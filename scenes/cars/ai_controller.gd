@@ -102,6 +102,33 @@ const DOOR_REACH_M: float = 120.0
 ## Marja pe estimarea sosirii: un pilot care franeaza pe viraj ajunge mai
 ## tarziu decat `along / speed`; se intreaba si „dar peste inca o secunda?".
 const DOOR_ETA_SLACK: float = 1.0
+
+## Torentul in pulsuri (Fiordland, `torrent_cycle.gd`, scurtatura Chasm): cat
+## de departe (m, pe BUCLA PRINCIPALA) se citeste torentul inainte de furca —
+## brief: „decizia se ia la furca, la ~80 m de perdea". 120 m la viteza
+## minima realista de decizie (~11 m/s, ca la DOOR_REACH_M/AI_REACH_M) da
+## ~11 s, mai mult decat un ciclu tipic de torent (14 s), deci decizia nu se
+## poate rasuci intre "e liber" si "vine pulsul" chiar inainte de furca —
+## acelasi motiv ca DOOR_REACH_M/TunnelSignalHazard.AI_REACH_M.
+const TORRENT_REACH_M: float = 120.0
+## Zona (m, inainte de furca) in care linia e trasa ferm spre PARTEA OPUSA
+## benzii cand torentul blocheaza — vezi `_torrent_lane_keep`.
+##
+## TREBUIE sa acopere `Track.BRANCH_SNAP_RANGE` (45 m): asta e raza in care
+## `resolve_route` comuta ruta pe PROXIMITATE LATERALA, independent de
+## steering — o zona de siguranta mai stramta decat 45 m ar lasa "gaura" intre
+## unde `_torrent_lane_keep` inca nu actioneaza si unde `resolve_route` poate
+## deja comuta. Bug gasit prin sonda (`probe_fiord_torent.gd`): cu 25 m aici,
+## `take_branch` era corect fals (verificat cu trace direct: `blocks_in`
+## prezicea SURGE corect la eta~3.7s), dar `resolve_route` comutase masina pe
+## ruta 1 la ~20 m de furca — in afara zonei de 25 m, deci linia nu mai era
+## trasa spre partea opusa la timp. 50 m = 45 (BRANCH_SNAP_RANGE) + 5 m marja.
+const TORRENT_LANE_REACH_M: float = 50.0
+## Tranzitie scurta la intrarea in zona — acelasi tipar ca SIGNAL_LANE_EASE_M.
+const TORRENT_LANE_EASE_M: float = 8.0
+## Cat de ferm se trage linia spre partea opusa benzii, ca fractie din
+## LINE_MAX. 0.9 = aproape la limita, dar nu smucit (LINE_MAX insusi).
+const TORRENT_LANE_TARGET_FRAC: float = 0.9
 ## Cine a ratat ocolul (a decis „deschisa" si s-a inselat, sau a fost
 ## imbrancit pe langa despicare) franeaza si ASTEAPTA in fata usii inchise,
 ## in loc sa intre in ea, sa se deblocheze in marsarier de trei ori si sa
@@ -272,6 +299,13 @@ var _door_block_m: float = INF
 ## Indexul de traseu al fiecarei usi, pe ruta 0 — scanare completa o data,
 ## nu per cadru (cheie: instance id).
 var _door_index: Dictionary = {}
+## Indexul pe BUCLA PRINCIPALA al furcii fiecarui torent (cheie: instance
+## id) — scanare completa o data, ca la usi/semafoare.
+var _torrent_index: Dictionary = {}
+## Semnul lateral (fata de axa buclei principale, la furca) pe care se
+## departeaza banda torentului — vezi `_torrent_lane_keep`. Cheie: instance
+## id, calculat o data (geometria furcii nu se schimba in timpul cursei).
+var _torrent_side_sign: Dictionary = {}
 ## Metri pana la semaforul din fata care VA FI rosu cand ajungem la linia de
 ## oprire. INF = niciunul in raza de decizie, sau va fi verde la sosire.
 var _signal_block_m: float = INF
@@ -384,6 +418,12 @@ func update(delta: float) -> void:
 	# de linie; o masina care tocmai a inceput sa ocoleasca pe stanga in zona
 	# trebuie trasa inapoi pe dreapta, nu invers.
 	line = _signal_lane_keep(idx, speed, line)
+	# Torentul in pulsuri (Fiordland, scurtatura Chasm): cand blocheaza,
+	# linia e trasa ferm spre partea OPUSA benzii chiar la furca — plasa de
+	# siguranta impotriva comutarii pe proximitate a lui `Track.resolve_route`
+	# (vezi antetul `_torrent_lane_keep`). Vine dupa `_avoid_line`, ca ocolirea
+	# unei masini din trafic sa nu impinga linia inapoi spre banda.
+	line = _torrent_lane_keep(idx, speed, line)
 	# CULOARUL UNIC are ultimul cuvant. Pe restul pistei ocolirea poate folosi
 	# toata latimea; intr-un blocaj cu o singura fanta, orice metru in afara
 	# fantei e zid, deci linia se strange inapoi in ea. Fereastra e ingusta
@@ -410,7 +450,8 @@ func update(delta: float) -> void:
 	# dar cu ACELASI tipar: distanta pana la linie, sau INF daca drumul e
 	# liber la sosire.
 	_signal_block_m = _signal_red_ahead(speed)
-	var take_branch := prefers_shortcut and car.route == 0 and track.branch_is_open(1)
+	var take_branch := prefers_shortcut and car.route == 0 and track.branch_is_open(1) \
+		and not _torrent_blocks_branch(speed)
 	# Usa de piatra inchisa la sosire: ocolul nu mai e o preferinta, e singurul
 	# drum. Vezi DOOR_REACH_M.
 	if car.route == 0 and _door_block_m < INF:
@@ -849,6 +890,130 @@ func _door_closed_ahead(speed: float) -> float:
 		if door.door_blocks_in(eta) or door.door_blocks_in(eta + DOOR_ETA_SLACK):
 			best = along
 	return best
+
+## Torentul in pulsuri (Fiordland, brief „Torentul in pulsuri"): scurtatura
+## Chasm e blocata cand ajungem la perdea in mijlocul unui PULS. Diferit de
+## usa de piatra/semafor: aici NU exista franare/asteptare — cine e blocat
+## pur si simplu NU ia scurtatura in ciclul asta, ia bucla principala (vezi
+## `take_branch` mai sus, unde asta e un AND simplu pe conditia existenta).
+##
+## AI ONEST: exact aceleasi trei bituri pe care le are jucatorul la furca —
+## FAZA torentului (vizibila: fir subtire/anunt/plin), DISTANTA pana la
+## furca si PROPRIA viteza (ca sa estimeze ETA, cum ar face un sofer la
+## volan). Niciun bit despre ceasul intern, despre ploaie, sau despre cat
+## mai are perdeaua — `TorrentCycle.blocks_in()` face exact calculul cu care
+## un om ar decide „ies eu la timp inainte sa vina puslul", nu-i da AI-ului
+## raspunsul direct.
+##
+## Aceeasi forma ca `_door_closed_ahead`: distanta pe bucla pana la furca,
+## ETA din viteza curenta, `blocks_in` cu marja de o secunda SI cu marja de
+## traversare (`cross_s()` — daca ajunge la timp dar pulsul vine cat inca e
+## SUB perdea, tot e blocat).
+func _torrent_blocks_branch(speed: float) -> bool:
+	if car.route != 0:
+		return false
+	var torrents := get_tree().get_nodes_in_group(TorrentCycle.AI_GROUP)
+	if torrents.is_empty():
+		return false
+	var n_pts: int = track.route_at(0).count()
+	var bake: float = track.curve.bake_interval
+	for node in torrents:
+		var torrent := node as TorrentCycle
+		if torrent == null or torrent.branch_index != 1:
+			continue
+		var key := torrent.get_instance_id()
+		if not _torrent_index.has(key):
+			_torrent_index[key] = track.closest_index_global(
+				torrent.ai_decision_point(), 0)
+		var d_idx: int = int(_torrent_index[key]) - car.road_index
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := float(d_idx) * bake
+		if along < 0.0 or along > TORRENT_REACH_M:
+			continue
+		# Metri pe BANDA de la intrare pana la perdea: `branch_frac` e
+		# fractia din lungimea rutei, deci `branch_frac * route.length()`.
+		var branch_route := track.route_at(1)
+		var along_branch := 0.0
+		if branch_route != null:
+			along_branch = torrent.branch_frac * branch_route.length()
+		var eta := (along + along_branch) / maxf(speed, 6.0)
+		if torrent.blocks_in(eta) or torrent.blocks_in(eta + DOOR_ETA_SLACK):
+			return true
+	return false
+
+## Trage linia spre partea OPUSA benzii torentului, aproape de furca, cand
+## torentul blocheaza — plasa de siguranta pentru `_torrent_blocks_branch`.
+##
+## GASIT PRIN SONDA (`probe_fiord_torent.gd`, verificarea AI onest): cu doar
+## `take_branch=false` (steering-ul normal tinteste bucla, fara sa mai
+## priveasca spre lure-ul benzii), `Track.resolve_route` tot putea comuta
+## masina pe ruta 1 — comutarea de ruta se face pe PROXIMITATE LATERALA
+## (banda mai apropiata decat bucla + o histereza de 1.5 m), independent de
+## ce a decis AI-ul sa faca cu volanul. O masina cu personalitate de linie
+## (`line_offset`) sau impinsa de trafic (`_avoid_line`, care ruleaza INAINTE
+## de bifurcatie) putea sa fie, la metri de furca, marginal mai aproape de
+## banda decat de axa buclei — si comuta ruta desi `take_branch` era fals in
+## fiecare cadru. Masurat: 5 intrari AI in SURGE pe 4 seed-uri inainte de fix.
+##
+## Fix: acelasi tipar ca `_signal_lane_keep` (linie IMPUSA intr-o zona
+## ingusta din fata unui hazard cu veto) — cand blocat, langa furca
+## (`TORRENT_LANE_REACH_M`), linia e trasa ferm spre partea opusa benzii, ca
+## nicio combinatie de personalitate+trafic sa nu mai ajunga mai aproape de
+## banda decat de axa. Se aplica DUPA `_avoid_line` (acelasi motiv ca la
+## semafor: e regula de siguranta cu veto, nu preferinta de linie).
+func _torrent_lane_keep(idx: int, speed: float, line: float) -> float:
+	if car.route != 0:
+		return line
+	var torrents := get_tree().get_nodes_in_group(TorrentCycle.AI_GROUP)
+	if torrents.is_empty():
+		return line
+	var n_pts: int = track.route_at(0).count()
+	var bake: float = track.curve.bake_interval
+	for node in torrents:
+		var torrent := node as TorrentCycle
+		if torrent == null or torrent.branch_index != 1:
+			continue
+		var key := torrent.get_instance_id()
+		if not _torrent_index.has(key):
+			_torrent_index[key] = track.closest_index_global(
+				torrent.ai_decision_point(), 0)
+		var fork_idx: int = int(_torrent_index[key])
+		if not _torrent_side_sign.has(key):
+			# Semnul lateral al benzii fata de axa buclei, la furca: banda
+			# torentului e mereu departe de axa (nu pe axa), deci un singur
+			# esantion (primul punct al ei) da semnul stabil pentru toata cursa.
+			var branch_route := track.route_at(1)
+			var sgn := 1.0
+			if branch_route != null and not branch_route.baked.is_empty():
+				var side := track.route_at(0).side_at(fork_idx)
+				var to_branch := branch_route.baked[0] - track.route_at(0).baked[fork_idx]
+				sgn = signf(side.dot(to_branch))
+				if sgn == 0.0:
+					sgn = 1.0
+			_torrent_side_sign[key] = sgn
+		var d_idx: int = fork_idx - idx
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := float(d_idx) * bake
+		# Zona: de la TORRENT_LANE_REACH_M inainte de furca pana chiar la ea
+		# (along negativ inseamna am trecut deja de indexul furcii pe ruta 0 —
+		# nu ar trebui sa se intample cat suntem pe ruta 0, dar tratam la fel
+		# ca semaforul: fara cod separat pentru "deja angajati").
+		if along > TORRENT_LANE_REACH_M or along < 0.0:
+			continue
+		var blocked := _torrent_blocks_branch(speed)
+		if not blocked:
+			continue
+		var opposite_sign: float = -float(_torrent_side_sign[key])
+		var target := opposite_sign * LINE_MAX * TORRENT_LANE_TARGET_FRAC
+		var t := clampf((TORRENT_LANE_REACH_M - along) / TORRENT_LANE_EASE_M, 0.0, 1.0)
+		line = lerpf(line, target, t)
+	return line
 
 ## Metri pana la semaforul din fata care VA FI rosu cand ajungem la linia de
 ## oprire, SAU pe care nu am cum sa-l traversam complet inainte sa vina rosul

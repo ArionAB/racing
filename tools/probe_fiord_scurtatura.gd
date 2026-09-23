@@ -46,11 +46,18 @@ var _track: Track
 var _fails: int = 0
 var _dry_wins: int = 0
 var _wet_losses: int = 0
+## Cate masini PIERD pe uscat fata de bucla (sau repun pe banda) — riscul,
+## masurat cu `--torrent=surge`.
+var _surge_losses: int = 0
 var _rows: Array[Dictionary] = []
 
 
 func _ready() -> void:
 	await get_tree().process_frame
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--torrent="):
+			_torrent_mode = arg.trim_prefix("--torrent=")
+	print("torent: %s" % _torrent_mode)
 	_track = (load(TRACK) as PackedScene).instantiate() as Track
 	add_child(_track)
 	await get_tree().process_frame
@@ -102,6 +109,8 @@ func _ready() -> void:
 		var wet_lose: bool = (wet_delta < 0.0) or (wet_resp > 0)
 		if wet_lose:
 			_wet_losses += 1
+		if dry_delta < 0.0 or dry_branch.resp > 0:
+			_surge_losses += 1
 		print("  %s: uscat bucla=%.2fs scurtatura=%.2fs delta=%+.2fs (castig %s) | ud bucla=%.2fs scurtatura=%.2fs delta=%+.2fs resp=%d (pierde/repune %s)"
 			% [label, dry_loop.time, dry_branch.time, dry_delta,
 			str(dry_win), wet_loop.time, wet_branch.time, wet_delta,
@@ -115,8 +124,23 @@ func _ready() -> void:
 		% [_dry_wins, PRESETS.size()])
 	print("ud: scurtatura pierde sau repune la %d/%d masini (cerut >= 2/4)"
 		% [_wet_losses, PRESETS.size()])
-	var ok := _dry_wins >= 3 and _wet_losses >= 2
-	print("VERDICT: %s" % ("TRECE" if ok else "PICA"))
+	print("uscat, pierde fata de bucla (riscul, cu --torrent=surge): %d/%d (cerut >= 3/4)"
+		% [_surge_losses, PRESETS.size()])
+	# Contractul depinde de faza torentului (vezi `_torrent_mode`):
+	#   calm  = RECOMPENSA: pe uscat castiga 0,5-1,5 s la >= 3/4 (udul nu mai
+	#           e contragreutate — ploaia uda tot traseul, masurat in brief);
+	#   surge = RISCUL: pe uscat PIERDE fata de bucla la >= 3/4;
+	#   free  = contractul vechi (uscat castiga 3/4 SI ud pierde 2/4), pastrat
+	#           pentru istoric — cu torentul pe banda amesteca fazele.
+	var ok := false
+	match _torrent_mode:
+		"calm":
+			ok = _dry_wins >= 3
+		"surge":
+			ok = _surge_losses >= 3
+		_:
+			ok = _dry_wins >= 3 and _wet_losses >= 2
+	print("VERDICT (%s): %s" % [_torrent_mode, "TRECE" if ok else "PICA"])
 	get_tree().quit(0 if ok else 1)
 
 
@@ -129,8 +153,29 @@ func _collect_rain_cycles(node: Node, out: Array[Node]) -> void:
 
 ## Conduce o masina de la START_FRAC la TARGET_FRAC, pe bucla sau pe
 ## scurtatura, uscat sau ud. Intoarce {time, resp, min_speed, off_band}.
+## Faza torentului (`--torrent=calm|surge|free`): scurtatura are acum un
+## hazard cu ceas (`TorrentCycle`), deci o rulare "libera" prinde o faza la
+## intamplare si tabelul amesteca recompensa cu pedeapsa (masurat pe scena
+## unita: Muscle +0,28 / Taxi +0,07 pe uscat, doar fiindca au prins pulsul).
+## `calm` ingheata ceasul in liniste (recompensa curata), `surge` in plin puls
+## (pedeapsa curata), `free` lasa ciclul (implicit, ca inainte).
+var _torrent_mode: String = "free"
+
+
+func _force_torrents() -> void:
+	if _torrent_mode == "free":
+		return
+	for node in get_tree().get_nodes_in_group(&"torrents"):
+		if not node.has_method("force_clock"):
+			continue
+		var period: float = float(node.get("period"))
+		var surge: float = float(node.get("surge"))
+		node.call("force_clock", 1.0 if _torrent_mode == "calm" else period - surge * 0.5)
+
+
 func _run(data: CarData, label: String, rain: bool, via_branch: bool) -> Dictionary:
 	_track.rain_wet = rain
+	_force_torrents()
 	var main := _track.route_at(0)
 	var branch := _track.route_at(1)
 	var n := main.baked.size()

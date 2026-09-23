@@ -1,0 +1,513 @@
+<title>Fiordland Recon</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --gneiss:#9AA3A8; --gneiss-deep:#5E686E; --forest:#1F2E27; --forest-soft:#3A5243; --moss:#5E7A52; --dirt:#8E7A55; --straw:#C9A65A;
+  --water:#1F4A50; --water-deep:#143238; --foam:#F3F6F6; --scree:#B8BDBE; --asphalt:#3E4756; --tunnel:#6B7278;
+  --hazard:#D6453A; --coach:#3E8E5A; --plane:#C8322B; --rata:#B23A2E;
+  --ground:#E8ECEC; --panel:#F4F6F6; --sunk:#DCE2E3;
+  --ink:#1B2325; --ink-soft:#5B6669; --hair:#C6CFD1;
+  --grid:rgba(27,35,37,.09);
+  --accent-title:#2E6C8C; --glow:rgba(46,108,140,.14); --ok:#3F7A3A;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --gneiss:#6E777C; --gneiss-deep:#3F474B; --forest:#16211C; --forest-soft:#2A3D32; --moss:#4A6142; --dirt:#6E5F42; --straw:#A88A40;
+    --water:#173A40; --water-deep:#0E2529; --foam:#D9DEDE; --scree:#7C8386; --asphalt:#2B323D; --tunnel:#4E545A;
+    --hazard:#F06A5C; --coach:#5FB37C; --plane:#E2574B; --rata:#D25A4C;
+    --ground:#141A1C; --panel:#1C2325; --sunk:#10161A;
+    --ink:#E6EAE9; --ink-soft:#A0A9AA; --hair:#31393C;
+    --grid:rgba(230,234,233,.07);
+    --accent-title:#7DB6D6; --glow:rgba(125,182,214,.18); --ok:#8FC47A;
+  }
+}
+:root[data-theme="dark"]{
+  --gneiss:#6E777C; --gneiss-deep:#3F474B; --forest:#16211C; --forest-soft:#2A3D32; --moss:#4A6142; --dirt:#6E5F42; --straw:#A88A40;
+  --water:#173A40; --water-deep:#0E2529; --foam:#D9DEDE; --scree:#7C8386; --asphalt:#2B323D; --tunnel:#4E545A;
+  --hazard:#F06A5C; --coach:#5FB37C; --plane:#E2574B; --rata:#D25A4C;
+  --ground:#141A1C; --panel:#1C2325; --sunk:#10161A;
+  --ink:#E6EAE9; --ink-soft:#A0A9AA; --hair:#31393C;
+  --grid:rgba(230,234,233,.07);
+  --accent-title:#7DB6D6; --glow:rgba(125,182,214,.18); --ok:#8FC47A;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif; font-size:15px; line-height:1.55}
+.mono{font-family:ui-monospace,"Cascadia Mono","Consolas",monospace}
+.wrap{max-width:1180px; margin:0 auto; padding-block:28px 64px; padding-inline:22px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px 28px; margin-bottom:8px}
+h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif; font-size:clamp(34px,5vw,54px);
+  line-height:.98; margin:0; font-weight:700; letter-spacing:.01em; text-transform:uppercase; text-wrap:balance}
+h1 small{display:block; font-family:"Source Sans 3",sans-serif; font-size:.26em; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--accent-title); margin-bottom:8px}
+.facts{display:flex; gap:22px; flex-wrap:wrap; margin-left:auto}
+.fact{display:flex; flex-direction:column}
+.fact b{font-family:"Barlow Condensed",sans-serif; font-size:24px; font-variant-numeric:tabular-nums; font-weight:700; line-height:1}
+.fact span{font-size:10.5px; text-transform:uppercase; letter-spacing:.11em; color:var(--ink-soft); margin-top:3px}
+.fact.ok b{color:var(--ok)}
+.lede{color:var(--ink-soft); max-width:72ch; margin:14px 0 26px}
+.lede b{color:var(--ink)}
+.layout{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr); gap:22px; align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel); border:1px solid var(--hair); border-radius:3px}
+.card h2{margin:0; padding:11px 15px; font-size:11px; font-weight:700; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-soft); border-bottom:1px solid var(--hair);
+  display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap}
+.plan{padding:6px}
+canvas{display:block; width:100%; height:auto; border-radius:2px; cursor:crosshair}
+.legend{display:flex; flex-wrap:wrap; gap:5px 16px; padding:10px 15px; border-top:1px solid var(--hair);
+  font-size:11.5px; color:var(--ink-soft)}
+.legend i{display:inline-block; width:16px; height:3px; vertical-align:middle; margin-right:6px; border-radius:2px}
+.detail{padding:15px; min-height:150px}
+.detail .tag{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  padding:3px 8px; border-radius:2px; background:var(--accent-title); color:#F4F6F6; margin-bottom:9px}
+.detail h3{margin:0 0 3px; font-family:"Barlow Condensed",sans-serif; font-size:24px; font-weight:700; letter-spacing:.01em}
+.detail .coord{font-size:12px; color:var(--ink-soft); margin-bottom:11px}
+.detail p{margin:0 0 13px; font-size:14px}
+.detail .assets{font-size:12.5px; line-height:1.7; color:var(--ink-soft); border-top:1px dashed var(--hair); padding-top:11px}
+.detail .assets b{display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); margin-bottom:5px}
+.hint{color:var(--ink-soft); font-size:13px; font-style:italic}
+.clocks{padding:13px 15px; display:flex; flex-direction:column; gap:10px}
+.clock{display:grid; grid-template-columns:96px 1fr 44px; gap:10px; align-items:center; font-size:13px}
+.clock .nm{font-weight:600}
+.clock .bar{height:8px; border-radius:2px; background:var(--sunk); position:relative; overflow:hidden}
+.clock .bar i{position:absolute; top:0; bottom:0; border-radius:2px}
+.clock .s{font-family:"Barlow Condensed",sans-serif; font-size:16px; font-weight:700; text-align:right; font-variant-numeric:tabular-nums}
+.clocks .note{padding:8px 0 0; border-top:1px dashed var(--hair); font-size:12.5px}
+table{width:100%; border-collapse:collapse; font-size:13px}
+.scroll{overflow-x:auto}
+th,td{text-align:left; padding:8px 15px; border-bottom:1px solid var(--hair); vertical-align:top}
+th{font-size:10px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-soft); font-weight:700}
+td.num{font-variant-numeric:tabular-nums; white-space:nowrap}
+tr.grp td{font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-title);
+  background:var(--sunk); padding-top:9px; padding-bottom:9px}
+tr.row:hover{background:var(--sunk); cursor:pointer}
+tr.row.on{background:var(--glow)}
+.pill{display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:9px; white-space:nowrap}
+.pill.decor{background:var(--glow); color:var(--accent-title)}
+.pill.reuse{background:rgba(63,122,58,.18); color:var(--ok)}
+.pill.conflict{background:rgba(91,102,105,.18); color:var(--ink-soft)}
+.pill.rupt{background:rgba(214,69,58,.16); color:var(--hazard)}
+.pill.cons{background:rgba(201,166,90,.28); color:var(--dirt)}
+.gaps{margin-top:22px}
+.note{padding:13px 15px; font-size:13.5px; color:var(--ink-soft); border-top:1px solid var(--hair)}
+.note b{color:var(--ink)}
+.prompt-body{padding:15px}
+.prompt-body pre{margin:0; max-height:440px; overflow:auto; white-space:pre-wrap;
+  font-family:ui-monospace,"Cascadia Mono","Consolas",monospace; font-size:12px; line-height:1.6; color:var(--ink-soft);
+  background:var(--sunk); border:1px solid var(--hair); border-radius:3px; padding:14px}
+.copy{font:inherit; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  border:1px solid var(--hair); background:var(--panel); color:var(--ink); padding:5px 12px; border-radius:2px; cursor:pointer}
+.copy:hover,.copy:focus-visible{border-color:var(--accent-title); outline:none; box-shadow:0 0 0 2px var(--glow)}
+.rules{padding:13px 15px; font-size:13.5px}
+.rules p{margin:0 0 9px}
+.rules b{color:var(--accent-title)}
+.guards{padding:6px 15px 10px}
+.guard{display:grid; grid-template-columns:120px 1fr; gap:10px; padding:7px 0; border-bottom:1px dashed var(--hair); font-size:13px}
+.guard:last-child{border-bottom:0}
+.guard .k{font-weight:700; font-family:"Barlow Condensed",sans-serif; font-size:15px; letter-spacing:.02em}
+.guard .v{color:var(--ink-soft)}
+.guard .v b{color:var(--ink); font-variant-numeric:tabular-nums}
+.steps{display:flex; flex-direction:column; gap:0}
+.step{display:grid; grid-template-columns:34px 1fr; gap:12px; padding:12px 15px; border-bottom:1px solid var(--hair); font-size:13.5px}
+.step:last-child{border-bottom:0}
+.step .n{font-family:"Barlow Condensed",sans-serif; font-size:24px; font-weight:700; color:var(--accent-title); line-height:1}
+.step b{display:block; margin-bottom:2px}
+.step span{color:var(--ink-soft)}
+code{font-family:ui-monospace,"Cascadia Mono","Consolas",monospace; font-size:.92em}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1><small>Track16 &middot; temă fiordland &middot; traseu măsurat, hazardele montate, fără decor</small>Fiordland Recon</h1>
+  <div class="facts">
+    <div class="fact"><b id="f-len">&mdash;</b><span>lungime din curbă</span></div>
+    <div class="fact"><b>0 &rarr; +44 &rarr; 0 m</b><span>chei · portal · chei</span></div>
+    <div class="fact"><b id="f-branch">&mdash;</b><span>scurtătura · câștig</span></div>
+    <div class="fact"><b id="f-inst">&mdash;</b><span>piese de făcut</span></div>
+    <div class="fact ok"><b>6 / 6</b><span>gărzi verzi</span></div>
+  </div>
+</header>
+
+<p class="lede"><b>Un golf de fiord după o noapte de ploaie: pereți de gneis ud, pădure neagră-verde, cascade albe și o insulă-vârf în apă.</b>
+Pornim de pe chei cu Mitre Peak în față, peste apă, urcăm pe <b>cornișa tăiată în perete, marea pe stânga la &minus;30 m fără parapet</b>, trecem
+<b>prin perdeaua Stirling</b> sau pe pragul uscat din spatele ei, coborâm în Chasm sub coronamentul fagilor, alegem la furcă între podețul de scânduri
+și <b>drumul vechi din pădure cu torentul în pulsuri</b>, urcăm prin grohotiș la portalul de beton și trecem pe dreapta prin tunelul Homer în timp ce
+autocarul vine pe stânga, coborâm prin cicatricea avalanșei, sărim kickerul Bowen și revenim pe mal, sub avionul care aterizează. Sens <b>orar pe plan</b>,
+<b>fiordul pe stânga</b>. <b>Traseul de aici e cel din <code>Track16.tscn</code></b>, trecut prin ProbeLayout, ProbeBuried, ProbeTunel, ProbeRace, sondele
+cascadei, ploii, semaforului, scurtăturii și torentului. Relieful din captură e placeholder: pădurea, pereții și satul vin din dioramă, apoi din assets.</p>
+
+<div class="layout">
+  <div>
+    <div class="card">
+      <h2>Plan &middot; vedere de sus, orientarea lumii din Godot (nord sus, +x la dreapta) <span class="mono" id="cursor">&mdash;</span></h2>
+      <div class="plan"><canvas id="plan" width="1000" height="760"></canvas></div>
+      <div class="legend">
+        <span><i style="background:#3E4756"></i>asfalt ud</span>
+        <span><i style="background:#6B7278"></i>tunelul Homer (banda de autocar pe stânga)</span>
+        <span><i style="background:#C9A65A"></i>podețul de scânduri</span>
+        <span><i style="background:#8E7A55"></i>drumul vechi (scurtătura)</span>
+        <span><i style="background:#1F4A50"></i>fiordul</span>
+        <span><i style="background:#3A5243"></i>pădurea de fag / râul Cleddau</span>
+        <span><i style="background:#F3F6F6;border:1px solid #9AA3A8"></i>perdele de apă</span>
+        <span><i style="background:#D6453A"></i>hazard cu ceas</span>
+      </div>
+    </div>
+    <div class="card gaps">
+      <h2>Profil de elevație &middot; un tur &middot; din curba reală</h2>
+      <div class="plan"><canvas id="elev" width="1000" height="200"></canvas></div>
+      <div class="note">Cheiul la 0, cornișa urcă la <b>+32 m</b> pe ~340 m (B, 8,8 %), Stirling pe platoul cornișei, coborârea în Chasm la <b>+16 m</b> (D),
+        scurtătura sare doar vârful văii, urcarea prin grohotiș la <b>+44 m</b> la portalul de est (E, 12 %), tunelul coboară în tub, ieșirea udă (F, 0,61&ndash;0,69),
+        coborârea 8 % spre Bowen și malul la 0. Marea e la &minus;19,6 m sub chei; fundul fiordului de pe cornișă e la &minus;30 m.</div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:22px">
+    <div class="card">
+      <h2>POI selectat</h2>
+      <div class="detail" id="detail"><p class="hint">Alege un POI pe hartă sau un rând din tabel.</p></div>
+    </div>
+    <div class="card">
+      <h2>Gărzile, pe scena unită (PR #402)</h2>
+      <div class="guards">
+        <div class="guard"><span class="k">ProbeLayout</span><span class="v"><b>2 161 m</b> · rază minimă <b>17,6 m</b> la 0,69 · banda: 180 m, rază <b>18,8 m</b>, la 49 m de buclă</span></div>
+        <div class="guard"><span class="k">ProbeRace</span><span class="v">8 seed-uri uscat: tur minim <b>1,64&ndash;1,69</b>, <b>0 blocaje</b>, repuneri 0&ndash;2 doar la tunel/Bowen; ud 4 seed-uri 1,59&ndash;1,62</span></div>
+        <div class="guard"><span class="k">ProbeFiordScurtatura</span><span class="v">liniște: <b>+0,9&hellip;+1,4 s</b> la 4/4 · puls: <b>&minus;1,1&hellip;&minus;2,6 s</b> la 4/4</span></div>
+        <div class="guard"><span class="k">ProbeFiordTorent</span><span class="v">ceas + sabotaj OK · fizica doar în puls (&minus;2,8 % / &minus;78 %) · AI în puls <b>3&ndash;4 din 27</b> intrări</span></div>
+        <div class="guard"><span class="k">ProbeBuried · ProbeTunel</span><span class="v"><b>0</b> carosabil îngropat pe ambele rute · gol 9,0 × 6,46 m, CameraZone</span></div>
+        <div class="guard"><span class="k">probe_decor</span><span class="v"><b>28 / 38</b> materiale, încă fără decor · triunghiuri 124 k</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Ceasurile de hazard <span class="mono">tur ~90 s</span></h2>
+      <div class="clocks" id="clocks"></div>
+    </div>
+    <div class="card">
+      <h2>Reguli care au decis harta</h2>
+      <div class="rules">
+        <p><b>Vârful e insulă, nu perete.</b> Măsurat de pe cornișă: un vârf pe malul opus iese din cadru pe azimut și e deal în ceață. Mitre Peak stă în golf la 41 m de asfalt, 70 m înalt, ridicat după râpe (<code>TerrainPeak.island</code>); se vede de pe chei și de pe cornișă, nu la ieșirea din tunel &mdash; acea poză nu există pe traseu.</p>
+        <p><b>Semaforul e bandă, nu oprire.</b> O flotă de 8 AI la o singură linie de stop se târăște peste marjă și trece pe roșu; roșul înseamnă „autocarul e în tunel, pe stânga", mașinile trec pe dreapta. AI onest: 0 treceri pe roșu, tur minim 1,64.</p>
+        <p><b>Riscul scurtăturii e timing, nu grip.</b> Ploaia udă tot traseul, deci o bandă udă nu e contragreutate. Torentul în pulsuri (7 / 3 / 4 s) se citește de la furcă, la 80 m; pulsul prins costă cât câștigă coarda, ori mai mult (<code>drag</code> 2,0, măsurat pe 3 trepte).</p>
+        <p><b>Sosirea e o fereastră, nu un moment.</b> Cu ETA la viteza curentă AI-ul intra în puls 5/30: banda are viraje de 19 m la furcă. <code>blocks_between(rapid, lent)</code> a dus la 3/27 fără cod nou de așteptare.</p>
+        <p><b>Capetele benzii pleacă tangent.</b> Capătul dedus e piciorul perpendicularei: 33 m lateral, două viraje la 90°, 3&ndash;4 s pierdute. <code>entry_at</code>/<code>exit_at</code> declarate au dus câștigul la +1 s la toate mașinile.</p>
+        <p><b>Un GLB fără consumator e muncă pierdută.</b> Trecerea de contracte din cod: perdelele, kickerul, tunelul și vârful le face codul; foca, feriga, bolovanii, chevronul se refolosesc; autocarul și avalanșa de copaci au contractul rupt.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card gaps">
+  <h2>Lista de assets, cu verdictul trecerii de contracte <span class="mono" id="a-count">&mdash;</span></h2>
+  <div class="scroll"><table id="asset-tbl"></table></div>
+  <div class="note"><b>Materiale:</b> 28 azi din 38 (atlas + clase: <code>alpine_granite</code>, <code>dirt_road</code>, shaderul perdelei, apa, spray, ploaia); clasele noi cerute de brief (<code>wet_gneiss</code>, <code>moss_carpet</code>, <code>gravel_wet</code>) intră la integrare, în buget.
+    <b>Fagul e piesa care se multiplică</b> (200+): sub 300 tri, coroana din 3&ndash;4 volume, nu brocoli; scara cere <code>decor: "bands"</code> + set <code>props: "fiordland"</code>, nu așezare de mână. Două fix-uri de cod înainte de kit: <code>TunnelSignalHazard.bus_model</code> și <code>_build_avalanche</code> cu <code>spec["model"]</code>.</div>
+</div>
+
+<div class="card gaps">
+  <h2>1 &middot; Planul de referință pentru ChatGPT &middot; captura reală din Godot, adnotată <span class="mono">docs/track_briefs/img/fiordland_plan.png</span></h2>
+  <div class="plan"><img id="plan-img" alt="Planul real al pistei Track16 văzut de sus din Godot, cu POI-urile și hazardele adnotate" src="__PLAN_IMG__" style="display:block;width:100%;height:auto;border-radius:2px"></div>
+  <div class="note"><b>Asta se atașează la prompturi</b>, nu planul schematic de mai sus: bucla, scurtătura, râpele, vârfurile și apa sunt geometria din <code>Track16.tscn</code>
+    (ortografic, <code>Snapshot.tscn -- --track=16 --rain=0 --no-fog</code>; fără <code>--no-fog</code> ceața umple cadrul de la 400 m), literele și dreptunghiurile sunt legenda.
+    <b>Pădurea, pereții și satul nu apar în captură</b> (decorul nu e construit) &mdash; de aceea sunt descrise în cuvinte, iar planul dă bucla, cotele, apa și pozițiile hazardelor. Torentul e capturat în puls.</div>
+</div>
+
+<div class="card gaps">
+  <h2>2 &middot; Prompt pentru dioramă (ChatGPT) &middot; v0.2 <button class="copy" id="copy-diorama" type="button">Copiază promptul</button></h2>
+  <div class="prompt-body"><pre id="prompt-diorama">__DIORAMA_PROMPT__</pre></div>
+  <div class="note">Se dă primul, cu planul atașat. Dacă diorama iese cu Mitre Peak pe malul opus, cu mașini oprite la semafor sau cu „fiordul în față la ieșirea din tunel", reafirmă cele trei corecții din v0.2: <b>insula în golf lângă chei</b>, <b>autocarul pe stânga, mașinile trec pe dreapta</b>, <b>după portalul de vest drumul coboară prin pădure</b>.</div>
+</div>
+
+<div class="card gaps">
+  <h2>3 &middot; Prompt pentru planșa de inventar (ChatGPT) &middot; 12 rânduri, cu numele de fișier <button class="copy" id="copy-sheet" type="button">Copiază tot</button></h2>
+  <div class="prompt-body"><pre id="prompt-sheet">__SHEET_PROMPT__</pre></div>
+  <div class="note">Se dă în aceeași conversație, după dioramă, ca să moștenească stilul. <b>Numele de fișier de pe planșă sunt contractul</b> cu <code>docs/asset_briefs/fiordland_kit.md</code> (de scris după planșă, tiparul Machu Picchu) și cu <code>tools/blender/build_fiordland_*.py</code>, categoria <code>assets/models/fiordland/</code>. Planșa cere doar ce are consumator sau e decor pur: fără perdele, kicker, tunel, vârf, pânze de ploaie și fără piesele refolosite.</div>
+</div>
+
+<div class="card gaps">
+  <h2>Ce urmează (brief §7, starea la PR #403)</h2>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><div><b>Diorama și planșa în ChatGPT</b><span>promptul 2 cu planul atașat, apoi promptul 3 în aceeași conversație. Imaginile intră în <code>docs/track_briefs/img/</code> (<code>fiordland_v1.jpeg</code>, <code>fiordland_assets_v1.jpeg</code>).</span></div></div>
+    <div class="step"><span class="n">2</span><div><b>Două fix-uri de contract, înainte de kit</b><span><code>TunnelSignalHazard</code> primește <code>bus_model</code> și îl trece în <code>_build_bus()</code>; <code>_build_avalanche</code> citește <code>spec["model"]</code> în locul căii hardcodate. Fără ele autocarul și avalanșa de copaci n-au unde intra.</span></div></div>
+    <div class="step"><span class="n">3</span><div><b>Kitul Blender</b><span><code>docs/asset_briefs/fiordland_kit.md</code> din planșă, cu sloturile de paletă și contractele din §5.6; instanța Blender MCP livrează GLB + build + verify + inventar; <code>PROP_COLLISION</code> primește intrările noi (fag = trunchi, pinguin = nimic).</span></div></div>
+    <div class="step"><span class="n">4</span><div><b>Decorul pe POI, constructor + critic orb</b><span>metoda din <code>docs/bara_vizuala.md</code>, valuri de trei; <code>decor: "bands"</code> pentru fagi; probe_decor &le; 38 materiale; capturi <code>--gamecam</code> de la chei, cornișă, furcă; verdict la volan pe cele 8 POI.</span></div></div>
+  </div>
+</div>
+</div>
+
+<script>
+"use strict";
+// ---- date REALE (metri, coordonate Godot: x dreapta, z in jos pe plan, y cota) ----
+const DATA = __DATA__;
+const LOOP = DATA.loop, BR = DATA.branch;
+const N = LOOP.length;
+let LEN = 0; const CUM = [0];
+for (let i = 1; i <= N; i++){ const a = LOOP[i-1], b = LOOP[i % N]; LEN += Math.hypot(b[0]-a[0], b[2]-a[2]); CUM.push(LEN); }
+let BLEN = 0; for (let i = 1; i < BR.length; i++){ BLEN += Math.hypot(BR[i][0]-BR[i-1][0], BR[i][2]-BR[i-1][2]); }
+document.getElementById("f-len").textContent = Math.round(LEN).toLocaleString("ro-RO") + " m";
+document.getElementById("f-branch").textContent = Math.round(BLEN) + " m · +29 m";
+
+function at(f){ f = ((f % 1) + 1) % 1; const d = f * LEN;
+  for (let i = 0; i < N; i++){ if (CUM[i+1] >= d){ const t = (d - CUM[i]) / Math.max(CUM[i+1]-CUM[i], 1e-6); const a = LOOP[i], b = LOOP[(i+1)%N];
+    return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t]; } } return LOOP[N-1]; }
+function tang(f){ const a = at(f-0.002), b = at(f+0.002); const v = [b[0]-a[0], b[2]-a[2]]; const l = Math.hypot(v[0], v[1]) || 1; return [v[0]/l, v[1]/l]; }
+function side(f){ const t = tang(f); return [-t[1], t[0]]; }   // dreapta sensului de mers
+function fracOf(x, z){ let bi = 0, bd = 1e9; for (let i = 0; i < N; i++){ const d = Math.hypot(LOOP[i][0]-x, LOOP[i][2]-z); if (d < bd){ bd = d; bi = i; } } return CUM[bi]/LEN; }
+
+// zone (fractii) — din Track16.tscn si din brief
+const ZONES = [["chei",0,0.05],["cornisa",0.05,0.21],["stirling",0.21,0.27],["chasm",0.27,0.41],["urcare",0.41,0.612],["tunel",0.612,0.69],["coborare",0.69,0.74],["bowen",0.74,0.80],["mal",0.80,1.0]];
+const SURF = {chei:"--asphalt", cornisa:"--asphalt", stirling:"--asphalt", chasm:"--asphalt", urcare:"--asphalt", tunel:"--tunnel", coborare:"--asphalt", bowen:"--asphalt", mal:"--asphalt"};
+function zoneAt(f){ for (const z of ZONES) if (f >= z[1] && f < z[2]) return z[0]; return "mal"; }
+// [f0, f1, side(+1 dreapta, -1 stanga), latime m, rol]  — custom_ravines din Track16.tscn
+const RAVINES = [[0.011,0.279,-1,220,"fiord"],[0.341,0.444,1,25,"rau"],[0.84,0.902,-1,22,"bowen"],[0.919,0.999,-1,220,"fiord"]];
+const PEAKS = [[-114.5,-412.6,160,"masivul tunelului · 85 m"],[-250,-200,44,"Mitre Peak · insulă · 70 m"]];
+const STEP = [0.406,0.424];               // podetul (custom_step_ranges)
+const TUNNEL = [0.612, 169];               // portal est + lungime
+const STIRLING = 0.300, RAINFALLS = [0.10,0.172,0.40,0.718,0.79], AVAL = 0.751, KICKER = 0.857, TORRENT_I = Math.floor(BR.length/2);
+const AIRSTRIP = [0.83, 0.95, 20];
+
+const POI = [
+  {k:"A", f:0.02, name:"Cheiul — START", w:"8 m · asfalt ud · 0 m",
+   desc:"Grila pe asfalt ud lângă pontonul cu două vaporașe albe și caiace, magazia cafenelei, trei pinguini tawaki pe pietre. Peste apă, la 41 m de asfalt, Mitre Peak ca insulă-vârf de 70 m, cu calotă albă și un fir de cascadă pe flanc. În spate, Bowen Falls. Cheiul are pereți cu masă (contact = ricoșeu).",
+   lot:["wharf + cafe_shed (decor)","wooden_pier (REUSE, mesh)","cruise_boat ×2 (PathMover)","kayak_a/b ×4","penguin_tawaki ×3 (none)","Mitre Peak = TerrainPeak, nu asset"]},
+  {k:"B", f:0.13, name:"Cornișa fiordului", w:"6–8 m · 0 → 32 m pe ~340 m · 8,8 % · fără parapet",
+   desc:"Drumul iese din sat și urcă pe o cornișă tăiată în peretele de gneis: marea pe stânga la −5…−30 m, peretele ud cu dungi negre pe dreapta, mușchi și rata cu flori roșii în crăpături, patru foci pe o stâncă în apă. Două cascade de ploaie (0,10 și 0,17) cad peste drum doar în faza de ploaie — teatru, fără forță. Ieșirea de pe cornișă = repunere.",
+   lot:["nerpa_seal ×4 (REUSE, none)","rata_tree ×3","guard_rock ×8","fjord_far_wall (horizon)","RainFallB1/B2 = WaterfallVisual (cod)"]},
+  {k:"C", f:0.24, name:"Stirling Falls — cea mai mare piesă", w:"6 m · +30 m · perdea 30 × 6 m · forță reală",
+   desc:"Peretele face o nișă concavă, cascada de 45 m cade de pe un surplomb peste un prag și se lățește peste drum pe 30 m, apoi în mare. Prin perdea: apăsare pe suspensie 48 m/s² scalată cu viteza, frânare, albire — Buggy atinge fundul, Poliția nu (identitate din CarData). Pe pragul uscat din spate treci fără cost, dar e îngust. Bazin alb, ceață, spray de 48 stropi.",
+   lot:["stirling_ledge (decor: surplomb + prag + buza bazinului, FĂRĂ apă)","perdeaua = WaterfallVisual (cod)","tussock_clump ×6"]},
+  {k:"D", f:0.34, name:"Chasm și pădurea de mușchi + furca", w:"6,5 m / podeț 5,5 m · +16 m · podeț 0,406–0,424",
+   desc:"Drumul intră într-o vale laterală, coboară sub coronamentul fagilor: trunchiuri negre subțiri, ferigi arborescente, bolovani înveliți în mușchi; podețul de scânduri de 40 m peste râul Cleddau săpat în marmite la −8 m (vibrație ±3 cm din custom_step_ranges, 0,85× grip), doi kea pe o buturugă. La 0,366 furca: drumul vechi din pădure (3,2 m semilățime, dirt_road, ud doar în ploaie) taie vârful văii și revine la 0,462, +29 m; la mijloc, Torentul în pulsuri: 7 s liniște / 3 s anunț / 4 s puls cu forța Stirling și drag 2,0. Câștig +0,9…+1,4 s în liniște, −1,1…−2,6 s în puls.",
+   lot:["beech_a/b/c ×60 (trunk)","tree_fern ×12 (REUSE)","moss_boulder_a/b/c ×20 (REUSE)","fern_clump ×20","chasm_bridge_rail (decor, none)","chasm_rock ×6","torrent_chute (decor, none)","stump + kea ×2","perdeaua torentului = TorrentCycle (cod)"]},
+  {k:"E", f:0.53, name:"Urcarea prin grohotiș și portalul de est", w:"6,5 → 4,5 m · +16 → +44 m · 12 %",
+   desc:"Urcare pe drum tăiat în grohotiș, panouri de zonă de avalanșă (chevron + glif, fără text) și jaloane. La 0,612 portalul de est: gură de beton cu galerie de avalanșă (aripi de 14 m, fără ele 8 ejectări/8 curse), semaforul pe stâlp: roșu = autocarul e în tunel pe banda stângă. Nimeni nu oprește; AI-ul ține +2,0 m pe dreapta cât e roșu sau cât ar prinde autocarul în tub (blocks_in). Un kea pe portal.",
+   lot:["chevron_sign ×6 (REUSE)","snow_pole ×10","scree_slab ×8","traffic_light_pole (decor; lămpile = HazardLamp)","portal + aripi = Track._build_tunnels (cod)","kea (PathMover, Idle)"]},
+  {k:"F", f:0.68, name:"Tunelul Homer și coborârea", w:"9 m tub · 169 m · +44 → +21 m · ud la ieșire",
+   desc:"Tub de 9 × 6,5 m sub un masiv de granit de 85 m, CameraZone cu tavan; autocarul alb-verde (3 m lat, 12,5 m/s, ciclu 47,5 s: verde 26 / roșu 21,5) urcă pe stânga cu farurile aprinse 3 s înainte, botul deflector te împinge înapoi-stânga dacă îl lovești. Ieșirea de vest e udă (0,61–0,69); coborârea 8 % prin pădure rară trece prin cicatricea avalanșei: la fiecare 90 s o masă de trunchiuri și bolovani coboară peste drum (AvalancheHazard, azi bolovani de zăpadă — GLB-ul de trunchiuri cere fix de contract). O cascadă de ploaie la 0,72.",
+   lot:["coach_fiordland (REUSE open_bus + clasă; CONTRACT RUPT: bus_model)","tree_avalanche (CONTRACT RUPT: spec.model)","beech_dead ×8","moss_boulder ×10 (REUSE)","tubul + portalul de vest = cod"]},
+  {k:"G", f:0.78, name:"Kickerul Bowen", w:"7 m · +12 → 0 m · gol 12 m · aterizare pe pietriș",
+   desc:"Drumul ajunge la baza cascadei Bowen (45 m, în perete pe dreapta), traversează pârâul ei pe un kicker de piatră de 6 m peste bazinul de cădere (apă albă, spray) și aterizează pe pietriș ud. Kickerul, golul și apa vin din TrackChannel jump (gap 12, calibrat cu ProbeJump: și Autobuzul trece). În ploaie aterizarea e udă: aici se adună repunerile de pe ud (0,85–0,87). A doua cascadă de ploaie la 0,79.",
+   lot:["bowen: kicker + gol = TrackChannel (cod)","perdeaua Bowen = WaterfallHazard (nemontat)","driftwood ×6","gravel_wet (clasă)"]},
+  {k:"H", f:0.90, name:"Malul și pista de avioane", w:"8 m · 0 m · pista paralelă la 20 m pe dreapta",
+   desc:"Drum drept pe malul fiordului: lodge, containere de bagaje, un heliport gol; pista de avioane paralelă la 20 m pe dreapta: avionul mic alb-roșu vine din spate la 25 m, coboară de-a lungul drumului, atinge pista și umbra lui trece peste mașini (PathMover, stick_to_ground = false, cast_shadow ON). Marea pe stânga (râpa 0,919–0,999). Înapoi la chei.",
+   lot:["bush_plane (PathMover)","lodge","luggage_container ×4","heli_pad (none)","driftwood ×4","pista = suprafață, nu asset"]}
+];
+
+const ASSETS = [
+  ["Hero și decor pur (de modelat)", null],
+  ["stirling_ledge.glb","surplomb + prag uscat 3 m + buza bazinului, FĂRĂ apă; ~45 m",1,"C","decor","world_prop; perdeaua o face WaterfallVisual"],
+  ["torrent_chute.glb","jgheab de granit + buza lacului suspendat, ~14 m peste bandă",1,"D","decor","poziția din TorrentCycle.curtain_position() după Regenerate; coliziune none"],
+  ["chasm_bridge_rail.glb","balustrada + grinzile podețului de 40 m, lemn ud",1,"D","decor","tabla = custom_step_ranges; coliziune none (precedent stream_bridge)"],
+  ["chasm_rock.glb","marmite, roci de râu",6,"D","decor","în râpa 1 (râul Cleddau), hull"],
+  ["wharf.glb + cafe_shed.glb","cheiul de piatră cu bolarzi + cafenea de lemn",1,"A","decor","hull (pereți cu masă); pontonul = wooden_pier"],
+  ["lodge.glb · luggage_container.glb · heli_pad.glb","satul de pe mal",6,"H","decor","hull / hull / none"],
+  ["driftwood.glb","lemn adus de apă",10,"G/H","decor","precedent beach_clutter Driftwood_Log"],
+  ["traffic_light_pole.glb","stâlp + carcasă, fără lămpi",1,"E","decor","lămpile = HazardLamp (visible = aprins)"],
+  ["snow_pole.glb · scree_slab.glb · guard_rock.glb · road_sign_blank.glb","punctuația drumului",30,"B/E","decor","trunk / hull / hull / trunk"],
+  ["cruise_boat.glb","vaporaș alb cu punte deschisă, 14 m",2,"A/B","cons","PathMover pe apă: stick_to_ground false, origine la linia de plutire, buclă"],
+  ["bush_plane.glb","monomotor alb-roșu, aripă sus, 8 m anvergură",1,"H","cons","PathMover în aer, −Z înainte, cast_shadow ON"],
+  ["kea.glb","papagal verde-oliv, portocaliu sub aripi; Idle / Open",3,"D/E","cons","PathMover.animation; comportamentul „pe capotă la roșu” n-are consumator"],
+  ["penguin_tawaki.glb","pinguin cu creastă, în picioare",3,"A","decor","PROP_COLLISION: none, altfel obstacol solid"],
+  ["kayak_a/b.glb","caiace roșu / galben (accent)",4,"A","decor","pe apă, Y de mână"],
+  ["Pădurea (de modelat, se multiplică)", null],
+  ["beech_a/b/c.glb","fag argintiu 8–14 m, trunchi negru subțire, coroană măruntă",200,"B/D/F","decor","sub 300 tri; PROP_COLLISION trunk; scara cere decor: bands + props: fiordland"],
+  ["beech_dead.glb","fag uscat",12,"D/F","decor","trunk"],
+  ["rata_tree.glb","copac mic cu flori roșii — accent",4,"B","decor","KERB_RED pe flori, la 2–3 m de bandă"],
+  ["fern_clump_a/b.glb · tussock_clump.glb","tufe de ferigă, iarbă tussock",40,"C/D","decor","none"],
+  ["Fundal (horizon_model, un singur GLB cu noduri numite)", null],
+  ["fiordland_horizon.glb","FarWall_A (250 m, benzi de pădure, 2 fire albe) · SnowRidge_A/B · CloudBank_A",1,"B/F/H","cons","tema primește horizon_model + horizon_rings proprii; cast_shadow OFF"],
+  ["Contract rupt — fix de cod înainte de asset", null],
+  ["coach_fiordland (REUSE open_bus.glb + clasă alb-verde)","autocar 12 m, faruri",1,"F","rupt","TunnelSignalHazard nu expune bus_model; BusHazard îl are din PathMover"],
+  ["tree_avalanche.glb","9 bucăți din 4 forme: trunchiuri + bolovani + mușchi, 2–4 m",1,"F","rupt","_build_avalanche ignoră spec.model; calea e hardcodată pe avalanche_boulders.glb"],
+  ["Refolosite din alte kituri (zero muncă de asset)", null],
+  ["nerpa_seal.glb","baikal/props · deja none în PROP_COLLISION",4,"B","reuse","clasa LOG_DARK"],
+  ["tree_fern.glb","machupicchu/plants · 768 tri",12,"D","reuse","none sau trunk"],
+  ["moss_boulder_a/b/c.glb","machupicchu/rocks · 200–242 tri",30,"D/F","reuse","clasa moss_carpet decide dacă arată a Fiordland"],
+  ["chevron_sign.glb","signs/ · brief propriu",6,"E","reuse","chevron_post: trunk"],
+  ["wooden_pier.glb","structures/ · deja mesh",1,"A","reuse","pontonul"],
+  ["fern_cluster.glb · grass_tuft_large/small.glb","plants/",30,"C/D","reuse","none"],
+  ["ice_road_marker.glb","baikal/props · bețe cu steguleț",10,"E","reuse","alternativă la snow_pole"],
+  ["Le face codul (nu se modelează)", null],
+  ["perdelele de apă (Stirling, torent, 5 de ploaie, Bowen)","WaterfallVisual: pânze + spumă + spray, un shader static",8,"B/C/D/F/G","conflict","WaterfallHazard / TorrentCycle n-au export model"],
+  ["kickerul Bowen + golul + apa","_build_channel_kicker din TrackChannel jump",1,"G","conflict","FlyoffKicker fără model"],
+  ["tubul, portalurile, aripile, CameraZone","Track._build_tunnels din nodul SemaforTunel; gol 9 × 6,5",1,"E/F","conflict","nișele NU există în cod — cer cod, nu GLB"],
+  ["Mitre Peak, masivul tunelului","TerrainPeak: teren regenerat (island = true)",2,"A/F","conflict","zero opțiune de GLB"],
+  ["rain_sheet ×5, ploaia pe ecran","RainCycle + RainScreen + grupul rain_falls",1,"tur","conflict","al 6-lea strat de transparență ar fi peste buget"],
+  ["Texturi de clasă (din cod)", null],
+  ["wet_gneiss","granit gri cu dungi verticale negre; NU există încă în Palette (tunelul e alpine_granite)",1,"B/E/F","cons","clasă nouă la integrare"],
+  ["moss_carpet · gravel_wet · beech_forest","mușchi gros / pietriș ud / pădure",3,"D/E/G","cons","clase noi, în bugetul de 38"],
+  ["waterfall (shader) · fjord_water · decal tyre_wet","există: un shader partajat, apă v12, RoadWear",3,"tur","reuse","—"]
+];
+const CLOCKS = [
+  {nm:"Ploaia", T:95, ph:[[0,35,"--sunk","uscat"],[35,40,"--gneiss","anunț"],[40,65,"--water","ploaie"],[65,70,"--gneiss","zvântare"]], s:"95 s", note:"start_clock 35: prima ploaie la 60 s, apoi ciclu 5 / 25 / 5"},
+  {nm:"Semaforul", T:47.5, ph:[[0,26,"--coach","verde"],[26,47.5,"--hazard","roșu = autocar în tunel"]], s:"47,5 s", note:"autocar 13,5 s + golire 8 s; AI pe dreapta cât e roșu"},
+  {nm:"Torentul", T:14, ph:[[0,7,"--sunk","liniște"],[7,10,"--gneiss","anunț"],[10,14,"--hazard","puls"]], s:"14 s", note:"în ploaie pulsul ține 6 s (×1,5) și apasă ×1,3"},
+  {nm:"Avalanșa", T:90, ph:[[0,84,"--sunk","liniște"],[84,90,"--hazard","cade"]], s:"90 s", note:"eveniment rar, ~o dată pe tur"},
+  {nm:"Stirling · Bowen", T:1, ph:[[0,1,"--water","permanent"]], s:"—", note:"fără ceas: forța și săritura sunt geometrie"}
+];
+
+// ---- proiectie: coordonate Godot direct (x dreapta, z in jos) = orientarea capturii -----
+const plan = document.getElementById("plan"), pcx = plan.getContext("2d");
+let minx = 1e9, maxx = -1e9, minz = 1e9, maxz = -1e9;
+LOOP.forEach(p => { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); minz = Math.min(minz, p[2]); maxz = Math.max(maxz, p[2]); });
+minx -= 70; maxx += 70; minz -= 60; maxz += 60;
+const S = Math.min(plan.width/(maxx-minx), plan.height/(maxz-minz));
+const ox = (plan.width-(maxx-minx)*S)/2, oy = (plan.height-(maxz-minz)*S)/2;
+const X = x => ox+(x-minx)*S, Y = z => oy+(z-minz)*S;
+
+const css = getComputedStyle(document.documentElement);
+const col = v => css.getPropertyValue(v).trim();
+let sel = null;
+
+function poly(ctx, pts, close){ ctx.beginPath(); pts.forEach((p,i)=> i? ctx.lineTo(X(p[0]),Y(p[1])) : ctx.moveTo(X(p[0]),Y(p[1]))); if (close) ctx.closePath(); }
+function offsetPath(f0, f1, sd, off){ const out = []; for (let i = 0; i < N; i++){ const f = CUM[i]/LEN; if (f < f0 || f > f1) continue;
+  const s = side(f); out.push([LOOP[i][0]+s[0]*sd*off, LOOP[i][2]+s[1]*sd*off]); } return out; }
+function band(c, f0, f1, sd, width, color, alpha){ const p = offsetPath(f0, f1, sd, 6+width/2); if (p.length < 2) return;
+  c.globalAlpha = alpha; c.strokeStyle = color; c.lineWidth = width*S; c.lineCap = "butt"; c.lineJoin = "round"; poly(c, p, false); c.stroke(); c.globalAlpha = 1; }
+function rectAt(c, f, len, wid, fill, stroke){ const p = at(f), t = tang(f), s = side(f);
+  const q = [[-len/2,-wid/2],[len/2,-wid/2],[len/2,wid/2],[-len/2,wid/2]].map(([a,b]) => [p[0]+t[0]*a+s[0]*b, p[2]+t[1]*a+s[1]*b]);
+  poly(c, q, true); c.fillStyle = fill; c.fill(); if (stroke){ c.strokeStyle = stroke; c.lineWidth = 1.5; c.stroke(); } }
+
+function draw(){
+  const c = pcx; c.clearRect(0,0,plan.width,plan.height);
+  c.fillStyle = col("--scree"); c.fillRect(0,0,plan.width,plan.height);
+  // apa: fiordul pe stanga cornisei si a malului, raul Cleddau, paraul Bowen
+  RAVINES.forEach(r => { const cl = r[4]==="fiord" ? col("--water") : r[4]==="rau" ? col("--forest-soft") : col("--water"); band(c, r[0], r[1], r[2], r[3], cl, r[4]==="fiord"? .95 : .85); });
+  // golful din jurul insulei
+  { const g = c.createRadialGradient(X(-250),Y(-200),0, X(-250),Y(-200), 150*S); g.addColorStop(0, col("--water")); g.addColorStop(1, "rgba(0,0,0,0)");
+    c.fillStyle = g; c.globalAlpha = .9; c.beginPath(); c.arc(X(-250),Y(-200),150*S,0,7); c.fill(); c.globalAlpha = 1; }
+  // padurea din Chasm: interiorul vaii
+  band(c, 0.28, 0.47, 1, 60, col("--forest"), .55); band(c, 0.28, 0.47, -1, 40, col("--forest"), .45);
+  band(c, 0.69, 0.80, 1, 50, col("--forest"), .4);
+  // varfurile
+  PEAKS.forEach(p => { const g = c.createRadialGradient(X(p[0]),Y(p[1]),0, X(p[0]),Y(p[1]), p[2]*S);
+    g.addColorStop(0, col("--foam")); g.addColorStop(.35, col("--gneiss")); g.addColorStop(.8, col("--forest-soft")); g.addColorStop(1, "rgba(0,0,0,0)");
+    c.fillStyle = g; c.beginPath(); c.arc(X(p[0]),Y(p[1]),p[2]*S,0,7); c.fill(); });
+  // grila
+  c.strokeStyle = col("--grid"); c.lineWidth = 1;
+  for (let gx = Math.ceil(minx/100)*100; gx < maxx; gx += 100){ c.beginPath(); c.moveTo(X(gx),0); c.lineTo(X(gx),plan.height); c.stroke(); }
+  for (let gz = Math.ceil(minz/100)*100; gz < maxz; gz += 100){ c.beginPath(); c.moveTo(0,Y(gz)); c.lineTo(plan.width,Y(gz)); c.stroke(); }
+  // pista de avioane
+  { const p = []; for (let f = AIRSTRIP[0]; f <= AIRSTRIP[1]; f += 0.005){ const q = at(f), s = side(f); p.push([q[0]+s[0]*AIRSTRIP[2], q[2]+s[1]*AIRSTRIP[2]]); }
+    c.strokeStyle = col("--gneiss"); c.lineWidth = 5*S; c.lineCap = "butt"; poly(c, p, false); c.stroke();
+    c.setLineDash([4,4]); c.strokeStyle = col("--foam"); c.lineWidth = 1; poly(c, p, false); c.stroke(); c.setLineDash([]); }
+  // cheiul + pontonul
+  { const p = at(0.0), s = side(0.0); const q = [p[0]-s[0]*18, p[2]-s[1]*18];
+    c.fillStyle = col("--gneiss-deep"); c.fillRect(X(q[0])-7*S, Y(q[1])-7*S, 14*S, 14*S);
+    c.fillStyle = col("--straw"); c.fillRect(X(q[0])-2*S, Y(q[1])-16*S, 4*S, 9*S); }
+  // tunelul: tub gri mai lat + banda de autocar pe stanga
+  { const p = []; for (let f = TUNNEL[0]; (f-TUNNEL[0])*LEN <= TUNNEL[1]; f += 0.003){ const q = at(f); p.push([q[0], q[2]]); }
+    c.strokeStyle = col("--tunnel"); c.lineWidth = 16*S; c.lineCap = "butt"; poly(c, p, false); c.stroke();
+    const l = offsetPath(TUNNEL[0], TUNNEL[0]+TUNNEL[1]/LEN, -1, 2.4-6); c.setLineDash([5,4]); c.strokeStyle = col("--coach"); c.lineWidth = 2.5; poly(c, l, false); c.stroke(); c.setLineDash([]); }
+  // scurtatura: drum de tara punctat
+  { const p = BR.map(q => [q[0], q[2]]); c.strokeStyle = "rgba(0,0,0,.2)"; c.lineWidth = 6.5; c.lineCap = "round"; poly(c, p, false); c.stroke();
+    c.setLineDash([9,6]); c.strokeStyle = col("--dirt"); c.lineWidth = 4.5; poly(c, p, false); c.stroke(); c.setLineDash([]); }
+  // bucla, cotele joase intai
+  const segs = []; for (let i = 0; i < N; i++){ const a = LOOP[i], b = LOOP[(i+1)%N]; segs.push([a, b, (a[1]+b[1])/2, CUM[i]/LEN]); }
+  segs.sort((p,q) => p[2]-q[2]);
+  segs.forEach(([a,b,,f]) => { const z = zoneAt(f); const inStep = f >= STEP[0] && f <= STEP[1];
+    c.strokeStyle = "rgba(0,0,0,.22)"; c.lineWidth = 9; c.lineCap = "round"; c.beginPath(); c.moveTo(X(a[0]),Y(a[2])); c.lineTo(X(b[0]),Y(b[2])); c.stroke();
+    c.strokeStyle = inStep ? col("--straw") : col(SURF[z]); c.lineWidth = z === "tunel" ? 5 : 6.5; c.beginPath(); c.moveTo(X(a[0]),Y(a[2])); c.lineTo(X(b[0]),Y(b[2])); c.stroke(); });
+  // linia mediana
+  c.setLineDash([4,7]); c.strokeStyle = "rgba(243,246,246,.55)"; c.lineWidth = 1; poly(c, LOOP.map(p => [p[0], p[2]]), true); c.stroke(); c.setLineDash([]);
+  // perdelele de apa
+  RAINFALLS.forEach(f => rectAt(c, f, 20, 8, "rgba(243,246,246,.75)", col("--gneiss")));
+  rectAt(c, STIRLING, 30, 10, col("--foam"), col("--hazard"));
+  { const b = BR[TORRENT_I], b2 = BR[Math.min(TORRENT_I+1, BR.length-1)]; const t = [b2[0]-b[0], b2[2]-b[2]]; const l = Math.hypot(t[0],t[1])||1; const s = [-t[1]/l, t[0]/l];
+    const q = [[-10,-5],[10,-5],[10,5],[-10,5]].map(([a,w]) => [b[0]+t[0]/l*a+s[0]*w, b[2]+t[1]/l*a+s[1]*w]); poly(c, q, true); c.fillStyle = col("--foam"); c.fill(); c.strokeStyle = col("--hazard"); c.lineWidth = 2; c.stroke(); }
+  // kickerul Bowen: gol albastru
+  rectAt(c, KICKER, 12, 14, col("--water"), col("--hazard"));
+  // hazarduri punctuale
+  const dot = (x,z,cl,r,ring) => { c.beginPath(); c.arc(X(x),Y(z),r||5,0,7); c.fillStyle = cl; c.fill(); if (ring){ c.strokeStyle = col("--hazard"); c.lineWidth = 2; c.stroke(); } };
+  { const p = at(TUNNEL[0]); dot(p[0], p[2], col("--hazard"), 6, false); const q = at(TUNNEL[0]+TUNNEL[1]/LEN); dot(q[0], q[2], col("--tunnel"), 5, false); }
+  { const p = at(AVAL); dot(p[0], p[2], col("--dirt"), 7, true); }
+  // insula: triunghi de varf
+  c.fillStyle = col("--foam"); c.beginPath(); c.moveTo(X(-250-9),Y(-200+7)); c.lineTo(X(-250),Y(-200-9)); c.lineTo(X(-250+9),Y(-200+7)); c.closePath(); c.fill(); c.strokeStyle = col("--ink-soft"); c.lineWidth = 1; c.stroke();
+  // linia de start
+  { const a0 = LOOP[0], s = side(0); c.strokeStyle = col("--foam"); c.lineWidth = 3; c.beginPath(); c.moveTo(X(a0[0]-s[0]*6),Y(a0[2]-s[1]*6)); c.lineTo(X(a0[0]+s[0]*6),Y(a0[2]+s[1]*6)); c.stroke(); }
+  // sageata sensului
+  { const p = at(0.17), t = tang(0.17); c.fillStyle = col("--hazard"); c.beginPath(); c.moveTo(X(p[0]+t[0]*14),Y(p[2]+t[1]*14)); c.lineTo(X(p[0]-t[1]*6),Y(p[2]+t[0]*6)); c.lineTo(X(p[0]+t[1]*6),Y(p[2]-t[0]*6)); c.closePath(); c.fill(); }
+  c.font = "11px 'Source Sans 3',system-ui"; c.lineJoin = "round";
+  const label = (t,x,z) => { c.strokeStyle = col("--panel"); c.lineWidth = 3; c.strokeText(t, X(x), Y(z)); c.fillStyle = col("--ink"); c.fillText(t, X(x), Y(z)); };
+  label("sens de mers ↗ (fiordul pe stânga)", -400, -320);
+  label("FIORDUL · marea la −30 m sub cornișă", -200, -130);
+  label("Mitre Peak · insulă · 70 m", -226, -196);
+  label("Stirling Falls · forță reală", -520, -360);
+  label("torentul în pulsuri", -545, -575);
+  label("drumul vechi din pădure", -470, -615);
+  label("podețul", -505, -600);
+  label("portal EST · semafor", -110, -520);
+  label("tunelul Homer 169 m", -80, -440);
+  label("masivul tunelului · 85 m", -60, -400);
+  label("avalanșa de pădure", 30, -300);
+  label("Bowen · kicker", 100, -80);
+  label("pista de avioane", 60, 20);
+  label("cheiul · START", -20, 40);
+  label("☀ soarele din stânga-sus, 30° sus, nori rupți", -560, -650);
+  label("N ↑", 90, -640);
+  POI.forEach(p => { const q = at(p.f), s = side(p.f); const x = q[0]+s[0]*14, z = q[2]+s[1]*14; p._x = x; p._z = z; const on = sel && sel.k === p.k;
+    c.beginPath(); c.arc(X(x),Y(z),on?12:10,0,7); c.fillStyle = on ? col("--accent-title") : col("--panel"); c.fill();
+    c.strokeStyle = on ? col("--accent-title") : col("--ink-soft"); c.lineWidth = 1.5; c.stroke();
+    c.fillStyle = on ? "#F4F6F6" : col("--ink"); c.font = "bold 11px 'Source Sans 3',system-ui"; c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillText(p.k, X(x), Y(z)); c.textAlign = "left"; c.textBaseline = "alphabetic"; c.font = "11px 'Source Sans 3',system-ui"; });
+}
+
+// ---- profil ------------------------------------------------------------------
+const ev = document.getElementById("elev"), ec = ev.getContext("2d");
+function drawElev(){
+  ec.clearRect(0,0,ev.width,ev.height);
+  const pad = 26, w = ev.width-2*pad, h = ev.height-2*pad, emin = -25, emax = 50;
+  const yOf = e => pad+h-((e-emin)/(emax-emin))*h;
+  ec.strokeStyle = col("--grid"); ec.lineWidth = 1;
+  for (let m = -20; m <= emax; m += 10){ const y = yOf(m); ec.beginPath(); ec.moveTo(pad,y); ec.lineTo(pad+w,y); ec.stroke(); ec.fillStyle = col("--ink-soft"); ec.font = "10px system-ui"; ec.fillText(m+" m", 2, y+3); }
+  ec.strokeStyle = col("--water"); ec.lineWidth = 2; ec.beginPath(); ec.moveTo(pad,yOf(-19.6)); ec.lineTo(pad+w,yOf(-19.6)); ec.stroke();
+  const bandF = (f0,f1,cl,al) => { ec.fillStyle = cl; ec.globalAlpha = al; ec.fillRect(pad+f0*w, pad, (f1-f0)*w, h); ec.globalAlpha = 1; };
+  bandF(0.366, 0.462, col("--dirt"), .25); bandF(STEP[0], STEP[1], col("--straw"), .5); bandF(TUNNEL[0], TUNNEL[0]+TUNNEL[1]/LEN, col("--tunnel"), .35); bandF(0.61, 0.694, col("--water"), .18);
+  ec.beginPath(); LOOP.forEach((p,i) => { const x = pad+(CUM[i]/LEN)*w, y = yOf(p[1]); i? ec.lineTo(x,y) : ec.moveTo(x,y); });
+  ec.strokeStyle = col("--accent-title"); ec.lineWidth = 2; ec.stroke(); ec.lineTo(pad+w,pad+h); ec.lineTo(pad,pad+h); ec.closePath(); ec.fillStyle = col("--accent-title"); ec.globalAlpha = .12; ec.fill(); ec.globalAlpha = 1;
+  // scurtatura: cotele ei intre furca si revenire
+  ec.beginPath(); BR.forEach((p,i) => { const f = 0.366 + (i/(BR.length-1))*(0.462-0.366); const x = pad+f*w, y = yOf(p[1]); i? ec.lineTo(x,y) : ec.moveTo(x,y); });
+  ec.setLineDash([5,4]); ec.strokeStyle = col("--dirt"); ec.lineWidth = 2; ec.stroke(); ec.setLineDash([]);
+  POI.forEach(p => { const x = pad+p.f*w, y = yOf(at(p.f)[1]); const on = sel && sel.k === p.k;
+    ec.beginPath(); ec.arc(x,y,on?8:6,0,7); ec.fillStyle = on ? col("--accent-title") : col("--panel"); ec.fill(); ec.strokeStyle = col("--ink-soft"); ec.lineWidth = 1; ec.stroke();
+    ec.fillStyle = on ? "#F4F6F6" : col("--ink"); ec.font = "bold 9px system-ui"; ec.textAlign = "center"; ec.textBaseline = "middle"; ec.fillText(p.k, x, y); ec.textAlign = "left"; ec.textBaseline = "alphabetic"; });
+}
+
+// ---- POI ----------------------------------------------------------------------
+const det = document.getElementById("detail");
+function showPOI(p){ sel = p; draw(); drawElev();
+  det.innerHTML = '<span class="tag">POI '+p.k+' · frac '+p.f.toFixed(2)+'</span><h3>'+p.name+'</h3><div class="coord">'+p.w+'</div><p>'+p.desc+'</p>' +
+    '<div class="assets"><b>Lotul de assets</b>'+p.lot.join(' · ')+'</div>';
+  document.querySelectorAll("tr.row").forEach(tr => tr.classList.toggle("on", tr.dataset.poi && tr.dataset.poi.split("/").includes(p.k))); }
+plan.addEventListener("click", e => { const r = plan.getBoundingClientRect(); const mx = (e.clientX-r.left)*plan.width/r.width, my = (e.clientY-r.top)*plan.height/r.height;
+  let best = null, bd = 18; POI.forEach(p => { const d = Math.hypot(X(p._x)-mx, Y(p._z)-my); if (d < bd){ bd = d; best = p; } }); if (best) showPOI(best); });
+plan.addEventListener("mousemove", e => { const r = plan.getBoundingClientRect(); const mx = (e.clientX-r.left)*plan.width/r.width, my = (e.clientY-r.top)*plan.height/r.height;
+  const x = minx+(mx-ox)/S, z = minz+(my-oy)/S; document.getElementById("cursor").textContent = "x "+x.toFixed(0)+" · z "+z.toFixed(0)+" · frac "+fracOf(x,z).toFixed(3); });
+
+// ---- ceasuri --------------------------------------------------------------------
+const clocksEl = document.getElementById("clocks");
+CLOCKS.forEach(k => { const bar = k.ph.map(p => '<i style="left:'+(p[0]/k.T*100)+'%;width:'+((p[1]-p[0])/k.T*100)+'%;background:var('+p[2]+')" title="'+p[3]+'"></i>').join("");
+  clocksEl.insertAdjacentHTML("beforeend", '<div class="clock"><span class="nm">'+k.nm+'</span><div class="bar">'+bar+'</div><span class="s">'+k.s+'</span></div>'); });
+clocksEl.insertAdjacentHTML("beforeend", '<div class="note">'+CLOCKS.map(k => '<b>'+k.nm+':</b> '+k.note).join(' · ')+'</div>');
+
+// ---- assets ---------------------------------------------------------------------
+const tbl = document.getElementById("asset-tbl");
+const PILL = {decor:["decor","decor pur"], reuse:["reuse","reuse"], conflict:["conflict","codul o face"], rupt:["rupt","contract rupt"], cons:["cons","are consumator"]};
+let rows = '<tr><th>piesă</th><th>ce e</th><th class="num">buc.</th><th>POI</th><th>verdict</th><th>contract / notă</th></tr>', made = 0;
+ASSETS.forEach(a => { if (a[1] === null){ rows += '<tr class="grp"><td colspan="6">'+a[0]+'</td></tr>'; return; }
+  const p = PILL[a[4]]; if (a[4] === "decor" || a[4] === "cons") made += a[2];
+  rows += '<tr class="row" data-poi="'+a[3]+'"><td class="mono">'+a[0]+'</td><td>'+a[1]+'</td><td class="num">'+a[2]+'</td><td class="num">'+a[3]+'</td><td><span class="pill '+p[0]+'">'+p[1]+'</span></td><td>'+a[5]+'</td></tr>'; });
+tbl.innerHTML = rows;
+document.getElementById("a-count").textContent = ASSETS.filter(a => a[1] !== null).length + " rânduri";
+document.getElementById("f-inst").textContent = made;
+tbl.querySelectorAll("tr.row").forEach(tr => tr.addEventListener("click", () => { const k = tr.dataset.poi.split("/")[0]; const p = POI.find(q => q.k === k); if (p) showPOI(p); }));
+
+// ---- copiere --------------------------------------------------------------------
+function copyOf(btnId, preId){ const b = document.getElementById(btnId); b.addEventListener("click", async () => { const t = document.getElementById(preId).textContent;
+  try { await navigator.clipboard.writeText(t); b.textContent = "Copiat"; } catch (e) { const r = document.createRange(); r.selectNodeContents(document.getElementById(preId)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selectat — Ctrl+C"; }
+  setTimeout(() => { b.textContent = btnId === "copy-sheet" ? "Copiază tot" : "Copiază promptul"; }, 1800); }); }
+copyOf("copy-diorama", "prompt-diorama"); copyOf("copy-sheet", "prompt-sheet");
+
+draw(); drawElev(); showPOI(POI[3]);
+if (window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { draw(); drawElev(); });
+</script>

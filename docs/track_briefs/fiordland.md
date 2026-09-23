@@ -769,9 +769,9 @@ satul vin din diorama asta, apoi din assets.
 > and comes back down through forest to the shore, the village and a short
 > airstrip.
 >
-> **THE ROUTE — a single closed loop of about 2 km, counter-clockwise on the
-> plan, the sea on the LEFT of the car along the ledge and along the shore
-> [!]:**
+> **THE ROUTE — a single closed loop of about 2 km, driven CLOCKWISE on the
+> plan (up the left side, across the top, down the right side), the sea on
+> the LEFT of the car along the ledge and along the shore [!]:**
 > 1. **A — Start/finish on the wharf:** wet asphalt beside a pontoon with two
 >    white open-deck cruise boats and colorful kayaks, a small café shed,
 >    three crested penguins on the rocks; **Mitre Peak stands in the water

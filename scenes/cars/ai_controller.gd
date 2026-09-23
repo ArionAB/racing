@@ -111,6 +111,10 @@ const DOOR_ETA_SLACK: float = 1.0
 ## poate rasuci intre "e liber" si "vine pulsul" chiar inainte de furca —
 ## acelasi motiv ca DOOR_REACH_M/TunnelSignalHazard.AI_REACH_M.
 const TORRENT_REACH_M: float = 120.0
+## Fractia din viteza curenta la care AI-ul presupune ca va merge, in cel mai
+## rau caz, pe banda scurtaturii pana la perdea (virajele de la furca). Vezi
+## `_torrent_blocks_branch`.
+const TORRENT_BRANCH_SLOW: float = 0.6
 ## Zona (m, inainte de furca) in care linia e trasa ferm spre PARTEA OPUSA
 ## benzii cand torentul blocheaza — vezi `_torrent_lane_keep`.
 ##
@@ -939,8 +943,17 @@ func _torrent_blocks_branch(speed: float) -> bool:
 		var along_branch := 0.0
 		if branch_route != null:
 			along_branch = torrent.branch_frac * branch_route.length()
-		var eta := (along + along_branch) / maxf(speed, 6.0)
-		if torrent.blocks_in(eta) or torrent.blocks_in(eta + DOOR_ETA_SLACK):
+		# Sosirea NU e un moment, e o FEREASTRA: cel mai devreme ajung daca tin
+		# viteza de acum; cel mai tarziu daca virajele benzii (raza 19 m la
+		# furca) ma incetinesc la TORRENT_BRANCH_SLOW din ea. Un om la volan
+		# socoteste la fel („ajung in 4-6 s, pulsul vine in 5 — nu intru").
+		# Cu un singur moment + 1 s slack, masurat pe scena unita: 5 intrari
+		# de AI in puls din 30 (memoria: eta cu viteza curenta minte pe o
+		# banda cu viraje). Aceleasi informatii ca jucatorul, doar cu marja.
+		var v := maxf(speed, 6.0)
+		var eta_fast := (along + along_branch) / v
+		var eta_slow := along / v + along_branch / (v * TORRENT_BRANCH_SLOW)
+		if torrent.blocks_between(eta_fast, eta_slow + DOOR_ETA_SLACK):
 			return true
 	return false
 

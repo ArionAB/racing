@@ -122,16 +122,26 @@ const AI_GROUP: StringName = &"torrents"
 ## grele stateau SECUNDE sub o perdea de 30 m cu forta constanta (bucla
 ## pozitiva descrisa in WaterfallHazard). Aici perdeaua e un PULS de 20 m pe
 ## care il traversezi in sub o secunda, iar rostul lui e RISCUL scurtaturii:
-## pulsul trebuie sa coste cat castiga coarda (1-3 s). Masurat cu
-## `ProbeFiordTorent --only=b --car=X --drag=D` (drum drept, 25 m/s):
-##   drag 0.25: Taxi -4%, Politia -2%, Autobuz -19%   (nu se simte)
-##   drag 0.6 : Taxi -26%, Politia -23%, Autobuz -42%
-##   drag 1.0 : Taxi -46%, Politia -44%, Autobuz -62%  <- ales
-##   drag 1.5 : Taxi -64%, Politia -62%, Autobuz -75%  (zid)
-## La 1.0 iesi din puls cu ~14 m/s (Taxi) / ~9 m/s (Autobuz): reaccelerarea
-## costa 1,5-3 s, exact ordinul de marime al recompensei. Forta in jos ramane
-## cea de la Stirling (apasarea pe suspensie e identitate per masina).
-@export_range(0.0, 3.0, 0.05) var drag: float = 1.0
+## pulsul trebuie sa coste MAI MULT decat castiga coarda, altfel nu e o
+## decizie. Doua masuratori, in ordine:
+##
+## 1. drum drept, 25 m/s (`ProbeFiordTorent --only=b --car=X --drag=D`):
+##      drag 0.25: Taxi -4%, Politia -2%, Autobuz -19%   (nu se simte)
+##      drag 0.6 : Taxi -26%, Politia -23%, Autobuz -42%
+##      drag 1.0 : Taxi -46%, Politia -44%, Autobuz -62%
+##      drag 1.5 : Taxi -64%, Politia -62%, Autobuz -75%
+## 2. pe pista, sonda risc/recompensa (`ProbeFiordScurtatura --torrent=surge`,
+##    fata de bucla, uscat; in liniste toate castiga +0,9..+1,4 s):
+##      drag 1.0 : Politia +0,05  Autobuz -0,75  Muscle +0,28  Taxi +0,07
+##      drag 1.5 : Politia -0,57  Autobuz -1,70  Muscle -0,37  Taxi -0,55
+##      drag 2.0 : Politia -1,17  Autobuz -2,63  Muscle -1,08  Taxi -1,20  <- ales
+## La 1.0 pulsul doar ANULEAZA castigul (net ~0): riscul nu exista. La 2.0
+## pulsul prins gresit te lasa cu 1-2,6 s in urma fata de podet, iar pulsul
+## evitat iti da +1..+1,4 s — o balansoare de 2-4 s, asta e decizia. Forta
+## in jos ramane cea de la Stirling (apasarea pe suspensie e identitate per
+## masina). Reglaj de volan: daca la joc pulsul pare zid, 1.5 e treapta de
+## dedesubt (tabelul de mai sus), nu 1.0.
+@export_range(0.0, 3.0, 0.05) var drag: float = 2.0
 ## In ploaie, pulsul e cu atat mai GREU (brief: rain_factor al perdelei
 ## 1.3) — trecut direct catre WaterfallHazard.rain_factor in fiecare cadru.
 @export_range(1.0, 2.0, 0.01) var rain_surge_factor_force: float = 1.3
@@ -373,12 +383,23 @@ func cross_s() -> float:
 ## ca AIController sa trateze torentul cu tiparul "daca ajung acolo peste X
 ## secunde, mai gasesc drumul liber pana ies din perdea?".
 func blocks_in(seconds: float) -> bool:
+	return blocks_between(seconds, seconds)
+
+
+## Va fi SURGE in vreun moment din [t0, t1 + cross_s()]? Generalizarea lui
+## `blocks_in` pentru un sofer care NU stie exact cand ajunge: AI-ul isi
+## estimeaza sosirea intre „cu viteza de acum" (t0) si „incetinit in virajele
+## benzii" (t1) — vezi `ai_controller.gd._torrent_blocks_branch`. Masurat pe
+## scena unita cu un singur moment (`blocks_in(eta)` + 1 s): 5 intrari de AI
+## in puls din 30, fiindca banda are viraje de 19 m raza la furca si masina
+## ajunge la perdea cu 2-3 s mai tarziu decat socotise la 25 m/s.
+func blocks_between(t0: float, t1: float) -> bool:
 	var rain_factor := _rain_factor()
 	var surge_now := surge * lerpf(1.0, rain_surge_factor, rain_factor)
 	var surge_start := maxf(period - surge_now, 0.0)
 	var cross := cross_s()
-	var t := seconds
-	var span := cross
+	var t := minf(t0, t1)
+	var span := absf(t1 - t0) + cross
 	# Verificam pe pasi mici in loc de o formula inchisa (perioada ramane
 	# fixa dar surge_now variaza cu ploaia doar la evaluare, nu in timp —
 	# in practica un `fposmod` simplu e suficient, fiindca in intervalul

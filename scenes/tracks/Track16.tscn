@@ -19,10 +19,10 @@ point_count = 180
 
 [sub_resource type="Curve3D" id="Curve3D_scurtatura_chasm"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -485.1, 28.01, -452.4, 0, 0, 0, 0, 0, 0, -465.8, 26.82, -465.9, 0, 0, 0, 0, 0, 0, -447.4, 25.63, -480.3, 0, 0, 0, 0, 0, 0, -430.1, 24.44, -495.8, 0, 0, 0, 0, 0, 0, -414.1, 23.26, -512.5, 0, 0, 0, 0, 0, 0, -399.4, 22.07, -530.4, 0, 0, 0, 0, 0, 0, -385.8, 20.88, -549.4, 0, 0, 0, 0, 0, 0, -373.1, 19.69, -569.3),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -505.13, 22.42, -526.82, 0, 0, 0, 0, 0, 0, -471.29, 20.47, -550.12, 0, 0, 0, 0, 0, 0, -434.35, 18.81, -558.56, 0, 0, 0, 0, 0, 0, -408.46, 16.86, -593.38),
+"tilts": PackedFloat32Array(0, 0, 0, 0)
 }
-point_count = 8
+point_count = 4
 
 [node name="Track16" type="Node3D"]
 script = ExtResource("1_track")
@@ -51,7 +51,7 @@ script = ExtResource("8_branch")
 branch_half_width = 3.2
 label = "drumul vechi din padure"
 rain_wet = true
-speed_factor = 0.90
+speed_factor = 1.0
 rut_depth = 0.05
 grass_center = 0.7
 edge_noise = 1.0

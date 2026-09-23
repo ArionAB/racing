@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="6_channel"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="7_marker"]
 [ext_resource type="Script" uid="uid://b82usw4sot3ep" path="res://scenes/tracks/track_branch.gd" id="8_branch"]
+[ext_resource type="Script" path="res://scenes/hazards/torrent_cycle.gd" id="9_torrent"]
 
 [sub_resource type="Curve3D" id="Curve3D_fiordland"]
 closed = true
@@ -19,10 +20,10 @@ point_count = 180
 
 [sub_resource type="Curve3D" id="Curve3D_scurtatura_chasm"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -485.1, 28.01, -452.4, 0, 0, 0, 0, 0, 0, -465.8, 26.82, -465.9, 0, 0, 0, 0, 0, 0, -447.4, 25.63, -480.3, 0, 0, 0, 0, 0, 0, -430.1, 24.44, -495.8, 0, 0, 0, 0, 0, 0, -414.1, 23.26, -512.5, 0, 0, 0, 0, 0, 0, -399.4, 22.07, -530.4, 0, 0, 0, 0, 0, 0, -385.8, 20.88, -549.4, 0, 0, 0, 0, 0, 0, -373.1, 19.69, -569.3),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -529.78, 22.45, -527.39, 0, 0, 0, 0, 0, 0, -482.21, 19.43, -563.80, 0, 0, 0, 0, 0, 0, -434.64, 16.41, -600.21),
+"tilts": PackedFloat32Array(0, 0, 0)
 }
-point_count = 8
+point_count = 3
 
 [node name="Track16" type="Node3D"]
 script = ExtResource("1_track")
@@ -49,9 +50,11 @@ curve = SubResource("Curve3D_fiordland")
 curve = SubResource("Curve3D_scurtatura_chasm")
 script = ExtResource("8_branch")
 branch_half_width = 3.2
+entry_at = 0.366
+exit_at = 0.462
 label = "drumul vechi din padure"
 rain_wet = true
-speed_factor = 0.90
+speed_factor = 1.0
 rut_depth = 0.05
 grass_center = 0.7
 edge_noise = 1.0
@@ -161,3 +164,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.36, 15.73, -258.36)
 script = ExtResource("7_marker")
 kind = 8
 avalanche_period = 90.0
+
+[node name="TorentChasm" type="Node3D" parent="Hazarduri"]
+script = ExtResource("9_torrent")
+branch_index = 1
+branch_frac = 0.5

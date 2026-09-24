@@ -32,6 +32,8 @@ extends Node
 var _track: Track
 var _av: AvalancheHazard
 var _dbg := false
+## Cat are voie centrul gramezii sa se abata de la teren + baza, in metri.
+const MAX_GAP: float = 1.0
 var _max_gap := 0.0
 var _max_gap_x := 0.0
 var _samples := 0
@@ -86,9 +88,14 @@ func _physics_process(delta: float) -> void:
 	var phase := _av._last_phase
 	if phase == 1 and _av._mass != null:
 		var x: float = _av.to_local(_av._mass.global_position).x
-		# Aceeasi formula ca in `_phase_sweep`: cota terenului + inaltimea de
-		# asezare a centrului gramezii.
-		var expected: float = _av._sample_ground(x) + _av._radius * 0.72
+		# Terenul se masoara INDEPENDENT, cu raza proprie a sondei, NU cu
+		# `_av._sample_ground`: comparata cu propriul profil al hazardului,
+		# masa iese la gap 0,00 prin constructie, chiar daca profilul e gol sau
+		# gresit (prima versiune a sondei raporta exact 0,00 pe ambele piste).
+		var ground := _ray_ground_local(_av._mass.global_position)
+		if is_nan(ground):
+			return
+		var expected: float = ground + _av._radius * 0.72
 		var actual: float = _av._mass.position.y
 		var gap := absf(actual - expected)
 		_samples += 1
@@ -116,5 +123,50 @@ func _report() -> void:
 		str(start), start.x, start.y])
 	print("gap maxim |masa - (teren+baza)| = %.2f m (la x=%.1f)" % [_max_gap, _max_gap_x])
 	print("")
-	print("VERDICT: ", "OK" if _samples > 0 else "PROBLEME (nicio proba)")
-	get_tree().quit(0 if _samples > 0 else 1)
+	var profile_ok: bool = not _av._profile.is_empty()
+	print("profil de teren rezolvat: %s (%d esantioane)" % [profile_ok, _av._profile.size()])
+	var failed := false
+	if _samples == 0:
+		print("  PROBLEMA: nicio proba in SWEEP")
+		failed = true
+	if not profile_ok:
+		print("  PROBLEMA: hazardul a ramas pe traiectoria analitica (fara teren)")
+		failed = true
+	# Startul pe versant, masurat tot cu raza sondei. Gapul de pe traversare nu
+	# ajunge: cu profilul sabotat (teren = 0 peste tot) hazardul cade pe
+	# startul clasic de langa drum, unde terenul e plat, si masa „lipeste"
+	# de sol la 0,34 m — sonda raporta OK. Deci: daca exista panta in bataie
+	# (<= 45 m), startul trebuie sa stea pe ea, la cota terenului.
+	var slope_max := -INF
+	var x := hw * _av.START_SIDE
+	while x <= 45.0:
+		var g := _ray_ground_local(_av.to_global(Vector3(x, 0.0, 0.0)))
+		if not is_nan(g):
+			slope_max = maxf(slope_max, g)
+		x += 1.0
+	var start_ground := _ray_ground_local(_av.to_global(Vector3(start.x, 0.0, 0.0)))
+	print("panta maxima in bataie: %.1f m | teren sub start: %.2f m" % [slope_max, start_ground])
+	var want := minf(slope_max, _av.START_HEIGHT) * 0.7
+	if slope_max >= 3.0 and start.y < want:
+		print("  PROBLEMA: exista panta de %.1f m, dar masa porneste de la %.1f m" % [slope_max, start.y])
+		failed = true
+	if not is_nan(start_ground) and absf(start.y - start_ground) > MAX_GAP:
+		print("  PROBLEMA: startul nu e pe teren (%.2f fata de %.2f)" % [start.y, start_ground])
+		failed = true
+	if _max_gap > MAX_GAP:
+		print("  PROBLEMA: gap peste %.1f m — masa pluteste sau e ingropata" % MAX_GAP)
+		failed = true
+	print("")
+	print("VERDICT: ", "PROBLEME" if failed else "OK")
+	get_tree().quit(1 if failed else 0)
+
+
+## Cota terenului sub un punct, in spatiul hazardului, din raza SONDEI.
+func _ray_ground_local(world: Vector3) -> float:
+	var space := _av.get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(world + Vector3.UP * 150.0,
+			world + Vector3.DOWN * 150.0, Track.CAMERA_BLOCKER_LAYER)
+	var hit := space.intersect_ray(q)
+	if hit.is_empty():
+		return NAN
+	return _av.to_local(hit.position).y

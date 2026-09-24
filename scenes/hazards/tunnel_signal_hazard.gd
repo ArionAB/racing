@@ -172,6 +172,12 @@ enum Mode { STOP, LANE }
 		bus_length = value
 		_rebuild_bus_curve()
 
+## Modelul autocarului (`coach_fiordland`, brief §5.2 — reuse mesh Autobuz
+## din garaj), trecut direct catre `bus.model` ([PathMover] deja stie sa-l
+## instantieze si sa masoare cutia de coliziune pe el). null (implicit) =
+## cutia galbena placeholder a [BusHazard], neschimbat.
+@export var bus_model: PackedScene = null
+
 ## Incotro deflecteaza botul autocarului la contact frontal: +1 = dreapta LUI
 ## (care e stanga masinii care vine din fata pe banda ei) — brief: „ghiont
 ## inapoi si in perete", nu o parte anume; -1 disponibil daca geometria
@@ -302,9 +308,12 @@ func _ready() -> void:
 func _build_bus() -> void:
 	_bus = BusHazard.new()
 	_bus.name = "Autocar"
-	# Fara model: cutia galbena a BusHazard e inlocuita mai tarziu de
-	# `coach_fiordland` (brief §5.2, reuse mesh Autobuz din garaj) — se
-	# seteaza din pista, prin `bus.model`, dupa Regenerate.
+	# Modelul (`coach_fiordland`, brief §5.2) vine din `bus_model`, setat pe
+	# ACEST nod din pista — trebuie scris INAINTE de add_child(_bus): PathMover
+	# construieste corpul in _ready() si alege intre model si placeholder o
+	# singura data (`_build_body`). null (implicit) = cutia galbena
+	# placeholder, comportament identic cu inainte.
+	_bus.model = bus_model
 	_bus.body_size = Vector3(bus_width, 3.0, bus_length)
 	_bus.nose_side = nose_side
 	_bus.nose_angle_deg = 20.0

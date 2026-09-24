@@ -52,6 +52,11 @@ GROUPS = {
     # (7-14 m) fata de caiace (3.6 m) — randuri separate, acelasi motiv ca
     # rocks/rocks_small.
     "vehicles": ("vehicles", ["coach_fiordland", "bush_plane", "cruise_boat"], 10.0),
+    # satul (val 4, brief §1.3): wharf (20 m) domina langa piesele mici —
+    # randuri separate, acelasi motiv ca rocks/rocks_small.
+    "village": ("structures", ["wharf", "heli_pad"], 8.0),
+    "village_small": ("props", ["luggage_container", "road_sign_blank",
+                                "traffic_light_pole", "snow_pole"], 3.0),
 }
 # caiacele (props/kayak_a, kayak_b) NU intra in GROUPS/sheet(): revizuire
 # coordonator (val 3) — cutia de referinta generica din `sheet()` (asezata la
@@ -517,6 +522,222 @@ def avalanche_sheet(path, models_dir=None, res=(1900, 800)):
     return [(o.name, len(o.data.polygons)) for o in built if o.type == "MESH"]
 
 
+def animals_sheet(path, models_dir=None, res=(1900, 900)):
+    """kea (Idle=stransa + Open=intinsa, doua exemplare langa altul) +
+    penguin_tawaki, fiecare cu cutia de referinta si un marcaj de om, ca
+    scara si pozele sa se judece direct."""
+    models_dir = models_dir or MODELS
+    _clear()
+    built = []
+    x = 0.0
+
+    # kea, doua exemplare: unul in poza Idle (cadrul 0 al NLA "Idle" —
+    # aripile stranse), unul in poza Open la ultimul cadru (aripile intinse).
+    for pose_name, frame_kind in (("Idle", "start"), ("Open", "end")):
+        objs = _import("animals", "kea", models_dir)
+        if not objs:
+            print("LIPSA: kea")
+            break
+        arm = next((o for o in objs if o.type == "ARMATURE"), None)
+        mesh = next((o for o in objs if o.type == "MESH"), None)
+        if arm is None or mesh is None:
+            print("LIPSA armatura/mesh in kea.glb")
+            continue
+        act = bpy.data.actions.get(pose_name)
+        if act is not None:
+            if arm.animation_data is None:
+                arm.animation_data_create()
+            for t in list(arm.animation_data.nla_tracks):
+                t.mute = True
+            arm.animation_data.action = act
+            # Blender 5.x (Action layered): asignarea actiunii NU leaga
+            # automat slotul cand actiunea are deja un slot dintr-o sesiune
+            # anterioara (cazul de aici — actiunea vine din GLB, cu slotul ei
+            # propriu) — fara asta poza ramane la bind pose (identitate),
+            # masurat direct (memoria din build_fiordland_animals.py).
+            if arm.animation_data.action_slot is None and act.slots:
+                arm.animation_data.action_slot = act.slots[0]
+            frame = act.frame_range[0] if frame_kind == "start" else act.frame_range[1]
+            bpy.context.scene.frame_set(int(frame))
+        bpy.context.view_layer.update()
+        roots = [o for o in objs if o.parent is None]
+        span_x = max(mesh.dimensions.x, 0.3)
+        for o in roots:
+            o.location.x += x + span_x * 0.5
+        bpy.context.view_layer.update()
+        piece_x = x + span_x * 0.5
+        # pas mare intre piese (nu 1.0): animalele sunt 0.5-0.75 m, iar
+        # cutia de referinta e 4 m LUNGA — asezata prea aproape (pas vechi de
+        # 1.0 m) o cutie ajungea sa acopere tot cadrul si animalul disparea
+        # in spatele ei (masurat pe fiordland_animals.png: doar doua cutii
+        # galbene vizibile). Pasul intre piese trebuie sa lase loc cutiei
+        # PE LATIME (1.8 m), nu doar pe lungime.
+        x += span_x + 3.0
+        built.append(mesh)
+
+        # Cutia de referinta ramane NEROTITA (lungimea ei de 4 m pe axa Y,
+        # ca la toate celelalte plansa) si asezata CLAR in spatele animalului
+        # (offset mare pe Y), nu alaturi pe X — la un animal de sub 1 m,
+        # orice offset mic pe X tot suprapune cutia peste el in perspectiva.
+        car = _make_ref_car()
+        car.location = (piece_x, -4.0, 0.0)
+        built.append(car)
+
+    x += 1.5
+    objs = _import("animals", "penguin_tawaki", models_dir)
+    if objs:
+        meshes = [o for o in objs if o.type == "MESH"]
+        span_x = max(max(o.dimensions.x for o in meshes), 0.3)
+        for o in [o for o in objs if o.parent is None]:
+            o.location.x += x + span_x * 0.5
+        bpy.context.view_layer.update()
+        piece_x = x + span_x * 0.5
+        built += meshes
+        car = _make_ref_car()
+        car.location = (piece_x, -4.0, 0.0)
+        built.append(car)
+    else:
+        print("LIPSA: penguin_tawaki")
+
+    if not built:
+        print("plansa animals SARITA (niciun GLB exportat inca)")
+        return []
+
+    for o in bpy.data.objects:
+        if o.type in ("MESH", "ARMATURE"):
+            o.hide_render = (o not in built) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_end = 500.0
+    cam.data.clip_start = 0.1
+    shot(built, path, azimuth=25.0, elevation=14.0, res=res, margin=1.3)
+    return [(o.name, len(o.data.polygons)) for o in built if o.type == "MESH"]
+
+
+def horizon_sheet(path, models_dir=None, res=(1900, 1000)):
+    """Cele 4 noduri de orizont, fiecare randat din 2-3 azimuturi diferite —
+    jocul le da un yaw ALEATOR (`Track._build_horizon`), deci planta trebuie
+    sa arate ca fiecare nod citeste corect din orice unghi, nu doar din cel
+    "bun". Layout: 4 randuri (cate un nod), 3 coloane (yaw 0/120/240) pe
+    fiecare rand."""
+    models_dir = models_dir or MODELS
+    node_names = ["FarWall_A", "FarWall_B", "SnowRidge_A", "SnowRidge_B"]
+    yaws = [0.0, 120.0, 240.0]
+
+    built = []
+    _clear()
+    path_obj = os.path.join(models_dir, "fiordland", "rocks",
+                            "fiordland_horizon.glb")
+    if not os.path.exists(path_obj):
+        print("LIPSA: fiordland_horizon")
+        return []
+    bpy.ops.import_scene.gltf(filepath=path_obj)
+    imported = {o.name: o for o in bpy.context.selected_objects
+               if o.type == "MESH"}
+    missing = [n for n in node_names if n not in imported]
+    if missing:
+        print("LIPSA noduri in fiordland_horizon.glb:", missing)
+
+    row_step = 130.0
+    col_step = 130.0
+    for row, name in enumerate(node_names):
+        src = imported.get(name)
+        if src is None:
+            continue
+        span_x = max(src.dimensions.x, 20.0)
+        for col, yaw in enumerate(yaws):
+            # duplica mesh-ul (link_duplicate) ca fiecare copie sa aiba
+            # propriul yaw, fara sa afecteze originalul
+            dup = src.copy()
+            dup.data = src.data.copy()
+            bpy.context.collection.objects.link(dup)
+            dup.location = (col * col_step, -row * row_step, 0.0)
+            dup.rotation_euler = (0.0, 0.0, math.radians(yaw))
+            bpy.context.view_layer.update()
+            mat = dup.matrix_world.copy()
+            for v in dup.data.vertices:
+                v.co = mat @ v.co
+            dup.matrix_world.identity()
+            dup.name = "%s_yaw%d" % (name, int(yaw))
+            built.append(dup)
+        # cutia de referinta o singura data per rand, langa prima coloana
+        car = _make_ref_car()
+        car.location = (-(span_x * 0.5 + REF_CAR[1] * 0.5 + 4.0), -row * row_step, 0.0)
+        built.append(car)
+
+    # sterge originalele neduplicate (raman doar copiile pozitionate)
+    for o in list(imported.values()):
+        bpy.data.objects.remove(o, do_unlink=True)
+
+    if not built:
+        print("plansa horizon SARITA (niciun nod gasit)")
+        return []
+
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.hide_render = (o not in built) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_end = 2000.0
+    cam.data.clip_start = 0.1
+    shot(built, path, azimuth=200.0, elevation=18.0, res=res, margin=1.15)
+    return [(o.name, len(o.data.polygons)) for o in built if o.type == "MESH"]
+
+
+def buildings_sheet(path, models_dir=None, res=(1900, 800)):
+    """cafe_shed + lodge, unul langa altul (doua noduri fiecare, House_Wall +
+    House_Roof) — verifica FARA ferestre luminate si acoperisul asezat pe
+    pereti (nu plutind), brief §1.3."""
+    models_dir = models_dir or MODELS
+    _clear()
+    built = []
+    y = 0.0
+    for cat, name in (("buildings", "cafe_shed"), ("buildings", "lodge")):
+        objs = _import(cat, name, models_dir)
+        if not objs:
+            print("LIPSA:", name)
+            continue
+        meshes = [o for o in objs if o.type == "MESH"]
+        roots = [o for o in objs if o.parent is None]
+        span_y = max(max(o.dimensions.y for o in meshes), 2.0)
+        half = span_y * 0.5
+        for o in roots:
+            o.location.y += y + half
+        bpy.context.view_layer.update()
+        piece_center_y = y + half
+        y += span_y + 6.0
+        built += meshes
+
+        car = _make_ref_car()
+        piece_span_x = max(max(o.dimensions.x for o in meshes), 0.5)
+        car.location = (-(piece_span_x * 0.5 + REF_CAR[1] * 0.5 + 1.5),
+                        piece_center_y, 0.0)
+        built.append(car)
+
+    if not built:
+        print("plansa buildings SARITA (niciun GLB exportat inca)")
+        return []
+
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.hide_render = (o not in built) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_end = 500.0
+    cam.data.clip_start = 0.1
+    shot(built, path, azimuth=30.0, elevation=13.0, res=res, margin=1.2)
+    return [(o.name, len(o.data.polygons)) for o in built]
+
+
 def kayak_sheet(path, models_dir=None, res=(1900, 700)):
     """kayak_a + kayak_b, fiecare cu cutia de referinta CLAR langa el —
     decalata atat pe X (in afara latimii caiacului) cat si pe Y (in spate),
@@ -628,3 +849,9 @@ print("plansa avalanche", avalanche_sheet(
     os.path.join(OUT, "fiordland_avalanche.png")))
 print("plansa vehicles_small", kayak_sheet(
     os.path.join(OUT, "fiordland_vehicles_small.png")))
+print("plansa buildings", buildings_sheet(
+    os.path.join(OUT, "fiordland_buildings.png")))
+print("plansa animals", animals_sheet(
+    os.path.join(OUT, "fiordland_animals.png")))
+print("plansa horizon", horizon_sheet(
+    os.path.join(OUT, "fiordland_horizon.png")))

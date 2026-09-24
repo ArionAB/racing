@@ -88,9 +88,27 @@ check "vehicles/cruise_boat.glb"    1500 --origin=waterline
 check "props/kayak_a.glb"            100 --allow-car-slots=KayakA
 check "props/kayak_b.glb"            100 --allow-car-slots=KayakB
 
-# Valurile urmatoare (§1.2, §1.3, §1.7) isi adauga liniile aici pe masura ce
-# se construiesc: fundalul, satul, animalele. Pana atunci nu apar in verdict
-# — kitul se livreaza in valuri (brief §3).
+echo "== satul (brief §1.3, val 4) =="
+check "structures/wharf.glb"          400
+# cafe_shed/lodge: House_Wall + House_Roof, origine ASSEMBLY — acoperisul nu
+# atinge solul prin constructie (aceeasi exceptie ca stirling_ledge/beech).
+check "buildings/cafe_shed.glb"       400 --origin=assembly
+check "buildings/lodge.glb"           700 --origin=assembly
+check "structures/heli_pad.glb"       200
+check "props/luggage_container.glb"   150
+check "props/road_sign_blank.glb"     100
+check "props/traffic_light_pole.glb"  250
+check "props/snow_pole.glb"            40
+
+echo "== animalele (brief §1.7, val 4) =="
+# kea: rig, actiuni Idle/Open (nu se verifica prin verify_glb.py, care nu
+# citeste actiuni) — verificat separat prin preview + raportul de culoare
+# din build_fiordland_animals.py.
+check "animals/kea.glb"              700
+check "animals/penguin_tawaki.glb"   300 --allow-car-slots=Penguin
+
+echo "== fundalul (brief §1.2, val 4) =="
+check "rocks/fiordland_horizon.glb"  5000 --origin=assembly
 
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)

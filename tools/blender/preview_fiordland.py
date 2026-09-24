@@ -405,6 +405,44 @@ def beech_sheet(path, models_dir=None, res=(1900, 900)):
     return [(o.name, len(o.data.polygons)) for o in built]
 
 
+def rata_sheet(path, models_dir=None, res=(1300, 1100)):
+    """rata_tree singur — vedere laterala + chase cam, cu cutia de referinta
+    si marcajul de om alaturi. Cerinta coordonator (a doua revizuire): rata
+    trebuie verificata izolat, nu doar in planul comun cu restul padurii,
+    ca sa se vada clar daca mai citeste ca acacie (silueta interzisa) sau
+    ca tufa rotunjita."""
+    models_dir = models_dir or MODELS
+    _clear()
+    objs = _import("plants", "rata_tree", models_dir)
+    if not objs:
+        print("LIPSA: rata_tree")
+        return []
+    meshes = [o for o in objs if o.type == "MESH"]
+    car = _make_ref_car()
+    span_x = max(max(o.dimensions.x for o in meshes), 0.5)
+    car.location = (-(span_x * 0.5 + REF_CAR[1] * 0.5 + 1.2), -1.0, 0.0)
+    person = _make_person(span_x * 0.5 + 1.0, -1.0)
+    built = meshes + [car, person]
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.hide_render = (o not in built) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_end = 500.0
+    cam.data.clip_start = 0.1
+    shot(built, path, azimuth=15.0, elevation=10.0, res=res, margin=1.2)
+    base, ext = os.path.splitext(path)
+    # chase cam: aceeasi conventie ca la fag (elevation=29, unghiul camerei
+    # de joc) — cerinta explicita a coordonatorului, "chase-cam view of
+    # rata alone"
+    shot(built, base + "_chasecam" + ext, azimuth=15.0, elevation=29.0,
+        res=res, margin=1.2)
+    return [(o.name, len(o.data.polygons)) for o in built]
+
+
 def bridge_rail_sheet(path, models_dir=None, res=(1700, 700)):
     """chasm_bridge_rail: doua noduri (Rail_L/Rail_R) la X=+-5.8, langa
     cutia de referinta asezata PE tablia imaginara (Y=0), ca sa se vada
@@ -450,5 +488,6 @@ for g in GROUPS:
         print("plansa", g, sheet(g, os.path.join(OUT, "fiordland_%s.png" % g)))
 stirling_elevation_sheet(os.path.join(OUT, "fiordland_stirling.png"))
 print("plansa beech", beech_sheet(os.path.join(OUT, "fiordland_beech.png")))
+print("plansa rata", rata_sheet(os.path.join(OUT, "fiordland_rata.png")))
 print("plansa bridge_rail", bridge_rail_sheet(
     os.path.join(OUT, "fiordland_bridge_rail.png")))

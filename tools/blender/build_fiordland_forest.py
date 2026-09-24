@@ -310,89 +310,141 @@ def build_beech_dead():
 # --- rata_tree -----------------------------------------------------------------
 
 def build_rata_tree():
-    """Rata in floare, 5 m: BUSTOASA, se ramifica JOS (de la ~1.2 m) in 2-3
-    limbi, coroana de 4-5 ciorchini LATA cat inaltimea (4-5 m), flori
-    KERB_RED pe fetele de sus/exterioare ale ciorchinilor.
+    """Rata in floare, 5 m: TUFA DENSA, ROTUNJITA — nu acacia africana.
 
-    Revizuire coordonator (val 2): prima versiune era un "bat inalt cu o
-    capsula mica" — trunchi drept pana sus, coroana ingusta agatata in varf,
-    citea ca ciuperca. Rata de fapt se ramifica jos si se latesc, nu creste
-    ca un fag inalt cu trunchi gol. Fix:
-      - trunchi SCURT (branch_h ~1.2-1.6 m), apoi 2-3 LIMBI groase care
-        urca oblic si se departeaza — fiecare limba e o a doua taper_sweep,
-        nu doar o ramura subtire ca la fag
-      - fiecare limba isi termina propriul ciorchine de coroana (2 pe limba
-        + inca 1-2 direct din varful trunchiului), 4-5 ciorchini total
-      - latimea combinata a coroanei ~ H (4-5 m), nu ~H*0.3 ca inainte:
-        limbile insele fac raspandirea, nu doar offset-ul norilor
+    A DOUA revizuire coordonator: prima versiune (limbi lungi si golase cu
+    cate un disc turtit in varf, plus un disc central la furca) citea EXACT
+    ca o acacie de Serengeti — silueta interzisa explicit pentru pista asta.
+    Cauza: limbile erau prea lungi si prea vizibile (bare pana la capat),
+    iar "ciorchinii" foloseau reteta `_crown_tier` a fagului (discuri
+    turtite, late-nu-inalte) — corecta pentru fag, gresita pentru rata.
+
+    Rata (Metrosideros umbellata) e o tufa DENSA si ROTUNDA: trunchi scurt,
+    limbi scurte aproape ascunse de frunzis, coroana UN SINGUR bulgare
+    umflat facut din 5-7 volume care se ATING si se INTREPATRUND (nu
+    turtite si distantate ca la fag). Fix complet, reteta noua:
+      - trunchi FOARTE scurt (<=1.2 m vizibil), apoi 3-4 limbi SCURTE
+        (<=1.5 m), majoritatea ingropate in coroana de la baza
+      - coroana: 6 bulgari `boulder()` ROTUNJITI (squash bland, NU turtiti
+        ca discurile de fag), cu centrele apropiate de centrul arborelui si
+        raze mari fata de distanta dintre ele — se SUPRAPUN masiv, ca sa nu
+        ramana cer vizibil prin mijloc
+      - FARA disc central la furca (interzis explicit de coordonator)
+      - flori: NU bulgari separati mari (43% din fete, prea mult) — acum
+        cutii mici RETAG pe o fractie din fetele de sus/exterior ale
+        coroanei (15-25% cerut), plus cateva bulgare-cluster mici RAR, ca
+        sa citeasca "verde punctat cu rosu", nu "copac rosu"
     """
     b = Builder()
     H = 5.0
     rand = _lcg(5301)
-    branch_h = 1.2 + rand() * 0.4          # unde se ramifica trunchiul (brief: "de la ~1.2 m")
-    trunk_pts = _beech_trunk(b, branch_h, 0.28, 5301, lean=0.10, kink=False)
-    base = trunk_pts[0]
+
+    # Trunchi foarte scurt: <=1.2 m vizibil (brief). `_beech_trunk` cu
+    # kink=False si o inaltime mica da un trunchi drept, gros la baza.
+    trunk_h = 0.75 + rand() * 0.35   # 0.75-1.10 m, sub plafonul de 1.2 m
+    trunk_pts = _beech_trunk(b, trunk_h, 0.30, 5301, lean=0.08, kink=False)
     fork = trunk_pts[-1]
 
-    n_limbs = 3
-    lump_centers = []
+    # Centrul coroanei: putin deasupra furcii, undeva pe la 40% din H —
+    # coroana insasi (bulgarii, mai jos) urca de acolo pana aproape de H.
+    crown_center_z = fork.z + H * 0.06
+
+    # 3-4 limbi SCURTE (<=1.5 m), majoritatea ascunse in coroana — nu se
+    # vede lemn gol intre trunchi si frunzis, ca la acacie. Limbile exista
+    # doar ca sa dea bulgarilor de coroana un punct de plecare diferit de
+    # trunchi (silueta usor asimetrica), nu ca element vizibil in sine.
+    n_limbs = 4
+    limb_tips = []
     for li in range(n_limbs):
         a = 2.0 * math.pi * li / n_limbs + rand() * 0.5
         d = Vector((math.cos(a), math.sin(a), 0.0))
-        # rise calibrat sa impinga varful ciorchinelui de pe fiecare limba
-        # aproape de H: masurat pe GLB, prima versiune (rise=0.30-0.42*H)
-        # dadea inaltimea totala la 3.63 m (27% sub tinta 5 m) — limbile nu
-        # urcau destul. limb_len coboara usor (limbile mai putin intinse
-        # lateral) ca latimea sa nu depaseasca 4-5 m odata cu inaltimea.
-        limb_len = H * (0.34 + rand() * 0.12)
-        rise = H * (0.58 + rand() * 0.14)
-        mid = fork + d * (limb_len * 0.5) + Vector((0, 0, rise * 0.55))
+        limb_len = 0.7 + rand() * 0.6          # <=1.5 m (brief)
+        rise = limb_len * (0.55 + rand() * 0.25)
         tip = fork + d * limb_len + Vector((0, 0, rise))
-        b.taper_sweep([fork, mid, tip], [0.14, 0.10, 0.06], TRUNK, segments=4)
-        # fiecare limba poarta UN ciorchine, la capat (brief: 4-5 ciorchini
-        # TOTAL, nu per limba — bugetul de 400 nu incape 2 per limba plus
-        # unul central cu lumps=2 fiecare)
-        p = tip
-        w = H * (0.20 + rand() * 0.06)
-        thick = w * (0.55 + rand() * 0.18)
-        _crown_tier(b, (p.x, p.y, p.z), (w, w * 0.92), thick,
-                   seed=5310 + li * 17, segments=4, lumps=2, rings=2)
-        lump_centers.append((p.x, p.y, p.z, w))
+        b.taper_sweep([fork, tip], [0.11, 0.05], TRUNK, segments=4)
+        limb_tips.append(tip)
 
-    # un ciorchine central, direct deasupra furcii, ca sa umple golul dintre
-    # cele 3 limbi vazut de sus — al 4-lea/5-lea din tinta "4-5 ciorchini"
-    cw = H * 0.20
-    cthick = cw * 0.6
-    ccenter = fork + Vector((0, 0, H * 0.20))
-    _crown_tier(b, (ccenter.x, ccenter.y, ccenter.z), (cw, cw * 0.9), cthick,
-               seed=5390, segments=5, lumps=1, rings=3)
-    lump_centers.append((ccenter.x, ccenter.y, ccenter.z, cw))
+    # Coroana: 6 bulgari ROTUNJITI, denși, care se ATING/INTREPATRUND.
+    # Raza fiecarui bulgare (crown_r) e mare fata de raza de distributie a
+    # centrelor (dist_r) — raportul asta e ce garanteaza suprapunerea
+    # masiva ceruta ("no sky shows through the middle"). Un bulgar central
+    # plus 5 in jurul lui, pe doua "etaje" joase (nu turnuri) — dom, nu
+    # coloana.
+    crown_w_target = H * (0.85 + rand() * 0.15)   # latime finala tinta 4-5 m (raza ~2.1-2.4)
+    crown_r_nominal = crown_w_target * 0.5
+    dist_r = crown_r_nominal * 0.34   # centrele stau APROAPE de mijloc -> suprapunere mare
+    lump_specs = []   # (center, size_xyz, seed)
+    # bulgarele central, cel mai mare
+    lump_specs.append((Vector((0.0, 0.0, crown_center_z + crown_r_nominal * 0.30)),
+                       crown_r_nominal * (0.62 + rand() * 0.10), 5311))
+    n_ring = 5
+    for k in range(n_ring):
+        a = 2.0 * math.pi * k / n_ring + rand() * 0.5
+        r = dist_r * (0.85 + rand() * 0.3)
+        cx, cy = math.cos(a) * r, math.sin(a) * r
+        # doua "randuri" pe Z (nu toate la aceeasi cota) — rupe conturul de
+        # sus, exact lectia de la fag, dar aici bulgarii RAMAN rotunjiti
+        # (squash bland), nu turtiti in disc
+        cz = crown_center_z + (crown_r_nominal * (0.05 if k % 2 == 0 else 0.55))
+        size = crown_r_nominal * (0.52 + rand() * 0.20)
+        lump_specs.append((Vector((cx, cy, cz)), size, 5320 + k * 11))
 
-    # ciorchinii de flori: bulgari mici FLOWER pe fetele de SUS/exterioare
-    # ale volumelor de coroana — plasati cu offset spre exterior (departe de
-    # centrul arborelui), nu doar "deasupra centrului", ca sa cada pe partea
-    # insorita/vizibila a norului, nu ingropati intre lumps
-    tree_center = Vector((0.0, 0.0, 0.0))
-    n_clusters = 10
-    flower_faces_total = 0
-    for i in range(n_clusters):
-        cx, cy, cz, w = lump_centers[i % len(lump_centers)]
-        outward = Vector((cx, cy, 0.0))
-        if outward.length < 1e-4:
-            a = rand() * 6.28
-            outward = Vector((math.cos(a), math.sin(a), 0.0))
-        outward = outward.normalized()
-        jitter_a = (rand() - 0.5) * 1.6
-        outward = Matrix.Rotation(jitter_a, 3, "Z") @ outward
-        rr = w * (0.55 + rand() * 0.30)
-        px, py = cx + outward.x * rr, cy + outward.y * rr
-        pz = cz + w * (0.10 + rand() * 0.10)
-        s = 0.11 + rand() * 0.05
-        faces = b.boulder((px, py, pz), (s, s, s * 0.8), FLOWER,
-                          seed=5400 + i, segments=4, rings=2, deviation=0.14)
-        flower_faces_total += len(faces)
-    print("rata_tree: %d fete FLOWER (KERB_RED) inainte de bevel/finish"
-          % flower_faces_total)
+    crown_faces = []
+    lump_records = []   # (center, size) pentru plasarea florilor
+    for center, size, seed in lump_specs:
+        # squash BLAND (0.78-0.92, nu 0.35-0.5 ca la fagul turtit): bulgarii
+        # raman rotunjiti — silueta de tufa, nu de disc
+        sz = size * (0.78 + _lcg(seed)() * 0.14)
+        faces = b.boulder((center.x, center.y, center.z),
+                          (size * 2.0, size * 1.9, sz * 2.0), CROWN,
+                          seed=seed, segments=6, rings=3, deviation=0.18)
+        crown_faces.extend(faces)
+        lump_records.append((center, size))
+
+    b.retag(crown_faces, TRUNK, where="down")
+    b.retag(crown_faces, CROWN, where="up")
+
+    # Flori: 15-25% din fetele coroanei, RETAG (fara cost de triunghiuri) pe
+    # fetele de sus/exterior selectate — plus cativa "muguri" mici ridicati
+    # (bulgari foarte mici) pe cateva dintre ele, ca florile sa citeasca
+    # usor 3D, nu doar ca pete de culoare. Selectia e determinista din LCG
+    # separat, NU toate fetele de sus (ar depasi 25%).
+    up_faces = [f for f in crown_faces if f.is_valid]
+    frand = _lcg(5401)
+    # Prima incercare (flower_target_frac=0.19, factor de compensare 1.35,
+    # plus 6 muguri de marime s=0.14-0.20*size) a dat 30.6% KERB_RED masurat
+    # DIRECT din GLB — peste tinta 15-25%, muguri numarati gresit ca "fete"
+    # cand de fapt sunt bulgari intregi (multe fete fiecare). Recalibrat
+    # DUPA masuratoare, nu presupus: fractia de retag coboara la 0.11 (fara
+    # factorul de compensare inventat), iar mugurii scad la 4, mult mai mici.
+    flower_target_frac = 0.11
+    flower_faces = set()
+    for f in up_faces:
+        f.normal_update()
+        if f.normal.z > 0.25 and frand() < flower_target_frac:
+            flower_faces.add(f)
+    b.retag(flower_faces, FLOWER)
+
+    # Cativa muguri mici RIDICATI (bulgari mici), rari — accent 3D peste
+    # petele retag, nu sursa principala de rosu (altfel se intoarce la
+    # "copac rosu"). 4 muguri mici, fiecare ~16 tri brut (2*4*2).
+    n_bud = 4
+    for i in range(n_bud):
+        center, size = lump_records[1 + (i % (len(lump_records) - 1))]
+        a = frand() * 6.28
+        outward = Vector((math.cos(a), math.sin(a), 0.0))
+        rr = size * (0.75 + frand() * 0.25)
+        px, py = center.x + outward.x * rr, center.y + outward.y * rr
+        pz = center.z + size * (0.15 + frand() * 0.35)
+        s = size * (0.08 + frand() * 0.04)
+        b.boulder((px, py, pz), (s, s, s * 0.85), FLOWER,
+                 seed=5500 + i, segments=4, rings=2, deviation=0.12)
+
+    tri_est_faces = len(crown_faces)
+    kerb_faces = len(flower_faces) + n_bud * 1   # aproximativ, pentru log; cifra reala se ia din GLB
+    print("rata_tree: %d fete coroana, %d RETAG la FLOWER (~%.0f%%) + %d muguri"
+          % (tri_est_faces, len(flower_faces),
+             100.0 * len(flower_faces) / max(tri_est_faces, 1), n_bud))
     return b.to_object("Rata")
 
 

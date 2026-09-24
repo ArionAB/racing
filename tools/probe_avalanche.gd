@@ -35,6 +35,9 @@ const WATCH: float = 12.0
 ## Cat trebuie sa fie carata masina ca sa spunem ca „te ia cu ea", in metri.
 ## Sub atat, efectul nu se distinge de o simpla oprire pe loc.
 const MIN_DRAG: float = 6.0
+## La cati metri de hazard (pe drum) se REALINIAZA ceasul avalansei cu viteza
+## MASURATA a masinii. Vezi `_resync`.
+const SYNC_DIST: float = 25.0
 
 ## Cate secunde de la inceputul traversarii pana cand masa e PE AXA drumului.
 ##
@@ -72,6 +75,8 @@ var _closest_t := 0.0
 var _closest_phase := -1
 ## Urmarire cadru cu cadru, pentru diagnostic: --dbg
 var _dbg := false
+## Ceasul a fost realiniat o data, la SYNC_DIST (vezi `_resync`).
+var _synced := false
 
 
 func _ready() -> void:
@@ -108,6 +113,7 @@ func _physics_process(delta: float) -> void:
 	if _av == null or _car == null:
 		return
 	_time += delta
+	_resync()
 	_observe()
 	if _dbg and int(_time * 60.0) % 30 == 0:
 		print("t=%.2f faza=%d masa=%s masina=%s dist=%.1f v=%.1f" % [
@@ -118,6 +124,41 @@ func _physics_process(delta: float) -> void:
 	if _time >= WATCH:
 		set_physics_process(false)
 		_report()
+
+
+## Realinierea ceasului pe viteza REALA a masinii, la SYNC_DIST de hazard.
+##
+## Alinierea din `_spawn_car` presupune 35 m/s pe cei 70 m de elan (cifra era
+## masurata pe CharacterBody). Dupa pivotul la fizica intreaga (#261) masina de
+## sonda merge ~28 m/s, deci ajungea cu ~0,5 s dupa ce masa trecuse de axa:
+## `--dbg` arata masa pe x = 0 la t = 2,02 cu masina la 15,5 m, apoi cel mai
+## aproape 6,9 m la t = 2,43. Sonda raporta „neprinsa" pentru un ceas prost
+## ales, nu pentru mecanica. Orice ETA scris de mana se desincronizeaza din nou
+## la urmatoarea schimbare de fizica. Aici se masoara distanta ramasa (pe drum,
+## nu in linie dreapta) si viteza de ACUM, la 25 m, cand nu mai e timp de
+## accelerat semnificativ.
+func _resync() -> void:
+	if _synced:
+		return
+	var n := _track.baked.size()
+	var target := _track.closest_index_global(_av.global_position)
+	var i := _track.closest_index_global(_car.global_position)
+	var d := 0.0
+	var steps := 0
+	while i != target and steps < n:
+		var nxt := posmod(i + 1, n)
+		d += _track.baked[i].distance_to(_track.baked[nxt])
+		i = nxt
+		steps += 1
+		if d > SYNC_DIST:
+			return
+	var v := Vector2(_car.velocity.x, _car.velocity.z).length()
+	if v < 1.0:
+		return
+	_synced = true
+	_av._time = fposmod(_av.TELEGRAPH + _sweep_mid() - d / v, _av.period)
+	if _dbg:
+		print("resync la %.1f m, v=%.1f m/s, eta=%.2f s" % [d, v, d / v])
 
 
 func _observe() -> void:

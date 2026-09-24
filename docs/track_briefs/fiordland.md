@@ -984,3 +984,27 @@ arborescentă, bolovanii cu mușchi, chevronul, pontonul, tufele).
 > 12. **Scale row** — the toy cars themselves are NOT needed; draw one
 >     `reference_car` silhouette 4 m long beside a `beech_a` and the
 >     `stirling_ledge` so the relative scale of every row is readable.
+
+**Rezultatul v0.2 al planșei**
+([`fiordland_assets_v1.jpg`](img/fiordland_assets_v1.jpg)) **e acceptat ca
+sursă de siluete și culori, NU de dimensiuni.** Toate cele 12 rânduri și toate
+numele de fișier sunt prezente, cu stilul corect. Pentru
+`docs/asset_briefs/fiordland_kit.md` contează următoarele:
+- **Scara nu se ia de pe planșă.** Mașina de 4 m din fiecare rând e
+  desenată la fel de mică peste tot. Măsurat pe ea, avionul iese cu ~37 m
+  anvergură (cota: 8 m), autocarul ~25 m (cota: 12 m), iar `stirling_ledge`
+  din rândul 12 ~15 m (cota: 45 m). Cotele vin din §5 și din acest prompt.
+- **`stirling_ledge` e un bloc cu copaci pe vârf, fără surplomb și fără
+  pragul uscat.** Tocmai astea sunt contractul piesei, pentru că perdeaua
+  trebuie să cadă de pe buză, iar pragul e ruta de pe lângă ea. Silueta se
+  ia doar pentru rocă și mușchi; forma se scrie în kit.
+- **Piese pe care codul le face deja și care nu intră în GLB:** apa din
+  `torrent_chute` (o face `WaterfallVisual`) și lămpile din
+  `traffic_light_pole` (le face `HazardLamp`).
+- **`beech_*` are tot trunchi brun gros și coroană-brocoli.** În kit
+  rămâne cota din §5: trunchi negru subțire, coronament mărunt din 3–4
+  volume, sub 300 de triunghiuri.
+- **Autocarul e verde-lime cu acoperiș alb.** Se refolosește mesh-ul din
+  garaj cu clasa `FOAM_WHITE` + `TROPICAL_GREEN` (§5), nu se modelează.
+- `penguin_tawaki`: de verificat creasta galbenă (sprânceana tawaki), pe
+  planșă abia se vede.

@@ -428,14 +428,23 @@ def build_rata_tree():
     # Cativa muguri mici RIDICATI (bulgari mici), rari — accent 3D peste
     # petele retag, nu sursa principala de rosu (altfel se intoarce la
     # "copac rosu"). 4 muguri mici, fiecare ~16 tri brut (2*4*2).
+    # FIX (wave-2 review): mugurii plecau de la `rr = size*(0.75..1.0)`, adica
+    # ADUNAND propria lor raza deasupra asta ii scotea des complet AFARA din
+    # bulgarele-parinte — masurat pe fiordland_rata_chasecam.png: 4 cuburi mici
+    # plutind detasat de coroana. Un mugure trebuie sa-si INTERSECTEZE bulgarele
+    # care-l gazduieste, nu doar sa-i atinga centrul cu al lui: centrul mugurelui
+    # se plaseaza la `rr = size*(0.55..0.75)` (STRICT sub raza bulgarelui), ca
+    # jumatate din volumul lui (raza proprie `s`) sa iasa peste crusta si
+    # jumatate sa ramana ingropat in ea — exact ce arata un mugur crescut din
+    # coroana, nu unul asezat langa ea.
     n_bud = 4
     for i in range(n_bud):
         center, size = lump_records[1 + (i % (len(lump_records) - 1))]
         a = frand() * 6.28
         outward = Vector((math.cos(a), math.sin(a), 0.0))
-        rr = size * (0.75 + frand() * 0.25)
+        rr = size * (0.55 + frand() * 0.20)
         px, py = center.x + outward.x * rr, center.y + outward.y * rr
-        pz = center.z + size * (0.15 + frand() * 0.35)
+        pz = center.z + size * (0.10 + frand() * 0.25)
         s = size * (0.08 + frand() * 0.04)
         b.boulder((px, py, pz), (s, s, s * 0.85), FLOWER,
                  seed=5500 + i, segments=4, rings=2, deviation=0.12)

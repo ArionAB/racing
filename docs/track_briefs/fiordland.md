@@ -746,6 +746,24 @@ Două generări, păstrate ca istoric:
   ținut, așa că v0.3 dă **culori hex**, interdicții pe nume („no pines, no
   palms”) și scara animalelor raportată la mașină.
 
+**Rezultatul v0.3**
+([`fiordland_diorama_v03.jpg`](img/fiordland_diorama_v03.jpg)) **e referința
+acceptată.** Bucla merge corect, în sensul acelor de ceasornic: chei →
+cornișa în sus-stânga → podețul → scurtătura → spatele → tunelul spre
+privitor → avalanșa → Bowen → pista de avioane paralelă → întoarcerea de la
+chei. Stilul are fețe plate, apă negru-verde, fără conifere și palmieri,
+pinguini mici și o singură insulă. **Defecte rămase, de neluat din imagine:**
+- Stirling e pe un **ciot de drum separat, la nivelul mării**, fără ieșire,
+  iar cornișa trece pe deasupra buzei cascadei. În joc, cascada cade pe
+  cornișă.
+- Autocarul iese din tunel **în același sens** cu mașinile, nu vine din față.
+- Avionul e de aproximativ 2× scara lui (anvergura ~18 m în loc de 8 m).
+- Fagii sunt „brocoli” rotunzi, nu coroane în etaje.
+- Lumina e plată, de cer acoperit, fără umbra peretelui pe apă.
+
+Planșa (§9.1) le fixează pe cele care contează pentru assets: `beech_*` și
+`bush_plane` au cotele lor.
+
 > Create a stylized low-poly **tabletop diorama** of a toy-car racing track at
 > **Milford Sound, Fiordland, New Zealand, on a morning right after heavy
 > rain**. **Use the attached top-down plan as the exact layout: same loop

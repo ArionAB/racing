@@ -47,8 +47,29 @@ check "rocks/chasm_rock.glb"        600
 check "rocks/guard_rock.glb"         80
 check "rocks/scree_slab.glb"        300
 
-# Valurile urmatoare (§1.2-§1.7) isi adauga liniile aici pe masura ce se
-# construiesc: fundalul, satul, padurea, avalansa, vehiculele, animalele.
+echo "== padurea (brief §1.4, val 2) =="
+# beech_a/b/c: DOUA noduri (Trunk+Crown, brief §0.6) cu origine comuna —
+# aceeasi exceptie ca stirling_ledge, si pentru acelasi motiv (Crown nu
+# atinge solul prin constructie, deci finish() per nod l-ar re-centra si
+# ansamblul s-ar desface).
+check "plants/beech_a.glb"          300 --origin=assembly
+check "plants/beech_b.glb"          300 --origin=assembly
+check "plants/beech_c.glb"          300 --origin=assembly
+check "plants/beech_dead.glb"       250
+check "plants/rata_tree.glb"        400
+check "plants/tussock_clump.glb"    150
+check "props/stump.glb"             150
+check "props/driftwood.glb"         150
+# chasm_bridge_rail: Rail_L/Rail_R, origine "waterline" — Y=0 e cota
+# TABLIEI (brief: "origine pe axa drumului, la cota tabliei"), nu solul:
+# grinda laterala coboara sub 0, balustrada urca deasupra, exact geometria
+# care "incaleca" originea pe care verify_glb.py o numeste waterline (in
+# lipsa unui mod "deck", contractul e identic: nimic n-are voie sa atinga
+# solul, originea trebuie STRADUITA de geometrie pe ambele parti).
+check "structures/chasm_bridge_rail.glb" 600 --origin=waterline
+
+# Valurile urmatoare (§1.2, §1.3, §1.5-§1.7) isi adauga liniile aici pe
+# masura ce se construiesc: fundalul, satul, avalansa, vehiculele, animalele.
 # Pana atunci nu apar in verdict — kitul se livreaza in valuri (brief §3).
 
 echo

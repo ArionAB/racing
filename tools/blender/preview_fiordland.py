@@ -44,6 +44,10 @@ GROUPS = {
     "rocks": ("rocks", ["stirling_ledge", "torrent_chute", "chasm_rock",
                         "guard_rock", "scree_slab"], 14.0),
     "rocks_small": ("rocks", ["chasm_rock", "guard_rock", "scree_slab"], 3.0),
+    # padurea (val 2, brief §1.4): fagii au randul lor dedicat (beech_sheet,
+    # mai jos, cu marcaj de inaltime om), aici doar restul valului.
+    "forest": ("plants", ["beech_dead", "rata_tree", "tussock_clump"], 4.0),
+    "forest_props": ("props", ["stump", "driftwood"], 2.5),
 }
 
 REF_CAR = (4.0, 1.8, 1.5)  # lungime (Y Blender) x latime (X) x inaltime (Z)
@@ -294,6 +298,131 @@ def stirling_elevation_sheet(path, res=(1600, 900)):
     print("3/4 salvat:", scene.render.filepath)
 
 
+def _make_person(x, y):
+    """Marcaj de inaltime om: 1.75 m, cilindru simplu albastru, la (x,y),
+    baza pe sol. Reper de scara langa fagi — brief §0.8/§1.4 cere sa se poata
+    judeca golul dintre etaje, iar cutia de masina (1.5 m inalt) nu da acelasi
+    reper vertical ca o siluetă umana."""
+    bm = bmesh.new()
+    bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=8,
+                          radius1=0.24, radius2=0.20, depth=1.75)
+    me = bpy.data.meshes.new("PersonMarker")
+    bm.to_mesh(me)
+    bm.free()
+    obj = bpy.data.objects.new("PersonMarker", me)
+    bpy.context.collection.objects.link(obj)
+    obj.location = (x, y, 0.875)
+    bpy.context.view_layer.update()
+    mat = obj.matrix_world.copy()
+    for v in obj.data.vertices:
+        v.co = mat @ v.co
+    obj.matrix_world.identity()
+    mp = bpy.data.materials.get("PersonBlue")
+    if mp is None:
+        mp = bpy.data.materials.new("PersonBlue")
+        mp.use_nodes = True
+        bsdf = mp.node_tree.nodes.get("Principled BSDF")
+        bsdf.inputs["Base Color"].default_value = (0.15, 0.35, 0.95, 1.0)
+        bsdf.inputs["Roughness"].default_value = 0.6
+    obj.data.materials.clear()
+    obj.data.materials.append(mp)
+    return obj
+
+
+def beech_sheet(path, models_dir=None, res=(1900, 900)):
+    """Fagii (a/b/c) unul langa altul, vedere LATERALA (nu 3/4): brief §1.4
+    cere sa se judece SILUETA — goluri intre etaje, nu bila plina. O vedere
+    de profil pura ar aplatiza umbrirea, deci elevatia ramane joasa (10°) ca
+    sa cada lumina rasant si sa scoata treptele coroanei.
+
+    Fiecare fag isi are cutia de referinta (4x1.8x1.5) si un marcaj de om
+    (1.75 m) LANGA el, nu suprapuse peste coroana — ca sa nu ascunda golurile
+    pe care exact planta asta trebuie sa le arate.
+    """
+    models_dir = models_dir or MODELS
+    _clear()
+    built = []
+    y = 0.0
+    names = ["beech_a", "beech_b", "beech_c"]
+    for n in names:
+        objs = _import("plants", n, models_dir)
+        if not objs:
+            print("LIPSA:", n)
+            continue
+        roots = [o for o in objs if o.parent is None]
+        meshes = [o for o in objs if o.type == "MESH"]
+        if not meshes:
+            continue
+        span_y = max(max(o.dimensions.y for o in meshes), 2.0)
+        half = span_y * 0.5
+        for o in roots:
+            o.location.y += y + half
+        bpy.context.view_layer.update()
+        piece_center_y = y + half
+        y += span_y + 5.0
+        built += meshes
+
+        car = _make_ref_car()
+        piece_span_x = max(max(o.dimensions.x for o in meshes), 0.5)
+        car.location = (-(piece_span_x * 0.5 + REF_CAR[1] * 0.5 + 1.2),
+                        piece_center_y - 1.0, 0.0)
+        built.append(car)
+        person = _make_person(piece_span_x * 0.5 + 1.0, piece_center_y - 1.0)
+        built.append(person)
+
+    if not built:
+        print("plansa beech SARITA (niciun GLB exportat inca)")
+        return []
+
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.hide_render = (o not in built) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_end = 500.0
+    cam.data.clip_start = 0.1
+    # Piesele sunt insirate pe Y (randul). Camera trebuie sa priveasca DE-A
+    # LUNGUL LUI X (azimut ~0), nu de-a lungul lui Y — un azimut aproape de
+    # 90 (cum era prima versiune) se uita PE randul de fagi si ii suprapune
+    # pe toti intr-o singura silueta stivuita (bug gasit chiar in aceasta
+    # planta: cei 3 fagi ieseau ca un singur "pagodon"). azimuth=8 (aproape
+    # de profil pur, dar cu un pic de unghi ca lumina sa cada oblic pe
+    # etaje) e vederea LATERALA reala.
+    shot(built, path, azimuth=8.0, elevation=10.0, res=res, margin=1.15)
+    return [(o.name, len(o.data.polygons)) for o in built]
+
+
+def bridge_rail_sheet(path, models_dir=None, res=(1700, 700)):
+    """chasm_bridge_rail: doua noduri (Rail_L/Rail_R) la X=+-5.8, langa
+    cutia de referinta asezata PE tablia imaginara (Y=0), ca sa se vada
+    ecartamentul fata de masina."""
+    models_dir = models_dir or MODELS
+    _clear()
+    objs = _import("structures", "chasm_bridge_rail", models_dir)
+    if not objs:
+        print("LIPSA: chasm_bridge_rail")
+        return []
+    meshes = [o for o in objs if o.type == "MESH"]
+    car = _make_ref_car()
+    car.location = (0.0, 0.0, 0.0)
+    built = meshes + [car]
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.hide_render = (o not in built) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_end = 500.0
+    cam.data.clip_start = 0.1
+    shot(built, path, azimuth=25.0, elevation=16.0, res=res, margin=1.2)
+    return [(o.name, len(o.data.polygons)) for o in built]
+
+
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "preview.py")).read())
 OUT = os.path.join(PROJECT, "docs", "asset_briefs", "img")
 os.makedirs(OUT, exist_ok=True)
@@ -310,3 +439,6 @@ for g in GROUPS:
     else:
         print("plansa", g, sheet(g, os.path.join(OUT, "fiordland_%s.png" % g)))
 stirling_elevation_sheet(os.path.join(OUT, "fiordland_stirling.png"))
+print("plansa beech", beech_sheet(os.path.join(OUT, "fiordland_beech.png")))
+print("plansa bridge_rail", bridge_rail_sheet(
+    os.path.join(OUT, "fiordland_bridge_rail.png")))

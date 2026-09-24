@@ -32,10 +32,18 @@ from mathutils import Vector
 # care intra impreuna cu piesele mici (0.6-6 m) — cadrul se retrage sa
 # incapa totul si bolovanii mici ajung cateva zeci de pixeli. Doua randuri
 # separate, ca la `preview_machupicchu.py` (hero/small).
+#
+# Revizuire coordonator (wave 1 review): "guard_rock intersects the
+# reference box" si "I can't see chasm_rock at all" — pasul de 4.0 m de la
+# prima versiune era mai mic decat piesele insesi (chasm_rock e 6 m lat),
+# deci se suprapuneau, iar cutia de referinta unica (langa PRIMA piesa) cadea
+# peste guard_rock. `sheet()` a fost rescris sa puna cate o cutie de
+# referinta LANGA FIECARE piesa (nu una singura pentru tot randul) si sa
+# calculeze pasul din latimea REALA a piesei + latimea cutiei, cu marja.
 GROUPS = {
     "rocks": ("rocks", ["stirling_ledge", "torrent_chute", "chasm_rock",
                         "guard_rock", "scree_slab"], 14.0),
-    "rocks_small": ("rocks", ["chasm_rock", "guard_rock", "scree_slab"], 4.0),
+    "rocks_small": ("rocks", ["chasm_rock", "guard_rock", "scree_slab"], 3.0),
 }
 
 REF_CAR = (4.0, 1.8, 1.5)  # lungime (Y Blender) x latime (X) x inaltime (Z)
@@ -90,43 +98,58 @@ def _make_ref_car(name="RefCar"):
 
 
 def sheet(group, path, models_dir=None, azimuth=180.0 - 32.0, elevation=13.0,
-          res=(1600, 720), place_car=True):
+          res=(1600, 720), place_car=True, margin=1.25):
     # azimuth implicit spre 148 grade (nu 32): stirling_ledge are fata utila
     # spre -X (brief: "fata peretelui e planul X=0"), deci o camera care
     # priveste dinspre +X cade in spatele/interiorul masei de 10 m si
     # randeaza fix partea care nu conteaza. Vezi acelasi bug rezolvat in
     # `stirling_elevation_sheet`.
+    #
+    # Revizuire coordonator (wave 1 review): fiecare piesa isi primeste ACUM
+    # propria cutie de referinta, asezata LANGA ea (nu in fata primei piese
+    # din rand), iar pasul dintre piese se calculeaza din latimea REALA
+    # (dimensions.y, lungimea pe Blender Y — axa pe care se insira piesele)
+    # plus latimea cutiei plus o marja — nu un `step` fix care putea fi mai
+    # mic decat piesa (chasm_rock 6 m lat, pas vechi 4 m -> se suprapuneau).
     models_dir = models_dir or MODELS
     category, names, step = GROUPS[group]
     _clear()
-    built, x = [], 0.0
+    built = []
+    y = 0.0
     for n in names:
         objs = _import(category, n, models_dir)
         if not objs:
             print("LIPSA:", n)
             continue
         roots = [o for o in objs if o.parent is None]
-        for o in roots:
-            o.location.x += x
-        bpy.context.view_layer.update()
         meshes = [o for o in objs if o.type == "MESH"]
         if not meshes:
             continue
-        w = max(max(o.dimensions.x for o in meshes), 1.0)
-        x += max(step, w * 1.25)
+        # latimea reala a piesei pe axa de insirare (Blender Y — lungimea ei
+        # "de-a lungul drumului"), luata DIN GEOMETRIE, nu presupusa
+        span_y = max(max(o.dimensions.y for o in meshes), 0.5)
+        half = span_y * 0.5
+        for o in roots:
+            o.location.y += y + half
+        bpy.context.view_layer.update()
+        piece_center_y = y + half
+        y += span_y + max(step, 2.0)
         built += meshes
+
+        if place_car:
+            car = _make_ref_car()
+            # cutia sta LANGA piesa (pe X, in afara ei), nu peste ea si nu
+            # in fata primei piese din rand — fiecare piesa isi are reperul.
+            # X-ul cutiei: jumatate din latimea piesei (dimensions.x) plus
+            # jumatate din latimea cutiei plus o marja, ca sa nu se atinga.
+            piece_span_x = max(max(o.dimensions.x for o in meshes), 0.5)
+            car.location = (-(piece_span_x * 0.5 + REF_CAR[1] * 0.5 + 1.5),
+                            piece_center_y, 0.0)
+            built.append(car)
 
     if not built:
         print("plansa", group, "SARITA (niciun GLB exportat inca)")
         return []
-
-    if place_car:
-        car = _make_ref_car()
-        # cutia sta langa PRIMA piesa a lotului (originea, X=0), nu in
-        # centrul intregului rand — altfel pe un rand de 5 stanci dispare
-        # intre ele si nu mai serveste ca reper de scara
-        car.location.x = -3.5
-        built.append(car)
 
     for o in bpy.data.objects:
         if o.type == "MESH":
@@ -138,7 +161,7 @@ def sheet(group, path, models_dir=None, azimuth=180.0 - 32.0, elevation=13.0,
         bpy.context.scene.collection.objects.link(cam)
     cam.data.clip_end = 500.0
     cam.data.clip_start = 0.1
-    shot(built, path, azimuth=azimuth, elevation=elevation, res=res)
+    shot(built, path, azimuth=azimuth, elevation=elevation, res=res, margin=margin)
     return [(o.name, len(o.data.polygons)) for o in built]
 
 
@@ -275,5 +298,15 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "preview.py")
 OUT = os.path.join(PROJECT, "docs", "asset_briefs", "img")
 os.makedirs(OUT, exist_ok=True)
 for g in GROUPS:
-    print("plansa", g, sheet(g, os.path.join(OUT, "fiordland_%s.png" % g)))
+    if g == "rocks_small":
+        # elevatie mica (7 grade, nu 13): la elevatia standard camera vede
+        # mai ales fata de SUS a placilor (scree_slab e SAND_SHADOW, cam
+        # aceeasi valoare ca podeaua de nisip din preview — se camufla). O
+        # elevatie joasa aduce mai mult din fetele LATERALE (GNEISS,
+        # distincte de nisip) in cadru. `margin` mai mic incadreaza mai
+        # aproape — coordonator: "frame the small pieces closer".
+        print("plansa", g, sheet(g, os.path.join(OUT, "fiordland_%s.png" % g),
+                                 elevation=7.0, res=(1600, 800), margin=1.05))
+    else:
+        print("plansa", g, sheet(g, os.path.join(OUT, "fiordland_%s.png" % g)))
 stirling_elevation_sheet(os.path.join(OUT, "fiordland_stirling.png"))

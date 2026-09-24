@@ -68,9 +68,29 @@ check "props/driftwood.glb"         150
 # solul, originea trebuie STRADUITA de geometrie pe ambele parti).
 check "structures/chasm_bridge_rail.glb" 600 --origin=waterline
 
-# Valurile urmatoare (§1.2, §1.3, §1.5-§1.7) isi adauga liniile aici pe
-# masura ce se construiesc: fundalul, satul, avalansa, vehiculele, animalele.
-# Pana atunci nu apar in verdict — kitul se livreaza in valuri (brief §3).
+echo "== avalansa (brief §1.5, val 3) =="
+# tree_avalanche: 4 noduri Boulder_A..D, origine CENTRU (contractul
+# AvalancheHazard — obiectul se rostogoleste, vezi memoria
+# `sonda-scurta-extrapolata-gresit` si docul din avalanche_hazard.gd).
+check "effects/tree_avalanche.glb"  300 --origin=center
+
+echo "== vehiculele (brief §1.6, val 3) =="
+check "vehicles/coach_fiordland.glb" 1200
+# bush_plane: origine CENTRU (PathMover in aer, stick_to_ground=false) +
+# exceptie CAR_RED declarata pe dungile fuzelajului/aripilor (brief §1.6).
+check "vehicles/bush_plane.glb"      900 --origin=center --allow-car-slots=Plane
+# cruise_boat: origine LA LINIA DE PLUTIRE — geometria INCALECA Y=0 (carena
+# sub, suprastructura deasupra), acelasi contract ca "waterline" din
+# verify_glb.py (memoria stirling_ledge/waterline).
+check "vehicles/cruise_boat.glb"    1500 --origin=waterline
+# kayak_a/b: exceptia CAR_BLUE/CAR_YELLOW declarata (brief §4 paleta —
+# caiacele sunt accent saturat, ca avionul).
+check "props/kayak_a.glb"            100 --allow-car-slots=KayakA
+check "props/kayak_b.glb"            100 --allow-car-slots=KayakB
+
+# Valurile urmatoare (§1.2, §1.3, §1.7) isi adauga liniile aici pe masura ce
+# se construiesc: fundalul, satul, animalele. Pana atunci nu apar in verdict
+# — kitul se livreaza in valuri (brief §3).
 
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)

@@ -48,7 +48,20 @@ GROUPS = {
     # mai jos, cu marcaj de inaltime om), aici doar restul valului.
     "forest": ("plants", ["beech_dead", "rata_tree", "tussock_clump"], 4.0),
     "forest_props": ("props", ["stump", "driftwood"], 2.5),
+    # vehiculele (val 3, brief §1.6): coach + plane + boat domina cadrul
+    # (7-14 m) fata de caiace (3.6 m) — randuri separate, acelasi motiv ca
+    # rocks/rocks_small.
+    "vehicles": ("vehicles", ["coach_fiordland", "bush_plane", "cruise_boat"], 10.0),
+    "vehicles_small": ("props", ["kayak_a", "kayak_b"], 3.0),
 }
+# avalansa (val 3, brief §1.5) NU intra in GROUPS/sheet(): tree_avalanche.glb
+# e UN SINGUR fisier cu 4 noduri Boulder_A..D, toate exportate la ACELASI
+# pivot de lume (0,0,0) — corect pentru contractul de joc (hazardul le
+# repozitioneaza pe fiecare in parte, vezi BOULDERS in avalanche_hazard.gd),
+# dar `sheet()` le-ar insira ca pe O SINGURA piesa si le-ar suprapune total
+# in randare (masurat: primul preview arata un singur bolovan vizibil, restul
+# ascunse dedesubt). `avalanche_sheet()` mai jos le desparte manual pe Y
+# DOAR pentru planta, fara sa atinga GLB-ul.
 
 REF_CAR = (4.0, 1.8, 1.5)  # lungime (Y Blender) x latime (X) x inaltime (Z)
 
@@ -443,6 +456,60 @@ def rata_sheet(path, models_dir=None, res=(1300, 1100)):
     return [(o.name, len(o.data.polygons)) for o in built]
 
 
+def avalanche_sheet(path, models_dir=None, res=(1900, 800)):
+    """Cele 4 tangle-uri (Boulder_A..D) insirate manual pe Y, fiecare cu
+    propria cutie de referinta — GLB-ul le tine pe toate la pivotul de lume
+    (0,0,0), contractul corect pentru hazard (fiecare nod e repozitionat
+    separat de `_place_shards`), dar gresit pentru o planta care trebuie sa
+    le arate pe toate patru distinct."""
+    models_dir = models_dir or MODELS
+    _clear()
+    objs = _import("effects", "tree_avalanche", models_dir)
+    if not objs:
+        print("LIPSA: tree_avalanche")
+        return []
+    meshes = {o.name: o for o in objs if o.type == "MESH"}
+    order = ["Boulder_A", "Boulder_B", "Boulder_C", "Boulder_D"]
+    built = []
+    y = 0.0
+    step = 3.4
+    for name in order:
+        o = meshes.get(name)
+        if o is None:
+            print("LIPSA nod:", name)
+            continue
+        span_y = max(o.dimensions.y, 0.5)
+        half = span_y * 0.5
+        o.location.y += y + half
+        bpy.context.view_layer.update()
+        piece_center_y = y + half
+        y += span_y + step
+        built.append(o)
+
+        car = _make_ref_car()
+        piece_span_x = max(o.dimensions.x, 0.5)
+        car.location = (-(piece_span_x * 0.5 + REF_CAR[1] * 0.5 + 1.2),
+                        piece_center_y, 0.0)
+        built.append(car)
+
+    if not built:
+        print("plansa avalanche SARITA (niciun nod gasit)")
+        return []
+
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.hide_render = (o not in built) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_end = 500.0
+    cam.data.clip_start = 0.1
+    shot(built, path, azimuth=20.0, elevation=16.0, res=res, margin=1.2)
+    return [(o.name, len(o.data.polygons)) for o in built if o.type == "MESH"]
+
+
 def bridge_rail_sheet(path, models_dir=None, res=(1700, 700)):
     """chasm_bridge_rail: doua noduri (Rail_L/Rail_R) la X=+-5.8, langa
     cutia de referinta asezata PE tablia imaginara (Y=0), ca sa se vada
@@ -491,3 +558,5 @@ print("plansa beech", beech_sheet(os.path.join(OUT, "fiordland_beech.png")))
 print("plansa rata", rata_sheet(os.path.join(OUT, "fiordland_rata.png")))
 print("plansa bridge_rail", bridge_rail_sheet(
     os.path.join(OUT, "fiordland_bridge_rail.png")))
+print("plansa avalanche", avalanche_sheet(
+    os.path.join(OUT, "fiordland_avalanche.png")))

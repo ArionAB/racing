@@ -52,8 +52,15 @@ GROUPS = {
     # (7-14 m) fata de caiace (3.6 m) — randuri separate, acelasi motiv ca
     # rocks/rocks_small.
     "vehicles": ("vehicles", ["coach_fiordland", "bush_plane", "cruise_boat"], 10.0),
-    "vehicles_small": ("props", ["kayak_a", "kayak_b"], 3.0),
 }
+# caiacele (props/kayak_a, kayak_b) NU intra in GROUPS/sheet(): revizuire
+# coordonator (val 3) — cutia de referinta generica din `sheet()` (asezata la
+# jumatate din latimea PIESEI plus jumatate din latimea CUTIEI) cade prea
+# aproape de un obiect de doar 0.58 m latime si, din unghiul standard, o
+# ACOPERA in perspectiva (masurat pe fiordland_vehicles_small.png: caiacul
+# aproape disparea dupa cutie). `kayak_sheet()` mai jos pune cutia clar LANGA
+# fiecare caiac, decalata si pe Y (nu doar pe X), ca sa nu se suprapuna din
+# nicio combinatie plauzibila de azimut.
 # avalansa (val 3, brief §1.5) NU intra in GROUPS/sheet(): tree_avalanche.glb
 # e UN SINGUR fisier cu 4 noduri Boulder_A..D, toate exportate la ACELASI
 # pivot de lume (0,0,0) — corect pentru contractul de joc (hazardul le
@@ -510,6 +517,65 @@ def avalanche_sheet(path, models_dir=None, res=(1900, 800)):
     return [(o.name, len(o.data.polygons)) for o in built if o.type == "MESH"]
 
 
+def kayak_sheet(path, models_dir=None, res=(1900, 700)):
+    """kayak_a + kayak_b, fiecare cu cutia de referinta CLAR langa el —
+    decalata atat pe X (in afara latimii caiacului) cat si pe Y (in spate),
+    ca sa nu-l acopere in perspectiva (revizuire coordonator: cutia genericA
+    din sheet() cadea aproape peste caiacul de 0.58 m latime)."""
+    models_dir = models_dir or MODELS
+    _clear()
+    built = []
+    y = 0.0
+    for cat, name in (("props", "kayak_a"), ("props", "kayak_b")):
+        objs = _import(cat, name, models_dir)
+        if not objs:
+            print("LIPSA:", name)
+            continue
+        meshes = [o for o in objs if o.type == "MESH"]
+        roots = [o for o in objs if o.parent is None]
+        span_y = max(max(o.dimensions.y for o in meshes), 0.5)
+        half = span_y * 0.5
+        for o in roots:
+            o.location.y += y + half
+        bpy.context.view_layer.update()
+        piece_center_y = y + half
+        y += span_y + 3.5
+        built += meshes
+
+        car = _make_ref_car()
+        piece_span_x = max(max(o.dimensions.x for o in meshes), 0.5)
+        # DOAR pe X, decalaj mare — un decalaj SI pe Y (incercarea 1) trage
+        # cutia inapoi spre randul PRECEDENT cand piesele sunt deja insirate
+        # pe Y (masurat: cutia caiacului B cadea peste coada caiacului A, in
+        # golul dintre ele). Pe X singur, cutia ramane clar in dreptul
+        # centrului piesei ei, fara sa intre in raza vreunei alte piese.
+        car.location = (-(piece_span_x * 0.5 + REF_CAR[1] * 0.5 + 2.2),
+                        piece_center_y, 0.0)
+        built.append(car)
+
+    if not built:
+        print("plansa kayaks SARITA (niciun GLB exportat inca)")
+        return []
+
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.hide_render = (o not in built) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_end = 500.0
+    cam.data.clip_start = 0.1
+    # azimuth 55 (nu 148, mostenit din sheet()): 148 e tuning-ul pentru
+    # stirling_ledge (fata utila spre -X) si privea aproape DE-A LUNGUL
+    # randului de caiace, punand cutia in perspectiva peste coada piesei
+    # urmatoare. Un azimut mai aproape de lateral (55) arata clar caiacul SI
+    # cutia lui, una langa alta, fara sa se suprapuna in cadru.
+    shot(built, path, azimuth=55.0, elevation=13.0, res=res, margin=1.2)
+    return [(o.name, len(o.data.polygons)) for o in built]
+
+
 def bridge_rail_sheet(path, models_dir=None, res=(1700, 700)):
     """chasm_bridge_rail: doua noduri (Rail_L/Rail_R) la X=+-5.8, langa
     cutia de referinta asezata PE tablia imaginara (Y=0), ca sa se vada
@@ -560,3 +626,5 @@ print("plansa bridge_rail", bridge_rail_sheet(
     os.path.join(OUT, "fiordland_bridge_rail.png")))
 print("plansa avalanche", avalanche_sheet(
     os.path.join(OUT, "fiordland_avalanche.png")))
+print("plansa vehicles_small", kayak_sheet(
+    os.path.join(OUT, "fiordland_vehicles_small.png")))

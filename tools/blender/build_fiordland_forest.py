@@ -80,22 +80,53 @@ def _beech_trunk(b, height, r_base, seed, lean=0.16, kink=True):
     return pts
 
 
-def _crown_tier(b, center, radius_xy, thick, seed, segments=6):
-    """Un etaj de coroana: disc NEREGULAT, turtit, fatetat. `rock(flat_top,
-    taper mic)` in loc de `boulder` — mult mai ieftin (vezi nota din capul
-    fisierului) si silueta ramane o fateta plata, exact ce cere "disc".
+def _crown_tier(b, center, radius_xy, thick, seed, segments=6, lumps=3,
+                rings=2):
+    """Un etaj de coroana: CIORCHINE de bulgari APROAPE EGALI ca marime, care
+    se suprapun, nu un disc/placa unica.
+
+    A TREIA revizuire coordonator (dupa doua incercari vizual esuate,
+    vezi `_debug_tier*.png` din sesiune): un singur bulgare MARE central +
+    satelite mici (v1/v2) tot citea ca o lentila dominanta cu niste umflaturi
+    minore la margine — de la distanta, silueta era tot un hexagon aproape
+    regulat cu o muchie tesita. Ce a schimbat efectiv citirea, verificat
+    direct pe randari izolate:
+      1. bulgarii NU mai au un lider dominant — toti au marimi APROAPE
+         EGALE (size_f 0.62-0.92, nu 1.0 vs 0.55-0.85), distribuiti pe cerc
+         (2*pi*i/lumps), nu "unul in centru, restul langa"
+      2. offset-ul pe Z e MULT mai mare (+-30% din thick, nu +-18%): asta e
+         ce rupe conturul de SUS — daca toate varfurile bulgarilor cad pe
+         acelasi plan orizontal, silueta laterala tot iese un dreptunghi
+         turtit, indiferent cate volume separate sunt dedesubt
+      3. `rings=2` (nu 3): mai putine inele, dar bulgarii NU se mai
+         suprapun in centrul comun, deci fiecare isi pastreaza propria
+         cupola vizibila — rings mare pe un singur bulgare dominant nu
+         ajuta daca geometria insasi e un disc
 
     Fetele de sus TROPICAL_GREEN (lumina), cele de jos LOG_DARK (umbra sub
     etaj) — brief-ul cere explicit asta, nu doar un slot uniform.
     """
-    faces = b.rock(
-        (center[0], center[1], center[2] - thick * 0.5 * Builder.FLAT_TOP_FRAC),
-        (radius_xy[0] * 2.0, radius_xy[1] * 2.0, thick / Builder.FLAT_TOP_FRAC),
-        CROWN, seed=seed, segments=segments, rings=1, taper=0.22,
-        squash=0.92, flat_top=True)
-    b.retag(faces, TRUNK, where="down")
-    b.retag(faces, CROWN, where="up")
-    return faces
+    rand = _lcg(seed)
+    rx, ry = radius_xy
+    all_faces = set()
+    for i in range(lumps):
+        a = 2.0 * math.pi * i / lumps + rand() * 0.7
+        r = 0.0 if lumps == 1 else max(rx, ry) * (0.36 + rand() * 0.16)
+        lx, ly = math.cos(a) * r, math.sin(a) * r
+        size_f = 0.62 + rand() * 0.30       # toti bulgarii, marime APROAPE EGALA
+        lz_off = thick * (rand() - 0.5) * 0.60   # offset Z GENEROS — rupe conturul de sus
+        lw = rx * size_f * (0.85 + rand() * 0.3)
+        lh = ry * size_f * (0.85 + rand() * 0.3)
+        lz = thick * (0.45 + rand() * 0.25) * size_f
+        faces = b.boulder(
+            (center[0] + lx, center[1] + ly, center[2] + lz_off),
+            (lw * 2.0, lh * 2.0, lz * 2.0), CROWN,
+            seed=seed + i * 13, segments=segments, rings=rings,
+            deviation=0.26)
+        all_faces |= set(faces)
+    b.retag(all_faces, TRUNK, where="down")
+    b.retag(all_faces, CROWN, where="up")
+    return all_faces
 
 
 def build_beech(height, n_tiers, seed_base, budget):
@@ -106,6 +137,23 @@ def build_beech(height, n_tiers, seed_base, budget):
     goluri intre ele (nu se ating pe Z), si fiecare are propriul offset XY, ca
     sa nu iasa un turn coaxial.
 
+    A DOUA revizuire coordonator (val 2, dupa fix-ul de goluri): golurile
+    erau acolo, dar (1) etajele PLUTEAU — nicio geometrie nu lega discul de
+    trunchi; (2) varful trunchiului STRAPUNGEA etajul de sus (vizibil pe
+    beech_b/c); (3) coroana combinata era doar 30-40% din inaltime, cand un
+    fag real e 55-70% — citea ca "table pe stalp", nu ca arbore. Fix, in
+    ordine:
+      - trunchiul se opreste la `trunk_top_t` (SUB centrul ultimului etaj,
+        nu la varful nominal `height`) — vezi mai jos
+      - fiecare etaj primeste o RAMURA scurta (taper_sweep, 1 prism conic,
+        cateva tri) de la trunchi pana sub centrul lui, inclinata 20-40°
+      - `off_r` (offset lateral) creste substantial — proportional cu
+        INALTIMEA arborelui, nu doar cu latimea discului, ca sa iasa o
+        coroana combinata de 55-70% din inaltime
+      - azimuturile etajelor sunt distribuite pe cerc (2*pi*i/n_tiers +
+        jitter), nu toate independente — asa se suprapun in PLAN (vazute de
+        sus, de la camera de joc), dar raman la Z diferite (vazute din lateral)
+
     DOUA noduri (Trunk + Crown, brief §0.6: o piesa care primeste clasa la
     integrare se sparge la export in obiecte cu un singur material) — doua
     Builder-e separate, ca la stirling_ledge (Wall/Overhang/Shelf).
@@ -113,51 +161,121 @@ def build_beech(height, n_tiers, seed_base, budget):
     rand = _lcg(seed_base)
     r_base = 0.16 + rand() * 0.09   # 0.25..0.45 m diametru brief -> raza 0.13..0.23
 
+    # Etajele intai (geometria lor decide unde se opreste trunchiul), apoi
+    # trunchiul, apoi ramurile — trunchiul din urma, ca varful lui sa poata
+    # fi plasat SUB primul etaj deja calculat (punctul 2 din revizuire).
+    crown_lo = height * 0.44
+    crown_hi = height * 0.98    # coroana nu mai urca pana aproape de varf -
+                                 # trunchiul se opreste SUB etajul de sus (pct 2)
+    n = max(n_tiers, 1)
+    avail = crown_hi - crown_lo
+    # etajele mai groase si mai late decat inainte: tinta buget 220-280/fag,
+    # nu 88-108 — coordonatorul cere sa se FOLOSEASCA bugetul (pct 5).
+    #
+    # ATENTIE: `w` aici e raza NOMINALA data lui `_crown_tier`, dar geometria
+    # REALA iese mai mare — bulgarii secundari din `_crown_tier` au propriul
+    # offset (pana la 0.6*max(rx,ry)) si propria marime (pana la 1.15*size_f),
+    # deci extentul randat pe o axa poate trece de 1.5x raza nominala.
+    # Masurat pe GLB (nu presupus): w_avg=0.30*H dadea beech_c la 16.97 m
+    # inaltime (18% peste 14 m) si 13.93 m latime (84% din inaltime, peste
+    # tinta 55-70%). Coboara la 0.20*H si off_r la 0.10*H, calibrate DIRECT
+    # pe masuratoarea gresita (impartite la ~1.4-1.5, factorul de balonare
+    # observat), apoi reverificate.
+    w_avg = height * 0.20        # raza medie NOMINALA a unui etaj
+    thick_avg = w_avg * 0.42
+    gap = thick_avg * 0.55
+    slot = max(avail / n, thick_avg + gap)
+    tier_specs = []   # (cx, cy, z_center, w, h, thick, seed)
+    z = crown_lo
+    # azimuturi distribuite pe cerc + jitter: coroana se suprapune in PLAN
+    for i in range(n):
+        t = i / max(n - 1, 1)
+        w = w_avg * (0.80 + rand() * 0.40) * (1.0 - 0.08 * t)
+        thick = w * (0.34 + rand() * 0.16)
+        z_center = z + thick * 0.5
+        a = (2.0 * math.pi * i / n) + (rand() - 0.5) * 1.1
+        # offset lateral PROPORTIONAL CU INALTIMEA arborelui (nu doar cu
+        # latimea discului): asa iese coroana combinata la 55-70% din H,
+        # in loc de 30-40% (defectul semnalat) — raza creste usor cu 'i'
+        # (etajele de sus, mai mici, se departeaza mai mult, ca la un fag
+        # real unde coroana se largeste catre mijloc/varf)
+        off_r = height * (0.09 + 0.06 * t) * (0.85 + rand() * 0.3)
+        cx, cy = math.cos(a) * off_r, math.sin(a) * off_r
+        tier_specs.append((cx, cy, z_center, w, w * (0.82 + rand() * 0.3),
+                           thick, seed_base + 40 + i * 11))
+        z += slot
+    # capacul FINAL: ultimul tier nu are voie sa impinga varful peste
+    # `height` — daca `slot` (dictat de thick_avg) a acumulat mai mult decat
+    # `avail`, se comprima uniform tot stivajul pe Z (pastreaza proportiile
+    # relative, doar scaleaza), in loc sa se lase varful sa treaca de tinta.
+    z_top = tier_specs[-1][2] + tier_specs[-1][5] * 0.5
+    if z_top > crown_hi:
+        scale_z = (crown_hi - crown_lo) / max(z_top - crown_lo, 1e-6)
+        tier_specs = [(cx, cy, crown_lo + (zc - crown_lo) * scale_z, w, h,
+                       th, sd)
+                      for (cx, cy, zc, w, h, th, sd) in tier_specs]
+
+    # A TREIA revizuire coordonator: trunchiul scurt (oprit sub PRIMUL etaj)
+    # obliga fiecare ramura sa acopere singura toata distanta pana la etajul
+    # ei — pentru etajul de sus (idx=3 la beech_c, la ~9 m deasupra bazei
+    # trunchiului), o SINGURA ramura dreapta pe distanta aia fie nu ajunge
+    # vizual (arata scurta/absenta), fie, daca ajunge, citeste ca un al
+    # doilea trunchi diagonal, nu ca o creanga. Fix arhitectural, nu doar
+    # numeric: trunchiul urca acum aproape pana SUB PENULTIMUL etaj (nu doar
+    # primul), iar fiecare ramura porneste dintr-un punct de-a lungul
+    # acestui trunchi LUNG, proportional cu inaltimea etajului ei — deci
+    # fiecare ramura ramane SCURTA (cateva metri, nu 5-9 m), exact reteta
+    # cursa "1 prism, 4-6 tris, 20-40°" ceruta de coordonator. Trunchiul
+    # insusi se opreste sub centrul ULTIMULUI etaj (fara sa-l strapunga —
+    # cerinta #2), iar acel ultim etaj primeste o ramura scurta separat,
+    # la fel ca celelalte.
+    trunk_h = tier_specs[-1][2] - tier_specs[-1][5] * 0.55
     bt = Builder()
-    trunk_top = _beech_trunk(bt, height, r_base * 2.0, seed_base, lean=0.14 + rand() * 0.10)
-    trunk_obj = bt.to_object("Trunk")
+    trunk_pts = _beech_trunk(bt, trunk_h, r_base * 2.0, seed_base,
+                             lean=0.14 + rand() * 0.10)
+    trunk_top = trunk_pts[-1]
 
     bc = Builder()
-    # Coroana: incepe la ~0.46 din inaltime (imediat sub varful trunchiului
-    # gol) si urca pana aproape de varf. n_tiers etaje, fiecare mai sus si mai
-    # spre exterior decat precedentul, cu GOL vertical REAL intre ele.
-    #
-    # Prima versiune (span = interval/n_tiers, thick pana la 0.44*w) stivuia
-    # discurile aproape lipite -> silueta de pagoda/umbrela, exact ce brief-ul
-    # interzice explicit (vazut in fiordland_beech.png: un "pagodon" fara
-    # cer intre etaje). Fix, cu doua schimbari masurate din desen, nu ghicite:
-    #  1. `thick` coboara la 0.16-0.26*w (un disc mai SUBTIRE lasa gol chiar
-    #     daza span-ul ramane acelasi)
-    #  2. `gap` explicit intre BAZA unui etaj si VARFUL celui de sub el:
-    #     jumatate din thick-ul mediu, garantat pozitiv — nu doar "centrele
-    #     la distanta", care nu garanteaza nimic daca discurile sunt groase.
-    crown_lo = height * 0.46
-    crown_hi = height * 0.99
-    avail = crown_hi - crown_lo
-    w_avg = height * 0.19
-    thick_avg = w_avg * 0.20
-    gap = thick_avg * 0.9   # gol vertical GARANTAT intre varful unui etaj si baza celui de deasupra
-    # inaltimea "de slot" per etaj (disc + gol de deasupra), din spatiul disponibil
-    slot = max(avail / n_tiers, thick_avg + gap)
-    z = crown_lo   # z urmareste BAZA slotului curent, creste cu `slot` la fiecare pas
-    for i in range(n_tiers):
-        t = i / max(n_tiers - 1, 1)
-        # discuri 2-4x mai late decat inalte, marimi inegale intre etaje,
-        # mai subtiri decat late (thick/w mic) ca sa lase gol vizibil
-        w = w_avg * (0.78 + rand() * 0.44) * (1.0 - 0.10 * t)
-        thick = w * (0.16 + rand() * 0.10)
-        z_center = z + thick * 0.5
-        # offset lateral GENEROS (pana la jumatate din latimea discului):
-        # etajele nu stau pe aceeasi axa, ca la un brad, ci pe ramuri scurte
-        # care ies in directii diferite (brief: "pe ramuri scurte")
-        a = rand() * 6.28
-        off_r = w * (0.30 + rand() * 0.30)
-        cx = math.cos(a) * off_r
-        cy = math.sin(a) * off_r
-        _crown_tier(bc, (cx, cy, z_center), (w, w * (0.82 + rand() * 0.3)),
-                   thick, seed=seed_base + 40 + i * 11,
-                   segments=5 + (i % 2))
-        z += slot
+    for idx, (cx, cy, z_center, w, h, thick, seed) in enumerate(tier_specs):
+        # etajele de jos (mai mari, mai aproape de camera) primesc un al
+        # treilea bulgare — masa in plus exact unde se vede cel mai mult;
+        # tinta coordonator 220-280 tri/fag (foloseste bugetul de 300)
+        # Pe fagii cu 4 etaje (b/c) doar PRIMUL etaj ia lumps=3 (bugetul de
+        # 300 nu incape 2x3-lumpuri + restul), pe cel cu 3 etaje (a) primele
+        # doua. Val 3 (rework silueta): TOATE etajele primesc acum lumps=3
+        # (nu doar cele apropiate) — testat izolat (`_debug_tier4_*.png`),
+        # 2 bulgari tot citeau ca doua placi lipite, 3 bulgari pe cerc rup
+        # conturul vizibil de jur imprejur. `rings=2` uniform (nu 3 pe
+        # apropiate) tine bugetul: 3 lumps x rings=2 x segments=4 = 48 tri
+        # brut/etaj, incape in 220-280/fag chiar la 4 etaje.
+        _crown_tier(bc, (cx, cy, z_center), (w, h), thick, seed=seed,
+                   segments=4, lumps=3, rings=2)
+        # RAMURA: porneste dintr-un punct DE-A LUNGUL TRUNCHIULUI LUNG, la
+        # aproape aceeasi cota ca centrul etajului ei (branch_t urmareste
+        # direct fractia de inaltime a etajului, nu un interval fix
+        # 0.55-0.95 independent de tier) — asa ramane SCURTA, doar diferenta
+        # locala dintre trunchi si tier, in loc sa acopere toata distanta de
+        # la baza trunchiului.
+        t_frac = (z_center - trunk_pts[0].z) / max(trunk_top.z - trunk_pts[0].z, 1e-6)
+        branch_t = max(0.0, min(t_frac - 0.06, 0.97))
+        branch_base = trunk_pts[0].lerp(trunk_top, branch_t)
+        tier_center = Vector((cx, cy, z_center))
+        to_tier = tier_center - branch_base
+        dist = to_tier.length
+        # opreste-te ADANC sub tier (in interiorul volumului de bulgari),
+        # nu la jumatate de drum — raza tier-ului e `w`
+        reach = max(dist - w * 0.40, dist * 0.6)
+        branch_dir = to_tier.normalized() if dist > 1e-4 else Vector((0, 0, 1))
+        branch_tip = branch_base + branch_dir * reach
+        branch_tip.z = min(branch_tip.z, z_center - thick * 0.15)
+        # Grosime substantiala: o ramura care sustine un nor de 2-3 m
+        # latime trebuie sa citeasca la fel de groasa ca o creanga reala,
+        # nu un fir.
+        r0 = max(r_base * 0.9, 0.08)
+        bc.taper_sweep([branch_base, branch_tip], [r0, r0 * 0.55], TRUNK,
+                      segments=5)
+
+    trunk_obj = bt.to_object("Trunk")
     crown_obj = bc.to_object("Crown")
     return trunk_obj, crown_obj
 
@@ -192,45 +310,89 @@ def build_beech_dead():
 # --- rata_tree -----------------------------------------------------------------
 
 def build_rata_tree():
-    """Rata in floare, 5 m: trunchi + coroana din 4-5 volume + 8-12 ciorchini
-    KERB_RED pe fetele de sus.
+    """Rata in floare, 5 m: BUSTOASA, se ramifica JOS (de la ~1.2 m) in 2-3
+    limbi, coroana de 4-5 ciorchini LATA cat inaltimea (4-5 m), flori
+    KERB_RED pe fetele de sus/exterioare ale ciorchinilor.
 
-    Inaltimea totala e trunchi + offset-ul coroanei DEASUPRA varfului lui +
-    jumatate din grosimea celui mai inalt volum + offset-ul florilor — prima
-    versiune aduna toate astea fara sa tina cont de tinta si iesea la 5.96 m
-    (19% peste 5 m, masurat pe GLB). Aici offset-urile coboara si se verifica
-    explicit fata de H, ca varful sa ramana sub tinta.
+    Revizuire coordonator (val 2): prima versiune era un "bat inalt cu o
+    capsula mica" — trunchi drept pana sus, coroana ingusta agatata in varf,
+    citea ca ciuperca. Rata de fapt se ramifica jos si se latesc, nu creste
+    ca un fag inalt cu trunchi gol. Fix:
+      - trunchi SCURT (branch_h ~1.2-1.6 m), apoi 2-3 LIMBI groase care
+        urca oblic si se departeaza — fiecare limba e o a doua taper_sweep,
+        nu doar o ramura subtire ca la fag
+      - fiecare limba isi termina propriul ciorchine de coroana (2 pe limba
+        + inca 1-2 direct din varful trunchiului), 4-5 ciorchini total
+      - latimea combinata a coroanei ~ H (4-5 m), nu ~H*0.3 ca inainte:
+        limbile insele fac raspandirea, nu doar offset-ul norilor
     """
     b = Builder()
     H = 5.0
     rand = _lcg(5301)
-    trunk_pts = _beech_trunk(b, H * 0.86, 0.30, 5301, lean=0.12, kink=False)
-    top = trunk_pts[-1]
-    lumps = 5
+    branch_h = 1.2 + rand() * 0.4          # unde se ramifica trunchiul (brief: "de la ~1.2 m")
+    trunk_pts = _beech_trunk(b, branch_h, 0.28, 5301, lean=0.10, kink=False)
+    base = trunk_pts[0]
+    fork = trunk_pts[-1]
+
+    n_limbs = 3
     lump_centers = []
-    for k in range(lumps):
-        a = 2.0 * math.pi * k / lumps + rand() * 0.7
-        r = H * (0.09 + rand() * 0.05) if k > 0 else 0.0
-        cx = top.x + math.cos(a) * r
-        cy = top.y + math.sin(a) * r
-        cz = top.z + H * (0.02 + rand() * 0.05)
-        w = H * (0.16 + rand() * 0.05)
-        thick = w * (0.42 + rand() * 0.16)
-        faces = _crown_tier(b, (cx, cy, cz), (w, w * 0.9), thick,
-                            seed=5310 + k * 7, segments=6)
-        lump_centers.append((cx, cy, cz, w))
-    # ciorchinii de flori: cutii mici FLOWER pe fetele de sus ale volumelor,
-    # 8-12 in total, distribuite pe cele 5 lumps
+    for li in range(n_limbs):
+        a = 2.0 * math.pi * li / n_limbs + rand() * 0.5
+        d = Vector((math.cos(a), math.sin(a), 0.0))
+        # rise calibrat sa impinga varful ciorchinelui de pe fiecare limba
+        # aproape de H: masurat pe GLB, prima versiune (rise=0.30-0.42*H)
+        # dadea inaltimea totala la 3.63 m (27% sub tinta 5 m) — limbile nu
+        # urcau destul. limb_len coboara usor (limbile mai putin intinse
+        # lateral) ca latimea sa nu depaseasca 4-5 m odata cu inaltimea.
+        limb_len = H * (0.34 + rand() * 0.12)
+        rise = H * (0.58 + rand() * 0.14)
+        mid = fork + d * (limb_len * 0.5) + Vector((0, 0, rise * 0.55))
+        tip = fork + d * limb_len + Vector((0, 0, rise))
+        b.taper_sweep([fork, mid, tip], [0.14, 0.10, 0.06], TRUNK, segments=4)
+        # fiecare limba poarta UN ciorchine, la capat (brief: 4-5 ciorchini
+        # TOTAL, nu per limba — bugetul de 400 nu incape 2 per limba plus
+        # unul central cu lumps=2 fiecare)
+        p = tip
+        w = H * (0.20 + rand() * 0.06)
+        thick = w * (0.55 + rand() * 0.18)
+        _crown_tier(b, (p.x, p.y, p.z), (w, w * 0.92), thick,
+                   seed=5310 + li * 17, segments=4, lumps=2, rings=2)
+        lump_centers.append((p.x, p.y, p.z, w))
+
+    # un ciorchine central, direct deasupra furcii, ca sa umple golul dintre
+    # cele 3 limbi vazut de sus — al 4-lea/5-lea din tinta "4-5 ciorchini"
+    cw = H * 0.20
+    cthick = cw * 0.6
+    ccenter = fork + Vector((0, 0, H * 0.20))
+    _crown_tier(b, (ccenter.x, ccenter.y, ccenter.z), (cw, cw * 0.9), cthick,
+               seed=5390, segments=5, lumps=1, rings=3)
+    lump_centers.append((ccenter.x, ccenter.y, ccenter.z, cw))
+
+    # ciorchinii de flori: bulgari mici FLOWER pe fetele de SUS/exterioare
+    # ale volumelor de coroana — plasati cu offset spre exterior (departe de
+    # centrul arborelui), nu doar "deasupra centrului", ca sa cada pe partea
+    # insorita/vizibila a norului, nu ingropati intre lumps
+    tree_center = Vector((0.0, 0.0, 0.0))
     n_clusters = 10
+    flower_faces_total = 0
     for i in range(n_clusters):
-        cx, cy, cz, w = lump_centers[i % lumps]
-        a = rand() * 6.28
-        rr = w * 0.35 * rand()
-        px, py = cx + math.cos(a) * rr, cy + math.sin(a) * rr
-        pz = cz + w * (0.12 + rand() * 0.06)
-        s = 0.10 + rand() * 0.05
-        b.boulder((px, py, pz), (s, s, s * 0.8), FLOWER,
-                 seed=5400 + i, segments=5, rings=2, deviation=0.14)
+        cx, cy, cz, w = lump_centers[i % len(lump_centers)]
+        outward = Vector((cx, cy, 0.0))
+        if outward.length < 1e-4:
+            a = rand() * 6.28
+            outward = Vector((math.cos(a), math.sin(a), 0.0))
+        outward = outward.normalized()
+        jitter_a = (rand() - 0.5) * 1.6
+        outward = Matrix.Rotation(jitter_a, 3, "Z") @ outward
+        rr = w * (0.55 + rand() * 0.30)
+        px, py = cx + outward.x * rr, cy + outward.y * rr
+        pz = cz + w * (0.10 + rand() * 0.10)
+        s = 0.11 + rand() * 0.05
+        faces = b.boulder((px, py, pz), (s, s, s * 0.8), FLOWER,
+                          seed=5400 + i, segments=4, rings=2, deviation=0.14)
+        flower_faces_total += len(faces)
+    print("rata_tree: %d fete FLOWER (KERB_RED) inainte de bevel/finish"
+          % flower_faces_total)
     return b.to_object("Rata")
 
 

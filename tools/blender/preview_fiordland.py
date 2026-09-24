@@ -392,6 +392,16 @@ def beech_sheet(path, models_dir=None, res=(1900, 900)):
     # de profil pur, dar cu un pic de unghi ca lumina sa cada oblic pe
     # etaje) e vederea LATERALA reala.
     shot(built, path, azimuth=8.0, elevation=10.0, res=res, margin=1.15)
+
+    # A DOUA vedere (cerinta coordonator, val 2): unghiul CAMEREI DE JOC —
+    # chase cam la 10 m sus, priveste in jos la ~29° (memoria
+    # `verifica-cu-parametrii-lui`: un ochi la 2,6 m da verdict fals, camera
+    # reala e sus si inclinata). `elevation` in `shot()` e unghiul camerei
+    # DEASUPRA orizontului tintei — 29° reproduce exact panta de privire a
+    # chase cam-ului, nu doar "o vedere de sus oarecare".
+    base, ext = os.path.splitext(path)
+    shot(built, base + "_chasecam" + ext, azimuth=8.0, elevation=29.0,
+        res=res, margin=1.15)
     return [(o.name, len(o.data.polygons)) for o in built]
 
 

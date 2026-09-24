@@ -88,18 +88,60 @@ def build_wharf():
 # luminate. cafe_shed 5x4, pereti 2.8, acoperis intr-o apa pana la 3.6.
 # lodge 16x7, pereti 3.0, acoperis in doua ape pana la 6.0, un singur nivel.
 
-def _shed_walls(b, width, depth, wall_h, seed):
+def _shed_walls(b, width, depth, wall_h, ridge_h, seed):
     """Cabana de lemn: 4 pereti WOOD, usa si o fereastra mare VOLCANIC_BLACK
-    pe fata dinspre chei (+Y)."""
+    pe fata dinspre chei (+Y).
+
+    Acoperis intr-o singura apa (`_shed_roof_single`): coama la +Y (cota
+    `ridge_h`), streasina la -Y (cota `wall_h`). REVIZUIRE COORDONATOR (val
+    4, a doua trecere): peretii vechi erau toti cutii PLATE la `wall_h` —
+    placa de acoperis, inclinata de la wall_h la ridge_h, atarna deasupra
+    peretelui de la coama in loc sa se reazeme pe el, lasand un triunghi
+    de cer vizibil intre perete si acoperis (planta `fiordland_buildings.
+    png`). Un acoperis intr-o apa cere peretii SA URMEZE panta:
+      - peretele de la STREASINA (-Y): ramane plat la wall_h (aici cade apa)
+      - peretele de la COAMA (+Y): urca PANA LA ridge_h (sustine coama)
+      - cei doi pereti de CAPAT (+-X): sunt TRAPEZE, urcand de la wall_h
+        (la -Y) la ridge_h (la +Y) — exact linia pe care aluneca placa.
+    """
     hw, hd = width * 0.5, depth * 0.5
     thick = 0.16
     faces = []
+
+    # peretele de la streasina (-Y): plat la wall_h
+    faces += list(b.box((0.0, -(hd - thick * 0.5), wall_h * 0.5),
+                        (width - 2 * thick, thick, wall_h), WOOD_SLOT))
+    # peretele de la coama (+Y): plat la ridge_h — sustine coama pe toata
+    # latimea, deci acoperisul are pe ce sa se aseze la capatul inalt
+    faces += list(b.box((0.0, hd - thick * 0.5, ridge_h * 0.5),
+                        (width - 2 * thick, thick, ridge_h), WOOD_SLOT))
+
+    # cei doi pereti de capat: TRAPEZE, in planul YZ (extrudate pe X =
+    # grosimea peretelui), varfurile urmarind exact panta acoperisului
+    # (wall_h la -Y, ridge_h la +Y) — asa dispare golul triunghiular.
     for sx in (-1.0, 1.0):
-        faces += list(b.box((sx * (hw - thick * 0.5), 0.0, wall_h * 0.5),
-                            (thick, depth, wall_h), WOOD_SLOT))
-    for sy in (-1.0, 1.0):
-        faces += list(b.box((0.0, sy * (hd - thick * 0.5), wall_h * 0.5),
-                            (width - 2 * thick, thick, wall_h), WOOD_SLOT))
+        x0 = sx * (hw - thick * 0.5)
+        x1 = sx * (hw + thick * 0.5)
+        bl = b.bm.verts.new((x0, -hd, 0.0))
+        br = b.bm.verts.new((x1, -hd, 0.0))
+        tl_low = b.bm.verts.new((x0, -hd, wall_h))
+        tr_low = b.bm.verts.new((x1, -hd, wall_h))
+        tl_high = b.bm.verts.new((x0, hd, ridge_h))
+        tr_high = b.bm.verts.new((x1, hd, ridge_h))
+        bl2 = b.bm.verts.new((x0, hd, 0.0))
+        br2 = b.bm.verts.new((x1, hd, 0.0))
+        gable = [
+            b.bm.faces.new((bl, br, tr_low, tl_low)),        # capatul jos (-Y)
+            b.bm.faces.new((bl2, tl_high, tr_high, br2)),     # capatul sus (+Y)
+            b.bm.faces.new((tl_low, tr_low, tr_high, tl_high)),  # panta (sus)
+            b.bm.faces.new((bl, tl_low, tl_high, bl2)),       # -X sau interior
+            b.bm.faces.new((br2, tr_high, tr_low, br)),       # +X sau interior
+            b.bm.faces.new((bl2, br2, br, bl)),               # talpa
+        ]
+        for f in gable:
+            f[b.slot] = WOOD_SLOT
+        faces += gable
+
     b.retag(faces, WET_STREAK, where=lambda c, n: n.y < -0.5)
 
     door = b.box((-width * 0.22, hd - thick * 0.45, wall_h * 0.34),
@@ -162,7 +204,7 @@ def _shed_roof_single(b, width, depth, wall_h, ridge_h, overhang=0.4, thickness=
 def build_cafe_shed():
     W, D, WALL, RIDGE = 5.0, 4.0, 2.8, 3.6
     bs = Builder()
-    _shed_walls(bs, W, D, WALL, 7201)
+    _shed_walls(bs, W, D, WALL, RIDGE, 7201)
     stone = bs.to_object("House_Wall")
 
     bt = Builder()

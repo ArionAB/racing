@@ -617,6 +617,135 @@ def animals_sheet(path, models_dir=None, res=(1900, 900)):
     return [(o.name, len(o.data.polygons)) for o in built if o.type == "MESH"]
 
 
+def _make_scale_bar(length=0.5, name="ScaleBar"):
+    """Bara de scara de 0.5 m: un cilindru subtire orizontal, PE SOL, cu
+    doua bilute la capete — reper de scara pentru piese mici (kea, pinguin),
+    unde cutia de 4 m de masina domina cadrul si ascunde piesa (revizuire
+    coordonator: "animals sheet is unjudgeable", val 4 a doua trecere)."""
+    bm = bmesh.new()
+    bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=True, segments=8,
+                          radius1=0.025, radius2=0.025, depth=length)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    obj = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(obj)
+    # cilindrul std e pe Z; il culcam pe Y (orizontal, pe sol)
+    obj.rotation_euler = (math.radians(90.0), 0.0, 0.0)
+    obj.location = (0.0, 0.0, 0.025)
+    bpy.context.view_layer.update()
+    mat = obj.matrix_world.copy()
+    for v in obj.data.vertices:
+        v.co = mat @ v.co
+    obj.matrix_world.identity()
+    mbar = bpy.data.materials.get("ScaleBarYellow")
+    if mbar is None:
+        mbar = bpy.data.materials.new("ScaleBarYellow")
+        mbar.use_nodes = True
+        bsdf = mbar.node_tree.nodes.get("Principled BSDF")
+        bsdf.inputs["Base Color"].default_value = (1.0, 0.82, 0.05, 1.0)
+        bsdf.inputs["Roughness"].default_value = 0.5
+    obj.data.materials.clear()
+    obj.data.materials.append(mbar)
+    return obj
+
+
+def _animal_close_shot(out_path, category, name, action_name=None,
+                       frame_kind=None, res=(900, 800), azimuth=20.0,
+                       elevation=12.0):
+    """O SINGURA piesa, incadrata STRANS (~2 m latime de cadru — cutia de
+    masina de 4 m disparea complet piesa, revizuire coordonator val 4 a
+    doua trecere), cu bara de scara de 0.5 m langa ea, din 3/4 fata.
+
+    Fisier separat per piesa (nu insirate pe un rand): un cadru comun ar
+    trebui sa incapa toate trei, ceea ce e exact problema de scara semnalata
+    ("specks") — un `margin` mic pe UN SINGUR obiect e singurul mod sa
+    ocupe cadrul cu adevarat."""
+    _clear()
+    objs = _import(category, name, MODELS)
+    if not objs:
+        print("LIPSA:", name)
+        return None
+    arm = next((o for o in objs if o.type == "ARMATURE"), None)
+    mesh = next((o for o in objs if o.type == "MESH"), None)
+    if arm is not None and action_name is not None:
+        act = bpy.data.actions.get(action_name)
+        if act is not None:
+            if arm.animation_data is None:
+                arm.animation_data_create()
+            for t in list(arm.animation_data.nla_tracks):
+                t.mute = True
+            arm.animation_data.action = act
+            if arm.animation_data.action_slot is None and act.slots:
+                arm.animation_data.action_slot = act.slots[0]
+            frame = (act.frame_range[0] if frame_kind == "start"
+                     else act.frame_range[1])
+            bpy.context.scene.frame_set(int(frame))
+    bpy.context.view_layer.update()
+    meshes = [o for o in objs if o.type == "MESH"]
+    span_x = max(max(o.dimensions.x for o in meshes), 0.3) if meshes else 0.5
+
+    # bara de scara LIPITA de piesa (0.2 m distanta, nu 0.5 m): un decalaj
+    # mare largeste bbox-ul combinat pe care `shot()` il incadreaza si
+    # departeaza camera exact ca o a doua piesa — masurat pe prima incercare
+    # (0.5 m offset), piesele tot ocupau doar ~1/3 din cadru.
+    bar = _make_scale_bar()
+    bar.location = (0.0, -(span_x * 0.5 + 0.2), 0.0)
+
+    built = meshes + [bar]
+    for o in bpy.data.objects:
+        if o.type in ("MESH", "ARMATURE"):
+            o.hide_render = (o not in built) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_end = 500.0
+    cam.data.clip_start = 0.1
+    # azimut mic (3/4 fata, cerinta coordonator), margin STRANS (0.95, sub
+    # 1.0 — `shot()` foloseste margin ca multiplicator peste distanta minima,
+    # deci sub 1.0 apropie camera peste cadrul "exact") ca piesa sa umple
+    # cadrul, nu doar o treime din el.
+    shot(built, out_path, azimuth=azimuth, elevation=elevation, res=res,
+        margin=1.05)
+    return [(o.name, len(o.data.polygons)) for o in meshes]
+
+
+def animals_close_sheet(path, models_dir=None, res=(900, 800)):
+    """3 fisiere separate (kea Idle, kea Open, penguin), fiecare incadrat
+    strans (~2 m latime), cu bara de scara de 0.5 m — vezi `_animal_close_shot`.
+    `path` da baza numelui; se scriu `<path>_kea_idle.png`,
+    `<path>_kea_open.png`, `<path>_penguin.png`."""
+    base, ext = os.path.splitext(path)
+    results = {}
+    r = _animal_close_shot(base + "_kea_idle" + ext, "animals", "kea",
+                           action_name="Idle", frame_kind="start", res=res)
+    if r:
+        results["kea_idle"] = r
+    # aripile deschise se intind pe X: un azimut aproape frontal le arata
+    # aproape din profil (edge-on), aproape invizibile in spatele corpului —
+    # revizuire coordonator ("looks like only one wing"). azimut ~55 grade
+    # (mai lateral) arata anvergura clar, fara sa piarda cititul 3/4.
+    r = _animal_close_shot(base + "_kea_open" + ext, "animals", "kea",
+                           action_name="Open", frame_kind="end", res=res,
+                           azimuth=55.0, elevation=18.0)
+    if r:
+        results["kea_open"] = r
+    # penguin: fata (burta+sprancene) e spre +Y Blender — azimut care
+    # priveste dinspre +Y arata fata, nu spatele (cerinta coordonator:
+    # "confirm the penguin's yellow brows are visible in the close-up")
+    # penguin: fata (burta+sprancene+cioc) e spre +Y Blender. Camera la
+    # azimut ~90 grade sta pe partea +Y (`shot()`: eye = center + (cos a,
+    # sin a, ...) * dist), deci priveste DINSPRE +Y spre -Y — exact fata
+    # piesei, nu spatele (masurat gresit prima data la 200 grade).
+    r = _animal_close_shot(base + "_penguin" + ext, "animals", "penguin_tawaki",
+                           res=res, azimuth=110.0, elevation=14.0)
+    if r:
+        results["penguin"] = r
+    return results
+
+
 def horizon_sheet(path, models_dir=None, res=(1900, 1000)):
     """Cele 4 noduri de orizont, fiecare randat din 2-3 azimuturi diferite —
     jocul le da un yaw ALEATOR (`Track._build_horizon`), deci planta trebuie
@@ -853,5 +982,7 @@ print("plansa buildings", buildings_sheet(
     os.path.join(OUT, "fiordland_buildings.png")))
 print("plansa animals", animals_sheet(
     os.path.join(OUT, "fiordland_animals.png")))
+print("plansa animals_close", animals_close_sheet(
+    os.path.join(OUT, "fiordland_animals_close.png")))
 print("plansa horizon", horizon_sheet(
     os.path.join(OUT, "fiordland_horizon.png")))

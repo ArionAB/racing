@@ -5,7 +5,13 @@ Sursa: `docs/asset_briefs/fiordland_kit.md` (contractul) și cele patru
 referințe vizuale pe care le numește. Verificare:
 `bash tools/blender/verify_fiordland.sh` → **VERDICT KIT: OK, 31 de GLB-uri**.
 Planșele de control, randate **din GLB-urile exportate**:
-`docs/asset_briefs/img/fiordland_*.png` (`preview_fiordland.py`).
+`docs/asset_briefs/img/fiordland_*.png` (`preview_fiordland.py`). Pentru
+animale, pe lângă planșa largă (`fiordland_animals.png`) există și 3 planșe
+apropiate, o piesă per fișier, cu bară de scară de 0,5 m în loc de cutia de
+4 m (revizuire coordonator, val 4 a doua trecere):
+`fiordland_animals_close_kea_idle.png`,
+`fiordland_animals_close_kea_open.png`,
+`fiordland_animals_close_penguin.png`.
 
 | script | ce produce | val |
 |---|---|---|
@@ -71,7 +77,7 @@ sferele de rezervă.
 | fișier | tri / buget | cote măsurate vs. brief | notă |
 |---|---:|---|---|
 | `structures/wharf.glb` | 376 / 400 | **20,00 × 4,00 × 2,00** (contract exact), capete plane la Z=±10,05 | `--origin=base_axis`, 4 babale |
-| `buildings/cafe_shed.glb` | 308 / 400 | pereți 2,80 (contract 2,8), acoperiș până la 3,66 (contract 3,6) | `House_Wall`+`House_Roof`, `--origin=assembly`; **acoperiș cu o singură apă — silueta din unghiul de previzualizare poate citi ca "detașat" la elevație joasă, deși `verify_glb.py --origin=assembly` confirmă streașina la Y=2,744 chiar deasupra peretelui la Y=2,800 (fără gol pe axa de contract)** |
+| `buildings/cafe_shed.glb` | 308 / 400 | pereți 2,80–3,60 (contract 2,8 la streașină, 3,6 la coamă), acoperiș 2,744–3,656 | `House_Wall`+`House_Roof`, `--origin=assembly`. **Golul de la coamă reparat (revizuire coordonator, val 4 a doua trecere):** peretele de la streașină rămâne plat la 2,8 m, peretele de la coamă urcă la 3,6 m, iar cei doi pereți de capăt sunt TRAPEZE care urmează exact panta acoperișului — verificat vizual din partea înaltă și din capătul de fronton, fără cer vizibil între perete și placă |
 | `buildings/lodge.glb` | 636 / 700 | pereți 3,00 (contract 3,0), coamă la 6,19 (contract 6,0) | idem, 4 ferestre, 1 lucarnă |
 | `structures/heli_pad.glb` | 178 / 200 | disc 11,7 m diametru (contract 12), 0,30 înălțime | cercul+H din fețe retag, coliziune `none` |
 | `props/luggage_container.glb` | 88 / 150 | 6,10 × 2,40 × 2,60 (contract exact) | nervuri retag |
@@ -86,18 +92,47 @@ sferele de rezervă.
 | `kea.glb` | 682 / 700 | poza statică (bind pose, construcție): anvergură 1,003 m; **poza Idle (start=cadrul 0): span 0,22 m** (aripi strânse); **poza Open (ultimul cadru): span 1,003 m** — contract **anvergură 1,0 m deschis** respectat EXACT în `Open` | Oase `Body/Head/WingL/WingR`, acțiuni `Idle`/`Open` (nume EXACTE, contract `PathMover.animation`) |
 | `penguin_tawaki.glb` | 282 / 300 | 0,205×0,268×0,770 (contract 0,75 — 2,7% peste) | `--allow-car-slots=Penguin` |
 
-### `rocks/fiordland_horizon.glb` — val 4, fundalul (4 noduri, 2.268 tri)
+### `rocks/fiordland_horizon.glb` — val 4, fundalul (4 noduri, 1.658 tri)
 
-| nod | tri | cote măsurate vs. brief |
-|---|---:|---|
-| `FarWall_A` | 400 | 180,00 × 44,90 × 68,00 (contract 180×45×70 — înălțimea 3% sub) |
-| `FarWall_B` | 400 | 180,00 × 44,91 × 74,00 (contract 180×45×70 — înălțimea 6% peste) |
-| `SnowRidge_A` | 730 | bază ~110×115, înălțime 90,00 (contract ~120 bază/90 înălțime — baza ~5-8% sub) |
-| `SnowRidge_B` | 736 | bază ~112×123, înălțime 90,00 | idem |
+**Refăcut complet (revizuire coordonator, val 4 a doua trecere):** prima
+versiune a `FarWall` avea o singură secțiune triunghiulară constantă
+extrudată pe 180 m, cu dinte de fierăstrău periodic ("Toblerone") —
+`SnowRidge` avea mase suplimentare (`b.rock()`/`b.boulder()`) care citeau ca
+"cutii lipite pe con" la scara relativă a piesei.
+
+| nod | tri | FOAM_WHITE (din GLB) | cote măsurate vs. brief |
+|---|---:|---:|---|
+| `FarWall_A` | 530 | 10,4% | 180,00 lung × 57,19 înălțime × ~68 lat (contract lung 180, înălțime 40-70 variabilă pe coloană, lat 30-55 variabil + pinteni — vezi mai jos) |
+| `FarWall_B` | 506 | 11,7% | 180,00 lung × 67,44 înălțime × ~73 lat |
+| `SnowRidge_A` | 316 | 33,9% | bază ~119×115, înălțime 90,00 (contract ~120/90) |
+| `SnowRidge_B` | 306 | 32,7% | bază ~107×123, înălțime 90,00 |
 
 `--origin=assembly`. **FĂRĂ `CloudBank_A`** (brief §1.2 — pânză billboard din
 cod). Toate 4 sunt volume ÎNCHISE, lizibile din orice yaw (verificat pe
 planșa `fiordland_horizon.png`, 3 azimuturi per nod).
+
+**FarWall — secțiune variabilă, nu "Toblerone":** înălțimea crestei
+variază 40-70 m PE COLOANĂ (random-walk aditiv, nu sumă de sinusoide
+periodice — asta era sursa dintelui regulat), lățimea de bază variază
+30-55 m INDEPENDENT de înălțime, 2-3 pinteni/contraforturi împinși în
+afară pe fiecare parte la poziții aleatoare (nu simetrice între cele două
+fețe), iar cele două fețe au taluz diferit (o parte abruptă ~18-28%,
+cealaltă domoală ~34-46%). Cele 2 fire albe verticale (FOAM_WHITE) pe
+fiecare față lungă rămân, lățimea benzii ridicată la ~1,3× pasul dintre
+coloane (9,4 m) — **bug găsit prin măsurătoare**: pragul literal de 1,5 m
+din brief nu nimerea NICIODATĂ centrul vreunei fețe pe o grilă de coloane
+la 7,2 m pas (0 fețe retag-uite, verificat direct din GLB înainte de fix).
+
+**SnowRidge — calotă retag pură, fără volume adăugate:** umărul lateral
+(`b.rock(flat_top=True)`) și masele de pădure pe flanc (`b.boulder()`) au
+fost SCOASE complet — la scara relativă a unui con de 90 m, cu doar 5-6
+segmente, citeau ca obiecte străine lipite pe con, nu ca relief. Calota
+FOAM_WHITE rămâne exact ce cere brief-ul: retag pur pe treimea de sus, zero
+triunghiuri adăugate. Punctele galbene mici vizibile la baza fiecărei piese
+în `fiordland_horizon.png` sunt marcajele `RefCar` ale planșei (cutia de
+referință de 4 m, minusculă față de piese de 90-180 m) — **nu sunt geometrie
+în GLB**, confirmat prin listarea nodurilor fișierului (doar
+`FarWall_A/B`, `SnowRidge_A/B`).
 
 ## Contracte înghețate în geometrie
 
@@ -187,15 +222,17 @@ planșa `fiordland_horizon.png`, 3 azimuturi per nod).
 
 ### Val 4 (acest val)
 
-- **`cafe_shed` — acoperiș cu o singură apă, citire ambiguă din unghiul de
-  previzualizare standard.** `verify_glb.py --origin=assembly` confirmă
-  geometric streașina (Y=2,744) chiar deasupra coamei peretelui (Y=2,800,
-  fără gol pe axa de contract), dar la elevație joasă (7-13°) placa unică,
-  subțire, poate citi ca detașată de perete în anumite unghiuri — planșa
-  `fiordland_buildings.png` arată exact acest caz. Nu s-a putut elimina
-  complet fără o a doua trecere de geometrie (grindă vizibilă la streașină
-  care să lege vizual placa de perete); rămâne o candidată pentru retuș la
-  integrare dacă verdictul pe device confirmă problema.
+- **`cafe_shed` — golul de la coamă REPARAT (revizuire coordonator, a doua
+  trecere).** Cauza reală: toți cei 4 pereți erau cutii plate la `wall_h`,
+  dar acoperișul urcă de la `wall_h` (streașină) la `ridge_h` (coamă) —
+  peretele de la coamă rămânea la cota veche, cu un triunghi de cer vizibil
+  între el și placa înclinată. `verify_glb.py --origin=assembly` nu prindea
+  asta (verifică doar baza, nu închiderea volumului) — corect, cum a
+  semnalat coordonatorul. Fix: peretele de la streașină rămâne plat la
+  `wall_h`, peretele de la coamă urcă la `ridge_h`, iar cei doi pereți de
+  capăt sunt TRAPEZE care urmăresc exact panta. Verificat vizual din partea
+  înaltă și din capătul de fronton — fără cer vizibil între perete și
+  acoperiș, în ambele unghiuri.
 - **`kea`: poza de REPAUS a fișierului (bind pose, fără nicio acțiune
   activă) arată aripile INTINSE** (span 1,0 m), nu strânse — contrar
   intenției vizuale. Cauza: exportul glTF scrie geometria din poza de
@@ -216,15 +253,24 @@ planșa `fiordland_horizon.png`, 3 azimuturi per nod).
   o torsiune pe axa proprie a aripii) ar apropia silueta de referință, dar
   n-a fost dusă mai departe în acest val — funcțional, distincția
   Idle/Open citește clar (span 0,22 m vs 1,003 m).
+- **`kea`: anvergura `Open`, verificată SIMETRIC din GLB** (revizuire
+  coordonator — planșa largă lăsa impresia unei singure aripi întinse,
+  artefact de unghi de cameră). Măsurat direct pe grupurile de vertecși
+  `WingL`/`WingR` din meshul EVALUAT (după deformarea armaturii, cadrul
+  final al `Open`): **WingL X ∈ [-0,5016, 0,0000]**, **WingR X ∈
+  [0,0000, 0,5016]** — perfect simetric, ambele aripi ating 0,5016 m,
+  anvergura totală 1,003 m. Planșa apropiată nouă (`fiordland_animals_close_
+  kea_open.png`, azimut 55° în loc de 20°) arată ambele aripi clar, fără
+  ambiguitate.
 - **`heli_pad` disc 11,7 m, nu 12** — geometria grilei radiale (3 inele)
   rotunjește ușor sub bevel; în limita de citire a piesei.
 - **`penguin_tawaki` 0,77 m, nu 0,75** — profilul corpului + cioc ies 2,7%
   peste cota nominală după bevel; nerecalibrat, sub pragul de vizibilitate.
-- **`fiordland_horizon`: FarWall_A/B 68-74 m înălțime (contract 70 m,
-  ±3-6%), SnowRidge_A/B bază ~110-123 m (contract ~120 m, ±5-8%)** — profil
-  neregulat pe creastă + capete care coboară la 35% din nominal pentru
-  închiderea volumului; variația e în limita citirii de siluetă la 150-300 m
-  prin ceață.
+- **`fiordland_horizon`: refăcut complet (revizuire coordonator, a doua
+  trecere)** — vezi secțiunea dedicată mai sus. `FarWall_A/B` acum
+  57,19/67,44 m înălțime (varia deja intenționat 40-70 m pe coloană, nu o
+  cotă unică), `SnowRidge_A/B` bază ~107-123 m (contract ~120 m, ±11%
+  maxim, tot din perturbația intenționată a crestei).
 
 ## Lecție de metodă: Blender 5.x Action Slots (kea)
 
@@ -269,5 +315,3 @@ DOAR după ce toate cadrele sunt scrise, pentru citire/verificare.
   FAR_PLANE camerei), altfel `_build_horizon_fallback` rămâne activ.
 - **`HazardLamp`** pe cele 2 alveole goale ale `traffic_light_pole`
   (0,3 m diametru, centrate la 0,35 m distanță pe verticală, VOLCANIC_BLACK).
-- **Retuș opțional pe `cafe_shed`** dacă verdictul pe device confirmă
-  citirea de "acoperiș detașat" (vezi abateri val 4).

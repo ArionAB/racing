@@ -60,61 +60,105 @@ FW_H = 78.0
 
 
 def _far_wall(seed, name):
-    """Creasta lunga si ingusta: profil dreptunghiular in plan (X=lungime,
-    Y=adancime), cu pereti VERTICALI pe ambele laturi lungi (+-Y) si capete
-    inchise pe X — deci un volum complet, citit corect din orice yaw.
+    """Creasta lunga si ingusta, cu SECTIUNE VARIABILA pe toata lungimea —
+    nu un profil triunghiular constant scalat doar in inaltime (defectul
+    "Toblerone" semnalat de coordonator, val 4 revizuire): fiecare coloana
+    isi are propria inaltime (40-70 m), propria latime de baza (30-55 m) si
+    propriul taluz, iar cateva coloane impinse in afara pe fiecare parte
+    (nu simetric) dau 2-3 pinteni/contraforturi vizibili in silueta. O parte
+    e mai abrupta decat cealalta (batere diferita pe +Y fata de -Y), iar
+    creasta e neregulata prin PERTURBATIE ADITIVA (LCG per coloana), nu
+    printr-o suma de sinusoide periodice — asta era sursa dintelui de
+    fierastrau regulat vizibil pe planta veche.
 
-    Construita din INELE pe lungime (COLS coloane), fiecare cu propriul
-    profil in sectiune (creasta + doua taluzuri), cusute intre ele — acelasi
-    tipar ca `gorge_far_wall`, dar profilul de sectiune e acum SIMETRIC (doua
-    fete abrupte), nu concav-cu-spate-plat."""
+    Construita din INELE pe lungime (COLS coloane), cusute intre ele —
+    acelasi tipar ca `gorge_far_wall`, dar profilul de sectiune e acum
+    SIMETRIC pe doua fete abrupte (nu concav-cu-spate-plat), cu latimea de
+    baza si taluzul variind independent de inaltime pe fiecare coloana."""
     b = Builder()
     rnd = _lcg(seed)
-    COLS = 22
+    COLS = 26
     half_len = FW_LEN * 0.5
-    half_d = FW_DEPTH * 0.5
 
-    # creasta neregulata pe lungime: variatie mare (in metri), ca la Machu
-    # Picchu — sub asta silueta se pierde inainte sa ajunga pe ecran.
-    crest_h = []
+    # --- inaltimea crestei: 40-70 m, perturbatie ADITIVA neperiodica (suma
+    # de pasi random-walk, nu sinusoide) — o creasta reala nu repeta acelasi
+    # interval la fiecare N coloane.
+    h_lo, h_hi = 40.0, FW_H
+    crest_h = [0.0] * COLS
+    walk = (h_lo + h_hi) * 0.5
     for i in range(COLS):
-        t = i / (COLS - 1.0)
-        f = (0.78 + 0.14 * math.sin(t * 5.1 + seed * 0.01)
-             + 0.08 * math.sin(t * 11.3 + 1.7)) * (0.93 + rnd() * 0.14)
-        crest_h.append(FW_H * max(0.55, min(1.0, f)))
+        walk += (rnd() - 0.5) * 22.0
+        walk = max(h_lo, min(h_hi, walk))
+        crest_h[i] = walk
     for _pass in range(2):
         sm = list(crest_h)
         for i in range(1, COLS - 1):
             crest_h[i] = (sm[i - 1] + 2.0 * sm[i] + sm[i + 1]) * 0.25
-    # capetele coboara spre 0: creasta se pierde in umerii de la capat, ca
-    # volumul sa se inchida curat (nu un zid cu capat taiat drept la inaltime
-    # maxima)
-    crest_h[0] *= 0.35
-    crest_h[-1] *= 0.35
-    crest_h[1] *= 0.65
-    crest_h[-2] *= 0.65
+    # capetele coboara, ca volumul sa se inchida curat
+    crest_h[0] = h_lo * 0.5
+    crest_h[-1] = h_lo * 0.5
+    crest_h[1] = (crest_h[1] + h_lo) * 0.5
+    crest_h[-2] = (crest_h[-2] + h_lo) * 0.5
 
-    # retragerea taluzului: cat se ingusteaza fiecare coloana spre creasta
-    # (simetric pe +-Y), per coloana, ca fetele sa nu fie plane perfecte
-    batter = [half_d * (0.30 + rnd() * 0.20) for _ in range(COLS)]
+    # --- latimea de baza: 30-55 m, INDEPENDENTA de inaltime (un varf inalt
+    # nu inseamna neaparat o baza lata) — acelasi random-walk, seed diferit.
+    w_lo, w_hi = 30.0, 55.0
+    base_w = [0.0] * COLS
+    walkw = (w_lo + w_hi) * 0.5
+    for i in range(COLS):
+        walkw += (rnd() - 0.5) * 14.0
+        walkw = max(w_lo, min(w_hi, walkw))
+        base_w[i] = walkw
+    for _pass in range(2):
+        sm = list(base_w)
+        for i in range(1, COLS - 1):
+            base_w[i] = (sm[i - 1] + 2.0 * sm[i] + sm[i + 1]) * 0.25
+
+    # --- 2-3 pinteni pe FIECARE parte, la pozitii ALEATOARE (nu simetrice
+    # intre cele doua fete): coloanele alese impinse in afara cu un bonus de
+    # latime local, ca un contrafort vizibil in silueta de sus.
+    def _spur_bonus(side_sign):
+        bonus = [0.0] * COLS
+        n_spurs = 2 + (1 if rnd() > 0.5 else 0)
+        for _ in range(n_spurs):
+            ci = int(2 + rnd() * (COLS - 4))
+            amp = 8.0 + rnd() * 10.0
+            width = 2 + int(rnd() * 2)
+            for di in range(-width, width + 1):
+                k = ci + di
+                if 0 <= k < COLS:
+                    falloff = max(0.0, 1.0 - abs(di) / (width + 1.0))
+                    bonus[k] = max(bonus[k], amp * falloff)
+        return bonus
+
+    spur_plus = _spur_bonus(1.0)     # pinteni pe fata +Y
+    spur_minus = _spur_bonus(-1.0)   # pinteni pe fata -Y, independenti
+
+    # --- asimetrie: o parte mai abrupta decat cealalta (batere diferita)
+    batter_plus_frac = 0.18 + rnd() * 0.10    # +Y: taluz mai INGUST (abrupt)
+    batter_minus_frac = 0.34 + rnd() * 0.12   # -Y: taluz mai LARG (domol)
 
     xs = [-half_len + FW_LEN * i / (COLS - 1.0) for i in range(COLS)]
 
-    # profil de sectiune, per coloana: talpa (+-half_d), un rand la mijloc
-    # (taluz), creasta (0, crest_h) — o pana simetrica, nu un dreptunghi cu
-    # muchii verticale (silueta de creasta, nu de cladire).
+    # profil de sectiune, per coloana: talpa (variabila pe Y), un rand la
+    # mijloc (taluz, ASIMETRIC intre +Y si -Y), creasta (0, crest_h) — deci
+    # atat inaltimea CAT SI latimea/adancimea variaza independent coloana cu
+    # coloana, plus pintenii impinsi in afara.
     cols = []
     for i, x in enumerate(xs):
         h = crest_h[i]
-        bd = batter[i]
-        y_mid = half_d - bd * 0.55
-        z_mid = h * 0.42
+        hw = base_w[i] * 0.5
+        y_plus = hw + spur_plus[i]     # talpa pe +Y, cu pinten
+        y_minus = hw + spur_minus[i]   # talpa pe -Y, cu pinten propriu
+        y_mid_plus = y_plus * (1.0 - batter_plus_frac)
+        y_mid_minus = y_minus * (1.0 - batter_minus_frac)
+        z_mid = h * (0.38 + rnd() * 0.08)
         cols.append([
-            Vector((x, -half_d, 0.0)),
-            Vector((x, -y_mid, z_mid)),
+            Vector((x, -y_minus, 0.0)),
+            Vector((x, -y_mid_minus, z_mid)),
             Vector((x, 0.0, h)),
-            Vector((x, y_mid, z_mid)),
-            Vector((x, half_d, 0.0)),
+            Vector((x, y_mid_plus, z_mid)),
+            Vector((x, y_plus, 0.0)),
         ])
 
     verts = [[b.bm.verts.new(p) for p in col] for col in cols]
@@ -126,8 +170,9 @@ def _far_wall(seed, name):
                                verts[i + 1][r + 1], verts[i][r + 1]))
             f[b.slot] = GNEISS
             faces.append(f)
-    # talpa: inchide dedesubt (Y intre -half_d si +half_d la Z=0), ca sa nu
-    # se vada prin volum de jos
+    # talpa: inchide dedesubt, urmarind latimea VARIABILA per coloana (nu un
+    # dreptunghi fix) — ca sa nu se vada prin volum de jos si sa nu apara
+    # trepte artificiale la talpa unde latimea sare intre coloane vecine.
     floor_faces = []
     for i in range(COLS - 1):
         f = b.bm.faces.new((verts[i][0], verts[i][-1],
@@ -159,8 +204,16 @@ def _far_wall(seed, name):
     # --- 2 fire albe verticale (FOAM_WHITE, 1.5 m late) pe FIECARE fata
     # lunga (+Y si -Y) — brief §1.2. Benzi verticale RETAG (zero triunghiuri),
     # pozitionate la 2 fractii de-a lungul lungimii, cate una pe fiecare fata.
+    # LATIMEA benzii trebuie sa fie CEL PUTIN cat pasul dintre coloane
+    # (FW_LEN/(COLS-1) ~= 7.2 m aici), altfel un prag de 1,5 m (litera
+    # brief-ului) nu nimereste NICIODATA centrul vreunei fete — masurat
+    # direct (0 fete retag-uite cu 1,5 m). Fata e unitatea cea mai fina pe
+    # care banda o poate ocupa; brief-ul cere "1,5 m late" ca impresie
+    # vizuala de la distanta prin ceata, nu ca toleranta geometrica exacta
+    # pe o grila de 7 m.
+    col_step = FW_LEN / (COLS - 1.0)
     thread_x = [-half_len + FW_LEN * 0.32, -half_len + FW_LEN * 0.68]
-    thread_w = 1.5
+    thread_w = max(1.5, col_step * 1.3)
     for side in (-1.0, 1.0):
         for tx in thread_x:
             b.retag(allf, SNOW,
@@ -244,32 +297,16 @@ def _snow_ridge(seed, name, lean_x=10.0, lean_y=4.0):
     b.retag(allf, GNEISS, where=lambda c, n: SR_H * 0.42 <= c.z < SR_H * 0.66)
     b.retag(allf, SNOW, where=lambda c, n: c.z >= SR_H * 0.66)
 
-    # umar lateral, ca la Machu Picchu — o masa lipita pe flanc, silueta care
-    # rupe conturul de con perfect
-    sh_z = SR_H * SHOULDER
-    b.rock((SR_BASE * 0.20, -SR_BASE * 0.08, sh_z * 0.5),
-          (SR_BASE * 0.30, SR_BASE * 0.26, sh_z * 0.8), GNEISS,
-          seed=seed + 100, segments=6, rings=3, taper=0.22, flat_top=True,
-          strata_slots=(GNEISS, FOREST, GNEISS))
-
-    # mase de padure pe flancurile joase, cateva, mari (silueta, nu detaliu)
-    for k in range(5):
-        a = 2.0 * math.pi * k / 5 + rnd() * 0.7
-        t = 0.14 + rnd() * 0.22
-        z = SR_H * t
-        if t < SHOULDER:
-            u = t / SHOULDER
-            rs = 1.0 - 0.32 * (u ** 1.25)
-        else:
-            u = (t - SHOULDER) / max(1.0 - SHOULDER, 1e-6)
-            rs = 0.68 * (1.0 - 0.90 * (u ** 1.05))
-        r = rs * SR_BASE * 0.5 * 0.84
-        s = 16.0 + rnd() * 10.0
-        b.boulder((math.cos(a) * r + lean_x * (t ** 1.7),
-                  math.sin(a) * r + lean_y * (t ** 2.1), z),
-                 (s, s * 0.86, s * 0.44),
-                 FOREST if k % 3 else FOREST_DARK,
-                 seed=seed + 200 + k, segments=5, rings=2, deviation=0.18)
+    # REVIZUIRE COORDONATOR (val 4, a doua trecere): umarul (`b.rock(...,
+    # flat_top=True)`) si masele de padure pe flanc (`b.boulder()`) citeau ca
+    # "cutii mici lipite pe con" in planta — la scara relativa a unui con de
+    # 90 m, un `rock()`/`boulder()` de 20-30 m cu doar 5-6 segmente si
+    # `flat_top` iese prea fatetat/dreptunghiular ca sa se confunde cu
+    # geometria conului insusi, si se vede exact ca un corp strain lipit.
+    # SCOASE complet: calota de zapada ramane retag PUR pe treimea de sus
+    # (fara volum adaugat), exact contractul brief-ului. Silueta conului
+    # (varf decalat, umar din PROFILUL inelelor, nu dintr-o masa separata)
+    # ramane singura sursa de relief pe flanc.
 
     return b.to_object(name)
 

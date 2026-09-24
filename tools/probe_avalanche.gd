@@ -41,15 +41,11 @@ const SYNC_DIST: float = 25.0
 
 ## Cate secunde de la inceputul traversarii pana cand masa e PE AXA drumului.
 ##
-## Se DERIVA din constantele hazardului, nu se scrie: X-ul interpoleaza liniar
-## de la `START_SIDE` la `-END_SIDE`, deci trece prin zero la fractia
-## START_SIDE / (START_SIDE + END_SIDE) din cursa. Scris de mana, s-ar
-## desincroniza tacut la prima ajustare a geometriei si sonda ar raporta
-## „neprinsa" pentru un hazard perfect functional.
-static func _sweep_mid() -> float:
-	var a := AvalancheHazard.START_SIDE
-	var b := AvalancheHazard.END_SIDE
-	return AvalancheHazard.SWEEP * (a / (a + b))
+## Se ia de la HAZARD (`sweep_mid_time()`), nu se deriva local din
+## START_SIDE/END_SIDE: de cand startul se poate muta pe panta reala
+## (`_pick_start_point`), constantele singure nu mai spun unde porneste masa.
+## Scris de mana aici, sonda s-ar desincroniza tacut la prima pista cu versant
+## si ar raporta „neprinsa" pentru un hazard perfect functional.
 
 var _track: Track
 var _car: Car
@@ -156,7 +152,7 @@ func _resync() -> void:
 	if v < 1.0:
 		return
 	_synced = true
-	_av._time = fposmod(_av.TELEGRAPH + _sweep_mid() - d / v, _av.period)
+	_av._time = fposmod(_av.TELEGRAPH + _av.sweep_mid_time() - d / v, _av.period)
 	if _dbg:
 		print("resync la %.1f m, v=%.1f m/s, eta=%.2f s" % [d, v, d / v])
 
@@ -319,7 +315,7 @@ func _spawn_car() -> void:
 	# accelereaza spre ~37, deci un ETA calculat pe viteza de start ar fi cu
 	# ~20% prea lung.
 	var eta := RUN_UP / 35.0
-	_av._time = fposmod(_av.TELEGRAPH + _sweep_mid() - eta, _av.period)
+	_av._time = fposmod(_av.TELEGRAPH + _av.sweep_mid_time() - eta, _av.period)
 
 
 func _find_avalanche(node: Node) -> AvalancheHazard:

@@ -32,6 +32,10 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# aceleasi piese fara axa functionala (chasm_rock/moss_boulder), acelasi
 	# motiv ca marmita/muschiBolovan mai sus.
 	"canionTreapta", "canionTreaptaMica", "canionMuschi",
+	# RUNDA 1 POI G (Bowen): perete/bazin cascada + padure de mal, acelasi
+	# principiu — bolovani/muschi/fagi cu yaw aleator intentionat
+	# (aranjamentul-bate-numarul), fara axa vizuala semnificativa.
+	"poolWall", "poolMoss", "gravelEdge", "poolDrift", "bankForest", "bankUnder",
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:

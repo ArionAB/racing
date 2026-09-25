@@ -223,6 +223,62 @@ script = ExtResource("prop")
 
 [node name="ZoneA_Chei" type="Node3D" parent="DecorManual"]
 
+[node name="wharf1" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_wharf")]
+transform = Transform3D(-0.947831, 0.000000, -0.318773, 0.000000, 1.000000, 0.000000, 0.318773, 0.000000, -0.947831, -26.584486, -1.964675, -15.908546)
+
+[node name="wharf2" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_wharf")]
+transform = Transform3D(-0.991364, 0.000000, 0.131142, 0.000000, 1.000000, 0.000000, -0.131142, 0.000000, -0.991364, -25.823521, -1.964675, -23.291496)
+
+[node name="woodenPier3" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_wooden_pier")]
+transform = Transform3D(-0.341905, 0.000000, -0.939734, 0.000000, 1.000000, 0.000000, 0.939734, 0.000000, -0.341905, -27.643475, -1.564675, -47.147228)
+
+[node name="cruiseBoatDock4" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_cruise_boat")]
+transform = Transform3D(0.939734, 0.000000, -0.341905, 0.000000, 1.000000, 0.000000, 0.341905, 0.000000, 0.939734, -33.418663, -1.964675, -51.438335)
+
+[node name="cruiseBoatDock5" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_cruise_boat")]
+transform = Transform3D(0.898848, 0.000000, -0.438261, 0.000000, 1.000000, 0.000000, 0.438261, 0.000000, 0.898848, -35.171497, -1.964675, -40.169743)
+
+[node name="kayakDock6" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_kayak_a")]
+transform = Transform3D(-0.822669, 0.000000, 0.568520, 0.000000, 1.000000, 0.000000, -0.568520, 0.000000, -0.822669, -25.244989, -1.964675, -39.187389)
+metadata/coliziune = "none"
+
+[node name="kayakDock7" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_kayak_b")]
+transform = Transform3D(-0.996287, 0.000000, 0.086089, 0.000000, 1.000000, 0.000000, -0.086089, 0.000000, -0.996287, -26.618504, -1.964675, -43.012569)
+metadata/coliziune = "none"
+
+[node name="cafeShed8" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_cafe_shed")]
+transform = Transform3D(0.329333, 0.000000, 0.944214, 0.000000, 1.000000, 0.000000, -0.944214, 0.000000, 0.329333, -3.702696, -0.296738, -44.833191)
+
+[node name="cheiDriftwood9" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_driftwood")]
+transform = Transform3D(0.357255, 0.000000, 0.934007, 0.000000, 1.000000, 0.000000, -0.934007, 0.000000, 0.357255, -14.869993, -0.265762, 11.758759)
+metadata/coliziune = "none"
+
+[node name="cheiGuardRock10" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.999956, 0.000000, 0.009368, 0.000000, 1.000000, 0.000000, -0.009368, 0.000000, 0.999956, -3.571467, -0.248856, 0.089391)
+
+[node name="cheiDriftwood11" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.879159, 0.000000, 0.476528, 0.000000, 1.000000, 0.000000, -0.476528, 0.000000, -0.879159, 2.684303, -0.279221, -25.715117)
+metadata/coliziune = "none"
+
+[node name="cheiGuardRock12" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.232373, 0.000000, -0.972627, 0.000000, 1.000000, 0.000000, 0.972627, 0.000000, 0.232373, -8.837805, -0.298721, -58.573082)
+
+[node name="cheiDriftwood13" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.552842, 0.000000, 0.833286, 0.000000, 1.000000, 0.000000, -0.833286, 0.000000, -0.552842, -19.076578, -0.285919, -88.546440)
+metadata/coliziune = "none"
+
+[node name="penguin14" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_penguin_tawaki")]
+transform = Transform3D(-0.996223, 0.000000, 0.086837, 0.000000, 1.000000, 0.000000, -0.086837, 0.000000, -0.996223, -43.407936, -1.914675, -90.766922)
+metadata/coliziune = "none"
+
+[node name="penguin15" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_penguin_tawaki")]
+transform = Transform3D(-0.445916, 0.000000, -0.895075, 0.000000, 1.000000, 0.000000, 0.895075, 0.000000, -0.445916, -46.436779, -1.914675, -97.080055)
+metadata/coliziune = "none"
+
+[node name="penguin16" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_penguin_tawaki")]
+transform = Transform3D(0.306286, 0.000000, -0.951939, 0.000000, 1.000000, 0.000000, 0.951939, 0.000000, 0.306286, -48.257153, -1.914675, -102.001411)
+metadata/coliziune = "none"
+
 [node name="ZoneB_Cornisa" type="Node3D" parent="DecorManual"]
 
 [node name="ZoneC_Stirling" type="Node3D" parent="DecorManual"]

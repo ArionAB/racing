@@ -1,0 +1,416 @@
+extends Node
+## Generator de decor MANUAL pentru POI B — CORNISA FIORDULUI (Track16,
+## Fiordland, frac 0.06-0.27, `DecorManual/ZoneB_Cornisa`).
+##
+##   godot --headless --fixed-fps 60 --path . res://tools/GenDecorFiordB.tscn -- \
+##       --out=C:/cale/zoneB.part [--survey]
+##
+## Cu `--survey` scrie doar profilul terenului (cote laterale, semi-latime,
+## vectorul lateral, directia soarelui) si nu genereaza nimic.
+##
+## ------------------------------------------------------------------------
+## CE CERE BARA (bara_poi_B.png + bara_poi_MITRE.png)
+##
+## Drum taiat in peretele de gneis; peretele gri cu dungi ude verticale negre
+## si muschi in crapaturi PE DREAPTA (versantul de sus); marea jos PE STANGA,
+## FARA parapet; padure densa de fag pe versantul de sus; rata cu flori rosii
+## ca accent RAR. Peste apa (decupajul MITRE): domul cu calota alba.
+##
+## Bara e LOOK, nu LAYOUT: se compara materia (piatra uda, muschiul, padurea,
+## apa), nu unde cade fiecare obiect. Peretele de gneis e TEREN (`custom_ravines`
+## + clasa `wet_gneiss`), nu GLB — POI B nu-l construieste, il incadreaza.
+##
+## ------------------------------------------------------------------------
+## CONTRACT (fiordland_poi_gauntlet.md §B)
+##
+## Rapa e pe INDEXUL 0 din custom_ravines: Vector4(0.011, 0.279, 30, -1) —
+## fund -30, semi-latime efectiva pe rapa 220 (contract), side -1. Semnul lui
+## `side` in `custom_ravines` e -1 (cade pe partea NEGATIVA a lui `_side_at`),
+## deci marea e pe partea unde `sgn=-1`, iar versantul de sus (peretele,
+## padurea) e pe `sgn=+1` — SE VERIFICA la survey, nu se presupune (memoria
+## rotatii-in-builder-semnul / semnul se deriva cu dot).
+##
+## Piese: `nerpa_seal` (reuse Baikal) x4 pe o stanca in apa (Seal Rock),
+## `rata_tree` 3-4 pe TOT turul (nu pe metru — e rar in tot jocul, brief-ul
+## zice explicit), `guard_rock` la 30-50 m pe marginea fara parapet,
+## `moss_boulder_a/b/c`, `fern_cluster`, `tussock_clump`, `beech_a/b/c` rari
+## pe versantul de sus.
+##
+## Capcana cea mai scumpa (umarul-ingust-ascunde-caderea): camera e la 10 m
+## deasupra soselei — un umar ingust ASCUNDE mai mult din cadere, nu mai
+## putin. Cornisa trebuie sa se vada CADERE in primii 3 m de la asfalt, nu
+## umar de iarba. Daca terenul insusi are umar lat (rapa RAVINE_CORNICE_INNER
+## e doar 0.5 m, deci teoretic cade repede), se verifica prin survey - daca nu
+## e asa, e problema de TEREN, nu de decor (se scrie in raport, nu se repara
+## aici).
+##
+## Al doilea S (frac ~0.17, spre interior) e captura decisiva (memoria
+## perete-paralel-nu-se-vede): doar virajul spre interior infasoara peretele
+## din dreapta in cadru.
+
+const TRACK := "res://scenes/tracks/Track16.tscn"
+const ZONE := "DecorManual/ZoneB_Cornisa"
+
+const F_IN := 0.062
+const F_OUT := 0.272
+
+## id-urile ext_resource deja inregistrate in Track16.tscn.
+const RES := {
+	"beech_a": "s_beech_a",
+	"beech_b": "s_beech_b",
+	"beech_c": "s_beech_c",
+	"rata_tree": "s_rata_tree",
+	"tussock_clump": "s_tussock_clump",
+	"guard_rock": "s_guard_rock",
+	"fern_cluster": "s_fern_cluster",
+	"nerpa_seal": "s_nerpa_seal",
+	"moss_boulder_a": "s_moss_boulder_a",
+	"moss_boulder_b": "s_moss_boulder_b",
+	"moss_boulder_c": "s_moss_boulder_c",
+}
+
+## Inaltimea AABB masurata (docs/asset_briefs/fiordland_masuratori.md §1).
+const HEIGHT := {
+	"beech_a": 7.030, "beech_b": 10.189, "beech_c": 13.501,
+	"rata_tree": 3.667, "tussock_clump": 0.804, "guard_rock": 0.585,
+	"fern_cluster": 1.2, "nerpa_seal": 0.6,
+	"moss_boulder_a": 0.741, "moss_boulder_b": 1.957, "moss_boulder_c": 3.069,
+}
+
+## Raza de DEGAJARE la sol (m) la scara 1: raza corpului fizic.
+## Fagii au coliziune `trunk` (cilindru in ax) — raza la baza masurata.
+const BASE_R := {
+	"beech_a": 0.81, "beech_b": 0.77, "beech_c": 1.03,
+	"rata_tree": 2.00, "tussock_clump": 0.05, "guard_rock": 0.65,
+	"fern_cluster": 0.35, "nerpa_seal": 0.25,
+	"moss_boulder_a": 0.741 * 0.5, "moss_boulder_b": 1.957 * 0.5, "moss_boulder_c": 3.069 * 0.5,
+}
+
+const TRI := {
+	"beech_a": 228, "beech_b": 292, "beech_c": 292,
+	"rata_tree": 354, "tussock_clump": 144, "guard_rock": 72,
+	"fern_cluster": 200, "nerpa_seal": 220,
+	"moss_boulder_a": 200, "moss_boulder_b": 242, "moss_boulder_c": 238,
+}
+
+## Coliziune per piesa (world_prop.gd o suprascrie oricum dupa nume, dar
+## generatorul scrie explicit metadata pentru cele care NU sunt hull implicit).
+const COLLISION := {
+	"beech_a": "trunk", "beech_b": "trunk", "beech_c": "trunk",
+	"tussock_clump": "none", "fern_cluster": "none", "nerpa_seal": "none",
+	"rata_tree": "hull", "guard_rock": "hull",
+	"moss_boulder_a": "hull", "moss_boulder_b": "hull", "moss_boulder_c": "hull",
+}
+
+## Degajarea minima de la MUCHIA drumului la marginea corpului fizic, pentru
+## orice piesa cu coliziune (memoria obstacol-pe-drum-poate-fi-gimmick +
+## garda-cu-numele-gimmickului: pe cornisa fara parapet, AI-ul tine linia
+## si un guard_rock prea aproape de muchie devine perete).
+const EDGE_KEEP := 0.8
+const NEAR_WINDOW_FRAC := 0.012
+const OTHER_ROAD_KEEP := 1.2
+## probe_manual numara "IN DRUM" orice punct sub semi-latime + 2,0 m (memoria
+## garzii, vezi tools/probe_manual.gd ROAD_MARGIN). `gap` de mai jos e distanta
+## de la MUCHIE la marginea corpului, deci pentru zero "IN DRUM" trebuie
+## `gap + raza > ROAD_MARGIN`. Se tine 2,1 ca sa nu pice pe zecimale.
+const ROAD_MARGIN := 2.1
+
+var _track: Track
+var _sampler: TrackSideSampler
+var _terrain_rid: RID = RID()
+var _sus_y := 0.0
+var _out: Array[String] = []
+var _n := 0
+var _warn := 0
+var _skipped := 0
+var _tri := 0
+var _rng := RandomNumberGenerator.new()
+var _out_path := ""
+var _survey_only := false
+var _total_len := 1.0
+var _sea_sign := -1.0   # semnul lui _side_at() pe care cade marea (se deriva la survey)
+
+
+func _ready() -> void:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--out="):
+			_out_path = a.trim_prefix("--out=")
+		elif a == "--survey":
+			_survey_only = true
+	await get_tree().process_frame
+	_track = (load(TRACK) as PackedScene).instantiate() as Track
+	get_tree().root.add_child(_track)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_sampler = _track._sampler
+	var nd: int = _track.baked.size()
+	if _track._dists.size() > nd:
+		_total_len = float(_track._dists[nd])
+	print("; lungime traseu %.1f m, %d puncte" % [_total_len, nd])
+	var hi := -INF
+	for bp in _track.baked:
+		hi = maxf(hi, bp.y)
+	_sus_y = hi + 150.0
+	_rng.seed = 160206
+	_survey()
+	if not _survey_only:
+		_seal_rock()
+		_rata_rare()
+		_guard_rail()
+		_upslope_forest()
+		_write()
+	get_tree().quit(0)
+
+
+# ------------------------------------------------------------------ masuratori
+
+func _survey() -> void:
+	var n := _track.baked.size()
+	print("; frac    ax(x,z)            y_drum  half   side(x,z)        sol la -3 -6 -9 -15 -25 -40 | +3 +6 +9 +15 +25 +40   sgn_mare")
+	var f := F_IN - 0.01
+	while f <= F_OUT + 0.01:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		var cols: Array[String] = []
+		for off: float in [-40.0, -25.0, -15.0, -9.0, -6.0, -3.0, 3.0, 6.0, 9.0, 15.0, 25.0, 40.0]:
+			var q := p + s * off
+			cols.append("%+6.1f" % (_sol_real(q.x, q.z) - p.y))
+		# marea e pe partea unde caderea e cea mai mare la 25/40 m.
+		var d_neg := _sol_real((p + s * -25.0).x, (p + s * -25.0).z) - p.y
+		var d_pos := _sol_real((p + s * 25.0).x, (p + s * 25.0).z) - p.y
+		var sgn_mare := -1.0 if d_neg < d_pos else 1.0
+		print("; %.3f  (%7.1f,%7.1f)  %6.1f  %4.1f  (%+.2f,%+.2f)  %s  %+.0f" % [
+			f, p.x, p.z, p.y, half, s.x, s.z, " ".join(cols), sgn_mare])
+		f += 0.004
+	# semnul dominant pe toata felia
+	var votes := 0
+	var f2 := F_IN
+	while f2 <= F_OUT:
+		var i2 := int(f2 * float(n)) % n
+		var p2 := _track.baked[i2]
+		var s2 := _track._side_at(i2)
+		var dn := _sol_real((p2 + s2 * -25.0).x, (p2 + s2 * -25.0).z) - p2.y
+		var dp := _sol_real((p2 + s2 * 25.0).x, (p2 + s2 * 25.0).z) - p2.y
+		votes += (1 if dn < dp else -1)
+		f2 += 0.01
+	_sea_sign = -1.0 if votes > 0 else 1.0
+	print("; sgn_mare dominant = %+.0f (votes=%d)" % [_sea_sign, votes])
+
+
+func _find_sun(node: Node) -> DirectionalLight3D:
+	if node is DirectionalLight3D:
+		return node as DirectionalLight3D
+	for c in node.get_children():
+		var r := _find_sun(c)
+		if r != null:
+			return r
+	return null
+
+
+# ------------------------------------------------------------------ compozitia
+
+## (1) SEAL ROCK — 4 foci jos, langa apa, pe stanca de mal. Contract: "jos
+## Seal Rock cu 4 foci". Se pun la o singura fractie, aproape de rapa (marea),
+## pe un `moss_boulder_c` (stanca) — dar bolovanul NU e in bandă, e sub cota
+## drumului, pe malul rapei (nu genereaza coliziune care sa strice ProbeRace,
+## e departe de asfalt).
+const SEAL_FRAC := 0.130
+
+func _seal_rock() -> void:
+	var n := _track.baked.size()
+	var i := int(SEAL_FRAC * float(n)) % n
+	var p := _track.baked[i]
+	var s := _track._side_at(i) * _sea_sign
+	var half := _track.width_at_index(i)
+	# stanca la ~18 m lateral (pe taluzul rapei, sub drum) — vizibila din masina
+	# la al doilea S, dar in afara oricarei benzi.
+	var d := half + 18.0
+	var q := p + s * d
+	var g := _sol_real(q.x, q.z)
+	_raw("moss_boulder_c", "sealRock", Vector3(q.x, g, q.z), 0.35, 1.4, "none")
+	# 4 foci pe stanca, jitter, yaw variat — nu grila (aranjamentul-bate-numarul).
+	for k in 4:
+		var ang := TAU * (float(k) / 4.0) + _rng.randf_range(-0.4, 0.4)
+		var r := _rng.randf_range(1.6, 3.2)
+		var pp := q + Vector3(cos(ang), 0.0, sin(ang)) * r
+		var gy := _sol_real(pp.x, pp.z) + 0.05
+		_raw("nerpa_seal", "sealB", Vector3(pp.x, gy, pp.z),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.9, 1.15), "none")
+
+
+## (2) RATA — 3-4 pe TOT turul (brief: nu pe metru). Pentru zona B se pun 2,
+## rare, spatiate, pe versantul de sus (flori rosii ca accent RAR — nu sir).
+const RATA_FRACS := [0.095, 0.205]
+
+func _rata_rare() -> void:
+	var n := _track.baked.size()
+	for f in RATA_FRACS:
+		var i := int(float(f) * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i) * (-_sea_sign)   # versantul de sus
+		var half := _track.width_at_index(i)
+		var gap := _rng.randf_range(2.5, 5.0)
+		_place("rata_tree", "rataB", float(f), 1.0 if _sea_sign < 0.0 else -1.0,
+			gap, _rng.randf_range(0.0, TAU), 1.0, "hull")
+
+
+## (3) GUARD_ROCK — la 30-50 m pe muchia FARA parapet (marea). Marcheaza
+## vizual limita, nu opreste nimic (brief: cornisa n-are parapet real).
+func _guard_rail() -> void:
+	var n := _track.baked.size()
+	var f := F_IN + 0.006
+	while f < F_OUT - 0.006:
+		var gap := _rng.randf_range(0.9, 1.8)
+		_place("guard_rock", "seaEdge", f, -1.0 if _sea_sign < 0.0 else 1.0,
+			gap, _rng.randf_range(0.0, TAU), _rng.randf_range(0.95, 1.15), "hull")
+		f += _step(_rng.randf_range(30.0, 50.0))
+
+
+## (4) VERSANTUL DE SUS — padure de fag rara + muschi + ferigi + tussock, cu
+## densitate care creste spre subiect (drumul) — memoria aranjamentul-bate-
+## numarul. Fagii sunt RARI (contract: "beech_* rari pe versantul de sus"),
+## nu perdea densa ca la POI D. Doua randuri: un rand aproape (6-16 m, des,
+## umple crapaturile cu muschi/ferigi) si un rand de fagi mai rar (10-30 m).
+func _upslope_forest() -> void:
+	var n := _track.baked.size()
+	var upslope := 1.0 if _sea_sign < 0.0 else -1.0
+	# muschi + ferigi, aproape de perete, deasupra drumului — umplu crapaturile.
+	var f := F_IN
+	while f < F_OUT:
+		if _rng.randf() < 0.55:
+			var model: String = ["moss_boulder_a", "moss_boulder_b", "fern_cluster", "tussock_clump"][_rng.randi_range(0, 3)]
+			var gap := _rng.randf_range(0.9, 2.4)
+			_place(model, "wallFoot", f, upslope, gap,
+				_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.3), COLLISION.get(model, "hull"))
+		f += _step(_rng.randf_range(3.5, 7.0))
+	# fagi rari, mai sus pe versant (8-26 m), densitate usor crescanda spre
+	# mijlocul zonei (al doilea S, frac ~0.17 — captura decisiva).
+	f = F_IN + 0.01
+	while f < F_OUT - 0.01:
+		var center_dist := absf(f - 0.17)
+		var density := clampf(1.0 - center_dist / 0.11, 0.25, 1.0)
+		if _rng.randf() < 0.35 + 0.35 * density:
+			var model: String = ["beech_a", "beech_a", "beech_b", "beech_c"][_rng.randi_range(0, 3)]
+			var gap := _rng.randf_range(6.0, 20.0)
+			_place(model, "wallForest", f, upslope, gap,
+				_rng.randf_range(0.0, TAU), 1.0, "trunk")
+		f += _step(_rng.randf_range(8.0, 16.0))
+
+
+func _step(meters: float) -> float:
+	return meters / _total_len
+
+
+## Aseaza o piesa la `frac`, pe partea `side_sign`, la `gap` metri de MUCHIA
+## drumului pana la MARGINEA corpului fizic. Cota din raycast pe TerrainBody.
+func _place(model: String, base: String, frac: float, side_sign: float,
+		gap: float, yaw: float, scl: float, mode: String = "hull") -> void:
+	var n := _track.baked.size()
+	var i := int(frac * float(n)) % n
+	var p := _track.baked[i]
+	var s := _track._side_at(i) * side_sign
+	var half := _track.width_at_index(i)
+	var r: float = BASE_R.get(model, 0.6) * scl
+	# probe_manual numara "IN DRUM" orice punct sub half + ROAD_MARGIN (2,0 m),
+	# indiferent de coliziune (memoria garda-fara-linie-de-baza-iese-zero: o
+	# garda fara prag armat pare verde dar nu e — aici pragul e 0 de reparat).
+	# Se ridica gap-ul, nu doar cel cerut de EDGE_KEEP, ca centrul piesei sa
+	# stea dincolo de marja masurata de garda insasi.
+	gap = maxf(gap, ROAD_MARGIN - r)
+	var d := half + gap + r
+	var q := p + s * d
+	var g := _sol_real(q.x, q.z)
+	if mode != "none" and d - r < half + EDGE_KEEP:
+		_warn += 1
+		print("; ATENTIE %s la frac %.4f: corpul la %.2f m de ax, muchia la %.2f" % [
+			model, frac, d - r, half])
+	if mode != "none" and _on_any_road(q, i, r):
+		_skipped += 1
+		return
+	var smooth := _sampler.ground_y(q.x, q.z)
+	var sink := smooth - g
+	var piece_h: float = float(HEIGHT.get(model, 1.0)) * scl
+	var zvelt: bool = model.begins_with("beech") or model == "rata_tree"
+	var max_sink: float = 0.8 if zvelt else maxf(0.5 * piece_h, 1.0)
+	if sink > max_sink:
+		_skipped += 1
+		return
+	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, mode)
+
+
+const NEAR_WINDOW_FRAC2 := NEAR_WINDOW_FRAC
+
+func _on_any_road(p: Vector3, home_i: int, body_r: float) -> bool:
+	var n := _track.baked.size()
+	var skip := int(round(float(n) * NEAR_WINDOW_FRAC))
+	for i in n:
+		var di := absi(i - home_i)
+		di = mini(di, n - di)
+		if di <= skip:
+			continue
+		var b: Vector3 = _track.baked[i]
+		var dx := b.x - p.x
+		var dz := b.z - p.z
+		var clear: float = _track.width_at_index(i) + OTHER_ROAD_KEEP + body_r
+		if dx * dx + dz * dz < clear * clear:
+			return true
+	return false
+
+
+func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
+		mode: String) -> void:
+	_n += 1
+	_tri += int(TRI.get(model, 0))
+	_out.append('[node name="%s%d" parent="%s" instance=ExtResource("%s")]'
+		% [base, _n, ZONE, RES[model]])
+	# Randurile bazei (memoria tscn-transform-e-pe-randuri).
+	var b := Basis.from_euler(Vector3(0.0, yaw, 0.0)).scaled(Vector3(scl, scl, scl))
+	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
+		% [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z,
+			pos.x, pos.y, pos.z])
+	if mode != "hull":
+		_out.append('metadata/coliziune = "%s"' % mode)
+	_out.append("")
+
+
+func _write() -> void:
+	print("; asezate %d piese, %d refuzate (cota in dezacord), %d avertismente, ~%d triunghiuri" % [_n, _skipped, _warn, _tri])
+	if _out_path.is_empty():
+		for line in _out:
+			print(line)
+		return
+	var fa := FileAccess.open(_out_path, FileAccess.WRITE)
+	if fa == null:
+		push_error("nu pot scrie %s" % _out_path)
+		return
+	for line in _out:
+		fa.store_line(line)
+	fa.close()
+	print("; scris %s" % _out_path)
+
+
+## Cota SOLULUI din coliziunea reala a panzei de teren (TerrainBody), nu din
+## campul neted si nu din _terrain_mesh_y (memoria terrain-mesh-y-extrapoleaza).
+func _sol_real(x: float, z: float) -> float:
+	if _terrain_rid == RID():
+		for c in _track.get_children():
+			if str(c.name) == "TerrainBody":
+				_terrain_rid = (c as StaticBody3D).get_rid()
+	var space := _track.get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(
+		Vector3(x, _sus_y, z), Vector3(x, _sus_y - 1200.0, z))
+	q.collide_with_areas = false
+	if _terrain_rid != RID():
+		q.collide_with_bodies = true
+		q.exclude = []
+		var hit: Dictionary = space.intersect_ray(q)
+		var guard := 0
+		while not hit.is_empty() and hit["rid"] != _terrain_rid and guard < 24:
+			q.exclude = q.exclude + [hit["rid"]]
+			hit = space.intersect_ray(q)
+			guard += 1
+		if not hit.is_empty() and hit["rid"] == _terrain_rid:
+			return float(hit["position"].y)
+	return _sampler.ground_y(x, z)

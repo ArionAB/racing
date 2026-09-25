@@ -208,7 +208,7 @@ jump = true
 label = "kickerul Bowen"
 
 [node name="WaterfallBowen" type="Area3D" parent="Hazarduri"]
-transform = Transform3D(-0.9867, -0.0115, 0.1621, 0.0000, 0.9975, 0.0708, -0.1626, 0.0699, -0.9842, 84.197, 2.550, -94.718)
+transform = Transform3D(-0.9634, -0.0240, 0.2670, 0.0000, 0.9960, 0.0894, -0.2681, 0.0861, -0.9595, 122.823, -5.141, -62.326)
 script = ExtResource("5_waterfall")
 length = 24.0
 thickness = 5.0

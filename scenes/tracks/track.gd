@@ -1120,13 +1120,47 @@ static func themes() -> Dictionary:
 			# vin cu POI-urile. `decor` stins ca la Cappadocia / Serengeti /
 			# Machu Picchu — decorul manual se pune pe POI, nu prin scatter.
 			#
-			# Pereti de gneis ud, gri-negru cu dungi ude — MARBLE_GREY (fete
-			# in lumina) e baza solului/terenului; VOLCANIC_BLACK (dungile)
-			# vine din clasa triplanara `wet_gneiss`, nu din tema. Solul
-			# propriu-zis (iarba tussock, platoul de portal) e mai verde-oliv
-			# decat gneisul pur, ca sa nu citeasca literalmente ca stanca.
-			"ground_tint": Palette.color(Palette.MARBLE_GREY).lerp(
-				Palette.color(Palette.CACTUS_GREEN), 0.28),
+			# DIAGNOSTIC (sesiunea "sol + apa", 25 sep): capturile de baza
+			# (base_B_017.png, base_0.40.png) arata solul aproape ALB-GRI pe
+			# toata pista, platouri si pereti la fel. Masurat direct pe mesh
+			# (ProbeFiordGroundDiag, vertex colors, nu pixeli): COLOR.rgb era
+			# (0.60-0.63, 0.62-0.64, 0.53-0.54) pe TOATE cele trei categorii de
+			# panta (plat <15°, mediu 15-38°, abrupt >38° pana la 73° masurat),
+			# adica exact `ground_tint` vechi (MARBLE_GREY.lerp(CACTUS_GREEN,
+			# 0.28) = 0.6195,0.6444,0.5427) — zero diferentiere pe panta,
+			# fiindca `scarp_tint` (mecanismul deja existent pentru fete de
+			# stanca, vezi declaratia lui mai jos in cod) nu era setat pe tema
+			# asta. A/B fortat (ground_tint -> rosu absurd) a aratat ca tot
+			# terenul, plat SI perete, ia culoarea din grid — deci parametrul
+			# chiar ajunge in cadru, doar ca valoarea lui era prea deschisa
+			# pentru gneis si nu exista o a doua tenta pentru pante mari
+			# (memoria `suprafata-palida-e-lumina` + `contrastul-nu-geometria`).
+			#
+			# Textura de detaliu (surface_sand/surface_grass, ambele gri
+			# neutru ~0.85 medie) doar MULTIPLICA vertex color — nu adauga
+			# alb. Vinovatul e tenta, nu clasa de textura.
+			#
+			# ground_tint nou: verde-oliv INCHIS de mus/tussock (nu gneis, ca
+			# sa nu citeasca literalmente ca stanca pe platouri) — calculat
+			# invers din lumina scenei (sun 1.55 x (0.92,0.95,1.0) + ambient
+			# 0.45 x A8B8C0, texturi ~0.7225 dupa micro*macro) ca sa iasa
+			# ~(58,74,44) dupa randare, adica mus inchis de padure temperata.
+			"ground_tint": Color(0.183, 0.223, 0.126),
+			# FATA DE STANCA (mecanismul `scarp_tint`, vezi declaratia lui in
+			# cod — colorare per-vertex dupa PANTA, nu dupa cota, deja folosit
+			# pe Machu Picchu). Gneis ud gri-negru, aproape neutru — calculat
+			# tot invers din lumina scenei ca sa iasa ~(62,63,63) dupa randare,
+			# masurat pe cei trei pereti din bara (bara_poi_B.png cliff_wall +
+			# doua esantioane din fiordland_diorama_v03.jpg): medie masurata
+			# H199 S0.02 V0.25, adica aproape achromatic si foarte inchis.
+			# scarp_slope_deg 32: peretii rapelor/cornisei sunt aproape
+			# verticali (masurat pana la 73° pe Terrain), dar taluzul care
+			# duce spre ei urca gradual — 32° prinde fata propriu-zisa fara sa
+			# inghita taluzul de iarba de la baza (Machu Picchu foloseste 28,
+			# dar acolo geometria era o cadere abrupta fara taluz de tranzitie).
+			"scarp_tint": Color(0.196, 0.190, 0.182),
+			"scarp_slope_deg": 32.0,
+			"scarp_fade_deg": 10.0,
 			# Cer inchis, printre nori (brief §4: sky_cover_alpha mare) —
 			# gri-albastru sus, alb-gri la orizont.
 			"sky_top": Color.html("6C7C8C"),
@@ -1232,6 +1266,55 @@ static func themes() -> Dictionary:
 			# Marea neagra-verde a fiordului (brief §4: SEA_DEEP, shader v12
 			# cu reflexii palide cenusii — memoria apa-stilizata-de-noapte,
 			# saturatia jos, variatia in reflexii).
+			#
+			# DIAGNOSTIC (sesiunea "sol + apa"): fara chei `water_*`, tema
+			# mostenea implicitul din `_water_material()` — REEF_SHALLOW/
+			# SEA_DEEP nedesaturate, adica exact turcoazul de recif din bara
+			# de Okinawa (comentariul de mai sus numea deja tinta corecta,
+			# dar cheile nu fusesera scrise niciodata).
+			#
+			# SEA_DEEP (#2E5F6B) e deja H192, aproape identic cu nuanta
+			# masurata pe diorama (H180-193 pe trei esantioane de mare
+			# deschisa din fiordland_diorama_v03.jpg). Acelasi slot pe
+			# shallow SI deep — apa e PLATA (brief §4: "negru-verde, plata"),
+			# nu o rampa turcoaz->albastru de recif.
+			#
+			# water_dim/water_desat gasite prin simulare pe formula din
+			# water_tint() (WATER_SATURATION_FIX=1.18, WATER_GAIN=0.87),
+			# tintind masuratoarea pe diorama (H185-195 S0.16-0.19 V0.20-0.28,
+			# medie pe 3 dreptunghiuri de apa deschisa):
+			#   dim 0.70 / desat 0.65 -> H192 S0.20 V0.22, rgb (45,54,56)
+			# in intervalul tinta pe toate trei canale H/S/V.
+			"water_shallow_slot": Palette.SEA_DEEP,
+			"water_deep_slot": Palette.SEA_DEEP,
+			"water_shore_slot": Palette.SEA_DEEP,
+			"water_dim": 0.70,
+			"water_desat": 0.65,
+			"water_deep_gain": 1.0,
+			# Spuma/scanteiere/hula OPRITE: fiordul e apa moarta intre pereti,
+			# nu recif cu valuri — spuma alba ar readuce turcoazul in amestec
+			# (memoria apa-stilizata-de-noapte: variatia sta in reflexii, nu
+			# in mai multa culoare pe fatete).
+			"water_foam": 0.0,
+			"water_glint": 0.35,
+			"water_crest": 0.0,
+			"water_band": 0.20,
+			# FATETE MARI, PLATE (bara: "fatete mari" pe oglinda apei) —
+			# water_facet_count mic si water_facet_scale mare fata de
+			# implicitul de recif (5 / 0.10), ca petele sa acopere zeci de
+			# metri, nu sa graneze marea.
+			"water_facet": 0.55,
+			"water_facet_count": 4,
+			"water_facet_scale": 0.55,
+			"water_facet_wobble": 0.20,
+			# Strat iluminat v12 (Fresnel razant din chase cam, memoria
+			# apa-iluminata-v12): rugozitate mare (mata, nu oglinda de sticla)
+			# ca fatetele sa se citeasca prin variatie de luminanta, nu prin
+			# reflexie ascutita de cer.
+			"water_lit_rough": 0.35,
+			"water_lit_fresnel": 0.30,
+			"water_lit_spec": 0.7,
+			"water_lit_wave_len": 2.0,
 			"water": true,
 		},
 		"forest": {

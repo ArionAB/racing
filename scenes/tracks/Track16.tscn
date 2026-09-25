@@ -477,6 +477,16 @@ fade = 12.0
 jump = true
 label = "kickerul Bowen"
 
+[node name="WaterfallBowen" type="Area3D" parent="Hazarduri"]
+transform = Transform3D(-0.9634, -0.0240, 0.2670, 0.0000, 0.9960, 0.0894, -0.2681, 0.0861, -0.9595, 122.823, -5.141, -62.326)
+script = ExtResource("5_waterfall")
+length = 24.0
+thickness = 5.0
+visual_height = 40.0
+force_accel = 0.0
+drag = 0.0
+spray_count = 40
+
 [node name="AvalansaF" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.36, 15.73, -258.36)
 script = ExtResource("7_marker")

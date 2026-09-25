@@ -45,6 +45,25 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# decor, nu ca element cu directie), yaw aleator intentionat
 	# (aranjamentul-bate-numarul).
 	"gneisMargine", "gneisBaza",
+	# RUNDA 1 POI E (Fiordland, urcarea si portalul de est): fagi, ferigi,
+	# bolovani cu muschi, tussock si grohotis pe versant — acelasi tipar
+	# organic ca padurea POI D, yaw aleator intentionat
+	# (aranjamentul-bate-numarul: un rand aliniat pe drum ar citi "instante
+	# plasate", nu versant natural). `parapetStanca` (guard_rock) si
+	# `jalon` (snow_pole) sunt bolovani/stalpi fara fata functionala — la
+	# fel ca traffic_light_pole/AvalansaF mentionate mai sus, directia lor
+	# nu conteaza pentru gameplay sau citire vizuala.
+	"fag", "feriga", "bolovanMuschi", "tussock", "grohotis", "parapetStanca",
+	"jalon",
+	# `chevron` (chevron_sign, panouri de zona de avalansa) ARE o axa
+	# functionala, dar nu "de-a lungul drumului" — un chevron trebuie sa
+	# priveasca SPRE asfalt (aproape perpendicular pe tangenta, ~90 grade),
+	# nu paralel cu ea ca o perdea sau un semafor. Unghiul lui fata de
+	# tangenta e deci intre 20 si 160 de grade PRIN CONSTRUCTIE
+	# (`_yaw_facing_road` in gen_decor_fiord_e.gd), nu o axa montata gresit —
+	# verificat vizual pe captura, nu de sonda asta (care compara doar cu
+	# directia drumului, nu cu normala lui).
+	"chevron",
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:

@@ -1579,6 +1579,15 @@ const SLOT_REMAP_BY_THEME := {
 			12: Palette.TROPICAL_GREEN},
 		"moss_boulder_c": {3: Palette.VOLCANIC_BLACK, 29: Palette.VOLCANIC_BLACK,
 			12: Palette.TROPICAL_GREEN},
+		# `chasm_rock`: build_fiordland_rocks.py defineste GNEISS = MARBLE_GREY
+		# (slot 29) direct pe corpul lespezii — acelasi gri deschis
+		# (182,178,170) care a facut moss_boulder sa citeasca "piatra de Anzi"
+		# in loc de gneis. MOSS pe muchia de sus e deja TROPICAL_GREEN (21),
+		# tinta corecta din fixul de mai sus — nu se atinge. Descoperit runda
+		# 4 POI B: banda de gneis de langa drum (chasm_rock, cerut de critic
+		# pentru peretele de pe partea de deal) a iesit gri-albastrui deschis
+		# in loc de gneis inchis, desi moss_boulder alaturat citea corect.
+		"chasm_rock": {29: Palette.VOLCANIC_BLACK},
 	},
 }
 
@@ -1816,7 +1825,21 @@ const SLOT_REPAINT_BY_BOX := {
 
 
 func _ready() -> void:
-	_remap_model_slots()
+	# `_remap_model_slots` cere `_ancestor_theme()`, iar Godot cheama _ready()
+	# BOTTOM-UP: DecorManual (acest nod) e copil direct al Track/TrackFromPath,
+	# deci ruleaza INAINTEA lui Track._ready() -> TrackFromPath._apply_custom()
+	# -> apply_theme(custom_theme). La acel moment theme_decor e inca implicitul
+	# "forest", nu tema reala a pistei (ex. "fiordland") — SLOT_REMAP_BY_THEME
+	# nu se aplica NICIODATA la runtime, desi codul e corect si testele izolate
+	# (instantiere manuala + await process_frame) confirma tema corecta o clipa
+	# mai tarziu. Descoperit runda 4 POI B Fiordland: moss_boulder_a/b/c si
+	# chasm_rock ies MARBLE_GREY (gri deschis) in captura reala din joc, desi
+	# fixurile anterioare (a4491e4d, 0f83d9aa) pareau sa treaca gardile — gardile
+	# nu verifica CULOAREA randata, doar numarul de materiale. `call_deferred`
+	# muta remaparea dupa ce tot lantul de _ready() (inclusiv al parintelui) s-a
+	# terminat, cand `theme_decor` e deja cel real. Restul functiilor de mai jos
+	# NU depind de tema, raman sincrone.
+	call_deferred("_remap_model_slots")
 	_repaint_slot_boxes()
 	_split_shutters()
 	_retint_tuff()

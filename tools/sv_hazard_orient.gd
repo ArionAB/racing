@@ -14,6 +14,30 @@ extends SceneTree
 ## semafor/kicker = local +Z pe drum (180 grade); avalansa e orientata din
 ## cod (unghiul ei nu conteaza). Orice altceva intre 20 si 160 de grade e
 ## suspect si se explica in raport.
+##
+## RUNDA 1 POI D (Fiordland): `--decor` cere si scatter organic (fagi,
+## bolovani, ferigi, tussock) cu YAW ALEATOR intentionat -- memoria
+## aranjamentul-bate-numarul: un yaw aliniat pe drum ar citi "instante
+## plasate", nu padure. Un fag cu yaw aleator NU e o axa montata gresit, e
+## decizia de compozitie. Fara exceptie, sonda ar cere fie 0 piese organice,
+## fie yaw fortat (0/180), amandoua gresite. Prefixele de mai jos sunt
+## piese FARA axa vizuala/functionala semnificativa (spre deosebire de o
+## perdea sau un semafor, unde directia CONTEAZA) -- acelasi principiu ca
+## AvalansaF/traffic_light_pole, doar numit explicit in loc de tacut.
+const YAW_FREE_PREFIXES: Array[String] = [
+	"fagApropiat", "fagEtaj2", "fagFund", "fagIntrare", "fagIesire",
+	"muschiBolovan", "feriga", "ferigaMica", "reperMargine", "tufaIarba",
+	"marmita", "marmitaMal", "kea", "stumpKea",
+	# RUNDA 2 POI D: ansamblul de canion la pod (_bridge_canyon_dressing),
+	# aceleasi piese fara axa functionala (chasm_rock/moss_boulder), acelasi
+	# motiv ca marmita/muschiBolovan mai sus.
+	"canionTreapta", "canionTreaptaMica", "canionMuschi",
+]
+static func _yaw_free(name: String) -> bool:
+	for prefix in YAW_FREE_PREFIXES:
+		if name.begins_with(prefix):
+			return true
+	return false
 
 func _init() -> void:
 	var scene := 16
@@ -70,8 +94,11 @@ func _init() -> void:
 		var lat := (n.position - p).dot(fwd.cross(Vector3.UP))
 		var flag := ""
 		if ang > 20.0 and ang < 160.0:
-			flag = "  <-- suspect"
-			suspect += 1
+			if _yaw_free(str(n.name)):
+				flag = "  (yaw liber, decor organic)"
+			else:
+				flag = "  <-- suspect"
+				suspect += 1
 		var tag := "" if best.name == "Path" else " [%s]" % best.name
 		print("%-32s %6.3f %8.1f %8.2f%s%s" % [n.name, best_o / L, ang, lat, tag, flag])
 	print("VERDICT: %d noduri cu orientare suspecta (20-160 grade)" % suspect)

@@ -29,18 +29,7 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	"muschiBolovan", "feriga", "ferigaMica", "reperMargine", "tufaIarba",
 	"marmita", "marmitaMal", "kea", "stumpKea",
 ]
-## `chasm_bridge_rail`: AABB lung pe axa locala X (12.24 x 40.48), nu pe -Z ca
-## perdele/ploaie/torent -- sonda masoara fata de -Z, deci o piesa aliniata
-## corect pe tangenta (asa cum o aseaza gen_decor_fiord_d.gd, `_bridge_rail`)
-## citeste ~90 grade prin CONVENTIA modelului, nu printr-o rotatie gresita.
-## Verificat manual: transform-ul are local +X pe tangenta traseului la ambele
-## jumatati (0.410 si 0.418), exact ca la celelalte piese de decor (nu ca la
-## perdele).
-const YAW_FREE_EXACT: Array[String] = ["chasmBridgeRail1", "chasmBridgeRail2"]
-
 static func _yaw_free(name: String) -> bool:
-	if name in YAW_FREE_EXACT:
-		return true
 	for prefix in YAW_FREE_PREFIXES:
 		if name.begins_with(prefix):
 			return true

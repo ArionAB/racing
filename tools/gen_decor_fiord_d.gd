@@ -346,7 +346,15 @@ func _bridge_rail() -> void:
 		var pb: Vector3 = _track.baked[ib]
 		var pm: Vector3 = _track.baked[im]
 		var tang := Vector3(pb.x - pa.x, 0.0, pb.z - pa.z).normalized()
-		var yaw := atan2(-tang.z, tang.x)
+		# RUNDA 1, a treia trecere: prima captura (v1r1_0415_uscat.png) a aratat
+		# balustradele ca doua bare DIAGONALE, care taie drumul ca niste
+		# bariere -- nu ca un parapet paralel cu marginea. AABB grup masurat e
+		# 12,24 x 40,48 (masuratori.md), iar `_raw`/restul pieselor aliniaza
+		# local +X pe tangenta -- daca axa lunga a modelului (40,48 m,
+		# Rail_L+Rail_R) ar fi pe local X ca la restul kitului, rezultatul ar
+		# fi corect. Captura arata ca nu e asa: modelul are axa lunga pe local
+		# Z, deci yaw-ul trebuie decalat cu 90 de grade fata de tangenta.
+		var yaw := atan2(-tang.z, tang.x) + PI * 0.5
 		_n += 1
 		_tri += int(TRI.get("chasm_bridge_rail", 0))
 		_out.append('[node name="chasmBridgeRail%d" parent="%s" instance=ExtResource("%s")]'

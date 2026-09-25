@@ -249,6 +249,49 @@ const PROP_COLLISION := {
 	# diagonala treptei de jos, nu un trunchi, iar hull-ul unei scari e o PANA,
 	# nu un capac plan. Daca o captura arata masina urcata pe capac in loc sa
 	# atinga treptele, se trece pe "mesh" (tiparul `kopje_kicker`).
+	# --- Fiordland (kitul din assets/models/fiordland/, brief fiordland_kit.md,
+	# masurat in docs/asset_briefs/fiordland_masuratori.md) --------------------
+	#
+	# Fagii: Trunk/Crown separate, acelasi tipar ca la copacii de mai sus.
+	# Rapoartele masurate raza-baza/semi-latime: beech_a 0,318, beech_b 0,242,
+	# beech_c 0,216 — coroana depaseste masiv baza, hull-ul ar fi un bloc solid
+	# de 5-9,5 m in care masina s-ar opri in aer, pe langa trunchi.
+	"beech_a": "trunk", "beech_b": "trunk", "beech_c": "trunk",
+	# beech_dead e UN SINGUR nod (nu Trunk+Crown separate) — coliziunea cade tot
+	# pe "trunk" (raport 0,415, siluetа relativ subtire, un trunchi uscat cu
+	# cateva crengi), cea mai apropiata aproximare rezonabila fara sa desparta
+	# geometria in doua noduri.
+	"beech_dead": "trunk",
+	# rata_tree: tufa DENSA (brief-ul cere explicit "nu acacie"), raport 0,930 —
+	# aproape de disc, nu de trunchi ingust. Ramane hull implicit.
+	#
+	# Fantome sub linia capotei sau contracte explicite de gameplay:
+	"penguin_tawaki": "none",  # brief 1.7 / inventar: pinguinul e figurant
+	"heli_pad": "none",  # disc jos de 0,3 m, se calca — un hull ar opri masina
+	"torrent_chute": "none",  # deasupra benzii (buza +14 iese peste drum)
+	"chasm_bridge_rail": "none",  # balustrada subtire pe marginea podului
+	"scree_slab": "none",  # placa joasa de grohotis pe panta (1,2 m), se calca
+	"snow_pole": "none",  # jalon subtire, pur decorativ
+	"kayak_a": "none", "kayak_b": "none",  # pe mal/apa, nu obstacol de coliziune
+	# Fundalul: 4 noduri (FarWall_A/B, SnowRidge_A/B), panze de 90-180 m — un
+	# hull ar fi un corp fizic cat o pista, acelasi tipar ca `gorge_far_wall`/
+	# `huayna_picchu` la Machu Picchu.
+	"fiordland_horizon": "none",
+	# stirling_ledge: nisa dintre Wall si fata interioara a Overhang e un gol
+	# real (Shelf, pragul uscat de 3 m, la y 0,38-0,40 intre Wall si Overhang la
+	# y 14,00-21,40) — hull-ul convex al intregului nod ar UMPLE concavitatea
+	# de sub surplomb si ar astupa pragul pe care se conduce prin spatele
+	# perdelei. Acelasi tipar ca `inca_bridge_ledge` la Machu Picchu.
+	"stirling_ledge": "mesh",
+	# Restul (implicit hull, corect): cafe_shed, lodge, chasm_rock, guard_rock,
+	# wharf, coach_fiordland, cruise_boat, traffic_light_pole,
+	# luggage_container, driftwood, stump, road_sign_blank, tussock_clump,
+	# tree_avalanche (bolovanii de avalansa au propriul colizor construit de
+	# AvalancheHazard, dar daca vreodata ajunge in DecorManual ca decor static,
+	# hull pe fiecare Boulder_* e corect — sunt bolovani compacti).
+	# bush_plane: "none" — PathMover zboara, stick_to_ground=false, un hull ar
+	# fi un perete invizibil in aer pe traiectoria de zbor.
+	"bush_plane": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.

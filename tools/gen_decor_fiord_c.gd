@@ -270,14 +270,29 @@ func _detect_wall_side() -> float:
 ## 30-40 m. Bucla de mai jos e stransa pe fereastra reala, deci nu mai sare
 ## piese in gol (SKIP explicit ramane, dar nu mai declanseaza in interior).
 ##
-## Al doilea defect (verdict): "stanca de langa cascada e complet goala de
-## decor" pe FLANCURI — cele 6 piese vechi erau toate agatate de tavanul
-## orizontal al buzei (privire de sus), nimic pe muchiile VERTICALE ale
-## peretelui (privire laterala, cum il vede soferul din masina). Adaugat mai
-## jos `_wall_flank_moss()`: raycast ORIZONTAL dinspre drum spre perete, la
-## inaltimi variate, chiar la cele doua muchii unde peretele intra/iese din
-## sol (f~0.287-0.291 si f~0.304-0.308) — acolo camera vede piatra goala in
-## prim-plan la intrarea/iesirea din cadru.
+## Al doilea defect (verdict runda 2): "stanca de langa cascada e complet
+## goala de decor" pe FLANCURI — cele 6 piese vechi erau toate agatate de
+## tavanul orizontal al buzei (privire de sus), nimic pe muchiile VERTICALE
+## ale peretelui. Solutia de-atunci (`_wall_flank_moss`, azi INLOCUITA) a
+## batut un raycast orizontal la inaltimi 1.5-16 m pe toata fata, cu bias
+## spre piese MARI (moss_boulder_b/c la scara 1.1-1.8) la inaltime medie.
+##
+## RUNDA 3 (verdict critic 25 sep, al doilea): corectie in exces. Rezultatul
+## rundei 2 citea ca "bulgari verzi lipiti pe fata peretelui, ca niste
+## baloane" chiar langa/sub perdea — acopera exact zona care trebuie sa
+## citeasca STANCA GOALA, intunecata, uda (fundatia 2 a reparat deja
+## culoarea `wet_gneiss`). Nota coordonatorului: ținta e INTRE r1 si r2 — fata
+## verticala a peretelui ramane goala, doar un TIV SUBTIRE, jos ca profil, pe
+## MUCHIA DE SUS a surplombului (langa unde apa se desprinde) + pe marginile
+## LATERALE (unde peretele intra/iese din cadru). `moss_boulder` la scara
+## mare citeste "bila" oricat de sus il pui — pentru tiv se foloseste
+## `fern_cluster`/`tussock_clump` (deja joase si late) si `moss_boulder`
+## TURTIT pe Y (0.3-0.5 din scara orizontala), ca sa citeasca perna, nu bila.
+## `_wall_flank_moss` (raycast orizontal pe toata inaltimea fetei) e sters:
+## nu mai punem NIMIC intre h=2 si h=13 pe fata verticala interioara a
+## peretelui — doar langa muchia de sus (h aproape de Overhang, ~13-16.5 m)
+## si pe cele doua muchii laterale, jos ca profil (inaltime AABB <= ~1 m dupa
+## turtire), ingropat/lipit strans de piatra ca sa nu iasa in relief.
 func _moss_and_nook() -> void:
 	var space_state := _track.get_world_3d().direct_space_state
 	var n := _track.baked.size()
@@ -309,96 +324,113 @@ func _moss_and_nook() -> void:
 		placed += 1
 		f += 0.0025
 	print("; muschi pe buza (tavan): %d piese, %d sarite in fereastra" % [placed, _skipped])
-	_wall_flank_moss(space_state, n)
+	_wall_edge_fringe(space_state, n)
 
 
-## Muschi/vegetatie pe MUCHIILE LATERALE ale peretelui — verdictul criticului
-## (runda 2): "stanca de langa cascada e complet goala... nicio piesa de
-## muschi sau vegetatie agatata pe buza SAU PE FLANCURI". Blocul de coliziune
-## `stirlingLedge_col` are fata verticala doar pe f in [0.288, 0.306]
-## (masurat prin raycast orizontal dinspre drum): dincolo de asta peretele nu
-## mai prezinta suprafata, deci "flancul" util e chiar la cele doua muchii,
-## unde piatra intra/iese din cadru — exact ce vede soferul la intrarea si
-## iesirea din perdea.
+## TIV SUBTIRE pe muchia de sus a surplombului + pe marginile laterale —
+## verdict critic runda 3 (INLOCUIESTE `_wall_flank_moss`, care punea
+## moss_boulder mare (scara 1.1-1.8) pe toata fata verticala intre h=1.5 si
+## h=16: citea "bulgari verzi lipiti ca niste baloane" exact unde peretele
+## trebuie sa ramana stanca goala, intunecata, uda. Nota coordonatorului:
+## ținta e INTRE r1 (stanca goala complet) si r2 (fata acoperita) — un tiv
+## JOS CA PROFIL doar pe (a) muchia orizontala de sus, langa unde apa se
+## desprinde, si (b) cele doua muchii verticale laterale, unde piatra
+## intra/iese din cadru. NIMIC intre h=2 si h=11 pe fata interioara.
 ##
-## Ancora: raza ORIZONTALA dinspre axa spre perete (nu in jos): gaseste fata
-## reala a lui `stirlingLedge_col` la inaltimea ceruta, piesa se aseaza LIPITA
-## de ea (impinsa cu 0.15 m inapoi spre drum, sa nu strapunga peretele).
+## Compozitie: fern_cluster/tussock_clump (deja joase si late) + moss_boulder
+## TURTIT pe Y la 0.30-0.50 din scara orizontala (Basis neuniform: scala mare
+## pe X/Z, mica pe Y) — turtit citeste "perna de muschi", nu "bila" (moss_boulder
+## la scara uniforma citeste bila indiferent unde-l pui, per nota
+## coordonatorului). Piese MICI (AABB inaltime dupa turtire <= ~1 m).
 ##
-## RUNDA 2b (captura v1r2_f028 verificata la ochi, nu doar la garda): primul
-## rand de 4+3 piese la scara 0.6-0.95 (moss_boulder are 0.7-2 m la scara 1)
-## trece toate gardile FIZICE dar pe camera arata ca "un fir de iarba in colt"
-## — invizibil langa un perete de 20+ m. Doua schimbari: (1) mai multe piese
-## (8-9 per muchie, nu 3-4), intinse pe toata inaltimea utila a peretelui
-## (masurata prin survey: 1.5-16 m la muchii, nu doar 2-11), ca sa citeasca
-## drept "muschi care urca stanca", nu un singur bolovan; (2) scara mai mare
-## si bias spre moss_boulder_b/c la inaltime medie (5-11 m, in raza vizuala a
-## camerei de joc), pastrand piese mici doar la baza/varf pentru detaliu.
-func _wall_flank_moss(space_state: PhysicsDirectSpaceState3D, n: int) -> void:
-	var edges := [
-		{"f0": 0.2865, "f1": 0.2905, "n": 9},   # muchia de intrare (dinspre chei)
-		{"f0": 0.3035, "f1": 0.3085, "n": 8},   # muchia de iesire (spre Chasm)
-	]
+## Ancora ca la r2b: raza ORIZONTALA dinspre drum spre perete gaseste fata
+## reala a `stirlingLedge_col`; piesa se lipeste de ea (+0.12 m pe normala).
+func _wall_edge_fringe(space_state: PhysicsDirectSpaceState3D, n: int) -> void:
 	var placed := 0
+	# (a) TIV PE MUCHIA DE SUS: banda ingusta de inaltime, chiar sub Overhang
+	# (buza e la +14..+21 local; fata verticala utila urca pana spre ~16.5 m
+	# masurat r2b), acolo unde apa se desprinde — languros pe toata lungimea
+	# peretelui expus (f 0.2865-0.3085, aceeasi fereastra masurata ca la r2).
+	var f0_top := 0.2865
+	var f1_top := 0.3085
+	var count_top := 14
+	for k in range(count_top):
+		var f: float = lerpf(f0_top, f1_top, (float(k) + _rng.randf_range(0.15, 0.85)) / float(count_top))
+		var i := int(f * float(n)) % n
+		var p: Vector3 = _track.baked[i]
+		var s: Vector3 = _track._side_at(i)
+		var h: float = _rng.randf_range(12.5, 16.5)   # chiar sub muchia de sus
+		var from := Vector3(p.x, p.y + h, p.z) + s * _wall_side * 2.5
+		var to: Vector3 = from + s * _wall_side * 20.0
+		var query := PhysicsRayQueryParameters3D.create(from, to)
+		var hit := space_state.intersect_ray(query)
+		if hit.is_empty() or str((hit.get("collider") as Node).name) != "stirlingLedge_col":
+			_skipped += 1
+			continue
+		var hp: Vector3 = hit["position"]
+		var normal: Vector3 = hit.get("normal", -s * _wall_side)
+		var anchor: Vector3 = hp + normal * 0.12
+		placed += _place_low_fringe(anchor, "muchieSus")
+	# (b) TIV PE MUCHIILE LATERALE: aceleasi doua ferestre unde piatra
+	# intra/iese din cadru, dar acum DOAR jos ca profil (piese turtite/joase),
+	# pe toata inaltimea utila — nu mai e "camp de bolovani", e o dunga
+	# subtire care urmareste muchia.
+	var edges := [
+		{"f0": 0.2865, "f1": 0.2905, "n": 6},   # muchia de intrare (dinspre chei)
+		{"f0": 0.3035, "f1": 0.3085, "n": 6},   # muchia de iesire (spre Chasm)
+	]
 	for edge: Dictionary in edges:
 		var f0: float = edge["f0"]
 		var f1: float = edge["f1"]
-		var count: int = edge["n"]
-		for k in range(count):
-			var f: float = lerpf(f0, f1, (float(k) + _rng.randf_range(0.1, 0.9)) / float(count))
+		var cnt: int = edge["n"]
+		for k in range(cnt):
+			var f: float = lerpf(f0, f1, (float(k) + _rng.randf_range(0.1, 0.9)) / float(cnt))
 			var i := int(f * float(n)) % n
 			var p: Vector3 = _track.baked[i]
 			var s: Vector3 = _track._side_at(i)
-			# Inaltime pe toata banda utila a peretelui, cu mai multa masa la
-			# inaltime medie (5-11 m, unde camera de joc o vede cel mai bine)
-			# si putine piese rare pana sus, ca sa citeasca drept crestere
-			# continua, nu o banda taiata.
-			var h: float = lerpf(1.5, 16.0, _rng.randf_range(0.0, 1.0) * _rng.randf_range(0.0, 1.0) + 0.15)
+			var h: float = _rng.randf_range(1.0, 16.0)
 			var from := Vector3(p.x, p.y + h, p.z) + s * _wall_side * 2.5
 			var to: Vector3 = from + s * _wall_side * 20.0
 			var query := PhysicsRayQueryParameters3D.create(from, to)
 			var hit := space_state.intersect_ray(query)
-			if hit.is_empty():
-				_skipped += 1
-				continue
-			var collider: Object = hit.get("collider")
-			if collider == null or str((collider as Node).name) != "stirlingLedge_col":
-				# muchia nu prezinta perete la inaltimea asta (sub sol sau
-				# dincolo de blocul real) — nu ghici, sari.
+			if hit.is_empty() or str((hit.get("collider") as Node).name) != "stirlingLedge_col":
 				_skipped += 1
 				continue
 			var hp: Vector3 = hit["position"]
 			var normal: Vector3 = hit.get("normal", -s * _wall_side)
-			var anchor: Vector3 = hp + normal * 0.15  # lipita de fata, nu ingropata
-			# Bias spre piese MARI la inaltime medie, mici jos/sus — citeste ca
-			# muschi care s-a intins pe stanca, nu ca resturi la baza.
-			var mdl: String
-			var scl: float
-			if h > 4.0 and h < 12.0 and _rng.randf() < 0.6:
-				mdl = "moss_boulder_c" if _rng.randf() < 0.4 else "moss_boulder_b"
-				scl = _rng.randf_range(1.1, 1.8)
-			else:
-				mdl = "moss_boulder_a" if _rng.randf() < 0.6 else "moss_boulder_b"
-				scl = _rng.randf_range(0.7, 1.1)
-			_raw(mdl, "muschiFlanc", anchor, _rng.randf_range(0.0, TAU), scl, "none")
-			placed += 1
-			# fern_cluster alaturat, ca sa rupa silueta rotunda a bolovanului
-			# si sa citeasca a vegetatie agatatoare, nu doar piatra verde.
-			if _rng.randf() < 0.6:
-				var h2: float = h + _rng.randf_range(-1.0, 1.5)
-				var from2 := Vector3(p.x, p.y + h2, p.z) + s * _wall_side * 2.5
-				var to2: Vector3 = from2 + s * _wall_side * 20.0
-				var q2 := PhysicsRayQueryParameters3D.create(from2, to2)
-				var hit2 := space_state.intersect_ray(q2)
-				if not hit2.is_empty():
-					var c2: Object = hit2.get("collider")
-					if c2 != null and str((c2 as Node).name) == "stirlingLedge_col":
-						var hp2: Vector3 = hit2["position"]
-						var n2: Vector3 = hit2.get("normal", -s * _wall_side)
-						_raw("fern_cluster", "fernFlanc", hp2 + n2 * 0.1,
-							_rng.randf_range(0.0, TAU), _rng.randf_range(1.0, 1.6), "none")
-						placed += 1
-	print("; muschi + ferigi pe flancuri: %d piese" % placed)
+			var anchor: Vector3 = hp + normal * 0.12
+			placed += _place_low_fringe(anchor, "muchieLat")
+	print("; tiv subtire (sus + laterale): %d piese" % placed)
+
+
+## Aseaza O piesa joasa/lata la ancora data (deja pe fata reala a peretelui):
+## fern_cluster, tussock_clump, sau moss_boulder TURTIT pe Y. Returneaza
+## numarul de piese adaugate (1, uneori +1 daca se adauga o ferigă alaturata).
+func _place_low_fringe(anchor: Vector3, prefix: String) -> int:
+	var placed := 0
+	var pick := _rng.randf()
+	if pick < 0.45:
+		_raw("fern_cluster", prefix, anchor, _rng.randf_range(0.0, TAU),
+			_rng.randf_range(0.8, 1.3), "none")
+		placed += 1
+	elif pick < 0.75:
+		_raw("tussock_clump", prefix, anchor, _rng.randf_range(0.0, TAU),
+			_rng.randf_range(0.8, 1.2), "none")
+		placed += 1
+	else:
+		var mdl := "moss_boulder_a" if _rng.randf() < 0.7 else "moss_boulder_b"
+		var scl_h := _rng.randf_range(0.6, 1.0)   # orizontal (X/Z)
+		var scl_y := scl_h * _rng.randf_range(0.30, 0.50)   # turtit: perna, nu bila
+		_raw_nonuniform(mdl, prefix, anchor, _rng.randf_range(0.0, TAU),
+			scl_h, scl_y, "none")
+		placed += 1
+	# ocazional o ferigă mica alaturi, sa rupa marginea dreapta a pernei
+	if _rng.randf() < 0.35:
+		var off := Vector3(_rng.randf_range(-0.4, 0.4), 0.0, _rng.randf_range(-0.4, 0.4))
+		_raw("fern_cluster", prefix, anchor + off, _rng.randf_range(0.0, TAU),
+			_rng.randf_range(0.6, 0.9), "none")
+		placed += 1
+	return placed
 
 
 ## (2) BOLOVANI UZI LA BAZA PERETELUI — intre picioarele peretelui si drum,
@@ -431,9 +463,15 @@ func _wet_boulders() -> void:
 			_raw(mdl, "bolovanUd", Vector3(q.x, y, q.z), _rng.randf_range(0.0, TAU),
 				_rng.randf_range(0.8, 1.3), "hull")
 			placed += 1
-			# uneori un fern_cluster langa bolovan, umed la baza
+			# uneori un fern_cluster langa bolovan, umed la baza. Offset doar
+			# spre AFARA drumului (nu spre ax): un offset negativ (spre ax)
+			# putea trece sub half+EDGE_KEEP si iesea "IN DRUM" la probe_manual
+			# (gasit la garda r3: fernUd la 8,0 m == prag exact, jitter -1,2
+			# il impingea sub 8,4 m minim). Corect e sa nu ne apropiem
+			# NICIODATA de asfalt fata de bolovanul-ancora, doar sa variem cat
+			# de departe.
 			if _rng.randf() < 0.5:
-				var off := s * _rng.randf_range(-1.2, 1.2)
+				var off := s * _wall_side * _rng.randf_range(0.0, 1.2)
 				var q2: Vector3 = q + off
 				var y2: float = _sampler.ground_y(q2.x, q2.z)
 				_raw("fern_cluster", "fernUd", Vector3(q2.x, y2, q2.z),
@@ -532,12 +570,20 @@ func _rata_and_guard() -> void:
 
 func _raw(model: String, prefix: String, pos: Vector3, yaw: float, scl: float,
 		collision_override: String) -> void:
+	_raw_nonuniform(model, prefix, pos, yaw, scl, scl, collision_override)
+
+
+## Ca `_raw`, dar cu scara VERTICALA separata de cea orizontala — pentru
+## piesele "turtite" (moss_boulder redus pe Y la tiv, runda 3): scl_h se
+## aplica pe X/Z, scl_y doar pe Y, ca sa citeasca perna, nu bila.
+func _raw_nonuniform(model: String, prefix: String, pos: Vector3, yaw: float,
+		scl_h: float, scl_y: float, collision_override: String) -> void:
 	var id: String = RES.get(model, "")
 	if id == "":
 		push_warning("model necunoscut in RES: " + model)
 		return
 	var name := "%s%d" % [prefix, _n]
-	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scl)
+	var basis := Basis(Vector3.UP, yaw).scaled(Vector3(scl_h, scl_y, scl_h))
 	var t := Transform3D(basis, pos)
 	_out.append('[node name="%s" parent="%s" instance=ExtResource("%s")]' % [
 		name, ZONE, id])

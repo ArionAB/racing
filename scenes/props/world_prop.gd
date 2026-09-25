@@ -1306,6 +1306,38 @@ const CLASSES_BY_MODEL := {
 	"elephant": {
 		"Elephant_Mesh_Accente": Palette.TRI_PREFIX + "elephant_hide",
 	},
+
+	# --- Fiordland: GNEISUL UD (Track16) ----------------------------------
+	#
+	# Clasa noua a pistei (brief §4/§5.6): dungile de scurgere verticale pe
+	# peretii de gneis se citesc exact la distanta la care trece masina pe
+	# langa ei (3-5 m). Pe atlasul plat peretele Stirling e o pata gri fara
+	# scara — WaterfallHazard face apa, dar STANCA din spatele ei ramane
+	# decor pur, si aici e singurul loc unde primeste material.
+	#
+	# COSTA UN SINGUR MATERIAL pentru toate nodurile de mai jos (cache pe
+	# clasa, ca la inca_stone).
+	#
+	# Aplicata DOAR pe nodurile cu mus/vegetatie sub pragul la care o
+	# ruptura ar merita un nod in plus (memoria clase-pe-piese-de-kit,
+	# tiparul inca_bridge_ledge la 2.5%):
+	#   stirling_ledge.Wall     4.8% TROPICAL_GREEN (musch pe coronament) — sub prag, ramane intreg pe wet_gneiss
+	#   torrent_chute.Rock     11.7% TROPICAL_GREEN — idem, sub pragul de ~20% de la Machu Picchu
+	# NU se aplica pe stirling_ledge.Overhang (27.0% TROPICAL_GREEN — peste
+	# pragul de 22.8% al inca_house_b, unde intervalele de y se suprapun cu
+	# stanca si o ruptura ar taia gresit) si NU pe .Shelf (20.0%, prag uscat
+	# ingust, judecat de-a lungul lui, nu de sus — ramane pe atlas).
+	# NU se aplica pe fiordland_horizon (FarWall_*/SnowRidge_*): acolo
+	# TROPICAL_GREEN/LOG_DARK/MARBLE_GREY/FOAM_WHITE sunt BENZI DE ALTITUDINE
+	# pictate intentionat (paduri/gheata/zapada pe treimi de inaltime, vezi
+	# fiordland_masuratori.md) — o clasa triplanara ar sterge exact
+	# stratificarea pe care tema o cere explicit (`horizon_class: ""`).
+	"stirling_ledge": {
+		"Wall": Palette.TRI_PREFIX + "wet_gneiss",
+	},
+	"torrent_chute": {
+		"Rock": Palette.TRI_PREFIX + "wet_gneiss",
+	},
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la

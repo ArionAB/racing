@@ -799,6 +799,11 @@ const CLASS_TEXTURES := {
 	# `concrete` ramane singura cu izotropie SI relief vizibil — exact
 	# argumentul care a ales-o si pentru elefant, redescoperit independent.
 	"hippo_hide": "res://assets/textures/classes/concrete.png",
+	# Gneisul ud al Fiordland-ului (stirling_ledge Wall/Overhang, torrent_chute
+	# Rock, nodurile FarWall_*/SnowRidge_* din fiordland_horizon) — brief §4:
+	# "gneisul ud si verde-negru sunt deja in atlas", clasa refoloseste dala
+	# `alpine_granite` (zero VRAM nou), ca `inca_stone`/`cut_stone` mai sus.
+	"wet_gneiss": "res://assets/textures/classes/alpine_granite.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -917,6 +922,14 @@ const CLASS_TINT := {
 	# (168.84*0.6101, 160.68*0.4107, 145.01*0.2138) = (103.00, 66.00, 31.00) —
 	# cade EXACT pe tinta (103, 66, 31), sub 0.01 unitate pe fiecare canal.
 	"hippo_hide": Color(0.6101, 0.4107, 0.2138),
+	# Gneisul ud (Fiordland): tinta = media ponderata pe arie a sloturilor
+	# VOLCANIC_BLACK/MARBLE_GREY masurate pe Wall (stirling_ledge, 1690 tri,
+	# 39.0%/56.2%) si Rock (torrent_chute, 196 tri, 28.3%/60.0%) din
+	# fiordland_masuratori.md: (0.5659, 0.5533, 0.5456). Dala `alpine_granite`
+	# (166,156,137)/255 are raport pe canale (0.8693, 0.9045, 1.0155) — un
+	# singur canal (B) peste 1, deci cere CLASS_LIFT mic. Calculata ca la
+	# inca_stone: tinta_c / (dala_c * k), k = max raport = 1.0155.
+	"wet_gneiss": Color(0.8560, 0.8907, 1.0),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -968,6 +981,12 @@ const CLASS_LIFT := {
 	# macchia_dry / tuff_cream / termite_clay: tinta se atinge DUPA tenta,
 	# care coboara doua canale din trei. k = max(tinta_c / dala_c) = 1.1142.
 	"inca_stone": 0.6704,
+	# Gneisul ud (Fiordland): dala `alpine_granite` luminanta 0.6147 (rec709
+	# pe 166,156,137), tinta masurata 0.5554. Raportul pe canale are un
+	# singur canal peste 1 (B, 1.0155), deci ridicarea e mica — k = 1.0155,
+	# nu media directa a luminantelor (acelasi motiv ca la inca_stone/
+	# termite_clay: tinta se atinge DUPA tenta CLASS_TINT).
+	"wet_gneiss": 1.0155,
 	# Scoarta acaciei-febra: dala `bark` are luminanta 0.568 (rec709) si
 	# trebuie sa ajunga pe slotul 0 SAND_LIGHT (232, 192, 116), luminanta
 	# 0.749. Ridicarea e la 0.775, nu la 0.749, din acelasi motiv ca la
@@ -1007,6 +1026,13 @@ const CLASS_TRIPLANAR_SCALE := {
 	# strat de piatra citeste cat un strat pe o stanca de 2-4 m, exact ca la
 	# `rock` — aceeasi familie de geologie, alta piatra.
 	"alpine_granite": 0.16,
+	# Gneisul ud (Fiordland): ACEEASI dala si ACEEASI scara ca alpine_granite
+	# — familie de geologie identica (sisturi/gneis stratificat), doar tenta
+	# diferita. stirling_ledge.Wall (26.57 m inaltime) e mai mare decat
+	# faleza alpina de referinta, dar la 0.16 (o repetitie la 6.25 m) tot
+	# citeste ca strat de piatra la distanta de care trece masina (3-5 m),
+	# nu ca tapet intins pe un perete de 26 m.
+	"wet_gneiss": 0.16,
 	# Valea Rosie: dala se intinde de DOUA ori mai mult decat pe Alpi
 	# (0.08 fata de 0.16). Modulul are 12.4 m inaltime: la scara alpina ar
 	# fi incaput ~2 randuri de sedimente pe toata faleza, adica desen prea

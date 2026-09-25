@@ -62,7 +62,15 @@ Cu `--track=9` la `probe_decor` măsori altă pistă și dai verde fals.
 | ProbeLaneClear | `res://tools/ProbeLaneClear.tscn -- --track=9` | **pe linia de bază** (armată la fundație; fără linie de bază pare verde dar nu e — memoria `garda-fara-linie-de-baza-iese-zero`) |
 | ProbeLayout | `res://tools/ProbeLayout.tscn -- --track=9` | 2159 m, pantă < 13 % |
 | probe_manual | `--script res://tools/probe_manual.gd -- --track=16` | **0 obiecte de reparat** (plutitoare / îngropate) |
-| fiord_frustum_table | `python tools/fiord_frustum_table.py` | verde; **regenerează grila** (`SvFiordVarfGrid --track=16 --out=tools/data/fiord_varf_grid`) dacă ai atins relieful |
+| fiord_frustum_table | `python tools/fiord_frustum_table.py` | **PICĂ pe F1 și pe main** (Mitre nevăzut de pe coborâre, decizia (b): rămâne); nu e regresie dacă F1 e singurul roșu; **regenerează grila** (`SvFiordVarfGrid --track=16 --out=tools/data/fiord_varf_grid`) dacă ai atins relieful |
+| **sv_hazard_orient** | `--script res://tools/sv_hazard_orient.gd -- --scene=16 --decor` | **0 noduri suspecte** în afara celor cunoscute (avalanșa e orientată din cod; stâlpul de semafor n-are axă). Se rulează după ORICE piesă cu axă montată: pe 25 sep toate cele 6 perdele erau rotite 50–107° de 5 zile fără ca cineva să măsoare |
+
+Cifrele de plecare după fundație (25 sep 2026, `feat/fiord-fundatie`): probe_decor
+**23 materiale** (orizontul de rezervă cu 5 materiale a fost înlocuit de GLB-ul
+cu 1), ProbeLaneClear **8**, probe_manual **0**, ProbeRace uscat 8/8 tur minim
+1,62–1,67 cu 0–3 repuneri (un blocaj tranzitoriu de 3 s la **furca
+scurtăturii**, frac 0,356 lat 6,2, apare pe ~1 rulare din 11 — slăbiciune a
+furcii, nu a decorului), ploaie 2/2 tur minim 1,57–1,59.
 
 `--import` înaintea oricărei serii (memoria `import-invechit-falsifica-masuratoarea`).
 
@@ -201,8 +209,16 @@ prag** și se lățește peste drum pe 30 m; două linii: **prin perdea** (drumu
 fiordul *prin* apă). Forța în jos scalată cu viteza; în ploaie perdeaua e cu
 30 % mai grea → pragul câștigă.
 
-Fundația a montat deja `stirling_ledge.glb` cu buza `Overhang` la +14 sub
-perdeaua din cod și a decis cota lui `Shelf`. **POI-ul C nu mută piesa** —
+Fundația a montat `stirling_ledge.glb` **paralel cu drumul, pe dreapta**: fața
+peretelui la **8,0 m** de axă (semi 6 + sagita de 1,8 m a drumului pe cei
+40 m ai peretelui + pragul `probe_manual` de semi+2), buza `Overhang` la
+**+14,0** peste jumătatea dinspre perete a perdelei (perdeaua: 6 m lățime
+centrată pe axă, 30 m lungime **de-a lungul drumului** — reparată la fundație,
+era rotită 90°). `Shelf` (pragul uscat) e la +0,38 în GLB, la 8–11 m de axă,
+deci **în afara asfaltului**: linia „în spatele perdelei" din brief e azi doar
+cei 3 m de asfalt uscat dintre perdea (+3) și marginea drumului (+6); dacă
+POI-ul C vrea pragul de piatră ca bandă, e o decizie cu dezvoltatorul (cere
+lărgirea segmentului sau mutarea perdelei), nu decor. **POI-ul C nu mută piesa** —
 construiește ce e în jurul ei: mușchiul pe buză și în nișă (`Moss` e nod
 separat), bolovanii uzi la baza peretelui, **bazinul alb** (spuma e
 `FOAM_WHITE`, ceața joasă de 20 m există din perdea v2), fagii pe platoul de
@@ -238,8 +254,14 @@ mușchi, ca banda să citească „drum vechi", nu poteca pe iarbă.
 Piese: `beech_a/b/c` (**200+**, `MultiMesh` obligatoriu peste ~1000 de piese
 — memoria `decor-in-masa-cere-multimesh`; sub 1000, noduri în `DecorManual`),
 `beech_dead`, `moss_boulder_a/b/c`, `chasm_rock` (marmitele, în albie),
-`chasm_bridge_rail` (origine pe axa drumului la cota tabliei, `--origin=waterline`
-în inventar — verifică cota!), `stump` + `kea` ×2 (`PathMover` sau static cu
+`chasm_bridge_rail` — **atenție: podețul e pe curbă** (sagita 2,16 m pe
+38,4 m), iar balustrada dreaptă de 40 m cu șinele la ±5,84 taie tăblia (semi
+5,5) la capete; fundația a scos-o. Opțiuni pentru POI D: două jumătăți de 20 m
+rotite pe tangentă, sau refacerea GLB-ului pe arc — decizie de asset, se
+scrie în raport, nu se strecoară. `torrent_chute` e montat la fundație
+paralel cu banda, pe partea opusă traseului principal, fața la 4,5 m de axa
+benzii, buza la +14 peste marginea ei; POI D verifică pe captură cu
+`--torrent-at` că pulsul cade DIN jgheab. `stump` + `kea` ×2 (`PathMover` sau static cu
 `Idle`), `tree_fern`, `fern_cluster`, `driftwood` pe mal.
 
 Capcana: memoria `aranjamentul-bate-numarul` — scatter pe GRILĂ citește
@@ -262,6 +284,11 @@ Brief: urcare 12 % pe drum tăiat în grohotiș, **panouri de zonă de avalanș�
 înalt); tubul, portalurile cu **aripi-pâlnie** și galeria sunt **cod**
 (`Track._build_tunnels` din `SemaforTunel`) — **POI-ul E nu construiește
 tunelul**. Stâlpul de semafor cu `HazardLamp` e montat la fundație.
+
+Stâlpul `traffic_light_pole` e la fundație la 10,3 m de axă, dar cele două
+`HazardLamp` rămân create de `SemaforTunel` pe poziția lor veche, **nu în
+alveolele stâlpului** — POI-ul E le aliniază (offsetul lămpii e în
+`tunnel_signal_hazard.gd`; alveolele: 0,3 m diametru, la 0,35 m pe verticală).
 
 Piese: `chevron_sign` (reuse), `road_sign_blank`, `snow_pole`, `scree_slab`
 (**placă pe pantă**, nu con; `none`), `tussock_clump` pe platou, `beech_*`

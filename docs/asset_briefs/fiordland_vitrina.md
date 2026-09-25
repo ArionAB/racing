@@ -158,3 +158,20 @@ Fiecare mod are un motiv scris explicit în comentariile din `world_prop.gd`
 (citat parțial în raportul de handoff). N-am validat empiric niciuna dintre
 aceste decizii — sunt raportate ca „ce spune codul", nu ca „verificat prin
 condus".
+
+## Punct deschis (revizuirea coordonatorului, 25 sep 2026): acoperișurile ies tan
+
+`cafe_shed` și `lodge` au `House_Roof` pe slotul 11 `PAINTED_METAL` (UV exact la
+centrul slotului, u = 0,3594; atlas #728EA3, albastru-gri; vertex color mediu
+neutru 0,73). În captură acoperișul măsoară **#BB8967** (tan) la yaw 0 și
+**#BB8967** la yaw 180; `luggage_container`, pe ACELAȘI slot, iese albastru.
+Normalele sunt consistente (aceeași orientare ca `heli_pad`, care iese gri).
+Nu e mapare de clasă (`CLASSES_BY_MODEL` n-are cafe/lodge, iar
+`House_Roof: roof_tiles` din track.gd e doar pe landmark-ul Okinawa
+`village_house`). Cauza NU e dovedită. Ipoteze rămase, de testat ca A/B în
+prima rundă a POI A (o captură per variantă, `--vitrina=cafe_shed`):
+(1) reflexia speculară a soarelui pe fața orizontală (`metallic_specular`
+0,15 în `world_material`) — test: `--rain=1` schimbă soarele; (2) fața de sus
+primește altceva decât slotul 11 la runtime — test: remap 11 → 8 în
+`SLOT_REMAP_BY_MODEL["cafe_shed"]`; dacă tot iese tan, nu e slotul.
+Verdict vizual: brief-ul cere „tablă gri"; tan citește a lemn/teracotă.

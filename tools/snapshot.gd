@@ -15,6 +15,8 @@ extends Node
 ##   --fog-aerial=0.35         forteaza `fog_aerial_perspective` pe toate
 ##                             WorldEnvironment-urile (A/B fara editarea temei)
 ##   --vignette                adauga vigneta din joc (Vignette) peste captura
+##   --ambient-sky=0.3         ambient din CER (AMBIENT_SOURCE_SKY) cu energia
+##                             data, in locul culorii plate a temei (A/B)
 ##   --track=3 --eye=250,6,-118 --look=232,8,-165
 ##                             CAMERA LIBERA: ochi si punct privit, in metri
 ##                             de lume (x,y,z). Pentru ce nu se vede de pe
@@ -256,6 +258,7 @@ func _ready() -> void:
 	var no_fog := false
 	var fog_aerial := -1.0
 	var vignette := false
+	var ambient_sky := -1.0
 	var game_cam := false
 	## --cave: aplica presetul si intunericul celei mai apropiate [CameraZone].
 	##
@@ -406,6 +409,8 @@ func _ready() -> void:
 			fog_aerial = float(arg.trim_prefix("--fog-aerial="))
 		elif arg == "--vignette":
 			vignette = true
+		elif arg.begins_with("--ambient-sky="):
+			ambient_sky = float(arg.trim_prefix("--ambient-sky="))
 		elif arg == "--no-fog":
 			# Diagnostic: stinge ceata de adancime. Raspunde la intrebarea
 			# „geometria departata lipseste, sau doar e inghitita de ceata?" —
@@ -456,6 +461,15 @@ func _ready() -> void:
 		for we in track.find_children("*", "WorldEnvironment", true, false):
 			(we as WorldEnvironment).environment.fog_aerial_perspective = fog_aerial
 		print("--fog-aerial=%.2f" % fog_aerial)
+	# Ambient din CER in loc de culoarea plata a temei (A/B pentru planul de
+	# grafica pe mobil): `--ambient-sky=E` cu E energia ambientului.
+	if ambient_sky >= 0.0:
+		for we in track.find_children("*", "WorldEnvironment", true, false):
+			var env := (we as WorldEnvironment).environment
+			env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+			env.ambient_light_sky_contribution = 1.0
+			env.ambient_light_energy = ambient_sky
+		print("--ambient-sky=%.2f" % ambient_sky)
 	# Vigneta din joc (Race o adauga; captura o pune doar la cerere, ca
 	# masuratorile de culoare pe margini sa nu se schimbe pe nesimtite).
 	if vignette:

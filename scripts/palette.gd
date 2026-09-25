@@ -1771,6 +1771,60 @@ static func apply_world_material(root: Node) -> void:
 			mi.material_override = mat
 
 
+## --- Vopseaua masinilor de joc -----------------------------------------------
+
+static var _car_paint: StandardMaterial3D = null
+
+## Vopsea de jucarie: acelasi atlas si aceleasi vertex colors ca lumea, dar
+## cu LUCIU — un reflex al soarelui pe capota si pe aripi. Masinile sunt
+## centrul fiecarui cadru si asta nu costa nimic in plus: e acelasi shader,
+## cu alt roughness. Fara stratul de detaliu triplanar: vopseaua e neteda,
+## granulatia de roca a lumii pe o caroserie de 4 m citea ca rugina. UN
+## material pentru toate masinile (cache static), deci +1 la materiale, nu +4.
+##
+## DE CE NU E METALICA si de ce specularul e mic (masurat pe Dunele, saturatia
+## rosului de pe caroserie, `tools/Snapshot.tscn --car`):
+##   lumea mata (0.9 / spec 0.15)          sat 0.96   plat, fara reflex
+##   metallic 0.30, rough 0.42, spec 0.55  sat 0.63   ROZ: cerul intra in difuz
+##   metallic 0,    rough 0.40, spec 0.60  sat 0.61   la fel, deci nu metalicul
+##   metallic 0,    rough 0.35, spec 0.80  sat 0.53   si mai spalat
+##   metallic 0,    rough 0.50, spec 0.30  sat 0.77   reflex vizibil, rosul ramane
+##   metallic 0,    rough 0.70, spec 0.30  sat 0.83   abia se vede reflexul
+## Orice reflexie a cerului (albastru-alb) se ADUNA peste rosu si il trage
+## spre roz; rosul saturat e identitatea masinilor (stilul RgsDev), deci se
+## plateste doar atat luciu cat nu-l spala: 0.50 / 0.30.
+static func car_paint_material() -> StandardMaterial3D:
+	if _car_paint == null:
+		_car_paint = StandardMaterial3D.new()
+		_car_paint.albedo_texture = load(ATLAS_PATH)
+		_car_paint.texture_filter = \
+			BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		_car_paint.vertex_color_use_as_albedo = true
+		_car_paint.roughness = 0.50
+		_car_paint.metallic = 0.0
+		_car_paint.metallic_specular = 0.30
+	return _car_paint
+
+
+## Vopseaua pe caroserie, lumea mata pe roti: cauciucul lucios ar citi ca
+## plastic, iar rotile sunt exact partea care atinge solul si trebuie sa
+## "stea" in lume. Rotile se recunosc dupa nume, ca in Car._build_visual.
+static func apply_car_paint(root: Node) -> void:
+	var paint := car_paint_material()
+	var world := world_material()
+	for node in _walk(root):
+		if node is MeshInstance3D:
+			var mi := node as MeshInstance3D
+			var on_wheel := false
+			var n: Node = mi
+			while n != null and n != root:
+				if "wheel" in String(n.name).to_lower():
+					on_wheel = true
+					break
+				n = n.get_parent()
+			mi.material_override = world if on_wheel else paint
+
+
 ## --- Lumina RECE de umplere, pe sloturile de piatra ------------------------
 
 ## [b]De ce nu merge niciun drum multiplicativ.[/b] Sub pamant, piesele salii

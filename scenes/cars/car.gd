@@ -507,7 +507,7 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	# GLB din pipeline-ul nostru: materialul de clasa (atlas + AO din vertex
 	# colors), ca orice alt asset al lumii. FBX-urile RgsDev raman cu ale lor.
 	if data.palette_model and _visual.get_child_count() > 0:
-		Palette.apply_world_material(_visual.get_child(0))
+		Palette.apply_car_paint(_visual.get_child(0))
 	# Soferul, doar pe caroserii deschise (vezi CarData.open_cockpit).
 	_driver = null
 	is_ejected = false

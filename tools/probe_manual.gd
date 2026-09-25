@@ -82,6 +82,8 @@ func _report() -> bool:
 		var verdict := "ok"
 		if ground < sea_y and absf(p.y - sea_y) <= 1.0:
 			verdict = "ok (pe apa)"
+		elif p.y - ground > FLOAT_MAX and _on_static_face(n3):
+			verdict = "ok (pe stanca)"
 		elif p.y - ground > FLOAT_MAX:
 			verdict = "PLUTESTE"
 		elif ground - p.y > SINK_MAX:
@@ -91,7 +93,15 @@ func _report() -> bool:
 		# latimea implicita raporteaza "IN DRUM" obiecte asezate cuminte langa
 		# asfaltul lat, si trece cu vederea unele chiar pe asfaltul ingust.
 		var hw_here: float = t.width_at(t.frac_at(near_i))
-		if near < hw_here + ROAD_MARGIN and not _spans_road(entry["path"]):
+		# O piesa cu coliziune "none" (fantoma, world_prop.gd) nu poate opri
+		# masina, deci "IN DRUM" e fara sens pentru ea — la fel de fals ca
+		# la Fiordland POI C: muschiul de pe TAVANUL buzei surplombului e la
+		# 20+ m peste asfalt, lateral aproape de ax fiindca buza chiar iese
+		# peste drum (asa cere brief-ul), dar n-are corp fizic care sa loveasca
+		# masina. Verificarea e pe MODUL REZOLVAT (metadata proprie, apoi
+		# `PROP_COLLISION` dupa numele fisierului), nu pe nume de prefix.
+		if (near < hw_here + ROAD_MARGIN and not _spans_road(entry["path"])
+				and _effective_collision_mode(n3) != "none"):
 			verdict += " / IN DRUM"
 		if not verdict.begins_with("ok") or verdict.contains("IN DRUM"):
 			bad += 1
@@ -145,9 +155,92 @@ const SPANS_ROAD_PREFIXES: Array[String] = [
 	"chasmBridgeRail",
 ]
 
+## Modul de coliziune REZOLVAT pentru un prop asezat de mana: metadata proprie
+## `coliziune` daca exista, altfel implicitul din `WorldProp.PROP_COLLISION`
+## dupa numele fisierului .glb — aceeasi regula pe care o aplica
+## `world_prop.gd` cand construieste corpurile la rulare (`_collision_mode`).
+## Recalculata aici (nu apelata direct pe instanta WorldProp, care nu exista
+## la acest nivel) ca sa citim intentia FARA sa depindem de un nume de prefix.
+static func _effective_collision_mode(n3: Node3D) -> String:
+	if n3.has_meta(WorldProp.COLLISION_META):
+		var m := String(n3.get_meta(WorldProp.COLLISION_META))
+		if WorldProp.COLLISION_MODES.has(m):
+			return m
+	var stem := n3.scene_file_path.get_file().get_basename()
+	return String(WorldProp.PROP_COLLISION.get(stem, "hull"))
+
+
 static func _spans_road(path: String) -> bool:
 	var leaf := path.get_file() if path.contains("/") else path
 	for prefix in SPANS_ROAD_PREFIXES:
 		if leaf.begins_with(prefix):
+			return true
+	return false
+
+
+## Piesele agatate pe FATA unei stanci mari, nu pe teren — ca la Fiordland
+## POI C (Cascada Stirling): `stirling_ledge` e un surplomb la +14..+21 m
+## peste axa drumului, iar muschiul de pe buza lui e ancorat prin raycast pe
+## coliziunea REALA a stancii (`tools/gen_decor_fiord_c.gd`), nu pe teren.
+## `ground` (terenul de dedesubt) e la ~15-23 m mai jos prin CONSTRUCTIE —
+## la fel cum o barca sta sub `ground` langa chei, moara asta sta deasupra
+## lui langa perete.
+##
+## FOST: exceptie pe NUME (prefix `muschiBuza`) — trecea orice piesa cu numele
+## asta chiar daca chiar PLUTEA (nimic nu verifica fizic ca piesa atinge ceva).
+## ACUM: test FIZIC. O raza in jos din piesa trebuie sa loveasca un corp STATIC
+## care NU e `TerrainBody` si NU e propriul colizor al piesei (numit `<nume>_col`
+## de `world_prop.gd`), la o distanta <= FLOAT_MAX de piesa — adica piesa chiar
+## sta lipita de o stanca/structura reala (stirling_ledge, chasm_rock etc.), nu
+## doar poarta un nume care suna a asta. Toleranta mica negativa (SINK_MAX)
+## pentru piese usor ingropate in hull-ul stancii (ancorate cu -0.05 in
+## `gen_decor_fiord_c.gd`, ca sa nu pluteasca vizibil).
+##
+## Sabotaj verificat manual (raport): ridicarea temporara a `muschiBuza0` cu
+## 3 m a facut raza sa NU mai loveasca nimic in FLOAT_MAX (cade liber spre
+## TerrainBody, la 15+ m) — garda o prinde ca PLUTESTE. Revenit imediat dupa.
+##
+## O SINGURA raza in jos rateaza piesele agatate pe o fata VERTICALA a stancii
+## (muschiul de pe flancul lateral al `stirlingLedge`, nu pe tavanul
+## orizontal): dedesubtul lor e aer liber, nu stanca. De aceea se incearca
+## 5 directii — jos si cele 4 orizontale — si e suficient ca UNA sa loveasca
+## structura reala la distanta mica: o piesa lipita de perete o atinge
+## indiferent pe ce fata (podea, tavan sau flanc).
+const _PROBE_DIRS: Array[Vector3] = [
+	Vector3(0, -1, 0), Vector3(1, 0, 0), Vector3(-1, 0, 0),
+	Vector3(0, 0, 1), Vector3(0, 0, -1),
+]
+
+static func _on_static_face(n3: Node3D) -> bool:
+	var world := n3.get_world_3d()
+	if world == null:
+		return false
+	var space_state := world.direct_space_state
+	var p := n3.global_position
+	var self_col_name := "%s_col" % n3.name
+	var range_m := FLOAT_MAX + 0.5
+	for dir: Vector3 in _PROBE_DIRS:
+		var from := p - dir * 0.5
+		var to := p + dir * range_m
+		var query := PhysicsRayQueryParameters3D.create(from, to)
+		query.collide_with_bodies = true
+		query.collide_with_areas = false
+		var hit := space_state.intersect_ray(query)
+		if not hit.is_empty():
+			var collider0: Object = hit.get("collider")
+			if collider0 is Node and str((collider0 as Node).name) == self_col_name:
+				query.exclude = [(collider0 as CollisionObject3D).get_rid()]
+				hit = space_state.intersect_ray(query)
+		if hit.is_empty():
+			continue
+		var collider: Object = hit.get("collider")
+		if collider == null:
+			continue
+		var body := collider as Node
+		if body != null and (str(body.name) == "TerrainBody" or str(body.name) == self_col_name):
+			continue
+		var hit_pos: Vector3 = hit["position"]
+		var dist: float = (hit_pos - p).length()
+		if dist <= FLOAT_MAX:
 			return true
 	return false

@@ -739,6 +739,18 @@ const CLASSES_BY_MODEL := {
 	# `village_house`).
 	"cafe_shed": {"House_Roof": Palette.ATLAS_PREFIX},
 	"lodge": {"House_Roof_001": Palette.ATLAS_PREFIX},
+	# Fiordland (POI A, runda 3 a criticului orb): `Boat` (cruise_boat.glb)
+	# n-avea NICIO intrare aici, deci cadea pe fallback-ul implicit al lui
+	# `apply_class_materials` — `world_material()`, materialul lumii cu
+	# stratul triplanar de detaliu gandit pentru roca/lemn de teren
+	# (style_bible §4). Pe carena ALBA (vopsea plata, nu piatra) acel strat
+	# citea exact ce a numit criticul: "model de fibra de lemn/scoarta".
+	# Verificat pe scena incarcata (tools/sv_boat_slots.gd), nu presupus:
+	# materialul de pe `Boat` era `PaletteAtlas`-ul brut din GLB — nicio
+	# coliziune de nume cu alt kit (nu e cazul `nume-noduri-nu-sunt-unice`).
+	# `PLAIN_PREFIX` pastreaza acelasi atlas si acelasi AO din vertex color,
+	# doar opreste `detail_enabled` — zero materiale noi la garda.
+	"cruise_boat": {"Boat": Palette.PLAIN_PREFIX},
 	# Firidele din peretele stancii goale (Cappadocia, POI G): fundul lor ARDE.
 	#
 	# Fara asta o fereastra sapata e o pata neagra, si verdictul rundei 2 spune
@@ -1617,6 +1629,19 @@ const SLOT_REMAP_BY_THEME := {
 }
 
 const SLOT_REMAP_BY_MODEL := {
+	# `wharf.glb` (Fiordland POI A): toata fata de SUS a peretelui de piatra
+	# (17 triunghiuri, y in [1.98, 2.12] — masurat direct pe mesh, acopera
+	# intreaga lungime de 20 m si latime de 4,2 m, deci CHIAR platforma de
+	# mers, nu un accent mic) e pe slotul 21 TROPICAL_GREEN, nu 29 MARBLE_GREY
+	# ca restul peretelui. Contractul (`fiordland_kit.md`): "Blocuri
+	# MARBLE_GREY, babale VOLCANIC_BLACK" — DOI sloturi, fara verde. Pe
+	# captura, platforma iese verde-crud (culoarea ierbii), nu piatra gri a
+	# babalelor de langa ea — se citeste ca un acoperis de casa, nu ca zid de
+	# chei (bara: piatra uniforma). Kitul are 400/400 triunghiuri (buget
+	# epuizat), deci nu se rescrie GLB-ul aici — remap de slot, ca la
+	# acaciile-umbrela.
+	"wharf": {21: Palette.MARBLE_GREY},
+
 	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
 	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea
 	# (190,188,96), identica cu campia) si pe 21 (TROPICAL_GREEN, verde de
@@ -2284,6 +2309,8 @@ func _apply_classes_mapping(by_stem: Dictionary) -> void:
 func _model_class_material(cls: String) -> Material:
 	if cls == Palette.ATLAS_PREFIX:
 		return Palette.world_material()
+	if cls == Palette.PLAIN_PREFIX:
+		return Palette.plain_material()
 	if cls.begins_with(Palette.GLOW_PREFIX):
 		return Palette._glow_from_spec(cls.trim_prefix(Palette.GLOW_PREFIX))
 	if cls.begins_with(Palette.FINISH_PREFIX):

@@ -140,6 +140,14 @@ extends Node
 ##                             fiordland_horizon, lodge, coach_fiordland,
 ##                             cruise_boat, torrent_chute).
 ##   --vitrina-yaw=0            rotatie (grade) fata de directia drumului.
+##   --vitrina-anim=Open        forteaza AnimationPlayer-ul gasit in piesa pe
+##                             clipul dat si il seeks la ULTIMUL cadru (poza
+##                             deschisa/intinsa) inainte de captura. Piesa
+##                             asezata prin --vitrina e statica (WorldProp),
+##                             nu un PathMover, deci fara asta un model cu
+##                             AnimationPlayer (kea: Idle/Open) ramane in bind
+##                             pose. Sufixul intra in numele fisierului:
+##                             vitrina_kea_open.png.
 ##   --cross-at=8.0            obstacolele care TRAVERSEAZA (SlidingHazard
 ##                             Motion.TRAVERSARE: elefantii din Serengeti,
 ##                             cireada) la N SECUNDE absolute in ciclul lor
@@ -296,6 +304,13 @@ func _ready() -> void:
 	var vitrina_stem := ""
 	var vitrina_side := 10.0
 	var vitrina_yaw := 0.0
+	# --vitrina-anim=<clip>: forteaza un AnimationPlayer gasit in piesa pe
+	# clipul dat si il seeks la ULTIMUL cadru (poza intinsa/deschisa) inainte
+	# de captura. Piesa asezata prin --vitrina e statica (WorldProp), nu un
+	# PathMover — fara asta, un model cu AnimationPlayer (kea: Idle/Open)
+	# ramane in bind pose brut, care nu e starea din joc (vezi inventarul:
+	# bind pose = aripi intinse, contrar intentiei).
+	var vitrina_anim := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--vitrina="):
 			vitrina_stem = arg.trim_prefix("--vitrina=")
@@ -305,6 +320,9 @@ func _ready() -> void:
 			continue
 		if arg.begins_with("--vitrina-yaw="):
 			vitrina_yaw = float(arg.trim_prefix("--vitrina-yaw="))
+			continue
+		if arg.begins_with("--vitrina-anim="):
+			vitrina_anim = arg.trim_prefix("--vitrina-anim=")
 			continue
 		if arg == "--car":
 			show_car = true
@@ -668,7 +686,7 @@ func _ready() -> void:
 			_seat_car_on_rope_bridge(track, car)
 			if vitrina_stem != "":
 				_place_vitrina(track, focus, dir, vitrina_stem, vitrina_side,
-					vitrina_yaw)
+					vitrina_yaw, vitrina_anim)
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
@@ -711,7 +729,9 @@ func _ready() -> void:
 		var dimg := get_viewport().get_texture().get_image()
 		var ddir := ProjectSettings.globalize_path("res://snapshots")
 		DirAccess.make_dir_recursive_absolute(ddir)
-		var dout := "%s/vitrina_%s.png" % [ddir, vitrina_stem] if vitrina_stem != "" \
+		var vitrina_suffix := "_%s" % vitrina_anim.to_lower() if vitrina_anim != "" else ""
+		var dout := "%s/vitrina_%s%s.png" % [ddir, vitrina_stem, vitrina_suffix] \
+			if vitrina_stem != "" \
 			else "%s/%s_%s%s%s.png" % [ddir,
 				GameState.TRACK_NAMES[track_index].to_lower(),
 				"joc" if game_cam else "sofer",
@@ -1079,7 +1099,7 @@ func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
 ## foloseste generatorul, nu un raycast fizic separat), rotita cu `yaw_deg`
 ## fata de directia drumului (`dir`).
 func _place_vitrina(track: Track, focus: Vector3, dir: Vector3, stem: String,
-		side: float, yaw_deg: float) -> void:
+		side: float, yaw_deg: float, anim_name: String = "") -> void:
 	if not _VITRINA_MODEL_PATHS.has(stem):
 		push_error("--vitrina=%s: stem necunoscut. Vezi _VITRINA_MODEL_PATHS in tools/snapshot.gd."
 			% stem)
@@ -1116,6 +1136,28 @@ func _place_vitrina(track: Track, focus: Vector3, dir: Vector3, stem: String,
 	add_child(holder)
 	print("--vitrina=%s: %s la (%.2f, %.2f, %.2f), side=%.1f yaw=%.1f"
 		% [stem, path, pos.x, pos.y, pos.z, side, yaw_deg])
+	if anim_name != "":
+		var players := inst.find_children("*", "AnimationPlayer", true, false)
+		if players.is_empty():
+			print("--vitrina-anim=%s: %s n-are AnimationPlayer" % [anim_name, stem])
+			return
+		var ap := players[0] as AnimationPlayer
+		if not ap.has_animation(anim_name):
+			print("--vitrina-anim=%s: %s nu are clipul (are: %s)"
+				% [anim_name, stem, ", ".join(ap.get_animation_list())])
+			return
+		var anim := ap.get_animation(anim_name)
+		# Seek la ULTIMUL cadru (poza deschisa/intinsa), nu la primul (bind
+		# pose brut sau prima cheie, care pentru kea Idle e pozitia STRANSA —
+		# vezi inventarul, exact ce vrem cand cerem Idle. Open cere ultimul
+		# cadru pentru anvergura maxima, contract 1.0 m). `advance` cu
+		# lungimea intreaga a clipului muta la ultimul cadru fara sa redea
+		# bucla.
+		ap.play(anim_name)
+		ap.advance(anim.length)
+		ap.seek(anim.length, true)
+		print("--vitrina-anim=%s: %s la cadrul final (t=%.3f)"
+			% [anim_name, stem, anim.length])
 
 
 func _set_hippo_phase(root: Node, at: float) -> void:

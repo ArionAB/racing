@@ -372,9 +372,14 @@ func _cliff_wall() -> void:
 	var skipped := 0
 	var f := F_IN + 0.004
 	while f < F_OUT - 0.004:
-		var cluster := 1 + (1 if _rng.randf() < 0.45 else 0)
+		# RUNDA 3 a doua trecere: prima densitate (cluster 1-2, prag 0.72) a
+		# dat 175 piese, dar in captura la 0.17 (decisiva) petele de muschi
+		# citeau ca puncte razlete, nu ca acoperire cu identitate — creste
+		# cluster-ul si pragul, ca aranjamentul sa produca mase, nu puncte
+		# (aranjamentul-bate-numarul).
+		var cluster := 2 + (1 if _rng.randf() < 0.5 else 0)
 		for k in cluster:
-			if _rng.randf() < 0.72:
+			if _rng.randf() < 0.85:
 				var i := int(f * float(n)) % n
 				var p: Vector3 = _track.baked[i]
 				var s: Vector3 = _track._side_at(i) * side_sign
@@ -387,13 +392,19 @@ func _cliff_wall() -> void:
 					skipped += 1
 					continue
 				var model: String = ["moss_boulder_a", "fern_cluster", "tussock_clump", "fern_cluster", "moss_boulder_a"][_rng.randi_range(0, 4)]
+				# scara usor marita fata de prima trecere (0.9-1.35 fata de
+				# 0.75-1.15) — la distanta si unghi de chase-cam, petele mici
+				# se pierd pe fondul intunecat al peretelui.
 				_raw(model, "cliffFace", r["pos"],
-					_rng.randf_range(0.0, TAU), _rng.randf_range(0.75, 1.15), "none")
+					_rng.randf_range(0.0, TAU), _rng.randf_range(0.9, 1.35), "none")
 				placed += 1
-		f += _step(_rng.randf_range(2.0, 3.6))
+		f += _step(_rng.randf_range(1.6, 2.8))
 	# cateva rata_tree cu flori rosii agatate pe fata peretelui, in pete rare
-	# (nu sir) — accentul cerut de bara si de verdictul runda 3.
-	var rata_wall_fracs: Array[float] = [0.115, 0.155, 0.195, 0.235]
+	# (nu sir) — accentul cerut de bara si de verdictul runda 3. Densitate
+	# dubla fata de prima trecere si concentrata in jurul frac 0,17 (al
+	# doilea S, captura decisiva) unde prima trecere n-a produs niciun
+	# exemplar vizibil in cadru.
+	var rata_wall_fracs: Array[float] = [0.100, 0.130, 0.150, 0.165, 0.175, 0.190, 0.210, 0.235]
 	for rf in rata_wall_fracs:
 		var i2 := int(rf * float(n)) % n
 		var p2: Vector3 = _track.baked[i2]
@@ -403,8 +414,12 @@ func _cliff_wall() -> void:
 		if not r2["found"]:
 			skipped += 1
 			continue
+		# scara marita (0.8-1.05 fata de 0.55-0.75 in prima trecere): la
+		# distanta de chase-cam pe un perete inclinat, tufa mica dispare;
+		# tot sub cota unui fag (rata_tree e "tufa densa", brief-ul o
+		# scaleaza pana la 1.0 in alte POI-uri fara sa devina copac).
 		_raw("rata_tree", "rataWall", r2["pos"],
-			_rng.randf_range(0.0, TAU), _rng.randf_range(0.55, 0.75), "none")
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.05), "none")
 		placed += 1
 	print("; perete stanca: %d piese (muschi/ferigi/tussock/rata) pe fata abrupta, %d sarite (perete instabil la esantion)" % [placed, skipped])
 

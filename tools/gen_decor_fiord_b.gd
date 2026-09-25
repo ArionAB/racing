@@ -68,6 +68,7 @@ const RES := {
 	"moss_boulder_a": "s_moss_boulder_a",
 	"moss_boulder_b": "s_moss_boulder_b",
 	"moss_boulder_c": "s_moss_boulder_c",
+	"chasm_rock": "s_chasm_rock",
 }
 
 ## Inaltimea AABB masurata (docs/asset_briefs/fiordland_masuratori.md §1).
@@ -76,6 +77,7 @@ const HEIGHT := {
 	"rata_tree": 3.667, "tussock_clump": 0.804, "guard_rock": 0.585,
 	"fern_cluster": 1.2, "nerpa_seal": 0.6,
 	"moss_boulder_a": 0.741, "moss_boulder_b": 1.957, "moss_boulder_c": 3.069,
+	"chasm_rock": 2.500,
 }
 
 ## Raza de DEGAJARE la sol (m) la scara 1: raza corpului fizic.
@@ -85,6 +87,7 @@ const BASE_R := {
 	"rata_tree": 2.00, "tussock_clump": 0.05, "guard_rock": 0.65,
 	"fern_cluster": 0.35, "nerpa_seal": 0.25,
 	"moss_boulder_a": 0.741 * 0.5, "moss_boulder_b": 1.957 * 0.5, "moss_boulder_c": 3.069 * 0.5,
+	"chasm_rock": 3.02,
 }
 
 const TRI := {
@@ -92,6 +95,7 @@ const TRI := {
 	"rata_tree": 354, "tussock_clump": 144, "guard_rock": 72,
 	"fern_cluster": 200, "nerpa_seal": 220,
 	"moss_boulder_a": 200, "moss_boulder_b": 242, "moss_boulder_c": 238,
+	"chasm_rock": 416,
 }
 
 ## Coliziune per piesa (world_prop.gd o suprascrie oricum dupa nume, dar
@@ -158,6 +162,7 @@ func _ready() -> void:
 		_seal_rock()
 		_rata_rare()
 		_guard_rail()
+		_rock_face_upslope()
 		_cliff_wall()
 		_upslope_forest()
 		_write()
@@ -424,6 +429,85 @@ func _cliff_wall() -> void:
 			_rng.randf_range(0.0, TAU), _rng.randf_range(0.95, 1.2), "none")
 		placed += 1
 	print("; perete stanca: %d piese (muschi/ferigi/tussock/rata) pe fata abrupta, %d sarite (perete instabil la esantion)" % [placed, skipped])
+
+
+## (4b) PERETELE DE GNEIS PE PARTEA DE DEAL — verdict runda 4: partea opusa
+## marii (versantul de sus) citea panta de iarba cu tufe/copaci individuali,
+## nu stanca expusa. Bara arata o fata de gneis CONTINUA si VERTICALA chiar la
+## marginea carosabilului, cu muschi concentrat in crapaturile stancii — nu
+## imprastiat pe iarba. NOTA coordonator: prototipul de relief (lant de
+## TerrainPeak) a esuat sa dea perete (citea dealuri conice), deci peretele
+## se face din DECOR: o banda de piese de stanca alaturate FARA goluri de
+## iarba, la marginea drumului, pe toata felia vizibila din camera
+## (0.10-0.22), inaintea padurii de fag existente (r2) care ramane neatinsa.
+##
+## Piese: chasm_rock (2,50 m, hull) si moss_boulder_b/c (1,96/3,07 m, hull,
+## deja gneis inchis+muschi) alaturate, cu guard_rock (0,585 m) umplind
+## golurile joase dintre ele — nu grila: inaltime/adancime variate, alaturate
+## cot la cot (pas mic, aproape de raza vecina) ca sa nu ramana fasii de iarba
+## intre bolovani. Muschi/ferigi in "crapaturi" = clustere LIPITE de baza
+## fiecarei stanci (gap aproape identic cu piatra de langa), nu covor difuz.
+##
+## Ancorare: acelasi raycast real + garda de acord cu analiticul
+## (terrain-mesh-y-extrapoleaza) ca la _cliff_wall, dar banda e ingusta si
+## FIXA (ROAD_MARGIN..ROAD_MARGIN+3.0) ca sa stea lipita de asfalt — nu se
+## cauta cel mai bun pocket pe o banda larga, fiindca "aproape de muchie" e
+## cerinta explicita a criticului, nu o optiune.
+const WALL_FACE_GAP_LO := ROAD_MARGIN
+const WALL_FACE_GAP_HI := ROAD_MARGIN + 3.0
+
+func _rock_face_upslope() -> void:
+	var n := _track.baked.size()
+	var upslope := 1.0 if _sea_sign < 0.0 else -1.0
+	var placed := 0
+	var skipped := 0
+	var f := F_IN + 0.003
+	# pas mic si fix: piesele trebuie alaturate, nu esantionate rar — un pas
+	# de 1.1-1.6 m cu raze de baza 0.9-1.5 m le tine cot la cot fara sa se
+	# intrepatrunda vizibil (aranjamentul-bate-numarul: continuitatea vine
+	# din pas mic + jitter mic pe gap, nu din piese mai mari).
+	while f < F_OUT - 0.003:
+		var i := int(f * float(n)) % n
+		var p: Vector3 = _track.baked[i]
+		var s: Vector3 = _track._side_at(i) * upslope
+		var half: float = _track.width_at_index(i)
+		var gap: float = _rng.randf_range(WALL_FACE_GAP_LO, WALL_FACE_GAP_LO + 0.6)
+		# RUNDA 4 a doua trecere: prima incercare a amestecat chasm_rock cu
+		# moss_boulder_b/c in proportie egala — moss_boulder e deja verde
+		# (gneis + muschi), deci fata a iesit acoperita de verde in loc de
+		# stanca expusa cu muschi doar in crapaturi (bara: gri dominant).
+		# chasm_rock (gneis curat) domina acum banda; moss_boulder_c apare
+		# rar, doar pentru variatie de forma/inaltime, nu pentru culoare.
+		var model: String = "chasm_rock" if _rng.randf() < 0.8 else "moss_boulder_c"
+		var r: float = BASE_R.get(model, 0.9)
+		var d := half + gap + r
+		var q := p + s * d
+		var nrm := _normal_real(q.x, q.z)
+		var g := _sol_real(q.x, q.z)
+		var analytic := _sampler.ground_y(q.x, q.z)
+		if absf(g - analytic) > CLIFF_DELTA_MAX or d - r < half + EDGE_KEEP * 0.5:
+			skipped += 1
+			f += _step(1.3)
+			continue
+		var scl: float = _rng.randf_range(1.1, 1.6)
+		var yaw := _rng.randf_range(0.0, TAU)
+		_raw(model, "gneisWall", Vector3(q.x, g, q.z), yaw, scl, "hull")
+		placed += 1
+		# muschi/ferigi ca ACCENT in crapatura, nu covor: bara arata gneis gri
+		# DOMINANT cu muschi doar in pete mici concentrate — a doua trecere
+		# scade probabilitatea (0.6 -> 0.3) si scara (0.8-1.15 -> 0.5-0.75)
+		# ca fiecare pata sa citeasca "crapatura cu muschi", nu "strat verde
+		# peste toata stanca" (verdictul rundei 4, remasurat pe captura f017).
+		if _rng.randf() < 0.3:
+			var moss_model: String = "fern_cluster" if _rng.randi_range(0, 1) == 0 else "tussock_clump"
+			var moss_gap := gap + r * 1.3 + _rng.randf_range(-0.3, 0.3)
+			var qm := p + s * (half + moss_gap)
+			var gm := _sol_real(qm.x, qm.z)
+			if absf(gm - _sampler.ground_y(qm.x, qm.z)) <= CLIFF_DELTA_MAX:
+				_raw(moss_model, "gneisMoss", Vector3(qm.x, gm, qm.z),
+					_rng.randf_range(0.0, TAU), _rng.randf_range(0.5, 0.75), "none")
+		f += _step(_rng.randf_range(1.1, 1.6))
+	print("; perete gneis versant deal: %d piese (chasm_rock/moss_boulder) alaturate, %d sarite (cota in dezacord)" % [placed, skipped])
 
 
 ## (5) VERSANTUL DE SUS — covor de muschi/ferigi la baza peretelui + padure

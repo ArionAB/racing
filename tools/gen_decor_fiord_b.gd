@@ -59,6 +59,7 @@ const RES := {
 	"beech_a": "s_beech_a",
 	"beech_b": "s_beech_b",
 	"beech_c": "s_beech_c",
+	"beech_dead": "s_beech_dead",
 	"rata_tree": "s_rata_tree",
 	"tussock_clump": "s_tussock_clump",
 	"guard_rock": "s_guard_rock",
@@ -71,7 +72,7 @@ const RES := {
 
 ## Inaltimea AABB masurata (docs/asset_briefs/fiordland_masuratori.md §1).
 const HEIGHT := {
-	"beech_a": 7.030, "beech_b": 10.189, "beech_c": 13.501,
+	"beech_a": 7.030, "beech_b": 10.189, "beech_c": 13.501, "beech_dead": 8.515,
 	"rata_tree": 3.667, "tussock_clump": 0.804, "guard_rock": 0.585,
 	"fern_cluster": 1.2, "nerpa_seal": 0.6,
 	"moss_boulder_a": 0.741, "moss_boulder_b": 1.957, "moss_boulder_c": 3.069,
@@ -80,14 +81,14 @@ const HEIGHT := {
 ## Raza de DEGAJARE la sol (m) la scara 1: raza corpului fizic.
 ## Fagii au coliziune `trunk` (cilindru in ax) — raza la baza masurata.
 const BASE_R := {
-	"beech_a": 0.81, "beech_b": 0.77, "beech_c": 1.03,
+	"beech_a": 0.81, "beech_b": 0.77, "beech_c": 1.03, "beech_dead": 0.68,
 	"rata_tree": 2.00, "tussock_clump": 0.05, "guard_rock": 0.65,
 	"fern_cluster": 0.35, "nerpa_seal": 0.25,
 	"moss_boulder_a": 0.741 * 0.5, "moss_boulder_b": 1.957 * 0.5, "moss_boulder_c": 3.069 * 0.5,
 }
 
 const TRI := {
-	"beech_a": 228, "beech_b": 292, "beech_c": 292,
+	"beech_a": 228, "beech_b": 292, "beech_c": 292, "beech_dead": 136,
 	"rata_tree": 354, "tussock_clump": 144, "guard_rock": 72,
 	"fern_cluster": 200, "nerpa_seal": 220,
 	"moss_boulder_a": 200, "moss_boulder_b": 242, "moss_boulder_c": 238,
@@ -96,7 +97,7 @@ const TRI := {
 ## Coliziune per piesa (world_prop.gd o suprascrie oricum dupa nume, dar
 ## generatorul scrie explicit metadata pentru cele care NU sunt hull implicit).
 const COLLISION := {
-	"beech_a": "trunk", "beech_b": "trunk", "beech_c": "trunk",
+	"beech_a": "trunk", "beech_b": "trunk", "beech_c": "trunk", "beech_dead": "trunk",
 	"tussock_clump": "none", "fern_cluster": "none", "nerpa_seal": "none",
 	"rata_tree": "hull", "guard_rock": "hull",
 	"moss_boulder_a": "hull", "moss_boulder_b": "hull", "moss_boulder_c": "hull",
@@ -268,11 +269,25 @@ func _guard_rail() -> void:
 		f += _step(_rng.randf_range(30.0, 50.0))
 
 
-## (4) VERSANTUL DE SUS — padure de fag rara + muschi + ferigi + tussock, cu
-## densitate care creste spre subiect (drumul) — memoria aranjamentul-bate-
-## numarul. Fagii sunt RARI (contract: "beech_* rari pe versantul de sus"),
-## nu perdea densa ca la POI D. Doua randuri: un rand aproape (6-16 m, des,
-## umple crapaturile cu muschi/ferigi) si un rand de fagi mai rar (10-30 m).
+## (4) VERSANTUL DE SUS — covor de muschi/ferigi la baza peretelui + padure
+## de fag pe versant, cu densitate care creste spre subiect (drumul) —
+## memoria aranjamentul-bate-numarul.
+##
+## RUNDA 2 (verdict critic): "padurea e prea rara si prea uniforma: instante
+## izolate, identice ca forma, iarba goala vizibila intre trunchiuri; in
+## referinta canopia e CONTINUA si stratificata, mase de verde suprapuse,
+## fara goluri de sol, cu variatie de marime/forma". NOTA coordonator: fagii
+## nu se scaleaza sistematic (decizia vitrinei), dar jitter +-10% si amestecul
+## beech_a/b/c/beech_dead cu yaw si inclinare usoara sunt permise; versantul
+## e teren (panta de iarba), NU al POI-ului — padurea deasa e ce-l acopera.
+## Fix: 3 randuri de adancime (8-13 / 13-19 / 19-27 m) in loc de un singur
+## rand rar, pas redus (3-6 m in loc de 8-16), probabilitate mare (nu mai
+## rar de 0.75) ca sa nu ramana goluri de iarba in cadru, scara jitter +-10%
+## per exemplar (nu sistematic) ca sa rupa siluetele identice, plus un strat
+## de vegetatie joasa (fern/tussock) intercalat la baza trunchiurilor care
+## leaga coroanele in silueta compusa (canopia "continua" ceruta de critic
+## vine din suprapunerea coroanelor mari + umplutura joasa dedesubt, nu din
+## marirea sistematica a fiecarui fag).
 func _upslope_forest() -> void:
 	var n := _track.baked.size()
 	var upslope := 1.0 if _sea_sign < 0.0 else -1.0
@@ -292,18 +307,42 @@ func _upslope_forest() -> void:
 				_place(model, "wallFoot", f, upslope, gap,
 					_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.3), COLLISION.get(model, "hull"))
 		f += _step(_rng.randf_range(1.8, 3.2))
-	# fagi rari, mai sus pe versant (8-26 m), densitate usor crescanda spre
-	# mijlocul zonei (al doilea S, frac ~0.17 — captura decisiva).
-	f = F_IN + 0.01
-	while f < F_OUT - 0.01:
-		var center_dist := absf(f - 0.17)
-		var density := clampf(1.0 - center_dist / 0.11, 0.25, 1.0)
-		if _rng.randf() < 0.35 + 0.35 * density:
-			var model: String = ["beech_a", "beech_a", "beech_b", "beech_c"][_rng.randi_range(0, 3)]
-			var gap := _rng.randf_range(6.0, 20.0)
-			_place(model, "wallForest", f, upslope, gap,
-				_rng.randf_range(0.0, TAU), 1.0, "trunk")
-		f += _step(_rng.randf_range(8.0, 16.0))
+	# PADURE DE FAG — 3 randuri de adancime, ca sa se suprapuna coroanele in
+	# cadru (memoria perete-paralel-nu-se-vede: la unghiul camerei, un rand
+	# din spate umple golul dintre trunchiurile din fata). Pas mic + prag de
+	# probabilitate ridicat ca sa nu ramana ferestre de iarba intre coroane.
+	# Densitatea inca urca spre al doilea S (frac ~0.17, captura decisiva),
+	# dar pragul minim e suficient de mare incat sa nu se vada gol nicaieri
+	# in zona (contract: "beech_* rari" fata de perdeaua deasa a POI D
+	# inseamna un rand, nu trei straturi suprapuse dese ca acolo — aici raman
+	# 3 randuri, dar fiecare rand e rar in adancimea LUI).
+	var bands: Array[Vector2] = [Vector2(8.0, 13.0), Vector2(13.0, 19.0), Vector2(19.0, 27.0)]
+	for band_i in bands.size():
+		var band: Vector2 = bands[band_i]
+		f = F_IN + 0.01 + float(band_i) * 0.003
+		while f < F_OUT - 0.01:
+			var center_dist := absf(f - 0.17)
+			var density := clampf(1.0 - center_dist / 0.13, 0.4, 1.0)
+			if _rng.randf() < 0.55 + 0.4 * density:
+				var model: String = ["beech_a", "beech_a", "beech_b", "beech_b", "beech_c", "beech_dead"][_rng.randi_range(0, 5)]
+				var gap: float = _rng.randf_range(band.x, band.y)
+				var scl := _rng.randf_range(0.9, 1.1)
+				var tilt := _rng.randf_range(-0.06, 0.06)
+				_place_tilted(model, "wallForest", f, upslope, gap,
+					_rng.randf_range(0.0, TAU), scl, "trunk", tilt)
+			f += _step(_rng.randf_range(3.0, 6.0))
+	# vegetatie joasa la baza trunchiurilor (4-9 m, intre peretele de mai jos
+	# si primul rand de fagi) — leaga coroanele in silueta compusa fara sa
+	# adauge inaltime: fara ea, sub coroane raman ferestre de teren gol intre
+	# trunchiuri chiar daca deasupra canopia s-a inchis.
+	f = F_IN
+	while f < F_OUT:
+		if _rng.randf() < 0.75:
+			var model: String = ["fern_cluster", "tussock_clump", "fern_cluster", "moss_boulder_a"][_rng.randi_range(0, 3)]
+			var gap := _rng.randf_range(4.0, 9.0)
+			_place(model, "wallUnder", f, upslope, gap,
+				_rng.randf_range(0.0, TAU), _rng.randf_range(0.85, 1.25), COLLISION.get(model, "hull"))
+		f += _step(_rng.randf_range(2.2, 4.0))
 
 
 func _step(meters: float) -> float:
@@ -313,7 +352,7 @@ func _step(meters: float) -> float:
 ## Aseaza o piesa la `frac`, pe partea `side_sign`, la `gap` metri de MUCHIA
 ## drumului pana la MARGINEA corpului fizic. Cota din raycast pe TerrainBody.
 func _place(model: String, base: String, frac: float, side_sign: float,
-		gap: float, yaw: float, scl: float, mode: String = "hull") -> void:
+		gap: float, yaw: float, scl: float, mode: String = "hull", tilt: float = 0.0) -> void:
 	var n := _track.baked.size()
 	var i := int(frac * float(n)) % n
 	var p := _track.baked[i]
@@ -344,7 +383,15 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	if sink > max_sink:
 		_skipped += 1
 		return
-	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, mode)
+	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, mode, tilt)
+
+
+## Varianta cu inclinare usoara pe X/Z (fagi cu trunchi usor aplecat, nu
+## drepti-ca-lumanarea toti — rupe siluetele identice, memoria criticului
+## runda 2 "variaza silueta/scara").
+func _place_tilted(model: String, base: String, frac: float, side_sign: float,
+		gap: float, yaw: float, scl: float, mode: String, tilt: float) -> void:
+	_place(model, base, frac, side_sign, gap, yaw, scl, mode, tilt)
 
 
 const NEAR_WINDOW_FRAC2 := NEAR_WINDOW_FRAC
@@ -367,13 +414,16 @@ func _on_any_road(p: Vector3, home_i: int, body_r: float) -> bool:
 
 
 func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
-		mode: String) -> void:
+		mode: String, tilt: float = 0.0) -> void:
 	_n += 1
 	_tri += int(TRI.get(model, 0))
 	_out.append('[node name="%s%d" parent="%s" instance=ExtResource("%s")]'
 		% [base, _n, ZONE, RES[model]])
-	# Randurile bazei (memoria tscn-transform-e-pe-randuri).
-	var b := Basis.from_euler(Vector3(0.0, yaw, 0.0)).scaled(Vector3(scl, scl, scl))
+	# Randurile bazei (memoria tscn-transform-e-pe-randuri). Tilt-ul se aplica
+	# INAINTE de yaw (rotatie pe X, apoi Y) ca sa nu se anuleze intre ele —
+	# ordinea Euler conteaza doar pentru unghiuri mari, la +-0.06 rad e
+	# neglijabil, dar pastram ordinea explicita oricum.
+	var b := Basis.from_euler(Vector3(tilt, yaw, 0.0)).scaled(Vector3(scl, scl, scl))
 	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
 		% [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z,
 			pos.x, pos.y, pos.z])

@@ -1340,6 +1340,32 @@ const CLASSES_BY_MODEL := {
 	},
 }
 
+## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),
+## nu global — la fel cum [constant SLOT_REMAP_BY_THEME] exista langa
+## [constant SLOT_REMAP_BY_MODEL].
+##
+## De ce nu direct in `CLASSES_BY_MODEL`: `chasm_rock.glb` e piesa fiordland a
+## marmitelor (Track16 POI D), dar numele e generic si ramane reuse posibil pe
+## alte piste (ca `moss_boulder_*` dinspre Machu Picchu, in sens invers) — o
+## intrare globala i-ar schimba culoarea oriunde ar fi plasat, nu doar aici.
+##
+## Verdict critic runda 5 POI B (Fiordland): peretele de gneis din dreapta
+## cornisei citea placa gri uniforma, fara dungile ude verticale si fara
+## muschiul din crapaturi — semnatura de material ceruta de brief §4/§5.6.
+## `chasm_rock` folosit ca bolovan de perete langa drum (nu doar in albia
+## raului la POI D) e exact suprafata care trebuie sa citeasca gneisul ud, nu
+## un gri neutru plat (`SLOT_REMAP_BY_THEME` ii da azi doar VOLCANIC_BLACK pe
+## slotul 29 — culoare corecta ca ton, dar plata, fara dala). `wet_gneiss` e
+## deja clasa corecta (stirling_ledge.Wall, torrent_chute.Rock, acelasi verdict
+## de brief) si costa ZERO materiale noi: e cache pe clasa, nu pe model.
+const CLASSES_BY_THEME := {
+	"fiordland": {
+		"chasm_rock": {
+			"Rock_001": Palette.TRI_PREFIX + "wet_gneiss",
+		},
+	},
+}
+
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
 ## 200-300 m. Un caster de 300 m care intra in cascada de umbre ii prabuseste
 ## precizia pentru prim-plan (memoria `caster-departat-fura-umbra`: hornurile
@@ -1557,15 +1583,14 @@ const SLOT_REMAP_BY_THEME := {
 			12: Palette.TROPICAL_GREEN},
 		"moss_boulder_c": {3: Palette.VOLCANIC_BLACK, 29: Palette.VOLCANIC_BLACK,
 			12: Palette.TROPICAL_GREEN},
-		# `chasm_rock`: build_fiordland_rocks.py defineste GNEISS = MARBLE_GREY
-		# (slot 29) direct pe corpul lespezii — acelasi gri deschis
-		# (182,178,170) care a facut moss_boulder sa citeasca "piatra de Anzi"
-		# in loc de gneis. MOSS pe muchia de sus e deja TROPICAL_GREEN (21),
-		# tinta corecta din fixul de mai sus — nu se atinge. Descoperit runda
-		# 4 POI B: banda de gneis de langa drum (chasm_rock, cerut de critic
-		# pentru peretele de pe partea de deal) a iesit gri-albastrui deschis
-		# in loc de gneis inchis, desi moss_boulder alaturat citea corect.
-		"chasm_rock": {29: Palette.VOLCANIC_BLACK},
+		# `chasm_rock` NU mai e aici din runda 5 POI B: fixul de runda 4
+		# (VOLCANIC_BLACK pe slotul 29) dadea gneisul ca ton corect dar plat —
+		# criticul a cerut semnatura de material (dungi ude + muschi in
+		# crapaturi), nu doar culoarea, deci piesa a trecut pe clasa
+		# triplanara `wet_gneiss` (`CLASSES_BY_THEME`, mai jos in fisier).
+		# `material_override` inlocuieste tot ce era pe atlas, inclusiv
+		# remaparea asta de slot — pastrarea ei aici ar fi o a doua sursa
+		# de adevar moarta, niciodata citita.
 	},
 }
 
@@ -1803,8 +1828,12 @@ func _ready() -> void:
 	# nu verifica CULOAREA randata, doar numarul de materiale. `call_deferred`
 	# muta remaparea dupa ce tot lantul de _ready() (inclusiv al parintelui) s-a
 	# terminat, cand `theme_decor` e deja cel real. Restul functiilor de mai jos
-	# NU depind de tema, raman sincrone.
+	# NU depind de tema, raman sincrone. `_apply_theme_classes` (runda 5 POI B:
+	# `CLASSES_BY_THEME`, `chasm_rock` -> `wet_gneiss` doar pe fiordland) are
+	# aceeasi dependenta de `_ancestor_theme()` si aceeasi problema, deci merge
+	# deferred langa `_remap_model_slots`.
 	call_deferred("_remap_model_slots")
+	call_deferred("_apply_theme_classes")
 	_repaint_slot_boxes()
 	_split_shutters()
 	_retint_tuff()
@@ -2147,17 +2176,34 @@ func _split_shutters() -> void:
 ## Aplica `CLASSES_BY_MODEL` peste materialele deja puse. Ruleaza DUPA
 ## `apply_class_materials`, ca sa aiba ultimul cuvant pe partile ambigue.
 func _apply_model_classes() -> void:
+	_apply_classes_mapping(CLASSES_BY_MODEL)
+
+
+## Ca [method _apply_model_classes], dar din [constant CLASSES_BY_THEME],
+## scopat pe tema pistei-stramos. `call_deferred` din `_ready()`, la fel ca
+## `_remap_model_slots` si pentru acelasi motiv: `_ancestor_theme()` e citit
+## BOTTOM-UP, inainte ca `Track._ready()` sa fi aplicat `custom_theme` — sincron
+## aici, `chasm_rock` n-ar primi niciodata `wet_gneiss` pe fiordland (tema ar
+## fi inca implicitul "forest", pentru care `CLASSES_BY_THEME` n-are intrare).
+func _apply_theme_classes() -> void:
+	var theme := _ancestor_theme()
+	if not CLASSES_BY_THEME.has(theme):
+		return
+	_apply_classes_mapping(CLASSES_BY_THEME[theme])
+
+
+## Motorul comun: aplica o mapare stem -> (nume-de-parte -> clasa) pe modelele
+## din subtree. NU `apply_class_materials`: ala pune materialul lumii pe tot ce
+## nu e in mapare, deci ar sterge clasele deja aplicate pe celelalte parti
+## (`Church_Tower` tocmai primise varul). Aici se ating DOAR partile numite.
+func _apply_classes_mapping(by_stem: Dictionary) -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
 	for model in models:
 		var stem := model.scene_file_path.get_file().get_basename()
-		if not CLASSES_BY_MODEL.has(stem):
+		if not by_stem.has(stem):
 			continue
-		# NU `apply_class_materials`: ala pune materialul lumii pe tot ce nu e
-		# in mapare, deci ar sterge clasele deja aplicate pe celelalte parti
-		# (`Church_Tower` tocmai primise varul). Aici se ating DOAR partile
-		# numite.
-		var mapping: Dictionary = CLASSES_BY_MODEL[stem]
+		var mapping: Dictionary = by_stem[stem]
 		var stack: Array[Node] = [model]
 		while not stack.is_empty():
 			var node: Node = stack.pop_back()

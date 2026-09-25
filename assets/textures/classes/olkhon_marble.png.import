@@ -3,8 +3,8 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bi5woqf02xkck"
-path.s3tc="res://.godot/imported/olkhon_marble.png-77d48bd7cb2096644a9b0bfd8d490985.s3tc.ctex"
-path.etc2="res://.godot/imported/olkhon_marble.png-77d48bd7cb2096644a9b0bfd8d490985.etc2.ctex"
+path.bptc="res://.godot/imported/olkhon_marble.png-77d48bd7cb2096644a9b0bfd8d490985.bptc.ctex"
+path.astc="res://.godot/imported/olkhon_marble.png-77d48bd7cb2096644a9b0bfd8d490985.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -13,12 +13,12 @@ metadata={
 [deps]
 
 source_file="res://assets/textures/classes/olkhon_marble.png"
-dest_files=["res://.godot/imported/olkhon_marble.png-77d48bd7cb2096644a9b0bfd8d490985.s3tc.ctex", "res://.godot/imported/olkhon_marble.png-77d48bd7cb2096644a9b0bfd8d490985.etc2.ctex"]
+dest_files=["res://.godot/imported/olkhon_marble.png-77d48bd7cb2096644a9b0bfd8d490985.bptc.ctex", "res://.godot/imported/olkhon_marble.png-77d48bd7cb2096644a9b0bfd8d490985.astc.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -94,6 +94,12 @@ const MAX_SHAKE: float = 0.35 # metri de offset la trauma maxima
 ## indepartate siluete de la orizont stau la ~350m. La 380m nu se pierde nimic
 ## vizibil, dar frustumul nu mai plimba geometrie prin pipeline degeaba.
 const FAR_PLANE: float = 380.0
+## Planul APROPIAT. Godot il lasa la 0.05 m, dar precizia bufferului de
+## adancime se imparte logaritmic intre near si far: cu far la 380 m, primii
+## 5 cm de la lentila inghit o parte din ea degeaba, iar restul scenei
+## primeste z-fighting la distanta si acnee de umbra. Camera nu se apropie
+## oricum de nimic sub CLIP_MARGIN (0.45 m), deci 0.3 m nu taie nimic vizibil.
+const NEAR_PLANE: float = 0.3
 
 # --- privire spre vectorul de viteza ---
 ## Cat de mult se muta TINTA PRIVIRII spre directia reala de deplasare.
@@ -197,6 +203,7 @@ func _ready() -> void:
 		"DEFAULT_HEIGHT nu mai e height_for(REFERENCE_LENGTH)")
 	_cam = Camera3D.new()
 	_cam.far = FAR_PLANE
+	_cam.near = NEAR_PLANE
 	add_child(_cam)
 	_cam.current = true
 	add_to_group(GROUP)

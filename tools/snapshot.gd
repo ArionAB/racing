@@ -1027,6 +1027,16 @@ func _set_cloud_time(root: Node, at: float) -> void:
 ## tren; `_has_prev` se stinge ca primul tick sa nu citeasca teleportarea ca
 ## pe o miscare (si sa roteasca botul dupa ea).
 func _set_bus_time(root: Node, at: float) -> void:
+	# `BusHazard` la Fiordland nu e declarat in .tscn: `TunnelSignalHazard`
+	# il construieste in `_build_bus.call_deferred()` din `_ready()` (brief
+	# §2E: lampa+autobuzul se construiesc, geometria tunelului ramane cod).
+	# Un `find_children` chemat prea devreme (un singur physics_frame, ca la
+	# `--cloud-at`) nu il gaseste inca — call_deferred ruleaza la finalul
+	# frame-ului IDLE curent, nu neaparat inaintea urmatorului tick de
+	# fizica. Un process_frame in plus lasa coada de deferred sa se goleasca
+	# inainte de cautare (masurat: fara el, "--bus-at: NICIUN autobuz pe
+	# pista asta" pe Track16, desi SemaforTunel avea deja bus_model setat).
+	await get_tree().process_frame
 	await get_tree().physics_frame
 	var found := 0
 	for node in root.find_children("*", "BusHazard", true, false):
@@ -1040,6 +1050,17 @@ func _set_bus_time(root: Node, at: float) -> void:
 		bus.set("_has_prev", false)
 		var pos: Vector3 = bus.to_global(bus.curve.sample_baked(d, true))
 		bus.set("_yaw", bus.call("_travel_yaw", length, pos))
+		# `--bus-at` cere autobuzul VIZIBIL la pozitia data, indiferent de
+		# ciclul lui ascuns/vizibil (TunnelSignalHazard/SemaforTunel il
+		# porneste ASCUNS pana la inceputul tranzitului — vezi
+		# `_force_hidden_until_transit` in tunnel_signal_hazard.gd). Fara
+		# `_show()` explicit, `_set_dist`/`_set_yaw` de mai sus repozitioneaza
+		# corpul, dar `_body.visible` ramane fals si captura iese cu autobuzul
+		# invizibil desi coordonatele sunt corecte (masurat pe Fiordland POI E,
+		# --bus-at=12 pe Track16: pozitia raportata era in gura tunelului, dar
+		# nimic randat acolo).
+		if bus.call("is_hidden"):
+			bus.call("_show")
 		found += 1
 		for _i in 3:
 			await get_tree().physics_frame

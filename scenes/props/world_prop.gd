@@ -1583,6 +1583,19 @@ const SLOT_REMAP_BY_THEME := {
 }
 
 const SLOT_REMAP_BY_MODEL := {
+	# `wharf.glb` (Fiordland POI A): toata fata de SUS a peretelui de piatra
+	# (17 triunghiuri, y in [1.98, 2.12] — masurat direct pe mesh, acopera
+	# intreaga lungime de 20 m si latime de 4,2 m, deci CHIAR platforma de
+	# mers, nu un accent mic) e pe slotul 21 TROPICAL_GREEN, nu 29 MARBLE_GREY
+	# ca restul peretelui. Contractul (`fiordland_kit.md`): "Blocuri
+	# MARBLE_GREY, babale VOLCANIC_BLACK" — DOI sloturi, fara verde. Pe
+	# captura, platforma iese verde-crud (culoarea ierbii), nu piatra gri a
+	# babalelor de langa ea — se citeste ca un acoperis de casa, nu ca zid de
+	# chei (bara: piatra uniforma). Kitul are 400/400 triunghiuri (buget
+	# epuizat), deci nu se rescrie GLB-ul aici — remap de slot, ca la
+	# acaciile-umbrela.
+	"wharf": {21: Palette.MARBLE_GREY},
+
 	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
 	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea
 	# (190,188,96), identica cu campia) si pe 21 (TROPICAL_GREEN, verde de

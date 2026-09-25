@@ -75,6 +75,12 @@ script = ExtResource("2_peak")
 radius_m = 44.0
 island = true
 
+[node name="ScarPeakF" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.6, 66.0, -204.41)
+gizmo_extents = 60.0
+script = ExtResource("2_peak")
+radius_m = 60.0
+
 [node name="Hazarduri" type="Node3D" parent="."]
 
 [node name="RainCycle" type="Node" parent="Hazarduri"]

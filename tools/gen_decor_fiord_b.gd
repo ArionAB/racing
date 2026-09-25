@@ -391,12 +391,15 @@ func _cliff_wall() -> void:
 				if not r["found"]:
 					skipped += 1
 					continue
-				var model: String = ["moss_boulder_a", "fern_cluster", "tussock_clump", "fern_cluster", "moss_boulder_a"][_rng.randi_range(0, 4)]
-				# scara usor marita fata de prima trecere (0.9-1.35 fata de
-				# 0.75-1.15) — la distanta si unghi de chase-cam, petele mici
-				# se pierd pe fondul intunecat al peretelui.
+				# A treia trecere: moss_boulder_a e doar 0,74 m inalt — chiar
+				# la scara 1,35 (~1 m) se pierde pe un perete de 6+ m vazut de
+				# la distanta de chase-cam. moss_boulder_b (1,96 m) intra in
+				# amestec pentru masa vizibila reala (o "pata", nu un punct);
+				# c ramane doar la Seal Rock (prea mare pentru o crapatura).
+				var model: String = ["moss_boulder_a", "moss_boulder_b", "fern_cluster", "tussock_clump", "fern_cluster", "moss_boulder_b"][_rng.randi_range(0, 5)]
+				var scl: float = _rng.randf_range(0.9, 1.3) if model == "moss_boulder_b" else _rng.randf_range(1.0, 1.5)
 				_raw(model, "cliffFace", r["pos"],
-					_rng.randf_range(0.0, TAU), _rng.randf_range(0.9, 1.35), "none")
+					_rng.randf_range(0.0, TAU), scl, "none")
 				placed += 1
 		f += _step(_rng.randf_range(1.6, 2.8))
 	# cateva rata_tree cu flori rosii agatate pe fata peretelui, in pete rare
@@ -404,7 +407,7 @@ func _cliff_wall() -> void:
 	# dubla fata de prima trecere si concentrata in jurul frac 0,17 (al
 	# doilea S, captura decisiva) unde prima trecere n-a produs niciun
 	# exemplar vizibil in cadru.
-	var rata_wall_fracs: Array[float] = [0.100, 0.130, 0.150, 0.165, 0.175, 0.190, 0.210, 0.235]
+	var rata_wall_fracs: Array[float] = [0.100, 0.130, 0.150, 0.162, 0.168, 0.172, 0.178, 0.190, 0.210, 0.235]
 	for rf in rata_wall_fracs:
 		var i2 := int(rf * float(n)) % n
 		var p2: Vector3 = _track.baked[i2]
@@ -414,12 +417,11 @@ func _cliff_wall() -> void:
 		if not r2["found"]:
 			skipped += 1
 			continue
-		# scara marita (0.8-1.05 fata de 0.55-0.75 in prima trecere): la
-		# distanta de chase-cam pe un perete inclinat, tufa mica dispare;
-		# tot sub cota unui fag (rata_tree e "tufa densa", brief-ul o
-		# scaleaza pana la 1.0 in alte POI-uri fara sa devina copac).
+		# scara marita din nou (0.95-1.2, a treia trecere): la 0,8-1,05 tot nu
+		# se distinge in captura fata de fondul intunecat al peretelui — tot
+		# sub cota unui fag (rata_tree e "tufa densa", nu copac).
 		_raw("rata_tree", "rataWall", r2["pos"],
-			_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.05), "none")
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.95, 1.2), "none")
 		placed += 1
 	print("; perete stanca: %d piese (muschi/ferigi/tussock/rata) pe fata abrupta, %d sarite (perete instabil la esantion)" % [placed, skipped])
 

@@ -152,6 +152,7 @@ func _props(node: Node, prefix: String) -> Array[Dictionary]:
 ## tools/gen_decor_baikal.gd.
 const SPANS_ROAD_PREFIXES: Array[String] = [
 	"PoartaStart", "Grota", "Arcada", "Pila", "CapatViaduct", "PortalTunel",
+	"chasmBridgeRail",
 ]
 
 ## Modul de coliziune REZOLVAT pentru un prop asezat de mana: metadata proprie

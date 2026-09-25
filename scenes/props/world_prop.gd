@@ -717,6 +717,28 @@ const CLASSES_BY_MODEL := {
 	"stromboli_church": {
 		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
 	},
+
+	# Fiordland (POI A/H, docs/asset_briefs/fiordland_vitrina.md "Punct
+	# deschis"): `House_Roof` (`cafe_shed`) si `House_Roof_001` (`lodge`,
+	# acelasi prefix — `_class_for`/bucla de mai jos fac `begins_with`, nu
+	# egalitate exacta) COINCID cu `House_Roof` din `village_house.glb`
+	# (landmark 6, Okinawa/Dunele), care intra in `prop_classes()` GLOBAL
+	# cu clasa `roof_tiles` (memoria `nume-noduri-nu-sunt-unice`).
+	# Verificat direct pe scena incarcata (nu presupus): `House_Roof`
+	# primea `albedo_texture = res://assets/textures/classes/roof_tiles.png`
+	# in loc de atlasul comun — media acelei texturi e (154,113,82), adica
+	# exact tanul #BB8967 raportat in vitrina, nu o chestiune de slot sau
+	# de lumina. Testat si respins pe captura: remap de slot (11 -> 8) NU
+	# schimba nimic (acoperisul nu citeste deloc slotul din atlas cat timp
+	# are alta textura), si `--rain=1` nu schimba nici el nuanta (nu e
+	# reflexie speculara). `House_Wall`/`House_Wall_001` NU colideaza —
+	# maparea globala n-are nicio cheie `House_Wall*` — si au iesit deja
+	# corect pe `palette_atlas.png` la verificare, deci raman neatinse.
+	# `ATLAS_PREFIX` forteaza inapoi materialul lumii doar pe acoperis,
+	# fara sa atinga maparea globala (care ramane corecta pentru
+	# `village_house`).
+	"cafe_shed": {"House_Roof": Palette.ATLAS_PREFIX},
+	"lodge": {"House_Roof_001": Palette.ATLAS_PREFIX},
 	# Firidele din peretele stancii goale (Cappadocia, POI G): fundul lor ARDE.
 	#
 	# Fara asta o fereastra sapata e o pata neagra, si verdictul rundei 2 spune
@@ -1557,6 +1579,15 @@ const SLOT_REMAP_BY_THEME := {
 			12: Palette.TROPICAL_GREEN},
 		"moss_boulder_c": {3: Palette.VOLCANIC_BLACK, 29: Palette.VOLCANIC_BLACK,
 			12: Palette.TROPICAL_GREEN},
+		# `chasm_rock`: build_fiordland_rocks.py defineste GNEISS = MARBLE_GREY
+		# (slot 29) direct pe corpul lespezii — acelasi gri deschis
+		# (182,178,170) care a facut moss_boulder sa citeasca "piatra de Anzi"
+		# in loc de gneis. MOSS pe muchia de sus e deja TROPICAL_GREEN (21),
+		# tinta corecta din fixul de mai sus — nu se atinge. Descoperit runda
+		# 4 POI B: banda de gneis de langa drum (chasm_rock, cerut de critic
+		# pentru peretele de pe partea de deal) a iesit gri-albastrui deschis
+		# in loc de gneis inchis, desi moss_boulder alaturat citea corect.
+		"chasm_rock": {29: Palette.VOLCANIC_BLACK},
 	},
 }
 
@@ -1781,7 +1812,21 @@ const SLOT_REPAINT_BY_BOX := {
 
 
 func _ready() -> void:
-	_remap_model_slots()
+	# `_remap_model_slots` cere `_ancestor_theme()`, iar Godot cheama _ready()
+	# BOTTOM-UP: DecorManual (acest nod) e copil direct al Track/TrackFromPath,
+	# deci ruleaza INAINTEA lui Track._ready() -> TrackFromPath._apply_custom()
+	# -> apply_theme(custom_theme). La acel moment theme_decor e inca implicitul
+	# "forest", nu tema reala a pistei (ex. "fiordland") — SLOT_REMAP_BY_THEME
+	# nu se aplica NICIODATA la runtime, desi codul e corect si testele izolate
+	# (instantiere manuala + await process_frame) confirma tema corecta o clipa
+	# mai tarziu. Descoperit runda 4 POI B Fiordland: moss_boulder_a/b/c si
+	# chasm_rock ies MARBLE_GREY (gri deschis) in captura reala din joc, desi
+	# fixurile anterioare (a4491e4d, 0f83d9aa) pareau sa treaca gardile — gardile
+	# nu verifica CULOAREA randata, doar numarul de materiale. `call_deferred`
+	# muta remaparea dupa ce tot lantul de _ready() (inclusiv al parintelui) s-a
+	# terminat, cand `theme_decor` e deja cel real. Restul functiilor de mai jos
+	# NU depind de tema, raman sincrone.
+	call_deferred("_remap_model_slots")
 	_repaint_slot_boxes()
 	_split_shutters()
 	_retint_tuff()
@@ -2150,12 +2195,18 @@ func _apply_model_classes() -> void:
 			# fi depins de ordinea cheilor — o mapare corecta ar fi devenit
 			# gresita la o reordonare inocenta.
 			var cls := ""
+			var matched := false
 			var best := -1
 			for part: String in mapping:
 				if nm.begins_with(part) and part.length() > best:
 					best = part.length()
 					cls = String(mapping[part])
-			if cls.is_empty():
+					matched = true
+			# `cls` poate fi gol prin constructie DOAR daca nimic nu s-a
+			# potrivit — un prefix care se potriveste dar are valoarea
+			# `ATLAS_PREFIX` nu e gol, deci trece mai departe si forteaza
+			# materialul lumii (vezi nota de la `ATLAS_PREFIX`).
+			if not matched:
 				continue
 			# Nodurile de accente exista tocmai ca sa RAMANA pe atlas, deci o
 			# clasa de suprafata nu are ce cauta pe ele PRIN LACOMIA UNUI
@@ -2185,6 +2236,8 @@ func _apply_model_classes() -> void:
 ## inexistenta. Prefixele sunt aceleasi ca in `apply_class_materials`, ca o
 ## mapare sa insemne acelasi lucru indiferent pe unde intra.
 func _model_class_material(cls: String) -> Material:
+	if cls == Palette.ATLAS_PREFIX:
+		return Palette.world_material()
 	if cls.begins_with(Palette.GLOW_PREFIX):
 		return Palette._glow_from_spec(cls.trim_prefix(Palette.GLOW_PREFIX))
 	if cls.begins_with(Palette.FINISH_PREFIX):

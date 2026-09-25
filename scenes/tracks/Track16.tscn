@@ -232,6 +232,9 @@ transform = Transform3D(0.6412, -0.0090, 0.7673, 0.0000, 0.9999, 0.0117, -0.7674
 
 [node name="ZoneD_Chasm" type="Node3D" parent="DecorManual"]
 
+[node name="torrentChute" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_torrent_chute")]
+transform = Transform3D(0.6078, 0.0400, -0.7931, -0.0000, 0.9987, 0.0503, 0.7941, -0.0306, 0.6070, -481.414, 19.553, -558.743)
+
 [node name="chasmBridgeRail1" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_bridge_rail")]
 transform = Transform3D(-0.677701, 0, 0.735337, 0, 1.000000, 0, -0.735337, 0, -0.677701, -511.161011, 17.966978, -587.609070)
 metadata/coliziune = "none"

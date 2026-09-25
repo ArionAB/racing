@@ -1427,6 +1427,16 @@ const SHADER_PREFIX := "shader:"
 ## aprinse costa UN material, nu unul per cladire.
 const GLOW_PREFIX := "glow:"
 
+## Al cincilea prefix acceptat: "atlas". Nu aduce nicio textura noua — forteaza
+## `world_material()` pe o parte anume a unui model, ca sa anuleze o coliziune
+## de nume cu maparea GLOBALA din `prop_classes()` (memoria
+## `nume-noduri-nu-sunt-unice`). Fara sentinela, `CLASSES_BY_MODEL` nu putea
+## SCOATE o clasa deja aplicata global — doar adauga una noua — fiindca un
+## string gol insemna "nicio intrare" si sarea nodul, lasand materialul gresit
+## pe loc. Vezi `cafe_shed`/`lodge` mai jos: `House_Roof` al lor coincide cu
+## `House_Roof` din `village_house.glb` (landmark Okinawa, `roof_tiles`).
+const ATLAS_PREFIX := "atlas"
+
 
 ## Materialul cerut de un "glow:<slot>|<energie>". Energia e optionala
 ## (implicit 1.2, ca la `glow_material`).

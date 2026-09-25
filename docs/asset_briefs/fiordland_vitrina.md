@@ -159,19 +159,48 @@ Fiecare mod are un motiv scris explicit în comentariile din `world_prop.gd`
 aceste decizii — sunt raportate ca „ce spune codul", nu ca „verificat prin
 condus".
 
-## Punct deschis (revizuirea coordonatorului, 25 sep 2026): acoperișurile ies tan
+## Punct ÎNCHIS (runda 1, POI A, 25 sep 2026): acoperișurile ieșeau tan — CAUZĂ GĂSITĂ ȘI REPARATĂ
 
-`cafe_shed` și `lodge` au `House_Roof` pe slotul 11 `PAINTED_METAL` (UV exact la
-centrul slotului, u = 0,3594; atlas #728EA3, albastru-gri; vertex color mediu
-neutru 0,73). În captură acoperișul măsoară **#BB8967** (tan) la yaw 0 și
-**#BB8967** la yaw 180; `luggage_container`, pe ACELAȘI slot, iese albastru.
-Normalele sunt consistente (aceeași orientare ca `heli_pad`, care iese gri).
-Nu e mapare de clasă (`CLASSES_BY_MODEL` n-are cafe/lodge, iar
-`House_Roof: roof_tiles` din track.gd e doar pe landmark-ul Okinawa
-`village_house`). Cauza NU e dovedită. Ipoteze rămase, de testat ca A/B în
-prima rundă a POI A (o captură per variantă, `--vitrina=cafe_shed`):
-(1) reflexia speculară a soarelui pe fața orizontală (`metallic_specular`
-0,15 în `world_material`) — test: `--rain=1` schimbă soarele; (2) fața de sus
-primește altceva decât slotul 11 la runtime — test: remap 11 → 8 în
-`SLOT_REMAP_BY_MODEL["cafe_shed"]`; dacă tot iese tan, nu e slotul.
-Verdict vizual: brief-ul cere „tablă gri"; tan citește a lemn/teracotă.
+`cafe_shed` și `lodge` au `House_Roof`/`House_Roof_001` pe slotul 11
+`PAINTED_METAL` (UV exact la centrul slotului, u = 0,3594; atlas albastru-gri
+(117,145,167), verificat direct din `palette_atlas.png`, nu presupus). În
+captură acoperișul măsura **#BB8967** (tan) la yaw 0 și yaw 180.
+
+**Ambele ipoteze din revizuirea precedentă au fost testate și RESPINSE, cu
+captură:**
+
+1. **Reflexie speculară** (`metallic_specular` 0,15 pe fața orizontală) —
+   testat cu `--vitrina=cafe_shed --rain=1` (schimbă soarele): acoperișul
+   rămâne #BB8967 identic sub ploaie. Respinsă.
+2. **Fața de sus primește alt slot la runtime** — testat cu un remap de probă
+   11 → 8 (CONCRETE) în `SLOT_REMAP_BY_MODEL["cafe_shed"]`: **acoperișul nu
+   s-a schimbat deloc**. Asta a fost semnalul că piesa nu citește slotul din
+   atlas prin mecanismul de remap — nu ajunge acolo deloc. Respinsă (remapul
+   de probă a fost scos din cod după test, nu a rămas pe ramură).
+
+**Cauza reală**, găsită instanțiind `cafe_shed.glb` sub un `WorldProp` real și
+citind `material_override`/`albedo_texture` pe scena încărcată: `House_Roof`
+primea `albedo_texture = res://assets/textures/classes/roof_tiles.png` —
+NU atlasul comun. Media acelei texturi e (154,113,82), adică exact tanul
+raportat, cu vertex color ridicând ușor valoarea. `roof_tiles` e clasa
+landmark-ului Okinawa (`village_house.glb`, `_LANDMARKS[6]` din `track.gd`):
+`"House_Roof": "roof_tiles"` intră GLOBAL în `WorldProp.prop_classes()`
+(`Palette.apply_class_materials`), iar `_class_for` face `begins_with`, nu
+egalitate exactă — deci prinde și `House_Roof_001` al lui `lodge`. Coliziune
+de nume de nod între kituri (memoria `nume-noduri-nu-sunt-unice`), nu slot,
+nu lumină.
+
+**Reparat în `world_prop.gd`** (o singură dată, cum cere brief-ul — POI H
+preia rezolvarea fără lucru suplimentar): adăugat sentinela
+`Palette.ATLAS_PREFIX` (nou, în `palette.gd`), care forțează explicit
+`world_material()` pe o parte a unui model prin `CLASSES_BY_MODEL`, distinct
+de "nicio intrare" (bug-ul vechi: un string gol în mapare era tratat ca
+"nimic de făcut" și nodul rămânea pe materialul greșit din pasul global).
+`CLASSES_BY_MODEL["cafe_shed"]["House_Roof"]` și
+`CLASSES_BY_MODEL["lodge"]["House_Roof_001"]` sunt acum `ATLAS_PREFIX`.
+`House_Wall`/`House_Wall_001` NU colidau (maparea globală n-are nicio cheie
+`House_Wall*`) și au rămas neatinse. `village_house`/Okinawa nu e atins:
+mapările noi sunt cheie pe fișier (`cafe_shed`/`lodge`), landmark-ul 6 rămâne
+neschimbat. Verificat pe captură (`--vitrina=cafe_shed`, `--vitrina=lodge`):
+ambele acoperișuri ies acum albastru-gri metalic, ca `luggage_container` pe
+același slot.

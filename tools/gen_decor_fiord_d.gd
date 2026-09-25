@@ -513,43 +513,80 @@ func _bridge_canyon_dressing() -> void:
 ## parti, cu exceptia benzii scurtaturii unde se opreste (AI-ul nu vede decor
 ## static -- niciun trunchi pe cei 3.2 m). In afara scurtaturii, decorul chiar
 ## se apropie de ea (pereti de trunchiuri langa banda veche, cere contractul).
+##
+## RUNDA 3, verdict critic: coronamentul din STANGA cadrului citea "zid verde
+## continuu" -- inaltimi aproape identice, plasate prea des, fara goluri de
+## cer. Nota coordonatorului (2): amestec beech_a/b/c (7.0/10.2/13.5) +
+## beech_dead pe stanga, jitter +/-10% pe inaltime, MAI PUTINE piese pe randul
+## apropiat stang (sa apara goluri de cer printre coroane din camera de joc).
+## Dreapta ramane neschimbata (criticul a numit STANGA, memoria
+## tinta-pe-o-axa-se-atinge-pe-axa-aia).
 func _near_row() -> void:
 	for sgn: float in [-1.0, 1.0]:
-		var f := F_IN + (0.0 if sgn < 0.0 else _step(4.0))
+		var left := sgn < 0.0
+		var f := F_IN + (0.0 if left else _step(4.0))
 		var k := 0
 		while f < F_OUT:
 			var dens := _density(f)
-			if _rng.randf() < 0.4 + 0.6 * dens:
-				var mdl := "beech_a" if k % 3 != 2 else "beech_b"
-				var h := _rng.randf_range(6.0, 7.2) if mdl == "beech_a" \
-					else _rng.randf_range(9.5, 10.4)
+			# Stanga: prag mai mare (mai rar) ca sa lase goluri de cer intre coroane.
+			var thresh := (0.22 + 0.45 * dens) if left else (0.4 + 0.6 * dens)
+			if _rng.randf() < thresh:
+				var mdl: String
+				var h: float
+				if left:
+					# amestec pe 4 clase, cu beech_dead ca a patra treapta de verde/lumina.
+					var pick := k % 4
+					mdl = ["beech_a", "beech_b", "beech_c", "beech_dead"][pick]
+					var base_h: float = {"beech_a": 6.6, "beech_b": 9.9,
+						"beech_c": 13.0, "beech_dead": 8.0}[mdl]
+					h = base_h * _rng.randf_range(0.9, 1.1)
+				else:
+					mdl = "beech_a" if k % 3 != 2 else "beech_b"
+					h = _rng.randf_range(6.0, 7.2) if mdl == "beech_a" \
+						else _rng.randf_range(9.5, 10.4)
 				var lat := _rng.randf_range(2.5, 5.5)
 				_place(mdl, "fagApropiat", f, sgn, lat,
 					_rng.randf_range(0.0, TAU), _scale_for(mdl, h), "trunk")
-			f += _step(5.5 + _rng.randf_range(-1.0, 1.0))
+			# Stanga: pas mai mare (rand mai rar) -- acelasi motiv, goluri de cer.
+			f += _step((7.0 if left else 5.5) + _rng.randf_range(-1.0, 1.0))
 			k += 1
 
 
 ## AL DOILEA RAND: fagi mai mari (beech_b/c) la 8-15 m de muchie -- al doilea
 ## etaj de coronament (bara: "coronament in etaje, cerul se vede printre ele").
+## RUNDA 3: stanga primeste acelasi amestec pe 4 clase + jitter +/-10% (vezi
+## _near_row) si pas usor mai mare, ca etajele 1-2 sa nu se suprapuna in zid.
 func _second_row() -> void:
 	for sgn: float in [-1.0, 1.0]:
-		var f := F_IN + _step(2.5 if sgn < 0.0 else 6.0)
+		var left := sgn < 0.0
+		var f := F_IN + _step(2.5 if left else 6.0)
 		var k := 0
 		while f < F_OUT:
 			var dens := _density(f)
-			if _rng.randf() < 0.2 + 0.8 * dens:
-				var mdl := "beech_b" if k % 3 != 1 else "beech_c"
-				var h := _rng.randf_range(9.5, 10.4) if mdl == "beech_b" \
-					else _rng.randf_range(12.5, 13.5)
+			var thresh := (0.12 + 0.55 * dens) if left else (0.2 + 0.8 * dens)
+			if _rng.randf() < thresh:
+				var mdl: String
+				var h: float
+				if left:
+					var pick := k % 4
+					mdl = ["beech_b", "beech_c", "beech_a", "beech_dead"][pick]
+					var base_h: float = {"beech_a": 6.6, "beech_b": 9.9,
+						"beech_c": 13.0, "beech_dead": 8.0}[mdl]
+					h = base_h * _rng.randf_range(0.9, 1.1)
+				else:
+					mdl = "beech_b" if k % 3 != 1 else "beech_c"
+					h = _rng.randf_range(9.5, 10.4) if mdl == "beech_b" \
+						else _rng.randf_range(12.5, 13.5)
 				_place(mdl, "fagEtaj2", f, sgn, _rng.randf_range(8.0, 15.0),
 					_rng.randf_range(0.0, TAU), _scale_for(mdl, h), "trunk")
-			f += _step(7.0 + _rng.randf_range(-1.2, 1.2))
+			f += _step((8.5 if left else 7.0) + _rng.randf_range(-1.2, 1.2))
 			k += 1
 
 
 ## FUNDALUL: fagii cei mai inalti (beech_c) la 18-32 m de muchie, sa inchida
-## cerul in etajul al treilea, mai rar spre margini.
+## cerul in etajul al treilea, mai rar spre margini. Fundalul ramane neschimbat
+## pe ambele parti -- criticul a incadrat defectul in "primele 2/3 din
+## inaltime" (etajele 1-2), fundalul e deja cel mai inalt/mai rar etaj.
 func _backdrop() -> void:
 	for sgn: float in [-1.0, 1.0]:
 		var f := F_IN + _step(4.0 if sgn < 0.0 else 9.0)

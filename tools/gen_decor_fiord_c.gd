@@ -324,13 +324,20 @@ func _moss_and_nook() -> void:
 ## Ancora: raza ORIZONTALA dinspre axa spre perete (nu in jos): gaseste fata
 ## reala a lui `stirlingLedge_col` la inaltimea ceruta, piesa se aseaza LIPITA
 ## de ea (impinsa cu 0.15 m inapoi spre drum, sa nu strapunga peretele).
-## Grupare (nu banda uniforma): 2-3 piese per muchie, inaltimi diferite
-## (2-11 m, sub linia buzei), yaw variat, densitate mai mare langa muchia
-## dinspre subiect (cea de intrare, 0.288, care se vede primă din masina).
+##
+## RUNDA 2b (captura v1r2_f028 verificata la ochi, nu doar la garda): primul
+## rand de 4+3 piese la scara 0.6-0.95 (moss_boulder are 0.7-2 m la scara 1)
+## trece toate gardile FIZICE dar pe camera arata ca "un fir de iarba in colt"
+## — invizibil langa un perete de 20+ m. Doua schimbari: (1) mai multe piese
+## (8-9 per muchie, nu 3-4), intinse pe toata inaltimea utila a peretelui
+## (masurata prin survey: 1.5-16 m la muchii, nu doar 2-11), ca sa citeasca
+## drept "muschi care urca stanca", nu un singur bolovan; (2) scara mai mare
+## si bias spre moss_boulder_b/c la inaltime medie (5-11 m, in raza vizuala a
+## camerei de joc), pastrand piese mici doar la baza/varf pentru detaliu.
 func _wall_flank_moss(space_state: PhysicsDirectSpaceState3D, n: int) -> void:
 	var edges := [
-		{"f0": 0.286, "f1": 0.290, "n": 4},   # muchia de intrare (dinspre chei)
-		{"f0": 0.304, "f1": 0.309, "n": 3},   # muchia de iesire (spre Chasm)
+		{"f0": 0.2865, "f1": 0.2905, "n": 9},   # muchia de intrare (dinspre chei)
+		{"f0": 0.3035, "f1": 0.3085, "n": 8},   # muchia de iesire (spre Chasm)
 	]
 	var placed := 0
 	for edge: Dictionary in edges:
@@ -342,7 +349,11 @@ func _wall_flank_moss(space_state: PhysicsDirectSpaceState3D, n: int) -> void:
 			var i := int(f * float(n)) % n
 			var p: Vector3 = _track.baked[i]
 			var s: Vector3 = _track._side_at(i)
-			var h: float = _rng.randf_range(2.0, 11.0)
+			# Inaltime pe toata banda utila a peretelui, cu mai multa masa la
+			# inaltime medie (5-11 m, unde camera de joc o vede cel mai bine)
+			# si putine piese rare pana sus, ca sa citeasca drept crestere
+			# continua, nu o banda taiata.
+			var h: float = lerpf(1.5, 16.0, _rng.randf_range(0.0, 1.0) * _rng.randf_range(0.0, 1.0) + 0.15)
 			var from := Vector3(p.x, p.y + h, p.z) + s * _wall_side * 2.5
 			var to: Vector3 = from + s * _wall_side * 20.0
 			var query := PhysicsRayQueryParameters3D.create(from, to)
@@ -359,13 +370,23 @@ func _wall_flank_moss(space_state: PhysicsDirectSpaceState3D, n: int) -> void:
 			var hp: Vector3 = hit["position"]
 			var normal: Vector3 = hit.get("normal", -s * _wall_side)
 			var anchor: Vector3 = hp + normal * 0.15  # lipita de fata, nu ingropata
-			var mdl := "moss_boulder_a" if _rng.randf() < 0.55 else "moss_boulder_b"
-			_raw(mdl, "muschiFlanc", anchor, _rng.randf_range(0.0, TAU),
-				_rng.randf_range(0.6, 0.95), "none")
+			# Bias spre piese MARI la inaltime medie, mici jos/sus — citeste ca
+			# muschi care s-a intins pe stanca, nu ca resturi la baza.
+			var mdl: String
+			var scl: float
+			if h > 4.0 and h < 12.0 and _rng.randf() < 0.6:
+				mdl = "moss_boulder_c" if _rng.randf() < 0.4 else "moss_boulder_b"
+				scl = _rng.randf_range(1.1, 1.8)
+			else:
+				mdl = "moss_boulder_a" if _rng.randf() < 0.6 else "moss_boulder_b"
+				scl = _rng.randf_range(0.7, 1.1)
+			_raw(mdl, "muschiFlanc", anchor, _rng.randf_range(0.0, TAU), scl, "none")
 			placed += 1
-			# un fern_cluster la baza flancului, jos langa perete
-			if _rng.randf() < 0.5:
-				var from2 := Vector3(p.x, p.y + 1.0, p.z) + s * _wall_side * 2.5
+			# fern_cluster alaturat, ca sa rupa silueta rotunda a bolovanului
+			# si sa citeasca a vegetatie agatatoare, nu doar piatra verde.
+			if _rng.randf() < 0.6:
+				var h2: float = h + _rng.randf_range(-1.0, 1.5)
+				var from2 := Vector3(p.x, p.y + h2, p.z) + s * _wall_side * 2.5
 				var to2: Vector3 = from2 + s * _wall_side * 20.0
 				var q2 := PhysicsRayQueryParameters3D.create(from2, to2)
 				var hit2 := space_state.intersect_ray(q2)
@@ -375,7 +396,7 @@ func _wall_flank_moss(space_state: PhysicsDirectSpaceState3D, n: int) -> void:
 						var hp2: Vector3 = hit2["position"]
 						var n2: Vector3 = hit2.get("normal", -s * _wall_side)
 						_raw("fern_cluster", "fernFlanc", hp2 + n2 * 0.1,
-							_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.1), "none")
+							_rng.randf_range(0.0, TAU), _rng.randf_range(1.0, 1.6), "none")
 						placed += 1
 	print("; muschi + ferigi pe flancuri: %d piese" % placed)
 

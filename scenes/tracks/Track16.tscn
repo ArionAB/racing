@@ -49,6 +49,7 @@
 [ext_resource type="PackedScene" uid="uid://ddu3p2qo2mup1" path="res://assets/models/machupicchu/rocks/moss_boulder_c.glb" id="s_moss_boulder_c"]
 [ext_resource type="PackedScene" uid="uid://byv4e26nfnp5w" path="res://assets/models/signs/chevron_sign.glb" id="s_chevron_sign"]
 [ext_resource type="PackedScene" uid="uid://6uiuyphujnhh" path="res://assets/models/structures/wooden_pier.glb" id="s_wooden_pier"]
+[ext_resource type="Script" uid="uid://pcypbcie67pr" path="res://scenes/hazards/foam_pool.gd" id="9_foam_pool"]
 
 [sub_resource type="Curve3D" id="Curve3D_fiordland"]
 closed = true
@@ -393,6 +394,20 @@ transform = Transform3D(-0.278469, 0.000000, 0.789448, 0.000000, 0.837122, 0.000
 
 [node name="bolovanUd42" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.947667, 0.000000, 0.815189, 0.000000, 1.250042, 0.000000, -0.815189, 0.000000, 0.947667, -462.8152, 31.1868, -403.3484)
+
+[node name="FoamPoolDreapta" type="Node3D" parent="DecorManual/ZoneC_Stirling"]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -443.5386, 31.6449, -385.8768)
+script = ExtResource("9_foam_pool")
+patch_count = 11
+radius = 1.8
+rng_seed = 160297
+
+[node name="FoamPoolStanga" type="Node3D" parent="DecorManual/ZoneC_Stirling"]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -455.5189, 31.6430, -371.3885)
+script = ExtResource("9_foam_pool")
+patch_count = 11
+radius = 1.8
+rng_seed = 160298
 
 [node name="fagPlatou43" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_c")]
 transform = Transform3D(0.784259, 0.000000, -0.677608, 0.000000, 1.036443, 0.000000, 0.677608, 0.000000, 0.784259, -383.7596, 30.8561, -364.7507)

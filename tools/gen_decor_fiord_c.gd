@@ -176,6 +176,7 @@ func _ready() -> void:
 		print("; wall_side = %.0f" % _wall_side)
 		_moss_and_nook()
 		_wet_boulders()
+		_foam_pool()
 		_plateau_beeches()
 		_rata_and_guard()
 		_write()
@@ -502,6 +503,58 @@ func _wet_boulders() -> void:
 				placed += 1
 		f += 0.004
 	print("; bolovani uzi + ferigi baza: %d piese" % placed)
+
+
+## (2b) BAZINUL ALB DE SPUMA LA BAZA CASCADEI — verdict critic runda 5:
+## "lipseste bazinul alb cu spray la baza cascadei... la noi coloana de apa se
+## termina direct in iarba verde". Verificat pe captura + cifre INAINTE de a
+## adauga ceva (nota coordonator): la frac 0.28 masina e la 36,7 m de centrul
+## perdelei (0.297 x 2159,2 m lungime traseu), la 0.31 la 28,1 m — amandoua
+## dincolo de raza efectiva a placii/inelului din `WaterfallVisual` (~15-16 m
+## local Z). Cascada se vede mica la orizont in ambele capturi, dar solul de
+## la baza ei (unde ar fi bazinul) e prea departe/prea jos ca sa citeasca din
+## unghiul camerei de joc la aceste fractii — nu shader-ul e stricat (nu-l
+## ating), lipseste decor STATIC care sa extinda zona alba vizual mai aproape
+## de camera, pe marginile drumului.
+##
+## Niciun GLB de "bazin/spuma" in kit (fiordland_masuratori.md) — solutia
+## fara asset nou e `FoamPool` (scenes/hazards/foam_pool.gd), petice joase pe
+## FOAM_WHITE construite cu `PaletteBox` (acelasi tipar ca reperele din
+## `FogCorridorHazard`), ZERO material nou. Cate un bazin pe FIECARE parte a
+## drumului (brief coordonator: "pe AMBELE margini"), la f=0.297 (centrul
+## perdelei), lateral la half+0.3 .. half+4 (in afara carosabilului, memoria
+## suprafete-cu-goluri-si-praguri — FoamPool n-are coliziune, deci pragul nu
+## se aplica, dar il respect oricum ca sa nu se suprapuna vizual cu asfaltul).
+func _foam_pool() -> void:
+	var n := _track.baked.size()
+	var i := int(F_CENTER * float(n)) % n
+	var p: Vector3 = _track.baked[i]
+	var s: Vector3 = _track._side_at(i)
+	var half: float = _track.width_at_index(i)
+	# RUNDA 5, a doua iterație: raza grupului (1.8) + jumatatea celui mai lat
+	# petic posibil din FoamPool (2.1/2=1.05) nu are voie sa treaca de half+0.3
+	# spre ax. Centrul grupului la half+3.4: cel mai apropiat petic posibil
+	# ajunge la half+3.4-1.8-1.05=half+0.55 — cu rezerva peste prag. Marginea
+	# exterioara: half+3.4+1.8+1.05=half+6.25 (grup mai mare si mai vizibil de
+	# la distanta, cu movile care ies din siluetă — proba de sanity la 0.28
+	# arata ca versiunea joasa/mica anterioara era sub pragul de vizibilitate).
+	var sides: Array[float] = [1.0, -1.0]   # dreapta (perete) si stanga (mare)
+	for k in range(sides.size()):
+		var side_sgn: float = sides[k]
+		var lat: float = side_sgn * (half + 3.4)
+		var q: Vector3 = p + s * lat
+		var y: float = _sampler.ground_y(q.x, q.z)
+		_out.append('[node name="FoamPool%s" type="Node3D" parent="%s"]' % [
+			"Dreapta" if side_sgn > 0.0 else "Stanga", ZONE])
+		_out.append("transform = %s" % _tscn_transform(
+			Transform3D(Basis.IDENTITY, Vector3(q.x, y, q.z))))
+		_out.append('script = ExtResource("9_foam_pool")')
+		_out.append("patch_count = 11")
+		_out.append("radius = 1.8")
+		_out.append("rng_seed = %d" % (160297 + k))
+		_out.append("")
+		_n += 1
+	print("; bazin de spuma: 2 grupuri (stanga+dreapta la f=%.3f)" % F_CENTER)
 
 
 ## (3) FAGI PE PLATOUL DE DEASUPRA PERETELUI — "fara copaci in GLB" (brief

@@ -395,6 +395,24 @@ transform = Transform3D(-0.278469, 0.000000, 0.789448, 0.000000, 0.837122, 0.000
 [node name="bolovanUd42" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(0.947667, 0.000000, 0.815189, 0.000000, 1.250042, 0.000000, -0.815189, 0.000000, 0.947667, -462.8152, 31.1868, -403.3484)
 
+[node name="gneisMargine43" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.422761, 0.000000, -0.140002, 0.000000, 0.445339, 0.000000, 0.140002, 0.000000, 0.422761, -423.9029, 31.4780, -375.5992)
+
+[node name="gneisMargine44" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.279018, 0.000000, 0.280834, 0.000000, 0.395877, 0.000000, -0.280834, 0.000000, -0.279018, -428.8487, 31.5259, -377.5522)
+
+[node name="gneisMargine45" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.271968, 0.000000, 0.390683, 0.000000, 0.476025, 0.000000, -0.390683, 0.000000, -0.271968, -464.4668, 31.1373, -405.4453)
+
+[node name="gneisMargine46" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.478402, 0.000000, -0.099961, 0.000000, 0.488734, 0.000000, 0.099961, 0.000000, 0.478402, -460.0454, 31.2643, -400.1908)
+
+[node name="gneisBaza47" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.446628, 0.000000, -0.117825, 0.000000, 0.461909, 0.000000, 0.117825, 0.000000, -0.446628, -437.3727, 31.6209, -381.6592)
+
+[node name="gneisBaza48" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.399575, 0.000000, 0.186317, 0.000000, 0.440879, 0.000000, -0.186317, 0.000000, -0.399575, -449.8122, 31.5216, -391.2465)
+
 [node name="FoamPoolDreapta" type="Node3D" parent="DecorManual/ZoneC_Stirling"]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -443.5386, 31.6449, -385.8768)
 script = ExtResource("9_foam_pool")

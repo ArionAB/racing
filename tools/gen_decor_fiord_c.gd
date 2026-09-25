@@ -88,6 +88,10 @@ const RES := {
 	"fern_cluster": "s_fern_cluster", "tree_fern": "s_tree_fern",
 	"guard_rock": "s_guard_rock", "tussock_clump": "s_tussock_clump",
 	"rata_tree": "s_rata_tree",
+	# RUNDA 6: chasm_rock, deja inregistrat (folosit in ZoneD_Chasm) — gneis
+	# inchis pe tema (slot 29 -> VOLCANIC_BLACK, world_prop.gd SLOT_REMAP_BY_MODEL),
+	# reuse fara ext_resource nou.
+	"chasm_rock": "s_chasm_rock",
 }
 
 ## Inaltimea AABB masurata (fiordland_masuratori.md / fiordland_inventory.md;
@@ -98,6 +102,7 @@ const HEIGHT := {
 	"fern_cluster": 0.90, "tree_fern": 3.306,
 	"guard_rock": 0.585, "tussock_clump": 0.80,
 	"rata_tree": 3.67,
+	"chasm_rock": 2.500,
 }
 
 ## Raza de degajare la sol (m) la scara 1.
@@ -109,6 +114,7 @@ const BASE_R := {
 	"fern_cluster": 0.45, "tree_fern": 0.15,
 	"guard_rock": 0.59, "tussock_clump": 0.40,
 	"rata_tree": 0.930 * 3.67,
+	"chasm_rock": 3.02,
 }
 
 const TRI := {
@@ -117,6 +123,7 @@ const TRI := {
 	"fern_cluster": 120, "tree_fern": 768,
 	"guard_rock": 72, "tussock_clump": 144,
 	"rata_tree": 354,
+	"chasm_rock": 416,
 }
 
 const COLLISION := {
@@ -126,6 +133,7 @@ const COLLISION := {
 	"fern_cluster": "hull", "tree_fern": "trunk",
 	"guard_rock": "hull", "tussock_clump": "hull",
 	"rata_tree": "hull",
+	"chasm_rock": "hull",
 }
 
 ## Degajarea minima de la muchia drumului (m), pentru orice piesa cu
@@ -176,6 +184,7 @@ func _ready() -> void:
 		print("; wall_side = %.0f" % _wall_side)
 		_moss_and_nook()
 		_wet_boulders()
+		_dark_gneiss_boulders()
 		_foam_pool()
 		_plateau_beeches()
 		_rata_and_guard()
@@ -503,6 +512,80 @@ func _wet_boulders() -> void:
 				placed += 1
 		f += 0.004
 	print("; bolovani uzi + ferigi baza: %d piese" % placed)
+
+
+## (2c) BOLOVANI DE GNEIS INTUNECAT PE MARGINILE PERDELEI SI LA BAZA — verdict
+## critic runda 6: "in jurul si sub perdeaua de apa (centru-dreapta) lipsesc
+## bolovani/stanci intunecate plasate ca decor — nicio piesa de roca nu iese
+## prin sau pe langa alb, asa ca peretele intunecat si ud din spatele cascadei
+## nu se citeste, doar alb continuu". Solutia ceruta explicit: 3-5 piese de
+## stanca INCHISA (nu moss_boulder verde) direct langa marginile perdelei
+## (stanga si dreapta) si la baza, suficient de aproape incat sa se suprapuna
+## vizual cu marginea jetului.
+##
+## `_wet_boulders()` de mai sus foloseste DOAR moss_boulder_a/b/c (verde-muschi,
+## slot 12/21 TROPICAL_GREEN) — bun pentru "bolovani uzi cu muschi" raspanditi
+## pe toata lungimea F_IN..F_OUT, dar niciunul nu citeste ca STANCA GOALA
+## inchisa, care e exact contrastul cerut aici. Piesa corecta e `chasm_rock`
+## (nota coordonator): pe tema fiordland `SLOT_REMAP_BY_MODEL` ii pune slotul
+## 29 pe VOLCANIC_BLACK (world_prop.gd) — gneis inchis, nu gri deschis
+## MARBLE_GREY ca implicitul. E deja ext_resource inregistrat (`s_chasm_rock`,
+## folosit in ZoneD_Chasm ca marmite), reuse fara resursa noua.
+##
+## Amplasare (nota coordonator, verbatim): pe marginile LATERALE ale perdelei
+## si la baza ei, pe acostament/bazin, NU pe asfalt. Perdeaua e f in
+## [0.273, 0.323] (semi 6 centrata pe axa) — deci:
+##   - 2 piese langa marginea de INTRARE a perdelei (f~0.286, dinspre chei),
+##   - 2 piese langa marginea de IESIRE (f~0.308, spre Chasm),
+##   - 1 piesa chiar la baza, cat mai aproape de linia de cadere (f=F_CENTER),
+##     pe partea peretelui, suficient de aproape de axa (half+EDGE_KEEP, ca
+##     bolovanUd) ca sa se suprapuna vizual cu jetul/bazinul alb din camera.
+## Scara: piesa masurata e 6.00x4.72 baza, 2.50 inaltime — prea mare pentru
+## "bolovan langa margine" la scara 1; redusa la 0.35-0.55 (2.1-3.3 m latime,
+## 0.9-1.4 m inaltime), comparabila cu moss_boulder_c alaturat, ca sa se
+## grupeze vizual cu bolovanii existenti, nu sa domine cadrul.
+## Ancora: `ground_y` (teren real), ca la `_wet_boulders`; verificata separat
+## fata de half+EDGE_KEEP ca sa nu intre in asfalt (ProbeLaneClear/probe_manual).
+func _dark_gneiss_boulders() -> void:
+	var n := _track.baked.size()
+	var placed := 0
+
+	# (a) marginile laterale ale perdelei — grupuri de 2, langa intrare/iesire,
+	# pe partea peretelui (_wall_side), cat mai aproape de EDGE_KEEP ca sa
+	# citeasca "aproape de asfalt/margine", nu departat pe versant.
+	var edge_fracs := [F_IN + 0.013, F_OUT - 0.015]   # ~0.286, ~0.308
+	for f_edge: float in edge_fracs:
+		for k in range(2):
+			var f: float = f_edge + _rng.randf_range(-0.003, 0.003)
+			var i := int(f * float(n)) % n
+			var p: Vector3 = _track.baked[i]
+			var s: Vector3 = _track._side_at(i)
+			var half: float = _track.width_at_index(i)
+			var lat: float = _wall_side * (half + EDGE_KEEP + _rng.randf_range(0.3, 1.6))
+			var q: Vector3 = p + s * lat
+			var y: float = _sampler.ground_y(q.x, q.z)
+			var scl := _rng.randf_range(0.38, 0.52)
+			_raw("chasm_rock", "gneisMargine", Vector3(q.x, y, q.z),
+				_rng.randf_range(0.0, TAU), scl, "hull")
+			placed += 1
+
+	# (b) direct la baza, pe partea peretelui, cat mai aproape de linia de
+	# cadere (F_CENTER) — se suprapune vizual cu bazinul alb/jetul din camera.
+	# Doua piese, offset lateral mic intre ele ca sa nu se suprapuna geometric.
+	for k in range(2):
+		var f: float = F_CENTER + float(k * 2 - 1) * 0.004
+		var i := int(f * float(n)) % n
+		var p: Vector3 = _track.baked[i]
+		var s: Vector3 = _track._side_at(i)
+		var half: float = _track.width_at_index(i)
+		var lat: float = _wall_side * (half + EDGE_KEEP + _rng.randf_range(0.2, 0.9))
+		var q: Vector3 = p + s * lat
+		var y: float = _sampler.ground_y(q.x, q.z)
+		var scl := _rng.randf_range(0.42, 0.55)
+		_raw("chasm_rock", "gneisBaza", Vector3(q.x, y, q.z),
+			_rng.randf_range(0.0, TAU), scl, "hull")
+		placed += 1
+	print("; bolovani de gneis intunecat (margini + baza): %d piese" % placed)
 
 
 ## (2b) BAZINUL ALB DE SPUMA LA BAZA CASCADEI — verdict critic runda 5:

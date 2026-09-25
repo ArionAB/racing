@@ -123,9 +123,18 @@ const ROAD_MARGIN := 2.1
 ## FELIA SALTULUI — kickerul e REGLAT (gap 12). Nicio piesa cu coliziune pe
 ## 0.85-0.875 la mai putin de 7 m de ax (contract explicit). Se tine 0.848-
 ## 0.877 si 8.0 m ca marja de siguranta peste cifra din contract.
+##
+## RUNDA 1, PRIMA TRECERE (ProbeRace seed 1/2 --slice=0.83,0.90): [blocaj]
+## repetat la frac 0.872-0.881, lat 5.8-7.9, atingand poolWall39/poolWall51 —
+## AMANDOUA in afara benzii declarate mai sus (0.848-0.877), pe ATERIZAREA
+## dupa kicker, unde masinile care aluneca lateral dupa salt ajung mai departe
+## de ax decat pe traiectoria de zbor insasi. Banda de siguranta trebuia sa
+## acopere si aterizarea propriu-zisa, nu doar zborul. Extinsa la 0.848-0.888
+## (contract 0.85-0.875 + marja) si JUMP_LAT la 9.5 m (masurat: blocajul cel
+## mai indepartat a fost la 7.9 m, deci 9.5 lasa 1.6 m rezerva).
 const JUMP_F_LO := 0.848
-const JUMP_F_HI := 0.877
-const JUMP_LAT := 8.0
+const JUMP_F_HI := 0.888
+const JUMP_LAT := 9.5
 
 var _track: Track
 var _sampler: TrackSideSampler
@@ -264,12 +273,24 @@ func _pool_wall() -> void:
 				var s: Vector3 = _track._side_at(i) * side_sign
 				var half: float = _track.width_at_index(i)
 				var model: String = ["chasm_rock", "moss_boulder_b", "moss_boulder_c", "chasm_rock", "guard_rock"][_rng.randi_range(0, 4)]
-				var r: float = BASE_R.get(model, 0.9)
+				# scl ALES INAINTE de calculul marginii — RUNDA 1, A DOUA
+				# TRECERE: pragul de siguranta al saltului folosea raza
+				# NESCALATA (BASE_R), dar piesa se aseaza cu `scl` pana la 1.5x
+				# aplicat DUPA. Masurat pe blocaj: poolWall46 (guard_rock,
+				# scl masurat 1.269 din transform) avea muchia reala la
+				# 9.5*0.65/... de fapt centrul calculat pe raza nescalata, deci
+				# muchia REALA (scalata) ateriza cu ~0.3*r inauntrul pragului —
+				# exact [blocaj] repetat la frac 0.878 lat 7.9-7.9, identic la
+				# fiecare rulare (Tu (Muscle) t=66.0/69.0s, seed 2, 2 rulari).
+				# Fix: raza foloseste `r * scl` peste tot unde intra in geometria
+				# de asezare, nu doar raza de baza.
+				var scl: float = _rng.randf_range(1.0, 1.5)
+				var r: float = BASE_R.get(model, 0.9) * scl
 				var gap := _rng.randf_range(1.0, 4.5) + float(k) * 1.6
-				# banda saltului: nicio piesa cu coliziune la mai putin de
-				# JUMP_LAT m de ax pe 0.848-0.877 (contract explicit).
+				# banda saltului: MUCHIA (nu centrul) piesei trebuie sa ramana
+				# la >= JUMP_LAT m de ax pe 0.848-0.888 (contract explicit).
 				if f >= JUMP_F_LO and f <= JUMP_F_HI:
-					gap = maxf(gap, JUMP_LAT - half - r + 0.3)
+					gap = maxf(gap, JUMP_LAT - half + 0.3)
 				var d := half + gap + r
 				var q := p + s * d
 				var nrm := _normal_real(q.x, q.z)
@@ -287,7 +308,6 @@ func _pool_wall() -> void:
 				if d - r < half + EDGE_KEEP:
 					skipped += 1
 					continue
-				var scl: float = _rng.randf_range(1.0, 1.5)
 				var yaw := _rng.randf_range(0.0, TAU)
 				_raw(model, "poolWall", Vector3(q.x, g, q.z), yaw, scl, "hull")
 				placed += 1
@@ -438,9 +458,11 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var half := _track.width_at_index(i)
 	var r: float = BASE_R.get(model, 0.6) * scl
 	gap = maxf(gap, ROAD_MARGIN - r)
-	# felia saltului: piesele cu coliziune trebuie sa ramana la >= JUMP_LAT.
+	# felia saltului: MUCHIA piesei (d - r) trebuie sa ramana la >= JUMP_LAT
+	# (acelasi fix ca in _pool_wall — gap se calculeaza pentru muchie, nu
+	# pentru centru).
 	if frac >= JUMP_F_LO and frac <= JUMP_F_HI and mode != "none":
-		gap = maxf(gap, JUMP_LAT - half - r + 0.3)
+		gap = maxf(gap, JUMP_LAT - half + 0.3)
 	var d := half + gap + r
 	var q := p + s * d
 	var g := _sol_real(q.x, q.z)

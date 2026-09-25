@@ -162,6 +162,13 @@ unul static la ponton, unul pe `PathMover` cu `stick_to_ground=false` pe apă,
 ciclu ~120 s), `kayak_a/b`, `cafe_shed`, `penguin_tawaki` ×3 (`none`),
 `driftwood`, `guard_rock`.
 
+**Vitrina kitului** (`docs/asset_briefs/fiordland_vitrina.md`, planșa
+`img/fiordland_vitrina.png`, flag `Snapshot --vitrina=<stem>`): fagii măsoară
+7,0 / 10,2 / 13,5 m în joc (nu se scalează), autocarul, vaporașul, stânca și
+jgheabul citesc corect. **Deschis:** acoperișurile `cafe_shed`/`lodge` ies
+**tan** (#BB8967) deși stau pe slotul 11 albastru-gri — prima rundă a POI A
+face A/B-ul din vitrina.md înainte de orice altceva.
+
 Capcana: **apa.** Memoriile `apa-iluminata-v12` (pata gri = pânză opacă;
 Fresnel din chase cam), `apa-stilizata-de-noapte` (saturația, nu luminanța;
 variația în reflexii) și `celula-de-apa-plana-peste-mal`. Diorama are apă
@@ -364,6 +371,9 @@ Brief: drum drept pe mal (semi 8), satul (lodge, magazii, heliport gol),
 `PathMover` cu `stick_to_ground=false`, **origine în centrul fuzelajului**),
 umbra lui trece peste mașini; container de bagaje, caiace, pinguini; apa pe
 stânga = repunere; dreapta lungă = locul de turbo.
+
+Acoperișul `lodge` are aceeași problemă de culoare ca la POI A (vitrina.md):
+se rezolvă o dată, la A, și se preia aici.
 
 Piese: `lodge`, `cafe_shed` (ca magazie), `luggage_container` ×2–3,
 `heli_pad` (`none`), `bush_plane` (`PathMover`, curbă în aer care coboară

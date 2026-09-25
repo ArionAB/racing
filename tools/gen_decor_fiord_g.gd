@@ -388,28 +388,77 @@ func _foam_pool() -> void:
 ## pe AMBELE maluri (peretele cascadei SI malul opus). Densitate moderata,
 ## suprapunere de coroane ca sa nu ramana ferestre de iarba (aranjamentul-
 ## bate-numarul), dar mult mai rara decat POI D.
+##
+## RUNDA 2, verdict critic: malul de la 40-65% din latimea cadrului, "intre
+## bolovanii din prim-plan si cotul drumului", citea "gard/aliniament".
+## Verificat pe captura marcata cu linii la 40%/65%: fasia respectiva cade
+## PESTE bolovanii+fagii de la peretele cascadei (poolWall/bankForest82-93,
+## side_sign == _wall_sign), NU peste malul opus — desi "peretele" e in
+## dreapta geografica dupa contract, la unghiul de camera al POI-ului G
+## (curba + chase cam) el proiecteaza in stanga cadrului. Fix aplicat pe
+## side_sign == _wall_sign: gap si pasul de-a lungul drumului devin PER
+## INSTANTA (jitter >= 0,5 din pas in ambele axe), 2-3 randuri de adancime cu
+## offset-uri care se suprapun (nu benzi separate cu goluri intre ele), plus
+## clustere dense intercalate cu goluri explicite. Malul opus (-_wall_sign,
+## aterizarea) ramane pe reteta veche (nu a fost numit de critic).
 func _bank_forest() -> void:
 	var n := _track.baked.size()
 	for side_sign: float in [_wall_sign, -_wall_sign]:
-		var bands: Array[Vector2] = [Vector2(9.0, 14.0), Vector2(14.0, 20.0)]
-		for band_i in bands.size():
-			var band: Vector2 = bands[band_i]
-			var f := F_IN + 0.006 + float(band_i) * 0.003
-			while f < F_OUT - 0.006:
-				# fereastra saltului: pe partea de aterizare tinem copacii mai
-				# departe de banda (JUMP_LAT), ca sa nu intre coroana peste
-				# traiectorie; pe peretele cascadei distanta laterala mare (9+ m)
-				# e deja in afara benzii.
-				if f >= JUMP_F_LO and f <= JUMP_F_HI and side_sign == -_wall_sign:
+		var jittered: bool = side_sign == _wall_sign
+		if not jittered:
+			var bands: Array[Vector2] = [Vector2(9.0, 14.0), Vector2(14.0, 20.0)]
+			for band_i in bands.size():
+				var band: Vector2 = bands[band_i]
+				var f := F_IN + 0.006 + float(band_i) * 0.003
+				while f < F_OUT - 0.006:
+					if _rng.randf() < 0.6:
+						var model: String = ["beech_a", "beech_a", "beech_b", "beech_c", "beech_dead"][_rng.randi_range(0, 4)]
+						var gap: float = _rng.randf_range(band.x, band.y)
+						var scl := _rng.randf_range(0.9, 1.1)
+						_place(model, "bankForest", f, side_sign, gap,
+							_rng.randf_range(0.0, TAU), scl, "trunk")
 					f += _step(_rng.randf_range(3.5, 6.0))
-					continue
-				if _rng.randf() < 0.6:
-					var model: String = ["beech_a", "beech_a", "beech_b", "beech_c", "beech_dead"][_rng.randi_range(0, 4)]
-					var gap: float = _rng.randf_range(band.x, band.y)
-					var scl := _rng.randf_range(0.9, 1.1)
-					_place(model, "bankForest", f, side_sign, gap,
-						_rng.randf_range(0.0, TAU), scl, "trunk")
-				f += _step(_rng.randf_range(3.5, 6.0))
+		else:
+			# malul stang: 2-3 randuri de adancime, gap si pas jitterate per
+			# instanta (>= 0,5 din pas), clustere dense + goluri intercalate,
+			# in loc de benzi paralele cu gap fix.
+			var depth_bands: Array[Vector2] = [Vector2(8.0, 13.0), Vector2(12.0, 18.0), Vector2(17.0, 24.0)]
+			for band_i in depth_bands.size():
+				var band: Vector2 = depth_bands[band_i]
+				var base_step := 4.5
+				var f := F_IN + 0.004 + float(band_i) * 0.0025
+				# faza de cluster/gol independenta per rand, ca randurile sa nu
+				# se goleasca in acelasi punct de-a lungul drumului.
+				var cluster_phase := _rng.randf_range(0.0, TAU)
+				while f < F_OUT - 0.004:
+					if f >= JUMP_F_LO and f <= JUMP_F_HI:
+						# fereastra saltului: copacii raman departe de banda,
+						# dar tot cu jitter (nu revenim la pas fix).
+						f += _step(base_step * _rng.randf_range(0.7, 1.4))
+						continue
+					# densitate variabila de-a lungul drumului: clustere (pana
+					# la 2 trunchiuri apropiate) alternand cu goluri, in loc de
+					# o proba uniforma per pozitie.
+					var cluster_wave: float = sin(cluster_phase + f * 220.0)
+					var p_place: float = clampf(0.72 + 0.28 * cluster_wave, 0.15, 0.95)
+					if _rng.randf() < p_place:
+						var model: String = ["beech_a", "beech_a", "beech_b", "beech_c", "beech_dead"][_rng.randi_range(0, 4)]
+						var gap: float = _rng.randf_range(band.x, band.y)
+						var scl := _rng.randf_range(0.85, 1.15)
+						var f_here := f + _step(_rng.randf_range(-1.8, 1.8))
+						_place(model, "bankForest", f_here, side_sign, gap,
+							_rng.randf_range(0.0, TAU), scl, "trunk")
+						# cluster ocazional: al doilea trunchi aproape, adancime
+						# si pozitie proprii, ca sa rupa ritmul de rand unic.
+						if cluster_wave > 0.5 and _rng.randf() < 0.45:
+							var model_c: String = ["beech_a", "beech_b", "beech_c"][_rng.randi_range(0, 2)]
+							var gap_c: float = clampf(gap + _rng.randf_range(-3.0, 3.5), band.x - 2.0, band.y + 4.0)
+							var f_c := f_here + _step(_rng.randf_range(1.0, 3.0))
+							_place(model_c, "bankForest", f_c, side_sign, gap_c,
+								_rng.randf_range(0.0, TAU), _rng.randf_range(0.85, 1.15), "trunk")
+					# pasul de-a lungul drumului variaza puternic (jitter >=
+					# 0,5 din pasul de baza) in loc de un increment ingust.
+					f += _step(base_step * _rng.randf_range(0.5, 1.9))
 		# vegetatie joasa la baza trunchiurilor + cate un tree_fern rar.
 		var f2 := F_IN
 		while f2 < F_OUT:

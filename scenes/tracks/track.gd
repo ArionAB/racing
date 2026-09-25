@@ -1170,8 +1170,33 @@ static func themes() -> Dictionary:
 			"fog_end": 320.0,
 			"fog_curve": 1.5,
 			"fog_max": 0.85,
-			"horizon_model": "",
+			# Fundalul: fiordland_horizon.glb (4 noduri, brief §5.6 — "ARE
+			# CONSUMATOR, tema goala"). FarWall_A/B sunt panze de 180 m
+			# lungime x 57-67 m inaltime; SnowRidge_A/B conuri de ~90 m,
+			# baza ~107-123 m (masurat in fiordland_masuratori.md). La
+			# fiordul stramt (~200 m intre maluri, brief §4) cele doua panze
+			# joaca rolul peretilor de fund, iar conurile de zapada rolul
+			# crestelor din spate — scari SUBUNITARE (0.55-0.85), altfel un
+			# perete de 180 m la scara 1.0 ar inghiti tot cadrul de la 190 m.
+			#
+			# Cotele legate intre ele (memoria efecte-de-fundal-cote-legate):
+			#   ChaseCamera.FAR_PLANE = 380 m  <- plafon absolut de frustum
+			#   fog_end = 320 m (uscat)        <- ce nu inghite ceata
+			#   inelele: 170 -> 300 m          <- incap sub amandoua
+			"horizon_model": "res://assets/models/fiordland/rocks/fiordland_horizon.glb",
+			"horizon_picks": [["FarWall_A", "FarWall_B"],
+				["SnowRidge_A", "SnowRidge_B"]],
+			# Clasa ramane pe atlas (fiecare nod are deja slot 2/21/22/28/29
+			# pictat — SAND_SHADOW/TROPICAL_GREEN/FOAM_WHITE/LOG_DARK/
+			# MARBLE_GREY, retag pe treimi de inaltime, vezi masuratoarea) —
+			# o clasa triplanara ar sterge exact benzile astea.
 			"horizon_class": "",
+			"horizon_rings": [
+				{"near": 170.0, "far": 220.0, "count": 3, "scale": 0.55,
+					"clear": 90.0, "picks": ["FarWall_A", "FarWall_B"]},
+				{"near": 220.0, "far": 300.0, "count": 3, "scale": 0.75,
+					"clear": 110.0, "picks": ["SnowRidge_A", "SnowRidge_B"]},
+			],
 			"walls": false,
 			"kerbs": false,
 			"cliffs": false,

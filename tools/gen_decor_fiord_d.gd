@@ -229,7 +229,6 @@ func _ready() -> void:
 	if not _survey_only:
 		_bridge_rail()
 		_riverbed()
-		_bridge_canyon_dressing()
 		_near_row()
 		_second_row()
 		_backdrop()
@@ -237,6 +236,14 @@ func _ready() -> void:
 		_understory()
 		_stump_and_kea()
 		_edges()
+		# RUNDA 2: adaugata LA COADA, dupa toate functiile care consuma _rng
+		# pentru padure -- inserata mai devreme (intre _riverbed si _near_row)
+		# a schimbat secventa aleatoare a TUTUROR copacilor plasati dupa ea,
+		# rarind vizibil padurea la frac 0.40 si dezvaluind balustrada
+		# indepartata a podului ca "X" pe carosabil din unghiul de camera de
+		# acolo (regresie descoperita pe captura, nicio piesa noua nu era de
+		# fapt gresit orientata -- copacii care o ascundeau anterior lipseau).
+		_bridge_canyon_dressing()
 		_write()
 	get_tree().quit(0)
 

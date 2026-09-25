@@ -52,11 +52,6 @@ const F_OUT := 0.460
 const F_DENSE_IN := 0.335
 const F_DENSE_OUT := 0.450
 
-## Scurtatura (banda AI-invizibila, NIMIC cu coliziune pe ea).
-const SCURT_IN := 0.366
-const SCURT_OUT := 0.462
-const SCURT_HALF := 3.2
-
 ## Podetul (custom_step_ranges) -- tablia e drumul; balustradele merg deasupra.
 const BRIDGE_IN := 0.406
 const BRIDGE_OUT := 0.424
@@ -143,6 +138,63 @@ var _survey_only := false
 var _tri := 0
 var _total_len := 2159.2
 var _sun_to := Vector3(0.54, 0.6, 0.54)
+## Puncte GLOBALE de pe curba REALA a ScurtaturaChasm (Path3D separat, care
+## PLEACA TANGENT de traseul principal si merge zeci de metri pe langa el --
+## nu e o banda paralela la distanta fixa de axa principala). RUNDA 1: prima
+## incercare a exclus coliziunea dupa fractia PE TRASEUL PRINCIPAL (SCURT_IN/
+## SCURT_OUT); ProbeLaneClear a aratat 445 probe blocate pe banda scurtaturii
+## fiindca fractia principala nu corespunde geometric cu unde e de fapt
+## scurtatura in spatiu -- piese "in afara" intervalului de fractie cadeau
+## totusi pe traiectoria ei reala. Fix: se esantioneaza direct curba proprie
+## (`ScurtaturaChasm.curve.get_baked_points()`, transformata global) si orice
+## piesa cu coliziune reala se respinge daca ajunge la mai putin de
+## `branch_half_width + raza ei` de cel mai apropiat punct de pe ACEASTA curba.
+var _scurt_pts: PackedVector3Array = PackedVector3Array()
+var _scurt_half := 3.2
+## RUNDA 1, a doua trecere: ProbeLaneClear (masina la +/-half_local/3 pe
+## RUTA PROPRIE a scurtaturii) tot lovea piese la 5.2-7.3 m de curba proprie
+## esantionata -- peste marja initiala (_scurt_half+r+1.0 ~= 4-5 m). Cauza nu
+## s-a putut confirma din acest worktree fara sa modific probe_lane_clear.gd
+## (latimea foloseste `track.width_at_index` cu indexul RUTEI, nu al
+## traseului principal -- posibil o latime mai mare pe segmentul de tranzitie
+## decat cei 3,2 m declarati). Raspunsul sigur, fara sa ating sonda sau
+## geometria pistei: marja de siguranta creste generos (8 m) pentru orice
+## piesa cu coliziune reala, verificat empiric ca acopera cazul cel mai rau
+## masurat (7,3 m). Vezi raportul rundei pentru nota catre coordonator.
+const SCURT_SAFETY := 8.0
+
+
+func _find_scurt_curve() -> void:
+	var node := _track.get_node_or_null("ScurtaturaChasm")
+	if node == null or not (node is Path3D):
+		print("; ATENTIE: ScurtaturaChasm nu a fost gasit -- refuzul de coliziune pe scurtatura e DEZACTIVAT")
+		return
+	var path3d := node as Path3D
+	if "branch_half_width" in path3d:
+		_scurt_half = float(path3d.get("branch_half_width"))
+	var curve := path3d.curve
+	if curve == null:
+		return
+	var local_pts := curve.get_baked_points()
+	var xf := path3d.global_transform
+	_scurt_pts.resize(local_pts.size())
+	for i in local_pts.size():
+		_scurt_pts[i] = xf * local_pts[i]
+	print("; scurtatura reala: %d puncte, half %.2f m (curba proprie, nu fractie pe traseul principal)"
+		% [_scurt_pts.size(), _scurt_half])
+
+
+## Distanta (XZ) de la `pos` la cel mai apropiat punct de pe curba REALA a
+## scurtaturii. INF daca nu exista curba (refuzul se dezactiveaza sigur).
+func _dist_to_scurt(pos: Vector3) -> float:
+	if _scurt_pts.is_empty():
+		return INF
+	var best := INF
+	for q in _scurt_pts:
+		var d := Vector2(pos.x - q.x, pos.z - q.z).length()
+		if d < best:
+			best = d
+	return best
 
 
 func _ready() -> void:
@@ -166,6 +218,7 @@ func _ready() -> void:
 		hi = maxf(hi, bp.y)
 	_sus_y = hi + 150.0
 	_rng.seed = 160406
+	_find_scurt_curve()
 	_survey()
 	if not _survey_only:
 		_bridge_rail()
@@ -250,13 +303,6 @@ func _density(f: float) -> float:
 	return minf(a, b)
 
 
-## E fractia in banda scurtaturii? (pentru refuzul de coliziune pe cei 3.2 m)
-func _in_scurt(f: float) -> bool:
-	return f >= SCURT_IN and f <= SCURT_OUT
-
-
-func _in_bridge(f: float) -> bool:
-	return f >= BRIDGE_IN - _step(2.0) and f <= BRIDGE_OUT + _step(2.0)
 
 
 # ------------------------------------------------------------------ podetul
@@ -350,16 +396,20 @@ func _riverbed() -> void:
 
 ## Aseaza o piesa IN albie, la `lat` metri fata de axa (nu fata de muchia
 ## drumului -- albia e mai lata decat carosabilul aici). Cota din raycast.
+## Refuzul de scurtatura foloseste curba REALA (vezi _dist_to_scurt).
 func _place_river(model: String, base: String, frac: float, lat: float,
 		scl: float, mode: String) -> void:
-	if _in_scurt(frac) and absf(lat) < SCURT_HALF + 1.0:
-		_skipped_scurt += 1
-		return
 	var n := _track.baked.size()
 	var i := int(frac * float(n)) % n
 	var p := _track.baked[i]
 	var s := _track._side_at(i)
 	var q := p + s * lat
+	if mode != "none":
+		var g0 := _sol_real(q.x, q.z)
+		var r0: float = BASE_R.get(model, 0.6) * scl
+		if _dist_to_scurt(Vector3(q.x, g0, q.z)) < _scurt_half + r0 + SCURT_SAFETY:
+			_skipped_scurt += 1
+			return
 	var g := _sol_real(q.x, q.z)
 	_raw(model, base, Vector3(q.x, g, q.z), _rng.randf_range(0.0, TAU), scl, mode)
 
@@ -540,9 +590,9 @@ func _scale_for(model: String, meters: float) -> float:
 
 ## Aseaza o piesa la `frac`, pe partea `side_sign`, la `gap` metri de MUCHIA
 ## drumului pana la corp (raza de degajare). REFUZA orice piesa cu coliziune
-## (trunk/hull/mesh) care ar cadea pe banda scurtaturii (SCURT_IN..SCURT_OUT,
-## +/- SCURT_HALF de axa benzii) -- memoria obstacol-pe-drum-poate-fi-gimmick:
-## AI-ul nu vede decor static, deci un trunchi acolo blocheaza pista.
+## (trunk/hull/mesh) care ar cadea pe banda REALA a scurtaturii (curba proprie
+## a `ScurtaturaChasm`, nu un interval de fractie pe traseul principal --
+## memoria obstacol-pe-drum-poate-fi-gimmick + fix RUNDA 1 dupa ProbeLaneClear).
 func _place(model: String, base: String, frac: float, side_sign: float,
 		gap: float, yaw: float, scl: float, mode: String = "hull") -> void:
 	var n := _track.baked.size()
@@ -553,14 +603,15 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var r: float = BASE_R.get(model, 0.6) * scl
 	var d := half + gap + r
 	var q := p + s * d
-	# Refuzul de scurtatura: distanta laterala fata de AXA benzii scurtaturii.
-	# Banda principala si scurtatura impart acelasi `baked` (branch pe path
-	# separat) -- aproximam conservator: orice piesa cu coliziune in fractia
-	# scurtaturii si la mai putin de SCURT_HALF+r de axa e refuzata.
-	if mode != "none" and _in_scurt(frac) and d < SCURT_HALF + r + 1.0:
-		_skipped_scurt += 1
-		return
 	var g := _sol_real(q.x, q.z)
+	# Refuzul de scurtatura: distanta reala (XZ) fata de curba proprie a
+	# ScurtaturaChasm, esantionata in spatiul global (nu fractia pe traseul
+	# principal, care nu corespunde geometric cu banda ei).
+	if mode != "none":
+		var ds := _dist_to_scurt(Vector3(q.x, g, q.z))
+		if ds < _scurt_half + r + SCURT_SAFETY:
+			_skipped_scurt += 1
+			return
 	if d - r < half + 0.5:
 		_warn += 1
 		print("; ATENTIE %s la frac %.4f: marginea la %.2f m de ax, banda %.2f" % [

@@ -233,17 +233,17 @@ transform = Transform3D(-0.991364, 0.000000, 0.131142, 0.000000, 1.000000, 0.000
 transform = Transform3D(-0.341905, 0.000000, -0.939734, 0.000000, 1.000000, 0.000000, 0.939734, 0.000000, -0.341905, -27.643475, -1.564675, -47.147228)
 
 [node name="cruiseBoatDock4" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_cruise_boat")]
-transform = Transform3D(0.939734, 0.000000, -0.341905, 0.000000, 1.000000, 0.000000, 0.341905, 0.000000, 0.939734, -33.418663, -1.964675, -51.438335)
+transform = Transform3D(-0.341905, 0.000000, -0.939734, 0.000000, 1.000000, 0.000000, 0.939734, 0.000000, -0.341905, -30.502117, -1.964675, -46.112938)
 
 [node name="cruiseBoatDock5" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_cruise_boat")]
-transform = Transform3D(0.898848, 0.000000, -0.438261, 0.000000, 1.000000, 0.000000, 0.438261, 0.000000, 0.898848, -35.171497, -1.964675, -40.169743)
+transform = Transform3D(-0.341905, 0.000000, -0.939734, 0.000000, 1.000000, 0.000000, 0.939734, 0.000000, -0.341905, -37.084518, -1.964675, -43.731350)
 
 [node name="kayakDock6" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_kayak_a")]
-transform = Transform3D(-0.822669, 0.000000, 0.568520, 0.000000, 1.000000, 0.000000, -0.568520, 0.000000, -0.822669, -25.244989, -1.964675, -39.187389)
+transform = Transform3D(-0.819222, 0.000000, 0.573476, 0.000000, 1.000000, 0.000000, -0.573476, 0.000000, -0.819222, -28.122307, -1.964675, -43.783661)
 metadata/coliziune = "none"
 
 [node name="kayakDock7" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_kayak_b")]
-transform = Transform3D(-0.996287, 0.000000, 0.086089, 0.000000, 1.000000, 0.000000, -0.086089, 0.000000, -0.996287, -26.618504, -1.964675, -43.012569)
+transform = Transform3D(-0.996205, 0.000000, 0.087034, 0.000000, 1.000000, 0.000000, -0.087034, 0.000000, -0.996205, -32.960537, -1.964675, -49.477211)
 metadata/coliziune = "none"
 
 [node name="cafeShed8" parent="DecorManual/ZoneA_Chei" instance=ExtResource("s_cafe_shed")]

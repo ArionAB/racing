@@ -282,38 +282,78 @@ func _wharf_row() -> void:
 	_raw("wooden_pier", "woodenPier", Vector3(qp.x, _sea_y + 0.4, qp.z), yawp, 1.0, "hull")
 
 	# cruise_boat x2 (brief: "doua vaporase albe legate"): AMANDOUA statice,
-	# legate la ponton - unul la capatul lantului wharf/wooden_pier, unul putin
-	# mai departe pe apa, langa primul (statice, nu PathMover: brief-ul cere
-	# "legate", nu in miscare; ciclul de 120s din contract ramane pentru POI H,
-	# unde brief-ul cere explicit figurant mobil pe traseu).
+	# legate DIRECT DE MARGINEA pontonului (nu in larg) - unul la capatul
+	# lantului wharf/wooden_pier, unul putin mai departe pe apa, langa primul
+	# (statice, nu PathMover: brief-ul cere "legate", nu in miscare; ciclul de
+	# 120s din contract ramane pentru POI H, unde brief-ul cere explicit
+	# figurant mobil pe traseu).
+	#
+	# RUNDA 2 (fix verdict critic), a doua trecere: prima trecere a apropiat
+	# bărcile de ponton (bun), dar captura --frac=0.03 arata cele doua
+	# vaporase SUPRAPUSE intr-un singur bloc. Cauza gasita cu sv_boat_aabb.gd:
+	# `Boat` are AABB local (4,23 X, 5,5 Y, 13,97 Z) — lungimea e pe local Z,
+	# la fel ca wharf/kayak. Formula veche `atan2(-tang.z,tang.x) + PI/2` mai
+	# adauga 90° peste alinierea de baza (care pune deja local X pe tangenta),
+	# deci punea local Z (cei 14 m lungime) PARALEL cu pontonul — cu doar
+	# 6,2 m separare tangentiala intre centre, doua cutii de 14 m se
+	# suprapun aproape integral (verificat pe captura, nu presupus). Fix:
+	# fara +PI/2 — local X pe tangenta ramane, ceea ce lasa local Z (deci
+	# lungimea si prova, care e la Z negativ in AABB: origine (-2.1,-1.2,-7.0),
+	# prova la Z=-7) PERPENDICULAR pe ponton, adica exact "prova spre doc"
+	# din bara (bara_zoom: ambele vaporase cu prova spre pilonii pontonului,
+	# umar-la-umar lateral, nu insirate cap-coada de-a lungul lui). Separarea
+	# dintre ele devine LATERALA (BOAT_GAP, pe langa BOAT_STANDOFF), nu
+	# tangentiala, iar decalajul tangential ramane mic (doar sa nu fie
+	# perfect aliniate, ca in bara).
 	# origine=waterline, carena coboara 1,2 m: se aseaza la SEA_Y (cota reala a
 	# apei, din Track._build_water), NU la cota fundului citita din raycast -
 	# fiordul cade la -11..-30 m la doar 8-25 m de mal, deci _sol_real ar
 	# scufunda barca pe taluz.
-	var boat_off := sp * side_sign * (halfp + 6.0)
-	var bq1 := pp + boat_off + Vector3(tangp.x, 0.0, tangp.z) * 6.0
-	var bq2 := pp + sp * side_sign * (halfp + 11.5) + Vector3(tangp.x, 0.0, tangp.z) * -4.0
-	var yaw_b := atan2(-tangp.z, tangp.x) + PI * 0.5 * side_sign
+	# A doua trecere pe geometrie: BOAT_GAP=5.5 tot lasa cutiile (4,23 m
+	# latime) sa se atinga, fiindca offsetul tangential (+2.0/-1.0) si
+	# rotatia suplimentara de 4 grade le inclina una spre alta la mijloc
+	# (vazut direct pe captura crop_r2b_0.03.png — corpurile se ating exact
+	# unde ar trebui sa fie golul). Fix: gap lateral mai mare decat latimea
+	# + marja (7,0 m > 4,23 m), ACEEASI orientare exacta pentru amandoua
+	# (fara +4°) si FARA offset tangential — paralele, umar la umar, exact
+	# ca in bara (bara_zoom.png: doua vaporase paralele, prova la ponton,
+	# fara unghi intre ele).
+	const BOAT_STANDOFF := 2.6
+	const BOAT_GAP := 7.0
+	var pier_outer_lat: float = halfp + PIER_HALF_THICK * 2.0 + BOAT_STANDOFF
+	var boat_lat1 := sp * side_sign * pier_outer_lat
+	var boat_lat2 := sp * side_sign * (pier_outer_lat + BOAT_GAP)
+	var bq1 := pp + boat_lat1
+	var bq2 := pp + boat_lat2
+	var yaw_b := atan2(-tangp.z, tangp.x)
 	_raw("cruise_boat", "cruiseBoatDock", Vector3(bq1.x, _sea_y, bq1.z), yaw_b, 1.0, "hull")
-	_raw("cruise_boat", "cruiseBoatDock", Vector3(bq2.x, _sea_y, bq2.z),
-		yaw_b + deg_to_rad(6.0), 1.0, "hull")
+	_raw("cruise_boat", "cruiseBoatDock", Vector3(bq2.x, _sea_y, bq2.z), yaw_b, 1.0, "hull")
 
-	# Caiacele colorate: pe apa, langa ponton, coliziune none (nu opresc masina)
-	# - tot la SEA_Y, nu la fundul fiordului.
-	for k in 2:
-		var kf: float = fp - 0.004 + 0.002 * float(k)
-		var ki := int(kf * float(n)) % n
-		var kp := _track.baked[ki]
-		var ks := _track._side_at(ki)
-		var khalf := _track.width_at_index(ki)
-		var kq := kp + ks * side_sign * (khalf + 2.5)
-		var ktang := _tangent_at(ki)
-		# +PI/2: kayak_a/b au lungimea (3,6 m) pe local Z, nu X (AABB masurat:
-		# size 0,58 X x 0,36 Y x 3,6 Z) — acelasi tipar ca wharf/cruise_boat.
-		var kyaw := atan2(-ktang.z, ktang.x) + PI * 0.5 \
-			+ deg_to_rad(15.0 * (1.0 if k == 0 else -1.0))
-		_raw("kayak_a" if k == 0 else "kayak_b", "kayakDock",
-			Vector3(kq.x, _sea_y, kq.z), kyaw, 1.0, "none")
+	# Caiacele colorate: RUNDA 2 (fix verdict critic), a saptea trecere —
+	# incercarile 1-6 (git blame) sau au cazut pe berma, sau in spatele
+	# corpurilor, sau IN corpul unei barci (intersectie de geometrie), sau
+	# ocluse partial dupa carena (lateral intre ponton si barca, prea ingust
+	# ca sa citeasca separat pe camera). Fix, cea mai simpla geometrie care
+	# nu se mai poate compune gresit: caiacele merg langa CAPATUL
+	# pontonului de lemn (`qp`, deja calculat, capat liber spre drum — vezi
+	# bara: caiacele plutesc chiar la marginea pontonului, langa pupa
+	# barcilor, in raza directa a camerei de la 0.03, fara nimic care sa le
+	# acopere), decalate lateral direct spre apa deschisa (fara sa treaca de
+	# fata dinspre drum a pontonului, care e deja pe apa la aceasta felie —
+	# survey: sol la lat 8 e deja -5,5 m sub drum).
+	const KAYAK_PIER_LAT := 1.6
+	const KAYAK_PIER_TANG := 3.0
+	var kq1 := qp + sp * side_sign * KAYAK_PIER_LAT \
+		+ Vector3(tangp.x, 0.0, tangp.z) * -KAYAK_PIER_TANG
+	var kq2 := qp + sp * side_sign * (KAYAK_PIER_LAT + 2.6) \
+		+ Vector3(tangp.x, 0.0, tangp.z) * (KAYAK_PIER_TANG + 1.0)
+	# +PI/2: kayak_a/b au lungimea (3,6 m) pe local Z, nu X (AABB masurat:
+	# size 0,58 X x 0,36 Y x 3,6 Z) — acelasi tipar ca wharf/cruise_boat.
+	var kyaw_base := atan2(-tangp.z, tangp.x) + PI * 0.5
+	_raw("kayak_a", "kayakDock", Vector3(kq1.x, _sea_y, kq1.z),
+		kyaw_base + deg_to_rad(15.0), 1.0, "none")
+	_raw("kayak_b", "kayakDock", Vector3(kq2.x, _sea_y, kq2.z),
+		kyaw_base + deg_to_rad(-15.0), 1.0, "none")
 
 	print("; wharf/pontoane: %d piese pana la frac %.3f" % [placed + 1, fp])
 

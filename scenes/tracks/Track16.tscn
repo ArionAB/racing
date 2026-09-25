@@ -50,6 +50,7 @@
 [ext_resource type="PackedScene" uid="uid://byv4e26nfnp5w" path="res://assets/models/signs/chevron_sign.glb" id="s_chevron_sign"]
 [ext_resource type="PackedScene" uid="uid://6uiuyphujnhh" path="res://assets/models/structures/wooden_pier.glb" id="s_wooden_pier"]
 [ext_resource type="Script" uid="uid://pcypbcie67pr" path="res://scenes/hazards/foam_pool.gd" id="9_foam_pool"]
+[ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="s_path_mover_script"]
 
 [sub_resource type="Curve3D" id="Curve3D_fiordland"]
 closed = true
@@ -65,6 +66,317 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0)
 }
 point_count = 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[sub_resource type="Curve3D" id="Curve3D_avionMal68"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, -47.450607, -11.334747, 46.880894, 0, 0, 0, 0, 0, 0, -61.492859, -22.425613, 56.738163, 0, 0, 0, 0, 0, 0, -64.585876, -25.209934, 42.684322, 0, 0, 0),
+"tilts": PackedFloat32Array(0, 0, 0, 0)
+}
+point_count = 4
+up_vector_enabled = false
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete8"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete9"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white10"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete11"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete12"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white13"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete14"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete15"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white16"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete17"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete18"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white19"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete20"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete21"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white22"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete23"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete24"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white25"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete26"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete27"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white28"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete29"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete30"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white31"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete32"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete33"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white34"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete35"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete36"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white37"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete38"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete39"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white40"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete41"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete42"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white43"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete44"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete45"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white46"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete47"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete48"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white49"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete50"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete51"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white52"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete53"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete54"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white55"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete56"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete57"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white58"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete59"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete60"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white61"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete62"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete63"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white64"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete65"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete66"]
+size = Vector3(0.001887, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white67"]
+size = Vector3(0.000925, 0.020000, 0.600000)
+
 
 [node name="Track16" type="Node3D"]
 script = ExtResource("1_track")
@@ -7011,3 +7323,460 @@ transform = Transform3D(0.323288, 0.000000, 0.946301, 0.000000, 1.000000, 0.0000
 [node name="ZoneG_Bowen" type="Node3D" parent="DecorManual"]
 
 [node name="ZoneH_Mal" type="Node3D" parent="DecorManual"]
+
+[node name="lodge1" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_lodge")]
+transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 8.432821, 0.153091, -0.069916)
+
+[node name="magazie2" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_cafe_shed")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 1.650034, -0.003326, 5.171878)
+
+[node name="heliport3" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_heli_pad")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -7.629538, -0.271652, 4.097164)
+metadata/coliziune = "none"
+
+[node name="container4" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_luggage_container")]
+transform = Transform3D(0.939693, 0.000000, -0.342020, 0.000000, 1.000000, 0.000000, 0.342020, 0.000000, 0.939693, 0.043261, -0.206345, -1.234758)
+
+[node name="container5" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_luggage_container")]
+transform = Transform3D(0.965926, 0.000000, 0.258819, 0.000000, 1.000000, 0.000000, -0.258819, 0.000000, 0.965926, -3.978825, -0.247009, 1.453651)
+
+[node name="baliza6" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 18.955883, 0.446548, 6.115547)
+metadata/coliziune = "none"
+
+[node name="semn7" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_road_sign_blank")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 1.957511, 0.257156, 18.492210)
+
+[node name="pistaAvioaneconcrete8" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.686946, 0.000000, 0.726708, 0.000000, 1.000000, 0.000000, -0.726708, 0.000000, 0.686946, 1.572016, 0.685125, 2.611016)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete8")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete9" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.682720, 0.000000, 0.730680, 0.000000, 1.000000, 0.000000, -0.730680, 0.000000, 0.682720, -0.823351, 0.654694, 4.877058)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete9")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white10" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.682720, 0.000000, 0.730680, 0.000000, 1.000000, 0.000000, -0.730680, 0.000000, 0.682720, -0.823351, 0.674694, 4.877058)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white10")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete11" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.688530, 0.000000, 0.725208, 0.000000, 1.000000, 0.000000, -0.725208, 0.000000, 0.688530, -4.084061, 0.618350, 7.863438)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete11")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete12" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.700185, 0.000000, 0.713962, 0.000000, 1.000000, 0.000000, -0.713962, 0.000000, 0.700185, -7.745754, 0.583862, 11.387371)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete12")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white13" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.700185, 0.000000, 0.713962, 0.000000, 1.000000, 0.000000, -0.713962, 0.000000, 0.700185, -7.745754, 0.603862, 11.387371)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white13")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete14" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.730804, 0.000000, 0.682587, 0.000000, 1.000000, 0.000000, -0.682587, 0.000000, 0.730804, -10.496891, 0.556456, 14.224871)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete14")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete15" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.749618, 0.000000, 0.661870, 0.000000, 1.000000, 0.000000, -0.661870, 0.000000, 0.749618, -14.111050, 0.526700, 18.144623)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete15")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white16" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.749618, 0.000000, 0.661870, 0.000000, 1.000000, 0.000000, -0.661870, 0.000000, 0.749618, -14.111050, 0.546700, 18.144623)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white16")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete17" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.768387, 0.000000, 0.639986, 0.000000, 1.000000, 0.000000, -0.639986, 0.000000, 0.768387, -17.198141, 0.500656, 21.819717)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete17")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete18" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.798104, 0.000000, 0.602519, 0.000000, 1.000000, 0.000000, -0.602519, 0.000000, 0.798104, -19.842033, 0.479662, 25.142248)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete18")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white19" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.798104, 0.000000, 0.602519, 0.000000, 1.000000, 0.000000, -0.602519, 0.000000, 0.798104, -19.842033, 0.499662, 25.142248)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white19")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete20" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.808520, 0.000000, 0.588469, 0.000000, 1.000000, 0.000000, -0.588469, 0.000000, 0.808520, -22.877371, 0.458350, 29.280928)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete20")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete21" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.815115, 0.000000, 0.579300, 0.000000, 1.000000, 0.000000, -0.579300, 0.000000, 0.815115, -25.051472, 0.438895, 32.398521)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete21")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white22" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.815115, 0.000000, 0.579300, 0.000000, 1.000000, 0.000000, -0.579300, 0.000000, 0.815115, -25.051472, 0.458895, 32.398521)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white22")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete23" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.814547, 0.000000, 0.580097, 0.000000, 1.000000, 0.000000, -0.580097, 0.000000, 0.814547, -27.318731, 0.420745, 35.545143)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete23")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete24" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.806749, 0.000000, 0.590894, 0.000000, 1.000000, 0.000000, -0.590894, 0.000000, 0.806749, -29.534996, 0.398350, 38.723190)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete24")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white25" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.806749, 0.000000, 0.590894, 0.000000, 1.000000, 0.000000, -0.590894, 0.000000, 0.806749, -29.534996, 0.418350, 38.723190)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white25")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete26" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.793904, 0.000000, 0.608044, 0.000000, 1.000000, 0.000000, -0.608044, 0.000000, 0.793904, -31.381933, 0.377812, 41.235054)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete26")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete27" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.758889, 0.000000, 0.651220, 0.000000, 1.000000, 0.000000, -0.651220, 0.000000, 0.758889, -33.295464, 0.362687, 43.591995)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete27")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white28" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.758889, 0.000000, 0.651220, 0.000000, 1.000000, 0.000000, -0.651220, 0.000000, 0.758889, -33.295464, 0.382687, 43.591995)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white28")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete29" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.740053, 0.000000, 0.672548, 0.000000, 1.000000, 0.000000, -0.672548, 0.000000, 0.740053, -35.227268, 0.348350, 45.821022)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete29")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete30" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.734580, 0.000000, 0.678522, 0.000000, 1.000000, 0.000000, -0.678522, 0.000000, 0.734580, -37.978191, 0.335870, 48.697647)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete30")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white31" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.734580, 0.000000, 0.678522, 0.000000, 1.000000, 0.000000, -0.678522, 0.000000, 0.734580, -37.978191, 0.355870, 48.697647)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white31")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete32" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.736045, 0.000000, 0.676932, 0.000000, 1.000000, 0.000000, -0.676932, 0.000000, 0.736045, -41.442017, 0.324040, 52.409588)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete32")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete33" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.698282, 0.000000, 0.715823, 0.000000, 1.000000, 0.000000, -0.715823, 0.000000, 0.698282, -42.936630, 0.310825, 54.349808)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete33")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white34" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.698282, 0.000000, 0.715823, 0.000000, 1.000000, 0.000000, -0.715823, 0.000000, 0.698282, -42.936630, 0.330825, 54.349808)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white34")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete35" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.623067, 0.000000, 0.782168, 0.000000, 1.000000, 0.000000, -0.782168, 0.000000, 0.623067, -42.144703, 0.296682, 54.060913)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete35")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete36" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.406377, 0.000000, 0.913705, 0.000000, 1.000000, 0.000000, -0.913705, 0.000000, 0.406377, -43.461948, 0.283159, 54.876873)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete36")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white37" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.406377, 0.000000, 0.913705, 0.000000, 1.000000, 0.000000, -0.913705, 0.000000, 0.406377, -43.461948, 0.303159, 54.876873)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white37")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete38" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.254285, 0.000000, 0.967129, 0.000000, 1.000000, 0.000000, -0.967129, 0.000000, 0.254285, -41.223263, 0.266650, 54.511318)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete38")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete39" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.091038, 0.000000, 0.995847, 0.000000, 1.000000, 0.000000, -0.995847, 0.000000, 0.091038, -41.081787, 0.248284, 54.714905)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete39")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white40" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.091038, 0.000000, 0.995847, 0.000000, 1.000000, 0.000000, -0.995847, 0.000000, 0.091038, -41.081787, 0.268284, 54.714905)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white40")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete41" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.202120, 0.000000, 0.979361, 0.000000, 1.000000, 0.000000, -0.979361, 0.000000, -0.202120, -41.766747, 0.231376, 54.779907)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete41")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete42" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.350109, 0.000000, 0.936709, 0.000000, 1.000000, 0.000000, -0.936709, 0.000000, -0.350109, -39.311157, 0.209175, 55.870090)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete42")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white43" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.350109, 0.000000, 0.936709, 0.000000, 1.000000, 0.000000, -0.936709, 0.000000, -0.350109, -39.311157, 0.229175, 55.870090)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white43")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete44" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.417041, 0.000000, 0.908888, 0.000000, 1.000000, 0.000000, -0.908888, 0.000000, -0.417041, -40.290062, 0.195253, 55.449486)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete44")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete45" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.550758, 0.000000, 0.834665, 0.000000, 1.000000, 0.000000, -0.834665, 0.000000, -0.550758, -42.442081, 0.180000, 54.125008)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete45")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white46" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.550758, 0.000000, 0.834665, 0.000000, 1.000000, 0.000000, -0.834665, 0.000000, -0.550758, -42.442081, 0.200000, 54.125008)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white46")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete47" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.659023, 0.000000, 0.752123, 0.000000, 1.000000, 0.000000, -0.752123, 0.000000, -0.659023, -42.797787, 0.166944, 54.052868)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete47")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete48" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.739980, 0.000000, 0.672629, 0.000000, 1.000000, 0.000000, -0.672629, 0.000000, -0.739980, -43.481094, 0.150581, 53.585167)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete48")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white49" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.739980, 0.000000, 0.672629, 0.000000, 1.000000, 0.000000, -0.672629, 0.000000, -0.739980, -43.481094, 0.170581, 53.585167)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white49")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete50" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.820213, 0.000000, 0.572058, 0.000000, 1.000000, 0.000000, -0.572058, 0.000000, -0.820213, -44.933231, 0.140000, 51.636444)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete50")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete51" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.880035, 0.000000, 0.474908, 0.000000, 1.000000, 0.000000, -0.474908, 0.000000, -0.880035, -45.424187, 0.128491, 51.092323)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete51")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white52" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.880035, 0.000000, 0.474908, 0.000000, 1.000000, 0.000000, -0.474908, 0.000000, -0.880035, -45.424187, 0.148491, 51.092323)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white52")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete53" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.917390, 0.000000, 0.397990, 0.000000, 1.000000, 0.000000, -0.397990, 0.000000, -0.917390, -46.346031, 0.110272, 49.286438)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete53")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete54" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.945731, 0.000000, 0.324950, 0.000000, 1.000000, 0.000000, -0.324950, 0.000000, -0.945731, -47.384350, 0.100000, 46.309837)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete54")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white55" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.945731, 0.000000, 0.324950, 0.000000, 1.000000, 0.000000, -0.324950, 0.000000, -0.945731, -47.384350, 0.120000, 46.309837)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white55")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete56" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.968082, 0.000000, 0.250633, 0.000000, 1.000000, 0.000000, -0.250633, 0.000000, -0.968082, -48.103550, 0.090672, 44.271320)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete56")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete57" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.985660, 0.000000, 0.168744, 0.000000, 1.000000, 0.000000, -0.168744, 0.000000, -0.985660, -48.554985, 0.078091, 42.970051)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete57")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white58" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.985660, 0.000000, 0.168744, 0.000000, 1.000000, 0.000000, -0.168744, 0.000000, -0.985660, -48.554985, 0.098091, 42.970051)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white58")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete59" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.998185, 0.000000, 0.060216, 0.000000, 1.000000, 0.000000, -0.060216, 0.000000, -0.998185, -48.730717, 0.070000, 40.845413)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete59")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete60" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.998087, 0.000000, -0.061821, 0.000000, 1.000000, 0.000000, 0.061821, 0.000000, -0.998087, -48.843735, 0.061291, 39.317612)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete60")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white61" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.998087, 0.000000, -0.061821, 0.000000, 1.000000, 0.000000, 0.061821, 0.000000, -0.998087, -48.843735, 0.081291, 39.317612)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white61")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete62" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.985270, 0.000000, -0.171004, 0.000000, 1.000000, 0.000000, 0.171004, 0.000000, -0.985270, -49.012554, 0.047472, 38.785408)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete62")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete63" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.951274, 0.000000, -0.308348, 0.000000, 1.000000, 0.000000, 0.308348, 0.000000, -0.951274, -48.517208, 0.040000, 37.038483)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete63")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white64" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.951274, 0.000000, -0.308348, 0.000000, 1.000000, 0.000000, 0.308348, 0.000000, -0.951274, -48.517208, 0.060000, 37.038483)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white64")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete65" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.893821, 0.000000, -0.448424, 0.000000, 1.000000, 0.000000, 0.448424, 0.000000, -0.893821, -48.367165, 0.032853, 36.289291)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete65")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete66" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.828170, 0.000000, -0.560478, 0.000000, 1.000000, 0.000000, 0.560478, 0.000000, -0.828170, -48.662628, 0.023434, 36.268570)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete66")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white67" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(-0.828170, 0.000000, -0.560478, 0.000000, 1.000000, 0.000000, 0.560478, 0.000000, -0.828170, -48.662628, 0.043434, 36.268570)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white67")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="avionMal68" type="Path3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.068672, 25.288757, -5.645841)
+curve = SubResource("Curve3D_avionMal68")
+script = ExtResource("s_path_mover_script")
+model = ExtResource("s_bush_plane")
+model_scale = 1.0
+speed = 9.0
+travel_mode = 1
+phase = 0.0
+stick_to_ground = false
+
+[node name="malDriftwood69" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.157331, 0.000000, -0.987546, 0.000000, 1.000000, 0.000000, 0.987546, 0.000000, -0.157331, 28.575531, 0.415115, 21.112875)
+metadata/coliziune = "none"
+
+[node name="malGuard70" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.230861, 0.000000, 0.972987, 0.000000, 1.000000, 0.000000, -0.972987, 0.000000, 0.230861, 26.948402, 0.350052, 29.318403)
+
+[node name="fagMalA71" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.993613, 0.000000, 0.112845, 0.000000, 1.000000, 0.000000, -0.112845, 0.000000, -0.993613, 28.713495, 0.357910, 28.928413)
+metadata/coliziune = "trunk"
+
+[node name="fagMalB72" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.175211, 0.000000, 0.984531, 0.000000, 1.000000, 0.000000, -0.984531, 0.000000, -0.175211, -47.408436, -0.249466, 32.321678)
+metadata/coliziune = "trunk"
+
+[node name="fagMalB73" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.999653, 0.000000, 0.026329, 0.000000, 1.000000, 0.000000, -0.026329, 0.000000, -0.999653, -31.396862, -0.028778, 43.616920)
+metadata/coliziune = "trunk"
+
+[node name="fagMalB74" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.987109, 0.000000, 0.160048, 0.000000, 1.000000, 0.000000, -0.160048, 0.000000, 0.987109, -38.644882, -0.083344, 48.323132)
+metadata/coliziune = "trunk"
+
+[node name="fagFeriga75" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.600223, 0.000000, -0.992355, 0.000000, 1.159757, 0.000000, 0.992355, 0.000000, -0.600223, -3.815417, 0.204193, 20.570614)
+metadata/coliziune = "none"
+
+[node name="fagFeriga76" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.329914, 0.000000, 0.909748, 0.000000, 0.967721, 0.000000, -0.909748, 0.000000, 0.329914, 14.821572, 0.348938, -0.874219)
+metadata/coliziune = "none"
+
+[node name="fagFeriga77" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.015114, 0.000000, 0.804097, 0.000000, 0.804239, 0.000000, -0.804097, 0.000000, 0.015114, 30.282887, 0.445694, 18.036657)
+metadata/coliziune = "none"
+
+[node name="fagFeriga78" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-1.113457, 0.000000, 0.148583, 0.000000, 1.123327, 0.000000, -0.148583, 0.000000, -1.113457, -54.978153, -0.217606, 46.226490)
+metadata/coliziune = "none"
+
+[node name="fagFeriga79" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.764894, 0.000000, 0.289902, 0.000000, 0.817989, 0.000000, -0.289902, 0.000000, -0.764894, -1.855771, 0.221680, 19.834650)
+metadata/coliziune = "none"
+
+[node name="fagFeriga80" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.885504, 0.000000, -0.027312, 0.000000, 0.885925, 0.000000, 0.027312, 0.000000, -0.885504, -57.869804, -0.214127, 49.913315)
+metadata/coliziune = "none"
+
+[node name="fagTussock81" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.701359, 0.000000, 0.719485, 0.000000, 1.004770, 0.000000, -0.719485, 0.000000, -0.701359, -49.408218, -0.253677, 33.260201)
+metadata/coliziune = "none"
+
+[node name="fagTussock82" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.441870, 0.000000, 0.771417, 0.000000, 0.889007, 0.000000, -0.771417, 0.000000, 0.441870, 21.189800, -0.050293, 39.708569)
+metadata/coliziune = "none"
+
+[node name="fagTussock83" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.991588, 0.000000, -0.448716, 0.000000, 1.088390, 0.000000, 0.448716, 0.000000, 0.991588, 15.563776, 0.382736, -0.092816)
+metadata/coliziune = "none"
+
+[node name="fagTussock84" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.618597, 0.000000, -0.569058, 0.000000, 0.840529, 0.000000, 0.569058, 0.000000, 0.618597, 6.956348, 0.313248, 13.317337)
+metadata/coliziune = "none"

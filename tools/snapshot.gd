@@ -876,7 +876,21 @@ func _set_train_phase(root: Node, at: float) -> void:
 		train.set("_time", train.period * clampf(at, 0.0, 0.999))
 		train._physics_process(0.0)
 		found += 1
-	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+	# POI H (Fiordland): avionul si vaporasul sunt PathMover generic, nu
+	# TrainHazard — acelasi tipar de ceas, extins la orice PathMover din
+	# scena (bucla: fractia*lungime; dus-intors: la fel, pe sensul curent).
+	for node in root.find_children("*", "PathMover", true, false):
+		var mover := node as PathMover
+		if mover == null or mover.curve == null:
+			continue
+		var length := mover.curve.get_baked_length()
+		if length < 0.5:
+			continue
+		mover.set("_started", true)
+		mover.set("_dist", length * clampf(at, 0.0, 0.999))
+		mover._physics_process(0.0)
+		found += 1
+	print("--train-at=%.2f: %d treceri (tren/PathMover) mutate in ciclu" % [at, found])
 
 
 ## Muta cosurile care urca la o fractie din ciclul lor (toate la aceeasi faza,

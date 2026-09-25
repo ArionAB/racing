@@ -292,40 +292,62 @@ func _wharf_row() -> void:
 	# bărcile de ponton (bun), dar captura --frac=0.03 arata cele doua
 	# vaporase SUPRAPUSE intr-un singur bloc. Cauza gasita cu sv_boat_aabb.gd:
 	# `Boat` are AABB local (4,23 X, 5,5 Y, 13,97 Z) — lungimea e pe local Z,
-	# la fel ca wharf/kayak. Formula veche `atan2(-tang.z,tang.x) + PI/2` mai
-	# adauga 90° peste alinierea de baza (care pune deja local X pe tangenta),
-	# deci punea local Z (cei 14 m lungime) PARALEL cu pontonul — cu doar
-	# 6,2 m separare tangentiala intre centre, doua cutii de 14 m se
-	# suprapun aproape integral (verificat pe captura, nu presupus). Fix:
-	# fara +PI/2 — local X pe tangenta ramane, ceea ce lasa local Z (deci
-	# lungimea si prova, care e la Z negativ in AABB: origine (-2.1,-1.2,-7.0),
-	# prova la Z=-7) PERPENDICULAR pe ponton, adica exact "prova spre doc"
-	# din bara (bara_zoom: ambele vaporase cu prova spre pilonii pontonului,
-	# umar-la-umar lateral, nu insirate cap-coada de-a lungul lui). Separarea
-	# dintre ele devine LATERALA (BOAT_GAP, pe langa BOAT_STANDOFF), nu
-	# tangentiala, iar decalajul tangential ramane mic (doar sa nu fie
-	# perfect aliniate, ca in bara).
-	# origine=waterline, carena coboara 1,2 m: se aseaza la SEA_Y (cota reala a
-	# apei, din Track._build_water), NU la cota fundului citita din raycast -
-	# fiordul cade la -11..-30 m la doar 8-25 m de mal, deci _sol_real ar
-	# scufunda barca pe taluz.
-	# A doua trecere pe geometrie: BOAT_GAP=5.5 tot lasa cutiile (4,23 m
-	# latime) sa se atinga, fiindca offsetul tangential (+2.0/-1.0) si
-	# rotatia suplimentara de 4 grade le inclina una spre alta la mijloc
-	# (vazut direct pe captura crop_r2b_0.03.png — corpurile se ating exact
-	# unde ar trebui sa fie golul). Fix: gap lateral mai mare decat latimea
-	# + marja (7,0 m > 4,23 m), ACEEASI orientare exacta pentru amandoua
-	# (fara +4°) si FARA offset tangential — paralele, umar la umar, exact
-	# ca in bara (bara_zoom.png: doua vaporase paralele, prova la ponton,
-	# fara unghi intre ele).
+	# la fel ca wharf/kayak. Fix runda 2: local X pe tangenta pontonului (fara
+	# +PI/2), deci local Z (lungimea) PERPENDICULAR pe ponton, "prova spre
+	# doc" — a rezolvat suprapunerea (BOAT_GAP lateral 7,0 m).
+	#
+	# RUNDA 3 (fix verdict critic), a treia trecere: orientarea de la runda 2
+	# citea "cutii albe stivuite", fara silueta de vas — criticul n-a mai
+	# numit suprapunerea, a numit ALTCEVA: nicio punte/cabina/geam vizibil.
+	# Masurat unghiul camerei (gamecam: 10 m sus, 12,5 m spate, frac 0,03,
+	# tools/sv_boat_angle.gd): axa lunga a barcii (local Z, "prova spre doc")
+	# facea ~50 grade cu directia de mers — nici flanc (0 grade), nici prova
+	# curata (90) — iar de la 10 m inaltime, la acel unghi, camera vede mai
+	# ales PUNTILE de sus (etajele-cutie), nu bordajul cu ferestre. Nota
+	# coordonatorului (v2r2_final): roteste ca FLANCUL lung sa fie spre
+	# camera, "prova spre doc SAU paralel cu cheiul" — aleasa a doua varianta,
+	# fiindca pontonul si cheiul sunt chiar paralele cu directia de mers aici
+	# (verificat pe survey), deci "paralel cu cheiul" e mai robust la unghiul
+	# camerei pe toata felia 0.00-0.06 decat "prova spre doc" (care functiona
+	# doar la un unghi anume de vedere).
+	#
+	# Geometrie noua: +PI/2 peste yaw_b vechi pune local Z (flancul lung, cu
+	# bordajul si puntea deschisa) PARALEL cu tangenta pontonului — bordajul
+	# priveste spre drum/camera, nu prova. Cu orientarea asta, bărcile nu mai
+	# incap "umar la umar" lateral (ar cere BOAT_GAP > 14 m, prea mult in larg
+	# pe felia asta ingusta — survey: sol la lat 15-20 e deja adanc); se
+	# asaza in schimb CAP-COADA de-a lungul pontonului, ca doua vase acostate
+	# la acelasi dig, separate TANGENTIAL cu marja peste lungimea lor
+	# (13,97 m + BOAT_TANG_GAP), la ACEEASI distanta laterala (fixa) de
+	# ponton — exact cum leaga doua vaporase paralele la un chei.
 	const BOAT_STANDOFF := 2.6
-	const BOAT_GAP := 7.0
-	var pier_outer_lat: float = halfp + PIER_HALF_THICK * 2.0 + BOAT_STANDOFF
-	var boat_lat1 := sp * side_sign * pier_outer_lat
-	var boat_lat2 := sp * side_sign * (pier_outer_lat + BOAT_GAP)
-	var bq1 := pp + boat_lat1
-	var bq2 := pp + boat_lat2
-	var yaw_b := atan2(-tangp.z, tangp.x)
+	# Runda 3, a treia trecere: 2,5 m tot lasa capatul APROPIAT al fiecarei
+	# barci la doar ~1,2 m de marginea tangentiala a pontonului (14 m lungime,
+	# jumatate 7) — insuficient, verificat cu coliziune FIZICA reala
+	# (tools/sv_boat_overlap.gd, PhysicsServer3D.intersect_shape pe shape-urile
+	# EXACTE, nu AABB world-aligned, care ascundea overlap-ul pe colturi).
+	# Marja crescuta la 2x lungimea pontonului (14 m) intre capetele apropiate
+	# ale celor doua barci, ca sa acopere si eventuale colturi neregulate ale
+	# corpului convex al vaporasului.
+	const BOAT_TANG_GAP := 16.0
+	var boat_half_len := 6.99   # jumatate din 13,97 m (lungime, masurat)
+	var boat_half_width := 2.12 # jumatate din 4,23 m (latime, masurat)
+	# Marginea EXTERIOARA a pontonului (fata de axa drumului, spre bărci) e
+	# `qp` + inca o jumatate-grosime: halfp + PIER_HALF_THICK*2 + EDGE_KEEP —
+	# `qp` insusi e centrul pontonului (halfp+PIER_HALF_THICK+EDGE_KEEP), deci
+	# marginea lui exterioara e cu inca un PIER_HALF_THICK mai departe.
+	# Runda 3, a doua trecere: formula veche omitea EDGE_KEEP din aceasta
+	# margine (folosea doar PIER_HALF_THICK*2), punand bărcile 0,8 m mai
+	# aproape decat trebuia — verificat cu coliziune FIZICA reala
+	# (tools/sv_boat_overlap.gd, PhysicsServer3D, nu OBB manual): woodenPier3
+	# si cruiseBoatDock4 se intersectau. Fix: adaugat EDGE_KEEP la marginea
+	# pontonului inainte de STANDOFF+latime.
+	var pier_outer_edge: float = halfp + PIER_HALF_THICK * 2.0 + EDGE_KEEP
+	var boat_lat: float = pier_outer_edge + BOAT_STANDOFF + boat_half_width
+	var tang_dir := Vector3(tangp.x, 0.0, tangp.z)
+	var bq1 := pp + sp * side_sign * boat_lat + tang_dir * (-boat_half_len - BOAT_TANG_GAP * 0.5)
+	var bq2 := pp + sp * side_sign * boat_lat + tang_dir * (boat_half_len + BOAT_TANG_GAP * 0.5)
+	var yaw_b := atan2(-tangp.z, tangp.x) + PI * 0.5
 	_raw("cruise_boat", "cruiseBoatDock", Vector3(bq1.x, _sea_y, bq1.z), yaw_b, 1.0, "hull")
 	_raw("cruise_boat", "cruiseBoatDock", Vector3(bq2.x, _sea_y, bq2.z), yaw_b, 1.0, "hull")
 
@@ -341,12 +363,24 @@ func _wharf_row() -> void:
 	# acopere), decalate lateral direct spre apa deschisa (fara sa treaca de
 	# fata dinspre drum a pontonului, care e deja pe apa la aceasta felie —
 	# survey: sol la lat 8 e deja -5,5 m sub drum).
+	#
+	# RUNDA 3: bărcile s-au rotit 90° (flancul lung spre camera) si s-au mutat
+	# CAP-COADA de-a lungul pontonului. Doua incercari intermediare au mutat
+	# geometria caiacelor cautand sa evite banda laterala a bărcilor — inutil
+	# (git blame): caiacele au `coliziune="none"` (PROP_COLLISION), deci NU
+	# pot intra vreodata in coliziune FIZICA cu nimic, nici cu barca, nici cu
+	# masina. Riscul real era doar VIZUAL (sa citeasca inglobate in carena),
+	# iar odata ce fixul de mai sus a corectat `boat_lat` (marginea reala a
+	# pontonului + EDGE_KEEP, nu mai putin), bărcile s-au mutat suficient mai
+	# departe lateral (~+0,8 m) incat geometria ORIGINALA din runda 2 (langa
+	# `qp`, neschimbata) nu mai are de ce sa citeasca ingropata — verificat pe
+	# captura finala.
 	const KAYAK_PIER_LAT := 1.6
 	const KAYAK_PIER_TANG := 3.0
 	var kq1 := qp + sp * side_sign * KAYAK_PIER_LAT \
-		+ Vector3(tangp.x, 0.0, tangp.z) * -KAYAK_PIER_TANG
+		+ tang_dir * -KAYAK_PIER_TANG
 	var kq2 := qp + sp * side_sign * (KAYAK_PIER_LAT + 2.6) \
-		+ Vector3(tangp.x, 0.0, tangp.z) * (KAYAK_PIER_TANG + 1.0)
+		+ tang_dir * (KAYAK_PIER_TANG + 1.0)
 	# +PI/2: kayak_a/b au lungimea (3,6 m) pe local Z, nu X (AABB masurat:
 	# size 0,58 X x 0,36 Y x 3,6 Z) — acelasi tipar ca wharf/cruise_boat.
 	var kyaw_base := atan2(-tangp.z, tangp.x) + PI * 0.5

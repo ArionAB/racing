@@ -1516,6 +1516,50 @@ const SLOT_REMAP_BY_GROUP := {
 	},
 }
 
+## Ca [constant SLOT_REMAP_BY_GROUP], dar scopeaza pe TEMA pistei
+## (`Track.theme_decor`, citit prin `_ancestor_theme`), nu pe numele grupului
+## de decor manual.
+##
+## De ce nu GROUP: `moss_boulder_a/b/c.glb` e reuse din Machu Picchu (brief
+## fiordland_kit.md), iar pe Fiordland zonele POI sunt inca goale — nu exista
+## niciun nume de grup de care sa agatam o reparatie. Tema exista din prima zi
+## a pistei (`custom_theme = "fiordland"` in Track16.tscn), deci e cheia care
+## nu asteapta dupa niciun POI. Scop pe TEMA, nu pe MODEL (SLOT_REMAP_BY_MODEL
+## ar fi global): Machu Picchu (tema "machupicchu") foloseste acelasi
+## `moss_boulder_*.glb` prin `_model_flock` cu `tri_class="inca_stone"`
+## (tools/gen_decor_mp_f.gd), care ignora complet sloturile de atlas — dar
+## piesele plasate individual (WorldProp, ex. `--vitrina`) tot citesc atlasul,
+## si o remapare globala pe model le-ar fi schimbat si pe Track15.
+const SLOT_REMAP_BY_THEME := {
+	"fiordland": {
+		# `moss_boulder_a/b/c`: masurat pe .glb (probe ad-hoc), un SINGUR
+		# material/mesh cu trei sloturi — corpul pe 3 ROCK_LIGHT (bej-tan
+		# 206,141,74), inelul de baza pe 29 MARBLE_GREY (gri deschis
+		# 182,178,170) si capacul de "muschi" pe 12 CACTUS_GREEN (oliv
+		# 88,120,50). Pe Fiordland, sub soarele rece al temei, asta randa
+		# DAMIER galben-verde / corp ALB cu capac verde crud / corp portocaliu
+		# (vezi capturile POI B/C/D) — bolovanul citea a piatra calda de
+		# Anzi, nu a gneis Fiordland.
+		#
+		# Bara (bara_poi_B/C/D.png) cere stanca INCHISA invelita in muschi
+		# VERDE INCHIS, aceeasi materie ca peretele `stirling_ledge`/terenul
+		# pe pantă (`scarp_tint`, randat ~(62,63,63), aproape achromatic). Nu
+		# exista slot de atlas la (62,63,63) exact, dar 20 VOLCANIC_BLACK
+		# (86,84,91, H257 L0.34 S0.04) e cel mai apropiat gri-neutru inchis
+		# deja in atlas — ZERO sloturi noi. Corpul SI inelul de baza trec pe
+		# 20, ca sa fie aceeasi piatra (fara sa desparta bolovanul in doua
+		# materii la baza). Capacul trece pe 21 TROPICAL_GREEN (66,127,62,
+		# H116) — mai inchis si mai saturat decat 12, verde de muschi de
+		# padure temperata, nu oliv de tufa uscata.
+		"moss_boulder_a": {3: Palette.VOLCANIC_BLACK, 29: Palette.VOLCANIC_BLACK,
+			12: Palette.TROPICAL_GREEN},
+		"moss_boulder_b": {3: Palette.VOLCANIC_BLACK, 29: Palette.VOLCANIC_BLACK,
+			12: Palette.TROPICAL_GREEN},
+		"moss_boulder_c": {3: Palette.VOLCANIC_BLACK, 29: Palette.VOLCANIC_BLACK,
+			12: Palette.TROPICAL_GREEN},
+	},
+}
+
 const SLOT_REMAP_BY_MODEL := {
 	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
 	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea
@@ -1780,12 +1824,15 @@ func _apply_no_shadow() -> void:
 func _remap_model_slots() -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
+	var _theme_cache := _ancestor_theme()
 	for model in models:
 		var stem := model.scene_file_path.get_file().get_basename()
 		var group := _group_of(model)
 		var remap: Dictionary
 		if SLOT_REMAP_BY_GROUP.has(group) and (SLOT_REMAP_BY_GROUP[group] as Dictionary).has(stem):
 			remap = SLOT_REMAP_BY_GROUP[group][stem]
+		elif SLOT_REMAP_BY_THEME.has(_theme_cache) and (SLOT_REMAP_BY_THEME[_theme_cache] as Dictionary).has(stem):
+			remap = SLOT_REMAP_BY_THEME[_theme_cache][stem]
 		elif SLOT_REMAP_BY_MODEL.has(stem):
 			remap = SLOT_REMAP_BY_MODEL[stem]
 		else:
@@ -1893,6 +1940,44 @@ func _group_of(node: Node) -> String:
 	while n != null and n.get_parent() != self:
 		n = n.get_parent()
 	return String(n.name) if n != null and n != self else ""
+
+
+## Cheia de tema a pistei-stramos (`Track.theme_decor`, ex. "fiordland",
+## "machupicchu"), urcand in ierarhie ca la `FlockProp._find_sampler`.
+##
+## De ce exista: `SLOT_REMAP_BY_GROUP` scopeaza pe numele grupului de decor
+## manual (copilul direct din .tscn), dar acela apartine constructorilor de
+## POI-uri si pe Fiordland zonele sunt inca goale la ora asta. O reparatie pe
+## PISTA (nu pe model, ca sa nu atinga Machu Picchu, care refoloseste acelasi
+## `moss_boulder_*.glb`) are nevoie de o cheie care exista INAINTE ca vreun
+## POI sa fie construit: tema pistei. "" daca WorldProp nu e sub un Track (ex.
+## piesa de vitrina printr-un holder in afara pistei — desi `--vitrina` chiar
+## adauga holderul ca frate cu Track, deci si acolo se gaseste).
+func _ancestor_theme() -> String:
+	var cur: Node = get_parent()
+	while cur != null:
+		if cur is Track:
+			return String((cur as Track).theme_decor)
+		cur = cur.get_parent()
+	# FALLBACK: in decorul real (.tscn), WorldProp e mereu descendentul unui
+	# Track, deci bucla de mai sus il gaseste din primul pas si linia de mai
+	# jos nu se atinge niciodata. Exceptia e harnasul de test: `--vitrina`
+	# (tools/snapshot.gd, `_place_vitrina`) adauga holderul CA FRATE al pistei
+	# (amandoi copii ai radacinii scriptului de captura), nu ca descendent —
+	# deci urcarea in ierarhie de mai sus nu ajunge niciodata la Track, si o
+	# reparatie scopeaza-pe-tema testata prin --vitrina ar parea moarta desi
+	# codul de productie merge. Cauta deci un Track oriunde in arbore, ca sa
+	# nu depinda de cum isi construieste harnasul scena.
+	if is_inside_tree():
+		var root := get_tree().root
+		var stack: Array[Node] = [root]
+		while not stack.is_empty():
+			var n: Node = stack.pop_back()
+			if n is Track:
+				return String((n as Track).theme_decor)
+			for c in n.get_children():
+				stack.append(c)
+	return ""
 
 
 ## Copia unui mesh cu UV-urile mutate pe alte sloturi de atlas.

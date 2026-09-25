@@ -158,6 +158,7 @@ func _ready() -> void:
 		_seal_rock()
 		_rata_rare()
 		_guard_rail()
+		_cliff_wall()
 		_upslope_forest()
 		_write()
 	get_tree().quit(0)
@@ -198,6 +199,34 @@ func _survey() -> void:
 		f2 += 0.01
 	_sea_sign = -1.0 if votes > 0 else 1.0
 	print("; sgn_mare dominant = %+.0f (votes=%d)" % [_sea_sign, votes])
+
+
+## Normala suprafetei din raycast REAL pe TerrainBody, la punctul (x,z).
+## Foloseste acelasi TerrainBody ca _sol_real (nu campul neted). Returneaza
+## Vector3(0,1,0) daca nu s-a gasit coliziune (implicit "plat", deci piesele
+## care cer perete abrupt se sar, nu se plaseaza gresit).
+func _normal_real(x: float, z: float) -> Vector3:
+	if _terrain_rid == RID():
+		for c in _track.get_children():
+			if str(c.name) == "TerrainBody":
+				_terrain_rid = (c as StaticBody3D).get_rid()
+	if _terrain_rid == RID():
+		return Vector3.UP
+	var space := _track.get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(
+		Vector3(x, _sus_y, z), Vector3(x, _sus_y - 1200.0, z))
+	q.collide_with_areas = false
+	q.collide_with_bodies = true
+	q.exclude = []
+	var hit: Dictionary = space.intersect_ray(q)
+	var guard := 0
+	while not hit.is_empty() and hit["rid"] != _terrain_rid and guard < 24:
+		q.exclude = q.exclude + [hit["rid"]]
+		hit = space.intersect_ray(q)
+		guard += 1
+	if not hit.is_empty() and hit["rid"] == _terrain_rid:
+		return (hit["normal"] as Vector3)
+	return Vector3.UP
 
 
 func _find_sun(node: Node) -> DirectionalLight3D:
@@ -269,7 +298,118 @@ func _guard_rail() -> void:
 		f += _step(_rng.randf_range(30.0, 50.0))
 
 
-## (4) VERSANTUL DE SUS — covor de muschi/ferigi la baza peretelui + padure
+## (4) PERETELE DE STANCA SPRE MARE — verdict runda 3: fasia dintre drum si
+## mare (peretele abrupt, partea `_sea_sign`) era GOALA — doar guard_rock la
+## marginea drumului, nimic pe fata peretelui. Bara cere muschi/ferigi/tussock
+## in PETE si crapaturi pe toata inaltimea peretelui, plus cateva rata_tree
+## cu flori rosii agatate — NU covor uniform (NOTA coordonator).
+##
+## Dungile ude verticale sunt TEXTURA (wet_gneiss, sub decor) — nu se
+## simuleaza aici. Ce se adauga sunt piese 3D ancorate prin raycast REAL pe
+## TerrainBody (`_sol_real`), cu doua garzi:
+##
+## (a) normala aproape orizontala (perete abrupt), nu umarul ingust de langa
+## asfalt (memoria umarul-ingust-ascunde-caderea: un smoc pus pe umar citeste
+## ca iarba, nu ca perete);
+## (b) `_sol_real(q) ~= _sampler.ground_y(q)` (memoria terrain-mesh-y-extrapoleaza):
+## masurat direct pe worktree-ul asta, intre half+2 si half+10 m analiticul
+## (folosit de probe_manual) si coliziunea REALA a peretelui diverg pana la
+## 13,8 m (tranzitia RAVINE_CORNICE_RIM=6 e prea abrupta ca sa fie prinsa la
+## rezolutia mesh-ului) — orice piesa plasata acolo dupa raycast pica
+## probe_manual cu PLUTESTE/INGROPAT, desi vizual sta corect pe stanca. Zona
+## sigura (delta<1) e fie foarte aproape de muchie (gap 0,5-1,5 m), fie dupa
+## ce panta s-a asezat (gap >= prag cautat per punct). Se cauta gap-ul din
+## banda ceruta, primul unde delta < 1,2 m; daca niciunul nu se potriveste,
+## piesa se sare (mai putine piese decat un covor uniform, dar toate stau pe
+## perete, nu plutesc/ingroapa).
+const CLIFF_DELTA_MAX := 1.8
+
+func _wall_anchor(q: Vector3) -> Dictionary:
+	var g: float = _sol_real(q.x, q.z)
+	var analytic: float = _sampler.ground_y(q.x, q.z)
+	return {"y": g, "ok": absf(g - analytic) <= CLIFF_DELTA_MAX}
+
+## Cauta un gap in banda [gap_lo, gap_hi] care sa cada pe perete abrupt SI
+## sa fie de acord cu analiticul (evita banda de tranzitie unde mesh-ul
+## diverge de formula). Scaneaza pe grila fina in loc de random — random pe
+## o banda ingusta a ratat des punctele bune (18/158 la prima incercare);
+## grila gaseste orice pocket de acord care exista in banda ceruta.
+func _find_wall_gap(p: Vector3, s: Vector3, half: float, gap_lo: float, gap_hi: float) -> Dictionary:
+	var steps := 24
+	var best_gap := -1.0
+	var best_delta := INF
+	var best_pos := Vector3.ZERO
+	for step in steps + 1:
+		var gap: float = gap_lo + (gap_hi - gap_lo) * float(step) / float(steps)
+		var q: Vector3 = p + s * (half + gap)
+		var nrm: Vector3 = _normal_real(q.x, q.z)
+		if nrm.y > 0.6:
+			continue  # umar, nu perete
+		var g: float = _sol_real(q.x, q.z)
+		var analytic: float = _sampler.ground_y(q.x, q.z)
+		var delta: float = absf(g - analytic)
+		if delta < best_delta:
+			best_delta = delta
+			best_gap = gap
+			best_pos = Vector3(q.x, g, q.z)
+	if best_gap >= 0.0 and best_delta <= CLIFF_DELTA_MAX:
+		# jitter mic in jurul gap-ului bun gasit, ca sa nu cada toate pe o
+		# grila vizibila (aranjamentul-bate-numarul) — re-verificat, nu doar
+		# aplicat orb.
+		var jittered: float = clampf(best_gap + _rng.randf_range(-0.25, 0.25), gap_lo, gap_hi)
+		var qj: Vector3 = p + s * (half + jittered)
+		var gj: float = _sol_real(qj.x, qj.z)
+		var aj: float = _sampler.ground_y(qj.x, qj.z)
+		if absf(gj - aj) <= CLIFF_DELTA_MAX and _normal_real(qj.x, qj.z).y <= 0.6:
+			return {"found": true, "pos": Vector3(qj.x, gj, qj.z)}
+		return {"found": true, "pos": best_pos}
+	return {"found": false}
+
+func _cliff_wall() -> void:
+	var n := _track.baked.size()
+	var side_sign := -1.0 if _sea_sign < 0.0 else 1.0  # spre mare
+	var placed := 0
+	var skipped := 0
+	var f := F_IN + 0.004
+	while f < F_OUT - 0.004:
+		var cluster := 1 + (1 if _rng.randf() < 0.45 else 0)
+		for k in cluster:
+			if _rng.randf() < 0.72:
+				var i := int(f * float(n)) % n
+				var p: Vector3 = _track.baked[i]
+				var s: Vector3 = _track._side_at(i) * side_sign
+				var half: float = _track.width_at_index(i)
+				# banda larga (0,4-9 m): grila fina in _find_wall_gap gaseste
+				# orice pocket de acord in ea, aproape de muchie SAU mai jos
+				# pe perete, in loc sa fortam un singur interval ingust.
+				var r: Dictionary = _find_wall_gap(p, s, half, ROAD_MARGIN, 9.0)
+				if not r["found"]:
+					skipped += 1
+					continue
+				var model: String = ["moss_boulder_a", "fern_cluster", "tussock_clump", "fern_cluster", "moss_boulder_a"][_rng.randi_range(0, 4)]
+				_raw(model, "cliffFace", r["pos"],
+					_rng.randf_range(0.0, TAU), _rng.randf_range(0.75, 1.15), "none")
+				placed += 1
+		f += _step(_rng.randf_range(2.0, 3.6))
+	# cateva rata_tree cu flori rosii agatate pe fata peretelui, in pete rare
+	# (nu sir) — accentul cerut de bara si de verdictul runda 3.
+	var rata_wall_fracs: Array[float] = [0.115, 0.155, 0.195, 0.235]
+	for rf in rata_wall_fracs:
+		var i2 := int(rf * float(n)) % n
+		var p2: Vector3 = _track.baked[i2]
+		var s2: Vector3 = _track._side_at(i2) * side_sign
+		var half2: float = _track.width_at_index(i2)
+		var r2: Dictionary = _find_wall_gap(p2, s2, half2, ROAD_MARGIN, 9.0)
+		if not r2["found"]:
+			skipped += 1
+			continue
+		_raw("rata_tree", "rataWall", r2["pos"],
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.55, 0.75), "none")
+		placed += 1
+	print("; perete stanca: %d piese (muschi/ferigi/tussock/rata) pe fata abrupta, %d sarite (perete instabil la esantion)" % [placed, skipped])
+
+
+## (5) VERSANTUL DE SUS — covor de muschi/ferigi la baza peretelui + padure
 ## de fag pe versant, cu densitate care creste spre subiect (drumul) —
 ## memoria aranjamentul-bate-numarul.
 ##

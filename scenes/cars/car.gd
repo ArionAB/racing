@@ -2573,7 +2573,15 @@ func _update_shadow() -> void:
 	_shadow.global_position = (hit.position as Vector3) + Vector3.UP * 0.06
 	_shadow.rotation = Vector3(0.0, rotation.y, 0.0)
 	var height := global_position.y - (hit.position as Vector3).y
-	_shadow_mat.albedo_color.a = clampf(0.38 - height * 0.03, 0.08, 0.38)
+	# Cu umbre dinamice pornite caroseria arunca deja o umbra reala, iar
+	# blob-ul peste ea dubla intunecarea sub masina. Ramane doar ca AO de
+	# contact (0.16) — si ca semn de aterizare in aer, unde umbra reala cade
+	# oriunde o duce soarele, dar blob-ul sta mereu sub roti. Fara umbre
+	# (theme_shadows stins pe device), blob-ul e singura umbra, deci 0.38.
+	var full := 0.38
+	if track != null and track.theme_shadows:
+		full = 0.16
+	_shadow_mat.albedo_color.a = clampf(full - height * 0.03, 0.06, full)
 
 func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	# Pe fizica intreaga, CORPUL insusi se inclina: panta, ruliul, squat-ul si

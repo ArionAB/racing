@@ -32,6 +32,19 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# aceleasi piese fara axa functionala (chasm_rock/moss_boulder), acelasi
 	# motiv ca marmita/muschiBolovan mai sus.
 	"canionTreapta", "canionTreaptaMica", "canionMuschi",
+	# RUNDA 5 POI C: `FoamPool` (bazinul de spuma la baza cascadei Stirling) —
+	# nod container fara axa functionala, la fel ca muschiul/bolovanii din
+	# aceeasi zona (deja neinregistrati aici, dar FoamPool nu adauga zgomot
+	# NOU peste ce exista deja pe restul POI-ului C, memoria
+	# criticul-cere-ce-zona-nu-poate-da nu se aplica: aici chiar nu exista
+	# directie de verificat, petecele interne au yaw aleator intentionat).
+	"FoamPool",
+	# RUNDA 6 POI C: bolovani de gneis intunecat (chasm_rock) langa marginile
+	# perdelei si la baza — acelasi tip de piesa fara axa functionala ca
+	# marmita/canionMuschi de mai sus (chasm_rock reutilizat ca bolovan de
+	# decor, nu ca element cu directie), yaw aleator intentionat
+	# (aranjamentul-bate-numarul).
+	"gneisMargine", "gneisBaza",
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:

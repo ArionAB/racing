@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://bee6c2pavxw1a" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="3_signal"]
+[ext_resource type="Script" uid="uid://d15eseb7qp8l2" path="res://scenes/hazards/hazard_lamp.gd" id="3b_lamp"]
 [ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="4_rain"]
 [ext_resource type="Script" path="res://scenes/hazards/waterfall_hazard.gd" id="5_waterfall"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="6_channel"]
@@ -193,6 +194,7 @@ bus_shove = 1.5
 bus_side_accel = 4.0
 bus_nose_angle_deg = 40.0
 tunnel_half_width = 4.5
+lamp = NodePath("../../DecorManual/ZoneE_Portal/trafficPoleEast/Lampa")
 
 [node name="KickerBowen" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.0, 0.2, -67.5)
@@ -7005,6 +7007,12 @@ transform = Transform3D(0.438583, 0, 0.836687, 0, 0.944669, 0, -0.836687, 0, 0.4
 
 [node name="trafficPoleEast" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_traffic_light_pole")]
 transform = Transform3D(0.323288, 0.000000, 0.946301, 0.000000, 1.000000, 0.000000, -0.946301, 0.000000, 0.323288, -113.2884, 44.6687, -500.1668)
+
+[node name="Lampa" type="Node3D" parent="DecorManual/ZoneE_Portal/trafficPoleEast"]
+transform = Transform3D(-1.000000, 0.000000, 0.000000, 0.000000, -1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 4.490000, -2.250000)
+script = ExtResource("3b_lamp")
+bulb_size = 0.28
+spacing = 0.175
 
 [node name="ZoneF_Coborare" type="Node3D" parent="DecorManual"]
 

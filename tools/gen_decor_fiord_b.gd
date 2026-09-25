@@ -277,14 +277,21 @@ func _upslope_forest() -> void:
 	var n := _track.baked.size()
 	var upslope := 1.0 if _sea_sign < 0.0 else -1.0
 	# muschi + ferigi, aproape de perete, deasupra drumului — umplu crapaturile.
+	# RUNDA 1: prima trecere (pas 3,5-7 m, o piesa) citea rar in captura — bara
+	# cere muschi in CRAPATURI, adica un covor continuu la baza peretelui, nu
+	# instante razlete. Pas mai scurt + 1-2 piese per punct (cluster, jitter pe
+	# adancime) — aranjamentul-bate-numarul: densitatea vine din asezare, nu
+	# din numarul brut.
 	var f := F_IN
 	while f < F_OUT:
-		if _rng.randf() < 0.55:
-			var model: String = ["moss_boulder_a", "moss_boulder_b", "fern_cluster", "tussock_clump"][_rng.randi_range(0, 3)]
-			var gap := _rng.randf_range(0.9, 2.4)
-			_place(model, "wallFoot", f, upslope, gap,
-				_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.3), COLLISION.get(model, "hull"))
-		f += _step(_rng.randf_range(3.5, 7.0))
+		var cluster := 1 + (1 if _rng.randf() < 0.5 else 0)
+		for k in cluster:
+			if _rng.randf() < 0.8:
+				var model: String = ["moss_boulder_a", "moss_boulder_b", "fern_cluster", "tussock_clump", "fern_cluster"][_rng.randi_range(0, 4)]
+				var gap := _rng.randf_range(0.9, 3.2) + float(k) * 1.3
+				_place(model, "wallFoot", f, upslope, gap,
+					_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.3), COLLISION.get(model, "hull"))
+		f += _step(_rng.randf_range(1.8, 3.2))
 	# fagi rari, mai sus pe versant (8-26 m), densitate usor crescanda spre
 	# mijlocul zonei (al doilea S, frac ~0.17 — captura decisiva).
 	f = F_IN + 0.01

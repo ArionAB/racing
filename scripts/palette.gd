@@ -1437,6 +1437,38 @@ const GLOW_PREFIX := "glow:"
 ## `House_Roof` din `village_house.glb` (landmark Okinawa, `roof_tiles`).
 const ATLAS_PREFIX := "atlas"
 
+## Al saselea prefix acceptat: "plain". La fel ca ATLAS_PREFIX, nu aduce nicio
+## textura noua — dar, spre deosebire de el, OPRESTE stratul triplanar de
+## detaliu (`detail_enabled`), nu doar reface `world_material()` (care il
+## are pornit din constructie).
+##
+## DE CE exista, separat de ATLAS_PREFIX: `world_material()` e gandit pentru
+## teren/roca/lemn — stratul triplanar (fibra, crapaturi) e exact ce cere
+## style_bible §4 pe suprafetele acelea. O caroserie de VOPSEA PLATA nu are
+## acel tipar de suprafata: masurat pe `cruise_boat` (POI A, runda 3), corpul
+## alb al vaporasului primea `world_material()` prin fallback-ul implicit al
+## lui `apply_class_materials` (nodul `Boat` nu are nicio intrare in
+## CLASSES_BY_MODEL), deci stratul triplanar de detaliu (gandit pentru
+## piatra/lemn de teren) se vedea PESTE gelcoat-ul alb ca un model de fibra
+## de lemn/scoarta — verdictul criticului orb: "carena alba are un model de
+## fibra de lemn/scoarta". Confirmat direct pe scena incarcata (sonda
+## tools/sv_boat_slots.gd), nu presupus: materialul pe `Boat` ERA chiar
+## `PaletteAtlas`-ul din GLB brut, deci nu e o coliziune de nume cu alt kit
+## (nume-noduri-nu-sunt-unice) — e fallback-ul universal, corect pentru
+## roca/lemn de decor, gresit pentru vopsea neteda.
+##
+## Cache-uit ca finish_material: ZERO materiale noi la garda (acelasi atlas,
+## aceeasi masca, doar `detail_enabled=false` pe o copie).
+const PLAIN_PREFIX := "plain"
+
+static var _plain_mat: StandardMaterial3D = null
+
+static func plain_material() -> StandardMaterial3D:
+	if _plain_mat == null:
+		_plain_mat = world_material().duplicate() as StandardMaterial3D
+		_plain_mat.detail_enabled = false
+	return _plain_mat
+
 
 ## Materialul cerut de un "glow:<slot>|<energie>". Energia e optionala
 ## (implicit 1.2, ca la `glow_material`).

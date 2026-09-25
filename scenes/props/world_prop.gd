@@ -739,6 +739,18 @@ const CLASSES_BY_MODEL := {
 	# `village_house`).
 	"cafe_shed": {"House_Roof": Palette.ATLAS_PREFIX},
 	"lodge": {"House_Roof_001": Palette.ATLAS_PREFIX},
+	# Fiordland (POI A, runda 3 a criticului orb): `Boat` (cruise_boat.glb)
+	# n-avea NICIO intrare aici, deci cadea pe fallback-ul implicit al lui
+	# `apply_class_materials` — `world_material()`, materialul lumii cu
+	# stratul triplanar de detaliu gandit pentru roca/lemn de teren
+	# (style_bible §4). Pe carena ALBA (vopsea plata, nu piatra) acel strat
+	# citea exact ce a numit criticul: "model de fibra de lemn/scoarta".
+	# Verificat pe scena incarcata (tools/sv_boat_slots.gd), nu presupus:
+	# materialul de pe `Boat` era `PaletteAtlas`-ul brut din GLB — nicio
+	# coliziune de nume cu alt kit (nu e cazul `nume-noduri-nu-sunt-unice`).
+	# `PLAIN_PREFIX` pastreaza acelasi atlas si acelasi AO din vertex color,
+	# doar opreste `detail_enabled` — zero materiale noi la garda.
+	"cruise_boat": {"Boat": Palette.PLAIN_PREFIX},
 	# Firidele din peretele stancii goale (Cappadocia, POI G): fundul lor ARDE.
 	#
 	# Fara asta o fereastra sapata e o pata neagra, si verdictul rundei 2 spune
@@ -2251,6 +2263,8 @@ func _apply_model_classes() -> void:
 func _model_class_material(cls: String) -> Material:
 	if cls == Palette.ATLAS_PREFIX:
 		return Palette.world_material()
+	if cls == Palette.PLAIN_PREFIX:
+		return Palette.plain_material()
 	if cls.begins_with(Palette.GLOW_PREFIX):
 		return Palette._glow_from_spec(cls.trim_prefix(Palette.GLOW_PREFIX))
 	if cls.begins_with(Palette.FINISH_PREFIX):

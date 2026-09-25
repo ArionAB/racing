@@ -257,15 +257,25 @@ func _village() -> void:
 ## start departe de grila (frac 0.905, la >200 m de start/finish care e la
 ## frac 0.0 — memoria corp-cinematic-aparut-in-masina), aterizare pe pista la
 ## frac ~0.97, cu umbra (cast_shadow ON, in shadow_distance).
+##
+## RUNDA 1, capcana gasita pe captura: brief-ul zice "drum drept pe mal"
+## (§H), dar survey-ul arata contrariul — malul e o BUCLA aproape completa
+## (0.900 la (35,1), 0.975 la (-70.8,40), inapoi la (-32.4,7.6) la 1.000;
+## vectorul lateral se roteste ~180 grade). O pista la offset lateral
+## CONSTANT fata de un drum care coteste asa iese ea insasi curbata — nu se
+## vede ca pista dreapta, se vede ca o dunga arcuita fara sens. Singurul
+## interval unde curbura e mica e chiar la intrare (0.900-0.917, unde side
+## ramane aproape (-0.69,-0.73) pe tot intervalul) — acolo sta si satul, deci
+## pista + avion se muta acolo, paralele cu drumul si cu satul, ca in bara.
 const STRIP_OFFSET := 22.0     # distanta laterala de la ax la mijlocul pistei
 const STRIP_HALF_W := 6.0      # jumatate din latimea pistei de avioane
-const STRIP_F_IN := 0.912
-const STRIP_F_OUT := 0.985
+const STRIP_F_IN := 0.900
+const STRIP_F_OUT := 0.917
 
 func _airstrip() -> void:
 	var n := _track.baked.size()
 	var f := STRIP_F_IN
-	var step := _step(4.0)
+	var step := _step(3.0)
 	var slabs := 0
 	while f < STRIP_F_OUT:
 		var i := int(f * float(n)) % n
@@ -301,16 +311,18 @@ func _airstrip() -> void:
 ## fata de `transform`-ul nodului — nu globale. Se pune deci originea
 ## transformului pe primul punct al curbei si restul punctelor relativ la ea.
 func _plane() -> void:
-	# Curba avionului: 4 puncte, de la intrarea in cadru (frac 0.905, departe
-	# de grila care e la frac 0.0 pe un traseu de 2159 m — peste 2000 m de
-	# start, memoria corp-cinematic-aparut-in-masina) pana dupa aterizare pe
-	# pista (frac 0.98). Coboara de la +25 m fata de sol la +0,3 (atinge
-	# pista), paralel cu drumul, deplasat spre STRIP_OFFSET.
+	# Curba avionului: 4 puncte, DE-A LUNGUL FELIEI DREPTE (0.900-0.917, acolo
+	# unde sta si pista) — nu pe toata zona H, care se curbeaza aproape 180
+	# grade (vezi nota de la STRIP_F_IN/OUT). Start departe de grila (frac
+	# 0.900, la >1900 m de start/finish, memoria corp-cinematic-aparut-in-
+	# masina), aterizare pe pista spre capatul feliei. Coboara de la +25 m
+	# fata de sol la +0,3 (atinge pista), paralel cu drumul, deplasat spre
+	# STRIP_OFFSET.
 	var n := _track.baked.size()
 	var pts: Array[Vector3] = []
 	var heights: Array[float] = [25.0, 14.0, 3.0, 0.3]
 	var offs: Array[float] = [STRIP_OFFSET - 4.0, STRIP_OFFSET, STRIP_OFFSET, STRIP_OFFSET]
-	var fracs: Array[float] = [0.905, 0.935, 0.965, 0.980]
+	var fracs: Array[float] = [0.900, 0.906, 0.912, 0.916]
 	for k in fracs.size():
 		var i := int(fracs[k] * float(n)) % n
 		var p := _track.baked[i]
@@ -324,9 +336,14 @@ func _plane() -> void:
 	var pv: Array[String] = []
 	for pt in pts:
 		var loc := pt - origin
-		# in-tangent, punct, out-tangent (tangente locale zero: segmente
-		# drepte intre puncte, suficient pentru o coborare scurta).
-		pv.append("0, 0, 0, %f, %f, %f, 0, 0, 0" % [loc.x, loc.y, loc.z])
+		# ORDINEA REALA (verificata empiric pe Curve3D_f51a1/Track01.tscn, un
+		# PathMover STIUT bun): (in, out, POZITIE) - pozitia e a TREIA
+		# tripleta, nu a doua. Scris gresit ca (in, pozitie, out) prima oara:
+		# toate cele 4 puncte ieseau cu pozitia reala la (0,0,0) (tangenta
+		# "out" citita ca pozitie), deci get_baked_length() intorcea 0.000 si
+		# avionul nu se misca deloc - prins cu `--train-at diag` in
+		# tools/snapshot.gd. In/out zero: segmente drepte intre puncte.
+		pv.append("0, 0, 0, 0, 0, 0, %f, %f, %f" % [loc.x, loc.y, loc.z])
 	_out_sub.append('[sub_resource type="Curve3D" id="%s"]' % sid)
 	_out_sub.append('_data = {')
 	_out_sub.append('"points": PackedVector3Array(%s),' % ", ".join(pv))

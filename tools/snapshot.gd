@@ -888,7 +888,25 @@ func _set_train_phase(root: Node, at: float) -> void:
 			continue
 		mover.set("_started", true)
 		mover.set("_dist", length * clampf(at, 0.0, 0.999))
-		mover._physics_process(0.0)
+		# `_body` e AnimatableBody3D cu `sync_to_physics = true`: scrierea lui
+		# `global_transform` din `_physics_process` (path_mover.gd) trece prin
+		# starea de fizica si nu se reflecta imediat in `global_position` cand
+		# e apelata manual, in afara unui tick real de fizica (verificat: doua
+		# apeluri succesive la `_physics_process(0.0)` tot au aratat corpul la
+		# originea curbei, desi `_dist`/`sample_baked` erau deja corecte).
+		# `TrainHazard` scapa de asta fiindca scrie `.position` local pe un
+		# Node3D simplu, nu `global_transform` pe un corp sincronizat cu
+		# fizica. Fix local: opreste sincronizarea CAT TIMP se scrie transful,
+		# ca scrierea sa fie directa pe Node3D (CPU), apoi o repune — corpul
+		# ramane sincronizat normal in cursa reala, doar captura foloseste
+		# ocolul.
+		var body: Node3D = mover.call("body")
+		if body != null and body.has_method("set"):
+			body.set("sync_to_physics", false)
+			mover._physics_process(0.0)
+			body.set("sync_to_physics", true)
+		else:
+			mover._physics_process(0.0)
 		found += 1
 	print("--train-at=%.2f: %d treceri (tren/PathMover) mutate in ciclu" % [at, found])
 

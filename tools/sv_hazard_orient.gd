@@ -28,6 +28,10 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	"fagApropiat", "fagEtaj2", "fagFund", "fagIntrare", "fagIesire",
 	"muschiBolovan", "feriga", "ferigaMica", "reperMargine", "tufaIarba",
 	"marmita", "marmitaMal", "kea", "stumpKea",
+	# RUNDA 2 POI D: ansamblul de canion la pod (_bridge_canyon_dressing),
+	# aceleasi piese fara axa functionala (chasm_rock/moss_boulder), acelasi
+	# motiv ca marmita/muschiBolovan mai sus.
+	"canionTreapta", "canionTreaptaMica", "canionMuschi",
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:

@@ -198,11 +198,15 @@ func _dist_to_scurt(pos: Vector3) -> float:
 
 
 func _ready() -> void:
+	var _survey_bridge := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			_out_path = a.trim_prefix("--out=")
 		elif a == "--survey":
 			_survey_only = true
+		elif a == "--survey-bridge":
+			_survey_only = true
+			_survey_bridge = true
 	await get_tree().process_frame
 	_track = (load(TRACK) as PackedScene).instantiate() as Track
 	get_tree().root.add_child(_track)
@@ -220,9 +224,12 @@ func _ready() -> void:
 	_rng.seed = 160406
 	_find_scurt_curve()
 	_survey()
+	if _survey_bridge:
+		_survey_bridge_fn()
 	if not _survey_only:
 		_bridge_rail()
 		_riverbed()
+		_bridge_canyon_dressing()
 		_near_row()
 		_second_row()
 		_backdrop()
@@ -262,6 +269,26 @@ func _survey() -> void:
 			f, p.x, p.z, p.y, half, s.x, s.z, _curv(i), " ".join(cols),
 			s.dot(shadow)])
 		f += 0.005
+
+
+## RUNDA 2, nota (2) a coordonatorului: cota albiei fata de drum la +/-6/10/15 m
+## EXACT (nu +/-8/15/25/40 ca in _survey()), pe segmentul podetului (0.400-0.424),
+## ca sa se decida cu dovada daca valea sub pod e vizibila sau ingropata.
+func _survey_bridge_fn() -> void:
+	var n := _track.baked.size()
+	print("; --- survey pod (partea +, side=1 conform custom_ravines index1) ---")
+	print("; frac    y_drum  sol la +6     +10    +15   | -6     -10    -15")
+	var f := 0.398
+	while f <= 0.426:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i)
+		var cols: Array[String] = []
+		for off: float in [6.0, 10.0, 15.0, -6.0, -10.0, -15.0]:
+			var q := p + s * off
+			cols.append("%+6.2f" % (_sol_real(q.x, q.z) - p.y))
+		print("; %.3f  %6.2f  %s" % [f, p.y, "  ".join(cols)])
+		f += 0.002
 
 
 func _curv(i: int) -> float:
@@ -420,6 +447,58 @@ func _place_river(model: String, base: String, frac: float, lat: float,
 			return
 	var g := _sol_real(q.x, q.z)
 	_raw(model, base, Vector3(q.x, g, q.z), _rng.randf_range(0.0, TAU), scl, mode)
+
+
+# ------------------------------------------------------------------ ansamblul de canion la pod
+## RUNDA 2, verdict critic: "lipseste silueta compusa a cascadei-canion ...
+## niciun podet cu balustrada peste vreun curs de apa vizibil -- doar copaci
+## si bolovani". Nota coordonatorului (2): masurat cu --survey-bridge, terenul
+## la +/-6/10/15 m fata de drum pe TOT segmentul podetului (0.398-0.424) e
+## intre -1.06 si +0.39 m -- NU cei -8 m de vale promisi de brief
+## (custom_ravines index 1, floor +7). Asta e relief, nu decor (contractul:
+## "NU atinge tema, terenul, relieful"). Ce RAMANE de facut in decor, fara sa
+## musc din regula aia: aglomerarea vizibila de stanci chiar la baza podului
+## (chasm_rock in "trepte" de inaltime descrescanda + moss_boulder la baza),
+## ca marmitele sa se vada IMEDIAT langa tablie, nu la 50+ m mai devreme pe
+## traseu (unde erau deja plasate de _riverbed). Cascada: RainFallChasm (cod,
+## `--rain=1`) verificata pe captura la frac 0.406 -- se vede lateral-dreapta
+## SI balustrada in acelasi cadru; in stare uscata nu exista geometrie de apa
+## alba (niciun asset din kit are FOAM_WHITE pe Chasm), deci in uscat ramane
+## doar ansamblul de stanci ca reper vizual -- nu se inventeaza cascada.
+func _bridge_canyon_dressing() -> void:
+	var n := _track.baked.size()
+	# Grup pe partea dreapta (side=+1, conform custom_ravines index1 "side": 1),
+	# chiar sub tablia podului si putin inainte de ea, ca sa fie in cadru din
+	# chase-cam la 0.404-0.418 (verificat pe captura).
+	var fracs := [0.401, 0.405, 0.408, 0.411, 0.414, 0.417, 0.420]
+	var k := 0
+	for f in fracs:
+		var i := int(float(f) * float(n)) % n
+		var p: Vector3 = _track.baked[i]
+		var s := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		# Bolovanul mare, cel mai aproape de asfalt permis de garda (half+2.5),
+		# scara mare -> citeste ca prag/treapta de canion.
+		var lat_big := half + 2.5
+		var mdl_big := "chasm_rock"
+		var scl_big := _rng.randf_range(1.1, 1.5)
+		_place(mdl_big, "canionTreapta", f, 1.0, 2.5, _rng.randf_range(0.0, TAU),
+			scl_big, "hull")
+		# Al doilea, mai mic, putin mai departe si mai jos vizual (scara mica),
+		# sugereaza coborarea in trepte spre "albie".
+		if k % 2 == 0:
+			_place("chasm_rock", "canionTreaptaMica", f + _step(1.5), 1.0,
+				_rng.randf_range(4.5, 6.0), _rng.randf_range(0.0, TAU),
+				_rng.randf_range(0.6, 0.9), "hull")
+		# Moss la baza, intre stanci -- "bolovani inveliti in muschi" din bara,
+		# aproape de tablie.
+		var mdl_moss: String = ["moss_boulder_a", "moss_boulder_b"][k % 2]
+		var h_moss: float = {"moss_boulder_a": 0.7, "moss_boulder_b": 1.6}[mdl_moss]
+		_place(mdl_moss, "canionMuschi", f - _step(1.0), -1.0,
+			_rng.randf_range(2.8, 4.0), _rng.randf_range(0.0, TAU),
+			_scale_for(mdl_moss, h_moss), "hull")
+		k += 1
+	print("; ansamblu canion la pod: %d fractii, stanci+muschi langa tablie (vezi comentariul _bridge_canyon_dressing)" % fracs.size())
 
 
 # ------------------------------------------------------------------ padurea de fag

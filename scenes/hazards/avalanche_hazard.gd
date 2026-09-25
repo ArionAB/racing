@@ -16,8 +16,14 @@ extends Node3D
 ##
 ## Contractul cu pista (`Track._build_avalanche`): hazardul primeste punctul de
 ## pe sosea, directia drumului si semilatimea, si isi calculeaza singur de unde
-## pleaca si unde se opreste. Nu stie nimic despre teren — coboara pe o panta
-## declarata, nu pe geometria reala, exact ca sania de busteni.
+## pleaca si unde se opreste.
+##
+## Traiectoria URMARESTE terenul real (vezi `_ground_profile`), gasit din
+## raycast-uri verticale esantionate pe X local, la fel cum face `RockfallHazard`
+## pentru bolovanul cu traseu. Doar cand nu gaseste teren (pista sintetica din
+## `ProbeAvalanche`, sau editorul inainte ca terenul sa fie construit) cade pe
+## panta declarata analitic, ca sa nu regreseze acolo unde n-a existat niciodata
+## geometrie.
 
 ## ------------------------------------------------------------------ cronologie
 ##
@@ -52,6 +58,24 @@ const START_SIDE: float = 2.6
 ## Cat de departe trece dincolo de drum. Tot >1: masa nu se opreste pe asfalt,
 ## il traverseaza si dispare in vale, altfel ar ramane un zid parcat pe pista.
 const END_SIDE: float = 2.4
+
+## ------------------------------------------------------------- profil de teren
+##
+## Cat de departe (X local, ambele sensuri) esantionam terenul cu raycast-uri.
+## 55 m acopera cautarea punctului de plecare (cap la 45 m, vezi `_pick_start_point`)
+## cu o marja.
+const PROFILE_REACH: float = 55.0
+## Pasul de esantionare, in metri: destul de fin cat sa prinda o panta fara sa
+## multiplice inutil raycast-urile.
+const PROFILE_STEP: float = 1.0
+## Cat de sus/jos cauta fiecare raza, fata de cota soselei (spatiul hazardului).
+const PROFILE_PROBE_UP: float = 60.0
+const PROFILE_PROBE_DOWN: float = 60.0
+## Pana la ce X (local, +) cautam un punct de start pe panta reala.
+const START_SEARCH_CAP: float = 45.0
+## Sub cat consideram ca dealul gasit nu justifica sa mutam startul de la
+## START_SIDE clasic — o ridicatura de 1-2 m nu e "versant".
+const MIN_SLOPE_ABOVE_ROAD: float = 3.0
 
 ## Raza sferei de coliziune, ca fractie din raza modelului. Sub 1 fiindca un
 ## bolovan e neregulat: o sfera pe conturul exterior ar lovi cu aer.
@@ -119,6 +143,18 @@ var road_half_width: float = 0.0
 var phase: float = 0.0
 @export var period: float = DEFAULT_PERIOD
 
+## Calea GLB a bolovanilor (`Track._build_avalanche` o citeste din
+## `spec["model"]`, aceeasi conventie ca `RockfallHazard`/`DeflectorHazard`).
+## Contractul GLB-ului NU se schimba: NOUA copii directi Node3D, numiti EXACT
+## `Boulder_A`/`Boulder_B`/`Boulder_C`/`Boulder_D` (cele patru forme din
+## `BOULDERS`), fiecare centrat in originea lui (pivotul roteste in jurul
+## centrului, vezi `_build_boulders`) si orientat sa coboare pe +X local (X e
+## directia de coborare a gramezii, vezi antetul clasei si `_start_point`/
+## `_end_point`). Un nume care nu se gaseste cade pe sfera placeholder
+## (`_fallback_boulder`), la fel ca lipsa completa a GLB-ului. Implicit =
+## calea de azi, comportament identic.
+@export var boulders_model_path: String = "res://assets/models/effects/avalanche_boulders.glb"
+
 ## Containerul gramezii. Node3D, nu corp: coliziunea e pe fiecare bolovan.
 var _mass: Node3D
 ## Cate un dictionar per bolovan: body / pivot / area / radius / spin.
@@ -135,6 +171,24 @@ var _radius: float = MASS_DIAMETER * 0.5
 var _cooldown: Dictionary = {}
 ## Masinile inghitite acum -> cat mai sunt duse. Golit cand expira stun-ul.
 var _carried: Dictionary = {}
+
+## Profilul de teren de-a lungul X local, esantionat o singura data. Cheia e
+## X rotunjit la PROFILE_STEP, valoarea e cota terenului (spatiul hazardului).
+## Ramane gol daca nu s-a gasit teren (pista sintetica) — atunci traiectoria
+## cade pe panta analitica veche.
+var _profile: Dictionary = {}
+var _profile_built := false
+## Punctul de start ales dupa profil (local); memorat ca sa nu recalculam
+## cautarea in fiecare cadru. Invalid (NAN) pana la prima constructie reusita.
+var _start_cache: Vector3 = Vector3(NAN, NAN, NAN)
+var _end_cache: Vector3 = Vector3(NAN, NAN, NAN)
+## Cate cadre fizice mai incercam sa gasim teren inainte sa renuntam definitiv
+## si sa ramanem pe fallback. Terenul poate fi construit amanat (`call_deferred`
+## pe unele piste), deci PRIMUL cadru fizic e prea devreme ca sa tragem
+## concluzia „nu exista teren" — dar nu putem astepta la nesfarsit nici pe
+## pista sintetica, unde chiar nu exista in afara soselei. 20 cadre @ 60 fps
+## = o treime de secunda, mult peste orice `call_deferred` normal.
+var _profile_attempts_left: int = 20
 
 ## Material static, partajat intre instante — aceeasi regula ca la bolovan:
 ## un material per instanta ar creste draw call-urile liniar cu numarul de
@@ -271,6 +325,17 @@ static func _plume_material() -> StandardMaterial3D:
 ## Dara de zapada pe versant: creste cat tine telegraful, ca sa se vada DE UNDE
 ## vine, nu doar ca vine. Acelasi rol ca umbra bolovanului, dar verticala —
 ## avalansa nu cade pe tine, coboara spre tine.
+##
+## Geometria NU foloseste `_start_point` aici (deci NU declanseaza
+## `_ensure_profile`): `_build()` ruleaza din `_ready()`, iar terenul poate fi
+## inca negenerat in acel moment (constructia amanata, vezi memoria „decorul
+## amanat nu e in captura"). O interogare de teren atat de devreme ar gasi orice
+## se afla temporar acolo (podea veche, nimic) si ar INGHETA rezultatul gresit
+## in `_profile_built`, fiindca profilul se construieste o singura data.
+##
+## Placarea reala (pe panta analitica initial, apoi rescrisa pe profilul real
+## de indata ce se rezolva) e in `_place_telegraph`, apelata din `_ensure_profile`
+## chiar in cadrul in care profilul reuseste sa gaseasca teren.
 func _build_telegraph(hw: float) -> Node3D:
 	var node := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
@@ -288,11 +353,23 @@ func _build_telegraph(hw: float) -> Node3D:
 		_tele_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 		_tele_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	node.material_override = _tele_mat
-	# Culcata pe panta dintre punctul de plecare si sosea.
-	node.position = (_start_point(hw) + _road_point()) * 0.5
+	# Culcata pe panta dintre punctul de plecare (analitic, provizoriu) si sosea.
+	# `_place_telegraph` o rescrie corect dupa ce profilul se rezolva.
+	node.position = (Vector3(hw * START_SIDE, START_HEIGHT, 0.0) + _road_point()) * 0.5
 	node.look_at_from_position(node.position, _road_point(), Vector3.UP)
 	node.rotate_object_local(Vector3.RIGHT, PI * 0.5)
 	return node
+
+
+## Rescrie transformul darei pe punctul de start CURENT (analitic sau de pe
+## profilul real). Idempotenta — se poate chema oricand dupa ce `_telegraph`
+## exista.
+func _place_telegraph(hw: float) -> void:
+	if _telegraph == null:
+		return
+	_telegraph.position = (_start_point(hw) + _road_point()) * 0.5
+	_telegraph.look_at_from_position(_telegraph.position, _road_point(), Vector3.UP)
+	_telegraph.rotate_object_local(Vector3.RIGHT, PI * 0.5)
 
 
 ## Modelul: GLB-ul de avalansa, cu materialul de clasa aplicat IN SPATIUL
@@ -404,16 +481,29 @@ func _build_boulders() -> Array:
 	return out
 
 
-## Formele din GLB, o singura incarcare pentru toate instantele.
+## Formele din GLB, o singura incarcare pentru toate instantele. Calea vine
+## din `boulders_model_path` (implicit `avalanche_boulders.glb`, dar
+## `Track._build_avalanche` poate trece alta prin `spec["model"]`).
 func _boulder_shapes() -> Dictionary:
-	const PATH := "res://assets/models/effects/avalanche_boulders.glb"
+	var path := boulders_model_path
 	var out := {}
-	if not ResourceLoader.exists(PATH):
+	if path.is_empty() or not ResourceLoader.exists(path):
 		return out
-	var root := (load(PATH) as PackedScene).instantiate() as Node3D
+	var root := (load(path) as PackedScene).instantiate() as Node3D
 	for child in root.get_children():
 		if child is Node3D:
 			out[child.name] = child
+	# Diagnostic: un GLB incarcat dar cu ZERO nume din contract (Boulder_A/B/
+	# C/D) e aproape sigur alt model, plantat gresit — cade oricum pe sfere
+	# placeholder per bucata (shapes.has() esueaza in _build_boulders), dar
+	# tacut, iar avalansa "merge" cu geometria gresita nedetectata.
+	var known := false
+	for spec in BOULDERS:
+		if out.has(spec[0]):
+			known = true
+			break
+	if not known:
+		push_warning("AvalancheHazard: '%s' nu are niciun nod Boulder_A/B/C/D — cad pe sfere placeholder" % path)
 	return out
 
 
@@ -448,13 +538,164 @@ func _road_point() -> Vector3:
 ##
 ## +X local e lateralul drumului (constructorul din `Track` orienteaza nodul cu
 ## `looking_at(dir)`, aceeasi conventie ca la tren si deflector).
+##
+## Cu profil de teren gasit: X-ul e ales de `_pick_start_x` (primul punct de pe
+## panta reala aflat la cel putin START_HEIGHT deasupra soselei, cautat pana la
+## START_SEARCH_CAP; altfel cel mai inalt punct gasit, daca depaseste cota
+## drumului cu MIN_SLOPE_ABOVE_ROAD; altfel START_SIDE clasic) si Y = cota
+## terenului acolo. Fara profil (fallback): pozitia analitica veche.
 func _start_point(hw: float) -> Vector3:
+	_ensure_profile()
+	if not is_nan(_start_cache.x):
+		return _start_cache
 	return Vector3(hw * START_SIDE, START_HEIGHT, 0.0)
 
 
 ## Unde se opreste: dincolo de sosea, mai jos, in vale.
+##
+## Cu profil: X = -hw * END_SIDE (neschimbat — doar startul se muta automat,
+## vezi nota din brief), Y = cota terenului acolo. Fara profil: analitic, ca
+## inainte.
 func _end_point(hw: float) -> Vector3:
+	_ensure_profile()
+	if not is_nan(_end_cache.x):
+		return _end_cache
 	return Vector3(-hw * END_SIDE, -START_HEIGHT * 0.35, 0.0)
+
+
+## Construieste profilul si alege start/end, o singura data, lenes — NU in
+## `_ready`: terenul poate fi construit amanat (`_build_terrain` ruleaza dupa
+## `_build_avalanche` in `Track.rebuild`, iar pe unele piste geometria e chiar
+## `call_deferred`, vezi memoria „decorul amanat nu e in captura"). Prima
+## interogare utila e primul apel din `_phase_telegraph`/`_phase_sweep`, adica
+## dupa ce arborele scenei s-a asezat complet.
+func _ensure_profile() -> void:
+	if _profile_built:
+		return
+	if not is_inside_tree():
+		return
+	var space := get_world_3d().direct_space_state if is_inside_tree() else null
+	if space == null:
+		return
+	# Reincercam pana la PROFILE_ATTEMPTS cadre fizice: pe pista sintetica sau
+	# in editorul fara teren construit inca, primele incercari nu gasesc nimic
+	# — dar terenul poate aparea la un cadru ulterior (constructie amanata), si
+	# o singura incercare prea devreme ar ingheta pentru totdeauna fallback-ul
+	# analitic acolo unde exista teren real. Cand bugetul se epuizeaza fara
+	# niciun hit, `_profile_built` se blocheaza pe fallback (pista chiar n-are
+	# teren in afara soselei — sintetica sau editor).
+	_profile_attempts_left -= 1
+	var last_try := _profile_attempts_left <= 0
+	var steps := int(PROFILE_REACH / PROFILE_STEP)
+	var any_hit := false
+	for i in range(-steps, steps + 1):
+		var x := float(i) * PROFILE_STEP
+		var g := to_global(Vector3(x, 0.0, 0.0))
+		var q := PhysicsRayQueryParameters3D.create(
+			g + Vector3.UP * PROFILE_PROBE_UP,
+			g + Vector3.DOWN * PROFILE_PROBE_DOWN)
+		# Masca de camera: acelasi layer pe care sta terenul/podeaua
+		# (Track.CAMERA_BLOCKER_LAYER), NU layer-ul implicit — asa se exclud
+		# fara nicio lista masinile si bolovanii hazardului, care stau pe
+		# layer-ul implicit. Acelasi truc ca in `TyphoonHazard._ground_y`.
+		q.collision_mask = Track.CAMERA_BLOCKER_LAYER
+		var hit := space.intersect_ray(q)
+		if hit.is_empty():
+			continue
+		any_hit = true
+		var local_y: float = (to_local(hit.position as Vector3) as Vector3).y
+		_profile[i] = local_y
+	if not any_hit:
+		if not last_try:
+			return # mai incercam la urmatorul cadru fizic
+		_profile_built = true # bugetul s-a epuizat: fallback definitiv
+		return
+	_profile_built = true
+	var hw := road_half_width if road_half_width > 0.0 else 10.0
+	_start_cache = _pick_start_point(hw)
+	var end_x := -hw * END_SIDE
+	_end_cache = Vector3(end_x, _sample_ground(end_x), 0.0)
+	# Dara de pe versant a fost asezata pe pozitia analitica in `_build()`
+	# (terenul nu exista inca atunci); acum ca profilul s-a rezolvat, o
+	# rescriem pe punctul real — altfel dara ar ramane pe panta inventata cat
+	# masa chiar pleaca de pe versantul real.
+	_place_telegraph(hw)
+
+
+## Cauta pe +X, de la hw*START_SIDE pana la START_SEARCH_CAP, primul punct la
+## care terenul urca la cel putin START_HEIGHT deasupra soselei (cota 0 local).
+## Daca nu gaseste asta, ia cel mai inalt punct din interval — dar numai daca
+## depaseste cota drumului cu MIN_SLOPE_ABOVE_ROAD, altfel raman pe START_SIDE
+## clasic (teren plat, ca pe Track16 dinainte de peak-ul nou).
+func _pick_start_point(hw: float) -> Vector3:
+	var classic_x := hw * START_SIDE
+	var best_x := classic_x
+	var best_y := _sample_ground(classic_x)
+	var x := classic_x
+	while x <= START_SEARCH_CAP:
+		var y := _sample_ground(x)
+		if y >= START_HEIGHT:
+			return Vector3(x, y, 0.0) # prima panta suficient de inalta
+		if y > best_y:
+			best_y = y
+			best_x = x
+		x += PROFILE_STEP
+	if best_y >= MIN_SLOPE_ABOVE_ROAD:
+		return Vector3(best_x, best_y, 0.0)
+	return Vector3(classic_x, START_HEIGHT, 0.0) # niciun deal: pastram cota
+	# analitica veche pe X clasic, ca sa nu ingropam masa intr-un teren aproape
+	# plat (Y real ar fi doar cativa metri, deci coborarea ar parea un salt).
+
+
+## Cota terenului la un X local, interpolata liniar intre esantioanele de pe
+## grila PROFILE_STEP. Presupune `_profile` populat (apelanta verifica).
+func _sample_ground(x: float) -> float:
+	var f := x / PROFILE_STEP
+	var i0 := int(floor(f))
+	var i1 := i0 + 1
+	if not _profile.has(i0):
+		return _nearest_ground(i0)
+	if not _profile.has(i1):
+		return _nearest_ground(i1)
+	var t := f - float(i0)
+	return lerpf(float(_profile[i0]), float(_profile[i1]), t)
+
+
+## Cel mai apropiat esantion existent de indicele cerut — pentru marginile
+## intervalului sau goluri punctuale (raza ratata pe un singur pas).
+func _nearest_ground(i: int) -> float:
+	if _profile.has(i):
+		return float(_profile[i])
+	var keys: Array = _profile.keys()
+	if keys.is_empty():
+		return 0.0
+	var best: int = keys[0]
+	for k in keys:
+		if absi(int(k) - i) < absi(best - i):
+			best = int(k)
+	return float(_profile[best])
+
+
+## Cate secunde de la INCEPUTUL traversarii (SWEEP) pana cand masa e pe axa
+## drumului (X local = 0). Public: `tools/probe_avalanche.gd` il foloseste in
+## loc sa deriva singur momentul din START_SIDE/END_SIDE — cu un X de start
+## variabil (vezi `_pick_start_point`), constantele singure nu mai spun nimic.
+##
+## Interpolarea lui X e liniara in `_phase_sweep` (`lerpf(from.x, to.x, k)`),
+## deci fractia de timp la care X=0 e direct `from.x / (from.x - to.x)`,
+## indiferent de teren — Y-ul (care s-a schimbat) nu intra in ecuatia timpului.
+## Cere `_ensure_profile()` intai, ca `_start_point`/`_end_point` sa dea
+## valorile REALE folosite de sweep, nu presupunerea "nu s-a construit inca".
+func sweep_mid_time() -> float:
+	_ensure_profile()
+	var hw := road_half_width if road_half_width > 0.0 else 10.0
+	var from := _start_point(hw)
+	var to := _end_point(hw)
+	var span := from.x - to.x
+	if absf(span) < 0.01:
+		return SWEEP * 0.5
+	var k := from.x / span
+	return SWEEP * clampf(k, 0.0, 1.0)
 
 
 func _physics_process(delta: float) -> void:
@@ -571,9 +812,6 @@ func _phase_sweep(k: float, hw: float) -> void:
 	_plume.emitting = true
 	var prev := _mass.position
 	var x := lerpf(from.x, to.x, k)
-	# `t` = 0 pe axa drumului, negativ inainte, pozitiv dupa. Cota se leaga de
-	# POZITIA LATERALA, nu de timp: asa raman corecte si daca se schimba
-	# START_SIDE / END_SIDE, fara alt numar de tunat.
 	# Cota la care trece CENTRUL gramezii peste asfalt.
 	#
 	# 0.72 din raza gramezii, nu raza celui mai mare bolovan: bucatile stau la
@@ -581,15 +819,29 @@ func _phase_sweep(k: float, hw: float) -> void:
 	# in timp ce cele mici trec putin peste el. Cu centrul la zero, jumatate din
 	# gramada ar fi ingropata in asfalt.
 	var base := _radius * 0.72
-	var t := 0.0
-	if x > 0.0 and absf(from.x) > 0.01:
-		t = x / from.x         # 1 la plecare -> 0 pe sosea
-		_mass.position = Vector3(x, base + (from.y - base) * t * t, 0.0)
-	elif absf(to.x) > 0.01:
-		t = x / to.x           # 0 pe sosea -> 1 la capat
-		_mass.position = Vector3(x, base + (to.y - base) * t * t, 0.0)
+	if not _profile.is_empty():
+		# TEREN REAL: Y-ul urmareste solul, nu o parabola inventata. Pe drum
+		# (x ~ 0) `_sample_ground` da cota soselei (0 local), deci centrul sta
+		# la `base` peste asfalt — exact ce dadea parabola inainte la t=0, dar
+		# acum corect si pe restul traseului, unde solul nu e simetric
+		# (versantul urca pe +X, coboara pe -X, vezi masuratorile Track09).
+		_mass.position = Vector3(x, _sample_ground(x) + base, 0.0)
 	else:
-		_mass.position = Vector3(x, base, 0.0)
+		# FALLBACK analitic (pista sintetica / fara teren gasit): parabola
+		# veche prin ZERO la traversare, nesimetrica intre plecare si sosire.
+		#
+		# `t` = 0 pe axa drumului, negativ inainte, pozitiv dupa. Cota se leaga
+		# de POZITIA LATERALA, nu de timp: asa raman corecte si daca se schimba
+		# START_SIDE / END_SIDE, fara alt numar de tunat.
+		var t := 0.0
+		if x > 0.0 and absf(from.x) > 0.01:
+			t = x / from.x         # 1 la plecare -> 0 pe sosea
+			_mass.position = Vector3(x, base + (from.y - base) * t * t, 0.0)
+		elif absf(to.x) > 0.01:
+			t = x / to.x           # 0 pe sosea -> 1 la capat
+			_mass.position = Vector3(x, base + (to.y - base) * t * t, 0.0)
+		else:
+			_mass.position = Vector3(x, base, 0.0)
 	_place_shards(_mass.position)
 	# Rostogolirea: unghi = distanta parcursa / raza, ca la `SlidingHazard`, dar
 	# PER BOLOVAN — fiecare are alta raza, deci alta viteza unghiulara la aceeasi

@@ -10448,6 +10448,14 @@ func _build_avalanche(frac: float, spec: Dictionary = {}) -> void:
 	var period := float(spec.get("avalanche_period", 0.0))
 	if period > 0.0:
 		av.period = period
+	# Modelul bolovanilor: ce cere nodul, altfel implicitul clasei
+	# (avalanche_boulders.glb) — aceeasi conventie ca la RockfallHazard/
+	# DeflectorHazard (spec["model"], verificat cu ResourceLoader.exists).
+	# Contractul GLB-ului (noua bucati, patru forme, coboara pe +X local) e
+	# documentat pe `AvalancheHazard.boulders_model_path`.
+	var model_path := String(spec.get("model", ""))
+	if not model_path.is_empty() and ResourceLoader.exists(model_path):
+		av.boulders_model_path = model_path
 	# ATENTIE la ordine: transformarea INAINTE de add_child. Masa e un
 	# AnimatableBody3D cu sync_to_physics, deci transformarea o tine serverul de
 	# fizica; pusa dupa intrarea in arbore, ramane un pas fizic in origine —

@@ -119,6 +119,18 @@ var road_half_width: float = 0.0
 var phase: float = 0.0
 @export var period: float = DEFAULT_PERIOD
 
+## Calea GLB a bolovanilor (`Track._build_avalanche` o citeste din
+## `spec["model"]`, aceeasi conventie ca `RockfallHazard`/`DeflectorHazard`).
+## Contractul GLB-ului NU se schimba: NOUA copii directi Node3D, numiti EXACT
+## `Boulder_A`/`Boulder_B`/`Boulder_C`/`Boulder_D` (cele patru forme din
+## `BOULDERS`), fiecare centrat in originea lui (pivotul roteste in jurul
+## centrului, vezi `_build_boulders`) si orientat sa coboare pe +X local (X e
+## directia de coborare a gramezii, vezi antetul clasei si `_start_point`/
+## `_end_point`). Un nume care nu se gaseste cade pe sfera placeholder
+## (`_fallback_boulder`), la fel ca lipsa completa a GLB-ului. Implicit =
+## calea de azi, comportament identic.
+@export var boulders_model_path: String = "res://assets/models/effects/avalanche_boulders.glb"
+
 ## Containerul gramezii. Node3D, nu corp: coliziunea e pe fiecare bolovan.
 var _mass: Node3D
 ## Cate un dictionar per bolovan: body / pivot / area / radius / spin.
@@ -404,16 +416,29 @@ func _build_boulders() -> Array:
 	return out
 
 
-## Formele din GLB, o singura incarcare pentru toate instantele.
+## Formele din GLB, o singura incarcare pentru toate instantele. Calea vine
+## din `boulders_model_path` (implicit `avalanche_boulders.glb`, dar
+## `Track._build_avalanche` poate trece alta prin `spec["model"]`).
 func _boulder_shapes() -> Dictionary:
-	const PATH := "res://assets/models/effects/avalanche_boulders.glb"
+	var path := boulders_model_path
 	var out := {}
-	if not ResourceLoader.exists(PATH):
+	if path.is_empty() or not ResourceLoader.exists(path):
 		return out
-	var root := (load(PATH) as PackedScene).instantiate() as Node3D
+	var root := (load(path) as PackedScene).instantiate() as Node3D
 	for child in root.get_children():
 		if child is Node3D:
 			out[child.name] = child
+	# Diagnostic: un GLB incarcat dar cu ZERO nume din contract (Boulder_A/B/
+	# C/D) e aproape sigur alt model, plantat gresit — cade oricum pe sfere
+	# placeholder per bucata (shapes.has() esueaza in _build_boulders), dar
+	# tacut, iar avalansa "merge" cu geometria gresita nedetectata.
+	var known := false
+	for spec in BOULDERS:
+		if out.has(spec[0]):
+			known = true
+			break
+	if not known:
+		push_warning("AvalancheHazard: '%s' nu are niciun nod Boulder_A/B/C/D — cad pe sfere placeholder" % path)
 	return out
 
 

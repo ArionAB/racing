@@ -2158,7 +2158,14 @@ func _puff_mesh(size: float) -> Mesh:
 		# LUMINAT, nu unshaded — asta e alegerea de directie: guide-ul cere
 		# puf-uri cu volum, cu o latura in lumina si una in umbra. Un billboard
 		# unshaded n-are cum sa aiba fete, deci n-are cum sa aiba volum.
-		m.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+		#
+		# PER VERTEX, nu per pixel (sep 2026, planul de grafica pe mobil): pe
+		# o sfera cu 8x4 segmente lumina per-vertex da aceleasi fete, cu
+		# aceeasi latura in lumina si in umbra — fatetarea e chiar din
+		# vertecsi. Diferenta e ca pixelul de fum nu mai evalueaza lumina, si
+		# fumul jucatorului e exact stratul transparent care sta cel mai
+		# aproape de camera, pe cel mai mult ecran, pe un GPU cu placi.
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_PER_VERTEX
 		# Difuz plat si fara specular: praful nu straluceste, doar prinde
 		# directia soarelui. Fara asta, sferele ies ca niste bile de plastic.
 		m.roughness = 1.0

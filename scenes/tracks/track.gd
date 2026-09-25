@@ -256,6 +256,11 @@ var theme_exposure: float = 1.0
 ## e o abatere asumata de la CLAUDE.md, cu un singur loc de unde se stinge daca
 ## primul test pe device nu tine 60fps.
 var theme_shadows: bool = true
+## Nivelul grafic al jucatorului (GameState.gfx_tier), scris de GameState la
+## pornire si la schimbarea setarii. Static si nu citit din autoload fiindca
+## scriptul e @tool: in editor autoload-ul nu exista, iar 1 (normal) e exact
+## ce trebuie sa vada editorul. 0 = economic: fara umbre dinamice, fara glow.
+static var gfx_tier: int = 1
 
 ## Bloom subtil (style_bible §8). Singurul efect fullscreen din joc — un lant de
 ## downsample pe cadru, deci cel mai scump item de fill rate pe care il rulam.
@@ -5628,7 +5633,7 @@ func _build_environment() -> void:
 	# Indicii 2 si 3 de mai jos sunt cei EFECTIV activi de atunci — adica
 	# etichetele 3-4 din inspector, nu 2-3. Se pastreaza asa: ei sunt in
 	# snapshot-urile pe care s-a calibrat restul tonemap-ului.
-	if theme_glow:
+	if theme_glow and gfx_tier >= 1:
 		env.glow_enabled = true
 		env.glow_intensity = 0.25
 		env.glow_bloom = 0.04
@@ -5672,8 +5677,11 @@ func _build_environment() -> void:
 	#
 	# COMUTATORUL E theme_shadows. Daca primul test pe device nu tine 60fps, se
 	# stinge de acolo si AO-ul copt ramane singura sursa de volum.
-	sun.shadow_enabled = theme_shadows
-	if theme_shadows:
+	# ...si al doilea comutator, al jucatorului: nivelul grafic ECONOMIC
+	# (GameState.gfx_tier = 0) le stinge pe orice tema.
+	var shadows := theme_shadows and gfx_tier >= 1
+	sun.shadow_enabled = shadows
+	if shadows:
 		# DOUA CASCADE (sep 2026, planul de grafica pe mobil). Comentariul de
 		# la SHADOW_DISTANCE spunea ca a doua cascada "ar dubla draw call-urile
 		# de umbra ale intregii scene"; masurat cu ProbePerf, nu e asa: felia

@@ -258,41 +258,126 @@ func _detect_wall_side() -> float:
 ## stancii (mesh, per masuratori — nisa concava, `probe_manual`-ul altor
 ## piese "pe apa"/"pe structura" foloseste acelasi principiu: ancora e
 ## suprafata pe care piesa chiar sta, nu terenul de dedesubt).
+##
+## RUNDA 2 (verdict critic 25 sep): garda veche accepta orice piesa numita
+## `muschiBuza*` FARA sa verifice fizic ca atinge ceva (`probe_manual.gd`
+## inlocuit cu test pe raza). Rularea aratat 3 din 6 piese ale rundei 1
+## PLUTIND cu adevarat (0, 1, 5 la 14-23 m peste teren, langa alt decor sau in
+## gol) — cauza: bucla masura f in [0.280, 0.315] cu lateral pana la ~10.6 m,
+## dar coliziunea REALA a buzei (`stirlingLedge_col`, verificat prin raycast
+## in jos, "y peste drum > 5") exista DOAR pe f in [0.288, 0.306] si lateral
+## in [6.3, 9.4] — un bloc mult mai ingust decat presupunerea initiala de
+## 30-40 m. Bucla de mai jos e stransa pe fereastra reala, deci nu mai sare
+## piese in gol (SKIP explicit ramane, dar nu mai declanseaza in interior).
+##
+## Al doilea defect (verdict): "stanca de langa cascada e complet goala de
+## decor" pe FLANCURI — cele 6 piese vechi erau toate agatate de tavanul
+## orizontal al buzei (privire de sus), nimic pe muchiile VERTICALE ale
+## peretelui (privire laterala, cum il vede soferul din masina). Adaugat mai
+## jos `_wall_flank_moss()`: raycast ORIZONTAL dinspre drum spre perete, la
+## inaltimi variate, chiar la cele doua muchii unde peretele intra/iese din
+## sol (f~0.287-0.291 si f~0.304-0.308) — acolo camera vede piatra goala in
+## prim-plan la intrarea/iesirea din cadru.
 func _moss_and_nook() -> void:
-	# Buza (Overhang) e la +14..+21.4 pe verticala LOCALA stirlingLedge, pe
-	# partea peretelui (side pozitiv fata de wall_side). Aproximez traseul ei
-	# de-a lungul drumului pe felia 0.280-0.315 (segmentul central al perdelei,
-	# unde buza taie drumul), cautata prin raycast in jos din +25 m peste
-	# axa pana la coliziunea stancii.
 	var space_state := _track.get_world_3d().direct_space_state
 	var n := _track.baked.size()
-	var f := 0.280
+	# Fereastra REALA a tavanului buzei (masurata prin raycast in jos, "y
+	# peste drum > 5m" = coliziunea Overhang, nu Wall/Shou/Terrain). Vezi
+	# comentariul de mai sus.
+	var f := 0.289
 	var placed := 0
-	while f <= 0.315:
+	while f <= 0.305:
 		var i := int(f * float(n)) % n
 		var p: Vector3 = _track.baked[i]
 		var s: Vector3 = _track._side_at(i)
-		var half: float = _track.width_at_index(i)
-		var lat: float = _wall_side * (half + EDGE_KEEP + _rng.randf_range(0.3, 2.2))
+		# Lateral STRANS pe fereastra masurata (6.3-9.4), nu half+EDGE_KEEP+jitter
+		# (asta a scos piesele in gol runda trecuta).
+		var lat: float = _wall_side * _rng.randf_range(6.4, 9.2)
 		var q: Vector3 = p + s * lat
-		var ray_from := Vector3(q.x, p.y + 25.0, q.z)
+		var ray_from := Vector3(q.x, p.y + 28.0, q.z)
 		var ray_to := Vector3(q.x, p.y + 5.0, q.z)
 		var query := PhysicsRayQueryParameters3D.create(ray_from, ray_to)
 		var hit := space_state.intersect_ray(query)
-		var y: float
 		if hit.is_empty():
-			# fara coliziune (ex. dincolo de nisa): renunta la piesa asta,
-			# nu ghici o cota.
 			_skipped += 1
-			f += 0.006
+			f += 0.0025
 			continue
-		y = (hit["position"] as Vector3).y - 0.05  # ingropata usor, sa nu pluteasca
+		var y: float = (hit["position"] as Vector3).y - 0.05  # ingropata usor, sa nu pluteasca
 		var mdl := "moss_boulder_a" if _rng.randf() < 0.6 else "moss_boulder_b"
 		_raw(mdl, "muschiBuza", Vector3(q.x, y, q.z), _rng.randf_range(0.0, TAU),
 			_rng.randf_range(0.7, 1.1), "none")
 		placed += 1
-		f += 0.006
-	print("; muschi pe buza: %d piese" % placed)
+		f += 0.0025
+	print("; muschi pe buza (tavan): %d piese, %d sarite in fereastra" % [placed, _skipped])
+	_wall_flank_moss(space_state, n)
+
+
+## Muschi/vegetatie pe MUCHIILE LATERALE ale peretelui — verdictul criticului
+## (runda 2): "stanca de langa cascada e complet goala... nicio piesa de
+## muschi sau vegetatie agatata pe buza SAU PE FLANCURI". Blocul de coliziune
+## `stirlingLedge_col` are fata verticala doar pe f in [0.288, 0.306]
+## (masurat prin raycast orizontal dinspre drum): dincolo de asta peretele nu
+## mai prezinta suprafata, deci "flancul" util e chiar la cele doua muchii,
+## unde piatra intra/iese din cadru — exact ce vede soferul la intrarea si
+## iesirea din perdea.
+##
+## Ancora: raza ORIZONTALA dinspre axa spre perete (nu in jos): gaseste fata
+## reala a lui `stirlingLedge_col` la inaltimea ceruta, piesa se aseaza LIPITA
+## de ea (impinsa cu 0.15 m inapoi spre drum, sa nu strapunga peretele).
+## Grupare (nu banda uniforma): 2-3 piese per muchie, inaltimi diferite
+## (2-11 m, sub linia buzei), yaw variat, densitate mai mare langa muchia
+## dinspre subiect (cea de intrare, 0.288, care se vede primă din masina).
+func _wall_flank_moss(space_state: PhysicsDirectSpaceState3D, n: int) -> void:
+	var edges := [
+		{"f0": 0.286, "f1": 0.290, "n": 4},   # muchia de intrare (dinspre chei)
+		{"f0": 0.304, "f1": 0.309, "n": 3},   # muchia de iesire (spre Chasm)
+	]
+	var placed := 0
+	for edge: Dictionary in edges:
+		var f0: float = edge["f0"]
+		var f1: float = edge["f1"]
+		var count: int = edge["n"]
+		for k in range(count):
+			var f: float = lerpf(f0, f1, (float(k) + _rng.randf_range(0.1, 0.9)) / float(count))
+			var i := int(f * float(n)) % n
+			var p: Vector3 = _track.baked[i]
+			var s: Vector3 = _track._side_at(i)
+			var h: float = _rng.randf_range(2.0, 11.0)
+			var from := Vector3(p.x, p.y + h, p.z) + s * _wall_side * 2.5
+			var to: Vector3 = from + s * _wall_side * 20.0
+			var query := PhysicsRayQueryParameters3D.create(from, to)
+			var hit := space_state.intersect_ray(query)
+			if hit.is_empty():
+				_skipped += 1
+				continue
+			var collider: Object = hit.get("collider")
+			if collider == null or str((collider as Node).name) != "stirlingLedge_col":
+				# muchia nu prezinta perete la inaltimea asta (sub sol sau
+				# dincolo de blocul real) — nu ghici, sari.
+				_skipped += 1
+				continue
+			var hp: Vector3 = hit["position"]
+			var normal: Vector3 = hit.get("normal", -s * _wall_side)
+			var anchor: Vector3 = hp + normal * 0.15  # lipita de fata, nu ingropata
+			var mdl := "moss_boulder_a" if _rng.randf() < 0.55 else "moss_boulder_b"
+			_raw(mdl, "muschiFlanc", anchor, _rng.randf_range(0.0, TAU),
+				_rng.randf_range(0.6, 0.95), "none")
+			placed += 1
+			# un fern_cluster la baza flancului, jos langa perete
+			if _rng.randf() < 0.5:
+				var from2 := Vector3(p.x, p.y + 1.0, p.z) + s * _wall_side * 2.5
+				var to2: Vector3 = from2 + s * _wall_side * 20.0
+				var q2 := PhysicsRayQueryParameters3D.create(from2, to2)
+				var hit2 := space_state.intersect_ray(q2)
+				if not hit2.is_empty():
+					var c2: Object = hit2.get("collider")
+					if c2 != null and str((c2 as Node).name) == "stirlingLedge_col":
+						var hp2: Vector3 = hit2["position"]
+						var n2: Vector3 = hit2.get("normal", -s * _wall_side)
+						_raw("fern_cluster", "fernFlanc", hp2 + n2 * 0.1,
+							_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.1), "none")
+						placed += 1
+	print("; muschi + ferigi pe flancuri: %d piese" % placed)
 
 
 ## (2) BOLOVANI UZI LA BAZA PERETELUI — intre picioarele peretelui si drum,
@@ -436,6 +521,18 @@ func _raw(model: String, prefix: String, pos: Vector3, yaw: float, scl: float,
 	_out.append('[node name="%s" parent="%s" instance=ExtResource("%s")]' % [
 		name, ZONE, id])
 	_out.append("transform = %s" % _tscn_transform(t))
+	# BUG runda 2 (gasit la garda IN DRUM): parametrul `collision_override` era
+	# primit dar NICIODATA scris in .tscn — orice piesa iesea pe implicitul
+	# `hull` din PROP_COLLISION (world_prop.gd), inclusiv muschiul de pe buza,
+	# suspendat la 20+ m peste sosea. Un hull acolo nu opreste masina (e prea
+	# sus ca sa fie atins vreodata), dar `probe_manual` il vede ca IN DRUM
+	# (distanta LATERALA, nu si verticala) — zgomot, nu defect real, insa
+	# corect e sa transmitem ce am decis, nu sa lasam implicitul sa decida
+	# pentru noi. Formatul e cel din `gen_decor_capp_a.gd`
+	# (`metadata/coliziune`), citit de `world_prop._collision_mode`.
+	if collision_override != "" and collision_override != "hull":
+		_out.append('metadata/coliziune = "%s"' % collision_override)
+	_out.append("")
 	_n += 1
 	_tri += int(TRI.get(model, 0))
 

@@ -230,6 +230,77 @@ script = ExtResource("prop")
 [node name="stirlingLedge" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_stirling_ledge")]
 transform = Transform3D(0.6412, -0.0090, 0.7673, 0.0000, 0.9999, 0.0117, -0.7674, -0.0075, 0.6411, -446.267, 31.900, -386.642)
 
+[node name="muschiBuza0" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.486658, 0.000000, 0.850874, 0.000000, 0.980215, 0.000000, -0.850874, 0.000000, -0.486658, -412.5517, 46.8120, -368.1447)
+[node name="muschiBuza1" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.605370, 0.000000, -0.750690, 0.000000, 0.964369, 0.000000, 0.750690, 0.000000, -0.605370, -424.1622, 47.1460, -375.1236)
+[node name="muschiBuza2" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.649623, 0.000000, -0.665957, 0.000000, 0.930328, 0.000000, 0.665957, 0.000000, 0.649623, -434.7181, 54.6853, -381.7928)
+[node name="muschiBuza3" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.797346, 0.000000, 0.163002, 0.000000, 0.813836, 0.000000, -0.163002, 0.000000, 0.797346, -444.8894, 52.5342, -387.6348)
+[node name="muschiBuza4" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.456190, 0.000000, -0.591175, 0.000000, 0.746724, 0.000000, 0.591175, 0.000000, -0.456190, -453.6575, 52.4702, -395.3713)
+[node name="muschiBuza5" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.841120, 0.000000, -0.304468, 0.000000, 0.894529, 0.000000, 0.304468, 0.000000, 0.841120, -464.7735, 45.3970, -405.1208)
+[node name="bolovanUd6" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.877080, 0.000000, 0.426338, 0.000000, 0.975209, 0.000000, -0.426338, 0.000000, 0.877080, -413.6938, 31.3687, -369.2641)
+[node name="fernUd7" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.988164, 0.000000, -0.000150, 0.000000, 0.988164, 0.000000, 0.000150, 0.000000, 0.988164, -413.7801, 31.3690, -369.1058)
+[node name="bolovanUd8" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.918612, 0.000000, 0.197476, 0.000000, 0.939598, 0.000000, -0.197476, 0.000000, 0.918612, -436.8420, 31.6138, -382.6488)
+[node name="bolovanUd9" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.819401, 0.000000, 0.075396, 0.000000, 0.822862, 0.000000, -0.075396, 0.000000, -0.819401, -443.5964, 31.6456, -385.8069)
+[node name="bolovanUd10" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.832310, 0.000000, 0.360764, 0.000000, 0.907133, 0.000000, -0.360764, 0.000000, -0.832310, -449.9977, 31.5229, -391.0397)
+[node name="bolovanUd11" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.178807, 0.000000, 0.989949, 0.000000, 1.005968, 0.000000, -0.989949, 0.000000, 0.178807, -467.9005, 31.0369, -409.5256)
+[node name="fernUd12" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-1.049014, 0.000000, 0.366719, 0.000000, 1.111267, 0.000000, -0.366719, 0.000000, -1.049014, -468.2685, 31.0397, -409.1265)
+[node name="bolovanUd13" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.745258, 0.000000, -0.952720, 0.000000, 1.209580, 0.000000, 0.952720, 0.000000, 0.745258, -480.4792, 30.5987, -421.7413)
+[node name="fagPlatou14" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_b")]
+transform = Transform3D(1.026611, 0.000000, -0.031445, 0.000000, 1.027093, 0.000000, 0.031445, 0.000000, 1.026611, -373.5160, 30.6436, -367.2377)
+[node name="fagUscat15" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.177989, 0.000000, 0.984032, 0.000000, 1.000000, 0.000000, -0.984032, 0.000000, 0.177989, -370.5160, 30.6436, -365.7377)
+[node name="fagPlatou16" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.318610, 0.000000, 0.788885, 0.000000, 0.850795, 0.000000, -0.788885, 0.000000, 0.318610, -383.2597, 30.8541, -366.9249)
+[node name="fagPlatou17" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.255590, 0.000000, -1.045018, 0.000000, 1.075820, 0.000000, 1.045018, 0.000000, -0.255590, -395.1444, 31.1309, -377.8465)
+[node name="fagPlatou18" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.832573, 0.000000, -0.443977, 0.000000, 0.943553, 0.000000, 0.443977, 0.000000, 0.832573, -408.2096, 31.3174, -376.1210)
+[node name="fagPlatou19" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.831140, 0.000000, -0.759149, 0.000000, 1.125656, 0.000000, 0.759149, 0.000000, 0.831140, -415.4789, 31.4090, -387.8239)
+[node name="fagPlatou20" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_a")]
+transform = Transform3D(1.099424, 0.000000, 0.065484, 0.000000, 1.101372, 0.000000, -0.065484, 0.000000, 1.099424, -426.6098, 31.4831, -389.1397)
+[node name="fagUscat21" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.014077, 0.000000, 0.999901, 0.000000, 1.000000, 0.000000, -0.999901, 0.000000, -0.014077, -423.6098, 31.4831, -387.6397)
+[node name="fagPlatou22" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.426284, 0.000000, -0.748540, 0.000000, 0.861412, 0.000000, 0.748540, 0.000000, 0.426284, -435.4963, 31.4967, -392.8528)
+[node name="fagPlatou23" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.974768, 0.000000, 0.105126, 0.000000, 0.980420, 0.000000, -0.105126, 0.000000, -0.974768, -440.1557, 31.4277, -399.2413)
+[node name="fagPlatou24" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-1.026634, 0.000000, -0.578759, 0.000000, 1.178533, 0.000000, 0.578759, 0.000000, -1.026634, -446.4694, 31.2903, -406.6921)
+[node name="fagPlatou25" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.282716, 0.000000, -0.893595, 0.000000, 0.937251, 0.000000, 0.893595, 0.000000, -0.282716, -459.7452, 31.0923, -410.4424)
+[node name="fagPlatou26" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.765479, 0.000000, -0.826861, 0.000000, 1.126791, 0.000000, 0.826861, 0.000000, -0.765479, -460.6856, 30.7686, -423.2285)
+[node name="fagPlatou27" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.863000, 0.000000, 0.102629, 0.000000, 0.869081, 0.000000, -0.102629, 0.000000, 0.863000, -468.0924, 30.4860, -427.6127)
+[node name="fagPlatou28" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.107819, 0.000000, 1.019941, 0.000000, 1.025624, 0.000000, -1.019941, 0.000000, 0.107819, -480.1125, 29.5606, -441.4961)
+[node name="fagPlatou29" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.725598, 0.000000, -0.475599, 0.000000, 0.867575, 0.000000, 0.475599, 0.000000, 0.725598, -486.5605, 28.8326, -451.6113)
+[node name="rataStirling30" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_rata_tree")]
+transform = Transform3D(0.566837, 0.000000, -0.823830, 0.000000, 1.000000, 0.000000, 0.823830, 0.000000, 0.566837, -422.6301, 31.4643, -374.7046)
+[node name="guardMare31" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.410248, 0.000000, -0.911974, 0.000000, 1.000000, 0.000000, 0.911974, 0.000000, 0.410248, -488.5601, 30.8406, -402.7222)
+[node name="tussockMare32" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.292304, 0.000000, -0.851293, 0.000000, 0.900079, 0.000000, 0.851293, 0.000000, 0.292304, -479.7963, 31.0767, -394.0539)
+[node name="tussockMare33" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-1.006867, 0.000000, -0.345376, 0.000000, 1.064456, 0.000000, 0.345376, 0.000000, -1.006867, -488.8160, 30.8383, -402.4676)
+[node name="tussockMare34" parent="DecorManual/ZoneC_Stirling" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.130459, 0.000000, 1.085360, 0.000000, 1.093173, 0.000000, -1.085360, 0.000000, -0.130459, -498.8317, 30.3521, -413.8529)
+
 [node name="ZoneD_Chasm" type="Node3D" parent="DecorManual"]
 
 [node name="torrentChute" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_torrent_chute")]

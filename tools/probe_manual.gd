@@ -82,6 +82,8 @@ func _report() -> bool:
 		var verdict := "ok"
 		if ground < sea_y and absf(p.y - sea_y) <= 1.0:
 			verdict = "ok (pe apa)"
+		elif p.y - ground > FLOAT_MAX and _on_rock_face(entry["path"]):
+			verdict = "ok (pe stanca)"
 		elif p.y - ground > FLOAT_MAX:
 			verdict = "PLUTESTE"
 		elif ground - p.y > SINK_MAX:
@@ -147,6 +149,25 @@ const SPANS_ROAD_PREFIXES: Array[String] = [
 static func _spans_road(path: String) -> bool:
 	var leaf := path.get_file() if path.contains("/") else path
 	for prefix in SPANS_ROAD_PREFIXES:
+		if leaf.begins_with(prefix):
+			return true
+	return false
+
+
+## Piesele agatate pe FATA unei stanci mari, nu pe teren — ca la Fiordland
+## POI C (Cascada Stirling): `stirling_ledge` e un surplomb la +14..+21 m
+## peste axa drumului, iar muschiul de pe buza lui e ancorat prin raycast pe
+## coliziunea REALA a stancii (`tools/gen_decor_fiord_c.gd`), nu pe teren.
+## `ground` (terenul de dedesubt) e la ~15-23 m mai jos prin CONSTRUCTIE —
+## la fel cum o barca sta sub `ground` langa chei, moara asta sta deasupra
+## lui langa perete. Exceptia e pe nume (aceeasi conventie ca `_spans_road`),
+## nu pe distanta, ca sa nu ascunda un muschi cazut din greseala pe alta
+## parte a zonei.
+const ROCK_FACE_PREFIXES: Array[String] = ["muschiBuza"]
+
+static func _on_rock_face(path: String) -> bool:
+	var leaf := path.get_file() if path.contains("/") else path
+	for prefix in ROCK_FACE_PREFIXES:
 		if leaf.begins_with(prefix):
 			return true
 	return false

@@ -209,6 +209,16 @@ const BASELINE := {
 	"Cappadocia (Track13)": 11,
 	"Serengeti (Track14)": 9,
 	"Machu Picchu (Track15)": 20,
+	# Fiordland (Track16), masurat dupa fundatia de decor (DecorManual +
+	# 8 zone, orizont, bus_model, avalansa) — 8 raportari, toate atribuite
+	# geometriei INTENTIONATE a pistei: 3x TunnelPortal (tubul Homer,
+	# frac 0.700), 3x ChannelKicker (kickerul Bowen, frac 0.850-0.855) si
+	# 2x RoadTop pe scurtatura ("drumul vechi din padure", frac 0.895-0.900,
+	# treapta scurtaturii). Niciuna dintre piesele plasate in acest val
+	# (stirling_ledge, torrent_chute, chasm_bridge_rail,
+	# traffic_light_pole) nu apare in raportare. Baza = 8 + marja 2 = 10,
+	# conventia documentata mai sus.
+	"Fiordland (Track16)": 10,
 }
 
 

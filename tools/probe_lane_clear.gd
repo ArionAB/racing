@@ -216,9 +216,10 @@ const BASELINE := {
 	# 2x RoadTop pe scurtatura ("drumul vechi din padure", frac 0.895-0.900,
 	# treapta scurtaturii). Niciuna dintre piesele plasate in acest val
 	# (stirling_ledge, torrent_chute, chasm_bridge_rail,
-	# traffic_light_pole) nu apare in raportare. Baza = 8 + marja 2 = 10,
-	# conventia documentata mai sus.
-	"Fiordland (Track16)": 10,
+	# traffic_light_pole) nu apare in raportare. Baza = 8, CIFRA MASURATA,
+	# fara marja: o marja ascunde exact prima piesa pusa pe banda (memoria
+	# garda-fara-linie-de-baza-iese-zero). Sabotaj verificat: 9 > 8 = REGRESIE.
+	"Fiordland (Track16)": 8,
 }
 
 

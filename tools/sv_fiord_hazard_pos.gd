@@ -45,9 +45,13 @@ func _ready() -> void:
 		print("\n--- %s (frac=%.4f idx=%d) ---" % [label, frac, idx])
 		print("  pos=(%.2f, %.2f, %.2f)  dir=(%.3f,%.3f,%.3f)  side=(%.3f,%.3f,%.3f)  half_width=%.2f"
 			% [p.x, p.y, p.z, dir.x, dir.y, dir.z, side.x, side.y, side.z, hw])
+		# .tscn stocheaza RANDURILE bazei, nu coloanele (memoria
+		# tscn-transform-e-pe-randuri). Varianta veche scria coloanele si a
+		# livrat toate cele 6 perdele TRANSPUSE (rotite 50-107 grade fata de
+		# drum) — gasit la fundatia de decor, 25 sep 2026.
 		print("  TRANSFORM3D (fwd, local -Z = dir): Transform3D(%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.3f, %.3f, %.3f)"
-			% [basis_fwd.x.x, basis_fwd.x.y, basis_fwd.x.z, basis_fwd.y.x, basis_fwd.y.y, basis_fwd.y.z,
-				basis_fwd.z.x, basis_fwd.z.y, basis_fwd.z.z, p.x, p.y, p.z])
+			% [basis_fwd.x.x, basis_fwd.y.x, basis_fwd.z.x, basis_fwd.x.y, basis_fwd.y.y, basis_fwd.z.y,
+				basis_fwd.x.z, basis_fwd.y.z, basis_fwd.z.z, p.x, p.y, p.z])
 
 	# Lungimea segmentului Stirling (0.273-0.323), pe traseu real, pentru
 	# WaterfallHazard.length.

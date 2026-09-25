@@ -309,11 +309,16 @@ func _scree_and_tussock() -> void:
 			_place("tussock_clump", "tussock", f + _step(_rng.randf_range(-2.0, 2.0)),
 				side, _rng.randf_range(1.5, 4.5), _rng.randf_range(0.0, TAU),
 				_scale_for("tussock_clump", _rng.randf_range(0.7, 1.0)), "none")
-		# guard_rock rar pe marginea care cade (urcare fara parapet)
+		# guard_rock rar pe marginea care cade (urcare fara parapet).
+		# Gap minim 3.0: probe_manual semnaleaza "IN DRUM" orice corp cu
+		# coliziune sub `half_width + ROAD_MARGIN` (2,0 m) de ax, adica sub
+		# 8,5 m aici — cu gap 1,0-3,0 si raza mica, doua bucati cadeau la
+		# 8,0-8,5 m (runda 1, probe_manual). 3,0-6,0 pune marginea corpului
+		# la >= 9,0 m, sigur peste prag.
 		if k % 4 == 0:
 			var down := -up
 			_place("guard_rock", "parapetStanca", f, down,
-				_rng.randf_range(1.0, 3.0), _rng.randf_range(0.0, TAU),
+				_rng.randf_range(3.0, 6.0), _rng.randf_range(0.0, TAU),
 				_scale_for("guard_rock", _rng.randf_range(0.5, 0.7)), "hull")
 		f += _step(9.0 + _rng.randf_range(-2.0, 2.0))
 		k += 1

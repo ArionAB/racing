@@ -7014,6 +7014,663 @@ script = ExtResource("3b_lamp")
 bulb_size = 0.28
 spacing = 0.175
 
+[node name="chevron1" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(0.167991, 0.000000, -0.985788, 0.000000, 1.000000, 0.000000, 0.985788, 0.000000, 0.167991, -413.675812, 16.114182, -597.265564)
+metadata/coliziune = "none"
+
+[node name="chevron2" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(-0.343472, 0.000000, 0.939163, 0.000000, 1.000000, 0.000000, -0.939163, 0.000000, -0.343472, -382.323303, 17.214600, -605.860962)
+metadata/coliziune = "none"
+
+[node name="chevron3" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(0.336340, 0.000000, -0.941741, 0.000000, 1.000000, 0.000000, 0.941741, 0.000000, 0.336340, -365.233490, 18.152664, -582.532288)
+metadata/coliziune = "none"
+
+[node name="chevron4" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(0.094184, 0.000000, 0.995555, 0.000000, 1.000000, 0.000000, -0.995555, 0.000000, 0.094184, -335.417145, 19.469147, -590.344482)
+metadata/coliziune = "none"
+
+[node name="chevron5" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(-0.234107, 0.000000, -0.972211, 0.000000, 1.000000, 0.000000, 0.972211, 0.000000, -0.234107, -306.703735, 22.136169, -580.010132)
+metadata/coliziune = "none"
+
+[node name="chevron6" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(0.227757, 0.000000, 0.973718, 0.000000, 1.000000, 0.000000, -0.973718, 0.000000, 0.227757, -287.119598, 24.534531, -601.569580)
+metadata/coliziune = "none"
+
+[node name="chevron7" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(0.234713, 0.000000, -0.972065, 0.000000, 1.000000, 0.000000, 0.972065, 0.000000, 0.234713, -257.731171, 27.610275, -583.826294)
+metadata/coliziune = "none"
+
+[node name="chevron8" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(-0.230173, 0.000000, 0.973150, 0.000000, 1.000000, 0.000000, -0.973150, 0.000000, -0.230173, -224.766815, 30.628281, -592.648926)
+metadata/coliziune = "none"
+
+[node name="chevron9" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(0.627487, 0.000000, -0.778627, 0.000000, 1.000000, 0.000000, 0.778627, 0.000000, 0.627487, -207.670486, 33.315842, -567.885681)
+metadata/coliziune = "none"
+
+[node name="chevron10" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(-0.605025, 0.000000, 0.796207, 0.000000, 1.000000, 0.000000, -0.796207, 0.000000, -0.605025, -177.374374, 36.011429, -565.137390)
+metadata/coliziune = "none"
+
+[node name="chevron11" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(0.662931, 0.000000, -0.748681, 0.000000, 1.000000, 0.000000, 0.748681, 0.000000, 0.662931, -167.089737, 38.666351, -537.005676)
+metadata/coliziune = "none"
+
+[node name="chevron12" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_chevron_sign")]
+transform = Transform3D(-0.777381, 0.000000, 0.629030, 0.000000, 1.000000, 0.000000, -0.629030, 0.000000, -0.777381, -139.453217, 40.982285, -530.355164)
+metadata/coliziune = "none"
+
+[node name="jalon13" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.740561, 0.000000, 0.671990, 0.000000, 1.000000, 0.000000, -0.671990, 0.000000, -0.740561, -405.080902, 16.514206, -611.195007)
+metadata/coliziune = "none"
+
+[node name="jalon14" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.996881, 0.000000, 0.078914, 0.000000, 1.000000, 0.000000, -0.078914, 0.000000, -0.996881, -407.739105, 16.372665, -597.184998)
+metadata/coliziune = "none"
+
+[node name="jalon15" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.844325, 0.000000, -0.535832, 0.000000, 1.000000, 0.000000, 0.535832, 0.000000, 0.844325, -389.063507, 16.923920, -607.372620)
+metadata/coliziune = "none"
+
+[node name="jalon16" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.996223, 0.000000, 0.086837, 0.000000, 1.000000, 0.000000, -0.086837, 0.000000, -0.996223, -393.932404, 16.897842, -593.969543)
+metadata/coliziune = "none"
+
+[node name="jalon17" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.445916, 0.000000, -0.895075, 0.000000, 1.000000, 0.000000, 0.895075, 0.000000, -0.445916, -375.348358, 17.516586, -602.324158)
+metadata/coliziune = "none"
+
+[node name="jalon18" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.999765, 0.000000, -0.021684, 0.000000, 1.000000, 0.000000, 0.021684, 0.000000, -0.999765, -380.151642, 17.553040, -588.897522)
+metadata/coliziune = "none"
+
+[node name="jalon19" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.284157, 0.000000, 0.958778, 0.000000, 1.000000, 0.000000, -0.958778, 0.000000, -0.284157, -364.049561, 17.991791, -598.282898)
+metadata/coliziune = "none"
+
+[node name="jalon20" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.981066, 0.000000, -0.193675, 0.000000, 1.000000, 0.000000, 0.193675, 0.000000, 0.981066, -368.850464, 17.987152, -584.855408)
+metadata/coliziune = "none"
+
+[node name="jalon21" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.896222, 0.000000, 0.443606, 0.000000, 1.000000, 0.000000, -0.443606, 0.000000, 0.896222, -350.412201, 18.572800, -593.322876)
+metadata/coliziune = "none"
+
+[node name="jalon22" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.986558, 0.000000, -0.163412, 0.000000, 1.000000, 0.000000, 0.163412, 0.000000, 0.986558, -354.962189, 18.557587, -579.808228)
+metadata/coliziune = "none"
+
+[node name="jalon23" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.746231, 0.000000, 0.665688, 0.000000, 1.000000, 0.000000, -0.665688, 0.000000, -0.746231, -338.965546, 19.074371, -589.657837)
+metadata/coliziune = "none"
+
+[node name="jalon24" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.575266, 0.000000, -0.817966, 0.000000, 1.000000, 0.000000, 0.817966, 0.000000, 0.575266, -340.470734, 19.118103, -575.477539)
+metadata/coliziune = "none"
+
+[node name="jalon25" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.958169, 0.000000, 0.286203, 0.000000, 1.000000, 0.000000, -0.286203, 0.000000, -0.958169, -327.399689, 20.319565, -590.670532)
+metadata/coliziune = "none"
+
+[node name="jalon26" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.485267, 0.000000, 0.874366, 0.000000, 1.000000, 0.000000, -0.874366, 0.000000, 0.485267, -324.800323, 20.333466, -576.649414)
+metadata/coliziune = "none"
+
+[node name="jalon27" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.868551, 0.000000, 0.495600, 0.000000, 1.000000, 0.000000, -0.495600, 0.000000, -0.868551, -312.833923, 21.869095, -594.199219)
+metadata/coliziune = "none"
+
+[node name="jalon28" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.967912, 0.000000, 0.251289, 0.000000, 1.000000, 0.000000, -0.251289, 0.000000, -0.967912, -309.495178, 21.865784, -580.335571)
+metadata/coliziune = "none"
+
+[node name="jalon29" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.596129, 0.000000, 0.802889, 0.000000, 1.000000, 0.000000, -0.802889, 0.000000, -0.596129, -298.617981, 23.346970, -597.643127)
+metadata/coliziune = "none"
+
+[node name="jalon30" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.658218, 0.000000, 0.752828, 0.000000, 1.000000, 0.000000, -0.752828, 0.000000, 0.658218, -295.256958, 23.353897, -583.784851)
+metadata/coliziune = "none"
+
+[node name="jalon31" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.932549, 0.000000, -0.361044, 0.000000, 1.000000, 0.000000, 0.361044, 0.000000, -0.932549, -283.869812, 24.827560, -601.317749)
+metadata/coliziune = "none"
+
+[node name="jalon32" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.910438, 0.000000, -0.413645, 0.000000, 1.000000, 0.000000, 0.413645, 0.000000, -0.910438, -281.538696, 24.824493, -587.249634)
+metadata/coliziune = "none"
+
+[node name="jalon33" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.999148, 0.000000, 0.041281, 0.000000, 1.000000, 0.000000, -0.041281, 0.000000, -0.999148, -268.399628, 26.222031, -601.809021)
+metadata/coliziune = "none"
+
+[node name="jalon34" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.999954, 0.000000, 0.009605, 0.000000, 1.000000, 0.000000, -0.009605, 0.000000, -0.999954, -270.176788, 26.204346, -587.660217)
+metadata/coliziune = "none"
+
+[node name="jalon35" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.383764, 0.000000, -0.923431, 0.000000, 1.000000, 0.000000, 0.923431, 0.000000, -0.383764, -255.832458, 27.437149, -599.058289)
+metadata/coliziune = "none"
+
+[node name="jalon36" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.983846, 0.000000, 0.179016, 0.000000, 1.000000, 0.000000, -0.179016, 0.000000, 0.983846, -259.352112, 27.422958, -585.239441)
+metadata/coliziune = "none"
+
+[node name="jalon37" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.608317, 0.000000, 0.793694, 0.000000, 1.000000, 0.000000, -0.793694, 0.000000, -0.608317, -242.498215, 28.829102, -595.811218)
+metadata/coliziune = "none"
+
+[node name="jalon38" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.079654, 0.000000, 0.996823, 0.000000, 1.000000, 0.000000, -0.996823, 0.000000, 0.079654, -245.841782, 28.827972, -581.948792)
+metadata/coliziune = "none"
+
+[node name="jalon39" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.571490, 0.000000, -0.820609, 0.000000, 1.000000, 0.000000, 0.820609, 0.000000, 0.571490, -230.873566, 30.040070, -593.012024)
+metadata/coliziune = "none"
+
+[node name="jalon40" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.999543, 0.000000, -0.030230, 0.000000, 1.000000, 0.000000, 0.030230, 0.000000, 0.999543, -234.126434, 30.046234, -579.127991)
+metadata/coliziune = "none"
+
+[node name="jalon41" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.918226, 0.000000, 0.396057, 0.000000, 1.000000, 0.000000, -0.396057, 0.000000, 0.918226, -217.143417, 31.416626, -589.592529)
+metadata/coliziune = "none"
+
+[node name="jalon42" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.914784, 0.000000, -0.403942, 0.000000, 1.000000, 0.000000, 0.403942, 0.000000, -0.914784, -221.063583, 31.464172, -575.881958)
+metadata/coliziune = "none"
+
+[node name="jalon43" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.454593, 0.000000, -0.890699, 0.000000, 1.000000, 0.000000, 0.890699, 0.000000, 0.454593, -204.285919, 32.671188, -584.312317)
+metadata/coliziune = "none"
+
+[node name="jalon44" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.263902, 0.000000, 0.964549, 0.000000, 1.000000, 0.000000, -0.964549, 0.000000, -0.263902, -211.865692, 32.645737, -572.233582)
+metadata/coliziune = "none"
+
+[node name="jalon45" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.926669, 0.000000, 0.375878, 0.000000, 1.000000, 0.000000, -0.375878, 0.000000, -0.926669, -192.920059, 34.073410, -575.769043)
+metadata/coliziune = "none"
+
+[node name="jalon46" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.948151, 0.000000, -0.317820, 0.000000, 1.000000, 0.000000, 0.317820, 0.000000, -0.948151, -201.562210, 34.059845, -564.426147)
+metadata/coliziune = "none"
+
+[node name="jalon47" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.275367, 0.000000, 0.961339, 0.000000, 1.000000, 0.000000, -0.961339, 0.000000, -0.275367, -183.390717, 35.307816, -568.492798)
+metadata/coliziune = "none"
+
+[node name="jalon48" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.836241, 0.000000, 0.548362, 0.000000, 1.000000, 0.000000, -0.548362, 0.000000, 0.836241, -192.021912, 35.305328, -557.141602)
+metadata/coliziune = "none"
+
+[node name="jalon49" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.990454, 0.000000, 0.137844, 0.000000, 1.000000, 0.000000, -0.137844, 0.000000, -0.990454, -173.842499, 36.545990, -561.236023)
+metadata/coliziune = "none"
+
+[node name="jalon50" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.766519, 0.000000, -0.642222, 0.000000, 1.000000, 0.000000, 0.642222, 0.000000, 0.766519, -182.465118, 36.547073, -549.878357)
+metadata/coliziune = "none"
+
+[node name="jalon51" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.866632, 0.000000, 0.498948, 0.000000, 1.000000, 0.000000, -0.498948, 0.000000, 0.866632, -162.122101, 38.055923, -552.504028)
+metadata/coliziune = "none"
+
+[node name="jalon52" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.730851, 0.000000, 0.682537, 0.000000, 1.000000, 0.000000, -0.682537, 0.000000, -0.730851, -170.679810, 38.058777, -541.097290)
+metadata/coliziune = "none"
+
+[node name="jalon53" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.320493, 0.000000, -0.947251, 0.000000, 1.000000, 0.000000, 0.947251, 0.000000, 0.320493, -150.251785, 39.543060, -541.861389)
+metadata/coliziune = "none"
+
+[node name="jalon54" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.608615, 0.000000, -0.793466, 0.000000, 1.000000, 0.000000, 0.793466, 0.000000, -0.608615, -160.832016, 39.508957, -532.300720)
+metadata/coliziune = "none"
+
+[node name="jalon55" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.082691, 0.000000, -0.996575, 0.000000, 1.000000, 0.000000, 0.996575, 0.000000, -0.082691, -141.314651, 40.816986, -531.130615)
+metadata/coliziune = "none"
+
+[node name="jalon56" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.972382, 0.000000, -0.233395, 0.000000, 1.000000, 0.000000, 0.233395, 0.000000, -0.972382, -152.453537, 40.807632, -522.227051)
+metadata/coliziune = "none"
+
+[node name="jalon57" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(0.946949, 0.000000, 0.321384, 0.000000, 1.000000, 0.000000, -0.321384, 0.000000, 0.946949, -132.665512, 42.115738, -520.425171)
+metadata/coliziune = "none"
+
+[node name="jalon58" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(-0.569337, 0.000000, -0.822104, 0.000000, 1.000000, 0.000000, 0.822104, 0.000000, -0.569337, -143.734482, 42.106979, -511.434845)
+metadata/coliziune = "none"
+
+[node name="grohotis59" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.306375, 0.000000, 0.951911, 0.000000, 1.000000, 0.000000, -0.951911, 0.000000, -0.306375, -415.111084, 16.236160, -588.843384)
+metadata/coliziune = "none"
+
+[node name="tussock60" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.879884, 0.000000, -0.122441, 0.000000, 0.888362, 0.000000, 0.122441, 0.000000, 0.879884, -410.839050, 16.381302, -613.911926)
+metadata/coliziune = "none"
+
+[node name="parapetStanca61" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.219738, 0.000000, 0.857736, 0.000000, 0.885435, 0.000000, -0.857736, 0.000000, -0.219738, -410.511871, 16.323853, -615.831970)
+
+[node name="grohotis62" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.712673, 0.000000, -0.701497, 0.000000, 1.000000, 0.000000, 0.701497, 0.000000, -0.712673, -403.472748, 16.526276, -589.629700)
+metadata/coliziune = "none"
+
+[node name="grohotis63" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.218049, 0.000000, 0.975938, 0.000000, 1.000000, 0.000000, -0.975938, 0.000000, -0.218049, -406.419281, 16.636871, -585.820435)
+metadata/coliziune = "none"
+
+[node name="tussock64" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.133918, 0.000000, -0.927120, 0.000000, 0.936742, 0.000000, 0.927120, 0.000000, -0.133918, -403.116394, 16.522293, -612.105896)
+metadata/coliziune = "none"
+
+[node name="grohotis65" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.056289, 0.000000, 0.998415, 0.000000, 1.000000, 0.000000, -0.998415, 0.000000, -0.056289, -389.988739, 17.053436, -617.540710)
+metadata/coliziune = "none"
+
+[node name="grohotis66" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.000930, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, 0.000930, -381.673431, 17.162766, -611.582703)
+metadata/coliziune = "none"
+
+[node name="grohotis67" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.546674, 0.000000, 0.837345, 0.000000, 1.000000, 0.000000, -0.837345, 0.000000, -0.546674, -378.360046, 17.314575, -611.741516)
+metadata/coliziune = "none"
+
+[node name="grohotis68" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.064575, 0.000000, 0.997913, 0.000000, 1.000000, 0.000000, -0.997913, 0.000000, 0.064575, -374.136322, 17.470840, -613.559570)
+metadata/coliziune = "none"
+
+[node name="tussock69" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.145473, 0.000000, -0.995638, 0.000000, 1.006209, 0.000000, 0.995638, 0.000000, 0.145473, -374.632263, 17.521759, -604.325867)
+metadata/coliziune = "none"
+
+[node name="parapetStanca70" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.814912, 0.000000, -0.818459, 0.000000, 1.154971, 0.000000, 0.818459, 0.000000, 0.814912, -381.343536, 17.541702, -585.565735)
+
+[node name="grohotis71" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.381001, 0.000000, 0.924575, 0.000000, 1.000000, 0.000000, -0.924575, 0.000000, 0.381001, -364.043610, 17.905075, -610.724304)
+metadata/coliziune = "none"
+
+[node name="grohotis72" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.399689, 0.000000, -0.916651, 0.000000, 1.000000, 0.000000, 0.916651, 0.000000, 0.399689, -366.057770, 17.820511, -610.489197)
+metadata/coliziune = "none"
+
+[node name="tussock73" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.844360, 0.000000, 0.316042, 0.000000, 0.901569, 0.000000, -0.316042, 0.000000, -0.844360, -366.774445, 17.831833, -603.089600)
+metadata/coliziune = "none"
+
+[node name="grohotis74" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.572051, 0.000000, 0.820218, 0.000000, 1.000000, 0.000000, -0.820218, 0.000000, -0.572051, -356.081726, 18.285049, -602.576782)
+metadata/coliziune = "none"
+
+[node name="tussock75" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.701115, 0.000000, 0.927694, 0.000000, 1.162833, 0.000000, -0.927694, 0.000000, -0.701115, -360.434540, 18.114014, -600.557007)
+metadata/coliziune = "none"
+
+[node name="grohotis76" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.655448, 0.000000, -0.755240, 0.000000, 1.000000, 0.000000, 0.755240, 0.000000, 0.655448, -348.836548, 18.687256, -605.032471)
+metadata/coliziune = "none"
+
+[node name="grohotis77" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.998682, 0.000000, 0.051317, 0.000000, 1.000000, 0.000000, -0.051317, 0.000000, 0.998682, -349.766357, 18.626175, -602.453003)
+metadata/coliziune = "none"
+
+[node name="tussock78" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.882307, 0.000000, 0.443548, 0.000000, 0.987522, 0.000000, -0.443548, 0.000000, -0.882307, -354.580505, 18.365021, -596.518311)
+metadata/coliziune = "none"
+
+[node name="grohotis79" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.092441, 0.000000, 0.995718, 0.000000, 1.000000, 0.000000, -0.995718, 0.000000, 0.092441, -344.124054, 18.981186, -601.791748)
+metadata/coliziune = "none"
+
+[node name="tussock80" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.447864, 0.000000, -0.773425, 0.000000, 0.893738, 0.000000, 0.773425, 0.000000, 0.447864, -344.389740, 18.822311, -594.392700)
+metadata/coliziune = "none"
+
+[node name="parapetStanca81" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-1.051539, 0.000000, 0.387527, 0.000000, 1.120674, 0.000000, -0.387527, 0.000000, -1.051539, -353.544617, 18.709793, -573.277832)
+
+[node name="grohotis82" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.439029, 0.000000, -0.898473, 0.000000, 1.000000, 0.000000, 0.898473, 0.000000, 0.439029, -338.351654, 19.310410, -599.793152)
+metadata/coliziune = "none"
+
+[node name="grohotis83" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.999295, 0.000000, -0.037551, 0.000000, 1.000000, 0.000000, 0.037551, 0.000000, 0.999295, -338.409424, 19.290039, -599.451294)
+metadata/coliziune = "none"
+
+[node name="tussock84" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.926187, 0.000000, 0.272724, 0.000000, 0.965505, 0.000000, -0.272724, 0.000000, 0.926187, -339.639740, 19.056503, -592.170654)
+metadata/coliziune = "none"
+
+[node name="grohotis85" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.445909, 0.000000, -0.895078, 0.000000, 1.000000, 0.000000, 0.895078, 0.000000, -0.445909, -333.352448, 19.670395, -568.519897)
+metadata/coliziune = "none"
+
+[node name="tussock86" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-1.146163, 0.000000, -0.276739, 0.000000, 1.179099, 0.000000, 0.276739, 0.000000, -1.146163, -330.171021, 19.780701, -572.618408)
+metadata/coliziune = "none"
+
+[node name="grohotis87" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.689480, 0.000000, -0.724305, 0.000000, 1.000000, 0.000000, 0.724305, 0.000000, 0.689480, -318.692596, 20.883224, -567.693115)
+metadata/coliziune = "none"
+
+[node name="grohotis88" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.264989, 0.000000, 0.964252, 0.000000, 1.000000, 0.000000, -0.964252, 0.000000, 0.264989, -316.202881, 21.083221, -570.154785)
+metadata/coliziune = "none"
+
+[node name="tussock89" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.969924, 0.000000, 0.643902, 0.000000, 1.164200, 0.000000, -0.643902, 0.000000, -0.969924, -317.736115, 20.987274, -575.758484)
+metadata/coliziune = "none"
+
+[node name="grohotis90" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.346477, 0.000000, -0.938058, 0.000000, 1.000000, 0.000000, 0.938058, 0.000000, -0.346477, -312.167511, 21.464767, -569.904419)
+metadata/coliziune = "none"
+
+[node name="tussock91" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.894275, 0.000000, -0.166893, 0.000000, 0.909715, 0.000000, 0.166893, 0.000000, -0.894275, -316.663727, 21.530518, -595.740295)
+metadata/coliziune = "none"
+
+[node name="parapetStanca92" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.476571, 0.000000, -0.901078, 0.000000, 1.019343, 0.000000, 0.901078, 0.000000, 0.476571, -317.292145, 21.518402, -598.345459)
+
+[node name="grohotis93" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.420446, 0.000000, -0.907318, 0.000000, 1.000000, 0.000000, 0.907318, 0.000000, 0.420446, -300.790131, 22.628967, -573.343201)
+metadata/coliziune = "none"
+
+[node name="grohotis94" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.951113, 0.000000, 0.308844, 0.000000, 1.000000, 0.000000, -0.308844, 0.000000, -0.951113, -301.965912, 22.489700, -571.619934)
+metadata/coliziune = "none"
+
+[node name="grohotis95" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.974296, 0.000000, -0.225274, 0.000000, 1.000000, 0.000000, 0.225274, 0.000000, -0.974296, -297.440552, 22.991882, -575.112122)
+metadata/coliziune = "none"
+
+[node name="tussock96" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.351068, 0.000000, 0.906379, 0.000000, 0.971993, 0.000000, -0.906379, 0.000000, 0.351068, -301.981842, 23.070541, -600.181396)
+metadata/coliziune = "none"
+
+[node name="grohotis97" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.999951, 0.000000, -0.009870, 0.000000, 1.000000, 0.000000, 0.009870, 0.000000, -0.999951, -286.852356, 24.129532, -574.941589)
+metadata/coliziune = "none"
+
+[node name="grohotis98" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.959318, 0.000000, -0.282329, 0.000000, 1.000000, 0.000000, 0.282329, 0.000000, 0.959318, -287.738739, 24.041000, -578.524170)
+metadata/coliziune = "none"
+
+[node name="tussock99" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(1.019950, 0.000000, 0.598341, 0.000000, 1.182501, 0.000000, -0.598341, 0.000000, 1.019950, -286.485413, 24.207733, -582.080383)
+metadata/coliziune = "none"
+
+[node name="grohotis100" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.306540, 0.000000, 0.951858, 0.000000, 1.000000, 0.000000, -0.951858, 0.000000, -0.306540, -279.260864, 25.069901, -578.581238)
+metadata/coliziune = "none"
+
+[node name="parapetStanca101" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.070573, 0.000000, 0.872726, 0.000000, 0.875575, 0.000000, -0.872726, 0.000000, -0.070573, -284.651886, 24.810547, -606.037598)
+
+[node name="grohotis102" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.537380, 0.000000, 0.843340, 0.000000, 1.000000, 0.000000, -0.843340, 0.000000, -0.537380, -276.428314, 25.514862, -612.978699)
+metadata/coliziune = "none"
+
+[node name="grohotis103" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.760482, 0.000000, -0.649359, 0.000000, 1.000000, 0.000000, 0.649359, 0.000000, -0.760482, -272.487366, 25.832077, -609.640991)
+metadata/coliziune = "none"
+
+[node name="grohotis104" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.618191, 0.000000, -0.786028, 0.000000, 1.000000, 0.000000, 0.786028, 0.000000, -0.618191, -260.661804, 26.841782, -608.093750)
+metadata/coliziune = "none"
+
+[node name="grohotis105" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.679335, 0.000000, -0.733828, 0.000000, 1.000000, 0.000000, 0.733828, 0.000000, -0.679335, -249.221359, 27.967682, -604.716980)
+metadata/coliziune = "none"
+
+[node name="grohotis106" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.749125, 0.000000, -0.662429, 0.000000, 1.000000, 0.000000, 0.662429, 0.000000, 0.749125, -249.746002, 27.853516, -609.138184)
+metadata/coliziune = "none"
+
+[node name="grohotis107" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.392503, 0.000000, -0.919751, 0.000000, 1.000000, 0.000000, 0.919751, 0.000000, -0.392503, -243.526810, 28.505157, -605.835205)
+metadata/coliziune = "none"
+
+[node name="tussock108" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-1.166118, 0.000000, 0.190718, 0.000000, 1.181611, 0.000000, -0.190718, 0.000000, -1.166118, -242.150787, 28.828079, -597.251709)
+metadata/coliziune = "none"
+
+[node name="parapetStanca109" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.971904, 0.000000, -0.118895, 0.000000, 0.979149, 0.000000, 0.118895, 0.000000, -0.971904, -248.694687, 28.632492, -577.873169)
+
+[node name="grohotis110" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.995059, 0.000000, 0.099289, 0.000000, 1.000000, 0.000000, -0.099289, 0.000000, -0.995059, -240.266449, 29.745163, -568.176880)
+metadata/coliziune = "none"
+
+[node name="grohotis111" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.233867, 0.000000, -0.972269, 0.000000, 1.000000, 0.000000, 0.972269, 0.000000, 0.233867, -240.239822, 29.744522, -568.287415)
+metadata/coliziune = "none"
+
+[node name="tussock112" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.476419, 0.000000, 0.770305, 0.000000, 0.905729, 0.000000, -0.770305, 0.000000, -0.476419, -231.796555, 29.854523, -596.729492)
+metadata/coliziune = "none"
+
+[node name="grohotis113" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.710574, 0.000000, -0.703622, 0.000000, 1.000000, 0.000000, 0.703622, 0.000000, 0.710574, -227.827667, 30.963242, -570.199036)
+metadata/coliziune = "none"
+
+[node name="tussock114" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.476542, 0.000000, -1.089948, 0.000000, 1.189571, 0.000000, 1.089948, 0.000000, 0.476542, -228.776962, 30.667236, -575.694397)
+metadata/coliziune = "none"
+
+[node name="grohotis115" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.368651, 0.000000, 0.929568, 0.000000, 1.000000, 0.000000, -0.929568, 0.000000, 0.368651, -224.233826, 31.651932, -564.794189)
+metadata/coliziune = "none"
+
+[node name="grohotis116" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.124144, 0.000000, 0.992264, 0.000000, 1.000000, 0.000000, -0.992264, 0.000000, -0.124144, -224.068604, 31.638229, -565.372009)
+metadata/coliziune = "none"
+
+[node name="tussock117" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.547395, 0.000000, -0.885057, 0.000000, 1.040657, 0.000000, 0.885057, 0.000000, 0.547395, -218.336777, 31.246735, -591.727417)
+metadata/coliziune = "none"
+
+[node name="grohotis118" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.774142, 0.000000, 0.633012, 0.000000, 1.000000, 0.000000, -0.633012, 0.000000, 0.774142, -201.180786, 32.534012, -594.236328)
+metadata/coliziune = "none"
+
+[node name="parapetStanca119" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.223078, 0.000000, 0.880166, 0.000000, 0.907996, 0.000000, -0.880166, 0.000000, -0.223078, -215.813278, 32.256332, -571.030884)
+
+[node name="grohotis120" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.692462, 0.000000, 0.721455, 0.000000, 1.000000, 0.000000, -0.721455, 0.000000, -0.692462, -192.997437, 33.301483, -590.032104)
+metadata/coliziune = "none"
+
+[node name="grohotis121" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.751903, 0.000000, -0.659274, 0.000000, 1.000000, 0.000000, 0.659274, 0.000000, 0.751903, -193.406860, 33.479477, -585.584961)
+metadata/coliziune = "none"
+
+[node name="tussock122" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(1.140619, 0.000000, 0.462287, 0.000000, 1.230740, 0.000000, -0.462287, 0.000000, 1.140619, -208.996811, 33.296021, -566.239868)
+metadata/coliziune = "none"
+
+[node name="grohotis123" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.978114, 0.000000, -0.208070, 0.000000, 1.000000, 0.000000, 0.208070, 0.000000, 0.978114, -185.858170, 34.144882, -585.037781)
+metadata/coliziune = "none"
+
+[node name="tussock124" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-1.054083, 0.000000, 0.217836, 0.000000, 1.076356, 0.000000, -0.217836, 0.000000, -1.054083, -189.213211, 34.352264, -576.211487)
+metadata/coliziune = "none"
+
+[node name="grohotis125" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.427066, 0.000000, -0.904220, 0.000000, 1.000000, 0.000000, 0.904220, 0.000000, -0.427066, -171.864090, 35.854324, -574.939697)
+metadata/coliziune = "none"
+
+[node name="grohotis126" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.973125, 0.000000, 0.230279, 0.000000, 1.000000, 0.000000, -0.230279, 0.000000, -0.973125, -178.639160, 35.315643, -574.741760)
+metadata/coliziune = "none"
+
+[node name="tussock127" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.873349, 0.000000, 0.797275, 0.000000, 1.182534, 0.000000, -0.797275, 0.000000, 0.873349, -194.089737, 35.300323, -554.422119)
+metadata/coliziune = "none"
+
+[node name="grohotis128" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.143207, 0.000000, -0.989693, 0.000000, 1.000000, 0.000000, 0.989693, 0.000000, -0.143207, -193.133896, 35.999664, -544.398010)
+metadata/coliziune = "none"
+
+[node name="tussock129" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.085927, 0.000000, -1.112460, 0.000000, 1.115773, 0.000000, 1.112460, 0.000000, -0.085927, -186.516449, 36.199326, -550.105042)
+metadata/coliziune = "none"
+
+[node name="parapetStanca130" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.277046, 0.000000, -0.860546, 0.000000, 0.904043, 0.000000, 0.860546, 0.000000, -0.277046, -174.029526, 36.197830, -566.541382)
+
+[node name="grohotis131" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.162157, 0.000000, -0.986765, 0.000000, 1.000000, 0.000000, 0.986765, 0.000000, 0.162157, -185.060287, 37.123352, -537.728088)
+metadata/coliziune = "none"
+
+[node name="grohotis132" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.307540, 0.000000, 0.951535, 0.000000, 1.000000, 0.000000, -0.951535, 0.000000, -0.307540, -184.083450, 37.114319, -539.014404)
+metadata/coliziune = "none"
+
+[node name="grohotis133" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.947227, 0.000000, -0.320564, 0.000000, 1.000000, 0.000000, 0.320564, 0.000000, 0.947227, -177.448471, 37.676147, -538.694458)
+metadata/coliziune = "none"
+
+[node name="tussock134" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-1.037991, 0.000000, -0.394003, 0.000000, 1.110254, 0.000000, 0.394003, 0.000000, -1.037991, -163.013031, 37.760696, -556.141113)
+metadata/coliziune = "none"
+
+[node name="grohotis135" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.935939, 0.000000, -0.352163, 0.000000, 1.000000, 0.000000, 0.352163, 0.000000, 0.935939, -170.624115, 38.954178, -529.123291)
+metadata/coliziune = "none"
+
+[node name="grohotis136" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.623236, 0.000000, 0.782034, 0.000000, 1.000000, 0.000000, -0.782034, 0.000000, -0.623236, -173.570801, 38.660294, -529.686279)
+metadata/coliziune = "none"
+
+[node name="tussock137" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.061687, 0.000000, -1.210962, 0.000000, 1.212532, 0.000000, 1.210962, 0.000000, 0.061687, -154.373718, 38.845367, -548.441284)
+metadata/coliziune = "none"
+
+[node name="grohotis138" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.979615, 0.000000, -0.200882, 0.000000, 1.000000, 0.000000, 0.200882, 0.000000, 0.979615, -140.786850, 39.690079, -548.244080)
+metadata/coliziune = "none"
+
+[node name="parapetStanca139" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.654140, 0.000000, 0.850775, 0.000000, 1.073181, 0.000000, -0.850775, 0.000000, 0.654140, -161.553131, 39.821442, -527.313599)
+
+[node name="grohotis140" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.797795, 0.000000, 0.602929, 0.000000, 1.000000, 0.000000, -0.602929, 0.000000, 0.797795, -135.695862, 40.469742, -540.600525)
+metadata/coliziune = "none"
+
+[node name="grohotis141" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(-0.764023, 0.000000, -0.645189, 0.000000, 1.000000, 0.000000, 0.645189, 0.000000, -0.764023, -133.239670, 40.825073, -537.585083)
+metadata/coliziune = "none"
+
+[node name="grohotis142" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_scree_slab")]
+transform = Transform3D(0.783124, 0.000000, -0.621866, 0.000000, 1.000000, 0.000000, 0.621866, 0.000000, 0.783124, -127.829124, 41.738281, -528.646545)
+metadata/coliziune = "none"
+
+[node name="fag143" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.911498, 0.000000, -0.304392, 0.000000, 0.960980, 0.000000, 0.304392, 0.000000, -0.911498, -414.087616, 16.080032, -594.849121)
+metadata/coliziune = "trunk"
+
+[node name="fag144" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.438176, 0.000000, 0.868203, 0.000000, 0.972509, 0.000000, -0.868203, 0.000000, 0.438176, -405.106812, 16.486481, -592.855774)
+metadata/coliziune = "trunk"
+
+[node name="feriga145" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.279669, 0.000000, -0.889450, 0.000000, 0.932382, 0.000000, 0.889450, 0.000000, -0.279669, -400.384186, 16.630219, -592.932190)
+metadata/coliziune = "none"
+
+[node name="fag146" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.135456, 0.000000, -0.892864, 0.000000, 0.903080, 0.000000, 0.892864, 0.000000, 0.135456, -389.101898, 16.872437, -613.097351)
+metadata/coliziune = "trunk"
+
+[node name="feriga147" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.208856, 0.000000, 0.864225, 0.000000, 0.889104, 0.000000, -0.864225, 0.000000, -0.208856, -384.908905, 17.033615, -610.273499)
+metadata/coliziune = "none"
+
+[node name="fag148" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.342116, 0.000000, -0.775877, 0.000000, 0.847955, 0.000000, 0.775877, 0.000000, -0.342116, -377.587280, 17.373947, -608.503174)
+metadata/coliziune = "trunk"
+
+[node name="bolovanMuschi149" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.745713, 0.000000, -0.494674, 0.000000, 0.894869, 0.000000, 0.494674, 0.000000, -0.745713, -376.970428, 17.423340, -605.632996)
+
+[node name="feriga150" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.853670, 0.000000, -0.615562, 0.000000, 1.052459, 0.000000, 0.615562, 0.000000, 0.853670, -374.669098, 17.521103, -604.222900)
+metadata/coliziune = "none"
+
+[node name="fag151" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.795526, 0.000000, -0.410515, 0.000000, 0.895201, 0.000000, 0.410515, 0.000000, -0.795526, -365.714111, 17.893723, -601.464294)
+metadata/coliziune = "trunk"
+
+[node name="bolovanMuschi152" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(1.080132, 0.000000, -0.452731, 0.000000, 1.171175, 0.000000, 0.452731, 0.000000, 1.080132, -362.723633, 18.001328, -601.991455)
+
+[node name="fag153" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.292095, 0.000000, -0.846032, 0.000000, 0.895036, 0.000000, 0.846032, 0.000000, 0.292095, -349.078979, 18.621567, -597.282837)
+metadata/coliziune = "trunk"
+
+[node name="bolovanMuschi154" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.448225, 0.000000, -1.228902, 0.000000, 1.308093, 0.000000, 1.228902, 0.000000, 0.448225, -348.602966, 18.636765, -594.248291)
+
+[node name="fag155" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.788340, 0.000000, -0.193903, 0.000000, 0.811837, 0.000000, 0.193903, 0.000000, -0.788340, -336.175018, 19.367508, -572.629761)
+metadata/coliziune = "trunk"
+
+[node name="bolovanMuschi156" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.893450, 0.000000, 1.047582, 0.000000, 1.376838, 0.000000, -1.047582, 0.000000, -0.893450, -333.806427, 19.530792, -573.318726)
+
+[node name="fag157" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.593105, 0.000000, -0.630262, 0.000000, 0.865450, 0.000000, 0.630262, 0.000000, 0.593105, -313.218719, 21.388367, -574.118225)
+metadata/coliziune = "trunk"
+
+[node name="bolovanMuschi158" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.529425, 0.000000, -1.207353, 0.000000, 1.318330, 0.000000, 1.207353, 0.000000, 0.529425, -310.072113, 21.735840, -576.144897)
+
+[node name="fag159" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.699624, 0.000000, -0.529579, 0.000000, 0.877455, 0.000000, 0.529579, 0.000000, -0.699624, -290.242035, 23.794296, -580.531433)
+metadata/coliziune = "trunk"
+
+[node name="fag160" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.919426, 0.000000, 0.038312, 0.000000, 0.920224, 0.000000, -0.038312, 0.000000, -0.919426, -263.896820, 26.593369, -603.888611)
+metadata/coliziune = "trunk"
+
+[node name="fag161" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.741193, 0.000000, -0.568970, 0.000000, 0.934395, 0.000000, 0.568970, 0.000000, 0.741193, -238.793747, 29.715286, -574.291138)
+metadata/coliziune = "trunk"
+
+[node name="bolovanMuschi162" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.485945, 0.000000, -0.991313, 0.000000, 1.104012, 0.000000, 0.991313, 0.000000, -0.485945, -234.716568, 30.057877, -576.609192)
+
+[node name="fag163" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.864248, 0.000000, -0.062652, 0.000000, 0.866516, 0.000000, 0.062652, 0.000000, 0.864248, -195.530212, 33.539185, -580.857361)
+metadata/coliziune = "trunk"
+
+[node name="bolovanMuschi164" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-1.046374, 0.000000, -0.458194, 0.000000, 1.142297, 0.000000, 0.458194, 0.000000, -1.046374, -194.356201, 33.706573, -579.587891)
+
+[node name="fag165" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.805141, 0.000000, 0.076761, 0.000000, 0.808792, 0.000000, -0.076761, 0.000000, 0.805141, -176.544067, 37.658356, -539.944214)
+metadata/coliziune = "trunk"
+
+[node name="fagUscat166" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.576471, 0.000000, 0.721841, 0.000000, 0.923782, 0.000000, -0.721841, 0.000000, 0.576471, -130.810791, 41.921387, -524.247192)
+metadata/coliziune = "trunk"
+
+[node name="fagUscat167" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.802523, 0.000000, 0.049240, 0.000000, 0.804032, 0.000000, -0.049240, 0.000000, -0.802523, -133.969162, 41.545166, -527.072388)
+metadata/coliziune = "trunk"
+
+[node name="fagUscat168" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.503890, 0.000000, -0.632891, 0.000000, 0.808985, 0.000000, 0.632891, 0.000000, -0.503890, -137.100830, 41.149841, -529.922546)
+metadata/coliziune = "trunk"
+
+
 [node name="ZoneF_Coborare" type="Node3D" parent="DecorManual"]
 
 [node name="ZoneG_Bowen" type="Node3D" parent="DecorManual"]

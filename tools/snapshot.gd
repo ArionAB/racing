@@ -1251,8 +1251,26 @@ func _set_avalanche_time(root: Node, seconds: float) -> void:
 			phase = "retragere"
 		elif seconds >= AvalancheHazard.TELEGRAPH:
 			phase = "traversare"
-		print("--avalanche-at=%.2f: %s, masa la (%.1f, %.1f, %.1f), faza %s"
-			% [seconds, ava.name, mp.x, mp.y, mp.z, phase])
+		# Cate bucati au trecut de axa drumului (X local < 0, coborand spre vale
+		# pe +X local -> -X): contractul POI F cere sa se verifice in log ca
+		# toate cele 9 bucati ajung la rau, nu doar ca masa containerului a plecat.
+		#
+		# NU se citeste `body.global_position`: bucatile sunt AnimatableBody3D cu
+		# `sync_to_physics=true`, iar `_place_shards` scrie `.position` in
+		# spatiul pe care serverul de fizica il aplica abia la urmatorul pas
+		# REAL de fizica (nota din cod) — apelurile directe la `_physics_process`
+		# de aici nu avanseaza acel server, deci pozitia citita ar fi veche.
+		# Se recalculeaza cu ACEEASI formula ca `_place_shards`: centru + offset
+		# (offset-ul nu se roteste, gramada isi pastreaza forma).
+		var mass_local: Vector3 = mass.position if mass != null else Vector3.ZERO
+		var shards: Array = ava.get("_shards")
+		var past_road := 0
+		for sh in shards:
+			var off: Vector3 = sh.get("offset")
+			if mass_local.x + off.x < 0.0:
+				past_road += 1
+		print("--avalanche-at=%.2f: %s, masa la (%.1f, %.1f, %.1f), faza %s, %d/%d bucati au trecut de axa drumului"
+			% [seconds, ava.name, mp.x, mp.y, mp.z, phase, past_road, shards.size()])
 	print("--avalanche-at=%.2f: %d avalanse mutate" % [seconds, found])
 
 

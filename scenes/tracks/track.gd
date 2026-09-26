@@ -4379,6 +4379,17 @@ func _build_environment() -> void:
 	# mare parte DE LA NISIP, nu de la cer. Folosim culoarea de bounce din
 	# style_bible §5 (#E2B77A) ca sursa de ambient, si umbrele ies calde in loc
 	# de albastre.
+	#
+	# RE-MASURAT in sep 2026 (planul de grafica pe mobil propunea ambient
+	# "hemisferic" din cer pe toate temele, ca fetele de sus sa primeasca
+	# altceva decat cele de jos). `snapshot --ambient-sky=E` pe trei teme:
+	#   Dunele:        drumul (76,69,70) -> (73,79,126), saturatie 0.09 -> 0.42,
+	#                  nuanta 233 (ALBASTRU); stanca sat 0.81 -> 0.14 (gri)
+	#   Machu Picchu:  drumul de nisip sat 0.20 -> 0.11 (spalat)
+	#   Fiordland:     +3 pe valoare, nimic altceva (cer gri ~ ambient gri)
+	# Adica exact defectul de mai sus, pe orice tema cu cer colorat. Ramane
+	# culoarea de bounce per tema; diferenta sus/jos vine din AO-ul copt si
+	# din umbre, nu din ambient.
 	var ambient: Variant = theme_flag("ambient_color")
 	if ambient != null:
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR

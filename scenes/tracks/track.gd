@@ -10882,8 +10882,29 @@ func _build_lift_bridge(ch: Dictionary) -> void:
 	# Baza e strict un yaw, deci verticala se pastreaza si cota apei se traduce
 	# printr-o scadere. (Un `inv * punct` ar fi fost la fel de corect, dar ar fi
 	# ascuns faptul ca aici ne bazam pe absenta oricarui tangaj.)
-	bridge.water_y = _sampler.mean_road_y() + sea_level_offset - origin.y
+	#
+	# APA NU VINE INTOTDEAUNA DIN MARE. Implicitul (sea_level_offset) e corect
+	# pentru un canal navigabil legat de mare (Okinawa) — dar un canal cu
+	# `water_y_drop` declarat explicit (parau de munte, ca la Chasm) are apa
+	# proprie, la cota lui, nu la cea a marii. Fara ramura asta, plasa de
+	# cadere si pescajul corabiei ar fi calculate fata de o mare la -2 m in
+	# loc de raul real la +9..11 m — gaura de cadere ar ajunge de trei ori mai
+	# adanca decat trebuie. `_build_channel_water` (suprafata vizibila a apei)
+	# foloseste deja exact aceasta ramura (vezi acolo, `water_y := o.y - drop`);
+	# aici era singurul loc unde nu se aplica.
+	var drop := float(ch.get("water_y_drop", -1.0))
+	if drop >= 0.0:
+		# Apa reala e la origin.y - drop (spatiu lume); in spatiul LOCAL al
+		# podului (origine la 0, doar yaw) asta e pur si simplu -drop.
+		bridge.water_y = -drop
+	else:
+		bridge.water_y = _sampler.mean_road_y() + sea_level_offset - origin.y
 	bridge.piers = _channel_piers(ch, bridge.transform.affine_inverse())
+	# Podet fix (parau de munte, Chasm) vs pod mobil (canal navigabil,
+	# Okinawa): trei steaguri opționale in spec, implicit purtarea veche.
+	bridge.static_deck = bool(ch.get("static_deck", false))
+	bridge.build_towers = bool(ch.get("build_towers", true))
+	bridge.build_ships = bool(ch.get("build_ships", true))
 	add_child(bridge)
 
 

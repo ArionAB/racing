@@ -161,6 +161,17 @@ const EDGE_KEEP := 1.0
 ## autocarului spre linia de oprire.
 const PORTAL_NO_COLLISION_FRAC := 0.010   # ~21,6 m pe 2159 m de tur
 
+## RUNDA 2 (verdict critic): "iarba goala 0-15 m de gura, fara copaci".
+## PORTAL_NO_COLLISION_FRAC (21,6 m) e corect pentru coliziune (aripile-palnie
+## se intind doar 14,3 m din capac), dar `_forest_thinning` folosea ACELASI
+## prag drept opritor pentru TOT decorul, deci si piesele `none` (fara
+## coliziune, nu pot ejecta autocarul) se opreau cu 21,6 m inainte de portal —
+## de-aici banda goala vazuta de critic. Piesele `none` (tussock/fern/
+## snow_pole) si fagii `trunk` cu trunchi departe de banda pot continua mult
+## mai aproape de capac; opritorul lor e F_PORTAL minus o franjă minima, ca in
+## nota coordonatorului ("ultimii ~5 m goi").
+const PORTAL_NONE_STOP_FRAC := 0.0023      # ~5 m pe 2159 m — franjul cerut de critic
+
 var _track: Track
 var _sampler: TrackSideSampler
 var _terrain_rid: RID = RID()
@@ -370,6 +381,79 @@ func _forest_thinning() -> void:
 		_place("beech_dead", "fagUscat", ff, up, _rng.randf_range(2.5, 5.0),
 			_rng.randf_range(0.0, TAU), _scale_for("beech_dead",
 				_rng.randf_range(6.0, 8.0)), "trunk")
+	_portal_fringe(f_stop)
+
+
+## RUNDA 2 (verdict critic): "in referinta padurea vine pana aproape de tunel
+## pe ambele parti si abia acolo se rareste; la noi 0-15 m de gura e iarba
+## goala". `_forest_thinning` de mai sus se oprea la `f_stop` (F_PORTAL minus
+## PORTAL_NO_COLLISION_FRAC, ~21,6 m) pentru TOATA vegetatia — corect pentru
+## coliziune (aripile-palnie ale tunelului se intind 14,3 m din capac), gresit
+## pentru piesele `none` care nu pot ejecta autocarul. Fringe-ul asta continua
+## PE AMBELE FLANCURI, dincolo de aripi (verificat: aripa la +8,0 m fata de ax
+## la capatul ei, deci gap-urile de mai jos pun corpul la peste 10 m de ax),
+## cu densitate DESCRESCATOARE spre portal, oprindu-se la PORTAL_NONE_STOP_FRAC
+## (~5 m goi, cum a cerut criticul). Piese `none`: tussock_clump, fern_cluster,
+## snow_pole — plus fagi `trunk` cu gap mare (trunchi > 10 m de ax, deci in
+## afara benzii autocarului de 4,5 m semilatime + aripa de 3,5 m).
+func _portal_fringe(f_stop: float) -> void:
+	var n := _track.baked.size()
+	# NU plafonat la F_OUT: F_OUT era capatul arbitrar al zonei de rarire de
+	# mai sus, nu o limita de siguranta — franjul trebuie sa ajunga aproape de
+	# portalul real (F_PORTAL), altfel `min(F_OUT, ...)` il taia inapoi la
+	# f_stop si franjul iese gol (bug gasit la prima rulare a rundei 2: 6,5 m
+	# de span in loc de ~16,4 m).
+	var f_stop_none := F_PORTAL - PORTAL_NONE_STOP_FRAC
+	if f_stop_none <= f_stop:
+		return
+	var span := f_stop_none - f_stop
+	var f := f_stop
+	var k := 0
+	while f < f_stop_none:
+		var t: float = clampf((f - f_stop) / span, 0.0, 1.0)  # 0 la coada, 1 la portal
+		# Pas care CRESTE spre portal (densitate care scade), dar mult mai
+		# strans decat rarirea de mai sus — bara arata padurea venind APROAPE
+		# de tunel, deci pasul ramane sub-2 m pana tarziu si creste doar in
+		# ultimii metri (runda 1 avea pas 4-14 m, prea rar pentru un span de
+		# 16,6 m — 3 iteratii cu roluri de probabilitate ieseau aproape goale).
+		var step_m: float = lerpf(1.3, 4.5, t)
+		var i := int(f * float(n)) % n
+		for sgn in [-1.0, 1.0]:
+			# Ciorchini, nu instante izolate (aranjamentul-bate-numarul): 1-3
+			# tussock/feriga per pas per parte, densitate care scade spre t=1.
+			var cnt: int = 1 + int(round(lerpf(2.0, 0.0, t)))
+			for c in cnt:
+				if _rng.randf() < lerpf(0.95, 0.35, t):
+					_place("tussock_clump", "tussockPortal",
+						f + _step(_rng.randf_range(-1.8, 1.8)), sgn,
+						_rng.randf_range(1.0, 4.0), _rng.randf_range(0.0, TAU),
+						_scale_for("tussock_clump", _rng.randf_range(0.7, 1.0)), "none")
+				if _rng.randf() < lerpf(0.8, 0.25, t):
+					_place("fern_cluster", "ferigaPortal",
+						f + _step(_rng.randf_range(-1.8, 1.8)), sgn,
+						_rng.randf_range(1.5, 4.5), _rng.randf_range(0.0, TAU),
+						_scale_for("fern_cluster", _rng.randf_range(0.6, 1.1)), "none")
+			# Fagi cu trunchi departe de banda: gap 5-9 m pune corpul (trunk,
+			# raza ~0.8-1.0 m) la peste 12 m de ax — dincolo de aripa (8,0 m).
+			# CIORCHINE garantat (nu coin-flip per copac): criticul a cerut
+			# explicit "ciorchini de copaci", nu un fag izolat din cand in
+			# cand — o singura rulare initiala a dat 1 fag pe TOT franjul (2
+			# flancuri) fiindca un rol de probabilitate per iteratie, cu doar
+			# 3-4 iteratii, e prea putin pentru un ciorchine vizibil. Acum:
+			# 2-3 fagi garantati per pas per parte la coada (t mic), scazand
+			# la 0-1 spre portal (t mare) — densitatea descrescatoare ceruta.
+			var tree_cnt: int = 1 + int(round(lerpf(2.0, 0.0, t)))
+			for tc in tree_cnt:
+				if _rng.randf() < lerpf(1.0, 0.4, t):
+					var mdl := "beech_a" if _rng.randf() < 0.6 else "beech_b"
+					var h: float = _rng.randf_range(5.5, 7.0) if mdl == "beech_a" \
+						else _rng.randf_range(7.5, 9.5)
+					_place(mdl, "fagPortal",
+						f + _step(_rng.randf_range(-2.5, 2.5)), sgn,
+						_rng.randf_range(5.0, 9.0), _rng.randf_range(0.0, TAU),
+						_scale_for(mdl, h), "trunk")
+		f += _step(step_m)
+		k += 1
 
 
 ## Partea dinspre munte (versant care URCA), la indexul i. Se citeste din

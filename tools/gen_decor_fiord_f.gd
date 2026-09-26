@@ -128,6 +128,7 @@ func _ready() -> void:
 	_survey()
 	if not _survey_only:
 		_scar()
+		_scar_debris()
 		_forest()
 		_write()
 	get_tree().quit(0)
@@ -238,6 +239,60 @@ func _scar() -> void:
 	print("; cicatrice: %d piese" % idx)
 
 
+## (1b) MOLOZ IMEDIAT LANGA BANDA -- runda 2, verdict critic: langa bordura, in
+## prim-plan-mijloc, unde referinta pune moloz angular + trunchiuri, noi aveam
+## doar fasia goala (AVALANCHE_LAT_CLEAR) urmata de primul rand al _scar() la
+## 9-13 m, prea departe pentru cadrul din masina. Aici pun un rand SUPLIMENTAR
+## chiar la marginea benzii (15-19 m, adica AVALANCHE_LAT_CLEAR + 0-4 m) --
+## tot in AFARA fasiei mobile (marja proprie, mai mare decat cea de siguranta
+## normala) -- plus 2-3 trunchiuri rupte asezate OBLIC pe acostament
+## (driftwood/beech_dead, tilt, NU pe carosabil). Bolovani angulari
+## (chasm_rock/guard_rock -- gneis) NU moss_boulder rotund, ca sa nu repete
+## defectul semnalat.
+func _scar_debris() -> void:
+	var n := _track.baked.size()
+	var f := AVALANCHE_F_LO - 0.010
+	var f_end := AVALANCHE_F_HI + 0.010
+	var idx := 0
+	var trunk_budget := 3 # 2-3 trunchiuri oblice, cerute explicit de critic
+	while f <= f_end:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		for sgn: float in [-1.0, 1.0]:
+			var lat := AVALANCHE_LAT_CLEAR + _jrange(0.6, 4.0)
+			var lo := sgn * lat
+			# marja proprie mai mare decat _in_avalanche_strip: raman departe
+			# de fasia mobila (bucatile avalansei nu trebuie sa se blocheze).
+			if absf(lo) <= AVALANCHE_LAT_CLEAR + 0.5:
+				continue
+			if absf(lo) < half + EDGE_KEEP:
+				continue
+			var q := p + s * lo
+			var gy := _ground(q.x, q.z)
+			if gy <= -900.0:
+				continue
+			var yaw := _rng.randf_range(0.0, TAU)
+			# bolovani angulari, NU moss_boulder (rotund) - asta era defectul.
+			var stems := ["chasm_rock", "chasm_rock", "guard_rock"]
+			var stem: String = stems[_rng.randi() % stems.size()]
+			_place(stem, q, gy, yaw, _rng.randf_range(0.9, 1.15))
+			idx += 1
+			# 2-3 trunchiuri oblice, rupte, peste marginea acostamentului --
+			# axa lunga taind spre drum dar capatul interior oprit inainte de
+			# asfalt (EDGE_KEEP normal: aici vrem "peste margine", nu departe).
+			if trunk_budget > 0 and _rng.randf() < 0.5 and lat < AVALANCHE_LAT_CLEAR + 2.5:
+				var stem_t: String = "driftwood" if _rng.randf() < 0.7 else "beech_dead"
+				var tilt := _rng.randf_range(8.0, 22.0) * (1.0 if _rng.randf() < 0.5 else -1.0)
+				var yaw_t := yaw + deg_to_rad(_rng.randf_range(20.0, 55.0))
+				_place(stem_t, q, gy, yaw_t, 1.0, tilt)
+				trunk_budget -= 1
+				idx += 1
+		f += _step(2.4)
+	print("; moloz langa banda (runda 2): %d piese, %d trunchiuri neplasate din buget" % [idx, trunk_budget])
+
+
 ## Ranged jitter helper: numar random uniform in [a,b].
 func _jrange(a: float, b: float) -> float:
 	return _rng.randf_range(a, b)
@@ -302,13 +357,22 @@ func _step(meters: float) -> float:
 ## Aseaza o piesa: verifica degajarea de la muchia drumului daca are coliziune,
 ## scrie linia .part. `gy` e cota REALA din raycast (TerrainBody), nu campul
 ## neted (memoria terrain-mesh-y-extrapoleaza).
-func _place(stem: String, pos: Vector3, ground_y: float, yaw: float, scale_mul: float) -> void:
+## `tilt_axis`/`tilt_deg`: pentru trunchiuri "cazute oblic" — o rotatie
+## SUPLIMENTARA pe o axa orizontala locala, aplicata INAINTE de yaw (deci
+## trunchiul se inclina, apoi se orienteaza in plan). 0 = fara tilt (default,
+## comportament neschimbat pentru restul pieselor).
+func _place(stem: String, pos: Vector3, ground_y: float, yaw: float, scale_mul: float, tilt_deg: float = 0.0) -> void:
 	if not RES.has(stem):
 		_skipped += 1
 		return
 	var h: float = HEIGHT.get(stem, 1.0)
 	var scale := scale_mul # inaltimea e deja cea masurata; scale_mul e variatie, nu conversie in metri
-	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale)
+	var basis := Basis(Vector3.UP, yaw)
+	if tilt_deg != 0.0:
+		# tilt pe axa locala X (inainte de yaw), apoi yaw peste — un trunchi
+		# "culcat oblic" fata de axa lunga a modelului, nu doar rotit plan.
+		basis = Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, deg_to_rad(tilt_deg))
+	basis = basis.scaled(Vector3.ONE * scale)
 	var origin := Vector3(pos.x, ground_y, pos.z)
 	_n += 1
 	var name := "%s%d" % [_camel(stem), _n]

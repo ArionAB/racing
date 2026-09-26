@@ -7259,137 +7259,378 @@ transform = Transform3D(0.8522, 0.0000, -0.5232, 0.0000, 1.0000, 0.0000, 0.5232,
 [node name="chasmRock80" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(0.9695, 0.0000, 0.2451, 0.0000, 1.0000, 0.0000, -0.2451, 0.0000, 0.9695, 19.5073, 11.7552, -220.6411)
 
-[node name="beechC81" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.7548, 0.0000, 0.6559, 0.0000, 1.0000, 0.0000, -0.6559, 0.0000, 0.7548, -95.7445, 26.0547, -330.1394)
+[node name="chasmRock81" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.8862, 0.0000, 0.4657, 0.0000, 1.0011, 0.0000, -0.4657, 0.0000, 0.8862, -36.8312, 19.4504, -292.4546)
 
-[node name="driftwood82" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
-transform = Transform3D(-0.5564, 0.0000, 0.8309, 0.0000, 1.0000, 0.0000, -0.8309, 0.0000, -0.5564, -112.4359, 25.6731, -312.8235)
+[node name="beechDead82" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.2649, 0.2943, 0.9183, 0.0000, 0.9523, -0.3052, -0.9643, 0.0809, 0.2523, -36.8312, 19.4504, -292.4546)
 
-[node name="driftwood83" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
-transform = Transform3D(-0.9814, 0.0000, -0.1920, 0.0000, 1.0000, 0.0000, 0.1920, 0.0000, -0.9814, -89.3416, 26.2761, -328.8788)
+[node name="chasmRock83" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.8154, 0.0000, -0.7303, 0.0000, 1.0946, 0.0000, 0.7303, 0.0000, -0.8154, -51.3848, 19.2779, -259.3743)
 
-[node name="beechB84" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.7855, 0.0000, -0.6189, 0.0000, 1.0000, 0.0000, 0.6189, 0.0000, -0.7855, -78.5316, 25.5218, -325.8936)
+[node name="chasmRock84" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.9301, 0.0000, -0.2260, 0.0000, 0.9572, 0.0000, 0.2260, 0.0000, 0.9301, -33.4346, 19.1622, -292.1446)
 
-[node name="driftwood85" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
-transform = Transform3D(-0.9966, 0.0000, -0.0821, 0.0000, 1.0000, 0.0000, 0.0821, 0.0000, -0.9966, -103.9799, 24.4017, -299.2900)
+[node name="guardRock85" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.5134, 0.0000, -1.0047, 0.0000, 1.1283, 0.0000, 1.0047, 0.0000, -0.5134, -47.5039, 19.0165, -259.5572)
 
-[node name="beechA86" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.1544, 0.0000, -0.9880, 0.0000, 1.0000, 0.0000, 0.9880, 0.0000, -0.1544, -97.6178, 24.3068, -303.3125)
+[node name="driftwood86" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
+transform = Transform3D(0.3691, 0.3252, -0.8707, 0.0000, 0.9368, 0.3499, 0.9294, -0.1291, 0.3457, -47.5039, 19.0165, -259.5572)
 
-[node name="tussockClump87" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.5726, 0.0000, -0.6321, 0.0000, 0.8528, 0.0000, 0.6321, 0.0000, -0.5726, -67.1501, 23.4494, -317.8027)
+[node name="chasmRock87" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.7360, 0.0000, -0.5576, 0.0000, 0.9234, 0.0000, 0.5576, 0.0000, -0.7360, -34.4084, 19.1312, -289.8892)
 
-[node name="beechB88" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.0642, 0.0000, 0.9979, 0.0000, 1.0000, 0.0000, -0.9979, 0.0000, -0.0642, -94.1319, 23.2827, -289.6160)
+[node name="guardRock88" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.0367, 0.0000, -1.0235, 0.0000, 1.0242, 0.0000, 1.0235, 0.0000, 0.0367, -47.0360, 19.0296, -260.6409)
 
-[node name="beechC89" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.2930, 0.0000, -0.9561, 0.0000, 1.0000, 0.0000, 0.9561, 0.0000, 0.2930, -68.4388, 22.7032, -306.5834)
+[node name="driftwood89" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
+transform = Transform3D(0.4672, 0.2718, -0.8413, 0.0000, 0.9516, 0.3074, 0.8841, -0.1436, 0.4446, -47.0360, 19.0296, -260.6409)
 
-[node name="tussockClump90" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.6023, 0.0000, 0.5619, 0.0000, 0.8237, 0.0000, -0.5619, 0.0000, 0.6023, -56.7524, 22.1377, -310.6720)
+[node name="chasmRock90" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.9028, 0.0000, -0.3410, 0.0000, 0.9651, 0.0000, 0.3410, 0.0000, -0.9028, -29.2373, 18.6687, -288.5853)
 
-[node name="guardRock91" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(-0.7747, 0.0000, -0.5880, 0.0000, 0.9725, 0.0000, 0.5880, 0.0000, -0.7747, -84.2676, 22.3320, -283.0970)
+[node name="chasmRock91" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-1.0523, 0.0000, 0.0713, 0.0000, 1.0547, 0.0000, -0.0713, 0.0000, -1.0523, -42.4186, 18.5799, -257.9493)
 
-[node name="beechC92" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-1.0000, 0.0000, -0.0022, 0.0000, 1.0000, 0.0000, 0.0022, 0.0000, -1.0000, -55.5642, 21.5151, -301.6220)
+[node name="guardRock92" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.1576, 0.0000, 0.9308, 0.0000, 0.9440, 0.0000, -0.9308, 0.0000, -0.1576, -28.6105, 18.6854, -290.0421)
 
-[node name="beechA93" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.5536, 0.0000, 0.8328, 0.0000, 1.0000, 0.0000, -0.8328, 0.0000, 0.5536, -72.9642, 21.5537, -281.4064)
+[node name="chasmRock93" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.1974, 0.0000, -0.9508, 0.0000, 0.9711, 0.0000, 0.9508, 0.0000, -0.1974, -43.0394, 18.5715, -256.5065)
 
-[node name="tussockClump94" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-1.2107, 0.0000, 0.3221, 0.0000, 1.2528, 0.0000, -0.3221, 0.0000, -1.2107, -48.8685, 21.1141, -304.1282)
+[node name="chasmRock94" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.0314, 0.0000, -0.2869, 0.0000, 1.0705, 0.0000, 0.2869, 0.0000, 1.0314, -28.0539, 18.5230, -287.3507)
 
-[node name="driftwood95" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
-transform = Transform3D(-0.7447, 0.0000, -0.6674, 0.0000, 1.0000, 0.0000, 0.6674, 0.0000, -0.7447, -49.2974, 20.6906, -296.2997)
+[node name="guardRock95" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(1.0085, 0.0000, -0.0705, 0.0000, 1.0109, 0.0000, 0.0705, 0.0000, 1.0085, -41.4320, 18.4510, -256.4090)
 
-[node name="beechB96" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.2307, 0.0000, -0.9730, 0.0000, 1.0000, 0.0000, 0.9730, 0.0000, 0.2307, -65.6555, 20.6290, -270.5943)
+[node name="chasmRock96" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.1981, 0.0000, -0.9040, 0.0000, 0.9254, 0.0000, 0.9040, 0.0000, -0.1981, -23.8125, 18.2221, -287.9451)
 
-[node name="beechC97" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.6376, 0.0000, -0.7704, 0.0000, 1.0000, 0.0000, 0.7704, 0.0000, -0.6376, -48.4451, 20.2474, -289.8387)
+[node name="chasmRock97" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.4171, 0.0000, 0.8414, 0.0000, 0.9392, 0.0000, -0.8414, 0.0000, -0.4171, -37.4337, 18.1636, -256.5607)
 
-[node name="tussockClump98" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.9438, 0.0000, -0.8204, 0.0000, 1.2505, 0.0000, 0.8204, 0.0000, -0.9438, -61.4686, 20.1373, -264.4864)
+[node name="chasmRock98" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.3512, 0.0000, -1.0942, 0.0000, 1.1492, 0.0000, 1.0942, 0.0000, -0.3512, -22.3748, 18.0871, -287.3596)
 
-[node name="beechC99" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.6868, 0.0000, 0.7269, 0.0000, 1.0000, 0.0000, -0.7269, 0.0000, -0.6868, -49.9614, 19.4800, -266.8334)
+[node name="chasmRock99" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.8114, 0.0000, -0.7718, 0.0000, 1.1199, 0.0000, 0.7718, 0.0000, -0.8114, -36.5134, 18.0271, -254.8139)
 
-[node name="beechB100" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.4248, 0.0000, 0.9053, 0.0000, 1.0000, 0.0000, -0.9053, 0.0000, 0.4248, 44.4422, 11.0732, -242.1694)
+[node name="guardRock100" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.0664, 0.0000, -1.0520, 0.0000, 1.0541, 0.0000, 1.0520, 0.0000, 0.0664, -20.3582, 17.8555, -285.3707)
 
-[node name="beechC101" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.2551, 0.0000, -0.9669, 0.0000, 1.0000, 0.0000, 0.9669, 0.0000, 0.2551, 49.4152, 10.5899, -240.3083)
+[node name="chasmRock101" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-1.1067, 0.0000, -0.1415, 0.0000, 1.1157, 0.0000, 0.1415, 0.0000, -1.1067, -34.5056, 17.7927, -252.8112)
 
-[node name="guardRock102" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(1.1732, 0.0000, -0.0626, 0.0000, 1.1748, 0.0000, 0.0626, 0.0000, 1.1732, 35.0536, 10.5550, -221.1779)
+[node name="chasmRock102" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.6184, 0.0000, -0.6793, 0.0000, 0.9186, 0.0000, 0.6793, 0.0000, 0.6184, -18.2440, 17.6261, -283.6235)
 
-[node name="guardRock103" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(-1.0461, 0.0000, -0.1490, 0.0000, 1.0567, 0.0000, 0.1490, 0.0000, -1.0461, 38.6352, 9.5179, -209.2997)
+[node name="chasmRock103" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.4440, 0.0000, -0.8087, 0.0000, 0.9226, 0.0000, 0.8087, 0.0000, -0.4440, -31.2546, 17.5806, -253.6553)
 
-[node name="driftwood104" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
-transform = Transform3D(0.0514, 0.0000, 0.9987, 0.0000, 1.0000, 0.0000, -0.9987, 0.0000, 0.0514, 66.0407, 9.1722, -234.2116)
+[node name="chasmRock104" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.9698, 0.0000, 0.5708, 0.0000, 1.1253, 0.0000, -0.5708, 0.0000, 0.9698, -16.9146, 17.4922, -282.8158)
 
-[node name="driftwood105" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
-transform = Transform3D(-0.8023, 0.0000, 0.5969, 0.0000, 1.0000, 0.0000, -0.5969, 0.0000, -0.8023, 44.7233, 8.9452, -207.9312)
+[node name="chasmRock105" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.6087, 0.0000, 0.8887, 0.0000, 1.0772, 0.0000, -0.8887, 0.0000, 0.6087, -29.6949, 17.4503, -253.3582)
 
-[node name="beechA106" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.4988, 0.0000, 0.8667, 0.0000, 1.0000, 0.0000, -0.8667, 0.0000, 0.4988, 77.6800, 7.7404, -216.8647)
+[node name="guardRock106" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.8716, 0.0000, 0.4750, 0.0000, 0.9926, 0.0000, -0.4750, 0.0000, 0.8716, -15.0843, 17.3371, -282.4825)
 
-[node name="beechC107" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.9771, 0.0000, 0.2129, 0.0000, 1.0000, 0.0000, -0.2129, 0.0000, 0.9771, 47.1855, 8.0304, -198.4666)
+[node name="chasmRock107" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.5266, 0.0000, -0.7419, 0.0000, 0.9097, 0.0000, 0.7419, 0.0000, -0.5266, -28.6827, 17.2816, -251.1217)
 
-[node name="tussockClump108" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.4625, 0.0000, -0.8270, 0.0000, 0.9476, 0.0000, 0.8270, 0.0000, -0.4625, 58.8892, 7.1391, -195.5355)
+[node name="chasmRock108" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.9725, 0.0000, 0.2899, 0.0000, 1.0148, 0.0000, -0.2899, 0.0000, -0.9725, -11.4829, 17.0554, -282.3584)
 
-[node name="tussockClump109" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.2009, 0.0000, -0.7813, 0.0000, 0.8067, 0.0000, 0.7813, 0.0000, 0.2009, 81.9444, 6.6776, -200.7858)
+[node name="guardRock109" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.1050, 0.0000, -1.0998, 0.0000, 1.1048, 0.0000, 1.0998, 0.0000, -0.1050, -25.2168, 16.9955, -250.6536)
 
-[node name="beechA110" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.0398, 0.0000, 0.9992, 0.0000, 1.0000, 0.0000, -0.9992, 0.0000, -0.0398, 92.2422, 6.2651, -199.5119)
+[node name="chasmRock110" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.6522, 0.0000, 0.6601, 0.0000, 0.9280, 0.0000, -0.6601, 0.0000, -0.6522, -8.7246, 16.8332, -282.0905)
 
-[node name="beechB111" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.5201, 0.0000, 0.8541, 0.0000, 1.0000, 0.0000, -0.8541, 0.0000, 0.5201, 64.4922, 5.6138, -173.9344)
+[node name="chasmRock111" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.5002, 0.0000, -0.8373, 0.0000, 0.9753, 0.0000, 0.8373, 0.0000, -0.5002, -23.5286, 16.7566, -247.9047)
 
-[node name="beechA112" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.0463, 0.0000, -0.9989, 0.0000, 1.0000, 0.0000, 0.9989, 0.0000, 0.0463, 98.2876, 4.4224, -171.8873)
+[node name="chasmRock112" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.7826, 0.0000, 0.6249, 0.0000, 1.0014, 0.0000, -0.6249, 0.0000, -0.7826, -4.9560, 16.4770, -280.2585)
 
-[node name="tussockClump113" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.9707, 0.0000, -0.4832, 0.0000, 1.0843, 0.0000, 0.4832, 0.0000, -0.9707, 102.7714, 4.1806, -167.2584)
+[node name="guardRock113" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.3124, 0.0000, 1.0085, 0.0000, 1.0557, 0.0000, -1.0085, 0.0000, 0.3124, -19.6750, 17.0401, -246.2787)
 
-[node name="beechC114" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.6474, 0.0000, 0.7621, 0.0000, 1.0000, 0.0000, -0.7621, 0.0000, 0.6474, 106.1271, 3.9454, -162.2695)
+[node name="guardRock114" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.8549, 0.0000, -0.5229, 0.0000, 1.0021, 0.0000, 0.5229, 0.0000, 0.8549, -3.3071, 16.3376, -279.7944)
 
-[node name="beechC115" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.9786, 0.0000, 0.2057, 0.0000, 1.0000, 0.0000, -0.2057, 0.0000, -0.9786, 80.6667, 3.8809, -154.7412)
+[node name="guardRock115" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.9083, 0.0000, 0.4881, 0.0000, 1.0312, 0.0000, -0.4881, 0.0000, 0.9083, -17.2492, 16.5074, -247.0548)
 
-[node name="tussockClump116" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(1.1303, 0.0000, -0.4380, 0.0000, 1.2122, 0.0000, 0.4380, 0.0000, 1.1303, 81.7079, 3.6177, -148.0826)
+[node name="chasmRock116" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.7250, 0.0000, -0.5460, 0.0000, 0.9076, 0.0000, 0.5460, 0.0000, -0.7250, -3.7145, 16.3316, -278.8376)
 
-[node name="tussockClump117" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.0864, 0.0000, -1.1176, 0.0000, 1.1210, 0.0000, 1.1176, 0.0000, 0.0864, 105.6063, 3.4730, -144.6396)
+[node name="guardRock117" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(1.0199, 0.0000, 0.1769, 0.0000, 1.0352, 0.0000, -0.1769, 0.0000, 1.0199, -17.4297, 16.7107, -246.6308)
 
-[node name="tussockClump118" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.6030, 0.0000, -0.6833, 0.0000, 0.9113, 0.0000, 0.6833, 0.0000, -0.6030, 102.7733, 3.3834, -139.3790)
+[node name="chasmRock118" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.7667, 0.0000, -0.6726, 0.0000, 1.0199, 0.0000, 0.6726, 0.0000, 0.7667, -1.4811, 16.0695, -276.2629)
 
-[node name="beechA119" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.7981, 0.0000, 0.6025, 0.0000, 1.0000, 0.0000, -0.6025, 0.0000, -0.7981, 73.9374, 3.4770, -135.2756)
+[node name="chasmRock119" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.1661, 0.0000, 0.8974, 0.0000, 0.9126, 0.0000, -0.8974, 0.0000, -0.1661, -14.4713, 16.7442, -244.1453)
 
-[node name="beechC120" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(1.0000, 0.0000, -0.0012, 0.0000, 1.0000, 0.0000, 0.0012, 0.0000, 1.0000, 114.6112, 3.3279, -136.8308)
+[node name="chasmRock120" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.0358, 0.0000, -1.0398, 0.0000, 1.0404, 0.0000, 1.0398, 0.0000, -0.0358, 1.3093, 15.8150, -275.2421)
 
-[node name="beechC121" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.1325, 0.0000, -0.9912, 0.0000, 1.0000, 0.0000, 0.9912, 0.0000, 0.1325, 113.4648, 3.2740, -134.0072)
+[node name="chasmRock121" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.4655, 0.0000, 0.9406, 0.0000, 1.0495, 0.0000, -0.9406, 0.0000, -0.4655, -12.1332, 16.5440, -243.7914)
 
-[node name="beechA122" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.6240, 0.0000, 0.7814, 0.0000, 1.0000, 0.0000, -0.7814, 0.0000, -0.6240, 79.9876, 3.2744, -129.2431)
+[node name="chasmRock122" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.1471, 0.0000, -1.0808, 0.0000, 1.0908, 0.0000, 1.0808, 0.0000, 0.1471, 4.2468, 15.5605, -274.1596)
 
 [node name="guardRock123" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(0.1204, 0.0000, 1.1332, 0.0000, 1.1396, 0.0000, -1.1332, 0.0000, 0.1204, 116.0211, 3.1658, -129.1563)
+transform = Transform3D(0.9032, 0.0000, 0.3897, 0.0000, 0.9837, 0.0000, -0.3897, 0.0000, 0.9032, -9.3517, 16.1512, -244.7431)
 
-[node name="beechC124" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.9960, 0.0000, -0.0892, 0.0000, 1.0000, 0.0000, 0.0892, 0.0000, 0.9960, 115.9714, 2.9055, -116.2283)
+[node name="chasmRock124" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.4271, 0.0000, -0.8085, 0.0000, 0.9143, 0.0000, 0.8085, 0.0000, 0.4271, 5.4812, 15.4088, -272.4208)
+
+[node name="guardRock125" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.9514, 0.0000, -0.4555, 0.0000, 1.0548, 0.0000, 0.4555, 0.0000, 0.9514, -8.6214, 15.9663, -243.4275)
+
+[node name="guardRock126" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.6692, 0.0000, -0.8107, 0.0000, 1.0512, 0.0000, 0.8107, 0.0000, -0.6692, 8.4384, 15.2641, -273.9735)
+
+[node name="chasmRock127" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.6469, 0.0000, 0.6720, 0.0000, 0.9328, 0.0000, -0.6720, 0.0000, 0.6469, -7.5612, 15.6413, -241.8437)
+
+[node name="guardRock128" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(1.0044, 0.0000, -0.3251, 0.0000, 1.0557, 0.0000, 0.3251, 0.0000, 1.0044, 11.4198, 14.9601, -271.4532)
+
+[node name="guardRock129" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.0604, 0.0000, 1.1155, 0.0000, 1.1171, 0.0000, -1.1155, 0.0000, -0.0604, -5.1413, 15.1346, -240.2030)
+
+[node name="chasmRock130" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.4074, 0.0000, -0.9663, 0.0000, 1.0487, 0.0000, 0.9663, 0.0000, 0.4074, 13.7020, 14.6978, -268.5918)
+
+[node name="chasmRock131" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.5018, 0.0000, 0.8240, 0.0000, 0.9648, 0.0000, -0.8240, 0.0000, 0.5018, -3.1646, 14.8829, -239.9701)
+
+[node name="chasmRock132" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.7617, 0.0000, 0.4930, 0.0000, 0.9073, 0.0000, -0.4930, 0.0000, 0.7617, 17.7031, 14.3076, -265.7859)
+
+[node name="chasmRock133" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.0019, 0.0000, 0.2621, 0.0000, 1.0356, 0.0000, -0.2621, 0.0000, 1.0019, 0.2445, 14.9378, -238.9792)
+
+[node name="chasmRock134" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.2034, 0.0000, 0.9029, 0.0000, 0.9256, 0.0000, -0.9029, 0.0000, -0.2034, 20.8437, 14.1231, -266.7576)
+
+[node name="chasmRock135" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.5632, 0.0000, -0.8572, 0.0000, 1.0257, 0.0000, 0.8572, 0.0000, -0.5632, 0.2410, 15.5925, -236.2142)
+
+[node name="chasmRock136" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.7675, 0.0000, 0.6499, 0.0000, 1.0057, 0.0000, -0.6499, 0.0000, 0.7675, 24.0330, 13.7605, -263.5431)
+
+[node name="chasmRock137" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.7421, 0.0000, -0.5347, 0.0000, 0.9147, 0.0000, 0.5347, 0.0000, -0.7421, 2.6738, 14.5528, -235.8194)
+
+[node name="chasmRock138" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.0055, 0.0000, 0.2356, 0.0000, 1.0327, 0.0000, -0.2356, 0.0000, 1.0055, 27.2330, 13.4778, -262.6061)
+
+[node name="guardRock139" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.8260, 0.0000, -0.5758, 0.0000, 1.0069, 0.0000, 0.5758, 0.0000, 0.8260, 5.5707, 14.2840, -235.9031)
+
+[node name="chasmRock140" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.2783, 0.0000, 1.0705, 0.0000, 1.1061, 0.0000, -1.0705, 0.0000, -0.2783, 29.7140, 13.1531, -259.6756)
+
+[node name="chasmRock141" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.4363, 0.0000, -0.9424, 0.0000, 1.0385, 0.0000, 0.9424, 0.0000, -0.4363, 7.4345, 14.3635, -230.8400)
+
+[node name="chasmRock142" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.3189, 0.0000, 1.0798, 0.0000, 1.1260, 0.0000, -1.0798, 0.0000, 0.3189, 30.9528, 12.9982, -258.5444)
+
+[node name="guardRock143" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.9265, 0.0000, 0.1295, 0.0000, 0.9355, 0.0000, -0.1295, 0.0000, 0.9265, 9.8077, 13.2067, -230.7111)
+
+[node name="chasmRock144" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.1324, 0.0000, -0.9905, 0.0000, 0.9993, 0.0000, 0.9905, 0.0000, 0.1324, 32.9295, 12.6949, -255.5999)
+
+[node name="chasmRock145" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.6779, 0.0000, 0.8573, 0.0000, 1.0929, 0.0000, -0.8573, 0.0000, -0.6779, 12.7253, 13.0985, -228.9869)
+
+[node name="guardRock146" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.5006, 0.0000, 0.8124, 0.0000, 0.9543, 0.0000, -0.8124, 0.0000, 0.5006, 36.4985, 12.4421, -255.9324)
+
+[node name="chasmRock147" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.5797, 0.0000, -0.9566, 0.0000, 1.1185, 0.0000, 0.9566, 0.0000, -0.5797, 15.1877, 12.7692, -227.8622)
+
+[node name="chasmRock148" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.9146, 0.0000, -0.6532, 0.0000, 1.1239, 0.0000, 0.6532, 0.0000, 0.9146, 37.9745, 12.1982, -253.5036)
+
+[node name="chasmRock149" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.5878, 0.0000, 0.8391, 0.0000, 1.0246, 0.0000, -0.8391, 0.0000, -0.5878, 17.1951, 12.2499, -226.1423)
+
+[node name="chasmRock150" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.4472, 0.0000, -1.0046, 0.0000, 1.0997, 0.0000, 1.0046, 0.0000, -0.4472, 39.9238, 11.8843, -250.5062)
+
+[node name="chasmRock151" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.7728, 0.0000, -0.5897, 0.0000, 0.9721, 0.0000, 0.5897, 0.0000, -0.7728, 19.9180, 11.8923, -224.1783)
+
+[node name="chasmRock152" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.9227, 0.0000, 0.5974, 0.0000, 1.0992, 0.0000, -0.5974, 0.0000, 0.9227, 40.5652, 11.8826, -251.3503)
+
+[node name="chasmRock153" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.5022, 0.0000, -0.8712, 0.0000, 1.0056, 0.0000, 0.8712, 0.0000, 0.5022, 19.3753, 11.8973, -223.4642)
+
+[node name="guardRock154" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.8823, 0.0000, 0.4858, 0.0000, 1.0071, 0.0000, -0.4858, 0.0000, 0.8823, 41.5531, 11.7145, -249.6479)
+
+[node name="chasmRock155" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.7094, 0.0000, 0.6299, 0.0000, 0.9487, 0.0000, -0.6299, 0.0000, 0.7094, 20.6749, 11.7368, -222.1773)
+
+[node name="driftwood156" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.9774, 0.0000, 0.2114, 0.0000, 1.0000, 0.0000, -0.2114, 0.0000, -0.9774, -89.0091, 29.9165, -337.1268)
+
+[node name="driftwood157" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.6953, 0.0000, -0.7187, 0.0000, 1.0000, 0.0000, 0.7187, 0.0000, -0.6953, -92.9298, 25.6761, -327.6071)
+
+[node name="beechA158" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.4110, 0.0000, -0.9117, 0.0000, 1.0000, 0.0000, 0.9117, 0.0000, 0.4110, -83.6995, 27.0292, -329.8359)
+
+[node name="beechC159" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.4909, 0.0000, -0.8712, 0.0000, 1.0000, 0.0000, 0.8712, 0.0000, -0.4909, -100.9955, 24.9676, -310.7542)
+
+[node name="beechB160" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.9971, 0.0000, 0.0767, 0.0000, 1.0000, 0.0000, -0.0767, 0.0000, 0.9971, -83.3667, 25.1735, -326.1032)
+
+[node name="beechC161" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.2599, 0.0000, 0.9656, 0.0000, 1.0000, 0.0000, -0.9656, 0.0000, 0.2599, -103.1762, 24.4165, -300.1302)
+
+[node name="beechA162" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.8561, 0.0000, 0.5169, 0.0000, 1.0000, 0.0000, -0.5169, 0.0000, 0.8561, -80.0604, 24.2986, -319.4419)
+
+[node name="tussockClump163" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(1.0834, 0.0000, 0.1741, 0.0000, 1.0973, 0.0000, -0.1741, 0.0000, 1.0834, -73.7262, 23.8330, -318.4270)
+
+[node name="beechC164" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.9889, 0.0000, 0.1487, 0.0000, 1.0000, 0.0000, -0.1487, 0.0000, -0.9889, -98.8492, 23.6892, -292.1541)
+
+[node name="beechB165" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.1951, 0.0000, -0.9808, 0.0000, 1.0000, 0.0000, 0.9808, 0.0000, -0.1951, -69.4216, 23.3968, -315.4298)
+
+[node name="driftwood166" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.9153, 0.0000, 0.4029, 0.0000, 1.0000, 0.0000, -0.4029, 0.0000, -0.9153, -91.0831, 23.2887, -292.8009)
+
+[node name="guardRock167" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.5789, 0.0000, 0.8308, 0.0000, 1.0126, 0.0000, -0.8308, 0.0000, -0.5789, -68.5363, 23.2328, -314.1154)
+
+[node name="tussockClump168" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(1.1574, 0.0000, 0.1874, 0.0000, 1.1725, 0.0000, -0.1874, 0.0000, 1.1574, -61.9559, 22.1041, -303.1317)
+
+[node name="beechB169" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.9022, 0.0000, -0.4314, 0.0000, 1.0000, 0.0000, 0.4314, 0.0000, -0.9022, -80.6787, 22.1832, -284.6583)
+
+[node name="beechA170" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.0138, 0.0000, 0.9999, 0.0000, 1.0000, 0.0000, -0.9999, 0.0000, -0.0138, -72.3748, 21.5537, -282.0912)
+
+[node name="beechB171" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.4989, 0.0000, 0.8667, 0.0000, 1.0000, 0.0000, -0.8667, 0.0000, -0.4989, -72.5303, 21.1449, -273.2286)
+
+[node name="tussockClump172" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.7754, 0.0000, 0.5514, 0.0000, 0.9515, 0.0000, -0.5514, 0.0000, 0.7754, -54.4616, 19.4829, -259.2017)
+
+[node name="beechB173" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.8782, 0.0000, 0.4783, 0.0000, 1.0000, 0.0000, -0.4783, 0.0000, 0.8782, 27.9505, 11.0461, -220.4800)
+
+[node name="beechA174" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.9836, 0.0000, 0.1805, 0.0000, 1.0000, 0.0000, -0.1805, 0.0000, -0.9836, 48.5280, 10.4324, -236.5946)
+
+[node name="guardRock175" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.9747, 0.0000, 0.5352, 0.0000, 1.1120, 0.0000, -0.5352, 0.0000, 0.9747, 55.3330, 9.9550, -236.4722)
+
+[node name="tussockClump176" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.9990, 0.0000, 0.0252, 0.0000, 0.9993, 0.0000, -0.0252, 0.0000, -0.9990, 54.7907, 9.5990, -230.3319)
+
+[node name="beechA177" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.9018, 0.0000, 0.4321, 0.0000, 1.0000, 0.0000, -0.4321, 0.0000, -0.9018, 61.2336, 9.0620, -228.2853)
+
+[node name="beechC178" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.9927, 0.0000, -0.1204, 0.0000, 1.0000, 0.0000, 0.1204, 0.0000, -0.9927, 70.0666, 8.6999, -229.1257)
+
+[node name="beechA179" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.9937, 0.0000, 0.1119, 0.0000, 1.0000, 0.0000, -0.1119, 0.0000, 0.9937, 45.6628, 8.4286, -202.2054)
+
+[node name="beechB180" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.9748, 0.0000, 0.2232, 0.0000, 1.0000, 0.0000, -0.2232, 0.0000, -0.9748, 79.1512, 7.5251, -213.8668)
+
+[node name="beechB181" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.7261, 0.0000, 0.6876, 0.0000, 1.0000, 0.0000, -0.6876, 0.0000, 0.7261, 49.0988, 7.7248, -195.6603)
+
+[node name="beechA182" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.1417, 0.0000, 0.9899, 0.0000, 1.0000, 0.0000, -0.9899, 0.0000, 0.1417, 79.3552, 6.8001, -201.3683)
+
+[node name="driftwood183" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.9998, 0.0000, 0.0187, 0.0000, 1.0000, 0.0000, -0.0187, 0.0000, -0.9998, 51.5268, 6.9722, -186.6461)
+
+[node name="beechC184" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.4366, 0.0000, 0.8997, 0.0000, 1.0000, 0.0000, -0.8997, 0.0000, 0.4366, 80.2713, 6.5503, -197.8226)
+
+[node name="beechC185" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.5404, 0.0000, -0.8414, 0.0000, 1.0000, 0.0000, 0.8414, 0.0000, 0.5404, 84.7873, 6.4418, -198.4974)
+
+[node name="driftwood186" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
+transform = Transform3D(0.7399, 0.0000, -0.6727, 0.0000, 1.0000, 0.0000, 0.6727, 0.0000, 0.7399, 57.9818, 6.1305, -178.0679)
+
+[node name="tussockClump187" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.8930, 0.0000, -0.4082, 0.0000, 0.9819, 0.0000, 0.4082, 0.0000, 0.8930, 87.4924, 5.8389, -190.1433)
+
+[node name="driftwood188" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.0256, 0.0000, 0.9997, 0.0000, 1.0000, 0.0000, -0.9997, 0.0000, -0.0256, 66.7985, 5.8395, -178.9967)
+
+[node name="guardRock189" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.1705, 0.0000, 0.8950, 0.0000, 0.9111, 0.0000, -0.8950, 0.0000, -0.1705, 89.4231, 5.4176, -184.3741)
+
+[node name="beechA190" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.9947, 0.0000, -0.1030, 0.0000, 1.0000, 0.0000, 0.1030, 0.0000, 0.9947, 95.9510, 5.2847, -184.8925)
+
+[node name="driftwood191" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.9758, 0.0000, -0.2186, 0.0000, 1.0000, 0.0000, 0.2186, 0.0000, -0.9758, 102.5870, 4.4060, -171.6580)
+
+[node name="beechC192" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.4222, 0.0000, -0.9065, 0.0000, 1.0000, 0.0000, 0.9065, 0.0000, 0.4222, 77.7743, 4.3019, -160.5330)
+
+[node name="beechA193" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.2778, 0.0000, -0.9606, 0.0000, 1.0000, 0.0000, 0.9606, 0.0000, -0.2778, 78.1293, 3.9446, -153.9910)
+
+[node name="beechA194" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.9129, 0.0000, 0.4083, 0.0000, 1.0000, 0.0000, -0.4083, 0.0000, -0.9129, 110.3132, 3.7766, -155.8547)
+
+[node name="tussockClump195" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.3946, 0.0000, 1.0666, 0.0000, 1.1373, 0.0000, -1.0666, 0.0000, 0.3946, 72.4621, 3.9063, -147.5453)
+
+[node name="beechC196" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.8867, 0.0000, 0.4624, 0.0000, 1.0000, 0.0000, -0.4624, 0.0000, 0.8867, 73.9637, 3.7295, -143.9544)
+
+[node name="beechA197" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.4022, 0.0000, -0.9155, 0.0000, 1.0000, 0.0000, 0.9155, 0.0000, -0.4022, 109.2522, 3.4096, -140.3010)
+
+[node name="tussockClump198" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(1.0340, 0.0000, 0.5088, 0.0000, 1.1524, 0.0000, -0.5088, 0.0000, 1.0340, 82.8245, 3.3959, -136.5403)
+
+[node name="guardRock199" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.3688, 0.0000, -0.9392, 0.0000, 1.0091, 0.0000, 0.9392, 0.0000, 0.3688, 84.1049, 3.3137, -132.4984)
+
+[node name="guardRock200" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.9037, 0.0000, -0.6111, 0.0000, 1.0909, 0.0000, 0.6111, 0.0000, -0.9037, 112.5900, 3.2059, -130.4966)
+
+[node name="beechC201" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.5411, 0.0000, -0.8410, 0.0000, 1.0000, 0.0000, 0.8410, 0.0000, -0.5411, 75.8099, 3.1827, -125.2464)
+
+[node name="tussockClump202" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.8562, 0.0000, 0.3747, 0.0000, 0.9346, 0.0000, -0.3747, 0.0000, -0.8562, 86.8878, 3.0190, -116.5348)
+
+[node name="beechA203" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.9534, 0.0000, 0.3017, 0.0000, 1.0000, 0.0000, -0.3017, 0.0000, -0.9534, 87.2503, 2.9016, -110.9434)
+
+[node name="beechA204" parent="DecorManual/ZoneF_Coborare" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.9141, 0.0000, 0.4056, 0.0000, 1.0000, 0.0000, -0.4056, 0.0000, 0.9141, 108.7900, 2.7970, -106.7600)
+
 
 
 [node name="ZoneG_Bowen" type="Node3D" parent="DecorManual"]

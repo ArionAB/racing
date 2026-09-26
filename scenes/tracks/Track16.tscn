@@ -51,6 +51,27 @@
 [ext_resource type="PackedScene" uid="uid://6uiuyphujnhh" path="res://assets/models/structures/wooden_pier.glb" id="s_wooden_pier"]
 [ext_resource type="Script" uid="uid://pcypbcie67pr" path="res://scenes/hazards/foam_pool.gd" id="9_foam_pool"]
 [ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="s_path_mover_script"]
+[ext_resource type="Texture2D" uid="uid://dq1xh1dac1h3l" path="res://assets/textures/classes/concrete.png" id="s_tex_concrete"]
+[ext_resource type="Texture2D" uid="uid://dfo81u3265emf" path="res://assets/textures/classes/plaster.png" id="s_tex_plaster"]
+
+[sub_resource type="StandardMaterial3D" id="StripConcreteMat"]
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("s_tex_concrete")
+metallic_specular = 0.15
+roughness = 0.9
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_triplanar = true
+uv1_world_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="StripMarkingMat"]
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.97, 1.0, 1.0, 1.0)
+albedo_texture = ExtResource("s_tex_plaster")
+metallic_specular = 0.15
+roughness = 0.9
+uv1_scale = Vector3(0.55, 0.55, 0.55)
+uv1_triplanar = true
+uv1_world_triplanar = true
 
 [sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete7"]
 size = Vector3(3.060000, 0.060000, 12.000000)
@@ -7314,114 +7335,133 @@ transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000
 [node name="pistaAvioaneconcrete7" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.686946, 0.000000, 0.726708, 0.000000, 1.000000, 0.000000, -0.726708, 0.000000, 0.686946, 1.572016, 0.685125, 2.611016)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete7")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete8" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.683527, 0.000000, 0.729925, 0.000000, 1.000000, 0.000000, -0.729925, 0.000000, 0.683527, 0.341903, 0.670000, 3.780262)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete8")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioanefoam_white9" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.683527, 0.000000, 0.729925, 0.000000, 1.000000, 0.000000, -0.729925, 0.000000, 0.683527, 0.341903, 0.690000, 3.780262)
 mesh = SubResource("BoxMesh_pistaAvioanefoam_white9")
+surface_material_override/0 = SubResource("StripMarkingMat")
 metadata/tri_class = "FOAM_WHITE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete10" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.684552, 0.000000, 0.728964, 0.000000, 1.000000, 0.000000, -0.728964, 0.000000, 0.684552, -1.866791, 0.641381, 5.839334)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete10")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete11" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.688530, 0.000000, 0.725208, 0.000000, 1.000000, 0.000000, -0.725208, 0.000000, 0.688530, -4.084061, 0.618350, 7.863438)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete11")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioanefoam_white12" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.688530, 0.000000, 0.725208, 0.000000, 1.000000, 0.000000, -0.725208, 0.000000, 0.688530, -4.084061, 0.638350, 7.863438)
 mesh = SubResource("BoxMesh_pistaAvioanefoam_white12")
+surface_material_override/0 = SubResource("StripMarkingMat")
 metadata/tri_class = "FOAM_WHITE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete13" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.700185, 0.000000, 0.713962, 0.000000, 1.000000, 0.000000, -0.713962, 0.000000, 0.700185, -7.745754, 0.583862, 11.387371)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete13")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete14" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.714293, 0.000000, 0.699847, 0.000000, 1.000000, 0.000000, -0.699847, 0.000000, 0.714293, -9.149223, 0.570000, 12.822540)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete14")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioanefoam_white15" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.714293, 0.000000, 0.699847, 0.000000, 1.000000, 0.000000, -0.699847, 0.000000, 0.714293, -9.149223, 0.590000, 12.822540)
 mesh = SubResource("BoxMesh_pistaAvioanefoam_white15")
+surface_material_override/0 = SubResource("StripMarkingMat")
 metadata/tri_class = "FOAM_WHITE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete16" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.739932, 0.000000, 0.672682, 0.000000, 1.000000, 0.000000, -0.672682, 0.000000, 0.739932, -11.834221, 0.545125, 15.638344)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete16")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete17" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.749618, 0.000000, 0.661870, 0.000000, 1.000000, 0.000000, -0.661870, 0.000000, 0.749618, -14.111050, 0.526700, 18.144623)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete17")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioanefoam_white18" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.749618, 0.000000, 0.661870, 0.000000, 1.000000, 0.000000, -0.661870, 0.000000, 0.749618, -14.111050, 0.546700, 18.144623)
 mesh = SubResource("BoxMesh_pistaAvioanefoam_white18")
+surface_material_override/0 = SubResource("StripMarkingMat")
 metadata/tri_class = "FOAM_WHITE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete19" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.768387, 0.000000, 0.639986, 0.000000, 1.000000, 0.000000, -0.639986, 0.000000, 0.768387, -17.198141, 0.500656, 21.819717)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete19")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete20" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.784643, 0.000000, 0.619948, 0.000000, 1.000000, 0.000000, -0.619948, 0.000000, 0.784643, -18.478138, 0.490000, 23.408737)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete20")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioanefoam_white21" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.784643, 0.000000, 0.619948, 0.000000, 1.000000, 0.000000, -0.619948, 0.000000, 0.784643, -18.478138, 0.510000, 23.408737)
 mesh = SubResource("BoxMesh_pistaAvioanefoam_white21")
+surface_material_override/0 = SubResource("StripMarkingMat")
 metadata/tri_class = "FOAM_WHITE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete22" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.803708, 0.000000, 0.595024, 0.000000, 1.000000, 0.000000, -0.595024, 0.000000, 0.803708, -21.118885, 0.471344, 26.833382)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete22")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete23" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.808520, 0.000000, 0.588469, 0.000000, 1.000000, 0.000000, -0.588469, 0.000000, 0.808520, -22.877371, 0.458350, 29.280928)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete23")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioanefoam_white24" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.808520, 0.000000, 0.588469, 0.000000, 1.000000, 0.000000, -0.588469, 0.000000, 0.808520, -22.877371, 0.478350, 29.280928)
 mesh = SubResource("BoxMesh_pistaAvioanefoam_white24")
+surface_material_override/0 = SubResource("StripMarkingMat")
 metadata/tri_class = "FOAM_WHITE"
 metadata/coliziune = "none"
 
 [node name="pistaAvioaneconcrete25" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
 transform = Transform3D(0.815115, 0.000000, 0.579300, 0.000000, 1.000000, 0.000000, -0.579300, 0.000000, 0.815115, -25.051472, 0.438895, 32.398521)
 mesh = SubResource("BoxMesh_pistaAvioaneconcrete25")
+surface_material_override/0 = SubResource("StripConcreteMat")
 metadata/tri_class = "CONCRETE"
 metadata/coliziune = "none"
 

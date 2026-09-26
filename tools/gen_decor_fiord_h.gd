@@ -697,20 +697,67 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 
 
 ## Placa plana pentru pista de avioane: PaletteBox-like, un MeshInstance3D
-## direct in .tscn (nu exista GLB, contract explicit). Clasa de textura vine
-## din numele nodului (`world_prop.gd` citeste dupa nume pentru piese fara
-## model, la fel ca alte fasii de asfalt manuale de pe alte piste).
+## direct in .tscn (nu exista GLB, contract explicit).
 ##
-## RUNDA 5, al doilea bug gasit in aceasta functie (primul era `step` folosit
-## ca metri, vezi `_airstrip`): `[sub_resource]` era scris in `_out` (blocul
-## de NODURI), DUPA nodul care il refera prin `SubResource("BoxMesh_...")`.
-## Godot cere id-ul declarat INAINTE de orice referinta in fisier — cu
-## sub_resource dupa, incarcarea Track16.tscn pica cu "Parse Error: Invalid
-## parameter" chiar la acel nod (confirmat: `probe_decor` nu rula deloc,
-## proces Godot ramas la 5 MB / 0 CPU time, aparent "blocat", de fapt mort pe
-## eroare de parsare). Fix: sub_resource-ul merge in `_out_sub`, care
-## `_write()` il varsa INAINTEA blocului de noduri.
+## RUNDA 5, doua bug-uri gasite si reparate in aceasta functie:
+##
+## (1) `[sub_resource]` era scris in `_out` (blocul de NODURI), DUPA nodul
+## care il refera prin `SubResource("BoxMesh_...")`. Godot cere id-ul
+## declarat INAINTE de orice referinta in fisier — cu sub_resource dupa,
+## incarcarea Track16.tscn pica cu "Parse Error: Invalid parameter" chiar la
+## acel nod (confirmat: `probe_decor` nu rula deloc, proces Godot ramas la
+## 5 MB / 0 CPU time, aparent "blocat", de fapt mort pe eroare de parsare).
+## Fix: sub_resource-ul merge in `_out_sub`, care `_write()` il varsa
+## INAINTEA blocului de noduri.
+##
+## (2) `metadata/tri_class` NU e citit de nimeni la runtime (doar de
+## `probe_decor.gd`, pentru raportare) — mecanismul care aplica efectiv
+## `Palette.apply_triplanar_class` pe subarbore ruleaza pe GLB-uri prin
+## `world_prop.gd`, niciodata pe un `MeshInstance3D` scris de mana in
+## `.tscn`. Placile ramaneau FARA MATERIAL, deci Godot le randa cu shaderul
+## de debug (checker curcubeu) — asta a citit criticul ca "iarba", nu ca
+## lipsa de textura, dar captura araba clar culorile UV nefolosite.
+## Fix: material triplanar STATIC (`sub_resource StandardMaterial3D`), doua
+## instante reutilizate pe TOATE placile (zero materiale noi -> zero cost la
+## garda de 38): clasa "concrete" (deja in Palette.CLASS_TRIPLANAR_SCALE,
+## `assets/textures/classes/concrete.png`) pentru dala gri, clasa
+## "village_plaster" (aproape alb, `plaster.png`) pentru marcaje — ambele
+## clase EXISTENTE, refolosite ca orice alt GLB de pe alta clasa.
+const MAT_CONCRETE_ID := "StripConcreteMat"
+const MAT_MARKING_ID := "StripMarkingMat"
+var _strip_mats_written := false
+
+func _ensure_strip_materials() -> void:
+	if _strip_mats_written:
+		return
+	_strip_mats_written = true
+	# Parametrii copiati din Palette.triplanar_class_material() (scripts/palette.gd):
+	# "concrete" uv1_scale 0.5, fara CLASS_TINT (albedo neted); "village_plaster"
+	# uv1_scale 0.55, tint aproape alb (0.97, 1.0, 1.0) — vezi CLASS_TRIPLANAR_SCALE
+	# / CLASS_TINT. Triplanar in spatiul LUMII: placile sunt statice, deci nu
+	# "inoata" (memoria din palette.gd despre obiecte care se misca nu se aplica).
+	_out_sub.append('[sub_resource type="StandardMaterial3D" id="%s"]' % MAT_CONCRETE_ID)
+	_out_sub.append('vertex_color_use_as_albedo = true')
+	_out_sub.append('albedo_texture = ExtResource("s_tex_concrete")')
+	_out_sub.append('metallic_specular = 0.15')
+	_out_sub.append('roughness = 0.9')
+	_out_sub.append('uv1_scale = Vector3(0.5, 0.5, 0.5)')
+	_out_sub.append('uv1_triplanar = true')
+	_out_sub.append('uv1_world_triplanar = true')
+	_out_sub.append("")
+	_out_sub.append('[sub_resource type="StandardMaterial3D" id="%s"]' % MAT_MARKING_ID)
+	_out_sub.append('vertex_color_use_as_albedo = true')
+	_out_sub.append('albedo_color = Color(0.97, 1.0, 1.0, 1.0)')
+	_out_sub.append('albedo_texture = ExtResource("s_tex_plaster")')
+	_out_sub.append('metallic_specular = 0.15')
+	_out_sub.append('roughness = 0.9')
+	_out_sub.append('uv1_scale = Vector3(0.55, 0.55, 0.55)')
+	_out_sub.append('uv1_triplanar = true')
+	_out_sub.append('uv1_world_triplanar = true')
+	_out_sub.append("")
+
 func _raw_box(pos: Vector3, yaw: float, size: Vector3, cls: String) -> void:
+	_ensure_strip_materials()
 	_n += 1
 	var nm := "pistaAvioane%s%d" % [cls.to_lower(), _n]
 	_out_sub.append('[sub_resource type="BoxMesh" id="BoxMesh_%s"]' % nm)
@@ -722,6 +769,8 @@ func _raw_box(pos: Vector3, yaw: float, size: Vector3, cls: String) -> void:
 		% [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z,
 			pos.x, pos.y, pos.z])
 	_out.append('mesh = SubResource("BoxMesh_%s")' % nm)
+	var mat_id := MAT_CONCRETE_ID if cls == "CONCRETE" else MAT_MARKING_ID
+	_out.append('surface_material_override/0 = SubResource("%s")' % mat_id)
 	_out.append('metadata/tri_class = "%s"' % cls)
 	_out.append('metadata/coliziune = "none"')
 	_out.append("")

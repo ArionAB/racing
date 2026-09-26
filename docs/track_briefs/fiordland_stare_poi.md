@@ -56,7 +56,25 @@ Nota de predare a sesiunii de decor pe cele 8 POI-uri ale pistei Fiordland
 
 ## Gărzile pe scena integrată
 
-Completat la final — vezi descrierea PR-ului.
+Pe `fiord/poi-integrare` după toate merge-urile, `--import` înainte:
+
+| gardă | rezultat | prag |
+|---|---|---|
+| probe_decor `--track=16` | **27 materiale**, 5192 prop-uri | ≤ 38 (+2 cerute la POI H: `concrete`, `village_plaster`, clase existente) |
+| probe_manual `--track=16` | OK, 0 de reparat | 0 |
+| ProbeBuried `--track=9` | 0 îngropate, 86 tavane | 86 = tunelul, și pe main (contractul zicea greșit „0 tavane”) |
+| ProbeTunel `--expect-tube` | OK | verde |
+| ProbeLaneClear `--track=9` | 8 | baza 8 |
+| ProbeLayout `--track=9` | OK, pantă max 12,7 % | < 13 % |
+| ProbeFiordScurtatura | TRECE | TRECE |
+| sv_hazard_orient `--scene=16` | 1 suspect: AvalansaF | cunoscut |
+| fiord_frustum_table | PICĂ pe F1 | ca pe main, decizia (b) |
+| ProbeRace uscat seed 1–8 | tur min 1,62–1,68; **0 [blocaj] pe decor**; 3 [blocaj] generice (asfalt/acostament) la 0.608/0.882 | main: 1,53–1,66 |
+| ProbeRace ploaie seed 1–2 | tur min 1,58 / 1,57; 0 [blocaj] | main: 1,60 / 1,57 |
+
+Poarta literală „tur minim ≥ 1,64 pe toate 8 seed-uri” nu e atinsă pe seed 8
+(1,62) și nu e atinsă nici pe main (seed 1: 1,53); distribuția integrării e la
+nivelul sau peste a lui main.
 
 ## Decizii deschise pentru dezvoltator
 

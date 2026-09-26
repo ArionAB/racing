@@ -46,7 +46,7 @@ const PAS: int = 2
 const DRIVABLE := [
 	"RoadTop", "RoadSides", "RoadOverpassDeck", "Shoulders",
 	"BranchDeck", "BranchDirt", "BranchSand", "BranchRails",
-	"Ramp", "ChannelKicker", "FlyoffRamp", "HummockBody",
+	"Ramp", "RampNear", "RampFar", "ChannelKicker", "FlyoffRamp", "HummockBody",
 	"IceSheet",
 ]
 

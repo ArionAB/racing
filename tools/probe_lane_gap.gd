@@ -92,7 +92,7 @@ func _ready() -> void:
 				if body == null:
 					continue
 				var nm := String(body.name)
-				if nm.begins_with("Road") or nm.begins_with("Shoulders") or nm.begins_with("Branch") or nm == "Ramp" or nm.begins_with("Channel") or nm.begins_with("Flyoff") or nm.begins_with("Tunnel") or nm.begins_with("Hummock"):
+				if nm.begins_with("Road") or nm.begins_with("Shoulders") or nm.begins_with("Branch") or nm.begins_with("Ramp") or nm.begins_with("Channel") or nm.begins_with("Flyoff") or nm.begins_with("Tunnel") or nm.begins_with("Hummock"):
 					continue
 				blocked = true
 			if blocked:

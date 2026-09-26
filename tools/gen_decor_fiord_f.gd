@@ -317,6 +317,19 @@ func _scar_debris() -> void:
 ## in gramada (jitter mic intre ei, NU sir de-a lungul marginii -- ruperea
 ## alinierii ceruta explicit de coordonator), intrand pe asfalt intre
 ## ~half-2,0 si ~half+0,8.
+##
+## Runda 4 -- FIX GAMEPLAY (coliziune "none" = fantoma, memoria
+## coliziune-none-e-fantoma-nu-stearsa): masinile TREC PRIN bolovani/trunchiuri
+## de metri intregi, deci amprenta lor conta ca bug de gameplay, nu doar
+## abatere vizuala. Regula coordonatorului: pe asfalt intra DOAR piese < 0,3 m
+## inaltime, pana la max 1,5 m de la margine; piesele mai inalte raman cu
+## AMPRENTA (bbox proiectat, cu rotatia si scara reale) strict in afara
+## carosabilului (>= half la fractia lor). Centerpiece si chasm_rock "mari"
+## (h=2,5 m la scara 1) NU se mai ating de asfalt -- stau la muchie. driftwood
+## (h=0,384 m, tot peste prag) primeste exceptia explicita din brief: radacina
+## pe acostament, varful la cel mult 1,5 m peste margine -- calculat din
+## semi-lungimea REALA scalata (4,03/2 * scale), nu dintr-un offset fix care
+## ignora scara.
 ## Runda 3c: un singur punct (0.734/0.766) s-a dovedit fragil -- drumul
 ## coteste chiar acolo (side vector se roteste de la (-0.65,+0.76) la
 ## (-0.40,+0.92) intre 0.719 si 0.734), deci care parte a cadrului "prinde"
@@ -328,6 +341,29 @@ func _scar_debris() -> void:
 ## > 0.765 -- limita coordonatorului).
 const PILEUP_RANGES := [[0.700, 0.734], [0.766, 0.800]]
 const PILEUP_STEP := 0.003
+
+## Raza de CORNER (semi-diagonala AABB, nu BASE_R -- BASE_R e doar jumatatea
+## laturii MARI, adica raza corecta doar cand un COLT al piesei nu ajunge sa
+## fie cea mai apropiata muchie de axa laterala). La un yaw ARBITRAR (runda 3
+## alegea `_rng.randf_range(0.0, TAU)`), un colt al AABB-ului poate iesi pe
+## axa laterala mai departe decat jumatatea laturii mari -- verificat direct
+## din mesh (tools/dbg_aabb.gd): chasm_rock are semi-laturi (2.999, 2.358),
+## deci semi-diagonala e 3.815 m, nu 3.02 (BASE_R). Un fix bazat pe BASE_R a
+## lasat 34 de piese sa treaca de limita (masurat cu probe_pileup_footprint,
+## verdictul runda 4a) -- exact colturile "norocoase" la yaw-uri intermediare.
+## guard_rock: semi-laturi (0.591, 0.351) -> semi-diagonala 0.688 (fata de
+## BASE_R 0.59).
+const CORNER_R := {
+	"chasm_rock": 3.816,
+	"guard_rock": 0.688,
+}
+
+## Marja suplimentara pentru eroarea de curbura (memoria runda-3c, de mai sus):
+## `half` calculat la indexul central al pasului nu e neaparat `half` de la
+## indexul cel mai apropiat REAL de pozitia offsetata a piesei -- pe curbele
+## din zona F diferenta masurata (probe_pileup_footprint, runda 4a) a fost
+## pana la ~0,8 m. 1,0 m acopera marja cu rezerva.
+const CURVE_MARGIN := 1.0
 
 func _scar_pileup() -> void:
 	var n := _track.baked.size()
@@ -350,18 +386,38 @@ func _scar_pileup() -> void:
 			var half := _track.width_at_index(i)
 
 			# trunchi oblic la fiecare al doilea pas -- radacina pe acostament,
-			# varful trecand ADANC peste banda (pana aproape de axa drumului,
-			# half=7,0 -> varf la ~2,3 m de axa). Coliziune none: nu blocheaza
+			# varful trecand PESTE marginea asfaltului dar NU mai mult de 1,5 m
+			# (regula coordonatorului, runda 4). Coliziune none: nu blocheaza
 			# AI-ul, doar citeste vizual ca trunchi cazut peste carosabil.
+			#
+			# Pozitia se deriva DIN yaw-ul final, nu invers: daca am fixa intai
+			# centrul pe o axa laterala aproximativa si am aplica jitter-ul de
+			# yaw dupa, varful REAL s-ar putea deplasa cu half_len*sin(jitter)
+			# -- la 4,2 m semi-lungime si 10 grade, ~0,73 m in plus, suficient
+			# sa sparga plafonul de 1,5 m. Aici calculam yaw-ul INTAI, apoi
+			# plasam originea ca varful (origin + basis.x * dw_half_len) sa
+			# cada exact la tip_lat dorit, pe axa laterala reala `s`.
 			if _rng.randf() < 0.6:
-				var root_lat := sgn * (half + 2.0)
-				var tip_lat := sgn * (half - 4.7)
-				var mid_lat := (root_lat + tip_lat) * 0.5
-				var q_mid := p + s * mid_lat
+				var dw_scale := _rng.randf_range(1.8, 2.1)
+				var dw_half_len := (4.03 * 0.5) * dw_scale # semi-lungimea REALA scalata
+				var tip_over := _rng.randf_range(0.5, 1.1) # <= 1,5 m, marja pentru rotunjiri
+				var lat_dir := s * sgn
+				var yaw := atan2(-lat_dir.z, lat_dir.x) + deg_to_rad(_rng.randf_range(-10.0, 10.0))
+				var basis_x := Vector3(cos(yaw), 0.0, -sin(yaw)) # axa locala X dupa yaw (vezi _place)
+				var tip_lat := sgn * (half - tip_over)
+				var q_tip := p + s * tip_lat
+				# basis_x e orientat spre `sgn` (paralel cu lat_dir INAINTE de
+				# jitter-ul de +/-10 grade), adica spre AFARA (acostament).
+				# Varful (spre drum) e capatul DINSPRE centru, deci varf =
+				# mijloc - basis_x*dw_half_len <=> mijloc = varf + basis_x*dw_half_len
+				# (radacina, spre acostament, e la mijloc + basis_x*dw_half_len).
+				# FOST (bug masurat cu probe_pileup_footprint runda 4a): semnul
+				# era invers (`q_mid = q_tip - basis_x*dw_half_len`), asta punea
+				# RADACINA aproape de ax si VARFUL departe pe acostament -- adica
+				# trunchiul intra cu 5+ m pe banda in loc de <=1,5 m.
+				var q_mid := q_tip + basis_x * dw_half_len
 				var gy_mid := _ground(q_mid.x, q_mid.z)
 				if gy_mid > -900.0:
-					var lat_dir := s * sgn
-					var yaw := atan2(-lat_dir.z, lat_dir.x) + deg_to_rad(_rng.randf_range(-10.0, 10.0))
 					var tilt := _rng.randf_range(4.0, 9.0)
 					# scale uniform 1,8-2,1 (nu bulk_mul anizotrop -- runda 3f/3g
 					# au incercat sa ingroase doar Y/Z si au deformat geometria
@@ -369,51 +425,69 @@ func _scar_pileup() -> void:
 					# mai mare in ansamblu tot citeste ca "trunchi masiv cazut",
 					# lungimea mai mare (~7-8 m) fiind plauzibila pentru un fag
 					# rupt de avalansa, nu doar o creanga.
-					_place("driftwood", q_mid, gy_mid, yaw, _rng.randf_range(1.8, 2.1), tilt, "none")
+					_place("driftwood", q_mid, gy_mid, yaw, dw_scale, tilt, "none")
 					idx += 1
 
-			# bolovani mari, angulari, la marginea asfaltului (half-1,0 pana
-			# half+1,8) -- "mormanul" vizibil, coliziune none (sub EDGE_KEEP).
+			# bolovani mari, angulari -- h=2,5 m la scara 1 (mult peste pragul
+			# de 0,3 m), deci NU mai ating asfaltul: amprenta (raza de COLT,
+			# CORNER_R -- semi-diagonala AABB, nu doar jumatatea laturii mari
+			# BASE_R -- vezi comentariul de la CORNER_R) ramane strict >= half,
+			# plus o marja de curbura (CURVE_MARGIN) fiindca `half` calculat
+			# aici e la indexul central `i`, dar piesa e offsetata lateral cu
+			# metri buni -- pe un viraj strans cel mai apropiat punct REAL de
+			# pe ax (masurat de sonda dupa pozitia piesei) poate fi alt index,
+			# cu alt `half`. Stau la muchie, nu pe banda.
 			for _rb in 2:
-				var lat_b := sgn * _rng.randf_range(half - 1.0, half + 1.8)
+				var cr_scale := _rng.randf_range(0.85, 1.1)
+				var cr_r := CORNER_R["chasm_rock"] * cr_scale
+				var lat_b := sgn * (half + cr_r + CURVE_MARGIN + _rng.randf_range(0.1, 1.2))
 				var qb := p + s * lat_b
 				var gyb := _ground(qb.x, qb.z)
 				if gyb <= -900.0:
 					continue
 				var yawb := _rng.randf_range(0.0, TAU)
-				_place("chasm_rock", qb, gyb, yawb, _rng.randf_range(0.85, 1.1), 0.0, "none")
+				_place("chasm_rock", qb, gyb, yawb, cr_scale, 0.0, "none")
 				idx += 1
 
 			# pietre mici angulare care intra efectiv pe asfalt -- prag < 0,3 m
-			# (memoria suprafete-cu-goluri-si-praguri), coliziune none.
+			# (memoria suprafete-cu-goluri-si-praguri), coliziune none. Scara
+			# 0,35-0,50 -> h 0,20-0,29 m (sub prag): intrarea pe banda ramane
+			# plafonata la 1,5 m fata de amprenta reala (raza de colt CORNER_R
+			# * scara, plus marja de curbura), nu fata de centrul piesei.
 			for _r in 2:
-				var lat := sgn * _rng.randf_range(half - 3.2, half + 0.3)
+				var gr_scale := _rng.randf_range(0.35, 0.50) # h masurata 0,585 -> 0,20-0,29 m
+				var gr_r := CORNER_R["guard_rock"] * gr_scale
+				var max_over := 1.5 - gr_r - CURVE_MARGIN # intrarea amprentei <= 1,5 m
+				var lat := sgn * _rng.randf_range(half - maxf(max_over, 0.0), half + 0.3)
 				var q := p + s * lat
 				var gy := _ground(q.x, q.z)
 				if gy <= -900.0:
 					continue
 				var yaw := _rng.randf_range(0.0, TAU)
-				var scl := _rng.randf_range(0.35, 0.50) # h masurata 0,585 -> 0,20-0,29 m
-				_place("guard_rock", q, gy, yaw, scl, 0.0, "none")
+				_place("guard_rock", q, gy, yaw, gr_scale, 0.0, "none")
 				idx += 1
 			f += PILEUP_STEP
 
 		# CENTERPIECE, o singura data per grup, la capatul cel mai aproape de
 		# fasie (unde captura de la 0,79/0,70 il vede aproape central): un
-		# bolovan mare care intra ADANC pe banda (pana la half-3,0, adica
-		# ~4 m de axa), nu doar pana la marginea ei -- criticul r3 cerea
-		# explicit interesctie VIZIBILA cu asfaltul, nu doar bolovani langa
-		# margine. Coliziune none (AI-ul nu vede decor static).
+		# bolovan mare, vizibil la marginea asfaltului -- runda 4, FIX
+		# GAMEPLAY: nu mai intra PE banda (h=2,5 m la scara 1,3 e mult peste
+		# pragul de 0,3 m, coliziunea "none" il facea fantoma strabatuta de
+		# masini). Amprenta (raza de COLT CORNER_R * scara, plus marja de
+		# curbura) sta chiar la muchie, in afara carosabilului -- tot centrul
+		# cadrului la frac 0,70/0,79, doar ca nu mai e strabatuta.
 		var f_edge: float = rng_f[1] if k == 1 else rng_f[0]
 		var i_edge := int(f_edge * float(n)) % n
 		var p_edge := _track.baked[i_edge]
 		var s_edge := _track._side_at(i_edge)
 		var half_edge := _track.width_at_index(i_edge)
-		var lat_edge := sgn * (half_edge - 3.0)
+		var cp_scale := 1.3
+		var cp_r := CORNER_R["chasm_rock"] * cp_scale
+		var lat_edge := sgn * (half_edge + cp_r + CURVE_MARGIN + 0.2)
 		var q_edge := p_edge + s_edge * lat_edge
 		var gy_edge := _ground(q_edge.x, q_edge.z)
 		if gy_edge > -900.0:
-			_place("chasm_rock", q_edge, gy_edge, _rng.randf_range(0.0, TAU), 1.3, 0.0, "none")
+			_place("chasm_rock", q_edge, gy_edge, _rng.randf_range(0.0, TAU), cp_scale, 0.0, "none")
 			idx += 1
 	print("; gramada peste banda (runda 3): %d piese (trunchiuri + bolovani mari + moloz mic pe asfalt)" % idx)
 

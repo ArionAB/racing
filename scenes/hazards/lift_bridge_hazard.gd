@@ -169,6 +169,12 @@ const FALL_BACKOFF: float = 70.0
 ## SENSUL: traveea urca intre turnuri (implicit) sau COBOARA sub drum
 ## (barnele scoase de sub cornisa). Cursa e aceeasi (LIFT_HEIGHT).
 @export var descend: bool = false
+## Podul NU se ridica niciodata si NU arunca — un podet fix de scanduri
+## (Chasm, Fiordland brief §2 randul D): tabliera, pilonii, rampele si
+## plasa de cadere raman identice cu podul mobil, dar ciclul e mort si
+## trambulina de la buza nu se construieste. Reuse cu parametru, ca la
+## barnele Podului Incas (`descend`) — nu e o clasa noua.
+@export var static_deck: bool = false
 
 @export_group("Structura")
 ## Turnurile cu grinda si lampile; corabiile de pe canal. Se sting pe un gol
@@ -223,7 +229,8 @@ func _ready() -> void:
 		_build_towers()
 	_build_piers()
 	_build_ramps()
-	_build_kicker()
+	if not static_deck:
+		_build_kicker()
 	_build_span()
 	if build_ships:
 		_build_ships()
@@ -349,6 +356,24 @@ func _build_ramps() -> void:
 				add_child(holder)
 				Palette.apply_world_material(model)
 		# Pana de coliziune: un prisma triunghiular peste toata latimea.
+		#
+		# NUMELE conteaza pentru tools/probe_lane_clear.gd: o pana pe care
+		# se CALCA (suprafata de rulare pana la gol) trebuie sa fie in lista
+		# DRIVABLE, altfel garda o citeste ca zid. Fara nume explicit
+		# ("Ramp", deja in lista — acelasi nume cu FlyoffKicker.gd), un
+		# StaticBody3D.new() ramane "@StaticBody3D@N" si NU se scuza —
+		# defect gasit pe Okinawa (Track08, absorbit tacut in linia de baza
+		# 18 in loc de reparat) si pe podetul Chasm (unde static_deck tine
+		# rampa permanent activa, deci orice sonda statica o prinde).
+		#
+		# Nume UNIC per capat, nu "Ramp" de doua ori. Masurat direct (Godot
+		# 4.7): daca al doilea `body.name = "Ramp"` ruleaza cand fratele cu
+		# acelasi nume exista deja, Godot NU uniformizeaza tacut in "Ramp2"
+		# atunci cand numele e atribuit INAINTE de add_child() — revine la
+		# formatul automat "@StaticBody3D@N", nenumit. Setat DUPA add_child()
+		# Godot chiar da "Ramp"/"Ramp2", dar "Ramp2" nu mai e in DRIVABLE
+		# (potrivire EXACTA, nu prefix) — deci nume explicite, ambele in
+		# probe_lane_clear.gd.
 		var body := StaticBody3D.new()
 		var shape := CollisionShape3D.new()
 		var wedge := ConvexPolygonShape3D.new()
@@ -366,6 +391,7 @@ func _build_ramps() -> void:
 		shape.shape = wedge
 		body.add_child(shape)
 		add_child(body)
+		body.name = "RampNear" if k == 0 else "RampFar"
 		body.position = lip
 
 
@@ -605,6 +631,8 @@ func _build_fall_zone() -> void:
 # ------------------------------------------------------------------- ciclul
 
 func _physics_process(delta: float) -> void:
+	if static_deck:
+		return # tabliera ramane la _span_rest, fixata o data in _ready
 	_time = fposmod(_time + delta, _ship_period())
 	_apply_cycle(fposmod(_time, period))
 	if Engine.is_editor_hint():
@@ -737,15 +765,28 @@ func _extract(scene: PackedScene, node_name: String) -> Node3D:
 
 func _emit(st: SurfaceTool, mat: StandardMaterial3D, node_name: String) -> void:
 	st.generate_normals()
+	var mesh := st.commit()
+	# BUG GASIT pe podetul Chasm: cand niciun pilon nu trece de PIER_MIN_DROP
+	# (aici, ambele capete au drop 0.24/0.30 m — malul e aproape la cota
+	# drumului langa buze, exact cum trebuie), `st.commit()` intoarce un mesh
+	# FARA SUPRAFETE. `create_trimesh_shape()` pe un mesh gol nu arunca eroare
+	# — produce un shape degenerat care se comporta ca un punct la ORIGINEA
+	# LOCALA a nodului, adica exact centrul podului, PE AXA soselei. Sonda
+	# `probe_lane_clear.gd` il gaseste ca "@StaticBody3D@N" la lat=0.000,
+	# citit ca zid in mijlocul benzii. Fara garda asta, orice pod cu toate
+	# capetele sub PIER_MIN_DROP (parauri inguste ca albia unui torent, nu
+	# doar podetul Chasm) ar fi lasat o coliziune fluture in banda.
+	if mesh.get_surface_count() == 0:
+		return
 	var inst := MeshInstance3D.new()
 	inst.name = node_name
-	inst.mesh = st.commit()
+	inst.mesh = mesh
 	inst.material_override = mat
 	add_child(inst)
 	# Structura e solida: pilonii si turnurile opresc masina, ca orice perete.
 	var body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
-	shape.shape = inst.mesh.create_trimesh_shape()
+	shape.shape = mesh.create_trimesh_shape()
 	body.add_child(shape)
 	add_child(body)
 

@@ -82,47 +82,55 @@ def _beech_trunk(b, height, r_base, seed, lean=0.16, kink=True):
 
 def _crown_tier(b, center, radius_xy, thick, seed, segments=6, lumps=3,
                 rings=2):
-    """Un etaj de coroana: CIORCHINE de bulgari APROAPE EGALI ca marime, care
-    se suprapun, nu un disc/placa unica.
+    """O MASA de coroana: ciorchine de bulgari APROAPE ROTUNZI (nu discuri
+    turtite), grupati intr-un volum compact, cu goluri de cer intre mase.
 
-    A TREIA revizuire coordonator (dupa doua incercari vizual esuate,
-    vezi `_debug_tier*.png` din sesiune): un singur bulgare MARE central +
-    satelite mici (v1/v2) tot citea ca o lentila dominanta cu niste umflaturi
-    minore la margine — de la distanta, silueta era tot un hexagon aproape
-    regulat cu o muchie tesita. Ce a schimbat efectiv citirea, verificat
-    direct pe randari izolate:
-      1. bulgarii NU mai au un lider dominant — toti au marimi APROAPE
-         EGALE (size_f 0.62-0.92, nu 1.0 vs 0.55-0.85), distribuiti pe cerc
-         (2*pi*i/lumps), nu "unul in centru, restul langa"
-      2. offset-ul pe Z e MULT mai mare (+-30% din thick, nu +-18%): asta e
-         ce rupe conturul de SUS — daca toate varfurile bulgarilor cad pe
-         acelasi plan orizontal, silueta laterala tot iese un dreptunghi
-         turtit, indiferent cate volume separate sunt dedesubt
-      3. `rings=2` (nu 3): mai putine inele, dar bulgarii NU se mai
-         suprapun in centrul comun, deci fiecare isi pastreaza propria
-         cupola vizibila — rings mare pe un singur bulgare dominant nu
-         ajuta daca geometria insasi e un disc
+    REFACUT sep 2026 (defectul "gard viu"/"lollipop"/"etaje plate", numit
+    orb pe 4 POI — vezi docs/track_briefs/fiordland_stare_poi.md). Cauza
+    gasita in geometrie, nu in asezare: fiecare "lump" avea marimea Z
+    (`lz`) derivata din `thick`, care la randul lui era o FRACTIUNE mica
+    din raza XY (`w * 0.34..0.50`) — deci fiecare bulgare era, prin
+    constructie, o placa lata si subtire. Cate placi ai fi pus una langa
+    alta, tot placi ramaneau: de-aia treceau toate variantele de asezare
+    (jitter, offset Z, cerc) fara sa schimbe verdictul criticilor.
+
+    Fix: bulgarii sunt acum aproape SFERICI (squash 0.82-1.05, ca la
+    `_crown_mass` din quenualul Machu Picchu — acelasi princiu: o coroana
+    de fag nu e o umbrela turtita, e o masa adunata). `thick` ramane
+    parametrul de INTRARE (controleaza cat de mare e masa pe verticala),
+    dar raza fiecarui bulgare se calculeaza din marimea lui, nu din
+    `thick` impartit iar. Bulgarii se suprapun partial (distanta dintre
+    centre < suma razelor) ca sa nu ramana goluri interne, dar fiecare isi
+    pastreaza cupola vizibila prin offset in TOATE cele 3 axe, nu doar pe
+    cerc in plan.
 
     Fetele de sus TROPICAL_GREEN (lumina), cele de jos LOG_DARK (umbra sub
-    etaj) — brief-ul cere explicit asta, nu doar un slot uniform.
+    masa) — brief-ul cere explicit asta, nu doar un slot uniform.
     """
     rand = _lcg(seed)
     rx, ry = radius_xy
+    r_lump = max(rx, ry) * 0.62     # raza tipica a UNUI bulgare, din marimea masei
     all_faces = set()
     for i in range(lumps):
-        a = 2.0 * math.pi * i / lumps + rand() * 0.7
-        r = 0.0 if lumps == 1 else max(rx, ry) * (0.36 + rand() * 0.16)
-        lx, ly = math.cos(a) * r, math.sin(a) * r
-        size_f = 0.62 + rand() * 0.30       # toti bulgarii, marime APROAPE EGALA
-        lz_off = thick * (rand() - 0.5) * 0.60   # offset Z GENEROS — rupe conturul de sus
-        lw = rx * size_f * (0.85 + rand() * 0.3)
-        lh = ry * size_f * (0.85 + rand() * 0.3)
-        lz = thick * (0.45 + rand() * 0.25) * size_f
+        a = 2.0 * math.pi * i / lumps + rand() * 0.8
+        # centrele stau APROAPE de mijloc (nu la marginea razei) — cu bulgari
+        # aproape sferici de raza r_lump, o distributie prea larga ar lasa
+        # goluri intre ei; aproape de centru + raze mari => suprapunere reala
+        dist_r = r_lump * (0.30 + rand() * 0.22)
+        lx, ly = math.cos(a) * dist_r, math.sin(a) * dist_r
+        size_f = 0.68 + rand() * 0.34       # marimi APROAPE EGALE intre bulgari
+        size = r_lump * size_f
+        # offset pe TOATE axele, nu doar Z: rupe silueta si din lateral, nu
+        # doar de sus (o distributie doar-pe-cerc-in-plan tot da un disc
+        # vazut din masina, chiar daca bulgarii individuali sunt rotunzi)
+        lz_off = thick * (rand() - 0.5) * 0.7
+        squash = 0.82 + rand() * 0.23       # APROAPE 1.0 — rotund, nu turtit
         faces = b.boulder(
             (center[0] + lx, center[1] + ly, center[2] + lz_off),
-            (lw * 2.0, lh * 2.0, lz * 2.0), CROWN,
+            (size * 2.0, size * (0.90 + rand() * 0.2) * 2.0,
+             size * squash * 2.0), CROWN,
             seed=seed + i * 13, segments=segments, rings=rings,
-            deviation=0.26)
+            deviation=0.24)
         all_faces |= set(faces)
     b.retag(all_faces, TRUNK, where="down")
     b.retag(all_faces, CROWN, where="up")

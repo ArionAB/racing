@@ -118,6 +118,36 @@ extends Node
 ##                             aceeasi faza): 0.05-0.07 = urca, 0.07-0.17 =
 ##                             SUS pe banda, 0.17-0.21 = se scufunda, restul
 ##                             = sub albie, invizibili.
+##   --vitrina=<stem>           instantiaza piesa de kit <stem>.glb (cautata in
+##                             _VITRINA_MODEL_PATHS din acest fisier) prin
+##                             ACEEASI cale prin care DecorManual pune nodurile
+##                             din Track16.tscn (WorldProp deasupra instantei
+##                             GLB, ca sa primeasca clasa de textura si
+##                             coliziunea din world_prop.gd), asezata pe teren
+##                             la fractia din --frac, la --vitrina-side metri
+##                             lateral pe DREAPTA fata de axa, cu yaw-ul din
+##                             --vitrina-yaw fata de directia drumului. Camera
+##                             e cea de joc (--gamecam implicit), cu masina
+##                             jucatorului in cadru ca scara de referinta
+##                             (4,0 x 1,8 x 1,5 m). Iese in
+##                             snapshots/vitrina_<stem>.png. Pentru piese cu mai
+##                             multe noduri numite (fiordland_horizon,
+##                             tree_avalanche) instantiaza fisierul intreg —
+##                             nodurile ies asezate unele langa altele, exact
+##                             cum sta GLB-ul.
+##   --vitrina-side=10          distanta laterala (m), implicit 10; mareste
+##                             pentru piesele mari (stirling_ledge,
+##                             fiordland_horizon, lodge, coach_fiordland,
+##                             cruise_boat, torrent_chute).
+##   --vitrina-yaw=0            rotatie (grade) fata de directia drumului.
+##   --vitrina-anim=Open        forteaza AnimationPlayer-ul gasit in piesa pe
+##                             clipul dat si il seeks la ULTIMUL cadru (poza
+##                             deschisa/intinsa) inainte de captura. Piesa
+##                             asezata prin --vitrina e statica (WorldProp),
+##                             nu un PathMover, deci fara asta un model cu
+##                             AnimationPlayer (kea: Idle/Open) ramane in bind
+##                             pose. Sufixul intra in numele fisierului:
+##                             vitrina_kea_open.png.
 ##   --cross-at=8.0            obstacolele care TRAVERSEAZA (SlidingHazard
 ##                             Motion.TRAVERSARE: elefantii din Serengeti,
 ##                             cireada) la N SECUNDE absolute in ciclul lor
@@ -150,6 +180,54 @@ const MEASURE_HEIGHT: float = 3.2
 const MEASURE_FOV: float = 68.0
 const MEASURE_LOOK_AHEAD: float = 14.0
 const MEASURE_LOOK_HEIGHT: float = 1.2
+
+## Tabelul de rezolvare stem -> cale .glb pentru --vitrina. Contine cele 31 de
+## piese native Fiordland (assets/models/fiordland/, pe subfoldere) plus cele
+## 8 reuse-uri inregistrate in Track16.tscn (fern_cluster, nerpa_seal,
+## tree_fern, moss_boulder_a/b/c, chevron_sign, wooden_pier) — vezi
+## docs/asset_briefs/fiordland_inventory.md.
+const _VITRINA_MODEL_PATHS := {
+	"kea": "res://assets/models/fiordland/animals/kea.glb",
+	"penguin_tawaki": "res://assets/models/fiordland/animals/penguin_tawaki.glb",
+	"cafe_shed": "res://assets/models/fiordland/buildings/cafe_shed.glb",
+	"lodge": "res://assets/models/fiordland/buildings/lodge.glb",
+	"tree_avalanche": "res://assets/models/fiordland/effects/tree_avalanche.glb",
+	"beech_a": "res://assets/models/fiordland/plants/beech_a.glb",
+	"beech_b": "res://assets/models/fiordland/plants/beech_b.glb",
+	"beech_c": "res://assets/models/fiordland/plants/beech_c.glb",
+	"beech_dead": "res://assets/models/fiordland/plants/beech_dead.glb",
+	"rata_tree": "res://assets/models/fiordland/plants/rata_tree.glb",
+	"tussock_clump": "res://assets/models/fiordland/plants/tussock_clump.glb",
+	"driftwood": "res://assets/models/fiordland/props/driftwood.glb",
+	"kayak_a": "res://assets/models/fiordland/props/kayak_a.glb",
+	"kayak_b": "res://assets/models/fiordland/props/kayak_b.glb",
+	"luggage_container": "res://assets/models/fiordland/props/luggage_container.glb",
+	"road_sign_blank": "res://assets/models/fiordland/props/road_sign_blank.glb",
+	"snow_pole": "res://assets/models/fiordland/props/snow_pole.glb",
+	"stump": "res://assets/models/fiordland/props/stump.glb",
+	"traffic_light_pole": "res://assets/models/fiordland/props/traffic_light_pole.glb",
+	"chasm_rock": "res://assets/models/fiordland/rocks/chasm_rock.glb",
+	"fiordland_horizon": "res://assets/models/fiordland/rocks/fiordland_horizon.glb",
+	"guard_rock": "res://assets/models/fiordland/rocks/guard_rock.glb",
+	"scree_slab": "res://assets/models/fiordland/rocks/scree_slab.glb",
+	"stirling_ledge": "res://assets/models/fiordland/rocks/stirling_ledge.glb",
+	"torrent_chute": "res://assets/models/fiordland/rocks/torrent_chute.glb",
+	"chasm_bridge_rail": "res://assets/models/fiordland/structures/chasm_bridge_rail.glb",
+	"heli_pad": "res://assets/models/fiordland/structures/heli_pad.glb",
+	"wharf": "res://assets/models/fiordland/structures/wharf.glb",
+	"bush_plane": "res://assets/models/fiordland/vehicles/bush_plane.glb",
+	"coach_fiordland": "res://assets/models/fiordland/vehicles/coach_fiordland.glb",
+	"cruise_boat": "res://assets/models/fiordland/vehicles/cruise_boat.glb",
+	# --- reuse, inregistrate in Track16.tscn ---
+	"fern_cluster": "res://assets/models/plants/fern_cluster.glb",
+	"nerpa_seal": "res://assets/models/baikal/props/nerpa_seal.glb",
+	"tree_fern": "res://assets/models/machupicchu/plants/tree_fern.glb",
+	"moss_boulder_a": "res://assets/models/machupicchu/rocks/moss_boulder_a.glb",
+	"moss_boulder_b": "res://assets/models/machupicchu/rocks/moss_boulder_b.glb",
+	"moss_boulder_c": "res://assets/models/machupicchu/rocks/moss_boulder_c.glb",
+	"chevron_sign": "res://assets/models/signs/chevron_sign.glb",
+	"wooden_pier": "res://assets/models/structures/wooden_pier.glb",
+}
 
 func _vec3(text: String) -> Vector3:
 	var p := text.split(",")
@@ -194,6 +272,7 @@ func _ready() -> void:
 	var typhoon_at := -1.0
 	var wave_at := -1.0
 	var rock_at := -1.0
+	var avalanche_at := -1.0
 	var door_at := -1.0
 	var herd_at := -1.0
 	var hippo_at := -1.0
@@ -216,7 +295,36 @@ func _ready() -> void:
 	# ruleaza aici (Snapshot nu porneste o cursa), deci nu exista alt mod de-a
 	# vedea overlay-ul decat sa-l declansezi manual.
 	var wipers_demo := -1
+	# --vitrina=<stem>: instantiaza piesa de kit <stem>.glb (cautata in
+	# _VITRINA_MODEL_PATHS) prin ACEEASI cale prin care DecorManual pune
+	# nodurile din Track16.tscn — un Node3D cu WorldProp deasupra unei
+	# instante de PackedScene, ca sa primeasca clasa de textura si coliziunea
+	# din world_prop.gd — asezata pe teren, lateral fata de axa. Camera de joc
+	# (--gamecam implicit) prinde si masina jucatorului in cadru, ca sa aiba
+	# piesa o scara de referinta (4,0 x 1,8 x 1,5 m).
+	var vitrina_stem := ""
+	var vitrina_side := 10.0
+	var vitrina_yaw := 0.0
+	# --vitrina-anim=<clip>: forteaza un AnimationPlayer gasit in piesa pe
+	# clipul dat si il seeks la ULTIMUL cadru (poza intinsa/deschisa) inainte
+	# de captura. Piesa asezata prin --vitrina e statica (WorldProp), nu un
+	# PathMover — fara asta, un model cu AnimationPlayer (kea: Idle/Open)
+	# ramane in bind pose brut, care nu e starea din joc (vezi inventarul:
+	# bind pose = aripi intinse, contrar intentiei).
+	var vitrina_anim := ""
 	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--vitrina="):
+			vitrina_stem = arg.trim_prefix("--vitrina=")
+			continue
+		if arg.begins_with("--vitrina-side="):
+			vitrina_side = float(arg.trim_prefix("--vitrina-side="))
+			continue
+		if arg.begins_with("--vitrina-yaw="):
+			vitrina_yaw = float(arg.trim_prefix("--vitrina-yaw="))
+			continue
+		if arg.begins_with("--vitrina-anim="):
+			vitrina_anim = arg.trim_prefix("--vitrina-anim=")
+			continue
 		if arg == "--car":
 			show_car = true
 			continue
@@ -250,6 +358,8 @@ func _ready() -> void:
 			wave_at = float(arg.trim_prefix("--wave-at="))
 		elif arg.begins_with("--rock-at="):
 			rock_at = float(arg.trim_prefix("--rock-at="))
+		elif arg.begins_with("--avalanche-at="):
+			avalanche_at = float(arg.trim_prefix("--avalanche-at="))
 		elif arg.begins_with("--door-at="):
 			door_at = float(arg.trim_prefix("--door-at="))
 		elif arg.begins_with("--herd-at="):
@@ -309,6 +419,14 @@ func _ready() -> void:
 			# cu terenul stins se afla instant daca o geometrie lipseste sau
 			# doar e acoperita.
 			hide_terrain = true
+	if vitrina_stem != "":
+		# --vitrina implica vederea de joc (masina in cadru ca scara) si o
+		# masina prezenta, exact ca --gamecam --car; poate fi suprascris
+		# explicit (--driver fara --gamecam) daca cineva vrea poza inghetata.
+		driver_view = true
+		if not ("--driver" in OS.get_cmdline_user_args()):
+			game_cam = true
+		show_car = true
 	if driver_view and zoom_frac < 0.0:
 		zoom_frac = 0.0
 	# `--track=` accepta si pozitia din lista (Stromboli = 4), si numarul
@@ -380,6 +498,8 @@ func _ready() -> void:
 			if child is EruptionCycle:
 				(child as EruptionCycle).hazard_group = &""
 		await _set_rock_time(track, rock_at)
+	if avalanche_at >= 0.0:
+		await _set_avalanche_time(track, avalanche_at)
 	# Faza de ploaie (Fiordland). `RainCycle._collect` e amanat cu
 	# `call_deferred`, deci `force_factor()` chemat in acelasi cadru ar ateriza
 	# pe un nod fara pista (acelasi bug platit de ProbeRace `--rain=`): doua
@@ -569,6 +689,9 @@ func _ready() -> void:
 			car.road_index = idx
 			car.on_start_grid = true
 			_seat_car_on_rope_bridge(track, car)
+			if vitrina_stem != "":
+				_place_vitrina(track, focus, dir, vitrina_stem, vitrina_side,
+					vitrina_yaw, vitrina_anim)
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
@@ -611,11 +734,14 @@ func _ready() -> void:
 		var dimg := get_viewport().get_texture().get_image()
 		var ddir := ProjectSettings.globalize_path("res://snapshots")
 		DirAccess.make_dir_recursive_absolute(ddir)
-		var dout := "%s/%s_%s%s%s.png" % [ddir,
-			GameState.TRACK_NAMES[track_index].to_lower(),
-			"joc" if game_cam else "sofer",
-			"" if route_idx == 0 else "_ruta%d" % route_idx,
-			"_overdraw" if overdraw else ""]
+		var vitrina_suffix := "_%s" % vitrina_anim.to_lower() if vitrina_anim != "" else ""
+		var dout := "%s/vitrina_%s%s.png" % [ddir, vitrina_stem, vitrina_suffix] \
+			if vitrina_stem != "" \
+			else "%s/%s_%s%s%s.png" % [ddir,
+				GameState.TRACK_NAMES[track_index].to_lower(),
+				"joc" if game_cam else "sofer",
+				"" if route_idx == 0 else "_ruta%d" % route_idx,
+				"_overdraw" if overdraw else ""]
 		dimg.save_png(dout)
 		print("SNAPSHOT: ", dout)
 		if cine:
@@ -755,7 +881,39 @@ func _set_train_phase(root: Node, at: float) -> void:
 		train.set("_time", train.period * clampf(at, 0.0, 0.999))
 		train._physics_process(0.0)
 		found += 1
-	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+	# POI H (Fiordland): avionul si vaporasul sunt PathMover generic, nu
+	# TrainHazard — acelasi tipar de ceas, extins la orice PathMover din
+	# scena (bucla: fractia*lungime; dus-intors: la fel, pe sensul curent).
+	for node in root.find_children("*", "PathMover", true, false):
+		var mover := node as PathMover
+		if mover == null or mover.curve == null:
+			continue
+		var length := mover.curve.get_baked_length()
+		if length < 0.5:
+			continue
+		mover.set("_started", true)
+		mover.set("_dist", length * clampf(at, 0.0, 0.999))
+		# `_body` e AnimatableBody3D cu `sync_to_physics = true`: scrierea lui
+		# `global_transform` din `_physics_process` (path_mover.gd) trece prin
+		# starea de fizica si nu se reflecta imediat in `global_position` cand
+		# e apelata manual, in afara unui tick real de fizica (verificat: doua
+		# apeluri succesive la `_physics_process(0.0)` tot au aratat corpul la
+		# originea curbei, desi `_dist`/`sample_baked` erau deja corecte).
+		# `TrainHazard` scapa de asta fiindca scrie `.position` local pe un
+		# Node3D simplu, nu `global_transform` pe un corp sincronizat cu
+		# fizica. Fix local: opreste sincronizarea CAT TIMP se scrie transful,
+		# ca scrierea sa fie directa pe Node3D (CPU), apoi o repune — corpul
+		# ramane sincronizat normal in cursa reala, doar captura foloseste
+		# ocolul.
+		var body: Node3D = mover.call("body")
+		if body != null and body.has_method("set"):
+			body.set("sync_to_physics", false)
+			mover._physics_process(0.0)
+			body.set("sync_to_physics", true)
+		else:
+			mover._physics_process(0.0)
+		found += 1
+	print("--train-at=%.2f: %d treceri (tren/PathMover) mutate in ciclu" % [at, found])
 
 
 ## Muta cosurile care urca la o fractie din ciclul lor (toate la aceeasi faza,
@@ -906,6 +1064,16 @@ func _set_cloud_time(root: Node, at: float) -> void:
 ## tren; `_has_prev` se stinge ca primul tick sa nu citeasca teleportarea ca
 ## pe o miscare (si sa roteasca botul dupa ea).
 func _set_bus_time(root: Node, at: float) -> void:
+	# `BusHazard` la Fiordland nu e declarat in .tscn: `TunnelSignalHazard`
+	# il construieste in `_build_bus.call_deferred()` din `_ready()` (brief
+	# §2E: lampa+autobuzul se construiesc, geometria tunelului ramane cod).
+	# Un `find_children` chemat prea devreme (un singur physics_frame, ca la
+	# `--cloud-at`) nu il gaseste inca — call_deferred ruleaza la finalul
+	# frame-ului IDLE curent, nu neaparat inaintea urmatorului tick de
+	# fizica. Un process_frame in plus lasa coada de deferred sa se goleasca
+	# inainte de cautare (masurat: fara el, "--bus-at: NICIUN autobuz pe
+	# pista asta" pe Track16, desi SemaforTunel avea deja bus_model setat).
+	await get_tree().process_frame
 	await get_tree().physics_frame
 	var found := 0
 	for node in root.find_children("*", "BusHazard", true, false):
@@ -919,6 +1087,17 @@ func _set_bus_time(root: Node, at: float) -> void:
 		bus.set("_has_prev", false)
 		var pos: Vector3 = bus.to_global(bus.curve.sample_baked(d, true))
 		bus.set("_yaw", bus.call("_travel_yaw", length, pos))
+		# `--bus-at` cere autobuzul VIZIBIL la pozitia data, indiferent de
+		# ciclul lui ascuns/vizibil (TunnelSignalHazard/SemaforTunel il
+		# porneste ASCUNS pana la inceputul tranzitului — vezi
+		# `_force_hidden_until_transit` in tunnel_signal_hazard.gd). Fara
+		# `_show()` explicit, `_set_dist`/`_set_yaw` de mai sus repozitioneaza
+		# corpul, dar `_body.visible` ramane fals si captura iese cu autobuzul
+		# invizibil desi coordonatele sunt corecte (masurat pe Fiordland POI E,
+		# --bus-at=12 pe Track16: pozitia raportata era in gura tunelului, dar
+		# nimic randat acolo).
+		if bus.call("is_hidden"):
+			bus.call("_show")
 		found += 1
 		for _i in 3:
 			await get_tree().physics_frame
@@ -964,6 +1143,79 @@ func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
 		print("--car pe %s: u=%.2f, x=%.2f, coborata cu %.2f m pe tablier" % [bridge.name, dc.z, dc.x, dc.y - 0.45])
 		bridge.set_physics_process(false)
 		return
+
+
+## --vitrina: instantiaza piesa de kit <stem>.glb pe ACEEASI cale prin care
+## DecorManual pune nodurile din Track16.tscn — un Node3D cu WorldProp
+## (world_prop.gd) deasupra unei instante de PackedScene, ca sa primeasca
+## clasa de textura si coliziunea din world_prop.gd, nu decor "gol" fara
+## materialul de joc.
+##
+## Pozitia: `focus` (punctul de pe axa la fractia ceruta) + `side` metri pe
+## DREAPTA (dir.cross(Vector3.UP), aceeasi conventie ca Track._side_at),
+## asezata pe teren cu Track._terrain_mesh_y (aceeasi interpolare pe care o
+## foloseste generatorul, nu un raycast fizic separat), rotita cu `yaw_deg`
+## fata de directia drumului (`dir`).
+func _place_vitrina(track: Track, focus: Vector3, dir: Vector3, stem: String,
+		side: float, yaw_deg: float, anim_name: String = "") -> void:
+	if not _VITRINA_MODEL_PATHS.has(stem):
+		push_error("--vitrina=%s: stem necunoscut. Vezi _VITRINA_MODEL_PATHS in tools/snapshot.gd."
+			% stem)
+		return
+	var path: String = _VITRINA_MODEL_PATHS[stem]
+	if not ResourceLoader.exists(path):
+		push_error("--vitrina=%s: fisierul nu exista: %s" % [stem, path])
+		return
+	var packed := load(path) as PackedScene
+	if packed == null:
+		push_error("--vitrina=%s: nu s-a putut incarca %s" % [stem, path])
+		return
+	# Container WorldProp, EXACT ca ZoneX din DecorManual (Track16.tscn):
+	# scriptul aplica textura de clasa si coliziunea in _ready, pe baza
+	# numelui fisierului .glb al copilului — deci copilul (instanta GLB)
+	# TREBUIE sa existe sub holder INAINTE ca holder sa intre in arbore.
+	# `_ready` ruleaza la `add_child`, nu amanat: cu ordinea inversa (holder
+	# adaugat, apoi copilul), `_collect_models` gaseste zero modele si piesa
+	# iese fara clasa de textura si fara coliziune — exact bug-ul gasit prin
+	# masurare (prima varianta a acestei functii): copacul aparea alb, plat,
+	# fara material.
+	var holder := Node3D.new()
+	holder.name = "Vitrina_%s" % stem
+	var inst := packed.instantiate() as Node3D
+	inst.name = stem
+	holder.add_child(inst)
+	var right := dir.cross(Vector3.UP).normalized()
+	var pos := focus + right * side
+	pos.y = track._terrain_mesh_y(pos.x, pos.z)
+	var basis := Basis.looking_at(dir, Vector3.UP).rotated(Vector3.UP,
+		deg_to_rad(yaw_deg))
+	holder.transform = Transform3D(basis, pos)
+	holder.set_script(load("res://scenes/props/world_prop.gd"))
+	add_child(holder)
+	print("--vitrina=%s: %s la (%.2f, %.2f, %.2f), side=%.1f yaw=%.1f"
+		% [stem, path, pos.x, pos.y, pos.z, side, yaw_deg])
+	if anim_name != "":
+		var players := inst.find_children("*", "AnimationPlayer", true, false)
+		if players.is_empty():
+			print("--vitrina-anim=%s: %s n-are AnimationPlayer" % [anim_name, stem])
+			return
+		var ap := players[0] as AnimationPlayer
+		if not ap.has_animation(anim_name):
+			print("--vitrina-anim=%s: %s nu are clipul (are: %s)"
+				% [anim_name, stem, ", ".join(ap.get_animation_list())])
+			return
+		var anim := ap.get_animation(anim_name)
+		# Seek la ULTIMUL cadru (poza deschisa/intinsa), nu la primul (bind
+		# pose brut sau prima cheie, care pentru kea Idle e pozitia STRANSA —
+		# vezi inventarul, exact ce vrem cand cerem Idle. Open cere ultimul
+		# cadru pentru anvergura maxima, contract 1.0 m). `advance` cu
+		# lungimea intreaga a clipului muta la ultimul cadru fara sa redea
+		# bucla.
+		ap.play(anim_name)
+		ap.advance(anim.length)
+		ap.seek(anim.length, true)
+		print("--vitrina-anim=%s: %s la cadrul final (t=%.3f)"
+			% [anim_name, stem, anim.length])
 
 
 func _set_hippo_phase(root: Node, at: float) -> void:
@@ -1014,6 +1266,65 @@ func _set_rock_time(root: Node, seconds: float) -> void:
 			% [seconds, bp.x, bp.y, bp.z,
 			rock.get("_cross_time"), rock.get("_route_travel")])
 	print("--rock-at=%.2f: %d bolovani mutati" % [seconds, found])
+
+
+## Aduce avalansa (`AvalancheHazard`) la `seconds` de la INCEPUTUL ciclului
+## (telegraf inclus), simuland cadrele — pe tiparul `_set_rock_time`.
+##
+## Nu se poate sari direct la faza `sweep`: gramada e NOUA corpuri
+## `AnimatableBody3D` cu `sync_to_physics=true`, pozitionate din `_place_shards`
+## in fiecare `_physics_process`, deci starea vizuala exista doar dupa ce
+## simularea a rulat pasii ei, nu prin scrierea unui singur camp.
+##
+## `AvalansaF` e copil al nodului `Hazarduri`, nu al radacinii pistei (spre
+## deosebire de `RockfallHazard`, gasit cu `root.get_children()`) — de aceea
+## cautarea e recursiva, ca la `_set_hippo_phase`/`TrainHazard`.
+func _set_avalanche_time(root: Node, seconds: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	var step := 1.0 / 60.0
+	for node in root.find_children("*", "AvalancheHazard", true, false):
+		var ava := node as AvalancheHazard
+		if ava == null:
+			continue
+		ava.set("_time", 0.0)
+		ava.set("_last_phase", -1)
+		var t := 0.0
+		while t < seconds:
+			ava._physics_process(step)
+			t += step
+		# INGHETATA dupa simulare, ca la bolovan: fizica normala care mai ruleaza
+		# pana la captura ar re-avansa ciclul si poza n-ar mai arata momentul cerut.
+		ava.set_physics_process(false)
+		found += 1
+		var mass := ava.get("_mass") as Node3D
+		var mp := mass.global_position if mass != null else ava.global_position
+		var phase := "telegraf"
+		if seconds >= AvalancheHazard.TELEGRAPH + AvalancheHazard.SWEEP:
+			phase = "retragere"
+		elif seconds >= AvalancheHazard.TELEGRAPH:
+			phase = "traversare"
+		# Cate bucati au trecut de axa drumului (X local < 0, coborand spre vale
+		# pe +X local -> -X): contractul POI F cere sa se verifice in log ca
+		# toate cele 9 bucati ajung la rau, nu doar ca masa containerului a plecat.
+		#
+		# NU se citeste `body.global_position`: bucatile sunt AnimatableBody3D cu
+		# `sync_to_physics=true`, iar `_place_shards` scrie `.position` in
+		# spatiul pe care serverul de fizica il aplica abia la urmatorul pas
+		# REAL de fizica (nota din cod) — apelurile directe la `_physics_process`
+		# de aici nu avanseaza acel server, deci pozitia citita ar fi veche.
+		# Se recalculeaza cu ACEEASI formula ca `_place_shards`: centru + offset
+		# (offset-ul nu se roteste, gramada isi pastreaza forma).
+		var mass_local: Vector3 = mass.position if mass != null else Vector3.ZERO
+		var shards: Array = ava.get("_shards")
+		var past_road := 0
+		for sh in shards:
+			var off: Vector3 = sh.get("offset")
+			if mass_local.x + off.x < 0.0:
+				past_road += 1
+		print("--avalanche-at=%.2f: %s, masa la (%.1f, %.1f, %.1f), faza %s, %d/%d bucati au trecut de axa drumului"
+			% [seconds, ava.name, mp.x, mp.y, mp.z, phase, past_road, shards.size()])
+	print("--avalanche-at=%.2f: %d avalanse mutate" % [seconds, found])
 
 
 ## Muta tromba intr-un moment ales din traversarea ei.

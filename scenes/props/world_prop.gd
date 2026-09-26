@@ -249,6 +249,49 @@ const PROP_COLLISION := {
 	# diagonala treptei de jos, nu un trunchi, iar hull-ul unei scari e o PANA,
 	# nu un capac plan. Daca o captura arata masina urcata pe capac in loc sa
 	# atinga treptele, se trece pe "mesh" (tiparul `kopje_kicker`).
+	# --- Fiordland (kitul din assets/models/fiordland/, brief fiordland_kit.md,
+	# masurat in docs/asset_briefs/fiordland_masuratori.md) --------------------
+	#
+	# Fagii: Trunk/Crown separate, acelasi tipar ca la copacii de mai sus.
+	# Rapoartele masurate raza-baza/semi-latime: beech_a 0,318, beech_b 0,242,
+	# beech_c 0,216 — coroana depaseste masiv baza, hull-ul ar fi un bloc solid
+	# de 5-9,5 m in care masina s-ar opri in aer, pe langa trunchi.
+	"beech_a": "trunk", "beech_b": "trunk", "beech_c": "trunk",
+	# beech_dead e UN SINGUR nod (nu Trunk+Crown separate) — coliziunea cade tot
+	# pe "trunk" (raport 0,415, siluetа relativ subtire, un trunchi uscat cu
+	# cateva crengi), cea mai apropiata aproximare rezonabila fara sa desparta
+	# geometria in doua noduri.
+	"beech_dead": "trunk",
+	# rata_tree: tufa DENSA (brief-ul cere explicit "nu acacie"), raport 0,930 —
+	# aproape de disc, nu de trunchi ingust. Ramane hull implicit.
+	#
+	# Fantome sub linia capotei sau contracte explicite de gameplay:
+	"penguin_tawaki": "none",  # brief 1.7 / inventar: pinguinul e figurant
+	"heli_pad": "none",  # disc jos de 0,3 m, se calca — un hull ar opri masina
+	"torrent_chute": "none",  # deasupra benzii (buza +14 iese peste drum)
+	"chasm_bridge_rail": "none",  # balustrada subtire pe marginea podului
+	"scree_slab": "none",  # placa joasa de grohotis pe panta (1,2 m), se calca
+	"snow_pole": "none",  # jalon subtire, pur decorativ
+	"kayak_a": "none", "kayak_b": "none",  # pe mal/apa, nu obstacol de coliziune
+	# Fundalul: 4 noduri (FarWall_A/B, SnowRidge_A/B), panze de 90-180 m — un
+	# hull ar fi un corp fizic cat o pista, acelasi tipar ca `gorge_far_wall`/
+	# `huayna_picchu` la Machu Picchu.
+	"fiordland_horizon": "none",
+	# stirling_ledge: nisa dintre Wall si fata interioara a Overhang e un gol
+	# real (Shelf, pragul uscat de 3 m, la y 0,38-0,40 intre Wall si Overhang la
+	# y 14,00-21,40) — hull-ul convex al intregului nod ar UMPLE concavitatea
+	# de sub surplomb si ar astupa pragul pe care se conduce prin spatele
+	# perdelei. Acelasi tipar ca `inca_bridge_ledge` la Machu Picchu.
+	"stirling_ledge": "mesh",
+	# Restul (implicit hull, corect): cafe_shed, lodge, chasm_rock, guard_rock,
+	# wharf, coach_fiordland, cruise_boat, traffic_light_pole,
+	# luggage_container, driftwood, stump, road_sign_blank, tussock_clump,
+	# tree_avalanche (bolovanii de avalansa au propriul colizor construit de
+	# AvalancheHazard, dar daca vreodata ajunge in DecorManual ca decor static,
+	# hull pe fiecare Boulder_* e corect — sunt bolovani compacti).
+	# bush_plane: "none" — PathMover zboara, stick_to_ground=false, un hull ar
+	# fi un perete invizibil in aer pe traiectoria de zbor.
+	"bush_plane": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -674,6 +717,52 @@ const CLASSES_BY_MODEL := {
 	"stromboli_church": {
 		"Church_Body": Palette.TRI_PREFIX + "village_plaster",
 	},
+
+	# Fiordland (POI A/H, docs/asset_briefs/fiordland_vitrina.md "Punct
+	# deschis"): `House_Roof` (`cafe_shed`) si `House_Roof_001` (`lodge`,
+	# acelasi prefix — `_class_for`/bucla de mai jos fac `begins_with`, nu
+	# egalitate exacta) COINCID cu `House_Roof` din `village_house.glb`
+	# (landmark 6, Okinawa/Dunele), care intra in `prop_classes()` GLOBAL
+	# cu clasa `roof_tiles` (memoria `nume-noduri-nu-sunt-unice`).
+	# Verificat direct pe scena incarcata (nu presupus): `House_Roof`
+	# primea `albedo_texture = res://assets/textures/classes/roof_tiles.png`
+	# in loc de atlasul comun — media acelei texturi e (154,113,82), adica
+	# exact tanul #BB8967 raportat in vitrina, nu o chestiune de slot sau
+	# de lumina. Testat si respins pe captura: remap de slot (11 -> 8) NU
+	# schimba nimic (acoperisul nu citeste deloc slotul din atlas cat timp
+	# are alta textura), si `--rain=1` nu schimba nici el nuanta (nu e
+	# reflexie speculara). `House_Wall`/`House_Wall_001` NU colideaza —
+	# maparea globala n-are nicio cheie `House_Wall*` — si au iesit deja
+	# corect pe `palette_atlas.png` la verificare, deci raman neatinse.
+	# `ATLAS_PREFIX` forteaza inapoi materialul lumii doar pe acoperis,
+	# fara sa atinga maparea globala (care ramane corecta pentru
+	# `village_house`).
+	"cafe_shed": {"House_Roof": Palette.ATLAS_PREFIX},
+	"lodge": {"House_Roof_001": Palette.ATLAS_PREFIX},
+	# Fiordland (POI A, runda 3 a criticului orb): `Boat` (cruise_boat.glb)
+	# n-avea NICIO intrare aici, deci cadea pe fallback-ul implicit al lui
+	# `apply_class_materials` — `world_material()`, materialul lumii cu
+	# stratul triplanar de detaliu gandit pentru roca/lemn de teren
+	# (style_bible §4). Pe carena ALBA (vopsea plata, nu piatra) acel strat
+	# citea exact ce a numit criticul: "model de fibra de lemn/scoarta".
+	# Verificat pe scena incarcata (tools/sv_boat_slots.gd), nu presupus:
+	# materialul de pe `Boat` era `PaletteAtlas`-ul brut din GLB — nicio
+	# coliziune de nume cu alt kit (nu e cazul `nume-noduri-nu-sunt-unice`).
+	# `PLAIN_PREFIX` pastreaza acelasi atlas si acelasi AO din vertex color,
+	# doar opreste `detail_enabled` — zero materiale noi la garda.
+	"cruise_boat": {"Boat": Palette.PLAIN_PREFIX},
+	# Fiordland (POI H, runda 6 a criticului orb): `luggage_container`
+	# (containerul de bagaje de langa lodge) avea mesh-ul `Container` fara
+	# NICIO intrare aici — nu se potriveste cu stem-ul "container" (alt kit,
+	# Chongqing, `props_junk.glb`), deci cadea pe fallback-ul implicit al
+	# lui `apply_class_materials`: `world_material()`, atlasul intins pe
+	# UV-ul brut al cutiei. Exact mecanismul documentat mai sus la
+	# `cruise_boat` (aceeasi capcana, alt model): pe o cutie simpla stratul
+	# triplanar de detaliu iese curcubeu, nu vopsea plata. Verificat pe
+	# .glb (mesh unic "Container", niciun nod `Container` in alt kit
+	# fiordland). `PLAIN_PREFIX` pastreaza atlasul si AO-ul din vertex
+	# color, opreste doar `detail_enabled` — zero materiale noi la garda.
+	"luggage_container": {"Container": Palette.PLAIN_PREFIX},
 	# Firidele din peretele stancii goale (Cappadocia, POI G): fundul lor ARDE.
 	#
 	# Fara asta o fereastra sapata e o pata neagra, si verdictul rundei 2 spune
@@ -1263,6 +1352,64 @@ const CLASSES_BY_MODEL := {
 	"elephant": {
 		"Elephant_Mesh_Accente": Palette.TRI_PREFIX + "elephant_hide",
 	},
+
+	# --- Fiordland: GNEISUL UD (Track16) ----------------------------------
+	#
+	# Clasa noua a pistei (brief §4/§5.6): dungile de scurgere verticale pe
+	# peretii de gneis se citesc exact la distanta la care trece masina pe
+	# langa ei (3-5 m). Pe atlasul plat peretele Stirling e o pata gri fara
+	# scara — WaterfallHazard face apa, dar STANCA din spatele ei ramane
+	# decor pur, si aici e singurul loc unde primeste material.
+	#
+	# COSTA UN SINGUR MATERIAL pentru toate nodurile de mai jos (cache pe
+	# clasa, ca la inca_stone).
+	#
+	# Aplicata DOAR pe nodurile cu mus/vegetatie sub pragul la care o
+	# ruptura ar merita un nod in plus (memoria clase-pe-piese-de-kit,
+	# tiparul inca_bridge_ledge la 2.5%):
+	#   stirling_ledge.Wall     4.8% TROPICAL_GREEN (musch pe coronament) — sub prag, ramane intreg pe wet_gneiss
+	#   torrent_chute.Rock     11.7% TROPICAL_GREEN — idem, sub pragul de ~20% de la Machu Picchu
+	# NU se aplica pe stirling_ledge.Overhang (27.0% TROPICAL_GREEN — peste
+	# pragul de 22.8% al inca_house_b, unde intervalele de y se suprapun cu
+	# stanca si o ruptura ar taia gresit) si NU pe .Shelf (20.0%, prag uscat
+	# ingust, judecat de-a lungul lui, nu de sus — ramane pe atlas).
+	# NU se aplica pe fiordland_horizon (FarWall_*/SnowRidge_*): acolo
+	# TROPICAL_GREEN/LOG_DARK/MARBLE_GREY/FOAM_WHITE sunt BENZI DE ALTITUDINE
+	# pictate intentionat (paduri/gheata/zapada pe treimi de inaltime, vezi
+	# fiordland_masuratori.md) — o clasa triplanara ar sterge exact
+	# stratificarea pe care tema o cere explicit (`horizon_class: ""`).
+	"stirling_ledge": {
+		"Wall": Palette.TRI_PREFIX + "wet_gneiss",
+	},
+	"torrent_chute": {
+		"Rock": Palette.TRI_PREFIX + "wet_gneiss",
+	},
+}
+
+## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),
+## nu global — la fel cum [constant SLOT_REMAP_BY_THEME] exista langa
+## [constant SLOT_REMAP_BY_MODEL].
+##
+## De ce nu direct in `CLASSES_BY_MODEL`: `chasm_rock.glb` e piesa fiordland a
+## marmitelor (Track16 POI D), dar numele e generic si ramane reuse posibil pe
+## alte piste (ca `moss_boulder_*` dinspre Machu Picchu, in sens invers) — o
+## intrare globala i-ar schimba culoarea oriunde ar fi plasat, nu doar aici.
+##
+## Verdict critic runda 5 POI B (Fiordland): peretele de gneis din dreapta
+## cornisei citea placa gri uniforma, fara dungile ude verticale si fara
+## muschiul din crapaturi — semnatura de material ceruta de brief §4/§5.6.
+## `chasm_rock` folosit ca bolovan de perete langa drum (nu doar in albia
+## raului la POI D) e exact suprafata care trebuie sa citeasca gneisul ud, nu
+## un gri neutru plat (`SLOT_REMAP_BY_THEME` ii da azi doar VOLCANIC_BLACK pe
+## slotul 29 — culoare corecta ca ton, dar plata, fara dala). `wet_gneiss` e
+## deja clasa corecta (stirling_ledge.Wall, torrent_chute.Rock, acelasi verdict
+## de brief) si costa ZERO materiale noi: e cache pe clasa, nu pe model.
+const CLASSES_BY_THEME := {
+	"fiordland": {
+		"chasm_rock": {
+			"Rock_001": Palette.TRI_PREFIX + "wet_gneiss",
+		},
+	},
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -1441,7 +1588,72 @@ const SLOT_REMAP_BY_GROUP := {
 	},
 }
 
+## Ca [constant SLOT_REMAP_BY_GROUP], dar scopeaza pe TEMA pistei
+## (`Track.theme_decor`, citit prin `_ancestor_theme`), nu pe numele grupului
+## de decor manual.
+##
+## De ce nu GROUP: `moss_boulder_a/b/c.glb` e reuse din Machu Picchu (brief
+## fiordland_kit.md), iar pe Fiordland zonele POI sunt inca goale — nu exista
+## niciun nume de grup de care sa agatam o reparatie. Tema exista din prima zi
+## a pistei (`custom_theme = "fiordland"` in Track16.tscn), deci e cheia care
+## nu asteapta dupa niciun POI. Scop pe TEMA, nu pe MODEL (SLOT_REMAP_BY_MODEL
+## ar fi global): Machu Picchu (tema "machupicchu") foloseste acelasi
+## `moss_boulder_*.glb` prin `_model_flock` cu `tri_class="inca_stone"`
+## (tools/gen_decor_mp_f.gd), care ignora complet sloturile de atlas — dar
+## piesele plasate individual (WorldProp, ex. `--vitrina`) tot citesc atlasul,
+## si o remapare globala pe model le-ar fi schimbat si pe Track15.
+const SLOT_REMAP_BY_THEME := {
+	"fiordland": {
+		# `moss_boulder_a/b/c`: masurat pe .glb (probe ad-hoc), un SINGUR
+		# material/mesh cu trei sloturi — corpul pe 3 ROCK_LIGHT (bej-tan
+		# 206,141,74), inelul de baza pe 29 MARBLE_GREY (gri deschis
+		# 182,178,170) si capacul de "muschi" pe 12 CACTUS_GREEN (oliv
+		# 88,120,50). Pe Fiordland, sub soarele rece al temei, asta randa
+		# DAMIER galben-verde / corp ALB cu capac verde crud / corp portocaliu
+		# (vezi capturile POI B/C/D) — bolovanul citea a piatra calda de
+		# Anzi, nu a gneis Fiordland.
+		#
+		# Bara (bara_poi_B/C/D.png) cere stanca INCHISA invelita in muschi
+		# VERDE INCHIS, aceeasi materie ca peretele `stirling_ledge`/terenul
+		# pe pantă (`scarp_tint`, randat ~(62,63,63), aproape achromatic). Nu
+		# exista slot de atlas la (62,63,63) exact, dar 20 VOLCANIC_BLACK
+		# (86,84,91, H257 L0.34 S0.04) e cel mai apropiat gri-neutru inchis
+		# deja in atlas — ZERO sloturi noi. Corpul SI inelul de baza trec pe
+		# 20, ca sa fie aceeasi piatra (fara sa desparta bolovanul in doua
+		# materii la baza). Capacul trece pe 21 TROPICAL_GREEN (66,127,62,
+		# H116) — mai inchis si mai saturat decat 12, verde de muschi de
+		# padure temperata, nu oliv de tufa uscata.
+		"moss_boulder_a": {3: Palette.VOLCANIC_BLACK, 29: Palette.VOLCANIC_BLACK,
+			12: Palette.TROPICAL_GREEN},
+		"moss_boulder_b": {3: Palette.VOLCANIC_BLACK, 29: Palette.VOLCANIC_BLACK,
+			12: Palette.TROPICAL_GREEN},
+		"moss_boulder_c": {3: Palette.VOLCANIC_BLACK, 29: Palette.VOLCANIC_BLACK,
+			12: Palette.TROPICAL_GREEN},
+		# `chasm_rock` NU mai e aici din runda 5 POI B: fixul de runda 4
+		# (VOLCANIC_BLACK pe slotul 29) dadea gneisul ca ton corect dar plat —
+		# criticul a cerut semnatura de material (dungi ude + muschi in
+		# crapaturi), nu doar culoarea, deci piesa a trecut pe clasa
+		# triplanara `wet_gneiss` (`CLASSES_BY_THEME`, mai jos in fisier).
+		# `material_override` inlocuieste tot ce era pe atlas, inclusiv
+		# remaparea asta de slot — pastrarea ei aici ar fi o a doua sursa
+		# de adevar moarta, niciodata citita.
+	},
+}
+
 const SLOT_REMAP_BY_MODEL := {
+	# `wharf.glb` (Fiordland POI A): toata fata de SUS a peretelui de piatra
+	# (17 triunghiuri, y in [1.98, 2.12] — masurat direct pe mesh, acopera
+	# intreaga lungime de 20 m si latime de 4,2 m, deci CHIAR platforma de
+	# mers, nu un accent mic) e pe slotul 21 TROPICAL_GREEN, nu 29 MARBLE_GREY
+	# ca restul peretelui. Contractul (`fiordland_kit.md`): "Blocuri
+	# MARBLE_GREY, babale VOLCANIC_BLACK" — DOI sloturi, fara verde. Pe
+	# captura, platforma iese verde-crud (culoarea ierbii), nu piatra gri a
+	# babalelor de langa ea — se citeste ca un acoperis de casa, nu ca zid de
+	# chei (bara: piatra uniforma). Kitul are 400/400 triunghiuri (buget
+	# epuizat), deci nu se rescrie GLB-ul aici — remap de slot, ca la
+	# acaciile-umbrela.
+	"wharf": {21: Palette.MARBLE_GREY},
+
 	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
 	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea
 	# (190,188,96), identica cu campia) si pe 21 (TROPICAL_GREEN, verde de
@@ -1662,7 +1874,25 @@ const SLOT_REPAINT_BY_BOX := {
 
 
 func _ready() -> void:
-	_remap_model_slots()
+	# `_remap_model_slots` cere `_ancestor_theme()`, iar Godot cheama _ready()
+	# BOTTOM-UP: DecorManual (acest nod) e copil direct al Track/TrackFromPath,
+	# deci ruleaza INAINTEA lui Track._ready() -> TrackFromPath._apply_custom()
+	# -> apply_theme(custom_theme). La acel moment theme_decor e inca implicitul
+	# "forest", nu tema reala a pistei (ex. "fiordland") — SLOT_REMAP_BY_THEME
+	# nu se aplica NICIODATA la runtime, desi codul e corect si testele izolate
+	# (instantiere manuala + await process_frame) confirma tema corecta o clipa
+	# mai tarziu. Descoperit runda 4 POI B Fiordland: moss_boulder_a/b/c si
+	# chasm_rock ies MARBLE_GREY (gri deschis) in captura reala din joc, desi
+	# fixurile anterioare (a4491e4d, 0f83d9aa) pareau sa treaca gardile — gardile
+	# nu verifica CULOAREA randata, doar numarul de materiale. `call_deferred`
+	# muta remaparea dupa ce tot lantul de _ready() (inclusiv al parintelui) s-a
+	# terminat, cand `theme_decor` e deja cel real. Restul functiilor de mai jos
+	# NU depind de tema, raman sincrone. `_apply_theme_classes` (runda 5 POI B:
+	# `CLASSES_BY_THEME`, `chasm_rock` -> `wet_gneiss` doar pe fiordland) are
+	# aceeasi dependenta de `_ancestor_theme()` si aceeasi problema, deci merge
+	# deferred langa `_remap_model_slots`.
+	call_deferred("_remap_model_slots")
+	call_deferred("_apply_theme_classes")
 	_repaint_slot_boxes()
 	_split_shutters()
 	_retint_tuff()
@@ -1705,12 +1935,15 @@ func _apply_no_shadow() -> void:
 func _remap_model_slots() -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
+	var _theme_cache := _ancestor_theme()
 	for model in models:
 		var stem := model.scene_file_path.get_file().get_basename()
 		var group := _group_of(model)
 		var remap: Dictionary
 		if SLOT_REMAP_BY_GROUP.has(group) and (SLOT_REMAP_BY_GROUP[group] as Dictionary).has(stem):
 			remap = SLOT_REMAP_BY_GROUP[group][stem]
+		elif SLOT_REMAP_BY_THEME.has(_theme_cache) and (SLOT_REMAP_BY_THEME[_theme_cache] as Dictionary).has(stem):
+			remap = SLOT_REMAP_BY_THEME[_theme_cache][stem]
 		elif SLOT_REMAP_BY_MODEL.has(stem):
 			remap = SLOT_REMAP_BY_MODEL[stem]
 		else:
@@ -1818,6 +2051,44 @@ func _group_of(node: Node) -> String:
 	while n != null and n.get_parent() != self:
 		n = n.get_parent()
 	return String(n.name) if n != null and n != self else ""
+
+
+## Cheia de tema a pistei-stramos (`Track.theme_decor`, ex. "fiordland",
+## "machupicchu"), urcand in ierarhie ca la `FlockProp._find_sampler`.
+##
+## De ce exista: `SLOT_REMAP_BY_GROUP` scopeaza pe numele grupului de decor
+## manual (copilul direct din .tscn), dar acela apartine constructorilor de
+## POI-uri si pe Fiordland zonele sunt inca goale la ora asta. O reparatie pe
+## PISTA (nu pe model, ca sa nu atinga Machu Picchu, care refoloseste acelasi
+## `moss_boulder_*.glb`) are nevoie de o cheie care exista INAINTE ca vreun
+## POI sa fie construit: tema pistei. "" daca WorldProp nu e sub un Track (ex.
+## piesa de vitrina printr-un holder in afara pistei — desi `--vitrina` chiar
+## adauga holderul ca frate cu Track, deci si acolo se gaseste).
+func _ancestor_theme() -> String:
+	var cur: Node = get_parent()
+	while cur != null:
+		if cur is Track:
+			return String((cur as Track).theme_decor)
+		cur = cur.get_parent()
+	# FALLBACK: in decorul real (.tscn), WorldProp e mereu descendentul unui
+	# Track, deci bucla de mai sus il gaseste din primul pas si linia de mai
+	# jos nu se atinge niciodata. Exceptia e harnasul de test: `--vitrina`
+	# (tools/snapshot.gd, `_place_vitrina`) adauga holderul CA FRATE al pistei
+	# (amandoi copii ai radacinii scriptului de captura), nu ca descendent —
+	# deci urcarea in ierarhie de mai sus nu ajunge niciodata la Track, si o
+	# reparatie scopeaza-pe-tema testata prin --vitrina ar parea moarta desi
+	# codul de productie merge. Cauta deci un Track oriunde in arbore, ca sa
+	# nu depinda de cum isi construieste harnasul scena.
+	if is_inside_tree():
+		var root := get_tree().root
+		var stack: Array[Node] = [root]
+		while not stack.is_empty():
+			var n: Node = stack.pop_back()
+			if n is Track:
+				return String((n as Track).theme_decor)
+			for c in n.get_children():
+				stack.append(c)
+	return ""
 
 
 ## Copia unui mesh cu UV-urile mutate pe alte sloturi de atlas.
@@ -1964,17 +2235,34 @@ func _split_shutters() -> void:
 ## Aplica `CLASSES_BY_MODEL` peste materialele deja puse. Ruleaza DUPA
 ## `apply_class_materials`, ca sa aiba ultimul cuvant pe partile ambigue.
 func _apply_model_classes() -> void:
+	_apply_classes_mapping(CLASSES_BY_MODEL)
+
+
+## Ca [method _apply_model_classes], dar din [constant CLASSES_BY_THEME],
+## scopat pe tema pistei-stramos. `call_deferred` din `_ready()`, la fel ca
+## `_remap_model_slots` si pentru acelasi motiv: `_ancestor_theme()` e citit
+## BOTTOM-UP, inainte ca `Track._ready()` sa fi aplicat `custom_theme` — sincron
+## aici, `chasm_rock` n-ar primi niciodata `wet_gneiss` pe fiordland (tema ar
+## fi inca implicitul "forest", pentru care `CLASSES_BY_THEME` n-are intrare).
+func _apply_theme_classes() -> void:
+	var theme := _ancestor_theme()
+	if not CLASSES_BY_THEME.has(theme):
+		return
+	_apply_classes_mapping(CLASSES_BY_THEME[theme])
+
+
+## Motorul comun: aplica o mapare stem -> (nume-de-parte -> clasa) pe modelele
+## din subtree. NU `apply_class_materials`: ala pune materialul lumii pe tot ce
+## nu e in mapare, deci ar sterge clasele deja aplicate pe celelalte parti
+## (`Church_Tower` tocmai primise varul). Aici se ating DOAR partile numite.
+func _apply_classes_mapping(by_stem: Dictionary) -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
 	for model in models:
 		var stem := model.scene_file_path.get_file().get_basename()
-		if not CLASSES_BY_MODEL.has(stem):
+		if not by_stem.has(stem):
 			continue
-		# NU `apply_class_materials`: ala pune materialul lumii pe tot ce nu e
-		# in mapare, deci ar sterge clasele deja aplicate pe celelalte parti
-		# (`Church_Tower` tocmai primise varul). Aici se ating DOAR partile
-		# numite.
-		var mapping: Dictionary = CLASSES_BY_MODEL[stem]
+		var mapping: Dictionary = by_stem[stem]
 		var stack: Array[Node] = [model]
 		while not stack.is_empty():
 			var node: Node = stack.pop_back()
@@ -1990,12 +2278,18 @@ func _apply_model_classes() -> void:
 			# fi depins de ordinea cheilor — o mapare corecta ar fi devenit
 			# gresita la o reordonare inocenta.
 			var cls := ""
+			var matched := false
 			var best := -1
 			for part: String in mapping:
 				if nm.begins_with(part) and part.length() > best:
 					best = part.length()
 					cls = String(mapping[part])
-			if cls.is_empty():
+					matched = true
+			# `cls` poate fi gol prin constructie DOAR daca nimic nu s-a
+			# potrivit — un prefix care se potriveste dar are valoarea
+			# `ATLAS_PREFIX` nu e gol, deci trece mai departe si forteaza
+			# materialul lumii (vezi nota de la `ATLAS_PREFIX`).
+			if not matched:
 				continue
 			# Nodurile de accente exista tocmai ca sa RAMANA pe atlas, deci o
 			# clasa de suprafata nu are ce cauta pe ele PRIN LACOMIA UNUI
@@ -2025,6 +2319,10 @@ func _apply_model_classes() -> void:
 ## inexistenta. Prefixele sunt aceleasi ca in `apply_class_materials`, ca o
 ## mapare sa insemne acelasi lucru indiferent pe unde intra.
 func _model_class_material(cls: String) -> Material:
+	if cls == Palette.ATLAS_PREFIX:
+		return Palette.world_material()
+	if cls == Palette.PLAIN_PREFIX:
+		return Palette.plain_material()
 	if cls.begins_with(Palette.GLOW_PREFIX):
 		return Palette._glow_from_spec(cls.trim_prefix(Palette.GLOW_PREFIX))
 	if cls.begins_with(Palette.FINISH_PREFIX):
@@ -2832,6 +3130,7 @@ static func prop_classes() -> Dictionary:
 	out.merge(TrackDecor.STROMBOLI_CLASSES)
 	out.merge(TrackDecor.CHONGQING_CLASSES)
 	out.merge(TrackDecor.CAPPADOCIA_CLASSES)
+	out.merge(TrackDecor.FIORDLAND_AIRSTRIP_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

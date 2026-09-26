@@ -124,6 +124,12 @@ var cam_fov_scale: float = 1.0
 ## Cat de repede se aseaza camera in spatele masinii. Sub 1.0 = mai lenesa.
 var cam_follow_scale: float = 1.0
 
+## Contorul de performanta din HUD (FPS, desene, triunghiuri, timp GPU).
+## E prima unealta pe care o pornesti pe telefon: fara ea, "merge prost" nu
+## are cifra, iar cifra e singura care spune DACA sunt umbrele, ceata sau
+## particulele. Persistat ca sa nu-l repornesti la fiecare build.
+var show_perf: bool = false
+
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
 var touch_steer: float = 0.0
 var touch_drift: bool = false
@@ -235,6 +241,7 @@ func load_settings() -> void:
 		float(cfg.get_value("camera", "fov_scale", 1.0)), 0.7, 1.3)
 	cam_follow_scale = clampf(
 		float(cfg.get_value("camera", "follow_scale", 1.0)), 0.4, 2.5)
+	show_perf = bool(cfg.get_value("debug", "show_perf", false))
 
 func save_settings() -> void:
 	var cfg := ConfigFile.new()
@@ -246,6 +253,7 @@ func save_settings() -> void:
 	cfg.set_value("camera", "height_scale", cam_height_scale)
 	cfg.set_value("camera", "fov_scale", cam_fov_scale)
 	cfg.set_value("camera", "follow_scale", cam_follow_scale)
+	cfg.set_value("debug", "show_perf", show_perf)
 	cfg.save(SETTINGS_PATH)
 
 

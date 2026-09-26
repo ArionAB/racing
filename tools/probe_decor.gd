@@ -494,6 +494,47 @@ const VARIANT_SOURCE := {
 	# ce ramane (nodul `Water` al fantanii) cade pe a doua cheie.
 	"basin": "fountain_basin", "water_channel": "water_channel",
 	"water": "fountain_basin",
+	# --- Fiordland (assets/models/fiordland/) ---
+	#
+	# Vehiculele si structurile compuse: nodurile lor de mesh au nume proprii
+	# scurte, nu stem-ul fisierului.
+	"coach": "coach_fiordland", "boat": "cruise_boat", "plane": "bush_plane",
+	"container": "luggage_container", "trafficpole": "traffic_light_pole",
+	# Fagii: Trunk/Crown NU poarta numele fisierului si nu pot fi separati
+	# a/b/c dupa numele nodului (Godot doar sufixeaza _001/_002 la a doua/a
+	# treia instantiere IN ACEEASI SCENA — aici sunt fisiere diferite, deci
+	# sufixul vine din ordinea de export, nu dintr-o cheie stabila). Linia pe
+	# surse spune "fag", nu "care fag" — la fel ca inca_house la MP.
+	"trunk": "beech", "crown": "beech",
+	# beech_dead e un singur nod, deja pe stem — nu are nevoie de intrare aici.
+	# Avalansa: Boulder_A..D sunt contract inghetat pentru AvalancheHazard
+	# (nume EXACTE), deci nu pot purta stem-ul in GLB. Daca piesele ajung si ca
+	# decor static in DecorManual, tot ca "tree_avalanche" se raporteaza.
+	"boulder_a": "tree_avalanche", "boulder_b": "tree_avalanche",
+	"boulder_c": "tree_avalanche", "boulder_d": "tree_avalanche",
+	# Stancile-hero, cu noduri numite generic (Wall/Shelf/Overhang, Rail_L/R):
+	# fara astea ar cadea pe "procedural (track.gd)".
+	"wall": "stirling_ledge", "shelf": "stirling_ledge", "overhang": "stirling_ledge",
+	"rail_l": "chasm_bridge_rail", "rail_r": "chasm_bridge_rail",
+	# torrent_chute si chasm_rock/guard_rock/scree_slab au nodul "Rock"/
+	# "Rock_00N" — "rock" simplu ar fi ambiguu intre ele (4 fisiere diferite
+	# folosesc "Rock" ca radacina de nume), deci fiecare varianta cu sufixul ei
+	# exact, ca la llama/train. "Rock" fara sufix (torrent_chute) e ultimul,
+	# ca sa nu inghita "Rock_001/2/3" prin begins_with inainte sa ajunga la ele.
+	"rock_001": "chasm_rock", "rock_002": "guard_rock", "rock_003": "scree_slab",
+	"rock": "torrent_chute",
+	# Fundalul: 4 noduri numite FarWall_A/B, SnowRidge_A/B — contract inghetat
+	# pentru Track._build_horizon (acelasi tipar ca la Machu Picchu, unde
+	# gorge_far_wall/huayna_picchu au noduri pe propriul lor nume).
+	"farwall_a": "fiordland_horizon", "farwall_b": "fiordland_horizon",
+	"snowridge_a": "fiordland_horizon", "snowridge_b": "fiordland_horizon",
+	# Casele satului: House_Wall/House_Roof (cafe_shed) vs House_Wall_001/
+	# House_Roof_001 (lodge) — Godot pune sufixul _001 la a doua incarcare a
+	# aceluiasi nume de nod IN ACELASI FISIER .tscn (ambele GLB-uri exporta
+	# "House_Wall"/"House_Roof", iar a doua instanta primeste sufixul la
+	# import), acelasi mecanism ca house_stone/_001 la Machu Picchu.
+	"house_wall_001": "lodge", "house_roof_001": "lodge",
+	"house_wall": "cafe_shed", "house_roof": "cafe_shed",
 }
 
 
@@ -539,7 +580,15 @@ func _source_of(mi: Node, track: Node) -> String:
 		"inti_punku", "intihuatana", "main_gate", "rope_rail", "sun_temple",
 		"three_windows", "trail_marker", "water_channel", "consettur_bus",
 		"guardhouse", "inca_house", "fountain_basin", "perurail_train",
-		"llama"]
+		"llama",
+		# Kitul Fiordland (assets/models/fiordland/). Piesele ale caror
+		# noduri de mesh NU incep cu stem-ul fisierului (fagii, avalansa,
+		# stancile-hero, fundalul, casele, vehiculele) sunt in VARIANT_SOURCE
+		# de mai sus. Astea de aici au deja nodul de mesh pe stem sau pe un
+		# prefix apropiat.
+		"kea", "penguin", "beech_dead", "rata", "tussock_clump",
+		"driftwood", "kayak_a", "kayak_b", "roadsign", "snow_pole",
+		"stump", "heli_pad", "wharf"]
 	# Intai numele PROPRIU al mesh-ului: variantele sunt cheia stabila.
 	var own := String(mi.name).to_lower()
 	for prefix: String in VARIANT_SOURCE:

@@ -88,6 +88,11 @@ func _build() -> void:
 			GameState.cam_follow_scale = v
 			_push_camera())
 
+	_add_choice(box, "Grafica", GameState.GFX_TIER_NAMES, GameState.gfx_tier,
+		func(i: int) -> void:
+			GameState.gfx_tier = i
+			GameState.apply_gfx_tier()
+			GameState.save_settings())
 	_add_toggle(box, "Contor de performanta", GameState.show_perf,
 		func(on: bool) -> void:
 			GameState.show_perf = on
@@ -148,6 +153,27 @@ func _add_slider(parent: VBoxContainer, label_text: String,
 	slider.value_changed.connect(func(v: float) -> void:
 		value_label.text = "%d%%" % roundi(v * 100.0)
 		on_change.call(v))
+
+
+## Alegere dintr-o lista scurta (OptionButton), pe acelasi rand cu eticheta.
+func _add_choice(parent: VBoxContainer, label_text: String,
+		names: Array[String], selected: int, on_change: Callable) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	parent.add_child(row)
+	var name_label := Label.new()
+	name_label.text = label_text
+	name_label.add_theme_font_size_override("font_size", 22)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(name_label)
+	var choice := OptionButton.new()
+	for n in names:
+		choice.add_item(n)
+	choice.selected = clampi(selected, 0, names.size() - 1)
+	choice.custom_minimum_size = Vector2(160, 44)
+	choice.add_theme_font_size_override("font_size", 20)
+	row.add_child(choice)
+	choice.item_selected.connect(func(i: int) -> void: on_change.call(i))
 
 
 ## Comutator mare (tinta de touch), pe acelasi rand cu eticheta lui.

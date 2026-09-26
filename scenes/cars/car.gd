@@ -1332,6 +1332,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	is_drifting = false
 	is_boosting = false
 	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
+	_douse_left = 0.0 # repus = uscat, nu mai picura
 	_yaw_kick_left = 0.0 # si nici in vartej
 	_yaw_kick = 0.0
 	burn_time = 0.0 # repusa pe sosea, nu mai arde
@@ -1402,7 +1403,8 @@ func _update_water(delta: float) -> void:
 	if _douse_left > 0.0:
 		_douse_left = maxf(_douse_left - delta, 0.0)
 	var doused := _douse_left > 0.0
-	var live := (in_water and horizontal_speed() > WATER_SPRAY_MIN_SPEED) or doused
+	var wading := in_water and horizontal_speed() > WATER_SPRAY_MIN_SPEED
+	var live := wading or doused
 	_water_spray.emitting = live
 	if live:
 		# Stropii pleaca CU masina, nu raman pe loc: la 27 m/s, un strop
@@ -1439,7 +1441,9 @@ func _update_water(delta: float) -> void:
 	#   2. frana apei: apa pana la butuc ia din viteza (mult sub valul de pe
 	#      dig, 1.4/s, care e o pedeapsa; aici e o senzatie);
 	#   3. un tremur de camera cat timp esti in apa cu viteza, ca la val.
-	_update_wake(level, live)
+	# Dara e pe OGLINDA apei: doar cand chiar esti in apa. Udat de cascada pe
+	# asfalt, `level` e -INF si dara ar primi cota -inf (NaN in randare).
+	_update_wake(level, wading)
 	if in_water and is_on_floor():
 		var keep := 1.0 - clampf(WATER_DRAG_PER_SEC * delta, 0.0, 0.5)
 		linear_velocity.x *= keep

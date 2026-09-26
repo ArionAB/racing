@@ -292,10 +292,41 @@ Cornișa (0 → 30 pe ~340 m ≈ **8,8%**), coborârea în Chasm (32 → 15 pe 3
 >   (CC-BY-4.0), ambele pe paleta pistei; credite în `assets/CREDITS.md`.
 >   **Vaporașul care traversează fiordul (§3) NU există** — doar cele două
 >   ancorate.
+> - **B:** peretele de gneis din dreapta există acum ca RELIEF, nu doar ca decor
+>   pus pe un câmp plat (decizia 4 din `fiordland_stare_poi.md`, 26 sep):
+>   nod `Faleze/PereteCornisa` (`CliffFace`, `cut_wall = true`), frac
+>   **0,052–0,271**, `side = -1.0` (aceeași latură ca `custom_ravines[0]`, deci
+>   peretele se ridică pe INTERIORUL virajului, opus golfului). **Reutilizat,
+>   nu inventat**: `CliffFace.cut_wall` e mecanismul deja validat pe Track13
+>   (Cappadocia POI C) și Track15 (Machu Picchu, `TaieturaDrumIncasA/B/C`) —
+>   taietura din interiorul virajului, cu strate, fațetare pe blocuri și taluz
+>   la picior. Terenul de pe partea muntelui era complet plat pe toată
+>   cornișa (măsurat: `ground_y` la +4..+22 m lateral abia diferă de cota
+>   drumului, sub 0,3 m), deci `cut_min_rise_m = 30` declară înălțimea
+>   direct (peretele nu e săpat într-un munte existent, ca la Cappadocia — e
+>   propria lui masă, ca taietura dintre buclele Serengeti). Paleta: sloturi
+>   29 `MARBLE_GREY` (dominant, fețele în lumină) + 20 `VOLCANIC_BLACK`
+>   (dungile ude, minoritar) — prima încercare avea raportul invers și peretele
+>   ieșea aproape negru în captură, corectat vizual (`cut_shade` 0,86→1,0).
+>   Se oprește la 0,271, înainte de geometria GLB `stirling_ledge` (Wall/
+>   Overhang/Shelf, deja montată la fundație, control 0,273–0,345): **nișa de
+>   la Stirling nu e relief nou** — cascada cade deja dintr-un surplomb construit
+>   ca hero-asset, iar plafonul terenului acolo e plat pe ambele părți (verificat
+>   în `tools/gen_decor_fiord_c.gd`), deci mecanismul de falie n-avea ce sapa.
+>   Verificat: hash pe grilă de `ground_y` identic la bit pe Track09/11/13/14/16
+>   înainte/după (peretele e geometrie așezată, nu atinge câmpul de teren);
+>   `probe_manual --track=16` raportează tot un singur obiect (`sealRock1`,
+>   preexistent); `probe_decor --track=16` neschimbat la 29 materiale;
+>   ProbeRace 8 seed-uri uscat, 0 incidente noi pe 0,05–0,30. Capturi
+>   `--gamecam` la 0,08/0,14/0,19: peretele umple partea dreaptă a cadrului,
+>   marea jos-stânga — înainte era doar bolovani izolați pe câmp plat.
 > - **C:** Stirling lovește la intrare: împingere laterală spre mare (`push_speed`
 >   9, fără parapet), smucitură de yaw (1,4 rad/s × 0,35 s), shake 0,55, mașina
 >   picură 3 s, parbrizul ud. Pragul uscat din spatele perdelei: tot geometrie
->   de făcut.
+>   de făcut. Nișa/surplombul din perete sunt deja construite ca GLB
+>   (`stirling_ledge`, `Wall`/`Overhang`/`Shelf`), nu ca relief procedural —
+>   `PereteCornisa` (de mai sus) se oprește la 0,271 tocmai ca să nu se suprapună
+>   cu ele.
 > - **D:** **podețul e real**: `Hazarduri/PodetChasm` (`TrackChannel`,
 >   `jump = false`, `static_deck`) la frac **0,4007**, gol **19 m** (nu 40: pe
 >   raza de ~45 m de la 0,412 un pod drept de 37 m arunca AI-ul de pe tablier),

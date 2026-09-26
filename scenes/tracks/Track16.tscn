@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://caek2oeiv5cwp"]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
+[ext_resource type="Script" uid="uid://c4avlqtdcpl6o" path="res://scenes/tracks/cliff_face.gd" id="cliffface"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://bee6c2pavxw1a" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="3_signal"]
 [ext_resource type="Script" uid="uid://bus431n67bchl" path="res://scenes/hazards/rain_cycle.gd" id="4_rain"]
@@ -164,6 +165,38 @@ rut_depth = 0.05
 grass_center = 0.7
 edge_noise = 1.0
 bumpiness = 0.05
+
+[node name="Faleze" type="Node3D" parent="."]
+
+[node name="PereteCornisa" type="Marker3D" parent="Faleze"]
+script = ExtResource("cliffface")
+frac_start = 0.052
+frac_end = 0.271
+side = -1.0
+far_wall = false
+cut_wall = true
+cut_offset_m = 8.2
+cut_edge_offset_m = 0.2
+cut_height_m = 34.0
+cut_min_rise_m = 30.0
+cut_batter_m = 1.6
+cut_step_m = 4.0
+cut_bands = 8
+cut_slots = Array[int]([29, 29, 20, 29, 29, 20, 29])
+cut_shade = 1.0
+cut_taper_frac = 0.05
+cut_tuck_m = 6.0
+cut_facet_m = 1.4
+cut_facet_cols = 3
+cut_facet_crown_bands = 0.6
+cut_facet_seed = 41
+cut_tread_m = 0.18
+cut_step_out_m = 0.22
+cut_foot_bite_m = 1.6
+talus_m = 3.0
+talus_rise_ratio = 0.62
+talus_rows = 2
+talus_slot = 20
 
 [node name="Peaks" type="Node3D" parent="." unique_id=1264933716]
 

@@ -939,6 +939,14 @@ func _carve_channel(y: float, wx: float, wz: float, road_dist: float = INF,
 			if over > 0.0:
 				target = lerpf(target, road_y - FORD_BED_SINK, over)
 		y = _smin(y, target, SMOOTH_RAVINE_K)
+		# Opt-in per canal (`TrackChannel.respect_branch`, Fiordland PodetChasm):
+		# in coridorul unei benzi secundare canalul nu coboara terenul sub cota
+		# benzii — aceeasi garda ca in _carve_ravines. Opt-in fiindca, aplicata
+		# tuturor canalelor, schimba terenul Alpilor si Stromboli (masurat).
+		if bool(ch.get("respect_branch", false)):
+			var bf := _branch_floor_at(wx, wz)
+			if bf.x > -INF and bf.y < 1.0:
+				y = lerpf(maxf(y, bf.x), y, bf.y)
 	return y
 
 
@@ -992,6 +1000,33 @@ func mean_road_y() -> float:
 ## _build_environment) intreaba de fapt "cat de jos poate cobori terenul sub
 ## sosea", iar o laguna sapata sub media soselei e exact asta. Fara ea, podeaua
 ## ar putea taia prin fundul lagunei.
+## Plafonul inferior impus de banda secundara cea mai apropiata:
+## (cota benzii - BRANCH_DROP, cat ramane liber 0..1). (-INF, 1) = nicio banda
+## in raza. Aceeasi masura ca garda din _carve_ravines.
+func _branch_floor_at(wx: float, wz: float) -> Vector2:
+	if _carve.is_empty():
+		return Vector2(-INF, 1.0)
+	var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
+	var near_sq := INF
+	var level := 0.0
+	var k := 0
+	var m := _carve.size()
+	while k < m:
+		var q := _carve[k]
+		var dx := q.x - wx
+		var dz := q.z - wz
+		var d_sq := dx * dx + dz * dz
+		if d_sq < near_sq:
+			near_sq = d_sq
+			level = q.y
+		k += GROUND_STRIDE
+	if near_sq > reach * reach:
+		return Vector2(-INF, 1.0)
+	var t := smoothstep(0.0, 1.0,
+		clampf((sqrt(near_sq) - BRANCH_FLAT_RADIUS) / BRANCH_BLEND_LEN, 0.0, 1.0))
+	return Vector2(level - BRANCH_DROP, t)
+
+
 func max_ravine_depth() -> float:
 	var d := _lagoon_depth
 	for r in _ravines:

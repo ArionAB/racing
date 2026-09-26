@@ -524,22 +524,30 @@ func _fit_camera_to_player() -> void:
 ## Cascada reala (nu o "cascada de ploaie" decorativa) se distinge prin
 ## `force_accel > 0.0` — cele 5 `RainFall*` de pe Fiordland au `force_accel =
 ## 0` (teatru, brief §3), deci ele NU trebuie sa declanseze rafala de 20-30.
+##
+## `in_curtain_fn` cauta la FIECARE apel, nu cacheaza o singura perdea la
+## `_ready`: pe Fiordland exista DOUA surse cu `force_accel > 0` (Stirling,
+## static in scena) SI torentul de pe scurtatura, a carui `WaterfallHazard`
+## e construit de `TorrentCycle` cu `call_deferred` (memoria „decor ready
+## inaintea temei" — `TorrentCycle._ready` amana constructia, deci la
+## `Race._ready()` sincron `_hazard` inca nu exista). Un cache luat aici ar
+## fi prins fie null (torentul), fie doar PRIMA gasita prin ordinea din
+## arbore (Stirling, inaintea `TorentChasm` in .tscn) — runda 3 cere ca
+## rafala de picaturi sa porneasca si la intrarea in puls, nu doar la
+## Stirling.
 func _setup_windshield_wipers() -> void:
 	wipers = WindshieldWipers.new()
 	add_child(wipers)
-	var curtain: WaterfallHazard = null
-	for node in track.find_children("*", "WaterfallHazard", true, false):
-		var wf := node as WaterfallHazard
-		if wf.force_accel > 0.0:
-			curtain = wf
-			break
 	var rain: RainCycle = null
 	var cycles := get_tree().get_nodes_in_group(&"rain_cycle")
 	if not cycles.is_empty():
 		rain = cycles[0] as RainCycle
 	var in_curtain_fn := (func() -> bool:
-		return curtain != null and is_instance_valid(curtain) \
-			and curtain.cars_inside().has(player))
+		for node in track.find_children("*", "WaterfallHazard", true, false):
+			var wf := node as WaterfallHazard
+			if wf.force_accel > 0.0 and wf.cars_inside().has(player):
+				return true
+		return false)
 	var rain_factor_fn := (func() -> float:
 		return rain.rain_factor if rain != null and is_instance_valid(rain) else 0.0)
 	wipers.configure(in_curtain_fn, rain_factor_fn)

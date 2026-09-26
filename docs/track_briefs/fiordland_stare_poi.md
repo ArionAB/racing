@@ -98,3 +98,19 @@ nivelul sau peste a lui main.
 8. **Movila tunelului**: iese bej cu textură de zidărie, nu granit gol.
 9. **Git**: `stash@{0}` „WIP on fiord/poi-h” e lăsat de un constructor care a
    încălcat regula; munca e comisă pe `fiord/poi-h`, stash-ul e redundant.
+
+## Deciziile dezvoltatorului (26 sep 2026)
+
+| # | decizie | livrat |
+|---|---|---|
+| 1 | fagul | neatins (nedecis) |
+| 2 | vaporașul | înlocuit cu „Cruise Ship – toofan”; caiacele cu „Canoe – Low poly” (CC-BY-4.0, `assets/CREDITS.md`) |
+| 3 | gneisul ud pe piese mici | **ignorat** |
+| 5 | valea de sub podeț | unită (f2ad9480), plus râu transversal și podeț real (`PodetChasm`, `TrackChannel` static) |
+| — | Stirling „nu simt nimic” | impact lateral + yaw + shake + picurat + sfx (`WaterfallHazard`, grupul „Impact la intrare”) |
+| — | torentul „nu are impact” | același impact, mai dur, prin `TorrentCycle`; parbrizul ud pornește acum și la torent |
+| — | avalanșa | 10 s |
+
+Rămân deschise: 1, 4, 6, 7, 8 de mai sus; caiacele din zona H (`malKayak`) nu
+apar (generatorul le respinge pe cotă — preexistent); `sealRock1` ridicat manual
+de dezvoltator e semnalat „plutește” de `probe_manual`.

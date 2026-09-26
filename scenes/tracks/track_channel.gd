@@ -96,6 +96,21 @@ extends Marker3D
 ## Golul se trece din SARITURA, nu pe pod. Vezi antetul clasei.
 @export var jump: bool = true
 
+## Cu `jump = false`: podul e FIX (podet de scanduri), nu se ridica si nu
+## arunca — pentru un parau de munte, nu un canal navigabil (Chasm, Fiordland
+## brief §2 randul D). Vezi [LiftBridgeHazard.static_deck]. Fara efect cand
+## `jump = true`.
+@export var static_deck: bool = false
+## Turnurile cu grinda si lampile de avertizare — opreste-le pe un podet fix
+## fara ciclu (n-are ce sa avertizeze). Fara efect cand `jump = true`.
+@export var build_towers: bool = true
+## Corabiile care traverseaza canalul — opreste-le pe un parau de munte, fara
+## canal navigabil. Fara efect cand `jump = true`.
+@export var build_ships: bool = true
+## Canalul nu sapa sub cota unei benzi secundare (`TrackBranch`) din raza ei.
+## Opt-in: pe Alpii/Stromboli garda ar schimba terenul existent.
+@export var respect_branch: bool = false
+
 ## Sapatura e o GROAPA CIRCULARA centrata pe taietura, nu o albie in lungul
 ## axei. Pentru gauri care exista doar ca sa se ascunda sub un asset rotund
 ## (cuva craterului de pe Stromboli): terenul coboara radial de la
@@ -161,6 +176,10 @@ func to_spec(track: Node3D) -> Dictionary:
 		"ford": ford,
 		"flow_sign": flow_sign,
 		"label": label if label != "" else name,
+		"static_deck": static_deck,
+		"build_towers": build_towers,
+		"build_ships": build_ships,
+		"respect_branch": respect_branch,
 	}
 	if ford:
 		# Apa peste drum = drop NEGATIV fata de cota soselei. Steagul „canal la

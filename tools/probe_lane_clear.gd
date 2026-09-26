@@ -82,6 +82,22 @@ const DRIVABLE := [
 	#     si de aceea raporta 205 blocaje pe o pista care se conduce.
 	"WaterFloor", "Plates",
 	"ServiceRamp", "Deck", "Span", "Gate", "Load", "Beam",
+	# Tabliera lui LiftBridgeHazard (`_span.name = "LiftSpan"`, `lift_bridge_
+	# hazard.gd`): pod mobil (Okinawa) SAU podet fix (`static_deck`, Chasm).
+	# Numele exact nu se potrivea cu "Span" de mai sus (`has()` e potrivire
+	# EXACTA, nu substring) — pe Okinawa n-a fost prins pana acum fiindca
+	# traveea sta jos doar cateva secunde din ciclu, iar `static_deck` (nou,
+	# Fiordland) o tine jos permanent, deci orice sonda statica o prinde
+	# de fiecare data. Fara asta: 17 blocaje false la fiecare esantion pe
+	# podetul Chasm (0.405-0.425), tabliera insasi raportata ca obstacol.
+	"LiftSpan",
+	# Panele de coliziune ale rampelor de la cele doua capete ale podului
+	# (`_build_ramps`, `RampNear`/`RampFar` — inainte "Ramp", dar Godot nu
+	# uniformizeaza in "Ramp2" un nume dat INAINTE de add_child() cand exista
+	# deja un frate cu acelasi nume, revine tacut la formatul automat
+	# nenumit). Fara ele: rampa e citita ca zid chiar acolo unde masina
+	# trebuie sa urce pe tabliera.
+	"RampNear", "RampFar",
 ]
 
 
@@ -219,7 +235,30 @@ const BASELINE := {
 	# traffic_light_pole) nu apare in raportare. Baza = 8, CIFRA MASURATA,
 	# fara marja: o marja ascunde exact prima piesa pusa pe banda (memoria
 	# garda-fara-linie-de-baza-iese-zero). Sabotaj verificat: 9 > 8 = REGRESIE.
-	"Fiordland (Track16)": 8,
+	#
+	# RIDICATA la 11 (podetul Chasm, TrackChannel + LiftBridgeHazard.
+	# static_deck, frac ~0.406-0.424): +3 raportari noi, toate pe verificarea
+	# INAINTE (coridorul din fata, care NU se filtreaza dupa DRIVABLE — "un
+	# carosabil perpendicular pe directia de mers e tot un zid, oricum l-ar
+	# chema", comentariul de mai jos), niciuna pe lateral (`lat=`), care ar
+	# fi insemnat coliziune REALA in banda: RampNear la 0.400 (4.42 m),
+	# RampFar la 0.420 (3.33 m si 2.99 m, doua inaltimi de raycast pe aceeasi
+	# rampa). Exact clasa deja acceptata la Okinawa (Track08, baza 18):
+	# rampele podurilor sunt geometrie ascendenta intentionata, nu zid — se
+	# vad in fata razei fiindca sunt sosea, nu fiindca blocheaza. Masurat de
+	# 3 ori, identic la bit (fara fizica implicata, doar geometrie statica).
+	# Sabotaj (stalp pe banda, --sabotaj): 14 > 11 = REGRESIE, verificat.
+	#
+	# RIDICATA din nou la 13 (runda 3, podetul Chasm remutat pe portiunea
+	# DREAPTA a soselei — frac 0.4007, sageata 0,018 m — ca sa nu mai poarte
+	# masinile in banda in curba, cauza reala a repunerilor BridgeFall
+	# gasita cu AI_UNSTICK_TRACE=1). Golul e acum mai scurt (19 m fata de
+	# 37 m), deci rampele cad pe alte fractii si RampFar ajunge sa fie
+	# vizibil la INCA o inaltime de raycast (0.4/1.0/1.6 in loc de 0.4/1.0):
+	# +2 fata de runda precedenta, tot pe INAINTE, tot RampNear/RampFar, zero
+	# pe lateral. Masurat de 3 ori, identic la bit. Sabotaj: 16 > 13 =
+	# REGRESIE, verificat.
+	"Fiordland (Track16)": 13,
 }
 
 

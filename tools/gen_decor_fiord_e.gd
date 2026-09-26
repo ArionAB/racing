@@ -75,6 +75,10 @@ const RES := {
 	"moss_boulder_b": "s_moss_boulder_b",
 	"moss_boulder_c": "s_moss_boulder_c",
 	"fern_cluster": "s_fern_cluster",
+	## RUNDA 3: gramezi de grohotis sub perete/pe taluz (verdict critic).
+	## `s_chasm_rock` e deja ext_resource in Track16.tscn (fundatie, folosit la
+	## ZoneB) — reuse, nu resursa noua.
+	"chasm_rock": "s_chasm_rock",
 }
 
 ## Inaltimea AABB masurata (docs/asset_briefs/fiordland_masuratori.md §1).
@@ -90,6 +94,7 @@ const HEIGHT := {
 	"guard_rock": 0.585,
 	"moss_boulder_a": 1.0, "moss_boulder_b": 1.0, "moss_boulder_c": 1.0,
 	"fern_cluster": 1.0,
+	"chasm_rock": 2.500,
 }
 
 ## Raza de DEGAJARE la sol (m) la scara 1: raza corpului fizic.
@@ -106,6 +111,7 @@ const BASE_R := {
 	"guard_rock": 0.59,
 	"moss_boulder_a": 0.6, "moss_boulder_b": 1.1, "moss_boulder_c": 1.6,
 	"fern_cluster": 0.5,
+	"chasm_rock": 3.02,
 }
 
 ## Raza COROANEI (m) la scara 1 — testul camerei / testul siluetei.
@@ -120,6 +126,7 @@ const CROWN_R := {
 	"guard_rock": 0.59,
 	"moss_boulder_a": 0.6, "moss_boulder_b": 1.1, "moss_boulder_c": 1.6,
 	"fern_cluster": 0.5,
+	"chasm_rock": 3.02,
 }
 
 const TRI := {
@@ -129,6 +136,7 @@ const TRI := {
 	"guard_rock": 72,
 	"moss_boulder_a": 200, "moss_boulder_b": 242, "moss_boulder_c": 238,
 	"fern_cluster": 150,
+	"chasm_rock": 416,
 }
 
 ## Coliziunea per model (decor_manual.md: hull/trunk/mesh/none). `beech_*` pe
@@ -147,6 +155,7 @@ const COLLISION := {
 	"guard_rock": "hull",
 	"moss_boulder_a": "hull", "moss_boulder_b": "hull", "moss_boulder_c": "hull",
 	"fern_cluster": "none",
+	"chasm_rock": "hull",
 }
 
 ## Degajarea minima de la MUCHIA drumului la marginea corpului fizic (m),
@@ -222,6 +231,7 @@ func _ready() -> void:
 	if not _survey_only:
 		_avalanche_signs()
 		_scree_and_tussock()
+		_talus_rockfall()
 		_forest_thinning()
 		_write()
 	get_tree().quit(0)
@@ -341,6 +351,103 @@ func _scree_and_tussock() -> void:
 				_rng.randf_range(3.0, 6.0), _rng.randf_range(0.0, TAU),
 				_scale_for("guard_rock", _rng.randf_range(0.5, 0.7)), "hull")
 		f += _step(9.0 + _rng.randf_range(-2.0, 2.0))
+		k += 1
+
+
+## (2b) GROHOTIS PE PANTA, RUNDA 3 (verdict critic): "lipseste grohotisul de
+## pe panta din jurul portalului. In referinta versantul dintre linia stancii
+## si acoperisul de beton al tunelului e acoperit cu bolovani/pietris varsat,
+## variat ca marime, asezat ca material cazut din perete. La noi aceeasi zona
+## (deasupra si lateral de gura tunelului, prim-plan-mediu, pe toata latimea
+## cadrului) e panta de iarba goala."
+##
+## `_scree_and_tussock` de mai sus se opreste la f_stop (~0.590, F_PORTAL minus
+## PORTAL_NO_COLLISION_FRAC) si foloseste DOAR `scree_slab` (placa unica,
+## coliziune `none`) rar, cu gap mare — arata ca pietre izolate pe iarba, nu ca
+## material cazut din perete. Nota coordonatorului: NU `scree_slab` ca grohotis
+## principal (iese placa portocaliu-nisip). Grohotisul real e GRAMEZI de
+## `chasm_rock` + `guard_rock` + `moss_boulder_*` (gneis inchis, tema
+## fiordland) la scari 0,3-1,2, DENSE sub peretele movilei si pe taluz, cu
+## yaw/inclinare variate — plus pietre mici FARA coliziune (`scree_slab` la
+## scara mica, sau `guard_rock` cu mode "none") aproape de culoar (sub 0,3 m
+## sau none, ca sa nu ejecteze masina). Acopera si franjul de langa portal
+## (pana la aproape F_PORTAL, ca in `_portal_fringe`), fiindca exact acolo e
+## bara: "deasupra si lateral de gura tunelului" — zona care azi e goala.
+func _talus_rockfall() -> void:
+	var n := _track.baked.size()
+	# Acopera tot sectorul, inclusiv franjul de langa portal (unde
+	# `_scree_and_tussock` nu ajunge): pietrele mici `none` merg pana aproape
+	# de F_PORTAL (ca tussock/fern in `_portal_fringe`), gramezile cu
+	# coliziune (`hull`) respecta wing-clearance-ul ca guard_rock-ul de mai jos.
+	var f_stop_hull := minf(F_OUT, F_PORTAL - PORTAL_NO_COLLISION_FRAC)
+	var f_stop_none := F_PORTAL - PORTAL_NONE_STOP_FRAC
+	var f := F_IN
+	var k := 0
+	while f < f_stop_none:
+		var i := int(f * float(n)) % n
+		var up := _uphill_side(i)
+		# Densitatea creste spre portal (bara: cea mai deasa chiar langa gura),
+		# de la 1 gramada la ~13 m pas, la 1 la ~2,5 m pas chiar langa portal
+		# (runda 3b: verdictul "0,605 tot bara langa perete" a aratat ca 5 m
+		# pas lasa goluri intre trunchiuri — bara arata camp CONTINUU de
+		# grohotis pe toata latimea cadrului, nu pete rare).
+		var t: float = clampf((f - F_IN) / (f_stop_none - F_IN), 0.0, 1.0)
+		var step_m: float = lerpf(13.0, 2.5, t)
+		# GRAMADA sub perete (versant, `up`): 2-4 bolovani suprapusi ca gramada
+		# cazuta, nu instante izolate (aranjamentul-bate-numarul). Sub
+		# f_stop_hull, gap normal (langa banda). DINCOLO de f_stop_hull (ultimii
+		# ~12 m pana la portal, exact zona numita de critic: "deasupra si
+		# lateral de gura tunelului") `_place` refuza orice `hull` sub
+		# PORTAL_WING_CLEAR_M (10 m de ax) — deci acolo se cere explicit un gap
+		# mai mare, ca piesa sa treaca de verificarea aripii (ca fagii din
+		# _portal_fringe), nu se renunta la gramezi in franj.
+		var near_portal := f >= f_stop_hull
+		var gap0: float = (_rng.randf_range(5.0, 7.0) if near_portal
+			else _rng.randf_range(1.5, 4.0))
+		var cnt: int = (4 + (k % 3)) if near_portal else (3 + (k % 2))
+		for j in cnt:
+			var mdl: String
+			var roll := _rng.randf()
+			if roll < 0.4:
+				mdl = "chasm_rock"
+			elif roll < 0.65:
+				mdl = "guard_rock"
+			elif roll < 0.83:
+				mdl = "moss_boulder_a"
+			elif roll < 0.93:
+				mdl = "moss_boulder_b"
+			else:
+				mdl = "moss_boulder_c"
+			var scl_m: float = _rng.randf_range(0.3, 1.2)
+			_place(mdl, "grohotisGramada",
+				f + _step(_rng.randf_range(-2.0, 2.0)), up,
+				gap0 + _rng.randf_range(0.0, 2.5) + float(j) * 0.6,
+				_rng.randf_range(0.0, TAU), scl_m, "hull")
+		if not near_portal:
+			# Cateva si pe partea care cade (mai rare — molozul se aduna mai
+			# ales sub perete, dar diorama arata si o franjura pe cealalta
+			# margine a drumului).
+			if _rng.randf() < 0.35:
+				var down := -up
+				var mdl2 := "chasm_rock" if _rng.randf() < 0.5 else "guard_rock"
+				_place(mdl2, "grohotisMargine", f + _step(_rng.randf_range(-2.0, 2.0)),
+					down, _rng.randf_range(3.0, 6.0), _rng.randf_range(0.0, TAU),
+					_rng.randf_range(0.3, 0.8), "hull")
+		# PIETRE MICI fara coliziune, aproape de culoar (sub 0,3 m efectiv,
+		# deci `none`): umplu golul dintre gramada si asfalt, pe ambele parti,
+		# ca materialul sa citeasca "varsat pe panta" pana la marginea drumului,
+		# nu doar sub perete. Merg pana aproape de portal (f_stop_none).
+		var small_cnt := 3 if near_portal else 1
+		for sgn in [-1.0, 1.0]:
+			for sc in small_cnt:
+				if _rng.randf() < 0.85:
+					var mdl3 := "guard_rock" if _rng.randf() < 0.6 else "chasm_rock"
+					_place(mdl3, "grohotisMic",
+						f + _step(_rng.randf_range(-1.8, 1.8)), sgn,
+						_rng.randf_range(0.3, 3.0) + float(sc) * 1.5,
+						_rng.randf_range(0.0, TAU),
+						_rng.randf_range(0.25, 0.45), "none")
+		f += _step(step_m)
 		k += 1
 
 

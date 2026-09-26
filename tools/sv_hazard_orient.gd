@@ -14,6 +14,103 @@ extends SceneTree
 ## semafor/kicker = local +Z pe drum (180 grade); avalansa e orientata din
 ## cod (unghiul ei nu conteaza). Orice altceva intre 20 si 160 de grade e
 ## suspect si se explica in raport.
+##
+## RUNDA 1 POI D (Fiordland): `--decor` cere si scatter organic (fagi,
+## bolovani, ferigi, tussock) cu YAW ALEATOR intentionat -- memoria
+## aranjamentul-bate-numarul: un yaw aliniat pe drum ar citi "instante
+## plasate", nu padure. Un fag cu yaw aleator NU e o axa montata gresit, e
+## decizia de compozitie. Fara exceptie, sonda ar cere fie 0 piese organice,
+## fie yaw fortat (0/180), amandoua gresite. Prefixele de mai jos sunt
+## piese FARA axa vizuala/functionala semnificativa (spre deosebire de o
+## perdea sau un semafor, unde directia CONTEAZA) -- acelasi principiu ca
+## AvalansaF/traffic_light_pole, doar numit explicit in loc de tacut.
+const YAW_FREE_PREFIXES: Array[String] = [
+	"fagApropiat", "fagEtaj2", "fagFund", "fagIntrare", "fagIesire",
+	"muschiBolovan", "feriga", "ferigaMica", "reperMargine", "tufaIarba",
+	"marmita", "marmitaMal", "kea", "stumpKea",
+	# RUNDA 2 POI D: ansamblul de canion la pod (_bridge_canyon_dressing),
+	# aceleasi piese fara axa functionala (chasm_rock/moss_boulder), acelasi
+	# motiv ca marmita/muschiBolovan mai sus.
+	"canionTreapta", "canionTreaptaMica", "canionMuschi",
+	# RUNDA 1 POI G (Bowen): perete/bazin cascada + padure de mal, acelasi
+	# principiu — bolovani/muschi/fagi cu yaw aleator intentionat
+	# (aranjamentul-bate-numarul), fara axa vizuala semnificativa.
+	"poolWall", "poolMoss", "gravelEdge", "poolDrift", "bankForest", "bankUnder",
+	# RUNDA 3 POI G (Bowen): bolovani la linia apei pe ambele maluri
+	# (chasm_rock/moss_boulder_b/c + guard_rock de accent), acelasi tip de
+	# piesa fara axa functionala ca poolWall de mai sus.
+	"waterline", "waterlineChip",
+	# RUNDA 5 POI C: `FoamPool` (bazinul de spuma la baza cascadei Stirling) —
+	# nod container fara axa functionala, la fel ca muschiul/bolovanii din
+	# aceeasi zona (deja neinregistrati aici, dar FoamPool nu adauga zgomot
+	# NOU peste ce exista deja pe restul POI-ului C, memoria
+	# criticul-cere-ce-zona-nu-poate-da nu se aplica: aici chiar nu exista
+	# directie de verificat, petecele interne au yaw aleator intentionat).
+	"FoamPool",
+	# RUNDA 6 POI C: bolovani de gneis intunecat (chasm_rock) langa marginile
+	# perdelei si la baza — acelasi tip de piesa fara axa functionala ca
+	# marmita/canionMuschi de mai sus (chasm_rock reutilizat ca bolovan de
+	# decor, nu ca element cu directie), yaw aleator intentionat
+	# (aranjamentul-bate-numarul).
+	"gneisMargine", "gneisBaza",
+	# RUNDA 1 POI E (Fiordland, urcarea si portalul de est): fagi, ferigi,
+	# bolovani cu muschi, tussock si grohotis pe versant — acelasi tipar
+	# organic ca padurea POI D, yaw aleator intentionat
+	# (aranjamentul-bate-numarul: un rand aliniat pe drum ar citi "instante
+	# plasate", nu versant natural). `parapetStanca` (guard_rock) si
+	# `jalon` (snow_pole) sunt bolovani/stalpi fara fata functionala — la
+	# fel ca traffic_light_pole/AvalansaF mentionate mai sus, directia lor
+	# nu conteaza pentru gameplay sau citire vizuala.
+	"fag", "feriga", "bolovanMuschi", "tussock", "grohotis", "parapetStanca",
+	"jalon",
+	# `chevron` (chevron_sign, panouri de zona de avalansa) ARE o axa
+	# functionala, dar nu "de-a lungul drumului" — un chevron trebuie sa
+	# priveasca SPRE asfalt (aproape perpendicular pe tangenta, ~90 grade),
+	# nu paralel cu ea ca o perdea sau un semafor. Unghiul lui fata de
+	# tangenta e deci intre 20 si 160 de grade PRIN CONSTRUCTIE
+	# (`_yaw_facing_road` in gen_decor_fiord_e.gd), nu o axa montata gresit —
+	# verificat vizual pe captura, nu de sonda asta (care compara doar cu
+	# directia drumului, nu cu normala lui).
+	"chevron",
+	# RUNDA 1 POI H (Malul si pista de avioane): fagii rari + subetajul de pe
+	# mal si driftwood/guard_rock de pe plaja — acelasi tip de piesa fara axa
+	# functionala (arbori/bolovani/lemn plutit dispersat), yaw aleator
+	# intentionat (aranjamentul-bate-numarul).
+	"fagMalA", "fagMalB", "fagFeriga", "fagTussock", "malDriftwood",
+	"malGuard", "malKayak",
+	# RUNDA 2 POI H: padurea din spatele satului (fagLodgeA/B/C), reparatie
+	# la verdictul criticului orb ("lipseste padurea compacta din spatele
+	# cladirilor") — acelasi tip de piesa fara axa functionala ca fagMalA/B
+	# de mai sus, yaw aleator intentionat (aranjamentul-bate-numarul).
+	"fagLodgeA", "fagLodgeB", "fagLodgeC",
+	# heliportul: disc jos, fara fata privilegiata (ca FoamPool mai sus).
+	"heliport",
+	# pista de avioane: placi plate CONCRETE/FOAM_WHITE fara model, orientate
+	# pe tangenta locala dar simetrice pe axa lor (un dreptunghi plat n-are
+	# "fata" ca o perdea) — acelasi motiv ca FoamPool/marmita.
+	"pistaAvioane",
+	# avionMal: PathMover — orientarea REALA vine din `_travel_yaw` la
+	# fiecare cadru (directia de zbor pe curba), nu din transformul static
+	# scris in .tscn la generare. Acelasi principiu ca AvalansaF ("orientata
+	# din cod, unghiul ei nu conteaza").
+	"avionMal",
+	# lodge/magazie: NU sunt in lista — fatada are orientare care CONTEAZA
+	# (spre drum, ca in bara) si raman verificabile ca orice piesa cu axa.
+	# RUNDA 1 POI F (Coborarea + avalansa): cicatricea de granit lucios
+	# (chasm_rock/moss_boulder_b/c/beech_dead) si padurea rara din jur
+	# (beech_a/b/c, guard_rock, driftwood, tussock_clump) — acelasi tip de
+	# piesa fara axa functionala ca poolWall/bankForest de la POI G: yaw
+	# aleator intentionat (aranjamentul-bate-numarul), NU o axa montata
+	# gresit. AvalansaF insasi (in Hazarduri, nu DecorManual) e deja exceptata
+	# ca hazard orientat din cod, conform notei din antet.
+	"chasmRock", "guardRock", "mossBoulderA", "mossBoulderB", "mossBoulderC",
+	"beechDead", "beechA", "beechB", "beechC", "driftwood", "tussockClump",
+]
+static func _yaw_free(name: String) -> bool:
+	for prefix in YAW_FREE_PREFIXES:
+		if name.begins_with(prefix):
+			return true
+	return false
 
 func _init() -> void:
 	var scene := 16
@@ -70,8 +167,11 @@ func _init() -> void:
 		var lat := (n.position - p).dot(fwd.cross(Vector3.UP))
 		var flag := ""
 		if ang > 20.0 and ang < 160.0:
-			flag = "  <-- suspect"
-			suspect += 1
+			if _yaw_free(str(n.name)):
+				flag = "  (yaw liber, decor organic)"
+			else:
+				flag = "  <-- suspect"
+				suspect += 1
 		var tag := "" if best.name == "Path" else " [%s]" % best.name
 		print("%-32s %6.3f %8.1f %8.2f%s%s" % [n.name, best_o / L, ang, lat, tag, flag])
 	print("VERDICT: %d noduri cu orientare suspecta (20-160 grade)" % suspect)

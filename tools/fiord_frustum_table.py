@@ -144,7 +144,11 @@ SEGMENTS = {
 def read_scene(path):
     with open(path, encoding="utf-8") as fh:
         txt = fh.read()
-    m = re.search(r'"points":\s*PackedVector3Array\(([^)]*)\)', txt)
+    # Curba TRASEULUI, pe id — nu prima din fisier: de la POI H (curba
+    # avionului, Curve3D_avionMal*) primul PackedVector3Array din Track16.tscn
+    # e al unui PathMover, iar garda masura distantele fata de avion.
+    m = re.search(r'\[sub_resource type="Curve3D" id="Curve3D_fiordland"\][^\[]*?'
+                  r'"points":\s*PackedVector3Array\(([^)]*)\)', txt)
     if not m:
         sys.exit("nu gasesc PackedVector3Array cu punctele curbei in %s" % path)
     nums = [float(x) for x in m.group(1).split(",") if x.strip()]

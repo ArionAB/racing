@@ -922,14 +922,31 @@ const CLASS_TINT := {
 	# (168.84*0.6101, 160.68*0.4107, 145.01*0.2138) = (103.00, 66.00, 31.00) —
 	# cade EXACT pe tinta (103, 66, 31), sub 0.01 unitate pe fiecare canal.
 	"hippo_hide": Color(0.6101, 0.4107, 0.2138),
-	# Gneisul ud (Fiordland): tinta = media ponderata pe arie a sloturilor
-	# VOLCANIC_BLACK/MARBLE_GREY masurate pe Wall (stirling_ledge, 1690 tri,
-	# 39.0%/56.2%) si Rock (torrent_chute, 196 tri, 28.3%/60.0%) din
-	# fiordland_masuratori.md: (0.5659, 0.5533, 0.5456). Dala `alpine_granite`
-	# (166,156,137)/255 are raport pe canale (0.8693, 0.9045, 1.0155) — un
-	# singur canal (B) peste 1, deci cere CLASS_LIFT mic. Calculata ca la
-	# inca_stone: tinta_c / (dala_c * k), k = max raport = 1.0155.
-	"wet_gneiss": Color(0.8560, 0.8907, 1.0),
+	# Gneisul ud (Fiordland). Valoarea veche (0.8560, 0.8907, 1.0) fusese
+	# calculata din sloturile de atlas VOLCANIC_BLACK/MARBLE_GREY MASURATE PE
+	# .GLB (fiordland_masuratori.md), nu din randare — si a iesit GRI-ALBASTRUI
+	# DESCHIS pe ecran (captura, nu presupunere: stirling_ledge.Wall citea
+	# ~(95,106,116) pe fata spre soare), cu textura de scoarta a dalei
+	# `alpine_granite` vizibila peste tot. Bara (bara_poi_C/B.png) cere gneis
+	# INCHIS, aceeasi materie ca `scarp_tint` de pe pantele terenului (mai sus
+	# in acest fisier era gresit sa duca la acelasi rezultat: scarp_tint e
+	# vertex-color pe texturile de teren, "wet_gneiss" e CLASS_TINT peste o
+	# dala complet diferita — cele doua mecanisme nu impart aceeasi curba de
+	# lumina, deci un factor derivat matematic din scarp_tint (~0.29-0.36) a
+	# iesit prea INCHIS la masurare (Wall mediu (29,33,34) pe fata din umbra,
+	# fata de tinta (62,63,63)).
+	#
+	# A/B fortat (albedo_color -> (3.0, 0.05, 3.0), magenta absurd): a aratat
+	# ca stirling_ledge.Wall SI torrent_chute.Rock ies amandoua magenta in
+	# aceeasi captura, deci tinta chiar ajunge pe ambii consumatori.
+	#
+	# Valoarea finala (0.40, 0.40, 0.42) a fost gasita prin masurare directa pe
+	# captura (--track=9 --frac=0.28 --gamecam), nu derivata: aproape neutra
+	# (canalul B usor peste, ca sa pastreze raceala gneisului ud), suficient de
+	# inchisa cat sa citeasca "stanca uda in umbra" (H191 S0.08, aproape de
+	# masuratoarea din bara H199 S0.02), fara sa stinga complet dungile
+	# verticale ale texturii `alpine_granite`.
+	"wet_gneiss": Color(0.40, 0.40, 0.42),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1409,6 +1426,48 @@ const SHADER_PREFIX := "shader:"
 ## materialul e cache-uit per (slot, energie) — un cartier intreg de ferestre
 ## aprinse costa UN material, nu unul per cladire.
 const GLOW_PREFIX := "glow:"
+
+## Al cincilea prefix acceptat: "atlas". Nu aduce nicio textura noua — forteaza
+## `world_material()` pe o parte anume a unui model, ca sa anuleze o coliziune
+## de nume cu maparea GLOBALA din `prop_classes()` (memoria
+## `nume-noduri-nu-sunt-unice`). Fara sentinela, `CLASSES_BY_MODEL` nu putea
+## SCOATE o clasa deja aplicata global — doar adauga una noua — fiindca un
+## string gol insemna "nicio intrare" si sarea nodul, lasand materialul gresit
+## pe loc. Vezi `cafe_shed`/`lodge` mai jos: `House_Roof` al lor coincide cu
+## `House_Roof` din `village_house.glb` (landmark Okinawa, `roof_tiles`).
+const ATLAS_PREFIX := "atlas"
+
+## Al saselea prefix acceptat: "plain". La fel ca ATLAS_PREFIX, nu aduce nicio
+## textura noua — dar, spre deosebire de el, OPRESTE stratul triplanar de
+## detaliu (`detail_enabled`), nu doar reface `world_material()` (care il
+## are pornit din constructie).
+##
+## DE CE exista, separat de ATLAS_PREFIX: `world_material()` e gandit pentru
+## teren/roca/lemn — stratul triplanar (fibra, crapaturi) e exact ce cere
+## style_bible §4 pe suprafetele acelea. O caroserie de VOPSEA PLATA nu are
+## acel tipar de suprafata: masurat pe `cruise_boat` (POI A, runda 3), corpul
+## alb al vaporasului primea `world_material()` prin fallback-ul implicit al
+## lui `apply_class_materials` (nodul `Boat` nu are nicio intrare in
+## CLASSES_BY_MODEL), deci stratul triplanar de detaliu (gandit pentru
+## piatra/lemn de teren) se vedea PESTE gelcoat-ul alb ca un model de fibra
+## de lemn/scoarta — verdictul criticului orb: "carena alba are un model de
+## fibra de lemn/scoarta". Confirmat direct pe scena incarcata (sonda
+## tools/sv_boat_slots.gd), nu presupus: materialul pe `Boat` ERA chiar
+## `PaletteAtlas`-ul din GLB brut, deci nu e o coliziune de nume cu alt kit
+## (nume-noduri-nu-sunt-unice) — e fallback-ul universal, corect pentru
+## roca/lemn de decor, gresit pentru vopsea neteda.
+##
+## Cache-uit ca finish_material: ZERO materiale noi la garda (acelasi atlas,
+## aceeasi masca, doar `detail_enabled=false` pe o copie).
+const PLAIN_PREFIX := "plain"
+
+static var _plain_mat: StandardMaterial3D = null
+
+static func plain_material() -> StandardMaterial3D:
+	if _plain_mat == null:
+		_plain_mat = world_material().duplicate() as StandardMaterial3D
+		_plain_mat.detail_enabled = false
+	return _plain_mat
 
 
 ## Materialul cerut de un "glow:<slot>|<energie>". Energia e optionala

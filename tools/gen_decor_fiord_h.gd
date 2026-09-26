@@ -256,7 +256,20 @@ func _village() -> void:
 	# balize pe marginea drumului, lânga sat.
 	_place("snow_pole", "baliza", 0.918, 1.0, 1.0, 0.0, 1.0, "none")
 	_place("road_sign_blank", "semn", 0.927, 1.0, 2.0, deg_to_rad(-90.0), 1.0, "hull")
-	print("; sat: lodge+magazie+heliport+containere asezate")
+	# RUNDA 6: a doua instanta de lodge, LANGA heliport (verdict runda 5:
+	# "langa heliportul cu H lipseste un lodge cu volum si silueta clara" —
+	# primul lodge e la frac 0.920/gap 4.0, langa drum, dar captura de la
+	# frac 0.98 (heliport + pista + avion in cadru) il priveste de peste
+	# apa, la ~90 m, unde citeste ca pata alba, nu cladire. Piesa e deja in
+	# kit (contract: "a doua instanta e ok"), deci nu se construieste nimic
+	# nou: doar un al doilea `lodge` asezat chiar dupa heliport (gap 20.0,
+	# fata de heliport la gap 14.0 + raza 6.0 -> centrul lui la ~2 m dincolo
+	# de marginea heliportului, in acelasi cadru din care camera la 0.98
+	# vede heliportul si pista). Yaw 90 ca fatada lunga sa ramana paralela
+	# cu drumul/pista, la fel ca lodge1 — silueta de acoperis in doua ape
+	# clar distincta de discul heliportului si de fasia pistei.
+	_place("lodge", "lodgeHeli", 0.935, 1.0, 14.0, deg_to_rad(90.0), 1.0, "hull")
+	print("; sat: lodge+magazie+heliport+containere asezate (2 lodge-uri)")
 
 
 ## (2) PISTA DE AVIOANE — fasie plata CONCRETE/SAND_SHADOW paralela cu drumul,

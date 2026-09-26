@@ -320,6 +320,42 @@ Cornișa (0 → 30 pe ~340 m ≈ **8,8%**), coborârea în Chasm (32 → 15 pe 3
 >   ProbeRace 8 seed-uri uscat, 0 incidente noi pe 0,05–0,30. Capturi
 >   `--gamecam` la 0,08/0,14/0,19: peretele umple partea dreaptă a cadrului,
 >   marea jos-stânga — înainte era doar bolovani izolați pe câmp plat.
+>   **Runda 2 (26 sep, corecție): peretele înghițea decorul bun de pe cornișă**
+>   (`gneisWall*`, `wallFoot*`, padurea de fag) și fața citea artificial (linii
+>   albe subțiri de strat, ca desenul pe hârtie). Două cauze, ambele măsurate:
+>   (1) `cut_edge_offset_m = 0.2` punea talpa peretelui la doar
+>   `half_width + 0,2` (6,2–8,2 m de ax) — chiar în mijlocul benzii de decor
+>   (`gneisWall` p95 lateral 11,71 m, `wallFoot` p95 10,92 m, măsurate direct
+>   din scenă, nu presupuse), deci decorul rămânea îngropat în perete. Fix:
+>   `cut_edge_offset_m = 12.0` (talpa la ~18–20 m), care lasă toată banda de
+>   bolovani în fața peretelui. (2) fața folosea `Palette.world_material()`
+>   (atlas plat pe sloturi UV, fără relief de textură) — cusăturile dintre
+>   sloturile 29/20 pe o singură față mare citeau exact ca liniile reclamate.
+>   Fix: `CliffFace` primește un export nou, opt-in, `material_class` (gol =
+>   comportamentul vechi, bit-identic pe Cappadocia/Machu Picchu/Serengeti);
+>   pe Fiordland peretele ia `material_class = "wet_gneiss"` — **aceeași clasă
+>   triplanară pe care o folosește deja decorul** (`chasm_rock`, `stirling_ledge`),
+>   memoizată static, deci zero materiale noi. Fanul lateral al feței
+>   (`cut_batter_m`, `cut_facet_m`, `cut_tread_m`) a fost strâns (1,6→0,6 /
+>   1,4→0,5 / 0,18→0,05) ca și coama peretelui să rămână în spatele bolovanilor,
+>   nu doar talpa. Rămas: 119 din 226 de fagi (`wallForest*`, rândul cel mai
+>   apropiat de drum) tot cădeau geometric în volumul peretelui — scoși direct
+>   din scenă (nu regenerați: gauntlet-ul de decor era deja câștigat pe zona
+>   asta, o regenerare completă risca să strice aranjamentul aprobat). Verificare
+>   nouă, permanentă: `tools/probe_wall_overlap.gd` — traduce atât peretele
+>   REAL construit (nu o reimplementare a formulei), cât și fiecare nod
+>   `DecorManual/ZoneB_*` în (frac-pe-curbă, lateral, înălțime) și testează
+>   suprapunerea pe toate trei axele; țintă și rezultat curent: 0. Reverificat
+>   după corecție: hash `ground_y` neschimbat (Track09/11/13/14/16), `probe_manual`
+>   tot un singur obiect (`sealRock1`), `probe_decor` tot 29 materiale,
+>   ProbeLayout/ProbeBuried/ProbeLaneClear/ProbeTunel OK. **ProbeRace 8 seed-uri
+>   uscat, minim de tur per seed**: 1,65 / 1,63 / 1,62 / 1,63 / 1,62 / 1,63 /
+>   1,61 (seed-urile 2–8, toate în linia de bază 1,61–1,66); seed 1 iese la 1,22
+>   din cauza Autobuzului (6 repuneri, 15% offroad la tunel/Bowen — slăbiciune
+>   preexistentă, documentată, neafectată de peretele nou). **Zero incidente
+>   (blocaj/repunere/ejectare) la frac ≤ 0,30 pe toate cele 8 seed-uri** — toate
+>   incidentele rămân grupate la tunel (0,60–0,70), Bowen (0,85–0,88) și mal
+>   (0,87–0,88), exact tiparul de dinainte.
 > - **C:** Stirling lovește la intrare: împingere laterală spre mare (`push_speed`
 >   9, fără parapet), smucitură de yaw (1,4 rad/s × 0,35 s), shake 0,55, mașina
 >   picură 3 s, parbrizul ud. Pragul uscat din spatele perdelei: tot geometrie

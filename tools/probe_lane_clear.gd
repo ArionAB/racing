@@ -248,7 +248,17 @@ const BASELINE := {
 	# vad in fata razei fiindca sunt sosea, nu fiindca blocheaza. Masurat de
 	# 3 ori, identic la bit (fara fizica implicata, doar geometrie statica).
 	# Sabotaj (stalp pe banda, --sabotaj): 14 > 11 = REGRESIE, verificat.
-	"Fiordland (Track16)": 11,
+	#
+	# RIDICATA din nou la 13 (runda 3, podetul Chasm remutat pe portiunea
+	# DREAPTA a soselei — frac 0.4007, sageata 0,018 m — ca sa nu mai poarte
+	# masinile in banda in curba, cauza reala a repunerilor BridgeFall
+	# gasita cu AI_UNSTICK_TRACE=1). Golul e acum mai scurt (19 m fata de
+	# 37 m), deci rampele cad pe alte fractii si RampFar ajunge sa fie
+	# vizibil la INCA o inaltime de raycast (0.4/1.0/1.6 in loc de 0.4/1.0):
+	# +2 fata de runda precedenta, tot pe INAINTE, tot RampNear/RampFar, zero
+	# pe lateral. Masurat de 3 ori, identic la bit. Sabotaj: 16 > 13 =
+	# REGRESIE, verificat.
+	"Fiordland (Track16)": 13,
 }
 
 

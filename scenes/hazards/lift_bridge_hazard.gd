@@ -169,12 +169,6 @@ const FALL_BACKOFF: float = 70.0
 ## SENSUL: traveea urca intre turnuri (implicit) sau COBOARA sub drum
 ## (barnele scoase de sub cornisa). Cursa e aceeasi (LIFT_HEIGHT).
 @export var descend: bool = false
-## Podul NU se ridica niciodata si NU arunca — un podet fix de scanduri
-## (Chasm, Fiordland brief §2 randul D): tabliera, pilonii, rampele si
-## plasa de cadere raman identice cu podul mobil, dar ciclul e mort si
-## trambulina de la buza nu se construieste. Reuse cu parametru, ca la
-## barnele Podului Incas (`descend`) — nu e o clasa noua.
-@export var static_deck: bool = false
 
 @export_group("Structura")
 ## Turnurile cu grinda si lampile; corabiile de pe canal. Se sting pe un gol
@@ -229,8 +223,7 @@ func _ready() -> void:
 		_build_towers()
 	_build_piers()
 	_build_ramps()
-	if not static_deck:
-		_build_kicker()
+	_build_kicker()
 	_build_span()
 	if build_ships:
 		_build_ships()
@@ -612,8 +605,6 @@ func _build_fall_zone() -> void:
 # ------------------------------------------------------------------- ciclul
 
 func _physics_process(delta: float) -> void:
-	if static_deck:
-		return # tabliera ramane la _span_rest, fixata o data in _ready
 	_time = fposmod(_time + delta, _ship_period())
 	_apply_cycle(fposmod(_time, period))
 	if Engine.is_editor_hint():

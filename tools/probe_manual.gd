@@ -84,6 +84,8 @@ func _report() -> bool:
 			verdict = "ok (pe apa)"
 		elif p.y - ground > FLOAT_MAX and _on_static_face(n3):
 			verdict = "ok (pe stanca)"
+		elif p.y - ground > FLOAT_MAX and _under_airborne_mover(n3):
+			verdict = "ok (in zbor)"
 		elif p.y - ground > FLOAT_MAX:
 			verdict = "PLUTESTE"
 		elif ground - p.y > SINK_MAX:
@@ -210,6 +212,23 @@ const _PROBE_DIRS: Array[Vector3] = [
 	Vector3(0, -1, 0), Vector3(1, 0, 0), Vector3(-1, 0, 0),
 	Vector3(0, 0, 1), Vector3(0, 0, -1),
 ]
+
+## Piesa e carata de un PathMover cu `stick_to_ground = false` (avionul de pe
+## Fiordland POI H, `bush_plane` pe traiectorie in aer, `--allow-car-slots`
+## nu se aplica) — inaltimea peste teren e INTENTIA, nu un accident de
+## generator. Acelasi tipar ca exceptia de apa/stanca de mai sus: se verifica
+## un fapt STRUCTURAL (un stramos concret cu flagul pus), nu un nume de
+## prefix, ca sa nu treaca in tacere un obiect plutitor pus GRESIT langa un
+## PathMover care intamplator se numeste la fel.
+static func _under_airborne_mover(n3: Node3D) -> bool:
+	var cur: Node = n3
+	while cur != null:
+		var mover := cur as PathMover
+		if mover != null:
+			return not mover.stick_to_ground
+		cur = cur.get_parent()
+	return false
+
 
 static func _on_static_face(n3: Node3D) -> bool:
 	var world := n3.get_world_3d()

@@ -751,6 +751,18 @@ const CLASSES_BY_MODEL := {
 	# `PLAIN_PREFIX` pastreaza acelasi atlas si acelasi AO din vertex color,
 	# doar opreste `detail_enabled` — zero materiale noi la garda.
 	"cruise_boat": {"Boat": Palette.PLAIN_PREFIX},
+	# Fiordland (POI H, runda 6 a criticului orb): `luggage_container`
+	# (containerul de bagaje de langa lodge) avea mesh-ul `Container` fara
+	# NICIO intrare aici — nu se potriveste cu stem-ul "container" (alt kit,
+	# Chongqing, `props_junk.glb`), deci cadea pe fallback-ul implicit al
+	# lui `apply_class_materials`: `world_material()`, atlasul intins pe
+	# UV-ul brut al cutiei. Exact mecanismul documentat mai sus la
+	# `cruise_boat` (aceeasi capcana, alt model): pe o cutie simpla stratul
+	# triplanar de detaliu iese curcubeu, nu vopsea plata. Verificat pe
+	# .glb (mesh unic "Container", niciun nod `Container` in alt kit
+	# fiordland). `PLAIN_PREFIX` pastreaza atlasul si AO-ul din vertex
+	# color, opreste doar `detail_enabled` — zero materiale noi la garda.
+	"luggage_container": {"Container": Palette.PLAIN_PREFIX},
 	# Firidele din peretele stancii goale (Cappadocia, POI G): fundul lor ARDE.
 	#
 	# Fara asta o fereastra sapata e o pata neagra, si verdictul rundei 2 spune
@@ -3118,6 +3130,7 @@ static func prop_classes() -> Dictionary:
 	out.merge(TrackDecor.STROMBOLI_CLASSES)
 	out.merge(TrackDecor.CHONGQING_CLASSES)
 	out.merge(TrackDecor.CAPPADOCIA_CLASSES)
+	out.merge(TrackDecor.FIORDLAND_AIRSTRIP_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

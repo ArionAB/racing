@@ -52,6 +52,72 @@
 [ext_resource type="PackedScene" uid="uid://6uiuyphujnhh" path="res://assets/models/structures/wooden_pier.glb" id="s_wooden_pier"]
 [ext_resource type="Script" path="res://scenes/hazards/foam_pool_g.gd" id="10_foam_pool_g"]
 [ext_resource type="Script" uid="uid://pcypbcie67pr" path="res://scenes/hazards/foam_pool.gd" id="9_foam_pool"]
+[ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="s_path_mover_script"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete7"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete8"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white9"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete10"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete11"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white12"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete13"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete14"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white15"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete16"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete17"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white18"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete19"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete20"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white21"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete22"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete23"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white24"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete25"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="Curve3D" id="Curve3D_avionMal26"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, -15.662294, -11.354813, 9.234149, 0, 0, 0, 0, 0, 0, -25.381430, -22.308533, 19.681553, 0, 0, 0, 0, 0, 0, -32.147713, -24.950748, 28.470078),
+"tilts": PackedFloat32Array(0, 0, 0, 0)
+}
+point_count = 4
+up_vector_enabled = false
 
 [sub_resource type="Curve3D" id="Curve3D_fiordland"]
 closed = true
@@ -67,6 +133,209 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0)
 }
 point_count = 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 [node name="Track16" type="Node3D"]
 script = ExtResource("1_track")
@@ -10102,3 +10371,370 @@ transform = Transform3D(-0.148980, 0.000000, -0.991873, 0.000000, 1.002999, 0.00
 metadata/coliziune = "none"
 
 [node name="ZoneH_Mal" type="Node3D" parent="DecorManual"]
+
+[node name="lodge1" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_lodge")]
+transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -9.377523, -0.089294, 15.287992)
+
+[node name="lodgeHeli1" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_lodge")]
+transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -38.182129, -0.159912, 35.776512)
+
+[node name="magazie2" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_cafe_shed")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -15.578222, -0.081650, 20.929173)
+
+[node name="heliport3" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_heli_pad")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -25.987938, -0.198853, 23.327339)
+metadata/coliziune = "none"
+
+[node name="container4" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_luggage_container")]
+transform = Transform3D(0.965926, 0.000000, 0.258819, 0.000000, 1.000000, 0.000000, -0.258819, 0.000000, 0.965926, -23.007099, -0.221970, 19.833628)
+
+[node name="baliza5" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_snow_pole")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 1.901800, 0.261627, 20.830090)
+metadata/coliziune = "none"
+
+[node name="semn6" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_road_sign_blank")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -13.678660, 0.131393, 35.670273)
+
+[node name="pistaAvioaneconcrete7" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.686946, 0.000000, 0.726708, 0.000000, 1.000000, 0.000000, -0.726708, 0.000000, 0.686946, 1.572016, 0.685125, 2.611016)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete7")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete8" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.683527, 0.000000, 0.729925, 0.000000, 1.000000, 0.000000, -0.729925, 0.000000, 0.683527, 0.341903, 0.670000, 3.780262)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete8")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white9" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.683527, 0.000000, 0.729925, 0.000000, 1.000000, 0.000000, -0.729925, 0.000000, 0.683527, 0.341903, 0.690000, 3.780262)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white9")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete10" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.684552, 0.000000, 0.728964, 0.000000, 1.000000, 0.000000, -0.728964, 0.000000, 0.684552, -1.866791, 0.641381, 5.839334)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete10")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete11" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.688530, 0.000000, 0.725208, 0.000000, 1.000000, 0.000000, -0.725208, 0.000000, 0.688530, -4.084061, 0.618350, 7.863438)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete11")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white12" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.688530, 0.000000, 0.725208, 0.000000, 1.000000, 0.000000, -0.725208, 0.000000, 0.688530, -4.084061, 0.638350, 7.863438)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white12")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete13" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.700185, 0.000000, 0.713962, 0.000000, 1.000000, 0.000000, -0.713962, 0.000000, 0.700185, -7.745754, 0.583862, 11.387371)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete13")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete14" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.714293, 0.000000, 0.699847, 0.000000, 1.000000, 0.000000, -0.699847, 0.000000, 0.714293, -9.149223, 0.570000, 12.822540)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete14")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white15" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.714293, 0.000000, 0.699847, 0.000000, 1.000000, 0.000000, -0.699847, 0.000000, 0.714293, -9.149223, 0.590000, 12.822540)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white15")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete16" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.739932, 0.000000, 0.672682, 0.000000, 1.000000, 0.000000, -0.672682, 0.000000, 0.739932, -11.834221, 0.545125, 15.638344)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete16")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete17" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.749618, 0.000000, 0.661870, 0.000000, 1.000000, 0.000000, -0.661870, 0.000000, 0.749618, -14.111050, 0.526700, 18.144623)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete17")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white18" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.749618, 0.000000, 0.661870, 0.000000, 1.000000, 0.000000, -0.661870, 0.000000, 0.749618, -14.111050, 0.546700, 18.144623)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white18")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete19" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.768387, 0.000000, 0.639986, 0.000000, 1.000000, 0.000000, -0.639986, 0.000000, 0.768387, -17.198141, 0.500656, 21.819717)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete19")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete20" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.784643, 0.000000, 0.619948, 0.000000, 1.000000, 0.000000, -0.619948, 0.000000, 0.784643, -18.478138, 0.490000, 23.408737)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete20")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white21" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.784643, 0.000000, 0.619948, 0.000000, 1.000000, 0.000000, -0.619948, 0.000000, 0.784643, -18.478138, 0.510000, 23.408737)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white21")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete22" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.803708, 0.000000, 0.595024, 0.000000, 1.000000, 0.000000, -0.595024, 0.000000, 0.803708, -21.118885, 0.471344, 26.833382)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete22")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete23" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.808520, 0.000000, 0.588469, 0.000000, 1.000000, 0.000000, -0.588469, 0.000000, 0.808520, -22.877371, 0.458350, 29.280928)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete23")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioanefoam_white24" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.808520, 0.000000, 0.588469, 0.000000, 1.000000, 0.000000, -0.588469, 0.000000, 0.808520, -22.877371, 0.478350, 29.280928)
+mesh = SubResource("BoxMesh_pistaAvioanefoam_white24")
+metadata/tri_class = "FOAM_WHITE"
+metadata/coliziune = "none"
+
+[node name="pistaAvioaneconcrete25" type="MeshInstance3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(0.815115, 0.000000, 0.579300, 0.000000, 1.000000, 0.000000, -0.579300, 0.000000, 0.815115, -25.051472, 0.438895, 32.398521)
+mesh = SubResource("BoxMesh_pistaAvioaneconcrete25")
+metadata/tri_class = "CONCRETE"
+metadata/coliziune = "none"
+
+[node name="avionMal26" type="Path3D" parent="DecorManual/ZoneH_Mal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.270342, 25.205383, 0.810851)
+curve = SubResource("Curve3D_avionMal26")
+script = ExtResource("s_path_mover_script")
+model = ExtResource("s_bush_plane")
+model_scale = 1.0
+speed = 9.0
+travel_mode = 1
+phase = 0.0
+stick_to_ground = false
+
+[node name="malDriftwood27" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.331032, 0.000000, -0.943619, 0.000000, 1.000000, 0.000000, 0.943619, 0.000000, -0.331032, 28.575531, 0.415115, 21.112875)
+metadata/coliziune = "none"
+
+[node name="malGuard28" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.993613, 0.000000, 0.112845, 0.000000, 1.000000, 0.000000, -0.112845, 0.000000, -0.993613, 25.294685, 0.357422, 27.577948)
+
+[node name="fagMalA29" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.876511, 0.000000, -0.481382, 0.000000, 1.000000, 0.000000, 0.481382, 0.000000, 0.876511, 33.803558, 0.416306, 16.870186)
+metadata/coliziune = "trunk"
+
+[node name="fagMalA30" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.853389, 0.000000, 0.521275, 0.000000, 1.000000, 0.000000, -0.521275, 0.000000, -0.853389, 29.285107, 0.412582, 21.859091)
+metadata/coliziune = "trunk"
+
+[node name="fagMalA31" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.940319, 0.000000, -0.340295, 0.000000, 1.000000, 0.000000, 0.340295, 0.000000, 0.940319, 22.326330, 0.326645, 29.992395)
+metadata/coliziune = "trunk"
+
+[node name="fagMalA32" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.463750, 0.000000, 0.885966, 0.000000, 1.000000, 0.000000, -0.885966, 0.000000, -0.463750, 17.685041, 0.263092, 36.278225)
+metadata/coliziune = "trunk"
+
+[node name="fagMalA33" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.999653, 0.000000, 0.026329, 0.000000, 1.000000, 0.000000, -0.026329, 0.000000, -0.999653, 16.538139, -0.074066, 37.519024)
+metadata/coliziune = "trunk"
+
+[node name="fagMalB34" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.980633, 0.000000, -0.195853, 0.000000, 1.000000, 0.000000, 0.195853, 0.000000, 0.980633, -37.704559, -0.287186, 21.882456)
+metadata/coliziune = "trunk"
+
+[node name="fagMalB35" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.998582, 0.000000, -0.053242, 0.000000, 1.000000, 0.000000, 0.053242, 0.000000, 0.998582, -47.562553, -0.256332, 31.497076)
+metadata/coliziune = "trunk"
+
+[node name="fagMalB36" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.943683, 0.000000, -0.330850, 0.000000, 1.000000, 0.000000, 0.330850, 0.000000, 0.943683, -26.745014, 0.024536, 43.200001)
+metadata/coliziune = "trunk"
+
+[node name="fagMalB37" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.950217, 0.000000, 0.311588, 0.000000, 1.000000, 0.000000, -0.311588, 0.000000, -0.950217, -36.554871, -0.041656, 52.377060)
+metadata/coliziune = "trunk"
+
+[node name="fagFeriga38" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.948458, 0.000000, -0.444725, 0.000000, 1.047546, 0.000000, 0.444725, 0.000000, 0.948458, 12.791223, 0.351868, 2.266497)
+metadata/coliziune = "none"
+
+[node name="fagFeriga39" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.737092, 0.000000, 0.756143, 0.000000, 1.055963, 0.000000, -0.756143, 0.000000, -0.737092, -50.717758, -0.265549, 31.979027)
+metadata/coliziune = "none"
+
+[node name="fagFeriga40" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.195974, 0.000000, -1.123644, 0.000000, 1.140605, 0.000000, 1.123644, 0.000000, 0.195974, -24.276134, 0.041809, 39.703110)
+metadata/coliziune = "none"
+
+[node name="fagFeriga41" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(1.250825, 0.000000, -0.122890, 0.000000, 1.256848, 0.000000, 0.122890, 0.000000, 1.250825, -31.608486, 0.007553, 54.861912)
+metadata/coliziune = "none"
+
+[node name="fagFeriga42" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.391655, 0.000000, -1.061837, 0.000000, 1.131765, 0.000000, 1.061837, 0.000000, 0.391655, 8.129183, 0.305756, 7.272220)
+metadata/coliziune = "none"
+
+[node name="fagFeriga43" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.834919, 0.000000, -0.202743, 0.000000, 0.859183, 0.000000, 0.202743, 0.000000, 0.834919, 31.691643, 0.420044, 22.151144)
+metadata/coliziune = "none"
+
+[node name="fagTussock44" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.924856, 0.000000, 0.199747, 0.000000, 0.946181, 0.000000, -0.199747, 0.000000, -0.924856, -51.597359, -0.199905, 46.031876)
+metadata/coliziune = "none"
+
+[node name="fagTussock45" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.764150, 0.000000, 0.435184, 0.000000, 0.879381, 0.000000, -0.435184, 0.000000, 0.764150, -54.370277, -0.279480, 31.471983)
+metadata/coliziune = "none"
+
+[node name="fagTussock46" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.848064, 0.000000, 0.751368, 0.000000, 1.133034, 0.000000, -0.751368, 0.000000, 0.848064, -50.126926, -0.266693, 31.370857)
+metadata/coliziune = "none"
+
+[node name="fagTussock47" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.008063, 0.000000, 0.997366, 0.000000, 0.997399, 0.000000, -0.997366, 0.000000, 0.008063, -53.157108, -0.291504, 27.844458)
+metadata/coliziune = "none"
+
+[node name="fagLodgeA_148" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.472032, -0.000812, 0.918209, -0.001073, 1.032435, 0.000361, -0.918209, -0.000789, -0.472033, 19.096645, 0.367065, -6.288707)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_149" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.994113, -0.018845, 0.176164, -0.015005, 1.009397, 0.023303, -0.176533, 0.020323, -0.994019, 22.017200, 0.449310, -5.451178)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_150" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.871756, 0.052464, 0.417760, 0.055056, 0.966520, -0.006492, -0.417426, 0.017912, -0.873309, 20.597691, 0.432419, -4.707165)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_151" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(1.039555, 0.008723, -0.182136, -0.012068, 1.055198, -0.018346, 0.181945, 0.020153, 1.039430, 21.510876, 0.436798, -5.984436)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_252" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.087513, 0.033345, 0.958319, 0.050974, 0.961103, -0.028787, -0.957543, 0.048116, -0.089116, 18.576481, 0.434616, 0.833143)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_253" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.906855, -0.037710, -0.051864, 0.037473, 0.908331, -0.005226, 0.052036, 0.003076, 0.907623, 17.392796, 0.409271, -0.413507)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_254" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.902410, -0.002413, -0.513544, 0.001952, 1.038302, -0.001448, 0.513546, 0.000293, 0.902412, 16.776953, 0.396576, -1.062106)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_255" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-1.031245, 0.003975, -0.448243, -0.008999, 1.124002, 0.030670, 0.448170, 0.031714, -1.030796, 15.684738, 0.385239, 0.034534)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_256" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.128773, -0.014933, -1.027692, -0.025338, 1.035365, -0.018220, 1.027488, 0.027404, 0.128350, 17.253635, 0.406387, -0.560066)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_357" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.267554, -0.008371, -0.978614, 0.001457, 1.014522, -0.009076, 0.978649, -0.003799, -0.267531, 16.043348, 0.418793, 5.687974)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_358" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.555241, 0.043916, -0.890379, 0.016554, 1.048272, 0.062027, 0.891308, -0.046827, 0.553511, 15.790970, 0.413773, 5.422453)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_359" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.886887, -0.006208, -0.338749, -0.009837, 0.948367, -0.043134, 0.338663, 0.043804, 0.885859, 13.981021, 0.376404, 3.518252)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_460" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.218922, -0.019217, 0.869306, -0.016643, 0.896179, 0.024002, -0.869359, -0.021995, 0.218449, 7.057014, 0.305344, 10.923929)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_461" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.660520, -0.007375, 0.717728, 0.022216, 0.974707, 0.030461, -0.717422, 0.036973, -0.659858, 7.821744, 0.318893, 11.737465)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_562" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.357427, 0.021652, -0.869582, 0.045178, 0.938401, 0.041935, 0.868678, -0.057713, 0.355618, 1.806248, 0.254761, 18.339176)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeA_563" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.688001, -0.044907, -0.901340, -0.035437, 1.133867, -0.029443, 0.901762, 0.010296, -0.688837, 0.335851, 0.236420, 16.851566)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeB_664" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.933944, 0.006927, 0.296171, 0.010547, 0.979693, 0.010347, -0.296064, 0.013051, -0.933912, -9.896929, 0.153214, 25.585894)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeB_665" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.422814, 0.007918, -0.804618, -0.000181, 0.908935, 0.009040, 0.804657, 0.004365, -0.422792, -8.231790, 0.168411, 26.950741)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeB_666" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.385749, 0.068232, 0.915743, -0.037912, 0.993597, -0.058063, -0.917499, -0.012369, 0.387410, -5.887250, 0.188034, 25.171577)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeB_667" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.921385, 0.014167, -0.319841, 0.027556, 0.974360, -0.036223, 0.318967, -0.043252, -0.920781, -8.153015, 0.166855, 23.235558)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeB_668" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.359770, -0.038861, 0.868688, 0.029152, 0.940114, 0.029983, -0.869068, 0.015447, 0.360618, -9.932497, 0.152893, 25.556740)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeB_769" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.947123, 0.055789, 0.616175, 0.041001, 1.129869, -0.039277, -0.617335, -0.010551, -0.947952, -11.216821, 0.142471, 26.643654)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeB_770" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.941966, 0.031538, -0.348636, -0.024413, 1.004304, 0.024889, 0.349207, -0.014860, 0.942166, -10.953767, 0.117752, 24.719646)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_871" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.784405, -0.020007, 0.708529, 0.000261, 1.056786, 0.030130, -0.708812, 0.022530, -0.784081, -15.130157, 0.117142, 34.662075)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_872" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.842237, -0.005468, 0.546915, 0.016801, 1.003980, -0.015834, -0.546684, 0.022429, 0.842106, -16.291336, 0.109802, 36.973732)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_973" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.518954, 0.020119, 0.804718, -0.021779, 0.957453, -0.009892, -0.804675, -0.012939, 0.519250, -23.569485, 0.053314, 43.053902)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_974" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.121537, 0.043897, -1.110467, 0.003608, 1.117098, 0.043764, 1.111329, 0.001174, -0.121585, -22.781662, 0.057007, 40.742439)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_975" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.238598, -0.013483, -0.939018, 0.026790, 0.968555, -0.007100, 0.938733, -0.024214, 0.238873, -23.341068, 0.055649, 43.219719)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_976" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.020797, -0.038117, 1.013428, 0.004843, 1.013634, 0.038025, -1.014133, 0.004058, 0.020964, -24.109415, 0.047806, 42.661934)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_977" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.969820, -0.037587, -0.286397, -0.040805, 1.011085, 0.005479, 0.285956, 0.016800, -0.970533, -21.399490, 0.070969, 41.703674)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_1078" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.426027, 0.032836, -1.015183, -0.050119, 1.098845, 0.056575, 1.014476, 0.068077, -0.423528, -28.561722, 0.024017, 52.149624)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_1079" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.889060, 0.000881, 0.147560, 0.001454, 0.901215, 0.003379, -0.147555, 0.003572, -0.889054, -27.766123, 0.029358, 49.848198)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_1080" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.833314, -0.037297, -0.560580, 0.010962, 1.003685, -0.050483, 0.561712, 0.035744, 0.832619, -28.620697, 0.019760, 49.085674)
+metadata/coliziune = "trunk"
+
+[node name="fagLodgeC_1081" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.959685, 0.007047, 0.268853, -0.014496, 0.996222, 0.025631, -0.268554, -0.028591, 0.959368, -28.918140, 0.023499, 51.811222)
+metadata/coliziune = "trunk"

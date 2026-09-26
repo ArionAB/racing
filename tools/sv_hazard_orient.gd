@@ -72,6 +72,30 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# verificat vizual pe captura, nu de sonda asta (care compara doar cu
 	# directia drumului, nu cu normala lui).
 	"chevron",
+	# RUNDA 1 POI H (Malul si pista de avioane): fagii rari + subetajul de pe
+	# mal si driftwood/guard_rock de pe plaja — acelasi tip de piesa fara axa
+	# functionala (arbori/bolovani/lemn plutit dispersat), yaw aleator
+	# intentionat (aranjamentul-bate-numarul).
+	"fagMalA", "fagMalB", "fagFeriga", "fagTussock", "malDriftwood",
+	"malGuard", "malKayak",
+	# RUNDA 2 POI H: padurea din spatele satului (fagLodgeA/B/C), reparatie
+	# la verdictul criticului orb ("lipseste padurea compacta din spatele
+	# cladirilor") — acelasi tip de piesa fara axa functionala ca fagMalA/B
+	# de mai sus, yaw aleator intentionat (aranjamentul-bate-numarul).
+	"fagLodgeA", "fagLodgeB", "fagLodgeC",
+	# heliportul: disc jos, fara fata privilegiata (ca FoamPool mai sus).
+	"heliport",
+	# pista de avioane: placi plate CONCRETE/FOAM_WHITE fara model, orientate
+	# pe tangenta locala dar simetrice pe axa lor (un dreptunghi plat n-are
+	# "fata" ca o perdea) — acelasi motiv ca FoamPool/marmita.
+	"pistaAvioane",
+	# avionMal: PathMover — orientarea REALA vine din `_travel_yaw` la
+	# fiecare cadru (directia de zbor pe curba), nu din transformul static
+	# scris in .tscn la generare. Acelasi principiu ca AvalansaF ("orientata
+	# din cod, unghiul ei nu conteaza").
+	"avionMal",
+	# lodge/magazie: NU sunt in lista — fatada are orientare care CONTEAZA
+	# (spre drum, ca in bara) si raman verificabile ca orice piesa cu axa.
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:

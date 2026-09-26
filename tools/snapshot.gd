@@ -876,7 +876,39 @@ func _set_train_phase(root: Node, at: float) -> void:
 		train.set("_time", train.period * clampf(at, 0.0, 0.999))
 		train._physics_process(0.0)
 		found += 1
-	print("--train-at=%.2f: %d treceri de cale ferata mutate in ciclu" % [at, found])
+	# POI H (Fiordland): avionul si vaporasul sunt PathMover generic, nu
+	# TrainHazard — acelasi tipar de ceas, extins la orice PathMover din
+	# scena (bucla: fractia*lungime; dus-intors: la fel, pe sensul curent).
+	for node in root.find_children("*", "PathMover", true, false):
+		var mover := node as PathMover
+		if mover == null or mover.curve == null:
+			continue
+		var length := mover.curve.get_baked_length()
+		if length < 0.5:
+			continue
+		mover.set("_started", true)
+		mover.set("_dist", length * clampf(at, 0.0, 0.999))
+		# `_body` e AnimatableBody3D cu `sync_to_physics = true`: scrierea lui
+		# `global_transform` din `_physics_process` (path_mover.gd) trece prin
+		# starea de fizica si nu se reflecta imediat in `global_position` cand
+		# e apelata manual, in afara unui tick real de fizica (verificat: doua
+		# apeluri succesive la `_physics_process(0.0)` tot au aratat corpul la
+		# originea curbei, desi `_dist`/`sample_baked` erau deja corecte).
+		# `TrainHazard` scapa de asta fiindca scrie `.position` local pe un
+		# Node3D simplu, nu `global_transform` pe un corp sincronizat cu
+		# fizica. Fix local: opreste sincronizarea CAT TIMP se scrie transful,
+		# ca scrierea sa fie directa pe Node3D (CPU), apoi o repune — corpul
+		# ramane sincronizat normal in cursa reala, doar captura foloseste
+		# ocolul.
+		var body: Node3D = mover.call("body")
+		if body != null and body.has_method("set"):
+			body.set("sync_to_physics", false)
+			mover._physics_process(0.0)
+			body.set("sync_to_physics", true)
+		else:
+			mover._physics_process(0.0)
+		found += 1
+	print("--train-at=%.2f: %d treceri (tren/PathMover) mutate in ciclu" % [at, found])
 
 
 ## Muta cosurile care urca la o fractie din ciclul lor (toate la aceeasi faza,

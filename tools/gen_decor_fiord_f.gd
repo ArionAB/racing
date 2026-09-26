@@ -95,6 +95,33 @@ const BASE_R := {
 const EDGE_KEEP := 0.8
 const EDGE_KEEP_DRIFTWOOD := 2.0
 
+## Raza de CORNER (semi-diagonala AABB, nu BASE_R -- BASE_R e doar jumatatea
+## laturii MARI, adica raza corecta doar cand un COLT al piesei nu ajunge sa
+## fie cea mai apropiata muchie de axa laterala). La un yaw ARBITRAR, un colt
+## al AABB-ului poate iesi pe axa laterala mai departe decat jumatatea laturii
+## mari -- verificat direct din mesh (tools/dbg_aabb.gd, dbg_aabb2.gd):
+##   chasm_rock:     semi-laturi (2.999, 2.358) -> semi-diagonala 3.816 (BASE_R 3.02)
+##   guard_rock:     semi-laturi (0.591, 0.351) -> semi-diagonala 0.688 (BASE_R 0.59)
+##   moss_boulder_b: semi-laturi (1.241, 1.177) -> semi-diagonala 1.710 (BASE_R 1.10)
+##   moss_boulder_c: semi-laturi (2.104, 1.688) -> semi-diagonala 2.697 (BASE_R 1.80)
+## Un fix bazat pe BASE_R a lasat piese sa treaca de limita (masurat cu
+## probe_pileup_footprint, runda 4a: 34/317 in _scar_pileup(); runda 4b:
+## chasmRock1 din _scar(), 0.76 m peste limita, coliziune REALA hull) -- exact
+## colturile "norocoase" la yaw-uri intermediare.
+const CORNER_R := {
+	"chasm_rock": 3.816,
+	"guard_rock": 0.688,
+	"moss_boulder_b": 1.710,
+	"moss_boulder_c": 2.697,
+}
+
+## Marja suplimentara pentru eroarea de curbura (memoria runda-3c): `half`
+## calculat la indexul central al pasului nu e neaparat `half` de la indexul
+## cel mai apropiat REAL de pozitia offsetata a piesei -- pe curbele din zona F
+## diferenta masurata (probe_pileup_footprint, runda 4a) a fost pana la ~0,8 m.
+## 1,0 m acopera marja cu rezerva.
+const CURVE_MARGIN := 1.0
+
 var _track: Track
 var _sampler: TrackSideSampler
 var _out: Array[String] = []
@@ -223,17 +250,28 @@ func _scar() -> void:
 				var lo := sgn * lat
 				if _in_avalanche_strip(f, lo):
 					continue # fasia mobila ramane goala (brief F)
-				if absf(lo) < half + EDGE_KEEP:
+				# Stem-ul se alege INAINTE de verificarea de degajare -- runda 4b
+				# (coordonator): `chasmRock1` intra 0,76 m pe carosabil fiindca
+				# degajarea verifica doar CENTRUL (half+EDGE_KEEP, 0,8 m), nu
+				# amprenta reala a piesei. La yaw arbitrar un chasm_rock are raza
+				# de colt 3,816 m (CORNER_R, vezi comentariul de la declaratie) --
+				# mult peste marja EDGE_KEEP. Aceeasi regula ca in _scar_pileup():
+				# piesele >= 0,3 m (toate cele hull de aici) trebuie sa stea cu
+				# toata amprenta in afara carosabilului, plus marja de curbura.
+				var stems := ["chasm_rock", "moss_boulder_c", "moss_boulder_b", "guard_rock"]
+				if _rng.randf() < 0.18:
+					stems = ["beech_dead"]
+				var stem: String = stems[_rng.randi() % stems.size()]
+				var min_lat: float = half + EDGE_KEEP
+				if CORNER_R.has(stem):
+					min_lat = maxf(min_lat, half + CORNER_R[stem] + CURVE_MARGIN)
+				if absf(lo) < min_lat:
 					continue
 				var q := p + s * lo
 				var gy := _ground(q.x, q.z)
 				if gy <= -900.0:
 					continue
 				var yaw := _rng.randf_range(0.0, TAU)
-				var stems := ["chasm_rock", "moss_boulder_c", "moss_boulder_b", "guard_rock"]
-				if _rng.randf() < 0.18:
-					stems = ["beech_dead"]
-				var stem: String = stems[_rng.randi() % stems.size()]
 				_place(stem, q, gy, yaw, 1.0)
 				idx += 1
 		f += _step(3.2)
@@ -341,29 +379,6 @@ func _scar_debris() -> void:
 ## > 0.765 -- limita coordonatorului).
 const PILEUP_RANGES := [[0.700, 0.734], [0.766, 0.800]]
 const PILEUP_STEP := 0.003
-
-## Raza de CORNER (semi-diagonala AABB, nu BASE_R -- BASE_R e doar jumatatea
-## laturii MARI, adica raza corecta doar cand un COLT al piesei nu ajunge sa
-## fie cea mai apropiata muchie de axa laterala). La un yaw ARBITRAR (runda 3
-## alegea `_rng.randf_range(0.0, TAU)`), un colt al AABB-ului poate iesi pe
-## axa laterala mai departe decat jumatatea laturii mari -- verificat direct
-## din mesh (tools/dbg_aabb.gd): chasm_rock are semi-laturi (2.999, 2.358),
-## deci semi-diagonala e 3.815 m, nu 3.02 (BASE_R). Un fix bazat pe BASE_R a
-## lasat 34 de piese sa treaca de limita (masurat cu probe_pileup_footprint,
-## verdictul runda 4a) -- exact colturile "norocoase" la yaw-uri intermediare.
-## guard_rock: semi-laturi (0.591, 0.351) -> semi-diagonala 0.688 (fata de
-## BASE_R 0.59).
-const CORNER_R := {
-	"chasm_rock": 3.816,
-	"guard_rock": 0.688,
-}
-
-## Marja suplimentara pentru eroarea de curbura (memoria runda-3c, de mai sus):
-## `half` calculat la indexul central al pasului nu e neaparat `half` de la
-## indexul cel mai apropiat REAL de pozitia offsetata a piesei -- pe curbele
-## din zona F diferenta masurata (probe_pileup_footprint, runda 4a) a fost
-## pana la ~0,8 m. 1,0 m acopera marja cu rezerva.
-const CURVE_MARGIN := 1.0
 
 func _scar_pileup() -> void:
 	var n := _track.baked.size()

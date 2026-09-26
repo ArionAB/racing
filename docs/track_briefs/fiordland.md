@@ -285,6 +285,32 @@ Cornișa (0 → 30 pe ~340 m ≈ **8,8%**), coborârea în Chasm (32 → 15 pe 3
    tunelul Homer: semafor, autocar ◄──────┘  + tunelul (45→27 m, 150 m)
 ```
 
+> **Starea pe scenă la 26 sep 2026 (citește asta înaintea tabelului — rândurile
+> de mai jos păstrează conceptul v0.1 și istoricul, nu contractul curent):**
+> - **A:** vaporașele de la ponton sunt `cruise_boat.glb` refăcut din
+>   „Cruise Ship – toofan” (CC-BY-4.0), caiacele din „Canoe – Low poly”
+>   (CC-BY-4.0), ambele pe paleta pistei; credite în `assets/CREDITS.md`.
+>   **Vaporașul care traversează fiordul (§3) NU există** — doar cele două
+>   ancorate.
+> - **C:** Stirling lovește la intrare: împingere laterală spre mare (`push_speed`
+>   9, fără parapet), smucitură de yaw (1,4 rad/s × 0,35 s), shake 0,55, mașina
+>   picură 3 s, parbrizul ud. Pragul uscat din spatele perdelei: tot geometrie
+>   de făcut.
+> - **D:** **podețul e real**: `Hazarduri/PodetChasm` (`TrackChannel`,
+>   `jump = false`, `static_deck`) la frac **0,4007**, gol **19 m** (nu 40: pe
+>   raza de ~45 m de la 0,412 un pod drept de 37 m arunca AI-ul de pe tablier),
+>   râul alb **pe sub pod**, apa la 10–12 m sub drum, grip 0,85× pe 0,394–0,407.
+> - **D/E:** pulsul torentului lovește mai tare decât Stirling (`push_speed` 13,
+>   yaw 1,8, shake 0,8, picură 4 s). Cu podețul, bucla e mai lentă cu
+>   0,3–0,5 s, deci scurtătura câștigă pe uscat +1,35…+1,93 s
+>   (`ProbeFiordScurtatura` free: PICĂ pe fereastra 0,5–1,5; contractul pe faze
+>   al torentului trece) — reglaj de volan.
+> - **E:** bandă de autocar fără oprire, `period` 47,5 (nu semafor cu oprire,
+>   nu nișe).
+> - **F:** fiordul **nu** e în față la ieșirea din tunel (decizia (b), 21 sep).
+>   Avalanșa: **`avalanche_period` 10 s** (decizia dezvoltatorului, 26 sep);
+>   blocajul real e 2,6 s din ciclu, prinde ~1 mașină AI în 5 din 8 curse.
+
 | # | frac | POI | ce se întâmplă | semi-lățime (`custom_width_segments`; drumul real e dublu) |
 |---|---|---|---|---|
 | **A** | 0.00–0.05 | **Start pe chei** — grila pe asfalt ud lângă pontonul cu două vaporașe albe și caiace; magazia cafenelei, 3 pinguini tawaki pe pietre (decor), peste apă **Mitre Peak ca perete negru** cu baza în mare; în spate, Bowen Falls ca fir alb în perete (se vede întreagă de pe B) | respiro; pontonul și magazia sunt pereți cu masă; apa de lângă chei = repunere (`RespawnZone`) | 8 m |
@@ -304,8 +330,8 @@ coborâre (răsplata: fiordul întreg în față; avalanșa) → Bowen (saltul) 
 mal (avionul) → chei.
 
 **Ceasuri care nu împart durata turului** (lecția Stromboli): ploaia
-**~95 s** (5 s telegraph + 25 s ploaie + 5 s zvântare), semaforul **40 s**
-(18 s roșu = 6 golire + 12 autocar), avalanșa **~60 s**, avionul **~50 s**, vaporașul **~120 s** pe
+**~95 s** (5 s telegraph + 25 s ploaie + 5 s zvântare), semaforul **47,5 s**
+(bandă de autocar, roșu 21,5 s; v0.1: 40 s), avalanșa **10 s** (v0.1: ~60 s), avionul **~50 s**, vaporașul **~120 s** pe
 traversare. Stirling n-are ceas: e mereu acolo, doar **greutatea** ei se
 schimbă cu ploaia. Faza fiecăruia se mută de la tur la tur.
 

@@ -423,14 +423,40 @@ func _riverbed() -> void:
 		var half := _track.width_at_index(i)
 		# bolovani mari, chiar sub linia drumului (vizibil prin/langa pod),
 		# dar impinsi peste half+ROAD_MARGIN pe fiecare parte (nu chiar pe ax).
-		var lat := (half + 3.5) * (1.0 if k % 2 == 0 else -1.0)
+		#
+		# REPARATIE INTEGRARE (fiord/poi-fix), a doua trecere: gap-ul fix 3.5 m
+		# (lat = half+3.5, mereu ~10.0 m la half~6.5) e OK departe de traseul
+		# principal in general, dar la frac 0.352-0.40 (furca scurtaturii, 0.366)
+		# un `marmita` (nu doar `marmitaMal`) a ramas exact pe linia unde AI-ul
+		# taie coltul la viteza mare -- masurat: [ejectare] "perete" 48.4 m/s la
+		# frac 0.365, pos (-538,24,-495), la 5.4 m de `marmita19` (lat -10.00,
+		# hull) -- identic pe seed 8 inainte SI dupa fix-ul de la `marmitaMal18`
+		# (deci un obstacol diferit, nu acelasi). Acelasi tratament: gap
+		# suplimentar in fereastra fork-ului.
+		var near_fork_c := f >= 0.352 and f <= 0.40
+		var gap_c := 6.5 if near_fork_c else 3.5
+		var lat := (half + gap_c) * (1.0 if k % 2 == 0 else -1.0)
 		var mdl := "chasm_rock"
 		_place_river(mdl, "marmita", f, lat, _rng.randf_range(0.75, 1.4), "hull")
-		# bolovani mai mici pe margini, spre malurile albiei
+		# bolovani mai mici pe margini, spre malurile albiei.
+		#
+		# REPARATIE INTEGRARE (fiord/poi-fix): gap-ul 4.0-8.0 (lat 9.5-13.5 la
+		# half~5.5-6.5) e sigur DEPARTE de traseul principal in general, dar la
+		# frac 0.355-0.40 (chiar inainte si la intrarea in furca scurtaturii,
+		# 0.366) traficul AI congestioneaza cand masinile decid ramura -- una
+		# a lovit REPETAT marmitaMal18 (frac 0.3636, lat 8.5, half 6.5 acolo)
+		# la fiecare din cele 8 seed-uri uscate si a ramas blocata (fara
+		# repunere ulterioara pana la finalul cursei, tur minim cazut la 1.42).
+		# Marja marita la 7.0-11.0 in fereastra fork-ului, ca sa acopere si
+		# deviatia laterala mai mare din trafic aglomerat, nu doar linia
+		# curata a unei singure masini.
+		var near_fork := f >= 0.352 and f <= 0.40
+		var gap_lo := 7.0 if near_fork else 4.0
+		var gap_hi := 11.0 if near_fork else 8.0
 		for sgn: float in [-1.0, 1.0]:
 			if _rng.randf() < 0.6:
 				_place_river("chasm_rock", "marmitaMal", f + _step(_rng.randf_range(-3.0, 3.0)),
-					sgn * (half + _rng.randf_range(4.0, 8.0)), _rng.randf_range(0.4, 0.75), "hull")
+					sgn * (half + _rng.randf_range(gap_lo, gap_hi)), _rng.randf_range(0.4, 0.75), "hull")
 		f += _step(7.0 + _rng.randf_range(-1.5, 1.5))
 		k += 1
 	print("; albie: piese de rau asezate (marmite chasm_rock)")
@@ -724,6 +750,23 @@ func _scale_for(model: String, meters: float) -> float:
 ## (trunk/hull/mesh) care ar cadea pe banda REALA a scurtaturii (curba proprie
 ## a `ScurtaturaChasm`, nu un interval de fractie pe traseul principal --
 ## memoria obstacol-pe-drum-poate-fi-gimmick + fix RUNDA 1 dupa ProbeLaneClear).
+## REPARATIE INTEGRARE (fiord/poi-fix): fereastra de APROPIERE DE FURCA
+## (0.360-0.372, chiar inainte si la intrarea in ScurtaturaChasm la 0.366) --
+## acolo traficul AI (6 masini, una grea/lenta) congestioneaza la decizia de
+## ramura, si deviatiile laterale ale unei masini in dificultate depasesc ce
+## vede vreodata o singura masina pe linie curata. ProbeRace pe integrare a
+## prins Autobuzul blocat repetat la exact frac 0.364, lat 8.5-9.0 (fix
+## anterior in _riverbed a scos marmitaMal18 din calea directa, dar padurea
+## deasa de langa drum -- fagApropiat/feriga/reperMargine, toate cu coliziune
+## reala -- ramane la 9.5-11 m, in aceeasi banda unde autobuzul incearca sa
+## manevreze). Gap suplimentar mic (1.5 m) DOAR pentru piesele cu coliziune
+## reala in aceasta fereastra ingusta -- nu schimba densitatea vizuala a
+## padurii pe restul POI-ului D (critic aprobat), doar da putin mai mult loc
+## de manevra exact la punctul de decizie.
+const FORK_APPROACH_LO := 0.360
+const FORK_APPROACH_HI := 0.372
+const FORK_APPROACH_EXTRA_GAP := 1.5
+
 func _place(model: String, base: String, frac: float, side_sign: float,
 		gap: float, yaw: float, scl: float, mode: String = "hull") -> void:
 	var n := _track.baked.size()
@@ -732,6 +775,9 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var s := _track._side_at(i) * side_sign
 	var half := _track.width_at_index(i)
 	var r: float = BASE_R.get(model, 0.6) * scl
+	var f_wrapped := fposmod(frac, 1.0)
+	if mode != "none" and f_wrapped >= FORK_APPROACH_LO and f_wrapped <= FORK_APPROACH_HI:
+		gap += FORK_APPROACH_EXTRA_GAP
 	var d := half + gap + r
 	var q := p + s * d
 	var g := _sol_real(q.x, q.z)

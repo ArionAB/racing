@@ -132,12 +132,47 @@ const ROAD_MARGIN := 2.1
 ## acopere si aterizarea propriu-zisa, nu doar zborul. Extinsa la 0.848-0.888
 ## (contract 0.85-0.875 + marja) si JUMP_LAT la 9.5 m (masurat: blocajul cel
 ## mai indepartat a fost la 7.9 m, deci 9.5 lasa 1.6 m rezerva).
+##
+## REPARATIE INTEGRARE (fiord/poi-fix): pe scena integrata (6 masini, nu doar
+## harnasul POI-ului izolat), ProbeRace a masurat repuneri repetate cu lat
+## PANA LA 10.1-10.2 (Muscle/Politia), peste cei 7.9 care au fixat 9.5 aici —
+## mai multe masini si trafic pe banda de aterizare inseamna deviatii mai
+## mari decat a vazut vreodata harnasul solo. Ridicat la 11.0 (marja ~0.8 m
+## peste cel mai mare lat masurat pe integrare).
 const JUMP_F_LO := 0.848
 const JUMP_F_HI := 0.888
-const JUMP_LAT := 9.5
+const JUMP_LAT := 11.0
 ## RUNDA 3: marja pentru piesele NOI de linie-a-apei (_waterline_boulders),
 ## mai mare decat JUMP_LAT — vezi comentariul din functia respectiva.
-const WATERLINE_LAT := 12.0
+##
+## REPARATIE INTEGRARE (fiord/poi-fix): 12.0 nu ajungea. ProbeRace pe scena
+## integrata a prins repetat [blocaj] cu masina lipita de `waterline109_col`
+## la frac 0.878, lat MASURAT DE MASINA 10.1-10.2 (nu de generator) — piesa
+## avea muchia calculata la exact 12.0 (centru la 14.28, moss_boulder_c scl
+## 1.29 x BASE_R 1.53 = r~1.97), dar corpul de coliziune REAL (hull convex pe
+## mesh, nu sfera) nu e simetric fata de centrul folosit la asezare: pe axa
+## lunga a bolovanului muchia reala ajunge mai aproape de drum decat raza
+## izotropa presupusa. Masurat pe blocaj: pozitia masinii (77,-2,-23) e la
+## ~4-5m de centrul nominal al piesei (79,-2.7,-19.5) de-a lungul drumului,
+## nu strict lateral -- hull-ul convex se intinde si pe directia drumului,
+## nu doar perpendicular. Ridicat la 15.0 (peste cel mai mare lat masurat la
+## blocaj, 10.2, cu marja de ~4-5m pentru extinderea hull-ului pe lungime).
+##
+## A DOUA TRECERE: 15.0 tot nu ajungea -- alt seed a prins [blocaj] repetat pe
+## `waterline119_col` cu masina la lat MASURAT 14.0 (piesa avea muchia
+## calculata la exact 15.0, deci acelasi fenomen de hull elongat, ~1 m peste
+## marja anterioara). Cauza structurala (nu doar "marja prea mica"): raza
+## folosita in tot calculul (`BASE_R * scl`) e IZOTROPA, dar hull-ul convex
+## real al unui bolovan neregulat (chasm_rock/moss_boulder) NU e un cerc --
+## pe axa lui lunga muchia reala poate iesi cu 30-40% peste raza nominala. De
+## asta fiecare marja anterioara (9.5, 12.0, 15.0) a fost gasita insuficienta
+## de urmatoarea rulare: problema nu era marja absoluta, era ca raza de
+## siguranta subestima sistematic hull-ul. Fix structural: HULL_SAFETY_MULT
+## umfla raza folosita DOAR in verificarea de siguranta a benzii saltului
+## (nu in `d`, ca sa nu îndese piesele degeaba in afara benzii), ca sa acopere
+## elongarea, in loc sa se tot ridice constanta exterioara la infinit.
+const HULL_SAFETY_MULT := 1.4
+const WATERLINE_LAT := 15.0
 
 var _track: Track
 var _sampler: TrackSideSampler
@@ -293,8 +328,14 @@ func _pool_wall() -> void:
 				var gap := _rng.randf_range(1.0, 4.5) + float(k) * 1.6
 				# banda saltului: MUCHIA (nu centrul) piesei trebuie sa ramana
 				# la >= JUMP_LAT m de ax pe 0.848-0.888 (contract explicit).
-				if f >= JUMP_F_LO and f <= JUMP_F_HI:
-					gap = maxf(gap, JUMP_LAT - half + 0.3)
+				# REPARATIE INTEGRARE: fereastra stricta (fara marja) lasa
+				# poolWall1/2/3 nesigurate la frac 0.8423 (chiar sub JUMP_F_LO),
+				# lat 8.3-11.5 -- aceeasi marja +-0.006 ca la _waterline_boulders,
+				# ca sa acopere si coada dinspre kicker.
+				if f >= (JUMP_F_LO - 0.006) and f <= (JUMP_F_HI + 0.006):
+					# HULL_SAFETY_MULT: vezi comentariul WATERLINE_LAT -- hull-ul
+					# convex real se intinde peste raza izotropa presupusa.
+					gap = maxf(gap, JUMP_LAT - half + r * (HULL_SAFETY_MULT - 1.0) + 0.3)
 				var d := half + gap + r
 				var q := p + s * d
 				var nrm := _normal_real(q.x, q.z)
@@ -368,7 +409,12 @@ func _waterline_boulders() -> void:
 				# de fiecare parte, ca sa acopere si coada aterizarii.
 				var in_jump_band := f >= (JUMP_F_LO - 0.006) and f <= (JUMP_F_HI + 0.006)
 				if in_jump_band:
-					gap = maxf(gap, WATERLINE_LAT - half + 0.3)
+					# HULL_SAFETY_MULT: hull-ul convex real (bolovan neregulat)
+					# se intinde peste raza izotropa presupusa -- vezi comentariul
+					# WATERLINE_LAT. Umflam raza DOAR aici (gap-ul de siguranta),
+					# nu in `d` (pozitia reala), ca sa nu departam inutil piesele
+					# din afara benzii saltului.
+					gap = maxf(gap, WATERLINE_LAT - half + r * (HULL_SAFETY_MULT - 1.0) + 0.3)
 				var d := half + gap + r
 				var q := p + s * d
 				var nrm := _normal_real(q.x, q.z)
@@ -414,10 +460,24 @@ func _waterline_boulders() -> void:
 
 ## (2) PIETRISUL ATERIZARII — clasa de teren (SAND_SHADOW), NU GLB. Aici doar
 ## marcheaza vizual cu cateva pietre mici (guard_rock) langa banda de
-## aterizare, in AFARA benzii saltului (0.85-0.875, +-7 m). world_prop.gd nu
-## ofera o "clasa" direct din generator — asta ramane treaba fundatiei
-## (custom_step_ranges/texturi de sol); aici punem doar accent 3D discret,
-## la distanta sigura de aterizare.
+## aterizare. world_prop.gd nu ofera o "clasa" direct din generator — asta
+## ramane treaba fundatiei (custom_step_ranges/texturi de sol); aici punem
+## doar accent 3D discret, la distanta sigura de aterizare.
+##
+## BUG GASIT LA INTEGRARE (reparatie fiord/poi-fix): comentariul vechi zicea
+## "in AFARA benzii saltului (+-7m)", dar codul nu impunea niciodata JUMP_LAT
+## aici — spre deosebire de `_pool_wall`/`_waterline_boulders`, care AU
+## verificarea. Cele 4 fracii (0.878/0.882/0.887/0.893) cad chiar in fereastra
+## JUMP_F_LO-JUMP_F_HI (0.848-0.888, si 0.893 e la 0.005 in afara), iar
+## gap 3-6m peste half~6m lasa pietrele la 9.2-11.4m de ax — sub JUMP_LAT
+## (9.5m), in banda unde masinile care aluneca dupa aterizare inca ajung
+## (ProbeRace pe integrare: [blocaj] repetat la frac 0.876-0.884, lat 6-10m,
+## una din runde a nimerit direct waterline (alta piesa), dar gravelEdge188
+## (frac 0.8868, lat +9.16) era singura piesa din TOATA zona cu coliziune
+## solida sub JUMP_LAT chiar in interiorul ferestrei protejate — restul
+## bolovanilor de la _pool_wall/_waterline_boulders respecta deja marja).
+## Fix: acelasi gap-floor ca in `_place`/`_pool_wall` (JUMP_LAT - half + 0.3)
+## pe toata fereastra saltului.
 func _landing_gravel() -> void:
 	var n := _track.baked.size()
 	var side_sign := -_wall_sign  # malul opus peretelui, unde aterizeaza masina
@@ -429,6 +489,16 @@ func _landing_gravel() -> void:
 		var s: Vector3 = _track._side_at(i) * side_sign
 		var half: float = _track.width_at_index(i)
 		var gap := _rng.randf_range(3.0, 6.0)
+		# aceeasi marja +-0.006 ca la _waterline_boulders/_pool_wall (0.893 e
+		# la 0.005 peste JUMP_F_HI strict -- fara buffer, gravelEdge189 ramanea
+		# nesigurata: masurat 10.82 m sub noul JUMP_LAT 11.0).
+		# `d` de mai jos e distanta la CENTRU (nu se scade `r` separat ca in
+		# celelalte functii) -- HULL_SAFETY_MULT aplicat pe raza maxima posibila
+		# a guard_rock (BASE_R*1.0) acopera elongarea hull-ului convex, la fel
+		# ca la _pool_wall/_waterline_boulders.
+		if f >= (JUMP_F_LO - 0.006) and f <= (JUMP_F_HI + 0.006):
+			var r_max: float = BASE_R.get("guard_rock", 0.65) * 1.0
+			gap = maxf(gap, JUMP_LAT - half + r_max * (HULL_SAFETY_MULT - 1.0) + 0.3)
 		var d := half + gap
 		var q := p + s * d
 		var g := _sol_real(q.x, q.z)
@@ -598,9 +668,10 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	gap = maxf(gap, ROAD_MARGIN - r)
 	# felia saltului: MUCHIA piesei (d - r) trebuie sa ramana la >= JUMP_LAT
 	# (acelasi fix ca in _pool_wall — gap se calculeaza pentru muchie, nu
-	# pentru centru).
+	# pentru centru). HULL_SAFETY_MULT: hull-ul convex real se intinde peste
+	# raza izotropa presupusa (vezi comentariul WATERLINE_LAT).
 	if frac >= JUMP_F_LO and frac <= JUMP_F_HI and mode != "none":
-		gap = maxf(gap, JUMP_LAT - half + 0.3)
+		gap = maxf(gap, JUMP_LAT - half + r * (HULL_SAFETY_MULT - 1.0) + 0.3)
 	var d := half + gap + r
 	var q := p + s * d
 	var g := _sol_real(q.x, q.z)

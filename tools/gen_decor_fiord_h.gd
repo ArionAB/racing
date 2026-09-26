@@ -710,54 +710,25 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 ## Fix: sub_resource-ul merge in `_out_sub`, care `_write()` il varsa
 ## INAINTEA blocului de noduri.
 ##
-## (2) `metadata/tri_class` NU e citit de nimeni la runtime (doar de
-## `probe_decor.gd`, pentru raportare) — mecanismul care aplica efectiv
-## `Palette.apply_triplanar_class` pe subarbore ruleaza pe GLB-uri prin
-## `world_prop.gd`, niciodata pe un `MeshInstance3D` scris de mana in
-## `.tscn`. Placile ramaneau FARA MATERIAL, deci Godot le randa cu shaderul
-## de debug (checker curcubeu) — asta a citit criticul ca "iarba", nu ca
-## lipsa de textura, dar captura araba clar culorile UV nefolosite.
-## Fix: material triplanar STATIC (`sub_resource StandardMaterial3D`), doua
-## instante reutilizate pe TOATE placile (zero materiale noi -> zero cost la
-## garda de 38): clasa "concrete" (deja in Palette.CLASS_TRIPLANAR_SCALE,
-## `assets/textures/classes/concrete.png`) pentru dala gri, clasa
-## "village_plaster" (aproape alb, `plaster.png`) pentru marcaje — ambele
-## clase EXISTENTE, refolosite ca orice alt GLB de pe alta clasa.
-const MAT_CONCRETE_ID := "StripConcreteMat"
-const MAT_MARKING_ID := "StripMarkingMat"
-var _strip_mats_written := false
-
-func _ensure_strip_materials() -> void:
-	if _strip_mats_written:
-		return
-	_strip_mats_written = true
-	# Parametrii copiati din Palette.triplanar_class_material() (scripts/palette.gd):
-	# "concrete" uv1_scale 0.5, fara CLASS_TINT (albedo neted); "village_plaster"
-	# uv1_scale 0.55, tint aproape alb (0.97, 1.0, 1.0) — vezi CLASS_TRIPLANAR_SCALE
-	# / CLASS_TINT. Triplanar in spatiul LUMII: placile sunt statice, deci nu
-	# "inoata" (memoria din palette.gd despre obiecte care se misca nu se aplica).
-	_out_sub.append('[sub_resource type="StandardMaterial3D" id="%s"]' % MAT_CONCRETE_ID)
-	_out_sub.append('vertex_color_use_as_albedo = true')
-	_out_sub.append('albedo_texture = ExtResource("s_tex_concrete")')
-	_out_sub.append('metallic_specular = 0.15')
-	_out_sub.append('roughness = 0.9')
-	_out_sub.append('uv1_scale = Vector3(0.5, 0.5, 0.5)')
-	_out_sub.append('uv1_triplanar = true')
-	_out_sub.append('uv1_world_triplanar = true')
-	_out_sub.append("")
-	_out_sub.append('[sub_resource type="StandardMaterial3D" id="%s"]' % MAT_MARKING_ID)
-	_out_sub.append('vertex_color_use_as_albedo = true')
-	_out_sub.append('albedo_color = Color(0.97, 1.0, 1.0, 1.0)')
-	_out_sub.append('albedo_texture = ExtResource("s_tex_plaster")')
-	_out_sub.append('metallic_specular = 0.15')
-	_out_sub.append('roughness = 0.9')
-	_out_sub.append('uv1_scale = Vector3(0.55, 0.55, 0.55)')
-	_out_sub.append('uv1_triplanar = true')
-	_out_sub.append('uv1_world_triplanar = true')
-	_out_sub.append("")
-
+## (2) Placile ieseau cu dungi curcubeu (atlasul de paleta intins pe UV-ul
+## implicit al BoxMesh-ului), nu beton. Cauza NU era lipsa unui
+## `material_override` in .tscn — orice valoare pusa acolo manual e
+## SUPRASCRISA necondiționat la incarcare: `DecorManual` are scriptul
+## `world_prop.gd` (scenes/tracks/Track16.tscn, nodul chiar), al carui
+## `_ready()` ruleaza `Palette.apply_class_materials(self, prop_classes())`
+## pe TOT subarborele — orice `MeshInstance3D` al carui nume nu se
+## potriveste cu un prefix din maparea globala primeste necondiționat
+## `world_material()` (scripts/palette.gd:1739). Descoperit abia in
+## captura, nu la incarcare (fara eroare de parsare, deci `probe_decor`/
+## `probe_manual` treceau "verde" in timp ce placile erau curcubeu).
+## Fix real: inregistrat prefixul "pistaAvioane*" in
+## `TrackDecor.FIORDLAND_AIRSTRIP_CLASSES` (scenes/tracks/track_decor.gd),
+## adaugat in `world_prop.prop_classes()` — acelasi mecanism ca orice alt
+## GLB de pe alta clasa triplanara ("concrete" pt dala, "village_plaster"
+## pt marcaje, ambele clase EXISTENTE, zero material nou). Generatorul nu
+## mai scrie niciun material in .tscn: doar `metadata/tri_class`, folosit
+## de `probe_decor.gd` pentru raportare.
 func _raw_box(pos: Vector3, yaw: float, size: Vector3, cls: String) -> void:
-	_ensure_strip_materials()
 	_n += 1
 	var nm := "pistaAvioane%s%d" % [cls.to_lower(), _n]
 	_out_sub.append('[sub_resource type="BoxMesh" id="BoxMesh_%s"]' % nm)
@@ -769,8 +740,6 @@ func _raw_box(pos: Vector3, yaw: float, size: Vector3, cls: String) -> void:
 		% [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z,
 			pos.x, pos.y, pos.z])
 	_out.append('mesh = SubResource("BoxMesh_%s")' % nm)
-	var mat_id := MAT_CONCRETE_ID if cls == "CONCRETE" else MAT_MARKING_ID
-	_out.append('surface_material_override/0 = SubResource("%s")' % mat_id)
 	_out.append('metadata/tri_class = "%s"' % cls)
 	_out.append('metadata/coliziune = "none"')
 	_out.append("")

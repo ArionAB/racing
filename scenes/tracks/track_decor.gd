@@ -1100,6 +1100,22 @@ const PINE_FAR: Array[String] = ["Pine_B", "Pine_C", "Pine_A", "Pine_C"]
 ## era exact "culoarea plata" din diagnosticul BBR2 (CLAUDE.md, texturi).
 const PINE_CLASSES: Dictionary = {"Pine": "tri:pine_needles"}
 
+## Pista de aterizare a POI-ului H (Fiordland): fasii CONCRETE/FOAM_WHITE
+## scrise de mana in Track16.tscn (gen_decor_fiord_h.gd), fara GLB. Fara
+## intrare aici, `Palette.apply_class_materials` (world_prop.gd._ready,
+## ruleaza pe TOT subarborele DecorManual) nu recunoaste prefixul
+## "pistaAvioane*" si cade pe `world_material()` — atlasul de paleta intins
+## pe UV-ul implicit al unui BoxMesh iese ca dungi curcubeu, nu ca beton
+## (runda 5, gasit abia in captura: `material_override` scris direct in
+## .tscn e suprascris necondiționat la _ready, nu ajunge sa se vada
+## niciodata). Prefixul lung ("pistaAvioaneconcrete" vs "pistaAvioanefoam")
+## castiga in `_class_for`, deci cele doua tipuri de placi ajung pe clase
+## diferite desi impart radacina "pistaAvioane".
+const FIORDLAND_AIRSTRIP_CLASSES: Dictionary = {
+	"pistaAvioaneconcrete": "tri:concrete",
+	"pistaAvioanefoam_white": "tri:village_plaster",
+}
+
 
 ## Decorul de banda al muntelui de vara.
 ##

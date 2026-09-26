@@ -3118,6 +3118,7 @@ static func prop_classes() -> Dictionary:
 	out.merge(TrackDecor.STROMBOLI_CLASSES)
 	out.merge(TrackDecor.CHONGQING_CLASSES)
 	out.merge(TrackDecor.CAPPADOCIA_CLASSES)
+	out.merge(TrackDecor.FIORDLAND_AIRSTRIP_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

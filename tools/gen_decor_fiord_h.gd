@@ -230,25 +230,32 @@ func _village() -> void:
 	# lodge: cladirea lunga, fatada spre drum. Yaw 90 ca fatada lunga (17 m pe
 	# X in fisier) sa fie paralela cu drumul, nu perpendiculara.
 	#
-	# RUNDA 1: gap 6.0 respinsa de `_on_any_road` — raza mare a lodge-ului
-	# (BASE_R 8.72) impinge punctul de test la ~22 m de ax, iar malul se
-	# curbeaza aproape 180° pe toata felia (survey), deci acolo cade langa o
-	# alta bucla a drumului. Mutat mai aproape de frac 0.910 (curbura mai
-	# blanda in survey: side aproape constant intre 0.905-0.915) si gap redus
-	# la 4.0 — lodge-ul ramane primul reper langa drum, ca in bara.
-	_place("lodge", "lodge", 0.910, 1.0, 4.0, deg_to_rad(90.0), 1.0, "hull")
-	# cafe_shed ca magazie, langa lodge, spre pista. Ramane pe aceeasi felie
-	# blanda (0.905-0.918) ca lodge-ul, gap redus (14 -> 10) pentru acelasi
-	# motiv (_on_any_road).
-	_place("cafe_shed", "magazie", 0.913, 1.0, 10.0, deg_to_rad(-90.0), 1.0, "hull")
+	# RUNDA 1: gap 6.0 respinsa de `_on_any_road`. RUNDA 2/3: mutat la frac
+	# 0.910, gap 4.0 — geometric plasat corect, dar verdictul rundei 4 a
+	# gasit cauza reala: `--gamecam` prива inainte doar LOOK_AHEAD=5 m (nu
+	# spre un punct anume), deci la fractia de captura 0.91 camera se afla
+	# la ~12,5 m in spatele lodge-ului si priveste aproape TANGENT la drum —
+	# un obiect la +19 m lateral de axa cade la ~57° fata de directia
+	# privirii, mult in afara jumatatii de FOV (34°). Calcul verificat
+	# analitic (unghi camera->obiect, tangenta ~constanta pe 0.900-0.930):
+	# la frac de captura 0.910, satul trebuie sa fie la 40-60 m INAINTE pe
+	# drum (nu la 10-25 m) ca sa intre in con. Drumul ramane aproape drept
+	# pana la 0.930 (deviatie tangentei < 10° fata de 0.910), deci mutarea nu
+	# strica "paralel cu drumul". Sat + pista + avion mutate cu ~+0,010 in
+	# frac (de la banda 0.908-0.917 la 0.918-0.927): la frac de captura 0.91,
+	# lodge iese la unghi ~-28° (era -57°), heliport ~-20° (era -47°) —
+	# ambele in con.
+	_place("lodge", "lodge", 0.920, 1.0, 4.0, deg_to_rad(90.0), 1.0, "hull")
+	# cafe_shed ca magazie, langa lodge, spre pista.
+	_place("cafe_shed", "magazie", 0.923, 1.0, 10.0, deg_to_rad(-90.0), 1.0, "hull")
 	# heliportul, disc gol, intre sat si pista de avioane.
-	_place("heli_pad", "heliport", 0.916, 1.0, 14.0, 0.0, 1.0, "none")
+	_place("heli_pad", "heliport", 0.926, 1.0, 14.0, 0.0, 1.0, "none")
 	# containerele de bagaje, langa magazie.
-	_place("luggage_container", "container", 0.911, 1.0, 16.0, deg_to_rad(20.0), 1.0, "hull")
-	_place("luggage_container", "container", 0.914, 1.0, 16.5, deg_to_rad(-15.0), 1.0, "hull")
+	_place("luggage_container", "container", 0.921, 1.0, 16.0, deg_to_rad(20.0), 1.0, "hull")
+	_place("luggage_container", "container", 0.924, 1.0, 16.5, deg_to_rad(-15.0), 1.0, "hull")
 	# balize pe marginea drumului, lânga sat.
-	_place("snow_pole", "baliza", 0.908, 1.0, 1.0, 0.0, 1.0, "none")
-	_place("road_sign_blank", "semn", 0.917, 1.0, 2.0, deg_to_rad(-90.0), 1.0, "hull")
+	_place("snow_pole", "baliza", 0.918, 1.0, 1.0, 0.0, 1.0, "none")
+	_place("road_sign_blank", "semn", 0.927, 1.0, 2.0, deg_to_rad(-90.0), 1.0, "hull")
 	print("; sat: lodge+magazie+heliport+containere asezate")
 
 
@@ -270,13 +277,16 @@ func _village() -> void:
 ## vectorul lateral se roteste ~180 grade). O pista la offset lateral
 ## CONSTANT fata de un drum care coteste asa iese ea insasi curbata — nu se
 ## vede ca pista dreapta, se vede ca o dunga arcuita fara sens. Singurul
-## interval unde curbura e mica e chiar la intrare (0.900-0.917, unde side
-## ramane aproape (-0.69,-0.73) pe tot intervalul) — acolo sta si satul, deci
-## pista + avion se muta acolo, paralele cu drumul si cu satul, ca in bara.
+## interval unde curbura e mica e chiar la intrare (0.900-0.930, unde side se
+## roteste sub 10° fata de tangenta la 0.910) — acolo sta si satul.
+##
+## RUNDA 4: fasia mutata odata cu satul (vezi nota din `_village`), de la
+## 0.900-0.917 la 0.912-0.930, ca la fractia de captura 0.91 sa fie in fata
+## camerei (con de 34°), nu tangent la ea.
 const STRIP_OFFSET := 22.0     # distanta laterala de la ax la mijlocul pistei
 const STRIP_HALF_W := 6.0      # jumatate din latimea pistei de avioane
-const STRIP_F_IN := 0.900
-const STRIP_F_OUT := 0.917
+const STRIP_F_IN := 0.912
+const STRIP_F_OUT := 0.930
 
 func _airstrip() -> void:
 	var n := _track.baked.size()
@@ -317,18 +327,18 @@ func _airstrip() -> void:
 ## fata de `transform`-ul nodului — nu globale. Se pune deci originea
 ## transformului pe primul punct al curbei si restul punctelor relativ la ea.
 func _plane() -> void:
-	# Curba avionului: 4 puncte, DE-A LUNGUL FELIEI DREPTE (0.900-0.917, acolo
-	# unde sta si pista) — nu pe toata zona H, care se curbeaza aproape 180
-	# grade (vezi nota de la STRIP_F_IN/OUT). Start departe de grila (frac
-	# 0.900, la >1900 m de start/finish, memoria corp-cinematic-aparut-in-
-	# masina), aterizare pe pista spre capatul feliei. Coboara de la +25 m
-	# fata de sol la +0,3 (atinge pista), paralel cu drumul, deplasat spre
-	# STRIP_OFFSET.
+	# Curba avionului: 4 puncte, DE-A LUNGUL FELIEI DREPTE (0.912-0.930, acolo
+	# unde sta acum si pista si satul — RUNDA 4, vezi nota de la STRIP_F_IN/
+	# OUT) — nu pe toata zona H, care se curbeaza aproape 180 grade. Start
+	# departe de grila (frac 0.910, la >1900 m de start/finish, memoria
+	# corp-cinematic-aparut-in-masina), aterizare pe pista langa heliport.
+	# Coboara de la +25 m fata de sol la +0,3 (atinge pista), paralel cu
+	# drumul, deplasat spre STRIP_OFFSET.
 	var n := _track.baked.size()
 	var pts: Array[Vector3] = []
 	var heights: Array[float] = [25.0, 14.0, 3.0, 0.3]
 	var offs: Array[float] = [STRIP_OFFSET - 4.0, STRIP_OFFSET, STRIP_OFFSET, STRIP_OFFSET]
-	var fracs: Array[float] = [0.900, 0.906, 0.912, 0.916]
+	var fracs: Array[float] = [0.910, 0.917, 0.923, 0.927]
 	for k in fracs.size():
 		var i := int(fracs[k] * float(n)) % n
 		var p := _track.baked[i]
@@ -382,7 +392,7 @@ func _plane() -> void:
 	_out.append('stick_to_ground = false')
 	_out.append("")
 	_tri += int(TRI.get("bush_plane", 0))
-	print("; avion: PathMover pe %d puncte, de la frac 0.905 la 0.980" % pts.size())
+	print("; avion: PathMover pe %d puncte, de la frac 0.910 la 0.927" % pts.size())
 
 
 ## (3) MALUL — apa pe stanga = repunere (verificata, nu construita aici):
@@ -412,15 +422,24 @@ func _shore() -> void:
 ## jitter pe fractie si pe gap, yaw variat, mix de specii/varste.
 func _forest() -> void:
 	var species := ["beech_a", "beech_b", "beech_a", "beech_c", "beech_dead", "beech_b"]
-	var side_left := [0.913, 0.927, 0.944, 0.957, 0.970, 0.983]
+	# RUNDA 4: verdictul criticului identifica exact acest sir (side_sign
+	# -1, spre apa) ca sursa golului din stanga/mijlocul cadrului — la
+	# distanta de 14 pasi de fractie (~30 m) intre 0.913 si 0.927, cu gap
+	# 6-16 m, un singur copac cade in conul camerei la 0.91 si urmatorul e
+	# prea departe ca sa citeasca "sir". Adaugate 3 exemplare intre ele
+	# (0.907/0.910/0.917, gap mai mic 3-9 m ca sa fie mai aproape de drum si
+	# deci mai mari in cadru), pastrand jitter-ul si fara sa devina grila
+	# (spatiere neregulata, nu echidistanta).
+	var side_left := [0.907, 0.910, 0.913, 0.917, 0.920, 0.927, 0.944, 0.957, 0.970, 0.983]
 	for k in side_left.size():
 		var f: float = side_left[k] + _rng.randf_range(-0.002, 0.002)
-		var gap: float = _rng.randf_range(6.0, 16.0)
+		var gap: float = _rng.randf_range(3.0, 9.0) if f < 0.922 else _rng.randf_range(6.0, 16.0)
 		_place(species[k % species.size()], "fagMalA", f, -1.0, gap,
 			_rng.randf_range(0.0, TAU), 1.0, MODE.get(species[k % species.size()], "trunk"))
 	# dreapta, dincolo de pista (>= STRIP_OFFSET + STRIP_HALF_W + 3): rar, ca
-	# sa nu inchida cadrul spre orizont.
-	var side_right := [0.919, 0.938, 0.966, 0.990]
+	# sa nu inchida cadrul spre orizont. Pista s-a mutat (STRIP_F_IN 0.912),
+	# prima entitate urmeaza (0.919 -> 0.929).
+	var side_right := [0.929, 0.938, 0.966, 0.990]
 	for k in side_right.size():
 		var f: float = side_right[k] + _rng.randf_range(-0.002, 0.002)
 		var gap: float = STRIP_OFFSET + STRIP_HALF_W - 8.0 + _rng.randf_range(6.0, 14.0)
@@ -467,11 +486,25 @@ func _lodge_forest() -> void:
 	# grup sa aiba silueta de contur diferita de vecinul lui; tree_fern doar
 	# la marginea clusterelor ("amestec ... + tree_fern la margine").
 	var trunk_species := ["beech_a", "beech_b", "beech_c", "beech_dead"]
+	# RUNDA 4: satul mutat cu +0,010 in frac (lodge 0.910->0.920, vezi
+	# `_village`), benzile se muta odata cu el. Banda A ("inainte de lodge")
+	# marita si densificata: verdictul rundei 4 arata exact acest interval —
+	# la fractia de captura 0.91 camera priveste spre 0.905-0.925, adica
+	# spre banda A si inceputul lodge-ului. Un "gol mare de iarba" acolo
+	# citeste "camp cu un copac"; contractul cere "lizera continua in cadru"
+	# (fagi rari CA EXEMPLARE, dar sirul neintrerupt), deci n_clusters creste
+	# 3->5 si banda se lateste ca sa acopere tot intervalul vizibil inainte
+	# de lodge, nu doar coada lui.
+	# gap_min 3.0 (nu 1.5): jitter-ul de cluster (+-1.6 pe gap_center, +-1.6
+	# per membru) putea impinge centrul unui fag sub `hw_here + ROAD_MARGIN`
+	# (probe_manual, prag 2.0 de la muchie) desi `_place` insusi il accepta
+	# (EDGE_KEEP 1.0 e doar warning) — prins de probe_manual ca "IN DRUM"
+	# (fagLodgeA_5 la 8.9 m, runda 4).
 	var bands := [
-		# [f0, f1, gap_min, gap_max, n_clusters] — cele trei benzi din runda 2.
-		[0.897, 0.908, 1.5, 9.5, 3],   # inainte de lodge
-		[0.9095, 0.9155, 2.5, 6.5, 2], # intre lodge si heliport
-		[0.9165, 0.929, 2.5, 6.5, 3],  # dupa heliport/containere, spre pista
+		# [f0, f1, gap_min, gap_max, n_clusters] — cele trei benzi.
+		[0.902, 0.918, 3.0, 9.5, 5],   # inainte de lodge (lizera din cadru)
+		[0.9195, 0.9255, 3.0, 6.5, 2], # intre lodge si heliport
+		[0.9265, 0.939, 3.0, 6.5, 3],  # dupa heliport/containere, spre pista
 	]
 	var band_names := ["fagLodgeA", "fagLodgeB", "fagLodgeC"]
 	var cluster_id := 0
@@ -506,7 +539,11 @@ func _lodge_forest() -> void:
 				# fiecarui membru variaza pe fractie SI pe gap, ca grupul sa
 				# aiba contur neregulat, nu un cerc perfect.
 				var f: float = f_center + _rng.randf_range(-0.55, 0.55) * (f1 - f0) / float(n_clusters * 2)
-				var gap: float = gap_center + _rng.randf_range(-1.6, 1.6)
+				# podea de 2.2 pe gap: cu raza fagului (~0.7-1.0) tine centrul
+				# piesei clar peste hw_here+ROAD_MARGIN (probe_manual, 2.0),
+				# altfel jitter-ul de -1.6 pe un gap_center minim (3.0) poate
+				# cobori sub prag ("IN DRUM", prins runda 4 pe fagLodgeA_5).
+				var gap: float = maxf(gap_center + _rng.randf_range(-1.6, 1.6), 2.2)
 				var yaw := _rng.randf_range(0.0, TAU)
 				# scara: jitter +-15% NESISTEMATIC — in loc de o banda mica
 				# si uniforma, trage din doua regimuri (majoritatea aproape

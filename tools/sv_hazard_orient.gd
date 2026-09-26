@@ -51,6 +51,11 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# intentionat (aranjamentul-bate-numarul).
 	"fagMalA", "fagMalB", "fagFeriga", "fagTussock", "malDriftwood",
 	"malGuard", "malKayak",
+	# RUNDA 2 POI H: padurea din spatele satului (fagLodgeA/B/C), reparatie
+	# la verdictul criticului orb ("lipseste padurea compacta din spatele
+	# cladirilor") — acelasi tip de piesa fara axa functionala ca fagMalA/B
+	# de mai sus, yaw aleator intentionat (aranjamentul-bate-numarul).
+	"fagLodgeA", "fagLodgeB", "fagLodgeC",
 	# heliportul: disc jos, fara fata privilegiata (ca FoamPool mai sus).
 	"heliport",
 	# pista de avioane: placi plate CONCRETE/FOAM_WHITE fara model, orientate

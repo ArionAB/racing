@@ -171,6 +171,7 @@ func _ready() -> void:
 		_airstrip()
 		_shore()
 		_forest()
+		_lodge_forest()
 		_write()
 	get_tree().quit(0)
 
@@ -436,6 +437,91 @@ func _forest() -> void:
 		_place("tussock_clump", "fagTussock", f, side, gap,
 			_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.2), "none")
 	print("; fagi rari + subetaj asezate")
+
+
+## (5) PADUREA DIN SPATELE SATULUI — reparatie runda 2. Criticul orb (v2r1):
+## "in referinta fasia dintre drum si pista e impadurita compact - zeci de
+## coroane suprapuse (...) care formeaza o silueta continua in spatele
+## cladirilor. La noi exista un singur copac izolat langa cladirea cu
+## acoperis albastru, restul terenului dintre drum si structuri e iarba
+## goala." Nota coordonator: padurea in SPATELE cladirilor (nu intre drum si
+## ele daca le-ar ascunde); clustere, jitter >= 0,5 din pas, 2-3 randuri
+## decalate; fagii NU se scaleaza sistematic (+-10%); nimic pe pista sau pe
+## traiectoria avionului.
+##
+## Geometrie: lodge la frac 0,910 gap 4,0 (BASE_R 8,72) -> centru la ~19,2 m
+## de ax; heliport 0,916 gap 14,0 (BASE_R 6,00) -> centru la ~26,7 m;
+## containere 0,911/0,914 gap 16-16,5. Pista incepe la interior 22-6=16 m de
+## ax. Deci fasia dintre satul propriu-zis si pista e ingusta (~16 pana la
+## marginea cladirilor) — padurea "din spate" incape doar ca banda subtire
+## intre containere si pista, PLUS lateral de-a lungul segmentelor de frac
+## fara cladiri (0,900-0,907 si 0,919-0,927), aproape de muchia drumului
+## (gap mic), unde din unghiul camerei (care vine dinspre frac mica spre
+## mare) copacii citesc drept fundal continuu chiar langa/dupa lodge si
+## heliport — exact "fasia de iarba dintre drum si cladirea cu acoperis
+## albastru" numita de critic. Trei clustere (nu grila), 2-3 randuri
+## decalate per cluster, jitter >= 0,5*pas pe fractie SI pe gap.
+func _lodge_forest() -> void:
+	var species := ["beech_a", "beech_b", "beech_c", "beech_a", "beech_b", "beech_dead"]
+	var sp_i := 0
+	# Cluster 1: imediat inainte de lodge (0,899-0,907), langa drum — umple
+	# perdeaua vazuta de camera INAINTE ca lodge-ul sa intre in cadru.
+	var c1_f0 := 0.898
+	var c1_f1 := 0.907
+	var c1_rows: Array[float] = [2.0, 5.0, 8.5]  # gap fata de muchia drumului, pe rand
+	for row in c1_rows.size():
+		var row_gap: float = c1_rows[row]
+		var n_in_row := 3
+		var step_f: float = (c1_f1 - c1_f0) / float(n_in_row)
+		for k in n_in_row:
+			var f_base: float = c1_f0 + step_f * (float(k) + 0.5)
+			var f: float = f_base + _rng.randf_range(-0.5 * step_f, 0.5 * step_f)
+			var gap: float = row_gap + _rng.randf_range(-0.5, 0.5) + float(row) * 0.3
+			var sp: String = species[sp_i % species.size()]
+			sp_i += 1
+			var scl: float = 1.0 + _rng.randf_range(-0.1, 0.1)
+			_place(sp, "fagLodgeA", f, 1.0, gap, _rng.randf_range(0.0, TAU), scl,
+				MODE.get(sp, "trunk"))
+	# Cluster 2: intre lodge si heliport (0,911-0,915), pe flancul dinspre
+	# camera — copacii dintre cele doua cladiri, ca in bara nu exista teren
+	# gol vizibil intre ele.
+	var c2_f0 := 0.9105
+	var c2_f1 := 0.9145
+	var c2_rows: Array[float] = [3.0, 5.5]
+	for row in c2_rows.size():
+		var row_gap: float = c2_rows[row]
+		var n_in_row := 2
+		var step_f: float = (c2_f1 - c2_f0) / float(n_in_row)
+		for k in n_in_row:
+			var f_base: float = c2_f0 + step_f * (float(k) + 0.5)
+			var f: float = f_base + _rng.randf_range(-0.5 * step_f, 0.5 * step_f)
+			var gap: float = row_gap + _rng.randf_range(-0.4, 0.4)
+			var sp: String = species[sp_i % species.size()]
+			sp_i += 1
+			var scl: float = 1.0 + _rng.randf_range(-0.1, 0.1)
+			_place(sp, "fagLodgeB", f, 1.0, gap, _rng.randf_range(0.0, TAU), scl,
+				MODE.get(sp, "trunk"))
+	# Cluster 3: dupa heliport/containere (0,918-0,928), inchizand silueta
+	# spre pista fara sa puna nimic PE pista (gap tinut sub limita interioara
+	# a pistei: STRIP_OFFSET - STRIP_HALF_W - 3 ~= 13 m fata de muchia
+	# drumului la half~7,5-8 -> gap max ~5,5; ramanem sub asta cu marja).
+	var c3_f0 := 0.917
+	var c3_f1 := 0.928
+	var c3_rows: Array[float] = [3.0, 5.5]
+	for row in c3_rows.size():
+		var row_gap: float = c3_rows[row]
+		var n_in_row := 3
+		var step_f: float = (c3_f1 - c3_f0) / float(n_in_row)
+		for k in n_in_row:
+			var f_base: float = c3_f0 + step_f * (float(k) + 0.5)
+			var f: float = f_base + _rng.randf_range(-0.5 * step_f, 0.5 * step_f)
+			var gap: float = row_gap + _rng.randf_range(-0.4, 0.4)
+			var sp: String = species[sp_i % species.size()]
+			sp_i += 1
+			var scl: float = 1.0 + _rng.randf_range(-0.1, 0.1)
+			_place(sp, "fagLodgeC", f, 1.0, gap, _rng.randf_range(0.0, TAU), scl,
+				MODE.get(sp, "trunk"))
+	print("; padurea din spatele satului: 3 clustere asezate (runda 2)")
 
 
 # ------------------------------------------------------------------ asezarea

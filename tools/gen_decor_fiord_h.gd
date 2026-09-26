@@ -72,7 +72,9 @@ const RES := {
 const HEIGHT := {
 	"lodge": 6.185, "cafe_shed": 3.656, "luggage_container": 2.600,
 	"heli_pad": 0.300, "bush_plane": 1.850, "snow_pole": 2.000,
-	"road_sign_blank": 2.450, "kayak_a": 0.361, "kayak_b": 0.361,
+	# 26 sep 2026: kayak_a/b inlocuite (fiordland_stare_poi.md decizia #2) —
+	# inaltimea a crescut de la 0,361 la 0,585 m (lungimea 3,6 m neschimbata).
+	"road_sign_blank": 2.450, "kayak_a": 0.585, "kayak_b": 0.585,
 	"penguin_tawaki": 0.770, "driftwood": 0.384,
 	"beech_a": 7.030, "beech_b": 10.189, "beech_c": 13.501, "beech_dead": 8.515,
 	"tree_fern": 3.306,
@@ -105,7 +107,8 @@ const CROWN_R := {
 const TRI := {
 	"lodge": 636, "cafe_shed": 308, "luggage_container": 88, "heli_pad": 178,
 	"bush_plane": 844, "snow_pole": 40, "road_sign_blank": 36,
-	"kayak_a": 94, "kayak_b": 94, "penguin_tawaki": 282, "driftwood": 52,
+	# 26 sep 2026: model nou, 94 -> 6775 tri (fara plafon, doar raportat).
+	"kayak_a": 6775, "kayak_b": 6775, "penguin_tawaki": 282, "driftwood": 52,
 	"beech_a": 228, "beech_b": 292, "beech_c": 292, "beech_dead": 136,
 	"tree_fern": 768,
 	"guard_rock": 72, "tussock_clump": 144, "fern_cluster": 60,
@@ -431,8 +434,14 @@ func _shore() -> void:
 	for f in fracs_drift:
 		_place("driftwood", "malDriftwood", f, -1.0, 1.5,
 			_rng.randf_range(0.0, TAU), 1.0, "none")
+	# 26 sep 2026: kayak_a/b inlocuite cu un model nou (canoe CC-BY-4.0, vezi
+	# fiordland_stare_poi.md) — latimea AABB a crescut de la 0,58 la 1,61 m
+	# (tools/sv_boat_aabb_v2.gd; lungimea 3,6 m a ramas neschimbata prin
+	# constructie). Gap-ul lateral dintre cele doua caiace era 0,6 m (3,0 vs
+	# 3,6), suficient pentru latimea veche (2x0,29 m) dar nu si pentru cea
+	# noua (2x0,805 m) — marit la 2,0 m ca sa nu se suprapuna vizual.
 	_place("kayak_a", "malKayak", 0.922, -1.0, 3.0, deg_to_rad(8.0), 1.0, "none")
-	_place("kayak_b", "malKayak", 0.923, -1.0, 3.6, deg_to_rad(-6.0), 1.0, "none")
+	_place("kayak_b", "malKayak", 0.923, -1.0, 5.0, deg_to_rad(-6.0), 1.0, "none")
 	for i in 3:
 		var f: float = 0.950 + 0.006 * float(i)
 		_place("penguin_tawaki", "malPinguin", f, -1.0,

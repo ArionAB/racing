@@ -55,6 +55,14 @@ const F_DENSE_OUT := 0.450
 ## Podetul (custom_step_ranges) -- tablia e drumul; balustradele merg deasupra.
 const BRIDGE_IN := 0.406
 const BRIDGE_OUT := 0.424
+## `chasm_bridge_rail` masoara 40.48 m pe local Z (axa lunga, masurat cu
+## tools/probe_rail_aabb.gd sters dupa folosire -- Rail_L/Rail_R la local Z
+## +-20.24 m). O jumatate de pod are ~20.24 m -- scara 0.5 pe local Z aduce
+## piesa la lungimea corecta a unei jumatati. FOST: RUNDA 1 pretindea
+## "scurtata la jumatate" dar scria scara 1.0 (niciodata scurtata de fapt) --
+## cele doua balustrade INTREGI de 40 m se suprapuneau/incrucisau vizibil
+## langa mijlocul podului (vezi comentariul _bridge_rail).
+const BRIDGE_HALF_LEN_SCALE := 0.5
 
 ## id-urile ext_resource deja inregistrate in Track16.tscn (fundatie + comune).
 const RES := {
@@ -98,6 +106,32 @@ const BASE_R := {
 	"guard_rock": 0.35, "tussock_clump": 0.05,
 	"kea": 0.0, "tree_fern": 0.5, "fern_cluster": 0.4, "driftwood": 2.0,
 }
+## Raza de COLT (semi-diagonala AABB * scara, nu BASE_R -- BASE_R e doar
+## jumatatea laturii MARI, corecta doar cand niciun colt al piesei nu iese mai
+## departe pe axa laterala decat atat). La un yaw ARBITRAR un colt poate iesi
+## mai departe: masurat direct din mesh (tools/dbg_aabb_d.gd, acelasi tipar ca
+## CORNER_R din gen_decor_fiord_f.gd):
+##   chasm_rock:     semi-laturi (2.999, 2.358) -> semi-diagonala 3.816
+##   moss_boulder_a: semi-laturi (0.423, 0.369) -> semi-diagonala 0.562
+##   moss_boulder_b: semi-laturi (1.241, 1.177) -> semi-diagonala 1.710
+##   moss_boulder_c: semi-laturi (2.104, 1.688) -> semi-diagonala 2.697
+##   tussock_clump:  semi-laturi (0.342, 0.344) -> semi-diagonala 0.485
+##                   (BASE_R 0.05 masura alt gabarit, ~10x sub amprenta reala
+##                   -- gasit cu garda podetului: 7 piese ramasesera la
+##                   9.6-9.8 m, sub pragul de 10 m, dupa primul fix bazat pe
+##                   BASE_R/guard_rock singur)
+##   guard_rock:     semi-laturi (0.591, 0.351) -> semi-diagonala 0.688
+## Folosita DOAR pentru garda podetului (_bridge_gap_floor), nu schimba
+## plasarea existenta in restul POI-ului D.
+const CORNER_R := {
+	"chasm_rock": 3.816,
+	"moss_boulder_a": 0.562,
+	"moss_boulder_b": 1.710,
+	"moss_boulder_c": 2.697,
+	"tussock_clump": 0.485,
+	"guard_rock": 0.688,
+}
+
 ## Raza COROANEI (m), pentru testul camerei (coroana n-are voie sub 4 m de ax).
 const CROWN_R := {
 	"beech_a": 2.55, "beech_b": 3.18, "beech_c": 4.78, "beech_dead": 1.64,
@@ -383,23 +417,56 @@ func _bridge_rail() -> void:
 		# RUNDA 1, a treia trecere: prima captura (v1r1_0415_uscat.png) a aratat
 		# balustradele ca doua bare DIAGONALE, care taie drumul ca niste
 		# bariere -- nu ca un parapet paralel cu marginea. AABB grup masurat e
-		# 12,24 x 40,48 (masuratori.md), iar `_raw`/restul pieselor aliniaza
-		# local +X pe tangenta -- daca axa lunga a modelului (40,48 m,
-		# Rail_L+Rail_R) ar fi pe local X ca la restul kitului, rezultatul ar
-		# fi corect. Captura arata ca nu e asa: modelul are axa lunga pe local
-		# Z, deci yaw-ul trebuie decalat cu 90 de grade fata de tangenta.
-		var yaw := atan2(-tang.z, tang.x) + PI * 0.5
+		# 12,24 x 40,48 (masuratori.md); modelul are axa LUNGA (40,48 m,
+		# Rail_L+Rail_R) pe local Z, latimea (12,24 m) pe local X (verificat
+		# direct din mesh, tools/probe_rail_aabb.gd sters dupa folosire).
+		#
+		# REPARATIE INTEGRARE (fiord/poi-fix), trecerea FINALA -- trei bug-uri
+		# separate, toate confirmate numeric (tools/probe_bridge_yaw.gd,
+		# tools/probe_rail_live.gd, sterse dupa folosire) inainte de a rescrie:
+		#
+		# 1) Yaw-ul vechi (`atan2(-tang.z, tang.x) + PI*0.5`) era o supracorectie
+		#    in directia gresita -- capetele ajungeau la 15.7-20.2 m LATERAL de
+		#    ax (banda are 5.5-6.5 m semi-latime aici).
+		# 2) RUNDA 1 PRETINDEA ca fiecare instanta e "scurtata la jumatate din
+		#    lungime", dar scria scara 1.0 pe toate axele -- niciodata scurtata
+		#    de fapt. Doua bare INTREGI de 40 m, fiecare rotita pe tangenta
+		#    LOCALA a jumatatii ei (yaw-uri diferite), centrate langa mijlocul
+		#    podului, se suprapuneau/incrucisau vizibil pe toata lungimea lor.
+		# 3) CEA MAI ADANCA: memoria tscn-transform-e-pe-randuri -- Transform3D
+		#    scris in text in .tscn ia 9 numere ca RANDURILE bazei
+		#    (row0=(x.x,y.x,z.x), row1=(x.y,y.y,z.y), row2=(x.z,y.z,z.z)), NU
+		#    coloanele. Codul (si increderea "aliniaza local +X pe tangenta" din
+		#    comentariul original) scria coloanele direct ca argumente -- iesea
+		#    o baza TRANSPUSA (oglindita), verificat cu probe_rail_live.gd:
+		#    global_transform.basis.x avea componenta Z gresita fata de ce
+		#    trebuia sa fie coloana X. Acelasi bug a lovit deja Track13
+		#    (baloane/arzator) si Track16 (perdelele de ploaie) -- a treia oara
+		#    pe acest cod, de-asta se construieste Basis-ul in obiect (nu direct
+		#    in text) si se scriu RANDURILE lui explicit mai jos.
+		#
+		# Fix: yaw = atan2(-tang.x, tang.z) face local Z (coloana z a bazei)
+		# paralel cu tang; scara 0.5 pe coloana z scurteaza piesa la ~20.24 m
+		# (o jumatate de pod); bazei i se scriu RANDURILE (nu coloanele) in
+		# .tscn, verificat cu sonda dupa scriere (nu presupus).
+		var yaw := atan2(-tang.x, tang.z)
+		var col_x := Vector3(cos(yaw), 0.0, sin(yaw))
+		var col_y := Vector3(0.0, 1.0, 0.0)
+		var col_z := Vector3(-sin(yaw), 0.0, cos(yaw)) * BRIDGE_HALF_LEN_SCALE
+		var basis := Basis(col_x, col_y, col_z)
 		_n += 1
 		_tri += int(TRI.get("chasm_bridge_rail", 0))
 		_out.append('[node name="chasmBridgeRail%d" parent="%s" instance=ExtResource("%s")]'
 			% [_n, ZONE, RES["chasm_bridge_rail"]])
-		var c := cos(yaw)
-		var s := sin(yaw)
-		_out.append("transform = Transform3D(%f, 0, %f, 0, %f, 0, %f, 0, %f, %f, %f, %f)"
-			% [c, s, 1.0, -s, c, pm.x, pm.y, pm.z])
+		# RANDURILE bazei (nu coloanele) -- vezi comentariul de mai sus.
+		var r0 := Vector3(basis.x.x, basis.y.x, basis.z.x)
+		var r1 := Vector3(basis.x.y, basis.y.y, basis.z.y)
+		var r2 := Vector3(basis.x.z, basis.y.z, basis.z.z)
+		_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
+			% [r0.x, r0.y, r0.z, r1.x, r1.y, r1.z, r2.x, r2.y, r2.z, pm.x, pm.y, pm.z])
 		_out.append('metadata/coliziune = "none"')
 		_out.append("")
-	print("; podet: 2 jumatati de balustrada (decizie RUNDA 1: doua jumatati rotite pe tangenta, vezi comentariul _bridge_rail)")
+	print("; podet: 2 jumatati de balustrada (decizie RUNDA 1: doua jumatati rotite pe tangenta, scurtate real pe local Z, randuri corecte -- vezi comentariul _bridge_rail)")
 
 
 # ------------------------------------------------------------------ albia raului
@@ -471,6 +538,17 @@ func _place_river(model: String, base: String, frac: float, lat: float,
 	var i := int(frac * float(n)) % n
 	var p := _track.baked[i]
 	var s := _track._side_at(i)
+	# REPARATIE INTEGRARE (fiord/poi-fix): vezi comentariul BRIDGE_MIN_LAT de
+	# la _place()/_bridge_gap_floor -- aceeasi garda, dar `lat` aici e deja
+	# distanta ABSOLUTA (semnata) de la ax pana la CENTRUL piesei, nu un gap
+	# fata de muchie. Impune |lat| - corner >= BRIDGE_MIN_LAT pastrand semnul.
+	var f_wrapped := fposmod(frac, 1.0)
+	if mode != "none" and f_wrapped >= BRIDGE_LO and f_wrapped <= BRIDGE_HI:
+		var corner_r0: float = CORNER_R[model] if CORNER_R.has(model) else BASE_R.get(model, 0.6)
+		var corner: float = corner_r0 * scl
+		var min_abs := BRIDGE_MIN_LAT + corner
+		if absf(lat) < min_abs:
+			lat = min_abs * (signf(lat) if lat != 0.0 else 1.0)
 	var q := p + s * lat
 	if mode != "none":
 		var g0 := _sol_real(q.x, q.z)
@@ -767,6 +845,45 @@ const FORK_APPROACH_LO := 0.360
 const FORK_APPROACH_HI := 0.372
 const FORK_APPROACH_EXTRA_GAP := 1.5
 
+## REPARATIE INTEGRARE (fiord/poi-fix), a treia trecere: garda finala pe
+## integrare (race_dry_2.log) a prins [blocaj] repetat pe Kai la frac 0.405,
+## lat 7.0/8.1, atingand Shoulders/RoadSides/RoadTop + marmita38_col si
+## canionTreapta324_col -- intrarea/iesirea podetului (custom_step_ranges
+## 0.406-0.424), unde semi-latimea scade la 5.5 m si masinile se inghesuie.
+## Fereastra de siguranta e mai LARGA decat podetul insusi (0.395-0.435) ca sa
+## acopere si manevra de aliniere inainte/dupa tablie.
+##
+## Fix structural (acelasi tipar ca HULL_SAFETY_MULT din gen_decor_fiord_g.gd):
+## in loc sa se tot creasca un gap fix (istoricul de mai sus a facut asta de
+## doua ori si tot a ramas o piesa sub prag), pragul se impune direct pe
+## AMPRENTA REALA -- `_bridge_lat_floor` calculeaza gap-ul minim necesar ca
+## distanta de la ax pana la cel mai apropiat COLT al piesei (CORNER_R * scara,
+## nu BASE_R) sa fie >= BRIDGE_MIN_LAT, si-l foloseste ca podea (`maxf`), nu ca
+## adaos -- corect indiferent de scara instantei.
+const BRIDGE_LO := 0.395
+const BRIDGE_HI := 0.435
+## +0.3 m peste pragul cerut (10.0): marja pentru eroarea de curbura (memoria
+## runda-3c/CURVE_MARGIN din gen_decor_fiord_f.gd) -- `half`/pozitia se
+## calculeaza la indexul central al pasului generatorului, dar sonda de
+## verificare masoara fata de indexul REAL cel mai apropiat de pozitia
+## offsetata a piesei; pe curbe diferenta a lasat o piesa (tufaIarba296) la
+## 9.98 m, sub cei 10.0 m ceruti la limita.
+const BRIDGE_MIN_LAT := 10.3
+
+## Gap-ul minim (fata de MUCHIA drumului) ca sa garanteze `BRIDGE_MIN_LAT` de
+## la AX pana la cel mai apropiat colt al piesei, folosind raza de colt REALA
+## (CORNER_R) in loc de BASE_R. `r` e raza nominala deja folosita de apelant in
+## calculul lui `d = half + gap + r` -- floor-ul se exprima in aceiasi termeni
+## (gap), ca sa se compuna cu `maxf` peste gap-ul cerut de apelant.
+func _bridge_gap_floor(model: String, scl: float, half: float, r: float) -> float:
+	# Implicit: fara CORNER_R masurat (piese `trunk`, cilindru izotrop -- fara
+	# colt care sa iasa mai departe decat raza nominala), amprenta reala e `r`
+	# insusi, deci floor-ul tot se aplica (distanta absoluta fata de ax conteaza,
+	# nu doar corectia de colt).
+	var corner: float = CORNER_R[model] * scl if CORNER_R.has(model) else r
+	return BRIDGE_MIN_LAT - half + corner - r
+
+
 func _place(model: String, base: String, frac: float, side_sign: float,
 		gap: float, yaw: float, scl: float, mode: String = "hull") -> void:
 	var n := _track.baked.size()
@@ -778,6 +895,8 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	var f_wrapped := fposmod(frac, 1.0)
 	if mode != "none" and f_wrapped >= FORK_APPROACH_LO and f_wrapped <= FORK_APPROACH_HI:
 		gap += FORK_APPROACH_EXTRA_GAP
+	if mode != "none" and f_wrapped >= BRIDGE_LO and f_wrapped <= BRIDGE_HI:
+		gap = maxf(gap, _bridge_gap_floor(model, scl, half, r))
 	var d := half + gap + r
 	var q := p + s * d
 	var g := _sol_real(q.x, q.z)

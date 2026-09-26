@@ -6093,11 +6093,11 @@ transform = Transform3D(-0.626378, 0.000000, 0.748079, 0.000000, 0.975691, 0.000
 transform = Transform3D(0.6078, 0.0400, -0.7931, -0.0000, 0.9987, 0.0503, 0.7941, -0.0306, 0.6070, -481.414, 19.553, -558.743)
 
 [node name="chasmBridgeRail1" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_bridge_rail")]
-transform = Transform3D(-0.677701, 0, 0.735337, 0, 1.000000, 0, -0.735337, 0, -0.677701, -511.161011, 17.966978, -587.609070)
+transform = Transform3D(-0.677701, 0.000000, 0.367669, 0.000000, 1.000000, 0.000000, -0.735337, 0.000000, -0.338851, -511.161011, 17.966978, -587.609070)
 metadata/coliziune = "none"
 
 [node name="chasmBridgeRail2" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_bridge_rail")]
-transform = Transform3D(-0.427439, 0, 0.904044, 0, 1.000000, 0, -0.904044, 0, -0.427439, -494.972687, 17.297382, -596.740356)
+transform = Transform3D(-0.427439, 0.000000, 0.452022, 0.000000, 1.000000, 0.000000, -0.904044, 0.000000, -0.213719, -494.972687, 17.297382, -596.740356)
 metadata/coliziune = "none"
 
 [node name="marmita3" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
@@ -6188,16 +6188,16 @@ transform = Transform3D(-0.343350, 0, -1.311692, 0, 1.355886, 0, 1.311692, 0, -0
 transform = Transform3D(0.089078, 0, 0.709581, 0, 0.715151, 0, -0.709581, 0, 0.089078, -541.914917, 19.602859, -568.260010)
 
 [node name="marmita32" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.054761, 0, -1.194374, 0, 1.195629, 0, 1.194374, 0, 0.054761, -535.203613, 19.142502, -572.826477)
+transform = Transform3D(0.054761, 0, -1.194374, 0, 1.195629, 0, 1.194374, 0, 0.054761, -536.890381, 19.163223, -573.616333)
 
 [node name="marmitaMal33" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(0.261820, 0, -0.370909, 0, 0.454008, 0, 0.370909, 0, 0.261820, -539.225769, 19.181976, -574.710022)
 
 [node name="marmita34" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.544938, 0, 0.548765, 0, 0.773369, 0, -0.548765, 0, -0.544938, -512.033508, 18.711578, -568.111572)
+transform = Transform3D(-0.544938, 0, 0.548765, 0, 0.773369, 0, -0.548765, 0, -0.544938, -509.038971, 18.896729, -566.845581)
 
 [node name="marmita35" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.705938, 0, -0.894145, 0, 1.139230, 0, 0.894145, 0, 0.705938, -527.115540, 18.342957, -583.352661)
+transform = Transform3D(0.705938, 0, -0.894145, 0, 1.139230, 0, 0.894145, 0, 0.705938, -531.127747, 18.409149, -585.697815)
 
 [node name="marmitaMal36" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(0.058978, 0, 0.502171, 0, 0.505622, 0, -0.502171, 0, 0.058978, -529.373474, 18.377701, -584.672424)
@@ -6206,7 +6206,7 @@ transform = Transform3D(0.058978, 0, 0.502171, 0, 0.505622, 0, -0.502171, 0, 0.0
 transform = Transform3D(-0.339093, 0, 0.306760, 0, 0.457259, 0, -0.306760, 0, -0.339093, -505.777252, 17.925812, -571.736450)
 
 [node name="marmita38" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.941160, 0, 0.665572, 0, 1.152722, 0, -0.665572, 0, -0.941160, -507.155029, 17.391113, -577.337891)
+transform = Transform3D(-0.941160, 0, 0.665572, 0, 1.152722, 0, -0.665572, 0, -0.941160, -503.569366, 17.600418, -574.301208)
 
 [node name="marmitaMal39" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(-0.373775, 0, -0.645365, 0, 0.745790, 0, 0.645365, 0, -0.373775, -527.343323, 18.106171, -591.205566)
@@ -6215,7 +6215,7 @@ transform = Transform3D(-0.373775, 0, -0.645365, 0, 0.745790, 0, 0.645365, 0, -0
 transform = Transform3D(-0.716596, 0, 0.075712, 0, 0.720585, 0, -0.075712, 0, -0.716596, -504.615570, 17.547577, -575.187256)
 
 [node name="marmita41" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.081263, 0, 0.755708, 0, 0.760065, 0, -0.755708, 0, 0.081263, -516.065796, 17.604965, -596.504150)
+transform = Transform3D(0.081263, 0, 0.755708, 0, 0.760065, 0, -0.755708, 0, 0.081263, -518.015381, 17.627274, -599.042236)
 
 [node name="marmitaMal42" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(-0.196908, 0, 0.349687, 0, 0.401315, 0, -0.349687, 0, -0.196908, -514.434326, 17.483597, -602.224487)
@@ -6224,1066 +6224,1081 @@ transform = Transform3D(-0.196908, 0, 0.349687, 0, 0.401315, 0, -0.349687, 0, -0
 transform = Transform3D(-0.591734, 0, 0.289044, 0, 0.658556, 0, -0.289044, 0, -0.591734, -502.888000, 17.269714, -577.430176)
 
 [node name="marmita44" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.501760, 0, -0.565949, 0, 0.756348, 0, 0.565949, 0, -0.501760, -501.206085, 16.834686, -582.644836)
+transform = Transform3D(-0.501760, 0, -0.565949, 0, 0.756348, 0, 0.565949, 0, -0.501760, -499.733185, 16.930115, -579.819519)
 
 [node name="marmitaMal45" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(-0.253036, 0, 0.584417, 0, 0.636844, 0, -0.584417, 0, -0.253036, -498.205475, 16.831131, -580.764526)
 
 [node name="marmita46" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.181752, 0, -0.833269, 0, 0.852861, 0, 0.833269, 0, 0.181752, -502.450195, 17.118347, -604.195251)
+transform = Transform3D(0.181752, 0, -0.833269, 0, 0.852861, 0, 0.833269, 0, 0.181752, -504.039124, 17.123352, -607.374878)
 
 [node name="marmitaMal47" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.242035, 0, 0.606651, 0, 0.653151, 0, -0.606651, 0, -0.242035, -503.131439, 17.121170, -605.558533)
+transform = Transform3D(-0.242035, 0, 0.606651, 0, 0.653151, 0, -0.606651, 0, -0.242035, -503.698456, 17.122528, -606.693115)
 
 [node name="marmita48" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.552432, 0, -0.512795, 0, 0.753750, 0, 0.512795, 0, -0.552432, -486.357910, 16.431412, -590.859070)
+transform = Transform3D(-0.552432, 0, -0.512795, 0, 0.753750, 0, 0.512795, 0, -0.552432, -484.576447, 16.822571, -587.081726)
 
 [node name="marmitaMal49" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.425182, 0, -0.264741, 0, 0.500867, 0, 0.264741, 0, 0.425182, -494.345551, 16.825378, -607.795288)
+transform = Transform3D(0.425182, 0, -0.264741, 0, 0.500867, 0, 0.264741, 0, 0.425182, -495.405975, 16.829987, -610.043762)
 
 [node name="marmita50" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.485947, 0, -0.854283, 0, 0.982825, 0, 0.854283, 0, -0.485947, -489.430603, 16.653900, -609.333923)
+transform = Transform3D(-0.485947, 0, -0.854283, 0, 0.982825, 0, 0.854283, 0, -0.485947, -491.622925, 16.673019, -613.883728)
 
 [node name="marmitaMal51" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.567305, 0, -0.288565, 0, 0.636478, 0, 0.288565, 0, 0.567305, -488.887970, 16.605820, -611.750488)
+transform = Transform3D(0.567305, 0, -0.288565, 0, 0.636478, 0, 0.288565, 0, 0.567305, -489.664948, 16.616287, -613.360107)
 
 [node name="marmitaMal52" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.586834, 0, -0.222824, 0, 0.627714, 0, 0.222824, 0, 0.586834, -482.443024, 16.540878, -590.621826)
+transform = Transform3D(0.586834, 0, -0.222824, 0, 0.627714, 0, 0.222824, 0, 0.586834, -481.662292, 16.727234, -588.996765)
 
 [node name="marmita53" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.858292, 0, 0.618276, 0, 1.057795, 0, -0.618276, 0, -0.858292, -475.457581, 16.400497, -595.973572)
+transform = Transform3D(-0.858292, 0, 0.618276, 0, 1.057795, 0, -0.618276, 0, -0.858292, -473.204285, 17.053802, -591.246582)
 
 [node name="marmitaMal54" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(-0.415563, 0, 0.054749, 0, 0.419154, 0, -0.054749, 0, -0.415563, -482.339813, 16.344482, -617.780334)
 
 [node name="marmitaMal55" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.384504, 0, -0.177581, 0, 0.423530, 0, 0.177581, 0, 0.384504, -473.698730, 16.541382, -595.828003)
+transform = Transform3D(0.384504, 0, -0.177581, 0, 0.423530, 0, 0.177581, 0, 0.384504, -472.872528, 16.780960, -594.086060)
 
 [node name="marmita56" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.967944, 0, -0.677849, 0, 1.181691, 0, 0.677849, 0, 0.967944, -477.896942, 16.218857, -615.436523)
+transform = Transform3D(0.967944, 0, -0.677849, 0, 1.181691, 0, 0.677849, 0, 0.967944, -480.490387, 16.276382, -620.132324)
 
 [node name="marmitaMal57" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(0.107091, 0, -0.425924, 0, 0.439180, 0, 0.425924, 0, 0.107091, -466.743469, 16.830475, -595.241333)
 
-[node name="marmita58" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.451896, 0, -1.087329, 0, 1.177495, 0, 1.087329, 0, -0.451896, -464.205536, 16.253723, -600.883240)
+[node name="marmitaMal58" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.526324, 0, 0.367601, 0, 0.641987, 0, -0.367601, 0, -0.526324, -463.285217, 16.634491, -598.014282)
 
-[node name="marmitaMal59" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.526324, 0, 0.367601, 0, 0.641987, 0, -0.367601, 0, -0.526324, -470.626282, 15.991104, -620.898193)
+[node name="marmita59" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.125082, 0, 0.263426, 0, 1.155509, 0, -0.263426, 0, 1.125082, -464.139130, 15.874222, -621.349731)
 
 [node name="marmitaMal60" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.635241, 0, 0.340425, 0, 0.720708, 0, -0.340425, 0, 0.635241, -464.008087, 16.335403, -600.267700)
+transform = Transform3D(0.198227, 0, 0.488659, 0, 0.527334, 0, -0.488659, 0, 0.198227, -458.711426, 16.537155, -599.591614)
 
-[node name="marmita61" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.712099, 0, 0.819967, 0, 1.086016, 0, -0.819967, 0, -0.712099, -460.452759, 15.854248, -622.028198)
+[node name="marmitaMal61" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.110710, 0, 0.690824, 0, 0.699638, 0, -0.690824, 0, -0.110710, -453.231018, 15.867477, -624.049744)
 
 [node name="marmitaMal62" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.455325, 0, 0.254387, 0, 0.521569, 0, -0.254387, 0, -0.455325, -457.202850, 15.848709, -623.439758)
+transform = Transform3D(-0.488189, 0, -0.202738, 0, 0.528613, 0, 0.202738, 0, -0.488189, -455.617432, 16.417999, -601.360962)
 
-[node name="marmitaMal63" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.515022, 0, 0.286535, 0, 0.589364, 0, -0.286535, 0, 0.515022, -456.885498, 16.456299, -600.689514)
+[node name="marmita63" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.001727, 0, -0.603911, 0, 1.169686, 0, 0.603911, 0, 1.001727, -443.061218, 15.983994, -620.736938)
 
-[node name="marmitaMal64" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.369459, 0, -0.617723, 0, 0.719779, 0, 0.617723, 0, 0.369459, -450.665497, 15.895279, -625.226807)
+[node name="fagApropiat64" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.881233, 0, -0.053009, 0, 0.882826, 0, 0.053009, 0, -0.881233, -502.886414, 30.045959, -416.974823)
+metadata/coliziune = "trunk"
 
-[node name="marmitaMal65" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.597278, 0, -0.431486, 0, 0.736832, 0, 0.431486, 0, 0.597278, -456.900330, 16.383163, -601.751953)
+[node name="fagApropiat65" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.430314, 0, 0.848078, 0, 0.951003, 0, -0.848078, 0, 0.430314, -511.873505, 29.190125, -428.136749)
+metadata/coliziune = "trunk"
 
-[node name="marmita66" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.036027, 0, 0.938684, 0, 0.939375, 0, -0.938684, 0, 0.036027, -445.500397, 15.940475, -621.317444)
+[node name="fagApropiat66" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.775295, 0, 0.545451, 0, 0.947945, 0, -0.545451, 0, 0.775295, -515.348755, 28.783264, -433.907166)
+metadata/coliziune = "trunk"
 
-[node name="marmitaMal67" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.142392, 0, -0.582497, 0, 0.599648, 0, 0.582497, 0, -0.142392, -444.914185, 15.951782, -623.787048)
+[node name="fagApropiat67" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(1.039422, 0, -0.009826, 0, 1.039469, 0, 0.009826, 0, 1.039422, -520.028442, 28.257492, -441.158051)
+metadata/coliziune = "trunk"
 
 [node name="fagApropiat68" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-1.005908, 0, -0.316561, 0, 1.054544, 0, 0.316561, 0, -1.005908, -503.581268, 29.910416, -419.559875)
+transform = Transform3D(-0.430660, 0, -0.927289, 0, 1.022415, 0, 0.927289, 0, -0.430660, -535.303345, 26.610168, -464.957886)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat69" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.596087, 0, -0.830680, 0, 1.022423, 0, 0.830680, 0, 0.596087, -506.787079, 29.608383, -423.341339)
+[node name="fagApropiat69" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.528953, 0, -0.740306, 0, 0.909859, 0, 0.740306, 0, 0.528953, -543.213074, 23.918472, -496.463501)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat70" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.416425, 0, -0.896637, 0, 0.988619, 0, 0.896637, 0, -0.416425, -526.852905, 27.524353, -451.069397)
+[node name="fagApropiat70" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.897611, 0, -0.506748, 0, 1.030776, 0, 0.506748, 0, -0.897611, -545.195984, 23.580154, -502.760895)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat71" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.511468, 0, -0.715835, 0, 0.879783, 0, 0.715835, 0, 0.511468, -538.325928, 25.291107, -482.732147)
+[node name="fagApropiat71" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.595354, 0, -0.603907, 0, 0.848027, 0, 0.603907, 0, -0.595354, -547.384216, 22.867462, -517.906738)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat72" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.875184, 0, -0.494087, 0, 1.005022, 0, 0.494087, 0, -0.875184, -541.797974, 24.442001, -489.781158)
+[node name="fagApropiat72" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.017319, 0, -0.893023, 0, 0.893191, 0, 0.893023, 0, -0.017319, -547.951050, 22.429688, -525.481689)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat73" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.610610, 0, -0.619383, 0, 0.869758, 0, 0.619383, 0, -0.610610, -545.054565, 23.646851, -501.241211)
+[node name="fagApropiat73" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.198120, 0, 0.864294, 0, 0.886710, 0, -0.864294, 0, 0.198120, -532.955688, 18.844696, -576.956909)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat74" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.016746, 0, -0.863504, 0, 0.863666, 0, 0.863504, 0, -0.016746, -544.940308, 23.226898, -510.156830)
+[node name="fagApropiat74" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.560996, 0, 0.703802, 0, 0.900030, 0, -0.703802, 0, -0.560996, -523.353455, 17.960861, -591.056396)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat75" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.203197, 0, 0.886442, 0, 0.909433, 0, -0.886442, 0, 0.203197, -538.779724, 19.703308, -564.865784)
+[node name="fagApropiat75" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.879572, 0, 0.410244, 0, 0.970540, 0, -0.410244, 0, -0.879572, -517.473694, 17.619873, -598.337036)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat76" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.546979, 0, 0.686218, 0, 0.877542, 0, -0.686218, 0, -0.546979, -530.265015, 18.815887, -575.819336)
+transform = Transform3D(-0.893724, 0, -0.003875, 0, 0.893732, 0, 0.003875, 0, -0.893724, -510.924713, 17.397202, -601.287659)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat77" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.909640, 0, 0.424268, 0, 1.003718, 0, -0.424268, 0, -0.909640, -529.208374, 18.374786, -584.575928)
+transform = Transform3D(1.065180, 0, -0.001703, 0, 1.065181, 0, 0.001703, 0, 1.065180, -503.300873, 17.121582, -605.897522)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat78" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.916626, 0, -0.003974, 0, 0.916635, 0, 0.003974, 0, -0.916626, -523.947998, 18.043365, -588.687317)
+[node name="fagApropiat78" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.857354, 0, 0.155655, 0, 0.871369, 0, -0.155655, 0, -0.857354, -490.252136, 16.656265, -611.038818)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat79" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(1.029970, 0, -0.001647, 0, 1.029971, 0, 0.001647, 0, 1.029970, -517.152039, 17.616455, -597.918335)
+[node name="fagApropiat79" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.515912, 0, -0.720741, 0, 0.886360, 0, 0.720741, 0, -0.515912, -484.306610, 16.435822, -614.537170)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat80" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.886663, 0, 0.160976, 0, 0.901157, 0, -0.160976, 0, -0.886663, -502.632660, 17.119217, -604.560364)
+transform = Transform3D(-0.363654, 0, 0.995443, 0, 1.059788, 0, -0.995443, 0, -0.363654, -478.712250, 16.233093, -616.912720)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat81" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.529132, 0, -0.739211, 0, 0.909073, 0, 0.739211, 0, -0.529132, -497.504486, 16.915985, -608.366943)
+transform = Transform3D(-0.885387, 0, -0.016930, 0, 0.885549, 0, 0.016930, 0, -0.885387, -470.909271, 16.009140, -621.780396)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat82" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.351634, 0, 0.962538, 0, 1.024756, 0, -0.962538, 0, -0.351634, -490.110901, 16.655579, -610.745789)
+[node name="fagApropiat82" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.476811, 0, 0.776453, 0, 0.911168, 0, -0.776453, 0, -0.476811, -450.898315, 15.878143, -622.838806)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat83" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.863266, 0, -0.016507, 0, 0.863424, 0, 0.016507, 0, -0.863266, -484.261292, 16.435242, -614.442078)
+[node name="fagApropiat83" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.736495, 0, -0.658916, 0, 0.988228, 0, 0.658916, 0, 0.736495, -442.927063, 15.986404, -621.348511)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat84" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.489029, 0, 0.796350, 0, 0.934517, 0, -0.796350, 0, -0.489029, -470.431396, 15.978180, -620.290710)
+[node name="fagApropiat84" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.230841, 0, 0.930128, 0, 0.958345, 0, -0.930128, 0, -0.230841, -428.253967, 15.837830, -618.819092)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat85" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.712150, 0, -0.637136, 0, 0.955562, 0, 0.637136, 0, 0.712150, -460.492615, 15.861557, -622.541626)
+[node name="fagApropiat85" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.496038, 0, -0.807705, 0, 0.947861, 0, 0.807705, 0, -0.496038, -489.952850, 29.515533, -436.667114)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat86" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.238732, 0, 0.961924, 0, 0.991106, 0, -0.961924, 0, -0.238732, -441.690216, 16.008484, -621.265991)
+[node name="fagApropiat86" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.876668, 0, 0.244892, 0, 0.910230, 0, -0.244892, 0, -0.876668, -493.983887, 29.099808, -442.174408)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat87" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.462307, 0, -0.752780, 0, 0.883406, 0, 0.752780, 0, -0.462307, -483.503174, 30.245468, -426.434723)
+transform = Transform3D(-0.277057, 0, 0.872780, 0, 0.915700, 0, -0.872780, 0, -0.277057, -496.189240, 28.784378, -446.931854)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat88" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.876668, 0, 0.244892, 0, 0.910230, 0, -0.244892, 0, -0.876668, -487.431732, 29.835754, -432.011780)
+[node name="fagApropiat88" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.704357, 0, -0.718659, 0, 1.006275, 0, 0.718659, 0, 0.704357, -499.454010, 28.453400, -451.100189)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat89" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.291844, 0, 0.919362, 0, 0.964572, 0, -0.919362, 0, -0.291844, -489.627747, 29.515060, -436.888367)
+[node name="fagApropiat89" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.751427, 0, 0.463759, 0, 0.883015, 0, -0.463759, 0, -0.751427, -501.197174, 28.111984, -456.247681)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat90" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.697368, 0, -0.711527, 0, 0.996289, 0, 0.711527, 0, 0.697368, -493.625977, 29.098557, -442.417847)
+transform = Transform3D(-0.045372, 0, 0.951191, 0, 0.952273, 0, -0.951191, 0, -0.045372, -505.183167, 26.916611, -461.610657)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat91" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.751427, 0, 0.463759, 0, 0.883015, 0, -0.463759, 0, -0.751427, -495.288239, 28.778915, -447.544373)
+[node name="fagApropiat91" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.859435, 0, 0.495748, 0, 0.992167, 0, -0.495748, 0, 0.859435, -508.952057, 26.397797, -465.694183)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat92" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.046860, 0, 0.982381, 0, 0.983498, 0, -0.982381, 0, -0.046860, -498.472412, 28.450638, -451.767242)
+[node name="fagApropiat92" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.760317, 0, 0.510790, 0, 0.915963, 0, -0.510790, 0, 0.760317, -511.790314, 26.037094, -470.440216)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat93" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.839390, 0, 0.484185, 0, 0.969026, 0, -0.484185, 0, 0.839390, -502.980743, 27.825760, -456.921783)
+transform = Transform3D(0.642404, 0, 0.640081, 0, 0.906855, 0, -0.640081, 0, 0.642404, -514.128540, 25.725113, -473.440369)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat94" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.760317, 0, 0.510790, 0, 0.915963, 0, -0.510790, 0, 0.760317, -505.549316, 26.934250, -461.365479)
+[node name="fagApropiat94" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.449366, 0, -0.893043, 0, 0.999728, 0, 0.893043, 0, 0.449366, -515.676208, 25.084763, -478.557373)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat95" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.680048, 0, 0.677589, 0, 0.959996, 0, -0.677589, 0, 0.680048, -509.216766, 26.416656, -465.506195)
+[node name="fagApropiat95" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.624470, 0, 0.658918, 0, 0.907820, 0, -0.658918, 0, -0.624470, -517.811279, 24.532120, -483.402283)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat96" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.442134, 0, -0.878670, 0, 0.983638, 0, 0.878670, 0, 0.442134, -512.376221, 26.186829, -470.117188)
+transform = Transform3D(-0.915375, 0, 0.363297, 0, 0.984833, 0, -0.363297, 0, -0.915375, -518.862305, 24.173737, -487.095673)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat97" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.624470, 0, 0.658918, 0, 0.907820, 0, -0.658918, 0, -0.624470, -514.839233, 25.735992, -473.155640)
+[node name="fagApropiat97" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.223728, 0, -0.968253, 0, 0.993765, 0, 0.968253, 0, -0.223728, -516.229919, 23.323578, -492.151367)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat98" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.929794, 0, 0.369020, 0, 1.000346, 0, -0.369020, 0, -0.929794, -515.967834, 25.468903, -475.782379)
+[node name="fagApropiat98" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.885508, 0, 0.030407, 0, 0.886030, 0, -0.030407, 0, 0.885508, -518.847656, 23.506027, -496.893982)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat99" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.218853, 0, -0.947158, 0, 0.972114, 0, 0.947158, 0, -0.218853, -514.888916, 24.715042, -480.544312)
+transform = Transform3D(-0.325940, 0, 0.854651, 0, 0.914694, 0, -0.854651, 0, -0.325940, -521.292725, 23.862640, -503.336212)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat100" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.885508, 0, 0.030407, 0, 0.886030, 0, -0.030407, 0, 0.885508, -517.560059, 24.361481, -484.836273)
+[node name="fagApropiat100" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.664170, 0, 0.696690, 0, 0.962548, 0, -0.696690, 0, 0.664170, -520.229980, 23.542999, -507.439270)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat101" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.343528, 0, 0.900769, 0, 0.964052, 0, -0.900769, 0, -0.343528, -518.477478, 23.755600, -491.618927)
+[node name="fagApropiat101" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.853672, 0, 0.457532, 0, 0.968551, 0, -0.457532, 0, -0.853672, -522.940979, 22.653961, -513.572937)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat102" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.629145, 0, 0.659951, 0, 0.911788, 0, -0.659951, 0, 0.629145, -517.751160, 23.156860, -497.157654)
+transform = Transform3D(0.251701, 0, -0.823849, 0, 0.861441, 0, 0.823849, 0, 0.251701, -516.211121, 20.201843, -556.510010)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat103" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.853672, 0, 0.457532, 0, 0.968551, 0, -0.457532, 0, -0.853672, -520.100586, 23.776031, -502.030243)
+[node name="fagApropiat103" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.272039, 0, 0.919525, 0, 0.958922, 0, -0.919525, 0, 0.272039, -512.160767, 19.651382, -562.035339)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat104" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.925855, 0, -0.198281, 0, 0.946849, 0, 0.198281, 0, 0.925855, -521.932556, 23.659439, -507.014191)
+[node name="fagApropiat104" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.124234, 0, -0.892525, 0, 0.901130, 0, 0.892525, 0, -0.124234, -511.084900, 18.763046, -567.710510)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat105" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.681295, 0, 0.718780, 0, 0.990357, 0, -0.718780, 0, 0.681295, -521.158386, 22.610764, -513.984985)
+transform = Transform3D(0.671736, 0, -0.763934, 0, 1.017263, 0, 0.763934, 0, 0.671736, -508.878448, 17.885376, -572.692871)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat106" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.124234, 0, -0.892525, 0, 0.901130, 0, 0.892525, 0, -0.124234, -517.392090, 20.161346, -557.049866)
+[node name="fagApropiat106" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.658984, 0, -0.746806, 0, 0.995982, 0, 0.746806, 0, -0.658984, -507.643494, 17.661758, -574.692627)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat107" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.671647, 0, -0.763832, 0, 1.017128, 0, 0.763832, 0, 0.671647, -514.401855, 19.492477, -563.084900)
+[node name="fagApropiat107" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.671148, 0, 0.679220, 0, 0.954872, 0, -0.679220, 0, 0.671148, -504.176819, 17.156326, -579.015930)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat108" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.646026, 0, -0.732122, 0, 0.976398, 0, 0.732122, 0, -0.646026, -510.976013, 18.768951, -567.664490)
+transform = Transform3D(-0.938414, 0, 0.178815, 0, 0.955299, 0, -0.178815, 0, -0.938414, -502.109650, 16.966095, -580.658752)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat109" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.671148, 0, 0.679220, 0, 0.954872, 0, -0.679220, 0, 0.671148, -509.195374, 17.873978, -572.878113)
+[node name="fagApropiat109" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.947311, 0, 0.119711, 0, 0.954845, 0, -0.119711, 0, 0.947311, -499.017273, 16.764160, -582.603455)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat110" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.967653, 0, 0.184386, 0, 0.985063, 0, -0.184386, 0, -0.967653, -508.037079, 17.642883, -574.970581)
+[node name="fagApropiat110" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.898752, 0, -0.381311, 0, 0.976296, 0, 0.381311, 0, -0.898752, -493.022217, 16.658752, -585.328979)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat111" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.889826, 0, 0.112446, 0, 0.896902, 0, -0.112446, 0, 0.889826, -504.183380, 17.155762, -579.023987)
+transform = Transform3D(0.870619, 0, 0.247857, 0, 0.905213, 0, -0.247857, 0, 0.870619, -487.908539, 16.672302, -587.887085)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat112" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.898752, 0, -0.381311, 0, 0.976296, 0, 0.381311, 0, -0.898752, -502.779297, 16.940613, -581.593201)
+[node name="fagApropiat112" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.933703, 0, -0.203702, 0, 0.955665, 0, 0.203702, 0, -0.933703, -484.048889, 16.591797, -589.697266)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat113" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.922490, 0, 0.262625, 0, 0.959146, 0, -0.262625, 0, 0.922490, -498.638794, 16.795395, -581.746094)
+[node name="fagApropiat113" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.870016, 0, -0.126864, 0, 0.879216, 0, 0.126864, 0, 0.870016, -480.743622, 16.521851, -591.305542)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat114" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.877838, 0, -0.191514, 0, 0.898486, 0, 0.191514, 0, -0.877838, -495.306732, 16.577164, -585.563660)
+transform = Transform3D(0.094448, 0, -0.989134, 0, 0.993633, 0, 0.989134, 0, 0.094448, -474.594879, 16.655273, -594.163818)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat115" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.870016, 0, -0.126864, 0, 0.879216, 0, 0.126864, 0, 0.870016, -490.001953, 16.702484, -586.328735)
+[node name="fagApropiat115" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.361402, 0, -0.901019, 0, 0.970797, 0, 0.901019, 0, 0.361402, -469.161011, 16.678818, -596.010925)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat116" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.095519, 0, -1.000350, 0, 1.004900, 0, 1.000350, 0, 0.095519, -486.027740, 16.491638, -590.158936)
+[node name="fagApropiat116" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.968421, 0, -0.129935, 0, 0.977099, 0, 0.129935, 0, -0.968421, -464.634674, 16.427261, -599.251770)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat117" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.345369, 0, -0.861047, 0, 0.927729, 0, 0.861047, 0, 0.345369, -479.142426, 16.606354, -591.560974)
+transform = Transform3D(-0.417402, 0, 0.906578, 0, 0.998052, 0, -0.906578, 0, -0.417402, -462.429779, 16.436096, -600.018555)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat118" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.968421, 0, -0.129935, 0, 0.977099, 0, 0.129935, 0, -0.968421, -475.300049, 16.455673, -595.643127)
+[node name="fagApropiat118" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.324030, 0, -0.913614, 0, 0.969374, 0, 0.913614, 0, -0.324030, -458.767120, 16.488068, -600.309326)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat119" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.421222, 0, 0.914876, 0, 1.007187, 0, -0.914876, 0, -0.421222, -469.984131, 16.473221, -597.557861)
+[node name="fagApropiat119" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.479747, 0, 0.826515, 0, 0.955659, 0, -0.826515, 0, 0.479747, -455.628387, 16.495483, -600.233093)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat120" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.309190, 0, -0.871773, 0, 0.924979, 0, 0.871773, 0, -0.309190, -466.065613, 16.502151, -598.225464)
+transform = Transform3D(-0.133766, 0, -0.968567, 0, 0.977760, 0, 0.968567, 0, -0.133766, -423.535522, 15.758575, -595.311340)
 metadata/coliziune = "trunk"
 
 [node name="fagApropiat121" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.479747, 0, 0.826515, 0, 0.955659, 0, -0.826515, 0, 0.479747, -462.216187, 16.534164, -599.270569)
+transform = Transform3D(0.901107, 0, -0.473658, 0, 1.018011, 0, 0.473658, 0, 0.901107, -418.162811, 15.847153, -595.548706)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat122" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.922395, 0, 0.136281, 0, 0.932408, 0, -0.136281, 0, -0.922395, -460.037506, 16.523804, -599.870178)
+[node name="fagEtaj2122" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.613821, 0, -0.758627, 0, 0.975854, 0, 0.758627, 0, -0.613821, -509.169525, 29.754547, -417.496338)
 metadata/coliziune = "trunk"
 
-[node name="fagApropiat123" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.930455, 0, 0.069516, 0, 0.933048, 0, -0.069516, 0, 0.930455, -455.618439, 16.425003, -601.259155)
+[node name="fagEtaj2123" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.690056, 0, 0.498075, 0, 0.851033, 0, -0.498075, 0, 0.690056, -523.909973, 28.763565, -428.087219)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2124" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.213646, 0, 0.916101, 0, 0.940683, 0, -0.916101, 0, -0.213646, -531.792236, 27.911011, -440.408386)
+[node name="fagEtaj2124" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.466639, 0, -0.954633, 0, 1.062580, 0, 0.954633, 0, -0.466639, -527.724915, 28.261185, -435.908386)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2125" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+[node name="fagEtaj2125" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.213646, 0, 0.916101, 0, 0.940683, 0, -0.916101, 0, -0.213646, -533.374084, 27.749268, -442.731323)
+metadata/coliziune = "trunk"
+
+[node name="fagEtaj2126" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
 transform = Transform3D(-0.962120, 0, -0.119005, 0, 0.969452, 0, 0.119005, 0, -0.962120, -536.236877, 27.404022, -448.012695)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2126" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.959986, 0, -0.249106, 0, 0.991780, 0, 0.249106, 0, -0.959986, -543.567566, 26.674347, -458.760742)
+[node name="fagEtaj2127" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.959986, 0, -0.249106, 0, 0.991780, 0, 0.249106, 0, -0.959986, -544.648499, 26.520630, -461.214294)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2127" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+[node name="fagEtaj2128" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
 transform = Transform3D(0.380851, 0, 0.912638, 0, 0.988916, 0, -0.912638, 0, 0.380851, -550.274963, 25.212677, -480.053284)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2128" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.818814, 0, -0.221839, 0, 0.848334, 0, 0.221839, 0, 0.818814, -549.059570, 24.778503, -488.032135)
+[node name="fagEtaj2129" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.818814, 0, -0.221839, 0, 0.848334, 0, 0.221839, 0, 0.818814, -549.423035, 24.673950, -489.541168)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2129" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.691782, 0, -0.739136, 0, 1.012366, 0, 0.739136, 0, 0.691782, -551.081970, 24.238937, -496.152161)
+[node name="fagEtaj2130" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.691782, 0, -0.739136, 0, 1.012366, 0, 0.739136, 0, 0.691782, -551.494507, 24.095886, -497.863190)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2130" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.545911, 0, 0.838206, 0, 1.000304, 0, -0.838206, 0, 0.545911, -557.105896, 23.974075, -502.668427)
+[node name="fagEtaj2131" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.545911, 0, 0.838206, 0, 1.000304, 0, -0.838206, 0, 0.545911, -557.799561, 23.824432, -505.515137)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2131" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.797084, 0, 0.590580, 0, 0.992032, 0, -0.590580, 0, 0.797084, -553.753113, 23.341400, -511.282410)
+[node name="fagEtaj2132" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.797084, 0, 0.590580, 0, 0.992032, 0, -0.590580, 0, 0.797084, -554.114136, 23.292023, -512.680481)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2132" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+[node name="fagEtaj2133" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
 transform = Transform3D(-0.809565, 0, 0.327514, 0, 0.873305, 0, -0.327514, 0, -0.809565, -558.725525, 22.734879, -525.144226)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2133" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.169245, 0, -0.944189, 0, 0.959238, 0, 0.944189, 0, -0.169245, -541.652222, 18.983536, -580.633606)
+[node name="fagEtaj2134" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.169245, 0, -0.944189, 0, 0.959238, 0, 0.944189, 0, -0.169245, -541.149719, 18.922745, -581.817871)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2134" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.467986, 0, -0.849876, 0, 0.970206, 0, 0.849876, 0, 0.467986, -532.479919, 18.351044, -589.381775)
+[node name="fagEtaj2135" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.467986, 0, -0.849876, 0, 0.970206, 0, 0.849876, 0, 0.467986, -531.188171, 18.255920, -591.321167)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2135" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.980234, 0, -0.123156, 0, 0.987940, 0, 0.123156, 0, 0.980234, -525.039246, 17.882797, -598.595825)
+[node name="fagEtaj2136" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.980234, 0, -0.123156, 0, 0.987940, 0, 0.123156, 0, 0.980234, -522.201050, 17.742401, -601.192383)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2136" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+[node name="fagEtaj2137" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
 transform = Transform3D(0.896249, 0, 0.318251, 0, 0.951076, 0, -0.318251, 0, 0.896249, -496.741882, 16.837463, -612.876282)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2137" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+[node name="fagEtaj2138" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
 transform = Transform3D(0.819750, 0, 0.622757, 0, 1.029474, 0, -0.622757, 0, 0.819750, -491.618134, 16.640091, -617.406433)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2138" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.790412, 0, -0.651493, 0, 1.024302, 0, 0.651493, 0, -0.790412, -485.996979, 16.452179, -621.757446)
+[node name="fagEtaj2139" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.790412, 0, -0.651493, 0, 1.024302, 0, 0.651493, 0, -0.790412, -484.660950, 16.410660, -622.480835)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2139" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.860924, 0, -0.194787, 0, 0.882685, 0, 0.194787, 0, 0.860924, -466.312103, 16.056107, -632.729431)
+[node name="fagEtaj2140" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.860924, 0, -0.194787, 0, 0.882685, 0, 0.194787, 0, 0.860924, -461.349243, 16.021622, -633.578735)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2140" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.711817, 0, 0.503865, 0, 0.872103, 0, -0.503865, 0, 0.711817, -450.003235, 15.978546, -632.019104)
+[node name="fagEtaj2141" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.711817, 0, 0.503865, 0, 0.872103, 0, -0.503865, 0, 0.711817, -446.879333, 15.989197, -631.648438)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2141" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.403882, 0, 0.909056, 0, 0.994737, 0, -0.909056, 0, -0.403882, -433.169403, 16.393951, -625.562439)
+[node name="fagEtaj2142" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.403882, 0, 0.909056, 0, 0.994737, 0, -0.909056, 0, -0.403882, -430.570160, 16.350906, -625.113525)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2142" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+[node name="fagEtaj2143" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
 transform = Transform3D(-0.147676, 0, -1.041150, 0, 1.051571, 0, 1.041150, 0, -0.147676, -425.547638, 16.199463, -623.830750)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2143" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.701972, 0, 0.689309, 0, 0.983825, 0, -0.689309, 0, 0.701972, -486.580383, 29.168503, -445.343048)
-metadata/coliziune = "trunk"
-
 [node name="fagEtaj2144" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.999559, 0, -0.093200, 0, 1.003894, 0, 0.093200, 0, 0.999559, -489.531921, 28.846451, -449.590790)
+transform = Transform3D(-0.855723, 0, -0.487626, 0, 0.984906, 0, 0.487626, 0, -0.855723, -485.278534, 29.162033, -446.228638)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2145" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.662954, 0, 0.654727, 0, 0.931760, 0, -0.654727, 0, -0.662954, -493.213135, 28.416092, -455.341309)
+[node name="fagEtaj2145" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.349415, 0, -0.888338, 0, 0.954587, 0, 0.888338, 0, 0.349415, -491.431030, 28.755951, -450.166504)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2146" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.393502, 0, 0.938826, 0, 1.017957, 0, -0.938826, 0, 0.393502, -494.583466, 27.931366, -462.710754)
+[node name="fagEtaj2146" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.817990, 0, 0.447595, 0, 0.932443, 0, -0.447595, 0, 0.817990, -494.371063, 28.317627, -456.423553)
 metadata/coliziune = "trunk"
 
 [node name="fagEtaj2147" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.997425, 0, -0.036251, 0, 0.998084, 0, 0.036251, 0, 0.997425, -501.610901, 26.536957, -465.746735)
+transform = Transform3D(0.967539, 0, -0.191801, 0, 0.986367, 0, 0.191801, 0, 0.967539, -500.603943, 27.374832, -461.657867)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2148" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.191964, 0, -0.935725, 0, 0.955213, 0, 0.935725, 0, -0.191964, -506.507874, 26.020905, -469.494659)
+[node name="fagEtaj2148" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.036371, 0, -0.942918, 0, 0.943619, 0, 0.942918, 0, -0.036371, -503.712585, 26.029190, -469.415405)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2149" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.237846, 0, -0.948829, 0, 0.978186, 0, 0.948829, 0, 0.237846, -506.859039, 24.511627, -475.228394)
+[node name="fagEtaj2149" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.740240, 0, 0.564370, 0, 0.930843, 0, -0.564370, 0, -0.740240, -506.711121, 24.983368, -473.240509)
 metadata/coliziune = "trunk"
 
 [node name="fagEtaj2150" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.964561, 0, 0.291391, 0, 1.007614, 0, -0.291391, 0, -0.964561, -506.664551, 23.759171, -478.188110)
+transform = Transform3D(-0.982458, 0, -0.115302, 0, 0.989201, 0, 0.115302, 0, -0.982458, -507.602905, 24.543350, -476.054474)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2151" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.092098, 0, 0.990304, 0, 0.994577, 0, -0.990304, 0, 0.092098, -511.139984, 23.254929, -485.134338)
+[node name="fagEtaj2151" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.585080, 0, -0.786856, 0, 0.980541, 0, 0.786856, 0, 0.585080, -505.876526, 22.443054, -481.054169)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2152" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.527865, 0, -0.785370, 0, 0.946281, 0, 0.785370, 0, -0.527865, -512.778564, 22.900757, -491.243622)
+[node name="fagEtaj2152" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.876540, 0, -0.427491, 0, 0.975229, 0, 0.427491, 0, 0.876540, -510.016846, 22.278290, -486.635773)
 metadata/coliziune = "trunk"
 
 [node name="fagEtaj2153" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.950302, 0, -0.148107, 0, 0.961774, 0, 0.148107, 0, 0.950302, -513.843750, 22.096802, -498.097290)
+transform = Transform3D(0.529061, 0, 0.804308, 0, 0.962714, 0, -0.804308, 0, 0.529061, -506.801971, 18.979691, -494.384888)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2154" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.767679, 0, 0.620777, 0, 0.987266, 0, -0.620777, 0, 0.767679, -510.277344, 19.141281, -505.992706)
+[node name="fagEtaj2154" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.497722, 0, 0.868905, 0, 1.001361, 0, -0.868905, 0, -0.497722, -507.887787, 18.813461, -499.529602)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2155" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.260535, 0, -0.948075, 0, 0.983221, 0, 0.948075, 0, 0.260535, -512.357544, 19.023087, -511.069336)
+[node name="fagEtaj2155" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.442492, 0, -0.816036, 0, 0.928286, 0, 0.816036, 0, 0.442492, -513.423889, 20.647476, -505.233887)
 metadata/coliziune = "trunk"
 
 [node name="fagEtaj2156" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.899261, 0, -0.361206, 0, 0.969092, 0, 0.361206, 0, 0.899261, -516.570129, 20.756287, -518.524963)
+transform = Transform3D(-0.863199, 0, -0.443957, 0, 0.970675, 0, 0.443957, 0, -0.863199, -514.575073, 19.796906, -513.060303)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2157" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.437592, 0, -0.835745, 0, 0.943375, 0, 0.835745, 0, -0.437592, -503.868561, 18.347198, -569.764526)
+[node name="fagEtaj2157" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.824339, 0, 0.483020, 0, 0.955429, 0, -0.483020, 0, -0.824339, -515.876343, 21.098724, -521.073486)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2158" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.112983, 0, 1.014172, 0, 1.020446, 0, -1.014172, 0, 0.112983, -498.943115, 18.355301, -570.141907)
+[node name="fagEtaj2158" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.079470, 0, 0.935022, 0, 0.938393, 0, -0.935022, 0, 0.079470, -499.882416, 18.880814, -567.434570)
 metadata/coliziune = "trunk"
 
 [node name="fagEtaj2159" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.885947, 0, 0.356322, 0, 0.954918, 0, -0.356322, 0, -0.885947, -499.052795, 17.850204, -572.711487)
+transform = Transform3D(0.951751, 0, -0.017783, 0, 0.951917, 0, 0.017783, 0, 0.951751, -499.548889, 18.246765, -570.591187)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2160" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.601733, 0, -0.721802, 0, 0.939724, 0, 0.721802, 0, -0.601733, -496.307404, 17.830933, -573.248047)
+[node name="fagEtaj2160" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.030873, 0, 0.948795, 0, 0.949297, 0, -0.948795, 0, -0.030873, -498.182617, 17.789429, -573.222961)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2161" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.121881, 0, -0.978854, 0, 0.986413, 0, 0.978854, 0, -0.121881, -490.715973, 17.808762, -576.092407)
+[node name="fagEtaj2161" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.362371, 0, 0.870384, 0, 0.942805, 0, -0.870384, 0, 0.362371, -496.315552, 17.345535, -576.483398)
 metadata/coliziune = "trunk"
 
 [node name="fagEtaj2162" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.617370, 0, 0.699677, 0, 0.933109, 0, -0.699677, 0, -0.617370, -485.560608, 17.098984, -582.876099)
+transform = Transform3D(-0.735877, 0, -0.622419, 0, 0.963806, 0, 0.622419, 0, -0.735877, -490.835327, 17.030960, -580.952820)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2163" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.441452, 0, -0.891000, 0, 0.994365, 0, 0.891000, 0, -0.441452, -480.596832, 17.057465, -586.779053)
+[node name="fagEtaj2163" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(1.005036, 0, 0.052331, 0, 1.006397, 0, -0.052331, 0, 1.005036, -482.634857, 17.460052, -582.964966)
 metadata/coliziune = "trunk"
 
-[node name="fagEtaj2164" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.407474, 0, -0.905802, 0, 0.993233, 0, 0.905802, 0, 0.407474, -473.887878, 17.537857, -586.667908)
+[node name="fagEtaj2164" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.827939, 0, -0.422380, 0, 0.929456, 0, 0.422380, 0, 0.827939, -477.785522, 17.529907, -585.166443)
 metadata/coliziune = "trunk"
 
-[node name="fagFund165" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.100864, 0, 0.965168, 0, 0.970424, 0, -0.965168, 0, -0.100864, -526.966431, 29.526352, -407.416351)
+[node name="fagEtaj2165" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.971695, 0, -0.115521, 0, 0.978538, 0, 0.115521, 0, 0.971695, -465.624908, 17.008148, -593.215942)
 metadata/coliziune = "trunk"
 
-[node name="fagFund166" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.241077, 0, 0.961913, 0, 0.991663, 0, -0.961913, 0, -0.241077, -525.574097, 29.041199, -420.687592)
+[node name="fagEtaj2166" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.484783, 0, 0.849613, 0, 0.978191, 0, -0.849613, 0, -0.484783, -430.281677, 16.041061, -587.273499)
 metadata/coliziune = "trunk"
 
-[node name="fagFund167" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.366087, 0, -0.907771, 0, 0.978809, 0, 0.907771, 0, -0.366087, -536.996643, 28.604584, -422.391632)
+[node name="fagFund167" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.098893, 0, 0.946308, 0, 0.951461, 0, -0.946308, 0, -0.098893, -532.604980, 29.019791, -415.905365)
 metadata/coliziune = "trunk"
 
 [node name="fagFund168" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.548335, 0, -0.828535, 0, 0.993550, 0, 0.828535, 0, 0.548335, -537.136169, 28.178299, -431.567169)
+transform = Transform3D(-0.242077, 0, 0.965906, 0, 0.995779, 0, -0.965906, 0, -0.242077, -531.830750, 28.459061, -429.097809)
 metadata/coliziune = "trunk"
 
-[node name="fagFund169" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.684885, 0, -0.710999, 0, 0.987212, 0, 0.710999, 0, -0.684885, -540.065857, 27.588303, -442.124512)
+[node name="fagFund169" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.366087, 0, -0.907771, 0, 0.978809, 0, 0.907771, 0, -0.366087, -541.294861, 28.191025, -428.711243)
 metadata/coliziune = "trunk"
 
-[node name="fagFund170" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.887301, 0, -0.301363, 0, 0.937082, 0, 0.301363, 0, -0.887301, -554.018127, 26.817856, -450.708069)
+[node name="fagFund170" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.545343, 0, -0.824014, 0, 0.988128, 0, 0.824014, 0, 0.545343, -542.678894, 27.601746, -440.355530)
 metadata/coliziune = "trunk"
 
 [node name="fagFund171" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.801588, 0, -0.591771, 0, 0.996362, 0, 0.591771, 0, -0.801588, -554.889893, 26.027557, -465.717712)
+transform = Transform3D(-0.688881, 0, -0.715147, 0, 0.992972, 0, 0.715147, 0, -0.688881, -546.598083, 26.973038, -451.249756)
 metadata/coliziune = "trunk"
 
-[node name="fagFund172" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.649299, 0, -0.694904, 0, 0.951042, 0, 0.694904, 0, -0.649299, -560.449402, 25.530869, -472.332275)
+[node name="fagFund172" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.887301, 0, -0.301363, 0, 0.937082, 0, 0.301363, 0, -0.887301, -559.408447, 25.988892, -464.549286)
 metadata/coliziune = "trunk"
 
-[node name="fagFund173" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.324790, 0, -0.890606, 0, 0.947981, 0, 0.890606, 0, 0.324790, -560.316467, 24.964706, -481.707214)
+[node name="fagFund173" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.798551, 0, -0.589529, 0, 0.992587, 0, 0.589529, 0, -0.798551, -556.541443, 25.553970, -473.346893)
 metadata/coliziune = "trunk"
 
 [node name="fagFund174" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.740735, 0, 0.583408, 0, 0.942896, 0, -0.583408, 0, 0.740735, -563.192993, 24.449387, -488.945587)
+transform = Transform3D(-0.662351, 0, -0.708873, 0, 0.970159, 0, 0.708873, 0, -0.662351, -564.734131, 24.842300, -482.379395)
 metadata/coliziune = "trunk"
 
-[node name="fagFund175" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.800514, 0, -0.477984, 0, 0.932358, 0, 0.477984, 0, 0.800514, -562.467773, 24.182770, -498.390961)
+[node name="fagFund175" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.324790, 0, -0.890606, 0, 0.947981, 0, 0.890606, 0, 0.324790, -562.115112, 24.450638, -489.204834)
 metadata/coliziune = "trunk"
 
-[node name="fagFund176" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.284571, 0, 0.891572, 0, 0.935885, 0, -0.891572, 0, -0.284571, -562.763611, 23.568161, -507.762451)
+[node name="fagFund176" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.713174, 0, 0.561701, 0, 0.907814, 0, -0.561701, 0, 0.713174, -564.618469, 24.154297, -496.356628)
 metadata/coliziune = "trunk"
 
 [node name="fagFund177" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.886323, 0, -0.324739, 0, 0.943940, 0, 0.324739, 0, -0.886323, -568.649658, 22.402054, -522.086487)
+transform = Transform3D(0.822853, 0, -0.491322, 0, 0.958376, 0, 0.491322, 0, 0.822853, -563.497742, 23.527466, -507.591400)
 metadata/coliziune = "trunk"
 
-[node name="fagFund178" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.408168, 0, 0.818741, 0, 0.914843, 0, -0.818741, 0, -0.408168, -567.910828, 21.658203, -536.916443)
+[node name="fagFund178" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.284571, 0, 0.891572, 0, 0.935885, 0, -0.891572, 0, -0.284571, -565.305054, 22.718475, -519.317749)
 metadata/coliziune = "trunk"
 
-[node name="fagFund179" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.864928, 0, 0.395818, 0, 0.951195, 0, -0.395818, 0, 0.864928, -565.430664, 21.037552, -549.347595)
+[node name="fagFund179" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.853956, 0, -0.312880, 0, 0.909470, 0, 0.312880, 0, -0.853956, -567.923035, 21.658173, -536.918579)
 metadata/coliziune = "trunk"
 
 [node name="fagFund180" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.854250, 0, -0.467598, 0, 0.973854, 0, 0.467598, 0, 0.854250, -564.464966, 20.437790, -561.507324)
+transform = Transform3D(-0.422662, 0, 0.847815, 0, 0.947329, 0, -0.847815, 0, -0.422662, -565.277771, 21.038498, -549.294739)
 metadata/coliziune = "trunk"
 
-[node name="fagFund181" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.847473, 0, 0.266779, 0, 0.888471, 0, -0.266779, 0, 0.847473, -561.527954, 20.026550, -569.028442)
+[node name="fagFund181" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.864928, 0, 0.395818, 0, 0.951195, 0, -0.395818, 0, 0.864928, -560.844299, 20.463684, -559.836914)
 metadata/coliziune = "trunk"
 
-[node name="fagFund182" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.408172, 0, -0.836313, 0, 0.930604, 0, 0.836313, 0, -0.408172, -555.354187, 19.638962, -574.403564)
+[node name="fagFund182" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.839378, 0, -0.459457, 0, 0.956900, 0, 0.459457, 0, 0.839378, -560.795898, 20.030594, -568.684631)
 metadata/coliziune = "trunk"
 
 [node name="fagFund183" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.818385, 0, 0.559231, 0, 0.991208, 0, -0.559231, 0, 0.818385, -550.149414, 19.182999, -581.672058)
+transform = Transform3D(0.887749, 0, 0.279458, 0, 0.930696, 0, -0.279458, 0, 0.887749, -558.702698, 19.647141, -575.934265)
 metadata/coliziune = "trunk"
 
-[node name="fagFund184" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.941873, 0, -0.081132, 0, 0.945361, 0, 0.081132, 0, 0.941873, -552.335815, 18.853012, -591.595337)
+[node name="fagFund184" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.408172, 0, -0.836313, 0, 0.930604, 0, 0.836313, 0, -0.408172, -551.677429, 19.193954, -582.395508)
 metadata/coliziune = "trunk"
 
-[node name="fagFund185" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.890058, 0, -0.338156, 0, 0.952130, 0, 0.338156, 0, -0.890058, -543.403137, 18.268005, -603.116699)
+[node name="fagFund185" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.812777, 0, 0.555398, 0, 0.984415, 0, -0.555398, 0, 0.812777, -546.620789, 18.799515, -588.857239)
 metadata/coliziune = "trunk"
 
 [node name="fagFund186" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.840649, 0, 0.461288, 0, 0.958894, 0, -0.461288, 0, 0.840649, -529.348267, 17.690872, -613.795959)
+transform = Transform3D(0.963011, 0, -0.082953, 0, 0.966577, 0, 0.082953, 0, 0.963011, -545.116455, 18.276779, -604.387390)
 metadata/coliziune = "trunk"
 
-[node name="fagFund187" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.965239, 0, -0.047460, 0, 0.966406, 0, 0.047460, 0, 0.965239, -516.166992, 17.243698, -621.451721)
+[node name="fagFund187" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.890058, 0, -0.338156, 0, 0.952130, 0, 0.338156, 0, -0.890058, -530.985474, 17.690918, -615.927307)
 metadata/coliziune = "trunk"
 
-[node name="fagFund188" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.949606, 0, 0.108609, 0, 0.955797, 0, -0.108609, 0, -0.949606, -514.041382, 17.104279, -627.390320)
+[node name="fagFund188" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.818106, 0, 0.448918, 0, 0.933180, 0, -0.448918, 0, 0.818106, -516.190308, 17.243500, -621.504517)
 metadata/coliziune = "trunk"
 
 [node name="fagFund189" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.193744, 0, -0.949663, 0, 0.969225, 0, 0.949663, 0, -0.193744, -503.485535, 16.815140, -630.460022)
+transform = Transform3D(0.978667, 0, -0.048120, 0, 0.979849, 0, 0.048120, 0, 0.978667, -510.343719, 17.055740, -624.559387)
 metadata/coliziune = "trunk"
 
-[node name="fagFund190" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.870954, 0, 0.192177, 0, 0.891904, 0, -0.192177, 0, 0.870954, -493.669495, 16.599380, -627.856140)
+[node name="fagFund190" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.949606, 0, 0.108609, 0, 0.955797, 0, -0.108609, 0, -0.949606, -503.832581, 16.814896, -631.187866)
 metadata/coliziune = "trunk"
 
-[node name="fagFund191" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.958767, 0, -0.170808, 0, 0.973863, 0, 0.170808, 0, -0.958767, -489.156830, 16.453415, -633.590271)
+[node name="fagFund191" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.189813, 0, -0.930395, 0, 0.949560, 0, 0.930395, 0, -0.189813, -496.393616, 16.615738, -633.528198)
 metadata/coliziune = "trunk"
 
 [node name="fagFund192" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.914610, 0, 0.219451, 0, 0.940569, 0, -0.219451, 0, -0.914610, -473.649719, 16.165222, -639.309204)
+transform = Transform3D(0.910949, 0, 0.201002, 0, 0.932862, 0, -0.201002, 0, 0.910949, -487.945221, 16.440994, -631.313293)
 metadata/coliziune = "trunk"
 
-[node name="fagFund193" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.312890, 0, 0.828632, 0, 0.885738, 0, -0.828632, 0, 0.312890, -457.440887, 16.038956, -640.506897)
+[node name="fagFund193" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.958767, 0, -0.170808, 0, 0.973863, 0, 0.170808, 0, -0.958767, -476.694794, 16.213669, -639.815308)
 metadata/coliziune = "trunk"
 
-[node name="fagFund194" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.406045, 0, 0.846928, 0, 0.939234, 0, -0.846928, 0, -0.406045, -441.472534, 16.069901, -638.286072)
+[node name="fagFund194" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.879172, 0, 0.210948, 0, 0.904125, 0, -0.210948, 0, -0.879172, -457.459625, 16.044250, -641.850464)
 metadata/coliziune = "trunk"
 
 [node name="fagFund195" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.035820, 0, 0.959152, 0, 0.959821, 0, -0.959152, 0, 0.035820, -435.020386, 16.127808, -639.781189)
+transform = Transform3D(0.328163, 0, 0.869079, 0, 0.928972, 0, -0.869079, 0, 0.328163, -441.207397, 16.074402, -639.403076)
 metadata/coliziune = "trunk"
 
-[node name="fagFund196" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.884064, 0, -0.307184, 0, 0.935912, 0, 0.307184, 0, 0.884064, -425.681122, 16.231827, -644.432495)
+[node name="fagFund196" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.406045, 0, 0.846928, 0, 0.939234, 0, -0.846928, 0, -0.406045, -435.487091, 16.120316, -637.045593)
 metadata/coliziune = "trunk"
 
-[node name="fagFund197" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.181131, 0, -0.961177, 0, 0.978095, 0, 0.961177, 0, -0.181131, -416.022675, 16.369766, -638.847351)
+[node name="fagFund197" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.034880, 0, 0.933999, 0, 0.934650, 0, -0.933999, 0, 0.034880, -425.003693, 16.241425, -637.699402)
 metadata/coliziune = "trunk"
 
-[node name="fagFund198" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.552118, 0, 0.712725, 0, 0.901560, 0, -0.712725, 0, -0.552118, -399.601715, 16.658401, -640.072632)
+[node name="fagFund198" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.907401, 0, -0.315293, 0, 0.960617, 0, 0.315293, 0, 0.907401, -415.305695, 16.376633, -643.002075)
 metadata/coliziune = "trunk"
 
 [node name="fagFund199" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.533264, 0, -0.823499, 0, 0.981082, 0, 0.823499, 0, 0.533264, -470.523254, 29.877060, -440.868622)
+transform = Transform3D(0.605829, 0, 0.779818, 0, 0.987494, 0, -0.779818, 0, 0.605829, -467.738922, 29.877747, -442.663361)
 metadata/coliziune = "trunk"
 
-[node name="fagFund200" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.546566, 0, 0.764407, 0, 0.939708, 0, -0.764407, 0, -0.546566, -471.090088, 29.278900, -452.693726)
+[node name="fagFund200" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.257094, 0, 0.860252, 0, 0.897848, 0, -0.860252, 0, -0.257094, -475.464447, 28.897842, -456.962738)
 metadata/coliziune = "trunk"
 
-[node name="fagFund201" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.022466, 0, 0.947331, 0, 0.947598, 0, -0.947331, 0, 0.022466, -481.632782, 28.805679, -454.961975)
+[node name="fagFund201" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.472785, 0, -0.797944, 0, 0.927491, 0, 0.797944, 0, 0.472785, -485.937653, 28.243576, -462.154846)
 metadata/coliziune = "trunk"
 
 [node name="fagFund202" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.897483, 0, 0.417482, 0, 0.989832, 0, -0.417482, 0, 0.897483, -486.346100, 28.102402, -464.132385)
+transform = Transform3D(0.456121, 0, 0.879866, 0, 0.991065, 0, -0.879866, 0, 0.456121, -486.846954, 27.427292, -471.030914)
 metadata/coliziune = "trunk"
 
-[node name="fagFund203" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.927042, 0, 0.259580, 0, 0.962699, 0, -0.259580, 0, -0.927042, -489.467346, 26.717743, -472.135498)
+[node name="fagFund203" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.008669, 0, 0.917805, 0, 0.917846, 0, -0.917805, 0, -0.008669, -489.254333, 24.356125, -479.684082)
 metadata/coliziune = "trunk"
 
-[node name="fagFund204" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.777874, 0, -0.471521, 0, 0.909626, 0, 0.471521, 0, -0.777874, -490.230988, 23.633102, -481.256226)
+[node name="fagFund204" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.849860, 0, 0.392019, 0, 0.935917, 0, -0.392019, 0, -0.849860, -494.227173, 23.656128, -480.123230)
 metadata/coliziune = "trunk"
 
 [node name="fagFund205" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.502343, 0, -0.797602, 0, 0.942613, 0, 0.797602, 0, -0.502343, -491.607117, 23.175064, -482.070526)
+transform = Transform3D(0.665387, 0, -0.667831, 0, 0.942729, 0, 0.667831, 0, 0.665387, -497.292572, 23.352692, -479.738495)
 metadata/coliziune = "trunk"
 
-[node name="fagFund206" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.400361, 0, -0.874436, 0, 0.961731, 0, 0.874436, 0, 0.400361, -495.878448, 21.081619, -485.682861)
+[node name="fagFund206" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.243148, 0, -0.852816, 0, 0.886801, 0, 0.852816, 0, 0.243148, -500.174500, 19.674438, -487.981293)
 metadata/coliziune = "trunk"
 
-[node name="fagFund207" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.773760, 0, -0.543922, 0, 0.945809, 0, 0.543922, 0, -0.773760, -497.624420, 17.713379, -494.709656)
+[node name="fagFund207" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.968813, 0, -0.078043, 0, 0.971951, 0, 0.078043, 0, -0.968813, -497.340332, 17.408295, -496.626343)
 metadata/coliziune = "trunk"
 
 [node name="fagFund208" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.846422, 0, 0.484902, 0, 0.975479, 0, -0.484902, 0, -0.846422, -495.297516, 17.765045, -502.557343)
+transform = Transform3D(-0.885934, 0, 0.270976, 0, 0.926448, 0, -0.270976, 0, -0.885934, -499.115601, 16.268372, -507.084564)
 metadata/coliziune = "trunk"
 
-[node name="fagFund209" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.905129, 0, -0.195551, 0, 0.926012, 0, 0.195551, 0, -0.905129, -499.677246, 16.191284, -510.518219)
+[node name="fagFund209" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.229377, 0, -0.888389, 0, 0.917523, 0, 0.888389, 0, 0.229377, -499.880737, 16.239380, -514.226074)
 metadata/coliziune = "trunk"
 
-[node name="fagFund210" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.646450, 0, 0.734035, 0, 0.978113, 0, -0.734035, 0, -0.646450, -507.635071, 16.436295, -517.111023)
+[node name="fagFund210" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.880333, 0, -0.463449, 0, 0.994872, 0, 0.463449, 0, -0.880333, -509.964783, 18.069107, -520.063904)
 metadata/coliziune = "trunk"
 
 [node name="fagFund211" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.624649, 0, -0.771198, 0, 0.992438, 0, 0.771198, 0, 0.624649, -503.261292, 17.429749, -526.173157)
+transform = Transform3D(0.926624, 0, 0.273674, 0, 0.966194, 0, -0.273674, 0, 0.926624, -502.458130, 17.362564, -526.243225)
 metadata/coliziune = "trunk"
 
-[node name="fagFund212" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.915609, 0, -0.156730, 0, 0.928926, 0, 0.156730, 0, 0.915609, -506.432434, 19.106842, -527.733032)
+[node name="fagFund212" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.145156, 0, -0.985122, 0, 0.995759, 0, 0.985122, 0, -0.145156, -502.477051, 17.319168, -525.568176)
 metadata/coliziune = "trunk"
 
-[node name="fagFund213" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.104198, 0, -0.945464, 0, 0.951188, 0, 0.945464, 0, -0.104198, -503.716034, 17.600174, -526.321289)
+[node name="fagFund213" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.184620, 0, -0.965779, 0, 0.983267, 0, 0.965779, 0, 0.184620, -436.378815, 16.906250, -571.623230)
 metadata/coliziune = "trunk"
 
-[node name="fagFund214" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.799998, 0, 0.503145, 0, 0.945067, 0, -0.503145, 0, 0.799998, -504.590912, 18.141693, -527.161499)
+[node name="fagFund214" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.174021, 0, 0.900268, 0, 0.916932, 0, -0.900268, 0, -0.174021, -429.043396, 16.644196, -578.936035)
 metadata/coliziune = "trunk"
 
 [node name="fagFund215" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.995706, 0, -0.023475, 0, 0.995983, 0, 0.023475, 0, 0.995706, -502.114319, 19.609543, -532.741089)
+transform = Transform3D(-0.830475, 0, 0.520997, 0, 0.980370, 0, -0.520997, 0, -0.830475, -419.881989, 16.714890, -575.133545)
 metadata/coliziune = "trunk"
 
-[node name="fagFund216" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.859448, 0, 0.417963, 0, 0.955690, 0, -0.417963, 0, 0.859448, -441.256866, 16.699905, -578.738892)
-metadata/coliziune = "trunk"
+[node name="muschiBolovan216" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.780995, 0, 0.039900, 0, 0.782014, 0, -0.039900, 0, 0.780995, -517.299072, 28.870651, -430.709900)
 
-[node name="fagFund217" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.767592, 0, -0.617399, 0, 0.985078, 0, 0.617399, 0, -0.767592, -432.213196, 16.720108, -576.074829)
-metadata/coliziune = "trunk"
+[node name="muschiBolovan217" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.814373, 0, -0.072320, 0, 0.817578, 0, 0.072320, 0, -0.814373, -506.048035, 26.962296, -461.031464)
 
-[node name="fagFund218" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.971450, 0, 0.049630, 0, 0.972717, 0, -0.049630, 0, 0.971450, -421.800629, 16.603210, -573.513855)
-metadata/coliziune = "trunk"
+[node name="muschiBolovan218" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.592667, 0, -0.510187, 0, 0.782014, 0, 0.510187, 0, -0.592667, -529.887390, 27.441132, -450.825348)
 
-[node name="fagFund219" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.811819, 0, -0.562239, 0, 0.987503, 0, 0.562239, 0, 0.811819, -414.651917, 16.693222, -570.630005)
-metadata/coliziune = "trunk"
+[node name="muschiBolovan219" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.252256, 0, -0.910366, 0, 0.944669, 0, 0.910366, 0, 0.252256, -538.044434, 26.588593, -463.859833)
 
-[node name="muschiBolovan220" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.119699, 0, -0.808768, 0, 0.817578, 0, 0.808768, 0, -0.119699, -509.542236, 29.589355, -421.466187)
+[node name="muschiBolovan220" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.368993, 0, 0.689485, 0, 0.782014, 0, -0.689485, 0, 0.368993, -513.350525, 23.421204, -488.331360)
 
-[node name="muschiBolovan221" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.619620, 0, -0.533389, 0, 0.817578, 0, 0.533389, 0, -0.619620, -486.089966, 29.706055, -435.231049)
+[node name="muschiBolovan221" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.643564, 0, -0.691539, 0, 0.944669, 0, 0.691539, 0, -0.643564, -545.124451, 23.956329, -496.003113)
 
-[node name="muschiBolovan222" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.208822, 0, -0.753617, 0, 0.782014, 0, 0.753617, 0, 0.208822, -489.723114, 29.085068, -445.072479)
+[node name="muschiBolovan222" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.167726, 0, -0.800189, 0, 0.817578, 0, 0.800189, 0, 0.167726, -518.617615, 22.498199, -509.485474)
 
-[node name="muschiBolovan223" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.100260, 0, -0.811407, 0, 0.817578, 0, 0.811407, 0, 0.100260, -524.492249, 28.059921, -442.092072)
+[node name="muschiBolovan223" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.722519, 0, 0.299184, 0, 0.782014, 0, -0.299184, 0, 0.722519, -552.401184, 23.271378, -511.631866)
 
-[node name="muschiBolovan224" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.343876, 0, 0.741743, 0, 0.817578, 0, -0.741743, 0, -0.343876, -504.052002, 27.332352, -459.308624)
+[node name="muschiBolovan224" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.659881, 0, -0.419646, 0, 0.782014, 0, 0.419646, 0, -0.659881, -553.530273, 21.732697, -540.047424)
 
 [node name="muschiBolovan225" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.846696, 0, -0.418934, 0, 0.944669, 0, 0.418934, 0, -0.846696, -536.743225, 26.844284, -459.233490)
+transform = Transform3D(-0.659975, 0, -0.675895, 0, 0.944669, 0, 0.675895, 0, -0.659975, -542.794006, 20.768631, -551.509155)
 
 [node name="muschiBolovan226" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.808414, 0, -0.122065, 0, 0.817578, 0, 0.122065, 0, 0.808414, -538.391052, 25.739822, -476.030975)
+transform = Transform3D(0.792182, 0, -0.202192, 0, 0.817578, 0, 0.202192, 0, 0.792182, -540.984253, 20.076370, -559.379761)
 
-[node name="muschiBolovan227" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.200052, 0, -0.792725, 0, 0.817578, 0, 0.792725, 0, -0.200052, -511.815125, 24.252701, -481.375183)
+[node name="muschiBolovan227" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.142332, 0, -0.768952, 0, 0.782014, 0, 0.768952, 0, 0.142332, -539.388306, 19.591370, -567.105042)
 
-[node name="muschiBolovan228" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.182148, 0, 0.760505, 0, 0.782014, 0, -0.760505, 0, -0.182148, -544.450806, 25.143097, -481.359009)
+[node name="muschiBolovan228" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.468859, 0, -0.820104, 0, 0.944669, 0, 0.820104, 0, 0.468859, -535.468811, 18.890717, -578.019409)
 
-[node name="muschiBolovan229" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.944636, 0, 0.007998, 0, 0.944669, 0, -0.007998, 0, 0.944636, -544.212524, 24.028366, -493.510437)
+[node name="muschiBolovan229" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.705797, 0, -0.412655, 0, 0.817578, 0, 0.412655, 0, 0.705797, -505.577515, 17.945190, -571.604431)
 
-[node name="muschiBolovan230" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.236566, 0, 0.782605, 0, 0.817578, 0, -0.782605, 0, 0.236566, -520.598755, 23.747299, -505.408691)
+[node name="muschiBolovan230" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.892514, 0, 0.309546, 0, 0.944669, 0, -0.309546, 0, 0.892514, -511.645905, 17.398666, -602.671082)
 
-[node name="muschiBolovan231" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.637084, 0, -0.512404, 0, 0.817578, 0, 0.512404, 0, -0.637084, -524.612854, 18.053925, -589.180481)
+[node name="muschiBolovan231" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(0.926684, 0, -0.183458, 0, 0.944669, 0, 0.183458, 0, 0.926684, -500.577148, 16.928421, -580.400940)
 
 [node name="muschiBolovan232" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.407920, 0, 0.708545, 0, 0.817578, 0, -0.708545, 0, 0.407920, -506.384308, 17.722107, -573.803284)
+transform = Transform3D(0.110384, 0, -0.810092, 0, 0.817578, 0, 0.810092, 0, 0.110384, -502.124939, 17.061157, -607.810974)
 
 [node name="muschiBolovan233" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(0.093929, 0, -0.776352, 0, 0.782014, 0, 0.776352, 0, 0.093929, -516.878601, 17.567383, -601.268250)
+transform = Transform3D(0.373727, 0, 0.686931, 0, 0.782014, 0, -0.686931, 0, 0.373727, -480.137238, 16.691788, -590.047058)
 
-[node name="muschiBolovan234" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.806792, 0, 0.132366, 0, 0.817578, 0, -0.132366, 0, 0.806792, -501.730774, 17.007919, -610.895752)
+[node name="muschiBolovan234" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.942820, 0, 0.059084, 0, 0.944669, 0, -0.059084, 0, -0.942820, -485.820984, 16.456482, -617.713989)
 
-[node name="muschiBolovan235" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.815977, 0, 0.051135, 0, 0.817578, 0, -0.051135, 0, -0.815977, -486.016815, 17.005371, -583.849731)
+[node name="muschiBolovan235" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.929892, 0, -0.166436, 0, 0.944669, 0, 0.166436, 0, -0.929892, -473.307404, 17.024216, -591.462952)
 
-[node name="muschiBolovan236" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.881562, 0, -0.339484, 0, 0.944669, 0, 0.339484, 0, 0.881562, -471.253204, 16.697342, -595.328674)
+[node name="muschiBolovan236" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.762960, 0, -0.293811, 0, 0.817578, 0, 0.293811, 0, 0.762960, -479.271057, 16.242813, -617.924500)
 
-[node name="muschiBolovan237" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
-transform = Transform3D(-0.132178, 0, -0.770762, 0, 0.782014, 0, 0.770762, 0, -0.132178, -464.555389, 15.909775, -623.529785)
+[node name="muschiBolovan237" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.226856, 0, -0.785474, 0, 0.817578, 0, 0.785474, 0, -0.226856, -464.268433, 16.912994, -594.487427)
 
-[node name="ferigaMica238" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(1.041791, 0, 0.470952, 0, 1.143295, 0, -0.470952, 0, 1.041791, -487.928711, 29.838989, -431.679932)
+[node name="muschiBolovan238" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.029557, 0, 0.781455, 0, 0.782014, 0, -0.781455, 0, -0.029557, -468.887360, 15.980530, -622.632141)
+
+[node name="muschiBolovan239" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.837856, 0, -0.436345, 0, 0.944669, 0, 0.436345, 0, -0.837856, -456.859161, 16.586288, -598.801392)
+
+[node name="muschiBolovan240" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.447116, 0, 0.684486, 0, 0.817578, 0, -0.684486, 0, -0.447116, -442.823578, 15.988266, -621.820374)
+
+[node name="muschiBolovan241" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.729229, 0, -0.369674, 0, 0.817578, 0, 0.369674, 0, 0.729229, -419.657379, 15.969376, -617.784607)
+
+[node name="ferigaMica242" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(1.041791, 0, 0.470952, 0, 1.143295, 0, -0.470952, 0, 1.041791, -501.951447, 30.055557, -417.565186)
 metadata/coliziune = "none"
 
-[node name="tufaIarba239" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.498527, 0, -0.955757, 0, 1.077961, 0, 0.955757, 0, -0.498527, -505.165619, 29.729919, -422.250885)
+[node name="tufaIarba243" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.498527, 0, -0.955757, 0, 1.077961, 0, 0.955757, 0, -0.498527, -485.569550, 30.105728, -427.909454)
 
-[node name="feriga240" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.864719, 0, -0.532083, 0, 1.015309, 0, 0.532083, 0, 0.864719, -509.378754, 29.345673, -426.639679)
-
-[node name="ferigaMica241" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.259914, 0, -0.783246, 0, 0.825246, 0, 0.783246, 0, -0.259914, -493.661804, 29.193817, -440.525726)
-metadata/coliziune = "none"
-
-[node name="tufaIarba242" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.960380, 0, -0.545296, 0, 1.104390, 0, 0.545296, 0, -0.960380, -490.397858, 29.516220, -436.364258)
-
-[node name="feriga243" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.490162, 0, 0.637848, 0, 0.804431, 0, -0.637848, 0, 0.490162, -513.396667, 28.881790, -433.363403)
-
-[node name="ferigaMica244" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.228399, 0, -0.917778, 0, 0.945771, 0, 0.917778, 0, -0.228399, -517.062561, 28.464508, -439.133881)
-metadata/coliziune = "none"
+[node name="feriga244" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.864719, 0, -0.532083, 0, 1.015309, 0, 0.532083, 0, 0.864719, -488.198883, 29.721191, -433.795990)
 
 [node name="ferigaMica245" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.274012, 0, -1.106767, 0, 1.140182, 0, 1.106767, 0, -0.274012, -503.298126, 28.106186, -454.804871)
+transform = Transform3D(-0.259914, 0, -0.783246, 0, 0.825246, 0, 0.783246, 0, -0.259914, -506.176727, 29.612167, -423.756744)
 metadata/coliziune = "none"
 
-[node name="feriga246" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.720814, 0, -0.384503, 0, 0.816955, 0, 0.384503, 0, -0.720814, -503.492920, 27.815567, -456.568695)
+[node name="tufaIarba246" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.960380, 0, -0.545296, 0, 1.104390, 0, 0.545296, 0, -0.960380, -505.490967, 29.727936, -422.029480)
 
-[node name="feriga247" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.704367, 0, 0.446327, 0, 0.833871, 0, -0.446327, 0, -0.704367, -524.927551, 27.727783, -448.387939)
+[node name="reperMargine247" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.563825, 0, -1.046060, 0, 1.188335, 0, 1.046060, 0, 0.563825, -494.824860, 29.102737, -441.602386)
 
-[node name="feriga248" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.441097, 0, -0.895102, 0, 0.997885, 0, 0.895102, 0, -0.441097, -508.824371, 26.618607, -463.274261)
+[node name="ferigaMica248" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.228399, 0, -0.917778, 0, 0.945771, 0, 0.917778, 0, -0.228399, -497.276489, 28.788559, -446.192749)
+metadata/coliziune = "none"
 
-[node name="tufaIarba249" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.177051, 0, -1.123390, 0, 1.137257, 0, 1.123390, 0, -0.177051, -525.337402, 27.523666, -452.095306)
+[node name="ferigaMica249" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.274012, 0, -1.106767, 0, 1.140182, 0, 1.106767, 0, -0.274012, -516.943054, 28.464584, -439.215088)
+metadata/coliziune = "none"
 
 [node name="feriga250" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.981310, 0, 0.127991, 0, 0.989621, 0, -0.127991, 0, 0.981310, -529.127563, 27.169464, -457.085022)
+transform = Transform3D(-0.720814, 0, -0.384503, 0, 0.816955, 0, 0.384503, 0, -0.720814, -519.514709, 28.257706, -441.508453)
 
 [node name="feriga251" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.548051, 0, 0.580459, 0, 0.798306, 0, -0.580459, 0, 0.548051, -513.360413, 26.094452, -470.773285)
+transform = Transform3D(-0.704367, 0, 0.446327, 0, 0.833871, 0, -0.446327, 0, -0.704367, -503.016266, 27.825027, -456.897308)
 
-[node name="reperMargine252" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(0.712548, 0, -0.634091, 0, 0.953832, 0, 0.634091, 0, 0.712548, -514.305420, 26.120178, -470.306915)
+[node name="feriga252" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.441097, 0, -0.895102, 0, 0.997885, 0, 0.895102, 0, -0.441097, -523.904236, 27.727386, -449.073212)
 
-[node name="ferigaMica253" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.717700, 0, 0.713662, 0, 1.012130, 0, -0.713662, 0, 0.717700, -515.353882, 25.626099, -473.868561)
-metadata/coliziune = "none"
+[node name="tufaIarba253" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.177051, 0, -1.123390, 0, 1.137257, 0, 1.123390, 0, -0.177051, -505.893677, 27.409927, -458.053802)
 
 [node name="feriga254" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.401378, 0, 0.935346, 0, 1.017829, 0, -0.935346, 0, -0.401378, -515.055603, 25.438690, -476.018280)
+transform = Transform3D(0.981310, 0, 0.127991, 0, 0.989621, 0, -0.127991, 0, 0.981310, -509.034424, 26.628922, -463.132080)
 
 [node name="feriga255" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.862237, 0, 0.036717, 0, 0.863018, 0, -0.036717, 0, -0.862237, -538.007751, 25.725922, -476.135956)
+transform = Transform3D(0.548051, 0, 0.580459, 0, 0.798306, 0, -0.580459, 0, 0.548051, -529.731934, 27.169800, -456.695068)
 
 [node name="reperMargine256" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(0.816228, 0, -0.703237, 0, 1.077391, 0, 0.703237, 0, 0.816228, -537.816895, 25.719009, -476.188263)
+transform = Transform3D(0.712548, 0, -0.634091, 0, 0.953832, 0, 0.634091, 0, 0.712548, -528.846436, 27.169327, -457.266418)
 
-[node name="feriga257" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.895008, 0, 0.395118, 0, 0.978344, 0, -0.395118, 0, -0.895008, -516.664368, 24.249313, -485.049957)
-
-[node name="ferigaMica258" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.900652, 0, 0.091110, 0, 0.905249, 0, -0.091110, 0, -0.900652, -539.187927, 25.274902, -482.538879)
+[node name="ferigaMica257" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.717700, 0, 0.713662, 0, 1.012130, 0, -0.713662, 0, 0.717700, -533.018127, 26.734863, -463.493286)
 metadata/coliziune = "none"
+
+[node name="feriga258" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.401378, 0, 0.935346, 0, 1.017829, 0, -0.935346, 0, -0.401378, -534.814880, 26.611404, -465.153595)
 
 [node name="feriga259" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.178550, 0, -0.825655, 0, 0.844741, 0, 0.825655, 0, 0.178550, -518.680237, 23.600784, -493.485657)
+transform = Transform3D(-0.862237, 0, 0.036717, 0, 0.863018, 0, -0.036717, 0, -0.862237, -515.171082, 25.442505, -475.988434)
 
-[node name="feriga260" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.021160, 0, -0.868490, 0, 0.868747, 0, 0.868490, 0, 0.021160, -544.554260, 24.054459, -493.428253)
+[node name="reperMargine260" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.816228, 0, -0.703237, 0, 1.077391, 0, 0.703237, 0, 0.816228, -516.017395, 25.104782, -478.470459)
 
-[node name="ferigaMica261" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.741031, 0, -0.606205, 0, 0.957398, 0, 0.606205, 0, -0.741031, -522.880615, 23.973282, -501.360657)
+[node name="feriga261" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.895008, 0, 0.395118, 0, 0.978344, 0, -0.395118, 0, -0.895008, -538.843689, 25.756256, -475.906982)
+
+[node name="ferigaMica262" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.900652, 0, 0.091110, 0, 0.905249, 0, -0.091110, 0, -0.900652, -517.592346, 24.506424, -483.459137)
 metadata/coliziune = "none"
-
-[node name="tufaIarba262" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-1.119692, 0, 0.391982, 0, 1.186322, 0, -0.391982, 0, -1.119692, -543.420654, 23.910049, -496.413483)
 
 [node name="feriga263" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.554048, 0, -0.731081, 0, 0.917306, 0, 0.731081, 0, -0.554048, -546.407593, 23.697845, -500.903412)
+transform = Transform3D(0.178550, 0, -0.825655, 0, 0.844741, 0, 0.825655, 0, 0.178550, -540.968384, 24.798340, -484.796082)
 
-[node name="ferigaMica264" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.736097, 0, 0.566148, 0, 0.928635, 0, -0.566148, 0, -0.736097, -524.154785, 23.546295, -508.084503)
+[node name="feriga264" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.021160, 0, -0.868490, 0, 0.868747, 0, 0.868490, 0, 0.021160, -517.232666, 23.298950, -493.834747)
+
+[node name="ferigaMica265" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.741031, 0, -0.606205, 0, 0.957398, 0, 0.606205, 0, -0.741031, -539.947510, 24.555161, -490.226868)
 metadata/coliziune = "none"
 
-[node name="reperMargine265" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(-0.919861, 0, 0.857427, 0, 1.257508, 0, -0.857427, 0, -0.919861, -524.003296, 22.709152, -513.327393)
+[node name="tufaIarba266" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-1.119692, 0, 0.391982, 0, 1.186322, 0, -0.391982, 0, -1.119692, -519.768372, 23.799179, -496.672546)
 
-[node name="feriga266" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.078964, 0, -0.882268, 0, 0.885794, 0, 0.882268, 0, 0.078964, -547.438538, 23.212402, -511.333008)
+[node name="feriga267" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.554048, 0, -0.731081, 0, 0.917306, 0, 0.731081, 0, -0.554048, -519.571960, 23.408905, -503.751190)
 
-[node name="tufaIarba267" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.417024, 0, 0.621348, 0, 0.748320, 0, -0.621348, 0, 0.417024, -526.235962, 22.741837, -514.313110)
-
-[node name="feriga268" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.879814, 0, 0.225674, 0, 0.908296, 0, -0.225674, 0, 0.879814, -546.861633, 21.485886, -542.927673)
-
-[node name="ferigaMica269" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.756818, 0, -0.947927, 0, 1.212987, 0, 0.947927, 0, 0.756818, -542.661743, 20.909683, -550.017212)
+[node name="ferigaMica268" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.736097, 0, 0.566148, 0, 0.928635, 0, -0.566148, 0, -0.736097, -542.670105, 23.761642, -500.018341)
 metadata/coliziune = "none"
 
-[node name="tufaIarba270" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.947770, 0, 0.157899, 0, 0.960833, 0, -0.157899, 0, 0.947770, -544.468445, 21.327423, -544.487061)
+[node name="reperMargine269" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.919861, 0, 0.857427, 0, 1.257508, 0, -0.857427, 0, -0.919861, -544.825867, 23.566147, -502.854553)
 
-[node name="feriga271" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.369627, 0, 0.861627, 0, 0.937564, 0, -0.861627, 0, 0.369627, -542.529419, 20.776276, -551.387085)
+[node name="feriga270" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.078964, 0, -0.882268, 0, 0.885794, 0, 0.882268, 0, 0.078964, -521.406982, 23.064301, -511.390991)
 
-[node name="ferigaMica272" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.932004, 0, -0.752382, 0, 1.197794, 0, 0.752382, 0, -0.932004, -538.653137, 20.114532, -558.284912)
-metadata/coliziune = "none"
+[node name="tufaIarba271" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.417024, 0, 0.621348, 0, 0.748320, 0, -0.621348, 0, 0.417024, -545.056030, 23.444427, -505.612671)
+
+[node name="feriga272" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.896525, 0, -0.471187, 0, 1.012805, 0, 0.471187, 0, -0.896525, -546.954346, 23.200638, -511.445801)
 
 [node name="feriga273" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.392118, 0, -0.751909, 0, 0.848012, 0, 0.751909, 0, 0.392118, -537.991882, 19.925568, -560.874146)
+transform = Transform3D(0.848653, 0, 0.312341, 0, 0.904306, 0, -0.312341, 0, 0.848653, -548.188660, 22.631332, -521.297424)
 
-[node name="ferigaMica274" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-1.214656, 0, 0.368399, 0, 1.269294, 0, -0.368399, 0, -1.214656, -518.556030, 20.403748, -553.529419)
+[node name="feriga274" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.728412, 0, -0.649205, 0, 0.975732, 0, 0.649205, 0, 0.728412, -549.176086, 22.086838, -533.667297)
+
+[node name="feriga275" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.810281, 0, -0.639255, 0, 1.032086, 0, 0.639255, 0, 0.810281, -545.745300, 21.474960, -542.541687)
+
+[node name="ferigaMica276" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.756818, 0, -0.947927, 0, 1.212987, 0, 0.947927, 0, 0.756818, -526.409119, 21.407974, -536.640869)
 metadata/coliziune = "none"
 
-[node name="reperMargine275" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(0.546961, 0, -0.802680, 0, 0.971319, 0, 0.802680, 0, 0.546961, -537.196594, 19.939072, -560.502319)
-
-[node name="tufaIarba276" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.373066, 0, 0.864931, 0, 0.941958, 0, -0.864931, 0, -0.373066, -520.617126, 20.630981, -549.813965)
-
-[node name="reperMargine277" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(-0.995200, 0, -0.433459, 0, 1.085500, 0, 0.433459, 0, -0.995200, -517.358704, 20.162506, -557.034607)
+[node name="tufaIarba277" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.109101, 0, 1.118888, 0, 1.124195, 0, -1.118888, 0, -0.109101, -544.304565, 21.326630, -544.415894)
 
 [node name="ferigaMica278" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.676767, 0, 0.807332, 0, 1.053470, 0, -0.807332, 0, -0.676767, -515.585754, 19.791077, -560.793579)
+transform = Transform3D(-0.932004, 0, -0.752382, 0, 1.197794, 0, 0.752382, 0, -0.932004, -522.900574, 20.984833, -544.466309)
 metadata/coliziune = "none"
 
-[node name="tufaIarba279" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.634703, 0, 0.753218, 0, 0.984980, 0, -0.753218, 0, -0.634703, -516.861694, 20.017456, -558.520813)
+[node name="ferigaMica279" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-1.214656, 0, 0.368399, 0, 1.269294, 0, -0.368399, 0, -1.214656, -538.788879, 20.112228, -558.348633)
+metadata/coliziune = "none"
 
-[node name="feriga280" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.800494, 0, -0.380092, 0, 0.886149, 0, 0.380092, 0, 0.800494, -531.035645, 18.819031, -576.145142)
+[node name="tufaIarba280" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.373066, 0, 0.864931, 0, 0.941958, 0, -0.864931, 0, -0.373066, -540.330994, 20.463211, -554.300537)
 
 [node name="reperMargine281" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(0.554443, 0, 1.138133, 0, 1.265999, 0, -1.138133, 0, 0.554443, -531.019043, 18.818954, -576.138184)
+transform = Transform3D(-0.995200, 0, -0.433459, 0, 1.085500, 0, 0.433459, 0, -0.995200, -537.326050, 19.936874, -560.562866)
 
-[node name="feriga282" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.922663, 0, -0.292102, 0, 0.967796, 0, 0.292102, 0, -0.922663, -508.852722, 18.167099, -570.762512)
+[node name="ferigaMica282" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.676767, 0, 0.807332, 0, 1.053470, 0, -0.807332, 0, -0.676767, -535.232666, 19.584000, -565.205322)
+metadata/coliziune = "none"
 
 [node name="tufaIarba283" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.067473, 0, 0.983514, 0, 0.985825, 0, -0.983514, 0, 0.067473, -529.419189, 18.717896, -577.028870)
+transform = Transform3D(-0.634703, 0, 0.753218, 0, 0.984980, 0, -0.753218, 0, -0.634703, -537.571411, 19.817413, -562.346924)
 
 [node name="feriga284" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.717593, 0, -0.529246, 0, 0.891651, 0, 0.529246, 0, 0.717593, -525.938416, 18.237854, -585.059143)
+transform = Transform3D(0.800494, 0, -0.380092, 0, 0.886149, 0, 0.380092, 0, 0.800494, -513.066284, 19.403549, -564.113831)
 
-[node name="ferigaMica285" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.805451, 0, -0.129446, 0, 0.815786, 0, 0.129446, 0, 0.805451, -519.963684, 17.789963, -593.168762)
-metadata/coliziune = "none"
+[node name="reperMargine285" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.554443, 0, 1.138133, 0, 1.265999, 0, -1.138133, 0, 0.554443, -512.679504, 19.459808, -563.930664)
 
-[node name="reperMargine286" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(0.718242, 0, -0.644941, 0, 0.965309, 0, 0.644941, 0, 0.718242, -507.040802, 17.397766, -577.241211)
+[node name="feriga286" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.922663, 0, -0.292102, 0, 0.967796, 0, 0.292102, 0, -0.922663, -532.245178, 18.831696, -576.656494)
 
-[node name="feriga287" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-1.033172, 0, -0.058559, 0, 1.034830, 0, 0.058559, 0, -1.033172, -518.289917, 17.668976, -596.380249)
+[node name="tufaIarba287" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.067473, 0, 0.983514, 0, 0.985825, 0, -0.983514, 0, 0.067473, -512.195190, 19.116608, -565.874084)
 
 [node name="feriga288" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.758310, 0, 0.501549, 0, 0.909167, 0, -0.501549, 0, -0.758310, -502.876312, 16.936752, -581.728577)
+transform = Transform3D(0.717593, 0, -0.529246, 0, 0.891651, 0, 0.529246, 0, 0.717593, -509.933014, 18.097565, -571.280029)
 
-[node name="tufaIarba289" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.869075, 0, 0.404083, 0, 0.958423, 0, -0.404083, 0, -0.869075, -515.699158, 17.601059, -596.026917)
+[node name="ferigaMica289" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.805451, 0, -0.129446, 0, 0.815786, 0, 0.129446, 0, 0.805451, -508.501862, 17.620605, -575.298828)
+metadata/coliziune = "none"
 
-[node name="feriga290" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.021324, 0, -1.054714, 0, 1.054930, 0, 1.054714, 0, -0.021324, -510.883514, 17.397110, -601.208557)
+[node name="reperMargine290" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.718242, 0, -0.644941, 0, 0.965309, 0, 0.644941, 0, 0.718242, -525.685730, 18.140228, -587.435059)
 
 [node name="feriga291" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.774565, 0, -0.177960, 0, 0.794746, 0, 0.177960, 0, -0.774565, -495.237671, 16.586548, -585.421204)
+transform = Transform3D(-1.033172, 0, -0.058559, 0, 1.034830, 0, 0.058559, 0, -1.033172, -506.160797, 17.452133, -576.495911)
 
-[node name="tufaIarba292" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.399358, 0, -0.628614, 0, 0.744743, 0, 0.628614, 0, -0.399358, -505.142090, 17.215317, -602.887634)
+[node name="feriga292" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.758310, 0, 0.501549, 0, 0.909167, 0, -0.501549, 0, -0.758310, -517.944092, 17.664978, -595.954773)
 
-[node name="feriga293" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.340159, 0, -0.821105, 0, 0.888775, 0, 0.821105, 0, -0.340159, -501.259338, 17.058868, -606.046997)
+[node name="tufaIarba293" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.869075, 0, 0.404083, 0, 0.958423, 0, -0.404083, 0, -0.869075, -505.730103, 17.299713, -577.949219)
 
-[node name="ferigaMica294" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.301057, 0, -1.161393, 0, 1.199779, 0, 1.161393, 0, 0.301057, -490.446106, 16.638641, -587.259033)
+[node name="feriga294" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.021324, 0, -1.054714, 0, 1.054930, 0, 1.054714, 0, -0.021324, -502.190643, 16.963043, -580.771729)
+
+[node name="feriga295" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.774565, 0, -0.177960, 0, 0.794746, 0, 0.177960, 0, -0.774565, -510.773773, 17.396881, -600.998047)
+
+[node name="tufaIarba296" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.399358, 0, -0.628614, 0, 0.744743, 0, 0.628614, 0, -0.399358, -500.900421, 16.854492, -582.058533)
+
+[node name="feriga297" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.340159, 0, -0.821105, 0, 0.888775, 0, 0.821105, 0, -0.340159, -494.765015, 16.650772, -584.446045)
+
+[node name="ferigaMica298" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.301057, 0, -1.161393, 0, 1.199779, 0, 1.161393, 0, 0.301057, -502.676575, 17.119431, -604.648254)
 metadata/coliziune = "none"
 
-[node name="tufaIarba295" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.392800, 0, -0.602269, 0, 0.719040, 0, 0.602269, 0, -0.392800, -493.501373, 16.595169, -586.287842)
-
-[node name="feriga296" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.797808, 0, -0.478204, 0, 0.930149, 0, 0.478204, 0, -0.797808, -488.216461, 16.604568, -588.544250)
-
-[node name="ferigaMica297" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.581061, 0, 0.827930, 0, 1.011484, 0, -0.827930, 0, 0.581061, -494.231110, 16.824875, -607.552673)
-metadata/coliziune = "none"
-
-[node name="feriga298" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.491714, 0, 0.737512, 0, 0.886401, 0, -0.737512, 0, -0.491714, -492.957733, 16.774582, -608.381042)
-
-[node name="ferigaMica299" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.423563, 0, -0.928826, 0, 1.020844, 0, 0.928826, 0, 0.423563, -483.116364, 16.380142, -592.023376)
-metadata/coliziune = "none"
+[node name="tufaIarba299" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.392800, 0, -0.602269, 0, 0.719040, 0, 0.602269, 0, -0.392800, -505.426422, 17.214828, -603.516479)
 
 [node name="feriga300" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.084226, 0, 0.908424, 0, 0.912320, 0, -0.908424, 0, -0.084226, -479.643188, 16.466248, -592.598328)
+transform = Transform3D(-0.797808, 0, -0.478204, 0, 0.930149, 0, 0.478204, 0, -0.797808, -501.339996, 17.059219, -606.211365)
 
-[node name="tufaIarba301" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.191078, 0, 0.982766, 0, 1.001169, 0, -0.982766, 0, -0.191078, -489.548065, 16.654083, -609.577759)
+[node name="ferigaMica301" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.581061, 0, 0.827930, 0, 1.011484, 0, -0.827930, 0, 0.581061, -490.467346, 16.635712, -587.303589)
+metadata/coliziune = "none"
 
 [node name="feriga302" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.479586, 0, 0.762674, 0, 0.900930, 0, -0.762674, 0, 0.479586, -478.450256, 16.228516, -616.438354)
+transform = Transform3D(-0.491714, 0, 0.737512, 0, 0.886401, 0, -0.737512, 0, -0.491714, -488.031586, 16.642273, -588.149719)
 
-[node name="reperMargine303" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(1.174631, 0, 0.154217, 0, 1.184711, 0, -0.154217, 0, 1.174631, -475.314758, 16.113510, -617.463196)
-
-[node name="ferigaMica304" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.388366, 0, -1.054434, 0, 1.123681, 0, 1.054434, 0, -0.388366, -460.372284, 16.339157, -601.623352)
+[node name="ferigaMica303" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.423563, 0, -0.928826, 0, 1.020844, 0, 0.928826, 0, 0.423563, -494.180145, 16.824661, -607.444580)
 metadata/coliziune = "none"
 
-[node name="feriga305" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.146044, 0, 0.999084, 0, 1.009702, 0, -0.999084, 0, 0.146044, -452.279083, 16.414078, -601.719116)
+[node name="feriga304" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.084226, 0, 0.908424, 0, 0.912320, 0, -0.908424, 0, -0.084226, -493.428162, 16.776749, -609.367554)
+
+[node name="tufaIarba305" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.191078, 0, 0.982766, 0, 1.001169, 0, -0.982766, 0, -0.191078, -484.156616, 16.565918, -589.923157)
 
 [node name="feriga306" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.737776, 0, -0.360791, 0, 0.821270, 0, 0.360791, 0, 0.737776, -442.653412, 15.991333, -622.596191)
+transform = Transform3D(0.479586, 0, 0.762674, 0, 0.900930, 0, -0.762674, 0, 0.479586, -471.580109, 16.614639, -595.990723)
 
-[node name="ferigaMica307" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.444685, 0, 0.899016, 0, 1.002983, 0, -0.899016, 0, 0.444685, -445.602081, 16.244400, -600.358032)
-metadata/coliziune = "none"
+[node name="reperMargine307" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(1.174631, 0, 0.154217, 0, 1.184711, 0, -0.154217, 0, 1.174631, -469.486908, 16.597427, -596.623413)
 
 [node name="ferigaMica308" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.756778, 0, 0.778888, 0, 1.085993, 0, -0.778888, 0, 0.756778, -438.278290, 16.074310, -620.684448)
+transform = Transform3D(-0.388366, 0, -1.054434, 0, 1.123681, 0, 1.054434, 0, -0.388366, -468.227142, 15.932922, -620.320129)
 metadata/coliziune = "none"
 
 [node name="feriga309" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.136974, 0, 1.044146, 0, 1.053092, 0, -1.044146, 0, -0.136974, -436.782806, 16.010025, -620.197266)
+transform = Transform3D(0.146044, 0, 0.999084, 0, 1.009702, 0, -0.999084, 0, 0.146044, -455.409210, 15.844284, -622.802307)
 
-[node name="feriga310" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.257103, 0, 0.743503, 0, 0.786701, 0, -0.743503, 0, -0.257103, -426.406525, 15.813919, -618.845032)
+[node name="ferigaMica310" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.444685, 0, 0.899016, 0, 1.002983, 0, -0.899016, 0, 0.444685, -445.395294, 15.942368, -621.760193)
+metadata/coliziune = "none"
 
-[node name="reperMargine311" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(-0.416215, 0, 0.944704, 0, 1.032327, 0, -0.944704, 0, -0.416215, -423.250824, 15.842606, -596.961121)
+[node name="tufaIarba311" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.781077, 0, 0.104264, 0, 0.788005, 0, -0.104264, 0, 0.781077, -451.035065, 15.868073, -621.436218)
 
-[node name="tufaIarba312" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.939141, 0, -0.280209, 0, 0.980052, 0, 0.280209, 0, -0.939141, -425.170471, 15.933594, -616.907288)
+[node name="feriga312" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.620412, 0, 0.579982, 0, 0.849288, 0, -0.579982, 0, 0.620412, -443.036591, 15.984436, -620.849182)
 
-[node name="tufaIarba313" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.125078, 0, -1.012402, 0, 1.020099, 0, 1.012402, 0, -0.125078, -414.803894, 16.219498, -615.894348)
+[node name="ferigaMica313" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.756778, 0, 0.778888, 0, 1.085993, 0, -0.778888, 0, 0.756778, -445.673370, 16.254288, -599.977051)
+metadata/coliziune = "none"
+
+[node name="reperMargine314" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.672797, 0, 0.938243, 0, 1.154537, 0, -0.938243, 0, -0.672797, -443.108948, 15.983124, -620.519287)
+
+[node name="tufaIarba315" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.183572, 0, 0.987400, 0, 1.004319, 0, -0.987400, 0, 0.183572, -431.626923, 15.874878, -618.994019)
+
+[node name="feriga316" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.687122, 0, -0.626044, 0, 0.929552, 0, 0.626044, 0, -0.687122, -426.575073, 15.856384, -617.866638)
+
+[node name="reperMargine317" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.416215, 0, 0.944704, 0, 1.032327, 0, -0.944704, 0, -0.416215, -426.586029, 15.859894, -617.802979)
+
+[node name="tufaIarba318" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.125078, 0, -1.012402, 0, 1.020099, 0, 1.012402, 0, -0.125078, -421.746765, 15.844116, -596.582214)
 
 [node name="stumpKea" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_stump")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -518.268066, 20.408524, -553.395874)
 
-[node name="kea315" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_kea")]
-transform = Transform3D(-0.612876, 0, 0.790179, 0, 1.000000, 0, -0.790179, 0, -0.612876, -518.018066, 21.236524, -553.295874)
+[node name="kea320" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_kea")]
+transform = Transform3D(-0.798507, 0, 0.601985, 0, 1.000000, 0, -0.601985, 0, -0.798507, -518.018066, 21.236524, -553.295874)
 metadata/coliziune = "none"
 
-[node name="kea316" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_kea")]
-transform = Transform3D(-0.469856, 0, 0.882743, 0, 1.000000, 0, -0.882743, 0, -0.469856, -518.518066, 21.236524, -553.545874)
+[node name="kea321" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_kea")]
+transform = Transform3D(-0.965933, 0, -0.258792, 0, 1.000000, 0, 0.258792, 0, -0.965933, -518.518066, 21.236524, -553.545874)
 metadata/coliziune = "none"
 
-[node name="fagIntrare317" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.024488, 0, -0.926810, 0, 0.927134, 0, 0.926810, 0, -0.024488, -492.881989, 30.709717, -403.260681)
+[node name="fagIntrare322" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.982785, 0, 0.008882, 0, 0.982825, 0, -0.008882, 0, -0.982785, -493.916626, 30.692825, -402.244293)
 metadata/coliziune = "trunk"
 
-[node name="fagIesire318" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.469359, 0, -0.812898, 0, 0.938670, 0, 0.812898, 0, 0.469359, -408.726532, 16.361710, -591.980835)
+[node name="fagIesire323" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.815636, 0, -0.377874, 0, 0.898917, 0, 0.377874, 0, 0.815636, -409.033966, 16.367020, -590.360535)
 metadata/coliziune = "trunk"
 
-[node name="fagIntrare319" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.959885, 0, -0.233489, 0, 0.987875, 0, 0.233489, 0, 0.959885, -466.909119, 30.969757, -412.972290)
+[node name="fagIntrare324" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.932592, 0, -0.155583, 0, 0.945480, 0, 0.155583, 0, -0.932592, -466.806305, 30.968903, -413.084778)
 metadata/coliziune = "trunk"
 
-[node name="fagIesire320" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.860201, 0, -0.383527, 0, 0.941828, 0, 0.383527, 0, 0.860201, -391.611328, 16.648193, -612.071289)
+[node name="fagIesire325" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.854727, 0, -0.224505, 0, 0.883720, 0, 0.224505, 0, 0.854727, -391.185303, 16.766876, -613.507385)
 metadata/coliziune = "trunk"
-
-[node name="canionTreapta321" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-1.290613, 0, -0.292590, 0, 1.323364, 0, 0.292590, 0, -1.290613, -510.177094, 19.289261, -564.952820)
-
-[node name="canionTreaptaMica322" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.757236, 0, 0.074902, 0, 0.760931, 0, -0.074902, 0, 0.757236, -507.670715, 19.043869, -566.267090)
-
-[node name="canionMuschi323" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.586317, 0, -0.740697, 0, 0.944669, 0, 0.740697, 0, -0.586317, -531.736267, 19.032288, -572.953735)
-
-[node name="canionTreapta324" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(1.262427, 0, -0.423163, 0, 1.331461, 0, 0.423163, 0, 1.262427, -507.240662, 17.957611, -571.735535)
-
-[node name="canionMuschi325" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.510149, 0, 0.638891, 0, 0.817578, 0, -0.638891, 0, 0.510149, -528.214661, 18.357574, -583.995117)
 
 [node name="canionTreapta326" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.100681, 0, 1.117267, 0, 1.121794, 0, -1.117267, 0, 0.100681, -505.749329, 17.571854, -575.189880)
+transform = Transform3D(0.610319, 0, 1.164310, 0, 1.314575, 0, -1.164310, 0, 0.610319, -508.066711, 19.531357, -563.989441)
 
 [node name="canionTreaptaMica327" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.292756, 0, 0.536140, 0, 0.610861, 0, -0.536140, 0, 0.292756, -504.820313, 17.534943, -575.360657)
+transform = Transform3D(-0.778725, 0, -0.419559, 0, 0.884557, 0, 0.419559, 0, -0.778725, -507.762970, 19.033951, -566.306091)
 
 [node name="canionMuschi328" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(0.126464, 0, -0.936166, 0, 0.944669, 0, 0.936166, 0, 0.126464, -524.373596, 18.050110, -589.002991)
+transform = Transform3D(0.589450, 0, 0.738206, 0, 0.944669, 0, -0.738206, 0, 0.589450, -532.565002, 19.033112, -573.346130)
 
 [node name="canionTreapta329" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-0.825679, 0, 0.894474, 0, 1.217304, 0, -0.894474, 0, -0.825679, -502.252167, 17.141220, -578.520935)
+transform = Transform3D(0.100681, 0, 1.117267, 0, 1.121794, 0, -1.117267, 0, 0.100681, -505.894073, 18.069763, -570.948425)
 
 [node name="canionMuschi330" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.252231, 0, -0.777697, 0, 0.817578, 0, 0.777697, 0, 0.252231, -517.686157, 17.661987, -595.637451)
+transform = Transform3D(0.391825, 0, 0.717570, 0, 0.817578, 0, -0.717570, 0, 0.391825, -528.581543, 18.363647, -584.209534)
 
 [node name="canionTreapta331" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.015795, 0, 1.466465, 0, 1.466550, 0, -1.466465, 0, 0.015795, -499.620972, 16.947205, -579.604248)
+transform = Transform3D(0.945935, 0, -0.589301, 0, 1.114482, 0, 0.589301, 0, 0.945935, -504.010376, 17.654556, -573.900146)
 
 [node name="canionTreaptaMica332" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.852203, 0, -0.114531, 0, 0.859865, 0, 0.114531, 0, 0.852203, -497.932617, 16.853653, -580.146423)
+transform = Transform3D(-0.190782, 0, 0.684502, 0, 0.710591, 0, -0.684502, 0, -0.190782, -503.871338, 17.585266, -574.556946)
 
 [node name="canionMuschi333" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.252363, 0, -0.910337, 0, 0.944669, 0, 0.910337, 0, -0.252363, -512.858459, 17.471634, -599.742676)
+transform = Transform3D(0.291440, 0, -0.898589, 0, 0.944669, 0, 0.898589, 0, 0.291440, -524.398621, 18.050522, -589.021545)
 
 [node name="canionTreapta334" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-1.324858, 0, 0.054316, 0, 1.325971, 0, -0.054316, 0, -1.324858, -493.945007, 16.762161, -582.754272)
+transform = Transform3D(0.015795, 0, 1.466465, 0, 1.466550, 0, -1.466465, 0, 0.015795, -500.290588, 17.339523, -575.967224)
 
 [node name="canionMuschi335" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(-0.721580, 0, 0.384391, 0, 0.817578, 0, -0.384391, 0, -0.721580, -504.204529, 17.174820, -603.920837)
+transform = Transform3D(0.810293, 0, -0.108898, 0, 0.817578, 0, 0.108898, 0, 0.810293, -518.539185, 17.671860, -596.686951)
 
 [node name="canionTreapta336" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(-1.006263, 0, 0.811870, 0, 1.292942, 0, -0.811870, 0, -1.006263, -489.412842, 16.815262, -585.094788)
+transform = Transform3D(0.788051, 0, -1.212971, 0, 1.446486, 0, 1.212971, 0, 0.788051, -498.515778, 17.144531, -577.484192)
 
 [node name="canionTreaptaMica337" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
-transform = Transform3D(0.667547, 0, -0.559914, 0, 0.871276, 0, 0.559914, 0, 0.667547, -486.608398, 16.902939, -585.112305)
+transform = Transform3D(-0.686657, 0, -0.296768, 0, 0.748044, 0, 0.296768, 0, -0.686657, -497.705658, 16.880875, -579.632324)
 
 [node name="canionMuschi338" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-0.207723, 0, 0.921548, 0, 0.944669, 0, -0.921548, 0, -0.207723, -499.331085, 17.002853, -605.869385)
+transform = Transform3D(-0.833748, 0, 0.444144, 0, 0.944669, 0, -0.444144, 0, -0.833748, -512.919922, 17.472076, -599.839478)
+
+[node name="canionTreapta339" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-1.006263, 0, 0.811870, 0, 1.292942, 0, -0.811870, 0, -1.006263, -492.972595, 16.942581, -580.748047)
+
+[node name="canionMuschi340" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.626405, 0, -0.525405, 0, 0.817578, 0, 0.525405, 0, 0.626405, -504.719452, 17.175430, -604.983154)
+
+[node name="canionTreapta341" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.795098, 0, 1.226537, 0, 1.461702, 0, -1.226537, 0, -0.795098, -488.131897, 17.047104, -582.411743)
+
+[node name="canionTreaptaMica342" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.348220, 0, -0.722070, 0, 0.801649, 0, 0.722070, 0, -0.348220, -486.921692, 16.848694, -585.780945)
+
+[node name="canionMuschi343" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_moss_boulder_a")]
+transform = Transform3D(-0.075061, 0, 0.941683, 0, 0.944669, 0, -0.941683, 0, -0.075061, -499.639069, 17.003983, -606.514465)
 
 [node name="ZoneE_Portal" type="Node3D" parent="DecorManual"]
 

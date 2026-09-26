@@ -1251,6 +1251,15 @@ static func themes() -> Dictionary:
 			# atinge TerrainBody. Cu "dirt_road" banda intra in `_carve` si
 			# garda de plafon (branch_floor / branch_room) se activeaza.
 			"branch_surface": "dirt_road",
+			# Podetul Chasm (brief §2 randul D): "0,85x grip (lemn ud)".
+			# `loose_grip` e mecanismul cu care Stromboli face 0,85x pe cenusa
+			# (6,8 pe scara asfalt=8/ud=3,6/drift=2) - un singur numar de
+			# tema, aplicat pe orice interval din `custom_loose_ranges`. E
+			# scopul corect aici (nu `wet_grip`, care e global pe tot turul
+			# prin RainCycle si ar coborî grip-ul intregii piste in ploaie,
+			# nu doar al podetului). `custom_loose_ranges` = [0.406, 0.424]
+			# in Track16.tscn, exact intervalul podetului.
+			"loose_grip": 6.8,
 			# Grip-ul ud INCERCAT si REVERTIT (23 sep): "wet_grip": 2.4 in
 			# incercarea de a face scurtatura uda sa piarda/repuna la >=2/4
 			# masini (sonda risc/recompensa). N-a schimbat nimic: sonda

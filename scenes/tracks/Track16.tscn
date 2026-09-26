@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/rain_cycle.gd" id="4_rain"]
 [ext_resource type="Script" path="res://scenes/hazards/waterfall_hazard.gd" id="5_waterfall"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="6_channel"]
+[ext_resource type="Script" uid="uid://cvl1i6n02fy74" path="res://scenes/hazards/wood_deck_strip.gd" id="6c_deck"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="7_marker"]
 [ext_resource type="Script" uid="uid://b82usw4sot3ep" path="res://scenes/tracks/track_branch.gd" id="8_branch"]
 [ext_resource type="Script" path="res://scenes/hazards/torrent_cycle.gd" id="9_torrent"]
@@ -347,6 +348,7 @@ custom_gate_model = "none"
 custom_sea_level_offset = -19.63
 custom_wet_ranges = Array[Vector2]([Vector2(0.61, 0.694)])
 custom_step_ranges = Array[Vector2]([Vector2(0.406, 0.424)])
+custom_loose_ranges = Array[Vector2]([Vector2(0.406, 0.424)])
 custom_ravines = Array[Vector4]([Vector4(0.011, 0.279, 30, -1), Vector4(0.341, 0.444, 8, -1), Vector4(0.84, 0.902, 6, -1), Vector4(0.919, 0.999, 30, -1)])
 custom_cornice_ravines = Array[int]([0, 3])
 custom_ravine_floors = Array[Vector2]([Vector2(0, -30.0), Vector2(1, 7.0), Vector2(2, -8.0), Vector2(3, -30.0)])
@@ -6092,13 +6094,51 @@ transform = Transform3D(-0.626378, 0.000000, 0.748079, 0.000000, 0.975691, 0.000
 [node name="torrentChute" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_torrent_chute")]
 transform = Transform3D(0.6078, 0.0400, -0.7931, -0.0000, 0.9987, 0.0503, 0.7941, -0.0306, 0.6070, -481.414, 19.553, -558.743)
 
-[node name="chasmBridgeRail1" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_bridge_rail")]
-transform = Transform3D(-0.677701, 0.000000, 0.367669, 0.000000, 1.000000, 0.000000, -0.735337, 0.000000, -0.338851, -511.161011, 17.966978, -587.609070)
-metadata/coliziune = "none"
+[node name="TabliereChasm" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+script = ExtResource("6c_deck")
+points = Array[Vector3]([Vector3(-516.73, 18.43, -581.11), Vector3(-508.56, 17.82, -589.66), Vector3(-494.9727, 17.29738, -596.7404), Vector3(-484.1316, 16.89582, -601.8969)])
+sides = Array[Vector3]([Vector3(0.816824, 0.0, 0.576887), Vector3(0.582487, 0.0, 0.81284), Vector3(0.430839, 0.0, 0.902429), Vector3(0.434708, 0.0, 0.900571)])
+half_widths = Array[float]([6.5, 6.5, 6.5, 5.511])
 
-[node name="chasmBridgeRail2" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_bridge_rail")]
-transform = Transform3D(-0.427439, 0.000000, 0.452022, 0.000000, 1.000000, 0.000000, -0.904044, 0.000000, -0.213719, -494.972687, 17.297382, -596.740356)
-metadata/coliziune = "none"
+[node name="RauCleddau" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+script = ExtResource("6c_deck")
+points = Array[Vector3]([Vector3(-548.411, 11.004, -584.782), Vector3(-537.679, 10.122, -603.189), Vector3(-519.697, 9.382, -618.115), Vector3(-507.898, 9.003, -623.813), Vector3(-497.173, 8.674, -628.914), Vector3(-487.834, 10.601, -633.430)])
+sides = Array[Vector3]([Vector3(0.9258, 0.0, 0.3780), Vector3(0.7631, 0.0, 0.6463), Vector3(0.4623, 0.0, 0.8867), Vector3(0.4308, 0.0, 0.9024), Vector3(0.4347, 0.0, 0.9006), Vector3(0.4835, 0.0, 0.8754)])
+half_widths = Array[float]([4.5, 4.5, 4.5, 4.5, 4.5, 4.5])
+slot = 22
+lift = 0.15
+thickness = 0.3
+
+[node name="RauSpuma1" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -537.679, 10.272, -603.189)
+script = ExtResource("9_foam_pool")
+patch_count = 9
+radius = 3.2
+rng_seed = 160401
+
+[node name="RauSpuma2" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -519.697, 9.532, -618.115)
+script = ExtResource("9_foam_pool")
+patch_count = 9
+radius = 3.2
+rng_seed = 160402
+
+[node name="RauSpuma3" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -507.898, 9.153, -623.813)
+script = ExtResource("9_foam_pool")
+patch_count = 9
+radius = 3.2
+rng_seed = 160403
+
+[node name="RauSpuma4" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -497.173, 8.824, -628.914)
+script = ExtResource("9_foam_pool")
+patch_count = 9
+radius = 3.2
+rng_seed = 160404
+
+[node name="chasmBridgeRail1" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_bridge_rail")]
+transform = Transform3D(-0.554382, 0.032857, 0.831614, 0.000000, 0.999220, -0.039480, -0.832262, -0.021887, -0.553950, -501.126900, 17.709265, -591.503450)
 
 [node name="marmita3" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(0.088779, 0, -1.224997, 0, 1.228210, 0, 1.224997, 0, 0.088779, -505.670654, 27.394714, -458.205780)

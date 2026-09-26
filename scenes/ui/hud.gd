@@ -14,6 +14,10 @@ signal results_primary # butonul principal din panoul de rezultate
 var _info: Label
 var _countdown: Label
 var _message: Label
+## Contorul de performanta (setare `GameState.show_perf`). Sus, centrat, ca
+## sa nu se bata cu pozitia/turul (stanga) si cu pauza/minimapa (dreapta).
+var _perf: Label
+var _perf_clock: float = 0.0
 var _charge_bg: ColorRect
 var _charge_fill: ColorRect
 var _touch: TouchControls
@@ -116,6 +120,14 @@ func _ready() -> void:
 	_message.position += Vector2(0, 100)
 	_message.modulate.a = 0.0
 	root.add_child(_message)
+
+	_perf = _make_label(18)
+	_perf.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 10)
+	_perf.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_perf.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_perf.visible = false
+	root.add_child(_perf)
 
 	# Bara de TURBO (model Ignition): mereu vizibila, se umple din mers
 	# (mai repede in drift); o arzi cand vrei tu cu butonul de turbo.
@@ -263,6 +275,37 @@ func _unhandled_input(event: InputEvent) -> void:
 			_close_pause()
 		elif not _results_panel.visible:
 			_open_pause()
+
+## Contorul de performanta se reimprospateaza de 4 ori pe secunda: destul ca
+## sa vezi o cadere, prea rar ca sa palpaie. Cifrele sunt ale cadrului
+## PRECEDENT (asa raporteaza RenderingServer), ceea ce nu conteaza la 60 Hz.
+## Timpul GPU cere `viewport_set_measure_render_time`, altfel citeste 0.
+func _process(delta: float) -> void:
+	if not GameState.show_perf:
+		if _perf.visible:
+			_perf.visible = false
+			RenderingServer.viewport_set_measure_render_time(
+				get_viewport().get_viewport_rid(), false)
+		return
+	if not _perf.visible:
+		_perf.visible = true
+		RenderingServer.viewport_set_measure_render_time(
+			get_viewport().get_viewport_rid(), true)
+	_perf_clock += delta
+	if _perf_clock < 0.25:
+		return
+	_perf_clock = 0.0
+	var vp := get_viewport().get_viewport_rid()
+	var t := RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE
+	var draws := RenderingServer.viewport_get_render_info(vp, t,
+		RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
+	var prims := RenderingServer.viewport_get_render_info(vp, t,
+		RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
+	_perf.text = "%d fps  |  %d desene  |  %dk tri  |  cpu %.1f ms  gpu %.1f ms" % [
+		Engine.get_frames_per_second(), draws, prims / 1000,
+		RenderingServer.viewport_get_measured_render_time_cpu(vp),
+		RenderingServer.viewport_get_measured_render_time_gpu(vp)]
+
 
 func _make_label(font_size: int) -> Label:
 	var label := Label.new()

@@ -88,6 +88,11 @@ func _build() -> void:
 			GameState.cam_follow_scale = v
 			_push_camera())
 
+	_add_toggle(box, "Contor de performanta", GameState.show_perf,
+		func(on: bool) -> void:
+			GameState.show_perf = on
+			GameState.save_settings())
+
 	var reset_cam := Button.new()
 	reset_cam.text = "RESETEAZA CAMERA"
 	reset_cam.custom_minimum_size = Vector2(200, 48)
@@ -143,3 +148,21 @@ func _add_slider(parent: VBoxContainer, label_text: String,
 	slider.value_changed.connect(func(v: float) -> void:
 		value_label.text = "%d%%" % roundi(v * 100.0)
 		on_change.call(v))
+
+
+## Comutator mare (tinta de touch), pe acelasi rand cu eticheta lui.
+func _add_toggle(parent: VBoxContainer, label_text: String, value: bool,
+		on_change: Callable) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	parent.add_child(row)
+	var name_label := Label.new()
+	name_label.text = label_text
+	name_label.add_theme_font_size_override("font_size", 22)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(name_label)
+	var toggle := CheckButton.new()
+	toggle.button_pressed = value
+	toggle.custom_minimum_size = Vector2(0, 44)
+	row.add_child(toggle)
+	toggle.toggled.connect(func(on: bool) -> void: on_change.call(on))

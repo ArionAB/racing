@@ -889,11 +889,6 @@ const FORD_BED_SINK: float = 0.35
 
 func _carve_channel(y: float, wx: float, wz: float, road_dist: float = INF,
 		road_y: float = 0.0, road_half: float = 0.0) -> float:
-	if _channels.is_empty():
-		return y
-	var bf := _branch_floor_at(wx, wz)
-	var branch_floor := bf.x
-	var branch_room := bf.y
 	for ch in _channels:
 		var o: Vector3 = ch["origin"]
 		# Groapa circulara (vezi TrackChannel.pit): acelasi profil de mal, dar
@@ -944,11 +939,14 @@ func _carve_channel(y: float, wx: float, wz: float, road_dist: float = INF,
 			if over > 0.0:
 				target = lerpf(target, road_y - FORD_BED_SINK, over)
 		y = _smin(y, target, SMOOTH_RAVINE_K)
-	# Aceeasi garda ca la _carve_ravines (vezi _branch_floor_at): in coridorul
-	# unei benzi secundare, canalul nu are voie sa coboare terenul sub cota
-	# benzii insesi.
-	if branch_floor > -INF and branch_room < 1.0:
-		y = lerpf(maxf(y, branch_floor), y, branch_room)
+		# Opt-in per canal (`TrackChannel.respect_branch`, Fiordland PodetChasm):
+		# in coridorul unei benzi secundare canalul nu coboara terenul sub cota
+		# benzii — aceeasi garda ca in _carve_ravines. Opt-in fiindca, aplicata
+		# tuturor canalelor, schimba terenul Alpilor si Stromboli (masurat).
+		if bool(ch.get("respect_branch", false)):
+			var bf := _branch_floor_at(wx, wz)
+			if bf.x > -INF and bf.y < 1.0:
+				y = lerpf(maxf(y, bf.x), y, bf.y)
 	return y
 
 
@@ -1002,36 +1000,13 @@ func mean_road_y() -> float:
 ## _build_environment) intreaba de fapt "cat de jos poate cobori terenul sub
 ## sosea", iar o laguna sapata sub media soselei e exact asta. Fara ea, podeaua
 ## ar putea taia prin fundul lagunei.
-func max_ravine_depth() -> float:
-	var d := _lagoon_depth
-	for r in _ravines:
-		d = maxf(d, r.z)
-	# Canalul se masoara de la cota DRUMULUI de acolo, nu de la media pistei, iar
-	# consumatorul vrea „cat de jos poate cobori terenul sub sosea". Pe o portiune
-	# de drum care sta peste medie, diferenta chiar conteaza.
-	for ch in _channels:
-		var o: Vector3 = ch["origin"]
-		d = maxf(d, float(ch["depth"]) + (o.y - _mean_y))
-	return d
-
-
-## Plafonul inferior impus de o banda secundara (`TrackBranch`) langa ea, si
-## cat de mult se aplica (0 = in plat, departe de banda; 1 = chiar pe banda).
-##
-## Extras dintr-o bucata care traia doar in `_carve_ravines` (protectia
-## descrisa acolo pe larg) fiindca ACEEASI capcana s-a repetat identic in
-## `_carve_channel`: un canal transversal (podetul Chasm, Fiordland) care
-## trece la 6-8 m de o scurtatura sapa sub platul ei protejat, exact cum sapa
-## o rapa longitudinala — `_smin` nu stie de banda, doar de cota. Masurat cu
-## ProbeRace: masina se repunea la nesfarsit la aceeasi pozitie (frac ~0.373
-## pe bucla), pe marginea benzii, cazuta intr-un perete de canal in loc de
-## un taluz. O SINGURA sursa a plafonului, folosita din amandoua locurile —
-## doua copii independente ar fi divergut la primul reglaj de banda.
+## Plafonul inferior impus de banda secundara cea mai apropiata:
+## (cota benzii - BRANCH_DROP, cat ramane liber 0..1). (-INF, 1) = nicio banda
+## in raza. Aceeasi masura ca garda din _carve_ravines.
 func _branch_floor_at(wx: float, wz: float) -> Vector2:
 	if _carve.is_empty():
 		return Vector2(-INF, 1.0)
 	var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
-	var reach_sq := reach * reach
 	var near_sq := INF
 	var level := 0.0
 	var k := 0
@@ -1045,12 +1020,24 @@ func _branch_floor_at(wx: float, wz: float) -> Vector2:
 			near_sq = d_sq
 			level = q.y
 		k += GROUND_STRIDE
-	if near_sq > reach_sq:
+	if near_sq > reach * reach:
 		return Vector2(-INF, 1.0)
-	var d := sqrt(near_sq)
 	var t := smoothstep(0.0, 1.0,
-		clampf((d - BRANCH_FLAT_RADIUS) / BRANCH_BLEND_LEN, 0.0, 1.0))
+		clampf((sqrt(near_sq) - BRANCH_FLAT_RADIUS) / BRANCH_BLEND_LEN, 0.0, 1.0))
 	return Vector2(level - BRANCH_DROP, t)
+
+
+func max_ravine_depth() -> float:
+	var d := _lagoon_depth
+	for r in _ravines:
+		d = maxf(d, r.z)
+	# Canalul se masoara de la cota DRUMULUI de acolo, nu de la media pistei, iar
+	# consumatorul vrea „cat de jos poate cobori terenul sub sosea". Pe o portiune
+	# de drum care sta peste medie, diferenta chiar conteaza.
+	for ch in _channels:
+		var o: Vector3 = ch["origin"]
+		d = maxf(d, float(ch["depth"]) + (o.y - _mean_y))
+	return d
 
 
 ## Sapa rapele declarate in campul de inaltime.
@@ -1075,9 +1062,30 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 	# chiar riscul crucii), ci sa nu lasam saparea sa treaca DINCOLO de cota
 	# benzii chiar sub ea insasi: `branch_floor` e un plafon inferior aplicat
 	# doar in raza platului benzii, care se stinge exact ca `_carve_branches`.
-	var bf := _branch_floor_at(wx, wz)
-	var branch_floor := bf.x
-	var branch_room := bf.y
+	var branch_floor := -INF
+	var branch_room := 1.0
+	if not _carve.is_empty():
+		var reach := BRANCH_FLAT_RADIUS + BRANCH_BLEND_LEN
+		var reach_sq := reach * reach
+		var near_sq := INF
+		var level := 0.0
+		var k := 0
+		var m := _carve.size()
+		while k < m:
+			var q := _carve[k]
+			var dx := q.x - wx
+			var dz := q.z - wz
+			var d_sq := dx * dx + dz * dz
+			if d_sq < near_sq:
+				near_sq = d_sq
+				level = q.y
+			k += GROUND_STRIDE
+		if near_sq <= reach_sq:
+			var d := sqrt(near_sq)
+			var t := smoothstep(0.0, 1.0,
+				clampf((d - BRANCH_FLAT_RADIUS) / BRANCH_BLEND_LEN, 0.0, 1.0))
+			branch_floor = level - BRANCH_DROP
+			branch_room = t
 	var f := _dists[near_i] / _total_len if _total_len > 0.0 else 0.0
 	for ri in _ravines.size():
 		var r: Vector4 = _ravines[ri]

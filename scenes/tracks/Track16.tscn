@@ -310,6 +310,7 @@ jump = false
 static_deck = true
 build_towers = false
 build_ships = false
+respect_branch = true
 label = "podetul Chasm"
 
 [node name="DecorManual" type="Node3D" parent="." unique_id=94849398]

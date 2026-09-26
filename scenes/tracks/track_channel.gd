@@ -107,6 +107,9 @@ extends Marker3D
 ## Corabiile care traverseaza canalul — opreste-le pe un parau de munte, fara
 ## canal navigabil. Fara efect cand `jump = true`.
 @export var build_ships: bool = true
+## Canalul nu sapa sub cota unei benzi secundare (`TrackBranch`) din raza ei.
+## Opt-in: pe Alpii/Stromboli garda ar schimba terenul existent.
+@export var respect_branch: bool = false
 
 ## Sapatura e o GROAPA CIRCULARA centrata pe taietura, nu o albie in lungul
 ## axei. Pentru gauri care exista doar ca sa se ascunda sub un asset rotund
@@ -176,6 +179,7 @@ func to_spec(track: Node3D) -> Dictionary:
 		"static_deck": static_deck,
 		"build_towers": build_towers,
 		"build_ships": build_ships,
+		"respect_branch": respect_branch,
 	}
 	if ford:
 		# Apa peste drum = drop NEGATIV fata de cota soselei. Steagul „canal la

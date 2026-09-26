@@ -47,6 +47,37 @@ extends Marker3D
 ## Latura pe care cade golul: +1 dreapta (sensul de mers), -1 stanga.
 @export_range(-1.0, 1.0, 2.0) var side: float = 1.0
 
+## Clasa de material TRIPLANAR (`Palette.triplanar_class_material`) pentru
+## fetele generate de acest nod. Gol (implicit) pastreaza comportamentul
+## dinainte — `Palette.world_material()`, atlas plat pe sloturi UV — deci
+## toate falezele existente (Cappadocia, Machu Picchu, Serengeti) raman
+## identice la bit.
+##
+## De ce exista, cu masuratoarea in fata. Pe Fiordland peretele cornisei
+## (`cut_wall`) trebuia sa citeasca ACEEASI stanca ca bolovanii de decor din
+## fata lui (`chasm_rock`, clasa `wet_gneiss`, triplanar pe `alpine_granite.png`
+## cu tenta proprie) — dar `world_material()` e un atlas de sloturi de culoare
+## plata, fara relieful texturii de clasa. Randul 1 de captura a aratat exact
+## simptomul descris de critic: "linii albe subtiri de strat care curg ca
+## desen pe hartie" — cusaturile UV dintre sloturi pe o singura fata mare,
+## fara nicio texturare de suprafata reala. Punand aici ACEEASI clasa pe care
+## decorul o foloseste deja (`Palette.triplanar_class_material` e memoizat —
+## zero materiale noi, e instanta partajata cu `chasm_rock`), fata capata
+## dungile verticale de gneis ud din `alpine_granite.png`, la scara calibrata
+## deja pentru pereti mari (`CLASS_TRIPLANAR_SCALE.wet_gneiss` 0.16, gandita
+## pentru `stirling_ledge.Wall` de 26,57 m — comparabil cu cei ~30 m de aici).
+## Vertex color (AO copt in `_shade`) ramane compatibil: clasa triplanara
+## foloseste `vertex_color_use_as_albedo` la fel ca `world_material()`.
+@export var material_class: String = ""
+
+## Materialul de folosit pentru fetele acestui nod: clasa triplanara daca
+## `material_class` e completat, altfel `world_material()` (comportamentul
+## dinainte, bit-identic).
+func _face_material() -> StandardMaterial3D:
+	if material_class != "":
+		return Palette.triplanar_class_material(material_class)
+	return Palette.world_material()
+
 ## Cat de departe de marginea asfaltului incepe BUZA falezei.
 ##
 ## Mic intentionat: POI C e „cornisa fara parapet", deci buza trebuie sa fie la
@@ -717,7 +748,7 @@ func _build_cut(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	var mi := MeshInstance3D.new()
 	mi.name = "Taietura " + name
 	mi.mesh = st.commit()
-	mi.material_override = Palette.world_material()
+	mi.material_override = _face_material()
 	# Peretele sta LANGA banda si la est de ea pe portiunea cornisei: la soare de
 	# zori umbra lui cade chiar pe carosabil, si e cel mai ieftin semn ca drumul
 	# e sapat in ceva solid.
@@ -904,7 +935,7 @@ func _build_brow(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	var mi := MeshInstance3D.new()
 	mi.name = "Buza " + name
 	mi.mesh = st.commit()
-	mi.material_override = Palette.world_material()
+	mi.material_override = _face_material()
 	# Pragul are COLIZIUNE, ca sa fie ce arata. Fara ea, corpul de sub buza
 	# era umarul soselei, cu 1.9 m mai jos (masurat la 0.30: lat 7 RoadTop
 	# 0.0, lat 8 Shoulders -1.9), deci masina care iesea pe prag se scufunda
@@ -1048,7 +1079,7 @@ func _build(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	var mi := MeshInstance3D.new()
 	mi.name = "Faleza " + name
 	mi.mesh = st.commit()
-	mi.material_override = Palette.world_material()
+	mi.material_override = _face_material()
 	# POLITELE primesc CORP FIZIC. Fara el ar fi un desen: tarusul n-ar avea pe
 	# ce sta, iar razele sondei ar trece prin ele si verdictul ar ramane rosu cu
 	# dreptate. O cutie per polita, nu un trimesh pe toata panza — faleza n-are
@@ -1142,7 +1173,7 @@ func _build_far(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 	var mi := MeshInstance3D.new()
 	mi.name = "Faleza pinten " + name
 	mi.mesh = st.commit()
-	mi.material_override = Palette.world_material()
+	mi.material_override = _face_material()
 	# Pintenul e SOLID: fata si coama au coliziune (trimesh), altfel masina
 	# trece prin peretele de langa banda ca printr-o perdea — verdictul de la
 	# volan din 4 sep 2026, pe TaieturaSerpentinei ("zidul din stanga e

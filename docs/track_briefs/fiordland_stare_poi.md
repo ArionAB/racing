@@ -87,7 +87,32 @@ nivelul sau peste a lui main.
    material), sau acceptat.
 4. **Relieful**: peretele în sus pe cornișă (B) și nișa Stirling (C) cer un mecanism
    de falie liniară (cod nou); prototipul cu `TerrainPeak` a dat dealuri conice și nu
-   e recomandat (`fiord/poi-relief`, neunit).
+   e recomandat (`fiord/poi-relief`, neunit). **Rezolvat 26 sep 2026, `fiord/falie`:**
+   nod `Faleze/PereteCornisa` (`CliffFace.cut_wall`, deja folosit pe Cappadocia și
+   Machu Picchu — reutilizat, zero cod nou în `cliff_face.gd`), frac 0,052–0,271,
+   `side=-1` (opus golfului). Terenul de pe partea muntelui era plat pe toată
+   cornișa, deci `cut_min_rise_m=30` declară înălțimea peretelui direct, ca la
+   taietura dintre buclele Serengeti. Nișa Stirling **nu a cerut relief nou**:
+   e deja geometrie GLB (`stirling_ledge`, Wall/Overhang/Shelf), iar peretele nou
+   se oprește la 0,271 ca să nu se suprapună cu ea. Hash pe `ground_y` identic la
+   bit pe Track09/11/13/14/16 (mecanismul e placed geometry, nu atinge terenul);
+   probe_manual/probe_decor/ProbeRace neschimbate pe alte piste; 0 incidente noi
+   pe B/C în 8 seed-uri. **Runda 2 (26 sep, corecție de compoziție):** peretele
+   înghițea decorul de gneis din fața lui și fața citea artificial (linii albe
+   de cusătură UV). Talpa peretelui (`cut_edge_offset_m` 0,2→12,0) s-a mutat
+   dincolo de banda de bolovani (măsurat, nu presupus: `gneisWall`/`wallFoot`
+   p95 lateral 11,7/10,9 m), fanul feței s-a strâns (`cut_batter_m`/
+   `cut_facet_m`/`cut_tread_m` reduse) ca și coama să rămână în spate, iar
+   `CliffFace` a primit un export opt-in nou (`material_class`, gol = vechiul
+   `world_material()`, bit-identic pe celelalte piste) prin care fața ia
+   aceeași clasă triplanară `wet_gneiss` pe care o folosește deja decorul
+   (`chasm_rock`) — zero materiale noi, dispar liniile de cusătură. 119 din
+   226 de fagi din primul rând (deveniți geometric interiori peretelui după
+   mutarea tălpii) au fost scoși direct din scenă. Gardă nouă permanentă:
+   `tools/probe_wall_overlap.gd` (AABB decor vs. peretele REAL construit,
+   pe frac/lateral/înălțime) — țintă și rezultat 0. ProbeRace 8 seed-uri,
+   minim de tur 1,61–1,65 (seed 1 excepție cunoscută, Autobuzul la tunel),
+   0 incidente la frac ≤ 0,30 pe toate cele 8.
 5. **Valea de sub podeț** (D): gata de unit dacă spui da — `fiord/poi-relief`
    f2ad9480, râpa 1 era pe aceeași parte cu scurtătura și protecția benzii o
    aplatiza; side +1 → −1 dă valea de −8 m din brief. Gărzile verzi.
@@ -106,11 +131,12 @@ nivelul sau peste a lui main.
 | 1 | fagul | neatins (nedecis) |
 | 2 | vaporașul | înlocuit cu „Cruise Ship – toofan”; caiacele cu „Canoe – Low poly” (CC-BY-4.0, `assets/CREDITS.md`) |
 | 3 | gneisul ud pe piese mici | **ignorat** |
+| 4 | relieful (peretele B / nișa C) | `Faleze/PereteCornisa` (`CliffFace.cut_wall`), frac 0,052–0,271 — vezi §4 de mai sus (`fiord/falie`, 26 sep) |
 | 5 | valea de sub podeț | unită (f2ad9480), plus râu transversal și podeț real (`PodetChasm`, `TrackChannel` static) |
 | — | Stirling „nu simt nimic” | impact lateral + yaw + shake + picurat + sfx (`WaterfallHazard`, grupul „Impact la intrare”) |
 | — | torentul „nu are impact” | același impact, mai dur, prin `TorrentCycle`; parbrizul ud pornește acum și la torent |
 | — | avalanșa | 10 s |
 
-Rămân deschise: 1, 4, 6, 7, 8 de mai sus; caiacele din zona H (`malKayak`) nu
+Rămân deschise: 1, 6, 7, 8 de mai sus; caiacele din zona H (`malKayak`) nu
 apar (generatorul le respinge pe cotă — preexistent); `sealRock1` ridicat manual
 de dezvoltator e semnalat „plutește” de `probe_manual`.

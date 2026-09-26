@@ -129,6 +129,7 @@ func _ready() -> void:
 	if not _survey_only:
 		_scar()
 		_scar_debris()
+		_scar_pileup()
 		_forest()
 		_write()
 	get_tree().quit(0)
@@ -293,6 +294,130 @@ func _scar_debris() -> void:
 	print("; moloz langa banda (runda 2): %d piese, %d trunchiuri neplasate din buget" % [idx, trunk_budget])
 
 
+## (1c) GRAMADA PESTE BANDA -- runda 3, verdict critic: r2 a lasat totul
+## dincolo de AVALANCHE_LAT_CLEAR (15 m), deci NIMIC nu intersecta vizibil
+## asfaltul (semi 7,0) si niciun trunchi nu ajungea pe marginea drumului --
+## in bara, chiar in centrul cadrului, un trunchi masiv taie oblic PESTE
+## marginea carosabilului si un morman de bolovani se suprapune pe asfalt,
+## nu doar insirat paralel cu ea.
+##
+## Aici, spre deosebire de _scar_debris, intram DELIBERAT sub half+EDGE_KEEP:
+## coliziune "none" pe fiecare piesa (AI-ul nu vede decor static -- memoria
+## obstacol-pe-drum-poate-fi-gimmick -- si nota coordonatorului: intrarea pe
+## asfalt e admisa DOAR fara coliziune). Doua grupuri (unul per parte a
+## cicatricei), fiecare in AFARA fasiei mobile 0.740-0.760 -- limita ceruta
+## EXPLICIT de coordonator (nu marja proprie de 0.008/0.010 din _scar/_scar_debris):
+## inainte de 0.735 sau dupa 0.765, cat mai aproape de ea ca sa intre in cadrul
+## de la 0.70/0.75/0.79.
+##
+## Trunchiul: driftwood (4,03 x 0,58 m) cu radacina pe acostament (~half+1,5)
+## si varful trecand PESTE marginea asfaltului (~half-0,7), tilt mic (cade
+## spre drum, nu se ridica). Bolovanii: guard_rock scalat mic (prag < 0,3 m
+## inaltime -- memoria suprafete-cu-goluri-si-praguri, "prag nu zid") grupati
+## in gramada (jitter mic intre ei, NU sir de-a lungul marginii -- ruperea
+## alinierii ceruta explicit de coordonator), intrand pe asfalt intre
+## ~half-2,0 si ~half+0,8.
+## Runda 3c: un singur punct (0.734/0.766) s-a dovedit fragil -- drumul
+## coteste chiar acolo (side vector se roteste de la (-0.65,+0.76) la
+## (-0.40,+0.92) intre 0.719 si 0.734), deci care parte a cadrului "prinde"
+## gramada depinde de UNDE se face captura, nu doar de cat de aproape e ea de
+## fasie. In loc sa nimeresc un singur cadru, intind fiecare gramada pe o
+## PLAJA de fractii (nu un punct), cu piese la fiecare pas -- ca ceva din ea
+## sa fie mereu aproape de centrul drumului vazut din orice cadru rezonabil
+## intre 0.70 si 0.79. Plajele raman strict in afara fasiei mobile (< 0.735,
+## > 0.765 -- limita coordonatorului).
+const PILEUP_RANGES := [[0.700, 0.734], [0.766, 0.800]]
+const PILEUP_STEP := 0.003
+
+func _scar_pileup() -> void:
+	var n := _track.baked.size()
+	var idx := 0
+	for k in PILEUP_RANGES.size():
+		var rng_f: Array = PILEUP_RANGES[k]
+		var sgn: float = -1.0 if k == 0 else 1.0 # o gramada pe fiecare parte, in cadre diferite
+		var f: float = rng_f[0]
+		var f_end: float = rng_f[1]
+		# densitate crescatoare spre fasie (aranjamentul-bate-numarul: nu
+		# grila uniforma) -- piesele cele mai dese chiar la marginea permisa.
+		while f <= f_end:
+			if f > 0.735 and f < 0.765:
+				push_warning("frac de gramada %.3f incalca limita 0.735/0.765, sarita" % f)
+				f += PILEUP_STEP
+				continue
+			var i := int(f * float(n)) % n
+			var p := _track.baked[i]
+			var s := _track._side_at(i)
+			var half := _track.width_at_index(i)
+
+			# trunchi oblic la fiecare al doilea pas -- radacina pe acostament,
+			# varful trecand ADANC peste banda (pana aproape de axa drumului,
+			# half=7,0 -> varf la ~2,3 m de axa). Coliziune none: nu blocheaza
+			# AI-ul, doar citeste vizual ca trunchi cazut peste carosabil.
+			if _rng.randf() < 0.6:
+				var root_lat := sgn * (half + 2.0)
+				var tip_lat := sgn * (half - 4.7)
+				var mid_lat := (root_lat + tip_lat) * 0.5
+				var q_mid := p + s * mid_lat
+				var gy_mid := _ground(q_mid.x, q_mid.z)
+				if gy_mid > -900.0:
+					var lat_dir := s * sgn
+					var yaw := atan2(-lat_dir.z, lat_dir.x) + deg_to_rad(_rng.randf_range(-10.0, 10.0))
+					var tilt := _rng.randf_range(4.0, 9.0)
+					# scale uniform 1,8-2,1 (nu bulk_mul anizotrop -- runda 3f/3g
+					# au incercat sa ingroase doar Y/Z si au deformat geometria
+					# neregulata a modelului intr-un zig-zag urat). Un driftwood
+					# mai mare in ansamblu tot citeste ca "trunchi masiv cazut",
+					# lungimea mai mare (~7-8 m) fiind plauzibila pentru un fag
+					# rupt de avalansa, nu doar o creanga.
+					_place("driftwood", q_mid, gy_mid, yaw, _rng.randf_range(1.8, 2.1), tilt, "none")
+					idx += 1
+
+			# bolovani mari, angulari, la marginea asfaltului (half-1,0 pana
+			# half+1,8) -- "mormanul" vizibil, coliziune none (sub EDGE_KEEP).
+			for _rb in 2:
+				var lat_b := sgn * _rng.randf_range(half - 1.0, half + 1.8)
+				var qb := p + s * lat_b
+				var gyb := _ground(qb.x, qb.z)
+				if gyb <= -900.0:
+					continue
+				var yawb := _rng.randf_range(0.0, TAU)
+				_place("chasm_rock", qb, gyb, yawb, _rng.randf_range(0.85, 1.1), 0.0, "none")
+				idx += 1
+
+			# pietre mici angulare care intra efectiv pe asfalt -- prag < 0,3 m
+			# (memoria suprafete-cu-goluri-si-praguri), coliziune none.
+			for _r in 2:
+				var lat := sgn * _rng.randf_range(half - 3.2, half + 0.3)
+				var q := p + s * lat
+				var gy := _ground(q.x, q.z)
+				if gy <= -900.0:
+					continue
+				var yaw := _rng.randf_range(0.0, TAU)
+				var scl := _rng.randf_range(0.35, 0.50) # h masurata 0,585 -> 0,20-0,29 m
+				_place("guard_rock", q, gy, yaw, scl, 0.0, "none")
+				idx += 1
+			f += PILEUP_STEP
+
+		# CENTERPIECE, o singura data per grup, la capatul cel mai aproape de
+		# fasie (unde captura de la 0,79/0,70 il vede aproape central): un
+		# bolovan mare care intra ADANC pe banda (pana la half-3,0, adica
+		# ~4 m de axa), nu doar pana la marginea ei -- criticul r3 cerea
+		# explicit interesctie VIZIBILA cu asfaltul, nu doar bolovani langa
+		# margine. Coliziune none (AI-ul nu vede decor static).
+		var f_edge: float = rng_f[1] if k == 1 else rng_f[0]
+		var i_edge := int(f_edge * float(n)) % n
+		var p_edge := _track.baked[i_edge]
+		var s_edge := _track._side_at(i_edge)
+		var half_edge := _track.width_at_index(i_edge)
+		var lat_edge := sgn * (half_edge - 3.0)
+		var q_edge := p_edge + s_edge * lat_edge
+		var gy_edge := _ground(q_edge.x, q_edge.z)
+		if gy_edge > -900.0:
+			_place("chasm_rock", q_edge, gy_edge, _rng.randf_range(0.0, TAU), 1.3, 0.0, "none")
+			idx += 1
+	print("; gramada peste banda (runda 3): %d piese (trunchiuri + bolovani mari + moloz mic pe asfalt)" % idx)
+
+
 ## Ranged jitter helper: numar random uniform in [a,b].
 func _jrange(a: float, b: float) -> float:
 	return _rng.randf_range(a, b)
@@ -357,11 +482,15 @@ func _step(meters: float) -> float:
 ## Aseaza o piesa: verifica degajarea de la muchia drumului daca are coliziune,
 ## scrie linia .part. `gy` e cota REALA din raycast (TerrainBody), nu campul
 ## neted (memoria terrain-mesh-y-extrapoleaza).
-## `tilt_axis`/`tilt_deg`: pentru trunchiuri "cazute oblic" — o rotatie
-## SUPLIMENTARA pe o axa orizontala locala, aplicata INAINTE de yaw (deci
-## trunchiul se inclina, apoi se orienteaza in plan). 0 = fara tilt (default,
-## comportament neschimbat pentru restul pieselor).
-func _place(stem: String, pos: Vector3, ground_y: float, yaw: float, scale_mul: float, tilt_deg: float = 0.0) -> void:
+## `tilt_deg`: pentru trunchiuri "cazute oblic" — o rotatie SUPLIMENTARA pe
+## axa locala Z (PERPENDICULARA pe lungimea trunchiului, care e X local la
+## `driftwood`: baza masurata 4,03 x 0,58 m), aplicata INAINTE de yaw, deci
+## trunchiul se inclina (un capat mai jos) fara sa se roteasca in jurul
+## propriei axe lungi. 0 = fara tilt (default, neschimbat pentru restul
+## pieselor). Runda 3: fixat -- tiltul era pe Vector3.RIGHT (chiar axa lunga),
+## deci trunchiul se rula pe loc in loc sa cada oblic (vizibil in captura:
+## trunchiul aparea vertical/subtire, nu culcat peste asfalt).
+func _place(stem: String, pos: Vector3, ground_y: float, yaw: float, scale_mul: float, tilt_deg: float = 0.0, coliziune_mode: String = "", bulk_mul: float = 1.0) -> void:
 	if not RES.has(stem):
 		_skipped += 1
 		return
@@ -369,10 +498,15 @@ func _place(stem: String, pos: Vector3, ground_y: float, yaw: float, scale_mul: 
 	var scale := scale_mul # inaltimea e deja cea masurata; scale_mul e variatie, nu conversie in metri
 	var basis := Basis(Vector3.UP, yaw)
 	if tilt_deg != 0.0:
-		# tilt pe axa locala X (inainte de yaw), apoi yaw peste — un trunchi
-		# "culcat oblic" fata de axa lunga a modelului, nu doar rotit plan.
-		basis = Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, deg_to_rad(tilt_deg))
+		# tilt pe axa locala Z (perpendiculara pe lungimea X), apoi yaw peste.
+		basis = Basis(Vector3.UP, yaw) * Basis(Vector3.BACK, deg_to_rad(tilt_deg))
 	basis = basis.scaled(Vector3.ONE * scale)
+	if bulk_mul != 1.0:
+		# ingroasa modelul pe Y si Z locale (grosimea), pastrand lungimea X --
+		# un driftwood standard (4,03 x 0,58) citea prea subtire/greu de vazut
+		# ca "trunchi masiv" din unghiul de sus-spate al camerei de joc.
+		basis.y *= bulk_mul
+		basis.z *= bulk_mul
 	var origin := Vector3(pos.x, ground_y, pos.z)
 	_n += 1
 	var name := "%s%d" % [_camel(stem), _n]
@@ -382,6 +516,12 @@ func _place(stem: String, pos: Vector3, ground_y: float, yaw: float, scale_mul: 
 		_f(basis.x.y), _f(basis.y.y), _f(basis.z.y),
 		_f(basis.x.z), _f(basis.y.z), _f(basis.z.z),
 		_f(origin.x), _f(origin.y), _f(origin.z)])
+	if not coliziune_mode.is_empty():
+		# suprascrie modul implicit al piesei (metadata `coliziune`, citita in
+		# world_prop.gd COLLISION_META) -- folosit pentru piese care intra
+		# deliberat pe asfalt (gramada de la avalansa) si NU trebuie sa
+		# blocheze AI-ul sau bucatile de avalansa.
+		_out.append('metadata/coliziune = "%s"' % coliziune_mode)
 	_out.append("")
 
 

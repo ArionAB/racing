@@ -135,6 +135,9 @@ const ROAD_MARGIN := 2.1
 const JUMP_F_LO := 0.848
 const JUMP_F_HI := 0.888
 const JUMP_LAT := 9.5
+## RUNDA 3: marja pentru piesele NOI de linie-a-apei (_waterline_boulders),
+## mai mare decat JUMP_LAT — vezi comentariul din functia respectiva.
+const WATERLINE_LAT := 12.0
 
 var _track: Track
 var _sampler: TrackSideSampler
@@ -355,8 +358,17 @@ func _waterline_boulders() -> void:
 				# gap MIC — aproape de muchia drumului, la linia apei, nu la
 				# 8-24 m ca padurea de mal (_bank_forest).
 				var gap := _rng.randf_range(0.4, 2.2)
-				if f >= JUMP_F_LO and f <= JUMP_F_HI:
-					gap = maxf(gap, JUMP_LAT - half + 0.3)
+				# RUNDA 3, a doua trecere: ProbeRace seed 2 a lovit
+				# waterline109/110 la frac 0.880 lat 8.1 desi JUMP_LAT=9.5
+				# teoretic acoperea 9.8 m minim la muchie -- aterizarea reala
+				# diverge de la half_at_index calculat aici (curbura +
+				# deviatia laterala a masinii dupa salt). Marja WATERLINE_LAT
+				# mai mare (peste JUMP_LAT global, folosit doar de pool_wall
+				# care deja trece gardienii) + fereastra F extinsa cu 0.006
+				# de fiecare parte, ca sa acopere si coada aterizarii.
+				var in_jump_band := f >= (JUMP_F_LO - 0.006) and f <= (JUMP_F_HI + 0.006)
+				if in_jump_band:
+					gap = maxf(gap, WATERLINE_LAT - half + 0.3)
 				var d := half + gap + r
 				var q := p + s * d
 				var nrm := _normal_real(q.x, q.z)
@@ -366,7 +378,12 @@ func _waterline_boulders() -> void:
 					skipped += 1
 					f += _step(_rng.randf_range(1.6, 2.8))
 					continue
-				if d - r < half + EDGE_KEEP:
+				# ROAD_MARGIN (2,1), nu EDGE_KEEP (0,8): probe_manual numara
+				# "IN DRUM" sub semi-latime + 2,0 m -- gap-ul mic (0,4-2,2)
+				# intentionat pentru "la linia apei" poate cadea sub acel
+				# prag daca nu se verifica explicit (runda 3, a treia trecere:
+				# waterline135 la 7,9 m cu semi 6 = prag 8,0).
+				if d - r < half + ROAD_MARGIN:
 					skipped += 1
 					f += _step(_rng.randf_range(1.6, 2.8))
 					continue
@@ -386,7 +403,7 @@ func _waterline_boulders() -> void:
 					var r2: float = BASE_R.get(model2, 0.6) * scl2
 					var d2 := half + gap2 + r2
 					var q2 := p + s * d2
-					if not (f >= JUMP_F_LO and f <= JUMP_F_HI and d2 - r2 < JUMP_LAT):
+					if not (in_jump_band and d2 - r2 < WATERLINE_LAT):
 						var g2 := _sol_real(q2.x, q2.z)
 						_raw(model2, "waterlineChip", Vector3(q2.x, g2, q2.z),
 							_rng.randf_range(0.0, TAU), scl2, "hull")

@@ -61,25 +61,37 @@ const RES := {
 }
 
 ## Inaltimea AABB masurata (docs/asset_briefs/fiordland_masuratori.md §1).
+## 26 sep 2026: cruise_boat/kayak_a/kayak_b inlocuite (fiordland_stare_poi.md
+## decizia #2) — remasurate cu tools/sv_boat_aabb_v2.gd pe instanta reala.
+## kayak_a/b: 0,361 -> 0,585 (inaltime), lungimea 3,6 m a ramas neschimbata.
+## cruise_boat: 5,500 -> 6,162 (lungimea 14,0 m a ramas neschimbata).
 const HEIGHT := {
 	"wharf": 2.640, "wooden_pier": 2.0, "cafe_shed": 3.656,
-	"driftwood": 0.384, "kayak_a": 0.361, "kayak_b": 0.361,
-	"guard_rock": 0.585, "penguin_tawaki": 0.770, "cruise_boat": 5.500,
+	"driftwood": 0.384, "kayak_a": 0.585, "kayak_b": 0.585,
+	"guard_rock": 0.585, "penguin_tawaki": 0.770, "cruise_boat": 6.162,
 }
 
 ## Raza de degajare la sol (m), la scara 1. wharf/cafe_shed hull (jumatatea
 ## laturii mari a AABB), guard_rock hull, driftwood/kayak/penguin none (nu
 ## opresc masina — vezi PROP_COLLISION in world_prop.gd).
+## 26 sep 2026: kayak_a/b latimea a crescut de la 0,58 la 1,61 m — jumatatea
+## laturii mari (lungimea, 3,6 m) ramane totusi cea relevanta aici (1,80),
+## neschimbata. cruise_boat: jumatatea laturii mari (14,0 m lungime) = 7,00
+## (rotunjit de la 6,99, diferenta e in limita de masurare).
 const BASE_R := {
 	"wharf": 2.28, "wooden_pier": 2.0, "cafe_shed": 2.90,
 	"driftwood": 2.02, "kayak_a": 1.80, "kayak_b": 1.80,
-	"guard_rock": 0.59, "penguin_tawaki": 0.21, "cruise_boat": 6.99,
+	"guard_rock": 0.59, "penguin_tawaki": 0.21, "cruise_boat": 7.00,
 }
 
+## 26 sep 2026: kayak_a/b 94 -> 6775 (model nou, mult mai detaliat — vezi
+## fiordland_stare_poi.md decizia #2 si CREDITS.md); cruise_boat 920 -> 1640.
+## Fara plafon (CLAUDE.md — triunghiurile se RAPORTEAZA, nu pica build-ul),
+## dar cifra reala conteaza pentru probe_decor (raportat, nu limitat).
 const TRI := {
 	"wharf": 376, "wooden_pier": 400, "cafe_shed": 308,
-	"driftwood": 52, "kayak_a": 94, "kayak_b": 94,
-	"guard_rock": 72, "penguin_tawaki": 282, "cruise_boat": 920,
+	"driftwood": 52, "kayak_a": 6775, "kayak_b": 6775,
+	"guard_rock": 72, "penguin_tawaki": 282, "cruise_boat": 1640,
 }
 
 ## Coliziunea per piesa (PROP_COLLISION din world_prop.gd, deja declarata
@@ -330,8 +342,16 @@ func _wharf_row() -> void:
 	# ale celor doua barci, ca sa acopere si eventuale colturi neregulate ale
 	# corpului convex al vaporasului.
 	const BOAT_TANG_GAP := 16.0
-	var boat_half_len := 6.99   # jumatate din 13,97 m (lungime, masurat)
-	var boat_half_width := 2.12 # jumatate din 4,23 m (latime, masurat)
+	# 26 sep 2026: cruise_boat.glb inlocuit (decizia dezvoltatorului, vaporasul
+	# "cutie alba" citea cutie de la camera de joc — fiordland_stare_poi.md
+	# decizia #2). Noul model (sursa CC-BY-4.0 "cruise_ship_-_toofan",
+	# remodelat pe scara veche) masoara 14,0 lungime x 4,824 latime (AABB
+	# instantiat, tools/sv_boat_aabb_v2.gd) — lungimea a ramas identica prin
+	# constructie (scalat explicit la 14 m ca sa nu strice geometria de mai
+	# jos), latimea a crescut de la 4,23 la 4,824 m (siluetă mai lată, cu
+	# punte deschisă vizibilă).
+	var boat_half_len := 7.00   # jumatate din 14,0 m (lungime, masurat)
+	var boat_half_width := 2.412 # jumatate din 4,824 m (latime, masurat)
 	# Marginea EXTERIOARA a pontonului (fata de axa drumului, spre bărci) e
 	# `qp` + inca o jumatate-grosime: halfp + PIER_HALF_THICK*2 + EDGE_KEEP —
 	# `qp` insusi e centrul pontonului (halfp+PIER_HALF_THICK+EDGE_KEEP), deci

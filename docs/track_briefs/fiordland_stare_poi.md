@@ -140,3 +140,16 @@ nivelul sau peste a lui main.
 Rămân deschise: 1, 6, 7, 8 de mai sus; caiacele din zona H (`malKayak`) nu
 apar (generatorul le respinge pe cotă — preexistent); `sealRock1` ridicat manual
 de dezvoltator e semnalat „plutește” de `probe_manual`.
+
+### Valul din 26 sep, după #416/#417
+
+| decizie | stare |
+|---|---|
+| 1 fagul | **refăcut** în Blender: mase rotunjite în loc de plăci (`build_fiordland_forest.py`, `_crown_tier`); aceleași triunghiuri |
+| 4 relieful B/C | **rezolvat** cu `CliffFace` (vezi mai sus); nișa C era deja `stirling_ledge.glb`; 119 fagi `wallForest*` scoși (erau în perete) |
+| 6 kickerul Bowen | **lăsat așa** (decizia dezvoltatorului); buclele de repunere de acolo sunt nedeterministe (același seed: 7 / 0) |
+| 7 stâlpul semaforului | **scos** (dezvoltatorul, 796d8b82); lampa e reconstruită de `TunnelSignalHazard` |
+| 8 movila tunelului | `wet_gneiss` în loc de `alpine_granite` (bej → gri rece); **forma** (bloc cu față verticală) încă citește „zid” — nedecis |
+| sunet | **amânat** |
+| vaporașul pe traseu | adăugat manual de dezvoltator (796d8b82) |
+| kea | **anulat**: pe o pistă unde nimeni nu oprește la roșu, kea pe capotă nu are când să aterizeze |

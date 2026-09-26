@@ -377,6 +377,7 @@ Cornișa (0 → 30 pe ~340 m ≈ **8,8%**), coborârea în Chasm (32 → 15 pe 3
 > - **F:** fiordul **nu** e în față la ieșirea din tunel (decizia (b), 21 sep).
 >   Avalanșa: **`avalanche_period` 10 s** (decizia dezvoltatorului, 26 sep);
 >   blocajul real e 2,6 s din ciclu, prinde ~1 mașină AI în 5 din 8 curse.
+> - **Anulate / amânate (26 sep):** kea (pe capotă și pe buturugă) — anulat, mașinile nu opresc la roșu; sunetul (ploaie, vuiet, anunțul torentului) — amânat; stâlpul semaforului — scos. Vaporașul traversează pe `PathMover` (adăugat manual).
 
 | # | frac | POI | ce se întâmplă | semi-lățime (`custom_width_segments`; drumul real e dublu) |
 |---|---|---|---|---|

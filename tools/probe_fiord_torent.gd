@@ -52,6 +52,8 @@ func _ready() -> void:
 		await _test_physics()
 	if _only == "" or _only == "c":
 		await _test_ai_honest()
+	if _only == "" or _only == "d":
+		await _test_impact()
 	print("")
 	print("REZULTAT FINAL: %s" % ("PICAT" if _failed else "TRECUT"))
 	get_tree().quit(1 if _failed else 0)
@@ -304,6 +306,150 @@ func _run_physics_case(force_surge: bool) -> Dictionary:
 	await get_tree().physics_frame
 	print("    intrare %.1f m/s -> iesire %.1f m/s" % [entry_speed, exit_speed])
 	return {"loss_pct": loss_pct, "fog_max": fog_max}
+
+
+# --------------------------------------------------------- (d) impact la intrare
+##
+## Runda 3 (verdict la volan): pulsul trebuie sa fie MAI DRASTIC decat
+## Stirling — dat vizibil peste cap de lovitura — dar FARA rasturnare/
+## repunere in mod obisnuit (o rasturnare ar insemna o PEDEAPSA DUBLA peste
+## franarea deja mare a lui `drag=2.0`). Verificare pe cele 4 masini cerute
+## (Politia, Muscle, Autobuzul, Buggy), la 25 m/s, in SURGE: masoara yaw
+## maxim, deplasare laterala, 0 rasturnari, si compara cu Stirling (aceeasi
+## masina, aceeasi viteza, hazardul Stirling implicit) ca sa confirme "mai
+## drastic decat Stirling".
+const IMPACT_CARS: Array[String] = ["police_sports", "muscle", "bus", "buggy"]
+
+func _test_impact() -> void:
+	print("")
+	print("-- (d) impact la intrare: torent (SURGE) vs Stirling, 25 m/s --")
+	print("%-14s | %8s %8s %6s | %8s %8s %6s" % [
+		"masina", "yaw_torent", "lat_torent", "flip", "yaw_stirl", "lat_stirl", "flip"])
+	var any_flip := false
+	var any_not_bigger := false
+	for car_name in IMPACT_CARS:
+		var t := await _run_impact_case(car_name, true) # torent, SURGE
+		var s := await _run_impact_case(car_name, false) # Stirling (calibrare implicita)
+		print("%-14s | %8.1f %8.2f %6s | %8.1f %8.2f %6s" % [
+			car_name, float(t.yaw_max), float(t.lateral), "DA" if bool(t.flipped) else "nu",
+			float(s.yaw_max), float(s.lateral), "DA" if bool(s.flipped) else "nu"])
+		if bool(t.flipped) or bool(s.flipped):
+			any_flip = true
+		var bigger: bool = float(t.yaw_max) > float(s.yaw_max) + 5.0 \
+			or float(t.lateral) > float(s.lateral) + 0.15
+		if not bigger:
+			any_not_bigger = true
+			print("  [PICAT] %s: torentul nu e clar mai drastic decat Stirling" % car_name)
+	print("")
+	print("- 0 rasturnari (torent SAU Stirling): %s" % ("DA (esec)" if any_flip else "OK"))
+	print("- torent clar mai drastic decat Stirling (yaw sau lateral), toate masinile: %s"
+		% ("PICAT" if any_not_bigger else "OK"))
+	if any_flip or any_not_bigger:
+		_failed = true
+
+
+## Drum sintetic drept (acelasi tipar ca `_run_physics_case`), fortand faza
+## SURGE (torent) sau folosind `WaterfallHazard` cu valorile implicite
+## (Stirling) direct, ca sa izoleze STRICT impactul de pozitionarea reala pe
+## banda curbata (deja confirmata separat in (b)/(c)).
+func _run_impact_case(car_name: String, use_torrent: bool) -> Dictionary:
+	var ground := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	var curtain_len := CURTAIN_LENGTH if use_torrent else 30.0
+	box.size = Vector3(30.0, 1.0, RUN_UP_M + curtain_len + RUN_DOWN_M + 20.0)
+	shape.shape = box
+	ground.add_child(shape)
+	add_child(ground)
+	ground.global_position = Vector3(0, -0.5, 0)
+
+	var world_env := WorldEnvironment.new()
+	world_env.environment = Environment.new()
+	add_child(world_env)
+
+	var hazard: WaterfallHazard = null
+	var torrent: TorrentCycle = null
+	if use_torrent:
+		torrent = TorrentCycle.new()
+		torrent.length = curtain_len
+		torrent.thickness = CURTAIN_THICKNESS
+		add_child(torrent)
+		torrent.global_position = Vector3(0, 0.0, 0)
+		torrent._build_hazard(CURTAIN_THICKNESS)
+		torrent._placed = true
+		hazard = torrent.hazard()
+	else:
+		hazard = WaterfallHazard.new()
+		hazard.length = curtain_len
+		hazard.thickness = 6.0
+		add_child(hazard)
+		hazard.global_position = Vector3(0, 0.0, 0)
+
+	var car := (load(CAR_SCENE) as PackedScene).instantiate() as Car
+	add_child(car)
+	car.apply_data(load("res://scenes/cars/data/%s.tres" % car_name) as CarData)
+	var driver := StraightDriver.new()
+	driver.throttle = 1.0
+	car.set_controller(driver)
+	car.race_active = true
+	car.is_player = true
+	var start_z := RUN_UP_M + curtain_len * 0.5
+	car.global_transform = Transform3D(Basis.IDENTITY, Vector3(0, 0.7, start_z))
+	car.velocity = Vector3(0, 0, -25.0)
+	car.last_safe_index = 0
+	var start_x := car.global_position.x
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	for _f in int(0.2 * 60.0):
+		if use_torrent:
+			torrent.force_clock(torrent.period - 0.3) # in plin SURGE
+		await get_tree().physics_frame
+
+	# Fereastra scurta dupa iesire (tiparul `probe_fiord_cascada.gd`
+	# LANDING_WINDOW), NU pana la capatul intregului RUN_DOWN de 40 m: un
+	# harnas care tine gazul apasat drept, fara nicio corectie de volan, timp
+	# de secunde intregi DUPA ce lovitura s-a stins masoara alunecarea
+	# necorectata a soferului sintetic, nu impactul (memoria
+	# `diferenta-on-off-cere-lume-inghetata` — prima varianta, watch=6.0s
+	# fix, dadea rasturnari si la Stirling desi `probe_fiord_cascada.gd
+	# --impact-ab`, cu aceleasi valori dar fereastra scurta, da 0/4).
+	const IMPACT_LANDING_WINDOW := 1.5
+	var yaw_max := 0.0
+	var flipped := false
+	var was_in_zone := true
+	var exit_time := -1.0
+	var t := 0.0
+	while t < 6.0:
+		if use_torrent:
+			torrent.force_clock(torrent.period - 0.3)
+		await get_tree().physics_frame
+		t += 1.0 / 60.0
+		yaw_max = maxf(yaw_max, absf(rad_to_deg(car.angular_velocity.y)))
+		var up := car.global_transform.basis.y
+		if up.dot(Vector3.UP) < 0.5:
+			flipped = true
+		var z := car.global_position.z
+		var in_zone := z > -curtain_len * 0.5 and z < curtain_len * 0.5
+		if was_in_zone and not in_zone and exit_time < 0.0:
+			exit_time = t
+		was_in_zone = in_zone
+		if exit_time >= 0.0 and t - exit_time > IMPACT_LANDING_WINDOW:
+			break
+		if z < -(curtain_len * 0.5 + RUN_DOWN_M):
+			break
+
+	var lateral := absf(car.global_position.x - start_x)
+
+	if use_torrent:
+		torrent.resume_clock()
+		torrent.queue_free()
+	else:
+		hazard.queue_free()
+	car.queue_free()
+	ground.queue_free()
+	world_env.queue_free()
+	await get_tree().physics_frame
+	return {"yaw_max": yaw_max, "lateral": lateral, "flipped": flipped}
 
 
 # ------------------------------------------------------------------- (c) AI onest

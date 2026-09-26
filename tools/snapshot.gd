@@ -272,6 +272,7 @@ func _ready() -> void:
 	var typhoon_at := -1.0
 	var wave_at := -1.0
 	var rock_at := -1.0
+	var avalanche_at := -1.0
 	var door_at := -1.0
 	var herd_at := -1.0
 	var hippo_at := -1.0
@@ -357,6 +358,8 @@ func _ready() -> void:
 			wave_at = float(arg.trim_prefix("--wave-at="))
 		elif arg.begins_with("--rock-at="):
 			rock_at = float(arg.trim_prefix("--rock-at="))
+		elif arg.begins_with("--avalanche-at="):
+			avalanche_at = float(arg.trim_prefix("--avalanche-at="))
 		elif arg.begins_with("--door-at="):
 			door_at = float(arg.trim_prefix("--door-at="))
 		elif arg.begins_with("--herd-at="):
@@ -495,6 +498,8 @@ func _ready() -> void:
 			if child is EruptionCycle:
 				(child as EruptionCycle).hazard_group = &""
 		await _set_rock_time(track, rock_at)
+	if avalanche_at >= 0.0:
+		await _set_avalanche_time(track, avalanche_at)
 	# Faza de ploaie (Fiordland). `RainCycle._collect` e amanat cu
 	# `call_deferred`, deci `force_factor()` chemat in acelasi cadru ar ateriza
 	# pe un nod fara pista (acelasi bug platit de ProbeRace `--rain=`): doua
@@ -1261,6 +1266,65 @@ func _set_rock_time(root: Node, seconds: float) -> void:
 			% [seconds, bp.x, bp.y, bp.z,
 			rock.get("_cross_time"), rock.get("_route_travel")])
 	print("--rock-at=%.2f: %d bolovani mutati" % [seconds, found])
+
+
+## Aduce avalansa (`AvalancheHazard`) la `seconds` de la INCEPUTUL ciclului
+## (telegraf inclus), simuland cadrele — pe tiparul `_set_rock_time`.
+##
+## Nu se poate sari direct la faza `sweep`: gramada e NOUA corpuri
+## `AnimatableBody3D` cu `sync_to_physics=true`, pozitionate din `_place_shards`
+## in fiecare `_physics_process`, deci starea vizuala exista doar dupa ce
+## simularea a rulat pasii ei, nu prin scrierea unui singur camp.
+##
+## `AvalansaF` e copil al nodului `Hazarduri`, nu al radacinii pistei (spre
+## deosebire de `RockfallHazard`, gasit cu `root.get_children()`) — de aceea
+## cautarea e recursiva, ca la `_set_hippo_phase`/`TrainHazard`.
+func _set_avalanche_time(root: Node, seconds: float) -> void:
+	await get_tree().physics_frame
+	var found := 0
+	var step := 1.0 / 60.0
+	for node in root.find_children("*", "AvalancheHazard", true, false):
+		var ava := node as AvalancheHazard
+		if ava == null:
+			continue
+		ava.set("_time", 0.0)
+		ava.set("_last_phase", -1)
+		var t := 0.0
+		while t < seconds:
+			ava._physics_process(step)
+			t += step
+		# INGHETATA dupa simulare, ca la bolovan: fizica normala care mai ruleaza
+		# pana la captura ar re-avansa ciclul si poza n-ar mai arata momentul cerut.
+		ava.set_physics_process(false)
+		found += 1
+		var mass := ava.get("_mass") as Node3D
+		var mp := mass.global_position if mass != null else ava.global_position
+		var phase := "telegraf"
+		if seconds >= AvalancheHazard.TELEGRAPH + AvalancheHazard.SWEEP:
+			phase = "retragere"
+		elif seconds >= AvalancheHazard.TELEGRAPH:
+			phase = "traversare"
+		# Cate bucati au trecut de axa drumului (X local < 0, coborand spre vale
+		# pe +X local -> -X): contractul POI F cere sa se verifice in log ca
+		# toate cele 9 bucati ajung la rau, nu doar ca masa containerului a plecat.
+		#
+		# NU se citeste `body.global_position`: bucatile sunt AnimatableBody3D cu
+		# `sync_to_physics=true`, iar `_place_shards` scrie `.position` in
+		# spatiul pe care serverul de fizica il aplica abia la urmatorul pas
+		# REAL de fizica (nota din cod) — apelurile directe la `_physics_process`
+		# de aici nu avanseaza acel server, deci pozitia citita ar fi veche.
+		# Se recalculeaza cu ACEEASI formula ca `_place_shards`: centru + offset
+		# (offset-ul nu se roteste, gramada isi pastreaza forma).
+		var mass_local: Vector3 = mass.position if mass != null else Vector3.ZERO
+		var shards: Array = ava.get("_shards")
+		var past_road := 0
+		for sh in shards:
+			var off: Vector3 = sh.get("offset")
+			if mass_local.x + off.x < 0.0:
+				past_road += 1
+		print("--avalanche-at=%.2f: %s, masa la (%.1f, %.1f, %.1f), faza %s, %d/%d bucati au trecut de axa drumului"
+			% [seconds, ava.name, mp.x, mp.y, mp.z, phase, past_road, shards.size()])
+	print("--avalanche-at=%.2f: %d avalanse mutate" % [seconds, found])
 
 
 ## Muta tromba intr-un moment ales din traversarea ei.

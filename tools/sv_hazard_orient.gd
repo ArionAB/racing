@@ -96,6 +96,15 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	"avionMal",
 	# lodge/magazie: NU sunt in lista — fatada are orientare care CONTEAZA
 	# (spre drum, ca in bara) si raman verificabile ca orice piesa cu axa.
+	# RUNDA 1 POI F (Coborarea + avalansa): cicatricea de granit lucios
+	# (chasm_rock/moss_boulder_b/c/beech_dead) si padurea rara din jur
+	# (beech_a/b/c, guard_rock, driftwood, tussock_clump) — acelasi tip de
+	# piesa fara axa functionala ca poolWall/bankForest de la POI G: yaw
+	# aleator intentionat (aranjamentul-bate-numarul), NU o axa montata
+	# gresit. AvalansaF insasi (in Hazarduri, nu DecorManual) e deja exceptata
+	# ca hazard orientat din cod, conform notei din antet.
+	"chasmRock", "guardRock", "mossBoulderA", "mossBoulderB", "mossBoulderC",
+	"beechDead", "beechA", "beechB", "beechC", "driftwood", "tussockClump",
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:

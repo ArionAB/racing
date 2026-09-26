@@ -448,6 +448,12 @@ transform = Transform3D(0.6412, -0.0090, 0.7673, 0.0000, 0.9999, 0.0117, -0.7674
 script = ExtResource("5_waterfall")
 length = 30.0
 thickness = 6.0
+push_speed = 9.0
+push_dir = Vector3(1, 0, 0)
+yaw_kick_rate = 1.4
+yaw_kick_seconds = 0.35
+splash_trauma = 0.55
+douse_seconds = 3.0
 
 [node name="SemaforTunel" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-0.9946, 0.0111, 0.1035, 0.0000, 0.9943, -0.1065, 0.1041, 0.1059, 0.9889, -123.3400, 44.6900, -497.1100)
@@ -493,7 +499,7 @@ spray_count = 40
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.36, 15.73, -258.36)
 script = ExtResource("7_marker")
 kind = 8
-avalanche_period = 90.0
+avalanche_period = 10.0
 model = ExtResource("s_tree_avalanche")
 
 [node name="TorentChasm" type="Node3D" parent="Hazarduri"]

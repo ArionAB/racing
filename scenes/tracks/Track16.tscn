@@ -7256,363 +7256,675 @@ transform = Transform3D(0.916492, 0.000000, -0.608393, 0.000000, 1.100045, 0.000
 transform = Transform3D(-0.696961, 0.000000, -0.436665, 0.000000, 0.822455, 0.000000, 0.436665, 0.000000, -0.696961, 50.913425, -0.567093, 7.633163)
 metadata/coliziune = "none"
 
-[node name="gravelEdge73" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(-0.910658, 0.000000, 0.245650, 0.000000, 0.943208, 0.000000, -0.245650, 0.000000, -0.910658, 64.106827, -1.243118, -39.243267)
+[node name="waterline73" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.661994, 0.000000, 0.646278, 0.000000, 0.925155, 0.000000, -0.646278, 0.000000, -0.661994, 108.064774, 1.753082, -97.669937)
 
-[node name="gravelEdge74" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(0.550146, 0.000000, -0.480329, 0.000000, 0.730326, 0.000000, 0.480329, 0.000000, 0.550146, 58.923412, -0.870834, -34.524284)
+[node name="waterline74" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.190169, 0.000000, -1.055305, 0.000000, 1.072303, 0.000000, 1.055305, 0.000000, -0.190169, 106.863029, 1.377914, -90.777046)
 
-[node name="gravelEdge75" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(-0.894886, 0.000000, -0.015577, 0.000000, 0.895021, 0.000000, 0.015577, 0.000000, -0.894886, 49.413914, -0.193329, -27.219969)
+[node name="waterlineChip75" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.610511, 0.000000, 0.790516, 0.000000, 0.998819, 0.000000, -0.790516, 0.000000, -0.610511, 106.953445, 1.374069, -90.761322)
 
-[node name="gravelEdge76" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
-transform = Transform3D(-0.400580, 0.000000, -0.613903, 0.000000, 0.733036, 0.000000, 0.613903, 0.000000, -0.400580, 40.222652, 0.368164, -19.253567)
+[node name="waterline76" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.655013, 0.000000, 0.762049, 0.000000, 1.004869, 0.000000, -0.762049, 0.000000, 0.655013, 109.674377, 0.833221, -85.463493)
 
-[node name="foamPoolG77" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 103.417854, 0.727203, -81.506744)
+[node name="waterlineChip77" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.708663, 0.000000, 0.528642, 0.000000, 0.884118, 0.000000, -0.528642, 0.000000, 0.708663, 109.317360, 0.876373, -85.567444)
+
+[node name="waterline78" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.127006, 0.000000, 0.409126, 0.000000, 1.198969, 0.000000, -0.409126, 0.000000, 1.127006, 109.319534, 0.440063, -82.194542)
+
+[node name="waterline79" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.182570, 0.000000, 0.998159, 0.000000, 1.014718, 0.000000, -0.998159, 0.000000, 0.182570, 105.626396, -0.171616, -79.449455)
+
+[node name="waterlineChip80" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.881422, 0.000000, 0.004103, 0.000000, 0.881432, 0.000000, -0.004103, 0.000000, -0.881422, 106.127007, -0.273087, -79.301697)
+
+[node name="waterline81" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.853989, 0.000000, 0.982653, 0.000000, 1.301885, 0.000000, -0.982653, 0.000000, 0.853989, 107.492065, -1.748016, -75.304482)
+
+[node name="waterlineChip82" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.544922, 0.000000, -0.620566, 0.000000, 0.825858, 0.000000, 0.620566, 0.000000, 0.544922, 106.955078, -1.776886, -75.455078)
+
+[node name="waterline83" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.972353, 0.000000, -0.433646, 0.000000, 1.064668, 0.000000, 0.433646, 0.000000, -0.972353, 103.019424, -5.564453, -67.873329)
+
+[node name="waterline84" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.918131, 0.000000, -0.274817, 0.000000, 0.958378, 0.000000, 0.274817, 0.000000, 0.918131, 103.750488, -6.689957, -65.809952)
+
+[node name="waterline85" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.374284, 0.000000, 1.151767, 0.000000, 1.211056, 0.000000, -1.151767, 0.000000, -0.374284, 101.627457, -6.533051, -64.555023)
+
+[node name="waterlineChip86" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.508316, 0.000000, -0.958940, 0.000000, 1.085335, 0.000000, 0.958940, 0.000000, 0.508316, 101.976425, -6.513489, -64.459297)
+
+[node name="waterline87" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-1.048501, 0.000000, -0.383112, 0.000000, 1.116301, 0.000000, 0.383112, 0.000000, -1.048501, 103.334312, -6.531906, -62.513306)
+
+[node name="waterlineChip88" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.203638, 0.000000, -1.072307, 0.000000, 1.091472, 0.000000, 1.072307, 0.000000, 0.203638, 102.855682, -6.434082, -62.643497)
+
+[node name="waterline89" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.792886, 0.000000, -0.685948, 0.000000, 1.048424, 0.000000, 0.685948, 0.000000, 0.792886, 100.362595, -5.924484, -60.524429)
+
+[node name="waterlineChip90" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.609489, 0.000000, -0.804385, 0.000000, 1.009214, 0.000000, 0.804385, 0.000000, 0.609489, 100.782356, -6.010254, -60.407867)
+
+[node name="waterline91" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.962462, 0.000000, -0.463136, 0.000000, 1.068096, 0.000000, 0.463136, 0.000000, 0.962462, 101.300995, -5.363007, -55.733768)
+
+[node name="waterline92" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.626222, 0.000000, -0.746358, 0.000000, 0.974271, 0.000000, 0.746358, 0.000000, 0.626222, 101.029037, -5.336899, -55.813324)
+
+[node name="waterline93" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.633581, 0.000000, 1.061730, 0.000000, 1.236405, 0.000000, -1.061730, 0.000000, 0.633581, 98.862442, -3.410965, -51.825439)
+
+[node name="waterline94" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.885891, 0.000000, 0.586761, 0.000000, 1.062587, 0.000000, -0.586761, 0.000000, 0.885891, 97.241699, -2.425201, -48.620975)
+
+[node name="waterline95" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.100059, 0.000000, 0.096284, 0.000000, 1.104265, 0.000000, -0.096284, 0.000000, 1.100059, 95.814529, -2.690628, -42.688908)
+
+[node name="waterline96" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.862993, 0.000000, -0.283680, 0.000000, 0.908423, 0.000000, 0.283680, 0.000000, -0.862993, 94.486763, -2.730240, -40.722675)
+
+[node name="waterline97" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.358316, 0.000000, -1.059386, 0.000000, 1.118342, 0.000000, 1.059386, 0.000000, 0.358316, 93.581795, -2.770111, -38.490318)
+
+[node name="waterline98" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.643434, 0.000000, -1.014591, 0.000000, 1.201417, 0.000000, 1.014591, 0.000000, -0.643434, 91.716797, -2.751312, -36.654243)
+
+[node name="waterline99" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.000235, 0.000000, -0.397796, 0.000000, 1.076434, 0.000000, 0.397796, 0.000000, 1.000235, 89.745193, -2.876221, -33.433270)
+
+[node name="waterlineChip100" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.802744, 0.000000, -0.110889, 0.000000, 0.810367, 0.000000, 0.110889, 0.000000, 0.802744, 89.816414, -2.892426, -33.365551)
+
+[node name="waterline101" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-1.106480, 0.000000, 0.574464, 0.000000, 1.246719, 0.000000, -0.574464, 0.000000, -1.106480, 86.428223, -2.660324, -30.620539)
+
+[node name="waterline102" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-1.268656, 0.000000, -0.066622, 0.000000, 1.270405, 0.000000, 0.066622, 0.000000, -1.268656, 85.148254, -2.600113, -29.271597)
+
+[node name="waterlineChip103" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.067887, 0.000000, 1.064160, 0.000000, 1.066324, 0.000000, -1.064160, 0.000000, 0.067887, 85.248917, -2.623520, -29.172722)
+
+[node name="waterline104" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.904889, 0.000000, 0.846164, 0.000000, 1.238878, 0.000000, -0.846164, 0.000000, 0.904889, 85.377754, -2.941330, -25.948856)
+
+[node name="waterline105" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.931201, 0.000000, -0.761843, 0.000000, 1.203138, 0.000000, 0.761843, 0.000000, -0.931201, 81.459953, -2.796417, -22.557581)
+
+[node name="waterlineChip106" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.954303, 0.000000, -0.390196, 0.000000, 1.030994, 0.000000, 0.390196, 0.000000, 0.954303, 80.917801, -2.638336, -23.214540)
+
+[node name="waterline107" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.301919, 0.000000, -1.307954, 0.000000, 1.342348, 0.000000, 1.307954, 0.000000, -0.301919, 79.782021, -2.737930, -20.628662)
+
+[node name="waterline108" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.812314, 0.000000, 0.867452, 0.000000, 1.188414, 0.000000, -0.867452, 0.000000, 0.812314, 77.311127, -2.139420, -21.465946)
+
+[node name="waterline109" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.529592, 0.000000, -0.938772, 0.000000, 1.077850, 0.000000, 0.938772, 0.000000, -0.529592, 75.511871, -1.847107, -20.917480)
+
+[node name="waterline110" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.259375, 0.000000, 0.959422, 0.000000, 0.993864, 0.000000, -0.959422, 0.000000, 0.259375, 75.447540, -2.158859, -18.255451)
+
+[node name="waterlineChip111" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.709606, 0.000000, -0.441044, 0.000000, 0.835500, 0.000000, 0.441044, 0.000000, -0.709606, 75.199799, -2.074951, -18.534195)
+
+[node name="waterline112" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.415729, 0.000000, 1.146962, 0.000000, 1.219980, 0.000000, -1.146962, 0.000000, 0.415729, 73.540825, -1.804611, -18.071823)
+
+[node name="waterline113" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.671101, 0.000000, -0.631826, 0.000000, 0.921727, 0.000000, 0.631826, 0.000000, 0.671101, 72.171768, -1.903046, -15.636098)
+
+[node name="waterline114" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(1.004464, 0.000000, 0.701172, 0.000000, 1.224986, 0.000000, -0.701172, 0.000000, 1.004464, 67.991806, -1.298538, -14.043090)
+
+[node name="waterlineChip115" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.677157, 0.000000, 0.440290, 0.000000, 0.807711, 0.000000, -0.440290, 0.000000, 0.677157, 67.986656, -1.298477, -14.048882)
+
+[node name="waterline116" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.615078, 0.000000, 1.035300, 0.000000, 1.204229, 0.000000, -1.035300, 0.000000, -0.615078, 68.423019, -1.355453, -13.557735)
+
+[node name="waterlineChip117" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.139014, 0.000000, 0.816819, 0.000000, 0.828564, 0.000000, -0.816819, 0.000000, 0.139014, 68.562645, -1.414032, -13.400581)
+
+[node name="waterline118" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.006244, 0.000000, -0.408561, 0.000000, 1.086025, 0.000000, 0.408561, 0.000000, 1.006244, 68.009109, -1.629211, -11.274594)
+
+[node name="waterline119" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(0.560881, 0.000000, -0.946085, 0.000000, 1.099847, 0.000000, 0.946085, 0.000000, 0.560881, 65.175850, -1.104080, -11.707140)
+
+[node name="waterline120" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.237711, 0.000000, 0.871994, 0.000000, 0.903814, 0.000000, -0.871994, 0.000000, -0.237711, 61.385025, -0.842636, -9.703713)
+
+[node name="waterline121" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(1.069132, 0.000000, 0.449939, 0.000000, 1.159951, 0.000000, -0.449939, 0.000000, 1.069132, 51.830616, -0.285538, -2.632170)
+
+[node name="waterlineChip122" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.019776, 0.000000, 1.046712, 0.000000, 1.046899, 0.000000, -1.046712, 0.000000, 0.019776, 51.853600, -0.286453, -2.607189)
+
+[node name="waterline123" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-1.009960, 0.000000, -0.395511, 0.000000, 1.084642, 0.000000, 0.395511, 0.000000, -1.009960, 51.600361, -0.326370, 0.944664)
+
+[node name="waterlineChip124" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.717921, 0.000000, -0.382805, 0.000000, 0.813603, 0.000000, 0.382805, 0.000000, -0.717921, 51.005501, -0.287552, 0.303612)
+
+[node name="waterline125" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.062350, 0.000000, -1.136882, 0.000000, 1.138591, 0.000000, 1.136882, 0.000000, 0.062350, 48.748840, -0.228897, 2.745901)
+
+[node name="waterlineChip126" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.449091, 0.000000, -0.907001, 0.000000, 1.012094, 0.000000, 0.907001, 0.000000, 0.449091, 48.225742, -0.210815, 2.186885)
+
+[node name="waterline127" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.007680, 0.000000, 0.835903, 0.000000, 1.309256, 0.000000, -0.835903, 0.000000, 1.007680, 86.663742, 2.283844, -95.760925)
+
+[node name="waterline128" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-1.072606, 0.000000, 0.367369, 0.000000, 1.133774, 0.000000, -0.367369, 0.000000, -1.072606, 89.080635, 2.182755, -93.869270)
+
+[node name="waterlineChip129" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.391191, 0.000000, -0.939256, 0.000000, 1.017464, 0.000000, 0.939256, 0.000000, 0.391191, 88.617577, 2.186295, -93.949791)
+
+[node name="waterline130" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.354707, 0.000000, 1.142402, 0.000000, 1.196203, 0.000000, -1.142402, 0.000000, 0.354707, 88.732040, 2.059082, -92.525902)
+
+[node name="waterline131" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.911575, 0.000000, 0.352644, 0.000000, 0.977408, 0.000000, -0.352644, 0.000000, 0.911575, 86.501999, 1.963562, -92.210106)
+
+[node name="waterlineChip132" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.043722, 0.000000, -1.065922, 0.000000, 1.066819, 0.000000, 1.065922, 0.000000, 0.043722, 86.369164, 1.962936, -92.248779)
+
+[node name="waterline133" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.926159, 0.000000, 0.734442, 0.000000, 1.182022, 0.000000, -0.734442, 0.000000, 0.926159, 83.952469, 1.758194, -90.811241)
+
+[node name="waterline134" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.837758, 0.000000, 0.391454, 0.000000, 0.924703, 0.000000, -0.391454, 0.000000, -0.837758, 85.988937, 1.758835, -90.119499)
+
+[node name="waterline135" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-1.160770, 0.000000, -0.479759, 0.000000, 1.256008, 0.000000, 0.479759, 0.000000, -1.160770, 84.139801, 0.252563, -83.734932)
+
+[node name="waterlineChip136" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.484993, 0.000000, 0.686167, 0.000000, 0.840264, 0.000000, -0.686167, 0.000000, 0.484993, 83.702003, 0.162415, -83.857567)
+
+[node name="waterline137" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-1.146679, 0.000000, 0.582960, 0.000000, 1.286358, 0.000000, -0.582960, 0.000000, -1.146679, 80.678314, -0.930908, -81.225410)
+
+[node name="waterlineChip138" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-1.024187, 0.000000, -0.296878, 0.000000, 1.066346, 0.000000, 0.296878, 0.000000, -1.024187, 81.336227, -0.933167, -81.040642)
+
+[node name="waterline139" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.538799, 0.000000, 1.194071, 0.000000, 1.310004, 0.000000, -1.194071, 0.000000, 0.538799, 80.609558, -0.916168, -81.244713)
+
+[node name="waterline140" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(1.165101, 0.000000, -0.023007, 0.000000, 1.165328, 0.000000, 0.023007, 0.000000, 1.165101, 81.892715, -5.112167, -75.398834)
+
+[node name="waterline141" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.461707, 0.000000, 1.108037, 0.000000, 1.200383, 0.000000, -1.108037, 0.000000, -0.461707, 79.081978, -6.004974, -74.578781)
+
+[node name="waterline142" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.898958, 0.000000, -0.240854, 0.000000, 0.930664, 0.000000, 0.240854, 0.000000, 0.898958, 79.370140, -6.739441, -72.587631)
+
+[node name="waterlineChip143" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.501739, 0.000000, -0.657592, 0.000000, 0.827145, 0.000000, 0.657592, 0.000000, -0.501739, 79.703384, -6.738724, -72.494987)
+
+[node name="waterline144" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.063693, 0.000000, -1.237856, 0.000000, 1.239493, 0.000000, 1.237856, 0.000000, -0.063693, 77.973053, -6.703964, -71.043953)
+
+[node name="waterlineChip145" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.568591, 0.000000, 0.772609, 0.000000, 0.959282, 0.000000, -0.772609, 0.000000, 0.568591, 78.908913, -6.720474, -70.787224)
+
+[node name="waterline146" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.836170, 0.000000, -0.461925, 0.000000, 0.955277, 0.000000, 0.461925, 0.000000, 0.836170, 78.384689, -6.708420, -69.299881)
+
+[node name="waterline147" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.806172, 0.000000, 0.700250, 0.000000, 1.067831, 0.000000, -0.700250, 0.000000, 0.806172, 76.703537, -5.834412, -64.463013)
+
+[node name="waterline148" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.149744, 0.000000, -1.252465, 0.000000, 1.261385, 0.000000, 1.252465, 0.000000, 0.149744, 75.165726, -3.589172, -61.251202)
+
+[node name="waterlineChip149" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-1.011977, 0.000000, 0.216069, 0.000000, 1.034787, 0.000000, -0.216069, 0.000000, -1.011977, 75.657921, -3.507568, -61.116146)
+
+[node name="waterline150" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.891827, 0.000000, 0.185903, 0.000000, 0.910997, 0.000000, -0.185903, 0.000000, 0.891827, 75.597481, -1.872925, -58.798122)
+
+[node name="waterline151" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.278227, 0.000000, -1.058382, 0.000000, 1.094341, 0.000000, 1.058382, 0.000000, 0.278227, 74.652496, -1.187897, -57.213062)
+
+[node name="waterlineChip152" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.056338, 0.000000, 0.851497, 0.000000, 0.853359, 0.000000, -0.851497, 0.000000, -0.056338, 74.980949, -1.194565, -57.139969)
+
+[node name="waterline153" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(0.977290, 0.000000, -0.828598, 0.000000, 1.281276, 0.000000, 0.828598, 0.000000, 0.977290, 75.588936, -1.370316, -55.115784)
+
+[node name="waterlineChip154" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.632378, 0.000000, -0.841334, 0.000000, 1.052494, 0.000000, 0.841334, 0.000000, -0.632378, 75.688293, -1.373016, -55.085979)
+
+[node name="waterline155" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.713072, 0.000000, 0.882197, 0.000000, 1.134347, 0.000000, -0.882197, 0.000000, 0.713072, 73.202354, -1.577560, -52.693298)
+
+[node name="waterline156" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(-0.995614, 0.000000, 0.614971, 0.000000, 1.170230, 0.000000, -0.614971, 0.000000, -0.995614, 74.407082, -1.824966, -50.103745)
+
+[node name="waterline157" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.301977, 0.000000, 1.155128, 0.000000, 1.193948, 0.000000, -1.155128, 0.000000, 0.301977, 71.731483, -1.685349, -50.562252)
+
+[node name="waterline158" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-1.168919, 0.000000, -0.587410, 0.000000, 1.308214, 0.000000, 0.587410, 0.000000, -1.168919, 71.237999, -1.727524, -47.720001)
+
+[node name="waterline159" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.691395, 0.000000, 0.773193, 0.000000, 1.037234, 0.000000, -0.773193, 0.000000, -0.691395, 69.258614, -1.602539, -47.321434)
+
+[node name="waterlineChip160" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.606893, 0.000000, 0.793221, 0.000000, 0.998758, 0.000000, -0.793221, 0.000000, -0.606893, 69.503265, -1.622314, -47.083458)
+
+[node name="waterline161" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.166164, 0.000000, -1.217496, 0.000000, 1.228783, 0.000000, 1.217496, 0.000000, 0.166164, 67.631157, -1.498474, -46.477722)
+
+[node name="waterline162" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-1.036170, 0.000000, 0.421225, 0.000000, 1.118516, 0.000000, -0.421225, 0.000000, -1.036170, 66.891075, -1.460892, -45.240440)
+
+[node name="waterline163" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.052713, 0.000000, -0.083944, 0.000000, 1.056054, 0.000000, 0.083944, 0.000000, 1.052713, 66.336174, -1.431366, -44.429733)
+
+[node name="waterline164" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(1.188354, 0.000000, 0.319153, 0.000000, 1.230465, 0.000000, -0.319153, 0.000000, 1.188354, 65.470078, -1.389984, -41.933338)
+
+[node name="waterlineChip165" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.028540, 0.000000, 0.961514, 0.000000, 0.961938, 0.000000, -0.961514, 0.000000, 0.028540, 65.581879, -1.391937, -41.797867)
+
+[node name="waterline166" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-1.162142, 0.000000, 0.339523, 0.000000, 1.210723, 0.000000, -0.339523, 0.000000, -1.162142, 60.824776, -1.113388, -40.365868)
+
+[node name="waterlineChip167" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.999118, 0.000000, 0.369393, 0.000000, 1.065217, 0.000000, -0.369393, 0.000000, -0.999118, 60.973610, -1.117111, -40.195248)
+
+[node name="waterline168" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.910175, 0.000000, 0.771148, 0.000000, 1.192932, 0.000000, -0.771148, 0.000000, 0.910175, 58.039650, -0.911865, -37.841713)
+
+[node name="waterline169" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_b")]
+transform = Transform3D(1.058115, 0.000000, -0.583091, 0.000000, 1.208140, 0.000000, 0.583091, 0.000000, 1.058115, 56.521763, -0.720963, -33.254936)
+
+[node name="waterlineChip170" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.465515, 0.000000, -0.683344, 0.000000, 0.826839, 0.000000, 0.683344, 0.000000, 0.465515, 56.275703, -0.721436, -33.531948)
+
+[node name="waterline171" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.195732, 0.000000, -0.998291, 0.000000, 1.017298, 0.000000, 0.998291, 0.000000, 0.195732, 52.137222, -0.490112, -31.888298)
+
+[node name="waterline172" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.962254, 0.000000, -0.619141, 0.000000, 1.144233, 0.000000, 0.619141, 0.000000, -0.962254, 50.534252, -0.389435, -30.976919)
+
+[node name="waterlineChip173" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.576649, 0.000000, -0.841347, 0.000000, 1.019995, 0.000000, 0.841347, 0.000000, -0.576649, 50.644470, -0.388840, -30.852650)
+
+[node name="waterline174" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.856048, 0.000000, -0.725756, 0.000000, 1.122293, 0.000000, 0.725756, 0.000000, 0.856048, 49.236504, -0.287720, -29.737299)
+
+[node name="waterlineChip175" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.115903, 0.000000, 0.890715, 0.000000, 0.898224, 0.000000, -0.890715, 0.000000, 0.115903, 49.735889, -0.284866, -29.172409)
+
+[node name="waterline176" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_moss_boulder_c")]
+transform = Transform3D(-0.870138, 0.000000, -0.317051, 0.000000, 0.926100, 0.000000, 0.317051, 0.000000, -0.870138, 46.171082, 0.181641, -20.459846)
+
+[node name="waterlineChip177" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.835322, 0.000000, -0.104421, 0.000000, 0.841823, 0.000000, 0.104421, 0.000000, 0.835322, 45.902119, 0.176941, -20.758831)
+
+[node name="waterline178" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.136838, 0.000000, 0.425917, 0.000000, 1.214004, 0.000000, -0.425917, 0.000000, 1.136838, 42.676300, 0.226379, -21.608955)
+
+[node name="waterlineChip179" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(-0.820259, 0.000000, -0.046149, 0.000000, 0.821556, 0.000000, 0.046149, 0.000000, -0.820259, 43.015953, 0.235107, -21.232378)
+
+[node name="waterline180" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(1.221129, 0.000000, 0.081529, 0.000000, 1.223848, 0.000000, -0.081529, 0.000000, 1.221129, 38.738808, 0.452957, -16.862591)
+
+[node name="waterline181" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(-0.036756, 0.000000, 0.982859, 0.000000, 0.983546, 0.000000, -0.982859, 0.000000, -0.036756, 37.055325, 0.513626, -14.729780)
+
+[node name="waterline182" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_chasm_rock")]
+transform = Transform3D(0.314091, 0.000000, -0.917130, 0.000000, 0.969423, 0.000000, 0.917130, 0.000000, 0.314091, 34.316181, 0.569885, -12.677783)
+
+[node name="gravelEdge183" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.583002, 0.000000, 0.740218, 0.000000, 0.942239, 0.000000, -0.740218, 0.000000, 0.583002, 64.209122, -1.244019, -39.121784)
+
+[node name="gravelEdge184" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.705669, 0.000000, 0.662304, 0.000000, 0.967790, 0.000000, -0.662304, 0.000000, 0.705669, 59.411514, -0.875519, -33.974907)
+
+[node name="gravelEdge185" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.877629, 0.000000, 0.220178, 0.000000, 0.904827, 0.000000, -0.220178, 0.000000, 0.877629, 50.846424, -0.189468, -25.596458)
+
+[node name="gravelEdge186" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_guard_rock")]
+transform = Transform3D(0.355525, 0.000000, 0.917342, 0.000000, 0.983826, 0.000000, -0.917342, 0.000000, 0.355525, 40.300823, 0.372223, -19.167515)
+
+[node name="foamPoolG187" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105.233101, 0.456223, -80.919685)
 script = ExtResource("10_foam_pool_g")
 patch_count = 9
-radius = 1.755803
-rng_seed = 171007
+radius = 2.212786
+rng_seed = 171117
 
-[node name="foamPoolG78" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 103.341721, -2.410782, -74.860741)
+[node name="foamPoolG188" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 101.771790, -2.902985, -75.301636)
 script = ExtResource("10_foam_pool_g")
 patch_count = 9
-radius = 1.940878
-rng_seed = 171008
+radius = 1.733366
+rng_seed = 171118
 
-[node name="foamPoolG79" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 101.130455, -6.292648, -66.538315)
+[node name="foamPoolG189" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99.385963, -6.028137, -67.023277)
 script = ExtResource("10_foam_pool_g")
 patch_count = 9
-radius = 2.084312
-rng_seed = 171009
+radius = 2.210584
+rng_seed = 171119
 
-[node name="foamPoolG80" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.017883, -5.047699, -56.694195)
+[node name="foamPoolG190" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 97.793098, -5.026123, -56.759953)
 script = ExtResource("10_foam_pool_g")
 patch_count = 9
-radius = 1.813157
-rng_seed = 171010
+radius = 1.898807
+rng_seed = 171120
 
-[node name="foamPoolG81" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 94.778145, -2.298447, -49.359924)
+[node name="foamPoolG191" type="Node3D" parent="DecorManual/ZoneG_Bowen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.109200, -2.291260, -49.260624)
 script = ExtResource("10_foam_pool_g")
 patch_count = 9
-radius = 1.703711
-rng_seed = 171011
+radius = 1.644223
+rng_seed = 171121
 
-[node name="bankForest82" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.776529, 0.000000, -0.458503, 0.000000, 0.901788, 0.000000, 0.458503, 0.000000, 0.776529, 114.409645, 1.208405, -93.754158)
+[node name="bankForest192" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.552331, 0.000000, 0.667097, 0.000000, 0.866076, 0.000000, -0.667097, 0.000000, 0.552331, 113.397507, 1.297775, -93.872353)
 metadata/coliziune = "trunk"
 
-[node name="bankForest83" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.176109, 0.000000, 0.875823, 0.000000, 0.893353, 0.000000, -0.875823, 0.000000, 0.176109, 115.767639, 0.937500, -91.583519)
+[node name="bankForest193" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.761572, 0.000000, -0.651272, 0.000000, 1.002071, 0.000000, 0.651272, 0.000000, 0.761572, 63.190300, -2.171234, 1.135014)
 metadata/coliziune = "trunk"
 
-[node name="bankForest84" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.527191, 0.000000, 0.717794, 0.000000, 0.890595, 0.000000, -0.717794, 0.000000, 0.527191, 62.885998, -1.450882, -4.127098)
+[node name="bankForest194" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.611248, 0.000000, 0.626065, 0.000000, 0.874975, 0.000000, -0.626065, 0.000000, -0.611248, 59.522205, -1.403091, 1.991887)
 metadata/coliziune = "trunk"
 
-[node name="bankForest85" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.193690, 0.000000, 1.110566, 0.000000, 1.127330, 0.000000, -1.110566, 0.000000, -0.193690, 59.530800, -1.210999, -0.228746)
+[node name="bankForest195" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.018481, 0.000000, -0.867751, 0.000000, 0.867947, 0.000000, 0.867751, 0.000000, 0.018481, 54.175575, -0.728943, 3.719838)
 metadata/coliziune = "trunk"
 
-[node name="bankForest86" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-1.025418, 0.000000, 0.390685, 0.000000, 1.097322, 0.000000, -0.390685, 0.000000, -1.025418, 53.086971, -0.691254, 4.775636)
+[node name="bankForest196" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.579984, 0.000000, 0.943993, 0.000000, 1.107928, 0.000000, -0.943993, 0.000000, 0.579984, 121.747360, 0.344376, -90.725227)
 metadata/coliziune = "trunk"
 
-[node name="bankForest87" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.607936, 0.000000, 0.722202, 0.000000, 0.944013, 0.000000, -0.722202, 0.000000, -0.607936, 51.630974, -0.592300, 5.825939)
+[node name="bankForest197" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.577496, 0.000000, 0.714843, 0.000000, 0.918968, 0.000000, -0.714843, 0.000000, 0.577496, 64.199699, -3.051422, 4.940669)
 metadata/coliziune = "trunk"
 
-[node name="bankForest88" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.641866, 0.000000, 0.842328, 0.000000, 1.059013, 0.000000, -0.842328, 0.000000, 0.641866, 54.023148, -0.962967, 8.382370)
+[node name="bankForest198" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(-0.384899, 0.000000, 1.010673, 0.000000, 1.081483, 0.000000, -1.010673, 0.000000, -0.384899, 60.677925, -2.312439, 10.727089)
 metadata/coliziune = "trunk"
 
-[node name="bankForest89" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.823237, 0.000000, 0.301388, 0.000000, 0.876672, 0.000000, -0.301388, 0.000000, -0.823237, 68.883759, -3.951523, 2.577210)
+[node name="bankForest199" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.056630, 0.000000, -0.947902, 0.000000, 0.949592, 0.000000, 0.947902, 0.000000, -0.056630, 60.899864, -2.007172, 13.163082)
 metadata/coliziune = "trunk"
 
-[node name="bankForest90" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.379217, 0.000000, -0.991532, 0.000000, 1.061575, 0.000000, 0.991532, 0.000000, -0.379217, 69.784027, -3.851379, 5.788601)
+[node name="bankForest200" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.282372, 0.000000, 0.960501, 0.000000, 1.001147, 0.000000, -0.960501, 0.000000, -0.282372, 55.605133, -1.281143, 10.072982)
 metadata/coliziune = "trunk"
 
-[node name="bankForest91" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.698106, 0.000000, 0.654004, 0.000000, 0.956595, 0.000000, -0.654004, 0.000000, 0.698106, 69.145248, -3.964767, 2.869504)
+[node name="bankForest201" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.958343, 0.000000, -0.468220, 0.000000, 1.066608, 0.000000, 0.468220, 0.000000, 0.958343, 70.025360, -3.843369, 6.056871)
 metadata/coliziune = "trunk"
 
-[node name="bankForest92" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(1.041207, 0.000000, 0.296807, 0.000000, 1.082685, 0.000000, -0.296807, 0.000000, 1.041207, 67.707481, -3.766464, 3.480293)
+[node name="bankForest202" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-1.129308, 0.000000, -0.154191, 0.000000, 1.139786, 0.000000, 0.154191, 0.000000, -1.129308, 70.903152, -3.434998, 9.686285)
 metadata/coliziune = "trunk"
 
-[node name="bankForest93" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.911243, 0.000000, 0.573093, 0.000000, 1.076475, 0.000000, -0.573093, 0.000000, 0.911243, 64.825043, -2.898392, 2.947462)
+[node name="bankForest203" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.089130, 0.000000, -0.939355, 0.000000, 0.943574, 0.000000, 0.939355, 0.000000, -0.089130, 63.499470, -2.621857, 10.051541)
 metadata/coliziune = "trunk"
 
-[node name="bankForest94" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.782897, 0.000000, 0.480070, 0.000000, 0.918365, 0.000000, -0.480070, 0.000000, 0.782897, 64.302795, -3.054886, 7.254488)
-metadata/coliziune = "trunk"
-
-[node name="bankForest95" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-1.008248, 0.000000, -0.019998, 0.000000, 1.008446, 0.000000, 0.019998, 0.000000, -1.008248, 55.885353, -1.481186, 12.908261)
-metadata/coliziune = "trunk"
-
-[node name="bankForest96" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.630910, 0.000000, 0.584312, 0.000000, 0.859924, 0.000000, -0.584312, 0.000000, 0.630910, 70.848198, -4.266617, 0.961639)
-metadata/coliziune = "trunk"
-
-[node name="bankForest97" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.821402, 0.000000, 0.626236, 0.000000, 1.032895, 0.000000, -0.626236, 0.000000, -0.821402, 69.544197, -3.507462, 8.179607)
-metadata/coliziune = "trunk"
-
-[node name="bankForest98" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.618312, 0.000000, -0.709974, 0.000000, 0.941474, 0.000000, 0.709974, 0.000000, -0.618312, 60.264721, -2.047928, 12.481232)
-metadata/coliziune = "trunk"
-
-[node name="bankForest99" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-1.035126, 0.000000, 0.108858, 0.000000, 1.040834, 0.000000, -0.108858, 0.000000, -1.035126, 59.922695, -1.503571, 17.191788)
-metadata/coliziune = "trunk"
-
-[node name="bankUnder100" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.450871, 0.000000, 1.014084, 0.000000, 1.109798, 0.000000, -1.014084, 0.000000, -0.450871, 112.929657, 2.669922, -105.033478)
-
-[node name="bankUnder101" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(1.054848, 0.000000, -0.431307, 0.000000, 1.139618, 0.000000, 0.431307, 0.000000, 1.054848, 112.217262, 1.394424, -94.010178)
+[node name="bankUnder204" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.567721, 0.000000, -0.975063, 0.000000, 1.128297, 0.000000, 0.975063, 0.000000, 0.567721, 110.578712, 2.444443, -103.019974)
 metadata/coliziune = "none"
 
-[node name="bankUnder102" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.225813, 0.000000, -0.978254, 0.000000, 1.003978, 0.000000, 0.978254, 0.000000, -0.225813, 111.264839, 1.190186, -90.011604)
+[node name="bankUnder205" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.089112, 0.000000, 1.140740, 0.000000, 1.144216, 0.000000, -1.140740, 0.000000, 0.089112, 108.463974, 1.148270, -88.169693)
 metadata/coliziune = "none"
 
-[node name="bankUnder103" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.739299, 0.000000, 0.903495, 0.000000, 1.167418, 0.000000, -0.903495, 0.000000, -0.739299, 109.381454, -0.431976, -79.578079)
+[node name="bankUnder206" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.943369, 0.000000, -0.022753, 0.000000, 0.943643, 0.000000, 0.022753, 0.000000, 0.943369, 109.169388, 0.459137, -82.245544)
 metadata/coliziune = "none"
 
-[node name="bankUnder104" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.480363, 0.000000, -0.851507, 0.000000, 0.977657, 0.000000, 0.851507, 0.000000, -0.480363, 108.166733, -0.686478, -78.699654)
-
-[node name="bankUnder105" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(1.096079, 0.000000, -0.263075, 0.000000, 1.127208, 0.000000, 0.263075, 0.000000, 1.096079, 105.388855, -1.590973, -75.894333)
-
-[node name="bankUnder106" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(1.048573, 0.000000, 0.328660, 0.000000, 1.098873, 0.000000, -0.328660, 0.000000, 1.048573, 106.414993, -4.991287, -68.521576)
-
-[node name="bankUnder107" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(1.005952, 0.000000, -0.314891, 0.000000, 1.054085, 0.000000, 0.314891, 0.000000, 1.005952, 100.988327, -6.246170, -63.151440)
+[node name="bankUnder207" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.731016, 0.000000, 0.595648, 0.000000, 0.942964, 0.000000, -0.595648, 0.000000, -0.731016, 106.935516, -0.436951, -79.063057)
 metadata/coliziune = "none"
 
-[node name="bankUnder108" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.965584, 0.000000, -0.532675, 0.000000, 1.102767, 0.000000, 0.532675, 0.000000, 0.965584, 100.504585, -5.953506, -60.485001)
+[node name="bankUnder208" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.699457, 0.000000, -0.663049, 0.000000, 0.963782, 0.000000, 0.663049, 0.000000, -0.699457, 103.740555, -3.309097, -72.008026)
 metadata/coliziune = "none"
 
-[node name="bankUnder109" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.387553, 0.000000, -0.780569, 0.000000, 0.871485, 0.000000, 0.780569, 0.000000, -0.387553, 90.382233, -3.021149, -32.827522)
-
-[node name="bankUnder110" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.898071, 0.000000, -0.329040, 0.000000, 0.956452, 0.000000, 0.329040, 0.000000, -0.898071, 87.632332, -2.939301, -29.449303)
+[node name="bankUnder209" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.373863, 0.000000, 0.961774, 0.000000, 1.031883, 0.000000, -0.961774, 0.000000, -0.373863, 105.181534, -5.813904, -67.267670)
 metadata/coliziune = "none"
 
-[node name="bankUnder111" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.031576, 0.000000, 0.994950, 0.000000, 0.995451, 0.000000, -0.994950, 0.000000, -0.031576, 73.826126, -1.746246, -20.079763)
+[node name="bankUnder210" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.408026, 0.000000, 0.869900, 0.000000, 0.960839, 0.000000, -0.869900, 0.000000, -0.408026, 94.542793, -2.986649, -37.879749)
+
+[node name="bankUnder211" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-1.186455, 0.000000, 0.100950, 0.000000, 1.190742, 0.000000, -0.100950, 0.000000, -1.186455, 88.113373, -2.869049, -30.975628)
 metadata/coliziune = "none"
 
-[node name="bankUnder112" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.643803, 0.000000, 0.862215, 0.000000, 1.076057, 0.000000, -0.862215, 0.000000, -0.643803, 69.690262, -1.887054, -12.131380)
+[node name="bankUnder212" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.374058, 0.000000, 0.990807, 0.000000, 1.059064, 0.000000, -0.990807, 0.000000, -0.374058, 86.738045, -2.969833, -27.710033)
 
-[node name="bankUnder113" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.691426, 0.000000, 0.795676, 0.000000, 1.054120, 0.000000, -0.795676, 0.000000, 0.691426, 65.241318, -1.105225, -11.633088)
-
-[node name="bankUnder114" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.847849, 0.000000, -0.829208, 0.000000, 1.185931, 0.000000, 0.829208, 0.000000, -0.847849, 60.265083, -0.858459, -4.792772)
-
-[node name="bankUnder115" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.957494, 0.000000, -0.280420, 0.000000, 0.997712, 0.000000, 0.280420, 0.000000, 0.957494, 57.694176, -0.591187, -4.958567)
+[node name="bankUnder213" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.780154, 0.000000, 0.741794, 0.000000, 1.076521, 0.000000, -0.741794, 0.000000, -0.780154, 78.670906, -2.603348, -19.907091)
 metadata/coliziune = "none"
 
-[node name="bankUnder116" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.818779, 0.000000, -0.450328, 0.000000, 0.934448, 0.000000, 0.450328, 0.000000, -0.818779, 52.617779, -0.396637, 2.041083)
+[node name="bankUnder214" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-1.136077, 0.000000, -0.348442, 0.000000, 1.188311, 0.000000, 0.348442, 0.000000, -1.136077, 71.102272, -2.101044, -12.866481)
 metadata/coliziune = "none"
 
-[node name="bankUnder117" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.366903, 0.000000, -0.844640, 0.000000, 0.920888, 0.000000, 0.844640, 0.000000, 0.366903, 50.487392, -0.289627, 1.984885)
-
-[node name="bankUnder118" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.911125, 0.000000, 0.668498, 0.000000, 1.130062, 0.000000, -0.668498, 0.000000, -0.911125, 49.555637, -0.357040, 6.192583)
+[node name="bankUnder215" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.203928, 0.000000, -1.040784, 0.000000, 1.060575, 0.000000, 1.040784, 0.000000, -0.203928, 66.226776, -1.195206, -13.284117)
 metadata/coliziune = "none"
 
-[node name="bankForest119" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-1.012657, 0.000000, 0.346837, 0.000000, 1.070407, 0.000000, -0.346837, 0.000000, -1.012657, 79.622940, 1.879486, -94.212936)
+[node name="bankUnder216" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.855977, 0.000000, 0.356175, 0.000000, 0.927123, 0.000000, -0.356175, 0.000000, -0.855977, 61.804260, -0.863968, -9.231219)
+metadata/coliziune = "none"
+
+[node name="bankUnder217" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(1.060012, 0.000000, -0.116139, 0.000000, 1.066356, 0.000000, 0.116139, 0.000000, 1.060012, 54.037193, -0.424469, -0.233685)
+metadata/coliziune = "none"
+
+[node name="bankUnder218" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.693712, 0.000000, 0.712901, 0.000000, 0.994718, 0.000000, -0.712901, 0.000000, 0.693712, 51.232918, -0.338226, 2.785233)
+metadata/coliziune = "none"
+
+[node name="bankUnder219" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.515992, 0.000000, 0.853396, 0.000000, 0.997263, 0.000000, -0.853396, 0.000000, -0.515992, 49.252586, -0.251160, 3.284237)
+metadata/coliziune = "none"
+
+[node name="bankUnder220" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.053089, 0.000000, -0.937245, 0.000000, 0.938748, 0.000000, 0.937245, 0.000000, 0.053089, 47.277428, -0.353088, 9.693739)
+
+[node name="bankUnder221" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.871625, 0.000000, -0.086527, 0.000000, 0.875909, 0.000000, 0.086527, 0.000000, -0.871625, 42.393730, -0.238235, 10.712216)
+metadata/coliziune = "none"
+
+[node name="bankForest222" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.482962, 0.000000, -0.938771, 0.000000, 1.055719, 0.000000, 0.938771, 0.000000, 0.482962, 81.150635, 1.887589, -93.768150)
 metadata/coliziune = "trunk"
 
-[node name="bankForest120" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.948053, 0.000000, -0.017136, 0.000000, 0.948208, 0.000000, 0.017136, 0.000000, -0.948053, 79.879601, 1.324066, -89.119186)
+[node name="bankForest223" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.790833, 0.000000, -0.435569, 0.000000, 0.902849, 0.000000, 0.435569, 0.000000, 0.790833, 80.014122, 1.298386, -89.075684)
 metadata/coliziune = "trunk"
 
-[node name="bankForest121" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.351354, 0.000000, -0.865829, 0.000000, 0.934403, 0.000000, 0.865829, 0.000000, 0.351354, 74.442017, -5.277664, -75.878548)
+[node name="bankForest224" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.686788, 0.000000, 0.777595, 0.000000, 1.037464, 0.000000, -0.777595, 0.000000, -0.686788, 72.307846, -6.401093, -65.722275)
 metadata/coliziune = "trunk"
 
-[node name="bankForest122" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.582824, 0.000000, 0.865537, 0.000000, 1.043474, 0.000000, -0.865537, 0.000000, -0.582824, 72.536392, -6.600021, -70.890686)
+[node name="bankForest225" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.880177, 0.000000, 0.579473, 0.000000, 1.053802, 0.000000, -0.579473, 0.000000, -0.880177, 67.688232, -1.710464, -58.762875)
 metadata/coliziune = "trunk"
 
-[node name="bankForest123" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.834109, 0.000000, 0.389749, 0.000000, 0.920675, 0.000000, -0.389749, 0.000000, -0.834109, 70.766647, -1.315018, -54.063168)
+[node name="bankForest226" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.841611, 0.000000, -0.572339, 0.000000, 1.017783, 0.000000, 0.572339, 0.000000, -0.841611, 71.255768, -1.238083, -55.346863)
 metadata/coliziune = "trunk"
 
-[node name="bankForest124" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.783678, 0.000000, -0.737502, 0.000000, 1.076133, 0.000000, 0.737502, 0.000000, -0.783678, 66.688263, -1.067764, -56.101200)
+[node name="bankForest227" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.328289, 0.000000, -0.978592, 0.000000, 1.032190, 0.000000, 0.978592, 0.000000, 0.328289, 68.363007, -1.131073, -55.415005)
 metadata/coliziune = "trunk"
 
-[node name="bankForest125" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.231372, 0.000000, -0.919300, 0.000000, 0.947969, 0.000000, 0.919300, 0.000000, -0.231372, 66.724396, -1.219406, -52.198566)
+[node name="bankForest228" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.787399, 0.000000, 0.653705, 0.000000, 1.023390, 0.000000, -0.653705, 0.000000, -0.787399, 66.356461, -1.346085, -50.144356)
 metadata/coliziune = "trunk"
 
-[node name="bankForest126" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.309887, 0.000000, -1.038952, 0.000000, 1.084183, 0.000000, 1.038952, 0.000000, -0.309887, 61.924438, -1.139740, -50.423321)
+[node name="bankForest229" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.360551, 0.000000, 0.956179, 0.000000, 1.021898, 0.000000, -0.956179, 0.000000, -0.360551, 61.964424, -1.142807, -50.381596)
 metadata/coliziune = "trunk"
 
-[node name="bankForest127" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.254665, 0.000000, 0.893625, 0.000000, 0.929205, 0.000000, -0.893625, 0.000000, -0.254665, 53.814362, -0.791550, -40.274719)
+[node name="bankForest230" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.210196, 0.000000, -0.961068, 0.000000, 0.983786, 0.000000, 0.961068, 0.000000, -0.210196, 62.065758, -1.166809, -46.058529)
 metadata/coliziune = "trunk"
 
-[node name="bankForest128" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.837622, 0.000000, -0.516549, 0.000000, 0.984090, 0.000000, 0.516549, 0.000000, 0.837622, 47.036919, -0.330978, -32.225410)
+[node name="bankForest231" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.880029, 0.000000, -0.614649, 0.000000, 1.073427, 0.000000, 0.614649, 0.000000, -0.880029, 49.557503, -0.492081, -34.791912)
 metadata/coliziune = "trunk"
 
-[node name="bankForest129" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.837653, 0.000000, 0.392621, 0.000000, 0.925102, 0.000000, -0.392621, 0.000000, 0.837653, 38.237335, 0.162292, -23.804911)
+[node name="bankForest232" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.519292, 0.000000, -0.843017, 0.000000, 0.990122, 0.000000, 0.843017, 0.000000, -0.519292, 47.174381, -0.328857, -32.069920)
 metadata/coliziune = "trunk"
 
-[node name="bankForest130" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.867250, 0.000000, 0.287394, 0.000000, 0.913629, 0.000000, -0.287394, 0.000000, -0.867250, 70.238640, 1.344986, -89.894417)
+[node name="bankForest233" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.853844, 0.000000, -0.533834, 0.000000, 1.006990, 0.000000, 0.533834, 0.000000, 0.853844, 39.064968, 0.089111, -25.612854)
 metadata/coliziune = "trunk"
 
-[node name="bankForest131" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(1.085026, 0.000000, -0.126041, 0.000000, 1.092322, 0.000000, 0.126041, 0.000000, 1.085026, 66.568199, -5.990097, -79.696579)
+[node name="bankForest234" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.018513, 0.000000, -1.016472, 0.000000, 1.016640, 0.000000, 1.016472, 0.000000, 0.018513, 35.096951, 0.292831, -20.821188)
 metadata/coliziune = "trunk"
 
-[node name="bankForest132" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.089682, 0.000000, 1.094177, 0.000000, 1.097846, 0.000000, -1.094177, 0.000000, -0.089682, 58.401836, -0.913895, -55.543198)
+[node name="bankForest235" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.494658, 0.000000, -0.769823, 0.000000, 0.915049, 0.000000, 0.769823, 0.000000, 0.494658, 70.991364, 1.343124, -89.672249)
 metadata/coliziune = "trunk"
 
-[node name="bankForest133" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.899301, 0.000000, -0.294237, 0.000000, 0.946212, 0.000000, 0.294237, 0.000000, 0.899301, 61.149342, -1.114578, -50.346703)
+[node name="bankForest236" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.803725, 0.000000, -0.710127, 0.000000, 1.072499, 0.000000, 0.710127, 0.000000, -0.803725, 69.103806, -5.169846, -78.985474)
 metadata/coliziune = "trunk"
 
-[node name="bankForest134" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.389834, 0.000000, -0.816610, 0.000000, 0.904888, 0.000000, 0.816610, 0.000000, -0.389834, 44.239212, -0.532700, -43.106422)
+[node name="bankForest237" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(1.033111, 0.000000, 0.307798, 0.000000, 1.077988, 0.000000, -0.307798, 0.000000, 1.033111, 69.151260, -6.716599, -73.463966)
 metadata/coliziune = "trunk"
 
-[node name="bankForest135" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.968762, 0.000000, -0.442039, 0.000000, 1.064847, 0.000000, 0.442039, 0.000000, -0.968762, 42.144325, -0.354828, -37.759781)
+[node name="bankForest238" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.915533, 0.000000, -0.174116, 0.000000, 0.931943, 0.000000, 0.174116, 0.000000, 0.915533, 64.330803, -1.217697, -58.492691)
 metadata/coliziune = "trunk"
 
-[node name="bankForest136" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.636268, 0.000000, -0.733467, 0.000000, 0.970985, 0.000000, 0.733467, 0.000000, 0.636268, 39.196140, -0.216797, -34.711418)
+[node name="bankForest239" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.265733, 0.000000, 0.916537, 0.000000, 0.954282, 0.000000, -0.916537, 0.000000, -0.265733, 64.509628, -1.122375, -58.221088)
 metadata/coliziune = "trunk"
 
-[node name="bankForest137" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.776412, 0.000000, 0.550791, 0.000000, 0.951938, 0.000000, -0.550791, 0.000000, -0.776412, 35.600143, -0.090424, -32.210640)
+[node name="bankForest240" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.789965, 0.000000, 0.456939, 0.000000, 0.912600, 0.000000, -0.456939, 0.000000, 0.789965, 66.127083, -1.061920, -55.933628)
 metadata/coliziune = "trunk"
 
-[node name="bankForest138" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.963522, 0.000000, 0.116307, 0.000000, 0.970517, 0.000000, -0.116307, 0.000000, 0.963522, 30.579021, 0.006409, -29.869528)
+[node name="bankForest241" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.206510, 0.000000, 1.008528, 0.000000, 1.029454, 0.000000, -1.008528, 0.000000, 0.206510, 60.043297, -0.923843, -56.285172)
 metadata/coliziune = "trunk"
 
-[node name="bankUnder139" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.718635, 0.000000, 0.889080, 0.000000, 1.143197, 0.000000, -0.889080, 0.000000, 0.718635, 84.963295, 2.717026, -105.085457)
+[node name="bankForest242" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.718193, 0.000000, -0.545440, 0.000000, 0.901834, 0.000000, 0.545440, 0.000000, -0.718193, 57.334312, -0.985275, -47.285759)
+metadata/coliziune = "trunk"
+
+[node name="bankForest243" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.816411, 0.000000, -0.679432, 0.000000, 1.062146, 0.000000, 0.679432, 0.000000, 0.816411, 48.592686, -0.647949, -42.181519)
+metadata/coliziune = "trunk"
+
+[node name="bankForest244" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_c")]
+transform = Transform3D(1.065754, 0.000000, -0.038126, 0.000000, 1.066436, 0.000000, 0.038126, 0.000000, 1.065754, 45.978821, -0.492599, -38.819916)
+metadata/coliziune = "trunk"
+
+[node name="bankForest245" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.743161, 0.000000, 0.627386, 0.000000, 0.972575, 0.000000, -0.627386, 0.000000, -0.743161, 42.804714, -0.356003, -37.012764)
+metadata/coliziune = "trunk"
+
+[node name="bankForest246" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_dead")]
+transform = Transform3D(0.585722, 0.000000, -0.775276, 0.000000, 0.971660, 0.000000, 0.775276, 0.000000, 0.585722, 32.162636, -0.008163, -30.530827)
+metadata/coliziune = "trunk"
+
+[node name="bankForest247" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.343770, 0.000000, 0.849381, 0.000000, 0.916311, 0.000000, -0.849381, 0.000000, 0.343770, 25.831850, 0.077484, -26.824745)
+metadata/coliziune = "trunk"
+
+[node name="bankUnder248" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.302554, 0.000000, 0.881905, 0.000000, 0.932360, 0.000000, -0.881905, 0.000000, 0.302554, 84.366692, 2.507629, -101.718582)
 metadata/coliziune = "none"
 
-[node name="bankUnder140" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(1.054744, 0.000000, 0.047696, 0.000000, 1.055822, 0.000000, -0.047696, 0.000000, 1.054744, 85.696075, 2.509705, -100.661453)
+[node name="bankUnder249" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.186289, 0.000000, -0.829976, 0.000000, 0.850625, 0.000000, 0.829976, 0.000000, -0.186289, 84.637062, 2.308746, -97.230995)
 metadata/coliziune = "none"
 
-[node name="bankUnder141" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.854025, 0.000000, 0.485805, 0.000000, 0.982530, 0.000000, -0.485805, 0.000000, -0.854025, 84.226547, 1.758286, -90.718147)
+[node name="bankUnder250" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-1.059935, 0.000000, -0.007465, 0.000000, 1.059961, 0.000000, 0.007465, 0.000000, -1.059935, 85.489532, 1.079742, -87.304893)
 metadata/coliziune = "none"
 
-[node name="bankUnder142" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.709657, 0.000000, 0.712817, 0.000000, 1.005844, 0.000000, -0.712817, 0.000000, -0.709657, 83.341537, 0.088211, -83.958542)
-
-[node name="bankUnder143" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.678085, 0.000000, 0.886270, 0.000000, 1.115918, 0.000000, -0.886270, 0.000000, -0.678085, 80.266083, -2.934814, -78.600426)
+[node name="bankUnder251" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(1.058520, 0.000000, 0.297755, 0.000000, 1.099601, 0.000000, -0.297755, 0.000000, 1.058520, 81.860664, -6.550003, -73.800407)
 metadata/coliziune = "none"
 
-[node name="bankUnder144" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.162232, 0.000000, -1.188683, 0.000000, 1.199703, 0.000000, 1.188683, 0.000000, 0.162232, 78.878365, -5.961441, -74.635818)
+[node name="bankUnder252" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.123594, 0.000000, -1.185960, 0.000000, 1.192383, 0.000000, 1.185960, 0.000000, 0.123594, 77.328621, -6.752472, -73.155174)
 metadata/coliziune = "none"
 
-[node name="bankUnder145" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.824942, 0.000000, -0.754068, 0.000000, 1.117653, 0.000000, 0.754068, 0.000000, -0.824942, 74.847412, -1.191849, -57.169685)
+[node name="bankUnder253" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(0.291257, 0.000000, 1.034833, 0.000000, 1.075039, 0.000000, -1.034833, 0.000000, 0.291257, 79.434158, -6.732544, -69.014412)
 
-[node name="bankUnder146" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(-0.479991, 0.000000, 0.871960, 0.000000, 0.995342, 0.000000, -0.871960, 0.000000, -0.479991, 74.505798, -1.642319, -51.960220)
-
-[node name="bankUnder147" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.858839, 0.000000, -0.062945, 0.000000, 0.861143, 0.000000, 0.062945, 0.000000, 0.858839, 67.974724, -1.526321, -46.140259)
+[node name="bankUnder254" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.337580, 0.000000, 0.945542, 0.000000, 1.003997, 0.000000, -0.945542, 0.000000, -0.337580, 76.640228, -5.845444, -64.481148)
 metadata/coliziune = "none"
 
-[node name="bankUnder148" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.906306, 0.000000, -0.510404, 0.000000, 1.040145, 0.000000, 0.510404, 0.000000, 0.906306, 63.726105, -1.275238, -44.046600)
+[node name="bankUnder255" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.373575, 0.000000, 0.814517, 0.000000, 0.896101, 0.000000, -0.814517, 0.000000, 0.373575, 73.034897, -1.465073, -53.991207)
 metadata/coliziune = "none"
 
-[node name="bankUnder149" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-1.139014, 0.000000, 0.314704, 0.000000, 1.181690, 0.000000, -0.314704, 0.000000, -1.139014, 60.144760, -0.953644, -35.473171)
+[node name="bankUnder256" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.281379, 0.000000, -0.911987, 0.000000, 0.954408, 0.000000, 0.911987, 0.000000, 0.281379, 74.351395, -1.761688, -50.708324)
 metadata/coliziune = "none"
 
-[node name="bankUnder150" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.933103, 0.000000, 0.392983, 0.000000, 1.012480, 0.000000, -0.392983, 0.000000, 0.933103, 49.388828, -0.286835, -29.564995)
+[node name="bankUnder257" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.996762, 0.000000, 0.543676, 0.000000, 1.135394, 0.000000, -0.543676, 0.000000, -0.996762, 55.993225, -0.723007, -33.849960)
 metadata/coliziune = "none"
 
-[node name="bankUnder151" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.200410, 0.000000, -1.022150, 0.000000, 1.041611, 0.000000, 1.022150, 0.000000, 0.200410, 49.945477, -0.191284, -26.617533)
+[node name="bankUnder258" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.675445, 0.000000, -0.906039, 0.000000, 1.130103, 0.000000, 0.906039, 0.000000, -0.675445, 51.536530, -0.383881, -29.846882)
+
+[node name="bankUnder259" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(1.048472, 0.000000, -0.000052, 0.000000, 1.048472, 0.000000, 0.000052, 0.000000, 1.048472, 48.080040, -0.216614, -28.731691)
 metadata/coliziune = "none"
 
-[node name="bankUnder152" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.547233, 0.000000, 0.828786, 0.000000, 0.993152, 0.000000, -0.828786, 0.000000, -0.547233, 44.332855, 0.037781, -24.865841)
+[node name="bankUnder260" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.257389, 0.000000, 0.979304, 0.000000, 1.012564, 0.000000, -0.979304, 0.000000, 0.257389, 44.492783, 0.041977, -24.687077)
 metadata/coliziune = "none"
 
-[node name="bankUnder153" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.911078, 0.000000, -0.465025, 0.000000, 1.022894, 0.000000, 0.465025, 0.000000, 0.911078, 41.410961, 0.317322, -20.291065)
+[node name="bankUnder261" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
+transform = Transform3D(-0.449995, 0.000000, -1.097899, 0.000000, 1.186540, 0.000000, 1.097899, 0.000000, -0.449995, 41.047005, 0.180817, -23.415359)
+
+[node name="bankUnder262" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.637785, 0.000000, 0.750977, 0.000000, 0.985259, 0.000000, -0.750977, 0.000000, 0.637785, 33.317402, 0.535934, -13.745144)
 metadata/coliziune = "none"
 
-[node name="bankUnder154" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(1.028336, 0.000000, -0.392432, 0.000000, 1.100672, 0.000000, 0.392432, 0.000000, 1.028336, 38.533463, 0.445847, -17.085793)
+[node name="poolDrift263" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-1.088032, 0.000000, -0.273718, 0.000000, 1.121933, 0.000000, 0.273718, 0.000000, -1.088032, 87.675674, 2.414612, -96.876144)
 metadata/coliziune = "none"
 
-[node name="bankUnder155" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tree_fern")]
-transform = Transform3D(0.581991, 0.000000, 0.628196, 0.000000, 0.856355, 0.000000, -0.628196, 0.000000, 0.581991, 34.158245, 0.483551, -15.545100)
-
-[node name="bankUnder156" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.479040, 0.000000, 0.998966, 0.000000, 1.107886, 0.000000, -0.998966, 0.000000, 0.479040, 34.426758, 0.573654, -12.559615)
+[node name="poolDrift264" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_driftwood")]
+transform = Transform3D(-0.903852, 0.000000, 0.156046, 0.000000, 0.917223, 0.000000, -0.156046, 0.000000, -0.903852, 78.656967, -4.403610, -62.357952)
 metadata/coliziune = "none"
 
-[node name="bankUnder157" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.033371, 0.000000, -1.004982, 0.000000, 1.005536, 0.000000, 1.004982, 0.000000, -0.033371, 32.899979, 0.595566, -11.478673)
+[node name="poolDrift265" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_driftwood")]
+transform = Transform3D(0.610924, 0.000000, 0.870208, 0.000000, 1.063245, 0.000000, -0.870208, 0.000000, 0.610924, 77.800407, -2.051849, -22.981869)
 metadata/coliziune = "none"
 
-[node name="bankUnder158" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.904333, 0.000000, -0.616044, 0.000000, 1.094225, 0.000000, 0.616044, 0.000000, 0.904333, 27.180824, 0.527252, -7.467540)
+[node name="poolDrift266" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_driftwood")]
+transform = Transform3D(0.822667, 0.000000, 0.494250, 0.000000, 0.959721, 0.000000, -0.494250, 0.000000, 0.822667, 36.368805, 0.490112, -15.469609)
 metadata/coliziune = "none"
-
-[node name="poolDrift159" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_driftwood")]
-transform = Transform3D(0.182495, 0.000000, 0.903306, 0.000000, 0.921556, 0.000000, -0.903306, 0.000000, 0.182495, 89.336975, 2.438522, -96.682137)
-metadata/coliziune = "none"
-
-[node name="poolDrift160" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_driftwood")]
-transform = Transform3D(-0.217502, 0.000000, 1.121034, 0.000000, 1.141939, 0.000000, -1.121034, 0.000000, -0.217502, 99.264587, -5.167450, -56.329487)
-metadata/coliziune = "none"
-
-[node name="poolDrift161" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_driftwood")]
-transform = Transform3D(0.245471, 0.000000, -0.882258, 0.000000, 0.915770, 0.000000, 0.882258, 0.000000, 0.245471, 76.868073, -2.019196, -24.089039)
-metadata/coliziune = "none"
-
-[node name="poolDrift162" parent="DecorManual/ZoneG_Bowen" instance=ExtResource("s_driftwood")]
-transform = Transform3D(0.243558, 0.000000, 0.906728, 0.000000, 0.938870, 0.000000, -0.906728, 0.000000, 0.243558, 50.008327, -0.222473, -0.770989)
-metadata/coliziune = "none"
-
 
 [node name="ZoneH_Mal" type="Node3D" parent="DecorManual"]

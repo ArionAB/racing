@@ -36,6 +36,10 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# principiu — bolovani/muschi/fagi cu yaw aleator intentionat
 	# (aranjamentul-bate-numarul), fara axa vizuala semnificativa.
 	"poolWall", "poolMoss", "gravelEdge", "poolDrift", "bankForest", "bankUnder",
+	# RUNDA 3 POI G (Bowen): bolovani la linia apei pe ambele maluri
+	# (chasm_rock/moss_boulder_b/c + guard_rock de accent), acelasi tip de
+	# piesa fara axa functionala ca poolWall de mai sus.
+	"waterline", "waterlineChip",
 	# RUNDA 5 POI C: `FoamPool` (bazinul de spuma la baza cascadei Stirling) —
 	# nod container fara axa functionala, la fel ca muschiul/bolovanii din
 	# aceeasi zona (deja neinregistrati aici, dar FoamPool nu adauga zgomot

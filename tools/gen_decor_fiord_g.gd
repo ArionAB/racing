@@ -176,6 +176,7 @@ func _ready() -> void:
 	_survey()
 	if not _survey_only:
 		_pool_wall()
+		_waterline_boulders()
 		_landing_gravel()
 		_foam_pool()
 		_bank_forest()
@@ -321,6 +322,77 @@ func _pool_wall() -> void:
 						_rng.randf_range(0.0, TAU), _rng.randf_range(0.6, 0.95), "none")
 		f += _step(_rng.randf_range(2.0, 3.6))
 	print("; perete/bazin cascada: %d piese (chasm_rock/moss_boulder/guard_rock), %d sarite" % [placed, skipped])
+
+
+## (1b) BOLOVANI LA LINIA APEI — RUNDA 3, verdict critic: malul stang-jos
+## (partea OPUSA peretelui cascadei, side_sign == -_wall_sign) coboara direct
+## din gazon neted in apa plata, fara nicio piatra la linia apei, "sub si in
+## jurul curbei drumului, langa blocul galben din prim-plan" — kickerul insusi.
+## Istoric: r1 a numit gardul de copaci pe malul stang, r2 a numit exact
+## aceeasi lipsa de bolovani la linia apei (deja reparat pe partea peretelui
+## in _pool_wall, dar NU pe malul opus). `_pool_wall` pune bolovani doar pe
+## `_wall_sign` (peretele cascadei); aici se adauga o banda DEDICATA, aproape
+## de muchia drumului (gap mic, nu 8-24 m ca padurea), pe AMBELE maluri, cu
+## bolovani mari-medii chasm_rock/moss_boulder_b/c concentrati spre kicker
+## (0.858), in afara benzii saltului (JUMP_F_LO/HI, JUMP_LAT).
+func _waterline_boulders() -> void:
+	var n := _track.baked.size()
+	var placed := 0
+	var skipped := 0
+	for side_sign: float in [_wall_sign, -_wall_sign]:
+		var f := F_IN + 0.004
+		while f < F_OUT - 0.004:
+			var center_dist := absf(f - 0.858)
+			var density := clampf(1.0 - center_dist / 0.028, 0.4, 1.0)
+			if _rng.randf() < (0.55 + 0.35 * density):
+				var i := int(f * float(n)) % n
+				var p: Vector3 = _track.baked[i]
+				var s: Vector3 = _track._side_at(i) * side_sign
+				var half: float = _track.width_at_index(i)
+				var model: String = ["chasm_rock", "moss_boulder_b", "moss_boulder_c", "chasm_rock"][_rng.randi_range(0, 3)]
+				var scl: float = _rng.randf_range(0.9, 1.35)
+				var r: float = BASE_R.get(model, 0.9) * scl
+				# gap MIC — aproape de muchia drumului, la linia apei, nu la
+				# 8-24 m ca padurea de mal (_bank_forest).
+				var gap := _rng.randf_range(0.4, 2.2)
+				if f >= JUMP_F_LO and f <= JUMP_F_HI:
+					gap = maxf(gap, JUMP_LAT - half + 0.3)
+				var d := half + gap + r
+				var q := p + s * d
+				var nrm := _normal_real(q.x, q.z)
+				var g := _sol_real(q.x, q.z)
+				var analytic := _sampler.ground_y(q.x, q.z)
+				if absf(g - analytic) > 1.8:
+					skipped += 1
+					f += _step(_rng.randf_range(1.6, 2.8))
+					continue
+				if d - r < half + EDGE_KEEP:
+					skipped += 1
+					f += _step(_rng.randf_range(1.6, 2.8))
+					continue
+				if _on_any_road(q, i, r):
+					skipped += 1
+					f += _step(_rng.randf_range(1.6, 2.8))
+					continue
+				var yaw := _rng.randf_range(0.0, TAU)
+				_raw(model, "waterline", Vector3(q.x, g, q.z), yaw, scl, "hull")
+				placed += 1
+				# ocazional o piatra mica a doua, chiar langa, ca sa nu ramana
+				# instante izolate una-cate-una (aranjamentul-bate-numarul).
+				if _rng.randf() < 0.35:
+					var model2: String = "guard_rock"
+					var gap2 := gap + r * 0.6 + _rng.randf_range(-0.2, 0.6)
+					var scl2 := _rng.randf_range(0.8, 1.1)
+					var r2: float = BASE_R.get(model2, 0.6) * scl2
+					var d2 := half + gap2 + r2
+					var q2 := p + s * d2
+					if not (f >= JUMP_F_LO and f <= JUMP_F_HI and d2 - r2 < JUMP_LAT):
+						var g2 := _sol_real(q2.x, q2.z)
+						_raw(model2, "waterlineChip", Vector3(q2.x, g2, q2.z),
+							_rng.randf_range(0.0, TAU), scl2, "hull")
+						placed += 1
+			f += _step(_rng.randf_range(1.4, 2.6))
+	print("; bolovani linie apa (ambele maluri): %d piese, %d sarite" % [placed, skipped])
 
 
 ## (2) PIETRISUL ATERIZARII — clasa de teren (SAND_SHADOW), NU GLB. Aici doar

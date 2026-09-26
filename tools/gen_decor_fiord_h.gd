@@ -62,6 +62,7 @@ const RES := {
 	"beech_b": "s_beech_b",
 	"beech_c": "s_beech_c",
 	"beech_dead": "s_beech_dead",
+	"tree_fern": "s_tree_fern",
 	"guard_rock": "s_guard_rock",
 	"tussock_clump": "s_tussock_clump",
 	"fern_cluster": "s_fern_cluster",
@@ -74,6 +75,7 @@ const HEIGHT := {
 	"road_sign_blank": 2.450, "kayak_a": 0.361, "kayak_b": 0.361,
 	"penguin_tawaki": 0.770, "driftwood": 0.384,
 	"beech_a": 7.030, "beech_b": 10.189, "beech_c": 13.501, "beech_dead": 8.515,
+	"tree_fern": 3.306,
 	"guard_rock": 0.585, "tussock_clump": 0.804, "fern_cluster": 1.0,
 }
 
@@ -86,6 +88,7 @@ const BASE_R := {
 	"road_sign_blank": 0.80, "kayak_a": 1.80, "kayak_b": 1.80,
 	"penguin_tawaki": 0.21, "driftwood": 2.02,
 	"beech_a": 0.81, "beech_b": 0.77, "beech_c": 1.03, "beech_dead": 0.68,
+	"tree_fern": 0.30,
 	"guard_rock": 0.59, "tussock_clump": 0.35, "fern_cluster": 0.4,
 }
 
@@ -95,6 +98,7 @@ const CROWN_R := {
 	"road_sign_blank": 0.80, "kayak_a": 1.80, "kayak_b": 1.80,
 	"penguin_tawaki": 0.21, "driftwood": 2.02,
 	"beech_a": 2.55, "beech_b": 3.18, "beech_c": 4.78, "beech_dead": 1.64,
+	"tree_fern": 0.15,
 	"guard_rock": 0.59, "tussock_clump": 0.35, "fern_cluster": 0.4,
 }
 
@@ -103,6 +107,7 @@ const TRI := {
 	"bush_plane": 844, "snow_pole": 40, "road_sign_blank": 36,
 	"kayak_a": 94, "kayak_b": 94, "penguin_tawaki": 282, "driftwood": 52,
 	"beech_a": 228, "beech_b": 292, "beech_c": 292, "beech_dead": 136,
+	"tree_fern": 768,
 	"guard_rock": 72, "tussock_clump": 144, "fern_cluster": 60,
 }
 
@@ -111,7 +116,7 @@ const TRI := {
 ## difera de implicitul "hull".
 const MODE := {
 	"beech_a": "trunk", "beech_b": "trunk", "beech_c": "trunk",
-	"beech_dead": "trunk",
+	"beech_dead": "trunk", "tree_fern": "trunk",
 	"heli_pad": "none", "penguin_tawaki": "none", "kayak_a": "none",
 	"kayak_b": "none", "bush_plane": "none", "fern_cluster": "none",
 	"tussock_clump": "none",
@@ -439,89 +444,84 @@ func _forest() -> void:
 	print("; fagi rari + subetaj asezate")
 
 
-## (5) PADUREA DIN SPATELE SATULUI — reparatie runda 2. Criticul orb (v2r1):
-## "in referinta fasia dintre drum si pista e impadurita compact - zeci de
-## coroane suprapuse (...) care formeaza o silueta continua in spatele
-## cladirilor. La noi exista un singur copac izolat langa cladirea cu
-## acoperis albastru, restul terenului dintre drum si structuri e iarba
-## goala." Nota coordonator: padurea in SPATELE cladirilor (nu intre drum si
-## ele daca le-ar ascunde); clustere, jitter >= 0,5 din pas, 2-3 randuri
-## decalate; fagii NU se scaleaza sistematic (+-10%); nimic pe pista sau pe
-## traiectoria avionului.
+## (5) PADUREA DIN SPATELE SATULUI — runda 2 a adaugat 3 clustere, dar pe
+## RANDURI la fractii aproape echidistante (grila deghizata): aceeasi specie
+## ciclata `sp_i % 6` in ordine fixa, scala doar +-10% (aproape identica),
+## fara inclinare, fara specie la margine — verdict runda 3 (critic orb):
+## "fagii din jurul pistei/heliportului sunt instante clonate identic —
+## aceeasi coroana, aceeasi inaltime, aceeasi orientare, plantate in aceeasi
+## linie". Nota coordonator: scara jitter +-15% NESISTEMATICA (nu doar mica
+## variatie, ci si outlieri ocazionali), yaw complet aleator (era deja),
+## inclinare usoara +-4 grade, amestec beech_a/b/c + beech_dead + tree_fern
+## LA MARGINE, grupuri neregulate de 2-5 cu GOLURI intre ele, NU in linie.
 ##
-## Geometrie: lodge la frac 0,910 gap 4,0 (BASE_R 8,72) -> centru la ~19,2 m
-## de ax; heliport 0,916 gap 14,0 (BASE_R 6,00) -> centru la ~26,7 m;
-## containere 0,911/0,914 gap 16-16,5. Pista incepe la interior 22-6=16 m de
-## ax. Deci fasia dintre satul propriu-zis si pista e ingusta (~16 pana la
-## marginea cladirilor) — padurea "din spate" incape doar ca banda subtire
-## intre containere si pista, PLUS lateral de-a lungul segmentelor de frac
-## fara cladiri (0,900-0,907 si 0,919-0,927), aproape de muchia drumului
-## (gap mic), unde din unghiul camerei (care vine dinspre frac mica spre
-## mare) copacii citesc drept fundal continuu chiar langa/dupa lodge si
-## heliport — exact "fasia de iarba dintre drum si cladirea cu acoperis
-## albastru" numita de critic. Trei clustere (nu grila), 2-3 randuri
-## decalate per cluster, jitter >= 0,5*pas pe fractie SI pe gap.
+## Geometrie neschimbata fata de runda 2 (lodge la frac 0,910 gap 4,0 ->
+## centru la ~19,2 m de ax; heliport 0,916 gap 14,0 -> ~26,7 m; containere
+## 0,911/0,914 gap 16-16,5; pista incepe la 16 m de ax): aceleasi trei benzi
+## de fractie (inainte de lodge, intre lodge si heliport, dupa heliport),
+## dar populate cu CLUSTERE de 2-5 copaci in loc de randuri, centrele
+## clusterelor plasate cu jitter mare pe fractie SI pe gap, cu goluri reale
+## intre clustere (nu acoperire continua).
 func _lodge_forest() -> void:
-	var species := ["beech_a", "beech_b", "beech_c", "beech_a", "beech_b", "beech_dead"]
-	var sp_i := 0
-	# Cluster 1: imediat inainte de lodge (0,899-0,907), langa drum — umple
-	# perdeaua vazuta de camera INAINTE ca lodge-ul sa intre in cadru.
-	var c1_f0 := 0.898
-	var c1_f1 := 0.907
-	var c1_rows: Array[float] = [2.0, 5.0, 8.5]  # gap fata de muchia drumului, pe rand
-	for row in c1_rows.size():
-		var row_gap: float = c1_rows[row]
-		var n_in_row := 3
-		var step_f: float = (c1_f1 - c1_f0) / float(n_in_row)
-		for k in n_in_row:
-			var f_base: float = c1_f0 + step_f * (float(k) + 0.5)
-			var f: float = f_base + _rng.randf_range(-0.5 * step_f, 0.5 * step_f)
-			var gap: float = row_gap + _rng.randf_range(-0.5, 0.5) + float(row) * 0.3
-			var sp: String = species[sp_i % species.size()]
-			sp_i += 1
-			var scl: float = 1.0 + _rng.randf_range(-0.1, 0.1)
-			_place(sp, "fagLodgeA", f, 1.0, gap, _rng.randf_range(0.0, TAU), scl,
-				MODE.get(sp, "trunk"))
-	# Cluster 2: intre lodge si heliport (0,911-0,915), pe flancul dinspre
-	# camera — copacii dintre cele doua cladiri, ca in bara nu exista teren
-	# gol vizibil intre ele.
-	var c2_f0 := 0.9105
-	var c2_f1 := 0.9145
-	var c2_rows: Array[float] = [3.0, 5.5]
-	for row in c2_rows.size():
-		var row_gap: float = c2_rows[row]
-		var n_in_row := 2
-		var step_f: float = (c2_f1 - c2_f0) / float(n_in_row)
-		for k in n_in_row:
-			var f_base: float = c2_f0 + step_f * (float(k) + 0.5)
-			var f: float = f_base + _rng.randf_range(-0.5 * step_f, 0.5 * step_f)
-			var gap: float = row_gap + _rng.randf_range(-0.4, 0.4)
-			var sp: String = species[sp_i % species.size()]
-			sp_i += 1
-			var scl: float = 1.0 + _rng.randf_range(-0.1, 0.1)
-			_place(sp, "fagLodgeB", f, 1.0, gap, _rng.randf_range(0.0, TAU), scl,
-				MODE.get(sp, "trunk"))
-	# Cluster 3: dupa heliport/containere (0,918-0,928), inchizand silueta
-	# spre pista fara sa puna nimic PE pista (gap tinut sub limita interioara
-	# a pistei: STRIP_OFFSET - STRIP_HALF_W - 3 ~= 13 m fata de muchia
-	# drumului la half~7,5-8 -> gap max ~5,5; ramanem sub asta cu marja).
-	var c3_f0 := 0.917
-	var c3_f1 := 0.928
-	var c3_rows: Array[float] = [3.0, 5.5]
-	for row in c3_rows.size():
-		var row_gap: float = c3_rows[row]
-		var n_in_row := 3
-		var step_f: float = (c3_f1 - c3_f0) / float(n_in_row)
-		for k in n_in_row:
-			var f_base: float = c3_f0 + step_f * (float(k) + 0.5)
-			var f: float = f_base + _rng.randf_range(-0.5 * step_f, 0.5 * step_f)
-			var gap: float = row_gap + _rng.randf_range(-0.4, 0.4)
-			var sp: String = species[sp_i % species.size()]
-			sp_i += 1
-			var scl: float = 1.0 + _rng.randf_range(-0.1, 0.1)
-			_place(sp, "fagLodgeC", f, 1.0, gap, _rng.randf_range(0.0, TAU), scl,
-				MODE.get(sp, "trunk"))
-	print("; padurea din spatele satului: 3 clustere asezate (runda 2)")
+	# specie: distribuita per-CLUSTER (nu ciclata copac cu copac), ca fiecare
+	# grup sa aiba silueta de contur diferita de vecinul lui; tree_fern doar
+	# la marginea clusterelor ("amestec ... + tree_fern la margine").
+	var trunk_species := ["beech_a", "beech_b", "beech_c", "beech_dead"]
+	var bands := [
+		# [f0, f1, gap_min, gap_max, n_clusters] — cele trei benzi din runda 2.
+		[0.897, 0.908, 1.5, 9.5, 3],   # inainte de lodge
+		[0.9095, 0.9155, 2.5, 6.5, 2], # intre lodge si heliport
+		[0.9165, 0.929, 2.5, 6.5, 3],  # dupa heliport/containere, spre pista
+	]
+	var band_names := ["fagLodgeA", "fagLodgeB", "fagLodgeC"]
+	var cluster_id := 0
+	for bi in bands.size():
+		var band: Array = bands[bi]
+		var f0: float = band[0]
+		var f1: float = band[1]
+		var gap_min: float = band[2]
+		var gap_max: float = band[3]
+		var n_clusters: int = band[4]
+		# centrele clusterelor: NU echidistante — jitter pe segment plus un
+		# gol garantat intre clustere consecutive, ca sa nu citeasca linie.
+		var edges: Array[float] = []
+		for c in n_clusters:
+			edges.append(f0 + (f1 - f0) * (float(c) + 0.5) / float(n_clusters))
+		for ci in n_clusters:
+			cluster_id += 1
+			var f_center: float = edges[ci] + _rng.randf_range(-0.35, 0.35) * (f1 - f0) / float(n_clusters)
+			var gap_center: float = _rng.randf_range(gap_min, gap_max)
+			var group_n := _rng.randi_range(2, 5)
+			# specia dominanta a clusterului (silueta de grup diferita intre
+			# clustere), cu o sansa mica de tree_fern la primul/ultimul
+			# membru al grupului ("la margine").
+			var dom_a: String = trunk_species[_rng.randi() % trunk_species.size()]
+			var dom_b: String = trunk_species[_rng.randi() % trunk_species.size()]
+			for m in group_n:
+				var is_edge_member := (m == 0 or m == group_n - 1)
+				var sp: String = dom_a if _rng.randf() < 0.6 else dom_b
+				if is_edge_member and _rng.randf() < 0.35:
+					sp = "tree_fern"
+				# jitter individual in jurul centrului clusterului — pozitia
+				# fiecarui membru variaza pe fractie SI pe gap, ca grupul sa
+				# aiba contur neregulat, nu un cerc perfect.
+				var f: float = f_center + _rng.randf_range(-0.55, 0.55) * (f1 - f0) / float(n_clusters * 2)
+				var gap: float = gap_center + _rng.randf_range(-1.6, 1.6)
+				var yaw := _rng.randf_range(0.0, TAU)
+				# scara: jitter +-15% NESISTEMATIC — in loc de o banda mica
+				# si uniforma, trage din doua regimuri (majoritatea aproape
+				# de 1.0, o parte rar mai marcanta) ca sa nu se vada "toate
+				# putin mai mici/mai mari la fel".
+				var scl: float
+				if _rng.randf() < 0.75:
+					scl = 1.0 + _rng.randf_range(-0.06, 0.06)
+				else:
+					scl = 1.0 + _rng.randf_range(-0.15, 0.15)
+				# inclinare usoara, axa aleatorie (facuta in _raw).
+				var tilt := deg_to_rad(_rng.randf_range(-4.0, 4.0))
+				_place(sp, "%s_%d" % [band_names[bi], cluster_id], f, 1.0, gap,
+					yaw, scl, MODE.get(sp, "trunk"), tilt)
+	print("; padurea din spatele satului: %d clustere neregulate (runda 3, mix + inclinare)" % cluster_id)
 
 
 # ------------------------------------------------------------------ asezarea
@@ -544,8 +544,12 @@ const MAX_DROP_FROM_ROAD := 2.5
 
 ## Aseaza o piesa la `frac`, pe partea `side_sign`, la `gap` metri de MUCHIA
 ## drumului pana la MARGINEA corpului fizic. Cota din raycast pe TerrainBody.
+## `tilt_rad` (implicit 0): inclinare mica a trunchiului fata de verticala,
+## in jurul unei axe orizontale aleatorii — organic, nu geometrie perfecta
+## (verdict runda 3: fagii citeau "clonati", vezi _lodge_forest).
 func _place(model: String, base: String, frac: float, side_sign: float,
-		gap: float, yaw: float, scl: float, mode: String) -> void:
+		gap: float, yaw: float, scl: float, mode: String,
+		tilt_rad: float = 0.0) -> void:
 	var n := _track.baked.size()
 	var i := int(frac * float(n)) % n
 	var p := _track.baked[i]
@@ -588,7 +592,7 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 	if sink > max_sink:
 		_skipped += 1
 		return
-	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, mode)
+	_raw(model, base, Vector3(q.x, g, q.z), yaw, scl, mode, tilt_rad)
 
 
 ## Cade punctul `p` pe carosabilul ALTUI tronson (nu pe cel local)? Portul
@@ -617,13 +621,21 @@ func _on_any_road(p: Vector3, home_i: int, body_r: float) -> bool:
 
 
 func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
-		mode: String) -> void:
+		mode: String, tilt_rad: float = 0.0) -> void:
 	_n += 1
 	_tri += int(TRI.get(model, 0))
 	_out.append('[node name="%s%d" parent="%s" instance=ExtResource("%s")]'
 		% [base, _n, ZONE, RES[model]])
-	# Randurile bazei (memoria tscn-transform-e-pe-randuri).
-	var b := Basis.from_euler(Vector3(0.0, yaw, 0.0)).scaled(Vector3(scl, scl, scl))
+	# Randurile bazei (memoria tscn-transform-e-pe-randuri). Ordinea Euler
+	# conteaza pentru cum se "citeste" inclinarea: yaw intai (in jurul Y,
+	# fiindca modelul e simetric pe azimut), apoi o mica inclinare pe X/Z ca
+	# axa de inclinare sa nu fie mereu aceeasi fata de drum (altfel toti
+	# trunchiurile s-ar apleca "in aceeasi directie", tot un pattern).
+	var tilt_axis := deg_to_rad(360.0) * _rng.randf()
+	var b := Basis.from_euler(Vector3(0.0, yaw, 0.0))
+	if tilt_rad != 0.0:
+		b = Basis(Vector3(cos(tilt_axis), 0.0, sin(tilt_axis)), tilt_rad) * b
+	b = b.scaled(Vector3(scl, scl, scl))
 	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
 		% [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z,
 			pos.x, pos.y, pos.z])

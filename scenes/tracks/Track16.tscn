@@ -7704,217 +7704,505 @@ metadata/coliziune = "none"
 transform = Transform3D(0.170881, 0.000000, 1.073461, 0.000000, 1.086977, 0.000000, -1.073461, 0.000000, 0.170881, -129.301910, 42.075562, -523.157104)
 metadata/coliziune = "none"
 
-[node name="ferigaPortal175" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.644933, 0.000000, 0.449575, 0.000000, 0.786166, 0.000000, -0.449575, 0.000000, -0.644933, -146.582520, 42.094299, -509.121613)
-metadata/coliziune = "none"
-
-[node name="tussockPortal176" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.776607, 0.000000, -0.618699, 0.000000, 0.992928, 0.000000, 0.618699, 0.000000, 0.776607, -144.724960, 42.269028, -508.256348)
-metadata/coliziune = "none"
-
-[node name="ferigaPortal177" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.436325, 0.000000, -0.864346, 0.000000, 0.968232, 0.000000, 0.864346, 0.000000, 0.436325, -146.180847, 42.096100, -509.447876)
-metadata/coliziune = "none"
-
-[node name="tussockPortal178" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.788671, 0.000000, 0.659983, 0.000000, 1.028387, 0.000000, -0.659983, 0.000000, -0.788671, -144.722092, 42.269073, -508.258667)
-metadata/coliziune = "none"
-
-[node name="ferigaPortal179" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.919206, 0.000000, -0.062810, 0.000000, 0.921349, 0.000000, 0.062810, 0.000000, 0.919206, -145.851883, 42.097565, -509.715057)
-metadata/coliziune = "none"
-
-[node name="fagPortal180" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.546461, 0.000000, -0.599201, 0.000000, 0.810963, 0.000000, 0.599201, 0.000000, 0.546461, -150.448654, 42.020569, -505.981506)
+[node name="fagPortal175" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.737094, 0.000000, -0.512964, 0.000000, 0.898020, 0.000000, 0.512964, 0.000000, -0.737094, -127.726837, 42.056747, -524.436401)
 metadata/coliziune = "trunk"
 
-[node name="fagPortal181" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.273519, 0.000000, -0.760237, 0.000000, 0.807943, 0.000000, 0.760237, 0.000000, -0.273519, -150.436371, 42.020813, -505.991486)
+[node name="fagPortal176" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.821946, 0.000000, -0.339273, 0.000000, 0.889214, 0.000000, 0.339273, 0.000000, -0.821946, -127.004509, 42.218414, -522.732544)
 metadata/coliziune = "trunk"
 
-[node name="tussockPortal182" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.101300, 0.000000, 0.980868, 0.000000, 0.986085, 0.000000, -0.980868, 0.000000, 0.101300, -128.832886, 42.397400, -519.265564)
-metadata/coliziune = "none"
-
-[node name="ferigaPortal183" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.020223, 0.000000, -0.659341, 0.000000, 0.659651, 0.000000, 0.659341, 0.000000, 0.020223, -130.299255, 42.258957, -520.041016)
-metadata/coliziune = "none"
-
-[node name="tussockPortal184" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.249904, 0.000000, 0.963874, 0.000000, 0.995743, 0.000000, -0.963874, 0.000000, 0.249904, -130.807541, 42.093552, -521.934204)
-metadata/coliziune = "none"
-
-[node name="ferigaPortal185" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.388069, 0.000000, 0.528243, 0.000000, 0.655468, 0.000000, -0.528243, 0.000000, -0.388069, -130.488159, 42.261276, -519.886719)
-metadata/coliziune = "none"
-
-[node name="tussockPortal186" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.789862, 0.000000, 0.648345, 0.000000, 1.021877, 0.000000, -0.648345, 0.000000, -0.789862, -128.412827, 42.392715, -519.609924)
-metadata/coliziune = "none"
-
-[node name="ferigaPortal187" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.214382, 0.000000, -0.781231, 0.000000, 0.810112, 0.000000, 0.781231, 0.000000, -0.214382, -129.229080, 42.245804, -520.915283)
-metadata/coliziune = "none"
-
-[node name="fagPortal188" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.530222, 0.000000, -0.655934, 0.000000, 0.843436, 0.000000, 0.655934, 0.000000, 0.530222, -127.599998, 42.055237, -524.539429)
+[node name="fagPortal177" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.665064, 0.000000, -0.533823, 0.000000, 0.852806, 0.000000, 0.533823, 0.000000, -0.665064, -126.003784, 42.365891, -521.585022)
 metadata/coliziune = "trunk"
 
-[node name="fagPortal189" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.576087, 0.000000, 0.597147, 0.000000, 0.829736, 0.000000, -0.597147, 0.000000, 0.576087, -125.941284, 42.035263, -525.886658)
+[node name="fagPortal178" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.689126, 0.000000, -0.549006, 0.000000, 0.881080, 0.000000, 0.549006, 0.000000, 0.689126, -124.504143, 42.338654, -522.814575)
 metadata/coliziune = "trunk"
+
+[node name="tussockPortal179" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.760230, 0.000000, 0.546316, 0.000000, 0.936168, 0.000000, -0.546316, 0.000000, -0.760230, -143.989609, 42.279663, -508.857056)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal180" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.369260, 0.000000, 0.826732, 0.000000, 0.905449, 0.000000, -0.826732, 0.000000, -0.369260, -147.088394, 42.092056, -508.710754)
+metadata/coliziune = "none"
+
+[node name="tussockPortal181" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.854485, 0.000000, -0.186954, 0.000000, 0.874698, 0.000000, 0.186954, 0.000000, -0.854485, -143.921814, 42.279968, -508.912445)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal182" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.592509, 0.000000, -0.546322, 0.000000, 0.805937, 0.000000, 0.546322, 0.000000, -0.592509, -145.838226, 42.245529, -507.346893)
+metadata/coliziune = "none"
+
+[node name="tussockPortal183" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.826048, 0.000000, 0.335304, 0.000000, 0.891507, 0.000000, -0.335304, 0.000000, -0.826048, -146.067841, 42.096619, -509.539642)
+metadata/coliziune = "none"
+
+[node name="fagPortal184" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.609694, 0.000000, 0.429166, 0.000000, 0.745594, 0.000000, -0.429166, 0.000000, 0.609694, -148.818390, 42.056793, -507.305634)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal185" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.598459, 0.000000, -0.584419, 0.000000, 0.836480, 0.000000, 0.584419, 0.000000, 0.598459, -147.419067, 42.212219, -506.055450)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal186" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.466213, 0.000000, -0.632898, 0.000000, 0.786075, 0.000000, 0.632898, 0.000000, 0.466213, -148.778137, 42.057709, -507.338318)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal187" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.512625, 0.000000, 0.697789, 0.000000, 0.865848, 0.000000, -0.697789, 0.000000, -0.512625, -146.662964, 42.228149, -506.673126)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal188" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.414091, 0.000000, 1.016957, 0.000000, 1.098031, 0.000000, -1.016957, 0.000000, -0.414091, -128.640762, 42.238571, -521.395874)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal189" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.680877, 0.000000, 0.305596, 0.000000, 0.746313, 0.000000, -0.305596, 0.000000, -0.680877, -130.850800, 42.094070, -521.899109)
+metadata/coliziune = "none"
 
 [node name="tussockPortal190" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.035976, 0.000000, 0.912099, 0.000000, 0.912808, 0.000000, -0.912099, 0.000000, -0.035976, -146.318375, 42.095474, -509.336182)
+transform = Transform3D(-0.214798, 0.000000, -0.927053, 0.000000, 0.951612, 0.000000, 0.927053, 0.000000, -0.214798, -130.855743, 42.265823, -519.586426)
 metadata/coliziune = "none"
 
 [node name="ferigaPortal191" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.485434, 0.000000, -0.421574, 0.000000, 0.642939, 0.000000, 0.421574, 0.000000, 0.485434, -144.199814, 42.386169, -506.666626)
+transform = Transform3D(0.883507, 0.000000, 0.172369, 0.000000, 0.900164, 0.000000, -0.172369, 0.000000, 0.883507, -131.520859, 42.102081, -521.354858)
 metadata/coliziune = "none"
 
 [node name="tussockPortal192" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.792660, 0.000000, 0.444603, 0.000000, 0.908835, 0.000000, -0.444603, 0.000000, -0.792660, -145.046539, 42.262253, -507.993622)
+transform = Transform3D(1.108251, 0.000000, -0.292978, 0.000000, 1.146323, 0.000000, 0.292978, 0.000000, 1.108251, -128.987076, 42.399109, -519.139099)
 metadata/coliziune = "none"
 
 [node name="ferigaPortal193" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.022040, 0.000000, 0.730106, 0.000000, 0.730439, 0.000000, -0.730106, 0.000000, 0.022040, -142.629425, 42.419052, -507.954163)
+transform = Transform3D(0.495174, 0.000000, 0.513276, 0.000000, 0.713196, 0.000000, -0.513276, 0.000000, 0.495174, -129.586243, 42.078979, -522.926147)
 metadata/coliziune = "none"
 
-[node name="tussockPortal194" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.106597, 0.000000, 1.119369, 0.000000, 1.124434, 0.000000, -1.119369, 0.000000, -0.106597, -143.423523, 42.402420, -507.303101)
-metadata/coliziune = "none"
-
-[node name="ferigaPortal195" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.834131, 0.000000, 0.402687, 0.000000, 0.926246, 0.000000, -0.402687, 0.000000, -0.834131, -145.615036, 42.250244, -507.529205)
-metadata/coliziune = "none"
-
-[node name="fagPortal196" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.290577, 0.000000, -0.724072, 0.000000, 0.780202, 0.000000, 0.724072, 0.000000, -0.290577, -150.026932, 42.029938, -506.324036)
+[node name="fagPortal194" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.110185, 0.000000, 0.750219, 0.000000, 0.758267, 0.000000, -0.750219, 0.000000, -0.110185, -124.857193, 42.191422, -524.486755)
 metadata/coliziune = "trunk"
 
-[node name="tussockPortal197" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.819355, 0.000000, 0.296290, 0.000000, 0.871281, 0.000000, -0.296290, 0.000000, -0.819355, -126.411568, 42.655441, -517.776672)
-metadata/coliziune = "none"
+[node name="fagPortal195" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.734541, 0.000000, 0.412004, 0.000000, 0.842198, 0.000000, -0.412004, 0.000000, -0.734541, -124.887321, 42.192047, -524.462158)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal196" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.060484, 0.000000, -0.883595, 0.000000, 0.885663, 0.000000, 0.883595, 0.000000, -0.060484, -126.221741, 42.038635, -525.658875)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal197" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.740060, 0.000000, 0.578224, 0.000000, 0.939166, 0.000000, -0.578224, 0.000000, -0.740060, -125.495972, 42.199875, -523.964905)
+metadata/coliziune = "trunk"
 
 [node name="tussockPortal198" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(1.151763, 0.000000, -0.148651, 0.000000, 1.161316, 0.000000, 0.148651, 0.000000, 1.151763, -129.283768, 42.402405, -518.895874)
+transform = Transform3D(-0.044899, 0.000000, -1.138604, 0.000000, 1.139489, 0.000000, 1.138604, 0.000000, -0.044899, -144.680130, 42.269974, -508.292938)
 metadata/coliziune = "none"
 
-[node name="tussockPortal199" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.841518, 0.000000, 0.546770, 0.000000, 1.003549, 0.000000, -0.546770, 0.000000, -0.841518, -129.246384, 42.401993, -518.926514)
+[node name="ferigaPortal199" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.140046, 0.000000, 0.780248, 0.000000, 0.792717, 0.000000, -0.780248, 0.000000, -0.140046, -145.890656, 42.097382, -509.683563)
 metadata/coliziune = "none"
 
-[node name="ferigaPortal200" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.166476, 0.000000, -0.656563, 0.000000, 0.677340, 0.000000, 0.656563, 0.000000, 0.166476, -127.645531, 42.384171, -520.239014)
+[node name="tussockPortal200" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.245091, 0.000000, 1.032990, 0.000000, 1.061667, 0.000000, -1.032990, 0.000000, 0.245091, -144.527863, 42.273178, -508.417328)
 metadata/coliziune = "none"
 
 [node name="tussockPortal201" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-1.067308, 0.000000, -0.520626, 0.000000, 1.187518, 0.000000, 0.520626, 0.000000, -1.067308, -143.234940, 42.406372, -507.457703)
+transform = Transform3D(0.208772, 0.000000, 0.964252, 0.000000, 0.986594, 0.000000, -0.964252, 0.000000, 0.208772, -144.633453, 42.102982, -510.704681)
 metadata/coliziune = "none"
 
 [node name="ferigaPortal202" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.749096, 0.000000, -0.627340, 0.000000, 0.977088, 0.000000, 0.627340, 0.000000, -0.749096, -144.363953, 42.382736, -506.532043)
+transform = Transform3D(-0.565040, 0.000000, 0.204326, 0.000000, 0.600849, 0.000000, -0.204326, 0.000000, -0.565040, -144.432236, 42.381302, -506.476074)
 metadata/coliziune = "none"
 
-[node name="tussockPortal203" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.747060, 0.000000, 0.469933, 0.000000, 0.882573, 0.000000, -0.469933, 0.000000, -0.747060, -143.689774, 42.280914, -509.101990)
-metadata/coliziune = "none"
+[node name="fagPortal203" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.151714, 0.000000, 0.823548, 0.000000, 0.837406, 0.000000, -0.823548, 0.000000, 0.151714, -147.859512, 42.077408, -508.084442)
+metadata/coliziune = "trunk"
 
-[node name="ferigaPortal204" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.606746, 0.000000, -0.068561, 0.000000, 0.610607, 0.000000, 0.068561, 0.000000, 0.606746, -142.505539, 42.629364, -504.704620)
-metadata/coliziune = "none"
+[node name="fagPortal204" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.540128, 0.000000, -0.685789, 0.000000, 0.872951, 0.000000, 0.685789, 0.000000, -0.540128, -149.661682, 42.038040, -506.620697)
+metadata/coliziune = "trunk"
 
-[node name="tussockPortal205" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.392034, 0.000000, -0.887618, 0.000000, 0.970338, 0.000000, 0.887618, 0.000000, 0.392034, -142.469482, 42.422394, -508.085297)
-metadata/coliziune = "none"
+[node name="fagPortal205" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.492880, 0.000000, 0.601186, 0.000000, 0.777403, 0.000000, -0.601186, 0.000000, -0.492880, -150.395172, 42.021744, -506.024933)
+metadata/coliziune = "trunk"
 
-[node name="ferigaPortal206" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.494608, 0.000000, 0.342413, 0.000000, 0.601568, 0.000000, -0.342413, 0.000000, 0.494608, -144.450043, 42.380920, -506.461487)
-metadata/coliziune = "none"
+[node name="fagPortal206" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.531786, 0.000000, -0.631535, 0.000000, 0.825611, 0.000000, 0.631535, 0.000000, -0.531786, -145.587341, 42.357101, -505.529053)
+metadata/coliziune = "trunk"
 
 [node name="tussockPortal207" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.968066, 0.000000, 0.688104, 0.000000, 1.187703, 0.000000, -0.688104, 0.000000, 0.968066, -126.331924, 42.654617, -517.841370)
+transform = Transform3D(0.841987, 0.000000, -0.392582, 0.000000, 0.929012, 0.000000, 0.392582, 0.000000, 0.841987, -128.892166, 42.241653, -521.190491)
 metadata/coliziune = "none"
 
-[node name="tussockPortal208" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.034331, 0.000000, -0.975543, 0.000000, 0.976147, 0.000000, 0.975543, 0.000000, 0.034331, -127.055893, 42.662231, -517.253357)
+[node name="ferigaPortal208" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.528559, 0.000000, 0.735110, 0.000000, 0.905407, 0.000000, -0.735110, 0.000000, 0.528559, -129.515991, 42.249344, -520.680908)
 metadata/coliziune = "none"
 
-[node name="ferigaPortal209" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.282280, 0.000000, -0.633702, 0.000000, 0.693730, 0.000000, 0.633702, 0.000000, 0.282280, -126.033676, 42.651489, -518.083618)
+[node name="tussockPortal209" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.026718, 0.000000, 1.018037, 0.000000, 1.018388, 0.000000, -1.018037, 0.000000, 0.026718, -129.108368, 42.400452, -519.039673)
 metadata/coliziune = "none"
 
-[node name="tussockPortal210" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.045717, 0.000000, -0.910775, 0.000000, 0.911922, 0.000000, 0.910775, 0.000000, -0.045717, -141.462555, 42.654495, -505.551758)
+[node name="ferigaPortal210" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.888492, 0.000000, -0.180870, 0.000000, 0.906715, 0.000000, 0.180870, 0.000000, 0.888492, -129.140045, 42.244705, -520.987976)
 metadata/coliziune = "none"
 
 [node name="ferigaPortal211" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(1.008508, 0.000000, 0.108881, 0.000000, 1.014368, 0.000000, -0.108881, 0.000000, 1.008508, -141.184998, 42.661194, -505.777222)
+transform = Transform3D(-0.912842, 0.000000, -0.351503, 0.000000, 0.978180, 0.000000, 0.351503, 0.000000, -0.912842, -130.432358, 42.260605, -519.932251)
 metadata/coliziune = "none"
 
-[node name="tussockPortal212" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-1.012414, 0.000000, 0.186527, 0.000000, 1.029453, 0.000000, -0.186527, 0.000000, -1.012414, -140.193420, 42.897842, -503.268951)
-metadata/coliziune = "none"
+[node name="fagPortal212" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.429843, 0.000000, 0.663012, 0.000000, 0.790159, 0.000000, -0.663012, 0.000000, 0.429843, -125.489128, 42.199783, -523.970520)
+metadata/coliziune = "trunk"
 
-[node name="ferigaPortal213" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.738929, 0.000000, -0.008985, 0.000000, 0.738984, 0.000000, 0.008985, 0.000000, 0.738929, -144.672607, 42.376282, -506.278992)
-metadata/coliziune = "none"
+[node name="fagPortal213" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.765099, 0.000000, -0.383225, 0.000000, 0.855709, 0.000000, 0.383225, 0.000000, 0.765099, -124.347198, 42.332932, -522.943237)
+metadata/coliziune = "trunk"
 
-[node name="tussockPortal214" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.712693, 0.000000, 0.918058, 0.000000, 1.162223, 0.000000, -0.918058, 0.000000, -0.712693, -124.456764, 42.907410, -515.870178)
-metadata/coliziune = "none"
+[node name="fagPortal214" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.319744, 0.000000, 0.883584, 0.000000, 0.939657, 0.000000, -0.883584, 0.000000, 0.319744, -124.753471, 42.189362, -524.571472)
+metadata/coliziune = "trunk"
 
 [node name="tussockPortal215" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-1.163545, 0.000000, 0.410986, 0.000000, 1.233996, 0.000000, -0.410986, 0.000000, -1.163545, -124.556450, 42.911591, -515.790344)
+transform = Transform3D(-0.506395, 0.000000, -1.014699, 0.000000, 1.134041, 0.000000, 1.014699, 0.000000, -0.506395, -143.834900, 42.280319, -508.983429)
 metadata/coliziune = "none"
 
 [node name="ferigaPortal216" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.910185, 0.000000, -0.244915, 0.000000, 0.942560, 0.000000, 0.244915, 0.000000, 0.910185, -125.473358, 42.927673, -515.056152)
+transform = Transform3D(0.519675, 0.000000, 0.913331, 0.000000, 1.050826, 0.000000, -0.913331, 0.000000, 0.519675, -145.334335, 42.256165, -507.758514)
 metadata/coliziune = "none"
 
 [node name="tussockPortal217" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.457925, 0.000000, 0.995571, 0.000000, 1.095836, 0.000000, -0.995571, 0.000000, 0.457925, -138.563507, 43.040543, -502.649139)
+transform = Transform3D(-0.980590, 0.000000, 0.438475, 0.000000, 1.074159, 0.000000, -0.438475, 0.000000, -0.980590, -143.149460, 42.408173, -507.527771)
 metadata/coliziune = "none"
 
 [node name="ferigaPortal218" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.288211, 0.000000, -0.722409, 0.000000, 0.777780, 0.000000, 0.722409, 0.000000, -0.288211, -140.664108, 42.894821, -502.892059)
+transform = Transform3D(0.289558, 0.000000, 0.963809, 0.000000, 1.006365, 0.000000, -0.963809, 0.000000, 0.289558, -144.306442, 42.277878, -508.598236)
 metadata/coliziune = "none"
 
 [node name="tussockPortal219" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.553343, 0.000000, 0.753618, 0.000000, 0.934949, 0.000000, -0.753618, 0.000000, 0.553343, -140.075699, 42.898605, -503.363220)
+transform = Transform3D(0.217765, 0.000000, 1.188327, 0.000000, 1.208115, 0.000000, -1.188327, 0.000000, 0.217765, -145.022339, 42.262772, -508.013397)
 metadata/coliziune = "none"
 
 [node name="ferigaPortal220" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.675198, 0.000000, 0.266115, 0.000000, 0.725747, 0.000000, -0.266115, 0.000000, 0.675198, -141.343201, 42.657394, -505.648712)
+transform = Transform3D(0.667445, 0.000000, 0.107953, 0.000000, 0.676118, 0.000000, -0.107953, 0.000000, 0.667445, -144.653046, 42.270523, -508.315063)
 metadata/coliziune = "none"
 
-[node name="tussockPortal221" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.210979, 0.000000, -0.877948, 0.000000, 0.902942, 0.000000, 0.877948, 0.000000, 0.210979, -139.659256, 43.030304, -501.780243)
-metadata/coliziune = "none"
+[node name="fagPortal221" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.716383, 0.000000, -0.369287, 0.000000, 0.805964, 0.000000, 0.369287, 0.000000, 0.716383, -148.495743, 42.189499, -505.175903)
+metadata/coliziune = "trunk"
 
-[node name="ferigaPortal222" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.771306, 0.000000, -0.478031, 0.000000, 0.907429, 0.000000, 0.478031, 0.000000, -0.771306, -138.644943, 43.202469, -500.076538)
-metadata/coliziune = "none"
+[node name="fagPortal222" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.818041, 0.000000, -0.412926, 0.000000, 0.916351, 0.000000, 0.412926, 0.000000, -0.818041, -147.337921, 42.320465, -504.093781)
+metadata/coliziune = "trunk"
 
-[node name="ferigaPortal223" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.861121, 0.000000, -0.091539, 0.000000, 0.865973, 0.000000, 0.091539, 0.000000, -0.861121, -138.826920, 43.038071, -502.440277)
-metadata/coliziune = "none"
+[node name="fagPortal223" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.606669, 0.000000, 0.678325, 0.000000, 0.910040, 0.000000, -0.678325, 0.000000, 0.606669, -148.717224, 42.059036, -507.387787)
+metadata/coliziune = "trunk"
 
-[node name="ferigaPortal224" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.440546, 0.000000, 0.932765, 0.000000, 1.031568, 0.000000, -0.932765, 0.000000, 0.440546, -122.804947, 43.350342, -511.011902)
+[node name="tussockPortal224" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.734431, 0.000000, 0.703633, 0.000000, 1.017098, 0.000000, -0.703633, 0.000000, 0.734431, -129.937347, 42.254501, -520.336670)
 metadata/coliziune = "none"
 
 [node name="ferigaPortal225" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.680411, 0.000000, 0.303235, 0.000000, 0.744923, 0.000000, -0.303235, 0.000000, 0.680411, -138.893433, 43.189560, -499.873474)
+transform = Transform3D(0.766932, 0.000000, 0.512605, 0.000000, 0.922469, 0.000000, -0.512605, 0.000000, 0.766932, -128.261841, 42.391006, -519.733704)
 metadata/coliziune = "none"
 
 [node name="tussockPortal226" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.944724, 0.000000, -0.734501, 0.000000, 1.196660, 0.000000, 0.734501, 0.000000, -0.944724, -133.387497, 43.831299, -496.767120)
+transform = Transform3D(-1.118082, 0.000000, 0.407045, 0.000000, 1.189872, 0.000000, -0.407045, 0.000000, -1.118082, -127.514236, 42.667053, -516.881042)
 metadata/coliziune = "none"
 
 [node name="ferigaPortal227" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(0.555702, 0.000000, -0.824045, 0.000000, 0.993909, 0.000000, 0.824045, 0.000000, 0.555702, -134.840439, 43.738754, -495.628082)
+transform = Transform3D(-0.593146, 0.000000, -0.442523, 0.000000, 0.740032, 0.000000, 0.442523, 0.000000, -0.593146, -127.561676, 42.667542, -516.842529)
 metadata/coliziune = "none"
+
+[node name="tussockPortal228" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.574883, 0.000000, -0.854026, 0.000000, 1.029490, 0.000000, 0.854026, 0.000000, -0.574883, -128.185822, 42.390167, -519.796021)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal229" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.838208, 0.000000, -0.401142, 0.000000, 0.929250, 0.000000, 0.401142, 0.000000, -0.838208, -128.887665, 42.398010, -519.220642)
+metadata/coliziune = "none"
+
+[node name="fagPortal230" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.303381, 0.000000, -0.760434, 0.000000, 0.818719, 0.000000, 0.760434, 0.000000, -0.303381, -124.882713, 42.352478, -522.504150)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal231" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.382359, 0.000000, -0.720281, 0.000000, 0.815477, 0.000000, 0.720281, 0.000000, 0.382359, -123.904137, 42.316772, -523.306458)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal232" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.432029, 0.000000, -0.644854, 0.000000, 0.776200, 0.000000, 0.644854, 0.000000, -0.432029, -124.077293, 42.609573, -519.672668)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal233" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.989609, 0.000000, 0.378785, 0.000000, 1.059625, 0.000000, -0.378785, 0.000000, -0.989609, -142.098633, 42.639191, -505.035126)
+metadata/coliziune = "none"
+
+[node name="tussockPortal234" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.935657, 0.000000, -0.341922, 0.000000, 0.996175, 0.000000, 0.341922, 0.000000, -0.935657, -142.407028, 42.631760, -504.784637)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal235" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.557506, 0.000000, -0.692722, 0.000000, 0.889200, 0.000000, 0.692722, 0.000000, -0.557506, -143.201553, 42.407074, -507.485077)
+metadata/coliziune = "none"
+
+[node name="fagPortal236" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.570695, 0.000000, 0.561813, 0.000000, 0.800829, 0.000000, -0.561813, 0.000000, -0.570695, -149.460358, 42.168442, -504.387878)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal237" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.783134, 0.000000, -0.083249, 0.000000, 0.787547, 0.000000, 0.083249, 0.000000, -0.783134, -146.023010, 42.348007, -505.171844)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal238" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.653354, 0.000000, -0.584052, 0.000000, 0.876349, 0.000000, 0.584052, 0.000000, 0.653354, -148.685120, 42.185471, -505.021179)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal239" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.801738, 0.000000, -0.312671, 0.000000, 0.860551, 0.000000, 0.312671, 0.000000, -0.801738, -146.516190, 42.532700, -501.447052)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal240" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.909943, 0.000000, -0.708775, 0.000000, 1.153412, 0.000000, 0.708775, 0.000000, 0.909943, -127.923996, 42.671341, -516.548218)
+metadata/coliziune = "none"
+
+[node name="tussockPortal241" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.605254, 0.000000, -0.906266, 0.000000, 1.089794, 0.000000, 0.906266, 0.000000, -0.605254, -128.762192, 42.396606, -519.323486)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal242" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.820938, 0.000000, -0.454125, 0.000000, 0.938173, 0.000000, 0.454125, 0.000000, -0.820938, -126.742592, 42.658936, -517.507813)
+metadata/coliziune = "none"
+
+[node name="fagPortal243" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.763595, 0.000000, 0.409789, 0.000000, 0.866605, 0.000000, -0.409789, 0.000000, 0.763595, -122.610229, 42.835526, -517.348816)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal244" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.686170, 0.000000, -0.561403, 0.000000, 0.886567, 0.000000, 0.561403, 0.000000, 0.686170, -120.853119, 42.771896, -518.755859)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal245" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.213798, 0.000000, 0.760739, 0.000000, 0.790211, 0.000000, -0.760739, 0.000000, 0.213798, -124.682037, 42.345123, -522.668701)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal246" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.890750, 0.000000, -0.513701, 0.000000, 1.028263, 0.000000, 0.513701, 0.000000, -0.890750, -142.845779, 42.414505, -507.776764)
+metadata/coliziune = "none"
+
+[node name="tussockPortal247" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.866357, 0.000000, 0.359702, 0.000000, 0.938062, 0.000000, -0.359702, 0.000000, -0.866357, -142.372391, 42.632584, -504.812775)
+metadata/coliziune = "none"
+
+[node name="fagPortal248" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.893682, 0.000000, -0.103335, 0.000000, 0.899637, 0.000000, 0.103335, 0.000000, -0.893682, -145.429321, 42.558914, -502.329834)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal249" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.747008, 0.000000, -0.480418, 0.000000, 0.888157, 0.000000, 0.480418, 0.000000, -0.747008, -144.902054, 42.745636, -499.498474)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal250" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.645172, 0.000000, 0.796444, 0.000000, 1.024973, 0.000000, -0.796444, 0.000000, -0.645172, -126.072922, 42.928421, -514.576050)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal251" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.960661, 0.000000, -0.180632, 0.000000, 0.977495, 0.000000, 0.180632, 0.000000, -0.960661, -126.879776, 42.660400, -517.396423)
+metadata/coliziune = "none"
+
+[node name="tussockPortal252" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.289707, 0.000000, -1.058113, 0.000000, 1.097056, 0.000000, 1.058113, 0.000000, 0.289707, -127.620613, 42.668152, -516.794678)
+metadata/coliziune = "none"
+
+[node name="fagPortal253" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.263738, 0.000000, -0.736475, 0.000000, 0.782275, 0.000000, 0.736475, 0.000000, -0.263738, -122.417404, 42.828552, -517.503235)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal254" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.848657, 0.000000, 0.062358, 0.000000, 0.850945, 0.000000, -0.062358, 0.000000, -0.848657, -122.290611, 42.545563, -521.123901)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal255" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.622529, 0.000000, -0.502368, 0.000000, 0.799948, 0.000000, 0.502368, 0.000000, -0.622529, -119.705688, 42.886612, -517.603027)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal256" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.019647, 0.000000, -0.936612, 0.000000, 0.936818, 0.000000, 0.936612, 0.000000, 0.019647, -140.588455, 42.672791, -506.261749)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal257" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(1.075275, 0.000000, 0.137745, 0.000000, 1.084061, 0.000000, -0.137745, 0.000000, 1.075275, -142.031906, 42.640778, -505.089325)
+metadata/coliziune = "none"
+
+[node name="tussockPortal258" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.737308, 0.000000, 0.476244, 0.000000, 0.877742, 0.000000, -0.476244, 0.000000, -0.737308, -142.394547, 42.632034, -504.794769)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal259" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.631367, 0.000000, 0.252085, 0.000000, 0.679831, 0.000000, -0.252085, 0.000000, -0.631367, -141.012726, 42.887543, -502.612885)
+metadata/coliziune = "none"
+
+[node name="fagPortal260" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.562729, 0.000000, 0.529405, 0.000000, 0.772615, 0.000000, -0.529405, 0.000000, 0.562729, -145.091507, 42.567047, -502.604218)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal261" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.700525, 0.000000, -0.426067, 0.000000, 0.819920, 0.000000, 0.426067, 0.000000, -0.700525, -146.205933, 42.344162, -505.021881)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal262" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.637338, 0.000000, 0.465979, 0.000000, 0.789516, 0.000000, -0.465979, 0.000000, -0.637338, -145.255341, 42.726318, -499.215576)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal263" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.275573, 0.000000, -1.063849, 0.000000, 1.098961, 0.000000, 1.063849, 0.000000, 0.275573, -125.723213, 42.927948, -514.856079)
+metadata/coliziune = "none"
+
+[node name="tussockPortal264" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(1.015879, 0.000000, -0.129970, 0.000000, 1.024160, 0.000000, 0.129970, 0.000000, 1.015879, -125.436005, 43.095795, -513.059021)
+metadata/coliziune = "none"
+
+[node name="fagPortal265" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.855471, 0.000000, -0.001848, 0.000000, 0.855473, 0.000000, 0.001848, 0.000000, -0.855471, -120.907822, 42.773895, -518.712036)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal266" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.791336, 0.000000, 0.402408, 0.000000, 0.887776, 0.000000, -0.402408, 0.000000, 0.791336, -120.407997, 42.755798, -519.112305)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal267" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.633746, 0.000000, 0.772969, 0.000000, 0.999557, 0.000000, -0.772969, 0.000000, -0.633746, -140.711990, 42.672089, -506.161407)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal268" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.599370, 0.000000, 0.429902, 0.000000, 0.737604, 0.000000, -0.429902, 0.000000, 0.599370, -140.617706, 42.895126, -502.929199)
+metadata/coliziune = "none"
+
+[node name="fagPortal269" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.324747, 0.000000, 0.789378, 0.000000, 0.853568, 0.000000, -0.789378, 0.000000, -0.324747, -143.713409, 42.867233, -498.565369)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal270" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.413352, 0.000000, 0.711821, 0.000000, 0.823134, 0.000000, -0.711821, 0.000000, -0.413352, -144.387192, 42.584030, -503.176300)
+metadata/coliziune = "trunk"
+
+[node name="ferigaPortal271" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.593191, 0.000000, 0.371714, 0.000000, 0.700033, 0.000000, -0.371714, 0.000000, -0.593191, -123.670815, 43.043488, -514.458801)
+metadata/coliziune = "none"
+
+[node name="tussockPortal272" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.902614, 0.000000, -0.064181, 0.000000, 0.904893, 0.000000, 0.064181, 0.000000, 0.902614, -124.173454, 43.064392, -514.060181)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal273" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.681672, 0.000000, -0.266586, 0.000000, 0.731945, 0.000000, 0.266586, 0.000000, 0.681672, -122.725365, 43.180222, -513.085938)
+metadata/coliziune = "none"
+
+[node name="fagPortal274" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.088227, 0.000000, -0.764443, 0.000000, 0.769518, 0.000000, 0.764443, 0.000000, -0.088227, -118.650444, 43.002533, -516.415955)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal275" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.849690, 0.000000, -0.179049, 0.000000, 0.868350, 0.000000, 0.179049, 0.000000, -0.849690, -119.691437, 43.047928, -515.565247)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal276" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.222607, 0.000000, 1.012068, 0.000000, 1.036261, 0.000000, -1.012068, 0.000000, 0.222607, -139.357147, 43.033127, -502.019806)
+metadata/coliziune = "none"
+
+[node name="tussockPortal277" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.619056, 0.000000, -0.905197, 0.000000, 1.096637, 0.000000, 0.905197, 0.000000, 0.619056, -139.774734, 43.029343, -501.688660)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal278" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.648925, 0.000000, 0.381501, 0.000000, 0.752760, 0.000000, -0.381501, 0.000000, -0.648925, -137.168274, 43.248154, -501.283264)
+metadata/coliziune = "none"
+
+[node name="fagPortal279" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.356064, 0.000000, -0.811139, 0.000000, 0.885849, 0.000000, 0.811139, 0.000000, 0.356064, -144.289429, 42.779129, -499.989044)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal280" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.516191, 0.000000, 0.763032, 0.000000, 0.921234, 0.000000, -0.763032, 0.000000, -0.516191, -142.516754, 42.932922, -499.514313)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal281" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(-0.801967, 0.000000, 0.269182, 0.000000, 0.845937, 0.000000, -0.269182, 0.000000, -0.801967, -140.668060, 43.097351, -498.423279)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal282" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(1.008341, 0.000000, -0.278756, 0.000000, 1.046163, 0.000000, 0.278756, 0.000000, 1.008341, -122.882339, 43.354065, -510.944702)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal283" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.773789, 0.000000, -0.624349, 0.000000, 0.994264, 0.000000, 0.624349, 0.000000, 0.773789, -123.342155, 43.207138, -512.581909)
+metadata/coliziune = "none"
+
+[node name="tussockPortal284" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(0.057184, 0.000000, 1.089480, 0.000000, 1.090979, 0.000000, -1.089480, 0.000000, 0.057184, -123.490608, 43.213593, -512.460632)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal285" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.426649, 0.000000, -0.817183, 0.000000, 0.921855, 0.000000, 0.817183, 0.000000, 0.426649, -122.072388, 43.151764, -513.619568)
+metadata/coliziune = "none"
+
+[node name="fagPortal286" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(0.855666, 0.000000, -0.212427, 0.000000, 0.881640, 0.000000, 0.212427, 0.000000, 0.855666, -118.776489, 43.163849, -514.509949)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal287" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.788315, 0.000000, -0.061861, 0.000000, 0.790738, 0.000000, 0.061861, 0.000000, -0.788315, -119.515572, 43.040268, -515.708984)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal288" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.406582, 0.000000, -0.884012, 0.000000, 0.973029, 0.000000, 0.884012, 0.000000, -0.406582, -118.856674, 43.011536, -516.247437)
+metadata/coliziune = "trunk"
+
+[node name="tussockPortal289" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(1.095701, 0.000000, 0.453657, 0.000000, 1.185902, 0.000000, -0.453657, 0.000000, 1.095701, -138.280609, 43.221405, -500.374268)
+metadata/coliziune = "none"
+
+[node name="ferigaPortal290" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(0.327817, 0.000000, 0.545820, 0.000000, 0.636697, 0.000000, -0.545820, 0.000000, 0.327817, -139.098877, 43.178879, -499.705597)
+metadata/coliziune = "none"
+
+[node name="tussockPortal291" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_tussock_clump")]
+transform = Transform3D(-0.066300, 0.000000, 0.963808, 0.000000, 0.966085, 0.000000, -0.963808, 0.000000, -0.066300, -136.523621, 43.378296, -499.099487)
+metadata/coliziune = "none"
+
+[node name="fagPortal292" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_b")]
+transform = Transform3D(0.764431, 0.000000, -0.408218, 0.000000, 0.866600, 0.000000, 0.408218, 0.000000, 0.764431, -143.517868, 42.877960, -498.720428)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal293" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.626058, 0.000000, 0.557691, 0.000000, 0.838432, 0.000000, -0.557691, 0.000000, 0.626058, -140.791092, 43.161774, -495.393890)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal294" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(0.543566, 0.000000, -0.592974, 0.000000, 0.804414, 0.000000, 0.592974, 0.000000, 0.543566, -141.645752, 43.117447, -494.651764)
+metadata/coliziune = "trunk"
+
+[node name="ferigaPortal295" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.824089, 0.000000, -0.631581, 0.000000, 1.038276, 0.000000, 0.631581, 0.000000, -0.824089, -121.178864, 43.272568, -512.423889)
+metadata/coliziune = "none"
+
+[node name="fagPortal296" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.133030, 0.000000, -0.780688, 0.000000, 0.791941, 0.000000, 0.780688, 0.000000, -0.133030, -117.622467, 43.112305, -515.512024)
+metadata/coliziune = "trunk"
+
+[node name="ferigaPortal297" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_fern_cluster")]
+transform = Transform3D(-0.593120, 0.000000, 0.663373, 0.000000, 0.889862, 0.000000, -0.663373, 0.000000, -0.593120, -137.040375, 43.352081, -498.650757)
+metadata/coliziune = "none"
+
+[node name="fagPortal298" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_c")]
+transform = Transform3D(-0.865063, 0.000000, -0.235741, 0.000000, 0.896609, 0.000000, 0.235741, 0.000000, -0.865063, -139.576141, 43.223450, -496.448853)
+metadata/coliziune = "trunk"
+
+[node name="fagPortal299" parent="DecorManual/ZoneE_Portal" instance=ExtResource("s_beech_a")]
+transform = Transform3D(-0.878472, 0.000000, 0.204877, 0.000000, 0.902046, 0.000000, -0.204877, 0.000000, -0.878472, -139.316177, 43.292755, -494.355774)
+metadata/coliziune = "trunk"
 
 
 [node name="ZoneF_Coborare" type="Node3D" parent="DecorManual"]

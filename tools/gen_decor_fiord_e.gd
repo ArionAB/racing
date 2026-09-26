@@ -162,14 +162,23 @@ const EDGE_KEEP := 1.0
 const PORTAL_NO_COLLISION_FRAC := 0.010   # ~21,6 m pe 2159 m de tur
 
 ## RUNDA 2 (verdict critic): "iarba goala 0-15 m de gura, fara copaci".
-## PORTAL_NO_COLLISION_FRAC (21,6 m) e corect pentru coliziune (aripile-palnie
-## se intind doar 14,3 m din capac), dar `_forest_thinning` folosea ACELASI
-## prag drept opritor pentru TOT decorul, deci si piesele `none` (fara
-## coliziune, nu pot ejecta autocarul) se opreau cu 21,6 m inainte de portal —
-## de-aici banda goala vazuta de critic. Piesele `none` (tussock/fern/
-## snow_pole) si fagii `trunk` cu trunchi departe de banda pot continua mult
-## mai aproape de capac; opritorul lor e F_PORTAL minus o franjă minima, ca in
-## nota coordonatorului ("ultimii ~5 m goi").
+## PORTAL_NO_COLLISION_FRAC (21,6 m) e corect ca REGULA IMPLICITA (piese langa
+## ax, gap mic — grohotis/parapetStanca), dar e o interdictie pe FRACTIE, oarba
+## la distanta laterala reala. Aripile-palnie (cod, Track._build_tunnels/
+## _tun_frame) exista doar pe TUNNEL_WING_LEN_M = 14,0 m din capac
+## (TUNNEL_CAP_PUSH_M 0,3 inainte de gol), largindu-se de la semilatimea
+## tubului (4,5) la +TUNNEL_WING_SPREAD_M (3,5) = 8,0 m la capatul lor. O
+## piesa cu trunchi la 12+ m de ax (fag cu gap 5-9 m) e sigur DINCOLO de aripa
+## chiar langa capac, deci n-are motiv sa fie refuzata doar fiindca fractia e
+## peste prag. `PORTAL_WING_CLEAR_M` e distanta laterala minima (de la ax)
+## sub care se aplica interdictia stricta pe fractie; peste ea, un `trunk`
+## bine departat trece (verificat: aripa max 8,0 m + marja).
+const PORTAL_WING_CLEAR_M := 10.0
+
+## Piesele `none` (tussock/fern/snow_pole) si fagii `trunk` cu trunchi departe
+## de banda pot continua mult mai aproape de capac decat PORTAL_NO_COLLISION_FRAC;
+## opritorul lor e F_PORTAL minus o franjă minima, ca in nota coordonatorului
+## ("ultimii ~5 m goi").
 const PORTAL_NONE_STOP_FRAC := 0.0023      # ~5 m pe 2159 m — franjul cerut de critic
 
 var _track: Track
@@ -416,7 +425,7 @@ func _portal_fringe(f_stop: float) -> void:
 		# de tunel, deci pasul ramane sub-2 m pana tarziu si creste doar in
 		# ultimii metri (runda 1 avea pas 4-14 m, prea rar pentru un span de
 		# 16,6 m — 3 iteratii cu roluri de probabilitate ieseau aproape goale).
-		var step_m: float = lerpf(1.3, 4.5, t)
+		var step_m: float = lerpf(0.9, 3.2, t)
 		var i := int(f * float(n)) % n
 		for sgn in [-1.0, 1.0]:
 			# Ciorchini, nu instante izolate (aranjamentul-bate-numarul): 1-3
@@ -442,12 +451,14 @@ func _portal_fringe(f_stop: float) -> void:
 			# 3-4 iteratii, e prea putin pentru un ciorchine vizibil. Acum:
 			# 2-3 fagi garantati per pas per parte la coada (t mic), scazand
 			# la 0-1 spre portal (t mare) — densitatea descrescatoare ceruta.
-			var tree_cnt: int = 1 + int(round(lerpf(2.0, 0.0, t)))
+			var tree_cnt: int = 2 + int(round(lerpf(2.0, 0.0, t)))
 			for tc in tree_cnt:
-				if _rng.randf() < lerpf(1.0, 0.4, t):
-					var mdl := "beech_a" if _rng.randf() < 0.6 else "beech_b"
-					var h: float = _rng.randf_range(5.5, 7.0) if mdl == "beech_a" \
-						else _rng.randf_range(7.5, 9.5)
+				if _rng.randf() < lerpf(1.0, 0.45, t):
+					var mdl := "beech_c" if _rng.randf() < 0.3 else \
+						("beech_a" if _rng.randf() < 0.6 else "beech_b")
+					var h: float = _rng.randf_range(10.0, 12.5) if mdl == "beech_c" else (
+						_rng.randf_range(5.5, 7.0) if mdl == "beech_a"
+						else _rng.randf_range(7.5, 9.5))
 					_place(mdl, "fagPortal",
 						f + _step(_rng.randf_range(-2.5, 2.5)), sgn,
 						_rng.randf_range(5.0, 9.0), _rng.randf_range(0.0, TAU),
@@ -516,10 +527,15 @@ func _place(model: String, base: String, frac: float, side_sign: float,
 		_warn += 1
 		print("; ATENTIE silueta %s la frac %.4f ajunge la %.2f m de ax (banda %.2f)" % [
 			model, frac, d - cr, half])
-	# Portalul: nimic cu coliziune in fasia finala (aripile-palnie, cod).
+	# Portalul: nimic cu coliziune in fasia finala (aripile-palnie, cod) —
+	# CU EXCEPTIA pieselor masurat departe de ax (d - r >= PORTAL_WING_CLEAR_M,
+	# adica dincolo de aripa reala de 8,0 m + marja), care pot continua pana
+	# aproape de capac (runda 2, verdict critic: "padure pana aproape de
+	# tunel"). Sub acel prag lateral, interdictia pe fractie ramane absoluta.
 	if mode != "none" and fw >= F_PORTAL - PORTAL_NO_COLLISION_FRAC:
-		_skipped += 1
-		return
+		if fw >= F_PORTAL or d - r < PORTAL_WING_CLEAR_M:
+			_skipped += 1
+			return
 	if mode != "none" and _on_any_road(q, i, r):
 		_skipped += 1
 		return

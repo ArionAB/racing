@@ -9874,10 +9874,19 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 ## doua fete raza numara par, iar inaltimea libera se citeste din fata de JOS.
 ##
 ## Materiale: peretii, tavanul si movila pe clasa triplanara EXISTENTA
-## `alpine_granite` (granit gri — Homer e sapat in granit nesapat, brief §2;
-## `wet_gneiss` din brief nu exista inca in `Palette`, si un tunel nu justifica
-## o clasa noua); portalurile pe CONCRETE, ca parapetul de tablier. Doua
-## materiale, amandoua deja in bugetul de clasa.
+## `wet_gneiss` (aceeasi dala ca `alpine_granite`, doar tentata rece/inchisa —
+## `Palette.CLASS_TINT["wet_gneiss"] = (0.40, 0.40, 0.42)`); portalurile pe
+## CONCRETE, ca parapetul de tablier. Doua materiale, amandoua deja in
+## bugetul de clasa.
+##
+## [b]De ce nu `alpine_granite` direct (cum era pana la fixul movilei bej,
+## sep 2026).[/b] `alpine_granite` n-are CLASS_TINT: randeaza dala BRUTA, calda
+## (corecta pe Alpi, in soare, langa zapada). Fara tentare, movila tunelului
+## Homer iesea bej cu aspect de zidarie in loc de granit gol — pe o pista unde
+## TOATE celelalte stanci (`stirling_ledge.Wall`, `torrent_chute.Rock`,
+## `chasm_rock.Rock_001` prin `WorldProp.CLASSES_BY_THEME["fiordland"]`) sunt
+## deja pe `wet_gneiss`. Aceeasi dala, acelasi cost de material (0 in plus),
+## doar clasa corecta pentru tema.
 
 ## Cat trece capacul portalului dincolo de primul / ultimul punct copt al
 ## intervalului (m). Punctele coapte sunt exact statiile la care ProbeBuried
@@ -10078,7 +10087,7 @@ func _build_tunnel(spec: Vector4) -> void:
 	rock.generate_normals()
 	_add_mesh_with_collision(rock.commit(), Color.WHITE, null, 0.9, 0.5,
 		BaseMaterial3D.CULL_DISABLED, null, null, true,
-		Palette.triplanar_class_material("alpine_granite"), "TunnelBore")
+		Palette.triplanar_class_material("wet_gneiss"), "TunnelBore")
 	concrete.generate_normals()
 	_add_mesh_with_collision(concrete.commit(), Palette.color(Palette.CONCRETE),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,

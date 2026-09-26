@@ -36,8 +36,19 @@ extends Node3D
 ## podetul/pontonul din paleta (§4 randul "podetul, balustradele, pontonul").
 ## Raul foloseste `FOAM_WHITE` (22), slotul lui FoamPool/WaterfallVisual.
 const WOOD_SLOT: int = 9   # Palette.WOOD_WEATHERED
-## Cat de sus deasupra suprafetei de sub ea sta fasia — peste orice decal
-## existent (linia de mijloc 0.045, marcaje 0.03-0.038), sub balustrada.
+## Cat de sus deasupra suprafetei de sub ea sta fasia (implicit; Track16.tscn
+## suprascrie cu `lift` — vezi mai jos DE CE.
+##
+## MASURAT (capturi --gamecam la frac 0.415, 26 sep): sub ~0.3 m tabliera nu
+## se vede DELOC de la camera de joc — asfaltul ramane vizibil pe toata
+## latimea, desi geometria (verificata cu AABB si raycast pe RoadTop) arata
+## tabliera corect asezata DEASUPRA asfaltului. La 0.4 m tabliera acopera tot
+## drumul, cu textura de scandura clar vizibila. Nu s-a gasit cauza exacta
+## (suspect: umbra proprie a soselei/normal bias la unghiul razant al camerei
+## de urmarire, nu z-fighting clasic — offsetul e prea mare pentru asta), dar
+## pragul e reproductibil (0.06/0.18/0.28 invizibile, 0.4/0.6 vizibile). Daca
+## refolosesti clasa asta pe alta suprafata, VERIFICA cu o captura, nu
+## presupune ca liftul mic ajunge.
 const DECK_LIFT: float = 0.06
 ## Grosimea vizuala a fasiei (fata de sus la DECK_LIFT, talpa mai jos).
 const DECK_THICK: float = 0.12

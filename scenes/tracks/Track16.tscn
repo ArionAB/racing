@@ -6096,9 +6096,11 @@ transform = Transform3D(0.6078, 0.0400, -0.7931, -0.0000, 0.9987, 0.0503, 0.7941
 
 [node name="TabliereChasm" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
 script = ExtResource("6c_deck")
-points = Array[Vector3]([Vector3(-516.73, 18.43, -581.11), Vector3(-508.56, 17.82, -589.66), Vector3(-494.9727, 17.29738, -596.7404), Vector3(-484.1316, 16.89582, -601.8969)])
-sides = Array[Vector3]([Vector3(0.816824, 0.0, 0.576887), Vector3(0.582487, 0.0, 0.81284), Vector3(0.430839, 0.0, 0.902429), Vector3(0.434708, 0.0, 0.900571)])
-half_widths = Array[float]([6.5, 6.5, 6.5, 5.511])
+points = Array[Vector3]([Vector3(-518.4822, 18.6323, -578.3063), Vector3(-517.7124, 18.5371, -579.6233), Vector3(-516.7300, 18.4300, -581.1100), Vector3(-515.6992, 18.3252, -582.5695), Vector3(-514.7861, 18.2372, -583.8007), Vector3(-513.0831, 18.0945, -585.8115), Vector3(-511.1610, 17.9670, -587.6091), Vector3(-509.9741, 17.8981, -588.5737), Vector3(-508.5600, 17.8200, -589.6600), Vector3(-507.1142, 17.7453, -590.6960), Vector3(-505.8287, 17.6863, -591.5123), Vector3(-503.4886, 17.5977, -592.7322), Vector3(-501.0392, 17.5177, -593.8135), Vector3(-499.6171, 17.4696, -594.4565), Vector3(-497.9800, 17.4100, -595.2500), Vector3(-496.3586, 17.3490, -596.0602), Vector3(-494.9727, 17.2974, -596.7404), Vector3(-492.5898, 17.2100, -597.8780), Vector3(-490.1970, 17.1226, -598.9991), Vector3(-488.7987, 17.0710, -599.6586), Vector3(-487.1600, 17.0100, -600.4400), Vector3(-485.5238, 16.9485, -601.2261), Vector3(-484.1316, 16.8958, -601.8969), Vector3(-481.7533, 16.8050, -603.0449), Vector3(-479.3733, 16.7142, -604.1880)])
+sides = Array[Vector3]([Vector3(0.8633, 0.0, 0.5046), Vector3(0.8343, 0.0, 0.5513), Vector3(0.8168, 0.0, 0.5769), Vector3(0.8032, 0.0, 0.5957), Vector3(0.7631, 0.0, 0.6463), Vector3(0.6831, 0.0, 0.7304), Vector3(0.6307, 0.0, 0.7760), Vector3(0.6092, 0.0, 0.7930), Vector3(0.5825, 0.0, 0.8128), Vector3(0.5360, 0.0, 0.8442), Vector3(0.4623, 0.0, 0.8867), Vector3(0.4039, 0.0, 0.9148), Vector3(0.4120, 0.0, 0.9112), Vector3(0.4362, 0.0, 0.8999), Vector3(0.4470, 0.0, 0.8945), Vector3(0.4405, 0.0, 0.8977), Vector3(0.4308, 0.0, 0.9024), Vector3(0.4243, 0.0, 0.9055), Vector3(0.4266, 0.0, 0.9045), Vector3(0.4304, 0.0, 0.9026), Vector3(0.4330, 0.0, 0.9014), Vector3(0.4341, 0.0, 0.9009), Vector3(0.4347, 0.0, 0.9006), Vector3(0.4329, 0.0, 0.9014), Vector3(0.4303, 0.0, 0.9027)])
+half_widths = Array[float]([6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.511, 5.546, 5.6])
+lift = 0.4
+thickness = 0.35
 
 [node name="RauCleddau" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
 script = ExtResource("6c_deck")
@@ -6106,36 +6108,71 @@ points = Array[Vector3]([Vector3(-548.411, 11.004, -584.782), Vector3(-537.679, 
 sides = Array[Vector3]([Vector3(0.9258, 0.0, 0.3780), Vector3(0.7631, 0.0, 0.6463), Vector3(0.4623, 0.0, 0.8867), Vector3(0.4308, 0.0, 0.9024), Vector3(0.4347, 0.0, 0.9006), Vector3(0.4835, 0.0, 0.8754)])
 half_widths = Array[float]([4.5, 4.5, 4.5, 4.5, 4.5, 4.5])
 slot = 22
-lift = 0.15
+lift = 0.4
 thickness = 0.3
 
 [node name="RauSpuma1" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -537.679, 10.272, -603.189)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -548.411, 11.154, -584.782)
 script = ExtResource("9_foam_pool")
-patch_count = 9
-radius = 3.2
-rng_seed = 160401
+patch_count = 12
+radius = 4.2
+rng_seed = 160400
 
 [node name="RauSpuma2" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -519.697, 9.532, -618.115)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -537.679, 10.272, -603.189)
 script = ExtResource("9_foam_pool")
-patch_count = 9
-radius = 3.2
-rng_seed = 160402
+patch_count = 12
+radius = 4.2
+rng_seed = 160401
 
 [node name="RauSpuma3" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -507.898, 9.153, -623.813)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -528.5, 9.9, -610.5)
 script = ExtResource("9_foam_pool")
-patch_count = 9
-radius = 3.2
-rng_seed = 160403
+patch_count = 12
+radius = 4.2
+rng_seed = 160450
 
 [node name="RauSpuma4" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -519.697, 9.532, -618.115)
+script = ExtResource("9_foam_pool")
+patch_count = 12
+radius = 4.2
+rng_seed = 160402
+
+[node name="RauSpuma5" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -513.8, 9.27, -621.0)
+script = ExtResource("9_foam_pool")
+patch_count = 12
+radius = 4.2
+rng_seed = 160460
+
+[node name="RauSpuma6" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -507.898, 9.153, -623.813)
+script = ExtResource("9_foam_pool")
+patch_count = 12
+radius = 4.2
+rng_seed = 160403
+
+[node name="RauSpuma7" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -502.5, 9.0, -626.5)
+script = ExtResource("9_foam_pool")
+patch_count = 12
+radius = 4.2
+rng_seed = 160470
+
+[node name="RauSpuma8" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -497.173, 8.824, -628.914)
 script = ExtResource("9_foam_pool")
-patch_count = 9
-radius = 3.2
+patch_count = 12
+radius = 4.2
 rng_seed = 160404
+
+[node name="RauSpuma9" type="Node3D" parent="DecorManual/ZoneD_Chasm"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -487.834, 10.751, -633.43)
+script = ExtResource("9_foam_pool")
+patch_count = 12
+radius = 4.2
+rng_seed = 160480
 
 [node name="chasmBridgeRail1" parent="DecorManual/ZoneD_Chasm" instance=ExtResource("s_chasm_bridge_rail")]
 transform = Transform3D(-0.554382, 0.032857, 0.831614, 0.000000, 0.999220, -0.039480, -0.832262, -0.021887, -0.553950, -501.126900, 17.709265, -591.503450)

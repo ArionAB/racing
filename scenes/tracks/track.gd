@@ -242,8 +242,9 @@ var theme_glow: bool = true
 ## ~110 m — exact banda in care chase cam-ul le vede cel mai des — nu aruncau
 ## nimic si pareau lipite pe fundal, iar ceata abia incepe acolo (~20% la
 ## 110 m). Rezolutia pe metru scade cu ~18%; shadow_blur-ul de mai jos o
-## acopera. NU se adauga a doua cascada: ar dubla draw call-urile de umbra
-## ale intregii scene.
+## acopera. (Pana in sep 2026 scria aici ca a doua cascada "ar dubla draw
+## call-urile de umbra ale intregii scene" — masurat, nu: vezi
+## `shadow_splits` in _build_environment.)
 const SHADOW_DISTANCE: float = 110.0
 
 ## Rotatia soarelui (elevatie 42°, azimut 315° — style_bible §5). Constanta,
@@ -4523,8 +4524,25 @@ func _build_environment() -> void:
 	# stinge de acolo si AO-ul copt ramane singura sursa de volum.
 	sun.shadow_enabled = theme_shadows
 	if theme_shadows:
-		sun.directional_shadow_mode = \
-			DirectionalLight3D.SHADOW_ORTHOGONAL
+		# DOUA CASCADE (sep 2026, planul de grafica pe mobil). Comentariul de
+		# la SHADOW_DISTANCE spunea ca a doua cascada "ar dubla draw call-urile
+		# de umbra ale intregii scene"; masurat cu ProbePerf, nu e asa: felia
+		# apropiata (primii ~15% din 110 m) contine doar casterii de langa
+		# masina, deci cateva zeci de desene, nu inca o scena. In schimb harta
+		# de umbra din jurul masinii — unde se uita ochiul, si unde vine
+		# contactul rotilor cu solul — capata de ~6 ori mai multi texeli pe
+		# metru. `blend_splits` topeste granita dintre felii, altfel s-ar
+		# vedea o linie unde rezolutia se schimba. Cheia `shadow_splits` a
+		# temei poate cere 1 (vechea purtare) daca o pista anume o cere.
+		if int(theme_flag("shadow_splits", 2)) >= 2:
+			sun.directional_shadow_mode = \
+				DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+			sun.directional_shadow_split_1 = float(
+				theme_flag("shadow_split_1", 0.15))
+			sun.directional_shadow_blend_splits = true
+		else:
+			sun.directional_shadow_mode = \
+				DirectionalLight3D.SHADOW_ORTHOGONAL
 		# Cheia de tema `shadow_distance` era SCRISA in trei teme si nu se
 		# citea niciodata (POI B, runda 6): valoarea folosita era constanta
 		# SHADOW_DISTANCE. Pe Serengeti casterii care conteaza — acaciile de pe

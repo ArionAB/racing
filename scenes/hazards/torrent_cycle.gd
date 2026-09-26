@@ -149,6 +149,47 @@ const AI_GROUP: StringName = &"torrents"
 ## cat timp `RainCycle.rain_factor` > 0, interpolat liniar cu el.
 @export_range(1.0, 3.0, 0.05) var rain_surge_factor: float = 1.5
 
+@export_group("Impact la intrare (SURGE, mai dur decat Stirling)")
+## Runda 3 (verdict la volan): „nu are niciun impact asupra soferului, trebuie
+## ceva mai drastic sa simti ca te-a lovit apa, poate chiar si vizual pe
+## masina" — pe torent, EXPLICIT mai dur decat `WaterfallHazard` default
+## (Stirling), fiindca aici e RISCUL scurtaturii (vezi `drag` mai sus: 2.0,
+## nu 0.25). Vezi `WaterfallHazard.push_speed`/`yaw_kick_rate`/
+## `splash_trauma`/`douse_seconds`/`impact_sfx` pentru ce face fiecare —
+## aceleasi campuri, trecute catre perdeaua construita in `_build_hazard`.
+##
+## De ce mai mult decat Stirling, dar NU rasturnare/repunere: brief-ul cere
+## „data vizibil peste cap de lovitura" fara sa scoata masina din cursa in
+## mod obisnuit (asta ar fi o a doua pedeapsa peste franarea `drag=2.0`, deja
+## masurata la -1..-2,6 s fata de podet — o rasturnare ar insemna si o
+## repunere de cateva secunde IN PLUS, dublarea pedepsei pentru aceeasi
+## greseala). Deci yaw mai mare ca sa CITEASCA drept lovitura serioasa, dar
+## sub pragul de rasturnare masurat in sonda (vezi `probe_fiord_torent.gd`,
+## verificarea noua de impact: 0 rasturnari pe toate masinile testate).
+@export_range(0.0, 20.0, 0.5) var push_speed: float = 13.0
+## Directia impulsului (spatiul LOCAL al perdelei construite, acelasi reper
+## ca `WaterfallHazard.push_dir`). Torentul cade PESTE banda scurtaturii, nu
+## langa un prag uscat cu risc — nicio parte nu e "mai sigura" geometric,
+## deci implicit +X (aceeasi conventie ca Stirling), fara semnificatie de
+## teren.
+@export var push_dir: Vector3 = Vector3.RIGHT
+## Mai mare decat Stirling (1.4): pulsul trebuie sa se CITEASCA vizual ca o
+## lovitura care te da peste cap, nu doar o abatere de traiectorie. Plafonat
+## sub pragul de rasturnare masurat (vezi antetul acestui grup) —
+## `probe_fiord_torent.gd --only=d`: la 2.6/0.45 (147.5°/s sustinut)
+## TOATE masinile se rastoarna la 25 m/s pe drum drept, grip plin; la
+## 1.8/0.35 (~103°/s), 0 rasturnari pe cele 4 masini cerute, ramanand totusi
+## clar peste Stirling (79°/s).
+@export_range(0.0, 4.0, 0.1) var yaw_kick_rate: float = 1.8
+@export_range(0.0, 1.0, 0.05) var yaw_kick_seconds: float = 0.35
+## Mai mare decat Stirling (0.55): shake^2, deci diferenta se simte clar fara
+## sa sature plafonul de trauma (1.0).
+@export_range(0.0, 1.0, 0.05) var splash_trauma: float = 0.8
+## Mai lung decat Stirling (3.0): pulsul e mai violent, picuratul de dupa
+## trebuie sa spuna asta.
+@export_range(0.0, 6.0, 0.5) var douse_seconds: float = 4.0
+@export var impact_sfx: StringName = &"splash"
+
 @export_group("Vizual")
 ## Intensitatea vizuala (`WaterfallVisual.set_intensity`, prin
 ## `WaterfallHazard.modulate.a`) in CALM — fir subtire, teatru, brief: „fir
@@ -258,6 +299,16 @@ func _build_hazard(eff_thickness: float) -> void:
 	_hazard.force_accel = force_accel
 	_hazard.drag = drag
 	_hazard.rain_extra_thickness = 0.0 # torentul isi tine singur latimea din banda
+	# Impactul la intrare (runda 3): valorile TORENTULUI, mai dure decat
+	# implicitul de pe WaterfallHazard (calibrat pentru Stirling) — vezi
+	# antetul grupului de mai sus.
+	_hazard.push_speed = push_speed
+	_hazard.push_dir = push_dir
+	_hazard.yaw_kick_rate = yaw_kick_rate
+	_hazard.yaw_kick_seconds = yaw_kick_seconds
+	_hazard.splash_trauma = splash_trauma
+	_hazard.douse_seconds = douse_seconds
+	_hazard.impact_sfx = impact_sfx
 	add_child(_hazard)
 	# Perdeaua NU e in "rain_falls" (RainCycle ar stinge-o pe uscat — vezi
 	# antetul WaterfallHazard §"Fade-ul de ploaie") — torentul e vizibil in

@@ -1165,6 +1165,19 @@ func apply_sweep(push: Vector3) -> void:
 func splash(strength: float) -> void:
 	splashed.emit(self, strength)
 
+
+## Uda masina pentru `seconds` (Fiordland: cascada Stirling / torentul).
+##
+## Nu inventeaza un nou emitator: refoloseste `_water_spray` (aceeasi panza de
+## stropi care iese de la rotile din fata cand esti IN apa) — o cascada te lasa
+## ud, nu iti creeaza o a doua sursa de apa. `_update_water` tine emisia vie
+## cat `_douse_left > 0`, INDIFERENT de `in_water` (esti pe asfalt uscat dupa
+## cascada, dar tot picuri). Se poate reinnoi: o a doua trecere prin perdea
+## inainte sa se stinga prima intinde efectul, nu il reseteaza la zero.
+var _douse_left: float = 0.0
+func douse(seconds: float) -> void:
+	_douse_left = maxf(_douse_left, seconds)
+
 ## Invarte caroseria in jurul verticalei, `duration` secunde. DOAR VIZUAL.
 ##
 ## Colizorul si directia de mers raman ale masinii, si asta e deliberat: o
@@ -1319,6 +1332,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	is_drifting = false
 	is_boosting = false
 	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
+	_douse_left = 0.0 # repus = uscat, nu mai picura
 	_yaw_kick_left = 0.0 # si nici in vartej
 	_yaw_kick = 0.0
 	burn_time = 0.0 # repusa pe sosea, nu mai arde
@@ -1346,6 +1360,11 @@ func respawn(backoff_m: float = 14.0) -> void:
 
 ## Sub viteza asta rotile nu mai arunca apa: o masina oprita in vad nu stropeste.
 const WATER_SPRAY_MIN_SPEED: float = 3.5
+## Durata implicita a lui `douse()` (s) — cat picura masina dupa cascada/
+## torent. Folosita si ca referinta pentru estomparea `amount_ratio` (vezi
+## `_update_water`): la `_douse_left == DOUSE_FADE_S` (chiar la iesire din
+## perdea) picuratul e plin, si se subtiaza spre pragul minim pana se stinge.
+const DOUSE_FADE_S: float = 3.0
 
 ## Apa de sub roti, o data pe tick. Intrarea (fals -> adevarat) da stropul,
 ## inelul de unde, semnalul `splashed` si sunetul; cat timp esti in apa si te
@@ -1377,7 +1396,15 @@ func _update_water(delta: float) -> void:
 		in_water = wheel_y < level - 0.02
 	if in_water and not was:
 		_enter_water(level)
-	var live := in_water and horizontal_speed() > WATER_SPRAY_MIN_SPEED
+	# Uda de cascada/torent (Fiordland): decade LINIAR, nu e o poarta on/off —
+	# altfel ai iesi din perdea si te-ai usca instantaneu, in loc sa se vada
+	# ca apa se scurge cateva secunde. Nu are legatura cu `in_water`: dupa
+	# Stirling esti pe asfalt uscat, dar tot picuri.
+	if _douse_left > 0.0:
+		_douse_left = maxf(_douse_left - delta, 0.0)
+	var doused := _douse_left > 0.0
+	var wading := in_water and horizontal_speed() > WATER_SPRAY_MIN_SPEED
+	var live := wading or doused
 	_water_spray.emitting = live
 	if live:
 		# Stropii pleaca CU masina, nu raman pe loc: la 27 m/s, un strop
@@ -1391,6 +1418,21 @@ func _update_water(delta: float) -> void:
 		_water_spray.direction = dir / v
 		_water_spray.initial_velocity_min = v * 0.8
 		_water_spray.initial_velocity_max = v * 1.2
+		if doused and not in_water:
+			# Picurat, nu spray de val: cade aproape vertical de pe caroserie
+			# in loc sa tasneasca de sub roata. `CPUParticles3D` n-are
+			# `amount_ratio` (aia e doar pe `GPUParticles3D` — descoperit prin
+			# eroare de scena la sonda), deci "mai putina apa" cu cat trece
+			# timpul vine din `speed_scale`: sistemul incetineste treptat spre
+			# 0, deci se vad tot mai putine picaturi noi pornind, fara sa
+			# atingem `amount` (schimbat live pe CPUParticles3D, e nesigur —
+			# vezi documentatia clasei).
+			_water_spray.initial_velocity_min = 0.4
+			_water_spray.initial_velocity_max = 1.4
+			_water_spray.direction = Vector3(0.0, -1.0, -0.1)
+			_water_spray.speed_scale = clampf(_douse_left / DOUSE_FADE_S, 0.1, 1.0)
+		else:
+			_water_spray.speed_scale = 1.0
 	# PRIN apa, nu PE apa (verdictul dezvoltatorului dupa #382: „masina pare
 	# ca merge pe apa"). Cota era corecta; lipsea INTERACTIUNEA — apa nu
 	# raspundea deloc la masina. Trei lucruri, toate legate de viteza:
@@ -1399,7 +1441,9 @@ func _update_water(delta: float) -> void:
 	#   2. frana apei: apa pana la butuc ia din viteza (mult sub valul de pe
 	#      dig, 1.4/s, care e o pedeapsa; aici e o senzatie);
 	#   3. un tremur de camera cat timp esti in apa cu viteza, ca la val.
-	_update_wake(level, live)
+	# Dara e pe OGLINDA apei: doar cand chiar esti in apa. Udat de cascada pe
+	# asfalt, `level` e -INF si dara ar primi cota -inf (NaN in randare).
+	_update_wake(level, wading)
 	if in_water and is_on_floor():
 		var keep := 1.0 - clampf(WATER_DRAG_PER_SEC * delta, 0.0, 0.5)
 		linear_velocity.x *= keep

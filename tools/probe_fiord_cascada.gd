@@ -95,6 +95,9 @@ var _compression_ease_override: float = -1.0
 var _compression_ease_min_override: float = -1.0
 ## Runda 2: adauga o rulare la 10 m/s pentru Autobuz/Pompieri.
 var _bus_slow: bool = false
+## Runda 3 (impact la intrare): ruleaza DOAR verificarea A/B de mai jos
+## (`_test_impact_ab`), nu matricea completa de compresie/bottom-out.
+var _impact_ab: bool = false
 
 var _ground: StaticBody3D
 var _results: Array[Dictionary] = []
@@ -120,6 +123,11 @@ func _ready() -> void:
 	_build_ground()
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+
+	if _impact_ab:
+		await _test_impact_ab()
+		get_tree().quit(1 if _failed_hint else 0)
+		return
 
 	print("")
 	print("=== WaterfallHazard — sonda tehnica (Fiordland, brief §7.1a) ===")
@@ -170,6 +178,8 @@ func _parse_args() -> void:
 			_compression_ease_override = float(arg.trim_prefix("--compression-ease="))
 		elif arg == "--bus-slow":
 			_bus_slow = true
+		elif arg == "--impact-ab":
+			_impact_ab = true
 		elif arg == "--quick":
 			_quick = true
 		elif arg == "--dbg":
@@ -438,6 +448,128 @@ func _run_once(preset: int, speed: float, rain: float, accel: float) -> Dictiona
 		"flipped": flipped,
 		"roll_max": roll_max,
 		"zone_time": zone_time,
+	}
+
+
+# --------------------------------------------------------- (runda 3) impact A/B
+##
+## Reglajul-ieftin-se-testeaza-pe-cifra: masoara deplasarea LATERALA, yaw-ul
+## MAXIM, pierderea de viteza si rasturnarile, cu impactul PORNIT (valorile
+## implicite din export-uri: push_speed/yaw_kick_rate/splash_trauma) versus
+## STINS complet (toate pe 0) — pe Politia, Muscle, Autobuzul, Buggy, la
+## 25 m/s pe uscat.
+## Cifrele "dupa" trebuie sa fie clar mai mari decat "inainte", altfel
+## mecanismul nu e conectat (aceeasi garda ca `_test_force_connected`, dar pe
+## impact, nu pe compresie).
+const IMPACT_AB_CARS: Array[String] = ["Politia", "Muscle", "Autobuzul", "Buggy"]
+const IMPACT_AB_SPEED: float = 25.0
+
+func _test_impact_ab() -> void:
+	print("")
+	print("=== (runda 3) IMPACT A/B: lateral + yaw + pierdere viteza, Stirling (accel=48) ===")
+	print("%-12s | %8s %8s %8s %6s | %8s %8s %8s %6s"
+		% ["masina", "lat_ON", "yaw_ON", "pierd_ON", "flip", "lat_OFF", "yaw_OFF", "pierd_OFF", "flip"])
+	var idx_by_name := {}
+	for i in GameState.CAR_DATA.size():
+		idx_by_name[String(GameState.CAR_DATA[i].display_name)] = i
+	var any_not_bigger := false
+	var any_flip := false
+	for name in IMPACT_AB_CARS:
+		if not idx_by_name.has(name):
+			print("  [ATENTIE] masina '%s' nu exista in GameState.CAR_DATA — sarita" % name)
+			continue
+		var idx: int = idx_by_name[name]
+		var on := await _run_impact_case(idx, IMPACT_AB_SPEED, true)
+		var off := await _run_impact_case(idx, IMPACT_AB_SPEED, false)
+		print("%-12s | %8.2f %8.1f %8.1f%% %6s | %8.2f %8.1f %8.1f%% %6s"
+			% [name, float(on.lateral), float(on.yaw_max), float(on.speed_loss_pct),
+				"DA" if bool(on.flipped) else "nu",
+				float(off.lateral), float(off.yaw_max), float(off.speed_loss_pct),
+				"DA" if bool(off.flipped) else "nu"])
+		if bool(on.flipped) or bool(off.flipped):
+			any_flip = true
+		# "dupa" (ON) trebuie sa fie clar mai mare decat "inainte" (OFF), pe
+		# CEL PUTIN una din cele doua axe ale impactului (lateral, yaw) — nu
+		# neaparat pe amandoua deodata, dar nu pe niciuna nu e acceptabil
+		# (mecanism neconectat, memoria `sonda-masura-alt-obiect`).
+		var lateral_bigger: bool = float(on.lateral) > float(off.lateral) + 0.15
+		var yaw_bigger: bool = float(on.yaw_max) > float(off.yaw_max) + 5.0
+		if not (lateral_bigger or yaw_bigger):
+			any_not_bigger = true
+			print("  [PICAT] %s: nici lateralul nici yaw-ul nu cresc clar ON fata de OFF" % name)
+	print("")
+	print("- 0 rasturnari: %s" % ("DA (esec)" if any_flip else "OK"))
+	print("- ON masurabil mai mare decat OFF (lateral sau yaw) pe toate masinile: %s"
+		% ("PICAT" if any_not_bigger else "OK"))
+	if any_flip or any_not_bigger:
+		_failed_hint = true
+	print("")
+	print("REZULTAT IMPACT A/B: ", "PICAT" if _failed_hint else "TRECUT")
+
+
+## O rulare: masoara deplasarea laterala totala (X, fata de Z-ul de intrare),
+## yaw-ul maxim instantaneu (grade/s, din `angular_velocity.y`, citit direct —
+## acelasi camp pe care `Car._physics_process` il rescrie din yaw_rate+kick,
+## deci masoara EXACT ce simte masina, nu o presupunere), pierderea de viteza
+## si rasturnarea. `impact_on=false` pune toate export-urile de impact pe 0,
+## pastrand force_accel/drag neschimbate — izoleaza STRICT impactul de
+## apasarea verticala deja validata in `_test_force_connected`.
+func _run_impact_case(preset: int, speed: float, impact_on: bool) -> Dictionary:
+	var wf := _build_curtain(48.0, 1.0) # calibrarea Stirling, neschimbata
+	if not impact_on:
+		wf.push_speed = 0.0
+		wf.yaw_kick_rate = 0.0
+		wf.splash_trauma = 0.0
+		wf.douse_seconds = 0.0
+	var car := _spawn_car(preset, speed)
+	var start_x := car.global_position.x
+	for _f in int(0.2 / STEP):
+		await get_tree().physics_frame
+
+	var flipped := false
+	var yaw_max := 0.0
+	var entry_speed := -1.0
+	var exit_speed := -1.0
+	var was_in_zone := false
+	var t := 0.0
+	while t < WATCH_MAX:
+		await get_tree().physics_frame
+		t += STEP
+		var hspeed := car.horizontal_speed()
+		var z := car.global_position.z
+		var in_zone := z > -CURTAIN_LENGTH * 0.5 and z < CURTAIN_LENGTH * 0.5
+		if in_zone and entry_speed < 0.0:
+			entry_speed = hspeed
+		yaw_max = maxf(yaw_max, absf(rad_to_deg(car.angular_velocity.y)))
+		var up := car.global_transform.basis.y
+		if up.dot(Vector3.UP) < 0.5:
+			flipped = true
+		if was_in_zone and not in_zone and exit_speed < 0.0:
+			exit_speed = hspeed
+		was_in_zone = in_zone
+		if exit_speed >= 0.0 and z < -(CURTAIN_LENGTH * 0.5 + 10.0):
+			break
+		if z < -(CURTAIN_LENGTH * 0.5 + RUN_DOWN):
+			break
+
+	if entry_speed < 0.0:
+		entry_speed = speed
+	if exit_speed < 0.0:
+		exit_speed = car.horizontal_speed()
+	var loss_pct := 0.0
+	if entry_speed > 0.01:
+		loss_pct = clampf((entry_speed - exit_speed) / entry_speed, -5.0, 5.0) * 100.0
+	var lateral := absf(car.global_position.x - start_x)
+
+	car.queue_free()
+	wf.queue_free()
+	await get_tree().physics_frame
+
+	return {
+		"lateral": lateral,
+		"yaw_max": yaw_max,
+		"speed_loss_pct": loss_pct,
+		"flipped": flipped,
 	}
 
 

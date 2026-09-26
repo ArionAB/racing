@@ -232,6 +232,51 @@ const FogCorridorHazardScript = preload("res://scenes/hazards/fog_corridor_hazar
 		if _visual != null and is_instance_valid(_visual):
 			_visual.set_intensity(value.a)
 
+@export_group("Impact la intrare")
+## Runda 3 (verdict la volan, sep 2026): „cand trec prin cascada nu simt
+## nimic" / „nu are niciun impact asupra soferului". `force_accel` comprima
+## suspensia (verticala, invizibila din chase cam); ce lipsea era o lovitura
+## pe planul pe care jucatorul CHIAR il vede — orizontal, la intrare, o
+## singura data (nu continuu, ca `force_accel`; apa te matura o data, nu te
+## tine impinsa lateral cat esti sub ea).
+##
+## Impuls LATERAL (m/s, `Car.apply_sweep`) aplicat o singura data la INTRARE,
+## pe directia `push_dir` (in spatiul LOCAL al perdelei — X e latimea, acelasi
+## reper ca forma de coliziune). 0 = fara impuls (variantele de teatru/ploaie
+## raman neschimbate, `force_accel=0` deja le scoate din calcul mai jos).
+## Stirling: brief-ul cere impuls spre marginea dinspre mare, FARA parapet —
+## risc real, nu o palma spre pragul uscat sigur.
+@export_range(0.0, 20.0, 0.5) var push_speed: float = 9.0
+## Directia impulsului lateral, in spatiul LOCAL (X = latimea perdelei, Z =
+## lungimea de-a lungul drumului — acelasi reper ca `_build_shape`). Nu
+## trebuie normalizat: se normalizeaza la aplicare. Implicit +X; fiecare
+## instanta isi seteaza semnul dupa geometria ei (Stirling: spre mare, vezi
+## nota din Track16 unde se instantiaza).
+@export var push_dir: Vector3 = Vector3.RIGHT
+## Smucitura de yaw (rad/s) prin `Car.apply_yaw_kick` — sabotaj de control
+## scurt, NU un cuplu fizic (memoria `yaw-ul-masinii-e-rescris-pe-tick`:
+## `apply_torque_impulse` pe Car e mort, `angular_velocity` se rescrie in
+## fiecare tick din `yaw_rate + kick`). Semnul urmeaza `push_dir` (impinsa
+## spre dreapta = si botul fuge usor spre dreapta, ca un vehicul real lovit
+## lateral de un perete de apa). 0 = fara smucitura.
+@export_range(0.0, 4.0, 0.1) var yaw_kick_rate: float = 1.4
+@export_range(0.0, 1.0, 0.05) var yaw_kick_seconds: float = 0.35
+## Trauma de camera la intrare (`Car.splash` -> `Race` -> `camera.add_trauma`,
+## acelasi lant ca la valul de pe dig — vezi `wave_surge.gd`). Shake-ul e
+## trauma^2, deci valorile mici practic nu se vad; 0.55 da un zguduit clar
+## fara sa acopere ecranul ca la un val intreg (`WaveSurge.SPLASH_TRAUMA`
+## 0.75, pentru un perete de apa mai mare).
+@export_range(0.0, 1.0, 0.05) var splash_trauma: float = 0.55
+## Cat picura masina dupa iesire (s, `Car.douse`) — vizibil pe caroserie
+## cateva secunde, nu doar in cadrul impactului. 0 = fara picurat.
+@export_range(0.0, 6.0, 0.5) var douse_seconds: float = 3.0
+## Sfx la intrare, prin `AudioManager.play_sfx` (grupul `SFX`, nu un stream
+## dedicat pe hazard — o lovitura scurta, nu un loop). Numele trebuie sa
+## existe in `AudioManager.SFX_STREAMS`; gol = fara sunet (nu s-a adaugat
+## niciun asset nou fara cerere explicita — `splash.wav` exista deja, e
+## refolosit aici).
+@export var impact_sfx: StringName = &"splash"
+
 @export_group("Albire")
 ## Cat ar trebui sa tina albirea vizuala (s) — vezi antetul: efectiv, albirea
 ## e ceata locala cat esti in zona, nu un ceas separat. Export pastrat pentru
@@ -355,11 +400,22 @@ func _physics_process(delta: float) -> void:
 		# membership-ul de la cadrul anterior, deci absenta lui aici = intrare
 		# noua). Doar pentru jucator sau AI, oricine declanseaza vizualul —
 		# splash-ul e al LUMII, nu al camerei (la fel ca spray-ul continuu).
-		if not _cars_inside.has(car) and _visual != null and is_instance_valid(_visual):
+		var entering := not _cars_inside.has(car)
+		if entering and _visual != null and is_instance_valid(_visual):
 			_visual.trigger_splash_burst()
 		_cars_inside[car] = true
 		if not _physics_enabled:
 			continue
+		# IMPACTUL la intrare (runda 3, verdict la volan): lateral + yaw +
+		# shake + picurat + sfx, o SINGURA data per intrare, nu la fiecare
+		# cadru cat esti sub perdea (force_accel/drag de mai jos raman
+		# continue, astea sunt lovitura). Doar cand fizica e chiar activa
+		# (nu in teatru/CALM, deja garantat de `continue`-ul de mai sus) SI
+		# `force_accel > 0`: varianta "cascada de ploaie" (teatru, brief S3)
+		# are force_accel=0 dar `_physics_enabled` ramane implicit true - fara
+		# conditia asta, cele 5 RainFall* te-ar imbranci si ele.
+		if entering and force_accel > 0.0:
+			_apply_entry_impact(car)
 		var base_accel := force_accel * rain_factor
 		if base_accel > 0.0:
 			var accel := base_accel * _speed_factor(car.horizontal_speed())
@@ -434,6 +490,48 @@ func _compression_factor(car: Car) -> float:
 		(frac - compression_ease_start) / maxf(1.0 - compression_ease_start, 0.001),
 		0.0, 1.0)
 	return lerpf(1.0, compression_ease_min, t)
+
+
+## Lovitura de la INTRARE (runda 3): lateral, yaw, shake, picurat, sfx — o
+## singura data per intrare, apelata din `_physics_process` inainte de
+## forta/franarea continue (care raman neschimbate mai jos, in bucla
+## principala). Toate cele cinci sunt export-uri, deci un "reglaj de volan"
+## fara cod nou: `push_speed=0` sau `splash_trauma=0` le scoate individual din
+## calcul, exact ca `force_accel=0` scoate apasarea verticala (variantele de
+## teatru/ploaie raman neatinse, fiindca `_physics_enabled` sau `force_accel`
+## le opresc deja mai devreme).
+##
+## AI ONEST (principiul 5): acelasi apel, pentru orice `Car` din zona — nu
+## exista `if car.is_player`. Diferenta de FEEDBACK (shake/sunet/picurat) intre
+## jucator si AI vine din `Race`, care leaga semnalele DOAR pe `player` (vezi
+## `race.gd`); AI-ul primeste exact aceeasi forta/impuls/yaw, doar fara
+## camera/HUD care sa le arate — la fel cum bumping-ul cu masa loveste AI-ul
+## identic, dar numai camera jucatorului tremura.
+func _apply_entry_impact(car: Car) -> void:
+	if push_speed > 0.0 and push_dir.length_squared() > 0.0001:
+		var local_dir := push_dir.normalized()
+		var world_dir := (global_transform.basis * local_dir)
+		world_dir.y = 0.0
+		if world_dir.length_squared() > 0.0001:
+			world_dir = world_dir.normalized()
+			car.apply_sweep(world_dir * push_speed)
+			if yaw_kick_rate > 0.0 and yaw_kick_seconds > 0.0:
+				# Semnul urmeaza spre ce parte a masinii impinge apa (dot cu
+				# dreapta locala a masinii): impinsa spre dreapta ei, botul
+				# fuge usor spre dreapta — un vehicul lovit lateral, nu un
+				# spin aleator. `car.basis.x` e dreapta locala (convenția
+				# Car: -Z e fata).
+				var car_right := car.global_transform.basis.x
+				var sign := signf(world_dir.dot(car_right))
+				if sign == 0.0:
+					sign = 1.0
+				car.apply_yaw_kick(sign * yaw_kick_rate, yaw_kick_seconds)
+	if splash_trauma > 0.0:
+		car.splash(splash_trauma)
+	if douse_seconds > 0.0:
+		car.douse(douse_seconds)
+	if impact_sfx != &"":
+		AudioManager.play_sfx(impact_sfx)
 
 
 # ---------------------------------------------------------------- pentru sonde

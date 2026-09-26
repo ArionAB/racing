@@ -235,6 +235,12 @@ spray_count = 16
 transform = Transform3D(0.6412, -0.009, 0.7673, 0, 0.9999, 0.0117, -0.7674, -0.0075, 0.6411, -451.558, 31.928, -380.31)
 monitorable = false
 script = ExtResource("5_waterfall")
+push_speed = 9.0
+push_dir = Vector3(1, 0, 0)
+yaw_kick_rate = 1.4
+yaw_kick_seconds = 0.35
+splash_trauma = 0.55
+douse_seconds = 3.0
 
 [node name="SemaforTunel" type="Node3D" parent="Hazarduri" unique_id=19408452 node_paths=PackedStringArray("lamp")]
 transform = Transform3D(-0.9946, 0.0111, 0.1035, 0, 0.9943, -0.1065, 0.1041, 0.1059, 0.9889, -123.34, 44.69, -497.11)
@@ -282,7 +288,7 @@ gizmo_extents = 3.0
 script = ExtResource("7_marker")
 kind = 8
 model = ExtResource("s_tree_avalanche")
-avalanche_period = 90.0
+avalanche_period = 10.0
 
 [node name="TorentChasm" type="Node3D" parent="Hazarduri" unique_id=858385021]
 script = ExtResource("9_torrent")

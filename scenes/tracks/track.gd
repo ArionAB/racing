@@ -1251,6 +1251,15 @@ static func themes() -> Dictionary:
 			# atinge TerrainBody. Cu "dirt_road" banda intra in `_carve` si
 			# garda de plafon (branch_floor / branch_room) se activeaza.
 			"branch_surface": "dirt_road",
+			# Podetul Chasm (brief §2 randul D): "0,85x grip (lemn ud)".
+			# `loose_grip` e mecanismul cu care Stromboli face 0,85x pe cenusa
+			# (6,8 pe scara asfalt=8/ud=3,6/drift=2) - un singur numar de
+			# tema, aplicat pe orice interval din `custom_loose_ranges`. E
+			# scopul corect aici (nu `wet_grip`, care e global pe tot turul
+			# prin RainCycle si ar coborî grip-ul intregii piste in ploaie,
+			# nu doar al podetului). `custom_loose_ranges` = [0.406, 0.424]
+			# in Track16.tscn, exact intervalul podetului.
+			"loose_grip": 6.8,
 			# Grip-ul ud INCERCAT si REVERTIT (23 sep): "wet_grip": 2.4 in
 			# incercarea de a face scurtatura uda sa piarda/repuna la >=2/4
 			# masini (sonda risc/recompensa). N-a schimbat nimic: sonda
@@ -10873,8 +10882,29 @@ func _build_lift_bridge(ch: Dictionary) -> void:
 	# Baza e strict un yaw, deci verticala se pastreaza si cota apei se traduce
 	# printr-o scadere. (Un `inv * punct` ar fi fost la fel de corect, dar ar fi
 	# ascuns faptul ca aici ne bazam pe absenta oricarui tangaj.)
-	bridge.water_y = _sampler.mean_road_y() + sea_level_offset - origin.y
+	#
+	# APA NU VINE INTOTDEAUNA DIN MARE. Implicitul (sea_level_offset) e corect
+	# pentru un canal navigabil legat de mare (Okinawa) — dar un canal cu
+	# `water_y_drop` declarat explicit (parau de munte, ca la Chasm) are apa
+	# proprie, la cota lui, nu la cea a marii. Fara ramura asta, plasa de
+	# cadere si pescajul corabiei ar fi calculate fata de o mare la -2 m in
+	# loc de raul real la +9..11 m — gaura de cadere ar ajunge de trei ori mai
+	# adanca decat trebuie. `_build_channel_water` (suprafata vizibila a apei)
+	# foloseste deja exact aceasta ramura (vezi acolo, `water_y := o.y - drop`);
+	# aici era singurul loc unde nu se aplica.
+	var drop := float(ch.get("water_y_drop", -1.0))
+	if drop >= 0.0:
+		# Apa reala e la origin.y - drop (spatiu lume); in spatiul LOCAL al
+		# podului (origine la 0, doar yaw) asta e pur si simplu -drop.
+		bridge.water_y = -drop
+	else:
+		bridge.water_y = _sampler.mean_road_y() + sea_level_offset - origin.y
 	bridge.piers = _channel_piers(ch, bridge.transform.affine_inverse())
+	# Podet fix (parau de munte, Chasm) vs pod mobil (canal navigabil,
+	# Okinawa): trei steaguri opționale in spec, implicit purtarea veche.
+	bridge.static_deck = bool(ch.get("static_deck", false))
+	bridge.build_towers = bool(ch.get("build_towers", true))
+	bridge.build_ships = bool(ch.get("build_ships", true))
 	add_child(bridge)
 
 

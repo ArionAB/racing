@@ -327,7 +327,15 @@ if len(sys.argv) > 1:
 
     ravines = [
         (r3(frac["A start chei"]), r3(frac["C intrare Stirling"] + 0.006), 30, -1, "mare A-B-C"),
-        (r3(frac["D intrare padure"] - 0.01), r3(frac["D iesire Chasm"] + 0.01), 8, 1, "raul D"),
+        # side -1, nu 1 (v1): ScurtaturaChasm ("drumul vechi din padure") merge
+        # PE ACEEASI parte declarata cu +1, la 5.7-16.5 m de sosea pe portiunea
+        # podetului - in raza branch_floor (27 m, track_side_sampler.gd
+        # _carve_ravines), care plafoneaza sapatura la nivelul benzii insesi.
+        # Masurat (tools/sv_fiord_chasm_ground.gd, sesiunea relief 25 sep):
+        # rapa nu trecea de -1.05 m sub sosea in loc de -8 declarati. Partea
+        # -1 (opusa scurtaturii, 32-61 m distanta) e in afara razei si sapa
+        # normal. Sincronizat cu Track16.tscn (prototip fiord/poi-relief).
+        (r3(frac["D intrare padure"] - 0.01), r3(frac["D iesire Chasm"] + 0.01), 8, -1, "raul D"),
         (r3(frac["G intrare kicker"] - 0.006), r3(frac["G aterizare pietris"] + 0.006), 6, -1, "bazinul Bowen G"),
         (r3(frac["H iesire din G"] - 0.004), r3(0.999), 30, -1, "mare H"),
     ]

@@ -1,0 +1,344 @@
+extends Node
+## Generator de decor MANUAL pentru POI F — COBORAREA SI AVALANSA
+## (Track16, Fiordland, frac 0.694-0.84, coborare 8% dupa iesirea din tunel).
+##
+## Ca gen_decor_mp_g.gd/gen_decor_ser_d.gd: nu e sonda, e unealta care CALCULEAZA
+## transformarile ce se lipesc in Track16.tscn sub
+## `DecorManual/ZoneF_Coborare`.
+##
+##   godot --headless --fixed-fps 60 --path . res://tools/GenDecorFiordF.tscn -- \
+##       --out=C:/cale/zoneF.part [--survey]
+##
+## Cu `--survey` scrie doar profilul terenului (cote laterale, semi-latime,
+## vectorul lateral, directia soarelui) si nu genereaza nimic.
+##
+## ------------------------------------------------------------------------
+## CE CERE BARA (docs/track_briefs/img/bar_fiordland/bara_poi_F.png)
+##
+## Drum in pante prin PADURE RARA, apoi cicatricea avalansei ca fasie GOALA
+## de granit lucios cu trunchiuri si bolovani rostogoliti peste drum. Bara e
+## LOOK, nu LAYOUT (docs/track_briefs/fiordland_poi_gauntlet.md): decizia (b)
+## e ca fiordul NU e in fata aici (e in dreapta-spate, 87-138 grade) — nu se
+## aduce.
+##
+## Capcana care decide POI-ul (memoria contrastul-nu-geometria): cicatricea se
+## citeste prin CONTRAST DE CLASA (gneis lucios `wet_gneiss` fata de padure),
+## nu prin numar de bolovani. `chasm_rock`/`moss_boulder_*` primesc deja
+## `wet_gneiss`/`moss_carpet` pe tema fiordland (world_prop.gd
+## CLASSES_BY_THEME/CLASSES_BY_MODEL) — generatorul doar le CONCENTREAZA pe
+## cicatrice si le RAREste in padure, in loc sa le imprastie uniform.
+##
+## A DOUA capcana, de gameplay: avalansa (`AvalansaF`, marker la frac ~0.750)
+## misca 9 bolovani PESTE drum intre 0.74 si 0.76 (plus 15 m lateral in ambele
+## parti din memoria avalansa-alpii-ciclu-implicit + brief). Orice piesa cu
+## coliziune in fasia aia BLOCHEAZA bolovanii (AnimatableBody3D-urile lor sunt
+## corpuri fizice, nu fantome) — deci fasia ramane `none`/absenta.
+##
+## ------------------------------------------------------------------------
+## SURVEY (runda 1, --survey) — cifrele care decid compozitia.
+
+const TRACK := "res://scenes/tracks/Track16.tscn"
+const ZONE := "DecorManual/ZoneF_Coborare"
+
+const F_IN := 0.694
+const F_OUT := 0.840
+
+## Avalansa: marker la ~0.750 (masurat pe .tscn), fasia mobila 0.74-0.76 +
+## 15 m lateral pe ambele parti — ramane GOALA de coliziune (brief sectiunea F).
+const AVALANCHE_FRAC := 0.750
+const AVALANCHE_F_LO := 0.740
+const AVALANCHE_F_HI := 0.760
+const AVALANCHE_LAT_CLEAR := 15.0
+
+## id-urile ext_resource din Track16.tscn (fundatia, deja inregistrate).
+const RES := {
+	"beech_a": "s_beech_a",
+	"beech_b": "s_beech_b",
+	"beech_c": "s_beech_c",
+	"beech_dead": "s_beech_dead",
+	"moss_boulder_a": "s_moss_boulder_a",
+	"moss_boulder_b": "s_moss_boulder_b",
+	"moss_boulder_c": "s_moss_boulder_c",
+	"chasm_rock": "s_chasm_rock",
+	"guard_rock": "s_guard_rock",
+	"driftwood": "s_driftwood",
+	"tussock_clump": "s_tussock_clump",
+}
+
+## Inaltimea AABB masurata (docs/asset_briefs/fiordland_masuratori.md §1).
+const HEIGHT := {
+	"beech_a": 7.030, "beech_b": 10.189, "beech_c": 13.501,
+	"beech_dead": 8.515,
+	"moss_boulder_a": 0.741, "moss_boulder_b": 1.957, "moss_boulder_c": 3.069,
+	"chasm_rock": 2.500,
+	"guard_rock": 0.585,
+	"driftwood": 0.384,
+	"tussock_clump": 0.804,
+}
+
+## Raza de degajare la sol (m), scara 1: `beech_*` are coliziune `trunk`
+## (raza masurata la baza); restul `hull` (jumatatea laturii mari a AABB).
+const BASE_R := {
+	"beech_a": 0.81, "beech_b": 0.77, "beech_c": 1.03,
+	"beech_dead": 0.68,
+	"moss_boulder_a": 0.60, "moss_boulder_b": 1.10, "moss_boulder_c": 1.80,
+	"chasm_rock": 3.02,
+	"guard_rock": 0.59,
+	"driftwood": 2.02,
+	"tussock_clump": 0.35,
+}
+
+## Degajarea minima de la MUCHIA drumului la marginea corpului fizic, pentru
+## orice piesa cu coliziune (AI-ul nu vede decor static — memoria
+## obstacol-pe-drum-poate-fi-gimmick). `driftwood` explicit "trunchiuri cazute
+## IN AFARA drumului" (brief F): degajare mai mare pentru el.
+const EDGE_KEEP := 0.8
+const EDGE_KEEP_DRIFTWOOD := 2.0
+
+var _track: Track
+var _sampler: TrackSideSampler
+var _out: Array[String] = []
+var _n := 0
+var _skipped := 0
+var _tri := 0
+var _rng := RandomNumberGenerator.new()
+var _out_path := ""
+var _survey_only := false
+var _total_len := 1.0
+var _sun_to := Vector3(0.0, 1.0, 0.0)
+
+
+func _ready() -> void:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--out="):
+			_out_path = a.trim_prefix("--out=")
+		elif a == "--survey":
+			_survey_only = true
+	await get_tree().process_frame
+	_track = (load(TRACK) as PackedScene).instantiate() as Track
+	get_tree().root.add_child(_track)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_sampler = _track._sampler
+	var nd: int = _track.baked.size()
+	if _track._dists.size() > nd:
+		_total_len = float(_track._dists[nd])
+	print("; lungime traseu %.1f m, %d puncte" % [_total_len, nd])
+	_rng.seed = 271601
+	_survey()
+	if not _survey_only:
+		_scar()
+		_forest()
+		_write()
+	get_tree().quit(0)
+
+
+# ------------------------------------------------------------------ masuratori
+
+func _find_sun(node: Node) -> DirectionalLight3D:
+	if node is DirectionalLight3D:
+		return node as DirectionalLight3D
+	for c in node.get_children():
+		var r := _find_sun(c)
+		if r != null:
+			return r
+	return null
+
+
+func _survey() -> void:
+	var sun := _find_sun(_track)
+	var shadow := Vector3.ZERO
+	if sun != null:
+		var dir: Vector3 = -sun.global_transform.basis.z
+		_sun_to = -dir
+		shadow = Vector3(dir.x, 0.0, dir.z).normalized()
+		print("; soare: rot %s, lumina merge spre (%.2f, %.2f, %.2f), umbra pe XZ -> (%.3f, %.3f), elevatie %.1f deg" % [
+			str(sun.rotation_degrees), dir.x, dir.y, dir.z, shadow.x, shadow.z,
+			rad_to_deg(asin(-dir.y))])
+	var n := _track.baked.size()
+	print("; frac    ax(x,z)            y_drum  half   side(x,z)        sol la -25 -15 -8 | +8 +15 +25   dot(side,umbra)")
+	var f := F_IN - 0.005
+	while f <= F_OUT + 0.005:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		var cols: Array[String] = []
+		for off: float in [-25.0, -15.0, -8.0, 8.0, 15.0, 25.0]:
+			var q := p + s * off
+			cols.append("%+6.1f" % (_ground(q.x, q.z) - p.y))
+		print("; %.3f  (%7.1f,%7.1f)  %6.1f  %4.1f  (%+.2f,%+.2f)  %s  %+.2f" % [
+			f, p.x, p.z, p.y, half, s.x, s.z, " ".join(cols), s.dot(shadow)])
+		f += 0.005
+
+
+## Cota reala a terenului la (x,z): raycast pe TerrainBody, pornind de
+## deasupra celui mai inalt punct al traseului (memoria terrain-mesh-y-extrapoleaza:
+## _terrain_mesh_y extrapoleaza in afara panzei, nu se foloseste aici).
+var _hi_y := -INF
+func _ground(x: float, z: float) -> float:
+	if _hi_y == -INF:
+		for bp in _track.baked:
+			_hi_y = maxf(_hi_y, bp.y)
+		_hi_y += 150.0
+	var space := _track.get_world_3d().direct_space_state
+	var from := Vector3(x, _hi_y, z)
+	var to := Vector3(x, _hi_y - 400.0, z)
+	var q := PhysicsRayQueryParameters3D.create(from, to)
+	q.collision_mask = Track.CAMERA_BLOCKER_LAYER
+	var hit := space.intersect_ray(q)
+	if hit.is_empty():
+		return -999.0
+	return (hit.position as Vector3).y
+
+
+# ------------------------------------------------------------------ compozitia
+
+## Fractia e in fasia avalansei (+ marja laterala de siguranta AVALANCHE_LAT_CLEAR)?
+func _in_avalanche_strip(f: float, lat: float) -> bool:
+	if f < AVALANCHE_F_LO or f > AVALANCHE_F_HI:
+		return false
+	return absf(lat) <= AVALANCHE_LAT_CLEAR
+
+
+## (1) CICATRICEA — fasie de granit lucios (`chasm_rock`/`moss_boulder_c`,
+## clasa `wet_gneiss` deja aplicata pe tema) cu bolovani si `beech_dead`,
+## SCREE_SLAB evitat ca grohotis principal (iese portocaliu-nisip pe tema
+## asta — brief sectiunea F). Fasia mobila a avalansei ramane goala.
+func _scar() -> void:
+	var n := _track.baked.size()
+	var f := AVALANCHE_F_LO - 0.010
+	var f_end := AVALANCHE_F_HI + 0.010
+	var idx := 0
+	while f <= f_end:
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		for sgn: float in [-1.0, 1.0]:
+			# doua "randuri" laterale, la 9-13 si 16-22 m de ax
+			for lat: float in [_jrange(9.0, 13.0), _jrange(16.0, 22.0)]:
+				var lo := sgn * lat
+				if _in_avalanche_strip(f, lo):
+					continue # fasia mobila ramane goala (brief F)
+				if absf(lo) < half + EDGE_KEEP:
+					continue
+				var q := p + s * lo
+				var gy := _ground(q.x, q.z)
+				if gy <= -900.0:
+					continue
+				var yaw := _rng.randf_range(0.0, TAU)
+				var stems := ["chasm_rock", "moss_boulder_c", "moss_boulder_b", "guard_rock"]
+				if _rng.randf() < 0.18:
+					stems = ["beech_dead"]
+				var stem: String = stems[_rng.randi() % stems.size()]
+				_place(stem, q, gy, yaw, 1.0)
+				idx += 1
+		f += _step(3.2)
+	print("; cicatrice: %d piese" % idx)
+
+
+## Ranged jitter helper: numar random uniform in [a,b].
+func _jrange(a: float, b: float) -> float:
+	return _rng.randf_range(a, b)
+
+
+## (2) PADUREA RARA — fagi rari (beech_a/b/c, coliziune trunk), tussock si
+## driftwood ca trunchiuri cazute in AFARA drumului, pe restul feliei
+## (0.694-0.84 minus cicatricea). Densitate scazuta ("rara" din decupaj) —
+## aranjamentul bate numarul: jitter mare, yaw variat, fara grila (memoria
+## aranjamentul-bate-numarul).
+func _forest() -> void:
+	var n := _track.baked.size()
+	var f := F_IN
+	var idx := 0
+	while f <= F_OUT:
+		# in interiorul cicatricei (+ marja) nu punem padure — e fasia de granit
+		if f >= AVALANCHE_F_LO - 0.010 and f <= AVALANCHE_F_HI + 0.010:
+			f += _step(6.0)
+			continue
+		var i := int(f * float(n)) % n
+		var p := _track.baked[i]
+		var s := _track._side_at(i)
+		var half := _track.width_at_index(i)
+		for sgn: float in [-1.0, 1.0]:
+			# "rara": nu la fiecare pas, si nu pe fiecare parte
+			if _rng.randf() < 0.45:
+				continue
+			var lat := half + EDGE_KEEP + _jrange(1.5, 14.0)
+			var q := p + s * (sgn * lat)
+			var gy := _ground(q.x, q.z)
+			if gy <= -900.0:
+				continue
+			var yaw := _rng.randf_range(0.0, TAU)
+			var roll := _rng.randf()
+			if roll < 0.55:
+				var stem: String = ["beech_a", "beech_b", "beech_c"][_rng.randi() % 3]
+				_place(stem, q, gy, yaw, 1.0)
+				idx += 1
+			elif roll < 0.75:
+				_place("tussock_clump", q, gy, yaw, _rng.randf_range(0.8, 1.3))
+				idx += 1
+			elif roll < 0.90:
+				# driftwood: trunchi cazut, explicit IN AFARA drumului -> degajare mai mare
+				if absf(lat) < EDGE_KEEP_DRIFTWOOD:
+					continue
+				_place("driftwood", q, gy, yaw, 1.0)
+				idx += 1
+			else:
+				_place("guard_rock", q, gy, yaw, _rng.randf_range(0.9, 1.2))
+				idx += 1
+		f += _step(4.5)
+	print("; padure rara: %d piese" % idx)
+
+
+## Pas in FRACTIE echivalent unei distante `meters` pe traseu, cu jitter
+## >= 0.5 din pas (memoria aranjamentul-bate-numarul: fara grila).
+func _step(meters: float) -> float:
+	var base := meters / _total_len
+	return base * _rng.randf_range(0.55, 1.55)
+
+
+## Aseaza o piesa: verifica degajarea de la muchia drumului daca are coliziune,
+## scrie linia .part. `gy` e cota REALA din raycast (TerrainBody), nu campul
+## neted (memoria terrain-mesh-y-extrapoleaza).
+func _place(stem: String, pos: Vector3, ground_y: float, yaw: float, scale_mul: float) -> void:
+	if not RES.has(stem):
+		_skipped += 1
+		return
+	var h: float = HEIGHT.get(stem, 1.0)
+	var scale := scale_mul # inaltimea e deja cea masurata; scale_mul e variatie, nu conversie in metri
+	var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale)
+	var origin := Vector3(pos.x, ground_y, pos.z)
+	_n += 1
+	var name := "%s%d" % [_camel(stem), _n]
+	_out.append('[node name="%s" parent="%s" instance=ExtResource("%s")]' % [name, ZONE, RES[stem]])
+	_out.append("transform = Transform3D(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" % [
+		_f(basis.x.x), _f(basis.y.x), _f(basis.z.x),
+		_f(basis.x.y), _f(basis.y.y), _f(basis.z.y),
+		_f(basis.x.z), _f(basis.y.z), _f(basis.z.z),
+		_f(origin.x), _f(origin.y), _f(origin.z)])
+	_out.append("")
+
+
+func _camel(stem: String) -> String:
+	var parts := stem.split("_")
+	var s := parts[0]
+	for k in range(1, parts.size()):
+		s += parts[k].capitalize()
+	return s
+
+
+func _f(v: float) -> String:
+	return "%.4f" % v
+
+
+func _write() -> void:
+	if _out_path.is_empty():
+		print("; --out lipseste, nu scriu nimic (%d piese calculate)" % _n)
+		return
+	var f := FileAccess.open(_out_path, FileAccess.WRITE)
+	for line in _out:
+		f.store_line(line)
+	f.close()
+	print("; scris %s: %d noduri, %d sarite (lipsa in RES)" % [_out_path, _n, _skipped])

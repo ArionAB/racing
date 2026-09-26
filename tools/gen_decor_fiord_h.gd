@@ -288,10 +288,22 @@ const STRIP_HALF_W := 6.0      # jumatate din latimea pistei de avioane
 const STRIP_F_IN := 0.912
 const STRIP_F_OUT := 0.930
 
+## RUNDA 5, capcana gasita si reparata: `step` (mai jos) e o FRACTIE de traseu
+## (`_step(3.0)` = 3 m convertiti in unitati de frac, ca sa avanseze `f`), dar
+## codul vechi o refolosea DIRECT ca dimensiune in METRI a placii
+## (`Vector3(step * 1.02, ...)`). Cu traseul la ~2162 m, `step` ~= 0.00139 —
+## placa CONCRETE iesea lata de 1,4 MILIMETRI (confirmat in .tscn: `size =
+## Vector3(0.001415, 0.06, 12.0)`), o linie invizibila. De-aici verdictul
+## criticului: "avionul sta pe iarba, fara nicio dala de asfalt/beton sub el"
+## — pista "exista" in .tscn, dar n-avea latime sa se vada. Fix: o constanta
+## separata `SLAB_LEN_M` (lungimea placii de-a lungul drumului, in metri),
+## `step` ramane doar pentru avansul pe frac.
+const SLAB_LEN_M := 3.0
+
 func _airstrip() -> void:
 	var n := _track.baked.size()
 	var f := STRIP_F_IN
-	var step := _step(3.0)
+	var step := _step(SLAB_LEN_M)
 	var slabs := 0
 	while f < STRIP_F_OUT:
 		var i := int(f * float(n)) % n
@@ -308,13 +320,16 @@ func _airstrip() -> void:
 		tang = tang.normalized()
 		var yaw := atan2(-tang.z, tang.x) + PI * 0.5
 		_raw_box(mid + Vector3.UP * 0.02, yaw,
-			Vector3(step * 1.02, 0.06, STRIP_HALF_W * 2.0), "CONCRETE")
+			Vector3(SLAB_LEN_M * 1.02, 0.06, STRIP_HALF_W * 2.0), "CONCRETE")
 		slabs += 1
 		# marcaj central FOAM_WHITE, mai ingust si mai scurt, la fiecare al
-		# doilea pas (linie intrerupta, ca pe pista reala).
+		# doilea pas (linie intrerupta, ca pe pista reala) — TRANSVERSAL pe
+		# pista (lat pe directia drumului, ingust pe latimea pistei), ca in
+		# bara ("marcaje albe transversale"): dimensiunea mare pe Z local
+		# (STRIP_HALF_W-ul e pe Z), deci marcajul trebuie lat pe X, ingust pe Z.
 		if slabs % 2 == 0:
 			_raw_box(mid + Vector3.UP * 0.04, yaw,
-				Vector3(step * 0.5, 0.02, 0.6), "FOAM_WHITE")
+				Vector3(SLAB_LEN_M * 0.5, 0.02, 1.2), "FOAM_WHITE")
 		f += step
 	print("; pista de avioane: %d placi la %.0f m de ax" % [slabs, STRIP_OFFSET])
 	_plane()
@@ -685,9 +700,22 @@ func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 ## direct in .tscn (nu exista GLB, contract explicit). Clasa de textura vine
 ## din numele nodului (`world_prop.gd` citeste dupa nume pentru piese fara
 ## model, la fel ca alte fasii de asfalt manuale de pe alte piste).
+##
+## RUNDA 5, al doilea bug gasit in aceasta functie (primul era `step` folosit
+## ca metri, vezi `_airstrip`): `[sub_resource]` era scris in `_out` (blocul
+## de NODURI), DUPA nodul care il refera prin `SubResource("BoxMesh_...")`.
+## Godot cere id-ul declarat INAINTE de orice referinta in fisier — cu
+## sub_resource dupa, incarcarea Track16.tscn pica cu "Parse Error: Invalid
+## parameter" chiar la acel nod (confirmat: `probe_decor` nu rula deloc,
+## proces Godot ramas la 5 MB / 0 CPU time, aparent "blocat", de fapt mort pe
+## eroare de parsare). Fix: sub_resource-ul merge in `_out_sub`, care
+## `_write()` il varsa INAINTEA blocului de noduri.
 func _raw_box(pos: Vector3, yaw: float, size: Vector3, cls: String) -> void:
 	_n += 1
 	var nm := "pistaAvioane%s%d" % [cls.to_lower(), _n]
+	_out_sub.append('[sub_resource type="BoxMesh" id="BoxMesh_%s"]' % nm)
+	_out_sub.append("size = Vector3(%f, %f, %f)" % [size.x, size.y, size.z])
+	_out_sub.append("")
 	_out.append('[node name="%s" type="MeshInstance3D" parent="%s"]' % [nm, ZONE])
 	var b := Basis.from_euler(Vector3(0.0, yaw, 0.0))
 	_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
@@ -696,9 +724,6 @@ func _raw_box(pos: Vector3, yaw: float, size: Vector3, cls: String) -> void:
 	_out.append('mesh = SubResource("BoxMesh_%s")' % nm)
 	_out.append('metadata/tri_class = "%s"' % cls)
 	_out.append('metadata/coliziune = "none"')
-	_out.append("")
-	_out.append('[sub_resource type="BoxMesh" id="BoxMesh_%s"]' % nm)
-	_out.append("size = Vector3(%f, %f, %f)" % [size.x, size.y, size.z])
 	_out.append("")
 
 

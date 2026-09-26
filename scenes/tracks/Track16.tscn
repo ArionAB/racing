@@ -52,6 +52,63 @@
 [ext_resource type="Script" uid="uid://pcypbcie67pr" path="res://scenes/hazards/foam_pool.gd" id="9_foam_pool"]
 [ext_resource type="Script" uid="uid://b1848dr3kabqm" path="res://scenes/props/path_mover.gd" id="s_path_mover_script"]
 
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete7"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete8"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white9"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete10"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete11"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white12"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete13"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete14"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white15"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete16"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete17"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white18"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete19"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete20"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white21"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete22"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete23"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white24"]
+size = Vector3(1.500000, 0.020000, 1.200000)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete25"]
+size = Vector3(3.060000, 0.060000, 12.000000)
+
 [sub_resource type="Curve3D" id="Curve3D_avionMal26"]
 _data = {
 "points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, -15.662294, -11.354813, 9.234149, 0, 0, 0, 0, 0, 0, -25.381430, -22.308533, 19.681553, 0, 0, 0, 0, 0, 0, -32.147713, -24.950748, 28.470078),
@@ -59,63 +116,6 @@ _data = {
 }
 point_count = 4
 up_vector_enabled = false
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete7"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete8"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white9"]
-size = Vector3(0.000694, 0.020000, 0.600000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete10"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete11"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white12"]
-size = Vector3(0.000694, 0.020000, 0.600000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete13"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete14"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white15"]
-size = Vector3(0.000694, 0.020000, 0.600000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete16"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete17"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white18"]
-size = Vector3(0.000694, 0.020000, 0.600000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete19"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete20"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white21"]
-size = Vector3(0.000694, 0.020000, 0.600000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete22"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete23"]
-size = Vector3(0.001415, 0.060000, 12.000000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioanefoam_white24"]
-size = Vector3(0.000694, 0.020000, 0.600000)
-
-[sub_resource type="BoxMesh" id="BoxMesh_pistaAvioaneconcrete25"]
-size = Vector3(0.001415, 0.060000, 12.000000)
 
 [sub_resource type="Curve3D" id="Curve3D_fiordland"]
 closed = true
@@ -7654,4 +7654,3 @@ metadata/coliziune = "trunk"
 [node name="fagLodgeC_1081" parent="DecorManual/ZoneH_Mal" instance=ExtResource("s_beech_dead")]
 transform = Transform3D(0.959685, 0.007047, 0.268853, -0.014496, 0.996222, 0.025631, -0.268554, -0.028591, 0.959368, -28.918140, 0.023499, 51.811222)
 metadata/coliziune = "trunk"
-

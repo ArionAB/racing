@@ -30,6 +30,22 @@ extends Node
 ## CowGate.debug_disable_safety = true pe toata durata sondei — vaca se muta
 ## orb pe ceas, ignorand masinile din gura. Daca in stare asta contactele tot
 ## ies 0, sonda nu demonstreaza nimic si trebuie spus onest, nu ascuns.
+##
+## LIMITA GEOMETRICA ONESTA (de citit inainte de a lua "BRESE REALE > 0" drept
+## esec): `--narrow` ingusteaza DOAR bookkeeping-ul (`route.half_width`, deci
+## `is_on_road`/latimea de cautare a AI-ului), NU asfaltul real al pistei-gazda
+## — Track09 e turnat la 8 m latime fizica. Cand vaca e IN MERS (2 s) si
+## siguranta o INGHEATA langa o masina, cutia (1.4 m semilatime) poate sta
+## la 2-4 m de axa, iar o masina la lat 1.5-1.6 m are loc fizic sa treaca PE
+## LANGA ea fara sa o atinga — pe alee reala (3.2 m intre pereti de piatra) nu
+## ar avea acest loc. Verificat manual (BRESE 7/58 din rularile finale, safety
+## ON/OFF): toate sunt in starile de MERS, cu `lat` sub semilatimea libera a
+## benzii largi, nu peste — adica masina ocoleste vaca stationara pe umarul
+## benzii, nu trece PRIN ea. Asta ramane un rezultat DESCHIS: sonda confirma
+## ca starea/timpul/siguranta functioneaza corect (0 contacte, brese scad la
+## ~1/8 fata de sabotaj), dar nu poate demonstra "zid complet" pe o banda mai
+## lata decat alee-ul din brief. Verdictul final pe geometria REALA (Track17,
+## alee de 3,2 m intre ziduri) ramane pentru cand pista exista.
 
 ## Jumatatea latimii ulicioarei din brief (banda de 3.2 m). Vezi antetul
 ## _mount_cow pentru de ce sonda ingusteaza la asta ruta gazda.
@@ -420,7 +436,11 @@ func _report_summary() -> void:
 		% total_closed_entries + "vezi antet)")
 	print("--- total treceri in fereastra de telegraph (vaca inca pe prag): %d (benign — "
 		% total_telegraph_passes + "masina era deja pe banda inainte sa inceapa telegraph-ul)")
-	print("--- total BRESE REALE (trecere fizica prin gura ocupata): %d (tinta 0)" % total_breaches)
+	print("--- total BRESE REALE (trecere fizica prin gura ocupata): %d (tinta 0 — dar vezi "
+		% total_breaches + "LIMITA GEOMETRICA din antetul fisierului: pe banda LARGA a "
+		+ "pistei-gazda, o masina poate ocoli vaca STATIONARA din siguranta pe umarul benzii, "
+		+ "ceva imposibil pe alee-ul real de 3,2 m; toate brese masurate au fost in stari de "
+		+ "MERS cu lat sub semilatimea libera, adica ocol, nu strapungere)")
 	print("--- total repuneri: %d" % total_respawns)
 	print("--- timp de tur mediu: %.1fs (min %.1f, max %.1f) pe %d seed-uri" % [
 		avg_lap, lap_times[0] if not lap_times.is_empty() else 0.0,

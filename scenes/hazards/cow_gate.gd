@@ -132,10 +132,19 @@ enum State {
 ## stinge explicit cu `--no-safety` sau direct pe nod.
 @export var debug_disable_safety: bool = false
 
-## Placeholder: cutie de vaca culcata (lungime x inaltime x latime), plus doua
-## "coarne" mici — gabaritul e cel cerut in brief (~2.8 x 1.4 x 1.3 m).
-const BOX_SIZE := Vector3(2.8, 1.3, 1.4)
-const HORN_SIZE := Vector3(0.5, 0.12, 0.12)
+## Placeholder: cutie de vaca culcata. AXELE sunt in spatiul CORPULUI, unde
+## local -Z e directia "side" (peste banda — vezi _place: Basis.looking_at(side, UP))
+## si local X e de-a lungul benzii. Vaca sta CULCATA DE-A LATUL benzii (brief:
+## "2.8 m latime dintr-o banda de 3.2 m"), deci lungimea ei (2.8 m, cap-coada)
+## trebuie sa fie pe Z (peste banda, ca sa blocheze), iar grosimea trupului
+## (1.4 m) pe X (de-a lungul benzii, ingusta). Inversarea asta a fost o eroare
+## reala, prinsa de sonda: cu lungimea pe X, cutia bloca doar o fasie de 1.4 m
+## din cei 8 m ai benzii de pe Track09 — masinile treceau pe langa ea cu
+## lat pana la 0.05 m, adica practic ATINGAND cutia, fara sa se opreasca
+## (245 de treceri fizice masurate, 0 contacte reale — cutia era acolo, dar cu
+## latimea gresita spre cine trecea).
+const BOX_SIZE := Vector3(1.4, 1.3, 2.8)
+const HORN_SIZE := Vector3(0.12, 0.12, 0.5)
 
 var _state: State = State.ON_THRESHOLD
 var _clock: float = 0.0
@@ -194,14 +203,17 @@ func _build_placeholder() -> void:
 
 	var horn_mat := StandardMaterial3D.new()
 	horn_mat.albedo_color = Color(0.95, 0.5, 0.1) # coarne pictate portocaliu
-	for side in [-1.0, 1.0]:
+	# Capul e la un capat al lungimii, care acum e pe Z (vezi BOX_SIZE); cele
+	# doua coarne se despart pe X (grosimea trupului), de o parte si de alta a
+	# capului.
+	for horn_side in [-1.0, 1.0]:
 		var horn := MeshInstance3D.new()
 		var hbox := BoxMesh.new()
 		hbox.size = HORN_SIZE
 		horn.mesh = hbox
 		horn.material_override = horn_mat
-		horn.position = Vector3(side * 0.35, BOX_SIZE.y + 0.05,
-			-BOX_SIZE.x * 0.5 + 0.2)
+		horn.position = Vector3(horn_side * 0.35, BOX_SIZE.y + 0.05,
+			-BOX_SIZE.z * 0.5 + 0.2)
 		_body.add_child(horn)
 
 	var shape := CollisionShape3D.new()
@@ -376,6 +388,15 @@ func shortcut_open() -> bool:
 
 func current_state() -> int:
 	return _state
+
+
+## Pozitia GURII (nu a corpului, care poate fi oriunde intre prag si gura in
+## timpul mersului) — pentru sonde: "a trecut vreo masina de punctul asta cat
+## poarta era inchisa?" e intrebarea reala, nu doar "s-a atins route == branch_index",
+## care se poate intampla si la fork, la zeci de metri inainte de gura (vezi
+## Track.resolve_route: comuta pe proximitate, indiferent de branch_is_open).
+func mouth_position() -> Vector3:
+	return _mouth_xf.origin
 
 
 ## Are o tranzitie amanata de siguranta ACUM? Pentru sonde — verdictul

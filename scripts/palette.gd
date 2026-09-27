@@ -947,6 +947,25 @@ const CLASS_TINT := {
 	# masuratoarea din bara H199 S0.02), fara sa stinga complet dungile
 	# verticale ale texturii `alpine_granite`.
 	"wet_gneiss": Color(0.40, 0.40, 0.42),
+	# Lemnul ud (Fiordland, brief §4: "podetul, balustradele, pontonul —
+	# WOOD_WEATHERED 9, ud = mai inchis"). Dala `wood.png` exista deja in
+	# CLASS_TEXTURES (0.7 in CLASS_TRIPLANAR_SCALE) din pipeline-ul general,
+	# dar pana acum n-avea niciun consumator in world_prop.gd — infrastructura
+	# pregatita, niciodata cablata.
+	#
+	# Masurat (script temporar, sters): dala are media (124.14, 98.99, 71.72),
+	# luminanta 0.401 (rec709). Slotul WOOD_WEATHERED (9, #835C34) e
+	# (131, 92, 52), luminanta 0.382 — aproape identic cu dala, deci un simplu
+	# multiplicator de potrivire ar fi cerut R usor PESTE 1 (raport 1.055),
+	# adica CLASS_LIFT pentru un canal aproape neschimbat. Fiindca brief-ul
+	# cere explicit mai INCHIS decat slotul uscat (nu potrivire cu el), tinta
+	# s-a ales direct la 65% din valoarea slotului uscat — (85.15, 59.80, 33.80),
+	# luminanta 0.248, o scadere de 35% fata de WOOD_WEATHERED uscat, in aceeasi
+	# ordine de marime ca alte clase "ud"/umbrite ale pistei (`volcanic_rock`,
+	# `wet_gneiss` fata de dala lor). Raportul tinta/dala pe toate trei canale
+	# (0.686, 0.604, 0.471) e SUB 1, deci se obtine integral din CLASS_TINT,
+	# fara CLASS_LIFT.
+	"wood": Color(0.686, 0.604, 0.471),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1201,7 +1220,10 @@ const CLASS_TRIPLANAR_SCALE := {
 	"old_stone": 0.35,
 	# Lemnaria: bena tricicletei Ape, busteni de rulare, bordaj. Sursa e o
 	# scanare de scanduri; la 0.7 (o repetitie la 1.43 m) fibra cade aproape
-	# la scara reala pe piese de 1-3 m.
+	# la scara reala pe piese de 1-3 m. Prim consumator REAL (Fiordland,
+	# `driftwood` 4,03 m si tabliera `WoodDeckStrip` a podetului Chasm,
+	# scanduri de ~1,5-2 m): scara ramane neschimbata, era deja gandita pentru
+	# exact plaja asta.
 	"wood": 0.7,
 	# Trunchiuri de maslin si de smochin. Sursa `bark` e o scanare de 1.3 m de
 	# trunchi, deci 0.77 (o repetitie la 1.3 m) e SCARA REALA — cicatricile

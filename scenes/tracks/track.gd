@@ -1326,6 +1326,89 @@ static func themes() -> Dictionary:
 			"water_lit_wave_len": 2.0,
 			"water": true,
 		},
+		"jodhpur": {
+			# ORASUL ALBASTRU DIN JODHPUR, SEARA DE DIWALI (docs/track_briefs/
+			# jodhpur.md §2.0, §4). Pasul 2 din §7: doar lumina, cerul, ceata
+			# si solul de baza -- kitul de oras, fantana, portile si fortul
+			# vin cu POI-urile (asset-uri hero, §5). `decor` stins ca la
+			# Cappadocia/Serengeti/Fiordland: decorul manual se pune pe POI.
+			#
+			# `ground_tint`: fara slot albastru dedicat (brief §4: "atlasul
+			# are 32 de sloturi, toate alocate"). Provizoriu, INAINTEA
+			# claselor triplanare `blue_lime_light`/`blue_lime_indigo` (care
+			# vin cu kitul de case, nu cu solul insusi): un ocru-nisipiu
+			# neutru, ca platoul intre case sa nu sara la ochi inainte sa
+			# existe ceva de sarit -- de remasurat pe captura cand exista
+			# case (memoria monocromia-se-masoara-dupa-remap).
+			"ground_tint": Color(0.62, 0.56, 0.46),
+			# Fata de stanca (mecanismul scarp_tint, ca la Fiordland/Machu
+			# Picchu): riolit roz-brun (brief §1, #9A6A5A), aproape neutru dupa
+			# randare -- stanca sub fort si coborarea G sunt fete de panta
+			# mare, nu platouri.
+			"scarp_tint": Color(0.42, 0.30, 0.27),
+			"scarp_slope_deg": 30.0,
+			"scarp_fade_deg": 10.0,
+			# Cer de amurg: portocaliu-roz la orizont -> violet sus (brief §0,
+			# §4, promptul de diorama). DuskCycle preia AMBIENTUL/CEATA in
+			# timpul cursei; sky_top/sky_horizon raman fixe (tema, nu ceasul --
+			# brief §3: "nu atinge fizica", iar cerul insusi nu e in lista de
+			# canale ale DuskCycle, doar soare+ambient+ceata+lampi).
+			"sky_top": Color(0.42, 0.35, 0.62),
+			"sky_horizon": Color(1.0, 0.70, 0.48),
+			"sky_cover_alpha": 0.0,
+			# Ceata CALDA de praf (brief §2.0, §4): "vine cu noaptea" e rolul
+			# lui DuskCycle (fog_light_color + fog_depth_end interpolate);
+			# aici e starea de baza (dusk=0, turul 1): #E8A878, fog_end 300.
+			"fog_sky_affect": 0.15,
+			"fog": Color(0.910, 0.659, 0.471), # #E8A878
+			"hill_color": Color(0.58, 0.42, 0.38),
+			# Soare la 8 grade, din VEST (brief §2.0/§4: "azimutul soarelui
+			# ramane cel din tema" -- DuskCycle scade doar elevatia/energia/
+			# culoarea, nu azimutul). custom_sun_rotation_deg de pe Track17
+			# suprascrie oricum cu Vector3(-8, 90, 0) (calculat: y_rot=90 =>
+			# sursa la compass 270 = vest, in conventia gen_*_route.py), dar
+			# tema declara aceeasi valoare ca ancora pentru orice sonda care
+			# incarca tema fara nodul de suprascriere.
+			"sun_color": Color(1.0, 0.698, 0.478), # #FFB27A
+			"sun_energy": 1.0,
+			"exposure": 1.0,
+			"sun_rotation_deg": Vector3(-8, 90, 0),
+			"ambient_color": Color(1.0, 0.698, 0.478),
+			"ambient_energy": 0.30,
+			# Umbre PORNITE, lungi (brief §4: "identitatea turului 1").
+			# shadow_distance 90 (CLAUDE.md: prima setare de scurtat/stins
+			# daca device-ul nu tine 60fps) -- la 8 grade casterii sunt
+			# departe (memoria umbre-exista-dar-cascada-e-scurta), deci se
+			# testeaza explicit la 90 m cand exista decor de umbrit.
+			"shadows": true,
+			"shadow_opacity": 0.65,
+			"shadow_distance": 90.0,
+			"shadow_blur": 1.0,
+			"fog_depth": true,
+			"fog_begin": 90.0,
+			"fog_end": 300.0,
+			"fog_curve": 1.4,
+			"fog_max": 0.85,
+			"horizon_model": "",
+			"horizon_class": "",
+			"walls": false,
+			"kerbs": false,
+			"cliffs": false,
+			"decor": "none",
+			"props": "forest",
+			"hazard_model": "",
+			"dust_color": Color(0.68, 0.60, 0.50),
+			# Scurtatura ulicioarei (TrackBranch, brief §2 randul D/D', §3
+			# "Vaca din ulicioara"): caldarâm bătătorit, NU bancul de nisip
+			# implicit -- aceeasi lectie ca Fiordland/Chasm (branch_surface
+			# lipsa => route.surface cade pe "sand", exclus explicit din
+			# saparea de rapa). "gravel" (pietris batatorit, fara fagase) e
+			# mai aproape de caldarâmul ingust dintre case decat drumul de
+			# tara cu iarba pe mijloc.
+			"branch_surface": "gravel",
+			"branch_tint": Color(0.55, 0.51, 0.46),
+			"water": false,
+		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
 			"sky_top": Color(0.22, 0.48, 0.9),

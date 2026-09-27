@@ -48,10 +48,11 @@ const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track14.tscn", # Serengeti = INDEXUL 7
 	"res://scenes/tracks/Track15.tscn", # Machu Picchu = INDEXUL 8
 	"res://scenes/tracks/Track16.tscn", # Fiordland = INDEXUL 9
+	"res://scenes/tracks/Track17.tscn", # Jodhpur = INDEXUL 10
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Alpii", "Baikal", "Stromboli", "Chongqing",
-	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
+	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland", "Jodhpur",
 ]
 const CHAMP_ROUNDS: int = 3
 

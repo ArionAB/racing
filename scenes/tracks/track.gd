@@ -13802,21 +13802,44 @@ func is_steps_at(frac: float) -> bool:
 	return _frac_in_ranges(frac, _step_ranges())
 
 
+## Grupul comun al "portilor de banda": orice nod care poate inchide o
+## scurtatura se inscrie aici in `_ready`, indiferent de tip sau de adancimea
+## in subarbore. Inlocuieste vechea cautare `get_children() + is LavaFlowHazard`
+## (Stromboli), care nu vedea nimic ce nu era copil DIRECT al pistei si nu
+## putea sti despre o a doua clasa de poarta (Jodhpur, `CowGate`) fara sa
+## primeasca fiecare tip nou scris in codul lui `Track`.
+const BRANCH_GATE_GROUP: StringName = &"branch_gate"
+
 ## Mai e practicabila banda secundara cu indexul dat?
 ##
 ## Implicit DA — pistele care n-au nimic care sa inchida o banda nu simt
 ## nimic. Pe Stromboli raspunde `LavaFlowHazard`: limba creste tur de tur si
-## de la stadiul 3 ruta scurta e zid.
+## de la stadiul 3 ruta scurta e zid. Pe Jodhpur raspunde `CowGate`: vaca se
+## culca in gura ulicioarei o data pe ciclu.
+##
+## Generalizat sa citeasca orice nod din grupul `BRANCH_GATE_GROUP` care are
+## `branch_index` si `shortcut_open()` — duck typing, nu o lista de clase
+## cunoscute, ca o poarta noua sa nu ceara alta modificare aici. Portile sunt
+## cautate prin `get_tree().get_nodes_in_group`, deci pot sta oriunde in
+## scena (LavaFlowHazard era copil direct al pistei; CowGate atarna sub un
+## Marker3D langa gura scurtaturii). DACA DOUA PORTI declara acelasi
+## `branch_index`, castiga prima gasita — nu e cazul azi (o singura poarta pe
+## banda), dar merita spus explicit.
 ##
 ## Intrebarea o pune AIController la fiecare cadru, nu o data pe cursa: o
 ## banda se poate inchide IN TIMPUL cursei, si un AI care a decis la turul 1
-## ca merge pe scurta ar intra in lava la turul 3.
+## ca merge pe scurta ar intra in zid mai tarziu (lava la turul 3, vaca la
+## urmatorul ciclu de 47 s).
 func branch_is_open(index: int) -> bool:
-	for child in get_children():
-		if child is LavaFlowHazard:
-			var lf := child as LavaFlowHazard
-			if lf.branch_index == index:
-				return lf.shortcut_open()
+	if not is_inside_tree():
+		return true
+	for node in get_tree().get_nodes_in_group(BRANCH_GATE_GROUP):
+		if not (node is Node3D):
+			continue
+		if not ("branch_index" in node) or not node.has_method("shortcut_open"):
+			continue
+		if int(node.branch_index) == index:
+			return bool(node.shortcut_open())
 	return true
 
 

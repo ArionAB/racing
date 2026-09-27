@@ -433,6 +433,17 @@ const SPLIT_MODELS := {
 	# `church_arch`/`fig_tree`/`fever_tree`: ACCENT_HOLDS_CLASS, nu
 	# CLASSES_BY_MODEL direct pe corp.
 	"elephant": true,
+	# Rata (Fiordland, lotul PADUREA DE FAGI): tufa densa cu flori rosii, UN
+	# SINGUR nod de mesh (`Rata`, nu Trunk+Crown ca fagii). Masurat
+	# (probe_slots.gd): 28.2% slot 7 (KERB_RED, florile — brief-ul le numeste
+	# accent), 38.8% slot 21 (TROPICAL_GREEN) + 33.0% slot 28 (LOG_DARK), toate
+	# TREI pe acelasi interval de inaltime (0-3.67 m) — nu se separa pe
+	# verticala, e o tufa amestecata, nu copac cu coroana dezlipita de
+	# trunchi (masuratori §2: raport raza-baza/semi-latime 0.930 -> `hull`).
+	# `true` (nu lista de grupuri): fisierul e unic in tot proiectul (verificat
+	# cu find pe assets/models), deci nu exista risc de coliziune de nume ca la
+	# `fig_tree`.
+	"rata_tree": true,
 }
 
 const ACCENT_SPLIT := {
@@ -577,6 +588,15 @@ const ACCENT_SPLIT := {
 	# `Kopje_Camp` unde iarba (mica) ramane si granitul (mare) e cel ce
 	# primeste clasa prin ACCENT_HOLDS_CLASS.
 	"Elephant_Mesh": Palette.FOAM_WHITE,
+	# Rata (Fiordland): se PASTREAZA slotul 7 (KERB_RED, florile, piesa MICA)
+	# pe corp, ca la `Fig_Tree`/`Fever_Tree` de mai sus — nu ca la
+	# `Elephant_Mesh` (unde piesa mica e cea care pleaca). Tufa mare
+	# (sloturile 21+28, 71.8% din arie) pleaca in `_Accente` si ia clasa
+	# `beech_canopy` prin ACCENT_HOLDS_CLASS mai jos, iar florile raman
+	# pictate pe atlas, ca sa nu le imbrace clasa de frunzis. Masurat
+	# (probe_slots.gd): slot 7 y 1.23..3.45, aproape acelasi interval ca 21
+	# (0.30..3.67) — nu se poate separa pe inaltime, doar pe slot.
+	"Rata": Palette.KERB_RED,
 }
 
 ## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
@@ -606,6 +626,12 @@ const ACCENT_HOLDS_CLASS := {
 	# ramas pe corp) ia `elephant_hide`; corpul original ramane doar cu
 	# fildesii pe atlas.
 	"elephant": true,
+	# Rata (Fiordland, lotul PADUREA DE FAGI): accentul (`Rata_Accente`, tufa
+	# de frunzis 21+28) ia `beech_canopy`; corpul original ramane cu florile
+	# (KERB_RED) pe atlas. Nu exista astazi vreo instanta cu metadata
+	# `racire`/`lumina` pe Rata, dar intrarea tine constanta consistenta cu
+	# restul ruptelor inversate, pentru cazul in care un lot viitor adauga.
+	"rata_tree": true,
 }
 
 
@@ -1383,6 +1409,59 @@ const CLASSES_BY_MODEL := {
 	},
 	"torrent_chute": {
 		"Rock": Palette.TRI_PREFIX + "wet_gneiss",
+	},
+
+	# --- Fiordland: PADUREA DE FAGI (Track16, lotul A) ----------------------
+	#
+	# Brief §4/§5.1: "verde-negru de muschi si fag, cel mai inchis verde din
+	# joc" — trunchiuri negre subtiri, coronament marunt. `cloud_forest` (numit
+	# in brief ca "reuse daca tine") NU EXISTA in cod (verificat cu grep pe
+	# palette.gd) — clasele de mai jos sunt noi, dar refolosesc dale deja in
+	# VRAM (`bark`, `acacia_canopy`), ca `bark_fever`/`termite_clay`.
+	#
+	# DOUA materiale noi (buget lot: +2, exact la limita).
+	#
+	# beech_a/b/c: kitul exporta DEJA Trunk/Crown ca noduri SEPARATE (nu
+	# necesita SPLIT_MODELS/ACCENT_SPLIT, spre deosebire de Rata mai jos).
+	# Masurat (probe_slots.gd): Trunk/Trunk_001/Trunk_002 100% slot 28
+	# (LOG_DARK) — deja monocrom SI deja pe culoarea tinta, trunchiul primeste
+	# doar granulatie de scoarta (`bark_beech`, tenta calculata in palette.gd).
+	# Crown/Crown_001/Crown_002: 56% slot 21 (TROPICAL_GREEN) + 44% slot 28
+	# (LOG_DARK), PE ACELASI interval de inaltime (nu se separa pe verticala
+	# ca la Serengeti) — o clasa pe tot nodul ia ambele sloturi deodata, deci
+	# `beech_canopy` e tentata pe media ponderata a lor (palette.gd), nu pe un
+	# singur slot ales cu ochiul.
+	"beech_a": {
+		"Trunk": Palette.TRI_PREFIX + "bark_beech",
+		"Crown": Palette.TRI_PREFIX + "beech_canopy",
+	},
+	"beech_b": {
+		"Trunk_001": Palette.TRI_PREFIX + "bark_beech",
+		"Crown_001": Palette.TRI_PREFIX + "beech_canopy",
+	},
+	"beech_c": {
+		"Trunk_002": Palette.TRI_PREFIX + "bark_beech",
+		"Crown_002": Palette.TRI_PREFIX + "beech_canopy",
+	},
+	# beech_dead: UN SINGUR nod (`Beech_Dead`, nu Trunk+Crown) — 94.4% slot 28
+	# (LOG_DARK, acelasi trunchi negru) + 5.6% slot 12 (CACTUS_GREEN, licheni/
+	# ramurele razlete, y 0.00..4.21, acelasi interval ca restul corpului — nu
+	# se separa). Sub pragul de ruptura (2.5%, memoria clase-pe-piese-de-kit)
+	# ar fi fost ignorat, dar 5.6% e putin peste — totusi, o ruptura pentru o
+	# creanga uscata fara frunze n-are sens vizual (nu exista "coroana" de
+	# separat pe un copac mort), asa ca merge direct pe tot nodul, ca
+	# `dead_tree` pe Serengeti (baobab/dead_tree, aceeasi mecanica).
+	"beech_dead": {
+		"Beech_Dead": Palette.TRI_PREFIX + "bark_beech",
+	},
+	# rata_tree: vezi SPLIT_MODELS["rata_tree"] si ACCENT_SPLIT["Rata"] —
+	# corpul pastreaza florile (KERB_RED, slot 7), tufa de frunzis (21+28)
+	# pleaca in `Rata_Accente` si ia `beech_canopy`. Tinta ponderata a Ratei
+	# (renormalizat pe 21/28: 54.0%/46.0%) cade la (68.1, 90.3, 49.9) — sub 2
+	# unitati pe canal fata de tinta fagului (67.8, 91.8, 50.4), aceeasi
+	# familie, deci ACEEASI clasa (nu un al treilea material).
+	"rata_tree": {
+		"Rata_Accente": Palette.TRI_PREFIX + "beech_canopy",
 	},
 }
 

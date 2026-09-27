@@ -17,6 +17,10 @@ const CAR_DATA: Array[Resource] = [
 	preload("res://scenes/cars/data/firetruck.tres"),
 	preload("res://scenes/cars/data/buggy.tres"),
 ]
+## Traficul de tuk-tuk-uri (Jodhpur): NU e in garaj (nu se poate alege ca
+## masina de jucator/AI de cursa) — separat de CAR_DATA ca sa nu apara din
+## greseala in lineup-ul AI_CARS sau la selectia de masina.
+const CAR_DATA_TUKTUK: CarData = preload("res://scenes/cars/data/tuktuk.tres")
 
 ## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in cursa rapida.
 ##
@@ -93,6 +97,15 @@ const CHAMP_POINTS: Array[int] = [10, 8, 6, 4, 2, 1]
 var total_laps: int = 3
 ## Adversarii. 5 AI + jucatorul = 6 masini pe grila.
 var ai_count: int = 5
+## Suprascrie `Track.traffic_count` la constructie — vezi `Race._ready`
+## (`track.traffic_count = traffic_override` cand >= 0). -1 (implicit) =
+## neatins, fiecare pista foloseste `traffic_count` propriu (0 pe toate in
+## afara de Jodhpur). Acelasi tipar ca `ai_count`: singurul punct din care
+## `tools/probe_race.gd` poate injecta `--traffic=N` INAINTE ca `Race._ready`
+## sa apuce sa cheme `_spawn_traffic()` — `Race` isi construieste pista si isi
+## cheama proprul `_ready` sincron, in interiorul lui `add_child`, deci nu
+## exista alt moment in care sonda sa apuce sa scrie pe `track` direct.
+var traffic_override: int = -1
 
 # Selectii (masina aleasa se persista).
 var selected_car: int = 0

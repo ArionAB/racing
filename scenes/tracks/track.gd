@@ -3601,6 +3601,14 @@ func _code_points() -> Array[Vector3]:
 	push_error("Track: suprascrie _code_points() in subclasa sau adauga un nod Path")
 	return []
 
+## Traficul de tuk-tuk-uri (Jodhpur, Track17, brief §3 „Traficul de tuk-tuk-
+## uri"): cate corpuri `Car` cu `TrafficController` circula pe traseu, in
+## afara masinilor de cursa. IMPLICIT OPRIT (0) — pe toate pistele existente
+## (Track01/08/09/.../16) comportamentul ramane NESCHIMBAT; doar Jodhpur il
+## va ridica. `Race._spawn_traffic` citeste exportul asta si construieste
+## lista separata de tuk-tuk-uri, distribuite uniform pe traseu (vezi acolo).
+@export var traffic_count: int = 0
+
 ## Bifeaza in Inspector ca sa reconstruiesti pista (doar in editor).
 ## Pe o pista definita in cod, PRIMA bifare creeaza si nodul "Path" cu
 ## punctele reale ale traseului — de atunci curba e a ta, trage de ea.

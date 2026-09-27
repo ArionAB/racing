@@ -17,8 +17,15 @@ extends Node
 ## AudioManager, iar acelea nu exista in modul --script):
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn
 ##   ... -- --mode=bump
-##   ... -- --mode=race --track=0 --seconds=150 [--car=0]
+##   ... -- --mode=race --track=0 --seconds=150 [--car=0] [--traffic=N]
 ##   ... -- --mode=cliff --track=0
+##
+## `--traffic=N` (Jodhpur, brief §4(c)): suprascrie `Track.traffic_count`
+## INAINTE de constructia pistei — vezi GameState.traffic_override. Pe orice
+## pista in afara de Jodhpur (Track17), traficul e doar corpuri `Car` in plus
+## pe traseul EI (nu are gimmick-ul de banda stanga), util strict pentru
+## harnasul sintetic de comparatie A/B, nu pentru verdictul final (memoria
+## `harnas-sintetic-comportament-emergent`: verdictul real se da pe Jodhpur).
 
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 ## `--slice=a,b`: felia de traseu (fractii) raportata separat. (-1,-1) = fara.
@@ -176,6 +183,11 @@ var _seconds: float = 150.0
 ## 2, diagnosticul coordonatorului). -1 (implicit) = neatins, ciclul normal.
 ## Pistele fara `RainCycle` ignora ambele steaguri.
 var _force_rain: int = -1
+## `--traffic=N`: seteaza `track.traffic_count` INAINTE de constructia pistei
+## (brief §4(c), Jodhpur) — cate tuk-tuk-uri circula pe traseu, in afara
+## masinilor de cursa. -1 (implicit) = neatins, orice pista foloseste
+## `traffic_count` propriu (0 pe toate in afara de Jodhpur).
+var _traffic: int = -1
 
 var _race: Node = null
 var _elapsed: float = 0.0
@@ -294,6 +306,8 @@ func _ready() -> void:
 			_slice = Vector2(float(ab[0]), float(ab[1]))
 		elif arg.begins_with("--rain="):
 			_force_rain = int(arg.trim_prefix("--rain="))
+		elif arg.begins_with("--traffic="):
+			_traffic = int(arg.trim_prefix("--traffic="))
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -351,6 +365,7 @@ func _start_race() -> void:
 	GameState.selected_track = _track_index
 	GameState.champ_active = false
 	GameState.total_laps = 99 # cursa nu se termina singura; o oprim pe timp
+	GameState.traffic_override = _traffic
 	_bucket_speed.resize(BUCKETS)
 	_bucket_samples.resize(BUCKETS)
 	_bucket_slow.resize(BUCKETS)
@@ -373,7 +388,13 @@ func _start_race() -> void:
 		if car == player:
 			var ai := AIController.new()
 			car.set_controller(ai)
-			ai.configure(_race.track, rng, cars)
+			# `_race.traffic` (tuk-tuk-urile, brief §4(c)): fara ele aici, AI-ul
+			# care inlocuieste jucatorul n-ar vedea traficul deloc — restul
+			# masinilor AI il vad (controller-ele lor originale au fost
+			# configurate de Race cu _ai_visible, care le include).
+			var visible: Array[Car] = cars.duplicate()
+			visible.append_array(_race.traffic)
+			ai.configure(_race.track, rng, visible)
 		else:
 			(car.controller as AIController).line_offset = rng.randf_range(-0.35, 0.35)
 		# Variatie onesta, dar determinista — altfel cifrele danseaza intre rulari.

@@ -52,6 +52,20 @@ extends Node
 ##                             `rain_falls` (cascadele de ploaie, altfel
 ##                             `visible = false`) si mediul de ploaie. Fara el,
 ##                             captura prinde mereu faza uscata.
+##   --dusk=0.5                 CEASUL DE LUMINA (DuskCycle, Jodhpur) fortat la
+##                             fractia data (0 = turul 1 auriu, 1 = turul 3,
+##                             noapte cu artificii — docs/track_briefs/
+##                             jodhpur.md §3/§4). Daca pista are deja un
+##                             `DuskCycle` (grupul `dusk_cycle`), i se cheama
+##                             `force_value()`; daca NU are (orice pista in
+##                             afara de Jodhpur), Snapshot ADAUGA unul temporar
+##                             — asa se poate testa ceasul pe piste existente
+##                             INAINTE ca Track17 sa existe (memoria
+##                             `sonda-masura-alt-obiect`: fara asta n-ai cum sa
+##                             verifici ca parametrii chiar se misca, doar ca
+##                             scriptul compileaza). Fara acest flag, o pista
+##                             fara `DuskCycle` propriu ramane exact ca inainte
+##                             (dusk=0, neatins).
 ##   --torrent-at=11.0         TORENTUL IN PULSURI (TorrentCycle, scurtatura
 ##                             Chasm): ceasul ciclului in secunde; 0 = CALM,
 ##                             7 = inceputul anuntului, 10 = inceputul pulsului
@@ -244,6 +258,7 @@ func _ready() -> void:
 	var driver_view := false
 	var rain_force := -1.0 # >= 0: RainCycle.force_factor() dupa doua cadre
 	var rain_clock := -1.0 # >= 0: RainCycle.force_clock() dupa doua cadre
+	var dusk_force := -1.0 # >= 0: DuskCycle.force_value() dupa doua cadre
 	var torrent_at := -1.0 # >= 0: TorrentCycle.force_clock() (secunde in ciclu)
 	var overdraw := false
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
@@ -409,6 +424,8 @@ func _ready() -> void:
 			rain_force = float(arg.trim_prefix("--rain="))
 		elif arg.begins_with("--rain-clock="):
 			rain_clock = float(arg.trim_prefix("--rain-clock="))
+		elif arg.begins_with("--dusk="):
+			dusk_force = float(arg.trim_prefix("--dusk="))
 		elif arg.begins_with("--torrent-at="):
 			torrent_at = float(arg.trim_prefix("--torrent-at="))
 		elif arg == "--overdraw":
@@ -519,6 +536,29 @@ func _ready() -> void:
 			print("--rain-clock=%.2f: %d RainCycle fortate" % [rain_clock, cycles])
 		else:
 			print("--rain=%.1f: %d RainCycle fortate" % [rain_force, cycles])
+	# Ceasul de lumina (Jodhpur, DuskCycle). Doua cadre, acelasi motiv ca
+	# ploaia (_collect.call_deferred() in DuskCycle._ready): fara asteptare,
+	# force_value() ar cadea pe un nod care inca n-a apucat sa-si gaseasca
+	# Environment-ul/soarele. DACA pista n-are niciun DuskCycle (orice pista
+	# in afara de Jodhpur), Snapshot adauga unul TEMPORAR direct pe track --
+	# asa se poate verifica ceasul pe piste existente inainte ca Track17 sa
+	# existe (memoria sonda-masura-alt-obiect: fara asta n-ai cum sa dovedesti
+	# ca parametrii chiar se misca).
+	if dusk_force >= 0.0:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var dusk_cycles := get_tree().get_nodes_in_group(&"dusk_cycle")
+		if dusk_cycles.is_empty():
+			var dc: Node = (preload("res://scenes/hazards/dusk_cycle.gd") as GDScript).new()
+			track.add_child(dc)
+			await get_tree().process_frame
+			await get_tree().process_frame
+			dusk_cycles = get_tree().get_nodes_in_group(&"dusk_cycle")
+			print("--dusk=%.2f: pista fara DuskCycle propriu, adaugat unul temporar" % dusk_force)
+		for node in dusk_cycles:
+			if node.has_method("force_value"):
+				node.call("force_value", dusk_force)
+		print("--dusk=%.2f: %d DuskCycle fortate" % [dusk_force, dusk_cycles.size()])
 	# Torentul in pulsuri (Fiordland, scurtatura Chasm): `TorrentCycle._place`
 	# e amanat si reincearca pana apar rutele, deci asteptam doua cadre si
 	# fortam ceasul pe toate torentele din grup (0 = CALM, period-telegraph-

@@ -55,17 +55,30 @@ extends Node
 const KEY_T: PackedFloat32Array = [0.0, 0.5, 1.0]
 const KEY_SUN_ELEV_DEG: PackedFloat32Array = [8.0, 3.0, 1.0]
 const KEY_SUN_ENERGY: PackedFloat32Array = [1.0, 0.60, 0.32]
-const KEY_SUN_COLOR: Array[Color] = [
-	Color.html("FFB27A"), Color.html("FF8FA0"), Color.html("8E9BD6")]
+## Culorile NU pot fi `const Array[Color]` initializat cu `Color.html()`/
+## `Color(...)` de call — GDScript cere o EXPRESIE CONSTANTA pentru `const`,
+## iar un apel de functie (chiar si un constructor) nu calific ("Assigned
+## value for constant... isn't a constant expression", verificat la
+## compilare). De-aia sunt `Array[Color]` populate in `_static_init()`, in loc
+## de literale `Color(r,g,b)` scrise de mana (mai usor de citit direct hexul
+## din brief §4 decat trei zecimale rotunjite).
+static var KEY_SUN_COLOR: Array[Color] = []
 ## Ambientul: energia urca usor (0,30 -> 0,45), culoarea trece spre indigo —
 ## se foloseste chiar culoarea de soare a fazei 1 ca ancora de ambient rece,
 ## amestecata cu un violet la mijloc (brief: "0,40, violet" la 0,5).
 const KEY_AMBIENT_ENERGY: PackedFloat32Array = [0.30, 0.40, 0.45]
-const KEY_AMBIENT_COLOR: Array[Color] = [
-	Color.html("FFB27A"), Color.html("B98FC0"), Color.html("8E9BD6")]
-const KEY_FOG_COLOR: Array[Color] = [
-	Color.html("E8A878"), Color.html("9A7FA8"), Color.html("3E4A7A")]
+static var KEY_AMBIENT_COLOR: Array[Color] = []
+static var KEY_FOG_COLOR: Array[Color] = []
 const KEY_FOG_END: PackedFloat32Array = [300.0, 270.0, 240.0]
+
+
+static func _static_init() -> void:
+	KEY_SUN_COLOR = [
+		Color.html("FFB27A"), Color.html("FF8FA0"), Color.html("8E9BD6")]
+	KEY_AMBIENT_COLOR = [
+		Color.html("FFB27A"), Color.html("B98FC0"), Color.html("8E9BD6")]
+	KEY_FOG_COLOR = [
+		Color.html("E8A878"), Color.html("9A7FA8"), Color.html("3E4A7A")]
 ## Emisia lampilor: 0,15 (abia perceptibil, ziua) -> 1,0 (sursa de lumina
 ## principala, noaptea) — brief §4 si §3 „emisia lampilor 0,15 -> 1,0".
 const KEY_LAMPS: PackedFloat32Array = [0.15, 0.6, 1.0]
@@ -232,14 +245,28 @@ func _apply_ambient_and_fog(d: float) -> void:
 	_env.fog_depth_end = _lerp_key(KEY_FOG_END, d, _base_fog_end)
 
 
+## Ultima valoare SCRISA pe `dusk_lamps` (vezi `_apply_lamps`). Exista DOAR
+## fiindca `RenderingServer.global_shader_parameter_get()` NU se poate citi
+## la runtime in afara editorului — Godot 4.7 arunca explicit "This function
+## should never be used outside the editor, it can severely damage
+## performance" si intoarce `null` necondiționat (verificat direct: si
+## imediat dupa un `global_shader_parameter_set()` pe ACEEASI cheie, `get()`
+## tot null). `set()` insa functioneaza normal la runtime — asta e calea
+## SUPORTATA prin care shaderele citesc valoarea (`global uniform float
+## dusk_lamps;`), doar unealta de INTROSPECTIE dinspre GDScript lipseste in
+## afara editorului. `lamps_value` e oglinda locala prin care o sonda poate
+## verifica "ce s-a scris", fara sa pretinda ca citeste inapoi din motor —
+## canalul real ramane tot `RenderingServer`/`global uniform`, neschimbat.
+var lamps_value: float = KEY_LAMPS[0]
+
 ## Scrie parametrul GLOBAL de shader (canalul unic de emisie a lampilor).
 ## `RenderingServer.global_shader_parameter_set` functioneaza indiferent daca
 ## parametrul e declarat in `project.godot` [shader_globals] sau nu (Godot il
 ## creeaza „soft" la runtime), dar fara declaratie niciun shader nou nu-l vede
 ## la compilare — de-aia proiectul TREBUIE sa aiba cheia (vezi project.godot).
 func _apply_lamps(d: float) -> void:
-	RenderingServer.global_shader_parameter_set(LAMPS_GLOBAL_PARAM,
-		_lerp_key(KEY_LAMPS, d, KEY_LAMPS[0]))
+	lamps_value = _lerp_key(KEY_LAMPS, d, KEY_LAMPS[0])
+	RenderingServer.global_shader_parameter_set(LAMPS_GLOBAL_PARAM, lamps_value)
 
 
 ## Interpolare liniara pe cheile `KEY_T` (0 / 0,5 / 1), PIVOTATA pe valoarea

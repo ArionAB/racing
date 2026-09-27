@@ -114,3 +114,12 @@ nivelul sau peste a lui main.
 Rămân deschise: 1, 4, 6, 7, 8 de mai sus; caiacele din zona H (`malKayak`) nu
 apar (generatorul le respinge pe cotă — preexistent); `sealRock1` ridicat manual
 de dezvoltator e semnalat „plutește” de `probe_manual`.
+
+### Acceptate la volan după PR #416 (26 sep 2026)
+
+- Scurtătura din pădure câștigă +1,35…+1,93 s pe uscat (peste fereastra 0,5–1,5):
+  **acceptat**, `ProbeFiordScurtatura` free rămâne roșu în cunoștință de cauză.
+- Stirling `push_speed` 9: **bine așa**.
+- `sealRock1` ridicat: **intenționat** (probe_manual îl raportează, se ignoră).
+- Spuma râului colțuroasă: se rezolvă cu atlasul de culori.
+- Caiacele lipsă din zona H: **ok așa**.

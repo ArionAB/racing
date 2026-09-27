@@ -251,6 +251,19 @@ func _tick_race(delta: float) -> void:
 				car.finished = true
 	_update_positions()
 
+## Progresul jucatorului ca fractie din cursa intreaga (0 pe grila/countdown,
+## 1 la ultima trecere) — sursa lui `DuskCycle.dusk` (Jodhpur, brief §3
+## „Ceasul de lumina”: iluminarea trebuie sa fie identica pentru acelasi PUNCT
+## din cursa, nu din timp, altfel recordurile de time trial nu se compara cu
+## cursa normala). `_progress[0]` e jucatorul (vezi `_setup`: `i == 0` seteaza
+## `is_player`), iar `.total` e acelasi camp continuu (tururi + fractie
+## curenta) folosit pentru clasament in `_tick_race`/`_update_positions`, deci
+## nu exista o a doua sursa de adevar pentru "cat de departe a ajuns".
+func player_progress_fraction() -> float:
+	if _progress.is_empty() or GameState.total_laps <= 0:
+		return 0.0
+	return clampf(float(_progress[0].total) / float(GameState.total_laps), 0.0, 1.0)
+
 ## Plasa de siguranta a cursei: nimeni nu ramane blocat. Zonele de fly-off au
 ## RespawnZone-ul lor, dar mai exista doua feluri de a te pierde — sa cazi din
 ## lume si sa te impotmolesti in nisip fara sa mai poti iesi. Amandoua se

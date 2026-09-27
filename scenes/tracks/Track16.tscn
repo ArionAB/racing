@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://caek2oeiv5cwp"]
 
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
-[ext_resource type="Script" uid="uid://c4avlqtdcpl6o" path="res://scenes/tracks/cliff_face.gd" id="cliffface"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" uid="uid://bee6c2pavxw1a" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="3_signal"]
 [ext_resource type="Script" uid="uid://bus431n67bchl" path="res://scenes/hazards/rain_cycle.gd" id="4_rain"]
@@ -13,6 +12,7 @@
 [ext_resource type="Script" uid="uid://cwppirrwclt8v" path="res://scenes/hazards/torrent_cycle.gd" id="9_torrent"]
 [ext_resource type="Script" uid="uid://bx1wbw1u4rebs" path="res://scenes/hazards/foam_pool_g.gd" id="10_foam_pool_g"]
 [ext_resource type="Texture2D" uid="uid://dq1xh1dac1h3l" path="res://assets/textures/classes/concrete.png" id="51_7j8at"]
+[ext_resource type="Script" uid="uid://c4avlqtdcpl6o" path="res://scenes/tracks/cliff_face.gd" id="cliffface"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="prop"]
 [ext_resource type="PackedScene" uid="uid://2lxl0bjqeg5p" path="res://assets/models/fiordland/plants/beech_a.glb" id="s_beech_a"]
 [ext_resource type="PackedScene" uid="uid://cspyssga3n5gs" path="res://assets/models/fiordland/plants/beech_b.glb" id="s_beech_b"]
@@ -166,25 +166,25 @@ grass_center = 0.7
 edge_noise = 1.0
 bumpiness = 0.05
 
-[node name="Faleze" type="Node3D" parent="."]
+[node name="Faleze" type="Node3D" parent="." unique_id=2083259351]
 
-[node name="PereteCornisa" type="Marker3D" parent="Faleze"]
+[node name="PereteCornisa" type="Marker3D" parent="Faleze" unique_id=745994821]
 script = ExtResource("cliffface")
 frac_start = 0.052
 frac_end = 0.271
 side = -1.0
 material_class = "wet_gneiss"
+talus_slot = 20
 far_wall = false
 cut_wall = true
-cut_offset_m = 8.2
 cut_edge_offset_m = 12.0
 cut_height_m = 34.0
 cut_min_rise_m = 30.0
 cut_batter_m = 0.6
-cut_step_m = 4.0
 cut_bands = 8
+cut_foot_bite_m = 1.6
 cut_slots = Array[int]([29, 29, 20, 29, 29, 20, 29])
-cut_shade = 1.0
+cut_step_out_m = 0.1
 cut_taper_frac = 0.05
 cut_tuck_m = 6.0
 cut_facet_m = 0.5
@@ -192,12 +192,6 @@ cut_facet_cols = 3
 cut_facet_crown_bands = 0.6
 cut_facet_seed = 41
 cut_tread_m = 0.05
-cut_step_out_m = 0.1
-cut_foot_bite_m = 1.6
-talus_m = 0.0
-talus_rise_ratio = 0.62
-talus_rows = 2
-talus_slot = 20
 
 [node name="Peaks" type="Node3D" parent="." unique_id=1264933716]
 
@@ -1040,10 +1034,6 @@ transform = Transform3D(1.206537, 0, -0.036407, 0, 1.207086, 0, 0.036407, 0, 1.2
 [node name="gneisWall190" parent="DecorManual/ZoneB_Cornisa" unique_id=1308840552 instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(0.777358, 0, -0.958914, 0, 1.234424, 0, 0.958914, 0, 0.777358, -163.60889, 15.928604, -246.86697)
 
-[node name="gneisMoss191" parent="DecorManual/ZoneB_Cornisa" unique_id=1235045046 instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.557317, 0, -0.107801, 0, 0.567647, 0, 0.107801, 0, -0.557317, -162.87848, 15.926285, -247.49315)
-metadata/coliziune = "none"
-
 [node name="gneisWall192" parent="DecorManual/ZoneB_Cornisa" unique_id=1781369067 instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(-1.361233, 0, -0.371672, 0, 1.411062, 0, 0.371672, 0, -1.361233, -164.22343, 16.065948, -248.37527)
 
@@ -1068,16 +1058,8 @@ transform = Transform3D(1.257153, 0, 0.13755, 0, 1.264656, 0, -0.13755, 0, 1.257
 [node name="gneisWall199" parent="DecorManual/ZoneB_Cornisa" unique_id=1448702577 instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(0.580702, 0, 1.230962, 0, 1.361059, 0, -1.230962, 0, 0.580702, -169.29494, 16.75058, -254.3208)
 
-[node name="gneisMoss200" parent="DecorManual/ZoneB_Cornisa" unique_id=1699991236 instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.114781, 0, 0.659056, 0, 0.668976, 0, -0.659056, 0, 0.114781, -168.38481, 16.749344, -255.10107)
-metadata/coliziune = "none"
-
 [node name="gneisWall201" parent="DecorManual/ZoneB_Cornisa" unique_id=2118899966 instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(-0.069592, 0, 1.303199, 0, 1.305056, 0, -1.303199, 0, -0.069592, -171.24326, 16.983444, -256.12766)
-
-[node name="gneisMoss202" parent="DecorManual/ZoneB_Cornisa" unique_id=161712297 instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(-0.107752, 0, 0.493116, 0, 0.504751, 0, -0.493116, 0, -0.107752, -170.40836, 16.982178, -256.8434)
-metadata/coliziune = "none"
 
 [node name="gneisWall203" parent="DecorManual/ZoneB_Cornisa" unique_id=1049953023 instance=ExtResource("s_chasm_rock")]
 transform = Transform3D(0.159636, 0, -1.553488, 0, 1.561669, 0, 1.553488, 0, 0.159636, -171.14738, 16.983307, -256.20984)
@@ -3944,9 +3926,6 @@ metadata/coliziune = "none"
 [node name="wallFoot971" parent="DecorManual/ZoneB_Cornisa" unique_id=1677424610 instance=ExtResource("s_moss_boulder_a")]
 transform = Transform3D(-1.211424, 0, -0.224325, 0, 1.232018, 0, 0.224325, 0, -1.211424, -166.21129, 15.97966, -246.67107)
 
-[node name="wallFoot972" parent="DecorManual/ZoneB_Cornisa" unique_id=1673696546 instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.449175, 0, -0.974464, 0, 1.073005, 0, 0.974464, 0, 0.449175, -165.63141, 16.225067, -249.55873)
-
 [node name="wallFoot973" parent="DecorManual/ZoneB_Cornisa" unique_id=1632773035 instance=ExtResource("s_fern_cluster")]
 transform = Transform3D(-0.30137, 0, -1.238761, 0, 1.274894, 0, 1.238761, 0, -0.30137, -168.93394, 16.386124, -249.11798)
 metadata/coliziune = "none"
@@ -3956,16 +3935,6 @@ transform = Transform3D(-1.190014, 0, 0.005092, 0, 1.190025, 0, -0.005092, 0, -1
 
 [node name="wallFoot975" parent="DecorManual/ZoneB_Cornisa" unique_id=1468965222 instance=ExtResource("s_tussock_clump")]
 transform = Transform3D(-1.109551, 0, 0.394624, 0, 1.177638, 0, -0.394624, 0, -1.109551, -169.84555, 16.520966, -250.3715)
-metadata/coliziune = "none"
-
-[node name="wallFoot976" parent="DecorManual/ZoneB_Cornisa" unique_id=1002224274 instance=ExtResource("s_moss_boulder_b")]
-transform = Transform3D(0.622714, 0, -0.920159, 0, 1.111065, 0, 0.920159, 0, 0.622714, -168.51534, 16.519135, -251.51189)
-
-[node name="wallFoot977" parent="DecorManual/ZoneB_Cornisa" unique_id=952440601 instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(1.00785, 0, -0.137648, 0, 1.017206, 0, 0.137648, 0, 1.00785, -173.16504, 16.910645, -254.48009)
-
-[node name="wallFoot978" parent="DecorManual/ZoneB_Cornisa" unique_id=1239895933 instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.075972, 0, 0.898272, 0, 0.901479, 0, -0.898272, 0, -0.075972, -174.7292, 17.088882, -255.17403)
 metadata/coliziune = "none"
 
 [node name="wallFoot979" parent="DecorManual/ZoneB_Cornisa" unique_id=1712159318 instance=ExtResource("s_moss_boulder_b")]
@@ -4398,426 +4367,6 @@ metadata/coliziune = "trunk"
 transform = Transform3D(-0.926726, 0, 0.086523, 0.001982, 0.930512, 0.021226, -0.0865, 0.021318, -0.926483, -321.6496, 28.928085, -348.75977)
 metadata/coliziune = "trunk"
 
-[node name="wallForest1178" parent="DecorManual/ZoneB_Cornisa" unique_id=1508782321 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.84403, 0, -0.545911, 0.026859, 1.003972, 0.041527, 0.54525, -0.049456, 0.843008, -41.402847, 4.119141, -153.88835)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1179" parent="DecorManual/ZoneB_Cornisa" unique_id=424645902 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.102885, 0, -0.897155, 0.041504, 0.902069, 0.00476, 0.896195, -0.041776, 0.102775, -46.142494, 4.083267, -155.62386)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1183" parent="DecorManual/ZoneB_Cornisa" unique_id=731777814 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.282412, 0, -0.921303, -0.012162, 0.963532, -0.003728, 0.921222, 0.01272, 0.282387, -56.905785, 10.403107, -173.10808)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1188" parent="DecorManual/ZoneB_Cornisa" unique_id=1798426921 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.634281, 0, -0.875471, 0.033131, 1.080318, -0.024004, 0.874843, -0.040913, -0.633827, -94.11621, 9.192871, -208.57732)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1189" parent="DecorManual/ZoneB_Cornisa" unique_id=379312059 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.905401, 0, -0.435714, -0.020867, 1.003634, 0.04336, 0.435214, 0.04812, -0.904362, -96.28317, 9.325653, -208.63646)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1190" parent="DecorManual/ZoneB_Cornisa" unique_id=511131640 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.876218, 0, -0.320528, -0.010763, 0.932478, -0.029422, 0.320347, 0.031329, 0.875724, -98.99855, 9.61084, -210.6027)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1193" parent="DecorManual/ZoneB_Cornisa" unique_id=1208124787 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.841642, 0, -0.448029, -0.012306, 0.953103, 0.023118, 0.44786, 0.02619, -0.841325, -113.9448, 10.996048, -219.39374)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1194" parent="DecorManual/ZoneB_Cornisa" unique_id=1210290849 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.315357, 0, 0.864286, -0.020077, 0.919773, -0.007326, -0.864052, -0.021372, -0.315272, -118.29454, 11.4095, -222.16881)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1197" parent="DecorManual/ZoneB_Cornisa" unique_id=1667296450 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.926892, 0, -0.042103, -0.001843, 0.926958, 0.040573, 0.042063, 0.040615, -0.926003, -130.91988, 12.858856, -232.63354)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1201" parent="DecorManual/ZoneB_Cornisa" unique_id=157846255 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.936381, 0, 0.325089, -0.010329, 0.990707, 0.029751, -0.324925, -0.031493, 0.935908, -142.44418, 14.212601, -241.29843)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1202" parent="DecorManual/ZoneB_Cornisa" unique_id=1004210502 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.378237, 0, 0.9808, -0.018558, 1.051017, -0.007157, -0.980624, -0.019891, -0.378169, -145.9621, 14.906876, -247.92189)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1204" parent="DecorManual/ZoneB_Cornisa" unique_id=1661478697 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.964666, 0, 0.455544, -0.014004, 1.066314, -0.029655, -0.455329, -0.032795, -0.96421, -150.13129, 15.420609, -251.46692)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1208" parent="DecorManual/ZoneB_Cornisa" unique_id=2054232189 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.419474, 0, -0.922117, 0.018909, 1.012831, -0.008602, 0.921923, -0.020773, -0.419386, -162.54604, 17.125519, -265.61856)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1210" parent="DecorManual/ZoneB_Cornisa" unique_id=1109518882 instance=ExtResource("s_beech_b")]
-transform = Transform3D(1.004968, 0, 0.133723, 0.005145, 1.013075, -0.038666, -0.133624, 0.039006, 1.004224, -169.78128, 18.021927, -273.18695)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1211" parent="DecorManual/ZoneB_Cornisa" unique_id=1336347159 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.909339, 0, -0.571184, -0.026732, 1.072671, 0.042558, 0.570558, 0.050257, -0.908343, -172.35365, 18.438553, -277.7349)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1213" parent="DecorManual/ZoneB_Cornisa" unique_id=983781049 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.257785, 0, -1.067405, 0.058962, 1.096416, 0.01424, 1.065775, -0.060657, 0.257391, -177.54968, 19.130615, -284.52216)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1215" parent="DecorManual/ZoneB_Cornisa" unique_id=508377396 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.470386, 0, -0.792297, 0.016666, 0.921207, 0.009895, 0.792122, -0.019382, 0.470282, -184.73878, 19.995316, -293.93768)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1216" parent="DecorManual/ZoneB_Cornisa" unique_id=1853755070 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.857201, 0, -0.387845, -0.007155, 0.9407, 0.015814, 0.387779, 0.017357, -0.857055, -190.62816, 20.494461, -298.45276)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1217" parent="DecorManual/ZoneB_Cornisa" unique_id=1781566610 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.837287, 0, 0.445573, 0.011669, 0.948139, -0.021928, -0.44542, 0.024839, 0.837, -195.79965, 20.919846, -302.58145)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1221" parent="DecorManual/ZoneB_Cornisa" unique_id=342094343 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.02656, 0, 0.920121, 0.0035, 0.920498, 0.000101, -0.920114, 0.003501, -0.02656, -219.08052, 22.690765, -317.3103)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1226" parent="DecorManual/ZoneB_Cornisa" unique_id=1031715254 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.787059, 0, 0.474053, 0.014875, 0.918345, 0.024697, -0.473819, 0.028831, -0.786672, -239.69182, 24.23346, -329.79694)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1227" parent="DecorManual/ZoneB_Cornisa" unique_id=1797645295 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.864858, 0, 0.576527, -0.024947, 1.038432, -0.037423, -0.575987, -0.044976, -0.864048, -246.70805, 24.77658, -336.24673)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1229" parent="DecorManual/ZoneB_Cornisa" unique_id=1926493303 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.654596, 0, 0.830571, 0.000386, 1.057518, -0.000305, -0.830571, 0.000492, 0.654596, -262.05954, 25.70401, -344.00067)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1230" parent="DecorManual/ZoneB_Cornisa" unique_id=1206723440 instance=ExtResource("s_beech_b")]
-transform = Transform3D(1.02789, 0, 0.047703, 0.001781, 1.02828, -0.038372, -0.047669, 0.038414, 1.027174, -269.0857, 26.09552, -346.90677)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1233" parent="DecorManual/ZoneB_Cornisa" unique_id=2120382658 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-1.00965, 0, -0.027281, 0.000561, 1.009804, -0.020763, 0.027276, -0.02077, -1.009436, -297.60822, 27.663406, -353.0934)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1236" parent="DecorManual/ZoneB_Cornisa" unique_id=106707328 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.981258, 0, 0.162637, -0.000592, 0.994638, 0.003569, -0.162636, -0.003618, 0.981252, -309.47092, 28.326294, -355.17978)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1244" parent="DecorManual/ZoneB_Cornisa" unique_id=1991595682 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.917469, 0, 0.25164, 0.011001, 0.950443, -0.040109, -0.2514, 0.04159, 0.916592, -356.55447, 30.226974, -363.7822)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1246" parent="DecorManual/ZoneB_Cornisa" unique_id=1359480665 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.132285, 0, -0.982005, -0.047741, 0.989704, -0.006431, 0.980844, 0.048172, 0.132129, -375.85483, 30.721329, -372.48712)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1247" parent="DecorManual/ZoneB_Cornisa" unique_id=891298333 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.916388, 0, 0.372505, -0.01812, 0.988034, 0.044577, -0.372064, -0.04812, 0.915304, -33.841118, 7.485596, -157.12416)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1248" parent="DecorManual/ZoneB_Cornisa" unique_id=522866777 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.06397, 0, 0.969176, -0.006825, 0.971261, -0.00045, -0.969152, -0.00684, -0.063968, -41.298008, 5.43924, -155.87244)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1249" parent="DecorManual/ZoneB_Cornisa" unique_id=785088005 instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.741926, 0, 0.791788, 0.037457, 1.083858, -0.035098, -0.790902, 0.051331, 0.741096, -43.36383, 6.703857, -160.89638)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1250" parent="DecorManual/ZoneB_Cornisa" unique_id=1512436336 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.541341, 0, -0.923525, 0.024172, 1.070123, -0.014169, 0.923209, -0.028019, -0.541155, -46.679832, 11.1427, -166.73691)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1251" parent="DecorManual/ZoneB_Cornisa" unique_id=1660562839 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.475318, 0, -0.773206, 0.016377, 0.907417, -0.010067, 0.773032, -0.019224, -0.475211, -46.80213, 14.456757, -169.95422)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1252" parent="DecorManual/ZoneB_Cornisa" unique_id=1533082528 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.895622, 0, -0.573478, 0.02905, 1.062127, 0.045368, 0.572741, -0.053872, 0.894472, -48.261116, 19.778488, -174.18993)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1253" parent="DecorManual/ZoneB_Cornisa" unique_id=1470672962 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.828744, 0, 0.469662, 0.011655, 0.952281, 0.020566, -0.469517, 0.023639, -0.828488, -54.304092, 17.433517, -179.35504)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1254" parent="DecorManual/ZoneB_Cornisa" unique_id=1576031967 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.080347, 0, -1.019243, -0.006751, 1.022382, -0.000532, 1.01922, 0.006772, 0.080346, -60.558342, 15.999664, -186.2116)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1255" parent="DecorManual/ZoneB_Cornisa" unique_id=1050491414 instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.859945, 0, 0.681843, 0.031544, 1.096284, 0.039784, -0.681113, 0.050772, -0.859024, -64.90478, 18.30336, -196.00932)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1256" parent="DecorManual/ZoneB_Cornisa" unique_id=1466226195 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.90022, 0, 0.257858, 0.004184, 0.936299, 0.014607, -0.257824, 0.015195, -0.900102, -72.75563, 10.796341, -197.65594)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1257" parent="DecorManual/ZoneB_Cornisa" unique_id=1344819880 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.816301, 0, 0.510426, -0.024865, 0.961605, -0.039765, -0.509821, -0.046899, -0.815332, -78.59191, 8.186386, -204.1384)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1258" parent="DecorManual/ZoneB_Cornisa" unique_id=1037144099 instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.117891, 0, -1.055022, 0.031676, 1.06111, -0.00354, 1.054546, -0.031873, -0.117838, -80.02164, 8.525101, -208.2547)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1259" parent="DecorManual/ZoneB_Cornisa" unique_id=383970186 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.052858, 0, -0.99025, 0.039569, 0.990868, -0.002112, 0.989459, -0.039625, -0.052816, -92.905396, 9.242615, -210.31523)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1260" parent="DecorManual/ZoneB_Cornisa" unique_id=442423968 instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.961506, 0, 0.24714, 0.006156, 0.992452, 0.023948, -0.247064, 0.024727, -0.961207, -94.80237, 9.760681, -216.62009)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1261" parent="DecorManual/ZoneB_Cornisa" unique_id=2074141695 instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.931555, 0, 0.342548, -0.006271, 0.992373, -0.017055, -0.34249, -0.018172, -0.931399, -98.70865, 10.268021, -220.25209)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1262" parent="DecorManual/ZoneB_Cornisa" unique_id=392736590 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.823407, 0, -0.698435, 0.00233, 1.079721, -0.002747, 0.698431, -0.003602, -0.823402, -101.39418, 10.48848, -222.2922)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1263" parent="DecorManual/ZoneB_Cornisa" unique_id=1821888145 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.347017, 0, -0.953107, -0.017322, 1.014147, -0.006307, 0.95295, 0.018434, 0.346959, -103.48615, 10.614563, -222.477)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1264" parent="DecorManual/ZoneB_Cornisa" unique_id=1047686135 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.881875, 0, 0.247165, -0.011022, 0.914945, -0.039327, -0.246919, -0.040843, -0.880997, -109.473366, 10.8246, -221.20781)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1265" parent="DecorManual/ZoneB_Cornisa" unique_id=1856059322 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.164359, 0, 1.0824, 0.05013, 1.093633, 0.007612, -1.081239, 0.050705, -0.164183, -112.35058, 11.19136, -224.37213)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1266" parent="DecorManual/ZoneB_Cornisa" unique_id=1379038872 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.466238, 0, 0.795406, 0.022206, 0.921621, -0.013016, -0.795096, 0.02574, 0.466056, -115.11793, 11.711304, -229.39772)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1267" parent="DecorManual/ZoneB_Cornisa" unique_id=1128612644 instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.87548, 0, 0.293001, 0.016846, 0.921682, 0.050336, -0.292516, 0.05308, -0.874032, -122.07837, 12.053024, -228.67265)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1268" parent="DecorManual/ZoneB_Cornisa" unique_id=135485911 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.842909, 0, -0.569707, 0.001785, 1.017375, -0.00264, 0.569704, -0.003187, -0.842905, -120.80917, 12.622818, -236.74475)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1269" parent="DecorManual/ZoneB_Cornisa" unique_id=1977773229 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.831978, 0, -0.617041, -0.017646, 1.035398, 0.023792, 0.616788, 0.029621, -0.831638, -127.45427, 13.012054, -237.66272)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1270" parent="DecorManual/ZoneB_Cornisa" unique_id=79968749 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.20349, 0, -1.053505, 0.024345, 1.072691, 0.004702, 1.053223, -0.024795, 0.203436, -129.7696, 13.499542, -241.75969)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1271" parent="DecorManual/ZoneB_Cornisa" unique_id=1992197080 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.606025, 0, 0.882467, 0.015619, 1.070353, -0.010726, -0.882329, 0.018948, 0.60593, -133.89104, 13.503342, -239.29492)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1272" parent="DecorManual/ZoneB_Cornisa" unique_id=1984354510 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.740902, 0, 0.757367, -0.033082, 1.058488, 0.032363, -0.756644, -0.04628, 0.740195, -133.50577, 13.976715, -245.45355)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1273" parent="DecorManual/ZoneB_Cornisa" unique_id=640376057 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.901287, 0, -0.555075, 0.005668, 1.058447, -0.009203, 0.555046, -0.010808, -0.90124, -137.05344, 14.473251, -248.80252)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1274" parent="DecorManual/ZoneB_Cornisa" unique_id=1787695707 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.567904, 0, -0.781665, -0.019768, 0.965877, 0.014362, 0.781415, 0.024434, -0.567722, -143.28722, 15.149002, -252.90886)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1275" parent="DecorManual/ZoneB_Cornisa" unique_id=1858496135 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.974422, 0, 0.464168, -0.005099, 1.079264, -0.010704, -0.46414, -0.011857, -0.974363, -148.23378, 15.421432, -253.09363)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1276" parent="DecorManual/ZoneB_Cornisa" unique_id=545965326 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.913819, 0, 0.299068, -0.008419, 0.961132, 0.025723, -0.29895, -0.027066, 0.913457, -150.66696, 15.92804, -257.96194)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1277" parent="DecorManual/ZoneB_Cornisa" unique_id=2109289637 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.0691, 0, 0.979038, 0.005108, 0.98146, 0.00036, -0.979025, 0.00512, -0.069099, -147.71016, 16.144287, -262.5323)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1278" parent="DecorManual/ZoneB_Cornisa" unique_id=1915319323 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.199456, 0, 0.886468, -0.016548, 0.908472, 0.003723, -0.886314, -0.016962, 0.199421, -156.77995, 17.02246, -268.52704)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1279" parent="DecorManual/ZoneB_Cornisa" unique_id=1047380004 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.062115, 0, 0.940658, -0.028574, 0.942272, 0.001887, -0.940224, -0.028637, 0.062086, -158.99211, 17.516296, -273.44672)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1280" parent="DecorManual/ZoneB_Cornisa" unique_id=168010486 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.916665, 0, 0.403607, -0.023328, 0.999911, -0.052983, -0.402932, -0.057891, -0.915133, -166.34235, 17.795883, -272.6574)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1281" parent="DecorManual/ZoneB_Cornisa" unique_id=1465149533 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.461878, 0, -0.923339, -0.054386, 1.030625, 0.027205, 0.921736, 0.060811, -0.461077, -170.05338, 18.30156, -277.3561)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1282" parent="DecorManual/ZoneB_Cornisa" unique_id=1814587272 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.038295, 0, -0.90747, -0.036552, 0.907541, 0.001542, 0.906734, 0.036585, -0.038264, -170.4386, 18.5943, -281.37643)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1283" parent="DecorManual/ZoneB_Cornisa" unique_id=104201952 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.42386, 0, 0.837054, 0.034264, 0.937465, 0.01735, -0.836352, 0.038406, -0.423505, -173.06932, 19.00351, -286.27414)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1284" parent="DecorManual/ZoneB_Cornisa" unique_id=1320728921 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.901042, 0, -0.469647, -0.000689, 1.016092, -0.001321, 0.469646, 0.00149, 0.901041, -174.4637, 19.251297, -289.21072)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1285" parent="DecorManual/ZoneB_Cornisa" unique_id=1309826034 instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.171095, 0, -0.894738, 0.046332, 0.909728, 0.00886, 0.893538, -0.047171, 0.170865, -180.6161, 19.698288, -292.2394)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1286" parent="DecorManual/ZoneB_Cornisa" unique_id=86339125 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.331879, 0, -0.944219, -0.020236, 1.000616, 0.007113, 0.944002, 0.02145, -0.331802, -182.47133, 20.177856, -299.76715)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1287" parent="DecorManual/ZoneB_Cornisa" unique_id=1864261848 instance=ExtResource("s_beech_a")]
-transform = Transform3D(1.035011, 0, -0.327628, 0.006555, 1.085411, 0.020709, 0.327562, -0.021722, 1.034804, -189.0392, 20.492416, -300.27795)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1288" parent="DecorManual/ZoneB_Cornisa" unique_id=978334638 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.375701, 0, 0.961868, 0.030016, 1.032135, 0.011724, -0.9614, 0.032224, -0.375518, -193.64554, 21.153091, -310.72516)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1289" parent="DecorManual/ZoneB_Cornisa" unique_id=1902956748 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.035596, 0, 0.93156, 0.040238, 0.93137, 0.001538, -0.930691, 0.040268, -0.035562, -197.08067, 21.337845, -311.42197)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1290" parent="DecorManual/ZoneB_Cornisa" unique_id=213473496 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.931734, 0, 0.117084, 0.002042, 0.938919, 0.016252, -0.117066, 0.01638, -0.931593, -206.26743, 21.782486, -311.07983)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1291" parent="DecorManual/ZoneB_Cornisa" unique_id=960133482 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.938939, 0, -0.178556, -0.005665, 0.955285, 0.029787, 0.178466, 0.030321, -0.938466, -206.00192, 22.049667, -318.51312)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1292" parent="DecorManual/ZoneB_Cornisa" unique_id=1771921134 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.128019, 0, 0.999297, -0.026738, 1.007103, -0.003425, -0.998939, -0.026957, -0.127973, -211.78133, 22.252365, -316.01257)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1293" parent="DecorManual/ZoneB_Cornisa" unique_id=979918326 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.964037, 0, -0.12627, -0.004878, 0.971546, 0.037239, 0.126176, 0.037557, -0.963317, -215.1969, 22.52359, -318.40976)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1294" parent="DecorManual/ZoneB_Cornisa" unique_id=1452231826 instance=ExtResource("s_beech_a")]
-transform = Transform3D(1.072557, 0, -0.111314, -0.00459, 1.077401, -0.044224, 0.111219, 0.044461, 1.071645, -216.5791, 22.69545, -321.1224)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1295" parent="DecorManual/ZoneB_Cornisa" unique_id=1570196155 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.934709, 0, -0.358455, -0.00407, 1.001021, -0.010613, 0.358432, 0.011367, 0.934649, -221.49161, 23.12529, -325.90762)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1296" parent="DecorManual/ZoneB_Cornisa" unique_id=1592733273 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.057245, 0, -0.907344, 0.002486, 0.909144, 0.000157, 0.90734, -0.002491, 0.057244, -226.14801, 23.461243, -328.461)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1297" parent="DecorManual/ZoneB_Cornisa" unique_id=1902988053 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-1.019192, 0, 0.1037, -0.004885, 1.023316, -0.048009, -0.103585, -0.048257, -1.01806, -228.16837, 23.665024, -331.48865)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1298" parent="DecorManual/ZoneB_Cornisa" unique_id=1264718140 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.353276, 0, 1.008162, 0.047015, 1.067105, -0.016475, -1.007065, 0.049818, 0.352892, -232.11636, 24.026993, -336.44458)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1299" parent="DecorManual/ZoneB_Cornisa" unique_id=871820428 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.032833, 0, 1.026227, 0.06121, 1.024924, 0.001958, -1.0244, 0.061241, -0.032775, -236.50043, 24.286285, -337.6207)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1300" parent="DecorManual/ZoneB_Cornisa" unique_id=234745421 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.343793, 0, -0.873915, -0.042334, 0.938004, 0.016654, 0.872889, 0.045492, -0.34339, -239.94344, 24.464752, -337.5567)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1301" parent="DecorManual/ZoneB_Cornisa" unique_id=609300818 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.577526, 0, -0.825524, -0.034898, 1.006585, -0.024414, 0.824786, 0.04259, 0.57701, -239.2249, 24.513992, -340.84436)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1302" parent="DecorManual/ZoneB_Cornisa" unique_id=1423368001 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.757126, 0, 0.601057, 0.015048, 0.966397, 0.018955, -0.600868, 0.024202, -0.756888, -249.90077, 25.10167, -343.23074)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1303" parent="DecorManual/ZoneB_Cornisa" unique_id=210056552 instance=ExtResource("s_beech_a")]
-transform = Transform3D(-0.985459, 0, 0.135646, -0.004584, 0.994182, -0.033301, -0.135569, -0.033615, -0.984896, -252.07657, 25.329666, -349.07034)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1304" parent="DecorManual/ZoneB_Cornisa" unique_id=1775303871 instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.947139, 0, 0.209891, 0.000774, 0.97011, 0.003492, -0.20989, 0.003577, -0.947133, -258.8953, 25.71141, -352.35428)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1305" parent="DecorManual/ZoneB_Cornisa" unique_id=259962862 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.39252, 0, 0.902894, -0.028352, 0.984039, 0.012326, -0.902448, -0.030916, 0.392327, -267.98517, 26.105011, -350.5051)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1306" parent="DecorManual/ZoneB_Cornisa" unique_id=79651699 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.921669, 0, 0.146384, -0.002735, 0.933059, 0.017222, -0.146358, -0.017438, 0.921508, -272.4932, 26.411713, -355.76648)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1307" parent="DecorManual/ZoneB_Cornisa" unique_id=1955700341 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.975825, 0, 0.140585, -0.001685, 0.985829, -0.011693, -0.140575, -0.011814, -0.975755, -280.0027, 26.756989, -354.19696)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1308" parent="DecorManual/ZoneB_Cornisa" unique_id=1890110155 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.239988, 0, -1.05415, 0.027614, 1.080752, 0.006287, 1.053788, -0.028321, 0.239906, -284.8517, 27.01979, -355.30344)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1309" parent="DecorManual/ZoneB_Cornisa" unique_id=975690504 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.890605, 0, -0.588327, 0.020355, 1.066743, 0.030813, 0.587975, -0.03693, 0.890071, -291.86432, 27.383057, -355.1668)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1310" parent="DecorManual/ZoneB_Cornisa" unique_id=274251946 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.208974, 0, -0.953874, -0.04306, 0.975501, -0.009433, 0.952902, 0.044081, 0.208761, -295.68005, 27.581268, -354.65466)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1311" parent="DecorManual/ZoneB_Cornisa" unique_id=1770287791 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.852401, 0, -0.622743, 0.024933, 1.054803, -0.034128, 0.622244, -0.042266, -0.851717, -301.2896, 27.953506, -360.76962)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1312" parent="DecorManual/ZoneB_Cornisa" unique_id=745817817 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-1.025371, 0, 0.007309, -0.000308, 1.024488, -0.043149, -0.007302, -0.043151, -1.024462, -303.19177, 28.0374, -359.40445)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1313" parent="DecorManual/ZoneB_Cornisa" unique_id=2045813541 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.396238, 0, -0.971048, 0.026167, 1.048398, -0.010677, 0.970695, -0.028261, -0.396094, -311.35797, 28.456924, -358.8399)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1314" parent="DecorManual/ZoneB_Cornisa" unique_id=1696970254 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(-0.947062, 0, 0.501788, 0.014553, 1.071332, 0.027468, -0.501577, 0.031085, -0.946664, -315.87515, 28.747742, -366.10223)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1315" parent="DecorManual/ZoneB_Cornisa" unique_id=247067530 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.0513, 0, -1.095977, -0.015415, 1.097068, -0.000722, 1.095868, 0.015432, 0.051295, -322.72086, 29.049469, -362.97537)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1316" parent="DecorManual/ZoneB_Cornisa" unique_id=71499495 instance=ExtResource("s_beech_a")]
-transform = Transform3D(0.844417, 0, -0.475357, 0.02012, 0.968154, 0.035741, 0.474931, -0.041015, 0.84366, -331.05304, 29.43155, -367.70575)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1317" parent="DecorManual/ZoneB_Cornisa" unique_id=792438755 instance=ExtResource("s_beech_b")]
-transform = Transform3D(-0.883058, 0, 0.548142, -0.004145, 1.039322, -0.006678, -0.548127, -0.00786, -0.883033, -337.08713, 29.645676, -364.877)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1318" parent="DecorManual/ZoneB_Cornisa" unique_id=2093631671 instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.941462, 0, -0.508279, 0.008656, 1.06975, 0.016034, 0.508205, -0.018221, 0.941325, -350.85788, 30.112885, -373.42212)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1319" parent="DecorManual/ZoneB_Cornisa" unique_id=130739300 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(0.900795, 0, -0.398578, 0.00024, 0.985036, 0.000542, 0.398578, -0.000593, 0.900795, -354.55927, 30.211838, -372.3091)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1320" parent="DecorManual/ZoneB_Cornisa" unique_id=490616459 instance=ExtResource("s_beech_c")]
-transform = Transform3D(-0.08463, 0, 1.044424, -0.003249, 1.047842, -0.000263, -1.044419, -0.00326, -0.08463, -360.96332, 30.38739, -374.96744)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1321" parent="DecorManual/ZoneB_Cornisa" unique_id=1452603521 instance=ExtResource("s_beech_dead")]
-transform = Transform3D(1.081689, 0, -0.046676, -0.000525, 1.082627, -0.012161, 0.046673, 0.012172, 1.08162, -364.5107, 30.47821, -375.80988)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1322" parent="DecorManual/ZoneB_Cornisa" unique_id=86314041 instance=ExtResource("s_beech_c")]
-transform = Transform3D(0.89481, 0, -0.575539, 0.012514, 1.06367, 0.019457, 0.575403, -0.023134, 0.894598, -368.3947, 30.579956, -377.63544)
-metadata/coliziune = "trunk"
-
-[node name="wallForest1323" parent="DecorManual/ZoneB_Cornisa" unique_id=1515401591 instance=ExtResource("s_beech_b")]
-transform = Transform3D(0.895254, 0, -0.479168, -0.008065, 1.015278, -0.015068, 0.4791, 0.01709, 0.895127, -374.42535, 30.722824, -378.74762)
-metadata/coliziune = "trunk"
-
 [node name="wallUnder1324" parent="DecorManual/ZoneB_Cornisa" unique_id=19860951 instance=ExtResource("s_fern_cluster")]
 transform = Transform3D(1.002761, 0, -0.382613, 0, 1.073276, 0, 0.382613, 0, 1.002761, -28.131557, -0.051926, -114.97837)
 metadata/coliziune = "none"
@@ -4987,14 +4536,6 @@ transform = Transform3D(0.369086, 0, -0.799862, 0, 0.880911, 0, 0.799862, 0, 0.3
 
 [node name="wallUnder1368" parent="DecorManual/ZoneB_Cornisa" unique_id=311234026 instance=ExtResource("s_tussock_clump")]
 transform = Transform3D(0.606887, 0, -0.670416, 0, 0.904306, 0, 0.670416, 0, 0.606887, -163.87811, 15.929459, -246.63617)
-metadata/coliziune = "none"
-
-[node name="wallUnder1369" parent="DecorManual/ZoneB_Cornisa" unique_id=241511915 instance=ExtResource("s_fern_cluster")]
-transform = Transform3D(-0.190009, 0, 0.855338, 0, 0.876188, 0, -0.855338, 0, -0.190009, -165.33876, 16.381546, -252.20009)
-metadata/coliziune = "none"
-
-[node name="wallUnder1370" parent="DecorManual/ZoneB_Cornisa" unique_id=303545231 instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.651234, 0, -1.052951, 0, 1.238068, 0, 1.052951, 0, 0.651234, -167.77892, 16.74849, -255.62051)
 metadata/coliziune = "none"
 
 [node name="wallUnder1371" parent="DecorManual/ZoneB_Cornisa" unique_id=712843865 instance=ExtResource("s_fern_cluster")]
@@ -5193,19 +4734,12 @@ metadata/coliziune = "none"
 transform = Transform3D(-1.111415, 0, 0.563441, 0, 1.246077, 0, -0.563441, 0, -1.111415, -375.38727, 30.650482, -359.19583)
 metadata/coliziune = "none"
 
-[node name="wallUnder1424" parent="DecorManual/ZoneB_Cornisa" unique_id=519431707 instance=ExtResource("s_moss_boulder_a")]
-transform = Transform3D(-1.005786, 0, 0.032356, 0, 1.006307, 0, -0.032356, 0, -1.005786, -380.19354, 30.769257, -362.19678)
-
 [node name="wallUnder1425" parent="DecorManual/ZoneB_Cornisa" unique_id=476758730 instance=ExtResource("s_fern_cluster")]
 transform = Transform3D(0.899943, 0, -0.319975, 0, 0.955134, 0, 0.319975, 0, 0.899943, -385.0844, 30.863754, -358.98883)
 metadata/coliziune = "none"
 
 [node name="wallUnder1426" parent="DecorManual/ZoneB_Cornisa" unique_id=1911090159 instance=ExtResource("s_fern_cluster")]
 transform = Transform3D(0.691281, 0, -0.951095, 0, 1.175777, 0, 0.951095, 0, 0.691281, -395.8367, 31.10437, -361.56183)
-metadata/coliziune = "none"
-
-[node name="wallUnder1427" parent="DecorManual/ZoneB_Cornisa" unique_id=1160264647 instance=ExtResource("s_tussock_clump")]
-transform = Transform3D(0.084764, 0, -1.091036, 0, 1.094323, 0, 1.091036, 0, 0.084764, -397.13593, 31.137344, -364.14133)
 metadata/coliziune = "none"
 
 [node name="ZoneC_Stirling" type="Node3D" parent="DecorManual" unique_id=896263569]

@@ -340,6 +340,7 @@ reach = 22.0
 fade = 8.0
 jump = false
 static_deck = true
+deck_material_class = "wood"
 build_towers = false
 build_ships = false
 respect_branch = true

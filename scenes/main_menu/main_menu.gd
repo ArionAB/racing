@@ -65,28 +65,13 @@ func _show_main() -> void:
 	for p in _panels:
 		p.visible = false
 
-## Alegerea pistei pentru cursa rapida.
+## Alegerea pistei pentru cursa rapida: grila de cartonase pe ecran intreg.
 func _build_track_panel() -> Control:
-	var panel := _make_panel()
-	var box := panel.get_child(0).get_child(0) as VBoxContainer
-	var title := Label.new()
-	title.text = "ALEGE PISTA"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 34)
-	box.add_child(title)
-	for i in GameState.TRACK_NAMES.size():
-		var track_index := i
-		var record_ms := GameState.best_lap(i)
-		var label := GameState.TRACK_NAMES[i]
-		if record_ms > 0:
-			@warning_ignore("integer_division")
-			label += "   (rec %d:%02d.%d)" % [record_ms / 60000,
-				(record_ms % 60000) / 1000, (record_ms % 1000) / 100]
-		var button := _make_button(label)
-		button.pressed.connect(func() -> void:
-			GameState.start_quick_race(track_index))
-		box.add_child(button)
-	_add_back(box)
+	var panel := TrackSelectPanel.new()
+	panel.visible = false
+	add_child(panel)
+	_panels.append(panel)
+	panel.back_pressed.connect(_show_main)
 	return panel
 
 ## Garajul: alegerea masinii, cu statistici; selectia se persista.

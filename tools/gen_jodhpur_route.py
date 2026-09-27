@@ -637,45 +637,26 @@ if len(sys.argv) > 1:
     # POARTA INGUSTATA la gura ulicioarei (runda 2, coordonator, pct. 1):
     # ulicioara insasi e acum 6,4 m latime (branch_half_width 3,2, ca sa
     # incapa manevra fizica), dar gura ramane STRAMTA -- doi stalpi de
-    # coliziune care lasa liber ~4 m (masurat ca GOL pe gabaritul caroseriei,
-    # memoria cota-de-contract-se-masoara-ca-gol: cea mai lata masina are
-    # body_width 2,1 m, deci 4 m liber lasa ~0,95 m marja pe fiecare parte).
-    # Acolo se culca vaca: cutia ei (2,8 m) peste o gura de 4 m -> nimeni nu
-    # trece cat sta culcata, exact ca in brief (§2 randul D/D').
+    # coliziune (nodul AlleyGate, scenes/hazards/alley_gate.gd) care lasa
+    # liber ~4 m (masurat ca GOL pe gabaritul caroseriei, memoria
+    # cota-de-contract-se-masoara-ca-gol: cea mai lata masina are body_width
+    # 2,1 m, deci 4 m liber lasa ~0,95 m marja pe fiecare parte). Acolo se
+    # culca vaca: cutia ei (2,8 m) peste o gura de 4 m -> nimeni nu trece cat
+    # sta culcata, exact ca in brief (§2 randul D/D').
     #
-    # Pozitia: langa mouth_dist_m (9 m de la intrarea benzii) -- ACELASI loc
-    # unde CowGate isi calculeaza gura (vezi mouth_dist_m mai jos), ca poarta
-    # fizica si vaca sa fie la acelasi punct, nu doua repere diferite pe
-    # aceeasi banda. Directia postilor (perpendiculara pe axa benzii) se ia
-    # din segmentul intrare->mijloc (aproximeaza tangenta benzii langa gura,
-    # unde curba n-a apucat inca sa se abata mult).
+    # POZITIA NU SE MAI CALCULEAZA IN PYTHON (capcana gasita in runda 2):
+    # aproximarea plata a generatorului diverge de bake-ul REAL Catmull-Rom
+    # al lui Godot langa un colt de fillet (exact unde se ataseaza
+    # scurtaturile) -- masurat: stalpii calculati aici stateau la 7-9 m de
+    # gura REALA raportata de ProbeLayout, deci un stalp ajungea in AFARA
+    # benzii si jumatate din culoar ramanea complet deschis. Fara nicio
+    # ingustare reala, AI-ul se aduna la fiecare masina care incearca sa
+    # treaca: 16-17 repuneri/cursa pe TOATE cele 8 seed-uri (fata de o
+    # singura masina blocata ocazional in runda 1). Fixul: AlleyGate se
+    # ancoreaza la RUNTIME pe Track.routes[branch_index], exact ca CowGate
+    # (acelasi mouth_dist_m/gate_dist_m), deci poarta si vaca ajung
+    # intotdeauna in acelasi loc REAL, indiferent de bake.
     GATE_MOUTH_DIST_M = 9.0
-    GATE_HALF_OPENING_M = 2.0  # 4 m liber intre stalpi
-    GATE_POST_HALF_WIDTH_M = 1.3  # stalpul insusi (dincolo de deschidere)
-    entry_dir_x = mid_x - a_entry[0]
-    entry_dir_y = mid_y - a_entry[1]
-    entry_dir_len = math.hypot(entry_dir_x, entry_dir_y)
-    if entry_dir_len > 1e-6:
-        entry_dir_x, entry_dir_y = entry_dir_x / entry_dir_len, entry_dir_y / entry_dir_len
-    else:
-        entry_dir_x, entry_dir_y = 0.0, 1.0
-    entry_perp_x, entry_perp_y = -entry_dir_y, entry_dir_x
-    gate_center_x = a_entry[0] + entry_dir_x * GATE_MOUTH_DIST_M
-    gate_center_y = a_entry[1] + entry_dir_y * GATE_MOUTH_DIST_M
-    gate_center_e = a_entry[2]  # elevatie aproape constanta pe o distanta de 9 m
-    gate_post_a_map = (gate_center_x + entry_perp_x * (GATE_HALF_OPENING_M + GATE_POST_HALF_WIDTH_M),
-                        gate_center_y + entry_perp_y * (GATE_HALF_OPENING_M + GATE_POST_HALF_WIDTH_M))
-    gate_post_b_map = (gate_center_x - entry_perp_x * (GATE_HALF_OPENING_M + GATE_POST_HALF_WIDTH_M),
-                        gate_center_y - entry_perp_y * (GATE_HALF_OPENING_M + GATE_POST_HALF_WIDTH_M))
-    gate_post_a = godot(gate_post_a_map, gate_center_e)
-    gate_post_b = godot(gate_post_b_map, gate_center_e)
-    # Basis alinieta cu directia benzii (X local = de-a lungul benzii, Z local
-    # = peste banda), ca stalpul (cutie ingusta pe X, lunga pe Z) sa stea
-    # transversal pe culoar, nu de-a lungul lui.
-    gdx, gdz = -entry_dir_x, -entry_dir_y  # conventia godot(): gx=-x, gz=-y
-    gpx, gpz = -entry_perp_x, -entry_perp_y
-    gate_post_a_basis = f"{gpx:.4f}, 0, {gpz:.4f}, 0, 1, 0, {-gdx:.4f}, 0, {-gdz:.4f}"
-    gate_post_b_basis = gate_post_a_basis  # aceeasi orientare, doar parte opusa
 
     # TerrainPeak (stanca fortului): centru ~(-165,200), dom pana la ~+34 SUB
     # creasta declarata pe drum (+38..+40 -- masivul trebuie sa treaca de cota
@@ -702,6 +683,7 @@ if len(sys.argv) > 1:
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="4_branch"]
 [ext_resource type="Script" path="res://scenes/hazards/cow_gate.gd" id="5_cow"]
 [ext_resource type="Script" path="res://scenes/hazards/dusk_cycle.gd" id="6_dusk"]
+[ext_resource type="Script" path="res://scenes/hazards/alley_gate.gd" id="7_gate"]
 
 [sub_resource type="Curve3D" id="Curve3D_jodhpur"]
 closed = true
@@ -718,9 +700,6 @@ _data = {{
 "tilts": PackedFloat32Array({", ".join("0" for _ in alley_pts_godot)})
 }}
 point_count = {len(alley_pts_godot)}
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_gatepost"]
-size = Vector3({GATE_POST_HALF_WIDTH_M * 2.0}, 3.0, 1.0)
 
 [node name="Track17" type="Node3D"]
 script = ExtResource("1_track")
@@ -781,19 +760,14 @@ walk_seconds = 2.0
 clear_radius_m = 12.0
 approach_clear_m = 40.0
 
-[node name="AlleyGatePostA" type="StaticBody3D" parent="."]
-transform = Transform3D({gate_post_a_basis}, {gate_post_a[0]}, {gate_post_a[1]}, {gate_post_a[2]})
-
-[node name="CollisionShapeA" type="CollisionShape3D" parent="AlleyGatePostA"]
-shape = SubResource("BoxShape3D_gatepost")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-
-[node name="AlleyGatePostB" type="StaticBody3D" parent="."]
-transform = Transform3D({gate_post_b_basis}, {gate_post_b[0]}, {gate_post_b[1]}, {gate_post_b[2]})
-
-[node name="CollisionShapeB" type="CollisionShape3D" parent="AlleyGatePostB"]
-shape = SubResource("BoxShape3D_gatepost")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+[node name="AlleyGate" type="Node3D" parent="."]
+script = ExtResource("7_gate")
+branch_index = 1
+gate_dist_m = {GATE_MOUTH_DIST_M}
+half_opening_m = 2.0
+post_half_width_m = 1.3
+post_height_m = 3.0
+post_depth_m = 1.0
 
 [node name="DuskCycle" type="Node" parent="."]
 script = ExtResource("6_dusk")

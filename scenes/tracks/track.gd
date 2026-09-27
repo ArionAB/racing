@@ -10912,6 +10912,7 @@ func _build_lift_bridge(ch: Dictionary) -> void:
 	# Podet fix (parau de munte, Chasm) vs pod mobil (canal navigabil,
 	# Okinawa): trei steaguri opționale in spec, implicit purtarea veche.
 	bridge.static_deck = bool(ch.get("static_deck", false))
+	bridge.deck_material_class = String(ch.get("deck_material_class", ""))
 	bridge.build_towers = bool(ch.get("build_towers", true))
 	bridge.build_ships = bool(ch.get("build_ships", true))
 	add_child(bridge)

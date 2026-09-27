@@ -538,6 +538,7 @@ const CLASS_TEXTURES := {
 	"village_plaster": "res://assets/textures/classes/plaster.png",
 	"rust_metal": "res://assets/textures/classes/rust_metal.png",
 	"wood": "res://assets/textures/classes/wood.png",
+	"wet_wood": "res://assets/textures/classes/wood.png",
 	"concrete": "res://assets/textures/classes/concrete.png",
 	# BETONUL ORASULUI (Chongqing). ACELASI PNG ca "concrete" — nu se dubleaza
 	# in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica pe care
@@ -992,6 +993,29 @@ const CLASS_TINT := {
 	# (88.8*0.7639, 108.2*0.8490, 56.1*0.8975) = (67.8, 91.8, 50.4), exact pe
 	# tinta.
 	"beech_canopy": Color(0.7639, 0.8490, 0.8975),
+	# Lemnul ud (Fiordland, brief §4: "podetul, balustradele, pontonul —
+	# WOOD_WEATHERED 9, ud = mai inchis"). Dala `wood.png` exista deja in
+	# CLASS_TEXTURES (0.7 in CLASS_TRIPLANAR_SCALE) din pipeline-ul general,
+	# dar pana acum n-avea niciun consumator in world_prop.gd — infrastructura
+	# pregatita, niciodata cablata.
+	#
+	# Masurat (script temporar, sters): dala are media (124.14, 98.99, 71.72),
+	# luminanta 0.401 (rec709). Slotul WOOD_WEATHERED (9, #835C34) e
+	# (131, 92, 52), luminanta 0.382 — aproape identic cu dala, deci un simplu
+	# multiplicator de potrivire ar fi cerut R usor PESTE 1 (raport 1.055),
+	# adica CLASS_LIFT pentru un canal aproape neschimbat. Fiindca brief-ul
+	# cere explicit mai INCHIS decat slotul uscat (nu potrivire cu el), tinta
+	# s-a ales direct la 65% din valoarea slotului uscat — (85.15, 59.80, 33.80),
+	# luminanta 0.248, o scadere de 35% fata de WOOD_WEATHERED uscat, in aceeasi
+	# ordine de marime ca alte clase "ud"/umbrite ale pistei (`volcanic_rock`,
+	# `wet_gneiss` fata de dala lor). Raportul tinta/dala pe toate trei canale
+	# (0.686, 0.604, 0.471) e SUB 1, deci se obtine integral din CLASS_TINT,
+	# fara CLASS_LIFT.
+	# Clasa SEPARATA, nu tenta pe `wood`: `wood` e folosita deja pe Dunele/
+	# Okinawa (moara, lazi, barca sabani, portalul minei — track.gd), iar o
+	# tenta globala le-ar fi intunecat pe toate cu 35%. Aceeasi dala, cache
+	# pe clasa: +1 material doar pe Track16.
+	"wet_wood": Color(0.686, 0.604, 0.471),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1246,8 +1270,12 @@ const CLASS_TRIPLANAR_SCALE := {
 	"old_stone": 0.35,
 	# Lemnaria: bena tricicletei Ape, busteni de rulare, bordaj. Sursa e o
 	# scanare de scanduri; la 0.7 (o repetitie la 1.43 m) fibra cade aproape
-	# la scara reala pe piese de 1-3 m.
+	# la scara reala pe piese de 1-3 m. Prim consumator REAL (Fiordland,
+	# `driftwood` 4,03 m si tabliera `WoodDeckStrip` a podetului Chasm,
+	# scanduri de ~1,5-2 m): scara ramane neschimbata, era deja gandita pentru
+	# exact plaja asta.
 	"wood": 0.7,
+	"wet_wood": 0.7,
 	# Trunchiuri de maslin si de smochin. Sursa `bark` e o scanare de 1.3 m de
 	# trunchi, deci 0.77 (o repetitie la 1.3 m) e SCARA REALA — cicatricile
 	# cad exact cat sunt. Regula 1 din pipeline (scara sursei fata de

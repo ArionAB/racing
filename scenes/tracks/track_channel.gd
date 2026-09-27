@@ -101,6 +101,18 @@ extends Marker3D
 ## brief §2 randul D). Vezi [LiftBridgeHazard.static_deck]. Fara efect cand
 ## `jump = true`.
 @export var static_deck: bool = false
+## Clasa triplanara pentru tabliera, in loc de culoarea plata WOOD_WEATHERED
+## ([LiftBridgeHazard._deck_material]). Gol (implicit) = comportamentul
+## vechi, bit-identic pe TOATE canalele existente (Okinawa inclusiv) — opt-in
+## doar unde s-a masurat si s-a cerut lemn cu granulatie reala (Chasm,
+## Fiordland brief §4: "podetul... WOOD_WEATHERED 9, ud = mai inchis").
+## `_deck_material()` e static/partajat pe clasa hazardului, deci un canal
+## care seteaza asta schimba tabliera DOAR pentru propria lui instanta de
+## `LiftBridgeHazard` (fiecare `_build_lift_bridge` creeaza hazardul ei),
+## nu pentru altele — dar clasa triplanara insasi (`Palette.triplanar_class_material`)
+## e cache-uita GLOBAL pe numele clasei, deci costa UN singur material la
+## garda indiferent pe cate canale se foloseste.
+@export var deck_material_class: String = ""
 ## Turnurile cu grinda si lampile de avertizare — opreste-le pe un podet fix
 ## fara ciclu (n-are ce sa avertizeze). Fara efect cand `jump = true`.
 @export var build_towers: bool = true
@@ -177,6 +189,7 @@ func to_spec(track: Node3D) -> Dictionary:
 		"flow_sign": flow_sign,
 		"label": label if label != "" else name,
 		"static_deck": static_deck,
+		"deck_material_class": deck_material_class,
 		"build_towers": build_towers,
 		"build_ships": build_ships,
 		"respect_branch": respect_branch,

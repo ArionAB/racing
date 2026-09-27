@@ -1462,6 +1462,7 @@ const CLASSES_BY_MODEL := {
 	# familie, deci ACEEASI clasa (nu un al treilea material).
 	"rata_tree": {
 		"Rata_Accente": Palette.TRI_PREFIX + "beech_canopy",
+	},
 	# --- Fiordland: LEMNUL UD (Track16, lotul C) ---------------------------
 	#
 	# Brief §4: "podetul, balustradele, pontonul — WOOD_WEATHERED 9, ud = mai

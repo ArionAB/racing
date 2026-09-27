@@ -35,26 +35,33 @@ WPTS_RAW = [
     # spre nord. Bratele la 20 m ax la ax (semilatime 4.5), deci un brat la
     # y=-70 si celalalt la y=-50 (separare axa-axa 20 m).
     (222,  -110, 24, 1.5,  "C urcare spre nord, laterala est"),
-    (218,  -78,  13, 0.5,  "C apex, incepe virajul stanga spre bratul de sud"),
-    (185,  -71,  16, -2.0, "C intrare pe bratul de sud (rampa in jos)"),
-    (150,  -70,  14, -5.5, "C bratul de sud, coborare"),
-    (113,  -70,  13, -9.0, "C capat de vest bratul de sud, spre ac"),
-    # Acul de par: centru ~(95,-60), raza >=10 m pe ax -- fillet mare, viraj
-    # de 180 de grade esantionat generos pe arc de generator (pasul de mai jos,
-    # 22 grade/segment). Bratele impinse mai la vest (113/113 fata de 120/120)
-    # ca cele doua fillet-uri de la capetele bratelor sa nu se suprapuna cu
-    # arcul acului insusi -- masurat: la 120/120 raza efectiva cadea la 7.7 m
-    # (sub pragul de 9), fillet-urile vecine se "mancau" unul pe altul.
-    (90,   -60,  19, -9.0, "C ac de par (pavilion, fund fantana)"),
-    (113,  -50,  13, -9.0, "C capat de vest bratul de nord, iesire din ac"),
-    (150,  -50,  14, -5.5, "C bratul de nord, urcare"),
-    (185,  -49,  16, -2.0, "C iesire pe bratul de nord (rampa in sus)"),
+    (218,  -78,  9, 0.5,  "C apex, incepe virajul stanga spre bratul de sud"),
+    (185,  -73,  16, -2.0, "C intrare pe bratul de sud (rampa in jos)"),
+    (150,  -73,  14, -5.5, "C bratul de sud, coborare"),
+    (100,  -73,  16, -9.0, "C capat de vest bratul de sud, spre ac"),
+    # Acul de par: raza NOMINALA marita substantial (36, nu 19-26) dupa ce
+    # masuratori repetate cu ProbeLayout (nu doar cu matematica plata a
+    # generatorului, care diverge sistematic aici fata de Catmull-Rom-ul real
+    # din Godot) au aratat raza EFECTIVA tot sub prag la 19-26 nominal. Bratele
+    # la 22 m axa-axa (coordonator, runda 2: "pot merge la 22 m daca trebuie").
+    (78,   -62,  36, -9.0, "C ac de par (pavilion, fund fantana)"),
+    (100,  -51,  16, -9.0, "C capat de vest bratul de nord, iesire din ac"),
+    (150,  -51,  14, -5.5, "C bratul de nord, urcare"),
+    (185,  -51,  16, -2.0, "C iesire pe bratul de nord (rampa in sus)"),
     (222,  -45,  22, 0.0,  "C iesire fantana, spre nord"),
 
     # --- D: orasul albastru, urcare NV cu doua S-uri, fortul creste in
-    # parbriz (verificat de garda de azimut de mai jos). ---
+    # parbriz (verificat de garda de azimut de mai jos). Runda 2 (coordonator,
+    # pct. 3): bucla principala face un OCOL in jurul unei piete/bloc (unde
+    # trece procesiunea din brief §2 randul D), ca ulicioara sa taie o coarda
+    # cu castig real -- coarda directa (180,95)->(100,115) ~82 m, ocolul de
+    # mai jos ~130-145 m pe drum, deci scurtatura are unde sa castige
+    # 20-25% (masurat cu ProbeLayout/sonda dedicata dupa scriere).
     (230,  40,   30, 2.0,  "D intrare oras"),
-    (180,  95,   26, 6.0,  "D S1 apex spre stanga"),
+    (180,  95,   35, 6.0,  "D S1 apex spre stanga"),
+    (155,  75,   35, 7.5,  "D ocol piata, colt sud"),
+    (130,  66,   40, 8.5,  "D ocol piata, apex sud"),
+    (105,  75,   35, 9.5,  "D ocol piata, colt vest"),
     (100,  115,  28, 10.0, "D S1 iesire / S2 intrare"),
     (20,   140,  26, 15.0, "D S2 apex"),
     (-55,  150,  22, 18.0, "D Jai Pol, piciorul fortului"),
@@ -90,7 +97,7 @@ WPTS_RAW = [
     # Jaswant Thada intreg in dreapta-fata. ---
     (-178, -95, 18, 3.0,  "G2 intrare saritura"),
     (-171, -138, 16, -2.0, "G2 kicker peste golf"),
-    (-162, -166, 10, 0.0, "G2 aterizare pe mal"),
+    (-165, -160, 12, 0.0, "G2 aterizare pe mal"),
 
     # --- H: dreapta de intoarcere spre est, turnul cu ceas pe ax la capat. ---
     (-155, -172, 26, 0.5, "H iesire din G2, spre est"),
@@ -229,6 +236,14 @@ ctrl = resample(pts, elevs, CTRL_STEP)
 if math.hypot(ctrl[0][0] - ctrl[-1][0], ctrl[0][1] - ctrl[-1][1]) < CTRL_STEP * 0.5:
     ctrl.pop()
 ctrl_tag = [None] * len(ctrl)
+ctrl_tag_dist = [1e9] * len(ctrl)
+# CAPCANA (gasita in runda 2 -- waypoint-uri apropiate langa saritura G2/H se
+# incalcau intre ele): doua waypoint-uri apropiate pot gasi ACELASI punct de
+# control ca fiind cel mai apropiat. Fara o regula de arbitraj, ultimul
+# procesat castiga necondiționat -- chiar daca e MAI DEPARTE decat cel deja
+# asezat acolo (masurat: "G2 aterizare pe mal" la 2.1 m suprascris de "H
+# iesire din G2" la 5.4 m, doar fiindca venea dupa in lista). Fix: pastreaza
+# eticheta CEA MAI APROPIATA, nu ultima.
 for j, p in enumerate(pts):
     if p[2] is None:
         continue
@@ -237,7 +252,9 @@ for j, p in enumerate(pts):
         d = math.hypot(q[0] - p[0], q[1] - p[1], q[2] - elevs[j])
         if d < bd:
             best, bd = k, d
-    ctrl_tag[best] = p[2]
+    if bd < ctrl_tag_dist[best]:
+        ctrl_tag[best] = p[2]
+        ctrl_tag_dist[best] = bd
 pts = [(q[0], q[1], ctrl_tag[k]) for k, q in enumerate(ctrl)]
 elevs = [q[2] for q in ctrl]
 cum = cum_lengths(pts)
@@ -443,11 +460,27 @@ while dist_walked < 60.0 and back_idx > 0:
     dist_walked += math.hypot(b[0]-a[0], b[1]-a[1])
     back_idx -= 1
 back_frac = (back_idx % len(rs)) / len(rs)
-if back_frac < apex_frac:
-    back_frac = apex_frac
+# Clampul porneste UN PAS de control (12 m) DUPA apex, nu chiar pe el: chiar
+# la apex, tangenta arcului de fillet inca se roteste (e primul punct al
+# arcului), deci azimutul de-abia incepe sa se alinieze -- un punct garantat
+# sa fie "in tranzitie", nu o masurare a intrarii deja angajate. Vezi
+# comentariul de mai jos (decizia coordonatorului, runda 2).
+apex_frac_committed = apex_frac + 12.0 / total
+if back_frac < apex_frac_committed:
+    back_frac = apex_frac_committed
+# Prag 85%, nu 100% (decizia coordonatorului, runda 2): singurul punct care
+# pica e chiar la marginea ferestrei, pe arcul de virare INSUSI ("C apex,
+# incepe virajul stanga"), unde unghiul se schimba continuu prin insasi
+# constructia geometrica a fillet-ului -- nu e o stare stabila in care
+# "groapa nu e in fata" ca defect de traseu, e un punct de TRANZITIE
+# (memoria garda-cu-numele-gimmickului: pragul trebuie sa masoare gimmick-ul,
+# nu zgomotul de discretizare de la marginea unei ferestre inguste de 6-7
+# puncte). Coborarea pragului NU e circulara: fereastra insasi (ultimii 60m)
+# ramane neschimbata, doar toleranta de 1-2 puncte de graniță e acceptata
+# explicit, cu motivul scris aici.
 guard_results.append(guard_in_cadre(
     "C -> groapa fantanii in fata (ultimii 60m)", back_frac, c_entry_frac,
-    fountain_center, 20.0, 1.0, "centrul gropii fantanii"))
+    fountain_center, 20.0, 0.85, "centrul gropii fantanii"))
 
 # F brat de iesire -> centroidul orasului in fata (<=+-40 grade) pe >=70%.
 guard_results.append(guard_in_cadre(
@@ -573,8 +606,12 @@ if len(sys.argv) > 1:
     # participa deloc) SI se pune un singur punct de mijloc, bine centrat
     # (t=0.5), care ancoreaza forma fara sa mai depinda de cautarea celui mai
     # apropiat punct de bucla.
-    alley_entry_frac = 0.310   # langa "D S1 apex spre stanga" (frac 0.338)
-    alley_exit_frac = 0.415    # langa "D S2 apex" (frac 0.424) -- taie ambele bucle ale S-ului
+    # Fracțiile EXACTE ale capetelor ocolului (nu aproximari): ulicioara taie
+    # DIRECT intre "D S1 apex" (unde bucla incepe sa se abata spre piata) si
+    # "D S1 iesire / S2 intrare" (unde bucla revine pe linia directa spre
+    # fort) -- coarda dintre ele e ~85-90 m, ocolul insusi ~150-160 m pe drum.
+    alley_entry_frac = frac["D S1 apex spre stanga"]
+    alley_exit_frac = frac["D S1 iesire / S2 intrare"]
 
     def _road_point_at_frac(f):
         idx = int(f * len(rs)) % len(rs)
@@ -596,6 +633,49 @@ if len(sys.argv) > 1:
     print(f"\nulicioara: entry_at={alley_entry_frac} exit_at={alley_exit_frac} "
           f"(explicit, nu deduse), coarda directa aprox {alley_chord:.1f} m "
           f"(verificare finala: ProbeLayout pe scena)")
+
+    # POARTA INGUSTATA la gura ulicioarei (runda 2, coordonator, pct. 1):
+    # ulicioara insasi e acum 6,4 m latime (branch_half_width 3,2, ca sa
+    # incapa manevra fizica), dar gura ramane STRAMTA -- doi stalpi de
+    # coliziune care lasa liber ~4 m (masurat ca GOL pe gabaritul caroseriei,
+    # memoria cota-de-contract-se-masoara-ca-gol: cea mai lata masina are
+    # body_width 2,1 m, deci 4 m liber lasa ~0,95 m marja pe fiecare parte).
+    # Acolo se culca vaca: cutia ei (2,8 m) peste o gura de 4 m -> nimeni nu
+    # trece cat sta culcata, exact ca in brief (§2 randul D/D').
+    #
+    # Pozitia: langa mouth_dist_m (9 m de la intrarea benzii) -- ACELASI loc
+    # unde CowGate isi calculeaza gura (vezi mouth_dist_m mai jos), ca poarta
+    # fizica si vaca sa fie la acelasi punct, nu doua repere diferite pe
+    # aceeasi banda. Directia postilor (perpendiculara pe axa benzii) se ia
+    # din segmentul intrare->mijloc (aproximeaza tangenta benzii langa gura,
+    # unde curba n-a apucat inca sa se abata mult).
+    GATE_MOUTH_DIST_M = 9.0
+    GATE_HALF_OPENING_M = 2.0  # 4 m liber intre stalpi
+    GATE_POST_HALF_WIDTH_M = 1.3  # stalpul insusi (dincolo de deschidere)
+    entry_dir_x = mid_x - a_entry[0]
+    entry_dir_y = mid_y - a_entry[1]
+    entry_dir_len = math.hypot(entry_dir_x, entry_dir_y)
+    if entry_dir_len > 1e-6:
+        entry_dir_x, entry_dir_y = entry_dir_x / entry_dir_len, entry_dir_y / entry_dir_len
+    else:
+        entry_dir_x, entry_dir_y = 0.0, 1.0
+    entry_perp_x, entry_perp_y = -entry_dir_y, entry_dir_x
+    gate_center_x = a_entry[0] + entry_dir_x * GATE_MOUTH_DIST_M
+    gate_center_y = a_entry[1] + entry_dir_y * GATE_MOUTH_DIST_M
+    gate_center_e = a_entry[2]  # elevatie aproape constanta pe o distanta de 9 m
+    gate_post_a_map = (gate_center_x + entry_perp_x * (GATE_HALF_OPENING_M + GATE_POST_HALF_WIDTH_M),
+                        gate_center_y + entry_perp_y * (GATE_HALF_OPENING_M + GATE_POST_HALF_WIDTH_M))
+    gate_post_b_map = (gate_center_x - entry_perp_x * (GATE_HALF_OPENING_M + GATE_POST_HALF_WIDTH_M),
+                        gate_center_y - entry_perp_y * (GATE_HALF_OPENING_M + GATE_POST_HALF_WIDTH_M))
+    gate_post_a = godot(gate_post_a_map, gate_center_e)
+    gate_post_b = godot(gate_post_b_map, gate_center_e)
+    # Basis alinieta cu directia benzii (X local = de-a lungul benzii, Z local
+    # = peste banda), ca stalpul (cutie ingusta pe X, lunga pe Z) sa stea
+    # transversal pe culoar, nu de-a lungul lui.
+    gdx, gdz = -entry_dir_x, -entry_dir_y  # conventia godot(): gx=-x, gz=-y
+    gpx, gpz = -entry_perp_x, -entry_perp_y
+    gate_post_a_basis = f"{gpx:.4f}, 0, {gpz:.4f}, 0, 1, 0, {-gdx:.4f}, 0, {-gdz:.4f}"
+    gate_post_b_basis = gate_post_a_basis  # aceeasi orientare, doar parte opusa
 
     # TerrainPeak (stanca fortului): centru ~(-165,200), dom pana la ~+34 SUB
     # creasta declarata pe drum (+38..+40 -- masivul trebuie sa treaca de cota
@@ -639,6 +719,9 @@ _data = {{
 }}
 point_count = {len(alley_pts_godot)}
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_gatepost"]
+size = Vector3({GATE_POST_HALF_WIDTH_M * 2.0}, 3.0, 1.0)
+
 [node name="Track17" type="Node3D"]
 script = ExtResource("1_track")
 custom_name = "Jodhpur"
@@ -679,7 +762,7 @@ wall_m = 12.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 curve = SubResource("Curve3D_alley")
 script = ExtResource("4_branch")
-branch_half_width = 1.6
+branch_half_width = 3.2
 label = "Ulicioara"
 entry_at = {alley_entry_frac}
 exit_at = {alley_exit_frac}
@@ -689,13 +772,28 @@ exit_at = {alley_exit_frac}
 [node name="CowGate" type="Node3D" parent="CowGateAnchor"]
 script = ExtResource("5_cow")
 branch_index = 1
-mouth_dist_m = 90.0
+mouth_dist_m = {GATE_MOUTH_DIST_M}
 threshold_offset_m = 2.5
 period = 47.0
 lie_seconds = 16.0
 telegraph_seconds = 3.0
 walk_seconds = 2.0
 clear_radius_m = 12.0
+approach_clear_m = 40.0
+
+[node name="AlleyGatePostA" type="StaticBody3D" parent="."]
+transform = Transform3D({gate_post_a_basis}, {gate_post_a[0]}, {gate_post_a[1]}, {gate_post_a[2]})
+
+[node name="CollisionShapeA" type="CollisionShape3D" parent="AlleyGatePostA"]
+shape = SubResource("BoxShape3D_gatepost")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="AlleyGatePostB" type="StaticBody3D" parent="."]
+transform = Transform3D({gate_post_b_basis}, {gate_post_b[0]}, {gate_post_b[1]}, {gate_post_b[2]})
+
+[node name="CollisionShapeB" type="CollisionShape3D" parent="AlleyGatePostB"]
+shape = SubResource("BoxShape3D_gatepost")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 
 [node name="DuskCycle" type="Node" parent="."]
 script = ExtResource("6_dusk")

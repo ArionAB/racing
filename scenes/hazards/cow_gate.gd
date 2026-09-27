@@ -128,7 +128,23 @@ enum State {
 ## niciun sens) — isi amana faza. Regula de siguranta din §8: masurata de la
 ## gura, nu de la vaca insasi, ca sa acopere si masina care a intrat deja pe
 ## scurtatura inaintea vacii.
+##
+## Foloseste ACUM `route`/`road_index` (vezi `_corridor_is_clear`), nu doar
+## distanta euclidiana: pe alee-ul real de 3,2 m (runda 2, Track17) distanta
+## singura nu prindea o masina deja angajata pe banda, langa vaca, DAR pe alt
+## segment al ei (aproape in 3D, departe pe traseu — coridorul se indoaie).
+## Ramane, totusi, pragul de distanta pentru cazul WALKING (vaca insasi se
+## misca intre prag si gura, iar `_mouth_is_clear_of` verifica fata de
+## pozitia ei CURENTA, nu doar fata de capete).
 @export_range(4.0, 30.0, 0.5, "suffix:m") var clear_radius_m: float = 12.0
+
+## Cat de departe INAINTE de intrarea benzii (pe bucla principala, in metri)
+## se considera o masina "pe cale sa intre" — a doua jumatate a regulii de
+## siguranta (runda 2, coordonator): o masina la 40 m de gura de pe bucla
+## principala poate ajunge acolo inainte ca vaca sa termine tranzitia (3 s
+## telegraph + pana la `walk_seconds`), deci trebuie vazuta INAINTE sa fi
+## intrat fizic pe ruta 1.
+@export_range(10.0, 100.0, 1.0, "suffix:m") var approach_clear_m: float = 40.0
 
 ## Modelul carat. Implicit (null) = cutia placeholder alba cu doua "coarne"
 ## portocalii (brief §3: nu se hardcodeaza o cale de model — placeholder pana
@@ -403,17 +419,70 @@ func _mouth_is_clear() -> bool:
 ## Fara asta, o masina care intra in raza abia dupa ce mersul a inceput ar
 ## trece prin cutie in miscare — gasit de ProbeJodVaca (gate_state=2, 15-28
 ## brese/rulare cu siguranta pornita, inainte de acest fix).
+##
+## Runda 2 (coordonator): combina DOUA verificari, nu doar distanta euclidiana.
+## `_corridor_is_clear()` e testul principal (route/frac, robust la coridorul
+## care se indoaie); distanta euclidiana fata de `reference_pos` ramane ca
+## PLASA suplimentara pentru starile de MERS (vaca insasi se misca, deci
+## "unde e ACUM" conteaza si nu se deduce doar din route/road_index-ul masinii).
 func _mouth_is_clear_of(reference_pos: Vector3) -> bool:
 	if debug_disable_safety:
 		return true
 	if not is_inside_tree():
 		return true
+	if not _corridor_is_clear():
+		return false
 	for car in get_tree().get_nodes_in_group(&"cars"):
 		var c := car as Node3D
 		if c == null:
 			continue
 		if c.global_position.distance_to(reference_pos) < clear_radius_m:
 			return false
+	return true
+
+
+## Testul principal de siguranta (runda 2): NIMENI pe ruta ulicioarei intre
+## intrare si gura+clear_radius_m, SI nimeni pe bucla principala in ultimii
+## `approach_clear_m` metri inainte de intrarea benzii.
+##
+## De ce route/frac si nu doar distanta: pe coridorul ingust (3,2 m) al
+## alee-ului real, o masina poate fi la mai putin de `clear_radius_m` metri
+## euclidieni de vaca FARA sa fie pe traseul ei — coridorul se indoaie, iar
+## bucla principala trece pe alaturi la cateva zeci de metri in linie dreapta
+## dar la sute de metri pe traseu. Invers, o masina deja angajata pe banda,
+## departe de gura in linie dreapta dar aproape pe traseu (banda are un cot),
+## nu era prinsa de testul euclidian vechi — asta explica cele 157 de
+## contacte masurate pe Track17 cu siguranta PORNITA (runda 1): mecanismul
+## verifica intrebarea gresita ("cat de aproape in 3D"), nu cea corecta
+## ("e cineva INTRE prag si gura, pe traseul PE CARE se misca vaca").
+func _corridor_is_clear() -> bool:
+	var track := _find_track()
+	if track == null or track.routes.size() <= branch_index:
+		return true
+	var branch := track.route_at(branch_index)
+	var main := track.route_at(0)
+	if branch == null or main == null:
+		return true
+	var mouth_dist := mouth_dist_m + clear_radius_m
+	var entry_frac := branch.entry_frac
+	var main_len := main.length()
+	# Fereastra de pe bucla principala: [entry_frac - approach_clear_m, entry_frac],
+	# in fractie, cu infasurare (o masina poate fi INAINTE de linia de start,
+	# adica dupa fractia 1.0 - epsilon, si tot sa fie in fereastra).
+	var approach_frac := approach_clear_m / maxf(main_len, 1.0)
+	for car in get_tree().get_nodes_in_group(&"cars"):
+		var c := car as Car
+		if c == null:
+			continue
+		if c.route == branch_index:
+			var d: float = branch.dists[clampi(c.road_index, 0, branch.dists.size() - 1)]
+			if d <= mouth_dist:
+				return false
+		elif c.route == 0:
+			var f := track.frac_at(c.road_index, 0)
+			var delta := fposmod(entry_frac - f, 1.0)
+			if delta <= approach_frac:
+				return false
 	return true
 
 

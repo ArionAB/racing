@@ -11,14 +11,16 @@ extends CarController
 ## cinematic — principiul 1 din CLAUDE.md ("masa decide, contactul e mecanica")
 ## cere ca imbrancelile cu tuk-tuk-urile sa treaca prin ACELASI solver ca intre
 ## masinile de cursa. `CarData.tuktuk.tres` ii da identitatea: usor (mass_factor
-## 0.45) si cu centrul de masa ridicat (center_of_mass_y), deci se poate
-## rasturna la o lovitura tare — asta e juice, nu bug.
+## 0.34 — retunat masurat fata de 0.45 din brief, vezi tools/probe_jod_tuk.gd)
+## si cu centrul de masa ridicat (center_of_mass_y), deci se poate rasturna la
+## o lovitura tare — asta e juice, nu bug.
 ##
-## AI-ul de cursa il vede GRATIS: `Race._spawn_cars` adauga tuk-tuk-urile in
-## lista `traffic` pe care o citeste `AIController._avoid_line` — vezi brief
-## §3, randul „Traficul de tuk-tuk-uri", coloana cod. Tuk-tuk-urile insele NU
-## intra in lista `cars` folosita pentru clasament/tururi/HUD (vezi
-## `Race._spawn_traffic`).
+## AI-ul de cursa il vede GRATIS: `Race._spawn_traffic` adauga fiecare
+## tuk-tuk in `_ai_visible`, aceeasi lista pe care o primesc si masinile de
+## cursa prin `AIController.configure` — deci `_avoid_line` (campul `traffic`
+## de-acolo) il vede ca pe orice alt obstacol. Vezi brief §3, randul „Traficul
+## de tuk-tuk-uri", coloana cod. Tuk-tuk-urile insele NU intra in `Race.cars`
+## (clasament/tururi/HUD/race_finished) — vezi `Race._spawn_traffic`.
 
 ## Viteza de croaziera (m/s) — brief: 14 m/s, 41% din viteza de varf de baza.
 const CRUISE_SPEED: float = 14.0

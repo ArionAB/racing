@@ -292,10 +292,77 @@ Cornișa (0 → 30 pe ~340 m ≈ **8,8%**), coborârea în Chasm (32 → 15 pe 3
 >   (CC-BY-4.0), ambele pe paleta pistei; credite în `assets/CREDITS.md`.
 >   **Vaporașul care traversează fiordul (§3) NU există** — doar cele două
 >   ancorate.
+> - **B:** peretele de gneis din dreapta există acum ca RELIEF, nu doar ca decor
+>   pus pe un câmp plat (decizia 4 din `fiordland_stare_poi.md`, 26 sep):
+>   nod `Faleze/PereteCornisa` (`CliffFace`, `cut_wall = true`), frac
+>   **0,052–0,271**, `side = -1.0` (aceeași latură ca `custom_ravines[0]`, deci
+>   peretele se ridică pe INTERIORUL virajului, opus golfului). **Reutilizat,
+>   nu inventat**: `CliffFace.cut_wall` e mecanismul deja validat pe Track13
+>   (Cappadocia POI C) și Track15 (Machu Picchu, `TaieturaDrumIncasA/B/C`) —
+>   taietura din interiorul virajului, cu strate, fațetare pe blocuri și taluz
+>   la picior. Terenul de pe partea muntelui era complet plat pe toată
+>   cornișa (măsurat: `ground_y` la +4..+22 m lateral abia diferă de cota
+>   drumului, sub 0,3 m), deci `cut_min_rise_m = 30` declară înălțimea
+>   direct (peretele nu e săpat într-un munte existent, ca la Cappadocia — e
+>   propria lui masă, ca taietura dintre buclele Serengeti). Paleta: sloturi
+>   29 `MARBLE_GREY` (dominant, fețele în lumină) + 20 `VOLCANIC_BLACK`
+>   (dungile ude, minoritar) — prima încercare avea raportul invers și peretele
+>   ieșea aproape negru în captură, corectat vizual (`cut_shade` 0,86→1,0).
+>   Se oprește la 0,271, înainte de geometria GLB `stirling_ledge` (Wall/
+>   Overhang/Shelf, deja montată la fundație, control 0,273–0,345): **nișa de
+>   la Stirling nu e relief nou** — cascada cade deja dintr-un surplomb construit
+>   ca hero-asset, iar plafonul terenului acolo e plat pe ambele părți (verificat
+>   în `tools/gen_decor_fiord_c.gd`), deci mecanismul de falie n-avea ce sapa.
+>   Verificat: hash pe grilă de `ground_y` identic la bit pe Track09/11/13/14/16
+>   înainte/după (peretele e geometrie așezată, nu atinge câmpul de teren);
+>   `probe_manual --track=16` raportează tot un singur obiect (`sealRock1`,
+>   preexistent); `probe_decor --track=16` neschimbat la 29 materiale;
+>   ProbeRace 8 seed-uri uscat, 0 incidente noi pe 0,05–0,30. Capturi
+>   `--gamecam` la 0,08/0,14/0,19: peretele umple partea dreaptă a cadrului,
+>   marea jos-stânga — înainte era doar bolovani izolați pe câmp plat.
+>   **Runda 2 (26 sep, corecție): peretele înghițea decorul bun de pe cornișă**
+>   (`gneisWall*`, `wallFoot*`, padurea de fag) și fața citea artificial (linii
+>   albe subțiri de strat, ca desenul pe hârtie). Două cauze, ambele măsurate:
+>   (1) `cut_edge_offset_m = 0.2` punea talpa peretelui la doar
+>   `half_width + 0,2` (6,2–8,2 m de ax) — chiar în mijlocul benzii de decor
+>   (`gneisWall` p95 lateral 11,71 m, `wallFoot` p95 10,92 m, măsurate direct
+>   din scenă, nu presupuse), deci decorul rămânea îngropat în perete. Fix:
+>   `cut_edge_offset_m = 12.0` (talpa la ~18–20 m), care lasă toată banda de
+>   bolovani în fața peretelui. (2) fața folosea `Palette.world_material()`
+>   (atlas plat pe sloturi UV, fără relief de textură) — cusăturile dintre
+>   sloturile 29/20 pe o singură față mare citeau exact ca liniile reclamate.
+>   Fix: `CliffFace` primește un export nou, opt-in, `material_class` (gol =
+>   comportamentul vechi, bit-identic pe Cappadocia/Machu Picchu/Serengeti);
+>   pe Fiordland peretele ia `material_class = "wet_gneiss"` — **aceeași clasă
+>   triplanară pe care o folosește deja decorul** (`chasm_rock`, `stirling_ledge`),
+>   memoizată static, deci zero materiale noi. Fanul lateral al feței
+>   (`cut_batter_m`, `cut_facet_m`, `cut_tread_m`) a fost strâns (1,6→0,6 /
+>   1,4→0,5 / 0,18→0,05) ca și coama peretelui să rămână în spatele bolovanilor,
+>   nu doar talpa. Rămas: 119 din 226 de fagi (`wallForest*`, rândul cel mai
+>   apropiat de drum) tot cădeau geometric în volumul peretelui — scoși direct
+>   din scenă (nu regenerați: gauntlet-ul de decor era deja câștigat pe zona
+>   asta, o regenerare completă risca să strice aranjamentul aprobat). Verificare
+>   nouă, permanentă: `tools/probe_wall_overlap.gd` — traduce atât peretele
+>   REAL construit (nu o reimplementare a formulei), cât și fiecare nod
+>   `DecorManual/ZoneB_*` în (frac-pe-curbă, lateral, înălțime) și testează
+>   suprapunerea pe toate trei axele; țintă și rezultat curent: 0. Reverificat
+>   după corecție: hash `ground_y` neschimbat (Track09/11/13/14/16), `probe_manual`
+>   tot un singur obiect (`sealRock1`), `probe_decor` tot 29 materiale,
+>   ProbeLayout/ProbeBuried/ProbeLaneClear/ProbeTunel OK. **ProbeRace 8 seed-uri
+>   uscat, minim de tur per seed**: 1,65 / 1,63 / 1,62 / 1,63 / 1,62 / 1,63 /
+>   1,61 (seed-urile 2–8, toate în linia de bază 1,61–1,66); seed 1 iese la 1,22
+>   din cauza Autobuzului (6 repuneri, 15% offroad la tunel/Bowen — slăbiciune
+>   preexistentă, documentată, neafectată de peretele nou). **Zero incidente
+>   (blocaj/repunere/ejectare) la frac ≤ 0,30 pe toate cele 8 seed-uri** — toate
+>   incidentele rămân grupate la tunel (0,60–0,70), Bowen (0,85–0,88) și mal
+>   (0,87–0,88), exact tiparul de dinainte.
 > - **C:** Stirling lovește la intrare: împingere laterală spre mare (`push_speed`
 >   9, fără parapet), smucitură de yaw (1,4 rad/s × 0,35 s), shake 0,55, mașina
 >   picură 3 s, parbrizul ud. Pragul uscat din spatele perdelei: tot geometrie
->   de făcut.
+>   de făcut. Nișa/surplombul din perete sunt deja construite ca GLB
+>   (`stirling_ledge`, `Wall`/`Overhang`/`Shelf`), nu ca relief procedural —
+>   `PereteCornisa` (de mai sus) se oprește la 0,271 tocmai ca să nu se suprapună
+>   cu ele.
 > - **D:** **podețul e real**: `Hazarduri/PodetChasm` (`TrackChannel`,
 >   `jump = false`, `static_deck`) la frac **0,4007**, gol **19 m** (nu 40: pe
 >   raza de ~45 m de la 0,412 un pod drept de 37 m arunca AI-ul de pe tablier),
@@ -310,6 +377,7 @@ Cornișa (0 → 30 pe ~340 m ≈ **8,8%**), coborârea în Chasm (32 → 15 pe 3
 > - **F:** fiordul **nu** e în față la ieșirea din tunel (decizia (b), 21 sep).
 >   Avalanșa: **`avalanche_period` 10 s** (decizia dezvoltatorului, 26 sep);
 >   blocajul real e 2,6 s din ciclu, prinde ~1 mașină AI în 5 din 8 curse.
+> - **Anulate / amânate (26 sep):** kea (pe capotă și pe buturugă) — anulat, mașinile nu opresc la roșu; sunetul (ploaie, vuiet, anunțul torentului) — amânat; stâlpul semaforului — scos. Vaporașul traversează pe `PathMover` (adăugat manual).
 
 | # | frac | POI | ce se întâmplă | semi-lățime (`custom_width_segments`; drumul real e dublu) |
 |---|---|---|---|---|

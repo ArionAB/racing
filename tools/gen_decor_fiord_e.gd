@@ -27,13 +27,21 @@ extends Node
 ## ------------------------------------------------------------------------
 ## CONTRACTUL RUNDEI 1 (fiordland_poi_gauntlet.md, sectiunea E):
 ##
-## 1. STALPUL DE SEMAFOR (`trafficPoleEast`, fundatie) NU se pierde la splice
-##    — se pastreaza exact cum e. `HazardLamp` (2 becuri create de
-##    `SemaforTunel`) sta azi pe pozitia VECHE a nodului `SemaforTunel`, nu in
-##    alveolele stalpului (0,3 m diametru, la 0,35 m pe verticala) — se repara
-##    aici cu un `HazardLamp` explicit, asezat pe stalp, atribuit direct
-##    `TunnelSignalHazard.lamp` (asa `_ready()` nu mai construieste unul nou pe
-##    pozitia veche).
+## 1. [ISTORIC — STALPUL DE SEMAFOR A FOST ELIMINAT, decizia dezvoltatorului,
+##    sep 2026.] Runda 1 cerea `trafficPoleEast` pastrat ca fundatie la splice,
+##    cu `HazardLamp` mutat in alveolele lui. In joc lampile ramaneau ingropate
+##    in movila tunelului si nu se vedeau (`docs/track_briefs/fiordland_stare_poi.md`
+##    decizia deschisa #7) — stalpul (`traffic_light_pole.glb`) si `Lampa`-i
+##    copil au fost scosi din `DecorManual/ZoneE_Portal` in Track16.tscn.
+##    `SemaforTunel.lamp` a ramas `NodePath("Lampa")` — un nume relativ care nu
+##    mai gaseste nimic sub stalp (nu mai exista), deci `TunnelSignalHazard._ready()`
+##    (`if lamp == null: lamp = HazardLamp.new(); ... add_child(lamp)`) construieste
+##    singur un `HazardLamp` implicit ca fiu direct al `SemaforTunel`, pe pozitia
+##    LUI (nu a stalpului) — exact comportamentul dinainte de runda 1. Niciun
+##    NodePath ramas mort: `lamp` se rezolva mereu, fie la un nod real, fie la
+##    null care declanseaza fallback-ul. Acest generator nu construieste
+##    stalpul si nu-l mai mentioneaza in output — orice piesa noua din ZoneE
+##    ramane libera sa foloseasca spatiul unde statea el.
 ## 2. CULOARUL AUTOCARULUI: nimic cu coliziune pe cei 9 m ai gurii (semilatime
 ##    tunel 4,5) si pe aripile-palnie (cod). Panourile de avalansa, jaloanele,
 ##    scree_slab, tussock, fagii — toate DINCOLO de EDGE_KEEP.
@@ -264,12 +272,9 @@ func _survey() -> void:
 		print("; %.3f  (%7.1f,%7.1f)  %6.1f  %4.1f  (%+.2f,%+.2f)  %s  %+.2f" % [
 			f, p.x, p.z, p.y, half, s.x, s.z, " ".join(cols), s.dot(shadow)])
 		f += 0.0025
-	# Pozitia reala a stalpului de semafor (fundatie) si a nodului SemaforTunel,
-	# ca sa se poata alinia HazardLamp fara sa se ghiceasca offsetul.
-	var pole := _track.get_node_or_null("%s/trafficPoleEast" % ZONE) as Node3D
-	if pole != null:
-		print("; trafficPoleEast global = %s" % [pole.global_transform.origin])
-		print("; trafficPoleEast basis.x (fata) = %s" % [pole.global_transform.basis.x])
+	# Pozitia nodului SemaforTunel (stalpul `trafficPoleEast` a fost eliminat,
+	# vezi antetul de mai sus — HazardLamp e azi fiul direct al semaforului,
+	# nimic de aliniat la un stalp care nu mai exista).
 	var haz := _track.get_node_or_null("Hazarduri/SemaforTunel") as Node3D
 	if haz != null:
 		print("; SemaforTunel global = %s, basis.z (spre tunel) = %s" % [

@@ -433,6 +433,27 @@ const SPLIT_MODELS := {
 	# `church_arch`/`fig_tree`/`fever_tree`: ACCENT_HOLDS_CLASS, nu
 	# CLASSES_BY_MODEL direct pe corp.
 	"elephant": true,
+	# Rata (Fiordland, lotul PADUREA DE FAGI): tufa densa cu flori rosii, UN
+	# SINGUR nod de mesh (`Rata`, nu Trunk+Crown ca fagii). Masurat
+	# (probe_slots.gd): 28.2% slot 7 (KERB_RED, florile — brief-ul le numeste
+	# accent), 38.8% slot 21 (TROPICAL_GREEN) + 33.0% slot 28 (LOG_DARK), toate
+	# TREI pe acelasi interval de inaltime (0-3.67 m) — nu se separa pe
+	# verticala, e o tufa amestecata, nu copac cu coroana dezlipita de
+	# trunchi (masuratori §2: raport raza-baza/semi-latime 0.930 -> `hull`).
+	# `true` (nu lista de grupuri): fisierul e unic in tot proiectul (verificat
+	# cu find pe assets/models), deci nu exista risc de coliziune de nume ca la
+	# `fig_tree`.
+	"rata_tree": true,
+	# guard_rock (Fiordland, lotul STANCA UDA): un singur nod (`Rock_002`),
+	# 74.0% MARBLE_GREY (corp, y 0.00-0.46) + 26.0% TROPICAL_GREEN (capacul de
+	# muschi, y 0.44-0.58, piesa 0.585 m). Corectie fata de runda 1 a lotului:
+	# refuzasem ruptura comparand procentul cu pragul de ~20% masurat la
+	# torrent_chute/Overhang, dar acolo procentul era doar UN SIMPTOM — cauza
+	# reala e SUPRAPUNEREA de y ("intervalele de y se suprapun cu stanca").
+	# Aici suprapunerea e 0.02 m din 0.585 m (3.4%), fata de Overhang unde
+	# muschiul e interlacat pe toata fata peretelui — nu acelasi caz. Ruptura
+	# e curata: corpul ramane piatra, capacul ramane pictat.
+	"guard_rock": true,
 }
 
 const ACCENT_SPLIT := {
@@ -577,6 +598,20 @@ const ACCENT_SPLIT := {
 	# `Kopje_Camp` unde iarba (mica) ramane si granitul (mare) e cel ce
 	# primeste clasa prin ACCENT_HOLDS_CLASS.
 	"Elephant_Mesh": Palette.FOAM_WHITE,
+	# Rata (Fiordland): se PASTREAZA slotul 7 (KERB_RED, florile, piesa MICA)
+	# pe corp, ca la `Fig_Tree`/`Fever_Tree` de mai sus — nu ca la
+	# `Elephant_Mesh` (unde piesa mica e cea care pleaca). Tufa mare
+	# (sloturile 21+28, 71.8% din arie) pleaca in `_Accente` si ia clasa
+	# `beech_canopy` prin ACCENT_HOLDS_CLASS mai jos, iar florile raman
+	# pictate pe atlas, ca sa nu le imbrace clasa de frunzis. Masurat
+	# (probe_slots.gd): slot 7 y 1.23..3.45, aproape acelasi interval ca 21
+	# (0.30..3.67) — nu se poate separa pe inaltime, doar pe slot.
+	"Rata": Palette.KERB_RED,
+	# guard_rock (Fiordland): corpul de piatra (29 MARBLE_GREY, 74.0%) ramane
+	# in CORP si primeste `wet_gneiss` (CLASSES_BY_MODEL, mai jos); capacul de
+	# muschi (21 TROPICAL_GREEN, 26.0%, y 0.44-0.58) pleaca in `_Accente` si
+	# ramane pictat pe atlas — e deja verdele corect, nu are nevoie de clasa.
+	"Rock_002": Palette.MARBLE_GREY,
 }
 
 ## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
@@ -606,6 +641,12 @@ const ACCENT_HOLDS_CLASS := {
 	# ramas pe corp) ia `elephant_hide`; corpul original ramane doar cu
 	# fildesii pe atlas.
 	"elephant": true,
+	# Rata (Fiordland, lotul PADUREA DE FAGI): accentul (`Rata_Accente`, tufa
+	# de frunzis 21+28) ia `beech_canopy`; corpul original ramane cu florile
+	# (KERB_RED) pe atlas. Nu exista astazi vreo instanta cu metadata
+	# `racire`/`lumina` pe Rata, dar intrarea tine constanta consistenta cu
+	# restul ruptelor inversate, pentru cazul in care un lot viitor adauga.
+	"rata_tree": true,
 }
 
 
@@ -1384,6 +1425,150 @@ const CLASSES_BY_MODEL := {
 	"torrent_chute": {
 		"Rock": Palette.TRI_PREFIX + "wet_gneiss",
 	},
+
+	# --- Fiordland: PADUREA DE FAGI (Track16, lotul A) ----------------------
+	#
+	# Brief §4/§5.1: "verde-negru de muschi si fag, cel mai inchis verde din
+	# joc" — trunchiuri negre subtiri, coronament marunt. `cloud_forest` (numit
+	# in brief ca "reuse daca tine") NU EXISTA in cod (verificat cu grep pe
+	# palette.gd) — clasele de mai jos sunt noi, dar refolosesc dale deja in
+	# VRAM (`bark`, `acacia_canopy`), ca `bark_fever`/`termite_clay`.
+	#
+	# DOUA materiale noi (buget lot: +2, exact la limita).
+	#
+	# beech_a/b/c: kitul exporta DEJA Trunk/Crown ca noduri SEPARATE (nu
+	# necesita SPLIT_MODELS/ACCENT_SPLIT, spre deosebire de Rata mai jos).
+	# Masurat (probe_slots.gd): Trunk/Trunk_001/Trunk_002 100% slot 28
+	# (LOG_DARK) — deja monocrom SI deja pe culoarea tinta, trunchiul primeste
+	# doar granulatie de scoarta (`bark_beech`, tenta calculata in palette.gd).
+	# Crown/Crown_001/Crown_002: 56% slot 21 (TROPICAL_GREEN) + 44% slot 28
+	# (LOG_DARK), PE ACELASI interval de inaltime (nu se separa pe verticala
+	# ca la Serengeti) — o clasa pe tot nodul ia ambele sloturi deodata, deci
+	# `beech_canopy` e tentata pe media ponderata a lor (palette.gd), nu pe un
+	# singur slot ales cu ochiul.
+	"beech_a": {
+		"Trunk": Palette.TRI_PREFIX + "bark_beech",
+		"Crown": Palette.TRI_PREFIX + "beech_canopy",
+	},
+	"beech_b": {
+		"Trunk_001": Palette.TRI_PREFIX + "bark_beech",
+		"Crown_001": Palette.TRI_PREFIX + "beech_canopy",
+	},
+	"beech_c": {
+		"Trunk_002": Palette.TRI_PREFIX + "bark_beech",
+		"Crown_002": Palette.TRI_PREFIX + "beech_canopy",
+	},
+	# beech_dead: UN SINGUR nod (`Beech_Dead`, nu Trunk+Crown) — 94.4% slot 28
+	# (LOG_DARK, acelasi trunchi negru) + 5.6% slot 12 (CACTUS_GREEN, licheni/
+	# ramurele razlete, y 0.00..4.21, acelasi interval ca restul corpului — nu
+	# se separa). Sub pragul de ruptura (2.5%, memoria clase-pe-piese-de-kit)
+	# ar fi fost ignorat, dar 5.6% e putin peste — totusi, o ruptura pentru o
+	# creanga uscata fara frunze n-are sens vizual (nu exista "coroana" de
+	# separat pe un copac mort), asa ca merge direct pe tot nodul, ca
+	# `dead_tree` pe Serengeti (baobab/dead_tree, aceeasi mecanica).
+	"beech_dead": {
+		"Beech_Dead": Palette.TRI_PREFIX + "bark_beech",
+	},
+	# rata_tree: vezi SPLIT_MODELS["rata_tree"] si ACCENT_SPLIT["Rata"] —
+	# corpul pastreaza florile (KERB_RED, slot 7), tufa de frunzis (21+28)
+	# pleaca in `Rata_Accente` si ia `beech_canopy`. Tinta ponderata a Ratei
+	# (renormalizat pe 21/28: 54.0%/46.0%) cade la (68.1, 90.3, 49.9) — sub 2
+	# unitati pe canal fata de tinta fagului (67.8, 91.8, 50.4), aceeasi
+	# familie, deci ACEEASI clasa (nu un al treilea material).
+	"rata_tree": {
+		"Rata_Accente": Palette.TRI_PREFIX + "beech_canopy",
+	},
+	# --- Fiordland: LEMNUL UD (Track16, lotul C) ---------------------------
+	#
+	# Brief §4: "podetul, balustradele, pontonul — WOOD_WEATHERED 9, ud = mai
+	# inchis". Clasa `wood` exista deja in palette.gd (CLASS_TEXTURES,
+	# CLASS_TRIPLANAR_SCALE) din pipeline-ul general, dar pana acum n-avea
+	# NICIUN consumator — infrastructura pregatita, niciodata cablata. Tenta
+	# noua (CLASS_TINT["wood"]) duce dala la 65% din valoarea slotului
+	# WOOD_WEATHERED uscat, vezi nota din palette.gd.
+	#
+	# UN SINGUR material la garda pentru tot lotul (clasa e cache-uita, ca la
+	# wet_gneiss/inca_stone) — se aplica AICI doar pe `driftwood` (monocrom
+	# 100% slot 9, masurat cu o sonda pe .glb, tools temporare sterse) si pe
+	# tabliera generata din cod a podetului Chasm (`WoodDeckStrip.material_class`
+	# in track.gd/Track16.tscn, acelasi tipar ca `CliffFace.material_class`).
+	#
+	# CINE NU intra, masurat, nu presupus (probe_lot_c_slots, script temporar):
+	#   wharf              21 TROPICAL_GREEN 57.2% + 29 MARBLE_GREY 41.8% +
+	#                      20 VOLCANIC_BLACK 0.9% — deloc lemn. Contractul
+	#                      kitului ("Blocuri MARBLE_GREY, babale VOLCANIC_BLACK")
+	#                      si SLOT_REMAP_BY_MODEL["wharf"] (mai sus in fisier)
+	#                      confirma: e piatra de chei, nu lemn — cheiul din
+	#                      brief §2 randul A e stanca, nu un ponton de lemn.
+	#   chasm_bridge_rail  100% slot 9, DAR balustrada (Rail_L/Rail_R) are
+	#                      grosime masurata 0.56 m (extenta X pe mesh) — sub
+	#                      pragul „piese INGUSTE raman pe atlas" (memoria
+	#                      clase-pe-piese-de-kit #3): la 3-5 m distanta de
+	#                      camera, o bara de 56 cm primeste prea putini texeli
+	#                      pentru ca fibra sa se vada, mipmap-ul o aplatizeaza.
+	#   stump              88.7% slot 28 LOG_DARK + 11.3% slot 12 CACTUS_GREEN
+	#                      (capac de muschi) — NU e pe WOOD_WEATHERED. LOG_DARK
+	#                      e alta familie de material in paleta (barne de casa
+	#                      siberiana aproape negre, deja folosit pentru
+	#                      trunchiuri moarte pe alte piste), nu „lemn ud de
+	#                      chei/podet" — brief-ul §4 nici nu-l numeste explicit.
+	#                      O clasa `wood` (tenta bruna cald) pe un slot gandit
+	#                      negru-carbune ar fi contrazis rolul lui in restul
+	#                      paletei.
+	#   heli_pad           76.2% slot 8 CONCRETE + 23.8% slot 22 FOAM_WHITE
+	#                      (marcaje) — beton, nu lemn (brief-ul insusi il
+	#                      marcheaza „probabil respins").
+	#   wooden_pier        REFOLOSIT cu Okinawa (Track08) — masurat pe .glb,
+	#                      NU e monocrom: 17 sloturi diferite pe acelasi nod
+	#                      (`Pier_Wood`), dominante 0 SAND_LIGHT 49.2% si 31
+	#                      FLAMINGO_PINK 38.1%, restul imprastiat pe alte 15.
+	#                      O clasa pe tot nodul ar sterge toata pictura asta
+	#                      (regula #313) — piesa nu respecta contractul de
+	#                      monocromie cerut de o clasa triplanara, indiferent
+	#                      de pista pe care sta.
+	"driftwood": {
+		"Driftwood": Palette.TRI_PREFIX + "wet_wood",
+	},
+	# Lotul STANCA UDA (bolovani, pietre de parapet, grohotis), val de
+	# materiale sep 2026. Masurat cu tools/probe_slots.gd --dir=fiordland/rocks
+	# (probele existente pentru chasm_rock/stirling_ledge/torrent_chute de mai
+	# sus, verificate din nou aici):
+	#
+	# `guard_rock` (Rock_002, 287 instante, bolovanul de parapet de langa
+	# drum — cel mai apropiat de camera din lot, 1.18x0.70x0.585 m). Sloturi:
+	# 74.0% MARBLE_GREY (29, corp, y 0.00-0.46), 26.0% TROPICAL_GREEN (21,
+	# capacul de muschi, y 0.44-0.58). PRIMA trecere a refuzat piesa comparand
+	# 26.0% cu pragul de ~20% masurat la torrent_chute/Overhang — gresit:
+	# pragul acela e un SIMPTOM, nu criteriul. Criteriul real (scris explicit
+	# la Overhang mai sus) e SUPRAPUNEREA de y: acolo muschiul e interlacat pe
+	# toata fata peretelui ("intervalele de y se suprapun cu stanca"), aici
+	# suprapunerea e 0.02 m din 0.585 m (3.4% din inaltime) — un capac curat,
+	# nu un amestec. Ruptura (SPLIT_MODELS/ACCENT_SPLIT, mai sus) separa
+	# corpul (29, keep_slot in ACCENT_SPLIT["Rock_002"]) de capac (21, pleaca
+	# in `_Accente`, ramane pictat — verdele lui e deja corect). Corpul
+	# primeste `wet_gneiss` mai jos.
+	"guard_rock": {
+		"Rock_002": Palette.TRI_PREFIX + "wet_gneiss",
+	},
+
+	# REFUZAT: `scree_slab` (Rock_003, 52 instante, toate in ZoneE_Portal —
+	# placa de grohotis de langa zona de avalansa). Sloturi: 50.8%
+	# SAND_SHADOW (2, #915D27, saturatie 0.731, portocaliu-ruginiu — EXACT
+	# tonul semnalat de memoria `rock-dark-nu-pe-bazalt`) si 49.2% MARBLE_GREY
+	# (29, #B8B4AC, saturatie 0.065, gri neutru). Ecart de saturatie intre cele
+	# doua sloturi: 0.666 — peste pragul de 0.63 la care Serengeti a respins
+	# `cave_house_a/b/c` ca "monocrom, deci n-are accent de pierdut" (memoria
+	# `monocromia-se-masoara-dupa-remap`). Aici nu e cazul opus (un accent mic
+	# de aparat): cele doua sloturi sunt ~50/50 pe ARIE, iar intervalele de y
+	# se suprapun aproape complet (2: 0.20-1.20, 29: 0.00-1.20, pe o piesa de
+	# doar 1.196 m inaltime) — nu exista o banda curata de tras o ruptura, e
+	# variatie de valoare AMESTECATA pe toata placa, nu un capac separabil.
+	# O clasa `wet_gneiss` pe tot nodul ar sterge exact variatia asta si ar
+	# rade portocaliul in gri uniform (schimbare de nuanta pe jumatate din
+	# arie, nu o simpla umbra). Brief-ul §5.1 oricum cere alta clasa pentru
+	# grohotis (`gravel_wet`, distincta de `wet_gneiss`), nu reuse — iar o
+	# clasa noua ar costa +1 material, peste tinta de buget a lotului (+0).
+	# Piesa ramane pe atlas, cu cele doua sloturi ei native.
 }
 
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),
@@ -1408,6 +1593,16 @@ const CLASSES_BY_THEME := {
 	"fiordland": {
 		"chasm_rock": {
 			"Rock_001": Palette.TRI_PREFIX + "wet_gneiss",
+		},
+		# Lotul STANCA UDA: moss_boulder_b, DUPA ruptura (_split_theme_accents,
+		# SPLIT_MODELS_BY_THEME) — corpul, curatat de capacul de muschi, ramane
+		# numit "Moss_Boulder_B" (ruptura nu redenumeste nodul original, doar
+		# ii scoate un copil `_Accente`), deci cheia de aici il gaseste direct.
+		# moss_boulder_a/c NU intra: ruptura lor a fost refuzata (suprapunere
+		# de y prea mare, vezi SPLIT_MODELS_BY_THEME), deci raman intregi cu
+		# `SLOT_REMAP_BY_THEME` (fara clasa triplanara).
+		"moss_boulder_b": {
+			"Moss_Boulder_B": Palette.TRI_PREFIX + "wet_gneiss",
 		},
 	},
 }
@@ -1637,6 +1832,55 @@ const SLOT_REMAP_BY_THEME := {
 		# `material_override` inlocuieste tot ce era pe atlas, inclusiv
 		# remaparea asta de slot — pastrarea ei aici ar fi o a doua sursa
 		# de adevar moarta, niciodata citita.
+	},
+}
+
+## Ca [constant SPLIT_MODELS], dar scopat pe TEMA pistei (`_ancestor_theme`),
+## nu global — acelasi motiv ca [constant SLOT_REMAP_BY_THEME]: piesa e reuse
+## pe alta pista, cu alta tema, si acolo nu trebuie sa se rupa.
+##
+## Lotul STANCA UDA (Fiordland): `moss_boulder_b` (corp remapat pe 20
+## VOLCANIC_BLACK de `SLOT_REMAP_BY_THEME`, capac de muschi pe 21
+## TROPICAL_GREEN, y corp 0.00-1.06 / y capac 0.92-1.96 pe o piesa de 1.957 m
+## — suprapunere 0.14 m, 7.2% din inaltime) primeste ruptura: corpul, curatat
+## de muschi, poate lua `wet_gneiss` (CLASSES_BY_THEME, mai jos) fara sa
+## piarda capacul verde, care ramane pictat.
+##
+## `moss_boulder_a` si `moss_boulder_c` NU intra aici, desi arata la fel la
+## prima vedere (acelasi kit, aceeasi remapare de slot). Masurat cu
+## tools/probe_slots.gd --dir=machupicchu/rocks (y-urile de mai jos sunt DUPA
+## remaparea de tema, calculate din sloturile brute 3+29 -> 20 si 12 -> 21):
+##   moss_boulder_a: corp y 0.00-0.68, capac y 0.38-0.74 (h 0.741) —
+##     suprapunere 0.30 m = 40.5% din inaltime
+##   moss_boulder_c: corp y 0.00-1.66, capac y 0.97-3.07 (h 3.069) —
+##     suprapunere 0.69 m = 22.5% din inaltime
+## Verificat si pe FOOTPRINT (x/z): muschiul acopera aproape tot conturul
+## orizontal al bolovanului la toate trei (nu un petic intr-o parte), deci
+## banda de muschi INFASOARA bolovanul ca un guler — asta e normal si nu
+## descalifica o ruptura pe cont propriu (la fel ca o creasta cu capac de
+## zapada, memoria `benzi-vertex-color-bisect`). Ce descalifica e cat de MULT
+## se intretaie pe verticala cu piatra: la `_a`/`_c` muschiul se intinde in
+## jos peste o treime sau mai mult din corp, exact tiparul `stirling_ledge.
+## Overhang`/`inca_house_b` (22.8-27.0%, "intervalele de y se suprapun cu
+## stanca, deci o ruptura ar taia gresit"); la `_b`, 7.2% e in familia
+## `guard_rock` (3.4%) si `torrent_chute.Rock` (sub prag, nici n-a cerut
+## ruptura). Pragul care conteaza e SUPRAPUNEREA, nu procentul brut de arie.
+const SPLIT_MODELS_BY_THEME := {
+	"fiordland": {
+		"moss_boulder_b": true,
+	},
+}
+
+## Ca [constant ACCENT_SPLIT], dar consultat DOAR de [method
+## _split_theme_accents], pentru intrarile din [constant SPLIT_MODELS_BY_THEME].
+## Cheia e numele de nod (dupa remaparea de slot), valoarea slotul/sloturile
+## care raman in CORP.
+const ACCENT_SPLIT_BY_THEME := {
+	"fiordland": {
+		# Dupa SLOT_REMAP_BY_THEME, corpul lui moss_boulder_b e pe 20
+		# VOLCANIC_BLACK (3 si 29 mutate acolo); capacul de muschi ramane pe 21
+		# TROPICAL_GREEN si pleaca in `_Accente`.
+		"Moss_Boulder_B": Palette.VOLCANIC_BLACK,
 	},
 }
 
@@ -1891,7 +2135,21 @@ func _ready() -> void:
 	# `CLASSES_BY_THEME`, `chasm_rock` -> `wet_gneiss` doar pe fiordland) are
 	# aceeasi dependenta de `_ancestor_theme()` si aceeasi problema, deci merge
 	# deferred langa `_remap_model_slots`.
+	#
+	# `_split_theme_accents` (lotul STANCA UDA, Fiordland) e ruptura de accente
+	# ECHIVALENTA lui `_split_shutters`, dar SCOPATA PE TEMA in loc de global:
+	# `moss_boulder_b` are nevoie de ruptura DOAR pe fiordland (corpul remapat
+	# de `_remap_model_slots` pe slotul 20 -> `wet_gneiss`), nu si pe Machu
+	# Picchu, unde acelasi .glb ramane intreg pe `inca_stone`
+	# (`_model_flock`). De aceea NU intra in `SPLIT_MODELS`/`ACCENT_SPLIT`
+	# (globale) ci in `SPLIT_MODELS_BY_THEME`/`ACCENT_SPLIT_BY_THEME`.
+	# Deferred, ca sa ruleze DUPA `_remap_model_slots` (citeste sloturile deja
+	# mutate: corp pe 20, nu pe sloturile brute 3/29 din .glb) si INAINTE de
+	# `_apply_theme_classes` (nodul `_Accente` trebuie sa existe cand se pune
+	# clasa pe corp, la fel ca la `_split_shutters`/`apply_class_materials`).
+	# Godot executa `call_deferred` in ordinea in care au fost puse in coada.
 	call_deferred("_remap_model_slots")
+	call_deferred("_split_theme_accents")
 	call_deferred("_apply_theme_classes")
 	_repaint_slot_boxes()
 	_split_shutters()
@@ -2229,6 +2487,43 @@ func _split_shutters() -> void:
 			for prefix: String in ACCENT_SPLIT:
 				if String(mi.name).begins_with(prefix):
 					Palette.split_accents(mi, ACCENT_SPLIT[prefix])
+					break
+
+
+## Ca [method _split_shutters], dar scopat pe TEMA in loc de global — vezi
+## [constant SPLIT_MODELS_BY_THEME] pentru motiv (`moss_boulder_b`, reuse pe
+## Machu Picchu, nu trebuie sa se rupa acolo).
+##
+## `call_deferred` din `_ready()`, DUPA `_remap_model_slots` (citeste sloturile
+## deja mutate de tema) si INAINTE de `_apply_theme_classes` (nodul `_Accente`
+## trebuie sa existe cand se pune clasa pe corp) — vezi comentariul din
+## `_ready()`.
+func _split_theme_accents() -> void:
+	var theme := _ancestor_theme()
+	if not SPLIT_MODELS_BY_THEME.has(theme):
+		return
+	var split_models: Dictionary = SPLIT_MODELS_BY_THEME[theme]
+	var accent_split: Dictionary = ACCENT_SPLIT_BY_THEME.get(theme, {})
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var stem := model.scene_file_path.get_file().get_basename()
+		if not split_models.has(stem):
+			continue
+		var where: Variant = split_models[stem]
+		if where is Array and not (where as Array).has(_group_of(model)):
+			continue
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null:
+				continue
+			for prefix: String in accent_split:
+				if String(mi.name).begins_with(prefix):
+					Palette.split_accents(mi, accent_split[prefix])
 					break
 
 

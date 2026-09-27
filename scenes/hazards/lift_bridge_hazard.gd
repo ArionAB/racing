@@ -175,6 +175,13 @@ const FALL_BACKOFF: float = 70.0
 ## trambulina de la buza nu se construieste. Reuse cu parametru, ca la
 ## barnele Podului Incas (`descend`) — nu e o clasa noua.
 @export var static_deck: bool = false
+## Clasa triplanara pentru tabliera (`Palette.triplanar_class_material`), in
+## loc de culoarea plata WOOD_WEATHERED din `_deck_material()`. Gol (implicit)
+## = comportamentul vechi, bit-identic — pod-ul mobil de pe Okinawa si
+## barnele Machu Picchu nu seteaza asta, deci raman neatinse. Setat de
+## `TrackChannel.deck_material_class` (Chasm, Fiordland) prin
+## `Track._build_lift_bridge`.
+@export var deck_material_class: String = ""
 
 @export_group("Structura")
 ## Turnurile cu grinda si lampile; corabiile de pe canal. Se sting pe un gol
@@ -251,7 +258,16 @@ static func _structure_material() -> StandardMaterial3D:
 	return _struct_mat
 
 
-static func _deck_material() -> StandardMaterial3D:
+## Instanta, NU static: `deck_material_class` e per-hazard (Chasm cere lemn
+## texturat, podul mobil de pe Okinawa si barnele Machu Picchu raman pe
+## culoarea plata), deci materialul nu poate fi memoizat o singura data pe
+## toata clasa, cum erau `_struct_mat`/`_lamp_mat` (identice peste tot).
+## `Palette.triplanar_class_material(cls)` e ea insasi memoizata GLOBAL pe
+## numele clasei — zero materiale noi la garda cata vreme clasa e deja
+## folosita in alta parte a pistei (aici, `wood`, cache cu `driftwood`).
+func _deck_material() -> StandardMaterial3D:
+	if deck_material_class != "":
+		return Palette.triplanar_class_material(deck_material_class)
 	if _deck_mat == null:
 		_deck_mat = StandardMaterial3D.new()
 		_deck_mat.albedo_color = Palette.color(Palette.WOOD_WEATHERED)

@@ -538,6 +538,7 @@ const CLASS_TEXTURES := {
 	"village_plaster": "res://assets/textures/classes/plaster.png",
 	"rust_metal": "res://assets/textures/classes/rust_metal.png",
 	"wood": "res://assets/textures/classes/wood.png",
+	"wet_wood": "res://assets/textures/classes/wood.png",
 	"concrete": "res://assets/textures/classes/concrete.png",
 	# BETONUL ORASULUI (Chongqing). ACELASI PNG ca "concrete" — nu se dubleaza
 	# in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica pe care
@@ -804,6 +805,35 @@ const CLASS_TEXTURES := {
 	# "gneisul ud si verde-negru sunt deja in atlas", clasa refoloseste dala
 	# `alpine_granite` (zero VRAM nou), ca `inca_stone`/`cut_stone` mai sus.
 	"wet_gneiss": "res://assets/textures/classes/alpine_granite.png",
+	# SCOARTA NEAGRA a fagului argintiu (Fiordland, lotul PADUREA DE FAGI).
+	# ACEEASI dala ca "bark" — nu se dubleaza in memorie, se schimba doar
+	# tenta (mecanica bark_fever/volcanic_rock/tuff_cream). Masurat
+	# (tools/probe_slots.gd): Trunk/Trunk_001/Trunk_002 sunt 100% pe slotul 28
+	# (LOG_DARK #4A3526) pe toate cele trei modele — deja monocrome SI deja pe
+	# culoarea tinta, spre deosebire de fever_tree (trunchi galben, tinta
+	# departe de dala). Aici tenta doar aduce dala de scoarta pe negrul-brun
+	# al fagului, fara nicio ridicare (vezi CLASS_TINT: toate canalele sub 1).
+	"bark_beech": "res://assets/textures/classes/bark.png",
+	# FRUNZISUL fagului argintiu, coronament marunt verde-negru (brief §4:
+	# "verde-negru de muschi si fag, cel mai inchis verde din joc"). ACEEASI
+	# dala ca "acacia_canopy" — nu se dubleaza in memorie, se schimba doar
+	# tenta. Masurat (probe_slots.gd): nodurile Crown/Crown_001/Crown_002 nu
+	# separa trunchi/coroana pe INALTIME ca la Serengeti (sloturile 21 si 28
+	# ocupa aproape acelasi interval de y in fiecare coroana) — coroana e UN
+	# nod amestecat 56% TROPICAL_GREEN (21) + 44% LOG_DARK (28, umbra/ramurile
+	# dese din interiorul coronamentului marunt). O clasa pe tot nodul Crown
+	# sterge ambele sloturi deodata, deci tinta e media ponderata pe arie a
+	# celor doua, nu un singur slot ales cu ochiul (aceeasi regula ca la
+	# `tuff_cream`/`termite_clay`).
+	#
+	# `rata_tree.Rata` (28.2% slot 7 KERB_RED flori + 38.8% slot 21 + 33.0%
+	# slot 28) refoloseste ACEEASI clasa pe corp, dupa ce accentul de flori
+	# ramane pe atlas prin ACCENT_SPLIT (vezi world_prop.gd): renormalizat
+	# doar pe sloturile 21/28 (54.0%/46.0%), tinta ponderata a Ratei cade la
+	# (68.1, 90.3, 49.9) — la sub 2 unitati pe canal fata de tinta fagului
+	# (67.8, 91.8, 50.4), aceeasi familie de culoare, deci nu justifica o a
+	# doua clasa (buget +2, nu +3).
+	"beech_canopy": "res://assets/textures/classes/acacia_canopy.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -947,6 +977,45 @@ const CLASS_TINT := {
 	# masuratoarea din bara H199 S0.02), fara sa stinga complet dungile
 	# verticale ale texturii `alpine_granite`.
 	"wet_gneiss": Color(0.40, 0.40, 0.42),
+	# Scoarta neagra a fagului: dala `bark` (171.7, 140.7, 107.7, medie exacta
+	# PIL/numpy pe bark.png) trasa spre LOG_DARK (74, 53, 38) — trunchiul e
+	# 100% pe slotul asta pe toate cele trei modele (beech_a/b/c), deci tinta
+	# se calculeaza direct pe el, fara ponderare. Raport pe canale (0.4311,
+	# 0.3767, 0.3529) — TOATE SUB 1, deci nu cere CLASS_LIFT. Verificare
+	# inversa: (171.7*0.4311, 140.7*0.3767, 107.7*0.3529) = (74.0, 53.0, 38.0),
+	# exact pe tinta.
+	"bark_beech": Color(0.4311, 0.3767, 0.3529),
+	# Coroana fagului: dala `acacia_canopy` (88.8, 108.2, 56.1) trasa spre
+	# media ponderata pe arie a coroanei (Crown/Crown_001/Crown_002, masurat
+	# probe_slots.gd): 56.3% TROPICAL_GREEN (63,122,60) + 43.7% LOG_DARK
+	# (74,53,38) = (67.8, 91.8, 50.4). Raport pe canale (0.7639, 0.8490,
+	# 0.8975) — TOATE SUB 1, nu cere CLASS_LIFT. Verificare inversa:
+	# (88.8*0.7639, 108.2*0.8490, 56.1*0.8975) = (67.8, 91.8, 50.4), exact pe
+	# tinta.
+	"beech_canopy": Color(0.7639, 0.8490, 0.8975),
+	# Lemnul ud (Fiordland, brief §4: "podetul, balustradele, pontonul —
+	# WOOD_WEATHERED 9, ud = mai inchis"). Dala `wood.png` exista deja in
+	# CLASS_TEXTURES (0.7 in CLASS_TRIPLANAR_SCALE) din pipeline-ul general,
+	# dar pana acum n-avea niciun consumator in world_prop.gd — infrastructura
+	# pregatita, niciodata cablata.
+	#
+	# Masurat (script temporar, sters): dala are media (124.14, 98.99, 71.72),
+	# luminanta 0.401 (rec709). Slotul WOOD_WEATHERED (9, #835C34) e
+	# (131, 92, 52), luminanta 0.382 — aproape identic cu dala, deci un simplu
+	# multiplicator de potrivire ar fi cerut R usor PESTE 1 (raport 1.055),
+	# adica CLASS_LIFT pentru un canal aproape neschimbat. Fiindca brief-ul
+	# cere explicit mai INCHIS decat slotul uscat (nu potrivire cu el), tinta
+	# s-a ales direct la 65% din valoarea slotului uscat — (85.15, 59.80, 33.80),
+	# luminanta 0.248, o scadere de 35% fata de WOOD_WEATHERED uscat, in aceeasi
+	# ordine de marime ca alte clase "ud"/umbrite ale pistei (`volcanic_rock`,
+	# `wet_gneiss` fata de dala lor). Raportul tinta/dala pe toate trei canale
+	# (0.686, 0.604, 0.471) e SUB 1, deci se obtine integral din CLASS_TINT,
+	# fara CLASS_LIFT.
+	# Clasa SEPARATA, nu tenta pe `wood`: `wood` e folosita deja pe Dunele/
+	# Okinawa (moara, lazi, barca sabani, portalul minei — track.gd), iar o
+	# tenta globala le-ar fi intunecat pe toate cu 35%. Aceeasi dala, cache
+	# pe clasa: +1 material doar pe Track16.
+	"wet_wood": Color(0.686, 0.604, 0.471),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1201,8 +1270,12 @@ const CLASS_TRIPLANAR_SCALE := {
 	"old_stone": 0.35,
 	# Lemnaria: bena tricicletei Ape, busteni de rulare, bordaj. Sursa e o
 	# scanare de scanduri; la 0.7 (o repetitie la 1.43 m) fibra cade aproape
-	# la scara reala pe piese de 1-3 m.
+	# la scara reala pe piese de 1-3 m. Prim consumator REAL (Fiordland,
+	# `driftwood` 4,03 m si tabliera `WoodDeckStrip` a podetului Chasm,
+	# scanduri de ~1,5-2 m): scara ramane neschimbata, era deja gandita pentru
+	# exact plaja asta.
 	"wood": 0.7,
+	"wet_wood": 0.7,
 	# Trunchiuri de maslin si de smochin. Sursa `bark` e o scanare de 1.3 m de
 	# trunchi, deci 0.77 (o repetitie la 1.3 m) e SCARA REALA — cicatricile
 	# cad exact cat sunt. Regula 1 din pipeline (scara sursei fata de
@@ -1218,6 +1291,25 @@ const CLASS_TRIPLANAR_SCALE := {
 	# 1.3 m/repetitie ramane la fel de potrivita ca pe acaciile-umbrela. Nu
 	# exista o masuratoare care sa ceara alta cifra.
 	"bark_fever": 0.77,
+	# Scoarta neagra a fagului (Fiordland): ACEEASI scara ca `bark` (0.77,
+	# repetitie la 1.3 m REALA — scara SURSEI, nu a piesei, regula #2 din
+	# `clase-pe-piese-de-kit`). Trunchiurile de fag masoara 1.54-2.06 m
+	# diametru la baza (raza 0.77-1.03 m, probe_slots.gd) — mai groase decat
+	# acaciile-umbrela/fever_tree (0.57-0.69 m), dar aceeasi fotografie de
+	# scoarta ramane aceeasi fotografie de scoarta oriunde e proiectata: la
+	# 0.77 un trunchi de 2 m prinde ~1.5 repetitii, destul cat cicatricile sa
+	# se citeasca fara sa devina tapet. Nicio masuratoare de aici nu cere alta
+	# cifra.
+	"bark_beech": 0.77,
+	# Coroana fagului (Fiordland): ACEEASI scara ca `acacia_canopy` (0.05,
+	# repetitie la 20 m) — clasa e derivata din aceeasi dala PICTATA, cu
+	# aceeasi logica de "bulgare de frunzis" (lobii mastii de densitate sunt o
+	# PROPORTIE a dalei, nu o marime fizica masurata). Coroanele de fag
+	# (5.1-9.55 m diametru, probe_slots.gd) si Rata (4.29 m) sunt in acelasi
+	# ordin de marime ca acaciile-umbrela/fig_tree (7-13 m) pentru care scara a
+	# fost aleasa — un lob la 20 m/repetitie cade tot in banda 1.2-2.6 m,
+	# "bulgare" vizibil, nu o pata cat toata coroana si nu tapet.
+	"beech_canopy": 0.05,
 	# Termitiere (Serengeti): scara DERIVATA din piesa, nu copiata de la `rock`
 	# (0.14, calibrata pe faleze de 6-12 m). Cele doua modele masoara 1.5 m
 	# (termite_mound_a) si 3.0 m (termite_mound_b) pe verticala

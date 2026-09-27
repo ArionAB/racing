@@ -290,9 +290,13 @@ de detaliu, deci se alege slotul după mască, nu doar după culoare).
 
 **Albastrul e decizia de risc a pistei.** Nu există un slot albastru-var:
 `CAR_BLUE` 15 e saturat de caroserie, `ICE_TURQUOISE`/`ICE_DEEP` sunt
-turcoaz-verde. Soluția propusă: albastrul se face din **tenta de clasă peste
-un slot alb** (`village_plaster` de la Stromboli, pe slotul lui, cu tenta
-schimbată). Alb × tentă = albastru, iar tenta **multiplică**, deci merge. Vertex
+turcoaz-verde. Soluția propusă: albastrul se face din **tenta a două clase
+NOI pe dala de var a lui `village_plaster`** (`assets/textures/classes/plaster.png`),
+nu din tenta lui `village_plaster`. **`CLASS_TINT["village_plaster"]` nu se
+atinge**: o tentă pe o clasă existentă recolorează toate pistele care o
+folosesc (Stromboli), iar `probe_decor` nu vede culori (memoria
+`tenta-pe-clasa-partajata`, lemnul ud de la Fiordland, PR #420). Alb × tentă =
+albastru, iar tenta **multiplică**, deci merge. Vertex
 color-ul **doar întunecă** (memoria `surfacetool-clamp-vertex-color`), deci
 variația între case vine din **două clase** (`blue_lime_light`,
 `blue_lime_indigo`) plus AO, nu din vertex color. **Se măsoară după remap**,
@@ -301,7 +305,7 @@ albastrul nu iese dintr-o tentă, se ia **aici** decizia „64 de sloturi", expl
 
 | rol | slot existent / clasă |
 |---|---|
-| casele albastre (dominant) | slotul lui `village_plaster` + clasele noi **`blue_lime_light`** (`#8FB0DC`) și **`blue_lime_indigo`** (`#4F6FB8`), triplanare, cu textura de var pe mască (pete, scurgeri sub ferestre) |
+| casele albastre (dominant) | dala lui `village_plaster` (fără să-i atingi tenta) + clasele noi **`blue_lime_light`** (`#8FB0DC`) și **`blue_lime_indigo`** (`#4F6FB8`), triplanare, cu textura de var pe mască (pete, scurgeri sub ferestre) |
 | fortul (ziduri, porți, fațade) | `ROCK_LIGHT` 3 + clasă **`red_sandstone`** (`#A5553A`); se măsoară întâi dacă `red_valley_tuff` (Cappadocia) ține tenta. **Nu** `TILE_TERRACOTTA` (e țiglă, portocaliu) |
 | stânca de sub fort, parcul de deșert | `ROCK_DARK` 4 — **aici maro-rozul e corect** (riolit, nu bazalt; memoria `rock-dark-nu-pe-bazalt` interzice doar invers) + clasă `rhyolite` (`#9A6A5A`) |
 | fântâna în trepte | `SAND_LIGHT` 0 / `SAND_MID` 1 + clasă **`rose_sandstone`** (`#D4957A`), cu **dungi de umbră pe fiecare treaptă** din geometrie, nu din textură (memoria `silueta-inainte-de-umbrire`) |

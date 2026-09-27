@@ -153,3 +153,11 @@ de dezvoltator e semnalat „plutește” de `probe_manual`.
 | sunet | **amânat** |
 | vaporașul pe traseu | adăugat manual de dezvoltator (796d8b82) |
 | kea | **anulat**: pe o pistă unde nimeni nu oprește la roșu, kea pe capotă nu are când să aterizeze |
+### Acceptate la volan după PR #416 (26 sep 2026)
+
+- Scurtătura din pădure câștigă +1,35…+1,93 s pe uscat (peste fereastra 0,5–1,5):
+  **acceptat**, `ProbeFiordScurtatura` free rămâne roșu în cunoștință de cauză.
+- Stirling `push_speed` 9: **bine așa**.
+- `sealRock1` ridicat: **intenționat** (probe_manual îl raportează, se ignoră).
+- Spuma râului colțuroasă: se rezolvă cu atlasul de culori.
+- Caiacele lipsă din zona H: **ok așa**.

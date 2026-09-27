@@ -1384,6 +1384,48 @@ const CLASSES_BY_MODEL := {
 	"torrent_chute": {
 		"Rock": Palette.TRI_PREFIX + "wet_gneiss",
 	},
+
+	# Lotul STANCA UDA (bolovani, pietre de parapet, grohotis), val de
+	# materiale sep 2026. Masurat cu tools/probe_slots.gd --dir=fiordland/rocks
+	# (probele existente pentru chasm_rock/stirling_ledge/torrent_chute de mai
+	# sus, verificate din nou aici):
+	#
+	# REFUZAT: `guard_rock` (Rock_002, 287 instante, bolovanul de parapet de
+	# langa drum — cel mai apropiat de camera din lot, 1.18x0.70x0.585m).
+	# Sloturi: 74.0% MARBLE_GREY (29, corp), 26.0% TROPICAL_GREEN (21, capacul
+	# de muschi), y corp 0.00-0.46, y muschi 0.44-0.58 — o ruptura (SPLIT_MODELS/
+	# ACCENT_SPLIT, ca la inca_wall) ar fi geometric curata (suprapunere doar
+	# 0.02 m din 0.585 m). Dar 26.0% e PESTE pragul de ~20% deja calibrat pe
+	# ACEEASI decizie, pe ACEEASI pista, cu doua runde mai devreme:
+	# torrent_chute.Rock (11.7%) a ramas intreg pe wet_gneiss, iar
+	# stirling_ledge.Overhang (27.0%) a fost refuzat explicit, ambele masurate
+	# mai sus. 26.0% cade langa Overhang (27.0%), nu langa torrent_chute
+	# (11.7%) — acelasi verdict: NU se aplica nicio clasa, piesa ramane
+	# intreaga pe atlas. A rescrie pragul acum, doar ca sa treaca bolovanul de
+	# parapet, ar insemna sa ignor exact linia trasata de criticul de runda 5
+	# fara o masuratoare noua care s-o justifice (vezi si comentariul de mai
+	# sus la Overhang/Shelf). Cost: 0 materiale noi, dar ZERO castig vizual pe
+	# cea mai vazuta piesa a lotului — semnalat in raport pentru revizuire la
+	# integrare, daca developerul vrea sa coboare pragul dupa o captura reala.
+	#
+	# REFUZAT: `scree_slab` (Rock_003, 52 instante, toate in ZoneE_Portal —
+	# placa de grohotis de langa zona de avalansa). Sloturi: 50.8%
+	# SAND_SHADOW (2, #915D27, saturatie 0.731, portocaliu-ruginiu — EXACT
+	# tonul semnalat de memoria `rock-dark-nu-pe-bazalt`) si 49.2% MARBLE_GREY
+	# (29, #B8B4AC, saturatie 0.065, gri neutru). Ecart de saturatie intre cele
+	# doua sloturi: 0.666 — peste pragul de 0.63 la care Serengeti a respins
+	# `cave_house_a/b/c` ca "monocrom, deci n-are accent de pierdut" (memoria
+	# `monocromia-se-masoara-dupa-remap`). Aici nu e cazul opus (un accent mic
+	# de aparat): cele doua sloturi sunt ~50/50 pe ARIE, iar intervalele de y
+	# se suprapun aproape complet (2: 0.20-1.20, 29: 0.00-1.20, pe o piesa de
+	# doar 1.196 m inaltime) — nu exista o banda curata de tras o ruptura, e
+	# variatie de valoare AMESTECATA pe toata placa, nu un capac separabil.
+	# O clasa `wet_gneiss` pe tot nodul ar sterge exact variatia asta si ar
+	# rade portocaliul in gri uniform (schimbare de nuanta pe jumatate din
+	# arie, nu o simpla umbra). Brief-ul §5.1 oricum cere alta clasa pentru
+	# grohotis (`gravel_wet`, distincta de `wet_gneiss`), nu reuse — iar o
+	# clasa noua ar costa +1 material, peste tinta de buget a lotului (+0).
+	# Piesa ramane pe atlas, cu cele doua sloturi ei native.
 }
 
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),

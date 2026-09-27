@@ -1384,6 +1384,58 @@ const CLASSES_BY_MODEL := {
 	"torrent_chute": {
 		"Rock": Palette.TRI_PREFIX + "wet_gneiss",
 	},
+
+	# --- Fiordland: LEMNUL UD (Track16, lotul C) ---------------------------
+	#
+	# Brief §4: "podetul, balustradele, pontonul — WOOD_WEATHERED 9, ud = mai
+	# inchis". Clasa `wood` exista deja in palette.gd (CLASS_TEXTURES,
+	# CLASS_TRIPLANAR_SCALE) din pipeline-ul general, dar pana acum n-avea
+	# NICIUN consumator — infrastructura pregatita, niciodata cablata. Tenta
+	# noua (CLASS_TINT["wood"]) duce dala la 65% din valoarea slotului
+	# WOOD_WEATHERED uscat, vezi nota din palette.gd.
+	#
+	# UN SINGUR material la garda pentru tot lotul (clasa e cache-uita, ca la
+	# wet_gneiss/inca_stone) — se aplica AICI doar pe `driftwood` (monocrom
+	# 100% slot 9, masurat cu o sonda pe .glb, tools temporare sterse) si pe
+	# tabliera generata din cod a podetului Chasm (`WoodDeckStrip.material_class`
+	# in track.gd/Track16.tscn, acelasi tipar ca `CliffFace.material_class`).
+	#
+	# CINE NU intra, masurat, nu presupus (probe_lot_c_slots, script temporar):
+	#   wharf              21 TROPICAL_GREEN 57.2% + 29 MARBLE_GREY 41.8% +
+	#                      20 VOLCANIC_BLACK 0.9% — deloc lemn. Contractul
+	#                      kitului ("Blocuri MARBLE_GREY, babale VOLCANIC_BLACK")
+	#                      si SLOT_REMAP_BY_MODEL["wharf"] (mai sus in fisier)
+	#                      confirma: e piatra de chei, nu lemn — cheiul din
+	#                      brief §2 randul A e stanca, nu un ponton de lemn.
+	#   chasm_bridge_rail  100% slot 9, DAR balustrada (Rail_L/Rail_R) are
+	#                      grosime masurata 0.56 m (extenta X pe mesh) — sub
+	#                      pragul „piese INGUSTE raman pe atlas" (memoria
+	#                      clase-pe-piese-de-kit #3): la 3-5 m distanta de
+	#                      camera, o bara de 56 cm primeste prea putini texeli
+	#                      pentru ca fibra sa se vada, mipmap-ul o aplatizeaza.
+	#   stump              88.7% slot 28 LOG_DARK + 11.3% slot 12 CACTUS_GREEN
+	#                      (capac de muschi) — NU e pe WOOD_WEATHERED. LOG_DARK
+	#                      e alta familie de material in paleta (barne de casa
+	#                      siberiana aproape negre, deja folosit pentru
+	#                      trunchiuri moarte pe alte piste), nu „lemn ud de
+	#                      chei/podet" — brief-ul §4 nici nu-l numeste explicit.
+	#                      O clasa `wood` (tenta bruna cald) pe un slot gandit
+	#                      negru-carbune ar fi contrazis rolul lui in restul
+	#                      paletei.
+	#   heli_pad           76.2% slot 8 CONCRETE + 23.8% slot 22 FOAM_WHITE
+	#                      (marcaje) — beton, nu lemn (brief-ul insusi il
+	#                      marcheaza „probabil respins").
+	#   wooden_pier        REFOLOSIT cu Okinawa (Track08) — masurat pe .glb,
+	#                      NU e monocrom: 17 sloturi diferite pe acelasi nod
+	#                      (`Pier_Wood`), dominante 0 SAND_LIGHT 49.2% si 31
+	#                      FLAMINGO_PINK 38.1%, restul imprastiat pe alte 15.
+	#                      O clasa pe tot nodul ar sterge toata pictura asta
+	#                      (regula #313) — piesa nu respecta contractul de
+	#                      monocromie cerut de o clasa triplanara, indiferent
+	#                      de pista pe care sta.
+	"driftwood": {
+		"Driftwood": Palette.TRI_PREFIX + "wood",
+	},
 }
 
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),

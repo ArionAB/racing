@@ -24,12 +24,22 @@ extends Node3D
 ## COD in interiorul unei masini o azvarle cu sute de m/s: masurat la turma de
 ## gnu din Serengeti (282 m/s, ingropat la -6 m — vezi memoria
 ## `corp-cinematic-aparut-in-masina`). De-asta vaca nu se muta niciodata orb pe
-## ceas: inainte de FIECARE tranzitie (spre gura SI inapoi spre prag) se
+## ceas: inainte de fiecare tranzitie (spre gura SI inapoi spre prag) se
 ## verifica `_mouth_is_clear()` — nicio masina la mai putin de `clear_radius_m`
 ## de gura. Daca nu e libera, faza se AMANA (ceasul de stare sta pe loc, nu
-## se reseteaza), pana se elibereaza. Nicio masina nu e oprita de asta: doar
-## vaca isi intarzie propriul pas, exact cum ar face un animal real care vede
-## trafic.
+## se reseteaza), pana se elibereaza.
+##
+## Verificarea NU se opreste la pornirea mersului: `WALKING_TO_MOUTH` si
+## `WALKING_TO_THRESHOLD` re-verifica `_mouth_is_clear_of(pozitia CURENTA a
+## corpului)` in FIECARE cadru si INGHEATA mersul (nu regreseaza, doar nu mai
+## avanseaza) daca o masina intra in raza in timp ce vaca e deja pe drum.
+## Fara asta — masurat cu `tools/probe_jod_vaca.gd` inainte de acest fix — o
+## masina care ajunge langa unde e vaca ACUM (nu langa gura finala, unde s-a
+## facut singura verificare la pornire) trece prin cutia in miscare: 15-28
+## brese pe 8 seed-uri, cu regula de siguranta PORNITA (fereastra de mers e de
+## doar 2 s, dar 8 masini + un ciclu la fiecare 47 s tot gasesc destule ocazii
+## sa coincida). Nicio masina nu e oprita de asta: doar vaca isi intarzie
+## propriul pas, exact cum ar face un animal real care vede trafic.
 ##
 ## [b]De ce nu SlidingHazard.Motion.USA.[/b] USA e generic (orice model care
 ## sta in nisa/pe banda/se intoarce) si nu stie de `TrackBranch` sau de
@@ -316,7 +326,19 @@ func _physics_process(delta: float) -> void:
 			if _clock >= telegraph_seconds:
 				_try_advance(State.WALKING_TO_MOUTH, telegraph_seconds)
 		State.WALKING_TO_MOUTH:
-			_clock += delta
+			# Siguranta se verifica in FIECARE cadru de mers, nu doar la
+			# pornire: o masina care ajunge langa unde e vaca ACUM (nu doar
+			# langa gura finala) trebuie sa o opreasca pe loc, altfel cutia
+			# ar traversa exact prin ea in fereastra de 2 s de mers — gasit
+			# de sonda (ProbeJodVaca, gate_state=2): 15-28 brese/rulare CU
+			# siguranta pornita, toate in starea asta. `_clock` INGHEATA
+			# (nu regreseaza) cat timp cineva e in raza — vaca sta pe loc pe
+			# banda pana se elibereaza, apoi continua de unde a ramas.
+			if _mouth_is_clear_of(_body.global_position):
+				_clock += delta
+				_pending = false
+			else:
+				_pending = true
 			_walk_t = clampf(_clock / walk_seconds, 0.0, 1.0)
 			if _clock >= walk_seconds:
 				_state = State.LYING_IN_MOUTH
@@ -331,7 +353,13 @@ func _physics_process(delta: float) -> void:
 			if _clock >= telegraph_seconds:
 				_try_advance(State.WALKING_TO_THRESHOLD, telegraph_seconds)
 		State.WALKING_TO_THRESHOLD:
-			_clock += delta
+			# Aceeasi verificare continua ca la WALKING_TO_MOUTH, in sens
+			# invers.
+			if _mouth_is_clear_of(_body.global_position):
+				_clock += delta
+				_pending = false
+			else:
+				_pending = true
 			_walk_t = 1.0 - clampf(_clock / walk_seconds, 0.0, 1.0)
 			if _clock >= walk_seconds:
 				_state = State.ON_THRESHOLD
@@ -362,18 +390,29 @@ func _try_advance(next: State, at_clock: float) -> void:
 ## Nicio masina la mai putin de `clear_radius_m` de GURA — nu de vaca insasi,
 ## ca regula sa acopere si o masina deja angajata pe scurtatura inaintea ei
 ## (brief: "daca ai intrat in ulicioara si vaca intra dupa tine, intra doar
-## daca gura e libera 12 m in fata si 12 m in spate").
+## daca gura e libera 12 m in fata si 12 m in spate"). Foloseste pozitia FIXA
+## a gurii — potrivita cand se decide DACA sa inceapa o tranzitie (inainte
+## sa existe vreo pozitie intermediara).
 func _mouth_is_clear() -> bool:
+	return _mouth_is_clear_of(_mouth_xf.origin)
+
+
+## Aceeasi regula, dar fata de o pozitie DATA — folosita in timpul mersului
+## (`_mouth_is_clear_of(_body.global_position)`), ca vaca sa se opreasca pe
+## loc daca o masina ajunge langa ea UNDE E ACUM, nu doar langa gura finala.
+## Fara asta, o masina care intra in raza abia dupa ce mersul a inceput ar
+## trece prin cutie in miscare — gasit de ProbeJodVaca (gate_state=2, 15-28
+## brese/rulare cu siguranta pornita, inainte de acest fix).
+func _mouth_is_clear_of(reference_pos: Vector3) -> bool:
 	if debug_disable_safety:
 		return true
 	if not is_inside_tree():
 		return true
-	var mouth_pos := _mouth_xf.origin
 	for car in get_tree().get_nodes_in_group(&"cars"):
 		var c := car as Node3D
 		if c == null:
 			continue
-		if c.global_position.distance_to(mouth_pos) < clear_radius_m:
+		if c.global_position.distance_to(reference_pos) < clear_radius_m:
 			return false
 	return true
 

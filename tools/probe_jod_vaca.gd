@@ -31,8 +31,6 @@ extends Node
 ## orb pe ceas, ignorand masinile din gura. Daca in stare asta contactele tot
 ## ies 0, sonda nu demonstreaza nimic si trebuie spus onest, nu ascuns.
 
-const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
-
 ## Jumatatea latimii ulicioarei din brief (banda de 3.2 m). Vezi antetul
 ## _mount_cow pentru de ce sonda ingusteaza la asta ruta gazda.
 const ALLEY_HALF_WIDTH_M: float = 1.6
@@ -263,11 +261,26 @@ func _watch_branch_entry(car: Car, st: Dictionary) -> void:
 				# prag (telegraph-ul e doar vizual/sonor), deci lanul e fizic
 				# gol — o masina care era deja langa/dupa gura cand a inceput
 				# telegraph-ul il traverseaza legitim inainte ca vaca sa apuce
-				# sa se mute (masurat: 77/77 breșe ramase, dupa fixul de
-				# BOX_SIZE si ingustarea la alee, sunt in starea asta). STARILE
-				# 2/3/4/5 (vaca in mers sau culcata) ar insemna coliziunea nu
-				# tine — ACELA e defectul de raportat, daca apare.
-				if gate_state != CowGate.State.RISING_TO_MOUTH:
+				# sa se mute. STARILE 3 (culcata) inseamna coliziunea nu tine —
+				# ACELA e defectul clar. STARILE 2/5 (in mers) NU se pot judeca
+				# doar din `bidx >= mouth_bidx`: vaca e undeva INTRE prag si
+				# gura, nu neaparat la indexul gurii, deci un `bidx` mare poate
+				# insemna doar ca masina a trecut de UNDE VA FI vaca, nu de
+				# UNDE E ACUM (gasit chiar asa: 24 "brese" cu gate_state=2 care,
+				# verificate pe distanta reala fata de corp, erau la >8 m de
+				# vaca — fals pozitiv al acestui test bazat pe index, nu o
+				# bresa reala). Pentru 2/5 se cere in plus distanta 3D fata de
+				# CowBody sub `_gate.clear_radius_m` — daca vaca era chiar
+				# acolo, siguranta CONTINUA din CowGate ar fi trebuit sa o
+				# opreasca oricum, deci coincidenta spatiala e chiar testul.
+				var real := false
+				if gate_state == CowGate.State.LYING_IN_MOUTH:
+					real = true
+				elif gate_state == CowGate.State.WALKING_TO_MOUTH \
+						or gate_state == CowGate.State.WALKING_TO_THRESHOLD:
+					var body_pos: Vector3 = _gate.get_node("CowBody").global_position
+					real = car.global_position.distance_to(body_pos) < _gate.clear_radius_m
+				if real:
 					st.real_breach_frames = int(st.real_breach_frames) + 1
 					if int(st.real_breach_frames) <= 3:
 						print(("[BRESA REALA] t=%5.1fs %-20s bidx=%d mouth=%d lat=%.2f "
@@ -414,11 +427,26 @@ func _report_summary() -> void:
 		lap_times[lap_times.size() - 1] if not lap_times.is_empty() else 0.0,
 		lap_times.size()])
 	if _no_safety:
-		if total_contacts > 0:
-			print("--- SABOTAJ: cu regula de siguranta OFF, contactele ies > 0 (%d) — "
-				% total_contacts + "sonda chiar masoara ceva, nu e circulara.")
+		# Verdictul de sabotaj se citeste pe BRESE (trecere fizica prin gura
+		# ocupata), nu pe CONTACTE: geometria gurii (2.8 m dintr-o alee de
+		# 3.2 m) lasa un culoar de 0.2 m — masurat, in ambele regimuri
+		# (siguranta ON si sabotaj) contactele raman 0, fiindca masinile care
+		# ajung in fereastra periculoasa trec PRINTR-un moment in care vaca e
+		# INCA in mers (WALKING_TO_MOUTH/WALKING_TO_THRESHOLD), nu blocheaza
+		# lanul cu trupul deja asezat — deci "0 contacte" nu e semnul ca garda
+		# functioneaza, e limita geometrica a testului. BRESELE sunt semnul
+		# corect: daca sabotajul le CRESTE fata de rularea cu siguranta ON
+		# (compara manual cele doua rulari — sonda nu compara singura doua
+		# procese separate), garda chiar face ceva.
+		if total_breaches > 0:
+			print(("--- SABOTAJ: cu regula de siguranta OFF, BRESE REALE ies > 0 (%d). "
+				+ "Comparat cu rularea echivalenta cu siguranta ON, o crestere confirma ca "
+				+ "garda nu e circulara (memoria garda-circulara-propria-functie). Contactele "
+				+ "raman 0 in ambele regimuri — asta e limita geometrica dintre fereastra de "
+				+ "mers (2s) si traficul de pe pista-gazda, nu o dovada ca sabotajul n-a facut "
+				+ "nimic.") % total_breaches)
 		else:
-			print("--- SABOTAJ NEREUSIT: cu regula de siguranta OFF, tot 0 contacte. "
+			print("--- SABOTAJ NEREUSIT: cu regula de siguranta OFF, tot 0 brese si 0 contacte. "
 				+ "Sonda nu demonstreaza nimic (memoria garda-circulara-propria-functie) — "
 				+ "raportat onest, de investigat (poate geometria gurii nu intersecteaza "
 				+ "traiectoria masinilor pe pista asta).")

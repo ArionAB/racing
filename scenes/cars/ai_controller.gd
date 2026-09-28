@@ -345,7 +345,10 @@ func configure(race_track: Track, rng: RandomNumberGenerator,
 	track = race_track
 	traffic = cars
 	line_offset = rng.randf_range(-0.28, 0.28)
-	prefers_shortcut = rng.randf() < SHORTCUT_CHANCE
+	var chance := SHORTCUT_CHANCE
+	if race_track != null and race_track.ai_shortcut_chance >= 0.0:
+		chance = race_track.ai_shortcut_chance
+	prefers_shortcut = rng.randf() < chance
 
 func update(delta: float) -> void:
 	if track == null or car == null:

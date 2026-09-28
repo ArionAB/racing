@@ -3692,6 +3692,18 @@ func _code_points() -> Array[Vector3]:
 ## lista separata de tuk-tuk-uri, distribuite uniform pe traseu (vezi acolo).
 @export var traffic_count: int = 0
 
+## Cati dintre AI iau scurtatura pe pista asta. Negativ = implicitul din
+## `AIController.SHORTCUT_CHANCE` (0.4) — pe toate pistele existente
+## comportamentul ramane NESCHIMBAT.
+##
+## Exista pentru o scurtatura cu gura INGUSTA pazita de un gimmick (vaca din
+## ulicioara, Jodhpur): cu 40%, ~3 AI converg pe aceeasi poarta de 4 m, iar
+## cand vaca se culca se fac gramada — masurat pe Track17 runda 2: 16-26
+## repuneri/cursa, 2 cu vaca inghetata deschisa. Mai putini AI pe acolo, nu
+## un AI care ocoleste gimmick-ul: cine o alege tot citeste vaca
+## (`branch_is_open`) si pierde scurtatura cand e culcata, ca jucatorul.
+@export_range(-1.0, 1.0, 0.05) var ai_shortcut_chance: float = -1.0
+
 ## Bifeaza in Inspector ca sa reconstruiesti pista (doar in editor).
 ## Pe o pista definita in cod, PRIMA bifare creeaza si nodul "Path" cu
 ## punctele reale ale traseului — de atunci curba e a ta, trage de ea.
@@ -14141,6 +14153,13 @@ func resolve_route(route: int, index: int, pos: Vector3) -> Vector2i:
 			# `pista-peste-pista` — de fiecare data cand pista trece peste ea
 			# insasi, testul care lipseste e cel vertical.
 			if b.is_other_level(bidx, pos):
+				continue
+			# O banda INCHISA (vaca culcata in gura, lava) nu e ruta: nu comuta
+			# pe ea pe proximitate. Masurat pe Track17: ulicioara pleaca tangent
+			# si sta pe asfaltul buclei ~25 m, iar plutonul era comutat pe ea
+			# cu vaca deja culcata — se oprea in vaca, iar vaca (regula de
+			# siguranta) nu se mai putea ridica: 23-45 repuneri/cursa.
+			if not branch_is_open(bi):
 				continue
 			if b.lateral_distance(bidx, pos) + BRANCH_HYSTERESIS \
 					< routes[0].lateral_distance(index, pos):

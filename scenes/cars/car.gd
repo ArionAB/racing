@@ -1324,6 +1324,14 @@ func respawn(backoff_m: float = 14.0) -> void:
 	if track == null or _respawn_cooldown > 0.0:
 		return
 	_respawn_cooldown = 1.5
+	# Nu inapoi pe o banda INCHISA: blocata in vaca culcata, masina ar fi
+	# repusa tot pe ulicioara, in spatele vacii, si s-ar bloca iar — bucla
+	# masurata pe Track17. Se repune pe bucla, inaintea furcii.
+	if last_safe_route != 0 and not track.branch_is_open(last_safe_route):
+		var br := track.route_at(last_safe_route)
+		if br != null and not br.baked.is_empty():
+			last_safe_index = track.closest_index_global(br.baked[0], 0)
+		last_safe_route = 0
 	global_transform = track.recovery_transform(last_safe_index, backoff_m,
 		last_safe_route)
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei

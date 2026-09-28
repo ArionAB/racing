@@ -316,6 +316,18 @@ func _place() -> void:
 		dir = -dir
 	var side := dir.cross(Vector3.UP).normalized()
 	var lateral := route.half_width + threshold_offset_m
+	# Pragul sta pe partea DEPARTE de bucla principala. Pe partea dinspre ea,
+	# la o banda care se desprinde tangent, vaca in picioare intra pe asfaltul
+	# soselei — masurat pe Track17: 7,1 m de axa, cu asfaltul pana la 6,5 m si
+	# corpul lat de 2,8 m.
+	var main := track.route_at(0)
+	if main != null and not main.baked.is_empty():
+		var a := pos + side * lateral
+		var b := pos - side * lateral
+		var ia := track.closest_index_global(a, 0)
+		var ib := track.closest_index_global(b, 0)
+		if absf(main.lateral_distance(ib, b)) > absf(main.lateral_distance(ia, a)):
+			side = -side
 	# GURA: culcata de-a latul benzii (coarnele "coloneaza" banda), deci corpul
 	# priveste PE LATERALA (`side`), nu de-a lungul ei — acelasi tipar
 	# Basis.looking_at ca TorrentCycle/PathMover, doar cu axa laterala in loc

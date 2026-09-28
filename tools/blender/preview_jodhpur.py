@@ -36,6 +36,9 @@ REF_CAR = (4.0, 1.8, 1.5)  # lungime (Y Blender) x latime (X) x inaltime (Z)
 # la scrierea asta -- restul se adauga pe masura ce valurile se livreaza.
 GROUPS = {
     "pilot": ("buildings", ["ghanta_ghar", "blue_house_a"], 10.0),
+    "landmarks": ("structures", ["market_gate", "stepwell_flight_module",
+                                 "stepwell_corner", "stepwell_pavilion",
+                                 "jaswant_thada"], 12.0),
 }
 
 # Tenta de preview per piesa/nod, pentru culoare REALA (brief §0.1 pasul 3,
@@ -75,6 +78,43 @@ COMPARE_SPECS = {
             "House_Rail": "#8FB0DC",
             "House_Trim": "#6B4A2E",
             "House_Glow": "#2A2A2E",
+        },
+    },
+    # Val 2b -- reperele (brief §1.3). Tente: gresia portii/fortului aceeasi
+    # ca ghanta_ghar (#B8703F, ROCK_LIGHT -> clasa red_sandstone la
+    # integrare); gresia roz a fantanii SAND_MID -> clasa rose_sandstone,
+    # tenta de comparatie #D4957A (data explicit in brief); marmura
+    # cenotafului FOAM_WHITE -> tenta #EEE8DF (data explicit), fetele
+    # umbrite MARBLE_GREY -> un gri cald mai inchis, ca sa se citeasca
+    # dedesubturile/umbrele fara sa fie negru.
+    "market_gate": {
+        "category": "structures",
+        "tints": {
+            "Gate_Stone": "#B8703F",
+            "Gate_Doors": {WOOD: "#6B4A2E", VOLCANIC_BLACK: "#2A2A2E"},
+            "Gate_Glow": "#2A2A2E",
+        },
+    },
+    "stepwell_flight_module": {
+        "category": "structures",
+        "tints": {"Well_Stone": "#D4957A"},
+    },
+    "stepwell_corner": {
+        "category": "structures",
+        "tints": {"Well_Stone": "#D4957A"},
+    },
+    "stepwell_pavilion": {
+        "category": "structures",
+        "tints": {
+            "Well_Stone": "#D4957A",
+            "Well_Glow": "#2A2A2E",
+        },
+    },
+    "jaswant_thada": {
+        "category": "structures",
+        "tints": {
+            "Thada_Stone": {FOAM_WHITE: "#EEE8DF", MARBLE_GREY: "#B9B0A2"},
+            "Thada_Glow": "#2A2A2E",
         },
     },
 }
@@ -506,17 +546,27 @@ def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2):
     return path
 
 
-WAVE_PIECES = {1: ["ghanta_ghar", "blue_house_a"]}
+WAVE_PIECES = {
+    1: ["ghanta_ghar", "blue_house_a"],
+    # "2b" (nu 2 -- brief-ul numeste valul reperelor "Val 2b" in inventar):
+    # cele 5 piese-reper, brief §1.3.
+    "2b": ["market_gate", "stepwell_flight_module", "stepwell_corner",
+          "stepwell_pavilion", "jaswant_thada"],
+}
 
 
 def fidelity_sheet(wave, out_dir=None, names=None):
     """Aduna comparatiile deja randate ale valului intr-o singura imagine
     (brief §0.1 pasul 5). Delegat catre `compose_jodhpur.py` (Python de
-    sistem, cu PIL) -- vezi motivul in `compare()`."""
+    sistem, cu PIL) -- vezi motivul in `compare()`.
+
+    `wave` poate fi int (valurile numerice) sau str (ex. "2b", valul
+    reperelor) -- WAVE_PIECES accepta ambele chei, iar numele fisierului
+    foloseste `str(wave)` (nu `%d`, care ar pica pe un wave alfanumeric)."""
     fid_dir = os.path.join(PROJECT, "docs", "asset_briefs", "img", "jodhpur_fidelity")
     out_dir = out_dir or os.path.join(PROJECT, "docs", "asset_briefs", "img")
     names = names or WAVE_PIECES.get(wave, [])
-    out_path = os.path.join(out_dir, "jodhpur_fidelity_val%d.png" % wave)
+    out_path = os.path.join(out_dir, "jodhpur_fidelity_val%s.png" % wave)
     ok = _run_compose(["--sheet", str(wave), "--fid-dir", fid_dir,
                        "--names", ",".join(names), "--out", out_path])
     if ok:
@@ -538,7 +588,8 @@ if "--compare" in args:
     compare(piece)
 elif "--sheet" in args:
     idx = args.index("--sheet")
-    wave = int(args[idx + 1])
+    wave_arg = args[idx + 1]
+    wave = int(wave_arg) if wave_arg.isdigit() else wave_arg
     fidelity_sheet(wave)
 elif "--group" in args:
     idx = args.index("--group")

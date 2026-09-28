@@ -330,3 +330,206 @@ scară solidă — tot ce exista erau cutii, cilindri și prisme drepte. Fără
 vocabular, orice construcție directă din primitive degenerează în cutii
 tesite. TASK A (acest val, v2) a adăugat vocabularul
 (`tools/blender/jodhpur_shapes.py`) înainte de a reconstrui piesele.
+
+## Val 2b — repere
+
+Contract: `docs/asset_briefs/jodhpur_kit.md` §1.3, §3 pasul 2 ("întâi
+`fort_gate_jai`... apoi restul" — reperele §1.3 s-au livrat separat, ca al
+doilea grup al valului cetății/reperelor). Build script:
+`tools/blender/build_jodhpur_landmarks.py`. Verdict kit:
+`bash tools/blender/verify_jodhpur.sh` → `VERDICT KIT: OK` (7/7 GLB, 2 din
+pilot + 5 din acest val).
+
+Comparațiile de fidelitate (decupare ↔ randare din GLB exportat, tentă FLAT
+hex×AO, `preview_jodhpur.py --compare`):
+`docs/asset_briefs/img/jodhpur_fidelity/market_gate.png`,
+`.../stepwell_flight_module.png`, `.../stepwell_corner.png`,
+`.../stepwell_pavilion.png`, `.../jaswant_thada.png`, adunate în
+`docs/asset_briefs/img/jodhpur_fidelity_val2b.png`.
+
+### `structures/market_gate.glb`
+
+- **Triunghiuri:** 8 416 total (`Gate_Stone` 6 920, `Gate_Doors` 1 408,
+  `Gate_Glow` 88). Buget declarat: 9 000.
+- **Cote măsurate din GLB** (`Gate_Stone`, `--origin=assembly`):
+  - lățime totală: **35,89 m** față de **34 m** contract (+5,6% — turnurile
+    ies puțin peste lățimea nominală; păstrat, fiindcă tăierea le-ar fi
+    subțiat sub pragul de lizibilitate la 30 m).
+  - înălțime: **17,28 m** față de **17 m** contract (+1,6% — bugetul de
+    înălțime al chhatri-ului de pe fiecare turn a fost recalculat explicit
+    din suprapunerea măsurată cupolă+finial peste `col_h`, vezi jurnalul mai
+    jos; rămâne o mică depășire, acceptată).
+  - adâncime: **7,2 m** față de **6 m** nominal (soclul în trepte iese lateral
+    și în adâncime, ca pe decupare).
+  - **golul, măsurat ca GAP pe planul porții** (memoria
+    `cota-de-contract-se-masoara-ca-gol`): **18,40 m**, față de contractul
+    **≥ 18,0 m** — verificat direct din constanta de construcție
+    `GATE_GAP_W`, confirmat și pe `Gate_Stone` (arcul nu îngustează golul,
+    `reveal=0`).
+  - **cheia arcului: 11,60 m** față de contractul **≥ 11,0 m** (măsurată ca
+    `crown_z`, tipărită de scriptul de build la fiecare rulare).
+  - origine: la bază, comună pe ansamblu (`--origin=assembly` — `Gate_Doors`
+    și `Gate_Glow` nu ating solul separat, fiind geometrie mică îngropată în
+    `Gate_Stone`).
+- **Tabel de fidelitate** (element / pe planșă / în GLB / verdict):
+
+  | element | pe planșă | în GLB | prezent? |
+  |---|---|---|---|
+  | 2 turnuri OCTOGONALE subțiri, cu chhatri deschis + cupolă mică + finial în vârf | turnuri cu cupole bulboase mici | `b.cylinder(segments=8)` (octogonal) + `chhatri(arch_style="round")` + `dome(profile="onion")` pe fiecare turn | **prezent** |
+  | parapet CRENELAT DREPT între turnuri, dese | creneluri triunghiulare/dreptunghiulare dese | `crenellation(style="rectangular", width=0.55, gap=0.42)` | **prezent** |
+  | arc central TURTIT (segmental), nu ascuțit | arc cu vârf abia marcat | `arch_opening(style="round")` cu `rise` mic explicit (`gate_rise≈2,8` din `gate_pier_h≈8,8`) — aproximează segmentalul cerut de abaterea permisă | **prezent**, dar arcul se citește mai degrabă ca gol dreptunghiular decât curbat la unghiul de comparație (`reveal=0`, fără firidă vizibilă) — vezi abateri |
+  | canaturi de lemn DESCHISE, cu țepi de fier (grilă mică) | canaturi cu țepi vizibili | `doorb.box` per canat (WOOD) + grilă 3×5 țepi mici (GLOW) — nod separat `Gate_Doors` | **prezent** |
+  | soclu TEȘIT care iese LATERAL, cu bolovani la bază | umăr de stâncă la baza turnurilor | `stepped_plinth` (2 nivele, mai lat decât turnul) + 5 bolovani `ROCK_DARK` per parte, poziții/dimensiuni aleatoare (seed fix) | **prezent** |
+  | fante de tragere verticale pe turnuri | fante subțiri | `bg.box` (GLOW), o fantă per turn, pe fața exterioară | **prezent** |
+
+- **Abateri cunoscute și motiv:**
+  - **Arcul central nu se citește curbat** în randarea de comparație — la
+    `reveal=0` (fără firidă retrasă) și la unghiul camerei (azimut 35°,
+    elevație 18°) pe o piesă de 34 m lățime × 6 m adâncime, golul citește ca
+    un dreptunghi cu colțuri tăiate, nu ca un arc plin. Geometria arcului
+    (profilul `_arch_profile("round", ...)`) există și e corectă (verificat
+    separat, randare frontală directă) — e o limitare a unghiului de
+    comparație pe o piesă atât de lată, nu a formei. Nu s-a găsit un unghi
+    alternativ care să rămână în contractul camerei brief §0.1 pasul 3
+    (unghi fix, ~35°/18°, pentru toate piesele).
+  - **Randarea de comparație e puternic "în rafuit"** (raking): piesa e de
+    2× mai lată decât înaltă (34×17) și doar 6 m adâncă — la azimutul fix de
+    35°, camera vede fațada aproape din lungul ei, nu frontal. Verificat cu
+    un test dedicat (cub cu fețe colorate, la 34×6×17): fața dominantă în
+    cadru E fațada (+Y), nu muchia — deci orientarea e corectă, dar
+    proporția extremă a piesei tot produce o perspectivă mai oblică decât la
+    piesele aproape cubice ale pilotului. Nu e o eroare de construcție.
+  - **Lățimea (35,89 m) și adâncimea (7,2 m) depășesc ușor cotele nominale**
+    din tabel (34 m / 6 m) — turnurile + bolovanii ies peste linia de bază.
+    Cota de contract cu adevărat critică (golul, ≥18 m) e respectată exact.
+
+### `structures/stepwell_flight_module.glb`
+
+- **Triunghiuri:** 2 508 (`Well_Stone`, nod unic). Buget declarat: 3 600.
+- **Cote măsurate din GLB:** **12,15 × 3,00 × 2,50 m** față de **12 × 3 × 2,5 m**
+  contract (+1,3% pe lățime, din capetele de îmbinare). Origine la bază,
+  centrată (`--origin` implicit, `base`).
+- **Tabel de fidelitate:**
+
+  | element | pe planșă | în GLB | prezent? |
+  |---|---|---|---|
+  | 3 V-uri de trepte inversate, ~4 m per V | 3 vârfuri clare, egal distanțate | `_flight_steps` × 3, vârfuri la x=-4/0/+4, praguri joase la x=-6/-2/+2/+6 | **prezent** |
+  | trepte REALE (0,3 m/treaptă), nu rosturi de zidărie desenate | trepte cu umbră proprie | fiecare treaptă = cutie solidă (`WELL_STEP_H=0,3`), coboară fizic până la nivelul următor | **prezent** |
+  | capete PLANE pentru înlănțuire | capete drepte, verticale | bandă verticală de 0,15 m la x=±6 | **prezent** |
+
+- **Abateri cunoscute:** niciuna semnificativă — piesa a fost corectă din
+  prima randare (nu a necesitat reorientare/rotație, spre deosebire de
+  celelalte 4 piese ale valului).
+
+### `structures/stepwell_corner.glb`
+
+- **Triunghiuri:** 968 (`Well_Stone`, nod unic). Buget declarat: 2 400.
+- **Cote măsurate din GLB:** **6,30 × 6,30 × 3,12 m** față de **6 × 6 × 3 m**
+  contract (+5% pe plan, din coping-ul care iese peste zid). Origine la bază.
+- **Tabel de fidelitate:**
+
+  | element | pe planșă | în GLB | prezent? |
+  |---|---|---|---|
+  | colț interior în L, două ziduri la 90° | ziduri clare, colț ascuțit | 2 plăci verticale (zid de fundal) la x=s-0,15/y=s-0,15, unite în colț | **prezent** |
+  | flux de trepte pe FIECARE zid, coborând spre colțul interior | trepte descendente spre centru pe ambele brațe | 2 seturi de trepte reale (0,3 m/treaptă), urcând de la colț (jos) spre capătul exterior (sus) | **prezent** |
+  | coronament plat (coping) pe muchia de sus | bandă subțire pe creastă | bandă de 0,12 m grosime pe muchia de sus a fiecărui zid | **prezent** |
+
+- **Abateri cunoscute și motiv (rezolvate, documentate ca lecție):**
+  - **Prima randare arăta DOAR doi pereți plini, fără nicio treaptă
+    vizibilă** — cauza: `finish(origin="base")` recentrează piesa pe bbox,
+    iar zidurile (construite lângă x=y=s) ajungeau pe partea +X/+Y, exact
+    spre cameră, blocând complet vederea spre interiorul în trepte (colțul
+    ajungea cu spatele la cameră). Fix: rotație 180° în jurul lui Z aplicată
+    vertex-cu-vertex după `to_object()`, ca interiorul deschis să ajungă cu
+    fața spre cameră. Comparația finală arată clar ambele fluxuri de trepte.
+
+### `structures/stepwell_pavilion.glb`
+
+- **Triunghiuri:** 10 094 total (`Well_Stone` 9 968 aprox, `Well_Glow` mic —
+  vezi verify pentru split exact; nodul GLOW poate fi gol dacă `arcade
+  (glass=False)` nu scrie nimic în `bg`, caz în care `_finish_or_none` îl
+  omite din fișier — **aici a rămas doar `Well_Stone`**, verificat cu
+  `verify_glb.py`, deci `Well_Glow` NU apare ca nod separat în acest export).
+  Buget declarat: 10 500.
+- **Cote măsurate din GLB** (`--origin=assembly`): **20,55 × 7,6 × 13,06 m**
+  față de **20 × 6 × 9 m + cupolă până la 12 m** contract — lățimea e
+  aproape exactă (+2,7%), adâncimea puțin peste (pavilionul central iese în
+  față), înălțimea totală (13,06 m) ușor peste cota cupolei (12 m,
+  +8,8%, din marja `dome_r`/`drum_h`/`finial_h` calculată pe `remaining`).
+- **Tabel de fidelitate:**
+
+  | element | pe planșă | în GLB | prezent? |
+  |---|---|---|---|
+  | arcade pe DOUĂ etaje, pe toată lungimea galeriei | ~4 arce vizibile per parte per etaj | `arcade(n_bays=9)` × 2 etaje, arce rotunjite deschise (`glass=False`) | **prezent** |
+  | chhatri mic la FIECARE capăt | cupolițe mici la colțuri | `chhatri(n_columns=6)` la ambele capete, deasupra acoperișului galeriei | **prezent** |
+  | pavilion CENTRAL mai înalt, iesit în față, cu balcon la etaj | corp central proeminent | corp central (`cw=5, cd=7,4`), arc de intrare la parter, `balcony_band`+`balustrade` la etaj | **prezent** |
+  | cupolă bulboasă MARE pe tambur înalt, cu finial | cupolă centrală dominantă | `dome(profile="onion", drum_h, finial_h)` pe pavilionul central | **prezent** |
+
+- **Abateri cunoscute și motiv (rezolvate, documentate ca lecție):**
+  - **Prima randare arăta placa de etaj/acoperiș ca doi "sandwich"-uri
+    orizontale plate, acoperind aproape toată silueta** — cauza: placa
+    dintre etaje și cea de pe acoperiș erau construite pe TOATĂ amprenta
+    (`WELL_PAV_W × WELL_PAV_D` = 20×6 m), citind ca un acoperiș/platformă
+    uriașă pe o clădire de doar 9-12 m înălțime, în loc de o cornișă de
+    galerie. Fix: bandă de cornișă îngustă (`cornice_d=1,3 m`, mult sub cei
+    6 m adâncime), ca o entablatură reală — arcadele au rămas vizibile sub
+    ea, nu îngropate.
+
+### `structures/jaswant_thada.glb`
+
+- **Triunghiuri:** 14 552 (`Thada_Stone`, nod unic — `Thada_Glow` gol,
+  omis de `_finish_or_none`: chhatri-urile deschise nu au geamuri).
+  Buget declarat: 15 000.
+- **Cote măsurate din GLB** (`--origin=assembly`): **29,0 × 18,46 × 13,90 m**
+  față de **30 × 20 m amprentă, 14 m înalt** contract (-3,3% / -7,7% / -0,7%
+  — toate în bandă rezonabilă, scara centrală și soclul în trepte dau
+  amprenta reală, ușor sub nominal).
+- **Tabel de fidelitate:**
+
+  | element | pe planșă | în GLB | prezent? |
+  |---|---|---|---|
+  | soclu în trepte, scară centrală LATĂ în față | trepte late, simetrice | `stepped_plinth` (2 nivele) + `solid_stair(cheek=True)` pe fața +Y | **prezent** |
+  | corp central deschis pe coloane, cu cupolă MARE nervurată | cupolă mare, coloane vizibile, interior umbrit | `chhatri(n_columns=10)` + `dome(profile="hemisphere", ribs=14)` | **prezent** |
+  | 4 chhatri MICI la colțuri (2 mai aproape/mari, 2 mai departe/mici) | 2 stânga + 2 dreapta, perechi vizibil distincte | 4× `chhatri(n_columns=8)` pe soclu propriu, rază 1,3 m (aproape) / 1,0 m (departe) | **prezent** |
+  | totul MARMURĂ albă | alb-crem uniform | `FOAM_WHITE` (`#EEE8DF` în comparație) pe tot, `MARBLE_GREY` pe obrazul scării | **prezent** |
+
+- **Abateri cunoscute și motiv (rezolvate, documentate ca lecție):**
+  - **Prima randare arăta doar 2 "grupuri" de chhatri, nu 4** — cele 4
+    poziții inițiale formau două perechi prea apropiate (3,6 m pe X, 3,4 m
+    pe Y, cu chhatri de 3 m diametru), suprapunându-se vizual într-o singură
+    siluetă cu două cupole stivuite. Fix: repoziționare cu separație
+    garantată (aceeași coordonată Y, distanță X ≥ 4× diametrul unui chhatri
+    mic) — toate 4 distincte în randarea finală, deși cel din dreapta-depărtare
+    rămâne parțial lângă coloanele corpului central la acest unghi de
+    cameră.
+
+## Contracte înghețate în geometrie (val 2b)
+
+- `market_gate`: originea la bază, comună pe ansamblu (`--origin=assembly`);
+  golul (18,40 m) e neafectat de canaturi (`Gate_Doors` stă lipit de
+  ambrazură, în afara golului, per memoria `golul-se-masoara-pe-fereastra-lui`);
+  cheia arcului (11,60 m) ≥ 11,0 m, pentru trecerea camerei de joc.
+- `stepwell_flight_module`, `stepwell_corner`: decor pur, FĂRĂ coliziune
+  (coliziunea e a terenului, `TerrainHollow`, per brief §1.3/§1.8) — capete
+  plane la x=±6 (modul), respectiv colț la 90° cu coping (corner), pentru
+  înlănțuire/îmbinare vizuală fără rosturi.
+- `stepwell_pavilion`, `jaswant_thada`: origine comună pe ansamblu
+  (`--origin=assembly`) — geometria GLOW (goluri de arcadă, unde există)
+  e îngropată în corpul principal, nu atinge solul separat.
+- **Regulă generală descoperită în acest val, pentru orice piesă lată/joasă
+  viitoare:** o placă orizontală construită pe TOATĂ amprenta unei clădiri cu
+  înălțime mică față de lățime (rație peste ~2:1) citește ca "acoperiș/
+  platformă", nu ca element arhitectural — orice cornișă/planșeu vizibil
+  trebuie construit ca bandă îngustă (o fracțiune din adâncimea totală, ca
+  `chajja`/`balcony_band`), niciodată ca dreptunghi plin pe toată aria.
+- **A doua regulă:** pe piese cu geometrie "concavă" (interior vizibil doar
+  dintr-o parte, ca `stepwell_corner`), `finish(origin="base")` recentrează
+  pe bbox și poate întoarce accidental partea SOLIDĂ spre cameră — verifică
+  întotdeauna randarea de comparație, nu doar `verify_glb.py` (care confirmă
+  doar bbox-ul, nu ce parte a piesei e goală).
+- **A treia regulă:** `chhatri()` adaugă peste `col_h` o cupolă+finial a
+  căror înălțime NU e limitată de niciun parametru — pentru orice buget de
+  înălțime total (contract), `col_h` trebuie calculat înapoi din bugetul
+  rămas MINUS overhead-ul cupolei, măsurat direct (nu aproximat): pentru
+  `dome_radius=r`, overhead-ul e `~0,22 + r×2,45` (măsurat pe o piesă de
+  test izolată, profil "onion" cu `lotus_ring`+`finial` impliciți).

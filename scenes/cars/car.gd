@@ -107,6 +107,9 @@ const SLIP_GRIP_ICE: float = 1.5
 ## MASA, nu un "factor": intra ca 1/m in impulsul de coliziune (_resolve_bump).
 @export var mass_factor: float = 1.0
 @export var offroad_speed_factor: float = 0.45
+## Centrul de masa pe verticala (m). Vezi CarData.center_of_mass_y — implicitul
+## de aici (-0.15) e cel vechi, pastrat pentru orice masina fara CarData.
+@export var center_of_mass_y: float = -0.15
 
 @export_group("Imbranceli")
 ## Cat de "saltarea" e izbitura. 0 = perfect plastica (se lipesc), 1 = bile de
@@ -435,8 +438,9 @@ func _ready() -> void:
 		"physics/3d/default_gravity", 9.8)
 	gravity_scale = gravity / project_g
 	# Centrul de masa sub origine: parghia care tine masina pe roti in viraj.
+	# Inaltimea e IDENTITATE (CarData.center_of_mass_y) — vezi apply_data.
 	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
-	center_of_mass = Vector3(0.0, -0.15, 0.0)
+	center_of_mass = Vector3(0.0, center_of_mass_y, 0.0)
 	# Nu doarme niciodata: un corp adormit pe grila n-ar mai primi fortele
 	# suspensiei si s-ar aseza pe colizer cand il trezeste contactul.
 	can_sleep = false
@@ -500,6 +504,8 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	grip = data.grip
 	mass_factor = data.mass_factor
 	mass = 100.0 * mass_factor # identitatea prin masa, direct in solver
+	center_of_mass_y = data.center_of_mass_y
+	center_of_mass = Vector3(0.0, center_of_mass_y, 0.0)
 	body_color = data.color if color_override.a == 0.0 else color_override
 	if _visual != null:
 		_visual.queue_free()

@@ -274,6 +274,36 @@ Acoperirea celor cinci clase din `ref_notes/sisteme.md` §3:
 | **Tunurile de salut** (F) | 5 tunuri pe metereze, salve la 0,8 s una după alta, ciclu 31 s, fum și flacără **spre oraș**, shake 0,15 pe mașinile de la < 15 m. **Fără forță, fără ceață pe drum** (culoarul de ceață e al lui Chongqing) | reuse `EruptionCycle`/ceas simplu + particule; tunurile sunt decor (`coliziune = hull`, pe metereze, în afara benzii) |
 | **Artificiile** (F, G, H, din `dusk ≥ 0,8`) | explozii **la 20–35 m peste case**, nu pe cer (§2.0), o dată la 2–4 s, în 4 culori (gălbenea, roz, verde, alb) | nou, doar vizual: billboard cu textură radială + alpha cu cădere continuă (memoria `particule-muchia-nu-numarul`), **plafon de 3 explozii simultane** (overdraw, §6) |
 
+**Starea sondelor tehnice (§7 pasul 1, 27 sep 2026, ramura `jodhpur/sonde-tehnice`):**
+
+- **Tuk-tuk (`ProbeJodTuk`): trece, cu `mass_factor` 0,34, nu 0,45.** La 0,45
+  Poliția pierdea 29,9% la 30 m/s bot în spate, iar Autobuzul 11,6%. La 0,34:
+  24,6% și 9,2%. Cele 12 pierderi sunt distincte, deci masa e conectată.
+  Tuk-tuk-ul se răstoarnă doar la lovituri laterale de 30 m/s. Nicio mașină de
+  curse nu se răstoarnă. Se redresează în 2,5 s și e în mers la ~3,4 s.
+  `tuktuk.tres`: `max_speed` 18, `acceleration` 7, `grip` 6,5,
+  `center_of_mass_y` −0,02 (câmp nou în `CarData`; implicitul −0,15 păstrează
+  mașinile existente neschimbate). **ProbeRace pe Dunele, 8 seed-uri:** cu 6
+  tuk-tuk-uri, +0,8 s/tur în medie (−2,5…+4,6), fără blocaje noi atribuite
+  traficului. Felia lentă 0,95–1,00 și blocajul de la 0,31 există identic și
+  fără trafic. **Nemăsurat:** claxonul și tragerea spre stânga.
+- **Ceasul de lumină (`ProbeJodDusk`): trece.** 8/8 parametri diferă între
+  `dusk` 0 și 1 și sunt monotoni. `dusk` = 0 pe grilă. Luminanța capturilor pe
+  Stromboli: 108 → 55 → 39. **Capătul `dusk = 0` e soarele TEMEI**, nu 8° fix:
+  tema `jodhpur` trebuie să pună ea soarele la 8° din vest. Lămpile se leagă
+  prin `global uniform float dusk_lamps` (vezi `assets/shaders/dusk_lamp_probe.gdshader`).
+  Godot 4.7 nu permite citirea parametrului global în afara editorului
+  (`global_shader_parameter_get` întoarce null), deci sondele citesc
+  `DuskCycle.lamps_value`.
+- **Vaca (`ProbeJodVaca`, pe Alpii): trece parțial.** `Track.branch_is_open`
+  e generalizat prin grupul `branch_gate`; Stromboli e identic pe toate cele 3
+  stadii de lavă. Contacte vacă–mașină: **0**, dar **0 și cu sabotajul** —
+  pe banda de 8 m a Alpilor mașinile ocolesc cutia, deci garda de contacte
+  **nu e încă armată**. Garda armată e cea de breșe: 7 cu siguranța pornită,
+  58 cu ea oprită. Cele 7 rămase sunt ocoliri pe umărul benzii largi,
+  imposibile pe ulicioara de 3,2 m. **Verdictul se dă pe Track17**, cu
+  ulicioara reală, iar acolo contactele trebuie să iasă >0 la sabotaj.
+
 **Ce NU e nou:** fântâna (`TerrainHollow`), săritura (`TrackChannel`),
 ulicioara (`TrackBranch`; `branch_is_open` se generalizează, §3), camera (`CameraZone`),
 decorul mobil (`PathMover` pentru tiroliană, ulii și procesiune). **Trei

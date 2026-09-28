@@ -77,6 +77,44 @@ COMPARE_SPECS = {
             "House_Glow": "#2A2A2E",
         },
     },
+    # --- val 2a: cetatea (brief §1.2) -- toate pe gresie STONE (#B8703F),
+    # cu exceptia canaturilor (lemn/fier) si tepilor/tunului (fier).
+    "fort_wall_segment": {
+        "category": "structures",
+        "tints": {"Wall_Stone": "#B8703F"},
+    },
+    "fort_wall_turret": {
+        "category": "structures",
+        "tints": {"Turret_Stone": "#B8703F"},
+    },
+    "fort_bastion": {
+        "category": "structures",
+        "tints": {"Bastion_Stone": "#B8703F"},
+    },
+    "fort_gate_jai": {
+        "category": "structures",
+        "tints": {"GateJai_Stone": "#B8703F", "GateJai_Doors": "#6B4A2E"},
+    },
+    "fort_gate_fateh": {
+        "category": "structures",
+        "tints": {"GateFateh_Stone": "#B8703F", "GateFateh_Doors": "#6B4A2E"},
+    },
+    "fort_gate_loha": {
+        "category": "structures",
+        "tints": {"GateLoha_Stone": "#B8703F", "GateLoha_Doors": "#4A4A4E"},
+    },
+    "palace_facade_a": {
+        "category": "structures",
+        "tints": {"Palace_Stone": "#B8703F"},
+    },
+    "palace_facade_b": {
+        "category": "structures",
+        "tints": {"Palace_Stone": "#B8703F"},
+    },
+    "rampart_cannon": {
+        "category": "props",
+        "tints": {"Cannon_Metal": "#2A2A2E", "Cannon_Wood": "#6B4A2E"},
+    },
 }
 
 
@@ -506,17 +544,28 @@ def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2):
     return path
 
 
-WAVE_PIECES = {1: ["ghanta_ghar", "blue_house_a"]}
+WAVE_PIECES = {
+    1: ["ghanta_ghar", "blue_house_a"],
+    # val 2a (brief §1.2, cetatea) -- "2a" ramane STRING (nu val int), vezi
+    # `fidelity_sheet`/argparsing mai jos, ca sa nu forteze `int()` pe un
+    # nume de val alfanumeric.
+    "2a": ["fort_gate_jai", "fort_gate_fateh", "fort_gate_loha",
+           "fort_wall_segment", "fort_wall_turret", "fort_bastion",
+           "palace_facade_a", "palace_facade_b", "rampart_cannon"],
+}
 
 
 def fidelity_sheet(wave, out_dir=None, names=None):
     """Aduna comparatiile deja randate ale valului intr-o singura imagine
     (brief §0.1 pasul 5). Delegat catre `compose_jodhpur.py` (Python de
-    sistem, cu PIL) -- vezi motivul in `compare()`."""
+    sistem, cu PIL) -- vezi motivul in `compare()`.
+
+    `wave` poate fi int (valurile 1, 2, ...) sau string ("2a") -- formatarea
+    de mai jos foloseste %s, care accepta ambele fara conversie."""
     fid_dir = os.path.join(PROJECT, "docs", "asset_briefs", "img", "jodhpur_fidelity")
     out_dir = out_dir or os.path.join(PROJECT, "docs", "asset_briefs", "img")
     names = names or WAVE_PIECES.get(wave, [])
-    out_path = os.path.join(out_dir, "jodhpur_fidelity_val%d.png" % wave)
+    out_path = os.path.join(out_dir, "jodhpur_fidelity_val%s.png" % wave)
     ok = _run_compose(["--sheet", str(wave), "--fid-dir", fid_dir,
                        "--names", ",".join(names), "--out", out_path])
     if ok:
@@ -538,7 +587,9 @@ if "--compare" in args:
     compare(piece)
 elif "--sheet" in args:
     idx = args.index("--sheet")
-    wave = int(args[idx + 1])
+    wave_arg = args[idx + 1]
+    # int daca e numeric (valurile 1, 2, ...), altfel string ("2a")
+    wave = int(wave_arg) if wave_arg.isdigit() else wave_arg
     fidelity_sheet(wave)
 elif "--group" in args:
     idx = args.index("--group")

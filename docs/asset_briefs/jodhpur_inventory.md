@@ -1088,3 +1088,61 @@ colorat pe fețe la noul azimut: +X rămâne fața dominantă a camerei).
   proiecteze explicit spre +X** (fața camerei) — a doua confirmare a
   lecției de orientare din runda 1, de data asta pe volume întregi, nu doar
   pe orientarea piesei per ansamblu.
+
+## Escaladare Opus — market_gate, fort_wall_segment, rampart_cannon — stare la oprire
+
+Oprit la cererea coordonatorului (PC-ul se inchide). **Niciun GLB nu s-a
+schimbat; nicio randare noua.** Ce e facut si ce ramane:
+
+**Cauze gasite (masurate/citite, nu presupuse):**
+
+- **Golul in "T" de la `market_gate`:** `arch_opening(open=False)` umple
+  panoul pe BOUNDING-BOX-ul golului (`panel_fill`), deci silueta golului e
+  mereu dreptunghiulara; arcul exista doar pe firida. In plus,
+  `_arch_profile("pointed")` cu `rise < half_w` (arcul turtit cerut aici)
+  degenereaza in "M": centrul iese la `cx < 0`, iar arcul trece peste cheie
+  si coboara inapoi.
+- **Culoarea prea inchisa la `market_gate`:** soarele din `_neutral_shot`
+  are rotatia fixa `(65°, 0, 125°)`, adica lumina vine din azimutul 35°
+  (relatia este: lumina vine din `Z - 90°`). Camera portii sta la azimutul
+  250°, deci vede fata din umbra. Fixul propus: un `sun_follow` optional in
+  `COMPARE_SPECS`, cu soarele la `Z = azimut_camera + 90 (± decalaj)`, fara sa
+  schimbe celelalte piese.
+- **Tunul negru:** atlasul pentru `VOLCANIC_BLACK` (20) are `#56545B`, deci
+  e gri inchis, nu negru. Tenta de preview `#2A2A2E` il innegrea. Tinta de
+  comparatie e ~`#3A3A36`.
+- **`fort_wall_segment` citit ca placa patrata:** un modul singur are
+  12 × 14 m. Decuparea arata **14 merloane** pe tronsonul dintre turnuri
+  (~3 module), adica ~5 pe modul, spatiere 2,4 m, merloane ~1,8 × 2,2 m cu
+  varf rotunjit-ascutit si punct. Pe tronson sunt **2 fante** mari. Decuparea
+  contrazice cerinta "~1 merlon / 1,2 m", iar decizia se ia la reluare.
+
+**Facut:** ciorna netestata a noii porti, in
+`tools/blender/_wip_market_gate_opus.py` (NEconectata la build). Contine
+lista de elemente plus layout-ul si un panou solid construit direct intre
+arc si dreptunghi (`_ring_solid`), deci golul E arcul. Mai contine un profil
+ascutit turtit cu varf ogee, arhivolta si alfiz in relief, medalioane,
+merloane kangura, turnuri tesite cu balcon si chhatri din panouri arcuite
+(fara `_arch_band`), contraforti in trepte, canaturi cu tepi si
+`measure_market_gate()`, care masoara golul/cheia din geometria finala.
+Geometria golului: gol fizic 22,2 m, cu canaturile de 5,2 m la 19° in
+afara golului liber de 18,4 m, si cheia la 11,6 m. Latimea totala iese
+~38 m, pentru ca un canat se vede din fata exact cat ingusteaza golul.
+
+**Ramane:**
+
+- `market_gate`: se muta ciorna in `build_jodhpur_landmarks.py`, se adauga
+  `sun_follow` in preview, iar camera merge la ~262°/7°/lens 110. Urmeaza
+  `--compare` si iteratii pe randare, masurarea golului/cheii, bugetul din
+  verify si tabelul de fidelitate.
+- `fort_wall_segment`: totul. Profilul modulului devine o prisma cu soclu
+  teşit, brâu, merloane cu fanta si o fanta pe modul, cu capete plane la
+  ±6. In preview se adauga `preview_chain: 3` plus `fort_wall_turret` la
+  capete (cu redenumirea `.001` la lookup-ul de tenta), apoi verificarea
+  rosturilor.
+- `rampart_cannon`: totul. Teava conica (culata ≈ 1,6× gura), 2–3 inele,
+  gura evazata, cascabel si tunari. Afetul primeste obraji inclinati cu
+  coada pe sol si 2 roti cu janta+spite+butuc in FATA, sub tunari. Tenta
+  metalului devine ~`#56545B`, iar camera trece pe partea stanga a tevii
+  (azimut ~300°, gura in dreapta cadrului).
+- Apoi: `verify_jodhpur.sh`, `--sheet 2a`/`2b` si commit-ul final.

@@ -79,41 +79,67 @@ COMPARE_SPECS = {
     },
     # --- val 2a: cetatea (brief §1.2) -- toate pe gresie STONE (#B8703F),
     # cu exceptia canaturilor (lemn/fier) si tepilor/tunului (fier).
+    #
+    # REVIZUIRE runda 2 (val 2a respins de sef pe fidelitate): decuparile
+    # sunt aproape FRONTALE (fatada principala catre camera, azimut 15-20
+    # grade, elevatie ~12 grade), nu 3/4 la 35/18 (implicitul mostenit din
+    # pilot, gandit pentru piese aproape patrate ca ghanta_ghar/blue_house_a).
+    # Piesele alungite ale cetatii (lungime pe Y, fata pe +X, vezi nota de
+    # orientare din build_jodhpur_fort.py) au acum azimut/elevatie proprii,
+    # mai aproape de frontal, si margin redus (~1.05) pentru cadrare la
+    # ~80% din latimea cadrului (brief: "framing la ~80%").
+    # Wall_Stone/Turret_Stone/Bastion_Stone amesteca ACUM doua sloturi
+    # (piatra + fantele de tragere STUD, runda 2) -- tenta e DICT, ca la
+    # portile de mai sus.
     "fort_wall_segment": {
         "category": "structures",
-        "tints": {"Wall_Stone": "#B8703F"},
+        "tints": {"Wall_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
     },
     "fort_wall_turret": {
         "category": "structures",
-        "tints": {"Turret_Stone": "#B8703F"},
+        "tints": {"Turret_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
     },
     "fort_bastion": {
         "category": "structures",
-        "tints": {"Bastion_Stone": "#B8703F"},
+        "tints": {"Bastion_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
+        "azimuth": 20.0, "elevation": 12.0, "margin": 1.05,
     },
+    # Gate_Stone amesteca ACUM doua sloturi (ROCK_LIGHT=3 piatra, +
+    # VOLCANIC_BLACK=20 fantele de tragere, runda 2) -- tenta e un DICT,
+    # ca la Clock_Glow, altfel `_apply_flat_tint` (un singur hex pe nod)
+    # ar picta fantele la fel ca piatra si ar ascunde exact fix-ul de
+    # "guri de tragere ies ca relief, nu ca fante intunecate".
     "fort_gate_jai": {
         "category": "structures",
-        "tints": {"GateJai_Stone": "#B8703F", "GateJai_Doors": "#6B4A2E"},
+        "tints": {"GateJai_Stone": {3: "#B8703F", 20: "#2A2A2E"}, "GateJai_Doors": "#6B4A2E"},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
     },
     "fort_gate_fateh": {
         "category": "structures",
-        "tints": {"GateFateh_Stone": "#B8703F", "GateFateh_Doors": "#6B4A2E"},
+        "tints": {"GateFateh_Stone": {3: "#B8703F", 20: "#2A2A2E"}, "GateFateh_Doors": "#6B4A2E"},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
     },
     "fort_gate_loha": {
         "category": "structures",
-        "tints": {"GateLoha_Stone": "#B8703F", "GateLoha_Doors": "#4A4A4E"},
+        "tints": {"GateLoha_Stone": {3: "#B8703F", 20: "#2A2A2E"}, "GateLoha_Doors": "#4A4A4E"},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
     },
     "palace_facade_a": {
         "category": "structures",
-        "tints": {"Palace_Stone": "#B8703F"},
+        "tints": {"Palace_Stone": "#B8703F", "Palace_Glow": "#2A2A2E"},
+        "azimuth": 15.0, "elevation": 10.0, "margin": 1.05,
     },
     "palace_facade_b": {
         "category": "structures",
-        "tints": {"Palace_Stone": "#B8703F"},
+        "tints": {"Palace_Stone": "#B8703F", "Palace_Glow": "#2A2A2E"},
+        "azimuth": 15.0, "elevation": 10.0, "margin": 1.05,
     },
     "rampart_cannon": {
         "category": "props",
         "tints": {"Cannon_Metal": "#2A2A2E", "Cannon_Wood": "#6B4A2E"},
+        "azimuth": 22.0, "elevation": 14.0, "margin": 1.1,
     },
 }
 
@@ -394,8 +420,18 @@ def compare(name, models_dir=None, res_height=900, out_dir=None):
     # fundal gri deschis #CFCFCF, lumina de zi neutra (nu tema calda din
     # `_world`/`_light`: aici vrem sa se citeasca CULOAREA reala a piesei, nu
     # tenta calda de apus a temei) -- randam manual, fara `shot()`.
-    _neutral_shot(meshes, render_path, azimuth=35.0, elevation=18.0,
-                 res_height=res_height)
+    #
+    # REVIZUIRE (runda 2, val 2a respins pe fidelitate de sef): decuparile
+    # sunt aproape FRONTALE (fatada principala catre camera, azimut ~15-20
+    # grade fata de frontal, elevatie ~12 grade), nu 3/4 la azimut 35/elevatie
+    # 18 -- valoarea fixa veche facea piesele lungi (fatadele de palat) sa
+    # iasa oblice si mici in cadru. `COMPARE_SPECS[name]` poate acum sa
+    # suprascrie `azimuth`/`elevation` per piesa (implicit 35/18, neschimbat,
+    # ca piesele deja acceptate din pilot sa nu se re-randeze diferit).
+    cam_azimuth = spec.get("azimuth", 35.0)
+    cam_elevation = spec.get("elevation", 18.0)
+    _neutral_shot(meshes, render_path, azimuth=cam_azimuth, elevation=cam_elevation,
+                 res_height=res_height, margin=spec.get("margin", 1.2))
 
     # Blender-ul headless n-are PIL in Python-ul lui bundle-uit (masurat: nu
     # exista, si nu instalam pachete in interpretorul lui Blender). Stitch-ul

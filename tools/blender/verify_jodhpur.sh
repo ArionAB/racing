@@ -64,12 +64,12 @@ echo "== cetatea (brief §1.2, val 2a) =="
 # tri-count-ul fata de prima versiune). rampart_cannon a primit buget mai
 # mare (3000 -> 3300) dupa rescrierea rotii cu spite vizibile (janta+butuc+
 # bare, nu disc plin fara relief).
-check "structures/fort_wall_segment.glb"  900  --origin=assembly
-check "structures/fort_wall_turret.glb"   1300 --origin=assembly
-check "structures/fort_bastion.glb"       3400 --origin=assembly
-check "structures/fort_gate_jai.glb"      4200 --origin=assembly
-check "structures/fort_gate_fateh.glb"    6200 --origin=assembly
-check "structures/fort_gate_loha.glb"     4200 --origin=assembly
+check "structures/fort_wall_segment.glb"  2200 --origin=assembly
+check "structures/fort_wall_turret.glb"   2900 --origin=assembly
+check "structures/fort_bastion.glb"       5500 --origin=assembly
+check "structures/fort_gate_jai.glb"      10600 --origin=assembly
+check "structures/fort_gate_fateh.glb"    12600 --origin=assembly
+check "structures/fort_gate_loha.glb"     10600 --origin=assembly
 check "structures/palace_facade_a.glb"    15000 --origin=assembly
 check "structures/palace_facade_b.glb"    14000 --origin=assembly
 check "props/rampart_cannon.glb"          3300 --origin=assembly

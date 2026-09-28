@@ -1088,3 +1088,92 @@ colorat pe fețe la noul azimut: +X rămâne fața dominantă a camerei).
   proiecteze explicit spre +X** (fața camerei) — a doua confirmare a
   lecției de orientare din runda 1, de data asta pe volume întregi, nu doar
   pe orientarea piesei per ansamblu.
+
+## Stare la oprire (val 3, oprire de urgență — dezvoltatorul închide PC-ul)
+
+**Sesiune întreruptă în timpul lucrului la `build_jodhpur_city.py`** (brief
+§1.4, casele + `haveli_facade` + props de acoperiș). Commit WIP:
+`805173a7` pe `feat/jodhpur-kit-city`. **NIMIC din val 3 nu e verificat
+vizual încă** (fără `--compare`, fără planșă de fidelitate) — tot ce
+urmează e doar "buildul rulează și `verify_glb.py` trece pe cotă/buget",
+nu un verdict de fidelitate.
+
+### Ce există (exportat, dar NEVERIFICAT vizual)
+
+Toate cele 7 piese din `buildings/blue_house_{b,c,d,e}.glb`,
+`buildings/haveli_facade.glb`, `props/rooftop_{tank,clutter}.glb` s-au
+construit și exportat cu succes din `build_jodhpur_city.py` (commit
+`805173a7`). Listele de elemente (brief §0.1 pasul 1) sunt scrise în
+docstring-urile fiecărei funcții `build_blue_house_*`/`build_haveli_facade`
+din fișier, citite din decupări. Contractul de noduri (House_Wall/
+House_Trim/House_Glow(+House_Rail)) e respectat pe toate — bug găsit și
+corectat în sesiune: primele versiuni scriau ușile pe Builder-ul greșit
+(`bglow` în loc de `bg`), ceea ce ar fi exportat `House_Trim` gol și
+`House_Glow` cu uși maro în loc de geamuri negre — vezi istoricul commit-ului
+pentru fix.
+
+Triunghiuri la ultima rulare (buget vs. măsurat):
+
+| piesă | tris | buget | status |
+|---|---:|---:|---|
+| blue_house_b | 2838 | 6000 | sub buget |
+| blue_house_c | 1231 | 3800 | sub buget |
+| blue_house_d | 4302 | 6500 | sub buget |
+| blue_house_e | 3287 | 6500 | sub buget |
+| haveli_facade | 1036 | **900** | **PESTE buget**, în lucru |
+| rooftop_tank | 544 | 700 | sub buget |
+| rooftop_clutter | 1672 | 1400 | **PESTE buget** |
+
+### Ce NU e făcut
+
+1. **`haveli_facade` peste buget** (1036 vs 900 — brief-ul dă 900 ca
+   plafon explicit pentru piesa asta, spre deosebire de casele simple unde
+   depășirea motivată e acceptabilă). S-a scris un vocabular ieftin propriu
+   (`_cheap_arch_opening`, colț tăiat în loc de profil de arc cu `steps`)
+   ca să înlocuiască `arch_opening` (prea scump la 9 goluri pe un buget de
+   900), a coborât de la 3954 → 1036 tri în 4 runde, dar tot 136 tri peste.
+   Pasul următor: fie mai taie o balustradă/chajja, fie — dacă geometria
+   rămasă e deja minimul pentru lista de elemente a briefului (3 arcade +
+   6 ferestre + 2 balcoane continue + parapet terasă + friză) — se scrie
+   onest numărul și motivul (ca la casele simple, brief §1.4) și se cere
+   verdictul dezvoltatorului dacă 900 rămâne strict sau se acceptă o mică
+   depășire.
+2. **`rooftop_clutter` peste buget** (1672 vs 1400) — nu s-a atins deloc încă
+   în sesiunea asta după prima rulare reușită; probabil cablurile/rufele
+   (`_cloth`, 4 segmente × 2 rufe × Builder separat `bl`) costă mai mult
+   decât părea. Netratat.
+3. **ZERO comparații de fidelitate** (`preview_jodhpur.py --compare`) rulate
+   pe vreo piesă din val 3 — pasul 3 din brief §0.1 ("randează comparația,
+   UITĂ-TE la ea, scrie ce arată") nu s-a făcut deloc încă. Tot ce e mai sus
+   sunt măsurători de cotă/tri, NU dovadă de fidelitate față de decupare.
+4. **`build_jodhpur_bazaar.py` nu există încă** — niciuna din cele 8 piese
+   de bazar (stall_canopy_a/b/c, textile_strip, spice_sacks, thela_cart,
+   chai_stall, marigold_garland) nu are nicio linie de cod scrisă.
+5. **`verify_jodhpur.sh` nu a fost extins** cu liniile pentru val 3 (nici
+   casele, nici bazarul).
+6. **`COMPARE_SPECS`/`WAVE_PIECES` din `preview_jodhpur.py` nu au fost
+   extinse** cu cheia `"3"` sau cu tentele/camerele per piesă din val 3.
+7. **`docs/asset_briefs/img/jodhpur_fidelity_val3.png` nu există.**
+8. **Niciun commit de grup** (case / haveli+props acoperiș / bazar) — doar
+   commit-ul WIP de mai sus, cu tot ce exista la momentul opririi.
+
+### Ce ar trebui să facă următoarea sesiune, în ordine
+
+1. Reia din `build_jodhpur_city.py` (commit `805173a7`, branch
+   `feat/jodhpur-kit-city`, worktree `D:/GameDev/wt-jod-city`).
+2. Rezolvă bugetul `haveli_facade` (900) — vezi punctul 1 de mai sus.
+3. Rezolvă bugetul `rooftop_clutter` (1400).
+4. Adaugă `COMPARE_SPECS` pentru toate cele 7 piese din val 3 în
+   `preview_jodhpur.py` (tente: light `#8FB0DC`, indigo `#4F6FB8`,
+   trim/alb din atlas, `*_Glow` închis, ca în restul kitului).
+5. Rulează `--compare` pe fiecare piesă, UITĂ-TE la randare, scrie tabelul
+   de fidelitate (element/decupare/GLB/verdict) în inventar — pasul care
+   lipsește complet acum.
+6. Iterează geometria pe ce arată randarea greșit (aproape sigur: cel puțin
+   o piesă va avea fața greșită spre cameră sau proporții greșite — istoricul
+   valurilor 1/2a/2b arată că asta se întâmplă aproape mereu la prima
+   randare).
+7. Abia după verdictul vizual pe toate piesele din `build_jodhpur_city.py`,
+   trece la `build_jodhpur_bazaar.py` (8 piese noi).
+8. Extinde `verify_jodhpur.sh`, `WAVE_PIECES["3"]`, randează
+   `jodhpur_fidelity_val3.png`, rulează verify complet, commit pe grupuri.

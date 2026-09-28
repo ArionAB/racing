@@ -22,6 +22,13 @@
 #                       House_Rail) cu acelasi motiv -- House_Trim (usa,
 #                       obloanele) si House_Rail (balustrada scarii) nu ating
 #                       solul la baza LOR proprie de bounding box.
+#
+#                       fort_gate_jai/fateh/loha: 2 noduri (*_Stone, *_Doors)
+#                       -- canaturile deschise (*_Doors) nu ating solul la
+#                       baza lor proprie de bounding box (balamale sus pe
+#                       perete, canatul se roteste deschis). rampart_cannon:
+#                       2 noduri (Cannon_Metal, Cannon_Wood) -- teava e
+#                       inclinata ~10 deg si nu atinge solul la baza proprie.
 
 set -u
 cd "$(dirname "$0")/../.." || exit 1
@@ -62,6 +69,21 @@ check "structures/stepwell_flight_module.glb"   3600
 check "structures/stepwell_corner.glb"          2400
 check "structures/stepwell_pavilion.glb"       12000 --origin=assembly
 check "structures/jaswant_thada.glb"           15000 --origin=assembly
+echo "== cetatea (brief §1.2, val 2a) =="
+# Bugetele: masurate dupa build, cu marja mica pentru iteratii ulterioare de
+# fidelitate (crenelurile marite de doua ori dupa --compare au crescut usor
+# tri-count-ul fata de prima versiune). rampart_cannon a primit buget mai
+# mare (3000 -> 3300) dupa rescrierea rotii cu spite vizibile (janta+butuc+
+# bare, nu disc plin fara relief).
+check "structures/fort_wall_segment.glb"  2200 --origin=assembly
+check "structures/fort_wall_turret.glb"   2900 --origin=assembly
+check "structures/fort_bastion.glb"       5500 --origin=assembly
+check "structures/fort_gate_jai.glb"      10600 --origin=assembly
+check "structures/fort_gate_fateh.glb"    12600 --origin=assembly
+check "structures/fort_gate_loha.glb"     10600 --origin=assembly
+check "structures/palace_facade_a.glb"    15000 --origin=assembly
+check "structures/palace_facade_b.glb"    14000 --origin=assembly
+check "props/rampart_cannon.glb"          3300 --origin=assembly
 
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)

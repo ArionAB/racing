@@ -140,6 +140,70 @@ COMPARE_SPECS = {
         # lens usor mai lung o umple mult mai bine.
         "camera": {"azimuth": 75.0, "elevation": 14.0, "lens": 60.0, "margin": 1.05},
     },
+    # --- val 2a: cetatea (brief §1.2) -- toate pe gresie STONE (#B8703F),
+    # cu exceptia canaturilor (lemn/fier) si tepilor/tunului (fier).
+    #
+    # REVIZUIRE runda 2 (val 2a respins de sef pe fidelitate): decuparile
+    # sunt aproape FRONTALE (fatada principala catre camera, azimut 15-20
+    # grade, elevatie ~12 grade), nu 3/4 la 35/18 (implicitul mostenit din
+    # pilot, gandit pentru piese aproape patrate ca ghanta_ghar/blue_house_a).
+    # Piesele alungite ale cetatii (lungime pe Y, fata pe +X, vezi nota de
+    # orientare din build_jodhpur_fort.py) au acum azimut/elevatie proprii,
+    # mai aproape de frontal, si margin redus (~1.05) pentru cadrare la
+    # ~80% din latimea cadrului (brief: "framing la ~80%").
+    # Wall_Stone/Turret_Stone/Bastion_Stone amesteca ACUM doua sloturi
+    # (piatra + fantele de tragere STUD, runda 2) -- tenta e DICT, ca la
+    # portile de mai sus.
+    "fort_wall_segment": {
+        "category": "structures",
+        "tints": {"Wall_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
+    },
+    "fort_wall_turret": {
+        "category": "structures",
+        "tints": {"Turret_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
+    },
+    "fort_bastion": {
+        "category": "structures",
+        "tints": {"Bastion_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
+        "azimuth": 20.0, "elevation": 12.0, "margin": 1.05,
+    },
+    # Gate_Stone amesteca ACUM doua sloturi (ROCK_LIGHT=3 piatra, +
+    # VOLCANIC_BLACK=20 fantele de tragere, runda 2) -- tenta e un DICT,
+    # ca la Clock_Glow, altfel `_apply_flat_tint` (un singur hex pe nod)
+    # ar picta fantele la fel ca piatra si ar ascunde exact fix-ul de
+    # "guri de tragere ies ca relief, nu ca fante intunecate".
+    "fort_gate_jai": {
+        "category": "structures",
+        "tints": {"GateJai_Stone": {3: "#B8703F", 20: "#2A2A2E"}, "GateJai_Doors": "#6B4A2E"},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
+    },
+    "fort_gate_fateh": {
+        "category": "structures",
+        "tints": {"GateFateh_Stone": {3: "#B8703F", 20: "#2A2A2E"}, "GateFateh_Doors": "#6B4A2E"},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
+    },
+    "fort_gate_loha": {
+        "category": "structures",
+        "tints": {"GateLoha_Stone": {3: "#B8703F", 20: "#2A2A2E"}, "GateLoha_Doors": "#4A4A4E"},
+        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
+    },
+    "palace_facade_a": {
+        "category": "structures",
+        "tints": {"Palace_Stone": "#B8703F", "Palace_Glow": "#2A2A2E"},
+        "azimuth": 15.0, "elevation": 10.0, "margin": 1.05,
+    },
+    "palace_facade_b": {
+        "category": "structures",
+        "tints": {"Palace_Stone": "#B8703F", "Palace_Glow": "#2A2A2E"},
+        "azimuth": 15.0, "elevation": 10.0, "margin": 1.05,
+    },
+    "rampart_cannon": {
+        "category": "props",
+        "tints": {"Cannon_Metal": "#2A2A2E", "Cannon_Wood": "#6B4A2E"},
+        "azimuth": 22.0, "elevation": 14.0, "margin": 1.1,
+    },
 }
 
 
@@ -420,14 +484,13 @@ def compare(name, models_dir=None, res_height=900, out_dir=None):
     # `_world`/`_light`: aici vrem sa se citeasca CULOAREA reala a piesei, nu
     # tenta calda de apus a temei) -- randam manual, fara `shot()`.
     #
-    # REVIZUIRE (runda 2, dupa respingerea sefului): azimut 35 / elevatie 18
-    # e calibrat pe piesele aproape cubice ale pilotului -- pe piese LATE SI
-    # JOASE (poarta, modulul de trepte) camera fixa arata muchia/spatele, nu
-    # fatada, pentru ca decuparile sunt vederi aproape FRONTALE (~15-20 grade
-    # azimut, ~12-15 elevatie). Fiecare piesa poate acum sa-si declare unghiul
-    # si cadrajul in COMPARE_SPECS (`camera`: azimuth/elevation/margin) --
-    # implicit ramane 35/18/1.2 pentru piesele fara override (pilotul).
-    cam_spec = spec.get("camera", {})
+    # REVIZUIRE (runda 2, ambele valuri respinse de sef pe fidelitate):
+    # decuparile pieselor late sunt aproape FRONTALE (~15-20 grade azimut,
+    # ~10-15 elevatie), nu 3/4 la 35/18 (implicitul pilotului). Fiecare piesa
+    # isi poate declara unghiul in COMPARE_SPECS, fie in dictul `camera`
+    # (val 2b), fie direct pe spec (val 2a); implicit 35/18/1.2/55.
+    cam_spec = dict(spec)
+    cam_spec.update(spec.get("camera", {}))
     _neutral_shot(meshes, render_path,
                  azimuth=cam_spec.get("azimuth", 35.0),
                  elevation=cam_spec.get("elevation", 18.0),
@@ -597,6 +660,12 @@ WAVE_PIECES = {
     # cele 5 piese-reper, brief §1.3.
     "2b": ["market_gate", "stepwell_flight_module", "stepwell_corner",
           "stepwell_pavilion", "jaswant_thada"],
+    # val 2a (brief §1.2, cetatea) -- "2a" ramane STRING (nu val int), vezi
+    # `fidelity_sheet`/argparsing mai jos, ca sa nu forteze `int()` pe un
+    # nume de val alfanumeric.
+    "2a": ["fort_gate_jai", "fort_gate_fateh", "fort_gate_loha",
+           "fort_wall_segment", "fort_wall_turret", "fort_bastion",
+           "palace_facade_a", "palace_facade_b", "rampart_cannon"],
 }
 
 
@@ -634,6 +703,7 @@ if "--compare" in args:
 elif "--sheet" in args:
     idx = args.index("--sheet")
     wave_arg = args[idx + 1]
+    # int daca e numeric (valurile 1, 2, ...), altfel string ("2a")
     wave = int(wave_arg) if wave_arg.isdigit() else wave_arg
     fidelity_sheet(wave)
 elif "--group" in args:

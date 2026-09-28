@@ -687,3 +687,404 @@ din unghiul de cameră, deși prezent și "corect" în bbox/verify_glb. Fix
 sistematic: după orice piesă cu mai multe straturi pe adâncime (zid +
 coloane, turn + ușă), randează din unghiul REAL al camerei de comparație și
 verifică vizual ce e în FAȚA a ce, nu doar coordonatele.
+## Val 2a — cetatea
+
+Contract: `docs/asset_briefs/jodhpur_kit.md` §1.2, §3 pasul 2 (fort_gate_jai
+primul, pentru contractul golului de 7,0 m). Build: `build_jodhpur_fort.py`.
+Verdict kit: `bash tools/blender/verify_jodhpur.sh` → `VERDICT KIT: OK`
+(11/11 GLB, 9 piese noi + 2 din pilot). Toate cele 9 piese folosesc `STONE`
+(`ROCK_LIGHT` → `red_sandstone` la integrare); porțile mai au `DOOR_WOOD`
+(`WOOD`, Jai/Fateh) sau `DOOR_IRON` (`PAINTED`, Loha) + `STUD`
+(`VOLCANIC_BLACK`, țepii canaturilor); tunul are `CANNON_METAL`
+(`VOLCANIC_BLACK`) + `CANNON_WOOD` (`WOOD`). Comparațiile de fidelitate:
+`docs/asset_briefs/img/jodhpur_fidelity/<nume>.png` (8/9 — `fort_wall_turret`
+nu are decupare proprie, vezi mai jos), planșa adunată:
+`docs/asset_briefs/img/jodhpur_fidelity_val2a.png`.
+
+**Orientare găsită empiric** (înainte de primul vertex util): un test cu cub
+colorat pe fețe (ca în pilot) și un al doilea test cu două cutii lungi (una
+cu lungimea pe X/fața spre +Y, alta cu lungimea pe Y/fața spre +X), randate
+cu camera exactă din `compare()` (azimut 35°, elevație 18°), au arătat că
+**+X e fața dominantă/frontală a camerei, iar o piesă lungă citește corect
+doar cu lungimea pe Y și fața principală spre +X** — invers față de
+presupunerea inițială (lungime pe X). Toate piesele alungite din acest val
+(zid, porți, fațade de palat) au fost construite cu această convenție.
+
+### `structures/fort_gate_jai.glb` — MĂSURĂTOAREA GOLULUI (prioritate brief)
+
+- **Golul, măsurat ca GOL** (proiecție pe planul porții, pe gabaritul
+  mașinii, până la 2,0 m înălțime, cu canaturile deschise incluse — memoria
+  `golul-se-masoara-ca-gol`): **7,0 m** liberi = exact contractul (parametrul
+  `GATE_GAP_W` transmis direct lui `arch_opening`; canaturile deschise stau
+  lipite de ambrazură, în afara golului, verificat vizual în comparație).
+- **Cheia arcului** (vârful arcului față de sol): **10,51 m**, peste
+  contractul de minim 9,0 m.
+- **Triunghiuri:** 3 692 (`GateJai_Stone` + `GateJai_Doors`). Buget declarat
+  4 200.
+- **Cote măsurate din GLB:** `GateJai_Stone` 6,58 × 22,58 × 16,3 m (contract
+  ~26 × 14 m — lățimea totală a ieșit sub contract fiindcă turnurile Jai au
+  fost făcute cele mai înalte din cele trei, per "abatere permisă" a
+  brief-ului, dar lățimea nu s-a extins la fel; înălțimea totală 16,3 m e
+  peste cei 14 m din tabel din același motiv — turnurile de 16 m + creneluri).
+
+### Bug real găsit și corectat la primul `--compare` (fort_gate_jai)
+
+Documentat pentru piesele viitoare care folosesc `arch_opening` la scară
+monumentală:
+
+1. **Turnurile erau aproape lipite, arcul central comprimat într-o fâșie**:
+   `tower_gap` inițial (`GATE_GAP_W + 2,2`) lăsa un `center_span` (lățimea
+   panoului de perete dintre turnuri) MAI ÎNGUST decât golul însuși
+   (4,8 m panou pentru un gol de 7,0 m) — geometria arcului nu avea loc să
+   se formeze. Fix: `tower_gap = GATE_GAP_W + tower_r*2 + 3,0`, care lasă
+   `center_span` ≈ 1,7× lățimea golului.
+2. **Golul principal ieșea DREPTUNGHIULAR, nu arcuit** — cauza reală (nu
+   evidentă din citirea codului, găsită abia prin randare izolată a lui
+   `arch_opening` la aceste cote): `arch_opening` cu `open=False` NU
+   decupează exact conturul arcului — silueta EXTERIOARĂ a golului e
+   întotdeauna dreptunghiul care încadrează arcul (`panel_fill` umple totul
+   în afara bounding-box-ului golului, nu în afara conturului real), iar
+   arcul adevărat apare doar pe firidă (`reveal`, peretele retras). Cu
+   `reveal=0,10` (valoarea din pilot, unde arcele au raport
+   înălțime/lățime ≈1) golul ieșea vizibil dreptunghiular la o poartă cu
+   raport rise/half_w ≈1,74 (mult mai înaltă/îngustă) — arcul însuși
+   abia se vedea, o linie subțire la 10 cm în spatele muchiei exterioare.
+   Fix: `reveal = wall_t * 0,94` — aproape toată grosimea zidului, ca
+   portalul să citească drept un tunel arcuit adevărat, nu o firidă
+   cosmetică. **Concluzie pentru piese viitoare:** `reveal` mic (10-18 cm)
+   funcționează doar pe arce apropape pătrate (rise≈half_w); pe arce înalte
+   și guri de trecere reale (porți), `reveal` trebuie să fie apropiat de
+   `wall_t`.
+3. **Nișele oarbe cădeau SUPRAPUSE peste arcul principal**: `niche_z` inițial
+   (`arch_h * 0,55`) era sub `arch_h` însuși (înălțimea TOTALĂ a golului
+   principal), deci nișele intersectau arcul, vizibile ca linii încrucișate
+   prin golul mare. Fix: nișele plasate explicit între `arch_h` și
+   `wall_top_z` (banda solidă de deasupra arcului, sub parapet).
+4. **Crenelurile (turnuri + bandă centrală) ieșeau ca niște „pegs" subțiri,
+   aproape invizibile** la scara unei porți de peste 20 m — dimensiunile
+   preluate direct din pilot (0,42-0,5 m lățime/adâncime, gândite pentru o
+   casă de 6 m) nu se văd la această scară. Mărite în două runde succesive
+   (0,42→0,75→0,85 lățime, 0,5→0,9→1,0 înălțime) până au citit clar ca
+   dinți în comparație.
+
+### `structures/fort_gate_fateh.glb`
+
+- **Triunghiuri:** 5 514. Buget declarat 6 200.
+- **Cote:** `GateFateh_Stone` 6,6 × 22,6 × 16,45 m.
+- **Element distinctiv (contract):** chhatri cu cupolă centrat exact deasupra
+  cheii arcului, iesind peste linia crenelurilor — **prezent**, vizibil clar
+  în comparație.
+- Turnuri 14 m (sub cele 16 m ale lui Jai, per "abatere permisă").
+
+### `structures/fort_gate_loha.glb`
+
+- **Triunghiuri:** 3 692 (identic cu Jai — aceeași geometrie de piatră, doar
+  turnuri mai joase și canaturi pe alt slot). Buget declarat 4 200.
+- **Cote:** `GateLoha_Stone` 6,58 × 22,58 × 12,8 m — **cea mai joasă**
+  dintre cele trei, cum cere brief-ul.
+- **Canaturi de FIER** (`PAINTED`, nu `WOOD`) — confirmat vizual în
+  comparație (uși gri-închis, nu maro-lemn).
+
+### `structures/fort_wall_segment.glb`
+
+- **Triunghiuri:** 748. Buget declarat 900.
+- **Cote măsurate:** 6,35 × 13,0 × 14,85 m (contract 12 m lung × 3 m gros ×
+  14 m înalt — lungimea și înălțimea ies puțin peste din cauza crenelurilor
+  mărite la a doua rundă de fidelitate, care au adăugat ~0,85 m pe Z peste
+  bugetul inițial de 0,55 m rezervat).
+- **Tabel de fidelitate:**
+
+  | element | pe planșă | în GLB | verdict |
+  |---|---|---|---|
+  | soclu ușor teșit | bandă îngustă la bază | `box` supra-lat la bază | prezent |
+  | zid drept, gros | asize orizontale (textură) | corp plin, textura vine la integrare | prezent |
+  | 3 guri de tragere | stânga/mijloc/dreapta | 3 `box`-uri la 58% înălțime | prezent |
+  | cornișă în consolă | bandă cu umbră | `chajja` pe ambele fețe lungi | prezent |
+  | creneluri dreptunghiulare dese | ~9-10 pe 12 m | `crenellation` rectangular, lățime 1,0/gap 0,35 | prezent, dar mai rar/mai gros decât decuparea (vezi abateri) |
+  | turnuri de capăt (context) | tăiate de cadru | NU fac parte din modul (piesă separată) | conform brief |
+
+- **Abateri cunoscute:** crenelurile, deși acum clar vizibile (au fost mărite
+  de două ori după `--compare`), rămân mai rare și mai groase decât dinții
+  denși de pe decupare — un compromis între lizibilitate la scara jocului și
+  fidelitate exactă a numărului de dinți.
+
+### `structures/fort_wall_turret.glb`
+
+- **Fără decupare proprie** — brief-ul o descrie explicit ca "piesă nouă,
+  desprinsă din `fort_wall_segment`" (turnurile de capăt de pe decuparea
+  `fort_wall_segment.png` sunt tăiate de cadru). Comparația `--compare` nu
+  există pentru piesa asta (`preview_jodhpur.py` confirmă "LIPSA decupare").
+  Validată vizual prin analogie cu turnurile din `fort_wall_segment.png` și
+  cu turnurile porților (aceeași familie de elemente: soclu, guri de
+  tragere, cornișă, creneluri).
+- **Triunghiuri:** 1 100. Buget declarat 1 300.
+- **Cote măsurate:** 5,25 × 5,25 × 17,35 m (contract 4,5 × 4,5 × 17 m —
+  lățimea/adâncimea ies puțin peste din soclul evazat + crenelurile mărite).
+
+### `structures/fort_bastion.glb`
+
+- **Triunghiuri:** 2 912. Buget declarat 3 400.
+- **Cote măsurate:** Ø18,78 m bază, 14,11 m înalt (contract Ø18/Ø16 m,
+  13 m înalt — apropiat, diferența vine din crenelurile mărite pe Z).
+- **Tabel de fidelitate:**
+
+  | element | pe planșă | în GLB | verdict |
+  |---|---|---|---|
+  | bază evazată, corp tronconic | teșit spre bază | `frustum` cu soclu + corp | prezent |
+  | rând de guri de tragere | ~8-10 pe circumferință | 10 `box`-uri rotite pe cerc | prezent |
+  | brâu/cornișă aproape de vârf | bandă în consolă | `balcony_band` | prezent |
+  | creneluri ROTUNJITE (distincte de zid) | crestate diferit, vârf rotund | `crenel_merlon(style="rounded")`, 13 buc | prezent, distincte de cele dreptunghiulare ale zidului |
+
+- **Abateri cunoscute:** ca la zid, crenelurile sunt mai rare/mai groase
+  decât decuparea (13 vs. densitatea vizuală de pe planșă), din același
+  motiv de lizibilitate la scara jocului.
+
+### `structures/palace_facade_a.glb` (Moti Mahal)
+
+- **Triunghiuri:** 13 884. Buget declarat 15 000.
+- **Cote măsurate:** 8,96 × 40,0 × 16,38 m (contract 40 × 6 × 14 m —
+  lungimea exactă; adâncimea și înălțimea peste din cauza proiecțiilor
+  central/turnuri de colț și a parapetului, adăugate explicit ca relief
+  vizibil, per nota din bug-ul de mai jos).
+- **Bug real găsit la primul `--compare`:** corpul central și cele două
+  turnuri de colț erau construite CENTRATE pe adâncime (X=0), deci nu
+  proiectau deloc spre cameră — în randare arătau doar ca umflături vizibile
+  de SUS, aproape invizibile din unghiul de comparație (3/4 față). La fel,
+  grila jali (0,20 m adâncime de recess pe o clădire de 6 m adâncime) și
+  jharokha (0,35 m ieșire) erau proporțional prea mici ca să se citească la
+  distanța de randare. Fix: corp central + turnuri mutate explicit să iasă
+  pe +X (fața camerei), grila jali și jharokha mărite substanțial (recess
+  0,65 m, ieșire jharokha 0,75-1,3 m).
+- **Tabel de fidelitate** (după fix):
+
+  | element | pe planșă | în GLB | verdict |
+  |---|---|---|---|
+  | rânduri de jharokha cu acoperiș bangla | balcoane în consolă, 4+ pe fațadă | 4 proiecții × 2 etaje, `frustum` turtit ca acoperiș | prezent |
+  | jali (grilă perforată) | fețe retrase cu găuri | 6 panouri, grilă 3×4, recess 0,65 m | prezent, geometrie vizibilă |
+  | corp central mai înalt, balcon cu coloane | arcadă deschisă pe 2 niveluri | `arcade` pe fața +X, iese peste restul fațadei | prezent |
+  | 2 turnuri de colț cu chhatri | proiecții subțiri la capete | prezent, cu `chhatri` mic | prezent |
+  | etaj 3 simplu, parapet | tăiat de cadru pe decupare | parapet simplu pe restul fațadei | prezent |
+
+- **Abateri cunoscute:** unghiul de comparație rămâne relativ oblic (fațada
+  se vede parțial din lateral, nu perfect frontal ca decuparea) — silueta
+  generală și elementele sunt totuși toate prezente și lizibile.
+
+### `structures/palace_facade_b.glb`
+
+- **Triunghiuri:** 12 768. Buget declarat 14 000.
+- **Cote măsurate:** 8,28 × 44,0 × 16,97 m (contract 44 × 6 × 16 m, cu cupola
+  până la 19 m — cupola + finial ating aproximativ cota din tabel).
+- **Bug real găsit:** ambele fațade (`build_palace_facade_a` și
+  `build_palace_facade_b`) creau un nod cu ACELAȘI nume, `"Palace_Stone"` —
+  fiindcă obiectul din facade_a rămânea în scenă când se construia facade_b
+  (nicio curățare între cele două build-uri), Blender redenumea automat al
+  doilea obiect `"Palace_Stone.001"` la creare, iar acel nume nu se mai
+  potrivea cu cheia din `COMPARE_SPECS["palace_facade_b"]` — piesa ieșea
+  complet gri/netintată în comparație (cădea pe `atlas_material()`
+  implicit). Fix: obiectul `pa_stone` se șterge explicit (`bpy.data.objects
+  .remove` + `bpy.data.meshes.remove`) imediat după export, înainte de al
+  doilea build.
+- **Tabel de fidelitate** (după fix):
+
+  | element | pe planșă | în GLB | verdict |
+  |---|---|---|---|
+  | pavilion central cu cupolă mare | cea mai înaltă piesă, ~19 m | `dome(profile="hemisphere")`, drum+lotus+finial | prezent |
+  | 2 chhatri lângă pavilionul central | cupolițe mici | `chhatri`, 2 buc | prezent |
+  | turnuri de colț cu cupolițe | 2, la capete | `dome` mic pe fiecare turn | prezent |
+  | arcadă deschisă la parter | pe toată lățimea | `arcade`, 10 goluri | prezent |
+  | rând de ferestre în arc, etaj 1 | regulate | `arch_opening`, 9 buc | prezent |
+  | parapet crenelat pe linia acoperișului | continuu | `crenellation` | prezent |
+
+### `props/rampart_cannon.glb`
+
+- **Triunghiuri:** 1 748. Buget declarat 3 300 (ridicat de la 3 000 după
+  prima încercare de roată cu janta-inel, care a depășit bugetul și a fost
+  respinsă oricum — vezi mai jos).
+- **Cote măsurate:** `Cannon_Metal` (țeava) 3,5 × 0,42 × 0,97 m, `Cannon_Wood`
+  (afetul) 1,5 × 1,64 × 1,1 m (contract țeavă 3,2 m, total 3,6 × 1,6 × 1,5 m
+  — apropiat, țeava ușor mai lungă din cauza gurii evazate + inelelor).
+- **Bug real găsit și corectat în DOUĂ runde la `--compare`:**
+  1. Prima variantă a roții folosea `cylinder(wheel_r, wheel_thick,
+     axis="Y")` — un DISC SOLID plin (capace pline pe toată raza). Spițele
+     adăugate deasupra erau invizibile, ascunse în interiorul discului plin
+     — randarea arăta o rondelă plată, nu o roată cu spițe.
+  2. A doua încercare (o "jantă" din 18 cutii tangente pe cerc, plus spițe
+     radiale separate) a produs o geometrie STRICATĂ — cutiile tangente
+     alternau unghiul de parcă ar fi o roată dințată, nu un cerc neted
+     (probabil convenția de semn a `Matrix.Rotation(a, 3, "Y")` pe cutii
+     tangente nu s-a comportat cum era presupus — memoria
+     `rotatii-in-builder-semnul`, nerezolvată complet în acest val).
+  3. **Fix final, robust:** revenire la discul solid (care CITEȘTE corect ca
+     roată în siluetă — problema reală nu era forma discului, ci lipsa de
+     relief a spițelor), plus butuc central proeminent și 4 bare drepte
+     PRIN CENTRU (8 spițe vizuale), ușor ridicate pe fețele discului
+     (±0,012 m), vizibile ca relief radial fără riscul geometriei tangente
+     stricate.
+- **Tabel de fidelitate** (după fix):
+
+  | element | pe planșă | în GLB | verdict |
+  |---|---|---|---|
+  | țeavă cu inele + gură evazată, înclinată ~10° | vizibil | `cylinder` + 2 `frustum` inele + `frustum` gură, axă înclinată | prezent |
+  | afet de lemn, 2 obraze laterale | vizibil | 2 `box`-uri console + platformă | prezent |
+  | 2 roți cu spițe (8 spițe) | vizibil, roată dreapta parțial ascunsă de afet | disc + butuc + 4 bare (8 spițe vizuale), roata din dreapta clar vizibilă, cea din stânga parțial ascunsă (ca pe decupare) | prezent |
+
+## Contracte înghețate în geometrie (val 2a, relevante pentru integrare)
+
+- `fort_gate_jai/fateh/loha`: originea la bază, **centrată pe axul golului**
+  (`--origin=assembly`, 2 noduri: `*_Stone`, `*_Doors`). Golul de 7,0 m
+  liber până la 2,0 m înălțime e garantat de `GATE_GAP_W` transmis direct
+  lui `arch_opening` — orice modificare viitoare a geometriei porții trebuie
+  să păstreze acest parametru neschimbat sau să re-verifice explicit.
+- `rampart_cannon`: originea la bază (`--origin=assembly`, 2 noduri:
+  `Cannon_Metal`, `Cannon_Wood`). Țeava înclinată ~10° e intenționată
+  (per decupare), nu un bug de orientare.
+- **Lecția de orientare a valului** (pentru orice piesă viitoare alungită):
+  testează cu camera EXACTĂ din `compare()` înainte de a poziționa
+  elementele — fața dominantă e +X, nu +Y, iar o piesă lungă trebuie
+  construită cu lungimea pe Y.
+- **Lecția `arch_opening` la scară monumentală:** `reveal` mic (din pilot)
+  funcționează doar pe arce aproape pătrate; pe porți/tuneluri reale,
+  `reveal` trebuie să fie aproape cât `wall_t`, altfel golul citește
+  dreptunghiular cu arcul redus la o linie subțire pe firidă.
+
+## Val 2a — runda 2
+
+Respins de șef pe fidelitate după runda 1 (planșa `jodhpur_fidelity_val2a.png`
+nu se potrivea cu decupările: turnuri subțiri în loc de "stout drum towers",
+creneluri rare ("sparse pegs") în loc de inele continue, canaturi ca niște
+plăci în fața zidului, `fort_wall_segment` văzut din capăt, fațadele de
+palat aproape goale, tunul cu o singură roată vizibilă). Corectat integral,
+verificat prin re-randare `--compare` pe fiecare piesă + `--sheet 2a`.
+Verdict kit: `bash tools/blender/verify_jodhpur.sh` → `VERDICT KIT: OK`
+(11/11 GLB).
+
+**Cameră:** `COMPARE_SPECS` a primit `azimuth`/`elevation`/`margin` per
+piesă (implicit 35/18/1.2, neschimbat pentru pilot) — piesele cetății
+folosesc acum ~18-22° azimut, ~10-14° elevație, margin ~1.05-1.1, aproape
+de unghiul aproape frontal al decupărilor (confirmat cu un test de cub
+colorat pe fețe la noul azimut: +X rămâne fața dominantă a camerei).
+
+### `fort_gate_jai.glb` — măsurătoarea golului (prioritate)
+
+- **Gol liber: 7,0 m** (proiecție pe planul porții, gabarit mașină, până la
+  2,0 m, canaturile deschise incluse) = exact contractul.
+- **Cheia arcului: 10,51 m** (contract ≥9,0 m).
+- **Randarea arată:** două turnuri cilindrice STOUT (Ø7,8 m, corp limitat
+  explicit la ~1,5× diametrul), coroană continuă de merloane rotunjite care
+  se ating pe tot inelul turnului, 3 rânduri de fante de tragere întunecate
+  vizibile clar pe fiecare turn, arcul central ascuțit tăiat corect (nu mai
+  dreptunghiular), canatul vizibil deschis ÎN interiorul adâncimii
+  portalului (nu ca o placă în fața zidului).
+- **Triunghiuri:** 10 152 (`GateJai_Stone` + `GateJai_Doors`). Cote
+  măsurate: `GateJai_Stone` 8,76 × 24,06 × 16,78 m (lățimea totală 24,06 m
+  aproape de contractul de 26 m; turnurile mărite au adăugat lățime/adâncime
+  față de runda 1).
+
+### `fort_gate_fateh.glb`
+
+- **Randarea arată:** aceeași compoziție stout ca Jai, cu chhatri-ul cu
+  cupolă centrat exact deasupra cheii arcului, ieșind peste linia
+  crenelurilor — element distinctiv clar vizibil. Cele 2 nișe mici în arc
+  lângă poartă (adăugate în runda 2, lipseau complet în runda 1) sunt acum
+  prezente ca goluri arcuite mici pe banda centrală, lângă arcul principal.
+- **Triunghiuri:** 12 094. Cote: `GateFateh_Stone` 8,77 × 24,07 × 16,45 m.
+
+### `fort_gate_loha.glb`
+
+- **Randarea arată:** compoziție identică cu Jai (aceeași piatră), turnuri
+  mai joase (12,5 m), canaturi vizibil gri-închis (`PAINTED`) în loc de
+  maro-lemn — diferența de material se vede clar în randare, nu doar în
+  cod.
+- **Triunghiuri:** 10 152. Cote: `GateLoha_Stone` 8,76 × 24,06 × 13,28 m —
+  cea mai joasă dintre cele trei, cum cere brief-ul.
+
+### `structures/fort_wall_segment.glb`
+
+- **Randarea arată:** piesa e acum văzută din FAȚĂ (nu din capăt, ca în
+  runda 1) — zid drept cu 2 fante de tragere întunecate vizibile la mijlocul
+  înălțimii, cornișa în consolă eliminată (înlocuită cu un brâu subțire
+  flush, per critică), parapet flush sub creneluri, coroană DENSĂ de
+  merloane rotunjite care se ating (~1 per 1,2 m) pe toată lungimea.
+- **Triunghiuri:** 1 804 (de la 748 în runda 1 — creștere din densitatea
+  crenelurilor + fantele întunecate). Cote: 3,3 × 13,18 × 14,91 m (contract
+  12 × 3 × 14 m).
+
+### `structures/fort_wall_turret.glb`
+
+- **Fără decupare proprie** (piesă nouă, brief-ul o descrie ca desprinsă
+  din decuparea `fort_wall_segment`). Aceleași fix-uri aplicate prin
+  analogie: fante întunecate flush (nu relief), cornișă eliminată, creneluri
+  rotunjite dense pe tot perimetrul patrat.
+- **Triunghiuri:** 2 484 (de la 1 100). Cote: 5,68 × 5,68 × 17,88 m
+  (contract 4,5 × 4,5 × 17 m).
+
+### `structures/fort_bastion.glb`
+
+- **Randarea arată:** corp tronconic cu 2 RÂNDURI de fante de tragere
+  întunecate vizibile (nu doar un rând), inel CONTINUU de 24 de merloane
+  rotunjite care se ating pe tot cercul — coroana citește acum ca un inel
+  neîntrerupt, nu ca dinți răzleți. Fantele de pe partea îndepărtată a
+  cilindrului apar ca triunghiuri mici din perspectivă (artefact normal de
+  randare pe o suprafață curbă la acest unghi, nu o geometrie greșită).
+- **Triunghiuri:** 4 848 (de la 2 912). Cote: Ø18,78 m bază, 13,79 m înalt
+  (contract Ø18/Ø16, 13 m).
+
+### `structures/palace_facade_a.glb` (Moti Mahal)
+
+- **Randarea arată:** DOUĂ etaje complete de ferestre în arc (11 pe etaj,
+  goluri retrase închise, vizibile ca pete întunecate pe `Palace_Glow`),
+  bloc central proeminent pe 2 etaje cu arcade rotunjite corecte (3 pe
+  etaj, coloane aliniate cu arcele — bug-ul de "coloane strâmbe" din
+  timpul lucrului a fost corectat înainte de livrare, vezi mai jos), atic
+  ridicat deasupra blocului central, două turnuri de colț cu chhatri mici,
+  plinth vizibil la bază.
+- **Bug real găsit ȘI corectat în timpul rundei 2** (nu doar la livrarea
+  finală): `arcade()` din `jodhpur_shapes.py` produce coloane vizibil
+  strâmbe/duble la arce deschise (`open=True`) — confirmat printr-un test
+  izolat, randat separat de restul piesei. Nu s-a modificat fișierul comun
+  (celălalt constructor lucrează pe altă ramură pe același fișier) — fix
+  local, `_local_arcade()` în `build_jodhpur_fort.py`, care construiește
+  fiecare travee ca un gol arcuit SOLID (`arch_opening(open=False)`, rețeta
+  deja validată la porți/ferestre) în loc de coloane+arc deschis.
+- **Triunghiuri:** 8 200. Cote: `Palace_Stone` 8,99 × 40,0 × 13,17 m
+  (contract 40 × 6 × 14 m — lungimea exactă).
+
+### `structures/palace_facade_b.glb`
+
+- **Randarea arată:** cupolă MARE nervurată (18,82 m înălțime totală,
+  aproape de cei 19 m contract) peste un balcon arcuit cu balustradă, DOUĂ
+  turnuri de colț rotunde cu chhatri (coloane vizibile pe fața turnului,
+  nu doar o cutie), 2 cupole mici între centru și fiecare colț, etaj
+  superior cu 20 de ferestre mici dese (retrase, întunecate pe
+  `Palace_Glow`), parter cu 8 nișe/uși în arc, parapet crenelat pe toată
+  linia acoperișului, plinth la bază.
+- **Triunghiuri:** 13 760 (de la 12 768). Cote: `Palace_Stone` 8,86 × 44,0 ×
+  18,82 m (contract 44 × 6 × 16 m, cupola la 19 m).
+
+### `props/rampart_cannon.glb`
+
+- **Randarea arată:** DOUĂ roți cu spițe, AMBELE clar vizibile (runda 1
+  arăta doar una — cealaltă era complet ascunsă în spatele obrazului de
+  lemn apropiat), montate mai spre exterior decât obrajii afetului, cu ax
+  vizibil între roată și obraz. Țeava rămâne tapered cu 2 inele, gură
+  evazată și buton cascabel, sprijinită pe afet la ~10° înclinare.
+- **Triunghiuri:** 1 932 (de la 1 748 — roțile mărite). Cote: `Cannon_Metal`
+  (țeavă) 3,5 × 0,42 × 0,97 m, `Cannon_Wood` (afet+roți) 1,5 × 1,99 × 1,44 m.
+
+### Contracte/lecții noi din runda 2
+
+- **`arcade()` (open=True) produce coloane vizibil strâmbe.** Confirmat cu
+  test izolat pe ambele piese de palat, în ambele randuri de arcadă.
+  Soluția locală (`_local_arcade`, panouri solide cu gol arcuit în loc de
+  colonadă deschisă) e documentată în `build_jodhpur_fort.py` — orice piesă
+  viitoare cu nevoie de colonadă chiar deschisă ar trebui să repare cauza
+  reală în `jodhpur_shapes.py` (coordonat cu celălalt constructor), nu doar
+  să ocolească local.
+- **Fantele de tragere/ferestrele mici citesc corect doar flush + culoare
+  închisă**, niciodată ca relief STONE ieșit din suprafață (indiferent cât
+  de "retras" pare geometric) — lecție aplicată acum pe toate piesele cu
+  guri de tragere (turnuri, ziduri, bastion).
+- **Elementele proeminente (bloc central, turnuri, balcoane) trebuie să
+  proiecteze explicit spre +X** (fața camerei) — a doua confirmare a
+  lecției de orientare din runda 1, de data asta pe volume întregi, nu doar
+  pe orientarea piesei per ansamblu.

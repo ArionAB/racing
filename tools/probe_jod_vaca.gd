@@ -58,6 +58,11 @@ const CLEAN_TRACKS: Dictionary = {
 	2: "Alpii (Track09)",
 	5: "Chongqing (Track12)",
 	6: "Cappadocia (Track13)",
+	# Track17 (Jodhpur) ARE deja CowGate-ul ei real -- nu e o pista-gazda
+	# "curata" in sensul vechi (o banda imprumutata pentru simulare), ci
+	# VERDICTUL FINAL (brief §7 pas 6): sonda refoloseste gate-ul existent
+	# (vezi _find_existing_cow_gate), nu mai monteaza un al doilea.
+	10: "Jodhpur (Track17, verdict final)",
 }
 
 var _track_index: int = 2 # Alpii implicit
@@ -190,16 +195,35 @@ func _start_race(seed_val: int) -> void:
 ## reala), nu geometria vizuala a asfaltului (ramane cea a pistei-gazda; sonda
 ## nu se uita la ea). Cu --no-narrow se dezactiveaza, ca sa se vada exact
 ## comportamentul descris mai sus (control, nu recomandat pentru verdict).
+## CAPCANA (runda 2, Track17 exista acum): daca pista are DEJA un CowGate
+## real (nodul din scena, nu unul montat de sonda), montarea unui AL DOILEA
+## pe acelasi branch_index e o dublura MOARTA pentru joc — Track.branch_is_open
+## castiga cu PRIMUL gasit in grup (BRANCH_GATE_GROUP), iar gate-ul static din
+## .tscn se inregistreaza inaintea celui adaugat aici la runtime, deci ramane
+## AUTORITATIV. Dubla montare masura o poarta-fantoma, fara efect real asupra
+## AI-ului — exact ce s-a intamplat cand sonda a rulat --track=10 in runda 1
+## (numerele raportate atunci nu descriau gate-ul care conta de fapt).
+## Fix: daca gaseste un CowGate deja prezent pe branch_index, il REFOLOSESTE
+## (seteaza doar debug_disable_safety pentru sabotaj), in loc sa creeze un
+## duplicat. --narrow/--mouth raman fara efect in cazul asta (pista reala isi
+## are deja geometria si pozitia ei, corecte prin constructie).
 func _mount_cow() -> void:
-	_gate = CowGate.new()
-	_gate.name = "ProbeCowGate"
-	_gate.branch_index = 1
 	var route := _track.route_at(1)
 	if route == null or route.baked.is_empty():
 		push_error("probe_jod_vaca: pista %d nu are routes[1] — nu e curata pentru sonda asta."
 			% _track_index)
 		_gate = null
 		return
+	var existing := _find_existing_cow_gate(_track)
+	if existing != null:
+		print("probe_jod_vaca: CowGate real gasit deja pe pista (%s) — il refolosesc, nu montez un duplicat."
+			% existing.get_path())
+		_gate = existing
+		_gate.debug_disable_safety = _no_safety
+		return
+	_gate = CowGate.new()
+	_gate.name = "ProbeCowGate"
+	_gate.branch_index = 1
 	if _narrow_alley:
 		route.half_width = ALLEY_HALF_WIDTH_M
 	_gate.mouth_dist_m = _mouth_dist_m if _mouth_dist_m >= 0.0 else route.length() * 0.5
@@ -211,6 +235,16 @@ func _mount_cow() -> void:
 	_gate.walk_seconds = 2.0
 	_gate.clear_radius_m = 12.0
 	_track.add_child(_gate)
+
+
+func _find_existing_cow_gate(node: Node) -> CowGate:
+	for child in node.get_children():
+		if child is CowGate:
+			return child as CowGate
+		var found := _find_existing_cow_gate(child)
+		if found != null:
+			return found
+	return null
 
 
 func _physics_process(delta: float) -> void:

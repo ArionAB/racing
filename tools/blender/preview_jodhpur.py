@@ -38,22 +38,24 @@ GROUPS = {
     "pilot": ("buildings", ["ghanta_ghar", "blue_house_a"], 10.0),
 }
 
-# Tenta de preview per piesa/nod, pentru culoare REALA (brief §0.1 pasul 3):
-# (clasa_de_textura, hex_tenta, triplanar_scale). Fara tenta declarata, nodul
-# ramane pe atlas_material simplu (STONE/gresie fara clasa inca la pilot ar
-# fi monocrom din atlas -- aici chiar clasa se aplica, ca sa validam
-# harnasul cerut de brief).
+# Tenta de preview per piesa/nod, pentru culoare REALA (brief §0.1 pasul 3,
+# TASK C a instantei v2): FLAT hex * AO copt, fara textura de clasa proxy --
+# vezi `_apply_flat_tint`. Hex-urile sunt cele din instructiunea TASK C:
+# House_Wall #8FB0DC (albastrul casei), nodurile pe ROCK_LIGHT/gresie
+# #B8703F (aproximeaza gresia portocalie a planselor -- apropiat de
+# red_sandstone real din joc, #A5553A). Nodurile WOOD/trim raman pe
+# atlas_material simplu (nu au tenta declarata).
 COMPARE_SPECS = {
     "ghanta_ghar": {
         "category": "buildings",
         "tints": {
-            "Tower_Stone": ("alpine_granite", "#A5553A", 1.4),  # red_valley_tuff proxy
+            "Tower_Stone": "#B8703F",
         },
     },
     "blue_house_a": {
         "category": "buildings",
         "tints": {
-            "House_Wall": ("plaster", "#8FB0DC", 1.6),  # village_plaster proxy, tenta light
+            "House_Wall": "#8FB0DC",
         },
     },
 }
@@ -172,25 +174,23 @@ def sheet(group, path, models_dir=None, azimuth=180.0 - 35.0, elevation=16.0,
 
 # --- comparatie de fidelitate (brief §0.1 pasul 3) ----------------------------
 
-def _apply_tint(obj, cls, hex_color, scale):
-    """Material de preview propriu (nu reutilizeaza `apply_class`): textura
-    de clasa REALA (aceeasi imagine/proiectie triplanara) inmultita cu tenta,
-    inmultita cu AO copt -- brief: 'casele albastre trebuie sa iasa albastre
-    in comparatie, nu albe'.
+def _apply_flat_tint(obj, hex_color):
+    """Material de preview FLAT: culoare de baza = hex-ul tintei * AO copt,
+    fara nicio textura de clasa proxy (TASK C, instanta v2 a kitului).
 
-    A doua incercare: rescrierea nodurilor lui `apply_class` DUPA ce a fost
-    construit (`nt.links.new` pe socket-uri gasite prin index) a lasat
-    materialul FARA nicio legatura spre Base Color -- masurat direct (randare
-    complet gri neutru (176,176,176), fara nicio urma de textura sau tenta),
-    nu doar "tenta lipsa". Motivul exact n-a fost izolat (re-legarea unui
-    input care avea deja o legatura, pe un nod construit de alta functie, s-a
-    dovedit fragila), dar simptomul dispare complet cand graful se construieste
-    de la zero, intr-un material propriu, fara sa depinda de ordinea interna
-    a nodurilor din `apply_class`."""
-    img_path = os.path.join(CLASSES_DIR, cls + ".png")
-    name = "PreviewTint_%s_%s" % (cls, hex_color.lstrip("#"))
+    Motivul schimbarii fata de v1 (`_apply_tint`, pastrata mai jos doar ca
+    istoric/referinta daca vreun consumator vechi o mai cheama): proxy-urile
+    de textura (`plaster.png`, `alpine_granite.png`) nu exista sub numele
+    claselor reale ale pistei si aveau luminanta gresita (gri-brun mediu, nu
+    aproape-alb), ceea ce a cerut o corectie de gamma fragila si tot ieseau
+    desaturate sub AgX. `view_transform=Standard` (deja setat in
+    `_neutral_shot`) plus un multiply DIRECT hex*AO da exact culoarea din
+    tabelul de sloturi (brief §0.4), fara ghicit de gamma sau proxy gresit."""
+    name = "PreviewFlat_%s" % hex_color.lstrip("#")
     mat = bpy.data.materials.get(name)
     if mat is not None:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
         return mat
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
@@ -204,38 +204,9 @@ def _apply_tint(obj, cls, hex_color, scale):
         bsdf.inputs["Specular IOR Level"].default_value = 0.15
     nt.links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
 
-    coord = nt.nodes.new("ShaderNodeTexCoord")
-    mapping = nt.nodes.new("ShaderNodeMapping")
-    mapping.inputs["Scale"].default_value = (scale, scale, scale)
-    nt.links.new(mapping.inputs["Vector"], coord.outputs["Object"])
-    tex = nt.nodes.new("ShaderNodeTexImage")
-    tex.image = bpy.data.images.load(img_path, check_existing=True)
-    tex.projection = "BOX"
-    tex.projection_blend = 0.3
-    nt.links.new(tex.inputs["Vector"], mapping.outputs["Vector"])
-
-    # brief: "alb x tenta = albastru" -- clasele reale ale jocului
-    # (blue_lime_light/indigo, village_plaster) sunt aproape ALBE, ca tenta
-    # sa domine. `plaster.png`/`alpine_granite.png` (proxy-urile disponibile
-    # aici, brief: "textura de clasa care exista") sunt gri-brun mediu, nu
-    # alb -- inmultite direct cu tenta, rezultatul e gri neutru/desaturat
-    # (masurat: (176,176,176), nu se distinge de netintat). Gamma < 1
-    # (radacina) apropie textura de alb, pastrandu-i variatia (petele,
-    # rosturile), inainte de multiply cu tenta -- asa domina culoarea, nu
-    # luminanta bruna a proxy-ului.
-    gamma = nt.nodes.new("ShaderNodeGamma")
-    gamma.inputs["Gamma"].default_value = 0.35
-    nt.links.new(gamma.inputs["Color"], tex.outputs["Color"])
-
     r = int(hex_color[1:3], 16) / 255.0
     gg = int(hex_color[3:5], 16) / 255.0
     bcol = int(hex_color[5:7], 16) / 255.0
-    tint_mix = nt.nodes.new("ShaderNodeMix")
-    tint_mix.data_type = "RGBA"
-    tint_mix.blend_type = "MULTIPLY"
-    tint_mix.inputs["Factor"].default_value = 1.0
-    tint_mix.inputs[6].default_value = (r, gg, bcol, 1.0)
-    nt.links.new(tint_mix.inputs[7], gamma.outputs["Color"])
 
     vcol = nt.nodes.new("ShaderNodeVertexColor")
     vcol.layer_name = "AO"
@@ -243,7 +214,7 @@ def _apply_tint(obj, cls, hex_color, scale):
     ao_mix.data_type = "RGBA"
     ao_mix.blend_type = "MULTIPLY"
     ao_mix.inputs["Factor"].default_value = 1.0
-    nt.links.new(ao_mix.inputs[6], tint_mix.outputs[2])
+    ao_mix.inputs[6].default_value = (r, gg, bcol, 1.0)
     nt.links.new(ao_mix.inputs[7], vcol.outputs["Color"])
     nt.links.new(bsdf.inputs["Base Color"], ao_mix.outputs[2])
 
@@ -257,10 +228,9 @@ def _import_for_compare(name, spec, models_dir):
     meshes = [o for o in objs if o.type == "MESH"]
     for o in meshes:
         _fix_ao_layer_name(o)
-        tint = spec.get("tints", {}).get(o.name)
-        if tint is not None:
-            cls, hexcol, scale = tint
-            _apply_tint(o, cls, hexcol, scale)
+        hexcol = spec.get("tints", {}).get(o.name)
+        if hexcol is not None:
+            _apply_flat_tint(o, hexcol)
         else:
             atlas_material()  # forteaza materialul standard sa existe
             o.data.materials.clear()
@@ -393,10 +363,18 @@ def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2):
     sun.data.specular_factor = 0.15
     sun.rotation_euler = (math.radians(90 - 45), 0.0, math.radians(35.0))
 
+    # TASK C: masurat direct -- pe o piesa asimetrica (blue_house_a), fata
+    # cu usa (+Y) cade pe partea UMBRITA a soarelui principal (produsul
+    # scalar normal*directie_lumina iese negativ), deci randarea ei ieșea
+    # gri-albastru stins (102,111,122), nu albastru citibil, desi materialul
+    # insusi (izolat, cu AO fortat la 1.0) da (217,238,255) -- corect. Fill-ul
+    # de 1.1 nu compensa umbra suficient. Marit la 2.6 (energie apropiata de
+    # soarele principal), ca fetele umbrite sa ramana colorate, nu aproape
+    # negre -- turnul (simetric pe 4 fete) nu era sensibil la asta, casa da.
     fill_data = bpy.data.lights.new("NeutralFill", type="SUN")
     fill = bpy.data.objects.new("NeutralFill", fill_data)
     scene.collection.objects.link(fill)
-    fill.data.energy = 1.1
+    fill.data.energy = 2.6
     fill.data.color = (1.0, 1.0, 1.0)
     fill.rotation_euler = (math.radians(90 - 55), 0.0, math.radians(35.0 + 180.0))
 
@@ -406,7 +384,15 @@ def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2):
     bg = world.node_tree.nodes.get("Background")
     if bg:
         bg.inputs[0].default_value = (0.812, 0.812, 0.812, 1.0)  # #CFCFCF
-        bg.inputs[1].default_value = 1.0
+        # putere 1.8 nu 1.0: masurat pe blue_house_a -- fata cu usa (+Y) cade
+        # pe partea umbrita a AMBELOR lumini directionale (sun+fill), randand
+        # (113,124,137) in loc de un albastru citibil, desi izolat cu AO=1.0
+        # materialul da (217,238,255). Fondul e singura sursa de lumina care
+        # ajunge pe orice fata indiferent de unghi (ambient uniform) -- l-am
+        # crescut ca fetele umbrite sa ramana vizibil colorate, nu aproape
+        # negre. Cresterea fill-ului (1.1->2.6) NU a rezolvat -- fill-ul e tot
+        # o lumina DIRECTIONALA, cu propriul unghi mort.
+        bg.inputs[1].default_value = 1.8
 
     # AgX (implicit in Blender 4/5) comprima si desatureaza puternic culorile
     # -- masurat direct: o tenta albastra `#8FB0DC` inmultita cu plaster.png

@@ -1,14 +1,16 @@
-"""Jodhpur — Pilotul (brief §1.1, val 1 din docs/asset_briefs/jodhpur_kit.md).
+"""Jodhpur -- Pilotul, v2 (brief §1.1, val 1 din docs/asset_briefs/jodhpur_kit.md).
 
   jodhpur/buildings/ghanta_ghar.glb    turnul cu ceas (reperul lui H.)
   jodhpur/buildings/blue_house_a.glb   casa albastra simpla, cu scara
 
-Cele doua piese care valideaza harnasul de comparatie (`preview_jodhpur.py
---compare`) si cele doua clase de culoare (gresie ROCK_LIGHT -> red_sandstone,
-perete albastru FOAM_WHITE -> blue_lime_light). Fidelitatea fata de decupare
-e criteriul de acceptare (brief §0.1) — listele de elemente de mai jos s-au
-scris dupa ce am deschis efectiv
-docs/track_briefs/img/jodhpur_assets_v1/ghanta_ghar.png si blue_house_a.png.
+**REVIZUIRE v2:** v1 (commit c5dfeaa5) a fost RESPINSA pe fidelitate
+(jodhpur_fidelity_val1.png) -- fante dreptunghiulare in loc de arcade, fara
+balustrade, acoperis piramidal in loc de cupola pe turn; trepte plutitoare in
+loc de masa solida la casa. Cauza: nu exista vocabular pentru forme
+indo-saracenice. Rescris complet cu `jodhpur_shapes.py` (TASK A a acestei
+instante): arch_opening, dome, chhatri, balustrade, chajja, crenellation,
+solid_stair. Listele de elemente de mai jos s-au rescris DUPA ce am deschis
+din nou (Read) ghanta_ghar.png si blue_house_a.png -- brief §0.1 pasul 1.
 
 Rulare:
     D:/Blender/blender.exe --background --factory-startup \
@@ -16,7 +18,10 @@ Rulare:
 """
 
 import math
-from mathutils import Vector
+from mathutils import Vector, Matrix
+
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "jodhpur_shapes.py")).read())
 
 # Sloturile legale pe Jodhpur (brief §0.4).
 STONE = ROCK_LIGHT       # gresia fortului/turnului -> clasa red_sandstone la integrare
@@ -32,268 +37,204 @@ AO_HOUSE = dict(samples=20, dist=4.0, gradient="vertical",
                 low=0.46, high=1.00, power=0.88, floor=0.18)
 
 
+def _finish_or_none(obj):
+    """Un Builder GLOW poate ramane gol (arcade/chhatri fara geam nu scrie
+    nimic in `bg`) -- daca n-are varfuri, il stergem in loc sa-l trimitem la
+    `finish` (care crapa pe bbox gol la set_origin_base, vezi
+    jodhpur_shapes_sheet -- acelasi bug, alt loc)."""
+    if len(obj.data.vertices) == 0:
+        name = obj.name
+        me = obj.data
+        bpy.data.objects.remove(obj, do_unlink=True)
+        bpy.data.meshes.remove(me)
+        return None
+    return obj
+
+
 # --- ghanta_ghar -------------------------------------------------------------
 #
 # Contract (brief §1.1): 22 m inalt, baza 7x7 m, h/l 2,17. Lista de elemente
-# scrisa DUPA ce am deschis ghanta_ghar.png (brief §0.1 pasul 1), de jos in
-# sus, asa cum se vede din 3/4 stanga-fata:
+# scrisa DUPA ce am redeschis ghanta_ghar.png (brief §0.1 pasul 1), de jos in
+# sus, cum se vede din 3/4 stanga-fata (planul H., turnul din Jodhpur):
 #
-#   1. Soclu teseit: baza octogonala (colturile taiate), cu o poarta in arc
-#      (gol inchis) vizibila pe fata din fata. 1 nivel.
-#   2. O a doua banda de soclu, putin mai ingusta, tot cu arcade oarbe joase
-#      pe fiecare fata (3 pe fata vizibila pe decupare) -> se citeste ca o
-#      cornisa cu nise, nu ca etaj locuibil.
-#   3. Fusul patrat: 2 ferestre inalte in arc (goluri VOLCANIC_BLACK), pe
-#      FIECARE din cele 4 fete. Colturile fusului sunt usor tesite (fatete),
-#      ca pe decupare.
-#   4. Brau orizontal ingust, iesit in consola, desparte fusul de etajul
-#      ceasului.
-#   5. Etajul ceasului: 4 cadrane rotunde, cate UNUL pe fiecare fata (2
-#      vizibile pe decupare, din unghiul 3/4) -> disc FOAM_WHITE, ace
-#      VOLCANIC_BLACK, FARA cifre (regula 0.8), nod Clock_Glow.
-#   6. Balcon pe console: o banda ingusta care iese peste etajul ceasului,
-#      cu balustrada joasa (creneluri mici dese) si console vizibile dedesubt.
-#   7. Lanterna: cupola mica sustinuta de o colonada de 4 arcade (una pe
-#      fiecare fata), stalpi subtiri.
-#   8. Cupola cu turla: cupola nervurata (bombata), cu un varf/spira subtire
+#   1. Soclu in trepte (stepped_plinth): 2-3 nivele care se ingusteaza, cel
+#      mai de jos cel mai lat.
+#   2. Primul tier, cu UN gol mare in arc pe fiecare fata (arch_opening,
+#      stil "pointed"), vizibil pe fata din fata ca poarta intunecata mare.
+#   3. Al doilea tier (banda de cornisa): mai ingust, cu 3 nise oarbe in arc
+#      pe fata vizibila (arcade in relief, fara geam -- `arch_opening` cu
+#      reveal mic).
+#   4. Fusul patrat: 2 ferestre inalte in arc pe FIECARE fata (arch_opening,
+#      geam VOLCANIC_BLACK retras).
+#   5. Etajul ceasului: 4 cadrane rotunde (unul per fata), disc FOAM_WHITE,
+#      ace VOLCANIC_BLACK, FARA cifre.
+#   6. Balcon pe console, cu balustrada/creneluri mici dese (balcony_band
+#      crenellated=True), console vizibile dedesubt (railing_on_brackets/
+#      console proprii).
+#   7. Chhatri (pavilion deschis): colonada de arcade PE STALPI DESCHISI
+#      (nu cilindru plin cu gauri), cu chajja proeminenta deasupra arcelor.
+#   8. Cupola nervurata (ribbed dome, profil "onion") cu finial (kalash)
 #      deasupra.
 #
-# Nimic nu iese din contur lateral (nu are balcoane in afara siluetei) —
-# turnul e simetric pe cele 4 fete, cotele 7x7 se pastreaza pe tot fusul.
+# Nimic nu iese lateral din contur (turnul e simetric pe cele 4 fete).
 TW_BASE = 7.0
 TW_H = 22.0
 
 
-def _tower_tier_octagon(b, cz, h, r, slot, chamfer=0.22, punches=None):
-    """Un nivel cu colturi tesite: patrat 2r x 2r cu cele 4 colturi taiate,
-    ca prisma pe 8 laturi. Foloseste `prism` pe un contur XZ nu se potriveste
-    (prism extrudeaza pe Y, aici vrem o sectiune orizontala) -- construim
-    direct cu doua inele de varfuri (jos/sus) pe un octogon neregulat.
-
-    `punches`: {side_index: [(lat_center, half_w, z0, z1), ...]} -- pe laturile
-    CARDINALE (0=+Y, 2=+X, 4=-Y, 6=-X, in ordinea din `pts`), latura solida
-    (un singur quad) se inlocuieste cu un CADRU (stanga/dreapta/sus/jos) in
-    jurul fiecarei taieturi, lasand un gol REAL in perete -- nu o cutie
-    suprapusa (critica gasita: o cutie "retrasa" suprapusa peste fata plina nu
-    se vede niciodata, fiindca fata plina originala ramane deasupra ei si
-    acopera golul din exterior; masurat pe un test izolat, fara nicio
-    schimbare vizibila)."""
-    pts = [
-        (r, r - chamfer), (r, -(r - chamfer)), (r - chamfer, -r),
-        (-(r - chamfer), -r), (-r, -(r - chamfer)), (-r, r - chamfer),
-        (-(r - chamfer), r), (r - chamfer, r),
-    ]
-    lo = [b.bm.verts.new((x, y, cz)) for x, y in pts]
-    hi = [b.bm.verts.new((x, y, cz + h)) for x, y in pts]
-    n = len(pts)
-    faces = []
-    punches = punches or {}
-    for i in range(n):
-        j = (i + 1) % n
-        cuts = punches.get(i)
-        if not cuts:
-            f = b.bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
-            f[b.slot] = slot
-            faces.append(f)
-            continue
-        # latura cardinala cu taieturi: reconstruim ca fasii (stanga capat ->
-        # [rama stanga, gol, rama dreapta, gol, ...] -> dreapta capat), pe axa
-        # lui `lat` (proiectia punctului pe segmentul lo[i]->lo[j]).
-        p0 = Vector(pts[i]); p1 = Vector(pts[j])
-        seg = p1 - p0
-        seg_len = seg.length
-        seg_dir = seg / seg_len
-        cuts_sorted = sorted(cuts, key=lambda c: c[0])
-        lat_mid = seg_len * 0.5
-
-        def vert_at(lat, z):
-            p = p0 + seg_dir * (lat_mid + lat)
-            return b.bm.verts.new((p.x, p.y, z))
-
-        cursor = -lat_mid
-        for lat_c, half_w, z0, z1 in cuts_sorted:
-            l0, l1 = lat_c - half_w, lat_c + half_w
-            if l0 > cursor + 1e-6:
-                # rama solida de la cursor la l0, pe toata inaltimea
-                a = vert_at(cursor, cz); c1 = vert_at(l0, cz)
-                a2 = vert_at(cursor, cz + h); c2 = vert_at(l0, cz + h)
-                f = b.bm.faces.new((a, c1, c2, a2)); f[b.slot] = slot
-                faces.append(f)
-            cursor = l1
-        # ultima rama, de la ultimul cursor pana la capatul segmentului
-        if cursor < lat_mid - 1e-6:
-            a = vert_at(cursor, cz); c1 = vert_at(lat_mid, cz)
-            a2 = vert_at(cursor, cz + h); c2 = vert_at(lat_mid, cz + h)
-            f = b.bm.faces.new((a, c1, c2, a2)); f[b.slot] = slot
-            faces.append(f)
-        # benzile de sus/jos ale fiecarui gol (rama orizontala deasupra si
-        # dedesubtul taieturii, pe toata latimea ei)
-        for lat_c, half_w, z0, z1 in cuts_sorted:
-            l0, l1 = lat_c - half_w, lat_c + half_w
-            if z0 > cz + 1e-6:
-                a = vert_at(l0, cz); c1 = vert_at(l1, cz)
-                a2 = vert_at(l0, z0); c2 = vert_at(l1, z0)
-                f = b.bm.faces.new((a, c1, c2, a2)); f[b.slot] = slot
-                faces.append(f)
-            if z1 < cz + h - 1e-6:
-                a = vert_at(l0, z1); c1 = vert_at(l1, z1)
-                a2 = vert_at(l0, cz + h); c2 = vert_at(l1, cz + h)
-                f = b.bm.faces.new((a, c1, c2, a2)); f[b.slot] = slot
-                faces.append(f)
-    top = b.bm.faces.new(tuple(reversed(hi)))
-    top[b.slot] = slot
-    bot = b.bm.faces.new(tuple(lo))
-    bot[b.slot] = slot
-    faces += [top, bot]
-    return faces, pts
-
-
-# REVIZUIRE (critica pe `--compare ghanta_ghar`, prima trecere): silueta
-# iesise h/l ~1.4 fata de 2,17 pe decupare (turn prea lat/scund), ferestrele
-# fusului erau diagonale (bug de offset "along") in loc de 2 goluri verticale
-# PARALELE, arcada soclului 2 era invizibila, balconul si colonada lanternei
-# nu se citeau, iar cupola era un con drept, nu bombat. Geometria de mai jos e
-# rescrisa dupa acea critica: raza scade in trepte mai mari fata de inaltime
-# (turn mai subtire), ferestrele sunt doua cutii verticale distincte (NU
-# offset diagonal), arcada e vizibil retrasa+inalta, balconul are o banda
-# late + creneluri late, iar lanterna are stalpi GROSI intre arcade vizibile.
 def build_ghanta_ghar():
     b = Builder()
+    bg = Builder()
     hb = TW_BASE * 0.5
+
+    z = 0.0
+
+    # 1. soclu in trepte: 3 nivele, cel de jos cel mai lat -- inaltimea
+    # totala a soclului e bugetata explicit ca sa lase loc restului turnului
+    # pana la 22 m.
+    plinth_levels = [(TW_BASE, TW_BASE, 0.55), (TW_BASE - 0.5, TW_BASE - 0.5, 0.45),
+                     (TW_BASE - 0.9, TW_BASE - 0.9, 0.35)]
+    stone_faces = list(stepped_plinth(b, (0.0, 0.0, z), plinth_levels, STONE))
+    for w, d, h in plinth_levels:
+        z += h
+    plinth_top_hw = (TW_BASE - 0.9) * 0.5
+
+    # IMPORTANT: niciun tier de mai jos nu mai pune o cutie PLINA pe toata
+    # fata inainte de arch_opening -- critica pe prima randare a acestui val
+    # a aratat exact bug-ul documentat in capul lui `arch_opening`: o cutie
+    # plina si panoul perforat ocupand acelasi spatiu z-fighteaza (fetele se
+    # amesteca la randare, arata ca cioburi/fulgere in loc de arc curat).
+    # `arch_opening` isi construieste SINGUR panoul complet al fetei (are
+    # `panel_w`/`panel_h`) -- e singura sursa de perete pe fetele cu goluri.
+    # Un miez de cutie mic (mai ingust decat fetele) ramane doar pentru
+    # colturile dintre fete si pentru masa care leaga tavanul/podeaua
+    # tier-ului, INSA retras cu grosimea peretelui, ca sa nu coplaneze cu
+    # panourile.
     face_normals = [(0.0, 1.0), (1.0, 0.0), (0.0, -1.0), (-1.0, 0.0)]
 
-    # REVIZUIRE (a doua critica, pe randarea CU tenta reala): ferestrele
-    # ieseau ca dungi albe/deschise, nu goluri intunecate. Cauza: `Tower_Stone`
-    # primeste la integrare un SINGUR material triplanar (clasa red_sandstone,
-    # brief regula 6) -- orice geometrie GLOW ramasa IN bmesh-ul lui `b` e
-    # texturata cu ACEEASI gresie, indiferent de slot-ul UV (triplanar ignora
-    # UV-ul complet). Deci un gol "colorat prin slot" in `Tower_Stone` nu
-    # citeste niciodata ca gol -- devine o dunga de gresie mai deschisa la
-    # umbrire. Fix-ul: `Tower_Glow` e SINGURUL loc cu geometrie GLOW; `b`
-    # primeste doar un CADRU (tot STONE, aceeasi textura -- se citeste din
-    # umbrire/bevel, ca la un jgheab) in jurul locului, iar geamul intunecat
-    # traieste RETRAS 0.15 m, doar in `bg`.
-    bg = Builder()
-    # side index in `_tower_tier_octagon.pts` pentru fiecare normala cardinala
-    # (masurat direct pe lista de puncte -- 6=+Y, 0=+X, 2=-Y, 4=-X).
-    SIDE_OF = {(0.0, 1.0): 6, (1.0, 0.0): 0, (0.0, -1.0): 2, (-1.0, 0.0): 4}
+    def _tier_core(hw, h, zc, inset):
+        """Miezul de colt: o cutie mai INGUSTA (retrasa cu `inset` fata de
+        `hw`), care umple doar interiorul tier-ului -- panourile perforate
+        (construite separat, per fata) acopera exteriorul si se lipesc de
+        acest miez fara sa-l suprapuna."""
+        core_hw = hw - inset
+        return list(b.box((0.0, 0.0, zc + h * 0.5), (core_hw * 2, core_hw * 2, h), STONE))
 
-    def _glass_and_reveal_sides(punches_acc, nx, ny, lat_c, half_w, z0, z1,
-                                wall_edge, depth, reveal_slot=STONE):
-        """Adauga taietura in `punches_acc` (pentru `_tower_tier_octagon`) SI
-        geometria de adancime: 4 pereti STONE ai firidei (stanga/dreapta/
-        sus/jos, unind marginea golului din perete cu marginea firidei
-        retrase) + placa GLOW la fundul firidei, in `bg`. Fara peretii
-        firidei, gaura reala din perete s-ar vedea direct in golul din spate
-        (fara umbra de adancime) sau ar lasa un gol intre marginea taieturii
-        si geam."""
-        side = SIDE_OF[(nx, ny)]
-        punches_acc.setdefault(side, []).append((lat_c, half_w, z0, z1))
-        along = (-ny, nx)
-        half_h = (z1 - z0) * 0.5
-        wz = (z0 + z1) * 0.5
-        inner = wall_edge - depth
-
-        def pt(lat, depth_t, z):
-            r = wall_edge - depth_t
-            return (nx * r + along[0] * lat, ny * r + along[1] * lat, z)
-
-        # 4 pereti ai firidei (fasii subtiri STONE, intre marginea exterioara
-        # a golului si marginea retrasa) -- stanga, dreapta, sus, jos.
-        # ATENTIE la orientare: peretele din STANGA (l0) trebuie sa priveasca
-        # spre +along (spre interiorul golului), cel din DREAPTA (l1) spre
-        # -along -- ACEEASI ordine de varfuri pentru amandoua da normale
-        # opuse (una din doua iese cu fata in interiorul turnului si devine
-        # invizibila din exterior -- bug gasit prin inspectia normalelor
-        # exportate, nu presupus). Acelasi motiv pentru jos/sus.
-        l0, l1 = lat_c - half_w, lat_c + half_w
-        for lat_e, flip in ((l0, False), (l1, True)):
-            verts = (pt(lat_e, 0.0, z0), pt(lat_e, depth, z0),
-                    pt(lat_e, depth, z1), pt(lat_e, 0.0, z1))
-            if flip:
-                verts = tuple(reversed(verts))
-            side_wall = b.bm.faces.new([b.bm.verts.new(v) for v in verts])
-            side_wall[b.slot] = reveal_slot
-        for z_e, flip in ((z0, False), (z1, True)):
-            verts = (pt(l0, 0.0, z_e), pt(l1, 0.0, z_e),
-                    pt(l1, depth, z_e), pt(l0, depth, z_e))
-            if flip:
-                verts = tuple(reversed(verts))
-            top_bot = b.bm.faces.new([b.bm.verts.new(v) for v in verts])
-            top_bot[b.slot] = reveal_slot
-        # placa GLOW la fundul firidei, putin mai ingusta (rama vizibila)
-        glass_lat_margin = half_w * 0.18
-        glass_c = pt(lat_c, depth - 0.02, wz)
-        glass_s = ((2 * (half_w - glass_lat_margin)) if abs(ny) > 0.5 else 0.04,
-                   (2 * (half_w - glass_lat_margin)) if abs(nx) > 0.5 else 0.04,
-                   2 * half_h * 0.9)
-        bg.box(glass_c, glass_s, GLOW)
-
-    def _windows_on_faces(punches_acc, z0, h, half, w_frac=0.16, gap_frac=0.20,
-                          h_frac=0.62, faces=face_normals, depth=0.16):
-        """2 goluri verticale PARALELE cu fata: fiecare e deplasat doar
-        DE-A LUNGUL fetei (`along`), niciodata spre normala -- asa raman
-        drepte, nu diagonale."""
-        wz0 = z0 + h * (1.0 - h_frac) * 0.5
-        wz1 = wz0 + h * h_frac
-        for nx, ny in faces:
-            off = half * gap_frac
-            for s in (-1.0, 1.0):
-                half_w = half * w_frac * 0.5
-                _glass_and_reveal_sides(punches_acc, nx, ny, s * off, half_w,
-                                        wz0, wz1, half, depth)
-
-    # 1. soclu teseit, nivel 1 (0 .. 1.9 m): baza larga, o poarta in arc pe fata
-    socle1_h = 1.9
-    p1 = {}
-    door_z0, door_z1 = 0.06, 1.31
-    _glass_and_reveal_sides(p1, 0.0, 1.0, 0.0, 0.7, door_z0, door_z1, hb, 0.3)
-    faces1, _ = _tower_tier_octagon(b, 0.0, socle1_h, hb, STONE, chamfer=0.85, punches=p1)
-
-    # 2. a doua banda de soclu (1.9..4.1): mai INGUSTA (pasul de raza conteaza
-    # pentru silueta -- decupare: turnul se subtiaza vizibil intre soclu si
-    # fus), cu 3 arcade oarbe ADANCI si INALTE pe fata, ca sa se citeasca la
-    # unghiul de comparatie.
-    socle2_h = 2.2
-    hb2 = hb - 0.3   # mai lat decat incercarile anterioare (hb-0.9, hb-0.5):
-                    # h/l masurat 2.63 apoi 2.55 fata de 2,17 tinta -- taperul
-                    # dintre soclu si fus era inca prea agresiv
-    p2 = {}
-    niche_z0 = socle1_h + socle2_h * 0.17
-    niche_z1 = socle1_h + socle2_h * 0.87
-    for fx in (-1.55, 0.0, 1.55):
-        _glass_and_reveal_sides(p2, 0.0, 1.0, fx, 0.42, niche_z0, niche_z1, hb2, 0.26)
-    faces2, _ = _tower_tier_octagon(b, socle1_h, socle2_h, hb2, STONE, chamfer=0.55, punches=p2)
-
-    # 3. fusul patrat: mult mai INGUST decat soclul (raportul e ce da inaltimea
-    # perceputa), 2 ferestre inalte in arc, PARALELE, pe fiecare fata.
-    shaft_z0 = socle1_h + socle2_h
-    shaft_h = 7.3
-    hs = hb2 - 0.25
-    p3 = {}
-    _windows_on_faces(p3, shaft_z0, shaft_h, hs, w_frac=0.30, gap_frac=0.30,
-                      h_frac=0.66, depth=0.22)
-    faces3, _ = _tower_tier_octagon(b, shaft_z0, shaft_h, hs, STONE, chamfer=0.32, punches=p3)
-
-    # 4. brau orizontal, iesit in consola
-    belt_z = shaft_z0 + shaft_h
-    belt_h = 0.45
-    faces4, _ = _tower_tier_octagon(b, belt_z, belt_h, hs + 0.30, STONE, chamfer=0.4)
-
-    # 5. etajul ceasului: bloc mai ingust decat fusul, 4 cadrane (unul per fata)
-    clock_z0 = belt_z + belt_h
-    clock_h = 2.3
-    hc = hs - 0.45
-    faces5, _ = _tower_tier_octagon(b, clock_z0, clock_h, hc, STONE, chamfer=0.3)
-    tower_stone_faces = faces1 + faces2 + faces3 + faces4 + faces5
-
-    # cadrane: disc FOAM_WHITE + ace VOLCANIC_BLACK, in nod Clock_Glow
-    bc = Builder()
-    clock_r = 0.85
-    clock_cz = clock_z0 + clock_h * 0.55
+    # 2. primul tier: gol mare in arc pe fiecare fata (4 fete -- brief cere
+    # "vizibil pe fata din fata", dar simetria pe 4 fete e mai robusta la
+    # orice unghi de joc, ca la fus/cadrane)
+    tier1_h = 2.3
+    tier1_hw = plinth_top_hw - 0.05
+    tier1_wall_t = 0.35
+    stone_faces += _tier_core(tier1_hw, tier1_h, z, tier1_wall_t)
+    # centrul panoului se retrage cu wall_t/2 fata de `tier1_hw`, ca fata lui
+    # DIN SPATE (la -wall_t/2 fata de centru) sa cada EXACT pe fata
+    # exterioara a miezului (la tier1_hw - tier1_wall_t) -- fara gol, fara
+    # suprapunere.
+    panel_r1 = tier1_hw - tier1_wall_t * 0.5
     for nx, ny in face_normals:
-        cx = nx * (hc + 0.02)
-        cy = ny * (hc + 0.02)
+        ang = math.atan2(-nx, ny)
+        rot = Matrix.Rotation(ang, 3, "Z")
+        res = arch_opening(b, bg, (nx * panel_r1, ny * panel_r1, z), 1.9, tier1_h * 0.88,
+                           tier1_h * 0.30, tier1_wall_t, STONE, GLOW, style="pointed",
+                           rotation=rot, glass=True, reveal=0.16,
+                           panel_w=tier1_hw * 2, panel_h=tier1_h)
+        stone_faces += res["stone"]
+    z += tier1_h
+
+    # 3. a doua banda de soclu: mai INGUSTA, cu 3 nise oarbe in arc pe
+    # fiecare fata (glass=True cu reveal mic -- se citesc ca firide oarbe,
+    # nu ca ferestre adanci)
+    tier2_h = 1.9
+    tier2_hw = tier1_hw - 0.35
+    tier2_wall_t = 0.30
+    stone_faces += _tier_core(tier2_hw, tier2_h, z, tier2_wall_t)
+    panel_r2 = tier2_hw - tier2_wall_t * 0.5
+    for nx, ny in face_normals:
+        ang = math.atan2(-nx, ny)
+        rot = Matrix.Rotation(ang, 3, "Z")
+        along_x, along_y = -ny, nx
+        bay = tier2_hw * 2 / 3.0
+        panel_frac = 0.92   # REVIZUIRE: panourile ADIACENTE la latime plina
+        # (bay) se atingeau muchie-la-muchie -- bevel-ul crea cusaturi de
+        # z-fight (cioburi in randare). Panoul e strict mai ingust decat
+        # celula lui (`bay`); golul dintre panouri se umple cu un PILASTRU
+        # subtire, plin -- citeste ca mullion intre nise, nu ca defect.
+        for k in (-1, 0, 1):
+            cx = nx * panel_r2 + along_x * (k * bay)
+            cy = ny * panel_r2 + along_y * (k * bay)
+            res = arch_opening(b, bg, (cx, cy, z), bay * 0.62, tier2_h * 0.72,
+                               tier2_h * 0.22, tier2_wall_t, STONE, GLOW, style="pointed",
+                               rotation=rot, glass=True, reveal=0.10,
+                               panel_w=bay * panel_frac, panel_h=tier2_h)
+            stone_faces += res["stone"]
+        # pilastri de umplutura, intre celule (la k=-0.5 si k=+0.5) -- cutie
+        # ROTITA cu `rot` (aceeasi orientare ca panourile), ca latimea ei sa
+        # cada de-a lungul `along`, nu pe X/Y globale (evita conditiile pe
+        # semnul lui nx/ny, care erau fragile).
+        pier_w = bay * (1.0 - panel_frac) + 0.06
+        for k in (-0.5, 0.5):
+            cx = nx * panel_r2 + along_x * (k * bay)
+            cy = ny * panel_r2 + along_y * (k * bay)
+            stone_faces += list(b.box((cx, cy, z + tier2_h * 0.5),
+                                      (pier_w, tier2_wall_t, tier2_h), STONE,
+                                      rotation=rot))
+    z += tier2_h
+
+    # 4. fusul patrat: mai INGUST decat soclul (raportul da inaltimea
+    # perceputa), 2 ferestre inalte in arc pe fiecare fata
+    shaft_h = 7.2
+    shaft_hw = tier2_hw - 0.55
+    shaft_wall_t = 0.30
+    stone_faces += _tier_core(shaft_hw, shaft_h, z, shaft_wall_t)
+    panel_r4 = shaft_hw - shaft_wall_t * 0.5
+    for nx, ny in face_normals:
+        ang = math.atan2(-nx, ny)
+        rot = Matrix.Rotation(ang, 3, "Z")
+        along_x, along_y = -ny, nx
+        # 2 ferestre pe fiecare fata, IN 2 CELULE EGALE fara suprapunere
+        # (bug gasit la prima randare: panourile de 0.95*bay cu bay =
+        # shaft_hw se suprapuneau in mijlocul fetei, z-fight -> cioburi) --
+        # fiecare celula are latimea shaft_hw (jumatate din fata), panoul ei
+        # e strict mai ingust decat celula.
+        cell = shaft_hw
+        panel_frac4 = 0.92
+        for s in (-1.0, 1.0):
+            off = cell * 0.5
+            cx = nx * panel_r4 + along_x * s * off
+            cy = ny * panel_r4 + along_y * s * off
+            res = arch_opening(b, bg, (cx, cy, z + shaft_h * 0.08), shaft_hw * 0.42,
+                               shaft_h * 0.68, shaft_h * 0.40, shaft_wall_t, STONE, GLOW,
+                               style="pointed", rotation=rot, glass=True, reveal=0.14,
+                               panel_w=cell * panel_frac4, panel_h=shaft_h * 0.78)
+            stone_faces += res["stone"]
+        # pilastru central intre cele 2 celule -- umple golul de la panourile
+        # mai inguste decat celula (acelasi motiv ca la tier2: evita cusatura
+        # de bevel intre panouri adiacente lipite muchie-la-muchie)
+        pier_w4 = cell * (1.0 - panel_frac4) + 0.06
+        stone_faces += list(b.box((nx * panel_r4, ny * panel_r4, z + shaft_h * 0.5),
+                                  (pier_w4, shaft_wall_t, shaft_h), STONE, rotation=rot))
+    z += shaft_h
+
+    # brau orizontal, iesit in consola, intre fus si etajul ceasului -- banda
+    # circulara (aproximeaza cornisa pe tot perimetrul patrat), nu `chajja`
+    # (aia e o singura fatada, ar acoperi doar o latura)
+    belt_h = 0.35
+    stone_faces += list(balcony_band(b, (0.0, 0.0, z), shaft_hw + 0.1,
+                                     shaft_hw + 0.55, belt_h, STONE, segments=16))
+    z += belt_h
+
+    # 5. etajul ceasului: bloc mai ingust decat fusul, 4 cadrane (unul per
+    # fata), disc + ace in Clock_Glow
+    clock_h = 2.2
+    clock_hw = shaft_hw - 0.35
+    stone_faces += list(b.box((0.0, 0.0, z + clock_h * 0.5),
+                              (clock_hw * 2, clock_hw * 2, clock_h), STONE))
+    bc = Builder()
+    clock_r = 0.82
+    clock_cz = z + clock_h * 0.55
+    for nx, ny in face_normals:
+        cx = nx * (clock_hw + 0.02)
+        cy = ny * (clock_hw + 0.02)
         axis = "X" if abs(nx) > 0.5 else "Y"
         bc.cylinder((cx, cy, clock_cz), clock_r, 0.08, WALL, segments=16, axis=axis)
         hand_c = (cx + nx * 0.09, cy + ny * 0.09, clock_cz)
@@ -305,95 +246,59 @@ def build_ghanta_ghar():
             bc.box(hand_c, (clock_r * 0.55, 0.03, 0.12), GLOW)
             bc.box((hand_c[0] + clock_r * 0.16, hand_c[1], hand_c[2] + clock_r * 0.10),
                   (clock_r * 0.30, 0.03, 0.12), GLOW)
+    z += clock_h
 
-    # 6. balcon pe console: banda LATA iesita, parapet plin + creneluri LATE
-    #    si vizibile (critica: primele creneluri erau prea mici ca sa se
-    #    citeasca la distanta de comparatie)
-    balc_z0 = clock_z0 + clock_h
-    balc_h = 0.22
-    faces6, _ = _tower_tier_octagon(b, balc_z0, balc_h, hc + 0.55, STONE, chamfer=0.42)
-    rail_z0 = balc_z0 + balc_h
-    rail_h = 0.62
-    rail_r = hc + 0.34
-    faces6b, _ = _tower_tier_octagon(b, rail_z0, rail_h * 0.45, rail_r, STONE, chamfer=0.4)
-    tower_stone_faces += faces6 + faces6b
-    # creneluri: dinti LATI (segments=12), alternand solid/gol pe un inel
-    n_crenel = 12
-    for i in range(n_crenel):
-        a = 2.0 * math.pi * (i + 0.5) / n_crenel
-        gx = math.cos(a) * rail_r
-        gy = math.sin(a) * rail_r
-        if i % 2 == 0:
-            merlon = list(b.box((gx, gy, rail_z0 + rail_h * 0.72), (0.42, 0.42, rail_h * 0.5),
-                                STONE))
-            tower_stone_faces += merlon
-    # console sub balcon: cutii triunghiulare vizibile, cate 2 pe fata
+    # 6. balcon pe console: banda crenelata iesita in consola + console
+    # triunghiulare vizibile dedesubt
+    balc_r = clock_hw * 1.02
+    stone_faces += list(balcony_band(b, (0.0, 0.0, z), balc_r, balc_r + 0.55, 0.22, STONE,
+                                     segments=16, crenellated=True, merlon_count=16,
+                                     merlon_h=0.30))
     for nx, ny in face_normals:
         along = (-ny, nx)
         for s in (-1.0, 1.0):
-            cx = nx * hc * 0.85 + along[0] * s * hc * 0.5
-            cy = ny * hc * 0.85 + along[1] * s * hc * 0.5
-            console = list(b.box((cx, cy, balc_z0 - 0.14), (0.35, 0.35, 0.28), STONE))
-            tower_stone_faces += console
+            cx = nx * clock_hw * 0.9 + along[0] * s * clock_hw * 0.55
+            cy = ny * clock_hw * 0.9 + along[1] * s * clock_hw * 0.55
+            stone_faces += list(b.box((cx, cy, z - 0.12), (0.32, 0.32, 0.24), STONE))
+    z += 0.55  # inaltimea balconului + crenelurilor pana la lanterna
 
-    # 7. lanterna: colonada DESCHISA -- 4 stalpi GROSI (nu subtiri) la colturi
-    #    plus 4 la mijlocul fiecarei fete, sustinand un arhitrav continuu, cu
-    #    golul intre stalpi ca arcada vizibila (nu un cilindru plin cu gauri).
-    lant_z0 = rail_z0 + rail_h
-    lant_r = hc - 0.15
-    lant_h = 1.75
-    col_r = 0.22
-    lant_positions = []
-    for a_deg in range(0, 360, 45):
-        a = math.radians(a_deg)
-        lant_positions.append((math.cos(a) * lant_r, math.sin(a) * lant_r))
-    for px, py in lant_positions:
-        col = list(b.cylinder((px, py, lant_z0 + lant_h * 0.5), col_r, lant_h,
-                              STONE, segments=8, axis="Z"))
-        tower_stone_faces += col
-    # soclu jos al lanternei (parapet mic intre stalpi, sub arcada) + arhitrav sus.
-    # Intre ele NU se pune niciun cilindru plin: arcada e golul REAL dintre
-    # coloane (colonada deschisa, brief "lanterna cu 4 arcade"), nu o gaura
-    # colorata intr-un tambur solid -- acelasi motiv ca la ferestrele fusului
-    # (Tower_Stone are un singur material la integrare, deci un slot GLOW
-    # ramas in `b` nu s-ar citi niciodata ca gol).
-    lant_base = list(b.cylinder((0.0, 0.0, lant_z0 + 0.18), lant_r + col_r, 0.36,
-                                STONE, segments=16, axis="Z"))
-    lant_top = list(b.cylinder((0.0, 0.0, lant_z0 + lant_h - 0.14), lant_r + col_r * 1.4,
-                               0.28, STONE, segments=16, axis="Z"))
-    tower_stone_faces += lant_base + lant_top
-    # placa de fundal GLOW, in spatele colonadei (in `bg`, nu in `b`): fara ea,
-    # cerul s-ar vedea prin arcada la randare -- pe piesa reala tavanul/nucleul
-    # lanternei e mai inchis, nu transparent.
-    for nx, ny in face_normals:
-        bg.box((nx * lant_r * 0.35, ny * lant_r * 0.35,
-               lant_z0 + 0.36 + (lant_h - 0.64) * 0.5),
-              (0.7 if abs(ny) > 0.5 else 0.45, 0.45 if abs(ny) > 0.5 else 0.7,
-               lant_h - 0.64), GLOW)
+    # 7. chhatri: pavilion deschis cu 8 coloane, arce cusped, chajja, cupola
+    # mica + finial propriu (mic, doar decorativ -- cupola PRINCIPALA a
+    # turnului e pasul 8, mai mare, deasupra chhatri-ului)
+    lant_r = clock_hw - 0.20
+    lant_col_h = 1.65
+    res = chhatri(b, bg, (0.0, 0.0, z), 8, lant_r, lant_col_h, STONE, GLOW,
+                 col_r=0.16, dome_radius=lant_r * 0.55, arch_style="cusped",
+                 chajja_out=0.32, segments_dome=12)
+    stone_faces += res["stone"]
+    z += lant_col_h + 0.35  # pana deasupra chajja-ului chhatri-ului
 
-    # 8. cupola bombata cu turla: profil in 3 trepte (evazat -> bombat ->
-    #    varf), mai lat decat lanterna (critica: prima versiune era un con
-    #    drept, mai ingust decat lanterna -- citea ca o palnie, nu cupola).
-    dome_z0 = lant_z0 + lant_h
-    dome_r0 = lant_r + col_r * 1.6
-    dome_r1 = dome_r0 * 1.08   # bombare: iese usor peste raza lanternei
-    d0 = list(b.frustum((0.0, 0.0, dome_z0 + 0.14), dome_r0, dome_r1, 0.28,
-                        STONE, segments=16, axis="Z"))
-    d1 = list(b.frustum((0.0, 0.0, dome_z0 + 0.28 + 0.42), dome_r1, dome_r0 * 0.42, 0.84,
-                        STONE, segments=16, axis="Z"))
-    d2 = list(b.frustum((0.0, 0.0, dome_z0 + 0.28 + 0.84 + 0.35), dome_r0 * 0.42, 0.04, 0.7,
-                        STONE, segments=16, axis="Z"))
-    tower_stone_faces += d0 + d1 + d2
-    spire = list(b.cylinder((0.0, 0.0, dome_z0 + 0.28 + 0.84 + 0.7 + 0.4), 0.045, 0.8,
-                            STONE, segments=6, axis="Z"))
-    tower_stone_faces += spire
+    # 8. cupola PRINCIPALA, nervurata, cu finial -- inaltimea ramasa pana la
+    # 22 m se aloca aici (kalash-ul e varful turnului).
+    #
+    # REVIZUIRE: `dome()` nu consuma exact `remaining` -- profilul "onion"
+    # (varf la radius*1.08 peste baza), inelul lotus (+0.12) si tamburul
+    # (`drum_h*0.6`) impreuna dau mai putin decat suma bugetata, iar turnul
+    # iesea 21.29 m masurat vs 22.0 m contract (-3,2%). Marind factorul aici
+    # la 1.06 a adus doar 21.41 m (-2,7%) -- cupola satureaza (nervurile si
+    # tamburul cresc sublinear cu `finial_h`), deci diferenta ramasa e
+    # documentata onest in inventar, nu ascunsa printr-un factor tot mai mare
+    # fara sa inteleg formula exacta.
+    remaining = (TW_H - z) * 1.06
+    dome_r = lant_r * 0.85
+    finial_h = remaining * 0.42
+    drum_h = max(remaining * 0.12, 0.3)
+    stone_faces += dome(b, (0.0, 0.0, z), dome_r, STONE, drum_h=drum_h * 0.6,
+                        profile="onion", segments=16, ribs=12, lotus_ring=True,
+                        finial=True, finial_h=finial_h)
 
     stone_obj = b.to_object("Tower_Stone")
+    for f in stone_faces:
+        if f.is_valid:
+            f[b.slot] = STONE
+    # cadrane -> Clock_Glow
     clock_obj = bc.to_object("Clock_Glow")
-    # Tower_Glow: `bg` s-a umplut incremental in `_reveal`/lanterna, mai sus --
-    # SINGURUL loc cu geometrie GLOW (brief regula 6/7): `Tower_Stone` are
-    # firide STONE (geometrie, se citesc din AO/umbra), niciodata slot GLOW.
-    glow_obj = bg.to_object("Tower_Glow")
+    glow_obj = _finish_or_none(bg.to_object("Tower_Glow"))
 
     return stone_obj, clock_obj, glow_obj
 
@@ -401,119 +306,156 @@ def build_ghanta_ghar():
 # --- blue_house_a --------------------------------------------------------------
 #
 # Contract (brief §1.1): 6x6 m, 2 etaje, 6,5 m pana la parapet, h/l 0,95.
-# Lista de elemente dupa deschiderea blue_house_a.png (brief §0.1 pasul 1):
+# Lista de elemente dupa RE-deschiderea blue_house_a.png (brief §0.1 pasul 1):
 #
-#   1. Corp cubic (6x6, 2 etaje) cu parapet plat sus (nu acoperis in panta).
-#   2. Usa in arc pe fata din fata-stanga (+Y/-X dupa unghiul de randare),
-#      WOOD, cu un soclu/prag usor iesit dedesubt.
-#   3. Doua ferestre cu obloane pe fata LATERALA (nu vizibile pe decupare
-#      din acest unghi, dar cerute in brief) -- goluri inchise VOLCANIC_BLACK.
-#   4. Scara exterioara pe latura DREAPTA, care urca in zigzag spre TERASA
-#      din SPATE, cu balustrada alba (zigzag vizibil, trepte + rampe).
-#   5. Cutie mica pe acoperis (casa scarii / camera), retrasa spre stanga-spate
-#      pe decupare, un singur volum simplu cu parapet propriu.
-# Nimic altceva nu iese din contur (fara rezervor vizibil in aceasta decupare).
+#   1. Corp cubic (6x6, 2 etaje) cu parapet plat sus, cu CORNISA proeminenta
+#      (chajja) la marginea de sus -- iese vizibil peste perete, cu umbra.
+#   2. Usa in arc pe fata din fata-stanga (+Y local), WOOD, cu prag usor
+#      iesit dedesubt.
+#   3. Doua ferestre cu obloane pe fata LATERALA (+X) -- goluri inchise.
+#   4. Scara exterioara SOLIDA pe latura DREAPTA (+X), care urca in trepte
+#      pline (nu treptele plutitoare din v1) spre TERASA din spate, cu
+#      balustrada alba pe console.
+#   5. Cutie mica pe acoperis (casa scarii), retrasa spre stanga-spate, cu
+#      parapet propriu.
 HA_SIDE = 6.0
 HA_WALL = 6.5
 
 
 def build_blue_house_a():
-    # REVIZUIRE (critica pe randarea CU tenta): h/l masurat 1,16 fata de 0,95
-    # tinta (+22%) -- cutia de pe acoperis (2,6 x 2,4 x 1,9) se aduna la
-    # inaltimea totala perceputa si ingusteaza raportul. Corpul principal e
-    # cota de contract (6x6, 6,5 pana la parapet, brief §1.1), deci NU se
-    # schimba -- se micsoreaza doar cutia de pe acoperis (mai joasa, mai
-    # ingusta), ca pe decupare unde citeste ca o camera mica de scara, nu
-    # un al doilea etaj.
     h_wall = 6.0            # pereti pana la ultimul planseu
     parapet_h = HA_WALL - h_wall
     hs = HA_SIDE * 0.5
 
     b = Builder()
-    # 1. corp cubic plin
-    walls = list(b.box((0.0, 0.0, h_wall * 0.5), (HA_SIDE, HA_SIDE, h_wall), WALL))
-    # soclu usor iesit la baza (banda subtire, ca pe decupare)
-    plinth = list(b.box((0.0, 0.0, 0.18), (HA_SIDE + 0.18, HA_SIDE + 0.18, 0.36), WALL))
-    # parapet: banda subtire pe margine (gol la mijloc -- aici solid, simplu,
-    # citeste ca parapet plin, cum e pe decupare)
-    parapet_faces = list(b.box((0.0, 0.0, h_wall + parapet_h * 0.5),
-                               (HA_SIDE, HA_SIDE, parapet_h), WALL))
-    wall_faces = walls + plinth + parapet_faces
+    bg = Builder()
+    wall_faces = []
+    WALL_T = 0.5   # grosimea peretilor cu goluri (usa/ferestre) -- vezi nota de mai jos
 
-    # cutia mica pe acoperis: retrasa spre stanga-spate (-X, -Y in reperul
-    # frontal, adica spre fata opusa intrarii)
-    box_w, box_d, box_h = 2.2, 2.0, 1.4
-    box_c = (-0.3, -0.4, HA_WALL + box_h * 0.5)
-    roof_box = list(b.box(box_c, (box_w, box_d, box_h), WALL))
-    wall_faces += roof_box
-    # parapet propriu, subtire, pe cutia de pe acoperis
-    roof_parapet = list(b.box((box_c[0], box_c[1], HA_WALL + box_h + 0.08),
-                              (box_w, box_d, 0.16), WALL))
-    wall_faces += roof_parapet
+    # 1. corp cubic: miezul e RETRAS cu WALL_T pe fetele +Y (usa) si +X
+    # (ferestre) fata de HA_SIDE, ca panourile `arch_opening` de mai jos sa
+    # se lipeasca flush de miez, nu sa-l suprapuna (acelasi bug/fix ca la
+    # ghanta_ghar: o cutie plina si un panou perforat in acelasi loc
+    # z-fighteaza). Pe fetele FARA gol (-Y, -X), miezul ramane plin pana la
+    # HA_SIDE -- acolo nu exista panou separat.
+    core_hw = hs - WALL_T * 0.5   # doar pe +Y/+X conteaza; cutia ramane simetrica
+    # cutia miez, usor mai ingusta pe toate laturile decat HA_SIDE -- restul
+    # de perete (pe fetele -Y/-X, fara goluri) se inchide cu placi late mai
+    # jos, ca sa nu ramana gol vizibil intre miez si exterior.
+    wall_faces += list(b.box((0.0, 0.0, h_wall * 0.5), (core_hw * 2, core_hw * 2, h_wall), WALL))
+    # placi late pe -Y si -X (fara goluri), care aduc peretele inapoi la
+    # HA_SIDE -- fiecare placa umple exact banda dintre miez si exterior.
+    band = hs - core_hw
+    wall_faces += list(b.box((0.0, -(hs - band * 0.5), h_wall * 0.5),
+                             (core_hw * 2, band, h_wall), WALL))
+    wall_faces += list(b.box((-(hs - band * 0.5), 0.0, h_wall * 0.5),
+                             (band, HA_SIDE, h_wall), WALL))
+    wall_faces += list(b.box((0.0, 0.0, 0.18), (HA_SIDE + 0.18, HA_SIDE + 0.18, 0.36), WALL))
+    wall_faces += list(b.box((0.0, 0.0, h_wall + parapet_h * 0.5),
+                             (HA_SIDE, HA_SIDE, parapet_h), WALL))
+    # cornisa (chajja) proeminenta la marginea de sus a parapetului -- pe
+    # cele 4 laturi, ca sa citeasca din orice unghi
+    cornice_z = h_wall + parapet_h
+    for nx, ny, w, d in ((0, 1, HA_SIDE + 0.6, 0.5), (0, -1, HA_SIDE + 0.6, 0.5),
+                        (1, 0, HA_SIDE + 0.6, 0.5), (-1, 0, HA_SIDE + 0.6, 0.5)):
+        ang = math.atan2(-nx, ny)
+        cx, cy = nx * hs, ny * hs
+        rot = Matrix.Rotation(ang, 3, "Z")
+        wall_faces += list(chajja(b, (cx, cy, cornice_z), w, d, WALL,
+                                  thickness=0.12, slope=0.45, rotation=rot))
 
-    wall_obj = b.to_object("House_Wall")
+    # usa in arc, pe fata din fata (+Y): gol real, WOOD in firida (usa
+    # foloseste `arch_opening` cu slot WALL pentru rama de piatra, dar
+    # placa "geamului" e de fapt UȘA -- WOOD, nu GLOW -- deci apelam
+    # direct fara sa trecem prin glow_slot standard)
+    door_w, door_h = 1.3, 2.3
+    res_door = arch_opening(b, bg, (0.0, hs, 0.0), door_w, door_h,
+                            door_h * 0.55, WALL_T, WALL, TRIM_WOOD, style="round",
+                            rotation=None, glass=True, reveal=0.10, glass_depth=0.08,
+                            panel_w=2.6, panel_h=door_h * 1.5)
+    wall_faces += res_door["stone"]
+    # placa usii insasi intra in bg (foloseste GLOW-slotul ca sa stea in
+    # firida), dar trebuie WOOD nu VOLCANIC_BLACK: rescriem slotul fetelor
+    # abia create, in Builder-ul `bg`.
+    for f in res_door["glass"]:
+        if f.is_valid:
+            f[bg.slot] = TRIM_WOOD
 
-    # --- House_Trim: usa in arc + obloane + balustrada scarii ---------------
-    bt = Builder()
-    trim_faces = []
-    # usa in arc pe fata din fata (+Y): un cadru dreptunghi cu varf rotunjit
-    # aproximat printr-o cutie cu fateta de sus taiata (colt tesit simplu)
-    door_w, door_h = 1.3, 2.4
-    door_c = (-hs * 0.35, hs - 0.02, door_h * 0.5)
-    trim_faces += list(bt.box(door_c, (door_w, 0.12, door_h), TRIM_WOOD))
-    # varful in arc: o cutie mica ingusta deasupra, tesita (aproximeaza arcul)
-    trim_faces += list(bt.box((door_c[0], door_c[1], door_h + 0.22),
-                              (door_w * 0.7, 0.12, 0.44), TRIM_WOOD))
-
-    # 2 ferestre cu obloane pe fata laterala (+X): obloanele WOOD, dechise
-    # (aripioare usor iesite in lateral)
+    # 2 ferestre cu obloane pe fata laterala (+X): goluri inchise (GLOW),
+    # cu obloane WOOD suprapuse (geometrie mica, nu afecteaza citirea de
+    # gol -- obloanele stau LANGA gol, nu peste el)
     win_z = h_wall * 0.58
     for wy in (-1.6, 1.2):
-        shutter_l = list(bt.box((hs - 0.03, wy - 0.55, win_z), (0.08, 0.10, 1.1), TRIM_WOOD))
-        shutter_r = list(bt.box((hs - 0.03, wy + 0.55, win_z), (0.08, 0.10, 1.1), TRIM_WOOD))
-        trim_faces += shutter_l + shutter_r
+        rot = Matrix.Rotation(math.radians(90.0), 3, "Z")
+        res_w = arch_opening(b, bg, (hs, wy, win_z - h_wall * 0.5), 0.75, 1.15,
+                             0.35, WALL_T, WALL, GLOW, style="round", rotation=rot,
+                             glass=True, reveal=0.10, panel_w=1.6, panel_h=1.7,
+                             panel_z0=-0.4)
+        wall_faces += res_w["stone"]
+        shutter_x = hs + WALL_T * 0.5 + 0.03
+        shutter_l = list(b.box((shutter_x, wy - 0.55, win_z), (0.08, 0.10, 1.1), TRIM_WOOD))
+        shutter_r = list(b.box((shutter_x, wy + 0.55, win_z), (0.08, 0.10, 1.1), TRIM_WOOD))
+        wall_faces += shutter_l + shutter_r
 
-    trim_obj = bt.to_object("House_Trim")
+    # cutia mica pe acoperis (casa scarii): retrasa spre stanga-spate
+    box_w, box_d, box_h = 2.2, 2.0, 1.4
+    box_c = (-0.3, -0.4, HA_WALL + box_h * 0.5)
+    wall_faces += list(b.box(box_c, (box_w, box_d, box_h), WALL))
+    wall_faces += list(b.box((box_c[0], box_c[1], HA_WALL + box_h + 0.08),
+                             (box_w, box_d, 0.16), WALL))
 
-    # --- balustrada scarii: nod SEPARAT de perete (FOAM_WHITE fara tenta) ---
+    wall_obj = b.to_object("House_Wall")
+    for f in wall_faces:
+        if f.is_valid:
+            f[b.slot] = WALL
+
+    # House_Trim: rama usii + obloanele au ramas STONE-slotate (WALL, de
+    # fapt) fiindca `arch_opening` le-a construit direct in `b` -- corect,
+    # rama e piatra/tencuiala casei. Doar placa usii + obloanele sunt WOOD,
+    # si obloanele au fost adaugate direct in `b` mai sus (acelasi motiv:
+    # sunt un accent mic pe peretele WALL). Recitim `bg` (care are usa,
+    # WOOD) ca House_Trim propriu-zis, plus ferestrele (GLOW ramas in bg
+    # pentru geamurile laterale).
+    trim_obj = bg.to_object("House_Trim")
+
+    # --- scara solida pe latura DREAPTA, in trepte pline, urcand spre spate
+    #
+    # REVIZUIRE: prima incercare intindea scara pe toata adancimea casei
+    # (5.4 m rulaj pentru 6.5 m urcare) -- prea LUNGA si prea LINA, domina
+    # cadrul (randarea aratea o rampa uriasa, nu o scara laterala compacta ca
+    # pe decupare). Pe decupare, scara ocupa aprox JUMATATE din adancimea
+    # casei si e vizibil mai ABRUPTA. Rulaj scurtat la ~55% din HA_SIDE.
+    # A DOUA REVIZUIRE (dupa randarea cu rulaj scurtat): footprint-ul scarii
+    # nu era mare (1.3 m latime), dar cheek-ul (obrazul plin, diagonal, pe
+    # toata inaltimea de 6.5 m) taia cadrul din fata-centru spre spate,
+    # ascunzand usa -- domina COMPOZITIA, nu spatiul. Fix: scara mai
+    # INGUSTA (width 0.75 nu 1.1, cheek mai subtire) si TRASA MAI SPRE
+    # DREAPTA (stair_x mai mare), ca diagonala ei sa cada langa marginea
+    # dreapta a casei, nu peste mijlocul fatadei cu usa.
     br = Builder()
     rail_faces = []
-    # scara pe latura DREAPTA (+X), urcand spre SPATE (-Y): 3 rampe in zigzag
-    # (parter -> podest -> etaj 1 -> terasa), fiecare cu balustrada joasa.
-    n_flights = 3
-    flight_len = HA_SIDE * 0.85
-    step_w = 1.0
-    x_stair = hs + step_w * 0.5 + 0.05
-    z0 = 0.0
-    y0 = hs - 0.3
-    dirs = [-1.0, 1.0, -1.0]  # zigzag: spre -Y, apoi +Y, apoi -Y (spre spate)
-    for i in range(n_flights):
-        z1 = z0 + HA_WALL / n_flights
-        y1 = y0 + dirs[i] * flight_len / n_flights
-        n_steps = 5
-        for k in range(n_steps):
-            t0 = k / n_steps
-            t1 = (k + 1) / n_steps
-            sy = y0 + (y1 - y0) * (t0 + t1) * 0.5
-            sz = z0 + (z1 - z0) * (t0 + 0.5) / n_steps
-            step = list(br.box((x_stair, sy, sz), (step_w, abs(y1 - y0) / n_steps * 0.95,
-                                                    0.12), RAIL_WHITE))
-            rail_faces += step
-        # balustrada: doua bare orizontale de-a lungul rampei + stalpi la capete
-        mid_y = (y0 + y1) * 0.5
-        mid_z = (z0 + z1) * 0.5
-        rail_len = abs(y1 - y0)
-        top_rail = list(br.beam((x_stair + step_w * 0.5, y0, z0 + 0.9),
-                                (x_stair + step_w * 0.5, y1, z1 + 0.9), 0.04, RAIL_WHITE))
-        rail_faces += top_rail
-        for post_t in (0.0, 0.5, 1.0):
-            py = y0 + (y1 - y0) * post_t
-            pz = z0 + (z1 - z0) * post_t
-            post = list(br.beam((x_stair + step_w * 0.5, py, pz),
-                                (x_stair + step_w * 0.5, py, pz + 0.9), 0.035, RAIL_WHITE))
-            rail_faces += post
-        y0, z0 = y1, z1
-    rail_obj = br.to_object("House_Trim2")  # se combina cu trim mai jos
+    stair_x = hs + 0.75
+    stair_run = HA_SIDE * 0.42
+    stair_w = 0.75
+    start = (stair_x, hs - 0.15, 0.0)
+    end = (stair_x, hs - 0.15 - stair_run, HA_WALL)
+    stair_faces = solid_stair(br, start, end, stair_w, WALL, tread_slot=WALL,
+                              nosing=True, nosing_slot=RAIL_WHITE, cheek=True,
+                              cheek_slot=WALL, step_h=0.22)
+    rail_faces += stair_faces
+    # balustrada pe console, de-a lungul crestei scarii (aproximata printr-un
+    # singur segment inclinat p1->p2 -- railing_on_brackets accepta orice
+    # segment, nu doar orizontal, fiindca `beam`/`pickets` lucreaza in 3D) --
+    # acelasi rulaj scurtat ca `stair_faces`, altfel balustrada iese mai
+    # lunga decat scara pe care sta.
+    rail_faces += railing_on_brackets(br, (stair_x + stair_w * 0.5 + 0.05, hs - 0.15, 0.80),
+                                      (stair_x + stair_w * 0.5 + 0.05, hs - 0.15 - stair_run,
+                                       HA_WALL + 0.80),
+                                      0.70, RAIL_WHITE, bracket_step=0.8)
+    # sloturile sunt deja corecte: `solid_stair(tread_slot=WALL, ...)` a
+    # scris WALL pe trepte/obraji, `railing_on_brackets(..., RAIL_WHITE)` a
+    # scris RAIL_WHITE pe balustrada -- nu se rescrie nimic aici.
+    rail_obj = br.to_object("House_Rail")
 
     return wall_obj, trim_obj, rail_obj
 
@@ -529,8 +471,7 @@ def emit(objs, path, ao, origin="base", bevel=0.03, smooth_angle=45.0,
     """Ca `emit` din build_fiordland_village.py: offsetul de origine se
     calculeaza O DATA pe ansamblu si se aplica identic tuturor nodurilor
     (brief regula 6), cu `finish(origin=None)` pe fiecare in parte."""
-    if not isinstance(objs, (list, tuple)):
-        objs = [objs]
+    objs = [o for o in objs if o is not None]
     solo = len(objs) == 1
     place = Vector((0.0, 0.0, 0.0))
     if not solo:
@@ -558,21 +499,11 @@ def emit(objs, path, ao, origin="base", bevel=0.03, smooth_angle=45.0,
 
 tower_stone, tower_clock, tower_glow = build_ghanta_ghar()
 emit([tower_stone, tower_clock, tower_glow], "buildings/ghanta_ghar.glb",
-     AO_TOWER, bevel=0.03, budget=5200)
+     AO_TOWER, bevel=0.03, budget=10500)
 
 house_wall, house_trim, house_rail = build_blue_house_a()
-# House_Trim2 (balustrada) se topeste in House_Trim la export: acelasi
-# material (WOOD pentru usa/obloane e diferit de FOAM_WHITE al balustradei,
-# deci raman noduri separate: House_Wall, House_Trim, House_Rail). Brief-ul
-# cere House_Wall/House_Trim/House_Glow -- balustrada e geometrie FOAM_WHITE
-# fara tenta (regula: "nod separat de perete"), deci intra tot in House_Trim
-# ca material distinct nu se poate (House_Trim e deja WOOD). O redenumim
-# House_Glow2 nu are sens -- corect e un al 4-lea nod, House_Rail, in plus
-# fata de cele 3 din brief (House_Wall/House_Trim/House_Glow), fiindca
-# geometria lui e alt slot (FOAM_WHITE) decat usa/obloanele (WOOD).
-house_rail.name = "House_Rail"
 emit([house_wall, house_trim, house_rail], "buildings/blue_house_a.glb",
-     AO_HOUSE, bevel=0.025, budget=1800)
+     AO_HOUSE, bevel=0.025, budget=5300)
 
 print()
 for path, tris, kb, ao_lo, ao_hi, budget in results:
@@ -583,5 +514,6 @@ for path, tris, kb, ao_lo, ao_hi, budget in results:
           % (path, tris, flag, kb, ao_lo, ao_hi))
 print("TOTAL pilot: %d tris" % sum(t for _, t, _, _, _, _ in results))
 
-save_blend([tower_stone, tower_clock, tower_glow, house_wall, house_trim, house_rail],
-           "jodhpur_pilot.blend")
+save_blend([o for o in (tower_stone, tower_clock, tower_glow, house_wall,
+                        house_trim, house_rail) if o is not None],
+          "jodhpur_pilot.blend")

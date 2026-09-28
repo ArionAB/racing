@@ -43,8 +43,11 @@ check() {  # check <cale> <buget> [flag...]
 }
 
 echo "== pilotul (brief §1.1, val 1) =="
-check "buildings/ghanta_ghar.glb"   5200 --origin=assembly
-check "buildings/blue_house_a.glb"  1800 --origin=assembly
+# Bugetele au crescut fata de v1 (5200/1800) odata cu rescrierea pe
+# vocabularul de forme (arcade/dome/chhatri/solid_stair reale, nu cutii
+# tesite) -- v2 e cifra masurata dupa fidelitate, cu putina marja.
+check "buildings/ghanta_ghar.glb"   10500 --origin=assembly
+check "buildings/blue_house_a.glb"  5300 --origin=assembly
 
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)

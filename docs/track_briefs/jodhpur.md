@@ -593,9 +593,19 @@ cel lângă drum, e `DecorManual` cu coliziune.
   fără nume de firme pe tarabe, panourile fără text real (regula plăcii
   „1904" de la Baikal). Tiroliana: fără numele operatorului.
 
-## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.2, paste-ready
 
-**v0.1 e diorama de concept, înaintea pistei.** Lecția de la Fiordland
+**v0.2 (28 sep), cu planul real atașat:** se dă împreună cu
+`docs/track_briefs/img/jodhpur_plan.png` (captura ortografică adnotată,
+`tools/annotate_jodhpur_plan.py`). **Topologia v0.1 era OGLINDITĂ** față de
+pista construită: v0.1 cerea bucla antiorară, fortul în spate-stânga și lacul
+în stânga; pe pista reală bucla e **orară** văzută de sus, fortul e în
+**spate-dreapta** și lacul în **dreapta**. Tot în v0.2, soarele vine din
+**dreapta** (tema: `sun_rotation_deg` (−8, 90, 0), deci lumina merge spre −X).
+Busola din §2 („spre vest", „spre est") **nu** se potrivește cu axele planului,
+de aceea promptul spune doar stânga/dreapta/față/spate.
+
+Istoric — **v0.1 era diorama de concept, înaintea pistei.** Lecția de la Fiordland
 (memoria `diorama-din-geometria-reala`): referința bună vine din **captura
 ortografică adnotată a pistei construite** (`Snapshot.tscn -- --track=10
 --no-fog`, apoi un script de adnotare, tiparul `annotate_fiordland_plan.py`).
@@ -609,27 +619,34 @@ buclei.
 > **the old blue city of Jodhpur, Rajasthan, India, on the evening of Diwali,
 > at sunset**.
 >
+> **THE ATTACHED IMAGE IS THE REAL TRACK SEEN FROM ABOVE [!].** Follow its
+> road shape exactly: the loop, the stepwell hairpin, the zig-zag up the fort
+> rock and the alley shortcut. Its **bottom edge is the front** of the
+> diorama. Ignore the big orange blobs at its edges and the flat orange ground
+> colour: they are placeholders, not buildings or hills.
+>
 > **THE ROAD IS ONE CLOSED LOOP. READ THIS FIRST [!]**
 > - There is **exactly one closed loop of road**, plus **one narrow alley
 >   shortcut** that leaves the loop and rejoins it on the same side. No other
 >   roads, no dead ends, no parking lots.
-> - The loop runs **counter-clockwise** seen from above. It starts at the
->   **front centre** (the clock tower square), runs **to the right** along the
->   front (the bazaar), turns **up the right side** (the stepwell, then the
->   blue city), crosses the **back** climbing toward the fort, which sits on a
->   rock in the **back-left corner**, comes **down the left side** over bare
->   pink rock (the lake and the white marble cenotaph are on the far left),
->   and returns along a **long straight** to the clock tower at the front.
+> - The loop runs **clockwise** seen from above, exactly as in the attached
+>   image. It starts at the **front centre** (the clock tower square), runs
+>   **to the left** along the front (the bazaar), turns **up the left side**
+>   (the stepwell, then the blue city), crosses the **back** climbing toward
+>   the fort, which sits on a rock in the **back-right corner**, comes **down
+>   the right side** over bare pink rock (the lake and the white marble
+>   cenotaph are on the far right), and returns along a **long straight** from
+>   the right to the clock tower at the front.
 > - **The inside of the loop is the blue city**: hundreds of small blue cube
 >   houses packed on a slope that rises toward the fort. No park, no lake and
 >   no open square inside the loop.
 >
 > **CAMERA AND BASE:** raised 3/4 view **from the front edge**, so the clock
-> tower is nearest and the fort is at the back-left, high above everything.
+> tower is nearest and the fort is at the back-right, high above everything.
 > The diorama sits on a thin dark rounded-rectangle base with a matte edge.
 > Behind the base, softly out of focus, low desert hills fade into warm dusty
 > haze, with the silhouette of a **domed sandstone palace on a distant hill**
-> on the right.
+> on the left.
 >
 > **STYLE (strict) [!]:** **flat-shaded low-poly, like a game-asset render in a
 > Blender viewport. Every face is one flat colour.** Big facets. No painted
@@ -656,9 +673,9 @@ buclei.
 > strips hanging across the bazaar street only), the **orange marigold
 > garlands**, the **peacocks**, and the **thousands of tiny warm lights**.
 >
-> **LIGHT [!]:** the sun is **very low, about 8°, on the LEFT**, just
+> **LIGHT [!]:** the sun is **very low, about 8°, on the RIGHT**, just
 > setting behind the fort. **The fort is backlit**: dark red with a glowing
-> orange rim. Long shadows of the houses fall toward the right across the
+> orange rim. Long shadows of the houses fall toward the left across the
 > blue city. **The lamps are just coming on**: tiny warm-orange **oil lamps
 > (diyas) line every parapet, doorstep and stepwell stair**, strings of warm
 > bulbs cross the streets, and some windows glow. **No neon, no electric
@@ -681,8 +698,9 @@ buclei.
 >    with its walls made of **zig-zag flights of steps in inverted-V
 >    patterns**, three levels deep, rose sandstone, and dark green water at the
 >    bottom with floating oil lamps. **The road goes DOWN INTO the pit on a
->    ramp along one long wall, makes a tight U-turn at the far end under a
->    small columned pavilion, and climbs back UP along the opposite wall.**
+>    ramp along one long wall, makes a tight U-turn at its inner end (toward
+>    the centre of the loop) under a small columned pavilion, and climbs back
+>    UP along the opposite wall.**
 >    No railing toward the water. Children sit on the steps above the ramps.
 > 4. **D: the blue city.** The road climbs through tightly packed blue cube
 >    houses with outside staircases, carved balconies, rooftop terraces and
@@ -707,9 +725,9 @@ buclei.
 >    row of **old cannons on the ramparts fires a salute toward the city** in
 >    puffs of white smoke. A **zip-line cable** crosses above the bastion with
 >    a tiny rider. Black kites (birds) circle **below** the bastion.
-> 7. **G: the descent.** The road comes down the left side over **bare
+> 7. **G: the descent.** The road comes down the right side over **bare
 >    pink-brown volcanic rock** with a few column cacti (euphorbia) and dry
->    shrubs. On the far left, a **small dark lake** with a **white marble
+>    shrubs. On the far right, a **small dark lake** with a **white marble
 >    cenotaph** (a domed memorial with four small domed kiosks) on a rock
 >    above it. **The road jumps across an arm of the lake over a rock
 >    ramp**: one car is in the air over the water.

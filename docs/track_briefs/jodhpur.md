@@ -516,6 +516,12 @@ cel lângă drum, e `DecorManual` cu coliziune.
 5. Sonda de feel: un tur singur, la `dusk` 0 și la 1. Captură `--gamecam` de
    pe bastion. **Verdictul la volan al dezvoltatorului** pe tuk-tuk-uri:
    haos distractiv sau taxă enervantă? Dacă e taxă, scade numărul, **nu** masa.
+   **Verdict la volan (28 sep, pista fără decor):** tuk-tuk-urile **rămân
+   cum sunt** (6; ProbeRace pe 16 seed-uri: +0,3 s pe cursă, sub ținta
+   +2…+5 s, acceptat). Durata **e bună** (~78 s pe tur, ~4 min pe cursă —
+   peste cele 2–3 min din CLAUDE.md, acceptat explicit). Ulicioara **nu se
+   citește** cu vaca-cub: se rejudecă după `zebu_cow.glb` și restul
+   assets-urilor, nu se retunează acum.
 6. Fântâna cu `CameraZone`, porțile, săritura Devkund, vaca.
 7. `DuskCycle` complet + candele + artificii + tunuri + tiroliană.
 8. Hero-assets: fântâna, porțile, fațadele, turnul, cenotaful, tuk-tuk-ul,

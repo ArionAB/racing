@@ -14,6 +14,10 @@ extends Node
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeJodVaca.tscn
 ##   ... -- --seeds=8,9,10,11,12,13,14,15 --seconds=150
 ##   ... -- --no-safety                      (SABOTAJ: cere contacte > 0)
+##   ... -- --ambush --all-shortcut [--no-safety]
+##                                            (sabotaj determinist, vezi _ambush)
+##   ... -- --all-shortcut                   (toti AI aleg scurtatura: coridor plin;
+##                                            sabotajul se citeste CU el)
 ##   ... -- --no-cow                         (control: fara vaca, pentru timpul de tur de referinta)
 ##   ... -- --track=6                        (alta pista curata: Cappadocia = pozitia 6)
 ##
@@ -70,6 +74,28 @@ var _seeds: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8]
 var _seconds: float = 150.0
 var _no_safety: bool = false
 var _no_cow: bool = false
+## Toti AI aleg scurtatura (`prefers_shortcut = true`). Fara asta, pe pista
+## reala (Track17, `ai_shortcut_chance` 0.2) si cu banda inchisa scoasa din
+## `resolve_route`, aproape nimeni nu e pe coridor cand vaca se misca, deci
+## sabotajul n-are pe cine lovi: masurat 0 contacte si cu siguranta OFF.
+## Proba de sabotaj se citeste CU flagul asta.
+var _all_shortcut: bool = false
+## AMBUSCADA (sabotaj determinist): cand o masina de pe scurtatura e la
+## cel mult `AMBUSH_REACH_M` de gura si vaca sta pe prag, sonda sare peste telegraph si
+## cere mersul spre gura, prin `_try_advance` (deci prin regula de siguranta).
+## Fara ea, contactul cere ca o masina sa fie exact in calea vacii in cele
+## 2 s de mers dintr-un ciclu de 47 s — masurat: 0 contacte si cu siguranta
+## OFF, deci proba nu dovedea nimic. Cu siguranta ON vaca trebuie sa refuze
+## (0 contacte); OFF trebuie sa intre in masina (contacte > 0).
+var _ambush: bool = false
+const AMBUSH_REACH_M: float = 20.0
+const AMBUSH_WALK_S: float = 0.6
+var _ambush_cd: float = 0.0
+var _ambush_armed: bool = false
+## Totaluri pe toate seed-urile: cate ambuscade s-au intins si in cate vaca
+## chiar a pornit spre gura. Zero ambuscade = proba n-a testat nimic.
+var _ambush_tries: int = 0
+var _ambush_walks: int = 0
 var _ai_count: int = 7 # +1 jucator = 8 masini, cum cere brieful
 var _mouth_dist_m: float = -1.0 # negativ = jumatatea benzii (implicit rezonabil)
 var _narrow_alley: bool = true # vezi antetul _mount_cow
@@ -98,6 +124,10 @@ func _ready() -> void:
 				_seeds.append(int(s))
 		elif arg == "--no-safety":
 			_no_safety = true
+		elif arg == "--ambush":
+			_ambush = true
+		elif arg == "--all-shortcut":
+			_all_shortcut = true
 		elif arg == "--no-cow":
 			_no_cow = true
 		elif arg == "--no-narrow":
@@ -114,7 +144,8 @@ func _ready() -> void:
 		% [CLEAN_TRACKS.get(_track_index, "necunoscuta"),
 			"FARA vaca (control)" if _no_cow else "CU vaca",
 			str(_seeds), _seconds,
-			" · SABOTAJ (siguranta OFF)" if _no_safety else "",
+			(" · SABOTAJ (siguranta OFF)" if _no_safety else "")
+				+ (" · toti AI pe scurtatura" if _all_shortcut else ""),
 			" · ai=%d" % _ai_count,
 			" · banda ingustata la %.1fm (alee, vezi antet _mount_cow)" % ALLEY_HALF_WIDTH_M
 				if (_narrow_alley and not _no_cow) else " · banda LATA a pistei-gazda (--no-narrow)"])
@@ -160,6 +191,8 @@ func _start_race(seed_val: int) -> void:
 			ai.configure(_race.track, rng, cars)
 		else:
 			(car.controller as AIController).line_offset = rng.randf_range(-0.35, 0.35)
+		if _all_shortcut:
+			(car.controller as AIController).prefers_shortcut = true
 		car.speed_scale = 1.0 if car == player else rng.randf_range(0.88, 0.97)
 		_stats.append({
 			"name": "%s (%s)" % [car.pilot_name, car.car_name],
@@ -263,6 +296,8 @@ func _physics_process(delta: float) -> void:
 		_watch_branch_entry(car, st)
 		_watch_stuck(car, st, speed, delta)
 	if _gate != null:
+		if _ambush:
+			_ambush_tick(delta)
 		_watch_cow_contacts()
 	if _elapsed >= _seconds:
 		_finish_seed()
@@ -372,6 +407,47 @@ func _watch_stuck(car: Car, st: Dictionary, speed: float, delta: float) -> void:
 		_elapsed, st.name, _track.frac_at(car.road_index, car.route), speed, car.route])
 
 
+func _ambush_tick(delta: float) -> void:
+	_ambush_cd -= delta
+	if _ambush_armed:
+		if _gate.current_state() == CowGate.State.WALKING_TO_MOUTH:
+			_ambush_walks += 1
+			_ambush_armed = false
+			_ambush_cd = 8.0
+		elif _ambush_cd <= 0.0:
+			_ambush_armed = false # refuzata de siguranta
+			_ambush_cd = 8.0
+		return
+	if _ambush_cd > 0.0 or _race.state != Race.State.RUNNING:
+		return
+	if _gate.current_state() != CowGate.State.ON_THRESHOLD:
+		return
+	# Doar masini DEJA pe ulicioara, inaintea gurii. Masinile de pe bucla trec
+	# la 12 m de gura si nu intra niciodata (masurat: 8 din 10 ambuscade cu
+	# siguranta ON au pornit vaca fara vreo tinta), iar cele dinaintea furcii
+	# renunta la scurtatura in clipa in care vaca se ridica.
+	var r1 := _track.route_at(1)
+	if r1 == null or r1.dists.is_empty():
+		return
+	for car: Car in _race.cars:
+		if car.route != 1:
+			continue
+		var d: float = r1.dists[clampi(car.road_index, 0, r1.dists.size() - 1)]
+		var along := _gate.mouth_dist_m - d
+		if along < 3.0 or along > AMBUSH_REACH_M:
+			continue
+		# Comutarea pe ruta 1 vine tarziu (banda tangenta): masina e la ~15 m
+		# de gura, sub 1 s, iar mersul normal de 2 s rateaza. Mersul scurtat
+		# e doar al sondei — tot prin `_try_advance`, deci prin siguranta.
+		_gate.walk_seconds = AMBUSH_WALK_S
+		_gate._state = CowGate.State.RISING_TO_MOUTH
+		_gate._clock = _gate.telegraph_seconds
+		_ambush_tries += 1
+		_ambush_armed = true
+		_ambush_cd = 1.0
+		return
+
+
 func _on_respawn(_car: Car, index: int) -> void:
 	_stats[index].respawns = int(_stats[index].respawns) + 1
 
@@ -466,6 +542,10 @@ func _report_summary() -> void:
 		avg_lap += t
 	avg_lap /= maxf(float(lap_times.size()), 1.0)
 	print("--- total contacte vaca-masina: %d (tinta 0)" % total_contacts)
+	if _ambush:
+		print("--- AMBUSCADA: %d intinse, vaca a pornit in %d, contacte %d%s" % [
+			_ambush_tries, _ambush_walks, total_contacts,
+			" — PROBA GOALA, nicio ambuscada" if _ambush_tries == 0 else ""])
 	print("--- total route-flip la fork cat era inchisa: %d (asteptat > 0, NU e defect — "
 		% total_closed_entries + "vezi antet)")
 	print("--- total treceri in fereastra de telegraph (vaca inca pe prag): %d (benign — "

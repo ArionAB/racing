@@ -429,20 +429,26 @@ fântână (ecou în groapă — reverb pe `CameraZone`), vântul pe bastion.
 
 ### 5.6 Trecerea de contracte — **de făcut înainte de primul build**
 (memoria `brief-cere-glb-cod-il-face-deja`: la Machu Picchu 4 piese n-aveau
-consumator, la Fiordland 8 CONFLICT-uri s-au găsit după brief.) Verdicte
-preliminare, **de confirmat pe cod citit**:
+consumator, la Fiordland 8 CONFLICT-uri s-au găsit după brief.) **Confirmat
+pe cod citit, 28 sep** (ramura `jodhpur/track17`; referințele sunt fișier:rând
+de atunci):
 
-| piesă | verdict preliminar | ce se face |
+| piesă | verdict | ce se face / contractul pentru GLB |
 |---|---|---|
-| stânca fortului | CONFLICT dacă se cere GLB | `TerrainPeak` (forma din relief), zidurile GLB se așază pe el |
-| groapa fântânii | CONFLICT dacă se cere GLB | `TerrainHollow` + modulele de trepte ca decor pur |
-| kickerul Devkund | CONFLICT dacă se cere GLB | `TrackChannel jump`, malul ca decor |
-| porțile | ARE CONSUMATOR (`DecorManual`, coliziune `mesh`) | de verificat: se bat cu `custom_lane_corridors`? |
-| `tuktuk.glb` | **ARE CONSUMATOR** — `CarData.model` (+ `model_scale`, `model_rotation_deg`, `body_length`/`body_width`, `palette_model`) există | `tuktuk.tres` cu `body_length` 2,6 / `body_width` 1,4; de verificat doar dacă raycasturile roților se derivă din gabarit sau sunt fixe |
-| `zebu_cow.glb` | **CONSUMATOR NOU** (`CowGate`) | se scrie cu export `model` de la început, nu hardcodat (lecția `AvalancheHazard._boulder_shapes`) |
-| orizontul | ARE CONSUMATOR (`horizon_model`) | cheie de temă nouă |
-| candelele, becurile | ARE CONSUMATOR? (`FlockProp` e MultiMesh **lipit de teren**) | becurile atârnă pe catenară, deci probabil **cod nou mic**; candelele de pe praguri merg pe `FlockProp` |
-| `PROP_COLLISION` | intrări noi | `neem_tree`/`khejri_tree: trunk`, `peacock`/`langur`/`floating_diya`/`textile_strip`/`lamp_string: none`, `stall_canopy_*: hull`, `fort_gate: mesh` |
+| stânca fortului | **CONFLICT** — `Peaks/FortRock` (`TerrainPeak`, rază 100) e deja în `Track17.tscn` | fără GLB de stâncă. Zidurile merg ca `WorldProp` în `DecorManual`, dar **nu se lipesc singure de teren**: pozițiile le dă un generator offline (`tools/gen_decor_jod_*.gd`, tiparul `gen_decor_mp_*.gd`, raycast pe `TerrainBody`). Track17 **n-are încă nod `DecorManual`** |
+| groapa fântânii | **CONFLICT** — `Hollows/FountainHollow` (`TerrainHollow`, podea −9, rază 60, perete 12) | modulele de trepte sunt decor pur. **Niciun sistem nu așază props pe pantă**: `snap_to_ground` dă doar cota, fără înclinare, deci modulele se așază din generator (raycast + yaw spre centrul gropii) |
+| kickerul Devkund | **CONFLICT dacă se cere GLB — și încă NECONSTRUIT** | Track17 n-are niciun `TrackChannel`. De făcut la pasul 6 (§7), tiparul `KickerBowen` din `Track16.tscn`; malul e decor |
+| porțile fortului | **ARE CONSUMATOR** (`DecorManual` + `PROP_COLLISION`) | cheia din `PROP_COLLISION` e **numele fișierului fără extensie**, deci **3 chei**: `fort_gate_jai`, `fort_gate_fateh`, `fort_gate_loha` → `mesh`. O cheie lipsă cade pe `hull` = **zid invizibil peste drum**. `custom_lane_corridors` există, dar Track17 nu-l setează: fără conflict azi |
+| `market_gate` (peste start) | **DOI CONSUMATORI — de ales** | (a) poarta de start (`custom_gate_model`, azi `"none"`): **o scalează uniform la (lățimea drumului + 1,2) × 2 ≈ 15,4 m**, ceea ce bate „gol ≥ 18 m”, iar coliziunea e 2 stâlpi-cutie, nu mesh; (b) `DecorManual` cu `market_gate: mesh` și poarta de start lăsată `"none"`. **Recomandat (b)**: golul rămâne cel măsurat |
+| `tuktuk.glb` | **ARE CONSUMATOR** — `scenes/cars/data/tuktuk.tres` (azi pe `stromboli/vehicles/ape_piaggio.glb`) | raycasturile roților **se derivă din gabarit** (`body_length`/`body_width`), nu din model, deci suspensia rămâne pe 4 puncte chiar cu 3 roți. **Roțile vizuale:** copii **direcți** ai rădăcinii, cu `wheel` în nume și `front` pentru față; raza = `position.y` a roții, deci roțile ating solul la Y = 0; modelul privește spre **+Z** (`model_rotation_deg` 180); UV pe atlas (`palette_model`) |
+| `zebu_cow.glb` | **CONSUMATOR PARȚIAL** — `CowGate.model` există, dar **nu redă animații** | cod nou mic (~30 de rânduri): `AnimationPlayer` găsit în `_build_model`, clip pe stare (`Stand` / `GetUp` pe telegraph / `Walk` / `LieDown` → `Lie`), cu fallback dacă lipsește un clip. **Lungimea vacii pe Z local** (−Z = peste bandă), origine la sol; coliziunea = cutie pe AABB-ul modelului |
+| orizontul | **ARE CONSUMATOR** — tema `jodhpur` există, dar cu `horizon_model` gol (azi: sfere turtite de rezervă) | un GLB cu **noduri copil numite** (`UmaidBhawan_A`, `FarCity_A`, `DesertRidge_A/B`), originea la bază (se îngroapă 4 m), yaw aleator; cheile noi de temă: `horizon_model`, `horizon_picks`, `horizon_rings`, `horizon_class` |
+| candelele de pe praguri | **ARE CONSUMATOR** (`FlockProp`, MultiMesh, `snap_to_ground`) | un singur mesh (ierarhia se coace), origine la bază, fără coliziune |
+| sforile de becuri | **CONSUMATOR NOU** — nu există niciun sistem de catenară | cel mai simplu: GLB static al sforii + `lamp_string: none` (tiparul `laundry_line`); altfel un generator mic de catenară cu MultiMesh |
+| ferestre / flăcări / becuri aprinse noaptea | **CONSUMATOR NOU** — `DuskCycle` publică `dusk_lamps` (0,15 → 1,0) ca parametru global de shader, dar **doar sonda îl citește** | calea `lumina` din `WorldProp` (`Palette.glow_material_slots`) **nu citește `dusk_lamps`**: ferestrele ar arde la fel ziua. De făcut: varianta care înmulțește emisia cu `dusk_lamps`, plus același lucru pe materialul flăcării |
+| artificiile | **CONSUMATOR NOU** — nu există nimic | cod nou complet (§5.1: billboard radial) |
+| păunul, langurul, uliul, tiroliana, procesiunea | **ARE CONSUMATOR** (`PathMover`) | un singur `AnimationPlayer`; clipurile se aleg după subșir: `walk/run/gallop/swim/fly/move` în mers, `idle/eating/rest/stand` pe loc. Uliul: buclă în aer (`stick_to_ground` false). Tiroliana: `PathMover` pe curba cablului, cablul e GLB separat. Procesiunea: mai multe `PathMover` cu `phase` decalat (fiecare duce un model) |
+| `PROP_COLLISION` | intrări noi, **câte una per fișier** | `neem_tree`/`khejri_tree: trunk`; `peacock`/`langur`/`black_kite`/`floating_diya`/`doorstep_diyas`/`textile_strip`/`lamp_string: none`; `stall_canopy_*: hull`; `fort_gate_jai`/`fort_gate_fateh`/`fort_gate_loha`/`market_gate: mesh` |
 
 **Scara decorului:** orașul albastru e **mii de case** dacă e făcut de mână.
 Peste ~1000 de piese, nodurile de scenă blochează încărcarea (memoria

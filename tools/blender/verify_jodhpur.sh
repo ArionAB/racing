@@ -45,8 +45,10 @@ check() {  # check <cale> <buget> [flag...]
 echo "== pilotul (brief §1.1, val 1) =="
 # Bugetele au crescut fata de v1 (5200/1800) odata cu rescrierea pe
 # vocabularul de forme (arcade/dome/chhatri/solid_stair reale, nu cutii
-# tesite) -- v2 e cifra masurata dupa fidelitate, cu putina marja.
-check "buildings/ghanta_ghar.glb"   10500 --origin=assembly
+# tesite). v3 (runda 3 -- forme corectate dupa critic+sef) a scazut fata
+# de v2 (8154 vs 10156 turn): panourile "box-margin" (fix runda 3) sunt mai
+# ieftine decat inelul radial vechi.
+check "buildings/ghanta_ghar.glb"   8600 --origin=assembly
 check "buildings/blue_house_a.glb"  5300 --origin=assembly
 
 echo

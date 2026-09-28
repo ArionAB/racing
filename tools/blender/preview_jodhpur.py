@@ -39,23 +39,42 @@ GROUPS = {
 }
 
 # Tenta de preview per piesa/nod, pentru culoare REALA (brief §0.1 pasul 3,
-# TASK C a instantei v2): FLAT hex * AO copt, fara textura de clasa proxy --
-# vezi `_apply_flat_tint`. Hex-urile sunt cele din instructiunea TASK C:
-# House_Wall #8FB0DC (albastrul casei), nodurile pe ROCK_LIGHT/gresie
-# #B8703F (aproximeaza gresia portocalie a planselor -- apropiat de
-# red_sandstone real din joc, #A5553A). Nodurile WOOD/trim raman pe
-# atlas_material simplu (nu au tenta declarata).
+# TASK C a instantei v2, extinsa in runda 3 dupa critica orbului + sef):
+# FLAT hex * AO copt, fara textura de clasa proxy -- vezi `_apply_flat_tint`.
+#
+# REVIZUIRE runda 3: doar `Tower_Stone`/`House_Wall` aveau tenta declarata --
+# restul nodurilor (Clock_Glow, Tower_Glow, House_Trim, House_Rail) cadeau pe
+# `atlas_material()` implicit (textura de paleta UV-mapata simplu), care
+# randeaza aproape alb/gri neutru pe fetele fara UV real -- exact bug-ul
+# semnalat ("cupola/acoperisul ies gri/aproape alb"). ACUM fiecare nod din
+# fiecare piesa are o tenta explicita:
+#   - piatra turnului (orice nod STONE): #B8703F, gresie portocalie
+#   - golurile GLOW pure (Tower_Glow): #2A2A2E, aproape negru -- ziua sunt
+#     goluri inchise (brief regula 7), nu trebuie sa fie albe/pale
+#   - `Clock_Glow` amesteca DOUA sloturi in acelasi nod (discul pe
+#     FOAM_WHITE=22, acele pe VOLCANIC_BLACK=20) -- contract inghetat
+#     (brief §1.1), nu se desparte in doua noduri doar pentru preview. Tenta
+#     e un DICT {slot: hex}, aplicat per-fata prin `_apply_multi_flat_tint`
+#     (recupereaza slotul din UV.x, colapsat pe centrul slotului).
+#   - peretele/scara casei (House_Wall, House_Rail -- ambele pe slotul WALL):
+#     #8FB0DC, albastru
+#   - usa/obloanele (House_Trim, slot WOOD): #6B4A2E, maro lemn cald
 COMPARE_SPECS = {
     "ghanta_ghar": {
         "category": "buildings",
         "tints": {
             "Tower_Stone": "#B8703F",
+            "Clock_Glow": {FOAM_WHITE: "#F2F2F2", VOLCANIC_BLACK: "#2A2A2E"},
+            "Tower_Glow": "#2A2A2E",
         },
     },
     "blue_house_a": {
         "category": "buildings",
         "tints": {
             "House_Wall": "#8FB0DC",
+            "House_Rail": "#8FB0DC",
+            "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
         },
     },
 }
@@ -186,11 +205,72 @@ def _apply_flat_tint(obj, hex_color):
     desaturate sub AgX. `view_transform=Standard` (deja setat in
     `_neutral_shot`) plus un multiply DIRECT hex*AO da exact culoarea din
     tabelul de sloturi (brief §0.4), fara ghicit de gamma sau proxy gresit."""
+    mat = _flat_material(hex_color)
+    obj.data.materials.clear()
+    obj.data.materials.append(mat)
+    return mat
+
+
+def _apply_multi_flat_tint(obj, slot_tints):
+    """Ca `_apply_flat_tint`, dar PE FATA, recuperand slotul din UV.x --
+    pentru noduri care amesteca mai multe sloturi (ex. `Clock_Glow`: discul
+    alb pe FOAM_WHITE si acele pe VOLCANIC_BLACK, in ACELASI nod -- contract
+    inghetat, brief §1.1, nu se desparte in doua noduri doar pentru preview).
+
+    Un singur `_apply_flat_tint` (un material FLAT pe tot obiectul) ar
+    colora tot nodul cu o singura culoare, stergand contrastul disc/ace --
+    exact bug-ul gasit runda 3 ("cadranele ies gri/pale, fara contrast").
+
+    `slot_tints`: {slot_int: hex_color}. UV-urile sunt colapsate pe centrul
+    slotului (`dio_lib.slot_u`), deci `round(u * SLOTS - 0.5)` recupereaza
+    slotul exact, fara ambiguitate."""
+    me = obj.data
+    uv = me.uv_layers.active
+    if uv is None:
+        return
+    mats = {}
+    for slot, hexcol in slot_tints.items():
+        mats[slot] = _flat_material(hexcol)
+    obj.data.materials.clear()
+    mat_index = {}
+    for slot in slot_tints:
+        mat_index[slot] = len(obj.data.materials)
+        obj.data.materials.append(mats[slot])
+    default_slot = next(iter(slot_tints))
+    for poly in me.polygons:
+        li = poly.loop_indices[0]
+        u = uv.data[li].uv[0]
+        slot = round(u * SLOTS - 0.5)
+        poly.material_index = mat_index.get(slot, mat_index[default_slot])
+
+
+def _srgb_to_linear(c):
+    """sRGB [0,1] -> liniar, formula standard (IEC 61966-2-1).
+
+    REVIZUIRE runda 3, cauza reala a desaturarii semnalate de critic (17%
+    randat vs 35% nativ hex-ului, MASURAT chiar si izolat, cu AO fortat la
+    1,0, fara alt multiply): `Base Color`-ul unui Principled BSDF asteapta
+    valori LINIARE, dar codul punea direct `int(hex,16)/255` (adica
+    fractia sRGB) in acel input. Blender interpreteaza acele numere ca
+    liniare si le trece prin conversia liniar->afisaj (sRGB OETF) INCA O
+    DATA la randare -- o dubla aplicare a curbei gamma, care comprima toate
+    culorile spre mijlocul intervalului (desatureaza), indiferent de
+    view_transform (Standard sau AgX -- ambele presupun input liniar).
+    Fara aceasta conversie, orice tenta flat din acest fisier era gresita
+    de la inceput, nu doar albastrul casei -- turnul (portocaliu, mai
+    aproape de mijlocul intervalului) mascase bug-ul, fiind mai putin
+    vizibil la ochi decat pe un albastru saturat."""
+    if c <= 0.04045:
+        return c / 12.92
+    return ((c + 0.055) / 1.055) ** 2.4
+
+
+def _flat_material(hex_color):
+    """Materialul FLAT (hex * AO) folosit de `_apply_flat_tint` si
+    `_apply_multi_flat_tint` -- extras ca sa nu se duplice graful de noduri."""
     name = "PreviewFlat_%s" % hex_color.lstrip("#")
     mat = bpy.data.materials.get(name)
     if mat is not None:
-        obj.data.materials.clear()
-        obj.data.materials.append(mat)
         return mat
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
@@ -199,14 +279,14 @@ def _apply_flat_tint(obj, hex_color):
         nt.nodes.remove(n)
     out = nt.nodes.new("ShaderNodeOutputMaterial")
     bsdf = nt.nodes.new("ShaderNodeBsdfPrincipled")
-    bsdf.inputs["Roughness"].default_value = 0.9
+    bsdf.inputs["Roughness"].default_value = 0.95
     if "Specular IOR Level" in bsdf.inputs:
-        bsdf.inputs["Specular IOR Level"].default_value = 0.15
+        bsdf.inputs["Specular IOR Level"].default_value = 0.0
     nt.links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
 
-    r = int(hex_color[1:3], 16) / 255.0
-    gg = int(hex_color[3:5], 16) / 255.0
-    bcol = int(hex_color[5:7], 16) / 255.0
+    r = _srgb_to_linear(int(hex_color[1:3], 16) / 255.0)
+    gg = _srgb_to_linear(int(hex_color[3:5], 16) / 255.0)
+    bcol = _srgb_to_linear(int(hex_color[5:7], 16) / 255.0)
 
     vcol = nt.nodes.new("ShaderNodeVertexColor")
     vcol.layer_name = "AO"
@@ -217,9 +297,6 @@ def _apply_flat_tint(obj, hex_color):
     ao_mix.inputs[6].default_value = (r, gg, bcol, 1.0)
     nt.links.new(ao_mix.inputs[7], vcol.outputs["Color"])
     nt.links.new(bsdf.inputs["Base Color"], ao_mix.outputs[2])
-
-    obj.data.materials.clear()
-    obj.data.materials.append(mat)
     return mat
 
 
@@ -228,9 +305,11 @@ def _import_for_compare(name, spec, models_dir):
     meshes = [o for o in objs if o.type == "MESH"]
     for o in meshes:
         _fix_ao_layer_name(o)
-        hexcol = spec.get("tints", {}).get(o.name)
-        if hexcol is not None:
-            _apply_flat_tint(o, hexcol)
+        tint = spec.get("tints", {}).get(o.name)
+        if isinstance(tint, dict):
+            _apply_multi_flat_tint(o, tint)
+        elif tint is not None:
+            _apply_flat_tint(o, tint)
         else:
             atlas_material()  # forteaza materialul standard sa existe
             o.data.materials.clear()
@@ -354,27 +433,40 @@ def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2):
     for o in list(bpy.data.objects):
         if o.type == "LIGHT":
             bpy.data.objects.remove(o, do_unlink=True)
+
+    # REVIZUIRE runda 3 (nota sefului): lumina principala trebuie sa fie PE
+    # PARTEA CAMEREI (azimut la <=40 grade de camera), altfel fetele vazute
+    # de camera cad in umbra si citesc desaturat, indiferent cat de tare e
+    # fill-ul. Masurat direct: cu `rotation_euler=(45,0,35)` (Z=azimutul
+    # camerei, in grade, dar Euler-ul unui SUN nu se comporta ca un azimut
+    # direct -- directia de iluminare rezultata e la ~90 grade de camera, nu
+    # la 35), fata cu usa a casei albastre (+Y) cadea in umbra AMBELOR
+    # lumini directionale. Rezolvat prin cautare numerica: pentru camera la
+    # azimut=35/elevatie=18 (formula `_neutral_shot`), directia care
+    # ILUMINEAZA exact partea camerei e `rotation_euler=(radians(65), 0,
+    # radians(125))` (produsul scalar cu directia camerei = 0,99, verificat
+    # cu Euler().to_matrix() @ (0,0,-1)) -- NU Z=azimut direct.
     sdata = bpy.data.lights.new("NeutralSun", type="SUN")
     sun = bpy.data.objects.new("NeutralSun", sdata)
     scene.collection.objects.link(sun)
-    sun.data.energy = 3.4
+    # REVIZUIRE: energiile de mai jos au fost coborate agresiv (pana la
+    # 1,2/0,9) in timp ce cautam cauza desaturarii, presupunand supra-
+    # expunere -- cauza REALA era conversia sRGB->liniar lipsa din
+    # `_flat_material` (vezi `_srgb_to_linear`), nu lumina. Cu bug-ul de
+    # culoare corectat, energii rezonabile (fata luminata direct, fara
+    # supra-expunere pe alb la AO=1) sunt 2,4/1,0.
+    sun.data.energy = 2.4
     sun.data.color = (1.0, 1.0, 1.0)
     sun.data.angle = math.radians(3.0)
-    sun.data.specular_factor = 0.15
-    sun.rotation_euler = (math.radians(90 - 45), 0.0, math.radians(35.0))
+    sun.data.specular_factor = 0.0
+    sun.rotation_euler = (math.radians(65.0), 0.0, math.radians(125.0))
 
-    # TASK C: masurat direct -- pe o piesa asimetrica (blue_house_a), fata
-    # cu usa (+Y) cade pe partea UMBRITA a soarelui principal (produsul
-    # scalar normal*directie_lumina iese negativ), deci randarea ei ieșea
-    # gri-albastru stins (102,111,122), nu albastru citibil, desi materialul
-    # insusi (izolat, cu AO fortat la 1.0) da (217,238,255) -- corect. Fill-ul
-    # de 1.1 nu compensa umbra suficient. Marit la 2.6 (energie apropiata de
-    # soarele principal), ca fetele umbrite sa ramana colorate, nu aproape
-    # negre -- turnul (simetric pe 4 fete) nu era sensibil la asta, casa da.
+    # fill mai slab (soarele principal acopera acum fata camerei) -- doar ca
+    # sa nu ramana complet negre fetele din umbra opusa.
     fill_data = bpy.data.lights.new("NeutralFill", type="SUN")
     fill = bpy.data.objects.new("NeutralFill", fill_data)
     scene.collection.objects.link(fill)
-    fill.data.energy = 2.6
+    fill.data.energy = 1.0
     fill.data.color = (1.0, 1.0, 1.0)
     fill.rotation_euler = (math.radians(90 - 55), 0.0, math.radians(35.0 + 180.0))
 
@@ -384,15 +476,12 @@ def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2):
     bg = world.node_tree.nodes.get("Background")
     if bg:
         bg.inputs[0].default_value = (0.812, 0.812, 0.812, 1.0)  # #CFCFCF
-        # putere 1.8 nu 1.0: masurat pe blue_house_a -- fata cu usa (+Y) cade
-        # pe partea umbrita a AMBELOR lumini directionale (sun+fill), randand
-        # (113,124,137) in loc de un albastru citibil, desi izolat cu AO=1.0
-        # materialul da (217,238,255). Fondul e singura sursa de lumina care
-        # ajunge pe orice fata indiferent de unghi (ambient uniform) -- l-am
-        # crescut ca fetele umbrite sa ramana vizibil colorate, nu aproape
-        # negre. Cresterea fill-ului (1.1->2.6) NU a rezolvat -- fill-ul e tot
-        # o lumina DIRECTIONALA, cu propriul unghi mort.
-        bg.inputs[1].default_value = 1.8
+        # Ambientul gri se amesteca aditiv cu fetele umbrite -- prea puternic
+        # desatureaza (griul domina). Cu soarele acum aliniat pe fata camerei
+        # (vezi mai sus) si bug-ul real de desaturare corectat
+        # (`_srgb_to_linear`), 0,5 e suficient doar ca sa umple umbrele
+        # adanci fara sa spele culoarea fetelor luminate.
+        bg.inputs[1].default_value = 0.5
 
     # AgX (implicit in Blender 4/5) comprima si desatureaza puternic culorile
     # -- masurat direct: o tenta albastra `#8FB0DC` inmultita cu plaster.png

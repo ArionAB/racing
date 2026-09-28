@@ -94,10 +94,24 @@ COMPARE_SPECS = {
             "Gate_Doors": {WOOD: "#6B4A2E", VOLCANIC_BLACK: "#2A2A2E"},
             "Gate_Glow": "#2A2A2E",
         },
+        # REVIZUIRE runda 2 (respins de sef): fatada (arch_opening implicit)
+        # e pe -Y local, gasita cu testul fetelor colorate la azimuturile
+        # cardinale (0/90/180/270) -- azimut 270 e frontal DREPT; 250 (20
+        # grade in lateral, ca in decupare) arata ambele turnuri, nu doar
+        # unul. Pe o piesa de 36x6x17 m, distanta implicita (calculata din
+        # latime) aduce camera atat de aproape incat cele doua turnuri au
+        # paralaxa mare -- `lens` mai lung (105 mm, fata de 55 mm implicit)
+        # comprima perspectiva, iar `margin` marit (1.15) lasa loc turnurilor
+        # sa nu iasa din cadru.
+        "camera": {"azimuth": 250.0, "elevation": 13.0, "lens": 105.0, "margin": 1.15},
     },
     "stepwell_flight_module": {
         "category": "structures",
         "tints": {"Well_Stone": "#D4957A"},
+        # fatada (fata cu treptele in relief) e pe +Y local, gasita cu
+        # testul fetelor colorate la azimuturile cardinale -- 90 e frontal
+        # drept, 72 (18 grade in lateral) arata usor 3/4, ca in decupare.
+        "camera": {"azimuth": 72.0, "elevation": 15.0, "lens": 65.0, "margin": 1.15},
     },
     "stepwell_corner": {
         "category": "structures",
@@ -109,6 +123,10 @@ COMPARE_SPECS = {
             "Well_Stone": "#D4957A",
             "Well_Glow": "#2A2A2E",
         },
+        # fatada (zidul de fundal + arcada) e pe +Y -- azimut 90 e frontal
+        # drept; 100 (10 grade lateral) arata ambele aripi simetric, ca in
+        # decupare, cu lens mai lung ca sa umple cadrul pe o piesa de 20 m.
+        "camera": {"azimuth": 100.0, "elevation": 13.0, "lens": 75.0, "margin": 1.25},
     },
     "jaswant_thada": {
         "category": "structures",
@@ -116,6 +134,11 @@ COMPARE_SPECS = {
             "Thada_Stone": {FOAM_WHITE: "#EEE8DF", MARBLE_GREY: "#B9B0A2"},
             "Thada_Glow": "#2A2A2E",
         },
+        # fatada (scara centrala) e pe +Y -- azimut 90 e frontal drept; 75
+        # (15 grade lateral) da 3/4 usor, ca in decupare. Piesa era "tiny in
+        # its frame" cu implicitul (margin 1.2, lens 55) -- margin redus +
+        # lens usor mai lung o umple mult mai bine.
+        "camera": {"azimuth": 75.0, "elevation": 14.0, "lens": 60.0, "margin": 1.05},
     },
 }
 
@@ -396,8 +419,21 @@ def compare(name, models_dir=None, res_height=900, out_dir=None):
     # fundal gri deschis #CFCFCF, lumina de zi neutra (nu tema calda din
     # `_world`/`_light`: aici vrem sa se citeasca CULOAREA reala a piesei, nu
     # tenta calda de apus a temei) -- randam manual, fara `shot()`.
-    _neutral_shot(meshes, render_path, azimuth=35.0, elevation=18.0,
-                 res_height=res_height)
+    #
+    # REVIZUIRE (runda 2, dupa respingerea sefului): azimut 35 / elevatie 18
+    # e calibrat pe piesele aproape cubice ale pilotului -- pe piese LATE SI
+    # JOASE (poarta, modulul de trepte) camera fixa arata muchia/spatele, nu
+    # fatada, pentru ca decuparile sunt vederi aproape FRONTALE (~15-20 grade
+    # azimut, ~12-15 elevatie). Fiecare piesa poate acum sa-si declare unghiul
+    # si cadrajul in COMPARE_SPECS (`camera`: azimuth/elevation/margin) --
+    # implicit ramane 35/18/1.2 pentru piesele fara override (pilotul).
+    cam_spec = spec.get("camera", {})
+    _neutral_shot(meshes, render_path,
+                 azimuth=cam_spec.get("azimuth", 35.0),
+                 elevation=cam_spec.get("elevation", 18.0),
+                 res_height=res_height,
+                 margin=cam_spec.get("margin", 1.2),
+                 lens=cam_spec.get("lens", 55.0))
 
     # Blender-ul headless n-are PIL in Python-ul lui bundle-uit (masurat: nu
     # exista, si nu instalam pachete in interpretorul lui Blender). Stitch-ul
@@ -430,9 +466,18 @@ def _run_compose(extra_args):
     return False
 
 
-def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2):
+def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2, lens=55.0):
     """Ca `shot()`, dar cu lumina de zi NEUTRA si fundal #CFCFCF (brief §0.1
-    pasul 3), nu tema calda de apus din `preview._light`/`_world`."""
+    pasul 3), nu tema calda de apus din `preview._light`/`_world`.
+
+    `lens` (mm): implicit 55. Pe piese FOARTE late si putin adanci (poarta,
+    modulul de trepte -- rata lungime/adancime >5:1), un obiectiv normal la
+    distanta calculata din latime aduce camera atat de aproape incat cele
+    doua capete (turnuri) ies la scari foarte diferite (paralaxa mare intre
+    ele) -- exact raportat de sef runda 2 ("vazuta din lateral/din spate").
+    Un `lens` mai lung (teleobiectiv, 100-150 mm) COMPRIMA perspectiva,
+    apropiind scara capetelor, ca in decupare (care e un randaj aproape
+    ortografic)."""
     scene = bpy.context.scene
     bpy.context.view_layer.update()
     lo = Vector((1e9, 1e9, 1e9))
@@ -453,7 +498,7 @@ def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2):
         cam = bpy.data.objects.new("PreviewCam", data)
         scene.collection.objects.link(cam)
     scene.camera = cam
-    cam.data.lens = 55.0
+    cam.data.lens = lens
     sensor = cam.data.sensor_width
     aspect = res[0] / float(res[1])
     hfov = 2.0 * math.atan(sensor / (2.0 * cam.data.lens))

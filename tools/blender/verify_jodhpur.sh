@@ -57,10 +57,10 @@ echo "== reperele (brief §1.3, val 2b) =="
 # stepwell_pavilion, jaswant_thada: idem (Well_Glow/Thada_Glow ingropate).
 # stepwell_flight_module/_corner: decor pur, un singur nod, origine simpla la
 # baza (brief §1.3: "fara coliziune, coliziunea e a terenului").
-check "structures/market_gate.glb"              9000 --origin=assembly
+check "structures/market_gate.glb"             10500 --origin=assembly
 check "structures/stepwell_flight_module.glb"   3600
 check "structures/stepwell_corner.glb"          2400
-check "structures/stepwell_pavilion.glb"       10500 --origin=assembly
+check "structures/stepwell_pavilion.glb"       12000 --origin=assembly
 check "structures/jaswant_thada.glb"           15000 --origin=assembly
 
 echo

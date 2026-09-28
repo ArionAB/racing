@@ -533,3 +533,157 @@ hex×AO, `preview_jodhpur.py --compare`):
   rămas MINUS overhead-ul cupolei, măsurat direct (nu aproximat): pentru
   `dome_radius=r`, overhead-ul e `~0,22 + r×2,45` (măsurat pe o piesă de
   test izolată, profil "onion" cu `lotus_ring`+`finial` impliciți).
+
+## Val 2b — runda 2
+
+**Runda 1 a fost RESPINSĂ de șef: 4 din 5 piese picau pe planșa de
+comparație, iar raportul runda 1 ("toate elementele prezente") nu era
+adevărat** — verdictul fusese scris din citirea codului, nu din privitul
+efectiv al jumătății de RANDARE a comparației. Regula de-acum: orice
+afirmație "prezent" se susține cu ce se vede în randare, nu cu ce face codul.
+
+### 0. Camera per piesă (cauza a jumătate din pagubă)
+
+Camera fixă (azimut 35°, elevație 18°, calibrată pe piesele aproape cubice
+ale pilotului) arăta `market_gate` și `stepwell_flight_module` aproape din
+lateral/din spate — decupările lor sunt vederi aproape FRONTALE. Fix:
+`COMPARE_SPECS[piesă]["camera"]` (azimut/elevație/lens/margin per piesă,
+implicit 35/18/55/1.2 neschimbat pentru pilot). Unghiul frontal real (unde
+`arch_opening`-ul/scara sunt orientate) a fost găsit cu testul fețelor
+colorate la azimuturile cardinale 0/90/180/270 pe FIECARE piesă (nu
+presupus) — pentru `market_gate`, fațada e pe +Y (azimut≈270 e frontal
+drept), nu pe +X cum lăsase de crezut un test anterior pe un cub simplu
+neexportat (testul pe cub, în spațiul de CONSTRUCȚIE Blender, nu prindea
+reimportul GLB care restaurează Z-up altfel).
+
+### `structures/market_gate.glb`
+
+- **Cameră:** azimut 250°, elevație 13°, lens 105 mm, margin 1.15 — 20°
+  lateral față de frontalul drept (270°), lens lung ca să comprime paralaxa
+  mare dintre cele două turnuri (36 m lățime / 6 m adâncime).
+- **Bug găsit (canaturile "plan străin"):** `leaf_c` folosea
+  `rot @ (side*door_w*0.5, 0, 0)` — pentru canatul stâng, asta rotea
+  punctul spre EXTERIOR (centrul canatului ajungea la x=-13,0, în
+  interiorul turnului de la -11,55, nu în arcadă). Fix: offset-ul local
+  spre `-side` (interior), canaturile ajung acum la x=±5,2, în golul de
+  18,4 m.
+- **Bug găsit (panoul arcului ascundea turnurile, motivul deja documentat
+  runda 1):** rămas fix; plus turnul era mai jos decât cheia arcului
+  (gol structural deasupra cheii) — `tower_top` calculat acum din
+  `crown_target + 1,6 m` marjă, iar bugetul de înălțime al chhatri-ului de
+  pe turn recalculat din overhead-ul cupolei MĂSURAT (nu presupus).
+- **Merloanele:** schimbate din `style="rectangular"` în `style="rounded"`.
+- **Arcul:** `reveal` 0→0,9 (firidă vizibilă) și `rise`-ul crescut (raport
+  rise/half_w 0,30→0,55) pentru curbură vizibilă — abaterea permisă din
+  tabel spune explicit "arcul devine mai turtit", nu drept.
+- **Ce se vede în RANDARE acum:** ambele turnuri octogonale, fiecare cu
+  chhatri deschis + cupolă mică + finial; parapet cu merloane rotunjite
+  între turnuri; gol central cu canaturi de lemn vizibile în interior
+  (închise la culoare, cu contur de arc vizibil sus); bolovani simetrici la
+  baza ambelor turnuri. **Ce rămâne slab:** curbura arcului se citește mai
+  degrabă ca o formă turtită/aproape dreptunghiulară decât ca un arc
+  pointat clar — geometria arcului EXISTĂ și e corectă (verificat cu
+  randare frontală directă), dar la acest unghi/iluminare umbra nu separă
+  clar conturul curbat de restul panoului.
+- **Cote măsurate:** gol **18,40 m** (contract ≥18,0), cheia arcului
+  **11,60 m** (contract ≥11,0), lățime totală 35,89 m, înălțime **17,28 m**
+  (contract 17,0, +1,6%). Triunghiuri: 10 256 (Gate_Stone 8760, Gate_Doors
+  1408, Gate_Glow 88). Buget declarat: 10 500.
+
+### `structures/stepwell_flight_module.glb`
+
+- **Cameră:** azimut 72°, elevație 15°, lens 65 mm, margin 1.15 — fațada
+  (fața cu reliefil de trepte) e pe +Y, găsită cu testul cardinal.
+- **Bug găsit (RESCRIS complet):** fiecare treaptă era o cutie care se
+  întindea pe TOATĂ adâncimea modulului (2,5 m) — din față citeau ca
+  "aripioare/coaste perpendiculare pe perete", nu ca trepte incrustate.
+  Fix: zid SOLID de fundal (12×2,5×3 m, plin), cu treptele ca relief
+  proiectat doar 0,45 m din fața zidului (+Y).
+- **Ce se vede în RANDARE acum:** un zid plin, jos, cu trei V-uri de trepte
+  mici (≈9-10 pe flux) tăiate în relief pe fața din față, coborând de la
+  vârfurile centrale spre patru praguri joase; capete plane, bandă de
+  coping pe toată muchia de sus.
+- **Cote măsurate:** 12,20×3,00×3,12 m (contract 12×3×2,5 — adâncimea a
+  crescut de la 2,5 la 3,12 datorită coping-ului care iese ușor peste
+  zidul de 2,5 m). Triunghiuri: 2 464. Buget declarat: 3 600.
+
+### `structures/stepwell_corner.glb`
+
+- **Cameră:** implicit (35°/18°) — acceptat de șef fără cameră dedicată.
+- **Fix:** 9→10 trepte explicite per flux (rise 0,3→0,27 m), coping deja
+  prezent pe ambele ziduri (confirmat vizibil în randare, nu doar în cod).
+- **Ce se vede în RANDARE acum:** colț interior în L, cu zece trepte fine
+  pe fiecare braț coborând spre colțul interior, coping vizibil pe muchia
+  de sus a ambelor ziduri.
+- **Cote măsurate:** 6,30×6,30×3,12 m (contract 6×6×3). Triunghiuri: 1 056.
+  Buget declarat: 2 400.
+
+### `structures/stepwell_pavilion.glb`
+
+- **Cameră:** azimut 100°, elevație 13°, lens 75 mm, margin 1.25 — 10°
+  lateral față de frontalul drept (90°), pentru simetria celor două aripi.
+- **Bug găsit (RESCRIS complet, "floating arches... parts are detached"):**
+  planșeele/acoperișul erau plăci pe toată amprenta (bug vechi reapărut),
+  ȘI, mai grav, zidul de fundal SOLID stătea în FAȚA coloanelor arcadei
+  (`wall_y` pozitiv, `col_y=0` mai în spate) — din fața frontală, zidul
+  plin bloca toată vederea spre arcadă, care arăta ca pereți plini fără
+  nicio deschidere. Fix: zidul mutat în spate (Y negativ), arcada mutată în
+  față (Y pozitiv aproape de muchie); aripile rescrise ca UN singur etaj
+  (4 arce rotunjite pe coloane, coloanele ating podeaua ȘI cornișa/
+  acoperișul); acoperiș plat susținut direct de coloane, cu chajja +
+  parapet; pavilion central pe DOUĂ etaje (parter cu arc de intrare, etaj
+  cu balcon + 2 arce), cupolă mare nervurată pe tambur.
+- **Ce se vede în RANDARE acum:** o clădire continuă — zid de fundal plin,
+  coloane de pe ambele aripi vizibile susținând acoperișul, cornișă +
+  parapet pe acoperiș, chhatri mici la ambele capete, pavilion central
+  proeminent cu ușă la parter, balcon la etaj, cupolă nervurată mare cu
+  finial. Nimic nu pare desprins/plutitor.
+- **Cote măsurate** (`--origin=assembly`): 20,56×8,38×10,90 m (contract
+  20×6×9 m corp + cupolă până la 12 — înălțimea totală a corpului cu
+  cupolă a ieșit 10,90 m, sub cei 12 m țintă; cupola/tamburul au fost
+  calculate mai conservator după rescriere, de recalibrat la nevoie într-o
+  rundă viitoare). Triunghiuri: 11 201 (Well_Stone 11162, Well_Glow 39).
+  Buget declarat: 12 000.
+
+### `structures/jaswant_thada.glb`
+
+- **Cameră:** azimut 75°, elevație 14°, lens 60 mm, margin 1.05 (redus de
+  la 1.2 implicit — piesa era "tiny in its frame").
+- **Bug găsit (compoziție):** cele 4 chhatri erau pe un singur rând, la
+  distanțe mici, citind "împrăștiate" — șeful a cerut layout-ul REAL de pe
+  decupare: 2 chhatri MEDII lipite de corpul central (stânga/dreapta), 2
+  chhatri MICI la colțurile exterioare din față, pe soclul de jos. Fix:
+  repoziționate cu raze diferite (2,0 m mediu / 1,2 m mic) și poziții
+  distincte (medii la 20% din lățime, mici la 42%, mai în față).
+- **Bug găsit (scara "odd"):** `stair_start` avea Y=8,2 m, dincolo de
+  marginea soclului inferior (7,2 m) — scara începea în aer, în afara
+  conturului. Fix: pornește exact la marginea soclului de jos (z=0).
+- **Culoare:** verificat cu test izolat (cub cu AO forțat la 1,0) că
+  materialul `#EEE8DF` randează corect cald — problema raportată ("looks
+  neutral grey") a fost re-verificată prin eșantionare de pixeli pe
+  randarea reală: fundalul scenei (o valoare `0.812` liniară moștenită,
+  necorelată cu comentariul "#CFCFCF" din cod) e un gri aproape neutru
+  (170-171) care domina vizual cadrul dat fiind cât de MIC ieșea piesa în
+  el (bug separat, de cameră/framing) — suprafețele de marmură propriu-zise
+  EȘANTIONATE direct din randare arată (175,170,164) la AO≈0,5, o potrivire
+  aproape exactă cu #EEE8DF×AO calculat analitic. Cu framing-ul reparat
+  (piesa umple mult mai mult din cadru), tenta caldă se vede acum clar.
+- **Ce se vede în RANDARE acum:** pavilion central mare, pe coloane, cu
+  cupolă nervurată dominantă; 2 chhatri medii lipite de el, stânga și
+  dreapta; 2 chhatri mici la colțurile din față; scară largă centrală care
+  pornește de la baza soclului; totul într-o tentă caldă crem, nu gri.
+- **Cote măsurate** (`--origin=assembly`): 28,80×17,54×13,89 m (contract
+  30×20 amprentă, 14 m înalt — în bandă). Triunghiuri: 14 552 (neschimbat
+  ca sumă, doar repoziționat). Buget declarat: 15 000.
+
+### Regulă generală descoperită runda 2
+
+**Poziția relativă zid-plin / element-decorativ pe axa de adâncime
+contează la fel de mult ca prezența geometriei.** De două ori în runda asta
+(ușile portii ajunse în turn, zidul fântânii ajuns în fața arcadei), un
+element era construit CORECT ca formă, dar plasat pe partea GREȘITĂ a unui
+alt element solid pe axa perpendiculară pe fațadă — invizibil sau blocant
+din unghiul de cameră, deși prezent și "corect" în bbox/verify_glb. Fix
+sistematic: după orice piesă cu mai multe straturi pe adâncime (zid +
+coloane, turn + ușă), randează din unghiul REAL al camerei de comparație și
+verifică vizual ce e în FAȚA a ce, nu doar coordonatele.

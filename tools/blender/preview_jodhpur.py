@@ -62,6 +62,17 @@ GROUPS = {
 #   - peretele/scara casei (House_Wall, House_Rail -- ambele pe slotul WALL):
 #     #8FB0DC, albastru
 #   - usa/obloanele (House_Trim, slot WOOD): #6B4A2E, maro lemn cald
+# val 4: hex-ul fiecarui slot, identic cu scripts/palette.gd HEX
+_PALETTE_HEX = [
+    "E8C074", "D4994D", "915D27", "C18446", "67421F", "4B4B4D", "696765",
+    "BB3522", "C8BDA9", "835C34", "91461E", "7692A8", "5B7C34", "AF9F4E",
+    "E54839", "2C82E8", "F2D03C",
+    "54BFB8", "2E5F6B", "E9DCC0", "55535A", "3F7A3C", "E9F2F0", "C4784F",
+    "7FC4C9", "2F6E82", "1A2A33", "A8683A", "4A3526", "B8B4AC",
+    "E8622D", "D2A0BE",
+]
+ANIMAL_TINT = {i: "#" + h for i, h in enumerate(_PALETTE_HEX)}
+
 COMPARE_SPECS = {
     "ghanta_ghar": {
         "category": "buildings",
@@ -434,7 +445,83 @@ COMPARE_SPECS = {
         "category": "props",
         "tints": {"Garland": "#E8792E"},  # LAVA_ORANGE, ca albedo per brief
     },
+    # --- val 4 grupa B: animalele (brief §1.6, build_jodhpur_animals.py) ---
+    # Tenta = culoarea REALA a fiecarui slot din atlas (ANIMAL_TINT, hex-urile
+    # din scripts/palette.gd), per fata: calea `atlas_material` ieșea alba pe
+    # GLB-ul importat.
+    # Fara tente: nicio piesa nu primeste clasa la integrare, deci culoarea
+    # reala e chiar atlasul (atlas_material). Capul e pe +Y: la azimut 0
+    # camera vede profilul cu capul in DREAPTA, ca pe decupari.
+    "zebu_cow": {
+        "category": "animals", "tints": "ANIMAL", "crop": "zebu_cow_stand",
+        "pose": None,
+        "camera": {"azimuth": 36.0, "elevation": 14.0, "margin": 1.08, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "zebu_cow_lie": {
+        "category": "animals", "tints": "ANIMAL", "glb": "zebu_cow", "crop": "zebu_cow_lie",
+        "pose": ("Lie", 1),
+        "camera": {"azimuth": 36.0, "elevation": 14.0, "margin": 1.08, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "black_kite_bird": {
+        "category": "animals", "tints": "ANIMAL",
+        # sus in bataie (cadrul 9 din 32): aripile in V, ca pe decupare
+        "pose": ("Fly", 9),
+        "camera": {"azimuth": 80.0, "elevation": -35.0, "margin": 1.08, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "peacock_closed": {
+        "category": "animals", "tints": "ANIMAL",
+        "camera": {"azimuth": 12.0, "elevation": 10.0, "margin": 1.06, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "peacock_fanned": {
+        "category": "animals", "tints": "ANIMAL",
+        "camera": {"azimuth": 90.0, "elevation": 8.0, "margin": 1.06, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "langur": {
+        "category": "animals", "tints": "ANIMAL",
+        "camera": {"azimuth": 30.0, "elevation": 10.0, "margin": 1.10, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
 }
+
+
+# --- val 4 (animalele, brief §1.6): poza scheletului in comparatie ---------
+
+def _pose_armatures(pose):
+    """Pune scheletele importate in poza ceruta: `pose` = (actiune, cadru),
+    sau None = poza de REPAUS. Importatorul glTF lasa activa PRIMA animatie
+    (alfabetic -- la vaca ar fi `GetUp`, adica vaca culcata) si pune restul
+    in piste NLA; fara asta comparatia ar arata o poza la intamplare."""
+    arms = [o for o in bpy.data.objects if o.type == "ARMATURE"]
+    for arm in arms:
+        ad = arm.animation_data or arm.animation_data_create()
+        for tr in ad.nla_tracks:
+            tr.mute = True
+        ad.action = None
+        for pb in arm.pose.bones:
+            pb.rotation_mode = "QUATERNION"
+            pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
+            pb.location = (0.0, 0.0, 0.0)
+            pb.scale = (1.0, 1.0, 1.0)
+        if pose:
+            act_name, frame = pose
+            act = bpy.data.actions.get(act_name)
+            if act is None:
+                cands = [a for a in bpy.data.actions if a.name.startswith(act_name)]
+                act = cands[0] if cands else None
+            if act is None:
+                print("LIPSA actiune", act_name, "in",
+                      [a.name for a in bpy.data.actions])
+                continue
+            ad.action = act
+            if hasattr(ad, "action_slot") and getattr(act, "slots", None):
+                ad.action_slot = act.slots[0]
+            bpy.context.scene.frame_set(int(frame))
+    bpy.context.view_layer.update()
 
 
 def _clear():
@@ -672,12 +759,18 @@ def _strip_dup_suffix(name):
 
 
 def _import_for_compare(name, spec, models_dir):
-    objs = _import(spec["category"], name, models_dir)
+    # val 4 (animalele): o decupare poate cere alt GLB (`glb`) -- zebu_cow_lie
+    # e vaca din zebu_cow.glb, in poza `Lie`
+    objs = _import(spec["category"], spec.get("glb", name), models_dir)
     meshes = [o for o in objs if o.type == "MESH"]
     for o in meshes:
         _fix_ao_layer_name(o)
         base_name = _strip_dup_suffix(o.name)
         tints = spec.get("tints", {})
+        if tints == "ANIMAL":
+            # val 4: fiecare nod, per fata, pe culoarea slotului lui
+            _apply_multi_flat_tint(o, ANIMAL_TINT)
+            continue
         tint = tints.get(o.name, tints.get(base_name))
         if isinstance(tint, dict):
             _apply_multi_flat_tint(o, tint)
@@ -753,13 +846,14 @@ def compare(name, models_dir=None, res_height=900, out_dir=None):
         return None
 
     crop_path = os.path.join(PROJECT, "docs", "track_briefs", "img",
-                             "jodhpur_assets_v1", name + ".png")
+                             "jodhpur_assets_v1", spec.get("crop", name) + ".png")
     if not os.path.exists(crop_path):
         print("LIPSA decupare:", crop_path)
         return None
 
     _clear()
     meshes = _import_for_compare(name, spec, models_dir)
+    _pose_armatures(spec.get("pose"))
     if not meshes:
         print("LIPSA GLB pentru compare:", name)
         return None
@@ -996,6 +1090,9 @@ WAVE_PIECES = {
           "stall_canopy_a", "stall_canopy_b", "stall_canopy_c",
           "textile_strip", "spice_sacks", "thela_cart", "chai_stall",
           "marigold_garland"],
+    # val 4 grupa B (brief §1.6): animalele; vaca are doua decupari
+    "4b": ["zebu_cow", "zebu_cow_lie", "black_kite_bird", "peacock_closed",
+           "peacock_fanned", "langur"],
 }
 
 

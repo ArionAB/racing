@@ -188,6 +188,25 @@ check "props/thela_cart.glb"          3700 --origin=assembly --allow-car-slots=C
 check "props/chai_stall.glb"          1600 --origin=assembly
 check "props/marigold_garland.glb"     800
 
+echo "== animalele (brief §1.6, val 4 grupa B) =="
+# build_jodhpur_animals.py. Bugetele = masurat + marja mica (fara plafon in
+# brief; animalele nu sunt multiplicate in masa).
+# zebu_cow: 2 noduri pielite pe acelasi schelet (Cow_Body + Bell) cu origine
+# COMUNA (--origin=assembly): clopotelul atarna la piept si nu atinge solul.
+# --allow-car-slots=Bell: clopotelul e CAR_YELLOW (brief §1.6, exceptie
+# declarata acolo). --allow-slots=31: ugerul roz (FLAMINGO_PINK, slotul
+# pistei, palette.gd:140) -- e pe decupare.
+check "animals/zebu_cow.glb"          2900 --origin=assembly --allow-car-slots=Bell --allow-slots=31
+# black_kite_bird: originea in CENTRUL corpului (--origin=center, brief:
+# zboara pe curba cu stick_to_ground = false). --allow-car-slots=Kite:
+# ciocul e CAR_YELLOW, cerut de tabelul §1.6.
+check "animals/black_kite_bird.glb"    600 --origin=center --allow-car-slots=Kite
+# paunii: gat/piept CAR_BLUE, ochii trenei CAR_BLUE pe CAR_YELLOW (brief
+# §1.6, --allow-car-slots=Peacock).
+check "animals/peacock_closed.glb"    3000 --allow-car-slots=Peacock
+check "animals/peacock_fanned.glb"    4800 --allow-car-slots=Peacock
+check "animals/langur.glb"            1100
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total"

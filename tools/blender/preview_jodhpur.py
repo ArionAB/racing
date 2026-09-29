@@ -244,10 +244,15 @@ COMPARE_SPECS = {
         "category": "buildings",
         "tints": {
             "House_Wall": {FOAM_WHITE: "#8FB0DC", LOG_DARK: "#2A2A2E", CACTUS_GREEN: "#4C8C3C"},
-            "House_Rail": "#8FB0DC",
+            # runda 3: House_Rail = balustrade/coame ALBE fara tenta (brief
+            # §1.4, "nod separat de perete"), nu albastru
+            "House_Rail": "#F2F2F2",
             "House_Trim": "#6B4A2E",
             "House_Glow": "#2A2A2E",
         },
+        # decuparea: fata +X (stanga) si +Y (dreapta) aproape egale => az ~46
+        "camera": {"azimuth": 46.0, "elevation": 16.0, "margin": 1.3, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "blue_house_c": {
         "category": "buildings",
@@ -256,6 +261,10 @@ COMPARE_SPECS = {
             "House_Trim": "#6B4A2E",
             "House_Glow": "#2A2A2E",
         },
+        # runda 3: decuparea arata fata cu USA (+Y) frontala si fata +X in
+        # fuga (latimi aparente 455/240 px => azimut ~62), privita usor de sus
+        "camera": {"azimuth": 62.0, "elevation": 17.0, "margin": 1.35, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "blue_house_d": {
         "category": "buildings",
@@ -275,21 +284,27 @@ COMPARE_SPECS = {
             "House_Wall": "#8FB0DC",
             "House_Trim": "#6B4A2E",
             "House_Glow": "#2A2A2E",
-            "House_Rail": "#8FB0DC",
+            # runda 3: treptele, parapetul scarii si balustradele sunt ALBE
+            # (nod fara tenta), ca pe decupare
+            "House_Rail": "#F2F2F2",
         },
+        "camera": {"azimuth": 48.0, "elevation": 16.0, "margin": 1.3, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "haveli_facade": {
         "category": "buildings",
+        # runda 3: decuparea e albastru DESCHIS (#7896DE pe fata luminata);
+        # indigo #4F6FB8 randa "albastru-marin" (verdictul liderului) -> tenta
+        # light. Nodurile: perete, usi de lemn (Trim), geamuri GLOW.
         "tints": {
-            "House_Wall": "#4F6FB8",
+            "House_Wall": "#8FB0DC",
             "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
         },
-        # piesa e 10x6 m (rație 1.67:1, mai alungita decat pilotul cubic) --
-        # camera implicita (35/18) arata prea mult din latura laterala goala
-        # si prea putin din fatada cu arcade/ferestre. Azimut mai mic (mai
-        # aproape de frontal, ca la haveli/porti val 2a); margin marit la
-        # 1.2 dupa prima incercare (1.05 taia parterul/coama din cadru).
-        "camera": {"azimuth": 20.0, "elevation": 12.0, "margin": 1.2},
+        # fata lata (+Y, 10 m) frontala, latura +X in fuga: latimi aparente
+        # 570/200 px => az ~60
+        "camera": {"azimuth": 60.0, "elevation": 12.0, "margin": 1.2, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "rooftop_tank": {
         "category": "props",
@@ -365,8 +380,10 @@ COMPARE_SPECS = {
             "Cart_Fruit": {TROPICAL_GREEN: "#3FA556", CAR_YELLOW: "#F2C230",
                           LAVA_ORANGE: "#E8792E", CAR_RED: "#D94A38"},
         },
-        # piesa mica (2.4x1.2m) -- margin redus ca sa umple mai mult cadrul
-        "camera": {"azimuth": 35.0, "elevation": 18.0, "margin": 1.0},
+        # runda 3: latura lunga (X) aproape frontala, capatul +X la stanga
+        # (decuparea) => az ~68
+        "camera": {"azimuth": 60.0, "elevation": 16.0, "margin": 1.15, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "chai_stall": {
         "category": "props",
@@ -377,6 +394,14 @@ COMPARE_SPECS = {
             # inchis-maroniu, nu gri neutru
             "Stall_Metal": "#4A4238",
         },
+        # margin implicit (1.2) lasa prea mult gol in jurul piesei (masurat
+        # dupa runda de corectii: stalpii/acoperisul ocupau doar ~55% din
+        # cadru) -- margin redus si elevatie usor mai mica, ca in decupare
+        # (camera aproape la nivelul tejghelei, nu de sus).
+        "camera": {"azimuth": -15.0, "elevation": 20.0, "margin": 1.4, "lens": 90.0},
+        # runda 3: fata tarabei (+X, 2,5 m) din fata-STANGA: pe decupare se vede
+        # volanul capatului -Y
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "marigold_garland": {
         "category": "props",

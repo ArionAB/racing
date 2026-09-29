@@ -103,7 +103,13 @@ COMPARE_SPECS = {
         # paralaxa mare -- `lens` mai lung (105 mm, fata de 55 mm implicit)
         # comprima perspectiva, iar `margin` marit (1.15) lasa loc turnurilor
         # sa nu iasa din cadru.
-        "camera": {"azimuth": 250.0, "elevation": 13.0, "lens": 105.0, "margin": 1.15},
+        # ESCALADARE OPUS: decuparea e aproape FRONTALA, usor din stanga
+        # (se vad fetele stangi ale contrafortilor) si aproape la nivelul
+        # ochiului -- 262/7, lens lung. `sun_follow`: soarele fix al uneltei
+        # vine din azimutul 35, iar camera portii sta la ~260 -> fata se vedea
+        # din UMBRA (culoarea "prea inchisa" a rundei 2 era lumina, nu tenta).
+        "camera": {"azimuth": 262.0, "elevation": 7.0, "lens": 110.0, "margin": 1.08},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "stepwell_flight_module": {
         "category": "structures",
@@ -496,7 +502,8 @@ def compare(name, models_dir=None, res_height=900, out_dir=None):
                  elevation=cam_spec.get("elevation", 18.0),
                  res_height=res_height,
                  margin=cam_spec.get("margin", 1.2),
-                 lens=cam_spec.get("lens", 55.0))
+                 lens=cam_spec.get("lens", 55.0),
+                 sun_follow=spec.get("sun_follow"))
 
     # Blender-ul headless n-are PIL in Python-ul lui bundle-uit (masurat: nu
     # exista, si nu instalam pachete in interpretorul lui Blender). Stitch-ul
@@ -529,7 +536,8 @@ def _run_compose(extra_args):
     return False
 
 
-def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2, lens=55.0):
+def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2, lens=55.0,
+                  sun_follow=None):
     """Ca `shot()`, dar cu lumina de zi NEUTRA si fundal #CFCFCF (brief §0.1
     pasul 3), nu tema calda de apus din `preview._light`/`_world`.
 
@@ -608,6 +616,16 @@ def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2, len
     sun.data.angle = math.radians(3.0)
     sun.data.specular_factor = 0.0
     sun.rotation_euler = (math.radians(65.0), 0.0, math.radians(125.0))
+    if sun_follow:
+        # Soarele urmeaza camera (optional, per piesa): un SUN cu
+        # rotation_euler (X, 0, Z) lumineaza DINSPRE azimutul Z - 90 (masurat:
+        # directia -Z locala rotita da sursa la atan2(-cos Z, sin Z)), la
+        # elevatia 90 - X. Deci sursa la azimutul camerei + `offset` cere
+        # Z = azimut + 90 + offset. Implicitul (65, 0, 125) = sursa la 35,
+        # potrivit doar camerei implicite (35/18) -- piesele cu camera
+        # proprie departe de 35 (poarta la ~260) se vedeau din umbra.
+        sun.rotation_euler = (math.radians(sun_follow.get("tilt", 65.0)), 0.0,
+                              math.radians(azimuth + 90.0 + sun_follow.get("offset", 0.0)))
 
     # fill mai slab (soarele principal acopera acum fata camerei) -- doar ca
     # sa nu ramana complet negre fetele din umbra opusa.

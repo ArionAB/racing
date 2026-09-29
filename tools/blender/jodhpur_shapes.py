@@ -46,7 +46,7 @@ from mathutils import Vector, Matrix
 # 1. arch_opening -- gol real intr-un perete, cu profil de arc
 # ---------------------------------------------------------------------------
 
-def _arch_profile(style, half_w, rise, steps):
+def _arch_profile(style, half_w, rise, steps, point=0.2):
     """Puncte (lat, z) ale INTRADOSULUI arcului, de la piciorul stang (-half_w,
     0) la piciorul drept (half_w, 0), trecand prin cheie. `rise` e inaltimea
     cheii peste picioare (nu inaltimea totala a golului -- aia e pier_h+rise).
@@ -73,6 +73,33 @@ def _arch_profile(style, half_w, rise, steps):
         #   cx^2 + rise^2 = R^2         (trece prin cheie, x=0)
         # => (half_w+cx)^2 = cx^2 + rise^2 => cx = (rise^2 - half_w^2) / (2*half_w)
         cx = (rise * rise - half_w * half_w) / (2.0 * half_w)
+        if cx < 0.0:
+            # REPARAT (escaladare Opus, market_gate): cu rise < half_w (arc
+            # TURTIT) formula de mai sus pune centrul la cx < 0, pe linia
+            # nasterii, iar arcul parcurs de la pi la a_end trece prin pi/2
+            # -- adica urca PESTE cheie (z = R > rise) si coboara inapoi:
+            # profilul iese in "M". Un arc ascutit turtit ("drop arch")
+            # are centrele SUB linia nasterii: pastram centrul pe partea
+            # opusa (c >= 0, deci jumatatea stanga ramane strict la stanga
+            # varfului cercului, x si z cresc monoton) si deducem zc < 0
+            # din conditia ca cercul sa treaca prin picior si prin cheie:
+            #   (half_w + c)^2 + zc^2 = c^2 + (rise - zc)^2
+            # `point`: cat de ascutit e varful arcului turtit (0 = aproape
+            # segmental, 0,4 = varf clar) -- centrul fiecarei jumatati sta la
+            # point*half_w de ax, pe partea opusa.
+            c = point * half_w
+            zc = (rise * rise - (half_w + c) ** 2 + c * c) / (2.0 * rise)
+            R = math.hypot(half_w + c, zc)
+            a_start = math.atan2(-zc, -half_w - c)
+            a_end = math.atan2(rise - zc, -c)
+            for i in range(steps + 1):
+                t = i / steps
+                a = a_start + (a_end - a_start) * t
+                pts.append((c + R * math.cos(a), zc + R * math.sin(a)))
+            pts[0] = (-half_w, 0.0)
+            pts[-1] = (0.0, rise)
+            right = [(-x, z) for x, z in reversed(pts[:-1])]
+            return pts + right
         R = math.hypot(half_w + cx, 0.0)
         # unghiul de start (la piciorul stang, vazut din centrul +cx) si cel
         # de la cheie (x=0, vazut din acelasi centru) -- ambele masurate
@@ -169,7 +196,7 @@ def _arch_band(b, center, w, h, pier_h, slot, style, steps, rotation,
 def arch_opening(b, bg, center, w, h, pier_h, wall_t, slot, glow_slot,
                   style="pointed", reveal=0.18, glass_depth=0.06,
                   steps=10, rotation=None, glass=True, panel_w=None,
-                  panel_h=None, panel_z0=0.0, open=False, band_w=None):
+                  panel_h=None, panel_z0=0.0, open=False, band_w=None, point=0.2):
     """Panou de perete cu un GOL REAL, cu capac de arc, taiat prin el -- pe
     fata +Y locala a lui `center` (rotit cu `rotation` daca peretele nu
     priveste spre +Y).
@@ -189,8 +216,9 @@ def arch_opening(b, bg, center, w, h, pier_h, wall_t, slot, glow_slot,
          panel_h, centrat pe `center`, extins de la `panel_z0`) si conturul
          golului, la grosimea `wall_t` -- fata din fata (spre +Y local).
       2. fata din SPATE, acelasi inel (peretele e un solid, nu o folie).
-      3. firida: peretii dintre fata exterioara si planul geamului (adancime
-         `reveal`), pe conturul golului.
+      3. intradosul: peretii golului pe TOATA grosimea (golul trece prin
+         perete; panoul e un solid inchis). `reveal` fixeaza doar adancimea
+         placii GLOW fata de fata exterioara (firida vizibila in fata ei).
     `bg` (Builder SEPARAT, obligatoriu -- vezi nota din capul fisierului)
     primeste placa GLOW retrasa in spatele firidei, pe `glow_slot`.
     `glass=False` omite placa (pentru arcade complet deschise, unde nu exista
@@ -228,15 +256,8 @@ def arch_opening(b, bg, center, w, h, pier_h, wall_t, slot, glow_slot,
             p = m @ p
         return (cx + p.x, cy + p.y, cz + p.z)
 
-    profile = _arch_profile(style, half_w, rise, steps)
-    # profil complet al golului, in sens ANTI-orar vazut din +Y (asa iese
-    # normala inelului corect fara sa mai depindem de recalc global):
-    # picior stang (jos->sus) -> arc (stanga->dreapta) -> picior drept
-    # (sus->jos) -> baza (dreapta->stanga).
-    hole = [(-half_w, 0.0), (-half_w, pier_h)]
-    hole += [(x, pier_h + z) for x, z in profile]
-    hole += [(half_w, pier_h), (half_w, 0.0)]
-    n = len(hole)
+    profile = _arch_profile(style, half_w, rise, steps, point=point)
+    hole = arch_hole_contour(style, w, h, pier_h, steps, profile=profile)
 
     hw_panel = panel_w * 0.5
     panel_z1 = panel_z0 + panel_h
@@ -246,100 +267,144 @@ def arch_opening(b, bg, center, w, h, pier_h, wall_t, slot, glow_slot,
     reveal_edge = inner_edge - reveal             # unde incepe firida (retras)
     glass_edge = reveal_edge - glass_depth        # unde sta geamul
 
+    # REPARAT (escaladare Opus, market_gate): versiunea veche umplea panoul
+    # din 4 DREPTUNGHIURI pe bounding-box-ul golului (sus/jos/stanga/dreapta)
+    # -- colturile dintre arc si dreptunghi (timpanele) ramaneau GOALE pe
+    # ambele fete, deci silueta golului era mereu dreptunghiulara, iar arcul
+    # exista doar ca banda de firida (`reveal`) -- golul in "T" de pe planse.
+    # Acum panoul e un SOLID INCHIS (varfuri partajate, manifold): prisma
+    # extrudata pe Y a poligonului concav "dreptunghi minus gol". Golul E
+    # arcul, pe toata grosimea (intradosul e fata laterala a prismei).
+    #   - gol care atinge baza panoului (usa, poarta): un singur poligon in
+    #     "U" intors;
+    #   - gol suspendat (fereastra): doua poligoane, stanga/dreapta de axa
+    #     x=0 (un poligon cu gaura nu e un ngon simplu).
+    # Fetele concave din fata/spate se triunghiuleaza explicit (polyfill).
+    hz0 = hole[0][1]
+    touches = abs(hz0 - panel_z0) < 1e-4
+    left_arc = [p for p in hole if p[0] <= 1e-9]          # (-hw,hz0) .. cheia
+    if touches:
+        polys = [[(-hw_panel, panel_z0)] + hole + [(hw_panel, panel_z0),
+                                                    (hw_panel, panel_z1),
+                                                    (-hw_panel, panel_z1)]]
+    else:
+        left = ([(0.0, panel_z0), (0.0, hz0)] + left_arc +
+                [(0.0, panel_z1), (-hw_panel, panel_z1), (-hw_panel, panel_z0)])
+        # left_arc incepe la (-hw, hz0): lipim baza golului (0,hz0)->(-hw,hz0)
+        right = [(-x, z) for x, z in reversed(left)]
+        polys = [left, right]
+
     stone_faces = []
-
-    # REVIZUIRE: prima versiune proiecta radial fiecare punct al golului spre
-    # marginea dreptunghiului panoului, dintr-un centru fix -- pe panouri
-    # INALTE SI INGUSTE (ferestrele fusului: panel_h aprox 3x panel_w), razele
-    # loveau muchia stanga/dreapta la inaltimi foarte diferite intre puncte
-    # vecine ale arcului, iar inelul rezultat facea zig-zag -- citea ca
-    # "cioburi"/fulgere in loc de perete neted (vazut direct in randare).
-    #
-    # Fix: umplutura panoului se face din DREPTUNGHIURI SIMPLE (nu un inel
-    # radial), pe bounding-box-ul golului -- banda de SUS (plina, peste tot
-    # golul), banda de JOS (idem), si benzile STANGA/DREAPTA (doar pe
-    # inaltimea golului). Colturile groove-ului (langa arc) raman acoperite
-    # de firida (mai jos) -- geometria e garantat plana si necontorsionata,
-    # indiferent de raportul panel_w/panel_h.
-    hole_x0 = min(x for x, _ in hole)
-    hole_x1 = max(x for x, _ in hole)
-    hole_z0 = min(z for _, z in hole)
-    hole_z1 = max(z for _, z in hole)
-
-    def flat_rect(x0, x1, z0, z1, y_val, flip):
-        if x1 - x0 < 1e-6 or z1 - z0 < 1e-6:
-            return None
-        pts = [(x0, y_val, z0), (x1, y_val, z0), (x1, y_val, z1), (x0, y_val, z1)]
-        if flip:
-            pts = list(reversed(pts))
-        f = b.bm.faces.new(tuple(b.bm.verts.new(rot_pt(*p)) for p in pts))
-        return f
-
-    def panel_fill(y_val, flip):
-        faces = []
-        # sus (peste tot golul, de la panel_x0 la panel_x1)
-        f = flat_rect(-hw_panel, hw_panel, hole_z1, panel_z1, y_val, flip)
-        if f:
-            faces.append(f)
-        # jos
-        f = flat_rect(-hw_panel, hw_panel, panel_z0, hole_z0, y_val, flip)
-        if f:
-            faces.append(f)
-        # stanga (doar pe inaltimea golului)
-        f = flat_rect(-hw_panel, hole_x0, hole_z0, hole_z1, y_val, flip)
-        if f:
-            faces.append(f)
-        # dreapta
-        f = flat_rect(hole_x1, hw_panel, hole_z0, hole_z1, y_val, flip)
-        if f:
-            faces.append(f)
-        return faces
-
-    # fata din fata (spre +Y local)
-    stone_faces += panel_fill(inner_edge, flip=False)
-    # fata din spate (spre -Y local)
-    stone_faces += panel_fill(back_edge, flip=True)
-    # firida: peretii golului intre fata exterioara si planul geamului
-    hole_outer = [rot_pt(x, inner_edge, z) for x, z in hole]
-    hole_reveal = [rot_pt(x, reveal_edge, z) for x, z in hole]
-    for i in range(n - 1):
-        quad = (hole_outer[i], hole_outer[i + 1], hole_reveal[i + 1], hole_reveal[i])
-        f = b.bm.faces.new(tuple(b.bm.verts.new(p) for p in quad))
-        stone_faces.append(f)
-    # marginea EXTERIOARA a panoului (grosimea vazuta din lateral -- cele 4
-    # muchii ale dreptunghiului panel_w x panel_h, unind fata cu spatele, ca
-    # peretele sa fie un solid inchis, nu o pereche de folii)
-    panel_corners = [(-hw_panel, panel_z0), (hw_panel, panel_z0),
-                     (hw_panel, panel_z1), (-hw_panel, panel_z1)]
-    outer_front = [rot_pt(x, inner_edge, z) for x, z in panel_corners]
-    outer_back = [rot_pt(x, back_edge, z) for x, z in panel_corners]
-    for i in range(4):
-        j = (i + 1) % 4
-        quad = (outer_front[i], outer_front[j], outer_back[j], outer_back[i])
-        f = b.bm.faces.new(tuple(b.bm.verts.new(p) for p in quad))
-        stone_faces.append(f)
+    y_front = inner_edge
+    y_back = back_edge
+    for poly in polys:
+        # curata dublurile consecutive (pier_h = 0, cheia pe x=0 etc.)
+        clean = []
+        for p in poly:
+            if not clean or math.hypot(p[0] - clean[-1][0], p[1] - clean[-1][1]) > 1e-5:
+                clean.append(p)
+        if math.hypot(clean[0][0] - clean[-1][0], clean[0][1] - clean[-1][1]) <= 1e-5:
+            clean.pop()
+        fr = [b.bm.verts.new(rot_pt(x, y_front, z)) for x, z in clean]
+        bk = [b.bm.verts.new(rot_pt(x, y_back, z)) for x, z in clean]
+        m = len(clean)
+        # capacele concave: ear-clipping propriu in 2D. `bmesh.ops.triangulate`
+        # pe ngon-ul concav (BEAUTY) a pus triunghiuri PESTE gol (masurat:
+        # 5 triunghiuri de capac cu centrul in gol) -- poarta iesea plina.
+        caps = []
+        for i0, i1, i2 in _ear_clip(clean):
+            caps.append(b.bm.faces.new((fr[i0], fr[i1], fr[i2])))
+            caps.append(b.bm.faces.new((bk[i2], bk[i1], bk[i0])))
+        sides = []
+        for i in range(m):
+            j = (i + 1) % m
+            sides.append(b.bm.faces.new((fr[i], bk[i], bk[j], fr[j])))
+        stone_faces += caps + sides
 
     if glass:
-        # placa GLOW la fundul firidei, usor mai mica (rama de piatra ramane
-        # vizibila in jurul geamului -- ca la _glass_and_reveal_sides)
-        margin = min(half_w, rise) * 0.12
-        gcx_hole, gcz_hole = (hole_x0 + hole_x1) * 0.5, (hole_z0 + hole_z1) * 0.5
-        glass_outline = []
-        for x, z in hole:
-            dx, dz = x - gcx_hole, z - gcz_hole
-            d = math.hypot(dx, dz) or 1e-6
-            shrink = max(0.0, 1.0 - margin / d) if d > margin else 0.0
-            glass_outline.append((gcx_hole + dx * shrink, gcz_hole + dz * shrink))
-        gpts_front = [rot_pt(x, glass_edge, z) for x, z in glass_outline]
+        # placa GLOW in gol, la adancimea firidei: acopera tot conturul
+        # golului (golul trece acum prin toata grosimea -- nu mai lasam un
+        # inel prin care se vede prin perete). Rama o face firida.
+        gpts_front = [rot_pt(x, glass_edge, z) for x, z in hole]
         glass_faces = [bg.bm.faces.new(tuple(bg.bm.verts.new(p) for p in gpts_front))]
         for f in glass_faces:
             f[bg.slot] = glow_slot
     else:
         glass_faces = []
 
+    stone_faces = [f for f in stone_faces if f.is_valid]
     for f in stone_faces:
         f[b.slot] = slot
     return {"stone": stone_faces, "glass": glass_faces}
+
+
+def _ear_clip(poly):
+    """Triunghiulare prin ear-clipping a unui poligon 2D SIMPLU (concav
+    permis), lista (x, z). Intoarce triplete de indici, in sensul
+    poligonului."""
+    n = len(poly)
+    area = 0.0
+    for i in range(n):
+        x0, z0 = poly[i]
+        x1, z1 = poly[(i + 1) % n]
+        area += x0 * z1 - x1 * z0
+    sgn = 1.0 if area > 0 else -1.0
+
+    def cross(o, a, c):
+        return (a[0] - o[0]) * (c[1] - o[1]) - (a[1] - o[1]) * (c[0] - o[0])
+
+    def inside(p, a, c, d):
+        c1, c2, c3 = cross(a, c, p) * sgn, cross(c, d, p) * sgn, cross(d, a, p) * sgn
+        return c1 >= -1e-12 and c2 >= -1e-12 and c3 >= -1e-12
+
+    idx = list(range(n))
+    out = []
+    guard = 0
+    while len(idx) > 3 and guard < 10000:
+        guard += 1
+        best = None
+        for k in range(len(idx)):
+            ia, ib, ic = idx[k - 1], idx[k], idx[(k + 1) % len(idx)]
+            a, c, d = poly[ia], poly[ib], poly[ic]
+            if cross(a, c, d) * sgn <= 1e-12:
+                continue
+            if any(inside(poly[j], a, c, d) for j in idx
+                   if j not in (ia, ib, ic) and poly[j] not in (a, c, d)):
+                continue
+            # prefera urechea cu unghiul cel mai aproape de 90 -> fara triunghiuri-ac
+            ab = math.hypot(a[0] - c[0], a[1] - c[1])
+            cb = math.hypot(d[0] - c[0], d[1] - c[1])
+            q = cross(a, c, d) * sgn / max(ab * cb, 1e-12)
+            if best is None or q > best[0]:
+                best = (q, k)
+        if best is None:
+            break
+        k = best[1]
+        out.append((idx[k - 1], idx[k], idx[(k + 1) % len(idx)]))
+        idx.pop(k)
+    if len(idx) == 3:
+        out.append(tuple(idx))
+    return out
+
+
+def arch_hole_contour(style, w, h, pier_h, steps=10, profile=None, point=0.2):
+    """Conturul golului unui arc, ca lista (x, z) in planul peretelui, de la
+    baza ambrazurii stangi (-w/2, 0), in sus pe ambrazura, peste arc, si in
+    jos pe ambrazura dreapta pana la (w/2, 0) -- deschis jos. Fara dubluri
+    consecutive. Folosit de `arch_opening` si de piesele care pun relief pe
+    conturul golului (arhivolta, alfiz)."""
+    half_w = w * 0.5
+    rise = max(h - pier_h, 0.05)
+    if profile is None:
+        profile = _arch_profile(style, half_w, rise, steps, point=point)
+    raw = [(-half_w, 0.0), (-half_w, pier_h)]
+    raw += [(x, pier_h + z) for x, z in profile]
+    raw += [(half_w, pier_h), (half_w, 0.0)]
+    out = []
+    for p in raw:
+        if not out or math.hypot(p[0] - out[-1][0], p[1] - out[-1][1]) > 1e-5:
+            out.append(p)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -872,3 +937,99 @@ def stepped_plinth(b, center, levels, slot, shape="box", segments=16):
                                      segments=segments, axis="Z"))
         z += lvl[-1]
     return faces
+
+
+# ---------------------------------------------------------------------------
+# masuratoarea unui gol de contract (poarta, tunel) -- ca GOL, nu AABB
+# ---------------------------------------------------------------------------
+
+def _clip_band(poly, axis, lo, hi):
+    """Taie un poligon 2D (lista (a, b)) la banda lo <= p[axis] <= hi
+    (Sutherland-Hodgman pe doua semiplane)."""
+    def clip(pts, keep, inter):
+        out = []
+        n = len(pts)
+        for i in range(n):
+            p, q = pts[i], pts[(i + 1) % n]
+            kp, kq = keep(p), keep(q)
+            if kp:
+                out.append(p)
+            if kp != kq:
+                out.append(inter(p, q))
+        return out
+
+    def at(p, q, v):
+        t = (v - p[axis]) / ((q[axis] - p[axis]) or 1e-12)
+        return (p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t)
+    pts = clip(poly, lambda p: p[axis] >= lo, lambda p, q: at(p, q, lo))
+    if pts:
+        pts = clip(pts, lambda p: p[axis] <= hi, lambda p, q: at(p, q, hi))
+    return pts
+
+
+def measure_opening(objs, windows=((0.15, 1.8), (0.15, 5.0)), axis_x=0.0,
+                    crown_half=0.3, crown_from=2.0):
+    """Golul unei porti masurat ca GOL (memoriile cota-de-contract-se-masoara-
+    ca-gol, golul-se-masoara-pe-fereastra-lui): proiectia TRIUNGHIURILOR
+    tuturor nodurilor pe planul portii (X lateral, Z sus; directia de mers
+    e Y), in coordonate lume.
+
+    - pentru fiecare fereastra (z0, z1): latimea benzii libere care contine
+      axul x = axis_x (0 daca ceva o blocheaza pe ax);
+    - cheia: cel mai jos punct ocupat peste `crown_from`, in coloana
+      |x - axis_x| <= crown_half.
+    Intoarce ({(z0, z1): latime}, cheie)."""
+    tris = []
+    for o in objs:
+        if o is None:
+            continue
+        mw = o.matrix_world
+        me = o.data
+        me.calc_loop_triangles()
+        vs = [mw @ v.co for v in me.vertices]
+        for lt in me.loop_triangles:
+            tris.append([(vs[i].x, vs[i].z) for i in lt.vertices])
+    gaps = {}
+    for z0, z1 in windows:
+        left, right = -1e9, 1e9
+        blocked = False
+        for t in tris:
+            c = _clip_band(t, 1, z0, z1)
+            if len(c) < 2:
+                continue
+            xs = [p[0] - axis_x for p in c]
+            lo, hi = min(xs), max(xs)
+            if hi - lo < 1e-9 and max(p[1] for p in c) - min(p[1] for p in c) < 1e-9:
+                continue
+            if lo < 0.0 < hi:
+                blocked = True
+            elif hi <= 0.0:
+                left = max(left, hi)
+            else:
+                right = min(right, lo)
+        gaps[(z0, z1)] = 0.0 if blocked else right - left
+    crown = 1e9
+    for t in tris:
+        c = _clip_band(t, 0, axis_x - crown_half, axis_x + crown_half)
+        if len(c) < 2:
+            continue
+        zs = [p[1] for p in c]
+        if max(zs) > crown_from:
+            crown = min(crown, max(min(zs), crown_from))
+    return gaps, crown
+
+
+def densify_for_ao(b, max_len=2.5, passes=6):
+    """Taie muchiile mai lungi de `max_len` (m), ca AO-ul copt PE VARF sa
+    aiba esantioane si in mijlocul fetelor mari. Fara asta, o fata de 12 m
+    cu varfuri doar la sol (gradient vertical intunecat) si sub cornisa
+    (umbrita) iese intunecata pe toata inaltimea -- masurat pe market_gate:
+    pilastrii si panoul langa ambrazura la (68,38,18), fata de (156,94,52) pe
+    restul panoului, aceeasi tenta. Taieturile sunt coplanare, deci bevel-ul
+    (limita de unghi) nu le atinge; slotul fetei se copiaza la impartire."""
+    bm = b.bm
+    for _ in range(passes):
+        edges = [e for e in bm.edges if e.calc_length() > max_len]
+        if not edges:
+            break
+        bmesh.ops.subdivide_edges(bm, edges=edges, cuts=1, use_grid_fill=True)

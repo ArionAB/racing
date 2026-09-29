@@ -64,7 +64,11 @@ echo "== reperele (brief §1.3, val 2b) =="
 # stepwell_pavilion, jaswant_thada: idem (Well_Glow/Thada_Glow ingropate).
 # stepwell_flight_module/_corner: decor pur, un singur nod, origine simpla la
 # baza (brief §1.3: "fara coliziune, coliziunea e a terenului").
-check "structures/market_gate.glb"             10500 --origin=assembly
+# market_gate 10500 -> 21500 (escaladare Opus): 21048 masurat. Panoul e acum
+# o prisma manifold cu gol real (nu 4 dreptunghiuri), chhatri-urile au 24 de
+# arcade reale, iar `densify_for_ao` taie fetele de 12 m (~4400 tri) ca AO-ul
+# copt pe varf sa nu le innegreasca -- o singura instanta pe pista.
+check "structures/market_gate.glb"             21500 --origin=assembly
 check "structures/stepwell_flight_module.glb"   3600
 check "structures/stepwell_corner.glb"          2400
 check "structures/stepwell_pavilion.glb"       12000 --origin=assembly

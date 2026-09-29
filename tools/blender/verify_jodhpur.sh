@@ -239,6 +239,15 @@ check "animals/peacock_closed.glb"    3000 --allow-car-slots=Peacock
 check "animals/peacock_fanned.glb"    4800 --allow-car-slots=Peacock
 check "animals/langur.glb"            1100
 
+echo "== fundalul (brief §1.7, val 5 grupa fundal) =="
+# build_jodhpur_horizon.py. UN GLB, 4 noduri radacina la origine (conventia
+# fiordland_horizon): UmaidBhawan_A, FarCity_A (+ copiii FarCity_A_Beige,
+# FarCity_A_Glow), DesertRidge_A, DesertRidge_B. Bugetul e PE NOD; plafonul
+# brief-ului (<= 5.000 tri TOTAL) il verifica build-ul (masurat 4752).
+# --origin=assembly: FarCity_A_Glow (geamurile, 4,8-9,2 m) nu atinge solul
+# pe nodul lui -- origine COMUNA cu FarCity_A. Nicio exceptie de slot.
+check "rocks/jodhpur_horizon.glb"    2100 --origin=assembly
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total"

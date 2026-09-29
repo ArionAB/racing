@@ -21,6 +21,10 @@ func _ready() -> void:
 	for a in args:
 		if a.begins_with("--out="):
 			_generate(a.substr(6))
+	if "--check" in args:
+		_check()
+	if "--camcheck" in args:
+		_camcheck()
 	if "--lines" in args:
 		_lines()
 	if "--inspect" in args:
@@ -270,6 +274,44 @@ func _sampler_ok(front_mid: Vector3, outward: Vector3, base: float) -> float:
 	return -1.0
 
 
+## Modul intr-o stiva: fara tragerea spre drum din `_sampler_ok` (ar rupe
+## stiva: fata etajului de sus trebuie sa stea pe spatele celui de jos).
+func _module_at(tag: String, k: int, front_mid: Vector3, along: Vector3, outward: Vector3, sx: float, sz: float, base_y := INF) -> void:
+	var y: float = TIER_TOP[k] - TIER_H
+	var sy := 1.0
+	if base_y != INF:
+		# etajul de jos al stivei, scurtat pe verticala: varful ramane la cota
+		# etajului, baza coboara doar 0,3 m sub teren (altfel s-ar ingropa 2-3 m)
+		sy = (TIER_TOP[k] - base_y) / TIER_H
+		y = base_y
+	var xf := _xf(front_mid, along, outward, sx, sz, y)
+	xf.basis.y *= sy
+	# probe_manual judeca muchia fetei pe campul neted (`_sampler`), care pe
+	# peretele debleului difera de suprafata randata cu 2-3 m. Unde campul
+	# respinge baza, piesa nu se pune (raportat), nu se falsifica ancora.
+	var fb := xf * Vector3(0, 0, -1.5)
+	var gs: float = tr._sampler.ground_y(fb.x, fb.z)
+	if gs - fb.y > 1.95 or fb.y - gs > 2.95:
+		print("  sar peste %s etaj %d la %s: campul %.2f fata de baza %.2f" % [tag, k, fb, gs, fb.y])
+		return
+	_node_i += 1
+	_emit("Trepte_%s_E%d_%02d" % [tag, k, _node_i], "s_stepwell_flight_module", xf, Vector3(0, 0, -1.5))
+	_candles(xf, sx)
+
+
+func _candles(xf: Transform3D, sx: float) -> void:
+	for sp in _step_spots():
+		if _rng.randf() < 0.7:
+			_diya.append(xf * sp)
+			_diya_yaw.append(_rng.randf() * TAU)
+	var n_edge := int(MOD_W * sx / 1.1)
+	for e in n_edge:
+		if _rng.randf() < 0.8:
+			var lx := -MOD_W * 0.5 + (float(e) + 0.5 + _rng.randf_range(-0.3, 0.3)) * MOD_W / n_edge
+			_diya.append(xf * Vector3(lx, 3.24, -1.3))
+			_diya_yaw.append(_rng.randf() * TAU)
+
+
 func _module(tag: String, k: int, front_mid: Vector3, along: Vector3, outward: Vector3, sx: float, sz: float) -> void:
 	var y: float = TIER_TOP[k] - TIER_H
 	var pull := _sampler_ok(front_mid, outward, y)
@@ -374,96 +416,100 @@ func _generate(path: String) -> void:
 		east[k] = xe
 		print("etaj %d: sud z = %.2f %+.4f x (%d es) | nord z = %.2f %+.4f x (%d es) | est x = %.2f" % [k, south[k].x, south[k].y, us.size(), north[k].x, north[k].y, usn.size(), east[k]])
 
-	# ---- bratele: de la peretele de est spre vest, module lipite cap la cap
-	for k in 3:
-		for arm in ["S", "N"]:
-			var line: Vector2 = south[k] if arm == "S" else north[k]
-			var sgn := 1.0 if arm == "S" else -1.0
-			var x_end: float = east[k]
-			var dirv := Vector3(-1.0, 0, -line.y).normalized()
-			var outward := Vector3(-line.y, 0, 1.0).normalized()
-			if outward.z * sgn < 0.0:
-				outward = -outward
-			var p_end := Vector3(x_end, 0, line.x + line.y * x_end)
-			var c := 0
-			var misses := 0
-			var placed := 0
-			while c < 12:
-				var mid := p_end + dirv * (MOD_W * (float(c) + 0.5))
-				c += 1
-				if mid.x < -200.0:
-					break
-				# X local spre est (-dirv): +Z local = outward; verifica mana dreapta
-				var along := -dirv
-				if along.cross(Vector3.UP).dot(outward) < 0.0:
-					along = dirv
-				var front := mid
-				if k < 2:
-					front = mid + outward * _local_front(mid, along, outward, levels[k])
-				var sz := 1.0
-				if k > 0:
-					var up_d := _local_front(front, along, outward, levels[k - 1])
-					sz = clampf(up_d / MOD_D, 1.0, 2.2)
-				front += outward * _clear_road(front, along, outward)
-				if not _visible_at(front - outward * 0.3, k):
-					# coltul (capatul de est) poate fi ingropat: sari peste el
-					# pana la primul modul vizibil, apoi opreste la doua ratari
-					if placed > 0:
-						misses += 1
-						if misses > 1:
-							break
+	# ---- STIVE (runda 1, a doua trecere): pe fiecare statie a peretelui
+	# etajele se aseaza de jos in sus, fiecare cu fata EXACT pe spatele celui
+	# de dedesubt. Prima trecere punea fiecare etaj pe conturul lui propriu,
+	# independent, iar intre etaje ramanea o fasie de nisip in panta de ~2 m:
+	# pe captura 0.160 modulele citeau ca banci suspendate peste nisip, nu
+	# ca zid de piatra in trepte. Adancimea fiecarui etaj ajunge pana unde
+	# terenul atinge varful lui (spatele ingropat), deci terasa e piatra.
+	var stations: Array[Dictionary] = []
+	# bratul de intrare (sud) si de iesire (nord): statii la 12.2 m pe x,
+	# de la acul de est spre vest
+	for arm in ["S", "N"]:
+		var z_ref := 73.0 if arm == "S" else 51.0
+		var x := -92.0
+		while x >= -205.0:
+			var i := tr.closest_index_global(Vector3(x, 0, z_ref))
+			var q: Vector3 = tr.baked[i]
+			var sd := tr._side_at(i)
+			# peretele e pe DREAPTA drumului (debleul): +side pe ambele brate
+			var tang := sd.cross(Vector3.UP) * -1.0
+			var edge := q + sd * tr.width_at_index(i)
+			edge.y = 0.0
+			stations.append({"tag": arm, "edge": edge, "n": sd, "a": tang, "sx": 1.0})
+			x -= MOD_W
+	# peretele de est (in spatele acului): normala +x, statii pe z
+	var apex_x := -INF
+	for i2 in range(int(0.19 * n), int(0.207 * n)):
+		apex_x = maxf(apex_x, tr.baked[i2].x + tr.width_at_index(i2))
+	for zc: float in [49.8, 62.0, 74.2]:
+		stations.append({"tag": "Est", "edge": Vector3(apex_x, 0, zc), "n": Vector3(1, 0, 0), "a": Vector3(0, 0, -1), "sx": 1.0})
+
+	var pav_front := -INF
+	for st in stations:
+		var edge: Vector3 = st["edge"]
+		var nv: Vector3 = st["n"]
+		var av: Vector3 = st["a"]
+		# mana dreapta: X = Y x Z -> a trebuie sa fie UP x n ... verifica
+		if av.cross(Vector3.UP).dot(nv) < 0.0:
+			av = -av
+		var f_prev := -1.0
+		for k in [2, 1, 0]:
+			var base: float = TIER_TOP[k] - TIER_H
+			var top: float = TIER_TOP[k]
+			var f: float
+			var base_y := INF
+			if f_prev < 0.0:
+				# etajul de jos: fata la LANE_KEEP de asfalt (nu la contur, altfel
+				# ramane o panta de nisip intre drum si zid); se alege etajul in
+				# care cade terenul de acolo, iar baza lui se ridica la teren - 0,3
+				var fr := edge + nv * LANE_KEEP
+				fr += nv * _clear_road(fr, av, nv)
+				var gmin := INF
+				var gmax := -INF
+				for sft: float in [-5.5, 0.0, 5.5]:
+					var pp := fr + av * sft + nv * 0.3
+					var gy: float = tr._terrain_mesh_y(pp.x, pp.z)
+					gmin = minf(gmin, gy)
+					gmax = maxf(gmax, gy)
+				# primul etaj (de jos in sus) al carui varf trece de teren cu 0,25 m;
+				# baza lui se muta la teren - 0,3 (scurtat sau lungit pe verticala)
+				if top < gmax + 0.25:
 					continue
-				misses = 0
-				placed += 1
-				mid = front
-				_module(arm, k, mid, along, outward, 1.0, sz)
-	# ---- peretele de est: intre fetele etajului pe nord si pe sud
-	for k in 3:
-		var xe: float = east[k]
-		var zs: float = south[k].x + south[k].y * xe
-		var zn: float = north[k].x + north[k].y * xe
-		var length := zs - zn
-		var cnt := maxi(1, int(round(length / MOD_W)))
-		var sx := length / (cnt * MOD_W)
-		for c in cnt:
-			var zc := zn + (float(c) + 0.5) * length / cnt
-			var mid := Vector3(xe, 0, zc)
-			var along := Vector3(0, 0, 1)
-			if along.cross(Vector3.UP).dot(Vector3(1, 0, 0)) < 0.0:
-				along = -along
-			if k < 2:
-				mid += Vector3(1, 0, 0) * _local_front(mid, along, Vector3(1, 0, 0), levels[k])
-			var sz := 1.0
-			if k > 0:
-				sz = clampf(_local_front(mid, along, Vector3(1, 0, 0), levels[k - 1]) / MOD_D, 1.0, 2.2)
-			mid += Vector3(1, 0, 0) * _clear_road(mid, along, Vector3(1, 0, 0))
-			if not _visible_at(mid - Vector3(0.3, 0, 0), k):
-				continue
-			_module("Est", k, mid, along, Vector3(1, 0, 0), sx, sz)
-	# ---- pavilionul pe buza peretelui de est, cu fata (-Z local) spre groapa (-x)
-	var pz: float = (south[0].x + south[0].y * east[0] + north[0].x + north[0].y * east[0]) * 0.5
-	var pc := Vector3(east[0] + 1.0 + 4.19, 0, pz)
+				if (top - (gmin - 0.3)) / TIER_H > 1.6:
+					continue
+				f = (fr - edge).dot(nv)
+				base_y = gmin - 0.3
+			else:
+				f = f_prev
+				var probe2 := edge + nv * (f + 0.3)
+				if tr._terrain_mesh_y(probe2.x, probe2.z) > top - 0.3:
+					break  # restul stivei e sub teren
+			# adancimea: pana unde terenul atinge varful etajului (max pe latime)
+			var reach := -1.0
+			for sft2: float in [-5.5, 0.0, 5.5]:
+				var c2 := _contour(edge + av * sft2, nv, top - 0.3)
+				if c2 > reach:
+					reach = c2
+			var depth := clampf(reach - f, MOD_D, 7.5) if reach > 0.0 else 7.5
+			var front := edge + nv * f
+			front += nv * _clear_road(front, av, nv)
+			_module_at(String(st["tag"]), k, front, av, nv, float(st["sx"]), depth / MOD_D, base_y)
+			f_prev = (front - edge).dot(nv) + depth
+		if st["tag"] == "Est" and absf(edge.z - 62.0) < 1.0:
+			pav_front = edge.x + maxf(f_prev, 0.0)
+
+	# ---- pavilionul pe buza peretelui de est, cu fata (-Z local) spre groapa,
+	# pe axa acului, cu fata pe spatele etajului de sus (1 m inapoi)
+	var pc := Vector3(pav_front - 1.0 + 4.19, 0, 62.0)
 	var pb := INF
 	for dx: float in [-4.0, 0.0, 4.0]:
 		for dz: float in [-10.0, 0.0, 10.0]:
 			pb = minf(pb, tr._terrain_mesh_y(pc.x + dx, pc.z + dz))
-	pc.y = minf(0.0, pb)
-	# +Z local -> +x (spre perete), X local -> -z (mana dreapta: X = Y x Z)
+	pc.y = clampf(pb, -1.9, 0.0)
 	_emit("Pavilion", "s_stepwell_pavilion", Transform3D(Basis(Vector3(0, 0, -1), Vector3.UP, Vector3(1, 0, 0)), pc))
 	print("pavilion la %s (teren minim %.2f)" % [pc, pb])
-	# ---- colturile etajului de sus (SE si NE)
-	var xe0: float = east[0]
-	var zs0: float = south[0].x + south[0].y * xe0
-	var zn0: float = north[0].x + north[0].y * xe0
-	var se := Vector3(xe0 - 3.15, TIER_TOP[0] - TIER_H, zs0 - 3.15)
-	var ne := Vector3(xe0 - 3.15, TIER_TOP[0] - TIER_H, zn0 + 3.15)
-	print("colturi: teren SE %.2f, NE %.2f (varful etajului 0)" % [tr._terrain_mesh_y(se.x, se.z), tr._terrain_mesh_y(ne.x, ne.z)])
-	# SE: peretii la +z si +x -> -X local spre +z, +Z local spre +x
-	if _visible_at(se, 0):
-		_emit("Colt_SE", "s_stepwell_corner", Transform3D(Basis(Vector3(0, 0, -1), Vector3.UP, Vector3(1, 0, 0)), Vector3(xe0 - 3.15, TIER_TOP[0] - TIER_H, zs0 - 3.15)))
-	# NE: peretii la -z si +x -> -X local spre +x, +Z local spre -z
-	if _visible_at(ne, 0):
-		_emit("Colt_NE", "s_stepwell_corner", Transform3D(Basis(Vector3(-1, 0, 0), Vector3.UP, Vector3(0, 0, -1)), Vector3(xe0 - 3.15, TIER_TOP[0] - TIER_H, zn0 + 3.15)))
 
 	# ---- candele plutitoare pe apa (celule ude, fundul sub -9.8), mai dese spre ac
 	var wet: Dictionary = tr.get("_ravine_wet")
@@ -503,3 +549,63 @@ func _flock(name: String, res: String, pos: PackedVector3Array, yw: PackedFloat3
 	_out.append("scale_min = %.2f" % smin)
 	_out.append("scale_max = %.2f" % smax)
 	_out.append("")
+
+
+## Profilul fiecarui modul asezat: terenul randat sub muchia fetei, la mijloc
+## si la spate, fata de baza si varful modulului (pe trei puncte pe latime).
+func _check() -> void:
+	var zone := tr.get_node("DecorManual/ZoneC_Fantana")
+	for c in zone.get_children():
+		if not String(c.name).begins_with("Trepte_"):
+			continue
+		var xf: Transform3D = (c as Node3D).global_transform
+		var base := xf.origin.y
+		var out := "%-20s baza %+6.2f |" % [c.name, base]
+		for lz: float in [-1.5, 0.0, 1.5]:
+			var worst := -INF
+			var best := INF
+			for lx: float in [-5.5, 0.0, 5.5]:
+				var p := xf * Vector3(lx, 0, lz)
+				var y: float = tr._terrain_mesh_y(p.x, p.z) - base
+				worst = maxf(worst, y)
+				best = minf(best, y)
+			out += "  z%+.1f: %+5.2f..%+5.2f" % [lz, best, worst]
+		print(out)
+
+
+## Camera (fara coliziune pe decor, deci ProbeCameraSolid nu vede treptele):
+## punctul camerei aproximat ca in ChaseCamera cu CameraFantana (13 m sus,
+## 12,5 m in spate pe tangenta) si distanta pana la cutia locala a fiecarei
+## piese din ZoneC. Negativ = camera in piesa.
+func _camcheck() -> void:
+	var zone := tr.get_node("DecorManual/ZoneC_Fantana")
+	var boxes := []
+	for c in zone.get_children():
+		var nm := String(c.name)
+		var aabb: AABB
+		if nm.begins_with("Trepte_"):
+			aabb = AABB(Vector3(-6.1, 0, -1.5), Vector3(12.2, 3.24, 3.0))
+		elif nm == "Pavilion":
+			aabb = AABB(Vector3(-10.28, 0, -4.19), Vector3(20.56, 10.9, 8.38))
+		else:
+			continue
+		boxes.append([nm, (c as Node3D).global_transform, aabb])
+	var worst := INF
+	var worst_at := ""
+	for i in range(int(0.125 * n), int(0.275 * n)):
+		var p: Vector3 = tr.baked[i]
+		var back: Vector3 = (tr.baked[i] - tr.baked[maxi(i - 6, 0)]).normalized()
+		var cam := p - back * 12.5 + Vector3.UP * 13.0
+		for b in boxes:
+			var xf: Transform3D = b[1]
+			var loc := xf.affine_inverse() * cam
+			var bb: AABB = b[2]
+			# distanta in metri (aproximativ, scala locala ~1..2.5)
+			var q := loc.clamp(bb.position, bb.end)
+			var d := (xf * q).distance_to(cam)
+			if bb.has_point(loc):
+				d = -1.0
+			if d < worst:
+				worst = d
+				worst_at = "%s la frac %.3f (camera %s)" % [b[0], float(i) / n, cam]
+	print("camera: cea mai mica distanta la o piesa din C = %.2f m, %s" % [worst, worst_at])

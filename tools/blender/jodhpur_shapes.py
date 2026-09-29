@@ -1091,3 +1091,355 @@ def kangura_merlon(b, center, w, h, t, slot, facing="Y"):
     for f in faces:
         f[b.slot] = slot
     return faces
+
+
+# ---------------------------------------------------------------------------
+# 10. facade -- perete PLAN cu goluri retrase (grila), plus facade_bays
+# ---------------------------------------------------------------------------
+#
+# Promovat aici din build_jodhpur_city.py (runda 3 a orasului) si din copia
+# lui din build_jodhpur_fort.py (runda fort3), care divergeau: cetatea adauga
+# `fill="none"`, `fill="jali"`, `point` per gol si `facade_bays`; orasul avea
+# `fill="shutter"`, montantul usii de lemn si pragul `step`. Versiunea de aici
+# e reuniunea lor; singura cota care diferea (pervazul, 0,10/0,08 la oras vs
+# 0,12/0,10 la cetate) a devenit parametru per gol (`sill_h`, `sill_out`).
+# Criteriul promovarii: ambele build-uri scot GLB-uri identice la byte.
+#
+# De ce grila: `arch_opening` pe goluri izolate pune fiecare gol intr-un PANOU
+# propriu care iese din perete ("arcade in rame iesite"). Aici peretele e o
+# GRILA: coloane la marginile golurilor x randuri la pragurile/buiandrugii
+# lor; fiecare celula e plina sau gol. Fata, spatele si firidele golurilor
+# partajeaza varfurile (fara fete interne => fara rosturi de bevel), timpanele
+# arcelor se lipesc de aceleasi varfuri. Rama e o banda SUBTIRE care iese
+# 4-5 cm. Golurile raman retrase (brief §1.4), cu placa GLOW / lemn in fund.
+
+def _fx(p0, u, n):
+    P0 = Vector(p0)
+    U = Vector(u).normalized()
+    N = Vector(n).normalized()
+
+    def W(uu, z, d):
+        return P0 + U * uu + N * d + Vector((0.0, 0.0, z))
+    return W
+
+
+def _lbox(b, W, u0, u1, z0, z1, d0, d1, slot):
+    """Cutie inchisa in coordonatele locale (u, z, d) ale unei fete."""
+    if u1 - u0 < 1e-4 or z1 - z0 < 1e-4 or abs(d1 - d0) < 1e-5:
+        return []
+    vs = {}
+    for iu, uu in enumerate((u0, u1)):
+        for iz, z in enumerate((z0, z1)):
+            for idd, d in enumerate((d0, d1)):
+                vs[(iu, iz, idd)] = b.bm.verts.new(W(uu, z, d))
+
+    def v(a, c, e):
+        return vs[(a, c, e)]
+    quads = [
+        (v(0, 0, 0), v(0, 0, 1), v(0, 1, 1), v(0, 1, 0)),
+        (v(1, 0, 0), v(1, 1, 0), v(1, 1, 1), v(1, 0, 1)),
+        (v(0, 0, 0), v(1, 0, 0), v(1, 0, 1), v(0, 0, 1)),
+        (v(0, 1, 0), v(0, 1, 1), v(1, 1, 1), v(1, 1, 0)),
+        (v(0, 0, 0), v(0, 1, 0), v(1, 1, 0), v(1, 0, 0)),
+        (v(0, 0, 1), v(1, 0, 1), v(1, 1, 1), v(0, 1, 1)),
+    ]
+    faces = [b.bm.faces.new(q) for q in quads]
+    for f in faces:
+        f[b.slot] = slot
+    return faces
+
+
+def _lprism(b, W, poly, d0, d1, slot):
+    """Prisma inchisa dintr-un poligon simplu (u, z), extrudata pe normala."""
+    clean = []
+    for p in poly:
+        if not clean or math.hypot(p[0] - clean[-1][0], p[1] - clean[-1][1]) > 1e-5:
+            clean.append(p)
+    if len(clean) > 2 and math.hypot(clean[0][0] - clean[-1][0],
+                                     clean[0][1] - clean[-1][1]) <= 1e-5:
+        clean.pop()
+    if len(clean) < 3:
+        return []
+    fr = [b.bm.verts.new(W(uu, z, d1)) for uu, z in clean]
+    bk = [b.bm.verts.new(W(uu, z, d0)) for uu, z in clean]
+    faces = []
+    for i0, i1, i2 in _ear_clip(clean):
+        faces.append(b.bm.faces.new((fr[i0], fr[i1], fr[i2])))
+        faces.append(b.bm.faces.new((bk[i2], bk[i1], bk[i0])))
+    m = len(clean)
+    for i in range(m):
+        j = (i + 1) % m
+        faces.append(b.bm.faces.new((fr[i], bk[i], bk[j], fr[j])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
+
+
+def _lband(b, W, pts, width, d0, d1, slot, closed=False, outward=True):
+    """Banda de sectiune dreptunghiulara de-a lungul unei polilinii (u, z) --
+    rama. Polilinia merge in sensul golului, stanga sensului = in afara lui."""
+    n = len(pts)
+    if n < 2:
+        return []
+    nseg = n if closed else n - 1
+    segn = []
+    for i in range(nseg):
+        a, c = pts[i], pts[(i + 1) % n]
+        dx, dz = c[0] - a[0], c[1] - a[1]
+        ln = math.hypot(dx, dz) or 1e-9
+        segn.append((-dz / ln, dx / ln))
+    sgn = 1.0 if outward else -1.0
+    offs = []
+    for i in range(n):
+        if closed:
+            n0, n1 = segn[i - 1], segn[i % nseg]
+        else:
+            n0 = segn[max(i - 1, 0)]
+            n1 = segn[min(i, nseg - 1)]
+        mx, mz = n0[0] + n1[0], n0[1] + n1[1]
+        ml = math.hypot(mx, mz) or 1e-9
+        mx, mz = mx / ml, mz / ml
+        cosv = max(mx * n0[0] + mz * n0[1], 0.35)
+        offs.append((pts[i][0] + sgn * mx * width / cosv,
+                     pts[i][1] + sgn * mz * width / cosv))
+    ring = []
+    for i in range(n):
+        ring.append([b.bm.verts.new(W(pts[i][0], pts[i][1], d1)),
+                     b.bm.verts.new(W(offs[i][0], offs[i][1], d1)),
+                     b.bm.verts.new(W(offs[i][0], offs[i][1], d0)),
+                     b.bm.verts.new(W(pts[i][0], pts[i][1], d0))])
+    faces = []
+    for i in range(nseg):
+        A, B = ring[i], ring[(i + 1) % n]
+        for k in range(4):
+            k2 = (k + 1) % 4
+            faces.append(b.bm.faces.new((A[k], B[k], B[k2], A[k2])))
+    if not closed:
+        faces.append(b.bm.faces.new(tuple(ring[0])))
+        faces.append(b.bm.faces.new(tuple(reversed(ring[-1]))))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
+
+
+def _opening_contour(o, steps=8):
+    uc, z, w, h = o["u"], o["z"], o["w"], o["h"]
+    hw = w * 0.5
+    if o.get("arch"):
+        pier = o.get("pier", h - hw)
+        pts = arch_hole_contour(o.get("style", "round"), w, h, pier, steps,
+                                point=o.get("point", 0.2))
+        return [(uc + x, z + zz) for x, zz in pts]
+    return [(uc - hw, z), (uc - hw, z + h), (uc + hw, z + h), (uc + hw, z)]
+
+
+def facade(b, bglow, btrim, p0, u, n, width, height, thick, openings, slot,
+           glow_slot, trim_slot, frame_slot=None, steps=8, bframe=None,
+           cap_left=True, cap_right=True, cap_top=True):
+    """Perete plan `width` x `height`, coltul stanga-jos al FETEI in `p0`,
+    `u` = spre dreapta vazut din afara, `n` = normala exterioara, gros `thick`
+    spre interior. `cap_left/right/top`: inchide capatul (False cand capatul
+    se lipeste coplanar de peretele vecin -- altfel bevel-ul face un rost).
+
+    Gol: dict cu u (centru), z (prag), w, h; optional arch=True, style,
+    pier, point (arc ascutit turtit, implicit 0.2); fill:
+      "glow"    placa GLOW retrasa (implicit);
+      "wood"    usa de lemn retrasa, cu un montant la mijloc (orasul);
+      "shutter" placa GLOW + oblon-rama si montant (orasul);
+      "open"    placa GLOW in spatele peretelui (gol vazut prin perete);
+      "none"    gol strapuns, fara fund (gura portii, cetatea);
+      "jali"    placa GLOW + grila de piatra 3 x 4 in fata ei (palatul);
+    frame (latimea ramei, 0 = fara), frame_out, reveal (adancimea fundului);
+    sill=True pervaz sub gol, cu sill_h (implicit 0,10) si sill_out (iesirea
+    peste frame_out, implicit 0,08) -- cetatea le da 0,12 / 0,10;
+    step=True prag de piatra la usa (orasul).
+    Intoarce {"wall", "frame", "glow", "trim"}."""
+    frame_slot = frame_slot if frame_slot is not None else slot
+    bf = bframe if bframe is not None else b
+    W = _fx(p0, u, n)
+    wall, frame, glow, trim = [], [], [], []
+    ops = [dict(o) for o in openings]
+    for o in ops:
+        o["_hw"] = o["w"] * 0.5
+        o["_pier"] = o.get("pier", o["h"] - o["_hw"]) if o.get("arch") else o["h"]
+
+    def key(x):
+        return round(x, 5)
+    us, zs = {0.0, width}, {0.0, height}
+    for o in ops:
+        us |= {o["u"] - o["_hw"], o["u"] + o["_hw"]}
+        zs |= {o["z"], o["z"] + o["h"]}
+        if o.get("arch"):
+            us.add(o["u"])
+            zs.add(o["z"] + o["_pier"])
+    us = sorted({key(min(max(x, 0.0), width)) for x in us})
+    zs = sorted({key(min(max(x, 0.0), height)) for x in zs})
+    nu, nz = len(us) - 1, len(zs) - 1
+
+    def cell(i, j):
+        if i < 0 or j < 0 or i >= nu or j >= nz:
+            return "out"
+        um, zm = (us[i] + us[i + 1]) * 0.5, (zs[j] + zs[j + 1]) * 0.5
+        for o in ops:
+            if abs(um - o["u"]) < o["_hw"] and o["z"] < zm < o["z"] + o["h"]:
+                if o.get("arch") and zm > o["z"] + o["_pier"]:
+                    return "rise"
+                return "hole"
+        return "solid"
+
+    V = {}
+
+    def gv(i, j, layer):
+        k = (i, j, layer)
+        if k not in V:
+            V[k] = b.bm.verts.new(W(us[i], zs[j], 0.0 if layer == 0 else -thick))
+        return V[k]
+
+    def quad(a, c, d, e):
+        f = b.bm.faces.new((a, c, d, e))
+        f[b.slot] = slot
+        wall.append(f)
+
+    for i in range(nu):
+        for j in range(nz):
+            if cell(i, j) != "solid":
+                continue
+            quad(gv(i, j, 0), gv(i + 1, j, 0), gv(i + 1, j + 1, 0), gv(i, j + 1, 0))
+            quad(gv(i, j + 1, 1), gv(i + 1, j + 1, 1), gv(i + 1, j, 1), gv(i, j, 1))
+            for di, dj, e0, e1 in ((-1, 0, (i, j), (i, j + 1)), (1, 0, (i + 1, j + 1), (i + 1, j)),
+                                   (0, -1, (i + 1, j), (i, j)), (0, 1, (i, j + 1), (i + 1, j + 1))):
+                nb = cell(i + di, j + dj)
+                if nb in ("solid", "rise"):
+                    continue
+                if nb == "out":
+                    if di == -1 and not cap_left:
+                        continue
+                    if di == 1 and not cap_right:
+                        continue
+                    if dj == 1 and not cap_top:
+                        continue
+                a0, a1 = gv(e0[0], e0[1], 0), gv(e1[0], e1[1], 0)
+                b0, b1 = gv(e0[0], e0[1], 1), gv(e1[0], e1[1], 1)
+                quad(a0, b0, b1, a1)
+
+    for o in ops:
+        if not o.get("arch"):
+            continue
+        uc, hw = o["u"], o["_hw"]
+        zp, top = o["z"] + o["_pier"], o["z"] + o["h"]
+        rise = top - zp
+        prof = _arch_profile(o.get("style", "round"), hw, rise, steps, point=o.get("point", 0.2))
+        left = [p for p in prof if p[0] <= 1e-9]
+        if abs(left[-1][0]) > 1e-6:
+            left.append((0.0, rise))
+        iu0, iuc, iu1 = us.index(key(uc - hw)), us.index(key(uc)), us.index(key(uc + hw))
+        jz0, jz1 = zs.index(key(zp)), zs.index(key(top))
+        for side in (-1, 1):
+            arc = [(uc - side * x, zp + zz) for x, zz in left[1:-1]]
+            outer_i = iu0 if side < 0 else iu1
+            front = [gv(outer_i, jz0, 0)] + [b.bm.verts.new(W(p[0], p[1], 0.0)) for p in arc] + \
+                    [gv(iuc, jz1, 0), gv(outer_i, jz1, 0)]
+            back = [gv(outer_i, jz0, 1)] + [b.bm.verts.new(W(p[0], p[1], -thick)) for p in arc] + \
+                   [gv(iuc, jz1, 1), gv(outer_i, jz1, 1)]
+            poly = [(us[outer_i], zs[jz0])] + arc + [(uc, top), (us[outer_i], top)]
+            for i0, i1, i2 in _ear_clip(poly):
+                wall.append(b.bm.faces.new((front[i0], front[i1], front[i2])))
+                wall.append(b.bm.faces.new((back[i2], back[i1], back[i0])))
+            m = len(front) - 1
+            for k in range(m - 1):
+                wall.append(b.bm.faces.new((front[k], back[k], back[k + 1], front[k + 1])))
+        for f in wall:
+            if f.is_valid:
+                f[b.slot] = slot
+
+    for o in ops:
+        uc, z0, w, h = o["u"], o["z"], o["w"], o["h"]
+        hw, pier = o["_hw"], o["_pier"]
+        fill = o.get("fill", "glow")
+        reveal = o.get("reveal", thick * 0.6)
+        cont = _opening_contour(o, steps)
+        fw = o.get("frame", 0.07)
+        fo = o.get("frame_out", 0.04)
+        door_like = z0 <= 1e-6
+        if fw > 0.0:
+            frame += _lband(bf, W, cont, fw, -0.01, fo, frame_slot, closed=not door_like)
+        if o.get("sill"):
+            frame += _lbox(bf, W, uc - hw - fw - 0.06, uc + hw + fw + 0.06,
+                           z0 - o.get("sill_h", 0.10), z0, -0.02,
+                           fo + o.get("sill_out", 0.08), frame_slot)
+        if o.get("step"):
+            frame += _lbox(bf, W, uc - hw - 0.3, uc + hw + 0.3, 0.0, 0.14, -0.02,
+                           0.42, frame_slot)
+        if fill == "none":
+            continue
+        if fill == "open":
+            glow += _lprism(bglow, W, cont, -thick - 0.30, -thick - 0.26, glow_slot)
+            continue
+        if fill == "wood":
+            trim += _lprism(btrim, W, cont, -reveal - 0.04, -reveal, trim_slot)
+            trim += _lbox(btrim, W, uc - 0.03, uc + 0.03, z0 + 0.02, z0 + pier - 0.05,
+                          -reveal, -reveal + 0.025, trim_slot)
+            continue
+        glow += _lprism(bglow, W, cont, -reveal - 0.03, -reveal, glow_slot)
+        if fill == "shutter":
+            tw = max(0.08, w * 0.22)
+            trim += _lband(btrim, W, cont, tw, -reveal, -reveal + 0.04, trim_slot,
+                           closed=True, outward=False)
+            trim += _lbox(btrim, W, uc - tw * 0.4, uc + tw * 0.4, z0, z0 + pier,
+                          -reveal, -reveal + 0.035, trim_slot)
+        if fill == "jali":
+            # grila de piatra 3 x 4 in fata placii GLOW (brief §1.2: "fete
+            # retrase cu grila de 3 x 4 gauri"): 2 montanti + 3 traverse,
+            # sub nasterea arcului
+            bt = 0.07
+            dj0, dj1 = -reveal + 0.01, -reveal + 0.10
+            for k in (1, 2):
+                uu = uc - hw + w * k / 3.0
+                frame += _lbox(bf, W, uu - bt * 0.5, uu + bt * 0.5, z0, z0 + pier,
+                               dj0, dj1, frame_slot)
+            for k in (1, 2, 3):
+                zz = z0 + pier * k / 4.0
+                frame += _lbox(bf, W, uc - hw, uc + hw, zz - bt * 0.5, zz + bt * 0.5,
+                               dj0, dj1, frame_slot)
+    return {"wall": wall, "frame": frame, "glow": glow, "trim": trim}
+
+
+def facade_bays(b, bglow, btrim, p0, u, n, width, height, thick, openings, slot,
+                glow_slot, trim_slot, pad=0.35, **kw):
+    """`facade` pe un perete LUNG, spart in travee: golurile se grupeaza pe
+    intervalele lor laterale (plus rama), iar peretele se taie la mijlocul
+    spatiului dintre grupuri. Fiecare bucata e un `facade` propriu, cu
+    capetele interioare deschise (cap_left/right=False, coplanare), deci
+    coloanele unui gol nu mai taie tot peretele in felii."""
+    ivs = sorted(((o["u"] - o["w"] * 0.5 - pad, o["u"] + o["w"] * 0.5 + pad) for o in openings))
+    groups = []
+    for a0, a1 in ivs:
+        if groups and a0 <= groups[-1][1]:
+            groups[-1][1] = max(groups[-1][1], a1)
+        else:
+            groups.append([a0, a1])
+    cuts = [0.0]
+    for g0, g1 in zip(groups, groups[1:]):
+        c = (g0[1] + g1[0]) * 0.5
+        if 0.05 < c < width - 0.05:
+            cuts.append(c)
+    cuts.append(width)
+    U = Vector(u).normalized()
+    out = {"wall": [], "frame": [], "glow": [], "trim": []}
+    for k in range(len(cuts) - 1):
+        s0, s1 = cuts[k], cuts[k + 1]
+        ops = []
+        for o in openings:
+            if s0 <= o["u"] < s1:
+                o2 = dict(o)
+                o2["u"] = o["u"] - s0
+                ops.append(o2)
+        res = facade(b, bglow, btrim, Vector(p0) + U * s0, u, n, s1 - s0, height, thick,
+                     ops, slot, glow_slot, trim_slot,
+                     cap_left=(k == 0) and kw.get("cap_left", True),
+                     cap_right=(k == len(cuts) - 2) and kw.get("cap_right", True),
+                     cap_top=kw.get("cap_top", True), steps=kw.get("steps", 8),
+                     frame_slot=kw.get("frame_slot"), bframe=kw.get("bframe"))
+        for kk in out:
+            out[kk] += res[kk]
+    return out

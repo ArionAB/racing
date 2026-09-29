@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/dusk_cycle.gd" id="6_dusk"]
 [ext_resource type="Script" path="res://scenes/hazards/alley_gate.gd" id="7_gate"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="prop"]
+[ext_resource type="Script" uid="uid://cq4f4qn3mfcwr" path="res://scenes/props/city_fill.gd" id="cityfill"]
 [ext_resource type="PackedScene" uid="uid://cr4g7v7yxvtw" path="res://assets/models/jodhpur/animals/baraat_horse.glb" id="s_baraat_horse"]
 [ext_resource type="PackedScene" uid="uid://cgs8pp67cghlt" path="res://assets/models/jodhpur/animals/black_kite_bird.glb" id="s_black_kite_bird"]
 [ext_resource type="PackedScene" uid="uid://ccx0v5j8mblnt" path="res://assets/models/jodhpur/animals/langur.glb" id="s_langur"]
@@ -166,3 +167,9 @@ script = ExtResource("prop")
 [node name="ZoneG_Stanca" type="Node3D" parent="DecorManual"]
 
 [node name="ZoneH_Dreapta" type="Node3D" parent="DecorManual"]
+
+[node name="OrasFill" type="Node3D" parent="."]
+script = ExtResource("cityfill")
+models = Array[PackedScene]([ExtResource("s_blue_house_a"), ExtResource("s_blue_house_b"), ExtResource("s_blue_house_c"), ExtResource("s_blue_house_d"), ExtResource("s_blue_house_e"), ExtResource("s_haveli_facade")])
+weights = PackedFloat32Array(0.1, 0.25, 0.25, 0.2, 0.2, 0.05)
+indigo_ratio = 0.4

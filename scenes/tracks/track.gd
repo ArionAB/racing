@@ -6479,44 +6479,71 @@ func _build_ravine_water() -> void:
 		zone.name = "RavineWater_%d" % ri
 		zone.backoff_m = spec.z
 		var depth_scale := maxf(water_y - float(_sampler._floors.get(ri, water_y - 3.0)), 1.0)
-		var wet := 0
+		# Semintele: celulele sub apa care tin de rapa (in interval, pe latura
+		# ei). Apoi UMPLERE pe vecini, oriunde terenul e tot sub apa: fara ea,
+		# marginea intervalului taia suprafata drept, cu apa "in aer" deasupra
+		# unui fund care continua sa coboare (prima captura de pe Devkund).
+		# Asa malul iese acolo unde terenul chiar urca peste apa.
+		var seeds: Array[Vector2i] = []
 		for gz in range(gz0, gz1 + 1):
 			for gx in range(gx0, gx1 + 1):
-				var h := [_terr_heights[gz * row + gx], _terr_heights[gz * row + gx + 1],
-					_terr_heights[(gz + 1) * row + gx], _terr_heights[(gz + 1) * row + gx + 1]]
-				var lowest: float = h.min()
-				if lowest >= water_y:
+				if _cell_lowest(gx, gz) >= water_y:
 					continue
 				var cx := _terr_origin.x + (float(gx) + 0.5) * step
 				var cz := _terr_origin.z + (float(gz) + 0.5) * step
-				var c := Vector3(cx, water_y, cz)
-				var ci := _closest_baked_index(c)
+				var ci := _closest_baked_index(Vector3(cx, water_y, cz))
 				if TrackSideSampler._ring_window(_dists[ci] / total, r.x, r.y, 0.0001) <= 0.0:
 					continue
 				if not is_zero_approx(r.w) and signf(r.w) != _sampler._side_sign_at(ci, cx, cz):
 					continue
-				if _channel_water_covers(c):
+				seeds.append(Vector2i(gx, gz))
+		var filled := {}
+		var queue := seeds.duplicate()
+		for c0 in seeds:
+			filled[c0] = true
+		while not queue.is_empty():
+			var cur: Vector2i = queue.pop_back()
+			for dv: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var nb := cur + dv
+				if filled.has(nb) or nb.x < 0 or nb.y < 0 						or nb.x >= _terr_cells or nb.y >= _terr_cells:
 					continue
-				wet += 1
-				_ravine_wet[Vector2i(gx, gz)] = water_y
-				var corners: Array[Vector3] = [
-					Vector3(_terr_origin.x + gx * step, water_y, _terr_origin.z + gz * step),
-					Vector3(_terr_origin.x + (gx + 1) * step, water_y, _terr_origin.z + gz * step),
-					Vector3(_terr_origin.x + gx * step, water_y, _terr_origin.z + (gz + 1) * step),
-					Vector3(_terr_origin.x + (gx + 1) * step, water_y, _terr_origin.z + (gz + 1) * step)]
-				for k: int in [0, 1, 2, 1, 3, 2]:
-					var t := clampf((water_y - float(h[k])) / depth_scale, 0.0, 1.0)
-					st.set_color(_sea_color(t * SEA_NEAR_DEPTH))
-					st.set_uv2(Vector2.ZERO)
-					st.add_vertex(corners[k] - global_position)
-				var shape := CollisionShape3D.new()
-				var box := BoxShape3D.new()
-				var top := water_y - 0.6
-				var bottom := lowest - 6.0
-				box.size = Vector3(step, top - bottom, step)
-				shape.shape = box
-				shape.position = Vector3(cx, (top + bottom) * 0.5, cz) - global_position
-				zone.add_child(shape)
+				if _cell_lowest(nb.x, nb.y) >= water_y:
+					continue
+				filled[nb] = true
+				queue.append(nb)
+		var wet := 0
+		for cell: Vector2i in filled:
+			var gx := cell.x
+			var gz := cell.y
+			var h := [_terr_heights[gz * row + gx], _terr_heights[gz * row + gx + 1],
+				_terr_heights[(gz + 1) * row + gx], _terr_heights[(gz + 1) * row + gx + 1]]
+			var lowest: float = h.min()
+			var cx := _terr_origin.x + (float(gx) + 0.5) * step
+			var cz := _terr_origin.z + (float(gz) + 0.5) * step
+			if _channel_water_covers(Vector3(cx, water_y, cz)):
+				continue
+			if _ravine_wet.has(cell):
+				continue # alta rapa a umplut-o deja
+			wet += 1
+			_ravine_wet[Vector2i(gx, gz)] = water_y
+			var corners: Array[Vector3] = [
+				Vector3(_terr_origin.x + gx * step, water_y, _terr_origin.z + gz * step),
+				Vector3(_terr_origin.x + (gx + 1) * step, water_y, _terr_origin.z + gz * step),
+				Vector3(_terr_origin.x + gx * step, water_y, _terr_origin.z + (gz + 1) * step),
+				Vector3(_terr_origin.x + (gx + 1) * step, water_y, _terr_origin.z + (gz + 1) * step)]
+			for k: int in [0, 1, 2, 1, 3, 2]:
+				var t := clampf((water_y - float(h[k])) / depth_scale, 0.0, 1.0)
+				st.set_color(_sea_color(t * SEA_NEAR_DEPTH))
+				st.set_uv2(Vector2.ZERO)
+				st.add_vertex(corners[k] - global_position)
+			var shape := CollisionShape3D.new()
+			var box := BoxShape3D.new()
+			var top := water_y - 0.6
+			var bottom := lowest - 6.0
+			box.size = Vector3(step, top - bottom, step)
+			shape.shape = box
+			shape.position = Vector3(cx, (top + bottom) * 0.5, cz) - global_position
+			zone.add_child(shape)
 		if wet == 0:
 			zone.free()
 			push_warning("custom_ravine_water: rapa %d n-are nicio celula sub %.1f" % [ri, water_y])
@@ -6552,6 +6579,12 @@ func jump_lip_ahead(idx: int, within_m: float) -> float:
 
 
 ## Un punct cade pe suprafata de apa a unui canal (nu vad, nu groapa)?
+func _cell_lowest(gx: int, gz: int) -> float:
+	var row := _terr_cells + 1
+	return minf(minf(_terr_heights[gz * row + gx], _terr_heights[gz * row + gx + 1]),
+		minf(_terr_heights[(gz + 1) * row + gx], _terr_heights[(gz + 1) * row + gx + 1]))
+
+
 func _channel_water_covers(pos: Vector3) -> bool:
 	for ch in _channels:
 		if bool(ch.get("ford", false)) or bool(ch.get("pit", false)):

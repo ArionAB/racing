@@ -173,7 +173,7 @@ G2 refăcut); rândurile noi (apa fântânii, peretele, kickerul) vin de acolo, 
 | sfârșitul benzii de 6,5 (bazarul se îngustează la 4,5) | 0.118 | +1,4 | → 4,5 | |
 | **buza fântânii** (începe coborârea) | **0.135** | −0,1 | 4,5 | (−209, 77) |
 | fundul: palierul de −9 | 0.189 – 0.206 | −9,0 | 4,5 / 5,0 | |
-| apa fântânii (între brațe, pe stânga) | cornișa 0.145 – 0.264 (lungime) | apă −9,5, fund −14 | | 20 de celule, repunere cu 14 m |
+| apa fântânii (între brațe, pe stânga) | cornișa 0.145 – 0.264 (lungime) | apă −9,5, fund −14 | | 26 de celule, repunere cu 14 m |
 | peretele exterior (dreapta, debleu 0.135 – 0.264) | | buza 0,0 | | +1 m la 4,5–9,5 m de margine, 90 % la 11–19 m |
 | **vârful acului de păr** (capătul de EST) | **0.198** | −9,0 | 5,0 | (−86, 61) |
 | **ieșirea din fântână** | **0.264** | −0,2 | 4,5 | (−215, 43) |

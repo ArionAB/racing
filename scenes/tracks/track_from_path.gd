@@ -200,6 +200,19 @@ extends Track
 @export var custom_ravine_widths: Array[Vector2] = []
 ## Vezi [method Track._ravine_floor_slopes].
 @export var custom_ravine_floor_slopes: Array[Vector2] = []
+## APA intr-o rapa: (indice in `custom_ravines`, cota ABSOLUTA a apei, metri
+## de elan la repunere). Pe o tema fara mare rapa ramane altfel uscata. Vezi
+## Track._build_ravine_water.
+@export var custom_ravine_water: Array[Vector3] = []
+## DEBLEE: (frac_start, frac_end pe LUNGIME, cota ABSOLUTA a buzei, latura
+## +-1). Soseaua taiata in teren: pe latura data peretele urca de la umar pana
+## la buza. Perechea pe plus a rapei-cornisa. Vezi
+## TrackSideSampler._lift_cuttings.
+@export var custom_cuttings: Array[Vector4] = []
+## Forma debleelor: (umar plat dincolo de asfalt m, panta peretelui m/m,
+## intindere m). Umarul sub ~5 m lasa un prag pe marginea asfaltului din cauza
+## grilei de teren de 7.9 m — vezi TrackSideSampler._lift_cuttings.
+@export var custom_cutting_shape: Vector3 = Vector3(5.5, 1.3, 40.0)
 ## PARAPET DECLARAT: (frac_start, frac_end, regim RAIL_*, latura +-1 sau 0).
 ## Vezi Track._rail_segments — pe o pista fara gard (`walls: false`) singurul
 ## regim cu efect e RAIL_POSTS: stalpi rari pe buza, fara coliziune.
@@ -358,6 +371,18 @@ func _ravine_widths() -> Array[Vector2]:
 
 func _ravine_floor_slopes() -> Array[Vector2]:
 	return custom_ravine_floor_slopes
+
+
+func _ravine_water() -> Array[Vector3]:
+	return custom_ravine_water
+
+
+func _cuttings() -> Array[Vector4]:
+	return custom_cuttings
+
+
+func _cutting_shape() -> Vector3:
+	return custom_cutting_shape
 
 
 func _lagoon_points() -> Array[Vector2]:

@@ -41,6 +41,12 @@ const HONK_SPEED_DIFF: float = 6.0
 ## in jurul pragului de viteza/distanta.
 const HONK_HOLD_S: float = 1.2
 
+## Viteza cu care un tuk-tuk ia buza unei sarituri de canal (m/s). ProbeJump pe
+## Devkund (gol 15.4 m): Muscle cade la 20 m/s si trece la 24 cu +4.6 m marja.
+const JUMP_SPEED: float = 26.0
+## Pe cati metri dinaintea buzei isi ia elanul.
+const JUMP_RUNUP_M: float = 40.0
+
 ## Rasturnat sau oprit peste atata (s) -> se redreseaza singur (impuls "de
 ## jucarie" — brief: "o saritura de jucarie").
 const UPSIDE_RECOVER_S: float = 2.5
@@ -126,6 +132,28 @@ func update(delta: float) -> void:
 	fwd.y = 0.0
 	fwd = fwd.normalized()
 	_steer = clampf(_angle_to(fwd, near) * 2.2, -1.0, 1.0)
+
+	# --- elanul de saritura (Devkund, brief §2 G2) ---
+	# La 14 m/s un tuk-tuk nu trece niciun gol de canal: ar cadea in apa,
+	# RespawnZone l-ar pune inapoi cu 70 m de elan (tot la 14 m/s) si ar cadea
+	# iar, la nesfarsit — o coada de tuk-tuk-uri pe loc chiar pe dreapta de
+	# lansare. Deci pe ultimii JUMP_RUNUP_M dinaintea buzei viteza e impinsa
+	# spre JUMP_SPEED (motorul lui are plafon 18, deci impingerea e directa pe
+	# corp, ca redresarea "de jucarie"). Dupa aterizare franeaza singur inapoi
+	# la croaziera.
+	var to_lip := track.jump_lip_ahead(idx, JUMP_RUNUP_M)
+	if to_lip >= 0.0:
+		var want := lerpf(JUMP_SPEED, CRUISE_SPEED, to_lip / JUMP_RUNUP_M)
+		if speed < want:
+			var r := track.route_at(0)
+			var dir := r.baked[r.wrap_index(idx + 1)] - r.baked[r.wrap_index(idx)]
+			dir.y = 0.0
+			if dir.length_squared() > 0.001:
+				var v := car.linear_velocity
+				var add := dir.normalized() * (want - speed)
+				car.linear_velocity = Vector3(v.x + add.x, v.y, v.z + add.z)
+		_throttle = 1.0
+		return
 
 	# --- pedale: tinta fixa de croaziera, fara drift, fara turbo ---
 	if speed > CRUISE_SPEED * 1.05:

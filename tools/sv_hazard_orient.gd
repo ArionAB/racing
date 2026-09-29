@@ -163,7 +163,10 @@ func _init() -> void:
 		var L := curve.get_baked_length()
 		var p := curve.sample_baked(best_o) + best.position
 		var fwd := (curve.sample_baked(fmod(best_o + 2.0, L)) - curve.sample_baked(best_o)).normalized()
-		var ang := rad_to_deg(acos(clampf((-n.transform.basis.z).dot(fwd), -1.0, 1.0)))
+		# Axa NORMALIZATA: o piesa scalata pe Z (zidurile scurtate pe curba la
+		# portile Jodhpur, scara 0,5-1,0) dadea dot = scara, adica 53-127 de
+		# grade pe un zid perfect aliniat.
+		var ang := rad_to_deg(acos(clampf((-n.transform.basis.z.normalized()).dot(fwd), -1.0, 1.0)))
 		var lat := (n.position - p).dot(fwd.cross(Vector3.UP))
 		var flag := ""
 		if ang > 20.0 and ang < 160.0:

@@ -1940,3 +1940,53 @@ de clasificatorul de permisiuni al sesiunii; nu am insistat. Piesele din
 runda asta nu depind de reparație (`facade()` își face singur placa GLOW ca
 prismă închisă), dar `blue_house_a/d` (care folosesc `arch_opening`) trebuie
 regenerate DUPĂ merge.
+
+## Val 3 — runda 3b: `blue_house_d` și decizia pe haveli (29 sep 2026)
+
+### `buildings/blue_house_d.glb` — 5624 tri (buget 6500)
+
+Același defect ca la b/c/e: ușa și fereastra erau panouri `arch_opening`
+ieșite, grupate jos pe fața +X (fața în fugă pe decupare), iar camera de pe
+acoperiș la fel. Trecută pe `facade()`; fața cu ușa e acum **+Y** (frontala
+decupării, ca la c), camera `--compare` az 67 (lățimi aparente 505/182 px).
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| corp | cub 7×7, perete ≈ 0,65 din lățimea totală, cornișă groasă | 7×7, corp 6,3 m (raport 0,63), cornișă 0,18 | da |
+| ușă | 1, pe fața FRONTALĂ (+Y), la dreapta mijlocului, arc rotund, lemn, ramă deschisă | u 3,65 din 6,65, 1,8×3,4, ramă 0,16 | da |
+| treaptă | dală lată de piatră în fața ușii | 2,9×0,76×0,24 | da |
+| fantă | 1, verticală, îngustă, stânga ușii, la mijlocul înălțimii | u 1,35, 0,16×1,2, prag 3,1 | da |
+| fereastră +X | 1, dreptunghi închis cu lemn, la mijlocul feței în fugă | u 3,1, 1,0×1,8, prag 2,0, obloane | da |
+| parapet + grilaj | parapet scund pe tot perimetrul, **stâlpi albaștri doar la colțuri**, grilaj NEGRU rar, scund | parapet 0,25, 4 stâlpi, grilaj 0,8 m cu 2 lise, stâlpi la 1,3 m | da |
+| camera de sus | retrasă spre spate, puțin spre stânga, ușă îngustă închisă pe +X, fereastră cu grilaj pe +Y | 3,0×2,6×2,1, ușă arcuită GLOW, fereastră GLOW | da |
+| culoare | albastru DESCHIS (~(120,150,216) pe fața frontală) | tentă preview light `#8FB0DC` | vezi mai jos |
+
+h/l: total 8,8 m (brief 8,5; +3,5%, în ±15%) — pe randare înălțime/lățime
+1,05 față de 1,02 pe decupare. **Tentă:** brief-ul dă `indigo`, dar
+decuparea e mai deschisă decât a lui c; preview-ul e pe light, ca la haveli.
+Consecință: în preview nu mai rămâne **nicio casă pe indigo** — la integrare
+liderul decide ce case primesc `blue_lime_indigo`. Diferențe rămase: pe
+decupare grilajul are un model în zigzag între lise; pene diagonale de AO pe
+fața frontală, aceleași ca la c (acceptată) — densify la 1,4 m le transformă
+în halouri pătrate în jurul golurilor și urcă la 7632 tri, deci rămâne 2,5.
+
+### `blue_house_a` (pilotul) — neatins, de semnalat
+
+Pe `blue_house_a.png` ușa stă tot într-un **panou ieșit** din `arch_opening`
+(se vede ca dreptunghi mai închis în jurul ușii, pe fața din stânga).
+Pilotul e acceptat de dezvoltator; nu l-am schimbat.
+
+### `haveli_facade` — decizia dezvoltatorului
+
+Dezvoltatorul a acceptat **4796 tri** (brief 900) și tenta **light** în locul
+indigo-ului. Consemnat în `jodhpur_kit.md` §1.4 și în comentariul pragului
+din `verify_jodhpur.sh` (pragul era deja 4900). Maparea de tentă există doar
+în `tools/blender/preview_jodhpur.py` (`COMPARE_SPECS["haveli_facade"]`,
+`House_Wall` `#8FB0DC`); în `scripts/`/`scenes/` nu apare `haveli`, deci
+maparea pe clasa `blue_lime_light` rămâne de făcut la integrarea pistei.
+
+### Bug reparat în `--sheet`
+
+`--sheet 3` trimitea valul ca `int`, dar cheia din `WAVE_PIECES` e `"3"`:
+planșa ieșea fără piese și nu se rescria. Acum `fidelity_sheet` încearcă și
+`str(wave)`; `jodhpur_fidelity_val3.png` e regenerată.

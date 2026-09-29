@@ -196,17 +196,18 @@ cele două clase de culoare.
 ### 1.4 Orașul albastru — `build_jodhpur_city.py`
 
 Casele se multiplică (sute de exemplare), deci **≤ 300 tri pe casă simplă**
-(brief-ul pistei §6; `haveli_facade` ≤ 900). Casele sunt pe **două tente**, iar
-preview-ul le arată pe cea din coloană.
+(brief-ul pistei §6; `haveli_facade` ≤ 900 — **depășit, decizia
+dezvoltatorului din 29 sep 2026, vezi rândul haveli**). Casele sunt pe **două
+tente**, iar preview-ul le arată pe cea din coloană.
 
 | fișier | cote | h/l | tentă în preview | contract (elementele de pe decupare) |
 |---|---|---:|---|---|
 | `buildings/blue_house_a.glb` | pilotul, §1.1 | 0,95 | light | — |
 | `buildings/blue_house_b.glb` | **7 × 6** m, **3 etaje în trepte**, 9,5 m | 1,09 | light | trei volume care se retrag spre spate, rezervor negru pe cel mai înalt, **o plantă verde în colțul terasei de jos**, balustradă pe terasa din mijloc |
 | `buildings/blue_house_c.glb` | **7 × 7** m, 2 etaje, 6,5 m | 0,88 | light | cub simplu cu parapet, ușă în arc pe față, 2 ferestre mici sus, **rezervor pe acoperiș** |
-| `buildings/blue_house_d.glb` | **7 × 7** m, 2 etaje + cameră pe acoperiș, 8,5 m | 0,88 | indigo | **terasă cu balustradă** pe tot perimetrul, camera de pe acoperiș retrasă spre spate |
+| `buildings/blue_house_d.glb` | **7 × 7** m, 2 etaje + cameră pe acoperiș, 8,5 m | 0,88 | ~~indigo~~ **light** în preview (runda 3: decuparea e albastru deschis, fața frontală ~(120,150,216), mai deschisă decât a lui c; tenta la integrare o decide liderul) | **terasă cu balustradă** pe tot perimetrul, camera de pe acoperiș retrasă spre spate |
 | `buildings/blue_house_e.glb` | **7 × 6** m, 2 + 1 etaje, 8,5 m | 0,83 | light | volum în L, **scară exterioară pe față** care urcă spre dreapta până la terasa de jos |
-| `buildings/haveli_facade.glb` | **10 × 6** m, 3 etaje, **11 m** | 0,92 | **indigo** | casa bogată: **arcade pe parter, balcoane de piatră cu console pe etajele 1 și 2**, ferestre în arc (numără-le), balustradă pe terasă. `≤ 900` tri |
+| `buildings/haveli_facade.glb` | **10 × 6** m, 3 etaje, **11 m** | 0,92 | ~~indigo~~ **light** | casa bogată: **arcade pe parter, balcoane de piatră cu console pe etajele 1 și 2**, ferestre în arc (numără-le), balustradă pe terasă. ~~`≤ 900`~~ **4796 tri** (prag verify 4900) și tentă **light**, nu indigo — **decizia dezvoltatorului, 29 sep 2026**. Motivul: decuparea e albastru deschis (`#7896DE` pe fața luminată; indigo `#4F6FB8` randa „albastru-marin”), iar jharokha cu 3 arce, cele 12 goluri arcuite cu rame și balustradele cu baluștri cer geometria (doar golurile ≈ 1400 tri). CLAUDE.md: triunghiurile se raportează fără plafon, doar materialele au veto |
 | `props/rooftop_tank.glb` | Ø **1,2** × **1,4** m | 0,79 | — | cilindru `LOG_DARK` cu **nervuri orizontale** și capac bombat. `segments` 12. Se pune pe sute de acoperișuri |
 | `props/rooftop_clutter.glb` | placă **3 × 2,5** m, stâlpi 1,8 m | 0,70 | light | placa de terasă, rezervor mic, oale, **două rufe (galben și roz) pe o sfoară între doi stâlpi**, ca pe decupare |
 

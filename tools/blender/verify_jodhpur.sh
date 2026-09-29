@@ -130,8 +130,8 @@ check "buildings/blue_house_b.glb"    6000 --origin=assembly
 check "buildings/blue_house_c.glb"    4600 --origin=assembly
 check "buildings/blue_house_d.glb"    6500 --origin=assembly
 check "buildings/blue_house_e.glb"    6500 --origin=assembly
-# haveli_facade 912 -> 4900 (runda 3, PESTE brief-ul de 900 -- decizia
-# liderului): verdictul "arcade in Y, usi maro in loc de geamuri, albastru-
+# haveli_facade 912 -> 4900 (runda 3, PESTE brief-ul de 900 -- acceptat de
+# DEZVOLTATOR 29 sep 2026, cu tenta light): verdictul "arcade in Y, usi maro in loc de geamuri, albastru-
 # marin" cerea lista completa de pe decupare: 4 goluri arcuite la parter (2
 # arcade mari cu usi de lemn), jharokha cu 3 arce + balcon cu baluștri +
 # streasina, 2 ferestre arcuite laterale, latura +X cu fereastra, 2 ferestre

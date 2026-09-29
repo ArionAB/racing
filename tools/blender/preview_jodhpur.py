@@ -268,8 +268,14 @@ COMPARE_SPECS = {
     },
     "blue_house_d": {
         "category": "buildings",
+        # runda 3: decuparea e albastru DESCHIS (fata frontala ~(120,150,216),
+        # mai deschisa decat decuparea lui blue_house_c) -> tenta light, ca la
+        # haveli; brief-ul o dadea indigo. Peretele amesteca WALL + nimic
+        # altceva (fara rezervor).
+        "camera": {"azimuth": 67.0, "elevation": 16.0, "margin": 1.3, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
         "tints": {
-            "House_Wall": "#4F6FB8",
+            "House_Wall": "#8FB0DC",
             "House_Trim": "#6B4A2E",
             "House_Glow": "#2A2A2E",
             # balustrada e GLOW (grilaj negru de fier pe blue_house_d, brief
@@ -978,7 +984,9 @@ def fidelity_sheet(wave, out_dir=None, names=None):
     foloseste `str(wave)` (nu `%d`, care ar pica pe un wave alfanumeric)."""
     fid_dir = os.path.join(PROJECT, "docs", "asset_briefs", "img", "jodhpur_fidelity")
     out_dir = out_dir or os.path.join(PROJECT, "docs", "asset_briefs", "img")
-    names = names or WAVE_PIECES.get(wave, [])
+    # `--sheet 3` vine ca int, dar cheia valului 3 e "3" -- fara fallback
+    # plansa iesea goala si nerescrisa (runda 3, blue_house_d)
+    names = names or WAVE_PIECES.get(wave) or WAVE_PIECES.get(str(wave), [])
     out_path = os.path.join(out_dir, "jodhpur_fidelity_val%s.png" % wave)
     ok = _run_compose(["--sheet", str(wave), "--fid-dir", fid_dir,
                        "--names", ",".join(names), "--out", out_path])

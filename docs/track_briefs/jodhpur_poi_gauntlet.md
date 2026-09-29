@@ -321,13 +321,49 @@ aparțin coordonatorului sau dezvoltatorului, nu unui POI.
 
 ## Fapte din fundație
 
-`<de completat>` — de coordonator, după merge-ul fundației
-(`wt-jod-poi-base`): commit-ul fundației; ce e montat per zonă (noduri
-`Zone*`); cifrele de plecare ale gărzilor (probe_decor, ProbeLaneClear cu
-baza scrisă, probe_manual, ProbeBuried, ProbeRace pe 16 seed-uri); ce s-a
-schimbat în traseu (re-rulează `SvJodFractii.tscn`); cotele reale ale pieselor
-din kit în joc (măsurătorile kitului); ce premise din lista de mai sus au fost
-închise de fundație.
+Scena integrată: `jodhpur/poi-integrare` (worktree `D:/GameDev/wt-jod-poi-main`),
+= fundația (`jodhpur/poi-fundatie` 74c471e3) + bara (`jodhpur/poi-bara`) +
+relieful (`jodhpur/poi-relief` 106d41d2) + lumina (`jodhpur/poi-lumina`
+56d35371). **Valurile pleacă din vârful acestei ramuri.**
+
+- **Kitul e plasabil:** `PROP_COLLISION` și `CLASSES_BY_MODEL` pentru cele 50
+  GLB, iar `.glb.import`-urile cu uid-urile de referință sunt comise. **Nu comite
+  niciun `.glb.import` regenerat local.** Măsurătoarea reală a fiecărei piese e în
+  `docs/asset_briefs/jodhpur_masuratori.md` (sursa de adevăr pentru cote).
+- **Clase noi:** `blue_lime_light`, `blue_lime_indigo`, `red_sandstone`,
+  `rose_sandstone`, `rhyolite`. O casă devine indigo prin metadata `indigo` pe nod.
+- **`DecorManual`** are zonele goale `ZoneA_Start` … `ZoneH_Dreapta` și cele 50
+  de `ext_resource` `s_<stem>`. **Fiecare constructor adaugă noduri doar în zona
+  lui** (G2 intră în `ZoneG_Stanca`).
+- **Orașul din buclă e `OrasFill`** (MultiMesh, 554 de case, `indigo_ratio`
+  0,4, la ≥ 40 m de drum). Nu se pun case de mână acolo unde le pune deja umplutura.
+- **Relieful:** fântâna e acum o cornișă pe stânga (fanta spre apă la −9,5) cu
+  debleu pe dreapta (peretele urcă la 4,5–19 m de asfalt), cu `CameraFantana`
+  și apă cu `RespawnZone`. **Treptele NU sunt în teren**, fiindcă grila de 7,9 m
+  nu poate reda trepte. Vin din modulele `stepwell_*`, puse de C pe peretele
+  din dreapta. Devkund are `KickerDevkund` (gap 15,4 m, airtime 0,88 s la 32 m/s),
+  cu `RespawnZone` pe lac.
+- **Lumina** e reglată pe mască (varul H 221–228 la toate fazele, solul cald).
+  Garda e `tools/ProbeJodLumina.tscn -- --guard`: cere fereastră și trece
+  prin lacătul de GPU.
+- **Cifrele de plecare** (scena integrată, d810aa99): probe_decor
+  **13 materiale**; probe_manual **0**; ProbeBuried **0/0**; ProbeLayout OK
+  (pantă max 12,8 %); ProbeLaneClear **31** = 28 de stâlpi ai porții
+  ulicioarei + 3 ai rampei `ChannelKicker` Devkund (intenționat). ProbeRace
+  8 seed-uri `--dusk=0`: tur maxim 2,13–2,22 pe 150 s, **6 repuneri în total,
+  toate la furca ulicioarei (0,347–0,348)**, **1 `[blocaj]` (seed 3, 0,355,
+  tot la ulicioară)**, 0 căderi în apă la C și la G2. Blocajul de la ulicioară
+  e preexistent și ține de valul 2 (D).
+- **Lipsesc din cod** (nu le cere de la decor): aprinderea ferestrelor
+  noaptea (`*_Glow` nelegate de `dusk_lamps`), animația de culcare a vacii,
+  tunurile, tiroliana, artificiile, flacăra candelelor. Snapshot nu pornește
+  traficul.
+- **Deciziile dezvoltatorului (29 sep 2026):** porțile E rămân **dop de 7 m**
+  (vezi contractul E); amestecul indigo de 40 % rămâne până la alegerea pe
+  planșa `jodhpur_lumina/plansa_dupa.png`.
+- **Captura** se face DOAR prin lacătul de GPU:
+  `bash <scratchpad>/capture.sh <worktree> <out.png> -- --track=10 --frac=<F> --gamecam --dusk=0`
+  (calea exactă e în promptul constructorului).
 
 ## Contractele per POI
 
@@ -416,7 +452,7 @@ obligatoriu în ac (bara de turbo se încarcă).
 
 Geometria reală (§Premise 2, 3, 5): acul la **est** (0.198, r 7,3), rampele pe
 terasament peste podeaua de −9, pereții gropii la 40–60 m.
-Nu se atinge: relieful gropii (`TerrainHollow`, râpa 0.141–0.253), rampele.
+Nu se atinge: relieful gropii (cornișa/debleul de pe relief, `CameraFantana`, apa), rampele. **Actualizare după relief:** peretele gropii e acum pe DREAPTA fiecărei rampe (debleu, la 4,5–19 m), iar spre stânga e fanta cu apă. Treptele vin din `stepwell_flight_module` / `stepwell_corner`, înlănțuite pe acel perete, pe trei etaje, în V.
 Dacă trebuie `CameraZone`/`RespawnZone` și nu le-a pus fundația, le pune C, cu
 ProbeRace pe felie înainte și după.
 Piese: `stepwell_flight_module` (**decor pur, fără coliziune**, capete plane
@@ -498,7 +534,20 @@ cu parapet crenelat pe cealaltă, languri pe parapet. **Golul de 7,0 m**
 măsurat ca GOL. **Niciun `[blocaj]` > 2 s la porți pe 16 seed-uri.**
 
 Geometria reală (§Premise 6, 7): patru ace de ~100°, drum de 9 m, teren plat
-lateral — zidul și căderea sunt decor. Nu se atinge: traseul, lățimea de 4,5.
+lateral — zidul și căderea sunt decor. Nu se atinge: traseul.
+
+**Decizia dezvoltatorului (29 sep 2026): dop de 7 m.** Porțile se pun la
+scara **1,0**: golul măsurat e 7,16 m, cheia la 9,35 m
+(`jodhpur_masuratori.md` §4). Drumul se **îngustează la semilățimea 3,5** pe
+±6 m în jurul fiecărei porți (`custom_width_segments`, singura atingere de
+traseu permisă lui E). O `CameraZone` pe fiecare poartă ține camera sub
+cheie (tavan ≤ 9 m) sau o trece curat prin gol, verificat cu
+`ProbeCameraSolid`. Pozițiile propuse de fundație: **Jai 0,508, Fateh 0,530
+(sau 0,552), Loha 0,572**, pe porțiuni drepte după ace, nu la 0,48–0,49
+(acolo drumul are 11–13 m). Contractul: **niciun `[blocaj]` > 2 s la porți
+pe 16 seed-uri** (cu trafic), iar ProbeLaneClear: raportările noi sunt doar
+ale ușciorilor porților, fiecare atribuită, apoi linia de bază se mută cu
+motiv scris.
 Piese: `fort_gate_jai`, `fort_gate_fateh`, `fort_gate_loha` (`mesh`, originea
 centrată pe axul golului, pusă pe axa drumului), `fort_wall_segment`
 (capete plane la ±6, se înlănțuie; `mesh`), `fort_wall_turret`, `langur`

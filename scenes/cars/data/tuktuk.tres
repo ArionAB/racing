@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CarData" load_steps=3 format=3]
 
 [ext_resource type="Script" uid="uid://b3bsh85drrmvy" path="res://scenes/cars/car_data.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/models/stromboli/vehicles/ape_piaggio.glb" id="2"]
+[ext_resource type="PackedScene" uid="uid://cblf5sj5j6gjl" path="res://assets/models/jodhpur/vehicles/tuktuk.glb" id="2"]
 
 [resource]
 script = ExtResource("1")

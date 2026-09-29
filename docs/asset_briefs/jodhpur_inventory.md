@@ -1229,6 +1229,135 @@ al doilea slot în același nod ar fi dispărut sub clasă (regula 6).
   se reproduc cu `measure_opening(objs, lateral="y")` pe GLB-ul importat
   (fără cubul implicit).
 
+## Runda de corecții „fort2" (29 sep 2026)
+
+Contract: `docs/asset_briefs/jodhpur_kit.md` §1.2, §5. Worktree
+`D:/GameDev/wt-jod-fix`, ramura `feat/jodhpur-kit-fort2`. Verdict kit:
+`bash tools/blender/verify_jodhpur.sh` → `VERDICT KIT: OK` (31 GLB). Planșa
+pieselor atinse: `docs/asset_briefs/img/jodhpur_fidelity_fort2.png`
+(`preview_jodhpur.py --sheet fort2`).
+
+### Porțile cetății — contractul golului, măsurat
+
+| poartă | gol înainte | gol după | cheie înainte | cheie după | contract |
+|---|---:|---:|---:|---:|---|
+| `fort_gate_jai` | 5,55 m | **7,00 m** | 10,32 m | 10,32 m | gol ≥7,0, cheie ≥9,0 |
+| `fort_gate_fateh` | 5,55 m | **7,00 m** | 8,93 m | **9,15 m** | gol ≥7,0, cheie ≥9,0 |
+| `fort_gate_loha` | 5,55 m | **7,00 m** | 7,89 m | **9,15 m** | gol ≥7,0, cheie ≥9,0 |
+
+Măsurat cu `measure_opening(objs, lateral="y")` pe GLB-ul importat (fereastra
+z 0,15..1,8 m pentru gol; `crown_half=0,3` pentru cheie), nu din cod, nu din
+AABB.
+
+**Cauze găsite, verificate numeric înainte de fix (nu presupuse):**
+
+1. **Canaturile deschise intrau în gol.** `_gate_doors` folosea
+   `open_angle_deg=100` — peste 90°, vârful canatului se rotește ÎNAPOI spre
+   centrul golului, nu rămâne flush pe perete (verificat cu o formulă
+   închisă: la unghi ≤90°, extrema canatului spre centru nu trece niciodată
+   de poziția balamalei pe axa perpendiculară pe braț; la unghi >90°, varful
+   trece de ea). Balamaua însăși stătea pe marginea golului de contract, deci
+   chiar la 90° jumătate din grosimea canatului tot intra în gol. Fix:
+   balamaua mutată `hinge_margin≈0,13 m` în afara golului de 7,0 m (în
+   ambrazură, unde `center_span` >> `gap_w`), unghi implicit `88°`. Verificat
+   numeric: vârful cel mai apropiat de centru rămâne la |y|=3,56 m, gol liber
+   7,12 m > 7,0 m, cu marjă pentru țepi.
+2. **Soclul turnurilor (plinth) tăia fizic golul.** Frustumul de la baza
+   turnului (`tower_r+0,35=4,25` m rază) ajungea, la `ty=tower_gap/2`, cu
+   muchia interioară la 3,40 m < `GATE_GAP_W/2=3,5` — invizibil în cod
+   (frustumul nu intersectează arcul, doar fereastra de măsurat a golului la
+   z 0,15..1,8 m). Fix: `tower_gap` primește un termen explicit care
+   garantează `tower_gap/2 - (tower_r+plinth_flare) >= GATE_GAP_W/2 + 0,15`.
+3. **Cheia (`arch_h`) nu avea podea.** `min(wall_top_z*0,72, tower_h-3,0)`
+   scădea liniar cu `tower_h` — la turnurile mai joase (Fateh 14 m, Loha
+   12,5 m, „abatere permisă" a brief-ului), cheia cădea sub contract. Fix:
+   `max(GATE_KEY_MIN + 0,3, ...)` — marja de 0,3 m compensează faptul că
+   vârful unui arc ascuțit e o muchie de lățime zero, iar `measure_opening`
+   citește cheia pe o fereastră `crown_half=0,3` (nu un punct), deci
+   măsoară mereu puțin SUB vârful geometric, pe panta arcului (verificat
+   izolat: la `arch_h=9,0` țintă, `measure_opening` citea 8,86 m).
+
+### Fațadele de palat — element / pe decupare / în GLB / verdict
+
+`palace_facade_a` (nicio schimbare de cod în această rundă, doar regenerare
+odată cu vocabularul partajat):
+
+| element | pe decupare | în GLB | verdict |
+|---|---|---|---|
+| 2 etaje de ferestre în arc, goluri închise | goluri închise vizibile | `arch_opening(glass=True)` × 2 etaje | **prezent**, contrast clar (placă de sticlă solidă, vezi fix mai jos) |
+| arcadă centrală deschisă | 3 arce | `_local_arcade` | **prezent** |
+| turnuri de colț cu chhatri | 2 | prezent | **prezent** |
+
+`palace_facade_b` (fix de poziție + normală, această rundă):
+
+| element | pe decupare | în GLB înainte | în GLB după | verdict |
+|---|---|---|---|---|
+| rând dens de ferestre mici pe etajul superior (~20) | goluri închise vizibile | **absent complet** — `center.z` transmis era citit ca BAZĂ golului, nu centrul etajului; fereastra pornea la mijlocul peretelui și urca aproape prin acoperiș | rând complet de 20 ferestre în arc, centrate vertical în banda etajului, vizibile clar în randare | **prezent** |
+| sticlă închisă (contrast geam/piatră) | vizibil închis la culoare | geometrie prezentă dar **normala feței spre interior** (`recalc_face_normals` pe o placă unică izolată alege o direcție arbitrară) — 0 pixeli gri-neutru găsiți în banda de fereastră pe randare | placă subțire ÎNCHISĂ (fund+spate+laturi) pe care `recalc_face_normals` o orientează corect — glass acum vizibil ca sticlă închisă | **prezent** |
+| pavilion central cu cupolă, 2 chhatri, turnuri de colț | vizibil | prezent | prezent (neschimbat) | **prezent** |
+
+Fix-ul de normală e în `arch_opening` (`jodhpur_shapes.py`), deci global —
+afectează orice piesă cu `glass=True`. `palace_facade_a`, `market_gate` și
+`stepwell_pavilion` au fost regenerate odată cu el; verificat vizual că
+niciuna nu s-a stricat (randări comparate, fără regresie).
+
+### `fort_wall_turret` — element / pe decupare (fort_wall_segment.png) / în GLB / verdict
+
+| element | pe decupare | în GLB înainte | în GLB după | verdict |
+|---|---|---|---|---|
+| corp lat, fațetat (nu pătrat simplu) | colțuri tăiate vizibile, turnul citește mai lat decât zidul | pătrat cu muchii drepte | octogon (`WT_CHAMFER=0,85`), amprenta de contract 4,5×4,5 m neschimbată | **prezent** |
+| creneluri kangura (același stil ca zidul) | merloane ascuțite, cu vârf întunecat, ca pe zid | `crenellation(style="rounded")` — familie diferită de zid | `kangura_merlon` pe fețele axis-aligned, `_kangura_merlon_rotated` (contur identic, rotit manual) pe fețele oblice — aceleași cote `WS_MERLON_*` ca zidul | **prezent** |
+| 2 fante de tragere verticale, înguste | fante clar verticale | 2 casete aproape pătrate (0,22×0,85, raport 3,9:1), în `Turret_Stone` (STUD) | 2 fante verticale (0,14×1,0, raport ~7:1), nod separat `Turret_Glow` (regula GLOW) | **prezent** |
+
+Fără decupare proprie (documentat în escaladarea val 2a) — validat prin
+analogie cu turnurile de capăt de pe `fort_wall_segment.png` și verificat
+vizual în randarea `chain` (3 module + turnuri la capete).
+
+### Restul pieselor produse de `build_jodhpur_fort.py` — verificare de regresie
+
+`fort_bastion.glb`, `rampart_cannon.glb`: **byte-identice** cu HEAD dinaintea
+rundei (`git status` confirmă, funcțiile lor nu au fost atinse). Randare
+`fort_bastion` re-verificată vizual (fără regresie).
+
+### Triunghiuri / buget
+
+| piesă | tri înainte | tri după | buget |
+|---|---:|---:|---:|
+| `fort_gate_jai` | 10 656 | 10 656 (neschimbat — fix-ul mută geometrie existentă, nu adaugă) | 10 600 (per-nod, OK) |
+| `fort_gate_fateh` | 12 902 | 12 902 | 12 600 (per-nod, OK) |
+| `fort_gate_loha` | 10 656 | 10 656 | 10 600 (per-nod, OK) |
+| `palace_facade_a` | 11 128 | 13 148 (fix normală: placă unică → placă solidă) | 15 000 |
+| `palace_facade_b` | 17 292 | 19 312 (poziție fereastră + fix normală) | **20 000** (ridicat de la 14 000, motiv în `verify_jodhpur.sh`) |
+| `fort_wall_turret` | 2 484 | **1 700** (octogon cu mai puține segmente decât crenelurile rotunjite vechi) | 2 900 |
+| `fort_wall_segment`, `fort_bastion`, `rampart_cannon` | neschimbat | neschimbat | neschimbat |
+
+Notă pe bugetul per-nod vs total: `verify_glb.py` verifică bugetul PE NOD
+(`*_Stone`, nu suma cu `*_Doors`/`*_Glow`), de-aici porțile ies „OK" deși
+`run_build.py` le semnalează „DEPĂȘIT" pe totalul afișat — cifra din
+`verify_jodhpur.sh` (autoritatea contractului) e cea per-nod.
+
+### Commit-uri și SHA
+
+- `fix(jodhpur): portile cetatii la gol 7,0 m si cheie >=9 m; ferestre reale fatada B` —
+  gate hinge/plinth/key fix + palace window position + glass normal fix.
+- `fix(jodhpur): regenerare stepwell_pavilion cu geam corect (efect al fix-ului de normala)` —
+  efect secundar documentat al fix-ului global de normală.
+- `fix(jodhpur): fort_wall_turret -- octogonal, merloane kangura, fante verticale`.
+
+### Ce rămâne
+
+- **`palace_facade_a`/`palace_facade_b` proporții** (h/l, lățime) nerevăzute
+  în această rundă — doar geometria ferestrelor/normalelor a fost atinsă.
+- **Bugetul `palace_facade_b` (20 000)** e generos; dacă un buget mai strict
+  devine necesar, prima reducere candidată e densitatea ferestrelor etajului
+  superior (20 → mai puține, mai late) sau simplificarea plăcii de sticlă
+  (glass_t mai mic, deja la minim 0,02 m).
+- **Fantele turnului** nu apar în randarea `chain` la unghiul curent de
+  cameră (fața cu fantele nu e cea vizibilă din acel azimut) — geometria e
+  verificată corect poziționată (bbox, `Turret_Glow`), dar nu s-a găsit un
+  unghi de cameră dedicat care să le arate în context, per limitarea de timp
+  a rundei.
+
 ## Val 3 — orașul albastru (sesiune de continuare, 29 sep 2026)
 
 Contract: `docs/asset_briefs/jodhpur_kit.md` §1.4. Build:

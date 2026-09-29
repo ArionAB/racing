@@ -2434,3 +2434,110 @@ vacii (acțiunile cu fake user rămân în `bpy.data`); `purge_actions()` între
 - Excepții de slot declarate în `verify_jodhpur.sh`: `Bell`, `Kite` (ciocul
   galben — brief-ul cere `CAR_YELLOW`, dar nu declara excepția), `Peacock`;
   `--allow-slots=31` pe vacă pentru uger.
+
+## Val 5 grupa fundal — `rocks/jodhpur_horizon.glb` (`build_jodhpur_horizon.py`, 29 sep 2026)
+
+Un singur GLB, **4 noduri rădăcină la origine** (plus doi copii ai lui
+`FarCity_A`). Scara 1 pe fiecare nod (verificat în JSON-ul GLB: niciun
+`scale`/`translation`/`rotation` pe noduri).
+
+| nod | tri | cote măsurate (X × Y × Z, m) | contract | sloturi |
+|---|---:|---|---|---|
+| `UmaidBhawan_A` | 1008 | 60,0 × 30,0 × 35,0 | 60 × 30 × 35 | `ROCK_LIGHT`, `SAND_MID` |
+| `FarCity_A` (pereți albaștri) | 1878 | 150,0 × 19,9 × 11,7 | 150 × 20 × 12 (ansamblu) | `FOAM_WHITE` |
+| ↳ `FarCity_A_Beige` (case bej + rezervoare) | 1056 | 137,6 × 19,7 × 12,0 | — | `SAND_LIGHT`, `LOG_DARK` |
+| ↳ `FarCity_A_Glow` (73 de geamuri) | 146 | 145,7 × 19,4 × 4,4 (z 4,8–9,2) | — | `VOLCANIC_BLACK` |
+| `DesertRidge_A` | 332 | 200,0 × 60,0 × 30,0 | 200 × 60 × 30 | `ROCK_DARK`, `SAND_SHADOW`, `SAND_MID` |
+| `DesertRidge_B` | 332 | 200,0 × 60,0 × 30,0 | 200 × 60 × 30 | idem |
+| **total** | **4752** | | ≤ 5.000 | |
+
+### Convenția de orizont găsită la celelalte piste
+
+- **Fiordland** (`build_fiordland_horizon.py`, `fiordland_horizon.glb`): un GLB,
+  noduri rădăcină toate la origine, `origin="base_axis"`, bevel ~0,3,
+  `≤ 5.000` tri, verificat cu `--origin=assembly`; tema declară
+  `horizon_model` + `horizon_picks` (liste pe inel) + `horizon_rings`
+  (scara 0,55–0,85) + `horizon_class: ""` (atlasul rămâne).
+- **Consumatorul** (`track.gd:4848 _build_horizon`, `_extract_glb_node`
+  la 5160): nodul după nume exact, copil direct al rădăcinii, **cu tot
+  subarborele** (deci `FarCity_A_Beige`/`_Glow` pleacă împreună cu
+  `FarCity_A`); poziția nodului în GLB se anulează; îngropat 4 m, yaw
+  aleator, scara inelului × 0,85–1,2; `cast_shadow` stins de cod
+  (`_fara_umbra_aruncata`), deci nu e treaba GLB-ului.
+- Clasa: `horizon_classes` (prefix → clasă, prefixul **cel mai lung** câștigă,
+  `Palette._class_for`). Recomandare pentru integrare:
+  `{"FarCity_A": "blue_lime_light", "FarCity_A_Beige": "", "FarCity_A_Glow": ""}`
+  sau clasa goală peste tot. **Fără clasă, casele albastre ies ALBE**
+  (`FOAM_WHITE`, cum cere brief-ul §0.4).
+- Tema `jodhpur` are azi `horizon_model: ""` (siluete de rezervă). Montarea
+  și inelele sunt ale instanței de gameplay.
+
+### Fidelitate (referința e diorama, brief §1.7 — nu există decupări pe planșă)
+
+Decupările din dioramă: `docs/track_briefs/img/jodhpur_horizon_ref/`
+(`umaid_bhawan` = cutia 110,30–260,110 × 6; `far_city` = 380,150–780,260 × 3;
+`desert_ridge` = 200,40–780,200 × 2; `horizon_game` = banda de sus 0–330 px).
+
+**`UmaidBhawan_A`** (`jodhpur_fidelity/umaid_bhawan.png`)
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| cupola centrală | pe dioramă NU se vede cupolă; contractul o cere | 1, cea mai înaltă (35 m cu finial), profil mai înalt ca emisfera, pe tambur | ok (contract) |
+| turnuri laterale | 2 turle zvelte, mai înalte decât corpul, stânga și centru-dreapta | 2 turnuri 4 × 4 m simetrice, cupolă mică + finial la ~31 m | abatere: pe dioramă turlele sunt vârful siluetei, aici cupola |
+| aripi în trepte | corp lung, crenelat, coboară spre capete | 3 trepte simetrice 22 → 18 → 13 m, cornișe | ok |
+| zimți mici la capete | turnulețe pe capete | 4 chhatri pe colțurile aripilor exterioare | ok |
+| soclu | dealul de sub palat | terasă 6 m (4 m îngropați) | ok |
+| culoare | siluetă caldă în ceață | gresie `ROCK_LIGHT`, cupole `SAND_MID` | ok |
+
+**`FarCity_A`** (`jodhpur_fidelity/far_city.png`, lumină neutră, îngropat 4 m, de la 70 m)
+
+| element | decupare | randare | ok? |
+|---|---|---|---|
+| cuburi albastre lipite, acoperiș plat | da, 2–3 etaje | 2 rânduri spate-în-spate, 5–9 m lățime, 2,6–7 m vizibili | ok |
+| case bej printre ele | ~1 din 4 | ~28 % (`FarCity_A_Beige`) | ok |
+| rezervoare negre | multe, pe acoperiș | cilindri cu 5 laturi pe ~40 % | ok |
+| etaje în trepte | case urcate una peste alta pe pantă | volum retras de 2,6 m pe ~40 % | parțial: diorama e pe pantă, banda e pe plat |
+| geamuri | mici, închise, 1–2 pe fațadă | 0,9 × 1,3 m retrase 0,15 m, în `_Glow` | ok |
+| linia zimțată | da | din salturile de înălțime | ok, amplitudine mai mică decât pe dioramă |
+
+**`DesertRidge_A/B`** (`jodhpur_fidelity/desert_ridge.png`)
+
+| element | decupare | randare | ok? |
+|---|---|---|---|
+| creastă lungă, joasă | da, straturi în ceață | h/l 0,15, A cu un vârf, B cu două și șa | ok |
+| umeri rotunzi | foarte rotunzi, largi | vârfuri mai ascuțite decât pe dioramă | abatere mică |
+| culoare | brun-portocaliu în ceață | riolit `ROCK_DARK`, praf `SAND_SHADOW` pe pante domoale, poale `SAND_MID` | ok |
+
+### Unghiul de joc (`jodhpur_horizon_game.png`, `jodhpur_horizon_chase.png`)
+
+Așezare: creste la 275–290 m, palatul la 225 m, orașul la 195 m, scara 1,
+îngropate 4 m, ceața temei (90 → 300 m, curba 1,4, max 0,85), `clip_end`
+380 m. Măsurat pe cadre:
+
+- **Camera jos (3 m, fov orizontal 70°):** totul încape, dar la scara 1
+  siluetele sunt mici (palatul ~8° lățime). Crestele de la 280 m ies la
+  ~80 % ceață: se citesc doar ca siluetă, cum trebuie.
+- **Camera de joc reală (10 m sus, fov vertical 68°, tangaj −29°):**
+  marginea de sus e la +5° peste orizontală, adică **la 225 m încap doar
+  ~30 m de siluetă peste sol**. Palatul la scara 1 (31 m vizibili) atinge
+  deja marginea cu vârful cupolei. **Pentru integrare:** un inel cu scara
+  > 1 pe palat îl taie de sus; mai departe (280 m) încap ~34 m. Axa 2 din
+  memoria `reperul-se-vede-pe-patru-axe`.
+- **Sub lumina caldă a temei, albastrul orașului (`#8FB0DC`) iese gri-bej**
+  (vezi `jodhpur_horizon_game`). Nu e o problemă a GLB-ului, dar clasa
+  `blue_lime_*` pe orizont trebuie verificată la integrare, în captură.
+
+### Abateri, cu motiv
+
+- **Cupola vs dioramă:** pe dioramă palatul e o siluetă de castel cu două turle;
+  contractul (brief + comandă) cere palatul cu cupolă centrală. Am urmat
+  contractul și am făcut turnurile laterale zvelte, cu finial, ca să păstreze
+  „turlele" dioramei.
+- **`FarCity_A_Beige`** e un copil în plus față de brief (care cere doar
+  `FarCity_A_Glow`): regula 6 (un nod = un material potențial) — altfel o clasă
+  albastră pe `FarCity_A` ar vopsi și casele bej.
+- Harnasul: `preview_jodhpur.py` are o secțiune nouă (val 5b) care
+  **înfășoară** `_import_for_compare`/`compare` fără să le schimbe: filtrul
+  pe noduri (`nodes`/`offsets`) și modul `game` (cadru de joc cu ceață;
+  `far_city` îl folosește cu lumină neutră și fără ceață, fiindcă în cadrul
+  4:3 al `_neutral_shot` banda de 150 × 12 m ieșea o dungă).

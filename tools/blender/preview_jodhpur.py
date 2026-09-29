@@ -571,6 +571,70 @@ COMPARE_SPECS = {
         "camera": {"azimuth": 30.0, "elevation": 10.0, "margin": 1.10, "lens": 70.0},
         "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
+    # --- val 5 grupa fundal: jodhpur_horizon.glb (brief §1.7,
+    # build_jodhpur_horizon.py). UN GLB cu 4 noduri radacina suprapuse la
+    # origine (conventia fiordland_horizon), deci fiecare comparatie isi alege
+    # nodurile (`nodes`, filtrul din sectiunea "val 5b" de mai jos) si le
+    # poate desparti (`offsets`). Nu exista decupari pe plansa: referinta e
+    # diorama (brief §1.7), decupata in docs/track_briefs/img/
+    # jodhpur_horizon_ref/ -- de acolo `crop` urca un nivel.
+    "umaid_bhawan": {
+        "category": "rocks", "glb": "jodhpur_horizon", "tints": "ANIMAL",
+        "crop": "../jodhpur_horizon_ref/umaid_bhawan",
+        "nodes": ["UmaidBhawan_A"],
+        # fata cu porticul e -Y: camera din fata, aproape la orizontala
+        "camera": {"azimuth": -70.0, "elevation": 4.0, "margin": 1.10, "lens": 85.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "far_city": {
+        "category": "rocks", "glb": "jodhpur_horizon",
+        "crop": "../jodhpur_horizon_ref/far_city",
+        "nodes": ["FarCity_A", "FarCity_A_Beige", "FarCity_A_Glow"],
+        # peretii albastri = FOAM_WHITE x tenta blue_lime_light (ca House_Wall)
+        "tints": {"FarCity_A": "#8FB0DC",
+                  "FarCity_A_Glow": "#2A2A2E"},
+        # banda e 150 x 12 m: in cadrul 4:3 al `_neutral_shot` iesea o dunga
+        # subtire. Randata ca `game`, FARA ceata si cu lumina NEUTRA (culoarea
+        # reala, brief §0.1): ingropata 4 m ca in joc, vazuta de la ~70 m.
+        "game": {"cam_h": 4.0, "pitch": 1.5, "hfov": 90.0, "fog": False,
+                 "neutral": True,
+                 "place": [("FarCity_A", 0.0, 70.0, 180.0)]},
+    },
+    "desert_ridge": {
+        "category": "rocks", "glb": "jodhpur_horizon", "tints": "ANIMAL",
+        "crop": "../jodhpur_horizon_ref/desert_ridge",
+        "nodes": ["DesertRidge_A", "DesertRidge_B"],
+        # B in spatele lui A, decalat -- straturile de dealuri din diorama
+        "offsets": {"DesertRidge_B": (70.0, 110.0, 0.0)},
+        # lens 35: la 85 mm camera iesea la ~790 m, peste clip_end 500 din compare()
+        "camera": {"azimuth": -95.0, "elevation": 5.0, "margin": 1.05, "lens": 35.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    # unghiul de joc: camera jos, siluetele la 190-290 m, ceata temei
+    # (fog_begin 90, fog_end 300, curba 1.4, max 0.85 -- track.gd "jodhpur")
+    "jodhpur_horizon_game": {
+        "category": "rocks", "glb": "jodhpur_horizon",
+        "crop": "../jodhpur_horizon_ref/horizon_game",
+        "tints": {"FarCity_A": "#8FB0DC"},
+        "game": {"cam_h": 3.0, "pitch": 1.0, "hfov": 70.0,
+                 "place": [("DesertRidge_A", -110.0, 290.0, 8.0),
+                           ("DesertRidge_B", 125.0, 275.0, -12.0),
+                           ("UmaidBhawan_A", -35.0, 225.0, 15.0),
+                           ("FarCity_A", 70.0, 195.0, -4.0)]},
+    },
+    # aceeasi asezare, dar prin camera de joc reala (memoria
+    # verifica-cu-parametrii-lui: 10 m sus, fov VERTICAL 68, marginea de
+    # sus la ~+5 grade peste orizontala -> tangaj -29)
+    "jodhpur_horizon_chase": {
+        "category": "rocks", "glb": "jodhpur_horizon",
+        "crop": "../jodhpur_horizon_ref/horizon_game",
+        "tints": {"FarCity_A": "#8FB0DC"},
+        "game": {"cam_h": 10.0, "pitch": -29.0, "vfov": 68.0,
+                 "place": [("DesertRidge_A", -110.0, 290.0, 8.0),
+                           ("DesertRidge_B", 125.0, 275.0, -12.0),
+                           ("UmaidBhawan_A", -35.0, 225.0, 15.0),
+                           ("FarCity_A", 70.0, 195.0, -4.0)]},
+    },
 }
 
 
@@ -1181,6 +1245,10 @@ WAVE_PIECES = {
     # val 4 grupa B (brief §1.6): animalele; vaca are doua decupari
     "4b": ["zebu_cow", "zebu_cow_lie", "black_kite_bird", "peacock_closed",
            "peacock_fanned", "langur"],
+    # val 5 grupa fundal (brief §1.7): jodhpur_horizon.glb, pe noduri, plus
+    # unghiul de joc cu ceata
+    "5b": ["umaid_bhawan", "far_city", "desert_ridge", "jodhpur_horizon_game",
+           "jodhpur_horizon_chase"],
 }
 
 
@@ -1204,6 +1272,214 @@ def fidelity_sheet(wave, out_dir=None, names=None):
         print("planta fidelitate val", wave, "salvata:", out_path)
         return out_path
     return None
+
+
+# --- val 5b: fundalul (jodhpur_horizon.glb) --------------------------------
+#
+# Sectiune ADAUGATA, fara sa schimbe functiile de mai sus: le infasoara.
+#   1. `nodes`/`offsets`: GLB-ul de orizont are 4 noduri radacina suprapuse
+#      la origine; comparatia pastreaza doar nodurile cerute (cu copiii lor)
+#      si le poate desparti.
+#   2. `game`: randarea din unghiul de joc -- nodurile asezate ca pe inel
+#      (ingropate 4 m, cu yaw), teren plat cu ground_tint, soare jos si
+#      CEATA DE ADANCIME a temei jodhpur, adaugata in fiecare material
+#      (amestec spre culoarea cetii dupa distanta fata de camera), iar
+#      clip_end = ChaseCamera.FAR_PLANE (380 m).
+
+_import_for_compare_v4 = _import_for_compare
+
+
+def _root_of(o):
+    while o.parent is not None:
+        o = o.parent
+    return o
+
+
+def _import_for_compare(name, spec, models_dir):
+    meshes = _import_for_compare_v4(name, spec, models_dir)
+    keep = spec.get("nodes")
+    if not keep:
+        return meshes
+    out = [o for o in meshes
+           if _dename(o.name) in keep or _dename(_root_of(o).name) in keep]
+    offs = spec.get("offsets", {})
+    for o in out:
+        off = offs.get(_dename(o.name))
+        if off and o.parent is None:
+            o.location += Vector(off)
+    bpy.context.view_layer.update()
+    return out
+
+
+JODHPUR_FOG = {"color": "#E8A878", "begin": 90.0, "end": 300.0,
+               "curve": 1.4, "max": 0.85}
+JODHPUR_SKY = "#FFB37A"      # sky_horizon (1.0, 0.70, 0.48)
+JODHPUR_GROUND = "#9E8F75"   # ground_tint (0.62, 0.56, 0.46)
+
+
+def _hex_lin(hex_color):
+    return tuple(_srgb_to_linear(int(hex_color[k:k + 2], 16) / 255.0)
+                 for k in (1, 3, 5))
+
+
+def _add_fog(mat, fog):
+    """Ceata de adancime a temei, ca in Godot: amestec spre culoarea cetii cu
+    factorul min(((d - begin) / (end - begin)) ^ curve, 1) * max."""
+    if mat is None or mat.get("fog_5b"):
+        return
+    nt = mat.node_tree
+    out = next((n for n in nt.nodes if n.type == "OUTPUT_MATERIAL"), None)
+    if out is None or not out.inputs["Surface"].links:
+        return
+    src = out.inputs["Surface"].links[0].from_socket
+    cam = nt.nodes.new("ShaderNodeCameraData")
+    mr = nt.nodes.new("ShaderNodeMapRange")
+    mr.clamp = True
+    mr.inputs["From Min"].default_value = fog["begin"]
+    mr.inputs["From Max"].default_value = fog["end"]
+    nt.links.new(cam.outputs["View Distance"], mr.inputs["Value"])
+    pw = nt.nodes.new("ShaderNodeMath")
+    pw.operation = "POWER"
+    pw.inputs[1].default_value = fog["curve"]
+    nt.links.new(mr.outputs["Result"], pw.inputs[0])
+    mul = nt.nodes.new("ShaderNodeMath")
+    mul.operation = "MULTIPLY"
+    mul.inputs[1].default_value = fog["max"]
+    nt.links.new(pw.outputs[0], mul.inputs[0])
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = _hex_lin(fog["color"]) + (1.0,)
+    em.inputs["Strength"].default_value = 1.0
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(mul.outputs[0], mix.inputs[0])
+    nt.links.new(src, mix.inputs[1])
+    nt.links.new(em.outputs[0], mix.inputs[2])
+    nt.links.new(mix.outputs[0], out.inputs["Surface"])
+    mat["fog_5b"] = 1
+
+
+def _game_shot(name, spec, models_dir, res_height=900, out_dir=None):
+    models_dir = models_dir or MODELS
+    out_dir = out_dir or os.path.join(PROJECT, "docs", "asset_briefs", "img",
+                                      "jodhpur_fidelity")
+    os.makedirs(out_dir, exist_ok=True)
+    game = spec["game"]
+    _clear()
+    shown = []
+    for node, x, y, yaw in game["place"]:
+        objs = _import(spec["category"], spec["glb"], models_dir)
+        roots = {o: _dename(_root_of(o).name) for o in objs}
+        for o in objs:
+            if roots[o] != node:
+                bpy.data.objects.remove(o, do_unlink=True)
+                continue
+            _fix_ao_layer_name(o)
+            tint = spec.get("tints", {}).get(_dename(o.name))
+            if isinstance(tint, str):
+                _apply_flat_tint(o, tint)
+            else:
+                _apply_multi_flat_tint(o, ANIMAL_TINT)
+            if o.parent is None:
+                # ca `_build_horizon`: ingropat 4 m, yaw, scara 1
+                o.location = (x, y, -4.0)
+                o.rotation_euler = (0.0, 0.0, math.radians(yaw))
+            shown.append(o)
+    # terenul plat
+    me = bpy.data.meshes.new("Preview5bGround")
+    bm = bmesh.new()
+    bmesh.ops.create_grid(bm, x_segments=1, y_segments=1, size=2000.0)
+    bm.to_mesh(me)
+    bm.free()
+    ground = bpy.data.objects.new("Preview5bGround", me)
+    bpy.context.scene.collection.objects.link(ground)
+    gm = bpy.data.materials.new("Preview5bGround")
+    gm.use_nodes = True
+    bsdf = gm.node_tree.nodes.get("Principled BSDF")
+    bsdf.inputs["Base Color"].default_value = _hex_lin(JODHPUR_GROUND) + (1.0,)
+    bsdf.inputs["Roughness"].default_value = 1.0
+    ground.data.materials.append(gm)
+    shown.append(ground)
+    if game.get("fog", True):
+        for o in shown:
+            for m in o.data.materials:
+                _add_fog(m, JODHPUR_FOG)
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.hide_render = o not in shown
+
+    scene = bpy.context.scene
+    res = (int(res_height * 16 / 9), res_height)
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        data = bpy.data.cameras.new("PreviewCam")
+        cam = bpy.data.objects.new("PreviewCam", data)
+        scene.collection.objects.link(cam)
+    scene.camera = cam
+    cam.data.clip_start = 0.5
+    cam.data.clip_end = 380.0          # ChaseCamera.FAR_PLANE
+    if "vfov" in game:
+        cam.data.sensor_fit = "VERTICAL"
+        cam.data.angle = math.radians(game["vfov"])
+    else:
+        cam.data.sensor_fit = "HORIZONTAL"
+        cam.data.angle = math.radians(game["hfov"])
+    cam.location = (0.0, 0.0, game["cam_h"])
+    cam.rotation_euler = (math.radians(90.0 + game["pitch"]), 0.0, 0.0)
+
+    for o in list(bpy.data.objects):
+        if o.type == "LIGHT":
+            bpy.data.objects.remove(o, do_unlink=True)
+    sdata = bpy.data.lights.new("Sun5b", type="SUN")
+    sun = bpy.data.objects.new("Sun5b", sdata)
+    scene.collection.objects.link(sun)
+    neutral = game.get("neutral", False)
+    sun.data.energy = 3.0
+    sun.data.color = (1.0, 1.0, 1.0) if neutral else _hex_lin("#FFB27A")
+    sun.data.specular_factor = 0.0
+    # sursa la azimut 230 (stanga-spate fata de camera, care priveste spre
+    # azimut 90), elevatie 8 grade: Z = azimut + 90, X = 90 - elevatie
+    sun.rotation_euler = (math.radians(55.0 if neutral else 82.0), 0.0,
+                          math.radians(320.0))
+
+    world = scene.world or bpy.data.worlds.new("PreviewWorld5b")
+    scene.world = world
+    world.use_nodes = True
+    bg = world.node_tree.nodes.get("Background")
+    if bg:
+        bg.inputs[0].default_value = (0.812, 0.812, 0.812, 1.0) if neutral             else _hex_lin(JODHPUR_SKY) + (1.0,)
+        bg.inputs[1].default_value = 0.5 if neutral else 1.0
+    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.look = "None"
+    scene.view_settings.exposure = 0.0
+    engines = [e.identifier for e in
+               bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items]
+    scene.render.engine = ("BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in engines
+                           else "BLENDER_EEVEE")
+    scene.render.resolution_x, scene.render.resolution_y = res
+    scene.render.resolution_percentage = 100
+    scene.render.film_transparent = False
+    render_path = os.path.join(out_dir, "_render_" + name + ".png")
+    scene.render.filepath = render_path
+    scene.render.image_settings.file_format = "PNG"
+    bpy.ops.render.render(write_still=True)
+
+    crop_path = os.path.join(PROJECT, "docs", "track_briefs", "img",
+                             "jodhpur_assets_v1", spec["crop"] + ".png")
+    out_path = os.path.join(out_dir, name + ".png")
+    _run_compose(["--compare", name, "--crop", crop_path,
+                 "--render", render_path, "--out", out_path,
+                 "--height", str(res_height)])
+    print("comparatie (unghi de joc) salvata:", out_path)
+    return out_path
+
+
+_compare_v4 = compare
+
+
+def compare(name, models_dir=None, res_height=900, out_dir=None):
+    spec = COMPARE_SPECS.get(name)
+    if spec is not None and "game" in spec:
+        return _game_shot(name, spec, models_dir, res_height, out_dir)
+    return _compare_v4(name, models_dir, res_height, out_dir)
 
 
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "preview.py")).read())

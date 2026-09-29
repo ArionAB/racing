@@ -984,7 +984,9 @@ def fidelity_sheet(wave, out_dir=None, names=None):
     foloseste `str(wave)` (nu `%d`, care ar pica pe un wave alfanumeric)."""
     fid_dir = os.path.join(PROJECT, "docs", "asset_briefs", "img", "jodhpur_fidelity")
     out_dir = out_dir or os.path.join(PROJECT, "docs", "asset_briefs", "img")
-    names = names or WAVE_PIECES.get(wave, [])
+    # `--sheet 3` vine ca int, dar cheia valului 3 e "3" -- fara fallback
+    # plansa iesea goala si nerescrisa (runda 3, blue_house_d)
+    names = names or WAVE_PIECES.get(wave) or WAVE_PIECES.get(str(wave), [])
     out_path = os.path.join(out_dir, "jodhpur_fidelity_val%s.png" % wave)
     ok = _run_compose(["--sheet", str(wave), "--fid-dir", fid_dir,
                        "--names", ",".join(names), "--out", out_path])

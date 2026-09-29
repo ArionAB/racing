@@ -1649,65 +1649,67 @@ const CLASSES_BY_MODEL := {
 	#   rhyolite         #9A6A5A  bolovanii si lespedea parcului de desert
 	# Balustradele/scarile albe (`House_Rail*`, slot 22) raman pe atlas: asa
 	# le-a acceptat kitul (preview-ul tenta doar `House_Wall`). `*_Glow`
-	# (golurile de fereastra) raman pe atlas pana cand un material de
-	# lampa legat de DuskCycle exista (jodhpur_masuratori.md §2).
+	# (golurile de fereastra) sunt pe `shader:jod_window`: albedo-ul atlasului
+	# ziua, emisie calda legata de `dusk_lamps` (DuskCycle) spre noapte, cu
+	# prag per cladire (assets/shaders/jod_window.gdshader,
+	# jodhpur_masuratori.md §9).
 	"blue_house_a": {
 		"House_Wall": Palette.TRI_PREFIX + "blue_lime_light",
 		"House_Rail": Palette.ATLAS_PREFIX, "House_Trim": Palette.ATLAS_PREFIX,
-		"House_Glow": Palette.ATLAS_PREFIX,
+		"House_Glow": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"blue_house_b": {
 		"House_Wall": Palette.TRI_PREFIX + "blue_lime_light",
 		"House_Rail": Palette.ATLAS_PREFIX, "House_Trim": Palette.ATLAS_PREFIX,
-		"House_Glow": Palette.ATLAS_PREFIX,
+		"House_Glow": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"blue_house_c": {
 		"House_Wall_001": Palette.TRI_PREFIX + "blue_lime_light",
-		"House_Trim_001": Palette.ATLAS_PREFIX, "House_Glow_001": Palette.ATLAS_PREFIX,
+		"House_Trim_001": Palette.ATLAS_PREFIX, "House_Glow_001": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"blue_house_d": {
 		"House_Wall_002": Palette.TRI_PREFIX + "blue_lime_light",
 		"House_Rail_001": Palette.ATLAS_PREFIX, "House_Trim_002": Palette.ATLAS_PREFIX,
-		"House_Glow_002": Palette.ATLAS_PREFIX,
+		"House_Glow_002": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"blue_house_e": {
 		"House_Wall_003": Palette.TRI_PREFIX + "blue_lime_light",
 		"House_Rail_002": Palette.ATLAS_PREFIX, "House_Trim_003": Palette.ATLAS_PREFIX,
-		"House_Glow_003": Palette.ATLAS_PREFIX,
+		"House_Glow_003": Palette.SHADER_PREFIX + "jod_window",
 	},
 	# Haveli: decizia dezvoltatorului din 29 sep (inventar, runda 3b) —
 	# albastru DESCHIS, nu indigo.
 	"haveli_facade": {
 		"House_Wall_004": Palette.TRI_PREFIX + "blue_lime_light",
-		"House_Trim_004": Palette.ATLAS_PREFIX, "House_Glow_004": Palette.ATLAS_PREFIX,
+		"House_Trim_004": Palette.ATLAS_PREFIX, "House_Glow_004": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"ghanta_ghar": {
 		"Tower_Stone": Palette.TRI_PREFIX + "red_sandstone",
-		"Tower_Glow": Palette.ATLAS_PREFIX, "Clock_Glow": Palette.ATLAS_PREFIX,
+		"Tower_Glow": Palette.SHADER_PREFIX + "jod_window", "Clock_Glow": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"market_gate": {
 		"Gate_Stone": Palette.TRI_PREFIX + "red_sandstone",
-		"Gate_Glow": Palette.ATLAS_PREFIX, "Gate_Doors": Palette.ATLAS_PREFIX,
+		"Gate_Glow": Palette.SHADER_PREFIX + "jod_window", "Gate_Doors": Palette.ATLAS_PREFIX,
 	},
 	"fort_gate_jai": {
 		"GateJai_Stone": Palette.TRI_PREFIX + "red_sandstone",
-		"GateJai_Glow": Palette.ATLAS_PREFIX, "GateJai_Doors": Palette.ATLAS_PREFIX,
+		"GateJai_Glow": Palette.SHADER_PREFIX + "jod_window", "GateJai_Doors": Palette.ATLAS_PREFIX,
 	},
 	"fort_gate_fateh": {
 		"GateFateh_Stone": Palette.TRI_PREFIX + "red_sandstone",
-		"GateFateh_Glow": Palette.ATLAS_PREFIX, "GateFateh_Doors": Palette.ATLAS_PREFIX,
+		"GateFateh_Glow": Palette.SHADER_PREFIX + "jod_window", "GateFateh_Doors": Palette.ATLAS_PREFIX,
 	},
 	"fort_gate_loha": {
 		"GateLoha_Stone": Palette.TRI_PREFIX + "red_sandstone",
-		"GateLoha_Glow": Palette.ATLAS_PREFIX, "GateLoha_Doors": Palette.ATLAS_PREFIX,
+		"GateLoha_Glow": Palette.SHADER_PREFIX + "jod_window", "GateLoha_Doors": Palette.ATLAS_PREFIX,
 	},
 	"fort_wall_segment": {
 		"Wall_Stone": Palette.TRI_PREFIX + "red_sandstone",
-		"Wall_Glow": Palette.ATLAS_PREFIX,
+		"Wall_Glow": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"fort_wall_turret": {
 		"Turret_Stone": Palette.TRI_PREFIX + "red_sandstone",
-		"Turret_Glow": Palette.ATLAS_PREFIX,
+		"Turret_Glow": Palette.SHADER_PREFIX + "jod_window",
 	},
 	# Rupt inainte (SPLIT_MODELS/ACCENT_SPLIT): corpul e doar gresia,
 	# gurile de tragere (20) sunt in `Bastion_Stone_Accente`, pe atlas.
@@ -1716,11 +1718,11 @@ const CLASSES_BY_MODEL := {
 	},
 	"palace_facade_a": {
 		"Palace_Stone": Palette.TRI_PREFIX + "red_sandstone",
-		"Palace_Glow": Palette.ATLAS_PREFIX,
+		"Palace_Glow": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"palace_facade_b": {
 		"Palace_Stone": Palette.TRI_PREFIX + "red_sandstone",
-		"Palace_Glow": Palette.ATLAS_PREFIX,
+		"Palace_Glow": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"stepwell_flight_module": {
 		"Well_Stone": Palette.TRI_PREFIX + "rose_sandstone",
@@ -1730,7 +1732,7 @@ const CLASSES_BY_MODEL := {
 	},
 	"stepwell_pavilion": {
 		"Well_Stone": Palette.TRI_PREFIX + "rose_sandstone",
-		"Well_Glow": Palette.ATLAS_PREFIX,
+		"Well_Glow": Palette.SHADER_PREFIX + "jod_window",
 	},
 	"rhyolite_boulder_a": {
 		"Rhyolite_Boulder_A": Palette.TRI_PREFIX + "rhyolite",
@@ -2855,6 +2857,10 @@ func _model_class_material(cls: String) -> Material:
 		return Palette._glow_from_spec(cls.trim_prefix(Palette.GLOW_PREFIX))
 	if cls.begins_with(Palette.FINISH_PREFIX):
 		return Palette.finish_material(cls.trim_prefix(Palette.FINISH_PREFIX))
+	# "shader:" (azi doar ferestrele Jodhpur, `jod_window`): fara ramura asta
+	# ar fi cazut tacut pe o clasa triplanara inexistenta, ca "glow:" inainte.
+	if cls.begins_with(Palette.SHADER_PREFIX):
+		return Palette.shader_material(cls.trim_prefix(Palette.SHADER_PREFIX))
 	return Palette.triplanar_class_material(
 		cls.trim_prefix(Palette.TRI_PREFIX))
 

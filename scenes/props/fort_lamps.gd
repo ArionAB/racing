@@ -24,6 +24,14 @@ extends Node3D
 @export var glow_slot: int = 30
 @export var glow_energy: float = 1.3
 @export var glow_tint: Color = Color(1.0, 0.33, 0.04)
+## Haloul fals (LampHalo, un material comun cu becurile si candelele): raza
+## miezului si a haloului ca multiplu al razei lampii. Miezul acopera
+## bipiramida (de aproape citea romb), haloul e lumina din jur. Lampile
+## fortului sunt flacari (candele pe merloane, torte), deci palpaie.
+@export var halo_core_k: float = 1.15
+@export var halo_radius_k: float = 5.0
+@export var halo_color: Color = Color(1.0, 0.52, 0.16)
+@export var halo_intensity: float = 1.0
 
 
 ## Construit in `_ready`, NU amanat: pozitiile sunt deja in lume, n-au nevoie
@@ -49,6 +57,16 @@ func _ready() -> void:
 		[glow_slot], glow_energy, glow_tint)
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mmi)
+	var core := PackedFloat32Array()
+	var halo := PackedFloat32Array()
+	var st := PackedFloat32Array()
+	for k in positions.size():
+		var r := radii[k] if k < radii.size() else 0.25
+		core.append(r * halo_core_k)
+		halo.append(r * halo_radius_k)
+		st.append(stretch[k] if k < stretch.size() else 1.0)
+	LampHalo.build(self, "LampiHalou", positions, halo_color, halo_intensity,
+		core, halo, st, true, 20260930)
 
 
 ## Bipiramida hexagonala (12 triunghiuri), UV colapsat pe slot — aceeasi forma

@@ -65,6 +65,44 @@ extends Node3D
 @export var bulb_slot: int = 30
 @export var glow_energy: float = 1.3
 @export var glow_tint: Color = Color(1.0, 0.33, 0.04)
+## Haloul fals (LampHalo: un material comun cu candelele si lampile fortului).
+## Miezul e putin mai mare decat bipiramida, deci de aproape silueta becului
+## e discul rotund al miezului, nu rombul geometriei; haloul e lumina din jur.
+## Becurile de pe sfoara stau la 0,34 m, deci halourile lor se ating si sfoara
+## citeste ca o linie de lumina, nu ca un sir de margele.
+@export var bulb_halo_core_m: float = 0.2
+@export var bulb_halo_m: float = 0.6
+@export var lamp_halo_core_m: float = 0.55
+@export var lamp_halo_m: float = 2.2
+@export var halo_color: Color = Color(1.0, 0.4, 0.08)
+@export var bulb_halo_intensity: float = 0.45
+@export var lamp_halo_intensity: float = 1.0
+## LUMINA CALDA PE FATADE (critica de la H: „casele stau in lumina rece, fara
+## lumina calda a becurilor pe ele"), fara OmniLight: un `Decal` cu DOAR
+## textura de emisie (gradient radial, cadere continua) proiectat orizontal pe
+## fatada din spatele festoanelor. Emisia decalului se ADUNA peste suprafata pe
+## care cade, deci varul albastru capata o pata calda in jurul sforilor, iar
+## `normal_fade` o tine doar pe fetele care privesc spre strada (nu pe sol).
+## Un decal nu e un material (garda nu-l numara) si nici o lumina; pe
+## renderer-ul mobil costul e o proiectie in plus pe pixelii acoperiti,
+## plafonat la 8 decaluri pe mesh — de aceea pasul e larg (`wash_step_m`).
+## Dincolo de `wash_fade_begin_m` decalurile se sting (ordinea de taiere).
+@export var facade_wash: bool = true
+@export var wash_step_m: float = 7.0
+@export var wash_size: Vector3 = Vector3(9.0, 5.0, 6.5)
+@export var wash_height_m: float = 4.3
+@export var wash_color: Color = Color(1.0, 0.55, 0.22)
+@export var wash_energy: float = 1.4
+@export var wash_fade_begin_m: float = 55.0
+@export var wash_fade_len_m: float = 20.0
+## Energia decalului urca cu ceasul (`DuskCycle.lamps_value`, 0,15 -> 1,0):
+## la apus soarele e cel care lumineaza fatada, noaptea becurile. Un decal nu
+## poate citi parametrul global de shader, deci nodul il copiaza pe cadru
+## (31 de decaluri, o atribuire fiecare, doar cand valoarea se schimba).
+@export var wash_day_k: float = 0.3
+
+var _washes: Array[Decal] = []
+var _wash_lamps := -1.0
 ## Slotul stalpilor (fier inchis).
 @export var post_slot: int = 20
 ## Coborarea bazei stalpului sub cota drumului (terenul de langa asfalt e
@@ -77,7 +115,24 @@ var stats := {}
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
+	# A/B pentru masuratoare (lume inghetata, acelasi cadru): `--no-facade-wash`
+	# stinge decalurile de pe fatade.
+	if OS.get_cmdline_user_args().has("--no-facade-wash"):
+		facade_wash = false
 	_build.call_deferred()
+
+
+func _process(_delta: float) -> void:
+	if _washes.is_empty():
+		return
+	var dc := get_tree().get_first_node_in_group(&"dusk_cycle")
+	var lamps: float = dc.get("lamps_value") if dc != null else 0.15
+	if absf(lamps - _wash_lamps) < 0.002:
+		return
+	_wash_lamps = lamps
+	var e := wash_energy * lerpf(wash_day_k, 1.0, smoothstep(0.15, 1.0, lamps))
+	for d in _washes:
+		d.emission_energy = e
 
 
 func _find_track() -> Track:
@@ -146,9 +201,20 @@ func _build() -> void:
 	for p in bulb_pos:
 		bulb_xf.append(Transform3D(Basis.IDENTITY, p))
 	_add_multimesh("Becuri", _octa(bulb_radius_m, bulb_slot), glow, bulb_xf, false)
+	var n_wash := _add_facade_wash(route, i0, i1) if facade_wash else 0
+	var lamp_pts := PackedVector3Array()
+	for xf in lamp_xf:
+		lamp_pts.append(global_transform * xf.origin)
+	var bulb_pts := PackedVector3Array()
+	for p in bulb_pos:
+		bulb_pts.append(global_transform * p)
+	LampHalo.build(self, "FelinareHalou", lamp_pts, halo_color, lamp_halo_intensity,
+		lamp_halo_core_m, lamp_halo_m)
+	LampHalo.build(self, "BecuriHalou", bulb_pts, halo_color, bulb_halo_intensity,
+		bulb_halo_core_m, bulb_halo_m)
 	stats = {"posts": post_xf.size(), "lamps": lamp_xf.size(),
 		"bulbs": bulb_xf.size(), "bulbs_cross": n_cross,
-		"bulbs_lamp_strings": n_lamp_strings,
+		"bulbs_lamp_strings": n_lamp_strings, "facade_wash": n_wash,
 		"bulbs_facade": bulb_xf.size() - n_cross - n_lamp_strings}
 	print("StreetLights %s: %s" % [name, stats])
 
@@ -171,6 +237,69 @@ func _stations(route: TrackRoute, i0: int, i1: int, step: float) -> Array[Dictio
 			out.append({"p": a, "s": side, "f": float(i) / float(n)})
 		acc += Vector2(b.x - a.x, b.z - a.z).length()
 	return out
+
+
+static var _wash_tex: GradientTexture2D = null
+
+
+## Textura de emisie a decalului: gradient RADIAL alb -> negru, cu cadere
+## continua (fara disc cu muchie, memoria particule-muchia-nu-numarul).
+static func _wash_texture() -> GradientTexture2D:
+	if _wash_tex == null:
+		var g := Gradient.new()
+		g.offsets = PackedFloat32Array([0.0, 0.35, 0.7, 1.0])
+		g.colors = PackedColorArray([Color(1, 1, 1), Color(0.62, 0.62, 0.62),
+			Color(0.18, 0.18, 0.18), Color(0, 0, 0)])
+		var t := GradientTexture2D.new()
+		t.gradient = g
+		t.fill = GradientTexture2D.FILL_RADIAL
+		t.fill_from = Vector2(0.5, 0.5)
+		t.fill_to = Vector2(1.0, 0.5)
+		t.width = 64
+		t.height = 64
+		_wash_tex = t
+	return _wash_tex
+
+
+## Decalurile de lumina calda pe fatadele primului rand (vezi `facade_wash`).
+func _add_facade_wash(route: TrackRoute, i0: int, i1: int) -> int:
+	var st := _stations(route, i0, i1, wash_step_m)
+	var holder := Node3D.new()
+	holder.name = "FatadeLumina"
+	add_child(holder)
+	var inv := holder.global_transform.affine_inverse()
+	var count := 0
+	for k in st.size():
+		var f: float = st[k]["f"]
+		var c: Vector3 = st[k]["p"]
+		var side: Vector3 = st[k]["s"]
+		var tangent := Vector3.UP.cross(side).normalized()
+		for side_i in 2:
+			var sgn := 1.0 if side_i == 0 else -1.0
+			if _in_gap(sgn, f):
+				continue
+			# -Y local = directia de proiectie: dinspre strada spre fatada.
+			var y := -side * sgn
+			var x := tangent
+			var z := x.cross(y).normalized()
+			var pos := c + side * (facade_lateral_m * sgn) + Vector3.UP * wash_height_m
+			var d := Decal.new()
+			d.name = "Lumina%d_%d" % [k, side_i]
+			d.transform = inv * Transform3D(Basis(x, y, z), pos)
+			d.size = wash_size
+			d.texture_emission = _wash_texture()
+			d.emission_energy = wash_energy
+			d.modulate = wash_color
+			d.normal_fade = 0.5
+			d.upper_fade = 0.0
+			d.lower_fade = 0.0
+			d.distance_fade_enabled = true
+			d.distance_fade_begin = wash_fade_begin_m
+			d.distance_fade_length = wash_fade_len_m
+			holder.add_child(d)
+			_washes.append(d)
+			count += 1
+	return count
 
 
 func _in_gap(sgn: float, f: float) -> bool:

@@ -554,6 +554,9 @@ func _flock(name: String, res: String, pos: PackedVector3Array, yw: PackedFloat3
 	_out.append("yaws = " + var_to_str(yw))
 	_out.append("scale_min = %.2f" % smin)
 	_out.append("scale_max = %.2f" % smax)
+	# candelele ard: flacara + haloul fals (FlockProp.halo_enabled, LampHalo)
+	if res.contains("diya"):
+		_out.append("halo_enabled = true")
 	_out.append("")
 
 

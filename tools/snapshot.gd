@@ -902,6 +902,63 @@ func _print_render_info() -> void:
 			RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME),
 		RenderingServer.viewport_get_render_info(vp, t,
 			RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)])
+	_print_halo_stats()
+
+
+## Costul halourilor false (LampHalo, Jodhpur) pe CADRUL capturat: cate
+## instante cad in frustum, cate au haloul intreg (< 45 m), si cati pixeli
+## acopera patratele lor — adica overdraw-ul aditiv, socotit cu ACEEASI
+## formula de raza ca shaderul (lamp_halo.gdshader), nu estimat.
+func _print_halo_stats() -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or LampHalo.built.is_empty():
+		return
+	var vp_h := float(get_viewport().get_visible_rect().size.y)
+	var px_per_rad := vp_h / (2.0 * tan(deg_to_rad(cam.fov) * 0.5))
+	var far_b := 45.0
+	var far_e := 60.0
+	var min_core := 0.0022
+	var pull_frac := 0.8
+	var pull_max := 1.2
+	var tot := 0
+	var vis := 0
+	var full := 0
+	var px := 0.0
+	var per := {}
+	for mmi: MultiMeshInstance3D in LampHalo.built:
+		if not is_instance_valid(mmi) or not mmi.is_visible_in_tree():
+			continue
+		var mm := mmi.multimesh
+		var gx := mmi.global_transform
+		var v_n := 0
+		var v_px := 0.0
+		for i in mm.instance_count:
+			tot += 1
+			var p: Vector3 = gx * mm.get_instance_transform(i).origin
+			var cd := mm.get_instance_custom_data(i)
+			var d := cam.global_position.distance_to(p)
+			var core := maxf(cd.r, d * min_core)
+			var keep := 1.0 - smoothstep(far_b, far_e, d)
+			var st := maxf(cd.b, 1.0)
+			var halo := lerpf(core * st, maxf(cd.g, core * st), keep)
+			var r := maxf(halo, core * st)
+			if not cam.is_position_in_frustum(p):
+				# patratul poate intra in cadru cu marginea; ignorat (sub-estimare mica)
+				continue
+			var dd := maxf(d - minf(r * pull_frac, pull_max), 0.3)
+			var rpx := r / dd * px_per_rad
+			var a := 4.0 * rpx * rpx
+			vis += 1
+			v_n += 1
+			if d < far_b:
+				full += 1
+			px += a
+			v_px += a
+		per[mmi.name] = "%d vizibile, %.0f px" % [v_n, v_px]
+	var area := get_viewport().get_visible_rect().size.x * vp_h
+	print("HALO: %d instante, %d in cadru, %d cu halou intreg (<45 m), %.0f px acoperiti = %.2f ecrane de overdraw aditiv" % [
+		tot, vis, full, px, px / area])
+	print("HALO per strat: ", per)
 
 
 ## Un landmark anume, vazut de pe sosea (--landmark=, vezi antetul).

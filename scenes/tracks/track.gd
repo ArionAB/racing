@@ -1456,14 +1456,15 @@ static func themes() -> Dictionary:
 			# (masurat) si fara `blue_lime_light` casele ies ALBE (PR #424).
 			# Copiii lui poarta acelasi prefix, deci primesc explicit atlasul
 			# ("" = materialul lumii): _Beige e ocru + LOG_DARK (rezervoare),
-			# _Glow sunt ferestrele. Palatul si dealurile raman pe atlas
+			# _Glow sunt ferestrele (aprinse cu `dusk_lamps`, `shader:jod_window`
+			# — brief §5.4: orasul continua dincolo de ceata). Palatul si dealurile raman pe atlas
 			# (gresie bej / riolit pictat pe benzi de inaltime). Zero materiale
 			# noi: blue_lime_light e deja pe pista prin case.
 			"horizon_class": "",
 			"horizon_classes": {
 				"FarCity_A": Palette.TRI_PREFIX + "blue_lime_light",
 				"FarCity_A_Beige": "",
-				"FarCity_A_Glow": "",
+				"FarCity_A_Glow": Palette.SHADER_PREFIX + "jod_window",
 			},
 			"walls": false,
 			"kerbs": false,

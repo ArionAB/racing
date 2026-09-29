@@ -2203,3 +2203,24 @@ gameplay (regula 0.3).
 Comparațiile: `docs/asset_briefs/img/jodhpur_fidelity/tuktuk_a.png`,
 `tuktuk_b.png` (preview: `COMPARE_SPECS` primește cheia `glb`, ca două
 decupări să randeze același GLB).
+
+### `tuktuk` — runda 2 (verdictul liderului: silueta)
+
+Contractul `Car` e neschimbat (noduri, rază 0,22, origine, botul spre −Y).
+Caroseria refăcută:
+1. **Plan trapez**: 0,96 m la stâlpul A, lățit liniar până la 1,38 m la
+   stâlpul din mijloc (`_hw(y)`); acoperișul, podeaua și bordul urmează planul.
+2. **Parbriz înclinat** spre spate (baza la y −1,02 / 0,91 m, vârful la
+   −0,88 / 1,47 m), acoperișul coboară în **cozoroc** peste el.
+3. **Carena botului** rotunjită, îngustă (0,44 m la vârf), neagră jos,
+   galbenă sus, luminile pe marginea neagră; aripa roții din față e lată
+   (0,24 m) și îmbracă toată jumătatea de sus a roții.
+4. **Spatele**: acoperișul și sfertul din spate sunt un singur loft care se
+   rotunjește și coboară spre spate (1,80 → 1,58 m pe fața din spate);
+   geamul din spate are colțuri rotunjite.
+5. Geamurile pe `MARBLE_GREY` (gri deschis), nu negre.
+
+5060 tri (prag verify 5200). Cote: 2,61 × 1,40 × 1,80 m. Sonda Godot
+reluată (după `--import`): 3 roți, doar `Wheel_Front` virează, rază 0,2200,
+y = 0,0000 la echilibru cu 4 contacte, talpa roților la 0, caroseria de la
+0,214 m, roata din față +1,02 m pe direcția de mers — TRECUT.

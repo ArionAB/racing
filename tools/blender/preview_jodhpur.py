@@ -443,7 +443,8 @@ COMPARE_SPECS = {
             "Tuktuk_Roof": "#F2C230",  # CAR_YELLOW
             "Tuktuk_Body": {LOG_DARK: "#2A2A2E", VOLCANIC_BLACK: "#1A1A1D",
                             CAR_YELLOW: "#F2C230", LAVA_ORANGE: "#E8792E",
-                            CAR_RED: "#D94A38", PAINTED: "#56545B"},
+                            CAR_RED: "#D94A38", PAINTED: "#56545B",
+                            MARBLE_GREY: "#9CA3AB"},  # geamuri gri
             "Wheel_Front": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
             "Wheel_Rear_L": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
             "Wheel_Rear_R": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
@@ -457,7 +458,8 @@ COMPARE_SPECS = {
             "Tuktuk_Roof": "#F2C230",
             "Tuktuk_Body": {LOG_DARK: "#2A2A2E", VOLCANIC_BLACK: "#1A1A1D",
                             CAR_YELLOW: "#F2C230", LAVA_ORANGE: "#E8792E",
-                            CAR_RED: "#D94A38", PAINTED: "#56545B"},
+                            CAR_RED: "#D94A38", PAINTED: "#56545B",
+                            MARBLE_GREY: "#9CA3AB"},  # geamuri gri
             "Wheel_Front": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
             "Wheel_Rear_L": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
             "Wheel_Rear_R": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},

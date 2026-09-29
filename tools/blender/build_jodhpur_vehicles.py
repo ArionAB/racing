@@ -37,7 +37,7 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 # Sloturile (brief §0.4 si §1.5).
 BODY = LOG_DARK          # caroseria neagra (Tuktuk_Body)
 YELLOW = CAR_YELLOW      # acoperisul si cowl-ul galben (excepie declarata)
-GLASS = VOLCANIC_BLACK   # parbrizul, geamul din spate
+GLASS = MARBLE_GREY      # parbrizul, geamul din spate: gri deschis, ca pe decupare
 SEAT = VOLCANIC_BLACK    # perne (mai inchise decat caroseria, ca pe decupare)
 TIRE = VOLCANIC_BLACK
 METAL = PAINTED          # butucii, ghidonul
@@ -55,7 +55,7 @@ WHEEL_R = 0.22
 FRONT_Y = -1.00            # osia din fata (roata iese putin in fata botului)
 REAR_Y = 0.84              # osia din spate
 REAR_X = 0.55              # ecartamentul spate (+-), sub caroserie
-ROOF_HW = 0.68             # acoperisul e partea cea mai lata
+ROOF_HW = 0.69             # acoperisul e partea cea mai lata
 BODY_HW = 0.66
 FLOOR_Z = 0.42             # podeaua cabinei
 BELT_Z = 0.95              # linia galben / negru pe sferturile din spate
@@ -106,6 +106,16 @@ def _rrect(hw, z0, z1, r_top, r_bot=0.0, n=3):
 
 def _sec(y, prof):
     return [(x, y, z) for x, z in prof]
+
+
+def _hw(y):
+    """Semilatimea planului TRAPEZ: 0,48 la stalpul A, 0,69 de la stalpul din
+    mijloc incolo, liniar intre ele (decuparea: botul cat un scuter)."""
+    if y <= COWL_BACK_Y:
+        return 0.48
+    if y >= -0.05:
+        return ROOF_HW
+    return 0.48 + (ROOF_HW - 0.48) * (y - COWL_BACK_Y) / (-0.05 - COWL_BACK_Y)
 
 
 def _hsec(z, plan):
@@ -178,102 +188,104 @@ def build_tuktuk():
     """
     body = Builder()
     roof = Builder()
+    P = lambda hw, z0, z1, rt, rb=0.0: _rrect(hw, z0, z1, rt, rb, n=4)
 
-    # 1. acoperisul: loft cu sectiune rotunjita sus, capetele racordate
-    prof = lambda hw, z0, z1, r: _rrect(hw, z0, z1, r, 0.0, n=4)
+    # 1/9/11. ACOPERISUL + sfertul din spate (galben), un singur loft pe Y.
+    # Planul e TRAPEZ (runda 2, verdictul liderului): ingust la stalpul A
+    # (0,96 m), lat de la stalpul din mijloc incolo (1,36 m). In fata,
+    # cozorocul se curbeaza in jos peste parbrizul inclinat; la stalpul din
+    # spate fundul sectiunii sare de la 1,50 la centura (fata sfertului
+    # inchis); spre spate acoperisul se rotunjeste si coboara.
+    rz0 = ROOF_Z0 - 0.02
     roof_secs = [
-        # botul acoperisului se rotunjeste in jos peste parbriz, ca pe decupare
-        _sec(-1.06, prof(ROOF_HW - 0.14, ROOF_Z0 + 0.04, ROOF_Z1 - 0.14, 0.06)),
-        _sec(-1.03, prof(ROOF_HW - 0.06, ROOF_Z0 + 0.01, ROOF_Z1 - 0.06, 0.14)),
-        _sec(-0.97, prof(ROOF_HW - 0.02, ROOF_Z0, ROOF_Z1 - 0.015, 0.20)),
-        _sec(-0.88, prof(ROOF_HW, ROOF_Z0, ROOF_Z1, 0.22)),
-        _sec(REAR_FACE_Y - 0.10, prof(ROOF_HW, ROOF_Z0, ROOF_Z1, 0.22)),
-        _sec(REAR_FACE_Y - 0.03, prof(ROOF_HW - 0.03, ROOF_Z0, ROOF_Z1 - 0.02, 0.20)),
-        _sec(REAR_FACE_Y, prof(ROOF_HW - 0.09, ROOF_Z0, ROOF_Z1 - 0.07, 0.14)),
+        _sec(-0.99, P(0.36, rz0 - 0.02, 1.58, 0.05)),
+        _sec(-0.95, P(0.43, rz0 - 0.04, 1.68, 0.10)),
+        _sec(-0.88, P(0.47, rz0 - 0.02, 1.75, 0.16)),
+        _sec(-0.76, P(0.50, rz0, 1.79, 0.20)),
+        _sec(-0.45, P(_hw(-0.45) + 0.02, rz0, ROOF_Z1, 0.22)),
+        _sec(-0.05, P(_hw(-0.05) + 0.01, rz0, ROOF_Z1, 0.22)),
+        _sec(CAB_BACK_Y - 0.001, P(ROOF_HW, rz0, ROOF_Z1, 0.22)),
+        _sec(CAB_BACK_Y, P(ROOF_HW, BELT_Z, ROOF_Z1, 0.22)),
+        _sec(1.02, P(ROOF_HW, BELT_Z, ROOF_Z1 - 0.01, 0.24)),
+        _sec(1.16, P(ROOF_HW - 0.02, BELT_Z, 1.74, 0.26)),
+        _sec(1.24, P(ROOF_HW - 0.07, BELT_Z, 1.66, 0.24)),
+        _sec(REAR_FACE_Y, P(ROOF_HW - 0.14, BELT_Z, 1.58, 0.20)),
     ]
     _loft(roof, roof_secs, YELLOW)
-
-    # 9/11. sfertul din spate, jumatatea galbena (de la centura la acoperis)
-    #     loft pe VERTICALA, cu colturile din spate rotunjite in plan (spatele
-    #     decuparii b e rotund, nu o cutie)
-    _loft(roof, [_hsec(z, _plan_rear(hw)) for z, hw in
-                 ((BELT_Z, BODY_HW), (ROOF_Z0 + 0.02, ROOF_HW))], YELLOW)
-    # 2. stalpii A, galbeni, putin inclinati (baza in fata)
+    # 2. stalpii A galbeni, pe marginile parbrizului inclinat
     for sx in (-1.0, 1.0):
-        roof.beam((sx * (BODY_HW - 0.04), -0.97, 0.88), (sx * (ROOF_HW - 0.07), -0.90, ROOF_Z0 + 0.02),
-                  (0.08, 0.08), YELLOW)
+        roof.beam((sx * 0.45, -1.02, 0.90), (sx * 0.44, -0.89, rz0 - 0.03),
+                  (0.07, 0.07), YELLOW)
 
-    # 11. geamul din spate (un singur dreptunghi)
-    body.box((0.0, REAR_FACE_Y + 0.006, 1.26), (0.78, 0.02, 0.34), GLASS)
-
-    # 2. parbrizul, inchis, intre stalpii A
-    body.beam((0.0, -0.98, 0.90), (0.0, -0.91, ROOF_Z0), (1.14, 0.03), GLASS,
+    # 2. parbrizul, INCLINAT spre spate (baza in fata, varful sub cozoroc),
+    # geam gri deschis ca pe decupare
+    body.beam((0.0, -1.02, 0.91), (0.0, -0.88, rz0 + 0.01), (0.86, 0.03), GLASS,
               up=(0.0, 1.0, 0.0))
+    # 11. geamul din spate, cu colturi rotunjite
+    win = _rrect(0.30, 1.12, 1.40, 0.07, 0.07, n=3)
+    _loft(body, [_sec(REAR_FACE_Y - 0.01, win), _sec(REAR_FACE_Y + 0.008, win)], GLASS)
 
-    # 3-4. botul: cowl galben peste botul negru, ambele ingustate spre fata
-    nose_lo = [(-1.20, 0.36, 0.40), (-1.14, 0.46, 0.36), (-1.02, 0.56, 0.34),
-               (COWL_BACK_Y, BODY_HW, 0.32)]
-    secs = [_sec(y, _rrect(hw, z0, 0.68, 0.06, 0.08, n=2)) for y, hw, z0 in nose_lo]
-    _loft(body, secs, BODY)
-    #     cowl-ul galben, bombat: sectiunea rotunjita sus, varful coboara spre bot
-    cowl = [(-1.15, 0.40, 0.82, 0.08), (-1.10, 0.50, 0.87, 0.12),
-            (-1.00, 0.58, 0.90, 0.14), (COWL_BACK_Y, BODY_HW, 0.91, 0.14)]
-    secs = [_sec(y, _rrect(hw, 0.68, zt, r, 0.0, n=3)) for y, hw, zt, r in cowl]
-    _loft(body, secs, YELLOW)
-    # lumini: far central rotund + 2 semnalizatoare
-    body.cylinder((0.0, -1.205, 0.58), 0.075, 0.03, YELLOW, segments=10, axis="Y")
+    # 3-4. carena botului: ingusta si rotunjita, neagra jos, galbena sus,
+    # continuata pana dupa stalpul A (bordul din fata soferului)
+    nose = [(-1.22, 0.22, 0.46, 0.70), (-1.17, 0.30, 0.40, 0.78),
+            (-1.08, 0.37, 0.36, 0.86), (-0.95, 0.43, 0.34, 0.91),
+            (-0.76, 0.48, 0.33, 0.93), (-0.56, _hw(-0.56), 0.32, 0.93)]
+    _loft(body, [_sec(y, P(hw, z0, 0.66, 0.05, 0.12)) for y, hw, z0, _ in nose], BODY)
+    _loft(body, [_sec(y, P(hw, 0.66, zt, min(0.16, (zt - 0.66) * 0.9), 0.0))
+                 for y, hw, _, zt in nose], YELLOW)
+    # lumini pe marginea neagra de sus a botului
+    body.cylinder((0.0, -1.232, 0.60), 0.06, 0.03, YELLOW, segments=10, axis="Y")
     for sx in (-1.0, 1.0):
-        body.cylinder((sx * 0.30, -1.20, 0.60), 0.045, 0.03, AMBER, segments=8, axis="Y")
+        body.cylinder((sx * 0.15, -1.222, 0.60), 0.035, 0.03, AMBER, segments=8, axis="Y")
 
-    # 5. aripa si furca rotii din fata
-    _arc_band(body, (0.0, FRONT_Y, WHEEL_R), WHEEL_R + 0.04, WHEEL_R + 0.08, 0.20,
-              25.0, 150.0, BODY)
+    # 5. aripa care IMBRACA roata din fata (lata, pe toata jumatatea de sus)
+    # si furca
+    _arc_band(body, (0.0, FRONT_Y, WHEEL_R), WHEEL_R + 0.03, WHEEL_R + 0.07, 0.24,
+              8.0, 172.0, BODY, n=9)
     for sx in (-1.0, 1.0):
-        body.beam((sx * 0.085, FRONT_Y, WHEEL_R), (sx * 0.085, FRONT_Y + 0.10, 0.52),
+        body.beam((sx * 0.10, FRONT_Y, WHEEL_R), (sx * 0.10, FRONT_Y + 0.12, 0.50),
                   (0.035, 0.05), BODY)
 
     # 6. oglinzile pe stalpii A
     for sx in (-1.0, 1.0):
-        body.beam((sx * (BODY_HW - 0.02), -0.93, 1.28), (sx * (ROOF_HW + 0.00), -0.95, 1.34),
-                  (0.02, 0.02), BODY)
-        body.box((sx * (ROOF_HW + 0.005), -0.95, 1.37), (0.02, 0.07, 0.10), BODY)
+        body.beam((sx * 0.47, -0.93, 1.26), (sx * 0.57, -0.95, 1.32), (0.02, 0.02), BODY)
+        body.box((sx * 0.58, -0.95, 1.35), (0.02, 0.07, 0.10), BODY)
 
-    # 10. podeaua cabinei, de la cowl la sfertul din spate
-    body.box((0.0, (COWL_BACK_Y + CAB_BACK_Y) * 0.5, (0.30 + FLOOR_Z) * 0.5),
-             (BODY_HW * 2.0 - 0.06, CAB_BACK_Y - COWL_BACK_Y, FLOOR_Z - 0.30), BODY)
+    # 10. podeaua, trapez ca planul
+    _loft(body, [_sec(y, P(_hw(y) - 0.03, 0.30, FLOOR_Z, 0.0)) for y in
+                 (-0.60, -0.05, CAB_BACK_Y)], BODY)
 
-    # 9/11/15. sfertul din spate, jumatatea neagra: peste roti pe toata
-    # latimea, iar intre roti coboara pana la podea (rotile raman la vedere)
-    _loft(body, [_hsec(z, _plan_rear(hw)) for z, hw in
-                 ((0.54, BODY_HW - 0.02), (BELT_Z, BODY_HW))], BODY)
-    body.box((0.0, (CAB_BACK_Y + REAR_FACE_Y) * 0.5, (0.30 + 0.54) * 0.5),
-             ((REAR_X - 0.10) * 2.0, REAR_FACE_Y - CAB_BACK_Y, 0.24), BODY)
+    # 9/11/15. sfertul din spate, jumatatea neagra (acelasi plan ca galbenul)
+    low = [(CAB_BACK_Y, ROOF_HW - 0.02), (1.16, ROOF_HW - 0.04),
+           (1.24, ROOF_HW - 0.09), (REAR_FACE_Y, ROOF_HW - 0.16)]
+    _loft(body, [_sec(y, P(hw, 0.54, BELT_Z, 0.0, 0.08)) for y, hw in low], BODY)
+    body.box((0.0, (CAB_BACK_Y + REAR_FACE_Y) * 0.5 - 0.02, (0.30 + 0.54) * 0.5),
+             ((REAR_X - 0.10) * 2.0, REAR_FACE_Y - CAB_BACK_Y - 0.04, 0.24), BODY)
     for sx in (-1.0, 1.0):
         _arc_band(body, (sx * REAR_X, REAR_Y, WHEEL_R), WHEEL_R + 0.03, WHEEL_R + 0.07,
                   0.20, 5.0, 175.0, BODY)
 
-    # 12. stopurile, 13. bara galbena
+    # 12. stopurile, 13. bara galbena, 14. catadioptrii
     for sx in (-1.0, 1.0):
-        body.box((sx * 0.44, REAR_FACE_Y + 0.012, 0.72), (0.10, 0.03, 0.16), TAIL)
-    body.box((0.0, REAR_FACE_Y + 0.02, 0.40), (0.56, 0.05, 0.08), YELLOW)
-    # 14. catadioptrul lateral, pe linia galben/negru
+        body.box((sx * 0.38, REAR_FACE_Y + 0.012, 0.74), (0.09, 0.03, 0.15), TAIL)
+    body.box((0.0, REAR_FACE_Y + 0.02, 0.44), (0.50, 0.05, 0.08), YELLOW)
     for sx in (-1.0, 1.0):
-        body.box((sx * (BODY_HW + 0.006), 1.02, BELT_Z - 0.04), (0.02, 0.30, 0.05), AMBER)
+        body.box((sx * (ROOF_HW - 0.013), 0.95, BELT_Z - 0.04), (0.02, 0.28, 0.05), AMBER)
 
-    # 7. stalpii golului lateral: cel de la mijloc (dupa scaunul soferului)
+    # 7. stalpul din mijlocul golului lateral
     for sx in (-1.0, 1.0):
-        body.box((sx * (BODY_HW - 0.03), -0.18, (FLOOR_Z + ROOF_Z0) * 0.5),
-                 (0.05, 0.05, ROOF_Z0 - FLOOR_Z), BODY)
+        body.box((sx * (_hw(-0.18) - 0.03), -0.18, (FLOOR_Z + rz0) * 0.5),
+                 (0.05, 0.05, rz0 - FLOOR_Z), BODY)
 
-    # 8. scaunul soferului, ghidonul, bancheta din spate
-    body.box((0.0, -0.44, 0.54), (0.44, 0.34, 0.24), BODY)               # soclul
-    body.box((0.0, -0.44, 0.71), (0.50, 0.38, 0.10), SEAT)               # perna
-    body.box((0.0, -0.26, 0.92), (0.50, 0.08, 0.34), SEAT)               # spatar
-    body.beam((0.0, -0.74, 0.82), (0.0, -0.66, 1.04), (0.05, 0.05), METAL)  # coloana
-    body.beam((-0.30, -0.64, 1.06), (0.30, -0.64, 1.06), (0.035, 0.035), METAL)
-    body.box((0.0, 0.26, 0.55), (BODY_HW * 2.0 - 0.10, 0.44, 0.26), BODY)  # soclul banchetei
-    body.box((0.0, 0.26, 0.73), (BODY_HW * 2.0 - 0.14, 0.48, 0.10), SEAT)
-    body.box((0.0, CAB_BACK_Y - 0.05, 1.02), (BODY_HW * 2.0 - 0.14, 0.09, 0.46), SEAT)
+    # 8. scaunul soferului, ghidonul (peste bord), bancheta din spate
+    body.box((0.0, -0.40, 0.54), (0.44, 0.30, 0.24), BODY)
+    body.box((0.0, -0.40, 0.71), (0.50, 0.36, 0.10), SEAT)
+    body.box((0.0, -0.24, 0.92), (0.50, 0.08, 0.34), SEAT)
+    body.beam((0.0, -0.62, 0.90), (0.0, -0.58, 1.06), (0.05, 0.05), METAL)
+    body.beam((-0.28, -0.57, 1.07), (0.28, -0.57, 1.07), (0.035, 0.035), METAL)
+    body.box((0.0, 0.26, 0.55), (ROOF_HW * 2.0 - 0.14, 0.44, 0.26), BODY)
+    body.box((0.0, 0.26, 0.73), (ROOF_HW * 2.0 - 0.18, 0.48, 0.10), SEAT)
+    body.box((0.0, CAB_BACK_Y - 0.05, 1.02), (ROOF_HW * 2.0 - 0.18, 0.09, 0.46), SEAT)
 
     body_obj = body.to_object("Tuktuk_Body")
     roof_obj = roof.to_object("Tuktuk_Roof")
@@ -319,7 +331,7 @@ clear_built()
 results = []
 
 tt_body, tt_roof, tt_wheels = build_tuktuk()
-tt = emit_car([tt_body, tt_roof], tt_wheels, "vehicles/tuktuk.glb", budget=4000)
+tt = emit_car([tt_body, tt_roof], tt_wheels, "vehicles/tuktuk.glb", budget=5200)
 
 print()
 for path, tris, kb, ao_lo, ao_hi, budget, place in results:

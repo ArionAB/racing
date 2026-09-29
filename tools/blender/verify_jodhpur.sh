@@ -196,7 +196,8 @@ echo "== traficul (brief §1.5, val 4a) =="
 # exceptia declarata de brief. Fara --front: la un vehicul latura (X) are
 # mereu mai multa arie decat botul (Z); orientarea botului (+Z in GLB, -Z in
 # joc dupa model_rotation_deg 180) e verificata in Godot, nu aici.
-check "vehicles/tuktuk.glb"           4000 --origin=assembly --allow-car-slots=Tuktuk_Roof,Tuktuk_Body
+# runda 2 (plan trapez, acoperis curbat, carena rotunjita): 3632 -> 5060 tri.
+check "vehicles/tuktuk.glb"           5200 --origin=assembly --allow-car-slots=Tuktuk_Roof,Tuktuk_Body
 
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)

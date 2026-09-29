@@ -188,6 +188,16 @@ check "props/thela_cart.glb"          3700 --origin=assembly --allow-car-slots=C
 check "props/chai_stall.glb"          1600 --origin=assembly
 check "props/marigold_garland.glb"     800
 
+echo "== traficul (brief §1.5, val 4a) =="
+# tuktuk: contract `Car` (car.gd:2431-2470). --origin=assembly: rotile sunt
+# noduri cu PIVOT in centrul osiei (translation != 0, baza identitate), deci
+# nu au baza la Y=0 pe nodul lor; ansamblul atinge solul prin talpa rotilor.
+# --allow-car-slots: CAR_YELLOW pe acoperis si cowl, CAR_RED pe stopuri --
+# exceptia declarata de brief. Fara --front: la un vehicul latura (X) are
+# mereu mai multa arie decat botul (Z); orientarea botului (+Z in GLB, -Z in
+# joc dupa model_rotation_deg 180) e verificata in Godot, nu aici.
+check "vehicles/tuktuk.glb"           4000 --origin=assembly --allow-car-slots=Tuktuk_Roof,Tuktuk_Body
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total"

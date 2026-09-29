@@ -2132,3 +2132,74 @@ maparea pe clasa `blue_lime_light` rămâne de făcut la integrarea pistei.
 `--sheet 3` trimitea valul ca `int`, dar cheia din `WAVE_PIECES` e `"3"`:
 planșa ieșea fără piese și nu se rescria. Acum `fidelity_sheet` încearcă și
 `str(wave)`; `jodhpur_fidelity_val3.png` e regenerată.
+
+## Val 4a — tuk-tuk-ul și curățenia `facade()` (29 sep 2026)
+
+### Curățenie: `facade()` promovat în `jodhpur_shapes.py` §10
+
+Cele două copii (`build_jodhpur_city.py`, `build_jodhpur_fort.py`) divergeau;
+în vocabular stă acum reuniunea lor (`fill` glow/wood/shutter/open/none/jali,
+`point`, `step`, `facade_bays`, helperele `_fx`/`_lbox`/`_lprism`/`_lband`/
+`_opening_contour`). Singura cotă care diferea, pervazul (0,10/0,08 la oraș,
+0,12/0,10 la cetate), e acum per gol (`sill_h`, `sill_out`); cetatea o dă prin
+`SILL`. **Verificare: toate cele 16 GLB-uri ale celor două build-uri ies
+identice la byte (sha256)** cu cele comise. Bugetul din `emit()` al lui
+`blue_house_c` e acum 4600, ca pragul din `verify_jodhpur.sh`.
+
+Observații în afara curățeniei (neatinse): `blue_house_a.glb` și
+`ghanta_ghar.glb` comise **nu** se reproduc din `build_jodhpur_pilot.py` de pe
+aceeași bază (și fără schimbarea mea ies aceleași hash-uri noi — GLB-urile
+pilotului sunt mai vechi decât codul); `thela_cart.glb` e **nedeterminist**:
+trei rulări consecutive ale `build_jodhpur_bazaar.py` dau trei hash-uri.
+
+### `vehicles/tuktuk.glb` — 3632 tri (prag verify 4000)
+
+Build: `build_jodhpur_vehicles.py`. Noduri: `Tuktuk_Body` (LOG_DARK + accente
+CAR_YELLOW/CAR_RED/LAVA_ORANGE/VOLCANIC_BLACK/PAINTED), `Tuktuk_Roof`
+(CAR_YELLOW), `Wheel_Front`, `Wheel_Rear_L`, `Wheel_Rear_R`.
+
+**Cote măsurate din GLB:** lungime 2,59 m (Z −1,298..1,293), lățime 1,39 m
+(caroseria; acoperișul 1,36), înălțime 1,80 m. Botul spre +Z în GLB (−Y în
+Blender). Rotile: pivot în centrul osiei, bază identitate, fără scală;
+`Wheel_Front` (0, 0,22, 1,027), `Wheel_Rear_L` (+0,55, 0,22, −0,813),
+`Wheel_Rear_R` (−0,55, 0,22, −0,813); rază 0,22 (16 segmente, cu un vârf
+exact la talpă — cu 14 segmente talpa ieșea la 0,2145 și ansamblul cobora
+6 mm, deci raza citită de `car.gd` ar fi fost 0,214).
+
+**Decupările:** brief-ul spune că ambele sunt din față; `tuktuk_b` e de fapt
+**3/4 spate-stânga** (stopuri, geam în spate, ambele roți din spate). Spatele
+urmează deci planșa (panou închis cu geam, stopuri, bară galbenă), fără
+prelata ruloată cerută de brief, care nu apare pe nicio decupare.
+
+**Sonda Godot** (temporară, ștearsă; `--headless --fixed-fps 60`, după
+`--import`; `tuktuk.tres` duplicat cu `model` = acest GLB, rotația 180 din
+`.tres`), toate TRECUT: 3 roți găsite, doar `Wheel_Front` virează (−24° la
+steer 1 = 0,42 rad, spatele 0°), rază citită 0,2200, bază identitate pe
+toate trei; după 3 s pe podea originea mașinii la y = 0,0000, 4 contacte de
+suspensie, talpa fiecărei roți la y = 0,000, caroseria de la 0,218 m (nu atinge
+solul); roata din față la +1,03 m pe direcția de mers (−Z), `Rear_L` pe stânga
+(+0,55), `Rear_R` pe dreapta; cu accelerat 1 s merge 3,1 m înainte, spre bot.
+`tuktuk.tres` încă leagă `ape_piaggio.glb` — schimbarea e a instanței de
+gameplay (regula 0.3).
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| acoperiș | 1 volum galben, rotunjit pe toate muchiile, cel mai lat, iese peste parbriz | loft rotunjit (r 0,22), botul coboară peste parbriz, colțurile din spate rotunjite | da |
+| parbriz | 1, mare, închis, cu stâlpi A galbeni | panou VOLCANIC_BLACK 1,14 m, 2 stâlpi galbeni înclinați | da (pe decupare geamul e gri, nu negru) |
+| cowl | galben sub parbriz, bombat, coboară pe față până la lumini | loft galben 0,68–0,91 m, rotunjit sus, îngustat spre bot | da |
+| bot | negru, mai îngust decât cabina, 3 lumini sus: centrală galbenă + 2 portocalii | negru trapezoidal, far central rotund galben + 2 semnalizatoare portocalii | da (centrala e dreptunghi pe decupare, rotundă după brief) |
+| roata din față | 1, sub bot, ieșită în față, aripă neagră + furcă | 1, aripă în arc 25–150°, furcă din 2 brațe | da (aripa mai mică decât pe decupare) |
+| oglinzi | 1 vizibilă, pe stâlpul A stâng | 2, câte una pe fiecare stâlp A | da |
+| gol lateral | 1 pe latură, fără ușă, de la stâlpul A la sfertul din spate, stâlp subțire la mijloc | gol y −0,74..0,55, stâlp la −0,18 | da |
+| interior | scaun șofer, bancheta din spate cu spătar, ghidon | scaun + spătar, banchetă lată cu spătar, ghidon PAINTED | da |
+| sfertul din spate | negru jos, galben sus, linia la ~0,95 m | loft vertical negru 0,54–0,95, galben 0,95–1,52, colțuri rotunjite | da |
+| spate | galben sus cu 1 geam dreptunghiular, negru jos | idem | da |
+| stopuri | 2, la colțurile de jos ale spatelui | 2, CAR_RED | da |
+| bară | galbenă, jos la mijloc, fără număr | bară CAR_YELLOW 0,56 m | da |
+| catadioptru | portocaliu, pe latură la linia galben/negru | câte unul pe latură | da |
+| roți spate | 2, sub caroserie, cu aripi | 2, ecartament ±0,55, aripi în arc | parțial: pe decupare se văd mai mult, cu aripi mai late |
+| h/l | 0,67 pe ambele decupări | 0,69 din cote (profil); în compare 0,77 (a) / 0,84 (b) | abatere de unghi: cotele sunt contractul brief-ului (h/l 0,70); decuparea b e mai laterală și mai joasă decât camera |
+
+Comparațiile: `docs/asset_briefs/img/jodhpur_fidelity/tuktuk_a.png`,
+`tuktuk_b.png` (preview: `COMPARE_SPECS` primește cheia `glb`, ca două
+decupări să randeze același GLB).

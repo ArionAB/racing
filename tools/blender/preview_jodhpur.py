@@ -434,6 +434,37 @@ COMPARE_SPECS = {
         "category": "props",
         "tints": {"Garland": "#E8792E"},  # LAVA_ORANGE, ca albedo per brief
     },
+    # val 4a -- tuk-tuk-ul are DOUA decupari (a = 3/4 fata-stanga, b = 3/4
+    # spate-stanga), acelasi GLB (`glb`). Botul e -Y, stanga masinii +X: fata-
+    # stanga = azimut negativ, spate-stanga = azimut pozitiv.
+    "tuktuk_a": {
+        "category": "vehicles", "glb": "tuktuk",
+        "tints": {
+            "Tuktuk_Roof": "#F2C230",  # CAR_YELLOW
+            "Tuktuk_Body": {LOG_DARK: "#2A2A2E", VOLCANIC_BLACK: "#1A1A1D",
+                            CAR_YELLOW: "#F2C230", LAVA_ORANGE: "#E8792E",
+                            CAR_RED: "#D94A38", PAINTED: "#56545B"},
+            "Wheel_Front": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
+            "Wheel_Rear_L": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
+            "Wheel_Rear_R": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
+        },
+        "camera": {"azimuth": -32.0, "elevation": 14.0, "margin": 1.15, "lens": 100.0},
+        "sun_follow": {"offset": -25.0, "tilt": 50.0},
+    },
+    "tuktuk_b": {
+        "category": "vehicles", "glb": "tuktuk",
+        "tints": {
+            "Tuktuk_Roof": "#F2C230",
+            "Tuktuk_Body": {LOG_DARK: "#2A2A2E", VOLCANIC_BLACK: "#1A1A1D",
+                            CAR_YELLOW: "#F2C230", LAVA_ORANGE: "#E8792E",
+                            CAR_RED: "#D94A38", PAINTED: "#56545B"},
+            "Wheel_Front": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
+            "Wheel_Rear_L": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
+            "Wheel_Rear_R": {VOLCANIC_BLACK: "#1A1A1D", PAINTED: "#56545B"},
+        },
+        "camera": {"azimuth": 42.0, "elevation": 14.0, "margin": 1.15, "lens": 100.0},
+        "sun_follow": {"offset": -25.0, "tilt": 50.0},
+    },
 }
 
 
@@ -672,7 +703,8 @@ def _strip_dup_suffix(name):
 
 
 def _import_for_compare(name, spec, models_dir):
-    objs = _import(spec["category"], name, models_dir)
+    # `glb`: o piesa cu mai multe decupari (tuktuk_a/_b) randeaza acelasi GLB
+    objs = _import(spec["category"], spec.get("glb", name), models_dir)
     meshes = [o for o in objs if o.type == "MESH"]
     for o in meshes:
         _fix_ao_layer_name(o)

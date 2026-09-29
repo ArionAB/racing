@@ -390,7 +390,8 @@ GATE_GAP_CLEAR_H = 2.0    # inaltimea pana la care golul trebuie sa fie liber
 GATE_KEY_MIN = 9.0
 
 
-def _gate_doors(b, center, gap_w, door_h, wall_t, slot, stud_slot, open_angle_deg=100.0):
+def _gate_doors(b, center, gap_w, door_h, wall_t, slot, stud_slot, open_angle_deg=88.0,
+                 hinge_margin=None):
     """Doua canaturi batute cu tepi (3x5), balamalate la ambrazura, deschise
     la `open_angle_deg` -- stau LIPITE de peretii golului, INAUNTRUL adancimii
     portalului (nu proiectate ca placi subtiri in FATA zidului, spre camera).
@@ -400,21 +401,45 @@ def _gate_doors(b, center, gap_w, door_h, wall_t, slot, stud_slot, open_angle_de
     unghiul de 75 grade lasa canatul aproape paralel cu zidul dar deplasat
     IN FATA lui (spre +X, catre camera) -- exact "placi subtiri in fata
     zidului" semnalat de critica. Fix: `center` se plaseaza acum la mijlocul
-    grosimii zidului (`cx=0`, apelantul trimite pozitia deja centrata), iar
-    unghiul de deschidere creste la ~100 grade, ceea ce duce canatul SPRE
-    INTERIORUL portalului (spre -X local, adica in adancimea tunelului
-    arcuit), lipit de peretele lateral al firidei -- vizibil prin gol, dar
-    nu iesind in fata piesei.
+    grosimii zidului (`cx=0`, apelantul trimite pozitia deja centrata).
+
+    REVIZUIRE runda de corectii (`measure_opening` a masurat 5,55 m liber,
+    sub contractul de 7,0 m, pe toate trei portile): unghiul de 100 de grade
+    din runda 2 trecea de 90 -- dincolo de 90 de grade, canatul se roteste
+    INAPOI spre centrul golului (`tip_y` scade odata cu unghiul, verificat
+    numeric: la 100 grade varful canatului ajunge la |y|=2,77, adica
+    intra 0,7 m in golul liber). Geometria corecta pentru "canat lipit de
+    perete, in afara golului" e unghiul de EXACT 90 de grade (canatul
+    devine paralel cu directia de mers, flush pe peretele lateral al
+    firidei) -- la 90 de grade sau mai putin, extrema canatului spre centru
+    NU trece niciodata de balama pe axa Y (matematic: rotatia unei bare
+    cu un capat fix nu poate scoate celalalt capat dincolo de pozitia lui
+    la 90 de grade, pe axa perpendiculara pe brat). Implicit 88 (usor sub
+    90, ca sa se citeasca vizual "deschis", nu perfect flush).
+
+    A doua cauza: balamaua insasi (`hinge_y`) statea pe marginea golului de
+    contract (`gap_w/2`), iar canatul are grosime (`leaf_t`) -- chiar la 90
+    de grade, jumatate din grosime tot intra in gol. Fix: balamaua se muta
+    cu `hinge_margin` in AFARA golului de contract (in ambrazura/pilonul de
+    piatra, unde e loc -- `center_span` >> `gap_w`), ca toata geometria
+    canatului (inclusiv tepii, care ies `leaf_t*0,5+0,02` peste fata
+    canatului) sa ramana strict in afara ferestrei de 7,0 m. Verificat
+    numeric (nu doar cod): cu `hinge_margin=0,13` si `open_angle_deg=88`,
+    varful cel mai apropiat de centru ramane la |y|=3,56, deci gol liber
+    2*3,56=7,12 m > 7,0 m contract, cu marja pentru tepi.
 
     Golul e de-a lungul Y (latimea 7 m), portalul strabate peretele pe X,
     deci canaturile se rotesc/deschid in planul XY, balamaua pe muchia
     exterioara (langa perete, pe Y)."""
     cx, cy, cz = center
-    leaf_w = gap_w * 0.5 - 0.05
     leaf_t = 0.14
+    if hinge_margin is None:
+        hinge_margin = leaf_t * 0.5 + 0.06
+    hinge_gap_w = gap_w + 2.0 * hinge_margin
+    leaf_w = hinge_gap_w * 0.5 - 0.05
     faces = []
     for side in (-1.0, 1.0):
-        hinge_y = cy + side * gap_w * 0.5
+        hinge_y = cy + side * hinge_gap_w * 0.5
         # balamaua e pe muchia exterioara; canatul se deschide spre INTERIOR
         # (spre -X local, in adancimea portalului), nu spre camera
         ang = math.radians(open_angle_deg) * side
@@ -461,6 +486,23 @@ def _build_gate(tower_h, door_slot, chhatri_over_arch, name_prefix):
     # center_span >= GATE_GAP_W * 1.3, indiferent de tower_r.
     center_span_min = GATE_GAP_W * 1.3
     tower_gap = center_span_min + (tower_r - 0.4) * 2.0 - 0.8
+
+    # REVIZUIRE (contract incalcat, masurat cu measure_opening: gol 6,92 m
+    # in loc de 7,0 m, pe stone-only, DUPA fixul canaturilor): sursa nu era
+    # arcul (izolat, `arch_opening` singur da exact 7,0 m), ci SOCLUL
+    # turnului (`plinth_h=0,7`, in fereastra de masurat 0,15..1,8 m) --
+    # frustumul de la baza turnului are raza `tower_r+0,35=4,25`, iar
+    # turnurile stau la `ty=tower_gap/2=7,65`, deci muchia interioara a
+    # soclului ajunge la `7,65-4,25=3,40` < `GATE_GAP_W/2=3,5`: soclul
+    # taia fizic 0,10 m din golul liber la nivelul solului, invizibil in
+    # cod (frustumul nu se intersecteaza cu arcul, doar cu FEREASTRA de
+    # masurare a golului). Fix: `tower_gap` primeste un termen suplimentar
+    # care garanteaza ca soclul (cel mai lat element de la baza turnului)
+    # ramane strict in afara golului de contract, cu o marja mica.
+    plinth_flare = 0.35
+    plinth_clear = (GATE_GAP_W * 0.5 + 0.15) - (tower_gap * 0.5 - (tower_r + plinth_flare))
+    if plinth_clear > 0.0:
+        tower_gap += 2.0 * plinth_clear
 
     # 1. turnurile rotunde STOUT, cate unul la fiecare capat (de-a lungul Y)
     for side in (-1.0, 1.0):
@@ -530,7 +572,34 @@ def _build_gate(tower_h, door_slot, chhatri_over_arch, name_prefix):
     # nu doar componenta arcului. Tinta: cheia (exact arch_h) ramane sub
     # wall_top_z (parapetul), cu marja pentru banda de nise + parapet, si
     # >= 9,0 m contract.
-    arch_h = min(wall_top_z * 0.72, tower_h - 3.0)
+    #
+    # REVIZUIRE (contract incalcat, masurat cu measure_opening pe toate trei
+    # portile de pe HEAD: cheia Jai 10,32 m OK, dar Fateh 8,93 m si Loha
+    # 7,89 m, sub GATE_KEY_MIN=9,0): formula veche (`min(wall_top_z*0.72,
+    # tower_h-3.0)`) alege mereu ramura `wall_top_z*0.72`, care scaleaza
+    # LINIAR cu tower_h -- pentru portile mai joase (Fateh 14 m, Loha
+    # 12,5 m, "abatere permisa" a brief-ului), cheia scade sub contract
+    # odata cu turnul. Fix: `arch_h` nu poate cobori sub GATE_KEY_MIN,
+    # indiferent cat de jos e turnul -- `max()` explicit. Verificat ca
+    # ramane spatiu pentru nise+parapet deasupra (`wall_top_z-arch_h`):
+    # Loha 11,1-9,0=2,1 m, Fateh 12,6-9,0=3,6 m, ambele pozitive si peste
+    # `niche_h` maxim (1,6 m).
+    #
+    # A DOUA REVIZUIRE: cu `arch_h=GATE_KEY_MIN` exact, `measure_opening`
+    # (`crown_half=0,3`, aceeasi fereastra folosita la toate portile) tot
+    # masoara SUB 9,0 m (Loha: 8,86 m) -- cauza nu e bevel (verificat izolat,
+    # bevel=0 da acelasi rezultat), ci geometria arcului ascutit insusi:
+    # varful e literal o muchie (latime zero), deci orice fereastra cu
+    # `crown_half>0` prinde un punct pe PANTA arcului, putin sub varf, nu
+    # varful. Cu cat arcul e mai "ascutit" (rise/half_w mai mare, ca la
+    # Loha, unde turnul jos comprima golul), panta de la varf e mai abrupta
+    # si caderea in fereastra de 0,3 m e mai mare (masurat: Jai cade 0,19 m,
+    # Loha 0,14 m -- pare invers intuitiv, dar Loha are pier_h mai mic, deci
+    # `cx`/raza arcului sunt diferite). Fix: se tinteste cu o marja fixa
+    # peste contract (`GATE_KEY_MIN + GATE_KEY_MARGIN`), nu chiar la limita,
+    # ca fereastra de masurare sa gaseasca tot >= 9,0 m dupa cadere.
+    GATE_KEY_MARGIN = 0.3
+    arch_h = max(GATE_KEY_MIN + GATE_KEY_MARGIN, min(wall_top_z * 0.72, tower_h - 3.0))
     pier_h = arch_h * 0.42
     # REVIZUIRE (gasita la primul --compare): `arch_opening` cu `open=False`
     # NU decupeaza golul exact pe conturul arcului -- silueta exterioara a
@@ -601,8 +670,17 @@ def _build_gate(tower_h, door_slot, chhatri_over_arch, name_prefix):
     # cu balamaua aproape de fata exterioara, canaturile deschise la 75 grade
     # ieseau ca placi subtiri IN FATA zidului, spre camera, in loc sa stea
     # in adancimea portalului.
+    #
+    # REVIZUIRE (contract incalcat, masurat cu measure_opening: 5,55 m in
+    # loc de 7,0 m): `gap_w` trimis aici era GATE_GAP_W-0,15, sub golul de
+    # piatra real -- balamaua statea deja in interiorul golului liber, iar
+    # unghiul de 100 grade impingea varful canatului si mai adanc spre
+    # centru. Acum se trimite golul REAL de piatra (GATE_GAP_W); `_gate_doors`
+    # isi muta singura balamaua in afara acestui gol (`hinge_margin`,
+    # implicit ~0,13 m) inainte sa roteasca la `open_angle_deg` (implicit
+    # 88, sub pragul de 90 dincolo de care canatul se intoarce spre centru).
     bdoor = Builder()
-    door_faces = _gate_doors(bdoor, (0.0, 0.0, 0.0), GATE_GAP_W - 0.15,
+    door_faces = _gate_doors(bdoor, (0.0, 0.0, 0.0), GATE_GAP_W,
                              pier_h + 0.4, wall_t, door_slot, STUD)
     for f in door_faces:
         pass  # sloturile sunt deja corecte (scrise in _gate_doors)
@@ -920,16 +998,30 @@ def build_palace_facade_b():
 
     # 2. etaj superior: rand DES de ferestre mici (~20), goluri RETRASE
     # inchise in Palace_Glow -- critica: "a dense row of small windows (~20)"
+    #
+    # REVIZUIRE (contract vizual incalcat: fatada B pierde total contrastul
+    # ferestrelor, randare complet plata pe toata banda de etaj superior):
+    # `center.z` transmis lui `arch_opening` e citit ca BAZA golului (hole
+    # incepe la `panel_z0=0`, implicit, si urca cu `h` -- vezi docstring,
+    # confirmat de apelul functional de mai sus, `res_n`, care trimite
+    # `plinth_h`, cota PODELEI, nu centrul etajului). Aici se trimitea
+    # `plinth_h+ground_h+upper_h*0.5` -- CENTRUL etajului superior tratat ca
+    # baza -- deci fiecare fereastra incepea la mijlocul etajului si urca
+    # aproape pana in creasta parapetului (verificat cu un test izolat:
+    # golul iesea ca un tepus care strapunge acoperisul, nu ca o fereastra
+    # in mijlocul peretelui). Fix: se calculeaza explicit baza ferestrei,
+    # centrata vertical in banda etajului superior.
     n_win = 20
     win_w, win_h_ = 0.75, 1.7
     win_margin2 = 2.4
+    win_base_z = plinth_h + ground_h + (upper_h - win_h_) * 0.5
     for i in range(n_win):
         t = i / (n_win - 1)
         wy = -hl + win_margin2 + t * (PB_LEN - 2 * win_margin2)
-        res_w = arch_opening(b, bg, (hd, wy, plinth_h + ground_h + upper_h * 0.5), win_w, win_h_,
+        res_w = arch_opening(b, bg, (hd, wy, win_base_z), win_w, win_h_,
                              win_h_ * 0.55, 0.30, STONE, GLOW, style="round", glass=True,
                              reveal=0.12, glass_depth=0.05, panel_w=win_w * 1.75,
-                             panel_h=upper_h * 0.85, rotation=ROT_YTOX)
+                             panel_h=win_h_ * 1.3, rotation=ROT_YTOX)
         faces += res_w["stone"]
 
     # 3. parapet crenelat pe toata linia acoperisului

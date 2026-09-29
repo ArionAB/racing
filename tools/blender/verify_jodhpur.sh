@@ -85,8 +85,17 @@ check "structures/fort_bastion.glb"       5500 --origin=assembly
 check "structures/fort_gate_jai.glb"      10600 --origin=assembly
 check "structures/fort_gate_fateh.glb"    12600 --origin=assembly
 check "structures/fort_gate_loha.glb"     10600 --origin=assembly
+# palace_facade_a/b: bugetul a crescut fata de val 2a/escaladare (a 11128->
+# 13148, b 17292->19312) dupa runda de corectii fort2 -- vocabularul reparat
+# (arch_opening pe gol real, nu "T") a mutat Palace_Stone la 17072 tri
+# INAINTE de aceasta runda (deja documentat in inventar), iar fix-ul
+# ferestrelor fatadei B (pozitie + sticla vizibila) a adaugat geometrie
+# LEGITIMA: placa de sticla era o singura fata (normala gresita, randa
+# invizibila) si a devenit o placa subtire inchisa (fata+spate+laturi) ca
+# `recalc_face_normals` sa o orienteze corect -- cost mic, cerut de
+# contractul vizual (geamuri inchise REALE), nu geometrie de umplutura.
 check "structures/palace_facade_a.glb"    15000 --origin=assembly
-check "structures/palace_facade_b.glb"    14000 --origin=assembly
+check "structures/palace_facade_b.glb"    20000 --origin=assembly
 check "props/rampart_cannon.glb"          4200 --origin=assembly
 
 echo "== orasul albastru (brief §1.4, val 3) =="

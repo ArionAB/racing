@@ -968,11 +968,12 @@ def _clip_band(poly, axis, lo, hi):
 
 
 def measure_opening(objs, windows=((0.15, 1.8), (0.15, 5.0)), axis_x=0.0,
-                    crown_half=0.3, crown_from=2.0):
+                    crown_half=0.3, crown_from=2.0, lateral="x"):
     """Golul unei porti masurat ca GOL (memoriile cota-de-contract-se-masoara-
     ca-gol, golul-se-masoara-pe-fereastra-lui): proiectia TRIUNGHIURILOR
     tuturor nodurilor pe planul portii (X lateral, Z sus; directia de mers
-    e Y), in coordonate lume.
+    e Y), in coordonate lume. `lateral="y"` pentru piesele cu fata pe +X
+    (portile cetatii: latimea pe Y, mersul pe X).
 
     - pentru fiecare fereastra (z0, z1): latimea benzii libere care contine
       axul x = axis_x (0 daca ceva o blocheaza pe ax);
@@ -988,7 +989,8 @@ def measure_opening(objs, windows=((0.15, 1.8), (0.15, 5.0)), axis_x=0.0,
         me.calc_loop_triangles()
         vs = [mw @ v.co for v in me.vertices]
         for lt in me.loop_triangles:
-            tris.append([(vs[i].x, vs[i].z) for i in lt.vertices])
+            tris.append([((vs[i].x if lateral == "x" else vs[i].y), vs[i].z)
+                         for i in lt.vertices])
     gaps = {}
     for z0, z1 in windows:
         left, right = -1e9, 1e9
@@ -1033,3 +1035,32 @@ def densify_for_ao(b, max_len=2.5, passes=6):
         if not edges:
             break
         bmesh.ops.subdivide_edges(bm, edges=edges, cuts=1, use_grid_fill=True)
+
+
+def kangura_merlon(b, center, w, h, t, slot, facing="Y"):
+    """Merlon "kangura" (planse Jodhpur: zidurile cetatii, poarta pietei):
+    dreptunghi + umeri rotunjiti + varf ascutit, prisma de grosime `t`.
+    `center` = mijlocul BAZEI. `facing` = axa fetei mari ("Y": fata spre
+    +-Y, latimea pe X; "X": fata spre +-X, latimea pe Y). Solid manifold."""
+    cx, cy, cz = center
+    hw = w * 0.5
+    outline = [(-hw, 0.0), (hw, 0.0), (hw, 0.52 * h), (0.43 * w, 0.70 * h),
+               (0.30 * w, 0.83 * h), (0.14 * w, 0.93 * h), (0.0, h),
+               (-0.14 * w, 0.93 * h), (-0.30 * w, 0.83 * h), (-0.43 * w, 0.70 * h),
+               (-hw, 0.52 * h)]
+
+    def P(u, d, z):
+        if facing == "Y":
+            return (cx + u, cy + d, cz + z)
+        return (cx + d, cy + u, cz + z)
+    bm = b.bm
+    fa = [bm.verts.new(P(u, -t * 0.5, z)) for u, z in outline]
+    fb = [bm.verts.new(P(u, t * 0.5, z)) for u, z in outline]
+    n = len(outline)
+    faces = [bm.faces.new(tuple(fa)), bm.faces.new(tuple(reversed(fb)))]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append(bm.faces.new((fa[i], fb[i], fb[j], fa[j])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces

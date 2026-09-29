@@ -111,86 +111,94 @@ def _local_arcade(b, bg, p1, p2, n, opening_h, pier_h, pier_w, wall_t, slot,
 # fort_wall_segment -- modul de zid inlantuibil
 # =============================================================================
 #
-# Contract (brief §1.2): 12 m lung (Y) x 3 m gros x 14 m inalt, h/l 0,34.
-# Decuparea arata un TRONSON intre doua turnuri -- turnurile sunt piesa
-# separata (fort_wall_turret), de-aici modulul e DOAR peretele drept dintre
-# ele. Lista de elemente (dupa Read fort_wall_segment.png), de jos in sus:
+# ESCALADARE OPUS (runda 3; rundele 1-2 respinse: modulul singur, 12 x 14 m,
+# citea ca o PLACA patrata cu o coroana de "dinti" rotunzi la 1,2 m).
 #
-#   1. Soclu usor tesit la baza (banda ingusta, teasa spre exterior).
-#   2. Zid drept, gros, cu linii de asize orizontale (TEXTURA, nu geometrie --
-#      regula 0.5 -- vine din clasa red_sandstone la integrare).
-#   3. Un rand de 3 guri de tragere dreptunghiulare inguste, la ~55-60% din
-#      inaltime, distantate regulat (pe decupare: stanga, mijloc, dreapta).
-#   4. O cornisa/parapet in consola aproape de varf (banda ingusta iesita),
-#      cu o umbra clara dedesubt -- `chajja`/`balcony_band` liniar.
-#   5. Creneluri DREPTUNGHIULARE, DESE, regulate pe toata lungimea sus, sub
-#      forma de dinti patrati egali (numarate pe decupare: ~9-10 pe cei 12 m).
+# LISTA DE ELEMENTE (decuparea fort_wall_segment.png, citita inainte de
+# primul vertex; vedere frontala, tronson de ~3 module intre doua turnuri):
+#   1. Soclu ingust la baza, usor tesit (iese putin din fata zidului).
+#   2. Corp de zid drept, plin, inalt -- rosturile de blocuri sunt TEXTURA
+#      (brief regula 5), nu geometrie.
+#   3. 2 fante de tragere inalte si inguste pe tronson, la ~65% din
+#      inaltimea zidului -> aici 1 pe modul (3 pe tronsonul de 3 module; decuparea
+#      are 2 -- abatere de +1 asumata: un modul inlantuibil nu poate avea
+#      "o fanta la 1,5 module").
+#   4. Un brau subtire, usor iesit, la baza crenelurilor (linia de umbra
+#      de sub merloane).
+#   5. Merloane "kangura" (dreptunghi + umeri rotunjiti + varf), cu un punct
+#      intunecat in mijloc: 14 pe tronsonul de ~3 module -> 5 pe modul, pas
+#      2,4 m, ~1,95 x 2,5 m, cu goluri inguste intre ele. NU "~1 la 1,2 m"
+#      (cifra rundei 2, contrazisa de decupare). Brief-ul scrie "creneluri
+#      dreptunghiulare" -- decuparea arata kangura; forma vine din planse
+#      (§0.1), deci kangura.
+#   6. Pe spate: drum de straja la cota brâului si un parapet interior jos
+#      (silueta din spate si din capat, nevazut pe decupare).
+#   Capete PLANE la y = +-6 (inlantuire cap la cap / langa turn): merloanele
+#   la y = 0, +-2,4, +-4,8, deci golul de la capat e jumatate din golul
+#   dintre merloane si ritmul continua peste rost.
+#   Ce iese din contur: doar merloanele.
 #
-# Lungimea pe Y (capete PLANE la y=+-6, ca sa se inlantuie cap la cap sau
-# langa turn), fata principala (guri de tragere, cornisa) spre +X.
+# Lungimea pe Y, fata principala (fante, merloane) spre +X.
 WS_LEN = 12.0
 WS_THICK = 3.0
 WS_H = 14.0
+WS_MERLONS = 5
+WS_MERLON_W = 1.95
+WS_MERLON_H = 2.5
+WS_MERLON_T = 0.7
 
 
 def build_fort_wall_segment():
     b = Builder()
-    faces = []
+    bg = Builder()
     hl = WS_LEN * 0.5
     ht = WS_THICK * 0.5
 
-    # 1. soclu usor tesit (banda ingusta la baza, mai lata decat zidul)
-    plinth_h = 0.6
-    faces += list(b.box((0.0, 0.0, plinth_h * 0.5), (WS_THICK + 0.30, WS_LEN, plinth_h), STONE))
+    # 1. soclu tesit: profil in X-Z extrudat pe toata lungimea (capete plane)
+    plinth = [(-ht - 0.30, 0.0), (ht + 0.30, 0.0), (ht + 0.30, 0.35),
+              (ht + 0.05, 0.9), (-ht - 0.05, 0.9), (-ht - 0.30, 0.35)]
+    bm = b.bm
+    fa = [bm.verts.new((x, -hl, z)) for x, z in plinth]
+    fb = [bm.verts.new((x, hl, z)) for x, z in plinth]
+    bm.faces.new(tuple(fa))
+    bm.faces.new(tuple(reversed(fb)))
+    for i in range(len(plinth)):
+        j = (i + 1) % len(plinth)
+        bm.faces.new((fa[i], fb[i], fb[j], fa[j]))
+    for f in bm.faces:
+        f[b.slot] = STONE
 
-    # 2. zidul drept, gros -- corpul principal
-    wall_h = WS_H - plinth_h - 1.1  # rezerva 1,1 pentru cornisa+creneluri
-    faces += list(b.box((0.0, 0.0, plinth_h + wall_h * 0.5), (WS_THICK, WS_LEN, wall_h), STONE))
-    wall_top_z = plinth_h + wall_h
+    # 2. corpul zidului
+    walk_z = WS_H - WS_MERLON_H - 0.45     # drumul de straja / baza braului
+    b.box((0.0, 0.0, (0.9 + walk_z) * 0.5), (WS_THICK, WS_LEN, walk_z - 0.9), STONE)
 
-    # 3. guri de tragere: 2, dreptunghiulare, la mijlocul inaltimii, pe fata
-    # +X (principala) -- REVIZUIRE runda 2 (critica: "a slab seen end-on",
-    # "2 dark arrow-slit windows at mid-height"): flush/usor retrase (nu
-    # relief iesit) SI colorate STUD (VOLCANIC_BLACK), ca la turnurile
-    # portilor -- aceeasi lectie (culoare inchisa + pozitie flush, nu
-    # geometrie protruzand).
-    slit_z = plinth_h + wall_h * 0.5
-    for t in (-0.35, 0.35):
-        sy = t * hl
-        faces += list(b.box((ht - 0.06, sy, slit_z), (0.05, 0.35, 1.0), STUD))
+    # 3. fanta de tragere: una pe modul, la mijloc, flush + inchisa (lectia
+    # val 2a: relieful de piatra nu se citeste ca fanta, culoarea da)
+    # decupare: fanta ~1 x 3 m la ~65% din inaltimea zidului (masurat in px
+    # pe tronson); aici 0,6 x 2,4 (1 pe modul, nu 2 pe 3 module)
+    slit_z = walk_z * 0.62
+    bg.box((ht + 0.01, 0.0, slit_z), (0.04, 0.6, 2.4), GLOW)
 
-    # 4. REVIZUIRE runda 2: cornisa in consola (chajja) ELIMINATA -- critica
-    # cere "flush parapet with a thin string course, remove the overhanging
-    # plate". Inlocuita cu un brau ingust, FLUSH (fara iesire in consola),
-    # doar ca o linie subtire de umbra la tranzitia zid/parapet.
-    faces += list(b.box((0.0, 0.0, wall_top_z + 0.06), (WS_THICK + 0.06, WS_LEN, 0.12), STONE))
-    parapet_base_z = wall_top_z + 0.12
+    # 4. brau la baza merloanelor, iesit 0,15 m in fata
+    b.box((0.15, 0.0, walk_z + 0.225), (WS_THICK + 0.3, WS_LEN, 0.45), STONE)
+    merlon_z = walk_z + 0.45
 
-    # parapetul plin de sub creneluri (banda continua pe toata lungimea),
-    # FLUSH cu zidul (fara sa iasa in consola)
-    parapet_h = WS_H - parapet_base_z - 0.9
-    faces += list(b.box((0.0, 0.0, parapet_base_z + parapet_h * 0.5),
-                        (WS_THICK - 0.1, WS_LEN, parapet_h), STONE))
-    crenel_z = parapet_base_z + parapet_h
+    # 5. merloane kangura pe muchia din fata, cu punct intunecat
+    pitch = WS_LEN / WS_MERLONS
+    mx = ht - WS_MERLON_T * 0.5
+    for i in range(WS_MERLONS):
+        y = -hl + pitch * (i + 0.5)
+        kangura_merlon(b, (mx, y, merlon_z), WS_MERLON_W, WS_MERLON_H, WS_MERLON_T,
+                       STONE, facing="X")
+        bg.box((ht + 0.01, y, merlon_z + WS_MERLON_H * 0.46), (0.04, 0.3, 0.3), GLOW)
 
-    # 5. creneluri ROTUNJITE, DENSE, care se ating (~1 per 1,2 m) --
-    # REVIZUIRE runda 2: critica cere explicit acelasi profil ca turnurile/
-    # bastionul (rounded, continuu), nu dreptunghiular rar. Banda flush sub
-    # creneluri (fundatia lor vizuala) -- piesa dreptunghiulara, deci `box`,
-    # nu `balcony_band` (care e pentru piese circulare).
-    faces += list(b.box((0.0, 0.0, crenel_z + 0.15), (WS_THICK, WS_LEN, 0.3), STONE))
-    crenel_z += 0.3
-    n_m = max(int(round(WS_LEN / 1.2)), 8)
-    merlon_w = (WS_LEN / n_m) * 0.98
-    faces += crenellation(b, (0.0, -hl, crenel_z), (0.0, hl, crenel_z), 1.1, STONE,
-                          width=merlon_w, gap=0.02, style="rounded")
+    # 6. parapet interior jos, pe muchia din spate
+    b.box((-ht + 0.2, 0.0, merlon_z + 0.5), (0.4, WS_LEN, 1.0), STONE)
 
-    # capete plane (deja plane din constructia pe cutii -- nimic de adaugat)
+    densify_for_ao(b, max_len=3.0)
     stone_obj = b.to_object("Wall_Stone")
-    for f in faces:
-        if f.is_valid:
-            f[b.slot] = STONE
-    return stone_obj
+    glow_obj = _finish_or_none(bg.to_object("Wall_Glow"))
+    return stone_obj, glow_obj
 
 
 # =============================================================================
@@ -645,8 +653,9 @@ def emit(objs, path, ao, origin="base", bevel=0.03, smooth_angle=45.0,
 
 
 # fort_wall_segment
-wall_stone = build_fort_wall_segment()
-emit([wall_stone], "structures/fort_wall_segment.glb", AO_STONE, bevel=0.03, budget=6000)
+wall_stone, wall_glow = build_fort_wall_segment()
+emit([wall_stone, wall_glow], "structures/fort_wall_segment.glb", AO_STONE,
+     origin="assembly", bevel=0.03, budget=3000)
 
 # fort_wall_turret
 turret_stone = build_fort_wall_turret()
@@ -1136,7 +1145,7 @@ for path, tris, kb, ao_lo, ao_hi, budget in results:
           % (path, tris, flag, kb, ao_lo, ao_hi))
 print("TOTAL cetate (val 2a): %d tris" % sum(t for _, t, _, _, _, _ in results))
 
-save_blend([o for o in (wall_stone, turret_stone, bastion_stone,
+save_blend([o for o in (wall_stone, wall_glow, turret_stone, bastion_stone,
                         jai_stone, jai_doors, fateh_stone, fateh_doors,
                         loha_stone, loha_doors, pb_stone, pb_glow,
                         cannon_metal, cannon_wood) if o is not None],

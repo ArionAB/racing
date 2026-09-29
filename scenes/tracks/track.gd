@@ -1358,9 +1358,19 @@ static func themes() -> Dictionary:
 			"sky_cover_alpha": 0.0,
 			# Ceata CALDA de praf (brief §2.0, §4): "vine cu noaptea" e rolul
 			# lui DuskCycle (fog_light_color + fog_depth_end interpolate);
-			# aici e starea de baza (dusk=0, turul 1): #E8A878, fog_end 300.
+			# aici e starea de baza (dusk=0, turul 1), fog_end 300.
+			#
+			# TRECEREA DE LUMINA (tools/ProbeJodLumina.tscn, masurat pe masca
+			# de clasa): ceata NU mai e praful auriu #E8A878 din brief. Orasul
+			# vazut de pe bastion (F) sta la 150-300 m, adica 50-70% ceata:
+			# cu ceata calda casele ieseau H 23-28 (bej), nu albastre. Ceata e
+			# acum un fum albastru-gri stins (H 226, S 0,20), mai RECE si mai
+			# PALID decat solul (memoria ceata-in-familia-solului), iar caldura
+			# spre apus o da DuskCycle prin `fog_sun_scatter` (0,8 la dusk 0):
+			# ceata SPRE soare (D urca spre NV, soarele e in V) ia culoarea
+			# soarelui, ceata DINSPRE soare (F priveste spre SE) ramane rece.
 			"fog_sky_affect": 0.15,
-			"fog": Color(0.910, 0.659, 0.471), # #E8A878
+			"fog": Color.html("8A94B8"),
 			"hill_color": Color(0.58, 0.42, 0.38),
 			# Soare la 8 grade, din VEST (brief §2.0/§4: "azimutul soarelui
 			# ramane cel din tema" -- DuskCycle scade doar elevatia/energia/
@@ -1369,12 +1379,28 @@ static func themes() -> Dictionary:
 			# sursa la compass 270 = vest, in conventia gen_*_route.py), dar
 			# tema declara aceeasi valoare ca ancora pentru orice sonda care
 			# incarca tema fara nodul de suprascriere.
-			"sun_color": Color(1.0, 0.698, 0.478), # #FFB27A
+			#
+			# Soarele ramane cald, dar cu o treapta mai putin portocaliu decat
+			# #FFB27A din brief: in spatiul liniar #FFB27A are B/R = 0,19, deci
+			# o fata de var albastru (B/R 2,6) batuta de soare iesea gri-mov.
+			# #FFBC8C (B/R 0,26) tine fetele insorite calde si nisipul auriu.
+			"sun_color": Color.html("FFBC8C"),
 			"sun_energy": 1.0,
 			"exposure": 1.0,
 			"sun_rotation_deg": Vector3(-8, 90, 0),
-			"ambient_color": Color(1.0, 0.698, 0.478),
-			"ambient_energy": 0.30,
+			# AMBIENTUL e parghia care decide culoarea orasului: la 8 grade
+			# soarele loveste un plan orizontal cu cos 82 = 0,14 si o fata
+			# dinspre D deloc, deci nisipul si fetele de case din umbra sunt
+			# luminate aproape numai de ambient. Ambientul CALD din brief
+			# (#FFB27A, 0,30; B/R liniar 0,19) inmultit cu varul albastru dadea
+			# gri-bej (masurat H 26, S 0,40). Un ambient NEUTRU-lila (#CEC0C0,
+			# B/R ~0,9) lasa fiecare albedo sa-si spuna culoarea: varul
+			# albastru ramane albastru (H 222-225), nisipul ramane cald
+			# (H 21-24). Albastru-rece pur (#9FA9D6) albastrea si nisipul (H
+			# 280, masurat) — de aceea neutru, nu rece. Energia 0,30 -> 0,42
+			# tine luminanta cadrului (luma 38 pe D, 42 pe F, ca inainte).
+			"ambient_color": Color.html("CAC0C4"),
+			"ambient_energy": 0.42,
 			# Umbre PORNITE, lungi (brief §4: "identitatea turului 1").
 			# shadow_distance 90 (CLAUDE.md: prima setare de scurtat/stins
 			# daca device-ul nu tine 60fps) -- la 8 grade casterii sunt

@@ -1264,6 +1264,144 @@ efectiv în `docs/asset_briefs/img/jodhpur_fidelity/<nume>.png`):
 - **Abateri:** niciuna semnificativă după fixul de sloturi — toate
   elementele din listă sunt prezente și corect colorate.
 
+## Val 3b — bazarul (aceeași sesiune, 29 sep 2026)
+
+Contract: `docs/asset_briefs/jodhpur_kit.md` §1.5. Build:
+`build_jodhpur_bazaar.py` (fișier nou). Brief-ul nu dă bugete stricte de
+triunghiuri pentru bazar (doar cote) — bugetele de mai jos sunt cele
+declarate în `emit()`, calibrate pe măsurătoare, nu presupuse (memoria
+`plafon-masurat-nu-presupus`).
+
+**Bug real găsit la primul `--compare`:** funcția `_build_stall_canopy`
+construia fețele copertinei pe `b.bm` (Builder-ul lemnului) în loc de
+`bc.bm` (Builder-ul dedicat `Canopy`) — nodul `Canopy` ieșea cu 0 vertecși,
+iar `emit()` crăpa la calculul de bounding box (`min()` pe listă goală).
+Fix: toate apelurile `bm.faces.new`/`bm.verts.new` din bucla copertinei
+mutate pe `bc.bm`.
+
+**A doua rundă de corecții, după ce toate 8 au exportat și au fost privite:**
+
+- **`stall_canopy_a/b/c`:** grămezile de marfă (cilindri coloraţi deasupra
+  lăzilor) erau aproape invizibile la raza/înălțimea inițială (0.11/0.14 m)
+  — mărite la 0.19/0.22 m, acum se văd clar ca „grămezi", nu ca puncte.
+- **`thela_cart`:** roțile foloseau `METAL_DARK` (VOLCANIC_BLACK), dar
+  brief-ul §1.5 cere explicit „4 roți de LEMN cu spițe" — corectat la
+  `CRATE_WOOD`. La randare, spițele erau invizibile pe fondul negru uniform;
+  cu lemnul, discul/butucul/spițele se disting clar.
+- **`textile_strip`:** camera implicită (azimut 5°, aproape din lungul
+  stâlpilor pe axa X) arăta piesa din MUCHIE — o bandă îngustă aproape
+  ilizibilă. Fix: azimut 80° (aproape perpendicular pe axa X), ca să se
+  vadă lățimea/culorile celor 7 panze.
+- **`chai_stall`:** oalele de metal aveau tentă gri neutru (`#8A8A8E`),
+  decuparea arată metal închis-cald — corectat la `#4A4238`.
+
+**Tabel de fidelitate** (element / pe decupare / în GLB / verdict, privit
+efectiv în `docs/asset_briefs/img/jodhpur_fidelity/<nume>.png`):
+
+### `props/stall_canopy_a.glb`, `_b.glb`, `_c.glb`
+
+- **Triunghiuri:** 1520 fiecare. Buget declarat: 1600 (măsurat — 1400
+  inițial era o estimare fără măsurătoare; forma completă din brief nu
+  încape sub 1500).
+- **Cote măsurate:** 3,50 × 3,10 × 2,60 m (contract 3×2,5 m, copertină la
+  2,6 m — lățimea/adâncimea peste din streașina copertinei, care iese
+  intenționat peste amprenta stâlpilor).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | 4 stâlpi de lemn | vizibili la colțuri | `cylinder` × 4 | **prezent** |
+  | copertină lăsată (catenară), înclinată spre spate | curbură moale vizibilă | 4 segmente, `sag` parabolic + pantă front/back | **prezent**, silueta curbată se citește clar |
+  | tejghea/ramă de lemn joasă | vizibilă la baza stâlpilor | 4 grinzi orizontale | **prezent**, mai subțire (sârmă) decât masa solidă de pe decupare — abatere minoră |
+  | lăzi cu marfă în trepte (2-3 niveluri) | grămezi colorate vizibile | 3 niveluri de ladă + grămezi cilindrice colorate deasupra | **prezent**, corectat runda 2 (grămezile inițiale erau prea mici) |
+  | culoare copertină: a=galben, b=roz, c=verde | clar diferențiate | `CAR_YELLOW`/`FLAMINGO_PINK`/`TROPICAL_GREEN` | **prezent** |
+
+- **Abateri cunoscute:** rama/tejgheaua joasă citește mai degrabă ca un
+  cadru de bare decât ca o masă solidă — decuparea arată o structură mai
+  plină. Nu s-a corectat în runda asta (element secundar, lăzile cu marfă
+  domină corect cadrul).
+
+### `props/textile_strip.glb`
+
+- **Triunghiuri:** 599. Buget declarat: 1600.
+- **Cote măsurate:** 10,15 × 0,15 × 2,60 m (contract 10 m între stâlpi,
+  pânze 0,9×1,6 m — lungimea exactă).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | 2 stâlpi + sfoară lăsată | vizibili la capete | `cylinder` × 2 + `box` segmentate pe catenară | **prezent** |
+  | 7 pânze colorate | portocaliu, galben, roz, roșu, verde, galben, roz | 7 pânze, `TS_COLORS` cu aceleași 7 culori (poziționate în ordine, dar unele adiacențe diferă ușor de decupare) | **prezent** |
+  | margine de jos crestată (zimți) | vizibilă | 3 „dinți" per pânză, geometrie (colț tăiat) | **prezent** |
+  | pânze opace | vizibile clar, nu transparente | fără alpha, atlas fără canal alpha | **prezent** |
+
+- **Abateri cunoscute și motiv (rezolvate):** camera implicită (azimut 35°)
+  arăta piesa aproape din muchie (stâlpii pe axa X, camera aproape aliniată
+  cu ei) — corectat la azimut 80°. După fix, toate 7 pânze sunt clar
+  vizibile și distincte.
+
+### `props/spice_sacks.glb`
+
+- **Triunghiuri:** 1232. Buget declarat: 1400.
+- **Cote măsurate:** 1,48 × 0,84 × 0,65 m (contract 1,6×1,0×0,9 m — puțin
+  sub, cei 3 saci sunt compacti).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | 3 saci de iută cu gura răsfrântă | 2 mari în prim-plan, al 3-lea mai mic/parțial vizibil în spate | `frustum`+`cylinder`×3 per sac × 3 saci, al treilea mai mic, poziționat median-spate | **prezent** |
+  | conuri de condiment: roșu, galben | vizibile clar, umplu gura sacului | `frustum` deasupra fiecărui sac, roșu/galben (al 3-lea tot roșu) | **prezent** |
+
+- **Abateri:** niciuna semnificativă — cea mai fidelă piesă a bazarului,
+  aproape identică cu decuparea la prima randare.
+
+### `props/thela_cart.glb`
+
+- **Triunghiuri:** 3028. Buget declarat: 3100 (măsurat — cele 4 roți cu
+  spițe reale costă ~380 tri/roată după bevel, cerute explicit de brief
+  „4, nu 2 — planșa câștigă"; 2200 inițial era o estimare fără măsurătoare).
+- **Cote măsurate:** 3,00 × 1,20 × 0,83 m (contract 2,4×1,2×1,1 m — lățimea
+  peste din mânerul de împins proeminent pe -X, geometrie cerută de
+  decupare, nu abatere de corp).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | platformă de lemn cu ramă | vizibilă, bordură ridicată | `box` + 4 borduri | **prezent** |
+  | 4 roți de lemn cu spițe (nu 2 de bicicletă) | vizibile, spițe distincte | `_wheel` × 4, disc+butuc+4 bare, acum pe `CRATE_WOOD` | **prezent**, corectat runda 2 (inițial metal negru, spițe invizibile) |
+  | grămadă de fructe colorate (verde, galben, portocaliu, roșu) | vizibilă, umple platforma | 11 cilindri colorați, 2 niveluri | **prezent** |
+
+- **Abateri cunoscute:** niciuna semnificativă după fixul de material al
+  roților.
+
+### `props/chai_stall.glb`
+
+- **Triunghiuri:** 896. Buget declarat: 1600.
+- **Cote măsurate:** 2,90 × 2,40 × 2,50 m (contract 2,5×2,0×2,6 m —
+  apropiat).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | 4 stâlpi + acoperiș de pânză bej, aproape plat | vizibil, panta ușoară | `box` pe 2 fețe, pantă front/back 0,20 m | **prezent** |
+  | tejghea de lemn joasă + 2 dulapuri laterale | vizibile | 3 `box`-uri | **prezent** |
+  | 2 oale de metal + o ceainică | vizibile pe tejghea | `cylinder` × 2 + corp+cioc ceainică | **prezent**, culoare corectată runda 2 (gri → metal cald închis) |
+
+- **Abateri cunoscute:** spațiul dintre stâlpul central și cel din dreapta
+  citește parțial gol în comparație (decuparea are mai multă masă vizuală
+  în acea zonă) — element secundar, nu afectează lizibilitatea tarabei.
+
+### `props/marigold_garland.glb`
+
+- **Triunghiuri:** 640. Buget declarat: 800 (măsurat — fără bevel pe
+  icosfere, deja rotunjite prin `subdivisions`; 2400 inițial supraestima
+  costul).
+- **Cote măsurate:** 2,59 × 0,15 × 1,09 m (contract 2,5 m deschidere, 0,8 m
+  lăsare — apropiat).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | margele portocalii pe o catenară | vizibile, dese | 22 icosfere (`subdivisions=1`), rază variabilă | **prezent** |
+  | 5 ciucuri care atârnă | vizibili, mai mari decât mărgelele | 5×2 icosfere (bulb mare+mic) sub catenară | **prezent** |
+
+- **Abateri:** niciuna semnificativă — a doua cea mai fidelă piesă a
+  bazarului.
+
 ## Stare la oprire (val 3, oprire de urgență — dezvoltatorul închide PC-ul)
 
 **Sesiune întreruptă în timpul lucrului la `build_jodhpur_city.py`** (brief
@@ -1352,3 +1490,46 @@ Triunghiuri la ultima rulare (buget vs. măsurat):
    trece la `build_jodhpur_bazaar.py` (8 piese noi).
 8. Extinde `verify_jodhpur.sh`, `WAVE_PIECES["3"]`, randează
    `jodhpur_fidelity_val3.png`, rulează verify complet, commit pe grupuri.
+
+## Val 3 — încheiat (sesiune de continuare, 29 sep 2026)
+
+Toți cei 8 pași de mai sus sunt făcuți. Rezumat (detaliile complete sunt în
+secțiunile „Val 3 — orașul albastru" și „Val 3b — bazarul" de mai sus):
+
+- Bugetele `haveli_facade` (860/900) și `rooftop_clutter` (1204/1400)
+  rezolvate.
+- Bug real de sloturi suprascrise orb (rezervor/oale/stâlpi/plantă pictate
+  WALL) corectat în cod pe `blue_house_b/c` și `rooftop_clutter`.
+- Bug real de geometrie pe Builder greșit (`Canopy` gol, fețele ajungeau în
+  `Canopy_Wood`) corectat pe cele 3 `stall_canopy_*`.
+- `COMPARE_SPECS`/`WAVE_PIECES["3"]` extinse cu toate cele 15 piese (7
+  oraș + 8 bazar), inclusiv camere dedicate pentru piesele alungite
+  (`haveli_facade`, `textile_strip`) — camera implicită (azimut 35°) nu
+  funcționează pe piese cu o axă mult mai lungă decât celelalte.
+  `_strip_dup_suffix()` adăugat în `preview_jodhpur.py` — Blender adaugă
+  sufix `.NNN` la nume de nod duplicate rămase în sesiune, ceea ce rata
+  lookup-ul de tentă și scotea piese gri la prima rundă de comparații.
+- Toate cele 15 piese noi rulate prin `--compare`, privite efectiv, tabel
+  de fidelitate scris în inventar; câteva runde de corecții după privit
+  (grămezi de marfă mărite, roți de lemn nu metal, cameră `textile_strip`,
+  culoare oale `chai_stall`).
+- `verify_jodhpur.sh` extins cu ambele valuri (3 și 3b) — `VERDICT KIT: OK`,
+  36/36 GLB.
+- `docs/asset_briefs/img/jodhpur_fidelity_val3.png` generată (15 piese).
+- 2 commit-uri de grup (case+haveli+props acoperiș, apoi bazarul) pe
+  `feat/jodhpur-kit-city`, push la fiecare.
+
+**Ce nu s-a terminat / abateri rămase, documentate onest** (nu blocante,
+nu ascunse):
+
+- `haveli_facade`: ferestrele + balcoanele etajelor 1/2 nu se disting clar
+  în comparație la bugetul strict de 900 tri (geometria există la cotele
+  corecte, dar relieful e prea subțire pentru unghiul/scara comparației).
+- `stall_canopy_*`: rama/tejgheaua joasă citește ca un cadru de bare, nu ca
+  masă solidă (element secundar, lăzile cu marfă domină corect cadrul).
+- `chai_stall`: spațiul dintre stâlpul central și cel din dreapta citește
+  parțial gol față de decupare (element secundar).
+- Hex-urile de tentă pentru culorile bazarului (`#F2C230`, `#D94A38`,
+  `#3FA556`, `#E8792E`, `#E874A1`) sunt aproximări rezonabile, nu extrase
+  dintr-o sursă exactă a paletei native — de recalibrat dacă la integrarea
+  în Godot culorile ies vizibil diferite de decupare.

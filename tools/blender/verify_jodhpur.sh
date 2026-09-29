@@ -107,6 +107,26 @@ check "buildings/haveli_facade.glb"    900 --origin=assembly
 check "props/rooftop_tank.glb"         700
 check "props/rooftop_clutter.glb"     1400 --origin=assembly --allow-car-slots=Clutter_Laundry --allow-slots=31
 
+echo "== bazarul (brief §1.5, val 3b) =="
+# Toate cu origine COMUNA pe ansamblu (--origin=assembly): copertinele au
+# Canopy/Goods geometrie mica ce nu atinge solul la baza EI proprie; sacii au
+# conurile de condiment deasupra gurii sacului; caruciorul are rotile pe axa
+# proprie; ceainaria are oalele pe tejghea; ghirlanda atarna intreaga sub z=0
+# relativ la un capat, origine comuna pastreaza catenara intacta.
+# Sloturi de accent (marfa/condimente/fructe): CAR_RED/CAR_YELLOW (14-16,
+# excepie pe NUME de nod, --allow-car-slots) + LAVA_ORANGE=30 (legal, 24-29
+# Baikal + 30 Stromboli deja in LEGAL_SLOTS -- fara nevoie de exceptie).
+# textile_strip: FLAMINGO_PINK=31 pe 2 din cele 7 panze (--allow-slots=31,
+# acelasi caz ca rooftop_clutter).
+check "props/stall_canopy_a.glb"      1600 --origin=assembly --allow-car-slots=Goods
+check "props/stall_canopy_b.glb"      1600 --origin=assembly --allow-car-slots=Goods
+check "props/stall_canopy_c.glb"      1600 --origin=assembly --allow-car-slots=Goods
+check "props/textile_strip.glb"       1600 --origin=assembly --allow-car-slots=Cloth --allow-slots=31
+check "props/spice_sacks.glb"         1400 --origin=assembly --allow-car-slots=Spice
+check "props/thela_cart.glb"          3100 --origin=assembly --allow-car-slots=Cart_Fruit
+check "props/chai_stall.glb"          1600 --origin=assembly
+check "props/marigold_garland.glb"     800
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total"

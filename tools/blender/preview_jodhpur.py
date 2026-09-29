@@ -244,10 +244,15 @@ COMPARE_SPECS = {
         "category": "buildings",
         "tints": {
             "House_Wall": {FOAM_WHITE: "#8FB0DC", LOG_DARK: "#2A2A2E", CACTUS_GREEN: "#4C8C3C"},
-            "House_Rail": "#8FB0DC",
+            # runda 3: House_Rail = balustrade/coame ALBE fara tenta (brief
+            # §1.4, "nod separat de perete"), nu albastru
+            "House_Rail": "#F2F2F2",
             "House_Trim": "#6B4A2E",
             "House_Glow": "#2A2A2E",
         },
+        # decuparea: fata +X (stanga) si +Y (dreapta) aproape egale => az ~46
+        "camera": {"azimuth": 46.0, "elevation": 16.0, "margin": 1.3, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "blue_house_c": {
         "category": "buildings",
@@ -256,6 +261,10 @@ COMPARE_SPECS = {
             "House_Trim": "#6B4A2E",
             "House_Glow": "#2A2A2E",
         },
+        # runda 3: decuparea arata fata cu USA (+Y) frontala si fata +X in
+        # fuga (latimi aparente 455/240 px => azimut ~62), privita usor de sus
+        "camera": {"azimuth": 62.0, "elevation": 17.0, "margin": 1.35, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "blue_house_d": {
         "category": "buildings",
@@ -275,8 +284,12 @@ COMPARE_SPECS = {
             "House_Wall": "#8FB0DC",
             "House_Trim": "#6B4A2E",
             "House_Glow": "#2A2A2E",
-            "House_Rail": "#8FB0DC",
+            # runda 3: treptele, parapetul scarii si balustradele sunt ALBE
+            # (nod fara tenta), ca pe decupare
+            "House_Rail": "#F2F2F2",
         },
+        "camera": {"azimuth": 48.0, "elevation": 16.0, "margin": 1.3, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "haveli_facade": {
         "category": "buildings",

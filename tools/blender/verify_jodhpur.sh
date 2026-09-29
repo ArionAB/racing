@@ -109,7 +109,11 @@ echo "== orasul albastru (brief §1.4, val 3) =="
 # excepie pe SLOT, --allow-slots -- deja legalizat de Serengeti/palette.gd
 # pentru exact acest roz, vezi comentariul din verify_glb.py).
 check "buildings/blue_house_b.glb"    6000 --origin=assembly
-check "buildings/blue_house_c.glb"    3800 --origin=assembly
+# blue_house_c 3800 -> 4600 (runda 3, verdict "cub prea mare, golurile in
+# colt"): peretii cu goluri sunt acum grila `facade()` (build_jodhpur_city.py)
+# pe DOUA fete, cu rame, glafuri si tocuri de lemn, plus parapet adevarat;
+# masurat 4430.
+check "buildings/blue_house_c.glb"    4600 --origin=assembly
 check "buildings/blue_house_d.glb"    6500 --origin=assembly
 check "buildings/blue_house_e.glb"    6500 --origin=assembly
 check "buildings/haveli_facade.glb"    912 --origin=assembly

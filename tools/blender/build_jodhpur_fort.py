@@ -202,7 +202,7 @@ def build_fort_wall_segment():
 
 
 # =============================================================================
-# fort_wall_turret -- turnul patrat de la capatul tronsonului
+# fort_wall_turret -- turnul de la capatul tronsonului
 # =============================================================================
 #
 # Contract (brief §1.2): 4,5 x 4,5 m, 17 m inalt -- piesa NOUA, desprinsa din
@@ -212,60 +212,150 @@ def build_fort_wall_segment():
 # unde turnurile de capat apar taiate de cadru), de jos in sus:
 #
 #   1. Soclu tesit la baza (ca zidul).
-#   2. Corp patrat, drept, depaseste inaltimea zidului cu ~3 m.
-#   3. 2 guri de tragere pe fata vizibila (+X, exterior).
-#   4. Cornisa in consola pe toate 4 laturile.
-#   5. Creneluri proprii, dreptunghiulare, pe tot perimetrul patrat.
+#   2. Corp OCTOGONAL (colturi taiate) -- pe decupare turnul are fete vizibile
+#      la colturi, nu muchii drepte, si se citeste mai LAT decat un patrat
+#      simplu la aceeasi cota.
+#   3. 2 guri de tragere VERTICALE, inguste, pe fata vizibila (+X, exterior).
+#   4. Fara cornisa in consola (flush, ca la fort_wall_segment).
+#   5. Creneluri KANGURA -- exact stilul zidului (`kangura_merlon`), nu
+#      "rounded" ca la bastion/porti (turnurile porticii sunt alta familie).
+#
+# REVIZUIRE (runda de corectii fort2, dupa "chain" in preview): comparat cu
+# `fort_wall_segment.png` (turnurile de capat, taiate de cadru dar clar
+# vizibile), turnul vechi picase pe TREI puncte -- ingust (patrat simplu,
+# muchii drepte, se citea "subtire" langa zidul de 3 m gros), creneluri
+# ROTUNJITE ca la porti/bastion (alta familie decat kangura zidului), 2 fante
+# aproape patrate (0,22x0,85, raport doar 3,9:1) in loc de fante VERTICALE
+# inguste ca pe decupare. Toate trei corectate mai jos.
 WT_SIDE = 4.5
 WT_H = 17.0
+# colturile taiate: fiecare colt pierde WT_CHAMFER din latura, latimea
+# aparenta a fetei principale ramane WT_SIDE (nu se schimba amprenta/cota de
+# contract), dar silueta citeste octogonala -- mai lata, ca pe decupare.
+WT_CHAMFER = 0.85
+
+
+def _octagon_outline(hs, chamfer):
+    """Conturul (x, y) al unui patrat de semi-latura `hs` cu colturile taiate
+    cu `chamfer` -- 8 laturi, fetele principale raman late WT_SIDE, colturile
+    citesc ca fatete, nu ca muchii ascutite (silueta mai lata pe decupare)."""
+    c = chamfer
+    return [(-hs + c, -hs), (hs - c, -hs), (hs, -hs + c), (hs, hs - c),
+            (hs - c, hs), (-hs + c, hs), (-hs, hs - c), (-hs, -hs + c)]
+
+
+def _octagon_prism(b, outline, z0, z1, slot):
+    bm = b.bm
+    fa = [bm.verts.new((x, y, z0)) for x, y in outline]
+    fb = [bm.verts.new((x, y, z1)) for x, y in outline]
+    n = len(outline)
+    faces = [bm.faces.new(tuple(reversed(fa))), bm.faces.new(tuple(fb))]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append(bm.faces.new((fa[i], fb[i], fb[j], fa[j])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
+
+
+def _kangura_merlon_rotated(b, center, w, h, t, slot, angle):
+    """Ca `kangura_merlon` (acelasi contur: dreptunghi + umeri rotunjiti +
+    varf ascutit), dar orientat cu `angle` (radiani, in jurul lui Z) in loc
+    de axis-aligned X/Y -- necesar pe fetele oblice ale unui octogon (colturi
+    taiate la 45 de grade), unde `kangura_merlon` (fara parametru `rotation`)
+    nu se poate alinia. `center` = mijlocul BAZEI, `w` de-a lungul directiei
+    `angle`, grosimea `t` perpendicular pe ea."""
+    cx, cy, cz = center
+    hw = w * 0.5
+    outline = [(-hw, 0.0), (hw, 0.0), (hw, 0.52 * h), (0.43 * w, 0.70 * h),
+               (0.30 * w, 0.83 * h), (0.14 * w, 0.93 * h), (0.0, h),
+               (-0.14 * w, 0.93 * h), (-0.30 * w, 0.83 * h), (-0.43 * w, 0.70 * h),
+               (-hw, 0.52 * h)]
+    along = (math.cos(angle), math.sin(angle))
+    perp = (math.cos(angle + math.radians(90.0)), math.sin(angle + math.radians(90.0)))
+    bm = b.bm
+    fa, fb = [], []
+    for u, z in outline:
+        fa.append(bm.verts.new((cx + along[0] * u - perp[0] * t * 0.5,
+                                cy + along[1] * u - perp[1] * t * 0.5, cz + z)))
+        fb.append(bm.verts.new((cx + along[0] * u + perp[0] * t * 0.5,
+                                cy + along[1] * u + perp[1] * t * 0.5, cz + z)))
+    n = len(outline)
+    faces = [bm.faces.new(tuple(fa)), bm.faces.new(tuple(reversed(fb)))]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append(bm.faces.new((fa[i], fb[i], fb[j], fa[j])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
 
 
 def build_fort_wall_turret():
     b = Builder()
+    bg = Builder()
     faces = []
     hs = WT_SIDE * 0.5
 
     plinth_h = 0.6
-    faces += list(b.box((0.0, 0.0, plinth_h * 0.5), (WT_SIDE + 0.35, WT_SIDE + 0.35, plinth_h), STONE))
+    plinth_outline = _octagon_outline(hs + 0.35, WT_CHAMFER + 0.20)
+    faces += _octagon_prism(b, plinth_outline, 0.0, plinth_h, STONE)
 
     wall_h = WT_H - plinth_h - 1.3
-    faces += list(b.box((0.0, 0.0, plinth_h + wall_h * 0.5), (WT_SIDE, WT_SIDE, wall_h), STONE))
+    body_outline = _octagon_outline(hs, WT_CHAMFER)
     wall_top_z = plinth_h + wall_h
+    faces += _octagon_prism(b, body_outline, plinth_h, wall_top_z, STONE)
 
-    # 2 guri de tragere pe fata +X (exterior, principala) -- REVIZUIRE runda
-    # 2 (aceeasi lectie ca la turnurile portilor): flush + STUD
-    # (VOLCANIC_BLACK), nu relief STONE iesit.
+    # 2 guri de tragere VERTICALE, inguste, flush + STUD (VOLCANIC_BLACK),
+    # pe fata +X -- raport inaltime/latime ~6:1 (0,14 x 0,85), ca pe decupare
+    # (fanta ingusta, nu caseta aproape patrata). Nod separat Turret_Glow,
+    # ca la zid/porti (regula GLOW: nu in acelasi Builder ca piesa cu clasa
+    # triplanara la integrare).
     slit_z = plinth_h + wall_h * 0.62
     for sy in (-0.55, 0.55):
-        faces += list(b.box((hs - 0.04, sy, slit_z), (0.05, 0.22, 0.85), STUD))
+        bg.box((hs - 0.03, sy, slit_z), (0.03, 0.14, 1.0), GLOW)
 
-    # REVIZUIRE runda 2: cornisa in consola ELIMINATA (ca la fort_wall_segment
-    # -- "flush parapet", nu placa iesita), inlocuita cu brau subtire flush.
-    faces += list(b.box((0.0, 0.0, wall_top_z + 0.06), (WT_SIDE + 0.06, WT_SIDE + 0.06, 0.12), STONE))
+    # flush, fara cornisa in consola -- ca la fort_wall_segment (brau subtire).
+    faces += _octagon_prism(b, body_outline, wall_top_z, wall_top_z + 0.12, STONE)
     parapet_base_z = wall_top_z + 0.12
     parapet_h = WT_H - parapet_base_z - 0.85
-    faces += list(b.box((0.0, 0.0, parapet_base_z + parapet_h * 0.5),
-                        (WT_SIDE - 0.1, WT_SIDE - 0.1, parapet_h), STONE))
+    parapet_outline = _octagon_outline(hs - 0.1, WT_CHAMFER - 0.1)
+    faces += _octagon_prism(b, parapet_outline, parapet_base_z, parapet_base_z + parapet_h, STONE)
     crenel_z = parapet_base_z + parapet_h
 
-    # creneluri ROTUNJITE, DENSE (ca la turnurile portilor/bastion) --
-    # REVIZUIRE runda 2: rectangular rare -> rounded continuu.
-    faces += list(b.box((0.0, 0.0, crenel_z + 0.15), (WT_SIDE, WT_SIDE, 0.3), STONE))
+    # brau la baza merloanelor (ca la zid), apoi creneluri KANGURA -- acelasi
+    # stil si aceleasi cote (WS_MERLON_*) ca `fort_wall_segment`, ca turnul
+    # sa citeasca din aceeasi familie in randarea "chain". `kangura_merlon`
+    # e axis-aligned (facing X/Y) -- pe fetele oblice ale octogonului
+    # (colturile taiate, la 45 grade) se construieste manual acelasi contur,
+    # rotit in planul XY cu unghiul segmentului (kangura_merlon nu accepta
+    # `rotation`).
+    faces += _octagon_prism(b, _octagon_outline(hs, WT_CHAMFER), crenel_z, crenel_z + 0.3, STONE)
     crenel_z += 0.3
-    corners = [(-hs, -hs), (hs, -hs), (hs, hs), (-hs, hs), (-hs, -hs)]
-    perimeter = WT_SIDE * 4
-    n_m_total = max(int(round(perimeter / 1.2)), 12)
-    merlon_w = (perimeter / n_m_total) * 0.98
-    for i in range(4):
-        p0 = (corners[i][0], corners[i][1], crenel_z)
-        p1 = (corners[i + 1][0], corners[i + 1][1], crenel_z)
-        faces += crenellation(b, p0, p1, 1.0, STONE, width=merlon_w, gap=0.02, style="rounded")
+    sides = list(zip(body_outline, body_outline[1:] + body_outline[:1]))
+    for (x0, y0), (x1, y1) in sides:
+        seg_len = math.hypot(x1 - x0, y1 - y0)
+        n_m = max(int(round(seg_len / 1.2)), 1)
+        pitch = seg_len / n_m
+        ang = math.atan2(y1 - y0, x1 - x0)
+        axis_aligned = abs(math.sin(ang)) < 1e-6 or abs(math.cos(ang)) < 1e-6
+        for i in range(n_m):
+            t = (i + 0.5) / n_m
+            mx = x0 + (x1 - x0) * t
+            my = y0 + (y1 - y0) * t
+            if axis_aligned:
+                facing = "Y" if abs(x1 - x0) > abs(y1 - y0) else "X"
+                kangura_merlon(b, (mx, my, crenel_z), pitch * 0.98, WS_MERLON_H,
+                               WS_MERLON_T, STONE, facing=facing)
+            else:
+                faces += _kangura_merlon_rotated(b, (mx, my, crenel_z), pitch * 0.98,
+                                                 WS_MERLON_H, WS_MERLON_T, STONE, ang)
 
     stone_obj = b.to_object("Turret_Stone")
     for f in faces:
         if f.is_valid:
             f[b.slot] = STONE
-    return stone_obj
+    glow_obj = _finish_or_none(bg.to_object("Turret_Glow"))
+    return stone_obj, glow_obj
 
 
 # =============================================================================
@@ -735,9 +825,11 @@ wall_stone, wall_glow = build_fort_wall_segment()
 emit([wall_stone, wall_glow], "structures/fort_wall_segment.glb", AO_STONE,
      origin="assembly", bevel=0.03, budget=3000)
 
-# fort_wall_turret
-turret_stone = build_fort_wall_turret()
-emit([turret_stone], "structures/fort_wall_turret.glb", AO_STONE, bevel=0.03, budget=5500)
+# fort_wall_turret -- acum 2 noduri (Turret_Stone, Turret_Glow) ca zidul,
+# origine COMUNA (fantele Turret_Glow nu ating solul separat).
+turret_stone, turret_glow = build_fort_wall_turret()
+emit([turret_stone, turret_glow], "structures/fort_wall_turret.glb", AO_STONE,
+     origin="assembly", bevel=0.03, budget=5500)
 
 # fort_bastion
 bastion_stone = build_fort_bastion()
@@ -1303,7 +1395,7 @@ for path, tris, kb, ao_lo, ao_hi, budget in results:
           % (path, tris, flag, kb, ao_lo, ao_hi))
 print("TOTAL cetate (val 2a): %d tris" % sum(t for _, t, _, _, _, _ in results))
 
-save_blend([o for o in (wall_stone, wall_glow, turret_stone, bastion_stone,
+save_blend([o for o in (wall_stone, wall_glow, turret_stone, turret_glow, bastion_stone,
                         jai_stone, jai_doors, fateh_stone, fateh_doors,
                         loha_stone, loha_doors, pb_stone, pb_glow,
                         cannon_metal, cannon_wood) if o is not None],

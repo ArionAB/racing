@@ -29,6 +29,11 @@
 #                       perete, canatul se roteste deschis). rampart_cannon:
 #                       2 noduri (Cannon_Metal, Cannon_Wood) -- teava e
 #                       inclinata ~10 deg si nu atinge solul la baza proprie.
+#
+#                       fort_wall_turret (runda fort2): 2 noduri (Turret_Stone,
+#                       Turret_Glow) -- fantele de tragere (Turret_Glow) sunt
+#                       geometrie mica, la ~11 m inaltime pe corp, nu ating
+#                       solul separat, acelasi motiv ca fort_wall_segment.
 
 set -u
 cd "$(dirname "$0")/../.." || exit 1

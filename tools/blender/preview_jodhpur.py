@@ -750,6 +750,8 @@ WAVE_PIECES = {
     # val 2a (brief §1.2, cetatea) -- "2a" ramane STRING (nu val int), vezi
     # `fidelity_sheet`/argparsing mai jos, ca sa nu forteze `int()` pe un
     # nume de val alfanumeric.
+    # escaladarea Opus (cele 3 piese respinse de doua ori in valul 2)
+    "2-opus": ["market_gate", "fort_wall_segment", "rampart_cannon"],
     "2a": ["fort_gate_jai", "fort_gate_fateh", "fort_gate_loha",
            "fort_wall_segment", "fort_wall_turret", "fort_bastion",
            "palace_facade_a", "palace_facade_b", "rampart_cannon"],

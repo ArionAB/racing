@@ -1089,60 +1089,142 @@ colorat pe fețe la noul azimut: +X rămâne fața dominantă a camerei).
   lecției de orientare din runda 1, de data asta pe volume întregi, nu doar
   pe orientarea piesei per ansamblu.
 
-## Escaladare Opus — market_gate, fort_wall_segment, rampart_cannon — stare la oprire
+## Escaladare Opus — market_gate, fort_wall_segment, rampart_cannon
 
-Oprit la cererea coordonatorului (PC-ul se inchide). **Niciun GLB nu s-a
-schimbat; nicio randare noua.** Ce e facut si ce ramane:
+Reluată după oprirea din 28 sep și încheiată pe 29 sep. Cele trei piese sunt
+reconstruite, exportate, verificate (`verify_jodhpur.sh` → `VERDICT KIT: OK`)
+și comparate cu decupările. Planșa de fidelitate a escaladării este
+`docs/asset_briefs/img/jodhpur_fidelity_val2-opus.png`, generată cu
+`preview_jodhpur.py --sheet 2-opus`. Verdictele din tabelele de mai jos sunt
+scrise după ce m-am uitat la randare, nu după citirea codului.
 
-**Cauze gasite (masurate/citite, nu presupuse):**
+### Cauzele erau în vocabular și în unealtă, nu în piese
 
-- **Golul in "T" de la `market_gate`:** `arch_opening(open=False)` umple
-  panoul pe BOUNDING-BOX-ul golului (`panel_fill`), deci silueta golului e
-  mereu dreptunghiulara; arcul exista doar pe firida. In plus,
-  `_arch_profile("pointed")` cu `rise < half_w` (arcul turtit cerut aici)
-  degenereaza in "M": centrul iese la `cx < 0`, iar arcul trece peste cheie
-  si coboara inapoi.
-- **Culoarea prea inchisa la `market_gate`:** soarele din `_neutral_shot`
-  are rotatia fixa `(65°, 0, 125°)`, adica lumina vine din azimutul 35°
-  (relatia este: lumina vine din `Z - 90°`). Camera portii sta la azimutul
-  250°, deci vede fata din umbra. Fixul propus: un `sun_follow` optional in
-  `COMPARE_SPECS`, cu soarele la `Z = azimut_camera + 90 (± decalaj)`, fara sa
-  schimbe celelalte piese.
-- **Tunul negru:** atlasul pentru `VOLCANIC_BLACK` (20) are `#56545B`, deci
-  e gri inchis, nu negru. Tenta de preview `#2A2A2E` il innegrea. Tinta de
-  comparatie e ~`#3A3A36`.
-- **`fort_wall_segment` citit ca placa patrata:** un modul singur are
-  12 × 14 m. Decuparea arata **14 merloane** pe tronsonul dintre turnuri
-  (~3 module), adica ~5 pe modul, spatiere 2,4 m, merloane ~1,8 × 2,2 m cu
-  varf rotunjit-ascutit si punct. Pe tronson sunt **2 fante** mari. Decuparea
-  contrazice cerinta "~1 merlon / 1,2 m", iar decizia se ia la reluare.
+- **`arch_opening(open=False)`** (`jodhpur_shapes.py`) umplea panoul din 4
+  dreptunghiuri așezate pe bounding-box-ul golului. Timpanele dintre arc și
+  dreptunghi rămâneau goale pe ambele fețe, așa că silueta golului ieșea
+  mereu dreptunghiulară: golul în „T” din runda 2. Acum panoul e o prismă
+  manifold „dreptunghi minus gol”, iar golul trece prin toată grosimea.
+  Prima încercare a folosit `bmesh.ops.triangulate` (BEAUTY) pe ngon-ul
+  concav, care a pus 5 triunghiuri peste gol, și poarta a ieșit plină. Am
+  măsurat asta și am înlocuit triangularea cu un ear-clipping propriu
+  (`_ear_clip`).
+- **`_arch_profile("pointed")`** cu `rise < half_w` ieșea în „M”. Acum are o
+  ramură „drop arch”, cu centrele sub naștere, și parametrul `point`.
+- **Masurătoarea golului:** `measure_opening` proiectează triunghiurile tuturor
+  nodurilor pe planul porții, pe ferestre de înălțime. `lateral="y"` servește
+  porțile cetății.
+- **AO pe fețe mari:** AO-ul se coace pe vârfuri. O față de 12 m care are
+  vârfuri doar la sol și sub cornișă, ambele umbrite, iese întunecată pe toată
+  înălțimea: turnul porții măsura (81,46,23), față de (156,94,52) pe panou,
+  cu aceeași tentă. `densify_for_ao` taie muchiile mai lungi de 2,5–3 m, iar
+  tăieturile sunt coplanare, deci bevel-ul nu le atinge.
+- **Culoarea „prea închisă” a porții venea din lumină:** soarele fix al
+  uneltei vine din azimutul 35, iar camera porții stă la ~260, deci vedea fața
+  din umbră. Relația verificată numeric este: un SUN `(X, 0, Z)` luminează
+  dinspre azimutul `Z − 90`. `COMPARE_SPECS[...]["sun_follow"]` pune soarele
+  la azimutul camerei + `offset`. Celelalte piese nu se schimbă.
+- **Tunul negru:** preview-ul folosea tenta `#2A2A2E`. Culorile reale din
+  atlas, măsurate pe `palette_atlas.png`, sunt: VOLCANIC_BLACK `#56545B`,
+  WOOD `#875F35`.
+- **Capcană de măsurare:** `--factory-startup` lasă cubul implicit în scenă.
+  O sondă care importă un GLB și măsoară „toate mesh-urile” îl include și
+  raportează gol 0.
 
-**Facut:** ciorna netestata a noii porti, in
-`tools/blender/_wip_market_gate_opus.py` (NEconectata la build). Contine
-lista de elemente plus layout-ul si un panou solid construit direct intre
-arc si dreptunghi (`_ring_solid`), deci golul E arcul. Mai contine un profil
-ascutit turtit cu varf ogee, arhivolta si alfiz in relief, medalioane,
-merloane kangura, turnuri tesite cu balcon si chhatri din panouri arcuite
-(fara `_arch_band`), contraforti in trepte, canaturi cu tepi si
-`measure_market_gate()`, care masoara golul/cheia din geometria finala.
-Geometria golului: gol fizic 22,2 m, cu canaturile de 5,2 m la 19° in
-afara golului liber de 18,4 m, si cheia la 11,6 m. Latimea totala iese
-~38 m, pentru ca un canat se vede din fata exact cat ingusteaza golul.
+### `structures/market_gate.glb`
 
-**Ramane:**
+Gol liber **18,39 m** pe fereastra y 0,15..1,80 (gabaritul caroseriei) și
+tot 18,39 m pe y 0,15..5,00, cu canaturile incluse (contract ≥ 18,0).
+**Cheia 11,34 m** (contract ≥ 11,0). Ambele sunt măsurate pe GLB-ul final cu
+`measure_opening`, nu din AABB. Anvergura e 40,4 × 7,0 × 16,9 m.
+**21 048 tri** (buget 10 500 → 21 500, justificat în `verify_jodhpur.sh`).
+h/l: randare 0,45, decupare 0,46.
 
-- `market_gate`: se muta ciorna in `build_jodhpur_landmarks.py`, se adauga
-  `sun_follow` in preview, iar camera merge la ~262°/7°/lens 110. Urmeaza
-  `--compare` si iteratii pe randare, masurarea golului/cheii, bugetul din
-  verify si tabelul de fidelitate.
-- `fort_wall_segment`: totul. Profilul modulului devine o prisma cu soclu
-  teşit, brâu, merloane cu fanta si o fanta pe modul, cu capete plane la
-  ±6. In preview se adauga `preview_chain: 3` plus `fort_wall_turret` la
-  capete (cu redenumirea `.001` la lookup-ul de tenta), apoi verificarea
-  rosturilor.
-- `rampart_cannon`: totul. Teava conica (culata ≈ 1,6× gura), 2–3 inele,
-  gura evazata, cascabel si tunari. Afetul primeste obraji inclinati cu
-  coada pe sol si 2 roti cu janta+spite+butuc in FATA, sub tunari. Tenta
-  metalului devine ~`#56545B`, iar camera trece pe partea stanga a tevii
-  (azimut ~300°, gura in dreapta cadrului).
-- Apoi: `verify_jodhpur.sh`, `--sheet 2a`/`2b` si commit-ul final.
+| element | decupare | GLB (randare) | verdict |
+|---|---|---|---|
+| gol mare în arc ascuțit, până la sol | 1, ascuțit, umeri ogee | 1, ascuțit („drop arch”), golul E arcul | OK. Umerii nu sunt ogee, arcul e mai turtit (abatere permisă) |
+| arhivoltă în relief pe arc + ambrazuri | da | da, 0,5 m, iese 0,22 m | OK |
+| alfiz (2 pilaștri + bandă) | da | da, se citește ca ramă | OK |
+| medalioane în timpane | 2 | 2 (disc + disc) | OK. Decuparea are panouri sculptate, aici discuri |
+| merloane kangura cu punct | 9 | 13 | OK. Parapetul se lungește (abatere permisă) |
+| turnuri teșite, soclu în trepte, 1 fantă | 2 | 2, brâu sub balcon | OK |
+| balcon în consolă + chhatri deschis cu cupolă și finial | 2 | 2; 3 arcade/latură, cupolă pe inel lotus | OK |
+| contraforți în trepte la capete | 2 perechi, aspect de stâncă | 2 perechi, prisme teșite | parțial: forma e prezentă, textura de stâncă lipsește |
+| canaturi deschise cu țepi | 2, mari, în gol | 2, înguste (proiecție 2,08 m fiecare) | **abatere**: ca să rămână 18,4 m liberi, canaturile stau în afara golului liber. Se văd, dar mult mai puțin decât pe decupare |
+| proporție: lățime | 34 m (contract) | 40,4 m | **abatere**: golul fizic dintre ambrazuri e 22,6 m = 18,4 + 2 × proiecția canatului |
+| culoare | cărămiziu deschis | cărămiziu uniform (tenta × AO) | OK după `sun_follow` + `densify_for_ao` |
+
+Rămâne diferit, spus pe față: arcadă mult mai lată în raport cu turnurile
+(53% din lățime față de ~36%, cerut de contract), canaturi mici și arc fără
+umeri ogee.
+
+### `structures/fort_wall_segment.glb`
+
+Comparația se face pe 3 module înlănțuite din GLB, cu `fort_wall_turret` la
+capete (`chain` în `COMPARE_SPECS`). **1 280 tri** (buget 2 200 → 3 000; e
+o piesă multiplicată). Anvergura e 3,6 × 12,0 × 14,0 m. h/l pe tronson:
+randare 0,39, decupare 0,34 (+15%, la limită: camera ușor de sus arată
+coroana și soclul).
+
+| element | decupare (tronson ~3 module) | GLB (3 module) | verdict |
+|---|---|---|---|
+| merloane kangura cu punct | 14 (~5/modul) | 15 (5/modul, pas 2,4, 1,95 × 2,5 m) | OK |
+| brâu sub merloane | da | da, iese 0,15 m | OK |
+| corp plin, rosturi de blocuri | rosturi pictate | plin, fără rosturi (textura clasei la integrare, regula 5) | OK |
+| fante de tragere, înalte, la ~65% din înălțime | 2 pe tronson | 1 pe modul = 3 pe tronson, 0,6 × 2,4 m | **abatere +1**: un modul înlănțuibil nu poate avea „o fantă la 1,5 module” |
+| soclu teșit | subțire | 0,9 m, teșit | OK |
+| capete plane, ritm continuu peste rost | — | la y = ±6, golul de la capăt e jumătate de gol | OK. Se vede o linie fină la rost (bevel), citită ca rost de bloc |
+| turnurile de capăt | late, creneluri dreptunghiulare | `fort_wall_turret` neatins: îngust, merloane rotunjite | **în afara escaladării**. Turnul are nevoie de propria rundă |
+| culoare | uniform | mai întunecat spre sol (gradient AO) | acceptabil |
+
+Fantele și punctele au trecut într-un nod separat, `Wall_Glow`
+(VOLCANIC_BLACK). `Wall_Stone` primește clasa triplanară la integrare, iar un
+al doilea slot în același nod ar fi dispărut sub clasă (regula 6).
+
+### `props/rampart_cannon.glb`
+
+**4 080 tri** (buget 3 300 → 4 200). Anvergura e 3,58 (X) × 1,42 (Y) ×
+1,52 (Z) m, față de contractul 3,6 × 1,6 × 1,5. Lățimea iese mai mică cu
+0,18 m: roțile stau la ±0,6. h/l: randare 0,48, decupare 0,45.
+
+| element | decupare | GLB | verdict |
+|---|---|---|---|
+| țeavă conică, ridicată ~10° | da | profil revolut pe axa înclinată la 10°, culata 0,265 / gura 0,155 | OK (runda 2 avea cilindru neînclinat) |
+| inele în relief | 2–3 | 3 (bază, tunari, gură) | OK |
+| gura evazată cu gaura vizibilă | da | buză 0,195 + gaură de 0,22 m adâncime | OK, gaura se vede ca pe decupare |
+| buton cascabel | mic | mic (r 0,095) | OK (runda 2: bilă uriașă) |
+| tunari pe obraji | da | da | OK |
+| obraji în trepte, coadă spre sol | da | 3 trepte, coadă la 0,14 m de sol | OK |
+| 2 roți mari cu spițe sub tunari | ~12 spițe | 12 spițe, jantă, butuc | OK (brief-ul scrie 8, forma vine din planșă) |
+| roți mici la coadă | da | 2 pline | OK |
+| culoare | fier gri-verzui, lemn roșcat | fier `#56545B` (gri-violaceu), lemn `#875F35` | culoarea e cea reală din atlas, nu cea din planșă. Nu se schimbă slotul (regula 4) |
+
+### Efecte ale reparației de vocabular asupra altor piese (NElivrate aici)
+
+- **`stepwell_pavilion`** (landmarks) s-a regenerat odată cu poarta, iar ușa
+  are acum arc curat. GLB-ul e comis (11 519 tri; înainte 11 201).
+- **Porțile cetății și fațadele de palat** (`build_jodhpur_fort.py`) se
+  schimbă la următoarea regenerare. Am regenerat și m-am uitat, apoi am
+  **restaurat GLB-urile de pe HEAD**, pentru că nu sunt în escaladare și au
+  nevoie de verdictul lor:
+  - `fort_gate_*`: golul și cheia rămân identice la bit (măsurat vechi/nou).
+    Numărul de triunghiuri crește ușor (10 152 → 10 656; Fateh 12 094 →
+    12 902), deci bugetele din `verify` trebuie ridicate la regenerare.
+  - `palace_facade_a/b`: nișele și ferestrele au arc real. Petele închise
+    dreptunghiulare de pe planșa rundei 2 erau **golurile timpanelor** (bug-ul
+    în „T”), nu ferestre. După fix, nișele sunt de piatră deschisă, iar
+    fațada B pierde contrastul de „ferestre închise”. Are nevoie de GLOW real
+    în nișe. Numărul de triunghiuri: a 8 200 → 11 128, b 13 760 → 17 292
+    (bugetul din `verify` pentru b e 14 000).
+  - Pilotul (`ghanta_ghar`, `blue_house_a`) folosește `arch_opening`, dar nu a
+    fost regenerat.
+- **Descoperire, contract încălcat înainte de escaladare:** `measure_opening`
+  pe GLB-urile de pe HEAD dă la toate trei porțile cetății **gol liber
+  5,55 m** (y 0,15..1,80 și 0,15..5,00, cu canaturile incluse). Contractul e
+  7,0 m, iar inventarul runda 2 scria „7,0 m = exact contractul”. Cheile sunt
+  Jai 10,32, Fateh 8,93 și Loha 7,89 m. Brief-ul §1.2 cere cheia ≥ 9 m la
+  toate trei, deci Fateh și Loha sunt sub contract. Cauza probabilă sunt
+  canaturile deschise, care intră în gol (brief-ul le vrea lipite de
+  ambrazură, în afara celor 7 m). Nu am reparat: nu e piesa escaladării. Cifrele
+  se reproduc cu `measure_opening(objs, lateral="y")` pe GLB-ul importat
+  (fără cubul implicit).

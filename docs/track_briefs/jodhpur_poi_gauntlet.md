@@ -159,7 +159,11 @@ Construirea lor e parte din POI-ul care le deține; flagul vine odată cu ele.
 
 Măsurate pe `Track17.tscn` la 4ac84517 cu `tools/sv_jod_fractii.gd`
 (headless): **2042,0 m**, 1019 puncte coapte, pas 2,0 m. Fracții pe index;
-pe lungime diferă cu ≤ 0,0009.
+pe lungime diferă cu ≤ 0,0009. Re-măsurate pe ramura `jodhpur/poi-relief`
+(fântâna strânsă + săritura Devkund): lungimea și toate reperele de mai jos
+au rămas la ±0,0002, cu excepția punctului cel mai jos de la Devkund (profilul
+G2 refăcut); rândurile noi (apa fântânii, peretele, kickerul) vin de acolo, cu
+`tools/SvJodRelief.tscn`.
 
 | reper | frac (index) | cotă | semi | poziție (x, z) |
 |---|---|---|---|---|
@@ -169,6 +173,8 @@ pe lungime diferă cu ≤ 0,0009.
 | sfârșitul benzii de 6,5 (bazarul se îngustează la 4,5) | 0.118 | +1,4 | → 4,5 | |
 | **buza fântânii** (începe coborârea) | **0.135** | −0,1 | 4,5 | (−209, 77) |
 | fundul: palierul de −9 | 0.189 – 0.206 | −9,0 | 4,5 / 5,0 | |
+| apa fântânii (între brațe, pe stânga) | cornișa 0.145 – 0.264 (lungime) | apă −9,5, fund −14 | | 20 de celule, repunere cu 14 m |
+| peretele exterior (dreapta, debleu 0.135 – 0.264) | | buza 0,0 | | +1 m la 4,5–9,5 m de margine, 90 % la 11–19 m |
 | **vârful acului de păr** (capătul de EST) | **0.198** | −9,0 | 5,0 | (−86, 61) |
 | **ieșirea din fântână** | **0.264** | −0,2 | 4,5 | (−215, 43) |
 | ieșirea din pâlnie (r 72) | 0.267 | 0,0 | 4,6 | |
@@ -189,8 +195,11 @@ pe lungime diferă cu ≤ 0,0009.
 | **vârful bastionului** (acul lat, −132°, r ≈ 17) | **0.666** | +39,9 | 6,0 | (125, −221) |
 | **începutul coborârii** (pantă < −3 %) | **0.691** | +39,2 | 6,0 → 6,5 | (167, −227) |
 | ieșirea din fort (viraj +95°) | 0.699 | +38,4 | 6,5 | (182, −230) |
-| râpa lacului Devkund (pe lungime 0.860–0.910) | **0.861 – 0.910** | fund −18 | 6,0 | lateral **stânga** |
-| punctul cel mai jos la Devkund | 0.891 | −1,6 | 6,0 | (171, 139) |
+| râpa lacului Devkund (pe lungime 0.860–0.910) | **0.861 – 0.910** | fund −18, apă −4,3 (= canalul) | 6,0 | lateral **stânga** |
+| **buza de lansare Devkund** (kicker 1,4 m) | **0.880** | +0,3 | 6,0 | (174, 118) |
+| golul Devkund (canal, apă −4,3) | 0.880 – 0.888 (15,4 m) | | | centrul la 0.884 |
+| **aterizarea Devkund** (dala de pe mal) | **0.888** | −1,1 | 6,0 | (172, 133) |
+| punctul cel mai jos la Devkund | 0.892 | −1,4 | 6,0 | (170, 142) |
 | intrarea pe dreapta H (viraj +73°) | **0.906** | +0,3 | 7,0 | (160, 166) |
 | capătul dreptei H | 0.999 | 0,0 | 7,0 | (−28, 190) |
 
@@ -245,16 +254,19 @@ aparțin coordonatorului sau dezvoltatorului, nu unui POI.
 2. **Fântâna: acul e la capătul de EST, nu de vest.** Se intră pe brațul de
    sud spre est, se iese pe brațul de nord spre vest. `stepwell_pavilion` („de
    la capătul de vest", kit §1.3) se pune la **est**, la (−86, 61).
-3. **Fântâna: rampele nu sunt tăiate în peretele de trepte.** Groapa e un
-   `TerrainHollow` circular (r 60 + perete 12, centrul (−152,5, 60)), cu
-   podeaua plată la −9. Pe rampe terenul de pe **ambele** părți, până la
-   ±40 m, e podeaua (la 0.150 drumul e la −2,4 și terenul la −9,0
-   peste tot în jur): rampele stau pe **terasament**, iar pereții gropii sunt
-   la 40–60 m lateral. Brief §2.0 („peretele de trepte urcă pe dreapta până la
-   buză") nu descrie geometria reală. Consecința pentru C: modulele de trepte
-   stau pe pereții gropii, departe; lângă rampă e marginea terasamentului.
-   Dacă POI-ul C vrea treptele lângă drum, e o decizie de relief (hollow mai
-   strâmt / pereți de rampă), deci **(c)**, nu decor.
+3. **Fântâna: ÎNCHISĂ pe `jodhpur/poi-relief`** (era: rampe pe terasament
+   peste o podea plată la −9, pereții la 40–60 m). Acum `TerrainHollow` e
+   scos; groapa e făcută din două piese de relief care urmăresc drumul: pe
+   **stânga** (interiorul acului, între brațe) o cornișă (`custom_ravines`
+   0.145–0.264, fund −14) cu **apă la −9,5** și `RespawnZone`; pe **dreapta**
+   un debleu (`custom_cuttings`, buza la 0,0): peretele urcă de la un umăr de
+   6,5 m, trece de +1 m la 4,5–9,5 m de marginea asfaltului și ajunge la buză
+   la 11–19 m. Umărul de 6,5 m nu e de gust: e grila de teren de 7,9 m (sub
+   ~5 m, coarda dintre noduri urcă peste asfalt). **Treptele nu sunt teren**
+   (grila nu poate reda trepte de 0,3 m și etaje de 3 m pe 2,5 m): modulele
+   `stepwell_flight_module` / `stepwell_corner` (decor fără coliziune) se
+   așază pe peretele de teren de pe dreapta, trei etaje. Apa se vede doar
+   unde fundul trece sub −9,5 (≈ 0.15–0.25); în capul rampelor fanta e uscată.
 4. **Buza fântânii nu e „în față" din bazar.** Pe B centrul fântânii e la
    +13…+87° pe dreapta (în cadru pe 10 % din B); frontală devine abia după
    virajul de la 0.129, cu ~13 m înainte de buză.
@@ -288,18 +300,23 @@ aparțin coordonatorului sau dezvoltatorului, nu unui POI.
 11. **Coborârea G: orașul e pe DREAPTA (în afara cadrului), lacul și cenotaful
     pe STÂNGA.** Brief-ul: „orașul stânga-față, cenotaful dreapta-față". Râpa
     lacului e pe stânga (`w = −1`; −13…−15 m la 30 m stânga pe 0.875–0.895).
-12. **G2 nu are săritură.** În Track17.tscn nu există `TrackChannel`,
-    `custom_ramp_fracs` sau `RespawnZone`; lacul e o râpă laterală, iar drumul
-    trece pe malul drept, coborând la −1,6 m (panta 14,2 % la 0.88). Kickerul
-    Devkund e o piesă de fundație / traseu. **POI-ul G2 nu poate livra
-    gameplay-ul lui până nu există kickerul** (memoria
-    `criticul-cere-ce-zona-nu-poate-da`).
+12. **G2 are săritură pe `jodhpur/poi-relief`** (era: niciun kicker). Nodul
+    `KickerDevkund` (`TrackChannel`, `jump`) taie drumul pe 15,4 m între
+    0.880 și 0.888, cu trambulina portocalie de 1,4 m la buză, apă la −4,3
+    în canal și în lac (`custom_ravine_water` −4,32, aceeași cotă ca apa canalului, altfel cusătură de 0,3 m între suprafețe), repunere cu 70 m de elan.
+    Profilul coborârii refăcut: panta maximă 14,2 % → **12,8 %** (acum la
+    0.77), aterizarea cu 1,4 m sub buză. Brațul de apă e **perpendicular** pe
+    drum (canal), lacul rămâne pe **stânga**; pe dreapta canalul se stinge în
+    45 m. Tuk-tuk-urile își iau elan pe ultimii 40 m (`TrafficController`).
+    Dala de aterizare și cenotaful rămân decor (POI-ul G2); orice piesă cu
+    coliziune pe 0.87–0.90 cere ProbeRace `--slice=0.84,0.92` înainte și după.
 13. **D: fortul e în cadru pe 73 % din urcare** (azimut), sub contractul de
     80 % din §2.0; cu verticala și ocluzia cifra poate doar scădea.
 14. **Lungimea e 2042 m**, nu ~2,1 km.
-15. **Lipsesc din scena de bază:** `CameraZone` în fântână (§2.0 cere height 13,
-    ceiling 0, fov_bonus 4), `RespawnZone` în apa fântânii și a lacului,
-    kickerul G2, linia de bază ProbeLaneClear. `<de completat după fundație>`
+15. **Lipsesc din scena de bază:** linia de bază ProbeLaneClear. (`CameraFantana`
+    — height 13, look 0.4, fov_bonus 4, ceiling 0, pe fracții 0.135–0.264 —,
+    `RespawnZone` în apa fântânii și a lacului și kickerul G2 vin de pe
+    `jodhpur/poi-relief`.) `<de completat după fundație>`
     care din ele a adus-o fundația.
 
 ## Fapte din fundație

@@ -467,6 +467,58 @@ COMPARE_SPECS = {
         "camera": {"azimuth": 42.0, "elevation": 14.0, "margin": 1.15, "lens": 100.0},
         "sun_follow": {"offset": -25.0, "tilt": 50.0},
     },
+    # Val 4 grupa C -- teatrul mobil (brief §1.6, build_jodhpur_theatre.py).
+    # Nicio piesa nu primeste clasa de textura la integrare, deci tenta e
+    # chiar culoarea slotului din atlas (scripts/palette.gd HEX), per fata
+    # (`_apply_multi_flat_tint`): fiecare nod amesteca 4-9 sloturi.
+    "baraat_horse": {
+        "category": "animals",
+        "tints": {
+            "Horse": {FOAM_WHITE: "#E9F2F0", CORAL_SAND: "#E9DCC0",
+                      VOLCANIC_BLACK: "#55535A"},
+            "Saddle": {CAR_RED: "#E54839", CAR_BLUE: "#2C82E8",
+                       CAR_YELLOW: "#F2D03C", TROPICAL_GREEN: "#3F7A3C",
+                       FLAMINGO_PINK: "#D2A0BE", CORAL_SAND: "#E9DCC0",
+                       LAVA_ORANGE: "#E8622D", VOLCANIC_BLACK: "#55535A"},
+            "Rider": {FOAM_WHITE: "#E9F2F0", CAR_RED: "#E54839",
+                      CAR_YELLOW: "#F2D03C", SAND_MID: "#D4994D",
+                      LOG_DARK: "#4A3526", VOLCANIC_BLACK: "#55535A"},
+        },
+        # decuparea: profil, capul la DREAPTA, usor din fata. Capul e pe +Y,
+        # deci camera pe +X (azimut 0 -> +Y iese in dreapta cadrului), rotita
+        # putin spre fata.
+        "camera": {"azimuth": 6.0, "elevation": 10.0, "lens": 95.0, "margin": 1.12},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "baraat_band": {
+        "category": "props",
+        "tints": {
+            name: {FOAM_WHITE: "#E9F2F0", CAR_RED: "#E54839",
+                   CAR_YELLOW: "#F2D03C", SAND_MID: "#D4994D",
+                   LOG_DARK: "#4A3526", VOLCANIC_BLACK: "#55535A",
+                   WOOD: "#835C34"}
+            for name in ("Band_Dhol", "Band_Trumpet", "Band_SmallDrum",
+                         "Band_Hands")
+        },
+        # randul pe X, figurile privesc spre +Y: camera pe +Y (azimut ~90),
+        # putin din stanga ca pe decupare.
+        "camera": {"azimuth": 55.0, "elevation": 8.0, "lens": 70.0, "margin": 1.08},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "zipline_rider": {
+        "category": "props",
+        "tints": {
+            "Zip_Pulley": {MARBLE_GREY: "#B8B4AC", VOLCANIC_BLACK: "#55535A",
+                           LOG_DARK: "#4A3526"},
+            "Zip_Rider": {CAR_RED: "#E54839", CAR_YELLOW: "#F2D03C",
+                          PAINTED: "#7692A8", SAND_MID: "#D4994D",
+                          LOG_DARK: "#4A3526", WOOD: "#835C34"},
+        },
+        # merge spre +Y cu picioarele inainte; pe decupare merge spre DREAPTA
+        # -> camera pe +X, putin din fata.
+        "camera": {"azimuth": 12.0, "elevation": 6.0, "lens": 70.0, "margin": 1.15},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
 }
 
 
@@ -1030,6 +1082,8 @@ WAVE_PIECES = {
           "stall_canopy_a", "stall_canopy_b", "stall_canopy_c",
           "textile_strip", "spice_sacks", "thela_cart", "chai_stall",
           "marigold_garland"],
+    # val 4 grupa C (brief §1.6): teatrul mobil, build_jodhpur_theatre.py
+    "4c": ["baraat_horse", "baraat_band", "zipline_rider"],
 }
 
 

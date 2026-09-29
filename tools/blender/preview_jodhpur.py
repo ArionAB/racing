@@ -226,6 +226,162 @@ COMPARE_SPECS = {
         "azimuth": 318.0, "elevation": 13.0, "margin": 1.1, "lens": 60.0,
         "sun_follow": {"offset": -35.0, "tilt": 50.0},
     },
+    # --- val 3: orasul albastru (brief §1.4) -- reuseste conventia
+    # pilotului (blue_house_a): +X e fatada camerei, casele sunt aproape
+    # cubice, deci camera implicita (azimut 35/elevatie 18) ramane
+    # neschimbata, ca la ghanta_ghar/blue_house_a. Tente: light #8FB0DC
+    # (majoritatea caselor), indigo #4F6FB8 (blue_house_d, haveli_facade --
+    # brief §1.4 coloana "tenta in preview"), trim lemn #6B4A2E, glow
+    # #2A2A2E, balustrada alba FARA tenta separata de perete (House_Rail
+    # foloseste aceeasi tenta ca House_Wall pe casele light) sau neagra
+    # (House_Rail=GLOW pe blue_house_d, grilaj de fier per contract).
+    # blue_house_b: House_Wall amesteca TREI sloturi (peretele WALL, +
+    # rezervorul TANK_DARK=LOG_DARK, + planta CACTUS_GREEN -- fix bug gasit
+    # la primul --compare al valului 3: rezervorul si planta apareau
+    # albastre, vezi jurnalul in inventar). blue_house_c: doar WALL+
+    # TANK_DARK (nu are planta).
+    "blue_house_b": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": {FOAM_WHITE: "#8FB0DC", LOG_DARK: "#2A2A2E", CACTUS_GREEN: "#4C8C3C"},
+            "House_Rail": "#8FB0DC",
+            "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
+        },
+    },
+    "blue_house_c": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": {FOAM_WHITE: "#8FB0DC", LOG_DARK: "#2A2A2E"},
+            "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
+        },
+    },
+    "blue_house_d": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": "#4F6FB8",
+            "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
+            # balustrada e GLOW (grilaj negru de fier pe blue_house_d, brief
+            # §1.4: "parapet inchis la culoare", contract in cod: rail_faces
+            # scrise pe slotul GLOW, nu RAIL_WHITE)
+            "House_Rail": "#2A2A2E",
+        },
+    },
+    "blue_house_e": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": "#8FB0DC",
+            "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
+            "House_Rail": "#8FB0DC",
+        },
+    },
+    "haveli_facade": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": "#4F6FB8",
+            "House_Trim": "#6B4A2E",
+        },
+        # piesa e 10x6 m (rație 1.67:1, mai alungita decat pilotul cubic) --
+        # camera implicita (35/18) arata prea mult din latura laterala goala
+        # si prea putin din fatada cu arcade/ferestre. Azimut mai mic (mai
+        # aproape de frontal, ca la haveli/porti val 2a); margin marit la
+        # 1.2 dupa prima incercare (1.05 taia parterul/coama din cadru).
+        "camera": {"azimuth": 20.0, "elevation": 12.0, "margin": 1.2},
+    },
+    "rooftop_tank": {
+        "category": "props",
+        "tints": {"Tank_Body": "#2A2A2E"},
+    },
+    # Clutter_Base amesteca 4 sloturi (placa WALL, rezervor TANK_DARK=
+    # LOG_DARK, oale WOOD, stalpi+sfoara LOG_DARK) -- fix bug gasit la
+    # primul --compare (totul aparea albastru, vezi jurnalul in inventar).
+    "rooftop_clutter": {
+        "category": "props",
+        "tints": {
+            "Clutter_Base": {FOAM_WHITE: "#8FB0DC", LOG_DARK: "#2A2A2E", WOOD: "#6B4A2E"},
+            "Clutter_Laundry": {CAR_YELLOW: "#F2C230", FLAMINGO_PINK: "#E874A1"},
+        },
+    },
+    # --- val 3b: bazarul (brief §1.5) -- aceeasi conventie de camera decat
+    # orasul (piese aproape cubice sau alungite pe Y, +X fata dominanta),
+    # exceptie textile_strip (foarte alungita pe X, camera dedicata mai jos).
+    "stall_canopy_a": {
+        "category": "props",
+        "tints": {
+            "Canopy_Wood": "#6B4A2E",
+            "Canopy": "#F2C230",  # CAR_YELLOW
+            "Goods": {CAR_RED: "#D94A38", CAR_YELLOW: "#F2C230", LAVA_ORANGE: "#E8792E"},
+        },
+    },
+    "stall_canopy_b": {
+        "category": "props",
+        "tints": {
+            "Canopy_Wood": "#6B4A2E",
+            "Canopy": "#E874A1",  # FLAMINGO_PINK
+            "Goods": {CAR_YELLOW: "#F2C230", LAVA_ORANGE: "#E8792E"},
+        },
+    },
+    "stall_canopy_c": {
+        "category": "props",
+        "tints": {
+            "Canopy_Wood": "#6B4A2E",
+            "Canopy": "#3FA556",  # TROPICAL_GREEN
+            "Goods": {TROPICAL_GREEN: "#3FA556", LAVA_ORANGE: "#E8792E", CAR_RED: "#D94A38"},
+        },
+    },
+    "textile_strip": {
+        "category": "props",
+        "tints": {
+            "Poles": "#6B4A2E",
+            "Cloth": {LAVA_ORANGE: "#E8792E", CAR_YELLOW: "#F2C230",
+                     FLAMINGO_PINK: "#E874A1", CAR_RED: "#D94A38",
+                     TROPICAL_GREEN: "#3FA556"},
+        },
+        # piesa e 10 m intinsa pe X (stalpii, sfoara), panzele sunt panouri
+        # plate in planul XZ -- camera la azimut mic (aproape din lungul
+        # stalpilor) vede piesa din MUCHIE (comprimata intr-o banda ingusta,
+        # confirmat vizual la prima runda). Fix: azimut ~80 (aproape
+        # perpendicular pe axa X), ca sa se vada latimea/culorile panzelor.
+        "camera": {"azimuth": 80.0, "elevation": 12.0, "margin": 1.15},
+    },
+    "spice_sacks": {
+        "category": "props",
+        "tints": {
+            "Sacks": "#C9A876",  # SAND_MID
+            "Spice": {CAR_RED: "#D94A38", CAR_YELLOW: "#F2C230"},
+        },
+    },
+    "thela_cart": {
+        "category": "props",
+        # Cart_Wheels e acum lemn (CRATE_WOOD), nu metal -- brief §1.5 "4
+        # roti de LEMN cu spite", fix dupa --compare (rotile ieseau negru
+        # uniform, spitele nedistinse de disc).
+        "tints": {
+            "Cart_Wood": "#6B4A2E",
+            "Cart_Wheels": "#6B4A2E",
+            "Cart_Fruit": {TROPICAL_GREEN: "#3FA556", CAR_YELLOW: "#F2C230",
+                          LAVA_ORANGE: "#E8792E", CAR_RED: "#D94A38"},
+        },
+        # piesa mica (2.4x1.2m) -- margin redus ca sa umple mai mult cadrul
+        "camera": {"azimuth": 35.0, "elevation": 18.0, "margin": 1.0},
+    },
+    "chai_stall": {
+        "category": "props",
+        "tints": {
+            "Stall_Wood": {WOOD: "#6B4A2E", SAND_LIGHT: "#D9C9A3"},
+            # PAINTED, corectat de la gri (#8A8A8E) la un metal inchis cald
+            # (aluminiu/cositor patinat) -- pe decupare oalele sunt
+            # inchis-maroniu, nu gri neutru
+            "Stall_Metal": "#4A4238",
+        },
+    },
+    "marigold_garland": {
+        "category": "props",
+        "tints": {"Garland": "#E8792E"},  # LAVA_ORANGE, ca albedo per brief
+    },
 }
 
 
@@ -449,12 +605,28 @@ def _flat_material(hex_color):
     return mat
 
 
+def _strip_dup_suffix(name):
+    """Blender adauga ".001"/".002".. cand numele obiectului e deja ocupat
+    de un data-block orfan ramas in bpy.data (build_jodhpur_city.py exporta
+    7 piese in ACEEASI sesiune, fara sa stearga obiectele intre emit()-uri
+    -- gasit prin masurare, nu presupus: `House_Wall` din blue_house_b ramane
+    orfan in bpy.data.objects, deci blue_house_c importa ca `House_Wall.001`.
+    Fara acest strip, lookup-ul in COMPARE_SPECS["tints"] rateaza exact pe
+    numele nodului principal si piesa cade pe atlas_material() implicit
+    (gri/alb) -- bug reprodus vizual pe blue_house_b/c/e (casele ies gri, nu
+    albastre) la prima comparatie a valului 3."""
+    import re
+    return re.sub(r"\.\d{3}$", "", name)
+
+
 def _import_for_compare(name, spec, models_dir):
     objs = _import(spec["category"], name, models_dir)
     meshes = [o for o in objs if o.type == "MESH"]
     for o in meshes:
         _fix_ao_layer_name(o)
-        tint = spec.get("tints", {}).get(o.name)
+        base_name = _strip_dup_suffix(o.name)
+        tints = spec.get("tints", {})
+        tint = tints.get(o.name, tints.get(base_name))
         if isinstance(tint, dict):
             _apply_multi_flat_tint(o, tint)
         elif tint is not None:
@@ -755,6 +927,13 @@ WAVE_PIECES = {
     "2a": ["fort_gate_jai", "fort_gate_fateh", "fort_gate_loha",
            "fort_wall_segment", "fort_wall_turret", "fort_bastion",
            "palace_facade_a", "palace_facade_b", "rampart_cannon"],
+    # val 3 (brief §1.4+§1.5, orasul albastru + bazarul) -- 7 piese din
+    # build_jodhpur_city.py + 8 din build_jodhpur_bazaar.py.
+    "3": ["blue_house_b", "blue_house_c", "blue_house_d", "blue_house_e",
+          "haveli_facade", "rooftop_tank", "rooftop_clutter",
+          "stall_canopy_a", "stall_canopy_b", "stall_canopy_c",
+          "textile_strip", "spice_sacks", "thela_cart", "chai_stall",
+          "marigold_garland"],
 }
 
 

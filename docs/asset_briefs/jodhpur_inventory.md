@@ -1228,3 +1228,448 @@ al doilea slot în același nod ar fi dispărut sub clasă (regula 6).
   ambrazură, în afara celor 7 m). Nu am reparat: nu e piesa escaladării. Cifrele
   se reproduc cu `measure_opening(objs, lateral="y")` pe GLB-ul importat
   (fără cubul implicit).
+
+## Val 3 — orașul albastru (sesiune de continuare, 29 sep 2026)
+
+Contract: `docs/asset_briefs/jodhpur_kit.md` §1.4. Build:
+`build_jodhpur_city.py`. Reia sesiunea întreruptă (vezi „Stare la oprire"
+mai jos) de la commit-ul WIP `805173a7`.
+
+**Bugete rezolvate** (ambele PESTE la oprire, acum sub):
+`haveli_facade` 1036→860/900 tri (merloanele balcoanelor/terasei
+`merlon_w/gap` 0,9/0,5→1,6/1,0 și 1,8/1,3 pe terasă — cost per segment de
+balustradă 176→132 tri, măsurat izolat), `rooftop_clutter` 1672→1204/1400
+tri (rezervorul mic 12→8 segmente/3→2 nervuri 476→336 tri, oale/stâlpi
+8→6 segmente, pânzele rufelor 4→2 segmente pe lățime).
+
+**Bug real găsit în codul sursă (citire, confirmat la `--compare`) —
+sloturi suprascrise:** `blue_house_b`, `blue_house_c` și `rooftop_clutter`
+construiesc elemente cu slot propriu (rezervor `TANK_DARK`, oale `WOOD`,
+stâlpi/sfoară `LOG_DARK`, planta `CACTUS_GREEN`) DAR le adăugau la lista
+`wall_faces`/`faces` care primește apoi `f[b.slot] = WALL` la finalul
+funcției — overwrite orb, care ar fi pictat rezervorul/oalele/stâlpii/planta
+albastru-perete în orice export nou. Fix: elementele cu slot propriu extrase
+din lista supra-scrisă, atribuite explicit DUPĂ overwrite-ul general
+(`blue_house_b`: tank + plantă; `blue_house_c`: tank; `rooftop_clutter`:
+tank + oale + stâlpi, fiecare cu propria listă de fețe). Corectat în cod.
+**Notă de reconciliere:** la diff-ul final, `blue_house_b.glb`/`blue_house_c.glb`
+de pe disc erau identice la byte cu commit-ul WIP `805173a7`, deși acel
+commit conținea codul VECHI (cu bug-ul de overwrite) — geometria exportată
+deja avea sloturile corecte (verificat prin re-import + citire UV), semn că
+fișierele GLB comise nu erau perfect sincronizate cu sursa la oprirea
+sesiunii anterioare. Doar `haveli_facade.glb` și `rooftop_clutter.glb` apar
+efectiv modificate față de HEAD (`git diff --stat`) — restul fixurilor de
+sloturi din cod sunt corecte și verificate, dar nu au produs un diff de
+export nou pe `blue_house_b/c`. `COMPARE_SPECS` a fost actualizat oricum să
+reflecte sloturile multiple (dict per nod, ca la `Clock_Glow`/`Gate_Stone`),
+necesar pentru ca previzualizarea să citească tenta corectă.
+
+**Al doilea bug găsit, tot la `--compare` — nume de nod cu sufix `.NNN`:**
+`build_jodhpur_city.py` exportă 7 piese în ACEEAȘI sesiune Blender fără să
+șteargă obiectele între `emit()`-uri; când `preview_jodhpur.py` importă un
+GLB și scena mai are un data-block orfan cu același nume (ex. `House_Wall`
+rămas de la piesa anterioară), Blender redenumește automat noul obiect
+`House_Wall.001`. Lookup-ul `COMPARE_SPECS[...]["tints"].get(o.name)` rata
+exact pe acest nume și piesa cădea pe `atlas_material()` implicit — **toate
+cele 4 case ieșeau gri/alb, nu albastre**, la prima rundă de comparații.
+Fix: `_strip_dup_suffix()` în `preview_jodhpur.py`, normalizează numele
+(strip `.NNN`) înainte de lookup în `tints`, indiferent de starea sesiunii.
+
+**Cameră dedicată:** `haveli_facade` (10×6 m, rație 1,67:1, mai alungită
+decât pilotul cubic) cu camera implicită (35°/18°) arăta predominant fața
+laterală goală, arcadele/ferestrele fiind abia vizibile. `COMPARE_SPECS`
+primește `azimuth=20°, elevation=12°, margin=1.2` (prima încercare cu
+margin 1.05 tăia parterul/coama din cadru).
+
+**Tabel de fidelitate** (element / pe decupare / în GLB / verdict, privit
+efectiv în `docs/asset_briefs/img/jodhpur_fidelity/<nume>.png`):
+
+### `buildings/blue_house_b.glb`
+
+- **Triunghiuri:** 2838. Buget: 6000.
+- **Cote măsurate:** 7,50 × 6,50 × 10,88 m (contract 7×6 m, 9,5 m — înălțimea
+  +14,5%, din parapetul+balustrada terasei mijlocii și cutia rezervorului,
+  adăugate peste volumul nominal al celor 3 cuburi).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | 3 volume în trepte, retrase spre spate | clar 3 nivele | 3 cuburi, fiecare retras pe -Y și mai îngust | **prezent** |
+  | rezervor negru pe volumul cel mai sus | cilindru negru | `_rooftop_tank`, acum corect NEGRU (fix sloturi) | **prezent** |
+  | plantă verde în colțul terasei de jos | tufiș verde vizibil | 5 cuburi mici `CACTUS_GREEN`, acum vizibile (fix sloturi) | **prezent**, poziție puțin diferită (decupare: lângă ușa laterală stânga; GLB: colț dreapta lângă balustradă) |
+  | balustradă pe terasa din mijloc | parapet alb | `balustrade` pe marginea +Y a terasei v1 | **prezent** |
+  | 2 uși de lemn pe fața parterului | vizibile, alăturate | `arch_opening` × 2, spre stânga feței +X | **prezent** |
+
+- **Abateri:** poziția plantei (colț opus față de decupare) — geometrie
+  prezentă și corect colorată, doar plasarea diferă.
+
+### `buildings/blue_house_c.glb`
+
+- **Triunghiuri:** 1231. Buget: 3800.
+- **Cote măsurate:** 7,50 × 7,50 × 7,88 m (contract 7×7 m, 6,5 m — parapetul
+  +cornișa explică diferența, geometrie cerută nu abatere de corp).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | cub simplu cu parapet plat | vizibil | `box` + parapet | **prezent** |
+  | ușă în arc, aproape centrată | vizibilă | `arch_opening(style="round")` | **prezent** |
+  | 2 ferestre mici sus | o parte și de alta a ușii | `arch_opening` × 2 pe `House_Glow` | **prezent** |
+  | rezervor pe acoperiș | cilindru negru aproape de colț | acum corect NEGRU (fix sloturi) | **prezent** |
+
+- **Abateri:** niciuna semnificativă — cea mai fidelă piesă a valului.
+
+### `buildings/blue_house_d.glb`
+
+- **Triunghiuri:** 4302. Buget: 6500.
+- **Cote măsurate:** 7,64 × 7,18 × 8,62 m (contract 7×7 m, 8,5 m — aproape
+  exact).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | ușă mare în arc, aproape centrată | vizibilă, cu trepte | `arch_opening` + 3 trepte de piatră | **prezent** |
+  | fereastră mică sus-stânga | vizibilă | `arch_opening` pe `House_Glow` | **prezent** |
+  | balustradă NEAGRĂ (grilaj) pe tot perimetrul | parapet închis la culoare | `railing_on_brackets` pe slot GLOW, vizibil negru pe fond albastru | **prezent**, cel mai clar contrast al valului |
+  | cameră mică pe acoperiș, retrasă spre spate | volum mic, fără geamuri vizibile | cub retras pe -Y | **prezent** |
+
+- **Abateri:** niciuna semnificativă. Tenta INDIGO (`#4F6FB8`) se distinge
+  clar de tenta LIGHT a celorlalte case în comparație.
+
+### `buildings/blue_house_e.glb`
+
+- **Triunghiuri:** 3287. Buget: 6500.
+- **Cote măsurate:** 8,20 × 6,49 × 8,50 m (contract 7×6 m, 8,5 m — lățimea
+  +17%, din scara exterioară proeminentă pe fața +X, geometrie cerută).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | volum principal (2 etaje) + volum scund alăturat (1 etaj) | formă în L vizibilă | corp principal `h=6.0` + volum scund `h=3.2` alăturat pe +Y | **prezent** |
+  | 2 uși pe corpul principal | alăturate, spre stânga | `arch_opening` × 2 | **prezent** |
+  | scară exterioară solidă, urcă spre dreapta | vizibilă clar, balustradă albă | `solid_stair` + `railing_on_brackets`, pe fața +X | **prezent** |
+  | etaj 3 mic, retras, deasupra corpului înalt | volum mic sus | cub retras | **prezent** |
+
+- **Abateri:** niciuna semnificativă — toate elementele din listă sunt
+  prezente și în poziția corectă.
+
+### `buildings/haveli_facade.glb`
+
+- **Triunghiuri:** 860. Buget: **900** (strict, per brief).
+- **Cote măsurate:** 10,47 × 6,20 × 12,70 m (contract 10×6 m, 11 m —
+  înălțimea +15,5%, din parapetul terasei + friza de sub cornișă, peste
+  cele 3 etaje nominale).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | parter: 3 arcade mari deschise | goluri clare pe toată fața | `_cheap_arch_opening(open=True)` × 3 | **prezent**, geometria octogonală (colț tăiat) citește ca arc turtit la unghiul comparației |
+  | etaj 1 și 2: 3 ferestre + balcon de piatră pe console | goluri închise + relief de balcon vizibil sub fiecare rând | `_cheap_arch_opening(open=False)` × 3/etaj + `chajja`+`balustrade` continuu | **abatere**: ferestrele/balcoanele nu se disting clar în randare — fațada celor 2 etaje mijlocii citește aproape plată la acest unghi, relieful balconului (0,45 m ieșire) e prea subțire ca umbră la distanța de comparație |
+  | terasă cu balustradă pe toată lățimea | parapet crenelat vizibil sus | `balustrade`, merloane rare | **prezent** |
+  | friză decorativă sub cornișă | bandă sub streașină | `chajja` îngust continuu | **prezent**, discret |
+
+- **Abateri cunoscute și motiv:** golurile etajelor 1/2 (ferestre + balcoane)
+  nu se citesc clar separate în comparație — la bugetul de 900 tri (strict),
+  `_cheap_arch_opening` a fost redus la varianta cea mai ieftină posibil
+  (fără firidă de adâncime pe ferestrele închise, vezi comentariul de cost
+  din cod), iar la unghiul de cameră ales asta lasă etajele mijlocii
+  vizual plate. Corectarea ar cere fie relief mai adânc (cost peste 900),
+  fie un unghi de cameră diferit care să prindă umbra ferestrelor — netestat
+  în runda asta. Geometria golurilor EXISTĂ la cotele corecte (verificat în
+  cod, `arch_h`/`arch_w` per etaj), doar lizibilitatea la acest unghi/scară
+  e sub cea a restului pieselor.
+
+### `props/rooftop_tank.glb`
+
+- **Triunghiuri:** 544. Buget: 700.
+- **Cote măsurate:** Ø1,25 × 1,28 m (contract Ø1,2 × 1,4 m — apropiat).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | cilindru negru cu nervuri orizontale (3-4) | vizibile clar | `_rooftop_tank`, `n_ribs=4`, `segments=12` | **prezent** |
+  | capac ușor bombat | vizibil | `frustum` + `cylinder` mic | **prezent** |
+
+- **Abateri:** niciuna — cea mai fidelă piesă a valului, aproape identică
+  cu decuparea.
+
+### `props/rooftop_clutter.glb`
+
+- **Triunghiuri:** 1204. Buget: 1400.
+- **Cote măsurate:** 3,00 × 2,50 × 1,96 m (contract placă 3×2,5 m, stâlpi
+  1,8 m — aproape exact).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | placă de terasă albastră | vizibilă | `box` pe slot WALL | **prezent** |
+  | rezervor mic negru, colț stânga-spate | vizibil | acum corect NEGRU (fix sloturi) | **prezent** |
+  | 2 grămezi de oale/lucruri | maro/lemn, spre mijloc/dreapta | acum corect MARO (fix sloturi) | **prezent** |
+  | 2 stâlpi + sfoară | negru/lemn închis | acum corect NEGRU (fix sloturi) | **prezent** |
+  | 2 rufe: galben (stânga), roz (dreapta) | vizibile clar, ușor lăsate | `_cloth` × 2, pe `Clutter_Laundry` | **prezent** |
+
+- **Abateri:** niciuna semnificativă după fixul de sloturi — toate
+  elementele din listă sunt prezente și corect colorate.
+
+## Val 3b — bazarul (aceeași sesiune, 29 sep 2026)
+
+Contract: `docs/asset_briefs/jodhpur_kit.md` §1.5. Build:
+`build_jodhpur_bazaar.py` (fișier nou). Brief-ul nu dă bugete stricte de
+triunghiuri pentru bazar (doar cote) — bugetele de mai jos sunt cele
+declarate în `emit()`, calibrate pe măsurătoare, nu presupuse (memoria
+`plafon-masurat-nu-presupus`).
+
+**Bug real găsit la primul `--compare`:** funcția `_build_stall_canopy`
+construia fețele copertinei pe `b.bm` (Builder-ul lemnului) în loc de
+`bc.bm` (Builder-ul dedicat `Canopy`) — nodul `Canopy` ieșea cu 0 vertecși,
+iar `emit()` crăpa la calculul de bounding box (`min()` pe listă goală).
+Fix: toate apelurile `bm.faces.new`/`bm.verts.new` din bucla copertinei
+mutate pe `bc.bm`.
+
+**A doua rundă de corecții, după ce toate 8 au exportat și au fost privite:**
+
+- **`stall_canopy_a/b/c`:** grămezile de marfă (cilindri coloraţi deasupra
+  lăzilor) erau aproape invizibile la raza/înălțimea inițială (0.11/0.14 m)
+  — mărite la 0.19/0.22 m, acum se văd clar ca „grămezi", nu ca puncte.
+- **`thela_cart`:** roțile foloseau `METAL_DARK` (VOLCANIC_BLACK), dar
+  brief-ul §1.5 cere explicit „4 roți de LEMN cu spițe" — corectat la
+  `CRATE_WOOD`. La randare, spițele erau invizibile pe fondul negru uniform;
+  cu lemnul, discul/butucul/spițele se disting clar.
+- **`textile_strip`:** camera implicită (azimut 5°, aproape din lungul
+  stâlpilor pe axa X) arăta piesa din MUCHIE — o bandă îngustă aproape
+  ilizibilă. Fix: azimut 80° (aproape perpendicular pe axa X), ca să se
+  vadă lățimea/culorile celor 7 panze.
+- **`chai_stall`:** oalele de metal aveau tentă gri neutru (`#8A8A8E`),
+  decuparea arată metal închis-cald — corectat la `#4A4238`.
+
+**Tabel de fidelitate** (element / pe decupare / în GLB / verdict, privit
+efectiv în `docs/asset_briefs/img/jodhpur_fidelity/<nume>.png`):
+
+### `props/stall_canopy_a.glb`, `_b.glb`, `_c.glb`
+
+- **Triunghiuri:** 1520 fiecare. Buget declarat: 1600 (măsurat — 1400
+  inițial era o estimare fără măsurătoare; forma completă din brief nu
+  încape sub 1500).
+- **Cote măsurate:** 3,50 × 3,10 × 2,60 m (contract 3×2,5 m, copertină la
+  2,6 m — lățimea/adâncimea peste din streașina copertinei, care iese
+  intenționat peste amprenta stâlpilor).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | 4 stâlpi de lemn | vizibili la colțuri | `cylinder` × 4 | **prezent** |
+  | copertină lăsată (catenară), înclinată spre spate | curbură moale vizibilă | 4 segmente, `sag` parabolic + pantă front/back | **prezent**, silueta curbată se citește clar |
+  | tejghea/ramă de lemn joasă | vizibilă la baza stâlpilor | 4 grinzi orizontale | **prezent**, mai subțire (sârmă) decât masa solidă de pe decupare — abatere minoră |
+  | lăzi cu marfă în trepte (2-3 niveluri) | grămezi colorate vizibile | 3 niveluri de ladă + grămezi cilindrice colorate deasupra | **prezent**, corectat runda 2 (grămezile inițiale erau prea mici) |
+  | culoare copertină: a=galben, b=roz, c=verde | clar diferențiate | `CAR_YELLOW`/`FLAMINGO_PINK`/`TROPICAL_GREEN` | **prezent** |
+
+- **Abateri cunoscute:** rama/tejgheaua joasă citește mai degrabă ca un
+  cadru de bare decât ca o masă solidă — decuparea arată o structură mai
+  plină. Nu s-a corectat în runda asta (element secundar, lăzile cu marfă
+  domină corect cadrul).
+
+### `props/textile_strip.glb`
+
+- **Triunghiuri:** 599. Buget declarat: 1600.
+- **Cote măsurate:** 10,15 × 0,15 × 2,60 m (contract 10 m între stâlpi,
+  pânze 0,9×1,6 m — lungimea exactă).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | 2 stâlpi + sfoară lăsată | vizibili la capete | `cylinder` × 2 + `box` segmentate pe catenară | **prezent** |
+  | 7 pânze colorate | portocaliu, galben, roz, roșu, verde, galben, roz | 7 pânze, `TS_COLORS` cu aceleași 7 culori (poziționate în ordine, dar unele adiacențe diferă ușor de decupare) | **prezent** |
+  | margine de jos crestată (zimți) | vizibilă | 3 „dinți" per pânză, geometrie (colț tăiat) | **prezent** |
+  | pânze opace | vizibile clar, nu transparente | fără alpha, atlas fără canal alpha | **prezent** |
+
+- **Abateri cunoscute și motiv (rezolvate):** camera implicită (azimut 35°)
+  arăta piesa aproape din muchie (stâlpii pe axa X, camera aproape aliniată
+  cu ei) — corectat la azimut 80°. După fix, toate 7 pânze sunt clar
+  vizibile și distincte.
+
+### `props/spice_sacks.glb`
+
+- **Triunghiuri:** 1232. Buget declarat: 1400.
+- **Cote măsurate:** 1,48 × 0,84 × 0,65 m (contract 1,6×1,0×0,9 m — puțin
+  sub, cei 3 saci sunt compacti).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | 3 saci de iută cu gura răsfrântă | 2 mari în prim-plan, al 3-lea mai mic/parțial vizibil în spate | `frustum`+`cylinder`×3 per sac × 3 saci, al treilea mai mic, poziționat median-spate | **prezent** |
+  | conuri de condiment: roșu, galben | vizibile clar, umplu gura sacului | `frustum` deasupra fiecărui sac, roșu/galben (al 3-lea tot roșu) | **prezent** |
+
+- **Abateri:** niciuna semnificativă — cea mai fidelă piesă a bazarului,
+  aproape identică cu decuparea la prima randare.
+
+### `props/thela_cart.glb`
+
+- **Triunghiuri:** 3028. Buget declarat: 3100 (măsurat — cele 4 roți cu
+  spițe reale costă ~380 tri/roată după bevel, cerute explicit de brief
+  „4, nu 2 — planșa câștigă"; 2200 inițial era o estimare fără măsurătoare).
+- **Cote măsurate:** 3,00 × 1,20 × 0,83 m (contract 2,4×1,2×1,1 m — lățimea
+  peste din mânerul de împins proeminent pe -X, geometrie cerută de
+  decupare, nu abatere de corp).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | platformă de lemn cu ramă | vizibilă, bordură ridicată | `box` + 4 borduri | **prezent** |
+  | 4 roți de lemn cu spițe (nu 2 de bicicletă) | vizibile, spițe distincte | `_wheel` × 4, disc+butuc+4 bare, acum pe `CRATE_WOOD` | **prezent**, corectat runda 2 (inițial metal negru, spițe invizibile) |
+  | grămadă de fructe colorate (verde, galben, portocaliu, roșu) | vizibilă, umple platforma | 11 cilindri colorați, 2 niveluri | **prezent** |
+
+- **Abateri cunoscute:** niciuna semnificativă după fixul de material al
+  roților.
+
+### `props/chai_stall.glb`
+
+- **Triunghiuri:** 896. Buget declarat: 1600.
+- **Cote măsurate:** 2,90 × 2,40 × 2,50 m (contract 2,5×2,0×2,6 m —
+  apropiat).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | 4 stâlpi + acoperiș de pânză bej, aproape plat | vizibil, panta ușoară | `box` pe 2 fețe, pantă front/back 0,20 m | **prezent** |
+  | tejghea de lemn joasă + 2 dulapuri laterale | vizibile | 3 `box`-uri | **prezent** |
+  | 2 oale de metal + o ceainică | vizibile pe tejghea | `cylinder` × 2 + corp+cioc ceainică | **prezent**, culoare corectată runda 2 (gri → metal cald închis) |
+
+- **Abateri cunoscute:** spațiul dintre stâlpul central și cel din dreapta
+  citește parțial gol în comparație (decuparea are mai multă masă vizuală
+  în acea zonă) — element secundar, nu afectează lizibilitatea tarabei.
+
+### `props/marigold_garland.glb`
+
+- **Triunghiuri:** 640. Buget declarat: 800 (măsurat — fără bevel pe
+  icosfere, deja rotunjite prin `subdivisions`; 2400 inițial supraestima
+  costul).
+- **Cote măsurate:** 2,59 × 0,15 × 1,09 m (contract 2,5 m deschidere, 0,8 m
+  lăsare — apropiat).
+
+  | element | pe decupare | în GLB | verdict |
+  |---|---|---|---|
+  | margele portocalii pe o catenară | vizibile, dese | 22 icosfere (`subdivisions=1`), rază variabilă | **prezent** |
+  | 5 ciucuri care atârnă | vizibili, mai mari decât mărgelele | 5×2 icosfere (bulb mare+mic) sub catenară | **prezent** |
+
+- **Abateri:** niciuna semnificativă — a doua cea mai fidelă piesă a
+  bazarului.
+
+## Stare la oprire (val 3, oprire de urgență — dezvoltatorul închide PC-ul)
+
+**Sesiune întreruptă în timpul lucrului la `build_jodhpur_city.py`** (brief
+§1.4, casele + `haveli_facade` + props de acoperiș). Commit WIP:
+`805173a7` pe `feat/jodhpur-kit-city`. **NIMIC din val 3 nu e verificat
+vizual încă** (fără `--compare`, fără planșă de fidelitate) — tot ce
+urmează e doar "buildul rulează și `verify_glb.py` trece pe cotă/buget",
+nu un verdict de fidelitate.
+
+### Ce există (exportat, dar NEVERIFICAT vizual)
+
+Toate cele 7 piese din `buildings/blue_house_{b,c,d,e}.glb`,
+`buildings/haveli_facade.glb`, `props/rooftop_{tank,clutter}.glb` s-au
+construit și exportat cu succes din `build_jodhpur_city.py` (commit
+`805173a7`). Listele de elemente (brief §0.1 pasul 1) sunt scrise în
+docstring-urile fiecărei funcții `build_blue_house_*`/`build_haveli_facade`
+din fișier, citite din decupări. Contractul de noduri (House_Wall/
+House_Trim/House_Glow(+House_Rail)) e respectat pe toate — bug găsit și
+corectat în sesiune: primele versiuni scriau ușile pe Builder-ul greșit
+(`bglow` în loc de `bg`), ceea ce ar fi exportat `House_Trim` gol și
+`House_Glow` cu uși maro în loc de geamuri negre — vezi istoricul commit-ului
+pentru fix.
+
+Triunghiuri la ultima rulare (buget vs. măsurat):
+
+| piesă | tris | buget | status |
+|---|---:|---:|---|
+| blue_house_b | 2838 | 6000 | sub buget |
+| blue_house_c | 1231 | 3800 | sub buget |
+| blue_house_d | 4302 | 6500 | sub buget |
+| blue_house_e | 3287 | 6500 | sub buget |
+| haveli_facade | 860 | 900 | sub buget (fix: merloane mai late/rare pe balcoane+terasă, 176→132 tri/segment) |
+| rooftop_tank | 544 | 700 | sub buget |
+| rooftop_clutter | 1204 | 1400 | sub buget (fix: rezervor mic 12→8 segmente/3→2 nervuri, oale/stâlpi 8→6 segmente, pânze 4→2 segmente) |
+
+### Ce NU e făcut
+
+1. **`haveli_facade` peste buget** (1036 vs 900 — brief-ul dă 900 ca
+   plafon explicit pentru piesa asta, spre deosebire de casele simple unde
+   depășirea motivată e acceptabilă). S-a scris un vocabular ieftin propriu
+   (`_cheap_arch_opening`, colț tăiat în loc de profil de arc cu `steps`)
+   ca să înlocuiască `arch_opening` (prea scump la 9 goluri pe un buget de
+   900), a coborât de la 3954 → 1036 tri în 4 runde, dar tot 136 tri peste.
+   Pasul următor: fie mai taie o balustradă/chajja, fie — dacă geometria
+   rămasă e deja minimul pentru lista de elemente a briefului (3 arcade +
+   6 ferestre + 2 balcoane continue + parapet terasă + friză) — se scrie
+   onest numărul și motivul (ca la casele simple, brief §1.4) și se cere
+   verdictul dezvoltatorului dacă 900 rămâne strict sau se acceptă o mică
+   depășire.
+2. **`rooftop_clutter` peste buget** (1672 vs 1400) — nu s-a atins deloc încă
+   în sesiunea asta după prima rulare reușită; probabil cablurile/rufele
+   (`_cloth`, 4 segmente × 2 rufe × Builder separat `bl`) costă mai mult
+   decât părea. Netratat.
+3. **ZERO comparații de fidelitate** (`preview_jodhpur.py --compare`) rulate
+   pe vreo piesă din val 3 — pasul 3 din brief §0.1 ("randează comparația,
+   UITĂ-TE la ea, scrie ce arată") nu s-a făcut deloc încă. Tot ce e mai sus
+   sunt măsurători de cotă/tri, NU dovadă de fidelitate față de decupare.
+4. **`build_jodhpur_bazaar.py` nu există încă** — niciuna din cele 8 piese
+   de bazar (stall_canopy_a/b/c, textile_strip, spice_sacks, thela_cart,
+   chai_stall, marigold_garland) nu are nicio linie de cod scrisă.
+5. **`verify_jodhpur.sh` nu a fost extins** cu liniile pentru val 3 (nici
+   casele, nici bazarul).
+6. **`COMPARE_SPECS`/`WAVE_PIECES` din `preview_jodhpur.py` nu au fost
+   extinse** cu cheia `"3"` sau cu tentele/camerele per piesă din val 3.
+7. **`docs/asset_briefs/img/jodhpur_fidelity_val3.png` nu există.**
+8. **Niciun commit de grup** (case / haveli+props acoperiș / bazar) — doar
+   commit-ul WIP de mai sus, cu tot ce exista la momentul opririi.
+
+### Ce ar trebui să facă următoarea sesiune, în ordine
+
+1. Reia din `build_jodhpur_city.py` (commit `805173a7`, branch
+   `feat/jodhpur-kit-city`, worktree `D:/GameDev/wt-jod-city`).
+2. Rezolvă bugetul `haveli_facade` (900) — vezi punctul 1 de mai sus.
+3. Rezolvă bugetul `rooftop_clutter` (1400).
+4. Adaugă `COMPARE_SPECS` pentru toate cele 7 piese din val 3 în
+   `preview_jodhpur.py` (tente: light `#8FB0DC`, indigo `#4F6FB8`,
+   trim/alb din atlas, `*_Glow` închis, ca în restul kitului).
+5. Rulează `--compare` pe fiecare piesă, UITĂ-TE la randare, scrie tabelul
+   de fidelitate (element/decupare/GLB/verdict) în inventar — pasul care
+   lipsește complet acum.
+6. Iterează geometria pe ce arată randarea greșit (aproape sigur: cel puțin
+   o piesă va avea fața greșită spre cameră sau proporții greșite — istoricul
+   valurilor 1/2a/2b arată că asta se întâmplă aproape mereu la prima
+   randare).
+7. Abia după verdictul vizual pe toate piesele din `build_jodhpur_city.py`,
+   trece la `build_jodhpur_bazaar.py` (8 piese noi).
+8. Extinde `verify_jodhpur.sh`, `WAVE_PIECES["3"]`, randează
+   `jodhpur_fidelity_val3.png`, rulează verify complet, commit pe grupuri.
+
+## Val 3 — încheiat (sesiune de continuare, 29 sep 2026)
+
+Toți cei 8 pași de mai sus sunt făcuți. Rezumat (detaliile complete sunt în
+secțiunile „Val 3 — orașul albastru" și „Val 3b — bazarul" de mai sus):
+
+- Bugetele `haveli_facade` (860/900) și `rooftop_clutter` (1204/1400)
+  rezolvate.
+- Bug real de sloturi suprascrise orb (rezervor/oale/stâlpi/plantă pictate
+  WALL) corectat în cod pe `blue_house_b/c` și `rooftop_clutter`.
+- Bug real de geometrie pe Builder greșit (`Canopy` gol, fețele ajungeau în
+  `Canopy_Wood`) corectat pe cele 3 `stall_canopy_*`.
+- `COMPARE_SPECS`/`WAVE_PIECES["3"]` extinse cu toate cele 15 piese (7
+  oraș + 8 bazar), inclusiv camere dedicate pentru piesele alungite
+  (`haveli_facade`, `textile_strip`) — camera implicită (azimut 35°) nu
+  funcționează pe piese cu o axă mult mai lungă decât celelalte.
+  `_strip_dup_suffix()` adăugat în `preview_jodhpur.py` — Blender adaugă
+  sufix `.NNN` la nume de nod duplicate rămase în sesiune, ceea ce rata
+  lookup-ul de tentă și scotea piese gri la prima rundă de comparații.
+- Toate cele 15 piese noi rulate prin `--compare`, privite efectiv, tabel
+  de fidelitate scris în inventar; câteva runde de corecții după privit
+  (grămezi de marfă mărite, roți de lemn nu metal, cameră `textile_strip`,
+  culoare oale `chai_stall`).
+- `verify_jodhpur.sh` extins cu ambele valuri (3 și 3b) — `VERDICT KIT: OK`,
+  36/36 GLB.
+- `docs/asset_briefs/img/jodhpur_fidelity_val3.png` generată (15 piese).
+- 2 commit-uri de grup (case+haveli+props acoperiș, apoi bazarul) pe
+  `feat/jodhpur-kit-city`, push la fiecare.
+
+**Ce nu s-a terminat / abateri rămase, documentate onest** (nu blocante,
+nu ascunse):
+
+- `haveli_facade`: ferestrele + balcoanele etajelor 1/2 nu se disting clar
+  în comparație la bugetul strict de 900 tri (geometria există la cotele
+  corecte, dar relieful e prea subțire pentru unghiul/scara comparației).
+- `stall_canopy_*`: rama/tejgheaua joasă citește ca un cadru de bare, nu ca
+  masă solidă (element secundar, lăzile cu marfă domină corect cadrul).
+- `chai_stall`: spațiul dintre stâlpul central și cel din dreapta citește
+  parțial gol față de decupare (element secundar).
+- Hex-urile de tentă pentru culorile bazarului (`#F2C230`, `#D94A38`,
+  `#3FA556`, `#E8792E`, `#E874A1`) sunt aproximări rezonabile, nu extrase
+  dintr-o sursă exactă a paletei native — de recalibrat dacă la integrarea
+  în Godot culorile ies vizibil diferite de decupare.

@@ -54,7 +54,7 @@ extends Node
 ## `Track._sun_rotation_deg` — vezi `_apply_sun`).
 const KEY_T: PackedFloat32Array = [0.0, 0.5, 1.0]
 const KEY_SUN_ELEV_DEG: PackedFloat32Array = [8.0, 3.0, 1.0]
-const KEY_SUN_ENERGY: PackedFloat32Array = [1.0, 0.60, 0.32]
+const KEY_SUN_ENERGY: PackedFloat32Array = [1.0, 0.60, 0.30]
 ## Culorile NU pot fi `const Array[Color]` initializat cu `Color.html()`/
 ## `Color(...)` de call — GDScript cere o EXPRESIE CONSTANTA pentru `const`,
 ## iar un apel de functie (chiar si un constructor) nu calific ("Assigned
@@ -63,22 +63,35 @@ const KEY_SUN_ENERGY: PackedFloat32Array = [1.0, 0.60, 0.32]
 ## de literale `Color(r,g,b)` scrise de mana (mai usor de citit direct hexul
 ## din brief §4 decat trei zecimale rotunjite).
 static var KEY_SUN_COLOR: Array[Color] = []
-## Ambientul: energia urca usor (0,30 -> 0,45), culoarea trece spre indigo —
-## se foloseste chiar culoarea de soare a fazei 1 ca ancora de ambient rece,
-## amestecata cu un violet la mijloc (brief: "0,40, violet" la 0,5).
-const KEY_AMBIENT_ENERGY: PackedFloat32Array = [0.30, 0.40, 0.45]
+## TRECEREA DE LUMINA (tools/ProbeJodLumina.tscn, cifre pe masca de clasa in
+## docs/track_briefs/img/jodhpur_lumina/): cheile din brief §4 faceau orasul
+## bej la dusk 0 (soare+ambient+ceata portocalii) si TOATA scena albastra la
+## dusk 1 (soare+ambient+ceata indigo: nisip H 232, asfalt H 238). Regula
+## noua: ALBASTRUL VINE DIN ALBEDO (varul caselor), NU DIN LUMINA. Lumina
+## ramane aproape neutra in spatiul liniar (B/R ~0,9-1,2), deci varul iese
+## albastru si nisipul cald la orice faza; ce face noaptea e ENERGIA (luma
+## cadrului scade ~40%), cerul si ceata inchisa, apoi flacarile (lampile).
+## Soarele pastreaza caldura fazei (auriu -> roz -> luna gri-lila).
+## Ambientul: neutru-cald -> lila stins -> gri-lila, energia 0,42 -> 0,45.
+const KEY_AMBIENT_ENERGY: PackedFloat32Array = [0.42, 0.42, 0.45]
 static var KEY_AMBIENT_COLOR: Array[Color] = []
 static var KEY_FOG_COLOR: Array[Color] = []
 const KEY_FOG_END: PackedFloat32Array = [300.0, 270.0, 240.0]
+## Imprastierea soarelui in ceata (`Environment.fog_sun_scatter`): ceata SPRE
+## soare capata culoarea soarelui, ceata DINSPRE soare ramane culoarea ei.
+## NEPIVOTATA pe baza (tema n-o declara): cheile se aplica exact.
+const KEY_FOG_SUN_SCATTER: PackedFloat32Array = [0.8, 0.4, 0.0]
 
 
+## Ceata: fum albastru-gri stins -> lila-gri -> gri-violet inchis (S <= 0,2
+## la toate fazele; ceata indigo #3E4A7A albastrea tot ce e dincolo de 90 m).
 static func _static_init() -> void:
 	KEY_SUN_COLOR = [
-		Color.html("FFB27A"), Color.html("FF8FA0"), Color.html("8E9BD6")]
+		Color.html("FFBC8C"), Color.html("FFA090"), Color.html("A4A0B4")]
 	KEY_AMBIENT_COLOR = [
-		Color.html("FFB27A"), Color.html("B98FC0"), Color.html("8E9BD6")]
+		Color.html("CAC0C4"), Color.html("BEB0B8"), Color.html("8A8690")]
 	KEY_FOG_COLOR = [
-		Color.html("E8A878"), Color.html("9A7FA8"), Color.html("3E4A7A")]
+		Color.html("8A94B8"), Color.html("8A8CA0"), Color.html("45424E")]
 ## Emisia lampilor: 0,15 (abia perceptibil, ziua) -> 1,0 (sursa de lumina
 ## principala, noaptea) — brief §4 si §3 „emisia lampilor 0,15 -> 1,0".
 const KEY_LAMPS: PackedFloat32Array = [0.15, 0.6, 1.0]
@@ -243,6 +256,7 @@ func _apply_ambient_and_fog(d: float) -> void:
 	_env.ambient_light_color = _lerp_color_key(KEY_AMBIENT_COLOR, d, _base_ambient_color)
 	_env.fog_light_color = _lerp_color_key(KEY_FOG_COLOR, d, _base_fog_color)
 	_env.fog_depth_end = _lerp_key(KEY_FOG_END, d, _base_fog_end)
+	_env.fog_sun_scatter = _lerp_key(KEY_FOG_SUN_SCATTER, d, KEY_FOG_SUN_SCATTER[0])
 
 
 ## Ultima valoare SCRISA pe `dusk_lamps` (vezi `_apply_lamps`). Exista DOAR

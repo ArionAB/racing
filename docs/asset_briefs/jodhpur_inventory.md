@@ -2132,3 +2132,102 @@ maparea pe clasa `blue_lime_light` rămâne de făcut la integrarea pistei.
 `--sheet 3` trimitea valul ca `int`, dar cheia din `WAVE_PIECES` e `"3"`:
 planșa ieșea fără piese și nu se rescria. Acum `fidelity_sheet` încearcă și
 `str(wave)`; `jodhpur_fidelity_val3.png` e regenerată.
+
+## Val 4 grupa B — animalele (`build_jodhpur_animals.py`, 29 sep 2026)
+
+Toate din primitive `Builder`, fără bevel (o primitivă = o insulă). Pe piesele
+cu schelet, osul fiecărei primitive se scrie **la construcție**, într-un
+atribut de față `part`, nu se ghicește după poziție; AO doar gradient vertical
+(`strength=0`), ca să nu rămână umbre lipite de blană când se mișcă scheletul.
+Comparațiile au culoarea REALĂ a slotului (tabelul `ANIMAL_TINT` din
+`preview_jodhpur.py` = HEX din `scripts/palette.gd`; calea `atlas_material`
+ieșea albă pe GLB-ul importat). `preview_jodhpur.py` a primit `pose`
+(acțiune, cadru) în `COMPARE_SPECS`: importatorul glTF lasă activă prima
+animație alfabetic (`GetUp` = vaca culcată), deci fără poză explicită
+comparația arăta o poză la întâmplare. Planșa valului:
+`docs/asset_briefs/img/jodhpur_fidelity_val4b.png`.
+
+| piesă | tri | cote măsurate în GLB | brief | origine |
+|---|---:|---|---|---|
+| `animals/zebu_cow.glb` | 2682 | 0,79 × **2,72** (Y) × 1,88 m; cocoașa 1,50 | 2,6 bot–crupă, 1,5 cocoașa | bază, `--origin=assembly` (Cow_Body + Bell) |
+| `animals/black_kite_bird.glb` | 508 | anvergură 1,50 m | 1,5 | **centru** (`--origin=center`) |
+| `animals/peacock_closed.glb` | 2500 | 2,14 × 1,03 m | 2,0 × 1,0 | bază |
+| `animals/peacock_fanned.glb` | 4568 | 1,60 × 1,00 m | 1,6 × 1,4 | bază |
+| `animals/langur.glb` | 988 | 0,70 m așezat, coada 1,05 m | 0,7 / 1,0 | bază |
+
+### Contractul înghețat: AABB-ul vacii (`CowGate`)
+
+Sondă headless temporară (necomisă) pe `scenes/hazards/cow_gate.gd` cu
+`model = zebu_cow.glb`, după `--import`: cutia de coliziune iese
+**0,787 × 1,88 × 2,724 m** (lungimea pe Z Godot = Y Blender, capul spre −Z),
+adică în intervalul cerut 2,6–2,9 m pentru ulicioara de 3,2 m. AnimationPlayer:
+`GetUp`, `Lie`, `LieDown`, `Stand` (2,0 s), `Walk` (1,0 s); 12 oase. Uliul pe
+un `PathMover` cu `speed > 0`: redă `Fly` în buclă (`LOOP_LINEAR`), 1,333 s =
+32 de cadre. Bug prins de sondă și reparat: cheile porneau de la cadrul 1, iar
+glTF-ul păstra un cadru mort la t=0 (Fly ieșea 1,375 s — sacadare la buclă);
+acum cheile încep la 0. Bug prins pe GLB: uliul pleca și cu cele 5 clipuri ale
+vacii (acțiunile cu fake user rămân în `bpy.data`); `purge_actions()` între piese.
+
+### Fidelitate — `zebu_cow` (decupări: `zebu_cow_stand.png`, `zebu_cow_lie.png`)
+
+| element | decupare | randare | ok? |
+|---|---|---|---|
+| corp | alb, 1, spinare dreaptă, crupă unghiulară | alb, crupă cu șolduri | ok, dar **mai lung** (vezi abateri) |
+| cocoașa | 1, peste umeri | 1, peste umeri, cel mai înalt punct | ok |
+| coarne | 2, portocalii, groase, liră | 2, `LAVA_ORANGE`, afară apoi vârful spre interior | ok; mai subțiri decât pe decupare |
+| urechi | 2, orizontale, laterale | 2, orizontale | ok; fără interior roz |
+| ochi, bot | 2 negri, bot negru lat | 2, bot `VOLCANIC_BLACK` | ok |
+| ghirlandă + clopoțel | buclă de la ceafă la piept, clopoțel galben la piept | 24 de mărgele pe buclă, clopoțel `CAR_YELLOW` (nod `Bell`) | ok; bucla citește mai mult ca inel decât ca ghirlandă groasă |
+| salba | sub gât, parțial ascunsă | placă sub gât | ok |
+| uger | roz, între picioarele din spate | `FLAMINGO_PINK` | ok |
+| picioare, copite | 4, copite negre, jaret îndoit | 4, copite negre, jaret înapoi | ok |
+| coada | atârnă, smoc negru la jaret | atârnă, smoc negru | ok |
+| **Lie** | burta pe sol, picioare strânse, capul SUS, clopoțelul pe sol | burta pe sol, antebrațe strânse, copitele din spate ies în spate, capul sus, clopoțelul la sol | ok; genunchii din față ies puțin în față, coada încă arcuită |
+
+### Fidelitate — `black_kite_bird`
+
+| element | decupare | randare (Fly, cadrul 9) | ok? |
+|---|---|---|---|
+| aripi | 2, deschise în V | 2, în V | ok |
+| pene-degete | ~6 pe vârf | 5 pe vârf, răsfirate | ok |
+| coada | furcă scurtă | furcă | ok |
+| cioc | galben, curbat | `CAR_YELLOW`, înclinat în jos | ok |
+| culoare | maro închis, acoperitoare mai deschise | `LOG_DARK`, bandă `WOOD` pe dosul aripii | ok |
+
+### Fidelitate — `peacock_closed` / `peacock_fanned`
+
+| element | decupare | randare | ok? |
+|---|---|---|---|
+| gât/piept | albastru, gât în S | `CAR_BLUE` | ok; gâtul mai drept |
+| moț, dungi albe, cioc | da | 6 tije cu vârf albastru, 2 dungi `FOAM_WHITE`, cioc gri | ok |
+| aripa (închis) | verde-gălbui, remige cafenii | `DRY_VEGETATION` + `SAND_MID` | ok |
+| trena (închis) | lungă, verde, coboară la sol, margine zdrențuită | `TROPICAL_GREEN`, 18 pene laterale + 7 la capăt | ok; mai „tub" decât pe decupare |
+| ochii trenei | puncte galben + albastru | 13 discuri `CAR_YELLOW` + centru `CAR_BLUE` | ok |
+| evantai (deschis) | semicerc lat, festonat | elipsă ~210°, 21 festoane, cauc spre față | ok |
+| ochii evantaiului | ~30 pe decupare | **20** (plafonul brief-ului 12–20), 3 rânduri 10/7/3 | ok (brief) |
+| picioare | bej, închis: în pas | `SAND_MID`; închis: **drepte**, nu în pas | abatere mică |
+
+### Fidelitate — `langur`
+
+| element | decupare | randare | ok? |
+|---|---|---|---|
+| poză | așezat pe vine, trunchi aplecat | idem | ok |
+| față | mască neagră, franjuri gri, spre privitor | mască `VOLCANIC_BLACK` rotită 40° spre privitor | ok |
+| brațe/mâini | drepte până la sol, mâini negre în fața tălpilor | idem | ok; brațele subțiri |
+| tălpi | negre | negre | ok |
+| coada | ~1 m pe sol, cârlig spre față | 1,05 m, cârlig spre privitor | ok; vârful nu e mai închis ca pe decupare |
+
+### Abateri, cu motiv
+
+- **Vaca e mai lungă decât pe decupare.** La cocoașa de 1,5 m, decuparea dă
+  ~2,1 m bot–crupă; brief-ul cere 2,6 (și AABB 2,6–2,9 pentru ulicioară).
+  Am păstrat cotele (contract de gameplay) și am îngroșat trunchiul.
+- **`peacock_fanned`: 1,60 × 1,00 m, nu 1,6 × 1,4.** Același rând din tabel
+  dă 1,6 × 1,4 (h/l 0,875) și h/l 0,59 măsurat pe decupare. Am păstrat lățimea
+  și proporția decupării (h/l randat ~0,63); pasărea are aceeași mărime ca
+  `peacock_closed` (capul la ~0,89 m în ambele). **De decis de lider:** dacă
+  vrea 1,4 m, evantaiul iese mai îngust decât pe decupare.
+- `peacock_closed` 2,14 m lungime (brief 2,0): +7%, penele de la capătul trenei.
+- Excepții de slot declarate în `verify_jodhpur.sh`: `Bell`, `Kite` (ciocul
+  galben — brief-ul cere `CAR_YELLOW`, dar nu declara excepția), `Peacock`;
+  `--allow-slots=31` pe vacă pentru uger.

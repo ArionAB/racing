@@ -325,8 +325,35 @@ def arch_opening(b, bg, center, w, h, pier_h, wall_t, slot, glow_slot,
         # placa GLOW in gol, la adancimea firidei: acopera tot conturul
         # golului (golul trece acum prin toata grosimea -- nu mai lasam un
         # inel prin care se vede prin perete). Rama o face firida.
-        gpts_front = [rot_pt(x, glass_edge, z) for x, z in hole]
-        glass_faces = [bg.bm.faces.new(tuple(bg.bm.verts.new(p) for p in gpts_front))]
+        #
+        # REVIZUIRE (contract vizual incalcat, palace_facade_b: ferestrele
+        # nu araratau NICIODATA sticla inchisa, doar conturul de piatra):
+        # masurat direct normalele fetei GLOW exportate -- ieseau (-1,0,0)
+        # in loc de (+1,0,0), adica intoarse SPRE interiorul zidului, opusul
+        # camerei -- randate ca fete nelumnate/negre, indistincte de piatra
+        # umbrita. Cauza: `to_object()` din `dio_lib.py` (comun, nu se
+        # modifica aici) cheama necondiitonat `recalc_face_normals` pe TOT
+        # bmesh-ul la creare -- pentru o placa SINGURA, izolata (fara alta
+        # geometrie manifold cu care sa fie consistenta), euristica de
+        # recalculare alege o directie arbitrara, verificat empiric ca iese
+        # mereu spre interior aici, indiferent de ordinea punctelor sau de
+        # un `normal_flip()` facut INAINTE (recalc il suprascrie oricum).
+        # Fix: geamul nu mai e o singura fata deschisa, ci o PLACA SUBTIRE
+        # inchisa (fata + spate + laturi, ca peretele STONE de mai sus) --
+        # un solid, chiar minuscul, pe care `recalc_face_normals` il
+        # orienteaza corect si consistent (are geometrie manifold reala de
+        # care sa se lege), plus fata din spate ramane vizibila prin gol
+        # daca vreodata camera ajunge in spatele peretelui.
+        glass_t = min(glass_depth * 0.5, 0.02)
+        gy_front = glass_edge + glass_t
+        gy_back = glass_edge - glass_t
+        gfr = [bg.bm.verts.new(rot_pt(x, gy_front, z)) for x, z in hole]
+        gbk = [bg.bm.verts.new(rot_pt(x, gy_back, z)) for x, z in hole]
+        n = len(hole)
+        glass_faces = [bg.bm.faces.new(tuple(gfr)), bg.bm.faces.new(tuple(reversed(gbk)))]
+        for i in range(n):
+            j = (i + 1) % n
+            glass_faces.append(bg.bm.faces.new((gfr[i], gbk[i], gbk[j], gfr[j])))
         for f in glass_faces:
             f[bg.slot] = glow_slot
     else:

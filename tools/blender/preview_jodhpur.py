@@ -927,6 +927,12 @@ WAVE_PIECES = {
     "2a": ["fort_gate_jai", "fort_gate_fateh", "fort_gate_loha",
            "fort_wall_segment", "fort_wall_turret", "fort_bastion",
            "palace_facade_a", "palace_facade_b", "rampart_cannon"],
+    # runda de corectii fort2 (29 sep 2026): porti (gol/cheie), fatade de
+    # palat (geamuri reale), fort_wall_turret (octogonal + kangura). Doar
+    # piesele ATINSE in aceasta runda -- fort_wall_turret nu are decupare
+    # proprie, dar "fort_wall_segment" o randeaza in "chain".
+    "fort2": ["fort_gate_jai", "fort_gate_fateh", "fort_gate_loha",
+             "palace_facade_a", "palace_facade_b", "fort_wall_segment"],
     # val 3 (brief §1.4+§1.5, orasul albastru + bazarul) -- 7 piese din
     # build_jodhpur_city.py + 8 din build_jodhpur_bazaar.py.
     "3": ["blue_house_b", "blue_house_c", "blue_house_d", "blue_house_e",

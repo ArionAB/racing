@@ -202,7 +202,7 @@ def build_fort_wall_segment():
 
 
 # =============================================================================
-# fort_wall_turret -- turnul patrat de la capatul tronsonului
+# fort_wall_turret -- turnul de la capatul tronsonului
 # =============================================================================
 #
 # Contract (brief §1.2): 4,5 x 4,5 m, 17 m inalt -- piesa NOUA, desprinsa din
@@ -212,60 +212,150 @@ def build_fort_wall_segment():
 # unde turnurile de capat apar taiate de cadru), de jos in sus:
 #
 #   1. Soclu tesit la baza (ca zidul).
-#   2. Corp patrat, drept, depaseste inaltimea zidului cu ~3 m.
-#   3. 2 guri de tragere pe fata vizibila (+X, exterior).
-#   4. Cornisa in consola pe toate 4 laturile.
-#   5. Creneluri proprii, dreptunghiulare, pe tot perimetrul patrat.
+#   2. Corp OCTOGONAL (colturi taiate) -- pe decupare turnul are fete vizibile
+#      la colturi, nu muchii drepte, si se citeste mai LAT decat un patrat
+#      simplu la aceeasi cota.
+#   3. 2 guri de tragere VERTICALE, inguste, pe fata vizibila (+X, exterior).
+#   4. Fara cornisa in consola (flush, ca la fort_wall_segment).
+#   5. Creneluri KANGURA -- exact stilul zidului (`kangura_merlon`), nu
+#      "rounded" ca la bastion/porti (turnurile porticii sunt alta familie).
+#
+# REVIZUIRE (runda de corectii fort2, dupa "chain" in preview): comparat cu
+# `fort_wall_segment.png` (turnurile de capat, taiate de cadru dar clar
+# vizibile), turnul vechi picase pe TREI puncte -- ingust (patrat simplu,
+# muchii drepte, se citea "subtire" langa zidul de 3 m gros), creneluri
+# ROTUNJITE ca la porti/bastion (alta familie decat kangura zidului), 2 fante
+# aproape patrate (0,22x0,85, raport doar 3,9:1) in loc de fante VERTICALE
+# inguste ca pe decupare. Toate trei corectate mai jos.
 WT_SIDE = 4.5
 WT_H = 17.0
+# colturile taiate: fiecare colt pierde WT_CHAMFER din latura, latimea
+# aparenta a fetei principale ramane WT_SIDE (nu se schimba amprenta/cota de
+# contract), dar silueta citeste octogonala -- mai lata, ca pe decupare.
+WT_CHAMFER = 0.85
+
+
+def _octagon_outline(hs, chamfer):
+    """Conturul (x, y) al unui patrat de semi-latura `hs` cu colturile taiate
+    cu `chamfer` -- 8 laturi, fetele principale raman late WT_SIDE, colturile
+    citesc ca fatete, nu ca muchii ascutite (silueta mai lata pe decupare)."""
+    c = chamfer
+    return [(-hs + c, -hs), (hs - c, -hs), (hs, -hs + c), (hs, hs - c),
+            (hs - c, hs), (-hs + c, hs), (-hs, hs - c), (-hs, -hs + c)]
+
+
+def _octagon_prism(b, outline, z0, z1, slot):
+    bm = b.bm
+    fa = [bm.verts.new((x, y, z0)) for x, y in outline]
+    fb = [bm.verts.new((x, y, z1)) for x, y in outline]
+    n = len(outline)
+    faces = [bm.faces.new(tuple(reversed(fa))), bm.faces.new(tuple(fb))]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append(bm.faces.new((fa[i], fb[i], fb[j], fa[j])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
+
+
+def _kangura_merlon_rotated(b, center, w, h, t, slot, angle):
+    """Ca `kangura_merlon` (acelasi contur: dreptunghi + umeri rotunjiti +
+    varf ascutit), dar orientat cu `angle` (radiani, in jurul lui Z) in loc
+    de axis-aligned X/Y -- necesar pe fetele oblice ale unui octogon (colturi
+    taiate la 45 de grade), unde `kangura_merlon` (fara parametru `rotation`)
+    nu se poate alinia. `center` = mijlocul BAZEI, `w` de-a lungul directiei
+    `angle`, grosimea `t` perpendicular pe ea."""
+    cx, cy, cz = center
+    hw = w * 0.5
+    outline = [(-hw, 0.0), (hw, 0.0), (hw, 0.52 * h), (0.43 * w, 0.70 * h),
+               (0.30 * w, 0.83 * h), (0.14 * w, 0.93 * h), (0.0, h),
+               (-0.14 * w, 0.93 * h), (-0.30 * w, 0.83 * h), (-0.43 * w, 0.70 * h),
+               (-hw, 0.52 * h)]
+    along = (math.cos(angle), math.sin(angle))
+    perp = (math.cos(angle + math.radians(90.0)), math.sin(angle + math.radians(90.0)))
+    bm = b.bm
+    fa, fb = [], []
+    for u, z in outline:
+        fa.append(bm.verts.new((cx + along[0] * u - perp[0] * t * 0.5,
+                                cy + along[1] * u - perp[1] * t * 0.5, cz + z)))
+        fb.append(bm.verts.new((cx + along[0] * u + perp[0] * t * 0.5,
+                                cy + along[1] * u + perp[1] * t * 0.5, cz + z)))
+    n = len(outline)
+    faces = [bm.faces.new(tuple(fa)), bm.faces.new(tuple(reversed(fb)))]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append(bm.faces.new((fa[i], fb[i], fb[j], fa[j])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
 
 
 def build_fort_wall_turret():
     b = Builder()
+    bg = Builder()
     faces = []
     hs = WT_SIDE * 0.5
 
     plinth_h = 0.6
-    faces += list(b.box((0.0, 0.0, plinth_h * 0.5), (WT_SIDE + 0.35, WT_SIDE + 0.35, plinth_h), STONE))
+    plinth_outline = _octagon_outline(hs + 0.35, WT_CHAMFER + 0.20)
+    faces += _octagon_prism(b, plinth_outline, 0.0, plinth_h, STONE)
 
     wall_h = WT_H - plinth_h - 1.3
-    faces += list(b.box((0.0, 0.0, plinth_h + wall_h * 0.5), (WT_SIDE, WT_SIDE, wall_h), STONE))
+    body_outline = _octagon_outline(hs, WT_CHAMFER)
     wall_top_z = plinth_h + wall_h
+    faces += _octagon_prism(b, body_outline, plinth_h, wall_top_z, STONE)
 
-    # 2 guri de tragere pe fata +X (exterior, principala) -- REVIZUIRE runda
-    # 2 (aceeasi lectie ca la turnurile portilor): flush + STUD
-    # (VOLCANIC_BLACK), nu relief STONE iesit.
+    # 2 guri de tragere VERTICALE, inguste, flush + STUD (VOLCANIC_BLACK),
+    # pe fata +X -- raport inaltime/latime ~6:1 (0,14 x 0,85), ca pe decupare
+    # (fanta ingusta, nu caseta aproape patrata). Nod separat Turret_Glow,
+    # ca la zid/porti (regula GLOW: nu in acelasi Builder ca piesa cu clasa
+    # triplanara la integrare).
     slit_z = plinth_h + wall_h * 0.62
     for sy in (-0.55, 0.55):
-        faces += list(b.box((hs - 0.04, sy, slit_z), (0.05, 0.22, 0.85), STUD))
+        bg.box((hs - 0.03, sy, slit_z), (0.03, 0.14, 1.0), GLOW)
 
-    # REVIZUIRE runda 2: cornisa in consola ELIMINATA (ca la fort_wall_segment
-    # -- "flush parapet", nu placa iesita), inlocuita cu brau subtire flush.
-    faces += list(b.box((0.0, 0.0, wall_top_z + 0.06), (WT_SIDE + 0.06, WT_SIDE + 0.06, 0.12), STONE))
+    # flush, fara cornisa in consola -- ca la fort_wall_segment (brau subtire).
+    faces += _octagon_prism(b, body_outline, wall_top_z, wall_top_z + 0.12, STONE)
     parapet_base_z = wall_top_z + 0.12
     parapet_h = WT_H - parapet_base_z - 0.85
-    faces += list(b.box((0.0, 0.0, parapet_base_z + parapet_h * 0.5),
-                        (WT_SIDE - 0.1, WT_SIDE - 0.1, parapet_h), STONE))
+    parapet_outline = _octagon_outline(hs - 0.1, WT_CHAMFER - 0.1)
+    faces += _octagon_prism(b, parapet_outline, parapet_base_z, parapet_base_z + parapet_h, STONE)
     crenel_z = parapet_base_z + parapet_h
 
-    # creneluri ROTUNJITE, DENSE (ca la turnurile portilor/bastion) --
-    # REVIZUIRE runda 2: rectangular rare -> rounded continuu.
-    faces += list(b.box((0.0, 0.0, crenel_z + 0.15), (WT_SIDE, WT_SIDE, 0.3), STONE))
+    # brau la baza merloanelor (ca la zid), apoi creneluri KANGURA -- acelasi
+    # stil si aceleasi cote (WS_MERLON_*) ca `fort_wall_segment`, ca turnul
+    # sa citeasca din aceeasi familie in randarea "chain". `kangura_merlon`
+    # e axis-aligned (facing X/Y) -- pe fetele oblice ale octogonului
+    # (colturile taiate, la 45 grade) se construieste manual acelasi contur,
+    # rotit in planul XY cu unghiul segmentului (kangura_merlon nu accepta
+    # `rotation`).
+    faces += _octagon_prism(b, _octagon_outline(hs, WT_CHAMFER), crenel_z, crenel_z + 0.3, STONE)
     crenel_z += 0.3
-    corners = [(-hs, -hs), (hs, -hs), (hs, hs), (-hs, hs), (-hs, -hs)]
-    perimeter = WT_SIDE * 4
-    n_m_total = max(int(round(perimeter / 1.2)), 12)
-    merlon_w = (perimeter / n_m_total) * 0.98
-    for i in range(4):
-        p0 = (corners[i][0], corners[i][1], crenel_z)
-        p1 = (corners[i + 1][0], corners[i + 1][1], crenel_z)
-        faces += crenellation(b, p0, p1, 1.0, STONE, width=merlon_w, gap=0.02, style="rounded")
+    sides = list(zip(body_outline, body_outline[1:] + body_outline[:1]))
+    for (x0, y0), (x1, y1) in sides:
+        seg_len = math.hypot(x1 - x0, y1 - y0)
+        n_m = max(int(round(seg_len / 1.2)), 1)
+        pitch = seg_len / n_m
+        ang = math.atan2(y1 - y0, x1 - x0)
+        axis_aligned = abs(math.sin(ang)) < 1e-6 or abs(math.cos(ang)) < 1e-6
+        for i in range(n_m):
+            t = (i + 0.5) / n_m
+            mx = x0 + (x1 - x0) * t
+            my = y0 + (y1 - y0) * t
+            if axis_aligned:
+                facing = "Y" if abs(x1 - x0) > abs(y1 - y0) else "X"
+                kangura_merlon(b, (mx, my, crenel_z), pitch * 0.98, WS_MERLON_H,
+                               WS_MERLON_T, STONE, facing=facing)
+            else:
+                faces += _kangura_merlon_rotated(b, (mx, my, crenel_z), pitch * 0.98,
+                                                 WS_MERLON_H, WS_MERLON_T, STONE, ang)
 
     stone_obj = b.to_object("Turret_Stone")
     for f in faces:
         if f.is_valid:
             f[b.slot] = STONE
-    return stone_obj
+    glow_obj = _finish_or_none(bg.to_object("Turret_Glow"))
+    return stone_obj, glow_obj
 
 
 # =============================================================================
@@ -390,7 +480,8 @@ GATE_GAP_CLEAR_H = 2.0    # inaltimea pana la care golul trebuie sa fie liber
 GATE_KEY_MIN = 9.0
 
 
-def _gate_doors(b, center, gap_w, door_h, wall_t, slot, stud_slot, open_angle_deg=100.0):
+def _gate_doors(b, center, gap_w, door_h, wall_t, slot, stud_slot, open_angle_deg=88.0,
+                 hinge_margin=None):
     """Doua canaturi batute cu tepi (3x5), balamalate la ambrazura, deschise
     la `open_angle_deg` -- stau LIPITE de peretii golului, INAUNTRUL adancimii
     portalului (nu proiectate ca placi subtiri in FATA zidului, spre camera).
@@ -400,21 +491,45 @@ def _gate_doors(b, center, gap_w, door_h, wall_t, slot, stud_slot, open_angle_de
     unghiul de 75 grade lasa canatul aproape paralel cu zidul dar deplasat
     IN FATA lui (spre +X, catre camera) -- exact "placi subtiri in fata
     zidului" semnalat de critica. Fix: `center` se plaseaza acum la mijlocul
-    grosimii zidului (`cx=0`, apelantul trimite pozitia deja centrata), iar
-    unghiul de deschidere creste la ~100 grade, ceea ce duce canatul SPRE
-    INTERIORUL portalului (spre -X local, adica in adancimea tunelului
-    arcuit), lipit de peretele lateral al firidei -- vizibil prin gol, dar
-    nu iesind in fata piesei.
+    grosimii zidului (`cx=0`, apelantul trimite pozitia deja centrata).
+
+    REVIZUIRE runda de corectii (`measure_opening` a masurat 5,55 m liber,
+    sub contractul de 7,0 m, pe toate trei portile): unghiul de 100 de grade
+    din runda 2 trecea de 90 -- dincolo de 90 de grade, canatul se roteste
+    INAPOI spre centrul golului (`tip_y` scade odata cu unghiul, verificat
+    numeric: la 100 grade varful canatului ajunge la |y|=2,77, adica
+    intra 0,7 m in golul liber). Geometria corecta pentru "canat lipit de
+    perete, in afara golului" e unghiul de EXACT 90 de grade (canatul
+    devine paralel cu directia de mers, flush pe peretele lateral al
+    firidei) -- la 90 de grade sau mai putin, extrema canatului spre centru
+    NU trece niciodata de balama pe axa Y (matematic: rotatia unei bare
+    cu un capat fix nu poate scoate celalalt capat dincolo de pozitia lui
+    la 90 de grade, pe axa perpendiculara pe brat). Implicit 88 (usor sub
+    90, ca sa se citeasca vizual "deschis", nu perfect flush).
+
+    A doua cauza: balamaua insasi (`hinge_y`) statea pe marginea golului de
+    contract (`gap_w/2`), iar canatul are grosime (`leaf_t`) -- chiar la 90
+    de grade, jumatate din grosime tot intra in gol. Fix: balamaua se muta
+    cu `hinge_margin` in AFARA golului de contract (in ambrazura/pilonul de
+    piatra, unde e loc -- `center_span` >> `gap_w`), ca toata geometria
+    canatului (inclusiv tepii, care ies `leaf_t*0,5+0,02` peste fata
+    canatului) sa ramana strict in afara ferestrei de 7,0 m. Verificat
+    numeric (nu doar cod): cu `hinge_margin=0,13` si `open_angle_deg=88`,
+    varful cel mai apropiat de centru ramane la |y|=3,56, deci gol liber
+    2*3,56=7,12 m > 7,0 m contract, cu marja pentru tepi.
 
     Golul e de-a lungul Y (latimea 7 m), portalul strabate peretele pe X,
     deci canaturile se rotesc/deschid in planul XY, balamaua pe muchia
     exterioara (langa perete, pe Y)."""
     cx, cy, cz = center
-    leaf_w = gap_w * 0.5 - 0.05
     leaf_t = 0.14
+    if hinge_margin is None:
+        hinge_margin = leaf_t * 0.5 + 0.06
+    hinge_gap_w = gap_w + 2.0 * hinge_margin
+    leaf_w = hinge_gap_w * 0.5 - 0.05
     faces = []
     for side in (-1.0, 1.0):
-        hinge_y = cy + side * gap_w * 0.5
+        hinge_y = cy + side * hinge_gap_w * 0.5
         # balamaua e pe muchia exterioara; canatul se deschide spre INTERIOR
         # (spre -X local, in adancimea portalului), nu spre camera
         ang = math.radians(open_angle_deg) * side
@@ -461,6 +576,23 @@ def _build_gate(tower_h, door_slot, chhatri_over_arch, name_prefix):
     # center_span >= GATE_GAP_W * 1.3, indiferent de tower_r.
     center_span_min = GATE_GAP_W * 1.3
     tower_gap = center_span_min + (tower_r - 0.4) * 2.0 - 0.8
+
+    # REVIZUIRE (contract incalcat, masurat cu measure_opening: gol 6,92 m
+    # in loc de 7,0 m, pe stone-only, DUPA fixul canaturilor): sursa nu era
+    # arcul (izolat, `arch_opening` singur da exact 7,0 m), ci SOCLUL
+    # turnului (`plinth_h=0,7`, in fereastra de masurat 0,15..1,8 m) --
+    # frustumul de la baza turnului are raza `tower_r+0,35=4,25`, iar
+    # turnurile stau la `ty=tower_gap/2=7,65`, deci muchia interioara a
+    # soclului ajunge la `7,65-4,25=3,40` < `GATE_GAP_W/2=3,5`: soclul
+    # taia fizic 0,10 m din golul liber la nivelul solului, invizibil in
+    # cod (frustumul nu se intersecteaza cu arcul, doar cu FEREASTRA de
+    # masurare a golului). Fix: `tower_gap` primeste un termen suplimentar
+    # care garanteaza ca soclul (cel mai lat element de la baza turnului)
+    # ramane strict in afara golului de contract, cu o marja mica.
+    plinth_flare = 0.35
+    plinth_clear = (GATE_GAP_W * 0.5 + 0.15) - (tower_gap * 0.5 - (tower_r + plinth_flare))
+    if plinth_clear > 0.0:
+        tower_gap += 2.0 * plinth_clear
 
     # 1. turnurile rotunde STOUT, cate unul la fiecare capat (de-a lungul Y)
     for side in (-1.0, 1.0):
@@ -530,7 +662,34 @@ def _build_gate(tower_h, door_slot, chhatri_over_arch, name_prefix):
     # nu doar componenta arcului. Tinta: cheia (exact arch_h) ramane sub
     # wall_top_z (parapetul), cu marja pentru banda de nise + parapet, si
     # >= 9,0 m contract.
-    arch_h = min(wall_top_z * 0.72, tower_h - 3.0)
+    #
+    # REVIZUIRE (contract incalcat, masurat cu measure_opening pe toate trei
+    # portile de pe HEAD: cheia Jai 10,32 m OK, dar Fateh 8,93 m si Loha
+    # 7,89 m, sub GATE_KEY_MIN=9,0): formula veche (`min(wall_top_z*0.72,
+    # tower_h-3.0)`) alege mereu ramura `wall_top_z*0.72`, care scaleaza
+    # LINIAR cu tower_h -- pentru portile mai joase (Fateh 14 m, Loha
+    # 12,5 m, "abatere permisa" a brief-ului), cheia scade sub contract
+    # odata cu turnul. Fix: `arch_h` nu poate cobori sub GATE_KEY_MIN,
+    # indiferent cat de jos e turnul -- `max()` explicit. Verificat ca
+    # ramane spatiu pentru nise+parapet deasupra (`wall_top_z-arch_h`):
+    # Loha 11,1-9,0=2,1 m, Fateh 12,6-9,0=3,6 m, ambele pozitive si peste
+    # `niche_h` maxim (1,6 m).
+    #
+    # A DOUA REVIZUIRE: cu `arch_h=GATE_KEY_MIN` exact, `measure_opening`
+    # (`crown_half=0,3`, aceeasi fereastra folosita la toate portile) tot
+    # masoara SUB 9,0 m (Loha: 8,86 m) -- cauza nu e bevel (verificat izolat,
+    # bevel=0 da acelasi rezultat), ci geometria arcului ascutit insusi:
+    # varful e literal o muchie (latime zero), deci orice fereastra cu
+    # `crown_half>0` prinde un punct pe PANTA arcului, putin sub varf, nu
+    # varful. Cu cat arcul e mai "ascutit" (rise/half_w mai mare, ca la
+    # Loha, unde turnul jos comprima golul), panta de la varf e mai abrupta
+    # si caderea in fereastra de 0,3 m e mai mare (masurat: Jai cade 0,19 m,
+    # Loha 0,14 m -- pare invers intuitiv, dar Loha are pier_h mai mic, deci
+    # `cx`/raza arcului sunt diferite). Fix: se tinteste cu o marja fixa
+    # peste contract (`GATE_KEY_MIN + GATE_KEY_MARGIN`), nu chiar la limita,
+    # ca fereastra de masurare sa gaseasca tot >= 9,0 m dupa cadere.
+    GATE_KEY_MARGIN = 0.3
+    arch_h = max(GATE_KEY_MIN + GATE_KEY_MARGIN, min(wall_top_z * 0.72, tower_h - 3.0))
     pier_h = arch_h * 0.42
     # REVIZUIRE (gasita la primul --compare): `arch_opening` cu `open=False`
     # NU decupeaza golul exact pe conturul arcului -- silueta exterioara a
@@ -601,8 +760,17 @@ def _build_gate(tower_h, door_slot, chhatri_over_arch, name_prefix):
     # cu balamaua aproape de fata exterioara, canaturile deschise la 75 grade
     # ieseau ca placi subtiri IN FATA zidului, spre camera, in loc sa stea
     # in adancimea portalului.
+    #
+    # REVIZUIRE (contract incalcat, masurat cu measure_opening: 5,55 m in
+    # loc de 7,0 m): `gap_w` trimis aici era GATE_GAP_W-0,15, sub golul de
+    # piatra real -- balamaua statea deja in interiorul golului liber, iar
+    # unghiul de 100 grade impingea varful canatului si mai adanc spre
+    # centru. Acum se trimite golul REAL de piatra (GATE_GAP_W); `_gate_doors`
+    # isi muta singura balamaua in afara acestui gol (`hinge_margin`,
+    # implicit ~0,13 m) inainte sa roteasca la `open_angle_deg` (implicit
+    # 88, sub pragul de 90 dincolo de care canatul se intoarce spre centru).
     bdoor = Builder()
-    door_faces = _gate_doors(bdoor, (0.0, 0.0, 0.0), GATE_GAP_W - 0.15,
+    door_faces = _gate_doors(bdoor, (0.0, 0.0, 0.0), GATE_GAP_W,
                              pier_h + 0.4, wall_t, door_slot, STUD)
     for f in door_faces:
         pass  # sloturile sunt deja corecte (scrise in _gate_doors)
@@ -657,9 +825,11 @@ wall_stone, wall_glow = build_fort_wall_segment()
 emit([wall_stone, wall_glow], "structures/fort_wall_segment.glb", AO_STONE,
      origin="assembly", bevel=0.03, budget=3000)
 
-# fort_wall_turret
-turret_stone = build_fort_wall_turret()
-emit([turret_stone], "structures/fort_wall_turret.glb", AO_STONE, bevel=0.03, budget=5500)
+# fort_wall_turret -- acum 2 noduri (Turret_Stone, Turret_Glow) ca zidul,
+# origine COMUNA (fantele Turret_Glow nu ating solul separat).
+turret_stone, turret_glow = build_fort_wall_turret()
+emit([turret_stone, turret_glow], "structures/fort_wall_turret.glb", AO_STONE,
+     origin="assembly", bevel=0.03, budget=5500)
 
 # fort_bastion
 bastion_stone = build_fort_bastion()
@@ -920,16 +1090,30 @@ def build_palace_facade_b():
 
     # 2. etaj superior: rand DES de ferestre mici (~20), goluri RETRASE
     # inchise in Palace_Glow -- critica: "a dense row of small windows (~20)"
+    #
+    # REVIZUIRE (contract vizual incalcat: fatada B pierde total contrastul
+    # ferestrelor, randare complet plata pe toata banda de etaj superior):
+    # `center.z` transmis lui `arch_opening` e citit ca BAZA golului (hole
+    # incepe la `panel_z0=0`, implicit, si urca cu `h` -- vezi docstring,
+    # confirmat de apelul functional de mai sus, `res_n`, care trimite
+    # `plinth_h`, cota PODELEI, nu centrul etajului). Aici se trimitea
+    # `plinth_h+ground_h+upper_h*0.5` -- CENTRUL etajului superior tratat ca
+    # baza -- deci fiecare fereastra incepea la mijlocul etajului si urca
+    # aproape pana in creasta parapetului (verificat cu un test izolat:
+    # golul iesea ca un tepus care strapunge acoperisul, nu ca o fereastra
+    # in mijlocul peretelui). Fix: se calculeaza explicit baza ferestrei,
+    # centrata vertical in banda etajului superior.
     n_win = 20
     win_w, win_h_ = 0.75, 1.7
     win_margin2 = 2.4
+    win_base_z = plinth_h + ground_h + (upper_h - win_h_) * 0.5
     for i in range(n_win):
         t = i / (n_win - 1)
         wy = -hl + win_margin2 + t * (PB_LEN - 2 * win_margin2)
-        res_w = arch_opening(b, bg, (hd, wy, plinth_h + ground_h + upper_h * 0.5), win_w, win_h_,
+        res_w = arch_opening(b, bg, (hd, wy, win_base_z), win_w, win_h_,
                              win_h_ * 0.55, 0.30, STONE, GLOW, style="round", glass=True,
                              reveal=0.12, glass_depth=0.05, panel_w=win_w * 1.75,
-                             panel_h=upper_h * 0.85, rotation=ROT_YTOX)
+                             panel_h=win_h_ * 1.3, rotation=ROT_YTOX)
         faces += res_w["stone"]
 
     # 3. parapet crenelat pe toata linia acoperisului
@@ -1211,7 +1395,7 @@ for path, tris, kb, ao_lo, ao_hi, budget in results:
           % (path, tris, flag, kb, ao_lo, ao_hi))
 print("TOTAL cetate (val 2a): %d tris" % sum(t for _, t, _, _, _, _ in results))
 
-save_blend([o for o in (wall_stone, wall_glow, turret_stone, bastion_stone,
+save_blend([o for o in (wall_stone, wall_glow, turret_stone, turret_glow, bastion_stone,
                         jai_stone, jai_doors, fateh_stone, fateh_doors,
                         loha_stone, loha_doors, pb_stone, pb_glow,
                         cannon_metal, cannon_wood) if o is not None],

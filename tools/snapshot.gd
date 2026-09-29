@@ -241,6 +241,59 @@ const _VITRINA_MODEL_PATHS := {
 	"moss_boulder_c": "res://assets/models/machupicchu/rocks/moss_boulder_c.glb",
 	"chevron_sign": "res://assets/models/signs/chevron_sign.glb",
 	"wooden_pier": "res://assets/models/structures/wooden_pier.glb",
+	# --- Jodhpur (Track17), cele 50 de piese ale kitului (fundatia POI) ---
+	# `euphorbia` are acelasi stem ca piesa Serengeti; cheia de vitrina e
+	# `jodhpur_euphorbia` (WorldProp decide clasa dupa FISIER, nu dupa cheie).
+	"baraat_horse": "res://assets/models/jodhpur/animals/baraat_horse.glb",
+	"black_kite_bird": "res://assets/models/jodhpur/animals/black_kite_bird.glb",
+	"langur": "res://assets/models/jodhpur/animals/langur.glb",
+	"peacock_closed": "res://assets/models/jodhpur/animals/peacock_closed.glb",
+	"peacock_fanned": "res://assets/models/jodhpur/animals/peacock_fanned.glb",
+	"zebu_cow": "res://assets/models/jodhpur/animals/zebu_cow.glb",
+	"blue_house_a": "res://assets/models/jodhpur/buildings/blue_house_a.glb",
+	"blue_house_b": "res://assets/models/jodhpur/buildings/blue_house_b.glb",
+	"blue_house_c": "res://assets/models/jodhpur/buildings/blue_house_c.glb",
+	"blue_house_d": "res://assets/models/jodhpur/buildings/blue_house_d.glb",
+	"blue_house_e": "res://assets/models/jodhpur/buildings/blue_house_e.glb",
+	"ghanta_ghar": "res://assets/models/jodhpur/buildings/ghanta_ghar.glb",
+	"haveli_facade": "res://assets/models/jodhpur/buildings/haveli_facade.glb",
+	"jodhpur_euphorbia": "res://assets/models/jodhpur/plants/euphorbia.glb",
+	"khejri_tree": "res://assets/models/jodhpur/plants/khejri_tree.glb",
+	"neem_tree": "res://assets/models/jodhpur/plants/neem_tree.glb",
+	"baraat_band": "res://assets/models/jodhpur/props/baraat_band.glb",
+	"chai_stall": "res://assets/models/jodhpur/props/chai_stall.glb",
+	"diya": "res://assets/models/jodhpur/props/diya.glb",
+	"floating_diya": "res://assets/models/jodhpur/props/floating_diya.glb",
+	"marigold_garland": "res://assets/models/jodhpur/props/marigold_garland.glb",
+	"rampart_cannon": "res://assets/models/jodhpur/props/rampart_cannon.glb",
+	"rooftop_clutter": "res://assets/models/jodhpur/props/rooftop_clutter.glb",
+	"rooftop_tank": "res://assets/models/jodhpur/props/rooftop_tank.glb",
+	"spice_sacks": "res://assets/models/jodhpur/props/spice_sacks.glb",
+	"stall_canopy_a": "res://assets/models/jodhpur/props/stall_canopy_a.glb",
+	"stall_canopy_b": "res://assets/models/jodhpur/props/stall_canopy_b.glb",
+	"stall_canopy_c": "res://assets/models/jodhpur/props/stall_canopy_c.glb",
+	"textile_strip": "res://assets/models/jodhpur/props/textile_strip.glb",
+	"thela_cart": "res://assets/models/jodhpur/props/thela_cart.glb",
+	"zipline_rider": "res://assets/models/jodhpur/props/zipline_rider.glb",
+	"jodhpur_horizon": "res://assets/models/jodhpur/rocks/jodhpur_horizon.glb",
+	"rhyolite_boulder_a": "res://assets/models/jodhpur/rocks/rhyolite_boulder_a.glb",
+	"rhyolite_boulder_b": "res://assets/models/jodhpur/rocks/rhyolite_boulder_b.glb",
+	"rhyolite_boulder_c": "res://assets/models/jodhpur/rocks/rhyolite_boulder_c.glb",
+	"rock_slab": "res://assets/models/jodhpur/rocks/rock_slab.glb",
+	"fort_bastion": "res://assets/models/jodhpur/structures/fort_bastion.glb",
+	"fort_gate_fateh": "res://assets/models/jodhpur/structures/fort_gate_fateh.glb",
+	"fort_gate_jai": "res://assets/models/jodhpur/structures/fort_gate_jai.glb",
+	"fort_gate_loha": "res://assets/models/jodhpur/structures/fort_gate_loha.glb",
+	"fort_wall_segment": "res://assets/models/jodhpur/structures/fort_wall_segment.glb",
+	"fort_wall_turret": "res://assets/models/jodhpur/structures/fort_wall_turret.glb",
+	"jaswant_thada": "res://assets/models/jodhpur/structures/jaswant_thada.glb",
+	"market_gate": "res://assets/models/jodhpur/structures/market_gate.glb",
+	"palace_facade_a": "res://assets/models/jodhpur/structures/palace_facade_a.glb",
+	"palace_facade_b": "res://assets/models/jodhpur/structures/palace_facade_b.glb",
+	"stepwell_corner": "res://assets/models/jodhpur/structures/stepwell_corner.glb",
+	"stepwell_flight_module": "res://assets/models/jodhpur/structures/stepwell_flight_module.glb",
+	"stepwell_pavilion": "res://assets/models/jodhpur/structures/stepwell_pavilion.glb",
+	"tuktuk": "res://assets/models/jodhpur/vehicles/tuktuk.glb",
 }
 
 func _vec3(text: String) -> Vector3:
@@ -327,6 +380,10 @@ func _ready() -> void:
 	# ramane in bind pose brut, care nu e starea din joc (vezi inventarul:
 	# bind pose = aripi intinse, contrar intentiei).
 	var vitrina_anim := ""
+	# --vitrina-ahead=<m>: piesa se aseaza si INAINTE pe drum, nu doar
+	# lateral — piesele mari (portile de 32,7 m, fatadele de 40-45 m) puse
+	# langa masina ies din cadrul camerei de joc (jumatate de cadru ~50 grade).
+	var vitrina_ahead := 0.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--vitrina="):
 			vitrina_stem = arg.trim_prefix("--vitrina=")
@@ -339,6 +396,8 @@ func _ready() -> void:
 			continue
 		if arg.begins_with("--vitrina-anim="):
 			vitrina_anim = arg.trim_prefix("--vitrina-anim=")
+		if arg.begins_with("--vitrina-ahead="):
+			vitrina_ahead = float(arg.trim_prefix("--vitrina-ahead="))
 			continue
 		if arg == "--car":
 			show_car = true
@@ -730,8 +789,8 @@ func _ready() -> void:
 			car.on_start_grid = true
 			_seat_car_on_rope_bridge(track, car)
 			if vitrina_stem != "":
-				_place_vitrina(track, focus, dir, vitrina_stem, vitrina_side,
-					vitrina_yaw, vitrina_anim)
+				_place_vitrina(track, focus + dir * vitrina_ahead, dir,
+					vitrina_stem, vitrina_side, vitrina_yaw, vitrina_anim)
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0

@@ -169,15 +169,17 @@ COMPARE_SPECS = {
     "fort_wall_segment": {
         "category": "structures",
         "tints": {"Wall_Stone": "#B8703F", "Wall_Glow": "#2A2A2E",
-                  "Turret_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
+                  "Turret_Stone": {3: "#B8703F", 20: "#2A2A2E"},
+                  "Turret_Glow": "#2A2A2E"},
         "azimuth": 4.0, "elevation": 9.0, "margin": 1.04, "lens": 70.0,
         "sun_follow": {"offset": -35.0, "tilt": 50.0},
         "chain": {"n": 3, "step": 12.0, "ends": ("structures", "fort_wall_turret"),
-                  "ends_half": 2.25, "ends_dx": 1.0},
+                  "ends_half": 3.4, "ends_dx": 0.6},
     },
     "fort_wall_turret": {
         "category": "structures",
-        "tints": {"Turret_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
+        "tints": {"Turret_Stone": {3: "#B8703F", 20: "#2A2A2E"},
+                  "Turret_Glow": "#2A2A2E"},
         "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
     },
     "fort_bastion": {
@@ -192,28 +194,47 @@ COMPARE_SPECS = {
     # "guri de tragere ies ca relief, nu ca fante intunecate".
     "fort_gate_jai": {
         "category": "structures",
-        "tints": {"GateJai_Stone": {3: "#B8703F", 20: "#2A2A2E"}, "GateJai_Doors": "#6B4A2E"},
-        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
+        "tints": {"GateJai_Stone": {3: "#B8703F", 20: "#2A2A2E"},
+                  "GateJai_Doors": {9: "#6B4A2E", 11: "#6B4A2E", 20: "#2A2A2E"},
+                  "GateJai_Glow": "#2A2A2E"},
+        # runda fort3: acelasi unghi ca decuparea (aproape frontal, usor 3/4
+        # din dreapta-fata, putin de sus), soarele dinspre camera
+        "azimuth": 6.0, "elevation": 8.0, "margin": 1.04, "lens": 85.0,
+        "sun_follow": {"offset": -35.0, "tilt": 60.0},
     },
     "fort_gate_fateh": {
         "category": "structures",
-        "tints": {"GateFateh_Stone": {3: "#B8703F", 20: "#2A2A2E"}, "GateFateh_Doors": "#6B4A2E"},
-        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
+        "tints": {"GateFateh_Stone": {3: "#B8703F", 20: "#2A2A2E"},
+                  "GateFateh_Doors": {9: "#6B4A2E", 11: "#6B4A2E", 20: "#2A2A2E"},
+                  "GateFateh_Glow": "#2A2A2E"},
+        # runda fort3: acelasi unghi ca decuparea (aproape frontal, usor 3/4
+        # din dreapta-fata, putin de sus), soarele dinspre camera
+        "azimuth": 6.0, "elevation": 8.0, "margin": 1.04, "lens": 85.0,
+        "sun_follow": {"offset": -35.0, "tilt": 60.0},
     },
     "fort_gate_loha": {
         "category": "structures",
-        "tints": {"GateLoha_Stone": {3: "#B8703F", 20: "#2A2A2E"}, "GateLoha_Doors": "#4A4A4E"},
-        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
+        "tints": {"GateLoha_Stone": {3: "#B8703F", 20: "#2A2A2E"},
+                  "GateLoha_Doors": {9: "#4A4A4E", 11: "#4A4A4E", 20: "#2A2A2E"},
+                  "GateLoha_Glow": "#2A2A2E"},
+        # runda fort3: acelasi unghi ca decuparea (aproape frontal, usor 3/4
+        # din dreapta-fata, putin de sus), soarele dinspre camera
+        "azimuth": 6.0, "elevation": 8.0, "margin": 1.04, "lens": 85.0,
+        "sun_follow": {"offset": -35.0, "tilt": 60.0},
     },
     "palace_facade_a": {
         "category": "structures",
         "tints": {"Palace_Stone": "#B8703F", "Palace_Glow": "#2A2A2E"},
-        "azimuth": 15.0, "elevation": 10.0, "margin": 1.05,
+        # runda fort3: decuparea e aproape FRONTALA, putin de sus
+        "azimuth": 6.0, "elevation": 7.0, "margin": 1.03, "lens": 85.0,
+        "sun_follow": {"offset": -35.0, "tilt": 55.0},
     },
     "palace_facade_b": {
         "category": "structures",
         "tints": {"Palace_Stone": "#B8703F", "Palace_Glow": "#2A2A2E"},
-        "azimuth": 15.0, "elevation": 10.0, "margin": 1.05,
+        # runda fort3: decuparea e aproape FRONTALA, putin de sus
+        "azimuth": 6.0, "elevation": 7.0, "margin": 1.03, "lens": 85.0,
+        "sun_follow": {"offset": -35.0, "tilt": 55.0},
     },
     # ESCALADARE OPUS: tentele = culorile REALE din atlas ale sloturilor
     # (masurate pe palette_atlas.png): VOLCANIC_BLACK #56545B (gri inchis, nu

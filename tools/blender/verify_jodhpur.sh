@@ -30,6 +30,9 @@
 #                       2 noduri (Cannon_Metal, Cannon_Wood) -- teava e
 #                       inclinata ~10 deg si nu atinge solul la baza proprie.
 #
+#                       fort_gate_*: runda fort3 adauga *_Glow (fante, nise,
+#                       puncte de merlon) -- tot origine comuna.
+#
 #                       fort_wall_turret (runda fort2): 2 noduri (Turret_Stone,
 #                       Turret_Glow) -- fantele de tragere (Turret_Glow) sunt
 #                       geometrie mica, la ~11 m inaltime pe corp, nu ating
@@ -87,8 +90,15 @@ echo "== cetatea (brief §1.2, val 2a) =="
 check "structures/fort_wall_segment.glb"  3000 --origin=assembly
 check "structures/fort_wall_turret.glb"   2900 --origin=assembly
 check "structures/fort_bastion.glb"       5500 --origin=assembly
+# Portile, runda fort3 (rescrise pe decupare): 3 noduri (*_Stone, *_Doors,
+# *_Glow -- fantele, nisele si punctele merlonilor au iesit din *_Stone in
+# nod GLOW propriu, regula GLOW, ca la zid/turn). Bugetul e PE NOD.
+# Jai/Loha *_Stone 10280/10184 (turnuri octogonale cu 16 merloni kangura
+# fiecare, cortina-grila de 5 m adancime, densify_for_ao pe fetele de 11 m).
+# Fateh 12600 -> 14600: chhatri-ul peste arc costa singur ~4000 tri
+# (6 arce deschise + cupola, din vocabular); masurat 14324.
 check "structures/fort_gate_jai.glb"      10600 --origin=assembly
-check "structures/fort_gate_fateh.glb"    12600 --origin=assembly
+check "structures/fort_gate_fateh.glb"    14600 --origin=assembly
 check "structures/fort_gate_loha.glb"     10600 --origin=assembly
 # palace_facade_a/b: bugetul a crescut fata de val 2a/escaladare (a 11128->
 # 13148, b 17292->19312) dupa runda de corectii fort2 -- vocabularul reparat
@@ -99,8 +109,15 @@ check "structures/fort_gate_loha.glb"     10600 --origin=assembly
 # invizibila) si a devenit o placa subtire inchisa (fata+spate+laturi) ca
 # `recalc_face_normals` sa o orienteze corect -- cost mic, cerut de
 # contractul vizual (geamuri inchise REALE), nu geometrie de umplutura.
-check "structures/palace_facade_a.glb"    15000 --origin=assembly
-check "structures/palace_facade_b.glb"    20000 --origin=assembly
+# Runda fort3 (fatadele rescrise pe perete-grila, dupa verdictul "A aproape
+# goala, B ferestre rare"): a 15000 -> 17000 (masurat 16772), b 20000 ->
+# 20500 (masurat 19990), cu bevel 0 (bevel-ul de 3,5 cm dubla cifra la
+# 39k/45k pe ramele si baluștrii ferestrelor). Costul e densitatea ceruta de
+# decupare: A are 26 de goluri pe fatada + 6 arce mari + 2 jharokha, B 28 de
+# goluri + 6 edicule + 2 jharokha + 3 cupole; `facade_bays` sparge peretele
+# in travee ca grila sa nu propage fiecare coloana pe toata lungimea.
+check "structures/palace_facade_a.glb"    17000 --origin=assembly
+check "structures/palace_facade_b.glb"    20500 --origin=assembly
 check "props/rampart_cannon.glb"          4200 --origin=assembly
 
 echo "== orasul albastru (brief §1.4, val 3) =="

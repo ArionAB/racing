@@ -148,7 +148,10 @@ check "props/spice_sacks.glb"         1400 --origin=assembly --allow-car-slots=S
 # ingropate in disc (spoke_y < half-thickness -- fix in _wheel, tools/blender/
 # build_jodhpur_bazaar.py) si fructele un rand subtire, nu o gramada. Vezi
 # jurnalul de la emit() din build_jodhpur_bazaar.py.
-check "props/thela_cart.glb"          3288 --origin=assembly --allow-car-slots=Cart_Fruit
+# thela_cart 3288 -> 3700 (runda 3, "fructe-cuburi, roti-discuri la
+# colturi"): roti DESCHISE (janta din 14 grinzi + 10 spite + butuc) sub tava,
+# gramada bombata din fructe sferice pe 3 zone; bevel 0. Masurat 3632.
+check "props/thela_cart.glb"          3700 --origin=assembly --allow-car-slots=Cart_Fruit
 check "props/chai_stall.glb"          1600 --origin=assembly
 check "props/marigold_garland.glb"     800
 

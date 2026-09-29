@@ -380,8 +380,10 @@ COMPARE_SPECS = {
             "Cart_Fruit": {TROPICAL_GREEN: "#3FA556", CAR_YELLOW: "#F2C230",
                           LAVA_ORANGE: "#E8792E", CAR_RED: "#D94A38"},
         },
-        # piesa mica (2.4x1.2m) -- margin redus ca sa umple mai mult cadrul
-        "camera": {"azimuth": 35.0, "elevation": 18.0, "margin": 1.0},
+        # runda 3: latura lunga (X) aproape frontala, capatul +X la stanga
+        # (decuparea) => az ~68
+        "camera": {"azimuth": 60.0, "elevation": 16.0, "margin": 1.15, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "chai_stall": {
         "category": "props",

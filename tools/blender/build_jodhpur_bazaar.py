@@ -369,115 +369,108 @@ def build_spice_sacks():
 
 # --- thela_cart --------------------------------------------------------------
 #
-# Contract (brief §1.5): 2.4x1.2x1.1 m, h/l 0.53. Element list (decupare
-# thela_cart.png): platforma de lemn cu rama, 4 roti de lemn cu spite (NU 2
-# roti de bicicleta -- planșa castiga), gramada de fructe colorate (verde,
-# galben, portocaliu/rosu) in trepte pe platforma.
+# Contract (brief §1.5): 2,4 x 1,2 x 1,1 m, h/l 0,53, platforma de lemn cu
+# rama, 4 roti de lemn cu spite, gramada de fructe colorate.
+#
+# Element list (decupare thela_cart.png, marire x4 -- runda 3 de corectii:
+# "fructele sunt cuburi; rotile sunt discuri pline la colturi"). Latura lunga
+# (X) e aproape frontala, capatul +X se vede in stanga => camera az ~68.
+#
+#   1. TAVA de lemn: platforma groasa cu rama de scanduri pe toate 4 laturile,
+#      la ~0,55..0,8 m; nimic (maner) in afara ei pe decupare.
+#   2. 4 ROTI MARI de lemn (O ~0,56 m, cat jumatate din inaltimea totala),
+#      SUB platforma, retrase ~0,5 m de capete, pe marginile lungi: janta
+#      subtire + 10 spite + butuc -- DESCHISE, se vede prin ele (nu disc).
+#      Doua osii sub tava.
+#   3. GRAMADA de fructe ROTUNDE, BOMBATA (varful la ~1,1 m), in TREI ZONE
+#      de culoare pe lungime: galben/verde (+X, stanga pe ecran), portocaliu
+#      (mijloc), rosu (-X) -- fiecare zona un morman de fructe sferice, nu un
+#      rand de cutii.
 TC_W, TC_D, TC_H = 2.4, 1.2, 1.1
-TC_WHEEL_R = 0.30
+TC_WHEEL_R = 0.28
+
+
+def _uvsphere(b, center, r, slot, sx=1.0, sy=1.0, sz=1.0, useg=7, vseg=5):
+    res = bmesh.ops.create_uvsphere(b.bm, u_segments=useg, v_segments=vseg, radius=r)
+    c = Vector(center)
+    for v in res["verts"]:
+        v.co = Vector((v.co.x * sx, v.co.y * sy, v.co.z * sz)) + c
+    return list(b._tag(res["verts"], slot))
+
+
+def _spoked_wheel(b, center, radius, width, slot, n_rim=14, n_spokes=10):
+    """Roata DESCHISA pe axa Y: janta din grinzi pe cerc, spite, butuc."""
+    cx, cy, cz = center
+    faces = []
+    rim_t = 0.05
+    pts = [(cx + math.cos(2 * math.pi * i / n_rim) * (radius - rim_t * 0.5), cy,
+            cz + math.sin(2 * math.pi * i / n_rim) * (radius - rim_t * 0.5)) for i in range(n_rim)]
+    for i in range(n_rim):
+        p, q = Vector(pts[i]), Vector(pts[(i + 1) % n_rim])
+        d = (q - p).normalized()
+        p2, q2 = p - d * 0.012, q + d * 0.012          # suprapunere mica la imbinari
+        faces += list(b.beam(p2, q2, (rim_t, width), slot, up=(0.0, 1.0, 0.0)))
+    for i in range(n_spokes):
+        a = 2 * math.pi * (i + 0.5) / n_spokes
+        tip = (cx + math.cos(a) * (radius - rim_t), cy, cz + math.sin(a) * (radius - rim_t))
+        faces += list(b.beam((cx, cy, cz), tip, (0.028, 0.028), slot))
+    faces += list(b.cylinder(center, radius * 0.16, width * 1.6, slot, segments=8, axis="Y"))
+    return faces
 
 
 def build_thela_cart():
-    b = Builder()    # platforma + rama (Cart_Wood)
-    bw = Builder()   # rotile (Cart_Wheels)
+    b = Builder()    # tava (Cart_Wood)
+    bw = Builder()   # rotile + osiile (Cart_Wheels)
     bf = Builder()   # fructele (Cart_Fruit)
-    faces = []
-    wheel_faces = []
-    fruit_faces = []
-
-    platform_z = TC_WHEEL_R * 2.0 * 0.62
     hw, hd = TC_W * 0.5, TC_D * 0.5
+    R = TC_WHEEL_R
+    p_z0 = 2 * R + 0.01          # fundul tavei, chiar peste roti
+    p_t = 0.1
+    rim_h, rim_t = 0.16, 0.06
 
-    # platforma de lemn cu rama (bordura usor ridicata pe margini)
-    faces += list(b.box((0.0, 0.0, platform_z), (TC_W, TC_D, 0.08), CRATE_WOOD))
-    rim_h = 0.10
-    faces += list(b.box((0.0, hd - 0.03, platform_z + rim_h * 0.5 + 0.04),
-                        (TC_W, 0.06, rim_h), CRATE_WOOD))
-    faces += list(b.box((0.0, -hd + 0.03, platform_z + rim_h * 0.5 + 0.04),
-                        (TC_W, 0.06, rim_h), CRATE_WOOD))
-    faces += list(b.box((hw - 0.03, 0.0, platform_z + rim_h * 0.5 + 0.04),
-                        (0.06, TC_D, rim_h), CRATE_WOOD))
-    faces += list(b.box((-hw + 0.03, 0.0, platform_z + rim_h * 0.5 + 0.04),
-                        (0.06, TC_D, rim_h), CRATE_WOOD))
+    # 1. tava cu rama de scanduri
+    b.box((0.0, 0.0, p_z0 + p_t * 0.5), (TC_W, TC_D, p_t), CRATE_WOOD)
+    top = p_z0 + p_t
+    for sy in (-1, 1):
+        b.box((0.0, sy * (hd - rim_t * 0.5), top + rim_h * 0.5), (TC_W + 0.04, rim_t, rim_h), CRATE_WOOD)
+    for sx in (-1, 1):
+        b.box((sx * (hw - rim_t * 0.5 + 0.02), 0.0, top + rim_h * 0.5), (rim_t, TC_D, rim_h), CRATE_WOOD)
+    # grinzile de sub tava (pe lung), pe care stau osiile
+    for sy in (-0.3, 0.3):
+        b.box((0.0, sy, p_z0 - 0.04), (TC_W - 0.3, 0.07, 0.08), CRATE_WOOD)
 
-    # picioarele/rama care sustine platforma (4 stinghii verticale scurte
-    # pana la axele rotilor)
-    for lx, ly in ((-hw + 0.2, -hd + 0.1), (hw - 0.2, -hd + 0.1),
-                  (-hw + 0.2, hd - 0.1), (hw - 0.2, hd - 0.1)):
-        faces += list(b.box((lx, ly, platform_z * 0.5), (0.06, 0.06, platform_z), CRATE_WOOD))
+    # 2. roti mari cu spite, SUB tava
+    wheel_x = hw - 0.5
+    wheel_y = hd - 0.06
+    for wx in (-wheel_x, wheel_x):
+        bw.cylinder((wx, 0.0, R), 0.03, TC_D, CRATE_WOOD, segments=6, axis="Y")     # osia
+        for sy in (-1, 1):
+            _spoked_wheel(bw, (wx, sy * wheel_y, R), R, 0.06, CRATE_WOOD)
 
-    # maner de impins, in fata (+X e fata camerei, dar maner-ul e context
-    # -- pus pe -Y ca sa nu acopere fructele din cadrul de comparatie)
-    handle_x = -hw - 0.35
-    faces += list(b.box((handle_x, 0.0, platform_z + 0.35), (0.5, 0.05, 0.05), CRATE_WOOD))
-    faces += list(b.box((-hw - 0.05, -0.15, platform_z + 0.18), (0.05, 0.05, 0.35), CRATE_WOOD))
-    faces += list(b.box((-hw - 0.05, 0.15, platform_z + 0.18), (0.05, 0.05, 0.35), CRATE_WOOD))
-
-    # 4 roti cu spite (nu 2 -- planșa castiga, brief §1.5) -- corectie:
-    # axle_y vechi (hd - 0.15 = 0.45) tinea rotile complet SUB platforma
-    # (Y in [-0.6,0.6]), invizibile din exterior (raportul liderului: "rotile
-    # nu se vad"). Decuparea arata rotile iesind clar in AFARA cadrului, pe
-    # ambele laturi -- axle_y acum depaseste hd cu raza rotii (minus o mica
-    # suprapunere, ca axul sa ramana prins de cadru).
-    axle_y = hd + TC_WHEEL_R * 0.55
-    for wx in (-hw + 0.35, hw - 0.35):
-        for wy in (-axle_y, axle_y):
-            # brief §1.5: "4 roti de LEMN cu spite" -- CRATE_WOOD, nu
-            # METAL_DARK (fix dupa --compare: rotile ieseau negru-metal
-            # uniform, fara sa se distinga spitele de disc, si nici nu
-            # respectau materialul cerut de brief)
-            wheel_faces += _wheel(bw, (wx, wy, TC_WHEEL_R), TC_WHEEL_R, 0.08,
-                                  CRATE_WOOD, segments=8, axis="Y")
-            # ax scurt care leaga roata de cadru (umple golul lasat de
-            # deplasarea in exterior)
-            axle_len = TC_WHEEL_R * 0.55 + 0.06
-            axle_sign = -1.0 if wy < 0 else 1.0
-            wheel_faces += list(bw.cylinder((wx, wy - axle_sign * axle_len * 0.5, TC_WHEEL_R),
-                                            0.035, axle_len, CRATE_WOOD, segments=8, axis="Y"))
-
-    # gramada BOMBATA de fructe -- corectie: varianta veche (un singur rand
-    # de 7 + 4 cilindri pe axa centrala Y=0) era o linie subtire, nu o
-    # gramada (raportul liderului: "fructele sunt cateva forme mici").
-    # Decuparea arata 3 ZONE de culoare (verde-stanga, galben-mijloc,
-    # portocaliu/rosu-dreapta), fiecare o gramada DEASA pe 2 randuri in Y si
-    # 2 nivele in Z (fructele de sus umplu golurile dintre cele de jos, ca o
-    # piramida joasa) -- grid in loc de linie.
-    fruit_zones = [
-        (FRUIT_GREEN, -hw + 0.30, -hw + 0.82),
-        (SPICE_YELLOW, -hw + 0.82, -hw + 1.58),
-        (FRUIT_ORANGE, -hw + 1.58, hw - 0.30),
-    ]
-    # segments=5 (nu 7-8): la 0.115 m raza, o piesa cu ~46 instante, 8
-    # segmente ar fi trecut mult peste buget (masurat: 6096 vs 3100) --
-    # 5 segmente tot citesc ca "fruct rotund" la scara jocului (brief regula
-    # 5), doar mai ieftin per instanta.
-    fruit_r = 0.13
-    base_z = platform_z + rim_h + fruit_r
-    for zi, (color, x0, x1) in enumerate(fruit_zones):
-        n_cols = 2 if zi != 1 else 3
-        for row_y, y_off in ((-1, -0.24), (1, 0.24)):
-            for c in range(n_cols):
-                t = (c + 0.5) / n_cols
-                fx = x0 + t * (x1 - x0)
-                jitter = 0.02 * ((c + row_y) % 3 - 1)
-                fc = SPICE_RED if (zi == 2 and c % 2 == 1) else color
-                fruit_faces += list(bf.cylinder((fx, y_off + jitter, base_z), fruit_r,
-                                                fruit_r * 1.7, fc, segments=5, axis="Z"))
-        # nivelul 2: 1 fruct pe zona, in mijloc, mai sus -- da profilul
-        # bombat vazut pe decupare la un cost minim (buget: masurat peste
-        # 3100, taiat de la 2/zona la 1/zona).
-        fc = SPICE_RED if zi == 2 else color
-        fruit_faces += list(bf.cylinder((x0 + (x1 - x0) * 0.5, 0.0, base_z + fruit_r * 1.5),
-                                        fruit_r * 0.9, fruit_r * 1.5, fc, segments=5, axis="Z"))
+    # 3. gramada bombata de fructe rotunde, 3 zone de culoare pe X
+    zones = [(SPICE_YELLOW, SPICE_YELLOW, hw - 0.42),   # +X (stanga pe ecran)
+             (FRUIT_ORANGE, SPICE_YELLOW, 0.0),
+             (SPICE_RED, FRUIT_ORANGE, -hw + 0.42)]
+    fr = 0.1
+    base = top + 0.02
+    for zi, (c_main, c_alt, zx) in enumerate(zones):
+        # miezul mormanului (dom turtit) + fructe pe suprafata lui
+        _uvsphere(bf, (zx, 0.0, base), 0.40, c_main, sx=1.0, sy=1.25, sz=0.62, useg=8, vseg=5)
+        k = 0
+        for ring, (rr, zz, n) in enumerate(((0.38, 0.05, 9), (0.25, 0.16, 7), (0.1, 0.25, 3))):
+            for i in range(n):
+                a = 2 * math.pi * (i + 0.37 * ring + 0.13 * zi) / n
+                px = zx + math.cos(a) * rr * 0.95
+                py = math.sin(a) * rr * 1.25
+                col = c_alt if (k % 3 == 1 and zi != 2) or (zi == 2 and k % 4 == 3) else c_main
+                if zi == 0 and ring >= 1 and i % 2 == 0:
+                    col = FRUIT_GREEN
+                _uvsphere(bf, (px, py, base + zz + fr * 0.6), fr * (1.0 + 0.15 * ((k * 7) % 3 - 1)),
+                          col, useg=6, vseg=4)
+                k += 1
 
     cart_obj = b.to_object("Cart_Wood")
-    for f in faces:
-        if f.is_valid:
-            f[b.slot] = CRATE_WOOD
     wheels_obj = bw.to_object("Cart_Wheels")
-    for f in wheel_faces:
-        if f.is_valid:
-            f[bw.slot] = CRATE_WOOD
     fruit_obj = bf.to_object("Cart_Fruit")
     return cart_obj, wheels_obj, fruit_obj
 
@@ -726,7 +719,9 @@ tc = build_thela_cart()
 # 12->8 segmente, fructele de la 46 la 24 instante (segments=5), nivelul 2 de la
 # 2/zona la 1/zona. Sub asta rotile ar deveni poligonale vizibil sau gramada s-ar
 # subtia la loc -- liderul decide daca cei 188 tri raman sau se ridica bugetul.
-emit(list(tc), "props/thela_cart.glb", AO_PROP, bevel=0.02, budget=3288)
+# runda 3: bevel 0 -- piesa mica din grinzi subtiri (janta, spite), unde
+# bevel-ul de 2 cm tripla cifra fara sa se vada la distanta jocului.
+emit(list(tc), "props/thela_cart.glb", AO_PROP, bevel=0.0, budget=3700)
 
 cs = build_chai_stall()
 emit(list(cs), "props/chai_stall.glb", AO_PROP, bevel=0.02, budget=1600)

@@ -204,7 +204,9 @@ check "animals/baraat_horse.glb"   1000 --origin=assembly --allow-car-slots=Sadd
 check "props/baraat_band.glb"       400 --origin=assembly --allow-car-slots=Band
 # zipline_rider: ORIGINEA IN SCRIPETE (brief §1.6) -- figura ATARNA sub Y=0
 # si atinge 0 in varful rotitei, adica exact contractul --origin=rim.
-# Casca CAR_YELLOW si bluza CAR_RED pe nodul Zip_Rider.
+# Casca CAR_YELLOW si bluza CAR_RED pe nodul Zip_Rider. Cota scripete-talpi
+# e 1,65 m (lonja scurta ca pe decupare; brief §1.6), nu 2,2 m -- garda nu
+# are prag pe inaltime, doar pe ancorare.
 check "props/zipline_rider.glb"     500 --origin=rim --allow-car-slots=Zip_Rider
 
 echo

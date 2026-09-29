@@ -794,8 +794,9 @@ def build_zipline_rider():
     """zipline_rider -- lista de elemente de pe decupare (zipline_rider.png):
 
     Vazut din lateral, mergand spre DREAPTA (inainte = +Y):
-      - SCRIPETELE gri sus, pe cablu (cablul NU e in GLB): carcasa din doua
-        placi + rotita, iar sub el o bucla/carabiniera;
+      - SCRIPETELE: carucior rotund gri pe cablu (cablul NU e in GLB), doua
+        roti mici in tandem intre doua flancuri rotunde, sub el o bucla si
+        o carabiniera;
       - LONJA (chinga scurta) coboara aproape vertical din scripete pana la
         ham; AMBELE MAINI o prind sus, una peste alta, la ~0,4 m sub
         scripete, coatele indoite in fata;
@@ -805,34 +806,43 @@ def build_zipline_rider():
       - HAMUL negru: centura la talie, bretele peste umeri, bucle pe coapse;
       - picioarele INAINTE: coapsele aproape orizontale spre +Y, gambele in
         jos-inainte; pantaloni ALBASTRI (blugi -> PAINTED), bocanci MARO;
-      - talpile sunt cel mai jos punct, ~2,2 m sub scripete.
+      - talpile sunt cel mai jos punct, ~1,65 m sub scripete (masurat pe
+        GLB; brief-ul initial cerea 2,2 m, vezi mai jos).
     Originea = punctul in care cablul atinge rotita (varful scripetelui), ca
     `PathMover` cu `stick_to_ground = false` sa-l aseze exact pe curba.
     """
     pb = Builder()   # scripetele + lonja (metal, chinga)
     rb = Builder()   # omul
     METAL = MARBLE_GREY
-    # scripetele: rotita (cablul sta pe ea, varful rotitei = origine)
-    pb.cylinder((0, 0, -0.055), 0.055, 0.035, VOLCANIC_BLACK, segments=10,
-                axis="X")
+    # scripetele = caruciorul ROTUND de pe decupare: doua roti mici in
+    # tandem pe cablu (varful lor = origine), prinse intre doua flancuri
+    # rotunde (discuri), cu axele iesite. Prima varianta era o cutie.
+    for wy in (-0.055, 0.055):
+        pb.cylinder((0, wy, -0.035), 0.035, 0.03, VOLCANIC_BLACK, segments=10,
+                    axis="X")
+        pb.cylinder((0, wy, -0.035), 0.012, 0.10, METAL, segments=6, axis="X")
     for sx in (-1, 1):
-        pb.box((sx * 0.03, 0, -0.085), (0.018, 0.17, 0.14), METAL)
-    pb.cylinder((0, 0, -0.055), 0.015, 0.09, METAL, segments=6, axis="X")
-    # bucla de sub carcasa + carabiniera
-    pb.box((0, 0, -0.175), (0.07, 0.03, 0.06), METAL)
-    pb.box((0, 0, -0.25), (0.02, 0.06, 0.10), METAL)
+        pb.cylinder((sx * 0.03, 0, -0.10), 0.10, 0.018, METAL, segments=12,
+                    axis="X")
+    # bucla de sub carucior + carabiniera
+    pb.box((0, 0, -0.215), (0.07, 0.03, 0.05), METAL)
+    pb.box((0, 0, -0.28), (0.02, 0.06, 0.09), METAL)
     # POZA E CEA DE PE DECUPARE: omul STA in ham ca pe un scaun -- trunchiul
     # lasat pe spate ~35 grade, coapsele INAINTE si putin in sus (genunchii
     # mai sus decat soldul), un picior cu gamba in jos, celalalt mai
     # intins. Prima varianta (trunchi aproape vertical, picioare atarnand
     # la 45 grade) citea om spanzurat, nu tiroliana. Pe decupare figura e
     # desenata mai mare decat 1,7 m fata de lonja; aici figura are 1,7 m
-    # (brief) si LONJA se lungeste cat sa iasa talpile la 2,2 m sub scripete.
-    hip_c = Vector((0, 0.0, -1.72))
+    # (brief), iar lonja are lungimea de pe decupare (vezi hip_c).
+    # Lonja SCURTA, ca pe decupare: mainile prind chingile la ~0,45 m sub
+    # roata, capul e la o lungime de brat sub ea. Cota initiala din brief
+    # (2,2 m pana la talpi) cerea o lonja de ~1,4 m care se citea ca o
+    # prajina -- planșa castiga, nicio dependenta in cod (verdictul liderului).
+    hip_c = Vector((0, 0.0, -1.17))
     sh_c = hip_c + Vector((0, -0.30, 0.43))       # umerii, lasati pe spate
     harness_pt = hip_c + Vector((0, 0.10, 0.08))
     # lonja: de la carabiniera pana la ham (in fata taliei)
-    pb.beam((0, 0.0, -0.29), harness_pt, (0.045, 0.012), LOG_DARK)
+    pb.beam((0, 0.0, -0.32), harness_pt, (0.045, 0.012), LOG_DARK)
 
     # --- omul -------------------------------------------------------------
     torso = rb.taper_sweep([hip_c + Vector((0, 0.02, -0.04)), hip_c.lerp(sh_c, 0.5),
@@ -850,9 +860,9 @@ def build_zipline_rider():
                 segments=8)
     # bratele: umar -> cot (in fata) -> mainile pe lonja, una peste alta, la
     # inaltimea capului
-    lan = lambda z: Vector((0, 0.0, -0.29)).lerp(
-        harness_pt, (z + 0.29) / (harness_pt.z + 0.29))
-    grips = (lan(-1.02), lan(-1.14))
+    lan = lambda z: Vector((0, 0.0, -0.32)).lerp(
+        harness_pt, (z + 0.32) / (harness_pt.z + 0.32))
+    grips = (lan(hip_c.z + 0.70), lan(hip_c.z + 0.58))
     for sx, grip in ((1, grips[0]), (-1, grips[1])):
         shp = sh_c + Vector((sx * 0.19, 0, 0))
         elbow = shp.lerp(grip, 0.5) + Vector((sx * 0.08, 0.10, -0.08))

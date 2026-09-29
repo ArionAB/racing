@@ -2224,3 +2224,22 @@ brief-ul cere FOAM_WHITE).
 Diferență rămasă: pe decupare figura e desenată mai mare față de lonjă. La
 1,7 m (brief) și 2,2 m până la tălpi, lonja iese ~1,4 m lungă. Cotele sunt
 din tabel, deci lonja lungă e costul lor.
+
+### `zipline_rider` — runda 2 (verdictul liderului: lonja-prăjină)
+
+Lonja de ~1,4 m cerută de cota de 2,2 m se citea ca o prăjină. Pe decupare
+mâinile țin chingile imediat sub scripete. **Planșa câștigă** (cota din
+brief §1.6 e acum 1,65 m, cu motivul scris). Nicio dependență în cod.
+
+- Figura, poza, culorile, originea în vârful roților (`--origin=rim`) și
+  înainte = +Y au rămas neschimbate; figura urcă 0,55 m. Mâinile prind lonja la 0,47 / 0,59 m sub
+  roți, iar casca e la ~0,3 m sub ele.
+- Scripetele e acum căruciorul rotund de pe decupare: 2 roți mici în tandem
+  (vârful lor = origine), 2 flancuri-disc, axe ieșite, buclă + carabinieră.
+- **Scripete–tălpi: 1,649 m** măsurat pe GLB. 678 tri (Zip_Pulley 236,
+  Zip_Rider 442).
+- Sonda PathMover (reimport + `--headless --fixed-fps 60`, necomisă):
+  originea pe curbă cu abatere 0,0000 m, vârful roților la 0,000 m de cablu,
+  tălpile la 1,649 m sub cablu.
+
+Rândul din tabelul valului 4C se înlocuiește cu: 678 tri, 0,48 × 1,28 × 1,65 m.

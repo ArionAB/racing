@@ -589,6 +589,19 @@ func _source_of(mi: Node, track: Node) -> String:
 		"kea", "penguin", "beech_dead", "rata", "tussock_clump",
 		"driftwood", "kayak_a", "kayak_b", "roadsign", "snow_pole",
 		"stump", "heli_pad", "wharf"]
+	# Kitul Jodhpur (assets/models/jodhpur/): numele lui de noduri se BAT cu
+	# alte kituri (`House_Wall` = cafe_shed Fiordland, `Crown`/`Trunk` = fagii,
+	# `Well_Stone` pe trei piese), deci atribuirea pe nume ar minti. Aici
+	# decide fisierul instantei-stramos, care e unic. Limitat la kitul asta,
+	# ca raportul celorlalte piste sa ramana identic cu main.
+	# Umplutura orasului (`CityFill`) isi boteaza buffer-ele `CityFill_<stem>`.
+	if String(mi.name).begins_with("CityFill_"):
+		return "GLB: " + String(mi.name).trim_prefix("CityFill_").get_slice("@", 0) + " (CityFill)"
+	var up: Node = mi
+	while up != null and up != track:
+		if up is Node3D and (up as Node3D).scene_file_path.contains("/models/jodhpur/"):
+			return "GLB: " + (up as Node3D).scene_file_path.get_file().get_basename()
+		up = up.get_parent()
 	# Intai numele PROPRIU al mesh-ului: variantele sunt cheia stabila.
 	var own := String(mi.name).to_lower()
 	for prefix: String in VARIANT_SOURCE:

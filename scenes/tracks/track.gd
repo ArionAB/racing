@@ -1530,6 +1530,13 @@ static func themes() -> Dictionary:
 			# intunecata, calma — bara C si G2. Fara cheile astea tema mostenea
 			# implicitul Okinawei (REEF_SHALLOW turcoaz, spuma 0.75, creste 0.85,
 			# scanteiere 0.55), de unde turcoazul si petele albe.
+			# `water_glint` 0: petele deschise ramase pe apa verde erau
+			# SCANTEIEREA (forma din fisurile dalei de detaliu), nu umbre si nu
+			# ondulare — A/B masurat: umbre stinse, ripple 0.12 -> 0.04 si
+			# lit_normal 0.35 -> 0.15 nu le-au miscat; glint 0.10 -> 0 le-a
+			# sters. Luminile de pe apa vin de la candelele plutitoare (decor).
+			# `water_deep_gain` 1.0: acelasi slot pe toata rampa; cu 0.75 celulele
+			# de grila (7.9 m) mai putin adanci ieseau dreptunghiuri mai deschise.
 			"water_shallow_slot": Palette.TROPICAL_GREEN,
 			"water_deep_slot": Palette.TROPICAL_GREEN,
 			"water_shore_slot": Palette.TROPICAL_GREEN,
@@ -1541,7 +1548,7 @@ static func themes() -> Dictionary:
 			"water_foam_mix": 1.0,
 			"water_crest": 0.0,
 			"water_band": 0.0,
-			"water_glint": 0.10,
+			"water_glint": 0.0,
 			"water_ripple": 0.04,
 			"water_lit_rough": 0.45,
 			"water_lit_fresnel": 0.18,

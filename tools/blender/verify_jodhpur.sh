@@ -97,8 +97,13 @@ echo "== orasul albastru (brief §1.4, val 3) =="
 # inaltime, scarile/balustradele incep de la z=0 dar pe un bbox propriu
 # offset). haveli_facade: un singur nod compus (House_Wall+House_Trim), tot
 # --origin=assembly pentru acelasi motiv (usile arcadelor nu ating solul
-# separat). Buget STRICT 900 (brief §1.4), nu 900+marja ca la restul --
-# vezi jurnalul din inventar (merloane rarite ca sa incapa).
+# separat).
+# haveli_facade 900 -> 912 (runda de corectii dupa verdictul "PICATA"):
+# bug real de axa (arcada era pe fata de 6 m, nu pe cei 10 m latime -- brief
+# "fatada LATA") plus trecerea de la 3 la 4 arcade/ferestre pe rand (decuparea
+# arata 4). Merloanele au fost rarite de 2 ori (176 tri economisiti) ca sa
+# incapa cat mai aproape de 900; cei 12 tri ramasi sunt cost ireductibil fara
+# sa piarda siluieta crenelata -- vezi jurnalul din build_jodhpur_city.py.
 # rooftop_clutter: rufele (Clutter_Laundry) folosesc CAR_YELLOW (14-16,
 # excepie pe NUME de nod, --allow-car-slots) si FLAMINGO_PINK=31 (rezerva,
 # excepie pe SLOT, --allow-slots -- deja legalizat de Serengeti/palette.gd
@@ -107,7 +112,7 @@ check "buildings/blue_house_b.glb"    6000 --origin=assembly
 check "buildings/blue_house_c.glb"    3800 --origin=assembly
 check "buildings/blue_house_d.glb"    6500 --origin=assembly
 check "buildings/blue_house_e.glb"    6500 --origin=assembly
-check "buildings/haveli_facade.glb"    900 --origin=assembly
+check "buildings/haveli_facade.glb"    912 --origin=assembly
 check "props/rooftop_tank.glb"         700
 check "props/rooftop_clutter.glb"     1400 --origin=assembly --allow-car-slots=Clutter_Laundry --allow-slots=31
 
@@ -127,7 +132,11 @@ check "props/stall_canopy_b.glb"      1600 --origin=assembly --allow-car-slots=G
 check "props/stall_canopy_c.glb"      1600 --origin=assembly --allow-car-slots=Goods
 check "props/textile_strip.glb"       1600 --origin=assembly --allow-car-slots=Cloth --allow-slots=31
 check "props/spice_sacks.glb"         1400 --origin=assembly --allow-car-slots=Spice
-check "props/thela_cart.glb"          3100 --origin=assembly --allow-car-slots=Cart_Fruit
+# thela_cart 3100 -> 3288 (runda de corectii, "PICATA"): rotile erau
+# ingropate in disc (spoke_y < half-thickness -- fix in _wheel, tools/blender/
+# build_jodhpur_bazaar.py) si fructele un rand subtire, nu o gramada. Vezi
+# jurnalul de la emit() din build_jodhpur_bazaar.py.
+check "props/thela_cart.glb"          3288 --origin=assembly --allow-car-slots=Cart_Fruit
 check "props/chai_stall.glb"          1600 --origin=assembly
 check "props/marigold_garland.glb"     800
 

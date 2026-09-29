@@ -55,7 +55,9 @@ extends Node3D
 @export var bulb_step_m: float = 0.34
 @export var bulb_radius_m: float = 0.16
 ## Capul felinarului (raza octaedrului emisiv din varful stalpului).
-@export var lamp_radius_m: float = 0.36
+@export var lamp_radius_m: float = 0.5
+## Grosimea stalpului (raza prismei). Runda 3: 0,09 -> 0,16 („felinare groase").
+@export var post_radius_m: float = 0.16
 ## Slotul si lumina becurilor: portocaliu-chihlimbar, nu galben pal. Slotul
 ## 30 (LAVA_ORANGE) si nu 16: emisia se ADUNA peste albedo, iar peste galbenul
 ## slotului 16 orice tenta portocalie iesea galben-alb (masurat pe captura r2).
@@ -137,7 +139,7 @@ func _build() -> void:
 				var pb: Vector3 = fst[k + 1]["p"] + (fst[k + 1]["s"] as Vector3) * (facade_lateral_m * sgn)
 				_catenary(pa + Vector3.UP * h, pb + Vector3.UP * h, facade_sag_m, bulb_pos, true)
 	var glow := Palette.glow_material_slots([bulb_slot], glow_energy, glow_tint)
-	_add_multimesh("Stalpi", _prism(0.09, post_height_m + base_drop_m, 6, post_slot),
+	_add_multimesh("Stalpi", _prism(post_radius_m, post_height_m + base_drop_m, 6, post_slot),
 		Palette.world_material(), post_xf, true)
 	_add_multimesh("Felinare", _octa(lamp_radius_m, bulb_slot), glow, lamp_xf, false)
 	var bulb_xf: Array[Transform3D] = []

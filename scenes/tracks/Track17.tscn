@@ -467,6 +467,131 @@ metadata/coliziune = "none"
 transform = Transform3D(-0.99989, 0, 0.015097, 0, 1, 0, -0.015097, 0, -0.99989, -23.178, -0.39138, 223.53)
 metadata/coliziune = "none"
 
+[node name="hTaraba1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_thela_cart")]
+transform = Transform3D(0.9988, 0, 0.04895, 0, 1, 0, -0.04895, 0, 0.9988, 132.1, 0.3972, 164.55)
+
+[node name="hTaraba2" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_a")]
+transform = Transform3D(0.99852, 0, 0.054301, 0, 1, 0, -0.054301, 0, 0.99852, 125.19, 0.44409, 165.81)
+
+[node name="hEufor3_0" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.78231, 0, -0.62288, 0, 1, 0, 0.62288, 0, 0.78231, 118.08, 0.50062, 165.97)
+
+[node name="hTaraba4" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_a")]
+transform = Transform3D(0.98755, 0, 0.15732, 0, 1, 0, -0.15732, 0, 0.98755, 111.15, 0.5622, 167.2)
+
+[node name="hTaraba5" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_b")]
+transform = Transform3D(0.99508, 0, 0.099097, 0, 1, 0, -0.099097, 0, 0.99508, 104.19, 0.62421, 167.96)
+
+[node name="hTaraba7" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_c")]
+transform = Transform3D(0.99878, 0, 0.049285, 0, 1, 0, -0.049285, 0, 0.99878, 90.362, 0.66053, 169.31)
+
+[node name="hTaraba8" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_c")]
+transform = Transform3D(0.99668, 0, 0.081419, 0, 1, 0, -0.081419, 0, 0.99668, 83.395, 0.62307, 169.99)
+
+[node name="hEufor9_0" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.22645, 0, 0.97402, 0, 1, 0, -0.97402, 0, -0.22645, 75.985, 0.56134, 169.87)
+
+[node name="hTaraba10" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_chai_stall")]
+transform = Transform3D(0.99184, 0, 0.12748, 0, 1, 0, -0.12748, 0, 0.99184, 69.454, 0.49969, 171.27)
+
+[node name="hSaci11_0" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(0.99807, 0, 0.062124, 0, 1, 0, -0.062124, 0, 0.99807, 63.254, 0.44725, 171.09)
+
+[node name="hSaci11_1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(0.99193, 0, 0.12682, 0, 1, 0, -0.12682, 0, 0.99193, 62.474, 0.44725, 171.33)
+
+[node name="hSaci11_2" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(0.98943, 0, 0.14502, 0, 1, 0, -0.14502, 0, 0.98943, 61.232, 0.44725, 171.18)
+
+[node name="hTaraba13" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_c")]
+transform = Transform3D(0.98859, 0, 0.15061, 0, 1, 0, -0.15061, 0, 0.98859, 48.532, 0.32963, 173.3)
+
+[node name="hSaci14_0" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(0.99999, 0, 0.0041406, 0, 1, 0, -0.0041406, 0, 0.99999, 42.657, 0.27445, 173.15)
+
+[node name="hSaci14_1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(0.98617, 0, -0.16573, 0, 1, 0, 0.16573, 0, 0.98617, 41.644, 0.27445, 173.25)
+
+[node name="hTuk15" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_tuktuk")]
+transform = Transform3D(0.10175, 0, -0.99481, 0, 1, 0, 0.99481, 0, 0.10175, 34.569, 0.21977, 174.27)
+metadata/coliziune = "hull"
+
+[node name="hTaraba16" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_c")]
+transform = Transform3D(0.98956, 0, 0.14411, 0, 1, 0, -0.14411, 0, 0.98956, 27.658, 0.16561, 175.35)
+
+[node name="hTaraba17" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_b")]
+transform = Transform3D(0.99105, 0, 0.13349, 0, 1, 0, -0.13349, 0, 0.99105, 20.69, 0.11201, 176.02)
+
+[node name="hTaraba18" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_a")]
+transform = Transform3D(0.99274, 0, 0.12032, 0, 1, 0, -0.12032, 0, 0.99274, 13.717, 0.052308, 176.69)
+
+[node name="hTaraba19" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_a")]
+transform = Transform3D(0.99168, 0, 0.12872, 0, 1, 0, -0.12872, 0, 0.99168, 6.7493, -0.0029234, 177.37)
+
+[node name="hEufor20_0" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.9543, 0, -0.29885, 0, 1, 0, 0.29885, 0, 0.9543, -0.23831, -0.055705, 177.65)
+
+[node name="hEufor20_1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.47261, 0, 0.88127, 0, 1, 0, -0.88127, 0, 0.47261, 0.46926, -0.055705, 177.65)
+
+[node name="hSaci21_0" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(0.97684, 0, 0.21397, 0, 1, 0, -0.21397, 0, 0.97684, -6.1794, -0.1093, 177.83)
+
+[node name="hSaci21_1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(0.98128, 0, 0.19258, 0, 1, 0, -0.19258, 0, 0.98128, -7.3153, -0.1093, 177.96)
+
+[node name="hSaci21_2" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(0.98781, 0, -0.15566, 0, 1, 0, 0.15566, 0, 0.98781, -8.2982, -0.1093, 177.93)
+
+[node name="hEufor22_0" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.36531, 0, -0.93089, 0, 1, 0, 0.93089, 0, -0.36531, 132.83, 0.3972, 184.06)
+
+[node name="hEufor22_1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.6692, 0, -0.74309, 0, 1, 0, 0.74309, 0, -0.6692, 133.93, 0.3972, 183.7)
+
+[node name="hNeem23" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_neem_tree")]
+transform = Transform3D(-0.033649, 0, 0.54897, 0, 0.55, 0, -0.54897, 0, -0.033649, 126.95, 0.44409, 184.13)
+
+[node name="hSaci25_0" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(-0.99858, 0, -0.053279, 0, 1, 0, 0.053279, 0, -0.99858, 114.34, 0.5622, 185.81)
+
+[node name="hSaci25_1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_spice_sacks")]
+transform = Transform3D(-0.97589, 0, -0.21827, 0, 1, 0, 0.21827, 0, -0.97589, 113.16, 0.5622, 186)
+
+[node name="hEufor26_0" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(0.99988, 0, -0.015602, 0, 1, 0, 0.015602, 0, 0.99988, 106.67, 0.62421, 186.68)
+
+[node name="hEufor26_1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_euphorbia")]
+transform = Transform3D(-0.99962, 0, 0.027498, 0, 1, 0, -0.027498, 0, -0.99962, 106.09, 0.62421, 186.56)
+
+[node name="hTaraba27" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_b")]
+transform = Transform3D(-0.99504, 0, -0.099463, 0, 1, 0, 0.099463, 0, -0.99504, 99.078, 0.65498, 186.76)
+
+[node name="hTaraba28" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_a")]
+transform = Transform3D(-0.99853, 0, -0.054166, 0, 1, 0, 0.054166, 0, -0.99853, 78.132, 0.56134, 188.75)
+
+[node name="hTaraba29" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_b")]
+transform = Transform3D(-0.98976, 0, -0.14276, 0, 1, 0, 0.14276, 0, -0.98976, 71.207, 0.49969, 189.39)
+
+[node name="hTaraba30" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_b")]
+transform = Transform3D(-0.99118, 0, -0.13256, 0, 1, 0, 0.13256, 0, -0.99118, 64.24, 0.44725, 190.06)
+
+[node name="hTaraba31" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_chai_stall")]
+transform = Transform3D(-0.98648, 0, -0.16385, 0, 1, 0, 0.16385, 0, -0.98648, 57.266, 0.38804, 190.74)
+
+[node name="hTuk32" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_tuktuk")]
+transform = Transform3D(0.10057, 0, -0.99493, 0, 1, 0, 0.99493, 0, 0.10057, 50.364, 0.32963, 191.81)
+metadata/coliziune = "hull"
+
+[node name="hTaraba33" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_c")]
+transform = Transform3D(-0.99278, 0, -0.11998, 0, 1, 0, 0.11998, 0, -0.99278, 43.359, 0.27445, 192.1)
+
+[node name="hTaraba34" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_stall_canopy_c")]
+transform = Transform3D(-0.99773, 0, -0.067394, 0, 1, 0, 0.067394, 0, -0.99773, 36.384, 0.21977, 192.78)
+
+[node name="hTaraba35" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_chai_stall")]
+transform = Transform3D(-0.99079, 0, -0.13543, 0, 1, 0, 0.13543, 0, -0.99079, 29.4, 0.16561, 193.46)
+
 [node name="hFelinare" type="Node3D" parent="DecorManual/ZoneH_Dreapta"]
 script = ExtResource("h_lights")
 facade_gaps = Array[Vector3]([Vector3(-1, 0.938, 0.947), Vector3(-1, 0.971, 0.991)])

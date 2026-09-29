@@ -3596,6 +3596,59 @@ const WIDTH_RAMP_M: float = 30.0
 ## [constant WIDTH_RAMP_M] metri, neteda la capete (smoothstep), nu o treapta.
 ## Vezi constanta pentru ce se intampla fara ea.
 func width_at(frac: float) -> float:
+	var base := _width_at_segments(frac)
+	var pins := _width_pinches()
+	if pins.is_empty():
+		return base
+	return _apply_pinches(fposmod(frac, 1.0), base, pins)
+
+
+## Strangerile LOCALE ale soselei: fiecare e (frac_start, frac_end, half_width).
+## Implicit nimic — si atunci `width_at` intoarce exact ce intorcea inainte,
+## deci pistele care nu declara nimic raman bit-identice.
+##
+## [b]De ce nu ajung sectoarele de latime.[/b] Rampele unui sector
+## ([method _width_blend]) merg mereu spre `half_width`-ul GLOBAL, iar intre
+## sectoare castiga primul din lista. Un sector ingust pus in mijlocul altui
+## sector ingust (poarta de 7 m pe drumul de 9 m al portilor Jodhpur) nu se
+## poate scrie: masurat pe Track17, rampa sectorului de dinainte il acoperea pe
+## 30 m (drumul urca de la 9 m la 13 m si SARE apoi la 7 m), adica exact pragul
+## lateral pe care rampa exista sa-l previna. O strangere se scrie deci PESTE
+## latimea sectoarelor, ca minim: rampa ei pleaca din latimea locala, nu din
+## cea globala, si nu atinge nimic din afara ei.
+func _width_pinches() -> Array[Vector3]:
+	return []
+
+## Pe cati metri se face trecerea in / din strangere. 12 m la o strangere de
+## 1 m pe inele de ~2 m: 0,17 m pe inel in medie, 0,25 m in varful
+## smoothstep-ului — sub pragul de 0,3 m peste care o margine laterala devine
+## perete (vezi [constant WIDTH_RAMP_M]).
+const PINCH_RAMP_M: float = 12.0
+
+
+func _apply_pinches(f: float, base: float, pins: Array[Vector3]) -> float:
+	var total := _dists[baked.size()] if _dists.size() > baked.size() else 0.0
+	var ramp := PINCH_RAMP_M / total if total > 0.0 else 0.01
+	var out := base
+	for p in pins:
+		var target := minf(base, p.z)
+		for shift: float in [-1.0, 0.0, 1.0]:
+			var a := p.x + shift
+			var b := p.y + shift
+			var k := 0.0
+			if f >= a and f <= b:
+				k = 1.0
+			elif f < a and f > a - ramp:
+				k = smoothstep(0.0, 1.0, (f - (a - ramp)) / ramp)
+			elif f > b and f < b + ramp:
+				k = smoothstep(0.0, 1.0, 1.0 - (f - b) / ramp)
+			if k > 0.0:
+				out = minf(out, lerpf(base, target, k))
+	return out
+
+
+## Latimea data doar de sectoare (fara strangeri) — vezi [method width_at].
+func _width_at_segments(frac: float) -> float:
 	var segs := _width_profile()
 	if segs.is_empty():
 		return half_width
@@ -3717,7 +3770,7 @@ func _width_segs_overlap(p: Vector3, q: Vector3) -> bool:
 ## risc, pentru o functie pe care n-o folosesc.
 func _baked_widths() -> PackedFloat32Array:
 	var out := PackedFloat32Array()
-	if _width_profile().is_empty():
+	if _width_profile().is_empty() and _width_pinches().is_empty():
 		return out
 	var n := baked.size()
 	out.resize(n)

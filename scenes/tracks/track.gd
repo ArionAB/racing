@@ -1512,6 +1512,12 @@ static func themes() -> Dictionary:
 				# stanca e in jurul lui, nu doar pe umar.
 				{"from": 0.474, "to": 0.699, "max_m": 70.0, "fade_m": 30.0,
 					"tint": Color(0.73, 0.51, 0.47)},
+				# Coborarea G pe stanca de riolit goala si malul Devkund (G2):
+				# brief §2 G/G2, bara G2 arata malul ca stanca roz, nu nisip.
+				# Aceeasi tenta ca fortul; 40 m tin stanca pe umar si pe mal
+				# fara sa inghita deserul de dincolo de lac.
+				{"from": 0.699, "to": 0.910, "max_m": 40.0, "fade_m": 20.0,
+					"tint": Color(0.73, 0.51, 0.47)},
 			],
 			# TROTUARUL: pe strazile orasului (A/B, D, H) fasia dintre asfalt si
 			# case e lata de ~3 m si iesea nisip. Umarul existent se lateste

@@ -250,16 +250,19 @@ def build_blue_house_b():
         wall_faces += list(chajja(b, (cx, cy, v1_h), w, 0.45, WALL,
                                   thickness=0.10, slope=0.4, rotation=rot))
 
-    # planta (tufis) in coltul dreapta-jos (fata +X, Y pozitiv) al terasei v1
+    # planta (tufis) in coltul dreapta-jos (fata +X, Y pozitiv) al terasei v1.
+    # NU adaugata la wall_faces: acelasi bug/fix ca la rezervor (gasit la
+    # --compare -- planta era invizibila, pictata WALL de overwrite-ul
+    # general in loc de PLANT_GREEN). Tentata separat, DUPA overwrite.
+    plant_faces = []
     plant_c = (hw - 0.5, hd - 0.5, v1_h)
     for i in range(5):
         ang = i * 1.3
         r = 0.16 + 0.05 * (i % 3)
         px = plant_c[0] + math.cos(ang) * r * 0.4
         py = plant_c[1] + math.sin(ang) * r * 0.4
-        wall_faces_extra = list(b.box((px, py, plant_c[2] + 0.18 + 0.05 * i),
-                                      (0.22, 0.22, 0.30), PLANT_GREEN))
-        wall_faces += wall_faces_extra
+        plant_faces += list(b.box((px, py, plant_c[2] + 0.18 + 0.05 * i),
+                                  (0.22, 0.22, 0.30), PLANT_GREEN))
 
     # volum 2: etaj 2, retras spre spate (Y negativ = spate, fata camerei e +X
     # deci "spate" e -Y), mai ingust, inaltime 3.2
@@ -288,13 +291,23 @@ def build_blue_house_b():
     v3_z0 = v2_z0 + v2_h
     wall_faces += list(b.box((0.0, v3_cy, v3_z0 + v3_h * 0.5), (v3_w, v3_d, v3_h), WALL))
     wall_faces += list(b.box((0.0, v3_cy, v3_z0 + 0.05), (v3_w + 0.10, v3_d + 0.10, 0.10), WALL))
+    # NU adaugat la wall_faces: bug real gasit la --compare (rezervorul
+    # aparea ALBASTRU in loc de negru) -- overwrite-ul de mai jos
+    # (`f[b.slot] = WALL` pe toate fetele din wall_faces) picta peste
+    # slotul TANK_DARK deja scris de `_rooftop_tank`. Tank-ul e tentat
+    # separat, DUPA overwrite-ul general.
     tank_faces = _rooftop_tank(b, (0.3, v3_cy, v3_z0 + v3_h), radius=0.55, height=1.2)
-    wall_faces += tank_faces
 
     wall_obj = b.to_object("House_Wall")
     for f in wall_faces:
         if f.is_valid:
             f[b.slot] = WALL
+    for f in tank_faces:
+        if f.is_valid:
+            f[b.slot] = TANK_DARK
+    for f in plant_faces:
+        if f.is_valid:
+            f[b.slot] = PLANT_GREEN
     trim_obj = bg.to_object("House_Trim")
     glow_obj = _finish_or_none(bglow.to_object("House_Glow"))
     for f in rail_faces:
@@ -367,14 +380,18 @@ def build_blue_house_c():
                              glass=True, reveal=0.10, panel_w=1.3, panel_h=1.4)
         wall_faces += res_w["stone"]
 
-    # rezervor negru pe acoperis, aproape de colt
+    # rezervor negru pe acoperis, aproape de colt -- NU adaugat la
+    # wall_faces, acelasi bug/fix ca la blue_house_b (vezi comentariul de
+    # acolo): tentat separat, DUPA overwrite-ul general pe WALL.
     tank_faces = _rooftop_tank(b, (hs - 1.1, hs - 1.1, HC_WALL), radius=0.55, height=1.2)
-    wall_faces += tank_faces
 
     wall_obj = b.to_object("House_Wall")
     for f in wall_faces:
         if f.is_valid:
             f[b.slot] = WALL
+    for f in tank_faces:
+        if f.is_valid:
+            f[b.slot] = TANK_DARK
     trim_obj = bg.to_object("House_Trim")
     glow_obj = _finish_or_none(bglow.to_object("House_Glow"))
     return wall_obj, trim_obj, glow_obj
@@ -668,19 +685,24 @@ def build_haveli_facade():
             wall_faces += _cheap_arch_opening(b, bg, (hw, by, fz0 - HV_H * 0.5 + floor_h * 0.24),
                                               win_w, win_h, 0.55, WALL_T, WALL, GLOW,
                                               rotation=door_rot, open=False)
-        # balcon de piatra CONTINUU pe console, sub randul de ferestre
+        # balcon de piatra CONTINUU pe console, sub randul de ferestre.
+        # merlon_w/gap marite (0.9/0.5 -> 1.6/1.0, buget: vezi jurnal mai
+        # jos) -- mai putine merloane pe acelasi segment, cost 176->132 tri
+        # per apel (masurat izolat), silueta de parapet crenelat neschimbata
+        # la scara jocului.
         bal_z = fz0
         wall_faces += list(chajja(b, (hw + 0.02, 0.0, bal_z), HV_D - 0.3, 0.45, WALL,
                                   thickness=0.08, slope=0.4, rotation=door_rot))
         wall_faces += list(balustrade(b, (hw + 0.30, -hd + 0.3, bal_z),
                                       (hw + 0.30, hd - 0.3, bal_z),
-                                      0.5, WALL, merlon_w=0.9, merlon_gap=0.5))
+                                      0.5, WALL, merlon_w=1.6, merlon_gap=1.0))
 
-    # terasa de sus: balustrada pe toata latimea fetei +X (buget mic:
-    # merloane rare -- la aceasta scara tot citesc ca parapet crenelat)
+    # terasa de sus: balustrada pe toata latimea fetei +X (merloane si mai
+    # rare decat la balcoane -- ultimii ~30 tri pentru incadrarea in 900,
+    # parapetul terasei e mai putin in prim-plan decat balcoanele)
     wall_faces += list(balustrade(b, (hw + 0.05, -hd + 0.3, HV_H),
                                   (hw + 0.05, hd - 0.3, HV_H),
-                                  0.75, WALL, merlon_w=0.9, merlon_gap=0.5))
+                                  0.75, WALL, merlon_w=1.8, merlon_gap=1.3))
 
     # friza decorativa sub cornisa de sus: UN SINGUR chajja ingust in loc de
     # dinti individuali (buget 900 nu incape inca 4 cutii bevel-uite -- un
@@ -732,38 +754,53 @@ RC_POST_H = 1.8
 def build_rooftop_clutter():
     b = Builder()
     bl = Builder()  # rufele (culori saturate, sloturi de accent, allow-car-slots)
-    faces = []
+    # NOTA fix (bug real gasit la primul --compare al valului 3): fetele nu
+    # se mai aduna intr-o singura lista `faces` pictata orbeste WALL la
+    # final -- placa, rezervorul, oalele si stalpii/sfoara sunt pe sloturi
+    # DIFERITE (WALL, TANK_DARK, WOOD, LOG_DARK), dar overwrite-ul vechi
+    # (`f[b.slot] = WALL` pe toata lista) le picta pe toate albastru,
+    # exact ce a aratat comparatia (rezervor + oale + stalpi, toate
+    # albastre in loc de negru/lemn). Acum fiecare grup isi pastreaza
+    # slotul propriu, scris o singura data.
     hw, hd = RC_W * 0.5, RC_D * 0.5
 
     # placa de terasa
-    faces += list(b.box((0.0, 0.0, 0.08), (RC_W, RC_D, 0.16), WALL))
+    plate_faces = list(b.box((0.0, 0.0, 0.08), (RC_W, RC_D, 0.16), WALL))
 
-    # rezervor mic negru, colt stanga-spate (X negativ, Y negativ)
-    tank_faces = _rooftop_tank(b, (-hw + 0.5, -hd + 0.5, 0.16), radius=0.35, height=0.55, n_ribs=3)
-    faces += tank_faces
+    # rezervor mic negru, colt stanga-spate (X negativ, Y negativ).
+    # segments 12->8, n_ribs 3->2 (buget: masurat izolat 476->336 tri --
+    # asta e piesa DECORATIVA de fundal, nu props/rooftop_tank.glb propriu-
+    # zis, care ramane la 12 segmente; brief §1 cere doar 8-16, nu maxim)
+    tank_faces = _rooftop_tank(b, (-hw + 0.5, -hd + 0.5, 0.16), radius=0.35, height=0.55,
+                               n_ribs=2, )
 
-    # 2 gramezi de oale (piatra/lemn), spre mijloc/dreapta
+    # 2 gramezi de oale (piatra/lemn), spre mijloc/dreapta (segments 8->6,
+    # buget: minor dar consistent cu restul reducerilor din piesa asta)
+    pot_faces = []
     for i, (px, py) in enumerate(((0.1, -hd + 0.5), (0.65, -hd + 0.55))):
         for k in range(3):
             r = 0.16 - k * 0.02
-            faces += list(b.cylinder((px + k * 0.05, py, 0.16 + r + k * 0.06), r,
-                                     0.14, WOOD, segments=8, axis="Z"))
+            pot_faces += list(b.cylinder((px + k * 0.05, py, 0.16 + r + k * 0.06), r,
+                                         0.14, WOOD, segments=6, axis="Z"))
 
     # 2 stalpi pe latura din spate (Y negativ e "spate" fata de +X camera;
     # dar rufele trebuie sa fie vizibile din fata -- le punem pe latura din
     # FATA/+Y, ca sa fie clar vizibile in comparatie, la fel ca decuparea
-    # care arata rufele in prim-plan)
+    # care arata rufele in prim-plan). segments 8->6 (stalpi subtiri,
+    # diferenta de silueta nula la aceasta raza).
     post_x0, post_x1 = -hw + 0.3, hw - 0.3
     post_y = hd - 0.25
-    faces += list(b.cylinder((post_x0, post_y, 0.16 + RC_POST_H * 0.5), 0.06, RC_POST_H,
-                             LOG_DARK, segments=8, axis="Z"))
-    faces += list(b.cylinder((post_x1, post_y, 0.16 + RC_POST_H * 0.5), 0.06, RC_POST_H,
-                             LOG_DARK, segments=8, axis="Z"))
+    post_faces = list(b.cylinder((post_x0, post_y, 0.16 + RC_POST_H * 0.5), 0.06, RC_POST_H,
+                                 LOG_DARK, segments=6, axis="Z"))
+    post_faces += list(b.cylinder((post_x1, post_y, 0.16 + RC_POST_H * 0.5), 0.06, RC_POST_H,
+                                  LOG_DARK, segments=6, axis="Z"))
     # sfoara (fir subtire) intre stalpi
-    faces += list(b.box((0.0, post_y, 0.16 + RC_POST_H - 0.02), (post_x1 - post_x0, 0.02, 0.02), LOG_DARK))
+    post_faces += list(b.box((0.0, post_y, 0.16 + RC_POST_H - 0.02), (post_x1 - post_x0, 0.02, 0.02), LOG_DARK))
 
     # 2 rufe atarnate pe sfoara: galben (stanga), roz (dreapta) -- panza
-    # opaca cu usoara lasare (blade pe un traseu in catenara aproximativa)
+    # opaca cu usoara lasare (blade pe un traseu in catenara aproximativa).
+    # segs 4->2 (buget: jumatate din geometria panzei, lasarea tot se
+    # citeste ca o usoara curba pe o piesa de 0.55x0.7m la distanta jocului)
     def _cloth(cx, color):
         w = 0.55
         h = 0.7
@@ -773,7 +810,7 @@ def build_rooftop_clutter():
         # panza plata verticala: folosim box-uri suprapuse in loc de sweep,
         # mai simplu si suficient pentru o piesa mica -- placa unica usor
         # curbata (2 segmente) atarnand de sfoara
-        segs = 4
+        segs = 2
         cf = []
         for k in range(segs):
             t0, t1 = k / segs, (k + 1) / segs
@@ -789,9 +826,18 @@ def build_rooftop_clutter():
     laundry_faces += _cloth(post_x0 + (post_x1 - post_x0) * 0.72, LAUNDRY_PINK)
 
     obj = b.to_object("Clutter_Base")
-    for f in faces:
+    for f in plate_faces:
         if f.is_valid:
             f[b.slot] = WALL
+    for f in tank_faces:
+        if f.is_valid:
+            f[b.slot] = TANK_DARK
+    for f in pot_faces:
+        if f.is_valid:
+            f[b.slot] = WOOD
+    for f in post_faces:
+        if f.is_valid:
+            f[b.slot] = LOG_DARK
     laundry_obj = _finish_or_none(bl.to_object("Clutter_Laundry"))
     return obj, laundry_obj
 

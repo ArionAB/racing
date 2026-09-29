@@ -85,6 +85,28 @@ check "structures/palace_facade_a.glb"    15000 --origin=assembly
 check "structures/palace_facade_b.glb"    14000 --origin=assembly
 check "props/rampart_cannon.glb"          3300 --origin=assembly
 
+echo "== orasul albastru (brief §1.4, val 3) =="
+# Casele: origine COMUNA pe ansamblu (--origin=assembly), ca la pilot/
+# cetate -- House_Trim (usi), House_Glow (geamuri) si House_Rail
+# (balustrade/scari) sunt geometrie mica/suspendata care NU atinge solul la
+# baza EI proprie de bounding box (usile sunt goluri in perete la orice
+# inaltime, scarile/balustradele incep de la z=0 dar pe un bbox propriu
+# offset). haveli_facade: un singur nod compus (House_Wall+House_Trim), tot
+# --origin=assembly pentru acelasi motiv (usile arcadelor nu ating solul
+# separat). Buget STRICT 900 (brief §1.4), nu 900+marja ca la restul --
+# vezi jurnalul din inventar (merloane rarite ca sa incapa).
+# rooftop_clutter: rufele (Clutter_Laundry) folosesc CAR_YELLOW (14-16,
+# excepie pe NUME de nod, --allow-car-slots) si FLAMINGO_PINK=31 (rezerva,
+# excepie pe SLOT, --allow-slots -- deja legalizat de Serengeti/palette.gd
+# pentru exact acest roz, vezi comentariul din verify_glb.py).
+check "buildings/blue_house_b.glb"    6000 --origin=assembly
+check "buildings/blue_house_c.glb"    3800 --origin=assembly
+check "buildings/blue_house_d.glb"    6500 --origin=assembly
+check "buildings/blue_house_e.glb"    6500 --origin=assembly
+check "buildings/haveli_facade.glb"    900 --origin=assembly
+check "props/rooftop_tank.glb"         700
+check "props/rooftop_clutter.glb"     1400 --origin=assembly --allow-car-slots=Clutter_Laundry --allow-slots=31
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total"

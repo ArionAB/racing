@@ -204,6 +204,85 @@ COMPARE_SPECS = {
         "tints": {"Cannon_Metal": "#2A2A2E", "Cannon_Wood": "#6B4A2E"},
         "azimuth": 22.0, "elevation": 14.0, "margin": 1.1,
     },
+    # --- val 3: orasul albastru (brief §1.4) -- reuseste conventia
+    # pilotului (blue_house_a): +X e fatada camerei, casele sunt aproape
+    # cubice, deci camera implicita (azimut 35/elevatie 18) ramane
+    # neschimbata, ca la ghanta_ghar/blue_house_a. Tente: light #8FB0DC
+    # (majoritatea caselor), indigo #4F6FB8 (blue_house_d, haveli_facade --
+    # brief §1.4 coloana "tenta in preview"), trim lemn #6B4A2E, glow
+    # #2A2A2E, balustrada alba FARA tenta separata de perete (House_Rail
+    # foloseste aceeasi tenta ca House_Wall pe casele light) sau neagra
+    # (House_Rail=GLOW pe blue_house_d, grilaj de fier per contract).
+    # blue_house_b: House_Wall amesteca TREI sloturi (peretele WALL, +
+    # rezervorul TANK_DARK=LOG_DARK, + planta CACTUS_GREEN -- fix bug gasit
+    # la primul --compare al valului 3: rezervorul si planta apareau
+    # albastre, vezi jurnalul in inventar). blue_house_c: doar WALL+
+    # TANK_DARK (nu are planta).
+    "blue_house_b": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": {FOAM_WHITE: "#8FB0DC", LOG_DARK: "#2A2A2E", CACTUS_GREEN: "#4C8C3C"},
+            "House_Rail": "#8FB0DC",
+            "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
+        },
+    },
+    "blue_house_c": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": {FOAM_WHITE: "#8FB0DC", LOG_DARK: "#2A2A2E"},
+            "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
+        },
+    },
+    "blue_house_d": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": "#4F6FB8",
+            "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
+            # balustrada e GLOW (grilaj negru de fier pe blue_house_d, brief
+            # §1.4: "parapet inchis la culoare", contract in cod: rail_faces
+            # scrise pe slotul GLOW, nu RAIL_WHITE)
+            "House_Rail": "#2A2A2E",
+        },
+    },
+    "blue_house_e": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": "#8FB0DC",
+            "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
+            "House_Rail": "#8FB0DC",
+        },
+    },
+    "haveli_facade": {
+        "category": "buildings",
+        "tints": {
+            "House_Wall": "#4F6FB8",
+            "House_Trim": "#6B4A2E",
+        },
+        # piesa e 10x6 m (rație 1.67:1, mai alungita decat pilotul cubic) --
+        # camera implicita (35/18) arata prea mult din latura laterala goala
+        # si prea putin din fatada cu arcade/ferestre. Azimut mai mic (mai
+        # aproape de frontal, ca la haveli/porti val 2a); margin marit la
+        # 1.2 dupa prima incercare (1.05 taia parterul/coama din cadru).
+        "camera": {"azimuth": 20.0, "elevation": 12.0, "margin": 1.2},
+    },
+    "rooftop_tank": {
+        "category": "props",
+        "tints": {"Tank_Body": "#2A2A2E"},
+    },
+    # Clutter_Base amesteca 4 sloturi (placa WALL, rezervor TANK_DARK=
+    # LOG_DARK, oale WOOD, stalpi+sfoara LOG_DARK) -- fix bug gasit la
+    # primul --compare (totul aparea albastru, vezi jurnalul in inventar).
+    "rooftop_clutter": {
+        "category": "props",
+        "tints": {
+            "Clutter_Base": {FOAM_WHITE: "#8FB0DC", LOG_DARK: "#2A2A2E", WOOD: "#6B4A2E"},
+            "Clutter_Laundry": {CAR_YELLOW: "#F2C230", FLAMINGO_PINK: "#E874A1"},
+        },
+    },
 }
 
 
@@ -427,12 +506,28 @@ def _flat_material(hex_color):
     return mat
 
 
+def _strip_dup_suffix(name):
+    """Blender adauga ".001"/".002".. cand numele obiectului e deja ocupat
+    de un data-block orfan ramas in bpy.data (build_jodhpur_city.py exporta
+    7 piese in ACEEASI sesiune, fara sa stearga obiectele intre emit()-uri
+    -- gasit prin masurare, nu presupus: `House_Wall` din blue_house_b ramane
+    orfan in bpy.data.objects, deci blue_house_c importa ca `House_Wall.001`.
+    Fara acest strip, lookup-ul in COMPARE_SPECS["tints"] rateaza exact pe
+    numele nodului principal si piesa cade pe atlas_material() implicit
+    (gri/alb) -- bug reprodus vizual pe blue_house_b/c/e (casele ies gri, nu
+    albastre) la prima comparatie a valului 3."""
+    import re
+    return re.sub(r"\.\d{3}$", "", name)
+
+
 def _import_for_compare(name, spec, models_dir):
     objs = _import(spec["category"], name, models_dir)
     meshes = [o for o in objs if o.type == "MESH"]
     for o in meshes:
         _fix_ao_layer_name(o)
-        tint = spec.get("tints", {}).get(o.name)
+        base_name = _strip_dup_suffix(o.name)
+        tints = spec.get("tints", {})
+        tint = tints.get(o.name, tints.get(base_name))
         if isinstance(tint, dict):
             _apply_multi_flat_tint(o, tint)
         elif tint is not None:
@@ -666,6 +761,10 @@ WAVE_PIECES = {
     "2a": ["fort_gate_jai", "fort_gate_fateh", "fort_gate_loha",
            "fort_wall_segment", "fort_wall_turret", "fort_bastion",
            "palace_facade_a", "palace_facade_b", "rampart_cannon"],
+    # val 3 (brief §1.4, orasul albastru) -- cele 7 piese din
+    # build_jodhpur_city.py.
+    "3": ["blue_house_b", "blue_house_c", "blue_house_d", "blue_house_e",
+          "haveli_facade", "rooftop_tank", "rooftop_clutter"],
 }
 
 

@@ -992,7 +992,8 @@ hb = build_blue_house_b()
 emit(list(hb), "buildings/blue_house_b.glb", AO_HOUSE, bevel=0.025, budget=6000)
 
 hc = build_blue_house_c()
-emit(list(hc), "buildings/blue_house_c.glb", AO_HOUSE, bevel=0.025, budget=3800)
+# buget = pragul din verify_jodhpur.sh (runda 3: grila facade pe doua fete, masurat 4430)
+emit(list(hc), "buildings/blue_house_c.glb", AO_HOUSE, bevel=0.025, budget=4600)
 
 hd_ = build_blue_house_d()
 emit(list(hd_), "buildings/blue_house_d.glb", AO_HOUSE, bevel=0.025, budget=6500)

@@ -3904,6 +3904,23 @@ func _ravine_widths() -> Array[Vector2]:
 func _ravine_floor_slopes() -> Array[Vector2]:
 	return []
 
+## APA intr-o rapa: (indice in [method _ravines], cota ABSOLUTA a apei, metri
+## de elan la repunere). Vezi [method _build_ravine_water]. Fara ea o rapa e
+## uscata pe orice tema fara mare (`water: false`), oricat de adanc ar fi sapata.
+func _ravine_water() -> Array[Vector3]:
+	return []
+
+## DEBLEELE: (frac_start, frac_end, cota ABSOLUTA a buzei, latura +-1) — soseaua
+## taiata in teren, cu peretele urcand pe latura data. Vezi
+## TrackSideSampler._lift_cuttings.
+func _cuttings() -> Array[Vector4]:
+	return []
+
+## Forma comuna a debleelor: (umar m, panta m/m, intindere m). Vezi
+## TrackSideSampler.cutting_shape.
+func _cutting_shape() -> Vector3:
+	return Vector3(5.5, 1.3, 40.0)
+
 ## PASAJE PE PILONI: intervale de tur (fractii, x..y, cu wrap peste 1.0) in care
 ## soseaua trece IN AER peste un alt tronson al aceleiasi piste — nodul rutier
 ## din Chongqing, sau orice „pista peste pista".
@@ -4376,6 +4393,9 @@ func rebuild() -> void:
 	# lista de argumente, si date DUPA constructie — samplerul le ridica dupa
 	# rape. Goala pe orice pista fara noduri cu flagul.
 	_sampler.late_peaks = _island_peaks
+	# Debleele, tot dupa constructie: lista goala pe orice pista fara ele.
+	_sampler.cuttings = _cuttings()
+	_sampler.cutting_shape = _cutting_shape()
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",
@@ -5936,6 +5956,7 @@ func _build_water() -> void:
 	# la nivelul marii. De aceea rularea nu mai e conditionata de steagul de
 	# tema: o pista fara mare (Alpii) poate avea totusi un canal cu apa.
 	_build_channel_water()
+	_build_ravine_water()
 	if not theme_flag("water", false):
 		return
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
@@ -6397,6 +6418,157 @@ func _build_channel_water() -> void:
 		_build_channel_respawn(ch, water_y)
 
 
+## Celulele ude ale rapelor cu apa: Vector2i(celula) -> cota apei. Le citeste
+## [method water_level_at], ca stropul si franarea in apa sa mearga si aici.
+var _ravine_wet: Dictionary = {}
+
+
+## APA in rapele declarate in [method _ravine_water], la cota lor absoluta.
+##
+## De ce nu marea: pe o tema fara mare (`water: false`, Jodhpur) nu exista
+## nicio suprafata de apa, iar o rapa sapata sub cota drumului ramane o groapa
+## uscata. Canalele isi aduc apa lor ([method _build_channel_water]), dar ele
+## TAIE soseaua; lacul Devkund si apa fantanii in trepte stau PE LANGA drum.
+##
+## Suprafata se aseaza pe celulele GRILEI DE TEREN (aceleasi cote pe care le
+## randeaza si le loveste masina, nu campul), si doar pe cele care au macar un
+## colt sub apa si al caror cel mai apropiat punct de sosea e in intervalul
+## rapei, pe latura ei — deci o alta groapa din apropiere nu se umple din
+## greseala. Celulele acoperite deja de apa unui canal se sar: doua suprafete
+## coplanare transparente s-ar amesteca de doua ori.
+##
+## Sub fiecare celula uda sta o cutie de [RespawnZone] (o singura zona pe rapa),
+## cu plafonul la 0.6 m sub apa, ca la canale: cine cade de pe margine e repus
+## cu `backoff` metri de elan.
+func _build_ravine_water() -> void:
+	var specs := _ravine_water()
+	if specs.is_empty() or _terr_cells <= 0:
+		return
+	var ravines := _ravines()
+	var n := baked.size()
+	var total := _dists[n]
+	var row := _terr_cells + 1
+	var step := _terr_step
+	var mat := _water_material()
+	for spec in specs:
+		var ri := int(spec.x)
+		if ri < 0 or ri >= ravines.size():
+			push_warning("custom_ravine_water: rapa %d nu exista" % ri)
+			continue
+		var r: Vector4 = ravines[ri]
+		var water_y := spec.y
+		# Caseta punctelor din interval, largita cat tine o rapa.
+		var lo := Vector2(INF, INF)
+		var hi := Vector2(-INF, -INF)
+		for i in n:
+			if TrackSideSampler._ring_window(_dists[i] / total, r.x, r.y, 0.0001) <= 0.0:
+				continue
+			lo = lo.min(Vector2(baked[i].x, baked[i].z))
+			hi = hi.max(Vector2(baked[i].x, baked[i].z))
+		if lo.x == INF:
+			continue
+		lo -= Vector2.ONE * 70.0
+		hi += Vector2.ONE * 70.0
+		var gx0 := clampi(int(floor((lo.x - _terr_origin.x) / step)), 0, _terr_cells - 1)
+		var gx1 := clampi(int(ceil((hi.x - _terr_origin.x) / step)), 0, _terr_cells - 1)
+		var gz0 := clampi(int(floor((lo.y - _terr_origin.z) / step)), 0, _terr_cells - 1)
+		var gz1 := clampi(int(ceil((hi.y - _terr_origin.z) / step)), 0, _terr_cells - 1)
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var zone := RespawnZone.new()
+		zone.name = "RavineWater_%d" % ri
+		zone.backoff_m = spec.z
+		var depth_scale := maxf(water_y - float(_sampler._floors.get(ri, water_y - 3.0)), 1.0)
+		var wet := 0
+		for gz in range(gz0, gz1 + 1):
+			for gx in range(gx0, gx1 + 1):
+				var h := [_terr_heights[gz * row + gx], _terr_heights[gz * row + gx + 1],
+					_terr_heights[(gz + 1) * row + gx], _terr_heights[(gz + 1) * row + gx + 1]]
+				var lowest: float = h.min()
+				if lowest >= water_y:
+					continue
+				var cx := _terr_origin.x + (float(gx) + 0.5) * step
+				var cz := _terr_origin.z + (float(gz) + 0.5) * step
+				var c := Vector3(cx, water_y, cz)
+				var ci := _closest_baked_index(c)
+				if TrackSideSampler._ring_window(_dists[ci] / total, r.x, r.y, 0.0001) <= 0.0:
+					continue
+				if not is_zero_approx(r.w) and signf(r.w) != _sampler._side_sign_at(ci, cx, cz):
+					continue
+				if _channel_water_covers(c):
+					continue
+				wet += 1
+				_ravine_wet[Vector2i(gx, gz)] = water_y
+				var corners: Array[Vector3] = [
+					Vector3(_terr_origin.x + gx * step, water_y, _terr_origin.z + gz * step),
+					Vector3(_terr_origin.x + (gx + 1) * step, water_y, _terr_origin.z + gz * step),
+					Vector3(_terr_origin.x + gx * step, water_y, _terr_origin.z + (gz + 1) * step),
+					Vector3(_terr_origin.x + (gx + 1) * step, water_y, _terr_origin.z + (gz + 1) * step)]
+				for k: int in [0, 1, 2, 1, 3, 2]:
+					var t := clampf((water_y - float(h[k])) / depth_scale, 0.0, 1.0)
+					st.set_color(_sea_color(t * SEA_NEAR_DEPTH))
+					st.set_uv2(Vector2.ZERO)
+					st.add_vertex(corners[k] - global_position)
+				var shape := CollisionShape3D.new()
+				var box := BoxShape3D.new()
+				var top := water_y - 0.6
+				var bottom := lowest - 6.0
+				box.size = Vector3(step, top - bottom, step)
+				shape.shape = box
+				shape.position = Vector3(cx, (top + bottom) * 0.5, cz) - global_position
+				zone.add_child(shape)
+		if wet == 0:
+			zone.free()
+			push_warning("custom_ravine_water: rapa %d n-are nicio celula sub %.1f" % [ri, water_y])
+			continue
+		st.generate_normals()
+		var mi := MeshInstance3D.new()
+		mi.name = "RavineWaterSurface_%d" % ri
+		mi.mesh = st.commit()
+		mi.material_override = mat
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+		add_child(zone)
+
+
+## Cati metri de sosea mai sunt, pe ruta principala, de la indexul dat pana la
+## buza de lansare a urmatorului canal cu saritura — sau -1 daca nu e niciuna
+## in `within_m`. O citeste traficul ([TrafficController]): un tuk-tuk la
+## viteza lui de croaziera n-ar trece niciun gol, deci isi ia elan inainte.
+func jump_lip_ahead(idx: int, within_m: float) -> float:
+	var n := baked.size()
+	if n == 0 or _channels.is_empty():
+		return -1.0
+	var total := _dists[n]
+	var best := -1.0
+	for ch in _channels:
+		if not bool(ch.get("jump", false)) or bool(ch.get("ford", false)):
+			continue
+		var near_i: int = ch["near"]
+		var d := fposmod(_dists[near_i] - _dists[((idx % n) + n) % n], total)
+		if d <= within_m and (best < 0.0 or d < best):
+			best = d
+	return best
+
+
+## Un punct cade pe suprafata de apa a unui canal (nu vad, nu groapa)?
+func _channel_water_covers(pos: Vector3) -> bool:
+	for ch in _channels:
+		if bool(ch.get("ford", false)) or bool(ch.get("pit", false)):
+			continue
+		if float(ch.get("water_y_drop", -1.0)) < 0.0:
+			continue
+		var o: Vector3 = ch["origin"]
+		var d := Vector2(pos.x - o.x, pos.z - o.z)
+		if absf(d.dot(ch["along2"])) > float(ch["reach"]):
+			continue
+		if absf(d.dot(ch["across2"])) \
+				> float(ch["water_half"]) + float(ch["bank"]) * 0.5:
+			continue
+		return true
+	return false
+
+
 ## Cata APA are efectiv un canal, in metri.
 ##
 ## NU e `depth`: aia e cat de adanc s-a SAPAT sub cota soselei. Apa sta la
@@ -6444,6 +6616,11 @@ func water_level_at(pos: Vector3) -> float:
 				> float(ch["water_half"]) + float(ch["bank"]) * 0.5:
 			continue
 		best = maxf(best, o.y - drop)
+	if not _ravine_wet.is_empty() and _terr_step > 0.0:
+		var cell := Vector2i(int(floor((pos.x - _terr_origin.x) / _terr_step)),
+			int(floor((pos.z - _terr_origin.z) / _terr_step)))
+		if _ravine_wet.has(cell):
+			best = maxf(best, float(_ravine_wet[cell]))
 	if theme_flag("water", false) and not is_frozen() \
 			and _sampler != null and not baked.is_empty():
 		var sea_y := _sampler.mean_road_y() + sea_level_offset

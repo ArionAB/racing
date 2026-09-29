@@ -269,6 +269,15 @@ var _peaks: Array[Vector4] = []
 ## lista e goala pe orice pista fara noduri cu flagul, si atunci `ground_y` nu
 ## se schimba cu nimic (verificat la bit pe Track16 si Track09, 21 sep 2026).
 var late_peaks: Array[Vector4] = []
+## DEBLEELE declarate: (frac_start, frac_end, cota ABSOLUTA a buzei, latura
+## +-1). Vezi [method _lift_cuttings]. Se seteaza de Track dupa constructie,
+## ca [member late_peaks]: goala pe orice pista fara ele, deci `ground_y` nu se
+## schimba cu nimic acolo.
+var cuttings: Array[Vector4] = []
+## Forma comuna a debleelor: (umar plat la cota drumului dincolo de asfalt,
+## panta peretelui in m/m, cat de departe de asfalt tine ridicatura inainte sa
+## se stinga in campul din jur). Vezi [method _lift_cuttings].
+var cutting_shape: Vector3 = Vector3(5.5, 1.3, 40.0)
 ## Volumele SCOBITE declarate: (x, z, raza, podea), plus grosimea peretelui in
 ## lista paralela [member _hollow_walls] — Vector4 e deja plin.
 ## Vezi [TerrainHollow] si [method _carve_hollows].
@@ -534,6 +543,9 @@ func ground_y(wx: float, wz: float) -> float:
 	y = _carve_branches(y, wx, wz, dist, near_i)
 	y = _carve_lagoon(y, dist, wx, wz, near_i)
 	y = _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
+	# Debleele DUPA rape: ridica doar latura opusa golului (o rapa declarata pe
+	# aceeasi latura ar fi umpluta la loc), si inaintea plafonului de scobitura.
+	y = _lift_cuttings(y, local, near_i, wx, wz)
 	# Insulele DUPA rape: un varf care trebuie sa iasa din mare nu poate sta
 	# inaintea sapaturii care face marea. Lista e goala pe pistele fara ele.
 	y = _lift_island_peaks(y, wx, wz, dist, near_i)
@@ -678,6 +690,70 @@ func _carve_hollows(y: float, wx: float, wz: float) -> float:
 		# neteda in loc de o treapta la raza.
 		var ceiling := lerpf(y, h.w, mix)
 		y = minf(y, ceiling)
+	return y
+
+
+## Pe cata fractie de tur se stinge un debleu la capete.
+##
+## Mai scurt decat la rape (RAVINE_FADE_FRAC, ~40 m pe 2 km): debleul se
+## termina de obicei acolo unde drumul a ajuns deja la cota buzei, deci nu mai
+## are ce ridica, si o stingere lunga ar lasa pe ultimii 40 m un taluz moale
+## exact sub peretele care trebuie sa citeasca drept.
+const CUT_FADE_FRAC: float = 0.01
+## Pe cati metri, dincolo de `cutting_shape.z`, ridicatura se stinge in camp.
+const CUT_FADE_M: float = 16.0
+
+
+## DEBLEUL: soseaua taiata IN teren, cu peretele urcand pe o latura pana la o
+## buza la cota absoluta. Perechea pe PLUS a rapei-cornisa: rapa coboara
+## terenul de langa asfalt, debleul il ridica.
+##
+## De ce exista (Jodhpur, fantana in trepte, brief §2 randul C): rampele
+## coboara 9 m spre fundul unei gropi, iar peretele gropii trebuie sa urce
+## CHIAR langa rampa, pe latura dinspre exterior, pana la cota orasului.
+## Terenul URMAREste soseaua (lacatul local, GROUND_LOCK_LEN), deci langa o
+## rampa care coboara el coboara cu ea: fara ridicatura asta groapa iesea o vale
+## de 100 m care se adancea odata cu drumul, nu o fantana. Scobitura
+## ([TerrainHollow]) nu ajuta: e un PLAFON, poate doar cobori.
+##
+## [b]Umarul nu e de gust, e rezolutia grilei.[/b] Terenul se randeaza pe o
+## grila de ~7.9 m (Track.TERRAIN_CELL), iar suprafata dintre doua noduri e o
+## coarda. Daca un nod de langa asfalt e deja pe perete, coarda dintre el si
+## nodul de sub sosea urca PESTE asfalt, adica un prag pe carosabil (memoria
+## `suprafete-cu-goluri-si-praguri`: peste 0.3 m e zid). Pe o dreapta aliniata
+## cu grila, pragul maxim la marginea asfaltului e
+## `max_a a*(celula - a - umar) * panta / celula`: cu umarul 5.5 si panta 1.3
+## iese 0.24 m. Sub ~5 m umar trece de 0.3.
+##
+## Forma: `min(buza, drum - GROUND_DROP + panta * max(0, d - umar))`, unde `d`
+## e distanta de la marginea asfaltului. Liniar pe portiuni (min/max, fara
+## produs de profile), ca peretele sa fie o fata plana, nu o curba aproximata
+## de celule (memoria `suprafete-din-placi-plane`). Se aplica doar cu `max`
+## (ridica, nu sapa) si doar pe latura declarata a punctelor al caror cel mai
+## apropiat punct de sosea e IN intervalul debleului — un drum vecin (bazarul
+## de langa buza fantanii) nu e atins.
+func _lift_cuttings(y: float, local: Vector2, near_i: int,
+		wx: float, wz: float) -> float:
+	if cuttings.is_empty():
+		return y
+	var f := _dists[near_i] / _total_len if _total_len > 0.0 else 0.0
+	var d := local.x - half_width_at(near_i)
+	for c in cuttings:
+		var along := _ring_window(f, c.x, c.y, CUT_FADE_FRAC)
+		if along <= 0.0:
+			continue
+		if signf(c.w) != _side_sign_at(near_i, wx, wz):
+			continue
+		var reach := 1.0 - smoothstep(0.0, 1.0,
+			clampf((d - cutting_shape.z) / CUT_FADE_M, 0.0, 1.0))
+		if reach <= 0.0:
+			continue
+		var wall := local.y - GROUND_DROP \
+			+ cutting_shape.y * maxf(0.0, d - cutting_shape.x)
+		var target := minf(c.z, wall)
+		if target <= y:
+			continue
+		y = lerpf(y, target, along * reach)
 	return y
 
 

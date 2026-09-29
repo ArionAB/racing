@@ -352,3 +352,57 @@ Planșele: `docs/track_briefs/img/jodhpur_lumina/`.
 S 0,37–0,42, L 8): albedo-ul drumului, nu lumina (la lumină neutră iese tot
 H 264–271); materialele drumului nu se ating aici. Cerul (`sky_top`/`sky_horizon`)
 nu e canal al `DuskCycle`, deci noaptea cerul rămâne violet-portocaliu la orizont.
+
+## 9. Luminile de Diwali (ramura `jodhpur/poi-lumini`)
+
+Critica oarbă pe C, E și H, de două ori la rând: luminile „lipsesc complet”.
+Sursele existau (2 298 de candele, 2 319 becuri, 38 de felinare, 128 de lămpi
+de fort), dar citeau ca „romburi portocalii plate” sau „discuri maro”: diya e
+100 % lut (sloturile 23 + 10), fără slot de flacără; becul era o bipiramidă
+emisivă fără halou; ferestrele `*_Glow` erau slotul 20 pe atlas, nelegate de
+ceas. **Fără glow/bloom și fără OmniLight** (decizia dezvoltatorului din 30 sep).
+
+| mecanism | unde | cost |
+|---|---|---|
+| `LampHalo` + `lamp_halo.gdshader`: billboard ADITIV, cădere continuă `(1-d)^3`, miez care se albește spre centru; per instanță culoare, rază miez/halou, alungire, fază de pâlpâire | candele (`FlockProp.halo_enabled`, flacăra la `(0; 0,075; 0)` în spațiul piesei), becuri, felinare, lămpile fortului | **+1 material** pentru toate |
+| tăierea din brief §6: între 45 și 60 m pătratul se strânge la miez; miezul are minim 0,0022 rad (~1,2 px la 720p) ca să nu clipească | în shader, nu în disciplină | overdraw-ul scade odată cu raza |
+| `jod_window.gdshader` (`shader:jod_window`): albedo-ul atlasului + emisie caldă `smoothstep(t0, t0+0,08, dusk_lamps)` | toate `*_Glow` (case, haveli, turn + cadran, poartă de piață, 3 porți de fort, zid, turn de zid, fațadele palatului, pavilionul fântânii, `FarCity_A_Glow`) | **+1 material** |
+| decaluri doar-emisie (gradient radial) pe fațadele primului rând de pe H, pas 7 m, `normal_fade` 0,5, stinse la 55–75 m; energia urcă cu `DuskCycle.lamps_value` (×0,3 la apus → ×1 noaptea) | `StreetLights.facade_wash` (31 de decaluri) | 0 materiale; o proiecție pe pixelii atinși, sub plafonul mobil de 8 decaluri/mesh |
+
+**Pragurile ferestrelor.** Brief-ul: turul 1 soare jos, turul 2 se aprind
+lămpile. `dusk_lamps` = 0,15 → 0,6 → 1,0, deci turul 2 (dusk 0,33–0,67) e
+`dusk_lamps` ≈ 0,45–0,73. Fiecare clădire își trage pragul `t0` din hash-ul
+poziției în [0,40; 0,70], cu tranziție de 0,08: prima casă începe la 0,40
+(dusk ≈ 0,28, finalul turului 1), ultima e plină la 0,78 (dusk ≈ 0,6). La
+dusk 0 (0,15) toate sunt stinse, la dusk 0,5 (0,6) ~40 % ard plin și încă ~27 % sunt în tranziție, la
+dusk 1 ard toate cu excepția a 12 % (`off_ratio`, case rămase stinse: un oraș
+cu toate ferestrele aprinse citește a carton), cu intensitate 0,65–1,15 între
+case. Candelele și becurile de Diwali ard de la dusk 0 (e Diwali, bara le
+arată aprinse la apus); doar haloul lor crește cu noaptea (×0,45 → ×1), fiindcă
+un halou plin peste cerul de apus spală fundalul.
+
+**Costul halourilor pe cadru** (`snapshot.gd` → `HALO:`, aceeași formulă de
+rază ca shaderul, dusk 1, camera de joc 1280×720):
+
+| cadru | instanțe în frustum | cu halou întreg (< 45 m) | pixeli acoperiți | overdraw aditiv |
+|---|---|---|---|---|
+| C 0,160 (candelele) | 4 131 (1 718 candele) | 465 | 391 523 | 0,42 ecrane |
+| E 0,505 (porțile) | 92 | 25 | 129 356 | 0,14 ecrane |
+| H 0,950 (ghirlandele, cel mai rău) | 3 569 (1 251 becuri) | 684 | 714 685 | **0,78 ecrane** |
+
+Fragmentul e fără textură (o lungime, un cub, un smoothstep), deci 0,78
+ecrane înseamnă sub un ecran de umplere ieftină pe cadrul cel mai rău. Pe H,
+80 % din pixeli vin din becurile de pe sfori. Dacă device-ul nu ține: întâi
+`halo_far_begin/end` 45/60 → 30/40, apoi `bulb_halo_m` 0,6 → 0,4.
+
+**Lumina caldă pe fațade, A/B pe lume înghețată** (H 0,950, dusk 1,
+`--no-facade-wash`): 13,8 % din cadru se schimbă; pe pixelii atinși, fațada
+stângă trece de la H 354 / S 0,15 / V 0,46, R−B +16 la H 16 / S 0,35 / V 0,61,
+R−B +54, iar cea dreaptă de la H 258 / V 0,40, R−B −12 la H 11 / V 0,60,
+R−B +52. Adică varul rece din spatele ghirlandelor capătă pata caldă a
+becurilor; departe de sfori rămâne albastru.
+
+**Gărzile:** `ProbeJodLumina --guard` OK (ferestrele aprinse nu mută
+măștile de clasă peste praguri); `probe_decor --track=17` **22 de materiale**
+(20 → 22: halou + ferestre), OK; `probe_manual --track=17`, `ProbeBuried`,
+`ProbeLaneClear` (31, exact baza) OK.

@@ -14581,8 +14581,50 @@ func frac_at(index: int, route: int = 0) -> float:
 func recovery_transform(index: int, backoff_m: float,
 		route: int = 0) -> Transform3D:
 	var r := route_at(route)
-	return r.recovery_transform(index, backoff_m) if r != null \
-		else Transform3D.IDENTITY
+	if r == null:
+		return Transform3D.IDENTITY
+	if route == 0:
+		var clamped := _clamp_respawn_past_gap(index, backoff_m)
+		if clamped >= 0:
+			return r.recovery_transform(clamped, 0.0)
+	return r.recovery_transform(index, backoff_m)
+
+
+## Cat de departe DUPA buza de aterizare se opreste o repunere care ar fi cazut
+## inapoi in golul unei sarituri (canal cu `respawn_past_gap`). 5 m: destul cat
+## masina sa stea pe asfalt plin, nu pe muchia peretelui de la buza.
+const GAP_RESPAWN_CLEAR_M: float = 5.0
+## Pana unde (m dupa buza de aterizare) o masina conteaza ca "a trecut golul"
+## pentru regula de mai sus. Dincolo, retragerea de 12-14 m nu mai ajunge la gol.
+const GAP_RESPAWN_WINDOW_M: float = 60.0
+
+
+## Indexul de repunere oprit dupa buza de aterizare, sau -1 daca regula nu se
+## aplica (niciun canal cu `respawn_past_gap`, masina n-a trecut golul, sau
+## retragerea nu ajunge la el). Vezi [member TrackChannel.respawn_past_gap].
+## Acelasi pas pe index ca [method TrackRoute.recovery_transform], ca tinta
+## comparata sa fie exact cea pe care ar fi ales-o repunerea.
+func _clamp_respawn_past_gap(index: int, backoff_m: float) -> int:
+	if _channels.is_empty():
+		return -1
+	var n := baked.size()
+	if n < 2 or _dists.size() <= n or _dists[n] <= 0.0:
+		return -1
+	var spacing := _dists[n] / float(n)
+	var steps := int(backoff_m / maxf(spacing, 0.001))
+	var window := int(GAP_RESPAWN_WINDOW_M / spacing)
+	var clear := maxi(ceili(GAP_RESPAWN_CLEAR_M / spacing), 1)
+	for ch: Dictionary in _channels:
+		if not bool(ch.get("respawn_past_gap", false)) \
+				or not bool(ch.get("jump", false)) or bool(ch.get("ford", false)):
+			continue
+		var far: int = ch["far"]
+		# Cati indici e masina DINCOLO de buza de aterizare (pe bucla).
+		var past := posmod(index - far, n)
+		if past > window or past - steps >= clear:
+			continue
+		return posmod(far + clear, n)
+	return -1
 
 func lateral_distance(index: int, pos: Vector3, route: int = 0) -> float:
 	var r := route_at(route)

@@ -20,7 +20,7 @@ func _ready() -> void:
 		_survey()
 	for a in args:
 		if a.begins_with("--out="):
-			_generate(a.substr(6))
+			_generate2(a.substr(6))
 	if "--check" in args:
 		_check()
 	if "--camcheck" in args:
@@ -177,7 +177,7 @@ const MOD_W := 12.2
 const MOD_D := 3.0
 const TIER_H := 3.12
 const TIER_TOP := [0.0, -3.12, -6.24]
-const LANE_KEEP := 2.0  # fata etajului de jos: metri de la marginea asfaltului
+const LANE_KEEP := 1.2  # fata etajului de jos: metri de la marginea asfaltului
 
 var _out := PackedStringArray()
 var _diya := PackedVector3Array()
@@ -596,6 +596,15 @@ func _camcheck() -> void:
 		else:
 			continue
 		boxes.append([nm, (c as Node3D).global_transform, aabb])
+	# runda 2: modulele sunt in MultiMesh-ul `Trepte` (FlockProp)
+	var mm := zone.get_node_or_null("Trepte")
+	if mm != null:
+		var pos: PackedVector3Array = mm.get("positions")
+		var yw: PackedFloat32Array = mm.get("yaws")
+		var sc: Array = mm.get("scale3_list")
+		for j in pos.size():
+			var xf := Transform3D(Basis(Vector3.UP, yw[j]) * Basis.from_scale(sc[j]), pos[j])
+			boxes.append(["Trepte#%d" % j, xf, AABB(Vector3(-6.1, 0, -1.5), Vector3(12.2, 3.24, 3.0))])
 	var worst := INF
 	var worst_at := ""
 	for i in range(int(0.125 * n), int(0.275 * n)):
@@ -615,3 +624,439 @@ func _camcheck() -> void:
 				worst = d
 				worst_at = "%s la frac %.3f (camera %s)" % [b[0], float(i) / n, cam]
 	print("camera: cea mai mica distanta la o piesa din C = %.2f m, %s" % [worst, worst_at])
+
+
+## ===========================================================================
+## RUNDA 2 — IMBRACAMINTE CONTINUA
+##
+## Verdictul orb al rundei 1: „treptele sunt blocuri disparate, ca niste mici
+## fortificatii pe nisip, cu pete goale intre ele". Cauza: stive independente
+## pe statii de 12,2 m, fiecare cu fata si adancimea ei. Acum:
+##
+##  * PERETELE DIN DREAPTA e un singur contur care inconjoara groapa (bratul
+##    de intrare -> acul -> bratul de iesire), la offset fata de marginea
+##    asfaltului. Pe fiecare statie (pas 2 m pe drum) se calculeaza etajul de
+##    jos (cel in care cade terenul de la 2 m de asfalt) si fetele etajelor
+##    de deasupra (conturul terenului la cota bazei lor, netezit pe +-14 m).
+##    Pe fiecare etaj modulele se INLANTUIE pe acea polilinie: coarda se
+##    inchide la 12,2 m sau cand sageata trece de 0,35 m (acul), iar ultimul
+##    modul dintr-o serie se scurteaza. Modulele se lungesc cu
+##    adancime*tan(unghi/2) la fiecare capat, ca pe curba sa nu ramana pene
+##    de nisip intre spatele lor.
+##  * TERASELE ADANCI: adancimea unui etaj se umple cu RANDURI de module
+##    nescalate (3 m fiecare, lipite spate-fata), nu cu un modul intins pe Z —
+##    un modul intins de 2,5x isi intindea si treptele (0,45 -> 1,1 m) si
+##    citea ca punte. Treptele randurilor din spate intra in plinul
+##    randului din fata, deci nu se vad; fetele de sus sunt la aceeasi cota,
+##    deci terasa e o suprafata de piatra continua.
+##  * MALUL DINSPRE APA (stanga): un rand de module cu fata spre apa, spatele
+##    la 0,3 m de asfalt, varful la 0,35 m SUB drum, baza sub apa/teren.
+##  * Totul intr-un singur MultiMesh (`FlockProp`, clasa `rose_sandstone`,
+##    aceeasi ca `Well_Stone` in world_prop): sute de module ar fi sute de
+##    desene ca noduri.
+
+const PAV_HALF_D := 4.19
+var DEBUG := false
+const SAG_MAX := 0.35
+const FRAC_A := 0.135
+const FRAC_B := 0.264
+
+var _mm_pos := PackedVector3Array()
+var _mm_yaw := PackedFloat32Array()
+var _mm_sc: Array[Vector3] = []
+var _road_diya := PackedVector3Array()
+
+
+func _gy(p: Vector3) -> float:
+	return tr._terrain_mesh_y(p.x, p.z)
+
+
+## Un modul in MultiMesh. `front_mid` = mijlocul fetei (cu trepte), `outward`
+## = +Z local (dinspre fata spre spate).
+func _mm_module(front_mid: Vector3, along: Vector3, outward: Vector3, sx: float, sz: float, base: float, top: float, candles: bool) -> void:
+	var sy := (top - base) / TIER_H
+	if sy < 0.08:
+		return
+	var o := outward.normalized()
+	var a := along.normalized()
+	if a.cross(Vector3.UP).dot(o) < 0.0:
+		a = -a
+	var origin := front_mid + o * (MOD_D * sz * 0.5)
+	origin.y = base
+	var xf := Transform3D(Basis(a * sx, Vector3.UP * sy, o * sz), origin)
+	_mm_pos.append(origin)
+	_mm_yaw.append(atan2(o.x, o.z))
+	_mm_sc.append(Vector3(sx, sy, sz))
+	if not candles:
+		return
+	# sir des pe buza terasei (1,1-1,5 m) + candele pe V-uri (doar unde
+	# modulul e destul de inalt ca V-urile sa se vada)
+	var span := MOD_W * sx
+	var cnt := int(span / 1.3)
+	for e in cnt:
+		var lx := -MOD_W * 0.5 + (float(e) + 0.5 + _rng.randf_range(-0.25, 0.25)) * MOD_W / cnt
+		_diya.append(xf * Vector3(lx, 3.24, -1.32))
+		_diya_yaw.append(_rng.randf() * TAU)
+	if sy > 0.6:
+		for sp in _step_spots():
+			if _rng.randf() < 0.45:
+				_diya.append(xf * sp)
+				_diya_yaw.append(_rng.randf() * TAU)
+
+
+func _median(arr: Array, i: int, w: int) -> float:
+	var vals: Array = []
+	for j in range(maxi(0, i - w), mini(arr.size(), i + w + 1)):
+		if arr[j] > -900.0:
+			vals.append(arr[j])
+	if vals.is_empty():
+		return -999.0
+	vals.sort()
+	return vals[vals.size() / 2]
+
+
+## Inlantuie module pe o serie de statii [s0, s1] la offset-urile date.
+## pts[i] = punctul fetei, nrm[i] = normala spre perete, depth[i], base[i].
+func _chain(pts: Array, nrm: Array, depth: Array, base: Array, top: float, s0: int, s1: int, candles: bool) -> int:
+	var placed := 0
+	var a := s0
+	while a < s1:
+		# cauta capatul corzii
+		var b := a + 1
+		while b < s1:
+			var nb := b + 1
+			var chord: float = (pts[nb] - pts[a]).length()
+			if chord > MOD_W:
+				break
+			var sag := 0.0
+			for m in range(a + 1, nb):
+				var d: Vector3 = pts[m] - pts[a]
+				var c: Vector3 = (pts[nb] - pts[a]).normalized()
+				sag = maxf(sag, (d - c * d.dot(c)).length())
+			if sag > SAG_MAX:
+				break
+			b = nb
+		# ultima bucata prea scurta: lipeste-o la coarda curenta
+		if s1 - b <= 2 and s1 - b > 0 and (pts[s1] - pts[a]).length() < MOD_W * 1.35:
+			b = s1
+		var pa: Vector3 = pts[a]
+		var pb: Vector3 = pts[b]
+		var chord_v := pb - pa
+		chord_v.y = 0.0
+		var L := chord_v.length()
+		if L < 1.0:
+			a = b
+			continue
+		var al := chord_v / L
+		var nv := Vector3.ZERO
+		var dep := 0.0
+		var bs := INF
+		for m in range(a, b + 1):
+			nv += nrm[m]
+			dep = maxf(dep, depth[m])  # max: spatele intra in etajul de sus, nu lasa nisip
+			bs = minf(bs, base[m])
+		nv = (nv - al * nv.dot(al)).normalized()
+		# unghiul cu vecinii -> prelungire ca sa inchida penele din spate
+		var ext := 0.3
+		if a > s0:
+			var prev: Vector3 = (pts[a] - pts[maxi(s0, a - 3)])
+			prev.y = 0.0
+			if prev.length() > 0.5:
+				ext = maxf(ext, dep * tan(prev.normalized().angle_to(al) * 0.5))
+		if b < s1:
+			var nxt: Vector3 = (pts[mini(s1, b + 3)] - pts[b])
+			nxt.y = 0.0
+			if nxt.length() > 0.5:
+				ext = maxf(ext, dep * tan(al.angle_to(nxt.normalized()) * 0.5))
+		ext = minf(ext, 2.5)
+		var sx := (L + 2.0 * ext) / MOD_W
+		var mid := (pa + pb) * 0.5
+		mid.y = 0.0
+		# randuri de 3 m pe adancime, nescalate pe Z
+		var rows := maxi(1, int(ceil(dep / MOD_D - 0.2)))
+		var sz := clampf(dep / (rows * MOD_D), 0.5, 1.25)
+		for r in rows:
+			_mm_module(mid + nv * (r * MOD_D * sz), al, nv, sx, sz, bs, top, candles and r == 0)
+			placed += 1
+		a = b
+	return placed
+
+
+func _generate2(path: String) -> void:
+	_rng.seed = 20260930
+	DEBUG = "--debug" in OS.get_cmdline_user_args()
+	var i0 := int(FRAC_A * n)
+	var i1 := int(FRAC_B * n)
+	var levels := [-3.12, -6.24, -9.36]
+	# ---- statiile peretelui din dreapta
+	var E: Array = []    # marginea asfaltului
+	var N: Array = []    # normala spre perete
+	var Y: Array = []    # cota drumului
+	var G2: Array = []   # terenul la 2 m de asfalt
+	var C: Array = [[], [], []]  # contururile bazelor (etaj 0, 1) + buza (-0.3)
+	for i in range(i0, i1 + 1):
+		var q: Vector3 = tr.baked[i]
+		var sd := tr._side_at(i)
+		var e := q + sd * tr.width_at_index(i)
+		e.y = 0.0
+		E.append(e)
+		N.append(sd)
+		Y.append(q.y)
+		var p2 := e + sd * (LANE_KEEP + 0.3)
+		G2.append(_gy(p2))
+		for k in 2:
+			var d := _contour(e, sd, levels[k])
+			C[k].append(d if d >= 0.0 else -999.0)
+		var dl := _contour(e, sd, -0.3)
+		C[2].append(dl if dl >= 0.0 else -999.0)
+	var S := E.size()
+	var Cs: Array = [[], [], []]
+	# mediana pe +-24 m, apoi medie pe +-8 m: fetele etajelor trebuie sa fie
+	# linii line, altfel coarda dintre doua statii cu offset-uri diferite iese
+	# modul pus in diagonala (runda 2, prima captura)
+	for k in 3:
+		var med: Array = []
+		for i in S:
+			med.append(_median(C[k], i, 12))
+		for i in S:
+			var acc := 0.0
+			var cn := 0
+			for j in range(maxi(0, i - 4), mini(S, i + 5)):
+				if med[j] > -900.0:
+					acc += med[j]
+					cn += 1
+			Cs[k].append(acc / cn if cn > 0 else -999.0)
+	# anvelopa Lipschitz de jos: fata unui etaj nu se departeaza de drum cu
+	# mai mult de 0,5 m pe statie (2 m), altfel coarda iese in diagonala
+	# (runda 2: pene inclinate langa camera la 0.150-0.166). Unde fata vine
+	# mai aproape decat conturul, etajul sta pe spatele celui de dedesubt.
+	for k in 3:
+		var env: Array = []
+		for i in S:
+			var best := 999.0
+			for j in S:
+				if Cs[k][j] > -900.0:
+					best = minf(best, float(Cs[k][j]) + 0.4 * absf(i - j))
+			env.append(best if Cs[k][i] > -900.0 else -999.0)
+		Cs[k] = env
+	# etajul de jos pe statie, apoi filtru de moda (+-3) ca sa nu clipeasca
+	var braw: Array = []
+	for i in S:
+		var b := -1
+		for k in [2, 1, 0]:
+			if TIER_TOP[k] >= float(G2[i]) + 0.25:
+				b = k
+				break
+		braw.append(b)
+	var bot: Array = []
+	for i in S:
+		var cnt := {}
+		for j in range(maxi(0, i - 3), mini(S, i + 4)):
+			cnt[braw[j]] = int(cnt.get(braw[j], 0)) + 1
+		var best: int = braw[i]
+		for key in cnt:
+			if cnt[key] > cnt.get(best, 0):
+				best = key
+		bot.append(best)
+	# offset-urile fetelor pe statie: front[k][i] (-1 = etajul nu exista)
+	var front: Array = [[], [], []]
+	var back: Array = [[], [], []]
+	for i in S:
+		var b: int = bot[i]
+		for k in 3:
+			front[k].append(-1.0)
+			back[k].append(-1.0)
+		if b < 0:
+			continue
+		var f_prev := -1.0
+		for k in range(b, -1, -1):
+			var f: float
+			if k == b:
+				f = LANE_KEEP
+			else:
+				f = maxf(float(Cs[k][i]) if Cs[k][i] > -900.0 else f_prev + 3.0, f_prev + 2.0)
+			front[k][i] = f
+			f_prev = f
+		for k in range(b, -1, -1):
+			var bk: float
+			if k > 0 and front[k - 1][i] > 0.0:
+				bk = front[k - 1][i]
+			else:
+				var lip: float = Cs[2][i] if Cs[2][i] > -900.0 else front[k][i] + 3.0
+				bk = clampf(lip, front[k][i] + 3.0, front[k][i] + 12.0)
+			back[k][i] = bk
+	if DEBUG:
+		for i in range(0, S, 4):
+			print("  perete f %.3f drum %+.2f G2 %+.2f bot %d | C0 %.1f C1 %.1f lip %.1f | fronts %.1f %.1f %.1f backs %.1f %.1f %.1f" % [float(i0 + i) / n, Y[i], G2[i], bot[i], Cs[0][i], Cs[1][i], Cs[2][i], front[0][i], front[1][i], front[2][i], back[0][i], back[1][i], back[2][i]])
+	# ---- inlantuirea pe etaje, pe serii continue cu acelasi rol (jos / sus)
+	var total := 0
+	for k in 3:
+		var i := 0
+		while i < S:
+			if front[k][i] < 0.0:
+				i += 1
+				continue
+			var role: bool = bot[i] == k
+			var j := i
+			while j + 1 < S and front[k][j + 1] >= 0.0 and (bot[j + 1] == k) == role:
+				j += 1
+			var pts: Array = []
+			var dep: Array = []
+			var bas: Array = []
+			for m in S:
+				var f: float = front[k][m] if front[k][m] >= 0.0 else LANE_KEEP
+				pts.append(E[m] + N[m] * f)
+				dep.append(maxf(float(back[k][m]) - f, MOD_D))
+				if role:
+					bas.append(float(G2[m]) - 0.3)
+				else:
+					bas.append(float(levels[k]))
+			if j > i:
+				total += _chain(pts, N, dep, bas, TIER_TOP[k], i, j, true)
+			i = j + 1
+	print("perete: %d module" % total)
+	# ---- malul dinspre apa (stanga): randuri de trepte care coboara spre
+	# mijlocul vaii / apa, fata spre apa. Randul r: fata la 3,3 + 3r m de
+	# asfalt, varful la (drum - 0,35) - 1,56 r (jumatate de etaj pe rand).
+	# Se opreste la apa, la teren mai sus decat varful, sau la jumatatea
+	# distantei pana la celalalt brat.
+	var bank := 0
+	for r in 4:
+		var W: Array = []
+		var WN: Array = []
+		var WD: Array = []
+		var WB: Array = []
+		var WT: Array = []
+		var ok: Array = []
+		for i in range(i0, i1 + 1):
+			var q: Vector3 = tr.baked[i]
+			var sd := -tr._side_at(i)  # spre apa
+			var hw := tr.width_at_index(i)
+			var e := q + sd * hw
+			e.y = 0.0
+			var f := float(i) / n
+			var inner := f > 0.186 and f < 0.212
+			var off0 := 0.3 + MOD_D * r
+			var off1 := off0 + MOD_D
+			var low := INF
+			for d: float in [off0 + 0.5, (off0 + off1) * 0.5, off1]:
+				low = minf(low, _gy(e + sd * d))
+			var top := q.y - 0.35 - 1.56 * r
+			var basey := maxf(low, -10.2) - 0.3
+			var pf := e + sd * (off1 + 0.5)
+			# ramai pe jumatatea ta de vale: fata randului nu trece de mijlocul
+			# dintre bratul tau si celalalt
+			var pm := e + sd * off1
+			var ci := tr.closest_index_global(pm)
+			var own := absf(ci - i) < 20
+			if not own:
+				var qo: Vector3 = tr.baked[ci]
+				var d_other := Vector2(pm.x - qo.x, pm.z - qo.z).length() - tr.width_at_index(ci)
+				var d_own := off1
+				# latimea libera pana la mijloc: taie randul la jumatate
+				var half := (d_other + d_own) * 0.5
+				if half - off0 >= 1.5:
+					off1 = half - 0.15
+					low = INF
+					for d: float in [off0 + 0.5, off1]:
+						low = minf(low, _gy(e + sd * d))
+					basey = maxf(low, -10.2) - 0.3
+					own = true
+			var need := 0.3 if r == 0 else 0.9
+			# randurile din spate doar pe vale USCATA: peste apa ar acoperi
+			# apa (bara: apa verde intre maluri, cu trepte doar pe margine)
+			if r > 0 and low < -9.4:
+				own = false
+			ok.append(not inner and own and top - basey > need and top > -9.3 and top > low + 0.4)
+			if DEBUG and i % 5 == 0:
+				print("  mal r%d f %.3f drum %+.2f low %+.2f top %+.2f base %+.2f own %s -> %s" % [r, f, q.y, low, top, basey, own, ok[ok.size() - 1]])
+			W.append(e + sd * off1)
+			WN.append(-sd)
+			WD.append(off1 - off0)
+			WB.append(basey)
+			WT.append(top)
+			if r == 0:
+				var er := q + tr._side_at(i) * (hw + 0.5)
+				er.y = _gy(er)
+				_road_diya.append(er)
+				if ok[ok.size() - 1]:
+					var el := e + sd * 0.5
+					el.y = top + 0.12 * (top - basey) / TIER_H
+					_road_diya.append(el)
+		var s := 0
+		while s < ok.size():
+			if not ok[s]:
+				s += 1
+				continue
+			var t := s
+			while t + 1 < ok.size() and ok[t + 1]:
+				t += 1
+			var aa := s
+			while aa < t:
+				var bb := mini(t, aa + 6)
+				var tp: float = WT.slice(aa, bb + 1).min()
+				bank += _chain(W, WN, WD, WB, tp, aa, bb, true)
+				aa = bb
+			s = t + 1
+	print("mal: %d module" % bank)
+	# ---- pavilionul: pe axa acului, in spatele etajului de sus
+	var ia := int((0.198 - FRAC_A) * n)
+	var pav_off := 12.0
+	if ia < S and back[0][ia] > 0.0:
+		pav_off = back[0][ia]
+	var pe: Vector3 = E[ia] + N[ia] * (pav_off - 1.0 + PAV_HALF_D)
+	var pb := INF
+	for dx: float in [-4.0, 0.0, 4.0]:
+		for dz: float in [-10.0, 0.0, 10.0]:
+			pb = minf(pb, tr._terrain_mesh_y(pe.x + dx, pe.z + dz))
+	pe.y = clampf(pb, -1.9, 0.0)
+	var pz: Vector3 = N[ia]
+	var px := Vector3.UP.cross(pz).normalized()
+	if px.cross(Vector3.UP).dot(pz) < 0.0:
+		px = -px
+	_emit("Pavilion", "s_stepwell_pavilion", Transform3D(Basis(px, Vector3.UP, pz), pe))
+	print("pavilion la %s (offset %.1f, teren %.2f)" % [pe, pav_off, pb])
+	# ---- candele plutitoare (nu sub modulele malului)
+	var wet: Dictionary = tr.get("_ravine_wet")
+	var step: float = tr.get("_terr_step")
+	var org: Vector3 = tr.get("_terr_origin")
+	var fl := PackedVector3Array()
+	var fly := PackedFloat32Array()
+	var gx := -210.0
+	while gx <= -88.0:
+		var gz := 52.0
+		while gz <= 72.0:
+			var p := Vector3(gx + _rng.randf_range(-1.0, 1.0), 0, gz + _rng.randf_range(-1.0, 1.0))
+			var cell := Vector2i(int(floor((p.x - org.x) / step)), int(floor((p.z - org.z) / step)))
+			var ci := tr.closest_index_global(p)
+			var q2: Vector3 = tr.baked[ci]
+			var dd := Vector2(p.x - q2.x, p.z - q2.z).length() - tr.width_at_index(ci)
+			if wet.has(cell) and _gy(p) < -9.8 and dd > 3.8:
+				var w := clampf((p.x + 210.0) / 120.0, 0.0, 1.0)
+				if _rng.randf() < 0.45 + 0.5 * w:
+					fl.append(Vector3(p.x, -9.5, p.z))
+					fly.append(_rng.randf() * TAU)
+			gz += 1.9
+		gx += 1.9
+	var ry := PackedFloat32Array()
+	for k in _road_diya.size():
+		ry.append(_rng.randf() * TAU)
+	print("module %d, candele pe trepte %d, pe drum %d, plutitoare %d" % [_mm_pos.size(), _diya.size(), _road_diya.size(), fl.size()])
+	# ---- iesirea
+	_out.append('[node name="Trepte" type="MultiMeshInstance3D" parent="DecorManual/ZoneC_Fantana"]')
+	_out.append('script = ExtResource("flock")')
+	_out.append('model = ExtResource("s_stepwell_flight_module")')
+	_out.append("positions = " + var_to_str(_mm_pos))
+	_out.append("yaws = " + var_to_str(_mm_yaw))
+	_out.append("scale3_list = " + var_to_str(_mm_sc))
+	_out.append('tri_class = "rose_sandstone"')
+	_out.append("")
+	var all_d := _diya.duplicate()
+	all_d.append_array(_road_diya)
+	var all_y := _diya_yaw.duplicate()
+	all_y.append_array(ry)
+	_flock("Candele_Trepte", "s_diya", all_d, all_y, 3.2, 4.0)
+	_flock("Candele_Apa", "s_floating_diya", fl, fly, 2.4, 3.2)
+	var fo := FileAccess.open(path, FileAccess.WRITE)
+	fo.store_string("\n".join(_out))
+	fo.close()

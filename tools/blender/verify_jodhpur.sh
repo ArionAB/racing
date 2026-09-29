@@ -248,6 +248,24 @@ echo "== fundalul (brief §1.7, val 5 grupa fundal) =="
 # pe nodul lui -- origine COMUNA cu FarCity_A. Nicio exceptie de slot.
 check "rocks/jodhpur_horizon.glb"    2100 --origin=assembly
 
+echo "== natura si candelele (brief §1.7, val 5 grupa natura) =="
+# build_jodhpur_nature.py. Bugetele sunt plafoanele BRIEF-ului (contract, nu
+# estimare): stanca <= 200, euforbia <= 300, copacii <= 400, diya <= 24,
+# floating_diya <= 40. verify_glb compara bugetul PE NOD; la copaci (Trunk +
+# Crown) totalul de <= 400 il verifica build-ul (`bugete depasite: 0`).
+# Copacii: --origin=assembly -- Crown nu atinge solul la baza lui proprie.
+# Candelele: O SINGURA plasa (FlockProp ia primul MeshInstance3D); TILE_TERRACOTTA
+# e interzis pe gresie, dar corect pe lut ars (brief §1.7).
+check "rocks/rhyolite_boulder_a.glb"    200
+check "rocks/rhyolite_boulder_b.glb"    200
+check "rocks/rhyolite_boulder_c.glb"    200
+check "rocks/rock_slab.glb"             200
+check "plants/euphorbia.glb"            300
+check "plants/neem_tree.glb"            400 --origin=assembly
+check "plants/khejri_tree.glb"          400 --origin=assembly
+check "props/diya.glb"                   24
+check "props/floating_diya.glb"          40
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total"

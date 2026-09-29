@@ -2541,3 +2541,140 @@ Așezare: creste la 275–290 m, palatul la 225 m, orașul la 195 m, scara 1,
   pe noduri (`nodes`/`offsets`) și modul `game` (cadru de joc cu ceață;
   `far_city` îl folosește cu lumină neutră și fără ceață, fiindcă în cadrul
   4:3 al `_neutral_shot` banda de 150 × 12 m ieșea o dungă).
+
+## Val 5 grupa natura — stânca, plantele, candelele (`build_jodhpur_nature.py`, 29 sep 2026)
+
+Fundalul (`rocks/jodhpur_horizon.glb`) e al altui constructor
+(`build_jodhpur_horizon.py`), nu e în secțiunea asta.
+
+**Stâncile sunt anvelope convexe** (`bmesh.ops.convex_hull`) ale unor puncte
+așezate de mână (capăt, pantă, vârf, umăr, flanc), cu proiecția fiecărui
+punct pe sol ușor evazată, deci fără surplombă. Asta dă fațetele mari și
+muchiile drepte ale planșei; `rock()`/`boulder()` din `dio_lib` dau benzi
+orizontale. Umbrire plată, fără bevel. Pentru comparație, tenta clasei
+`rhyolite` e `#9A6A5A` (brief-ul pistei §4). Plantele și candelele sunt pe
+culoarea reală a slotului (`ANIMAL_TINT`). Candelele n-au decupare pe planșă,
+așa că `preview_jodhpur.py --solo` scrie doar randarea din GLB. Planșa
+valului e `docs/asset_briefs/img/jodhpur_fidelity_val5a.png`.
+
+| piesă | tri / plafon brief | cote măsurate în GLB (X × Y × Z) | brief | h/l decupare → randare | origine |
+|---|---:|---|---|---|---|
+| `rocks/rhyolite_boulder_a.glb` | 40 / 200 | 2,40 × 3,00 × 2,00 | 3,0 × 2,4 × 2,0 | 0,72 → 0,79 (+11%) | bază |
+| `rocks/rhyolite_boulder_b.glb` | 44 / 200 | 2,20 × 3,50 × 1,80 | 3,5 × 2,2 × 1,8 | 0,67 → 0,63 (−7%) | bază |
+| `rocks/rhyolite_boulder_c.glb` | 36 / 200 | 2,00 × 2,50 × 1,60 | 2,5 × 2,0 × 1,6 | 0,72 → 0,74 (+3%) | bază |
+| `rocks/rock_slab.glb` | 44 / 200 | 2,50 × 4,00 × 0,80 | 4,0 × 2,5 × 0,8 | 0,35 → 0,38 (+9%) | bază |
+| `plants/euphorbia.glb` | 280 / 300 | 0,75 × 1,97 × 2,21 | 2,2 m | 1,18 → 1,15 (−3%) | bază |
+| `plants/neem_tree.glb` | 386 / 400 (Trunk 54 + Crown 332) | 7,77 × 8,64 × 7,02 | 7 m | 0,80 → 0,81 | bază, `--origin=assembly` |
+| `plants/khejri_tree.glb` | 346 / 400 (Trunk 106 + Crown 240) | 6,97 × 7,30 × 6,07 | 6 m | 0,79 → 0,81 | bază, `--origin=assembly` |
+| `props/diya.glb` | 22 / 24 | 0,087 × 0,113 × 0,053 | Ø 0,10, 0,05 | — (fără decupare) | bază |
+| `props/floating_diya.glb` | 38 / 40 | 0,236 × 0,243 × 0,054 | Ø 0,25 | — (fără decupare) | bază |
+
+h/l e măsurat pe pixelii saturați (obiectul fără umbra gri și fără etichetă),
+pe decupare și pe `_render_<piesă>.png`. Toate sunt în ±15%.
+
+### Sonda `FlockProp` pe candele (temporară, necomisă)
+
+Am rulat `--import`, apoi o scenă-sondă cu rădăcina `Node3D` care dă
+`diya.glb` și `floating_diya.glb` câte unui `FlockProp` (12 poziții, yaw-uri
+diferite) și citește `multimesh` după 3 cadre:
+
+- fiecare GLB are **un singur `MeshInstance3D`** (`Diya`, `Floating_Diya`),
+  cu scala 1 pe nod și pe rădăcină, o singură suprafață;
+- `FlockProp` ia mesh-ul: AABB-ul din MultiMesh e identic cu cel din GLB
+  (diya 0,087 × 0,053 × 0,113, cu ciocul spre −Z, adică înainte), 22 / 38 tri,
+  `material_override` = materialul de lume;
+- **12 instanțe, 12 nenule** — dar **doar cu fereastră**. În `--headless`
+  toate transformurile ies (0,0,0). Un martor (MultiMesh scris de mână cu
+  (1,2,3) și citit înapoi) iese tot (0,0,0) în headless și (1,2,3) cu
+  fereastră: rendererul dummy din `--headless` nu păstrează bufferul
+  MultiMesh-ului. E aceeași semnătură de măsurătoare moartă din memoria
+  `multimesh-masuratoare-moarta`, dar cu altă cauză. Orice sondă care citește
+  `get_instance_transform` cere un martor și o rulare cu fereastră.
+
+### Fidelitate — `rhyolite_boulder_a`
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| corp | 1, fațete mari plate, muchii drepte | 1, anvelopă convexă, umbrire plată | ok; **mai puține fațete** (~12 vizibile față de ~20) |
+| vârf | 1, puțin la dreapta centrului, ascuțit-bont | 1, la ~50%, bont | ok |
+| stânga | capăt jos, pantă lungă spre vârf | idem | ok |
+| dreapta | față de sus înclinată → umăr → flanc aproape vertical | idem | ok |
+| talpă | lată, pe sol | lată, fără surplombă | ok |
+
+### Fidelitate — `rhyolite_boulder_b`
+
+| element | decupare | randare | ok? |
+|---|---|---|---|
+| corp | 1, lat și jos | 1, lat | ok |
+| vârf | 1, la stânga centrului (~40%), ascuțit | 1, la ~40%, bont | ok; mai rotund |
+| lob stânga-jos | 1, treaptă separată | umflătură pe flanc, fără treaptă concavă | **abatere**: anvelopa convexă nu poate face concavitatea dintre lob și corp |
+| umăr dreapta + flanc abrupt | da | da | ok |
+
+### Fidelitate — `rhyolite_boulder_c`
+
+| element | decupare | randare | ok? |
+|---|---|---|---|
+| corp | 1, compact | 1, compact | ok |
+| flanc stâng | abrupt, aproape vertical | abrupt | ok |
+| creastă | plată, lată, stânga-centru | plată | ok |
+| panta dreaptă | lungă, domoală | mai scurtă, mai abruptă | abatere mică |
+
+### Fidelitate — `rock_slab`
+
+| element | decupare | randare | ok? |
+|---|---|---|---|
+| lespede | 1, joasă, lungă | 1, 4,0 × 0,8 m | ok |
+| flancuri | verticale, 2-3 plane pe latura lungă | verticale, 3 plane | ok |
+| teșitura | bandă de fațete înclinate de jur împrejur | bandă la 58–93% din înălțime | ok |
+| fața de sus | aproape plană, fațetată | aproape plană, 3-4 plane | ok |
+| capete | stânga bont, dreapta ascuțit | idem (romb alungit) | ok |
+
+### Fidelitate — `euphorbia`
+
+| element | decupare | randare | ok? |
+|---|---|---|---|
+| movilă de pământ | 1, brun-roșcat, la bază | 1, `ROCK_DARK`, 6 laturi | ok |
+| coloane | 8, muchiate, capete bonte | 8, prisme cu 5 fețe, capac `TROPICAL_GREEN` | ok |
+| cea mai înaltă | centru, ușor în stânga | centru, 2,2 m | ok |
+| stânga / dreapta / spate | 3 / 3 / 1, înălțimi diferite | 3 / 3 / 1 (1,2–1,9 m) | ok |
+| pornire | mănunchi strâns la sol, cot moale | mănunchi la sol, cot la 0,2–0,45 m | ok; coatele exterioare mai oblice decât pe decupare |
+| ramurele laterale mici | ~4, pe coloanele exterioare | 0 | **abatere**: bugetul de 300 (280 folosiți) nu mai încape o ramură (~23 tri) |
+
+### Fidelitate — `neem_tree` și `khejri_tree` (diferența e silueta)
+
+| element | neem: decupare → randare | khejri: decupare → randare | ok? |
+|---|---|---|---|
+| trunchi | gros, scurt, evazat → idem, `WOOD` | răsucit, evazat → S ușor, `WOOD` | ok |
+| crengi | 3, se desfac la ~1/3 → 3 de la 2,05 m | 2 brațe în V jos → 2 brațe de la 1,55 m + 5 crengi spre plăci | ok |
+| coroană | plină, rotundă, fără cer printre volume → masă centrală + 7 umflături, fără goluri | rară, turtită, umbrelă, cer printre plăci → 5 plăci turtite, cerul se vede între ele | ok |
+| bază coroană | ~37% din înălțime → ~37% | ~55% → ~55% (trunchiul și brațele se văd) | ok |
+| vârf | cocoșat → 2 umflături sus | plat-bombat → placa din mijloc cea mai sus | ok |
+| textura de frunziș | ciorchini mici pictați | volume fațetate low-poly | abatere de stil (regula 0.5: textura nu e geometrie) |
+
+Pe planșă, neem-ul e un nor închis, iar khejri-ul o umbrelă de plăci cu cer
+printre ele. Pe `jodhpur_fidelity_val5a.png`, puse una lângă alta, se
+deosebesc după siluetă, cu aceleași sloturi.
+
+### Candelele (fără decupare)
+
+| element | brief | GLB | ok? |
+|---|---|---|---|
+| `diya`: castronel de lut | Ø 0,10, 0,05 m, `TILE_TERRACOTTA` | 6 laturi, gura mai lată ca talpa, 0,087 × 0,053 | ok |
+| `diya`: cioc (fitil) | — (e pe orice diya) | vârful de pe +Y (−Z în Godot) tras în afară și ridicat | ok |
+| `diya`: interior | — | pâlnie `RUST` (lut ars mai închis / ulei) | ok |
+| flacăra | NU (shaderul `diya_flame`) | absentă | ok |
+| o singură plasă | da | 1 nod, confirmat de sondă | ok |
+| `floating_diya`: talger | frunză `TROPICAL_GREEN`, Ø 0,25 | 8 laturi cu vârf de frunză, marginea ridicată 2 cm | ok |
+| `floating_diya`: candela | pe talger | diya × 0,85 pe mijloc | ok |
+
+### Diferențe rămase (de decis de lider)
+
+- Bolovanii au **mai puține fațete** decât decuparea (36–44 tri, ~10–14
+  fațete vizibile față de ~20), iar lumina neutră a uneltei le contrastează
+  mai puțin decât planșa. Plafonul (200) ar permite dublul, dar punctele în
+  plus pe o anvelopă convexă doar rotunjesc corpul. Fațetele concave
+  (lobul lui `_b`, treptele interioare de pe decupări) ar cere geometrie
+  neconvexă.
+- `euphorbia`: fără ramurelele laterale mici (buget).
+- Coroanele sunt low-poly fațetate, nu ciorchini. Lumina de frunziș o dă
+  eventual o clasă la integrare, nu geometria.

@@ -635,6 +635,46 @@ COMPARE_SPECS = {
                            ("UmaidBhawan_A", -35.0, 225.0, 15.0),
                            ("FarCity_A", 70.0, 195.0, -4.0)]},
     },
+    # --- val 5 grupa natura (brief §1.7, build_jodhpur_nature.py) ---
+    # Stanca: ROCK_DARK -> clasa `rhyolite` la integrare, deci tenta clasei
+    # (#9A6A5A, brief-ul pistei §4), plata x AO. Plantele nu primesc clasa:
+    # culoarea reala e slotul (ANIMAL_TINT = HEX din palette.gd). Lungimea
+    # stancilor e pe Y: camera de pe +X o vede pe orizontala, ca pe decupare.
+    "rhyolite_boulder_a": {
+        "category": "rocks", "tints": {"Rhyolite_Boulder_A": "#9A6A5A"},
+        "camera": {"azimuth": 20.0, "elevation": 14.0, "margin": 1.10, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "rhyolite_boulder_b": {
+        "category": "rocks", "tints": {"Rhyolite_Boulder_B": "#9A6A5A"},
+        "camera": {"azimuth": 20.0, "elevation": 14.0, "margin": 1.10, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "rhyolite_boulder_c": {
+        "category": "rocks", "tints": {"Rhyolite_Boulder_C": "#9A6A5A"},
+        "camera": {"azimuth": 20.0, "elevation": 14.0, "margin": 1.10, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "rock_slab": {
+        "category": "rocks", "tints": {"Rock_Slab": "#9A6A5A"},
+        "camera": {"azimuth": 20.0, "elevation": 16.0, "margin": 1.10, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "euphorbia": {
+        "category": "plants", "tints": "ANIMAL",
+        "camera": {"azimuth": 10.0, "elevation": 8.0, "margin": 1.08, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "neem_tree": {
+        "category": "plants", "tints": "ANIMAL",
+        "camera": {"azimuth": 10.0, "elevation": 6.0, "margin": 1.08, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
+    "khejri_tree": {
+        "category": "plants", "tints": "ANIMAL",
+        "camera": {"azimuth": 10.0, "elevation": 6.0, "margin": 1.08, "lens": 70.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
+    },
 }
 
 
@@ -1249,6 +1289,11 @@ WAVE_PIECES = {
     # unghiul de joc cu ceata
     "5b": ["umaid_bhawan", "far_city", "desert_ridge", "jodhpur_horizon_game",
            "jodhpur_horizon_chase"],
+    # val 5 grupa natura (brief §1.7): build_jodhpur_nature.py; candelele
+    # sunt randari `--solo` (fara decupare pe planșa)
+    "5a": ["rhyolite_boulder_a", "rhyolite_boulder_b", "rhyolite_boulder_c",
+           "rock_slab", "euphorbia", "neem_tree", "khejri_tree",
+           "diya", "floating_diya"],
 }
 
 
@@ -1481,6 +1526,42 @@ def compare(name, models_dir=None, res_height=900, out_dir=None):
         return _game_shot(name, spec, models_dir, res_height, out_dir)
     return _compare_v4(name, models_dir, res_height, out_dir)
 
+# --- val 5 grupa natura: candelele n-au decupare pe planșa ------------------
+# `diya`/`floating_diya` sunt descrise doar in brief (§1.7), deci nu exista
+# `jodhpur_assets_v1/<nume>.png` si `compare()` nu le poate randa. `--solo`
+# scrie DOAR randarea din GLB (aceeasi lumina neutra, acelasi fundal) in
+# jodhpur_fidelity/<nume>.png, ca planșa valului sa le contina oricum.
+SOLO_SPECS = {
+    "diya": {"category": "props", "tints": "ANIMAL",
+             "camera": {"azimuth": 35.0, "elevation": 30.0, "margin": 1.15, "lens": 70.0}},
+    "floating_diya": {"category": "props", "tints": "ANIMAL",
+                      "camera": {"azimuth": 35.0, "elevation": 30.0, "margin": 1.15, "lens": 70.0}},
+}
+
+
+def solo(name, models_dir=None, res_height=900):
+    spec = SOLO_SPECS[name]
+    out_dir = os.path.join(PROJECT, "docs", "asset_briefs", "img", "jodhpur_fidelity")
+    os.makedirs(out_dir, exist_ok=True)
+    _clear()
+    meshes = _import_for_compare(name, spec, models_dir or MODELS)
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.hide_render = (o not in meshes) and not o.name.startswith("Preview")
+    cam = bpy.data.objects.get("PreviewCam")
+    if cam is None:
+        cam = bpy.data.objects.new("PreviewCam", bpy.data.cameras.new("PreviewCam"))
+        bpy.context.scene.collection.objects.link(cam)
+    cam.data.clip_start = 0.001
+    cam.data.clip_end = 50.0
+    c = spec["camera"]
+    path = os.path.join(out_dir, name + ".png")
+    _neutral_shot(meshes, path, azimuth=c["azimuth"], elevation=c["elevation"],
+                  res_height=res_height, margin=c["margin"], lens=c["lens"],
+                  sun_follow={"offset": -30.0, "tilt": 50.0})
+    print("randare solo salvata:", path)
+    return path
+
 
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "preview.py")).read())
 OUT = os.path.join(PROJECT, "docs", "asset_briefs", "img")
@@ -1499,6 +1580,8 @@ elif "--sheet" in args:
     # int daca e numeric (valurile 1, 2, ...), altfel string ("2a")
     wave = int(wave_arg) if wave_arg.isdigit() else wave_arg
     fidelity_sheet(wave)
+elif "--solo" in args:
+    solo(args[args.index("--solo") + 1])
 elif "--group" in args:
     idx = args.index("--group")
     g = args[idx + 1]

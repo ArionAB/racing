@@ -64,7 +64,11 @@ echo "== reperele (brief §1.3, val 2b) =="
 # stepwell_pavilion, jaswant_thada: idem (Well_Glow/Thada_Glow ingropate).
 # stepwell_flight_module/_corner: decor pur, un singur nod, origine simpla la
 # baza (brief §1.3: "fara coliziune, coliziunea e a terenului").
-check "structures/market_gate.glb"             10500 --origin=assembly
+# market_gate 10500 -> 21500 (escaladare Opus): 21048 masurat. Panoul e acum
+# o prisma manifold cu gol real (nu 4 dreptunghiuri), chhatri-urile au 24 de
+# arcade reale, iar `densify_for_ao` taie fetele de 12 m (~4400 tri) ca AO-ul
+# copt pe varf sa nu le innegreasca -- o singura instanta pe pista.
+check "structures/market_gate.glb"             21500 --origin=assembly
 check "structures/stepwell_flight_module.glb"   3600
 check "structures/stepwell_corner.glb"          2400
 check "structures/stepwell_pavilion.glb"       12000 --origin=assembly
@@ -75,7 +79,7 @@ echo "== cetatea (brief §1.2, val 2a) =="
 # tri-count-ul fata de prima versiune). rampart_cannon a primit buget mai
 # mare (3000 -> 3300) dupa rescrierea rotii cu spite vizibile (janta+butuc+
 # bare, nu disc plin fara relief).
-check "structures/fort_wall_segment.glb"  2200 --origin=assembly
+check "structures/fort_wall_segment.glb"  3000 --origin=assembly
 check "structures/fort_wall_turret.glb"   2900 --origin=assembly
 check "structures/fort_bastion.glb"       5500 --origin=assembly
 check "structures/fort_gate_jai.glb"      10600 --origin=assembly
@@ -83,7 +87,7 @@ check "structures/fort_gate_fateh.glb"    12600 --origin=assembly
 check "structures/fort_gate_loha.glb"     10600 --origin=assembly
 check "structures/palace_facade_a.glb"    15000 --origin=assembly
 check "structures/palace_facade_b.glb"    14000 --origin=assembly
-check "props/rampart_cannon.glb"          3300 --origin=assembly
+check "props/rampart_cannon.glb"          4200 --origin=assembly
 
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)

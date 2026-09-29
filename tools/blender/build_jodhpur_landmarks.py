@@ -45,42 +45,185 @@ def _finish_or_none(obj):
 
 # --- market_gate -----------------------------------------------------------
 #
-# Contract (brief §1.3): 34 m latime totala, 17 m inalta, adancime 6 m; golul
-# >= 18 m (masurat ca GAP pe planul portii), cheia >= 11 m. Lista de elemente,
-# scrisa dupa (re)citirea decuparii (market_gate.png), de jos in sus:
+# ESCALADARE OPUS (runda 3; rundele 1-2 respinse: gol dreptunghiular in "T",
+# culoare prea inchisa, arc citit ca dreptunghi). Cauzele au fost in
+# VOCABULAR, nu in piesa, si s-au reparat acolo (`jodhpur_shapes.py`):
+#   - `arch_opening(open=False)` umplea panoul din 4 dreptunghiuri pe
+#     bounding-box-ul golului -> timpanele ramaneau goale, silueta golului
+#     era dreptunghiulara. Acum panoul e o prisma manifold "dreptunghi minus
+#     gol": golul E arcul, pe toata grosimea.
+#   - `_arch_profile("pointed")` cu rise < half_w (arcul turtit de aici)
+#     iesea in "M". Acum are ramura "drop arch" (centre sub nastere).
+#   - masuratoarea golului: `measure_opening` (proiectia triunghiurilor pe
+#     planul portii, pe ferestre de inaltime), nu AABB.
 #
-#   1. Soclu TESIT care iese LATERAL fata de baza turnurilor (stepped_plinth),
-#      cu bolovani (ROCK_DARK) ingramaditi la baza, de o parte si de alta --
-#      NU parte din corpul turnurilor, ci un umar separat, mai lat.
-#   2. Doua turnuri OCTOGONALE subtiri, unul in stanga si unul in dreapta
-#      arcadei centrale -- corp octogonal drept, cu o singura fanta ingusta
-#      (arrow-slit) verticala pe fata exterioara vizibila.
-#   3. Parapet CRENELAT DREPT intre cele doua turnuri, deasupra arcului
-#      central -- creneluri dese, dreptunghiulare (numarate pe decupare:
-#      ~9-10 pe latimea dintre turnuri).
-#   4. In varful FIECARUI turn: o galerie/balcon in consola cu balustrada,
-#      apoi un chhatri mic deschis (coloane + arce + cupola bulboasa mica +
-#      finial) -- turnurile se termina in chhatri, nu plat.
-#   5. Arcada centrala: UN gol mare, cu profil de arc SEGMENTAL (turtit, nu
-#      ascutit -- la 18 m gol / 34 m latime totala golul trece de 50% din
-#      latime, deci arcul trebuie sa fie mult mai plat decat "pointed" ca sa
-#      nu atinga coronamentul turnurilor -- abaterea permisa explicita din
-#      tabel).
-#   6. Canaturi de lemn DESCHISE, lipite de ambrazura, cate un canat de o
-#      parte si de alta a golului (WOOD, cu grila mica de tepi -- vizibile ca
-#      dungi orizontale/verticale pe decupare).
-#   7. O nisa mica decorativa (medalion) pe fiecare fata a peretelui de
-#      deasupra arcului, langa creneluri -- geometrie mica, opționala,
-#      omisa aici (sub pragul "se vede la 30 m din masina ca forma").
+# LISTA DE ELEMENTE (decuparea market_gate.png, citita inainte de primul
+# vertex; vedere aproape frontala, usor din stanga):
+#   1. UN panou central de zid intre turnuri, cu UN gol mare in arc ASCUTIT
+#      (nasterea la ~3/4 din cheie), deschis pana la sol.
+#   2. Arhivolta: banda IN RELIEF pe conturul arcului, coborata pe
+#      ambrazuri pana la sol (1 pe fiecare fata).
+#   3. Alfiz: cadru dreptunghiular in relief in jurul arcului (2 pilastri +
+#      1 banda sus) si 2 medalioane rotunde in timpane.
+#   4. 2 canaturi de lemn DESCHISE, cate unul pe fiecare ambrazura, cu tepi
+#      de fier (grila 4 x 7 pe fata vizibila).
+#   5. Cornisa sub parapet, apoi merloane "kangura" (dreptunghi + umeri
+#      rotunjiti + varf), 9 pe decupare, aproape lipite, fiecare cu un punct
+#      intunecat. Aici 13 (arcada e 53% din latime, nu 30% -> parapetul se
+#      lungeste, abaterea permisa din brief §1.3).
+#   6. 2 turnuri patrate cu colturi tesite, cu soclu in 2 trepte si 1 fanta
+#      de tragere pe fata.
+#   7. Pe fiecare turn: balcon in consola cu parapet jos, apoi chhatri
+#      DESCHIS cu 3 arcade pe latura, streasina, cupola pe inel de lotus,
+#      finial.
+#   8. La ambele capete, contraforti in trepte (o masa inalta lipita de
+#      turn + o masa joasa in afara ei) -- silueta se evazeaza la sol.
+#   Ce iese din contur: chhatri-urile (cupole + finial) si contrafortii.
 #
-# Nimic nu iese din contur in afara de bolovanii de la baza si chhatri-urile
-# turnurilor.
+# LAYOUT (X = latimea, fata spre -Y = spre camera de comparatie, simetric
+# fata/spate). Canaturile deschise nu au voie in golul liber de 18,4 m, deci
+# stau in afara lui: proiectia unui canat pe planul portii e
+# L*sin(a) + t*cos(a), exact cat se vede din fata si exact cat ar ingusta
+# golul. Golul fizic dintre ambrazuri e deci 18,4 + 2*2,08 = 22,6 m, iar
+# latimea totala iese ~41 m in loc de 34 (turnurile isi pastreaza latimea,
+# parapetul se lungeste -- abaterea permisa; inaltimea NU creste).
 GATE_TOTAL_W = 34.0
 GATE_H = 17.0
 GATE_D = 6.0
-GATE_GAP_W = 18.4     # golul (contract >=18.0) -- marja mica peste minim
+GATE_GAP_W = 18.4     # golul LIBER (contract >=18.0), cu canaturile incluse
 GATE_CROWN_MIN = 11.0  # cheia arcului, contract minim
-GATE_CROWN_TARGET = 11.6  # tinta constructiei -- marja reala peste minim
+GATE_CROWN_TARGET = 11.4
+
+MG_LEAF_L = 5.0
+MG_LEAF_T = 0.22
+MG_LEAF_ANG = 22.0     # canatul fata de ambrazura (grade)
+MG_OPEN_HW = GATE_GAP_W * 0.5 + (MG_LEAF_L * math.sin(math.radians(MG_LEAF_ANG))
+                                 + MG_LEAF_T * math.cos(math.radians(MG_LEAF_ANG)))
+MG_SPRING = 6.2        # nasterea arcului (decupare: ~0,75 din cheie; aici mai jos ca
+                       # arcul turtit sa-si pastreze varful)
+MG_POINT = 0.38        # varf clar (decupare: arc ascutit, nu segmental)
+MG_WALL_T = 5.0
+MG_PANEL_HW = MG_OPEN_HW + 1.5
+MG_WALL_TOP = 13.0
+MG_TOWER_W = 4.4
+MG_TOWER_D = 6.0
+MG_TOWER_CX = MG_PANEL_HW + MG_TOWER_W * 0.5
+
+
+def _offset_contour(pts, d):
+    """Deplaseaza conturul deschis al golului cu `d` spre EXTERIOR (normala
+    stanga a sensului stanga-jos -> dreapta-jos); capetele raman verticale."""
+    out = []
+    n = len(pts)
+    for i in range(n):
+        x0, z0 = pts[max(i - 1, 0)]
+        x1, z1 = pts[min(i + 1, n - 1)]
+        tx, tz = x1 - x0, z1 - z0
+        ln = math.hypot(tx, tz) or 1e-6
+        nx, nz = -tz / ln, tx / ln
+        x, z = pts[i]
+        # normala stanga a sensului (urcare pe ambrazura stanga, arc spre
+        # dreapta) arata SPRE EXTERIOR; ciorna o scadea si banda intra in gol
+        # (masurat: cheia coborase la 11,06 m)
+        out.append((x + nx * d, z + nz * d))
+    out[0] = (pts[0][0] - d, pts[0][1])
+    out[-1] = (pts[-1][0] + d, pts[-1][1])
+    return out
+
+
+def _ring_solid(b, inner, outer, y0, y1, slot):
+    """Solid INCHIS (manifold) intre doua contururi deschise corespondente
+    unu-la-unu, in planul XZ, extrudat pe Y intre y0 si y1 -- arhivolta."""
+    bm = b.bm
+    n = len(inner)
+    fi = [bm.verts.new((x, y0, z)) for x, z in inner]
+    fo = [bm.verts.new((x, y0, z)) for x, z in outer]
+    bi = [bm.verts.new((x, y1, z)) for x, z in inner]
+    bo = [bm.verts.new((x, y1, z)) for x, z in outer]
+    faces = []
+    for i in range(n - 1):
+        j = i + 1
+        faces.append(bm.faces.new((fi[i], fi[j], fo[j], fo[i])))
+        faces.append(bm.faces.new((bi[i], bo[i], bo[j], bi[j])))
+        faces.append(bm.faces.new((fi[i], bi[i], bi[j], fi[j])))
+        faces.append(bm.faces.new((fo[i], fo[j], bo[j], bo[i])))
+    faces.append(bm.faces.new((fi[0], fo[0], bo[0], bi[0])))
+    faces.append(bm.faces.new((fi[-1], bi[-1], bo[-1], fo[-1])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
+
+
+def _prism_z(b, outline_xy, z0, z1, slot, ring_step=None):
+    """Prisma verticala dintr-un contur convex in planul XY. `ring_step`
+    (m): inele intermediare pe laturi -- AO-ul e copt PE VARF, iar o fata de
+    12 m cu varfuri doar sub balcon si la soclu (ambele umbrite) iesea
+    intunecata pe toata inaltimea (masurat pe randare: 81,46,23 fata de
+    156,94,52 pe panou)."""
+    bm = b.bm
+    n = len(outline_xy)
+    k = max(1, int(math.ceil((z1 - z0) / ring_step))) if ring_step else 1
+    rings = [[bm.verts.new((x, y, z0 + (z1 - z0) * r / k)) for x, y in outline_xy]
+             for r in range(k + 1)]
+    lo, hi = rings[0], rings[-1]
+    faces = [bm.faces.new(tuple(reversed(lo))), bm.faces.new(tuple(hi))]
+    for ra, rb in zip(rings, rings[1:]):
+        for i in range(n):
+            j = (i + 1) % n
+            faces.append(bm.faces.new((ra[i], ra[j], rb[j], rb[i])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
+
+
+def _chamfer_rect(cx, cy, hw, hd, c):
+    """Dreptunghi cu colturile tesite (octogon neregulat), sens trigonometric."""
+    return [(cx - hw + c, cy - hd), (cx + hw - c, cy - hd), (cx + hw, cy - hd + c),
+            (cx + hw, cy + hd - c), (cx + hw - c, cy + hd), (cx - hw + c, cy + hd),
+            (cx - hw, cy + hd - c), (cx - hw, cy - hd + c)]
+
+
+def _mg_kangura(b, bg, x, y, z, w, h, t, dot_side):
+    """Merlon "kangura": dreptunghi + umeri rotunjiti + varf, prisma pe Y,
+    cu un punct intunecat (GLOW) pe fata dinspre `dot_side` (-1/+1 pe Y)."""
+    hw = w * 0.5
+    outline = [(-hw, 0.0), (hw, 0.0), (hw, 0.52 * h), (0.43 * w, 0.70 * h),
+               (0.30 * w, 0.83 * h), (0.14 * w, 0.93 * h), (0.0, h),
+               (-0.14 * w, 0.93 * h), (-0.30 * w, 0.83 * h), (-0.43 * w, 0.70 * h),
+               (-hw, 0.52 * h)]
+    b.prism(outline, t, STONE, center=(x, y, z))
+    bg.box((x, y + dot_side * (t * 0.5 + 0.01), z + 0.50 * h), (0.28, 0.03, 0.28), GLOW)
+
+
+def _mg_chhatri(b, cx, cy, z0):
+    """Chhatri patrat deschis: pe fiecare latura 3 arcade ascutite -- fiecare
+    travee e un `arch_opening(open=False, glass=False)` (panou cu gol real,
+    vocabularul reparat), pilonii sunt ambrazurile dintre goluri. Streasina,
+    inel de lotus, cupola emisferica, finial. Intoarce cota varfului."""
+    side = 3.4
+    col_h = 1.55
+    t = 0.26
+    bays = 3
+    bay = side / bays
+    hs = side * 0.5
+    rot90 = Matrix.Rotation(math.radians(90.0), 3, "Z")
+    for i in range(bays):
+        u = -hs + bay * (i + 0.5)
+        for s in (-1.0, 1.0):
+            # laturile fata/spate (planul XZ) si laturile stanga/dreapta
+            arch_opening(b, None, (cx + u, cy + s * hs, z0), bay * 0.62, 1.22, 0.72, t,
+                         STONE, GLOW, style="pointed", glass=False, steps=6,
+                         panel_w=bay, panel_h=col_h)
+            arch_opening(b, None, (cx + s * hs, cy + u, z0), bay * 0.62, 1.22, 0.72, t,
+                         STONE, GLOW, style="pointed", glass=False, steps=6,
+                         panel_w=bay, panel_h=col_h, rotation=rot90)
+    # streasina (chajja) + placa
+    b.box((cx, cy, z0 + col_h + 0.08), (side + 0.9, side + 0.9, 0.16), STONE)
+    b.box((cx, cy, z0 + col_h + 0.21), (side + 0.35, side + 0.35, 0.10), STONE)
+    dome_z = z0 + col_h + 0.26
+    dome(b, (cx, cy, dome_z), 1.30, STONE, drum_h=0.0, profile="hemisphere",
+         segments=12, lotus_ring=True, finial=True, finial_h=0.62)
+    return dome_z + 0.12 + 1.30 + 0.62
 
 
 def build_market_gate():
@@ -88,193 +231,109 @@ def build_market_gate():
     bg = Builder()
     doorb = Builder()
 
-    stone_faces = []
-    door_faces = []
+    hw = MG_OPEN_HW
+    yf, yb = -MG_WALL_T * 0.5, MG_WALL_T * 0.5
 
-    tower_w = 4.4          # latimea (diametrul) turnului octogonal
-    tower_gap_half = GATE_GAP_W * 0.5
-    tower_cx = tower_gap_half + tower_w * 0.5 + 0.15  # centrul fiecarui turn pe X
+    # 1. panoul central cu golul in arc -- vocabularul reparat
+    arch_opening(b, None, (0.0, 0.0, 0.0), 2.0 * hw, GATE_CROWN_TARGET, MG_SPRING,
+                 MG_WALL_T, STONE, GLOW, style="pointed", glass=False, steps=16,
+                 panel_w=2.0 * MG_PANEL_HW, panel_h=MG_WALL_TOP, point=MG_POINT)
+    hole = arch_hole_contour("pointed", 2.0 * hw, GATE_CROWN_TARGET, MG_SPRING, 16,
+                             point=MG_POINT)
 
-    # 1. soclu tesit, mai lat decat turnul, cu bolovani laterali
-    plinth_levels = [(tower_w + 1.6, GATE_D + 1.2, 0.55),
-                     (tower_w + 0.9, GATE_D + 0.6, 0.45)]
-    for side in (-1.0, 1.0):
-        stone_faces += list(stepped_plinth(b, (side * tower_cx, 0.0, 0.0),
-                                           plinth_levels, STONE))
-    plinth_h = sum(lvl[-1] for lvl in plinth_levels)
+    # 2. arhivolta in relief (0,5 m lata, iesita 0,22 m), fata si spate
+    band = _offset_contour(hole, 0.5)
+    for y0, y1 in ((yf - 0.22, yf), (yb, yb + 0.22)):
+        _ring_solid(b, hole, band, y0, y1, STONE)
 
-    # bolovani laterali (ROCK), ingramaditi in afara turnurilor -- umarul care
-    # iese lateral, ca pe decupare (nu parte din corpul turnului).
-    import random
-    rnd = random.Random(7)
-    for side in (-1.0, 1.0):
-        base_x = side * (tower_cx + tower_w * 0.5 + 1.3)
-        for i in range(5):
-            rx = base_x + side * rnd.uniform(0.0, 2.6)
-            ry = rnd.uniform(-GATE_D * 0.45, GATE_D * 0.45)
-            rr = rnd.uniform(0.55, 1.05)
-            stone_faces += list(b.box((rx, ry, rr * 0.5), (rr * 1.4, rr * 1.3, rr), ROCK,
-                                      rotation=Matrix.Rotation(rnd.uniform(0, math.pi), 3, "Z")))
+    # 3. alfiz (2 pilastri + banda sus, iesiti 0,3 m) + medalioane
+    # decupare: pilastri lati, banda de sus mult sub cornisa, chiar peste
+    # varful arhivoltei
+    fr_x0, fr_x1 = hw + 0.6, hw + 1.35
+    fr_top0, fr_top1 = MG_WALL_TOP - 1.05, MG_WALL_TOP - 0.5
+    for y_c, sy in ((yf - 0.18, -1.0), (yb + 0.18, 1.0)):
+        for s in (-1.0, 1.0):
+            b.box((s * (fr_x0 + fr_x1) * 0.5, y_c, fr_top1 * 0.5),
+                  (fr_x1 - fr_x0, 0.36, fr_top1), STONE)
+        b.box((0.0, y_c, (fr_top0 + fr_top1) * 0.5),
+              (2.0 * fr_x1, 0.36, fr_top1 - fr_top0), STONE)
+        for s in (-1.0, 1.0):
+            mx, mz = s * hw * 0.74, fr_top0 - 0.95
+            b.cylinder((mx, y_c, mz), 0.62, 0.3, STONE, segments=12, axis="Y")
+            b.cylinder((mx, y_c + sy * 0.18, mz), 0.40, 0.08, STONE, segments=12, axis="Y")
 
-    # 2. turnuri octogonale
-    #
-    # REVIZUIRE: `tower_top = GATE_H*0.62 = 10.54` era MAI JOS decat cheia
-    # arcului (`crown_z = GATE_CROWN_TARGET = 11.6`) -- panoul arcului
-    # (`panel_h=parapet_z`) rezulta mai scund decat arcul insusi, iar
-    # umplutura de sus a panoului (`flat_rect` intre `hole_z1` si `panel_z1`)
-    # degenereaza (inaltime negativa, sarita de garda `if x1-x0<1e-6`), deci
-    # ramane un GOL deasupra cheii -- exact ce se vedea in randare (parapetul
-    # crenelat plutind ca o "punte", cu un vid mare dedesubt in loc de arc
-    # plin). Fix: turnul (si parapetul de pe el) trebuie sa fie CLAR mai
-    # inalt decat cheia arcului, cu marja pentru banda de parapet.
-    tower_top = max(GATE_H * 0.62, GATE_CROWN_TARGET + 1.6)
-    tower_base_z = plinth_h
-    tower_body_h = tower_top - tower_base_z
-    tower_r = tower_w * 0.5
-    for side in (-1.0, 1.0):
-        cx = side * tower_cx
-        stone_faces += list(b.cylinder((cx, 0.0, tower_base_z + tower_body_h * 0.5),
-                                       tower_r, tower_body_h, STONE, segments=8, axis="Z"))
-        # fanta ingusta pe fata exterioara (spre afara de arcada, adica +Y)
-        # -- merge in `bg` (slot GLOW), NU in `stone_faces` (Builder `b`).
-        slit_cz = tower_base_z + tower_body_h * 0.42
-        bg.box((cx, tower_r * 0.92, slit_cz), (0.14, 0.10, 1.6), GLOW)
+    # 5. cornisa + merloane kangura (fata si spate)
+    b.box((0.0, 0.0, MG_WALL_TOP - 0.15), (2.0 * MG_PANEL_HW + 0.2, MG_WALL_T + 0.5, 0.3), STONE)
+    n_m = 13
+    m_w, m_h, m_t = 1.55, 2.0, 0.6
+    span = 2.0 * MG_PANEL_HW - 0.4
+    for i in range(n_m):
+        x = -span * 0.5 + span * (i + 0.5) / n_m
+        for yc, ds in ((yf + m_t * 0.5, -1.0), (yb - m_t * 0.5, 1.0)):
+            _mg_kangura(b, bg, x, yc, MG_WALL_TOP, m_w, m_h, m_t, ds)
 
-    # 3. parapet crenelat drept intre turnuri, deasupra golului
-    parapet_z = tower_top
-    parapet_h_solid = 0.55
-    stone_faces += list(b.box((0.0, 0.0, parapet_z + parapet_h_solid * 0.5),
-                              (GATE_GAP_W + tower_w * 0.3, GATE_D * 0.6, parapet_h_solid), STONE))
-    # REVIZUIRE runda 2 (sef): merloanele parapetului trebuie sa fie
-    # ROTUNJITE (crop: varfuri curbate), nu dreptunghiulare drepte.
-    stone_faces += crenellation(b, (-(GATE_GAP_W * 0.5 + tower_w * 0.1), 0.0, parapet_z + parapet_h_solid),
-                                (GATE_GAP_W * 0.5 + tower_w * 0.1, 0.0, parapet_z + parapet_h_solid),
-                                0.55, STONE, width=0.55, gap=0.42, style="rounded")
+    # 6-7. turnurile
+    top_z = 0.0
+    for s in (-1.0, 1.0):
+        cx = s * MG_TOWER_CX
+        thw, thd = MG_TOWER_W * 0.5, MG_TOWER_D * 0.5
+        _prism_z(b, _chamfer_rect(cx, 0.0, thw + 0.45, thd + 0.45, 0.9), 0.0, 0.8, STONE)
+        _prism_z(b, _chamfer_rect(cx, 0.0, thw + 0.22, thd + 0.22, 0.75), 0.8, 1.5, STONE)
+        _prism_z(b, _chamfer_rect(cx, 0.0, thw, thd, 0.6), 1.5, 12.2, STONE, ring_step=2.2)
+        # brau sub balcon (decupare: linie de umbra sub consola)
+        _prism_z(b, _chamfer_rect(cx, 0.0, thw + 0.1, thd + 0.1, 0.65), 11.3, 11.55, STONE)
+        # fanta de tragere (flush + inchisa -- lectia val 2a), fata si spate
+        for sy in (-1.0, 1.0):
+            bg.box((cx, sy * (thd + 0.01), 7.8), (0.4, 0.04, 1.5), GLOW)
+        # balcon in consola: doua trepte + placa + parapet jos
+        _prism_z(b, _chamfer_rect(cx, 0.0, thw + 0.2, thd + 0.2, 0.7), 12.2, 12.6, STONE)
+        _prism_z(b, _chamfer_rect(cx, 0.0, thw + 0.5, thd + 0.5, 0.85), 12.6, 13.1, STONE)
+        bw_, bd_ = thw + 0.42, thd + 0.42
+        for (px, py, sx, sy2) in ((cx, -bd_, 2 * bw_, 0.16), (cx, bd_, 2 * bw_, 0.16),
+                                  (cx - bw_, 0.0, 0.16, 2 * bd_), (cx + bw_, 0.0, 0.16, 2 * bd_)):
+            b.box((px, py, 13.1 + 0.25), (sx, sy2, 0.5), STONE)
+        top_z = max(top_z, _mg_chhatri(b, cx, 0.0, 13.1))
 
-    # 4. galerie + chhatri pe fiecare turn
-    #
-    # REVIZUIRE: bugetul de inaltime al chhatri-ului era calculat cu
-    # `GATE_H - (gal_z+0.55)` folosind vechiul `gal_z` (mai jos) -- dupa
-    # ridicarea lui `tower_top` (fix-ul anterior pentru arcul ingropat),
-    # aceeasi formula lasa doar `col_h` corect, dar `chhatri()` ADAUGA
-    # deasupra coloanelor chajja+placa+cupola+finial fara sa plafoneze la
-    # `col_h` -- turnul complet iesea la 18,3 m (masurat cu verify_glb.py),
-    # peste contractul de 17 m. Fix: `col_h` foloseste un buget EXPLICIT mai
-    # mic, calculat inapoi din inaltimea tipica adaugata de dome+finial
-    # (~1,3x raza cupolei), nu doar diferenta bruta pana la GATE_H.
-    gal_z = tower_top
-    chhatri_top_budget = GATE_H - (gal_z + 0.55)  # spatiu total ramas pt chhatri
-    ch_dome_r = (tower_r - 0.35) * 0.62
-    # overhead masurat direct (nu aproximat): pentru dome_radius=0.5, cupola
-    # onion + lotus_ring + finial (implicit `chhatri`) adauga 1,444 m peste
-    # `col_h` -- raportul (1,444-0,22)/0,5 = 2,448 pe partea de cupola.
-    ch_overhead = 0.22 + ch_dome_r * 2.45
-    ch_col_h = max(chhatri_top_budget - ch_overhead, 0.6)
-    for side in (-1.0, 1.0):
-        cx = side * tower_cx
-        stone_faces += list(balcony_band(b, (cx, 0.0, gal_z), tower_r - 0.15, tower_r + 0.30,
-                                         0.16, STONE, segments=8))
-        stone_faces += list(balustrade(b, (cx - 0.75, tower_r + 0.05, gal_z + 0.16),
-                                       (cx + 0.75, tower_r + 0.05, gal_z + 0.16),
-                                       0.45, STONE, merlon_w=0.14, merlon_gap=0.10))
-        res_ch = chhatri(b, bg, (cx, 0.0, gal_z + 0.55), 8, tower_r - 0.35,
-                         ch_col_h, STONE, GLOW,
-                         col_r=0.11, dome_radius=ch_dome_r,
-                         arch_style="round", chajja_out=0.30, segments_dome=10)
-        stone_faces += res_ch["stone"]
+    # 8. contrafortii in trepte (prisme cu profil tesit, extrudate pe Y)
+    for s in (-1.0, 1.0):
+        x_in = MG_TOWER_CX + MG_TOWER_W * 0.5 - 0.3
+        tall = [(x_in, 0.0), (x_in + 2.0, 0.0), (x_in + 1.8, 4.4), (x_in + 1.2, 5.9),
+                (x_in + 0.4, 6.5), (x_in, 6.5)]
+        low = [(x_in + 1.7, 0.0), (x_in + 3.3, 0.0), (x_in + 3.1, 2.6), (x_in + 2.5, 3.5),
+               (x_in + 1.7, 3.7)]
+        for outline, depth in ((tall, 5.2), (low, 4.4)):
+            pts = [(s * x, z) for x, z in outline]
+            if s < 0:
+                pts = list(reversed(pts))
+            b.prism(pts, depth, STONE, center=(0.0, 0.0, 0.0))
 
-    # 5. arcada centrala: profil SEGMENTAL (turtit) -- abatere permisa
-    # explicita din tabel: la 18 m gol / 34 m latime, un arc "round" clasic
-    # (semicerc) ar avea rise = half_w = 9.2 m, depasind cu mult cheia minima
-    # si atingand coronamentul turnurilor. Aproximam segmental cu "round" la
-    # `rise` mic (fractie din half_w), care da exact profilul turtit cerut,
-    # fara sa introducem un nou stil in vocabular.
-    #
-    # REVIZUIRE: `panel_w=GATE_TOTAL_W` (34 m) facea din panoul arcului un
-    # SINGUR perete plin care acoperea toata latimea portii, INGROPAND
-    # turnurile octogonale (la +-9,35, deja construite mai sus) in interiorul
-    # lui -- acelasi material/locatie, deci invizibile in randare (verificat:
-    # comparatia arata doar panoul cu arcul, FARA turnuri/chhatri/creneluri,
-    # desi geometria lor exista in fisier). Fix: panoul arcului se opreste
-    # DOAR intre turnuri (panel_w putin peste GATE_GAP_W), nu peste toata
-    # latimea -- turnurile raman piese vizual separate, cum apar pe decupare.
-    # REVIZUIRE runda 2 (sef): arcul trebuie sa se citeasca vizibil curbat
-    # (nu gol dreptunghiular) -- rise-ul a crescut de la 0,30 la 0,55 din
-    # jumatatea golului, pastrand totusi profilul mult mai turtit decat un
-    # semicerc complet (rise=half_w la "round" clasic) -- abaterea permisa
-    # explicita din tabel ("arcul devine mai turtit, dar NU creste inaltimea
-    # ca sa pastreze raportul").
-    gate_pier_h = GATE_CROWN_TARGET - GATE_GAP_W * 0.5 * 0.55  # rise mai mare -> curbura vizibila
-    gate_pier_h = max(gate_pier_h, GATE_H * 0.30)
-    gate_rise = GATE_CROWN_TARGET - gate_pier_h
-    gate_wall_t = GATE_D
-    gate_panel_w = GATE_GAP_W + tower_w * 0.35   # se opreste langa turnuri, nu peste ele
-    # REVIZUIRE runda 2 (sef): arcul trebuie sa se CITEASCA curbat, nu ca un
-    # gol dreptunghiular -- `reveal=0` elimina firida (banda care arata
-    # curbura intradosului din umbra), facand arcul sa para taiat drept.
-    # `reveal>0` pastreaza un inel vizibil al curburii pe toata adancimea
-    # peretelui (`gate_wall_t=6 m`), cu umbra proprie (memoria
-    # `silueta-inainte-de-umbrire`).
-    res_gate = arch_opening(b, bg, (0.0, 0.0, 0.0), GATE_GAP_W, gate_pier_h + gate_rise,
-                            gate_pier_h, gate_wall_t, STONE, GLOW, style="round",
-                            rotation=None, glass=False, reveal=0.9,
-                            panel_w=gate_panel_w, panel_h=parapet_z, panel_z0=0.0, open=False)
-    stone_faces += res_gate["stone"]
-    crown_z = gate_pier_h + gate_rise
+    # 4. canaturile deschise, in golul fizic, in afara golului liber
+    ang = math.radians(MG_LEAF_ANG)
+    leaf_h = MG_SPRING + 0.4
+    for s in (-1.0, 1.0):
+        hinge = Vector((s * hw, yf + 0.18, 0.0))
+        d = Vector((-s * math.sin(ang), math.cos(ang), 0.0))      # in trecere
+        nrm = Vector((-s * math.cos(ang), -math.sin(ang), 0.0))   # spre ax/camera
+        rot = Matrix(((nrm.x, d.x, 0.0), (nrm.y, d.y, 0.0), (0.0, 0.0, 1.0)))
+        c = hinge + d * (MG_LEAF_L * 0.5) + nrm * (MG_LEAF_T * 0.5)
+        doorb.box((c.x, c.y, leaf_h * 0.5), (MG_LEAF_T, MG_LEAF_L, leaf_h), TRIM_WOOD,
+                  rotation=rot)
+        face_c = c + nrm * (MG_LEAF_T * 0.5 + 0.03)
+        for zb in (0.18, 0.5, 0.82):
+            doorb.box((face_c.x, face_c.y, leaf_h * zb), (0.05, MG_LEAF_L * 0.96, 0.14),
+                      GLOW, rotation=rot)
+        for ix in range(4):
+            for iz in range(7):
+                p = face_c + d * ((ix - 1.5) * MG_LEAF_L * 0.22)
+                doorb.box((p.x, p.y, leaf_h * (0.10 + 0.12 * iz)), (0.12, 0.16, 0.16),
+                          GLOW, rotation=rot)
 
-    # 6. canaturi de lemn deschise, lipite de ambrazura -- cate un canat de o
-    # parte si de alta a golului, usor rotite ca sa se citeasca "deschise".
-    # REVIZUIRE: leaf_c folosea `rot @ (side*door_w*0.5, 0, 0)` -- pentru
-    # side=-1 (canatul stang), asta rotea punctul (-4.4, 0) cu +28 grade, care
-    # muta centrul canatului la x=-13,0 (MAI DEPARTE de centrul golului decat
-    # balamaua, adica in interiorul TURNULUI de la -11,55, nu in arcada) --
-    # exact "planul strain" semnalat: doua dreptunghiuri late plutind langa
-    # turnuri, nu canaturi in prag. Balamaua sta la marginea golului
-    # (`hinge_x`), iar canatul trebuie sa se roteasca astfel incat capatul lui
-    # LIBER sa intre spre centrul golului (x=0), nu sa iasa spre turn -- deci
-    # offset-ul local trebuie sa fie spre INTERIOR (-side), nu spre exterior
-    # (side).
-    door_w = GATE_GAP_W * 0.5 - 0.35
-    door_h = gate_pier_h * 0.94
-    for side, open_ang in ((-1.0, 28.0), (1.0, -28.0)):
-        hinge_x = side * (GATE_GAP_W * 0.5 - 0.10)
-        rot = Matrix.Rotation(math.radians(open_ang), 3, "Z")
-        leaf_c = Vector((hinge_x, 0.0, door_h * 0.5)) + rot @ Vector((-side * door_w * 0.5, 0.0, 0.0))
-        door_faces += list(doorb.box((leaf_c.x, leaf_c.y, leaf_c.z),
-                                     (door_w, 0.10, door_h), TRIM_WOOD, rotation=rot))
-        # tepi de fier: grila mica 3x5 pe fata canatului (geometrie mica)
-        for ix in range(3):
-            for iz in range(5):
-                lx = (ix - 1) * door_w * 0.32
-                lz = (iz - 2) * door_h * 0.16
-                local = Vector((lx, 0.07, lz))
-                p = Vector((hinge_x, 0.0, door_h * 0.5)) + rot @ (Vector((-side * door_w * 0.5, 0.0, 0.0)) + local)
-                door_faces += list(doorb.box((p.x, p.y, p.z), (0.05, 0.05, 0.05), GLOW, rotation=rot))
-
+    densify_for_ao(b, max_len=2.5)
     stone_obj = b.to_object("Gate_Stone")
-    for f in stone_faces:
-        if f.is_valid:
-            f[b.slot] = STONE
-    # `door_faces` nu mai are nevoie de re-tagging: `doorb.box(...)` a scris
-    # deja slotul corect pe fiecare fata (TRIM_WOOD canatul, GLOW tepii) --
-    # ambele in ACELASI nod `Gate_Doors`, intentionat (contract §1.3: canaturi
-    # de lemn cu tepi de fier, un singur nod de decor).
     door_obj = doorb.to_object("Gate_Doors")
     glow_obj = _finish_or_none(bg.to_object("Gate_Glow"))
-
-    # NOTA (istoricul rotatiei): o incercare anterioara a rotit ansamblul 90°
-    # in jurul lui Z, presupunand ca testul cu cubul de fete colorate (facut
-    # PE UN CUB SIMPLU 34x6x17) cerea ca fatada sa fie pe +X. Randarea cu
-    # rotatia aplicata arata insa clar poarta din CAPAT (parapetul crenelat
-    # vazut pe lungime, turnurile asimetrice) -- deci axa lunga trebuie sa
-    # ramana pe X (asa cum a fost construita, fara rotatie): fatada
-    # (arch_opening, implicit +Y) ramane spre camera fara nicio rotatie
-    # suplimentara, la fel ca la restul pieselor din pilot. Bug-ul real care
-    # ascundea turnurile nu era orientarea, ci panoul arcului supradimensionat
-    # (`panel_w=GATE_TOTAL_W`, fix separat mai sus) -- odata ingropat turnul
-    # scos la vedere, orientarea originala (fara rotatie) e cea corecta.
-
-    return stone_obj, door_obj, glow_obj, crown_z
+    print("market_gate: varf chhatri z=%.2f m" % top_z)
+    return stone_obj, door_obj, glow_obj, GATE_CROWN_TARGET
 
 
 # --- stepwell_flight_module --------------------------------------------------
@@ -774,9 +833,12 @@ AO_THADA = dict(samples=22, dist=5.0, gradient="vertical",
 
 gate_stone, gate_doors, gate_glow, gate_crown_z = build_market_gate()
 emit([gate_stone, gate_doors, gate_glow], "structures/market_gate.glb",
-     AO_GATE, origin="assembly", bevel=0.03, budget=10500)  # runda 2: reveal marit + rise marit pt arc curbat vizibil
-print("market_gate: cheie arcului la z=%.2f m (contract >=11.0)" % gate_crown_z)
-print("market_gate: gol=%.2f m (contract >=18.0)" % GATE_GAP_W)
+     AO_GATE, origin="assembly", bevel=0.03, budget=21500)  # escaladare Opus: 21048 masurat -- panou manifold cu gol real, chhatri din 24 de arcade, densify_for_ao (~4400) ca AO-ul sa nu innegreasca fetele de 12 m
+_mg_gaps, _mg_crown = measure_opening([gate_stone, gate_doors, gate_glow])
+print("MASURATOARE market_gate (proiectie pe planul portii, toate nodurile, dupa emit):")
+for (_z0, _z1), _g in sorted(_mg_gaps.items()):
+    print("  gol liber y=%.2f..%.2f m: %.2f m  (contract >= 18.0)" % (_z0, _z1, _g))
+print("  cheia arcului (|x|<=0,3 m): %.2f m  (contract >= 11.0)" % _mg_crown)
 
 well_flight = build_stepwell_flight_module()
 emit([well_flight], "structures/stepwell_flight_module.glb", AO_WELL,

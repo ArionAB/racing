@@ -103,7 +103,13 @@ COMPARE_SPECS = {
         # paralaxa mare -- `lens` mai lung (105 mm, fata de 55 mm implicit)
         # comprima perspectiva, iar `margin` marit (1.15) lasa loc turnurilor
         # sa nu iasa din cadru.
-        "camera": {"azimuth": 250.0, "elevation": 13.0, "lens": 105.0, "margin": 1.15},
+        # ESCALADARE OPUS: decuparea e aproape FRONTALA, usor din stanga
+        # (se vad fetele stangi ale contrafortilor) si aproape la nivelul
+        # ochiului -- 262/7, lens lung. `sun_follow`: soarele fix al uneltei
+        # vine din azimutul 35, iar camera portii sta la ~260 -> fata se vedea
+        # din UMBRA (culoarea "prea inchisa" a rundei 2 era lumina, nu tenta).
+        "camera": {"azimuth": 262.0, "elevation": 7.0, "lens": 110.0, "margin": 1.08},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "stepwell_flight_module": {
         "category": "structures",
@@ -154,10 +160,20 @@ COMPARE_SPECS = {
     # Wall_Stone/Turret_Stone/Bastion_Stone amesteca ACUM doua sloturi
     # (piatra + fantele de tragere STUD, runda 2) -- tenta e DICT, ca la
     # portile de mai sus.
+    # ESCALADARE OPUS: decuparea arata un TRONSON de ~3 module intre doua
+    # turnuri (brief §1.2, coloana h/l); un modul singur (12 x 14 m) citea ca
+    # o placa patrata. `chain`: modulul se importa de 3 ori cap la cap pe Y,
+    # cu `fort_wall_turret` la ambele capete (iesit in fata cu `ends_dx`),
+    # ca in decupare. Vedere aproape frontala (turnurile isi arata ambele
+    # fete interioare pe decupare -> camera centrata).
     "fort_wall_segment": {
         "category": "structures",
-        "tints": {"Wall_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
-        "azimuth": 18.0, "elevation": 12.0, "margin": 1.05,
+        "tints": {"Wall_Stone": "#B8703F", "Wall_Glow": "#2A2A2E",
+                  "Turret_Stone": {3: "#B8703F", 20: "#2A2A2E"}},
+        "azimuth": 4.0, "elevation": 9.0, "margin": 1.04, "lens": 70.0,
+        "sun_follow": {"offset": -35.0, "tilt": 50.0},
+        "chain": {"n": 3, "step": 12.0, "ends": ("structures", "fort_wall_turret"),
+                  "ends_half": 2.25, "ends_dx": 1.0},
     },
     "fort_wall_turret": {
         "category": "structures",
@@ -199,10 +215,16 @@ COMPARE_SPECS = {
         "tints": {"Palace_Stone": "#B8703F", "Palace_Glow": "#2A2A2E"},
         "azimuth": 15.0, "elevation": 10.0, "margin": 1.05,
     },
+    # ESCALADARE OPUS: tentele = culorile REALE din atlas ale sloturilor
+    # (masurate pe palette_atlas.png): VOLCANIC_BLACK #56545B (gri inchis, nu
+    # negru -- #2A2A2E innegrea teava in preview, nu in joc), WOOD #875F35.
+    # Camera din stanga-fata a tevii (teava spre +X, gura in dreapta
+    # cadrului, putin spre camera -- se vede gaura gurii, ca in decupare).
     "rampart_cannon": {
         "category": "props",
-        "tints": {"Cannon_Metal": "#2A2A2E", "Cannon_Wood": "#6B4A2E"},
-        "azimuth": 22.0, "elevation": 14.0, "margin": 1.1,
+        "tints": {"Cannon_Metal": "#56545B", "Cannon_Wood": "#875F35"},
+        "azimuth": 318.0, "elevation": 13.0, "margin": 1.1, "lens": 60.0,
+        "sun_follow": {"offset": -35.0, "tilt": 50.0},
     },
 }
 
@@ -444,6 +466,56 @@ def _import_for_compare(name, spec, models_dir):
     return meshes
 
 
+def _dename(name):
+    import re
+    return re.sub(r"\.\d{3}$", "", name)
+
+
+def _tint_obj(o, spec):
+    _fix_ao_layer_name(o)
+    tint = spec.get("tints", {}).get(_dename(o.name))
+    if isinstance(tint, dict):
+        _apply_multi_flat_tint(o, tint)
+    elif tint is not None:
+        _apply_flat_tint(o, tint)
+
+
+def _chain_for_compare(name, spec, chain, first, models_dir):
+    """Modul inlantuibil: `n` copii ale GLB-ului cap la cap pe Y (pas
+    `step`), plus piesa de capat (`ends`) la ambele capete, iesita cu
+    `ends_dx` pe X. Toate importate din GLB, deci rosturile care se vad sunt
+    cele reale."""
+    n = chain.get("n", 3)
+    step = chain.get("step", 12.0)
+    out = list(first)
+    for o in first:
+        if o.parent is None:
+            o.location.y += -step * (n - 1) * 0.5
+    for k in range(1, n):
+        objs = _import(spec["category"], name, models_dir)
+        for o in objs:
+            if o.type == "MESH":
+                _tint_obj(o, spec)
+                out.append(o)
+            if o.parent is None:
+                o.location.y += -step * (n - 1) * 0.5 + step * k
+    ends = chain.get("ends")
+    if ends:
+        cat, end_name = ends
+        span = step * n * 0.5 + chain.get("ends_half", 0.0)
+        for sgn in (-1.0, 1.0):
+            objs = _import(cat, end_name, models_dir)
+            for o in objs:
+                if o.type == "MESH":
+                    _tint_obj(o, spec)
+                    out.append(o)
+                if o.parent is None:
+                    o.location.y += sgn * span
+                    o.location.x += chain.get("ends_dx", 0.0)
+    bpy.context.view_layer.update()
+    return out
+
+
 def compare(name, models_dir=None, res_height=900, out_dir=None):
     """Decupare (stanga) + randare din GLB exportat (dreapta), la aceeasi
     inaltime in pixeli (brief §0.1 pasul 3)."""
@@ -467,6 +539,9 @@ def compare(name, models_dir=None, res_height=900, out_dir=None):
     if not meshes:
         print("LIPSA GLB pentru compare:", name)
         return None
+    chain = spec.get("chain")
+    if chain:
+        meshes = _chain_for_compare(name, spec, chain, meshes, models_dir)
 
     for o in bpy.data.objects:
         if o.type == "MESH":
@@ -496,7 +571,8 @@ def compare(name, models_dir=None, res_height=900, out_dir=None):
                  elevation=cam_spec.get("elevation", 18.0),
                  res_height=res_height,
                  margin=cam_spec.get("margin", 1.2),
-                 lens=cam_spec.get("lens", 55.0))
+                 lens=cam_spec.get("lens", 55.0),
+                 sun_follow=spec.get("sun_follow"))
 
     # Blender-ul headless n-are PIL in Python-ul lui bundle-uit (masurat: nu
     # exista, si nu instalam pachete in interpretorul lui Blender). Stitch-ul
@@ -529,7 +605,8 @@ def _run_compose(extra_args):
     return False
 
 
-def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2, lens=55.0):
+def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2, lens=55.0,
+                  sun_follow=None):
     """Ca `shot()`, dar cu lumina de zi NEUTRA si fundal #CFCFCF (brief §0.1
     pasul 3), nu tema calda de apus din `preview._light`/`_world`.
 
@@ -608,6 +685,16 @@ def _neutral_shot(objects, path, azimuth, elevation, res_height, margin=1.2, len
     sun.data.angle = math.radians(3.0)
     sun.data.specular_factor = 0.0
     sun.rotation_euler = (math.radians(65.0), 0.0, math.radians(125.0))
+    if sun_follow:
+        # Soarele urmeaza camera (optional, per piesa): un SUN cu
+        # rotation_euler (X, 0, Z) lumineaza DINSPRE azimutul Z - 90 (masurat:
+        # directia -Z locala rotita da sursa la atan2(-cos Z, sin Z)), la
+        # elevatia 90 - X. Deci sursa la azimutul camerei + `offset` cere
+        # Z = azimut + 90 + offset. Implicitul (65, 0, 125) = sursa la 35,
+        # potrivit doar camerei implicite (35/18) -- piesele cu camera
+        # proprie departe de 35 (poarta la ~260) se vedeau din umbra.
+        sun.rotation_euler = (math.radians(sun_follow.get("tilt", 65.0)), 0.0,
+                              math.radians(azimuth + 90.0 + sun_follow.get("offset", 0.0)))
 
     # fill mai slab (soarele principal acopera acum fata camerei) -- doar ca
     # sa nu ramana complet negre fetele din umbra opusa.
@@ -663,6 +750,8 @@ WAVE_PIECES = {
     # val 2a (brief §1.2, cetatea) -- "2a" ramane STRING (nu val int), vezi
     # `fidelity_sheet`/argparsing mai jos, ca sa nu forteze `int()` pe un
     # nume de val alfanumeric.
+    # escaladarea Opus (cele 3 piese respinse de doua ori in valul 2)
+    "2-opus": ["market_gate", "fort_wall_segment", "rampart_cannon"],
     "2a": ["fort_gate_jai", "fort_gate_fateh", "fort_gate_loha",
            "fort_wall_segment", "fort_wall_turret", "fort_bastion",
            "palace_facade_a", "palace_facade_b", "rampart_cannon"],

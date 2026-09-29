@@ -111,86 +111,94 @@ def _local_arcade(b, bg, p1, p2, n, opening_h, pier_h, pier_w, wall_t, slot,
 # fort_wall_segment -- modul de zid inlantuibil
 # =============================================================================
 #
-# Contract (brief §1.2): 12 m lung (Y) x 3 m gros x 14 m inalt, h/l 0,34.
-# Decuparea arata un TRONSON intre doua turnuri -- turnurile sunt piesa
-# separata (fort_wall_turret), de-aici modulul e DOAR peretele drept dintre
-# ele. Lista de elemente (dupa Read fort_wall_segment.png), de jos in sus:
+# ESCALADARE OPUS (runda 3; rundele 1-2 respinse: modulul singur, 12 x 14 m,
+# citea ca o PLACA patrata cu o coroana de "dinti" rotunzi la 1,2 m).
 #
-#   1. Soclu usor tesit la baza (banda ingusta, teasa spre exterior).
-#   2. Zid drept, gros, cu linii de asize orizontale (TEXTURA, nu geometrie --
-#      regula 0.5 -- vine din clasa red_sandstone la integrare).
-#   3. Un rand de 3 guri de tragere dreptunghiulare inguste, la ~55-60% din
-#      inaltime, distantate regulat (pe decupare: stanga, mijloc, dreapta).
-#   4. O cornisa/parapet in consola aproape de varf (banda ingusta iesita),
-#      cu o umbra clara dedesubt -- `chajja`/`balcony_band` liniar.
-#   5. Creneluri DREPTUNGHIULARE, DESE, regulate pe toata lungimea sus, sub
-#      forma de dinti patrati egali (numarate pe decupare: ~9-10 pe cei 12 m).
+# LISTA DE ELEMENTE (decuparea fort_wall_segment.png, citita inainte de
+# primul vertex; vedere frontala, tronson de ~3 module intre doua turnuri):
+#   1. Soclu ingust la baza, usor tesit (iese putin din fata zidului).
+#   2. Corp de zid drept, plin, inalt -- rosturile de blocuri sunt TEXTURA
+#      (brief regula 5), nu geometrie.
+#   3. 2 fante de tragere inalte si inguste pe tronson, la ~65% din
+#      inaltimea zidului -> aici 1 pe modul (3 pe tronsonul de 3 module; decuparea
+#      are 2 -- abatere de +1 asumata: un modul inlantuibil nu poate avea
+#      "o fanta la 1,5 module").
+#   4. Un brau subtire, usor iesit, la baza crenelurilor (linia de umbra
+#      de sub merloane).
+#   5. Merloane "kangura" (dreptunghi + umeri rotunjiti + varf), cu un punct
+#      intunecat in mijloc: 14 pe tronsonul de ~3 module -> 5 pe modul, pas
+#      2,4 m, ~1,95 x 2,5 m, cu goluri inguste intre ele. NU "~1 la 1,2 m"
+#      (cifra rundei 2, contrazisa de decupare). Brief-ul scrie "creneluri
+#      dreptunghiulare" -- decuparea arata kangura; forma vine din planse
+#      (§0.1), deci kangura.
+#   6. Pe spate: drum de straja la cota brâului si un parapet interior jos
+#      (silueta din spate si din capat, nevazut pe decupare).
+#   Capete PLANE la y = +-6 (inlantuire cap la cap / langa turn): merloanele
+#   la y = 0, +-2,4, +-4,8, deci golul de la capat e jumatate din golul
+#   dintre merloane si ritmul continua peste rost.
+#   Ce iese din contur: doar merloanele.
 #
-# Lungimea pe Y (capete PLANE la y=+-6, ca sa se inlantuie cap la cap sau
-# langa turn), fata principala (guri de tragere, cornisa) spre +X.
+# Lungimea pe Y, fata principala (fante, merloane) spre +X.
 WS_LEN = 12.0
 WS_THICK = 3.0
 WS_H = 14.0
+WS_MERLONS = 5
+WS_MERLON_W = 1.95
+WS_MERLON_H = 2.5
+WS_MERLON_T = 0.7
 
 
 def build_fort_wall_segment():
     b = Builder()
-    faces = []
+    bg = Builder()
     hl = WS_LEN * 0.5
     ht = WS_THICK * 0.5
 
-    # 1. soclu usor tesit (banda ingusta la baza, mai lata decat zidul)
-    plinth_h = 0.6
-    faces += list(b.box((0.0, 0.0, plinth_h * 0.5), (WS_THICK + 0.30, WS_LEN, plinth_h), STONE))
+    # 1. soclu tesit: profil in X-Z extrudat pe toata lungimea (capete plane)
+    plinth = [(-ht - 0.30, 0.0), (ht + 0.30, 0.0), (ht + 0.30, 0.35),
+              (ht + 0.05, 0.9), (-ht - 0.05, 0.9), (-ht - 0.30, 0.35)]
+    bm = b.bm
+    fa = [bm.verts.new((x, -hl, z)) for x, z in plinth]
+    fb = [bm.verts.new((x, hl, z)) for x, z in plinth]
+    bm.faces.new(tuple(fa))
+    bm.faces.new(tuple(reversed(fb)))
+    for i in range(len(plinth)):
+        j = (i + 1) % len(plinth)
+        bm.faces.new((fa[i], fb[i], fb[j], fa[j]))
+    for f in bm.faces:
+        f[b.slot] = STONE
 
-    # 2. zidul drept, gros -- corpul principal
-    wall_h = WS_H - plinth_h - 1.1  # rezerva 1,1 pentru cornisa+creneluri
-    faces += list(b.box((0.0, 0.0, plinth_h + wall_h * 0.5), (WS_THICK, WS_LEN, wall_h), STONE))
-    wall_top_z = plinth_h + wall_h
+    # 2. corpul zidului
+    walk_z = WS_H - WS_MERLON_H - 0.45     # drumul de straja / baza braului
+    b.box((0.0, 0.0, (0.9 + walk_z) * 0.5), (WS_THICK, WS_LEN, walk_z - 0.9), STONE)
 
-    # 3. guri de tragere: 2, dreptunghiulare, la mijlocul inaltimii, pe fata
-    # +X (principala) -- REVIZUIRE runda 2 (critica: "a slab seen end-on",
-    # "2 dark arrow-slit windows at mid-height"): flush/usor retrase (nu
-    # relief iesit) SI colorate STUD (VOLCANIC_BLACK), ca la turnurile
-    # portilor -- aceeasi lectie (culoare inchisa + pozitie flush, nu
-    # geometrie protruzand).
-    slit_z = plinth_h + wall_h * 0.5
-    for t in (-0.35, 0.35):
-        sy = t * hl
-        faces += list(b.box((ht - 0.06, sy, slit_z), (0.05, 0.35, 1.0), STUD))
+    # 3. fanta de tragere: una pe modul, la mijloc, flush + inchisa (lectia
+    # val 2a: relieful de piatra nu se citeste ca fanta, culoarea da)
+    # decupare: fanta ~1 x 3 m la ~65% din inaltimea zidului (masurat in px
+    # pe tronson); aici 0,6 x 2,4 (1 pe modul, nu 2 pe 3 module)
+    slit_z = walk_z * 0.62
+    bg.box((ht + 0.01, 0.0, slit_z), (0.04, 0.6, 2.4), GLOW)
 
-    # 4. REVIZUIRE runda 2: cornisa in consola (chajja) ELIMINATA -- critica
-    # cere "flush parapet with a thin string course, remove the overhanging
-    # plate". Inlocuita cu un brau ingust, FLUSH (fara iesire in consola),
-    # doar ca o linie subtire de umbra la tranzitia zid/parapet.
-    faces += list(b.box((0.0, 0.0, wall_top_z + 0.06), (WS_THICK + 0.06, WS_LEN, 0.12), STONE))
-    parapet_base_z = wall_top_z + 0.12
+    # 4. brau la baza merloanelor, iesit 0,15 m in fata
+    b.box((0.15, 0.0, walk_z + 0.225), (WS_THICK + 0.3, WS_LEN, 0.45), STONE)
+    merlon_z = walk_z + 0.45
 
-    # parapetul plin de sub creneluri (banda continua pe toata lungimea),
-    # FLUSH cu zidul (fara sa iasa in consola)
-    parapet_h = WS_H - parapet_base_z - 0.9
-    faces += list(b.box((0.0, 0.0, parapet_base_z + parapet_h * 0.5),
-                        (WS_THICK - 0.1, WS_LEN, parapet_h), STONE))
-    crenel_z = parapet_base_z + parapet_h
+    # 5. merloane kangura pe muchia din fata, cu punct intunecat
+    pitch = WS_LEN / WS_MERLONS
+    mx = ht - WS_MERLON_T * 0.5
+    for i in range(WS_MERLONS):
+        y = -hl + pitch * (i + 0.5)
+        kangura_merlon(b, (mx, y, merlon_z), WS_MERLON_W, WS_MERLON_H, WS_MERLON_T,
+                       STONE, facing="X")
+        bg.box((ht + 0.01, y, merlon_z + WS_MERLON_H * 0.46), (0.04, 0.3, 0.3), GLOW)
 
-    # 5. creneluri ROTUNJITE, DENSE, care se ating (~1 per 1,2 m) --
-    # REVIZUIRE runda 2: critica cere explicit acelasi profil ca turnurile/
-    # bastionul (rounded, continuu), nu dreptunghiular rar. Banda flush sub
-    # creneluri (fundatia lor vizuala) -- piesa dreptunghiulara, deci `box`,
-    # nu `balcony_band` (care e pentru piese circulare).
-    faces += list(b.box((0.0, 0.0, crenel_z + 0.15), (WS_THICK, WS_LEN, 0.3), STONE))
-    crenel_z += 0.3
-    n_m = max(int(round(WS_LEN / 1.2)), 8)
-    merlon_w = (WS_LEN / n_m) * 0.98
-    faces += crenellation(b, (0.0, -hl, crenel_z), (0.0, hl, crenel_z), 1.1, STONE,
-                          width=merlon_w, gap=0.02, style="rounded")
+    # 6. parapet interior jos, pe muchia din spate
+    b.box((-ht + 0.2, 0.0, merlon_z + 0.5), (0.4, WS_LEN, 1.0), STONE)
 
-    # capete plane (deja plane din constructia pe cutii -- nimic de adaugat)
+    densify_for_ao(b, max_len=3.0)
     stone_obj = b.to_object("Wall_Stone")
-    for f in faces:
-        if f.is_valid:
-            f[b.slot] = STONE
-    return stone_obj
+    glow_obj = _finish_or_none(bg.to_object("Wall_Glow"))
+    return stone_obj, glow_obj
 
 
 # =============================================================================
@@ -645,8 +653,9 @@ def emit(objs, path, ao, origin="base", bevel=0.03, smooth_angle=45.0,
 
 
 # fort_wall_segment
-wall_stone = build_fort_wall_segment()
-emit([wall_stone], "structures/fort_wall_segment.glb", AO_STONE, bevel=0.03, budget=6000)
+wall_stone, wall_glow = build_fort_wall_segment()
+emit([wall_stone, wall_glow], "structures/fort_wall_segment.glb", AO_STONE,
+     origin="assembly", bevel=0.03, budget=3000)
 
 # fort_wall_turret
 turret_stone = build_fort_wall_turret()
@@ -1022,109 +1031,175 @@ emit([pb_stone, pb_glow], "structures/palace_facade_b.glb", AO_STONE, origin="as
 # =============================================================================
 #
 # Contract (brief §1.2): teava 3,2 m, total 3,6 x 1,6 x 1,5, h/l 0,42.
-# Lista de elemente (dupa Read rampart_cannon.png), de jos in sus / spate-fata:
+# ESCALADARE OPUS (runda 3; rundele 1-2 respinse: teava un cilindru drept
+# NEINCLINAT -- `cylinder(axis="X")` nu primea inclinarea, doar centrul
+# mutat pe axa inclinata -- cu o bila uriasa in spate, roti ca discuri
+# plate, obraji ca placi drepte, negru mort in preview).
 #
-#   1. Afet de lemn: doua obraze/console laterale, cu o platforma orizontala.
-#   2. DOUA roti cu spite (8 spite fiecare, geometrie), montate pe axul de
-#      sub teava.
-#   3. Teava metalica intunecata (VOLCANIC_BLACK), cu 2-3 inele in relief si
-#      gura evazata -- usor ridicata (~10 deg) pe afet. Teava priveste spre
-#      +X (fata principala catre camera).
+# LISTA DE ELEMENTE (decuparea rampart_cannon.png, citita inainte de primul
+# vertex; vedere din stanga-fata, gura in dreapta cadrului, putin spre noi):
+#   1. Teava lunga, CONICA (culata ~1,6x gura), gri inchis, ridicata ~10 grd.
+#   2. 3 inele in relief: inelul de baza la culata, unul la tunari, unul
+#      spre gura; gura EVAZATA (buza), cu gaura neagra vizibila.
+#   3. Buton (cascabel) mic in spatele culatei.
+#   4. Tunarii (fusurile laterale) sprijiniti pe obraji.
+#   5. Afet de lemn roscat: 2 obraji cu profil IN TREPTE (inalti in fata,
+#      sub tunari, coborand in trepte spre spate), cu coada inclinata pana
+#      aproape de sol.
+#   6. 2 roti MARI cu spite in fata, sub tunari: janta groasa, butuc,
+#      ~12 spite (decuparea; brief-ul scrie 8 -- forma vine din planse).
+#   7. 2 roti MICI pline la coada (rotile de spate ale afetului de
+#      metereza, stanga-jos pe decupare).
+#   Ce iese din contur: gura tevii (dreapta-sus), rotile.
+#
+# Axe: teava spre +X (fata principala, ca restul cetatii), rotile pe +-Y.
 CN_BARREL_LEN = 3.2
+CN_TILT = 10.0
+CN_TRUNNION = (0.25, 0.0, 1.0)   # (x, y, z) al tunarilor
+CN_TRUNNION_T = 1.3              # tunarii la 1,3 m de fata culatei (~40%)
+CN_WHEEL_R = 0.62
+CN_REAR_R = 0.25
+
+
+def _lathe(b, profile, origin, axis, slot, segments=14, closed=False):
+    """Suprafata de revolutie in jurul unei axe OARECARE: `profile` = lista
+    (r, t) de-a lungul axei (t in m de la `origin`); r = 0 la capete da un
+    varf inchis. Solid inchis daca profilul incepe si se termina la r = 0."""
+    o = Vector(origin)
+    a = Vector(axis).normalized()
+    ref = Vector((0.0, 0.0, 1.0)) if abs(a.z) < 0.9 else Vector((1.0, 0.0, 0.0))
+    u = a.cross(ref).normalized()
+    v = a.cross(u).normalized()
+    bm = b.bm
+    rings = []
+    for r, t in profile:
+        c = o + a * t
+        if r <= 1e-6:
+            rings.append([bm.verts.new(c)])
+        else:
+            rings.append([bm.verts.new(c + (u * math.cos(2 * math.pi * k / segments)
+                                            + v * math.sin(2 * math.pi * k / segments)) * r)
+                          for k in range(segments)])
+    faces = []
+    pairs = list(zip(rings, rings[1:]))
+    if closed:  # profil inchis (janta): ultimul inel se leaga de primul
+        pairs.append((rings[-1], rings[0]))
+    for ra, rb in pairs:
+        if len(ra) == 1 and len(rb) == 1:
+            continue
+        for k in range(segments):
+            k2 = (k + 1) % segments
+            if len(ra) == 1:
+                faces.append(bm.faces.new((ra[0], rb[k], rb[k2])))
+            elif len(rb) == 1:
+                faces.append(bm.faces.new((ra[k], rb[0], ra[k2])))
+            else:
+                faces.append(bm.faces.new((ra[k], rb[k], rb[k2], ra[k2])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
+
+
+def _plate_xz(b, outline, y0, y1, slot):
+    """Placa (prisma pe Y) dintr-un contur CONCAV in planul XZ -- capace prin
+    ear-clipping (vocabularul), laturi quad. Solid manifold."""
+    bm = b.bm
+    fa = [bm.verts.new((x, y0, z)) for x, z in outline]
+    fb = [bm.verts.new((x, y1, z)) for x, z in outline]
+    faces = []
+    for i0, i1, i2 in _ear_clip(outline):
+        faces.append(bm.faces.new((fa[i0], fa[i1], fa[i2])))
+        faces.append(bm.faces.new((fb[i2], fb[i1], fb[i0])))
+    n = len(outline)
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append(bm.faces.new((fa[i], fb[i], fb[j], fa[j])))
+    for f in faces:
+        f[b.slot] = slot
+    return faces
+
+
+def _spoked_wheel(b, center, r, width, spokes, slot):
+    """Roata cu janta (inel gros), butuc si spite -- pe axa Y."""
+    cx, cy, cz = center
+    # janta: inel inchis (profil dreptunghiular revolut in jurul lui Y)
+    rim_in = r * 0.84
+    hw = width * 0.5
+    faces = _lathe(b, [(rim_in, -hw), (r, -hw), (r, hw), (rim_in, hw)],
+                   (cx, cy, cz), (0, 1, 0), slot, segments=14, closed=True)
+    # butucul
+    b.cylinder((cx, cy, cz), r * 0.17, width * 1.9, slot, segments=10, axis="Y")
+    # spitele
+    for k in range(spokes):
+        ang = 2 * math.pi * (k + 0.5) / spokes
+        d = Vector((math.cos(ang), 0.0, math.sin(ang)))
+        p1 = Vector(center) + d * (r * 0.15)
+        p2 = Vector(center) + d * (rim_in + 0.02)
+        b.beam(p1, p2, (0.055, width * 0.55), slot, up=(0, 1, 0))
+    return faces
 
 
 def build_rampart_cannon():
-    b = Builder()
-    bw = Builder()
-    faces = []
-    wood_faces = []
+    b = Builder()     # Cannon_Metal
+    bw = Builder()    # Cannon_Wood
 
-    tilt = math.radians(10.0)
+    tilt = math.radians(CN_TILT)
+    axis = Vector((math.cos(tilt), 0.0, math.sin(tilt)))
+    trun = Vector(CN_TRUNNION)
+    breech = trun - axis * CN_TRUNNION_T
 
-    # 3. teava: cilindru principal + 2 inele + gura evazata (con), inclinata
-    # in planul XZ (lungimea pe X, spre camera)
-    barrel_r = 0.16
-    barrel_c0 = Vector((0.0, 0.0, 0.85))
-    barrel_axis = Vector((math.cos(tilt), 0.0, math.sin(tilt)))
-    barrel_c = barrel_c0 + barrel_axis * (CN_BARREL_LEN * 0.5 - 0.3)
-    faces += list(b.cylinder((barrel_c.x, barrel_c.y, barrel_c.z), barrel_r, CN_BARREL_LEN,
-                             CANNON_METAL, segments=14, axis="X"))
-    # inelele: 2, ca frustum-uri usor mai late, distantate pe lungimea tevii
-    for t_ring in (0.25, 0.62):
-        ring_c = barrel_c0 + barrel_axis * (CN_BARREL_LEN * (t_ring - 0.5) + CN_BARREL_LEN * 0.2)
-        faces += list(b.frustum((ring_c.x, ring_c.y, ring_c.z), barrel_r * 1.22, barrel_r * 1.22,
-                                0.10, CANNON_METAL, segments=14, axis="X"))
-    # gura evazata la capatul din fata
-    muzzle_c = barrel_c0 + barrel_axis * (CN_BARREL_LEN - 0.05)
-    faces += list(b.frustum((muzzle_c.x, muzzle_c.y, muzzle_c.z), barrel_r * 1.35, barrel_r * 1.05,
-                            0.16, CANNON_METAL, segments=14, axis="X"))
+    # 1-3. teava: un singur profil revolut (r, t) de la butonul cascabelului
+    # la fundul gurii -- culata 0,25, gura 0,155 (raport 1,6), buza 0,19
+    L = CN_BARREL_LEN
+    prof = [
+        (0.0, -0.30), (0.075, -0.28), (0.095, -0.21), (0.075, -0.14),   # buton
+        (0.05, -0.10), (0.05, -0.06), (0.17, -0.03), (0.23, 0.0),       # gat + culata
+        (0.265, 0.02), (0.265, 0.16), (0.245, 0.18),                      # inel de baza
+        (0.215, CN_TRUNNION_T - 0.08), (0.235, CN_TRUNNION_T - 0.06),     # inel la tunari
+        (0.235, CN_TRUNNION_T + 0.06), (0.205, CN_TRUNNION_T + 0.08),
+        (0.18, 2.20), (0.20, 2.22), (0.20, 2.32), (0.175, 2.34),          # inelul gurii
+        (0.155, L - 0.26), (0.19, L - 0.14), (0.195, L),                  # buza evazata
+        (0.095, L), (0.095, L - 0.22), (0.0, L - 0.22),                   # gaura
+    ]
+    _lathe(b, prof, breech, axis, CANNON_METAL, segments=12)
+    # 4. tunarii (fusuri pe Y)
+    b.cylinder((trun.x, trun.y, trun.z), 0.075, 0.74, CANNON_METAL, segments=10, axis="Y")
 
-    # 1. afet de lemn: doua console laterale (pe Y, de o parte si de alta a
-    # tevii) + platforma. REVIZUIRE runda 2 (critica: "TWO LARGE SPOKED
-    # WHEELS...at the front under the trunnions" -- in randare doar UNA se
-    # vedea, cealalta complet ascunsa in spatele obrazului de lemn apropiat).
-    # Obrajii s-au mutat mai spre spate (axle_y creste) fata de roti, ca
-    # rotile (marite si ele) sa iasa CLAR in lateral, dincolo de obraji,
-    # vizibile din ambele parti la unghiul de comparatie.
-    axle_z = 0.6
-    axle_y = 0.55
-    for sy in (-axle_y, axle_y):
-        wood_faces += list(bw.box((0.0, sy, axle_z * 0.5 + 0.05), (1.5, 0.14, axle_z + 0.1), CANNON_WOOD))
-    wood_faces += list(bw.box((0.0, 0.0, axle_z + 0.18), (0.9, axle_y * 2 + 0.14, 0.16), CANNON_WOOD))
+    # 5. obrajii afetului: profil in trepte, coada pana aproape de sol
+    cheek = [(0.62, 0.40), (0.62, 0.93), (0.36, 0.93), (0.33, 1.0), (0.17, 1.0),
+             (0.14, 0.93), (0.02, 0.93), (0.02, 0.80), (-0.36, 0.80), (-0.36, 0.66),
+             (-0.74, 0.66), (-1.42, 0.36), (-1.42, 0.14), (-0.70, 0.26), (0.10, 0.38)]
+    for s in (-1.0, 1.0):
+        y0, y1 = s * 0.28, s * 0.40
+        _plate_xz(bw, cheek, min(y0, y1), max(y0, y1), CANNON_WOOD)
+    # traversele dintre obraji (fata, mijloc, coada) + pana de sub culata
+    bw.box((0.45, 0.0, 0.52), (0.26, 0.58, 0.22), CANNON_WOOD)
+    bw.box((-0.45, 0.0, 0.42), (0.30, 0.58, 0.18), CANNON_WOOD)
+    bw.box((-1.20, 0.0, 0.30), (0.30, 0.58, 0.18), CANNON_WOOD)
+    bw.box((-0.62, 0.0, 0.64), (0.46, 0.30, 0.16), CANNON_WOOD)
 
-    # 2. doua roti MARI cu spite (8 spite fiecare), pe axul Y, montate mai
-    # spre exterior decat obrajii (axle_y+0,35 in loc de +0,12) -- ca sa
-    # iasa clar vizibile pe ambele laturi, nu ascunse in spatele afetului.
-    # REVIZUIRE (gasita la primul --compare): un disc solid plin + spite
-    # deasupra citea ca o rondela plata (spitele coplanare, invizibile). A
-    # DOUA REVIZUIRE: incercarea de janta-inel din cutii tangente
-    # (Matrix.Rotation pe Y) a iesit ca o roata dintata/alternanta,
-    # geometrie stricata -- semnul sau referinta unghiului pentru
-    # `rotation` pe cutii tangente nu se comporta simplu (memoria
-    # semnul-rotatiilor-in-builder). Revenire la ce functioneaza sigur:
-    # disc SUBTIRE (janta) + disc si mai subtire decalat (butuc central,
-    # contrastant prin proeminenta) + spite ca bare DREPTE prin centru (nu
-    # tangente) -- 4 bare complete care trec prin butuc (8 "spite" vizuale,
-    # cate 2 pe fiecare bara).
-    wheel_r = 0.72
-    wheel_thick = 0.12
-    for sy in (-axle_y - 0.35, axle_y + 0.35):
-        # janta (discul propriu-zis)
-        wood_faces += list(bw.cylinder((0.0, sy, wheel_r), wheel_r, wheel_thick,
-                                       CANNON_WOOD, segments=16, axis="Y"))
-        # butucul central, usor proeminent pe ambele fete
-        wood_faces += list(bw.cylinder((0.0, sy, wheel_r), wheel_r * 0.16, wheel_thick * 1.6,
-                                       CANNON_WOOD, segments=10, axis="Y"))
-        # 4 bare drepte prin centru (8 spite vizuale), usor in relief pe fata
-        # discului (+/-Y fata de planul jantei) -- se vad ca dungi radiale
-        n_bars = 4
-        for i in range(n_bars):
-            a = math.pi * i / n_bars
-            rot = Matrix.Rotation(a, 3, "Y")
-            for face_sign in (-1.0, 1.0):
-                bar_y = sy + face_sign * (wheel_thick * 0.5 + 0.015)
-                wood_faces += list(bw.box((0.0, bar_y, wheel_r), (wheel_r * 1.82, 0.025, 0.09),
-                                          CANNON_WOOD, rotation=rot))
-        # axul dintre roata si obraz -- geometrie mica dar leaga vizual roata
-        # de carul afetului, in loc sa pluteasca separat
-        axle_stub_y = axle_y * math.copysign(1.0, sy)
-        wood_faces += list(bw.cylinder((0.0, (sy + axle_stub_y) * 0.5, wheel_r), wheel_r * 0.1,
-                                       abs(sy - axle_stub_y), CANNON_WOOD, segments=8, axis="Y"))
+    # 6. rotile mari cu spite, sub tunari, pe osie
+    ax_x = CN_TRUNNION[0]
+    bw.cylinder((ax_x, 0.0, CN_WHEEL_R), 0.065, 1.42, CANNON_WOOD, segments=8, axis="Y")
+    for s in (-1.0, 1.0):
+        _spoked_wheel(bw, (ax_x, s * 0.60, CN_WHEEL_R), CN_WHEEL_R, 0.11, 12, CANNON_WOOD)
 
-    stone_obj = b.to_object("Cannon_Metal")
-    for f in faces:
-        if f.is_valid:
-            f[b.slot] = CANNON_METAL
+    # 7. rotile mici pline de la coada
+    for s in (-1.0, 1.0):
+        bw.cylinder((-1.18, s * 0.48, CN_REAR_R), CN_REAR_R, 0.12, CANNON_WOOD,
+                    segments=12, axis="Y")
+        bw.cylinder((-1.18, s * 0.48, CN_REAR_R), CN_REAR_R * 0.35, 0.18, CANNON_WOOD,
+                    segments=8, axis="Y")
+    bw.cylinder((-1.18, 0.0, CN_REAR_R), 0.05, 1.04, CANNON_WOOD, segments=8, axis="Y")
+
+    metal_obj = b.to_object("Cannon_Metal")
     wood_obj = bw.to_object("Cannon_Wood")
-    for f in wood_faces:
-        if f.is_valid:
-            f[bw.slot] = CANNON_WOOD
-    return stone_obj, wood_obj
+    return metal_obj, wood_obj
 
 
 cannon_metal, cannon_wood = build_rampart_cannon()
 emit([cannon_metal, cannon_wood], "props/rampart_cannon.glb", AO_PROP, origin="assembly",
-     bevel=0.015, budget=3300)
+     bevel=0.012, budget=4200)
 
 
 print()
@@ -1136,7 +1211,7 @@ for path, tris, kb, ao_lo, ao_hi, budget in results:
           % (path, tris, flag, kb, ao_lo, ao_hi))
 print("TOTAL cetate (val 2a): %d tris" % sum(t for _, t, _, _, _, _ in results))
 
-save_blend([o for o in (wall_stone, turret_stone, bastion_stone,
+save_blend([o for o in (wall_stone, wall_glow, turret_stone, bastion_stone,
                         jai_stone, jai_doors, fateh_stone, fateh_doors,
                         loha_stone, loha_doors, pb_stone, pb_glow,
                         cannon_metal, cannon_wood) if o is not None],

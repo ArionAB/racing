@@ -116,7 +116,15 @@ check "buildings/blue_house_b.glb"    6000 --origin=assembly
 check "buildings/blue_house_c.glb"    4600 --origin=assembly
 check "buildings/blue_house_d.glb"    6500 --origin=assembly
 check "buildings/blue_house_e.glb"    6500 --origin=assembly
-check "buildings/haveli_facade.glb"    912 --origin=assembly
+# haveli_facade 912 -> 4900 (runda 3, PESTE brief-ul de 900 -- decizia
+# liderului): verdictul "arcade in Y, usi maro in loc de geamuri, albastru-
+# marin" cerea lista completa de pe decupare: 4 goluri arcuite la parter (2
+# arcade mari cu usi de lemn), jharokha cu 3 arce + balcon cu baluștri +
+# streasina, 2 ferestre arcuite laterale, latura +X cu fereastra, 2 ferestre
+# inalte si balconas, terasa cu baluștri intre stalpi cu varf, chhatri cu
+# cupolita. Doar cele 12 goluri arcuite cu rame costa ~1400. Masurat 4796, cu
+# bevel 0 (bevel-ul de 2 cm tripla cifra la 11502 pe baluștri si rame).
+check "buildings/haveli_facade.glb"   4900 --origin=assembly
 check "props/rooftop_tank.glb"         700
 check "props/rooftop_clutter.glb"     1400 --origin=assembly --allow-car-slots=Clutter_Laundry --allow-slots=31
 

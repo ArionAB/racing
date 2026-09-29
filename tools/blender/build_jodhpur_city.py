@@ -943,119 +943,174 @@ def build_blue_house_e():
 
 # --- haveli_facade -------------------------------------------------------------
 #
-# Contract (brief §1.4): 10x6 m, 3 etaje, 11 m, h/l 0,92, tenta INDIGO,
-# <=900 tri. Element list (decupare haveli_facade.png, RECITITA in runda de
-# corectii, zoom 6x -- bug real gasit: codul vechi punea arcada pe fata care
-# spanuie DOAR 6 m (HV_D, adancimea), nu pe fata de 10 m (HV_W, latimea) --
-# "fatada LATA" cerea explicit sa fie pe dimensiunea mare. Fix: arcada trece
-# pe fata +Y (implicita a `arch_opening`/`_cheap_arch_opening` fara rotatie),
-# care spanuie X = HV_W = 10 m.
+# Contract (brief §1.4): 10x6 m, 3 etaje, 11 m, h/l 0,92, <=900 tri, casa
+# bogata: arcade pe parter, balcoane de piatra, ferestre in arc, balustrada pe
+# terasa.
 #
-#   1. Parter: 4 goluri arcuite in sir pe toata fata +Y (nu 3 -- decuparea
-#      arata 4 arce la parter, cele 2 din mijloc mai late/deschise, cele 2
-#      de la capete mai inguste).
-#   2. Etaj 1: 4 ferestre in arc (aceeasi grila ca parterul), cu UN BALCON
-#      de piatra pe console CONTINUU sub tot randul.
-#   3. Etaj 2: acelasi model -- 4 ferestre in arc cu balcon continuu.
-#   4. Terasa de sus cu balustrada pe toata latimea fetei +Y.
-#   5. Ornament sculptat sub cornisa de sus (banda decorativa).
+# Element list (decupare haveli_facade.png, marire x4 -- runda 3 de corectii:
+# "albastru-marin in loc de deschis, usi maro in loc de geamuri, arcade in
+# Y"). Vazuta aproape din fata, az ~60: fata LATA (10 m) = +Y, frontala;
+# latura de 6 m = +X, in fuga, la stanga. Pozitiile pe fata +Y sunt date ca
+# u = metri de la coltul STANG (X = +5).
 #
-# BUGET: 912 tri, PESTE cei 900 din brief (+12, ~1,3%) -- decizia acestei
-# runde de corectii, motiv scris (regula "nu mutila piesa", brief §0.1):
-# trecerea de la 3 la 4 arcade/ferestre pe rand (fix de fidelitate, decuparea
-# arata clar 4, nu 3) plus fix-ul de axa (fatada pe cei 10 m, nu pe cei 6 m)
-# aduc cost ireductibil. Merloanele balcoanelor/terasei au fost rarite de
-# doua ori (de la 0.9/0.5 gap la 2.8/1.8 si 3.0/2.0) ca sa reduca 176 tri;
-# sub asta, siluieta de parapet crenelat s-ar pierde. Liderul decide daca
-# cei 12 tri raman sau se ridica bugetul in `verify_jodhpur.sh`.
+#   PARTER (0..3,8 m), de la stanga la dreapta:
+#     1. fereastra ARCUITA inchisa (u 1,7, ~1 x 2 m), rama subtire;
+#     2. doua ARCADE ROTUNDE mari, deschise, cu usi de lemn in fund (u 3,95 si
+#        6,3, ~1,6 x 2,8 m) -- arce adevarate, nu bare in Y;
+#     3. fereastra ARCUITA (u 8,5), pereche cu 1.; pilastri subtiri intre
+#        travee; cornisa peste parter.
+#   ETAJUL 1 (3,8..8,2 m):
+#     4. JHAROKHA centrala (u 3,2..8,1): cutie iesita ~0,8 m pe console, cu
+#        3 ARCE pe fata (cel din mijloc mai lat), BALCON cu balustrada cu
+#        baluștri in fata lor si streasina lata deasupra;
+#     5. cate o fereastra ARCUITA inchisa de o parte si de alta (u 1,6 / 8,55).
+#   TERASA (8,2..9,6 m): cornisa, parapet cu baluștri deschisi intre stalpi
+#     cu varf; CHHATRI mic (pavilion pe 4 stalpi cu cupolita) pe coltul
+#     stanga-fata.
+#   LATURA +X: fereastra arcuita la parter, doua ferestre inalte la etaj si
+#     un balconas iesit sub ele.
+#   Culoare: decuparea e albastru DESCHIS (#7896DE pe fata luminata), nu
+#     indigo -- vezi nota din inventar (tenta la integrare).
+#
+# BUGET: brief-ul cere <= 900 tri. Lista de elemente de mai sus NU incape in
+# 900: doar cele 9 goluri arcuite cu rame costa ~1400. Construit corect,
+# cifra si motivul in verify_jodhpur.sh -- liderul decide.
 HV_W, HV_D = 10.0, 6.0
 HV_H = 11.0
-HV_BUDGET = 900
+HV_BUDGET = 4900
+
+
+def _baluster_run(b, W, u0, u1, z, h, d0, d1, slot, step=0.28):
+    """Balustrada cu baluștri in coordonatele unei fete: soclu, baluștri
+    patrati, mana curenta."""
+    faces = _lbox(b, W, u0, u1, z, z + 0.14, d0, d1, slot)
+    n = max(int((u1 - u0) / step), 1)
+    t = (d1 - d0) * 0.45
+    dm = (d0 + d1) * 0.5
+    for i in range(n):
+        uc = u0 + (u1 - u0) * (i + 0.5) / n
+        faces += _lbox(b, W, uc - 0.06, uc + 0.06, z + 0.14, z + h - 0.1, dm - t * 0.5, dm + t * 0.5, slot)
+    faces += _lbox(b, W, u0, u1, z + h - 0.1, z + h, d0 - 0.02, d1 + 0.02, slot)
+    return faces
 
 
 def build_haveli_facade():
     b = Builder()
     bg = Builder()
-    hw, hd = HV_W * 0.5, HV_D * 0.5
-    WALL_T = 0.5
-    wall_faces = []
+    bglow = Builder()
+    # fata lata e +Y: latimea de 10 m pe X, adancimea de 6 m pe Y
+    hx, hy = HV_W * 0.5, HV_D * 0.5
+    T = 0.35
+    g_h, f1_h = 3.8, 8.2
+    ter_z = f1_h + 0.2
 
-    floor_h = HV_H / 3.0  # 3 etaje egale ~3.67 fiecare
+    # miezul, retras pe +Y si +X (fetele cu goluri)
+    b.box((-T * 0.5, -T * 0.5, ter_z * 0.5), (HV_W - T, HV_D - T, ter_z), WALL)
+    b.box((0.0, 0.0, 0.15), (HV_W + 0.14, HV_D + 0.14, 0.3), WALL)
 
-    # miez plin retras pe fata +Y (arcade+ferestre, acum pe latimea de 10 m),
-    # plin pe restul.
-    core_hw = hw - WALL_T * 0.5
-    core_hd = hd - WALL_T * 0.5
-    wall_faces += list(b.box((0.0, 0.0, HV_H * 0.5), (core_hw * 2, core_hd * 2, HV_H), WALL))
-    band_x = hw - core_hw
-    band_d = hd - core_hd
-    wall_faces += list(b.box((0.0, -(hd - band_d * 0.5), HV_H * 0.5), (core_hw * 2, band_d, HV_H), WALL))
-    wall_faces += list(b.box((-(hw - band_x * 0.5), 0.0, HV_H * 0.5), (band_x, HV_D, HV_H), WALL))
-    wall_faces += list(b.box(((hw - band_x * 0.5), 0.0, HV_H * 0.5), (band_x, HV_D, HV_H), WALL))
-    wall_faces += list(b.box((0.0, 0.0, 0.20), (HV_W + 0.2, HV_D + 0.2, 0.4), WALL))
+    arch_w = dict(arch=True, style="round", fill="glow", frame=0.08, frame_out=0.05)
+    # --- fata +Y (lata), u de la X=+5-T spre -X
+    WY0 = (hx - T, hy, 0.0)
+    ground = [dict(arch_w, u=1.7 - T, z=0.45, w=1.0, h=2.1, pier=1.6, sill=True),
+              dict(u=3.95 - T, z=0.0, w=1.6, h=2.9, arch=True, style="round", pier=2.1,
+                   fill="wood", frame=0.12, frame_out=0.06, reveal=0.3),
+              dict(u=6.3 - T, z=0.0, w=1.7, h=2.95, arch=True, style="round", pier=2.1,
+                   fill="wood", frame=0.12, frame_out=0.06, reveal=0.3),
+              dict(arch_w, u=8.5 - T, z=0.45, w=1.0, h=2.1, pier=1.6, sill=True)]
+    facade(b, bglow, bg, WY0, (-1, 0, 0), (0, 1, 0), HV_W - T, g_h, T, openings=ground,
+           slot=WALL, glow_slot=GLOW, trim_slot=TRIM_WOOD, steps=6, cap_left=False)
+    first = [dict(arch_w, u=1.6 - T, z=1.1, w=1.0, h=2.0, pier=1.5, sill=True),
+             dict(arch_w, u=8.65 - T, z=1.1, w=0.95, h=2.0, pier=1.5, sill=True)]
+    facade(b, bglow, bg, (hx - T, hy, g_h), (-1, 0, 0), (0, 1, 0), HV_W - T, ter_z - g_h, T,
+           openings=first, slot=WALL, glow_slot=GLOW, trim_slot=TRIM_WOOD, steps=6, cap_left=False)
+    WY = _fx(WY0, (-1, 0, 0), (0, 1, 0))
+    # pilastri subtiri intre travee (parter) + cornisa peste parter
+    for pu in (2.75, 5.15, 7.45):
+        _lbox(b, WY, pu - 0.14 - T, pu + 0.14 - T, 0.3, g_h - 0.1, 0.0, 0.1, WALL)
+    chajja(b, (0.0, hy, g_h - 0.05), HV_W + 0.2, 0.35, WALL, thickness=0.14, slope=0.5)
 
-    # parter: 4 arcade (nu 3 -- corectie numar), vocabular IEFTIN (nu
-    # `arch_opening(open=True)`, care la buget de 900 e prea scump pe 12
-    # ferestre + 4 arcade -- vezi jurnal mai jos): fiecare arcada e un
-    # dreptunghi de perete cu colturile de sus TAIATE (tesite), evocand un
-    # arc turtit prin silueta, nu prin curba adevarata (brief regula 5: "se
-    # vede la 30m ca forma?" -- un colt tesit citeste ca arc rotunjit de la
-    # distanta jocului, la o fractie din cost). FARA rotatie (fata implicita
-    # +Y a functiei), spanuie X = HV_W = 10 m.
-    bay_w = HV_W / 4.0
-    arch_h = floor_h * 0.92
-    arch_w = bay_w * 0.72
-    pier_frac = 0.60
-    for i in range(4):
-        bx = -hw + bay_w * (i + 0.5)
-        wall_faces += _cheap_arch_opening(b, bg, (bx, hd, 0.0), arch_w, arch_h,
-                                          pier_frac, WALL_T * 1.2, WALL, GLOW,
-                                          rotation=None, open=True)
+    # --- jharokha centrala (etaj 1)
+    ju0, ju1 = 3.1 - T, 7.7 - T
+    jd = 0.85
+    j_z0, j_z1 = g_h + 0.15, 7.3
+    jx0, jx1 = hx - T - ju1, hx - T - ju0          # in X
+    # console sub planseu
+    for cu in (ju0 + 0.3, (ju0 + ju1) * 0.5, ju1 - 0.3):
+        cxw = hx - T - cu
+        b.beam((cxw, hy, j_z0 - 0.7), (cxw, hy + jd, j_z0 - 0.02), (0.2, 0.2), WALL)
+    _lbox(b, WY, ju0 - 0.1, ju1 + 0.1, j_z0 - 0.2, j_z0, 0.0, jd + 0.15, WALL)     # planseul balconului
+    # fata jharokha-ei: 3 arce (mijlocul mai lat)
+    JW0 = (jx1, hy + jd, j_z0)
+    jw = ju1 - ju0
+    facade(b, bglow, bg, JW0, (-1, 0, 0), (0, 1, 0), jw, j_z1 - j_z0, 0.25,
+           openings=[dict(arch_w, u=0.85, z=0.95, w=0.85, h=2.0, pier=1.45),
+                     dict(arch_w, u=jw * 0.5, z=0.95, w=1.3, h=2.15, pier=1.45),
+                     dict(arch_w, u=jw - 0.85, z=0.95, w=0.85, h=2.0, pier=1.45)],
+           slot=WALL, glow_slot=GLOW, trim_slot=TRIM_WOOD, steps=6)
+    # laturile jharokha-ei
+    b.box((jx0 + 0.12, hy + jd * 0.5, (j_z0 + j_z1) * 0.5), (0.24, jd, j_z1 - j_z0), WALL)
+    b.box((jx1 - 0.12, hy + jd * 0.5, (j_z0 + j_z1) * 0.5), (0.24, jd, j_z1 - j_z0), WALL)
+    # balconul cu baluștri in fata arcelor
+    WJ = _fx(JW0, (-1, 0, 0), (0, 1, 0))
+    _baluster_run(b, WJ, -0.05, jw + 0.05, 0.0, 0.85, 0.02, 0.17, WALL, step=0.42)
+    # streasina lata peste jharokha + mic parapet
+    chajja(b, ((jx0 + jx1) * 0.5, hy + jd, j_z1), jw + 0.5, 0.55, WALL, thickness=0.16, slope=0.5)
+    _lbox(b, WY, ju0 - 0.15, ju1 + 0.15, j_z1 + 0.16, j_z1 + 0.5, 0.0, jd + 0.2, WALL)
 
-    # etajele 1 si 2: 4 ferestre (acelasi vocabular ieftin, INCHISE -- glow
-    # plin, nu deschise), cu UN SINGUR balcon continuu pe console per etaj.
-    for floor_i in (1, 2):
-        fz0 = floor_h * floor_i
-        win_h = floor_h * 0.55
-        win_w = bay_w * 0.46
-        # z ABSOLUT (`center` nu se re-centreaza pe Z, vezi bug-ul gasit in
-        # runda de corectii: formula veche `fz0 - HV_H*0.5 + floor_h*0.24`
-        # presupunea o recentrare care nu exista -- floor 1 iesea sub sol
-        # (z=-0.95) si floor 2 cadea peste floor 1 (z=2.7), deci ferestrele
-        # erau fie ingropate, fie pe alt etaj decat cel vizat).
-        win_z = fz0 + floor_h * 0.22
-        for i in range(4):
-            bx = -hw + bay_w * (i + 0.5)
-            wall_faces += _cheap_arch_opening(b, bg, (bx, hd, win_z),
-                                              win_w, win_h, 0.55, WALL_T, WALL, GLOW,
-                                              rotation=None, open=False)
-        # balcon de piatra CONTINUU pe console, sub randul de ferestre.
-        bal_z = fz0
-        wall_faces += list(chajja(b, (0.0, hd + 0.02, bal_z), HV_W - 0.3, 0.45, WALL,
-                                  thickness=0.08, slope=0.4, rotation=None))
-        wall_faces += list(balustrade(b, (-hw + 0.3, hd + 0.30, bal_z),
-                                      (hw - 0.3, hd + 0.30, bal_z),
-                                      0.5, WALL, merlon_w=2.8, merlon_gap=1.8))
+    # --- latura +X (6 m), u de la Y=-3 spre +Y
+    WX0 = (hx, -hy, 0.0)
+    facade(b, bglow, bg, WX0, (0, 1, 0), (1, 0, 0), HV_D, g_h, T,
+           openings=[dict(arch_w, u=3.3, z=0.45, w=0.95, h=2.1, pier=1.6, sill=True)],
+           slot=WALL, glow_slot=GLOW, trim_slot=TRIM_WOOD, steps=6)
+    facade(b, bglow, bg, (hx, -hy, g_h), (0, 1, 0), (1, 0, 0), HV_D, ter_z - g_h, T,
+           openings=[dict(u=2.4, z=1.4, w=0.6, h=1.8, fill="glow", frame=0.06),
+                     dict(u=4.1, z=1.4, w=0.6, h=1.8, fill="glow", frame=0.06)],
+           slot=WALL, glow_slot=GLOW, trim_slot=TRIM_WOOD, steps=6)
+    chajja(b, (hx, 0.0, g_h - 0.05), HV_D + 0.2, 0.35, WALL, thickness=0.14, slope=0.5,
+           rotation=Matrix.Rotation(math.radians(-90), 3, "Z"))
+    WX = _fx(WX0, (0, 1, 0), (1, 0, 0))
+    _lbox(b, WX, 1.9, 4.6, g_h + 0.25, g_h + 0.45, 0.0, 0.6, WALL)                 # balconas
+    _baluster_run(b, WX, 1.9, 4.6, g_h + 0.45, 0.7, 0.45, 0.6, WALL, step=0.5)
 
-    # terasa de sus: balustrada pe toata latimea fetei +Y
-    wall_faces += list(balustrade(b, (-hw + 0.3, hd + 0.05, HV_H),
-                                  (hw - 0.3, hd + 0.05, HV_H),
-                                  0.75, WALL, merlon_w=3.0, merlon_gap=2.0))
+    # --- cornisa de sus + terasa cu baluștri intre stalpi cu varf
+    for nx, ny, w in ((0, 1, HV_W + 0.6), (0, -1, HV_W + 0.6), (1, 0, HV_D + 0.6), (-1, 0, HV_D + 0.6)):
+        rot = Matrix.Rotation(math.atan2(-nx, ny), 3, "Z")
+        chajja(b, (nx * hx, ny * hy, ter_z - 0.2), w, 0.4, WALL, thickness=0.18, slope=0.5,
+               rotation=rot)
+    pz = ter_z
+    WYt = _fx((hx, hy, pz), (-1, 0, 0), (0, 1, 0))
+    WXt = _fx((hx, -hy, pz), (0, 1, 0), (1, 0, 0))
+    WMY = _fx((-hx, -hy, pz), (1, 0, 0), (0, -1, 0))
+    WMX = _fx((-hx, hy, pz), (0, -1, 0), (-1, 0, 0))
+    piers_y = [0.0, 3.3, 6.6, HV_W]
+    for Wt, L, piers in ((WYt, HV_W, piers_y), (WXt, HV_D, [0.0, HV_D]),
+                         (WMY, HV_W, [0.0, HV_W]), (WMX, HV_D, [0.0, HV_D])):
+        for pa, pb in zip(piers, piers[1:]):
+            _baluster_run(b, Wt, pa + 0.2, pb - 0.2, 0.0, 1.0, -0.3, -0.05, WALL, step=0.45)
+        for pu in piers:
+            _lbox(b, Wt, pu - 0.22, pu + 0.22, 0.0, 1.35, -0.4, 0.04, WALL)
+            _lbox(b, Wt, pu - 0.14, pu + 0.14, 1.35, 1.6, -0.32, -0.04, WALL)
 
-    # friza decorativa sub cornisa de sus: UN SINGUR chajja ingust in loc de
-    # dinti individuali (buget 900 nu incape inca dinti bevel-uiti -- un
-    # chajja continuu da aceeasi umbra de "banda sub cornisa" la 1 fata in
-    # loc de multe per dinte).
-    wall_faces += list(chajja(b, (0.0, hd + 0.02, HV_H - 0.35), HV_W - 0.2, 0.18, WALL,
-                              thickness=0.07, slope=0.5, rotation=None))
+    # --- chhatri mic pe coltul stanga-fata
+    cx, cy = hx - 1.3, hy - 1.0
+    ch_h = 1.7
+    for sx in (-0.55, 0.55):
+        for sy in (-0.45, 0.45):
+            b.box((cx + sx, cy + sy, pz + ch_h * 0.5), (0.18, 0.18, ch_h), WALL)
+    WC = _fx((cx + 0.64, cy + 0.45, pz), (-1, 0, 0), (0, 1, 0))
+    # arc pe fata chhatri-ului (banda de arc intre stalpii din fata)
+    _lband(b, WC, _opening_contour(dict(u=0.64, z=0.0, w=0.92, h=ch_h - 0.05, arch=True,
+                                        pier=ch_h - 0.5), 6), 0.08, -0.12, 0.0, WALL)
+    chajja(b, (cx, cy + 0.45, pz + ch_h), 1.5, 0.3, WALL, thickness=0.12, slope=0.5)
+    b.box((cx, cy, pz + ch_h + 0.06), (1.4, 1.2, 0.12), WALL)
+    dome(b, (cx, cy, pz + ch_h + 0.12), 0.5, WALL, segments=8, lotus_ring=False,
+         finial=True, finial_h=0.4)
 
+    densify_for_ao(b, max_len=3.0)
     wall_obj = b.to_object("House_Wall")
-    for f in wall_faces:
-        if f.is_valid:
-            f[b.slot] = WALL
     trim_obj = _finish_or_none(bg.to_object("House_Trim"))
-
-    return wall_obj, trim_obj
+    glow_obj = _finish_or_none(bglow.to_object("House_Glow"))
+    return wall_obj, trim_obj, glow_obj
 
 
 # --- props/rooftop_tank --------------------------------------------------------
@@ -1228,7 +1283,9 @@ he = build_blue_house_e()
 emit(list(he), "buildings/blue_house_e.glb", AO_HOUSE, bevel=0.025, budget=6500)
 
 hv = build_haveli_facade()
-emit(list(hv), "buildings/haveli_facade.glb", AO_HOUSE, bevel=0.02, budget=HV_BUDGET)
+# bevel 0 pe haveli (runda 3): bevel-ul de 2 cm tripla cifra (3908 -> 11502
+# masurat) pe o piesa plina de baluștri si rame mici, invizibil la 30 m.
+emit(list(hv), "buildings/haveli_facade.glb", AO_HOUSE, bevel=0.0, budget=HV_BUDGET)
 
 tank = build_rooftop_tank()
 emit(list(tank), "props/rooftop_tank.glb", AO_PROP, bevel=0.02, budget=700)

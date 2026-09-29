@@ -293,25 +293,18 @@ COMPARE_SPECS = {
     },
     "haveli_facade": {
         "category": "buildings",
+        # runda 3: decuparea e albastru DESCHIS (#7896DE pe fata luminata);
+        # indigo #4F6FB8 randa "albastru-marin" (verdictul liderului) -> tenta
+        # light. Nodurile: perete, usi de lemn (Trim), geamuri GLOW.
         "tints": {
-            "House_Wall": "#4F6FB8",
+            "House_Wall": "#8FB0DC",
             "House_Trim": "#6B4A2E",
+            "House_Glow": "#2A2A2E",
         },
-        # piesa e 10x6 m (rație 1.67:1, mai alungita decat pilotul cubic) --
-        # camera implicita (35/18) arata prea mult din latura laterala goala
-        # si prea putin din fatada cu arcade/ferestre.
-        # CORECTIE runda 2 (a doua parte): fatada cu arcade a fost MUTATA pe
-        # fata +Y (spanuie HV_W=10 m -- bug real, vezi jurnalul din
-        # build_jodhpur_city.py), deci camera trebuie sa priveasca spre +Y,
-        # nu spre +X (care acum e doar latura goala de 6 m adancime).
-        # Azimut ~80 (aproape frontal pe +Y, usor din stanga ca in decupare),
-        # lens lung (comprima perspectiva pe o piesa lata), margin 1.1.
-        # `sun_follow`: la azimut 80 (departe de implicitul 35 al soarelui
-        # fix), dot camera/sursa scade la ~0.70 -- fata citea desaturata
-        # (acelasi mecanism ca market_gate/fort_wall_segment, vezi escaladarea
-        # Opus). Soarele urmareste camera.
-        "camera": {"azimuth": 80.0, "elevation": 10.0, "margin": 1.1, "lens": 85.0},
-        "sun_follow": {"offset": -35.0, "tilt": 50.0},
+        # fata lata (+Y, 10 m) frontala, latura +X in fuga: latimi aparente
+        # 570/200 px => az ~60
+        "camera": {"azimuth": 60.0, "elevation": 12.0, "margin": 1.2, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "rooftop_tank": {
         "category": "props",

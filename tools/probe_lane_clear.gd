@@ -268,7 +268,10 @@ const BASELINE := {
 	# oalele de pe Cappadocia. Nimic pe bucla principala. Baza = cifra
 	# masurata, fara marja (vezi Fiordland mai sus): prima piesa pusa pe banda
 	# de un constructor de POI trebuie sa pice garda. Sabotaj verificat.
-	"Jodhpur (Track17)": 28,
+	# +3 la integrarea reliefului (jodhpur/poi-integrare): `ChannelKicker`
+	# pe INAINTE la 0.875-0.880 — rampa sariturii Devkund (G2), obstacolul
+	# intentionat pe care se sare, ca RampNear/RampFar la Fiordland.
+	"Jodhpur (Track17)": 31,
 }
 
 

@@ -61,6 +61,7 @@
 [ext_resource type="PackedScene" uid="uid://cblf5sj5j6gjl" path="res://assets/models/jodhpur/vehicles/tuktuk.glb" id="s_tuktuk"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
+[ext_resource type="Script" path="res://scenes/props/street_lights.gd" id="h_lights"]
 
 [sub_resource type="Curve3D" id="Curve3D_jodhpur"]
 closed = true
@@ -166,6 +167,308 @@ script = ExtResource("prop")
 [node name="ZoneG_Stanca" type="Node3D" parent="DecorManual"]
 
 [node name="ZoneH_Dreapta" type="Node3D" parent="DecorManual"]
+
+[node name="hDr1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(0.084799, 0, -0.9964, 0, 1, 0, 0.9964, 0, 0.084799, 134.66, 0.25831, 160.43)
+metadata/indigo = true
+
+[node name="hDrGhirlanda2" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99724, 0, 0.074262, 0, 1, 0, -0.074262, 0, 0.99724, 134.94, 3.2783, 164.14)
+
+[node name="hDr3" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(0.99718, 0, 0.074986, 0, 1, 0, -0.074986, 0, 0.99718, 126.36, 0.31356, 161.51)
+metadata/indigo = true
+
+[node name="hDrGhirlanda4" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99541, 0, 0.095712, 0, 1, 0, -0.095712, 0, 0.99541, 126.67, 3.3336, 164.77)
+
+[node name="hDr5" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(0.9913, 0, 0.13165, 0, 1, 0, -0.13165, 0, 0.9913, 118.29, 0.37577, 161.65)
+metadata/indigo = true
+
+[node name="hDrGhirlanda6" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99523, 0, 0.097571, 0, 1, 0, -0.097571, 0, 0.99523, 118.61, 3.3958, 164.91)
+
+[node name="hDr7" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(0.98697, 0, 0.16088, 0, 1, 0, -0.16088, 0, 0.98697, 109.9, 0.44805, 161.9)
+metadata/indigo = true
+
+[node name="hDr8" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(0.9885, 0, 0.1512, 0, 1, 0, -0.1512, 0, 0.9885, 102.03, 0.51835, 162.88)
+
+[node name="hDrGhirlanda9" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99412, 0, 0.10827, 0, 1, 0, -0.10827, 0, 0.99412, 102.48, 3.5383, 167.01)
+
+[node name="hDr10" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(0.99893, 0, 0.046241, 0, 1, 0, -0.046241, 0, 0.99893, 93.655, 0.54421, 163.94)
+metadata/indigo = true
+
+[node name="hDrGhirlanda11" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99541, 0, 0.095712, 0, 1, 0, -0.095712, 0, 0.99541, 94.053, 3.5642, 168.07)
+
+[node name="hDr12" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(0.11263, 0, -0.99364, 0, 1, 0, 0.99364, 0, 0.11263, 85.743, 0.51812, 165.06)
+metadata/indigo = true
+
+[node name="hDr13" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(0.09273, 0, -0.99569, 0, 1, 0, 0.99569, 0, 0.09273, 78.526, 0.46414, 165.7)
+
+[node name="hDrGhirlanda14" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99582, 0, 0.091284, 0, 1, 0, -0.091284, 0, 0.99582, 78.866, 3.4841, 169.41)
+
+[node name="hDr15" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_haveli_facade")]
+transform = Transform3D(0.98824, 0, 0.15291, 0, 1, 0, -0.15291, 0, 0.98824, 69.001, 0.37983, 166.4)
+
+[node name="hDr16" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.99314, 0, 0.1169, 0, 1, 0, -0.1169, 0, 0.99314, 58.981, 0.30197, 167.41)
+metadata/indigo = true
+
+[node name="hDr17" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(0.99799, 0, 0.063333, 0, 1, 0, -0.063333, 0, 0.99799, 50.736, 0.23092, 167.85)
+metadata/indigo = true
+
+[node name="hDr18" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.99765, 0, 0.068531, 0, 1, 0, -0.068531, 0, 0.99765, 42.553, 0.16605, 169.03)
+metadata/indigo = true
+
+[node name="hDr19" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(0.99882, 0, 0.04865, 0, 1, 0, -0.04865, 0, 0.99882, 34.728, 0.10402, 170.32)
+
+[node name="hDrGhirlanda20" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99523, 0, 0.097571, 0, 1, 0, -0.097571, 0, 0.99523, 35.048, 3.124, 173.59)
+
+[node name="hDr21" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(0.043274, 0, -0.99906, 0, 1, 0, 0.99906, 0, 0.043274, 27.317, 0.046576, 170.48)
+
+[node name="hDr22" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(0.052741, 0, -0.99861, 0, 1, 0, 0.99861, 0, 0.052741, 20.05, -0.0096122, 171.57)
+
+[node name="hDr23" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(0.98849, 0, 0.1513, 0, 1, 0, -0.1513, 0, 0.98849, 12.456, -0.07463, 172.07)
+
+[node name="hDrGhirlanda24" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99535, 0, 0.096324, 0, 1, 0, -0.096324, 0, 0.99535, 12.772, 2.9454, 175.34)
+
+[node name="hDr25" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(0.99334, 0, 0.11524, 0, 1, 0, -0.11524, 0, 0.99334, 3.953, -0.14099, 173.5)
+
+[node name="hDrGhirlanda26" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99535, 0, 0.096324, 0, 1, 0, -0.096324, 0, 0.99535, 4.269, 2.879, 176.76)
+
+[node name="hDr27" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.99648, 0, 0.083808, 0, 1, 0, -0.083808, 0, 0.99648, -4.7035, -0.20653, 173.4)
+
+[node name="hDrGhirlanda28" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.99541, 0, 0.095712, 0, 1, 0, -0.095712, 0, 0.99541, -4.3279, 2.8135, 177.31)
+
+[node name="hDrB1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(0.99038, 0, 0.13834, 0, 1, 0, -0.13834, 0, 0.99038, 131.37, 0.27308, 150.47)
+
+[node name="hDrB2" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(0.97756, 0, 0.21067, 0, 1, 0, -0.21067, 0, 0.97756, 121.15, 0.34035, 149.51)
+
+[node name="hDrB3" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_haveli_facade")]
+transform = Transform3D(-0.064352, 0, 0.99793, 0, 1, 0, -0.99793, 0, -0.064352, 109.83, 0.44003, 152.89)
+
+[node name="hDrB4" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(-0.15341, 0, 0.98816, 0, 1, 0, -0.98816, 0, -0.15341, 100.45, 0.52206, 153.97)
+
+[node name="hDrB5" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_haveli_facade")]
+transform = Transform3D(-0.99992, 0, 0.012341, 0, 1, 0, -0.012341, 0, -0.99992, 88.256, 0.53693, 154.55)
+
+[node name="hDrB6" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(-0.99989, 0, 0.015049, 0, 1, 0, -0.015049, 0, -0.99989, 77.666, 0.46514, 155.12)
+
+[node name="hDrB7" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(0.99292, 0, 0.11879, 0, 1, 0, -0.11879, 0, 0.99292, 68.504, 0.38337, 156.36)
+metadata/indigo = true
+
+[node name="hDrB8" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.16419, 0, -0.98643, 0, 1, 0, 0.98643, 0, 0.16419, 59.572, 0.31513, 157.59)
+metadata/indigo = true
+
+[node name="hDrB9" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(0.99861, 0, 0.052696, 0, 1, 0, -0.052696, 0, 0.99861, 51.455, 0.24486, 158.41)
+
+[node name="hDrB10" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_haveli_facade")]
+transform = Transform3D(0.98235, 0, 0.18707, 0, 1, 0, -0.18707, 0, 0.98235, 40.87, 0.16142, 157.99)
+
+[node name="hDrB11" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(0.98063, 0, 0.19586, 0, 1, 0, -0.19586, 0, 0.98063, 28.624, 0.064486, 159.64)
+
+[node name="hDrB12" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(0.02474, 0, -0.99969, 0, 1, 0, 0.99969, 0, 0.02474, 19.487, -0.0060719, 160.88)
+metadata/indigo = true
+
+[node name="hDrB13" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(-0.99782, 0, -0.065939, 0, 1, 0, 0.065939, 0, -0.99782, 10.744, -0.080398, 161.38)
+
+[node name="hDrB14" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.040042, 0, -0.9992, 0, 1, 0, 0.9992, 0, 0.040042, 2.4633, -0.14328, 161.28)
+metadata/indigo = true
+
+[node name="hDrB15" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.99979, 0, 0.020445, 0, 1, 0, -0.020445, 0, 0.99979, -5.2304, -0.20232, 162.17)
+
+[node name="hSt1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(-0.99956, 0, -0.029771, 0, 1, 0, 0.029771, 0, -0.99956, 136.63, 0.25855, 187.33)
+metadata/indigo = true
+
+[node name="hSt2" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(-0.12115, 0, 0.99263, 0, 1, 0, -0.99263, 0, -0.12115, 128.78, 0.31455, 188.29)
+metadata/indigo = true
+
+[node name="hStGhirlanda3" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(-0.99541, 0, -0.095712, 0, 1, 0, 0.095712, 0, -0.99541, 128.43, 3.3345, 184.58)
+
+[node name="hSt4" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_haveli_facade")]
+transform = Transform3D(-0.99469, 0, -0.10287, 0, 1, 0, 0.10287, 0, -0.99469, 119.39, 0.39025, 189.74)
+
+[node name="hSt5" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(-0.99047, 0, -0.13771, 0, 1, 0, 0.13771, 0, -0.99047, 109.31, 0.48086, 190.67)
+
+[node name="hStGhirlanda6" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(-0.99412, 0, -0.10827, 0, 1, 0, 0.10827, 0, -0.99412, 108.89, 3.5009, 186.77)
+
+[node name="hSt7" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(-0.99256, 0, -0.12179, 0, 1, 0, 0.12179, 0, -0.99256, 101.75, 0.52881, 192.08)
+metadata/indigo = true
+
+[node name="hStGhirlanda8" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(-0.99541, 0, -0.095712, 0, 1, 0, 0.095712, 0, -0.99541, 101.35, 3.5488, 187.95)
+
+[node name="hSt9" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(-0.9951, 0, -0.098852, 0, 1, 0, 0.098852, 0, -0.9951, 68.979, 0.35912, 194.87)
+
+[node name="hSt10" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(-0.99612, 0, -0.088019, 0, 1, 0, 0.088019, 0, -0.99612, 60.909, 0.29478, 196.19)
+metadata/indigo = true
+
+[node name="hStGhirlanda11" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(-0.99541, 0, -0.095712, 0, 1, 0, 0.095712, 0, -0.99541, 60.511, 3.3148, 192.05)
+
+[node name="hSt12" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(-0.99737, 0, -0.07249, 0, 1, 0, 0.07249, 0, -0.99737, 52.737, 0.22423, 196.97)
+
+[node name="hStGhirlanda13" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(-0.99513, 0, -0.098528, 0, 1, 0, 0.098528, 0, -0.99513, 52.328, 3.2442, 192.84)
+
+[node name="hSt14" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(-0.99787, 0, -0.065174, 0, 1, 0, 0.065174, 0, -0.99787, 44.839, 0.16223, 197.04)
+
+[node name="hSt15" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_haveli_facade")]
+transform = Transform3D(-0.99729, 0, -0.073509, 0, 1, 0, 0.073509, 0, -0.99729, 35.065, 0.085782, 197.71)
+
+[node name="hStB1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(0.99675, 0, 0.080504, 0, 1, 0, -0.080504, 0, 0.99675, 135.99, 0.27396, 199.93)
+
+[node name="hStB2" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(-0.993, 0, -0.11812, 0, 1, 0, 0.11812, 0, -0.993, 125.17, 0.34705, 198.29)
+metadata/indigo = true
+
+[node name="hStB3" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(-0.1296, 0, 0.99157, 0, 1, 0, -0.99157, 0, -0.1296, 115.18, 0.43872, 200.62)
+metadata/indigo = true
+
+[node name="hStB4" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(-0.99847, 0, -0.055222, 0, 1, 0, 0.055222, 0, -0.99847, 105.37, 0.5209, 200.99)
+
+[node name="hStB5" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(-0.99808, 0, -0.061999, 0, 1, 0, 0.061999, 0, -0.99808, 69.605, 0.35686, 204.47)
+
+[node name="hStB6" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(-0.98763, 0, -0.15681, 0, 1, 0, 0.15681, 0, -0.98763, 60.628, 0.28559, 204.41)
+metadata/indigo = true
+
+[node name="hStB7" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(0.21768, 0, -0.97602, 0, 1, 0, 0.97602, 0, 0.21768, 50.721, 0.20025, 207.49)
+
+[node name="hStB8" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(0.038646, 0, -0.99925, 0, 1, 0, 0.99925, 0, 0.038646, 41.573, 0.12921, 207.07)
+metadata/indigo = true
+
+[node name="hStB9" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.068196, 0, -0.99767, 0, 1, 0, 0.99767, 0, 0.068196, 31.084, 0.048032, 207.67)
+
+[node name="hStC1" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(-0.99929, 0, -0.037685, 0, 1, 0, 0.037685, 0, -0.99929, 137.5, 0.26288, 206.82)
+metadata/indigo = true
+metadata/coliziune = "none"
+
+[node name="hStC2" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(-0.084288, 0, 0.99644, 0, 1, 0, -0.99644, 0, -0.084288, 128.18, 0.33191, 209.08)
+metadata/indigo = true
+metadata/coliziune = "none"
+
+[node name="hStC3" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(0.12401, 0, -0.99228, 0, 1, 0, 0.99228, 0, 0.12401, 120.28, 0.39962, 209.76)
+metadata/coliziune = "none"
+
+[node name="hStC4" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(-0.99987, 0, -0.016216, 0, 1, 0, 0.016216, 0, -0.99987, 110.84, 0.48706, 211.19)
+metadata/coliziune = "none"
+
+[node name="hStC5" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.99824, 0, 0.059365, 0, 1, 0, -0.059365, 0, 0.99824, 100.06, 0.53938, 213.01)
+metadata/coliziune = "none"
+
+[node name="hStC6" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.12671, 0, -0.99194, 0, 1, 0, 0.99194, 0, 0.12671, 75.238, 0.39418, 213.79)
+metadata/indigo = true
+metadata/coliziune = "none"
+
+[node name="hStC7" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(1, 0, -0.00087993, 0, 1, 0, 0.00087993, 0, 1, 64.929, 0.31432, 214.29)
+metadata/indigo = true
+metadata/coliziune = "none"
+
+[node name="hStC8" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.19161, 0, -0.98147, 0, 1, 0, 0.98147, 0, 0.19161, 57.348, 0.24714, 216.93)
+metadata/indigo = true
+metadata/coliziune = "none"
+
+[node name="hStC9" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(-0.027043, 0, 0.99963, 0, 1, 0, -0.99963, 0, -0.027043, 48.488, 0.17516, 217.24)
+metadata/coliziune = "none"
+
+[node name="hStC10" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(-0.083956, 0, 0.99647, 0, 1, 0, -0.99647, 0, -0.083956, 39.471, 0.10568, 216.51)
+metadata/coliziune = "none"
+
+[node name="hStC11" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(-0.98997, 0, -0.1413, 0, 1, 0, 0.1413, 0, -0.98997, 30.606, 0.035358, 219.99)
+metadata/coliziune = "none"
+
+[node name="hStC12" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.98791, 0, 0.15501, 0, 1, 0, -0.15501, 0, 0.98791, 21.631, -0.034993, 218.83)
+metadata/indigo = true
+metadata/coliziune = "none"
+
+[node name="hStC13" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(-0.9999, 0, 0.014244, 0, 1, 0, -0.014244, 0, -0.9999, 12.02, -0.11557, 221.63)
+metadata/indigo = true
+metadata/coliziune = "none"
+
+[node name="hStC14" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.99999, 0, 0.0049783, 0, 1, 0, -0.0049783, 0, 0.99999, 3.1269, -0.18187, 221.18)
+metadata/indigo = true
+metadata/coliziune = "none"
+
+[node name="hStC15" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(-0.99389, 0, -0.11038, 0, 1, 0, 0.11038, 0, -0.99389, -6.0588, -0.25133, 222.99)
+metadata/coliziune = "none"
+
+[node name="hStC16" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(0.99341, 0, 0.1146, 0, 1, 0, -0.1146, 0, 0.99341, -14.997, -0.32425, 223.3)
+metadata/indigo = true
+metadata/coliziune = "none"
+
+[node name="hStC17" parent="DecorManual/ZoneH_Dreapta" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(-0.99989, 0, 0.015097, 0, 1, 0, -0.015097, 0, -0.99989, -23.178, -0.39138, 223.53)
+metadata/coliziune = "none"
+
+[node name="hFelinare" type="Node3D" parent="DecorManual/ZoneH_Dreapta"]
+script = ExtResource("h_lights")
 
 [node name="OrasFill" type="Node3D" parent="."]
 script = ExtResource("cityfill")

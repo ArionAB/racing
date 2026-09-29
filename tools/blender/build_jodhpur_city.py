@@ -696,22 +696,37 @@ def build_blue_house_c():
 
 # --- blue_house_d ------------------------------------------------------------
 #
-# Contract (brief §1.4): 7x7 m, 2 etaje + camera pe acoperis, 8,5 m, h/l
-# 0,88, tenta INDIGO. Element list (decupare blue_house_d.png), de jos in
-# sus:
+# Contract (brief §1.4): 7x7 m, 2 etaje + camera pe acoperis, 8,5 m (aici
+# 8,8: corpul ridicat la 6,3 ca raportul corp/latime sa iasa 0,63 ca pe
+# decupare, nu 0,51 -- in +-15% fata de brief). Tenta:
+# brief-ul zice indigo, dar decuparea e albastru DESCHIS (fata frontala
+# ~(120,150,216), mai deschisa decat decuparea lui blue_house_c) -- ca la
+# haveli, preview-ul e pe light (runda 3 de corectii).
 #
-#   1. Cub (7x7, 2 etaje, h~6.0) cu usa mare in arc pe fata +X, aproape
-#      centrata, cu 2-3 trepte de piatra in fata usii.
-#   2. O fereastra mica sus-stanga pe fata +X.
-#   3. Terasa cu BALUSTRADA (grilaj negru, nu alba -- decuparea arata un
-#      parapet inchis la culoare) pe TOT PERIMETRUL acoperisului.
-#   4. Camera mica de pe acoperis, RETRASA spre spate (Y negativ) -- CORECTIE:
-#      decuparea (rezasata) arata clar 1 usa (stanga) + 1 fereastra (dreapta)
-#      pe fata ei din fata; comentariul vechi "fara geamuri" era o citire
-#      gresita a plansei.
+# Element list (decupare blue_house_d.png, marire x4 -- runda 3: "usa si
+# fereastra in panouri iesite, grupate jos; casa prea inalta/ingusta").
+# Vazuta din colt: fata DREAPTA = +Y, frontala (505 px), fata STANGA = +X in
+# fuga (182 px) => az ~70 (camera --compare pusa pe 67). Scara ~77 px/m.
+#
+#   fata +Y (frontala):
+#     1. USA de lemn in ARC rotund, la dreapta mijlocului (centrul la ~4,0 m
+#        de coltul +X), ~1,8 x 3,4 m, rama deschisa in relief, TREAPTA lata
+#        de piatra in fata.
+#     2. o FANTA verticala ingusta (~0,15 x 1,2 m) la ~1,7 m de colt, prag la
+#        ~3,1 m.
+#   fata +X (in fuga):
+#     3. o FEREASTRA dreptunghiulara inchisa (obloane de lemn) la mijlocul
+#        fetei, ~1,0 x 1,8 m, prag la ~2,0 m.
+#   acoperis:
+#     4. cornisa groasa la ~6,3 m, parapet SCUND pe tot perimetrul, cu
+#        STALPI albastri DOAR la cele 4 colturi, GRILAJ NEGRU de fier (2
+#        lise, stalpi rari ~1,3 m) intre ei, ~0,8 m -- scund fata de corp.
+#     5. camera mica (3,0 x 2,6, ~2,1 m) retrasa spre SPATE (-Y), putin spre
+#        -X: pe +X o USA ingusta inchisa, pe +Y o FEREASTRA cu grilaj
+#        (inchisa, gri-negru -- nu lemn).
 HD_SIDE = 7.0
-HD_WALL = 6.0
-HD_TOTAL = 8.5
+HD_BODY = 6.3
+HD_TOTAL = 8.8
 
 
 def build_blue_house_d():
@@ -719,92 +734,78 @@ def build_blue_house_d():
     bg = Builder()
     bglow = Builder()
     br = Builder()
-    wall_faces, rail_faces = [], []
     hs = HD_SIDE * 0.5
-    WALL_T = 0.5
-    h_wall = HD_WALL
+    T = 0.35
+    body_h = HD_BODY
 
-    core_hw = hs - WALL_T * 0.5
-    wall_faces += list(b.box((0.0, 0.0, h_wall * 0.5), (core_hw * 2, core_hw * 2, h_wall), WALL))
-    band = hs - core_hw
-    wall_faces += list(b.box((-(hs - band * 0.5), 0.0, h_wall * 0.5), (band, core_hw * 2, h_wall), WALL))
-    wall_faces += list(b.box((0.0, (hs - band * 0.5), h_wall * 0.5), (HD_SIDE, band, h_wall), WALL))
-    wall_faces += list(b.box((0.0, -(hs - band * 0.5), h_wall * 0.5), (HD_SIDE, band, h_wall), WALL))
-    wall_faces += list(b.box((0.0, 0.0, 0.18), (HD_SIDE + 0.18, HD_SIDE + 0.18, 0.36), WALL))
+    # miezul plin, retras cu T pe fetele cu `facade` (+X, +Y)
+    b.box((-T * 0.5, -T * 0.5, body_h * 0.5), (HD_SIDE - T, HD_SIDE - T, body_h), WALL)
+    b.box((0.0, 0.0, 0.15), (HD_SIDE + 0.12, HD_SIDE + 0.12, 0.30), WALL)   # soclu
 
-    # usa mare in arc, aproape centrata
-    door_rot = Matrix.Rotation(math.radians(-90.0), 3, "Z")
-    door_w, door_h = 1.6, 2.8
-    door_y = 0.1
-    res_door = arch_opening(b, bg, (hs, door_y, 0.0), door_w, door_h,
-                            door_h * 0.90, WALL_T, WALL, GLOW, style="round",
-                            rotation=door_rot, glass=True, reveal=0.12, glass_depth=0.09,
-                            panel_w=2.6, panel_h=door_h * 1.35)
-    wall_faces += res_door["stone"]
-    for f in res_door["glass"]:
-        if f.is_valid:
-            f[bg.slot] = TRIM_WOOD
-    # 2-3 trepte de piatra in fata usii
-    for i, s in enumerate((0.9, 0.6, 0.3)):
-        step_y0 = door_y - door_w * 0.5 * s - 0.1
-        wall_faces += list(b.box((hs + 0.15 + i * 0.16, door_y, 0.05 + i * 0.0),
-                                 (0.16, door_w + 0.4 + i * 0.3, 0.10), WALL))
+    facade(b, bglow, bg, (hs - T, hs, 0.0), (-1, 0, 0), (0, 1, 0), HD_SIDE - T, body_h, T,
+           cap_left=False, openings=
+           [dict(u=3.65, z=0.0, w=1.8, h=3.4, arch=True, pier=2.5, fill="wood",
+                 frame=0.16, frame_out=0.05),
+            dict(u=1.35, z=3.1, w=0.16, h=1.2, fill="glow", frame=0.05)],
+           slot=WALL, glow_slot=GLOW, trim_slot=TRIM_WOOD)
+    # treapta lata si groasa de piatra in fata usii (decuparea: dala clara,
+    # mai lata decat rama; `step` din facade e prea subtire la scara asta)
+    b.box((hs - T - 3.65, hs + 0.38, 0.12), (2.9, 0.76, 0.24), WALL)
+    facade(b, bglow, bg, (hs, -hs, 0.0), (0, 1, 0), (1, 0, 0), HD_SIDE, body_h, T,
+           [dict(u=3.1, z=2.0, w=1.0, h=1.8, fill="shutter", frame=0.07, sill=True)],
+           WALL, GLOW, TRIM_WOOD)
 
-    # fereastra mica sus-stanga
-    win_rot = door_rot
-    res_w = arch_opening(b, bglow, (hs, -1.7, h_wall * 0.62 - h_wall * 0.5), 0.7, 1.0,
-                         0.32, WALL_T, WALL, GLOW, style="round", rotation=win_rot,
-                         glass=True, reveal=0.10, panel_w=1.35, panel_h=1.45)
-    wall_faces += res_w["stone"]
-
-    # balustrada NEAGRA (grilaj) pe tot perimetrul acoperisului
-    rail_h = 1.0
-    rz = h_wall
-    corners = [(-hs + 0.15, -hs + 0.15), (hs - 0.15, -hs + 0.15),
-              (hs - 0.15, hs - 0.15), (-hs + 0.15, hs - 0.15)]
+    # cornisa groasa
+    for nx, ny, w in ((0, 1, HD_SIDE + 0.5), (0, -1, HD_SIDE + 0.5),
+                      (1, 0, HD_SIDE + 0.5), (-1, 0, HD_SIDE + 0.5)):
+        rot = Matrix.Rotation(math.atan2(-nx, ny), 3, "Z")
+        chajja(b, (nx * hs, ny * hs, body_h), w, 0.3, WALL, thickness=0.18,
+               slope=0.5, rotation=rot)
+    # parapet scund pe perimetru + terasa
+    p_z0, p_z1 = body_h + 0.15, body_h + 0.40
+    pt = 0.3
+    for (cx, cy, sx, sy) in ((0.0, hs - pt * 0.5, HD_SIDE, pt), (0.0, -hs + pt * 0.5, HD_SIDE, pt),
+                             (hs - pt * 0.5, 0.0, pt, HD_SIDE - 2 * pt),
+                             (-hs + pt * 0.5, 0.0, pt, HD_SIDE - 2 * pt)):
+        b.box((cx, cy, (p_z0 + p_z1) * 0.5), (sx, sy, p_z1 - p_z0), WALL)
+    b.box((0.0, 0.0, body_h + 0.25), (HD_SIDE - 2 * pt, HD_SIDE - 2 * pt, 0.14), WALL)
+    # stalpi albastri: colturi + mijlocul laturilor
+    e = hs - pt * 0.5
+    pier_top = p_z1 + 0.85
+    piers = [(sx * e, sy * e) for sx in (-1, 1) for sy in (-1, 1)]
+    for (px, py) in piers:
+        b.box((px, py, (p_z1 + pier_top) * 0.5), (0.34, 0.34, pier_top - p_z1), WALL)
+        b.box((px, py, pier_top + 0.05), (0.42, 0.42, 0.10), WALL)
+    # grilajul negru de fier intre stalpi
+    ring = [(e, -e), (e, e), (-e, e), (-e, -e)]
     for i in range(4):
-        p1 = (corners[i][0], corners[i][1], rz)
-        p2 = (corners[(i + 1) % 4][0], corners[(i + 1) % 4][1], rz)
-        rail_faces += list(railing_on_brackets(br, p1, p2, rail_h, GLOW,
-                                               bracket_step=1.4, bracket_out=0.0))
+        a, c = ring[i], ring[(i + 1) % 4]
+        d = Vector((c[0] - a[0], c[1] - a[1], 0.0)).normalized() * 0.19
+        br.railing((a[0] + d.x, a[1] + d.y, p_z1), (c[0] - d.x, c[1] - d.y, p_z1), 0.80,
+                   1.3, 0.05, 0.05, GLOW, rails=2)
 
-    # camera de pe acoperis, retrasa spre spate (-Y), CU 1 usa (stanga) + 1
-    # fereastra (dreapta) pe fata ei din fata (+X) -- corectie: comentariul
-    # vechi zicea gresit "fara geamuri", decuparea le arata clar pe amandoua.
-    rc_w, rc_d, rc_h = 3.4, 2.8, 2.5
-    rc_hw, rc_hd = rc_w * 0.5, rc_d * 0.5
-    rc_cy = -hs + rc_d * 0.5 + 0.4
-    rc_core_hw = rc_hw - WALL_T * 0.5
-    wall_faces += list(b.box((-(rc_hw - rc_core_hw), rc_cy, h_wall + rc_h * 0.5),
-                             (rc_core_hw * 2, rc_d, rc_h), WALL))
-    wall_faces += list(b.box((0.0, rc_cy, h_wall + 0.05), (rc_w + 0.10, rc_d + 0.10, 0.10), WALL))
-    wall_faces += list(b.box((0.0, rc_cy, h_wall + rc_h + 0.06), (rc_w + 0.14, rc_d + 0.14, 0.12), WALL))
+    # camera de pe acoperis, retrasa spre spate (-Y), putin spre -X
+    z0 = body_h + 0.32
+    rx0, rx1 = -2.3, 0.7
+    ry0, ry1 = -hs + pt, -hs + pt + 2.6
+    r_h = HD_TOTAL - 0.12 - z0
+    b.box(((rx0 + rx1 - T) * 0.5, (ry0 + ry1 - T) * 0.5, z0 + r_h * 0.5),
+          (rx1 - rx0 - T, ry1 - ry0 - T, r_h), WALL)
+    facade(b, bglow, bg, (rx1 - T, ry1, z0), (-1, 0, 0), (0, 1, 0), rx1 - T - rx0, r_h, T,
+           cap_left=False, openings=
+           [dict(u=1.0, z=0.75, w=0.75, h=0.95, fill="glow", frame=0.06, sill=True)],
+           slot=WALL, glow_slot=GLOW, trim_slot=TRIM_WOOD)
+    facade(b, bglow, bg, (rx1, ry0, z0), (0, 1, 0), (1, 0, 0), ry1 - ry0, r_h, T,
+           [dict(u=1.2, z=0.0, w=0.6, h=1.7, arch=True, pier=1.4, fill="glow", frame=0.06)],
+           WALL, GLOW, TRIM_WOOD)
+    b.box(((rx0 + rx1) * 0.5, (ry0 + ry1) * 0.5, HD_TOTAL - 0.06),
+          (rx1 - rx0 + 0.2, ry1 - ry0 + 0.2, 0.12), WALL)
 
-    rc_door_w, rc_door_h = 0.8, 1.9
-    res_rc_door = arch_opening(b, bg, (rc_hw, rc_cy - 0.6, h_wall), rc_door_w, rc_door_h,
-                               rc_door_h * 0.94, WALL_T, WALL, GLOW, style="round",
-                               rotation=door_rot, glass=True, reveal=0.09, glass_depth=0.07,
-                               panel_w=rc_d * 0.5, panel_h=rc_h)
-    wall_faces += res_rc_door["stone"]
-    for f in res_rc_door["glass"]:
-        if f.is_valid:
-            f[bg.slot] = TRIM_WOOD
-    res_rc_win = arch_opening(b, bglow, (rc_hw, rc_cy + 0.7, h_wall + 0.4), 0.55, 0.85,
-                              0.28, WALL_T, WALL, GLOW, style="round", rotation=door_rot,
-                              glass=True, reveal=0.09, panel_w=rc_d * 0.5, panel_h=rc_h * 0.7)
-    wall_faces += res_rc_win["stone"]
-
+    densify_for_ao(b, max_len=2.5)
     wall_obj = b.to_object("House_Wall")
-    for f in wall_faces:
-        if f.is_valid:
-            f[b.slot] = WALL
     trim_obj = _finish_or_none(bg.to_object("House_Trim"))
     glow_obj = _finish_or_none(bglow.to_object("House_Glow"))
-    for f in rail_faces:
-        if f.is_valid:
-            f[br.slot] = GLOW
     rail_obj = _finish_or_none(br.to_object("House_Rail"))
-
     return wall_obj, trim_obj, glow_obj, rail_obj
 
 

@@ -268,8 +268,14 @@ COMPARE_SPECS = {
     },
     "blue_house_d": {
         "category": "buildings",
+        # runda 3: decuparea e albastru DESCHIS (fata frontala ~(120,150,216),
+        # mai deschisa decat decuparea lui blue_house_c) -> tenta light, ca la
+        # haveli; brief-ul o dadea indigo. Peretele amesteca WALL + nimic
+        # altceva (fara rezervor).
+        "camera": {"azimuth": 67.0, "elevation": 16.0, "margin": 1.3, "lens": 90.0},
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
         "tints": {
-            "House_Wall": "#4F6FB8",
+            "House_Wall": "#8FB0DC",
             "House_Trim": "#6B4A2E",
             "House_Glow": "#2A2A2E",
             # balustrada e GLOW (grilaj negru de fier pe blue_house_d, brief

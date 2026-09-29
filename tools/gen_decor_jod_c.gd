@@ -437,6 +437,12 @@ func _generate(path: String) -> void:
 			var tang := sd.cross(Vector3.UP) * -1.0
 			var edge := q + sd * tr.width_at_index(i)
 			edge.y = 0.0
+			# peretele sub ~2,5 m (capul rampelor) nu tine o stiva: un etaj de
+			# 3,12 m cu terasa de 7 m iesea punte suspendata peste panta
+			# (capturile 0.130 si 0.260)
+			if q.y > -2.3:
+				x -= MOD_W
+				continue
 			stations.append({"tag": arm, "edge": edge, "n": sd, "a": tang, "sx": 1.0})
 			x -= MOD_W
 	# peretele de est (in spatele acului): normala +x, statii pe z

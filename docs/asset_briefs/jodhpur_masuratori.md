@@ -297,3 +297,58 @@ sondei), 150 s, seed 1..8.
   de pe loc intră în felie), identică cu și fără trafic.
 - Costul traficului: −0,014 tururi în 150 s (~−0,7%, ~0,5 s pe tur) —
   în ținta brief-ului (+2…+5 s pe cursă).
+
+## 8. Trecerea de lumină (ramura `jodhpur/poi-lumina`)
+
+Comanda (cere fereastră; capturile serial):
+
+```
+Godot_v4.7-stable_win64_console.exe --path . --resolution 1280x720 res://tools/ProbeJodLumina.tscn -- --guard
+    [--indigo=0.2] [--out=res://snapshots/jod_lumina/x]
+```
+
+Masca e **de clasă**, randată pe GPU pe același cadru (trecere de ID pe lume
+înghețată, eroziune 3×3): var deschis, indigo, sol (teren ≤ 30°), stâncă
+(teren > 30°), drum. 4 vederi × 5 eșantioane (ochi deplasat ±6 m sau 5 fracții
+de joc). Celulele: **H / S (HSV a culorii medii) / L (luma Rec.601, 0–100)**,
+la amestecul scenei (indigo 40%).
+
+**F pe brațul de intrare (0,59–0,62) nu vede orașul**: `--scan` dă sub 6 000 px
+de case pe cadru acolo (urcarea privește spre SV). Orașul intră în cadru la
+vârful bastionului, 0,64–0,665 (până la 36 000 px); acolo e `F_joc`.
+
+| vedere | dusk | var ÎNAINTE | indigo ÎNAINTE | sol ÎNAINTE | drum ÎNAINTE | luma cadru ÎNAINTE | var DUPĂ | indigo DUPĂ | sol DUPĂ | drum DUPĂ | luma cadru DUPĂ |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| D_ochi | 0,0 | 26 / 0.40 / 27 | 281 / 0.18 / 14 | 26 / 0.76 / 34 | — | 50 | 221 / 0.39 / 33 | 227 / 0.70 / 18 | 22 / 0.27 / 39 | — | 53 |
+| D_ochi | 0,5 | 248 / 0.55 / 24 | 240 / 0.75 / 12 | 321 / 0.38 / 27 | — | 46 | 226 / 0.42 / 29 | 229 / 0.72 / 15 | 14 / 0.22 / 33 | — | 49 |
+| D_ochi | 1,0 | 225 / 0.74 / 24 | 229 / 0.91 / 13 | 232 / 0.36 / 27 | — | 45 | 222 / 0.56 / 20 | 227 / 0.83 / 10 | 9 / 0.14 / 23 | — | 42 |
+| D_joc | 0,0 | 27 / 0.43 / 30 | 5 / 0.23 / 21 | 26 / 0.76 / 34 | 16 / 0.65 / 16 | 33 | 224 / 0.32 / 38 | 231 / 0.46 / 29 | 22 / 0.28 / 40 | 341 / 0.25 / 19 | 38 |
+| D_joc | 0,5 | 250 / 0.51 / 27 | 244 / 0.64 / 19 | 320 / 0.38 / 27 | 282 / 0.56 / 10 | 27 | 230 / 0.34 / 33 | 236 / 0.48 / 24 | 13 / 0.21 / 33 | 283 / 0.28 / 13 | 32 |
+| D_joc | 1,0 | 225 / 0.72 / 25 | 229 / 0.86 / 16 | 232 / 0.36 / 27 | 238 / 0.56 / 11 | 26 | 223 / 0.51 / 21 | 228 / 0.72 / 13 | 7 / 0.14 / 22 | 263 / 0.37 / 8 | 23 |
+| F_joc | 0,0 | 28 / 0.46 / 48 | 23 / 0.42 / 43 | 27 / 0.72 / 41 | 13 / 0.61 / 14 | 40 | 224 / 0.31 / 47 | 227 / 0.42 / 39 | 22 / 0.29 / 46 | 318 / 0.23 / 17 | 42 |
+| F_joc | 0,5 | 261 / 0.39 / 41 | 260 / 0.44 / 36 | 325 / 0.39 / 32 | 284 / 0.57 / 10 | 34 | 229 / 0.27 / 44 | 232 / 0.34 / 38 | 10 / 0.23 / 38 | 286 / 0.31 / 13 | 37 |
+| F_joc | 1,0 | 226 / 0.68 / 29 | 228 / 0.75 / 23 | 231 / 0.37 / 29 | 238 / 0.59 / 10 | 31 | 228 / 0.40 / 25 | 234 / 0.48 / 20 | 0 / 0.11 / 25 | 258 / 0.42 / 8 | 28 |
+| F_ochi | 0,0 | 28 / 0.45 / 42 | 23 / 0.43 / 44 | 27 / 0.70 / 43 | 13 / 0.59 / 15 | 53 | 223 / 0.33 / 43 | 227 / 0.41 / 39 | 19 / 0.24 / 47 | 315 / 0.23 / 17 | 53 |
+| F_ochi | 0,5 | 257 / 0.43 / 36 | 260 / 0.43 / 37 | 321 / 0.36 / 34 | 284 / 0.55 / 11 | 48 | 228 / 0.31 / 40 | 233 / 0.33 / 39 | 7 / 0.19 / 39 | 286 / 0.30 / 13 | 50 |
+| F_ochi | 1,0 | 225 / 0.69 / 28 | 228 / 0.74 / 23 | 231 / 0.39 / 30 | 239 / 0.58 / 11 | 45 | 225 / 0.44 / 24 | 234 / 0.47 / 20 | 352 / 0.11 / 25 | 260 / 0.41 / 8 | 42 |
+
+Ce s-a schimbat (motivul: albastrul vine din albedo, nu din lumină; lumina
+rămâne aproape neutră în spațiul liniar, B/R ~0,9–1,2):
+
+| fază | soare | ambient | ceață |
+|---|---|---|---|
+| 0 (tema) | `#FFB27A` → `#FFBC8C`, 1,0 | `#FFB27A` 0,30 → `#CAC0C4` 0,42 | `#E8A878` → `#8A94B8`, `fog_sun_scatter` 0,8 |
+| 0,5 | `#FF8FA0` → `#FFA090`, 0,60 | `#B98FC0` 0,40 → `#BEB0B8` 0,42 | `#9A7FA8` → `#8A8CA0`, scatter 0,4 |
+| 1 | `#8E9BD6` 0,32 → `#A4A0B4` 0,30 | `#8E9BD6` 0,45 → `#8A8690` 0,45 | `#3E4A7A` → `#45424E`, scatter 0 |
+
+Respinse, măsurat: ambient albastru-rece `#9FA9D6` (varul H 224, dar nisipul H
+280 S 0,14); ceață caldă `#B8A4A8` (orașul de pe F H 246 S 0,13 — la 150–300 m
+e 50–70% ceață); ceață albastru-deschis `#ADB0C6` fără scatter (stânca
+îndepărtată de pe D H 264). Garda: `--guard` pe valorile vechi → 21 de abateri,
+exit 1; pe cele noi → OK. `probe_decor --track=17`: 12 materiale (neschimbat).
+Planșele: `docs/track_briefs/img/jodhpur_lumina/`.
+
+**Ce nu s-a atins:** asfaltul noaptea rămâne violet foarte închis (H 258–263,
+S 0,37–0,42, L 8): albedo-ul drumului, nu lumina (la lumină neutră iese tot
+H 264–271); materialele drumului nu se ating aici. Cerul (`sky_top`/`sky_horizon`)
+nu e canal al `DuskCycle`, deci noaptea cerul rămâne violet-portocaliu la orizont.

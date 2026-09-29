@@ -406,3 +406,12 @@ becurilor; departe de sfori rămâne albastru.
 măștile de clasă peste praguri); `probe_decor --track=17` **22 de materiale**
 (20 → 22: halou + ferestre), OK; `probe_manual --track=17`, `ProbeBuried`,
 `ProbeLaneClear` (31, exact baza) OK.
+
+**Baza, măsurată pe codul din 84e4c308** (fișierele scoase temporar în
+worktree, apoi restaurate): Track17 avea 20 de materiale și 769 de desene; acum
+22 și 820 (+51: pătratele de halou, decalurile și părțile `jod_window` ale
+caselor din `CityFill`). **Neutralitatea:** `probe_decor` pe Track12, 14 și 16
+identic la cifră (32/31/30 de materiale, aceleași desene și triunghiuri) cu și
+fără schimbare. **ProbeRace, 8 seed-uri:** 10 repuneri acum față de 11 pe bază
+(0/3/3/0/1/2/0/1 față de 1/5/1/0/1/2/0/1), zero `[blocaj]` în ambele; aceeași
+distribuție, fără nimic fizic atins (halourile și decalurile n-au corp).

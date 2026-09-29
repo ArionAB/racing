@@ -189,6 +189,8 @@ yaws = PackedFloat32Array(3.5689557, 4.8394856, 4.6918564, 4.758747, 4.935009, 1
 scale_min = 2.40
 scale_max = 3.20
 halo_enabled = true
+halo_reflect = 0.6
+halo_reflect_stretch = 5.0
 
 [node name="ZoneD_Oras" type="Node3D" parent="DecorManual"]
 

@@ -539,6 +539,13 @@ uniform float flow_speed : hint_range(0.0, 8.0) = 1.5;
 uniform float flow_foam : hint_range(0.0, 1.0) = 0.0;
 uniform float flow_foam_cut : hint_range(0.0, 0.95) = 0.35;
 uniform vec3 flow_foam_col = vec3(1.0);
+// NOAPTEA pe apa (Jodhpur). Apa e unshaded, deci nu vede DuskCycle: ambientul
+// si soarele scad, apa ramane la luminozitatea de amurg si iese mai deschisa
+// decat malul (masurat la dusk 1 pe lacul Devkund). `dusk_dim` e cat din apa
+// ramane cand `dusk_lamps` (canalul global al ceasului de lumina) ajunge la 1.
+// 1.0 (implicit) = ramura nu ruleaza, bit-identic pe orice alta pista.
+uniform float dusk_dim : hint_range(0.0, 1.0) = 1.0;
+global uniform float dusk_lamps;
 
 varying vec3 world_pos;
 // Directia de curgere, din UV2 (zero unde apa nu curge).
@@ -1275,6 +1282,10 @@ void fragment() {
 			lit = mix(lit, flow_foam_col, sk * flow_foam * (1.0 - foam));
 		}
 		base = mix(base, lit, lit_strength);
+	}
+
+	if (dusk_dim < 1.0) {
+		base *= mix(1.0, dusk_dim, smoothstep(0.15, 1.0, dusk_lamps));
 	}
 
 	ALBEDO = base;

@@ -1544,23 +1544,31 @@ static func themes() -> Dictionary:
 			# sters. Luminile de pe apa vin de la candelele plutitoare (decor).
 			# `water_deep_gain` 1.0: acelasi slot pe toata rampa; cu 0.75 celulele
 			# de grila (7.9 m) mai putin adanci ieseau dreptunghiuri mai deschise.
-			"water_shallow_slot": Palette.TROPICAL_GREEN,
-			"water_deep_slot": Palette.TROPICAL_GREEN,
-			"water_shore_slot": Palette.TROPICAL_GREEN,
-			"water_dim": 0.50,
+			"water_shallow_slot": Palette.SEA_DEEP,
+			"water_deep_slot": Palette.SEA_DEEP,
+			"water_shore_slot": Palette.SEA_DEEP,
+			"water_dim": 0.55,
 			"water_desat": 0.35,
-			"water_mul": Color(1.0, 0.95, 0.70),
+			"water_mul": Color(0.85, 1.0, 0.80),
 			"water_deep_gain": 1.0,
 			"water_foam": 0.0,
 			"water_foam_mix": 1.0,
 			"water_crest": 0.0,
 			"water_band": 0.0,
 			"water_glint": 0.0,
-			"water_ripple": 0.04,
-			"water_lit_rough": 0.45,
-			"water_lit_fresnel": 0.18,
-			"water_lit_spec": 0.35,
-			"water_lit_normal": 0.15,
+			"water_ripple": 0.08,
+			"water_fresnel": 0.42,
+			"water_fresnel_sharp": 3.5,
+			"water_fresnel_color": Color(0.58, 0.44, 0.60),
+			"water_view_lo": 1.0,
+			"water_view_hi": 0.75,
+			"water_view_ref": 0.60,
+			"water_lit_rough": 0.10,
+			"water_lit_fresnel": 0.80,
+			"water_lit_spec": 0.60,
+			"water_lit_normal": 0.25,
+			"water_lit_wave_len": 1.2,
+			"water_dusk_dim": 0.55,
 		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
@@ -7735,6 +7743,10 @@ func _water_material() -> ShaderMaterial:
 	_water_mat.set_shader_parameter("flow_foam_col",
 		Vector3(ffoam.r, ffoam.g, ffoam.b))
 	_water_mat.set_shader_parameter("wave_amp", SEA_WAVE_AMP)
+	# Cata apa ramane noaptea (DuskCycle -> `dusk_lamps` = 1). Vezi `dusk_dim`
+	# in water.gdshader; 1.0 implicit = neatins.
+	_water_mat.set_shader_parameter("dusk_dim",
+		float(theme_flag("water_dusk_dim", 1.0)))
 	return _water_mat
 
 

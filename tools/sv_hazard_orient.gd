@@ -105,6 +105,12 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# ca hazard orientat din cod, conform notei din antet.
 	"chasmRock", "guardRock", "mossBoulderA", "mossBoulderB", "mossBoulderC",
 	"beechDead", "beechA", "beechB", "beechC", "driftwood", "tussockClump",
+	# Jodhpur POI E: ghirlanda de craite are LUNGIMEA pe X local (2,59 m), deci
+	# intinsa pe coama zidului are -Z perpendicular pe drum (~90 grade) PRIN
+	# CONSTRUCTIE (tools/gen_decor_jod_e.gd); langurii si bolovanii au yaw liber.
+	"ghirlanda", "langur", "bolovan",
+	# LampiFort: nodul FortLamps sta la origine, pozitiile sunt in lume.
+	"LampiFort",
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:

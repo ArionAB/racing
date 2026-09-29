@@ -61,6 +61,7 @@
 [ext_resource type="PackedScene" uid="uid://cblf5sj5j6gjl" path="res://assets/models/jodhpur/vehicles/tuktuk.glb" id="s_tuktuk"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
+[ext_resource type="Script" path="res://scenes/props/fort_lamps.gd" id="e_fort_lamps"]
 
 [sub_resource type="Curve3D" id="Curve3D_jodhpur"]
 closed = true
@@ -182,247 +183,342 @@ metadata/scufundat = true
 transform = Transform3D(-0.802915, 0.000000, 0.596093, 0.000000, 1.000000, 0.000000, -0.596093, 0.000000, -0.802915, 57.123390, 13.847965, -167.204285)
 metadata/scufundat = true
 
-[node name="zid6" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="bolovan6" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_c")]
+transform = Transform3D(-0.458092, 0.000000, 0.396739, 0.000000, 0.606011, 0.000000, -0.396739, 0.000000, -0.458092, 59.047234, 18.364674, -167.626328)
+
+[node name="bolovan7" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_a")]
+transform = Transform3D(-0.154478, 0.000000, -0.692763, 0.000000, 0.709778, 0.000000, 0.692763, 0.000000, -0.154478, 60.331528, 18.500126, -169.356216)
+
+[node name="zid8" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.793836, 0.000000, 0.608132, 0.000000, 1.000000, 0.000000, -0.608132, 0.000000, -0.793836, 64.348747, 14.578957, -176.784790)
 metadata/scufundat = true
 
-[node name="zid7" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="bolovan9" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_b")]
+transform = Transform3D(0.594302, 0.000000, -0.121189, 0.000000, 0.606533, 0.000000, 0.121189, 0.000000, 0.594302, 66.227409, 19.111225, -177.106873)
+
+[node name="zid10" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.941770, 0.000000, 0.107797, 0.000000, 1.000000, 0.000000, -0.336259, 0.000000, -0.301910, 74.503441, 15.636644, -187.981873)
 metadata/scufundat = true
 
-[node name="zid8" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid11" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.885789, 0.000000, -0.148776, 0.000000, 1.000000, 0.000000, 0.464089, 0.000000, -0.283964, 74.257568, 9.610001, -191.497116)
 metadata/scufundat = true
 
-[node name="zid9" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid12" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.763717, 0.000000, -0.645552, 0.000000, 1.000000, 0.000000, 0.645552, 0.000000, -0.763717, 69.491592, 10.490984, -197.783203)
 metadata/scufundat = true
 
-[node name="langur10" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
-transform = Transform3D(-0.208119, 0.000000, 0.978104, 0.000000, 1.000000, 0.000000, -0.978104, 0.000000, -0.208119, 68.669319, 24.470984, -198.755981)
+[node name="ghirlanda13" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(-0.645552, 0.000000, 0.763717, 0.000000, 1.000000, 0.000000, -0.763717, 0.000000, -0.645552, 69.770782, 24.370983, -200.201721)
 metadata/coliziune = "none"
 
-[node name="zid11" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid14" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.565474, 0.000000, 0.824766, 0.000000, 1.000000, 0.000000, -0.824766, 0.000000, -0.565474, 60.577576, 6.629999, -145.873871)
 metadata/scufundat = true
 
-[node name="zid12" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
-transform = Transform3D(-0.716302, 0.000000, 0.697790, 0.000000, 1.000000, 0.000000, -0.697790, 0.000000, -0.716302, 69.712921, 7.150032, -153.564545)
-metadata/scufundat = true
-
-[node name="zid13" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
-transform = Transform3D(-0.729356, 0.000000, 0.684134, 0.000000, 1.000000, 0.000000, -0.684134, 0.000000, -0.729356, 78.004463, 7.884672, -162.238495)
-metadata/scufundat = true
-
-[node name="zid14" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
-transform = Transform3D(-0.724133, 0.000000, 0.221089, 0.000000, 1.000000, 0.000000, -0.689660, 0.000000, -0.232140, 83.435806, 8.295036, -168.007477)
-metadata/scufundat = true
-
-[node name="langur15" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
-transform = Transform3D(-0.948435, 0.000000, -0.316970, 0.000000, 1.000000, 0.000000, 0.316970, 0.000000, -0.948435, 83.237556, 22.275036, -167.799316)
+[node name="ghirlanda15" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.824766, 0.000000, 0.565474, 0.000000, 1.000000, -0.000000, -0.565474, 0.000000, 0.824766, 61.737877, 20.509998, -148.967499)
 metadata/coliziune = "none"
 
 [node name="zid16" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(-0.716302, 0.000000, 0.697790, 0.000000, 1.000000, 0.000000, -0.697790, 0.000000, -0.716302, 69.712921, 7.150032, -153.564545)
+metadata/scufundat = true
+
+[node name="ghirlanda17" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.697790, 0.000000, 0.716302, 0.000000, 1.000000, -0.000000, -0.716302, 0.000000, 0.697790, 68.295769, 21.030031, -154.859955)
+metadata/coliziune = "none"
+
+[node name="zid18" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(-0.729356, 0.000000, 0.684134, 0.000000, 1.000000, 0.000000, -0.684134, 0.000000, -0.729356, 78.004463, 7.884672, -162.238495)
+metadata/scufundat = true
+
+[node name="ghirlanda19" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.684134, 0.000000, 0.729356, 0.000000, 1.000000, -0.000000, -0.729356, 0.000000, 0.684134, 76.589050, 21.764671, -163.535797)
+metadata/coliziune = "none"
+
+[node name="zid20" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(-0.724133, 0.000000, 0.221089, 0.000000, 1.000000, 0.000000, -0.689660, 0.000000, -0.232140, 83.435806, 8.295036, -168.007477)
+metadata/scufundat = true
+
+[node name="zid21" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.973659, 0.000000, 0.119022, 0.000000, 1.000000, 0.000000, -0.228009, 0.000000, -0.508256, 90.924995, 15.795252, -185.255035)
 metadata/scufundat = true
 
-[node name="zid17" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid22" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.993824, 0.000000, -0.068150, 0.000000, 1.000000, 0.000000, 0.110970, 0.000000, -0.610332, 91.230232, 16.075243, -191.966583)
 metadata/scufundat = true
 
-[node name="zid18" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid23" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.901200, 0.000000, -0.226239, 0.000000, 1.000000, 0.000000, 0.433404, 0.000000, -0.470432, 89.463898, 16.350969, -198.451172)
 metadata/scufundat = true
 
-[node name="zid19" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid24" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.768752, 0.000000, -0.639547, 0.000000, 1.000000, 0.000000, 0.639547, 0.000000, -0.768752, 84.269180, 16.951683, -205.886261)
 metadata/scufundat = true
 
-[node name="zid20" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid25" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.753908, 0.000000, -0.656981, 0.000000, 1.000000, 0.000000, 0.656981, 0.000000, -0.753908, 60.421726, 11.966251, -207.325531)
 metadata/scufundat = true
 
-[node name="langur21" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
-transform = Transform3D(-0.936824, 0.000000, 0.349800, 0.000000, 1.000000, 0.000000, -0.349800, 0.000000, -0.936824, 62.102783, 25.946251, -205.396469)
+[node name="ghirlanda26" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(-0.656981, 0.000000, 0.753908, 0.000000, 1.000000, 0.000000, -0.753908, 0.000000, -0.656981, 61.772285, 25.846251, -208.690231)
 metadata/coliziune = "none"
 
-[node name="zid22" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid27" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.906663, 0.000000, -0.220212, 0.000000, 1.000000, 0.000000, 0.421857, 0.000000, -0.473283, 55.158569, 12.416424, -214.688675)
 metadata/scufundat = true
 
-[node name="zid23" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="langur28" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
+transform = Transform3D(-0.690913, 0.000000, 0.722938, 0.000000, 1.000000, 0.000000, -0.722938, 0.000000, -0.690913, 55.722038, 26.396423, -213.477661)
+metadata/coliziune = "none"
+
+[node name="zid29" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.993525, 0.000000, -0.069775, 0.000000, 1.000000, 0.000000, 0.113616, 0.000000, -0.610148, 53.418648, 12.888479, -221.189270)
 metadata/scufundat = true
 
-[node name="zid24" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid30" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.979356, 0.000000, 0.105519, 0.000000, 1.000000, 0.000000, -0.202142, 0.000000, -0.511230, 53.633118, 13.291800, -227.917557)
 metadata/scufundat = true
 
-[node name="zid25" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid31" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.873225, 0.000000, 0.352086, 0.000000, 1.000000, 0.000000, -0.487316, 0.000000, -0.630905, 56.378754, 20.309969, -234.770386)
 metadata/scufundat = true
 
-[node name="zid26" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="bolovan32" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_c")]
+transform = Transform3D(-0.576196, 0.000000, -0.588940, 0.000000, 0.823925, 0.000000, 0.588940, 0.000000, -0.576196, 58.309437, 24.970371, -235.581863)
+
+[node name="bolovan33" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_b")]
+transform = Transform3D(-0.460079, 0.000000, 0.708202, 0.000000, 0.844525, 0.000000, -0.708202, 0.000000, -0.460079, 58.349854, 24.978016, -235.654282)
+
+[node name="zid34" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.650851, 0.000000, 0.548526, 0.000000, 1.000000, 0.000000, -0.759205, 0.000000, -0.470240, 61.782429, 21.086700, -241.377258)
 metadata/scufundat = true
 
-[node name="zid27" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid35" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.612594, 0.000000, 0.790397, 0.000000, 1.000000, 0.000000, -0.790397, 0.000000, -0.612594, 69.815971, 21.872381, -247.874268)
 metadata/scufundat = true
 
-[node name="zid28" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="bolovan36" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_b")]
+transform = Transform3D(-0.810149, 0.000000, 0.112698, 0.000000, 0.817950, 0.000000, -0.112698, 0.000000, -0.810149, 70.340866, 26.390339, -246.650009)
+
+[node name="zid37" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.730818, 0.000000, 0.419185, 0.000000, 1.000000, 0.000000, -0.682572, 0.000000, -0.448814, 77.073471, 23.082201, -254.242722)
 metadata/scufundat = true
 
-[node name="zid29" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid38" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.998481, 0.000000, -0.017662, 0.000000, 1.000000, 0.000000, 0.055094, 0.000000, -0.320090, 79.482605, 17.510000, -258.856140)
 metadata/scufundat = true
 
-[node name="zid30" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid39" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.800821, 0.000000, -0.312632, 0.000000, 1.000000, 0.000000, 0.598904, 0.000000, -0.418033, 77.500839, 18.809999, -263.284912)
 metadata/scufundat = true
 
-[node name="zid31" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="langur40" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
+transform = Transform3D(-0.652661, 0.000000, 0.757650, 0.000000, 1.000000, 0.000000, -0.757650, 0.000000, -0.652661, 77.440338, 32.790001, -263.365814)
+metadata/coliziune = "none"
+
+[node name="zid41" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.672849, 0.000000, -0.739780, 0.000000, 1.000000, 0.000000, 0.739780, 0.000000, -0.672849, 71.186356, 19.460001, -269.830200)
 metadata/scufundat = true
 
-[node name="zid32" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="ghirlanda42" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(-0.739780, 0.000000, 0.672849, 0.000000, 1.000000, 0.000000, -0.672849, 0.000000, -0.739780, 74.822273, 33.340000, -268.689850)
+metadata/coliziune = "none"
+
+[node name="langur43" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
+transform = Transform3D(-0.508834, 0.000000, 0.860865, 0.000000, 1.000000, 0.000000, -0.860865, 0.000000, -0.508834, 70.286552, 33.440002, -270.648590)
+metadata/coliziune = "none"
+
+[node name="zid44" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.748257, 0.000000, -0.563898, 0.000000, 1.000000, 0.000000, 0.663409, 0.000000, -0.636018, 73.297455, 18.566252, -217.752838)
 metadata/scufundat = true
 
-[node name="zid33" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid45" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.999958, 0.000000, -0.002944, 0.000000, 1.000000, 0.000000, 0.009182, 0.000000, -0.320564, 69.896400, 19.320000, -223.492325)
 metadata/scufundat = true
 
-[node name="zid34" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid46" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.843412, 0.000000, 0.172236, 0.000000, 1.000000, 0.000000, -0.537267, 0.000000, -0.270379, 70.912155, 13.889999, -227.037994)
 metadata/scufundat = true
 
-[node name="zid35" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid47" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.604441, 0.000000, 0.796650, 0.000000, 1.000000, 0.000000, -0.796650, 0.000000, -0.604441, 76.725471, 14.907598, -232.286911)
 metadata/scufundat = true
 
-[node name="zid36" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="ghirlanda48" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.796650, 0.000000, 0.604441, 0.000000, 1.000000, -0.000000, -0.604441, 0.000000, 0.796650, 73.522682, 28.787598, -232.257568)
+metadata/coliziune = "none"
+
+[node name="langur49" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
+transform = Transform3D(-0.532332, 0.000000, -0.846536, 0.000000, 1.000000, 0.000000, 0.846536, 0.000000, -0.532332, 75.751648, 28.887598, -231.548050)
+metadata/coliziune = "none"
+
+[node name="zid50" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.669036, 0.000000, 0.631745, 0.000000, 1.000000, 0.000000, -0.743230, 0.000000, -0.568681, 85.295845, 15.960890, -239.325653)
 metadata/scufundat = true
 
-[node name="zid37" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="ghirlanda51" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.743230, 0.000000, 0.669036, 0.000000, 1.000000, -0.000000, -0.669036, 0.000000, 0.743230, 82.393661, 29.840889, -239.289505)
+metadata/coliziune = "none"
+
+[node name="langur52" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
+transform = Transform3D(-0.022391, 0.000000, -0.999749, 0.000000, 1.000000, 0.000000, 0.999749, 0.000000, -0.022391, 87.358330, 29.940889, -241.182251)
+metadata/coliziune = "none"
+
+[node name="zid53" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.769201, 0.000000, 0.392430, 0.000000, 1.000000, 0.000000, -0.639008, 0.000000, -0.472385, 91.440903, 16.636015, -245.572052)
 metadata/scufundat = true
 
-[node name="zid38" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid54" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.925729, 0.000000, 0.197417, 0.000000, 1.000000, 0.000000, -0.378188, 0.000000, -0.483236, 94.979988, 17.162848, -251.305786)
 metadata/scufundat = true
 
-[node name="langur39" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
-transform = Transform3D(0.386884, 0.000000, -0.922128, 0.000000, 1.000000, 0.000000, 0.922128, 0.000000, 0.386884, 95.624504, 31.142847, -252.883423)
-metadata/coliziune = "none"
-
-[node name="zid40" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid55" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.999049, 0.000000, 0.026778, 0.000000, 1.000000, 0.000000, -0.043603, 0.000000, -0.613541, 96.325157, 24.110001, -257.886475)
 metadata/scufundat = true
 
-[node name="zid41" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid56" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.948750, 0.000000, -0.164969, 0.000000, 1.000000, 0.000000, 0.316028, 0.000000, -0.495253, 95.496010, 24.465651, -264.539246)
 metadata/scufundat = true
 
-[node name="zid42" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid57" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.836813, 0.000000, -0.465366, 0.000000, 1.000000, 0.000000, 0.547489, 0.000000, -0.711291, 91.714005, 25.212563, -271.778503)
 metadata/scufundat = true
 
-[node name="zid43" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid58" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.680458, 0.000000, -0.732787, 0.000000, 1.000000, 0.000000, 0.732787, 0.000000, -0.680458, 84.525078, 25.773998, -280.129028)
 metadata/scufundat = true
 
-[node name="bolovan44" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_a")]
-transform = Transform3D(0.112707, 0.000000, 0.685826, 0.000000, 0.695025, 0.000000, -0.685826, 0.000000, 0.112707, 86.445595, 30.336796, -275.478149)
+[node name="bolovan59" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_b")]
+transform = Transform3D(-0.515010, 0.000000, -0.608863, 0.000000, 0.797464, 0.000000, 0.608863, 0.000000, -0.515010, 85.392296, 30.752216, -277.829681)
 
-[node name="zid45" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="bolovan60" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_c")]
+transform = Transform3D(0.020303, 0.000000, -0.841894, 0.000000, 0.842139, 0.000000, 0.841894, 0.000000, 0.020303, 86.957855, 30.394398, -276.375916)
+
+[node name="zid61" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.667107, 0.000000, -0.538235, 0.000000, 1.000000, 0.000000, 0.744962, 0.000000, -0.481984, 67.047974, 20.769075, -273.508545)
 metadata/scufundat = true
 
-[node name="zid46" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="ghirlanda62" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(-0.744962, 0.000000, 0.667107, 0.000000, 1.000000, 0.000000, -0.667107, 0.000000, -0.744962, 66.780830, 34.649075, -276.289063)
+metadata/coliziune = "none"
+
+[node name="zid63" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.846866, 0.000000, -0.277606, 0.000000, 1.000000, 0.000000, 0.531806, 0.000000, -0.442070, 62.152927, 21.056211, -279.052856)
 metadata/scufundat = true
 
-[node name="langur47" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
-transform = Transform3D(-0.966742, 0.000000, 0.255753, 0.000000, 1.000000, 0.000000, -0.255753, 0.000000, -0.966742, 61.561005, 35.036213, -279.995453)
+[node name="langur64" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
+transform = Transform3D(-0.438183, 0.000000, 0.898886, 0.000000, 1.000000, 0.000000, -0.898886, 0.000000, -0.438183, 61.587978, 35.036213, -279.952515)
 metadata/coliziune = "none"
 
-[node name="zid48" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid65" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.964840, 0.000000, -0.161416, 0.000000, 1.000000, 0.000000, 0.262839, 0.000000, -0.592532, 59.518791, 21.597567, -285.260498)
 metadata/scufundat = true
 
-[node name="zid49" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid66" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.999430, 0.000000, 0.017629, 0.000000, 1.000000, 0.000000, -0.033771, 0.000000, -0.521709, 58.656059, 22.019854, -291.945984)
 metadata/scufundat = true
 
-[node name="zid50" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="langur67" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
+transform = Transform3D(-0.399814, 0.000000, 0.916596, 0.000000, 1.000000, 0.000000, -0.916596, 0.000000, -0.399814, 58.698315, 35.999855, -293.196533)
+metadata/coliziune = "none"
+
+[node name="zid68" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.941921, 0.000000, 0.206245, 0.000000, 1.000000, 0.000000, -0.335836, 0.000000, -0.578457, 59.999306, 22.425428, -298.546997)
 metadata/scufundat = true
 
-[node name="zid51" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid69" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.786138, 0.000000, 0.322627, 0.000000, 1.000000, 0.000000, -0.618051, 0.000000, -0.410369, 63.172543, 29.373825, -304.479950)
 metadata/scufundat = true
 
-[node name="zid52" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid70" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.648697, 0.000000, 0.761047, 0.000000, 1.000000, 0.000000, -0.761047, 0.000000, -0.648697, 69.674591, 30.151234, -310.834351)
 metadata/scufundat = true
 
-[node name="zid53" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="bolovan71" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_c")]
+transform = Transform3D(0.351147, 0.000000, -0.578068, 0.000000, 0.676363, 0.000000, 0.578068, 0.000000, 0.351147, 68.079193, 34.313236, -307.771606)
+
+[node name="bolovan72" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_c")]
+transform = Transform3D(-0.622513, 0.000000, -0.295441, 0.000000, 0.689063, 0.000000, 0.295441, 0.000000, -0.622513, 74.225410, 35.031040, -313.010468)
+
+[node name="zid73" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.653077, 0.000000, -0.465072, 0.000000, 1.000000, 0.000000, 0.757292, 0.000000, -0.401071, 78.775467, 27.369076, -285.260468)
 metadata/scufundat = true
 
-[node name="zid54" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid74" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.962329, 0.000000, -0.087161, 0.000000, 1.000000, 0.000000, 0.271888, 0.000000, -0.308501, 75.462051, 28.010002, -289.517914)
 metadata/scufundat = true
 
-[node name="zid55" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid75" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.912046, 0.000000, 0.131465, 0.000000, 1.000000, 0.000000, -0.410087, 0.000000, -0.292381, 75.727875, 22.600000, -293.123230)
 metadata/scufundat = true
 
-[node name="zid56" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="langur76" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_langur")]
+transform = Transform3D(-0.728557, 0.000000, -0.684985, 0.000000, 1.000000, 0.000000, 0.684985, 0.000000, -0.728557, 75.610512, 36.580002, -292.862213)
+metadata/coliziune = "none"
+
+[node name="zid77" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.648679, 0.000000, 0.761062, 0.000000, 1.000000, 0.000000, -0.761062, 0.000000, -0.648679, 81.083038, 23.551233, -298.769592)
 metadata/scufundat = true
 
-[node name="zid57" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="ghirlanda78" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.761062, 0.000000, 0.648679, 0.000000, 1.000000, -0.000000, -0.648679, 0.000000, 0.761062, 81.417816, 37.431232, -301.535156)
+metadata/coliziune = "none"
+
+[node name="zid79" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.661534, 0.000000, 0.749915, 0.000000, 1.000000, 0.000000, -0.749915, 0.000000, -0.661534, 83.413956, 32.042076, -322.154663)
 metadata/scufundat = true
 
-[node name="bolovan58" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_c")]
-transform = Transform3D(0.834864, 0.000000, -0.156694, 0.000000, 0.849441, 0.000000, 0.156694, 0.000000, 0.834864, 82.371490, 35.902363, -317.748779)
-
-[node name="zid59" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="zid80" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.486932, 0.000000, 0.742424, 0.000000, 1.000000, 0.000000, -0.873440, 0.000000, -0.413892, 92.367996, 32.560001, -328.607239)
 metadata/scufundat = true
 
-[node name="zid60" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="bolovan81" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_c")]
+transform = Transform3D(0.097783, 0.000000, -0.798995, 0.000000, 0.804956, 0.000000, 0.798995, 0.000000, 0.097783, 96.266563, 37.195515, -329.338440)
+
+[node name="zid82" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.248566, 0.000000, 0.968615, 0.000000, 1.000000, 0.000000, -0.968615, 0.000000, -0.248566, 102.634232, 33.047466, -332.581970)
 metadata/scufundat = true
 
-[node name="zid61" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="bolovan83" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_a")]
+transform = Transform3D(0.042445, 0.000000, -0.788010, 0.000000, 0.789152, 0.000000, 0.788010, 0.000000, 0.042445, 104.386040, 37.523960, -331.744568)
+
+[node name="bolovan84" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_rhyolite_boulder_b")]
+transform = Transform3D(0.549774, 0.000000, 0.446158, 0.000000, 0.708032, 0.000000, -0.446158, 0.000000, 0.549774, 107.392509, 37.589054, -332.516083)
+
+[node name="zid85" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.668119, 0.000000, 0.632446, 0.000000, 1.000000, 0.000000, -0.744054, 0.000000, -0.567901, 93.781677, 25.442076, -309.226654)
 metadata/scufundat = true
 
-[node name="zid62" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
+[node name="ghirlanda86" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(0.744054, 0.000000, 0.668119, 0.000000, 1.000000, -0.000000, -0.668119, 0.000000, 0.744054, 91.377708, 39.322075, -309.566986)
+metadata/coliziune = "none"
+
+[node name="zid87" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.418778, 0.000000, 0.474028, 0.000000, 1.000000, 0.000000, -0.908089, 0.000000, -0.218605, 100.420525, 26.087637, -313.945679)
 metadata/scufundat = true
 
-[node name="turn63" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_turret")]
-transform = Transform3D(0.569013, 0.000000, 0.822329, 0.000000, 1.000000, 0.000000, -0.822329, 0.000000, 0.569013, 92.840042, 14.710001, -193.737839)
+[node name="turn88" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_turret")]
+transform = Transform3D(-0.174269, 0.000000, 0.984698, 0.000000, 1.000000, 0.000000, -0.984698, 0.000000, -0.174269, 92.840042, 14.710001, -193.737839)
 metadata/scufundat = true
 
-[node name="turn64" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_turret")]
-transform = Transform3D(0.041510, 0.000000, -0.999138, 0.000000, 1.000000, 0.000000, 0.999138, 0.000000, 0.041510, 52.069675, 17.988480, -218.732498)
+[node name="turn89" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_turret")]
+transform = Transform3D(0.320372, 0.000000, -0.947292, 0.000000, 1.000000, 0.000000, 0.947292, 0.000000, 0.320372, 52.069675, 17.988480, -218.732498)
 metadata/scufundat = true
 
-[node name="turn65" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_turret")]
-transform = Transform3D(-0.392765, 0.000000, -0.919639, 0.000000, 1.000000, 0.000000, 0.919639, 0.000000, -0.392765, 97.967422, 22.610001, -255.418823)
+[node name="turn90" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_turret")]
+transform = Transform3D(0.151140, 0.000000, 0.988512, 0.000000, 1.000000, 0.000000, -0.988512, 0.000000, 0.151140, 97.967422, 22.610001, -255.418823)
 metadata/scufundat = true
 
-[node name="turn66" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_turret")]
-transform = Transform3D(0.053786, 0.000000, -0.998553, 0.000000, 1.000000, 0.000000, 0.998553, 0.000000, 0.053786, 58.616791, 27.525429, -299.671631)
+[node name="turn91" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_turret")]
+transform = Transform3D(-0.470834, 0.000000, -0.882222, 0.000000, 1.000000, 0.000000, 0.882222, 0.000000, -0.470834, 58.616791, 27.525429, -299.671631)
 metadata/scufundat = true
+
+[node name="LampiFort" type="Node3D" parent="DecorManual/ZoneE_Porti"]
+script = ExtResource("e_fort_lamps")
+positions = PackedVector3Array(79.280, 26.845, -206.320, 72.596, 26.845, -199.711, 84.031, 35.593, -275.503, 77.805, 35.593, -268.461, 81.989, 40.206, -304.197, 76.117, 40.206, -311.537, 49.905, 27.434, -161.108, 56.200, 28.052, -167.890, 63.436, 28.783, -177.484, 73.420, 29.841, -188.369, 73.953, 23.814, -189.600, 73.239, 23.814, -190.963, 72.525, 23.814, -192.326, 71.712, 24.695, -193.375, 68.613, 24.695, -197.041, 65.515, 24.695, -200.707, 55.968, 20.834, -144.108, 59.927, 20.834, -146.822, 63.886, 20.834, -149.537, 65.540, 21.354, -150.929, 68.889, 21.354, -154.367, 72.239, 21.354, -157.805, 73.882, 22.089, -159.524, 77.166, 22.089, -163.025, 80.450, 22.089, -166.526, 81.542, 22.499, -167.686, 82.603, 22.499, -168.801, 83.664, 22.499, -169.915, 89.805, 29.999, -185.517, 90.087, 30.279, -191.839, 88.428, 30.555, -197.953, 83.385, 31.156, -205.151, 62.708, 26.170, -202.951, 59.555, 26.170, -206.570, 56.401, 26.170, -210.189, 55.173, 26.620, -211.932, 54.116, 26.620, -214.204, 53.059, 26.620, -216.475, 52.611, 27.092, -218.130, 52.276, 27.092, -221.059, 51.941, 27.092, -223.987, 52.000, 27.496, -225.696, 52.507, 27.496, -228.150, 53.013, 27.496, -230.604, 55.375, 34.514, -235.331, 61.034, 35.291, -242.250, 69.111, 36.076, -248.783, 76.233, 37.286, -255.028, 78.419, 31.714, -257.256, 78.334, 31.714, -258.793, 78.250, 31.714, -260.329, 78.081, 33.014, -260.590, 76.580, 33.014, -262.596, 75.079, 33.014, -264.603, 73.964, 33.664, -265.750, 70.413, 33.664, -268.979, 66.862, 33.664, -272.209, 72.437, 32.770, -216.990, 68.746, 33.524, -223.482, 69.116, 28.094, -226.358, 69.942, 28.094, -227.656, 70.769, 28.094, -228.954, 72.206, 29.112, -230.302, 76.030, 29.112, -233.203, 79.854, 29.112, -236.104, 81.494, 30.165, -237.451, 84.526, 30.165, -240.180, 87.559, 30.165, -242.910, 88.673, 30.840, -244.039, 90.556, 30.840, -246.307, 92.440, 30.840, -248.574, 92.968, 31.367, -249.421, 93.915, 31.367, -251.741, 94.863, 31.367, -254.060, 95.176, 38.314, -257.937, 94.405, 38.670, -264.176, 90.752, 39.417, -271.149, 83.743, 39.978, -279.286, 68.864, 34.973, -270.338, 66.281, 34.973, -272.652, 63.697, 34.973, -274.965, 62.512, 35.260, -276.319, 61.179, 35.260, -278.441, 59.847, 35.260, -280.563, 59.184, 35.802, -282.114, 58.409, 35.802, -284.958, 57.634, 35.802, -287.802, 57.422, 36.224, -289.481, 57.507, 36.224, -291.985, 57.591, 36.224, -294.489, 57.926, 36.629, -296.157, 58.916, 36.629, -298.933, 59.906, 36.629, -301.710, 62.268, 43.578, -305.191, 68.929, 44.355, -311.710, 78.024, 41.573, -284.390, 74.355, 42.214, -289.205, 74.048, 36.804, -292.191, 74.679, 36.804, -293.595, 75.310, 36.804, -294.998, 76.684, 37.755, -296.531, 80.337, 37.755, -299.645, 83.990, 37.755, -302.758, 82.653, 46.246, -323.017, 91.808, 46.764, -329.612, 102.348, 47.251, -333.696, 89.978, 39.646, -307.356, 93.013, 39.646, -310.082, 96.049, 39.646, -312.808, 97.664, 40.292, -313.941, 99.939, 40.292, -314.990, 102.214, 40.292, -316.039, 92.309, 31.914, -196.741, 95.843, 31.914, -194.269, 93.372, 31.914, -190.735, 89.837, 31.914, -193.206, 53.047, 35.192, -215.843, 49.180, 35.192, -217.755, 51.093, 35.192, -221.622, 54.959, 35.192, -219.710, 98.428, 39.814, -258.434, 100.982, 39.814, -254.958, 97.506, 39.814, -252.404, 94.952, 39.814, -255.880, 57.181, 44.729, -296.981, 55.926, 44.729, -301.108, 60.053, 44.729, -302.362, 61.308, 44.729, -298.236)
+radii = PackedFloat32Array(0.30, 0.30, 0.30, 0.30, 0.30, 0.30, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28)
+stretch = PackedFloat32Array(1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00)
 
 [node name="ZoneF_Bastion" type="Node3D" parent="DecorManual"]
 

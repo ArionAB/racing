@@ -55,6 +55,7 @@ const RES := {
 	"fort_wall_segment": "s_fort_wall_segment",
 	"fort_wall_turret": "s_fort_wall_turret",
 	"langur": "s_langur",
+	"marigold_garland": "s_marigold_garland",
 	"rhyolite_boulder_a": "s_rhyolite_boulder_a",
 	"rhyolite_boulder_b": "s_rhyolite_boulder_b",
 	"rhyolite_boulder_c": "s_rhyolite_boulder_c",
@@ -81,6 +82,27 @@ const WALL_GAP := 2.0
 const WALL_MIN_LEN := 4.0
 const SAG_MAX := 0.35
 const LANGUR_P := 0.3
+## RUNDA 2 (criticul: „linia drumului se deseneaza in puncte de lumina").
+## Varfurile merloanelor lui `fort_wall_segment`, masurate pe GLB: z = -4,8 /
+## -2,4 / 0 / 2,4 / 4,8, varful la y 13,98, pe x 0,8..1,5.
+const MERLON_TIP_Y := 13.98
+const MERLON_X := 1.15
+## Parapet: lampa pe merlonii de la -4,8 / 0 / +4,8 -> pas 4,8 / 4,8 / 2,4 peste
+## imbinare, ~4 m in medie. Zidul de sus: doar merlonul din mijloc (~12 m).
+const PARAPET_LAMP_Z := [-4.8, 0.0, 4.8]
+const UPHILL_LAMP_Z := [0.0]
+const LAMP_R := 0.28
+## Tortele portilor: DOUA, pe fata dinspre care vii (x -4,6; fata portii e la
+## x -4,32), la stalpii arcului (golul se termina la +-3,58), deasupra
+## acoperisului oricarei masini. Runda 2: si pe fata de iesire erau doua, dar
+## camera trece la 2-3 m de ele dupa poarta si ieseau romburi de 1,3 m in
+## prim-plan (captura 0.555).
+const TORCH_LOCAL := [Vector3(-4.6, 4.4, 4.7), Vector3(-4.6, 4.4, -4.7)]
+const TORCH_R := 0.3
+const TORCH_STRETCH := 1.6
+## Turnurile rotunde: merlonii de pe coroana, la raza ~3,05, varful 16,98.
+const TURRET_TIP_Y := 16.98
+const TURRET_LAMP_R := 3.05
 ## Pana unde (lateral, de la ax) se cauta un brat vecin.
 const NEIGHBOR_REACH := 40.0
 
@@ -89,6 +111,10 @@ var _sampler: TrackSideSampler
 var _terrain_rid: RID = RID()
 var _sus_y := 0.0
 var _out: Array[String] = []
+## Lampile (runda 2): pozitie in lume, raza, alungire. Le deseneaza FortLamps.
+var _lamp_pos := PackedVector3Array()
+var _lamp_r := PackedFloat32Array()
+var _lamp_s := PackedFloat32Array()
 var _n := 0
 var _tri := 0
 var _skipped := 0
@@ -134,6 +160,7 @@ func _ready() -> void:
 		_gates()
 		_walls()
 		_turrets()
+		_lamps_node()
 		_write()
 	get_tree().quit(0)
 
@@ -263,6 +290,8 @@ func _gates() -> void:
 		# Baza la cota drumului in centru, coborata 0,3 m (masuratori §4.2).
 		var pos := Vector3(p.x, p.y - 0.3, p.z)
 		_raw_basis(model, "PoartaFort" + model.trim_prefix("fort_gate_").capitalize() + "_", pos, b, "")
+		for lp: Vector3 in TORCH_LOCAL:
+			_lamp(pos + b * lp, TORCH_R, TORCH_STRETCH)
 		print("; poarta %s la frac %.4f (i %d) pos %s, tangenta %s, raza %.1f, panta %.1f%%" % [
 			model, float(g[1]), i, str(pos), str(t), _radius(i), 100.0 * _slope(i)])
 
@@ -371,13 +400,27 @@ func _wall_run(a: int, b: int, sgn: float) -> void:
 			_skipped += 1
 			continue
 		var x := Vector3.UP.cross(z).normalized()
-		_raw_basis("fort_wall_segment", "zid", Vector3(c.x, base_y, c.z),
-			Basis(x, Vector3.UP, z * (len / WALL_LEN)), "")
+		var wb := Basis(x, Vector3.UP, z * (len / WALL_LEN))
+		var wpos := Vector3(c.x, base_y, c.z)
+		_raw_basis("fort_wall_segment", "zid", wpos, wb, "")
 		if g - base_y > 2.0:
 			_meta_last("metadata/scufundat = true")
 		var toward_road := _track.baked[ci] - c
 		toward_road.y = 0.0
 		toward_road = toward_road.normalized()
+		# Lampile pe varful merloanelor (runda 2).
+		var zs: Array = PARAPET_LAMP_Z if kind == "parapet" else UPHILL_LAMP_Z
+		for lz: float in zs:
+			_lamp(wpos + wb * Vector3(MERLON_X, MERLON_TIP_Y + LAMP_R * 0.8, lz),
+				LAMP_R, 1.0)
+		# Ghirlanda de craite pe fata dinspre drum a parapetului, atarnata de
+		# coama (originea ei e SUS, atarna 1,09 m), cate una pe bucata intreaga.
+		if kind == "parapet" and len > 8.0:
+			var gz: float = [-2.4, 0.0, 2.4][_rng.randi_range(0, 2)]
+			var face := wpos + wb * Vector3(0.0, 0.0, gz) + toward_road * (WALL_HALF_T + 0.12)
+			var gb := Basis(z, Vector3.UP, z.cross(Vector3.UP))
+			_raw_basis("marigold_garland", "ghirlanda", Vector3(face.x, top - 0.1, face.z),
+				gb, "none")
 		if kind == "parapet" and _rng.randf() < LANGUR_P:
 			var lp := c + z * _rng.randf_range(-0.35, 0.35) * len
 			var yaw := atan2(toward_road.x, toward_road.z) + _rng.randf_range(-0.9, 0.9)
@@ -388,8 +431,11 @@ func _wall_run(a: int, b: int, sgn: float) -> void:
 				var model: String = ["rhyolite_boulder_a", "rhyolite_boulder_b",
 					"rhyolite_boulder_c"][_rng.randi_range(0, 2)]
 				var scl := _rng.randf_range(0.6, 0.85)
+				# Centrul 0,5 m in zid: bolovanul sta pe jumatate
+				# in zid, la picior. Cu centrul in fata zidului (runda 1) cadea la
+				# < 2 m de muchie si probe_manual il dadea IN DRUM.
 				var bp := c + z * _rng.randf_range(-5.0, 5.0) \
-					+ toward_road * (WALL_HALF_T + 1.0 * scl)
+					+ toward_road * (WALL_HALF_T - 0.5)
 				bp.y = c.y
 				if not _footprint_clear(bp, z, 1.5 * scl, 1.5 * scl, 0.8):
 					continue
@@ -501,8 +547,19 @@ func _turrets() -> void:
 				var top := p.y + TURRET_TOP
 				var by := top - 16.98
 				if by <= Y_MAX:
-					_raw("fort_wall_turret", "turn", Vector3(q.x, by, q.z),
-						_rng.randf_range(0.0, TAU), 1.0, "")
+					# Yaw ALINIAT pe `out`, nu aleator: soclul turnului e PATRAT
+					# (7,5 x 7,5), iar `_footprint_clear` de mai sus testeaza patratul
+					# aliniat pe `out`. Cu yaw aleator (runda 1) un colt ajungea cu
+					# pana la 1,55 m mai aproape de asfalt decat testul — pe runda 2
+					# (alt yaw din acelasi rng) ProbeRace a dat 3 repuneri la 0,500 si
+					# un [blocaj] la 0,561, langa turnurile acelor.
+					var tyaw := atan2(out.x, out.z)
+					_raw("fort_wall_turret", "turn", Vector3(q.x, by, q.z), tyaw, 1.0, "")
+					var tb := Basis.from_euler(Vector3(0.0, tyaw, 0.0))
+					for k in 4:
+						var ang := TAU * float(k) / 4.0
+						_lamp(Vector3(q.x, by, q.z) + tb * Vector3(cos(ang) * TURRET_LAMP_R,
+							TURRET_TIP_Y + LAMP_R * 0.8, sin(ang) * TURRET_LAMP_R), LAMP_R, 1.0)
 					if _sol_real(q.x, q.z) - by > 2.0:
 						_meta_last("metadata/scufundat = true")
 			else:
@@ -535,6 +592,32 @@ func _raw_basis(model: String, base: String, pos: Vector3, b: Basis,
 		# Camera: piatra de deasupra arcului o opreste (ChaseCamera._unclip).
 		_out.append("metadata/camera_blocker = true")
 	_out.append("")
+
+
+func _lamp(p: Vector3, r: float, st: float) -> void:
+	_lamp_pos.append(p)
+	_lamp_r.append(r)
+	_lamp_s.append(st)
+
+
+## Nodul FortLamps (un MultiMesh emisiv) cu toate lampile zonei.
+func _lamps_node() -> void:
+	_out.append('[node name="LampiFort" type="Node3D" parent="%s"]' % ZONE)
+	_out.append('script = ExtResource("e_fort_lamps")')
+	var ps: Array[String] = []
+	for v in _lamp_pos:
+		ps.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+	_out.append("positions = PackedVector3Array(%s)" % ", ".join(ps))
+	var rs: Array[String] = []
+	for v in _lamp_r:
+		rs.append("%.2f" % v)
+	_out.append("radii = PackedFloat32Array(%s)" % ", ".join(rs))
+	var ss: Array[String] = []
+	for v in _lamp_s:
+		ss.append("%.2f" % v)
+	_out.append("stretch = PackedFloat32Array(%s)" % ", ".join(ss))
+	_out.append("")
+	print("; lampi: %d (din care torte %d)" % [_lamp_pos.size(), GATES.size() * TORCH_LOCAL.size()])
 
 
 ## Adauga o linie de metadata la ULTIMUL nod scris (inaintea liniei goale).

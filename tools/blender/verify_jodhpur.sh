@@ -152,6 +152,8 @@ check "props/spice_sacks.glb"         1400 --origin=assembly --allow-car-slots=S
 # colturi"): roti DESCHISE (janta din 14 grinzi + 10 spite + butuc) sub tava,
 # gramada bombata din fructe sferice pe 3 zone; bevel 0. Masurat 3632.
 check "props/thela_cart.glb"          3700 --origin=assembly --allow-car-slots=Cart_Fruit
+# chai_stall 1600 (runda 3, refacuta dupa "tejghele stivuite"): doua
+# tejghele alaturate, masuta, 4 oale, copertina inclinata cu volan; bevel 0.
 check "props/chai_stall.glb"          1600 --origin=assembly
 check "props/marigold_garland.glb"     800
 

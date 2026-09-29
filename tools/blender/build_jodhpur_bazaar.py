@@ -477,136 +477,129 @@ def build_thela_cart():
 
 # --- chai_stall ----------------------------------------------------------------
 #
-# Contract (brief §1.5): 2.5x2.0x2.6 m, h/l 0.77. Element list (decupare
-# chai_stall.png, RECITITA in runda de corectii -- raportul liderului "aproape
-# goala" era corect):
+# Contract (brief §1.5): 2,5 x 2,0 x 2,6 m, h/l 0,77, acoperis de panza bej
+# (SAND_LIGHT), tejghea de lemn, 2 oale de metal (PAINTED) si o ceainica.
 #
-#   1. 4 stalpi de lemn cu varf in FURCA (Y, ca o creanga taiata -- nu cilindri
-#      simpli) + acoperis de panza BEJ (SAND_LIGHT) cu VALURE vizibile (nu
-#      plat -- aceeasi tehnica ca `_build_stall_canopy`, dar mai putin lasat).
-#   2. Tejghea de lemn joasa STANGA (mai inalta/deschisa) si DREAPTA (mai
-#      scunda/inchisa la culoare) -- corectie: erau ambele identice si pe
-#      aceeasi parte in codul vechi.
-#   3. Un SCAUN/MASUTA ROTUNDA joasa intre cele doua tejghele, in spate --
-#      corectie: lipsea complet (al treilea element din decupare).
-#   4. 2 canistre/oale mari de metal pe tejgheaua STANGA, plus o ceainica cu
-#      CIOC si MANER pe tejgheaua dreapta -- corectie: toate 3 erau
-#      inghesuite in acelasi punct (hw-0.35, 0.0), suprapuse.
+# Element list (decupare chai_stall.png, marire x4 -- runda 3 de corectii:
+# "tejghelele stivuite vertical in mijloc"). Fata tarabei = +X (lata, 2,5 m
+# pe Y), camera az ~25; stanga pe ecran = -Y.
+#
+#   1. DOUA TEJGHELE-CUTIE de lemn ALATURATE, jos (~0,85 m), in FATA:
+#      stanga mai lata si mai in fata (Y -1,2..0), dreapta mai ingusta si
+#      putin mai in spate (Y 0,4..1,2), cu un gol intre ele; scanduri
+#      verticale (rosturi) si blat usor iesit.
+#   2. MASUTA ROTUNDA pe picior, in golul dintre tejghele, putin in spate.
+#   3. OALE: 2 bidoane mari de metal pe tejgheaua stanga, un bidon mic pe
+#      masuta, CEAINICUL (cioc + toarta) pe tejgheaua dreapta.
+#   4. PATRU STALPI de lemn (colturile), cei din fata cu contrafise in V sub
+#      copertina.
+#   5. COPERTINA de panza bej, usor bombata, mai joasa in fata, cu MARGINE
+#      ATARNATA (volan) pe fata si pe capatul stang.
 CH_W, CH_D, CH_H = 2.5, 2.0, 2.6
 CH_ROOF_H = 2.5
 
 
 def build_chai_stall():
-    b = Builder()    # stalpi + tejghea + acoperis + scaun (Stall_Wood)
-    bm_ = Builder()  # oalele/ceainica (Stall_Metal)
-    faces = []
-    metal_faces = []
-    hw, hd = CH_W * 0.5, CH_D * 0.5
+    b = Builder()    # stalpi + tejghele + masuta + copertina (Stall_Wood)
+    bm_ = Builder()  # oalele/ceainicul (Stall_Metal)
+    hy, hx = CH_W * 0.5, CH_D * 0.5          # Y lung (fata), X adanc
 
-    # 4 stalpi cu varf in furca (2 brate scurte in V, ca o creanga taiata --
-    # corectie: cilindri simpli inainte, decuparea arata clar furca sub
-    # acoperis pe stalpii din fata)
-    post_r = 0.06
-    posts = [(-hw + 0.12, -hd + 0.12), (hw - 0.12, -hd + 0.12),
-             (-hw + 0.12, hd - 0.12), (hw - 0.12, hd - 0.12)]
-    fork_h = 0.22
+    # 1. doua tejghele-cutie alaturate, in fata
+    def counter(x0, x1, y0, y1, h):
+        b.box(((x0 + x1) * 0.5, (y0 + y1) * 0.5, (h - 0.05) * 0.5), (x1 - x0, y1 - y0, h - 0.05), CRATE_WOOD)
+        b.box(((x0 + x1) * 0.5 + 0.02, (y0 + y1) * 0.5, h - 0.025), (x1 - x0 + 0.08, y1 - y0 + 0.08, 0.05), CRATE_WOOD)
+        # scanduri: sipci verticale in relief pe fata +X si pe latura +Y
+        n = max(int((y1 - y0) / 0.32), 2)
+        for i in range(1, n):
+            yy = y0 + (y1 - y0) * i / n
+            b.box((x1 + 0.01, yy, (h - 0.05) * 0.5), (0.03, 0.04, h - 0.12), CRATE_WOOD)
+        b.box((x1 + 0.01, (y0 + y1) * 0.5, 0.12), (0.03, y1 - y0, 0.06), CRATE_WOOD)
+        return h
+    hl = counter(0.2, 0.98, -1.22, 0.02, 0.98)
+    hr = counter(-0.2, 0.55, 0.42, 1.22, 0.92)
+
+    # 2. masuta rotunda pe picior, intre tejghele, in spate
+    tx, ty, th = -0.25, 0.22, 0.72
+    b.cylinder((tx, ty, th * 0.5), 0.05, th, CRATE_WOOD, segments=6, axis="Z")
+    b.cylinder((tx, ty, 0.03), 0.2, 0.06, CRATE_WOOD, segments=8, axis="Z")
+    b.cylinder((tx, ty, th + 0.025), 0.32, 0.05, CRATE_WOOD, segments=12, axis="Z")
+
+    # 5. copertina de panza: foaie groasa de 4 cm, bombata pe Y, mai joasa in
+    # fata (+X), cu volan pe fata si pe capatul -Y
+    roof = []
+    nx_, ny_ = 4, 6
+    ext_x, ext_y = hx + 0.05, hy + 0.08
+    z_back, z_front = CH_H - 0.1, 2.0    # panta mare spre fata, ca pe decupare
+
+    def rz(x, y):
+        t = (x + ext_x) / (2 * ext_x)
+        s = (y + ext_y) / (2 * ext_y)
+        return z_back + (z_front - z_back) * t + 0.12 * math.sin(math.pi * s) * math.sin(math.pi * (0.3 + 0.7 * t))
+    # 4. stalpi + contrafise in V pe cei din fata
+    post_r = 0.055
+    posts = [(0.15, -hy + 0.12), (0.15, hy - 0.12), (-0.9, -hy + 0.12), (-0.9, hy - 0.12)]
     for px, py in posts:
-        faces += list(b.cylinder((px, py, (CH_ROOF_H - fork_h) * 0.5), post_r,
-                                 CH_ROOF_H - fork_h, POST_WOOD, segments=8, axis="Z"))
-        for bx, by in ((-0.09, -0.05), (0.09, 0.05)):
-            arm = Vector((bx, by, fork_h))
-            faces += list(b.beam((px, py, CH_ROOF_H - fork_h),
-                                 (px + arm.x, py + arm.y, CH_ROOF_H - fork_h + arm.z),
-                                 post_r * 0.7, POST_WOOD))
+        top = rz(px, py) - 0.03
+        b.cylinder((px, py, top * 0.5), post_r, top, CRATE_WOOD, segments=6, axis="Z")
+        if px > 0:
+            inward = -0.3 if py > 0 else 0.3          # V-ul ramane sub panza
+            for dx, dy in ((0.0, inward), (-0.3, 0.0)):
+                b.beam((px, py, top - 0.45), (px + dx, py + dy, rz(px + dx, py + dy) - 0.05),
+                       (0.05, 0.05), CRATE_WOOD)
 
-    # acoperis de panza bej, cu 3 VALURI vizibile (tehnica _build_stall_canopy,
-    # dar `sag` mai mic -- brief: "aproape plat, fara curbura pronuntata" fata
-    # de stall_canopy, deci valuri subtile, nu o lasare adanca)
-    roof_faces = []
-    segs = 3
-    front_h, back_h = CH_ROOF_H, CH_ROOF_H - 0.20
-    for k in range(segs):
-        t0, t1 = k / segs, (k + 1) / segs
-        y0 = -hd - 0.2 + (CH_D + 0.4) * t0
-        y1 = -hd - 0.2 + (CH_D + 0.4) * t1
-        sag0 = 0.06 * math.sin(t0 * math.pi)
-        sag1 = 0.06 * math.sin(t1 * math.pi)
-        z0 = front_h + (back_h - front_h) * t0 - sag0
-        z1 = front_h + (back_h - front_h) * t1 - sag1
-        w0 = (CH_W + 0.4) * (1.0 - 0.03 * math.sin(t0 * math.pi))
-        w1 = (CH_W + 0.4) * (1.0 - 0.03 * math.sin(t1 * math.pi))
-        hw0, hw1 = w0 * 0.5, w1 * 0.5
-        p00 = (-hw0, y0, z0); p10 = (hw0, y0, z0)
-        p01 = (-hw1, y1, z1); p11 = (hw1, y1, z1)
-        f1 = b.bm.faces.new((b.bm.verts.new(p00), b.bm.verts.new(p10),
-                             b.bm.verts.new(p11), b.bm.verts.new(p01)))
-        roof_faces.append(f1)
-        p00b = (-hw0, y0, z0 - 0.04); p10b = (hw0, y0, z0 - 0.04)
-        p01b = (-hw1, y1, z1 - 0.04); p11b = (hw1, y1, z1 - 0.04)
-        f2 = b.bm.faces.new((b.bm.verts.new(p01b), b.bm.verts.new(p11b),
-                             b.bm.verts.new(p10b), b.bm.verts.new(p00b)))
-        roof_faces.append(f2)
+    grid_t, grid_b = {}, {}
+    for i in range(nx_ + 1):
+        for j in range(ny_ + 1):
+            x = -ext_x + 2 * ext_x * i / nx_
+            y = -ext_y + 2 * ext_y * j / ny_
+            grid_t[(i, j)] = b.bm.verts.new((x, y, rz(x, y)))
+            grid_b[(i, j)] = b.bm.verts.new((x, y, rz(x, y) - 0.04))
+    for i in range(nx_):
+        for j in range(ny_):
+            roof.append(b.bm.faces.new((grid_t[(i, j)], grid_t[(i + 1, j)], grid_t[(i + 1, j + 1)], grid_t[(i, j + 1)])))
+            roof.append(b.bm.faces.new((grid_b[(i, j + 1)], grid_b[(i + 1, j + 1)], grid_b[(i + 1, j)], grid_b[(i, j)])))
+    for i in range(nx_):
+        for j in (0, ny_):
+            roof.append(b.bm.faces.new((grid_t[(i, j)], grid_b[(i, j)], grid_b[(i + 1, j)], grid_t[(i + 1, j)])))
+    for j in range(ny_):
+        for i in (0, nx_):
+            roof.append(b.bm.faces.new((grid_t[(i, j)], grid_t[(i, j + 1)], grid_b[(i, j + 1)], grid_b[(i, j)])))
+    # volan: panza atarnata -- scurt (0,18 m) pe fata (+X), lung (0,45 m) pe
+    # capatul -Y, ca pe decupare; din
+    # fasii LIPITE care urmaresc marginea bombata (fara goluri intre ele)
+    val_h = 0.45
+    for j in range(ny_):
+        y0 = -ext_y + 2 * ext_y * j / ny_
+        y1 = -ext_y + 2 * ext_y * (j + 1) / ny_
+        zt = rz(ext_x, (y0 + y1) * 0.5) - 0.02
+        roof += list(b.box((ext_x - 0.012, (y0 + y1) * 0.5, zt - 0.09), (0.024, y1 - y0 + 0.01, 0.18), SAND_LIGHT))
+    for i in range(nx_):
+        x0 = -ext_x + 2 * ext_x * i / nx_
+        x1 = -ext_x + 2 * ext_x * (i + 1) / nx_
+        zt = rz((x0 + x1) * 0.5, -ext_y) - 0.02
+        roof += list(b.box(((x0 + x1) * 0.5, -ext_y + 0.012, zt - val_h * 0.5), (x1 - x0 + 0.01, 0.024, val_h), SAND_LIGHT))
+    for f in roof:
+        f[b.slot] = SAND_LIGHT
 
-    # tejghea STANGA (mai inalta/deschisa, tejghea de servit) si tejghea
-    # DREAPTA (mai scunda, dulap de depozit) -- corectie: ambele identice pe
-    # aceeasi latura in codul vechi, acum pe cele 2 laturi ca in decupare.
-    counter_z_l, counter_z_r = 0.58, 0.50
-    counter_l_cy, counter_r_cy = -hd + 0.55, hd - 0.55
-    faces += list(b.box((-hw + 0.4, counter_l_cy, counter_z_l * 0.5),
-                        (0.85, 0.95, counter_z_l), CRATE_WOOD))
-    faces += list(b.box((hw - 0.4, counter_r_cy, counter_z_r * 0.5),
-                        (0.85, 0.95, counter_z_r), CRATE_WOOD))
-
-    # scaun/masuta rotunda joasa intre cele doua tejghele, in spate (-Y) --
-    # corectie: lipsea complet (al treilea element vizibil pe decupare).
-    stool_z = 0.42
-    faces += list(b.cylinder((0.0, -0.15, stool_z * 0.5), 0.16, stool_z,
-                             POST_WOOD, segments=8, axis="Z"))
-    faces += list(b.cylinder((0.0, -0.15, stool_z + 0.02), 0.20, 0.06,
-                             CRATE_WOOD, segments=8, axis="Z"))
-
-    # 2 canistre/oale mari de metal pe tejgheaua STANGA
-    for oy, r, h in ((counter_l_cy - 0.22, 0.14, 0.32), (counter_l_cy + 0.22, 0.14, 0.32)):
-        metal_faces += list(bm_.cylinder((-hw + 0.4, oy, counter_z_l + h * 0.5), r, h,
-                                         POT_METAL, segments=10, axis="Z"))
-
-    # ceainica CU CIOC SI MANER pe tejgheaua DREAPTA -- corectie: inainte
-    # doar corp + un "cioc" fara sa se distinga de oale, si suprapusa peste
-    # ele in acelasi punct.
-    kx, ky = hw - 0.4, counter_r_cy
-    kh = 0.20
-    metal_faces += list(bm_.cylinder((kx, ky, counter_z_r + kh * 0.5), 0.10, kh,
-                                     POT_METAL, segments=8, axis="Z"))
-    # cioc: teava inclinata in fata (+Y)
-    metal_faces += list(bm_.beam((kx, ky + 0.08, counter_z_r + kh * 0.75),
-                                 (kx, ky + 0.24, counter_z_r + kh * 1.05),
-                                 0.025, POT_METAL))
-    # maner: bara in spate (-Y), in arc (2 segmente de beam ca o toarta)
-    metal_faces += list(bm_.beam((kx, ky - 0.09, counter_z_r + kh * 0.55),
-                                 (kx, ky - 0.15, counter_z_r + kh * 1.05),
-                                 0.02, POT_METAL))
-    metal_faces += list(bm_.beam((kx, ky - 0.15, counter_z_r + kh * 1.05),
-                                 (kx, ky - 0.09, counter_z_r + kh * 1.35),
-                                 0.02, POT_METAL))
-    # capac cu maner mic deasupra
-    metal_faces += list(bm_.cylinder((kx, ky, counter_z_r + kh + 0.02), 0.06, 0.04,
-                                     POT_METAL, segments=8, axis="Z"))
+    # 3. oale: 2 bidoane mari pe tejgheaua stanga, unul mic pe masuta,
+    # ceainicul pe tejgheaua dreapta
+    def can(x, y, z, r, h):
+        bm_.cylinder((x, y, z + h * 0.42), r, h * 0.84, POT_METAL, segments=10, axis="Z")
+        bm_.frustum((x, y, z + h * 0.9), r, r * 0.6, h * 0.12, POT_METAL, segments=10, axis="Z")
+        bm_.cylinder((x, y, z + h * 0.98), r * 0.62, h * 0.05, POT_METAL, segments=10, axis="Z")
+    can(0.6, -0.85, hl, 0.15, 0.42)
+    can(0.55, -0.3, hl, 0.15, 0.42)
+    can(tx, ty, th + 0.05, 0.1, 0.24)
+    kx, ky, kz = 0.25, 0.85, hr
+    kh = 0.26
+    bm_.cylinder((kx, ky, kz + kh * 0.5), 0.13, kh, POT_METAL, segments=10, axis="Z")
+    bm_.frustum((kx, ky, kz + kh + 0.04), 0.13, 0.06, 0.08, POT_METAL, segments=10, axis="Z")
+    bm_.beam((kx + 0.1, ky, kz + kh * 0.45), (kx + 0.3, ky, kz + kh * 0.95), (0.035, 0.035), POT_METAL)   # cioc
+    bm_.beam((kx - 0.12, ky, kz + kh * 0.25), (kx - 0.2, ky, kz + kh * 0.8), (0.03, 0.03), POT_METAL)     # toarta
+    bm_.beam((kx - 0.2, ky, kz + kh * 0.8), (kx - 0.08, ky, kz + kh * 1.05), (0.03, 0.03), POT_METAL)
 
     stall_obj = b.to_object("Stall_Wood")
-    for f in faces:
-        if f.is_valid:
-            f[b.slot] = CRATE_WOOD
-    # acoperisul primeste tenta bej separat de restul (nod unic, deci
-    # sloturile se aplica per-fata inainte de finish; suprascriem doar
-    # fetele acoperisului dupa ce lista `faces` a primit deja CRATE_WOOD --
-    # corectam explicit acele fete la SAND_LIGHT)
-    for f in roof_faces:
-        if f.is_valid:
-            f[b.slot] = SAND_LIGHT
     metal_obj = bm_.to_object("Stall_Metal")
-    for f in metal_faces:
-        if f.is_valid:
-            f[bm_.slot] = POT_METAL
     return stall_obj, metal_obj
 
 
@@ -724,7 +717,8 @@ tc = build_thela_cart()
 emit(list(tc), "props/thela_cart.glb", AO_PROP, bevel=0.0, budget=3700)
 
 cs = build_chai_stall()
-emit(list(cs), "props/chai_stall.glb", AO_PROP, bevel=0.02, budget=1600)
+# runda 3: bevel 0 (sipci, stalpi, panza subtire: bevel-ul dubla cifra).
+emit(list(cs), "props/chai_stall.glb", AO_PROP, bevel=0.0, budget=1600)
 
 mg = build_marigold_garland()
 # buget masurat: fara bevel pe icosfere (deja rotunjite prin subdivisions,

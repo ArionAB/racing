@@ -398,7 +398,10 @@ COMPARE_SPECS = {
         # dupa runda de corectii: stalpii/acoperisul ocupau doar ~55% din
         # cadru) -- margin redus si elevatie usor mai mica, ca in decupare
         # (camera aproape la nivelul tejghelei, nu de sus).
-        "camera": {"azimuth": 35.0, "elevation": 22.0, "margin": 1.55},
+        "camera": {"azimuth": -15.0, "elevation": 20.0, "margin": 1.4, "lens": 90.0},
+        # runda 3: fata tarabei (+X, 2,5 m) din fata-STANGA: pe decupare se vede
+        # volanul capatului -Y
+        "sun_follow": {"offset": -30.0, "tilt": 50.0},
     },
     "marigold_garland": {
         "category": "props",

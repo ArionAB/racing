@@ -121,7 +121,7 @@ există încă** — le semnalez ca să nu fie descoperite de un constructor de 
 |---|---|
 | `zipline_rider` | cablul („îl trage codul, pe curbă", kit §1.6) — nu există niciun cod de cablu; `PathMover` mută doar figura |
 | `rampart_cannon` | salvele (ceas 31 s + fum/flacără, brief §3) — piesa e doar decor static până atunci |
-| `zebu_cow` | `CowGate.model` e gol în `Track17.tscn` — vaca e azi cutia implicită; legată la pasul 4 |
+| `zebu_cow` | `CowGate.model` era gol (cutia placeholder) — **legat la pasul 4**; dar `CowGate` nu redă nicio animație, deci vaca stă în picioare și când e „culcată” |
 | `*_Glow` (case, turn, porți, fațade, orizont) | nu devin emisive noaptea: niciun material de clasă nu e legat de `dusk_lamps` (DuskCycle) — ferestrele rămân `VOLCANIC_BLACK` la `dusk = 1` |
 | `diya`, `floating_diya` | `FlockProp` le poate purta, dar flacăra (shader `diya_flame`) nu există |
 
@@ -255,3 +255,45 @@ la porțile cetății s-a cerut doar ≥ 9 m).
 | `ProbeLayout --track=10` | index | OK — 2042,0 m; rază min 7,3 m @0,20; pantă max 14,2% @0,88; apropiere de sine 22,0 m @0,15 |
 | `ProbeLaneClear --track=10` | index | 28 blocate, **nearmată** (pistă fără linie de bază → exit 0) — toate 28 pe `AlleyGatePostA/B` (poarta de 4 m a ulicioarei, gimmick) |
 | `ProbeJodTuk` | — | TRECUT: Poliția 24,6%, Autobuzul 9,2% la 30 m/s bot-în-spate, 12/12 valori distincte, redresat 2,50 s, în mers 3,43 s |
+
+## 7. Gărzile pe scena integrată (după pașii 2–5 ai fundației)
+
+`--track=17` = numărul de scenă (doar `probe_decor` și `probe_manual`),
+`--track=10` = indexul din `GameState` (restul). ProbeRace cu 6 mașini (implicitul
+sondei), 150 s, seed 1..8.
+
+| gardă | înainte (4ac84517) | după fundație | notă |
+|---|---|---|---|
+| `probe_decor --track=17` | 16 materiale, 126 prop-uri, 77 638 tri | **12 materiale**, 1179 prop-uri / 202 desene, 2 884 254 tri | −5: vaca placeholder (2) și fundalul procedural; +1: `blue_lime_indigo` (restul claselor noi nu apar încă: nicio piesă de fort/fântână/stâncă în scenă). Plafonul veto e 38 |
+| `probe_manual --track=17` | fără DecorManual | DecorManual, 0 obiecte, OK | zonele sunt goale |
+| `ProbeBuried --track=10` | 0 / 0 | 0 / 0 | |
+| `ProbeLayout --track=10` | OK | OK, neschimbat | rază min 7,3 m @0,20 (acul fântânii) și pantă 14,2% @0,88 — sonda le trece |
+| `ProbeLaneClear --track=10` | 28, **nearmată** (exit 0) | **armată la 28**; sabotaj 34 → REGRESIE, exit 1 | toate 28 pe `AlleyGatePostA/B` |
+| `ProbeJodClase --track=10` | — | OK, 6 materiale pe kit; sabotaj → exit 1 | nou |
+| `ProbeJodOrizont --track=10` | — | 10/10 siluete, FarCity_A pe `blue_lime_light`, umbră stinsă | nou |
+| `ProbeJodTukModel` | — | TRECUT (tuktuk.glb, 3 roți la sol, bot înainte) | nou |
+| `ProbeJodTuk` | TRECUT 24,6% / 9,2% | identic la bit | fizica nu citește mesh-ul (raza 0,22 în ambele) |
+| `sv_hazard_orient --scene=17 --decor` | — | „0 noduri suspecte" — **pe zero măsurători** | Track17 n-are `Hazarduri`, iar DecorManual e gol: garda nu are încă ce măsura |
+
+**ProbeRace --mode=race --track=10 --seconds=150, seed 1..8:**
+
+| | fără trafic (`--traffic=0`) | cu trafic (`--traffic=6`) | fără trafic, vaca placeholder (A/B) |
+|---|---:|---:|---:|
+| repuneri (total 8 seed-uri) | 4 | 10 | 5 |
+| `[blocaj]` | 2 | 2 | 2 |
+| lent (s, sumă) | 212,8 | 225,7 | 213,3 |
+| invers (s, sumă) | 41,0 | 46,4 | 40,8 |
+| carusel | 0 | 0 | 0 |
+| tururi medii în 150 s | 1,927 | 1,913 | 1,926 |
+
+- Cele 2 `[blocaj]` sunt la **acul fântânii** (frac 0,196–0,199, Pompierii /
+  Autobuzul ieșiți lateral 7–8 m, ating `TerrainBody`/umerii) — geometrie de
+  traseu, nu decor.
+- Repunerile se strâng la **0,347–0,350** (poz ≈ (−169, 8, −87)) = furca
+  ulicioarei: 3 fără trafic, **9 cu trafic** (seed 2: 5). A/B cu vaca
+  placeholder dă același tipar (4 la 0,347–0,350), deci **nu vine din
+  `zebu_cow.glb`**; e preexistent și îl amplifică traficul. De văzut la POI D.
+- Felia 0,95–1,00 „40% lent" pe toate seed-urile e grila de start (plecarea
+  de pe loc intră în felie), identică cu și fără trafic.
+- Costul traficului: −0,014 tururi în 150 s (~−0,7%, ~0,5 s pe tur) —
+  în ținta brief-ului (+2…+5 s pe cursă).

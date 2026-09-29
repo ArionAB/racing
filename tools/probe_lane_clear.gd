@@ -259,6 +259,16 @@ const BASELINE := {
 	# pe lateral. Masurat de 3 ori, identic la bit. Sabotaj: 16 > 13 =
 	# REGRESIE, verificat.
 	"Fiordland (Track16)": 13,
+	# Jodhpur (Track17), armat la fundatia gauntlet-ului de POI (ramura
+	# jodhpur/poi-fundatie): 28 raportari, masurat de 5 ori la rand pe stari
+	# succesive ale fundatiei (curat, DecorManual + 8 zone goale, CityFill),
+	# identic de fiecare data. TOATE pe `AlleyGatePostA/B` (14 + 14) — stalpii
+	# portii de 4 m din gura ulicioarei (`AlleyGate`, half_opening 2,0 pe banda
+	# de 3,2): ingustarea e gimmick-ul scurtaturii, deci contact legitim, ca
+	# oalele de pe Cappadocia. Nimic pe bucla principala. Baza = cifra
+	# masurata, fara marja (vezi Fiordland mai sus): prima piesa pusa pe banda
+	# de un constructor de POI trebuie sa pice garda. Sabotaj verificat.
+	"Jodhpur (Track17)": 28,
 }
 
 

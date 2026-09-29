@@ -188,6 +188,25 @@ check "props/thela_cart.glb"          3700 --origin=assembly --allow-car-slots=C
 check "props/chai_stall.glb"          1600 --origin=assembly
 check "props/marigold_garland.glb"     800
 
+echo "== teatrul mobil (brief §1.6, val 4 grupa C) =="
+# Bugetul e PE NOD (verify_glb compara fiecare nod cu el).
+# baraat_horse: schelet + actiunile Walk/Idle; 3 noduri skinnuite (Horse,
+# Saddle, Rider) cu origine COMUNA -- valtrapul si mirele nu ating solul.
+# Exceptii: Saddle (valtrap rosu/albastru/galben, panglici) si Rider
+# (turbanul si pelerina mirelui) pe sloturile de masina -- declarate de
+# brief §1.6; FLAMINGO_PINK=31 pe panglicile cozii si ciucuri (--allow-slots,
+# acelasi caz ca rooftop_clutter). Cel mai mare nod: Saddle ~950.
+check "animals/baraat_horse.glb"   1000 --origin=assembly --allow-car-slots=Saddle,Rider --allow-slots=31
+# baraat_band: 4 noduri, cate unul pe figura, ca bugetul de <= 400 tri pe
+# figura (brief) sa fie verificat de garda, nu doar declarat. Turbanele,
+# pelerinele, esarfele (CAR_RED) si trompeta (CAR_YELLOW) sunt accente de
+# masina -> exceptie pe prefixul Band.
+check "props/baraat_band.glb"       400 --origin=assembly --allow-car-slots=Band
+# zipline_rider: ORIGINEA IN SCRIPETE (brief §1.6) -- figura ATARNA sub Y=0
+# si atinge 0 in varful rotitei, adica exact contractul --origin=rim.
+# Casca CAR_YELLOW si bluza CAR_RED pe nodul Zip_Rider.
+check "props/zipline_rider.glb"     500 --origin=rim --allow-car-slots=Zip_Rider
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total"

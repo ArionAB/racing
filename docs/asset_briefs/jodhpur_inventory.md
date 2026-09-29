@@ -2132,3 +2132,95 @@ maparea pe clasa `blue_lime_light` rămâne de făcut la integrarea pistei.
 `--sheet 3` trimitea valul ca `int`, dar cheia din `WAVE_PIECES` e `"3"`:
 planșa ieșea fără piese și nu se rescria. Acum `fidelity_sheet` încearcă și
 `str(wave)`; `jodhpur_fidelity_val3.png` e regenerată.
+
+## Val 4 grupa C — teatrul mobil (29 sep 2026)
+
+Build: `tools/blender/build_jodhpur_theatre.py` (un singur script, trei piese).
+Comparațiile: `docs/asset_briefs/img/jodhpur_fidelity/{baraat_horse,baraat_band,zipline_rider}.png`,
+planșa valului `docs/asset_briefs/img/jodhpur_fidelity_val4c.png`
+(`preview_jodhpur.py -- --sheet 4c`). Verificare: `verify_jodhpur.sh`,
+secțiunea „teatrul mobil" → `VERDICT KIT: OK`.
+
+| piesă | tri | cote măsurate (X × Y × Z) | față de tabel | origine |
+|---|---:|---|---|---|
+| `animals/baraat_horse.glb` | 1974 (Horse 570, Saddle 952, Rider 452) | 0,74 × 2,50 × 2,41 m | 2,4 m lung: 2,50 cu panglicile cozii (botul–crupa 2,16); 2,4 m cu călărețul: 2,41 | bază, pe ansamblu (`--origin=assembly`) |
+| `props/baraat_band.glb` | 1490 (Dhol 392, Trumpet 378, SmallDrum 380, Hands 340) | 3,64 × 0,93 × 1,80 m | rând de 4 m: 3,64 (centre la 1 m, dhol-ul iese); 1,80 m: da; ≤ 400/figură: da, verificat PE NOD de gardă | bază, pe ansamblu |
+| `props/zipline_rider.glb` | 558 (Zip_Pulley 116, Zip_Rider 442) | 0,48 × 1,28 × 2,20 m | 2,2 m scripete–tălpi: 2,199 | **în scripete**: vârful roții la Y=0, totul atârnă sub (`--origin=rim`) |
+
+Excepții declarate în `verify_jodhpur.sh`: `Saddle,Rider` (brief), `Band`
+(turbane/pelerine/trompeta), `Zip_Rider` (cască/bluză); `--allow-slots=31`
+pe cal (FLAMINGO_PINK pe panglici/ciucuri). Scala nodurilor rădăcină: 1
+(verificat în JSON-ul GLB; doar oasele au rotații de repaus).
+
+**Sonda Godot** (temporară, necomisă, `--headless --fixed-fps 60`, după
+`--import`): calul pe un `PathMover` cu `speed` 0,85 → clipurile `Idle, Walk`
+găsite, PathMover a pornit `Walk` cu buclă `LOOP_LINEAR`, scheletul (12 oase)
+deformează (amplitudine 0,331), genunchii urcă 0,016 m pe ciclu; același
+model parcat → `Idle`. Tiroliana pe `PathMover` cu `stick_to_ground = false`
+pe o curbă în pantă: originea modelului = punctul curbei (abatere 0,0000 m),
+vârful roții la −0,003 m de cotă, tălpile la 2,199 m sub cablu, modelul
+privește pe tangenta cablului.
+
+### `animals/baraat_horse.glb`
+
+Schelet în cod (rețeta `build_donkey.py`): Body, Neck, Head, Tail, Leg/Shin ×4.
+`Walk` 1 s în **patru timpi laterali** (spate-stg, față-stg, spate-dr,
+față-dr — pasul calului, nu diagonala măgarului), `Idle` 3 s (cap, coadă).
+Viteza fără patinaj la `animation_speed` 1: **~0,85 m/s** (derivarea e în
+docstring-ul `animate_horse`). Calul e construit la ~2,1 m și întins pe Y cu
+1,15 (primul export ieșea 2,09 lung × 2,42 înalt); mirele nu e întins.
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| cal | alb, profil, capul la dreapta, gât ridicat, crupă rotundă | FOAM_WHITE, trunchi turtit, gât ridicat | da |
+| urechi, coamă | 2 urechi drepte, coamă crem pe muchia gâtului | 2 conuri, lamă CORAL_SAND continuă | da |
+| picioare | 4, subțiri, copite negre, **în pas** | 4, copite VOLCANIC_BLACK; **drepte în poza de repaus** (pasul e în `Walk`) | abatere: comparația arată poza de repaus |
+| coada | lungă, 4–5 panglici colorate în evantai, în spate | coadă albă + 5 panglici (roz, galben, verde, roșu, roz) în evantai | da |
+| valtrap | panou pe flanc: chenar roșu, câmp albastru, tiv galben, franjuri colorați | chenar CAR_RED, câmp CAR_BLUE, bandă verde, tiv CAR_YELLOW, 6 ciucuri roz/verzi pe flanc | da |
+| șa | roșie, oblânc auriu | pernă roșie, oblâncuri galbene față/spate | da |
+| acoperământul crupei | pânză crem cu motive galbene/portocalii, ciucuri | coajă CORAL_SAND lăsată pe crupă, tiv galben, 5 ciucuri portocalii, motiv auriu | da |
+| căpăstru, frâie | curele roșii, frâie verzi/teal până în mâini, ciucuri roșii sub falcă, colier colorat, panaș | nasar/obrazare/frontal roșii, frâie TROPICAL_GREEN, 3 ciucuri roșii, colier 8 ciucuri, panaș roșu-portocaliu | da |
+| mirele | turban roșu cu vârf + bijuterie, barbă, pelerină roșie, haină și pantaloni albi, mâinile în față, pantofi negri în scări | toate, scări negre | da |
+| h/l | decupare ~0,87 (cu coada) | 2,41 / 2,50 = 0,96 (cotele tabelului dau 1,0) | abatere: cotele din tabel (2,4 × 2,4) impun raportul |
+
+Diferențe rămase: calul e mai „de jucărie" (picioare-tub, gât scurt) decât
+calul pictat; pe decupare gâtul e arcuit și capul mai în față; pelerina
+acoperă din profil tot bustul (pe decupare se vede o fâșie albă în față).
+
+### `props/baraat_band.glb`
+
+4 noduri (câte unul pe figură, ca bugetul ≤ 400 să fie verificat de
+gardă). Rândul pe X, figurile privesc spre +Y; comparația e din azimut 55,
+ca figurile să apară întoarse spre dreapta cum sunt pe decupare. Capul e
+mărit ×1,2 (proporție de jucărie), iar piesa e comprimată pe Z cu ~6% ca să
+iasă exact 1,80 m cu moțul turbanului.
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| figuri | 4 pe rând, ~1 m între ele | 4, centre la 1 m | da |
+| turbane | roșii, bulb cu moț, toate 4 | profil de revoluție + moț, CAR_RED | da |
+| haine | kurta albă până la genunchi, pantaloni albi, pantofi negri, bărbi | toate | da |
+| 1. dhol | în pas, pelerină roșie, butoi maro cu fețe albe culcat pe burtă, bățul pe față | pas, pelerină, butoi WOOD + fețe FOAM_WHITE rotit 25°, băț | da |
+| 2. trompetist | trompetă galbenă la gură spre înainte-sus, eșarfă roșie, curea maro + cataramă galbenă | toate | da |
+| 3. tobă mică | pelerină roșie, tobă maro cu față albă la brâu, înclinată, mâinile pe ea | toate | da |
+| 4. al patrulea | stolă roșie în V, curea, mâinile la brâu pe un obiect mic maro | toate | da (brief: „mâinile în șold" — decuparea le arată împreunate la brâu; am urmat decuparea) |
+
+Diferențe rămase: figurile sunt mai subțiri decât pe decupare, fețele ies
+maro-închis (SAND_MID sub AO), iar alb-ul e FOAM_WHITE rece (decuparea e crem;
+brief-ul cere FOAM_WHITE).
+
+### `props/zipline_rider.glb`
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| scripete | gri, sus, pe cablu | 2 plăci MARBLE_GREY + roată neagră, vârful roții = origine | da (pe decupare e rotunjit) |
+| lonjă, mâini | lonja coboară din scripete, ambele mâini o prind una peste alta | lonjă LOG_DARK, 2 mâini pe ea | da |
+| cască | galbenă | CAR_YELLOW, calotă + bor | da |
+| poză | șezând în ham: trunchi lăsat pe spate, coapse înainte, genunchi sus, un picior în jos | trunchi −35°, coapse înainte-sus, gambe una în jos, una întinsă | da |
+| haine | bluză roșie, blugi albaștri, bocanci maro | CAR_RED, PAINTED, WOOD | da |
+| ham | negru: centură, bretele, bucle pe coapse | toate trei | da |
+| cablu | pe decupare | **nu e în GLB** (contract: îl trage codul) | da |
+
+Diferență rămasă: pe decupare figura e desenată mai mare față de lonjă. La
+1,7 m (brief) și 2,2 m până la tălpi, lonja iese ~1,4 m lungă. Cotele sunt
+din tabel, deci lonja lungă e costul lor.

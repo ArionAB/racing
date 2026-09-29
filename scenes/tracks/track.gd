@@ -1389,8 +1389,56 @@ static func themes() -> Dictionary:
 			"fog_end": 300.0,
 			"fog_curve": 1.4,
 			"fog_max": 0.85,
-			"horizon_model": "",
+			# Fundalul: jodhpur_horizon.glb (kit §1.7, masurat in
+			# jodhpur_masuratori.md): FarCity_A (banda de case 150 x 20 x
+			# 12 m, cu copiii FarCity_A_Beige / FarCity_A_Glow), DesertRidge_A/B
+			# (dealuri de riolit 200 x 60 x 30 m), UmaidBhawan_A (palatul cu
+			# cupola, 60 x 30 x 35 m). Conventia Fiordland: inele cu picks pe
+			# nod, `cast_shadow` OFF automat (_fara_umbra_aruncata).
+			#
+			# DE CE inelele incep la 330-380 m de centroid: bucla ajunge la
+			# 315 m de centroid, iar INTERIORUL ei e orasul albastru (CityFill).
+			# Cautarea din _build_horizon accepta primul punct la `clear` de
+			# sosea, deci cu `near` mic ar fi pus banda de case si palatul IN
+			# interiorul buclei. De la 330 m in afara, punctul cade dincolo de
+			# sosea, la `clear` de ea.
+			#
+			# Cotele legate (memoria efecte-de-fundal-cote-legate): siluetele
+			# stau la 70-170 m de cel mai apropiat punct de sosea — sub
+			# fog_end de NOAPTE (240, DuskCycle) si sub FAR_PLANE (380).
+			# Palatul are `clear` 170 si scara 0,7 (x 0,85..1,2 = 0,60..0,84,
+			# deci 21-29 m): camera vede la 170 m pana la 10 + 0,092 x 170 =
+			# 25,6 m peste drum, deci cupola intra in cadru. Scara >= 1 o
+			# scotea afara (PR #424). Toate scarile inelelor <= 0,8.
+			"horizon_model": "res://assets/models/jodhpur/rocks/jodhpur_horizon.glb",
+			"horizon_picks": [["FarCity_A"], ["DesertRidge_A", "DesertRidge_B"],
+				["UmaidBhawan_A"]],
+			"horizon_rings": [
+				{"near": 330.0, "far": 400.0, "count": 5, "scale": 0.8,
+					"clear": 70.0, "picks": ["FarCity_A"]},
+				{"near": 360.0, "far": 440.0, "count": 4, "scale": 0.6,
+					"clear": 120.0, "picks": ["DesertRidge_A", "DesertRidge_B"]},
+				# Palatul: azimut FIX 50 grade (cos pe X, sin pe Z), dincolo de
+				# coltul de sud-est al buclei, pe axa coborarii G si a intrarii pe
+				# H (directia de mers 178-213 grade busola la 0,75-0,90): de la
+				# frac ~0,87 e la ~230 m in fata, in cadru pe azimut, cu varful
+				# sub marginea de sus (10 + 0,092 x 230 = 31 m).
+				{"near": 360.0, "far": 460.0, "count": 1, "scale": 0.65,
+					"clear": 120.0, "angle_deg": 50.0, "picks": ["UmaidBhawan_A"]},
+			],
+			# Clasele pe nod, nu una pe tot modelul: FarCity_A e 100% FOAM_WHITE
+			# (masurat) si fara `blue_lime_light` casele ies ALBE (PR #424).
+			# Copiii lui poarta acelasi prefix, deci primesc explicit atlasul
+			# ("" = materialul lumii): _Beige e ocru + LOG_DARK (rezervoare),
+			# _Glow sunt ferestrele. Palatul si dealurile raman pe atlas
+			# (gresie bej / riolit pictat pe benzi de inaltime). Zero materiale
+			# noi: blue_lime_light e deja pe pista prin case.
 			"horizon_class": "",
+			"horizon_classes": {
+				"FarCity_A": Palette.TRI_PREFIX + "blue_lime_light",
+				"FarCity_A_Beige": "",
+				"FarCity_A_Glow": "",
+			},
 			"walls": false,
 			"kerbs": false,
 			"cliffs": false,
@@ -4888,6 +4936,13 @@ func _build_horizon(centroid: Vector3) -> void:
 		for slot in count:
 			var angle := float(slot) * arc \
 				+ rng.randf_range(-arc * 0.35, arc * 0.35)
+			# Azimut FIX (optional, din sep 2026, Jodhpur): un reper unic
+			# (palatul Umaid Bhawan) trebuie sa cada unde il vede camera, nu
+			# la un unghi tras la sorti. Unghiul e in conventia de mai jos
+			# (cos pe X, sin pe Z, fata de centroid). Tragerea rng de mai sus
+			# ramane, ca sirul aleator al celorlalte inele sa fie identic.
+			if ring.has("angle_deg"):
+				angle = deg_to_rad(float(ring["angle_deg"]))
 			var pos := Vector3.ZERO
 			var found := false
 			# Distanta e REZULTAT, nu intrare. Raza se masoara din centroid, dar

@@ -1673,3 +1673,141 @@ nu ascunse):
   `#3FA556`, `#E8792E`, `#E874A1`) sunt aproximări rezonabile, nu extrase
   dintr-o sursă exactă a paletei native — de recalibrat dacă la integrarea
   în Godot culorile ies vizibil diferite de decupare.
+
+
+## Val 3 — runda 3 de corecturi (constructor Opus, 29 sep 2026)
+
+Preluate cele 6 piese care au picat de două ori la fidelitate pe AMPLASARE,
+FORMĂ și PROPORȚIE (numărătoarea ieșea corectă — memoria
+`numaratoarea-trece-amplasarea-nu`). Metoda: decupajele mărite x4 (PIL,
+LANCZOS), lista de elemente cu poziție măsurată în pixeli scrisă în
+docstring, apoi `--compare` citit la rezoluție plină după fiecare pas.
+
+### Cauza comună la case: vocabularul, nu piesele
+
+`arch_opening` construiește fiecare gol într-un **panou propriu** de
+`panel_w × panel_h`, centrat pe fața peretelui, deci ieșit cu jumătate de
+grosime — de aici „arcade în rame ieșite". Restul feței era un miez retras
+într-o nișă, cu vârfuri doar în colțuri: AO-ul copt pe vârf îl înnegrea tot
+(„albastru-marin", aceeași față ieșea la ~55% din hex). Reparația e
+`facade()` în `build_jodhpur_city.py` (nu în `jodhpur_shapes.py`, care e comun
+cu constructorul cetății): peretele e o **grilă** — coloane la marginile
+golurilor × rânduri la praguri/buiandrugi, fiecare celulă plină sau gol,
+vârfuri partajate (fără fețe interne, deci fără rosturi de bevel), timpanele
+arcelor lipite de aceleași vârfuri, ramă subțire care iese 4–5 cm, glaf,
+toc de lemn (`shutter`) sau ușă de lemn (`wood`) în fund. `_cheap_arch_opening`
+a ieșit din uz (haveli folosește și el `facade()`); a rămas în fișier,
+neapelat.
+
+Camera `--compare` e acum per piesă (azimutul măsurat din lățimile aparente
+ale celor două fețe pe decupare: tan φ = lățime dreapta / lățime stânga),
+cu `sun_follow`. Nodul `House_Rail` e randat alb (`#F2F2F2`) pe b/e — brief
+§1.4: balustradele albe sunt nod separat, **fără tentă**.
+
+### `buildings/blue_house_b.glb` — 5932 tri (buget 6000)
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| parter | corp plin pe toată amprenta, cornișă | idem, 3,6 m | da |
+| ușă parter +X | 1, capătul stâng al feței, dreptunghi lemn | u 0,9 m, 1,0×2,15 | da |
+| plantă | tufă pe cornișă, deasupra ușii +X | 5 bulgări verzi acolo | da (mai mică, mai închisă) |
+| fereastră parter +X | 1, spre colț, dreptunghi mic închis, ramă | u 4,9 m | da |
+| ușă parter +Y | 1, puțin la dreapta mijlocului | u 2,8 m, 1,1×2,2 | da |
+| volum stâng-spate | 1 etaj, câte o fereastră pe +X și +Y | idem | da |
+| balustradă | albă, de fier, pe acoperișul volumului stâng | pe laturile +X și +Y | da |
+| turn | 2 etaje, ușă de lemn pe +Y la nivelul terasei | idem, spre stânga feței | da |
+| terasa din față | parapet scund cu coamă albă, stâlp la colț | idem | da |
+| rezervor | negru, lat și scund, pe turn | Ø1,6 × 0,65 | da |
+
+Diferențe rămase: tufa e mai compactă decât pe decupare; pe decupare
+turnul are câteva urme fine (aerisiri) nemodelate.
+
+### `buildings/blue_house_c.glb` — 4430 tri (buget 3800 → 4600)
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| volum | cub 7×7, perete ≈ lățimea feței, cornișă + parapet gros | 7×7, corp 5,6 + parapet la 6,5 | da |
+| ușă | 1, pe fața FRONTALĂ (+Y), aproape centrată, arc rotund, lemn, ramă lată deschisă, treaptă | u 3,4 m din 6,65, 1,7×2,9, ramă 0,16, treaptă | da |
+| fereastră +Y | 1, sus-dreapta, dreptunghi, toc lemn, glaf | u 5,85 m, prag 3,1 | da |
+| ferestre +X | 2, pe fața în fugă, distribuite (~2,2 și ~5,3 m de colț), aceeași înălțime | u 1,7 și 4,8, prag 3,1 | da |
+| rezervor | 1 negru, înalt, pe terasă | idem | da |
+
+„Cubul prea mare cu golurile minuscule în colț" era combinația de cameră
+(az 35 punea fața fără ușă în față) + panouri ieșite + goluri mici. Cotele
+brief-ului (7×7×6,5) se păstrează; golurile au crescut la proporțiile
+măsurate pe decupare (ușa ≈ 26% din lățimea feței, cheia la ~50% din
+înălțime). Diferențe rămase: coama parapetului e mai deschisă pe decupare.
+
+### `buildings/blue_house_e.glb` — 5642 tri (buget 6500)
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| corp mare | 2 etaje, ușă lemn la parter pe +Y, fereastră mică deasupra | idem, bandă între etaje | da |
+| ușă etaj +X | 1, în capul scării, pe terasa aripii | u 2,1 m, z 3 | da |
+| aripa scundă | 1 etaj în fața +X, fereastră mică, balustradă albă | idem | da |
+| scara | PLINĂ: masă albastră până la sol (obraz triunghiular), trepte ALBE, parapet alb înclinat, coboară spre dreapta-jos | un singur solid în trepte (fără rosturi) + călcâie/contratrepte albe + parapet alb | da |
+| camera de sus | retrasă, ușă pe +X, fereastră de lemn pe +Y | idem | da |
+| balustradă pe acoperiș | albă, pe marginea +X | idem | da |
+
+Diferențe rămase: pe decupare camera de sus e ceva mai mare față de corp,
+iar parapetul scării are stâlpi, nu e plin.
+
+### `buildings/haveli_facade.glb` — 4796 tri (buget brief 900 → 4900, decide liderul)
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| parter | fereastră arcuită – arcadă – arcadă – fereastră arcuită; arce ROTUNDE | idem, arce rotunde reale, arcadele cu uși de lemn în fund, pilaștri | da |
+| jharokha | centrală la etaj, iese pe console, 3 arce (mijlocul mai lat), balcon cu baluștri, streașină | idem | da |
+| ferestre etaj | câte 1 arcuită de o parte și de alta a jharokha-ei, închise, ramă subțire | idem, GLOW (nu lemn) | da |
+| terasă | parapet cu baluștri între stâlpi cu vârf | idem | da |
+| chhatri | mic, pe colțul stânga-față | pavilion pe 4 stâlpi, arc, cupoliță | da |
+| latura +X | fereastră arcuită jos, 2 ferestre înalte + balconaș sus | idem | da |
+| culoare | albastru DESCHIS (#7896DE pe fața luminată) | tentă preview light #8FB0DC | vezi mai jos |
+
+**Tentă:** brief §1.4 dă haveli pe `indigo`, dar decuparea e albastru
+deschis — `#4F6FB8` randa exact „albastru-marin" din verdict. Preview-ul e
+trecut pe light; **la integrare haveli trebuie mapată pe `blue_lime_light`**
+(sau liderul decide altfel). **Buget:** lista de elemente nu încape în 900
+(doar cele 12 goluri arcuite cu rame ≈ 1400); bevel 0 pe piesă (bevelul de
+2 cm tripla cifra la 11 502). Motivul e scris și în `verify_jodhpur.sh`.
+Diferențe rămase: arcele jharokha-ei sunt geam închis, pe decupare par
+loggia deschisă; lattice-ul terasei e mai des pe decupare.
+
+### `props/thela_cart.glb` — 3632 tri (buget 3288 → 3700)
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| tava | platformă cu ramă de scânduri, fără mâner | idem, mânerul scos | da |
+| roți | 4, MARI (Ø ≈ ½ din înălțime), SUB tavă, spițe deschise | 4 × Ø0,56, jantă din 14 grinzi + 10 spițe + butuc, pe 2 osii sub tavă | da |
+| fructe | grămadă BOMBATĂ de fructe rotunde, 3 zone: galben/verde, portocaliu, roșu | 3 movile (dom + ~19 fructe sferice fiecare) | da |
+
+Diferențe rămase: roțile de pe decupare par cu ~10% mai mari față de tavă;
+fructele sunt sfere low-poly (6×4), pe decupare au mai multă varietate.
+
+### `props/chai_stall.glb` — 1016 tri (buget 1600)
+
+| element | decupare (nr, poziție, formă) | randare | ok? |
+|---|---|---|---|
+| tejghele | 2 cutii de lemn ALĂTURATE în față, stânga mai lată și mai în față | idem, cu șipci | da |
+| măsuță | rotundă pe picior, între ele, în spate | idem | da |
+| oale | 2 bidoane pe tejgheaua stângă, 1 pe măsuță, ceainic pe cea dreaptă | idem, ceainic cu cioc + toartă | da |
+| stâlpi | 4, cei din față cu contrafișe | idem | da |
+| copertină | pânză bej, înclinată spre față, volan atârnat | pânză bombată, volan scurt pe față, lung pe capătul −Y | da |
+
+Diferențe rămase: lemnul e mai închis decât pe decupare (tenta `WOOD` e
+comună kitului); volanul de pe decupare e ondulat.
+
+### Neatinse, verificate
+
+`blue_house_a` și `blue_house_d` au GLB-uri identice după regenerare (codul
+lor n-a fost atins; `git status` curat pe ele). Celelalte piese de bazar
+au geometria neschimbată.
+
+### Merge-ul cu `feat/jodhpur-kit` — NEFĂCUT
+
+Coordonatorul a cerut `git merge feat/jodhpur-kit` (86d07756, placa de geam
+din `arch_opening` închisă) înainte de regenerare. Comanda a fost refuzată
+de clasificatorul de permisiuni al sesiunii; nu am insistat. Piesele din
+runda asta nu depind de reparație (`facade()` își face singur placa GLOW ca
+prismă închisă), dar `blue_house_a/d` (care folosesc `arch_opening`) trebuie
+regenerate DUPĂ merge.

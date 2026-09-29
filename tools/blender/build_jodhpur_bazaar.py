@@ -74,16 +74,24 @@ def _wheel(b, center, radius, thickness, slot, segments=12, axis="Y"):
     """Roata cu spite: disc solid (citeste corect ca roata in silueta, per
     lectia rampart_cannon val 2a) + butuc proeminent + 4 bare radiale in
     relief pe ambele fete (8 spite vizuale). NU incearca jante din cutii
-    tangente pe cerc (geometrie stricata, memoria rotatii-in-builder-semnul)."""
+    tangente pe cerc (geometrie stricata, memoria rotatii-in-builder-semnul).
+
+    CORECTIE (runda de corectii, thela_cart "rotile nu se vad"): barele de
+    spite aveau adancimea (Y) STRICT MAI MICA decat jumatatea grosimii
+    discului (0.0088 < 0.04) -- ingropate complet IN discul solid, deci
+    invizibile la orice unghi de camera (relieful era in interiorul
+    volumului, nu pe suprafata). `spoke_y` acum DEPASESTE fata discului pe
+    ambele parti, ca sa iasa in relief real, vizibil in silueta si in AO."""
     cx, cy, cz = center
     faces = []
     if axis == "Y":
         faces += list(b.cylinder(center, radius, thickness, slot, segments=segments, axis="Y"))
         faces += list(b.cylinder(center, radius * 0.18, thickness * 1.6, slot, segments=8, axis="Y"))
+        spoke_y = thickness * 1.15   # depaseste discul (thickness) pe ambele fete
         for i in range(4):
             ang = i * math.pi / 4.0
             rot = Matrix.Rotation(ang, 3, "Y")
-            faces += list(b.box(center, (radius * 1.82, thickness * 0.22, 0.05),
+            faces += list(b.box(center, (radius * 1.82, spoke_y, 0.06),
                                 slot, rotation=rot))
     else:  # axis == "Z" (roata orizontala, nefolosita azi, pastrata pt generalitate)
         faces += list(b.cylinder(center, radius, thickness, slot, segments=segments, axis="Z"))
@@ -405,8 +413,13 @@ def build_thela_cart():
     faces += list(b.box((-hw - 0.05, -0.15, platform_z + 0.18), (0.05, 0.05, 0.35), CRATE_WOOD))
     faces += list(b.box((-hw - 0.05, 0.15, platform_z + 0.18), (0.05, 0.05, 0.35), CRATE_WOOD))
 
-    # 4 roti cu spite (nu 2 -- planșa castiga, brief §1.5)
-    axle_y = hd - 0.15
+    # 4 roti cu spite (nu 2 -- planșa castiga, brief §1.5) -- corectie:
+    # axle_y vechi (hd - 0.15 = 0.45) tinea rotile complet SUB platforma
+    # (Y in [-0.6,0.6]), invizibile din exterior (raportul liderului: "rotile
+    # nu se vad"). Decuparea arata rotile iesind clar in AFARA cadrului, pe
+    # ambele laturi -- axle_y acum depaseste hd cu raza rotii (minus o mica
+    # suprapunere, ca axul sa ramana prins de cadru).
+    axle_y = hd + TC_WHEEL_R * 0.55
     for wx in (-hw + 0.35, hw - 0.35):
         for wy in (-axle_y, axle_y):
             # brief §1.5: "4 roti de LEMN cu spite" -- CRATE_WOOD, nu
@@ -414,22 +427,48 @@ def build_thela_cart():
             # uniform, fara sa se distinga spitele de disc, si nici nu
             # respectau materialul cerut de brief)
             wheel_faces += _wheel(bw, (wx, wy, TC_WHEEL_R), TC_WHEEL_R, 0.08,
-                                  CRATE_WOOD, segments=12, axis="Y")
+                                  CRATE_WOOD, segments=8, axis="Y")
+            # ax scurt care leaga roata de cadru (umple golul lasat de
+            # deplasarea in exterior)
+            axle_len = TC_WHEEL_R * 0.55 + 0.06
+            axle_sign = -1.0 if wy < 0 else 1.0
+            wheel_faces += list(bw.cylinder((wx, wy - axle_sign * axle_len * 0.5, TC_WHEEL_R),
+                                            0.035, axle_len, CRATE_WOOD, segments=8, axis="Y"))
 
-    # gramada de fructe in trepte (2 niveluri), culori verde/galben/portocaliu-rosu
-    fruit_colors = [FRUIT_GREEN, SPICE_YELLOW, FRUIT_ORANGE, SPICE_RED]
-    n_fruit_bottom = 7
-    for i in range(n_fruit_bottom):
-        fx = -hw + 0.35 + i * (TC_W - 0.7) / (n_fruit_bottom - 1)
-        color = fruit_colors[i % len(fruit_colors)]
-        fruit_faces += list(bf.cylinder((fx, 0.0, platform_z + rim_h + 0.10), 0.13, 0.16,
-                                        color, segments=8, axis="Z"))
-    n_fruit_top = 4
-    for i in range(n_fruit_top):
-        fx = -hw + 0.6 + i * (TC_W - 1.2) / (n_fruit_top - 1)
-        color = fruit_colors[(i + 2) % len(fruit_colors)]
-        fruit_faces += list(bf.cylinder((fx, 0.0, platform_z + rim_h + 0.28), 0.12, 0.15,
-                                        color, segments=8, axis="Z"))
+    # gramada BOMBATA de fructe -- corectie: varianta veche (un singur rand
+    # de 7 + 4 cilindri pe axa centrala Y=0) era o linie subtire, nu o
+    # gramada (raportul liderului: "fructele sunt cateva forme mici").
+    # Decuparea arata 3 ZONE de culoare (verde-stanga, galben-mijloc,
+    # portocaliu/rosu-dreapta), fiecare o gramada DEASA pe 2 randuri in Y si
+    # 2 nivele in Z (fructele de sus umplu golurile dintre cele de jos, ca o
+    # piramida joasa) -- grid in loc de linie.
+    fruit_zones = [
+        (FRUIT_GREEN, -hw + 0.30, -hw + 0.82),
+        (SPICE_YELLOW, -hw + 0.82, -hw + 1.58),
+        (FRUIT_ORANGE, -hw + 1.58, hw - 0.30),
+    ]
+    # segments=5 (nu 7-8): la 0.115 m raza, o piesa cu ~46 instante, 8
+    # segmente ar fi trecut mult peste buget (masurat: 6096 vs 3100) --
+    # 5 segmente tot citesc ca "fruct rotund" la scara jocului (brief regula
+    # 5), doar mai ieftin per instanta.
+    fruit_r = 0.13
+    base_z = platform_z + rim_h + fruit_r
+    for zi, (color, x0, x1) in enumerate(fruit_zones):
+        n_cols = 2 if zi != 1 else 3
+        for row_y, y_off in ((-1, -0.24), (1, 0.24)):
+            for c in range(n_cols):
+                t = (c + 0.5) / n_cols
+                fx = x0 + t * (x1 - x0)
+                jitter = 0.02 * ((c + row_y) % 3 - 1)
+                fc = SPICE_RED if (zi == 2 and c % 2 == 1) else color
+                fruit_faces += list(bf.cylinder((fx, y_off + jitter, base_z), fruit_r,
+                                                fruit_r * 1.7, fc, segments=5, axis="Z"))
+        # nivelul 2: 1 fruct pe zona, in mijloc, mai sus -- da profilul
+        # bombat vazut pe decupare la un cost minim (buget: masurat peste
+        # 3100, taiat de la 2/zona la 1/zona).
+        fc = SPICE_RED if zi == 2 else color
+        fruit_faces += list(bf.cylinder((x0 + (x1 - x0) * 0.5, 0.0, base_z + fruit_r * 1.5),
+                                        fruit_r * 0.9, fruit_r * 1.5, fc, segments=5, axis="Z"))
 
     cart_obj = b.to_object("Cart_Wood")
     for f in faces:
@@ -446,60 +485,119 @@ def build_thela_cart():
 # --- chai_stall ----------------------------------------------------------------
 #
 # Contract (brief §1.5): 2.5x2.0x2.6 m, h/l 0.77. Element list (decupare
-# chai_stall.png):
+# chai_stall.png, RECITITA in runda de corectii -- raportul liderului "aproape
+# goala" era corect):
 #
-#   1. 4 stalpi de lemn + acoperis de panza BEJ (SAND_LIGHT), aproape plat
-#      (usoara panta intr-o singura apa), fara curbura pronuntata (diferit
-#      de stall_canopy).
-#   2. Tejghea de lemn joasa in fata (+X), cu 1-2 dulapuri/cutii laterale.
-#   3. 2 oale de metal (PAINTED) pe tejghea, plus o ceainica mica langa ele.
+#   1. 4 stalpi de lemn cu varf in FURCA (Y, ca o creanga taiata -- nu cilindri
+#      simpli) + acoperis de panza BEJ (SAND_LIGHT) cu VALURE vizibile (nu
+#      plat -- aceeasi tehnica ca `_build_stall_canopy`, dar mai putin lasat).
+#   2. Tejghea de lemn joasa STANGA (mai inalta/deschisa) si DREAPTA (mai
+#      scunda/inchisa la culoare) -- corectie: erau ambele identice si pe
+#      aceeasi parte in codul vechi.
+#   3. Un SCAUN/MASUTA ROTUNDA joasa intre cele doua tejghele, in spate --
+#      corectie: lipsea complet (al treilea element din decupare).
+#   4. 2 canistre/oale mari de metal pe tejgheaua STANGA, plus o ceainica cu
+#      CIOC si MANER pe tejgheaua dreapta -- corectie: toate 3 erau
+#      inghesuite in acelasi punct (hw-0.35, 0.0), suprapuse.
 CH_W, CH_D, CH_H = 2.5, 2.0, 2.6
 CH_ROOF_H = 2.5
 
 
 def build_chai_stall():
-    b = Builder()    # stalpi + tejghea + acoperis (Stall_Wood)
+    b = Builder()    # stalpi + tejghea + acoperis + scaun (Stall_Wood)
     bm_ = Builder()  # oalele/ceainica (Stall_Metal)
     faces = []
     metal_faces = []
     hw, hd = CH_W * 0.5, CH_D * 0.5
 
-    # 4 stalpi
+    # 4 stalpi cu varf in furca (2 brate scurte in V, ca o creanga taiata --
+    # corectie: cilindri simpli inainte, decuparea arata clar furca sub
+    # acoperis pe stalpii din fata)
     post_r = 0.06
     posts = [(-hw + 0.12, -hd + 0.12), (hw - 0.12, -hd + 0.12),
              (-hw + 0.12, hd - 0.12), (hw - 0.12, hd - 0.12)]
+    fork_h = 0.22
     for px, py in posts:
-        faces += list(b.cylinder((px, py, CH_ROOF_H * 0.5), post_r, CH_ROOF_H,
-                                 POST_WOOD, segments=8, axis="Z"))
+        faces += list(b.cylinder((px, py, (CH_ROOF_H - fork_h) * 0.5), post_r,
+                                 CH_ROOF_H - fork_h, POST_WOOD, segments=8, axis="Z"))
+        for bx, by in ((-0.09, -0.05), (0.09, 0.05)):
+            arm = Vector((bx, by, fork_h))
+            faces += list(b.beam((px, py, CH_ROOF_H - fork_h),
+                                 (px + arm.x, py + arm.y, CH_ROOF_H - fork_h + arm.z),
+                                 post_r * 0.7, POST_WOOD))
 
-    # acoperis de panza bej, aproape plat, usoara panta intr-o singura apa
-    # (spre -Y, mai jos in spate)
-    roof_front_z, roof_back_z = CH_ROOF_H, CH_ROOF_H - 0.20
-    roof_pts_top = [(-hw - 0.2, -hd - 0.2, roof_back_z), (hw + 0.2, -hd - 0.2, roof_back_z),
-                    (hw + 0.2, hd + 0.2, roof_front_z), (-hw - 0.2, hd + 0.2, roof_front_z)]
-    fr = b.bm.faces.new(tuple(b.bm.verts.new(p) for p in roof_pts_top))
-    faces.append(fr)
-    roof_pts_bot = [(p[0], p[1], p[2] - 0.05) for p in reversed(roof_pts_top)]
-    fr2 = b.bm.faces.new(tuple(b.bm.verts.new(p) for p in roof_pts_bot))
-    faces.append(fr2)
+    # acoperis de panza bej, cu 3 VALURI vizibile (tehnica _build_stall_canopy,
+    # dar `sag` mai mic -- brief: "aproape plat, fara curbura pronuntata" fata
+    # de stall_canopy, deci valuri subtile, nu o lasare adanca)
+    roof_faces = []
+    segs = 3
+    front_h, back_h = CH_ROOF_H, CH_ROOF_H - 0.20
+    for k in range(segs):
+        t0, t1 = k / segs, (k + 1) / segs
+        y0 = -hd - 0.2 + (CH_D + 0.4) * t0
+        y1 = -hd - 0.2 + (CH_D + 0.4) * t1
+        sag0 = 0.06 * math.sin(t0 * math.pi)
+        sag1 = 0.06 * math.sin(t1 * math.pi)
+        z0 = front_h + (back_h - front_h) * t0 - sag0
+        z1 = front_h + (back_h - front_h) * t1 - sag1
+        w0 = (CH_W + 0.4) * (1.0 - 0.03 * math.sin(t0 * math.pi))
+        w1 = (CH_W + 0.4) * (1.0 - 0.03 * math.sin(t1 * math.pi))
+        hw0, hw1 = w0 * 0.5, w1 * 0.5
+        p00 = (-hw0, y0, z0); p10 = (hw0, y0, z0)
+        p01 = (-hw1, y1, z1); p11 = (hw1, y1, z1)
+        f1 = b.bm.faces.new((b.bm.verts.new(p00), b.bm.verts.new(p10),
+                             b.bm.verts.new(p11), b.bm.verts.new(p01)))
+        roof_faces.append(f1)
+        p00b = (-hw0, y0, z0 - 0.04); p10b = (hw0, y0, z0 - 0.04)
+        p01b = (-hw1, y1, z1 - 0.04); p11b = (hw1, y1, z1 - 0.04)
+        f2 = b.bm.faces.new((b.bm.verts.new(p01b), b.bm.verts.new(p11b),
+                             b.bm.verts.new(p10b), b.bm.verts.new(p00b)))
+        roof_faces.append(f2)
 
-    # tejghea de lemn joasa in fata (+X), cu 2 dulapuri laterale (stanga/dreapta)
-    counter_z = 0.55
-    faces += list(b.box((hw - 0.35, 0.0, counter_z * 0.5), (0.7, CH_D - 0.5, counter_z), CRATE_WOOD))
-    faces += list(b.box((-hw + 0.4, -hd + 0.5, counter_z * 0.5), (0.8, 1.0, counter_z), CRATE_WOOD))
-    faces += list(b.box((-hw + 0.4, hd - 0.5, counter_z * 0.5), (0.8, 1.0, counter_z), CRATE_WOOD))
+    # tejghea STANGA (mai inalta/deschisa, tejghea de servit) si tejghea
+    # DREAPTA (mai scunda, dulap de depozit) -- corectie: ambele identice pe
+    # aceeasi latura in codul vechi, acum pe cele 2 laturi ca in decupare.
+    counter_z_l, counter_z_r = 0.58, 0.50
+    counter_l_cy, counter_r_cy = -hd + 0.55, hd - 0.55
+    faces += list(b.box((-hw + 0.4, counter_l_cy, counter_z_l * 0.5),
+                        (0.85, 0.95, counter_z_l), CRATE_WOOD))
+    faces += list(b.box((hw - 0.4, counter_r_cy, counter_z_r * 0.5),
+                        (0.85, 0.95, counter_z_r), CRATE_WOOD))
 
-    # 2 oale de metal + o ceainica, pe tejghea
-    for oy, r, h in ((-0.35, 0.14, 0.30), (0.35, 0.14, 0.30)):
-        metal_faces += list(bm_.cylinder((hw - 0.35, oy, counter_z + h * 0.5), r, h,
+    # scaun/masuta rotunda joasa intre cele doua tejghele, in spate (-Y) --
+    # corectie: lipsea complet (al treilea element vizibil pe decupare).
+    stool_z = 0.42
+    faces += list(b.cylinder((0.0, -0.15, stool_z * 0.5), 0.16, stool_z,
+                             POST_WOOD, segments=8, axis="Z"))
+    faces += list(b.cylinder((0.0, -0.15, stool_z + 0.02), 0.20, 0.06,
+                             CRATE_WOOD, segments=8, axis="Z"))
+
+    # 2 canistre/oale mari de metal pe tejgheaua STANGA
+    for oy, r, h in ((counter_l_cy - 0.22, 0.14, 0.32), (counter_l_cy + 0.22, 0.14, 0.32)):
+        metal_faces += list(bm_.cylinder((-hw + 0.4, oy, counter_z_l + h * 0.5), r, h,
                                          POT_METAL, segments=10, axis="Z"))
-    # ceainica: corp mic + toc + manerul, simplificat la un corp+cioc
-    kx, ky = hw - 0.35, 0.0
+
+    # ceainica CU CIOC SI MANER pe tejgheaua DREAPTA -- corectie: inainte
+    # doar corp + un "cioc" fara sa se distinga de oale, si suprapusa peste
+    # ele in acelasi punct.
+    kx, ky = hw - 0.4, counter_r_cy
     kh = 0.20
-    metal_faces += list(bm_.cylinder((kx, ky, counter_z + kh * 0.5), 0.09, kh,
+    metal_faces += list(bm_.cylinder((kx, ky, counter_z_r + kh * 0.5), 0.10, kh,
                                      POT_METAL, segments=8, axis="Z"))
-    metal_faces += list(bm_.cylinder((kx + 0.10, ky, counter_z + kh * 0.7), 0.03, 0.14,
-                                     POT_METAL, segments=6, axis="Y"))
+    # cioc: teava inclinata in fata (+Y)
+    metal_faces += list(bm_.beam((kx, ky + 0.08, counter_z_r + kh * 0.75),
+                                 (kx, ky + 0.24, counter_z_r + kh * 1.05),
+                                 0.025, POT_METAL))
+    # maner: bara in spate (-Y), in arc (2 segmente de beam ca o toarta)
+    metal_faces += list(bm_.beam((kx, ky - 0.09, counter_z_r + kh * 0.55),
+                                 (kx, ky - 0.15, counter_z_r + kh * 1.05),
+                                 0.02, POT_METAL))
+    metal_faces += list(bm_.beam((kx, ky - 0.15, counter_z_r + kh * 1.05),
+                                 (kx, ky - 0.09, counter_z_r + kh * 1.35),
+                                 0.02, POT_METAL))
+    # capac cu maner mic deasupra
+    metal_faces += list(bm_.cylinder((kx, ky, counter_z_r + kh + 0.02), 0.06, 0.04,
+                                     POT_METAL, segments=8, axis="Z"))
 
     stall_obj = b.to_object("Stall_Wood")
     for f in faces:
@@ -507,9 +605,9 @@ def build_chai_stall():
             f[b.slot] = CRATE_WOOD
     # acoperisul primeste tenta bej separat de restul (nod unic, deci
     # sloturile se aplica per-fata inainte de finish; suprascriem doar
-    # cele 2 fete ale acoperisului dupa ce lista `faces` a primit deja
-    # CRATE_WOOD -- corectam explicit acele 2 fete la SAND_LIGHT)
-    for f in (fr, fr2):
+    # fetele acoperisului dupa ce lista `faces` a primit deja CRATE_WOOD --
+    # corectam explicit acele fete la SAND_LIGHT)
+    for f in roof_faces:
         if f.is_valid:
             f[b.slot] = SAND_LIGHT
     metal_obj = bm_.to_object("Stall_Metal")
@@ -621,7 +719,14 @@ tc = build_thela_cart()
 # explicit de brief "4, nu 2" -- planșa castiga) costa ~380 tri/roata dupa
 # bevel = ~1520 tri doar pe roti; platforma+fructele adauga restul. 2200
 # initial era o estimare fara masuratoare -- 3028 ramane forma completa.
-emit(list(tc), "props/thela_cart.glb", AO_PROP, bevel=0.02, budget=3100)
+#
+# BUGET: 3288 tri, PESTE 3100 (+188, ~6%) -- runda de corectii dupa verdictul
+# "PICATA" (rotile nu se vedeau -- ingropate in disc, fix in `_wheel`; fructele
+# erau un rand subtire -- acum gramada pe 3 zone de culoare). Taiat deja: rotile
+# 12->8 segmente, fructele de la 46 la 24 instante (segments=5), nivelul 2 de la
+# 2/zona la 1/zona. Sub asta rotile ar deveni poligonale vizibil sau gramada s-ar
+# subtia la loc -- liderul decide daca cei 188 tri raman sau se ridica bugetul.
+emit(list(tc), "props/thela_cart.glb", AO_PROP, bevel=0.02, budget=3288)
 
 cs = build_chai_stall()
 emit(list(cs), "props/chai_stall.glb", AO_PROP, bevel=0.02, budget=1600)

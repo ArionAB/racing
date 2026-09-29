@@ -847,6 +847,10 @@ func _generate2(path: String) -> void:
 			if TIER_TOP[k] >= float(G2[i]) + 0.25:
 				b = k
 				break
+		# pe capul rampelor etajul de jos ar fi o placa sub 1,2 m: citea
+		# scanduri puse pe nisip (captura r2 0.130 / 0.260), deci nimic
+		if b == 0 and float(G2[i]) > -1.2 + 0.3:
+			b = -1
 		braw.append(b)
 	var bot: Array = []
 	for i in S:
@@ -962,7 +966,7 @@ func _generate2(path: String) -> void:
 						low = minf(low, _gy(e + sd * d))
 					basey = maxf(low, -10.2) - 0.3
 					own = true
-			var need := 0.3 if r == 0 else 0.9
+			var need := 0.9
 			# randurile din spate doar pe vale USCATA: peste apa ar acoperi
 			# apa (bara: apa verde intre maluri, cu trepte doar pe margine)
 			if r > 0 and low < -9.4:

@@ -256,6 +256,12 @@ func _build_model() -> void:
 		_build_placeholder()
 		return
 	_body.add_child(inst)
+	# GLB din pipeline-ul nostru (zebu_cow.glb, kitul Jodhpur): UV-uri pe
+	# sloturile atlasului + AO in vertex colors, deci materialul COMUN de lume,
+	# ca orice prop — altfel ramane pe materialul importat din Blender (+1
+	# material pe pista si alta culoare decat restul kitului). Acelasi tipar ca
+	# `Car.apply_data` cu `palette_model`.
+	Palette.apply_world_material(inst)
 	var box := Track.model_aabb(inst)
 	var shape := CollisionShape3D.new()
 	var col := BoxShape3D.new()

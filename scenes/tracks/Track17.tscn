@@ -7,6 +7,57 @@
 [ext_resource type="Script" path="res://scenes/hazards/cow_gate.gd" id="5_cow"]
 [ext_resource type="Script" path="res://scenes/hazards/dusk_cycle.gd" id="6_dusk"]
 [ext_resource type="Script" path="res://scenes/hazards/alley_gate.gd" id="7_gate"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="prop"]
+[ext_resource type="PackedScene" uid="uid://cr4g7v7yxvtw" path="res://assets/models/jodhpur/animals/baraat_horse.glb" id="s_baraat_horse"]
+[ext_resource type="PackedScene" uid="uid://cgs8pp67cghlt" path="res://assets/models/jodhpur/animals/black_kite_bird.glb" id="s_black_kite_bird"]
+[ext_resource type="PackedScene" uid="uid://ccx0v5j8mblnt" path="res://assets/models/jodhpur/animals/langur.glb" id="s_langur"]
+[ext_resource type="PackedScene" uid="uid://dss1pmwg35hjt" path="res://assets/models/jodhpur/animals/peacock_closed.glb" id="s_peacock_closed"]
+[ext_resource type="PackedScene" uid="uid://w201t007bmg5" path="res://assets/models/jodhpur/animals/peacock_fanned.glb" id="s_peacock_fanned"]
+[ext_resource type="PackedScene" uid="uid://c5e52tgukt2pr" path="res://assets/models/jodhpur/animals/zebu_cow.glb" id="s_zebu_cow"]
+[ext_resource type="PackedScene" uid="uid://cdb4q46u3ewje" path="res://assets/models/jodhpur/buildings/blue_house_a.glb" id="s_blue_house_a"]
+[ext_resource type="PackedScene" uid="uid://ceqwdksqrw774" path="res://assets/models/jodhpur/buildings/blue_house_b.glb" id="s_blue_house_b"]
+[ext_resource type="PackedScene" uid="uid://5d317pe3qe4j" path="res://assets/models/jodhpur/buildings/blue_house_c.glb" id="s_blue_house_c"]
+[ext_resource type="PackedScene" uid="uid://y3fdenouve0b" path="res://assets/models/jodhpur/buildings/blue_house_d.glb" id="s_blue_house_d"]
+[ext_resource type="PackedScene" uid="uid://0krp78jdvvxn" path="res://assets/models/jodhpur/buildings/blue_house_e.glb" id="s_blue_house_e"]
+[ext_resource type="PackedScene" uid="uid://bybyk5gdqmmqe" path="res://assets/models/jodhpur/buildings/ghanta_ghar.glb" id="s_ghanta_ghar"]
+[ext_resource type="PackedScene" uid="uid://bht8erkiccwg5" path="res://assets/models/jodhpur/buildings/haveli_facade.glb" id="s_haveli_facade"]
+[ext_resource type="PackedScene" uid="uid://bd6drjumh78xd" path="res://assets/models/jodhpur/plants/euphorbia.glb" id="s_euphorbia"]
+[ext_resource type="PackedScene" uid="uid://cp67yr3a2xw6a" path="res://assets/models/jodhpur/plants/khejri_tree.glb" id="s_khejri_tree"]
+[ext_resource type="PackedScene" uid="uid://ccp7tfnty3747" path="res://assets/models/jodhpur/plants/neem_tree.glb" id="s_neem_tree"]
+[ext_resource type="PackedScene" uid="uid://bfg3vd2k5vmys" path="res://assets/models/jodhpur/props/baraat_band.glb" id="s_baraat_band"]
+[ext_resource type="PackedScene" uid="uid://p252jdsft3g4" path="res://assets/models/jodhpur/props/chai_stall.glb" id="s_chai_stall"]
+[ext_resource type="PackedScene" uid="uid://xw5l31l7lv0" path="res://assets/models/jodhpur/props/diya.glb" id="s_diya"]
+[ext_resource type="PackedScene" uid="uid://bhsgj1xqr2evd" path="res://assets/models/jodhpur/props/floating_diya.glb" id="s_floating_diya"]
+[ext_resource type="PackedScene" uid="uid://mbqc4xbwx7gs" path="res://assets/models/jodhpur/props/marigold_garland.glb" id="s_marigold_garland"]
+[ext_resource type="PackedScene" uid="uid://ctbdbl0vh1oy7" path="res://assets/models/jodhpur/props/rampart_cannon.glb" id="s_rampart_cannon"]
+[ext_resource type="PackedScene" uid="uid://md8l2vluwf6" path="res://assets/models/jodhpur/props/rooftop_clutter.glb" id="s_rooftop_clutter"]
+[ext_resource type="PackedScene" uid="uid://be2e13o01u3cu" path="res://assets/models/jodhpur/props/rooftop_tank.glb" id="s_rooftop_tank"]
+[ext_resource type="PackedScene" uid="uid://dbbud7q0h78ok" path="res://assets/models/jodhpur/props/spice_sacks.glb" id="s_spice_sacks"]
+[ext_resource type="PackedScene" uid="uid://dmm3new8bbvfw" path="res://assets/models/jodhpur/props/stall_canopy_a.glb" id="s_stall_canopy_a"]
+[ext_resource type="PackedScene" uid="uid://cr7olqpjk07xl" path="res://assets/models/jodhpur/props/stall_canopy_b.glb" id="s_stall_canopy_b"]
+[ext_resource type="PackedScene" uid="uid://bjxx1hvy8a3ko" path="res://assets/models/jodhpur/props/stall_canopy_c.glb" id="s_stall_canopy_c"]
+[ext_resource type="PackedScene" uid="uid://bvrg4le2uokt3" path="res://assets/models/jodhpur/props/textile_strip.glb" id="s_textile_strip"]
+[ext_resource type="PackedScene" uid="uid://bnp4qpbftlu8f" path="res://assets/models/jodhpur/props/thela_cart.glb" id="s_thela_cart"]
+[ext_resource type="PackedScene" uid="uid://ckk63wmylsc5t" path="res://assets/models/jodhpur/props/zipline_rider.glb" id="s_zipline_rider"]
+[ext_resource type="PackedScene" uid="uid://c0nwr1snwhg7q" path="res://assets/models/jodhpur/rocks/jodhpur_horizon.glb" id="s_jodhpur_horizon"]
+[ext_resource type="PackedScene" uid="uid://c1vo6i5v3q6f3" path="res://assets/models/jodhpur/rocks/rhyolite_boulder_a.glb" id="s_rhyolite_boulder_a"]
+[ext_resource type="PackedScene" uid="uid://gmgh7qld7ouu" path="res://assets/models/jodhpur/rocks/rhyolite_boulder_b.glb" id="s_rhyolite_boulder_b"]
+[ext_resource type="PackedScene" uid="uid://xbsx06aty468" path="res://assets/models/jodhpur/rocks/rhyolite_boulder_c.glb" id="s_rhyolite_boulder_c"]
+[ext_resource type="PackedScene" uid="uid://o7eh7j1mrsgy" path="res://assets/models/jodhpur/rocks/rock_slab.glb" id="s_rock_slab"]
+[ext_resource type="PackedScene" uid="uid://bdig8uuhtqo4w" path="res://assets/models/jodhpur/structures/fort_bastion.glb" id="s_fort_bastion"]
+[ext_resource type="PackedScene" uid="uid://dmg1v2pepu1sj" path="res://assets/models/jodhpur/structures/fort_gate_fateh.glb" id="s_fort_gate_fateh"]
+[ext_resource type="PackedScene" uid="uid://yfkqjwo33qjd" path="res://assets/models/jodhpur/structures/fort_gate_jai.glb" id="s_fort_gate_jai"]
+[ext_resource type="PackedScene" uid="uid://dc32iddv1u5a2" path="res://assets/models/jodhpur/structures/fort_gate_loha.glb" id="s_fort_gate_loha"]
+[ext_resource type="PackedScene" uid="uid://bapsur725vf65" path="res://assets/models/jodhpur/structures/fort_wall_segment.glb" id="s_fort_wall_segment"]
+[ext_resource type="PackedScene" uid="uid://jm43m0wvfax0" path="res://assets/models/jodhpur/structures/fort_wall_turret.glb" id="s_fort_wall_turret"]
+[ext_resource type="PackedScene" uid="uid://bstnouejoyk8y" path="res://assets/models/jodhpur/structures/jaswant_thada.glb" id="s_jaswant_thada"]
+[ext_resource type="PackedScene" uid="uid://lpccf7aa1c4e" path="res://assets/models/jodhpur/structures/market_gate.glb" id="s_market_gate"]
+[ext_resource type="PackedScene" uid="uid://eco0t18qrd5v" path="res://assets/models/jodhpur/structures/palace_facade_a.glb" id="s_palace_facade_a"]
+[ext_resource type="PackedScene" uid="uid://20ig0egfe8y2" path="res://assets/models/jodhpur/structures/palace_facade_b.glb" id="s_palace_facade_b"]
+[ext_resource type="PackedScene" uid="uid://dfpo2apopwful" path="res://assets/models/jodhpur/structures/stepwell_corner.glb" id="s_stepwell_corner"]
+[ext_resource type="PackedScene" uid="uid://c4dfqp353u75l" path="res://assets/models/jodhpur/structures/stepwell_flight_module.glb" id="s_stepwell_flight_module"]
+[ext_resource type="PackedScene" uid="uid://mr75og66d0cn" path="res://assets/models/jodhpur/structures/stepwell_pavilion.glb" id="s_stepwell_pavilion"]
+[ext_resource type="PackedScene" uid="uid://cblf5sj5j6gjl" path="res://assets/models/jodhpur/vehicles/tuktuk.glb" id="s_tuktuk"]
 
 [sub_resource type="Curve3D" id="Curve3D_jodhpur"]
 closed = true
@@ -83,6 +134,7 @@ telegraph_seconds = 3.0
 walk_seconds = 2.0
 clear_radius_m = 12.0
 approach_clear_m = 40.0
+model = ExtResource("s_zebu_cow")
 
 [node name="AlleyGate" type="Node3D" parent="."]
 script = ExtResource("7_gate")
@@ -95,3 +147,22 @@ post_depth_m = 1.0
 
 [node name="DuskCycle" type="Node" parent="."]
 script = ExtResource("6_dusk")
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("prop")
+
+[node name="ZoneA_Start" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneB_Bazar" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneC_Fantana" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneD_Oras" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneE_Porti" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneF_Bastion" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneG_Stanca" type="Node3D" parent="DecorManual"]
+
+[node name="ZoneH_Dreapta" type="Node3D" parent="DecorManual"]

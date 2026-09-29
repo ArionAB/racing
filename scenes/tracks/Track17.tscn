@@ -469,6 +469,7 @@ metadata/coliziune = "none"
 
 [node name="hFelinare" type="Node3D" parent="DecorManual/ZoneH_Dreapta"]
 script = ExtResource("h_lights")
+facade_gaps = Array[Vector3]([Vector3(-1, 0.938, 0.947), Vector3(-1, 0.971, 0.991)])
 
 [node name="OrasFill" type="Node3D" parent="."]
 script = ExtResource("cityfill")

@@ -415,3 +415,101 @@ identic la cifră (32/31/30 de materiale, aceleași desene și triunghiuri) cu �
 fără schimbare. **ProbeRace, 8 seed-uri:** 10 repuneri acum față de 11 pe bază
 (0/3/3/0/1/2/0/1 față de 1/5/1/0/1/2/0/1), zero `[blocaj]` în ambele; aceeași
 distribuție, fără nimic fizic atins (halourile și decalurile n-au corp).
+
+## 10. A doua trecere de lumină, „cald + albastru” (ramura `jodhpur/poi-lumina2`)
+
+Criticii orbi din gauntletul pe POI-uri au numit de 9 ori „lumina rece de
+apus” ca diferență nereparabilă din decor (H ×4, A, D ×2, D′, F). Cererea
+dezvoltatorului: apus mai portocaliu/saturat (soarele și cerul), gresia și
+solul calde, casele rămân albastre. Garda `ProbeJodLumina --guard` e aceeași
+(varul H 195–230, S ≥ 0,25 la dusk 0; sol/stâncă calde).
+
+**Măsurătoarea:** `ProbeJodLumina --fracs=0.02,0.198,0.38,r1:0.360,0.505,0.67,0.95`
+(camera de joc pe 5 eșantioane ±0,004 în jurul cadrului-erou; `r1:` = ruta 1,
+ulicioara). Sonda are acum două clase doar măsurate, `gresie`
+(`red_sandstone` + `rose_sandstone`) și `cer`; `_verdict` nu le citește, deci
+garda nu s-a schimbat. „Înainte” = aceeași sondă pe lumina integrării
+0feda59e (fișierele de scenă scoase temporar, apoi reaplicate).
+Celule: **H / S / L** (HSV al culorii medii pe mască; L = luma 0–100). Pe E
+varul are sub 7 000 px (poarta ascunde orașul), deci rândul lui nu contează.
+
+| POI | dusk | var | gresie | sol | cer | luma cadru |
+|---|---|---|---|---|---|---|
+| A 0,020 | 0,0 | 225 / 0.29 / 42 → **228 / 0.32 / 42** | 13 / 0.73 / 39 → **9 / 0.74 / 36** | 19 / 0.25 / 43 → **18 / 0.43 / 44** | 23 / 0.32 / 84 → **19 / 0.59 / 69** | 35.9 → **35.3** |
+| A 0,020 | 0,5 | 232 / 0.32 / 35 → **232 / 0.35 / 37** | 6 / 0.73 / 30 → **5 / 0.74 / 30** | 7 / 0.19 / 36 → **15 / 0.39 / 38** | 25 / 0.35 / 84 → **13 / 0.62 / 64** | 30.6 → **31.0** |
+| A 0,020 | 1,0 | 223 / 0.50 / 22 → **223 / 0.50 / 22** | 3 / 0.60 / 18 → **3 / 0.60 / 18** | 355 / 0.12 / 23 → **18 / 0.41 / 23** | 26 / 0.40 / 82 → **305 / 0.45 / 25** | 23.2 → **21.6** |
+| C 0,198 | 0,0 | 227 / 0.24 / 45 → **235 / 0.26 / 45** | 16 / 0.61 / 40 → **14 / 0.57 / 42** | 13 / 0.33 / 39 → **15 / 0.37 / 42** | 16 / 0.29 / 82 → **12 / 0.54 / 68** | 34.0 → **35.0** |
+| C 0,198 | 0,5 | 237 / 0.29 / 38 → **238 / 0.31 / 38** | 13 / 0.61 / 35 → **11 / 0.57 / 37** | 8 / 0.32 / 35 → **12 / 0.37 / 38** | 18 / 0.31 / 82 → **6 / 0.56 / 63** | 31.1 → **32.0** |
+| C 0,198 | 1,0 | 223 / 0.50 / 24 → **223 / 0.51 / 24** | 14 / 0.57 / 25 → **14 / 0.58 / 25** | 5 / 0.29 / 23 → **14 / 0.41 / 23** | 20 / 0.36 / 79 → **299 / 0.44 / 24** | 24.7 → **22.9** |
+| D 0,380 | 0,0 | 224 / 0.31 / 38 → **227 / 0.35 / 40** | 281 / 0.10 / 74 → **305 / 0.13 / 72** | 12 / 0.15 / 42 → **18 / 0.34 / 45** | 22 / 0.31 / 84 → **17 / 0.58 / 69** | 31.1 → **31.4** |
+| D 0,380 | 0,5 | 229 / 0.37 / 32 → **229 / 0.41 / 34** | 282 / 0.11 / 68 → **309 / 0.12 / 68** | 1 / 0.14 / 38 → **14 / 0.33 / 40** | 23 / 0.34 / 83 → **11 / 0.61 / 64** | 28.0 → **28.1** |
+| D 0,380 | 1,0 | 223 / 0.52 / 21 → **223 / 0.52 / 21** | 271 / 0.20 / 31 → **270 / 0.20 / 30** | 345 / 0.11 / 24 → **16 / 0.37 / 24** | 25 / 0.39 / 81 → **304 / 0.45 / 25** | 21.5 → **17.4** |
+| D′ r1 0,360 | 0,0 | 221 / 0.42 / 32 → **221 / 0.47 / 36** | 7 / 0.56 / 27 → **5 / 0.53 / 29** | 20 / 0.22 / 38 → **21 / 0.41 / 40** | 24 / 0.26 / 87 → **18 / 0.53 / 72** | 31.7 → **32.4** |
+| D′ r1 0,360 | 0,5 | 225 / 0.44 / 29 → **225 / 0.48 / 32** | 4 / 0.57 / 24 → **2 / 0.54 / 26** | 11 / 0.19 / 33 → **18 / 0.40 / 36** | 17 / 0.31 / 82 → **8 / 0.57 / 64** | 28.0 → **28.5** |
+| D′ r1 0,360 | 1,0 | 222 / 0.54 / 20 → **222 / 0.54 / 20** | 2 / 0.58 / 15 → **3 / 0.58 / 15** | 2 / 0.12 / 22 → **20 / 0.45 / 22** | 20 / 0.35 / 77 → **300 / 0.44 / 24** | 20.7 → **16.3** |
+| E 0,505 | 0,0 | 0 / 0.11 / 63 → **342 / 0.15 / 60** | 12 / 0.69 / 35 → **8 / 0.67 / 35** | 18 / 0.39 / 41 → **19 / 0.44 / 44** | 22 / 0.31 / 83 → **17 / 0.58 / 69** | 35.2 → **35.5** |
+| E 0,505 | 0,5 | 8 / 0.21 / 59 → **357 / 0.18 / 58** | 7 / 0.68 / 28 → **5 / 0.66 / 30** | 15 / 0.39 / 37 → **17 / 0.44 / 40** | 24 / 0.34 / 82 → **12 / 0.60 / 64** | 30.4 → **31.3** |
+| E 0,505 | 1,0 | 24 / 0.35 / 59 → **24 / 0.34 / 58** | 6 / 0.61 / 19 → **7 / 0.62 / 19** | 18 / 0.38 / 28 → **22 / 0.49 / 28** | 26 / 0.39 / 80 → **311 / 0.43 / 26** | 23.4 → **22.4** |
+| F 0,670 | 0,0 | 221 / 0.40 / 34 → **222 / 0.44 / 37** | 8 / 0.65 / 24 → **6 / 0.60 / 27** | 14 / 0.32 / 47 → **15 / 0.38 / 49** | 24 / 0.26 / 83 → **17 / 0.49 / 69** | 39.2 → **37.4** |
+| F 0,670 | 0,5 | 225 / 0.42 / 30 → **225 / 0.46 / 33** | 6 / 0.65 / 21 → **4 / 0.61 / 23** | 6 / 0.30 / 40 → **11 / 0.37 / 43** | 20 / 0.29 / 78 → **12 / 0.54 / 62** | 33.7 → **32.3** |
+| F 0,670 | 1,0 | 222 / 0.53 / 20 → **222 / 0.53 / 20** | 4 / 0.63 / 15 → **5 / 0.64 / 14** | 360 / 0.25 / 25 → **12 / 0.38 / 25** | 22 / 0.34 / 72 → **302 / 0.38 / 24** | 25.5 → **17.3** |
+| H 0,950 | 0,0 | 238 / 0.14 / 48 → **257 / 0.20 / 45** | 4 / 0.51 / 50 → **360 / 0.52 / 47** | 333 / 0.09 / 50 → **2 / 0.19 / 51** | 22 / 0.32 / 84 → **18 / 0.59 / 69** | 41.0 → **39.9** |
+| H 0,950 | 0,5 | 248 / 0.27 / 37 → **250 / 0.30 / 37** | 358 / 0.47 / 44 → **357 / 0.49 / 43** | 331 / 0.09 / 46 → **2 / 0.18 / 48** | 24 / 0.35 / 84 → **12 / 0.62 / 64** | 37.5 → **36.8** |
+| H 0,950 | 1,0 | 224 / 0.50 / 24 → **224 / 0.50 / 23** | 353 / 0.42 / 25 → **352 / 0.42 / 24** | 329 / 0.12 / 27 → **5 / 0.25 / 27** | 26 / 0.40 / 81 → **305 / 0.45 / 25** | 32.5 → **28.1** |
+
+
+**Ce s-a schimbat și de ce:**
+
+| pârghie | înainte | după | de ce |
+|---|---|---|---|
+| soare (dusk 0 / 0,5) | `#FFBC8C` 1,0 / `#FFA090` 0,60 | `#FF9050` 0,85 / `#FF7A50` 0,55 | apus portocaliu saturat; mai slab ca să nu spele varul |
+| ambient (0 / 0,5) | `#CAC0C4` 0,42 / `#BEB0B8` 0,42 | `#C8C4D0` 0,50 / `#BEB4C4` 0,48 | umplerea mai tare ține fațadele albastre sub soarele portocaliu |
+| cer (tema, dusk 0) | top (0,42; 0,35; 0,62), orizont (1,0; 0,70; 0,48) | top (0,55; 0,28; 0,50), orizont (1,0; 0,48; 0,22) | cer de apus portocaliu → magenta |
+| cer (DuskCycle, canal nou) | fix pe temă (noaptea rămânea apus, L 72–82) | chei 0,5 `#5A3A78` / `#F06A3A`, 1 `#1A1834` / `#4A2E44` | noaptea cerul se închide (L 24–26) |
+| discul soarelui | `sun_angle_max` 30° fix | 30 → 18 → 0° | pata întunecată (vezi mai jos) |
+| `fog_sky_affect` | 0,15 | 0,08 | ceața albastră spală mai puțin cerul |
+| `fog_sun_scatter` | 0,8 / 0,4 / 0 | 1,0 / 0,6 / 0 | ceața spre soare (D, A) mai caldă |
+| sol `ground_tint` | (0,62; 0,56; 0,46) | (0,78; 0,50; 0,30) | nisip ocru, nu gri-bej |
+| sol pe zone (fântâna / fortul + G) | (1,0; 0,68; 0,62) / (0,73; 0,51; 0,47) | (1,0; 0,64; 0,50) / (0,80; 0,50; 0,38) | solul de pe F ieșea roz-gri (H 355, S 0,19) |
+| `scarp_tint` | (0,42; 0,30; 0,27) | (0,46; 0,30; 0,24) | stânca în aceeași familie caldă |
+
+Tenta gresiei (`red_sandstone`/`rose_sandstone`) NU s-a atins: gresia era deja
+caldă (H 2–16, S 0,51–0,74) și rămâne (H 0–14, S 0,52–0,74); o tentă mai
+saturată fusese respinsă de critic pe E.
+
+**Respinse, măsurat:** ceață mov-caldă `#9690B0` (orașul de pe F: H 239–240,
+S 0,22–0,23 — garda pică, 2 abateri); soare `#FF9E5C` la energie 1,0 cu
+ambientul vechi (F_joc var S 0,24, F_ochi 0,23 — pică). Ceața rămâne
+`#8A94B8`: orașul văzut de pe bastion stă la 150–300 m, adică 50–70 % ceață,
+iar albastrul lui e în mare parte albastrul ceții.
+
+**Pata întunecată de pe cer (dusk 0,5–1):** `ProceduralSkyMaterial`
+*amestecă* cerul spre `culoarea × energia` soarelui pe 30° în jurul lui, nu
+adună. Când soarele scade la 0,30 (luna gri-lilă), discul iese mai închis
+decât orizontul: o pată gri-albăstruie de ~30° deasupra lui (F 0,670 și D′ în
+planșa dusk 1, coloana „înainte”; urma ei și pe F la dusk 0,5). Raza scade
+acum cu ceasul (30 → 18 → 0°); pe captura F la dusk 1 pata dispare (luma pe
+coloanele de cer, rândurile 5–60: 80–213 înainte, 41–83 după). Cerul se
+scrie în trepte de 0,01 din `dusk` (schimbarea materialului cerului reface
+harta de radianță). `ground_bottom` urmează ceața ceasului (legătura din
+`_build_environment`).
+
+**Garda:** `ProbeJodLumina --guard` → **OK** la dusk 0 / 0,5 / 1. Cea mai
+strânsă: F_ochi dusk 0 var S **0,27**, F_joc 0,28 (prag 0,25); F la 0,5:
+S 0,23–0,24 (prag 0,20). Luma cadrului noaptea 17–20 (prag 12; înainte
+21–25). `probe_decor --track=17`: **24 de materiale** (identic cu baza, pe
+toate coloanele); `--track=16`: 30, identic la cifră cu și fără schimbare. În
+`track.gd` s-a atins doar dicționarul temei `jodhpur`; `DuskCycle` există
+doar în Track17.
+
+**Ce n-a mers / rămâne:** varul **luminat de soare** pe H (fațadele spre vest)
+trece de la H 238 / S 0,14 la H 257 / S 0,20: mai saturat, dar spre lila, nu
+albastru — soarele portocaliu pe albastru dă mov; lumina nu poate face mai
+mult fără să răcească tot. Fortul îndepărtat văzut de pe D rămâne rece
+(gresie H 305, S 0,13): e 70 % ceață albastră. Banda de deșert îndepărtat din
+cadrul F rămâne albastru-pal — aceeași ceață, aceeași constrângere. Pavajul
+(umerii, ulicioara) și asfaltul nu sunt atinse. Garda pe F are marjă mică
+(0,02–0,03 pe S): orice încălzire suplimentară a luminii trece prin ea.
+
+Planșele: `docs/track_briefs/img/jodhpur_lumina2/plansa_dusk0.jpg` și
+`plansa_dusk1.jpg` (7 POI-uri, înainte | după, camera de joc).

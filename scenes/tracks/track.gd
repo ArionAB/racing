@@ -1533,6 +1533,11 @@ static func themes() -> Dictionary:
 			"shoulder_tile": 6.0,
 			"shoulder_width_zones": [Vector3(0.906, 0.129, 3.2),
 				Vector3(0.267, 0.474, 3.2)],
+			# Trotuarul e DRUM (decizia dezvoltatorului, 30 sep 2026): fasia
+			# pavata din ferestrele de mai sus nu mai taie viteza ca iarba.
+			# Citita de `is_on_road` prin `_paved_shoulder_at`. AI-ul nu o
+			# vede (linia lui vine din `lookahead_point`/`width_at_index`).
+			"shoulder_zones_are_road": true,
 			# APA (fantana C si lacul Devkund G2 impart materialul): verde-inchis,
 			# intunecata, calma — bara C si G2. Fara cheile astea tema mostenea
 			# implicitul Okinawei (REEF_SHALLOW turcoaz, spuma 0.75, creste 0.85,
@@ -14684,8 +14689,17 @@ func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 	var r := route_at(route)
 	if r == null:
 		return false
-	if route != 0 or _width_profile().is_empty():
+	# TROTUARUL e drum (decizia dezvoltatorului, Jodhpur POI H): pe tema care
+	# declara `shoulder_zones_are_road`, fasia pavata din `shoulder_width_zones`
+	# se adauga la latimea „pe drum". Fara cheia asta `paved` e 0 si ramurile de
+	# mai jos sunt EXACT cele de dinainte (dovedit cu tools/sv_on_road_diff.gd).
+	var paved := _paved_shoulder_at(index) if route == 0 else 0.0
+	if route != 0 or (_width_profile().is_empty() and paved <= 0.0):
 		return r.is_on_road(index, pos)
+	if paved > 0.0:
+		if r.lateral_distance(index, pos) > width_at_index(index) + paved + 0.5:
+			return false
+		return not r.is_other_level(index, pos)
 	# Si LATERAL, si VERTICAL — pe AMANDOUA ramurile. Ramura cu profil de latime
 	# a fost scrisa inainte de pistele care trec peste ele insele si compara doar
 	# in plan; cand a venit pasajul de la Chongqing, testul vertical a intrat in
@@ -14699,6 +14713,43 @@ func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 	if r.lateral_distance(index, pos) > width_at_index(index) + 0.5:
 		return false
 	return not r.is_other_level(index, pos)
+
+## Latimea de trotuar care conteaza ca drum la indexul dat (0 in afara
+## ferestrelor, sau pe orice tema fara `shoulder_zones_are_road`). Aceleasi
+## ferestre si aceeasi rampa ca umarul desenat (`_shoulder_width`), dar doar
+## latimea DECLARATA a trotuarului, nu si latirea dupa caderea terenului:
+## pedeapsa se ridica numai pe ce e pavat prin decizie.
+##
+## Cache per index: `is_on_road` se cheama de cateva ori pe cadru per masina.
+var _paved_cache: PackedFloat32Array = PackedFloat32Array()
+var _paved_n := -1
+
+func _paved_shoulder_at(index: int) -> float:
+	if _paved_n != baked.size():
+		_paved_n = baked.size()
+		_paved_cache = PackedFloat32Array()
+		if not bool(theme_flag("shoulder_zones_are_road", false)):
+			return 0.0
+		var zones: Variant = theme_flag("shoulder_width_zones", null)
+		var n := baked.size()
+		if zones == null or n < 2:
+			return 0.0
+		if _dists.size() <= n:
+			_paved_n = -1 # traseul inca nu e copt de tot: reincearca
+			return 0.0
+		_paved_cache.resize(n)
+		var total_m := maxf(_dists[n], 0.001)
+		for i in n:
+			var frac := _dists[i] / total_m
+			var w := 0.0
+			for z: Vector3 in zones:
+				var ramp := TrackSideSampler._ring_window(frac, z.x, z.y,
+					SHOULDER_ZONE_RAMP / total_m)
+				w = maxf(w, z.z * ramp)
+			_paved_cache[i] = w
+	if _paved_cache.is_empty():
+		return 0.0
+	return _paved_cache[posmod(index, _paved_cache.size())]
 
 func lookahead_point(index: int, ahead_m: float, lateral_frac: float,
 		route: int = 0) -> Vector3:

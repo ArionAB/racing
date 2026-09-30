@@ -240,6 +240,26 @@ const PARAPET_TOP := 2.4
 ## chiar in fata orasului, iar la +2,4 merloanele lui acopereau banda de jos
 ## a caselor (captura w2_0.650).
 const PARAPET_B_TOP := 1.2
+## Runda 2: scara uniforma a parapetilor de langa drum (merlon 1,2 x 0,8 m in
+## loc de 1,2 x 1,2 cu calota de 1,5): varful ramane la PARAPET_TOP.
+const PARAPET_SCALE := 0.65
+## Coronamentul lui `fort_wall_segment` (masurat pe GLB, runda 2): drumul de
+## straja la y 11,5 (x -1,1..0,8), buza interioara la 12,5 (x -1,5..-1,1),
+## crenelurile la 12,8 (x 0,8..1,5), merloanele pana la 14,0.
+const WALK_Y := 11.5
+const LIP_X := -1.3
+const LIP_Y := 12.5
+const CRENEL_Y := 12.8
+const CRENEL_Z := [-6.0, -3.6, -1.2, 1.2, 3.6, 6.0]
+const ROW_R := 0.09
+const ROW_STEP := 0.5
+## Tunurile de pe zidul exterior (dreapta bratului de intrare, in cadrul-erou
+## 0.650, plus unul pe bratul de iesire), scara si pozitia pe X fata de axa
+## zidului (gura trece de fata exterioara cu ~0,9 m).
+const WALL_CANNON_FRACS := [0.6435, 0.6485, 0.6535, 0.684]
+const WALL_CANNON_SCALE := 1.1
+const WALL_CANNON_X := 0.1
+const PEACOCK_FRACS := [0.639, 0.678]
 ## Curtea dintre brate (interiorul acului): in capturile w3 era o pata de
 ## sol gol care domina jumatatea stanga a cadrului-erou. Parapet (+2,4) pe
 ## muchia interioara a fiecarui brat, oprit la ~20 m de varf. La +1,2 (w4)
@@ -290,11 +310,15 @@ func _wall_chain(pts: Array[Vector3], idx: Array[int], start: Array, sgn: float,
 		kind: String) -> void:
 	var cur := start
 	var guard := 0
+	# Parapetii de langa drum: zidul intreg la scara uniforma PARAPET_SCALE
+	# (merloane mai mici, sa citeasca crenelaj, nu butoaie — critic runda 1).
+	var sc := 1.0 if kind == "sus" else PARAPET_SCALE
+	var nf := float(_track.baked.size())
 	while int(cur[1]) < pts.size() - 1 and guard < 200:
 		guard += 1
-		var len := WALL_LEN
+		var len := WALL_LEN * sc
 		var nxt := _chord_next(pts, cur, len)
-		while len > WALL_MIN_LEN and _sag(pts, cur, nxt) > SAG_MAX:
+		while len > WALL_MIN_LEN * sc and _sag(pts, cur, nxt) > SAG_MAX:
 			len *= 0.85
 			nxt = _chord_next(pts, cur, len)
 		var p0: Vector3 = cur[0]
@@ -313,13 +337,13 @@ func _wall_chain(pts: Array[Vector3], idx: Array[int], start: Array, sgn: float,
 		var z := x.cross(Vector3.UP).normalized()
 		if _in_bastion(c, len * 0.5):
 			continue
-		if not _footprint_clear(c, z, len * 0.5, WALL_HALF_T, 1.5):
+		if not _footprint_clear(c, z, len * 0.5, WALL_HALF_T * sc, 1.5):
 			_skipped += 1
 			continue
 		var top: float = road.y + float({"sus": LEFT_TOP, "parapet": PARAPET_TOP,
 			"parapet_jos": PARAPET_B_TOP}[kind])
-		var base_y := top - WALL_H
-		var wb := Basis(x, Vector3.UP, z * (len / WALL_LEN))
+		var base_y := top - WALL_H * sc
+		var wb := Basis(x * sc, Vector3.UP * sc, z * (len / WALL_LEN))
 		var wpos := Vector3(c.x, base_y, c.z)
 		_raw_basis("fort_wall_segment", "fzid", wpos, wb, "")
 		if _sol_real(c.x, c.z) - base_y > 2.0:
@@ -329,6 +353,41 @@ func _wall_chain(pts: Array[Vector3], idx: Array[int], start: Array, sgn: float,
 		if kind == "sus" and len > 8.0:
 			for nz: float in NICHE_Z:
 				_lamp(wpos + wb * Vector3(-(WALL_HALF_T + 0.12), NICHE_Y, nz), NICHE_R, NICHE_STRETCH)
+		if kind == "sus":
+			continue
+		var pf := float(ci) / nf
+		# Runda 2 (critic): sir des de diya pe coronament, INTRE merloane:
+		# cate una in fiecare crenel (coama la y 12,8, x 0,8..1,5) si un sir
+		# continuu la ~0,5 m pe buza interioara (x -1,5..-1,1, y 12,5), fata
+		# dinspre drum — acolo se vede din masina.
+		for gz: float in CRENEL_Z:
+			_lamp(wpos + wb * Vector3(MERLON_X, CRENEL_Y + ROW_R / sc, gz), ROW_R, 1.0)
+		var step := ROW_STEP * WALL_LEN / len
+		var lz := -6.0 + step * 0.5
+		while lz < 6.0:
+			_lamp(wpos + wb * Vector3(LIP_X, LIP_Y + ROW_R / sc, lz), ROW_R, 1.0)
+			lz += step
+		# Tunurile de pe metereze (runda 2): in crenelul de la z +1,2, pe
+		# drumul de straja (y 11,5), gura (+X) prin crenel spre vale.
+		for cf: float in WALL_CANNON_FRACS:
+			if absf(pf - cf) < 0.5 * len / _total_len and not _cannon_done.has(cf):
+				_cannon_done[cf] = true
+				var cx := x.normalized()
+				var cb := Basis(cx, Vector3.UP, cx.cross(Vector3.UP).normalized()).scaled(
+					Vector3.ONE * WALL_CANNON_SCALE)
+				var mz := 1.2 * len / WALL_LEN
+				var cpos := wpos + z * mz + cx * WALL_CANNON_X + Vector3.UP * (WALK_Y * sc)
+				_raw_basis("rampart_cannon", "tunZid", cpos, cb, "")
+				print("; tun pe zid la frac %.4f, %.1f m de ax" % [pf,
+					Vector2(cpos.x - road.x, cpos.z - road.z).length()])
+		# Paunii: pe drumul de straja (y 11,5), inchisi (evantaiul verde citea
+		# ca un disc plutitor — critic runda 1; si era la 12,75, nu pe piatra).
+		for pk: float in PEACOCK_FRACS:
+			if absf(pf - pk) < 0.5 * len / _total_len and not _cannon_done.has(-pk):
+				_cannon_done[-pk] = true
+				var pp := wpos + wb * Vector3(-0.2, WALK_Y, -3.6)
+				_raw("peacock_closed", "paun", pp, atan2(z.x, z.z) + _rng.randf_range(-0.4, 0.4),
+					1.0, "none")
 
 
 func _left_wall() -> void:
@@ -423,6 +482,7 @@ func _place_facade(model: String, base: String, c: Vector3, ci: int, length: flo
 
 
 var _bastion_c := Vector3.INF
+var _cannon_done := {}
 
 
 func _in_bastion(c: Vector3, half_len: float) -> bool:
@@ -478,21 +538,11 @@ func _rim_and_bastion() -> void:
 			[PARAPET_IN_A_FROM, PARAPET_IN_A_TO, "parapet", 1.0],
 			[PARAPET_IN_B_FROM, PARAPET_IN_B_TO, "parapet", 1.0]]:
 		var sg: float = run[3]
-		var ol := _offset_line(float(run[0]), float(run[1]), sg, RIM_GAP + WALL_HALF_T)
+		var ol := _offset_line(float(run[0]), float(run[1]), sg,
+			RIM_GAP + WALL_HALF_T * PARAPET_SCALE)
 		var pts: Array[Vector3] = ol[0]
 		var idx: Array[int] = ol[1]
 		_wall_chain(pts, idx, [pts[0], 0], sg, str(run[2]))
-	# Paunii: pe coama parapetilor (fara coliziune), pe calota merloanelor
-	# nu, ci pe drumul de straja din spatele lor (x -0,9 fata de axa zidului).
-	for f: float in [0.640, 0.651, 0.678]:
-		var ki := _idx(f)
-		var pk := _track.baked[ki]
-		var q := pk - _left(ki) * (_track.width_at_index(ki) + RIM_GAP + WALL_HALF_T - 0.9)
-		var model := "peacock_fanned" if f == 0.651 else "peacock_closed"
-		# Drumul de straja: sub crenel (y local ~12,75 → varf - 1,2).
-		var ptop := PARAPET_B_TOP if f > PARAPET_B_FROM else PARAPET_TOP
-		_raw(model, "paun", Vector3(q.x, pk.y + ptop - 1.25, q.z),
-			_rng.randf_range(0.0, TAU), 1.0, "none")
 
 
 ## Cat se departeaza polilinia de coarda cur..nxt (m, in plan).

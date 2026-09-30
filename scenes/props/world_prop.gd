@@ -2078,6 +2078,13 @@ const SLOT_REMAP_BY_MODEL := {
 	# epuizat), deci nu se rescrie GLB-ul aici — remap de slot, ca la
 	# acaciile-umbrela.
 	"wharf": {21: Palette.MARBLE_GREY},
+	# `fort_gate_loha.glb` (Jodhpur POI E): canaturile `GateLoha_Doors` sunt pe
+	# slotul 11 PAINTED_METAL (+20), iar pe Jai/Fateh pe 9 WOOD_WEATHERED (+20).
+	# Slotul 11 e albastru-vopsea (containere), deci canaturile Loha ieseau
+	# albastre in toate capturile E; bara cere „canaturi de lemn inchis" la
+	# toate portile. Remap cheiat pe model, ca la wharf: tuk-tuk-ul isi pastreaza
+	# slotul 11, nicio alta piesa nu se atinge.
+	"fort_gate_loha": {Palette.PAINTED_METAL: Palette.WOOD_WEATHERED},
 
 	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
 	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea
@@ -3023,6 +3030,16 @@ func _glow_spec(model: Node3D) -> String:
 	return ""
 
 
+## Parti de mesh fara hull, per MODEL (stem .glb). Fantele de tragere ale
+## fortului Jodhpur sunt placi subtiri inauntrul hull-ului pietrei; Jolt le
+## respingea hull-ul la unele rotatii (`zid82_col`, 30 sep 2026). Vezi
+## `TrackDecor.add_hull_collision`.
+const HULL_SKIP_PARTS := {
+	"fort_wall_segment": ["Wall_Glow"],
+	"fort_wall_turret": ["Turret_Glow"],
+}
+
+
 func _build_collision() -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
@@ -3039,7 +3056,9 @@ func _build_collision() -> void:
 			"mesh":
 				added = _add_trimesh(body, model)
 			_:
-				added = TrackDecor.add_hull_collision(body, model, true)
+				added = TrackDecor.add_hull_collision(body, model, true,
+					HULL_SKIP_PARTS.get(
+						model.scene_file_path.get_file().get_basename(), []))
 		if not added:
 			body.free()
 			continue

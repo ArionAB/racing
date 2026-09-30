@@ -1481,7 +1481,11 @@ static func themes() -> Dictionary:
 			# mai aproape de caldarâmul ingust dintre case decat drumul de
 			# tara cu iarba pe mijloc.
 			"branch_surface": "gravel",
-			"branch_tint": Color(0.55, 0.51, 0.46),
+			# Runda 4 POI D′: lespezile trotuarului, nu pietris — criticul orb,
+			# de doua ori, „arcada pe maidan": maidanul era banda insasi.
+			# Aceeasi dala si aceeasi culoare ca `shoulder_*` mai jos.
+			"branch_tint": Color(0.80, 0.84, 0.92),
+			"branch_texture": "res://assets/textures/classes/alpine_granite.png",
 			"water": false,
 			# --- STRATUL DE SUB DECOR (jodhpur/poi-sol, dupa valul 1 al
 			# gauntlet-ului). Trei critici orbi (C fantana, E portile, H strada)

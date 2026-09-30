@@ -237,6 +237,12 @@ const FACADE_B_EDGE := 9.0
 ## varful citea din camera ca un sir de conuri portocalii (captura w_0650).
 const PARAPET_A_FROM := 0.634
 const PARAPET_A_TO := 0.6555
+## Runda 4 (dupa FortBluff): parapetul de pe DREAPTA bratului de iesire e
+## SCOS. Acolo e acum caderea de 25 m spre casele de la picior; parapetul
+## (+1,2) le acoperea din ochiul fix al garzii (ProbeJodLumina F_ochi: case_var
+## S 0,20 < 0,20, cu 31 000 px de case ascunse de decorul F) si inchidea exact
+## vederea pe care relieful a fost facut s-o deschida. Constantele raman
+## pentru paunul de pe bratul de iesire si pentru istoric.
 const PARAPET_B_FROM := 0.6715
 const PARAPET_B_TO := 0.690
 const PARAPET_TOP := 2.4
@@ -260,7 +266,8 @@ const ROW_STEP := 0.5
 ## Tunurile de pe zidul exterior (dreapta bratului de intrare, in cadrul-erou
 ## 0.650, plus unul pe bratul de iesire), scara si pozitia pe X fata de axa
 ## zidului (gura trece de fata exterioara cu ~0,9 m).
-const WALL_CANNON_FRACS := [0.6435, 0.6485, 0.6535, 0.684]
+## Runda 4: fara tunul de la 0.684 (parapetul bratului de iesire a disparut).
+const WALL_CANNON_FRACS := [0.6435, 0.6485, 0.6535]
 const WALL_CANNON_SCALE := 1.1
 const WALL_CANNON_X := 0.1
 const PEACOCK_FRACS := [0.639, 0.678]
@@ -277,18 +284,30 @@ const CLUSTER_EDGE_MAX := 24.0
 const CLUSTER_SPACING := 8.5
 const CLUSTER_COUNT := 16
 const CLUSTER_X_MIN := 104.0
+const CLUSTER_PLATEAU_DY := 2.5
 ## Candelele din fasia asfalt-parapet.
 const STRIP_F0 := 0.626
 const STRIP_F1 := 0.692
 ## Statia de sus a tirolienei: in spatele fatadei A (m in spate, m de-a lungul).
 const ZIP_STATION_BACK := 12.0
 const ZIP_STATION_ALONG := -6.0
-## Artificiile: centrul la FW_AHEAD m in fata punctului FW_FROM_FRAC (cadrul-erou).
-const FW_FROM_FRAC := 0.650
-const FW_AHEAD := 140.0
-## Cotele exploziilor (lume). La 140 m in fata cadrului-erou e orasul de pe D
-## (case la +10..+18); la 85 m (prima incercare) cadeau peste zidurile lui E.
-const FW_Y := Vector2(32.0, 44.0)
+## Artificiile (runda 4, dupa FortBluff): centrul la FW_OUT m de bastion, pe
+## iesirea lui, peste casele de la picior (sol 15-23). Cotele (lume) = 20-30 m
+## peste case, adica 0-10 m sub drum (+39,5).
+const FW_OUT := 32.0
+const FW_ALONG := 28.0
+## Caderea are doar ~25 m: „20-35 m peste case" (case la 17-24) si „sub tine"
+## (drumul la +39,5) nu incap amandoua. Ales: ~22-34 m peste solul de sub
+## centru (+18,3), adica de la
+## cota drumului pana la 12 m peste ea.
+const FW_Y := Vector2(40.0, 52.0)
+## Tiroliana: de pe bastion (FROM_OUT m spre exterior, FROM_UP m peste podea)
+## pana la ZIP_RUN m, pe terasele de jos.
+const ZIP_FROM_OUT := 4.0
+const ZIP_FROM_UP := 3.2
+const ZIP_RUN := 75.0
+## Uliii: cotele fata de varf (+39,9): 8-15 m sub drum, peste case (<= +23).
+const KITE_DY := Vector3(-8.0, -12.0, -15.0)
 ## Curtea dintre brate (interiorul acului): in capturile w3 era o pata de
 ## sol gol care domina jumatatea stanga a cadrului-erou. Parapet (+2,4) pe
 ## muchia interioara a fiecarui brat, oprit la ~20 m de varf. La +1,2 (w4)
@@ -302,6 +321,13 @@ const RIM_GAP := 2.5
 const RIM_DROP := 0.1
 ## Bastionul rotund sub varful acului, pe partea din afara (spre oras).
 const TIP_FRAC := 0.664
+## Runda 4: bastionul pe dreapta bratului de iesire, peste caderea FortBluff.
+const BASTION_FRAC := 0.676
+## Bucata de jos a bastionului: putin mai lata (corpul se evazeaza spre sol),
+## merloanele ei (r <= 8,5 x scara) intra in talpa celei de sus (r 9,06-9,39
+## pe primul metru), deci nu se vad.
+const BASTION_LOW_SCALE := 1.05
+const BASTION_LOW_OVERLAP := 1.2
 const BASTION_R := 9.39
 const BASTION_TIP_Y := 13.79
 const BASTION_FLOOR_Y := 12.45
@@ -545,13 +571,15 @@ func _in_bastion(c: Vector3, half_len: float) -> bool:
 
 
 func _rim_and_bastion() -> void:
-	var n := _track.baked.size()
-	var ti := _idx(TIP_FRAC)
+	# Runda 4 (dupa FortBluff, poi-fsub): bastionul NU mai sta pe normala
+	# varfului (acolo terenul e platou), ci pe DREAPTA bratului de iesire, la
+	# BASTION_FRAC, unde relieful cade 25 m spre casele de la picior. Coroana
+	# ramane sub cota drumului (fara parapet), corpul coboara pe cadere: doua
+	# bucati suprapuse (cea de jos putin mai lata, merloanele ei ascunse in
+	# talpa celei de sus), ca sa ajunga pana la sol pe toata amprenta.
+	var ti := _idx(BASTION_FRAC)
 	var p := _track.baked[ti]
-	var a := _track.baked[(ti - 6 + n) % n]
-	var b := _track.baked[(ti + 6) % n]
-	var mid := (a + b) * 0.5
-	var out := Vector3(p.x - mid.x, 0.0, p.z - mid.z).normalized()
+	var out := -_left(ti)
 	var dist := _track.width_at_index(ti) + RIM_GAP + BASTION_R
 	var c := p + out * dist
 	c.y = p.y
@@ -561,11 +589,25 @@ func _rim_and_bastion() -> void:
 	var yaw := atan2(out.x, out.z)
 	var bb := Basis.from_euler(Vector3(0.0, yaw, 0.0))
 	var bpos := Vector3(c.x, base_y, c.z)
-	# `mesh`: podeaua dintre merloane e fata reala, pe ea stau tunurile (cu
-	# hull-ul convex, podeaua ar fi inauntrul corpului).
+	# `mesh`: podeaua dintre merloane e fata reala (tiroliana pleaca de pe ea).
 	_raw_basis("fort_bastion", "bastion", bpos, bb, "mesh")
 	if _sol_real(c.x, c.z) - base_y > 2.0:
 		_meta_last("metadata/scufundat = true")
+	var gmin := INF
+	for k in 16:
+		var ang := TAU * float(k) / 16.0
+		gmin = minf(gmin, _sol_real(c.x + cos(ang) * BASTION_R, c.z + sin(ang) * BASTION_R))
+	if gmin < base_y - 0.3:
+		var low_s := BASTION_LOW_SCALE
+		var low_top := base_y + BASTION_LOW_OVERLAP
+		var low_base := low_top - BASTION_TIP_Y
+		var lb := bb.scaled(Vector3(low_s, 1.0, low_s))
+		_raw_basis("fort_bastion", "bastionJos", Vector3(c.x, low_base, c.z), lb, "mesh")
+		_meta_last("metadata/scufundat = true")
+		# Partea vazuta a bucatii de jos e fata dinspre cadere (+Z local =
+		# `out`); in centru terenul (platoul) ii acopera varful prin proiect.
+		_meta_last("metadata/ancora_sol = Vector3(0, 0, %.2f)" % (BASTION_R * 0.95))
+		print("; bastion jos: baza %.1f, solul minim sub amprenta %.1f" % [low_base, gmin])
 	print("; bastion: centru %s, iesire %s, sol la centru %+.1f fata de drum, marginea la %.1f m de asfalt" % [
 		str(bpos), str(out), _sol_real(c.x, c.z) - p.y, _edge_dist(c) - BASTION_R])
 	for k in BASTION_MERLONS:
@@ -581,7 +623,6 @@ func _rim_and_bastion() -> void:
 	# ambelor brate, spre curtea dintre ele) sunt joasi si se opresc departe de
 	# ac (PARAPET_IN_*), unde AI-ul taie interiorul: fara capete de zid acolo.
 	for run: Array in [[PARAPET_A_FROM, PARAPET_A_TO, "parapet", -1.0],
-			[PARAPET_B_FROM, PARAPET_B_TO, "parapet_jos", -1.0],
 			[PARAPET_IN_A_FROM, PARAPET_IN_A_TO, "parapet", 1.0],
 			[PARAPET_IN_B_FROM, PARAPET_IN_B_TO, "parapet", 1.0]]:
 		var sg: float = run[3]
@@ -881,6 +922,10 @@ func _ground_clusters() -> void:
 			gmax = maxf(gmax, gg)
 		if gmax - gmin > 2.5:
 			continue
+		# Runda 4: doar pe PLATOU (dupa FortBluff, terasele de la picior sunt
+		# la 15-25 m sub drum; grupurile de acolo pluteau fata de drum).
+		if absf(g0 - _track.baked[i].y) > CLUSTER_PLATEAU_DY:
+			continue
 		q.y = g0
 		centers.append(q)
 		var kind := centers.size() % 4
@@ -1052,8 +1097,14 @@ func _theatre_node() -> void:
 	for v in _muzzle_dirs:
 		ds.append("%.4f, %.4f, %.4f" % [v.x, v.y, v.z])
 	_out.append("muzzle_dirs = PackedVector3Array(%s)" % ", ".join(ds))
-	if _zip_from != Vector3.ZERO and _bastion_c != Vector3.INF:
-		var to := Vector3(_bastion_c.x, _bastion_floor_y + 2.2, _bastion_c.z)
+	if _bastion_c != Vector3.INF:
+		# Runda 4: tiroliana pleaca de pe bastion (peste cadere) si coboara la
+		# casele de la picior. Statia de pe coasta ar fi tras cablul peste
+		# ambele brate, la 3 m peste drum.
+		_zip_from = _bastion_c + _bastion_out * ZIP_FROM_OUT
+		_zip_from.y = _bastion_floor_y + ZIP_FROM_UP
+		var zt := _bastion_c + _bastion_out * ZIP_RUN
+		var to := Vector3(zt.x, _sol_real(zt.x, zt.z) + 2.2, zt.z)
 		_out.append("zip_from = Vector3(%.3f, %.3f, %.3f)" % [_zip_from.x, _zip_from.y, _zip_from.z])
 		_out.append("zip_to = Vector3(%.3f, %.3f, %.3f)" % [to.x, to.y, to.z])
 		_out.append('zip_rider = ExtResource("s_zipline_rider")')
@@ -1069,10 +1120,15 @@ func _theatre_node() -> void:
 		kc = _bastion_c + _bastion_out * 22.0
 	_out.append('kite_model = ExtResource("s_black_kite_bird")')
 	_out.append("kite_center = Vector3(%.3f, %.3f, %.3f)" % [kc.x, tip.y, kc.z])
+	_out.append("kite_heights = PackedFloat32Array(%.1f, %.1f, %.1f)" % [KITE_DY.x, KITE_DY.y, KITE_DY.z])
+	print("; uliii: sol sub centru %.1f, zbor la %.1f..%.1f" % [_sol_real(kc.x, kc.z),
+		tip.y + KITE_DY.z, tip.y + KITE_DY.x])
 	# Artificiile: in fata cadrului-erou (bratul de intrare priveste orasul),
 	# nu pe normala varfului — acolo le acopereau turnurile lui E (captura r3).
-	var hi := _idx(FW_FROM_FRAC)
-	var fc := _track.baked[hi] + _tangent(hi) * FW_AHEAD
+	# Runda 4: „sub tine", peste casele de la picior: pe iesirea bastionului.
+	# Si inainte pe traseu (FW_ALONG), ca sa intre in cadrul-erou 0.670, care
+	# priveste spre est: pe normala bastionului erau la 90 grade, pe margine.
+	var fc := _bastion_c + _bastion_out * FW_OUT + _tangent(_idx(BASTION_FRAC)) * FW_ALONG
 	_out.append("fw_center = Vector3(%.3f, 0, %.3f)" % [fc.x, fc.z])
 	_out.append("fw_y_min = %.1f" % FW_Y.x)
 	_out.append("fw_y_max = %.1f" % FW_Y.y)

@@ -81,13 +81,18 @@ const MAIN_ROWS := [
 ]
 ## Ulicioara: fata la >= 1,0 m de marginea benzii (3,2), randul 2 in spate.
 const ALLEY_ROWS := [
-	{"front": 1.0, "jit": 0.35, "gap": Vector2(0.0, 0.8), "turn_p": 0.0, "yaw_deg": 3.0},
+	{"front": 1.0, "jit": 0.3, "gap": Vector2(0.0, 0.4), "turn_p": 0.0, "yaw_deg": 2.0},
 	{"front": 9.8, "jit": 1.0, "gap": Vector2(0.4, 2.4), "turn_p": 0.3, "yaw_deg": 10.0},
 ]
 ## Marja fata de marginea ORICAREI benzi pentru amprenta intreaga (orice punct
 ## al dreptunghiului): pe bucla, trotuarul; pe ulicioara, 1 m.
 const KEEP_MAIN := 3.2
 const KEEP_ALLEY := 0.9
+## Casele-ziduri ale ulicioarei stau in buzunarul dintre ea si bucla (15-21 m
+## intre axe): acolo fata dinspre bucla are voie pana la 2 m de asfaltul ei
+## (pe trotuar; ProbeLaneClear cere banda + 0,5 m), altfel buzunarul ramane
+## nisip si ulicioara nu are zid pe partea aia.
+const KEEP_MAIN_FROM_ALLEY := 2.0
 ## Amprenta unei case din OrasFill, ca cerc (casele ei au 6,3-7,7 m latura si
 ## yaw pe multipli de 90° ± 6°; haveli 10,9 m, rar): raza cercului cuprinzator.
 const FILL_R := 5.4
@@ -283,7 +288,8 @@ func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 			c3 = p + right * sgn * (front + pushed + d_half)
 			c = Vector2(c3.x, c3.z)
 			why = _free_why(c, ax, w_half, d_half)
-			if why == "" and not _clear_of_roads(c, ax, w_half, d_half):
+			if why == "" and not _clear_of_roads(c, ax, w_half, d_half,
+					KEEP_MAIN_FROM_ALLEY if ri == 1 else KEEP_MAIN):
 				why = "drum"
 			if why == "" or why == "fill" or why == "rezervat":
 				break
@@ -381,12 +387,13 @@ func _obb_overlap(c1: Vector2, a1: Vector2, h1a: float, h1b: float,
 
 ## Fiecare punct al amprentei la >= KEEP de marginea fiecarei benzi (bucla:
 ## KEEP_MAIN; ulicioara: KEEP_ALLEY), pe toata pista (orice cota apropiata).
-func _clear_of_roads(c: Vector2, ax: Vector2, ha: float, hb: float) -> bool:
+func _clear_of_roads(c: Vector2, ax: Vector2, ha: float, hb: float,
+		keep_main: float = KEEP_MAIN) -> bool:
 	var pts := _samples(c, ax, ha, hb)
 	var reach := ha + hb + 20.0
 	for ri in _track.routes.size():
 		var route := _track.route_at(ri)
-		var keep := KEEP_MAIN if ri == 0 else KEEP_ALLEY
+		var keep := keep_main if ri == 0 else KEEP_ALLEY
 		for j in route.baked.size():
 			var bp := route.baked[j]
 			var bp2 := Vector2(bp.x, bp.z)

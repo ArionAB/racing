@@ -554,6 +554,13 @@ func _flock(name: String, res: String, pos: PackedVector3Array, yw: PackedFloat3
 	_out.append("yaws = " + var_to_str(yw))
 	_out.append("scale_min = %.2f" % smin)
 	_out.append("scale_max = %.2f" % smax)
+	# candelele ard: flacara + haloul fals (FlockProp.halo_enabled, LampHalo)
+	if res.contains("diya"):
+		_out.append("halo_enabled = true")
+	# cele de pe apa isi arunca si reflexia pe luciu (FlockProp.halo_reflect)
+	if res.contains("floating_diya"):
+		_out.append("halo_reflect = 0.6")
+		_out.append("halo_reflect_stretch = 5.0")
 	_out.append("")
 
 

@@ -133,6 +133,17 @@ class_name FlockProp
 @export var halo_color: Color = Color(1.0, 0.5, 0.12)
 @export var halo_intensity: float = 1.0
 @export var halo_flicker: bool = true
+## REFLEXIA flacarii in apa, pentru stolurile care plutesc (candelele de pe
+## apa fantanii si a lacului Devkund). > 0 = inca un MultiMesh `LampHalo`
+## (acelasi material, zero materiale noi) cu cate o pata alungita la baza
+## fiecarei piese, la `halo_reflect` din intensitatea haloului. Pata sta la
+## `halo_reflect_lift` peste planul piesei (linia apei), nu la oglinda reala
+## a flacarii: apa e opaca si scrie adancime, deci o pata sub luciu ar fi
+## ascunsa de apa insasi. Miezul alungit pe verticala (`halo_reflect_stretch`)
+## citeste ca dara de lumina pe apa calma. 0 (implicit) = nimic nou.
+@export_range(0.0, 1.0, 0.01) var halo_reflect: float = 0.0
+@export var halo_reflect_lift: float = 0.03
+@export var halo_reflect_stretch: float = 4.0
 
 
 func _ready() -> void:
@@ -169,6 +180,7 @@ func _build() -> void:
 	# ingropa cealalta jumatate.
 	var sampler: Object = _find_sampler() if snap_to_ground else null
 	var halo_pts := PackedVector3Array()
+	var refl_pts := PackedVector3Array()
 	for i in positions.size():
 		var yaw: float = yaws[i] if i < yaws.size() else 0.0
 		# ATENTIE: niciodata scale.x negativ pentru oglindire — Godot culleste
@@ -191,10 +203,17 @@ func _build() -> void:
 		mm.set_instance_transform(i, ixf)
 		if halo_enabled:
 			halo_pts.append(global_transform * (ixf * halo_offset))
+			if halo_reflect > 0.0:
+				refl_pts.append(global_transform * (p + Vector3.UP * halo_reflect_lift))
 	multimesh = mm
 	if halo_enabled:
 		LampHalo.build(self, name + "_Halou", halo_pts, halo_color, halo_intensity,
 			halo_core_m, halo_radius_m, halo_stretch, halo_flicker, seed_value)
+		if halo_reflect > 0.0:
+			# Aceeasi samanta => aceleasi faze de palpaire ca flacara de deasupra.
+			LampHalo.build(self, name + "_Reflexie", refl_pts, halo_color,
+				halo_intensity * halo_reflect, halo_core_m * 0.8,
+				halo_radius_m * 0.7, halo_reflect_stretch, halo_flicker, seed_value)
 	material_override = Palette.triplanar_class_material(tri_class) if tri_class != "" else Palette.world_material()
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 

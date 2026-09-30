@@ -123,6 +123,18 @@ extends Marker3D
 ## Opt-in: pe Alpii/Stromboli garda ar schimba terenul existent.
 @export var respect_branch: bool = false
 
+## Repunerea unei masini care a TRECUT deja golul nu are voie sa cada inapoi in
+## el. [method Car.respawn] retrage masina cu 12-14 m pe ax, iar la o saritura
+## cu gol de ~15 m o ratare chiar dupa aterizare (ejectare, blocaj) o punea
+## exact deasupra golului: cadea pe malul de sub buza de aterizare si ramanea
+## lipita de peretele soselei, deasupra cutiei [RespawnZone] (masurat pe Track17,
+## Devkund: repusa la frac 0.886, buza la 0.888, [blocaj] pe RoadSides). Pornit,
+## o repunere care pleaca de dincolo de buza de aterizare si s-ar retrage
+## inapoi peste ea e oprita pe asfalt, la [constant Track.GAP_RESPAWN_CLEAR_M]
+## dupa buza. Cine n-a trecut inca golul se repune ca inainte (si cade, si il
+## prinde [RespawnZone] cu elanul ei). Oprit (implicit) = bit-identic.
+@export var respawn_past_gap: bool = false
+
 ## Sapatura e o GROAPA CIRCULARA centrata pe taietura, nu o albie in lungul
 ## axei. Pentru gauri care exista doar ca sa se ascunda sub un asset rotund
 ## (cuva craterului de pe Stromboli): terenul coboara radial de la
@@ -193,6 +205,7 @@ func to_spec(track: Node3D) -> Dictionary:
 		"build_towers": build_towers,
 		"build_ships": build_ships,
 		"respect_branch": respect_branch,
+		"respawn_past_gap": respawn_past_gap,
 	}
 	if ford:
 		# Apa peste drum = drop NEGATIV fata de cota soselei. Steagul „canal la

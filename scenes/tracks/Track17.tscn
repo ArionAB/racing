@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bhkx6a1cg2py7" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" uid="uid://da4os4mcgj643" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="3_hollow"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_bluff.gd" id="3_bluff"]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="4_branch"]
 [ext_resource type="Script" path="res://scenes/hazards/cow_gate.gd" id="5_cow"]
 [ext_resource type="Script" path="res://scenes/hazards/dusk_cycle.gd" id="6_dusk"]
@@ -132,6 +133,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 135.0, 60.0, -275.0)
 gizmo_extents = 100.0
 script = ExtResource("2_peak")
 radius_m = 100.0
+
+[node name="FortBluff" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 142.0, 39.0, -203.0)
+gizmo_extents = 30.0
+script = ExtResource("3_bluff")
+run_m = 16.0
+terrace_count = 6
+terrace_tread_m = 16.0
+terrace_rise_m = -3.0
 
 [node name="Hollows" type="Node3D" parent="."]
 
@@ -2047,6 +2057,9 @@ script = ExtResource("cityfill")
 models = Array[PackedScene]([ExtResource("s_blue_house_a"), ExtResource("s_blue_house_b"), ExtResource("s_blue_house_c"), ExtResource("s_blue_house_d"), ExtResource("s_blue_house_e"), ExtResource("s_haveli_facade")])
 weights = PackedFloat32Array(0.1, 0.25, 0.25, 0.2, 0.2, 0.05)
 indigo_ratio = 0.4
+face_xz = Vector3(135, -215, 200)
+front_yaw_deg = PackedFloat32Array(-90, -90, 0, -90, 0, 0)
+below_road_m = 22.0
 
 [node name="KickerDevkund" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 173.0, 0.0, 125.0)

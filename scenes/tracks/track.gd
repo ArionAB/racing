@@ -3964,6 +3964,28 @@ func _code_points() -> Array[Vector3]:
 ## iar in canal — bucla masurata pe Track17 seed 2 (6 repuneri, 1 ejectare).
 @export var ai_progress_reset_on_respawn: bool = false
 
+## Muchii FARA PARAPET pe care AI-ul le trateaza ca pe o prapastie, nu ca pe
+## o margine de asfalt: fiecare e (frac_start, frac_end, latura, margine_m),
+## fractii pe LUNGIME (ca in ProbeRace), latura -1 = stanga sensului de mers,
+## +1 = dreapta. Vezi [method ai_drop_edge_at] si `AIController._drop_*`.
+## Implicit gol = comportamentul vechi, deci pistele existente raman
+## NESCHIMBATE (opt-in, ca [member ai_progress_reset_on_respawn]).
+##
+## Exista pentru fantana din Jodhpur (POI C): apa e pe stanga pe tot drumul,
+## fara parapet (brief), iar caderile veneau din pluton, pe turul 1, in doua
+## locuri: iesirea din virajul de intrare (viraj la dreapta, deci apa pe
+## EXTERIOR; exact acolo soseaua sare de la 6,5 la 4,5 m, iar masina iesita
+## larg ramane sub buza asfaltului si aluneca in cornisa) si apropierea de
+## acul de la fund (viraj la stanga, apa pe INTERIOR: masina din dreapta taie
+## spre apex si o impinge pe cea de langa ea in apa). Linia AI-ului mergea
+## pana la 0,8 din semilatime, adica cu roata pe muchie, iar ocolirea alegea
+## la egalitate partea stanga. In zona declarata AI-ul: tine axa la
+## `margine_m` de muchie (si la 1,4 m de cealalta margine), intra mai incet
+## in virajele cu muchia pe exterior si nu inchide usa vecinului de alaturi.
+## Masurat pe 16 seed-uri x 2 variante de decor: iesirile cu axa peste muchia
+## stanga 6 -> 1-2, cu roata pe buza 19-21 -> 6-7, caderi in apa 2 -> 0.
+@export var ai_drop_edges: Array[Vector4] = []
+
 ## Bifeaza in Inspector ca sa reconstruiesti pista (doar in editor).
 ## Pe o pista definita in cod, PRIMA bifare creeaza si nodul "Path" cu
 ## punctele reale ale traseului — de atunci curba e a ta, trage de ea.
@@ -11496,6 +11518,22 @@ func lane_forced_at(index: int) -> float:
 		if inside and absf(seg.z) > absf(out):
 			out = seg.z
 	return out
+
+## Muchia fara parapet la indexul dat (bucla principala): (latura ±1,
+## margine_m), sau ZERO daca nu e niciuna. Vezi [member ai_drop_edges].
+func ai_drop_edge_at(index: int) -> Vector2:
+	if ai_drop_edges.is_empty():
+		return Vector2.ZERO
+	var f := frac_at(index)
+	for seg in ai_drop_edges:
+		var inside: bool
+		if seg.x <= seg.y:
+			inside = f >= seg.x and f <= seg.y
+		else:
+			inside = f >= seg.x or f <= seg.y
+		if inside:
+			return Vector2(signf(seg.z), seg.w)
+	return Vector2.ZERO
 
 func lane_bias_at(index: int) -> float:
 	if _lane_bias.is_empty():

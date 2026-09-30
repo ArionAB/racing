@@ -127,6 +127,7 @@ custom_width_pinches = Array[Vector3]([Vector3(0.5054, 0.51128, 3.5), Vector3(0.
 traffic_count = 6
 ai_shortcut_chance = 0.2
 ai_progress_reset_on_respawn = true
+ai_drop_edges = Array[Vector4]([Vector4(0.095, 0.268, -1, 2.2)])
 terrain_pad_m = 260.0
 
 [node name="Path" type="Path3D" parent="."]

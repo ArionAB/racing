@@ -340,6 +340,24 @@ var _fb_side: float = 0.0
 var _span_node: Node = null
 var _span_side: float = 0.0
 
+## Muchia fara parapet (`Track.ai_drop_edges`, fantana din Jodhpur): limitele
+## liniei pe cadrul curent, in aceleasi fractii ca `line`. In afara unei
+## muchii declarate sunt exact ±LINE_MAX, deci tot ce le citeste (inclusiv
+## `_avoid_line`) face ce facea inainte — bit cu bit, pe orice alta pista.
+var _line_lo: float = -LINE_MAX
+var _line_hi: float = LINE_MAX
+## Latura muchiei (-1 stanga, +1 dreapta, 0 = nicio muchie aici).
+var _drop_side: float = 0.0
+## Cat de departe in fata/spate (m, pe directia masinii) e „alaturi" pentru
+## regula de a nu inchide usa (`_drop_alongside`): o lungime de caroserie si
+## ceva — cine e la 8 m in fata se ocoleste cu `_avoid_line`, nu se striveste.
+const DROP_ALONGSIDE_M: float = 6.5
+## Cat din viteza-tinta ramane intr-un viraj plin cu muchia pe EXTERIOR.
+const DROP_OUTSIDE_SPEED: float = 0.8
+## Marginea (m, de la marginea asfaltului la axa masinii) pe partea OPUSA
+## muchiei, in zona declarata: o caroserie si ceva.
+const DROP_FAR_MARGIN_M: float = 1.4
+
 func configure(race_track: Track, rng: RandomNumberGenerator,
 		cars: Array[Car] = []) -> void:
 	track = race_track
@@ -376,6 +394,10 @@ func update(delta: float) -> void:
 	# a_far pozitiv inseamna viraj la stanga: interiorul e in sens invers.
 	var line := clampf(line_offset - signf(a_far) * severity * INSIDE_BIAS,
 		-LINE_MAX, LINE_MAX)
+	# Muchie fara parapet (apa fantanii, Jodhpur): linia nu mai merge cu roata
+	# pe buza. No-op cand pista nu declara nimic aici (limitele raman ±LINE_MAX).
+	_drop_limits(idx, speed)
+	line = clampf(line, _line_lo, _line_hi)
 	# Sector cu hazard PE AXA (trenul pe sens de pe Baikal): pilotul se tine
 	# de margine, pe partea lui de personalitate. Zero peste tot in rest.
 	var keep_off := track.lane_bias_at(idx)
@@ -443,6 +465,10 @@ func update(delta: float) -> void:
 		line = clampf(line, minf(lo, hi), maxf(lo, hi))
 		line = clampf(line, -LINE_MAX, LINE_MAX)
 	line = _alley_gate_line(idx, line)
+	# Muchia fara parapet are ultimul cuvant, dupa ocolire: nici depasirea nu
+	# trece pe buza, nici nu inchide usa celui de langa noi spre apa.
+	if _drop_side != 0.0:
+		line = _drop_alongside(idx, line)
 	var near := track.lookahead_point(idx, _lookahead_near(speed), line, car.route)
 	# Bifurcatia: cine a decis ca o ia, tinteste banda cealalta cat timp cele
 	# doua sunt inca lipite. Comutarea propriu-zisa de ruta o face Car, pe
@@ -483,6 +509,12 @@ func update(delta: float) -> void:
 
 	# --- pedale: viteza-tinta din cat de stramt e ce urmeaza ---
 	var target := car.max_speed * lerpf(1.0, CORNER_SPEED_FLOOR, severity)
+	# Muchie fara parapet pe EXTERIORUL virajului (iesirea din virajul de
+	# intrare in fantana, apa pe stanga unui viraj la dreapta): iesirea larga
+	# duce spre apa, deci pilotul intra mai incet. Fals peste tot unde nu e
+	# declarata o muchie (`_drop_side` = 0).
+	if _drop_side != 0.0 and signf(a_far) == _drop_side:
+		target *= lerpf(1.0, DROP_OUTSIDE_SPEED, severity)
 	# Poarta ingustata a ulicioarei: de la desprinderea benzii pana dupa
 	# poarta, cu plafon de viteza — ca sa aiba timp sa se aseze pe axa.
 	if _alley_approach:
@@ -861,8 +893,10 @@ func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	# pastrata cat tine acelasi blocaj daca inca incape.
 	var cand_l := blocker_lat - gap_frac
 	var cand_r := blocker_lat + gap_frac
-	var l_ok := cand_l >= -LINE_MAX
-	var r_ok := cand_r <= LINE_MAX
+	# `_line_lo`/`_line_hi` = ±LINE_MAX peste tot in afara unei muchii fara
+	# parapet (`Track.ai_drop_edges`), deci testul e cel vechi.
+	var l_ok := cand_l >= _line_lo
+	var r_ok := cand_r <= _line_hi
 	var target: float
 	# In elanul unei sarituri (`Track.ai_keep_side_at`), cu blocajul LANGA
 	# noi (sub AVOID_TAIL_M): trecerea e pe partea pe care suntem deja. Regula
@@ -901,7 +935,98 @@ func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	# Aproape = mutare completa; departe = abia schitata.
 	var t := clampf((window - best_ahead) / maxf(window - AVOID_FULL_M, 0.001),
 		0.0, 1.0)
-	return lerpf(line, clampf(target, -LINE_MAX, LINE_MAX), t)
+	return lerpf(line, clampf(target, _line_lo, _line_hi), t)
+
+## Limitele liniei pe muchia fara parapet (`Track.ai_drop_edges`). In afara
+## unei muchii declarate: ±LINE_MAX si `_drop_side` = 0, adica exact ce era.
+##
+## Marginea se masoara de la marginea asfaltului la AXA masinii si se
+## converteste in fractie pe latimea cea mai INGUSTA dintre aici si punctul de
+## tintire: tinta de aproape se pune pe latimea de la indexul ei (vezi
+## `Track.lookahead_point`), iar la intrarea in fantana soseaua se strange de
+## la 6,5 la 4,5 m chiar la iesirea din viraj — o fractie calculata pe 6,5 ar
+## cadea la 1,6 m de buza pe 4,5.
+func _drop_limits(idx: int, speed: float) -> void:
+	_line_lo = -LINE_MAX
+	_line_hi = LINE_MAX
+	_drop_side = 0.0
+	if car.route != 0:
+		return
+	var edge := track.ai_drop_edge_at(idx)
+	if edge.x == 0.0:
+		return
+	var steps := int(_lookahead_near(speed) / maxf(track.curve.bake_interval, 0.001))
+	# Cea mai INGUSTA latime pana la tinta, nu doar capetele: sectoarele de
+	# latime din fantana au trepte de 2 m (6,5 -> 4,5) la 0.133, 0.163 si
+	# 0.217, iar o linie calculata pe latimea de aici ducea masina pe
+	# portiunea lata drept in treapta.
+	var hw := track.width_at_index(idx)
+	for k in range(1, steps + 1):
+		hw = minf(hw, track.width_at_index(idx + k))
+	hw = maxf(hw, 0.001)
+	var lim := clampf(1.0 - edge.y / hw, 0.0, LINE_MAX)
+	# Si partea cealalta, cu o margine mica: pe dreapta fantanii umarul e sub
+	# buza asfaltului (0,3-0,5 m, adica perete la urcare), iar o masina
+	# impinsa acolo de regula de mai jos se infunda — masurat.
+	var far_lim := clampf(1.0 - DROP_FAR_MARGIN_M / hw, 0.0, LINE_MAX)
+	_drop_side = edge.x
+	if edge.x < 0.0:
+		_line_lo = -lim
+		_line_hi = far_lim
+	else:
+		_line_hi = lim
+		_line_lo = -far_lim
+
+## Nu inchide usa: in zona cu muchie fara parapet, o masina ALATURI de noi
+## (sub DROP_ALONGSIDE_M pe directia de mers) ramane cu culoarul ei — linia
+## noastra nu se apropie de ea sub AVOID_CLEARANCE_M, fie ca vine de la
+## tragerea spre apex, fie de la o ocolire. Spre apa, mereu, ca sa nu
+## impingem vecinul in ea; spre perete, cand vecinul e deja la limita lui,
+## fiindca ocolirea care nu mai are voie pe stanga (limita de mai sus) trece
+## pe dreapta, iar vecinul de acolo era impins peste treapta de latime, sub
+## buza, unde se infunda (masurat: Tu il impingea pe Vex de la -1,2 la
+## +5,9 m, seed 11).
+##
+## De ce nu ajunge `_avoid_line`: aia vede doar ce e IN FATA. Masurat pe
+## Track17 (seed 3, cu decorul bazarului): Luna (masina grea) e cu 0,5 m in
+## fata lui Tu, pe dreapta lui, la 25 m de acul de la fund; tragerea spre
+## interior (apa) o muta spre stanga si-l impinge pe Tu, care e deja langa
+## muchie, in apa — Luna nu-l vede, fiindca e alaturi, nu in fata.
+func _drop_alongside(idx: int, line: float) -> float:
+	var r := track.route_at(0)
+	if r == null or r.count() == 0:
+		return line
+	var hw := maxf(track.width_at_index(idx), 0.001)
+	var base_pt := r.baked[r.wrap_index(idx)]
+	var side := r.side_at(idx)
+	var fwd := -car.global_transform.basis.z
+	var my_lat := side.dot(car.global_position - base_pt) / hw
+	var gap_frac := AVOID_CLEARANCE_M / hw
+	var out := line
+	for other in traffic:
+		if other == null or other == car or not is_instance_valid(other):
+			continue
+		if other.route != 0:
+			continue
+		var d := other.global_position - car.global_position
+		if absf(fwd.dot(d)) > DROP_ALONGSIDE_M:
+			continue
+		var o_lat := side.dot(other.global_position - base_pt) / hw
+		# Cel mult cat suntem ACUM: regula opreste inchiderea usii, nu ne
+		# impinge spre marginea cealalta (pe dreapta fantanii e un umar sub
+		# buza asfaltului, iar o masina impinsa acolo se infunda — masurat).
+		# Spre muchie: mereu. Spre partea opusa: doar cand vecinul de acolo nu
+		# mai are unde sa se dea (e la un gabarit de limita lui) — altfel, in
+		# plutonul din virajul de intrare, regula tinea masinile de pe stanga
+		# lipite de muchie (masurat: 26 de treceri cu roata pe buza fata de 7).
+		var toward_drop := (o_lat < my_lat) == (_drop_side < 0.0)
+		if o_lat < my_lat:
+			if toward_drop or o_lat <= _line_lo + gap_frac:
+				out = maxf(out, minf(o_lat + gap_frac, minf(my_lat, _line_hi)))
+		else:
+			if toward_drop or o_lat >= _line_hi - gap_frac:
+				out = minf(out, maxf(o_lat - gap_frac, maxf(my_lat, _line_lo)))
+	return clampf(out, _line_lo, _line_hi)
 
 ## Metri pana la prima usa de piatra de pe banda noastra care va fi INCHISA
 ## cand ajungem la ea (INF daca nu e niciuna, sau va fi deschisa). Doar pe

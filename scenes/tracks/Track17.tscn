@@ -555,6 +555,108 @@ stretch = PackedFloat32Array(1.60, 1.60, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.0
 
 [node name="ZoneF_Bastion" type="Node3D" parent="DecorManual"]
 
+[node name="fzid1" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(0.088786, 0.000000, 0.996051, 0.000000, 1.000000, -0.000000, -0.996051, 0.000000, 0.088786, 114.426300, 33.393833, -333.537292)
+metadata/scufundat = true
+
+[node name="fzid2" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(0.145131, 0.000000, 0.989412, 0.000000, 1.000000, -0.000000, -0.989412, 0.000000, 0.145131, 126.339096, 33.617199, -332.133789)
+metadata/scufundat = true
+
+[node name="fzid3" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(0.144809, 0.000000, 0.841041, 0.000000, 1.000000, -0.000000, -0.989460, 0.000000, 0.123087, 137.321823, 33.814224, -330.524475)
+metadata/scufundat = true
+
+[node name="fzid4" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(0.404639, 0.000000, 0.777305, 0.000000, 1.000000, -0.000000, -0.914477, 0.000000, 0.343943, 147.031906, 33.995132, -327.722290)
+metadata/scufundat = true
+
+[node name="fzid5" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(0.609416, 0.000000, 0.792851, 0.000000, 1.000000, -0.000000, -0.792851, 0.000000, 0.609416, 156.452850, 34.181721, -322.002136)
+metadata/scufundat = true
+
+[node name="fatadaA6" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_palace_facade_a")]
+transform = Transform3D(0.490342, 0.000000, 0.871530, 0.000000, 1.000000, -0.000000, -0.871530, 0.000000, 0.490342, 127.718704, 38.586254, -299.419312)
+metadata/ancora_sol = Vector3(4.20, 0, 0)
+
+[node name="fatadaB7" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_palace_facade_b")]
+transform = Transform3D(-0.993543, 0.000000, 0.113454, -0.000000, 1.000000, 0.000000, -0.113454, 0.000000, -0.993543, 184.090012, 39.667408, -293.933228)
+metadata/ancora_sol = Vector3(4.20, 0, 0)
+
+[node name="bastion8" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_bastion")]
+transform = Transform3D(0.229448, 0.000000, -0.973321, 0.000000, 1.000000, 0.000000, 0.973321, 0.000000, 0.229448, 106.327286, 26.040001, -219.785172)
+metadata/coliziune = "mesh"
+metadata/scufundat = true
+
+[node name="tun9" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_rampart_cannon")]
+transform = Transform3D(-0.746227, 0.000000, 0.665692, 0.000000, 1.000000, 0.000000, -0.665692, 0.000000, -0.746227, 103.043892, 38.490002, -222.714218)
+
+[node name="tun10" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_rampart_cannon")]
+transform = Transform3D(-0.969293, 0.000000, 0.245907, 0.000000, 1.000000, 0.000000, -0.245907, 0.000000, -0.969293, 102.062393, 38.490002, -220.867157)
+
+[node name="tun11" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_rampart_cannon")]
+transform = Transform3D(-0.973321, 0.000000, -0.229448, 0.000000, 1.000000, 0.000000, 0.229448, 0.000000, -0.973321, 102.044670, 38.490002, -218.775604)
+
+[node name="tun12" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_rampart_cannon")]
+transform = Transform3D(-0.757399, 0.000000, -0.652952, 0.000000, 1.000000, 0.000000, 0.652952, 0.000000, -0.757399, 102.994728, 38.490002, -216.912186)
+
+[node name="tun13" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_rampart_cannon")]
+transform = Transform3D(-0.370321, 0.000000, -0.928904, 0.000000, 1.000000, 0.000000, 0.928904, 0.000000, -0.370321, 104.697868, 38.490002, -215.697998)
+
+[node name="fzid14" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(-0.830306, 0.000000, 0.557308, 0.000000, 1.000000, 0.000000, -0.557308, 0.000000, -0.830306, 144.678696, 28.420000, -275.545563)
+metadata/scufundat = true
+
+[node name="fzid15" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(-0.836911, 0.000000, 0.547340, 0.000000, 1.000000, 0.000000, -0.547340, 0.000000, -0.836911, 138.050797, 28.420000, -265.542236)
+metadata/scufundat = true
+
+[node name="fzid16" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(-0.754170, 0.000000, 0.656679, 0.000000, 1.000000, 0.000000, -0.656679, 0.000000, -0.754170, 130.826675, 28.420000, -255.995758)
+metadata/scufundat = true
+
+[node name="fzid17" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(-0.669094, 0.000000, 0.743178, 0.000000, 1.000000, 0.000000, -0.743178, 0.000000, -0.669094, 122.427536, 28.420633, -247.456177)
+metadata/scufundat = true
+
+[node name="fzid18" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(-0.359940, 0.000000, -0.572963, -0.000000, 1.000000, 0.000000, 0.932975, 0.000000, -0.221048, 130.911560, 26.895250, -203.336929)
+metadata/scufundat = true
+
+[node name="fzid19" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(-0.065581, 0.000000, -0.848170, -0.000000, 1.000000, 0.000000, 0.997847, 0.000000, -0.055744, 139.438385, 26.787386, -201.676178)
+metadata/scufundat = true
+
+[node name="fzid20" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(0.209300, 0.000000, -0.706498, -0.000000, 1.000000, 0.000000, 0.977851, 0.000000, 0.151220, 148.766388, 26.710238, -202.249023)
+metadata/scufundat = true
+
+[node name="fzid21" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(0.475416, 0.000000, -0.747797, -0.000000, 1.000000, 0.000000, 0.879761, 0.000000, 0.404103, 157.492172, 26.614897, -205.580963)
+metadata/scufundat = true
+
+[node name="fzid22" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_fort_wall_segment")]
+transform = Transform3D(0.672593, 0.000000, -0.740013, -0.000000, 1.000000, 0.000000, 0.740013, 0.000000, 0.672593, 166.419037, 26.473558, -212.041138)
+metadata/scufundat = true
+
+[node name="paun23" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_peacock_closed")]
+transform = Transform3D(-0.523808, 0.000000, 0.851836, 0.000000, 1.000000, 0.000000, -0.851836, 0.000000, -0.523808, 141.850204, 41.150002, -269.714874)
+metadata/coliziune = "none"
+
+[node name="paun24" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_peacock_fanned")]
+transform = Transform3D(-0.561366, 0.000000, 0.827567, 0.000000, 1.000000, 0.000000, -0.827567, 0.000000, -0.561366, 129.434570, 41.150002, -252.896667)
+metadata/coliziune = "none"
+
+[node name="paun25" parent="DecorManual/ZoneF_Bastion" instance=ExtResource("s_peacock_closed")]
+transform = Transform3D(0.998873, 0.000000, 0.047463, 0.000000, 1.000000, 0.000000, -0.047463, 0.000000, 0.998873, 147.309143, 39.440239, -202.518219)
+metadata/coliziune = "none"
+
+[node name="LampiBastion" type="Node3D" parent="DecorManual/ZoneF_Bastion"]
+script = ExtResource("e_fort_lamps")
+positions = PackedVector3Array(109.747, 47.478, -335.109, 112.138, 47.478, -334.896, 114.528, 47.478, -334.683, 116.919, 47.478, -334.470, 119.309, 47.478, -334.257, 110.670, 40.894, -331.945, 117.842, 40.894, -331.305, 121.757, 47.701, -333.968, 124.131, 47.701, -333.620, 126.506, 47.701, -333.272, 128.881, 47.701, -332.923, 131.255, 47.701, -332.575, 122.499, 41.117, -330.757, 129.622, 41.117, -329.712, 133.451, 47.898, -332.253, 135.470, 47.898, -331.958, 137.488, 47.898, -331.662, 139.507, 47.898, -331.367, 141.525, 47.898, -331.072, 134.016, 41.314, -329.068, 140.072, 41.314, -328.182, 143.766, 48.079, -330.425, 145.632, 48.079, -329.599, 147.497, 48.079, -328.774, 149.363, 48.079, -327.948, 151.228, 48.079, -327.123, 143.457, 41.495, -327.205, 149.053, 41.495, -324.728, 153.348, 48.266, -325.839, 155.251, 48.266, -324.377, 157.154, 48.266, -322.914, 159.057, 48.266, -321.451, 160.959, 48.266, -319.989, 152.429, 41.682, -322.674, 158.137, 41.682, -318.286, 113.827, 39.934, -219.785, 113.523, 39.934, -217.672, 112.637, 39.934, -215.730, 111.239, 39.934, -214.117, 109.443, 39.934, -212.963, 107.395, 39.934, -212.362, 105.260, 39.934, -212.362, 103.212, 39.934, -212.963, 101.416, 39.934, -214.117, 100.018, 39.934, -215.730, 99.131, 39.934, -217.672, 98.827, 39.934, -219.785, 99.131, 39.934, -221.898, 100.018, 39.934, -223.840, 101.416, 39.934, -225.453, 103.212, 39.934, -226.607, 105.260, 39.934, -227.209, 107.395, 39.934, -227.209, 109.443, 39.934, -226.607, 111.239, 39.934, -225.453, 112.637, 39.934, -223.840, 113.523, 39.934, -221.898, 141.049, 42.504, -272.201, 142.386, 42.504, -274.194, 143.724, 42.504, -276.186, 145.061, 42.504, -278.179, 146.399, 42.504, -280.172, 134.461, 42.504, -262.155, 135.775, 42.504, -264.163, 137.088, 42.504, -266.172, 138.402, 42.504, -268.180, 139.716, 42.504, -270.189, 126.807, 42.504, -253.131, 128.383, 42.504, -254.941, 129.959, 42.504, -256.751, 131.535, 42.504, -258.561, 133.111, 42.504, -260.371, 118.091, 42.505, -245.099, 119.874, 42.505, -246.705, 121.658, 42.505, -248.311, 123.442, 42.505, -249.917, 125.225, 42.505, -251.522, 133.248, 40.979, -201.203, 131.873, 40.979, -201.733, 130.498, 40.979, -202.264, 129.123, 40.979, -202.795, 127.747, 40.979, -203.325, 143.434, 40.871, -200.261, 141.399, 40.871, -200.395, 139.363, 40.871, -200.529, 137.327, 40.871, -200.662, 135.292, 40.871, -200.796, 152.398, 40.794, -201.850, 150.703, 40.794, -201.487, 149.007, 40.794, -201.124, 147.311, 40.794, -200.762, 145.616, 40.794, -200.399, 161.628, 40.699, -206.509, 159.834, 40.699, -205.539, 158.039, 40.699, -204.569, 156.244, 40.699, -203.599, 154.449, 40.699, -202.630, 170.745, 40.558, -214.419, 168.969, 40.558, -212.804, 167.193, 40.558, -211.190, 165.416, 40.558, -209.576, 163.640, 40.558, -207.962)
+radii = PackedFloat32Array(0.13, 0.13, 0.13, 0.13, 0.13, 0.20, 0.20, 0.13, 0.13, 0.13, 0.13, 0.13, 0.20, 0.20, 0.13, 0.13, 0.13, 0.13, 0.13, 0.20, 0.20, 0.13, 0.13, 0.13, 0.13, 0.13, 0.20, 0.20, 0.13, 0.13, 0.13, 0.13, 0.13, 0.20, 0.20, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13)
+stretch = PackedFloat32Array(1.00, 1.00, 1.00, 1.00, 1.00, 1.40, 1.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.40, 1.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.40, 1.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.40, 1.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.40, 1.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00)
+
 [node name="ZoneG_Stanca" type="Node3D" parent="DecorManual"]
 
 [node name="ZoneH_Dreapta" type="Node3D" parent="DecorManual"]

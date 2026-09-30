@@ -244,7 +244,12 @@ func _verdict(vname: String, d: float, st: Dictionary) -> Array[String]:
 		var h: float = st[c]["h"]
 		var s: float = st[c]["s"]
 		if d < 0.25 and c != "drum":
-			if not (h < 45.0 or h > 340.0):
+			# Nuanta unui pixel aproape gri e zgomot: stanca indepartata din
+			# D_joc, in ceata, iese S 0.12-0.13 si H 339/344 dupa cat din ea
+			# ascund zidurile lui E (7449 -> 5146 px, integrarea valului 1).
+			# „Cald" se cere doar unde exista culoare, ca pragul de noapte
+			# de mai jos; un gri nu e nici cald, nici albastru.
+			if s >= 0.15 and not (h < 45.0 or h > 340.0):
 				out.append("%s: %s H %.0f nu e cald (vrea < 45)" % [tag, c, h])
 		elif d >= 0.25:
 			if h >= 190.0 and h <= 250.0 and s >= 0.15:

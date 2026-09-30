@@ -89,8 +89,15 @@ const HOUSE_DIMS := {
 }
 const STALL_DEPTH := {
 	"stall_canopy_a": 3.10, "stall_canopy_b": 3.10, "stall_canopy_c": 3.10,
-	"chai_stall": 2.67, "thela_cart": 1.20,
+	"chai_stall": 2.67,
 }
+## Latimea in lungul strazii (X local), din inventar.
+const STALL_W := {
+	"stall_canopy_a": 3.50, "stall_canopy_b": 3.50, "stall_canopy_c": 3.50,
+	"chai_stall": 2.11,
+}
+## Spatele tarabelor de pe margini (m de la ax): lipite de fatada (11,4).
+const BOOTH_BACK_LAT := 11.5
 ## Fatada primului rand (m de la ax): trotuarul se termina la 9,7, fasia de
 ## tarabe sta intre 9,1 si 11,2.
 const FACADE_LAT := 11.4
@@ -291,99 +298,99 @@ func _houses() -> void:
 		k += 1
 
 
-## Fasia de bazar dintre asfalt si case (tiparul lui H, runda 3): o taraba in
-## fiecare golf dintre doi stalpi de felinar (golful are 7 m, taraba 3,5 m, deci
-## nu atinge stalpul), o piesa mica (saci / cactus) la fiecare stalp: un
-## obiect la ~3,5 m. Tarabele stau cu spatele la case si fata spre drum, cu
-## felinarul de pravalie la gura (`StreetLights.extra_lamps`).
+## Fasia de bazar dintre asfalt si case. Runda 3 (criticul: „mese de picnic
+## goale, in randuri lungi, larg spatiate"): GRUPURI de 2-4 tarabe cu copertina
+## lipite una de alta si cu spatele de fatada, apoi un gol de 4-7 m; saci si
+## ghirlande ingramadite la capetele fiecarui grup; o lampa mica SUB copertina
+## (nu felinarul mare la gura). Fara `thela_cart` (citea ca masa goala).
 func _market() -> void:
-	var stations := _stations_x()
 	for side: float in [1.0, -1.0]: # +1 = stanga (+Z), -1 = dreapta
-		for i in range(stations.size() - 1):
-			var bay := (stations[i] + stations[i + 1]) * 0.5
-			if _market_blocked(side, bay, 2.0):
+		var x := -10.0 - _rng.randf_range(0.0, 2.0)
+		while x > -73.0:
+			var n := _rng.randi_range(2, 4)
+			var ms: Array[String] = []
+			var span := 0.0
+			for i in n:
+				var m := _pick_booth()
+				ms.append(m)
+				span += STALL_W[m]
+			# Grupul intreg trebuie sa incapa: altfel se scurteaza pana incape.
+			while ms.size() > 1 and _market_blocked(side, x - span * 0.5, span * 0.5):
+				span -= STALL_W[ms[ms.size() - 1]]
+				ms.pop_back()
+			if _market_blocked(side, x - span * 0.5, span * 0.5):
+				x -= 1.5
 				continue
-			var r := _rng.randf()
-			var m := "stall_canopy_a"
-			if r < 0.22:
-				m = "stall_canopy_a"
-			elif r < 0.44:
-				m = "stall_canopy_b"
-			elif r < 0.66:
-				m = "stall_canopy_c"
-			elif r < 0.82:
-				m = "chai_stall"
-			else:
-				m = "thela_cart"
-			_stall(m, "aTaraba", bay + _rng.randf_range(-0.4, 0.4), side)
-		for i in stations.size():
-			var xs: float = stations[i]
-			if _market_blocked(side, xs, 0.9):
-				continue
-			var c := _rng.randf()
-			var z := _rz(xs) + side * (9.95 + _rng.randf_range(0.0, 0.15))
-			if c < 0.55:
-				for j in [-0.5, 0.5]:
-					var sx: float = xs + j * 0.9
-					_raw("spice_sacks", "aSaci", Vector3(sx, _sol_real(sx, z), z),
-						_yaw_to_road(side) + _rng.randf_range(-0.4, 0.4), 1.0, "")
-			elif c < 0.8:
-				_raw("euphorbia", "aEufor", Vector3(xs, _sol_real(xs, z), z),
-					_rng.randf_range(0.0, TAU), 1.0, "")
-			else:
-				_raw("spice_sacks", "aSaci", Vector3(xs, _sol_real(xs, z), z),
-					_yaw_to_road(side), 1.0, "")
+			_cluster(ms, x, side, BOOTH_BACK_LAT, _yaw_to_road(side), "aTaraba")
+			x -= span + _rng.randf_range(4.0, 7.0)
 	_square()
 
 
-## Piata din stanga, INAINTEA turnului (x -9..-44, 14-20 m): doua randuri de
-## tarabe joase (2,6 m) cu culoar intre ele, saci si ghirlande. Nimic mai inalt
-## de 2,6 m: de pe H turnul (13,5 m lateral) se vede peste ele.
+## Piata din stanga, INAINTEA turnului (x -9..-44): grupuri scurte de tarabe
+## joase (2,6 m), cu fata spre drum, pe doua adancimi, cu saci si ghirlande
+## ingramadite intre ele. Nimic peste 2,6 m: de pe H turnul se vede peste ele.
 func _square() -> void:
-	for row in [[14.6, 1.0], [19.6, -1.0]]:
-		var lat: float = row[0]
-		var face: float = row[1] # +1 = fata spre drum
-		var x := -9.5 + _rng.randf_range(-0.5, 0.5)
+	for row in [[17.0, -10.5], [21.5, -14.0]]:
+		var back_lat: float = row[0]
+		var x: float = row[1] - _rng.randf_range(0.0, 1.5)
 		while x > -44.0:
-			var r := _rng.randf()
-			var z := _rz(x) + lat + _rng.randf_range(-0.3, 0.3)
-			var y := _sol_real(x, z)
-			if r < 0.7:
-				var ms := ["stall_canopy_a", "stall_canopy_b", "stall_canopy_c", "chai_stall"]
-				var m: String = ms[_rng.randi() % ms.size()]
-				var yaw := _yaw_to_road(1.0) if face > 0.0 else _yaw_to_road(1.0) + PI
-				yaw += _rng.randf_range(-0.08, 0.08)
-				_raw(m, "aPiata", Vector3(x, y, z), yaw, 1.0, "")
-				_shop_lamp_for(m, Vector3(x, y, z), yaw)
-				var gdir := Vector3(sin(yaw), 0.0, cos(yaw))
-				var gp := Vector3(x, y + 2.55, z) + gdir * 1.6
-				_raw("marigold_garland", "aPiataGhirlanda", gp, yaw, 1.0, "")
-			else:
-				for j in [-0.6, 0.6]:
-					var sx: float = x + j
-					_raw("spice_sacks", "aPiataSaci", Vector3(sx, _sol_real(sx, z), z),
-						_rng.randf_range(0.0, TAU), 1.0, "")
-			x -= 4.1 + _rng.randf_range(-0.3, 0.5)
+			var n := _rng.randi_range(2, 3)
+			var ms: Array[String] = []
+			var span := 0.0
+			for i in n:
+				var m := _pick_booth()
+				ms.append(m)
+				span += STALL_W[m]
+			if x - span < -44.0:
+				break
+			_cluster(ms, x, 1.0, back_lat, _yaw_to_road(1.0), "aPiata")
+			x -= span + _rng.randf_range(5.0, 8.0)
 
 
-func _stall(m: String, base: String, x: float, side: float) -> void:
-	var depth: float = STALL_DEPTH[m]
-	var lat := maxf(9.1, 11.2 - depth * 0.5)
-	var z := _rz(x) + side * lat
-	var y := _sol_real(x, z)
-	var yaw := _yaw_to_road(side) + _rng.randf_range(-0.07, 0.07)
-	_raw(m, base, Vector3(x, y, z), yaw, 1.0, "")
-	_shop_lamp_for(m, Vector3(x, y, z), yaw)
+func _pick_booth() -> String:
+	var r := _rng.randf()
+	if r < 0.3:
+		return "stall_canopy_a"
+	if r < 0.6:
+		return "stall_canopy_b"
+	if r < 0.88:
+		return "stall_canopy_c"
+	return "chai_stall"
+
+
+## Un grup de tarabe LIPITE, pornind de la x_start spre vest (-X), cu spatele
+## la `back_lat` de ax pe partea `side`.
+func _cluster(ms: Array[String], x_start: float, side: float, back_lat: float,
+		yaw: float, base: String) -> void:
+	var x := x_start
 	var fr := Vector3(sin(yaw), 0.0, cos(yaw))
-	var rt := Vector3(cos(yaw), 0.0, -sin(yaw))
-	# Ghirlanda de galbenele pe muchia din fata a copertinei.
-	if m.begins_with("stall_canopy") or m == "chai_stall":
-		_raw("marigold_garland", base + "Ghirlanda", Vector3(x, y + 2.55, z) + fr * (depth * 0.5),
-			yaw, 1.0, "")
-	# Candele in fata tarabei.
-	for j in [-1.2, -0.4, 0.4, 1.2]:
-		var p := Vector3(x, 0.0, z) + fr * (depth * 0.5 + 0.1) + rt * float(j)
-		_diyas.append(Vector3(p.x, _sol_real(p.x, p.z), p.z))
+	for m in ms:
+		var w: float = STALL_W[m]
+		var depth: float = STALL_DEPTH[m]
+		var cx := x - w * 0.5
+		var z := _rz(cx) + side * (back_lat - depth * 0.5)
+		var y := _sol_real(cx, z)
+		var yy := yaw + _rng.randf_range(-0.03, 0.03)
+		_raw(m, base, Vector3(cx, y, z), yy, 1.0, "")
+		# Lampa mica SUB copertina, in mijlocul tejghelei.
+		var lamp_h := 2.05 if m != "chai_stall" else 2.1
+		_shop_lamps.append(Vector3(cx, y + lamp_h, z) + fr * (depth * 0.5 - 0.7))
+		# Ghirlanda pe muchia din fata a copertinei.
+		_raw("marigold_garland", base + "Ghirlanda",
+			Vector3(cx, y + 2.55, z) + fr * (depth * 0.5), yy, 1.0, "")
+		# Candele pe tejghea.
+		for j in [-0.9, 0.0, 0.9]:
+			var p := Vector3(cx + float(j), 0.0, z) + fr * (depth * 0.5 + 0.1)
+			_diyas.append(Vector3(p.x, _sol_real(p.x, p.z), p.z))
+		x -= w
+	# Saci ingramaditi la cele doua capete ale grupului, lipiti de tarabe.
+	for end_x in [x_start + 0.7, x - 0.7]:
+		var z := _rz(end_x) + side * (back_lat - 1.0)
+		for k in 2:
+			var dz := float(k) * 0.85 * side
+			var sx: float = end_x + _rng.randf_range(-0.2, 0.2)
+			_raw("spice_sacks", base + "Saci", Vector3(sx, _sol_real(sx, z - dz), z - dz),
+				_rng.randf_range(0.0, TAU), 1.0, "")
 
 
 ## Felinarul atarna la gura pravaliei (inaltimi si adancimi de la H).
@@ -503,6 +510,14 @@ func _lights_node() -> void:
 	_out.append('script = ExtResource("h_lights")')
 	_out.append("frac_from = %.3f" % L_FROM)
 	_out.append("frac_to = %.3f" % L_TO)
+	# Runda 3 (criticul: „globurile ard ca niste sori in prim-plan"): capul si
+	# haloul felinarelor de pe A la jumatate fata de H (0,5 / 0,55 / 2,2);
+	# lampile de sub copertine, mai mici decat capul felinarului.
+	_out.append("lamp_radius_m = 0.24")
+	_out.append("lamp_halo_core_m = 0.26")
+	_out.append("lamp_halo_m = 1.0")
+	_out.append("lamp_halo_intensity = 0.8")
+	_out.append("extra_lamp_radius_m = 0.12")
 	# Fara fatade: stanga toata (piata, turnul, tuk-tuk-urile), dreapta de la
 	# poarta incolo.
 	_out.append("facade_gaps = Array[Vector3]([Vector3(-1, 0.98, 1.04), Vector3(1, 1.02, 1.04)])")

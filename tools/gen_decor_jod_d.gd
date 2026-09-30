@@ -173,6 +173,11 @@ var _clutter_yaws := PackedFloat32Array()
 ## Harta de inaltimi a fiecarui model (celula 0,25 m): {model: {"o": Vector2, "n": Vector2i, "h": PackedFloat32Array}}
 var _hmaps := {}
 var _stats := {}
+## Cat au voie doua case sa intre una in alta (m, pe fiecare latura). Randul 1
+## al buclei: 0,6 — pe interiorul virajelor fetele converg, iar fara
+## suprapunere casele se retrageau si reaparea fasia de nisip (criticul,
+## runda 1). Peretii lipiti nu se vad; intrepatrunderea de 0,6 m nici ea.
+var _shrink := 0.1
 
 
 func _ready() -> void:
@@ -324,14 +329,22 @@ func _tangent(route: TrackRoute, i: int) -> Vector3:
 ## Un rand de case pe o parte a unei benzi, intre distantele s0..s1.
 func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 		s0: float, s1: float) -> void:
+	_shrink = 0.6 if (ri == 0 and r == 0) else 0.1
 	var s := s0 + _rng.randf_range(0.0, 3.0)
 	var since_neem := 0
+	# Randul 1: daca o casa nu incape pana la banda din spate (buzunarul
+	# dintre bucla si ulicioara are 7-8 m), se reincearca pe loc cu cea mai
+	# putin adanca (blue_house_e, 6,26 m), in loc sa ramana nisip.
+	var retry_shallow := false
 	var next_neem := _rng.randi_range(NEEM_ROW1_EVERY.x, NEEM_ROW1_EVERY.y) + 1
 	var placed := 0
 	var tried := 0
 	while s < s1:
 		tried += 1
-		var model := _pick_model(r)
+		var s_prev := s
+		var model := "blue_house_e" if retry_shallow else _pick_model(r)
+		var was_retry := retry_shallow
+		retry_shallow = false
 		var neem := r > 0 and _rng.randf() < NEEM_P
 		var small_neem := false
 		if ri == 0 and r == 0:
@@ -398,6 +411,12 @@ func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 				break
 			pushed += push_step
 		if c3.z > Z_MAX_C or c3.x > X_MAX_E:
+			continue
+		if why == "drum" and ri == 0 and r == 0 and not was_retry and not small_neem:
+			s = s_prev
+			retry_shallow = true
+			if small_neem:
+				since_neem = 0
 			continue
 		if why != "":
 			var key := "%d.%d.%+.0f %s" % [ri, r + 1, sgn, why]
@@ -485,8 +504,8 @@ func _free_why(c: Vector2, ax: Vector2, ha: float, hb: float) -> String:
 			if q.distance_to(Vector2(cir.x, cir.y)) < cir.z:
 				return "fill" if cir.z == FILL_R else "rezervat"
 	for rc: Dictionary in _rects:
-		if _obb_overlap(c, ax, ha - 0.1, hb - 0.1, rc["c"], rc["ax"], float(rc["ha"]) - 0.1,
-				float(rc["hb"]) - 0.1):
+		if _obb_overlap(c, ax, ha - _shrink, hb - _shrink, rc["c"], rc["ax"],
+				float(rc["ha"]) - _shrink, float(rc["hb"]) - _shrink):
 			return "casa"
 	return ""
 

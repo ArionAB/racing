@@ -487,6 +487,12 @@ func update(delta: float) -> void:
 	# poarta, cu plafon de viteza — ca sa aiba timp sa se aseze pe axa.
 	if _alley_approach:
 		target = minf(target, ALLEY_GATE_SPEED)
+	# Coloana la poarta ingustata: cine e in spate urmareste masina din fata
+	# pe fereastra portii, nu intra peste ea in gol. Vezi ALLEY_FOLLOW_*.
+	var gate_follow := _alley_gate_follow(idx)
+	_gate_hold = gate_follow < 1.0
+	if gate_follow < INF:
+		target = minf(target, gate_follow)
 	# Pe banda uda ridica piciorul, ca un sofer.
 	#
 	# Fara asta AI-ul intra pe bancul de nisip cu viteza de asfalt, aluneca si
@@ -529,6 +535,9 @@ func update(delta: float) -> void:
 	# zero ar da `_throttle = -0.15` la nesfarsit si masina ar da inapoi pana
 	# in pluton.
 	if door_wait and target < 1.0 and speed < 2.0:
+		_throttle = 0.0
+	# Oprit in spatele celui blocat in poarta ingustata: la fel.
+	if _gate_hold and speed < 2.0:
 		_throttle = 0.0
 	# Oprit la linia de oprire: nici gaz, nici marsarier, exact ca la usa —
 	# altfel tinta zero ar franeaza la nesfarsit spre spate in pluton.
@@ -855,6 +864,19 @@ func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	var l_ok := cand_l >= -LINE_MAX
 	var r_ok := cand_r <= LINE_MAX
 	var target: float
+	# In elanul unei sarituri (`Track.ai_keep_side_at`), cu blocajul LANGA
+	# noi (sub AVOID_TAIL_M): trecerea e pe partea pe care suntem deja. Regula
+	# „mai aproape de axa" de mai jos ar trimite masina de pe margine prin
+	# caroseria vecinului — si doua masini frecate una de alta ajung la buza
+	# prea lente. Vezi `TrackChannel.ai_keep_side_run_m`.
+	if car.route == 0 and best_ahead < AVOID_TAIL_M and track.ai_keep_side_at(idx):
+		var my_lat := r.side_at(idx).dot(
+			car.global_position - r.baked[r.wrap_index(idx)]) / hw
+		if my_lat < blocker_lat and l_ok:
+			_avoid_side = -1.0
+		elif my_lat >= blocker_lat and r_ok:
+			_avoid_side = 1.0
+		_avoid_car = best
 	if _avoid_car == best and _avoid_side < 0.0 and l_ok:
 		target = cand_l
 	elif _avoid_car == best and _avoid_side > 0.0 and r_ok:
@@ -1194,6 +1216,7 @@ func _angle_to(fwd: Vector3, point: Vector3) -> float:
 ## o masina care se invarte pe loc sau se freaca de un perete macina metri fara
 ## sa avanseze in cursa.
 func _watch_progress(delta: float, speed: float) -> void:
+	_hook_respawn()
 	if _unstick_timer > 0.0:
 		return
 	# Asteptarea in fata usii de piatra e progres zero DELIBERAT, nu blocaj:
@@ -1207,6 +1230,11 @@ func _watch_progress(delta: float, speed: float) -> void:
 	# ar rata verdele care oricum vine, si dupa 3 incercari s-ar repune singur
 	# — exact defectul pe care semaforul cu iesire nu trebuie sa-l aiba.
 	if _signal_block_m < SIGNAL_BRAKE_M:
+		_reset_progress()
+		return
+	# Si asteptarea in coloana la poarta ingustata (`_alley_gate_follow`):
+	# masina din fata isi face singura manevra; a noastra doar asteapta.
+	if _gate_hold:
 		_reset_progress()
 		return
 	# Plasa rapida: izbitura frontala care opreste masina pe loc.
@@ -1247,6 +1275,26 @@ func _watch_progress(delta: float, speed: float) -> void:
 		_begin_unstick()
 	else:
 		_attempts = 0 # merge cursa; uitam incercarile vechi
+	_reset_progress()
+
+## Repunerea muta masina pe traseu (inapoi, uneori zeci de metri — vezi
+## `Track.ai_progress_reset_on_respawn`). Fereastra de progres de dinainte nu
+## mai spune nimic despre masina de acum: se incepe una noua, fara incercarile
+## vechi si fara o manevra de deblocare ramasa pe jumatate. Doar pe pistele
+## care cer asta; in rest semnalul nici nu se leaga.
+var _respawn_hooked: bool = false
+
+func _hook_respawn() -> void:
+	if _respawn_hooked or car == null or track == null:
+		return
+	_respawn_hooked = true
+	if track.ai_progress_reset_on_respawn:
+		car.respawned.connect(_on_car_respawned)
+
+func _on_car_respawned(_c: Car) -> void:
+	_unstick_timer = 0.0
+	_unstick_reversing = false
+	_attempts = 0
 	_reset_progress()
 
 func _reset_progress() -> void:
@@ -1375,6 +1423,69 @@ func _alley_gate_aim_on(route: int, idx: int, near: Vector3) -> Vector3:
 	while j < r.baked.size() - 1 and r.dists[j] < aim_d:
 		j += 1
 	return r.baked[j]
+
+
+## Coloana la poarta ingustata (runda 3, POI D Jodhpur): ultimul [blocaj]
+## ramas pe ulicioara era a doua masina (autobuz) care intra in poarta de 4 m
+## peste prima, deja lenta sau blocata in ea — doua caroserii de 2,2+ m intr-un
+## gol in care incape una. Pe fereastra portii (ALLEY_GATE_APPROACH_M inainte,
+## ALLEY_FOLLOW_EXIT_M dupa), viteza-tinta se leaga de masina din fata de pe
+## ACEEASI banda: viteza ei plus un termen proportional cu golul peste
+## ALLEY_FOLLOW_GAP_M; sub ALLEY_FOLLOW_STOPPED_SPEED se opreste la gol.
+## AI onest: citeste doar pozitia si viteza masinii din fata, pe care un sofer
+## le vede. Doar pe benzile care AU poarta (`Track.branch_gate`), deci pe
+## pistele fara `AlleyGate` intoarce mereu INF.
+const ALLEY_FOLLOW_GAP_M: float = 9.0
+const ALLEY_FOLLOW_EXIT_M: float = 10.0
+const ALLEY_FOLLOW_REACH_M: float = 35.0
+const ALLEY_FOLLOW_K: float = 0.8
+const ALLEY_FOLLOW_STOPPED_SPEED: float = 3.0
+var _gate_hold: bool = false
+
+func _alley_gate_follow(idx: int) -> float:
+	if traffic.is_empty():
+		return INF
+	var gr := car.route
+	if gr == 0:
+		if not _alley_approach:
+			return INF
+		gr = 1
+	var gate := track.branch_gate(gr)
+	if gate == null:
+		return INF
+	var r := track.route_at(gr)
+	if r == null or r.dists.is_empty():
+		return INF
+	var gd := float(gate.gate_dist_m)
+	var my_d: float
+	if car.route == gr:
+		my_d = r.dists[clampi(idx, 0, r.dists.size() - 1)]
+	else:
+		var bi := r.closest_index_global(car.global_position)
+		my_d = r.dists[bi]
+		if bi == 0:
+			my_d = -car.global_position.distance_to(r.baked[0])
+	if my_d < gd - ALLEY_GATE_APPROACH_M or my_d > gd + ALLEY_GATE_AFTER_M:
+		return INF
+	var cap := INF
+	for other in traffic:
+		if other == null or other == car or not is_instance_valid(other):
+			continue
+		if other.route != gr:
+			continue
+		var od: float = r.dists[clampi(other.road_index, 0, r.dists.size() - 1)]
+		if od > gd + ALLEY_FOLLOW_EXIT_M:
+			continue
+		var gap := od - my_d
+		if gap <= 0.0 or gap > ALLEY_FOLLOW_REACH_M:
+			continue
+		var room := maxf(gap - ALLEY_FOLLOW_GAP_M, 0.0)
+		var v := other.horizontal_speed()
+		if v < ALLEY_FOLLOW_STOPPED_SPEED:
+			cap = minf(cap, room * 1.2)
+		else:
+			cap = minf(cap, v + room * ALLEY_FOLLOW_K)
+	return cap
 
 
 func _alley_gate_line(idx: int, line: float) -> float:

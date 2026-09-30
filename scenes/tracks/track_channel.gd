@@ -135,6 +135,15 @@ extends Marker3D
 ## prinde [RespawnZone] cu elanul ei). Oprit (implicit) = bit-identic.
 @export var respawn_past_gap: bool = false
 
+## Elanul sariturii, in metri inaintea buzei de desprindere, pe care AI-ul nu
+## traverseaza PE LANGA o masina aflata alaturi (`AIController._avoid_line`):
+## trece pe partea pe care e deja, nu pe cea „mai aproape de axa". Pe Devkund
+## (Track17, seed 2) regula veche trimitea autobuzul de pe margine prin
+## pompierii de langa el; frecate bot in bot, amandoua caroseriile grele au
+## ajuns la buza cu 16-20 m/s in loc de ~28 si au cazut in golul de 16 m.
+## Zero (implicit) = regula veche, bit-identic pe orice alt canal.
+@export var ai_keep_side_run_m: float = 0.0
+
 ## Sapatura e o GROAPA CIRCULARA centrata pe taietura, nu o albie in lungul
 ## axei. Pentru gauri care exista doar ca sa se ascunda sub un asset rotund
 ## (cuva craterului de pe Stromboli): terenul coboara radial de la
@@ -206,6 +215,7 @@ func to_spec(track: Node3D) -> Dictionary:
 		"build_ships": build_ships,
 		"respect_branch": respect_branch,
 		"respawn_past_gap": respawn_past_gap,
+		"ai_keep_side_run_m": ai_keep_side_run_m,
 	}
 	if ford:
 		# Apa peste drum = drop NEGATIV fata de cota soselei. Steagul „canal la

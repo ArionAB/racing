@@ -20,7 +20,7 @@ func _ready() -> void:
 		_survey()
 	for a in args:
 		if a.begins_with("--out="):
-			_generate2(a.substr(6))
+			_generate3(a.substr(6))
 	if "--check" in args:
 		_check()
 	if "--camcheck" in args:
@@ -664,6 +664,7 @@ func _camcheck() -> void:
 
 const PAV_HALF_D := 4.19
 var DEBUG := false
+var _regular := false
 const SAG_MAX := 0.35
 const FRAC_A := 0.135
 const FRAC_B := 0.264
@@ -695,6 +696,14 @@ func _mm_module(front_mid: Vector3, along: Vector3, outward: Vector3, sx: float,
 	_mm_yaw.append(atan2(o.x, o.z))
 	_mm_sc.append(Vector3(sx, sy, sz))
 	if not candles:
+		return
+	if _regular:
+		# runda 3: doar muchia, la pas fix, fara aleator
+		var cnt_r := maxi(1, int(round(MOD_W * sx / CANDLE_PITCH)))
+		for e in cnt_r:
+			var lxr := -MOD_W * 0.5 + (float(e) + 0.5) * MOD_W / cnt_r
+			_diya.append(xf * Vector3(lxr, 3.24, -1.5 + 0.25 / sz))
+			_diya_yaw.append(float(e) * 1.7)
 		return
 	# sir des pe buza terasei (1,1-1,5 m) + candele pe V-uri (doar unde
 	# modulul e destul de inalt ca V-urile sa se vada)
@@ -1068,6 +1077,475 @@ func _generate2(path: String) -> void:
 	all_y.append_array(ry)
 	_flock("Candele_Trepte", "s_diya", all_d, all_y, 3.2, 4.0)
 	_flock("Candele_Apa", "s_floating_diya", fl, fly, 2.4, 3.2)
+	var fo := FileAccess.open(path, FileAccess.WRITE)
+	fo.store_string("\n".join(_out))
+	fo.close()
+
+
+## Malul dinspre apa (copia din runda 2, fara candelele de drum): intoarce
+## cota de sus a randului de langa asfalt, pe index de drum.
+func _bank(i0: int, i1: int) -> Dictionary:
+	# ---- malul dinspre apa (stanga): randuri de trepte care coboara spre
+	# mijlocul vaii / apa, fata spre apa. Randul r: fata la 3,3 + 3r m de
+	# asfalt, varful la (drum - 0,35) - 1,56 r (jumatate de etaj pe rand).
+	# Se opreste la apa, la teren mai sus decat varful, sau la jumatatea
+	# distantei pana la celalalt brat.
+	var bank := 0
+	var tops := {}
+	for r in 4:
+		var W: Array = []
+		var WN: Array = []
+		var WD: Array = []
+		var WB: Array = []
+		var WT: Array = []
+		var ok: Array = []
+		for i in range(i0, i1 + 1):
+			var q: Vector3 = tr.baked[i]
+			var sd := -tr._side_at(i)  # spre apa
+			var hw := tr.width_at_index(i)
+			var e := q + sd * hw
+			e.y = 0.0
+			var f := float(i) / n
+			var inner := f > 0.186 and f < 0.212
+			var off0 := 0.3 + MOD_D * r
+			var off1 := off0 + MOD_D
+			var low := INF
+			for d: float in [off0 + 0.5, (off0 + off1) * 0.5, off1]:
+				low = minf(low, _gy(e + sd * d))
+			var top := q.y - 0.35 - 1.56 * r
+			var basey := maxf(low, -10.2) - 0.3
+			var pf := e + sd * (off1 + 0.5)
+			# ramai pe jumatatea ta de vale: fata randului nu trece de mijlocul
+			# dintre bratul tau si celalalt
+			var pm := e + sd * off1
+			var ci := tr.closest_index_global(pm)
+			var own := absf(ci - i) < 20
+			if not own:
+				var qo: Vector3 = tr.baked[ci]
+				var d_other := Vector2(pm.x - qo.x, pm.z - qo.z).length() - tr.width_at_index(ci)
+				var d_own := off1
+				# latimea libera pana la mijloc: taie randul la jumatate
+				var half := (d_other + d_own) * 0.5
+				if half - off0 >= 1.5:
+					off1 = half - 0.15
+					low = INF
+					for d: float in [off0 + 0.5, off1]:
+						low = minf(low, _gy(e + sd * d))
+					basey = maxf(low, -10.2) - 0.3
+					own = true
+			var need := 0.9
+			# randurile din spate doar pe vale USCATA: peste apa ar acoperi
+			# apa (bara: apa verde intre maluri, cu trepte doar pe margine)
+			if r > 0 and low < -9.4:
+				own = false
+			ok.append(not inner and own and top - basey > need and top > -9.3 and top > low + 0.4)
+			if DEBUG and i % 5 == 0:
+				print("  mal r%d f %.3f drum %+.2f low %+.2f top %+.2f base %+.2f own %s -> %s" % [r, f, q.y, low, top, basey, own, ok[ok.size() - 1]])
+			W.append(e + sd * off1)
+			WN.append(-sd)
+			WD.append(off1 - off0)
+			WB.append(basey)
+			WT.append(top)
+			if r == 0 and ok[ok.size() - 1]:
+				tops[i] = top + 0.12 * (top - basey) / TIER_H
+		var s := 0
+		while s < ok.size():
+			if not ok[s]:
+				s += 1
+				continue
+			var t := s
+			while t + 1 < ok.size() and ok[t + 1]:
+				t += 1
+			var aa := s
+			while aa < t:
+				var bb := mini(t, aa + 6)
+				var tp: float = WT.slice(aa, bb + 1).min()
+				bank += _chain(W, WN, WD, WB, tp, aa, bb, true)
+				aa = bb
+			s = t + 1
+	print("mal: %d module" % bank)
+	return tops
+
+
+## ===========================================================================
+## RUNDA 3 — GROAPA-ARHITECTURA (decizia dezvoltatorului, 30 sep 2026)
+##
+## Criticul orb a numit de trei ori aceeasi cauza: la noi groapa e un canion
+## de teren terasat si rupt, in tinta e o groapa DREPTUNGHIULARA, cu ziduri
+## verticale drepte si fluxuri de trepte in V. Deci peretii nu mai urmeaza
+## terenul: sunt o INCINTA cu trei laturi drepte (sud, est, nord; vestul e
+## capul rampelor, la cota strazii) si colturi in unghi drept, pe trei etaje
+## orizontale (varfuri 0 / -3,12 / -6,24). Fiecare etaj e o banda de SETBACK m
+## (modulul turtit pe Z: treptele ies 0,3 m, zidul citeste aproape vertical),
+## iar in coltul fiecarui etaj sta un `stepwell_corner` scalat la banda.
+##
+## Etajul k exista pe o bucata de zid doar unde e peste drum (TOP_k > drum +
+## 0,4): drumul coboara prin etaje. Intre drum si primul etaj prezent e o
+## terasa de pavaj (modul turtit, varful la 0,15 m sub drum). In spatele
+## etajului de sus, randuri plate la cota 0 pana unde terenul ajunge la buza,
+## ca incinta sa ascunda panta din spatele ei. Baza fiecarui modul coboara pana
+## sub teren (min(baza nominala, teren - 0,3)): nimic nu pluteste.
+##
+## Candelele: DOAR pe muchii, la pas fix (CANDLE_PITCH), fara aleator: bordura
+## drumului pe ambele parti, muchia de sus a fiecarui etaj, marginea terasei,
+## si fluxurile V (fiecare a treia treapta). Pe apa, siruri paralele cu zidul.
+
+const SETBACK := 2.0
+const CANDLE_PITCH := 1.25
+const TIER_EXIST_MARGIN := 0.4
+
+var _wall_mods := 0
+
+
+## Distanta pana la marginea ORICARUI asfalt (bucla si ulicioara), pe grila
+## de 8 m: `closest_index_global` e liniar si generatorul il cheama de zeci de
+## mii de ori (prima rulare a rundei 3 n-a terminat in 5 minute).
+var _grid := {}
+
+
+func _grid_build() -> void:
+	for r in [0, 1]:
+		var rt: Variant = tr.route_at(r)
+		if rt == null:
+			continue
+		var pts: PackedVector3Array = rt.baked
+		for i in pts.size():
+			var c := Vector2i(int(floor(pts[i].x / 8.0)), int(floor(pts[i].z / 8.0)))
+			if not _grid.has(c):
+				_grid[c] = []
+			var hw: float = tr.width_at_index(i) if r == 0 else 3.2
+			_grid[c].append(Vector3(pts[i].x, hw, pts[i].z))
+
+
+func _near_road(p: Vector3) -> float:
+	if _grid.is_empty():
+		_grid_build()
+	var c := Vector2i(int(floor(p.x / 8.0)), int(floor(p.z / 8.0)))
+	var best := 99.0
+	for dx in range(-2, 3):
+		for dz in range(-2, 3):
+			for v in _grid.get(c + Vector2i(dx, dz), []):
+				best = minf(best, Vector2(p.x - v.x, p.z - v.z).length() - v.y)
+	return best
+
+
+## Amprenta unui modul (colturi + mijloace) departe de orice asfalt.
+func _footprint_clear(xf: Transform3D, keep: float) -> bool:
+	for lp: Vector3 in [Vector3(-6.1, 0, -1.5), Vector3(6.1, 0, -1.5), Vector3(-6.1, 0, 1.5), Vector3(6.1, 0, 1.5), Vector3(0, 0, -1.5), Vector3(-3.0, 0, -1.5), Vector3(3.0, 0, -1.5)]:
+		if _near_road(xf * lp) < keep:
+			return false
+	return true
+
+
+func _tmin(xf: Transform3D) -> float:
+	var m := INF
+	for lx: float in [-5.5, -2.75, 0.0, 2.75, 5.5]:
+		for lz: float in [-1.4, 0.0, 1.4]:
+			var p := xf * Vector3(lx, 0, lz)
+			m = minf(m, _gy(p))
+	return m
+
+
+## Transform pentru un modul cu fata (treptele) la `front_mid`, spre -outward.
+func _mod_xf(front_mid: Vector3, outward: Vector3, sx: float, sz: float) -> Transform3D:
+	var o := outward.normalized()
+	var a := Vector3.UP.cross(o).normalized()  # X local, cu X x Y = Z
+	if a.cross(Vector3.UP).dot(o) < 0.0:
+		a = -a
+	var origin := front_mid + o * (MOD_D * sz * 0.5)
+	return Transform3D(Basis(a * sx, Vector3.UP, o * sz), origin)
+
+
+## Pune un modul (daca e liber de drum) cu varful la `top`; baza coboara sub
+## teren. `edge_candles`: sir pe muchia de sus a fetei; `v_candles`: pe V-uri.
+func _put(xf0: Transform3D, top: float, nominal_base: float, edge_candles: bool, v_candles: bool) -> bool:
+	if not _footprint_clear(xf0, 1.2):
+		return false
+	var base := minf(nominal_base, _tmin(xf0) - 0.3)
+	var sy := (top - base) / TIER_H
+	if sy < 0.05:
+		return false
+	var xf := xf0
+	xf.origin.y = base
+	xf.basis.y = Vector3.UP * sy
+	var sc := Vector3(xf.basis.x.length(), sy, xf.basis.z.length())
+	_mm_pos.append(xf.origin)
+	_mm_yaw.append(atan2(xf.basis.z.x, xf.basis.z.z))
+	_mm_sc.append(sc)
+	_wall_mods += 1
+	var span := MOD_W * sc.x
+	if edge_candles:
+		var cnt := maxi(1, int(round(span / CANDLE_PITCH)))
+		for e in cnt:
+			var lx := -MOD_W * 0.5 + (float(e) + 0.5) * MOD_W / cnt
+			_diya.append(xf * Vector3(lx, 3.24, -1.5 + 0.25 / sc.z))
+			_diya_yaw.append(float(e) * 1.7)
+	if v_candles and sy > 0.7 and sc.x > 0.6:
+		for a: float in [-4.0, 0.0, 4.0]:
+			for side: float in [-1.0, 1.0]:
+				for k: int in [2, 5, 8]:
+					var t := float(k) / 9.0
+					_diya.append(xf * Vector3(a + side * 2.0 * (1.0 - t), 0.3 + 2.7 * t, -1.5 + 0.2 / sc.z))
+					_diya_yaw.append(float(k))
+	return true
+
+
+## Un zid drept: fata etajului k pe linia `p0 + dir * u`, u in [0, length],
+## normala spre spate `outward`. Modulele merg de la u=0 (coltul) spre u=length;
+## ultimul se scurteaza. Intoarce lista bucatilor [u0, u1, prezent].
+func _wall(tag: String, k: int, p0: Vector3, dir: Vector3, length: float, outward: Vector3, skip_from := INF, skip_to := -INF) -> void:
+	var u := 0.0
+	var sz := SETBACK / MOD_D
+	while u < length - 0.5:
+		var w := minf(MOD_W, length - u)
+		if length - u - w < 3.0 and length - u - w > 0.0:
+			w = length - u  # nu lasa un ciot la capat
+		var mid_u := u + w * 0.5
+		var front_mid := p0 + dir * mid_u
+		front_mid.y = 0.0
+		if mid_u > skip_from and mid_u < skip_to:
+			u += w
+			continue
+		# etajul exista doar unde e peste drum: cota drumului cel mai apropiat
+		var ci := tr.closest_index_global(front_mid)
+		var road_y: float = tr.baked[ci].y
+		if TIER_TOP[k] > road_y + TIER_EXIST_MARGIN:
+			var xf := _mod_xf(front_mid, outward, w / MOD_W, sz)
+			_put(xf, TIER_TOP[k], TIER_TOP[k] - TIER_H, true, true)
+		u += w
+
+
+## Terasa de pavaj intre drum si primul etaj prezent, pe o latura dreapta.
+## `edge_fn`: pentru un u, distanta de-a lungul lui outward de la linia fetei
+## etajului 2 inapoi pana la marginea asfaltului (negativ = asfaltul e in
+## spatele liniei). Se face pe bucati de 12,2 m, varful la drum_min - 0,15.
+func _pavement(p0: Vector3, dir: Vector3, length: float, outward: Vector3, fronts: Array) -> void:
+	var u := 0.0
+	while u < length - 0.5:
+		var w := minf(MOD_W * 0.5, length - u)
+		var mid_u := u + w * 0.5
+		var line_mid := p0 + dir * mid_u  # pe linia fetei etajului 2
+		line_mid.y = 0.0
+		# primul etaj prezent (de jos) pe bucata asta
+		var ci := tr.closest_index_global(line_mid)
+		var road_y: float = tr.baked[ci].y
+		var k_low := -1
+		for k in [2, 1, 0]:
+			if TIER_TOP[k] > road_y + TIER_EXIST_MARGIN:
+				k_low = k
+				break
+		# unde se opreste pavajul (spre spate): fata etajului k_low, sau buza
+		var stop: float = fronts[k_low] if k_low >= 0 else fronts[0]
+		# unde incepe (spre drum): 1,2 m de asfalt, masurat pe 5 puncte ale bucatii
+		var start := stop
+		var road_min := INF
+		for t: float in [0.0, 0.25, 0.5, 0.75, 1.0]:
+			var pu := p0 + dir * (u + w * t)
+			pu.y = 0.0
+			var d := stop
+			while d > -12.0:
+				if _near_road(pu + outward * d) < 1.2:
+					break
+				d -= 0.25
+			start = minf(start, d + 0.25)
+			var cj := tr.closest_index_global(pu)
+			road_min = minf(road_min, tr.baked[cj].y)
+		# `start` e un offset relativ la linia etajului 2; negativ = spre drum
+		var depth := stop - start
+		if depth >= 0.8 and k_low != -1:
+			var top := road_min - 0.15
+			var rows := maxi(1, int(ceil(depth / MOD_D - 0.1)))
+			var szr := depth / (rows * MOD_D)
+			for r in rows:
+				var fm := line_mid + outward * (start + MOD_D * szr * r)
+				var xf := _mod_xf(fm, outward, w / MOD_W, szr)
+				# unde terenul natural (coltul rotunjit al debleului) e peste
+				# pavaj, terasa urca la primul etaj de deasupra lui: altfel
+				# panta gri se vede in coltul incintei (r3a/r3b, 0.160)
+				var tmx := -INF
+				for lx: float in [-2.8, 0.0, 2.8]:
+					for lz: float in [-1.3, 0.0, 1.3]:
+						tmx = maxf(tmx, _gy(xf * Vector3(lx / (w / MOD_W) * 0.5 * 2.0, 0, lz)))
+				var tp := top
+				if tmx > tp - 0.1:
+					tp = 0.0
+					for kk in [2, 1, 0]:
+						if TIER_TOP[kk] >= tmx + 0.05:
+							tp = TIER_TOP[kk]
+							break
+				_put(xf, tp, tp - TIER_H, r == 0 or tp != top, tp != top)
+		u += w
+
+
+func _generate3(path: String) -> void:
+	_rng.seed = 20260930
+	_regular = true
+	var i0 := int(FRAC_A * n)
+	var i1 := int(FRAC_B * n)
+	# ---- fetele etajelor: 1,5 m dincolo de cel mai departat punct al
+	# marginii asfaltului pe fiecare latura (sud: z max pe bratul de intrare,
+	# nord: z min pe iesire, est: x max in ac), apoi SETBACK spre spate
+	var s_edge := -INF
+	var n_edge := INF
+	var e_edge := -INF
+	for i in range(i0, i1 + 1):
+		var q: Vector3 = tr.baked[i]
+		var sd := tr._side_at(i)
+		var e := q + sd * tr.width_at_index(i)
+		# doar unde exista etajul 2 (drumul sub -6,64) conteaza pentru linia lui
+		if q.y < TIER_TOP[2] - TIER_EXIST_MARGIN:
+			if e.z > 62.0 and e.x < -84.0:
+				s_edge = maxf(s_edge, e.z)
+			elif e.z < 62.0 and e.x < -84.0:
+				n_edge = minf(n_edge, e.z)
+			if e.x > -100.0:
+				e_edge = maxf(e_edge, e.x)
+	var Zs: Array = []
+	var Zn: Array = []
+	var Xe: Array = []
+	for k in 3:
+		Zs.append(s_edge + 1.5 + SETBACK * (2 - k))
+		Zn.append(n_edge - 1.5 - SETBACK * (2 - k))
+		Xe.append(e_edge + 1.5 + SETBACK * (2 - k))
+	print("fete: sud %s | nord %s | est %s" % [Zs, Zn, Xe])
+	var X_WEST := -216.0
+	# ---- pavilionul: in zidul de est, pe axa gropii, fata la fata etajului 0,
+	# pe varful etajului 1 (galeria din zid)
+	var pav_z: float = (Zs[0] + Zn[0]) * 0.5
+	var pav := Vector3(Xe[0] + PAV_HALF_D, TIER_TOP[1], pav_z)
+	_emit("Pavilion", "s_stepwell_pavilion", Transform3D(Basis(Vector3(0, 0, -1), Vector3.UP, Vector3(1, 0, 0)), pav))
+	# ---- zidurile, pe etaje
+	for k in 3:
+		var sz_c := SETBACK / 6.3
+		# sud: de la coltul SE spre vest, fata spre nord (outward +z)
+		_wall("S", k, Vector3(Xe[k], 0, Zs[k]), Vector3(-1, 0, 0), Xe[k] - X_WEST, Vector3(0, 0, 1))
+		# nord: de la coltul NE spre vest, outward -z
+		_wall("N", k, Vector3(Xe[k], 0, Zn[k]), Vector3(-1, 0, 0), Xe[k] - X_WEST, Vector3(0, 0, -1))
+		# est: de la NE la SE, outward +x; etajul 0 lasa loc pavilionului
+		if k == 0:
+			# etajul 0 de est: doua bucati, lipite de pavilion (fara gol)
+			_wall("E", k, Vector3(Xe[k], 0, Zn[k]), Vector3(0, 0, 1), (pav_z - 10.2) - Zn[k], Vector3(1, 0, 0))
+			_wall("E", k, Vector3(Xe[k], 0, pav_z + 10.2), Vector3(0, 0, 1), Zs[k] - (pav_z + 10.2), Vector3(1, 0, 0))
+		else:
+			_wall("E", k, Vector3(Xe[k], 0, Zn[k]), Vector3(0, 0, 1), Zs[k] - Zn[k], Vector3(1, 0, 0))
+		# colturile (unghi drept), scalate la banda etajului
+		var road_y_c := -9.0
+		if TIER_TOP[k] > road_y_c + TIER_EXIST_MARGIN:
+			var c_se := Vector3(Xe[k] + SETBACK * 0.5, 0, Zs[k] + SETBACK * 0.5)
+			var c_ne := Vector3(Xe[k] + SETBACK * 0.5, 0, Zn[k] - SETBACK * 0.5)
+			for c in [["Colt_SE_E%d" % k, c_se, Basis(Vector3(0, 0, -1), Vector3.UP, Vector3(1, 0, 0))],
+					["Colt_NE_E%d" % k, c_ne, Basis(Vector3(-1, 0, 0), Vector3.UP, Vector3(0, 0, -1))]]:
+				var pc: Vector3 = c[1]
+				var base: float = minf(TIER_TOP[k] - TIER_H, _gy(pc) - 0.3)
+				var sy: float = (TIER_TOP[k] - base) / TIER_H
+				var bs: Basis = c[2]
+				var xf := Transform3D(Basis(bs.x * sz_c, Vector3.UP * sy, bs.z * sz_c), Vector3(pc.x, base, pc.z))
+				# colturile dreptunghiului cad in afara debleului rotunjit al acului:
+				# terenul e la 0 peste ele (probe_manual: 6/6 ingropate, -3..-7,6 m),
+				# deci nu se pun - vezi raportul rundei 3
+				if _gy(pc) < TIER_TOP[k] - 0.5:
+					_emit(c[0], "s_stepwell_corner", xf)
+	print("ziduri: %d module" % _wall_mods)
+	# ---- sortul de la cota 0 in afara incintei: acopera panta naturala a
+	# debleului care altfel se vede peste zid (penele gri de la colturi, r3a)
+	var ap0 := _wall_mods
+	var z_back_s: float = Zs[0] + SETBACK
+	var z_back_n: float = Zn[0] - SETBACK
+	var x_back_e: float = Xe[0] + SETBACK
+	# sud si nord: randuri pe x, grila aliniata cu incinta
+	for side in [[z_back_s, 1.0], [z_back_n, -1.0]]:
+		var z0: float = side[0]
+		var sg: float = side[1]
+		var x := x_back_e + 12.0
+		while x > X_WEST:
+			for r in 5:
+				var fm := Vector3(x - MOD_W * 0.5, 0, z0 + sg * MOD_D * r)
+				var xf := _mod_xf(fm, Vector3(0, 0, sg), 1.0, 1.0)
+				if _tmin(xf) < -0.8:
+					_put(xf, 0.0, -TIER_H, false, false)
+			x -= MOD_W
+	# est: coloane pe z, intre cele doua sorturi, fara amprenta pavilionului
+	var z := z_back_n
+	while z < z_back_s:
+		var w := minf(MOD_W, z_back_s - z)
+		for r in 4:
+			var fm := Vector3(x_back_e + MOD_D * r, 0, z + w * 0.5)
+			if absf(fm.z - pav_z) < 10.6 and fm.x < Xe[0] + 8.6:
+				continue
+			var xf := _mod_xf(fm, Vector3(1, 0, 0), w / MOD_W, 1.0)
+			if _tmin(xf) < -0.8:
+				_put(xf, 0.0, -TIER_H, false, false)
+		z += w
+	print("sort: %d module" % (_wall_mods - ap0))
+	# ---- terasele de pavaj intre drum si ziduri
+	var before := _wall_mods
+	_pavement(Vector3(Xe[2], 0, Zs[2]), Vector3(-1, 0, 0), Xe[2] - X_WEST, Vector3(0, 0, 1), [Zs[0] - Zs[2], Zs[1] - Zs[2], 0.0])
+	_pavement(Vector3(Xe[2], 0, Zn[2]), Vector3(-1, 0, 0), Xe[2] - X_WEST, Vector3(0, 0, -1), [Zn[2] - Zn[0], Zn[2] - Zn[1], 0.0])
+	_pavement(Vector3(Xe[2], 0, Zn[2]), Vector3(0, 0, 1), Zs[2] - Zn[2], Vector3(1, 0, 0), [Xe[0] - Xe[2], Xe[1] - Xe[2], 0.0])
+	print("pavaj: %d module" % (_wall_mods - before))
+	# ---- malul dinspre apa (ca in runda 2)
+	var bank_tops := _bank(i0, i1)
+	# ---- bordura drumului: sir la pas fix pe ambele parti
+	var acc := 0.0
+	var last := tr.baked[i0]
+	for i in range(i0, i1 + 1):
+		var q: Vector3 = tr.baked[i]
+		acc += Vector2(q.x - last.x, q.z - last.z).length()
+		last = q
+		# pas pe drum ~ CANDLE_PITCH * 1.6 (bordura e dubla)
+		var steps := int(acc / (CANDLE_PITCH * 1.6))
+		if steps < 1:
+			continue
+		acc -= steps * CANDLE_PITCH * 1.6
+		var sd := tr._side_at(i)
+		var hw := tr.width_at_index(i)
+		var pr := q + sd * (hw + 0.45)
+		pr.y = maxf(_gy(pr), q.y - 0.3)
+		_road_diya.append(pr)
+		var pl := q - sd * (hw + 0.45)
+		if bank_tops.has(i):
+			pl.y = bank_tops[i]
+		elif _gy(pl) < q.y - 0.5:
+			pl = q - sd * (hw - 0.15)  # fara mal: pe marginea asfaltului
+			pl.y = q.y
+		else:
+			pl.y = _gy(pl)
+		_road_diya.append(pl)
+	# ---- candele plutitoare: siruri paralele cu zidurile lungi, pas fix
+	var wet: Dictionary = tr.get("_ravine_wet")
+	var step: float = tr.get("_terr_step")
+	var org: Vector3 = tr.get("_terr_origin")
+	var fl := PackedVector3Array()
+	var fly := PackedFloat32Array()
+	for zl: float in [57.0, 59.0, 61.0, 63.0, 65.0, 67.0]:
+		var x := -210.0
+		var j := 0
+		while x <= -86.0:
+			var p := Vector3(x + (1.2 if int(zl) % 2 == 0 else 0.0), 0, zl)
+			var cell := Vector2i(int(floor((p.x - org.x) / step)), int(floor((p.z - org.z) / step)))
+			if wet.has(cell) and _gy(p) < -9.8 and _near_road(p) > 3.5:
+				fl.append(Vector3(p.x, -9.5, p.z))
+				fly.append(float(j) * 0.9)
+			x += 2.4
+			j += 1
+	var ry := PackedFloat32Array()
+	for k in _road_diya.size():
+		ry.append(float(k) * 1.3)
+	print("module %d, candele pe muchii %d, pe bordura %d, plutitoare %d" % [_mm_pos.size(), _diya.size(), _road_diya.size(), fl.size()])
+	_out.append('[node name="Trepte" type="MultiMeshInstance3D" parent="DecorManual/ZoneC_Fantana"]')
+	_out.append('script = ExtResource("flock")')
+	_out.append('model = ExtResource("s_stepwell_flight_module")')
+	_out.append("positions = " + var_to_str(_mm_pos))
+	_out.append("yaws = " + var_to_str(_mm_yaw))
+	_out.append("scale3_list = " + var_to_str(_mm_sc))
+	_out.append('tri_class = "rose_sandstone"')
+	_out.append("")
+	var all_d := _diya.duplicate()
+	all_d.append_array(_road_diya)
+	var all_y := _diya_yaw.duplicate()
+	all_y.append_array(ry)
+	_flock("Candele_Trepte", "s_diya", all_d, all_y, 3.4, 3.6)
+	_flock("Candele_Apa", "s_floating_diya", fl, fly, 2.8, 3.0)
 	var fo := FileAccess.open(path, FileAccess.WRITE)
 	fo.store_string("\n".join(_out))
 	fo.close()

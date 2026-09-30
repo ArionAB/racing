@@ -1317,14 +1317,16 @@ func _set_cow(track: Track, mode: String) -> void:
 	if body != null:
 		body.global_transform = xf
 	var posed := 0
+	# Duck typing, nu `is CowPose`: o clasa noua intra in cache-ul de clase
+	# globale abia la urmatorul --import, iar pana atunci snapshot.gd nu se
+	# mai compileaza deloc (Snapshot sta cu fereastra goala, fara eroare vizibila).
 	for n in track.find_children("*", "Node", true, false):
-		if n is CowPose:
-			var pose := n as CowPose
+		if n.has_method("snap_to_state") and n.has_method("is_bound"):
 			for i in 60:
-				if pose.is_bound():
+				if bool(n.call("is_bound")):
 					break
 				await get_tree().process_frame
-			pose.snap_to_state()
+			n.call("snap_to_state")
 			posed += 1
 	print("--cow=%s: vaca %s la (%.1f, %.1f, %.1f), CowPose %d"
 		% [mode, "culcata in gura" if lie else "pe prag", xf.origin.x, xf.origin.y,

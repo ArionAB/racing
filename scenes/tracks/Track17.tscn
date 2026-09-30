@@ -138,10 +138,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 142.0, 39.0, -203.0)
 gizmo_extents = 30.0
 script = ExtResource("3_bluff")
 run_m = 16.0
-terrace_tread_m = 20.0
-terrace_rise_m = 2.5
-length_m = 70.0
-end_fade_m = 50.0
+terrace_count = 6
+terrace_tread_m = 16.0
+terrace_rise_m = -3.0
 
 [node name="Hollows" type="Node3D" parent="."]
 

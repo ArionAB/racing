@@ -68,26 +68,63 @@ const RES := {
 	"peacock_fanned": "s_peacock_fanned",
 	"peacock_closed": "s_peacock_closed",
 	"neem_tree": "s_neem_tree",
+	"market_gate": "s_market_gate",
+	"textile_strip": "s_textile_strip",
+	"laundry_line": "s_laundry_line",
+	"street_shrine": "s_street_shrine",
 }
+
+## D′ — piesele ulicioarei (runda 2), pe distanta de la capul benzii (m).
+## Arcada de gresie peste poarta de 4 m (bara D2: „arcada de gresie in zid
+## albastru"): `market_gate` la scara ARCH_SCALE — golul 18,39 -> 5,5 m (mai
+## lat decat golul portii, deci nu-l ingusteaza), cheia 11,34 -> 3,4 m,
+## semi-latimea 20,2 -> 6,05 m (sub asfaltul buclei, care e la ~6,1 m de axa
+## ulicioarei acolo). Fara coliziune: stalpii invizibili ai `AlleyGate` si
+## palnia fac treaba fizica; arcada doar ii arata.
+const ARCH_SCALE := 0.3
+## Fasii textile si rufe PESTE banda (sub camera: varful la ~5 m).
+const TEXTILE_AT := [40.0, 60.0]
+const LAUNDRY_AT := [50.0, 70.0]
+const TEXTILE_SCALE := Vector3(0.9, 1.9, 1.0)
+const LAUNDRY_SCALE := Vector3(1.85, 1.7, 1.0)
+## Altarul alb, langa pila de nord a arcadei (partea departe de bucla).
+const SHRINE_AT := 35.0
+const SHRINE_LAT := -6.6
 
 ## Trotuarul pavat de pe D (`shoulder_width_zones`): 3,2 m. Fata randului 1
 ## sta dupa el, cu o abatere mica.
 const SIDEWALK := 3.2
-## Randurile: retragerea FETEI fata de marginea asfaltului, pe bucla.
+## Randurile pe bucla: retragerea FETEI fata de marginea TROTUARULUI pavat
+## (`Track._shoulder_width`, 3,2-4 m dupa asfalt). Runda 2 (criticul orb:
+## „benzi largi de nisip intre bordura si case, zid continuu de cuburi in
+## bara"): randul 1 lipit de trotuar, goluri <= 0,3 m, cate un neem mic la
+## 3-4 case; randurile 2-4 in trepte, fiecare imediat in spatele celui din
+## fata (adancimea caselor e 6,3-8 m), pana la umplutura OrasFill.
 const MAIN_ROWS := [
-	{"front": 3.4, "jit": 0.7, "gap": Vector2(0.0, 1.1), "turn_p": 0.0, "yaw_deg": 5.0},
-	{"front": 12.2, "jit": 1.2, "gap": Vector2(0.4, 2.6), "turn_p": 0.25, "yaw_deg": 10.0},
-	{"front": 21.0, "jit": 1.5, "gap": Vector2(0.6, 3.2), "turn_p": 0.35, "yaw_deg": 14.0},
+	{"front": 0.1, "jit": 0.1, "gap": Vector2(0.0, 0.3), "turn_p": 0.0, "yaw_deg": 1.5},
+	{"front": 8.4, "jit": 0.4, "gap": Vector2(0.0, 0.6), "turn_p": 0.15, "yaw_deg": 4.0},
+	{"front": 16.8, "jit": 0.6, "gap": Vector2(0.0, 0.9), "turn_p": 0.2, "yaw_deg": 6.0},
+	{"front": 25.2, "jit": 0.8, "gap": Vector2(0.2, 1.2), "turn_p": 0.25, "yaw_deg": 8.0},
 ]
+## Neem mic intre casele randului 1, la fiecare 3-4 case (bara: verdeata
+## printre cuburi). Scara si amprenta (fanta) pe drum.
+const NEEM_ROW1_EVERY := Vector2i(3, 4)
+const NEEM_SMALL_SCALE := 0.55
+const NEEM_SLOT_HALF := 1.6
 ## Ulicioara: fata la >= 1,0 m de marginea benzii (3,2), randul 2 in spate.
 const ALLEY_ROWS := [
-	{"front": 1.0, "jit": 0.35, "gap": Vector2(0.0, 0.8), "turn_p": 0.0, "yaw_deg": 3.0},
+	{"front": 1.0, "jit": 0.3, "gap": Vector2(0.0, 0.4), "turn_p": 0.0, "yaw_deg": 2.0},
 	{"front": 9.8, "jit": 1.0, "gap": Vector2(0.4, 2.4), "turn_p": 0.3, "yaw_deg": 10.0},
 ]
 ## Marja fata de marginea ORICAREI benzi pentru amprenta intreaga (orice punct
 ## al dreptunghiului): pe bucla, trotuarul; pe ulicioara, 1 m.
 const KEEP_MAIN := 3.2
 const KEEP_ALLEY := 0.9
+## Casele-ziduri ale ulicioarei din buzunarul dintre ea si bucla: fata dinspre
+## bucla are voie pana la 2 m de asfaltul ei (pe trotuar; LaneClear cere
+## banda + 0,5). Runda 1 a dat [blocaj] aici, dar cauza era momeala AI-ului
+## dupa furca (`TrackBranch.lure_before_entry_only`, runda 2), nu casele.
+const KEEP_MAIN_FROM_ALLEY := 2.0
 ## Amprenta unei case din OrasFill, ca cerc (casele ei au 6,3-7,7 m latura si
 ## yaw pe multipli de 90° ± 6°; haveli 10,9 m, rar): raza cercului cuprinzator.
 const FILL_R := 5.4
@@ -96,6 +133,9 @@ const MAX_STEP := 2.5
 ## Retragerea maxima (si pasul) cand amprenta atinge o banda sau o casa.
 const PUSH_MAX := 3.0
 const PUSH_STEP := 0.5
+## Randul 1 se retrage putin si fin: altfel reapare fasia de nisip.
+const PUSH_MAX_ROW1 := 1.5
+const PUSH_STEP_ROW1 := 0.25
 const SINK := 0.3
 ## Zone rezervate (x, z, raza): se completeaza la rulare cu pragul vacii si
 ## stalpii portii. Plus graniste cu alte POI-uri.
@@ -155,6 +195,7 @@ func _ready() -> void:
 	for m in HOUSES:
 		_hmaps[m] = _heightmap(m)
 	_reserve()
+	_alley_pieces()
 	# Ulicioara intai (zidurile ei sunt contract), apoi bucla, rand cu rand.
 	var alley := _track.route_at(1)
 	var main := _track.route_at(0)
@@ -174,6 +215,56 @@ func _ready() -> void:
 
 
 # ------------------------------------------------------------------ rezervari
+
+## Punctul, directia si dreapta benzii 1 la distanta d (m) de la capul ei.
+func _alley_frame(d: float) -> Array:
+	var r := _track.route_at(1)
+	var i := _index_at_dist(r, d)
+	var j := mini(i + 1, r.baked.size() - 1)
+	if j == i:
+		i = maxi(i - 1, 0)
+	var dir := r.baked[j] - r.baked[i]
+	dir.y = 0.0
+	dir = dir.normalized()
+	return [r.baked[i], dir, dir.cross(Vector3.UP).normalized()]
+
+
+func _alley_pieces() -> void:
+	var gate := _track.get_node_or_null("AlleyGate")
+	var gd := 30.0 if gate == null else float(gate.gate_dist_m)
+	# Arcada: trecerea pe Z-ul modelului = directia benzii.
+	var f := _alley_frame(gd)
+	var pos: Vector3 = f[0]
+	var dir: Vector3 = f[1]
+	var side: Vector3 = f[2]
+	var b := Basis(-side, Vector3.UP, dir).scaled(Vector3.ONE * ARCH_SCALE)
+	_node("market_gate", "arcadaUlicioara", Vector3(pos.x, _sol_real(pos.x, pos.z) - 0.1, pos.z), b,
+		['metadata/coliziune = "none"'])
+	# Casele nu intra in pilele arcadei.
+	for sg: float in [1.0, -1.0]:
+		var q := pos + side * sg * 4.6
+		_circles.append(Vector3(q.x, q.z, 1.9))
+	for d: float in TEXTILE_AT:
+		var ff := _alley_frame(d)
+		var p: Vector3 = ff[0]
+		var bb := Basis(-(ff[2] as Vector3), Vector3.UP, ff[1]).scaled(TEXTILE_SCALE)
+		_node("textile_strip", "textileUlicioara", Vector3(p.x, _sol_real(p.x, p.z) - 0.05, p.z), bb, [])
+	for d: float in LAUNDRY_AT:
+		var ff := _alley_frame(d)
+		var p: Vector3 = ff[0]
+		var bb := Basis(-(ff[2] as Vector3), Vector3.UP, ff[1]).scaled(LAUNDRY_SCALE)
+		_node("laundry_line", "rufeUlicioara", Vector3(p.x, _sol_real(p.x, p.z) - 0.05, p.z), bb,
+			['metadata/coliziune = "none"'])
+	var fs := _alley_frame(SHRINE_AT)
+	var ps: Vector3 = fs[0] + (fs[2] as Vector3) * SHRINE_LAT
+	# Fata altarului (+Z-ul modelului) spre banda.
+	var to_lane := -(fs[2] as Vector3) * signf(SHRINE_LAT)
+	var bs := Basis.looking_at(-to_lane, Vector3.UP)
+	_node("street_shrine", "altar", Vector3(ps.x, _sol_real(ps.x, ps.z), ps.z), bs, [])
+	_circles.append(Vector3(ps.x, ps.z, 1.4))
+	print("; ulicioara: arcada la %.0f m, %d textile, %d rufe, altar la %.0f m"
+		% [gd, TEXTILE_AT.size(), LAUNDRY_AT.size(), SHRINE_AT])
+
 
 func _reserve() -> void:
 	# OrasFill: aceleasi pozitii pe care le va pune la rulare.
@@ -234,12 +325,21 @@ func _tangent(route: TrackRoute, i: int) -> Vector3:
 func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 		s0: float, s1: float) -> void:
 	var s := s0 + _rng.randf_range(0.0, 3.0)
+	var since_neem := 0
+	var next_neem := _rng.randi_range(NEEM_ROW1_EVERY.x, NEEM_ROW1_EVERY.y) + 1
 	var placed := 0
 	var tried := 0
 	while s < s1:
 		tried += 1
-		var model := _pick_model()
+		var model := _pick_model(r)
 		var neem := r > 0 and _rng.randf() < NEEM_P
+		var small_neem := false
+		if ri == 0 and r == 0:
+			since_neem += 1
+			if since_neem >= next_neem:
+				small_neem = true
+				since_neem = 0
+				next_neem = _rng.randi_range(NEEM_ROW1_EVERY.x, NEEM_ROW1_EVERY.y) + 1
 		var h: Dictionary = HOUSES[model]
 		var turned := _rng.randf() < float(cfg["turn_p"])
 		# Latimea pe drum (W) si adancimea (D) in functie de axa fetei.
@@ -253,13 +353,19 @@ func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 		if neem:
 			w_half = 3.0
 			d_half = 3.0
+		if small_neem:
+			w_half = NEEM_SLOT_HALF
+			d_half = NEEM_SLOT_HALF
 		var sc := s + w_half
 		var i := _index_at_dist(route, sc)
 		var p := route.baked[i]
 		var t := _tangent(route, i)
 		var right := t.cross(Vector3.UP).normalized()
 		var hw := route.half_width if ri == 1 else _track.width_at_index(i)
-		var front := hw + float(cfg["front"]) + _rng.randf_range(-float(cfg["jit"]), float(cfg["jit"]))
+		var pave := 0.0
+		if ri == 0:
+			pave = maxf(_track._shoulder_width(i, sgn), SIDEWALK)
+		var front := hw + pave + float(cfg["front"]) + _rng.randf_range(-float(cfg["jit"]), float(cfg["jit"]))
 		if ri == 0 and r == 0:
 			front = maxf(front, hw + KEEP_MAIN + 0.05)
 		if ri == 1 and r == 0:
@@ -279,15 +385,18 @@ func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 		var c3 := Vector3.ZERO
 		var why := "?"
 		var pushed := 0.0
-		while pushed <= PUSH_MAX + 0.001:
+		var push_max := PUSH_MAX_ROW1 if (ri == 0 and r == 0) else PUSH_MAX
+		var push_step := PUSH_STEP_ROW1 if (ri == 0 and r == 0) else PUSH_STEP
+		while pushed <= push_max + 0.001:
 			c3 = p + right * sgn * (front + pushed + d_half)
 			c = Vector2(c3.x, c3.z)
 			why = _free_why(c, ax, w_half, d_half)
-			if why == "" and not _clear_of_roads(c, ax, w_half, d_half):
+			if why == "" and not _clear_of_roads(c, ax, w_half, d_half,
+					KEEP_MAIN_FROM_ALLEY if ri == 1 else KEEP_MAIN):
 				why = "drum"
 			if why == "" or why == "fill" or why == "rezervat":
 				break
-			pushed += PUSH_STEP
+			pushed += push_step
 		if c3.z > Z_MAX_C or c3.x > X_MAX_E:
 			continue
 		if why != "":
@@ -305,6 +414,12 @@ func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 			face = face.rotated(PI * 0.5 * (1.0 if _rng.randf() < 0.5 else -1.0))
 		var face3 := Vector3(face.x, 0.0, face.y)
 		_rects.append({"c": c, "ax": ax, "ha": w_half, "hb": d_half})
+		if small_neem:
+			var yawn := _rng.randf_range(0.0, TAU)
+			var bn := Basis(Vector3.UP, yawn).scaled(Vector3.ONE * NEEM_SMALL_SCALE)
+			_node("neem_tree", "neemMic", Vector3(c.x, g.x - 0.05, c.y), bn, [])
+			placed += 1
+			continue
 		if neem:
 			var yaw := _rng.randf_range(0.0, TAU)
 			_node("neem_tree", "neem", Vector3(c.x, g.x - 0.05, c.y), Basis(Vector3.UP, yaw), [])
@@ -327,13 +442,24 @@ func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 	print("; banda %d rand %d parte %+.0f: %d puse din %d" % [ri, r + 1, sgn, placed, tried])
 
 
-func _pick_model() -> String:
+## Randurile din spate trag mai des casele inalte (b 10,4 m, haveli 11,1,
+## d/e 8,8), ca orasul sa urce in trepte spre spate.
+const TALL := ["blue_house_b", "haveli_facade", "blue_house_d", "blue_house_e"]
+
+func _w(m: String, r: int) -> float:
+	var w := float(HOUSES[m]["w"])
+	if r > 0 and TALL.has(m):
+		w *= 1.8
+	return w
+
+
+func _pick_model(r: int = 0) -> String:
 	var total := 0.0
 	for m in HOUSES:
-		total += float(HOUSES[m]["w"])
+		total += _w(m, r)
 	var x := _rng.randf() * total
 	for m in HOUSES:
-		x -= float(HOUSES[m]["w"])
+		x -= _w(m, r)
 		if x <= 0.0:
 			return m
 	return "blue_house_b"
@@ -381,12 +507,13 @@ func _obb_overlap(c1: Vector2, a1: Vector2, h1a: float, h1b: float,
 
 ## Fiecare punct al amprentei la >= KEEP de marginea fiecarei benzi (bucla:
 ## KEEP_MAIN; ulicioara: KEEP_ALLEY), pe toata pista (orice cota apropiata).
-func _clear_of_roads(c: Vector2, ax: Vector2, ha: float, hb: float) -> bool:
+func _clear_of_roads(c: Vector2, ax: Vector2, ha: float, hb: float,
+		keep_main: float = KEEP_MAIN) -> bool:
 	var pts := _samples(c, ax, ha, hb)
 	var reach := ha + hb + 20.0
 	for ri in _track.routes.size():
 		var route := _track.route_at(ri)
-		var keep := KEEP_MAIN if ri == 0 else KEEP_ALLEY
+		var keep := keep_main if ri == 0 else KEEP_ALLEY
 		for j in route.baked.size():
 			var bp := route.baked[j]
 			var bp2 := Vector2(bp.x, bp.z)

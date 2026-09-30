@@ -57,7 +57,43 @@ const RES := {
 	"blue_house_d": "s_blue_house_d",
 	"blue_house_e": "s_blue_house_e",
 	"haveli_facade": "s_haveli_facade",
+	"stall_canopy_a": "s_stall_canopy_a",
+	"stall_canopy_b": "s_stall_canopy_b",
+	"stall_canopy_c": "s_stall_canopy_c",
+	"chai_stall": "s_chai_stall",
+	"thela_cart": "s_thela_cart",
+	"spice_sacks": "s_spice_sacks",
+	"euphorbia": "s_euphorbia",
 }
+## Fata cu usi si ferestre a fiecarei case, MASURATA pe GLB (runda 2): aria
+## golurilor `*_Glow` + a ramelor `*_Trim` la < 1 m de fiecare fata a lui
+## `House_Wall*` (m2):
+##   blue_house_a  +X 3,0  +Z 1,2           -> +X (usa; ca la H)
+##   blue_house_b  +X 7,0  -Z 5,3           -> +X
+##   blue_house_c  -Z 16,2 +X 14,0          -> -Z
+##   blue_house_d  +X 6,7  -Z 6,5           -> +X (casa de colt)
+##   blue_house_e  +X 0,8, restul 0         -> golurile sunt RETRASE in volum
+##                 (Trim z -2,0..1,2 in peretele de +-3,1); media lor cade spre
+##                 -Z (Glow z -0,77, Trim z -1,22) -> -Z, masuratoare slaba
+##   haveli_facade -Z 12,0 +X 8,5; usa e un plan la z -2,28 -> -Z
+## Nicio casa nu are fata pe +Z, cum presupunea runda 1 (yaw 0 spre drum).
+const FACE := {
+	"blue_house_a": "+X", "blue_house_b": "+X", "blue_house_c": "-Z",
+	"blue_house_d": "+X", "blue_house_e": "-Z", "haveli_facade": "-Z",
+}
+## (latime pe X, adancime pe Z) din inventar.
+const HOUSE_DIMS := {
+	"blue_house_a": Vector2(7.15, 6.62), "blue_house_b": Vector2(6.82, 7.55),
+	"blue_house_c": Vector2(7.50, 7.67), "blue_house_d": Vector2(7.50, 8.01),
+	"blue_house_e": Vector2(7.40, 6.26), "haveli_facade": Vector2(10.92, 7.43),
+}
+const STALL_DEPTH := {
+	"stall_canopy_a": 3.10, "stall_canopy_b": 3.10, "stall_canopy_c": 3.10,
+	"chai_stall": 2.67, "thela_cart": 1.20,
+}
+## Fatada primului rand (m de la ax): trotuarul se termina la 9,7, fasia de
+## tarabe sta intre 9,1 si 11,2.
+const FACADE_LAT := 11.4
 const HOUSES := ["blue_house_b", "blue_house_d", "blue_house_a", "haveli_facade",
 	"blue_house_c", "blue_house_e", "blue_house_b", "blue_house_d"]
 
@@ -76,6 +112,8 @@ var _out_path := ""
 var _rng := RandomNumberGenerator.new()
 var _diyas: Array[Vector3] = []
 var _eaves: Array[Vector3] = []
+var _shop_lamps: Array[Vector3] = []
+var _tuk_x: Array[float] = []
 
 
 func _ready() -> void:
@@ -93,6 +131,7 @@ func _ready() -> void:
 	_gate()
 	_tuks()
 	_houses()
+	_market()
 	_rangoli()
 	_post_garlands()
 	_diya_node()
@@ -172,70 +211,227 @@ func _gate() -> void:
 
 func _tuks() -> void:
 	# Trei in piata dinaintea turnului (se vad din cadrul de start, langa
-	# rangoli, si sunt joase: nu acopera turnul de pe H), doua intre turn si
-	# poarta.
-	var xs := [-35.2, -39.1, -43.0, -59.5, -63.6]
+	# rangoli, si sunt joase: nu acopera turnul de pe H).
+	var xs := [-35.2, -39.1, -43.0]
 	for i in xs.size():
 		var x: float = xs[i] + _rng.randf_range(-0.3, 0.3)
-		var z := ROAD_Z + 10.9 + _rng.randf_range(-0.15, 0.25)
+		var z := _rz(x) + 10.9 + _rng.randf_range(-0.15, 0.25)
 		var yaw := -PI * 0.5 + _rng.randf_range(-0.12, 0.12)
 		_raw("tuktuk", "aTuk", Vector3(x, _sol_real(x, z), z), yaw, 1.0, "hull")
+		_tuk_x.append(x)
+
+
+## Yaw-ul care intoarce FATA MASURATA a modelului spre directia (tx, tz).
+## Fata = unde stau golurile `*_Glow` si ramele `*_Trim` (usi, ferestre),
+## masurata pe GLB (runda 2; vezi FACE).
+func _yaw_facing(model: String, tx: float, tz: float) -> float:
+	match String(FACE.get(model, "+Z")):
+		"+X":
+			return atan2(-tz, tx)
+		"-Z":
+			return atan2(-tx, -tz)
+		_:
+			return atan2(tx, tz)
+
+
+## Adancimea casei pe directia spre drum (dupa fata masurata).
+func _depth_facing(model: String) -> float:
+	var dims: Vector2 = HOUSE_DIMS[model]
+	return dims.x if String(FACE.get(model, "+Z")) == "+X" else dims.y
 
 
 func _houses() -> void:
-	# Randul intai pe dreapta (nord), lipit de trotuar: coliziune implicita.
+	# Randul intai pe dreapta (nord): fatada la FACADE_LAT, cu usile si
+	# ferestrele spre drum; coliziune implicita (hull).
 	var x := -13.5
 	var k := 0
-	while x > -67.0:
-		var xx := x + _rng.randf_range(-0.5, 0.5)
-		var lat := 14.0 + _rng.randf_range(-0.6, 0.8)
+	while x > -70.0:
 		var m: String = HOUSES[k % HOUSES.size()]
-		var yaw := 0.0 if _rng.randf() < 0.75 else (PI * 0.5 if _rng.randf() < 0.5 else -PI * 0.5)
-		var z := ROAD_Z - lat
+		var dims: Vector2 = HOUSE_DIMS[m]
+		var w: float = dims.y if String(FACE.get(m, "+Z")) == "+X" else dims.x
+		var xx := x - w * 0.5
+		if xx - w * 0.5 < -72.0:
+			break
+		var lat := FACADE_LAT + _depth_facing(m) * 0.5 + _rng.randf_range(0.0, 0.5)
+		var z := _rz(xx) - lat
+		var yaw := _yaw_facing(m, 0.0, 1.0) + _rng.randf_range(-0.05, 0.05)
 		_raw(m, "aDr", Vector3(xx, _sol_real(xx, z), z), yaw, 1.0, "")
-		if _rng.randf() < 0.4:
+		if m != "haveli_facade" and _rng.randf() < 0.4:
 			_meta_last("metadata/indigo = true")
 		if k % 2 == 0:
-			var gz := z + 3.7
+			var gz := _rz(xx) - FACADE_LAT + 0.15
 			_raw("marigold_garland", "aDrGhirlanda", Vector3(xx, _sol_real(xx, gz) + 3.1, gz), 0.0, 1.0, "")
-		# Candele pe pragul casei.
-		var dx := -3.0
-		while dx <= 3.0:
-			var dz := z + 4.2
-			_diyas.append(Vector3(xx + dx, _sol_real(xx + dx, dz), dz))
-			dx += 0.75
-		x -= 8.0 + _rng.randf_range(-0.4, 0.6)
+		x -= w + _rng.randf_range(0.3, 1.2)
 		k += 1
-	# Randul doi pe dreapta (fundal, fara corp).
+	# Randul doi pe dreapta (fundal, fara corp), tot cu fata spre drum.
 	x = -17.0
 	while x > -68.0:
 		var xx := x + _rng.randf_range(-0.8, 0.8)
-		var z := ROAD_Z - 24.5 - _rng.randf_range(0.0, 1.5)
 		var m: String = HOUSES[(k + 3) % HOUSES.size()]
-		_raw(m, "aDrB", Vector3(xx, _sol_real(xx, z), z), 0.0, 1.0, "none")
-		if _rng.randf() < 0.4:
+		var z := _rz(xx) - 24.5 - _rng.randf_range(0.0, 1.5)
+		_raw(m, "aDrB", Vector3(xx, _sol_real(xx, z), z), _yaw_facing(m, 0.0, 1.0), 1.0, "none")
+		if m != "haveli_facade" and _rng.randf() < 0.4:
 			_meta_last("metadata/indigo = true")
 		x -= 8.3 + _rng.randf_range(-0.4, 0.6)
 		k += 1
-	# Fundalul din spatele turnului (stanga, 24 m): casele pe care turnul se
-	# decupeaza de pe grila. Nu intre x -72 si -88 (aripa portii).
-	x = -32.0
+	# Fundalul pietei din stanga (24 m): de la x -8 pana la aripa portii; turnul
+	# se decupeaza pe el de pe grila. Fata spre drum (-Z in lume).
+	x = -8.0
 	while x > -70.0:
 		var xx := x + _rng.randf_range(-0.6, 0.6)
-		var z := ROAD_Z + 24.5 + _rng.randf_range(0.0, 1.5)
+		if absf(xx - TOWER_X) < 5.0:
+			x -= 8.2
+			continue
+		var z := _rz(xx) + 24.5 + _rng.randf_range(0.0, 1.5)
 		var m: String = HOUSES[(k + 5) % HOUSES.size()]
-		_raw(m, "aSt", Vector3(xx, _sol_real(xx, z), z), PI, 1.0, "none")
-		if _rng.randf() < 0.4:
+		_raw(m, "aSt", Vector3(xx, _sol_real(xx, z), z), _yaw_facing(m, 0.0, -1.0), 1.0, "none")
+		if m != "haveli_facade" and _rng.randf() < 0.4:
 			_meta_last("metadata/indigo = true")
 		x -= 8.2 + _rng.randf_range(-0.4, 0.6)
 		k += 1
-	# Candele pe bordura pietei (stanga, x -12..-33, in afara trotuarului;
-	# mai departe stau tuk-tuk-urile parcate).
-	var px := -12.0
-	while px > -33.5:
-		var pz := ROAD_Z + 10.0
-		_diyas.append(Vector3(px, _sol_real(px, pz), pz))
-		px -= 0.8
+
+
+## Fasia de bazar dintre asfalt si case (tiparul lui H, runda 3): o taraba in
+## fiecare golf dintre doi stalpi de felinar (golful are 7 m, taraba 3,5 m, deci
+## nu atinge stalpul), o piesa mica (saci / cactus) la fiecare stalp: un
+## obiect la ~3,5 m. Tarabele stau cu spatele la case si fata spre drum, cu
+## felinarul de pravalie la gura (`StreetLights.extra_lamps`).
+func _market() -> void:
+	var stations := _stations_x()
+	for side: float in [1.0, -1.0]: # +1 = stanga (+Z), -1 = dreapta
+		for i in range(stations.size() - 1):
+			var bay := (stations[i] + stations[i + 1]) * 0.5
+			if _market_blocked(side, bay, 2.0):
+				continue
+			var r := _rng.randf()
+			var m := "stall_canopy_a"
+			if r < 0.22:
+				m = "stall_canopy_a"
+			elif r < 0.44:
+				m = "stall_canopy_b"
+			elif r < 0.66:
+				m = "stall_canopy_c"
+			elif r < 0.82:
+				m = "chai_stall"
+			else:
+				m = "thela_cart"
+			_stall(m, "aTaraba", bay + _rng.randf_range(-0.4, 0.4), side)
+		for i in stations.size():
+			var xs: float = stations[i]
+			if _market_blocked(side, xs, 0.9):
+				continue
+			var c := _rng.randf()
+			var z := _rz(xs) + side * (9.95 + _rng.randf_range(0.0, 0.15))
+			if c < 0.55:
+				for j in [-0.5, 0.5]:
+					var sx: float = xs + j * 0.9
+					_raw("spice_sacks", "aSaci", Vector3(sx, _sol_real(sx, z), z),
+						_yaw_to_road(side) + _rng.randf_range(-0.4, 0.4), 1.0, "")
+			elif c < 0.8:
+				_raw("euphorbia", "aEufor", Vector3(xs, _sol_real(xs, z), z),
+					_rng.randf_range(0.0, TAU), 1.0, "")
+			else:
+				_raw("spice_sacks", "aSaci", Vector3(xs, _sol_real(xs, z), z),
+					_yaw_to_road(side), 1.0, "")
+	_square()
+
+
+## Piata din stanga, INAINTEA turnului (x -9..-44, 14-20 m): doua randuri de
+## tarabe joase (2,6 m) cu culoar intre ele, saci si ghirlande. Nimic mai inalt
+## de 2,6 m: de pe H turnul (13,5 m lateral) se vede peste ele.
+func _square() -> void:
+	for row in [[14.6, 1.0], [19.6, -1.0]]:
+		var lat: float = row[0]
+		var face: float = row[1] # +1 = fata spre drum
+		var x := -9.5 + _rng.randf_range(-0.5, 0.5)
+		while x > -44.0:
+			var r := _rng.randf()
+			var z := _rz(x) + lat + _rng.randf_range(-0.3, 0.3)
+			var y := _sol_real(x, z)
+			if r < 0.7:
+				var ms := ["stall_canopy_a", "stall_canopy_b", "stall_canopy_c", "chai_stall"]
+				var m: String = ms[_rng.randi() % ms.size()]
+				var yaw := _yaw_to_road(1.0) if face > 0.0 else _yaw_to_road(1.0) + PI
+				yaw += _rng.randf_range(-0.08, 0.08)
+				_raw(m, "aPiata", Vector3(x, y, z), yaw, 1.0, "")
+				_shop_lamp_for(m, Vector3(x, y, z), yaw)
+				var gdir := Vector3(sin(yaw), 0.0, cos(yaw))
+				var gp := Vector3(x, y + 2.55, z) + gdir * 1.6
+				_raw("marigold_garland", "aPiataGhirlanda", gp, yaw, 1.0, "")
+			else:
+				for j in [-0.6, 0.6]:
+					var sx: float = x + j
+					_raw("spice_sacks", "aPiataSaci", Vector3(sx, _sol_real(sx, z), z),
+						_rng.randf_range(0.0, TAU), 1.0, "")
+			x -= 4.1 + _rng.randf_range(-0.3, 0.5)
+
+
+func _stall(m: String, base: String, x: float, side: float) -> void:
+	var depth: float = STALL_DEPTH[m]
+	var lat := maxf(9.1, 11.2 - depth * 0.5)
+	var z := _rz(x) + side * lat
+	var y := _sol_real(x, z)
+	var yaw := _yaw_to_road(side) + _rng.randf_range(-0.07, 0.07)
+	_raw(m, base, Vector3(x, y, z), yaw, 1.0, "")
+	_shop_lamp_for(m, Vector3(x, y, z), yaw)
+	var fr := Vector3(sin(yaw), 0.0, cos(yaw))
+	var rt := Vector3(cos(yaw), 0.0, -sin(yaw))
+	# Ghirlanda de galbenele pe muchia din fata a copertinei.
+	if m.begins_with("stall_canopy") or m == "chai_stall":
+		_raw("marigold_garland", base + "Ghirlanda", Vector3(x, y + 2.55, z) + fr * (depth * 0.5),
+			yaw, 1.0, "")
+	# Candele in fata tarabei.
+	for j in [-1.2, -0.4, 0.4, 1.2]:
+		var p := Vector3(x, 0.0, z) + fr * (depth * 0.5 + 0.1) + rt * float(j)
+		_diyas.append(Vector3(p.x, _sol_real(p.x, p.z), p.z))
+
+
+## Felinarul atarna la gura pravaliei (inaltimi si adancimi de la H).
+func _shop_lamp_for(m: String, pos: Vector3, yaw: float) -> void:
+	var lamp_h := {"stall_canopy_a": 2.25, "stall_canopy_b": 2.25, "stall_canopy_c": 2.25,
+		"chai_stall": 2.3, "thela_cart": 1.9}
+	var lamp_dz := {"thela_cart": 0.75, "chai_stall": 1.45}
+	if not lamp_h.has(m):
+		return
+	var f := Vector3(sin(yaw), 0.0, cos(yaw))
+	_shop_lamps.append(pos + Vector3.UP * float(lamp_h[m]) + f * float(lamp_dz.get(m, 1.65)))
+
+
+## +Z local spre drum (tarabe, saci): side +1 = stanga, drumul e spre -Z.
+func _yaw_to_road(side: float) -> float:
+	return PI if side > 0.0 else 0.0
+
+
+## Unde NU intra fasia: turnul, tuk-tuk-urile parcate, aripa portii.
+func _market_blocked(side: float, x: float, half: float) -> bool:
+	if x + half > -9.0 or x - half < -73.0:
+		return true
+	if side > 0.0:
+		if absf(x - TOWER_X) < 3.5 + half + 0.5:
+			return true
+		for tx in _tuk_x:
+			if absf(x - tx) < 1.4 + half:
+				return true
+	return false
+
+
+## x-ul statiilor de felinar (aceleasi ca StreetLights aFelinare).
+func _stations_x() -> Array[float]:
+	var out: Array[float] = []
+	var route := _track.route_at(0)
+	var pts := route.baked
+	var n := pts.size()
+	var i0 := int(L_FROM * float(n))
+	var i1 := int(L_TO * float(n))
+	var acc := L_STEP
+	for i in range(i0, i1):
+		var a: Vector3 = pts[route.wrap_index(i)]
+		var b: Vector3 = pts[route.wrap_index(i + 1)]
+		if acc >= L_STEP:
+			acc = 0.0
+			out.append(a.x)
+		acc += Vector2(b.x - a.x, b.z - a.z).length()
+	return out
 
 
 func _rangoli() -> void:
@@ -246,7 +442,7 @@ func _rangoli() -> void:
 		_n += 1
 		_out.append('[node name="aRangoli%d" type="Decal" parent="%s"]' % [_n, ZONE])
 		_out.append("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %f, %f, %f)"
-			% [x, _road_y(x), ROAD_Z])
+			% [x, _road_y(x), _rz(x)])
 		_out.append('script = ExtResource("a_rangoli")')
 		_out.append("size = Vector3(%.2f, 1.2, %.2f)" % [d, d])
 		_out.append("variant = %d" % int(it[2]))
@@ -314,6 +510,10 @@ func _lights_node() -> void:
 	for v in _eaves:
 		ps.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
 	_out.append("eave_points = PackedVector3Array(%s)" % ", ".join(ps))
+	var sl: Array[String] = []
+	for v in _shop_lamps:
+		sl.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+	_out.append("extra_lamps = PackedVector3Array(%s)" % ", ".join(sl))
 	_out.append("")
 	print("; sfori pe muchii: %d" % (_eaves.size() / 2))
 
@@ -353,6 +553,20 @@ func _write() -> void:
 		fa.store_line(line)
 	fa.close()
 	print("; scris %s" % _out_path)
+
+
+## z-ul axei drumului la x (dreapta H urca spre z 188 la est de x -30; la
+## vest de x -30 drumul e pe z 190). Interpolare pe punctele coapte.
+func _rz(x: float) -> float:
+	var pts := _track.baked
+	for i in pts.size():
+		var a: Vector3 = pts[i]
+		var b: Vector3 = pts[(i + 1) % pts.size()]
+		if absf(a.z - ROAD_Z) > 8.0 or absf(b.z - ROAD_Z) > 8.0:
+			continue
+		if (a.x - x) * (b.x - x) <= 0.0 and absf(a.x - b.x) > 0.001:
+			return lerpf(a.z, b.z, (x - a.x) / (b.x - a.x))
+	return ROAD_Z
 
 
 func _road_y(x: float) -> float:

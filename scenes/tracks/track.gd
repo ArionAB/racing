@@ -1340,12 +1340,19 @@ static func themes() -> Dictionary:
 			# neutru, ca platoul intre case sa nu sara la ochi inainte sa
 			# existe ceva de sarit -- de remasurat pe captura cand exista
 			# case (memoria monocromia-se-masoara-dupa-remap).
-			"ground_tint": Color(0.62, 0.56, 0.46),
+			#
+			# A DOUA TRECERE DE LUMINA („cald + albastru", ProbeJodLumina pe
+			# masca de clasa, docs/asset_briefs/jodhpur_masuratori.md §10):
+			# nisipul iesea gri-bej (D 0,380: H 12, S 0,15) — criticii orbi au
+			# citit „apus rece" de 9 ori. Caldura solului vine din ALBEDO (nisip
+			# ocru-portocaliu, S 0,34 pe D), nu din ambient: ambientul trebuie
+			# sa ramana aproape neutru ca varul sa ramana albastru.
+			"ground_tint": Color(0.78, 0.50, 0.30),
 			# Fata de stanca (mecanismul scarp_tint, ca la Fiordland/Machu
 			# Picchu): riolit roz-brun (brief §1, #9A6A5A), aproape neutru dupa
 			# randare -- stanca sub fort si coborarea G sunt fete de panta
 			# mare, nu platouri.
-			"scarp_tint": Color(0.42, 0.30, 0.27),
+			"scarp_tint": Color(0.46, 0.30, 0.24),
 			"scarp_slope_deg": 30.0,
 			"scarp_fade_deg": 10.0,
 			# Cer de amurg: portocaliu-roz la orizont -> violet sus (brief §0,
@@ -1353,8 +1360,12 @@ static func themes() -> Dictionary:
 			# timpul cursei; sky_top/sky_horizon raman fixe (tema, nu ceasul --
 			# brief §3: "nu atinge fizica", iar cerul insusi nu e in lista de
 			# canale ale DuskCycle, doar soare+ambient+ceata+lampi).
-			"sky_top": Color(0.42, 0.35, 0.62),
-			"sky_horizon": Color(1.0, 0.70, 0.48),
+			# A doua trecere de lumina: cerul devine canal al DuskCycle (vezi
+			# KEY_SKY_* acolo: noaptea se inchide), iar valorile de aici sunt
+			# dusk 0 — orizont portocaliu saturat, zenit magenta-violet
+			# (cer pe masca: S 0,26-0,32 -> 0,49-0,59).
+			"sky_top": Color(0.55, 0.28, 0.50),
+			"sky_horizon": Color(1.0, 0.48, 0.22),
 			"sky_cover_alpha": 0.0,
 			# Ceata CALDA de praf (brief §2.0, §4): "vine cu noaptea" e rolul
 			# lui DuskCycle (fog_light_color + fog_depth_end interpolate);
@@ -1369,7 +1380,9 @@ static func themes() -> Dictionary:
 			# spre apus o da DuskCycle prin `fog_sun_scatter` (0,8 la dusk 0):
 			# ceata SPRE soare (D urca spre NV, soarele e in V) ia culoarea
 			# soarelui, ceata DINSPRE soare (F priveste spre SE) ramane rece.
-			"fog_sky_affect": 0.15,
+			# 0,15 -> 0,08 (a doua trecere): ceata albastra, necesara orasului
+			# vazut de pe F, spala mai putin cerul portocaliu.
+			"fog_sky_affect": 0.08,
 			"fog": Color.html("8A94B8"),
 			"hill_color": Color(0.58, 0.42, 0.38),
 			# Soare la 8 grade, din VEST (brief §2.0/§4: "azimutul soarelui
@@ -1384,8 +1397,17 @@ static func themes() -> Dictionary:
 			# #FFB27A din brief: in spatiul liniar #FFB27A are B/R = 0,19, deci
 			# o fata de var albastru (B/R 2,6) batuta de soare iesea gri-mov.
 			# #FFBC8C (B/R 0,26) tine fetele insorite calde si nisipul auriu.
-			"sun_color": Color.html("FFBC8C"),
-			"sun_energy": 1.0,
+			#
+			# A doua trecere: soarele e din nou portocaliu SATURAT (#FF9050),
+			# dar mai SLAB (1,0 -> 0,85), iar ambientul mai tare (0,42 -> 0,50,
+			# cu o umbra de albastru, #C8C4D0). Raportul cheie/umplere decide
+			# culoarea caselor: soare portocaliu tare pe var = fatade gri-lila
+			# (masurat: F_joc S 0,24, sub garda). Cu umplerea mai tare, varul
+			# ramane albastru (F_joc S 0,28, D S 0,35) iar caldura o duc
+			# fetele spre vest, cerul, nisipul si gresia. Ceata ramane
+			# #8A94B8: una mov (#9690B0) ducea orasul de pe F la H 240 S 0,22.
+			"sun_color": Color.html("FF9050"),
+			"sun_energy": 0.85,
 			"exposure": 1.0,
 			"sun_rotation_deg": Vector3(-8, 90, 0),
 			# AMBIENTUL e parghia care decide culoarea orasului: la 8 grade
@@ -1399,8 +1421,8 @@ static func themes() -> Dictionary:
 			# (H 21-24). Albastru-rece pur (#9FA9D6) albastrea si nisipul (H
 			# 280, masurat) — de aceea neutru, nu rece. Energia 0,30 -> 0,42
 			# tine luminanta cadrului (luma 38 pe D, 42 pe F, ca inainte).
-			"ambient_color": Color.html("CAC0C4"),
-			"ambient_energy": 0.42,
+			"ambient_color": Color.html("C8C4D0"),
+			"ambient_energy": 0.50,
 			# Umbre PORNITE, lungi (brief §4: "identitatea turului 1").
 			# shadow_distance 90 (CLAUDE.md: prima setare de scurtat/stins
 			# daca device-ul nu tine 60fps) -- la 8 grade casterii sunt
@@ -1502,23 +1524,26 @@ static func themes() -> Dictionary:
 			# de piatra, aceeasi imagine ca Well_Stone din kit) — zero materiale
 			# noi, terenul ramane unul. Tentele sunt tinta / media dalei ridicate
 			# (~0.83, 0.81, 0.745): #D4957A -> (1.0, 0.72, 0.64), #9A6A5A ->
-			# (0.73, 0.51, 0.47). Desertul de dincolo ramane nisip.
+			# (0.73, 0.51, 0.47). Desertul de dincolo ramane nisip. A doua
+			# trecere de lumina: ambele mai calde (riolitul -> 0.80, 0.50, 0.38),
+			# solul de pe F iesea roz-gri (H 355-6, S 0,19-0,27).
 			"terrain_alt_class": "rose_sandstone",
 			"ground_zones": [
 				# Fantana: acul de par are bratele la 22 m, groapa e intre ele si
 				# pe umerii lor. 30 m acopera groapa si umarul de langa asfalt.
 				{"from": 0.129, "to": 0.267, "max_m": 30.0, "fade_m": 12.0,
-					"tint": Color(1.0, 0.68, 0.62)},
+					# a doua trecere: 0.68/0.62 -> 0.64/0.50, gresie mai calda
+					"tint": Color(1.0, 0.64, 0.50)},
 				# Portile si stanca fortului: zigzagul urca pe FortRock (r 100 m),
 				# stanca e in jurul lui, nu doar pe umar.
 				{"from": 0.474, "to": 0.699, "max_m": 70.0, "fade_m": 30.0,
-					"tint": Color(0.73, 0.51, 0.47)},
+					"tint": Color(0.80, 0.50, 0.38)},
 				# Coborarea G pe stanca de riolit goala si malul Devkund (G2):
 				# brief §2 G/G2, bara G2 arata malul ca stanca roz, nu nisip.
 				# Aceeasi tenta ca fortul; 40 m tin stanca pe umar si pe mal
 				# fara sa inghita deserul de dincolo de lac.
 				{"from": 0.699, "to": 0.910, "max_m": 40.0, "fade_m": 20.0,
-					"tint": Color(0.73, 0.51, 0.47)},
+					"tint": Color(0.80, 0.50, 0.38)},
 			],
 			# TROTUARUL: pe strazile orasului (A/B, D, H) fasia dintre asfalt si
 			# case e lata de ~3 m si iesea nisip. Umarul existent se lateste

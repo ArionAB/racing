@@ -98,6 +98,10 @@ extends Node
 ##                             flag traficul nu apare in captura. Corpuri
 ##                             `Car` + tuktuk.tres, INGHETATE (on_start_grid),
 ##                             botul pe sensul de mers. Fara flag: nimic.
+##   --cow=stand|lie           VACA din ulicioara (CowGate, Jodhpur D′)
+##                             inghetata: `lie` culcata in gura (scurtatura
+##                             inchisa), `stand` pe prag (deschisa). Fara
+##                             flag: pe prag, ceasul nu ruleaza.
 ##   --bus-at=30               AUTOBUZUL de pe serpentine (BusHazard, Machu
 ##                             Picchu) la N SECUNDE de coborare pe curba lui
 ##                             (7 m/s => 30 s = 210 m de la capatul de sus),
@@ -363,6 +367,7 @@ func _ready() -> void:
 	var cloud_at := -1.0
 	var bus_at := -1.0
 	var tuk_at := ""
+	var cow_mode := ""
 	var cross_at := -1.0
 	var burner_at := -1.0
 	# Teatrul bastionului (Jodhpur, POI F): ceasurile BastionTheatre, inghetate.
@@ -465,6 +470,8 @@ func _ready() -> void:
 			bus_at = float(arg.trim_prefix("--bus-at="))
 		elif arg.begins_with("--tuk-at="):
 			tuk_at = arg.trim_prefix("--tuk-at=")
+		elif arg.begins_with("--cow="):
+			cow_mode = arg.trim_prefix("--cow=")
 		elif arg.begins_with("--rope-load="):
 			var parts := arg.trim_prefix("--rope-load=").split(",")
 			rope_load = float(parts[0])
@@ -579,6 +586,8 @@ func _ready() -> void:
 		await _set_bus_time(track, bus_at)
 	if tuk_at != "":
 		_place_tuktuks(track, tuk_at)
+	if cow_mode != "":
+		await _set_cow(track, cow_mode)
 	if cross_at >= 0.0:
 		await _set_cross_time(track, cross_at)
 	if burner_at >= 0.0:
@@ -1307,6 +1316,52 @@ func _set_bus_time(root: Node, at: float) -> void:
 				body.global_position.z])
 	if found == 0:
 		print("--bus-at: NICIUN autobuz pe pista asta")
+
+
+## `--cow=stand|lie` (Jodhpur, D′): vaca din ulicioara (`CowGate`) INGHETATA
+## in pozitia ceruta, fara telegraph: `lie` = culcata in gura (scurtatura
+## inchisa), `stand` = in picioare pe prag (deschisa). Snapshot nu ruleaza
+## ceasul portii, deci fara flag vaca e pe prag, adica jumatate din gimmick
+## nu se vede niciodata. Opreste `_physics_process` al portii (lume
+## inghetata), pune starea si transformul corpului, apoi cere `CowPose` sa
+## aplice poza finala a clipului. Fara `CowGate` pe pista: nimic.
+func _set_cow(track: Track, mode: String) -> void:
+	var gate: CowGate = null
+	for n in get_tree().get_nodes_in_group(Track.BRANCH_GATE_GROUP):
+		if n is CowGate:
+			gate = n as CowGate
+			break
+	if gate == null:
+		print("--cow: pista fara CowGate")
+		return
+	for i in 60:
+		if bool(gate.get("_placed")):
+			break
+		await get_tree().process_frame
+	var lie := mode == "lie"
+	gate.set_physics_process(false)
+	gate.set("_state", CowGate.State.LYING_IN_MOUTH if lie else CowGate.State.ON_THRESHOLD)
+	gate.set("_walk_t", 1.0 if lie else 0.0)
+	gate.set("_clock", 0.0)
+	var body := gate.get_node_or_null("CowBody") as Node3D
+	var xf: Transform3D = gate.get("_mouth_xf") if lie else gate.get("_threshold_xf")
+	if body != null:
+		body.global_transform = xf
+	var posed := 0
+	# Duck typing, nu `is CowPose`: o clasa noua intra in cache-ul de clase
+	# globale abia la urmatorul --import, iar pana atunci snapshot.gd nu se
+	# mai compileaza deloc (Snapshot sta cu fereastra goala, fara eroare vizibila).
+	for n in track.find_children("*", "Node", true, false):
+		if n.has_method("snap_to_state") and n.has_method("is_bound"):
+			for i in 60:
+				if bool(n.call("is_bound")):
+					break
+				await get_tree().process_frame
+			n.call("snap_to_state")
+			posed += 1
+	print("--cow=%s: vaca %s la (%.1f, %.1f, %.1f), CowPose %d"
+		% [mode, "culcata in gura" if lie else "pe prag", xf.origin.x, xf.origin.y,
+			xf.origin.z, posed])
 
 
 ## `--tuk-at`: tuk-tuk-uri inghetate pe banda stanga a buclei (ruta 0), la

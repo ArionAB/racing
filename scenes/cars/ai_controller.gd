@@ -442,6 +442,7 @@ func update(delta: float) -> void:
 		var hi := forced + FORCED_SLACK
 		line = clampf(line, minf(lo, hi), maxf(lo, hi))
 		line = clampf(line, -LINE_MAX, LINE_MAX)
+	line = _alley_gate_line(idx, line)
 	var near := track.lookahead_point(idx, _lookahead_near(speed), line, car.route)
 	# Bifurcatia: cine a decis ca o ia, tinteste banda cealalta cat timp cele
 	# doua sunt inca lipite. Comutarea propriu-zisa de ruta o face Car, pe
@@ -463,14 +464,29 @@ func update(delta: float) -> void:
 	# drum. Vezi DOOR_REACH_M.
 	if car.route == 0 and _door_block_m < INF:
 		take_branch = true
+	_alley_approach = false
 	if take_branch:
-		var lure := track.branch_lure(car.global_position, _lookahead_near(speed))
+		var lure := track.branch_lure(car.global_position, _lookahead_near(speed), idx)
 		if lure != Vector3.INF:
 			near = lure
+			# Momit spre o banda cu poarta ingustata: de la capul benzii,
+			# tinta e pe axa portii si viteza se plafoneaza (vezi mai jos).
+			if track.branch_gate(1) != null:
+				var br := track.route_at(1)
+				var bi := br.closest_index_global(car.global_position)
+				near = _alley_gate_aim_on(1, bi, near)
+				if br.dists[bi] <= float(track.branch_gate(1).gate_dist_m):
+					_alley_approach = true
+	if car.route != 0:
+		near = _alley_gate_aim_on(car.route, idx, near)
 	_steer = clampf(_angle_to(fwd, near) * 2.2, -1.0, 1.0)
 
 	# --- pedale: viteza-tinta din cat de stramt e ce urmeaza ---
 	var target := car.max_speed * lerpf(1.0, CORNER_SPEED_FLOOR, severity)
+	# Poarta ingustata a ulicioarei: de la desprinderea benzii pana dupa
+	# poarta, cu plafon de viteza — ca sa aiba timp sa se aseze pe axa.
+	if _alley_approach:
+		target = minf(target, ALLEY_GATE_SPEED)
 	# Pe banda uda ridica piciorul, ca un sofer.
 	#
 	# Fara asta AI-ul intra pe bancul de nisip cu viteza de asfalt, aluneca si
@@ -1310,3 +1326,73 @@ func is_drift_pressed() -> bool:
 
 func is_turbo_pressed() -> bool:
 	return _turbo
+
+
+## Poarta ingustata a unei benzi (`AlleyGate`, ulicioara Jodhpur): golul are
+## 4 m, masina 2,1, deci marja e +-0,95 m. Linia de cursa obisnuita (pana la
+## +-LINE_MAX din semilatimea benzii de 3,2 = +-2,56 m) ducea masina cu
+## 1-1,5 m langa axa si botul la 8-13 grade: masurat pe 16 seed-uri, 10
+## ejectari de perete, toate pe stalpii portii. Pe ultimii
+## ALLEY_GATE_APPROACH_M inainte de poarta si pana la ALLEY_GATE_AFTER_M dupa,
+## linia se strange pe axa, la (golul - jumatatea caroseriei - marja) din
+## semilatimea benzii. Doar pe benzile care AU poarta (Track.branch_gate).
+const ALLEY_GATE_APPROACH_M: float = 25.0
+const ALLEY_GATE_AFTER_M: float = 6.0
+const ALLEY_GATE_MARGIN_M: float = 0.3
+
+## Linia stransa singura nu ajunge (masurat, runda 2): masina iese din curba
+## buclei pe dreapta benzii (+1,5 m) si, cu tinta de urmarire la 15-20 m in
+## fata, corecteaza prea incet — ajunge la poarta tot la +1,4 m. Pe fereastra
+## de apropiere tinta devine punctul de pe AXA benzii chiar dupa poarta, deci
+## unghiul de corectie creste pe masura ce poarta se apropie.
+const ALLEY_GATE_AIM_T: float = 0.55
+const ALLEY_GATE_AIM_MIN_M: float = 6.0
+const ALLEY_GATE_AIM_MAX_M: float = 14.0
+
+## Viteza maxima pe apropierea portii ingustate (m/s). Masurat (runda 2):
+## AI-ul ajungea la poarta cu 25-35 m/s si nu mai avea timp sa corecteze
+## +1,5 m din curba buclei in cei ~14 m dintre comutare si poarta.
+const ALLEY_GATE_SPEED: float = 15.0
+var _alley_approach: bool = false
+
+func _alley_gate_aim_on(route: int, idx: int, near: Vector3) -> Vector3:
+	var gate := track.branch_gate(route)
+	if gate == null:
+		return near
+	var r := track.route_at(route)
+	if r == null or r.dists.is_empty():
+		return near
+	var d: float = r.dists[clampi(idx, 0, r.dists.size() - 1)]
+	var gd := float(gate.gate_dist_m)
+	if d < gd - ALLEY_GATE_APPROACH_M or d > gd:
+		return near
+	_alley_approach = true
+	# Urmarire pura pe AXA benzii, cu distanta de tinta proportionala cu
+	# viteza (stabila: o tinta fixa dupa poarta oscila +-1,4 m, masurat).
+	var aim_d := d + clampf(car.horizontal_speed() * ALLEY_GATE_AIM_T,
+		ALLEY_GATE_AIM_MIN_M, ALLEY_GATE_AIM_MAX_M)
+	var j := idx
+	while j < r.baked.size() - 1 and r.dists[j] < aim_d:
+		j += 1
+	return r.baked[j]
+
+
+func _alley_gate_line(idx: int, line: float) -> float:
+	if car.route == 0:
+		return line
+	var gate := track.branch_gate(car.route)
+	if gate == null:
+		return line
+	var r := track.route_at(car.route)
+	if r == null or r.dists.is_empty():
+		return line
+	var d: float = r.dists[clampi(idx, 0, r.dists.size() - 1)]
+	var gd := float(gate.gate_dist_m)
+	if d < gd - ALLEY_GATE_APPROACH_M or d > gd + ALLEY_GATE_AFTER_M:
+		return line
+	var half_body := 1.05
+	if car.data != null:
+		half_body = car.data.body_width * 0.5
+	var room := maxf(float(gate.half_opening_m) - half_body - ALLEY_GATE_MARGIN_M, 0.0)
+	var k := room / maxf(r.half_width, 0.1)
+	return clampf(line, -k, k)

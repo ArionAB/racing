@@ -4218,7 +4218,7 @@ func _holds_declarations(node: Node) -> bool:
 		return true
 	if node is TrackChannel or node is HazardMarker:
 		return true
-	if node is CliffFace:
+	if node is CliffFace or node is TerrainBluff:
 		return true
 	for child in node.get_children():
 		if _holds_declarations(child):
@@ -4274,6 +4274,20 @@ func _collect_hollows(node: Node, out: Array[Vector4],
 			out.append(Vector4(p.x, p.z, hl.radius_m, p.y))
 			walls.append(hl.wall_m)
 		_collect_hollows(child, out, walls)
+
+
+## Abrupturile plasate ca noduri [TerrainBluff], aceeasi cautare recursiva ca
+## la scobituri; cate [constant TrackSideSampler.BLUFF_STRIDE] numere pe nod.
+func _node_bluffs() -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var st: Array[Node] = [self]
+	while not st.is_empty():
+		var n: Node = st.pop_back()
+		for c in n.get_children():
+			st.append(c)
+		if n is TerrainBluff:
+			out.append_array((n as TerrainBluff).spec(self))
+	return out
 
 
 ## Scurtaturile desenate ca noduri [TrackBranch] — se ADUNA la cele declarate in
@@ -4616,6 +4630,9 @@ func rebuild() -> void:
 	# Debleele, tot dupa constructie: lista goala pe orice pista fara ele.
 	_sampler.cuttings = _cuttings()
 	_sampler.cutting_shape = _cutting_shape()
+	# Abrupturile (TerrainBluff), tot dupa constructie: goale pe orice pista
+	# fara noduri, deci ground_y nu se schimba acolo.
+	_sampler.bluffs = _node_bluffs()
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",

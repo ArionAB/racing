@@ -274,6 +274,17 @@ var late_peaks: Array[Vector4] = []
 ## ca [member late_peaks]: goala pe orice pista fara ele, deci `ground_y` nu se
 ## schimba cu nimic acolo.
 var cuttings: Array[Vector4] = []
+## ABRUPTURILE declarate ([TerrainBluff]): cate 15 numere pe abrupt, in ordinea
+## din [method TerrainBluff.spec]. Se seteaza de Track dupa constructie, ca
+## [member cuttings]: goala pe orice pista fara noduri, deci `ground_y` nu se
+## schimba cu nimic acolo. Vezi [method _carve_bluffs].
+var bluffs: PackedFloat32Array = PackedFloat32Array()
+const BLUFF_STRIDE := 15
+## Pe cati metri, dincolo de `road_clear_m`, abruptul creste de la zero la plin.
+const BLUFF_ROAD_FADE: float = 8.0
+## Latimea rampei dintre doua terase (m): sub doua celule de grila, ca treapta
+## sa iasa o singura coarda de mesh, adica un rand de case lipsa, nu o panta.
+const BLUFF_RISER_M: float = 4.0
 ## Forma comuna a debleelor: (umar plat la cota drumului dincolo de asfalt,
 ## panta peretelui in m/m, cat de departe de asfalt tine ridicatura inainte sa
 ## se stinga in campul din jur). Vezi [method _lift_cuttings].
@@ -554,7 +565,10 @@ func ground_y(wx: float, wz: float) -> float:
 	# ridica teren (media soselei, lacatul local, masivele, benzile), altfel un
 	# singur drum care trece pe deasupra golului il umple la loc. Vezi
 	# _carve_hollows — pe pistele fara scobituri declarate nu se schimba nimic.
-	return _carve_hollows(y, wx, wz)
+	y = _carve_hollows(y, wx, wz)
+	# Abrupturile: tot un PLAFON, dupa scobituri — dar CU banda de protectie a
+	# asfaltului (vezi TerrainBluff). Lista goala pe orice pista fara ele.
+	return _carve_bluffs(y, wx, wz, dist, near_i)
 
 
 ## Distanta perpendiculara pana la axa soselei si cota drumului acolo, ca
@@ -669,6 +683,58 @@ func _lift_island_peaks(y: float, wx: float, wz: float, dist: float,
 ## `minf`, nu `_smin`: tinta e o suprafata deja C1 in plan (smoothstep pe perete)
 ## si constanta pe verticala, deci nu apare cuta pe care o rezolva _smin — iar un
 ## _smin ar fi coborat podeaua cu k/4 uniform, adica ar fi sapat sub drum.
+## Coboara terenul sub profilul abrupturilor declarate — vezi [TerrainBluff].
+##
+## Pe directia de cadere `s` (de la buza): taluz liniar pe `run`, apoi terase
+## plane legate de rampe de [constant BLUFF_RISER_M], ultima tinuta pana la
+## `length`. Se compune ca la [method _carve_hollows] (plafonul interpolat intre
+## teren si profil, apoi `minf`), deci nu ridica nimic. Diferenta: banda de
+## protectie a asfaltului, pentru ca abruptul sta langa un drum pe care nu-l
+## traverseaza — sub `road_clear` de la margine e stins complet.
+func _carve_bluffs(y: float, wx: float, wz: float, dist: float,
+		near_i: int) -> float:
+	if bluffs.is_empty():
+		return y
+	var edge := dist - half_width_at(near_i)
+	var k := 0
+	while k + BLUFF_STRIDE <= bluffs.size():
+		var rx := wx - bluffs[k]
+		var rz := wz - bluffs[k + 1]
+		var dx := bluffs[k + 2]
+		var dz := bluffs[k + 3]
+		var s := rx * dx + rz * dz
+		var lat := absf(rz * dx - rx * dz)
+		var half_w := bluffs[k + 5]
+		var side_fade := bluffs[k + 6]
+		var length := bluffs[k + 12]
+		var end_fade := bluffs[k + 13]
+		var clear := bluffs[k + 14]
+		if s > 0.0 and s < length + end_fade and lat < half_w + side_fade:
+			var mix := (1.0 - smoothstep(half_w, half_w + side_fade, lat)) 				* (1.0 - smoothstep(length, length + end_fade, s)) 				* smoothstep(clear, clear + BLUFF_ROAD_FADE, edge)
+			if mix > 0.0:
+				var crest := bluffs[k + 4]
+				var run := bluffs[k + 7]
+				var foot := crest - bluffs[k + 8]
+				var c := foot
+				if s < run:
+					c = lerpf(crest, foot, s / run)
+				else:
+					var tread := maxf(bluffs[k + 9], 1.0)
+					var rise := bluffs[k + 10]
+					var last := bluffs[k + 11] - 1.0
+					var u := (s - run) / tread
+					var step := floorf(u)
+					if step >= last:
+						c = foot - rise * last
+					else:
+						var riser := minf(BLUFF_RISER_M, tread * 0.5) / tread
+						var ramp := clampf((u - step - (1.0 - riser)) / riser, 0.0, 1.0)
+						c = foot - rise * (step + ramp)
+				y = minf(y, lerpf(y, c, mix))
+		k += BLUFF_STRIDE
+	return y
+
+
 func _carve_hollows(y: float, wx: float, wz: float) -> float:
 	if _hollows.is_empty():
 		return y

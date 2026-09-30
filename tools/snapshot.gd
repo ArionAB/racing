@@ -123,6 +123,13 @@ extends Node
 ##                             fractie din ciclul ei: 0 = abia deschisa (in
 ##                             nisa), ~0.53 = la jumatatea rostogolirii spre
 ##                             axa, 0.60-0.84 = INCHISA pe banda.
+##   --salute-at=5.0           TUNURILE DE SALUT (BastionTheatre, Jodhpur POI F)
+##                             la N secunde in ciclul de 31 s (salvele trag la
+##                             4,0 / 4,8 / 5,6 / 6,4 / 7,2 s). Ceas inghetat.
+##   --zip-at=4.0              TIROLIANA: figura pe cablu la N secunde (ciclu
+##                             23 s, cursa 0..9 s). Ceas inghetat.
+##   --fireworks-at=1.0        ARTIFICIILE la N secunde, APRINSE indiferent de
+##                             dusk (lumina o da `--dusk=1`). Ceas inghetat.
 ##   --rock-at=3.5             bolovanii cu traseu, la N SECUNDE de la
 ##                             desprindere (nu fractie: traseele au lungimi
 ##                             diferite). Se SIMULEAZA cadru cu cadru de la 0,
@@ -363,6 +370,10 @@ func _ready() -> void:
 	var cow_mode := ""
 	var cross_at := -1.0
 	var burner_at := -1.0
+	# Teatrul bastionului (Jodhpur, POI F): ceasurile BastionTheatre, inghetate.
+	var salute_at := -1.0
+	var zip_at := -1.0
+	var fireworks_at := -1.0
 	var balloon_at := -1.0
 	var lava_stage := -1
 	var route_idx := 0
@@ -502,6 +513,12 @@ func _ready() -> void:
 			rain_clock = float(arg.trim_prefix("--rain-clock="))
 		elif arg.begins_with("--dusk="):
 			dusk_force = float(arg.trim_prefix("--dusk="))
+		elif arg.begins_with("--salute-at="):
+			salute_at = float(arg.trim_prefix("--salute-at="))
+		elif arg.begins_with("--zip-at="):
+			zip_at = float(arg.trim_prefix("--zip-at="))
+		elif arg.begins_with("--fireworks-at="):
+			fireworks_at = float(arg.trim_prefix("--fireworks-at="))
 		elif arg.begins_with("--torrent-at="):
 			torrent_at = float(arg.trim_prefix("--torrent-at="))
 		elif arg == "--overdraw":
@@ -639,6 +656,20 @@ func _ready() -> void:
 			if node.has_method("force_value"):
 				node.call("force_value", dusk_force)
 		print("--dusk=%.2f: %d DuskCycle fortate" % [dusk_force, dusk_cycles.size()])
+	# Teatrul bastionului (Jodhpur, POI F). Opt-in: fara flag nu se atinge
+	# nimic. Ceasul e o functie pura de timp (BastionTheatre), deci se pune
+	# direct si se ingheata — fara simulare de cadre.
+	if salute_at >= 0.0 or zip_at >= 0.0 or fireworks_at >= 0.0:
+		await get_tree().process_frame
+		var theatres := get_tree().get_nodes_in_group(&"bastion_theatre")
+		for node in theatres:
+			if salute_at >= 0.0:
+				node.call("force_clock", "salute", salute_at)
+			if zip_at >= 0.0:
+				node.call("force_clock", "zip", zip_at)
+			if fireworks_at >= 0.0:
+				node.call("force_clock", "fw", fireworks_at)
+		print("--salute-at/--zip-at/--fireworks-at: %d BastionTheatre fortate" % theatres.size())
 	# Torentul in pulsuri (Fiordland, scurtatura Chasm): `TorrentCycle._place`
 	# e amanat si reincearca pana apar rutele, deci asteptam doua cadre si
 	# fortam ceasul pe toate torentele din grup (0 = CALM, period-telegraph-

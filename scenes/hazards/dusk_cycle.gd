@@ -54,7 +54,7 @@ extends Node
 ## `Track._sun_rotation_deg` — vezi `_apply_sun`).
 const KEY_T: PackedFloat32Array = [0.0, 0.5, 1.0]
 const KEY_SUN_ELEV_DEG: PackedFloat32Array = [8.0, 3.0, 1.0]
-const KEY_SUN_ENERGY: PackedFloat32Array = [1.0, 0.60, 0.30]
+const KEY_SUN_ENERGY: PackedFloat32Array = [0.85, 0.55, 0.30]
 ## Culorile NU pot fi `const Array[Color]` initializat cu `Color.html()`/
 ## `Color(...)` de call — GDScript cere o EXPRESIE CONSTANTA pentru `const`,
 ## iar un apel de functie (chiar si un constructor) nu calific ("Assigned
@@ -73,25 +73,46 @@ static var KEY_SUN_COLOR: Array[Color] = []
 ## cadrului scade ~40%), cerul si ceata inchisa, apoi flacarile (lampile).
 ## Soarele pastreaza caldura fazei (auriu -> roz -> luna gri-lila).
 ## Ambientul: neutru-cald -> lila stins -> gri-lila, energia 0,42 -> 0,45.
-const KEY_AMBIENT_ENERGY: PackedFloat32Array = [0.42, 0.42, 0.45]
+## A DOUA TRECERE („cald + albastru", jodhpur_masuratori.md §10): soarele
+## portocaliu saturat (#FF9050 -> #FF7A50 la 0,5) dar mai slab (0,85/0,55),
+## ambientul mai tare (0,50/0,48) — raportul cheie/umplere tine varul albastru
+## sub un soare mai cald. Faza 1 (noaptea) neschimbata la soare/ambient/ceata.
+const KEY_AMBIENT_ENERGY: PackedFloat32Array = [0.50, 0.48, 0.45]
 static var KEY_AMBIENT_COLOR: Array[Color] = []
 static var KEY_FOG_COLOR: Array[Color] = []
 const KEY_FOG_END: PackedFloat32Array = [300.0, 270.0, 240.0]
 ## Imprastierea soarelui in ceata (`Environment.fog_sun_scatter`): ceata SPRE
 ## soare capata culoarea soarelui, ceata DINSPRE soare ramane culoarea ei.
 ## NEPIVOTATA pe baza (tema n-o declara): cheile se aplica exact.
-const KEY_FOG_SUN_SCATTER: PackedFloat32Array = [0.8, 0.4, 0.0]
+const KEY_FOG_SUN_SCATTER: PackedFloat32Array = [1.0, 0.6, 0.0]
+## CERUL (a doua trecere de lumina, „cald + albastru"): pana aici cerul nu era
+## canal al ceasului, deci noaptea ramanea cu orizontul de apus. Acum
+## `sky_top`/`sky_horizon` ale `ProceduralSkyMaterial` se interpoleaza ca
+## restul (pivotate pe tema la dusk 0), iar `ground_horizon` urmeaza
+## orizontul (tema le leaga la fel in `Track._build_environment`).
+static var KEY_SKY_TOP: Array[Color] = []
+static var KEY_SKY_HORIZON: Array[Color] = []
+## Discul soarelui in ProceduralSky e un AMESTEC catre `culoare x energie` a
+## luminii, nu un adaos: cand soarele scade la 0,30 (luna gri-lila) discul
+## iese MAI INCHIS decat orizontul — pata intunecata de pe cer la dusk 1, de
+## 30 de grade (`sun_angle_max` implicit). Raza haloului scade cu ceasul si
+## dispare noaptea. NEPIVOTATA: tema nu declara unghiul.
+const KEY_SUN_ANGLE_MAX: PackedFloat32Array = [30.0, 18.0, 0.0]
 
 
 ## Ceata: fum albastru-gri stins -> lila-gri -> gri-violet inchis (S <= 0,2
 ## la toate fazele; ceata indigo #3E4A7A albastrea tot ce e dincolo de 90 m).
 static func _static_init() -> void:
 	KEY_SUN_COLOR = [
-		Color.html("FFBC8C"), Color.html("FFA090"), Color.html("A4A0B4")]
+		Color.html("FF9050"), Color.html("FF7A50"), Color.html("A4A0B4")]
 	KEY_AMBIENT_COLOR = [
-		Color.html("CAC0C4"), Color.html("BEB0B8"), Color.html("8A8690")]
+		Color.html("C8C4D0"), Color.html("BEB4C4"), Color.html("8A8690")]
 	KEY_FOG_COLOR = [
 		Color.html("8A94B8"), Color.html("8A8CA0"), Color.html("45424E")]
+	KEY_SKY_TOP = [
+		Color.html("8C4780"), Color.html("5A3A78"), Color.html("1A1834")]
+	KEY_SKY_HORIZON = [
+		Color.html("FF7A38"), Color.html("F06A3A"), Color.html("4A2E44")]
 ## Emisia lampilor: 0,15 (abia perceptibil, ziua) -> 1,0 (sursa de lumina
 ## principala, noaptea) — brief §4 si §3 „emisia lampilor 0,15 -> 1,0".
 const KEY_LAMPS: PackedFloat32Array = [0.15, 0.6, 1.0]
@@ -125,6 +146,11 @@ var _base_ambient_energy: float = 1.0
 var _base_ambient_color: Color = Color.WHITE
 var _base_fog_color: Color = Color.WHITE
 var _base_fog_end: float = 300.0
+var _sky_mat: ProceduralSkyMaterial = null
+var _base_sky_top: Color = Color.WHITE
+var _base_sky_horizon: Color = Color.WHITE
+var _base_sun_angle_max: float = 0.0
+var _last_sky_d: float = -1.0
 
 
 func _ready() -> void:
@@ -223,6 +249,12 @@ func _take_base() -> void:
 		_base_ambient_color = _env.ambient_light_color
 		_base_fog_color = _env.fog_light_color
 		_base_fog_end = _env.fog_depth_end
+		if _env.sky != null:
+			_sky_mat = _env.sky.sky_material as ProceduralSkyMaterial
+		if _sky_mat != null:
+			_base_sky_top = _sky_mat.sky_top_color
+			_base_sky_horizon = _sky_mat.sky_horizon_color
+			_base_sun_angle_max = _sky_mat.sun_angle_max
 	_base_taken = true
 
 
@@ -230,6 +262,7 @@ func _apply(d: float) -> void:
 	dusk = d
 	_apply_sun(d)
 	_apply_ambient_and_fog(d)
+	_apply_sky(d)
 	_apply_lamps(d)
 
 
@@ -257,6 +290,37 @@ func _apply_ambient_and_fog(d: float) -> void:
 	_env.fog_light_color = _lerp_color_key(KEY_FOG_COLOR, d, _base_fog_color)
 	_env.fog_depth_end = _lerp_key(KEY_FOG_END, d, _base_fog_end)
 	_env.fog_sun_scatter = _lerp_key(KEY_FOG_SUN_SCATTER, d, KEY_FOG_SUN_SCATTER[0])
+
+
+## Cerul: vezi `KEY_SKY_TOP`/`KEY_SKY_HORIZON`/`KEY_SUN_ANGLE_MAX`.
+##
+## Scris in TREPTE de 0,01 din `dusk`, nu la fiecare cadru: o schimbare de
+## parametru pe materialul cerului face motorul sa refaca harta de radianta a
+## cerului (cubemap), cost care pe mobil nu se plateste de 60 de ori pe
+## secunda. 100 de trepte pe o cursa de 2-3 minute = o scriere la ~1,5 s,
+## sub pragul la care se vede un salt de culoare.
+func _apply_sky(d: float) -> void:
+	if _sky_mat == null:
+		return
+	if _last_sky_d >= 0.0 and absf(d - _last_sky_d) < 0.01 and d != 0.0 and d != 1.0:
+		return
+	if d == _last_sky_d:
+		return
+	_last_sky_d = d
+	_sky_mat.sky_top_color = _lerp_color_key(KEY_SKY_TOP, d, _base_sky_top)
+	var hz := _lerp_color_key(KEY_SKY_HORIZON, d, _base_sky_horizon)
+	_sky_mat.sky_horizon_color = hz
+	_sky_mat.ground_horizon_color = hz
+	# Sub orizont cerul e `ground_bottom` = ceata intunecata cu 40% (aceeasi
+	# legatura ca in `Track._build_environment`). Fixa pe tema, ramanea
+	# albastru-gri deschis noaptea: de pe bastion (F, dusk 1) se vedea o banda
+	# palida sub cerul de noapte, acolo unde terenul se termina inainte de
+	# linia orizontului. Urmeaza acum ceata ceasului.
+	if _env != null:
+		_sky_mat.ground_bottom_color = _env.fog_light_color.darkened(0.4)
+	# Tema care a stins discul (`sky_sun_disc` false => 0) ramane stinsa.
+	if _base_sun_angle_max > 0.0:
+		_sky_mat.sun_angle_max = maxf(_lerp_key(KEY_SUN_ANGLE_MAX, d, _base_sun_angle_max), 0.0)
 
 
 ## Ultima valoare SCRISA pe `dusk_lamps` (vezi `_apply_lamps`). Exista DOAR

@@ -248,6 +248,10 @@ extends Track
 ## Track.WIDTH_RAMP_M metri de fiecare parte — deci un sector mai scurt decat
 ## doua rampe nu-si atinge niciodata latimea ceruta. Vezi Track.width_at.
 @export var custom_width_segments: Array[Vector3] = []
+## Strangeri locale PESTE sectoare: (frac_start, frac_end, half_width), cu
+## rampa proprie de Track.PINCH_RAMP_M din latimea locala. Vezi
+## Track._width_pinches (portile Jodhpur, dopul de 7 m).
+@export var custom_width_pinches: Array[Vector3] = []
 ## Regenerate vine din Track (checkbox-ul e mostenit); aici doar ne aplicam
 ## intai exporturile custom_* si curba de pornire. Citirea punctelor din
 ## nodul "Path" traieste tot in Track — orice pista o are, nu doar asta.
@@ -410,6 +414,9 @@ func _hummock_fracs() -> Array[float]:
 
 func _width_segments() -> Array[Vector3]:
 	return custom_width_segments
+
+func _width_pinches() -> Array[Vector3]:
+	return custom_width_pinches
 
 ## Daca curba lipseste sau are prea putine puncte, o umplem cu un circuit
 ## de pornire decent — ai de unde sa incepi sa tragi de puncte.

@@ -2078,6 +2078,13 @@ const SLOT_REMAP_BY_MODEL := {
 	# epuizat), deci nu se rescrie GLB-ul aici — remap de slot, ca la
 	# acaciile-umbrela.
 	"wharf": {21: Palette.MARBLE_GREY},
+	# `fort_gate_loha.glb` (Jodhpur POI E): canaturile `GateLoha_Doors` sunt pe
+	# slotul 11 PAINTED_METAL (+20), iar pe Jai/Fateh pe 9 WOOD_WEATHERED (+20).
+	# Slotul 11 e albastru-vopsea (containere), deci canaturile Loha ieseau
+	# albastre in toate capturile E; bara cere „canaturi de lemn inchis" la
+	# toate portile. Remap cheiat pe model, ca la wharf: tuk-tuk-ul isi pastreaza
+	# slotul 11, nicio alta piesa nu se atinge.
+	"fort_gate_loha": {Palette.PAINTED_METAL: Palette.WOOD_WEATHERED},
 
 	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
 	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea

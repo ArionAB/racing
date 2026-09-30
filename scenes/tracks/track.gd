@@ -3927,6 +3927,18 @@ func _code_points() -> Array[Vector3]:
 ## (`branch_is_open`) si pierde scurtatura cand e culcata, ca jucatorul.
 @export_range(-1.0, 1.0, 0.05) var ai_shortcut_chance: float = -1.0
 
+## Paznicul de progres al AI-ului (`AIController._watch_progress`) uita
+## fereastra curenta la fiecare repunere. Fals = comportamentul vechi, deci
+## pistele existente raman NESCHIMBATE (opt-in).
+##
+## Exista pentru o repunere care duce masina MULT inapoi pe traseu — canalul cu
+## `respawn_past_gap` o pune inaintea golului (60-80 m in spate pe kickerul
+## Devkund, Jodhpur). Paznicul citea saltul de index ca „mers inapoi" si,
+## in fereastra de 2 s, cerea marsarier virat la 23-27 m/s: masina se oprea pe
+## loc inaintea kickerului, relua de la zero, ajungea la buza cu ~10 m/s, cadea
+## iar in canal — bucla masurata pe Track17 seed 2 (6 repuneri, 1 ejectare).
+@export var ai_progress_reset_on_respawn: bool = false
+
 ## Bifeaza in Inspector ca sa reconstruiesti pista (doar in editor).
 ## Pe o pista definita in cod, PRIMA bifare creeaza si nodul "Path" cu
 ## punctele reale ale traseului — de atunci curba e a ta, trage de ea.
@@ -14683,6 +14695,26 @@ func _clamp_respawn_past_gap(index: int, backoff_m: float) -> int:
 			continue
 		return posmod(far + clear, n)
 	return -1
+
+## E indexul (pe bucla) in elanul unei sarituri care cere AI-ului sa nu
+## traverseze pe langa vecin? Vezi [member TrackChannel.ai_keep_side_run_m].
+## Fals pe orice pista fara canal care declara elanul (toate, in afara de
+## Jodhpur).
+func ai_keep_side_at(index: int) -> bool:
+	if _channels.is_empty():
+		return false
+	var n := baked.size()
+	if n < 2 or _dists.size() <= n or _dists[n] <= 0.0:
+		return false
+	var spacing := _dists[n] / float(n)
+	for ch: Dictionary in _channels:
+		var run_m := float(ch.get("ai_keep_side_run_m", 0.0))
+		if run_m <= 0.0 or not bool(ch.get("jump", false)):
+			continue
+		var before := posmod(int(ch["near"]) - index, n)
+		if float(before) * spacing <= run_m:
+			return true
+	return false
 
 func lateral_distance(index: int, pos: Vector3, route: int = 0) -> float:
 	var r := route_at(route)

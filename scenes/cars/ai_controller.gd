@@ -864,6 +864,19 @@ func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	var l_ok := cand_l >= -LINE_MAX
 	var r_ok := cand_r <= LINE_MAX
 	var target: float
+	# In elanul unei sarituri (`Track.ai_keep_side_at`), cu blocajul LANGA
+	# noi (sub AVOID_TAIL_M): trecerea e pe partea pe care suntem deja. Regula
+	# „mai aproape de axa" de mai jos ar trimite masina de pe margine prin
+	# caroseria vecinului — si doua masini frecate una de alta ajung la buza
+	# prea lente. Vezi `TrackChannel.ai_keep_side_run_m`.
+	if car.route == 0 and best_ahead < AVOID_TAIL_M and track.ai_keep_side_at(idx):
+		var my_lat := r.side_at(idx).dot(
+			car.global_position - r.baked[r.wrap_index(idx)]) / hw
+		if my_lat < blocker_lat and l_ok:
+			_avoid_side = -1.0
+		elif my_lat >= blocker_lat and r_ok:
+			_avoid_side = 1.0
+		_avoid_car = best
 	if _avoid_car == best and _avoid_side < 0.0 and l_ok:
 		target = cand_l
 	elif _avoid_car == best and _avoid_side > 0.0 and r_ok:
@@ -1203,6 +1216,7 @@ func _angle_to(fwd: Vector3, point: Vector3) -> float:
 ## o masina care se invarte pe loc sau se freaca de un perete macina metri fara
 ## sa avanseze in cursa.
 func _watch_progress(delta: float, speed: float) -> void:
+	_hook_respawn()
 	if _unstick_timer > 0.0:
 		return
 	# Asteptarea in fata usii de piatra e progres zero DELIBERAT, nu blocaj:
@@ -1261,6 +1275,26 @@ func _watch_progress(delta: float, speed: float) -> void:
 		_begin_unstick()
 	else:
 		_attempts = 0 # merge cursa; uitam incercarile vechi
+	_reset_progress()
+
+## Repunerea muta masina pe traseu (inapoi, uneori zeci de metri — vezi
+## `Track.ai_progress_reset_on_respawn`). Fereastra de progres de dinainte nu
+## mai spune nimic despre masina de acum: se incepe una noua, fara incercarile
+## vechi si fara o manevra de deblocare ramasa pe jumatate. Doar pe pistele
+## care cer asta; in rest semnalul nici nu se leaga.
+var _respawn_hooked: bool = false
+
+func _hook_respawn() -> void:
+	if _respawn_hooked or car == null or track == null:
+		return
+	_respawn_hooked = true
+	if track.ai_progress_reset_on_respawn:
+		car.respawned.connect(_on_car_respawned)
+
+func _on_car_respawned(_c: Car) -> void:
+	_unstick_timer = 0.0
+	_unstick_reversing = false
+	_attempts = 0
 	_reset_progress()
 
 func _reset_progress() -> void:

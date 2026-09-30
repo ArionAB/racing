@@ -126,6 +126,7 @@ custom_width_segments = Array[Vector3]([Vector3(0.0, 0.095, 6.5), Vector3(0.095,
 custom_width_pinches = Array[Vector3]([Vector3(0.5054, 0.51128, 3.5), Vector3(0.54858, 0.55446, 3.5), Vector3(0.57115, 0.57703, 3.5)])
 traffic_count = 6
 ai_shortcut_chance = 0.2
+ai_progress_reset_on_respawn = true
 terrain_pad_m = 260.0
 
 [node name="Path" type="Path3D" parent="."]
@@ -3056,6 +3057,7 @@ reach = 45.0
 fade = 15.0
 label = "kickerul Devkund"
 respawn_past_gap = true
+ai_keep_side_run_m = 100.0
 
 [node name="CameraFantana" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, -9, 62)

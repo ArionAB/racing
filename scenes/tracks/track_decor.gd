@@ -2173,14 +2173,23 @@ static func _claim(pos: Vector3, radius: float,
 ## nefolosite (`visible = false`, vezi docs/decor_manual.md), iar un colizor
 ## construit din ele ar fi un ZID INVIZIBIL — exact clasa de bug pe care nici
 ## garda de materiale, nici o captura n-o prind.
+##
+## `skip_parts`: nume de noduri de mesh care NU primesc hull (implicit nimic, deci
+## comportamentul de dinainte). Nascut pe zidul fortului Jodhpur: fantele de
+## tragere (`Wall_Glow`) sunt placi aproape plane INAUNTRUL hull-ului pietrei,
+## iar Jolt refuza hull-ul lor la unele rotatii („Hull building failed, point 7
+## had an error of 0.019") — eroare in log la fiecare incarcare, fara niciun
+## castig de coliziune.
 static func add_hull_collision(body: StaticBody3D, model: Node3D,
-		only_visible: bool = false) -> bool:
+		only_visible: bool = false, skip_parts: Array = []) -> bool:
 	if body == null or model == null:
 		return false
 	var added := false
 	for entry in _hull_meshes(model, model.transform, [], only_visible):
 		var mi: MeshInstance3D = entry[0]
 		var xform: Transform3D = entry[1]
+		if not skip_parts.is_empty() and skip_parts.has(String(mi.name)):
+			continue
 		var src := _hull_points(mi.mesh)
 		if src.is_empty():
 			continue

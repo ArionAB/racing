@@ -121,7 +121,8 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# verificabila.
 	"gStalp", "gLespede", "gBolovan", "gMoloz", "gMargine", "gCopac",
 	"gEuforbie", "gSocluColt", "gCandele", "gFelinare", "gCenotafFestoane",
-	"gMal", "gTreapta", "gTerasa", "gChhatri",
+	"gMal", "gTreapta", "gTerasa", "gChhatri", "gTufaBlat", "gTufaBordura",
+	"gTerase",
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:

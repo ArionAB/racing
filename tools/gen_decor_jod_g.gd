@@ -58,6 +58,8 @@ var _rng := RandomNumberGenerator.new()
 var _out_path := ""
 var _survey_only := false
 var _mesh_only := false
+var _water_frac := -1.0
+var _last_block_solid := false
 var _space: PhysicsDirectSpaceState3D
 
 
@@ -69,6 +71,8 @@ func _ready() -> void:
 			_survey_only = true
 		elif a == "--mesh":
 			_mesh_only = true
+		elif a.begins_with("--water-view="):
+			_water_frac = float(a.trim_prefix("--water-view="))
 	await get_tree().process_frame
 	if _mesh_only:
 		_mesh_report()
@@ -85,7 +89,11 @@ func _ready() -> void:
 		hi = maxf(hi, bp.y)
 	_sus_y = hi + 150.0
 	_rng.seed = 300930
-	if _survey_only:
+	if _water_frac >= 0.0:
+		for _k in 4:
+			await get_tree().physics_frame
+		_water_view(_water_frac)
+	elif _survey_only:
 		_survey()
 	else:
 		_build()
@@ -226,6 +234,8 @@ func _build() -> void:
 	_g2_group()
 	_rock_terraces()
 	_houses_right()
+	_roofs()
+	_kerb_strip()
 	_lake()
 	_kerb_diyas()
 	_emit_nodes()
@@ -535,7 +545,9 @@ func _block(base: String, c: Vector3, yaw: float, hx: float, hz: float, top: flo
 		if not _bank.has("rock_slab"):
 			_bank["rock_slab"] = []
 		(_bank["rock_slab"] as Array).append([pos, yaw, sc])
+		_last_block_solid = false
 	else:
+		_last_block_solid = true
 		var bas := Basis(Vector3.UP, yaw) * Basis.from_scale(sc)
 		_raw_basis("rock_slab", base, pos, bas, "")
 	_obst.append(Vector3(c.x, c.z, maxf(hx, hz)))
@@ -590,9 +602,16 @@ func _rock_terraces() -> void:
 		var hx0 := _rng.randf_range(1.1, 1.7)
 		var c0 := road + L * (w + d0 + hx0)
 		var top0 := road.y + _rng.randf_range(0.9, 2.0)
+		# Runda 3 (masurat cu --water-view=0.850): pe ultimii ~30 m inaintea
+		# lacului blocurile gTreapta ascundeau apa din cadrul-erou G2; acolo
+		# raman doar blocuri joase (sub linia de vedere spre lac).
+		var low := clampf((_frac_of(i) - 0.844) / 0.006, 0.0, 1.0)
+		top0 = lerpf(top0, road.y + 0.7, low)
 		if _rng.randf() >= 0.28:
 			if _block("gTreapta", c0, yaw, hx0, hz0, top0, EDGE_ROW_GAP):
 				placed += 1
+				if _last_block_solid and _rng.randf() < 0.3:
+					_top_shrub(c0, yaw, hx0, hz0, top0)
 				_edge_row("gCandeleStanca", c0, yaw, hx0, hz0, top0, face, 0.8)
 		else:
 			for k in _rng.randi_range(2, 3):
@@ -608,9 +627,12 @@ func _rock_terraces() -> void:
 		var fr := _frac_of(i)
 		var taper := clampf((fr - TAPER_F) / 0.014, 0.0, 1.0)
 		var top1 := road.y + lerpf(_rng.randf_range(2.8, 4.6), _rng.randf_range(1.4, 2.2), taper)
+		top1 = lerpf(top1, road.y + 0.9, low)
 		if _block("gTreapta", c1, yaw + _rng.randf_range(-0.15, 0.15), hx1,
 				hz0 * _rng.randf_range(1.0, 1.3), top1, EDGE_ROW_GAP):
 			placed += 1
+			if _last_block_solid and _rng.randf() < 0.4:
+				_top_shrub(c1, yaw, hx1, hz0, top1)
 			if _rng.randf() < 0.5:
 				_edge_row("gCandeleStanca", c1, yaw, hx1, hz0, top1, face, 1.0)
 		# randul 3 (inalt), nu la fiecare statie
@@ -640,7 +662,7 @@ func _rock_terraces() -> void:
 func _houses_right() -> void:
 	for row in 2:
 		var i := _idx(0.706)
-		var i_end := _idx(0.8595)
+		var i_end := _idx(HOUSE_F_MAX)
 		var nh := 0
 		while i < i_end:
 			var road := _track.baked[i]
@@ -666,6 +688,7 @@ func _houses_right() -> void:
 			var gr := _box_ground(c, yaw, hx, hz)
 			if ok and gr.y - gr.x < 1.6 and absf(gr.x - road.y) < 1.5 and _rng.randf() > 0.12:
 				_raw(m, "gCasa", Vector3(c.x, gr.x - 0.25, c.z), yaw, 1.0, "")
+				_houses.append([m, Transform3D(Basis(Vector3.UP, yaw), Vector3(c.x, gr.x - 0.25, c.z))])
 				if _rng.randf() < 0.4:
 					_meta_last("metadata/indigo = true")
 				_obst.append(Vector3(c.x, c.z, maxf(hx, hz) * 0.95))
@@ -678,6 +701,13 @@ func _houses_right() -> void:
 				_gap_fill(road + R * (w + 3.0) + T * (width * 0.5 + 2.0), R, T)
 			i = _advance(i, i_end, step)
 		print("; case dreapta, randul %d: %d" % [row + 1, nh])
+	# dupa HOUSE_F_MAX, pe dreapta doar piese joase (bolovan, tufa, copac)
+	var j := _idx(HOUSE_F_MAX)
+	var j_end := _idx(0.8595)
+	while j < j_end:
+		_gap_fill(_track.baked[j] - _left(j) * (_track.width_at_index(j) + 3.0),
+			-_left(j), _tangent(j))
+		j = _advance(j, j_end, _rng.randf_range(4.5, 7.0))
 
 
 func _pick_house() -> String:
@@ -868,6 +898,281 @@ func _chhatri(base: Vector3, s: float, yaw: float, sides: int) -> void:
 		_eaves.append(pts[(k + 1) % sides])
 
 
+# ---------------------------------------------------------------- runda 3
+
+## Casele se opresc inainte de felia pe care cadrul-erou G2 (0.850) o vede
+## in dreapta: critic r2 „blocul de case albastre din dreapta domina
+## cadrul". Dupa HOUSE_F_MAX pe dreapta raman doar piese joase.
+const HOUSE_F_MAX := 0.833
+## Fasia de bordura (critic r2): sir continuu de piese mici la 1-2 m de
+## asfalt — felinare de sol, ghivece, palcuri de tufe. Toate FARA corp
+## (fantome mici, sub 1,3 m, in afara asfaltului), deci nu ating contractul
+## de 2,2 m pentru corpuri si nici garda de banda.
+const STRIP_LAMP_STEP := 3.3
+const STRIP_LAMP_LAT := 0.75
+const STRIP_POT_STEP := 2.6
+
+var _houses: Array = [] # [model, Transform3D]
+var _hgrid := {} # model -> grila de inaltimi (celula 0,5 m)
+var _pots := PackedVector3Array()
+var _tanks := PackedVector3Array()
+var _tank_sc := PackedFloat32Array()
+var _lines := PackedVector3Array()
+
+
+func _hm(model: String, lx: float, lz: float) -> float:
+	if not _hgrid.has(model):
+		_hgrid[model] = _height_grid("buildings/%s" % model, 0.5)["grid"]
+	var g: Dictionary = _hgrid[model]
+	var k := Vector2i(int(floor(lx / 0.5)), int(floor(lz / 0.5)))
+	return float(g.get(k, 0.0))
+
+
+func _hm_disc(model: String, lx: float, lz: float, r: float) -> Vector2:
+	var lo := INF
+	var hi := -INF
+	var a := -r
+	while a <= r + 0.001:
+		var b := -r
+		while b <= r + 0.001:
+			if a * a + b * b <= r * r + 0.001:
+				var y := _hm(model, lx + a, lz + b)
+				lo = minf(lo, y)
+				hi = maxf(hi, y)
+			b += 0.25
+		a += 0.25
+	return Vector2(lo, hi)
+
+
+## Rezervoare negre, ghivece si rufe pe terasele caselor mele (RoofKit al lui
+## D: un material, fara corp). Locul: o grila pe acoperis, primul disc plat
+## peste 2,8 m.
+func _roofs() -> void:
+	for hs: Array in _houses:
+		var model: String = hs[0]
+		var xf: Transform3D = hs[1]
+		var d: Array = HOUSES[model]
+		var hx := float(d[0]) * 0.5
+		var hz := float(d[1]) * 0.5
+		var spots: Array[Vector2] = []
+		var gx := -hx + 1.0
+		while gx <= hx - 1.0:
+			var gz := -hz + 1.0
+			while gz <= hz - 1.0:
+				spots.append(Vector2(gx, gz))
+				gz += 0.9
+			gx += 0.9
+		for k in range(spots.size() - 1, 0, -1):
+			var q := _rng.randi_range(0, k)
+			var t := spots[k]
+			spots[k] = spots[q]
+			spots[q] = t
+		var n_tank := 0
+		var n_pot := 0
+		var line_done := false
+		for sp in spots:
+			var dd := _hm_disc(model, sp.x, sp.y, 0.7)
+			if dd.x < 2.8 or dd.y - dd.x > 0.15:
+				continue
+			if n_tank < (2 if _rng.randf() < 0.4 else 1):
+				_tanks.append(xf * Vector3(sp.x, dd.y, sp.y))
+				_tank_sc.append(_rng.randf_range(0.9, 1.2))
+				n_tank += 1
+			elif n_pot < 2 and _rng.randf() < 0.6:
+				_pots.append(xf * Vector3(sp.x, dd.y, sp.y))
+				n_pot += 1
+			elif not line_done and _rng.randf() < 0.55:
+				# franghie de 2,5-3,5 m pe acelasi palier plat
+				var dir := Vector2(1, 0) if _rng.randf() < 0.5 else Vector2(0, 1)
+				var ln := _rng.randf_range(2.5, 3.5)
+				var e := sp + dir * ln
+				var de := _hm_disc(model, e.x, e.y, 0.4)
+				if absf(de.y - dd.y) < 0.15 and absf(e.x) < hx - 0.5 and absf(e.y) < hz - 0.5:
+					_lines.append(xf * Vector3(sp.x, dd.y + 1.6, sp.y))
+					_lines.append(xf * Vector3(e.x, dd.y + 1.6, e.y))
+					line_done = true
+	print("; terase: rezervoare %d, ghivece %d, rufe %d" % [_tanks.size(), _pots.size(), _lines.size() / 2])
+
+
+## Fasia de bordura, ambele parti.
+func _kerb_strip() -> void:
+	var n_lamp := 0
+	var n_shrub := 0
+	for span: Vector2 in [Vector2(0.704, 0.8755), Vector2(0.8915, 0.9055)]:
+		for sgn: float in [-1.0, 1.0]:
+			var i := _idx(span.x)
+			var i_end := _idx(span.y)
+			var k := 0
+			while i < i_end:
+				var road := _track.baked[i]
+				var L := _left(i)
+				var T := _tangent(i)
+				var w := _track.width_at_index(i)
+				var side := L * sgn
+				var gq := road + side * (w + 1.0)
+				if absf(_sol_real(gq.x, gq.z) - road.y) < 0.9:
+					# felinar de sol la fiecare statie (glob pe un soclu jos)
+					var lp := road + side * (w + STRIP_LAMP_LAT) + T * _rng.randf_range(-0.3, 0.3)
+					_lamp("gFelinareSol", Vector3(lp.x, _sol_real(lp.x, lp.z) + 0.42, lp.z), 0.2)
+					n_lamp += 1
+					# palc: 1-3 ghivece sau euforbii mici, la 1,2-2,1 m
+					var cnt := _rng.randi_range(1, 3)
+					for j in cnt:
+						var q := road + side * (w + _rng.randf_range(1.2, 2.1)) + T * _rng.randf_range(0.4, STRIP_LAMP_STEP - 0.4)
+						var g := _sol_real(q.x, q.z)
+						if absf(g - road.y) > 0.9:
+							continue
+						if _rng.randf() < 0.5:
+							_pots.append(Vector3(q.x, g, q.z))
+						else:
+							_raw("euphorbia", "gTufaBordura", Vector3(q.x, g - 0.05, q.z),
+								_rng.randf_range(-PI, PI), _rng.randf_range(0.35, 0.6), "none")
+							n_shrub += 1
+				k += 1
+				i = _advance(i, i_end, STRIP_LAMP_STEP * _rng.randf_range(0.85, 1.15))
+	print("; fasia de bordura: felinare de sol %d, tufe %d" % [n_lamp, n_shrub])
+
+
+## O tufa mica pe blatul unui bloc (critic r2: „cate o tufa/copacel pe
+## blaturile plate"). Fara corp; sta pe corpul blocului.
+func _top_shrub(c: Vector3, yaw: float, hx: float, hz: float, top: float) -> void:
+	var b := Basis(Vector3.UP, yaw)
+	var q := c + b.x * _rng.randf_range(-hx, hx) * 0.45 + b.z * _rng.randf_range(-hz, hz) * 0.45
+	_raw("euphorbia", "gTufaBlat", Vector3(q.x, top - 0.05, q.z), _rng.randf_range(-PI, PI),
+		_rng.randf_range(0.4, 0.75), "none")
+
+
+## MASURATOARE (runda 3, cerinta coordonatorului): cat din cadrul-erou G2
+## ar fi apa daca nimic n-ar acoperi-o, si ce o ascunde. Camera = cea din
+## `snapshot.gd --gamecam` (12,5 m in spate, 10 m sus, fov 68, privire la
+## 5 m in fata, +0,4). Raze pe o grila 320 x 180:
+##  - `apa_libera`: raza atinge planul apei (-4,32) intr-un punct unde solul e
+##    sub apa (lacul, fara nimic in fata);
+##  - `apa_teren`: dintre acelea, terenul NU e atins inainte (buza rapei);
+##  - `apa_decor`: dintre acelea, nici corpurile scenei (case, blocuri, soclu)
+##    nici blocurile-fantoma ale malului nu sunt atinse inainte.
+func _water_view(frac: float) -> void:
+	var pts := _track.baked
+	var n := pts.size()
+	var idx := int(frac * float(n)) % n
+	var focus := pts[idx]
+	var dir := (pts[(idx + 12) % n] - focus).normalized()
+	var eye := focus - dir * ChaseCamera.DEFAULT_DISTANCE + Vector3.UP * ChaseCamera.DEFAULT_HEIGHT
+	var target := focus + dir * ChaseCamera.LOOK_AHEAD + Vector3.UP * ChaseCamera.LOOK_HEIGHT
+	var basis := Basis.looking_at(target - eye, Vector3.UP)
+	var W := 320
+	var H := 180
+	var tv := tan(deg_to_rad(ChaseCamera.BASE_FOV) * 0.5)
+	var th := tv * float(W) / float(H)
+	var terrain_rid := RID()
+	for c in _track.get_children():
+		if str(c.name) == "TerrainBody":
+			terrain_rid = (c as StaticBody3D).get_rid()
+	var ghosts: Array = []
+	# blocurile-fantoma: MultiMesh-urile gMal_* (instante -> cutii orientate)
+	for mmi in _track.find_children("*", "MultiMeshInstance3D", true, false):
+		if not str(mmi.name).begins_with("gMal"):
+			continue
+		var mm := (mmi as MultiMeshInstance3D).multimesh
+		if mm == null or mm.mesh == null:
+			continue
+		var ab := mm.mesh.get_aabb()
+		for k in mm.instance_count:
+			ghosts.append([(mmi as Node3D).global_transform * mm.get_instance_transform(k), ab])
+	print(";   blocuri-fantoma citite: %d" % ghosts.size())
+	var body_names := {}
+	var free := 0
+	var by_terrain := 0
+	var by_body := 0
+	var by_ghost := 0
+	var rows := PackedInt32Array()
+	rows.resize(3)
+	for py in H:
+		for px in W:
+			var u := (2.0 * (float(px) + 0.5) / float(W) - 1.0) * th
+			var v := (1.0 - 2.0 * (float(py) + 0.5) / float(H)) * tv
+			var rd := (basis * Vector3(u, v, -1.0)).normalized()
+			if rd.y >= -1e-4:
+				continue
+			var tw := (WATER_Y - eye.y) / rd.y
+			var pw := eye + rd * tw
+			if _sol_real(pw.x, pw.z) >= WATER_Y - 0.05:
+				continue
+			free += 1
+			# terenul inainte?
+			var q := PhysicsRayQueryParameters3D.create(eye, pw)
+			q.collide_with_areas = false
+			var hit := _space.intersect_ray(q)
+			var blocked := ""
+			var guard := 0
+			while not hit.is_empty() and guard < 8:
+				if hit["rid"] == terrain_rid:
+					blocked = "t"
+					break
+				var col: Object = hit["collider"]
+				var nm := str((col as Node).name) if col is Node else ""
+				# masinile/hazardele nu exista aici; orice alt corp e decor
+				blocked = "b:" + nm
+				body_names[nm] = int(body_names.get(nm, 0)) + 1
+				break
+			if blocked == "t":
+				by_terrain += 1
+				continue
+			if blocked != "":
+				by_body += 1
+				continue
+			var gh := false
+			for g in ghosts:
+				var xf: Transform3D = g[0]
+				var ab: AABB = g[1]
+				var inv := xf.affine_inverse()
+				var o := inv * eye
+				var e := inv * pw
+				if _seg_aabb(o, e, ab):
+					gh = true
+					break
+			if gh:
+				by_ghost += 1
+				continue
+			rows[mini(py * 3 / H, 2)] += 1
+	var tot := float(W * H)
+	print("; APA la frac %.3f: libera %.2f%% din cadru | ascunsa de teren (buza rapei) %.2f%% | de corpuri (decor cu corp) %.2f%% | de blocurile-fantoma %.2f%% | VIZIBILA %.2f%%" % [
+		frac, 100.0 * free / tot, 100.0 * by_terrain / tot, 100.0 * by_body / tot,
+		100.0 * by_ghost / tot, 100.0 * (free - by_terrain - by_body - by_ghost) / tot])
+	var bn := body_names.keys()
+	bn.sort_custom(func(a, b) -> bool: return int(body_names[a]) > int(body_names[b]))
+	var top: Array[String] = []
+	for k in mini(bn.size(), 8):
+		top.append("%s %d" % [bn[k], int(body_names[bn[k]])])
+	print(";   corpurile care ascund apa: %s" % ", ".join(top))
+	print(";   vizibila pe treimi (sus/mijloc/jos): %.2f%% / %.2f%% / %.2f%%" % [
+		100.0 * rows[0] / tot, 100.0 * rows[1] / tot, 100.0 * rows[2] / tot])
+
+
+func _seg_aabb(o: Vector3, e: Vector3, ab: AABB) -> bool:
+	var d := e - o
+	var t0 := 0.0
+	var t1 := 1.0
+	for a in 3:
+		var lo := ab.position[a]
+		var hi := ab.end[a]
+		if absf(d[a]) < 1e-6:
+			if o[a] < lo or o[a] > hi:
+				return false
+			continue
+		var ta := (lo - o[a]) / d[a]
+		var tb := (hi - o[a]) / d[a]
+		if ta > tb:
+			var t := ta
+			ta = tb
+			tb = t
+		t0 = maxf(t0, ta)
+		t1 = minf(t1, tb)
+		if t0 > t1:
+			return false
+	return true
+
+
 # ---------------------------------------------------------------- noduri
 
 func _emit_nodes() -> void:
@@ -932,6 +1237,25 @@ func _emit_nodes() -> void:
 		_out.append("stretch = PackedFloat32Array(%s)" % ", ".join(ss))
 		_out.append("")
 		print("; %s: %d lampi" % [key, pp.size()])
+	if not (_tanks.is_empty() and _pots.is_empty()):
+		_out.append('[node name="gTerase" type="Node3D" parent="%s"]' % ZONE)
+		_out.append('script = ExtResource("d_roof_kit")')
+		var tp: Array[String] = []
+		var tsc: Array[String] = []
+		for k in _tanks.size():
+			tp.append("%.3f, %.3f, %.3f" % [_tanks[k].x, _tanks[k].y, _tanks[k].z])
+			tsc.append("%.2f" % _tank_sc[k])
+		_out.append("tanks = PackedVector3Array(%s)" % ", ".join(tp))
+		_out.append("tank_scales = PackedFloat32Array(%s)" % ", ".join(tsc))
+		var pp2: Array[String] = []
+		for v in _pots:
+			pp2.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+		_out.append("pots = PackedVector3Array(%s)" % ", ".join(pp2))
+		var lp2: Array[String] = []
+		for v in _lines:
+			lp2.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+		_out.append("lines = PackedVector3Array(%s)" % ", ".join(lp2))
+		_out.append("")
 	if not _chh_b.is_empty():
 		_out.append('[node name="gChhatri" type="Node3D" parent="%s"]' % ZONE)
 		_out.append('script = ExtResource("g_chhatri")')
@@ -951,7 +1275,7 @@ func _emit_nodes() -> void:
 		_out.append("")
 	for m in _bank.keys():
 		var items: Array = _bank[m]
-		_out.append('[node name="gMal_%s" type="MultiMeshInstance3D" parent="%s"]' % [str(m).right(1), ZONE])
+		_out.append('[node name="gMal_%s" type="MultiMeshInstance3D" parent="%s"]' % [str(m), ZONE])
 		_out.append('script = ExtResource("flock")')
 		_out.append('model = ExtResource("%s")' % RES[m])
 		var ps: Array[String] = []

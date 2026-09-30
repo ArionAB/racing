@@ -63,6 +63,7 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
 [ext_resource type="Script" path="res://scenes/props/fort_lamps.gd" id="e_fort_lamps"]
+[ext_resource type="Script" path="res://scenes/props/gate_funnel.gd" id="e_gate_funnel"]
 [ext_resource type="Script" path="res://scenes/props/street_lights.gd" id="h_lights"]
 
 [sub_resource type="Curve3D" id="Curve3D_jodhpur"]
@@ -200,13 +201,25 @@ halo_reflect_stretch = 5.0
 transform = Transform3D(-0.703065, 0.000000, 0.711125, 0.000000, 1.000000, -0.000000, -0.711125, 0.000000, -0.703065, 72.703773, 22.445000, -206.286453)
 metadata/camera_blocker = true
 
+[node name="TesirePoartaJai" type="StaticBody3D" parent="DecorManual/ZoneE_Porti"]
+transform = Transform3D(-0.703065, 0.000000, 0.711125, 0.000000, 1.000000, -0.000000, -0.711125, 0.000000, -0.703065, 72.703773, 22.445000, -206.286453)
+script = ExtResource("e_gate_funnel")
+
 [node name="PoartaFortFateh_2" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_gate_fateh")]
 transform = Transform3D(-0.749150, 0.000000, 0.662401, 0.000000, 1.000000, -0.000000, -0.662401, 0.000000, -0.749150, 77.471825, 31.193375, -275.028748)
 metadata/camera_blocker = true
 
+[node name="TesirePoartaFateh" type="StaticBody3D" parent="DecorManual/ZoneE_Porti"]
+transform = Transform3D(-0.749150, 0.000000, 0.662401, 0.000000, 1.000000, -0.000000, -0.662401, 0.000000, -0.749150, 77.471825, 31.193375, -275.028748)
+script = ExtResource("e_gate_funnel")
+
 [node name="PoartaFortLoha_3" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_gate_loha")]
 transform = Transform3D(0.780841, 0.000000, 0.624729, 0.000000, 1.000000, -0.000000, -0.624729, 0.000000, 0.780841, 82.644714, 35.806400, -310.740479)
 metadata/camera_blocker = true
+
+[node name="TesirePoartaLoha" type="StaticBody3D" parent="DecorManual/ZoneE_Porti"]
+transform = Transform3D(0.780841, 0.000000, 0.624729, 0.000000, 1.000000, -0.000000, -0.624729, 0.000000, 0.780841, 82.644714, 35.806400, -310.740479)
+script = ExtResource("e_gate_funnel")
 
 [node name="zid4" parent="DecorManual/ZoneE_Porti" instance=ExtResource("s_fort_wall_segment")]
 transform = Transform3D(-0.597260, 0.000000, 0.492558, 0.000000, 1.000000, 0.000000, -0.802048, 0.000000, -0.366792, 50.591484, 13.230000, -160.186035)

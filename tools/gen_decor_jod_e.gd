@@ -323,6 +323,15 @@ func _gates() -> void:
 		# Baza la cota drumului in centru, coborata 0,3 m (masuratori §4.2).
 		var pos := Vector3(p.x, p.y - 0.3, p.z)
 		_raw_basis(model, "PoartaFort" + model.trim_prefix("fort_gate_").capitalize() + "_", pos, b, "")
+		# Tesirea usciorilor (GateFunnel, ProbeRace seed 11 pe scena integrata):
+		# acelasi transform ca poarta, frate in zona (nu copil al instantei GLB).
+		_out.append('[node name="TesirePoarta%s" type="StaticBody3D" parent="%s"]'
+			% [model.trim_prefix("fort_gate_").capitalize(), ZONE])
+		_out.append("transform = Transform3D(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)"
+			% [b.x.x, b.y.x, b.z.x, b.x.y, b.y.y, b.z.y, b.x.z, b.y.z, b.z.z,
+				pos.x, pos.y, pos.z])
+		_out.append('script = ExtResource("e_gate_funnel")')
+		_out.append("")
 		for lp: Vector3 in TORCH_LOCAL:
 			_lamp(pos + b * lp, TORCH_R, TORCH_STRETCH)
 		var gt: Dictionary = GATE_TOP[model]

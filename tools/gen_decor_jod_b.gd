@@ -94,9 +94,21 @@ const CLOTHES := [14, 16, 31, 30, 15, 21, 22, 14, 31, 16]
 const SACK_SLOTS := [1, 19, 13, 1]
 ## Multimea: linia grupurilor si limitele (de la ax). Asfaltul se termina la
 ## 6,5, trotuarul la 9,7; marfa din fata tarabelor incepe la ~9,0.
-const CROWD_LAT := 8.0
-const CROWD_MIN_LAT := 7.1
-const CROWD_MAX_LAT := 9.1
+## Runda 3: multimea se strange spre asfalt (7,0-8,2 m), ca tejgheaua de
+## expunere (9,0-9,9 m) sa ramana libera in camera.
+const CROWD_LAT := 7.6
+const CROWD_MIN_LAT := 7.0
+const CROWD_MAX_LAT := 8.2
+## Hainele multimii: rosu, galben, roz, portocaliu, albastru, verde, alb,
+## crem, indigo (ICE_DEEP), bleumarin (ICE_CRACK), rugina, petrol.
+const CROWD_CLOTHES := [14, 16, 31, 30, 15, 21, 22, 19, 25, 26, 22, 19, 27, 18, 25]
+## Tejgheaua de expunere din fata tarabei (runda 3).
+const DISPLAY_OFF := 0.55
+const DISPLAY_HALF_D := 0.45
+const DISPLAY_H := 0.7
+const DISPLAY_SLOT := 9
+## Marfa calda: ocru, turmeric, rosu, portocaliu, teracota, rugina, nisip.
+const WARM_GOODS := [0, 16, 14, 30, 23, 27, 1, 30, 14, 16, 21]
 ## Fasiile peste strada.
 ## Runda 1, prima captura: la pas 11 m si panze de 0,9-1,35 m fasiile acopereau
 ## jumatatea de sus a cadrului (un zid de panza in fata camerei). Mai rare, mai
@@ -291,7 +303,7 @@ func _stalls(side: float) -> void:
 				var sx := c + fwd * 0.6
 				_raw("spice_sacks", base + "Saci", Vector3(sx.x, _sol_real(sx.x, sx.z), sx.z),
 					atan2(fwd.x, fwd.z) + PI * 0.5 + _rng.randf_range(-0.2, 0.2), 1.0, "")
-			var lp := c - fwd * 0.9
+			var lp := c + fwd * 1.55
 			var hh := _rng.randf_range(1.05, 1.35)
 			var gy := _sol_real(lp.x, lp.z)
 			_stands.append(Vector3(lp.x, gy, lp.z))
@@ -335,39 +347,37 @@ func _stall_dressing(m: String, c: Vector3, y: float, fwd: Vector3, w: float,
 	var fr := br + out + Vector3.DOWN * 0.2
 	_eaves.append(fl)
 	_eaves.append(fr)
-	# O lampa mica sub copertina, deasupra tejghelei.
-	_shop_lamps.append(Vector3(c.x, y + 2.25, c.z) + fwd * (dp * 0.5 + 0.2))
-	# MARFA, runda 2 (criticul: „stive CONTINUE de marfa: cosuri, saci, textile
-	# stivuite, care umplu tejgheaua"). Trei randuri lipite pe toata latimea:
-	#   - pe tejghea (y + 0,85): stive de baloti de textile;
-	#   - randul A, lipit de fata tarabei: saci plini (cu con de condiment) si
-	#     stive de baloti de 0,4-0,9 m;
-	#   - randul B, pe muchia trotuarului, sub marginea copertinei: cosuri joase
-	#     cu gramezi (se vad de sub falbala din camera de joc).
+	# MARFA, runda 3 (criticul r2: „marfa e ascunsa de multime; in REF fiecare
+	# taraba are TEJGHEAUA DIN FATA plina de gramezi colorate, cu un felinar
+	# mic cald deasupra"). O tejghea de expunere in fata tarabei (lat 9,0-9,9,
+	# 0,7 m inalta), cu o treapta in spate; pe ea doua randuri lipite de
+	# gramezi cu con in culori calde, cu varful la ~1,3 m. Masurat pe cadrul
+	# de joc: raza camerei (10 m sus, pe ax) spre marfa trece pe sub muchia
+	# copertinei (2,45 m la 8,9 m) si pe deasupra multimii, care sta acum la
+	# 7,0-8,2 m.
 	var yaw := atan2(fwd.x, fwd.z)
-	var u := -w * 0.5 + 0.05
-	while u < w * 0.5 - 0.25:
-		var wid := _rng.randf_range(0.38, 0.52)
-		var p := c + t * (u + wid * 0.5) + fwd * (dp * 0.5 + 0.28)
-		_front_item(p, wid, yaw)
-		u += wid + 0.02
-	u = -w * 0.5 + 0.1
-	while u < w * 0.5 - 0.3:
-		var wid := _rng.randf_range(0.5, 0.62)
-		var p := c + t * (u + wid * 0.5) + fwd * (dp * 0.5 + 0.8)
-		_goods.append(Vector3(p.x, _sol_real(p.x, p.z), p.z))
-		_goods_s.append(wid / 0.52)
-		_goods_sl.append(SPICE_SLOTS[_rng.randi() % SPICE_SLOTS.size()])
-		u += wid + 0.03
-	# Un felinar jos, pe caldaram, in fata fiecarei tarabe.
-	var lp := c + fwd * (dp * 0.5 + 0.8) + t * (w * 0.5 - 0.1)
-	var ly := _sol_real(lp.x, lp.z)
-	_stands.append(Vector3(lp.x, ly, lp.z))
-	_stand_h.append(0.42)
-	_lamps.append(Vector3(lp.x, ly + 0.58, lp.z))
-	_lamp_r.append(0.1)
+	var tab := c + fwd * (dp * 0.5 + DISPLAY_OFF)
+	var ty := _sol_real(tab.x, tab.z)
+	_box(Vector3(tab.x, ty, tab.z), Vector3(w * 0.5 - 0.08, DISPLAY_H, DISPLAY_HALF_D), yaw,
+		DISPLAY_SLOT, 1.0)
+	var step := c + fwd * (dp * 0.5 + DISPLAY_OFF - 0.25)
+	_box(Vector3(step.x, ty + DISPLAY_H, step.z), Vector3(w * 0.5 - 0.1, 0.2, 0.2), yaw,
+		DISPLAY_SLOT, 1.0)
+	for row in [[DISPLAY_OFF - 0.25, DISPLAY_H + 0.2], [DISPLAY_OFF + 0.2, DISPLAY_H]]:
+		var u := -w * 0.5 + 0.12
+		while u < w * 0.5 - 0.3:
+			var wid := _rng.randf_range(0.46, 0.58)
+			var p := c + t * (u + wid * 0.5) + fwd * (dp * 0.5 + float(row[0]))
+			_goods.append(Vector3(p.x, ty + float(row[1]), p.z))
+			_goods_s.append(wid / 0.5)
+			_goods_sl.append(WARM_GOODS[_rng.randi() % WARM_GOODS.size()])
+			u += wid + 0.02
+	# Felinarul mic cald deasupra marfii, sub marginea copertinei (FortLamps).
+	var lp := c + fwd * (dp * 0.5 + DISPLAY_OFF) + t * _rng.randf_range(-0.4, 0.4)
+	_lamps.append(Vector3(lp.x, ty + 1.95, lp.z))
+	_lamp_r.append(0.13)
 	if m != "chai_stall":
-		u = -w * 0.5 + 0.12
+		var u := -w * 0.5 + 0.12
 		while u < w * 0.5 - 0.3:
 			var wid := _rng.randf_range(0.42, 0.58)
 			var p := c + t * (u + wid * 0.5) + fwd * (dp * 0.5 - 0.35)
@@ -424,8 +434,8 @@ func _crowd(side: float) -> void:
 		var s: Vector3 = q["s"]
 		var t := Vector3.UP.cross(s).normalized()
 		var gc: Vector3 = q["p"] + s * side * _rng.randf_range(-0.5, 0.5)
-		var n := _rng.randi_range(3, 6)
-		var r := 0.35 + 0.12 * float(n)
+		var n := _rng.randi_range(3, 5)
+		var r := 0.3 + 0.12 * float(n)
 		var a0 := _rng.randf_range(0.0, TAU)
 		for i in n:
 			var a := a0 + TAU * float(i) / float(n) + _rng.randf_range(-0.3, 0.3)
@@ -433,11 +443,12 @@ func _crowd(side: float) -> void:
 			var to_c := gc - pp
 			_person(pp, atan2(to_c.x, to_c.z) + _rng.randf_range(-0.4, 0.4))
 		# Trecatori intre grupuri, mergand in lungul strazii.
-		for i in _rng.randi_range(0, 2):
-			var pp := gc + t * _rng.randf_range(1.6, 2.6) + s * side * _rng.randf_range(-0.7, 0.7)
+		for i in _rng.randi_range(0, 1):
+			var pp := gc + t * _rng.randf_range(1.8, 2.6) + s * side * _rng.randf_range(-0.7, 0.7)
 			var yw := atan2(t.x, t.z) + (PI if _rng.randf() < 0.5 else 0.0)
 			_person(pp, yw + _rng.randf_range(-0.2, 0.2))
-		d += _rng.randf_range(3.2, 4.6)
+		# Runda 3: goluri de 2-4 m intre grupuri (densitatea ~40 % din r2).
+		d += _rng.randf_range(4.5, 7.0)
 
 
 func _person(p: Vector3, yaw: float) -> void:
@@ -445,11 +456,12 @@ func _person(p: Vector3, yaw: float) -> void:
 	if ad < CROWD_MIN_LAT or ad > CROWD_MAX_LAT:
 		return
 	_ppl.append(Vector3(p.x, _sol_real(p.x, p.z) - 0.03, p.z))
-	_ppl_h.append(_rng.randf_range(1.6, 1.85))
-	_ppl_sl.append(CLOTHES[_rng.randi() % CLOTHES.size()])
+	# Runda 3: copii (1,1-1,3 m) printre adulti, paleta mai larga.
+	_ppl_h.append(_rng.randf_range(1.1, 1.3) if _rng.randf() < 0.25 else _rng.randf_range(1.5, 1.85))
+	_ppl_sl.append(CROWD_CLOTHES[_rng.randi() % CROWD_CLOTHES.size()])
 	_ppl_yaw.append(yaw)
 	var r := _rng.randf()
-	_ppl_hs.append(-1 if r < 0.4 else CLOTHES[_rng.randi() % CLOTHES.size()])
+	_ppl_hs.append(-1 if r < 0.4 else CROWD_CLOTHES[_rng.randi() % CROWD_CLOTHES.size()])
 
 
 # ------------------------------------------------------------------ casele

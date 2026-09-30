@@ -190,220 +190,227 @@ transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -75.972000, 7.999188, 176.800003)
 
 [node name="aTuk11" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_tuktuk")]
-transform = Transform3D(-0.117911, 0.000000, -0.993024, 0.000000, 1.000000, 0.000000, 0.993024, 0.000000, -0.117911, -58.597355, -0.298141, 200.887939)
+transform = Transform3D(-0.117911, 0.000000, -0.993024, 0.000000, 1.000000, 0.000000, 0.993024, 0.000000, -0.117911, -35.297352, -0.296188, 200.887939)
 metadata/coliziune = "hull"
 
 [node name="aTuk12" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_tuktuk")]
-transform = Transform3D(0.080646, 0.000000, -0.996743, 0.000000, 1.000000, 0.000000, 0.996743, 0.000000, 0.080646, -62.212105, -0.297638, 201.096100)
+transform = Transform3D(0.080646, 0.000000, -0.996743, 0.000000, 1.000000, 0.000000, 0.996743, 0.000000, 0.080646, -38.912102, -0.298782, 201.096100)
 metadata/coliziune = "hull"
 
 [node name="aTuk13" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_tuktuk")]
-transform = Transform3D(-0.104084, 0.000000, -0.994568, 0.000000, 1.000000, 0.000000, 0.994568, 0.000000, -0.104084, -66.501869, -0.297333, 201.092392)
+transform = Transform3D(-0.104084, 0.000000, -0.994568, 0.000000, 1.000000, 0.000000, 0.994568, 0.000000, -0.104084, -42.901867, -0.297760, 201.092392)
 metadata/coliziune = "hull"
 
 [node name="aTuk14" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_tuktuk")]
-transform = Transform3D(-0.006778, 0.000000, -0.999977, 0.000000, 1.000000, 0.000000, 0.999977, 0.000000, -0.006778, -70.281929, -0.296356, 200.981003)
+transform = Transform3D(-0.006778, 0.000000, -0.999977, 0.000000, 1.000000, 0.000000, 0.999977, 0.000000, -0.006778, -59.381927, -0.298096, 200.981003)
 metadata/coliziune = "hull"
 
-[node name="aDr15" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
-transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -13.392078, -0.155060, 175.266724)
+[node name="aTuk15" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_tuktuk")]
+transform = Transform3D(0.113414, 0.000000, -0.993548, 0.000000, 1.000000, 0.000000, 0.993548, 0.000000, 0.113414, -63.535248, -0.297302, 201.130936)
+metadata/coliziune = "hull"
 
-[node name="aDrGhirlanda16" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -13.392078, 2.941308, 178.966721)
-
-[node name="aDr17" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_d")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -21.623827, -0.215622, 175.930420)
-
-[node name="aDr18" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_a")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -29.996824, -0.269608, 175.697800)
+[node name="aDr16" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -13.486245, -0.156158, 175.619400)
 metadata/indigo = true
 
-[node name="aDrGhirlanda19" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -29.996824, 2.816812, 179.397797)
+[node name="aDrGhirlanda17" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -13.486245, 2.940240, 179.319412)
 
-[node name="aDr20" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_haveli_facade")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -38.490608, -0.287216, 176.100296)
-
-[node name="aDr21" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_c")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -46.273384, -0.292114, 175.319839)
+[node name="aDr18" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -21.804399, -0.216385, 175.417236)
 metadata/indigo = true
 
-[node name="aDrGhirlanda22" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -46.273384, 2.804056, 179.019836)
-
-[node name="aDr23" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_e")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -55.147552, -0.295807, 176.405472)
-
-[node name="aDr24" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -62.547840, -0.295898, 175.857620)
-
-[node name="aDrGhirlanda25" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -62.547840, 2.801813, 179.557617)
-
-[node name="aDrB26" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_a")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -16.793566, -0.162460, 165.293854)
-metadata/coliziune = "none"
-
-[node name="aDrB27" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_haveli_facade")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -25.071766, -0.210434, 165.198334)
-metadata/coliziune = "none"
+[node name="aDr19" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, -30.193705, -0.272614, 176.441086)
 metadata/indigo = true
 
-[node name="aDrB28" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_c")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -32.803463, -0.242752, 164.117004)
-metadata/coliziune = "none"
+[node name="aDrGhirlanda20" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -30.193705, 2.813776, 180.141083)
 
-[node name="aDrB29" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_e")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -41.573490, -0.268967, 165.059952)
+[node name="aDr21" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_haveli_facade")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -37.564644, -0.286560, 175.619919)
+
+[node name="aDr22" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -46.229015, -0.292282, 175.578033)
+metadata/indigo = true
+
+[node name="aDrGhirlanda23" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -46.229015, 2.803766, 179.278030)
+
+[node name="aDr24" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -54.013985, -0.295258, 175.659027)
+metadata/indigo = true
+
+[node name="aDr25" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -61.940220, -0.295929, 175.719376)
+
+[node name="aDrGhirlanda26" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -61.940220, 2.801874, 179.419373)
+
+[node name="aDrB27" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_a")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -17.119793, -0.164459, 165.198334)
 metadata/coliziune = "none"
 metadata/indigo = true
 
-[node name="aDrB30" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -49.609310, -0.281601, 164.858353)
+[node name="aDrB28" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_haveli_facade")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -24.851488, -0.207855, 164.117004)
 metadata/coliziune = "none"
 
-[node name="aDrB31" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_d")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -58.385220, -0.287445, 164.086746)
-metadata/coliziune = "none"
-
-[node name="aDrB32" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -67.438652, -0.286621, 164.166763)
-metadata/coliziune = "none"
-
-[node name="aSt33" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_haveli_facade")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -31.962923, -0.251801, 215.219147)
-metadata/coliziune = "none"
-
-[node name="aSt34" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_c")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -39.953892, -0.271484, 215.039444)
+[node name="aDrB29" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -33.621517, -0.246933, 165.059952)
 metadata/coliziune = "none"
 metadata/indigo = true
 
-[node name="aSt35" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_e")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -49.485306, -0.283646, 215.028091)
+[node name="aDrB30" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -41.657337, -0.268906, 164.858353)
 metadata/coliziune = "none"
 
-[node name="aSt36" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -57.403988, -0.286942, 215.195694)
+[node name="aDrB31" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -50.433247, -0.282043, 164.086746)
+metadata/coliziune = "none"
+
+[node name="aDrB32" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -59.486679, -0.288208, 164.166763)
+metadata/coliziune = "none"
+
+[node name="aDrB33" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -67.039757, -0.286270, 164.780853)
+metadata/coliziune = "none"
+
+[node name="aSt34" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_haveli_facade")]
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -31.573603, -0.250839, 215.039444)
 metadata/coliziune = "none"
 metadata/indigo = true
 
-[node name="aSt37" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_d")]
-transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -65.406662, -0.285217, 214.860748)
+[node name="aSt35" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_c")]
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -41.105019, -0.273392, 215.028091)
+metadata/coliziune = "none"
+
+[node name="aSt36" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_e")]
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -49.023701, -0.283188, 215.195694)
 metadata/coliziune = "none"
 metadata/indigo = true
 
-[node name="aRangoli38" type="Decal" parent="DecorManual/ZoneA_Start"]
+[node name="aSt37" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_b")]
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -57.026371, -0.287079, 214.860748)
+metadata/coliziune = "none"
+metadata/indigo = true
+
+[node name="aSt38" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_blue_house_d")]
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -64.745911, -0.285767, 214.536957)
+metadata/coliziune = "none"
+
+[node name="aRangoli39" type="Decal" parent="DecorManual/ZoneA_Start"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40.000000, -0.000902, 190.000000)
 script = ExtResource("a_rangoli")
 size = Vector3(11.00, 1.2, 11.00)
 variant = 0
 
-[node name="aRangoli39" type="Decal" parent="DecorManual/ZoneA_Start"]
+[node name="aRangoli40" type="Decal" parent="DecorManual/ZoneA_Start"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.000000, 0.100000, 190.000000)
 script = ExtResource("a_rangoli")
 size = Vector3(3.00, 1.2, 3.00)
 variant = 1
 
-[node name="aRangoli40" type="Decal" parent="DecorManual/ZoneA_Start"]
+[node name="aRangoli41" type="Decal" parent="DecorManual/ZoneA_Start"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.000000, 0.019028, 190.000000)
 script = ExtResource("a_rangoli")
 size = Vector3(3.00, 1.2, 3.00)
 variant = 1
 
-[node name="aStalpGhirlanda41" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda42" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.995470, 0.000000, -0.095080, 0.000000, 1.000000, 0.000000, 0.095080, 0.000000, -0.995470, -8.513914, 4.127380, 179.600372)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda42" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda43" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.995470, 0.000000, -0.095080, 0.000000, 1.000000, 0.000000, 0.095080, 0.000000, -0.995470, -6.935590, 4.126907, 196.125183)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda43" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda44" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.995442, 0.000000, -0.095372, 0.000000, 1.000000, 0.000000, 0.095372, 0.000000, -0.995442, -16.833118, 4.063126, 180.393616)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda44" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda45" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.995442, 0.000000, -0.095372, 0.000000, 1.000000, 0.000000, 0.095372, 0.000000, -0.995442, -15.249946, 4.062073, 196.917938)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda45" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda46" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.994935, 0.000000, -0.100516, 0.000000, 1.000000, 0.000000, 0.100516, 0.000000, -0.994935, -24.759331, 3.997650, 181.251083)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda46" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda47" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.994935, 0.000000, -0.100516, 0.000000, 1.000000, 0.000000, 0.100516, 0.000000, -0.994935, -23.090771, 3.997040, 197.767014)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda47" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda48" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.999749, 0.000000, -0.022393, 0.000000, 1.000000, 0.000000, 0.022393, 0.000000, -0.999749, -32.009705, 3.955322, 181.775986)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda48" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda49" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.999749, 0.000000, -0.022393, 0.000000, 1.000000, 0.000000, 0.022393, 0.000000, -0.999749, -31.637983, 3.950790, 198.371811)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda49" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda50" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.999983, 0.000000, 0.005822, 0.000000, 1.000000, 0.000000, -0.005822, 0.000000, -0.999983, -40.137943, 3.949478, 181.710693)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda50" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda51" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.999983, 0.000000, 0.005822, 0.000000, 1.000000, 0.000000, -0.005822, 0.000000, -0.999983, -40.234585, 3.947586, 198.310425)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda51" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda52" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -48.000000, 3.951019, 181.699997)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda52" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda53" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -48.000000, 3.950256, 198.300003)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda53" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda54" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -55.814999, 3.950623, 181.699997)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda54" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda55" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -55.814999, 3.950211, 198.300003)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda55" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda56" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -64.184998, 3.950546, 181.699997)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda56" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda57" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -64.184998, 3.950211, 198.300003)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda57" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda58" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -72.000000, 3.950806, 181.699997)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda58" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda59" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -72.000000, 3.950287, 198.300003)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda59" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda60" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.999744, 0.000000, 0.022633, 0.000000, 1.000000, 0.000000, -0.022633, 0.000000, -0.999744, -87.999046, 3.954880, 181.743164)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda60" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda61" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.999744, 0.000000, 0.022633, 0.000000, 1.000000, 0.000000, -0.022633, 0.000000, -0.999744, -88.374748, 3.952927, 198.338928)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda61" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda62" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.997880, 0.000000, 0.065087, 0.000000, 1.000000, 0.000000, -0.065087, 0.000000, -0.997880, -95.448898, 3.992599, 181.485016)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
-[node name="aStalpGhirlanda62" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
+[node name="aStalpGhirlanda63" parent="DecorManual/ZoneA_Start" instance=ExtResource("s_marigold_garland")]
 transform = Transform3D(-0.997880, 0.000000, 0.065087, 0.000000, 1.000000, 0.000000, -0.065087, 0.000000, -0.997880, -96.529343, 3.991241, 198.049805)
 metadata/ancora_sol = Vector3(0, -4.25, 0)
 
 [node name="aCandele" type="MultiMeshInstance3D" parent="DecorManual/ZoneA_Start"]
 script = ExtResource("flock")
 model = ExtResource("s_diya")
-positions = PackedVector3Array(-53.900, -0.276, 199.600, -53.900, -0.276, 207.400, -53.900, -0.276, 199.600, -46.100, -0.276, 199.600, -53.350, -0.276, 199.600, -53.350, -0.276, 207.400, -53.900, -0.276, 200.150, -46.100, -0.276, 200.150, -52.800, -0.276, 199.600, -52.800, -0.276, 207.400, -53.900, -0.276, 200.700, -46.100, -0.276, 200.700, -52.250, -0.276, 199.600, -52.250, -0.276, 207.400, -53.900, -0.276, 201.250, -46.100, -0.276, 201.250, -51.700, -0.276, 199.600, -51.700, -0.276, 207.400, -53.900, -0.276, 201.800, -46.100, -0.276, 201.800, -51.150, -0.276, 199.600, -51.150, -0.276, 207.400, -53.900, -0.276, 202.350, -46.100, -0.276, 202.350, -50.600, -0.276, 199.600, -50.600, -0.276, 207.400, -53.900, -0.276, 202.900, -46.100, -0.276, 202.900, -50.050, -0.276, 199.600, -50.050, -0.276, 207.400, -53.900, -0.276, 203.450, -46.100, -0.276, 203.450, -49.500, -0.276, 199.600, -49.500, -0.276, 207.400, -53.900, -0.276, 204.000, -46.100, -0.276, 204.000, -48.950, -0.276, 199.600, -48.950, -0.276, 207.400, -53.900, -0.276, 204.550, -46.100, -0.276, 204.550, -48.400, -0.276, 199.600, -48.400, -0.276, 207.400, -53.900, -0.276, 205.100, -46.100, -0.276, 205.100, -47.850, -0.276, 199.600, -47.850, -0.276, 207.400, -53.900, -0.276, 205.650, -46.100, -0.276, 205.650, -47.300, -0.276, 199.600, -47.300, -0.276, 207.400, -53.900, -0.276, 206.200, -46.100, -0.276, 206.200, -46.750, -0.276, 199.600, -46.750, -0.276, 207.400, -53.900, -0.276, 206.750, -46.100, -0.276, 206.750, -46.200, -0.276, 199.600, -46.200, -0.276, 207.400, -53.900, -0.276, 207.300, -46.100, -0.276, 207.300, -16.392, -0.163, 179.467, -15.642, -0.157, 179.467, -14.892, -0.151, 179.467, -14.142, -0.145, 179.467, -13.392, -0.139, 179.467, -12.642, -0.134, 179.467, -11.892, -0.128, 179.467, -11.142, -0.122, 179.467, -10.392, -0.117, 179.467, -24.624, -0.229, 180.130, -23.874, -0.223, 180.130, -23.124, -0.216, 180.130, -22.374, -0.209, 180.130, -21.624, -0.203, 180.130, -20.874, -0.197, 180.130, -20.124, -0.191, 180.130, -19.374, -0.186, 180.130, -18.624, -0.181, 180.130, -32.997, -0.269, 179.898, -32.247, -0.268, 179.898, -31.497, -0.267, 179.898, -30.747, -0.266, 179.898, -29.997, -0.265, 179.898, -29.247, -0.264, 179.898, -28.497, -0.259, 179.898, -27.747, -0.254, 179.898, -26.997, -0.249, 179.898, -41.491, -0.276, 180.300, -40.741, -0.277, 180.300, -39.991, -0.277, 180.300, -39.241, -0.277, 180.300, -38.491, -0.278, 180.300, -37.741, -0.278, 180.300, -36.991, -0.278, 180.300, -36.241, -0.277, 180.300, -35.491, -0.275, 180.300, -49.273, -0.277, 179.520, -48.523, -0.277, 179.520, -47.773, -0.277, 179.520, -47.023, -0.277, 179.520, -46.273, -0.277, 179.520, -45.523, -0.277, 179.520, -44.773, -0.276, 179.520, -44.023, -0.276, 179.520, -43.273, -0.275, 179.520, -58.148, -0.279, 180.605, -57.398, -0.279, 180.605, -56.648, -0.279, 180.605, -55.898, -0.279, 180.605, -55.148, -0.279, 180.605, -54.398, -0.279, 180.605, -53.648, -0.279, 180.605, -52.898, -0.279, 180.605, -52.148, -0.278, 180.605, -65.548, -0.278, 180.058, -64.798, -0.278, 180.058, -64.048, -0.278, 180.058, -63.298, -0.278, 180.058, -62.548, -0.278, 180.058, -61.798, -0.278, 180.058, -61.048, -0.278, 180.058, -60.298, -0.278, 180.058, -59.548, -0.278, 180.058, -12.000, -0.142, 200.000, -12.800, -0.148, 200.000, -13.600, -0.154, 200.000, -14.400, -0.160, 200.000, -15.200, -0.165, 200.000, -16.000, -0.172, 200.000, -16.800, -0.179, 200.000, -17.600, -0.186, 200.000, -18.400, -0.193, 200.000, -19.200, -0.200, 200.000, -20.000, -0.207, 200.000, -20.800, -0.214, 200.000, -21.600, -0.219, 200.000, -22.400, -0.223, 200.000, -23.200, -0.228, 200.000, -24.000, -0.234, 200.000, -24.800, -0.240, 200.000, -25.600, -0.245, 200.000, -26.400, -0.251, 200.000, -27.200, -0.257, 200.000, -28.000, -0.262, 200.000, -28.800, -0.268, 200.000, -29.600, -0.272, 200.000, -30.400, -0.273, 200.000, -31.200, -0.275, 200.000, -32.000, -0.275, 200.000, -32.800, -0.276, 200.000, -33.600, -0.277, 200.000, -34.400, -0.278, 200.000, -35.200, -0.278, 200.000, -36.000, -0.279, 200.000, -36.800, -0.280, 200.000, -37.600, -0.281, 200.000, -38.400, -0.281, 200.000, -39.200, -0.281, 200.000, -40.000, -0.281, 200.000, -40.800, -0.280, 200.000, -41.600, -0.280, 200.000, -42.400, -0.279, 200.000, -43.200, -0.279, 200.000, -44.000, -0.278, 200.000, -44.800, -0.278, 200.000)
-yaws = PackedFloat32Array(0.00, 1.70, 3.40, 5.10, 6.80, 8.50, 10.20, 11.90, 13.60, 15.30, 17.00, 18.70, 20.40, 22.10, 23.80, 25.50, 27.20, 28.90, 30.60, 32.30, 34.00, 35.70, 37.40, 39.10, 40.80, 42.50, 44.20, 45.90, 47.60, 49.30, 51.00, 52.70, 54.40, 56.10, 57.80, 59.50, 61.20, 62.90, 64.60, 66.30, 68.00, 69.70, 71.40, 73.10, 74.80, 76.50, 78.20, 79.90, 81.60, 83.30, 85.00, 86.70, 88.40, 90.10, 91.80, 93.50, 95.20, 96.90, 98.60, 100.30, 102.00, 103.70, 105.40, 107.10, 108.80, 110.50, 112.20, 113.90, 115.60, 117.30, 119.00, 120.70, 122.40, 124.10, 125.80, 127.50, 129.20, 130.90, 132.60, 134.30, 136.00, 137.70, 139.40, 141.10, 142.80, 144.50, 146.20, 147.90, 149.60, 151.30, 153.00, 154.70, 156.40, 158.10, 159.80, 161.50, 163.20, 164.90, 166.60, 168.30, 170.00, 171.70, 173.40, 175.10, 176.80, 178.50, 180.20, 181.90, 183.60, 185.30, 187.00, 188.70, 190.40, 192.10, 193.80, 195.50, 197.20, 198.90, 200.60, 202.30, 204.00, 205.70, 207.40, 209.10, 210.80, 212.50, 214.20, 215.90, 217.60, 219.30, 221.00, 222.70, 224.40, 226.10, 227.80, 229.50, 231.20, 232.90, 234.60, 236.30, 238.00, 239.70, 241.40, 243.10, 244.80, 246.50, 248.20, 249.90, 251.60, 253.30, 255.00, 256.70, 258.40, 260.10, 261.80, 263.50, 265.20, 266.90, 268.60, 270.30, 272.00, 273.70, 275.40, 277.10, 278.80)
+positions = PackedVector3Array(-53.900, -0.276, 199.600, -53.900, -0.276, 207.400, -53.900, -0.276, 199.600, -46.100, -0.276, 199.600, -53.350, -0.276, 199.600, -53.350, -0.276, 207.400, -53.900, -0.276, 200.150, -46.100, -0.276, 200.150, -52.800, -0.276, 199.600, -52.800, -0.276, 207.400, -53.900, -0.276, 200.700, -46.100, -0.276, 200.700, -52.250, -0.276, 199.600, -52.250, -0.276, 207.400, -53.900, -0.276, 201.250, -46.100, -0.276, 201.250, -51.700, -0.276, 199.600, -51.700, -0.276, 207.400, -53.900, -0.276, 201.800, -46.100, -0.276, 201.800, -51.150, -0.276, 199.600, -51.150, -0.276, 207.400, -53.900, -0.276, 202.350, -46.100, -0.276, 202.350, -50.600, -0.276, 199.600, -50.600, -0.276, 207.400, -53.900, -0.276, 202.900, -46.100, -0.276, 202.900, -50.050, -0.276, 199.600, -50.050, -0.276, 207.400, -53.900, -0.276, 203.450, -46.100, -0.276, 203.450, -49.500, -0.276, 199.600, -49.500, -0.276, 207.400, -53.900, -0.276, 204.000, -46.100, -0.276, 204.000, -48.950, -0.276, 199.600, -48.950, -0.276, 207.400, -53.900, -0.276, 204.550, -46.100, -0.276, 204.550, -48.400, -0.276, 199.600, -48.400, -0.276, 207.400, -53.900, -0.276, 205.100, -46.100, -0.276, 205.100, -47.850, -0.276, 199.600, -47.850, -0.276, 207.400, -53.900, -0.276, 205.650, -46.100, -0.276, 205.650, -47.300, -0.276, 199.600, -47.300, -0.276, 207.400, -53.900, -0.276, 206.200, -46.100, -0.276, 206.200, -46.750, -0.276, 199.600, -46.750, -0.276, 207.400, -53.900, -0.276, 206.750, -46.100, -0.276, 206.750, -46.200, -0.276, 199.600, -46.200, -0.276, 207.400, -53.900, -0.276, 207.300, -46.100, -0.276, 207.300, -16.486, -0.164, 179.819, -15.736, -0.158, 179.819, -14.986, -0.152, 179.819, -14.236, -0.146, 179.819, -13.486, -0.140, 179.819, -12.736, -0.135, 179.819, -11.986, -0.129, 179.819, -11.236, -0.123, 179.819, -10.486, -0.118, 179.819, -24.804, -0.230, 179.617, -24.054, -0.223, 179.617, -23.304, -0.217, 179.617, -22.554, -0.210, 179.617, -21.804, -0.203, 179.617, -21.054, -0.197, 179.617, -20.304, -0.192, 179.617, -19.554, -0.186, 179.617, -18.804, -0.181, 179.617, -33.194, -0.272, 180.641, -32.444, -0.271, 180.641, -31.694, -0.270, 180.641, -30.944, -0.269, 180.641, -30.194, -0.268, 180.641, -29.444, -0.267, 180.641, -28.694, -0.263, 180.641, -27.944, -0.258, 180.641, -27.194, -0.253, 180.641, -40.565, -0.276, 179.820, -39.815, -0.276, 179.820, -39.065, -0.276, 179.820, -38.315, -0.277, 179.820, -37.565, -0.277, 179.820, -36.815, -0.277, 179.820, -36.065, -0.275, 179.820, -35.315, -0.273, 179.820, -34.565, -0.271, 179.820, -49.229, -0.277, 179.778, -48.479, -0.277, 179.778, -47.729, -0.277, 179.778, -46.979, -0.277, 179.778, -46.229, -0.277, 179.778, -45.479, -0.277, 179.778, -44.729, -0.277, 179.778, -43.979, -0.276, 179.778, -43.229, -0.275, 179.778, -57.014, -0.278, 179.859, -56.264, -0.278, 179.859, -55.514, -0.278, 179.859, -54.764, -0.278, 179.859, -54.014, -0.278, 179.859, -53.264, -0.278, 179.859, -52.514, -0.278, 179.859, -51.764, -0.278, 179.859, -51.014, -0.277, 179.859, -64.940, -0.278, 179.919, -64.190, -0.278, 179.919, -63.440, -0.278, 179.919, -62.690, -0.278, 179.919, -61.940, -0.278, 179.919, -61.190, -0.278, 179.919, -60.440, -0.278, 179.919, -59.690, -0.278, 179.919, -58.940, -0.278, 179.919, -12.000, -0.142, 200.000, -12.800, -0.148, 200.000, -13.600, -0.154, 200.000, -14.400, -0.160, 200.000, -15.200, -0.165, 200.000, -16.000, -0.172, 200.000, -16.800, -0.179, 200.000, -17.600, -0.186, 200.000, -18.400, -0.193, 200.000, -19.200, -0.200, 200.000, -20.000, -0.207, 200.000, -20.800, -0.214, 200.000, -21.600, -0.219, 200.000, -22.400, -0.223, 200.000, -23.200, -0.228, 200.000, -24.000, -0.234, 200.000, -24.800, -0.240, 200.000, -25.600, -0.245, 200.000, -26.400, -0.251, 200.000, -27.200, -0.257, 200.000, -28.000, -0.262, 200.000, -28.800, -0.268, 200.000, -29.600, -0.272, 200.000, -30.400, -0.273, 200.000, -31.200, -0.275, 200.000, -32.000, -0.275, 200.000, -32.800, -0.276, 200.000)
+yaws = PackedFloat32Array(0.00, 1.70, 3.40, 5.10, 6.80, 8.50, 10.20, 11.90, 13.60, 15.30, 17.00, 18.70, 20.40, 22.10, 23.80, 25.50, 27.20, 28.90, 30.60, 32.30, 34.00, 35.70, 37.40, 39.10, 40.80, 42.50, 44.20, 45.90, 47.60, 49.30, 51.00, 52.70, 54.40, 56.10, 57.80, 59.50, 61.20, 62.90, 64.60, 66.30, 68.00, 69.70, 71.40, 73.10, 74.80, 76.50, 78.20, 79.90, 81.60, 83.30, 85.00, 86.70, 88.40, 90.10, 91.80, 93.50, 95.20, 96.90, 98.60, 100.30, 102.00, 103.70, 105.40, 107.10, 108.80, 110.50, 112.20, 113.90, 115.60, 117.30, 119.00, 120.70, 122.40, 124.10, 125.80, 127.50, 129.20, 130.90, 132.60, 134.30, 136.00, 137.70, 139.40, 141.10, 142.80, 144.50, 146.20, 147.90, 149.60, 151.30, 153.00, 154.70, 156.40, 158.10, 159.80, 161.50, 163.20, 164.90, 166.60, 168.30, 170.00, 171.70, 173.40, 175.10, 176.80, 178.50, 180.20, 181.90, 183.60, 185.30, 187.00, 188.70, 190.40, 192.10, 193.80, 195.50, 197.20, 198.90, 200.60, 202.30, 204.00, 205.70, 207.40, 209.10, 210.80, 212.50, 214.20, 215.90, 217.60, 219.30, 221.00, 222.70, 224.40, 226.10, 227.80, 229.50, 231.20, 232.90, 234.60, 236.30, 238.00, 239.70, 241.40, 243.10, 244.80, 246.50, 248.20, 249.90, 251.60, 253.30)
 scale_min = 3.40
 scale_max = 3.60
 halo_enabled = true

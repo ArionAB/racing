@@ -28,7 +28,7 @@ extends Node
 ##   de pe H spre turn (13,5 m lateral) si l-ar ascunde pana la cadrane. Dupa
 ##   turn, poarta e FUNDALUL lui, ca in dioramă („arcada in spatele turnului").
 ## - Tuk-tuk-urile parcate: prop static `hull`, la 10,9 m (in afara
-##   trotuarului), intre turn si poarta. Varianta cu corp `Car` oprit (se
+##   trotuarului), trei in piata dinaintea turnului si doua intre turn si poarta. Varianta cu corp `Car` oprit (se
 ##   impinge) e cod: `TrafficController` n-are mod „parcat".
 ## - Rangoli: `RangoliDecal` (decal, nu textura pe drum) — unul mare, 11 m,
 ##   imediat dupa linie (in fata grilei, x -40), si doua mici pe axul grilei,
@@ -171,7 +171,10 @@ func _gate() -> void:
 
 
 func _tuks() -> void:
-	var xs := [-58.5, -62.4, -66.6, -70.4]
+	# Trei in piata dinaintea turnului (se vad din cadrul de start, langa
+	# rangoli, si sunt joase: nu acopera turnul de pe H), doua intre turn si
+	# poarta.
+	var xs := [-35.2, -39.1, -43.0, -59.5, -63.6]
 	for i in xs.size():
 		var x: float = xs[i] + _rng.randf_range(-0.3, 0.3)
 		var z := ROAD_Z + 10.9 + _rng.randf_range(-0.15, 0.25)
@@ -226,9 +229,10 @@ func _houses() -> void:
 			_meta_last("metadata/indigo = true")
 		x -= 8.2 + _rng.randf_range(-0.4, 0.6)
 		k += 1
-	# Candele pe bordura pietei (stanga, x -12..-45, in afara trotuarului).
+	# Candele pe bordura pietei (stanga, x -12..-33, in afara trotuarului;
+	# mai departe stau tuk-tuk-urile parcate).
 	var px := -12.0
-	while px > -45.5:
+	while px > -33.5:
 		var pz := ROAD_Z + 10.0
 		_diyas.append(Vector3(px, _sol_real(px, pz), pz))
 		px -= 0.8

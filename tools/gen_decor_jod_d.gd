@@ -48,12 +48,12 @@ const MOUTH_REAL_M := 25.4
 ## Modelele de case: jumatatile AABB (x, z), inaltimea, axa fetei (+Z sau +X)
 ## si ponderea. Masurate din GLB (tools: house_inspect, `jodhpur_masuratori.md`).
 const HOUSES := {
-	"blue_house_a": {"hx": 3.575, "hz": 3.31, "front_x": true, "w": 0.16},
-	"blue_house_b": {"hx": 3.41, "hz": 3.775, "front_x": false, "w": 0.22},
-	"blue_house_c": {"hx": 3.75, "hz": 3.835, "front_x": false, "w": 0.2},
-	"blue_house_d": {"hx": 3.75, "hz": 4.005, "front_x": false, "w": 0.18},
-	"blue_house_e": {"hx": 3.7, "hz": 3.13, "front_x": false, "w": 0.18},
-	"haveli_facade": {"hx": 5.46, "hz": 3.7125, "front_x": false, "w": 0.06},
+	"blue_house_a": {"hx": 3.575, "hz": 3.31, "front": Vector2(1, 0), "w": 0.16},
+	"blue_house_b": {"hx": 3.41, "hz": 3.775, "front": Vector2(1, 0), "w": 0.22},
+	"blue_house_c": {"hx": 3.75, "hz": 3.835, "front": Vector2(0, -1), "w": 0.2},
+	"blue_house_d": {"hx": 3.75, "hz": 4.005, "front": Vector2(1, 0), "w": 0.18},
+	"blue_house_e": {"hx": 3.7, "hz": 3.13, "front": Vector2(0, -1), "w": 0.18},
+	"haveli_facade": {"hx": 5.46, "hz": 3.7125, "front": Vector2(0, -1), "w": 0.06},
 }
 ## Casele care au deja rezervorul in mesh (nu primesc altul).
 const HAS_TANK := ["blue_house_b", "blue_house_c"]
@@ -243,8 +243,9 @@ func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 		var h: Dictionary = HOUSES[model]
 		var turned := _rng.randf() < float(cfg["turn_p"])
 		# Latimea pe drum (W) si adancimea (D) in functie de axa fetei.
-		var w_half: float = h["hz"] if bool(h["front_x"]) else h["hx"]
-		var d_half: float = h["hx"] if bool(h["front_x"]) else h["hz"]
+		var fx := absf((h["front"] as Vector2).x) > 0.5
+		var w_half: float = h["hz"] if fx else h["hx"]
+		var d_half: float = h["hx"] if fx else h["hz"]
 		if turned:
 			var tmp := w_half
 			w_half = d_half
@@ -309,11 +310,11 @@ func _row(route: TrackRoute, ri: int, r: int, cfg: Dictionary, sgn: float,
 			_node("neem_tree", "neem", Vector3(c.x, g.x - 0.05, c.y), Basis(Vector3.UP, yaw), [])
 			placed += 1
 			continue
-		var yaw := 0.0
-		if bool(h["front_x"]):
-			yaw = atan2(-face3.z, face3.x)
-		else:
-			yaw = atan2(face3.x, face3.z)
+		# Fata cu usi/ferestre a modelului (masurata pe golurile *_Glow si
+		# ramele *_Trim, constructorul A) intoarsa spre drum: rotatia in jurul
+		# Y duce directia de unghi atan2(x, z) in unghi + yaw.
+		var fl: Vector2 = h["front"]
+		var yaw := atan2(face3.x, face3.z) - atan2(fl.x, fl.y)
 		var b := Basis(Vector3.UP, yaw)
 		var metas: Array[String] = []
 		if _rng.randf() < INDIGO_P:
@@ -492,6 +493,13 @@ func _hm_disc(model: String, lx: float, lz: float, r: float) -> Vector2:
 	return Vector2(lo, hi)
 
 
+## Muchia de pe latura `dir` (unitar pe o axa, local x,z): capete + spre interior.
+func _edge(dir: Vector2, hx: float, hz: float) -> Array:
+	var c := Vector2(dir.x * hx, dir.y * hz)
+	var t := Vector2(absf(dir.y) * hx, absf(dir.x) * hz)
+	return [c - t, c + t, -dir]
+
+
 func _roofs() -> void:
 	for hs: Dictionary in _houses:
 		var model: String = hs["model"]
@@ -500,20 +508,13 @@ func _roofs() -> void:
 		var hx: float = h["hx"]
 		var hz: float = h["hz"]
 		# Fata spre drum in coordonate LOCALE ale modelului.
-		var front_local := Vector3(1, 0, 0) if bool(h["front_x"]) else Vector3(0, 0, 1)
+		var fl: Vector2 = h["front"]
 		# --- candelele pe muchia fetei (si pe laturi, la randul 1) ---
-		var edges: Array = []
-		if bool(h["front_x"]):
-			edges.append([Vector2(hx, -hz), Vector2(hx, hz), Vector2(-1, 0)])
-		else:
-			edges.append([Vector2(-hx, hz), Vector2(hx, hz), Vector2(0, -1)])
+		var edges: Array = [_edge(fl, hx, hz)]
 		if int(hs["row"]) == 0:
-			if bool(h["front_x"]):
-				edges.append([Vector2(hx, hz), Vector2(-hx, hz), Vector2(0, -1)])
-				edges.append([Vector2(hx, -hz), Vector2(-hx, -hz), Vector2(0, 1)])
-			else:
-				edges.append([Vector2(hx, hz), Vector2(hx, -hz), Vector2(-1, 0)])
-				edges.append([Vector2(-hx, hz), Vector2(-hx, -hz), Vector2(1, 0)])
+			var perp := Vector2(-fl.y, fl.x)
+			edges.append(_edge(perp, hx, hz))
+			edges.append(_edge(-perp, hx, hz))
 		for e: Array in edges:
 			var a: Vector2 = e[0]
 			var b: Vector2 = e[1]
@@ -582,14 +583,11 @@ func _peacocks() -> void:
 		var hx: float = h["hx"]
 		var hz: float = h["hz"]
 		# Pe muchia fetei, spre un capat (nu in mijloc, unde sta candela).
-		var lx := 0.0
-		var lz := 0.0
-		if bool(h["front_x"]):
-			lx = hx - 0.3
-			lz = hz * 0.45
-		else:
-			lx = hx * 0.45
-			lz = hz - 0.3
+		var fl: Vector2 = h["front"]
+		var perp := Vector2(-fl.y, fl.x)
+		var ext := Vector2(hx, hz)
+		var lx := fl.x * (ext.x - 0.3) + perp.x * ext.x * 0.45
+		var lz := fl.y * (ext.y - 0.3) + perp.y * ext.y * 0.45
 		var top := _hm_disc(model, lx, lz, 0.25).y
 		if top < 2.5:
 			continue

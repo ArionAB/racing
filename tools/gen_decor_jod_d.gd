@@ -174,6 +174,7 @@ var _clutter_yaws := PackedFloat32Array()
 var _hmaps := {}
 var _stats := {}
 var _arch_d := 30.0
+var _shuf_rng := RandomNumberGenerator.new()
 var _w_org := PackedVector3Array()
 var _w_yaw := PackedFloat32Array()
 var _w_size := PackedVector3Array()
@@ -203,6 +204,7 @@ func _ready() -> void:
 		hi = maxf(hi, bp.y)
 	_sus_y = hi + 150.0
 	_rng.seed = 300926
+	_shuf_rng.seed = 926003
 	for m in HOUSES:
 		_hmaps[m] = _heightmap(m)
 	_reserve()
@@ -722,7 +724,13 @@ func _roofs() -> void:
 					spots.append(Vector2(gx, gz))
 					gz += 0.9
 				gx += 0.9
-			spots.shuffle()
+			# Amestecat cu un rng propriu, nu `Array.shuffle()` (rng-ul global):
+			# altfel rezervoarele ieseau altundeva la fiecare rulare.
+			for k in range(spots.size() - 1, 0, -1):
+				var q := _shuf_rng.randi_range(0, k)
+				var tmp = spots[k]
+				spots[k] = spots[q]
+				spots[q] = tmp
 			for sp: Vector2 in spots:
 				var dd := _hm_disc(model, sp.x, sp.y, 0.7)
 				if dd.x > 2.8 and dd.y - dd.x < 0.15:
@@ -731,7 +739,11 @@ func _roofs() -> void:
 					break
 		if _rng.randf() < CLUTTER_P:
 			var spots2 := [Vector2(0, 0), Vector2(hx - 1.8, 0), Vector2(-hx + 1.8, 0)]
-			spots2.shuffle()
+			for k in range(spots2.size() - 1, 0, -1):
+				var q := _shuf_rng.randi_range(0, k)
+				var tmp = spots2[k]
+				spots2[k] = spots2[q]
+				spots2[q] = tmp
 			for sp: Vector2 in spots2:
 				var dd := _hm_disc(model, sp.x, sp.y, 1.6)
 				if dd.x > 4.0 and dd.y - dd.x < 0.12:
@@ -887,6 +899,9 @@ func _fill_houses(route: TrackRoute, sgn: float, s0: float, s1: float) -> void:
 ## balcoane/scari — nisipul e SUB amprenta, deci prispa intra sub fatada.
 const PLINTH_STEP := 2.0
 const PLINTH_D := 1.6
+## Suprapunerea pieselor: pe exteriorul virajelor pasul de 2 m de pe axa se
+## lungeste la bordura si prispa iesea in dale cu goluri (captura 0,460).
+const PLINTH_OVERLAP := 0.9
 const PLINTH_H := 0.45
 
 func _plinths(route: TrackRoute, sgn: float, s0: float, s1: float) -> void:
@@ -935,7 +950,7 @@ func _plinths(route: TrackRoute, sgn: float, s0: float, s1: float) -> void:
 		var z := -right * sgn
 		_w_org.append(Vector3(c.x, g.x - SINK, c.y))
 		_w_yaw.append(atan2(z.x, z.z))
-		_w_size.append(Vector3(PLINTH_STEP + 0.1, dep, PLINTH_H + SINK + (g.y - g.x)))
+		_w_size.append(Vector3(PLINTH_STEP + PLINTH_OVERLAP, dep, PLINTH_H + SINK + (g.y - g.x)))
 		_w_flags.append(64)
 		placed += 1
 	print("; prispe parte %+.0f: %d" % [sgn, placed])

@@ -1037,10 +1037,19 @@ const CLASS_TINT := {
 	# ridicata la 0.98 (masurat efectiv (1.000, 0.970, 0.866) — R retezat):
 	"blue_lime_light": Color(0.561, 0.711, 0.997),
 	"blue_lime_indigo": Color(0.310, 0.448, 0.834),
-	# Gresia rosie a fortului #A5553A si cea roz a fantanii #D4957A, pe dala
-	# `stone_wall` ridicata la 0.81 (masurat efectiv (0.824, 0.804, 0.742); roz: R
-	# ramane cu 0.8% sub tinta, tenta nu poate urca peste 1):
-	"red_sandstone": Color(0.785, 0.414, 0.306),
+	# Gresia roz a fantanii #D4957A, pe dala `stone_wall` ridicata la 0.81
+	# (masurat efectiv (0.824, 0.804, 0.742); R ramane cu 0.8% sub tinta, tenta
+	# nu poate urca peste 1).
+	# Gresia fortului: #B87466 efectiv (roz-teracota), NU #A5553A din brief.
+	# Criticul orb a numit tenta de TREI ori pe POI E (portocaliu-rosu saturat,
+	# uniform; tinta e roz-teracota cu buze mai deschise). Masurat pe masca
+	# gresiei (scratchpad val1/e/hsv.py, frac 0.505 si 0.530, dusk 0): S
+	# mediana 0,86-0,88 cu #A5553A (lumina calda de apus o satureaza), 0,64-0,67
+	# cu #B87466, fata de 0,66 in bara E; V p90 0,72 -> 0,78 (bara 0,83).
+	# Variantele A #B06A55 si C #A0604E ramaneau la 0,73-0,75. Aleasa de
+	# coordonator (30 sep 2026). Muta si A (turnul, market_gate) si F
+	# (bastionul, fatadele): clasa e folosita doar pe Jodhpur.
+	"red_sandstone": Color(0.876, 0.566, 0.539),
 	"rose_sandstone": Color(1.0, 0.726, 0.645),
 	# Riolitul roz-brun #9A6A5A pe dala `alpine_granite` NERIDICATA
 	# (0.650, 0.611, 0.534): toate trei rapoartele sub 1, deci fara

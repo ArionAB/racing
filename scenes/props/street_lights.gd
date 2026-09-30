@@ -50,6 +50,18 @@ extends Node3D
 ## Portiuni FARA fatada (si deci fara festoane): (latura, frac_de_la, frac_pana_la),
 ## latura +1 = dreapta sensului de mers, -1 = stanga.
 @export var facade_gaps: Array[Vector3] = []
+## Festoane pe STREASINI si pe balustradele de pe acoperis, casa cu casa
+## (runda finala H: criticul cerea becurile pe muchiile caselor, nu doar in
+## arce in fata fatadei). Perechi de puncte in coordonate de lume (a, b, a, b
+## ...), fiecare pereche o sfoara lasata cu `eave_sag_m`. Le scrie
+## generatorul, din profilul masurat al fiecarui model (raze verticale pe
+## muchia din fata), deci urmeaza treptele caselor.
+@export var eave_points: PackedVector3Array = PackedVector3Array()
+@export var eave_sag_m: float = 0.25
+## Felinare FARA stalp (gura fiecarei pravalii): acelasi glob si acelasi
+## halou ca felinarele de pe bordura, in coordonate de lume.
+@export var extra_lamps: PackedVector3Array = PackedVector3Array()
+@export var extra_lamp_radius_m: float = 0.3
 ## Becurile: pasul pe sfoara si raza. Runda 2: raza x3, pasul /2 (cu de doua
 ## ori mai multe sfori, ~4x becuri) — globuri aproape lipite.
 @export var bulb_step_m: float = 0.34
@@ -193,10 +205,21 @@ func _build() -> void:
 				var pa: Vector3 = fst[k]["p"] + (fst[k]["s"] as Vector3) * (facade_lateral_m * sgn)
 				var pb: Vector3 = fst[k + 1]["p"] + (fst[k + 1]["s"] as Vector3) * (facade_lateral_m * sgn)
 				_catenary(pa + Vector3.UP * h, pb + Vector3.UP * h, facade_sag_m, bulb_pos, true)
+	var n_before_eaves := bulb_pos.size()
+	var inv := global_transform.affine_inverse()
+	for k in range(0, eave_points.size() - 1, 2):
+		_catenary(inv * eave_points[k], inv * eave_points[k + 1], eave_sag_m,
+			bulb_pos, true)
+	var n_eaves := bulb_pos.size() - n_before_eaves
+	var shop_xf: Array[Transform3D] = []
+	for p in extra_lamps:
+		shop_xf.append(Transform3D(Basis.IDENTITY, inv * p))
 	var glow := Palette.glow_material_slots([bulb_slot], glow_energy, glow_tint)
 	_add_multimesh("Stalpi", _prism(post_radius_m, post_height_m + base_drop_m, 6, post_slot),
 		Palette.world_material(), post_xf, true)
 	_add_multimesh("Felinare", _octa(lamp_radius_m, bulb_slot), glow, lamp_xf, false)
+	_add_multimesh("FelinarePravalii", _octa(extra_lamp_radius_m, bulb_slot), glow,
+		shop_xf, false)
 	var bulb_xf: Array[Transform3D] = []
 	for p in bulb_pos:
 		bulb_xf.append(Transform3D(Basis.IDENTITY, p))
@@ -204,6 +227,8 @@ func _build() -> void:
 	var n_wash := _add_facade_wash(route, i0, i1) if facade_wash else 0
 	var lamp_pts := PackedVector3Array()
 	for xf in lamp_xf:
+		lamp_pts.append(global_transform * xf.origin)
+	for xf in shop_xf:
 		lamp_pts.append(global_transform * xf.origin)
 	var bulb_pts := PackedVector3Array()
 	for p in bulb_pos:
@@ -215,7 +240,8 @@ func _build() -> void:
 	stats = {"posts": post_xf.size(), "lamps": lamp_xf.size(),
 		"bulbs": bulb_xf.size(), "bulbs_cross": n_cross,
 		"bulbs_lamp_strings": n_lamp_strings, "facade_wash": n_wash,
-		"bulbs_facade": bulb_xf.size() - n_cross - n_lamp_strings}
+		"bulbs_eaves": n_eaves, "shop_lamps": shop_xf.size(),
+		"bulbs_facade": bulb_xf.size() - n_cross - n_lamp_strings - n_eaves}
 	print("StreetLights %s: %s" % [name, stats])
 
 

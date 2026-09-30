@@ -91,6 +91,13 @@ extends Node
 ##                             `phase` ignorat): 0-3.5 urca de sub banda,
 ##                             3.5-7.5 ACOPERA drumul, 7.5-10 se retrage,
 ##                             restul = ascuns. Fara el norul e in defileu.
+##   --tuk-at=0.93,0.96[:-2.2] TUK-TUK-URI (Jodhpur) la fractiile date din
+##                             bucla, pe banda STANGA (lat -2,2 = offsetul
+##                             TrafficController; `:lat` il suprascrie per
+##                             piesa). Snapshot nu porneste cursa, deci fara
+##                             flag traficul nu apare in captura. Corpuri
+##                             `Car` + tuktuk.tres, INGHETATE (on_start_grid),
+##                             botul pe sensul de mers. Fara flag: nimic.
 ##   --bus-at=30               AUTOBUZUL de pe serpentine (BusHazard, Machu
 ##                             Picchu) la N SECUNDE de coborare pe curba lui
 ##                             (7 m/s => 30 s = 210 m de la capatul de sus),
@@ -348,6 +355,7 @@ func _ready() -> void:
 	var rope_u := 0.5
 	var cloud_at := -1.0
 	var bus_at := -1.0
+	var tuk_at := ""
 	var cross_at := -1.0
 	var burner_at := -1.0
 	var balloon_at := -1.0
@@ -444,6 +452,8 @@ func _ready() -> void:
 			cloud_at = float(arg.trim_prefix("--cloud-at="))
 		elif arg.begins_with("--bus-at="):
 			bus_at = float(arg.trim_prefix("--bus-at="))
+		elif arg.begins_with("--tuk-at="):
+			tuk_at = arg.trim_prefix("--tuk-at=")
 		elif arg.begins_with("--rope-load="):
 			var parts := arg.trim_prefix("--rope-load=").split(",")
 			rope_load = float(parts[0])
@@ -550,6 +560,8 @@ func _ready() -> void:
 		await _set_cloud_time(track, cloud_at)
 	if bus_at >= 0.0:
 		await _set_bus_time(track, bus_at)
+	if tuk_at != "":
+		_place_tuktuks(track, tuk_at)
 	if cross_at >= 0.0:
 		await _set_cross_time(track, cross_at)
 	if burner_at >= 0.0:
@@ -890,6 +902,63 @@ func _print_render_info() -> void:
 			RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME),
 		RenderingServer.viewport_get_render_info(vp, t,
 			RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)])
+	_print_halo_stats()
+
+
+## Costul halourilor false (LampHalo, Jodhpur) pe CADRUL capturat: cate
+## instante cad in frustum, cate au haloul intreg (< 45 m), si cati pixeli
+## acopera patratele lor — adica overdraw-ul aditiv, socotit cu ACEEASI
+## formula de raza ca shaderul (lamp_halo.gdshader), nu estimat.
+func _print_halo_stats() -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or LampHalo.built.is_empty():
+		return
+	var vp_h := float(get_viewport().get_visible_rect().size.y)
+	var px_per_rad := vp_h / (2.0 * tan(deg_to_rad(cam.fov) * 0.5))
+	var far_b := 45.0
+	var far_e := 60.0
+	var min_core := 0.0022
+	var pull_frac := 0.8
+	var pull_max := 1.2
+	var tot := 0
+	var vis := 0
+	var full := 0
+	var px := 0.0
+	var per := {}
+	for mmi: MultiMeshInstance3D in LampHalo.built:
+		if not is_instance_valid(mmi) or not mmi.is_visible_in_tree():
+			continue
+		var mm := mmi.multimesh
+		var gx := mmi.global_transform
+		var v_n := 0
+		var v_px := 0.0
+		for i in mm.instance_count:
+			tot += 1
+			var p: Vector3 = gx * mm.get_instance_transform(i).origin
+			var cd := mm.get_instance_custom_data(i)
+			var d := cam.global_position.distance_to(p)
+			var core := maxf(cd.r, d * min_core)
+			var keep := 1.0 - smoothstep(far_b, far_e, d)
+			var st := maxf(cd.b, 1.0)
+			var halo := lerpf(core * st, maxf(cd.g, core * st), keep)
+			var r := maxf(halo, core * st)
+			if not cam.is_position_in_frustum(p):
+				# patratul poate intra in cadru cu marginea; ignorat (sub-estimare mica)
+				continue
+			var dd := maxf(d - minf(r * pull_frac, pull_max), 0.3)
+			var rpx := r / dd * px_per_rad
+			var a := 4.0 * rpx * rpx
+			vis += 1
+			v_n += 1
+			if d < far_b:
+				full += 1
+			px += a
+			v_px += a
+		per[mmi.name] = "%d vizibile, %.0f px" % [v_n, v_px]
+	var area := get_viewport().get_visible_rect().size.x * vp_h
+	print("HALO: %d instante, %d in cadru, %d cu halou intreg (<45 m), %.0f px acoperiti = %.2f ecrane de overdraw aditiv" % [
+		tot, vis, full, px, px / area])
+	print("HALO per strat: ", per)
 
 
 ## Un landmark anume, vazut de pe sosea (--landmark=, vezi antetul).
@@ -1207,6 +1276,46 @@ func _set_bus_time(root: Node, at: float) -> void:
 				body.global_position.z])
 	if found == 0:
 		print("--bus-at: NICIUN autobuz pe pista asta")
+
+
+## `--tuk-at`: tuk-tuk-uri inghetate pe banda stanga a buclei (ruta 0), la
+## fractiile date (pe index, ca `--frac`). Aceeasi asezare ca
+## `Race._spawn_traffic` (axa + side_at * offset, botul pe sensul de mers),
+## dar cu corpul inghetat: poza arata traficul acolo unde il cere captura,
+## nu unde l-ar fi dus fizica in cele cateva cadre de asteptare.
+func _place_tuktuks(track: Track, spec: String) -> void:
+	var route := track.route_at(0)
+	if route == null or route.count() == 0:
+		print("--tuk-at: pista fara ruta 0")
+		return
+	var n := route.count()
+	var data := load("res://scenes/cars/data/tuktuk.tres") as CarData
+	var placed := 0
+	for item in spec.split(",", false):
+		var parts := item.split(":")
+		var frac := float(parts[0])
+		var lat := TrafficController.LANE_OFFSET_M
+		if parts.size() > 1:
+			lat = float(parts[1])
+		var idx := int(frac * float(n)) % n
+		var dir := route.baked[route.wrap_index(idx + 1)] - route.baked[idx]
+		dir.y = 0.0
+		if dir.length_squared() < 0.001:
+			dir = Vector3.FORWARD
+		dir = dir.normalized()
+		var pos := route.baked[idx] + route.side_at(idx) * lat + Vector3.UP * 0.45
+		var car := (load("res://scenes/cars/Car.tscn") as PackedScene).instantiate() as Car
+		car.track = track
+		add_child(car)
+		car.apply_data(data)
+		car.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP), pos)
+		car.route = 0
+		car.road_index = idx
+		car.on_start_grid = true
+		placed += 1
+		print("--tuk-at: tuk-tuk la frac %.3f (idx %d), lat %.1f, (%.1f, %.1f, %.1f)"
+			% [frac, idx, lat, pos.x, pos.y, pos.z])
+	print("--tuk-at: %d tuk-tuk-uri inghetate" % placed)
 
 
 ## Podul de franghie: o incarcare fantoma la fractia u din pod, cu sageata

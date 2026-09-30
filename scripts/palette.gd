@@ -1797,6 +1797,8 @@ static func lava_material() -> ShaderMaterial:
 static func shader_material(name: String) -> ShaderMaterial:
 	if name == "faded_detail":
 		return faded_detail_material()
+	if name == "jod_window":
+		return window_lamp_material()
 	assert(name == "lava", "shader necunoscut: " + name)
 	return lava_material()
 
@@ -1822,6 +1824,21 @@ static func shader_material(name: String) -> ShaderMaterial:
 ## UN material pentru toate piesele care il cer, ca la `lava_material`: garda
 ## numara materialele, deci o padure intreaga de hornuri aduce +1, nu +41.
 static var _faded_detail: ShaderMaterial
+
+## Ferestrele si nisele care se aprind cu ceasul (`dusk_lamps`, DuskCycle).
+## Azi doar pe Jodhpur (`shader:jod_window` in maparile de clase); vezi
+## assets/shaders/jod_window.gdshader pentru praguri. UN material pentru
+## toate ferestrele pistei: +1 la garda, nu +1 per cladire.
+static var _window_lamp: ShaderMaterial
+
+static func window_lamp_material() -> ShaderMaterial:
+	if _window_lamp != null:
+		return _window_lamp
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://assets/shaders/jod_window.gdshader")
+	mat.set_shader_parameter("albedo_atlas", load(ATLAS_PATH))
+	_window_lamp = mat
+	return mat
 
 static func faded_detail_material() -> ShaderMaterial:
 	if _faded_detail != null:

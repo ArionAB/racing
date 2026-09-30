@@ -75,6 +75,14 @@ func _report() -> bool:
 	for entry in props:
 		var n3: Node3D = entry["node"]
 		var p := n3.global_position
+		# Ancora de sol OPT-IN (metadata `ancora_sol`, punct LOCAL): piesele
+		# care sunt FATADE lipite de un perete de teren (modulele de trepte ale
+		# fantanii Jodhpur, POI C) au originea la mijlocul bazei, deci 1,5 m
+		# INAUNTRUL peretelui, unde terenul e prin proiect cu 2-4 m peste baza.
+		# Pentru ele baza vizibila e muchia de jos a FETEI; acolo se judeca
+		# plutit/ingropat. Fara metadata, comportamentul e cel de dinainte.
+		if n3.has_meta("ancora_sol"):
+			p = n3.global_transform * (n3.get_meta("ancora_sol") as Vector3)
 		var ground: float = t._sampler.ground_y(p.x, p.z)
 		var near := 1e9
 		var near_i := 0

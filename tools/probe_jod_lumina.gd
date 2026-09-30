@@ -63,6 +63,7 @@ func _ready() -> void:
 	var indigo := -1.0
 	var scan_from := -1.0
 	var scan_to := -1.0
+	var fracs: Array = []
 	for a in OS.get_cmdline_user_args():
 		if a == "--guard":
 			guard = true
@@ -76,6 +77,9 @@ func _ready() -> void:
 			scan_to = float(sp[1])
 		elif a.begins_with("--indigo="):
 			indigo = float(a.trim_prefix("--indigo="))
+		elif a.begins_with("--fracs="):
+			for x in a.trim_prefix("--fracs=").split(","):
+				fracs.append(float(x))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_out_dir))
 
 	var idx := GameState.resolve_track_index(10)
@@ -118,7 +122,10 @@ func _ready() -> void:
 		await _scan(scan_from, scan_to)
 		get_tree().quit(0)
 		return
-	var views := _views()
+	# --fracs=a,b,c: in loc de vederile garzii, o vedere de joc per fractie,
+	# fiecare pe 5 esantioane la +-0,002 / +-0,004 (masuratoarea „orasul sub
+	# tine" pe cadrele eroului F; fara --guard, doar cifre).
+	var views := _views() if fracs.is_empty() else _frac_views(fracs)
 	# acc[view][dusk_i][cls] = [sumR, sumG, sumB, sumLuma, n]
 	var acc := {}
 	var per_sample := []
@@ -285,6 +292,15 @@ func _views() -> Array:
 		f_eyes.append([f_eye + off, look])
 	out.append({"name": "F_ochi", "eyes": f_eyes})
 	print("centroid oras (%.0f, %.1f, %.0f), D_ochi priveste la %s" % [city.x, city.y, city.z, str(look)])
+	return out
+
+
+func _frac_views(fracs: Array) -> Array:
+	var out := []
+	for fr in fracs:
+		var f := float(fr)
+		out.append({"name": "f%04d" % roundi(f * 1000.0),
+			"eyes": _gamecam_eyes([f - 0.004, f - 0.002, f, f + 0.002, f + 0.004])})
 	return out
 
 

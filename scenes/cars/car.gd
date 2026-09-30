@@ -1332,6 +1332,18 @@ func respawn(backoff_m: float = 14.0) -> void:
 		if br != null and not br.baked.is_empty():
 			last_safe_index = track.closest_index_global(br.baked[0], 0)
 		last_safe_route = 0
+	# Nici intre furca si poarta ingustata a benzii (`AlleyGate`): repusa acolo
+	# (cu 15 m pana la poarta si botul deviat), masina lovea iar stalpul —
+	# bucla masurata pe Track17 (ejectare -> repunere la 0,348 -> ejectare).
+	# Se repune pe bucla, inaintea furcii. Pistele fara AlleyGate: neatinse.
+	if last_safe_route != 0:
+		var gate := track.branch_gate(last_safe_route)
+		var gbr := track.route_at(last_safe_route)
+		if gate != null and gbr != null and not gbr.baked.is_empty():
+			var sd: float = gbr.dists[clampi(last_safe_index, 0, gbr.dists.size() - 1)]
+			if sd < float(gate.gate_dist_m) + 3.0:
+				last_safe_index = track.closest_index_global(gbr.baked[0], 0)
+				last_safe_route = 0
 	global_transform = track.recovery_transform(last_safe_index, backoff_m,
 		last_safe_route)
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei

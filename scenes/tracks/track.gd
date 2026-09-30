@@ -4319,6 +4319,7 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 				"bumpiness": br.bumpiness,
 				"tufts": br.tufts,
 				"elevated": br.elevated,
+				"lure_before_entry_only": br.lure_before_entry_only,
 			}
 			if br.entry_at >= 0.0:
 				spec["entry"] = br.entry_at
@@ -9036,6 +9037,7 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.elevated = elevated
 	route.no_surface = bool(spec.get("no_surface", false))
 	route.detour = bool(spec.get("detour", false))
+	route.lure_before_entry_only = bool(spec.get("lure_before_entry_only", false))
 	route.own_ends = bool(spec.get("own_ends", false))
 	if spec.has("tint"):
 		route.tint = spec["tint"] as Color
@@ -14503,6 +14505,24 @@ func is_steps_at(frac: float) -> bool:
 ## primeasca fiecare tip nou scris in codul lui `Track`.
 const BRANCH_GATE_GROUP: StringName = &"branch_gate"
 
+## Distanta (m, de la capul benzii) pana la poarta ingustata (`AlleyGate`) de
+## pe banda data; INF daca banda n-are poarta. Cautat o singura data, prin
+## duck typing (`branch_index` + `gate_dist_m` + `half_opening_m`) — logica
+## portii nu se atinge. Consumat de AIController (linia strans pe axa inainte
+## de poarta) si de Car.respawn (nu se repune intre furca si poarta).
+## Pe pistele fara AlleyGate intoarce mereu INF, deci nimic nu se schimba.
+var _alley_gate_cache: Dictionary = {}
+var _alley_gate_scanned: bool = false
+
+func branch_gate(route: int) -> Node:
+	if not _alley_gate_scanned:
+		_alley_gate_scanned = true
+		for n in find_children("*", "Node3D", true, false):
+			if "branch_index" in n and "gate_dist_m" in n and "half_opening_m" in n:
+				_alley_gate_cache[int(n.branch_index)] = n
+	return _alley_gate_cache.get(route, null)
+
+
 ## Mai e practicabila banda secundara cu indexul dat?
 ##
 ## Implicit DA — pistele care n-au nimic care sa inchida o banda nu simt
@@ -14784,14 +14804,25 @@ const BRANCH_HYSTERESIS: float = 1.5
 ## cealalta inainte ca despicatura sa se termine. Cu o raza egala, AI-ul ar
 ## incepe sa vireze exact cand ar fi trebuit sa fie deja acolo.
 const BRANCH_LURE_RANGE: float = 70.0
+## Cat de departe DUPA furca (m, pe bucla) mai momeste o banda cu
+## `lure_before_entry_only`: banda pleaca tangent si sta pe asfaltul buclei
+## ~25 m, deci o masina abia trecuta de indexul furcii e inca pe ea.
+const BRANCH_LURE_GRACE_M: float = 15.0
 
 ## Punct-tinta care duce spre intrarea unei scurtaturi.
 ##
 ## Intoarce [code]Vector3.INF[/code] daca nu e nicio bifurcatie in fata — asa
 ## apelantul stie sa-si pastreze tinta obisnuita, fara sa mai intrebe nimic.
-func branch_lure(pos: Vector3, ahead_m: float) -> Vector3:
+func branch_lure(pos: Vector3, ahead_m: float, main_index: int = -1) -> Vector3:
 	for bi in range(1, routes.size()):
 		var b := routes[bi]
+		# Opt-in (TrackBranch.lure_before_entry_only): doar inainte de furca
+		# (plus o toleranta), nu si dupa ce masina a ramas pe bucla.
+		if b.lure_before_entry_only and main_index >= 0:
+			var past := fposmod(frac_at(main_index) - b.entry_frac, 1.0)
+			var grace := BRANCH_LURE_GRACE_M / maxf(route_at(0).length(), 1.0)
+			if past > grace and past < 0.5:
+				continue
 		# Un ocol de pedeapsa nu se momeste niciodata: se ia doar cand banda
 		# directa e inchisa, si atunci decide ceasul hazardului prin
 		# `AiController._span_line`. Vezi `TrackRoute.detour`.

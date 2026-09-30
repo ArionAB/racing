@@ -241,8 +241,9 @@ const PARAPET_TOP := 2.4
 ## a caselor (captura w2_0.650).
 const PARAPET_B_TOP := 1.2
 ## Curtea dintre brate (interiorul acului): in capturile w3 era o pata de
-## sol gol care domina jumatatea stanga a cadrului-erou. Parapet jos (+1,2) pe
-## muchia interioara a fiecarui brat, oprit la ~20 m de varf.
+## sol gol care domina jumatatea stanga a cadrului-erou. Parapet (+2,4) pe
+## muchia interioara a fiecarui brat, oprit la ~20 m de varf. La +1,2 (w4)
+## zidul era ingropat si ramaneau doar merloanele, un sir de „oua" pe sol.
 const PARAPET_IN_A_FROM := 0.628
 const PARAPET_IN_A_TO := 0.650
 const PARAPET_IN_B_FROM := 0.680
@@ -474,8 +475,8 @@ func _rim_and_bastion() -> void:
 	# ac (PARAPET_IN_*), unde AI-ul taie interiorul: fara capete de zid acolo.
 	for run: Array in [[PARAPET_A_FROM, PARAPET_A_TO, "parapet", -1.0],
 			[PARAPET_B_FROM, PARAPET_B_TO, "parapet_jos", -1.0],
-			[PARAPET_IN_A_FROM, PARAPET_IN_A_TO, "parapet_jos", 1.0],
-			[PARAPET_IN_B_FROM, PARAPET_IN_B_TO, "parapet_jos", 1.0]]:
+			[PARAPET_IN_A_FROM, PARAPET_IN_A_TO, "parapet", 1.0],
+			[PARAPET_IN_B_FROM, PARAPET_IN_B_TO, "parapet", 1.0]]:
 		var sg: float = run[3]
 		var ol := _offset_line(float(run[0]), float(run[1]), sg, RIM_GAP + WALL_HALF_T)
 		var pts: Array[Vector3] = ol[0]

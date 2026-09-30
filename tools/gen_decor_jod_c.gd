@@ -1102,6 +1102,9 @@ func _bank(i0: int, i1: int) -> Dictionary:
 		for i in range(i0, i1 + 1):
 			var q: Vector3 = tr.baked[i]
 			var sd := -tr._side_at(i)  # spre apa
+			# De la ASFALT, nu de la marginea pragului: primul rand (varful la
+			# 0,35 m sub drum) trece pe sub pragul plat, iar malul nu inainteaza
+			# peste apa dintre brate.
 			var hw := tr.width_at_index(i)
 			var e := q + sd * hw
 			e.y = 0.0
@@ -1122,7 +1125,7 @@ func _bank(i0: int, i1: int) -> Dictionary:
 			var own := absf(ci - i) < 20
 			if not own:
 				var qo: Vector3 = tr.baked[ci]
-				var d_other := Vector2(pm.x - qo.x, pm.z - qo.z).length() - tr.width_at_index(ci)
+				var d_other := Vector2(pm.x - qo.x, pm.z - qo.z).length() - _hw(ci)
 				var d_own := off1
 				# latimea libera pana la mijloc: taie randul la jumatate
 				var half := (d_other + d_own) * 0.5
@@ -1197,6 +1200,14 @@ const TIER_EXIST_MARGIN := 0.4
 var _wall_mods := 0
 
 
+## Marginea suprafetei PLATE de la cota drumului: asfaltul plus pragul de umar
+## (`Track.level_shoulder_zones`, 2 m in fantana). Tot ce se aseaza „langa
+## drum" (fetele incintei, malul, grila de distante) porneste de aici, altfel
+## ar sta pe prag sau sub el.
+func _hw(i: int) -> float:
+	return tr.width_at_index(i) + tr._level_shoulder_at(i)
+
+
 ## Distanta pana la marginea ORICARUI asfalt (bucla si ulicioara), pe grila
 ## de 8 m: `closest_index_global` e liniar si generatorul il cheama de zeci de
 ## mii de ori (prima rulare a rundei 3 n-a terminat in 5 minute).
@@ -1213,7 +1224,7 @@ func _grid_build() -> void:
 			var c := Vector2i(int(floor(pts[i].x / 8.0)), int(floor(pts[i].z / 8.0)))
 			if not _grid.has(c):
 				_grid[c] = []
-			var hw: float = tr.width_at_index(i) if r == 0 else 3.2
+			var hw: float = _hw(i) if r == 0 else 3.2
 			_grid[c].append(Vector3(pts[i].x, hw, pts[i].z))
 
 
@@ -1391,7 +1402,7 @@ func _generate3(path: String) -> void:
 	for i in range(i0, i1 + 1):
 		var q: Vector3 = tr.baked[i]
 		var sd := tr._side_at(i)
-		var e := q + sd * tr.width_at_index(i)
+		var e := q + sd * _hw(i)
 		# doar unde exista etajul 2 (drumul sub -6,64) conteaza pentru linia lui
 		if q.y < TIER_TOP[2] - TIER_EXIST_MARGIN:
 			if e.z > 62.0 and e.x < -84.0:
@@ -1499,11 +1510,16 @@ func _generate3(path: String) -> void:
 		acc -= steps * CANDLE_PITCH * 1.6
 		var sd := tr._side_at(i)
 		var hw := tr.width_at_index(i)
+		# Pe pragul plat de la cota asfaltului (`Track.level_shoulder_zones`)
+		# bordura sta pe prag, la cota drumului, pe ambele parti.
+		var on_ledge := tr._level_shoulder_at(i) > 0.45
 		var pr := q + sd * (hw + 0.45)
-		pr.y = maxf(_gy(pr), q.y - 0.3)
+		pr.y = q.y if on_ledge else maxf(_gy(pr), q.y - 0.3)
 		_road_diya.append(pr)
 		var pl := q - sd * (hw + 0.45)
-		if bank_tops.has(i):
+		if on_ledge:
+			pl.y = q.y
+		elif bank_tops.has(i):
 			pl.y = bank_tops[i]
 		elif _gy(pl) < q.y - 0.5:
 			pl = q - sd * (hw - 0.15)  # fara mal: pe marginea asfaltului
@@ -1523,7 +1539,9 @@ func _generate3(path: String) -> void:
 		while x <= -86.0:
 			var p := Vector3(x + (1.2 if int(zl) % 2 == 0 else 0.0), 0, zl)
 			var cell := Vector2i(int(floor((p.x - org.x) / step)), int(floor((p.z - org.z) / step)))
-			if wet.has(cell) and _gy(p) < -9.8 and _near_road(p) > 3.5:
+			# 1,5 m de marginea pragului = 3,5 m de asfalt, ca inainte de prag
+			# (`_near_road` masoara acum de la marginea pragului, vezi `_hw`).
+			if wet.has(cell) and _gy(p) < -9.8 and _near_road(p) > 1.5:
 				fl.append(Vector3(p.x, -9.5, p.z))
 				fly.append(float(j) * 0.9)
 			x += 2.4

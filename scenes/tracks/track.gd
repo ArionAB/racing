@@ -3718,6 +3718,8 @@ const WIDTH_RAMP_M: float = 30.0
 ## Vezi constanta pentru ce se intampla fara ea.
 func width_at(frac: float) -> float:
 	var base := _width_at_segments(frac)
+	if not width_flow_windows.is_empty():
+		base = _width_flow(fposmod(frac, 1.0), base)
 	var pins := _width_pinches()
 	if pins.is_empty():
 		return base
@@ -3766,6 +3768,110 @@ func _apply_pinches(f: float, base: float, pins: Array[Vector3]) -> float:
 			if k > 0.0:
 				out = minf(out, lerpf(base, target, k))
 	return out
+
+
+## Ferestre de tur, (frac_de_la, frac_pana_la), in care latimea CURGE intre
+## sectoare lipite unul de altul, fara trepte. Gol (implicit) = regula veche,
+## bit cu bit, pe orice pista.
+##
+## [b]De ce.[/b] Regula din [method _width_at_segments] e „primul sector
+## castiga", iar rampele unui sector merg mereu spre `half_width`-ul GLOBAL.
+## Intre doua sectoare LIPITE de latimi diferite asta da o treapta: rampa de
+## iesire a primului acopera inceputul celui de-al doilea si apoi drumul sare
+## direct la latimea lui. Masurat pe Track17, fantana C: 6,5 -> 4,5 intr-un
+## singur pas la 0.1335, o umflatura pana la 6,5 intre 0.147 si 0.163 si
+## 6,3 -> 4,5 la 0.2177 (acolo cadeau 21 din 25 de iesiri peste marginea
+## dreapta). Pe alte piste (Track13/14/16 au si ele sectoare lipite) regula
+## veche ramane: o schimbare globala le-ar misca soseaua si decorul asezat pe
+## marginea ei.
+##
+## In fereastra, latimea e ANVELOPA DE JOS a profilului declarat, cu panta
+## limitata la [constant WIDTH_FLOW_SLOPE]: w(f) = min peste bucati
+## (w_bucata + panta * distanta_m pana la bucata), unde bucatile sunt
+## sectoarele si golurile dintre ele (la `half_width`). Consecinta: un sector
+## INGUST isi pastreaza toata latimea declarata, de la un capat la altul
+## (poarta ramane poarta), iar trecerea se face in sectorul mai LAT — acelasi
+## contract ca „rampele stau in afara sectorului declarat" din
+## [method _width_blend], acum si intre doua sectoare lipite.
+##
+## Marginile ferestrei se aleg unde profilul vechi e deja constant (altfel
+## treapta se muta pe marginea ferestrei); `_validate_width_flow` se plange
+## in Output daca nu e asa.
+@export var width_flow_windows: Array[Vector2] = []
+
+## Panta maxima a latimii in fereastra de curgere, in m de semilatime pe m de
+## drum. 1/15: 2 m de schimbare se fac pe 30 m (cat [constant WIDTH_RAMP_M]),
+## adica 0,13 m pe inel de 2 m — sub pragul de 0,15 m al unei margini care se
+## citeste continua si departe de cei 0,3 m peste care devine perete.
+const WIDTH_FLOW_SLOPE: float = 1.0 / 15.0
+
+## Bucatile profilului declarat, (start, end, half_width) desfasurate pe
+## [0, 2): sectoarele si golurile dintre ele. Coapte o data pe rebuild, ca
+## `_width_segs`.
+var _width_pieces: Array[Vector3] = []
+var _width_pieces_ready: bool = false
+
+
+func _width_flow(f: float, base: float) -> float:
+	var inside := false
+	for w in width_flow_windows:
+		if TrackSideSampler._ring_window(f, w.x, w.y, 0.0001) > 0.0:
+			inside = true
+			break
+	if not inside:
+		return base
+	var total := _dists[baked.size()] if _dists.size() > baked.size() else 0.0
+	if total <= 0.0:
+		return base
+	var pieces := _width_flow_pieces()
+	if pieces.is_empty():
+		return base
+	var out := INF
+	for p in pieces:
+		var d := INF
+		for shift: float in [-1.0, 0.0, 1.0]:
+			var g := f + shift
+			var dd := 0.0
+			if g < p.x:
+				dd = p.x - g
+			elif g > p.y:
+				dd = g - p.y
+			d = minf(d, dd)
+		out = minf(out, p.z + WIDTH_FLOW_SLOPE * d * total)
+	return out
+
+
+func _width_flow_pieces() -> Array[Vector3]:
+	if _width_pieces_ready:
+		return _width_pieces
+	_width_pieces_ready = true
+	_width_pieces = []
+	var segs := _width_profile().duplicate()
+	if segs.is_empty():
+		return _width_pieces
+	segs.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.x < b.x)
+	for k in segs.size():
+		var s: Vector3 = segs[k]
+		_width_pieces.append(s)
+		var nxt: Vector3 = segs[(k + 1) % segs.size()]
+		var next_a := nxt.x if k + 1 < segs.size() else nxt.x + 1.0
+		if next_a > s.y + 0.00001:
+			_width_pieces.append(Vector3(s.y, next_a, half_width))
+	_validate_width_flow()
+	return _width_pieces
+
+
+## Marginile ferestrelor trebuie sa cada unde profilul vechi si cel curs
+## coincid, altfel treapta doar se muta pe margine.
+func _validate_width_flow() -> void:
+	for w in width_flow_windows:
+		# Un pas inauntru: pe muchia exacta fereastra nu se aplica deloc.
+		for f: float in [w.x + 0.0005, w.y - 0.0005]:
+			var old := _width_at_segments(f)
+			var flow := _width_flow(fposmod(f, 1.0), old)
+			if absf(old - flow) > 0.02:
+				push_warning(("Track: fereastra de latime curgatoare %.3f-%.3f are marginea "
+					+ "%.3f pe o treapta: vechi %.2f, curs %.2f") % [w.x, w.y, f, old, flow])
 
 
 ## Latimea data doar de sectoare (fara strangeri) — vezi [method width_at].
@@ -4635,6 +4741,7 @@ func rebuild() -> void:
 	# se pot fi schimbat de sub noi, iar lungimea pistei (deci si lungimea
 	# rampelor, in fractii) se schimba la orice retus de traseu.
 	_width_segs_ready = false
+	_width_pieces_ready = false
 	_terr_cells = 0 # grila de teren se recoace odata cu curba
 	for child in get_children():
 		if child is Path3D:
@@ -12440,6 +12547,52 @@ const SHOULDER_TILE: float = 5.0
 ## (cheia de tema `shoulder_width_zones`, vezi `_shoulder_width`).
 const SHOULDER_ZONE_RAMP: float = 12.0
 
+## PRAG DE UMAR la nivelul asfaltului, pe ferestre de tur: (frac_de_la,
+## frac_pana_la, latime_m), pe ambele laturi. Gol (implicit) = umarul de
+## pana acum, bit cu bit, pe orice pista.
+##
+## [b]De ce.[/b] Umarul obisnuit pleaca de la buza asfaltului si COBOARA imediat
+## spre teren. In fantana din Jodhpur (Track17, C) terenul de langa drum e cu
+## 0,3-0,5 m mai jos, iar pe stanga e chiar cornisa spre apa: masina iesita cu
+## o roata de pe asfalt ramanea sub buza, cu marginea soselei ca perete la
+## urcare (0,3 m e deja zid pentru o roata, memoria
+## `suprafete-cu-goluri-si-praguri`), si aluneca de-a lungul ei in apa sau
+## ramanea in debleu. Prin brief, spre apa nu exista parapet — deci nu se
+## pune zid, se pune loc: o fasie PLATA, la cota asfaltului, de `latime_m`,
+## de pe care iesi inapoi pe drum fara treapta. Abia dupa ea umarul obisnuit
+## (cu plafonul lui de cadere si fusta) coboara spre teren sau spre apa.
+##
+## Fasia face parte din banda `Shoulders` (acelasi material, aceeasi
+## coliziune), deci nu adauga nici material, nici corp nou. Nu e drum pentru
+## `is_on_road`: pedeapsa de offroad ramane, doar ca acum iesirea e
+## recuperabila. Capetele au rampa de [constant SHOULDER_ZONE_RAMP] m.
+@export var level_shoulder_zones: Array[Vector3] = []
+
+## Nuanta (vertex color, deci doar INTUNECA — memoria
+## `surfacetool-clamp-vertex-color`) a pragului plat peste materialul umarului.
+## Implicit = nuanta de contact a umarului obisnuit. Track17 o trage spre
+## gresia roz a fantanii: pe strazi umarul e trotuar gri, in fantana pragul e
+## piatra incintei.
+@export var level_shoulder_tint: Color = Color(0.82, 0.82, 0.84)
+
+
+## Latimea pragului plat la un index (0 in afara ferestrelor), cu rampa
+## neteda la capete. Vezi [member level_shoulder_zones].
+func _level_shoulder_at(i: int) -> float:
+	if level_shoulder_zones.is_empty():
+		return 0.0
+	var n := baked.size()
+	var total := _dists[n] if _dists.size() > n else 0.0
+	if total <= 0.0:
+		return 0.0
+	var frac := _dists[posmod(i, n)] / total
+	var out := 0.0
+	for z in level_shoulder_zones:
+		var k := TrackSideSampler._ring_window(frac, z.x, z.y,
+			SHOULDER_ZONE_RAMP / total)
+		out = maxf(out, z.z * smoothstep(0.0, 1.0, k))
+	return out
+
 ## Cate trepte de nuanta au petele de praf si cat de tare bat.
 ## Cuantificate, ca sa nu inmulteasca materialele si ca sa citeasca a pete, nu a
 ## zgomot: doua bucati vecine cad des in aceeasi treapta si formeaza o pata lata.
@@ -12499,6 +12652,16 @@ func _build_shoulders() -> void:
 		# si arcadele din kit (vazut din lateral cu Snapshot --eye).
 		var bridge := maxf(maxf(_bridge_mix(i), _bridge_mix(j)),
 			maxf(_viaduct_mix(i), _overpass_mix(i)))
+		# Pragul plat (`level_shoulder_zones`) e o fereastra DECLARATA, deci
+		# castiga peste stingerea de pod: in fantana din Jodhpur apa e
+		# declarata ca canal, iar bratul de intrare trece pe langa ea — acolo
+		# `_bridge_mix` urca la 1 si stingea tot umarul, lasand buza soselei
+		# direct deasupra unei caderi de 4 m. Nu e un pod: nu sunt pile de
+		# ascuns, e mal.
+		var lv0 := _level_shoulder_at(i)
+		var lv1 := _level_shoulder_at(j)
+		if lv0 > 0.01 or lv1 > 0.01:
+			bridge = 0.0
 		var s0 := _side_at(i)
 		var s1 := _side_at(j)
 		var v0 := _dists[i] / tile
@@ -12516,6 +12679,31 @@ func _build_shoulders() -> void:
 			# ating pe o muchie comuna, nu se suprapun.
 			var inner0 := baked[i] + s0 * width_at_index(i) * side_sign
 			var inner1 := baked[j] + s1 * width_at_index(j) * side_sign
+			# PRAGUL PLAT (`level_shoulder_zones`): o fasie orizontala la cota
+			# buzei, apoi umarul obisnuit porneste de la marginea ei. Zero in
+			# afara ferestrelor, deci nimic nu se emite si `inner` ramane buza.
+			if lv0 > 0.01 or lv1 > 0.01:
+				var l0 := inner0 + s0 * lv0 * side_sign
+				var l1 := inner1 + s1 * lv1 * side_sign
+				var ul := maxf(lv0, lv1) / tile
+				var lc0 := level_shoulder_tint * _shoulder_patch(i, side_sign)
+				var lc1 := level_shoulder_tint * _shoulder_patch(j, side_sign)
+				if side_sign < 0.0:
+					st.set_color(lc0); st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
+					st.set_color(lc0); st.set_uv(Vector2(ul, v0)); st.add_vertex(l0)
+					st.set_color(lc1); st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+					st.set_color(lc0); st.set_uv(Vector2(ul, v0)); st.add_vertex(l0)
+					st.set_color(lc1); st.set_uv(Vector2(ul, v1)); st.add_vertex(l1)
+					st.set_color(lc1); st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				else:
+					st.set_color(lc0); st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
+					st.set_color(lc1); st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+					st.set_color(lc0); st.set_uv(Vector2(ul, v0)); st.add_vertex(l0)
+					st.set_color(lc0); st.set_uv(Vector2(ul, v0)); st.add_vertex(l0)
+					st.set_color(lc1); st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+					st.set_color(lc1); st.set_uv(Vector2(ul, v1)); st.add_vertex(l1)
+				inner0 = l0
+				inner1 = l1
 			var outer0 := inner0 + s0 * w0 * side_sign
 			var outer1 := inner1 + s1 * w1 * side_sign
 			# PLAFONUL DE CADERE, si de ce e chiar AICI. Latimea umarului se
@@ -12711,8 +12899,10 @@ func _shoulder_width(i: int, side_sign: float) -> float:
 			if ramp > 0.0:
 				w_min = maxf(w_min, lerpf(w_min, z.z, ramp))
 	var w := w_min
+	# Pragul plat (`level_shoulder_zones`) muta inceputul pantei in afara.
+	var lvl := _level_shoulder_at(i)
 	for _pass in 2:
-		var p := base + lat * (width_at_index(i) + w)
+		var p := base + lat * (width_at_index(i) + lvl + w)
 		# Acelasi plafon ca la emitere: latimea se calculeaza pentru caderea
 		# pe care umarul chiar o construieste, nu pentru fundul unui gol.
 		var drop := minf(base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK,

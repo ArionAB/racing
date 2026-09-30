@@ -1383,7 +1383,7 @@ static func themes() -> Dictionary:
 			# 0,15 -> 0,08 (a doua trecere): ceata albastra, necesara orasului
 			# vazut de pe F, spala mai putin cerul portocaliu.
 			"fog_sky_affect": 0.08,
-			"fog": Color.html("8A94B8"),
+			"fog": Color.html("8898B8"),
 			"hill_color": Color(0.58, 0.42, 0.38),
 			# Soare la 8 grade, din VEST (brief §2.0/§4: "azimutul soarelui
 			# ramane cel din tema" -- DuskCycle scade doar elevatia/energia/

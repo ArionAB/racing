@@ -357,6 +357,31 @@ func _render() -> Image:
 
 # ------------------------------------------------------------ trecerea de ID
 
+## TERENUL DEPARTAT NU E SOL, E CEATA. Dupa decorul lui D (runda 3-4:
+## LimeWall, RoofKit) ochiul fix al D_ochi (0,27,-140) nu mai vede nisipul de
+## aproape: tot ce ramanea in masca „sol" era banda de teren de la orizont,
+## la > 250 m (id_D_ochi.png: 8 126 px, toti pe randurile 307-357), iesita
+## (172,176,211) = culoarea cetii albastre, H 234. Verdictul „solul e cald"
+## judeca atunci ceata, nu solul. Terenul mai departe decat distanta la care
+## ceata acopera o TREIME din culoare trece in clasa „rest" (nejudecata).
+## Distanta se deriva din ceata scenei la dusk 0 (FOG_MODE_DEPTH:
+## f = fog_density * ((d - begin) / (end - begin)) ^ curve), nu e ghicita:
+## pe tema jodhpur (90 / 300 / 1,4 / 0,85) iese 197 m.
+const FAR_FOG_FRACTION := 1.0 / 3.0
+
+
+func _far_terrain_m() -> float:
+	var b := _env.fog_depth_begin
+	var e := maxf(_env.fog_depth_end, b + 1.0)
+	var dens := maxf(_env.fog_density, 1e-3)
+	var c := maxf(_env.fog_depth_curve, 1e-3)
+	if dens <= FAR_FOG_FRACTION:
+		return 1.0e6
+	var d := b + (e - b) * pow(FAR_FOG_FRACTION / dens, 1.0 / c)
+	print("ProbeJodLumina: teren peste %.0f m = ceata (clasa rest, nejudecat)" % d)
+	return d
+
+
 func _make_id_materials() -> void:
 	for c in CLS_COLORS.size():
 		var m := StandardMaterial3D.new()
@@ -371,8 +396,11 @@ shader_type spatial;
 render_mode unshaded, fog_disabled, cull_disabled;
 varying float wy;
 void vertex() { wy = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz).y; }
-void fragment() { ALBEDO = abs(wy) < %f ? vec3(1.0, 1.0, 0.0) : vec3(0.0, 1.0, 0.0); }
-""" % SCARP_COS
+void fragment() {
+	if (length(VERTEX) > %f) { ALBEDO = vec3(0.0, 1.0, 1.0); }
+	else { ALBEDO = abs(wy) < %f ? vec3(1.0, 1.0, 0.0) : vec3(0.0, 1.0, 0.0); }
+}
+""" % [_far_terrain_m(), SCARP_COS]
 	_terrain_id = ShaderMaterial.new()
 	_terrain_id.shader = sh
 

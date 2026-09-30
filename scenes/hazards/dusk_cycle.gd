@@ -108,7 +108,7 @@ static func _static_init() -> void:
 	KEY_AMBIENT_COLOR = [
 		Color.html("C8C4D0"), Color.html("BEB4C4"), Color.html("8A8690")]
 	KEY_FOG_COLOR = [
-		Color.html("8A94B8"), Color.html("8A8CA0"), Color.html("45424E")]
+		Color.html("8898B8"), Color.html("8A8CA0"), Color.html("45424E")]
 	KEY_SKY_TOP = [
 		Color.html("8C4780"), Color.html("5A3A78"), Color.html("1A1834")]
 	KEY_SKY_HORIZON = [

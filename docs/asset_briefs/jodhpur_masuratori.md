@@ -513,3 +513,25 @@ cadrul F rămâne albastru-pal — aceeași ceață, aceeași constrângere. Pav
 
 Planșele: `docs/track_briefs/img/jodhpur_lumina2/plansa_dusk0.jpg` și
 `plansa_dusk1.jpg` (7 POI-uri, înainte | după, camera de joc).
+
+### 10.1 După merge-ul cu decorul lui D (runda 3–4)
+
+`--guard` pe integrare: 2 abateri. Cauzele, separate:
+
+- **D_ochi dusk 0, „sol H 234” — măsurătoare greșită.** Ochiul fix
+  (0, 27, −140) nu mai vede nisipul de aproape (acoperișurile noi îl ascund):
+  toți cei 8 126 px de „sol” din masca de ID stăteau pe rândurile 307–357,
+  adică banda de teren de la orizont, la peste 250 m, ieșită (172, 176, 211) =
+  culoarea ceții. **Fix în sondă:** terenul mai departe decât distanța la care
+  ceața acoperă o treime din culoare (derivată din ceața scenei: 198 m) trece
+  în clasa `rest`, nejudecată. Pragurile nu s-au atins. D_ochi mai are acum
+  654 px de sol apropiat (H 21, S 0,47), sub `MIN_PX`: vederea aceasta nu mai
+  judecă solul, pe care îl judecă D_joc (H 19, S 0,41).
+- **F_ochi dusk 0, „var H 231 S 0,26” — lumină reală.** Orașul văzut de pe
+  bastion, la 150–300 m, e 50–70 % ceață; casele noi ale lui D au adăugat
+  pixeli (56 292 → 59 120) și media a trecut de 230 cu un grad. **Fix:**
+  ceața de dusk 0 `#8A94B8` → `#8898B8` (H 226 → 220, aceeași luminanță):
+  F_ochi var **227 / 0,27**, F_joc **224 / 0,29** (erau 231 / 0,26 și
+  228 / 0,28); cerul, solul și gresia neschimbate la cifră pe toate vederile.
+
+`--guard` → OK la dusk 0 / 0,5 / 1. `probe_decor --track=17`: 24 de materiale.

@@ -48,6 +48,10 @@ const RES := {
 	"rhyolite_boulder_a": "s_rhyolite_boulder_a",
 	"rhyolite_boulder_b": "s_rhyolite_boulder_b",
 	"rhyolite_boulder_c": "s_rhyolite_boulder_c",
+	"rock_slab": "s_rock_slab",
+	"euphorbia": "s_euphorbia",
+	"neem_tree": "s_neem_tree",
+	"khejri_tree": "s_khejri_tree",
 }
 
 var _track: Track
@@ -260,6 +264,31 @@ const WALL_CANNON_FRACS := [0.6435, 0.6485, 0.6535, 0.684]
 const WALL_CANNON_SCALE := 1.1
 const WALL_CANNON_X := 0.1
 const PEACOCK_FRACS := [0.639, 0.678]
+## Runda 3: rotirea gurii tunurilor de zid spre oras (grade, fata de normala).
+const WALL_CANNON_TURN := 25.0
+## Salvele: cate guri trag (tunurile de zid intai, apoi bateriile).
+const SALVO_COUNT := 5
+## Grupurile de pe sol: fereastra pe traseu, distanta de la muchia asfaltului,
+## distanta minima intre centre, numarul tinta. x < CLUSTER_X_MIN e zona lui E.
+const CLUSTER_F0 := 0.624
+const CLUSTER_F1 := 0.692
+const CLUSTER_EDGE_MIN := 7.5
+const CLUSTER_EDGE_MAX := 24.0
+const CLUSTER_SPACING := 8.5
+const CLUSTER_COUNT := 16
+const CLUSTER_X_MIN := 104.0
+## Candelele din fasia asfalt-parapet.
+const STRIP_F0 := 0.626
+const STRIP_F1 := 0.692
+## Statia de sus a tirolienei: in spatele fatadei A (m in spate, m de-a lungul).
+const ZIP_STATION_BACK := 12.0
+const ZIP_STATION_ALONG := -6.0
+## Artificiile: centrul la FW_AHEAD m in fata punctului FW_FROM_FRAC (cadrul-erou).
+const FW_FROM_FRAC := 0.650
+const FW_AHEAD := 140.0
+## Cotele exploziilor (lume). La 140 m in fata cadrului-erou e orasul de pe D
+## (case la +10..+18); la 85 m (prima incercare) cadeau peste zidurile lui E.
+const FW_Y := Vector2(32.0, 44.0)
 ## Curtea dintre brate (interiorul acului): in capturile w3 era o pata de
 ## sol gol care domina jumatatea stanga a cadrului-erou. Parapet (+2,4) pe
 ## muchia interioara a fiecarui brat, oprit la ~20 m de varf. La +1,2 (w4)
@@ -290,6 +319,10 @@ func _build() -> void:
 	_facade_a()
 	_facade_b()
 	_rim_and_bastion()
+	_facade_backs()
+	_ground_clusters()
+	_strip_diyas()
+	_theatre_node()
 
 
 ## Punctele liniei paralele cu axa pe partea `sgn` (+1 stanga), la `off` m
@@ -372,12 +405,15 @@ func _wall_chain(pts: Array[Vector3], idx: Array[int], start: Array, sgn: float,
 		for cf: float in WALL_CANNON_FRACS:
 			if absf(pf - cf) < 0.5 * len / _total_len and not _cannon_done.has(cf):
 				_cannon_done[cf] = true
-				var cx := x.normalized()
+				var mz := 1.2 * len / WALL_LEN
+				var cpos := wpos + z * mz + x.normalized() * WALL_CANNON_X + Vector3.UP * (WALK_Y * sc)
+				# Runda 3 (salvele trag „spre oras"): gura rotita spre oras, dar
+				# cel mult WALL_CANNON_TURN fata de normala zidului (prin crenel).
+				var cx := _toward_city(cpos, x.normalized(), WALL_CANNON_TURN)
 				var cb := Basis(cx, Vector3.UP, cx.cross(Vector3.UP).normalized()).scaled(
 					Vector3.ONE * WALL_CANNON_SCALE)
-				var mz := 1.2 * len / WALL_LEN
-				var cpos := wpos + z * mz + cx * WALL_CANNON_X + Vector3.UP * (WALK_Y * sc)
 				_raw_basis("rampart_cannon", "tunZid", cpos, cb, "")
+				_muzzle(cpos, cx, WALL_CANNON_SCALE)
 				print("; tun pe zid la frac %.4f, %.1f m de ax" % [pf,
 					Vector2(cpos.x - road.x, cpos.z - road.z).length()])
 		# Paunii: pe drumul de straja (y 11,5), inchisi (evantaiul verde citea
@@ -459,6 +495,9 @@ func _facade_b() -> void:
 	var pos := Vector3(center.x, base, center.z)
 	_raw_basis("palace_facade_b", "fatadaB", pos, Basis(x, Vector3.UP, z), "")
 	_meta_last("metadata/ancora_sol = Vector3(%.2f, 0, 0)" % FACADE_HALF_D)
+	_facade_b_c = pos
+	_facade_b_look = look
+	_obstacles.append(Vector3(pos.x, 25.0, pos.z))
 	print("; fatada B: fata la %.1f m dincolo de colt, centru %s" % [along, str(pos)])
 
 
@@ -475,6 +514,9 @@ func _place_facade(model: String, base: String, c: Vector3, ci: int, length: flo
 	for u: float in [-1.0, -0.5, 0.0, 0.5, 1.0]:
 		dmin = minf(dmin, _edge_dist(front + z * (u * length * 0.5)))
 	_raw_basis(model, base, pos, Basis(x, Vector3.UP, z), "")
+	_facade_a_c = pos
+	_facade_a_x = x
+	_obstacles.append(Vector3(pos.x, 22.0, pos.z))
 	# Fatada sta cu spatele in stanca (terenul urca spre dreapta): baza
 	# vizibila e muchia de jos a FETEI (+X), acolo se judeca plutit/ingropat.
 	_meta_last("metadata/ancora_sol = Vector3(%.2f, 0, 0)" % FACADE_HALF_D)
@@ -482,6 +524,17 @@ func _place_facade(model: String, base: String, c: Vector3, ci: int, length: flo
 
 
 var _bastion_c := Vector3.INF
+var _bastion_floor_y := 0.0
+var _bastion_out := Vector3.ZERO
+var _facade_b_c := Vector3.ZERO
+var _facade_b_look := Vector3.ZERO
+var _facade_a_c := Vector3.ZERO
+var _facade_a_x := Vector3.ZERO
+## Obstacole pentru grupurile de pe sol: (x, raza, z).
+var _obstacles: Array[Vector3] = []
+var _muzzles := PackedVector3Array()
+var _muzzle_dirs := PackedVector3Array()
+var _zip_from := Vector3.ZERO
 var _cannon_done := {}
 
 
@@ -519,16 +572,10 @@ func _rim_and_bastion() -> void:
 		var ang := TAU * float(k) / float(BASTION_MERLONS)
 		_lamp(bpos + Vector3(cos(ang) * BASTION_MERLON_R, BASTION_TIP_Y + DIYA_R * 0.8,
 			sin(ang) * BASTION_MERLON_R), DIYA_R, 1.0)
-	# Tunurile: evantai pe jumatatea dinspre exterior, gura spre exterior.
-	var floor_y := base_y + BASTION_FLOOR_Y
-	for k in CANNONS:
-		var t := (float(k) / float(CANNONS - 1) - 0.5) * deg_to_rad(CANNON_FAN_DEG)
-		var dir := out.rotated(Vector3.UP, t)
-		var cp := c + dir * CANNON_R
-		var cx := dir
-		var cz := cx.cross(Vector3.UP).normalized()
-		_raw_basis("rampart_cannon", "tun", Vector3(cp.x, floor_y, cp.z),
-			Basis(cx, Vector3.UP, cz), "")
+	# Runda 3: cele 5 tunuri de pe podeaua bastionului (nevazute din masina)
+	# s-au mutat in bateriile de pe sol (`_ground_clusters`).
+	_bastion_floor_y = base_y + BASTION_FLOOR_Y
+	_bastion_out = out
 	# Parapetii de pe cele doua brate, varful ramane deschis.
 	# [de la, pana la, fel, parte (+1 stanga)]. Parapetii interiori (stanga
 	# ambelor brate, spre curtea dintre ele) sunt joasi si se opresc departe de
@@ -733,3 +780,302 @@ func _xf_to(n: Node3D, root: Node) -> Transform3D:
 			xf = (p as Node3D).transform * xf
 		p = p.get_parent()
 	return xf
+
+
+# ------------------------------------------------------------------ runda 3
+
+## Gura de tun rotita spre oras, cel mult `max_deg` fata de `base`.
+func _toward_city(p: Vector3, base: Vector3, max_deg: float) -> Vector3:
+	var to := Vector3(_city.x - p.x, 0.0, _city.z - p.z).normalized()
+	var ang := base.signed_angle_to(to, Vector3.UP)
+	ang = clampf(ang, -deg_to_rad(max_deg), deg_to_rad(max_deg))
+	return base.rotated(Vector3.UP, ang).normalized()
+
+
+## Gura tunului (varful tevii, masurat pe GLB: x 1,79, y 1,02) si directia.
+func _muzzle(cpos: Vector3, cx: Vector3, scl: float) -> void:
+	_muzzles.append(cpos + cx * (1.79 * scl) + Vector3.UP * (1.02 * scl))
+	_muzzle_dirs.append(cx)
+
+
+## Spatele plin al fatadelor (critic runda 2: vizibil la 0.630 si 0.685).
+## B: o fatada A lipita spate-in-spate (fata spre bratul de iesire). A: statia
+## tirolienei si copaci pe coasta din spatele ei.
+func _facade_backs() -> void:
+	if _facade_b_c != Vector3.ZERO:
+		var x := _facade_b_look
+		var z := x.cross(Vector3.UP).normalized()
+		var c := _facade_b_c + _facade_b_look * (FACADE_HALF_D * 2.0 + 0.05)
+		var pos := Vector3(c.x, _facade_b_c.y, c.z)
+		_raw_basis("palace_facade_a", "fatadaBspate", pos, Basis(x, Vector3.UP, z), "")
+		_meta_last("metadata/ancora_sol = Vector3(%.2f, 0, 0)" % FACADE_HALF_D)
+		var front := pos + x * FACADE_HALF_D
+		print("; fatada B spate: fata la %.1f m de asfalt" % _edge_dist(Vector3(front.x, pos.y + 0.3, front.z)))
+	if _facade_a_c != Vector3.ZERO:
+		var back := -_facade_a_x
+		var along := back.cross(Vector3.UP).normalized()
+		# Statia de sus a tirolienei: turn rotund pe coasta, in spatele fatadei.
+		var sp := _facade_a_c + back * (FACADE_HALF_D + ZIP_STATION_BACK) + along * ZIP_STATION_ALONG
+		var g := _sol_real(sp.x, sp.z)
+		var top := g + 14.0
+		var tb := top - 16.98
+		_raw("fort_wall_turret", "statieTiroliana", Vector3(sp.x, tb, sp.z),
+			atan2(back.x, back.z), 1.0, "")
+		_meta_last("metadata/scufundat = true")
+		_zip_from = Vector3(sp.x, top + 1.2, sp.z)
+		_obstacles.append(Vector3(sp.x, 6.0, sp.z))
+		for rim: Vector2 in [Vector2(3.4, 0), Vector2(-3.4, 0), Vector2(0, 3.4),
+				Vector2(0, -3.4), Vector2(2.4, 2.4), Vector2(-2.4, 2.4),
+				Vector2(2.4, -2.4), Vector2(-2.4, -2.4)]:
+			_lamp(Vector3(sp.x + rim.x, top + DIYA_R, sp.z + rim.y), DIYA_R, 1.0)
+		print("; statia tirolienei %s, sol %+.1f fata de drum" % [str(sp), g - _facade_a_c.y])
+		for k in 5:
+			var u := (float(k) / 4.0 - 0.5) * 34.0 + _rng.randf_range(-2.5, 2.5)
+			var q := _facade_a_c + back * (FACADE_HALF_D + _rng.randf_range(3.0, 6.5)) + along * u
+			if Vector2(q.x - sp.x, q.z - sp.z).length() < 6.0:
+				continue
+			if _edge_dist(Vector3(q.x, _facade_a_c.y, q.z)) < 6.0:
+				continue
+			var model := "neem_tree" if k % 2 == 0 else "khejri_tree"
+			_raw(model, "copacPalat", Vector3(q.x, _sol_real(q.x, q.z) - 0.15, q.z),
+				_rng.randf_range(0.0, TAU), _rng.randf_range(0.7, 0.9), "")
+
+
+## Grupurile de pe sol (critic runda 2: „zidurile merg ca niste garduri printr-un
+## camp gol"). Nu siruri: grupuri la 2-4 m intre piese, cu goluri intre grupuri.
+## Tipuri: baterie (lespede + 2-3 tunuri + candele), altar (euforbii + candele
+## in arc + pietre), copac (neem/khejri + candele la picior), zid scund
+## crenelat cu candele pe coama.
+func _ground_clusters() -> void:
+	var centers: Array[Vector3] = []
+	var tries := 0
+	var batteries := 0
+	while centers.size() < CLUSTER_COUNT and tries < 4000:
+		tries += 1
+		var f := _rng.randf_range(CLUSTER_F0, CLUSTER_F1)
+		var i := _idx(f)
+		var sgn := -1.0 if _rng.randf() < 0.5 else 1.0
+		var lat := _track.width_at_index(i) + _rng.randf_range(CLUSTER_EDGE_MIN, CLUSTER_EDGE_MAX)
+		var q := _track.baked[i] + _left(i) * sgn * lat
+		q.y = _track.baked[i].y
+		if q.x < CLUSTER_X_MIN:
+			continue
+		if _edge_dist(q) < CLUSTER_EDGE_MIN:
+			continue
+		if _near_obstacle(q, 5.0):
+			continue
+		var bad := false
+		for c in centers:
+			if Vector2(q.x - c.x, q.z - c.z).length() < CLUSTER_SPACING:
+				bad = true
+				break
+		if bad:
+			continue
+		# panta: cel mult 2,5 m pe 4 m in jurul centrului
+		var g0 := _sol_real(q.x, q.z)
+		var gmin := g0
+		var gmax := g0
+		for d: Vector2 in [Vector2(4, 0), Vector2(-4, 0), Vector2(0, 4), Vector2(0, -4)]:
+			var gg := _sol_real(q.x + d.x, q.z + d.y)
+			gmin = minf(gmin, gg)
+			gmax = maxf(gmax, gg)
+		if gmax - gmin > 2.5:
+			continue
+		q.y = g0
+		centers.append(q)
+		var kind := centers.size() % 4
+		if kind == 0:
+			_battery(q, i)
+			batteries += 1
+			continue
+		match kind:
+			1:
+				_shrine(q)
+			2:
+				_tree_cluster(q)
+			_:
+				_low_wall(q, i)
+	print("; grupuri pe sol: %d (baterii %d), incercari %d" % [centers.size(), batteries, tries])
+
+
+func _near_obstacle(q: Vector3, pad: float) -> bool:
+	if _bastion_c != Vector3.INF and Vector2(q.x - _bastion_c.x, q.z - _bastion_c.z).length() < BASTION_R + pad:
+		return true
+	for o in _obstacles:
+		if Vector2(q.x - o.x, q.z - o.z).length() < o.y + pad:
+			return true
+	return false
+
+
+func _ground_lamp(x: float, z: float, r: float, st: float) -> void:
+	_lamp(Vector3(x, _sol_real(x, z) + r * st * 0.9, z), r, st)
+
+
+## Arc/cerc de candele pe sol in jurul lui c (raza rr, n bucati, jitter).
+func _diya_ring(c: Vector3, rr: float, n: int, a0: float, span: float) -> void:
+	for k in n:
+		var a := a0 + span * (float(k) + _rng.randf_range(-0.25, 0.25)) / float(maxi(n, 1))
+		var r := rr * _rng.randf_range(0.85, 1.15)
+		_ground_lamp(c.x + cos(a) * r, c.z + sin(a) * r, ROW_R, 1.0)
+
+
+## Baterie: lespede de riolit ca platforma (hull), 2-3 tunuri pe ea cu gura
+## spre oras, candele pe muchia din spate, un felinar si un arc de candele.
+func _battery(c: Vector3, i: int) -> void:
+	var road := _track.baked[i]
+	var away := Vector3(c.x - road.x, 0.0, c.z - road.z).normalized()
+	var dir := _toward_city(c, away, 70.0)
+	var zside := dir.cross(Vector3.UP).normalized()
+	# lespedea: 2,5 (X) x 4 (Z) x 0,8 la scara 1,4; Z de-a latul tragerii
+	var sc := 1.4
+	var g := c.y
+	var lb := Basis(dir, Vector3.UP, zside).scaled(Vector3.ONE * sc)
+	var slab_top := g + 0.8 * sc - 0.35
+	_raw_basis("rock_slab", "platforma", Vector3(c.x, g - 0.35, c.z), lb, "")
+	var n := 2 + (_rng.randi() % 2)
+	for k in n:
+		var off := (float(k) - float(n - 1) * 0.5) * 1.8
+		var cp := c + zside * off - dir * 0.4
+		var cx := dir.rotated(Vector3.UP, _rng.randf_range(-0.12, 0.12))
+		var cb := Basis(cx, Vector3.UP, cx.cross(Vector3.UP).normalized())
+		_raw_basis("rampart_cannon", "tunBaterie", Vector3(cp.x, slab_top, cp.z), cb, "")
+		if _muzzles.size() < SALVO_COUNT:
+			_muzzle(Vector3(cp.x, slab_top, cp.z), cx, 1.0)
+	for k in 7:
+		var u := (float(k) / 6.0 - 0.5) * 5.0
+		var q := c - dir * 1.6 + zside * u
+		_lamp(Vector3(q.x, slab_top + ROW_R, q.z), ROW_R, 1.0)
+	var fl := c - dir * 2.0 + zside * 3.4
+	_ground_lamp(fl.x, fl.z, 0.2, 1.4)
+	_diya_ring(c, 4.2, 6, atan2(-dir.z, -dir.x) - 1.2, 2.4)
+
+
+## Altar: 2-3 euforbii, candele in doua arcuri, pietre mici ca bordura.
+func _shrine(c: Vector3) -> void:
+	var a0 := _rng.randf_range(0.0, TAU)
+	for k in 2 + (_rng.randi() % 2):
+		var a := a0 + float(k) * 2.2 + _rng.randf_range(-0.4, 0.4)
+		var r := _rng.randf_range(0.8, 2.2)
+		var q := c + Vector3(cos(a) * r, 0, sin(a) * r)
+		_raw("euphorbia", "euforbie", Vector3(q.x, _sol_real(q.x, q.z) - 0.1, q.z),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.2), "")
+	for k in 3:
+		var a := a0 + 3.4 + float(k) * 0.9
+		var q := c + Vector3(cos(a) * 3.0, 0, sin(a) * 3.0)
+		var model: String = ["rhyolite_boulder_a", "rhyolite_boulder_b", "rhyolite_boulder_c"][k]
+		_raw(model, "piatra", Vector3(q.x, _sol_real(q.x, q.z) - 0.25, q.z),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.3, 0.45), "")
+	_diya_ring(c, 1.6, 7, a0, TAU)
+	_diya_ring(c, 3.4, 9, a0 + 0.3, 3.8)
+	_ground_lamp(c.x, c.z, 0.2, 1.4)
+
+
+## Copac (neem sau khejri, mic) cu candele la picior si o euforbie alaturi.
+func _tree_cluster(c: Vector3) -> void:
+	var model := "neem_tree" if _rng.randf() < 0.5 else "khejri_tree"
+	_raw(model, "copac", Vector3(c.x, c.y - 0.15, c.z), _rng.randf_range(0.0, TAU),
+		_rng.randf_range(0.55, 0.75), "")
+	_diya_ring(c, 1.5, 8, _rng.randf_range(0.0, TAU), TAU)
+	var q := c + Vector3(_rng.randf_range(-3.0, 3.0), 0, _rng.randf_range(-3.0, 3.0))
+	_raw("euphorbia", "euforbie", Vector3(q.x, _sol_real(q.x, q.z) - 0.1, q.z),
+		_rng.randf_range(0.0, TAU), 0.8, "")
+	_diya_ring(q, 1.0, 4, 0.0, TAU)
+
+
+## Zid scund crenelat (fort_wall_segment la scara 0,3: 3,6 x 1,1 x 4,2, ingropat
+## pana ii ies ~1,1 m), cu candele pe merloane si in creneluri.
+func _low_wall(c: Vector3, i: int) -> void:
+	var sc := 0.3
+	var t := _tangent(i)
+	var z := t.rotated(Vector3.UP, _rng.randf_range(-0.5, 0.5))
+	var x := z.cross(Vector3.UP).normalized()
+	var road := _track.baked[i]
+	if x.dot(Vector3(road.x - c.x, 0, road.z - c.z)) > 0.0:
+		x = -x
+	z = x.cross(Vector3.UP).normalized()
+	var top := c.y + 1.1
+	var base_y := top - WALL_H * sc
+	var wb := Basis(x * sc, Vector3.UP * sc, z * sc)
+	var wpos := Vector3(c.x, base_y, c.z)
+	_raw_basis("fort_wall_segment", "zidScund", wpos, wb, "")
+	_meta_last("metadata/scufundat = true")
+	for lz: float in MERLON_Z:
+		_lamp(wpos + wb * Vector3(MERLON_X, MERLON_TIP_Y, lz) + Vector3.UP * ROW_R, ROW_R, 1.0)
+	for gz: float in CRENEL_Z:
+		_lamp(wpos + wb * Vector3(MERLON_X, CRENEL_Y, gz) + Vector3.UP * ROW_R, ROW_R, 1.0)
+	_diya_ring(c - x * 1.6, 1.8, 5, atan2(-x.z, -x.x) - 1.0, 2.0)
+
+
+## Grupuri mici de candele pe fasia de 2,5 m dintre asfalt si parapeti: 3-5
+## candele la 0,3-0,6 m una de alta, grupurile la 5-9 m (nu sir).
+func _strip_diyas() -> void:
+	for sgn: float in [-1.0, 1.0]:
+		var s := _s(_idx(STRIP_F0))
+		var s_end := _s(_idx(STRIP_F1))
+		while s < s_end:
+			s += _rng.randf_range(5.0, 9.0)
+			var i := _idx_at_s(s)
+			var lat := _track.width_at_index(i) + _rng.randf_range(0.9, 1.7)
+			var q := _track.baked[i] + _left(i) * sgn * lat
+			if _near_obstacle(q, 1.0):
+				continue
+			var t := _tangent(i)
+			var n := 3 + (_rng.randi() % 3)
+			for k in n:
+				var p := q + t * (float(k) * _rng.randf_range(0.3, 0.6)) + _left(i) * sgn * _rng.randf_range(-0.3, 0.3)
+				_ground_lamp(p.x, p.z, ROW_R, 1.0)
+
+
+func _idx_at_s(s: float) -> int:
+	var n := _track.baked.size()
+	var lo := 0
+	var hi := n - 1
+	while lo < hi:
+		var m := (lo + hi) / 2
+		if _s(m) < s:
+			lo = m + 1
+		else:
+			hi = m
+	return lo
+
+
+## Nodul BastionTheatre (salvele, tiroliana, uliii, artificiile).
+func _theatre_node() -> void:
+	var tip := _track.baked[_idx(TIP_FRAC)]
+	_out.append('[node name="TeatruBastion" type="Node3D" parent="%s"]' % ZONE)
+	_out.append('script = ExtResource("f_theatre")')
+	var ms: Array[String] = []
+	for v in _muzzles:
+		ms.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+	_out.append("muzzles = PackedVector3Array(%s)" % ", ".join(ms))
+	var ds: Array[String] = []
+	for v in _muzzle_dirs:
+		ds.append("%.4f, %.4f, %.4f" % [v.x, v.y, v.z])
+	_out.append("muzzle_dirs = PackedVector3Array(%s)" % ", ".join(ds))
+	if _zip_from != Vector3.ZERO and _bastion_c != Vector3.INF:
+		var to := Vector3(_bastion_c.x, _bastion_floor_y + 2.2, _bastion_c.z)
+		_out.append("zip_from = Vector3(%.3f, %.3f, %.3f)" % [_zip_from.x, _zip_from.y, _zip_from.z])
+		_out.append("zip_to = Vector3(%.3f, %.3f, %.3f)" % [to.x, to.y, to.z])
+		_out.append('zip_rider = ExtResource("s_zipline_rider")')
+		print("; tiroliana: %s -> %s (%.0f m, cadere %.1f m)" % [str(_zip_from), str(to),
+			_zip_from.distance_to(to), _zip_from.y - to.y])
+		var dmin := INF
+		for k in 21:
+			var p := _zip_from.lerp(to, float(k) / 20.0)
+			dmin = minf(dmin, _edge_dist(Vector3(p.x, tip.y, p.z)))
+		print("; tiroliana: cablul la min %.1f m de asfalt (in plan)" % dmin)
+	var kc := tip
+	if _bastion_c != Vector3.INF:
+		kc = _bastion_c + _bastion_out * 22.0
+	_out.append('kite_model = ExtResource("s_black_kite_bird")')
+	_out.append("kite_center = Vector3(%.3f, %.3f, %.3f)" % [kc.x, tip.y, kc.z])
+	# Artificiile: in fata cadrului-erou (bratul de intrare priveste orasul),
+	# nu pe normala varfului — acolo le acopereau turnurile lui E (captura r3).
+	var hi := _idx(FW_FROM_FRAC)
+	var fc := _track.baked[hi] + _tangent(hi) * FW_AHEAD
+	_out.append("fw_center = Vector3(%.3f, 0, %.3f)" % [fc.x, fc.z])
+	_out.append("fw_y_min = %.1f" % FW_Y.x)
+	_out.append("fw_y_max = %.1f" % FW_Y.y)
+	print("; artificii: sol la centru %+.1f (lume)" % _sol_real(fc.x, fc.z))
+	_out.append("")
+	print("; teatru: %d guri de tun, uliii la %s, artificii la %s" % [_muzzles.size(), str(kc), str(fc)])

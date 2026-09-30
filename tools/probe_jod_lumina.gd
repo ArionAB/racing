@@ -39,10 +39,13 @@ const DUSKS: Array[float] = [0.0, 0.5, 1.0]
 const SCARP_COS := 0.866 # 30 grade = scarp_slope_deg din tema jodhpur
 
 ## Clase de ID: culoarea din trecerea de ID (canale 0/1) -> nume.
-const CLS_NAMES := ["cer", "case_var", "case_indigo", "sol", "stanca", "drum", "rest"]
+## `gresie` (clasele red_sandstone/rose_sandstone: fortul, portile, turnul,
+## fantana) si `cer` sunt DOAR masurate (a doua trecere de lumina, „cald +
+## albastru"): `_verdict` nu le citeste, deci garda e aceeasi.
+const CLS_NAMES := ["cer", "case_var", "case_indigo", "sol", "stanca", "drum", "rest", "gresie"]
 const CLS_COLORS := [
 	Color(0, 0, 0), Color(1, 0, 0), Color(1, 0, 1), Color(0, 1, 0),
-	Color(1, 1, 0), Color(0, 0, 1), Color(0, 1, 1)]
+	Color(1, 1, 0), Color(0, 0, 1), Color(0, 1, 1), Color(1, 1, 1)]
 const MIN_PX := 1500 # sub atatia pixeli (pe 5 esantioane) clasa nu se judeca
 const MIN_PX_CMP := 40000 # esantion minim pentru „indigo mai inchis decat varul"
 
@@ -78,8 +81,9 @@ func _ready() -> void:
 		elif a.begins_with("--indigo="):
 			indigo = float(a.trim_prefix("--indigo="))
 		elif a.begins_with("--fracs="):
+			# `r1:0.360` = fractia pe ruta 1 (ulicioara D'), altfel ruta 0.
 			for x in a.trim_prefix("--fracs=").split(","):
-				fracs.append(float(x))
+				fracs.append(x)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_out_dir))
 
 	var idx := GameState.resolve_track_index(10)
@@ -173,7 +177,7 @@ func _ready() -> void:
 			var stats := {"frame_luma": fsum / float(fl.size())}
 			print("=== %s dusk=%.1f  (luma cadru %.1f; esantioane: %s)" % [
 				vname, DUSKS[di], stats["frame_luma"], _fmt_list(fl)])
-			for c in range(1, CLS_NAMES.size()):
+			for c in range(0, CLS_NAMES.size()):
 				var a: Array = acc[vname][di][c]
 				var n: int = a[4]
 				if n == 0:
@@ -298,15 +302,20 @@ func _views() -> Array:
 func _frac_views(fracs: Array) -> Array:
 	var out := []
 	for fr in fracs:
-		var f := float(fr)
-		out.append({"name": "f%04d" % roundi(f * 1000.0),
-			"eyes": _gamecam_eyes([f - 0.004, f - 0.002, f, f + 0.002, f + 0.004])})
+		var sfr := String(fr)
+		var route := 0
+		if sfr.begins_with("r1:"):
+			route = 1
+			sfr = sfr.trim_prefix("r1:")
+		var f := float(sfr)
+		out.append({"name": ("r1_" if route == 1 else "") + "f%04d" % roundi(f * 1000.0),
+			"eyes": _gamecam_eyes([f - 0.004, f - 0.002, f, f + 0.002, f + 0.004], route)})
 	return out
 
 
-func _gamecam_eyes(fracs: Array) -> Array:
+func _gamecam_eyes(fracs: Array, route: int = 0) -> Array:
 	var out := []
-	var r = _track.route_at(0)
+	var r = _track.route_at(route)
 	var pts: PackedVector3Array = r.baked
 	var n := pts.size()
 	for fr in fracs:
@@ -375,6 +384,9 @@ func _cls_of(gi: GeometryInstance3D, mat: Material) -> int:
 		return 1
 	if tri.has("blue_lime_indigo") and mat == tri["blue_lime_indigo"]:
 		return 2
+	for k in ["red_sandstone", "rose_sandstone"]:
+		if tri.has(k) and mat == tri[k]:
+			return 7
 	var nm := String(gi.name)
 	if nm == "Terrain" or nm.begins_with("Terrain"):
 		return 3 # sol / stanca se despart in shader dupa panta
@@ -475,7 +487,7 @@ func _classify(img: Image) -> PackedInt32Array:
 			continue
 		var key := (1 if r > 127 else 0) * 4 + (1 if g > 127 else 0) * 2 + (1 if b > 127 else 0)
 		# rgb bits -> clasa: 000 cer, 100 var, 101 indigo, 010 sol, 110 stanca, 001 drum, 011 rest
-		raw[p] = [0, 5, 3, 6, 1, 2, 4, -1][key]
+		raw[p] = [0, 5, 3, 6, 1, 2, 4, 7][key]
 	var out := PackedInt32Array()
 	out.resize(w * h)
 	out.fill(-1)
@@ -510,7 +522,7 @@ func _accumulate(img: Image, mask: PackedInt32Array, acc_row: Array) -> Dictiona
 		var y := 0.299 * r + 0.587 * g + 0.114 * b
 		fl += y
 		var c := mask[p]
-		if c <= 0:
+		if c < 0:
 			continue
 		var a: Array = loc[c]
 		a[0] += r
@@ -519,7 +531,7 @@ func _accumulate(img: Image, mask: PackedInt32Array, acc_row: Array) -> Dictiona
 		a[3] += y
 		a[4] += 1
 	var cls := {}
-	for c in range(1, CLS_NAMES.size()):
+	for c in range(0, CLS_NAMES.size()):
 		var a: Array = loc[c]
 		var t: Array = acc_row[c]
 		for j in 5:
@@ -540,7 +552,7 @@ func _scan(a: float, b: float) -> void:
 		_cam.look_at(pair[1], Vector3.UP)
 		var ids := await _render_ids()
 		var m := _classify(ids)
-		var cnt := [0, 0, 0, 0, 0, 0, 0]
+		var cnt := [0, 0, 0, 0, 0, 0, 0, 0]
 		for p in m.size():
 			if m[p] >= 0:
 				cnt[m[p]] += 1

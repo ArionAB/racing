@@ -66,6 +66,22 @@
 [ext_resource type="Script" path="res://scenes/props/gate_funnel.gd" id="e_gate_funnel"]
 [ext_resource type="Script" path="res://scenes/props/street_lights.gd" id="h_lights"]
 [ext_resource type="Script" path="res://scenes/props/rangoli_decal.gd" id="a_rangoli"]
+[ext_resource type="Script" uid="uid://gqbkuahm3vdk" path="res://scenes/hazards/respawn_zone.gd" id="respawn_vale"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vale0"]
+size = Vector3(10.2, 12.17, 11)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vale1"]
+size = Vector3(10.2, 11.15, 11)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vale2"]
+size = Vector3(10.2, 10.20, 11)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vale3"]
+size = Vector3(10.2, 9.42, 11)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vale4"]
+size = Vector3(10.2, 8.70, 11)
 
 [sub_resource type="Curve3D" id="Curve3D_jodhpur"]
 closed = true
@@ -1753,3 +1769,27 @@ height = 6.5
 look_height = 0.4
 fov_bonus = 0.0
 ceiling = 0.0
+
+[node name="FantanaValeUscata" type="Area3D" parent="."]
+monitorable = false
+script = ExtResource("respawn_vale")
+
+[node name="Vale0" type="CollisionShape3D" parent="FantanaValeUscata"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180.0, -9.91, 62)
+shape = SubResource("BoxShape3D_vale0")
+
+[node name="Vale1" type="CollisionShape3D" parent="FantanaValeUscata"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -170.0, -10.43, 62)
+shape = SubResource("BoxShape3D_vale1")
+
+[node name="Vale2" type="CollisionShape3D" parent="FantanaValeUscata"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160.0, -10.90, 62)
+shape = SubResource("BoxShape3D_vale2")
+
+[node name="Vale3" type="CollisionShape3D" parent="FantanaValeUscata"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150.0, -11.29, 62)
+shape = SubResource("BoxShape3D_vale3")
+
+[node name="Vale4" type="CollisionShape3D" parent="FantanaValeUscata"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140.0, -11.65, 62)
+shape = SubResource("BoxShape3D_vale4")

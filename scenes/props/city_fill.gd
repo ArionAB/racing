@@ -64,6 +64,15 @@ class_name CityFill
 ## golurile `TerrainHollow` (fantana) care se exclud singure.
 @export var exclude_xz: PackedVector3Array = PackedVector3Array()
 
+## CASE SUB DRUM (opt-in; 0 = oprit, comportamentul dinainte): o casa poate sta
+## mai aproape de `min_road_m` — dar nu sub `below_road_m` — de orice punct de
+## banda fata de care terenul ei e cu cel putin `below_drop_m` mai JOS. Regula
+## de 40 m exista fiindca umplutura n-are coliziune; o casa cu 20 m sub buza
+## unui bastion nu e ceva in care intra o masina, e ce vede soferul cand se
+## uita in jos (Jodhpur, POI F: piciorul abruptului e la 36-40 m de drum).
+@export var below_road_m: float = 0.0
+@export var below_drop_m: float = 15.0
+
 ## CASELE CU FATA SPRE UN PUNCT (x, z, raza; raza 0 = oprit, comportamentul
 ## dinainte). Casele din raza se rotesc — tot in pasi de 90°, ca grila de ulite
 ## sa ramana dreapta, cu acelasi jitter de ±6° — pe pasul cel mai apropiat de
@@ -147,7 +156,7 @@ func _build() -> void:
 		cen += (p["xf"] as Transform3D).origin
 	cen /= maxf(float(places.size()), 1.0)
 	var rej: Dictionary = stats.get("rejected", {})
-	stats = {"houses": places.size(), "indigo": indigo_n, "batches": batches, "centroid": cen, "rejected": rej,
+	stats = {"below_road": stats.get("below_road", 0), "houses": places.size(), "indigo": indigo_n, "batches": batches, "centroid": cen, "rejected": rej,
 		"tris": tris, "ms": Time.get_ticks_msec() - t0, "per_model": counts}
 	print("CityFill %s: %d case (%d indigo, raport %.2f), %d buffere, %d tri, %d ms, centroid (%.0f, %.1f, %.0f), respinse %s" % [
 		name, places.size(), indigo_n, indigo_ratio, batches, tris, stats["ms"],
@@ -199,10 +208,12 @@ func _generate(track: Track, space: PhysicsDirectSpaceState3D) -> Array:
 		lo = lo.min(q)
 		hi = hi.max(q)
 	var roads := PackedVector2Array()
+	var road_y := PackedFloat32Array()
 	for r: TrackRoute in track.routes:
 		var b: PackedVector3Array = r.baked
 		for i in range(0, b.size(), 2):
 			roads.append(Vector2(b[i].x, b[i].z))
+			road_y.append(b[i].y)
 	var holes: Array[Vector3] = []
 	for n in _all(track):
 		if n is TerrainHollow:
@@ -216,6 +227,8 @@ func _generate(track: Track, space: PhysicsDirectSpaceState3D) -> Array:
 	var out: Array = []
 	var rejected := {"road": 0, "hole": 0, "step": 0, "nohit": 0}
 	var min2 := min_road_m * min_road_m
+	var below2 := below_road_m * below_road_m
+	var below_n := 0
 	var y := lo.y
 	while y <= hi.y:
 		var x := lo.x
@@ -228,13 +241,25 @@ func _generate(track: Track, space: PhysicsDirectSpaceState3D) -> Array:
 			if not Geometry2D.is_point_in_polygon(c, loop):
 				continue
 			var near := false
-			for q in roads:
-				if c.distance_squared_to(q) < min2:
-					near = true
-					break
+			var below := false
+			var g0 := NAN
+			for qi in roads.size():
+				var d2 := c.distance_squared_to(roads[qi])
+				if d2 >= min2:
+					continue
+				if below_road_m > 0.0 and d2 >= below2:
+					if is_nan(g0):
+						g0 = _ground(space, track, c)
+					if not is_nan(g0) and road_y[qi] - g0 >= below_drop_m:
+						below = true
+						continue
+				near = true
+				break
 			if near:
 				rejected["road"] += 1
 				continue
+			if below:
+				below_n += 1
 			var in_hole := false
 			for h in holes:
 				if c.distance_to(Vector2(h.x, h.y)) < h.z:
@@ -264,6 +289,7 @@ func _generate(track: Track, space: PhysicsDirectSpaceState3D) -> Array:
 				Vector3(c.x, hmin - sink_m, c.y))})
 		y += spacing_m
 	stats["rejected"] = rejected
+	stats["below_road"] = below_n
 	return out
 
 

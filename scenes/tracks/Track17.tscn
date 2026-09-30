@@ -134,9 +134,14 @@ script = ExtResource("2_peak")
 radius_m = 100.0
 
 [node name="FortBluff" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 142.0, 39.0, -198.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 142.0, 39.0, -203.0)
 gizmo_extents = 30.0
 script = ExtResource("3_bluff")
+run_m = 16.0
+terrace_tread_m = 20.0
+terrace_rise_m = 2.5
+length_m = 70.0
+end_fade_m = 50.0
 
 [node name="Hollows" type="Node3D" parent="."]
 
@@ -1718,6 +1723,7 @@ weights = PackedFloat32Array(0.1, 0.25, 0.25, 0.2, 0.2, 0.05)
 indigo_ratio = 0.4
 face_xz = Vector3(135, -215, 200)
 front_yaw_deg = PackedFloat32Array(-90, -90, 0, -90, 0, 0)
+below_road_m = 22.0
 
 [node name="KickerDevkund" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 173.0, 0.0, 125.0)

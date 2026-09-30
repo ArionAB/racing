@@ -38,4 +38,13 @@ func _ready() -> void:
 	var cf := tr.get_node_or_null("OrasFill")
 	if cf:
 		print("\n--- OrasFill stats: ", cf.get("stats"))
+	var dcs := get_tree().get_nodes_in_group(&"dusk_cycle")
+	if not dcs.is_empty():
+		for d in [0.0, 1.0]:
+			dcs[0].call("force_value", d)
+			var env: Environment = dcs[0].call("environment")
+			if env:
+				print("ceata dusk=%.0f: mode %d density %.3f begin %.1f end %.1f curve %.2f aerial %.2f sky_affect %.2f" % [
+					d, env.fog_mode, env.fog_density, env.fog_depth_begin, env.fog_depth_end,
+					env.fog_depth_curve, env.fog_aerial_perspective, env.fog_sky_affect])
 	get_tree().quit(0)

@@ -143,7 +143,7 @@ const Z_MAX_C := 22.0 # la sud de asta e fantana (C)
 const X_MAX_E := 36.0 # la est de asta sunt portile (E)
 
 const INDIGO_P := 0.4
-const TANK_P := 0.7
+const TANK_P := 0.95
 const CLUTTER_P := 0.25
 const NEEM_P := 0.06
 ## Candele: pas pe muchia fetei, raza lampii.
@@ -173,6 +173,12 @@ var _clutter_yaws := PackedFloat32Array()
 ## Harta de inaltimi a fiecarui model (celula 0,25 m): {model: {"o": Vector2, "n": Vector2i, "h": PackedFloat32Array}}
 var _hmaps := {}
 var _stats := {}
+var _arch_d := 30.0
+var _w_org := PackedVector3Array()
+var _w_yaw := PackedFloat32Array()
+var _w_size := PackedVector3Array()
+var _w_flags := PackedInt32Array()
+var _walls := 0
 ## Cat au voie doua case sa intre una in alta (m, pe fiecare latura). Randul 1
 ## al buclei: 0,6 — pe interiorul virajelor fetele converg, iar fara
 ## suprapunere casele se retrageau si reaparea fasia de nisip (criticul,
@@ -201,10 +207,14 @@ func _ready() -> void:
 		_hmaps[m] = _heightmap(m)
 	_reserve()
 	_alley_pieces()
-	# Ulicioara intai (zidurile ei sunt contract), apoi bucla, rand cu rand.
+	# Ulicioara intai: doua fronturi continue de ziduri LimeWall, pornind din
+	# pilele arcadei; in spatele lor, al doilea rand de case din kit.
 	var alley := _track.route_at(1)
 	var main := _track.route_at(0)
-	for r in ALLEY_ROWS.size():
+	for sgn: float in [1.0, -1.0]:
+		_wall_front(alley, 1, sgn, _arch_d + 1.15, alley.length() - 4.0,
+			KEEP_ALLEY + 0.15, true)
+	for r in range(1, ALLEY_ROWS.size()):
 		for sgn: float in [1.0, -1.0]:
 			_row(alley, 1, r, ALLEY_ROWS[r], sgn, MOUTH_REAL_M + 1.0,
 				alley.length() - 6.0)
@@ -213,8 +223,20 @@ func _ready() -> void:
 	for r in MAIN_ROWS.size():
 		for sgn: float in [1.0, -1.0]:
 			_row(main, 0, r, MAIN_ROWS[r], sgn, s_in, s_out)
+	# Golurile ramase (criticul, runda 2: goluri adanci intre case, sol
+	# vizibil): intai case din kit oriunde incap pe banda de 0-30 m, apoi
+	# ziduri subtiri in fantele de langa trotuar.
+	for sgn: float in [1.0, -1.0]:
+		_fill_houses(main, sgn, s_in, s_out)
+	for fr: float in [0.1, 3.3, 6.5, 9.7]:
+		for sgn: float in [1.0, -1.0]:
+			_wall_front(main, 0, sgn, s_in, s_out, fr, false)
 	_roofs()
+	_curb_lamps(main, s_in, s_out)
 	_peacocks()
+	# La urma (fara rng, deci restul decorului ramane identic): prispele.
+	for sgn: float in [1.0, -1.0]:
+		_plinths(main, sgn, s_in, s_out)
 	_write()
 	get_tree().quit(0)
 
@@ -245,10 +267,13 @@ func _alley_pieces() -> void:
 	var b := Basis(-side, Vector3.UP, dir).scaled(Vector3.ONE * ARCH_SCALE)
 	_node("market_gate", "arcadaUlicioara", Vector3(pos.x, _sol_real(pos.x, pos.z) - 0.1, pos.z), b,
 		['metadata/coliziune = "none"'])
-	# Casele nu intra in pilele arcadei.
+	# Casele nu intra in pilele arcadei (pilele: lateral 2,75..6,05 m,
+	# +-1,05 m in lungul benzii) — dreptunghiuri ocupate.
 	for sg: float in [1.0, -1.0]:
-		var q := pos + side * sg * 4.6
-		_circles.append(Vector3(q.x, q.z, 1.9))
+		var q := pos + side * sg * 4.4
+		_rects.append({"c": Vector2(q.x, q.z), "ax": Vector2(side.x, side.z),
+			"ha": 1.75, "hb": 1.15})
+	_arch_d = gd
 	for d: float in TEXTILE_AT:
 		var ff := _alley_frame(d)
 		var p: Vector3 = ff[0]
@@ -687,12 +712,20 @@ func _roofs() -> void:
 				_lamps.append(xf * lp)
 		# --- rezervorul pe acoperisul plat ---
 		if not HAS_TANK.has(model) and _rng.randf() < TANK_P:
-			var spots := [Vector2(hx - 1.3, -hz + 1.3), Vector2(-hx + 1.3, -hz + 1.3),
-				Vector2(hx - 1.3, hz - 1.6), Vector2(-hx + 1.3, hz - 1.6), Vector2(0, -hz + 1.3)]
+			# Grila de locuri pe acoperis (runda 3: rezervoare pe aproape
+			# fiecare terasa), amestecata; primul loc plat castiga.
+			var spots := []
+			var gx := -hx + 1.0
+			while gx <= hx - 1.0:
+				var gz := -hz + 1.0
+				while gz <= hz - 1.0:
+					spots.append(Vector2(gx, gz))
+					gz += 0.9
+				gx += 0.9
 			spots.shuffle()
 			for sp: Vector2 in spots:
-				var dd := _hm_disc(model, sp.x, sp.y, 0.75)
-				if dd.x > 4.0 and dd.y - dd.x < 0.12:
+				var dd := _hm_disc(model, sp.x, sp.y, 0.7)
+				if dd.x > 2.8 and dd.y - dd.x < 0.15:
 					_tanks.append(xf * Vector3(sp.x, dd.y, sp.y))
 					_tank_yaws.append(_rng.randf_range(0.0, TAU))
 					break
@@ -707,6 +740,256 @@ func _roofs() -> void:
 					_clutter_yaws.append(basis_yaw + _rng.randf_range(-0.3, 0.3))
 					break
 	print("; candele %d, rezervoare %d, rufe %d" % [_lamps.size(), _tanks.size(), _clutter.size()])
+
+
+# ------------------------------------------------------------------ ziduri
+
+## Front continuu de ziduri `LimeWall` pe partea `sgn` a benzii, intre
+## distantele s0..s1, cu fata la `front` m de marginea benzii (bucla:
+## + trotuarul). `strict`: pe ulicioara zidul e contract (pas mic intre
+## incercari); pe bucla umple doar fantele ramase.
+const WALL_LEN := Vector2(4.5, 7.0)
+const WALL_H := Vector2(5.0, 8.0)
+const WALL_DEPTHS := [3.0, 2.6, 2.2, 1.8, 1.5, 1.2]
+
+func _wall_front(route: TrackRoute, ri: int, sgn: float, s0: float, s1: float,
+		front: float, strict: bool) -> void:
+	var s := s0
+	var placed := 0
+	_shrink = 0.25
+	while s < s1:
+		var ln := _rng.randf_range(WALL_LEN.x, WALL_LEN.y)
+		var ok := false
+		for lt: float in [ln, ln * 0.7, 3.0]:
+			var sc := s + lt * 0.5
+			var i := _index_at_dist(route, sc)
+			var p := route.baked[i]
+			var t := _tangent(route, i)
+			var right := t.cross(Vector3.UP).normalized()
+			var hw := route.half_width if ri == 1 else _track.width_at_index(i)
+			var pave := 0.0 if ri == 1 else maxf(_track._shoulder_width(i, sgn), SIDEWALK)
+			var ax := Vector2(t.x, t.z)
+			for dep: float in WALL_DEPTHS:
+				var c3 := p + right * sgn * (hw + pave + front + dep * 0.5)
+				var c := Vector2(c3.x, c3.z)
+				if c3.z > Z_MAX_C or c3.x > X_MAX_E:
+					break
+				if _free_why(c, ax, lt * 0.5, dep * 0.5) != "":
+					continue
+				if not _clear_of_roads(c, ax, lt * 0.5, dep * 0.5,
+						KEEP_MAIN_FROM_ALLEY if ri == 1 else KEEP_MAIN):
+					continue
+				var g := _ground_under(c, ax, lt * 0.5, dep * 0.5)
+				if is_nan(g.x) or g.y - g.x > MAX_STEP:
+					continue
+				var to_road := -right * sgn
+				_emit_wall(Vector3(c.x, g.x - SINK, c.y), to_road, lt, dep,
+					_rng.randf_range(WALL_H.x, WALL_H.y) + (g.y - g.x), ri)
+				_rects.append({"c": c, "ax": ax, "ha": lt * 0.5, "hb": dep * 0.5})
+				placed += 1
+				ok = true
+				break
+			if ok:
+				s += lt
+				break
+		if not ok:
+			s += 1.5 if strict else 2.5
+	_shrink = 0.1
+	print("; ziduri banda %d parte %+.0f: %d" % [ri, sgn, placed])
+
+
+func _emit_wall(base: Vector3, face: Vector3, ln: float, dep: float,
+		h: float, ri: int) -> void:
+	_walls += 1
+	# local X = in lungul frontului, +Z = fata spre banda.
+	var z := face.normalized()
+	var x := Vector3.UP.cross(z).normalized()
+	var b := Basis(x, Vector3.UP, z)
+	var ind := _rng.randf() < INDIGO_P
+	var fl := (1 if ind else 0) | (2 if ln >= 3.5 else 0) 		| ((2 if ln >= 5.0 else 1) << 2) | ((1 if ri == 1 else 0) << 4)
+	_w_org.append(base)
+	_w_yaw.append(atan2(z.x, z.z))
+	_w_size.append(Vector3(ln, dep, h))
+	_w_flags.append(fl)
+	var xf := Transform3D(b, base)
+	# Candele: pe coama parapetului din fata, dese; pe ulicioara si la prag.
+	var top := h + 0.75 + DIYA_R * 0.9
+	var cnt := int(floor((ln - 0.3) / DIYA_STEP))
+	for k in cnt + 1:
+		var lx := -ln * 0.5 + 0.15 + (ln - 0.3) * float(k) / float(maxi(cnt, 1))
+		_lamps.append(xf * Vector3(lx, top, dep * 0.5 - 0.11))
+	if ri == 1:
+		for k in 3:
+			_lamps.append(xf * Vector3(-0.8 + 0.8 * float(k), DIYA_R, dep * 0.5 + 0.35))
+	# Rezervor pe acoperis, pe zidurile destul de adanci.
+	if dep >= 1.8 and _rng.randf() < 0.6:
+		_tanks.append(xf * Vector3(_rng.randf_range(-ln * 0.25, ln * 0.25), h, 0.0))
+		_tank_yaws.append(_rng.randf_range(0.0, TAU))
+
+
+## Case din kit in golurile de pe banda de 0-30 m de trotuar, pe o grila
+## rara cu jitter, cu fata spre drum.
+func _fill_houses(route: TrackRoute, sgn: float, s0: float, s1: float) -> void:
+	var placed := 0
+	var s := s0
+	while s < s1:
+		var lat := 0.5
+		while lat < 30.0:
+			var model := _pick_model(1)
+			var h: Dictionary = HOUSES[model]
+			var fl: Vector2 = h["front"]
+			var fx := absf(fl.x) > 0.5
+			var w_half: float = h["hz"] if fx else h["hx"]
+			var d_half: float = h["hx"] if fx else h["hz"]
+			var i := _index_at_dist(route, s + _rng.randf_range(-1.0, 1.0))
+			var p := route.baked[i]
+			var t := _tangent(route, i)
+			var right := t.cross(Vector3.UP).normalized()
+			var hw := _track.width_at_index(i)
+			var pave := maxf(_track._shoulder_width(i, sgn), SIDEWALK)
+			var yaw_j := deg_to_rad(_rng.randf_range(-6.0, 6.0))
+			var ax := Vector2(t.x, t.z).rotated(-yaw_j)
+			var c3 := p + right * sgn * (hw + pave + lat + d_half)
+			var c := Vector2(c3.x, c3.z)
+			lat += 1.5
+			if c3.z > Z_MAX_C or c3.x > X_MAX_E:
+				continue
+			if _free_why(c, ax, w_half, d_half) != "":
+				continue
+			if not _clear_of_roads(c, ax, w_half, d_half):
+				continue
+			var g := _ground_under(c, ax, w_half, d_half)
+			if is_nan(g.x) or g.y - g.x > MAX_STEP:
+				continue
+			var tr := -right * sgn
+			var face := Vector2(tr.x, tr.z).rotated(-yaw_j)
+			var yaw := atan2(face.x, face.y) - atan2(fl.x, fl.y)
+			var b := Basis(Vector3.UP, yaw)
+			var metas: Array[String] = []
+			if _rng.randf() < INDIGO_P:
+				metas.append("metadata/indigo = true")
+			var pos := Vector3(c.x, g.x - SINK, c.y)
+			_node(model, "dfill%s_" % ("dr" if sgn > 0.0 else "st"), pos, b, metas)
+			_houses.append({"model": model, "xf": Transform3D(b, pos), "row": 2,
+				"route": 0, "to_road": Vector3(face.x, 0.0, face.y)})
+			_rects.append({"c": c, "ax": ax, "ha": w_half, "hb": d_half})
+			placed += 1
+			lat += d_half * 2.0
+		s += 3.0
+	print("; umplutura case parte %+.0f: %d" % [sgn, placed])
+
+
+## Prispa (otla) la baza caselor: fasia de nisip dintre bordura trotuarului
+## si fata casei (runda 3, masurat pe cadrul 0,380: 2,5 % nisip ramas, in
+## fasii la baza fatadelor) se acopera cu o treapta joasa de var, lipita de
+## bordura, PLINTH_D adancime. Amprentele caselor ating bordura (masurat: 381
+## din 412 de pasi aveau casa la <= 0,25 m), dar parterul kitului e retras sub
+## balcoane/scari — nisipul e SUB amprenta, deci prispa intra sub fatada.
+const PLINTH_STEP := 2.0
+const PLINTH_D := 1.6
+const PLINTH_H := 0.45
+
+func _plinths(route: TrackRoute, sgn: float, s0: float, s1: float) -> void:
+	var placed := 0
+	var al := _track.route_at(1)
+	var s := s0
+	var dep := PLINTH_D
+	while s < s1:
+		var i := _index_at_dist(route, s + PLINTH_STEP * 0.5)
+		s += PLINTH_STEP
+		var p := route.baked[i]
+		var t := _tangent(route, i)
+		var right := t.cross(Vector3.UP).normalized()
+		# Bordura REALA a trotuarului (latimea lui variaza pe zone), cu 0,1 m
+		# peste ea: cu SIDEWALK fix ramanea o fasie de nisip unde trotuarul e
+		# mai ingust (captura 0,380, partea dreapta).
+		var sw: float = _track._shoulder_width(i, sgn)
+		var edge := _track.width_at_index(i) + sw - 0.1
+		var ax := Vector2(t.x, t.z)
+		var ha := PLINTH_STEP * 0.5 + 0.05
+		var c3 := p + right * sgn * (edge + dep * 0.5)
+		if c3.z > Z_MAX_C or c3.x > X_MAX_E:
+			continue
+		var c := Vector2(c3.x, c3.z)
+		# Casele au voie deasupra (prispa intra sub fatada); rezervarile nu.
+		var why := _free_why(c, ax, ha, dep * 0.5)
+		if why != "" and why != "casa":
+			_stats["pl " + why] = int(_stats.get("pl " + why, 0)) + 1
+			continue
+		# Departe de gura ulicioarei (masinile taie trotuarul acolo).
+		var near_alley := false
+		for j in al.baked.size():
+			if Vector2(al.baked[j].x, al.baked[j].z).distance_to(c) < al.half_width + 3.0 + dep:
+				near_alley = true
+				break
+		if near_alley:
+			_stats["pl alee"] = int(_stats.get("pl alee", 0)) + 1
+			continue
+		if not _clear_of_roads(c, ax, ha, dep * 0.5, maxf(sw - 0.6, 1.5)):
+			_stats["pl drum"] = int(_stats.get("pl drum", 0)) + 1
+			continue
+		var g := _ground_under(c, ax, ha, dep * 0.5)
+		if is_nan(g.x) or g.y - g.x > 1.0:
+			_stats["pl sol"] = int(_stats.get("pl sol", 0)) + 1
+			continue
+		var z := -right * sgn
+		_w_org.append(Vector3(c.x, g.x - SINK, c.y))
+		_w_yaw.append(atan2(z.x, z.z))
+		_w_size.append(Vector3(PLINTH_STEP + 0.1, dep, PLINTH_H + SINK + (g.y - g.x)))
+		_w_flags.append(64)
+		placed += 1
+	print("; prispe parte %+.0f: %d" % [sgn, placed])
+
+
+## Candele pe bordura: sirul de pe marginea exterioara a trotuarului, pe ambele
+## parti (runda 3: candele pe bordura drumului, nu doar pe streasini).
+const CURB_STEP := 1.4
+
+func _curb_lamps(route: TrackRoute, s0: float, s1: float) -> void:
+	var before := _lamps.size()
+	var al := _track.route_at(1)
+	for sgn: float in [1.0, -1.0]:
+		var s := s0
+		while s < s1:
+			var i := _index_at_dist(route, s)
+			s += CURB_STEP
+			var p := route.baked[i]
+			var t := _tangent(route, i)
+			var right := t.cross(Vector3.UP).normalized()
+			var hw := _track.width_at_index(i)
+			var pave := maxf(_track._shoulder_width(i, sgn), SIDEWALK)
+			var q := p + right * sgn * (hw + pave - 0.25)
+			# Nu pe gura ulicioarei (banda iese peste trotuar acolo).
+			var qa := Vector2(q.x, q.z)
+			var near_alley := false
+			for j in al.baked.size():
+				if Vector2(al.baked[j].x, al.baked[j].z).distance_to(qa) < al.half_width + 0.5:
+					near_alley = true
+					break
+			if near_alley:
+				continue
+			var y := _surface_y(q.x, q.z)
+			if is_nan(y):
+				continue
+			_lamps.append(Vector3(q.x, y + DIYA_R, q.z))
+	print("; candele pe bordura: %d" % (_lamps.size() - before))
+
+
+## Cota suprafetei (trotuar, asfalt sau teren) sub (x, z), ignorand decorul.
+func _surface_y(x: float, z: float) -> float:
+	var q := PhysicsRayQueryParameters3D.create(
+		Vector3(x, _sus_y, z), Vector3(x, _sus_y - 1200.0, z))
+	q.collide_with_areas = false
+	for k in 24:
+		var hit: Dictionary = _space.intersect_ray(q)
+		if hit.is_empty():
+			return NAN
+		var col := hit["collider"] as Node
+		var nm := String(col.name) if col != null else ""
+		if nm in ["Shoulders", "RoadTop", "RoadSides", "TerrainBody"]:
+			return float(hit["position"].y)
+		q.exclude = q.exclude + [hit["rid"]]
+	return NAN
 
 
 ## Pauni pe parapetul fetei, la case din primul rand de pe bucla, raspanditi.
@@ -802,6 +1085,26 @@ func _write() -> void:
 	_out.append("radii = PackedFloat32Array(%s)" % ", ".join(rs))
 	_out.append("stretch = PackedFloat32Array(%s)" % ", ".join(ss))
 	_out.append("")
+	if not _w_org.is_empty():
+		_out.append('[node name="ZiduriVar" type="StaticBody3D" parent="%s"]' % ZONE)
+		_out.append('script = ExtResource("d_lime_wall")')
+		var wps: Array[String] = []
+		for v in _w_org:
+			wps.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+		_out.append("origins = PackedVector3Array(%s)" % ", ".join(wps))
+		var wys: Array[String] = []
+		for v in _w_yaw:
+			wys.append("%.4f" % v)
+		_out.append("yaws = PackedFloat32Array(%s)" % ", ".join(wys))
+		var wss: Array[String] = []
+		for v in _w_size:
+			wss.append("%.2f, %.2f, %.2f" % [v.x, v.y, v.z])
+		_out.append("sizes = PackedVector3Array(%s)" % ", ".join(wss))
+		var wfs: Array[String] = []
+		for v in _w_flags:
+			wfs.append("%d" % v)
+		_out.append("flags = PackedInt32Array(%s)" % ", ".join(wfs))
+		_out.append("")
 	_out.append('[node name="VacaPoza" type="Node" parent="%s"]' % ZONE)
 	_out.append('script = ExtResource("d_cow_pose")')
 	_out.append("")

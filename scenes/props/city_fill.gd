@@ -64,6 +64,17 @@ class_name CityFill
 ## golurile `TerrainHollow` (fantana) care se exclud singure.
 @export var exclude_xz: PackedVector3Array = PackedVector3Array()
 
+## CASELE CU FATA SPRE UN PUNCT (x, z, raza; raza 0 = oprit, comportamentul
+## dinainte). Casele din raza se rotesc — tot in pasi de 90°, ca grila de ulite
+## sa ramana dreapta, cu acelasi jitter de ±6° — pe pasul cel mai apropiat de
+## directia spre punct. Jodhpur: punctul e varful bastionului (POI F), ca de
+## pe bastion orasul de la piciorul stancii sa arate fatade, nu spate.
+## Pozitiile nu se schimba (rotirea e dupa alegerea modelului, pe acelasi rng).
+@export var face_xz: Vector3 = Vector3.ZERO
+## Unde e FATA fiecarui model (aceeasi ordine ca `models`), ca unghi Y in grade
+## fata de −Z: 0 = fata pe −Z, −90 = fata pe +X. Gol = toate pe −Z.
+@export var front_yaw_deg: PackedFloat32Array = PackedFloat32Array()
+
 var stats := {}
 
 
@@ -100,6 +111,8 @@ func _build() -> void:
 			indigo_n += 1
 		counts[mi] += 1
 		var xf: Transform3D = p["xf"]
+		if face_xz.z > 0.0:
+			xf = _faced(xf, mi)
 		var cell := Vector2i(floori(xf.origin.x / cell_m), floori(xf.origin.z / cell_m))
 		for part: Dictionary in parts[mi]:
 			if part["variant"] != -1 and int(part["variant"]) != int(ind):
@@ -139,6 +152,24 @@ func _build() -> void:
 	print("CityFill %s: %d case (%d indigo, raport %.2f), %d buffere, %d tri, %d ms, centroid (%.0f, %.1f, %.0f), respinse %s" % [
 		name, places.size(), indigo_n, indigo_ratio, batches, tris, stats["ms"],
 		cen.x, cen.y, cen.z, str(stats.get("rejected", {}))])
+
+
+## Rotirea spre `face_xz` (vezi exportul): pasul de 90° cel mai apropiat de
+## directia spre punct, pastrand jitterul original al casei.
+func _faced(xf: Transform3D, mi: int) -> Transform3D:
+	var o := xf.origin
+	var to := Vector2(face_xz.x - o.x, face_xz.y - o.z)
+	if to.length() > face_xz.z or to.length() < 1.0:
+		return xf
+	var q := PI * 0.5
+	# yaw-ul curent, din baza (Basis(UP, yaw) duce -Z in (-sin, 0, -cos)).
+	var f := xf.basis * Vector3(0, 0, -1)
+	var yaw := atan2(-f.x, -f.z)
+	var jitter := yaw - roundf(yaw / q) * q
+	var front := deg_to_rad(front_yaw_deg[mi]) if mi < front_yaw_deg.size() else 0.0
+	# fata in lume = Basis(UP, yaw + front) * (0, 0, -1); vrem sa fie `to`.
+	var want := atan2(-to.x, -to.y) - front
+	return Transform3D(Basis(Vector3.UP, roundf(want / q) * q + jitter), o)
 
 
 func _pick(rng: RandomNumberGenerator) -> int:

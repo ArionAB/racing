@@ -3023,6 +3023,16 @@ func _glow_spec(model: Node3D) -> String:
 	return ""
 
 
+## Parti de mesh fara hull, per MODEL (stem .glb). Fantele de tragere ale
+## fortului Jodhpur sunt placi subtiri inauntrul hull-ului pietrei; Jolt le
+## respingea hull-ul la unele rotatii (`zid82_col`, 30 sep 2026). Vezi
+## `TrackDecor.add_hull_collision`.
+const HULL_SKIP_PARTS := {
+	"fort_wall_segment": ["Wall_Glow"],
+	"fort_wall_turret": ["Turret_Glow"],
+}
+
+
 func _build_collision() -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
@@ -3039,7 +3049,9 @@ func _build_collision() -> void:
 			"mesh":
 				added = _add_trimesh(body, model)
 			_:
-				added = TrackDecor.add_hull_collision(body, model, true)
+				added = TrackDecor.add_hull_collision(body, model, true,
+					HULL_SKIP_PARTS.get(
+						model.scene_file_path.get_file().get_basename(), []))
 		if not added:
 			body.free()
 			continue

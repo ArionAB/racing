@@ -87,11 +87,45 @@ const LANGUR_P := 0.3
 ## -2,4 / 0 / 2,4 / 4,8, varful la y 13,98, pe x 0,8..1,5.
 const MERLON_TIP_Y := 13.98
 const MERLON_X := 1.15
-## Parapet: lampa pe merlonii de la -4,8 / 0 / +4,8 -> pas 4,8 / 4,8 / 2,4 peste
-## imbinare, ~4 m in medie. Zidul de sus: doar merlonul din mijloc (~12 m).
-const PARAPET_LAMP_Z := [-4.8, 0.0, 4.8]
-const UPHILL_LAMP_Z := [0.0]
-const LAMP_R := 0.28
+## RUNDA 3 (criticul, pe scena integrata: „diyas mici si dese, cate una pe
+## fiecare merlon", ca silueta crenelata sa se citeasca drept linie de
+## lumini). O diya pe FIECARE din cei 5 merloni ai fiecarei bucati (pas 2,4 m
+## in bucata, 1,2..2,4 peste imbinare), pe parapet si pe zidul inalt.
+## Runda 2 avea globuri de 0,28 m pe 3 din 5 merloni — „4-5 globuri mari".
+const MERLON_Z := [-4.8, -2.4, 0.0, 2.4, 4.8]
+const DIYA_R := 0.13
+## Felinarele din nisele fetei goale a zidului inalt (fata dinspre drum), la
+## ~2,5 m peste drum (y local 7,5 = varful 13,98 minus 6,5; varful zidului inalt
+## e la +9 peste drum). Doua pe bucata intreaga.
+const NICHE_Z := [-3.6, 3.6]
+const NICHE_Y := 7.5
+const NICHE_R := 0.2
+const NICHE_STRETCH := 1.4
+## Portile: sirul de pe muchia de sus. Varfurile merloanelor peretelui dintre
+## turnuri si coroanele celor doua turnuri, luate din GLB (sloturile *_Glow
+## de sub fiecare merlon dau z-ul; varful pietrei da y-ul): z pe peretele
+## central si (x, z) pe coroanele turnurilor, y = varful merlonului.
+const GATE_TOP := {
+	"fort_gate_jai": {"wall_y": 13.28, "tower_y": 16.28,
+		"wall_z": [-7.3, -5.8, -4.4, -2.9, -1.5, 0.0, 1.5, 2.9, 4.4, 5.8, 7.3]},
+	"fort_gate_fateh": {"wall_y": 13.2, "tower_y": 15.2,
+		"wall_z": [-7.4, -6.2, -4.9, -3.7, -2.5, 2.5, 3.7, 4.9, 6.2, 7.4]},
+	"fort_gate_loha": {"wall_y": 12.13, "tower_y": 14.19,
+		"wall_z": [-7.3, -5.8, -4.4, -2.9, -1.5, 0.0, 1.5, 2.9, 4.4, 5.8, 7.3]},
+}
+const GATE_WALL_X := 1.1
+## Coroana unui turn de poarta (centrul la z +-12), in jumatatea lui: (x, dz).
+const GATE_TOWER_RIM := [Vector2(4.0, 0.85), Vector2(4.0, -0.85),
+	Vector2(3.4, 2.2), Vector2(3.4, -2.2), Vector2(2.3, 3.4), Vector2(2.3, -3.4),
+	Vector2(0.8, 4.0), Vector2(0.8, -4.0), Vector2(-0.8, 4.0), Vector2(-0.8, -4.0),
+	Vector2(-2.3, 3.4), Vector2(-2.3, -3.4), Vector2(-3.4, 2.2), Vector2(-3.4, -2.2),
+	Vector2(-4.0, 0.85), Vector2(-4.0, -0.85)]
+## Turnul rotund de zid: coroana din `Turret_Glow` (16 puncte la raza ~3,4).
+const TURRET_RIM := [Vector2(3.4, 0.0), Vector2(3.4, 1.5), Vector2(3.4, -1.5),
+	Vector2(-3.4, 0.0), Vector2(-3.4, 1.5), Vector2(-3.4, -1.5),
+	Vector2(0.0, 3.4), Vector2(1.5, 3.4), Vector2(-1.5, 3.4),
+	Vector2(0.0, -3.4), Vector2(1.5, -3.4), Vector2(-1.5, -3.4),
+	Vector2(2.9, 2.8), Vector2(2.9, -2.8), Vector2(-2.9, 2.8), Vector2(-2.9, -2.8)]
 ## Tortele portilor: DOUA, pe fata dinspre care vii (x -4,6; fata portii e la
 ## x -4,32), la stalpii arcului (golul se termina la +-3,58), deasupra
 ## acoperisului oricarei masini. Runda 2: si pe fata de iesire erau doua, dar
@@ -102,7 +136,6 @@ const TORCH_R := 0.3
 const TORCH_STRETCH := 1.6
 ## Turnurile rotunde: merlonii de pe coroana, la raza ~3,05, varful 16,98.
 const TURRET_TIP_Y := 16.98
-const TURRET_LAMP_R := 3.05
 ## Pana unde (lateral, de la ax) se cauta un brat vecin.
 const NEIGHBOR_REACH := 40.0
 
@@ -292,6 +325,14 @@ func _gates() -> void:
 		_raw_basis(model, "PoartaFort" + model.trim_prefix("fort_gate_").capitalize() + "_", pos, b, "")
 		for lp: Vector3 in TORCH_LOCAL:
 			_lamp(pos + b * lp, TORCH_R, TORCH_STRETCH)
+		var gt: Dictionary = GATE_TOP[model]
+		for wz: float in gt["wall_z"]:
+			_lamp(pos + b * Vector3(GATE_WALL_X, float(gt["wall_y"]) + DIYA_R * 0.8, wz),
+				DIYA_R, 1.0)
+		for tz: float in [-12.0, 12.0]:
+			for rim: Vector2 in GATE_TOWER_RIM:
+				_lamp(pos + b * Vector3(rim.x, float(gt["tower_y"]) + DIYA_R * 0.8,
+					tz + rim.y), DIYA_R, 1.0)
 		print("; poarta %s la frac %.4f (i %d) pos %s, tangenta %s, raza %.1f, panta %.1f%%" % [
 			model, float(g[1]), i, str(pos), str(t), _radius(i), 100.0 * _slope(i)])
 
@@ -408,11 +449,16 @@ func _wall_run(a: int, b: int, sgn: float) -> void:
 		var toward_road := _track.baked[ci] - c
 		toward_road.y = 0.0
 		toward_road = toward_road.normalized()
-		# Lampile pe varful merloanelor (runda 2).
-		var zs: Array = PARAPET_LAMP_Z if kind == "parapet" else UPHILL_LAMP_Z
-		for lz: float in zs:
-			_lamp(wpos + wb * Vector3(MERLON_X, MERLON_TIP_Y + LAMP_R * 0.8, lz),
-				LAMP_R, 1.0)
+		# Diyas pe varful FIECARUI merlon (runda 3). Pe o bucata scurtata pe
+		# curba merlonii se strang odata cu ea (wb poarta scara pe Z).
+		for lz: float in MERLON_Z:
+			_lamp(wpos + wb * Vector3(MERLON_X, MERLON_TIP_Y + DIYA_R * 0.8, lz),
+				DIYA_R, 1.0)
+		# Felinarele din nise, pe fata dinspre drum a zidului inalt.
+		if kind == "sprijin" and len > 8.0:
+			var face_x := (WALL_HALF_T + 0.12) * (1.0 if x.dot(toward_road) > 0.0 else -1.0)
+			for nz: float in NICHE_Z:
+				_lamp(wpos + wb * Vector3(face_x, NICHE_Y, nz), NICHE_R, NICHE_STRETCH)
 		# Ghirlanda de craite pe fata dinspre drum a parapetului, atarnata de
 		# coama (originea ei e SUS, atarna 1,09 m), cate una pe bucata intreaga.
 		if kind == "parapet" and len > 8.0:
@@ -556,10 +602,9 @@ func _turrets() -> void:
 					var tyaw := atan2(out.x, out.z)
 					_raw("fort_wall_turret", "turn", Vector3(q.x, by, q.z), tyaw, 1.0, "")
 					var tb := Basis.from_euler(Vector3(0.0, tyaw, 0.0))
-					for k in 4:
-						var ang := TAU * float(k) / 4.0
-						_lamp(Vector3(q.x, by, q.z) + tb * Vector3(cos(ang) * TURRET_LAMP_R,
-							TURRET_TIP_Y + LAMP_R * 0.8, sin(ang) * TURRET_LAMP_R), LAMP_R, 1.0)
+					for rim: Vector2 in TURRET_RIM:
+						_lamp(Vector3(q.x, by, q.z) + tb * Vector3(rim.x,
+							TURRET_TIP_Y + DIYA_R * 0.8, rim.y), DIYA_R, 1.0)
 					if _sol_real(q.x, q.z) - by > 2.0:
 						_meta_last("metadata/scufundat = true")
 			else:

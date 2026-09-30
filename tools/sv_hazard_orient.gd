@@ -114,12 +114,14 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# Jodhpur POI G/G2 (tools/gen_decor_jod_g.gd): stanca de riolit
 	# (stalpi/lespezi/bolovani/moloz), copacii si euforbiile au yaw liber
 	# intentionat (aranjamentul-bate-numarul); nodurile de lumini (FortLamps,
-	# StreetLights) stau la origine, pozitiile sunt in lume. Cenotaful si
-	# soclul lui NU sunt aici: fata lor spre drum (~90 grade, peste lac) e
-	# axa care conteaza si ramane verificabila.
+	# StreetLights, ChhatriKit) stau la origine, pozitiile sunt in lume.
+	# Treptele de riolit (gTreapta/gTerasa) sunt stanca cu yaw liber.
+	# Cenotaful, soclul lui si casele (gCasa) NU sunt aici: fata lor spre
+	# drum (~90 sau ~0/180 grade dupa model) e axa care conteaza si ramane
+	# verificabila.
 	"gStalp", "gLespede", "gBolovan", "gMoloz", "gMargine", "gCopac",
 	"gEuforbie", "gSocluColt", "gCandele", "gFelinare", "gCenotafFestoane",
-	"gMal",
+	"gMal", "gTreapta", "gTerasa", "gChhatri",
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:

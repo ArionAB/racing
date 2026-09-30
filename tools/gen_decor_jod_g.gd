@@ -43,6 +43,9 @@ const RES := {
 	"khejri_tree": "s_khejri_tree",
 	"jaswant_thada": "s_jaswant_thada",
 	"marigold_garland": "s_marigold_garland",
+	"blue_house_a": "s_blue_house_a", "blue_house_b": "s_blue_house_b",
+	"blue_house_c": "s_blue_house_c", "blue_house_d": "s_blue_house_d",
+	"blue_house_e": "s_blue_house_e", "haveli_facade": "s_haveli_facade",
 }
 
 var _track: Track
@@ -185,12 +188,11 @@ const BIG := ["rhyolite_boulder_a", "rhyolite_boulder_b"]
 const FLIGHT_F0 := 0.862
 const FLIGHT_F1 := 0.904
 const FLIGHT_GAP := 12.0
-## Elanul spre trambulina (`ai_keep_side_run_m` 100 m ~ 0.049): o masina
-## atinsa de un bolovan aici ajunge prea incet la buza si cade in canal.
-## Runda 1, ProbeRace seed 12: o repunere noua la 0.891 (Robo), determinista
-## pe 4 rulari, absenta fara decor -> pe elan nimic cu corp la < 8 m.
-const APPROACH_F0 := 0.815
-const APPROACH_GAP := 8.0
+## Elanul spre trambulina: runda 1 a incercat 8 m liberi pe 0.815-0.862
+## (seed 12 avea o repunere noua la 0.891). N-a eliminat evenimentul, doar l-a
+## mutat (ordinea contactelor Jolt, nu decorul) — decizia coordonatorului:
+## pe elan contractul obisnuit (>= 2,2 m pe colt), 12 m doar pe fata
+## kickerului si pe traiectoria de zbor (FLIGHT_F0..FLIGHT_F1).
 ## Cea mai mica distanta colt-margine pentru piesele cu corp. Bolovanii de
 ## margine (contract: „bolovani hull pe marginea dreapta") au EDGE_ROW_GAP.
 const GAP_MIN := 4.0
@@ -206,12 +208,6 @@ const WATER_Y := -4.32
 const LIGHT_A := Vector2(0.703, 0.8755)
 const LIGHT_B := Vector2(0.8915, 0.9055)
 
-## Cenotaful: fractia de ancora pe drum, pe STANGA, dincolo de lac.
-const THADA_FRAC := 0.898
-## Soclul: rock_slab (2,5 x 0,8 x 4, blat plat pe interior +-1,0 / +-1,5).
-const PLINTH_SX := 15.0
-const PLINTH_SZ := 6.5
-const PLINTH_ABOVE := 6.0
 
 var _obst: Array[Vector3] = [] # (x, z, raza)
 var _lamp_sets := {} # nume nod -> {"p": PackedVector3Array, "r": PackedFloat32Array}
@@ -223,16 +219,13 @@ var _thada_xf := Transform3D.IDENTITY
 ## In interiorul unui afloriment piesele se suprapun intentionat (silueta
 ## decupata); suprapunerea se verifica doar intre aflorimente.
 var _ignore_overlap := false
-var _clusters: Array[Vector3] = []
-var _thada_lat := 40.0
 var _bank := {} # model -> [[pozitie, yaw, scara], ...]
 
 
 func _build() -> void:
-	_cenotaph()
-	_left_massif()
-	_right_edge()
-	_trees()
+	_g2_group()
+	_rock_terraces()
+	_houses_right()
 	_lake()
 	_kerb_diyas()
 	_emit_nodes()
@@ -251,8 +244,6 @@ func _solid_ok(q: Vector3, r: float, gap: float, pad: float = 0.5) -> bool:
 	if ed < gap:
 		return false
 	if f >= FLIGHT_F0 and f <= FLIGHT_F1 and ed < FLIGHT_GAP:
-		return false
-	if f >= APPROACH_F0 and f < FLIGHT_F0 and ed < APPROACH_GAP:
 		return false
 	return not _overlaps(q, r, pad)
 
@@ -327,108 +318,6 @@ func _lamp(set_name: String, p: Vector3, r: float) -> void:
 
 # ---------------------------------------------------------------- G2: cenotaful
 
-func _cenotaph() -> void:
-	var i := _idx(THADA_FRAC)
-	var road := _track.baked[i]
-	var L := _left(i)
-	# Malul departat al lacului pe stanga: prima iesire din apa dupa ce ai
-	# intrat in ea.
-	var in_water := false
-	var far := 40.0
-	var lat := 10.0
-	while lat < 90.0:
-		var q := road + L * lat
-		var g := _sol_real(q.x, q.z)
-		if g < WATER_Y:
-			in_water = true
-		elif in_water and g > WATER_Y + 0.5:
-			far = lat
-			break
-		lat += 0.5
-	var front := far - 1.0
-	var depth := 4.0 * PLINTH_SZ
-	var yaw := atan2(L.x, L.z) # +Z local = departe de drum
-	var basis := Basis.from_euler(Vector3(0.0, yaw, 0.0))
-	var pc := road + L * (front + depth * 0.5)
-	var ground_c := _sol_real(pc.x, pc.z)
-	var top := maxf(ground_c, road.y) + PLINTH_ABOVE
-	var lo := INF
-	var X := basis.x
-	for u: float in [-1.0, -0.5, 0.0, 0.5, 1.0]:
-		for v: float in [-1.0, -0.5, 0.0, 0.5, 1.0]:
-			var q := pc + X * (u * 1.25 * PLINTH_SX) + L * (v * 2.0 * PLINTH_SZ)
-			lo = minf(lo, _sol_real(q.x, q.z))
-	var base_y := lo - 0.3
-	var sy := (top - base_y) / 0.8
-	print("; cenotaf: malul departat la %.1f m, soclu %.1f..%.1f (sy %.2f), centru %s" % [
-		far, base_y, top, sy, str(pc)])
-	_raw_basis("rock_slab", "gSoclu", Vector3(pc.x, base_y, pc.z),
-		basis * Basis.from_scale(Vector3(PLINTH_SX, sy, PLINTH_SZ)), "")
-	_meta_last('metadata/scufundat = true')
-	_obst.append(Vector3(pc.x, pc.z, 2.36 * PLINTH_SX * 0.95))
-	# Treapta de jos spre apa (terasa la +2,5 peste apa), mai ingusta, in fata.
-	var step_c := road + L * (front - 1.5)
-	var step_top := WATER_Y + 2.8
-	var step_lo := _ground_min(step_c, 6.0) - 0.3
-	_raw_basis("rock_slab", "gSocluTreapta", Vector3(step_c.x, step_lo, step_c.z),
-		basis * Basis.from_scale(Vector3(PLINTH_SX * 0.7, (step_top - step_lo) / 0.8, 1.6)), "none")
-	_meta_last('metadata/scufundat = true')
-	# Cenotaful: treptele (z local -10,3) la 3,5 m de fata soclului, pe blatul
-	# plat.
-	var tc := road + L * (front + 13.8)
-	_thada_lat = front + 13.8 - 8.0
-	tc.y = top
-	_thada_c = tc
-	_thada_xf = Transform3D(basis, tc)
-	_raw_basis("jaswant_thada", "gCenotaf", tc, basis, "mesh")
-	# Blocuri de riolit pe fata soclului si la picior, in apa (fantome: sunt
-	# in rapa), mari si rare sus, marunte jos (gradient de moloz).
-	for k in 14:
-		var u := _rng.randf_range(-1.05, 1.05)
-		var q := road + L * (front + _rng.randf_range(-2.5, 0.5)) + X * (u * 1.25 * PLINTH_SX)
-		var m: String = BOULDERS[_rng.randi() % 3]
-		var s := _rng.randf_range(1.6, 3.2) if k < 8 else _rng.randf_range(0.8, 1.5)
-		_rock(m, "gSocluBloc", q, s, 1.0, -1.0)
-	# Colturile soclului: doua blocuri inalte (silueta decupata, nu cutie).
-	for sgn: float in [-1.0, 1.0]:
-		var q := pc + X * (sgn * 1.25 * PLINTH_SX * 0.97) + L * _rng.randf_range(-6.0, 6.0)
-		var g := _sol_real(q.x, q.z)
-		var s := (top - g + 1.5) / 2.0
-		_raw("rhyolite_boulder_a", "gSocluColt", Vector3(q.x, g - 0.5, q.z),
-			_rng.randf_range(-PI, PI), clampf(s, 2.0, 5.0), "")
-	# Candele: sir pe muchia din fata a blatului, inel pe tambur, sir pe
-	# terasa a doua; festoane (StreetLights fara stalpi) pe platforma si
-	# tambur.
-	var xf := _thada_xf
-	# muchia din fata a blatului plat (z local -10,5), de-a lungul lui
-	var x := -0.97 * PLINTH_SX
-	while x <= 0.97 * PLINTH_SX:
-		_lamp("gCandeleCenotaf", xf * Vector3(x, 0.14, -10.5), 0.14)
-		x += 0.9
-	# terasa a doua (y 1,6): dreptunghi x +-7,8, z -4,8..5,6
-	_rect_lamps(xf, Vector2(-7.8, -4.8), Vector2(7.8, 5.6), 1.6 + 0.12, 0.7, 0.12)
-	# platforma de baza (y 0,9): x +-10,6, z -8,2..7,0
-	_rect_lamps(xf, Vector2(-10.6, -8.2), Vector2(10.6, 7.0), 0.9 + 0.12, 0.8, 0.12)
-	# tamburul (y 7,0), inel r 4,3
-	for k in 30:
-		var a := TAU * float(k) / 30.0
-		_lamp("gCandeleCenotaf", xf * Vector3(cos(a) * 4.2, 7.0 + 0.12, sin(a) * 4.2), 0.12)
-	# festoane: pe muchia platformei (prinse la +0,9 peste ea) si pe tambur
-	_festoon_rect(xf, Vector2(-10.6, -8.2), Vector2(10.6, 7.0), 0.9 + 1.0, 3.5)
-	var ring: Array[Vector3] = []
-	for k in 12:
-		var a := TAU * float(k) / 12.0
-		ring.append(xf * Vector3(cos(a) * 4.5, 7.0 + 1.6, sin(a) * 4.5))
-	for k in 12:
-		_eaves.append(ring[k])
-		_eaves.append(ring[(k + 1) % 12])
-	# chhatri-urile din fata (x +-13, varf 4,2): festoane de la tambur la ele
-	for sgn: float in [-1.0, 1.0]:
-		_eaves.append(xf * Vector3(sgn * 4.5, 8.6, -1.0))
-		_eaves.append(xf * Vector3(sgn * 12.8, 4.4, -3.5))
-		_eaves.append(xf * Vector3(sgn * 4.5, 8.6, 1.0))
-		_eaves.append(xf * Vector3(sgn * 10.0, 2.6, 6.8))
-
 
 func _rect_lamps(xf: Transform3D, a: Vector2, b: Vector2, y: float, step: float,
 		r: float) -> void:
@@ -458,179 +347,9 @@ func _festoon_rect(xf: Transform3D, a: Vector2, b: Vector2, y: float, span: floa
 
 # ---------------------------------------------------------------- G: stanca
 
-## Masivul de riolit pe STANGA coborarii (partea din afara buclei): aflorimente
-## cu un miez inalt, lespezi cu blat luminat, bolovani medii si moloz marunt
-## spre drum (densitatea creste spre drum, fara grila).
-func _left_massif() -> void:
-	var f := 0.707
-	var count := 0
-	while f < 0.858:
-		var i := _idx(f)
-		var road := _track.baked[i]
-		var L := _left(i)
-		var w := _track.width_at_index(i)
-		var cs := _rng.randf_range(3.2, 5.2)
-		var lat := w + 2.07 * cs + _rng.randf_range(GAP_MIN + 3.0, GAP_MIN + 16.0)
-		var c := road + L * lat
-		if _outcrop(c, i, cs, 1.0):
-			count += 1
-		f += _rng.randf_range(0.006, 0.010)
-	print("; aflorimente stanga: %d" % count)
 
 
-## Un afloriment: miez + lespezi + bolovani + moloz. `side` +1 = stanga.
-func _outcrop(c: Vector3, i: int, core_s: float, side: float) -> bool:
-	var core: String = BIG[_rng.randi() % 2]
-	var cr0: float = CORNER[core] * core_s
-	# tot aflorimentul (miez + moloz spre drum) e un singur obstacol
-	for o in _clusters:
-		if Vector2(c.x - o.x, c.z - o.y).length() < o.z + cr0 * 1.6:
-			return false
-	var road := _track.baked[i]
-	var to_road := Vector3(road.x - c.x, 0.0, road.z - c.z).normalized()
-	# Miezul: 2-4 STALPI de riolit (rock_slab intins pe verticala: blat plat,
-	# fete fatetate) de inaltimi diferite, lipiti unul de altul — blocuri
-	# mari cu silueta in trepte. Runda 1, prima captura: un bolovan scalat x4
-	# citea piramida rosie, nu bloc.
-	var k0 := core_s / 3.5
-	var yaw0 := _rng.randf_range(-PI, PI)
-	var h0 := core_s * 2.0
-	if not _pillar(c, _rng.randf_range(1.3, 2.0) * k0, h0, _rng.randf_range(0.9, 1.3) * k0,
-			yaw0, GAP_MIN + 3.0, to_road):
-		return false
-	_ignore_overlap = true
-	for k in _rng.randi_range(1, 3):
-		var a := _rng.randf_range(-PI, PI)
-		var q := c + Vector3(cos(a), 0, sin(a)) * cr0 * _rng.randf_range(0.35, 0.7)
-		_pillar(q, _rng.randf_range(1.0, 1.8) * k0, h0 * _rng.randf_range(0.45, 0.85),
-			_rng.randf_range(0.8, 1.3) * k0, yaw0 + _rng.randf_range(-0.6, 0.6), GAP_MIN + 1.0, to_road)
-	var T := Vector3(-to_road.z, 0.0, to_road.x)
-	var cr: float = CORNER[core] * core_s
-	# lespezi: blat plat la 1,8-3,2 m, lipite de miez spre drum / lateral
-	for k in _rng.randi_range(1, 2):
-		var off := to_road * cr * _rng.randf_range(0.5, 0.9) + T * cr * _rng.randf_range(-0.9, 0.9)
-		var q := c + off
-		var sx := _rng.randf_range(2.2, 3.4)
-		var sz := _rng.randf_range(1.8, 2.8)
-		var sy := _rng.randf_range(2.3, 4.0)
-		var r := Vector2(1.25 * sx, 2.0 * sz).length()
-		if not _solid_ok(q, r, GAP_MIN, -r * 0.5):
-			continue
-		var yaw := atan2(to_road.x, to_road.z) + _rng.randf_range(-0.5, 0.5)
-		var bas := Basis.from_euler(Vector3(0.0, yaw, 0.0)) * Basis.from_scale(Vector3(sx, sy, sz))
-		var g := _ground_min(q, r * 0.5)
-		_raw_basis("rock_slab", "gLespede", Vector3(q.x, g - 0.2, q.z), bas, "")
-		_obst.append(Vector3(q.x, q.z, r * 0.8))
-		# sir de candele pe muchia blatului dinspre drum (z local -1,5 dupa
-		# yaw: +Z local e spre drum)
-		var top := g - 0.2 + 0.8 * sy
-		var xf := Transform3D(Basis.from_euler(Vector3(0.0, yaw, 0.0)), Vector3(q.x, 0.0, q.z))
-		var x := -1.0 * sx
-		while x <= 1.0 * sx:
-			var p := xf * Vector3(x, 0.0, 1.45 * sz)
-			p.y = top + 0.12
-			_lamp("gCandeleStanca", p, 0.12)
-			x += 0.75
-	# bolovani medii in jurul miezului
-	for k in _rng.randi_range(2, 4):
-		var a := _rng.randf_range(-PI, PI)
-		var q := c + Vector3(cos(a), 0, sin(a)) * cr * _rng.randf_range(0.8, 1.3) + to_road * cr * 0.3
-		_rock(BOULDERS[_rng.randi() % 3], "gBolovan", q, _rng.randf_range(1.2, 2.2), GAP_MIN, -0.3)
-	# moloz marunt, spre drum (gradient)
-	for k in _rng.randi_range(4, 8):
-		var q := c + to_road * cr * _rng.randf_range(1.1, 2.4) + T * cr * _rng.randf_range(-1.4, 1.4)
-		_rock(BOULDERS[_rng.randi() % 3], "gMoloz", q, _rng.randf_range(0.35, 0.8), GAP_MIN - 1.0, 0.1)
-	# o euforbie la picior
-	if _rng.randf() < 0.6:
-		var q := c + to_road * cr * 1.2 + T * cr * _rng.randf_range(-1.0, 1.0)
-		if _solid_ok(q, 0.45, GAP_MIN, 0.3):
-			_raw("euphorbia", "gEuforbie", Vector3(q.x, _sol_real(q.x, q.z) - 0.05, q.z),
-				_rng.randf_range(-PI, PI), _rng.randf_range(0.9, 1.3), "")
-			_obst.append(Vector3(q.x, q.z, 0.45))
-	_ignore_overlap = false
-	_clusters.append(Vector3(c.x, c.z, cr0 * 1.6))
-	return true
 
-
-## Un stalp de riolit: rock_slab cu scara (sx, inaltime/0,8, sz), corp hull.
-func _pillar(q: Vector3, sx: float, h: float, sz: float, yaw: float, gap: float,
-		to_road: Vector3) -> bool:
-	var r := Vector2(1.25 * sx, 2.0 * sz).length()
-	if _in_ravine(q) or not _solid_ok(q, r, gap, 0.3):
-		return false
-	var g := _ground_min(q, r * 0.6) - 0.3
-	var sy := (h + 0.3) / 0.8
-	var bas := Basis.from_euler(Vector3(0.0, yaw, 0.0)) * Basis.from_scale(Vector3(sx, sy, sz))
-	_raw_basis("rock_slab", "gStalp", Vector3(q.x, g, q.z), bas, "")
-	_obst.append(Vector3(q.x, q.z, r * 0.8))
-	return true
-
-
-## Marginea DREAPTA (spre oras): sir de bolovani `hull` pe margine (contract),
-## la pas neregulat, si aflorimente joase la 10-20 m (orasul trebuie sa se
-## citeasca peste ele).
-func _right_edge() -> void:
-	var f := 0.706
-	var n := 0
-	while f < APPROACH_F0:
-		var i := _idx(f)
-		var road := _track.baked[i]
-		var R := -_left(i)
-		var w := _track.width_at_index(i)
-		var m: String = BOULDERS[_rng.randi() % 3]
-		var s := _rng.randf_range(0.9, 1.6)
-		var lat: float = w + EDGE_ROW_GAP + float(CORNER[m]) * s + _rng.randf_range(0.0, 1.2)
-		if _rock(m, "gMargine", road + R * lat, s, EDGE_ROW_GAP, 0.3):
-			n += 1
-			# uneori un al doilea, mai mic, lipit in spate
-			if _rng.randf() < 0.45:
-				_rock(BOULDERS[_rng.randi() % 3], "gMargine",
-					road + R * (lat + _rng.randf_range(1.8, 3.0)) + _tangent(i) * _rng.randf_range(-1.5, 1.5),
-					_rng.randf_range(0.5, 1.0), EDGE_ROW_GAP + 1.0, -0.3)
-		f += _rng.randf_range(0.0035, 0.008)
-	print("; bolovani de margine dreapta: %d" % n)
-	var f2 := 0.712
-	var k := 0
-	while f2 < 0.852:
-		var i := _idx(f2)
-		var road := _track.baked[i]
-		var R := -_left(i)
-		var w := _track.width_at_index(i)
-		var cs := _rng.randf_range(1.8, 2.8)
-		var c := road + R * (w + 2.07 * cs + _rng.randf_range(GAP_MIN + 3.0, GAP_MIN + 10.0))
-		# pe 0.70-0.73 terenul cade la 30 m pe dreapta: doar pe sol plat
-		if absf(_sol_real(c.x, c.z) - road.y) < 1.2 and _outcrop(c, i, cs, -1.0):
-			k += 1
-		f2 += _rng.randf_range(0.016, 0.026)
-	print("; aflorimente dreapta: %d" % k)
-
-
-## Copaci (khejri, neem) pe ambele parti, la 4-12 m de margine: coroanele
-## umbresc marginea asfaltului in prim-plan (memoria contrastul-e-umbra).
-func _trees() -> void:
-	var f := 0.708
-	var n := 0
-	while f < 0.905:
-		var i := _idx(f)
-		var road := _track.baked[i]
-		var sgn := 1.0 if _rng.randf() < 0.5 else -1.0
-		var w := _track.width_at_index(i)
-		var q := road + _left(i) * sgn * (w + _rng.randf_range(4.5, 12.0))
-		var model := "khejri_tree" if _rng.randf() < 0.55 else "neem_tree"
-		if not _in_ravine(q) and _solid_ok(q, 0.5, 4.0, 1.5):
-			_raw(model, "gCopac", Vector3(q.x, _sol_real(q.x, q.z) - 0.1, q.z),
-				_rng.randf_range(-PI, PI), _rng.randf_range(0.85, 1.2), "")
-			_obst.append(Vector3(q.x, q.z, 0.5))
-			n += 1
-			# tufa de euforbii langa trunchi
-			for k in _rng.randi_range(1, 3):
-				var e := q + Vector3(_rng.randf_range(-3, 3), 0, _rng.randf_range(-3, 3))
-				if not _in_ravine(e) and _solid_ok(e, 0.45, 3.0, 0.2):
-					_raw("euphorbia", "gEuforbie", Vector3(e.x, _sol_real(e.x, e.z) - 0.05, e.z),
-						_rng.randf_range(-PI, PI), _rng.randf_range(0.7, 1.2), "")
-					_obst.append(Vector3(e.x, e.z, 0.45))
-		f += _rng.randf_range(0.0035, 0.007)
-	print("; copaci: %d" % n)
 
 
 # ---------------------------------------------------------------- G2: lacul
@@ -662,7 +381,7 @@ func _lake() -> void:
 				if _thada_c != Vector3.INF:
 					var dc := Vector2(x - _thada_c.x, z - _thada_c.z).length()
 					pr += 0.5 * clampf(1.0 - (dc - 14.0) / 30.0, 0.0, 1.0)
-				if _rng.randf() < pr:
+				if _rng.randf() < pr and not _overlaps(Vector3(x, 0, z), 0.4, 0.0):
 					var j := Vector3(_rng.randf_range(-0.7, 0.7), 0, _rng.randf_range(-0.7, 0.7)) * cell
 					_floats.append(Vector3(x + j.x, WATER_Y, z + j.z))
 					_float_yaw.append(_rng.randf_range(0.0, 360.0))
@@ -746,6 +465,409 @@ func _kerb_diyas() -> void:
 			_lamp("gCandeleMargine", Vector3(q.x, g + 0.13, q.z), 0.13)
 
 
+# ---------------------------------------------------------------- runda 2
+
+## Casele kitului: dimensiunile AABB (X, Z) si yaw-ul fetei (grade), ca in
+## `OrasFill.front_yaw_deg` (fata in lume = Basis(UP, yaw + front) * -Z).
+const HOUSES := {
+	"blue_house_a": [7.15, 6.62, -90.0], "blue_house_b": [6.82, 7.55, -90.0],
+	"blue_house_c": [7.50, 7.67, 0.0], "blue_house_d": [7.50, 8.01, -90.0],
+	"blue_house_e": [7.40, 6.26, 0.0], "haveli_facade": [10.92, 7.43, 0.0],
+}
+const HOUSE_W := {"blue_house_a": 0.14, "blue_house_b": 0.26, "blue_house_c": 0.2,
+	"blue_house_d": 0.2, "blue_house_e": 0.14, "haveli_facade": 0.06}
+
+var _chh_b := PackedVector3Array()
+var _chh_s := PackedFloat32Array()
+var _chh_y := PackedFloat32Array()
+var _chh_n := PackedInt32Array()
+
+
+## Cutie orientata (centru, yaw, semi-laturi X/Z): toate punctele de pe
+## contur (colturi + mijloace) la >= gap de asfalt; pe fereastra de zbor
+## >= FLIGHT_GAP. Amprenta reala, nu raza (memoria amprenta-hull).
+func _box_clear(c: Vector3, yaw: float, hx: float, hz: float, gap: float) -> bool:
+	var b := Basis(Vector3.UP, yaw)
+	for u: float in [-1.0, 0.0, 1.0]:
+		for v: float in [-1.0, 0.0, 1.0]:
+			if u == 0.0 and v == 0.0:
+				continue
+			var q := c + b.x * (u * hx) + b.z * (v * hz)
+			q.y = c.y
+			var ed := _edge_dist(q, 40.0)
+			if ed < gap:
+				return false
+			var f := _frac_of(_nearest_i(q))
+			if f >= FLIGHT_F0 and f <= FLIGHT_F1 and ed < FLIGHT_GAP:
+				return false
+	return true
+
+
+func _box_ground(c: Vector3, yaw: float, hx: float, hz: float) -> Vector2:
+	var b := Basis(Vector3.UP, yaw)
+	var lo := INF
+	var hi := -INF
+	for u: float in [-1.0, 0.0, 1.0]:
+		for v: float in [-1.0, 0.0, 1.0]:
+			var q := c + b.x * (u * hx) + b.z * (v * hz)
+			var g := _sol_real(q.x, q.z)
+			lo = minf(lo, g)
+			hi = maxf(hi, g)
+	return Vector2(lo, hi)
+
+
+## Un bloc de riolit cu blat plat (rock_slab: 2,5 x 0,8 x 4, blatul la 0,8):
+## cutie de semi-laturi hx (X local) si hz (Z local), varful la `top` (lume).
+## Corp `hull` pe uscat, fantoma (MultiMesh-ul malului) in rapa.
+func _block(base: String, c: Vector3, yaw: float, hx: float, hz: float, top: float,
+		gap: float, check: bool = true) -> bool:
+	if check and not _box_clear(c, yaw, hx, hz, gap):
+		return false
+	var gr := _box_ground(c, yaw, hx, hz)
+	var y0 := gr.x - 0.3
+	if top - y0 < 0.4:
+		return false
+	var sc := Vector3(hx / 1.25, (top - y0) / 0.8, hz / 2.0)
+	var pos := Vector3(c.x, y0, c.z)
+	# Blocurile de pe buza rapei au talpa in rapa: fantome (MultiMesh), altfel
+	# `probe_manual` (solul samplerului, care nu stie de rapa) le da INGROPAT.
+	if _in_ravine(c) or y0 < _sampler.ground_y(c.x, c.z) - 1.8:
+		if not _bank.has("rock_slab"):
+			_bank["rock_slab"] = []
+		(_bank["rock_slab"] as Array).append([pos, yaw, sc])
+	else:
+		var bas := Basis(Vector3.UP, yaw) * Basis.from_scale(sc)
+		_raw_basis("rock_slab", base, pos, bas, "")
+	_obst.append(Vector3(c.x, c.z, maxf(hx, hz)))
+	return true
+
+
+## Sir de candele pe muchia din fata (X local * face) a unui bloc.
+func _edge_row(set_name: String, c: Vector3, yaw: float, hx: float, hz: float,
+		top: float, face: float, step: float) -> void:
+	var b := Basis(Vector3.UP, yaw)
+	var z := -hz * 0.85
+	while z <= hz * 0.85:
+		var p := c + b.x * (face * hx * 0.9) + b.z * z
+		p.y = top + 0.12
+		_lamp(set_name, p, 0.12)
+		z += step
+
+
+func _advance(i: int, i_end: int, step: float) -> int:
+	var n := _track.baked.size()
+	var acc := 0.0
+	while acc < step and i < i_end:
+		var a := _track.baked[i]
+		var b := _track.baked[(i + 1) % n]
+		acc += Vector2(b.x - a.x, b.z - a.z).length()
+		i += 1
+	return i
+
+
+## G, partea STANCII (stanga, in afara buclei): riolit in TREPTE, CONTINUU,
+## imediat dupa lantul de lumini — trei randuri de blocuri cu blat plat
+## (jos langa drum, mediu, inalt in spate), lipite si suprapuse, cu euforbii
+## in golurile randului din fata. Critic r1: „benzile de pe ambele parti sunt
+## GOALE, 20-40 m de nisip plat intre lumini si decor". Inaltimile NU trec de
+## 9 m (memoria capcana-parametrului-care-doar-aduna: lipsa era
+## continuitatea langa drum, nu scara).
+func _rock_terraces() -> void:
+	var i := _idx(0.704)
+	var i_end := _idx(0.859)
+	var placed := 0
+	while i < i_end:
+		var road := _track.baked[i]
+		var L := _left(i)
+		var T := _tangent(i)
+		var w := _track.width_at_index(i)
+		var yaw := atan2(T.x, T.z) + _rng.randf_range(-0.22, 0.22) # Z local ~ tangenta
+		var bx := Basis(Vector3.UP, yaw).x
+		var face := -1.0 if bx.dot(L) > 0.0 else 1.0
+		var hz0 := _rng.randf_range(1.5, 2.3)
+		# randul 1 (jos): la 2,4-3,2 m de asfalt; uneori gol cu euforbii
+		var d0 := _rng.randf_range(2.4, 3.2)
+		var hx0 := _rng.randf_range(1.1, 1.7)
+		var c0 := road + L * (w + d0 + hx0)
+		var top0 := road.y + _rng.randf_range(0.9, 2.0)
+		if _rng.randf() >= 0.28:
+			if _block("gTreapta", c0, yaw, hx0, hz0, top0, EDGE_ROW_GAP):
+				placed += 1
+				_edge_row("gCandeleStanca", c0, yaw, hx0, hz0, top0, face, 0.8)
+		else:
+			for k in _rng.randi_range(2, 3):
+				var e := c0 + T * _rng.randf_range(-1.6, 1.6) + L * _rng.randf_range(-0.8, 0.8)
+				if _box_clear(e, 0.0, 0.45, 0.45, EDGE_ROW_GAP):
+					_raw("euphorbia", "gEuforbie", Vector3(e.x, _sol_real(e.x, e.z) - 0.05, e.z),
+						_rng.randf_range(-PI, PI), _rng.randf_range(0.8, 1.3), "")
+		# randul 2 (mediu), suprapus 0,6 m peste randul 1
+		var hx1 := _rng.randf_range(1.4, 2.2)
+		var c1 := road + L * (w + d0 + 2.0 * hx0 + hx1 - 0.6) + T * _rng.randf_range(-1.0, 1.0)
+		# Spre lac (> TAPER_F) stanca coboara: din cadrul-erou G2 (0.850)
+		# randurile inalte acopereau grupul de chhatri (captura w4).
+		var fr := _frac_of(i)
+		var taper := clampf((fr - TAPER_F) / 0.014, 0.0, 1.0)
+		var top1 := road.y + lerpf(_rng.randf_range(2.8, 4.6), _rng.randf_range(1.4, 2.2), taper)
+		if _block("gTreapta", c1, yaw + _rng.randf_range(-0.15, 0.15), hx1,
+				hz0 * _rng.randf_range(1.0, 1.3), top1, EDGE_ROW_GAP):
+			placed += 1
+			if _rng.randf() < 0.5:
+				_edge_row("gCandeleStanca", c1, yaw, hx1, hz0, top1, face, 1.0)
+		# randul 3 (inalt), nu la fiecare statie
+		if _rng.randf() < 0.7 and taper < 0.5:
+			var hx2 := _rng.randf_range(1.8, 2.8)
+			var c2 := road + L * (w + d0 + 2.0 * hx0 + 2.0 * hx1 + hx2 - 1.2) + T * _rng.randf_range(-1.5, 1.5)
+			var top2 := road.y + _rng.randf_range(5.5, 8.8)
+			if _block("gTreapta", c2, yaw + _rng.randf_range(-0.3, 0.3), hx2,
+					hz0 * _rng.randf_range(1.1, 1.5), top2, EDGE_ROW_GAP):
+				placed += 1
+		if _rng.randf() < 0.16:
+			var q := road + L * (w + d0 + _rng.randf_range(10.0, 14.0))
+			if _solid_ok(q, 0.5, 4.0, 0.2):
+				_raw("khejri_tree" if _rng.randf() < 0.6 else "neem_tree", "gCopac",
+					Vector3(q.x, _sol_real(q.x, q.z) - 0.1, q.z), _rng.randf_range(-PI, PI),
+					_rng.randf_range(0.9, 1.2), "")
+				_obst.append(Vector3(q.x, q.z, 0.5))
+		# pasul: lungimea blocului, cu suprapunere mica -> sir continuu
+		i = _advance(i, i_end, 2.0 * hz0 * _rng.randf_range(0.8, 0.95))
+	print("; trepte de riolit (stanga): %d blocuri" % placed)
+
+
+## G, partea ORASULUI (dreapta): case albastre din kit pana la bordura
+## (primul rand la 2,6-3,6 m de asfalt, dincolo de felinare), al doilea rand
+## in spate; in golurile dintre case bolovani, euforbii, copaci. Corp `hull`
+## (casele kitului). Pe fereastra de zbor nimic.
+func _houses_right() -> void:
+	for row in 2:
+		var i := _idx(0.706)
+		var i_end := _idx(0.8595)
+		var nh := 0
+		while i < i_end:
+			var road := _track.baked[i]
+			var R := -_left(i)
+			var T := _tangent(i)
+			var w := _track.width_at_index(i)
+			var m := _pick_house()
+			var d: Array = HOUSES[m]
+			var side_front := absf(float(d[2])) > 1.0
+			var front := deg_to_rad(float(d[2]))
+			var width: float = float(d[1]) if side_front else float(d[0])
+			var depth: float = float(d[0]) if side_front else float(d[1])
+			var gap_front := _rng.randf_range(2.6, 3.6)
+			var lat := w + gap_front + depth * 0.5
+			if row == 1:
+				lat += depth + _rng.randf_range(1.0, 3.0)
+			var to := -R
+			var yaw := atan2(-to.x, -to.z) - front + _rng.randf_range(-0.08, 0.08)
+			var c := road + R * lat + T * _rng.randf_range(-0.5, 0.5)
+			var hx := float(d[0]) * 0.5
+			var hz := float(d[1]) * 0.5
+			var ok := _box_clear(c, yaw, hx, hz, EDGE_ROW_GAP) and not _overlaps(c, maxf(hx, hz) * 0.9, 0.0)
+			var gr := _box_ground(c, yaw, hx, hz)
+			if ok and gr.y - gr.x < 1.6 and absf(gr.x - road.y) < 1.5 and _rng.randf() > 0.12:
+				_raw(m, "gCasa", Vector3(c.x, gr.x - 0.25, c.z), yaw, 1.0, "")
+				if _rng.randf() < 0.4:
+					_meta_last("metadata/indigo = true")
+				_obst.append(Vector3(c.x, c.z, maxf(hx, hz) * 0.95))
+				nh += 1
+			elif row == 0:
+				_gap_fill(road + R * (w + 3.0), R, T)
+			var step := width + _rng.randf_range(0.3, 1.4)
+			if row == 0 and _rng.randf() < 0.18:
+				step += 4.0
+				_gap_fill(road + R * (w + 3.0) + T * (width * 0.5 + 2.0), R, T)
+			i = _advance(i, i_end, step)
+		print("; case dreapta, randul %d: %d" % [row + 1, nh])
+
+
+func _pick_house() -> String:
+	var r := _rng.randf()
+	var acc := 0.0
+	for k in HOUSE_W.keys():
+		acc += float(HOUSE_W[k])
+		if r <= acc:
+			return k
+	return "blue_house_b"
+
+
+## Golul dintre case: un bolovan de margine (contract: bolovani `hull` pe
+## marginea dreapta), o euforbie, uneori un copac.
+func _gap_fill(q: Vector3, R: Vector3, T: Vector3) -> void:
+	var m: String = BOULDERS[_rng.randi() % 3]
+	var s := _rng.randf_range(0.9, 1.4)
+	var c := q + R * (float(CORNER[m]) * s)
+	_rock(m, "gMargine", c, s, EDGE_ROW_GAP, 0.3)
+	var e := c + R * _rng.randf_range(1.5, 3.0) + T * _rng.randf_range(-1.5, 1.5)
+	if _solid_ok(e, 0.45, EDGE_ROW_GAP, 0.1):
+		_raw("euphorbia", "gEuforbie", Vector3(e.x, _sol_real(e.x, e.z) - 0.05, e.z),
+			_rng.randf_range(-PI, PI), _rng.randf_range(0.9, 1.3), "")
+		_obst.append(Vector3(e.x, e.z, 0.45))
+	if _rng.randf() < 0.45:
+		var t := c + R * _rng.randf_range(4.0, 6.0)
+		if _solid_ok(t, 0.5, 4.0, 0.3):
+			_raw("neem_tree" if _rng.randf() < 0.5 else "khejri_tree", "gCopac",
+				Vector3(t.x, _sol_real(t.x, t.z) - 0.1, t.z), _rng.randf_range(-PI, PI),
+				_rng.randf_range(0.85, 1.1), "")
+			_obst.append(Vector3(t.x, t.z, 0.5))
+
+
+## G2: GRUPUL de chhatri in trepte pe stanca de riolit, chiar deasupra apei,
+## cu `jaswant_thada` ca piesa centrala sus. Critic r1: „un singur pavilion
+## mic, departe, pe un bloc jos izolat; in REF 4-6 chhatri albe in trepte pe
+## stanca masiva, silueta verticala, ghirlande pe cornise".
+## Terasele: T0 din apa (blat la ~1,3 m peste apa), T1 pe mal, T2, apoi
+## soclul cenotafului — fiecare rand mai departe si mai sus.
+const TAPER_F := 0.832
+const G2_F0 := 0.864
+const G2_F1 := 0.899
+const G2_THADA := 0.884
+const TIER_TOP := [-2.4, 1.6, 4.4, 7.2]
+
+
+func _far_bank(i: int) -> float:
+	var road := _track.baked[i]
+	var L := _left(i)
+	var in_water := false
+	var lat := 10.0
+	while lat < 90.0:
+		var q := road + L * lat
+		var g := _sol_real(q.x, q.z)
+		if g < WATER_Y:
+			in_water = true
+		elif in_water and g > WATER_Y + 0.5:
+			return lat
+		lat += 0.5
+	return 40.0
+
+
+func _g2_group() -> void:
+	var i := _idx(G2_F0)
+	var i_end := _idx(G2_F1)
+	var ti := _idx(G2_THADA)
+	var fb_t := _far_bank(ti)
+	var Lt := _left(ti)
+	var yaw_t := atan2(Lt.x, Lt.z)
+	# Cenotaful: fata (z local -10,3 = treptele) spre drum, pe soclul T3.
+	var tc := _track.baked[ti] + Lt * (fb_t + 12.5 + 10.3)
+	tc.y = float(TIER_TOP[3])
+	var tb := Basis(Vector3.UP, yaw_t)
+	_thada_c = tc
+	_thada_xf = Transform3D(tb, tc)
+	# soclul: un bloc larg sub cenotaf (1 m de blat in jurul lui)
+	_block("gSoclu", tc - tb.z * 1.5, yaw_t, 15.8, 10.5, float(TIER_TOP[3]), 20.0, false)
+	_raw_basis("jaswant_thada", "gCenotaf", tc, tb, "mesh")
+	print("; cenotaf la %s, malul departat %.1f m" % [str(tc), fb_t])
+	var tiers_pts: Array = [[], [], []]
+	while i < i_end:
+		var road := _track.baked[i]
+		var L := _left(i)
+		var T := _tangent(i)
+		var fb := _far_bank(i)
+		var yaw := atan2(L.x, L.z) + _rng.randf_range(-0.12, 0.12)
+		var hx := _rng.randf_range(3.0, 4.0)
+		# Z local = spre departe (L); X local = de-a lungul malului. Randul
+		# -1: bolovani-treapta in apa, sub T0 (stanca intra in lac in trepte).
+		var specs := [
+			[fb - 5.0, _rng.randf_range(3.0, 3.8), float(TIER_TOP[0]) + _rng.randf_range(-0.3, 0.4)],
+			[fb + 1.8, _rng.randf_range(3.2, 4.0), float(TIER_TOP[1]) + _rng.randf_range(-0.3, 0.5)],
+			[fb + 8.6, _rng.randf_range(3.2, 4.0), float(TIER_TOP[2]) + _rng.randf_range(-0.4, 0.6)],
+			[fb - 10.0, _rng.randf_range(1.6, 2.4), WATER_Y + _rng.randf_range(0.4, 1.0)],
+		]
+		for k in 4:
+			var sp: Array = specs[k]
+			var hzk := float(sp[1])
+			var c := road + L * float(sp[0]) + T * _rng.randf_range(-0.8, 0.8)
+			# sub cenotaf nu se pun trepte peste soclu
+			var loc := _thada_xf.affine_inverse() * c
+			if absf(loc.x) < 16.5 and loc.z > -13.0:
+				continue
+			if k == 3:
+				_block("gTerasa", c, yaw + _rng.randf_range(-0.4, 0.4), hx * 0.7, hzk, float(sp[2]), 8.0)
+				continue
+			if _block("gTerasa", c, yaw, hx, hzk, float(sp[2]), 10.0):
+				(tiers_pts[k] as Array).append([Vector3(c.x, float(sp[2]), c.z), yaw])
+				# candele pe muchia dinspre apa (-Z local)
+				var bb := Basis(Vector3.UP, yaw)
+				var x := -hx * 0.85
+				while x <= hx * 0.85:
+					var p := c + bb.x * x - bb.z * (hzk * 0.9)
+					p.y = float(sp[2]) + 0.12
+					_lamp("gCandeleTerase", p, 0.13)
+					x += 0.9
+		i = _advance(i, i_end, 2.0 * hx * 0.75)
+	# Chhatri: 2 pe T0 (langa apa), 2 pe T1, 2 pe T2, 2 pe colturile din
+	# fata ale soclului — in trepte, cele mai mari sus.
+	var picks := [[0, 2, 1.3], [1, 2, 1.5], [2, 2, 1.75]]
+	for pk in picks:
+		var arr: Array = tiers_pts[int(pk[0])]
+		if arr.is_empty():
+			continue
+		var cnt := int(pk[1])
+		for j in cnt:
+			var idx := int(round(float(j + 1) * float(arr.size()) / float(cnt + 1))) - 1
+			idx = clampi(idx + _rng.randi_range(-1, 1), 0, arr.size() - 1)
+			var it: Array = arr[idx]
+			var sc := float(pk[2]) * _rng.randf_range(0.9, 1.1)
+			_chhatri(it[0], sc, float(it[1]), 4 if _rng.randf() < 0.6 else 8)
+	for sgn: float in [-1.0, 1.0]:
+		_chhatri(_thada_xf * Vector3(sgn * 13.5, 0.0, -11.5), 1.5, yaw_t, 8)
+	print("; chhatri: %d, blocuri pe trepte T0/T1/T2: %d/%d/%d" % [_chh_b.size(),
+		(tiers_pts[0] as Array).size(), (tiers_pts[1] as Array).size(),
+		(tiers_pts[2] as Array).size()])
+	# Candelele cenotafului + festoane (ca in runda 1).
+	var xf := _thada_xf
+	var x2 := -15.0
+	while x2 <= 15.0:
+		_lamp("gCandeleCenotaf", xf * Vector3(x2, 0.14, -11.2), 0.14)
+		x2 += 0.9
+	_rect_lamps(xf, Vector2(-7.8, -4.8), Vector2(7.8, 5.6), 1.6 + 0.12, 0.7, 0.12)
+	_rect_lamps(xf, Vector2(-10.6, -8.2), Vector2(10.6, 7.0), 0.9 + 0.12, 0.8, 0.12)
+	for k in 30:
+		var a := TAU * float(k) / 30.0
+		_lamp("gCandeleCenotaf", xf * Vector3(cos(a) * 4.2, 7.12, sin(a) * 4.2), 0.12)
+	_festoon_rect(xf, Vector2(-10.6, -8.2), Vector2(10.6, 7.0), 1.9, 3.5)
+	var ring: Array[Vector3] = []
+	for k in 12:
+		var a := TAU * float(k) / 12.0
+		ring.append(xf * Vector3(cos(a) * 4.5, 8.6, sin(a) * 4.5))
+	for k in 12:
+		_eaves.append(ring[k])
+		_eaves.append(ring[(k + 1) % 12])
+	# ghirlande intre chhatri vecini (la streasina): lantul de lumini in trepte
+	var inv := _thada_xf.affine_inverse()
+	var order: Array = []
+	for k in _chh_b.size():
+		order.append(k)
+	order.sort_custom(func(a: int, b: int) -> bool:
+		return (inv * _chh_b[a]).x < (inv * _chh_b[b]).x)
+	for k in range(order.size() - 1):
+		var a: int = order[k]
+		var b: int = order[k + 1]
+		var pa := _chh_b[a] + Vector3.UP * 3.3 * _chh_s[a]
+		var pb := _chh_b[b] + Vector3.UP * 3.3 * _chh_s[b]
+		if pa.distance_to(pb) < 12.0:
+			_eaves.append(pa)
+			_eaves.append(pb)
+
+
+func _chhatri(base: Vector3, s: float, yaw: float, sides: int) -> void:
+	_chh_b.append(base)
+	_chh_s.append(s)
+	_chh_y.append(yaw)
+	_chh_n.append(sides)
+	# festoane pe conturul streasinii (chajja)
+	var rc := 1.6 * s * (1.41 if sides == 4 else 1.0) * 1.3
+	var ey := base.y + (0.5 + 2.3 + 0.52) * s
+	var off := yaw + (PI / float(sides) if sides == 4 else 0.0)
+	var pts: Array[Vector3] = []
+	for k in sides:
+		var a := off + TAU * float(k) / float(sides)
+		pts.append(Vector3(base.x + cos(a) * rc, ey, base.z + sin(a) * rc))
+	for k in sides:
+		_eaves.append(pts[k])
+		_eaves.append(pts[(k + 1) % sides])
+
+
 # ---------------------------------------------------------------- noduri
 
 func _emit_nodes() -> void:
@@ -810,6 +932,23 @@ func _emit_nodes() -> void:
 		_out.append("stretch = PackedFloat32Array(%s)" % ", ".join(ss))
 		_out.append("")
 		print("; %s: %d lampi" % [key, pp.size()])
+	if not _chh_b.is_empty():
+		_out.append('[node name="gChhatri" type="Node3D" parent="%s"]' % ZONE)
+		_out.append('script = ExtResource("g_chhatri")')
+		var cb: Array[String] = []
+		var cs: Array[String] = []
+		var cy: Array[String] = []
+		var cn: Array[String] = []
+		for k in _chh_b.size():
+			cb.append("%.3f, %.3f, %.3f" % [_chh_b[k].x, _chh_b[k].y, _chh_b[k].z])
+			cs.append("%.3f" % _chh_s[k])
+			cy.append("%.4f" % _chh_y[k])
+			cn.append("%d" % _chh_n[k])
+		_out.append("bases = PackedVector3Array(%s)" % ", ".join(cb))
+		_out.append("scales = PackedFloat32Array(%s)" % ", ".join(cs))
+		_out.append("yaws = PackedFloat32Array(%s)" % ", ".join(cy))
+		_out.append("sides = PackedInt32Array(%s)" % ", ".join(cn))
+		_out.append("")
 	for m in _bank.keys():
 		var items: Array = _bank[m]
 		_out.append('[node name="gMal_%s" type="MultiMeshInstance3D" parent="%s"]' % [str(m).right(1), ZONE])
@@ -822,7 +961,8 @@ func _emit_nodes() -> void:
 			var v: Vector3 = it[0]
 			ps.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
 			ys.append("%.3f" % float(it[1]))
-			ss.append("Vector3(%.3f, %.3f, %.3f)" % [float(it[2]), float(it[2]), float(it[2])])
+			var sv: Vector3 = it[2] if it[2] is Vector3 else Vector3.ONE * float(it[2])
+			ss.append("Vector3(%.3f, %.3f, %.3f)" % [sv.x, sv.y, sv.z])
 		_out.append("positions = PackedVector3Array(%s)" % ", ".join(ps))
 		_out.append("yaws = PackedFloat32Array(%s)" % ", ".join(ys))
 		_out.append("scale3_list = Array[Vector3]([%s])" % ", ".join(ss))

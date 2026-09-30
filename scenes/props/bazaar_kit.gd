@@ -38,6 +38,22 @@ extends Node3D
 @export var people_heights: PackedFloat32Array = PackedFloat32Array()
 @export var people_slots: PackedInt32Array = PackedInt32Array()
 @export var people_head_slots: PackedInt32Array = PackedInt32Array()
+## Directia fetei fiecarui om (yaw, rad). Runda 2: siluete cu umeri si brate,
+## deci conteaza incotro privesc (grupurile se intorc unul spre altul).
+@export var people_yaws: PackedFloat32Array = PackedFloat32Array()
+## Stivele de marfa (runda 2, criticul: „tarabele incarcate cu STIVE continue
+## de marfa: cosuri, saci, textile stivuite"): cutii orientate. Baza (lume),
+## semi-latime x / inaltime / semi-adancime z, yaw, slot, ingustarea capului
+## (1 = cutie, <1 = sac strans la gura).
+@export var boxes: PackedVector3Array = PackedVector3Array()
+@export var box_dims: PackedVector3Array = PackedVector3Array()
+@export var box_yaws: PackedFloat32Array = PackedFloat32Array()
+@export var box_slots: PackedInt32Array = PackedInt32Array()
+@export var box_tapers: PackedFloat32Array = PackedFloat32Array()
+## Stativele felinarelor de la sol (baza, lume; inaltimea in y a vectorului
+## din `stand_heights`). Lampa insasi e in nodul `FortLamps` vecin.
+@export var stands: PackedVector3Array = PackedVector3Array()
+@export var stand_heights: PackedFloat32Array = PackedFloat32Array()
 ## Fasiile peste strada: perechi de capete (lume, la cota franghiei); panzele
 ## atarna de franghie, lipite una de alta, in culori alternate.
 @export var strips: PackedVector3Array = PackedVector3Array()
@@ -54,6 +70,7 @@ const BASKET_SLOT := 28
 const ROPE_SLOT := 28
 const SKIN_SLOT := 27
 const HAIR_SLOT := 26
+const STAND_SLOT := 20
 const CLOTH_SLOTS := [16, 31, 21, 14, 30, 15]
 
 var _meshes: Array[MeshInstance3D] = []
@@ -80,7 +97,18 @@ func _ready() -> void:
 		var h: float = people_heights[i] if i < people_heights.size() else 1.65
 		var sl: int = people_slots[i] if i < people_slots.size() else 14
 		var hs: int = people_head_slots[i] if i < people_head_slots.size() else -1
-		_person(_cell(cells, people[i]), people[i], h, sl, hs, i)
+		var yw: float = people_yaws[i] if i < people_yaws.size() else 0.0
+		_person(_cell(cells, people[i]), people[i], h, sl, hs, yw, i)
+	for i in boxes.size():
+		var dm: Vector3 = box_dims[i] if i < box_dims.size() else Vector3(0.25, 0.3, 0.25)
+		var yw: float = box_yaws[i] if i < box_yaws.size() else 0.0
+		var sl: int = box_slots[i] if i < box_slots.size() else 9
+		var tp: float = box_tapers[i] if i < box_tapers.size() else 1.0
+		_obox(_cell(cells, boxes[i]), boxes[i], dm.x, dm.z, dm.y, yw, sl,
+			Vector2(tp, tp), 0.6)
+	for i in stands.size():
+		var hh: float = stand_heights[i] if i < stand_heights.size() else 1.1
+		_stand(_cell(cells, stands[i]), stands[i], hh)
 	var ns := 0
 	for i in range(0, strips.size() - 1, 2):
 		_strip(_cell(cells, (strips[i] + strips[i + 1]) * 0.5), strips[i], strips[i + 1], i)
@@ -96,6 +124,7 @@ func _ready() -> void:
 		_meshes.append(mi)
 		tris += mi.mesh.surface_get_array_len(0) / 3 if mi.mesh.get_surface_count() > 0 else 0
 	stats = {"awnings": na, "goods": goods.size(), "people": people.size(),
+		"boxes": boxes.size(), "stands": stands.size(),
 		"strips": ns, "cells": cells.size(), "tris": tris}
 	if not Engine.is_editor_hint():
 		print("BazaarKit %s: %s" % [name, stats])
@@ -227,28 +256,72 @@ func _heap(st: SurfaceTool, p: Vector3, s: float, slot: int, idx: int) -> void:
 		_tri(st, q0, q1, apex, slot, 1.0)
 
 
-## Om stilizat: fusta/sari (trunchi de con), bust, cap, acoperamant de cap
-## colorat. ~40 de triunghiuri. Picioarele sunt ascunse de haina.
-func _person(st: SurfaceTool, p: Vector3, h: float, slot: int, head_slot: int,
-		idx: int) -> void:
-	var k := h / 1.65
-	_prism(st, p, 0.23 * k, 0.17 * k, 0.9 * k, slot, 6, 0.6, false)
-	var torso := p + Vector3.UP * (0.9 * k)
-	var torso_slot: int = slot if idx % 3 != 0 else CLOTH_SLOTS[(idx * 5) % CLOTH_SLOTS.size()]
-	_prism(st, torso, 0.17 * k, 0.2 * k, 0.45 * k, torso_slot, 6, 0.85, true)
-	# Capul: octaedru turtit.
-	var c := p + Vector3.UP * (1.5 * k)
-	var r := 0.11 * k
-	var ring := [Vector3(r, 0, 0), Vector3(0, 0, r), Vector3(-r, 0, 0), Vector3(0, 0, -r)]
-	var up := c + Vector3.UP * r * 1.25
-	var dn := c + Vector3.DOWN * r * 1.1
-	var top_slot := head_slot if head_slot >= 0 else HAIR_SLOT
+## Triunghi cu normala spre EXTERIORUL unui solid (fata de centrul lui):
+## ordinea se intoarce singura, deci solidele nu depind de sensul colturilor.
+func _tri_out(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, slot: int,
+		ao: float, center: Vector3) -> void:
+	var n := (c - a).cross(b - a)
+	if n.dot((a + b + c) / 3.0 - center) < 0.0:
+		_tri(st, a, c, b, slot, ao)
+	else:
+		_tri(st, a, b, c, slot, ao)
+
+
+## Cutie orientata (yaw), cu capul ingustat pe x/z cu `top`; fara fund.
+## Fetele laterale au AO `ao0` jos (vertex color pe triunghi: media).
+func _obox(st: SurfaceTool, base: Vector3, hx: float, hz: float, h: float,
+		yaw: float, slot: int, top: Vector2 = Vector2.ONE, ao_side: float = 0.8) -> void:
+	var ax := Vector3(cos(yaw), 0.0, -sin(yaw))
+	var az := Vector3(sin(yaw), 0.0, cos(yaw))
+	var center := base + Vector3.UP * (h * 0.5)
+	var b: Array[Vector3] = []
+	var t: Array[Vector3] = []
+	for q: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+		b.append(base + ax * (q.x * hx) + az * (q.y * hz))
+		t.append(base + Vector3.UP * h + ax * (q.x * hx * top.x) + az * (q.y * hz * top.y))
 	for i in 4:
-		var a: Vector3 = c + (ring[i] as Vector3)
-		var b: Vector3 = c + (ring[(i + 1) % 4] as Vector3)
-		# Ordinea da normala spre EXTERIOR (fata vazuta din afara).
-		_tri(st, a, b, up, top_slot, 1.0)
-		_tri(st, a, dn, b, SKIN_SLOT, 0.85)
+		var j := (i + 1) % 4
+		_tri_out(st, b[i], b[j], t[j], slot, ao_side, center)
+		_tri_out(st, b[i], t[j], t[i], slot, ao_side, center)
+	_tri_out(st, t[0], t[1], t[2], slot, 1.0, center)
+	_tri_out(st, t[0], t[2], t[3], slot, 1.0, center)
+
+
+## Om stilizat, runda 2 (criticul: figurantii „citesc ca stalpisori"): silueta
+## de figurina — fusta/dhoti lata, trunchi cu UMERI mai lati decat talia, doua
+## brate, cap de piele si turban/val colorat (sau par negru). ~60 de
+## triunghiuri, sase cutii orientate dupa `yaw`.
+func _person(st: SurfaceTool, p: Vector3, h: float, slot: int, head_slot: int,
+		yaw: float, idx: int) -> void:
+	var k := h / 1.65
+	var top_slot: int = slot if idx % 3 != 0 else CLOTH_SLOTS[(idx * 5) % CLOTH_SLOTS.size()]
+	# Fusta / sari: lata jos, stransa la talie.
+	_obox(st, p, 0.2 * k, 0.15 * k, 0.82 * k, yaw, slot, Vector2(0.8, 0.8), 0.6)
+	# Trunchiul: talia 0,32 m, umerii 0,5 m.
+	var waist := p + Vector3.UP * (0.8 * k)
+	_obox(st, waist, 0.16 * k, 0.11 * k, 0.56 * k, yaw, top_slot, Vector2(1.5, 1.1), 0.85)
+	# Bratele, lipite de umeri, putin departate de trunchi.
+	var ax := Vector3(cos(yaw), 0.0, -sin(yaw))
+	for sgn in [-1.0, 1.0]:
+		var sh := waist + ax * (float(sgn) * 0.29 * k) + Vector3.DOWN * (0.02 * k)
+		_obox(st, sh, 0.055 * k, 0.06 * k, 0.56 * k, yaw, top_slot, Vector2(1.2, 1.1), 0.75)
+	# Capul (piele) si acoperamantul.
+	var head := p + Vector3.UP * (1.38 * k)
+	_obox(st, head, 0.1 * k, 0.11 * k, 0.23 * k, yaw, SKIN_SLOT, Vector2(1.0, 1.0), 0.9)
+	var cap_slot := head_slot if head_slot >= 0 else HAIR_SLOT
+	var cap_h := 0.13 * k if head_slot >= 0 else 0.07 * k
+	_obox(st, head + Vector3.UP * (0.2 * k), 0.12 * k, 0.13 * k, cap_h, yaw, cap_slot,
+		Vector2(0.75, 0.75), 0.9)
+
+
+## Stativul unui felinar de la sol: picior subtire, negru, cu o talpa si o
+## cutie de felinar (rama) in varf; lumina e in `FortLamps`.
+func _stand(st: SurfaceTool, base: Vector3, h: float) -> void:
+	_obox(st, base, 0.14, 0.14, 0.05, 0.0, STAND_SLOT, Vector2.ONE, 0.6)
+	_obox(st, base, 0.03, 0.03, h, 0.0, STAND_SLOT, Vector2.ONE, 0.7)
+	var top := base + Vector3.UP * h
+	# Rama felinarului: capac piramidal peste lampa.
+	_obox(st, top + Vector3.UP * 0.28, 0.13, 0.13, 0.1, 0.0, STAND_SLOT, Vector2(0.3, 0.3), 0.8)
 
 
 ## Fasie de textile peste strada: franghia lasata in arc intre fatade si

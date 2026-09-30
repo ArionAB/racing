@@ -90,6 +90,13 @@ const CLOTH_SLOTS := [16, 31, 21, 14, 30, 15]
 ## Condimentele: rosu, galben (turmeric), portocaliu, verde, roz, alb, maro.
 const SPICE_SLOTS := [14, 16, 30, 21, 31, 22, 27, 30, 14, 16]
 const CLOTHES := [14, 16, 31, 30, 15, 21, 22, 14, 31, 16]
+## Sacii: iuta (nisip mediu), panza alba-crem, iarba uscata.
+const SACK_SLOTS := [1, 19, 13, 1]
+## Multimea: linia grupurilor si limitele (de la ax). Asfaltul se termina la
+## 6,5, trotuarul la 9,7; marfa din fata tarabelor incepe la ~9,0.
+const CROWD_LAT := 8.0
+const CROWD_MIN_LAT := 7.1
+const CROWD_MAX_LAT := 9.1
 ## Fasiile peste strada.
 ## Runda 1, prima captura: la pas 11 m si panze de 0,9-1,35 m fasiile acopereau
 ## jumatatea de sus a cadrului (un zid de panza in fata camerei). Mai rare, mai
@@ -119,6 +126,16 @@ var _ppl := PackedVector3Array()
 var _ppl_h := PackedFloat32Array()
 var _ppl_sl := PackedInt32Array()
 var _ppl_hs := PackedInt32Array()
+var _ppl_yaw := PackedFloat32Array()
+var _boxes := PackedVector3Array()
+var _box_dims := PackedVector3Array()
+var _box_yaws := PackedFloat32Array()
+var _box_slots := PackedInt32Array()
+var _box_tapers := PackedFloat32Array()
+var _stands := PackedVector3Array()
+var _stand_h := PackedFloat32Array()
+var _lamps := PackedVector3Array()
+var _lamp_r := PackedFloat32Array()
 var _strips := PackedVector3Array()
 var _eaves: Array[Vector3] = []
 var _shop_lamps: Array[Vector3] = []
@@ -144,8 +161,11 @@ func _ready() -> void:
 		_houses(side, FACADE_LAT, "bDr" if side > 0.0 else "bSt", "")
 	for side: float in [1.0, -1.0]:
 		_houses(side, -1.0, "bDrB" if side > 0.0 else "bStB", "none")
+	for side: float in [1.0, -1.0]:
+		_crowd(side)
 	_strips_across()
 	_kit_node()
+	_lamps_node()
 	_lights_node()
 	_write()
 	get_tree().quit(0)
@@ -259,21 +279,25 @@ func _stalls(side: float) -> void:
 			_stall_dressing(m, c, y, fwd, w, dp)
 			d += w + _rng.randf_range(0.0, 0.08)
 			placed_any = true
-		# Golul dintre grupuri: pasaj cu saci si oameni.
-		var gap := _rng.randf_range(0.7, 1.4)
+		# Golul dintre grupuri: pasaj cu un sac si un FELINAR LA SOL (runda 2,
+		# criticul: „felinare/lampi calde la sol intre tarabe").
+		var gap := _rng.randf_range(0.8, 1.4)
 		if placed_any:
 			var q := _on_line(line, d + gap * 0.5)
 			var s: Vector3 = q["s"]
 			var fwd := -s * side
 			var c: Vector3 = q["p"] + s * side * 0.3
-			if _rng.randf() < 0.7:
+			if _rng.randf() < 0.6:
 				var sx := c + fwd * 0.6
 				_raw("spice_sacks", base + "Saci", Vector3(sx.x, _sol_real(sx.x, sx.z), sx.z),
 					atan2(fwd.x, fwd.z) + PI * 0.5 + _rng.randf_range(-0.2, 0.2), 1.0, "")
-			for k in _rng.randi_range(1, 2):
-				var pp := c + fwd * _rng.randf_range(-0.8, 0.4) \
-					+ Vector3.UP.cross(fwd).normalized() * _rng.randf_range(-0.2, 0.2)
-				_person(pp)
+			var lp := c - fwd * 0.9
+			var hh := _rng.randf_range(1.05, 1.35)
+			var gy := _sol_real(lp.x, lp.z)
+			_stands.append(Vector3(lp.x, gy, lp.z))
+			_stand_h.append(hh)
+			_lamps.append(Vector3(lp.x, gy + hh + 0.16, lp.z))
+			_lamp_r.append(0.13)
 		d += gap
 
 
@@ -313,38 +337,119 @@ func _stall_dressing(m: String, c: Vector3, y: float, fwd: Vector3, w: float,
 	_eaves.append(fr)
 	# O lampa mica sub copertina, deasupra tejghelei.
 	_shop_lamps.append(Vector3(c.x, y + 2.25, c.z) + fwd * (dp * 0.5 + 0.2))
-	# Marfa: un rand de gramezi in fata tejghelei (muchia trotuarului) si un
-	# al doilea, mai mic, pe tejghea.
-	var front := c + fwd * (dp * 0.5 + 0.28)
-	var nh := int(round(w / 0.62))
-	for k in nh:
-		var u := (float(k) + 0.5) / float(nh) - 0.5
-		var p := front + t * (u * (w - 0.3)) + fwd * _rng.randf_range(-0.05, 0.1)
+	# MARFA, runda 2 (criticul: „stive CONTINUE de marfa: cosuri, saci, textile
+	# stivuite, care umplu tejgheaua"). Trei randuri lipite pe toata latimea:
+	#   - pe tejghea (y + 0,85): stive de baloti de textile;
+	#   - randul A, lipit de fata tarabei: saci plini (cu con de condiment) si
+	#     stive de baloti de 0,4-0,9 m;
+	#   - randul B, pe muchia trotuarului, sub marginea copertinei: cosuri joase
+	#     cu gramezi (se vad de sub falbala din camera de joc).
+	var yaw := atan2(fwd.x, fwd.z)
+	var u := -w * 0.5 + 0.05
+	while u < w * 0.5 - 0.25:
+		var wid := _rng.randf_range(0.38, 0.52)
+		var p := c + t * (u + wid * 0.5) + fwd * (dp * 0.5 + 0.28)
+		_front_item(p, wid, yaw)
+		u += wid + 0.02
+	u = -w * 0.5 + 0.1
+	while u < w * 0.5 - 0.3:
+		var wid := _rng.randf_range(0.5, 0.62)
+		var p := c + t * (u + wid * 0.5) + fwd * (dp * 0.5 + 0.8)
 		_goods.append(Vector3(p.x, _sol_real(p.x, p.z), p.z))
-		_goods_s.append(_rng.randf_range(0.95, 1.15))
+		_goods_s.append(wid / 0.52)
 		_goods_sl.append(SPICE_SLOTS[_rng.randi() % SPICE_SLOTS.size()])
+		u += wid + 0.03
+	# Un felinar jos, pe caldaram, in fata fiecarei tarabe.
+	var lp := c + fwd * (dp * 0.5 + 0.8) + t * (w * 0.5 - 0.1)
+	var ly := _sol_real(lp.x, lp.z)
+	_stands.append(Vector3(lp.x, ly, lp.z))
+	_stand_h.append(0.42)
+	_lamps.append(Vector3(lp.x, ly + 0.58, lp.z))
+	_lamp_r.append(0.1)
 	if m != "chai_stall":
-		for k in nh - 1:
-			var u := (float(k) + 1.0) / float(nh) - 0.5
-			var p := c + fwd * (dp * 0.5 - 0.35) + t * (u * (w - 0.3))
-			_goods.append(Vector3(p.x, y + 0.85, p.z))
-			_goods_s.append(_rng.randf_range(0.7, 0.85))
-			_goods_sl.append(SPICE_SLOTS[_rng.randi() % SPICE_SLOTS.size()])
-	# Oameni in fata tarabei, pe muchia trotuarului (0-2 pe taraba).
-	for k in _rng.randi_range(0, 2):
-		var p := c + fwd * (dp * 0.5 + _rng.randf_range(0.75, 1.25)) \
-			+ t * _rng.randf_range(-w * 0.45, w * 0.45)
-		_person(p)
+		u = -w * 0.5 + 0.12
+		while u < w * 0.5 - 0.3:
+			var wid := _rng.randf_range(0.42, 0.58)
+			var p := c + t * (u + wid * 0.5) + fwd * (dp * 0.5 - 0.35)
+			_stack(Vector3(p.x, y + 0.85, p.z), wid, yaw, _rng.randi_range(2, 5))
+			u += wid + 0.02
 
 
-func _person(p: Vector3) -> void:
-	if _axis_dist(p) < 8.4:
+## Un obiect din randul A: sac plin cu condiment sau stiva de baloti.
+func _front_item(p: Vector3, wid: float, yaw: float) -> void:
+	var gy := _sol_real(p.x, p.z)
+	if _rng.randf() < 0.55:
+		var h := _rng.randf_range(0.5, 0.7)
+		_box(Vector3(p.x, gy, p.z), Vector3(wid * 0.5, h, 0.2), yaw + _rng.randf_range(-0.15, 0.15),
+			SACK_SLOTS[_rng.randi() % SACK_SLOTS.size()], 0.8)
+		_goods.append(Vector3(p.x, gy + h - 0.2, p.z))
+		_goods_s.append(wid / 0.55)
+		_goods_sl.append(SPICE_SLOTS[_rng.randi() % SPICE_SLOTS.size()])
+	else:
+		_stack(Vector3(p.x, gy, p.z), wid, yaw, _rng.randi_range(3, 6))
+
+
+## Stiva de baloti de textile (0,12-0,16 m fiecare, culori saturate alternate).
+func _stack(base: Vector3, wid: float, yaw: float, n: int) -> void:
+	var y := base.y
+	var k := _rng.randi() % CLOTHES.size()
+	for i in n:
+		var hh := _rng.randf_range(0.12, 0.16)
+		_box(Vector3(base.x, y, base.z), Vector3(wid * 0.5 * _rng.randf_range(0.9, 1.0), hh, 0.22),
+			yaw + _rng.randf_range(-0.12, 0.12), CLOTHES[k % CLOTHES.size()], 1.0)
+		y += hh
+		k += 1 + (_rng.randi() % 3)
+
+
+func _box(p: Vector3, dims: Vector3, yaw: float, slot: int, taper: float) -> void:
+	_boxes.append(p)
+	_box_dims.append(dims)
+	_box_yaws.append(yaw)
+	_box_slots.append(slot)
+	_box_tapers.append(taper)
+
+
+## MULTIMEA pe caldaram, runda 2 (criticul: „figurine de oameni DESE, in
+## picioare, grupuri, de-a lungul marginilor pavate, pe ambele parti, pana
+## departe"): grupuri de 3-6 intorsi unul spre altul, cu trecatori razleti
+## intre ele. Doar pe trotuarul pavat (7,1-9,1 m de ax), niciodata pe asfalt
+## (6,5 m); fara corp: trotuarul e drum, o masina trece prin ei.
+func _crowd(side: float) -> void:
+	var f1 := F_TO_RIGHT if side > 0.0 else F_TO_LEFT
+	var line := _offset_line(F_FROM + 0.002, f1, side, CROWD_LAT)
+	var total: float = (line["c"] as Array)[(line["c"] as Array).size() - 1]
+	var d := _rng.randf_range(0.5, 2.0)
+	while d < total - 1.0:
+		var q := _on_line(line, d)
+		var s: Vector3 = q["s"]
+		var t := Vector3.UP.cross(s).normalized()
+		var gc: Vector3 = q["p"] + s * side * _rng.randf_range(-0.5, 0.5)
+		var n := _rng.randi_range(3, 6)
+		var r := 0.35 + 0.12 * float(n)
+		var a0 := _rng.randf_range(0.0, TAU)
+		for i in n:
+			var a := a0 + TAU * float(i) / float(n) + _rng.randf_range(-0.3, 0.3)
+			var pp := gc + (t * cos(a) + s * sin(a)) * r * _rng.randf_range(0.75, 1.0)
+			var to_c := gc - pp
+			_person(pp, atan2(to_c.x, to_c.z) + _rng.randf_range(-0.4, 0.4))
+		# Trecatori intre grupuri, mergand in lungul strazii.
+		for i in _rng.randi_range(0, 2):
+			var pp := gc + t * _rng.randf_range(1.6, 2.6) + s * side * _rng.randf_range(-0.7, 0.7)
+			var yw := atan2(t.x, t.z) + (PI if _rng.randf() < 0.5 else 0.0)
+			_person(pp, yw + _rng.randf_range(-0.2, 0.2))
+		d += _rng.randf_range(3.2, 4.6)
+
+
+func _person(p: Vector3, yaw: float) -> void:
+	var ad := _axis_dist(p)
+	if ad < CROWD_MIN_LAT or ad > CROWD_MAX_LAT:
 		return
 	_ppl.append(Vector3(p.x, _sol_real(p.x, p.z) - 0.03, p.z))
-	_ppl_h.append(_rng.randf_range(1.5, 1.78))
+	_ppl_h.append(_rng.randf_range(1.6, 1.85))
 	_ppl_sl.append(CLOTHES[_rng.randi() % CLOTHES.size()])
+	_ppl_yaw.append(yaw)
 	var r := _rng.randf()
-	_ppl_hs.append(-1 if r < 0.45 else CLOTHES[_rng.randi() % CLOTHES.size()])
+	_ppl_hs.append(-1 if r < 0.4 else CLOTHES[_rng.randi() % CLOTHES.size()])
 
 
 # ------------------------------------------------------------------ casele
@@ -440,6 +545,14 @@ func _kit_node() -> void:
 	_out.append("people_heights = PackedFloat32Array(%s)" % ", ".join(Array(_ppl_h).map(func(v): return "%.2f" % v)))
 	_out.append("people_slots = PackedInt32Array(%s)" % ", ".join(Array(_ppl_sl).map(func(v): return str(v))))
 	_out.append("people_head_slots = PackedInt32Array(%s)" % ", ".join(Array(_ppl_hs).map(func(v): return str(v))))
+	_out.append("people_yaws = PackedFloat32Array(%s)" % ", ".join(Array(_ppl_yaw).map(func(v): return "%.2f" % v)))
+	_out.append("boxes = " + _pv3(_boxes))
+	_out.append("box_dims = " + _pv3(_box_dims))
+	_out.append("box_yaws = PackedFloat32Array(%s)" % ", ".join(Array(_box_yaws).map(func(v): return "%.2f" % v)))
+	_out.append("box_slots = PackedInt32Array(%s)" % ", ".join(Array(_box_slots).map(func(v): return str(v))))
+	_out.append("box_tapers = PackedFloat32Array(%s)" % ", ".join(Array(_box_tapers).map(func(v): return "%.2f" % v)))
+	_out.append("stands = " + _pv3(_stands))
+	_out.append("stand_heights = PackedFloat32Array(%s)" % ", ".join(Array(_stand_h).map(func(v): return "%.2f" % v)))
 	_out.append("strips = " + _pv3(_strips))
 	_out.append("strip_sag_m = 0.45")
 	_out.append("strip_cloth_h = Vector2(0.5, 0.75)")
@@ -448,6 +561,21 @@ func _kit_node() -> void:
 	_out.append("")
 	print("; copertine %d, marfa %d, oameni %d, fasii %d" % [_awn_slots.size(), _goods.size(),
 		_ppl.size(), _strips.size() / 2])
+
+
+## Felinarele de la sol (lampile; stativele sunt in BazaarKit). Acelasi
+## material si acelasi halou ca FortLamps din E/D si becurile din H.
+func _lamps_node() -> void:
+	_out.append('[node name="bLampiSol" type="Node3D" parent="%s"]' % ZONE)
+	_out.append('script = ExtResource("e_fort_lamps")')
+	_out.append("positions = " + _pv3(_lamps))
+	_out.append("radii = PackedFloat32Array(%s)" % ", ".join(Array(_lamp_r).map(func(v): return "%.2f" % v)))
+	var st: Array[String] = []
+	for i in _lamps.size():
+		st.append("1.40")
+	_out.append("stretch = PackedFloat32Array(%s)" % ", ".join(st))
+	_out.append("")
+	print("; felinare la sol %d, stive %d" % [_lamps.size(), _boxes.size()])
 
 
 func _lights_node() -> void:

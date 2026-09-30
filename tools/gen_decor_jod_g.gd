@@ -185,6 +185,12 @@ const BIG := ["rhyolite_boulder_a", "rhyolite_boulder_b"]
 const FLIGHT_F0 := 0.862
 const FLIGHT_F1 := 0.904
 const FLIGHT_GAP := 12.0
+## Elanul spre trambulina (`ai_keep_side_run_m` 100 m ~ 0.049): o masina
+## atinsa de un bolovan aici ajunge prea incet la buza si cade in canal.
+## Runda 1, ProbeRace seed 12: o repunere noua la 0.891 (Robo), determinista
+## pe 4 rulari, absenta fara decor -> pe elan nimic cu corp la < 8 m.
+const APPROACH_F0 := 0.815
+const APPROACH_GAP := 8.0
 ## Cea mai mica distanta colt-margine pentru piesele cu corp. Bolovanii de
 ## margine (contract: „bolovani hull pe marginea dreapta") au EDGE_ROW_GAP.
 const GAP_MIN := 4.0
@@ -245,6 +251,8 @@ func _solid_ok(q: Vector3, r: float, gap: float, pad: float = 0.5) -> bool:
 	if ed < gap:
 		return false
 	if f >= FLIGHT_F0 and f <= FLIGHT_F1 and ed < FLIGHT_GAP:
+		return false
+	if f >= APPROACH_F0 and f < FLIGHT_F0 and ed < APPROACH_GAP:
 		return false
 	return not _overlaps(q, r, pad)
 
@@ -564,7 +572,7 @@ func _pillar(q: Vector3, sx: float, h: float, sz: float, yaw: float, gap: float,
 func _right_edge() -> void:
 	var f := 0.706
 	var n := 0
-	while f < 0.852:
+	while f < APPROACH_F0:
 		var i := _idx(f)
 		var road := _track.baked[i]
 		var R := -_left(i)

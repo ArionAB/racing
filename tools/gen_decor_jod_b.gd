@@ -373,8 +373,10 @@ func _stall_dressing(m: String, c: Vector3, y: float, fwd: Vector3, w: float,
 			_goods_sl.append(WARM_GOODS[_rng.randi() % WARM_GOODS.size()])
 			u += wid + 0.02
 	# Felinarul mic cald deasupra marfii, sub marginea copertinei (FortLamps).
-	var lp := c + fwd * (dp * 0.5 + DISPLAY_OFF) + t * _rng.randf_range(-0.4, 0.4)
-	_lamps.append(Vector3(lp.x, ty + 1.95, lp.z))
+	# Pe muchia din fata a tejghelei si sub falbala (2,15 m): altfel, din
+	# camera de joc, falbala il ascundea (captura r3, prima trecere).
+	var lp := c + fwd * (dp * 0.5 + DISPLAY_OFF + 0.4) + t * _rng.randf_range(-0.4, 0.4)
+	_lamps.append(Vector3(lp.x, ty + 1.72, lp.z))
 	_lamp_r.append(0.13)
 	if m != "chai_stall":
 		var u := -w * 0.5 + 0.12

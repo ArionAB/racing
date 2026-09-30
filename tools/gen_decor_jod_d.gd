@@ -175,6 +175,11 @@ var _hmaps := {}
 var _stats := {}
 var _arch_d := 30.0
 var _shuf_rng := RandomNumberGenerator.new()
+var _terr_rng := RandomNumberGenerator.new()
+var _pots := PackedVector3Array()
+var _lines := PackedVector3Array()
+var _tank_sc := PackedFloat32Array()
+var _lanterns := PackedVector3Array()
 var _w_org := PackedVector3Array()
 var _w_yaw := PackedFloat32Array()
 var _w_size := PackedVector3Array()
@@ -205,6 +210,7 @@ func _ready() -> void:
 	_sus_y = hi + 150.0
 	_rng.seed = 300926
 	_shuf_rng.seed = 926003
+	_terr_rng.seed = 41026
 	for m in HOUSES:
 		_hmaps[m] = _heightmap(m)
 	_reserve()
@@ -239,6 +245,8 @@ func _ready() -> void:
 	# La urma (fara rng, deci restul decorului ramane identic): prispele.
 	for sgn: float in [1.0, -1.0]:
 		_plinths(main, sgn, s_in, s_out)
+	# Runda 4, tot la urma si cu rng propriu: terasele si felinarele.
+	_terraces()
 	_write()
 	get_tree().quit(0)
 
@@ -674,7 +682,9 @@ func _edge(dir: Vector2, hx: float, hz: float) -> Array:
 
 
 func _roofs() -> void:
+	var hi := -1
 	for hs: Dictionary in _houses:
+		hi += 1
 		var model: String = hs["model"]
 		var xf: Transform3D = hs["xf"]
 		var h: Dictionary = HOUSES[model]
@@ -683,11 +693,14 @@ func _roofs() -> void:
 		# Fata spre drum in coordonate LOCALE ale modelului.
 		var fl: Vector2 = h["front"]
 		# --- candelele pe muchia fetei (si pe laturi, la randul 1) ---
+		# Runda 4 (criticul: „o parte din sirurile de becuri albe inlocuite cu
+		# felinare calde, mai rare"): doar muchia fetei, nu si laturile.
+		# Pe randul 1 al buclei, o casa din doua ramane fara sir: acolo stau
+		# felinarele din `_terraces` (casele cu `lanterns_only`).
 		var edges: Array = [_edge(fl, hx, hz)]
-		if int(hs["row"]) == 0:
-			var perp := Vector2(-fl.y, fl.x)
-			edges.append(_edge(perp, hx, hz))
-			edges.append(_edge(-perp, hx, hz))
+		if int(hs["row"]) == 0 and int(hs["route"]) == 0 and hi % 2 == 1:
+			edges.clear()
+			hs["lanterns_only"] = true
 		for e: Array in edges:
 			var a: Vector2 = e[0]
 			var b: Vector2 = e[1]
@@ -825,11 +838,18 @@ func _emit_wall(base: Vector3, face: Vector3, ln: float, dep: float,
 	_w_flags.append(fl)
 	var xf := Transform3D(b, base)
 	# Candele: pe coama parapetului din fata, dese; pe ulicioara si la prag.
+	# Runda 4: pe bucla, un zid din doua poarta in loc de sir doua felinare
+	# calde la capetele parapetului (criticul: becuri albe -> felinare rare).
 	var top := h + 0.75 + DIYA_R * 0.9
-	var cnt := int(floor((ln - 0.3) / DIYA_STEP))
-	for k in cnt + 1:
-		var lx := -ln * 0.5 + 0.15 + (ln - 0.3) * float(k) / float(maxi(cnt, 1))
-		_lamps.append(xf * Vector3(lx, top, dep * 0.5 - 0.11))
+	if ri == 0 and _walls % 2 == 0:
+		for sx: float in [-1.0, 1.0]:
+			_lanterns.append(xf * Vector3(sx * (ln * 0.5 - 0.2), h + 0.75 + LANTERN_R * 1.6,
+				dep * 0.5 - 0.11))
+	else:
+		var cnt := int(floor((ln - 0.3) / DIYA_STEP))
+		for k in cnt + 1:
+			var lx := -ln * 0.5 + 0.15 + (ln - 0.3) * float(k) / float(maxi(cnt, 1))
+			_lamps.append(xf * Vector3(lx, top, dep * 0.5 - 0.11))
 	if ri == 1:
 		for k in 3:
 			_lamps.append(xf * Vector3(-0.8 + 0.8 * float(k), DIYA_R, dep * 0.5 + 0.35))
@@ -956,9 +976,139 @@ func _plinths(route: TrackRoute, sgn: float, s0: float, s1: float) -> void:
 	print("; prispe parte %+.0f: %d" % [sgn, placed])
 
 
+## TERASELE (runda 4, criticul orb pe 0,380: „pe aproape fiecare terasa 1–3
+## rezervoare NEGRE, un copac mic in ghiveci, rufe colorate; la noi fete mari
+## goale"). Pe fiecare casa, in siruri pe muchii: rezervoarele pe muchia din
+## SPATE (1-3, pas 1,5 m), ghivecele in colturile muchiei din FATA, franghia de
+## rufe paralela cu fata, pe mijlocul terasei. Pe zidurile LimeWall: ghiveci la
+## un colt, rufe pe cele lungi. Felinarele calde: la colturile muchiei din fata
+## (casele de pe randul 1) si langa usa zidurilor. Rng propriu, deci restul
+## decorului ramane identic.
+const LANTERN_R := 0.16
+const TERR_FLAT := 0.15
+
+func _terr_ok(model: String, q: Vector2, r: float) -> float:
+	var dd := _hm_disc(model, q.x, q.y, r)
+	if dd.x > 2.8 and dd.y - dd.x < TERR_FLAT:
+		return dd.y
+	return NAN
+
+
+func _terraces() -> void:
+	var n_tank0 := _tanks.size()
+	for k in n_tank0:
+		_tank_sc.append(1.0)
+	for hs: Dictionary in _houses:
+		var model: String = hs["model"]
+		var xf: Transform3D = hs["xf"]
+		var h: Dictionary = HOUSES[model]
+		var hx: float = h["hx"]
+		var hz: float = h["hz"]
+		var fl: Vector2 = h["front"]
+		var mine: Array[Vector2] = []
+		for k in n_tank0:
+			var lp := xf.affine_inverse() * _tanks[k]
+			if absf(lp.x) < hx and absf(lp.z) < hz:
+				mine.append(Vector2(lp.x, lp.z))
+		# --- rezervoare pe muchia din spate ---
+		if not HAS_TANK.has(model):
+			var e: Array = _edge(-fl, hx, hz)
+			var a: Vector2 = e[0]
+			var b: Vector2 = e[1]
+			var inward: Vector2 = e[2]
+			var want := _terr_rng.randi_range(1, 3)
+			var len := a.distance_to(b)
+			var t := 1.0
+			while t < len - 0.9 and want > 0:
+				var q := a + (b - a).normalized() * t + inward * 0.95
+				var free := true
+				for m in mine:
+					if m.distance_to(q) < 1.45:
+						free = false
+				var y := _terr_ok(model, q, 0.7) if free else NAN
+				if not is_nan(y):
+					_tanks.append(xf * Vector3(q.x, y, q.y))
+					_tank_yaws.append(0.0)
+					_tank_sc.append(_terr_rng.randf_range(0.85, 1.1))
+					mine.append(q)
+					want -= 1
+					t += 1.5
+				else:
+					t += 0.5
+		# --- ghivece in colturile fetei ---
+		var ef: Array = _edge(fl, hx, hz)
+		var fa: Vector2 = ef[0]
+		var fb: Vector2 = ef[1]
+		var fin: Vector2 = ef[2]
+		var fdir := (fb - fa).normalized()
+		for side: float in [0.0, 1.0]:
+			if _terr_rng.randf() < 0.25:
+				continue
+			# Primul loc plat, mergand dinspre colt spre mijlocul muchiei.
+			for step in 6:
+				var along := 0.75 + 0.5 * float(step)
+				var q := (fa + fdir * along if side == 0.0 else fb - fdir * along) + fin * 0.8
+				var y := _terr_ok(model, q, 0.35)
+				if not is_nan(y):
+					_pots.append(xf * Vector3(q.x, y, q.y))
+					break
+		# --- felinare calde in colturile fetei (randul 1 al buclei) ---
+		if int(hs["row"]) == 0 and int(hs["route"]) == 0:
+			var lq: Array = [fa + fdir * 0.2 + fin * 0.2, fb - fdir * 0.2 + fin * 0.2]
+			if hs.get("lanterns_only", false):
+				lq.append((fa + fb) * 0.5 + fin * 0.2)
+			for q: Vector2 in lq:
+				var top := 0.0
+				for st in 3:
+					top = maxf(top, _hm_at(model, q.x + fin.x * 0.15 * st, q.y + fin.y * 0.15 * st))
+				if top > 2.5:
+					_lanterns.append(xf * Vector3(q.x, top + LANTERN_R * 1.6, q.y))
+		# --- franghia de rufe pe mijloc, paralela cu fata ---
+		if _terr_rng.randf() < 0.65:
+			var mid_in := (hz if absf(fl.y) > 0.5 else hx) * 0.9
+			var c := (fa + fb) * 0.5 + fin * mid_in
+			var half := minf(fa.distance_to(fb) * 0.5 - 1.0, 3.0)
+			if half > 1.0:
+				var p0 := c - fdir * half
+				var p1 := c + fdir * half
+				var y0 := _terr_ok(model, p0, 0.3)
+				var y1 := _terr_ok(model, p1, 0.3)
+				var ym := _terr_ok(model, c, 0.3)
+				if not is_nan(y0) and not is_nan(y1) and not is_nan(ym) \
+						and absf(y0 - y1) < 0.1:
+					_lines.append(xf * Vector3(p0.x, y0 + 1.6, p0.y))
+					_lines.append(xf * Vector3(p1.x, y1 + 1.6, p1.y))
+	# --- zidurile LimeWall ---
+	for i in _w_org.size():
+		var fl2 := _w_flags[i]
+		if (fl2 & 64) != 0:
+			continue
+		var sz := _w_size[i]
+		var z := Vector3(sin(_w_yaw[i]), 0.0, cos(_w_yaw[i]))
+		var xf2 := Transform3D(Basis(Vector3.UP.cross(z).normalized(), Vector3.UP, z), _w_org[i])
+		var ln := sz.x
+		var dep := sz.y
+		var hh := sz.z
+		if dep >= 1.5 and _terr_rng.randf() < 0.5:
+			var sx := -1.0 if _terr_rng.randf() < 0.5 else 1.0
+			_pots.append(xf2 * Vector3(sx * (ln * 0.5 - 0.55), hh, 0.0))
+		if ln >= 5.0 and dep >= 2.2 and _terr_rng.randf() < 0.45:
+			_lines.append(xf2 * Vector3(-ln * 0.5 + 0.6, hh + 1.6, -0.2))
+			_lines.append(xf2 * Vector3(ln * 0.5 - 0.6, hh + 1.6, -0.2))
+		# Felinar langa usa (usa: fereastra din mijloc a fetei, la parter).
+		var nwin := (fl2 >> 2) & 3
+		if (fl2 & 2) != 0 and nwin > 0:
+			var k := nwin / 2
+			var cx := -ln * 0.5 + ln * (float(k) + 0.5) / float(nwin)
+			_lanterns.append(xf2 * Vector3(cx + 0.8, 2.5, dep * 0.5 + 0.2))
+	print("; terase: rezervoare %d (+%d), ghivece %d, franghii %d, felinare %d" % [
+		_tanks.size(), _tanks.size() - n_tank0, _pots.size(), _lines.size() / 2,
+		_lanterns.size()])
+
+
 ## Candele pe bordura: sirul de pe marginea exterioara a trotuarului, pe ambele
 ## parti (runda 3: candele pe bordura drumului, nu doar pe streasini).
-const CURB_STEP := 1.4
+const CURB_STEP := 2.8
 
 func _curb_lamps(route: TrackRoute, s0: float, s1: float) -> void:
 	var before := _lamps.size()
@@ -1085,7 +1235,43 @@ func _flock(name_: String, res: String, pts: PackedVector3Array,
 
 
 func _write() -> void:
-	_flock("Rezervoare", "s_rooftop_tank", _tanks, _tank_yaws)
+	# Rezervoarele NEGRE (slotul 26) si restul mobilierului teraselor: RoofKit.
+	_out.append('[node name="Terase" type="Node3D" parent="%s"]' % ZONE)
+	_out.append('script = ExtResource("d_roof_kit")')
+	var tps: Array[String] = []
+	var tss: Array[String] = []
+	for k in _tanks.size():
+		var v := _tanks[k]
+		tps.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+		tss.append("%.2f" % (_tank_sc[k] if k < _tank_sc.size() else 1.0))
+	_out.append("tanks = PackedVector3Array(%s)" % ", ".join(tps))
+	_out.append("tank_scales = PackedFloat32Array(%s)" % ", ".join(tss))
+	var pps: Array[String] = []
+	for v in _pots:
+		pps.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+	_out.append("pots = PackedVector3Array(%s)" % ", ".join(pps))
+	var lps: Array[String] = []
+	for v in _lines:
+		lps.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+	_out.append("lines = PackedVector3Array(%s)" % ", ".join(lps))
+	_out.append("")
+	if not _lanterns.is_empty():
+		_out.append('[node name="FelinareOras" type="Node3D" parent="%s"]' % ZONE)
+		_out.append('script = ExtResource("e_fort_lamps")')
+		var fps: Array[String] = []
+		var frs: Array[String] = []
+		var fss: Array[String] = []
+		for v in _lanterns:
+			fps.append("%.3f, %.3f, %.3f" % [v.x, v.y, v.z])
+			frs.append("%.2f" % LANTERN_R)
+			fss.append("1.60")
+		_out.append("positions = PackedVector3Array(%s)" % ", ".join(fps))
+		_out.append("radii = PackedFloat32Array(%s)" % ", ".join(frs))
+		_out.append("stretch = PackedFloat32Array(%s)" % ", ".join(fss))
+		_out.append("halo_radius_k = 7.0")
+		_out.append("halo_color = Color(1, 0.4, 0.07, 1)")
+		_out.append("halo_intensity = 1.2")
+		_out.append("")
 	_flock("Rufe", "s_rooftop_clutter", _clutter, _clutter_yaws)
 	_out.append('[node name="CandeleOras" type="Node3D" parent="%s"]' % ZONE)
 	_out.append('script = ExtResource("e_fort_lamps")')

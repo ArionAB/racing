@@ -117,6 +117,10 @@ jobs:
           ls .godot/imported | wc -l
           for s in s3tc etc2 astc; do echo "$s: $(ls .godot/imported | grep -c "\.$s\.ctex" || true)"; done
           ls .godot/imported | grep "t_bush" || true
+          echo "--- import1.log: progres si erori (fara zgomot de iconite) ---"
+          grep -nE "reimport|first_scan|Started|ERROR|WARNING|crash|signal|extension|GDExtension" import1.log             | grep -vE "road_(container|point)|/icons/|\.svg" | head -120 || true
+          echo "--- coada import1.log ---"
+          tail -30 import1.log
 
       - name: Export proiect Xcode
         run: |
@@ -137,7 +141,13 @@ jobs:
       - name: xcodebuild (fara semnatura)
         run: |
           set -euo pipefail
+          # Godot 4.7 scrie un project.pbxproj pe care Xcode 16 nu-l mai citeste;
+          # alegem cel mai nou Xcode instalat pe imagine.
+          ls -d /Applications/Xcode*.app
+          XC=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XC"
           xcodebuild -version
+          head -c 600 "build/ios/${APP_NAME}.xcodeproj/project.pbxproj"; echo
           xcodebuild -list -project "build/ios/${APP_NAME}.xcodeproj"
           xcodebuild build \
             -project "build/ios/${APP_NAME}.xcodeproj" \

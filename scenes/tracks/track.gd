@@ -10,6 +10,16 @@ extends Node3D
 ## tot; pe INTERIOR doar unde soseaua e inaltata. La nivelul solului
 ## interiorul e deschis -> scurtaturi prin iarba lenta = risc/recompensa.
 
+## Emis la capatul fiecarei faze din `rebuild()` (vezi `BUILD_STEPS`), ca
+## ecranul de incarcare sa-si mute bara intre pasi (LoadingScreen). NU lasa
+## niciun cadru sa treaca: constructia ramane un singur apel sincron, deci
+## pista iese identica cu cea fara ecran. Fara ascultatori nu costa nimic.
+signal build_step(step: StringName)
+## Fazele emise de `build_step`, in ordine. "pregatire" acopera si `_ready`-ul
+## decorului manual, care ruleaza inaintea pistei (copiii intai).
+const BUILD_STEPS: Array[StringName] = [&"pregatire", &"drum", &"obstacole",
+	&"umeri", &"decor", &"teren", &"umbre", &"apa"]
+
 const WALL_HEIGHT: float = 1.3
 ## Cate repetitii de textura de suprafata intra intr-un metru de lume.
 ## 0.08 = o dala la 12.5m — destul de mare cat sa nu se vada tiparul repetandu-se,
@@ -4817,11 +4827,13 @@ func rebuild() -> void:
 		TrackSideSampler.LAGOON_INNER))
 	_sampler.lagoon_rim = float(theme_flag("lagoon_rim",
 		TrackSideSampler.LAGOON_RIM))
+	build_step.emit(&"pregatire")
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
 	_build_walls()
 	_build_viaduct_nets()
+	build_step.emit(&"drum")
 	# Tuburile de tunel DUPA sosea si ziduri (le foloseste ca reper de cota) si
 	# INAINTEA gimmickurilor: zona de camera pe care o aduc trebuie sa existe
 	# cand se monteaza restul. Vezi `_build_tunnels`.
@@ -4888,10 +4900,13 @@ func rebuild() -> void:
 	_build_start_gate()
 	_build_start_line()
 	_build_center_line()
+	build_step.emit(&"obstacole")
 	_build_shoulders()
+	build_step.emit(&"umeri")
 	_build_kerbs()
 	_build_tire_marks()
 	_build_world_decor()
+	build_step.emit(&"decor")
 	# Chevron-urile DUPA decor, nu inaintea lui: canionul si stancile de margine
 	# se aseaza exact pe exteriorul virajelor, adica fix unde stau si semnele.
 	# Puse inainte, primul semn de pe Dunele a iesit INGROPAT intr-o faleza.
@@ -4902,12 +4917,15 @@ func rebuild() -> void:
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
 	_build_terrain()
+	build_step.emit(&"teren")
 	# Umbrele de contact DUPA teren: fiecare disc isi citeste cota din sampler,
 	# si trebuie sa cada peste asfalt/nisip, nu sub ele.
 	_build_prop_contact()
+	build_step.emit(&"umbre")
 	# Apa DUPA teren: are nevoie de aceleasi cote ca sa stie unde e tarmul.
 	_build_water()
 	_build_world_bounds()
+	build_step.emit(&"apa")
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
 ## la fiecare 6.5m de-a lungul curbei.

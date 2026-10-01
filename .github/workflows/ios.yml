@@ -100,8 +100,18 @@ jobs:
       # Bilantul pe sufixe arata daca importul a produs ce cere iOS (etc2/astc):
       # un import care iese devreme lasa exportul sa impacheteze texturi lipsa
       # fara sa pice — jocul ar porni cu materiale goale.
+      # Blender nu exista pe runner. Fara Blender, importul headless se opreste
+      # la primul .blend si NU mai importa nimic dupa el (62 de fisiere in loc
+      # de ~1700, zero texturi etc2/astc). Singurele .blend importate sunt
+      # demo-uri din addons/, nefolosite de joc. override.cfg schimba setarea
+      # doar aici, nu in project.godot-ul echipei.
       - name: Import resources
         run: |
+          printf '[filesystem]
+
+import/blender/enabled=false
+import/fbx2gltf/enabled=false
+' > override.cfg
           "$GODOT" --headless --import > import1.log 2>&1 || true
           "$GODOT" --headless --import > import2.log 2>&1 || true
           wc -l import1.log import2.log
@@ -116,8 +126,9 @@ jobs:
           mkdir -p build/ios
           # Codul de iesire nu e verdict: Godot iese cu 1 si dupa un export
           # reusit daca a logat erori pe drum. Verdictul e proiectul Xcode.
-          "$GODOT" --headless --export-release "iOS" "build/ios/${APP_NAME}.ipa" > export.log 2>&1
-          echo "Godot a iesit cu $?"
+          STATUS=0
+          "$GODOT" --headless --export-release "iOS" "build/ios/${APP_NAME}.ipa" > export.log 2>&1 || STATUS=$?
+          echo "Godot a iesit cu $STATUS"
           grep -E "ERROR" export.log | sort | uniq -c | sort -rn | head -30 || true
           ls -la build/ios
           test -d "build/ios/${APP_NAME}.xcodeproj" || {

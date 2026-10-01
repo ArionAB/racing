@@ -132,9 +132,11 @@ var show_perf: bool = false
 
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
 var touch_steer: float = 0.0
-var touch_drift: bool = false
+# Pedale explicite (sageata sus/jos): +1 gaz, -1 frana/marsarier, 0 nimic.
+# Nu mai exista auto-accelerate — decizia dezvoltatorului dupa primul test pe
+# iPhone (oct 2026): butoane separate de viraj si de pedale, fara DRIFT pe touch.
+var touch_throttle: float = 0.0
 var touch_turbo: bool = false
-var touch_active: bool = false # cel putin un deget pe ecran (auto-accelerate)
 
 # Best lap per pista (nume pista -> milisecunde), persistat. Cheia e numele,
 # nu indexul: la stergerea sau reordonarea unei piste, indexul ramas liber era
@@ -216,9 +218,8 @@ func go_to_menu() -> void:
 
 func reset_touch() -> void:
 	touch_steer = 0.0
-	touch_drift = false
+	touch_throttle = 0.0
 	touch_turbo = false
-	touch_active = false
 
 # ---------------------------------------------------------------- setari
 

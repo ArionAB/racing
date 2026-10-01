@@ -16,14 +16,13 @@ func get_throttle() -> float:
 		return -1.0
 	if Input.is_action_pressed("accelerate"):
 		return 1.0
-	# Touch: auto-accelerate — orice deget pe ecran inseamna gaz (standardul
-	# mobile, nu exista pedala). Pe tastatura accelerezi explicit cu W/Sus.
-	if GameState.touch_active:
-		return 1.0
-	return 0.0
+	# Touch: sageata sus = gaz, sageata jos = frana/marsarier (aceeasi
+	# conventie ca S/Jos pe tastatura).
+	return GameState.touch_throttle
 
 func is_drift_pressed() -> bool:
-	return Input.is_action_pressed("drift") or GameState.touch_drift
+	# Pe touch nu exista DRIFT (scos la cererea dezvoltatorului); ramane tasta.
+	return Input.is_action_pressed("drift")
 
 func is_turbo_pressed() -> bool:
 	return Input.is_action_pressed("turbo") or GameState.touch_turbo

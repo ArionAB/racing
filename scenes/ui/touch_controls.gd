@@ -1,22 +1,36 @@
 class_name TouchControls
 extends Control
-## Controale touch (portate din racing 2D): jumatatea stanga/dreapta a
-## ecranului vireaza (auto-accelerate, fara pedala) + butoane mari pentru
-## TURBO (dreapta-jos) si DRIFT (stanga-jos). Evenimente touch brute pentru
-## multitouch corect; starea se scrie in GameState.
+## Controale touch: butoane explicite, fara zone de jumatate de ecran.
+##
+##   stanga-jos:  [ < ]   (gol de un buton)   [ > ]      viraj
+##   dreapta-jos:            [ ^ ]                       gaz
+##                           [ v ]   [ TURBO ]           frana/marsarier, turbo
+##
+## Aranjamentul e decizia dezvoltatorului dupa primul test pe iPhone (oct
+## 2026): fara auto-accelerate si fara DRIFT pe touch. Golul dintre < si > e
+## cat un buton, ca degetul mare sa nu le atinga pe amandoua deodata.
+##
+## Evenimente touch brute pentru multitouch corect; fiecare deget isi
+## re-evalueaza butonul la glisare (degetul mare aluneca de pe < pe > sau de
+## pe ^ pe v fara sa se ridice). Starea se scrie in GameState.
 
-const BUTTON_RADIUS: float = 78.0
+const BUTTON_RADIUS: float = 66.0
+const TURBO_SCALE: float = 1.15
+## Toleranta in jurul cercului: degetul nu nimereste centrul pe sticla.
+const HIT_SLACK: float = 18.0
+const EDGE_MARGIN: float = 34.0
+const PEDAL_GAP: float = 18.0
 
-var _touches: Dictionary = {} # index deget -> zona ("left"/"right"/"drift"/"turbo")
+var _touches: Dictionary = {} # index deget -> buton ("left"/"right"/"up"/"down"/"turbo"/"")
 
 func _ready() -> void:
 	# _AND_OFFSETS: in arbore, set_anchors_preset singur pastreaza dreptunghiul
 	# curent (0x0) prin offset-uri de -latime. Controlul ramanea 0x0, deci
-	# "jumatatea ecranului" era x=0 si orice atingere citea "dreapta", iar
-	# DRIFT/TURBO se desenau in afara ecranului. Pe desktop nu se vedea
-	# (tastatura); pe iPhone, primul test, nu se putea vira deloc.
+	# butoanele se calculau fata de un ecran de latime zero; pe iPhone, primul
+	# test, nu se putea vira deloc.
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	resized.connect(queue_redraw)
 
 func _exit_tree() -> void:
 	GameState.reset_touch()
@@ -27,60 +41,120 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
 		if touch.pressed:
-			_touches[touch.index] = _zone_at(touch.position)
+			_touches[touch.index] = _button_at(touch.position)
 		else:
 			_touches.erase(touch.index)
 		_refresh()
-		queue_redraw()
 	elif event is InputEventScreenDrag:
 		var drag := event as InputEventScreenDrag
-		if _touches.get(drag.index, "") in ["left", "right"]:
-			var zone := _zone_at(drag.position)
-			if zone in ["left", "right"]:
-				_touches[drag.index] = zone
+		if _touches.has(drag.index):
+			var b := _button_at(drag.position)
+			if b != _touches[drag.index]:
+				_touches[drag.index] = b
 				_refresh()
 
-func _zone_at(pos: Vector2) -> String:
-	if pos.distance_to(_turbo_center()) < BUTTON_RADIUS + 14.0:
-		return "turbo"
-	if pos.distance_to(_drift_center()) < BUTTON_RADIUS + 6.0:
-		return "drift"
-	return "left" if pos.x < size.x * 0.5 else "right"
-
 func _refresh() -> void:
+	var held: Array = _touches.values()
 	var steer := 0.0
-	var drift := false
-	var turbo := false
-	for zone in _touches.values():
-		match zone:
-			"left":
-				steer -= 1.0
-			"right":
-				steer += 1.0
-			"drift":
-				drift = true
-			"turbo":
-				turbo = true
-	GameState.touch_steer = clampf(steer, -1.0, 1.0)
-	GameState.touch_drift = drift
-	GameState.touch_turbo = turbo
-	GameState.touch_active = not _touches.is_empty()
+	if held.has("left"):
+		steer -= 1.0
+	if held.has("right"):
+		steer += 1.0
+	GameState.touch_steer = steer
+	# Sus + jos deodata = frana castiga, ca pe tastatura (S bate W).
+	if held.has("down"):
+		GameState.touch_throttle = -1.0
+	elif held.has("up"):
+		GameState.touch_throttle = 1.0
+	else:
+		GameState.touch_throttle = 0.0
+	GameState.touch_turbo = held.has("turbo")
+	queue_redraw()
 
-func _turbo_center() -> Vector2:
-	return Vector2(size.x - 130.0, size.y - 130.0)
+# ---------------------------------------------------------------- geometrie
 
-func _drift_center() -> Vector2:
-	return Vector2(130.0, size.y - 130.0)
+## Butonul sub punctul dat, sau "" daca degetul a cazut intre butoane.
+func _button_at(pos: Vector2) -> String:
+	var best := ""
+	var best_d := INF
+	var layout := _layout()
+	for b: String in layout:
+		var c: Vector2 = layout[b][0]
+		var r: float = layout[b][1]
+		var d := pos.distance_to(c)
+		if d < r + HIT_SLACK and d < best_d:
+			best = b
+			best_d = d
+	return best
+
+## Centrul si raza fiecarui buton, in coordonatele controlului.
+func _layout() -> Dictionary:
+	var inset := _safe_insets()
+	var r := BUTTON_RADIUS
+	var rt := BUTTON_RADIUS * TURBO_SCALE
+	var bottom := size.y - maxf(EDGE_MARGIN, inset.w)
+	var left_x := maxf(EDGE_MARGIN, inset.x) + r
+	var right_edge := size.x - maxf(EDGE_MARGIN, inset.z)
+	var left_c := Vector2(left_x, bottom - r)
+	var turbo_c := Vector2(right_edge - rt, bottom - rt)
+	var pedal_x := turbo_c.x - rt - PEDAL_GAP - r
+	var down_c := Vector2(pedal_x, bottom - r)
+	return {
+		"left": [left_c, r],
+		# Gol de un buton intreg (2r) intre marginile lui < si >.
+		"right": [left_c + Vector2(4.0 * r, 0.0), r],
+		"down": [down_c, r],
+		"up": [down_c - Vector2(0.0, 2.0 * r + PEDAL_GAP), r],
+		"turbo": [turbo_c, rt],
+	}
+
+## Zona sigura a ecranului (notch, colturi rotunjite, bara home), in unitatile
+## controlului: (stanga, sus, dreapta, jos). Pe desktop iese zero.
+func _safe_insets() -> Vector4:
+	var win := Vector2(DisplayServer.window_get_size())
+	if win.x <= 0.0 or win.y <= 0.0 or size.x <= 0.0:
+		return Vector4.ZERO
+	var safe := Rect2(DisplayServer.get_display_safe_area())
+	if safe.size.x <= 0.0 or safe.size.y <= 0.0:
+		return Vector4.ZERO
+	var k := size.x / win.x
+	return Vector4(safe.position.x, safe.position.y,
+		win.x - safe.end.x, win.y - safe.end.y) * k
+
+# ------------------------------------------------------------------- desen
 
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
-	var turbo_active: bool = _touches.values().has("turbo")
-	var drift_active: bool = _touches.values().has("drift")
-	draw_circle(_turbo_center(), BUTTON_RADIUS,
-		Color(1.0, 0.6, 0.15, 0.35 if turbo_active else 0.16))
-	draw_string(font, _turbo_center() + Vector2(-38, 8), "TURBO",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(1, 1, 1, 0.85))
-	draw_circle(_drift_center(), BUTTON_RADIUS * 0.9,
-		Color(1, 1, 1, 0.28 if drift_active else 0.14))
-	draw_string(font, _drift_center() + Vector2(-34, 8), "DRIFT",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(1, 1, 1, 0.8))
+	var held: Array = _touches.values()
+	var layout := _layout()
+	for b: String in layout:
+		var c: Vector2 = layout[b][0]
+		var r: float = layout[b][1]
+		var on := held.has(b)
+		var fill := Color(1.0, 0.6, 0.15, 0.38 if on else 0.18) if b == "turbo" \
+			else Color(1, 1, 1, 0.30 if on else 0.14)
+		draw_circle(c, r, fill)
+		draw_arc(c, r, 0.0, TAU, 48, Color(1, 1, 1, 0.35), 2.0, true)
+		var ink := Color(1, 1, 1, 0.9 if on else 0.75)
+		match b:
+			"left":
+				_draw_arrow(c, Vector2.LEFT, r, ink)
+			"right":
+				_draw_arrow(c, Vector2.RIGHT, r, ink)
+			"up":
+				_draw_arrow(c, Vector2.UP, r, ink)
+			"down":
+				_draw_arrow(c, Vector2.DOWN, r, ink)
+			"turbo":
+				draw_string(font, c + Vector2(-40, 8), "TURBO",
+					HORIZONTAL_ALIGNMENT_CENTER, 80, 22, ink)
+
+## Triunghi plin in directia data. Desenat, nu glif: fontul de rezerva nu are
+## garantat sagetile Unicode pe toate platformele.
+func _draw_arrow(c: Vector2, dir: Vector2, r: float, col: Color) -> void:
+	var s := r * 0.42
+	var side := Vector2(-dir.y, dir.x)
+	var tip := c + dir * s
+	var base := c - dir * s * 0.7
+	draw_colored_polygon(PackedVector2Array([
+		tip, base + side * s, base - side * s]), col)

@@ -505,7 +505,7 @@ func _swap_player_car(index: int) -> void:
 func _on_respawn_requested() -> void:
 	if state != State.RUNNING or player.finished:
 		return
-	player.respawn()
+	player.respawn(14.0, true) # butonul: mereu pe bucla principala
 
 
 func _fit_camera_to_player() -> void:

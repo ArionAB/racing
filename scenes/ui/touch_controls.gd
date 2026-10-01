@@ -2,13 +2,13 @@ class_name TouchControls
 extends Control
 ## Controale touch: butoane explicite, fara zone de jumatate de ecran.
 ##
-##   stanga-jos:  [ < ]   (gol de un buton)   [ > ]      viraj
+##   stanga-jos:  [ < ] [ > ]                           viraj
 ##   dreapta-jos:            [ ^ ]                       gaz
 ##                           [ v ]   [ TURBO ]           frana/marsarier, turbo
 ##
 ## Aranjamentul e decizia dezvoltatorului dupa primul test pe iPhone (oct
-## 2026): fara auto-accelerate si fara DRIFT pe touch. Golul dintre < si > e
-## cat un buton, ca degetul mare sa nu le atinga pe amandoua deodata.
+## 2026): fara auto-accelerate si fara DRIFT pe touch. TURBO da si gaz — nu
+## trebuie tinut si ^ in acelasi timp. < si > stau apropiate (STEER_GAP).
 ##
 ## Evenimente touch brute pentru multitouch corect; fiecare deget isi
 ## re-evalueaza butonul la glisare (degetul mare aluneca de pe < pe > sau de
@@ -20,6 +20,9 @@ const TURBO_SCALE: float = 1.15
 const HIT_SLACK: float = 18.0
 const EDGE_MARGIN: float = 34.0
 const PEDAL_GAP: float = 18.0
+## Golul dintre < si >. Prima varianta avea un buton intreg (132); la volan,
+## dezvoltatorul le-a vrut apropiate.
+const STEER_GAP: float = 22.0
 
 var _touches: Dictionary = {} # index deget -> buton ("left"/"right"/"up"/"down"/"turbo"/"")
 
@@ -62,9 +65,10 @@ func _refresh() -> void:
 		steer += 1.0
 	GameState.touch_steer = steer
 	# Sus + jos deodata = frana castiga, ca pe tastatura (S bate W).
+	# TURBO tinut singur da si gaz: turbo fara acceleratie n-are sens.
 	if held.has("down"):
 		GameState.touch_throttle = -1.0
-	elif held.has("up"):
+	elif held.has("up") or held.has("turbo"):
 		GameState.touch_throttle = 1.0
 	else:
 		GameState.touch_throttle = 0.0
@@ -101,8 +105,7 @@ func _layout() -> Dictionary:
 	var down_c := Vector2(pedal_x, bottom - r)
 	return {
 		"left": [left_c, r],
-		# Gol de un buton intreg (2r) intre marginile lui < si >.
-		"right": [left_c + Vector2(4.0 * r, 0.0), r],
+		"right": [left_c + Vector2(2.0 * r + STEER_GAP, 0.0), r],
 		"down": [down_c, r],
 		"up": [down_c - Vector2(0.0, 2.0 * r + PEDAL_GAP), r],
 		"turbo": [turbo_c, rt],

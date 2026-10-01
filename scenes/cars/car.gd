@@ -410,6 +410,13 @@ var _wheel_orig_pos: Array[Vector3] = []
 var _wheel_corner: Array[int] = []
 var _skid_accum: float = 0.0
 var _respawn_cooldown: float = 0.0
+## Plasa de siguranta dupa repunerea jucatorului (s ramase; 0 = inactiva).
+## Cand expira, masina trebuie sa fie pe asfalt — altfel ceva a impins-o
+## imediat dupa teleportare (alta masina, un hazard, decor) si o repunem inca
+## o data, mai in spate. O singura reincercare: `_respawn_retry` opreste bucla.
+var _respawn_check: float = 0.0
+var _respawn_retry: bool = false
+const RESPAWN_CHECK_S: float = 0.75
 
 # Resurse partajate intre toate urmele de cauciuc (ieftin la instantiere).
 static var _skid_mesh: PlaneMesh
@@ -653,6 +660,7 @@ func _physics_process(delta: float) -> void:
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
 	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
 	_respawn_cooldown = maxf(_respawn_cooldown - delta, 0.0)
+	_check_respawn_landing(delta)
 	# Checkpoint: aici, cu roatele pe asfalt, eram in siguranta.
 	if track != null and is_on_floor() \
 			and track.is_on_road(road_index, global_position, route):
@@ -1314,12 +1322,22 @@ func can_respawn() -> bool:
 	return track != null and _respawn_cooldown <= 0.0 and not finished
 
 
-func respawn(backoff_m: float = 14.0) -> void:
+## `main_road`: repunerea ceruta de jucator merge mereu pe bucla principala.
+## Pe o scurtatura `last_safe_route` e traseul ei — adesea pamant — iar
+## dezvoltatorul a cerut explicit ca butonul sa te puna "tot timpul pe drum".
+## Indexul echivalent pe bucla e cel mai apropiat de punctul de pe scurtatura.
+func respawn(backoff_m: float = 14.0, main_road: bool = false) -> void:
 	if track == null or _respawn_cooldown > 0.0:
 		return
 	_respawn_cooldown = 1.5
+	if main_road and last_safe_route != 0:
+		var p := track.recovery_transform(last_safe_index, 0.0, last_safe_route).origin
+		last_safe_index = track.closest_index_global(p, 0)
+		last_safe_route = 0
 	global_transform = track.recovery_transform(last_safe_index, backoff_m,
 		last_safe_route)
+	if is_player and not _respawn_retry:
+		_respawn_check = RESPAWN_CHECK_S
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei
 	# curse e mai frustranta decat saritura ratata.
 	velocity = -global_transform.basis.z * 9.0
@@ -1355,6 +1373,21 @@ func respawn(backoff_m: float = 14.0) -> void:
 	road_index = track.closest_index_global(global_position, route)
 	last_safe_index = road_index
 	respawned.emit(self)
+
+## Plasa de siguranta (vezi `_respawn_check`). Doar jucatorul: AI-ul are deja
+## anti-blocajul lui, iar verdictele ProbeRace nu trebuie sa se mute.
+func _check_respawn_landing(delta: float) -> void:
+	if _respawn_check <= 0.0:
+		return
+	_respawn_check -= delta
+	if _respawn_check > 0.0 or track == null or finished:
+		return
+	if track.is_on_road(road_index, global_position, route):
+		return
+	_respawn_retry = true
+	_respawn_cooldown = 0.0
+	respawn(30.0, true)
+	_respawn_retry = false
 
 # ------------------------------------------------------------------- apa
 

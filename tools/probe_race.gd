@@ -17,8 +17,21 @@ extends Node
 ## AudioManager, iar acelea nu exista in modul --script):
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn
 ##   ... -- --mode=bump
-##   ... -- --mode=race --track=0 --seconds=150 [--car=0]
+##   ... -- --mode=race --track=0 --seconds=150 [--car=0] [--traffic=N]
 ##   ... -- --mode=cliff --track=0
+##
+## `--traffic=N` (Jodhpur, brief §4(c)): suprascrie `Track.traffic_count`
+## INAINTE de constructia pistei — vezi GameState.traffic_override. Pe orice
+## pista in afara de Jodhpur (Track17), traficul e doar corpuri `Car` in plus
+## pe traseul EI (nu are gimmick-ul de banda stanga), util strict pentru
+## harnasul sintetic de comparatie A/B, nu pentru verdictul final (memoria
+## `harnas-sintetic-comportament-emergent`: verdictul real se da pe Jodhpur).
+##   ... -- --mode=race --track=4 --dusk=1.0
+##                             CEASUL DE LUMINA (DuskCycle, Jodhpur) fortat la
+##                             fractia data, vezi `_force_dusk` mai jos. Fara
+##                             el, `GameState.total_laps = 99` din modul race
+##                             tine progresul (deci `dusk` din `Race`) mereu
+##                             aproape de 0.
 
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 ## `--slice=a,b`: felia de traseu (fractii) raportata separat. (-1,-1) = fara.
@@ -176,6 +189,22 @@ var _seconds: float = 150.0
 ## 2, diagnosticul coordonatorului). -1 (implicit) = neatins, ciclul normal.
 ## Pistele fara `RainCycle` ignora ambele steaguri.
 var _force_rain: int = -1
+## `--traffic=N`: seteaza `track.traffic_count` INAINTE de constructia pistei
+## (brief §4(c), Jodhpur) — cate tuk-tuk-uri circula pe traseu, in afara
+## masinilor de cursa. -1 (implicit) = neatins, orice pista foloseste
+## `traffic_count` propriu (0 pe toate in afara de Jodhpur).
+var _traffic: int = -1
+
+## `--dusk=0.5`: forteaza DuskCycle.force_value() la fractia data (0 = turul 1
+## auriu, 1 = turul 3 noapte cu artificii -- docs/track_briefs/jodhpur.md
+## §3/§4). -1 (implicit) = neatins: pe modul "race", GameState.total_laps se
+## forteaza la 99 mai jos (cursa nu se termina singura), deci progresul
+## jucatorului ramane mereu aproape de 0 si DuskCycle n-ar avansa niciodata
+## fara acest steag -- e mecanismul de test, nu un bug de ignorat. Daca pista
+## n-are niciun DuskCycle, se adauga unul TEMPORAR (acelasi tipar ca in
+## snapshot.gd), ca sondele sa poata verifica ceasul pe piste existente
+## inainte ca Track17 sa existe.
+var _force_dusk: float = -1.0
 
 var _race: Node = null
 var _elapsed: float = 0.0
@@ -294,6 +323,10 @@ func _ready() -> void:
 			_slice = Vector2(float(ab[0]), float(ab[1]))
 		elif arg.begins_with("--rain="):
 			_force_rain = int(arg.trim_prefix("--rain="))
+		elif arg.begins_with("--traffic="):
+			_traffic = int(arg.trim_prefix("--traffic="))
+		elif arg.begins_with("--dusk="):
+			_force_dusk = float(arg.trim_prefix("--dusk="))
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -351,6 +384,7 @@ func _start_race() -> void:
 	GameState.selected_track = _track_index
 	GameState.champ_active = false
 	GameState.total_laps = 99 # cursa nu se termina singura; o oprim pe timp
+	GameState.traffic_override = _traffic
 	_bucket_speed.resize(BUCKETS)
 	_bucket_samples.resize(BUCKETS)
 	_bucket_slow.resize(BUCKETS)
@@ -373,7 +407,13 @@ func _start_race() -> void:
 		if car == player:
 			var ai := AIController.new()
 			car.set_controller(ai)
-			ai.configure(_race.track, rng, cars)
+			# `_race.traffic` (tuk-tuk-urile, brief §4(c)): fara ele aici, AI-ul
+			# care inlocuieste jucatorul n-ar vedea traficul deloc — restul
+			# masinilor AI il vad (controller-ele lor originale au fost
+			# configurate de Race cu _ai_visible, care le include).
+			var visible: Array[Car] = cars.duplicate()
+			visible.append_array(_race.traffic)
+			ai.configure(_race.track, rng, visible)
 		else:
 			(car.controller as AIController).line_offset = rng.randf_range(-0.35, 0.35)
 		# Variatie onesta, dar determinista — altfel cifrele danseaza intre rulari.
@@ -413,6 +453,8 @@ func _start_race() -> void:
 	_setup_signal_hazards()
 	if _force_rain >= 0:
 		_force_rain_cycle_deferred(float(_force_rain))
+	if _force_dusk >= 0.0:
+		_force_dusk_cycle_deferred(_force_dusk)
 
 
 ## `--rain=1`/`--rain=0`: gaseste orice `RainCycle` prin grupul lui
@@ -460,6 +502,40 @@ func _force_rain_cycle(factor: float) -> void:
 	for node in get_tree().get_nodes_in_group(&"rain_cycle"):
 		if node.has_method("force_factor"):
 			node.call("force_factor", factor)
+
+
+## `--dusk=x` (Jodhpur, DuskCycle): acelasi leac in doi pasi ca ploaia de mai
+## sus (`_force_rain_cycle_deferred`), fiindca DuskCycle._collect e la fel
+## amanat cu `call_deferred`. DACA pista n-are niciun DuskCycle (orice pista
+## in afara de Jodhpur), se adauga unul TEMPORAR pe `_race.track` -- fara
+## asta n-ar exista nicio pista pe care sa se verifice ceasul inainte ca
+## Track17 sa existe (memoria `sonda-masura-alt-obiect`).
+func _force_dusk_cycle_deferred(value: float) -> void:
+	call_deferred(&"_force_dusk_cycle_step2", value)
+
+
+func _force_dusk_cycle_step2(value: float) -> void:
+	var cycles := get_tree().get_nodes_in_group(&"dusk_cycle")
+	if cycles.is_empty():
+		var dc: Node = (preload("res://scenes/hazards/dusk_cycle.gd") as GDScript).new()
+		_race.track.add_child(dc)
+		call_deferred(&"_force_dusk_cycle_step3", value)
+		return
+	_force_dusk_cycle(value)
+
+
+## Al treilea pas, doar cand pista n-avea DuskCycle: nodul proaspat adaugat
+## isi programeaza si EL `_collect` prin `call_deferred`, deci mai e nevoie
+## de un tur de coada inainte sa aiba `_env`/`_sun` gasite.
+func _force_dusk_cycle_step3(value: float) -> void:
+	_force_dusk_cycle(value)
+	print("--dusk=%.2f: pista fara DuskCycle propriu, adaugat unul temporar" % value)
+
+
+func _force_dusk_cycle(value: float) -> void:
+	for node in get_tree().get_nodes_in_group(&"dusk_cycle"):
+		if node.has_method("force_value"):
+			node.call("force_value", value)
 
 
 ## Fiordland: agata contorul de evenimente pe orice TunnelSignalHazard din

@@ -107,6 +107,9 @@ const SLIP_GRIP_ICE: float = 1.5
 ## MASA, nu un "factor": intra ca 1/m in impulsul de coliziune (_resolve_bump).
 @export var mass_factor: float = 1.0
 @export var offroad_speed_factor: float = 0.45
+## Centrul de masa pe verticala (m). Vezi CarData.center_of_mass_y — implicitul
+## de aici (-0.15) e cel vechi, pastrat pentru orice masina fara CarData.
+@export var center_of_mass_y: float = -0.15
 
 @export_group("Imbranceli")
 ## Cat de "saltarea" e izbitura. 0 = perfect plastica (se lipesc), 1 = bile de
@@ -435,8 +438,9 @@ func _ready() -> void:
 		"physics/3d/default_gravity", 9.8)
 	gravity_scale = gravity / project_g
 	# Centrul de masa sub origine: parghia care tine masina pe roti in viraj.
+	# Inaltimea e IDENTITATE (CarData.center_of_mass_y) — vezi apply_data.
 	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
-	center_of_mass = Vector3(0.0, -0.15, 0.0)
+	center_of_mass = Vector3(0.0, center_of_mass_y, 0.0)
 	# Nu doarme niciodata: un corp adormit pe grila n-ar mai primi fortele
 	# suspensiei si s-ar aseza pe colizer cand il trezeste contactul.
 	can_sleep = false
@@ -500,6 +504,8 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	grip = data.grip
 	mass_factor = data.mass_factor
 	mass = 100.0 * mass_factor # identitatea prin masa, direct in solver
+	center_of_mass_y = data.center_of_mass_y
+	center_of_mass = Vector3(0.0, center_of_mass_y, 0.0)
 	body_color = data.color if color_override.a == 0.0 else color_override
 	if _visual != null:
 		_visual.queue_free()
@@ -1318,6 +1324,26 @@ func respawn(backoff_m: float = 14.0) -> void:
 	if track == null or _respawn_cooldown > 0.0:
 		return
 	_respawn_cooldown = 1.5
+	# Nu inapoi pe o banda INCHISA: blocata in vaca culcata, masina ar fi
+	# repusa tot pe ulicioara, in spatele vacii, si s-ar bloca iar — bucla
+	# masurata pe Track17. Se repune pe bucla, inaintea furcii.
+	if last_safe_route != 0 and not track.branch_is_open(last_safe_route):
+		var br := track.route_at(last_safe_route)
+		if br != null and not br.baked.is_empty():
+			last_safe_index = track.closest_index_global(br.baked[0], 0)
+		last_safe_route = 0
+	# Nici intre furca si poarta ingustata a benzii (`AlleyGate`): repusa acolo
+	# (cu 15 m pana la poarta si botul deviat), masina lovea iar stalpul —
+	# bucla masurata pe Track17 (ejectare -> repunere la 0,348 -> ejectare).
+	# Se repune pe bucla, inaintea furcii. Pistele fara AlleyGate: neatinse.
+	if last_safe_route != 0:
+		var gate := track.branch_gate(last_safe_route)
+		var gbr := track.route_at(last_safe_route)
+		if gate != null and gbr != null and not gbr.baked.is_empty():
+			var sd: float = gbr.dists[clampi(last_safe_index, 0, gbr.dists.size() - 1)]
+			if sd < float(gate.gate_dist_m) + 3.0:
+				last_safe_index = track.closest_index_global(gbr.baked[0], 0)
+				last_safe_route = 0
 	global_transform = track.recovery_transform(last_safe_index, backoff_m,
 		last_safe_route)
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei

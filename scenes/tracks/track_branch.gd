@@ -100,6 +100,14 @@ extends Path3D
 ## cablu. Banda ramane in fizica si in AI exact ca oricare alta.
 @export var elevated: bool = false
 
+## Momeala AI-ului (`Track.branch_lure`) doar pana la furca: dupa ce masina a
+## trecut de `entry_frac` cu mai mult de `Track.BRANCH_LURE_GRACE_M` pe bucla,
+## banda nu o mai trage. Opt-in (Jodhpur, Track17): acolo raza de 70 m de la
+## capul ulicioarei ajungea si la masinile trecute de furca, care taiau apoi
+## prin buzunarul de case dintre bucla si ulicioara spre banda. Pe celelalte
+## piste ramane fals, deci comportamentul lor e neschimbat.
+@export var lure_before_entry_only: bool = false
+
 @export_group("Suprafata")
 
 ## Din ce e facuta banda. THEME = ce spune tema pistei (`branch_surface`:

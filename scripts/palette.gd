@@ -834,6 +834,20 @@ const CLASS_TEXTURES := {
 	# (67.8, 91.8, 50.4), aceeasi familie de culoare, deci nu justifica o a
 	# doua clasa (buget +2, nu +3).
 	"beech_canopy": "res://assets/textures/classes/acacia_canopy.png",
+	# --- Jodhpur (Track17), brief §4/§5.1 -----------------------------------
+	# Varul albastru al caselor: DOUA clase NOI pe dala lui `village_plaster`,
+	# nu tenta lui (o tenta pe o clasa existenta recoloreaza Stromboli —
+	# memoria `tenta-pe-clasa-partajata`). Alb x tenta = albastru.
+	"blue_lime_light": "res://assets/textures/classes/plaster.png",
+	"blue_lime_indigo": "res://assets/textures/classes/plaster.png",
+	# Gresia fortului si a fantanii: blocuri cu rosturi fine (kitul, regula 5:
+	# rosturile NU sunt geometrie, vin din textura clasei) -> dala de blocuri
+	# `stone_wall`, ca `old_stone`. Doua tente, o singura imagine ridicata.
+	"red_sandstone": "res://assets/textures/classes/stone_wall.png",
+	"rose_sandstone": "res://assets/textures/classes/stone_wall.png",
+	# Riolitul (stanca fortului, bolovanii parcului de desert): dala
+	# stratificata `alpine_granite`, ca `red_valley_tuff` — zero VRAM nou.
+	"rhyolite": "res://assets/textures/classes/alpine_granite.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -1016,6 +1030,31 @@ const CLASS_TINT := {
 	# tenta globala le-ar fi intunecat pe toate cu 35%. Aceeasi dala, cache
 	# pe clasa: +1 material doar pe Track16.
 	"wet_wood": Color(0.686, 0.604, 0.471),
+	# --- Jodhpur (Track17): tente calculate pe dala EFECTIVA (dupa ridicare),
+	# masurata cu tools/ProbeJodDale.tscn — tinta_c / dala_c pe canale, ca la
+	# inca_stone / wet_gneiss. Tintele sunt culorile brief-ului §1/§4.
+	# Varul albastru deschis #8FB0DC si indigo #4F6FB8, pe dala `plaster`
+	# ridicata la 0.98 (masurat efectiv (1.000, 0.970, 0.866) — R retezat):
+	"blue_lime_light": Color(0.561, 0.711, 0.997),
+	"blue_lime_indigo": Color(0.310, 0.448, 0.834),
+	# Gresia roz a fantanii #D4957A, pe dala `stone_wall` ridicata la 0.81
+	# (masurat efectiv (0.824, 0.804, 0.742); R ramane cu 0.8% sub tinta, tenta
+	# nu poate urca peste 1).
+	# Gresia fortului: #B87466 efectiv (roz-teracota), NU #A5553A din brief.
+	# Criticul orb a numit tenta de TREI ori pe POI E (portocaliu-rosu saturat,
+	# uniform; tinta e roz-teracota cu buze mai deschise). Masurat pe masca
+	# gresiei (scratchpad val1/e/hsv.py, frac 0.505 si 0.530, dusk 0): S
+	# mediana 0,86-0,88 cu #A5553A (lumina calda de apus o satureaza), 0,64-0,67
+	# cu #B87466, fata de 0,66 in bara E; V p90 0,72 -> 0,78 (bara 0,83).
+	# Variantele A #B06A55 si C #A0604E ramaneau la 0,73-0,75. Aleasa de
+	# coordonator (30 sep 2026). Muta si A (turnul, market_gate) si F
+	# (bastionul, fatadele): clasa e folosita doar pe Jodhpur.
+	"red_sandstone": Color(0.876, 0.566, 0.539),
+	"rose_sandstone": Color(1.0, 0.726, 0.645),
+	# Riolitul roz-brun #9A6A5A pe dala `alpine_granite` NERIDICATA
+	# (0.650, 0.611, 0.534): toate trei rapoartele sub 1, deci fara
+	# CLASS_LIFT si fara imagine noua in memorie.
+	"rhyolite": Color(0.929, 0.681, 0.661),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1083,6 +1122,21 @@ const CLASS_LIFT := {
 	# media (171.72, 140.74, 107.71), la 0.03-0.07% de valorile citate in
 	# nota de respingere a valului 1).
 	"bark_fever": 0.775,
+	# --- Jodhpur (Track17), masurat cu tools/ProbeJodDale.tscn -------------
+	# Varul albastru: dala `plaster` (0.593, 0.552, 0.492) e CALDA, iar tinta
+	# #8FB0DC are albastrul la 0.863. Chiar ridicata ca `village_plaster`
+	# (0.88 -> B 0.776) raportul pe B ramane 1.11 > 1, deci tenta n-ar ajunge
+	# niciodata pe albastru. La 0.98 canalul B ajunge la ~0.87 si tenta il
+	# poate cobori exact pe tinta; R se reteaza la 1.0 (detaliul varului ramane
+	# in G/B, exact canalele care conteaza pe o casa albastra). Indigo
+	# imparte ACEEASI imagine ridicata (CLASS_LIFT_SHARED): o singura dala in
+	# memorie pentru amandoua tentele.
+	"blue_lime_light": 0.98,
+	# Gresia: dala `stone_wall` (0.598, 0.582, 0.535). Tinta cea mai deschisa
+	# e gresia roz a fantanii #D4957A: raport R 1.39 -> ridicare la
+	# 0.582 x 1.39 = 0.81. Gresia rosie a fortului (#A5553A) imparte aceeasi
+	# imagine si coboara din tenta.
+	"rose_sandstone": 0.81,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -1336,6 +1390,20 @@ const CLASS_TRIPLANAR_SCALE := {
 	# intre coroanele vecine dintr-o padure deasa (POI D), exact ca la
 	# `pine_needles` pe un rand de brazi.
 	"acacia_canopy": 0.05,
+	# --- Jodhpur (Track17) ---------------------------------------------
+	# Varul albastru: ACEEASI scara ca `village_plaster` (aceeasi dala de
+	# tencuiala, ~1.8 m pe repetitie) — o casa de 7 m prinde ~4 repetitii,
+	# destul pentru pete si scurgeri, prea putin ca tiparul sa citeasca tapet.
+	"blue_lime_light": 0.55,
+	"blue_lime_indigo": 0.55,
+	# Gresia fortului si a fantanii: ACEEASI scara ca `old_stone` (aceeasi
+	# dala de blocuri `stone_wall`) — blocurile au marimea unor asize de zid
+	# (~2.9 m pe repetitie), nu de pietre de caldaram.
+	"red_sandstone": 0.35,
+	"rose_sandstone": 0.35,
+	# Riolitul: dala stratificata `alpine_granite` la scara ei (0.16), ca la
+	# `red_valley_tuff` / `wet_gneiss` — aceeasi familie de stanca.
+	"rhyolite": 0.16,
 }
 
 static var _tri_mats: Dictionary = {}
@@ -1345,7 +1413,19 @@ static var _tri_mats: Dictionary = {}
 ## aceeasi clasa nu platesc doua imagini.
 static var _lifted: Dictionary = {}
 
+## Clase care IMPART imaginea ridicata a altei clase (aceeasi dala, aceeasi
+## ridicare, alta tenta). Fara asta, `_lifted` e cheiat pe numele clasei si
+## doua tente pe aceeasi dala ridicata ar plati doua imagini in memorie.
+## Introdus pentru Jodhpur (varul in doua tente, gresia in doua tente); nu
+## atinge nicio clasa existenta.
+const CLASS_LIFT_SHARED := {
+	"blue_lime_indigo": "blue_lime_light",
+	"red_sandstone": "rose_sandstone",
+}
+
 static func _class_texture(cls: String) -> Texture2D:
+	if CLASS_LIFT_SHARED.has(cls):
+		return _class_texture(CLASS_LIFT_SHARED[cls])
 	var src: Texture2D = load(CLASS_TEXTURES[cls])
 	if not CLASS_LIFT.has(cls):
 		return src
@@ -1726,6 +1806,8 @@ static func lava_material() -> ShaderMaterial:
 static func shader_material(name: String) -> ShaderMaterial:
 	if name == "faded_detail":
 		return faded_detail_material()
+	if name == "jod_window":
+		return window_lamp_material()
 	assert(name == "lava", "shader necunoscut: " + name)
 	return lava_material()
 
@@ -1751,6 +1833,21 @@ static func shader_material(name: String) -> ShaderMaterial:
 ## UN material pentru toate piesele care il cer, ca la `lava_material`: garda
 ## numara materialele, deci o padure intreaga de hornuri aduce +1, nu +41.
 static var _faded_detail: ShaderMaterial
+
+## Ferestrele si nisele care se aprind cu ceasul (`dusk_lamps`, DuskCycle).
+## Azi doar pe Jodhpur (`shader:jod_window` in maparile de clase); vezi
+## assets/shaders/jod_window.gdshader pentru praguri. UN material pentru
+## toate ferestrele pistei: +1 la garda, nu +1 per cladire.
+static var _window_lamp: ShaderMaterial
+
+static func window_lamp_material() -> ShaderMaterial:
+	if _window_lamp != null:
+		return _window_lamp
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://assets/shaders/jod_window.gdshader")
+	mat.set_shader_parameter("albedo_atlas", load(ATLAS_PATH))
+	_window_lamp = mat
+	return mat
 
 static func faded_detail_material() -> ShaderMaterial:
 	if _faded_detail != null:

@@ -3,6 +3,16 @@
     D:/Blender/blender.exe --background --factory-startup \
         --python tools/blender/run_build.py -- build_veg_set.py [build_X.py ...]
 
+Un SINGUR script poate primi propriile argumente dupa un AL DOILEA `--`
+(Blender nu mai taie nimic dupa primul, deci al doilea ajunge intact in
+`sys.argv` — vezi preview_jodhpur.py, care isi citeste argumentele dupa
+`--compare`/`--sheet`/`--group`):
+
+    ... -- preview_jodhpur.py -- --compare ghanta_ghar
+
+Cu al doilea `--`, doar UN script se ruleaza (cel dinaintea lui); ambiguu sa
+inlantui mai multe build-uri cu argumente separate per script.
+
 Exista fiindca reteta documentata (exec cu globale partajate, vezi
 assets/blender/README.md) presupunea consola din Blender sau MCP-ul — adica un
 om la butoane. Scriptul asta face exact acelasi exec, cu `__file__` setat pe
@@ -16,7 +26,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 if "--" not in sys.argv:
     raise SystemExit("folosire: blender --background --python run_build.py -- build_X.py ...")
-scripts = sys.argv[sys.argv.index("--") + 1:]
+after = sys.argv[sys.argv.index("--") + 1:]
+if not after:
+    raise SystemExit("niciun build script cerut")
+
+if "--" in after:
+    # al doilea `--`: totul dupa el sunt argumentele scriptului, nu alte
+    # scripturi de rulat. `sys.argv` ramane setat pentru scriptul executat,
+    # ca sa-si citeasca argumentele exact cum ar face un `python x.py -- ...`.
+    sep = after.index("--")
+    scripts = after[:sep]
+    sys.argv = [after[0]] + after[sep:]
+else:
+    scripts = after
+
 if not scripts:
     raise SystemExit("niciun build script cerut")
 

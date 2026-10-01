@@ -22,6 +22,15 @@ extends Resource
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=bump
 @export var mass_factor: float = 1.0
 
+## Centrul de masa pe verticala (m fata de origine, sub 0 = mai jos, coborat).
+## Identitate: majoritatea masinilor stau jos si stabil (-0.15, ca inainte de
+## acest camp). Tuk-tuk-ul (Jodhpur, ecartament ingust) il ridica aproape de
+## 0 — parghia scurta care il tine pe roti in viraj normal dispare, deci un
+## impact lateral tare il poate rasturna. E identitate voita (CLAUDE.md
+## principiul 1: contactul intre masini e mecanica, nu bug), nu un defect de
+## reglat — vezi tools/probe_jod_tuk.gd pentru cifrele masurate.
+@export var center_of_mass_y: float = -0.15
+
 @export_group("Suspensie")
 ## Frecventa naturala a arcurilor (Hz) — RIGIDITATEA ca identitate: sportiva
 ## teapana (2.8-3.0), autobuzul moale si leganat (1.8). Compresia statica e

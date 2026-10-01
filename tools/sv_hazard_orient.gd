@@ -105,6 +105,24 @@ const YAW_FREE_PREFIXES: Array[String] = [
 	# ca hazard orientat din cod, conform notei din antet.
 	"chasmRock", "guardRock", "mossBoulderA", "mossBoulderB", "mossBoulderC",
 	"beechDead", "beechA", "beechB", "beechC", "driftwood", "tussockClump",
+	# Jodhpur POI E: ghirlanda de craite are LUNGIMEA pe X local (2,59 m), deci
+	# intinsa pe coama zidului are -Z perpendicular pe drum (~90 grade) PRIN
+	# CONSTRUCTIE (tools/gen_decor_jod_e.gd); langurii si bolovanii au yaw liber.
+	"ghirlanda", "langur", "bolovan",
+	# LampiFort: nodul FortLamps sta la origine, pozitiile sunt in lume.
+	"LampiFort",
+	# Jodhpur POI G/G2 (tools/gen_decor_jod_g.gd): stanca de riolit
+	# (stalpi/lespezi/bolovani/moloz), copacii si euforbiile au yaw liber
+	# intentionat (aranjamentul-bate-numarul); nodurile de lumini (FortLamps,
+	# StreetLights, ChhatriKit) stau la origine, pozitiile sunt in lume.
+	# Treptele de riolit (gTreapta/gTerasa) sunt stanca cu yaw liber.
+	# Cenotaful, soclul lui si casele (gCasa) NU sunt aici: fata lor spre
+	# drum (~90 sau ~0/180 grade dupa model) e axa care conteaza si ramane
+	# verificabila.
+	"gStalp", "gLespede", "gBolovan", "gMoloz", "gMargine", "gCopac",
+	"gEuforbie", "gSocluColt", "gCandele", "gFelinare", "gCenotafFestoane",
+	"gMal", "gTreapta", "gTerasa", "gChhatri", "gTufaBlat", "gTufaBordura",
+	"gTerase",
 ]
 static func _yaw_free(name: String) -> bool:
 	for prefix in YAW_FREE_PREFIXES:
@@ -163,7 +181,10 @@ func _init() -> void:
 		var L := curve.get_baked_length()
 		var p := curve.sample_baked(best_o) + best.position
 		var fwd := (curve.sample_baked(fmod(best_o + 2.0, L)) - curve.sample_baked(best_o)).normalized()
-		var ang := rad_to_deg(acos(clampf((-n.transform.basis.z).dot(fwd), -1.0, 1.0)))
+		# Axa NORMALIZATA: o piesa scalata pe Z (zidurile scurtate pe curba la
+		# portile Jodhpur, scara 0,5-1,0) dadea dot = scara, adica 53-127 de
+		# grade pe un zid perfect aliniat.
+		var ang := rad_to_deg(acos(clampf((-n.transform.basis.z.normalized()).dot(fwd), -1.0, 1.0)))
 		var lat := (n.position - p).dot(fwd.cross(Vector3.UP))
 		var flag := ""
 		if ang > 20.0 and ang < 160.0:

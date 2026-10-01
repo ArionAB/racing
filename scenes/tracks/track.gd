@@ -8263,17 +8263,41 @@ func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
 		if absf(mi.global_transform.basis.determinant()) < 0.000001:
 			continue
 		var rel := inv * mi.global_transform
-		for si in mi.mesh.get_surface_count():
-			var arrays: Array = mi.mesh.surface_get_arrays(si)
-			if arrays.size() <= Mesh.ARRAY_VERTEX:
+		for v in _mesh_vertices(mi.mesh):
+			var lv := rel * v
+			if lv.y > band:
 				continue
-			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			for v in verts:
-				var lv := rel * v
-				if lv.y > band:
-					continue
-				best = maxf(best, Vector2(lv.x, lv.z).length())
+			best = maxf(best, Vector2(lv.x, lv.z).length())
 	return best * PROP_AO_FOOT_SCALE
+
+
+## Vertecsii tuturor suprafetelor unui mesh, cititi O DATA pe mesh si
+## constructie (golit la capatul lui `_build_prop_contact`).
+##
+## Cu randare reala, `surface_get_arrays` nu e o citire de memorie: aduce
+## bufferele inapoi de pe GPU, cu tot cu normale, UV-uri si culori. Iar
+## `_prop_foot_radius` o chema pentru fiecare nod din DecorManual, de mai
+## multe ori pe acelasi .glb (radacina, nodul de mesh, grupul parinte).
+## Masurat pe Fiordland CU FEREASTRA: faza discurilor 13,2 s, fata de 2,6 s in
+## --headless, unde bufferele stau in memorie si sonda nu vedea costul.
+##
+## Suprafetele se pun cap la cap: rezultatul e un maxim, deci ordinea nu
+## schimba nimic — discurile ies identice la bit.
+var _foot_verts: Dictionary = {}
+
+func _mesh_vertices(mesh: Mesh) -> PackedVector3Array:
+	var key := mesh.get_rid()
+	var hit: Variant = _foot_verts.get(key)
+	if hit != null:
+		return hit
+	var all := PackedVector3Array()
+	for si in mesh.get_surface_count():
+		var arrays: Array = mesh.surface_get_arrays(si)
+		if arrays.size() <= Mesh.ARRAY_VERTEX:
+			continue
+		all.append_array(arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array)
+	_foot_verts[key] = all
+	return all
 
 
 ## Umbra de contact a prop-urilor, ca factor multiplicativ (1.0 = neatins).
@@ -8305,6 +8329,8 @@ const PROP_AO_SEAT_TOL: float = 1.2
 
 func _build_prop_contact() -> void:
 	var discs := _prop_contact_discs()
+	# Vertecsii au servit doar razelor de amprenta: nu-i tinem in memorie.
+	_foot_verts.clear()
 	if discs.is_empty():
 		return
 	var st := SurfaceTool.new()

@@ -24,6 +24,21 @@ var state: State = State.COUNTDOWN
 var track: Track
 var player: Car
 var cars: Array[Car] = []
+## Tuk-tuk-urile (Jodhpur, Track17, brief §3): corpuri `Car` reale, cu
+## `TrafficController`, dar EXCLUSE din clasament/tururi/`race_finished`/HUD —
+## vezi `_spawn_traffic`. Gol pe orice pista cu `Track.traffic_count == 0`
+## (implicit), deci comportamentul ramane neschimbat peste tot in afara de
+## Jodhpur.
+var traffic: Array[Car] = []
+## Lista pe care o vede FIECARE `AIController` prin `configure(..., cars)` —
+## deci citita de `_avoid_line` (campul `traffic` de acolo, nume din pacate
+## identic cu `Race.traffic`, dar alt obiect). Contine masinile de cursa SI
+## tuk-tuk-urile, in ACEEASI referinta partajata (tiparul vechi: fiecare pilot
+## primeste aceeasi lista si o vede crescand pe masura ce se adauga restul
+## masinilor) — separata de `Race.cars` (doar cursa: pozitii/tururi/HUD) si de
+## `Race.traffic` (doar tuk-tuk-uri: exclus din cursa), ca niciuna din cele
+## doua liste "oficiale" sa nu se amestece cu cealalta.
+var _ai_visible: Array[Car] = []
 var camera: ChaseCamera
 var hud: RaceHUD
 ## „Parbrizul ud" (Fiordland, brief pasul 4): picaturi pe ecran cand jucatorul
@@ -56,11 +71,16 @@ func _ready() -> void:
 	var track_scene := load(
 		GameState.TRACK_SCENES[GameState.selected_track]) as PackedScene
 	track = track_scene.instantiate() as Track
+	# `--traffic=N` (ProbeRace, brief §4(c)): suprascrie ÎNAINTE de
+	# `_spawn_traffic()`. Vezi GameState.traffic_override.
+	if GameState.traffic_override >= 0:
+		track.traffic_count = GameState.traffic_override
 	add_child(track)
 	_skid_parent = Node3D.new()
 	_skid_parent.name = "SkidMarks"
 	add_child(_skid_parent)
 	_spawn_cars()
+	_spawn_traffic()
 	camera = ChaseCamera.new()
 	add_child(camera)
 	camera.target = player
@@ -163,20 +183,70 @@ func _spawn_cars() -> void:
 				AI_COLORS[(i - 1) % AI_COLORS.size()])
 			var ai := AIController.new()
 			car.set_controller(ai)
-			# `cars` e aceeasi lista in care se adauga toate masinile mai jos,
-			# deci fiecare pilot le vede pe toate — asa stie pe cine depaseste.
-			ai.configure(track, _rng, cars)
+			# `_ai_visible` e aceeasi lista in care se adauga toate masinile (si,
+			# mai jos, tuk-tuk-urile) — fiecare pilot o vede crescand.
+			ai.configure(track, _rng, _ai_visible)
 			car.speed_scale = _rng.randf_range(0.88, 0.97)
 		# Inghetata pana la GO: pe grila nu se aluneca la vale. Vezi nota din
 		# Car._physics_process — blocarea comenzilor singura nu ajunge.
 		car.on_start_grid = true
 		cars.append(car)
+		_ai_visible.append(car)
 		var frac := track.frac_at(car.road_index, car.route)
 		_progress.append({
 			"frac": frac,
 			"total": frac - 1.0 if frac > 0.5 else frac,
 			"laps": 0,
 		})
+
+## Tuk-tuk-urile (Jodhpur, brief §3): `Track.traffic_count` corpuri `Car`
+## reale, cu `TrafficController`, distribuite UNIFORM pe bucla principala
+## (ruta 0 — brief: "circula pe tot circuitul, fara ulicioara"), pe banda
+## stanga. No-op pe orice pista cu `traffic_count == 0` (implicit) — deci
+## Track01/08/09/.../16 raman neschimbate.
+##
+## EXCLUSE din `cars`/`_progress`/clasament/HUD/`race_finished`: intra doar in
+## `traffic` (proprie) si in `_ai_visible` (vazuta de AIController._avoid_line
+## prin campul `traffic` de-acolo — nume identic, alt obiect, vezi comentariul
+## de la declaratia `_ai_visible`).
+func _spawn_traffic() -> void:
+	var count := track.traffic_count
+	if count <= 0:
+		return
+	var route := track.route_at(0)
+	if route == null or route.count() == 0:
+		return
+	var n := route.count()
+	for i in count:
+		var idx := int(float(i) / float(count) * float(n)) % n
+		var pos := route.baked[route.wrap_index(idx)] \
+			+ route.side_at(idx) * TrafficController.LANE_OFFSET_M \
+			+ Vector3.UP * 0.5
+		var dir := (route.baked[route.wrap_index(idx + 1)]
+			- route.baked[route.wrap_index(idx)])
+		dir.y = 0.0
+		if dir.length_squared() < 0.001:
+			dir = Vector3.FORWARD
+		dir = dir.normalized()
+		var car := CAR_SCENE.instantiate() as Car
+		car.track = track
+		add_child(car)
+		car.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP), pos)
+		car.route = 0
+		car.road_index = idx
+		car.last_safe_index = idx
+		car.last_safe_route = 0
+		car.skid_parent = _skid_parent
+		car.pilot_name = "Tuk-tuk %d" % (i + 1)
+		car.apply_data(GameState.CAR_DATA_TUKTUK)
+		var traf := TrafficController.new()
+		car.set_controller(traf)
+		traf.configure(track, _ai_visible)
+		car.on_start_grid = false # circula din primul cadru, nu asteapta grila
+		car.race_active = true
+		car.linear_velocity = dir * TrafficController.CRUISE_SPEED
+		traffic.append(car)
+		_ai_visible.append(car)
 
 func _physics_process(delta: float) -> void:
 	if state == State.COUNTDOWN:
@@ -250,6 +320,19 @@ func _tick_race(delta: float) -> void:
 			if laps >= GameState.total_laps and not car.finished:
 				car.finished = true
 	_update_positions()
+
+## Progresul jucatorului ca fractie din cursa intreaga (0 pe grila/countdown,
+## 1 la ultima trecere) — sursa lui `DuskCycle.dusk` (Jodhpur, brief §3
+## „Ceasul de lumina”: iluminarea trebuie sa fie identica pentru acelasi PUNCT
+## din cursa, nu din timp, altfel recordurile de time trial nu se compara cu
+## cursa normala). `_progress[0]` e jucatorul (vezi `_setup`: `i == 0` seteaza
+## `is_player`), iar `.total` e acelasi camp continuu (tururi + fractie
+## curenta) folosit pentru clasament in `_tick_race`/`_update_positions`, deci
+## nu exista o a doua sursa de adevar pentru "cat de departe a ajuns".
+func player_progress_fraction() -> float:
+	if _progress.is_empty() or GameState.total_laps <= 0:
+		return 0.0
+	return clampf(float(_progress[0].total) / float(GameState.total_laps), 0.0, 1.0)
 
 ## Plasa de siguranta a cursei: nimeni nu ramane blocat. Zonele de fly-off au
 ## RespawnZone-ul lor, dar mai exista doua feluri de a te pierde — sa cazi din

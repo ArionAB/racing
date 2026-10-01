@@ -19,6 +19,10 @@ extends SceneTree
 const FLOAT_MAX: float = 3.0
 ## Sub atat fata de teren, s-a ingropat.
 const SINK_MAX: float = 2.0
+## Metadata pentru piesele scufundate PRIN PROIECT si cat trebuie sa iasa
+## varful lor din teren ca sa nu fie totusi ingropate (vezi `_report`).
+const SUNK_META := "scufundat"
+const SUNK_MIN_VISIBLE: float = 0.8
 ## Marja peste jumatatea de sosea sub care obiectul e practic pe carosabil.
 const ROAD_MARGIN: float = 2.0
 
@@ -71,6 +75,14 @@ func _report() -> bool:
 	for entry in props:
 		var n3: Node3D = entry["node"]
 		var p := n3.global_position
+		# Ancora de sol OPT-IN (metadata `ancora_sol`, punct LOCAL): piesele
+		# care sunt FATADE lipite de un perete de teren (modulele de trepte ale
+		# fantanii Jodhpur, POI C) au originea la mijlocul bazei, deci 1,5 m
+		# INAUNTRUL peretelui, unde terenul e prin proiect cu 2-4 m peste baza.
+		# Pentru ele baza vizibila e muchia de jos a FETEI; acolo se judeca
+		# plutit/ingropat. Fara metadata, comportamentul e cel de dinainte.
+		if n3.has_meta("ancora_sol"):
+			p = n3.global_transform * (n3.get_meta("ancora_sol") as Vector3)
 		var ground: float = t._sampler.ground_y(p.x, p.z)
 		var near := 1e9
 		var near_i := 0
@@ -88,6 +100,17 @@ func _report() -> bool:
 			verdict = "ok (in zbor)"
 		elif p.y - ground > FLOAT_MAX:
 			verdict = "PLUTESTE"
+		elif ground - p.y > SINK_MAX and n3.has_meta(SUNK_META):
+			# Scufundat PRIN PROIECT (zidurile-parapet ale portilor Jodhpur: un
+			# zid de 14 m ingropat pana ii raman crenelurile peste drum). Nu se
+			# iarta pe declaratie: se masoara VARFUL real al mesh-ului, care
+			# trebuie sa iasa din teren cu cel putin SUNK_MIN_VISIBLE — altfel
+			# terenul l-a inghitit si e tot INGROPAT.
+			var top := _top_y(n3)
+			if top - ground >= SUNK_MIN_VISIBLE:
+				verdict = "ok (scufundat, varf %+.1f m)" % (top - ground)
+			else:
+				verdict = "INGROPAT (varf %+.1f m)" % (top - ground)
 		elif ground - p.y > SINK_MAX:
 			verdict = "INGROPAT"
 		# Latimea LOCALA, nu `half_width`. Pe o pista cu profil de latime
@@ -155,6 +178,8 @@ func _props(node: Node, prefix: String) -> Array[Dictionary]:
 const SPANS_ROAD_PREFIXES: Array[String] = [
 	"PoartaStart", "Grota", "Arcada", "Pila", "CapatViaduct", "PortalTunel",
 	"chasmBridgeRail",
+	# Jodhpur POI E: portile fortului (coliziune `mesh`, drumul trece prin gol).
+	"PoartaFort",
 ]
 
 ## Modul de coliziune REZOLVAT pentru un prop asezat de mana: metadata proprie
@@ -170,6 +195,20 @@ static func _effective_collision_mode(n3: Node3D) -> String:
 			return m
 	var stem := n3.scene_file_path.get_file().get_basename()
 	return String(WorldProp.PROP_COLLISION.get(stem, "hull"))
+
+
+## Cota cea mai inalta a mesh-urilor vizibile ale unei instante (lume).
+static func _top_y(n3: Node3D) -> float:
+	var top := -INF
+	for mi in n3.find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if m.mesh == null:
+			continue
+		var xf := m.global_transform
+		var bb := m.mesh.get_aabb()
+		for k in 8:
+			top = maxf(top, (xf * bb.get_endpoint(k)).y)
+	return top if top > -INF else n3.global_position.y
 
 
 static func _spans_road(path: String) -> bool:

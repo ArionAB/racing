@@ -92,7 +92,7 @@ func road_is_loose() -> bool:
 func road_dust_color() -> Color:
 	if road_surface == "snow":
 		return SNOW_ROAD_COLOR
-	return dirt_road_color() if road_is_loose() else ROAD_COLOR
+	return dirt_road_color() if road_is_loose() else asphalt_color()
 
 ## Suprafata pe care masinile lasa brazde rulind (vezi SandTrail).
 ##
@@ -1325,6 +1325,284 @@ static func themes() -> Dictionary:
 			"water_lit_spec": 0.7,
 			"water_lit_wave_len": 2.0,
 			"water": true,
+		},
+		"jodhpur": {
+			# ORASUL ALBASTRU DIN JODHPUR, SEARA DE DIWALI (docs/track_briefs/
+			# jodhpur.md §2.0, §4). Pasul 2 din §7: doar lumina, cerul, ceata
+			# si solul de baza -- kitul de oras, fantana, portile si fortul
+			# vin cu POI-urile (asset-uri hero, §5). `decor` stins ca la
+			# Cappadocia/Serengeti/Fiordland: decorul manual se pune pe POI.
+			#
+			# `ground_tint`: fara slot albastru dedicat (brief §4: "atlasul
+			# are 32 de sloturi, toate alocate"). Provizoriu, INAINTEA
+			# claselor triplanare `blue_lime_light`/`blue_lime_indigo` (care
+			# vin cu kitul de case, nu cu solul insusi): un ocru-nisipiu
+			# neutru, ca platoul intre case sa nu sara la ochi inainte sa
+			# existe ceva de sarit -- de remasurat pe captura cand exista
+			# case (memoria monocromia-se-masoara-dupa-remap).
+			#
+			# A DOUA TRECERE DE LUMINA („cald + albastru", ProbeJodLumina pe
+			# masca de clasa, docs/asset_briefs/jodhpur_masuratori.md §10):
+			# nisipul iesea gri-bej (D 0,380: H 12, S 0,15) — criticii orbi au
+			# citit „apus rece" de 9 ori. Caldura solului vine din ALBEDO (nisip
+			# ocru-portocaliu, S 0,34 pe D), nu din ambient: ambientul trebuie
+			# sa ramana aproape neutru ca varul sa ramana albastru.
+			"ground_tint": Color(0.78, 0.50, 0.30),
+			# Fata de stanca (mecanismul scarp_tint, ca la Fiordland/Machu
+			# Picchu): riolit roz-brun (brief §1, #9A6A5A), aproape neutru dupa
+			# randare -- stanca sub fort si coborarea G sunt fete de panta
+			# mare, nu platouri.
+			"scarp_tint": Color(0.46, 0.30, 0.24),
+			"scarp_slope_deg": 30.0,
+			"scarp_fade_deg": 10.0,
+			# Cer de amurg: portocaliu-roz la orizont -> violet sus (brief §0,
+			# §4, promptul de diorama). DuskCycle preia AMBIENTUL/CEATA in
+			# timpul cursei; sky_top/sky_horizon raman fixe (tema, nu ceasul --
+			# brief §3: "nu atinge fizica", iar cerul insusi nu e in lista de
+			# canale ale DuskCycle, doar soare+ambient+ceata+lampi).
+			# A doua trecere de lumina: cerul devine canal al DuskCycle (vezi
+			# KEY_SKY_* acolo: noaptea se inchide), iar valorile de aici sunt
+			# dusk 0 — orizont portocaliu saturat, zenit magenta-violet
+			# (cer pe masca: S 0,26-0,32 -> 0,49-0,59).
+			"sky_top": Color(0.55, 0.28, 0.50),
+			"sky_horizon": Color(1.0, 0.48, 0.22),
+			"sky_cover_alpha": 0.0,
+			# Ceata CALDA de praf (brief §2.0, §4): "vine cu noaptea" e rolul
+			# lui DuskCycle (fog_light_color + fog_depth_end interpolate);
+			# aici e starea de baza (dusk=0, turul 1), fog_end 300.
+			#
+			# TRECEREA DE LUMINA (tools/ProbeJodLumina.tscn, masurat pe masca
+			# de clasa): ceata NU mai e praful auriu #E8A878 din brief. Orasul
+			# vazut de pe bastion (F) sta la 150-300 m, adica 50-70% ceata:
+			# cu ceata calda casele ieseau H 23-28 (bej), nu albastre. Ceata e
+			# acum un fum albastru-gri stins (H 226, S 0,20), mai RECE si mai
+			# PALID decat solul (memoria ceata-in-familia-solului), iar caldura
+			# spre apus o da DuskCycle prin `fog_sun_scatter` (0,8 la dusk 0):
+			# ceata SPRE soare (D urca spre NV, soarele e in V) ia culoarea
+			# soarelui, ceata DINSPRE soare (F priveste spre SE) ramane rece.
+			# 0,15 -> 0,08 (a doua trecere): ceata albastra, necesara orasului
+			# vazut de pe F, spala mai putin cerul portocaliu.
+			"fog_sky_affect": 0.08,
+			"fog": Color.html("8898B8"),
+			"hill_color": Color(0.58, 0.42, 0.38),
+			# Soare la 8 grade, din VEST (brief §2.0/§4: "azimutul soarelui
+			# ramane cel din tema" -- DuskCycle scade doar elevatia/energia/
+			# culoarea, nu azimutul). custom_sun_rotation_deg de pe Track17
+			# suprascrie oricum cu Vector3(-8, 90, 0) (calculat: y_rot=90 =>
+			# sursa la compass 270 = vest, in conventia gen_*_route.py), dar
+			# tema declara aceeasi valoare ca ancora pentru orice sonda care
+			# incarca tema fara nodul de suprascriere.
+			#
+			# Soarele ramane cald, dar cu o treapta mai putin portocaliu decat
+			# #FFB27A din brief: in spatiul liniar #FFB27A are B/R = 0,19, deci
+			# o fata de var albastru (B/R 2,6) batuta de soare iesea gri-mov.
+			# #FFBC8C (B/R 0,26) tine fetele insorite calde si nisipul auriu.
+			#
+			# A doua trecere: soarele e din nou portocaliu SATURAT (#FF9050),
+			# dar mai SLAB (1,0 -> 0,85), iar ambientul mai tare (0,42 -> 0,50,
+			# cu o umbra de albastru, #C8C4D0). Raportul cheie/umplere decide
+			# culoarea caselor: soare portocaliu tare pe var = fatade gri-lila
+			# (masurat: F_joc S 0,24, sub garda). Cu umplerea mai tare, varul
+			# ramane albastru (F_joc S 0,28, D S 0,35) iar caldura o duc
+			# fetele spre vest, cerul, nisipul si gresia. Ceata ramane
+			# #8A94B8: una mov (#9690B0) ducea orasul de pe F la H 240 S 0,22.
+			"sun_color": Color.html("FF9050"),
+			"sun_energy": 0.85,
+			"exposure": 1.0,
+			"sun_rotation_deg": Vector3(-8, 90, 0),
+			# AMBIENTUL e parghia care decide culoarea orasului: la 8 grade
+			# soarele loveste un plan orizontal cu cos 82 = 0,14 si o fata
+			# dinspre D deloc, deci nisipul si fetele de case din umbra sunt
+			# luminate aproape numai de ambient. Ambientul CALD din brief
+			# (#FFB27A, 0,30; B/R liniar 0,19) inmultit cu varul albastru dadea
+			# gri-bej (masurat H 26, S 0,40). Un ambient NEUTRU-lila (#CEC0C0,
+			# B/R ~0,9) lasa fiecare albedo sa-si spuna culoarea: varul
+			# albastru ramane albastru (H 222-225), nisipul ramane cald
+			# (H 21-24). Albastru-rece pur (#9FA9D6) albastrea si nisipul (H
+			# 280, masurat) — de aceea neutru, nu rece. Energia 0,30 -> 0,42
+			# tine luminanta cadrului (luma 38 pe D, 42 pe F, ca inainte).
+			"ambient_color": Color.html("C8C4D0"),
+			"ambient_energy": 0.50,
+			# Umbre PORNITE, lungi (brief §4: "identitatea turului 1").
+			# shadow_distance 90 (CLAUDE.md: prima setare de scurtat/stins
+			# daca device-ul nu tine 60fps) -- la 8 grade casterii sunt
+			# departe (memoria umbre-exista-dar-cascada-e-scurta), deci se
+			# testeaza explicit la 90 m cand exista decor de umbrit.
+			"shadows": true,
+			"shadow_opacity": 0.65,
+			"shadow_distance": 90.0,
+			"shadow_blur": 1.0,
+			"fog_depth": true,
+			"fog_begin": 90.0,
+			"fog_end": 300.0,
+			"fog_curve": 1.4,
+			"fog_max": 0.85,
+			# Fundalul: jodhpur_horizon.glb (kit §1.7, masurat in
+			# jodhpur_masuratori.md): FarCity_A (banda de case 150 x 20 x
+			# 12 m, cu copiii FarCity_A_Beige / FarCity_A_Glow), DesertRidge_A/B
+			# (dealuri de riolit 200 x 60 x 30 m), UmaidBhawan_A (palatul cu
+			# cupola, 60 x 30 x 35 m). Conventia Fiordland: inele cu picks pe
+			# nod, `cast_shadow` OFF automat (_fara_umbra_aruncata).
+			#
+			# DE CE inelele incep la 330-380 m de centroid: bucla ajunge la
+			# 315 m de centroid, iar INTERIORUL ei e orasul albastru (CityFill).
+			# Cautarea din _build_horizon accepta primul punct la `clear` de
+			# sosea, deci cu `near` mic ar fi pus banda de case si palatul IN
+			# interiorul buclei. De la 330 m in afara, punctul cade dincolo de
+			# sosea, la `clear` de ea.
+			#
+			# Cotele legate (memoria efecte-de-fundal-cote-legate): siluetele
+			# stau la 70-170 m de cel mai apropiat punct de sosea — sub
+			# fog_end de NOAPTE (240, DuskCycle) si sub FAR_PLANE (380).
+			# Palatul are `clear` 170 si scara 0,7 (x 0,85..1,2 = 0,60..0,84,
+			# deci 21-29 m): camera vede la 170 m pana la 10 + 0,092 x 170 =
+			# 25,6 m peste drum, deci cupola intra in cadru. Scara >= 1 o
+			# scotea afara (PR #424). Toate scarile inelelor <= 0,8.
+			"horizon_model": "res://assets/models/jodhpur/rocks/jodhpur_horizon.glb",
+			"horizon_picks": [["FarCity_A"], ["DesertRidge_A", "DesertRidge_B"],
+				["UmaidBhawan_A"]],
+			"horizon_rings": [
+				{"near": 330.0, "far": 400.0, "count": 5, "scale": 0.8,
+					"clear": 70.0, "picks": ["FarCity_A"]},
+				{"near": 360.0, "far": 440.0, "count": 4, "scale": 0.6,
+					"clear": 120.0, "picks": ["DesertRidge_A", "DesertRidge_B"]},
+				# Palatul: azimut FIX 50 grade (cos pe X, sin pe Z), dincolo de
+				# coltul de sud-est al buclei, pe axa coborarii G si a intrarii pe
+				# H (directia de mers 178-213 grade busola la 0,75-0,90): de la
+				# frac ~0,87 e la ~230 m in fata, in cadru pe azimut, cu varful
+				# sub marginea de sus (10 + 0,092 x 230 = 31 m).
+				{"near": 360.0, "far": 460.0, "count": 1, "scale": 0.65,
+					"clear": 120.0, "angle_deg": 50.0, "picks": ["UmaidBhawan_A"]},
+			],
+			# Clasele pe nod, nu una pe tot modelul: FarCity_A e 100% FOAM_WHITE
+			# (masurat) si fara `blue_lime_light` casele ies ALBE (PR #424).
+			# Copiii lui poarta acelasi prefix, deci primesc explicit atlasul
+			# ("" = materialul lumii): _Beige e ocru + LOG_DARK (rezervoare),
+			# _Glow sunt ferestrele (aprinse cu `dusk_lamps`, `shader:jod_window`
+			# — brief §5.4: orasul continua dincolo de ceata). Palatul si dealurile raman pe atlas
+			# (gresie bej / riolit pictat pe benzi de inaltime). Zero materiale
+			# noi: blue_lime_light e deja pe pista prin case.
+			"horizon_class": "",
+			"horizon_classes": {
+				"FarCity_A": Palette.TRI_PREFIX + "blue_lime_light",
+				"FarCity_A_Beige": "",
+				"FarCity_A_Glow": Palette.SHADER_PREFIX + "jod_window",
+			},
+			"walls": false,
+			"kerbs": false,
+			"cliffs": false,
+			"decor": "none",
+			"props": "forest",
+			"hazard_model": "",
+			"dust_color": Color(0.68, 0.60, 0.50),
+			# Scurtatura ulicioarei (TrackBranch, brief §2 randul D/D', §3
+			# "Vaca din ulicioara"): caldarâm bătătorit, NU bancul de nisip
+			# implicit -- aceeasi lectie ca Fiordland/Chasm (branch_surface
+			# lipsa => route.surface cade pe "sand", exclus explicit din
+			# saparea de rapa). "gravel" (pietris batatorit, fara fagase) e
+			# mai aproape de caldarâmul ingust dintre case decat drumul de
+			# tara cu iarba pe mijloc.
+			"branch_surface": "gravel",
+			# Runda 4 POI D′: lespezile trotuarului, nu pietris — criticul orb,
+			# de doua ori, „arcada pe maidan": maidanul era banda insasi.
+			# Aceeasi dala si aceeasi culoare ca `shoulder_*` mai jos.
+			"branch_tint": Color(0.80, 0.84, 0.92),
+			"branch_texture": "res://assets/textures/classes/alpine_granite.png",
+			"water": false,
+			# --- STRATUL DE SUB DECOR (jodhpur/poi-sol, dupa valul 1 al
+			# gauntlet-ului). Trei critici orbi (C fantana, E portile, H strada)
+			# au numit independent aceleasi trei lucruri pe care decorul nu le
+			# poate repara: solul nisip gri-bej peste tot, apa fantanii turcoaz
+			# cu pete albe, asfaltul bleumarin-violet. Masuratorile pe masca sunt
+			# in raportul ramurii; aici doar ce cumpara fiecare cheie.
+			#
+			# ASFALTUL: gri-antracit (bara), nu ROAD_COLOR (0.23, 0.24, 0.30).
+			# Sub ambientul lila + soarele de 8 grade, albastrul lui ROAD_COLOR
+			# iesea H 264-271 pe ecran. Albedo aproape neutru, cu o urma de rece
+			# care compenseaza lumina calda; tot cea mai inchisa suprafata
+			# continua din cadru (style_bible §1).
+			"road_tint": Color(0.24, 0.26, 0.255),
+			# SOLUL PE ZONE (_ground_zone_field): gresie roz in groapa fantanii
+			# (C), riolit pe stanca fortului (E-F). Perechea a doua de texturi a
+			# terenului poarta dala ridicata a clasei `rose_sandstone` (blocuri
+			# de piatra, aceeasi imagine ca Well_Stone din kit) — zero materiale
+			# noi, terenul ramane unul. Tentele sunt tinta / media dalei ridicate
+			# (~0.83, 0.81, 0.745): #D4957A -> (1.0, 0.72, 0.64), #9A6A5A ->
+			# (0.73, 0.51, 0.47). Desertul de dincolo ramane nisip. A doua
+			# trecere de lumina: ambele mai calde (riolitul -> 0.80, 0.50, 0.38),
+			# solul de pe F iesea roz-gri (H 355-6, S 0,19-0,27).
+			"terrain_alt_class": "rose_sandstone",
+			"ground_zones": [
+				# Fantana: acul de par are bratele la 22 m, groapa e intre ele si
+				# pe umerii lor. 30 m acopera groapa si umarul de langa asfalt.
+				{"from": 0.129, "to": 0.267, "max_m": 30.0, "fade_m": 12.0,
+					# a doua trecere: 0.68/0.62 -> 0.64/0.50, gresie mai calda
+					"tint": Color(1.0, 0.64, 0.50)},
+				# Portile si stanca fortului: zigzagul urca pe FortRock (r 100 m),
+				# stanca e in jurul lui, nu doar pe umar.
+				{"from": 0.474, "to": 0.699, "max_m": 70.0, "fade_m": 30.0,
+					"tint": Color(0.80, 0.50, 0.38)},
+				# Coborarea G pe stanca de riolit goala si malul Devkund (G2):
+				# brief §2 G/G2, bara G2 arata malul ca stanca roz, nu nisip.
+				# Aceeasi tenta ca fortul; 40 m tin stanca pe umar si pe mal
+				# fara sa inghita deserul de dincolo de lac.
+				{"from": 0.699, "to": 0.910, "max_m": 40.0, "fade_m": 20.0,
+					"tint": Color(0.80, 0.50, 0.38)},
+			],
+			# TROTUARUL: pe strazile orasului (A/B, D, H) fasia dintre asfalt si
+			# case e lata de ~3 m si iesea nisip. Umarul existent se lateste
+			# acolo la 3.2 m si poarta dala `alpine_granite` (pietre plate
+			# asezate — citeste caldaram/lespezi de sus) in loc de pietris.
+			# Tile 6 m: pietre de ~30 cm, care supravietuiesc mipmap-ului pe o
+			# banda de 3 m (vezi SHOULDER_TILE). Culoarea = gresie bej-roz
+			# stinsa (0.58, 0.50, 0.46) / media dalei (0.65, 0.61, 0.54).
+			# Pedeapsa de offroad NU se schimba: `is_on_road` nu citeste umarul.
+			"shoulder_texture": "res://assets/textures/classes/alpine_granite.png",
+			"shoulder_color": Color(0.80, 0.84, 0.92),
+			"shoulder_tile": 6.0,
+			"shoulder_width_zones": [Vector3(0.906, 0.129, 3.2),
+				Vector3(0.267, 0.474, 3.2)],
+			# Trotuarul e DRUM (decizia dezvoltatorului, 30 sep 2026): fasia
+			# pavata din ferestrele de mai sus nu mai taie viteza ca iarba.
+			# Citita de `is_on_road` prin `_paved_shoulder_at`. AI-ul nu o
+			# vede (linia lui vine din `lookahead_point`/`width_at_index`).
+			"shoulder_zones_are_road": true,
+			# APA (fantana C si lacul Devkund G2 impart materialul): verde-inchis,
+			# intunecata, calma — bara C si G2. Fara cheile astea tema mostenea
+			# implicitul Okinawei (REEF_SHALLOW turcoaz, spuma 0.75, creste 0.85,
+			# scanteiere 0.55), de unde turcoazul si petele albe.
+			# `water_glint` 0: petele deschise ramase pe apa verde erau
+			# SCANTEIEREA (forma din fisurile dalei de detaliu), nu umbre si nu
+			# ondulare — A/B masurat: umbre stinse, ripple 0.12 -> 0.04 si
+			# lit_normal 0.35 -> 0.15 nu le-au miscat; glint 0.10 -> 0 le-a
+			# sters. Luminile de pe apa vin de la candelele plutitoare (decor).
+			# `water_deep_gain` 1.0: acelasi slot pe toata rampa; cu 0.75 celulele
+			# de grila (7.9 m) mai putin adanci ieseau dreptunghiuri mai deschise.
+			"water_shallow_slot": Palette.SEA_DEEP,
+			"water_deep_slot": Palette.SEA_DEEP,
+			"water_shore_slot": Palette.SEA_DEEP,
+			"water_dim": 0.55,
+			"water_desat": 0.35,
+			"water_mul": Color(0.85, 1.0, 0.80),
+			"water_deep_gain": 1.0,
+			"water_foam": 0.0,
+			"water_foam_mix": 1.0,
+			"water_crest": 0.0,
+			"water_band": 0.0,
+			"water_glint": 0.0,
+			"water_ripple": 0.08,
+			"water_fresnel": 0.42,
+			"water_fresnel_sharp": 3.5,
+			"water_fresnel_color": Color(0.58, 0.44, 0.60),
+			"water_view_lo": 1.0,
+			"water_view_hi": 0.75,
+			"water_view_ref": 0.60,
+			"water_lit_rough": 0.10,
+			"water_lit_fresnel": 0.80,
+			"water_lit_spec": 0.60,
+			"water_lit_normal": 0.25,
+			"water_lit_wave_len": 1.2,
+			"water_dusk_dim": 0.55,
 		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
@@ -3439,6 +3717,165 @@ const WIDTH_RAMP_M: float = 30.0
 ## [constant WIDTH_RAMP_M] metri, neteda la capete (smoothstep), nu o treapta.
 ## Vezi constanta pentru ce se intampla fara ea.
 func width_at(frac: float) -> float:
+	var base := _width_at_segments(frac)
+	if not width_flow_windows.is_empty():
+		base = _width_flow(fposmod(frac, 1.0), base)
+	var pins := _width_pinches()
+	if pins.is_empty():
+		return base
+	return _apply_pinches(fposmod(frac, 1.0), base, pins)
+
+
+## Strangerile LOCALE ale soselei: fiecare e (frac_start, frac_end, half_width).
+## Implicit nimic — si atunci `width_at` intoarce exact ce intorcea inainte,
+## deci pistele care nu declara nimic raman bit-identice.
+##
+## [b]De ce nu ajung sectoarele de latime.[/b] Rampele unui sector
+## ([method _width_blend]) merg mereu spre `half_width`-ul GLOBAL, iar intre
+## sectoare castiga primul din lista. Un sector ingust pus in mijlocul altui
+## sector ingust (poarta de 7 m pe drumul de 9 m al portilor Jodhpur) nu se
+## poate scrie: masurat pe Track17, rampa sectorului de dinainte il acoperea pe
+## 30 m (drumul urca de la 9 m la 13 m si SARE apoi la 7 m), adica exact pragul
+## lateral pe care rampa exista sa-l previna. O strangere se scrie deci PESTE
+## latimea sectoarelor, ca minim: rampa ei pleaca din latimea locala, nu din
+## cea globala, si nu atinge nimic din afara ei.
+func _width_pinches() -> Array[Vector3]:
+	return []
+
+## Pe cati metri se face trecerea in / din strangere. 12 m la o strangere de
+## 1 m pe inele de ~2 m: 0,17 m pe inel in medie, 0,25 m in varful
+## smoothstep-ului — sub pragul de 0,3 m peste care o margine laterala devine
+## perete (vezi [constant WIDTH_RAMP_M]).
+const PINCH_RAMP_M: float = 12.0
+
+
+func _apply_pinches(f: float, base: float, pins: Array[Vector3]) -> float:
+	var total := _dists[baked.size()] if _dists.size() > baked.size() else 0.0
+	var ramp := PINCH_RAMP_M / total if total > 0.0 else 0.01
+	var out := base
+	for p in pins:
+		var target := minf(base, p.z)
+		for shift: float in [-1.0, 0.0, 1.0]:
+			var a := p.x + shift
+			var b := p.y + shift
+			var k := 0.0
+			if f >= a and f <= b:
+				k = 1.0
+			elif f < a and f > a - ramp:
+				k = smoothstep(0.0, 1.0, (f - (a - ramp)) / ramp)
+			elif f > b and f < b + ramp:
+				k = smoothstep(0.0, 1.0, 1.0 - (f - b) / ramp)
+			if k > 0.0:
+				out = minf(out, lerpf(base, target, k))
+	return out
+
+
+## Ferestre de tur, (frac_de_la, frac_pana_la), in care latimea CURGE intre
+## sectoare lipite unul de altul, fara trepte. Gol (implicit) = regula veche,
+## bit cu bit, pe orice pista.
+##
+## [b]De ce.[/b] Regula din [method _width_at_segments] e „primul sector
+## castiga", iar rampele unui sector merg mereu spre `half_width`-ul GLOBAL.
+## Intre doua sectoare LIPITE de latimi diferite asta da o treapta: rampa de
+## iesire a primului acopera inceputul celui de-al doilea si apoi drumul sare
+## direct la latimea lui. Masurat pe Track17, fantana C: 6,5 -> 4,5 intr-un
+## singur pas la 0.1335, o umflatura pana la 6,5 intre 0.147 si 0.163 si
+## 6,3 -> 4,5 la 0.2177 (acolo cadeau 21 din 25 de iesiri peste marginea
+## dreapta). Pe alte piste (Track13/14/16 au si ele sectoare lipite) regula
+## veche ramane: o schimbare globala le-ar misca soseaua si decorul asezat pe
+## marginea ei.
+##
+## In fereastra, latimea e ANVELOPA DE JOS a profilului declarat, cu panta
+## limitata la [constant WIDTH_FLOW_SLOPE]: w(f) = min peste bucati
+## (w_bucata + panta * distanta_m pana la bucata), unde bucatile sunt
+## sectoarele si golurile dintre ele (la `half_width`). Consecinta: un sector
+## INGUST isi pastreaza toata latimea declarata, de la un capat la altul
+## (poarta ramane poarta), iar trecerea se face in sectorul mai LAT — acelasi
+## contract ca „rampele stau in afara sectorului declarat" din
+## [method _width_blend], acum si intre doua sectoare lipite.
+##
+## Marginile ferestrei se aleg unde profilul vechi e deja constant (altfel
+## treapta se muta pe marginea ferestrei); `_validate_width_flow` se plange
+## in Output daca nu e asa.
+@export var width_flow_windows: Array[Vector2] = []
+
+## Panta maxima a latimii in fereastra de curgere, in m de semilatime pe m de
+## drum. 1/15: 2 m de schimbare se fac pe 30 m (cat [constant WIDTH_RAMP_M]),
+## adica 0,13 m pe inel de 2 m — sub pragul de 0,15 m al unei margini care se
+## citeste continua si departe de cei 0,3 m peste care devine perete.
+const WIDTH_FLOW_SLOPE: float = 1.0 / 15.0
+
+## Bucatile profilului declarat, (start, end, half_width) desfasurate pe
+## [0, 2): sectoarele si golurile dintre ele. Coapte o data pe rebuild, ca
+## `_width_segs`.
+var _width_pieces: Array[Vector3] = []
+var _width_pieces_ready: bool = false
+
+
+func _width_flow(f: float, base: float) -> float:
+	var inside := false
+	for w in width_flow_windows:
+		if TrackSideSampler._ring_window(f, w.x, w.y, 0.0001) > 0.0:
+			inside = true
+			break
+	if not inside:
+		return base
+	var total := _dists[baked.size()] if _dists.size() > baked.size() else 0.0
+	if total <= 0.0:
+		return base
+	var pieces := _width_flow_pieces()
+	if pieces.is_empty():
+		return base
+	var out := INF
+	for p in pieces:
+		var d := INF
+		for shift: float in [-1.0, 0.0, 1.0]:
+			var g := f + shift
+			var dd := 0.0
+			if g < p.x:
+				dd = p.x - g
+			elif g > p.y:
+				dd = g - p.y
+			d = minf(d, dd)
+		out = minf(out, p.z + WIDTH_FLOW_SLOPE * d * total)
+	return out
+
+
+func _width_flow_pieces() -> Array[Vector3]:
+	if _width_pieces_ready:
+		return _width_pieces
+	_width_pieces_ready = true
+	_width_pieces = []
+	var segs := _width_profile().duplicate()
+	if segs.is_empty():
+		return _width_pieces
+	segs.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.x < b.x)
+	for k in segs.size():
+		var s: Vector3 = segs[k]
+		_width_pieces.append(s)
+		var nxt: Vector3 = segs[(k + 1) % segs.size()]
+		var next_a := nxt.x if k + 1 < segs.size() else nxt.x + 1.0
+		if next_a > s.y + 0.00001:
+			_width_pieces.append(Vector3(s.y, next_a, half_width))
+	_validate_width_flow()
+	return _width_pieces
+
+
+## Marginile ferestrelor trebuie sa cada unde profilul vechi si cel curs
+## coincid, altfel treapta doar se muta pe margine.
+func _validate_width_flow() -> void:
+	for w in width_flow_windows:
+		# Un pas inauntru: pe muchia exacta fereastra nu se aplica deloc.
+		for f: float in [w.x + 0.0005, w.y - 0.0005]:
+			var old := _width_at_segments(f)
+			var flow := _width_flow(fposmod(f, 1.0), old)
+			if absf(old - flow) > 0.02:
+				push_warning(("Track: fereastra de latime curgatoare %.3f-%.3f are marginea "
+					+ "%.3f pe o treapta: vechi %.2f, curs %.2f") % [w.x, w.y, f, old, flow])
+
+
+## Latimea data doar de sectoare (fara strangeri) — vezi [method width_at].
+func _width_at_segments(frac: float) -> float:
 	var segs := _width_profile()
 	if segs.is_empty():
 		return half_width
@@ -3560,7 +3997,7 @@ func _width_segs_overlap(p: Vector3, q: Vector3) -> bool:
 ## risc, pentru o functie pe care n-o folosesc.
 func _baked_widths() -> PackedFloat32Array:
 	var out := PackedFloat32Array()
-	if _width_profile().is_empty():
+	if _width_profile().is_empty() and _width_pinches().is_empty():
 		return out
 	var n := baked.size()
 	out.resize(n)
@@ -3600,6 +4037,60 @@ func _points() -> Array[Vector3]:
 func _code_points() -> Array[Vector3]:
 	push_error("Track: suprascrie _code_points() in subclasa sau adauga un nod Path")
 	return []
+
+## Traficul de tuk-tuk-uri (Jodhpur, Track17, brief §3 „Traficul de tuk-tuk-
+## uri"): cate corpuri `Car` cu `TrafficController` circula pe traseu, in
+## afara masinilor de cursa. IMPLICIT OPRIT (0) — pe toate pistele existente
+## (Track01/08/09/.../16) comportamentul ramane NESCHIMBAT; doar Jodhpur il
+## va ridica. `Race._spawn_traffic` citeste exportul asta si construieste
+## lista separata de tuk-tuk-uri, distribuite uniform pe traseu (vezi acolo).
+@export var traffic_count: int = 0
+
+## Cati dintre AI iau scurtatura pe pista asta. Negativ = implicitul din
+## `AIController.SHORTCUT_CHANCE` (0.4) — pe toate pistele existente
+## comportamentul ramane NESCHIMBAT.
+##
+## Exista pentru o scurtatura cu gura INGUSTA pazita de un gimmick (vaca din
+## ulicioara, Jodhpur): cu 40%, ~3 AI converg pe aceeasi poarta de 4 m, iar
+## cand vaca se culca se fac gramada — masurat pe Track17 runda 2: 16-26
+## repuneri/cursa, 2 cu vaca inghetata deschisa. Mai putini AI pe acolo, nu
+## un AI care ocoleste gimmick-ul: cine o alege tot citeste vaca
+## (`branch_is_open`) si pierde scurtatura cand e culcata, ca jucatorul.
+@export_range(-1.0, 1.0, 0.05) var ai_shortcut_chance: float = -1.0
+
+## Paznicul de progres al AI-ului (`AIController._watch_progress`) uita
+## fereastra curenta la fiecare repunere. Fals = comportamentul vechi, deci
+## pistele existente raman NESCHIMBATE (opt-in).
+##
+## Exista pentru o repunere care duce masina MULT inapoi pe traseu — canalul cu
+## `respawn_past_gap` o pune inaintea golului (60-80 m in spate pe kickerul
+## Devkund, Jodhpur). Paznicul citea saltul de index ca „mers inapoi" si,
+## in fereastra de 2 s, cerea marsarier virat la 23-27 m/s: masina se oprea pe
+## loc inaintea kickerului, relua de la zero, ajungea la buza cu ~10 m/s, cadea
+## iar in canal — bucla masurata pe Track17 seed 2 (6 repuneri, 1 ejectare).
+@export var ai_progress_reset_on_respawn: bool = false
+
+## Muchii FARA PARAPET pe care AI-ul le trateaza ca pe o prapastie, nu ca pe
+## o margine de asfalt: fiecare e (frac_start, frac_end, latura, margine_m),
+## fractii pe LUNGIME (ca in ProbeRace), latura -1 = stanga sensului de mers,
+## +1 = dreapta. Vezi [method ai_drop_edge_at] si `AIController._drop_*`.
+## Implicit gol = comportamentul vechi, deci pistele existente raman
+## NESCHIMBATE (opt-in, ca [member ai_progress_reset_on_respawn]).
+##
+## Exista pentru fantana din Jodhpur (POI C): apa e pe stanga pe tot drumul,
+## fara parapet (brief), iar caderile veneau din pluton, pe turul 1, in doua
+## locuri: iesirea din virajul de intrare (viraj la dreapta, deci apa pe
+## EXTERIOR; exact acolo soseaua sare de la 6,5 la 4,5 m, iar masina iesita
+## larg ramane sub buza asfaltului si aluneca in cornisa) si apropierea de
+## acul de la fund (viraj la stanga, apa pe INTERIOR: masina din dreapta taie
+## spre apex si o impinge pe cea de langa ea in apa). Linia AI-ului mergea
+## pana la 0,8 din semilatime, adica cu roata pe muchie, iar ocolirea alegea
+## la egalitate partea stanga. In zona declarata AI-ul: tine axa la
+## `margine_m` de muchie (si la 1,4 m de cealalta margine), intra mai incet
+## in virajele cu muchia pe exterior si nu inchide usa vecinului de alaturi.
+## Masurat pe 16 seed-uri x 2 variante de decor: iesirile cu axa peste muchia
+## stanga 6 -> 1-2, cu roata pe buza 19-21 -> 6-7, caderi in apa 2 -> 0.
+@export var ai_drop_edges: Array[Vector4] = []
 
 ## Bifeaza in Inspector ca sa reconstruiesti pista (doar in editor).
 ## Pe o pista definita in cod, PRIMA bifare creeaza si nodul "Path" cu
@@ -3801,6 +4292,23 @@ func _ravine_widths() -> Array[Vector2]:
 func _ravine_floor_slopes() -> Array[Vector2]:
 	return []
 
+## APA intr-o rapa: (indice in [method _ravines], cota ABSOLUTA a apei, metri
+## de elan la repunere). Vezi [method _build_ravine_water]. Fara ea o rapa e
+## uscata pe orice tema fara mare (`water: false`), oricat de adanc ar fi sapata.
+func _ravine_water() -> Array[Vector3]:
+	return []
+
+## DEBLEELE: (frac_start, frac_end, cota ABSOLUTA a buzei, latura +-1) — soseaua
+## taiata in teren, cu peretele urcand pe latura data. Vezi
+## TrackSideSampler._lift_cuttings.
+func _cuttings() -> Array[Vector4]:
+	return []
+
+## Forma comuna a debleelor: (umar m, panta m/m, intindere m). Vezi
+## TrackSideSampler.cutting_shape.
+func _cutting_shape() -> Vector3:
+	return Vector3(5.5, 1.3, 40.0)
+
 ## PASAJE PE PILONI: intervale de tur (fractii, x..y, cu wrap peste 1.0) in care
 ## soseaua trece IN AER peste un alt tronson al aceleiasi piste — nodul rutier
 ## din Chongqing, sau orice „pista peste pista".
@@ -3879,7 +4387,7 @@ func _holds_declarations(node: Node) -> bool:
 		return true
 	if node is TrackChannel or node is HazardMarker:
 		return true
-	if node is CliffFace:
+	if node is CliffFace or node is TerrainBluff:
 		return true
 	for child in node.get_children():
 		if _holds_declarations(child):
@@ -3937,6 +4445,20 @@ func _collect_hollows(node: Node, out: Array[Vector4],
 		_collect_hollows(child, out, walls)
 
 
+## Abrupturile plasate ca noduri [TerrainBluff], aceeasi cautare recursiva ca
+## la scobituri; cate [constant TrackSideSampler.BLUFF_STRIDE] numere pe nod.
+func _node_bluffs() -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var st: Array[Node] = [self]
+	while not st.is_empty():
+		var n: Node = st.pop_back()
+		for c in n.get_children():
+			st.append(c)
+		if n is TerrainBluff:
+			out.append_array((n as TerrainBluff).spec(self))
+	return out
+
+
 ## Scurtaturile desenate ca noduri [TrackBranch] — se ADUNA la cele declarate in
 ## cod, exact ca varfurile de mai sus. O pista scrisa in cod (Alpii) poate primi
 ## o scurtatura NOUA tragand un nod, fara sa atinga `_branch_specs()`.
@@ -3980,6 +4502,7 @@ func _collect_branches(node: Node, out: Array[Dictionary]) -> void:
 				"bumpiness": br.bumpiness,
 				"tufts": br.tufts,
 				"elevated": br.elevated,
+				"lure_before_entry_only": br.lure_before_entry_only,
 			}
 			if br.entry_at >= 0.0:
 				spec["entry"] = br.entry_at
@@ -4218,6 +4741,7 @@ func rebuild() -> void:
 	# se pot fi schimbat de sub noi, iar lungimea pistei (deci si lungimea
 	# rampelor, in fractii) se schimba la orice retus de traseu.
 	_width_segs_ready = false
+	_width_pieces_ready = false
 	_terr_cells = 0 # grila de teren se recoace odata cu curba
 	for child in get_children():
 		if child is Path3D:
@@ -4273,6 +4797,12 @@ func rebuild() -> void:
 	# lista de argumente, si date DUPA constructie — samplerul le ridica dupa
 	# rape. Goala pe orice pista fara noduri cu flagul.
 	_sampler.late_peaks = _island_peaks
+	# Debleele, tot dupa constructie: lista goala pe orice pista fara ele.
+	_sampler.cuttings = _cuttings()
+	_sampler.cutting_shape = _cutting_shape()
+	# Abrupturile (TerrainBluff), tot dupa constructie: goale pe orice pista
+	# fara noduri, deci ground_y nu se schimba acolo.
+	_sampler.bluffs = _node_bluffs()
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
 	_sampler.shore_in = float(theme_flag("shore_band_in",
@@ -4785,6 +5315,13 @@ func _build_horizon(centroid: Vector3) -> void:
 		for slot in count:
 			var angle := float(slot) * arc \
 				+ rng.randf_range(-arc * 0.35, arc * 0.35)
+			# Azimut FIX (optional, din sep 2026, Jodhpur): un reper unic
+			# (palatul Umaid Bhawan) trebuie sa cada unde il vede camera, nu
+			# la un unghi tras la sorti. Unghiul e in conventia de mai jos
+			# (cos pe X, sin pe Z, fata de centroid). Tragerea rng de mai sus
+			# ramane, ca sirul aleator al celorlalte inele sa fie identic.
+			if ring.has("angle_deg"):
+				angle = deg_to_rad(float(ring["angle_deg"]))
 			var pos := Vector3.ZERO
 			var found := false
 			# Distanta e REZULTAT, nu intrare. Raza se masoara din centroid, dar
@@ -5303,6 +5840,84 @@ func _terrain_mesh_y(x: float, z: float) -> float:
 	return h11 + (1.0 - u) * (h01 - h11) + (1.0 - v) * (h10 - h11)
 
 
+## SOLUL PE ZONE DE TUR: greutate + tenta per varf de grila, din cheia de tema
+## `ground_zones` (Array de Dictionary: `from`/`to` = fereastra de tur, `tint`
+## = culoarea de varf, `max_m` = pana la ce distanta de soseaua din fereastra
+## ajunge, `fade_m` = pe cati metri se stinge spre exterior).
+##
+## De ce (Jodhpur, valul 1 al gauntlet-ului): trei critici orbi, pe fantana, pe
+## porti si pe strada, au numit independent ACELASI defect pe care decorul nu-l
+## poate repara — solul iese nisip gri-bej plat peste tot. In groapa fantanii
+## trebuie gresie roz, pe stanca fortului riolit. Mecanismele existente cad
+## toate pe alta axa: `scarp_tint` pe PANTA (podeaua gropii e plata),
+## `strata_*`/`rock_band` pe COTA (fantana e SUB sosea, fortul PESTE ea — nicio
+## linie de nivel nu le desparte de oras), crusta lagunei pe un contur de apa.
+## Aici axa e LOCUL pe tur, masurat ca distanta pana la soseaua din fereastra.
+##
+## O zona fara `own` nu intreaba ce tronson e mai aproape: fantana e un ac de
+## par cu doua brate la 22 m, iar groapa dintre ele e a amandurora.
+##
+## Intoarce [] pe temele fara cheie (zero cost, zero diferenta), altfel
+## [PackedFloat32Array greutati, PackedColorArray tente] pe (cells+1)^2 varfuri.
+func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
+	var zones: Variant = theme_flag("ground_zones", null)
+	if zones == null or (zones as Array).is_empty() or baked.is_empty():
+		return []
+	var n := baked.size()
+	var total := maxf(_dists[n], 0.001)
+	var row := cells + 1
+	var w := PackedFloat32Array()
+	w.resize(row * row)
+	w.fill(0.0)
+	var tints := PackedColorArray()
+	tints.resize(row * row)
+	tints.fill(Color.WHITE)
+	for zd: Dictionary in zones:
+		var f0 := float(zd.get("from", 0.0))
+		var f1 := float(zd.get("to", 0.0))
+		var reach := float(zd.get("max_m", 30.0))
+		var fade := maxf(float(zd.get("fade_m", 10.0)), 0.001)
+		var tint: Color = zd.get("tint", Color.WHITE)
+		# Punctele de sosea din fereastra, din 2 in 2 (bake ~1-2 m: eroarea de
+		# distanta ramane sub un metru, fata de un fade de zeci).
+		var pts := PackedVector2Array()
+		var lo := Vector2(INF, INF)
+		var hi := Vector2(-INF, -INF)
+		for i in range(0, n, 2):
+			if TrackSideSampler._ring_window(_dists[i] / total, f0, f1, 0.0001) <= 0.0:
+				continue
+			var p := Vector2(baked[i].x, baked[i].z)
+			pts.append(p)
+			lo = lo.min(p)
+			hi = hi.max(p)
+		if pts.is_empty():
+			continue
+		lo -= Vector2.ONE * reach
+		hi += Vector2.ONE * reach
+		var gx0 := clampi(int(floor((lo.x - origin.x) / step)), 0, cells)
+		var gx1 := clampi(int(ceil((hi.x - origin.x) / step)), 0, cells)
+		var gz0 := clampi(int(floor((lo.y - origin.z) / step)), 0, cells)
+		var gz1 := clampi(int(ceil((hi.y - origin.z) / step)), 0, cells)
+		var reach2 := reach * reach
+		for gz in range(gz0, gz1 + 1):
+			for gx in range(gx0, gx1 + 1):
+				var q := Vector2(origin.x + float(gx) * step, origin.z + float(gz) * step)
+				var best := INF
+				for p in pts:
+					best = minf(best, q.distance_squared_to(p))
+				if best > reach2:
+					continue
+				var zw := 1.0 - smoothstep(reach - fade, reach, sqrt(best))
+				var gi := gz * row + gx
+				if zw > w[gi]:
+					# Doua zone care se ating: castiga cea mai prezenta, cu
+					# tenta amestecata, ca granita sa nu sara intre doua culori.
+					tints[gi] = tint if w[gi] <= 0.0 \
+						else tints[gi].lerp(tint, zw / (zw + w[gi]))
+					w[gi] = zw
+	return [w, tints]
+
+
 func _build_terrain() -> void:
 	_terrain_grid()
 	var cells := _terr_cells
@@ -5439,6 +6054,16 @@ func _build_terrain() -> void:
 	dirt_noise.seed = _world_seed() ^ 0xD127
 	dirt_noise.frequency = 0.035 # perioada ~28 m: pete de 8-15 m, ca in referinta
 	dirt_noise.fractal_octaves = 2
+	# SOLUL PE ZONE DE TUR (cheia `ground_zones`). Vezi `_ground_zone_field`.
+	# Null pe orice tema fara cheie: restul pistelor nu se schimba cu un pixel.
+	var zone_field: Array = _ground_zone_field(cells, step, origin)
+	var zone_w: PackedFloat32Array = zone_field[0] if not zone_field.is_empty() \
+		else PackedFloat32Array()
+	var zone_tints: PackedColorArray = zone_field[1] if not zone_field.is_empty() \
+		else PackedColorArray()
+	# Greutatea zonei intra si in COLOR.a (perechea a doua de texturi a
+	# shader-ului) DOAR daca tema a dat perechii a doua o dala de roca.
+	var zone_alt: bool = theme_flag("terrain_alt_class", null) != null
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for gz in cells:
@@ -5659,6 +6284,18 @@ func _build_terrain() -> void:
 							tint = tint.lerp(scarp_tint as Color, scarp_w)
 							# Pe fata de stanca nu creste iarba.
 							grass_w *= 1.0 - scarp_w
+					# ZONA DE SOL (gresia fantanii, riolitul fortului): DUPA
+					# fata de stanca, ca in zona ei sa castige zona — groapa
+					# fantanii e gresie si pe pereti, nu riolit.
+					if not zone_w.is_empty():
+						var gi: int = idx00 + [0, 1, cells + 1, cells + 2][corner_idx]
+						var zw: float = zone_w[gi]
+						if zw > 0.0:
+							zw = smoothstep(0.0, 1.0, clampf(zw + dirt_noise.get_noise_2d(
+								v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0))
+							tint = tint.lerp(zone_tints[gi], zw)
+							if zone_alt:
+								grass_w = lerpf(grass_w, 1.0, zw)
 					if snow_tint != null:
 						var snow_w := clampf(
 							(v.y - snow_line) / snow_fade, 0.0, 1.0)
@@ -5713,6 +6350,17 @@ func _build_terrain() -> void:
 		mat.set_shader_parameter("grass_micro", grass_tex)
 		mat.set_shader_parameter("grass_macro",
 			_tex("res://assets/textures/surface_grass_macro.png"))
+		# A DOUA PERECHE CA ROCA (cheia `terrain_alt_class`): pe o tema fara
+		# iarba (Jodhpur: grass_w e 0 peste tot) perechea de iarba e moarta, deci
+		# poate purta dala unei clase de piatra — aceeasi imagine (ridicata) pe
+		# care o folosesc deja piesele clasei, zero VRAM si ZERO materiale noi:
+		# terenul ramane un singur material. Greutatea vine din `ground_zones`.
+		var alt_cls: Variant = theme_flag("terrain_alt_class", null)
+		if alt_cls != null:
+			mat.set_shader_parameter("grass_micro",
+				Palette._class_texture(String(alt_cls)))
+			mat.set_shader_parameter("grass_macro",
+				_tex("res://assets/textures/surface_sand_macro.png"))
 		inst.material_override = mat
 	else:
 		# Checkout fara texturi: macar culoarea din vertex colors.
@@ -5833,6 +6481,7 @@ func _build_water() -> void:
 	# la nivelul marii. De aceea rularea nu mai e conditionata de steagul de
 	# tema: o pista fara mare (Alpii) poate avea totusi un canal cu apa.
 	_build_channel_water()
+	_build_ravine_water()
 	if not theme_flag("water", false):
 		return
 	var sea_y := _sampler.mean_road_y() + sea_level_offset
@@ -6294,6 +6943,190 @@ func _build_channel_water() -> void:
 		_build_channel_respawn(ch, water_y)
 
 
+## Celulele ude ale rapelor cu apa: Vector2i(celula) -> cota apei. Le citeste
+## [method water_level_at], ca stropul si franarea in apa sa mearga si aici.
+var _ravine_wet: Dictionary = {}
+
+
+## APA in rapele declarate in [method _ravine_water], la cota lor absoluta.
+##
+## De ce nu marea: pe o tema fara mare (`water: false`, Jodhpur) nu exista
+## nicio suprafata de apa, iar o rapa sapata sub cota drumului ramane o groapa
+## uscata. Canalele isi aduc apa lor ([method _build_channel_water]), dar ele
+## TAIE soseaua; lacul Devkund si apa fantanii in trepte stau PE LANGA drum.
+##
+## Suprafata se aseaza pe celulele GRILEI DE TEREN (aceleasi cote pe care le
+## randeaza si le loveste masina, nu campul), si doar pe cele care au macar un
+## colt sub apa si al caror cel mai apropiat punct de sosea e in intervalul
+## rapei, pe latura ei — deci o alta groapa din apropiere nu se umple din
+## greseala. Celulele acoperite deja de apa unui canal se sar: doua suprafete
+## coplanare transparente s-ar amesteca de doua ori.
+##
+## Sub fiecare celula uda sta o cutie de [RespawnZone] (o singura zona pe rapa),
+## cu plafonul la 0.6 m sub apa, ca la canale: cine cade de pe margine e repus
+## cu `backoff` metri de elan.
+func _build_ravine_water() -> void:
+	var specs := _ravine_water()
+	if specs.is_empty() or _terr_cells <= 0:
+		return
+	var ravines := _ravines()
+	var n := baked.size()
+	var total := _dists[n]
+	var row := _terr_cells + 1
+	var step := _terr_step
+	var mat := _water_material()
+	for spec in specs:
+		var ri := int(spec.x)
+		if ri < 0 or ri >= ravines.size():
+			push_warning("custom_ravine_water: rapa %d nu exista" % ri)
+			continue
+		var r: Vector4 = ravines[ri]
+		var water_y := spec.y
+		# Caseta punctelor din interval, largita cat tine o rapa.
+		var lo := Vector2(INF, INF)
+		var hi := Vector2(-INF, -INF)
+		for i in n:
+			if TrackSideSampler._ring_window(_dists[i] / total, r.x, r.y, 0.0001) <= 0.0:
+				continue
+			lo = lo.min(Vector2(baked[i].x, baked[i].z))
+			hi = hi.max(Vector2(baked[i].x, baked[i].z))
+		if lo.x == INF:
+			continue
+		lo -= Vector2.ONE * 70.0
+		hi += Vector2.ONE * 70.0
+		var gx0 := clampi(int(floor((lo.x - _terr_origin.x) / step)), 0, _terr_cells - 1)
+		var gx1 := clampi(int(ceil((hi.x - _terr_origin.x) / step)), 0, _terr_cells - 1)
+		var gz0 := clampi(int(floor((lo.y - _terr_origin.z) / step)), 0, _terr_cells - 1)
+		var gz1 := clampi(int(ceil((hi.y - _terr_origin.z) / step)), 0, _terr_cells - 1)
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var zone := RespawnZone.new()
+		zone.name = "RavineWater_%d" % ri
+		zone.backoff_m = spec.z
+		var depth_scale := maxf(water_y - float(_sampler._floors.get(ri, water_y - 3.0)), 1.0)
+		# Semintele: celulele sub apa care tin de rapa (in interval, pe latura
+		# ei). Apoi UMPLERE pe vecini, oriunde terenul e tot sub apa: fara ea,
+		# marginea intervalului taia suprafata drept, cu apa "in aer" deasupra
+		# unui fund care continua sa coboare (prima captura de pe Devkund).
+		# Asa malul iese acolo unde terenul chiar urca peste apa.
+		var seeds: Array[Vector2i] = []
+		for gz in range(gz0, gz1 + 1):
+			for gx in range(gx0, gx1 + 1):
+				if _cell_lowest(gx, gz) >= water_y:
+					continue
+				var cx := _terr_origin.x + (float(gx) + 0.5) * step
+				var cz := _terr_origin.z + (float(gz) + 0.5) * step
+				var ci := _closest_baked_index(Vector3(cx, water_y, cz))
+				if TrackSideSampler._ring_window(_dists[ci] / total, r.x, r.y, 0.0001) <= 0.0:
+					continue
+				if not is_zero_approx(r.w) and signf(r.w) != _sampler._side_sign_at(ci, cx, cz):
+					continue
+				seeds.append(Vector2i(gx, gz))
+		var filled := {}
+		var queue := seeds.duplicate()
+		for c0 in seeds:
+			filled[c0] = true
+		while not queue.is_empty():
+			var cur: Vector2i = queue.pop_back()
+			for dv: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var nb := cur + dv
+				if filled.has(nb) or nb.x < 0 or nb.y < 0 						or nb.x >= _terr_cells or nb.y >= _terr_cells:
+					continue
+				if _cell_lowest(nb.x, nb.y) >= water_y:
+					continue
+				filled[nb] = true
+				queue.append(nb)
+		var wet := 0
+		for cell: Vector2i in filled:
+			var gx := cell.x
+			var gz := cell.y
+			var h := [_terr_heights[gz * row + gx], _terr_heights[gz * row + gx + 1],
+				_terr_heights[(gz + 1) * row + gx], _terr_heights[(gz + 1) * row + gx + 1]]
+			var lowest: float = h.min()
+			var cx := _terr_origin.x + (float(gx) + 0.5) * step
+			var cz := _terr_origin.z + (float(gz) + 0.5) * step
+			if _channel_water_covers(Vector3(cx, water_y, cz)):
+				continue
+			if _ravine_wet.has(cell):
+				continue # alta rapa a umplut-o deja
+			wet += 1
+			_ravine_wet[Vector2i(gx, gz)] = water_y
+			var corners: Array[Vector3] = [
+				Vector3(_terr_origin.x + gx * step, water_y, _terr_origin.z + gz * step),
+				Vector3(_terr_origin.x + (gx + 1) * step, water_y, _terr_origin.z + gz * step),
+				Vector3(_terr_origin.x + gx * step, water_y, _terr_origin.z + (gz + 1) * step),
+				Vector3(_terr_origin.x + (gx + 1) * step, water_y, _terr_origin.z + (gz + 1) * step)]
+			for k: int in [0, 1, 2, 1, 3, 2]:
+				var t := clampf((water_y - float(h[k])) / depth_scale, 0.0, 1.0)
+				st.set_color(_sea_color(t * SEA_NEAR_DEPTH))
+				st.set_uv2(Vector2.ZERO)
+				st.add_vertex(corners[k] - global_position)
+			var shape := CollisionShape3D.new()
+			var box := BoxShape3D.new()
+			var top := water_y - 0.6
+			var bottom := lowest - 6.0
+			box.size = Vector3(step, top - bottom, step)
+			shape.shape = box
+			shape.position = Vector3(cx, (top + bottom) * 0.5, cz) - global_position
+			zone.add_child(shape)
+		if wet == 0:
+			zone.free()
+			push_warning("custom_ravine_water: rapa %d n-are nicio celula sub %.1f" % [ri, water_y])
+			continue
+		st.generate_normals()
+		var mi := MeshInstance3D.new()
+		mi.name = "RavineWaterSurface_%d" % ri
+		mi.mesh = st.commit()
+		mi.material_override = mat
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+		add_child(zone)
+
+
+## Cati metri de sosea mai sunt, pe ruta principala, de la indexul dat pana la
+## buza de lansare a urmatorului canal cu saritura — sau -1 daca nu e niciuna
+## in `within_m`. O citeste traficul ([TrafficController]): un tuk-tuk la
+## viteza lui de croaziera n-ar trece niciun gol, deci isi ia elan inainte.
+func jump_lip_ahead(idx: int, within_m: float) -> float:
+	var n := baked.size()
+	if n == 0 or _channels.is_empty():
+		return -1.0
+	var total := _dists[n]
+	var best := -1.0
+	for ch in _channels:
+		if not bool(ch.get("jump", false)) or bool(ch.get("ford", false)):
+			continue
+		var near_i: int = ch["near"]
+		var d := fposmod(_dists[near_i] - _dists[((idx % n) + n) % n], total)
+		if d <= within_m and (best < 0.0 or d < best):
+			best = d
+	return best
+
+
+## Un punct cade pe suprafata de apa a unui canal (nu vad, nu groapa)?
+func _cell_lowest(gx: int, gz: int) -> float:
+	var row := _terr_cells + 1
+	return minf(minf(_terr_heights[gz * row + gx], _terr_heights[gz * row + gx + 1]),
+		minf(_terr_heights[(gz + 1) * row + gx], _terr_heights[(gz + 1) * row + gx + 1]))
+
+
+func _channel_water_covers(pos: Vector3) -> bool:
+	for ch in _channels:
+		if bool(ch.get("ford", false)) or bool(ch.get("pit", false)):
+			continue
+		if float(ch.get("water_y_drop", -1.0)) < 0.0:
+			continue
+		var o: Vector3 = ch["origin"]
+		var d := Vector2(pos.x - o.x, pos.z - o.z)
+		if absf(d.dot(ch["along2"])) > float(ch["reach"]):
+			continue
+		if absf(d.dot(ch["across2"])) \
+				> float(ch["water_half"]) + float(ch["bank"]) * 0.5:
+			continue
+		return true
+	return false
+
+
 ## Cata APA are efectiv un canal, in metri.
 ##
 ## NU e `depth`: aia e cat de adanc s-a SAPAT sub cota soselei. Apa sta la
@@ -6341,6 +7174,11 @@ func water_level_at(pos: Vector3) -> float:
 				> float(ch["water_half"]) + float(ch["bank"]) * 0.5:
 			continue
 		best = maxf(best, o.y - drop)
+	if not _ravine_wet.is_empty() and _terr_step > 0.0:
+		var cell := Vector2i(int(floor((pos.x - _terr_origin.x) / _terr_step)),
+			int(floor((pos.z - _terr_origin.z) / _terr_step)))
+		if _ravine_wet.has(cell):
+			best = maxf(best, float(_ravine_wet[cell]))
 	if theme_flag("water", false) and not is_frozen() \
 			and _sampler != null and not baked.is_empty():
 		var sea_y := _sampler.mean_road_y() + sea_level_offset
@@ -7098,6 +7936,10 @@ func _water_material() -> ShaderMaterial:
 	_water_mat.set_shader_parameter("flow_foam_col",
 		Vector3(ffoam.r, ffoam.g, ffoam.b))
 	_water_mat.set_shader_parameter("wave_amp", SEA_WAVE_AMP)
+	# Cata apa ramane noaptea (DuskCycle -> `dusk_lamps` = 1). Vezi `dusk_dim`
+	# in water.gdshader; 1.0 implicit = neatins.
+	_water_mat.set_shader_parameter("dusk_dim",
+		float(theme_flag("water_dusk_dim", 1.0)))
 	return _water_mat
 
 
@@ -8382,6 +9224,7 @@ func _make_branch(spec: Dictionary) -> TrackRoute:
 	route.elevated = elevated
 	route.no_surface = bool(spec.get("no_surface", false))
 	route.detour = bool(spec.get("detour", false))
+	route.lure_before_entry_only = bool(spec.get("lure_before_entry_only", false))
 	route.own_ends = bool(spec.get("own_ends", false))
 	if spec.has("tint"):
 		route.tint = spec["tint"] as Color
@@ -8723,6 +9566,19 @@ const ROAD_PROFILE: Array[float] = [-1.0, -0.85, -0.62, -0.5, -0.34, 0.0,
 ## ca masinile saturate sa "sara" din ecran (style_bible §1: asfaltul e cea mai
 ## inchisa suprafata continua).
 const ROAD_COLOR: Color = Color(0.23, 0.24, 0.3)
+
+## Culoarea asfaltului cu voie de suprascriere din TEMA (cheia `road_tint`),
+## aceeasi mecanica ca `dirt_road_tint` pentru drumul afanat.
+##
+## De ce exista (Jodhpur, jodhpur/poi-sol): ROAD_COLOR e albastru-rece (H 231)
+## ca masinile saturate sa sara de pe el sub cer de zi. Sub ambientul lila si
+## soarele de 8 grade al Jodhpur-ului acelasi albedo iesea bleumarin-violet pe
+## ecran (H 264-271 masurat pe masca de carosabil, chiar si cu lumina neutra),
+## iar bara cere gri-antracit. Lumina era deja reglata pe mask (ProbeJodLumina),
+## deci parghia ramasa e albedo-ul. Temele fara cheie raman pe ROAD_COLOR la bit.
+func asphalt_color() -> Color:
+	var tint: Variant = theme_flag("road_tint", null)
+	return tint as Color if tint != null else ROAD_COLOR
 ## Media texturii macro de asfalt (process_class_textures.surfaces()). Culoarea
 ## se imparte la ea, ca a doua inmultire sa nu intunece soseaua.
 const ASPHALT_MACRO_MEAN: float = 0.900
@@ -9043,9 +9899,9 @@ func _build_road() -> void:
 	# nuanta neatinsa — celelalte lumi nu se schimba cu un pixel.
 	var road_dark := Color.WHITE
 	if snow_tint != null and snow_amount > 0.0:
-		var lifted := (dirt_road_color() if road_is_loose() else ROAD_COLOR) \
+		var lifted := (dirt_road_color() if road_is_loose() else asphalt_color()) \
 			.lerp(snow_tint as Color, ROAD_SNOW_CEIL)
-		var plain := dirt_road_color() if road_is_loose() else ROAD_COLOR
+		var plain := dirt_road_color() if road_is_loose() else asphalt_color()
 		road_dark = Color(
 			plain.r / maxf(lifted.r, 0.001),
 			plain.g / maxf(lifted.g, 0.001),
@@ -9236,7 +10092,7 @@ func _build_road() -> void:
 	# Micro-ul e surface_sand (aceeasi granulatie ca terenul, la 3.5 m in loc de
 	# 3.125 — deci si aceeasi lume), macro-ul e surface_sand_macro: petele lui de
 	# 45 m sunt exact tiparul de nisip spalat de ploaie pe care il vrem.
-	var base := ROAD_COLOR
+	var base := asphalt_color()
 	var macro_mean := ASPHALT_MACRO_MEAN
 	if road_surface == "snow":
 		base = SNOW_ROAD_COLOR
@@ -10770,6 +11626,22 @@ func lane_forced_at(index: int) -> float:
 			out = seg.z
 	return out
 
+## Muchia fara parapet la indexul dat (bucla principala): (latura ±1,
+## margine_m), sau ZERO daca nu e niciuna. Vezi [member ai_drop_edges].
+func ai_drop_edge_at(index: int) -> Vector2:
+	if ai_drop_edges.is_empty():
+		return Vector2.ZERO
+	var f := frac_at(index)
+	for seg in ai_drop_edges:
+		var inside: bool
+		if seg.x <= seg.y:
+			inside = f >= seg.x and f <= seg.y
+		else:
+			inside = f >= seg.x or f <= seg.y
+		if inside:
+			return Vector2(signf(seg.z), seg.w)
+	return Vector2.ZERO
+
 func lane_bias_at(index: int) -> float:
 	if _lane_bias.is_empty():
 		return 0.0
@@ -11357,7 +12229,7 @@ func _road_fade_material(color: Color, micro: String, macro: String,
 
 
 func road_material() -> Material:
-	var base := ROAD_COLOR
+	var base := asphalt_color()
 	var macro_mean := ASPHALT_MACRO_MEAN
 	if road_surface == "snow":
 		base = SNOW_ROAD_COLOR
@@ -11671,6 +12543,56 @@ const INNER_SHADE_SKIRT := Color(0.58, 0.57, 0.56)
 ## (SHOULDER_PATCH_*), care nu trec prin mipmap deloc.
 const SHOULDER_TILE: float = 5.0
 
+## Pe cati metri de tur creste umarul de la latimea lui la latimea de trotuar
+## (cheia de tema `shoulder_width_zones`, vezi `_shoulder_width`).
+const SHOULDER_ZONE_RAMP: float = 12.0
+
+## PRAG DE UMAR la nivelul asfaltului, pe ferestre de tur: (frac_de_la,
+## frac_pana_la, latime_m), pe ambele laturi. Gol (implicit) = umarul de
+## pana acum, bit cu bit, pe orice pista.
+##
+## [b]De ce.[/b] Umarul obisnuit pleaca de la buza asfaltului si COBOARA imediat
+## spre teren. In fantana din Jodhpur (Track17, C) terenul de langa drum e cu
+## 0,3-0,5 m mai jos, iar pe stanga e chiar cornisa spre apa: masina iesita cu
+## o roata de pe asfalt ramanea sub buza, cu marginea soselei ca perete la
+## urcare (0,3 m e deja zid pentru o roata, memoria
+## `suprafete-cu-goluri-si-praguri`), si aluneca de-a lungul ei in apa sau
+## ramanea in debleu. Prin brief, spre apa nu exista parapet — deci nu se
+## pune zid, se pune loc: o fasie PLATA, la cota asfaltului, de `latime_m`,
+## de pe care iesi inapoi pe drum fara treapta. Abia dupa ea umarul obisnuit
+## (cu plafonul lui de cadere si fusta) coboara spre teren sau spre apa.
+##
+## Fasia face parte din banda `Shoulders` (acelasi material, aceeasi
+## coliziune), deci nu adauga nici material, nici corp nou. Nu e drum pentru
+## `is_on_road`: pedeapsa de offroad ramane, doar ca acum iesirea e
+## recuperabila. Capetele au rampa de [constant SHOULDER_ZONE_RAMP] m.
+@export var level_shoulder_zones: Array[Vector3] = []
+
+## Nuanta (vertex color, deci doar INTUNECA — memoria
+## `surfacetool-clamp-vertex-color`) a pragului plat peste materialul umarului.
+## Implicit = nuanta de contact a umarului obisnuit. Track17 o trage spre
+## gresia roz a fantanii: pe strazi umarul e trotuar gri, in fantana pragul e
+## piatra incintei.
+@export var level_shoulder_tint: Color = Color(0.82, 0.82, 0.84)
+
+
+## Latimea pragului plat la un index (0 in afara ferestrelor), cu rampa
+## neteda la capete. Vezi [member level_shoulder_zones].
+func _level_shoulder_at(i: int) -> float:
+	if level_shoulder_zones.is_empty():
+		return 0.0
+	var n := baked.size()
+	var total := _dists[n] if _dists.size() > n else 0.0
+	if total <= 0.0:
+		return 0.0
+	var frac := _dists[posmod(i, n)] / total
+	var out := 0.0
+	for z in level_shoulder_zones:
+		var k := TrackSideSampler._ring_window(frac, z.x, z.y,
+			SHOULDER_ZONE_RAMP / total)
+		out = maxf(out, z.z * smoothstep(0.0, 1.0, k))
+	return out
+
 ## Cate trepte de nuanta au petele de praf si cat de tare bat.
 ## Cuantificate, ca sa nu inmulteasca materialele si ca sa citeasca a pete, nu a
 ## zgomot: doua bucati vecine cad des in aceeasi treapta si formeaza o pata lata.
@@ -11704,7 +12626,10 @@ func _build_shoulders() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n := baked.size()
-	var tile := SHOULDER_TILE
+	# `shoulder_tile` (tema): cati metri acopera o repetitie a texturii. Un pavaj
+	# de lespezi vrea pietre mai mari decat pietrisul — vezi SHOULDER_TILE despre
+	# ce supravietuieste mipmap-ului pe o banda ingusta.
+	var tile := float(theme_flag("shoulder_tile", SHOULDER_TILE))
 	# Latimea per (punct, latura), coapta INAINTE de emitere: doua segmente
 	# vecine trebuie sa foloseasca exact aceeasi valoare in punctul comun, altfel
 	# banda se rupe si fisura devine o capcana de coliziune.
@@ -11727,6 +12652,16 @@ func _build_shoulders() -> void:
 		# si arcadele din kit (vazut din lateral cu Snapshot --eye).
 		var bridge := maxf(maxf(_bridge_mix(i), _bridge_mix(j)),
 			maxf(_viaduct_mix(i), _overpass_mix(i)))
+		# Pragul plat (`level_shoulder_zones`) e o fereastra DECLARATA, deci
+		# castiga peste stingerea de pod: in fantana din Jodhpur apa e
+		# declarata ca canal, iar bratul de intrare trece pe langa ea — acolo
+		# `_bridge_mix` urca la 1 si stingea tot umarul, lasand buza soselei
+		# direct deasupra unei caderi de 4 m. Nu e un pod: nu sunt pile de
+		# ascuns, e mal.
+		var lv0 := _level_shoulder_at(i)
+		var lv1 := _level_shoulder_at(j)
+		if lv0 > 0.01 or lv1 > 0.01:
+			bridge = 0.0
 		var s0 := _side_at(i)
 		var s1 := _side_at(j)
 		var v0 := _dists[i] / tile
@@ -11744,6 +12679,31 @@ func _build_shoulders() -> void:
 			# ating pe o muchie comuna, nu se suprapun.
 			var inner0 := baked[i] + s0 * width_at_index(i) * side_sign
 			var inner1 := baked[j] + s1 * width_at_index(j) * side_sign
+			# PRAGUL PLAT (`level_shoulder_zones`): o fasie orizontala la cota
+			# buzei, apoi umarul obisnuit porneste de la marginea ei. Zero in
+			# afara ferestrelor, deci nimic nu se emite si `inner` ramane buza.
+			if lv0 > 0.01 or lv1 > 0.01:
+				var l0 := inner0 + s0 * lv0 * side_sign
+				var l1 := inner1 + s1 * lv1 * side_sign
+				var ul := maxf(lv0, lv1) / tile
+				var lc0 := level_shoulder_tint * _shoulder_patch(i, side_sign)
+				var lc1 := level_shoulder_tint * _shoulder_patch(j, side_sign)
+				if side_sign < 0.0:
+					st.set_color(lc0); st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
+					st.set_color(lc0); st.set_uv(Vector2(ul, v0)); st.add_vertex(l0)
+					st.set_color(lc1); st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+					st.set_color(lc0); st.set_uv(Vector2(ul, v0)); st.add_vertex(l0)
+					st.set_color(lc1); st.set_uv(Vector2(ul, v1)); st.add_vertex(l1)
+					st.set_color(lc1); st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+				else:
+					st.set_color(lc0); st.set_uv(Vector2(0, v0)); st.add_vertex(inner0)
+					st.set_color(lc1); st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+					st.set_color(lc0); st.set_uv(Vector2(ul, v0)); st.add_vertex(l0)
+					st.set_color(lc0); st.set_uv(Vector2(ul, v0)); st.add_vertex(l0)
+					st.set_color(lc1); st.set_uv(Vector2(0, v1)); st.add_vertex(inner1)
+					st.set_color(lc1); st.set_uv(Vector2(ul, v1)); st.add_vertex(l1)
+				inner0 = l0
+				inner1 = l1
 			var outer0 := inner0 + s0 * w0 * side_sign
 			var outer1 := inner1 + s1 * w1 * side_sign
 			# PLAFONUL DE CADERE, si de ce e chiar AICI. Latimea umarului se
@@ -11877,8 +12837,18 @@ func _build_shoulders() -> void:
 	# diferenta fata de teren era culoarea, si banda citea ca vopsea.
 	#
 	# CU COLIZIUNE: banda e rampa de reintrare pe sosea, nu doar o culoare.
+	#
+	# PAVAJ in loc de pietris, pe teme care il cer (`shoulder_texture` +
+	# `shoulder_color`): pe strazile Jodhpur-ului banda e trotuarul de lespezi.
+	# Culoarea materialului se imparte la media dalei in tema, ca la asfalt.
+	# Implicitele = exact banda de pietris de pana acum, deci celelalte piste au
+	# acelasi material (aceeasi cheie de cache) la bit.
+	var sh_color: Variant = theme_flag("shoulder_color", null)
+	if sh_color != null:
+		dust = sh_color as Color
 	_add_mesh_with_collision(st.commit(), dust,
-		_tex("res://assets/textures/surface_gravel.png"), 1.0, 0.5,
+		_tex(String(theme_flag("shoulder_texture",
+			"res://assets/textures/surface_gravel.png"))), 1.0, 0.5,
 		BaseMaterial3D.CULL_BACK, null, null, true, null, "Shoulders")
 
 
@@ -11911,9 +12881,28 @@ func _shoulder_width(i: int, side_sign: float) -> float:
 	# pamant din Cappadocia acostamentul de pietris CHIAR e lat, si atunci
 	# latimea e o proprietate a drumului, nu una dedusa din relief.
 	var w_min: float = float(theme_flag("shoulder_min_width", SHOULDER_WIDTH))
+	# TROTUARUL pe ferestre de tur (cheia `shoulder_width_zones`, Array de
+	# Vector3(de_la, pana_la, latime); de_la > pana_la trece peste start).
+	# Jodhpur: pe strazile orasului fasia de ~3 m dintre asfalt si case iesea
+	# nisip de teren (criticii orbi pe H, E, C, valul 1) — acolo latimea minima
+	# a umarului devine latimea trotuarului, iar textura lui de tema il face
+	# pavaj. Rampa de SHOULDER_ZONE_RAMP m la capete, ca banda sa nu sara in
+	# trepte intre doua puncte vecine. Nimic fizic nou: umarul exista deja cu
+	# coliziune si sta pe teren; `is_on_road` nu-l citeste (pedeapsa de offroad
+	# ramane exact cea de dinainte, pe nisipul pe care il acopera).
+	var zones: Variant = theme_flag("shoulder_width_zones", null)
+	if zones != null:
+		var total_m := maxf(_dists[baked.size()], 0.001)
+		for z: Vector3 in zones:
+			var ramp := TrackSideSampler._ring_window(frac, z.x, z.y,
+				SHOULDER_ZONE_RAMP / total_m)
+			if ramp > 0.0:
+				w_min = maxf(w_min, lerpf(w_min, z.z, ramp))
 	var w := w_min
+	# Pragul plat (`level_shoulder_zones`) muta inceputul pantei in afara.
+	var lvl := _level_shoulder_at(i)
 	for _pass in 2:
-		var p := base + lat * (width_at_index(i) + w)
+		var p := base + lat * (width_at_index(i) + lvl + w)
 		# Acelasi plafon ca la emitere: latimea se calculeaza pentru caderea
 		# pe care umarul chiar o construieste, nu pentru fundul unui gol.
 		var drop := minf(base.y - _terrain_mesh_y(p.x, p.z) + SHOULDER_SINK,
@@ -13794,21 +14783,62 @@ func is_steps_at(frac: float) -> bool:
 	return _frac_in_ranges(frac, _step_ranges())
 
 
+## Grupul comun al "portilor de banda": orice nod care poate inchide o
+## scurtatura se inscrie aici in `_ready`, indiferent de tip sau de adancimea
+## in subarbore. Inlocuieste vechea cautare `get_children() + is LavaFlowHazard`
+## (Stromboli), care nu vedea nimic ce nu era copil DIRECT al pistei si nu
+## putea sti despre o a doua clasa de poarta (Jodhpur, `CowGate`) fara sa
+## primeasca fiecare tip nou scris in codul lui `Track`.
+const BRANCH_GATE_GROUP: StringName = &"branch_gate"
+
+## Distanta (m, de la capul benzii) pana la poarta ingustata (`AlleyGate`) de
+## pe banda data; INF daca banda n-are poarta. Cautat o singura data, prin
+## duck typing (`branch_index` + `gate_dist_m` + `half_opening_m`) — logica
+## portii nu se atinge. Consumat de AIController (linia strans pe axa inainte
+## de poarta) si de Car.respawn (nu se repune intre furca si poarta).
+## Pe pistele fara AlleyGate intoarce mereu INF, deci nimic nu se schimba.
+var _alley_gate_cache: Dictionary = {}
+var _alley_gate_scanned: bool = false
+
+func branch_gate(route: int) -> Node:
+	if not _alley_gate_scanned:
+		_alley_gate_scanned = true
+		for n in find_children("*", "Node3D", true, false):
+			if "branch_index" in n and "gate_dist_m" in n and "half_opening_m" in n:
+				_alley_gate_cache[int(n.branch_index)] = n
+	return _alley_gate_cache.get(route, null)
+
+
 ## Mai e practicabila banda secundara cu indexul dat?
 ##
 ## Implicit DA — pistele care n-au nimic care sa inchida o banda nu simt
 ## nimic. Pe Stromboli raspunde `LavaFlowHazard`: limba creste tur de tur si
-## de la stadiul 3 ruta scurta e zid.
+## de la stadiul 3 ruta scurta e zid. Pe Jodhpur raspunde `CowGate`: vaca se
+## culca in gura ulicioarei o data pe ciclu.
+##
+## Generalizat sa citeasca orice nod din grupul `BRANCH_GATE_GROUP` care are
+## `branch_index` si `shortcut_open()` — duck typing, nu o lista de clase
+## cunoscute, ca o poarta noua sa nu ceara alta modificare aici. Portile sunt
+## cautate prin `get_tree().get_nodes_in_group`, deci pot sta oriunde in
+## scena (LavaFlowHazard era copil direct al pistei; CowGate atarna sub un
+## Marker3D langa gura scurtaturii). DACA DOUA PORTI declara acelasi
+## `branch_index`, castiga prima gasita — nu e cazul azi (o singura poarta pe
+## banda), dar merita spus explicit.
 ##
 ## Intrebarea o pune AIController la fiecare cadru, nu o data pe cursa: o
 ## banda se poate inchide IN TIMPUL cursei, si un AI care a decis la turul 1
-## ca merge pe scurta ar intra in lava la turul 3.
+## ca merge pe scurta ar intra in zid mai tarziu (lava la turul 3, vaca la
+## urmatorul ciclu de 47 s).
 func branch_is_open(index: int) -> bool:
-	for child in get_children():
-		if child is LavaFlowHazard:
-			var lf := child as LavaFlowHazard
-			if lf.branch_index == index:
-				return lf.shortcut_open()
+	if not is_inside_tree():
+		return true
+	for node in get_tree().get_nodes_in_group(BRANCH_GATE_GROUP):
+		if not (node is Node3D):
+			continue
+		if not ("branch_index" in node) or not node.has_method("shortcut_open"):
+			continue
+		if int(node.branch_index) == index:
+			return bool(node.shortcut_open())
 	return true
 
 
@@ -13874,8 +14904,70 @@ func frac_at(index: int, route: int = 0) -> float:
 func recovery_transform(index: int, backoff_m: float,
 		route: int = 0) -> Transform3D:
 	var r := route_at(route)
-	return r.recovery_transform(index, backoff_m) if r != null \
-		else Transform3D.IDENTITY
+	if r == null:
+		return Transform3D.IDENTITY
+	if route == 0:
+		var clamped := _clamp_respawn_past_gap(index, backoff_m)
+		if clamped >= 0:
+			return r.recovery_transform(clamped, 0.0)
+	return r.recovery_transform(index, backoff_m)
+
+
+## Cat de departe DUPA buza de aterizare se opreste o repunere care ar fi cazut
+## inapoi in golul unei sarituri (canal cu `respawn_past_gap`). 5 m: destul cat
+## masina sa stea pe asfalt plin, nu pe muchia peretelui de la buza.
+const GAP_RESPAWN_CLEAR_M: float = 5.0
+## Pana unde (m dupa buza de aterizare) o masina conteaza ca "a trecut golul"
+## pentru regula de mai sus. Dincolo, retragerea de 12-14 m nu mai ajunge la gol.
+const GAP_RESPAWN_WINDOW_M: float = 60.0
+
+
+## Indexul de repunere oprit dupa buza de aterizare, sau -1 daca regula nu se
+## aplica (niciun canal cu `respawn_past_gap`, masina n-a trecut golul, sau
+## retragerea nu ajunge la el). Vezi [member TrackChannel.respawn_past_gap].
+## Acelasi pas pe index ca [method TrackRoute.recovery_transform], ca tinta
+## comparata sa fie exact cea pe care ar fi ales-o repunerea.
+func _clamp_respawn_past_gap(index: int, backoff_m: float) -> int:
+	if _channels.is_empty():
+		return -1
+	var n := baked.size()
+	if n < 2 or _dists.size() <= n or _dists[n] <= 0.0:
+		return -1
+	var spacing := _dists[n] / float(n)
+	var steps := int(backoff_m / maxf(spacing, 0.001))
+	var window := int(GAP_RESPAWN_WINDOW_M / spacing)
+	var clear := maxi(ceili(GAP_RESPAWN_CLEAR_M / spacing), 1)
+	for ch: Dictionary in _channels:
+		if not bool(ch.get("respawn_past_gap", false)) \
+				or not bool(ch.get("jump", false)) or bool(ch.get("ford", false)):
+			continue
+		var far: int = ch["far"]
+		# Cati indici e masina DINCOLO de buza de aterizare (pe bucla).
+		var past := posmod(index - far, n)
+		if past > window or past - steps >= clear:
+			continue
+		return posmod(far + clear, n)
+	return -1
+
+## E indexul (pe bucla) in elanul unei sarituri care cere AI-ului sa nu
+## traverseze pe langa vecin? Vezi [member TrackChannel.ai_keep_side_run_m].
+## Fals pe orice pista fara canal care declara elanul (toate, in afara de
+## Jodhpur).
+func ai_keep_side_at(index: int) -> bool:
+	if _channels.is_empty():
+		return false
+	var n := baked.size()
+	if n < 2 or _dists.size() <= n or _dists[n] <= 0.0:
+		return false
+	var spacing := _dists[n] / float(n)
+	for ch: Dictionary in _channels:
+		var run_m := float(ch.get("ai_keep_side_run_m", 0.0))
+		if run_m <= 0.0 or not bool(ch.get("jump", false)):
+			continue
+		var before := posmod(int(ch["near"]) - index, n)
+		if float(before) * spacing <= run_m:
+			return true
+	return false
 
 func lateral_distance(index: int, pos: Vector3, route: int = 0) -> float:
 	var r := route_at(route)
@@ -13923,8 +15015,17 @@ func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 	var r := route_at(route)
 	if r == null:
 		return false
-	if route != 0 or _width_profile().is_empty():
+	# TROTUARUL e drum (decizia dezvoltatorului, Jodhpur POI H): pe tema care
+	# declara `shoulder_zones_are_road`, fasia pavata din `shoulder_width_zones`
+	# se adauga la latimea „pe drum". Fara cheia asta `paved` e 0 si ramurile de
+	# mai jos sunt EXACT cele de dinainte (dovedit cu tools/sv_on_road_diff.gd).
+	var paved := _paved_shoulder_at(index) if route == 0 else 0.0
+	if route != 0 or (_width_profile().is_empty() and paved <= 0.0):
 		return r.is_on_road(index, pos)
+	if paved > 0.0:
+		if r.lateral_distance(index, pos) > width_at_index(index) + paved + 0.5:
+			return false
+		return not r.is_other_level(index, pos)
 	# Si LATERAL, si VERTICAL — pe AMANDOUA ramurile. Ramura cu profil de latime
 	# a fost scrisa inainte de pistele care trec peste ele insele si compara doar
 	# in plan; cand a venit pasajul de la Chongqing, testul vertical a intrat in
@@ -13938,6 +15039,43 @@ func is_on_road(index: int, pos: Vector3, route: int = 0) -> bool:
 	if r.lateral_distance(index, pos) > width_at_index(index) + 0.5:
 		return false
 	return not r.is_other_level(index, pos)
+
+## Latimea de trotuar care conteaza ca drum la indexul dat (0 in afara
+## ferestrelor, sau pe orice tema fara `shoulder_zones_are_road`). Aceleasi
+## ferestre si aceeasi rampa ca umarul desenat (`_shoulder_width`), dar doar
+## latimea DECLARATA a trotuarului, nu si latirea dupa caderea terenului:
+## pedeapsa se ridica numai pe ce e pavat prin decizie.
+##
+## Cache per index: `is_on_road` se cheama de cateva ori pe cadru per masina.
+var _paved_cache: PackedFloat32Array = PackedFloat32Array()
+var _paved_n := -1
+
+func _paved_shoulder_at(index: int) -> float:
+	if _paved_n != baked.size():
+		_paved_n = baked.size()
+		_paved_cache = PackedFloat32Array()
+		if not bool(theme_flag("shoulder_zones_are_road", false)):
+			return 0.0
+		var zones: Variant = theme_flag("shoulder_width_zones", null)
+		var n := baked.size()
+		if zones == null or n < 2:
+			return 0.0
+		if _dists.size() <= n:
+			_paved_n = -1 # traseul inca nu e copt de tot: reincearca
+			return 0.0
+		_paved_cache.resize(n)
+		var total_m := maxf(_dists[n], 0.001)
+		for i in n:
+			var frac := _dists[i] / total_m
+			var w := 0.0
+			for z: Vector3 in zones:
+				var ramp := TrackSideSampler._ring_window(frac, z.x, z.y,
+					SHOULDER_ZONE_RAMP / total_m)
+				w = maxf(w, z.z * ramp)
+			_paved_cache[i] = w
+	if _paved_cache.is_empty():
+		return 0.0
+	return _paved_cache[posmod(index, _paved_cache.size())]
 
 func lookahead_point(index: int, ahead_m: float, lateral_frac: float,
 		route: int = 0) -> Vector3:
@@ -13972,14 +15110,25 @@ const BRANCH_HYSTERESIS: float = 1.5
 ## cealalta inainte ca despicatura sa se termine. Cu o raza egala, AI-ul ar
 ## incepe sa vireze exact cand ar fi trebuit sa fie deja acolo.
 const BRANCH_LURE_RANGE: float = 70.0
+## Cat de departe DUPA furca (m, pe bucla) mai momeste o banda cu
+## `lure_before_entry_only`: banda pleaca tangent si sta pe asfaltul buclei
+## ~25 m, deci o masina abia trecuta de indexul furcii e inca pe ea.
+const BRANCH_LURE_GRACE_M: float = 15.0
 
 ## Punct-tinta care duce spre intrarea unei scurtaturi.
 ##
 ## Intoarce [code]Vector3.INF[/code] daca nu e nicio bifurcatie in fata — asa
 ## apelantul stie sa-si pastreze tinta obisnuita, fara sa mai intrebe nimic.
-func branch_lure(pos: Vector3, ahead_m: float) -> Vector3:
+func branch_lure(pos: Vector3, ahead_m: float, main_index: int = -1) -> Vector3:
 	for bi in range(1, routes.size()):
 		var b := routes[bi]
+		# Opt-in (TrackBranch.lure_before_entry_only): doar inainte de furca
+		# (plus o toleranta), nu si dupa ce masina a ramas pe bucla.
+		if b.lure_before_entry_only and main_index >= 0:
+			var past := fposmod(frac_at(main_index) - b.entry_frac, 1.0)
+			var grace := BRANCH_LURE_GRACE_M / maxf(route_at(0).length(), 1.0)
+			if past > grace and past < 0.5:
+				continue
 		# Un ocol de pedeapsa nu se momeste niciodata: se ia doar cand banda
 		# directa e inchisa, si atunci decide ceasul hazardului prin
 		# `AiController._span_line`. Vezi `TrackRoute.detour`.
@@ -14027,6 +15176,13 @@ func resolve_route(route: int, index: int, pos: Vector3) -> Vector2i:
 			# `pista-peste-pista` — de fiecare data cand pista trece peste ea
 			# insasi, testul care lipseste e cel vertical.
 			if b.is_other_level(bidx, pos):
+				continue
+			# O banda INCHISA (vaca culcata in gura, lava) nu e ruta: nu comuta
+			# pe ea pe proximitate. Masurat pe Track17: ulicioara pleaca tangent
+			# si sta pe asfaltul buclei ~25 m, iar plutonul era comutat pe ea
+			# cu vaca deja culcata — se oprea in vaca, iar vaca (regula de
+			# siguranta) nu se mai putea ridica: 23-45 repuneri/cursa.
+			if not branch_is_open(bi):
 				continue
 			if b.lateral_distance(bidx, pos) + BRANCH_HYSTERESIS \
 					< routes[0].lateral_distance(index, pos):

@@ -20,6 +20,15 @@ extends Node
 ## --gamecam`) in loc de camera inghetata MEASURE_*, pentru compozitie "cum
 ## arata cand joci" in loc de poza de masurare.
 ##
+## `--dusk=0.5`: CEASUL DE LUMINA (DuskCycle, Jodhpur) fortat la fractia data
+## (0 = turul 1 auriu, 1 = turul 3 noapte — docs/track_briefs/jodhpur.md
+## §3/§4). Daca pista are deja un `DuskCycle`, i se cheama `force_value()`;
+## daca nu are (orice pista in afara de Jodhpur), sonda adauga unul TEMPORAR,
+## ca masca sa poata verifica pe piste existente daca obiectele luminate de
+## ceas (ferestre, candele) chiar se separa de fundal la `dusk=1` — testul de
+## material din brief §4 ("daca la dusk=1 casele devin o pata uniforma,
+## problema nu e lumina").
+##
 ## MultiMesh: decorul imprastiat (stoluri, turme — `MultiMeshInstance3D`, ca
 ## `FlamingoFlock`) era INVIZIBIL pentru unealta: `_collect` aduna doar
 ## `MeshInstance3D`. Acum se colecteaza si instantele 3D dintr-un
@@ -49,6 +58,13 @@ func _ready() -> void:
 	# REPAUS (sub apa), deci o masca pe ei ar iesi mereu 0 px si ar „dovedi"
 	# ca gimmickul lipseste chiar cand e in regula.
 	var hippo_at := -1.0
+	# --dusk: CEASUL DE LUMINA (DuskCycle, Jodhpur), fortat la fractia data
+	# (0 = turul 1 auriu, 1 = turul 3 noapte -- brief §3/§4). Aceasta sonda nu
+	# porneste nicio cursa (nu exista `Race`), deci fara acest flag `dusk` ar
+	# ramane mereu la 0 -- exact starea in care ceasul n-ar putea fi verificat
+	# pe o masca de obiect (ferestre/candele luminate, brief §4 „testul de
+	# material").
+	var dusk_force := -1.0
 	# --min-group-px / --min-total-px transforma sonda in GARDA: fiecare grup
 	# raportat trebuie sa aiba cel putin atatia pixeli, iar suma cel putin
 	# atatia, altfel iesirea e 1. Fara ele sonda doar masoara, ca pana acum.
@@ -90,6 +106,8 @@ func _ready() -> void:
 			groups.append(arg.trim_prefix("--group="))
 		elif arg.begins_with("--hippo-at="):
 			hippo_at = float(arg.trim_prefix("--hippo-at="))
+		elif arg.begins_with("--dusk="):
+			dusk_force = float(arg.trim_prefix("--dusk="))
 		elif arg.begins_with("--min-group-px="):
 			min_group_px = int(arg.trim_prefix("--min-group-px="))
 		elif arg.begins_with("--min-total-px="):
@@ -106,6 +124,25 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+	# Ceasul de lumina (Jodhpur, DuskCycle). Doua cadre suplimentare, acelasi
+	# motiv ca in Snapshot/ProbeRace: `DuskCycle._collect` e amanat cu
+	# `call_deferred`. DACA pista n-are niciun DuskCycle (orice pista in afara
+	# de Jodhpur), se adauga unul TEMPORAR direct pe `track`, ca sonda sa poata
+	# verifica masca obiectelor luminate de ceas (ferestre, candele) inainte
+	# ca Track17 sa existe.
+	if dusk_force >= 0.0:
+		var dusk_cycles := get_tree().get_nodes_in_group(&"dusk_cycle")
+		if dusk_cycles.is_empty():
+			var dc: Node = (preload("res://scenes/hazards/dusk_cycle.gd") as GDScript).new()
+			track.add_child(dc)
+			await get_tree().process_frame
+			await get_tree().process_frame
+			dusk_cycles = get_tree().get_nodes_in_group(&"dusk_cycle")
+			print("--dusk=%.2f: pista fara DuskCycle propriu, adaugat unul temporar" % dusk_force)
+		for node in dusk_cycles:
+			if node.has_method("force_value"):
+				node.call("force_value", dusk_force)
+		print("--dusk=%.2f: %d DuskCycle fortate" % [dusk_force, dusk_cycles.size()])
 	if hippo_at >= 0.0:
 		for node in track.find_children("*", "HippoHazard", true, false):
 			var hippo := node as HippoHazard

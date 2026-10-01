@@ -44,9 +44,14 @@ LARCH_RUST, LOG_DARK, MARBLE_GREY = 27, 28, 29
 SNOW_WHITE = FOAM_WHITE
 # Stromboli (Track11) ia UN singur slot: lava e singura sursa de portocaliu
 # saturat din decor. Emisivul nu vine de aici (atlasul e albedo) — vine din
-# materialul de clasa al lavei, atasat la integrare in Godot. 31 ramane
-# ULTIMA rezerva si se randeaza magenta, ca greselile de UV sa sara in ochi.
+# materialul de clasa al lavei, atasat la integrare in Godot.
 LAVA_ORANGE = 30
+# Jodhpur (Track17) ia ultimul slot: accentele saturate de roz (copertine,
+# textile, ghirlande) sunt semnalul pistei, la fel cum LAVA_ORANGE a fost al
+# Stromboli-ului. Pictat de instanta de gameplay (scripts/palette.gd:140);
+# NU mai e rezerva magenta — costul asumat e ca sloturile >=32 (inexistente)
+# raman singurul marcaj de eroare de UV.
+FLAMINGO_PINK = 31
 # Cele 5 culori de panglica serge, in ordinea din brief (albastru, alb, galben,
 # rosu, verde). CAR_* nu sunt definite mai sus fiindca decorul nu le foloseste:
 # aici sunt explicit indicii lor.

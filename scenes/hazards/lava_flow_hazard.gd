@@ -65,6 +65,11 @@ var _meshes: Array[Node3D] = []
 func _ready() -> void:
 	_collect()
 	_apply()
+	# Grupul comun de "porti de banda" (Track.branch_is_open, generalizat sep
+	# 2026 pentru vaca de la Jodhpur): orice nod cu `branch_index` +
+	# `shortcut_open()` intra aici, ca pista sa-l gaseasca fara sa-i cunoasca
+	# tipul. Precedentul e lava, deci grupul se alatura, nu se creeaza.
+	add_to_group(Track.BRANCH_GATE_GROUP)
 
 
 ## Se apeleaza din Race la fiecare tur incheiat de LIDER (nu de jucator: lava

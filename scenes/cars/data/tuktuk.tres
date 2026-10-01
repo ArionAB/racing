@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="CarData" load_steps=3 format=3]
+
+[ext_resource type="Script" uid="uid://b3bsh85drrmvy" path="res://scenes/cars/car_data.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://cblf5sj5j6gjl" path="res://assets/models/jodhpur/vehicles/tuktuk.glb" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Tuk-tuk"
+color = Color(0.95, 0.8, 0.15, 1)
+max_speed = 18.0
+acceleration = 7.0
+grip = 6.5
+mass_factor = 0.34
+center_of_mass_y = -0.02
+spring_freq = 2.6
+damping_ratio = 0.55
+suspension_rest = 0.3
+model = ExtResource("2")
+model_scale = 1.0
+model_rotation_deg = 180.0
+body_length = 2.6
+body_width = 1.4
+palette_model = true

@@ -52,6 +52,20 @@ extends Node
 ##                             `rain_falls` (cascadele de ploaie, altfel
 ##                             `visible = false`) si mediul de ploaie. Fara el,
 ##                             captura prinde mereu faza uscata.
+##   --dusk=0.5                 CEASUL DE LUMINA (DuskCycle, Jodhpur) fortat la
+##                             fractia data (0 = turul 1 auriu, 1 = turul 3,
+##                             noapte cu artificii — docs/track_briefs/
+##                             jodhpur.md §3/§4). Daca pista are deja un
+##                             `DuskCycle` (grupul `dusk_cycle`), i se cheama
+##                             `force_value()`; daca NU are (orice pista in
+##                             afara de Jodhpur), Snapshot ADAUGA unul temporar
+##                             — asa se poate testa ceasul pe piste existente
+##                             INAINTE ca Track17 sa existe (memoria
+##                             `sonda-masura-alt-obiect`: fara asta n-ai cum sa
+##                             verifici ca parametrii chiar se misca, doar ca
+##                             scriptul compileaza). Fara acest flag, o pista
+##                             fara `DuskCycle` propriu ramane exact ca inainte
+##                             (dusk=0, neatins).
 ##   --torrent-at=11.0         TORENTUL IN PULSURI (TorrentCycle, scurtatura
 ##                             Chasm): ceasul ciclului in secunde; 0 = CALM,
 ##                             7 = inceputul anuntului, 10 = inceputul pulsului
@@ -77,6 +91,17 @@ extends Node
 ##                             `phase` ignorat): 0-3.5 urca de sub banda,
 ##                             3.5-7.5 ACOPERA drumul, 7.5-10 se retrage,
 ##                             restul = ascuns. Fara el norul e in defileu.
+##   --tuk-at=0.93,0.96[:-2.2] TUK-TUK-URI (Jodhpur) la fractiile date din
+##                             bucla, pe banda STANGA (lat -2,2 = offsetul
+##                             TrafficController; `:lat` il suprascrie per
+##                             piesa). Snapshot nu porneste cursa, deci fara
+##                             flag traficul nu apare in captura. Corpuri
+##                             `Car` + tuktuk.tres, INGHETATE (on_start_grid),
+##                             botul pe sensul de mers. Fara flag: nimic.
+##   --cow=stand|lie           VACA din ulicioara (CowGate, Jodhpur D′)
+##                             inghetata: `lie` culcata in gura (scurtatura
+##                             inchisa), `stand` pe prag (deschisa). Fara
+##                             flag: pe prag, ceasul nu ruleaza.
 ##   --bus-at=30               AUTOBUZUL de pe serpentine (BusHazard, Machu
 ##                             Picchu) la N SECUNDE de coborare pe curba lui
 ##                             (7 m/s => 30 s = 210 m de la capatul de sus),
@@ -98,6 +123,13 @@ extends Node
 ##                             fractie din ciclul ei: 0 = abia deschisa (in
 ##                             nisa), ~0.53 = la jumatatea rostogolirii spre
 ##                             axa, 0.60-0.84 = INCHISA pe banda.
+##   --salute-at=5.0           TUNURILE DE SALUT (BastionTheatre, Jodhpur POI F)
+##                             la N secunde in ciclul de 31 s (salvele trag la
+##                             4,0 / 4,8 / 5,6 / 6,4 / 7,2 s). Ceas inghetat.
+##   --zip-at=4.0              TIROLIANA: figura pe cablu la N secunde (ciclu
+##                             23 s, cursa 0..9 s). Ceas inghetat.
+##   --fireworks-at=1.0        ARTIFICIILE la N secunde, APRINSE indiferent de
+##                             dusk (lumina o da `--dusk=1`). Ceas inghetat.
 ##   --rock-at=3.5             bolovanii cu traseu, la N SECUNDE de la
 ##                             desprindere (nu fractie: traseele au lungimi
 ##                             diferite). Se SIMULEAZA cadru cu cadru de la 0,
@@ -227,6 +259,59 @@ const _VITRINA_MODEL_PATHS := {
 	"moss_boulder_c": "res://assets/models/machupicchu/rocks/moss_boulder_c.glb",
 	"chevron_sign": "res://assets/models/signs/chevron_sign.glb",
 	"wooden_pier": "res://assets/models/structures/wooden_pier.glb",
+	# --- Jodhpur (Track17), cele 50 de piese ale kitului (fundatia POI) ---
+	# `euphorbia` are acelasi stem ca piesa Serengeti; cheia de vitrina e
+	# `jodhpur_euphorbia` (WorldProp decide clasa dupa FISIER, nu dupa cheie).
+	"baraat_horse": "res://assets/models/jodhpur/animals/baraat_horse.glb",
+	"black_kite_bird": "res://assets/models/jodhpur/animals/black_kite_bird.glb",
+	"langur": "res://assets/models/jodhpur/animals/langur.glb",
+	"peacock_closed": "res://assets/models/jodhpur/animals/peacock_closed.glb",
+	"peacock_fanned": "res://assets/models/jodhpur/animals/peacock_fanned.glb",
+	"zebu_cow": "res://assets/models/jodhpur/animals/zebu_cow.glb",
+	"blue_house_a": "res://assets/models/jodhpur/buildings/blue_house_a.glb",
+	"blue_house_b": "res://assets/models/jodhpur/buildings/blue_house_b.glb",
+	"blue_house_c": "res://assets/models/jodhpur/buildings/blue_house_c.glb",
+	"blue_house_d": "res://assets/models/jodhpur/buildings/blue_house_d.glb",
+	"blue_house_e": "res://assets/models/jodhpur/buildings/blue_house_e.glb",
+	"ghanta_ghar": "res://assets/models/jodhpur/buildings/ghanta_ghar.glb",
+	"haveli_facade": "res://assets/models/jodhpur/buildings/haveli_facade.glb",
+	"jodhpur_euphorbia": "res://assets/models/jodhpur/plants/euphorbia.glb",
+	"khejri_tree": "res://assets/models/jodhpur/plants/khejri_tree.glb",
+	"neem_tree": "res://assets/models/jodhpur/plants/neem_tree.glb",
+	"baraat_band": "res://assets/models/jodhpur/props/baraat_band.glb",
+	"chai_stall": "res://assets/models/jodhpur/props/chai_stall.glb",
+	"diya": "res://assets/models/jodhpur/props/diya.glb",
+	"floating_diya": "res://assets/models/jodhpur/props/floating_diya.glb",
+	"marigold_garland": "res://assets/models/jodhpur/props/marigold_garland.glb",
+	"rampart_cannon": "res://assets/models/jodhpur/props/rampart_cannon.glb",
+	"rooftop_clutter": "res://assets/models/jodhpur/props/rooftop_clutter.glb",
+	"rooftop_tank": "res://assets/models/jodhpur/props/rooftop_tank.glb",
+	"spice_sacks": "res://assets/models/jodhpur/props/spice_sacks.glb",
+	"stall_canopy_a": "res://assets/models/jodhpur/props/stall_canopy_a.glb",
+	"stall_canopy_b": "res://assets/models/jodhpur/props/stall_canopy_b.glb",
+	"stall_canopy_c": "res://assets/models/jodhpur/props/stall_canopy_c.glb",
+	"textile_strip": "res://assets/models/jodhpur/props/textile_strip.glb",
+	"thela_cart": "res://assets/models/jodhpur/props/thela_cart.glb",
+	"zipline_rider": "res://assets/models/jodhpur/props/zipline_rider.glb",
+	"jodhpur_horizon": "res://assets/models/jodhpur/rocks/jodhpur_horizon.glb",
+	"rhyolite_boulder_a": "res://assets/models/jodhpur/rocks/rhyolite_boulder_a.glb",
+	"rhyolite_boulder_b": "res://assets/models/jodhpur/rocks/rhyolite_boulder_b.glb",
+	"rhyolite_boulder_c": "res://assets/models/jodhpur/rocks/rhyolite_boulder_c.glb",
+	"rock_slab": "res://assets/models/jodhpur/rocks/rock_slab.glb",
+	"fort_bastion": "res://assets/models/jodhpur/structures/fort_bastion.glb",
+	"fort_gate_fateh": "res://assets/models/jodhpur/structures/fort_gate_fateh.glb",
+	"fort_gate_jai": "res://assets/models/jodhpur/structures/fort_gate_jai.glb",
+	"fort_gate_loha": "res://assets/models/jodhpur/structures/fort_gate_loha.glb",
+	"fort_wall_segment": "res://assets/models/jodhpur/structures/fort_wall_segment.glb",
+	"fort_wall_turret": "res://assets/models/jodhpur/structures/fort_wall_turret.glb",
+	"jaswant_thada": "res://assets/models/jodhpur/structures/jaswant_thada.glb",
+	"market_gate": "res://assets/models/jodhpur/structures/market_gate.glb",
+	"palace_facade_a": "res://assets/models/jodhpur/structures/palace_facade_a.glb",
+	"palace_facade_b": "res://assets/models/jodhpur/structures/palace_facade_b.glb",
+	"stepwell_corner": "res://assets/models/jodhpur/structures/stepwell_corner.glb",
+	"stepwell_flight_module": "res://assets/models/jodhpur/structures/stepwell_flight_module.glb",
+	"stepwell_pavilion": "res://assets/models/jodhpur/structures/stepwell_pavilion.glb",
+	"tuktuk": "res://assets/models/jodhpur/vehicles/tuktuk.glb",
 }
 
 func _vec3(text: String) -> Vector3:
@@ -244,6 +329,7 @@ func _ready() -> void:
 	var driver_view := false
 	var rain_force := -1.0 # >= 0: RainCycle.force_factor() dupa doua cadre
 	var rain_clock := -1.0 # >= 0: RainCycle.force_clock() dupa doua cadre
+	var dusk_force := -1.0 # >= 0: DuskCycle.force_value() dupa doua cadre
 	var torrent_at := -1.0 # >= 0: TorrentCycle.force_clock() (secunde in ciclu)
 	var overdraw := false
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
@@ -280,8 +366,14 @@ func _ready() -> void:
 	var rope_u := 0.5
 	var cloud_at := -1.0
 	var bus_at := -1.0
+	var tuk_at := ""
+	var cow_mode := ""
 	var cross_at := -1.0
 	var burner_at := -1.0
+	# Teatrul bastionului (Jodhpur, POI F): ceasurile BastionTheatre, inghetate.
+	var salute_at := -1.0
+	var zip_at := -1.0
+	var fireworks_at := -1.0
 	var balloon_at := -1.0
 	var lava_stage := -1
 	var route_idx := 0
@@ -312,6 +404,10 @@ func _ready() -> void:
 	# ramane in bind pose brut, care nu e starea din joc (vezi inventarul:
 	# bind pose = aripi intinse, contrar intentiei).
 	var vitrina_anim := ""
+	# --vitrina-ahead=<m>: piesa se aseaza si INAINTE pe drum, nu doar
+	# lateral — piesele mari (portile de 32,7 m, fatadele de 40-45 m) puse
+	# langa masina ies din cadrul camerei de joc (jumatate de cadru ~50 grade).
+	var vitrina_ahead := 0.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--vitrina="):
 			vitrina_stem = arg.trim_prefix("--vitrina=")
@@ -324,6 +420,8 @@ func _ready() -> void:
 			continue
 		if arg.begins_with("--vitrina-anim="):
 			vitrina_anim = arg.trim_prefix("--vitrina-anim=")
+		if arg.begins_with("--vitrina-ahead="):
+			vitrina_ahead = float(arg.trim_prefix("--vitrina-ahead="))
 			continue
 		if arg == "--car":
 			show_car = true
@@ -370,6 +468,10 @@ func _ready() -> void:
 			cloud_at = float(arg.trim_prefix("--cloud-at="))
 		elif arg.begins_with("--bus-at="):
 			bus_at = float(arg.trim_prefix("--bus-at="))
+		elif arg.begins_with("--tuk-at="):
+			tuk_at = arg.trim_prefix("--tuk-at=")
+		elif arg.begins_with("--cow="):
+			cow_mode = arg.trim_prefix("--cow=")
 		elif arg.begins_with("--rope-load="):
 			var parts := arg.trim_prefix("--rope-load=").split(",")
 			rope_load = float(parts[0])
@@ -409,6 +511,14 @@ func _ready() -> void:
 			rain_force = float(arg.trim_prefix("--rain="))
 		elif arg.begins_with("--rain-clock="):
 			rain_clock = float(arg.trim_prefix("--rain-clock="))
+		elif arg.begins_with("--dusk="):
+			dusk_force = float(arg.trim_prefix("--dusk="))
+		elif arg.begins_with("--salute-at="):
+			salute_at = float(arg.trim_prefix("--salute-at="))
+		elif arg.begins_with("--zip-at="):
+			zip_at = float(arg.trim_prefix("--zip-at="))
+		elif arg.begins_with("--fireworks-at="):
+			fireworks_at = float(arg.trim_prefix("--fireworks-at="))
 		elif arg.begins_with("--torrent-at="):
 			torrent_at = float(arg.trim_prefix("--torrent-at="))
 		elif arg == "--overdraw":
@@ -474,6 +584,10 @@ func _ready() -> void:
 		await _set_cloud_time(track, cloud_at)
 	if bus_at >= 0.0:
 		await _set_bus_time(track, bus_at)
+	if tuk_at != "":
+		_place_tuktuks(track, tuk_at)
+	if cow_mode != "":
+		await _set_cow(track, cow_mode)
 	if cross_at >= 0.0:
 		await _set_cross_time(track, cross_at)
 	if burner_at >= 0.0:
@@ -519,6 +633,43 @@ func _ready() -> void:
 			print("--rain-clock=%.2f: %d RainCycle fortate" % [rain_clock, cycles])
 		else:
 			print("--rain=%.1f: %d RainCycle fortate" % [rain_force, cycles])
+	# Ceasul de lumina (Jodhpur, DuskCycle). Doua cadre, acelasi motiv ca
+	# ploaia (_collect.call_deferred() in DuskCycle._ready): fara asteptare,
+	# force_value() ar cadea pe un nod care inca n-a apucat sa-si gaseasca
+	# Environment-ul/soarele. DACA pista n-are niciun DuskCycle (orice pista
+	# in afara de Jodhpur), Snapshot adauga unul TEMPORAR direct pe track --
+	# asa se poate verifica ceasul pe piste existente inainte ca Track17 sa
+	# existe (memoria sonda-masura-alt-obiect: fara asta n-ai cum sa dovedesti
+	# ca parametrii chiar se misca).
+	if dusk_force >= 0.0:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var dusk_cycles := get_tree().get_nodes_in_group(&"dusk_cycle")
+		if dusk_cycles.is_empty():
+			var dc: Node = (preload("res://scenes/hazards/dusk_cycle.gd") as GDScript).new()
+			track.add_child(dc)
+			await get_tree().process_frame
+			await get_tree().process_frame
+			dusk_cycles = get_tree().get_nodes_in_group(&"dusk_cycle")
+			print("--dusk=%.2f: pista fara DuskCycle propriu, adaugat unul temporar" % dusk_force)
+		for node in dusk_cycles:
+			if node.has_method("force_value"):
+				node.call("force_value", dusk_force)
+		print("--dusk=%.2f: %d DuskCycle fortate" % [dusk_force, dusk_cycles.size()])
+	# Teatrul bastionului (Jodhpur, POI F). Opt-in: fara flag nu se atinge
+	# nimic. Ceasul e o functie pura de timp (BastionTheatre), deci se pune
+	# direct si se ingheata — fara simulare de cadre.
+	if salute_at >= 0.0 or zip_at >= 0.0 or fireworks_at >= 0.0:
+		await get_tree().process_frame
+		var theatres := get_tree().get_nodes_in_group(&"bastion_theatre")
+		for node in theatres:
+			if salute_at >= 0.0:
+				node.call("force_clock", "salute", salute_at)
+			if zip_at >= 0.0:
+				node.call("force_clock", "zip", zip_at)
+			if fireworks_at >= 0.0:
+				node.call("force_clock", "fw", fireworks_at)
+		print("--salute-at/--zip-at/--fireworks-at: %d BastionTheatre fortate" % theatres.size())
 	# Torentul in pulsuri (Fiordland, scurtatura Chasm): `TorrentCycle._place`
 	# e amanat si reincearca pana apar rutele, deci asteptam doua cadre si
 	# fortam ceasul pe toate torentele din grup (0 = CALM, period-telegraph-
@@ -690,8 +841,8 @@ func _ready() -> void:
 			car.on_start_grid = true
 			_seat_car_on_rope_bridge(track, car)
 			if vitrina_stem != "":
-				_place_vitrina(track, focus, dir, vitrina_stem, vitrina_side,
-					vitrina_yaw, vitrina_anim)
+				_place_vitrina(track, focus + dir * vitrina_ahead, dir,
+					vitrina_stem, vitrina_side, vitrina_yaw, vitrina_anim)
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
@@ -791,6 +942,63 @@ func _print_render_info() -> void:
 			RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME),
 		RenderingServer.viewport_get_render_info(vp, t,
 			RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)])
+	_print_halo_stats()
+
+
+## Costul halourilor false (LampHalo, Jodhpur) pe CADRUL capturat: cate
+## instante cad in frustum, cate au haloul intreg (< 45 m), si cati pixeli
+## acopera patratele lor — adica overdraw-ul aditiv, socotit cu ACEEASI
+## formula de raza ca shaderul (lamp_halo.gdshader), nu estimat.
+func _print_halo_stats() -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or LampHalo.built.is_empty():
+		return
+	var vp_h := float(get_viewport().get_visible_rect().size.y)
+	var px_per_rad := vp_h / (2.0 * tan(deg_to_rad(cam.fov) * 0.5))
+	var far_b := 45.0
+	var far_e := 60.0
+	var min_core := 0.0022
+	var pull_frac := 0.8
+	var pull_max := 1.2
+	var tot := 0
+	var vis := 0
+	var full := 0
+	var px := 0.0
+	var per := {}
+	for mmi: MultiMeshInstance3D in LampHalo.built:
+		if not is_instance_valid(mmi) or not mmi.is_visible_in_tree():
+			continue
+		var mm := mmi.multimesh
+		var gx := mmi.global_transform
+		var v_n := 0
+		var v_px := 0.0
+		for i in mm.instance_count:
+			tot += 1
+			var p: Vector3 = gx * mm.get_instance_transform(i).origin
+			var cd := mm.get_instance_custom_data(i)
+			var d := cam.global_position.distance_to(p)
+			var core := maxf(cd.r, d * min_core)
+			var keep := 1.0 - smoothstep(far_b, far_e, d)
+			var st := maxf(cd.b, 1.0)
+			var halo := lerpf(core * st, maxf(cd.g, core * st), keep)
+			var r := maxf(halo, core * st)
+			if not cam.is_position_in_frustum(p):
+				# patratul poate intra in cadru cu marginea; ignorat (sub-estimare mica)
+				continue
+			var dd := maxf(d - minf(r * pull_frac, pull_max), 0.3)
+			var rpx := r / dd * px_per_rad
+			var a := 4.0 * rpx * rpx
+			vis += 1
+			v_n += 1
+			if d < far_b:
+				full += 1
+			px += a
+			v_px += a
+		per[mmi.name] = "%d vizibile, %.0f px" % [v_n, v_px]
+	var area := get_viewport().get_visible_rect().size.x * vp_h
+	print("HALO: %d instante, %d in cadru, %d cu halou intreg (<45 m), %.0f px acoperiti = %.2f ecrane de overdraw aditiv" % [
+		tot, vis, full, px, px / area])
+	print("HALO per strat: ", per)
 
 
 ## Un landmark anume, vazut de pe sosea (--landmark=, vezi antetul).
@@ -1108,6 +1316,92 @@ func _set_bus_time(root: Node, at: float) -> void:
 				body.global_position.z])
 	if found == 0:
 		print("--bus-at: NICIUN autobuz pe pista asta")
+
+
+## `--cow=stand|lie` (Jodhpur, D′): vaca din ulicioara (`CowGate`) INGHETATA
+## in pozitia ceruta, fara telegraph: `lie` = culcata in gura (scurtatura
+## inchisa), `stand` = in picioare pe prag (deschisa). Snapshot nu ruleaza
+## ceasul portii, deci fara flag vaca e pe prag, adica jumatate din gimmick
+## nu se vede niciodata. Opreste `_physics_process` al portii (lume
+## inghetata), pune starea si transformul corpului, apoi cere `CowPose` sa
+## aplice poza finala a clipului. Fara `CowGate` pe pista: nimic.
+func _set_cow(track: Track, mode: String) -> void:
+	var gate: CowGate = null
+	for n in get_tree().get_nodes_in_group(Track.BRANCH_GATE_GROUP):
+		if n is CowGate:
+			gate = n as CowGate
+			break
+	if gate == null:
+		print("--cow: pista fara CowGate")
+		return
+	for i in 60:
+		if bool(gate.get("_placed")):
+			break
+		await get_tree().process_frame
+	var lie := mode == "lie"
+	gate.set_physics_process(false)
+	gate.set("_state", CowGate.State.LYING_IN_MOUTH if lie else CowGate.State.ON_THRESHOLD)
+	gate.set("_walk_t", 1.0 if lie else 0.0)
+	gate.set("_clock", 0.0)
+	var body := gate.get_node_or_null("CowBody") as Node3D
+	var xf: Transform3D = gate.get("_mouth_xf") if lie else gate.get("_threshold_xf")
+	if body != null:
+		body.global_transform = xf
+	var posed := 0
+	# Duck typing, nu `is CowPose`: o clasa noua intra in cache-ul de clase
+	# globale abia la urmatorul --import, iar pana atunci snapshot.gd nu se
+	# mai compileaza deloc (Snapshot sta cu fereastra goala, fara eroare vizibila).
+	for n in track.find_children("*", "Node", true, false):
+		if n.has_method("snap_to_state") and n.has_method("is_bound"):
+			for i in 60:
+				if bool(n.call("is_bound")):
+					break
+				await get_tree().process_frame
+			n.call("snap_to_state")
+			posed += 1
+	print("--cow=%s: vaca %s la (%.1f, %.1f, %.1f), CowPose %d"
+		% [mode, "culcata in gura" if lie else "pe prag", xf.origin.x, xf.origin.y,
+			xf.origin.z, posed])
+
+
+## `--tuk-at`: tuk-tuk-uri inghetate pe banda stanga a buclei (ruta 0), la
+## fractiile date (pe index, ca `--frac`). Aceeasi asezare ca
+## `Race._spawn_traffic` (axa + side_at * offset, botul pe sensul de mers),
+## dar cu corpul inghetat: poza arata traficul acolo unde il cere captura,
+## nu unde l-ar fi dus fizica in cele cateva cadre de asteptare.
+func _place_tuktuks(track: Track, spec: String) -> void:
+	var route := track.route_at(0)
+	if route == null or route.count() == 0:
+		print("--tuk-at: pista fara ruta 0")
+		return
+	var n := route.count()
+	var data := load("res://scenes/cars/data/tuktuk.tres") as CarData
+	var placed := 0
+	for item in spec.split(",", false):
+		var parts := item.split(":")
+		var frac := float(parts[0])
+		var lat := TrafficController.LANE_OFFSET_M
+		if parts.size() > 1:
+			lat = float(parts[1])
+		var idx := int(frac * float(n)) % n
+		var dir := route.baked[route.wrap_index(idx + 1)] - route.baked[idx]
+		dir.y = 0.0
+		if dir.length_squared() < 0.001:
+			dir = Vector3.FORWARD
+		dir = dir.normalized()
+		var pos := route.baked[idx] + route.side_at(idx) * lat + Vector3.UP * 0.45
+		var car := (load("res://scenes/cars/Car.tscn") as PackedScene).instantiate() as Car
+		car.track = track
+		add_child(car)
+		car.apply_data(data)
+		car.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP), pos)
+		car.route = 0
+		car.road_index = idx
+		car.on_start_grid = true
+		placed += 1
+		print("--tuk-at: tuk-tuk la frac %.3f (idx %d), lat %.1f, (%.1f, %.1f, %.1f)"
+			% [frac, idx, lat, pos.x, pos.y, pos.z])
+	print("--tuk-at: %d tuk-tuk-uri inghetate" % placed)
 
 
 ## Podul de franghie: o incarcare fantoma la fractia u din pod, cu sageata

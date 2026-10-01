@@ -292,6 +292,41 @@ const PROP_COLLISION := {
 	# bush_plane: "none" — PathMover zboara, stick_to_ground=false, un hull ar
 	# fi un perete invizibil in aer pe traiectoria de zbor.
 	"bush_plane": "none",
+	# --- Jodhpur (kitul din assets/models/jodhpur/, brief jodhpur_kit.md,
+	# masurat in docs/asset_briefs/jodhpur_masuratori.md §3) ------------------
+	#
+	# Se TRECE prin ele: hull-ul ar umple golul (7,16 m la porti, 18,39 m la
+	# poarta pietei, masurate ca GOL) si ar face zid peste drum.
+	"fort_gate_jai": "mesh", "fort_gate_fateh": "mesh",
+	"fort_gate_loha": "mesh", "market_gate": "mesh",
+	# Coroana depaseste masiv baza: raza-baza/semi-latime neem 0,18, khejri
+	# 0,13 — hull-ul ar fi un cort de 7-8 m care opreste masina in aer.
+	# (`euphorbia` e deja "trunk" mai sus, intrarea Serengeti; acelasi stem,
+	# raport 0,46 si aici, deci aceeasi decizie.)
+	"neem_tree": "trunk", "khejri_tree": "trunk",
+	# Contract (kit §1.3): treptele fantanii sunt decor LIPIT de peretele
+	# gropii; coliziunea e a terenului (`TerrainHollow`). Un hull pe modulul
+	# de 12 m ar fi o treapta falsa pe rampa.
+	"stepwell_flight_module": "none", "stepwell_corner": "none",
+	"stepwell_pavilion": "none",
+	# Teatru si figuranti (brief §3/§8: procesiunea e pe trotuar, fara
+	# coliziune; vaca isi face singura cutia in `CowGate`).
+	"baraat_horse": "none", "baraat_band": "none", "peacock_closed": "none",
+	"peacock_fanned": "none", "langur": "none", "black_kite_bird": "none",
+	"zipline_rider": "none", "zebu_cow": "none",
+	# Sub linia capotei / deasupra benzii / contract: candelele, ghirlanda si
+	# fasia de textile atarna peste strada, tunul e "none" prin kit §1.2.
+	"diya": "none", "floating_diya": "none", "marigold_garland": "none",
+	"textile_strip": "none", "rampart_cannon": "none",
+	# Pe acoperisuri (nu le atinge nimeni — corpuri de fizica degeaba),
+	# tuk-tuk-ul e `Car` (nu decor), orizontul e fundal de 150-200 m.
+	"rooftop_tank": "none", "rooftop_clutter": "none", "tuktuk": "none",
+	"jodhpur_horizon": "none",
+	# Restul (implicit hull, corect): casele a-e, haveli, ghanta_ghar, zidul
+	# si turnul de zid (bloc plin: hull = zidul; brief-ul zicea "mesh", pe un
+	# corp convex e identic si mai ieftin), bastionul, fatadele, cenotaful,
+	# tarabele (brief: "pereti cu masa, nu decor fantoma"), thela, sacii,
+	# bolovanii de riolit si lespedea.
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -424,7 +459,16 @@ const SPLIT_MODELS := {
 	# (`get_file().get_basename()`, vezi `_split_shutters`), un `true` ar fi
 	# rupt si smochinul de pe Track11. Ramane limitarea pe grupuri de mai sus.
 	"fever_tree": true,
-	"euphorbia": true,
+	# euphorbia: NU `true` (din sep 2026). `jodhpur/plants/euphorbia.glb` are
+	# ACELASI stem ca `serengeti/plants/euphorbia.glb` (masurat,
+	# jodhpur_masuratori.md), deci `true` rupea si cactusul Jodhpur si ii
+	# punea `acacia_canopy` pe accent (+1 material, frunzis pe cactus).
+	# Limitata la cele 8 zone Serengeti in care e asezata (Track14.tscn,
+	# numarat: A 3, B 3, C 3, D 19, E 5, F 6, G 6, H 87) — mecanica
+	# `fig_tree`. Serengeti ramane neschimbat.
+	"euphorbia": ["ZoneA_Camp", "ZoneB_RaulDeGnu", "ZoneC_VadulMara",
+		"ZoneD_PadureaDeCeata", "ZoneE_Buza", "ZoneF_Serpentine",
+		"ZoneG_FundulCraterului", "ZoneH_Spartura"],
 	# Elefantul (Serengeti, lotul ELEFANTULUI): pielea (corp + cap/picioare,
 	# sloturile 2 si 29, 91.5% din arie masurata) ia clasa `elephant_hide`, dar
 	# fildesii (slot 22, 8.5%, z=[-4.02,-2.66] — fata modelului) raman
@@ -454,6 +498,16 @@ const SPLIT_MODELS := {
 	# muschiul e interlacat pe toata fata peretelui — nu acelasi caz. Ruptura
 	# e curata: corpul ramane piatra, capacul ramane pictat.
 	"guard_rock": true,
+	# --- Jodhpur: casele albastre cu accente pe peretele insusi (masurat,
+	# jodhpur_masuratori.md §1): a — obloane 9 WOOD 15.2% (y 2.93-4.03);
+	# b — planta 12 CACTUS_GREEN 9.6% + rezervorul 28 LOG_DARK 8.7%; c —
+	# rezervorul 28 LOG_DARK 18.4%. Varul (clasa) ar fi sters obloanele si
+	# ar fi facut rezervorul negru albastru — exact punctul grafic pe care
+	# brief-ul §4 il cere negru. d/e/haveli au peretele 100% pe 22: nu se rup.
+	"blue_house_a": true, "blue_house_b": true, "blue_house_c": true,
+	# Bastionul: gurile de tragere (20 VOLCANIC_BLACK, 20.9%, y 5.3-8.9) sunt
+	# pe acelasi nod cu gresia; raman pictate, gresia ia `red_sandstone`.
+	"fort_bastion": true,
 }
 
 const ACCENT_SPLIT := {
@@ -612,6 +666,12 @@ const ACCENT_SPLIT := {
 	# muschi (21 TROPICAL_GREEN, 26.0%, y 0.44-0.58) pleaca in `_Accente` si
 	# ramane pictat pe atlas — e deja verdele corect, nu are nevoie de clasa.
 	"Rock_002": Palette.MARBLE_GREY,
+	# Jodhpur: pe CORP ramane varul (22); obloanele/planta/rezervorul pleaca
+	# in `_Accente`. Prinde si `House_Wall_001..004` (Godot rescrie `.001`),
+	# dar numai pe stem-urile din SPLIT_MODELS — cafe_shed (Fiordland) are si
+	# el un `House_Wall` si NU e acolo.
+	"House_Wall": Palette.FOAM_WHITE,
+	"Bastion_Stone": Palette.ROCK_LIGHT,
 }
 
 ## Modelele la care ruptura are rolurile INVERSATE: clasa sta pe ACCENT, nu pe
@@ -1569,6 +1629,127 @@ const CLASSES_BY_MODEL := {
 	# grohotis (`gravel_wet`, distincta de `wet_gneiss`), nu reuse — iar o
 	# clasa noua ar costa +1 material, peste tinta de buget a lotului (+0).
 	# Piesa ramane pe atlas, cu cele doua sloturi ei native.
+
+	# --- Jodhpur (Track17): clasele kitului ----------------------------------
+	#
+	# Cheie pe FISIER, nu pe nume de nod: `House_Wall/Trim/Glow/Rail` exista
+	# si pe `fiordland/buildings/cafe_shed.glb`, `Crown`/`Trunk` pe fagi,
+	# `Wall_` e prefixul GLOBAL al varului de Stromboli (`prop_classes()` ->
+	# STROMBOLI_CLASSES) si ar fi prins `Wall_Stone`/`Wall_Glow` ai zidului
+	# de fort. De aceea fiecare model de mai jos isi numeste TOATE nodurile:
+	# ce trebuie sa ramana pe atlas e scris explicit `ATLAS_PREFIX`, ca o
+	# mapare globala de prefix sa nu-l poata prinde (memoria
+	# `nume-noduri-nu-sunt-unice`). Clasele (palette.gd, masurate cu
+	# tools/ProbeJodDale.tscn):
+	#   blue_lime_light  #8FB0DC  varul caselor (tenta implicita)
+	#   blue_lime_indigo #4F6FB8  aceeasi dala; se alege PE INSTANTA cu
+	#                             metadata `indigo` (vezi LIME_INDIGO_META)
+	#   red_sandstone    #A5553A  fortul, portile, turnul cu ceas, fatadele
+	#   rose_sandstone   #D4957A  fantana in trepte
+	#   rhyolite         #9A6A5A  bolovanii si lespedea parcului de desert
+	# Balustradele/scarile albe (`House_Rail*`, slot 22) raman pe atlas: asa
+	# le-a acceptat kitul (preview-ul tenta doar `House_Wall`). `*_Glow`
+	# (golurile de fereastra) sunt pe `shader:jod_window`: albedo-ul atlasului
+	# ziua, emisie calda legata de `dusk_lamps` (DuskCycle) spre noapte, cu
+	# prag per cladire (assets/shaders/jod_window.gdshader,
+	# jodhpur_masuratori.md §9).
+	"blue_house_a": {
+		"House_Wall": Palette.TRI_PREFIX + "blue_lime_light",
+		"House_Rail": Palette.ATLAS_PREFIX, "House_Trim": Palette.ATLAS_PREFIX,
+		"House_Glow": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"blue_house_b": {
+		"House_Wall": Palette.TRI_PREFIX + "blue_lime_light",
+		"House_Rail": Palette.ATLAS_PREFIX, "House_Trim": Palette.ATLAS_PREFIX,
+		"House_Glow": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"blue_house_c": {
+		"House_Wall_001": Palette.TRI_PREFIX + "blue_lime_light",
+		"House_Trim_001": Palette.ATLAS_PREFIX, "House_Glow_001": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"blue_house_d": {
+		"House_Wall_002": Palette.TRI_PREFIX + "blue_lime_light",
+		"House_Rail_001": Palette.ATLAS_PREFIX, "House_Trim_002": Palette.ATLAS_PREFIX,
+		"House_Glow_002": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"blue_house_e": {
+		"House_Wall_003": Palette.TRI_PREFIX + "blue_lime_light",
+		"House_Rail_002": Palette.ATLAS_PREFIX, "House_Trim_003": Palette.ATLAS_PREFIX,
+		"House_Glow_003": Palette.SHADER_PREFIX + "jod_window",
+	},
+	# Haveli: decizia dezvoltatorului din 29 sep (inventar, runda 3b) —
+	# albastru DESCHIS, nu indigo.
+	"haveli_facade": {
+		"House_Wall_004": Palette.TRI_PREFIX + "blue_lime_light",
+		"House_Trim_004": Palette.ATLAS_PREFIX, "House_Glow_004": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"ghanta_ghar": {
+		"Tower_Stone": Palette.TRI_PREFIX + "red_sandstone",
+		"Tower_Glow": Palette.SHADER_PREFIX + "jod_window", "Clock_Glow": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"market_gate": {
+		"Gate_Stone": Palette.TRI_PREFIX + "red_sandstone",
+		"Gate_Glow": Palette.SHADER_PREFIX + "jod_window", "Gate_Doors": Palette.ATLAS_PREFIX,
+	},
+	"fort_gate_jai": {
+		"GateJai_Stone": Palette.TRI_PREFIX + "red_sandstone",
+		"GateJai_Glow": Palette.SHADER_PREFIX + "jod_window", "GateJai_Doors": Palette.ATLAS_PREFIX,
+	},
+	"fort_gate_fateh": {
+		"GateFateh_Stone": Palette.TRI_PREFIX + "red_sandstone",
+		"GateFateh_Glow": Palette.SHADER_PREFIX + "jod_window", "GateFateh_Doors": Palette.ATLAS_PREFIX,
+	},
+	"fort_gate_loha": {
+		"GateLoha_Stone": Palette.TRI_PREFIX + "red_sandstone",
+		"GateLoha_Glow": Palette.SHADER_PREFIX + "jod_window", "GateLoha_Doors": Palette.ATLAS_PREFIX,
+	},
+	"fort_wall_segment": {
+		"Wall_Stone": Palette.TRI_PREFIX + "red_sandstone",
+		"Wall_Glow": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"fort_wall_turret": {
+		"Turret_Stone": Palette.TRI_PREFIX + "red_sandstone",
+		"Turret_Glow": Palette.SHADER_PREFIX + "jod_window",
+	},
+	# Rupt inainte (SPLIT_MODELS/ACCENT_SPLIT): corpul e doar gresia,
+	# gurile de tragere (20) sunt in `Bastion_Stone_Accente`, pe atlas.
+	"fort_bastion": {
+		"Bastion_Stone": Palette.TRI_PREFIX + "red_sandstone",
+	},
+	"palace_facade_a": {
+		"Palace_Stone": Palette.TRI_PREFIX + "red_sandstone",
+		"Palace_Glow": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"palace_facade_b": {
+		"Palace_Stone": Palette.TRI_PREFIX + "red_sandstone",
+		"Palace_Glow": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"stepwell_flight_module": {
+		"Well_Stone": Palette.TRI_PREFIX + "rose_sandstone",
+	},
+	"stepwell_corner": {
+		"Well_Stone": Palette.TRI_PREFIX + "rose_sandstone",
+	},
+	"stepwell_pavilion": {
+		"Well_Stone": Palette.TRI_PREFIX + "rose_sandstone",
+		"Well_Glow": Palette.SHADER_PREFIX + "jod_window",
+	},
+	"rhyolite_boulder_a": {
+		"Rhyolite_Boulder_A": Palette.TRI_PREFIX + "rhyolite",
+	},
+	"rhyolite_boulder_b": {
+		"Rhyolite_Boulder_B": Palette.TRI_PREFIX + "rhyolite",
+	},
+	"rhyolite_boulder_c": {
+		"Rhyolite_Boulder_C": Palette.TRI_PREFIX + "rhyolite",
+	},
+	"rock_slab": {
+		"Rock_Slab": Palette.TRI_PREFIX + "rhyolite",
+	},
+	# Restul kitului ramane pe atlas (masurat, jodhpur_masuratori.md §1):
+	# cenotaful (22/29, marmura), animalele, bazarul, candelele, tuk-tuk-ul,
+	# copacii (`Crown`/`Trunk` — niciun prefix global nu-i prinde, verificat
+	# cu tools/ProbeJodClase.tscn), orizontul (clasa lui vine din tema).
 }
 
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),
@@ -1897,6 +2078,13 @@ const SLOT_REMAP_BY_MODEL := {
 	# epuizat), deci nu se rescrie GLB-ul aici — remap de slot, ca la
 	# acaciile-umbrela.
 	"wharf": {21: Palette.MARBLE_GREY},
+	# `fort_gate_loha.glb` (Jodhpur POI E): canaturile `GateLoha_Doors` sunt pe
+	# slotul 11 PAINTED_METAL (+20), iar pe Jai/Fateh pe 9 WOOD_WEATHERED (+20).
+	# Slotul 11 e albastru-vopsea (containere), deci canaturile Loha ieseau
+	# albastre in toate capturile E; bara cere „canaturi de lemn inchis" la
+	# toate portile. Remap cheiat pe model, ca la wharf: tuk-tuk-ul isi pastreaza
+	# slotul 11, nicio alta piesa nu se atinge.
+	"fort_gate_loha": {Palette.PAINTED_METAL: Palette.WOOD_WEATHERED},
 
 	# Acaciile-umbrela (Serengeti, POI B): coroana e pe 13 (DRY_VEGETATION —
 	# ACELASI slot ca iarba de sub ele, deci fata de sus a coroanei iesea
@@ -2160,6 +2348,7 @@ func _ready() -> void:
 	_cool_inca_cliff()
 	Palette.apply_class_materials(self, prop_classes())
 	_apply_model_classes()
+	_apply_lime_indigo()
 	_fade_tuff_detail()
 	_apply_tint()
 	_apply_glow()
@@ -2533,6 +2722,59 @@ func _apply_model_classes() -> void:
 	_apply_classes_mapping(CLASSES_BY_MODEL)
 
 
+## Metadata care muta varul unei case albastre (Jodhpur) de pe tenta deschisa
+## (`blue_lime_light`, implicita din CLASSES_BY_MODEL) pe INDIGO
+## (`blue_lime_indigo`). In Inspector: Add Metadata -> `indigo` = true, pe
+## instanta casei SAU pe un container (zona) — se mosteneste in jos.
+##
+## De ce metadata si nu o mapare pe model: aceeasi casa (acelasi .glb) apare in
+## ambele tente, amestecate casa cu casa (brief §0.1: „doua tente, nu una").
+## Costul e +1 material pe pista (clasa indigo), oricate case ar purta-o.
+## Umplutura din interiorul buclei (`CityFill`) foloseste aceeasi metadata pe
+## sabloanele ei, deci amestecul se decide intr-un singur loc.
+const LIME_INDIGO_META := "indigo"
+const LIME_LIGHT := "blue_lime_light"
+const LIME_INDIGO := "blue_lime_indigo"
+
+
+func _apply_lime_indigo() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		if not _wants_indigo(model):
+			continue
+		var stem := model.scene_file_path.get_file().get_basename()
+		var mapping: Dictionary = CLASSES_BY_MODEL.get(stem, {})
+		var parts: Array[String] = []
+		for part: String in mapping:
+			if String(mapping[part]) == Palette.TRI_PREFIX + LIME_LIGHT:
+				parts.append(part)
+		if parts.is_empty():
+			continue
+		var mat := Palette.triplanar_class_material(LIME_INDIGO)
+		var stack: Array[Node] = [model]
+		while not stack.is_empty():
+			var node: Node = stack.pop_back()
+			for c in node.get_children():
+				stack.append(c)
+			var mi := node as MeshInstance3D
+			if mi == null or String(mi.name).ends_with(Palette.ACCENT_SUFFIX):
+				continue
+			for part in parts:
+				if String(mi.name).begins_with(part):
+					mi.material_override = mat
+					break
+
+
+func _wants_indigo(model: Node) -> bool:
+	var n: Node = model
+	while n != null and n != self:
+		if n.has_meta(LIME_INDIGO_META):
+			return bool(n.get_meta(LIME_INDIGO_META))
+		n = n.get_parent()
+	return false
+
+
 ## Ca [method _apply_model_classes], dar din [constant CLASSES_BY_THEME],
 ## scopat pe tema pistei-stramos. `call_deferred` din `_ready()`, la fel ca
 ## `_remap_model_slots` si pentru acelasi motiv: `_ancestor_theme()` e citit
@@ -2622,6 +2864,10 @@ func _model_class_material(cls: String) -> Material:
 		return Palette._glow_from_spec(cls.trim_prefix(Palette.GLOW_PREFIX))
 	if cls.begins_with(Palette.FINISH_PREFIX):
 		return Palette.finish_material(cls.trim_prefix(Palette.FINISH_PREFIX))
+	# "shader:" (azi doar ferestrele Jodhpur, `jod_window`): fara ramura asta
+	# ar fi cazut tacut pe o clasa triplanara inexistenta, ca "glow:" inainte.
+	if cls.begins_with(Palette.SHADER_PREFIX):
+		return Palette.shader_material(cls.trim_prefix(Palette.SHADER_PREFIX))
 	return Palette.triplanar_class_material(
 		cls.trim_prefix(Palette.TRI_PREFIX))
 
@@ -2784,6 +3030,16 @@ func _glow_spec(model: Node3D) -> String:
 	return ""
 
 
+## Parti de mesh fara hull, per MODEL (stem .glb). Fantele de tragere ale
+## fortului Jodhpur sunt placi subtiri inauntrul hull-ului pietrei; Jolt le
+## respingea hull-ul la unele rotatii (`zid82_col`, 30 sep 2026). Vezi
+## `TrackDecor.add_hull_collision`.
+const HULL_SKIP_PARTS := {
+	"fort_wall_segment": ["Wall_Glow"],
+	"fort_wall_turret": ["Turret_Glow"],
+}
+
+
 func _build_collision() -> void:
 	var models: Array[Node3D] = []
 	_collect_models(self, models)
@@ -2800,7 +3056,9 @@ func _build_collision() -> void:
 			"mesh":
 				added = _add_trimesh(body, model)
 			_:
-				added = TrackDecor.add_hull_collision(body, model, true)
+				added = TrackDecor.add_hull_collision(body, model, true,
+					HULL_SKIP_PARTS.get(
+						model.scene_file_path.get_file().get_basename(), []))
 		if not added:
 			body.free()
 			continue

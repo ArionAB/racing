@@ -117,6 +117,34 @@ class_name FlockProp
 ## inaltimea camerei si peste zgomotul de interpolare al samplerului.
 @export_range(0.0, 1.0, 0.01) var snap_lift: float = 0.06
 
+## FLACARA + HALOUL fals al fiecarei piese (Jodhpur: candelele `diya` si
+## `floating_diya`, peste 2000 pe POI C). Cand `halo_enabled`, stolul mai
+## deseneaza un MultiMesh de billboard-uri aditive (`LampHalo`, UN material
+## comun cu becurile si lampile fortului), cate unul la `halo_offset` in
+## spatiul PIESEI (inainte de scara si yaw, deci flacara sta pe fitil la orice
+## marime). Miezul alungit e flacara, haloul e lumina ei; dincolo de ~60 m
+## ramane doar punctul (shaderul). Implicit STINS: niciun stol existent nu se
+## schimba.
+@export var halo_enabled: bool = false
+@export var halo_offset: Vector3 = Vector3(0, 0.075, 0)
+@export var halo_core_m: float = 0.07
+@export var halo_radius_m: float = 0.6
+@export var halo_stretch: float = 1.8
+@export var halo_color: Color = Color(1.0, 0.5, 0.12)
+@export var halo_intensity: float = 1.0
+@export var halo_flicker: bool = true
+## REFLEXIA flacarii in apa, pentru stolurile care plutesc (candelele de pe
+## apa fantanii si a lacului Devkund). > 0 = inca un MultiMesh `LampHalo`
+## (acelasi material, zero materiale noi) cu cate o pata alungita la baza
+## fiecarei piese, la `halo_reflect` din intensitatea haloului. Pata sta la
+## `halo_reflect_lift` peste planul piesei (linia apei), nu la oglinda reala
+## a flacarii: apa e opaca si scrie adancime, deci o pata sub luciu ar fi
+## ascunsa de apa insasi. Miezul alungit pe verticala (`halo_reflect_stretch`)
+## citeste ca dara de lumina pe apa calma. 0 (implicit) = nimic nou.
+@export_range(0.0, 1.0, 0.01) var halo_reflect: float = 0.0
+@export var halo_reflect_lift: float = 0.03
+@export var halo_reflect_stretch: float = 4.0
+
 
 func _ready() -> void:
 	if positions.is_empty():
@@ -151,6 +179,8 @@ func _build() -> void:
 	# celalalt, deci un reper unic ar lasa jumatate din placi in aer si ar
 	# ingropa cealalta jumatate.
 	var sampler: Object = _find_sampler() if snap_to_ground else null
+	var halo_pts := PackedVector3Array()
+	var refl_pts := PackedVector3Array()
 	for i in positions.size():
 		var yaw: float = yaws[i] if i < yaws.size() else 0.0
 		# ATENTIE: niciodata scale.x negativ pentru oglindire — Godot culleste
@@ -169,9 +199,21 @@ func _build() -> void:
 			# cota ei corecta e chiar solul — nu o cota mostenita dintr-un
 			# relief care nu mai exista.
 			p.y = sampler.ground_y(p.x, p.z) + snap_lift
-		mm.set_instance_transform(i, Transform3D(
-			Basis(Vector3.UP, yaw) * Basis.from_scale(sc), p))
+		var ixf := Transform3D(Basis(Vector3.UP, yaw) * Basis.from_scale(sc), p)
+		mm.set_instance_transform(i, ixf)
+		if halo_enabled:
+			halo_pts.append(global_transform * (ixf * halo_offset))
+			if halo_reflect > 0.0:
+				refl_pts.append(global_transform * (p + Vector3.UP * halo_reflect_lift))
 	multimesh = mm
+	if halo_enabled:
+		LampHalo.build(self, name + "_Halou", halo_pts, halo_color, halo_intensity,
+			halo_core_m, halo_radius_m, halo_stretch, halo_flicker, seed_value)
+		if halo_reflect > 0.0:
+			# Aceeasi samanta => aceleasi faze de palpaire ca flacara de deasupra.
+			LampHalo.build(self, name + "_Reflexie", refl_pts, halo_color,
+				halo_intensity * halo_reflect, halo_core_m * 0.8,
+				halo_radius_m * 0.7, halo_reflect_stretch, halo_flicker, seed_value)
 	material_override = Palette.triplanar_class_material(tri_class) if tri_class != "" else Palette.world_material()
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 

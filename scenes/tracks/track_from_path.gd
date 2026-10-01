@@ -24,7 +24,7 @@ extends Track
 
 @export var custom_name: String = "Pista noua"
 @export_enum("forest", "desert", "island", "baikal", "stromboli", "chongqing",
-	"cappadocia", "serengeti", "machupicchu", "fiordland") var custom_theme: String = "forest"
+	"cappadocia", "serengeti", "machupicchu", "fiordland", "jodhpur") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
 ## Unghiul soarelui pentru pista asta, cand tema nu-l nimereste.
 ##
@@ -200,6 +200,19 @@ extends Track
 @export var custom_ravine_widths: Array[Vector2] = []
 ## Vezi [method Track._ravine_floor_slopes].
 @export var custom_ravine_floor_slopes: Array[Vector2] = []
+## APA intr-o rapa: (indice in `custom_ravines`, cota ABSOLUTA a apei, metri
+## de elan la repunere). Pe o tema fara mare rapa ramane altfel uscata. Vezi
+## Track._build_ravine_water.
+@export var custom_ravine_water: Array[Vector3] = []
+## DEBLEE: (frac_start, frac_end pe LUNGIME, cota ABSOLUTA a buzei, latura
+## +-1). Soseaua taiata in teren: pe latura data peretele urca de la umar pana
+## la buza. Perechea pe plus a rapei-cornisa. Vezi
+## TrackSideSampler._lift_cuttings.
+@export var custom_cuttings: Array[Vector4] = []
+## Forma debleelor: (umar plat dincolo de asfalt m, panta peretelui m/m,
+## intindere m). Umarul sub ~5 m lasa un prag pe marginea asfaltului din cauza
+## grilei de teren de 7.9 m — vezi TrackSideSampler._lift_cuttings.
+@export var custom_cutting_shape: Vector3 = Vector3(5.5, 1.3, 40.0)
 ## PARAPET DECLARAT: (frac_start, frac_end, regim RAIL_*, latura +-1 sau 0).
 ## Vezi Track._rail_segments — pe o pista fara gard (`walls: false`) singurul
 ## regim cu efect e RAIL_POSTS: stalpi rari pe buza, fara coliziune.
@@ -235,6 +248,10 @@ extends Track
 ## Track.WIDTH_RAMP_M metri de fiecare parte — deci un sector mai scurt decat
 ## doua rampe nu-si atinge niciodata latimea ceruta. Vezi Track.width_at.
 @export var custom_width_segments: Array[Vector3] = []
+## Strangeri locale PESTE sectoare: (frac_start, frac_end, half_width), cu
+## rampa proprie de Track.PINCH_RAMP_M din latimea locala. Vezi
+## Track._width_pinches (portile Jodhpur, dopul de 7 m).
+@export var custom_width_pinches: Array[Vector3] = []
 ## Regenerate vine din Track (checkbox-ul e mostenit); aici doar ne aplicam
 ## intai exporturile custom_* si curba de pornire. Citirea punctelor din
 ## nodul "Path" traieste tot in Track — orice pista o are, nu doar asta.
@@ -360,6 +377,18 @@ func _ravine_floor_slopes() -> Array[Vector2]:
 	return custom_ravine_floor_slopes
 
 
+func _ravine_water() -> Array[Vector3]:
+	return custom_ravine_water
+
+
+func _cuttings() -> Array[Vector4]:
+	return custom_cuttings
+
+
+func _cutting_shape() -> Vector3:
+	return custom_cutting_shape
+
+
 func _lagoon_points() -> Array[Vector2]:
 	if custom_lagoon.is_empty():
 		return super()
@@ -385,6 +414,9 @@ func _hummock_fracs() -> Array[float]:
 
 func _width_segments() -> Array[Vector3]:
 	return custom_width_segments
+
+func _width_pinches() -> Array[Vector3]:
+	return custom_width_pinches
 
 ## Daca curba lipseste sau are prea putine puncte, o umplem cu un circuit
 ## de pornire decent — ai de unde sa incepi sa tragi de puncte.

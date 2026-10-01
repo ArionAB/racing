@@ -10,7 +10,12 @@ const BUTTON_RADIUS: float = 78.0
 var _touches: Dictionary = {} # index deget -> zona ("left"/"right"/"drift"/"turbo")
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# _AND_OFFSETS: in arbore, set_anchors_preset singur pastreaza dreptunghiul
+	# curent (0x0) prin offset-uri de -latime. Controlul ramanea 0x0, deci
+	# "jumatatea ecranului" era x=0 si orice atingere citea "dreapta", iar
+	# DRIFT/TURBO se desenau in afara ecranului. Pe desktop nu se vedea
+	# (tastatura); pe iPhone, primul test, nu se putea vira deloc.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _exit_tree() -> void:

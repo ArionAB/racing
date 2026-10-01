@@ -308,6 +308,89 @@ var _over_mask: PackedByteArray = PackedByteArray()
 ## media terenului n-ar mai avea din ce se face.
 var _ground_points: int = 0
 
+# --- grila de accelerare a lui ground_y ---
+## SCANAREA DIN `ground_y`, PE CELULE (timpul de incarcare, oct 2026).
+##
+## `ground_y` parcurgea la fiecare apel toate punctele coapte (din 2 in 2), ca
+## sa adune media ponderata a cotelor si sa gaseasca punctul cel mai apropiat.
+## Se cheama de zeci de mii de ori la constructia unei piste (discuri de umbra
+## sub decor, umeri, apa, teren, iarba), iar bucla era 70% din cost: masurat
+## pe Fiordland, 124.506 apeluri numai din discurile de contact, 9,8 s din
+## 14 s doar in scanare (tools/ProbeLoadTime.tscn).
+##
+## Grila nu schimba NICIUN raspuns. Asta e contractul, nu o aproximare:
+##   - media: ponderea e nula dincolo de GROUND_ROAD_RADIUS, iar celulele
+##     vecine acopera cel putin `_gg_ring * GROUND_GRID_CELL` (132 m > 130 m)
+##     in jurul punctului. Candidatii se parcurg CRESCATOR dupa index, deci
+##     suma de float-uri se face in aceeasi ordine ca in bucla veche;
+##   - punctul cel mai apropiat: acceptat doar daca e strict mai aproape decat
+##     marginea zonei cautate (minus GROUND_GRID_MARGIN), deci mai aproape
+##     decat orice punct ramas pe dinafara. Altfel se reface scanarea completa.
+##     Departe de sosea (peste ~130 m) asta e cazul obisnuit: acolo nu se
+##     castiga nimic, dar nici nu se pierde.
+## Verificat la bit fata de scanarea completa (`use_ground_grid = false`) pe
+## toate pistele, cu tools/ProbeTrackHash.tscn.
+static var use_ground_grid: bool = true
+## 66 m si nu 65: cu inelul de 2 celule acopera 132 m, deci ramane o marja de
+## 2 m peste GROUND_ROAD_RADIUS pentru rotunjirea de la marginea celulelor.
+const GROUND_GRID_CELL: float = 66.0
+const GROUND_GRID_MARGIN: float = 0.5
+var _gg_ring: int = -1
+## Celula -> indicii coapti (multipli de GROUND_STRIDE) din ea, crescator.
+var _gg_buckets: Dictionary = {}
+## Celula interogata -> reuniunea celulelor din inel, sortata. Lenesa: se
+## construieste la prima interogare din celula, iar interogarile vin grupate.
+var _gg_cache: Dictionary = {}
+## Toti indicii vizitati de scanarea completa, in ordinea ei.
+var _gg_all: PackedInt32Array = PackedInt32Array()
+
+
+func _ground_grid_build() -> void:
+	_gg_ring = ceili(GROUND_ROAD_RADIUS / GROUND_GRID_CELL)
+	_gg_all = PackedInt32Array()
+	_gg_buckets = {}
+	_gg_cache = {}
+	var n := _baked.size()
+	var i := 0
+	while i < n:
+		_gg_all.append(i)
+		var c := Vector2i(floori(_baked[i].x / GROUND_GRID_CELL),
+			floori(_baked[i].z / GROUND_GRID_CELL))
+		# Citire, append, scriere inapoi: un PackedInt32Array e valoare, iar
+		# append pe ce intoarce `get` ar scrie intr-o copie.
+		var arr: PackedInt32Array = _gg_buckets.get(c, PackedInt32Array())
+		arr.append(i)
+		_gg_buckets[c] = arr
+		i += GROUND_STRIDE
+
+
+func _ground_cell_candidates(cell: Vector2i) -> PackedInt32Array:
+	var hit: Variant = _gg_cache.get(cell)
+	if hit != null:
+		return hit
+	var out := PackedInt32Array()
+	for dz in range(-_gg_ring, _gg_ring + 1):
+		for dx in range(-_gg_ring, _gg_ring + 1):
+			var b: Variant = _gg_buckets.get(Vector2i(cell.x + dx, cell.y + dz))
+			if b != null:
+				out.append_array(b)
+	out.sort()
+	_gg_cache[cell] = out
+	return out
+
+
+## Punctul cel mai apropiat gasit in celulele vecine e sigur si cel global?
+## Da, daca e strict mai aproape decat marginea zonei cautate.
+func _ground_grid_exact(wx: float, wz: float, near_sq: float) -> bool:
+	var cx := floori(wx / GROUND_GRID_CELL)
+	var cz := floori(wz / GROUND_GRID_CELL)
+	var x0 := float(cx - _gg_ring) * GROUND_GRID_CELL
+	var x1 := float(cx + _gg_ring + 1) * GROUND_GRID_CELL
+	var z0 := float(cz - _gg_ring) * GROUND_GRID_CELL
+	var z1 := float(cz + _gg_ring + 1) * GROUND_GRID_CELL
+	var edge := minf(minf(wx - x0, x1 - wx), minf(wz - z0, z1 - wz)) 		- GROUND_GRID_MARGIN
+	return edge > 0.0 and near_sq < edge * edge
+
 
 func _bake_overpass_mask(overpasses: Array[Vector2]) -> void:
 	var n := _baked.size()
@@ -469,24 +552,44 @@ func ground_y(wx: float, wz: float) -> float:
 	# Terenul urmeaza deci doar ce sta pe pamant; tablierul isi aduce fusta si
 	# pilonii lui. Vezi docs/track_briefs/chongqing.md §7.1.
 	var skip_over := _ground_points > 0 and _ground_points < n
-	var i := 0
-	while i < n:
-		if skip_over and _over_mask[i] == 1:
-			i += GROUND_STRIDE
-			continue
-		var p := _baked[i]
-		var dx := p.x - wx
-		var dz := p.z - wz
-		var d_sq := dx * dx + dz * dz
-		if d_sq < near_sq:
-			near_sq = d_sq
-			near_i = i
-		if d_sq < r_sq:
-			var u := 1.0 - sqrt(d_sq) / GROUND_ROAD_RADIUS
-			var w := (u * u) * (u * u) / (d_sq + soft_sq)
-			num += w * p.y
-			den += w
-		i += GROUND_STRIDE
+	# Intai doar punctele din celulele vecine (vezi `_ground_cell_candidates`):
+	# aceiasi indici care conteaza, in aceeasi ordine, deci aceeasi suma la bit.
+	# Daca cel mai apropiat punct gasit nu e garantat mai aproape decat tot ce
+	# a ramas pe dinafara, se reface scanarea completa, ca inainte.
+	if _gg_ring < 0:
+		_ground_grid_build()
+	var idx := _gg_all
+	var check_edge := false
+	if use_ground_grid:
+		var cand := _ground_cell_candidates(Vector2i(
+			floori(wx / GROUND_GRID_CELL), floori(wz / GROUND_GRID_CELL)))
+		if not cand.is_empty():
+			idx = cand
+			check_edge = true
+	while true:
+		for i in idx:
+			if skip_over and _over_mask[i] == 1:
+				continue
+			var p := _baked[i]
+			var dx := p.x - wx
+			var dz := p.z - wz
+			var d_sq := dx * dx + dz * dz
+			if d_sq < near_sq:
+				near_sq = d_sq
+				near_i = i
+			if d_sq < r_sq:
+				var u := 1.0 - sqrt(d_sq) / GROUND_ROAD_RADIUS
+				var w := (u * u) * (u * u) / (d_sq + soft_sq)
+				num += w * p.y
+				den += w
+		if not check_edge or _ground_grid_exact(wx, wz, near_sq):
+			break
+		num = 0.0
+		den = 0.0
+		near_sq = INF
+		near_i = 0
+		idx = _gg_all
+		check_edge = false
 	var road_level := (num / den) if den > 0.0 else _mean_y
 	var dist := sqrt(near_sq)
 	# Langa asfalt, cota LOCALA a drumului bate media (vezi GROUND_LOCK_LEN).

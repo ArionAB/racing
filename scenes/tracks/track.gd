@@ -8309,6 +8309,11 @@ func _build_prop_contact() -> void:
 		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Cotele de margine ale discurilor deja calculate, pe discul EXACT (aceeasi
+	# pozitie, raza si baza, la bit). Un model din .glb da un disc si pentru
+	# radacina, si pentru nodul de mesh dinauntru, deci acelasi disc vine de
+	# mai multe ori — iar fiecare cota de margine e un `ground_y`.
+	var rim_cache: Dictionary = {}
 	for d in discs:
 		var cx: float = d.x
 		var cz: float = d.y
@@ -8317,7 +8322,8 @@ func _build_prop_contact() -> void:
 		# Culoarea e NEAGRA peste tot, doar alfa variaza — asa discul intuneca
 		# orice suprafata pe care cade (nisip, asfalt, kerb) fara sa-i schimbe
 		# nuanta.
-		var gy := _sampler.ground_y(cx, cz)
+		var hit: Variant = rim_cache.get(d)
+		var gy: float = _sampler.ground_y(cx, cz) if hit == null 			else (hit as PackedFloat64Array)[0]
 		# DISCUL SE EMITE DOAR DACA PIESA CHIAR STA PE TERENUL SAMPLERULUI.
 		#
 		# Prima varianta le emitea pentru toate cele 728: pe malul din dreapta,
@@ -8333,20 +8339,36 @@ func _build_prop_contact() -> void:
 			continue
 		var cy := gy + PROP_AO_LIFT
 		var dark := 1.0 - PROP_AO_STRENGTH
+		# Fiecare vertex isi ia cota LUI din sampler, dar LIMITATA la un
+		# plafon fata de centru. Fara limita, pe malurile abrupte de langa
+		# drum discul se ridica odata cu panta si ajunge aproape vertical —
+		# adica se vede din lateral ca o pata neagra, nu ca un contact.
+		#
+		# Cotele se calculeaza O DATA pe punct de margine. Inainte, fiecare
+		# felie le cerea pe amandoua capetele ei, deci fiecare punct era cerut
+		# de doua ori: 20 de `ground_y` pe disc in loc de 11. Punctul k=SEGMENTS
+		# se calculeaza separat, nu se refoloseste k=0: cos(TAU) nu e exact
+		# cos(0), iar discul trebuie sa iasa identic la bit cu cel dinainte.
+		var rim: PackedFloat64Array
+		if hit != null:
+			rim = hit
+		else:
+			rim = PackedFloat64Array()
+			rim.resize(PROP_AO_SEGMENTS + 2)
+			rim[0] = gy
+			for k in PROP_AO_SEGMENTS + 1:
+				var a := TAU * float(k) / float(PROP_AO_SEGMENTS)
+				var pk := Vector2(cos(a), sin(a)) * r
+				rim[k + 1] = _rim_y(cx + pk.x, cz + pk.y, cy)
+			rim_cache[d] = rim
 		for i in PROP_AO_SEGMENTS:
 			var a0 := TAU * float(i) / float(PROP_AO_SEGMENTS)
 			var a1 := TAU * float(i + 1) / float(PROP_AO_SEGMENTS)
 			var p0 := Vector2(cos(a0), sin(a0)) * r
 			var p1 := Vector2(cos(a1), sin(a1)) * r
-			# Fiecare vertex isi ia cota LUI din sampler, dar LIMITATA la un
-			# plafon fata de centru. Fara limita, pe malurile abrupte de langa
-			# drum discul se ridica odata cu panta si ajunge aproape vertical —
-			# adica se vede din lateral ca o pata neagra, nu ca un contact.
 			var v0 := Vector3(cx, cy, cz)
-			var v1 := Vector3(cx + p0.x,
-					_rim_y(cx + p0.x, cz + p0.y, cy), cz + p0.y)
-			var v2 := Vector3(cx + p1.x,
-					_rim_y(cx + p1.x, cz + p1.y, cy), cz + p1.y)
+			var v1 := Vector3(cx + p0.x, rim[i + 1], cz + p0.y)
+			var v2 := Vector3(cx + p1.x, rim[i + 2], cz + p1.y)
 			# CENTRUL E GRI, NU NEGRU, si asta e o reparatie masurata, nu un
 			# gust. Cu BLEND_MODE_MUL un vertex negru inmulteste pixelul cu
 			# zero; un disc prins pe muchie in golul dintre sosea si teren

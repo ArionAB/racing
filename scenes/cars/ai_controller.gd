@@ -340,6 +340,24 @@ var _fb_side: float = 0.0
 var _span_node: Node = null
 var _span_side: float = 0.0
 
+## Muchia fara parapet (`Track.ai_drop_edges`, fantana din Jodhpur): limitele
+## liniei pe cadrul curent, in aceleasi fractii ca `line`. In afara unei
+## muchii declarate sunt exact ±LINE_MAX, deci tot ce le citeste (inclusiv
+## `_avoid_line`) face ce facea inainte — bit cu bit, pe orice alta pista.
+var _line_lo: float = -LINE_MAX
+var _line_hi: float = LINE_MAX
+## Latura muchiei (-1 stanga, +1 dreapta, 0 = nicio muchie aici).
+var _drop_side: float = 0.0
+## Cat de departe in fata/spate (m, pe directia masinii) e „alaturi" pentru
+## regula de a nu inchide usa (`_drop_alongside`): o lungime de caroserie si
+## ceva — cine e la 8 m in fata se ocoleste cu `_avoid_line`, nu se striveste.
+const DROP_ALONGSIDE_M: float = 6.5
+## Cat din viteza-tinta ramane intr-un viraj plin cu muchia pe EXTERIOR.
+const DROP_OUTSIDE_SPEED: float = 0.8
+## Marginea (m, de la marginea asfaltului la axa masinii) pe partea OPUSA
+## muchiei, in zona declarata: o caroserie si ceva.
+const DROP_FAR_MARGIN_M: float = 1.4
+
 func configure(race_track: Track, rng: RandomNumberGenerator,
 		cars: Array[Car] = []) -> void:
 	track = race_track
@@ -376,6 +394,10 @@ func update(delta: float) -> void:
 	# a_far pozitiv inseamna viraj la stanga: interiorul e in sens invers.
 	var line := clampf(line_offset - signf(a_far) * severity * INSIDE_BIAS,
 		-LINE_MAX, LINE_MAX)
+	# Muchie fara parapet (apa fantanii, Jodhpur): linia nu mai merge cu roata
+	# pe buza. No-op cand pista nu declara nimic aici (limitele raman ±LINE_MAX).
+	_drop_limits(idx, speed)
+	line = clampf(line, _line_lo, _line_hi)
 	# Sector cu hazard PE AXA (trenul pe sens de pe Baikal): pilotul se tine
 	# de margine, pe partea lui de personalitate. Zero peste tot in rest.
 	var keep_off := track.lane_bias_at(idx)
@@ -442,6 +464,11 @@ func update(delta: float) -> void:
 		var hi := forced + FORCED_SLACK
 		line = clampf(line, minf(lo, hi), maxf(lo, hi))
 		line = clampf(line, -LINE_MAX, LINE_MAX)
+	line = _alley_gate_line(idx, line)
+	# Muchia fara parapet are ultimul cuvant, dupa ocolire: nici depasirea nu
+	# trece pe buza, nici nu inchide usa celui de langa noi spre apa.
+	if _drop_side != 0.0:
+		line = _drop_alongside(idx, line)
 	var near := track.lookahead_point(idx, _lookahead_near(speed), line, car.route)
 	# Bifurcatia: cine a decis ca o ia, tinteste banda cealalta cat timp cele
 	# doua sunt inca lipite. Comutarea propriu-zisa de ruta o face Car, pe
@@ -463,14 +490,41 @@ func update(delta: float) -> void:
 	# drum. Vezi DOOR_REACH_M.
 	if car.route == 0 and _door_block_m < INF:
 		take_branch = true
+	_alley_approach = false
 	if take_branch:
-		var lure := track.branch_lure(car.global_position, _lookahead_near(speed))
+		var lure := track.branch_lure(car.global_position, _lookahead_near(speed), idx)
 		if lure != Vector3.INF:
 			near = lure
+			# Momit spre o banda cu poarta ingustata: de la capul benzii,
+			# tinta e pe axa portii si viteza se plafoneaza (vezi mai jos).
+			if track.branch_gate(1) != null:
+				var br := track.route_at(1)
+				var bi := br.closest_index_global(car.global_position)
+				near = _alley_gate_aim_on(1, bi, near)
+				if br.dists[bi] <= float(track.branch_gate(1).gate_dist_m):
+					_alley_approach = true
+	if car.route != 0:
+		near = _alley_gate_aim_on(car.route, idx, near)
 	_steer = clampf(_angle_to(fwd, near) * 2.2, -1.0, 1.0)
 
 	# --- pedale: viteza-tinta din cat de stramt e ce urmeaza ---
 	var target := car.max_speed * lerpf(1.0, CORNER_SPEED_FLOOR, severity)
+	# Muchie fara parapet pe EXTERIORUL virajului (iesirea din virajul de
+	# intrare in fantana, apa pe stanga unui viraj la dreapta): iesirea larga
+	# duce spre apa, deci pilotul intra mai incet. Fals peste tot unde nu e
+	# declarata o muchie (`_drop_side` = 0).
+	if _drop_side != 0.0 and signf(a_far) == _drop_side:
+		target *= lerpf(1.0, DROP_OUTSIDE_SPEED, severity)
+	# Poarta ingustata a ulicioarei: de la desprinderea benzii pana dupa
+	# poarta, cu plafon de viteza — ca sa aiba timp sa se aseze pe axa.
+	if _alley_approach:
+		target = minf(target, ALLEY_GATE_SPEED)
+	# Coloana la poarta ingustata: cine e in spate urmareste masina din fata
+	# pe fereastra portii, nu intra peste ea in gol. Vezi ALLEY_FOLLOW_*.
+	var gate_follow := _alley_gate_follow(idx)
+	_gate_hold = gate_follow < 1.0
+	if gate_follow < INF:
+		target = minf(target, gate_follow)
 	# Pe banda uda ridica piciorul, ca un sofer.
 	#
 	# Fara asta AI-ul intra pe bancul de nisip cu viteza de asfalt, aluneca si
@@ -513,6 +567,9 @@ func update(delta: float) -> void:
 	# zero ar da `_throttle = -0.15` la nesfarsit si masina ar da inapoi pana
 	# in pluton.
 	if door_wait and target < 1.0 and speed < 2.0:
+		_throttle = 0.0
+	# Oprit in spatele celui blocat in poarta ingustata: la fel.
+	if _gate_hold and speed < 2.0:
 		_throttle = 0.0
 	# Oprit la linia de oprire: nici gaz, nici marsarier, exact ca la usa —
 	# altfel tinta zero ar franeaza la nesfarsit spre spate in pluton.
@@ -836,9 +893,24 @@ func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	# pastrata cat tine acelasi blocaj daca inca incape.
 	var cand_l := blocker_lat - gap_frac
 	var cand_r := blocker_lat + gap_frac
-	var l_ok := cand_l >= -LINE_MAX
-	var r_ok := cand_r <= LINE_MAX
+	# `_line_lo`/`_line_hi` = ±LINE_MAX peste tot in afara unei muchii fara
+	# parapet (`Track.ai_drop_edges`), deci testul e cel vechi.
+	var l_ok := cand_l >= _line_lo
+	var r_ok := cand_r <= _line_hi
 	var target: float
+	# In elanul unei sarituri (`Track.ai_keep_side_at`), cu blocajul LANGA
+	# noi (sub AVOID_TAIL_M): trecerea e pe partea pe care suntem deja. Regula
+	# „mai aproape de axa" de mai jos ar trimite masina de pe margine prin
+	# caroseria vecinului — si doua masini frecate una de alta ajung la buza
+	# prea lente. Vezi `TrackChannel.ai_keep_side_run_m`.
+	if car.route == 0 and best_ahead < AVOID_TAIL_M and track.ai_keep_side_at(idx):
+		var my_lat := r.side_at(idx).dot(
+			car.global_position - r.baked[r.wrap_index(idx)]) / hw
+		if my_lat < blocker_lat and l_ok:
+			_avoid_side = -1.0
+		elif my_lat >= blocker_lat and r_ok:
+			_avoid_side = 1.0
+		_avoid_car = best
 	if _avoid_car == best and _avoid_side < 0.0 and l_ok:
 		target = cand_l
 	elif _avoid_car == best and _avoid_side > 0.0 and r_ok:
@@ -863,7 +935,98 @@ func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	# Aproape = mutare completa; departe = abia schitata.
 	var t := clampf((window - best_ahead) / maxf(window - AVOID_FULL_M, 0.001),
 		0.0, 1.0)
-	return lerpf(line, clampf(target, -LINE_MAX, LINE_MAX), t)
+	return lerpf(line, clampf(target, _line_lo, _line_hi), t)
+
+## Limitele liniei pe muchia fara parapet (`Track.ai_drop_edges`). In afara
+## unei muchii declarate: ±LINE_MAX si `_drop_side` = 0, adica exact ce era.
+##
+## Marginea se masoara de la marginea asfaltului la AXA masinii si se
+## converteste in fractie pe latimea cea mai INGUSTA dintre aici si punctul de
+## tintire: tinta de aproape se pune pe latimea de la indexul ei (vezi
+## `Track.lookahead_point`), iar la intrarea in fantana soseaua se strange de
+## la 6,5 la 4,5 m chiar la iesirea din viraj — o fractie calculata pe 6,5 ar
+## cadea la 1,6 m de buza pe 4,5.
+func _drop_limits(idx: int, speed: float) -> void:
+	_line_lo = -LINE_MAX
+	_line_hi = LINE_MAX
+	_drop_side = 0.0
+	if car.route != 0:
+		return
+	var edge := track.ai_drop_edge_at(idx)
+	if edge.x == 0.0:
+		return
+	var steps := int(_lookahead_near(speed) / maxf(track.curve.bake_interval, 0.001))
+	# Cea mai INGUSTA latime pana la tinta, nu doar capetele: sectoarele de
+	# latime din fantana au trepte de 2 m (6,5 -> 4,5) la 0.133, 0.163 si
+	# 0.217, iar o linie calculata pe latimea de aici ducea masina pe
+	# portiunea lata drept in treapta.
+	var hw := track.width_at_index(idx)
+	for k in range(1, steps + 1):
+		hw = minf(hw, track.width_at_index(idx + k))
+	hw = maxf(hw, 0.001)
+	var lim := clampf(1.0 - edge.y / hw, 0.0, LINE_MAX)
+	# Si partea cealalta, cu o margine mica: pe dreapta fantanii umarul e sub
+	# buza asfaltului (0,3-0,5 m, adica perete la urcare), iar o masina
+	# impinsa acolo de regula de mai jos se infunda — masurat.
+	var far_lim := clampf(1.0 - DROP_FAR_MARGIN_M / hw, 0.0, LINE_MAX)
+	_drop_side = edge.x
+	if edge.x < 0.0:
+		_line_lo = -lim
+		_line_hi = far_lim
+	else:
+		_line_hi = lim
+		_line_lo = -far_lim
+
+## Nu inchide usa: in zona cu muchie fara parapet, o masina ALATURI de noi
+## (sub DROP_ALONGSIDE_M pe directia de mers) ramane cu culoarul ei — linia
+## noastra nu se apropie de ea sub AVOID_CLEARANCE_M, fie ca vine de la
+## tragerea spre apex, fie de la o ocolire. Spre apa, mereu, ca sa nu
+## impingem vecinul in ea; spre perete, cand vecinul e deja la limita lui,
+## fiindca ocolirea care nu mai are voie pe stanga (limita de mai sus) trece
+## pe dreapta, iar vecinul de acolo era impins peste treapta de latime, sub
+## buza, unde se infunda (masurat: Tu il impingea pe Vex de la -1,2 la
+## +5,9 m, seed 11).
+##
+## De ce nu ajunge `_avoid_line`: aia vede doar ce e IN FATA. Masurat pe
+## Track17 (seed 3, cu decorul bazarului): Luna (masina grea) e cu 0,5 m in
+## fata lui Tu, pe dreapta lui, la 25 m de acul de la fund; tragerea spre
+## interior (apa) o muta spre stanga si-l impinge pe Tu, care e deja langa
+## muchie, in apa — Luna nu-l vede, fiindca e alaturi, nu in fata.
+func _drop_alongside(idx: int, line: float) -> float:
+	var r := track.route_at(0)
+	if r == null or r.count() == 0:
+		return line
+	var hw := maxf(track.width_at_index(idx), 0.001)
+	var base_pt := r.baked[r.wrap_index(idx)]
+	var side := r.side_at(idx)
+	var fwd := -car.global_transform.basis.z
+	var my_lat := side.dot(car.global_position - base_pt) / hw
+	var gap_frac := AVOID_CLEARANCE_M / hw
+	var out := line
+	for other in traffic:
+		if other == null or other == car or not is_instance_valid(other):
+			continue
+		if other.route != 0:
+			continue
+		var d := other.global_position - car.global_position
+		if absf(fwd.dot(d)) > DROP_ALONGSIDE_M:
+			continue
+		var o_lat := side.dot(other.global_position - base_pt) / hw
+		# Cel mult cat suntem ACUM: regula opreste inchiderea usii, nu ne
+		# impinge spre marginea cealalta (pe dreapta fantanii e un umar sub
+		# buza asfaltului, iar o masina impinsa acolo se infunda — masurat).
+		# Spre muchie: mereu. Spre partea opusa: doar cand vecinul de acolo nu
+		# mai are unde sa se dea (e la un gabarit de limita lui) — altfel, in
+		# plutonul din virajul de intrare, regula tinea masinile de pe stanga
+		# lipite de muchie (masurat: 26 de treceri cu roata pe buza fata de 7).
+		var toward_drop := (o_lat < my_lat) == (_drop_side < 0.0)
+		if o_lat < my_lat:
+			if toward_drop or o_lat <= _line_lo + gap_frac:
+				out = maxf(out, minf(o_lat + gap_frac, minf(my_lat, _line_hi)))
+		else:
+			if toward_drop or o_lat >= _line_hi - gap_frac:
+				out = minf(out, maxf(o_lat - gap_frac, maxf(my_lat, _line_lo)))
+	return clampf(out, _line_lo, _line_hi)
 
 ## Metri pana la prima usa de piatra de pe banda noastra care va fi INCHISA
 ## cand ajungem la ea (INF daca nu e niciuna, sau va fi deschisa). Doar pe
@@ -1178,6 +1341,7 @@ func _angle_to(fwd: Vector3, point: Vector3) -> float:
 ## o masina care se invarte pe loc sau se freaca de un perete macina metri fara
 ## sa avanseze in cursa.
 func _watch_progress(delta: float, speed: float) -> void:
+	_hook_respawn()
 	if _unstick_timer > 0.0:
 		return
 	# Asteptarea in fata usii de piatra e progres zero DELIBERAT, nu blocaj:
@@ -1191,6 +1355,11 @@ func _watch_progress(delta: float, speed: float) -> void:
 	# ar rata verdele care oricum vine, si dupa 3 incercari s-ar repune singur
 	# — exact defectul pe care semaforul cu iesire nu trebuie sa-l aiba.
 	if _signal_block_m < SIGNAL_BRAKE_M:
+		_reset_progress()
+		return
+	# Si asteptarea in coloana la poarta ingustata (`_alley_gate_follow`):
+	# masina din fata isi face singura manevra; a noastra doar asteapta.
+	if _gate_hold:
 		_reset_progress()
 		return
 	# Plasa rapida: izbitura frontala care opreste masina pe loc.
@@ -1231,6 +1400,26 @@ func _watch_progress(delta: float, speed: float) -> void:
 		_begin_unstick()
 	else:
 		_attempts = 0 # merge cursa; uitam incercarile vechi
+	_reset_progress()
+
+## Repunerea muta masina pe traseu (inapoi, uneori zeci de metri — vezi
+## `Track.ai_progress_reset_on_respawn`). Fereastra de progres de dinainte nu
+## mai spune nimic despre masina de acum: se incepe una noua, fara incercarile
+## vechi si fara o manevra de deblocare ramasa pe jumatate. Doar pe pistele
+## care cer asta; in rest semnalul nici nu se leaga.
+var _respawn_hooked: bool = false
+
+func _hook_respawn() -> void:
+	if _respawn_hooked or car == null or track == null:
+		return
+	_respawn_hooked = true
+	if track.ai_progress_reset_on_respawn:
+		car.respawned.connect(_on_car_respawned)
+
+func _on_car_respawned(_c: Car) -> void:
+	_unstick_timer = 0.0
+	_unstick_reversing = false
+	_attempts = 0
 	_reset_progress()
 
 func _reset_progress() -> void:
@@ -1310,3 +1499,136 @@ func is_drift_pressed() -> bool:
 
 func is_turbo_pressed() -> bool:
 	return _turbo
+
+
+## Poarta ingustata a unei benzi (`AlleyGate`, ulicioara Jodhpur): golul are
+## 4 m, masina 2,1, deci marja e +-0,95 m. Linia de cursa obisnuita (pana la
+## +-LINE_MAX din semilatimea benzii de 3,2 = +-2,56 m) ducea masina cu
+## 1-1,5 m langa axa si botul la 8-13 grade: masurat pe 16 seed-uri, 10
+## ejectari de perete, toate pe stalpii portii. Pe ultimii
+## ALLEY_GATE_APPROACH_M inainte de poarta si pana la ALLEY_GATE_AFTER_M dupa,
+## linia se strange pe axa, la (golul - jumatatea caroseriei - marja) din
+## semilatimea benzii. Doar pe benzile care AU poarta (Track.branch_gate).
+const ALLEY_GATE_APPROACH_M: float = 25.0
+const ALLEY_GATE_AFTER_M: float = 6.0
+const ALLEY_GATE_MARGIN_M: float = 0.3
+
+## Linia stransa singura nu ajunge (masurat, runda 2): masina iese din curba
+## buclei pe dreapta benzii (+1,5 m) si, cu tinta de urmarire la 15-20 m in
+## fata, corecteaza prea incet — ajunge la poarta tot la +1,4 m. Pe fereastra
+## de apropiere tinta devine punctul de pe AXA benzii chiar dupa poarta, deci
+## unghiul de corectie creste pe masura ce poarta se apropie.
+const ALLEY_GATE_AIM_T: float = 0.55
+const ALLEY_GATE_AIM_MIN_M: float = 6.0
+const ALLEY_GATE_AIM_MAX_M: float = 14.0
+
+## Viteza maxima pe apropierea portii ingustate (m/s). Masurat (runda 2):
+## AI-ul ajungea la poarta cu 25-35 m/s si nu mai avea timp sa corecteze
+## +1,5 m din curba buclei in cei ~14 m dintre comutare si poarta.
+const ALLEY_GATE_SPEED: float = 15.0
+var _alley_approach: bool = false
+
+func _alley_gate_aim_on(route: int, idx: int, near: Vector3) -> Vector3:
+	var gate := track.branch_gate(route)
+	if gate == null:
+		return near
+	var r := track.route_at(route)
+	if r == null or r.dists.is_empty():
+		return near
+	var d: float = r.dists[clampi(idx, 0, r.dists.size() - 1)]
+	var gd := float(gate.gate_dist_m)
+	if d < gd - ALLEY_GATE_APPROACH_M or d > gd:
+		return near
+	_alley_approach = true
+	# Urmarire pura pe AXA benzii, cu distanta de tinta proportionala cu
+	# viteza (stabila: o tinta fixa dupa poarta oscila +-1,4 m, masurat).
+	var aim_d := d + clampf(car.horizontal_speed() * ALLEY_GATE_AIM_T,
+		ALLEY_GATE_AIM_MIN_M, ALLEY_GATE_AIM_MAX_M)
+	var j := idx
+	while j < r.baked.size() - 1 and r.dists[j] < aim_d:
+		j += 1
+	return r.baked[j]
+
+
+## Coloana la poarta ingustata (runda 3, POI D Jodhpur): ultimul [blocaj]
+## ramas pe ulicioara era a doua masina (autobuz) care intra in poarta de 4 m
+## peste prima, deja lenta sau blocata in ea — doua caroserii de 2,2+ m intr-un
+## gol in care incape una. Pe fereastra portii (ALLEY_GATE_APPROACH_M inainte,
+## ALLEY_FOLLOW_EXIT_M dupa), viteza-tinta se leaga de masina din fata de pe
+## ACEEASI banda: viteza ei plus un termen proportional cu golul peste
+## ALLEY_FOLLOW_GAP_M; sub ALLEY_FOLLOW_STOPPED_SPEED se opreste la gol.
+## AI onest: citeste doar pozitia si viteza masinii din fata, pe care un sofer
+## le vede. Doar pe benzile care AU poarta (`Track.branch_gate`), deci pe
+## pistele fara `AlleyGate` intoarce mereu INF.
+const ALLEY_FOLLOW_GAP_M: float = 9.0
+const ALLEY_FOLLOW_EXIT_M: float = 10.0
+const ALLEY_FOLLOW_REACH_M: float = 35.0
+const ALLEY_FOLLOW_K: float = 0.8
+const ALLEY_FOLLOW_STOPPED_SPEED: float = 3.0
+var _gate_hold: bool = false
+
+func _alley_gate_follow(idx: int) -> float:
+	if traffic.is_empty():
+		return INF
+	var gr := car.route
+	if gr == 0:
+		if not _alley_approach:
+			return INF
+		gr = 1
+	var gate := track.branch_gate(gr)
+	if gate == null:
+		return INF
+	var r := track.route_at(gr)
+	if r == null or r.dists.is_empty():
+		return INF
+	var gd := float(gate.gate_dist_m)
+	var my_d: float
+	if car.route == gr:
+		my_d = r.dists[clampi(idx, 0, r.dists.size() - 1)]
+	else:
+		var bi := r.closest_index_global(car.global_position)
+		my_d = r.dists[bi]
+		if bi == 0:
+			my_d = -car.global_position.distance_to(r.baked[0])
+	if my_d < gd - ALLEY_GATE_APPROACH_M or my_d > gd + ALLEY_GATE_AFTER_M:
+		return INF
+	var cap := INF
+	for other in traffic:
+		if other == null or other == car or not is_instance_valid(other):
+			continue
+		if other.route != gr:
+			continue
+		var od: float = r.dists[clampi(other.road_index, 0, r.dists.size() - 1)]
+		if od > gd + ALLEY_FOLLOW_EXIT_M:
+			continue
+		var gap := od - my_d
+		if gap <= 0.0 or gap > ALLEY_FOLLOW_REACH_M:
+			continue
+		var room := maxf(gap - ALLEY_FOLLOW_GAP_M, 0.0)
+		var v := other.horizontal_speed()
+		if v < ALLEY_FOLLOW_STOPPED_SPEED:
+			cap = minf(cap, room * 1.2)
+		else:
+			cap = minf(cap, v + room * ALLEY_FOLLOW_K)
+	return cap
+
+
+func _alley_gate_line(idx: int, line: float) -> float:
+	if car.route == 0:
+		return line
+	var gate := track.branch_gate(car.route)
+	if gate == null:
+		return line
+	var r := track.route_at(car.route)
+	if r == null or r.dists.is_empty():
+		return line
+	var d: float = r.dists[clampi(idx, 0, r.dists.size() - 1)]
+	var gd := float(gate.gate_dist_m)
+	if d < gd - ALLEY_GATE_APPROACH_M or d > gd + ALLEY_GATE_AFTER_M:
+		return line
+	var half_body := 1.05
+	if car.data != null:
+		half_body = car.data.body_width * 0.5
+	var room := maxf(float(gate.half_opening_m) - half_body - ALLEY_GATE_MARGIN_M, 0.0)
+	var k := room / maxf(r.half_width, 0.1)
+	return clampf(line, -k, k)

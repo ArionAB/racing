@@ -96,6 +96,8 @@ var no_surface: bool = false
 ## ea. Fara asta, exact masina care a facut ce trebuia ar fi fost pedepsita ca
 ## si cum ar fi iesit de pe sosea.
 var detour: bool = false
+## Vezi `TrackBranch.lure_before_entry_only`.
+var lure_before_entry_only: bool = false
 ## Banda si-a pus SINGURA capetele, pe axa benzii directe, in loc sa le
 ## primeasca de la [code]Track._branch_end[/code].
 ##

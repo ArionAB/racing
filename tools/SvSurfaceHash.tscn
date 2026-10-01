@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/sv_surface_hash.gd" id="1"]
+
+[node name="SvSurfaceHash" type="Node"]
+script = ExtResource("1")

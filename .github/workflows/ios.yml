@@ -99,17 +99,18 @@ jobs:
 
       # Blender nu exista pe runner. Fara Blender, importul headless se opreste
       # la primul .blend si NU mai importa nimic dupa el (62 de fisiere in loc
-      # de ~1700, zero texturi etc2/astc). Singurele .blend importate sunt
-      # demo-uri din addons/, nefolosite de joc. override.cfg schimba setarea
-      # doar aici, nu in project.godot-ul echipei. (FBX-urile masinilor merg pe
-      # ufbx, intern, deci nu au nevoie de nimic.)
+      # de ~1700, zero texturi etc2/astc). Un override.cfg cu
+      # import/blender/enabled=false NU ajunge — eroarea de cale apare oricum.
+      # Asa ca scoatem .blend-urile din copia de pe runner: in afara de
+      # assets/blender/ (deja .gdignore) sunt doar demo-uri de addon, nefolosite
+      # de joc. FBX-urile masinilor merg pe ufbx, intern, fara Blender.
       #
       # Bilantul pe sufixe arata daca importul a produs ce cere iOS (etc2/astc):
       # un import care iese devreme lasa exportul sa impacheteze texturi lipsa
       # fara sa pice — jocul ar porni cu materiale goale.
       - name: Import resources
         run: |
-          printf '[filesystem]\n\nimport/blender/enabled=false\n' > override.cfg
+          git ls-files '*.blend' | while read -r f; do rm -f "$f" "$f.import"; done
           "$GODOT" --headless --import > import1.log 2>&1 || true
           "$GODOT" --headless --import > import2.log 2>&1 || true
           wc -l import1.log import2.log
@@ -147,7 +148,9 @@ jobs:
           XC=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
           sudo xcode-select -s "$XC"
           xcodebuild -version
-          head -c 600 "build/ios/${APP_NAME}.xcodeproj/project.pbxproj"; echo
+          PBX="build/ios/${APP_NAME}.xcodeproj/project.pbxproj"
+          plutil -lint "$PBX" || true
+          cat -s "$PBX"
           xcodebuild -list -project "build/ios/${APP_NAME}.xcodeproj"
           xcodebuild build \
             -project "build/ios/${APP_NAME}.xcodeproj" \

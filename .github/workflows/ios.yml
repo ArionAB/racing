@@ -1,0 +1,144 @@
+# Build iOS fara Mac — Toy Racer pe iPhone-ul dezvoltatorului.
+#
+# Lantul: Godot exporta proiectul Xcode -> xcodebuild il compileaza FARA
+# semnatura -> .ipa urcat ca artefact. Semnarea si instalarea se fac pe Windows
+# cu Sideloadly si un Apple ID gratuit (aplicatia expira dupa 7 zile; se
+# reinstaleaza din acelasi .ipa).
+#
+# De ce fara semnatura aici: un certificat de distributie cere cont Apple
+# Developer ($99/an). Sideloadly re-semneaza oricum cu identitatea ta, deci ce
+# iese de aici trebuie doar sa fie un .app compilat pentru arm64.
+#
+# Presetul e in export_presets.cfg. Team id-ul de acolo ("XXXXXXXXXX") e un
+# substituent: Godot refuza exportul cu el gol, dar cu CODE_SIGNING_ALLOWED=NO
+# xcodebuild nu-l citeste. docs/ (160 MB de capturi) si tools/ (sonde) sunt
+# excluse din build — codul jocului le pomeneste doar in comentarii.
+#
+# COST: repo-ul e privat, iar un minut de macOS consuma 10 din cele 2000 de
+# minute gratuite pe luna — raman ~200 de minute de Mac. De aceea NU ruleaza la
+# fiecare push pe main: se porneste manual (Actions -> iOS build -> Run
+# workflow) sau prin push pe o ramura `ios/**` (iterare pe pipeline).
+#
+# Bump de versiune Godot: schimba GODOT_VERSION (aceeasi ca in ci.yml si
+# config/features din project.godot).
+name: iOS build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["ios/**"]
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7"
+  APP_NAME: "ToyRacer"
+
+jobs:
+  ios:
+    name: Export + xcodebuild (fara semnatura)
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Godot + template iOS
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-bin
+            ~/Library/Application Support/Godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-macos-ios-templates
+
+      # Arhiva de template-uri are ~1 GB (toate platformele); pastram doar
+      # ios.zip, deci cache-ul ramane mic.
+      - name: Download Godot ${{ env.GODOT_VERSION }} + template iOS
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          mkdir -p ~/godot-bin
+          curl -fsSL -o /tmp/godot.zip "${BASE}/Godot_v${GODOT_VERSION}-stable_macos.universal.zip"
+          unzip -q /tmp/godot.zip -d ~/godot-bin
+          curl -fsSL -o /tmp/templates.tpz "${BASE}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -l /tmp/templates.tpz | grep -iE "ios|version" || true
+          TDIR="$HOME/Library/Application Support/Godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$TDIR"
+          unzip -q -j /tmp/templates.tpz 'templates/ios*' 'templates/version.txt' -d "$TDIR"
+          ls -la "$TDIR"
+          rm /tmp/templates.tpz
+
+      - name: Godot version
+        run: |
+          echo "GODOT=$HOME/godot-bin/Godot.app/Contents/MacOS/Godot" >> "$GITHUB_ENV"
+          ~/godot-bin/Godot.app/Contents/MacOS/Godot --version
+
+      # Importul pe iOS comprima texturile in ASTC, care e lent. Cache-ul pe
+      # .godot/ face ca un build fara assets noi sa sara aproape tot importul.
+      - name: Cache import (.godot)
+        uses: actions/cache@v4
+        with:
+          path: .godot
+          key: godot-import-ios-${{ hashFiles('**/*.import') }}
+          restore-keys: godot-import-ios-
+
+      - name: Import resources
+        run: |
+          "$GODOT" --headless --import 2>&1 | tail -40 || true
+          "$GODOT" --headless --import 2>&1 | tail -40 || true
+
+      - name: Export proiect Xcode
+        run: |
+          set -euo pipefail
+          mkdir -p build/ios
+          "$GODOT" --headless --export-release "iOS" "build/ios/${APP_NAME}.ipa" 2>&1 | tee export.log
+          ls -la build/ios
+          test -d "build/ios/${APP_NAME}.xcodeproj" || {
+            echo "::error::Godot nu a produs ${APP_NAME}.xcodeproj — vezi export.log mai sus."
+            exit 1
+          }
+
+      - name: xcodebuild (fara semnatura)
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcodebuild -list -project "build/ios/${APP_NAME}.xcodeproj"
+          xcodebuild build \
+            -project "build/ios/${APP_NAME}.xcodeproj" \
+            -scheme "${APP_NAME}" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            | tail -60
+
+      # Un .ipa e doar un zip cu Payload/<App>.app inauntru.
+      - name: Impachetare .ipa
+        run: |
+          set -euo pipefail
+          APP=$(find build/dd/Build/Products -maxdepth 2 -name "*.app" -type d | head -1)
+          test -n "$APP" || { echo "::error::Niciun .app compilat."; exit 1; }
+          echo "App: $APP"
+          mkdir -p build/ipa/Payload
+          cp -R "$APP" build/ipa/Payload/
+          (cd build/ipa && zip -qry "../${APP_NAME}.ipa" Payload)
+          ls -lh "build/${APP_NAME}.ipa"
+
+      # Retentie scurta: stocarea de artefacte pe repo privat e de 500 MB in
+      # planul gratuit, iar un .ipa poate avea cateva sute de MB.
+      - name: Upload .ipa
+        uses: actions/upload-artifact@v4
+        with:
+          name: ToyRacer-ios-${{ github.run_number }}
+          path: build/${{ env.APP_NAME }}.ipa
+          retention-days: 3
+          compression-level: 0

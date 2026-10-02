@@ -533,6 +533,13 @@ Textul inițial, păstrat ca istoric:
     cer.
   - **Nemăsurat:** regula WCAG specială pentru roșu saturat (de adăugat,
     porțile sunt vermilion) și culoarul real E′, cu curbă și relief.
+  - **Pe E′ real (`kyoto/torii`, 2 oct 2026):** `ToriiTunnel` (90 de porți
+    la 1,2 m pe banda reală, pereți colizori continui cu pâlnie la gură, 198
+    de cedri placeholder) trece `ProbeFlicker --track=11` cu 0 flash-uri/s pe
+    laterale; roșul saturat are regulă separată în sondă. Sabotajul care
+    pică pe pista reală e peretele luminos în locul pădurii (`bright`, 6
+    flash-uri/s); fără pădure, terenul olive din spate ține singur (0,5/s), deci
+    „cer prin goluri" nu apare pe E′ decât dacă fundalul devine luminos.
 - **Frunzișul (`ProbeKyotoFrunzis`): textura și clasele există, cu trei
   probleme văzute pe captură.**
   - **Ce atinge ținta:** `autumn_foliage.png` e neutră (media 196), cu 6

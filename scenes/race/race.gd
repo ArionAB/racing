@@ -18,7 +18,8 @@ const AI_COLORS: Array[Color] = [
 	Color(0.3, 0.8, 0.4), Color(0.8, 0.4, 0.9), Color(0.55, 0.75, 0.95),
 	Color(0.95, 0.8, 0.25), Color(0.9, 0.35, 0.3)]
 
-enum State { COUNTDOWN, RUNNING, FINISHED }
+## LOADING e la coada, nu in fata: valorile vechi raman aceleasi numere.
+enum State { COUNTDOWN, RUNNING, FINISHED, LOADING }
 
 var state: State = State.COUNTDOWN
 var track: Track
@@ -67,15 +68,58 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.randomize()
+	# Din joc (meniu, restart, campionat) cursa se incarca in spatele ecranului
+	# de incarcare. Sondele si F6 din editor instantiaza Race direct si raman
+	# pe drumul sincron de mai jos: citesc `player`/`track` imediat dupa
+	# add_child, deci au nevoie ca _ready sa fi terminat tot.
+	if GameState.take_loading_screen():
+		_load_behind_screen()
+		return
 	# Mediul (cer, soare, teren) e construit de pista — fiecare are tema ei.
 	var track_scene := load(
 		GameState.TRACK_SCENES[GameState.selected_track]) as PackedScene
-	track = track_scene.instantiate() as Track
+	_mount_track(track_scene.instantiate() as Track)
+	_setup_race()
+
+
+## Cursa pornita din joc: ecranul apare intai, scena pistei se citeste pe alt
+## fir, apoi pista se construieste (sincron, cu bara mutata intre faze) si
+## abia la urma pornesc numaratoarea si fizica de cursa. Vezi LoadingScreen.
+func _load_behind_screen() -> void:
+	state = State.LOADING
+	var screen := LoadingScreen.new()
+	screen.track_index = GameState.selected_track
+	add_child(screen)
+	var scene := await screen.load_scene(
+		GameState.TRACK_SCENES[GameState.selected_track])
+	var t := scene.instantiate() as Track if scene != null else null
+	if t == null:
+		push_error("Race: pista %s nu s-a putut incarca"
+			% GameState.TRACK_SCENES[GameState.selected_track])
+		GameState.go_to_menu()
+		return
+	screen.watch_build(t)
+	_mount_track(t)
+	_setup_race()
+	screen.end_phase(&"masini")
+	# Numaratoarea porneste cand ecranul incepe sa se ridice, nu inainte:
+	# cadrele de incalzire nu au voie sa manance din READY?/3/2/1.
+	await screen.finish()
+	state = State.COUNTDOWN
+
+
+## Pista intra in scena: `Track._ready` o construieste intreaga, sincron.
+func _mount_track(t: Track) -> void:
+	track = t
 	# `--traffic=N` (ProbeRace, brief §4(c)): suprascrie ÎNAINTE de
 	# `_spawn_traffic()`. Vezi GameState.traffic_override.
 	if GameState.traffic_override >= 0:
 		track.traffic_count = GameState.traffic_override
 	add_child(track)
+
+
+## Tot ce sta pe pista: masini, camera, HUD, legaturile de feedback.
+func _setup_race() -> void:
 	_skid_parent = Node3D.new()
 	_skid_parent.name = "SkidMarks"
 	add_child(_skid_parent)
@@ -249,6 +293,9 @@ func _spawn_traffic() -> void:
 		_ai_visible.append(car)
 
 func _physics_process(delta: float) -> void:
+	# In timpul incarcarii nu exista inca masini, HUD sau camera.
+	if state == State.LOADING:
+		return
 	if state == State.COUNTDOWN:
 		_tick_countdown(delta)
 	else:
@@ -553,6 +600,8 @@ func _update_positions() -> void:
 		cars[order[rank]].race_position = rank + 1
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if state == State.LOADING:
+		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return

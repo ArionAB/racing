@@ -221,7 +221,18 @@ func champ_next_race() -> void:
 
 func start_race() -> void:
 	reset_touch()
+	_loading_screen = true
 	get_tree().change_scene_to_file(RACE_SCENE)
+
+## Cursa pornita din joc trece prin ecranul de incarcare. Race citeste flagul
+## o singura data, in _ready, si il sterge; sondele care instantiaza Race
+## direct nu trec pe aici, deci raman pe drumul sincron.
+var _loading_screen: bool = false
+
+func take_loading_screen() -> bool:
+	var v := _loading_screen
+	_loading_screen = false
+	return v
 
 func go_to_menu() -> void:
 	champ_active = false

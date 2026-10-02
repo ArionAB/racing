@@ -1614,6 +1614,116 @@ static func themes() -> Dictionary:
 			"water_lit_wave_len": 1.2,
 			"water_dusk_dim": 0.55,
 		},
+		"kyoto": {
+			# KYOTO LA SFARSITUL LUI NOIEMBRIE, LA VARFUL TOAMNEI (docs/track_briefs/
+			# kyoto.md §0.1, §4). Pasul 2 din §7: doar lumina, cerul, ceata si solul
+			# de baza; kitul (machiya, artari, bambus), hero-urile si orizontul vin
+			# cu POI-urile (§5). `decor` stins ca la Jodhpur/Fiordland: decorul se
+			# pune manual pe POI. Lumina e FIXA, nu un ceas (brief §0): fara
+			# DuskCycle, ca sa nu dubleze Jodhpur.
+			#
+			# SOARELE: 22 de grade, din SV (azimut ~225 busola), #FFD8A8. In
+			# conventia generatorului (x est, y nord, Godot gx=-x, gz=-y) sursa
+			# la busola 180+y_rot => y_rot = 45. Verificat pe directia de mers:
+			# C (scena, spre S) il are in fata-dreapta (arțarii din rapa in
+			# contralumina — intentia), F (spre V) il are in stanga-fata si
+			# lumineaza fata de S a pavilionului, H (spre N) il are in spate-stanga
+			# (pagoda luminata din fata). Se remasoara la fiecare redesenare a
+			# traseului (memoria azimutul-soarelui-fata-de-drum).
+			"sun_color": Color.html("FFD8A8"),
+			"sun_energy": 1.0,
+			"exposure": 1.0,
+			"sun_rotation_deg": Vector3(-22, 45, 0),
+			# AMBIENT 0,35, albastru rece de cer: umbrele trag spre albastru, nu
+			# spre negru (memoria umbra-fara-culoare-e-negru-mort).
+			"ambient_color": Color.html("B4C8E6"),
+			"ambient_energy": 0.35,
+			# Cer limpede de toamna (aki-bare): #8DB8E8 sus -> #F2E2C2 la orizont.
+			"sky_top": Color.html("8DB8E8"),
+			"sky_horizon": Color.html("F2E2C2"),
+			"sky_cover_alpha": 0.0,
+			# Ceata: pacla calda a unei dupa-amiezi senine, fog_end 340 (mai
+			# limpede ca Jodhpur, 300). Inelele de fundal vor respecta
+			# < 340 < FAR_PLANE 380 (memoria efecte-de-fundal-cote-legate).
+			"fog": Color.html("E9D6BC"),
+			"fog_sky_affect": 0.10,
+			"fog_depth": true,
+			"fog_begin": 100.0,
+			"fog_end": 340.0,
+			"fog_curve": 1.4,
+			"fog_max": 0.85,
+			# Umbre PORNITE, shadow_distance 90 (CLAUDE.md: prima setare de scurtat
+			# daca device-ul nu tine 60 fps). La 22 de grade umbra are ~2,5x
+			# inaltimea obiectului: umbrele lungi ale caselor si ale tulpinilor de
+			# bambus pe drum sunt identitatea luminii (brief §4).
+			"shadows": true,
+			"shadow_opacity": 0.65,
+			"shadow_distance": 90.0,
+			"shadow_blur": 1.0,
+			# SOLUL: pamant de padure cu muschi, olive cald. Sub decor se vede
+			# pe versant; covorul de frunze din D vine din perechea a doua de
+			# texturi (`terrain_alt_class` + `ground_zones`, mecanismul
+			# Jodhpur): clasa `leaf_litter` ia tenta ei de clasa, deci zona
+			# trage spre ruginiu-carmin. Muschiul de pe malul iazului NU e pe
+			# teren: perechea a doua e una singura pe tema, deci `moss` ramane
+			# pentru decor/prop-uri (de decis pe captura, pasul 9).
+			"ground_tint": Color(0.46, 0.50, 0.28),
+			"scarp_tint": Color(0.52, 0.48, 0.43),
+			"scarp_slope_deg": 32.0,
+			"scarp_fade_deg": 10.0,
+			"hill_color": Color(0.30, 0.38, 0.22),
+			"terrain_alt_class": "leaf_litter",
+			"ground_zones": [
+				# D: valea de artari, de la aterizarea de pe scena pana la gura
+				# podului Tsutenkyo (fractii din tools/gen_kyoto_route.py).
+				{"from": 0.331, "to": 0.449, "max_m": 45.0, "fade_m": 18.0,
+					"tint": Color(0.8626, 0.54, 0.3079)},
+			],
+			"horizon_model": "",
+			"walls": false,
+			"kerbs": false,
+			"cliffs": false,
+			"decor": "none",
+			"props": "forest",
+			"hazard_model": "",
+			"dust_color": Color(0.62, 0.56, 0.46),
+			# Caldaram de oras vechi: gri cald, aproape neutru (ROAD_COLOR e
+			# albastrui si sub ambientul rece ar iesi violet — lectia Jodhpur).
+			"road_tint": Color(0.30, 0.29, 0.27),
+			# Tunelul de torii (E'): pamant batatorit de poteca de pelerinaj.
+			"branch_surface": "gravel",
+			"branch_tint": Color(0.72, 0.64, 0.54),
+			# APA (iazul pavilionului F, raul Katsura H): verde-inchis, calma,
+			# `SEA_DEEP` (#2E5F6B), cu luciu de iaz (rugozitate mica — memoria
+			# apa-iluminata-v12: lumina se vede doar pe o apa lucioasa). Chei
+			# luate de la Jodhpur (aceeasi apa calma, fara spuma), de retuat pe
+			# captura la pasul 9.
+			"water": false,
+			"water_shallow_slot": Palette.SEA_DEEP,
+			"water_deep_slot": Palette.SEA_DEEP,
+			"water_shore_slot": Palette.SEA_DEEP,
+			"water_dim": 0.65,
+			"water_desat": 0.20,
+			"water_mul": Color(0.90, 1.0, 0.92),
+			"water_deep_gain": 1.0,
+			"water_foam": 0.0,
+			"water_foam_mix": 1.0,
+			"water_crest": 0.0,
+			"water_band": 0.0,
+			"water_glint": 0.0,
+			"water_ripple": 0.06,
+			"water_fresnel": 0.45,
+			"water_fresnel_sharp": 3.5,
+			"water_fresnel_color": Color(0.90, 0.80, 0.62),
+			"water_view_lo": 1.0,
+			"water_view_hi": 0.75,
+			"water_view_ref": 0.60,
+			"water_lit_rough": 0.08,
+			"water_lit_fresnel": 0.85,
+			"water_lit_spec": 0.60,
+			"water_lit_normal": 0.20,
+			"water_lit_wave_len": 1.4,
+		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
 			"sky_top": Color(0.22, 0.48, 0.9),

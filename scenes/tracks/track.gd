@@ -1681,6 +1681,14 @@ static func themes() -> Dictionary:
 			],
 			"horizon_model": "",
 			"walls": false,
+			# Balustrada de tablier pe viaducte (scena Kiyomizu, Tsutenkyo,
+			# Togetsukyo), ca Chongqing: brief §2 „pe laturi scena are balustrada,
+			# nu cazi decat pe capat", „de pe pod nu se cade". Fara ea, ProbeRace
+			# (16 seed-uri, 8 masini) repunea 47 de masini la iesirea de pe pod
+			# (frac 0.46): AI-ul taie interiorul arcului de dupa pod la 35 m/s si
+			# iese pe marginea unui tablier fara parapet. Mesh-ul e placeholderul
+			# CONCRETE din `_build_walls`; modulele de pod din kit il inlocuiesc.
+			"deck_rails": true,
 			"kerbs": false,
 			"cliffs": false,
 			"decor": "none",
@@ -12302,11 +12310,12 @@ func _build_viaduct_nets() -> void:
 		var bottom := top - 25.0
 		var zone := RespawnZone.new()
 		zone.name = "ViaductNet%d" % ri
-		zone.backoff_m = 16.0
+		zone.backoff_m = _viaduct_net_backoff(ri)
 		var shape := CollisionShape3D.new()
 		var box := BoxShape3D.new()
-		box.size = Vector3(hi.x - lo.x + VIADUCT_NET_MARGIN * 2.0,
-			top - bottom, hi.y - lo.y + VIADUCT_NET_MARGIN * 2.0)
+		var margin := _viaduct_net_margin()
+		box.size = Vector3(hi.x - lo.x + margin * 2.0,
+			top - bottom, hi.y - lo.y + margin * 2.0)
 		shape.shape = box
 		zone.add_child(shape)
 		zone.position = Vector3((lo.x + hi.x) * 0.5, (top + bottom) * 0.5,
@@ -12315,6 +12324,23 @@ func _build_viaduct_nets() -> void:
 
 ## Cat dincolo de amprenta XZ a tablierului se intinde plasa viaductului.
 const VIADUCT_NET_MARGIN: float = 45.0
+
+## Marja plasei, pe pista. Implicit [constant VIADUCT_NET_MARGIN]. O pista cu un
+## tablier IN AER langa propria rampa de urcare (Kyoto: puntea scenei la +32,
+## rampa C1 la +23..+27 la 40 m de ea) o coboara, altfel plasa prinde si soseaua
+## de langa tablier: masurat cu ProbeRace pe Track18, toate cele 8 masini erau
+## repuse la 0.239, pe asfalt, cu 33 m/s, de `ViaductNet0`.
+func _viaduct_net_margin() -> float:
+	return VIADUCT_NET_MARGIN
+
+## Cat de departe INAPOI repune plasa viaductului `ri` (m). Implicit 16. Un
+## viaduct care poarta o SARITURA (Kyoto, scena Kiyomizu) cere elan: repusa cu
+## 16 m inainte de buza si cu 9 m/s, masina nu mai ajunge la viteza de
+## trecere, cade iar si bucla tine toata cursa (masurat cu ProbeRace pe Track18:
+## 185 de repuneri intr-o cursa, autobuzul 83). Aceeasi cifra si acelasi motiv
+## ca [constant CHANNEL_FALL_BACKOFF].
+func _viaduct_net_backoff(_ri: int) -> float:
+	return 16.0
 
 ## Nodurile (Node3D) care cer plasei de viaduct un plafon mai jos.
 func _net_drop_nodes() -> Array[Node]:

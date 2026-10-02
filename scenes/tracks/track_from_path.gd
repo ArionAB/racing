@@ -183,6 +183,14 @@ extends Track
 ## din kit se pun sub el (Baikal, viaductul Circum-Baikal). Se combina cu
 ## `custom_cornice_ravines` (cazi de pe margine). Vezi Track._viaduct_ravines.
 @export var custom_viaduct_ravines: Array[int] = []
+## Marja plasei de repunere a viaductelor (m dincolo de amprenta tablierului).
+## Negativ (implicit) = [constant Track.VIADUCT_NET_MARGIN], deci nicio pista
+## existenta nu se schimba. Vezi [method Track._viaduct_net_margin].
+@export var custom_viaduct_net_margin: float = -1.0
+## Elanul plasei de repunere, per viaduct: (indice in `custom_ravines`, metri
+## inapoi). Fara intrare = 16 (comportamentul vechi). Vezi
+## [method Track._viaduct_net_backoff].
+@export var custom_viaduct_net_backoffs: Array[Vector2] = []
 ## Care dintre CORNISE sunt taiate VERTICAL (indici in `custom_ravines`):
 ## peretele de sub buza cade drept, nu in panta. Se cere doar unde ceva urca pe
 ## langa faleza — baloanele ancorate de sub cornisa Vaii Rosii. Vezi
@@ -361,6 +369,15 @@ func _cornice_ravines() -> Array[int]:
 
 func _viaduct_ravines() -> Array[int]:
 	return custom_viaduct_ravines
+
+func _viaduct_net_backoff(ri: int) -> float:
+	for v in custom_viaduct_net_backoffs:
+		if int(v.x) == ri:
+			return v.y
+	return 16.0
+
+func _viaduct_net_margin() -> float:
+	return custom_viaduct_net_margin if custom_viaduct_net_margin >= 0.0 		else VIADUCT_NET_MARGIN
 
 func _scarp_ravines() -> Array[int]:
 	return custom_scarp_ravines

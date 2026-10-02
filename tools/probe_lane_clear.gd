@@ -338,6 +338,16 @@ func _sweep(space: PhysicsDirectSpaceState3D, track: Track,
 				if body == null:
 					continue
 				var nm := String(body.name)
+				# PERETELE TUNELULUI DE TORII (`ToriiTunnel`) e MARGINEA culoarului, nu un
+				# obstacol in el: sta la +-3,2 m, chiar la semilatimea benzii. Firele laterale
+				# ale sondei se iau din profilul BUCLEI (`width_at_index`: 7,5 pe E'), deci
+				# cad la +-2,5 m si caroseria (+-1,1) ajunge in zid desi masina centrata nu-l
+				# atinge. Se scuza DOAR pe firele laterale: pe axa si in coridorul din fata
+				# peretele ramane urmarit, deci un perete cazut in mijlocul culoarului pica.
+				# (Nu s-a corectat latimea firelor: ar muta rezultatele celorlalte piste —
+				# Alpii 21 -> 23 pe proba — si garda nu e locul unei astfel de schimbari.)
+				if nm == "PereteTunel" and lat != 0.0:
+					continue
 				# Lista de suprafete de rulare scuza numele, NU orice forma cu
 				# numele ala. `Shoulders` e chiar corpul care a blocat elicea
 				# (o perdea de 38 m atarnata peste gura stancii): daca l-am

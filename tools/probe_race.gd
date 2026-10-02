@@ -213,6 +213,9 @@ var _traffic: int = -1
 ## snapshot.gd), ca sondele sa poata verifica ceasul pe piste existente
 ## inainte ca Track17 sa existe.
 var _force_dusk: float = -1.0
+## `--no-torii`: scoate `ToriiTunnel` (portile, peretii colizori, padurea) din scena
+## INAINTE de prima fizica: A/B-ul costului tunelului de torii (banda E' goala).
+var _no_torii: bool = false
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
 ## `--blind`: AI-ul IGNORA tubul (`reads_shishi = false`). Martorul garzii: cu el
@@ -361,6 +364,8 @@ func _ready() -> void:
 			_blind = true
 		elif arg == "--no-turbo":
 			_no_turbo = true
+		elif arg == "--no-torii":
+			_no_torii = true
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -508,6 +513,11 @@ func _start_race() -> void:
 ## pista fara ele (`_jump_near` ramane -1).
 func _setup_kyoto() -> void:
 	var track: Track = _race.track
+	if _no_torii:
+		var tt := track.get_node_or_null("ToriiTunel")
+		if tt != null:
+			tt.get_parent().remove_child(tt)
+			tt.free()
 	for n in get_tree().get_nodes_in_group(ShishiOdoshiHazard.AI_GROUP):
 		var hz := n as ShishiOdoshiHazard
 		if hz == null:

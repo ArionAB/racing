@@ -145,7 +145,24 @@ func _check_route(track: Track, ri: int) -> int:
 	# --- panta ---------------------------------------------------------------
 	var max_slope := 0.0
 	var slope_at := 0.0
+	# Golul unui canal cu `jump` NU e sosea: acolo nu exista asfalt, iar caderea
+	# dintre buze e chiar dramatismul sariturii (Kyoto: 6 m pe ~12 m). Panta
+	# curbei coapte peste gol nu spune nimic despre ce se conduce, deci
+	# segmentele dintre buza de plecare si cea de aterizare nu intra in cifra.
+	var gap_lo: Array[int] = []
+	var gap_hi: Array[int] = []
+	if ri == 0:
+		for ch in track.get("_channels"):
+			if bool(ch.get("jump", false)) and not bool(ch.get("ford", false)):
+				gap_lo.append(int(ch["near"]))
+				gap_hi.append(int(ch["far"]))
 	for i in n - 1:
+		var in_gap := false
+		for k in gap_lo.size():
+			if i >= gap_lo[k] and i < gap_hi[k]:
+				in_gap = true
+		if in_gap:
+			continue
 		var d := r.baked[i].distance_to(r.baked[i + 1])
 		if d < 0.01:
 			continue

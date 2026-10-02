@@ -55,7 +55,7 @@ E_ARC = arc(E_C[0], E_C[1], E_R, E_A0, E_A1, 12.0, elevs=None, label="E arc")
 E_ARC[0] = (E_ARC[0][0], E_ARC[0][1], 0, 12.0, "E arc intrare (E' se desprinde)")
 E_ARC[len(E_ARC) // 2] = (E_ARC[len(E_ARC) // 2][0], E_ARC[len(E_ARC) // 2][1],
                           0, 24.0, "E arc apex (flancul Inari, +24)")
-E_ARC[-1] = (E_ARC[-1][0], E_ARC[-1][1], 0, 15.0, "E arc iesire (E' revine)")
+E_ARC[-1] = (E_ARC[-1][0], E_ARC[-1][1], 0, 12.0, "E arc iesire (E' revine)")
 E_END_HEAD = BR_HEAD + E_SWEEP         # 297
 
 # --- Curba lunga la STANGA a lui F: raza 200, 47 grade, centrul la stanga.
@@ -67,7 +67,7 @@ F_A0 = math.degrees(math.atan2(_e_end[1] - F_C[1], _e_end[0] - F_C[0]))
 F_SWEEP = 47.0
 F_ARC = arc(F_C[0], F_C[1], F_R, F_A0, F_A0 + F_SWEEP, 16.0, elevs=None, label="F arc")
 F_ARC = F_ARC[1:]   # primul punct e chiar sfarsitul arcului lui E
-F_ARC[0] = (F_ARC[0][0], F_ARC[0][1], 0, 8.0, "F intrare (spre V)")
+F_ARC[0] = (F_ARC[0][0], F_ARC[0][1], 0, 5.0, "F intrare (spre V)")
 F_ARC[len(F_ARC) // 2] = (F_ARC[len(F_ARC) // 2][0], F_ARC[len(F_ARC) // 2][1],
                           0, 0.0, "F curba stanga mijloc (shishi-odoshi)")
 F_ARC[-1] = (F_ARC[-1][0], F_ARC[-1][1], 0, 0.0, "F curba stanga sfarsit")
@@ -93,13 +93,16 @@ WPTS_RAW = [
     (250,  196,  0,  None, "C1 Niomon"),
     (325,  202,  0,  None, "C1 inainte de colt"),
     (362,  198,  24, None, "C colt dreapta spre scena"),
-    (364,  168,  0,  None, "C scena intrare"),
-    (364,  106,  0,  32.0, "C scena capat (buza)"),
+    (364,  168,  0,  32.0, "C scena intrare"),
+    (364,  118,  0,  32.0, "C scena inainte de buza"),
+    (364,  104,  0,  32.0, "C scena capat (buza)"),
     # --- C2: golul de ~20 m, aterizare pe versantul opus la +26 ---
-    (364,  76,   0,  27.5, "C2 aterizare"),
+    (364,  96,   0,  25.0, "C2 aterizare"),
+    (364,  84,   0,  24.2, "C2 aterizare coborare 1"),
 
     # --- D: valea de artari, S-uri largi spre S; podul Tsutenkyo drept pe
     # directia 150 (SSE), de unde arcul lui E continua tangent ---
+    (364,  68,   0,  22.5, "C2 panta de aterizare"),
     (366,  40,   0,  None, "D aterizare coborare"),
     (396,  -14,  40, 22.0, "D S1 dreapta"),
     (352,  -86,  40, 18.5, "D S1 stanga"),
@@ -227,7 +230,10 @@ def circumradius(a, b, c):
     area2 = max(1e-9, s * (s - ab) * (s - bc) * (s - ca))
     return ab * bc * ca / (4 * math.sqrt(area2))
 
-def resample(pts, elevs, step):
+def resample(pts, elevs, step, local=None):
+    """Esantioneaza la pas uniform. `local(x, y)` poate da un pas mai mic
+    (zona sariturii C2: o curba Catmull-Rom cu puncte la 12 m nu poate cobori
+    6 m intre buze si ramane plata la ambele capete)."""
     cum = cum_lengths(pts)
     total = cum[-1]
     out = []
@@ -237,16 +243,19 @@ def resample(pts, elevs, step):
             j += 1
         a, b = pts[j], pts[(j + 1) % len(pts)]
         f = (target - cum[j]) / max(1e-6, cum[j + 1] - cum[j])
-        out.append((a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f,
-                    elevs[j] + (elevs[(j + 1) % len(pts)] - elevs[j]) * f))
-        target += step
+        x, y = a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f
+        out.append((x, y, elevs[j] + (elevs[(j + 1) % len(pts)] - elevs[j]) * f))
+        target += local(x, y) if local is not None else step
     return out
+
+def jump_step(x, y):
+    return 4.0 if (abs(x - 364.0) < 10.0 and 82.0 <= y <= 120.0) else 12.0
 
 pts = fillet_loop(WPTS)
 elevs, cum, total = assign_elev(pts, WPTS)
 
 CTRL_STEP = 12.0
-ctrl = resample(pts, elevs, CTRL_STEP)
+ctrl = resample(pts, elevs, CTRL_STEP, jump_step)
 if math.hypot(ctrl[0][0] - ctrl[-1][0], ctrl[0][1] - ctrl[-1][1]) < CTRL_STEP * 0.5:
     ctrl.pop()
 ctrl_tag = [None] * len(ctrl)
@@ -519,7 +528,10 @@ if len(sys.argv) > 1:
     #   2: raul Katsura sub Togetsukyo (viaduct, podea -6, apa -3)
     #   3: iazul pavilionului (pe dreapta lui F, podea -3, apa -1)
     ravines = [
-        (r3(f_scene_a - 0.004), r3(f_land + 0.004), 16.0, 0, "scena + golul C2"),
+        # Inceputul rapei urca cu ~0,016 inaintea puntii: fade-ul de capat al
+        # rapelor (RAVINE_FADE_FRAC 0,02 ~ 43 m) altfel lasa doar ~4 m adancime
+        # la intrarea pe punte (profil masurat, ProbeKyotoRapa).
+        (r3(f_scene_a - 0.020), r3(f_land + 0.004), 16.0, 0, "scena + golul C2"),
         (r3(f_bridge_a - 0.006), r3(f_bridge_b + 0.006), 16.0, 0, "Tsutenkyo"),
         (r3(f_togetsu_a - 0.008), r3(f_togetsu_b + 0.008), 6.0, 0, "raul Katsura"),
         (r3(f_f_a), r3(f_f_b), 3.0, 1, "iazul pavilionului"),
@@ -596,9 +608,9 @@ if len(sys.argv) > 1:
     # roteste la multipli de ~4,1 m (pasul curbei coapte): 8 / 12,2 / 16,4 / 20,9.
     # Brief §3: "daca Autobuzul nu trece fara turbo, se strange golul, nu
     # creste viteza" => 12,2 m.
-    SCENE_GAP_M = 8.0
-    gap_node_xy = ((324.0), 92.0)
-    gap_y = 29.0
+    SCENE_GAP_M = 12.0
+    gap_node_xy = (364.0, 100.0)
+    gap_y = 30.0
     gap_g = godot(gap_node_xy, gap_y)
 
     # Hazarduri: tubul pe axa soselei la frac F tub, cu directia mersului

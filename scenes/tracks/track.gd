@@ -1706,14 +1706,16 @@ static func themes() -> Dictionary:
 			# `SEA_DEEP` (#2E5F6B), cu luciu de iaz (rugozitate mica — memoria
 			# apa-iluminata-v12: lumina se vede doar pe o apa lucioasa). Chei
 			# luate de la Jodhpur (aceeasi apa calma, fara spuma), de retuat pe
-			# captura la pasul 9.
+			# captura la pasul 9. Runda 2: iazul iesea gri-pal (Fresnel din chase cam
+			# reflecta cerul pe toata suprafata) => Fresnel 0,22, culoare de Fresnel
+			# verde-inchis, dim mai mare.
 			"water": false,
 			"water_shallow_slot": Palette.SEA_DEEP,
 			"water_deep_slot": Palette.SEA_DEEP,
 			"water_shore_slot": Palette.SEA_DEEP,
-			"water_dim": 0.65,
-			"water_desat": 0.20,
-			"water_mul": Color(0.90, 1.0, 0.92),
+			"water_dim": 0.45,
+			"water_desat": 0.05,
+			"water_mul": Color(0.60, 0.92, 0.82),
 			"water_deep_gain": 1.0,
 			"water_foam": 0.0,
 			"water_foam_mix": 1.0,
@@ -1721,14 +1723,14 @@ static func themes() -> Dictionary:
 			"water_band": 0.0,
 			"water_glint": 0.0,
 			"water_ripple": 0.06,
-			"water_fresnel": 0.45,
+			"water_fresnel": 0.22,
 			"water_fresnel_sharp": 3.5,
-			"water_fresnel_color": Color(0.90, 0.80, 0.62),
+			"water_fresnel_color": Color(0.20, 0.34, 0.36),
 			"water_view_lo": 1.0,
 			"water_view_hi": 0.75,
 			"water_view_ref": 0.60,
-			"water_lit_rough": 0.08,
-			"water_lit_fresnel": 0.85,
+			"water_lit_rough": 0.06,
+			"water_lit_fresnel": 0.35,
 			"water_lit_spec": 0.60,
 			"water_lit_normal": 0.20,
 			"water_lit_wave_len": 1.4,

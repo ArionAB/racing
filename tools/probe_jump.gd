@@ -225,8 +225,8 @@ func _water_y() -> float:
 		# Canal USCAT (Kyoto, scena Kiyomizu: rapa fara apa proprie). Pragul de
 		# cadere nu mai e cota originii: cand buza de aterizare e MAI JOS decat
 		# originea (saritura cu cadere), o masina care a trecut si a atins buza
-		# era declarata „cazuta in albie". Acum: sub cea mai joasa buza.
-		return minf(_near_lip.y, _far_lip.y) - 2.0
+		# era declarata „cazuta in albie". Acum: aproape de fundul albiei (origine - adancime), ca panta de aterizare descendenta sa nu conteze drept cadere.
+		return float((_ch["origin"] as Vector3).y) - float(_ch["depth"]) + 3.0
 	return float((_ch["origin"] as Vector3).y) - float(_ch.get("water_y_drop", 0.0))
 
 

@@ -629,6 +629,10 @@ if len(sys.argv) > 1:
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
 [ext_resource type="Script" path="res://scenes/hazards/shishi_odoshi_hazard.gd" id="11_shishi"]
+[ext_resource type="Script" path="res://scenes/props/torii_tunnel.gd" id="12_torii"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_senbon.glb" id="13_senbon"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_large.glb" id="14_large"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
 """
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
@@ -703,6 +707,13 @@ branch_half_width = 3.2
 label = "Tunelul de torii"
 entry_at = {e_in:.5f}
 exit_at = {e_out:.5f}
+
+[node name="ToriiTunel" type="Node3D" parent="."]
+script = ExtResource("12_torii")
+branch_index = 1
+gate_scene = ExtResource("13_senbon")
+large_gate_scene = ExtResource("14_large")
+cedar_scene = ExtResource("15_cedar")
 
 [node name="Hazarduri" type="Node3D" parent="."]
 

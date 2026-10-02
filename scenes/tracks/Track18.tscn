@@ -5,14 +5,7 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="4_branch"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
-[ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="10_respawn"]
 [ext_resource type="Script" path="res://scenes/hazards/shishi_odoshi_hazard.gd" id="11_shishi"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_zone0"]
-size = Vector3(46.00, 16.00, 130.00)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_zone1"]
-size = Vector3(40.00, 12.00, 84.00)
 
 [sub_resource type="Curve3D" id="Curve3D_kyoto"]
 closed = true
@@ -41,6 +34,8 @@ custom_sun_rotation_deg = Vector3(-22, 45, 0)
 custom_sea_level_offset = -32.45
 custom_ravines = Array[Vector4]([Vector4(0.271, 0.318, 16.0, 0), Vector4(0.443, 0.472, 16.0, 0), Vector4(0.824, 0.902, 6.0, 0), Vector4(0.607, 0.657, 3.0, 1)])
 custom_viaduct_ravines = Array[int]([0, 1, 2])
+custom_viaduct_net_margin = 10.0
+custom_viaduct_net_backoffs = Array[Vector2]([Vector2(0, 70.0)])
 custom_ravine_floors = Array[Vector2]([Vector2(0, 16.0), Vector2(1, -4.0), Vector2(2, -6.0), Vector2(3, -3.0)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 50.0), Vector2(1, 45.0), Vector2(2, 70.0), Vector2(3, 90.0)])
 custom_ravine_water = Array[Vector3]([Vector3(2, -3.0, 14.0), Vector3(3, -1.0, 10.0)])
@@ -86,7 +81,7 @@ exit_at = 0.57897
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -324.00, 29.00, -92.00)
 gizmo_extents = 40.0
 script = ExtResource("8_channel")
-gap = 20.0
+gap = 12.0
 water_half = 8.0
 bank = 10.0
 depth = 13.0
@@ -122,19 +117,3 @@ height = 2.4
 look_height = 0.6
 fov_bonus = 3.0
 ceiling = 5.2
-
-[node name="RapaScena" type="Area3D" parent="Hazarduri"]
-monitorable = false
-script = ExtResource("10_respawn")
-
-[node name="Cutie" type="CollisionShape3D" parent="Hazarduri/RapaScena"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -364.00, 16.00, -124.81)
-shape = SubResource("BoxShape3D_zone0")
-
-[node name="RapaTsutenkyo" type="Area3D" parent="Hazarduri"]
-monitorable = false
-script = ExtResource("10_respawn")
-
-[node name="Cutie" type="CollisionShape3D" parent="Hazarduri/RapaTsutenkyo"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -374.93, -2.00, 205.12)
-shape = SubResource("BoxShape3D_zone1")

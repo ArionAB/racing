@@ -573,16 +573,25 @@ if len(sys.argv) > 1:
     higashi_g = godot((372.0, 150.0), 60.0)
     hill_f_g = godot((60.0, -300.0), 24.0)
 
-    # RespawnZone-uri: sub scena (rapa 0) si sub Tsutenkyo (rapa 1), cutii cu
-    # plafonul la 6 m sub tablier.
-    def zone_box(name, x, y_floor, y_top, z, sx, sz):
-        return (name, godot((x, z), (y_floor + y_top) / 2.0), (sx, y_top - y_floor, sz))
+    # RespawnZone-uri: NU se mai declara de mana. Le construieste Track singur:
+    # `ViaductNet0/1/2` sub fiecare viaduct (plasa de sub scena are elan de 70 m,
+    # `custom_viaduct_net_backoffs`), `ChannelFall_*` sub gol si `RavineWater_*`
+    # in iaz si in rau. Cutiile de mana (RapaScena/RapaTsutenkyo, repunere cu
+    # 14 m) se calcau cu plasa si readuceau masina la 14 m de buza: fara elan,
+    # bucla de caderi (masurat cu ProbeRace, 185 de repuneri pe o cursa).
+    zones = []
     scene_mid = road_at_frac((f_scene_a + f_scene_b) / 2.0)
     br_mid = road_at_frac((f_bridge_a + f_bridge_b) / 2.0)
-    zones = [
-        zone_box("RapaScena", scene_mid[0], 8.0, 24.0, scene_mid[1] - 10.0, 46.0, 130.0),
-        zone_box("RapaTsutenkyo", br_mid[0], -8.0, 4.0, br_mid[1], 40.0, 84.0),
-    ]
+    # GOLUL C2. Brief: ~20 m (calcul cu g = 9,8 si cadere de 6 m). Masurat cu
+    # ProbeJump pe fizica reala (gravitatie arcade ~28 m/s^2, trambulina de
+    # +7 m/s la desprindere, cadere de ~3 m intre buze): la 20 m gol obtinut
+    # 20,9 m trece abia de la ~28 m/s; la 16,4 m, Autobuzul (plafonul 30,
+    # AI x0,88-0,97) pica sub 28 m/s; la 12,17 m trece de la 26 m/s si in
+    # ProbeRace 16 seed-uri trece de la 24 m/s (viteza reala la buza). Golul se
+    # roteste la multipli de ~4,1 m (pasul curbei coapte): 8 / 12,2 / 16,4 / 20,9.
+    # Brief §3: "daca Autobuzul nu trece fara turbo, se strange golul, nu
+    # creste viteza" => 12,2 m.
+    SCENE_GAP_M = 12.0
     gap_node_xy = ((324.0), 92.0)
     gap_y = 29.0
     gap_g = godot(gap_node_xy, gap_y)
@@ -602,7 +611,6 @@ if len(sys.argv) > 1:
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="4_branch"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
-[ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="10_respawn"]
 [ext_resource type="Script" path="res://scenes/hazards/shishi_odoshi_hazard.gd" id="11_shishi"]
 """
     for k, (_, _, sz) in enumerate(zones):
@@ -638,6 +646,8 @@ custom_sun_rotation_deg = Vector3(-22, 45, 0)
 custom_sea_level_offset = {sea_offset}
 custom_ravines = Array[Vector4]([{rav_txt}])
 custom_viaduct_ravines = Array[int]([{", ".join(str(i) for i in VIADUCTS)}])
+custom_viaduct_net_margin = 10.0
+custom_viaduct_net_backoffs = Array[Vector2]([Vector2(0, 70.0)])
 custom_ravine_floors = Array[Vector2]([{fl_txt}])
 custom_ravine_widths = Array[Vector2]([{rw_txt}])
 custom_ravine_water = Array[Vector3]([{wt_txt}])
@@ -683,7 +693,7 @@ exit_at = {e_out:.5f}
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {gap_g[0]:.2f}, {gap_g[1]:.2f}, {gap_g[2]:.2f})
 gizmo_extents = 40.0
 script = ExtResource("8_channel")
-gap = 20.0
+gap = {SCENE_GAP_M}
 water_half = 8.0
 bank = 10.0
 depth = 13.0

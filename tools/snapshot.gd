@@ -20,6 +20,13 @@ extends Node
 ##                             camerei de urmarire
 ##   --shishi-phase=0.72       (Kyoto) ceasul shishi-odoshi la fractia data din ciclu:
 ##                             0.02 sus, 0.72 aproape orizontal, 0.90 lovit.
+##   --daruma-phase=0.15       (Kyoto) ceasul daruma-otoshi la fractia data din ciclul
+##                             MARE (71 s): 0.15 = turn plin, ciocanul tras inapoi
+##                             (telegraful); 0.16 = discul in mijlocul drumului;
+##                             0.45 = turn scazut la 3 etaje. `--daruma-clock=S` da
+##                             direct secunde (11.5 = discul la ~1/3 din drum).
+##   --daruma-dist=120         (Kyoto) cu --gamecam: pune CAMERA la atatia metri pe
+##                             axa, inaintea turnului (fractia se deduce, nu se ghiceste).
 ##   --track=0 --frac=0.5 --gamecam --route=1
 ##                             la fel, dar pe BANDA SECUNDARA cu indexul dat
 ##                             (1 = prima scurtatura, in ordinea din
@@ -334,6 +341,9 @@ func _ready() -> void:
 	var dusk_force := -1.0 # >= 0: DuskCycle.force_value() dupa doua cadre
 	var torrent_at := -1.0 # >= 0: TorrentCycle.force_clock() (secunde in ciclu)
 	var shishi_phase := -1.0 # >= 0: ShishiOdoshiHazard.force_clock(faza * ciclu), faza 0..1
+	var daruma_phase := -1.0 # >= 0: DarumaOtoshiHazard.force_clock(faza * ciclu mare)
+	var daruma_clock := -1.0 # >= 0: la fel, direct in secunde
+	var daruma_dist := -1.0 # > 0: camera de joc la atatia metri inaintea turnului
 	var shishi_backdrop := false # SONDA: panou verde inchis in spatele tubului (simuleaza padurea)
 	var overdraw := false
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
@@ -458,6 +468,12 @@ func _ready() -> void:
 			typhoon_at = float(arg.trim_prefix("--typhoon-at="))
 		elif arg.begins_with("--wave-at="):
 			wave_at = float(arg.trim_prefix("--wave-at="))
+		elif arg.begins_with("--daruma-phase="):
+			daruma_phase = float(arg.trim_prefix("--daruma-phase="))
+		elif arg.begins_with("--daruma-clock="):
+			daruma_clock = float(arg.trim_prefix("--daruma-clock="))
+		elif arg.begins_with("--daruma-dist="):
+			daruma_dist = float(arg.trim_prefix("--daruma-dist="))
 		elif arg == "--shishi-backdrop":
 			shishi_backdrop = true
 		elif arg.begins_with("--shishi-phase="):
@@ -721,6 +737,36 @@ func _ready() -> void:
 				q.position = Vector3(0.0, 8.0, -6.0)
 				node.add_child(q)
 			print("--shishi-backdrop: panou adaugat")
+	# Daruma-otoshi (Kyoto, POI F): tot ce se vede e o functie pura de ceasul mare,
+	# deci faza se fixeaza direct (`force_clock` opreste avansul).
+	if daruma_phase >= 0.0 or daruma_clock >= 0.0:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var darumas := 0
+		for node in get_tree().get_nodes_in_group(&"daruma_otoshi"):
+			if node.has_method("force_clock"):
+				var secs := daruma_clock
+				if secs < 0.0:
+					secs = daruma_phase * float(node.call("total_seconds"))
+				node.call("force_clock", secs)
+				darumas += 1
+		print("--daruma: %d DarumaOtoshiHazard fortate la ceasul %.2f s" % [darumas,
+			daruma_clock if daruma_clock >= 0.0 else daruma_phase * 71.0])
+	if daruma_dist > 0.0:
+		for node in get_tree().get_nodes_in_group(&"daruma_otoshi"):
+			var rt := track.route_at(0)
+			var ti := track.closest_index_global((node as Node3D).global_position, 0)
+			var acc := 0.0
+			var bi := ti
+			var m := rt.baked.size()
+			# camera de joc sta cu DEFAULT_DISTANCE in spatele masinii pusa la `--frac`
+			var want := daruma_dist - ChaseCamera.DEFAULT_DISTANCE
+			while acc < want:
+				var nb := (bi - 1 + m) % m
+				acc += (rt.baked[bi] as Vector3).distance_to(rt.baked[nb])
+				bi = nb
+			zoom_frac = float(bi) / float(m)
+			print("--daruma-dist=%.0f: masina la %.0f m inaintea turnului (frac %.4f)" % [daruma_dist, acc, zoom_frac])
 	if overdraw:
 		get_viewport().debug_draw = Viewport.DEBUG_DRAW_OVERDRAW
 	# Stadiul limbii de lava (Stromboli): 0 = turul 1 ... 2 = zid. Fara el,

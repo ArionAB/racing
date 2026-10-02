@@ -40,8 +40,18 @@ extends Node3D
 ## cu `flare_out`. Masurat cu ProbeRace: cu zidul taiat drept la gura, masinile care
 ## taie coltul dinspre sosea (banda se desprinde in unghi de ~37 grade) dau cu botul
 ## in capatul peretelui si raman acolo; palnia le plimba spre axa.
-@export_range(0.0, 20.0, 0.5, "suffix:m") var flare_len: float = 9.0
-@export_range(0.0, 10.0, 0.1, "suffix:m") var flare_out: float = 4.0
+@export_range(0.0, 20.0, 0.5, "suffix:m") var flare_len: float = 14.0
+@export_range(0.0, 10.0, 0.1, "suffix:m") var flare_out: float = 8.0
+## Poarta mare + bulevardul: pornesc de unde banda e la `gate_clear_m` de marginea
+## buclei (jumatatea portii mari 5,5 + marja), adica LA furca, nu 22 m mai in
+## spate. Intre ea si gura tunelului stau porti rare (fara perete), din `avenue_gap`
+## in `avenue_gap` metri: se vad de pe sosea si cheama.
+@export_range(0.0, 20.0, 0.5, "suffix:m") var gate_clear_m: float = 9.4
+## Scara portii mari: de pe sosea, de la 100-150 m, o poarta de 8 m ocupa cativa pixeli.
+@export_range(1.0, 2.5, 0.05) var big_scale: float = 1.6
+@export_range(1.2, 6.0, 0.1, "suffix:m") var avenue_gap: float = 2.0
+## Doua vulpi de piatra (placeholder) de o parte si de alta a portii mari.
+@export var foxes_enabled: bool = true
 @export var wall_height: float = 6.0
 @export var wall_friction: float = 1.0
 @export var wall_bounce: float = 0.1
@@ -57,6 +67,8 @@ var forest_count: int = 0
 var tunnel_start_dist: float = 0.0
 var tunnel_end_dist: float = 0.0
 var built: bool = false
+var avenue_count: int = 0
+var big_gate_dist: float = 0.0
 
 
 func _ready() -> void:
@@ -118,9 +130,37 @@ func _place() -> void:
 		gate_yaw.append(_yaw(dirs[i]))
 	gate_count = gate_pos.size()
 	_add_flock("PortiTorii", gate_scene, gate_pos, gate_yaw, 1.0, 1.0)
-	var big_pos := PackedVector3Array([pts[first], pts[last]])
-	var big_yaw := PackedFloat32Array([_yaw(dirs[first]), _yaw(dirs[last])])
-	_add_flock("PortiMari", large_gate_scene, big_pos, big_yaw, 1.0, 1.0)
+	# Furca: poarta mare la inceputul real al benzii (la `gate_clear_m` de bucla).
+	var big_first := first
+	for i in first:
+		if _clear_of_main(track, main, pts[i], gate_clear_m):
+			big_first = i
+			break
+	var step := maxi(1, int(round(avenue_gap / spacing)))
+	var av_pos := PackedVector3Array()
+	var av_yaw := PackedFloat32Array()
+	var k := big_first + step
+	while k <= first:
+		av_pos.append(pts[k])
+		av_yaw.append(_yaw(dirs[k]))
+		k += step
+	_add_flock("PortiBulevard", gate_scene, av_pos, av_yaw, 1.0, 1.0)
+	avenue_count = av_pos.size()
+	var big_pos := PackedVector3Array([pts[big_first], pts[last]])
+	# Poarta de la furca se roteste spre masina care vine pe bucla (60% spre tangenta
+	# buclei): banda se desprinde in unghi de ~37 grade, iar o poarta pusa strict
+	# pe axa benzii s-ar vedea din sosea doar pe muchie, ca o linie.
+	var mi0 := main.closest_index_global(pts[big_first])
+	var mdir := main.baked[mini(mi0 + 2, main.baked.size() - 1)] - main.baked[maxi(mi0 - 2, 0)]
+	mdir.y = 0.0
+	var bdir := dirs[big_first]
+	if mdir.length_squared() > 1e-6:
+		bdir = (dirs[big_first] * 0.4 + mdir.normalized() * 0.6).normalized()
+	var big_yaw := PackedFloat32Array([_yaw(bdir), _yaw(dirs[last])])
+	big_gate_dist = dists[big_first]
+	if foxes_enabled:
+		_build_foxes(track, main, pts[big_first], dirs[big_first])
+	_add_flock("PortiMari", large_gate_scene, big_pos, big_yaw, big_scale, big_scale)
 	_build_walls(pts, dirs, first, last)
 	if forest_enabled:
 		_build_forest(track, main, pts, dirs, first, last)
@@ -205,6 +245,58 @@ func _build_walls(pts: Array[Vector3], dirs: Array[Vector3], first: int, last: i
 	cs.shape = tri
 	body.add_child(cs)
 	add_child(body)
+
+
+## Doua vulpi kitsune placeholder (soclu + corp + cap, bavet rosu) la +-7 m de axa,
+## cu fata spre masina care vine. Fara coliziune; se omit daca ar cadea pe sosea.
+func _build_foxes(track: Track, main: TrackRoute, at: Vector3, dir: Vector3) -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var side := dir.cross(Vector3.UP)
+	var any := false
+	for sgn: float in [-1.0, 1.0]:
+		var c := at + side * (5.5 * big_scale + 1.6) * sgn
+		if not _clear_of_main(track, main, c, 2.5):
+			continue
+		any = true
+		var fwd := -dir # fata spre masina care vine
+		var basis := Basis(side, Vector3.UP, -dir)
+		_box(st, c, basis, Vector3(1.1, 0.9, 1.1), 0.45, Palette.MARBLE_GREY)
+		_box(st, c, basis, Vector3(0.55, 1.0, 0.9), 0.9 + 0.5, Palette.MARBLE_GREY)
+		_box(st, c + fwd * 0.45 + Vector3.UP * 0.0, basis, Vector3(0.4, 0.45, 0.5), 2.05, Palette.MARBLE_GREY)
+		_box(st, c + fwd * 0.3, basis, Vector3(0.6, 0.5, 0.08), 1.55, Palette.KERB_RED)
+	if not any:
+		return
+	var mesh := st.commit()
+	mesh.surface_set_material(0, Palette.world_material())
+	var mi := MeshInstance3D.new()
+	mi.name = "VulpiKitsune"
+	mi.mesh = mesh
+	add_child(mi)
+
+
+func _box(st: SurfaceTool, c: Vector3, basis: Basis, size: Vector3, y_center: float, slot: int) -> void:
+	var h := size * 0.5
+	var uv := Palette.uv(slot)
+	var ctr := c + Vector3.UP * y_center
+	var faces := [
+		[Vector3.UP, Vector3(-1, 1, -1), Vector3(1, 1, -1), Vector3(1, 1, 1), Vector3(-1, 1, 1)],
+		[Vector3.DOWN, Vector3(-1, -1, 1), Vector3(1, -1, 1), Vector3(1, -1, -1), Vector3(-1, -1, -1)],
+		[Vector3.RIGHT, Vector3(1, -1, 1), Vector3(1, 1, 1), Vector3(1, 1, -1), Vector3(1, -1, -1)],
+		[Vector3.LEFT, Vector3(-1, -1, -1), Vector3(-1, 1, -1), Vector3(-1, 1, 1), Vector3(-1, -1, 1)],
+		[Vector3.BACK, Vector3(-1, -1, 1), Vector3(-1, 1, 1), Vector3(1, 1, 1), Vector3(1, -1, 1)],
+		[Vector3.FORWARD, Vector3(1, -1, -1), Vector3(1, 1, -1), Vector3(-1, 1, -1), Vector3(-1, -1, -1)],
+	]
+	for f in faces:
+		var nrm: Vector3 = basis * (f[0] as Vector3)
+		var vs: Array[Vector3] = []
+		for k in range(1, 5):
+			vs.append(ctr + basis * ((f[k] as Vector3) * h))
+		for idx in [0, 1, 2, 0, 2, 3]:
+			st.set_normal(nrm)
+			st.set_uv(uv)
+			st.set_color(Color.WHITE)
+			st.add_vertex(vs[idx])
 
 
 ## Laterala peretelui la esantionul `i`: `half_gap`, plus palnia de la capete.

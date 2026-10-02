@@ -5,7 +5,7 @@ extends Node3D
 ## EXTERIOARA a drumului; un ciocan de lemn mare, pe un brat cu pivot, in spatele
 ## turnului. Ciocanul se trage inapoi incet (telegraful, ~3 s), apoi loveste discul
 ## de JOS, care ALUNECA peste drum ca o puca, perpendicular pe sosea, si iese in
-## iaz. Turnul coboara un etaj, cu o mica saritura de jucarie.
+## iarba din interior. Turnul coboara un etaj, cu o mica saritura de jucarie.
 ##
 ## Inlocuieste `ShishiOdoshiHazard` (decizia dezvoltatorului, 3 oct 2026: tubul nu
 ## se citea, „arata ca o pompa"). Clasa veche ramane in repo, neatinsa.
@@ -21,7 +21,7 @@ extends Node3D
 ## [b]Perioada de lovitura[/b] (s, in perioada): repaus -> ciocanul se trage inapoi
 ## (`windup_seconds`) -> ramane tensionat (`hold_seconds`) -> LOVITURA
 ## (`swing_seconds`, pana la `hit_at`) -> discul aluneca (`slide_seconds`) si se
-## scufunda -> turnul coboara un etaj. Dupa al 5-lea disc, ramane doar capul, iar
+## strange la nimic -> turnul coboara un etaj. Dupa al 5-lea disc, ramane doar capul, iar
 ## turnul creste la loc (`rebuild_seconds`), disc cu disc, de jos in sus.
 ##
 ## [b]Geometria[/b]: radacina sta PE AXA soselei, cu fata pe sensul de mers (-Z), ca
@@ -92,7 +92,7 @@ signal car_thrown(car: Car)
 ## Semilatimea soselei in punctul turnului (m). 0 = nu se atinge `road_width`.
 @export var road_half_width: float = 0.0
 ## Distanta (m) intre marginea soselei si fata dinspre drum a turnului.
-@export_range(0.2, 5.0, 0.1) var tower_gap: float = 1.4
+@export_range(0.2, 5.0, 0.1) var tower_gap: float = 1.7
 @export_range(1.5, 3.5, 0.1) var disc_diameter: float = 4.0
 @export_range(0.6, 2.0, 0.05) var disc_height: float = 1.3
 ## Grosimea placii pe care sta turnul (m).
@@ -107,9 +107,9 @@ signal car_thrown(car: Car)
 
 @export_group("Ciocanul")
 ## Distanta (m) de la axa turnului la axa pivotului, spre exterior.
-@export_range(1.0, 6.0, 0.1) var hammer_u: float = 3.3
+@export_range(1.0, 6.0, 0.1) var hammer_u: float = 3.05
 ## De la axa pivotului la centrul capului de ciocan (m).
-@export_range(2.0, 8.0, 0.1) var hammer_length: float = 5.2
+@export_range(2.0, 8.0, 0.1) var hammer_length: float = 5.02
 @export_range(0.4, 1.6, 0.05) var hammer_head_radius: float = 0.95
 ## Cat de departe se trage inapoi (grade).
 @export_range(20.0, 90.0, 1.0) var pull_back_deg: float = 72.0
@@ -297,11 +297,10 @@ func _disc_bottom_y(tau: float) -> float:
 	var d := disc_distance(tau)
 	var t := smoothstep(0.0, 2.5, d)
 	var y := lerpf(base_height, 0.03, t)
-	var sink_u := clampf((tau - slide_seconds - 0.2) / 0.6, 0.0, 1.0)
-	return y - sink_u * (disc_height + 1.0)
+	return y
 
 
-## Discul e in miscare (a plecat din turn si nu s-a scufundat inca)?
+## Discul e in miscare (a plecat din turn si nu s-a strans inca)?
 func disc_flying(g: float) -> bool:
 	var k := period_index(g)
 	if k >= LEVELS:
@@ -312,8 +311,9 @@ func disc_flying(g: float) -> bool:
 
 ## `tau` de la lovitura pana cand discul a eliberat soseaua (s), dupa distanta.
 func crossing_clear_tau() -> float:
-	var need := road_width + tower_gap * 1.0 + disc_diameter * 2.0 \
-		+ 0.0 # tx + hw + r = 2*hw + gap + 2*r
+	# marginea de IESIRE a discului trece de marginea opusa: tx + hw + r, adica
+	# 2*hw + gap + 2*r
+	var need := road_width + tower_gap + disc_diameter
 	var lo := 0.0
 	var hi := slide_seconds
 	for _i in 30:
@@ -519,12 +519,12 @@ func _build_rig() -> void:
 	_splash.amount = 28
 	_splash.lifetime = 0.9
 	_splash.explosiveness = 1.0
-	_splash.mesh = PaletteBox.mesh(Vector3(0.22, 0.22, 0.22), Palette.FOAM_WHITE)
+	_splash.mesh = PaletteBox.mesh(Vector3(0.3, 0.3, 0.3), Palette.SAND_MID)
 	_splash.direction = Vector3.UP
 	_splash.spread = 38.0
-	_splash.initial_velocity_min = 5.0
-	_splash.initial_velocity_max = 9.0
-	_splash.gravity = Vector3(0.0, -22.0, 0.0)
+	_splash.initial_velocity_min = 3.0
+	_splash.initial_velocity_max = 6.5
+	_splash.gravity = Vector3(0.0, -12.0, 0.0)
 	_splash.scale_amount_min = 0.7
 	_splash.scale_amount_max = 1.5
 	add_child(_splash)
@@ -569,7 +569,7 @@ func _placeholder() -> Node3D:
 		frame.add_child(PaletteBox.instance(
 			Vector3(0.7, hammer_length + 1.6, 0.7), Palette.WOOD_WEATHERED,
 			Vector3(hammer_u, (hammer_length + 1.6) * 0.5, sz * 1.9)))
-	var pivot_y := base_height + disc_height * 0.5 + hammer_length
+	var pivot_y := 0.95 + hammer_length # centrul maciucii in repaus: 0,95 m (talpa la sol)
 	var hammer := Node3D.new()
 	hammer.name = "Hammer"
 	hammer.position = Vector3(hammer_u, pivot_y, 0.0)
@@ -668,8 +668,11 @@ func _apply_state() -> void:
 				d.visible = fly
 				var c := disc_center(tau)
 				d.position = Vector3(-disc_distance(tau), _disc_bottom_y(tau), 0.0)
-				d.rotation.y = spin_rate_disc * slide_seconds * (1.0 - pow(1.0 - minf(tau / slide_seconds, 1.0), 2.0)) * 0.5 \
-					if tau > 0.0 else 0.0
+				var tt := minf(tau, slide_seconds)
+				d.rotation.y = spin_rate_disc * (tt - tt * tt / (2.0 * slide_seconds))
+				# oprit, mai sta o clipa, apoi se strange la nimic cu un nor de praf
+				var vanish := clampf((tau - slide_seconds - 0.3) / 0.4, 0.0, 1.0)
+				d.scale = Vector3.ONE * (1.0 - vanish)
 				_place_body(tau, tau < slide_seconds and _on_road_window(c))
 			continue
 		d.visible = true
@@ -681,8 +684,8 @@ func _apply_state() -> void:
 	if s < hit_at:
 		_flying_off()
 		_splashed_period = -1
-	# plescaitul, o singura data pe perioada, cand discul se opreste
-	elif s - hit_at >= slide_seconds + 0.2 and _splashed_period != k:
+	# norul de praf, o singura data pe perioada, cand discul se strange
+	elif s - hit_at >= slide_seconds + 0.3 and _splashed_period != k:
 		_splashed_period = k
 		_splash.restart()
 		_splash.emitting = true

@@ -301,7 +301,8 @@ func _test_coverage() -> void:
 	var left_on_road := 0
 	var post_samples := 0
 	var t_end := _hz.strike_period - _hz.windup_seconds - _hz.hold_seconds - _hz.swing_seconds - 0.3
-	var s_post := _hz.hit_at + tau_clear + 0.15
+	# (cu min: un disc care nu iese niciodata de pe sosea n-are un `tau_clear` real)
+	var s_post := _hz.hit_at + minf(tau_clear, _hz.slide_seconds - 0.3) + 0.15
 	# pana la urmatoarea lovitura (14 s mai tarziu, in perioada urmatoare): ciocanul
 	# tras si turnul coborat sunt in cadru, discul trebuie sa lipseasca de pe asfalt
 	while s_post < _hz.strike_period + _hz.hit_at - 0.6:
@@ -317,6 +318,15 @@ func _test_coverage() -> void:
 			for hit in space.intersect_shape(q, 16):
 				var c: Object = hit["collider"]
 				if c == _hz.body() or c == _hz.hit_zone():
+					left_on_road += 1
+		# si discul VIZIBIL (nodul din model): un disc oprit pe asfalt si fara corp
+		# activ tot ar fi un obstacol pentru ochi. Lateral fata de axa = x in spatiul
+		# radacinii (turnul sta pe +X, deci un disc la x < hw + r e pe/langa asfalt).
+		for di in DarumaOtoshiHazard.LEVELS:
+			var dn := _hz.disc_node(di)
+			if dn.visible and dn.scale.x > 0.5:
+				var lx := absf(_hz.to_local(dn.global_position).x)
+				if lx - _hz.disc_diameter * 0.5 < HALF_WIDTH - 0.05:
 					left_on_road += 1
 		s_post += 0.25
 	print("  dupa traversare: %d cadre pana la sfarsitul perioadei, %d atingeri disc-asfalt" % [post_samples, left_on_road])

@@ -53,11 +53,11 @@ BASE_H = 0.12
 LEVELS = 5
 HEAD_H = 2.7
 HAMMER_U = 3.05             # axa pivotului, de la axa turnului (spre +X)
-HAMMER_L = 5.2              # pivot -> centrul capului maciucii
+HAMMER_L = 5.02             # pivot -> centrul capului maciucii (talpa maciucii la z = 0)
 R_MALLET = 0.95
-MALLET_LEN = 2.2            # pe Y Blender (sensul de mers)
-PIVOT_Z = BASE_H + DISC_H * 0.5 + HAMMER_L   # 5.97
-POST_Y = 1.9                # stalpii, la +-Y Blender (de-o parte si de alta a maciucii)
+MALLET_LEN = 2.8            # pe Y Blender (sensul de mers)
+PIVOT_Z = 0.95 + HAMMER_L   # 5.97: maciuca in repaus are centrul la 0,95 m (talpa la sol)
+POST_Y = 2.2                # stalpii, la +-Y Blender (de-o parte si de alta a maciucii)
 SEG = 16
 
 
@@ -104,7 +104,7 @@ def build_hammer():
     """Originea = axa pivotului. Geometria atarna pe -Z Blender (in jos)."""
     b = Builder()
     # Bratul de lemn si maciuca (cilindru cu axa pe Y, doua inele de legatura).
-    b.beam((0.0, 0.0, 0.25), (0.0, 0.0, -HAMMER_L + 0.3), (0.34, 0.34), WOODC)
+    b.beam((0.0, 0.0, 0.25), (0.0, 0.0, -HAMMER_L + 0.3), (0.46, 0.46), WOODC)
     b.cylinder((0.0, 0.0, -HAMMER_L), R_MALLET, MALLET_LEN, WOODC,
                segments=SEG, axis="Y")
     for sy in (-1.0, 1.0):
@@ -127,12 +127,12 @@ def build_frame():
         # picior de piatra
         b.box((px, y, -0.1), (1.5, 1.5, 0.9), STONE)
         # stalpul de lemn, din piatra pana deasupra pivotului
-        b.box((px, y, (PIVOT_Z + 0.55) * 0.5 + 0.2), (0.70, 0.70, PIVOT_Z + 0.35), INK)
+        b.box((px, y, (PIVOT_Z + 0.55) * 0.5 + 0.2), (0.80, 0.80, PIVOT_Z + 0.35), WOODC)
         # contrafisa spre exterior (+X): sprijin pentru zvacnetul loviturii
-        b.beam((px, y, 0.4), (px + 2.1, y, 0.15), (0.40, 0.40), INK)
-        b.beam((px + 2.1, y, 0.4), (px, y, PIVOT_Z * 0.78), (0.34, 0.34), INK)
+        b.beam((px, y, 0.4), (px + 2.1, y, 0.15), (0.44, 0.44), WOODC)
+        b.beam((px + 2.1, y, 0.4), (px, y, PIVOT_Z * 0.78), (0.40, 0.40), WOODC)
         # cap rosu pe stalp (accent, citeste de departe)
-        b.box((px, y, PIVOT_Z + 0.62), (0.98, 0.98, 0.26), RED)
+        b.box((px, y, PIVOT_Z + 0.62), (1.08, 1.08, 0.30), RED)
         # lagarul (bloc de lemn deschis) in care intra axa
         b.box((px, y * 0.78, PIVOT_Z), (0.52, 0.34, 0.52), WOODC)
     # axa: bara pe Y, trece prin butucul ciocanului

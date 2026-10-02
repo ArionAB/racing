@@ -483,6 +483,11 @@ func _apply_state() -> void:
 	var box := _hit_shape.shape as BoxShape3D
 	var reach := strike_reach if in_strike() else rest_reach
 	box.size.y = tube_diameter + reach * 2.0
+	# `seek`/`force_clock` opresc `_physics_process`, deci petecul ud nu s-ar mai
+	# actualiza: o captura la o faza fortata ar arata balta starii initiale.
+	if _puddle != null and is_wet() != _wet:
+		_wet = is_wet()
+		_puddle.visible = _wet
 
 
 func _advance(delta: float) -> bool:

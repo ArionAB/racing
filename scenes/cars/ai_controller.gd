@@ -325,6 +325,14 @@ var _shishi_index: Dictionary = {}
 var _shishi_sign: Dictionary = {}
 var _shishi_latched: Dictionary = {}
 var _shishi_blend: Dictionary = {}
+## Doar pentru sonde: `false` = AI-ul ignora daruma-otoshi (garda trebuie sa prinda
+## contacte cu discul — altfel nu e armata).
+var reads_daruma: bool = true
+## Per daruma (cheie: instance id): indexul de pista si decizia luata la intrarea in
+## raza — {lift: bool, clear_at: float (ceas propriu, s)}.
+var _daruma_index: Dictionary = {}
+var _daruma_state: Dictionary = {}
+var _daruma_now: float = 0.0
 var _unstick_timer: float = 0.0
 var _unstick_reversing: bool = false
 var _unstick_steer: float = 0.0
@@ -570,6 +578,10 @@ func update(delta: float) -> void:
 		target = minf(target, stop_m * 1.2)
 	if door_wait:
 		target = minf(target, maxf(_door_block_m - DOOR_STOP_M, 0.0) * 1.2)
+	# Daruma-otoshi (Kyoto): discul traverseaza TOATA soseaua, deci nu exista banda
+	# libera — se scapa prin timing. Ridic piciorul ca sa trec DUPA disc (niciodata
+	# pana la oprire: plafonul are podea), sau trec inainte de lovitura.
+	target = minf(target, _daruma_cap(idx, speed))
 	if speed > target * 1.06:
 		# Franare proportionala cu depasirea, nu o smucitura fixa.
 		_throttle = clampf(-(speed - target) / 6.0, -1.0, -0.15)
@@ -956,6 +968,78 @@ func _shishi_line(idx: int, speed: float, line: float) -> float:
 			-LINE_MAX, LINE_MAX)
 		return lerpf(line, target, blend)
 	return line
+
+
+## Daruma-otoshi (Kyoto, `daruma_otoshi_hazard.gd`): cat de departe (m) se citeste
+## ciocanul tras inapoi. Telegraful dureaza ~3,5 s, deci la ~25 m/s se vede de la
+## 90 m; 140 m acopera si perioada de repaus, ca sa ne putem pregati.
+const DARUMA_REACH_M: float = 140.0
+## Cat de jos coboara plafonul de viteza (fractie din croaziera): niciodata oprire.
+const DARUMA_FLOOR: float = 0.5
+## Dupa turn, cati metri mai tine decizia (lungimea masinii + amprenta discului).
+const DARUMA_PASSED_M: float = 8.0
+## Marja de siguranta peste sfarsitul ferestrei de pericol (s).
+const DARUMA_EXTRA_S: float = 0.2
+
+## Daruma-otoshi: cand discul va traversa in FEREASTRA mea de sosire [rapid, lent]
+## (`blocks_between`), aleg intre doua lucruri, o singura data, si tin alegerea:
+##   - ridic piciorul si ajung DUPA ce discul a eliberat soseaua (daca viteza
+##     necesara nu coboara sub `DARUMA_FLOOR` din croaziera);
+##   - altfel nu ating nimic: ajung inaintea loviturii (plafon fara efect).
+## Citeste doar ce vede si un om: ciocanul tras (ceasul hazardului prin
+## `window_rel`) si propria viteza. Intoarce plafonul de viteza (INF = niciunul).
+func _daruma_cap(idx: int, speed: float) -> float:
+	if not reads_daruma:
+		return INF
+	var nodes := get_tree().get_nodes_in_group(DarumaOtoshiHazard.AI_GROUP)
+	if nodes.is_empty():
+		return INF
+	var r := track.route_at(car.route)
+	if r == null or r.count() == 0:
+		return INF
+	var n_pts := r.count()
+	var bake: float = track.curve.bake_interval
+	_daruma_now += get_physics_process_delta_time()
+	var cap := INF
+	var cruise: float = car.max_speed * car.speed_scale
+	for node in nodes:
+		var hz := node as DarumaOtoshiHazard
+		if hz == null:
+			continue
+		var key := hz.get_instance_id()
+		if not _daruma_index.has(key):
+			_daruma_index[key] = track.closest_index_global(hz.ai_decision_point(), car.route)
+		var d_idx: int = int(_daruma_index[key]) - idx
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := _arc_to(r, idx, d_idx, bake)
+		if along > DARUMA_REACH_M or along < -DARUMA_PASSED_M:
+			_daruma_state.erase(key)
+			continue
+		if not _daruma_state.has(key):
+			var ahead := maxf(along, 0.0)
+			var eta_fast := ahead / maxf(maxf(speed, cruise * SHISHI_FAST), 10.0)
+			var eta_slow := ahead / maxf(maxf(speed * SHISHI_SLOW, cruise * SHISHI_SLOW_FLOOR), 8.0)
+			var st := {"lift": false, "clear_at": 0.0}
+			if hz.blocks_between(eta_fast, eta_slow):
+				var w := hz.window_rel(eta_fast)
+				var wait_v := ahead / maxf(w.y + hz.ai_margin + DARUMA_EXTRA_S, 0.1)
+				if wait_v >= cruise * DARUMA_FLOOR:
+					st["lift"] = true
+					st["clear_at"] = _daruma_now + w.y
+				if OS.get_environment("DARUMA_TRACE") == "1":
+					print("[daruma] %s along=%.1f v=%.1f eta=[%.2f, %.2f] fereastra=[%.2f, %.2f] -> %s" % [car.pilot_name, along, speed, eta_fast, eta_slow, w.x, w.y, "RIDIC" if st["lift"] else "TREC"])
+			_daruma_state[key] = st
+		var state: Dictionary = _daruma_state[key]
+		if not state["lift"] or along < 0.0:
+			continue
+		var left: float = float(state["clear_at"]) - _daruma_now + hz.ai_margin + DARUMA_EXTRA_S
+		if left <= 0.0:
+			continue
+		cap = minf(cap, maxf(along / left, cruise * DARUMA_FLOOR))
+	return cap
 
 
 func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:

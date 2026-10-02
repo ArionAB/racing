@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
 [ext_resource type="Script" path="res://scenes/hazards/shishi_odoshi_hazard.gd" id="11_shishi"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/shishi_odoshi.glb" id="12_shishi_glb"]
 
 [sub_resource type="Curve3D" id="Curve3D_kyoto"]
 closed = true
@@ -96,6 +97,7 @@ transform = Transform3D(-0.20230, 0, 0.97932, 0, 1, 0, -0.97932, 0, -0.20230, 18
 script = ExtResource("11_shishi")
 side = 1
 road_half_width = 5.5
+model = ExtResource("12_shishi_glb")
 
 [node name="CameraTsutenkyo" type="Area3D" parent="Hazarduri"]
 monitorable = false

@@ -383,11 +383,17 @@ func _build_rig() -> void:
 		# Contractul: originea modelului = axa pivotului, deci modelul sta in
 		# pivot, nu pe sol.
 		_pivot.add_child(root)
+		# Materialul lumii (atlasul de paleta + AO din vertex color): zero
+		# materiale in plus fata de placeholder.
+		Palette.apply_world_material(root)
 		_tube = root.find_child("Tube", true, false) as Node3D
 	if _tube == null:
 		if root == null:
 			root = _placeholder()
 			_pivot.add_child(root)
+		# Materialul lumii (atlasul de paleta + AO din vertex color): zero
+		# materiale in plus fata de placeholder.
+		Palette.apply_world_material(root)
 		_tube = root.find_child("Tube", true, false) as Node3D
 	_tube.rotation.x = angle_at(_clock)
 
@@ -477,6 +483,11 @@ func _apply_state() -> void:
 	var box := _hit_shape.shape as BoxShape3D
 	var reach := strike_reach if in_strike() else rest_reach
 	box.size.y = tube_diameter + reach * 2.0
+	# `seek`/`force_clock` opresc `_physics_process`, deci petecul ud nu s-ar mai
+	# actualiza: o captura la o faza fortata ar arata balta starii initiale.
+	if _puddle != null and is_wet() != _wet:
+		_wet = is_wet()
+		_puddle.visible = _wet
 
 
 func _advance(delta: float) -> bool:

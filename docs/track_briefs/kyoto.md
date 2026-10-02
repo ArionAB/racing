@@ -445,7 +445,7 @@ doar *dacă* vine. Iar tubul e pe drumul principal, nu pe scurtătură, deci îl
 | **Podul acoperit Tsūten-kyō** (D) | 70 m la +12, peste o râpă de arțari. Are stâlpi la 3 m, parapet și acoperiș de țiglă, iar camera coboară înăuntru (§2.0) | **reutilizare:** secțiune înălțată + `CameraZone`. Modulele de acoperiș urmăresc curba (§5.6) |
 | **Covorul de frunze** (D, E) | Drumul din valea de arțari pornește **acoperit de frunze** (un decal de frunze peste caldarâm), iar roțile curăță linia. **După trei tururi se vede linia de cursă a plutonului**, ca o dâră de piatră curată prin roșu. În v0.1 e doar vizual | **reutilizare:** `RoadWear` (foaia de uzură), folosită invers: urmele *scot* frunzele în loc să pună praf. E un shader mic pe decal: `alpha × (1 − uzură)`. Capcanele `RoadWear` sunt în memoria `roadwear-foaia-de-uzura` (SubViewport necurățat). Grip-ul diferit pe frunze e opțional (§3.1) |
 | ***Kogarashi*** (D, la ieșirea de pe pod) | Un vârtej de frunze roșii traversează drumul pe un ciclu de ~29 s. Te răsucește puțin (`Car.apply_yaw_kick`), nu te oprește. **E mai slab decât la Serengeti** (kick ×0,6) și are altă culoare | **reutilizare:** `DustDevilHazard` cu particule de frunze (billboard, plafon ≤ 48 — memoria `particule-muchia-nu-numarul`). **De confirmat (§3.1)** |
-| **Pavilionul de Aur și reflexia** (F) | Pavilionul e decor. **Reflexia e o decizie de risc:** apa v12 e **opacă și unshaded** (memoria `apa-iluminata-v12`), deci o copie oglindită pusă sub apă nu se vede. Ar fi nevoie de o **pânză de apă transparentă locală** sub pavilion, cu copia oglindită dedesubt | Copia oglindită e un **nod** cu `scale.y = −1`, pe care Godot îl compensează pe noduri; într-un MultiMesh ar fi tăiată (memoria `multimesh-oglindire-culling`). Costă **+1 material** și overdraw pe o suprafață mică. Se decide pe captură (§3.1) |
+| **Pavilionul de Aur și reflexia** (F) | Pavilionul e decor. **Reflexia e aprobată de dezvoltator (§3.1), cu +1 material.** Problema tehnică: apa v12 e **opacă și unshaded** (memoria `apa-iluminata-v12`), deci o copie oglindită pusă sub apă nu se vede. Ar fi nevoie de o **pânză de apă transparentă locală** sub pavilion, cu copia oglindită dedesubt | Copia oglindită e un **nod** cu `scale.y = −1`, pe care Godot îl compensează pe noduri; într-un MultiMesh ar fi tăiată (memoria `multimesh-oglindire-culling`). Costă **+1 material** și overdraw pe o suprafață mică. Se decide pe captură (§3.1) |
 
 **Ce NU e nou:** săritura (`TrackChannel`), podurile (secțiuni înălțate),
 scurtătura (`TrackBranch`), camera (`CameraZone`), petecul ud
@@ -457,7 +457,21 @@ urmele (`RoadWear`) și decorul mobil (`PathMover` pentru tren, bărci, ricșe
 de fotosensibilitate (`ProbeFlicker`) și foaia de uzură folosită invers.
 Identitatea pistei e **frunzișul + tubul + scena**, nu numărul de mecanici.
 
-### 3.1 Decizii deschise pentru dezvoltator
+### 3.1 Decizii pentru dezvoltator
+
+**Deciziile dezvoltatorului (2 oct 2026), care înlocuiesc recomandările de
+mai jos:**
+1. ***Kogarashi*: DA.** Se reutilizează `DustDevilHazard` cu frunze, la
+   ieșirea de pe Tsūten-kyō, kick ×0,6. Intră în pasul 7 din §7.
+2. **Al doilea shishi-odoshi:** se decide **după primul tur la volan**
+   (pasul 5 din §7).
+3. **Grip pe frunze:** NU în v0.1, covorul e doar vizual.
+4. **Reflexia pavilionului: DA, +1 material aprobat** (pânza transparentă
+   locală). Motivul dezvoltatorului: nicio pistă n-a atins plafonul de
+   materiale. Tot se raportează explicit în probe_decor, iar overdraw-ul se
+   măsoară la pasul 1(d).
+
+Textul inițial, păstrat ca istoric:
 
 1. ***Kogarashi*: reutilizăm vârtejul Serengeti?**
    - **Pentru:** ai cerut ca o parte din hazarde să fie reutilizate, iar

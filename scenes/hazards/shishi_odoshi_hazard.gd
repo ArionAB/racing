@@ -383,11 +383,17 @@ func _build_rig() -> void:
 		# Contractul: originea modelului = axa pivotului, deci modelul sta in
 		# pivot, nu pe sol.
 		_pivot.add_child(root)
+		# Materialul lumii (atlasul de paleta + AO din vertex color): zero
+		# materiale in plus fata de placeholder.
+		Palette.apply_world_material(root)
 		_tube = root.find_child("Tube", true, false) as Node3D
 	if _tube == null:
 		if root == null:
 			root = _placeholder()
 			_pivot.add_child(root)
+		# Materialul lumii (atlasul de paleta + AO din vertex color): zero
+		# materiale in plus fata de placeholder.
+		Palette.apply_world_material(root)
 		_tube = root.find_child("Tube", true, false) as Node3D
 	_tube.rotation.x = angle_at(_clock)
 

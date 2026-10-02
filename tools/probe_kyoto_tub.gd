@@ -19,7 +19,9 @@ extends Node
 ##
 ## Ruleaza CA SCENA:
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeKyotoTub.tscn
-##   argumente (dupa `--`): --only=a|b|c|d  --blind  --pivot-h=6.5  --seconds=180
+##   argumente (dupa `--`): --only=a|b|c|d  --pivot-h=6.5  --seconds=180  --seed=N
+##   --car=i (doar masina i, cu --trace) ; --sabotage-mass (verdictul de masa TREBUIE sa pice)
+##   Garda AI e armata mereu: ruleaza intai AI-ul care citeste, apoi cel ORB.
 
 const CraneScript := preload("res://scenes/hazards/shishi_odoshi_hazard.gd")
 const WaypointDriver := preload("res://tools/probe_waypoint_driver.gd")
@@ -44,6 +46,7 @@ var _blind: bool = false
 var _pivot_h: float = -1.0
 var _trace: bool = false
 var _seed: int = 7
+var _sabotage_mass: bool = false
 var _car_only: int = -1
 var _ai_seconds: float = 180.0
 var _free_cache: Dictionary = {}
@@ -56,6 +59,8 @@ func _parse_args() -> void:
 			_only = arg.trim_prefix("--only=")
 		elif arg.begins_with("--seed="):
 			_seed = int(arg.trim_prefix("--seed="))
+		elif arg == "--sabotage-mass":
+			_sabotage_mass = true
 		elif arg == "--trace":
 			_trace = true
 		elif arg.begins_with("--car="):
@@ -91,6 +96,11 @@ func _ready() -> void:
 	_hz.side = 1
 	if _pivot_h > 0.0:
 		_hz.pivot_height = _pivot_h
+	if _sabotage_mass:
+		# Sabotaj: masa deconectata (raport saturat, fara bonus de masa). Verdictul
+		# „cifrele difera intre masini" TREBUIE sa pice.
+		_hz.reference_mass = 0.001
+		_hz.keep_per_mass = 0.0
 	add_child(_hz)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -343,7 +353,7 @@ func _test_strike() -> void:
 			light = r
 		if float(r["mass"]) > float(heavy["mass"]) or float(heavy["speed"]) != 20.0:
 			heavy = r
-	_verdict(float(heavy["rise"]) < float(light["rise"]),
+	_verdict(float(heavy["rise"]) < float(light["rise"]) - 0.1,
 		"masa conectata: %s (%.0f) urca %.2f m < %s (%.0f) urca %.2f m"
 		% [heavy["name"], heavy["mass"], heavy["rise"], light["name"],
 		light["mass"], light["rise"]])

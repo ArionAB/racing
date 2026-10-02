@@ -633,6 +633,7 @@ if len(sys.argv) > 1:
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_senbon.glb" id="13_senbon"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_large.glb" id="14_large"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/shishi_odoshi.glb" id="12_shishi_glb"]
 """
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
@@ -736,6 +737,7 @@ transform = {tub_xf}
 script = ExtResource("11_shishi")
 side = 1
 road_half_width = 5.5
+model = ExtResource("12_shishi_glb")
 """
     tscn += f"""
 [node name="CameraTsutenkyo" type="Area3D" parent="Hazarduri"]

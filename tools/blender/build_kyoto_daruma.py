@@ -59,11 +59,14 @@ MALLET_LEN = 2.8            # pe Y Blender (sensul de mers)
 PIVOT_Z = 0.95 + HAMMER_L   # 5.97: maciuca in repaus are centrul la 0,95 m (talpa la sol)
 POST_Y = 2.2                # stalpii, la +-Y Blender (de-o parte si de alta a maciucii)
 SEG = 16
+PIER = 3.0                  # adancimea pilonului de sub placa (si a picioarelor cadrului)
 
 
 def build_base():
     b = Builder()
-    b.cylinder((0.0, 0.0, (BASE_H - 0.5) * 0.5), R_DISC + 0.55, BASE_H + 0.5,
+    # Pilon de piatra care coboara 3 m sub cota soselei: pe malul iazului turnul sta
+    # pe stanca, nu plutește deasupra apei.
+    b.cylinder((0.0, 0.0, (BASE_H - PIER) * 0.5), R_DISC + 0.55, BASE_H + PIER,
                STONE, segments=SEG)
     # inel mai ingust, de piatra mai inchisa, sub disc: placa pare asezata
     b.cylinder((0.0, 0.0, BASE_H * 0.5), R_DISC + 0.25, BASE_H + 0.02, STONE_D,
@@ -125,7 +128,7 @@ def build_frame():
     for sy in (-1.0, 1.0):
         y = sy * POST_Y
         # picior de piatra
-        b.box((px, y, -0.1), (1.5, 1.5, 0.9), STONE)
+        b.box((px, y, (0.35 - PIER) * 0.5), (1.5, 1.5, PIER + 0.35), STONE)
         # stalpul de lemn, din piatra pana deasupra pivotului
         b.box((px, y, (PIVOT_Z + 0.55) * 0.5 + 0.2), (0.80, 0.80, PIVOT_Z + 0.35), WOODC)
         # contrafisa spre exterior (+X): sprijin pentru zvacnetul loviturii
@@ -156,7 +159,7 @@ def _ao(z_lo, z_hi, low=0.62, dist=1.6, grad="vertical"):
 
 
 stats = {}
-stats["Base"] = finish(base, bevel=0.04, ao=_ao(-0.5, BASE_H, 0.7), origin=None,
+stats["Base"] = finish(base, bevel=0.04, ao=_ao(-PIER, BASE_H, 0.7), origin=None,
                        smooth_angle=None)
 for j, d in enumerate(discs):
     stats[d.name] = finish(d, bevel=0.06, bevel_segments=2, ao=_ao(0.0, DISC_H, 0.72),
@@ -166,7 +169,7 @@ stats["Head"] = finish(head, bevel=0.03, ao=_ao(0.0, HEAD_H, 0.62), origin=None,
 # Ciocanul se balanseaza: gradient vertical copt ar ajunge pe partea gresita.
 stats["Hammer"] = finish(hammer, bevel=0.03, ao=dict(samples=24, dist=1.0,
                          gradient="none", floor=0.35), origin=None, smooth_angle=40.0)
-stats["Frame"] = finish(frame, bevel=0.04, ao=_ao(-0.55, PIVOT_Z + 0.75, 0.55),
+stats["Frame"] = finish(frame, bevel=0.04, ao=_ao(-PIER, PIVOT_Z + 0.75, 0.55),
                         origin=None, smooth_angle=None)
 
 base.location = (0.0, 0.0, 0.0)

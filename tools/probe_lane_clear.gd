@@ -272,6 +272,16 @@ const BASELINE := {
 	# pe INAINTE la 0.875-0.880 — rampa sariturii Devkund (G2), obstacolul
 	# intentionat pe care se sare, ca RampNear/RampFar la Fiordland.
 	"Jodhpur (Track17)": 31,
+	# Kyoto (Track18), armat la traseul gol (§7 pasul 2-3, fara decor): 3
+	# raportari, masurate de 3 ori, identic — 2 la frac 0.305 pe INAINTE
+	# (`ChannelKicker`, trambulina sariturii de pe scena Kiyomizu, h=0.4 si
+	# 1.0, obstacolul pe care se sare, ca la Devkund) si 1 la 0.585 pe INAINTE
+	# (`TerrainBody` la 5,1 m, h=0.4: iesirea din arcul lui E, unde soseaua
+	# coboara 10% si terenul de 7,9 m al grilei sta cu pana la 0,9 m peste
+	# asfalt — vezi ProbeBuried, +0.93 m). Nimic in tunelul de torii. Baza =
+	# cifra masurata, fara marja: prima piesa de decor pusa in banda trebuie sa
+	# pice garda. Sabotaj (`--sabotaj`) verificat la armare.
+	"Kyoto (Track18)": 3,
 }
 
 

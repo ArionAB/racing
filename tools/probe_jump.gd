@@ -174,6 +174,10 @@ func _run_one(entry_speed: float) -> void:
 		if armed:
 			y_min = minf(y_min, p.y)
 		var on_floor := car.is_on_floor()
+		if _trace and armed and int(round(t * 60.0)) % 6 == 0:
+			print("    [trace] t=%.2f gap_axis=%+6.1f y=%5.2f v=%5.1f vy=%+5.1f floor=%s"
+				% [t, s, p.y, Vector2(car.velocity.x, car.velocity.z).length(),
+					car.velocity.y, str(on_floor)])
 		if armed and not on_floor:
 			if not was_air and _trace:
 				print("    [trace] desprindere la gap_axis=%.1f v_oriz=%.1f "
@@ -217,6 +221,12 @@ func _run_one(entry_speed: float) -> void:
 
 ## Cota apei din albie: originea canalului minus caderea declarata.
 func _water_y() -> float:
+	if not _ch.has("water_y_drop"):
+		# Canal USCAT (Kyoto, scena Kiyomizu: rapa fara apa proprie). Pragul de
+		# cadere nu mai e cota originii: cand buza de aterizare e MAI JOS decat
+		# originea (saritura cu cadere), o masina care a trecut si a atins buza
+		# era declarata „cazuta in albie". Acum: sub cea mai joasa buza.
+		return minf(_near_lip.y, _far_lip.y) - 2.0
 	return float((_ch["origin"] as Vector3).y) - float(_ch.get("water_y_drop", 0.0))
 
 

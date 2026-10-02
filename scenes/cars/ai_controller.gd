@@ -316,6 +316,15 @@ var _signal_block_m: float = INF
 ## Indexul de traseu al fiecarui semafor gasit (ca la usi: scanat o data per
 ## instanta, cheie = instance id).
 var _signal_index: Dictionary = {}
+## Doar pentru sonde: `false` = AI-ul ignora tubul (garda trebuie sa prinda
+## contacte cu el — altfel nu e armata).
+var reads_shishi: bool = true
+## Per tub (cheie: instance id): indexul de pista, semnul lateral al pivotului,
+## angajamentul pe banda exterioara si cat de instalata e linia (0..1).
+var _shishi_index: Dictionary = {}
+var _shishi_sign: Dictionary = {}
+var _shishi_latched: Dictionary = {}
+var _shishi_blend: Dictionary = {}
 var _unstick_timer: float = 0.0
 var _unstick_reversing: bool = false
 var _unstick_steer: float = 0.0
@@ -453,6 +462,9 @@ func update(delta: float) -> void:
 	# (vezi antetul `_torrent_lane_keep`). Vine dupa `_avoid_line`, ca ocolirea
 	# unei masini din trafic sa nu impinga linia inapoi spre banda.
 	line = _torrent_lane_keep(idx, speed, line)
+	# Shishi-odoshi (Kyoto): tubul care bate peste interiorul drumului. NU se
+	# franeaza pentru el — doar trece pe banda exterioara (vezi `_shishi_line`).
+	line = _shishi_line(idx, speed, line)
 	# CULOARUL UNIC are ultimul cuvant. Pe restul pistei ocolirea poate folosi
 	# toata latimea; intr-un blocaj cu o singura fanta, orice metru in afara
 	# fantei e zid, deci linia se strange inapoi in ea. Fereastra e ingusta
@@ -738,6 +750,25 @@ func _span_line(speed: float, line: float) -> float:
 	var t := clampf(1.0 - best_d / RotatingSpanHazard.AI_REACH_M, 0.0, 1.0)
 	return lerpf(line, target, t)
 
+## Shishi-odoshi (Kyoto, `shishi_odoshi_hazard.gd`): cat de departe (m) se citeste
+## unghiul tubului. La ~20 m/s sunt 7 s — deci tubul se citeste in toata faza
+## de umplere, nu doar la lovitura.
+const SHISHI_REACH_M: float = 150.0
+## Cat de incet presupunem ca ajungem, in cel mai rau caz, la tub (fractie din
+## viteza curenta; virajele dinaintea lui il pot incetini). Sosirea e o
+## FEREASTRA [rapid, lent], nu un moment (memoria `eta-cu-viteza-curenta-minte-
+## pe-banda-cu-viraje`).
+const SHISHI_SLOW: float = 0.7
+## Cel mai repede ajunge la fractia asta din viteza de croaziera a masinii, iar
+## cel mai lent nu coboara sub SLOW_FLOOR din ea (accelereaza pe drum).
+const SHISHI_FAST: float = 0.95
+const SHISHI_SLOW_FLOOR: float = 0.55
+## Cat de repede (1/s) se instaleaza / se desface linia exterioara. Pe 1 s la
+## 25 m/s: o mutare de 25 m, nu un smucit.
+const SHISHI_BLEND_RATE: float = 1.2
+## Dupa tub, cati metri mai tine linia exterioara (lungimea masinii).
+const SHISHI_PASSED_M: float = 4.0
+
 ## Banda de autocar (Fiordland, brief §3 „optiunea 0" — vezi comentariul de la
 ## SIGNAL_LANE_EASE_M): cat un TunnelSignalHazard `mode == LANE` e ACTIV
 ## (rosu ACUM, sau va prinde masina inauntru — vezi `active` mai jos) si masina
@@ -837,6 +868,95 @@ func _signal_lane_keep(idx: int, speed: float, line: float) -> float:
 					sig.is_red(), eta_west])
 		return result
 	return line
+
+## Lungimea de arc (m) de la indexul `idx` la `idx + d_idx` pe ruta `r`, cu semn
+## (negativ = punctul e in spatele nostru). Suma segmentelor coapte, nu un
+## produs cu `bake_interval`. Dincolo de 600 de pasi intoarce o valoare uriasa:
+## apelantul oricum ignora tot ce e mai departe de raza lui.
+func _arc_to(r: TrackRoute, idx: int, d_idx: int, bake: float) -> float:
+	var steps := absi(d_idx)
+	if steps > 600:
+		return signf(float(d_idx)) * 1.0e6
+	var n := r.count()
+	var total := 0.0
+	var sgn := 1 if d_idx >= 0 else -1
+	var i := idx
+	for _k in steps:
+		var a: Vector3 = r.baked[((i % n) + n) % n]
+		var b: Vector3 = r.baked[(((i + sgn) % n) + n) % n]
+		total += a.distance_to(b)
+		i += sgn
+	return total * float(sgn)
+
+
+## Shishi-odoshi: cand tubul va bate in fereastra mea de sosire, ma mut pe linia
+## exterioara (banda libera de langa pivot). Niciodata frana.
+##
+## Citeste doar ce vede si un om: unghiul tubului (`blocks_between` pe ceasul lui)
+## si propria viteza. Angajamentul se TINE (latch) pana trec de tub — fara el,
+## linia ar oscila in clipa in care fereastra de pericol trece pe langa estimare.
+func _shishi_line(idx: int, speed: float, line: float) -> float:
+	if not reads_shishi:
+		return line
+	var nodes := get_tree().get_nodes_in_group(ShishiOdoshiHazard.AI_GROUP)
+	if nodes.is_empty():
+		return line
+	var r := track.route_at(car.route)
+	if r == null or r.count() == 0:
+		return line
+	var n_pts := r.count()
+	var bake: float = track.curve.bake_interval
+	var dt := get_physics_process_delta_time()
+	for node in nodes:
+		var hz := node as ShishiOdoshiHazard
+		if hz == null:
+			continue
+		var key := hz.get_instance_id()
+		if not _shishi_index.has(key):
+			var hi := track.closest_index_global(hz.ai_decision_point(), car.route)
+			_shishi_index[key] = hi
+			_shishi_sign[key] = signf(r.side_at(hi).dot(
+				hz.global_transform.basis.x * float(hz.side)))
+		var d_idx: int = int(_shishi_index[key]) - idx
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		# Metri REALI pe axa pana la tub, nu `d_idx * bake_interval`: bake_interval
+		# e un MAXIM, punctele coapte se indesesc langa nodurile curbei, iar eroarea
+		# masurata aici a fost de 16 m din 42 — destul cat sa angajezi banda
+		# exterioara cu o secunda prea tarziu.
+		var along := _arc_to(r, idx, d_idx, bake)
+		var in_zone := along <= SHISHI_REACH_M and along >= -SHISHI_PASSED_M
+		if not in_zone:
+			_shishi_latched.erase(key)
+		elif not _shishi_latched.has(key):
+			var ahead := maxf(along, 0.0)
+			# Sosirea e o FEREASTRA, si viteza de ACUM nu o ancoreaza: la iesirea din
+			# viraj masina accelereaza (masurat: un pilot care vedea 15 m/s la 150 m
+			# a ajuns cu 33 si s-a angajat pe exterior abia la 42 m — prea tarziu).
+			# Un pilot isi stie masina: cel mai repede = viteza ei de croaziera,
+			# cel mai lent = o fractie din viteza de acum sau din croaziera.
+			var cruise: float = car.max_speed * car.speed_scale
+			var eta_fast := ahead / maxf(maxf(speed, cruise * SHISHI_FAST), 10.0)
+			var eta_slow := ahead / maxf(maxf(speed * SHISHI_SLOW, cruise * SHISHI_SLOW_FLOOR), 8.0)
+			if hz.blocks_between(eta_fast, eta_slow):
+				_shishi_latched[key] = true
+				if OS.get_environment("SHISHI_TRACE") == "1":
+					print("[shishi] %s angajat along=%.1f v=%.1f eta=[%.2f, %.2f] ceas=%.2f" % [car.pilot_name, along, speed, eta_fast, eta_slow, hz.clock()])
+		var blend: float = _shishi_blend.get(key, 0.0)
+		blend = move_toward(blend,
+			1.0 if _shishi_latched.has(key) else 0.0, dt * SHISHI_BLEND_RATE)
+		_shishi_blend[key] = blend
+		if blend <= 0.0:
+			continue
+		var hw: float = maxf(track.width_at_index(idx) if car.route == 0 			else r.half_width, 0.001)
+		var target := clampf(
+			float(_shishi_sign[key]) * absf(hz.ai_safe_lane_m()) / hw,
+			-LINE_MAX, LINE_MAX)
+		return lerpf(line, target, blend)
+	return line
+
 
 func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:
 	if traffic.is_empty():

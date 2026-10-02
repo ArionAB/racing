@@ -18,6 +18,8 @@ extends Node
 ##                             sosea: viaductul din lateral, de pe gheata.
 ##                             vederea reala de JOC, cu parametrii curenti ai
 ##                             camerei de urmarire
+##   --shishi-phase=0.72       (Kyoto) ceasul shishi-odoshi la fractia data din ciclu:
+##                             0.02 sus, 0.72 aproape orizontal, 0.90 lovit.
 ##   --track=0 --frac=0.5 --gamecam --route=1
 ##                             la fel, dar pe BANDA SECUNDARA cu indexul dat
 ##                             (1 = prima scurtatura, in ordinea din
@@ -331,6 +333,7 @@ func _ready() -> void:
 	var rain_clock := -1.0 # >= 0: RainCycle.force_clock() dupa doua cadre
 	var dusk_force := -1.0 # >= 0: DuskCycle.force_value() dupa doua cadre
 	var torrent_at := -1.0 # >= 0: TorrentCycle.force_clock() (secunde in ciclu)
+	var shishi_phase := -1.0 # >= 0: ShishiOdoshiHazard.force_clock(faza * ciclu), faza 0..1
 	var overdraw := false
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
 	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
@@ -454,6 +457,8 @@ func _ready() -> void:
 			typhoon_at = float(arg.trim_prefix("--typhoon-at="))
 		elif arg.begins_with("--wave-at="):
 			wave_at = float(arg.trim_prefix("--wave-at="))
+		elif arg.begins_with("--shishi-phase="):
+			shishi_phase = float(arg.trim_prefix("--shishi-phase="))
 		elif arg.begins_with("--rock-at="):
 			rock_at = float(arg.trim_prefix("--rock-at="))
 		elif arg.begins_with("--avalanche-at="):
@@ -683,6 +688,19 @@ func _ready() -> void:
 				node.call("force_clock", torrent_at)
 				torrents += 1
 		print("--torrent-at=%.2f: %d TorrentCycle fortate" % [torrent_at, torrents])
+	# Shishi-odoshi (Kyoto, POI F): ceasul tubului e UNGHIUL, deci o captura fara
+	# asta prinde tubul in faza in care a pornit pista. Faza e fractia din ciclu
+	# (16,6 s): ~0.02 = sus (inceput de umplere), ~0.72 = aproape orizontal
+	# (~85% din umplere), ~0.90 = lovit (gura pe drum).
+	if shishi_phase >= 0.0:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var tubs := 0
+		for node in get_tree().get_nodes_in_group(&"shishi_odoshi"):
+			if node.has_method("force_clock"):
+				node.call("force_clock", shishi_phase * float(node.call("cycle_seconds")))
+				tubs += 1
+		print("--shishi-phase=%.2f: %d ShishiOdoshiHazard fortate" % [shishi_phase, tubs])
 	if overdraw:
 		get_viewport().debug_draw = Viewport.DEBUG_DRAW_OVERDRAW
 	# Stadiul limbii de lava (Stromboli): 0 = turul 1 ... 2 = zid. Fara el,

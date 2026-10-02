@@ -91,6 +91,11 @@ res://
 - Commit-uri mici și dese; `.godot/` în .gitignore
 - Verificare headless cu sonde temporare (`--headless --fixed-fps 60`) înainte
   de commit la orice schimbare de fizică/gameplay
+- **Înainte de orice merge în main: `bash tools/verify_local.sh`**, pe ramura
+  cu main-ul adus în ea. Înlocuiește CI-ul de pe GitHub, care e doar manual din
+  oct 2026: rulat automat la fiecare push, a ars ~36.800 de minute într-o lună
+  (joburi agățate câte 6 ore) și a lăsat fără buget build-ul de iOS. Minutele
+  de GitHub Actions sunt rezervate build-ului de iOS (`ios.yml`).
 
 ## Constrângeri mobile 3D
 

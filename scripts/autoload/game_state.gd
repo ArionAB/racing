@@ -49,10 +49,14 @@ const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track15.tscn", # Machu Picchu = INDEXUL 8
 	"res://scenes/tracks/Track16.tscn", # Fiordland = INDEXUL 9
 	"res://scenes/tracks/Track17.tscn", # Jodhpur = INDEXUL 10
+	# Track18 = INDEXUL 11, nu 18 (aceeasi capcana ca la Track13/Track17):
+	# `snapshot`/`probe_race`/`probe_layout` vor 11, `probe_decor`/`probe_manual`
+	# vor 18 (memoria `probe-decor-numar-de-scena`).
+	"res://scenes/tracks/Track18.tscn", # Kyoto = INDEXUL 11
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Alpii", "Baikal", "Stromboli", "Chongqing",
-	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland", "Jodhpur",
+	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland", "Jodhpur", "Kyoto",
 ]
 const CHAMP_ROUNDS: int = 3
 

@@ -2405,6 +2405,27 @@ func _add_extras(mi: MeshInstance3D) -> void:
 				out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	mi.mesh = out
+	_verts_cache.clear()
+
+
+## Vertecsii lui `src`, pe suprafete, cititi O DATA pe mesh (timpul de
+## incarcare, oct 2026). `_radius_at` si `_wall_coverage` se chemau de zeci de
+## ori pe horn, si fiecare apel aducea inapoi de pe GPU toate array-urile
+## mesh-ului (cu normale, UV-uri, culori) doar ca sa citeasca pozitiile — iar
+## `_wall_coverage` o facea de zece ori pe apel. Masurat pe Cappadocia: 1,6 s
+## in `_add_extras`, pe 55 de hornuri. Mesh-ul nu se schimba cat dureaza
+## `_add_extras` (se scrie abia la capat), deci pozitiile sunt aceleasi la bit.
+var _verts_cache: Dictionary = {}
+
+func _verts_of(src: Mesh) -> Array[PackedVector3Array]:
+	var hit: Variant = _verts_cache.get(src)
+	if hit != null:
+		return hit
+	var out: Array[PackedVector3Array] = []
+	for sfc in src.get_surface_count():
+		out.append(src.surface_get_arrays(sfc)[Mesh.ARRAY_VERTEX])
+	_verts_cache[src] = out
+	return out
 
 
 ## Muta o cota de deschidere (usa/fereastra) departe de o buza de terasa.
@@ -2472,9 +2493,8 @@ func _wall_coverage(src: Mesh, cx: float, cz: float, y0: float, h: float,
 	# rama, si atunci acoperirea iesea 1.00 pe un perete care nu tine nimic.
 	var r_ax := 0.0
 	var n_ax := 0
-	for sfc0 in src.get_surface_count():
-		var arr0 := src.surface_get_arrays(sfc0)
-		var vv0: PackedVector3Array = arr0[Mesh.ARRAY_VERTEX]
+	var surfs := _verts_of(src)
+	for vv0 in surfs:
 		for v0 in vv0:
 			if absf((v0.y - y0) / h - frac) >= 0.05:
 				continue
@@ -2490,29 +2510,29 @@ func _wall_coverage(src: Mesh, cx: float, cz: float, y0: float, h: float,
 	# coltul ramei sa iasa in cer.
 	var r_min := r_ax * 0.88
 
+	# Felia de cota e aceeasi pentru toate sondele, deci vertecsii din ea, cu
+	# azimutul si raza lor, se aleg o singura data (aceleasi expresii ca
+	# inainte; testul e "exista un vertex", deci ordinea nu conteaza).
+	var slice_ang := PackedFloat64Array()
+	var slice_r := PackedFloat64Array()
+	for verts in surfs:
+		for v in verts:
+			if absf((v.y - y0) / h - frac) >= 0.05:
+				continue
+			slice_ang.append(atan2(v.z - cz, v.x - cx))
+			slice_r.append(Vector2(v.x - cx, v.z - cz).length())
 	var probe := 9
 	var hit := 0
 	for i in probe:
 		var a := azim + lerpf(-half_arc, half_arc, float(i) / float(probe - 1))
-		var found := false
-		for sfc in src.get_surface_count():
-			if found:
-				break
-			var arrays := src.surface_get_arrays(sfc)
-			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			for v in verts:
-				if absf((v.y - y0) / h - frac) >= 0.05:
-					continue
-				var da := absf(fposmod(
-					atan2(v.z - cz, v.x - cx) - a + PI, TAU) - PI)
-				if da > 0.09:
-					continue
-				if Vector2(v.x - cx, v.z - cz).length() < r_min:
-					continue
-				found = true
-				break
-		if found:
+		for k in slice_ang.size():
+			var da := absf(fposmod(slice_ang[k] - a + PI, TAU) - PI)
+			if da > 0.09:
+				continue
+			if slice_r[k] < r_min:
+				continue
 			hit += 1
+			break
 	return float(hit) / float(probe)
 
 
@@ -2539,22 +2559,27 @@ func _radius_at(src: Mesh, cx: float, cz: float, y0: float, h: float,
 		frac: float, azim: float = 9.0) -> float:
 	var radii: PackedFloat32Array = []
 	var sector := azim <= TAU
+	# Distanta pe cota, sectorul si raza fiecarui vertex nu depind de fereastra,
+	# deci se calculeaza o data; ferestrele doar refiltreaza, in aceeasi ordine.
+	var dt := PackedFloat64Array()
+	var r := PackedFloat32Array()
+	for verts in _verts_of(src):
+		for v in verts:
+			if sector:
+				var da := absf(fposmod(
+					atan2(v.z - cz, v.x - cx) - azim + PI, TAU) - PI)
+				if da > 0.61:
+					continue
+			dt.append(absf((v.y - y0) / h - frac))
+			r.append(Vector2(v.x - cx, v.z - cz).length())
 	# Fereastra creste daca felia iese goala (hornurile n-au inele de vertecsi
 	# la orice cota), ca sa returnam mereu o raza reala.
 	for win in [0.06, 0.12, 0.25, 0.5]:
 		radii.clear()
-		for sfc in src.get_surface_count():
-			var arrays := src.surface_get_arrays(sfc)
-			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			for v in verts:
-				if absf((v.y - y0) / h - frac) >= win:
-					continue
-				if sector:
-					var da := absf(fposmod(
-						atan2(v.z - cz, v.x - cx) - azim + PI, TAU) - PI)
-					if da > 0.61:
-						continue
-				radii.append(Vector2(v.x - cx, v.z - cz).length())
+		for k in dt.size():
+			if dt[k] >= win:
+				continue
+			radii.append(r[k])
 		if radii.size() >= 6:
 			break
 	if radii.is_empty():

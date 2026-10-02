@@ -34,7 +34,7 @@ extends Node
 ## ChaseCamera + CameraZone-ul tunelului, portile/peretii/padurea din `ToriiTunnel`.
 ##   ... -- --track=11                       (tinta: trebuie sa treaca)
 ##   ... -- --track=11 --sabotage=forest_off (padurea stinsa: cer prin goluri, trebuie sa pice)
-##   ... -- --track=11 --sabotage=gap24      (pas 2,4 m, cer in goluri, trebuie sa pice)
+##   ... -- --track=11 --sabotage=gap24      (pas 2,4 m, cer in goluri; de la decizia de raritate 50% e chiar pasul tintei, deci nu mai pica pe E' real)
 ##   ... -- --track=11 --sabotage=both       (ambele)
 ##   ... -- --track=11 --sabotage=bright     (perete luminos in locul padurii: trebuie sa pice)
 ##   ... -- --track=11 --sabotage=red_flash  (porti la 6 m pe fundal negru: arma regula rosului saturat)

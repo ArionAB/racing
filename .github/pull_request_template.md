@@ -12,7 +12,7 @@ Closes #
 - [ ] Branch dedicat (nu commit direct pe `main`)
 - [ ] Commit-uri mici si descriptive
 - [ ] Pentru schimbari de fizica/gameplay: verificat headless (`--headless --fixed-fps 60`)
-- [ ] CI verde (smoke test headless)
+- [ ] `bash tools/verify_local.sh` trece, rulat pe ramura cu main-ul adus in ea (inlocuieste CI-ul de pe GitHub)
 - [ ] Respecta constrangerile mobile (poly buget, particule, UI touch-first) daca e cazul
 
 ## Cum am testat

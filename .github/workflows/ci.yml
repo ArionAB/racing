@@ -1,16 +1,21 @@
 # CI — smoke test headless pentru Toy Racer.
-# Ruleaza la fiecare push si PR: descarca Godot, importa resursele si booteaza
-# scena principala cateva cadre in --headless. Pica daca Godot raporteaza erori
-# de script/parse/load. Scop: prinde regresiile de incarcare inainte de merge.
+# Descarca Godot, importa resursele si booteaza scena principala cateva cadre in
+# --headless, apoi ruleaza gardele. Pica daca Godot raporteaza erori de
+# script/parse/load sau o garda da VERDICT: PROBLEMA.
+#
+# DOAR MANUAL (oct 2026). Verificarea de dinainte de merge se face LOCAL, cu
+# `bash tools/verify_local.sh` — aceleasi pasi, pe Godot-ul de Windows, gratis.
+# Motivul: rulat la fiecare push pe orice ramura plus pe fiecare PR, fara limita
+# de timp, CI-ul a ars ~36.800 de minute in septembrie (90 de joburi agatate
+# cate 6 ore) si a epuizat bugetul comun cu build-ul de iOS. Daca il readuci pe
+# automat, pastreaza `timeout-minutes` si nu-l pune pe `push: ["**"]`.
 #
 # Bump de versiune Godot: schimba doar GODOT_VERSION mai jos (trebuie sa fie
 # identica cu config/features din project.godot).
 name: CI
 
 on:
-  push:
-    branches: ["**"]
-  pull_request:
+  workflow_dispatch:
 
 env:
   GODOT_VERSION: "4.7"
@@ -19,6 +24,8 @@ jobs:
   headless-smoke:
     name: Headless smoke test
     runs-on: ubuntu-latest
+    # Un pas agatat costa cel mult atat, nu limita implicita de 6 ore.
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4

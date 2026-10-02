@@ -37,7 +37,7 @@ from mathutils import Vector, Matrix
 GREEN = TROPICAL_GREEN      # 21 -- doar accent (coada), runda 2
 DRY = DRY_VEGETATION        # 13 -- paie, trunchiul
 STRAW = SAND_LIGHT          # 0  -- internoduri alternante, mai deschise
-NODE = ROCK_DARK            # 4  -- nodurile, mult mai inchise decat paiul
+NODE = LOG_DARK             # 28 -- nodurile, lemn intunecat
 OPEN = CORAL_SAND           # 19 -- buza si interiorul gurii (citeste „deschis")
 ROPE = KERB_RED              # 7  -- legatura de langa gura (carmin; CAR_RED 14 e rezervat masinilor in verify)
 WATER = FOAM_WHITE          # 22 -- firul de apa din jgheab
@@ -97,20 +97,23 @@ def build_tube():
     # Statii (y, raza, slot-ul fasiei care PORNESTE de la statia anterioara).
     nodes = [-2.3, 1.5, 4.9, 7.2]           # centrele celor 4 noduri de bambus
     col_r, col_w = R_TUBE + 0.1, 0.11       # inel ingrosat: +10 cm, ~44 cm lat
-    stations = [(-TAIL, 0.85, None), (-TAIL + 0.14, R_TUBE, DRY)]   # capac tesit
-    inter = [GREEN, DRY, DRY, DRY]           # verdele doar la coada; restul paie (13)
+    stations = [(-TAIL, 0.85, None), (-TAIL + 0.14, R_TUBE, GREEN)]   # capac tesit
+    # Runda 3: corp verde inchis (contrast de luminanta pe ceata deschisa), nod de
+    # lemn intunecat, banda carmin LA FIECARE NOD (semn care se vede si pe padure).
     for i, y in enumerate(nodes):
-        stations.append((y - 0.22, R_TUBE, inter[i]))
+        stations.append((y - 0.45, R_TUBE, GREEN))
+        stations.append((y - 0.40, R_TUBE + 0.04, ROPE))
+        stations.append((y - 0.15, R_TUBE + 0.04, ROPE))
         stations.append((y - col_w, col_r, NODE))
         stations.append((y + col_w, col_r, NODE))
-        stations.append((y + 0.22, R_TUBE, NODE))
+        stations.append((y + 0.20, R_TUBE, NODE))
     # Legatura rosie, ~1 m lata, chiar in spatele gurii (semn pe varful tubului).
     # Raza +0.06 fata de tub: doar vizual, colizorul nu o vede.
-    stations.append((8.1, R_TUBE, DRY))
+    stations.append((8.1, R_TUBE, GREEN))
     stations.append((8.18, R_TUBE + 0.06, ROPE))
     stations.append((9.18, R_TUBE + 0.06, ROPE))
     stations.append((9.26, R_TUBE, ROPE))
-    stations.append((9.5, R_TUBE, DRY))   # ultimul internod, pana la taietura
+    stations.append((9.5, R_TUBE, GREEN))   # ultimul internod, pana la taietura
     rings = []
     for y, r, _slot in stations:
         rings.append(_ring(b, const(y), r))
@@ -120,7 +123,7 @@ def build_tube():
 
     # Gura: ultimul inel al corpului -> inelul oblic exterior -> buza -> interior.
     ro = _ring(b, oblique, R_TUBE)
-    _strip(b, rings[-1], ro, DRY)
+    _strip(b, rings[-1], ro, GREEN)
     ri = _ring(b, oblique, R_TUBE - 0.2)
     _strip(b, ro, ri, OPEN, flip=False)      # grosimea peretelui, vizibila
     depth_y = 7.4

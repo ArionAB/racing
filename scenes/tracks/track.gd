@@ -1622,9 +1622,10 @@ static func themes() -> Dictionary:
 			# pune manual pe POI. Lumina e FIXA, nu un ceas (brief §0): fara
 			# DuskCycle, ca sa nu dubleze Jodhpur.
 			#
-			# SOARELE: 22 de grade, din SV (azimut ~225 busola), #FFD8A8. In
-			# conventia generatorului (x est, y nord, Godot gx=-x, gz=-y) sursa
-			# la busola 180+y_rot => y_rot = 45. Verificat pe directia de mers:
+			# SOARELE: 22 de grade, din SV (azimut ~225 busola), #FFD8A8. Harta lui
+			# Kyoto ajunge in Godot fara oglindire (gx = x, gz = -y, vezi
+			# tools/gen_kyoto_route.py), deci sursa la busola 180 - y_rot =>
+			# y_rot = -45. Verificat pe directia de mers:
 			# C (scena, spre S) il are in fata-dreapta (arțarii din rapa in
 			# contralumina — intentia), F (spre V) il are in stanga-fata si
 			# lumineaza fata de S a pavilionului, H (spre N) il are in spate-stanga
@@ -1633,7 +1634,7 @@ static func themes() -> Dictionary:
 			"sun_color": Color.html("FFD8A8"),
 			"sun_energy": 1.0,
 			"exposure": 1.0,
-			"sun_rotation_deg": Vector3(-22, 45, 0),
+			"sun_rotation_deg": Vector3(-22, -45, 0),
 			# AMBIENT 0,35, albastru rece de cer: umbrele trag spre albastru, nu
 			# spre negru (memoria umbra-fara-culoare-e-negru-mort).
 			"ambient_color": Color.html("B4C8E6"),

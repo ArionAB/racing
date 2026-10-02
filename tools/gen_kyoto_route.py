@@ -6,8 +6,13 @@
 #
 #   python tools/gen_kyoto_route.py [scenes/tracks/Track18.tscn]
 #
-# Coordonate de HARTA: x est, y nord (metri). Godot: gx = -x, gz = -y (rotatie
-# de 180 de grade, NU oglindire) -- acelasi tipar ca gen_jodhpur_route.py.
+# Coordonate de HARTA: x est, y nord (metri). Godot: gx = x, gz = -y (nord = -Z,
+# est = +X): harta ajunge in lume FARA oglindire, deci "dreapta" de pe harta e
+# dreapta si in cadrul camerei. NU e conventia lui gen_jodhpur_route.py
+# (gx = -x, gz = -y), care oglindeste harta: acolo garda de azimut folosea doar
+# |azimut|, deci oglindirea nu conta. Aici brieful vorbeste de stanga/dreapta
+# (scena in fata-DREAPTA, pavilionul in DREAPTA, tubul pe exteriorul unei curbe la
+# STANGA) si semnul se verifica in cadrul soferului, nu pe o harta oglindita.
 # Sens ORAR pe plan: A spre N pe latura de vest, B/C spre E pe latura de nord,
 # D/E spre S pe cea de est, F/G spre V pe cea de sud, H spre N pe latura de vest.
 import math
@@ -463,7 +468,7 @@ print(f"\nGARDA DE AZIMUT: {'TOATE TREC' if all_ok else 'CEL PUTIN O LINIE A PIC
 
 
 def godot(p, e):
-    return (-p[0], e, -p[1])
+    return (p[0], e, -p[1])
 
 def r3(x):
     return round(x, 3)
@@ -481,7 +486,7 @@ def godot_basis_row_text(f, x, y, z):
     """Transform3D cu -Z pe sensul de mers (hazard pe axa soselei). Formatul
     tscn e pe RANDURI (memoria tscn-transform-e-pe-randuri)."""
     hx, hy = heading_vec_at_frac(f)
-    fx, fz = -hx, -hy  # directia in Godot
+    fx, fz = hx, -hy  # directia in Godot (gx = x, gz = -y)
     return (f"Transform3D({-fz:.5f}, 0, {-fx:.5f}, 0, 1, 0, {fx:.5f}, 0, {-fz:.5f}, "
             f"{x:.3f}, {y:.3f}, {z:.3f})")
 
@@ -562,8 +567,8 @@ if len(sys.argv) > 1:
     # Camera tunelului: cutie rotita pe coarda, ceva mai scurta ca sa nu prinda
     # bucla principala la capete.
     tdx, tdy = (p_out[0] - p_in[0]) / chord, (p_out[1] - p_in[1]) / chord
-    # (fx, fz) in Godot = (-tdx, -tdy); -Z local = directia coardei.
-    tun_basis = (f"Transform3D({tdy:.5f}, 0, {tdx:.5f}, 0, 1, 0, {-tdx:.5f}, 0, {tdy:.5f}, ")
+    # (fx, fz) in Godot = (tdx, -tdy); -Z local = directia coardei; tscn pe randuri.
+    tun_basis = (f"Transform3D({tdy:.5f}, 0, {-tdx:.5f}, 0, 1, 0, {tdx:.5f}, 0, {tdy:.5f}, ")
     tun_g = godot(mid_xy, mid_e)
 
     # Peak-uri: muntele Inari (centrul arcului E, inaltat), versantul
@@ -591,7 +596,7 @@ if len(sys.argv) > 1:
     # roteste la multipli de ~4,1 m (pasul curbei coapte): 8 / 12,2 / 16,4 / 20,9.
     # Brief §3: "daca Autobuzul nu trece fara turbo, se strange golul, nu
     # creste viteza" => 12,2 m.
-    SCENE_GAP_M = 12.0
+    SCENE_GAP_M = 8.0
     gap_node_xy = ((324.0), 92.0)
     gap_y = 29.0
     gap_g = godot(gap_node_xy, gap_y)
@@ -642,7 +647,7 @@ custom_theme = "kyoto"
 custom_half_width = 6.0
 custom_road_surface = "asphalt"
 custom_gate_model = "none"
-custom_sun_rotation_deg = Vector3(-22, 45, 0)
+custom_sun_rotation_deg = Vector3(-22, -45, 0)
 custom_sea_level_offset = {sea_offset}
 custom_ravines = Array[Vector4]([{rav_txt}])
 custom_viaduct_ravines = Array[int]([{", ".join(str(i) for i in VIADUCTS)}])

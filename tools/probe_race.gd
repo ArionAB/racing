@@ -219,6 +219,10 @@ var _no_tub: bool = false
 ## contactele AI-tub trebuie sa fie > 0, altfel garda nu e armata (memoria
 ## `garda-fara-linie-de-baza-iese-zero`).
 var _blind: bool = false
+## `--no-turbo`: bara de turbo nu se mai incarca la nicio masina (turbo_fill_time
+## enorm). Pentru intrebarea „Autobuzul trece saritura FARA turbo?" (brief
+## Kyoto §3): altfel AI-ul arde turbo pe dreapta scenei si cifra se amesteca.
+var _no_turbo: bool = false
 ## Hazardurile shishi-odoshi gasite in scena (goale cu --no-tub).
 var _shishi: Array[ShishiOdoshiHazard] = []
 var _tub_throws: int = 0
@@ -355,6 +359,8 @@ func _ready() -> void:
 			_no_tub = true
 		elif arg == "--blind":
 			_blind = true
+		elif arg == "--no-turbo":
+			_no_turbo = true
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -483,6 +489,9 @@ func _start_race() -> void:
 			car.bumped.connect(_on_bumped.bind(i))
 	_setup_signal_hazards()
 	_setup_kyoto()
+	if _no_turbo:
+		for car in cars:
+			car.turbo_fill_time = 1.0e9
 	if _blind:
 		for car in cars:
 			var ai_c := car.controller as AIController

@@ -364,7 +364,7 @@ Acoperirea celor cinci clase din `ref_notes/sisteme.md` §3:
 
 ### Shishi-odoshi (F) — hazardul nou
 
-**Ce e:** un tub de bambus de **16 m**, cu Ø 1,8 m, pe un pivot la **6 m**
+**Ce e:** un tub de bambus de **16 m**, cu Ø 1,8 m, pe un pivot la **6,6 m** (brief v0.1: 6 m — corectat de sondă, vezi „Starea sondelor tehnice”)
 înălțime, montat pe un cadru de piatră pe **malul iazului** (marginea dinspre
 exteriorul curbei). Coada (4 m) stă deasupra malului, iar gura (12 m)
 deasupra drumului. Un jgheab de bambus (*kakei*) varsă apă în gură.
@@ -497,6 +497,78 @@ Textul inițial, păstrat ca istoric:
    fără reflexie. **Recomandarea mea:** se încearcă la pasul 1 (§7) și se
    decide pe captură. Fără reflexie, aurul rămâne pe pavilion și pista nu
    pierde mult.
+
+### 3.2 Starea sondelor tehnice (§7 pasul 1, 2 oct 2026, ramura `kyoto/sonde-tehnice`)
+
+- **Shishi-odoshi (`ProbeKyotoTub`): trece, cu pivotul la 6,6 m, nu 6,0.**
+  - **Golul exterior:** la 6,0 m ieșea 6,22 m, fiindcă v0.1 calculase din
+    axa tubului, fără raza de 0,9 m. La 6,6 m: 7,22 m cu zona de lovitură
+    (7,72 m pe corpul solid). Contract: ≥ 7 m.
+  - **Lovitura** (6 mașini × 20/30 m/s): toate 12 lovite, nimeni ieșit din
+    lume. Pierderi 0,78–1,70 s, cu media 1,30 s. Urcarea e 0,43 m la
+    Autobuz și 1,23 m la Poliție, deci masa e conectată. Armat prin
+    sabotaj: cu `--sabotage-mass`, verdictul de masă pică.
+  - **Tubul culcat (ricoșeul)** costă mai mult decât lovitura: 1,3–3,4 s,
+    cel mai mult la Autobuz.
+  - **Ocolul pe exterior** costă 0,03–0,13 s cu șoferul de sondă, nu ~0,3.
+    Pe AI-ul real se remăsoară.
+  - **AI-ul** (6 mașini, 180 s, 5 seed-uri): cel care citește tubul are 0
+    contacte, 0 opriri, 0 repuneri; cel orb are 4–5 contacte, deci garda e
+    armată.
+  - **AI-ul măsoară distanța pe arc**, pe segmentele coapte:
+    `d_idx * bake_interval` greșea cu 16 m din 42, fiindcă `bake_interval`
+    e doar un maxim.
+  - **Pe alte piste:** ProbeRace pe Fiordland (4 seed-uri) iese identic pe 3
+    seed-uri; diferența de pe al patrulea e zgomotul Jolt.
+  - **Nemăsurat:** `[blocaj]` pe Track18 cu 16 seed-uri; malul real (în
+    sondă, mașinile aruncate treceau peste zidul de la pivot până la
+    reglajul 9 m/s / 1,2 m); petecul ud; sunetul; GLB-ul.
+- **Fotosensibilitate (`ProbeFlicker`): trece, cu sabotajul armat.**
+  - Porți la 1,2 m, golul mai îngust decât stâlpul, pădure în spate: **0
+    flash-uri/s** pe laterale.
+  - Martorul (porți rare, cer în goluri) pică cu 6 flash-uri/s.
+  - **Porțile la 2,4 m cu cer în spate pică deja** (9,5 flash-uri/s). Deci
+    **desimea porților și fundalul întunecat sunt regulă de artă, nu
+    detaliu.** Golurile tunelului real se umplu cu pădure (cedri), nu cu
+    cer.
+  - **Nemăsurat:** regula WCAG specială pentru roșu saturat (de adăugat,
+    porțile sunt vermilion) și culoarul real E′, cu curbă și relief.
+- **Frunzișul (`ProbeKyotoFrunzis`): textura și clasele există, cu trei
+  probleme văzute pe captură.**
+  - **Ce atinge ținta:** `autumn_foliage.png` e neutră (media 196), cu 6
+    clase noi. Tentele sunt găsite prin bisecție pe pixeli, fiindcă Godot
+    înmulțește în spațiu liniar, iar raportul simplu greșea cu 1–3%.
+    `machiya_wood` și `moss` ating ținta la ±1. Niciun material nu s-a
+    schimbat pe pistele existente.
+  - **(1) Carminul și roșu-portocaliul se topesc** sub lumina caldă cu
+    saturație 1,18, deci practic sunt două roșuri, nu trei. Se depărtează:
+    carminul spre bordo, iar ruginiul devine a treia nuanță.
+  - **(2) Ginkgo iese lămâie** (nuanța 55° față de 49°): R 242 e peste ce
+    poate da dala, chiar ridicată ×1,15. Se coboară ținta spre un auriu mai
+    cald sau primește o dală mai luminoasă.
+  - **(3) În contralumină, roșurile devin bordo-maroniu** (mai aproape de
+    tuful Cappadociei), iar ginkgo devine oliv. E riscul din §4, acum
+    confirmat. **Translucența falsă se face** (+1 material, aprobat prin
+    decizia de buget din §3.1), înaintea scenei Kiyomizu.
+  - **Nemăsurat:** roșul pe `--gamecam` pe pista reală și ceața peste
+    frunziș.
+- **Reflexia pavilionului (`ProbeKyotoReflexie`): fezabilă, +1 material,
+  dar costă geometrie.**
+  - Reflexia vârfului cade la ~0,41·D de cameră, adică mult înaintea
+    clădirii.
+  - Iazul opac are nevoie de o **gaură de ~64 × 32 m**, cu o a doua apă
+    opacă la −16 m dedesubt (~90 × 160 m, același material).
+  - Overdraw pe tot cadrul: +3–6%.
+  - **Defect:** pânza se vede ca un petec ușor mai deschis; alfa mare îl
+    ascunde, dar șterge reflexia.
+  - **Z-fighting:** offset-ul trebuie să fie ≥ amplitudinea valurilor, sau
+    iazul se face fără valuri.
+  - **Recomandare:** se construiește după primul build, nu blochează
+    traseul.
+- **Observație colaterală, neverificată:** `PaletteBox.add()` pare să aibă
+  fețele întoarse invers față de convenția Godot (o cutie văzută din afară
+  e luminată ca o față din umbră). De verificat separat; atinge toate
+  hazardele cu placeholder.
 
 ## 4. Paleta și lumina (fără slot nou)
 

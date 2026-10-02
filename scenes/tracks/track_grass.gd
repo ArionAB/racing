@@ -195,6 +195,9 @@ static func build(sampler: TrackSideSampler, world_seed: int,
 	var cells := {}
 	var n := sampler.point_count()
 	var placed := 0
+	# Fara plafon de altitudine nicio tragere RNG nu depinde de cota, deci
+	# cotele se pot calcula la final, pe fire (vezi `_Deferred`).
+	var defer: _Deferred = _Deferred.new() if max_y > NO_CEILING else null
 	for i in n:
 		var a := sampler.baked_point(i)
 		var b := sampler.baked_point((i + 1) % n)
@@ -211,9 +214,11 @@ static func build(sampler: TrackSideSampler, world_seed: int,
 				continue
 			var side := side_v * side_sign
 			placed += _scatter(cells, sampler, rng, corridor, prop_buckets, max_y,
-				a, along, side, hw, seg, near_pm, BAND_MIN, BAND_NEAR)
+				a, along, side, hw, seg, near_pm, BAND_MIN, BAND_NEAR, defer)
 			placed += _scatter(cells, sampler, rng, corridor, prop_buckets, max_y,
-				a, along, side, hw, seg, far_pm, BAND_NEAR, band_max)
+				a, along, side, hw, seg, far_pm, BAND_NEAR, band_max, defer)
+	if defer != null:
+		defer.resolve(cells, sampler)
 
 	_emit_cells(root, cells, mesh)
 	root.set_meta(&"grass_patches", placed)
@@ -304,11 +309,88 @@ static func material() -> ShaderMaterial:
 	return _material
 
 
+## Peste cota asta `max_y` inseamna "fara plafon": niciun teren nu ajunge acolo,
+## deci tragerea de rarire din `_scatter` nu are loc niciodata.
+const NO_CEILING: float = 1e6
+## Cate smocuri primeste o sarcina de pe fir.
+const Y_CHUNK: int = 1024
+
+
+## Smocurile a caror COTA se calculeaza la final, in paralel (timpul de
+## incarcare, oct 2026).
+##
+## Pe Serengeti, iarba deasa cere 122.826 de apeluri `ground_y` — 5,7 s din
+## faza de decor, chiar dupa celulele de interogare din TrackSideSampler, fiindca
+## fiecare apel insumeaza ~130 de puncte de drum. Formula nu se poate scurta
+## fara sa schimbe terenul, dar se poate imparti: `ground_y` e o functie pura,
+## iar smocurile nu depind unul de altul.
+##
+## De ce rezultatul e identic la bit cu bucla secventiala: fara plafon de
+## altitudine, nicio tragere RNG nu depinde de cota, deci `_scatter` face
+## aceleasi trageri in aceeasi ordine si doar amana cota. `resolve` pune apoi
+## smocurile in celule exact in ordinea in care ar fi fost puse. Cu plafon
+## (Alpii) ramane bucla veche: acolo o tragere depinde de cota.
+class _Deferred:
+	var pos: Array[Vector3] = []
+	var rot: Array[float] = []
+	var scl: Array[Vector3] = []
+
+	func resolve(cells: Dictionary, sampler: TrackSideSampler) -> void:
+		var ys := _ground_ys(sampler)
+		for k in pos.size():
+			var p := pos[k]
+			var basis := Basis(Vector3.UP, rot[k]).scaled(scl[k])
+			var xf := Transform3D(basis, Vector3(p.x, ys[k] - SINK, p.z))
+			var key := Vector2i(int(floor(p.x / CELL_M)), int(floor(p.z / CELL_M)))
+			if not cells.has(key):
+				cells[key] = [] as Array[Transform3D]
+			(cells[key] as Array).append(xf)
+
+	## `ground_y` pe toate pozitiile, impartit pe WorkerThreadPool. Listele
+	## lenese ale sampler-ului se construiesc INAINTE, pe firul principal: dupa
+	## `warm_ground_cells`, `ground_y` doar citeste, deci firele nu scriu nimic
+	## comun in afara de felia lor de rezultat.
+	func _ground_ys(sampler: TrackSideSampler) -> PackedFloat64Array:
+		var n := pos.size()
+		var out := PackedFloat64Array()
+		out.resize(n)
+		if n == 0:
+			return out
+		sampler.warm_ground_cells(pos)
+		var chunks := (n + Y_CHUNK - 1) / Y_CHUNK
+		var parts: Array = []
+		parts.resize(chunks)
+		var lock := Mutex.new()
+		var points := pos
+		var work := func(c: int) -> void:
+			var a := c * Y_CHUNK
+			var b := mini(a + Y_CHUNK, n)
+			var ys := PackedFloat64Array()
+			ys.resize(b - a)
+			for k in range(a, b):
+				var p: Vector3 = points[k]
+				ys[k - a] = sampler.ground_y(p.x, p.z)
+			lock.lock()
+			parts[c] = ys
+			lock.unlock()
+		var task := WorkerThreadPool.add_group_task(work, chunks, -1, true,
+			"TrackGrass.ground_y")
+		WorkerThreadPool.wait_for_group_task_completion(task)
+		var k := 0
+		for ys: PackedFloat64Array in parts:
+			for y in ys:
+				out[k] = y
+				k += 1
+		return out
+
+
 ## Imprastie smocurile unei benzi pe segmentul curent. Intoarce cate a pus.
+## Cu `defer`, doar trage pozitia si forma; cota si celula vin in `resolve`.
 static func _scatter(cells: Dictionary, sampler: TrackSideSampler,
 		rng: RandomNumberGenerator, corridor: Dictionary, prop_buckets: Dictionary,
 		max_y: float, a: Vector3, along: Vector3, side: Vector3, hw: float,
-		seg: float, per_m: float, off_min: float, off_max: float) -> int:
+		seg: float, per_m: float, off_min: float, off_max: float,
+		defer: _Deferred) -> int:
 	# Numarul fractionar se rotunjeste STOCASTIC, altfel segmentele scurte din
 	# viraje n-ar primi niciodata nimic si banda ar avea gauri exact pe arc.
 	var want := per_m * seg
@@ -324,6 +406,15 @@ static func _scatter(cells: Dictionary, sampler: TrackSideSampler,
 		# Paraul si malurile lui raman fara iarba (smocul si-ar lua cota din
 		# ground_y si ar creste de pe fundul albiei, cu varful prin apa).
 		if sampler.channel_mix(p.x, p.z) > 0.25:
+			continue
+		if defer != null:
+			# Aceleasi trageri, in aceeasi ordine ca mai jos: rotatia, apoi
+			# scara pe x, y, z. Cota vine la final (vezi `_Deferred`).
+			defer.pos.append(p)
+			defer.rot.append(rng.randf_range(0.0, TAU))
+			defer.scl.append(Vector3(rng.randf_range(0.85, 1.15),
+				rng.randf_range(0.75, 1.35), rng.randf_range(0.85, 1.15)))
+			placed += 1
 			continue
 		var y := sampler.ground_y(p.x, p.z)
 		# Plafonul de altitudine, cu rarire pe ALT_FADE metri sub el: limita

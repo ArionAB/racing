@@ -848,6 +848,23 @@ const CLASS_TEXTURES := {
 	# Riolitul (stanca fortului, bolovanii parcului de desert): dala
 	# stratificata `alpine_granite`, ca `red_valley_tuff` — zero VRAM nou.
 	"rhyolite": "res://assets/textures/classes/alpine_granite.png",
+	# --- Kyoto (Track18), brief §4 ----------------------------------------------
+	# FRUNZISUL DE TOAMNA: o singura dala NEUTRA (gri, R=G=B), patru clase pe ea.
+	# Tenta doar inmulteste, deci un rosu de artar (#BB3522) nu se poate scoate
+	# din nicio dala verde existenta (acacia_canopy 89/108/56 ar cere R x2.1):
+	# dala trebuie sa fie gri si cat mai deschisa. Generata de
+	# tools/gen_autumn_foliage.py (frunze de artar lobate, 3 straturi, goluri
+	# intunecate, infasurata). Patru materiale, O SINGURA imagine in memorie
+	# (doar maple_orange/ginkgo_gold impart o a doua, ridicata — vezi CLASS_LIFT).
+	"maple_crimson": "res://assets/textures/classes/autumn_foliage.png",
+	"maple_orange": "res://assets/textures/classes/autumn_foliage.png",
+	"ginkgo_gold": "res://assets/textures/classes/autumn_foliage.png",
+	"leaf_litter": "res://assets/textures/classes/autumn_foliage.png",
+	# Lemnul de machiya si muschiul: clase NOI pe dalele lui `wood` si `macchia`,
+	# NU tente pe ele (memoria `tenta-pe-clasa-partajata`: `wood` e folosit pe
+	# Dunele/Okinawa, `macchia` pe Okinawa/Stromboli).
+	"machiya_wood": "res://assets/textures/classes/wood.png",
+	"moss": "res://assets/textures/classes/macchia.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -1055,6 +1072,31 @@ const CLASS_TINT := {
 	# (0.650, 0.611, 0.534): toate trei rapoartele sub 1, deci fara
 	# CLASS_LIFT si fara imagine noua in memorie.
 	"rhyolite": Color(0.929, 0.681, 0.661),
+	# --- Kyoto (Track18): tente CALCULATE, nu alese (tools in sesiunea 2 oct
+	# 2026: scratchpad tints.py, reprodus in tools/probe_kyoto_frunzis.gd).
+	# Metoda: Godot inmulteste in spatiu LINIAR (textura sRGB->liniar, albedo_color
+	# la fel, rezultatul inapoi in sRGB), deci raportul simplu tinta/medie de pe
+	# celelalte clase e usor gresit (~1-3%). Aici, pentru fiecare canal, tenta e
+	# gasita prin bisectie pe pixelii reali ai dalei astfel incat media
+	# imaginii randate (sRGB, cum o citeste un instrument de culoare) sa fie
+	# EXACT tinta. Tintele sunt hex-urile sloturilor din brief §4.
+	#
+	# Dala neutra neridicata are media 195.2/255. Peste 195 un canal nu se poate
+	# atinge doar din tenta: maple_crimson (R 187) si leaf_litter (R 168) se
+	# incadreaza, maple_orange (R 229) si ginkgo_gold (R 242) NU — vezi
+	# CLASS_LIFT. Chiar si ridicate (media 220.6 dupa taiere), R ramane cu
+	# 3.7% sub tinta la portocaliu si 8.9% la auriu: ridicarea mai mare taie
+	# luminile dalei (la 1.25x, 53% din pixeli sunt albi si frunzele dispar).
+	# R=1.0 la ele inseamna "tenta nu mai poate", nu "aleasa".
+	"maple_crimson": Color(0.9584, 0.2826, 0.1863),   # #BB3522
+	"maple_orange": Color(1.0, 0.3318, 0.2642),       # #E54839 (R: 220.6 din 229)
+	"ginkgo_gold": Color(1.0, 0.9434, 0.2777),        # #F2D03C (R: 220.6 din 242)
+	"leaf_litter": Color(0.8626, 0.5400, 0.3079),     # #A8683A (LARCH_RUST 27)
+	# Lemn de machiya (74, 53, 38) pe dala `wood` (124.1, 99.0, 71.7), NERIDICATA:
+	# toate canalele sub 1, nu cere CLASS_LIFT.
+	"machiya_wood": Color(0.6171, 0.5707, 0.5841),
+	# Muschi (63, 122, 60) pe dala `macchia` (86.7, 122.6, 73.3), NERIDICATA.
+	"moss": Color(0.7520, 0.9954, 0.8392),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1137,6 +1179,13 @@ const CLASS_LIFT := {
 	# 0.582 x 1.39 = 0.81. Gresia rosie a fortului (#A5553A) imparte aceeasi
 	# imagine si coboara din tenta.
 	"rose_sandstone": 0.81,
+	# Kyoto: frunzisul portocaliu si cel auriu cer R 229/242, iar dala neutra are
+	# media 0.7656 (lum). Ridicare 1.15x (L = 1.15 * 0.7656 = 0.8805): media dupa
+	# taiere 220.6, 28% din pixeli taiati. Mai mult nu: la 1.25x jumatate din
+	# dala e alba. Auriul ramane cu R sub tinta (vezi CLASS_TINT). `ginkgo_gold`
+	# imparte imaginea (CLASS_LIFT_SHARED); maple_crimson/leaf_litter NU se
+	# ridica — folosesc dala originala.
+	"maple_orange": 0.8805,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -1404,6 +1453,19 @@ const CLASS_TRIPLANAR_SCALE := {
 	# Riolitul: dala stratificata `alpine_granite` la scara ei (0.16), ca la
 	# `red_valley_tuff` / `wet_gneiss` — aceeasi familie de stanca.
 	"rhyolite": 0.16,
+	# --- Kyoto (Track18) ---
+	# Frunzisul: o repetitie la 10 m (0.1). O frunza din dala (~25 px din 512)
+	# e ~0.5 m, un palc ~1.5-2 m, un golf intunecat ~3 m: o coroana de arțar de
+	# 8-10 m prinde ~1 repetitie. De la 12 m (camera) frunza are ~35 px.
+	"maple_crimson": 0.1,
+	"maple_orange": 0.1,
+	"ginkgo_gold": 0.1,
+	# Covorul de frunze: acelasi PNG la scara de 2.5x mai deasa (o repetitie la
+	# 4 m, frunza ~20 cm — frunze cazute pe sol, nu coroana).
+	"leaf_litter": 0.25,
+	# Aceeasi scara ca dala-sursa (`wood` 0.7, `macchia` 1.4).
+	"machiya_wood": 0.7,
+	"moss": 1.4,
 }
 
 static var _tri_mats: Dictionary = {}
@@ -1421,6 +1483,7 @@ static var _lifted: Dictionary = {}
 const CLASS_LIFT_SHARED := {
 	"blue_lime_indigo": "blue_lime_light",
 	"red_sandstone": "rose_sandstone",
+	"ginkgo_gold": "maple_orange",
 }
 
 static func _class_texture(cls: String) -> Texture2D:
@@ -2106,7 +2169,7 @@ static func split_accents(mi: MeshInstance3D, keep_slot) -> bool:
 		return false
 	if mi.has_node(NodePath(String(mi.name) + ACCENT_SUFFIX)):
 		return false # deja rupt (scena reincarcata in editor)
-	var arr: Array = mi.mesh.surface_get_arrays(0)
+	var arr: Array = MeshCpu.surface_arrays(mi.mesh, 0)
 	var uvs: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
 	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
 	if uvs.is_empty() or idx.is_empty():
@@ -2152,7 +2215,7 @@ static func _mesh_with_indices(src: Array, indices: PackedInt32Array) -> ArrayMe
 		out[k] = src[k]
 	out[Mesh.ARRAY_INDEX] = indices
 	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, out)
+	MeshCpu.add_surface(mesh, out)
 	return mesh
 
 

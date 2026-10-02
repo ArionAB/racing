@@ -2471,7 +2471,7 @@ func _dim_model_vertex_colors() -> void:
 static func _mesh_with_colors_dimmed(src: Mesh, f: float) -> Mesh:
 	var out := ArrayMesh.new()
 	for s in src.get_surface_count():
-		var arr := src.surface_get_arrays(s)
+		var arr := MeshCpu.surface_arrays(src, s)
 		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 		var cols: PackedColorArray = arr[Mesh.ARRAY_COLOR]
 		if cols.is_empty():
@@ -2484,7 +2484,7 @@ static func _mesh_with_colors_dimmed(src: Mesh, f: float) -> Mesh:
 				var c := cols[i]
 				cols[i] = Color(c.r * f, c.g * f, c.b * f, c.a)
 		arr[Mesh.ARRAY_COLOR] = cols
-		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		MeshCpu.add_surface(out, arr)
 		var m := src.surface_get_material(s)
 		if m != null:
 			out.surface_set_material(s, m)
@@ -2542,7 +2542,7 @@ func _ancestor_theme() -> String:
 static func _mesh_with_slots_moved(src: Mesh, remap: Dictionary) -> Mesh:
 	var out := ArrayMesh.new()
 	for s in src.get_surface_count():
-		var arr := src.surface_get_arrays(s)
+		var arr := MeshCpu.surface_arrays(src, s)
 		var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
 		if not uv.is_empty():
 			for i in uv.size():
@@ -2552,7 +2552,7 @@ static func _mesh_with_slots_moved(src: Mesh, remap: Dictionary) -> Mesh:
 					# culoarea vecinului la prima filtrare bilineara.
 					uv[i].x = (float(int(remap[slot])) + 0.5) / float(Palette.SLOTS)
 			arr[Mesh.ARRAY_TEX_UV] = uv
-		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		MeshCpu.add_surface(out, arr)
 		var m := src.surface_get_material(s)
 		if m != null:
 			out.surface_set_material(s, m)
@@ -2587,12 +2587,12 @@ func _repaint_slot_boxes() -> void:
 static func _mesh_with_boxes_repainted(src: Mesh, rules: Array) -> Mesh:
 	var out := ArrayMesh.new()
 	for s in src.get_surface_count():
-		var arr := src.surface_get_arrays(s)
+		var arr := MeshCpu.surface_arrays(src, s)
 		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 		var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
 		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
 		if verts.is_empty() or uv.is_empty() or idx.is_empty():
-			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			MeshCpu.add_surface(out, arr)
 			var m0 := src.surface_get_material(s)
 			if m0 != null:
 				out.surface_set_material(s, m0)
@@ -2636,7 +2636,7 @@ static func _mesh_with_boxes_repainted(src: Mesh, rules: Array) -> Mesh:
 			na[Mesh.ARRAY_NORMAL] = nn
 		if not nc.is_empty():
 			na[Mesh.ARRAY_COLOR] = nc
-		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, na)
+		MeshCpu.add_surface(out, na)
 		var m := src.surface_get_material(s)
 		if m != null:
 			out.surface_set_material(s, m)
@@ -3155,7 +3155,7 @@ func _retint_tuff() -> void:
 			var out := ArrayMesh.new()
 			var changed := false
 			for s in mi.mesh.get_surface_count():
-				var arr := mi.mesh.surface_get_arrays(s)
+				var arr := MeshCpu.surface_arrays(mi.mesh, s)
 				var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
 				for i in uv.size():
 					var slot := int(floor(uv[i].x * float(Palette.SLOTS)))
@@ -3163,7 +3163,7 @@ func _retint_tuff() -> void:
 						uv[i] = Palette.uv(int(remap[slot]))
 						changed = true
 				arr[Mesh.ARRAY_TEX_UV] = uv
-				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+				MeshCpu.add_surface(out, arr)
 			if changed:
 				mi.mesh = out
 
@@ -3218,7 +3218,7 @@ func _warm_tuff() -> void:
 			var h := maxf(aabb.size.y, 0.001)
 			var out := ArrayMesh.new()
 			for si in mi.mesh.get_surface_count():
-				var arr := mi.mesh.surface_get_arrays(si)
+				var arr := MeshCpu.surface_arrays(mi.mesh, si)
 				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 				# ARRAY_COLOR e `null`, nu un vector gol, cand mesh-ul n-are
 				# culori de vertex — atribuirea directa intr-un
@@ -3292,7 +3292,7 @@ func _warm_tuff() -> void:
 							1.0 - (0.09 + hue_shift) * k,
 							1.0 - (0.16 + hue_shift * 2.0) * k)
 				arr[Mesh.ARRAY_COLOR] = cols
-				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+				MeshCpu.add_surface(out, arr)
 			mi.mesh = out
 
 
@@ -3447,7 +3447,7 @@ func _strata_tuff() -> void:
 				cota_sus = baza + h * 0.55
 			var out := ArrayMesh.new()
 			for si in mi.mesh.get_surface_count():
-				var arr := mi.mesh.surface_get_arrays(si)
+				var arr := MeshCpu.surface_arrays(mi.mesh, si)
 				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
 				var cols := PackedColorArray()
@@ -3459,7 +3459,7 @@ func _strata_tuff() -> void:
 					cols.fill(Color.WHITE)
 				if verts.size() % 3 != 0:
 					arr[Mesh.ARRAY_COLOR] = cols
-					out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+					MeshCpu.add_surface(out, arr)
 					continue
 				for tri in verts.size() / 3:
 					var i := tri * 3
@@ -3486,7 +3486,7 @@ func _strata_tuff() -> void:
 					for j in 3:
 						cols[i + j] = cols[i + j] * t
 				arr[Mesh.ARRAY_COLOR] = cols
-				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+				MeshCpu.add_surface(out, arr)
 			mi.mesh = out
 
 
@@ -3539,7 +3539,7 @@ func _redden_cliff() -> void:
 				continue
 			var out := ArrayMesh.new()
 			for si in mi.mesh.get_surface_count():
-				var arr := mi.mesh.surface_get_arrays(si)
+				var arr := MeshCpu.surface_arrays(mi.mesh, si)
 				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
 				var cols := PackedColorArray()
@@ -3565,7 +3565,7 @@ func _redden_cliff() -> void:
 					c.b *= 0.42
 					cols[i] = c
 				arr[Mesh.ARRAY_COLOR] = cols
-				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+				MeshCpu.add_surface(out, arr)
 			mi.mesh = out
 
 
@@ -3768,7 +3768,7 @@ func _cool_inca_cliff() -> void:
 				continue
 			var out := ArrayMesh.new()
 			for si in mi.mesh.get_surface_count():
-				var arr := mi.mesh.surface_get_arrays(si)
+				var arr := MeshCpu.surface_arrays(mi.mesh, si)
 				var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 				var raw_cols: Variant = arr[Mesh.ARRAY_COLOR]
 				var cols := PackedColorArray()
@@ -3790,5 +3790,5 @@ func _cool_inca_cliff() -> void:
 					c.b *= f * CLIFF_COOL.b
 					cols[i] = c
 				arr[Mesh.ARRAY_COLOR] = cols
-				out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+				MeshCpu.add_surface(out, arr)
 			mi.mesh = out

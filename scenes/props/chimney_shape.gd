@@ -799,7 +799,7 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 
 	var out := ArrayMesh.new()
 	for s in src.get_surface_count():
-		var arrays := src.surface_get_arrays(s)
+		var arrays := MeshCpu.surface_arrays(src, s)
 		# Chirurgia de topologie INAINTEA oricarei deformari: se taie pe cotele
 		# din mesh-ul NEATINS, deci planele sunt orizontale prin constructie.
 		# Dupa inclinarea axei (`lean`) o taietura orizontala ar fi fost oblica
@@ -943,8 +943,7 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 		# Normalele vechi mint dupa deformare; se refac din geometria noua.
 		arrays[Mesh.ARRAY_NORMAL] = null
 		arrays[Mesh.ARRAY_TANGENT] = null
-		out.add_surface_from_arrays(
-			Mesh.PRIMITIVE_TRIANGLES, arrays)
+		MeshCpu.add_surface(out, arrays)
 		out.surface_set_material(s, src.surface_get_material(s))
 
 	# PROFILUL MONOTON, dupa toate deformarile si dupa cusatura buzelor.
@@ -993,7 +992,7 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 		# culori — deci trebuie sa treaca peste orice a scris umbrirea.
 		if not is_zero_approx(cap_basalt):
 			fa = _cap_basalt_uvs(fa, y0, h)
-		fixed.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, fa)
+		MeshCpu.add_surface(fixed, fa)
 		fixed.surface_set_material(s, out.surface_get_material(s))
 	mi.mesh = fixed
 
@@ -1081,7 +1080,7 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 	for k in n:
 		buckets[k] = PackedFloat32Array()
 	for sfc in src.get_surface_count():
-		var arrays := src.surface_get_arrays(sfc)
+		var arrays := MeshCpu.surface_arrays(src, sfc)
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		for v in verts:
 			var t := clampf((v.y - y0) / h, 0.0, 0.9999)
@@ -1179,7 +1178,7 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 		cap[k] = lerpf(rmed[k], lin, taper_straighten)
 	var out := ArrayMesh.new()
 	for sfc in src.get_surface_count():
-		var arrays := src.surface_get_arrays(sfc)
+		var arrays := MeshCpu.surface_arrays(src, sfc)
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		for i in verts.size():
 			var v := verts[i]
@@ -1221,7 +1220,7 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 		arrays[Mesh.ARRAY_VERTEX] = verts
 		arrays[Mesh.ARRAY_NORMAL] = null
 		arrays[Mesh.ARRAY_TANGENT] = null
-		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		MeshCpu.add_surface(out, arrays)
 		out.surface_set_material(sfc, src.surface_get_material(sfc))
 	return out
 
@@ -2247,8 +2246,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 
 	var out := ArrayMesh.new()
 	for sfc in src.get_surface_count():
-		out.add_surface_from_arrays(
-			Mesh.PRIMITIVE_TRIANGLES, src.surface_get_arrays(sfc))
+		MeshCpu.add_surface(out, MeshCpu.surface_arrays(src, sfc))
 		out.surface_set_material(sfc, src.surface_get_material(sfc))
 	var mat := src.surface_get_material(0)
 
@@ -2280,7 +2278,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			# deci se scrie: o poala de aceeasi valoare cu hornul citea a
 			# prelungire a conului, nu a material cazut LANGA el.
 			ta = _darken(ta, TALUS_SHADE)
-			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, ta)
+			MeshCpu.add_surface(out, ta)
 			out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	# --- RANDURI DE FERESTRE ------------------------------------------------
@@ -2359,8 +2357,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			stw.generate_normals()
 			var mw := stw.commit()
 			if mw != null and mw.get_surface_count() > 0:
-				out.add_surface_from_arrays(
-					Mesh.PRIMITIVE_TRIANGLES, mw.surface_get_arrays(0))
+				MeshCpu.add_surface(out, mw.surface_get_arrays(0))
 				out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	if door_count > 0:
@@ -2400,11 +2397,31 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			st2.generate_normals()
 			var m2 := st2.commit()
 			if m2 != null and m2.get_surface_count() > 0:
-				out.add_surface_from_arrays(
-					Mesh.PRIMITIVE_TRIANGLES, m2.surface_get_arrays(0))
+				MeshCpu.add_surface(out, m2.surface_get_arrays(0))
 				out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	mi.mesh = out
+	_verts_cache.clear()
+
+
+## Vertecsii lui `src`, pe suprafete, cititi O DATA pe mesh (timpul de
+## incarcare, oct 2026). `_radius_at` si `_wall_coverage` se chemau de zeci de
+## ori pe horn, si fiecare apel aducea inapoi de pe GPU toate array-urile
+## mesh-ului (cu normale, UV-uri, culori) doar ca sa citeasca pozitiile — iar
+## `_wall_coverage` o facea de zece ori pe apel. Masurat pe Cappadocia: 1,6 s
+## in `_add_extras`, pe 55 de hornuri. Mesh-ul nu se schimba cat dureaza
+## `_add_extras` (se scrie abia la capat), deci pozitiile sunt aceleasi la bit.
+var _verts_cache: Dictionary = {}
+
+func _verts_of(src: Mesh) -> Array[PackedVector3Array]:
+	var hit: Variant = _verts_cache.get(src)
+	if hit != null:
+		return hit
+	var out: Array[PackedVector3Array] = []
+	for sfc in src.get_surface_count():
+		out.append(MeshCpu.vertices(src, sfc))
+	_verts_cache[src] = out
+	return out
 
 
 ## Muta o cota de deschidere (usa/fereastra) departe de o buza de terasa.
@@ -2472,9 +2489,8 @@ func _wall_coverage(src: Mesh, cx: float, cz: float, y0: float, h: float,
 	# rama, si atunci acoperirea iesea 1.00 pe un perete care nu tine nimic.
 	var r_ax := 0.0
 	var n_ax := 0
-	for sfc0 in src.get_surface_count():
-		var arr0 := src.surface_get_arrays(sfc0)
-		var vv0: PackedVector3Array = arr0[Mesh.ARRAY_VERTEX]
+	var surfs := _verts_of(src)
+	for vv0 in surfs:
 		for v0 in vv0:
 			if absf((v0.y - y0) / h - frac) >= 0.05:
 				continue
@@ -2490,29 +2506,29 @@ func _wall_coverage(src: Mesh, cx: float, cz: float, y0: float, h: float,
 	# coltul ramei sa iasa in cer.
 	var r_min := r_ax * 0.88
 
+	# Felia de cota e aceeasi pentru toate sondele, deci vertecsii din ea, cu
+	# azimutul si raza lor, se aleg o singura data (aceleasi expresii ca
+	# inainte; testul e "exista un vertex", deci ordinea nu conteaza).
+	var slice_ang := PackedFloat64Array()
+	var slice_r := PackedFloat64Array()
+	for verts in surfs:
+		for v in verts:
+			if absf((v.y - y0) / h - frac) >= 0.05:
+				continue
+			slice_ang.append(atan2(v.z - cz, v.x - cx))
+			slice_r.append(Vector2(v.x - cx, v.z - cz).length())
 	var probe := 9
 	var hit := 0
 	for i in probe:
 		var a := azim + lerpf(-half_arc, half_arc, float(i) / float(probe - 1))
-		var found := false
-		for sfc in src.get_surface_count():
-			if found:
-				break
-			var arrays := src.surface_get_arrays(sfc)
-			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			for v in verts:
-				if absf((v.y - y0) / h - frac) >= 0.05:
-					continue
-				var da := absf(fposmod(
-					atan2(v.z - cz, v.x - cx) - a + PI, TAU) - PI)
-				if da > 0.09:
-					continue
-				if Vector2(v.x - cx, v.z - cz).length() < r_min:
-					continue
-				found = true
-				break
-		if found:
+		for k in slice_ang.size():
+			var da := absf(fposmod(slice_ang[k] - a + PI, TAU) - PI)
+			if da > 0.09:
+				continue
+			if slice_r[k] < r_min:
+				continue
 			hit += 1
+			break
 	return float(hit) / float(probe)
 
 
@@ -2539,22 +2555,27 @@ func _radius_at(src: Mesh, cx: float, cz: float, y0: float, h: float,
 		frac: float, azim: float = 9.0) -> float:
 	var radii: PackedFloat32Array = []
 	var sector := azim <= TAU
+	# Distanta pe cota, sectorul si raza fiecarui vertex nu depind de fereastra,
+	# deci se calculeaza o data; ferestrele doar refiltreaza, in aceeasi ordine.
+	var dt := PackedFloat64Array()
+	var r := PackedFloat32Array()
+	for verts in _verts_of(src):
+		for v in verts:
+			if sector:
+				var da := absf(fposmod(
+					atan2(v.z - cz, v.x - cx) - azim + PI, TAU) - PI)
+				if da > 0.61:
+					continue
+			dt.append(absf((v.y - y0) / h - frac))
+			r.append(Vector2(v.x - cx, v.z - cz).length())
 	# Fereastra creste daca felia iese goala (hornurile n-au inele de vertecsi
 	# la orice cota), ca sa returnam mereu o raza reala.
 	for win in [0.06, 0.12, 0.25, 0.5]:
 		radii.clear()
-		for sfc in src.get_surface_count():
-			var arrays := src.surface_get_arrays(sfc)
-			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			for v in verts:
-				if absf((v.y - y0) / h - frac) >= win:
-					continue
-				if sector:
-					var da := absf(fposmod(
-						atan2(v.z - cz, v.x - cx) - azim + PI, TAU) - PI)
-					if da > 0.61:
-						continue
-				radii.append(Vector2(v.x - cx, v.z - cz).length())
+		for k in dt.size():
+			if dt[k] >= win:
+				continue
+			radii.append(r[k])
 		if radii.size() >= 6:
 			break
 	if radii.is_empty():
@@ -3168,7 +3189,7 @@ func _erode_arch(mi: MeshInstance3D) -> void:
 
 	var out := ArrayMesh.new()
 	for s in src.get_surface_count():
-		var arrays := src.surface_get_arrays(s)
+		var arrays := MeshCpu.surface_arrays(src, s)
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		for i in verts.size():
 			var v := verts[i]
@@ -3206,7 +3227,7 @@ func _erode_arch(mi: MeshInstance3D) -> void:
 		arrays[Mesh.ARRAY_VERTEX] = verts
 		arrays[Mesh.ARRAY_NORMAL] = null
 		arrays[Mesh.ARRAY_TANGENT] = null
-		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		MeshCpu.add_surface(out, arrays)
 		out.surface_set_material(s, src.surface_get_material(s))
 	var st := SurfaceTool.new()
 	var fixed := ArrayMesh.new()
@@ -3221,7 +3242,7 @@ func _erode_arch(mi: MeshInstance3D) -> void:
 		var fa := m.surface_get_arrays(0)
 		if faceted:
 			fa = _shade_facets(fa)
-		fixed.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, fa)
+		MeshCpu.add_surface(fixed, fa)
 		fixed.surface_set_material(s, out.surface_get_material(s))
 	mi.mesh = fixed
 

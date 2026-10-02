@@ -308,6 +308,188 @@ var _over_mask: PackedByteArray = PackedByteArray()
 ## media terenului n-ar mai avea din ce se face.
 var _ground_points: int = 0
 
+# --- grila de accelerare a lui ground_y ---
+## SCANAREA DIN `ground_y`, PE CELULE (timpul de incarcare, oct 2026).
+##
+## `ground_y` parcurgea la fiecare apel toate punctele coapte (din 2 in 2), ca
+## sa adune media ponderata a cotelor si sa gaseasca punctul cel mai apropiat.
+## Se cheama de zeci de mii de ori la constructia unei piste (discuri de umbra
+## sub decor, umeri, apa, teren, iarba), iar bucla era 70% din cost: masurat
+## pe Fiordland, 124.506 apeluri numai din discurile de contact, 9,8 s din
+## 14 s doar in scanare (tools/ProbeLoadTime.tscn).
+##
+## Grila nu schimba NICIUN raspuns. Asta e contractul, nu o aproximare:
+##   - media: ponderea e nula dincolo de GROUND_ROAD_RADIUS, iar lista unei
+##     celule de interogare tine TOATE punctele de sub raza (vezi
+##     `_ground_query_candidates`). Candidatii se parcurg CRESCATOR dupa
+##     index, deci suma de float-uri se face in aceeasi ordine ca in bucla
+##     veche;
+##   - punctul cel mai apropiat: daca e sub raza, e si cel global (tot ce a
+##     ramas pe dinafara e mai departe de raza). Altfel nu exista nicio
+##     pondere pe toata pista si se cauta pe inele (`_ground_nearest_far`).
+## Verificat la bit fata de scanarea completa (`use_ground_grid = false`) pe
+## toate pistele, cu tools/ProbeTrackHash.tscn.
+static var use_ground_grid: bool = true
+## Celulele de stocare ale punctelor coapte. Marimea lor nu schimba niciun
+## raspuns, doar cat de multe galeti se citesc la construirea listelor.
+const GROUND_GRID_CELL: float = 66.0
+## Marja pentru rotunjirea de la marginea celulelor.
+const GROUND_GRID_MARGIN: float = 0.5
+var _gg_built: bool = false
+## Celula -> indicii coapti (multipli de GROUND_STRIDE) din ea, crescator.
+var _gg_buckets: Dictionary = {}
+## Toti indicii vizitati de scanarea completa, in ordinea ei.
+var _gg_all: PackedInt32Array = PackedInt32Array()
+
+
+func _ground_grid_build() -> void:
+	_gg_built = true
+	_gg_all = PackedInt32Array()
+	_gg_buckets = {}
+	_gq_cache = {}
+	_hq_cache = {}
+	var n := _baked.size()
+	var i := 0
+	while i < n:
+		_gg_all.append(i)
+		var c := Vector2i(floori(_baked[i].x / GROUND_GRID_CELL),
+			floori(_baked[i].z / GROUND_GRID_CELL))
+		# Citire, append, scriere inapoi: un PackedInt32Array e valoare, iar
+		# append pe ce intoarce `get` ar scrie intr-o copie.
+		var arr: PackedInt32Array = _gg_buckets.get(c, PackedInt32Array())
+		arr.append(i)
+		_gg_buckets[c] = arr
+		if i == 0:
+			_gg_min = c
+			_gg_max = c
+		else:
+			_gg_min = Vector2i(mini(_gg_min.x, c.x), mini(_gg_min.y, c.y))
+			_gg_max = Vector2i(maxi(_gg_max.x, c.x), maxi(_gg_max.y, c.y))
+		i += GROUND_STRIDE
+
+
+## CELULA DE INTEROGARE (timpul de incarcare, oct 2026, al doilea pas).
+##
+## Grila de mai sus da, pe fiecare apel, toate punctele dintr-un bloc de 5 x 5
+## celule de 66 m — un patrat de 330 m, desi ponderea e nula dincolo de 130 m.
+## Pe Serengeti asta insemna 217 puncte parcurse pe apel; bucla era 7,1 s din
+## cele ~11,5 s petrecute in `ground_y` la constructia pistei (masurat headless,
+## 172 de mii de apeluri, dintre care 122.826 numai pentru iarba deasa).
+##
+## Aici lista se face pe o celula mica (16 m) si pastreaza doar punctele aflate
+## la cel mult `GROUND_ROAD_RADIUS + GROUND_GRID_MARGIN` de DREPTUNGHIUL celulei,
+## deci de orice punct din ea. Contractul ramane cel al grilei: aceiasi indici
+## care au pondere, crescator, deci aceeasi suma la bit; iar cel mai apropiat
+## punct e sigur cel global daca e sub GROUND_ROAD_RADIUS, fiindca tot ce a
+## ramas pe dinafara e la peste 130,5 m. Punctele mascate de pasaje ies din
+## lista de la constructie, nu din bucla.
+const GROUND_QUERY_CELL: float = 16.0
+var _gq_cache: Dictionary = {}
+## Scobiturile care pot atinge celula, crescator — vezi `_carve_hollows`.
+var _hq_cache: Dictionary = {}
+## Cutia celulelor de 66 m ocupate: limita cautarii pe inele.
+var _gg_min: Vector2i = Vector2i.ZERO
+var _gg_max: Vector2i = Vector2i.ZERO
+
+
+func _ground_query_candidates(qc: Vector2i, skip_over: bool) -> PackedInt32Array:
+	var hit: Variant = _gq_cache.get(qc)
+	if hit != null:
+		return hit
+	var x0 := float(qc.x) * GROUND_QUERY_CELL
+	var z0 := float(qc.y) * GROUND_QUERY_CELL
+	var x1 := x0 + GROUND_QUERY_CELL
+	var z1 := z0 + GROUND_QUERY_CELL
+	var reach := GROUND_ROAD_RADIUS + GROUND_GRID_MARGIN
+	var reach_sq := reach * reach
+	var out := PackedInt32Array()
+	for bz in range(floori((z0 - reach) / GROUND_GRID_CELL),
+			floori((z1 + reach) / GROUND_GRID_CELL) + 1):
+		for bx in range(floori((x0 - reach) / GROUND_GRID_CELL),
+				floori((x1 + reach) / GROUND_GRID_CELL) + 1):
+			var b: Variant = _gg_buckets.get(Vector2i(bx, bz))
+			if b == null:
+				continue
+			for i: int in b:
+				if skip_over and _over_mask[i] == 1:
+					continue
+				var p := _baked[i]
+				var ex := maxf(maxf(x0 - p.x, p.x - x1), 0.0)
+				var ez := maxf(maxf(z0 - p.z, p.z - z1), 0.0)
+				if ex * ex + ez * ez < reach_sq:
+					out.append(i)
+	out.sort()
+	_gq_cache[qc] = out
+	return out
+
+
+## Construieste dinainte listele lenese ale celulelor in care cad punctele.
+## Dupa asta `ground_y` nu mai scrie nimic in sampler pentru punctele astea,
+## deci se poate chema de pe mai multe fire (vezi TrackGrass._Deferred).
+## Celula se calculeaza cu exact aceeasi expresie ca in `ground_y`.
+func warm_ground_cells(points: Array[Vector3]) -> void:
+	if not _gg_built:
+		_ground_grid_build()
+	if not use_ground_grid:
+		return
+	var skip_over := _ground_points > 0 and _ground_points < _baked.size()
+	for p in points:
+		var wx: float = p.x
+		var wz: float = p.z
+		var qc := Vector2i(floori(wx / GROUND_QUERY_CELL),
+			floori(wz / GROUND_QUERY_CELL))
+		_ground_query_candidates(qc, skip_over)
+		if not _hollows.is_empty():
+			_hollows_near(qc)
+
+
+## Cel mai apropiat punct copt, pentru interogarile DEPARTE de sosea (niciun
+## punct sub GROUND_ROAD_RADIUS, deci nicio pondere: conteaza doar el).
+##
+## Inainte, cazul asta refacea scanarea completa a pistei. Aici se cauta pe
+## inele de celule de 66 m in jurul punctului si se opreste cand cel mai bun
+## gasit e strict mai aproape decat marginea blocului cercetat — orice punct
+## de dincolo e mai departe. La egalitate castiga indicele mai mic, exact ca
+## bucla crescatoare cu `<` strict a scanarii complete.
+func _ground_nearest_far(wx: float, wz: float, skip_over: bool) -> int:
+	var cx := floori(wx / GROUND_GRID_CELL)
+	var cz := floori(wz / GROUND_GRID_CELL)
+	var kmax := maxi(maxi(cx - _gg_min.x, _gg_max.x - cx),
+		maxi(cz - _gg_min.y, _gg_max.y - cz))
+	var best_sq := INF
+	var best_i := -1
+	var k := 0
+	while true:
+		for dz in range(-k, k + 1):
+			var step := 1 if (dz == -k or dz == k) else maxi(2 * k, 1)
+			var dx := -k
+			while dx <= k:
+				var b: Variant = _gg_buckets.get(Vector2i(cx + dx, cz + dz))
+				if b != null:
+					for i: int in b:
+						if skip_over and _over_mask[i] == 1:
+							continue
+						var p := _baked[i]
+						var ex := p.x - wx
+						var ez := p.z - wz
+						var d_sq := ex * ex + ez * ez
+						if d_sq < best_sq or (d_sq == best_sq and i < best_i):
+							best_sq = d_sq
+							best_i = i
+				dx += step
+		if k >= kmax:
+			return best_i
+		if best_i >= 0:
+			var edge := minf(
+				minf(wx - float(cx - k) * GROUND_GRID_CELL,
+					float(cx + k + 1) * GROUND_GRID_CELL - wx),
+				minf(wz - float(cz - k) * GROUND_GRID_CELL,
+					float(cz + k + 1) * GROUND_GRID_CELL - wz)) - GROUND_GRID_MARGIN
+			if edge > 0.0 and best_sq < edge * edge:
+				return best_i
+		k += 1
+	return best_i
+
 
 func _bake_overpass_mask(overpasses: Array[Vector2]) -> void:
 	var n := _baked.size()
@@ -469,24 +651,53 @@ func ground_y(wx: float, wz: float) -> float:
 	# Terenul urmeaza deci doar ce sta pe pamant; tablierul isi aduce fusta si
 	# pilonii lui. Vezi docs/track_briefs/chongqing.md §7.1.
 	var skip_over := _ground_points > 0 and _ground_points < n
-	var i := 0
-	while i < n:
-		if skip_over and _over_mask[i] == 1:
-			i += GROUND_STRIDE
-			continue
-		var p := _baked[i]
-		var dx := p.x - wx
-		var dz := p.z - wz
-		var d_sq := dx * dx + dz * dz
-		if d_sq < near_sq:
-			near_sq = d_sq
-			near_i = i
-		if d_sq < r_sq:
-			var u := 1.0 - sqrt(d_sq) / GROUND_ROAD_RADIUS
-			var w := (u * u) * (u * u) / (d_sq + soft_sq)
-			num += w * p.y
-			den += w
-		i += GROUND_STRIDE
+	# Intai doar punctele care pot avea pondere (vezi `_ground_query_candidates`):
+	# aceiasi indici care conteaza, in aceeasi ordine, deci aceeasi suma la bit.
+	if not _gg_built:
+		_ground_grid_build()
+	if use_ground_grid:
+		# Celula mica: doar punctele care pot avea pondere (vezi
+		# `_ground_query_candidates`). Daca niciunul nu e sub raza, nu exista
+		# pondere nicaieri pe pista si conteaza doar cel mai apropiat punct.
+		var cand := _ground_query_candidates(Vector2i(
+			floori(wx / GROUND_QUERY_CELL), floori(wz / GROUND_QUERY_CELL)),
+			skip_over)
+		for i in cand:
+			var p := _baked[i]
+			var dx := p.x - wx
+			var dz := p.z - wz
+			var d_sq := dx * dx + dz * dz
+			if d_sq < near_sq:
+				near_sq = d_sq
+				near_i = i
+			if d_sq < r_sq:
+				var u := 1.0 - sqrt(d_sq) / GROUND_ROAD_RADIUS
+				var w := (u * u) * (u * u) / (d_sq + soft_sq)
+				num += w * p.y
+				den += w
+		if not (near_sq < r_sq):
+			near_i = _ground_nearest_far(wx, wz, skip_over)
+			var pn := _baked[near_i]
+			var ndx := pn.x - wx
+			var ndz := pn.z - wz
+			near_sq = ndx * ndx + ndz * ndz
+	else:
+		# Referinta: scanarea completa, cum era inainte de orice grila.
+		for i in _gg_all:
+			if skip_over and _over_mask[i] == 1:
+				continue
+			var p := _baked[i]
+			var dx := p.x - wx
+			var dz := p.z - wz
+			var d_sq := dx * dx + dz * dz
+			if d_sq < near_sq:
+				near_sq = d_sq
+				near_i = i
+			if d_sq < r_sq:
+				var u := 1.0 - sqrt(d_sq) / GROUND_ROAD_RADIUS
+				var w := (u * u) * (u * u) / (d_sq + soft_sq)
+				num += w * p.y
+				den += w
 	var road_level := (num / den) if den > 0.0 else _mean_y
 	var dist := sqrt(near_sq)
 	# Langa asfalt, cota LOCALA a drumului bate media (vezi GROUND_LOCK_LEN).
@@ -738,7 +949,16 @@ func _carve_bluffs(y: float, wx: float, wz: float, dist: float,
 func _carve_hollows(y: float, wx: float, wz: float) -> float:
 	if _hollows.is_empty():
 		return y
-	for hi in _hollows.size():
+	# Doar scobiturile care pot atinge celula: celelalte ar fi iesit oricum pe
+	# `d >= outer`, iar ordinea ramane crescatoare (plafonul depinde de `y`-ul
+	# curent, deci ordinea conteaza). Serengeti are 66 — erau 1,8 s pe pista.
+	var near: PackedInt32Array
+	if use_ground_grid:
+		near = _hollows_near(Vector2i(floori(wx / GROUND_QUERY_CELL),
+			floori(wz / GROUND_QUERY_CELL)))
+	else:
+		near = PackedInt32Array(range(_hollows.size()))
+	for hi in near:
 		var h: Vector4 = _hollows[hi]
 		var wall := _hollow_walls[hi] if hi < _hollow_walls.size() else 0.0
 		var d := Vector2(wx - h.x, wz - h.y).length()
@@ -757,6 +977,29 @@ func _carve_hollows(y: float, wx: float, wz: float) -> float:
 		var ceiling := lerpf(y, h.w, mix)
 		y = minf(y, ceiling)
 	return y
+
+
+## Indicii scobiturilor al caror disc exterior (raza + perete) poate atinge
+## celula de interogare, crescator. Vezi `_carve_hollows`.
+func _hollows_near(qc: Vector2i) -> PackedInt32Array:
+	var hit: Variant = _hq_cache.get(qc)
+	if hit != null:
+		return hit
+	var x0 := float(qc.x) * GROUND_QUERY_CELL
+	var z0 := float(qc.y) * GROUND_QUERY_CELL
+	var x1 := x0 + GROUND_QUERY_CELL
+	var z1 := z0 + GROUND_QUERY_CELL
+	var out := PackedInt32Array()
+	for hi in _hollows.size():
+		var h: Vector4 = _hollows[hi]
+		var wall := _hollow_walls[hi] if hi < _hollow_walls.size() else 0.0
+		var reach := h.z + wall + GROUND_GRID_MARGIN
+		var ex := maxf(maxf(x0 - h.x, h.x - x1), 0.0)
+		var ez := maxf(maxf(z0 - h.y, h.y - z1), 0.0)
+		if ex * ex + ez * ez < reach * reach:
+			out.append(hi)
+	_hq_cache[qc] = out
+	return out
 
 
 ## Pe cata fractie de tur se stinge un debleu la capete.

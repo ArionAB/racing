@@ -10,6 +10,16 @@ extends Node3D
 ## tot; pe INTERIOR doar unde soseaua e inaltata. La nivelul solului
 ## interiorul e deschis -> scurtaturi prin iarba lenta = risc/recompensa.
 
+## Emis la capatul fiecarei faze din `rebuild()` (vezi `BUILD_STEPS`), ca
+## ecranul de incarcare sa-si mute bara intre pasi (LoadingScreen). NU lasa
+## niciun cadru sa treaca: constructia ramane un singur apel sincron, deci
+## pista iese identica cu cea fara ecran. Fara ascultatori nu costa nimic.
+signal build_step(step: StringName)
+## Fazele emise de `build_step`, in ordine. "pregatire" acopera si `_ready`-ul
+## decorului manual, care ruleaza inaintea pistei (copiii intai).
+const BUILD_STEPS: Array[StringName] = [&"pregatire", &"drum", &"obstacole",
+	&"umeri", &"decor", &"teren", &"umbre", &"apa"]
+
 const WALL_HEIGHT: float = 1.3
 ## Cate repetitii de textura de suprafata intra intr-un metru de lume.
 ## 0.08 = o dala la 12.5m — destul de mare cat sa nu se vada tiparul repetandu-se,
@@ -4722,8 +4732,16 @@ func _channel_specs() -> Array[Dictionary]:
 func _scenography() -> Array[Dictionary]:
 	return []
 
+## Registrul de array-uri pe CPU porneste INAINTE de _ready-ul decorului manual
+## (copiii sunt gata inaintea pistei, iar _enter_tree vine de sus in jos) si se
+## inchide dupa constructie. Vezi [MeshCpu].
+func _enter_tree() -> void:
+	if not is_node_ready():
+		MeshCpu.begin()
+
 func _ready() -> void:
 	rebuild()
+	MeshCpu.end()
 
 ## Reconstruieste toata pista (folosit si de editor, la Regenerate).
 ##
@@ -4817,11 +4835,13 @@ func rebuild() -> void:
 		TrackSideSampler.LAGOON_INNER))
 	_sampler.lagoon_rim = float(theme_flag("lagoon_rim",
 		TrackSideSampler.LAGOON_RIM))
+	build_step.emit(&"pregatire")
 	_build_environment()
 	_build_road()
 	_build_branch_surfaces()
 	_build_walls()
 	_build_viaduct_nets()
+	build_step.emit(&"drum")
 	# Tuburile de tunel DUPA sosea si ziduri (le foloseste ca reper de cota) si
 	# INAINTEA gimmickurilor: zona de camera pe care o aduc trebuie sa existe
 	# cand se monteaza restul. Vezi `_build_tunnels`.
@@ -4888,10 +4908,13 @@ func rebuild() -> void:
 	_build_start_gate()
 	_build_start_line()
 	_build_center_line()
+	build_step.emit(&"obstacole")
 	_build_shoulders()
+	build_step.emit(&"umeri")
 	_build_kerbs()
 	_build_tire_marks()
 	_build_world_decor()
+	build_step.emit(&"decor")
 	# Chevron-urile DUPA decor, nu inaintea lui: canionul si stancile de margine
 	# se aseaza exact pe exteriorul virajelor, adica fix unde stau si semnele.
 	# Puse inainte, primul semn de pe Dunele a iesit INGROPAT intr-o faleza.
@@ -4902,12 +4925,15 @@ func rebuild() -> void:
 	# Terenul DUPA faleze: le citeste pozitiile ca sa coaca umbra la baza lor.
 	# Fara asta, stancile par lipite peste nisip, nu infipte in el.
 	_build_terrain()
+	build_step.emit(&"teren")
 	# Umbrele de contact DUPA teren: fiecare disc isi citeste cota din sampler,
 	# si trebuie sa cada peste asfalt/nisip, nu sub ele.
 	_build_prop_contact()
+	build_step.emit(&"umbre")
 	# Apa DUPA teren: are nevoie de aceleasi cote ca sa stie unde e tarmul.
 	_build_water()
 	_build_world_bounds()
+	build_step.emit(&"apa")
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
 ## la fiecare 6.5m de-a lungul curbei.
@@ -8263,17 +8289,40 @@ func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
 		if absf(mi.global_transform.basis.determinant()) < 0.000001:
 			continue
 		var rel := inv * mi.global_transform
-		for si in mi.mesh.get_surface_count():
-			var arrays: Array = mi.mesh.surface_get_arrays(si)
-			if arrays.size() <= Mesh.ARRAY_VERTEX:
+		for v in _mesh_vertices(mi.mesh):
+			var lv := rel * v
+			if lv.y > band:
 				continue
-			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-			for v in verts:
-				var lv := rel * v
-				if lv.y > band:
-					continue
-				best = maxf(best, Vector2(lv.x, lv.z).length())
+			best = maxf(best, Vector2(lv.x, lv.z).length())
 	return best * PROP_AO_FOOT_SCALE
+
+
+## Vertecsii tuturor suprafetelor unui mesh, cititi O DATA pe mesh si
+## constructie (golit la capatul lui `_build_prop_contact`).
+##
+## Cu randare reala, `surface_get_arrays` nu e o citire de memorie: aduce
+## bufferele inapoi de pe GPU, cu tot cu normale, UV-uri si culori. Iar
+## `_prop_foot_radius` o chema pentru fiecare nod din DecorManual, de mai
+## multe ori pe acelasi .glb (radacina, nodul de mesh, grupul parinte).
+## Masurat pe Fiordland CU FEREASTRA: faza discurilor 13,2 s, fata de 2,6 s in
+## --headless, unde bufferele stau in memorie si sonda nu vedea costul.
+##
+## Suprafetele se pun cap la cap: rezultatul e un maxim, deci ordinea nu
+## schimba nimic — discurile ies identice la bit.
+var _foot_verts: Dictionary = {}
+
+func _mesh_vertices(mesh: Mesh) -> PackedVector3Array:
+	var key := mesh.get_rid()
+	var hit: Variant = _foot_verts.get(key)
+	if hit != null:
+		return hit
+	var all := PackedVector3Array()
+	for si in mesh.get_surface_count():
+		# Pozitiile din registru: decorul recolorat/deformat a fost urcat chiar
+		# acum, deci nu mai trebuie citit inapoi de pe GPU. Vezi [MeshCpu].
+		all.append_array(MeshCpu.vertices(mesh, si))
+	_foot_verts[key] = all
+	return all
 
 
 ## Umbra de contact a prop-urilor, ca factor multiplicativ (1.0 = neatins).
@@ -8305,10 +8354,17 @@ const PROP_AO_SEAT_TOL: float = 1.2
 
 func _build_prop_contact() -> void:
 	var discs := _prop_contact_discs()
+	# Vertecsii au servit doar razelor de amprenta: nu-i tinem in memorie.
+	_foot_verts.clear()
 	if discs.is_empty():
 		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Cotele de margine ale discurilor deja calculate, pe discul EXACT (aceeasi
+	# pozitie, raza si baza, la bit). Un model din .glb da un disc si pentru
+	# radacina, si pentru nodul de mesh dinauntru, deci acelasi disc vine de
+	# mai multe ori — iar fiecare cota de margine e un `ground_y`.
+	var rim_cache: Dictionary = {}
 	for d in discs:
 		var cx: float = d.x
 		var cz: float = d.y
@@ -8317,7 +8373,8 @@ func _build_prop_contact() -> void:
 		# Culoarea e NEAGRA peste tot, doar alfa variaza — asa discul intuneca
 		# orice suprafata pe care cade (nisip, asfalt, kerb) fara sa-i schimbe
 		# nuanta.
-		var gy := _sampler.ground_y(cx, cz)
+		var hit: Variant = rim_cache.get(d)
+		var gy: float = _sampler.ground_y(cx, cz) if hit == null 			else (hit as PackedFloat64Array)[0]
 		# DISCUL SE EMITE DOAR DACA PIESA CHIAR STA PE TERENUL SAMPLERULUI.
 		#
 		# Prima varianta le emitea pentru toate cele 728: pe malul din dreapta,
@@ -8333,20 +8390,36 @@ func _build_prop_contact() -> void:
 			continue
 		var cy := gy + PROP_AO_LIFT
 		var dark := 1.0 - PROP_AO_STRENGTH
+		# Fiecare vertex isi ia cota LUI din sampler, dar LIMITATA la un
+		# plafon fata de centru. Fara limita, pe malurile abrupte de langa
+		# drum discul se ridica odata cu panta si ajunge aproape vertical —
+		# adica se vede din lateral ca o pata neagra, nu ca un contact.
+		#
+		# Cotele se calculeaza O DATA pe punct de margine. Inainte, fiecare
+		# felie le cerea pe amandoua capetele ei, deci fiecare punct era cerut
+		# de doua ori: 20 de `ground_y` pe disc in loc de 11. Punctul k=SEGMENTS
+		# se calculeaza separat, nu se refoloseste k=0: cos(TAU) nu e exact
+		# cos(0), iar discul trebuie sa iasa identic la bit cu cel dinainte.
+		var rim: PackedFloat64Array
+		if hit != null:
+			rim = hit
+		else:
+			rim = PackedFloat64Array()
+			rim.resize(PROP_AO_SEGMENTS + 2)
+			rim[0] = gy
+			for k in PROP_AO_SEGMENTS + 1:
+				var a := TAU * float(k) / float(PROP_AO_SEGMENTS)
+				var pk := Vector2(cos(a), sin(a)) * r
+				rim[k + 1] = _rim_y(cx + pk.x, cz + pk.y, cy)
+			rim_cache[d] = rim
 		for i in PROP_AO_SEGMENTS:
 			var a0 := TAU * float(i) / float(PROP_AO_SEGMENTS)
 			var a1 := TAU * float(i + 1) / float(PROP_AO_SEGMENTS)
 			var p0 := Vector2(cos(a0), sin(a0)) * r
 			var p1 := Vector2(cos(a1), sin(a1)) * r
-			# Fiecare vertex isi ia cota LUI din sampler, dar LIMITATA la un
-			# plafon fata de centru. Fara limita, pe malurile abrupte de langa
-			# drum discul se ridica odata cu panta si ajunge aproape vertical —
-			# adica se vede din lateral ca o pata neagra, nu ca un contact.
 			var v0 := Vector3(cx, cy, cz)
-			var v1 := Vector3(cx + p0.x,
-					_rim_y(cx + p0.x, cz + p0.y, cy), cz + p0.y)
-			var v2 := Vector3(cx + p1.x,
-					_rim_y(cx + p1.x, cz + p1.y, cy), cz + p1.y)
+			var v1 := Vector3(cx + p0.x, rim[i + 1], cz + p0.y)
+			var v2 := Vector3(cx + p1.x, rim[i + 2], cz + p1.y)
 			# CENTRUL E GRI, NU NEGRU, si asta e o reparatie masurata, nu un
 			# gust. Cu BLEND_MODE_MUL un vertex negru inmulteste pixelul cu
 			# zero; un disc prins pe muchie in golul dintre sosea si teren

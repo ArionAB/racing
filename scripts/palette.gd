@@ -2106,7 +2106,7 @@ static func split_accents(mi: MeshInstance3D, keep_slot) -> bool:
 		return false
 	if mi.has_node(NodePath(String(mi.name) + ACCENT_SUFFIX)):
 		return false # deja rupt (scena reincarcata in editor)
-	var arr: Array = mi.mesh.surface_get_arrays(0)
+	var arr: Array = MeshCpu.surface_arrays(mi.mesh, 0)
 	var uvs: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
 	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
 	if uvs.is_empty() or idx.is_empty():
@@ -2152,7 +2152,7 @@ static func _mesh_with_indices(src: Array, indices: PackedInt32Array) -> ArrayMe
 		out[k] = src[k]
 	out[Mesh.ARRAY_INDEX] = indices
 	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, out)
+	MeshCpu.add_surface(mesh, out)
 	return mesh
 
 

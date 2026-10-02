@@ -799,7 +799,7 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 
 	var out := ArrayMesh.new()
 	for s in src.get_surface_count():
-		var arrays := src.surface_get_arrays(s)
+		var arrays := MeshCpu.surface_arrays(src, s)
 		# Chirurgia de topologie INAINTEA oricarei deformari: se taie pe cotele
 		# din mesh-ul NEATINS, deci planele sunt orizontale prin constructie.
 		# Dupa inclinarea axei (`lean`) o taietura orizontala ar fi fost oblica
@@ -943,8 +943,7 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 		# Normalele vechi mint dupa deformare; se refac din geometria noua.
 		arrays[Mesh.ARRAY_NORMAL] = null
 		arrays[Mesh.ARRAY_TANGENT] = null
-		out.add_surface_from_arrays(
-			Mesh.PRIMITIVE_TRIANGLES, arrays)
+		MeshCpu.add_surface(out, arrays)
 		out.surface_set_material(s, src.surface_get_material(s))
 
 	# PROFILUL MONOTON, dupa toate deformarile si dupa cusatura buzelor.
@@ -993,7 +992,7 @@ func _deform_mesh(mi: MeshInstance3D) -> void:
 		# culori — deci trebuie sa treaca peste orice a scris umbrirea.
 		if not is_zero_approx(cap_basalt):
 			fa = _cap_basalt_uvs(fa, y0, h)
-		fixed.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, fa)
+		MeshCpu.add_surface(fixed, fa)
 		fixed.surface_set_material(s, out.surface_get_material(s))
 	mi.mesh = fixed
 
@@ -1081,7 +1080,7 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 	for k in n:
 		buckets[k] = PackedFloat32Array()
 	for sfc in src.get_surface_count():
-		var arrays := src.surface_get_arrays(sfc)
+		var arrays := MeshCpu.surface_arrays(src, sfc)
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		for v in verts:
 			var t := clampf((v.y - y0) / h, 0.0, 0.9999)
@@ -1179,7 +1178,7 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 		cap[k] = lerpf(rmed[k], lin, taper_straighten)
 	var out := ArrayMesh.new()
 	for sfc in src.get_surface_count():
-		var arrays := src.surface_get_arrays(sfc)
+		var arrays := MeshCpu.surface_arrays(src, sfc)
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		for i in verts.size():
 			var v := verts[i]
@@ -1221,7 +1220,7 @@ func _taper_monotone(src: ArrayMesh, cx: float, cz: float,
 		arrays[Mesh.ARRAY_VERTEX] = verts
 		arrays[Mesh.ARRAY_NORMAL] = null
 		arrays[Mesh.ARRAY_TANGENT] = null
-		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		MeshCpu.add_surface(out, arrays)
 		out.surface_set_material(sfc, src.surface_get_material(sfc))
 	return out
 
@@ -2247,8 +2246,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 
 	var out := ArrayMesh.new()
 	for sfc in src.get_surface_count():
-		out.add_surface_from_arrays(
-			Mesh.PRIMITIVE_TRIANGLES, src.surface_get_arrays(sfc))
+		MeshCpu.add_surface(out, MeshCpu.surface_arrays(src, sfc))
 		out.surface_set_material(sfc, src.surface_get_material(sfc))
 	var mat := src.surface_get_material(0)
 
@@ -2280,7 +2278,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			# deci se scrie: o poala de aceeasi valoare cu hornul citea a
 			# prelungire a conului, nu a material cazut LANGA el.
 			ta = _darken(ta, TALUS_SHADE)
-			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, ta)
+			MeshCpu.add_surface(out, ta)
 			out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	# --- RANDURI DE FERESTRE ------------------------------------------------
@@ -2359,8 +2357,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			stw.generate_normals()
 			var mw := stw.commit()
 			if mw != null and mw.get_surface_count() > 0:
-				out.add_surface_from_arrays(
-					Mesh.PRIMITIVE_TRIANGLES, mw.surface_get_arrays(0))
+				MeshCpu.add_surface(out, mw.surface_get_arrays(0))
 				out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	if door_count > 0:
@@ -2400,8 +2397,7 @@ func _add_extras(mi: MeshInstance3D) -> void:
 			st2.generate_normals()
 			var m2 := st2.commit()
 			if m2 != null and m2.get_surface_count() > 0:
-				out.add_surface_from_arrays(
-					Mesh.PRIMITIVE_TRIANGLES, m2.surface_get_arrays(0))
+				MeshCpu.add_surface(out, m2.surface_get_arrays(0))
 				out.surface_set_material(out.get_surface_count() - 1, mat)
 
 	mi.mesh = out
@@ -2423,7 +2419,7 @@ func _verts_of(src: Mesh) -> Array[PackedVector3Array]:
 		return hit
 	var out: Array[PackedVector3Array] = []
 	for sfc in src.get_surface_count():
-		out.append(src.surface_get_arrays(sfc)[Mesh.ARRAY_VERTEX])
+		out.append(MeshCpu.vertices(src, sfc))
 	_verts_cache[src] = out
 	return out
 
@@ -3193,7 +3189,7 @@ func _erode_arch(mi: MeshInstance3D) -> void:
 
 	var out := ArrayMesh.new()
 	for s in src.get_surface_count():
-		var arrays := src.surface_get_arrays(s)
+		var arrays := MeshCpu.surface_arrays(src, s)
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		for i in verts.size():
 			var v := verts[i]
@@ -3231,7 +3227,7 @@ func _erode_arch(mi: MeshInstance3D) -> void:
 		arrays[Mesh.ARRAY_VERTEX] = verts
 		arrays[Mesh.ARRAY_NORMAL] = null
 		arrays[Mesh.ARRAY_TANGENT] = null
-		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		MeshCpu.add_surface(out, arrays)
 		out.surface_set_material(s, src.surface_get_material(s))
 	var st := SurfaceTool.new()
 	var fixed := ArrayMesh.new()
@@ -3246,7 +3242,7 @@ func _erode_arch(mi: MeshInstance3D) -> void:
 		var fa := m.surface_get_arrays(0)
 		if faceted:
 			fa = _shade_facets(fa)
-		fixed.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, fa)
+		MeshCpu.add_surface(fixed, fa)
 		fixed.surface_set_material(s, out.surface_get_material(s))
 	mi.mesh = fixed
 

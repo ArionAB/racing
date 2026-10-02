@@ -4732,8 +4732,16 @@ func _channel_specs() -> Array[Dictionary]:
 func _scenography() -> Array[Dictionary]:
 	return []
 
+## Registrul de array-uri pe CPU porneste INAINTE de _ready-ul decorului manual
+## (copiii sunt gata inaintea pistei, iar _enter_tree vine de sus in jos) si se
+## inchide dupa constructie. Vezi [MeshCpu].
+func _enter_tree() -> void:
+	if not is_node_ready():
+		MeshCpu.begin()
+
 func _ready() -> void:
 	rebuild()
+	MeshCpu.end()
 
 ## Reconstruieste toata pista (folosit si de editor, la Regenerate).
 ##
@@ -8310,10 +8318,9 @@ func _mesh_vertices(mesh: Mesh) -> PackedVector3Array:
 		return hit
 	var all := PackedVector3Array()
 	for si in mesh.get_surface_count():
-		var arrays: Array = mesh.surface_get_arrays(si)
-		if arrays.size() <= Mesh.ARRAY_VERTEX:
-			continue
-		all.append_array(arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array)
+		# Pozitiile din registru: decorul recolorat/deformat a fost urcat chiar
+		# acum, deci nu mai trebuie citit inapoi de pe GPU. Vezi [MeshCpu].
+		all.append_array(MeshCpu.vertices(mesh, si))
 	_foot_verts[key] = all
 	return all
 

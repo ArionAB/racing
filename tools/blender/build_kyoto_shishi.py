@@ -34,15 +34,21 @@ import math
 from mathutils import Vector, Matrix
 
 # --- Sloturi (brief §4): bambus = 21 + 13; piatra = 29 + 8; lemn = 28 -------
-GREEN = TROPICAL_GREEN      # 21
-DRY = DRY_VEGETATION        # 13 -- galben-verde la noduri
+GREEN = TROPICAL_GREEN      # 21 -- doar accent (coada), runda 2
+DRY = DRY_VEGETATION        # 13 -- paie, trunchiul
+STRAW = SAND_LIGHT          # 0  -- internoduri alternante, mai deschise
+NODE = ROCK_DARK            # 4  -- nodurile, mult mai inchise decat paiul
+OPEN = CORAL_SAND           # 19 -- buza si interiorul gurii (citeste „deschis")
+ROPE = KERB_RED              # 7  -- legatura de langa gura (carmin; CAR_RED 14 e rezervat masinilor in verify)
+WATER = FOAM_WHITE          # 22 -- firul de apa din jgheab
 GRANITE = MARBLE_GREY       # 29 (la integrare capata clasa `granite`)
 GRANITE_B = CONCRETE        # 8  -- a doua nuanta, ca blocurile sa nu iasa unul
 DARK = LOG_DARK             # 28
 
 PIVOT_H = 6.6               # cota pivotului din hazard (`pivot_height`)
 GROUND = -PIVOT_H
-R_TUBE = 0.9                # tube_diameter / 2
+R_COL = 0.9                 # raza de COLIZIUNE (tube_diameter / 2) -- nu se atinge
+R_TUBE = 1.1                # raza VIZUALA: +0.2 m ca bara sa se citeasca de la 120 m
 ARM = 12.0                  # tube_length - tail_length
 TAIL = 4.0
 SEG = 12                    # laturi pe tub (8-12 conform sarcinii)
@@ -50,8 +56,7 @@ SEG = 12                    # laturi pe tub (8-12 conform sarcinii)
 # Capatul cozii la +35 deg (fill_start_deg), colt de jos al capacului:
 #   z' = y sin a + z cos a,  y = -TAIL, z = -R  ->  -4*0.5736 - 0.9*0.8192
 FILL_START = math.radians(35.0)
-TAIL_LOW = -TAIL * math.sin(FILL_START) - R_TUBE * math.cos(FILT_START) \
-    if False else (-TAIL * math.sin(FILL_START) - R_TUBE * math.cos(FILL_START))
+TAIL_LOW = -TAIL * math.sin(FILL_START) - R_TUBE * math.cos(FILL_START)  # cu raza vizuala
 STONE_TOP = round(TAIL_LOW - 0.02, 3)   # 2 cm sub colt: se ating dupa bevel
 
 
@@ -90,15 +95,22 @@ def build_tube():
     oblique = lambda t: ARM - (R_TUBE * math.sin(t) + R_TUBE)
 
     # Statii (y, raza, slot-ul fasiei care PORNESTE de la statia anterioara).
-    nodes = [-2.15, 1.85, 5.45, 8.85]       # centrele celor 4 noduri de bambus
-    col_r, col_w = 1.0, 0.11                # inel ingrosat: +10 cm, ~44 cm lat
-    stations = [(-TAIL, 0.70, None), (-TAIL + 0.14, R_TUBE, DRY)]   # capac tesit
+    nodes = [-2.3, 1.5, 4.9, 7.2]           # centrele celor 4 noduri de bambus
+    col_r, col_w = R_TUBE + 0.1, 0.11       # inel ingrosat: +10 cm, ~44 cm lat
+    stations = [(-TAIL, 0.85, None), (-TAIL + 0.14, R_TUBE, DRY)]   # capac tesit
+    inter = [GREEN, DRY, DRY, DRY]           # verdele doar la coada; restul paie (13)
     for i, y in enumerate(nodes):
-        stations.append((y - 0.22, R_TUBE, GREEN))
-        stations.append((y - col_w, col_r, DRY))
-        stations.append((y + col_w, col_r, DRY))
-        stations.append((y + 0.22, R_TUBE, DRY))
-    stations.append((9.3, R_TUBE, GREEN))   # ultimul internod, pana la taietura
+        stations.append((y - 0.22, R_TUBE, inter[i]))
+        stations.append((y - col_w, col_r, NODE))
+        stations.append((y + col_w, col_r, NODE))
+        stations.append((y + 0.22, R_TUBE, NODE))
+    # Legatura rosie, ~1 m lata, chiar in spatele gurii (semn pe varful tubului).
+    # Raza +0.06 fata de tub: doar vizual, colizorul nu o vede.
+    stations.append((8.1, R_TUBE, DRY))
+    stations.append((8.18, R_TUBE + 0.06, ROPE))
+    stations.append((9.18, R_TUBE + 0.06, ROPE))
+    stations.append((9.26, R_TUBE, ROPE))
+    stations.append((9.5, R_TUBE, DRY))   # ultimul internod, pana la taietura
     rings = []
     for y, r, _slot in stations:
         rings.append(_ring(b, const(y), r))
@@ -108,13 +120,13 @@ def build_tube():
 
     # Gura: ultimul inel al corpului -> inelul oblic exterior -> buza -> interior.
     ro = _ring(b, oblique, R_TUBE)
-    _strip(b, rings[-1], ro, GREEN)
-    ri = _ring(b, oblique, 0.72)
-    _strip(b, ro, ri, DRY, flip=False)      # grosimea peretelui, vizibila
+    _strip(b, rings[-1], ro, DRY)
+    ri = _ring(b, oblique, R_TUBE - 0.2)
+    _strip(b, ro, ri, OPEN, flip=False)      # grosimea peretelui, vizibila
     depth_y = 7.4
-    rf = _ring(b, const(depth_y), 0.72)
-    _strip(b, ri, rf, DARK, flip=True)      # peretele interior, inchis
-    _cap(b, rf, DARK, flip=False)           # fundul
+    rf = _ring(b, const(depth_y), R_TUBE - 0.2)
+    _strip(b, ri, rf, OPEN, flip=True)      # peretele interior, deschis la culoare
+    _cap(b, rf, DRY, flip=False)            # fundul
     return b.to_object("Tube")
 
 
@@ -127,7 +139,7 @@ def _stone_block(b, cx, cy, z0, z1, sx, sy, slot, yaw=0.0):
 
 def build_frame():
     b = Builder()
-    post_x = 1.55
+    post_x = 1.75
     top = 0.65
     for sgn in (-1.0, 1.0):
         x = sgn * post_x
@@ -139,12 +151,12 @@ def build_frame():
         _stone_block(b, x, 0.0, GROUND + 5.3, top - 0.35, 1.0, 1.25, GRANITE, yaw=-1)
         # Capul stalpului + lagarul de lemn pe care sta axa
         _stone_block(b, x, 0.0, top - 0.35, top, 1.2, 1.45, GRANITE_B)
-        b.box((sgn * 1.2, 0.0, 0.05), (0.55, 0.8, 0.42), DARK)
+        b.box((sgn * 1.4, 0.0, 0.05), (0.55, 0.8, 0.42), DARK)
     # Axa: grinda de lemn intunecat, trece prin tub (marginile ies in exterior).
-    b.cylinder((0.0, 0.0, 0.0), 0.17, 3.9, DARK, segments=8, axis="X")
+    b.cylinder((0.0, 0.0, 0.0), 0.17, 4.3, DARK, segments=8, axis="X")
     # Capetele axei: doua dopuri mai groase, ca o cuie de fixare
     for sgn in (-1.0, 1.0):
-        b.cylinder((sgn * 2.0, 0.0, 0.0), 0.26, 0.18, DARK, segments=8, axis="X")
+        b.cylinder((sgn * 2.2, 0.0, 0.0), 0.26, 0.18, DARK, segments=8, axis="X")
     return b.to_object("Frame")
 
 
@@ -204,6 +216,9 @@ def build_kakei():
     spout = Vector((0.0, 10.0, 8.7))
     start = Vector((2.7, -0.4, 11.2))
     _trough(b, start, spout, 0.42, 0.32, GREEN, DARK)
+    # Firul de apa: scurt, din varf in jos. Tubul se invarte, deci un fir pana in
+    # gura ar trece prin el la unghiuri mici; la +35 deg gura e chiar dedesubt.
+    b.box((0.0, 10.0, 7.7), (0.16, 0.16, 2.0), WATER)
     # noduri de bambus pe jgheab
     for t in (0.18, 0.5, 0.82):
         c = start.lerp(spout, t)

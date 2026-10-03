@@ -2,7 +2,7 @@ extends Node
 ## GARDA: e carul Gion Matsuri ASEZAT pe soseaua reala a lui Track18 si se misca in
 ## lungul unei linii perpendiculare pe ea?
 ##
-##   godot --headless --fixed-fps 60 --path . res://tools/ProbeKyotoGionPos.tscn
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeKyotoGionPos.tscn [-- --sabotage]
 ##
 ## De ce exista (memoria hazard-dezaliniat-contamineaza-verdictul): pozitia vine din
 ## generator (curba Python, plata), iar drumul REAL e bake-ul Catmull-Rom din Godot.
@@ -16,7 +16,9 @@ extends Node
 ## <= 0.01 m) si pozitia e continua (salt maxim pe cadru); (f) rotile ating solul real
 ## (raycast independent de profilul hazardului): nu plutesc, nu se ingroapa; (g) carul e
 ## in cadru de la 150 la 35 m inaintea lui (|azimut| <= 30 spre ambele odihne, pe >= 80%
-## din puncte); plafonul camerei se tipareste ca tabel.
+## din puncte); plafonul camerei se tipareste ca tabel; (h) nimic solid din decor (copac,
+## gard, piatra) pe traseul carului, caseta lui plimbata de la o odihna la cealalta;
+## `--sabotage` pune un bloc pe traseu si (h) TREBUIE sa pice.
 
 const CAM_HEIGHT: float = 10.0
 const CAM_BACK: float = 12.5
@@ -153,6 +155,53 @@ func _ready() -> void:
 	lines.append("  [%s] (f) rotile pe sol (raycast independent, %d masuratori): cel mai rau plutesc %.2f m, cel mai rau ingropat %.2f m (plutire <= 0,5, ingropare <= 0,45)"
 		% [_pf(ff), samples_f, worst_float, -worst_sink])
 	ok = ok and ff
+
+	# (h) nimic solid din decor pe drumul carului: caseta caroseriei (+ trasatori) plimbata
+	# pe tot traseul lui, cu cota terenului; coliziunile cu hazardul insusi si cu terenul
+	# (stratul camerei) nu se numara. Un copac sau un gard pe traseu ar bloca carul.
+	var shape_q := PhysicsShapeQueryParameters3D.new()
+	var cbox := BoxShape3D.new()
+	cbox.size = Vector3(hz.cart_length, 3.0, hz.cart_width + 1.0)
+	shape_q.shape = cbox
+	shape_q.collide_with_areas = false
+	shape_q.collide_with_bodies = true
+	shape_q.collision_mask = 0xFFFFF & ~Track.CAMERA_BLOCKER_LAYER
+	if "--sabotage" in OS.get_cmdline_user_args():
+		# Sabotaj: un bloc solid pe traseul carului. Verdictul (h) TREBUIE sa pice.
+		var blk := StaticBody3D.new()
+		blk.name = "BlocSabotaj"
+		var blk_shape := CollisionShape3D.new()
+		var blk_box := BoxShape3D.new()
+		blk_box.size = Vector3(2.0, 3.0, 2.0)
+		blk_shape.shape = blk_box
+		blk.add_child(blk_shape)
+		get_tree().root.add_child(blk)
+		blk.global_position = hz.to_global(Vector3(3.0, hz.ground_at(3.0) + 1.5, 0.0))
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+	var obstacles: Dictionary = {}
+	var sweep_n := 0
+	var xs := -hz.rest_x()
+	while xs <= hz.rest_x() + 0.01:
+		var gy2 := hz.ground_at(xs)
+		var tr := Transform3D(hz.global_transform.basis, hz.to_global(Vector3(xs, gy2 + 0.5 + 1.5, 0.0)))
+		shape_q.transform = tr
+		sweep_n += 1
+		for hit in space.intersect_shape(shape_q, 16):
+			var col: Object = hit["collider"]
+			if col is Node and hz.is_ancestor_of(col as Node):
+				continue
+			# soseaua insasi (asfalt, acostament, margini): carul sta pe ea, nu in ea
+			if col is Node and (col as Node).name in ["RoadTop", "Shoulders", "RoadSides"]:
+				continue
+			var nm := str((col as Node).get_path()) if col is Node else str(col)
+			obstacles[nm] = float(obstacles.get(nm, 0.0)) + 1.0
+		xs += 0.5
+	var hh := obstacles.is_empty() and sweep_n >= 30
+	lines.append("  [%s] (h) nimic solid din decor pe traseul carului (%d pozitii x 0,5 m, caseta %.1f x %.1f m): %d obstacole%s"
+		% [_pf(hh), sweep_n, hz.cart_length, hz.cart_width + 1.0, obstacles.size(),
+		"" if obstacles.is_empty() else " " + str(obstacles.keys())])
+	ok = ok and hh
 
 	# (g) cadru + plafon
 	var route := track.routes[0]

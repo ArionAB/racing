@@ -303,7 +303,7 @@ nodurilor aplicate), nu AABB. Comparatii: `docs/asset_briefs/img/kyoto_fidelity/
 
 # Grupa kit-h: fundalul (`build_kyoto_horizon.py`, kit §1.11)
 
-`rocks/kyoto_horizon.glb`, 4 noduri copii directi ai radacinii, origine la baza, fara coliziune, fara clasa, zero sloturi noi/de masina. 5 134 tri total (verify: `VERDICT: OK`, buget 7500).
+`rocks/kyoto_horizon.glb`, 4 noduri copii directi ai radacinii, origine la baza, fara coliziune, fara clasa, zero sloturi noi/de masina. 6 866 tri total (verify: `VERDICT: OK`, buget 7500).
 
 | nod | tri | cote masurate L x A x I (m) | culori | comparatie |
 |---|---:|---|---|---|

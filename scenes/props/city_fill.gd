@@ -63,6 +63,13 @@ class_name CityFill
 ## Zone fara case (centru XZ in coordonate de lume + raza), pe langa
 ## golurile `TerrainHollow` (fantana) care se exclud singure.
 @export var exclude_xz: PackedVector3Array = PackedVector3Array()
+## ZONA PROPRIE (opt-in; gol = interiorul buclei, comportamentul dinainte):
+## poligon XZ in coordonate de lume care INLOCUIESTE bucla ca zona de umplut.
+## Kyoto (Track18, POI A): orasul vechi e doar o parte din interior (iazul F,
+## dealul gradinii si padurile raman libere), iar cartierul din jurul pagodei
+## Yasaka e in AFARA buclei, la nord de B. Restul regulilor (distanta de banda,
+## goluri, treapta de teren) raman aceleasi.
+@export var region_xz: PackedVector2Array = PackedVector2Array()
 
 ## CASE SUB DRUM (opt-in; 0 = oprit, comportamentul dinainte): o casa poate sta
 ## mai aproape de `min_road_m` — dar nu sub `below_road_m` — de orice punct de
@@ -207,6 +214,13 @@ func _generate(track: Track, space: PhysicsDirectSpaceState3D) -> Array:
 		loop.append(q)
 		lo = lo.min(q)
 		hi = hi.max(q)
+	if not region_xz.is_empty():
+		loop = region_xz
+		lo = Vector2(INF, INF)
+		hi = Vector2(-INF, -INF)
+		for q in region_xz:
+			lo = lo.min(q)
+			hi = hi.max(q)
 	var roads := PackedVector2Array()
 	var road_y := PackedFloat32Array()
 	for r: TrackRoute in track.routes:

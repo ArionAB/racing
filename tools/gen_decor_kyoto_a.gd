@@ -38,7 +38,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_space = _track.get_world_3d().direct_space_state
 	if _scan:
-		_do_scan()
+		await _do_scan()
 		get_tree().quit(0)
 		return
 	_rng.seed = 31026
@@ -63,6 +63,57 @@ func _do_scan() -> void:
 		print(line)
 	for q in [Vector2(4, -200), Vector2(0, -200), Vector2(4, -210), Vector2(-10, -200), Vector2(14, -200)]:
 		print("; sol la (%.0f, %.0f): %.2f" % [q.x, q.y, _sol_real(q.x, q.y)])
+	await _scan_map()
+
+
+## Harta pe celule de 20 m: R = banda la < 30 m, T = copaci (PadureMasa),
+## ~ = sol sub cota drumului cu > 2 m (apa/rapa), . = liber; cota in zecimi.
+func _scan_map() -> void:
+	var forest0 := _track.get_node_or_null("PadureMasa")
+	for k in 900:
+		if forest0 != null and bool(forest0.get("done")):
+			break
+		await get_tree().process_frame
+	# Pozitiile copacilor din ocuparea lui MeshForest (transformarile citite din
+	# MultiMesh ies (0,0,0) headless: memoria multimesh-masuratoare-moarta).
+	var trees := PackedVector2Array()
+	var forest := _track.get_node_or_null("PadureMasa")
+	if forest != null:
+		var occ: Dictionary = forest.get("_occ")
+		# Valorile din _occ ies goale (append pe copia unui PackedVector2Array in
+		# mesh_forest._occupy), dar CHEILE sunt celulele de 2 m ocupate.
+		for k in occ:
+			trees.append(Vector2((k as Vector2i).x * 2.0 + 1.0, (k as Vector2i).y * 2.0 + 1.0))
+	print("; copaci: %d (inst %s, occ %s)" % [trees.size(), str(forest.get("instance_count")), str((forest.get("_occ") as Dictionary).size())])
+	var cell := 20.0
+	var hdr := "      "
+	for gx in range(-60, 440, 20):
+		hdr += "%-1s" % ("|" if gx % 100 == 0 else " ")
+	print(hdr)
+	for gz in range(-280, 480, 20):
+		var line := "%5d " % gz
+		for gx in range(-60, 440, 20):
+			var c := Vector2(gx + 10, gz + 10)
+			var ch := "."
+			var near := INF
+			var ny := 0.0
+			for p in _track.baked:
+				var d := c.distance_to(Vector2(p.x, p.z))
+				if d < near:
+					near = d
+					ny = p.y
+			var nt := 0
+			for t in trees:
+				if absf(t.x - c.x) < cell * 0.5 and absf(t.y - c.y) < cell * 0.5:
+					nt += 1
+			if near < 30.0:
+				ch = "R"
+			elif nt > 0:
+				ch = "T"
+			elif _sol_real(c.x, c.y) < ny - 2.0:
+				ch = "~"
+			line += ch
+		print(line)
 
 
 ## ------------------------------------------------------------------------
@@ -113,6 +164,7 @@ func _build() -> void:
 		_row(side)
 		_row2(side)
 	_monks()
+	_old_town()
 
 
 func _prep() -> void:
@@ -183,10 +235,10 @@ func _pagoda() -> void:
 		var x: float = PAGODA.x + dx
 		var z := PAGODA.z + 5.0
 		_raw("stone_lantern_b", "props", "aPagodaFelinar", Vector3(x, _sol_min(x, z, 0.6) - 0.05, z), PI, 1.0, "")
-	for k in 3:
-		var z := PAGODA.z + 4.0 - 8.0 * k
-		var x := PAGODA.x - 10.5
-		_raw("temple_wall", "structures", "aPagodaZid", Vector3(x, _sol_min(x, z, 4.0) - 0.15, z), 0.0, 1.0, "")
+	# Fara zid de incinta (runda 2): sirul de trei piese de pe vest (24 m
+	# continuu) si apoi cele doua de pe nord se citeau, din camera de 10 m si
+	# pe muchia cadrului, ca o placa alba culcata. Incinta o fac felinarele de
+	# piatra si copacii; zidurile raman doar in curtile de pe strada.
 	# Copacii stau in SPATELE si pe LATURILE pagodei (nord, vest, est), nu in
 	# fata: de pe grila trebuie sa se vada baza. Coroanele (7-10 m) ajung la
 	# primele doua acoperisuri, ca in dioramă.
@@ -312,7 +364,7 @@ func _row2(side: float) -> void:
 ## Doi calugari care matura pe trotuarul din dreapta, in fata grilei (se vad
 ## din cadrul de start), cu gramezile lor de frunze.
 func _monks() -> void:
-	for it in [[5.0, 1.5, 0.35], [9.5, 2.3, -0.5]]:
+	for it in [[-4.5, 1.5, 0.35], [-0.5, 2.3, -0.5]]:
 		var f := _frame(float(it[0]))
 		var hw: float = f[3]
 		var tan: Vector3 = f[1]
@@ -367,16 +419,102 @@ func _raw(stem: String, folder: String, base: String, pos: Vector3, yaw: float,
 	_out.append("")
 
 
+## ORASUL VECHI (runda 2, aprobat de coordonator): doua noduri `CityFill`
+## (MultiMesh feliat, fara corp) cu machiya a-e.
+##  * Interiorul buclei, dincolo de randul doi al lui A (x > ~30): de la B
+##    (z -150) pana inainte de iazul F (z 228), pana la padurea de pe D
+##    (x ~262). Poligonul vine din harta `--scan` (celule de 20 m, copacii din
+##    ocuparea lui MeshForest): liber = x 20..260, z -160..230.
+##  * Cartierul pagodei, in AFARA buclei, la nord de B si la vest de randul
+##    din stanga (`region_xz`, extensie opt-in in city_fill.gd).
+## Curtile: puncte rare in interior, exceptate din umplutura (`exclude_xz`),
+## cu cate un artar/ginkgo — diorama are coroane rosii printre acoperisuri.
+const TOWN_IN := [Vector2(32, -150), Vector2(170, -150), Vector2(258, -140),
+	Vector2(262, 40), Vector2(255, 200), Vector2(200, 228), Vector2(40, 228),
+	Vector2(32, 180)]
+const TOWN_PAGODA := [Vector2(-75, -165), Vector2(-30, -165), Vector2(-28, -232),
+	Vector2(40, -236), Vector2(175, -246), Vector2(175, -300), Vector2(-75, -300)]
+
+var _cf_lines: Array[String] = []
+
+
+func _road_dist(c: Vector2) -> float:
+	var best := INF
+	for r: TrackRoute in _track.routes:
+		var b: PackedVector3Array = r.baked
+		for i in range(0, b.size(), 2):
+			best = minf(best, c.distance_to(Vector2(b[i].x, b[i].z)))
+	return best
+
+
+func _old_town() -> void:
+	var models := ["machiya_a", "machiya_b", "machiya_c", "machiya_d", "machiya_e"]
+	for m in models:
+		_res_id(m, "res://assets/models/kyoto/buildings/%s.glb" % m)
+	# Curtile din interior: puncte la >= 16 m unul de altul si >= 40 m de banda.
+	var courts: Array[Vector3] = []
+	var poly := PackedVector2Array(TOWN_IN)
+	var tries := 0
+	while courts.size() < 26 and tries < 4000:
+		tries += 1
+		var c := Vector2(_rng.randf_range(32.0, 262.0), _rng.randf_range(-150.0, 228.0))
+		if not Geometry2D.is_point_in_polygon(c, poly):
+			continue
+		if _road_dist(c) < 40.0:
+			continue
+		var ok := true
+		for q in courts:
+			if c.distance_to(Vector2(q.x, q.y)) < 16.0:
+				ok = false
+				break
+		if ok:
+			courts.append(Vector3(c.x, c.y, 6.5))
+	var trees := ["momiji_a", "momiji_b", "momiji_c", "momiji_b", "momiji_a", "ginkgo"]
+	for q in courts:
+		var tm: String = trees[_rng.randi_range(0, trees.size() - 1)]
+		_raw(tm, "plants", "aOrasCopac", Vector3(q.x, _sol_real(q.x, q.y) - 0.05, q.y),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 0.95), "")
+	var pag_ex: Array[Vector3] = [Vector3(PAGODA.x, PAGODA.z, 26.0)]
+	_cityfill("OrasVechi", PackedVector2Array(TOWN_IN), 32.0, courts, 20261003)
+	_cityfill("OrasPagoda", PackedVector2Array(TOWN_PAGODA), 26.0, pag_ex, 20261004)
+	print("; curti cu copac: %d" % courts.size())
+
+
+func _cityfill(nm: String, poly: PackedVector2Array, min_road: float,
+		excl: Array[Vector3], sd: int) -> void:
+	var ms: Array[String] = []
+	for m in ["machiya_a", "machiya_b", "machiya_c", "machiya_d", "machiya_e"]:
+		ms.append('ExtResource("poia_%s")' % m)
+	var pv: Array[String] = []
+	for q in poly:
+		pv.append("%.1f, %.1f" % [q.x, q.y])
+	var ev: Array[String] = []
+	for e in excl:
+		ev.append("%.1f, %.1f, %.1f" % [e.x, e.y, e.z])
+	_cf_lines.append('[node name="%s" type="Node3D" parent="."]' % nm)
+	_cf_lines.append('script = ExtResource("poia_cityfill")')
+	_cf_lines.append("models = Array[PackedScene]([%s])" % ", ".join(ms))
+	_cf_lines.append("weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)")
+	_cf_lines.append("indigo_ratio = 0.0")
+	_cf_lines.append("min_road_m = %.1f" % min_road)
+	_cf_lines.append("seed_value = %d" % sd)
+	_cf_lines.append("exclude_xz = PackedVector3Array(%s)" % ", ".join(ev))
+	_cf_lines.append("region_xz = PackedVector2Array(%s)" % ", ".join(pv))
+	_cf_lines.append("")
+
+
 func _write() -> void:
 	var lines: Array[String] = [";;EXT"]
 	var stems := _ext.keys()
 	stems.sort()
 	for s in stems:
 		lines.append('[ext_resource type="PackedScene" path="%s" id="poia_%s"]' % [_ext[s], s])
+	lines.append('[ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="poia_cityfill"]')
 	lines.append(";;NODES")
 	lines.append('[node name="ZoneA_Yasaka" type="Node3D" parent="DecorManual"]')
 	lines.append("")
 	lines.append_array(_out)
+	lines.append_array(_cf_lines)
 	print("; asezate %d piese, %d modele" % [_n, stems.size()])
 	if _out_path.is_empty():
 		for l in lines:

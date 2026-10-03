@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/teahouse_front.glb" id="poia_teahouse_front"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/temple_wall.glb" id="poia_temple_wall"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/yasaka_pagoda.glb" id="poia_yasaka_pagoda"]
+[ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="poia_cityfill"]
 ;;NODES
 [node name="ZoneA_Yasaka" type="Node3D" parent="DecorManual"]
 
@@ -34,688 +35,777 @@ transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.00
 [node name="aPagodaFelinar5" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_stone_lantern_b")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, 11.600000, 4.169864, -195.000000)
 
-[node name="aPagodaZid6" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -6.500000, 3.678125, -196.000000)
-
-[node name="aPagodaZid7" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -6.500000, 3.792123, -204.000000)
-
-[node name="aPagodaZid8" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, -6.500000, 3.891672, -212.000000)
-
-[node name="aPagodaCopac9" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+[node name="aPagodaCopac6" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
 transform = Transform3D(0.921061, 0.000000, 0.389418, 0.000000, 1.000000, 0.000000, -0.389418, 0.000000, 0.921061, -13.000000, 3.960269, -208.000000)
 
-[node name="aPagodaCopac10" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+[node name="aPagodaCopac7" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
 transform = Transform3D(0.326122, 0.000000, 0.838835, 0.000000, 0.900000, 0.000000, -0.838835, 0.000000, 0.326122, 17.000000, 4.515155, -209.000000)
 
-[node name="aPagodaCopac11" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+[node name="aPagodaCopac8" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
 transform = Transform3D(-0.374532, 0.000000, 0.818368, 0.000000, 0.900000, 0.000000, -0.818368, 0.000000, -0.374532, -5.000000, 4.147281, -215.000000)
 
-[node name="aPagodaCopac12" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+[node name="aPagodaCopac9" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
 transform = Transform3D(0.621610, 0.000000, 0.783327, 0.000000, 1.000000, 0.000000, -0.783327, 0.000000, 0.621610, 12.000000, 4.485476, -217.000000)
 
-[node name="aPagodaCopac13" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+[node name="aPagodaCopac10" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
 transform = Transform3D(-0.899733, 0.000000, 0.541277, 0.000000, 1.050000, 0.000000, -0.541277, 0.000000, -0.899733, 2.000000, 4.334613, -222.000000)
 
-[node name="aPagodaCopac14" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+[node name="aPagodaCopac11" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
 transform = Transform3D(0.980067, 0.000000, 0.198669, 0.000000, 1.000000, 0.000000, -0.198669, 0.000000, 0.980067, -15.000000, 4.041125, -218.000000)
 
-[node name="aPagodaCopac15" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+[node name="aPagodaCopac12" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
 transform = Transform3D(-0.122402, 0.000000, 0.942082, 0.000000, 0.950000, 0.000000, -0.942082, 0.000000, -0.122402, 21.000000, 4.741870, -220.000000)
 
-[node name="aPagodaCopac16" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+[node name="aPagodaCopac13" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
 transform = Transform3D(0.408236, 0.000000, 0.802087, 0.000000, 0.900000, 0.000000, -0.802087, 0.000000, 0.408236, -20.000000, 3.835498, -204.000000)
 
-[node name="aCurteZid17" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid14" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-0.993820, 0.000000, 0.111007, 0.000000, 1.000000, 0.000000, -0.111007, 0.000000, -0.993820, -13.399362, 0.038690, 73.271088)
 
-[node name="aCurteCopac18" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+[node name="aCurteCopac15" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
 transform = Transform3D(0.043644, 0.000000, 0.824966, 0.000000, 0.826120, 0.000000, -0.824966, 0.000000, 0.043644, -16.977112, 0.205005, 72.871460)
 
-[node name="aFrunze19" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze16" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.672838, 0.000000, 0.553727, 0.000000, 0.871392, 0.000000, -0.553727, 0.000000, -0.672838, -12.214399, 0.209354, 73.922943)
 
-[node name="aCasa20" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa17" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.125446, 0.000000, -0.992100, 0.000000, 1.000000, 0.000000, 0.992100, 0.000000, -0.125446, -14.823039, 0.020632, 65.230965)
 
-[node name="aCasa21" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa18" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.122586, 0.000000, -0.992458, 0.000000, 1.000000, 0.000000, 0.992458, 0.000000, -0.122586, -14.082384, -0.065184, 58.808010)
 
-[node name="aFelinar22" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar19" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.111950, 0.000000, -0.993714, 0.000000, 1.000000, 0.000000, 0.993714, 0.000000, -0.111950, -9.918630, -0.025983, 57.365070)
 
-[node name="aCasa23" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa20" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.075376, 0.000000, -0.997155, 0.000000, 1.000000, 0.000000, 0.997155, 0.000000, -0.075376, -13.706684, -0.136885, 52.554932)
 
-[node name="aCasa24" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa21" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.030190, 0.000000, -0.999544, 0.000000, 1.000000, 0.000000, 0.999544, 0.000000, -0.030190, -13.342445, -0.190870, 46.708160)
 
-[node name="aFelinar25" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar22" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.040892, 0.000000, -0.999164, 0.000000, 1.000000, 0.000000, 0.999164, 0.000000, -0.040892, -9.099504, -0.160153, 44.980217)
 
-[node name="aCasa26" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasa23" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(0.009987, 0.000000, -0.999950, 0.000000, 1.000000, 0.000000, 0.999950, 0.000000, 0.009987, -13.068592, -0.219374, 40.965458)
 
-[node name="aCurteZid27" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid24" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-0.999993, 0.000000, -0.003777, 0.000000, 1.000000, 0.000000, 0.003777, 0.000000, -0.999993, -10.747928, -0.335013, 33.448933)
 
-[node name="aCurteCopac28" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+[node name="aCurteCopac25" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
 transform = Transform3D(0.050489, 0.000000, 0.795812, 0.000000, 0.797412, 0.000000, -0.795812, 0.000000, 0.050489, -14.347902, -0.202924, 33.462532)
 
-[node name="aFrunze29" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze26" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.825759, 0.000000, -0.480661, 0.000000, 0.955465, 0.000000, 0.480661, 0.000000, -0.825759, -9.497322, -0.215298, 33.606689)
 
-[node name="aCasa30" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa27" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.003713, 0.000000, -0.999993, 0.000000, 1.000000, 0.000000, 0.999993, 0.000000, -0.003713, -13.219256, -0.284285, 25.968037)
 
-[node name="aFelinar31" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar28" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -9.100000, -0.254819, 24.068037)
 
-[node name="aCasa32" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa29" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.000178, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000178, -13.133048, -0.306639, 19.555744)
 
-[node name="aCasa33" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa30" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.012421, 0.000000, -0.999923, 0.000000, 1.000000, 0.000000, 0.999923, 0.000000, 0.012421, -13.188991, -0.329558, 12.948757)
 
-[node name="aFelinar34" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar31" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -9.100000, -0.301266, 11.048758)
 
-[node name="aCurteZid35" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid32" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -10.750000, -0.428946, 5.212242)
 
-[node name="aCurteCopac36" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+[node name="aCurteCopac33" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
 transform = Transform3D(-0.020947, 0.000000, 0.766263, 0.000000, 0.766549, 0.000000, -0.766263, 0.000000, -0.020947, -14.350000, -0.289517, 5.212242)
 
-[node name="aFrunze37" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze34" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(0.959617, 0.000000, -0.168105, 0.000000, 0.974230, 0.000000, 0.168105, 0.000000, 0.959617, -9.500000, -0.322461, 7.519062)
 
-[node name="aCasa38" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa35" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.010124, 0.000000, -0.999949, 0.000000, 1.000000, 0.000000, 0.999949, 0.000000, -0.010124, -14.203719, -0.319975, -2.227839)
 
-[node name="aCasa39" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa36" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.000679, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000679, -14.063561, -0.243788, -8.733382)
 
-[node name="aFelinar40" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar37" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -10.100000, -0.127866, -10.633382)
 
-[node name="aCasa41" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa38" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(-0.014736, 0.000000, -0.999891, 0.000000, 1.000000, 0.000000, 0.999891, 0.000000, -0.014736, -14.270349, -0.116026, -15.233467)
 
-[node name="aCasa42" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa39" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.010399, 0.000000, -0.999946, 0.000000, 1.000000, 0.000000, 0.999946, 0.000000, -0.010399, -14.277633, 0.006807, -21.595644)
 
-[node name="aFelinar43" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar40" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -10.100000, 0.122760, -23.495644)
 
-[node name="aCasa44" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa41" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(-0.001912, 0.000000, -0.999998, 0.000000, 1.000000, 0.000000, 0.999998, 0.000000, -0.001912, -14.293776, 0.132631, -28.001530)
 
-[node name="aCurteZid45" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid42" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -11.750000, 0.180215, -35.507626)
 
-[node name="aCurteCopac46" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+[node name="aCurteCopac43" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
 transform = Transform3D(0.013308, 0.000000, 0.792399, 0.000000, 0.792511, 0.000000, -0.792399, 0.000000, 0.013308, -15.350000, 0.362750, -35.507626)
 
-[node name="aFrunze47" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze44" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.205079, 0.000000, 0.776060, 0.000000, 0.802699, 0.000000, -0.776060, 0.000000, -0.205079, -10.500000, 0.392932, -37.107643)
 
-[node name="aCasa48" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa45" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.001582, 0.000000, -0.999999, 0.000000, 1.000000, 0.000000, 0.999999, 0.000000, 0.001582, -14.152375, 0.431246, -43.107628)
 
-[node name="aFelinar49" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar46" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -10.100000, 0.550449, -45.007629)
 
-[node name="aCasa50" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasa47" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(-0.005163, 0.000000, -0.999987, 0.000000, 1.000000, 0.000000, 0.999987, 0.000000, -0.005163, -14.190287, 0.560396, -49.592499)
 
-[node name="aCasa51" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa48" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.014160, 0.000000, -0.999900, 0.000000, 1.000000, 0.000000, 0.999900, 0.000000, 0.014160, -14.233411, 0.686769, -55.923946)
 
-[node name="aFelinar52" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar49" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -10.100000, 0.806598, -57.823948)
 
-[node name="aCasa53" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa50" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.007968, 0.000000, -0.999968, 0.000000, 1.000000, 0.000000, 0.999968, 0.000000, -0.007968, -14.254517, 0.818514, -62.511326)
 
-[node name="aCasa54" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa51" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.012932, 0.000000, -0.999916, 0.000000, 1.000000, 0.000000, 0.999916, 0.000000, 0.012932, -14.231593, 0.949984, -69.077141)
 
-[node name="aFelinar55" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar52" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -10.100000, 1.069782, -70.977142)
 
-[node name="aCurteZid56" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid53" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -11.750000, 1.001901, -76.597305)
 
-[node name="aCurteCopac57" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+[node name="aCurteCopac54" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
 transform = Transform3D(-0.083221, 0.000000, 0.802469, 0.000000, 0.806773, 0.000000, -0.802469, 0.000000, -0.083221, -15.350000, 1.184131, -76.597305)
 
-[node name="aFrunze58" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze55" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.831643, 0.000000, 0.152708, 0.000000, 0.845547, 0.000000, -0.152708, 0.000000, -0.831643, -10.500000, 1.224704, -78.705452)
 
-[node name="aCasa59" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasa56" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(0.011116, 0.000000, -0.999938, 0.000000, 1.000000, 0.000000, 0.999938, 0.000000, 0.011116, -14.285863, 1.250200, -84.037308)
 
-[node name="aCasa60" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa57" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(-0.012131, 0.000000, -0.999926, 0.000000, 1.000000, 0.000000, 0.999926, 0.000000, -0.012131, -14.208326, 1.376634, -90.420036)
 
-[node name="aFelinar61" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar58" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -10.100000, 1.497318, -92.320038)
 
-[node name="aCasa62" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa59" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.009151, 0.000000, -0.999958, 0.000000, 1.000000, 0.000000, 0.999958, 0.000000, -0.009151, -14.245049, 1.513399, -96.997673)
 
-[node name="aCasa63" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa60" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.012303, 0.000000, -0.999924, 0.000000, 1.000000, 0.000000, 0.999924, 0.000000, 0.012303, -14.229224, 1.659105, -103.580666)
 
-[node name="aFelinar64" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar61" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -10.100000, 1.792712, -105.480667)
 
-[node name="aCasa65" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa62" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.003374, 0.000000, -0.999994, 0.000000, 1.000000, 0.000000, 0.999994, 0.000000, -0.003374, -14.066779, 1.809969, -109.964523)
 
-[node name="aCurteZid66" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid63" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, -11.750000, 1.891565, -117.497597)
 
-[node name="aCurteCopac67" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+[node name="aCurteCopac64" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
 transform = Transform3D(0.046359, 0.000000, 0.756064, 0.000000, 0.757484, 0.000000, -0.756064, 0.000000, 0.046359, -15.350000, 2.099445, -117.497597)
 
-[node name="aFrunze68" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze65" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.248580, 0.000000, -0.987408, 0.000000, 1.018217, 0.000000, 0.987408, 0.000000, -0.248580, -10.500000, 2.092960, -117.377556)
 
-[node name="aCasa69" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasa66" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(0.012631, 0.000000, -0.999920, 0.000000, 1.000000, 0.000000, 0.999920, 0.000000, 0.012631, -14.037442, 2.190004, -124.937599)
 
-[node name="aFelinar70" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar67" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -9.833651, 2.331653, -126.837601)
 
-[node name="aCasa71" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa68" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.000492, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000492, -13.289585, 2.347872, -131.276138)
 
-[node name="aCasa72" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa69" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.010105, 0.000000, -0.999949, 0.000000, 1.000000, 0.000000, 0.999949, 0.000000, -0.010105, -12.721730, 2.516039, -137.867813)
 
-[node name="aFelinar73" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar70" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, -8.719266, 2.661060, -139.767807)
 
-[node name="aCurteZid74" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid71" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-0.999992, 0.000000, -0.004026, 0.000000, 1.000000, 0.000000, 0.004026, 0.000000, -0.999992, -9.815497, 2.606683, -145.559799)
 
-[node name="aCurteCopac75" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+[node name="aCurteCopac72" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
 transform = Transform3D(-0.083941, 0.000000, 0.792058, 0.000000, 0.796493, 0.000000, -0.792058, 0.000000, -0.083941, -13.415467, 2.807956, -145.545303)
 
-[node name="aFrunze76" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze73" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.853169, 0.000000, -0.357718, 0.000000, 0.925127, 0.000000, 0.357718, 0.000000, -0.853169, -8.560799, 2.780399, -144.395355)
 
-[node name="aCasa77" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa74" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.024227, 0.000000, -0.999707, 0.000000, 1.000000, 0.000000, 0.999707, 0.000000, 0.024227, -11.862045, 2.891314, -152.852844)
 
-[node name="aCasa78" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa75" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.025293, 0.000000, -0.999680, 0.000000, 1.000000, 0.000000, 0.999680, 0.000000, 0.025293, -11.837854, 3.045504, -159.254486)
 
-[node name="aFelinar79" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar76" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(0.015800, 0.000000, -0.999875, 0.000000, 1.000000, 0.000000, 0.999875, 0.000000, 0.015800, -7.844958, 3.197086, -161.217819)
 
-[node name="aCeainarie80" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_teahouse_front")]
+[node name="aCeainarie77" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_teahouse_front")]
 transform = Transform3D(0.015800, 0.000000, -0.999875, 0.000000, 1.000000, 0.000000, 0.999875, 0.000000, 0.015800, -10.302893, 3.222369, -164.865143)
 
-[node name="aCasa81" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa78" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.025075, 0.000000, -0.999686, 0.000000, 1.000000, 0.000000, 0.999686, 0.000000, 0.025075, -12.061845, 3.282244, -170.438049)
 
-[node name="aCasa82" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa79" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.022570, 0.000000, -0.999745, 0.000000, 1.000000, 0.000000, 0.999745, 0.000000, 0.022570, -12.100976, 3.406481, -176.989838)
 
-[node name="aFelinar83" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar80" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(0.015800, 0.000000, -0.999875, 0.000000, 1.000000, 0.000000, 0.999875, 0.000000, 0.015800, -8.125206, 3.554645, -178.952896)
 
-[node name="aCasa84" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasa81" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(0.023195, 0.000000, -0.999731, 0.000000, 1.000000, 0.000000, 0.999731, 0.000000, 0.023195, -12.362623, 3.518679, -183.335159)
 
-[node name="aCasaSpate85" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate82" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.001408, 0.000000, -0.999999, 0.000000, 1.000000, 0.000000, 0.999999, 0.000000, -0.001408, -21.416323, -0.227888, 34.342827)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate86" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate83" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.002389, 0.000000, -0.999997, 0.000000, 1.000000, 0.000000, 0.999997, 0.000000, 0.002389, -21.507322, -0.256498, 27.388945)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate87" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate84" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.006028, 0.000000, -0.999982, 0.000000, 1.000000, 0.000000, 0.999982, 0.000000, 0.006028, -21.564137, -0.274168, 20.980625)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate88" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate85" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(0.012182, 0.000000, -0.999926, 0.000000, 1.000000, 0.000000, 0.999926, 0.000000, 0.012182, -20.948416, -0.285063, 14.276772)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate89" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate86" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.010041, 0.000000, -0.999950, 0.000000, 1.000000, 0.000000, 0.999950, 0.000000, -0.010041, -21.316603, -0.284178, 7.397769)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate90" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate87" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(-0.006526, 0.000000, -0.999979, 0.000000, 1.000000, 0.000000, 0.999979, 0.000000, -0.006526, -21.166811, -0.275267, 0.591536)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate91" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate88" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.002604, 0.000000, -0.999997, 0.000000, 1.000000, 0.000000, 0.999997, 0.000000, 0.002604, -21.762592, -0.223188, -6.229785)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate92" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate89" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(-0.005005, 0.000000, -0.999987, 0.000000, 1.000000, 0.000000, 0.999987, 0.000000, -0.005005, -22.586952, -0.113279, -12.963387)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate93" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate90" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.009388, 0.000000, -0.999956, 0.000000, 1.000000, 0.000000, 0.999956, 0.000000, -0.009388, -22.612495, -0.001371, -19.767061)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate94" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate91" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.022537, 0.000000, -0.999746, 0.000000, 1.000000, 0.000000, 0.999746, 0.000000, -0.022537, -21.956575, 0.116518, -26.509943)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate95" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate92" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.005115, 0.000000, -0.999987, 0.000000, 1.000000, 0.000000, 0.999987, 0.000000, 0.005115, -21.992538, 0.236544, -32.950104)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate96" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate93" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.002843, 0.000000, -0.999996, 0.000000, 1.000000, 0.000000, 0.999996, 0.000000, 0.002843, -22.261339, 0.366167, -39.661655)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate97" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasaSpate94" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.019950, 0.000000, -0.999801, 0.000000, 1.000000, 0.000000, 0.999801, 0.000000, 0.019950, -21.963514, 0.492815, -46.121593)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate98" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate95" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.017616, 0.000000, -0.999845, 0.000000, 1.000000, 0.000000, 0.999845, 0.000000, 0.017616, -21.920698, 0.625093, -52.773834)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate99" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasaSpate96" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.015996, 0.000000, -0.999872, 0.000000, 1.000000, 0.000000, 0.999872, 0.000000, 0.015996, -21.783653, 0.756380, -59.354176)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate100" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate97" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.000898, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000898, -21.723471, 0.890276, -66.038475)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate101" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasaSpate98" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(-0.010146, 0.000000, -0.999949, 0.000000, 1.000000, 0.000000, 0.999949, 0.000000, -0.010146, -22.328426, 1.022463, -72.593826)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate102" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate99" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.009525, 0.000000, -0.999955, 0.000000, 1.000000, 0.000000, 0.999955, 0.000000, 0.009525, -22.206858, 1.154619, -79.107643)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate103" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate100" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(-0.012549, 0.000000, -0.999921, 0.000000, 1.000000, 0.000000, 0.999921, 0.000000, -0.012549, -22.480001, 1.291094, -85.744347)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate104" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate101" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.007660, 0.000000, -0.999971, 0.000000, 1.000000, 0.000000, 0.999971, 0.000000, 0.007660, -21.971973, 1.426836, -92.329620)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate105" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate102" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(-0.029374, 0.000000, -0.999568, 0.000000, 1.000000, 0.000000, 0.999568, 0.000000, -0.029374, -22.471050, 1.565035, -98.687714)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate106" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate103" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.012602, 0.000000, -0.999921, 0.000000, 1.000000, 0.000000, 0.999921, 0.000000, -0.012602, -22.603676, 1.720751, -105.490158)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate107" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate104" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.021752, 0.000000, -0.999763, 0.000000, 1.000000, 0.000000, 0.999763, 0.000000, 0.021752, -22.157742, 1.874224, -111.992981)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate108" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate105" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(0.019128, 0.000000, -0.999817, 0.000000, 1.000000, 0.000000, 0.999817, 0.000000, 0.019128, -21.995201, 2.028902, -118.339371)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate109" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate106" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.026482, 0.000000, -0.999649, 0.000000, 1.000000, 0.000000, 0.999649, 0.000000, 0.026482, -22.186892, 2.191622, -124.864029)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate110" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate107" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(-0.009669, 0.000000, -0.999953, 0.000000, 1.000000, 0.000000, 0.999953, 0.000000, -0.009669, -21.808434, 2.363070, -131.735672)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate111" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasaSpate108" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.019117, 0.000000, -0.999817, 0.000000, 1.000000, 0.000000, 0.999817, 0.000000, 0.019117, -20.275764, 2.530596, -138.499664)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate112" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate109" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.017511, 0.000000, -0.999847, 0.000000, 1.000000, 0.000000, 0.999847, 0.000000, -0.017511, -19.845533, 2.692919, -145.113480)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate113" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate110" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.042637, 0.000000, -0.999091, 0.000000, 1.000000, 0.000000, 0.999091, 0.000000, 0.042637, -20.195463, 2.846453, -151.621582)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate114" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate111" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(0.029654, 0.000000, -0.999560, 0.000000, 1.000000, 0.000000, 0.999560, 0.000000, 0.029654, -19.543764, 3.003450, -158.450302)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate115" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate112" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.044555, 0.000000, -0.999007, 0.000000, 1.000000, 0.000000, 0.999007, 0.000000, 0.044555, -19.601517, 3.143694, -165.120438)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate116" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasaSpate113" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.030618, 0.000000, -0.999531, 0.000000, 1.000000, 0.000000, 0.999531, 0.000000, 0.030618, -19.796106, 3.267962, -171.699402)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate117" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate114" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.009045, 0.000000, -0.999959, 0.000000, 1.000000, 0.000000, 0.999959, 0.000000, -0.009045, -20.529175, 3.380678, -178.406418)
 metadata/coliziune = "none"
 
-[node name="aCurteZid118" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid115" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-0.993820, 0.000000, 0.111007, 0.000000, 1.000000, 0.000000, -0.111007, 0.000000, -0.993820, 7.967761, 0.047479, 75.657730)
 
-[node name="aCurteCopac119" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+[node name="aCurteCopac116" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
 transform = Transform3D(0.012964, 0.000000, 0.821316, 0.000000, 0.821419, 0.000000, -0.821316, 0.000000, 0.012964, 11.545512, 0.207431, 76.057358)
 
-[node name="aFrunze120" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze117" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.436270, 0.000000, 0.905429, 0.000000, 1.005053, 0.000000, -0.905429, 0.000000, -0.436270, 6.690566, 0.205936, 75.831612)
 
-[node name="aCasa121" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa118" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.109610, 0.000000, 0.993975, 0.000000, 1.000000, 0.000000, -0.993975, 0.000000, 0.109610, 11.288116, 0.033892, 68.334610)
 
-[node name="aFelinar122" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar119" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.118032, 0.000000, -0.993010, 0.000000, 1.000000, 0.000000, 0.993010, 0.000000, -0.118032, 7.407753, 0.064548, 65.959999)
 
-[node name="aCasa123" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa120" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.103904, 0.000000, 0.994587, 0.000000, 1.000000, 0.000000, -0.994587, 0.000000, 0.103904, 12.053299, -0.054136, 61.844784)
 
-[node name="aCasa124" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa121" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.095158, 0.000000, 0.995462, 0.000000, 1.000000, 0.000000, -0.995462, 0.000000, 0.095158, 12.556537, -0.131239, 54.950718)
 
-[node name="aFelinar125" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar122" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.084999, 0.000000, -0.996381, 0.000000, 1.000000, 0.000000, 0.996381, 0.000000, -0.084999, 8.727051, -0.100949, 52.717133)
 
-[node name="aCasa126" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa123" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.030920, 0.000000, 0.999522, 0.000000, 1.000000, 0.000000, -0.999522, 0.000000, 0.030920, 13.122813, -0.188200, 47.839657)
 
-[node name="aCasa127" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa124" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.005422, 0.000000, 0.999985, 0.000000, 1.000000, 0.000000, -0.999985, 0.000000, -0.005422, 13.146130, -0.224836, 40.732838)
 
-[node name="aFelinar128" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar125" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(0.002968, 0.000000, -0.999996, 0.000000, 1.000000, 0.000000, 0.999996, 0.000000, 0.002968, 9.162623, -0.194714, 38.844654)
 
-[node name="aCurteZid129" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid126" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-0.999993, 0.000000, -0.003777, 0.000000, 1.000000, 0.000000, 0.003777, 0.000000, -0.999993, 10.750834, -0.336661, 33.080559)
 
-[node name="aCurteCopac130" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+[node name="aCurteCopac127" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
 transform = Transform3D(-0.079215, 0.000000, 0.767045, 0.000000, 0.771124, 0.000000, -0.767045, 0.000000, -0.079215, 14.350809, -0.208218, 33.066959)
 
-[node name="aFrunze131" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze128" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(0.159208, 0.000000, -0.947793, 0.000000, 0.961072, 0.000000, 0.947793, 0.000000, 0.159208, 9.492533, -0.225949, 30.885237)
 
-[node name="aCasa132" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa129" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(-0.002464, 0.000000, 0.999997, 0.000000, 1.000000, 0.000000, -0.999997, 0.000000, -0.002464, 13.255859, -0.283537, 25.680868)
 
-[node name="aCasa133" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa130" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.000157, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, 0.000157, 13.175191, -0.303022, 19.325941)
 
-[node name="aFelinar134" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar131" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 9.100000, -0.275830, 17.425941)
 
-[node name="aCasa135" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa132" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.006346, 0.000000, 0.999980, 0.000000, 1.000000, 0.000000, -0.999980, 0.000000, -0.006346, 13.111331, -0.321562, 12.796096)
 
-[node name="aCasa136" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa133" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.008938, 0.000000, 0.999960, 0.000000, 1.000000, 0.000000, -0.999960, 0.000000, 0.008938, 13.139030, -0.353758, 6.262335)
 
-[node name="aFelinar137" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar134" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 9.100000, -0.335248, 4.362335)
 
-[node name="aCurteZid138" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid135" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, 11.750000, -0.440039, -1.293865)
 
-[node name="aCurteCopac139" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+[node name="aCurteCopac136" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
 transform = Transform3D(-0.092590, 0.000000, 0.773786, 0.000000, 0.779306, 0.000000, -0.773786, 0.000000, -0.092590, 15.350000, -0.250653, -1.293865)
 
-[node name="aFrunze140" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze137" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(0.865016, 0.000000, -0.176263, 0.000000, 0.882792, 0.000000, 0.176263, 0.000000, 0.865016, 10.500000, -0.283917, -1.901497)
 
-[node name="aCasa141" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa138" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.010274, 0.000000, 0.999947, 0.000000, 1.000000, 0.000000, -0.999947, 0.000000, -0.010274, 14.298737, -0.249968, -8.733866)
 
-[node name="aCasa142" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa139" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.001202, 0.000000, 0.999999, 0.000000, 1.000000, 0.000000, -0.999999, 0.000000, 0.001202, 14.287042, -0.118879, -15.130985)
 
-[node name="aFelinar143" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar140" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 10.100000, -0.006055, -17.030985)
 
-[node name="aCasa144" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa141" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.002908, 0.000000, 0.999996, 0.000000, 1.000000, 0.000000, -0.999996, 0.000000, 0.002908, 14.289223, 0.008089, -21.732361)
 
-[node name="aCurteZid145" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid142" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, 11.750000, 0.059686, -29.475325)
 
-[node name="aCurteCopac146" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+[node name="aCurteCopac143" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
 transform = Transform3D(-0.069834, 0.000000, 0.845751, 0.000000, 0.848629, 0.000000, -0.845751, 0.000000, -0.069834, 15.350000, 0.243671, -29.475325)
 
-[node name="aFrunze147" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze144" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-1.038836, 0.000000, 0.195312, 0.000000, 1.057037, 0.000000, -0.195312, 0.000000, -1.038836, 10.500000, 0.271716, -31.040859)
 
-[node name="aCasa148" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa145" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.013564, 0.000000, 0.999908, 0.000000, 1.000000, 0.000000, -0.999908, 0.000000, 0.013564, 14.283670, 0.307497, -36.915325)
 
-[node name="aFelinar149" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar146" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 10.100000, 0.426639, -38.815327)
 
-[node name="aCasa150" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa147" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.000208, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, 0.000208, 14.127269, 0.435381, -43.342491)
 
-[node name="aCasa151" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa148" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.013200, 0.000000, 0.999913, 0.000000, 1.000000, 0.000000, -0.999913, 0.000000, 0.013200, 14.293221, 0.563799, -49.773045)
 
-[node name="aFelinar152" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar149" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 10.100000, 0.683612, -51.673046)
 
-[node name="aCurteZid153" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid150" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, 11.750000, 0.615152, -57.259079)
 
-[node name="aCurteCopac154" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+[node name="aCurteCopac151" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
 transform = Transform3D(0.089420, 0.000000, 0.756795, 0.000000, 0.762060, 0.000000, -0.756795, 0.000000, 0.089420, 15.350000, 0.795718, -57.259079)
 
-[node name="aFrunze155" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze152" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.886667, 0.000000, -0.501941, 0.000000, 1.018883, 0.000000, 0.501941, 0.000000, -0.886667, 10.500000, 0.790683, -57.025845)
 
-[node name="aCasa156" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa153" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.007946, 0.000000, 0.999968, 0.000000, 1.000000, 0.000000, -0.999968, 0.000000, -0.007946, 14.268590, 0.862398, -64.699081)
 
-[node name="aCasa157" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa154" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.013091, 0.000000, 0.999914, 0.000000, 1.000000, 0.000000, -0.999914, 0.000000, 0.013091, 14.241365, 0.989061, -71.022942)
 
-[node name="aFelinar158" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar155" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 10.100000, 1.109058, -72.922943)
 
-[node name="aCasa159" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa156" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.014360, 0.000000, 0.999897, 0.000000, 1.000000, 0.000000, -0.999897, 0.000000, 0.014360, 14.222022, 1.118044, -77.454391)
 
-[node name="aCasa160" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa157" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.012653, 0.000000, 0.999920, 0.000000, 1.000000, 0.000000, -0.999920, 0.000000, 0.012653, 14.107383, 1.250856, -84.044655)
 
-[node name="aFelinar161" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar158" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 10.100000, 1.371005, -85.944656)
 
-[node name="aCasa162" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa159" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.001487, 0.000000, 0.999999, 0.000000, 1.000000, 0.000000, -0.999999, 0.000000, -0.001487, 14.171384, 1.382082, -90.546562)
 
-[node name="aCurteZid163" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
+[node name="aCurteZid160" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_temple_wall")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, 11.750000, 1.434091, -98.158836)
 
-[node name="aCurteCopac164" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+[node name="aCurteCopac161" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
 transform = Transform3D(0.047077, 0.000000, 0.795890, 0.000000, 0.797281, 0.000000, -0.795890, 0.000000, 0.047077, 15.350000, 1.631046, -98.158836)
 
-[node name="aFrunze165" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze162" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.618593, 0.000000, -0.800223, 0.000000, 1.011442, 0.000000, 0.800223, 0.000000, -0.618593, 10.500000, 1.651767, -99.457382)
 
-[node name="aCasa166" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasa163" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.007094, 0.000000, 0.999975, 0.000000, 1.000000, 0.000000, -0.999975, 0.000000, 0.007094, 14.178493, 1.707201, -105.598831)
 
-[node name="aFelinar167" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar164" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 10.100000, 1.842258, -107.498833)
 
-[node name="aCasa168" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa165" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.013465, 0.000000, 0.999909, 0.000000, 1.000000, 0.000000, -0.999909, 0.000000, 0.013465, 14.254779, 1.860796, -111.926689)
 
-[node name="aCasa169" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasa166" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.000498, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, 0.000498, 14.294498, 2.022738, -118.274620)
 
-[node name="aFelinar170" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar167" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 10.095252, 2.166736, -120.174622)
 
-[node name="aCasa171" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasa168" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.008715, 0.000000, 0.999962, 0.000000, 1.000000, 0.000000, -0.999962, 0.000000, 0.008715, 13.849488, 2.186586, -124.650917)
 
-[node name="aCasa172" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasa169" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(-0.011490, 0.000000, 0.999934, 0.000000, 1.000000, 0.000000, -0.999934, 0.000000, -0.011490, 13.357498, 2.350145, -131.029892)
 
-[node name="aFelinar173" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
+[node name="aFelinar170" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_paper_lantern")]
 transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 9.310531, 2.494052, -132.929886)
 
-[node name="aCeainarie174" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_teahouse_front")]
+[node name="aCeainarie171" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_teahouse_front")]
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 11.119266, 2.537036, -136.633789)
 
-[node name="aCasa175" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasa172" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.006543, 0.000000, 0.999979, 0.000000, 1.000000, 0.000000, -0.999979, 0.000000, -0.006543, 12.252926, 2.642763, -142.233795)
 
-[node name="aCasaSpate176" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate173" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.010165, 0.000000, 0.999948, 0.000000, 1.000000, 0.000000, -0.999948, 0.000000, -0.010165, 21.501974, -0.233809, 33.993561)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate177" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate174" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.013660, 0.000000, 0.999907, 0.000000, 1.000000, 0.000000, -0.999907, 0.000000, 0.013660, 20.874052, -0.257948, 27.544161)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate178" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate175" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.010885, 0.000000, 0.999941, 0.000000, 1.000000, 0.000000, -0.999941, 0.000000, 0.010885, 20.738527, -0.276152, 21.078384)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate179" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate176" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.022025, 0.000000, 0.999757, 0.000000, 1.000000, 0.000000, -0.999757, 0.000000, 0.022025, 21.308411, -0.283568, 14.498318)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate180" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasaSpate177" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.021522, 0.000000, 0.999768, 0.000000, 1.000000, 0.000000, -0.999768, 0.000000, 0.021522, 21.641203, -0.277250, 7.868582)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate181" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate178" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.015341, 0.000000, 0.999882, 0.000000, 1.000000, 0.000000, -0.999882, 0.000000, 0.015341, 20.769070, -0.285109, 1.530593)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate182" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate179" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.020352, 0.000000, 0.999793, 0.000000, 1.000000, 0.000000, -0.999793, 0.000000, 0.020352, 22.597258, -0.219618, -5.043402)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate183" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate180" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(0.003362, 0.000000, 0.999994, 0.000000, 1.000000, 0.000000, -0.999994, 0.000000, 0.003362, 22.603048, -0.142393, -11.776036)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate184" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate181" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.021267, 0.000000, 0.999774, 0.000000, 1.000000, 0.000000, -0.999774, 0.000000, 0.021267, 22.369570, -0.034712, -18.310820)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate185" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate182" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.002907, 0.000000, 0.999996, 0.000000, 1.000000, 0.000000, -0.999996, 0.000000, -0.002907, 22.396416, 0.085421, -24.972231)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate186" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate183" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.005932, 0.000000, 0.999982, 0.000000, 1.000000, 0.000000, -0.999982, 0.000000, -0.005932, 22.124439, 0.204409, -31.324585)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate187" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate184" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.003966, 0.000000, 0.999992, 0.000000, 1.000000, 0.000000, -0.999992, 0.000000, -0.003966, 22.583406, 0.327288, -37.677376)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate188" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate185" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.028381, 0.000000, 0.999597, 0.000000, 1.000000, 0.000000, -0.999597, 0.000000, -0.028381, 22.417297, 0.454470, -44.180920)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate189" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasaSpate186" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.019856, 0.000000, 0.999803, 0.000000, 1.000000, 0.000000, -0.999803, 0.000000, 0.019856, 22.463896, 0.580889, -50.558517)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate190" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate187" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.008223, 0.000000, 0.999966, 0.000000, 1.000000, 0.000000, -0.999966, 0.000000, 0.008223, 21.801710, 0.708803, -56.975536)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate191" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate188" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.006015, 0.000000, 0.999982, 0.000000, 1.000000, 0.000000, -0.999982, 0.000000, 0.006015, 21.762886, 0.837511, -63.400406)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate192" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate189" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.028882, 0.000000, 0.999583, 0.000000, 1.000000, 0.000000, -0.999583, 0.000000, -0.028882, 22.498899, 0.968523, -69.909050)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate193" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate190" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.027194, 0.000000, 0.999630, 0.000000, 1.000000, 0.000000, -0.999630, 0.000000, -0.027194, 21.957928, 1.099306, -76.366844)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate194" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate191" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(-0.028066, 0.000000, 0.999606, 0.000000, 1.000000, 0.000000, -0.999606, 0.000000, -0.028066, 22.013130, 1.238069, -83.121338)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate195" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate192" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(0.028239, 0.000000, 0.999601, 0.000000, 1.000000, 0.000000, -0.999601, 0.000000, 0.028239, 22.083965, 1.378008, -89.789513)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate196" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate193" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(0.016481, 0.000000, 0.999864, 0.000000, 1.000000, 0.000000, -0.999864, 0.000000, 0.016481, 21.980188, 1.520784, -96.511864)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate197" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate194" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(-0.001646, 0.000000, 0.999999, 0.000000, 1.000000, 0.000000, -0.999999, 0.000000, -0.001646, 21.878809, 1.671434, -103.269325)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate198" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate195" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.005405, 0.000000, 0.999985, 0.000000, 1.000000, 0.000000, -0.999985, 0.000000, 0.005405, 21.917608, 1.827654, -109.824310)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate199" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
+[node name="aCasaSpate196" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_a")]
 transform = Transform3D(-0.002057, 0.000000, 0.999998, 0.000000, 1.000000, 0.000000, -0.999998, 0.000000, -0.002057, 22.152090, 1.994341, -116.341393)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate200" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
+[node name="aCasaSpate197" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_c")]
 transform = Transform3D(0.009467, 0.000000, 0.999955, 0.000000, 1.000000, 0.000000, -0.999955, 0.000000, 0.009467, 21.902281, 2.164644, -122.725739)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate201" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
+[node name="aCasaSpate198" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_d")]
 transform = Transform3D(-0.023819, 0.000000, 0.999716, 0.000000, 1.000000, 0.000000, -0.999716, 0.000000, -0.023819, 21.691593, 2.351946, -129.390884)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate202" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
+[node name="aCasaSpate199" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_e")]
 transform = Transform3D(0.029284, 0.000000, 0.999571, 0.000000, 1.000000, 0.000000, -0.999571, 0.000000, 0.029284, 20.563036, 2.526125, -135.727600)
 metadata/coliziune = "none"
 
-[node name="aCasaSpate203" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
+[node name="aCasaSpate200" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_machiya_b")]
 transform = Transform3D(0.009184, 0.000000, 0.999958, 0.000000, 1.000000, 0.000000, -0.999958, 0.000000, 0.009184, 20.726685, 2.730089, -142.449066)
 metadata/coliziune = "none"
 
-[node name="aCalugar204" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_monk_sweeper")]
-transform = Transform3D(0.939373, 0.000000, 0.342898, 0.000000, 1.000000, 0.000000, -0.342898, 0.000000, 0.939373, 9.500000, -0.235780, -5.000000)
+[node name="aCalugar201" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_monk_sweeper")]
+transform = Transform3D(0.939373, 0.000000, 0.342898, 0.000000, 1.000000, 0.000000, -0.342898, 0.000000, 0.939373, 8.500000, -0.319490, 4.500061)
+
+[node name="aFrunze202" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+transform = Transform3D(-0.787628, 0.000000, -0.435479, 0.000000, 0.900000, 0.000000, 0.435479, 0.000000, -0.787628, 8.100000, -0.341565, 3.200061)
+
+[node name="aCalugar203" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_monk_sweeper")]
+transform = Transform3D(0.877583, 0.000000, -0.479426, 0.000000, 1.000000, 0.000000, 0.479426, 0.000000, 0.877583, 9.299944, -0.291551, 0.500001)
+
+[node name="aFrunze204" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+transform = Transform3D(-0.788641, 0.000000, 0.433642, 0.000000, 0.900000, 0.000000, -0.433642, 0.000000, -0.788641, 8.899944, -0.303937, -0.799999)
 
 [node name="aFrunze205" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
-transform = Transform3D(-0.787628, 0.000000, -0.435479, 0.000000, 0.900000, 0.000000, 0.435479, 0.000000, -0.787628, 9.100000, -0.232220, -6.300000)
-
-[node name="aCalugar206" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_monk_sweeper")]
-transform = Transform3D(0.877583, 0.000000, -0.479426, 0.000000, 1.000000, 0.000000, 0.479426, 0.000000, 0.877583, 10.300000, -0.137758, -9.500000)
-
-[node name="aFrunze207" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
-transform = Transform3D(-0.788641, 0.000000, 0.433642, 0.000000, 0.900000, 0.000000, -0.433642, 0.000000, -0.788641, 9.900001, -0.129971, -10.800000)
-
-[node name="aFrunze208" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.624756, 0.000000, 0.407787, 0.000000, 0.746063, 0.000000, -0.407787, 0.000000, -0.624756, -8.781919, 2.217105, -122.264801)
 
-[node name="aFrunze209" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze206" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.115701, 0.000000, 0.771613, 0.000000, 0.780240, 0.000000, -0.771613, 0.000000, -0.115701, 9.100782, 1.262378, -80.580803)
 
-[node name="aFrunze210" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze207" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.393512, 0.000000, 0.704874, 0.000000, 0.807279, 0.000000, -0.704874, 0.000000, -0.393512, -8.225952, -0.243878, 27.216457)
 
-[node name="aFrunze211" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze208" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.658473, 0.000000, 0.537956, 0.000000, 0.850284, 0.000000, -0.537956, 0.000000, -0.658473, 9.612067, -0.077847, -13.434978)
 
-[node name="aFrunze212" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze209" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(-0.431817, 0.000000, 0.564986, 0.000000, 0.711108, 0.000000, -0.564986, 0.000000, -0.431817, -9.197128, 1.401782, -87.647011)
 
-[node name="aFrunze213" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
+[node name="aFrunze210" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(0.839569, 0.000000, -0.356662, 0.000000, 0.912186, 0.000000, 0.356662, 0.000000, 0.839569, 9.698485, 1.410632, -87.988678)
+
+[node name="aOrasCopac211" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.632545, 0.000000, 0.667705, 0.000000, 0.919752, 0.000000, -0.667705, 0.000000, 0.632545, 67.222855, 0.885760, 10.563705)
+
+[node name="aOrasCopac212" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+transform = Transform3D(-0.739356, 0.000000, -0.348486, 0.000000, 0.817367, 0.000000, 0.348486, 0.000000, -0.739356, 116.960884, 10.561862, -87.521744)
+
+[node name="aOrasCopac213" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+transform = Transform3D(-0.269872, 0.000000, -0.856566, 0.000000, 0.898074, 0.000000, 0.856566, 0.000000, -0.269872, 38.734142, 2.248630, 187.980988)
+
+[node name="aOrasCopac214" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.948078, 0.000000, -0.024475, 0.000000, 0.948394, 0.000000, 0.024475, 0.000000, 0.948078, 105.911049, 9.080279, -146.630417)
+
+[node name="aOrasCopac215" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.671141, 0.000000, -0.669482, 0.000000, 0.947964, 0.000000, 0.669482, 0.000000, -0.671141, 102.197357, 8.944140, 225.895996)
+
+[node name="aOrasCopac216" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.025797, 0.000000, 0.894209, 0.000000, 0.894581, 0.000000, -0.894209, 0.000000, 0.025797, 58.213928, 0.953296, 87.711609)
+
+[node name="aOrasCopac217" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.788188, 0.000000, -0.288836, 0.000000, 0.839444, 0.000000, 0.288836, 0.000000, -0.788188, 124.277283, 9.079532, 2.938675)
+
+[node name="aOrasCopac218" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.094886, 0.000000, 0.936690, 0.000000, 0.941484, 0.000000, -0.936690, 0.000000, -0.094886, 77.533173, 7.552829, 211.143372)
+
+[node name="aOrasCopac219" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.697525, 0.000000, -0.427769, 0.000000, 0.818246, 0.000000, 0.427769, 0.000000, 0.697525, 162.272858, 10.649295, -64.534828)
+
+[node name="aOrasCopac220" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+transform = Transform3D(0.833902, 0.000000, -0.404590, 0.000000, 0.926868, 0.000000, 0.404590, 0.000000, 0.833902, 252.856003, 11.794040, 151.571075)
+
+[node name="aOrasCopac221" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.519456, 0.000000, 0.615236, 0.000000, 0.805202, 0.000000, -0.615236, 0.000000, 0.519456, 176.955612, 10.122790, -36.013290)
+
+[node name="aOrasCopac222" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.907394, 0.000000, 0.191910, 0.000000, 0.927466, 0.000000, -0.191910, 0.000000, 0.907394, 244.778015, 8.998935, -15.742432)
+
+[node name="aOrasCopac223" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.412224, 0.000000, -0.799080, 0.000000, 0.899142, 0.000000, 0.799080, 0.000000, 0.412224, 97.166191, 9.063663, 205.299438)
+
+[node name="aOrasCopac224" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.762658, 0.000000, 0.278496, 0.000000, 0.811916, 0.000000, -0.278496, 0.000000, -0.762658, 213.902374, 16.221607, -137.860977)
+
+[node name="aOrasCopac225" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.686514, 0.000000, 0.587033, 0.000000, 0.903277, 0.000000, -0.587033, 0.000000, 0.686514, 66.474586, 5.431476, 183.883301)
+
+[node name="aOrasCopac226" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.494749, 0.000000, -0.754033, 0.000000, 0.901855, 0.000000, 0.754033, 0.000000, 0.494749, 113.708893, 8.275928, 37.994781)
+
+[node name="aOrasCopac227" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.844159, 0.000000, -0.106772, 0.000000, 0.850884, 0.000000, 0.106772, 0.000000, 0.844159, 109.969940, 7.916873, -47.401260)
+
+[node name="aOrasCopac228" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.823760, 0.000000, -0.000490, 0.000000, 0.823760, 0.000000, 0.000490, 0.000000, -0.823760, 101.541550, 6.536273, 56.242523)
+
+[node name="aOrasCopac229" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.876632, 0.000000, -0.097914, 0.000000, 0.882083, 0.000000, 0.097914, 0.000000, -0.876632, 106.072052, 9.937030, 129.162994)
+
+[node name="aOrasCopac230" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.210226, 0.000000, -0.803183, 0.000000, 0.830240, 0.000000, 0.803183, 0.000000, -0.210226, 99.459351, 6.990542, 78.876587)
+
+[node name="aOrasCopac231" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.868497, 0.000000, -0.158164, 0.000000, 0.882781, 0.000000, 0.158164, 0.000000, -0.868497, 79.191162, 2.176822, -6.186523)
+
+[node name="aOrasCopac232" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.566882, 0.000000, 0.576740, 0.000000, 0.808693, 0.000000, -0.576740, 0.000000, -0.566882, 221.736969, 13.593020, -91.946419)
+
+[node name="aOrasCopac233" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.040850, 0.000000, 0.894354, 0.000000, 0.895287, 0.000000, -0.894354, 0.000000, -0.040850, 42.649345, 0.147571, -21.894836)
+
+[node name="aOrasCopac234" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.422032, 0.000000, 0.749935, 0.000000, 0.860531, 0.000000, -0.749935, 0.000000, -0.422032, 44.945251, -0.146939, 6.331482)
+
+[node name="aOrasCopac235" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.810151, 0.000000, 0.272148, 0.000000, 0.854640, 0.000000, -0.272148, 0.000000, -0.810151, 163.448608, 10.181705, 161.068848)
+
+[node name="aOrasCopac236" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.804361, 0.000000, 0.094217, 0.000000, 0.809860, 0.000000, -0.094217, 0.000000, 0.804361, 199.381653, 13.951770, -97.455688)
+
+[node name="OrasVechi" type="Node3D" parent="."]
+script = ExtResource("poia_cityfill")
+models = Array[PackedScene]([ExtResource("poia_machiya_a"), ExtResource("poia_machiya_b"), ExtResource("poia_machiya_c"), ExtResource("poia_machiya_d"), ExtResource("poia_machiya_e")])
+weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)
+indigo_ratio = 0.0
+min_road_m = 32.0
+seed_value = 20261003
+exclude_xz = PackedVector3Array(67.2, 10.6, 6.5, 117.0, -87.5, 6.5, 38.7, 188.0, 6.5, 105.9, -146.6, 6.5, 102.2, 225.9, 6.5, 58.2, 87.7, 6.5, 124.3, 2.9, 6.5, 77.5, 211.1, 6.5, 162.3, -64.5, 6.5, 252.9, 151.6, 6.5, 177.0, -36.0, 6.5, 244.8, -15.7, 6.5, 97.2, 205.3, 6.5, 213.9, -137.9, 6.5, 66.5, 183.9, 6.5, 113.7, 38.0, 6.5, 110.0, -47.4, 6.5, 101.5, 56.2, 6.5, 106.1, 129.2, 6.5, 99.5, 78.9, 6.5, 79.2, -6.2, 6.5, 221.7, -91.9, 6.5, 42.6, -21.9, 6.5, 44.9, 6.3, 6.5, 163.4, 161.1, 6.5, 199.4, -97.5, 6.5)
+region_xz = PackedVector2Array(32.0, -150.0, 170.0, -150.0, 258.0, -140.0, 262.0, 40.0, 255.0, 200.0, 200.0, 228.0, 40.0, 228.0, 32.0, 180.0)
+
+[node name="OrasPagoda" type="Node3D" parent="."]
+script = ExtResource("poia_cityfill")
+models = Array[PackedScene]([ExtResource("poia_machiya_a"), ExtResource("poia_machiya_b"), ExtResource("poia_machiya_c"), ExtResource("poia_machiya_d"), ExtResource("poia_machiya_e")])
+weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)
+indigo_ratio = 0.0
+min_road_m = 26.0
+seed_value = 20261004
+exclude_xz = PackedVector3Array(4.0, -200.0, 26.0)
+region_xz = PackedVector2Array(-75.0, -165.0, -30.0, -165.0, -28.0, -232.0, 40.0, -236.0, 175.0, -246.0, 175.0, -300.0, -75.0, -300.0)
 

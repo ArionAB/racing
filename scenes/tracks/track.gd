@@ -1638,6 +1638,8 @@ static func themes() -> Dictionary:
 			"sun_energy": 1.0,
 			"exposure": 1.0,
 			"sun_rotation_deg": Vector3(-22, -45, 0),
+			# POI F: fara stalpi de bordura / chevron in iaz (_skip_wet_marker).
+			"markers_skip_water": true,
 			# AMBIENT 0,35, albastru rece de cer: umbrele trag spre albastru, nu
 			# spre negru (memoria umbra-fara-culoare-e-negru-mort).
 			"ambient_color": Color.html("B4C8E6"),
@@ -14418,8 +14420,37 @@ func _build_markers() -> void:
 			# sus sare peste sloturile inaltate, care erau exact cele afectate.
 			# Acum stau pe sol prin constructie, nu prin coincidenta.
 			spot.y = _sampler.ground_y(spot.x, spot.z) + 0.2
+			if _skip_wet_marker(i, spot - Vector3.UP * 0.2):
+				marker.queue_free()
+				continue
 			marker.global_position = spot
 			placed += 1
+
+
+## Opt-in pe tema (`markers_skip_water`, implicit false): stalpii de bordura si
+## chevron-urile NU se pun unde solul e sub apa unei rape declarate
+## (`custom_ravine_water`): pe Kyoto POI F stateau in iaz. Markerii se construiesc
+## INAINTEA apei, deci regula se judeca pe intervalul rapei si pe cota, nu pe
+## celulele ude (`_ravine_wet` e inca gol aici). Pe pistele fara cheie nu ruleaza.
+func _skip_wet_marker(i: int, p: Vector3) -> bool:
+	if not bool(theme_flag("markers_skip_water", false)):
+		return false
+	var specs := _ravine_water()
+	if specs.is_empty():
+		return false
+	var ravines := _ravines()
+	var total := _dists[baked.size()]
+	var g := _sampler.ground_y(p.x, p.z)
+	for spec in specs:
+		var ri := int(spec.x)
+		if ri < 0 or ri >= ravines.size():
+			continue
+		var r: Vector4 = ravines[ri]
+		if TrackSideSampler._ring_window(_dists[i] / total, r.x, r.y, 0.0001) <= 0.0:
+			continue
+		if g < spec.y + 0.05:
+			return true
+	return false
 
 
 func _marker_variant(rng: RandomNumberGenerator) -> String:
@@ -14591,6 +14622,8 @@ func _place_chevron(scene: PackedScene, rng: RandomNumberGenerator,
 			if absf(ground - baked[i].y) > 2.0:
 				continue # sectiune inaltata: ar pluti sau ar cadea sub drum
 			if not _chevron_spot_clear(stand, i, obstacles):
+				continue
+			if _skip_wet_marker(i, Vector3(stand.x, ground, stand.z)):
 				continue
 			var variant := "Chevron_A"
 			if absf(turn) < CHEVRON_TURN_TRIPLE:

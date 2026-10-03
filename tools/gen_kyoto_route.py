@@ -367,7 +367,9 @@ for w in WPTS:
 PAGODA_XY = (4.0, 200.0)          # Yasaka: 15-25 m de coltul B, pe axa gridului
 SCENE_XY = (324.0, 137.0)         # mijlocul puntii Kiyomizu
 KOYASU_XY = (348.0, 30.0)         # pagoda Koyasu, pe versantul de aterizare
-KINKAKU_XY = (150.0, -300.0)      # pavilionul, pe malul de nord al iazului
+# POI F r2: pozitia REALA (tools/gen_decor_kyoto_f.gd): malul de VEST al iazului
+# (iazul real ~100 x 100 m; vechiul (150, -300) cadea in mijlocul apei).
+KINKAKU_XY = (117.6, -285.0)      # pavilionul, pe malul de vest al iazului
 CENTROID_XY = (centroid_x, centroid_y)
 
 def heading_deg(dx, dy):
@@ -443,12 +445,15 @@ ok = sum(1 for i in sel if abs(azimut_to(i, KOYASU_XY)) <= 15.0)
 report(len(sel) > 0 and ok == len(sel),
        f"C2 Koyasu in fata de pe scena: {ok}/{len(sel)} puncte la 60-110 m cu |azimut| <= 15")
 
-# 4. Pavilionul in dreapta pe F, 20-45 deg la 70-110 m.
+# 4. Pavilionul in dreapta pe F. POI F r2 (pozitia reala, acceptata de
+# coordonator pe captura): de pe apropierea de daruma pavilionul e la 100-150 m,
+# 15-45 deg dreapta (vazut peste apa); sub 100 m drumul a trecut deja de el si
+# azimutul sare peste 45 (iese din cadru lateral, corect: decizia e la daruma).
 f_idx = frac_range_indices(frac["F intrare (spre V)"], frac["F curba stanga sfarsit"])
-sel = [i for i in f_idx if 70.0 <= dist_to(i, KINKAKU_XY) <= 110.0]
-ok = sum(1 for i in sel if 20.0 <= azimut_to(i, KINKAKU_XY) <= 45.0)
+sel = [i for i in f_idx if 100.0 <= dist_to(i, KINKAKU_XY) <= 150.0]
+ok = sum(1 for i in sel if 15.0 <= azimut_to(i, KINKAKU_XY) <= 45.0)
 report(len(sel) > 0 and ok / len(sel) >= 0.6,
-       f"F pavilionul in dreapta (20-45 deg) la 70-110 m: {ok}/{len(sel)} puncte "
+       f"F pavilionul in dreapta (15-45 deg) la 100-150 m: {ok}/{len(sel)} puncte "
        f"({100*ok/max(1,len(sel)):.0f}%, prag 60%)")
 
 # 5. Turnul daruma-otoshi (inainte: tubul): pe exteriorul unei curbe la STANGA, cu
@@ -738,9 +743,23 @@ if len(sys.argv) > 1:
     fz("Inari cedru disc", 1, ("cedar_dark", "momiji_b"), (0.88, 0.12), center=(332.72, 0.0, 292.0),
        radius=70.0, spacing=4.0, scale_min=0.95, scale_max=1.45, seed=42)
     # F: gradina, niwaki cu cativa artari; nimic in iaz (sol sub cota soselei).
+    # POI F: pe DREAPTA (spre iaz) fasia se opreste la 0,595, de unde incepe
+    # vederea spre pavilion peste apa; malul drept il imbraca DecorManual (ZoneF).
     fz("gradina F", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
        frac_from=F["F intrare (spre V)"] - 0.012, frac_to=F["G S1 intrare"] + 0.004,
-       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=51)
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=51, side=-1)
+    fz("gradina F dreapta", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
+       frac_from=F["F intrare (spre V)"] - 0.012, frac_to=0.595,
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=53, side=1)
+    fz("gradina F dreapta 2", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
+       frac_from=0.656, frac_to=F["G S1 intrare"] + 0.004,
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=54, side=1)
+    # POI F: dealul gradinii (+24, in spatele pavilionului, vazut din drum pe
+    # cadrul-erou): artari in trei rosuri, niwaki si cativa ginkgo, ca aurul
+    # pavilionului sa stea pe rosu si verde, nu pe un con de iarba.
+    fz("deal gradina F", 1, MAPLES + ("niwaki_pine", "ginkgo"), (0.26, 0.24, 0.24, 0.16, 0.10),
+       center=(hill_f_g[0], 0.0, hill_f_g[2]), radius=46.0, spacing=6.0,
+       edge_clear_m=10.5, scale_min=0.95, scale_max=1.3, seed=52)
     # G: padurea de bambus (mii de tulpini moso) cu tufe de bambus la margine.
     fz("bambus G tulpini", 0, ("moso_culm",), (1.0,), frac_from=F["G S1 intrare"] - 0.012,
        frac_to=F["G2 sub podul trenului"] + 0.006, lat_min=6.5, lat_max=44.0, spacing=2.0,
@@ -783,6 +802,8 @@ seed_value = {d.get('seed', 1)}
         if d['kind'] == 0:
             forest_sub += (f"frac_from = {r3(d['frac_from'])}\nfrac_to = {r3(d['frac_to'])}\n"
                            f"lat_min = {d['lat_min']}\nlat_max = {d['lat_max']}\n")
+            if 'side' in d:
+                forest_sub += f"side = {d['side']}\n"
         else:
             c_ = d['center']
             forest_sub += (f"center = Vector3({c_[0]:.2f}, {c_[1]:.2f}, {c_[2]:.2f})\n"

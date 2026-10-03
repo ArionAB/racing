@@ -29,6 +29,13 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/moso_culm.glb" id="mf_moso_culm"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/bamboo_crown.glb" id="mf_bamboo_crown"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="mf_cedar_dark"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="dm_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/bamboo_crown.glb" id="poig_bamboo_crown"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/iron_truss_bridge.glb" id="poig_iron_truss_bridge"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/vehicles/jinrikisha.glb" id="poig_jinrikisha"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/vehicles/sagano_train.glb" id="poig_sagano_train"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/shiba_fence.glb" id="poig_shiba_fence"]
+[ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="poig_pathmover"]
 
 [sub_resource type="Resource" id="MFZ_0"]
 script = ExtResource("mf_zone")
@@ -220,6 +227,150 @@ lat_max = 56.0
 
 [sub_resource type="Resource" id="MFZ_10"]
 script = ExtResource("mf_zone")
+label = "G2 culoar viaduct 0"
+kind = 1
+species = PackedStringArray("bamboo_crown")
+weights = PackedFloat32Array(1.0)
+spacing = 3.0
+edge_clear_m = 60.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 70
+center = Vector3(-97.56, 0.00, 414.01)
+radius = 4.5
+
+[sub_resource type="Resource" id="MFZ_11"]
+script = ExtResource("mf_zone")
+label = "G2 culoar viaduct 1"
+kind = 1
+species = PackedStringArray("bamboo_crown")
+weights = PackedFloat32Array(1.0)
+spacing = 3.0
+edge_clear_m = 60.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 71
+center = Vector3(-90.59, 0.00, 413.35)
+radius = 4.5
+
+[sub_resource type="Resource" id="MFZ_12"]
+script = ExtResource("mf_zone")
+label = "G2 culoar viaduct 2"
+kind = 1
+species = PackedStringArray("bamboo_crown")
+weights = PackedFloat32Array(1.0)
+spacing = 3.0
+edge_clear_m = 60.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 72
+center = Vector3(-83.62, 0.00, 412.70)
+radius = 4.5
+
+[sub_resource type="Resource" id="MFZ_13"]
+script = ExtResource("mf_zone")
+label = "G2 culoar viaduct 3"
+kind = 1
+species = PackedStringArray("bamboo_crown")
+weights = PackedFloat32Array(1.0)
+spacing = 3.0
+edge_clear_m = 60.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 73
+center = Vector3(-77.15, 0.00, 412.09)
+radius = 4.5
+
+[sub_resource type="Resource" id="MFZ_14"]
+script = ExtResource("mf_zone")
+label = "G2 culoar viaduct 4"
+kind = 1
+species = PackedStringArray("bamboo_crown")
+weights = PackedFloat32Array(1.0)
+spacing = 3.0
+edge_clear_m = 60.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 74
+center = Vector3(-54.25, 0.00, 409.95)
+radius = 4.5
+
+[sub_resource type="Resource" id="MFZ_15"]
+script = ExtResource("mf_zone")
+label = "G2 culoar viaduct 5"
+kind = 1
+species = PackedStringArray("bamboo_crown")
+weights = PackedFloat32Array(1.0)
+spacing = 3.0
+edge_clear_m = 60.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 75
+center = Vector3(-47.78, 0.00, 409.34)
+radius = 4.5
+
+[sub_resource type="Resource" id="MFZ_16"]
+script = ExtResource("mf_zone")
+label = "G2 culoar viaduct 6"
+kind = 1
+species = PackedStringArray("bamboo_crown")
+weights = PackedFloat32Array(1.0)
+spacing = 3.0
+edge_clear_m = 60.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 76
+center = Vector3(-40.81, 0.00, 408.69)
+radius = 4.5
+
+[sub_resource type="Resource" id="MFZ_17"]
+script = ExtResource("mf_zone")
+label = "G2 culoar viaduct 7"
+kind = 1
+species = PackedStringArray("bamboo_crown")
+weights = PackedFloat32Array(1.0)
+spacing = 3.0
+edge_clear_m = 60.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 77
+center = Vector3(-33.84, 0.00, 408.03)
+radius = 4.5
+
+[sub_resource type="Resource" id="MFZ_18"]
+script = ExtResource("mf_zone")
 label = "bambus G tulpini"
 kind = 0
 species = PackedStringArray("moso_culm")
@@ -238,7 +389,7 @@ frac_to = 0.81
 lat_min = 6.5
 lat_max = 44.0
 
-[sub_resource type="Resource" id="MFZ_11"]
+[sub_resource type="Resource" id="MFZ_19"]
 script = ExtResource("mf_zone")
 label = "bambus G margine"
 kind = 0
@@ -343,7 +494,7 @@ script = ExtResource("17_leaffall")
 [node name="PadureMasa" type="Node3D" parent="."]
 script = ExtResource("mf_script")
 scenes = Array[PackedScene]([ExtResource("mf_momiji_a"), ExtResource("mf_momiji_b"), ExtResource("mf_momiji_c"), ExtResource("mf_ginkgo"), ExtResource("mf_niwaki_pine"), ExtResource("mf_moso_culm"), ExtResource("mf_bamboo_crown"), ExtResource("mf_cedar_dark")])
-zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11")])
+zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11"), SubResource("MFZ_12"), SubResource("MFZ_13"), SubResource("MFZ_14"), SubResource("MFZ_15"), SubResource("MFZ_16"), SubResource("MFZ_17"), SubResource("MFZ_18"), SubResource("MFZ_19")])
 
 [node name="Hazarduri" type="Node3D" parent="."]
 
@@ -444,3 +595,854 @@ frac_from = 0.804
 frac_to = 0.0
 module_length = 5.8
 collision_mode = "mesh"
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("dm_prop")
+
+[node name="ZoneG_Bambus" type="Node3D" parent="DecorManual"]
+
+[node name="gGard1" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.872062, 0.007307, -0.489341, -0.000000, 0.999889, 0.014932, 0.489396, -0.013021, 0.871964, 113.804947, 0.518751, 406.681396)
+
+[node name="gGard2" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.861556, 0.008179, -0.507596, -0.000000, 0.999870, 0.016111, 0.507662, -0.013881, 0.861444, 112.309364, 0.565320, 409.281830)
+
+[node name="gGard3" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.844062, 0.009253, -0.536165, -0.000000, 0.999851, 0.017255, 0.536245, -0.014564, 0.843937, 110.718353, 0.616186, 411.879822)
+
+[node name="gGard4" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.828770, 0.011175, -0.559477, -0.000000, 0.999801, 0.019970, 0.559589, -0.016550, 0.828605, 109.049461, 0.672841, 414.428650)
+
+[node name="gGard5" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.810125, 0.015045, -0.586064, -0.000000, 0.999671, 0.025662, 0.586257, -0.020790, 0.809858, 107.330704, 0.741308, 416.886993)
+
+[node name="gGard6" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.797384, 0.015597, -0.603271, -0.000000, 0.999666, 0.025845, 0.603473, -0.020608, 0.797117, 105.546112, 0.818593, 419.298248)
+
+[node name="gGard7" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.802107, 0.015458, -0.596980, -0.000000, 0.999665, 0.025886, 0.597180, -0.020763, 0.801838, 103.745140, 0.896215, 421.697479)
+
+[node name="gGard8" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.807272, 0.016072, -0.589961, -0.000000, 0.999629, 0.027232, 0.590180, -0.021984, 0.806972, 101.964104, 0.975919, 424.111542)
+
+[node name="gGard9" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806286, 0.016316, -0.591301, -0.000000, 0.999620, 0.027583, 0.591526, -0.022239, 0.805979, 100.191544, 1.058172, 426.531860)
+
+[node name="gGard10" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.805624, 0.016338, -0.592202, -0.000000, 0.999620, 0.027577, 0.592428, -0.022217, 0.805317, 98.415619, 1.140943, 428.949738)
+
+[node name="gGard11" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806122, 0.016136, -0.591529, -0.000000, 0.999628, 0.027268, 0.591749, -0.021981, 0.805823, 96.639359, 1.223241, 431.367371)
+
+[node name="gGard12" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806649, 0.015834, -0.590818, -0.000000, 0.999641, 0.026790, 0.591030, -0.021610, 0.806360, 94.865196, 1.304357, 433.786499)
+
+[node name="gGard13" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806902, 0.015797, -0.590474, -0.000000, 0.999642, 0.026744, 0.590686, -0.021580, 0.806613, 93.092628, 1.384687, 436.206818)
+
+[node name="gGard14" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806872, 0.015777, -0.590516, -0.000000, 0.999643, 0.026709, 0.590727, -0.021550, 0.806584, 91.320503, 1.464895, 438.627502)
+
+[node name="gGard15" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806559, 0.015675, -0.590946, -0.000000, 0.999648, 0.026516, 0.591153, -0.021386, 0.806276, 89.547684, 1.544759, 441.047638)
+
+[node name="gGard16" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806295, 0.015675, -0.591307, -0.000000, 0.999649, 0.026500, 0.591514, -0.021367, 0.806011, 87.773682, 1.624311, 443.466919)
+
+[node name="gGard17" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806000, 0.015737, -0.591707, -0.000000, 0.999647, 0.026587, 0.591916, -0.021429, 0.805715, 85.998535, 1.703969, 445.885376)
+
+[node name="gGard18" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.805898, 0.016042, -0.591837, -0.000000, 0.999633, 0.027095, 0.592054, -0.021836, 0.805602, 84.222580, 1.784521, 448.303223)
+
+[node name="gGard19" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806077, 0.016086, -0.591593, -0.000000, 0.999631, 0.027181, 0.591811, -0.021910, 0.805779, 82.446777, 1.865964, 450.721191)
+
+[node name="gGard20" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.808289, 0.016007, -0.588568, -0.000000, 0.999630, 0.027186, 0.588786, -0.021974, 0.807990, 80.675873, 1.947546, 453.142731)
+
+[node name="gGard21" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.811289, 0.015811, -0.584431, -0.000000, 0.999634, 0.027044, 0.584645, -0.021940, 0.810992, 78.915726, 2.028921, 455.572083)
+
+[node name="gGard22" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.807471, 0.015941, -0.589692, -0.000000, 0.999635, 0.027023, 0.589907, -0.021821, 0.807176, 77.153893, 2.110052, 458.000244)
+
+[node name="gGard23" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.822926, 0.014129, -0.567972, -0.000000, 0.999691, 0.024869, 0.568148, -0.020466, 0.822672, 71.847061, 2.348257, 465.268188)
+
+[node name="gGard24" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.790218, 0.015679, -0.612625, -0.000000, 0.999673, 0.025586, 0.612826, -0.020218, 0.789960, 70.075600, 2.423963, 467.687897)
+
+[node name="gGard25" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.733651, 0.017486, -0.679301, -0.000000, 0.999669, 0.025733, 0.679526, -0.018879, 0.733408, 68.137070, 2.500967, 469.973694)
+
+[node name="gGard26" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.682278, 0.019166, -0.730842, -0.000000, 0.999656, 0.026216, 0.731093, -0.017886, 0.682043, 66.021133, 2.578916, 472.097595)
+
+[node name="gGard27" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.632398, 0.020792, -0.774365, -0.000000, 0.999640, 0.026841, 0.774644, -0.016974, 0.632170, 63.762524, 2.658529, 474.069641)
+
+[node name="gGard28" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.569506, 0.026610, -0.821556, -0.000000, 0.999476, 0.032372, 0.821987, -0.018436, 0.569208, 61.367577, 2.747388, 475.872498)
+
+[node name="gGard29" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.503804, 0.027762, -0.863371, -0.000000, 0.999483, 0.032139, 0.863818, -0.016192, 0.503544, 58.838863, 2.844205, 477.482452)
+
+[node name="gGard30" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.485951, 0.027765, -0.873545, -0.000000, 0.999495, 0.031768, 0.873986, -0.015438, 0.485706, 56.232155, 2.940114, 478.967102)
+
+[node name="gGard31" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.470500, 0.031133, -0.881851, -0.000000, 0.999377, 0.035282, 0.882400, -0.016600, 0.470207, 53.597576, 3.040746, 480.401764)
+
+[node name="gGard32" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.423107, 0.032286, -0.905504, -0.000000, 0.999365, 0.035632, 0.906080, -0.015076, 0.422838, 50.914860, 3.147184, 481.742188)
+
+[node name="gGard33" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.391459, 0.033045, -0.919602, -0.000000, 0.999355, 0.035911, 0.920195, -0.014058, 0.391207, 48.175453, 3.254568, 482.964020)
+
+[node name="gGard34" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.399516, 0.035824, -0.916026, -0.000000, 0.999236, 0.039078, 0.916726, -0.015612, 0.399211, 45.420067, 3.367132, 484.150482)
+
+[node name="gGard35" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.417999, 0.035491, -0.907754, -0.000000, 0.999237, 0.039068, 0.908447, -0.016331, 0.417680, 42.682308, 3.484441, 485.376770)
+
+[node name="gGard36" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.420542, 0.035303, -0.906586, -0.000000, 0.999243, 0.038911, 0.907273, -0.016364, 0.420224, 39.958725, 3.601499, 486.634583)
+
+[node name="gGard37" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.419526, 0.034732, -0.907079, -0.000000, 0.999268, 0.038261, 0.907744, -0.016052, 0.419218, 37.236202, 3.717344, 487.894653)
+
+[node name="gGard38" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.416899, 0.034791, -0.908287, -0.000000, 0.999267, 0.038276, 0.908953, -0.015957, 0.416593, 34.511154, 3.832235, 489.149292)
+
+[node name="gGard39" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.432953, 0.033890, -0.900779, -0.000000, 0.999293, 0.037596, 0.901417, -0.016278, 0.432647, 31.795591, 3.946126, 490.424072)
+
+[node name="gGard40" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.462770, 0.031866, -0.885905, -0.000000, 0.999354, 0.035947, 0.886478, -0.016635, 0.462471, 29.113754, 4.056516, 491.767670)
+
+[node name="gGard41" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.427409, 0.032498, -0.903474, -0.000000, 0.999354, 0.035947, 0.904058, -0.015364, 0.427133, 26.427952, 4.164426, 493.102936)
+
+[node name="gGard42" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.356394, 0.032467, -0.933771, -0.000000, 0.999396, 0.034749, 0.934336, -0.012384, 0.356179, 23.670361, 4.270536, 494.278625)
+
+[node name="gGard43" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.299245, 0.026469, -0.953809, -0.000000, 0.999615, 0.027740, 0.954176, -0.008301, 0.299130, 20.837593, 4.364316, 495.262085)
+
+[node name="gGard44" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.270732, 0.026186, -0.962299, -0.000000, 0.999630, 0.027201, 0.962655, -0.007364, 0.270631, 17.962345, 4.446760, 496.117065)
+
+[node name="gGard45" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.210653, 0.021127, -0.977333, -0.000000, 0.999766, 0.021612, 0.977561, -0.004553, 0.210603, 15.052022, 4.520002, 496.839142)
+
+[node name="gGard46" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.106497, 0.020738, -0.994097, -0.000000, 0.999783, 0.020856, 0.994313, -0.002221, 0.106474, 12.091089, 4.583784, 497.315186)
+
+[node name="gGard47" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.002635, 0.021993, -0.999755, 0.000000, 0.999758, 0.021993, 0.999997, 0.000058, -0.002634, 9.096503, 4.648138, 497.471313)
+
+[node name="gGard48" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.053222, 0.015004, -0.998470, 0.000000, 0.999887, 0.015026, 0.998583, 0.000800, -0.053216, 6.269238, 4.701108, 497.396637)
+
+[node name="gGard49" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.133728, 0.015342, -0.990899, 0.000000, 0.999880, 0.015481, 0.991018, 0.002070, -0.133712, 3.455440, 4.744306, 497.125305)
+
+[node name="gGard50" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.227336, 0.014640, -0.973706, 0.000000, 0.999887, 0.015033, 0.973816, 0.003418, -0.227310, 0.508187, 4.790082, 496.583710)
+
+[node name="gGard51" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.316050, 0.011971, -0.948667, 0.000000, 0.999920, 0.012618, 0.948743, 0.003988, -0.316025, -2.375652, 4.831563, 495.768616)
+
+[node name="gGard52" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.317515, 0.011656, -0.948182, 0.000000, 0.999924, 0.012293, 0.948253, 0.003903, -0.317491, -5.221145, 4.868932, 494.818298)
+
+[node name="gGard53" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.339833, 0.011676, -0.940413, 0.000000, 0.999923, 0.012415, 0.940486, 0.004219, -0.339807, -8.054255, 4.905996, 493.832275)
+
+[node name="gGard54" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.411379, 0.010685, -0.911402, 0.000000, 0.999931, 0.011723, 0.911465, 0.004823, -0.411350, -10.832176, 4.942205, 492.705444)
+
+[node name="gGard55" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.461303, 0.012039, -0.887161, 0.000000, 0.999908, 0.013569, 0.887242, 0.006259, -0.461261, -13.530231, 4.980146, 491.396423)
+
+[node name="gGard56" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.448567, 0.012972, -0.893655, 0.000000, 0.999895, 0.014515, 0.893749, 0.006511, -0.448520, -16.201721, 5.022275, 490.031616)
+
+[node name="gGard57" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.435567, 0.013564, -0.900054, 0.000000, 0.999886, 0.015069, 0.900156, 0.006564, -0.435518, -18.892578, 5.066656, 488.705414)
+
+[node name="gGard58" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.450448, 0.013481, -0.892701, 0.000000, 0.999886, 0.015099, 0.892803, 0.006801, -0.450397, -21.582022, 5.111913, 487.376404)
+
+[node name="gGard59" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.457469, 0.012988, -0.889131, 0.000000, 0.999893, 0.014606, 0.889226, 0.006682, -0.457420, -24.255070, 5.156476, 486.014526)
+
+[node name="gGard60" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.458108, 0.012640, -0.888807, 0.000000, 0.999899, 0.014220, 0.888897, 0.006514, -0.458061, -26.922258, 5.199720, 484.641144)
+
+[node name="gGard61" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.456185, 0.013156, -0.889788, 0.000000, 0.999891, 0.014784, 0.889885, 0.006744, -0.456135, -29.590443, 5.243230, 483.269714)
+
+[node name="gGard62" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.449392, 0.011954, -0.893255, 0.000000, 0.999910, 0.013381, 0.893335, 0.006013, -0.449352, -32.265278, 5.285482, 481.911316)
+
+[node name="gGard63" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.453969, 0.013087, -0.890921, 0.000000, 0.999892, 0.014688, 0.891017, 0.006668, -0.453920, -34.941803, 5.327589, 480.556274)
+
+[node name="gGard64" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.467905, 0.012751, -0.883687, 0.000000, 0.999896, 0.014428, 0.883779, 0.006751, -0.467857, -37.604000, 5.371267, 479.173462)
+
+[node name="gGard65" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.469095, 0.012625, -0.883057, 0.000000, 0.999898, 0.014296, 0.883148, 0.006706, -0.469047, -40.254395, 5.414358, 477.767975)
+
+[node name="gGard66" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.441326, 0.011806, -0.897269, 0.000000, 0.999913, 0.013157, 0.897347, 0.005807, -0.441288, -42.925133, 5.455541, 476.402344)
+
+[node name="gGard67" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.476462, 0.015005, -0.879067, 0.000000, 0.999854, 0.017067, 0.879195, 0.008132, -0.476393, -45.589935, 5.500883, 475.025665)
+
+[node name="gGard68" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.538889, 0.008462, -0.842334, 0.000000, 0.999950, 0.010045, 0.842376, 0.005413, -0.538862, -48.172291, 5.541555, 473.502625)
+
+[node name="gGard69" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.613620, 0.003795, -0.789593, 0.000000, 0.999988, 0.004806, 0.789602, 0.002949, -0.613613, -50.620255, 5.563833, 471.773865)
+
+[node name="gGard70" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.645735, -0.000365, -0.763561, 0.000000, 1.000000, -0.000478, 0.763562, -0.000309, -0.645735, -52.949986, 5.570325, 469.884857)
+
+[node name="gGard71" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.694622, -0.003154, -0.719368, 0.000000, 0.999990, -0.004384, 0.719375, -0.003045, -0.694616, -55.174381, 5.563032, 467.874329)
+
+[node name="gGard72" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.767386, -0.004566, -0.641169, 0.000000, 0.999975, -0.007121, 0.641185, -0.005464, -0.767367, -57.215218, 5.545774, 465.681335)
+
+[node name="gGard73" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.820850, -0.005267, -0.571119, 0.000000, 0.999958, -0.009221, 0.571143, -0.007569, -0.820816, -59.033710, 5.521261, 463.298950)
+
+[node name="gGard74" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.866962, -0.006438, -0.498333, 0.000000, 0.999917, -0.012918, 0.498375, -0.011199, -0.866889, -60.637993, 5.488050, 460.767242)
+
+[node name="gGard75" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.975639, -0.003857, -0.219347, 0.000000, 0.999845, -0.017581, 0.219381, -0.017152, -0.975488, -64.750885, 5.315969, 449.561768)
+
+[node name="gGard76" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.967926, -0.004275, -0.251200, 0.000000, 0.999855, -0.017016, 0.251236, -0.016470, -0.967786, -65.456810, 5.264066, 446.646423)
+
+[node name="gGard77" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.971830, -0.004226, -0.235644, 0.000000, 0.999839, -0.017931, 0.235682, -0.017426, -0.971674, -66.187187, 5.211637, 443.736816)
+
+[node name="gGard78" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.976542, -0.003328, -0.215301, 0.000000, 0.999881, -0.015455, 0.215327, -0.015093, -0.976425, -66.863701, 5.161550, 440.814240)
+
+[node name="gGard79" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.977649, -0.003719, -0.210212, 0.000000, 0.999844, -0.017687, 0.210245, -0.017292, -0.977496, -67.502060, 5.111829, 437.882935)
+
+[node name="gGard80" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.974970, -0.003855, -0.222301, 0.000000, 0.999850, -0.017337, 0.222334, -0.016903, -0.974824, -68.150925, 5.059286, 434.954041)
+
+[node name="gGard81" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.974211, -0.003909, -0.225605, 0.000000, 0.999850, -0.017326, 0.225639, -0.016879, -0.974065, -68.822891, 5.007284, 432.030273)
+
+[node name="gGard82" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.974302, -0.003931, -0.225213, 0.000000, 0.999848, -0.017453, 0.225247, -0.017005, -0.974153, -69.499222, 4.955106, 429.107483)
+
+[node name="gTufa83" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.873954, 0.000000, 0.195901, 0.000000, 0.895641, 0.000000, -0.195901, 0.000000, -0.873954, 116.833015, 0.497043, 407.634827)
+
+[node name="gTufa84" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.312591, 0.000000, -0.803258, 0.000000, 0.861938, 0.000000, 0.803258, 0.000000, 0.312591, 113.342171, 0.598819, 413.117035)
+
+[node name="gTufa85" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.917247, 0.000000, -0.235809, 0.000000, 0.947074, 0.000000, 0.235809, 0.000000, 0.917247, 109.628609, 0.711826, 418.490234)
+
+[node name="gTufa86" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.789078, 0.000000, -0.420655, 0.000000, 0.894201, 0.000000, 0.420655, 0.000000, 0.789078, 106.785248, 0.845004, 422.990479)
+
+[node name="gTufa87" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.143610, 0.000000, -0.867423, 0.000000, 0.879230, 0.000000, 0.867423, 0.000000, 0.143610, 103.648979, 0.977908, 427.044189)
+
+[node name="gTufa88" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.028313, 0.000000, 1.030211, 0.000000, 1.030600, 0.000000, -1.030211, 0.000000, 0.028313, 100.011047, 1.127139, 431.370819)
+
+[node name="gTufa89" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.806406, 0.000000, -0.333015, 0.000000, 0.872462, 0.000000, 0.333015, 0.000000, -0.806406, 97.497787, 1.259006, 435.547485)
+
+[node name="gTufa90" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.143873, 0.000000, -1.060020, 0.000000, 1.069740, 0.000000, 1.060020, 0.000000, 0.143873, 93.996574, 1.406787, 439.815521)
+
+[node name="gTufa91" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.917556, 0.000000, 0.175668, 0.000000, 0.934220, 0.000000, -0.175668, 0.000000, -0.917556, 90.473778, 1.565921, 444.645081)
+
+[node name="gTufa92" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.371924, 0.000000, 0.779793, 0.000000, 0.863947, 0.000000, -0.779793, 0.000000, 0.371924, 87.865898, 1.693820, 448.701599)
+
+[node name="gTufa93" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.613542, 0.000000, -0.815818, 0.000000, 1.020780, 0.000000, 0.815818, 0.000000, 0.613542, 84.605423, 1.837161, 452.949432)
+
+[node name="gTufa94" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.862157, 0.000000, -0.253404, 0.000000, 0.898626, 0.000000, 0.253404, 0.000000, -0.862157, 81.634003, 1.963962, 456.568573)
+
+[node name="gTufa95" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.053372, 0.000000, -0.244307, 0.000000, 1.081332, 0.000000, 0.244307, 0.000000, 1.053372, 78.287270, 2.114475, 461.035980)
+
+[node name="gTufa96" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.819702, 0.000000, 0.262135, 0.000000, 0.860597, 0.000000, -0.262135, 0.000000, 0.819702, 75.547737, 2.248966, 465.275330)
+
+[node name="gTufa97" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.972429, 0.000000, 0.507292, 0.000000, 1.096797, 0.000000, -0.507292, 0.000000, 0.972429, 72.564102, 2.385364, 469.875366)
+
+[node name="gTufa98" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.067048, 0.000000, -0.858828, 0.000000, 0.861441, 0.000000, 0.858828, 0.000000, 0.067048, 67.177864, 2.577472, 475.163605)
+
+[node name="gTufa99" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.759186, 0.000000, -0.604016, 0.000000, 0.970154, 0.000000, 0.604016, 0.000000, 0.759186, 62.465275, 2.725223, 478.469604)
+
+[node name="gTufa100" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.482444, 0.000000, -0.763320, 0.000000, 0.903001, 0.000000, 0.763320, 0.000000, -0.482444, 56.809677, 2.926074, 481.804810)
+
+[node name="gTufa101" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.866309, 0.000000, 0.242727, 0.000000, 0.899670, 0.000000, -0.242727, 0.000000, 0.866309, 52.043880, 3.102268, 484.453644)
+
+[node name="gTufa102" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.417483, 0.000000, 0.801117, 0.000000, 0.903372, 0.000000, -0.801117, 0.000000, -0.417483, 46.748043, 3.303745, 486.807159)
+
+[node name="gTufa103" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.263381, 0.000000, 0.865918, 0.000000, 0.905087, 0.000000, -0.865918, 0.000000, -0.263381, 41.575684, 3.521518, 489.214966)
+
+[node name="gTufa104" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.716850, 0.000000, -0.492879, 0.000000, 0.869945, 0.000000, 0.492879, 0.000000, -0.716850, 37.116730, 3.706134, 490.946136)
+
+[node name="gTufa105" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.218968, 0.000000, 0.917107, 0.000000, 0.942885, 0.000000, -0.917107, 0.000000, 0.218968, 32.664814, 3.902332, 493.322845)
+
+[node name="gTufa106" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.070533, 0.000000, -0.060700, 0.000000, 1.072253, 0.000000, 0.060700, 0.000000, 1.070533, 28.459236, 4.080417, 495.525421)
+
+[node name="gTufa107" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.048666, 0.000000, 0.930246, 0.000000, 0.931518, 0.000000, -0.930246, 0.000000, 0.048666, 22.600470, 4.283252, 497.895050)
+
+[node name="gTufa108" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.806720, 0.000000, -0.279139, 0.000000, 0.853649, 0.000000, 0.279139, 0.000000, -0.806720, 16.168123, 4.459628, 499.640961)
+
+[node name="gTufa109" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.825522, 0.000000, -0.244618, 0.000000, 0.861002, 0.000000, 0.244618, 0.000000, -0.825522, 8.029341, 4.631213, 500.226715)
+
+[node name="gTufa110" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.434814, 0.000000, 0.843739, 0.000000, 0.949189, 0.000000, -0.843739, 0.000000, 0.434814, 0.576483, 4.755191, 499.399750)
+
+[node name="gTufa111" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.633143, 0.000000, -0.792555, 0.000000, 1.014403, 0.000000, 0.792555, 0.000000, 0.633143, -6.106398, 4.843860, 497.882721)
+
+[node name="gTufa112" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.991374, 0.000000, 0.090521, 0.000000, 0.995498, 0.000000, -0.090521, 0.000000, 0.991374, -12.650869, 4.935260, 495.309448)
+
+[node name="gTufa113" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.082350, 0.000000, 0.194603, 0.000000, 1.099705, 0.000000, -0.194603, 0.000000, -1.082350, -17.115717, 4.995151, 492.882874)
+
+[node name="gTufa114" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.750607, 0.000000, -0.561357, 0.000000, 0.937301, 0.000000, 0.561357, 0.000000, 0.750607, -21.262226, 5.064670, 490.606140)
+
+[node name="gTufa115" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.485290, 0.000000, -0.862318, 0.000000, 0.989494, 0.000000, 0.862318, 0.000000, -0.485290, -25.582792, 5.138171, 488.369293)
+
+[node name="gTufa116" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.777970, 0.000000, -0.474989, 0.000000, 0.911511, 0.000000, 0.474989, 0.000000, 0.777970, -29.973295, 5.206729, 486.398926)
+
+[node name="gTufa117" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.466317, 0.000000, 0.912468, 0.000000, 1.024719, 0.000000, -0.912468, 0.000000, -0.466317, -34.246971, 5.272388, 484.566681)
+
+[node name="gTufa118" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.536981, 0.000000, -0.737245, 0.000000, 0.912074, 0.000000, 0.737245, 0.000000, 0.536981, -39.321712, 5.346454, 481.825378)
+
+[node name="gTufa119" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.931140, 0.000000, 0.163865, 0.000000, 0.945449, 0.000000, -0.163865, 0.000000, -0.931140, -43.718479, 5.409305, 479.611389)
+
+[node name="gTufa120" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.070988, 0.000000, 1.073343, 0.000000, 1.075688, 0.000000, -1.073343, 0.000000, 0.070988, -49.055542, 5.503421, 476.587616)
+
+[node name="gTufa121" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.960932, 0.000000, 0.415477, 0.000000, 1.046905, 0.000000, -0.415477, 0.000000, 0.960932, -54.767872, 5.540378, 472.501221)
+
+[node name="gTufa122" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.598543, 0.000000, -0.772842, 0.000000, 0.977517, 0.000000, 0.772842, 0.000000, -0.598543, -60.032753, 5.508807, 467.044525)
+
+[node name="gTufa123" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.612468, 0.000000, -0.624085, 0.000000, 0.874413, 0.000000, 0.624085, 0.000000, 0.612468, -63.743675, 5.445483, 460.818909)
+
+[node name="gTufa124" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.856310, 0.000000, 0.660719, 0.000000, 1.081581, 0.000000, -0.660719, 0.000000, 0.856310, -66.636276, 5.339313, 454.067444)
+
+[node name="gTufa125" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.647885, 0.000000, -0.648458, 0.000000, 0.916653, 0.000000, 0.648458, 0.000000, -0.647885, -67.817757, 5.255069, 448.377045)
+
+[node name="gTufa126" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.910932, 0.000000, 0.410461, 0.000000, 0.999137, 0.000000, -0.410461, 0.000000, 0.910932, -69.420731, 5.160998, 442.758026)
+
+[node name="gTufa127" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.154766, 0.000000, 0.839851, 0.000000, 0.853991, 0.000000, -0.839851, 0.000000, 0.154766, -70.690887, 5.080249, 438.108673)
+
+[node name="gTufa128" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.338493, 0.000000, -0.953364, 0.000000, 1.011672, 0.000000, 0.953364, 0.000000, -0.338493, -71.672394, 5.000918, 433.745331)
+
+[node name="gGard129" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.871715, 0.008732, -0.489936, -0.000000, 0.999841, 0.017819, 0.490013, -0.015533, 0.871576, 102.100494, 0.524930, 400.154968)
+
+[node name="gGard130" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.859666, 0.009991, -0.510759, -0.000000, 0.999809, 0.019558, 0.510857, -0.016813, 0.859501, 100.599190, 0.581006, 402.752014)
+
+[node name="gGard131" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.839443, 0.010734, -0.543341, -0.000000, 0.999805, 0.019751, 0.543447, -0.016580, 0.839280, 99.017731, 0.639982, 405.300720)
+
+[node name="gGard132" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.820816, 0.012977, -0.571046, -0.000000, 0.999742, 0.022720, 0.571193, -0.018649, 0.820604, 97.345764, 0.703702, 407.791077)
+
+[node name="gGard133" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.802410, 0.015454, -0.596572, -0.000000, 0.999665, 0.025896, 0.596772, -0.020779, 0.802141, 95.593826, 0.776647, 410.225922)
+
+[node name="gGard134" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.798461, 0.016331, -0.601826, -0.000000, 0.999632, 0.027125, 0.602047, -0.021658, 0.798167, 93.795593, 0.856206, 412.627228)
+
+[node name="gGard135" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806143, 0.016123, -0.591501, -0.000000, 0.999629, 0.027247, 0.591721, -0.021965, 0.805843, 92.004944, 0.937795, 415.034119)
+
+[node name="gGard136" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806831, 0.016205, -0.590560, -0.000000, 0.999624, 0.027430, 0.590783, -0.022131, 0.806527, 90.231186, 1.019842, 417.453613)
+
+[node name="gGard137" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.805861, 0.016248, -0.591882, -0.000000, 0.999623, 0.027440, 0.592105, -0.022113, 0.805558, 88.456856, 1.102178, 419.872620)
+
+[node name="gGard138" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.805777, 0.016184, -0.591998, -0.000000, 0.999627, 0.027328, 0.592220, -0.022021, 0.805476, 86.680374, 1.184362, 422.290100)
+
+[node name="gGard139" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806457, 0.015820, -0.591081, -0.000000, 0.999642, 0.026754, 0.591293, -0.021576, 0.806168, 84.905106, 1.265516, 424.708435)
+
+[node name="gGard140" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806807, 0.015804, -0.590604, -0.000000, 0.999642, 0.026749, 0.590815, -0.021582, 0.806518, 83.131943, 1.345800, 427.128326)
+
+[node name="gGard141" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806415, 0.015818, -0.591139, -0.000000, 0.999642, 0.026749, 0.591350, -0.021571, 0.806126, 77.813950, 1.586584, 434.389099)
+
+[node name="gGard142" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806122, 0.015829, -0.591537, -0.000000, 0.999642, 0.026749, 0.591749, -0.021563, 0.805834, 76.039291, 1.666860, 436.807922)
+
+[node name="gGard143" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.805928, 0.015821, -0.591802, -0.000000, 0.999643, 0.026724, 0.592013, -0.021538, 0.805641, 74.263657, 1.747098, 439.225983)
+
+[node name="gGard144" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.805966, 0.015807, -0.591751, -0.000000, 0.999643, 0.026703, 0.591962, -0.021522, 0.805678, 72.487686, 1.827268, 441.643829)
+
+[node name="gGard145" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.806773, 0.016144, -0.590641, -0.000000, 0.999627, 0.027323, 0.590861, -0.022044, 0.806472, 70.713448, 1.908338, 444.062927)
+
+[node name="gGard146" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.810125, 0.016275, -0.586031, -0.000000, 0.999615, 0.027760, 0.586257, -0.022489, 0.809813, 68.947769, 1.990995, 446.488281)
+
+[node name="gGard147" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.809758, 0.016012, -0.586546, -0.000000, 0.999628, 0.027288, 0.586765, -0.022097, 0.809456, 67.188232, 2.073598, 448.918121)
+
+[node name="gGard148" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.803532, 0.016259, -0.595039, -0.000000, 0.999627, 0.027313, 0.595261, -0.021947, 0.803232, 65.415207, 2.155530, 451.338043)
+
+[node name="gGard149" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.800241, 0.016577, -0.599449, -0.000000, 0.999618, 0.027643, 0.599679, -0.022121, 0.799935, 63.622795, 2.237997, 453.743713)
+
+[node name="gGard150" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.817518, 0.018591, -0.575603, -0.000000, 0.999479, 0.032281, 0.575903, -0.026390, 0.817092, 61.859428, 2.327924, 456.170349)
+
+[node name="gGard151" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.807832, 0.018994, -0.589106, -0.000000, 0.999481, 0.032225, 0.589413, -0.026032, 0.807413, 60.111458, 2.424734, 458.608337)
+
+[node name="gGard152" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.736341, 0.022374, -0.676241, -0.000000, 0.999453, 0.033068, 0.676611, -0.024349, 0.735938, 58.212425, 2.522726, 460.924622)
+
+[node name="gGard153" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.661261, 0.025423, -0.749725, -0.000000, 0.999426, 0.033890, 0.750156, -0.022410, 0.660881, 56.072273, 2.623220, 463.020996)
+
+[node name="gGard154" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.560100, 0.033866, -0.827732, -0.000000, 0.999164, 0.040880, 0.828425, -0.022897, 0.559632, 53.704399, 2.735456, 464.853058)
+
+[node name="gGard155" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.495117, 0.036130, -0.868075, -0.000000, 0.999135, 0.041585, 0.868826, -0.020589, 0.494689, 51.158524, 2.859258, 466.435883)
+
+[node name="gGard156" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.483521, 0.036405, -0.874575, -0.000000, 0.999135, 0.041590, 0.875333, -0.020110, 0.483103, 48.542282, 2.984128, 467.903839)
+
+[node name="gGard157" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.437602, 0.036306, -0.898435, -0.000000, 0.999185, 0.040377, 0.899169, -0.017669, 0.437245, 45.880535, 3.107183, 469.285522)
+
+[node name="gGard158" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.394694, 0.036885, -0.918072, -0.000000, 0.999194, 0.040144, 0.918812, -0.015845, 0.394376, 43.153564, 3.228063, 470.533966)
+
+[node name="gGard159" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.396667, 0.035616, -0.917271, -0.000000, 0.999247, 0.038799, 0.917962, -0.015390, 0.396369, 40.398407, 3.346570, 471.721008)
+
+[node name="gGard160" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.416067, 0.034843, -0.908666, -0.000000, 0.999266, 0.038317, 0.909334, -0.015943, 0.415761, 37.657463, 3.462331, 472.940125)
+
+[node name="gGard161" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.420451, 0.034743, -0.906650, -0.000000, 0.999267, 0.038292, 0.907315, -0.016100, 0.420142, 34.932487, 3.577329, 474.194885)
+
+[node name="gGard162" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.419830, 0.034588, -0.906943, -0.000000, 0.999274, 0.038109, 0.907603, -0.015999, 0.419525, 32.210110, 3.692014, 475.455322)
+
+[node name="gGard163" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.417574, 0.033553, -0.908023, -0.000000, 0.999318, 0.036927, 0.908643, -0.015420, 0.417289, 29.485746, 3.804647, 476.711426)
+
+[node name="gGard164" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.423585, 0.033459, -0.905238, -0.000000, 0.999318, 0.036937, 0.905857, -0.015646, 0.423296, 26.764004, 3.915517, 477.973145)
+
+[node name="gGard165" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.456136, 0.033349, -0.889285, -0.000000, 0.999298, 0.037475, 0.889910, -0.017094, 0.455816, 24.070358, 4.027212, 479.292725)
+
+[node name="gGard166" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.442373, 0.036230, -0.896099, -0.000000, 0.999184, 0.040398, 0.896831, -0.017871, 0.442011, 21.390247, 4.144109, 480.640503)
+
+[node name="gGard167" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.351604, 0.038806, -0.935344, -0.000000, 0.999141, 0.041453, 0.936149, -0.014575, 0.351301, 18.640778, 4.266988, 481.831451)
+
+[node name="gGard168" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.290741, 0.037007, -0.956086, -0.000000, 0.999252, 0.038677, 0.956802, -0.011245, 0.290523, 15.801353, 4.387281, 482.794983)
+
+[node name="gGard169" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.227917, 0.032346, -0.973143, -0.000000, 0.999448, 0.033221, 0.973681, -0.007572, 0.227791, 12.905638, 4.495199, 483.572937)
+
+[node name="gGard170" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(0.056936, 0.036872, -0.997697, -0.000000, 0.999318, 0.036932, 0.998378, -0.002103, 0.056897, 9.947559, 4.600492, 484.000244)
+
+[node name="gGard171" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.089274, 0.024082, -0.995716, 0.000000, 0.999708, 0.024178, 0.996007, 0.002158, -0.089248, 6.955985, 4.692205, 483.951721)
+
+[node name="gGard172" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.285625, 0.017676, -0.958178, 0.000000, 0.999830, 0.018445, 0.958341, 0.005268, -0.285576, 4.024467, 4.756155, 483.389374)
+
+[node name="gGard173" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.399404, 0.022585, -0.916497, 0.000000, 0.999696, 0.024635, 0.916775, 0.009840, -0.399283, 1.211796, 4.820791, 482.361816)
+
+[node name="gGard174" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.423543, 0.013908, -0.905769, 0.000000, 0.999882, 0.015354, 0.905876, 0.006503, -0.423493, -1.522180, 4.880788, 481.127411)
+
+[node name="gGard175" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.495901, 0.014569, -0.868257, 0.000000, 0.999859, 0.016777, 0.868379, 0.008320, -0.495831, -4.183561, 4.928991, 479.748230)
+
+[node name="gGard176" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.526775, 0.012588, -0.849912, 0.000000, 0.999890, 0.014810, 0.850005, 0.007801, -0.526717, -6.761134, 4.976377, 478.214233)
+
+[node name="gGard177" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.519114, 0.011558, -0.854627, 0.000000, 0.999909, 0.013523, 0.854705, 0.007020, -0.519066, -9.318199, 5.018880, 476.645386)
+
+[node name="gGard178" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.486328, 0.012416, -0.873688, 0.000000, 0.999899, 0.014210, 0.873776, 0.006911, -0.486279, -11.910923, 5.060483, 475.137238)
+
+[node name="gGard179" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.465808, 0.014958, -0.884759, 0.000000, 0.999857, 0.016904, 0.884886, 0.007874, -0.465742, -14.548922, 5.107160, 473.709045)
+
+[node name="gGard180" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.458445, 0.013632, -0.888618, 0.000000, 0.999882, 0.015338, 0.888723, 0.007032, -0.458391, -17.209339, 5.155530, 472.322632)
+
+[node name="gGard181" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.458110, 0.012265, -0.888811, 0.000000, 0.999905, 0.013798, 0.888896, 0.006321, -0.458066, -19.875767, 5.199239, 470.947815)
+
+[node name="gGard182" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.456299, 0.012938, -0.889733, 0.000000, 0.999894, 0.014540, 0.889827, 0.006635, -0.456250, -22.543850, 5.241750, 469.576202)
+
+[node name="gGard183" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.449525, 0.012139, -0.893185, 0.000000, 0.999908, 0.013589, 0.893268, 0.006109, -0.449484, -25.218489, 5.283948, 468.217468)
+
+[node name="gGard184" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.468506, 0.015469, -0.883325, 0.000000, 0.999847, 0.017509, 0.883461, 0.008203, -0.468434, -33.206657, 5.421911, 464.072388)
+
+[node name="gGard185" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.441854, 0.012925, -0.896994, 0.000000, 0.999896, 0.014408, 0.897087, 0.006366, -0.441808, -35.877480, 5.469793, 462.706848)
+
+[node name="gGard186" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.480477, 0.013122, -0.876909, 0.000000, 0.999888, 0.014962, 0.877007, 0.007189, -0.480423, -38.538628, 5.513853, 461.323364)
+
+[node name="gGard187" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.607329, 0.004518, -0.794437, 0.000000, 0.999984, 0.005686, 0.794450, 0.003453, -0.607320, -41.045818, 5.544828, 459.691650)
+
+[node name="gGard188" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.660380, -0.001841, -0.750929, 0.000000, 0.999997, -0.002452, 0.750931, -0.001619, -0.660378, -43.363892, 5.549680, 457.790070)
+
+[node name="gGard189" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.757881, -0.006673, -0.652358, 0.000000, 0.999948, -0.010228, 0.652393, -0.007752, -0.757842, -45.468880, 5.530660, 455.662659)
+
+[node name="gGard190" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.865944, -0.009606, -0.500049, 0.000000, 0.999816, -0.019207, 0.500142, -0.016633, -0.865784, -47.197678, 5.486501, 453.226929)
+
+[node name="gGard191" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.931895, -0.008473, -0.362629, 0.000000, 0.999727, -0.023360, 0.362728, -0.021769, -0.931641, -48.491982, 5.422636, 450.530182)
+
+[node name="gGard192" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.974144, -0.004333, -0.225886, 0.000000, 0.999816, -0.019177, 0.225927, -0.018681, -0.973965, -49.374969, 5.358816, 447.671112)
+
+[node name="gGard193" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.972607, -0.004305, -0.232417, 0.000000, 0.999829, -0.018521, 0.232457, -0.018014, -0.972440, -50.062546, 5.302259, 444.750977)
+
+[node name="gGard194" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.967990, -0.004572, -0.250947, 0.000000, 0.999834, -0.018216, 0.250989, -0.017633, -0.967829, -50.787712, 5.247144, 441.840088)
+
+[node name="gGard195" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.974159, -0.004091, -0.225824, 0.000000, 0.999836, -0.018114, 0.225861, -0.017646, -0.974000, -51.502983, 5.192640, 438.926880)
+
+[node name="gGard196" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.978040, -0.003693, -0.208386, 0.000000, 0.999843, -0.017718, 0.208419, -0.017329, -0.977886, -52.154396, 5.138883, 435.998596)
+
+[node name="gGard197" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.976284, -0.003724, -0.216464, 0.000000, 0.999852, -0.017199, 0.216496, -0.016791, -0.976139, -52.791767, 5.086500, 433.067139)
+
+[node name="gGard198" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.974400, -0.004226, -0.224782, 0.000000, 0.999823, -0.018795, 0.224822, -0.018314, -0.974228, -53.453743, 5.032499, 430.141113)
+
+[node name="gGard199" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_shiba_fence")]
+transform = Transform3D(-0.974156, -0.003762, -0.225843, 0.000000, 0.999861, -0.016655, 0.225874, -0.016225, -0.974021, -54.129787, 4.979314, 427.218262)
+
+[node name="gTufa200" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.943112, 0.000000, -0.418252, 0.000000, 1.031696, 0.000000, 0.418252, 0.000000, 0.943112, 99.305611, 0.513156, 398.508514)
+
+[node name="gTufa201" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.946425, 0.000000, -0.274236, 0.000000, 0.985355, 0.000000, 0.274236, 0.000000, 0.946425, 96.797363, 0.601840, 402.876801)
+
+[node name="gTufa202" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.468359, 0.000000, -0.768915, 0.000000, 0.900328, 0.000000, 0.768915, 0.000000, 0.468359, 94.367149, 0.691852, 406.567200)
+
+[node name="gTufa203" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.785791, 0.000000, -0.393241, 0.000000, 0.878696, 0.000000, 0.393241, 0.000000, 0.785791, 91.495453, 0.817523, 411.077637)
+
+[node name="gTufa204" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.554564, 0.000000, -0.815122, 0.000000, 0.985883, 0.000000, 0.815122, 0.000000, 0.554564, 88.060760, 0.976840, 415.820404)
+
+[node name="gTufa205" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.984203, 0.000000, -0.014694, 0.000000, 0.984312, 0.000000, 0.014694, 0.000000, 0.984203, 84.247147, 1.136447, 420.260071)
+
+[node name="gTufa206" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.673224, 0.000000, 0.638142, 0.000000, 0.927608, 0.000000, -0.638142, 0.000000, -0.673224, 81.119759, 1.291705, 425.039917)
+
+[node name="gTufa207" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.754565, 0.000000, -0.458878, 0.000000, 0.883141, 0.000000, 0.458878, 0.000000, -0.754565, 77.871925, 1.431201, 429.124207)
+
+[node name="gTufa208" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.976068, 0.000000, 0.469101, 0.000000, 1.082942, 0.000000, -0.469101, 0.000000, -0.976068, 74.715843, 1.582660, 433.804413)
+
+[node name="gTufa209" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.890871, 0.000000, 0.319514, 0.000000, 0.946436, 0.000000, -0.319514, 0.000000, -0.890871, 70.854095, 1.740604, 438.305908)
+
+[node name="gTufa210" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.888622, 0.000000, -0.617621, 0.000000, 1.082175, 0.000000, 0.617621, 0.000000, 0.888622, 68.185059, 1.884052, 442.940582)
+
+[node name="gTufa211" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.685504, 0.000000, -0.699325, 0.000000, 0.979271, 0.000000, 0.699325, 0.000000, 0.685504, 64.679565, 2.029437, 446.802460)
+
+[node name="gTufa212" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.593674, 0.000000, -0.800290, 0.000000, 0.996450, 0.000000, 0.800290, 0.000000, 0.593674, 62.193172, 2.152606, 450.531403)
+
+[node name="gTufa213" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.713635, 0.000000, 0.585964, 0.000000, 0.923379, 0.000000, -0.585964, 0.000000, -0.713635, 58.859360, 2.324893, 455.288910)
+
+[node name="gTufa214" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.901969, 0.000000, -0.026882, 0.000000, 0.902370, 0.000000, 0.026882, 0.000000, 0.901969, 56.424614, 2.454211, 458.534546)
+
+[node name="gTufa215" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.581580, 0.000000, 0.670732, 0.000000, 0.887759, 0.000000, -0.670732, 0.000000, -0.581580, 53.940475, 2.574710, 461.167572)
+
+[node name="gTufa216" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.686238, 0.000000, -0.848837, 0.000000, 1.091534, 0.000000, 0.848837, 0.000000, 0.686238, 50.250511, 2.758243, 463.388519)
+
+[node name="gTufa217" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.530659, 0.000000, 0.907930, 0.000000, 1.051635, 0.000000, -0.907930, 0.000000, -0.530659, 46.214432, 2.954730, 465.569855)
+
+[node name="gTufa218" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.030721, 0.000000, 0.087999, 0.000000, 1.034471, 0.000000, -0.087999, 0.000000, -1.030721, 42.266979, 3.135242, 467.580750)
+
+[node name="gTufa219" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.044720, 0.000000, -0.171414, 0.000000, 1.058690, 0.000000, 0.171414, 0.000000, -1.044720, 36.653790, 3.380588, 469.800201)
+
+[node name="gTufa220" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.673440, 0.000000, -0.795666, 0.000000, 1.042404, 0.000000, 0.795666, 0.000000, -0.673440, 31.989893, 3.585208, 472.173584)
+
+[node name="gTufa221" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.886241, 0.000000, -0.512900, 0.000000, 1.023958, 0.000000, 0.512900, 0.000000, -0.886241, 27.872772, 3.762805, 474.414368)
+
+[node name="gTufa222" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.121172, 0.000000, -0.936019, 0.000000, 0.943830, 0.000000, 0.936019, 0.000000, -0.121172, 22.513905, 3.988345, 476.760590)
+
+[node name="gTufa223" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.072040, 0.000000, 1.003469, 0.000000, 1.006051, 0.000000, -1.003469, 0.000000, -0.072040, 18.361721, 4.177310, 478.708099)
+
+[node name="gTufa224" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.784469, 0.000000, -0.476803, 0.000000, 0.918005, 0.000000, 0.476803, 0.000000, 0.784469, 14.752097, 4.337878, 479.970367)
+
+[node name="gTufa225" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.680175, 0.000000, 0.784498, 0.000000, 1.038304, 0.000000, -0.784498, 0.000000, 0.680175, 11.747849, 4.464633, 480.977783)
+
+[node name="gTufa226" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.721785, 0.000000, -0.525421, 0.000000, 0.892771, 0.000000, 0.525421, 0.000000, -0.721785, 8.039653, 4.609820, 481.247253)
+
+[node name="gTufa227" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.883855, 0.000000, -0.077999, 0.000000, 0.887290, 0.000000, 0.077999, 0.000000, 0.883855, 5.241968, 4.704333, 480.528870)
+
+[node name="gTufa228" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.775614, 0.000000, 0.679306, 0.000000, 1.031035, 0.000000, -0.679306, 0.000000, 0.775614, 1.547798, 4.779712, 479.133331)
+
+[node name="gTufa229" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.134046, 0.000000, -0.918495, 0.000000, 0.928225, 0.000000, 0.918495, 0.000000, -0.134046, -2.645285, 4.883395, 477.208038)
+
+[node name="gTufa230" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.430561, 0.000000, 0.831362, 0.000000, 0.936240, 0.000000, -0.831362, 0.000000, 0.430561, -5.955831, 4.938388, 475.472443)
+
+[node name="gTufa231" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.010767, 0.000000, 0.319257, 0.000000, 1.059988, 0.000000, -0.319257, 0.000000, 1.010767, -10.550211, 5.038226, 472.372894)
+
+[node name="gTufa232" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.127410, 0.000000, 0.938918, 0.000000, 0.947523, 0.000000, -0.938918, 0.000000, -0.127410, -15.883612, 5.132297, 469.614868)
+
+[node name="gTufa233" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.377199, 0.000000, -0.859490, 0.000000, 0.938617, 0.000000, 0.859490, 0.000000, 0.377199, -20.714951, 5.209002, 467.075317)
+
+[node name="gTufa234" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.765961, 0.000000, 0.416579, 0.000000, 0.871914, 0.000000, -0.416579, 0.000000, 0.765961, -25.570807, 5.290317, 464.823242)
+
+[node name="gTufa235" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.002783, 0.000000, -0.081820, 0.000000, 1.006115, 0.000000, 0.081820, 0.000000, 1.002783, -30.222088, 5.368487, 462.003113)
+
+[node name="gTufa236" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.574232, 0.000000, -0.658770, 0.000000, 0.873911, 0.000000, 0.658770, 0.000000, -0.574232, -35.285606, 5.438891, 459.449615)
+
+[node name="gTufa237" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.782873, 0.000000, 0.643954, 0.000000, 1.013690, 0.000000, -0.643954, 0.000000, 0.782873, -38.704006, 5.498981, 457.928345)
+
+[node name="gTufa238" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.164451, 0.000000, -0.861099, 0.000000, 0.876661, 0.000000, 0.861099, 0.000000, -0.164451, -41.732574, 5.508456, 455.079010)
+
+[node name="gTufa239" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.569674, 0.000000, -0.883436, 0.000000, 1.051184, 0.000000, 0.883436, 0.000000, -0.569674, -43.841232, 5.455615, 452.752136)
+
+[node name="gTufa240" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.212548, 0.000000, 1.070422, 0.000000, 1.091320, 0.000000, -1.070422, 0.000000, -0.212548, -45.382217, 5.392627, 449.896667)
+
+[node name="gTufa241" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.814325, 0.000000, -0.668773, 0.000000, 1.053747, 0.000000, 0.668773, 0.000000, 0.814325, -46.311787, 5.339648, 447.184479)
+
+[node name="gTufa242" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.690515, 0.000000, 0.559250, 0.000000, 0.888578, 0.000000, -0.559250, 0.000000, 0.690515, -47.493572, 5.238589, 441.821716)
+
+[node name="gTufa243" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.453189, 0.000000, 0.920516, 0.000000, 1.026026, 0.000000, -0.920516, 0.000000, 0.453189, -48.678570, 5.143939, 436.734802)
+
+[node name="gTufa244" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.068835, 0.000000, -0.116840, 0.000000, 1.075202, 0.000000, 0.116840, 0.000000, -1.068835, -50.294586, 5.051120, 431.781372)
+
+[node name="gTufa245" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.565865, 0.000000, -0.908097, 0.000000, 1.069974, 0.000000, 0.908097, 0.000000, 0.565865, -51.536255, 4.946826, 426.080719)
+
+[node name="gRicsa246" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_jinrikisha")]
+transform = Transform3D(-0.555404, 0.000000, 0.831581, 0.000000, 1.000000, 0.000000, -0.831581, 0.000000, -0.555404, 80.653870, 1.511143, 431.105621)
+metadata/coliziune = "none"
+
+[node name="gViaduct247" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_iron_truss_bridge")]
+transform = Transform3D(0.995638, 0.000000, 0.093302, 0.000000, 1.000000, 0.000000, -0.093302, 0.000000, 0.995638, -86.606834, 4.874973, 412.978821)
+
+[node name="gViaduct248" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_iron_truss_bridge")]
+transform = Transform3D(0.995638, 0.000000, 0.093302, 0.000000, 1.000000, 0.000000, -0.093302, 0.000000, 0.995638, -44.790047, 4.874973, 409.060120)
+
+[node name="gTren249" type="Path3D" parent="DecorManual/ZoneG_Bambus"]
+script = ExtResource("poig_pathmover")
+model = ExtResource("poig_sagano_train")
+collide = false
+points = PackedVector3Array(-111.50, 1.02, 415.31, -84.62, 12.47, 412.79, -46.78, 12.47, 409.25, -19.90, 1.02, 406.73, -7.95, -19.98, 405.61, 3.75, -19.98, 444.69, -127.68, -19.98, 457.00, -123.45, -19.98, 416.43, -111.50, 1.02, 415.31)
+speed = 8.75
+travel_mode = 0
+phase = 0.135
+stick_to_ground = false
+
+[node name="gTufaTren250" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.065364, 0.000000, 0.854365, 0.000000, 1.365628, 0.000000, -0.854365, 0.000000, 1.065364, -99.565453, 4.443027, 410.065918)
+
+[node name="gTufaTren251" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.361270, 0.000000, -0.456809, 0.000000, 1.435872, 0.000000, 0.456809, 0.000000, 1.361270, -98.866585, 4.526034, 414.167725)
+
+[node name="gTufaTren252" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.168550, 0.000000, -1.251240, 0.000000, 1.262542, 0.000000, 1.251240, 0.000000, -0.168550, -99.466873, 4.610873, 418.579498)
+
+[node name="gTufaTren253" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.240693, 0.000000, -0.486114, 0.000000, 1.332526, 0.000000, 0.486114, 0.000000, -1.240693, -103.695663, 4.426455, 409.642944)
+
+[node name="gTufaTren254" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.687070, 0.000000, 1.255141, 0.000000, 1.430889, 0.000000, -1.255141, 0.000000, 0.687070, -103.403297, 4.528186, 414.771881)
+
+[node name="gTufaTren255" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.385519, 0.000000, -1.365637, 0.000000, 1.419009, 0.000000, 1.365637, 0.000000, 0.385519, -104.103966, 4.608279, 419.049286)
+
+[node name="gTufaTren256" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.064694, 0.000000, -1.420192, 0.000000, 1.421665, 0.000000, 1.420192, 0.000000, 0.064694, -109.321175, 4.420917, 409.811981)
+
+[node name="gTufaTren257" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.888835, 0.000000, 1.074070, 0.000000, 1.394150, 0.000000, -1.074070, 0.000000, 0.888835, -107.882370, 4.515292, 414.580139)
+
+[node name="gTufaTren258" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.244444, 0.000000, -0.514655, 0.000000, 1.346667, 0.000000, 0.514655, 0.000000, 1.244444, -108.629395, 4.607715, 419.542725)
+
+[node name="gTufaTren259" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.232058, 0.000000, -1.366685, 0.000000, 1.386246, 0.000000, 1.366685, 0.000000, -0.232058, -114.068123, 4.463275, 411.126221)
+
+[node name="gTufaTren260" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.766301, 0.000000, 1.128774, 0.000000, 1.364313, 0.000000, -1.128774, 0.000000, 0.766301, -113.649300, 4.539432, 415.358582)
+
+[node name="gTufaTren261" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.018002, 0.000000, -0.941532, 0.000000, 1.386654, 0.000000, 0.941532, 0.000000, -1.018002, -112.819611, 4.613986, 419.970184)
+
+[node name="gTufaTren262" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.294757, 0.000000, -1.343701, 0.000000, 1.375650, 0.000000, 1.343701, 0.000000, -0.294757, -117.602539, 4.508883, 411.050812)
+
+[node name="gTufaTren263" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.992682, 0.000000, -0.988462, 0.000000, 1.400884, 0.000000, 0.988462, 0.000000, -0.992682, -118.136398, 4.618487, 416.336090)
+
+[node name="gTufaTren264" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.249346, 0.000000, 1.272358, 0.000000, 1.296560, 0.000000, -1.272358, 0.000000, -0.249346, -117.419182, 4.692355, 420.603729)
+
+[node name="gTufaTren265" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.172093, 0.000000, -0.585231, 0.000000, 1.310075, 0.000000, 0.585231, 0.000000, 1.172093, -31.858957, 4.221881, 402.656067)
+
+[node name="gTufaTren266" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.389313, 0.000000, 0.253633, 0.000000, 1.412274, 0.000000, -0.253633, 0.000000, -1.389313, -32.431179, 4.397601, 407.551544)
+
+[node name="gTufaTren267" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.070811, 0.000000, -0.948737, 0.000000, 1.430643, 0.000000, 0.948737, 0.000000, 1.070811, -30.961746, 4.547717, 411.990143)
+
+[node name="gTufaTren268" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(0.052982, 0.000000, -1.351348, 0.000000, 1.352386, 0.000000, 1.351348, 0.000000, 0.052982, -26.997030, 4.240039, 403.153748)
+
+[node name="gTufaTren269" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.347984, 0.000000, 0.323938, 0.000000, 1.386361, 0.000000, -0.323938, 0.000000, -1.347984, -27.914036, 4.382205, 407.103729)
+
+[node name="gTufaTren270" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.294745, 0.000000, 0.009076, 0.000000, 1.294777, 0.000000, -0.009076, 0.000000, -1.294745, -27.520954, 4.570224, 412.597046)
+
+[node name="gTufaTren271" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.241003, 0.000000, -0.165656, 0.000000, 1.252010, 0.000000, 0.165656, 0.000000, -1.241003, -22.867668, 4.228763, 402.796967)
+
+[node name="gTufaTren272" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.429880, 0.000000, 0.198781, 0.000000, 1.443631, 0.000000, -0.198781, 0.000000, -1.429880, -23.448452, 4.384341, 407.061981)
+
+[node name="gTufaTren273" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.503351, 0.000000, 1.144754, 0.000000, 1.250530, 0.000000, -1.144754, 0.000000, -0.503351, -22.158823, 4.553683, 411.846497)
+
+[node name="gTufaTren274" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.214855, 0.000000, -0.709256, 0.000000, 1.406740, 0.000000, 0.709256, 0.000000, 1.214855, -19.264605, 4.207095, 401.972229)
+
+[node name="gTufaTren275" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(1.197735, 0.000000, 0.592368, 0.000000, 1.336214, 0.000000, -0.592368, 0.000000, 1.197735, -18.818003, 4.392291, 406.919373)
+
+[node name="gTufaTren276" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.277901, 0.000000, -1.393684, 0.000000, 1.421121, 0.000000, 1.393684, 0.000000, -0.277901, -17.658047, 4.526813, 410.453979)
+
+[node name="gTufaTren277" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.102796, 0.000000, 0.747071, 0.000000, 1.332019, 0.000000, -0.747071, 0.000000, -1.102796, -15.079769, 4.212955, 401.843536)
+
+[node name="gTufaTren278" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-1.412951, 0.000000, 0.157461, 0.000000, 1.421698, 0.000000, -0.157461, 0.000000, -1.412951, -13.938128, 4.374530, 405.467987)
+
+[node name="gTufaTren279" parent="DecorManual/ZoneG_Bambus" instance=ExtResource("poig_bamboo_crown")]
+transform = Transform3D(-0.540999, 0.000000, -1.267665, 0.000000, 1.378280, 0.000000, 1.267665, 0.000000, -0.540999, -12.841420, 4.573230, 409.987335)
+

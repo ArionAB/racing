@@ -1687,15 +1687,10 @@ static func themes() -> Dictionary:
 				# pete de muschi (vezi `_build_terrain`, zona de sol): pe 1 - a
 				# din pete solul revine la solul temei (oliv, muschi). Sta INAINTEA
 				# zonei vechi D si are raza mai mare, deci aceea nu mai castiga
-				# nicaieri (`zw > w` strict); ramasa doar ca merge-ul cu POI C sa
-				# nu atinga aceleasi randuri (de sters la integrare). Pana la
+				# nicaieri (`zw > w` strict); stearsa la integrare. Pana la
 				# iesirea de pe pod: fundul rapei Tsutenkyo e tot padure.
 				{"from": 0.331, "to": 0.468, "max_m": 60.0, "fade_m": 18.0,
 					"tint": Color(0.42, 0.21, 0.11, 0.4)},
-				# D: valea de artari, de la aterizarea de pe scena pana la gura
-				# podului Tsutenkyo (fractii din tools/gen_kyoto_route.py).
-				{"from": 0.331, "to": 0.449, "max_m": 45.0, "fade_m": 18.0,
-					"tint": Color(0.8626, 0.54, 0.3079)},
 				# C: rapa de sub scena Kiyomizu (POI C runda 2). Fundul ei e in
 				# umbra peretelui de vest toata dupa-amiaza (soarele de 22° din SV),
 				# deci lumina doar de ambientul albastru: solul oliv iesea TURCOAZ

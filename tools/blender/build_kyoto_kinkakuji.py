@@ -46,6 +46,15 @@ def _phoenix(b, z):
     b.beam((0, -0.4, z + 0.7), (0, -0.95, z + 1.5), (0.1, 0.3), GOLD)    # coada
 
 
+def _finial(b, z):
+    """Varf mic auriu, curbat: bulb, ou si flacara (inlocuieste fenixul cand
+    acoperisul de sus e plat; fenixul ramane in `_phoenix`)."""
+    b.frustum((0, 0, z + 0.2), 0.5, 0.35, 0.4, GOLD, segments=8)
+    b.frustum((0, 0, z + 0.65), 0.28, 0.45, 0.5, GOLD, segments=8)
+    b.frustum((0, 0, z + 1.1), 0.45, 0.0, 0.5, GOLD, segments=8)
+    b.frustum((0, 0, z + 1.6), 0.12, 0.0, 0.7, GOLD, segments=6)
+
+
 def build_kinkakuji():
     """`kinkakuji.png` -- lista de elemente (inainte de modelare):
 
@@ -68,7 +77,7 @@ def build_kinkakuji():
     z0, z1 = bh, 3.6
     h1 = z1 - z0
     hx1, hy1 = 5.6, 4.5
-    wood.box((0, 0, z0 + h1 * 0.5), (2 * hx1 - 0.1, 2 * hy1 - 0.1, h1), BEAM)       # perete intunecat
+    wood.box((0, 0, z0 + h1 * 0.5), (2 * hx1 - 0.7, 2 * hy1 - 0.7, h1), BEAM)       # fundal intunecat, retras
     n = 7
     for k in range(n):
         x = -hx1 + 2 * hx1 * k / (n - 1)
@@ -82,15 +91,33 @@ def build_kinkakuji():
     frame_ring(wood, 0, 0, z1 - 0.45, hx1 + 0.1, hy1 + 0.1, 0.45, 0.3, WOODS)
     frame_ring(wood, 0, 0, z0 + 0.15, hx1 + 0.05, hy1 + 0.05, 0.3, 0.25, WOODS)
     frame_ring(wood, 0, 0, z0 + 1.1, hx1 + 0.03, hy1 + 0.03, 0.14, 0.14, BEAM)
-    # panouri de zabrele (mai deschise) intre stalpi, pe fetele lungi
+    # ferestre mari cu ZABRELE intre stalpi: sort jos plin, apoi retea
+    # (3 montanti + 2 traverse) care lasa goluri intunecate vizibile
+    cellx = 2 * hx1 / (n - 1)
+    celly = 2 * hy1 / 6
+    zl0, zl1 = z0 + 0.9, z1 - 0.6
     for k in range(n - 1):
-        x = -hx1 + 2 * hx1 * (k + 0.5) / (n - 1)
+        x = -hx1 + cellx * (k + 0.5)
         for sy in (-1, 1):
-            wood.box((x, sy * (hy1 + 0.02), z0 + h1 * 0.52), (2 * hx1 / (n - 1) - 0.7, 0.08, h1 * 0.55), WOODS)
+            wood.box((x, sy * (hy1 - 0.1), z0 + 0.45), (cellx - 0.4, 0.1, 0.8), WOODS)
+            for m in range(1, 4):
+                wood.box((x - (cellx - 0.4) / 2 + (cellx - 0.4) * m / 4, sy * (hy1 - 0.1),
+                          (zl0 + zl1) / 2), (0.09, 0.1, zl1 - zl0), WOODS)
+            for zz in (zl0 + 0.05, (zl0 + zl1) / 2, zl1 - 0.05):
+                wood.box((x, sy * (hy1 - 0.1), zz), (cellx - 0.4, 0.1, 0.09), WOODS)
+    for k in range(6):
+        y = -hy1 + celly * (k + 0.5)
+        for sx in (-1, 1):
+            wood.box((sx * (hx1 - 0.1), y, z0 + 0.45), (0.1, celly - 0.4, 0.8), WOODS)
+            for m in range(1, 3):
+                wood.box((sx * (hx1 - 0.1), y - (celly - 0.4) / 2 + (celly - 0.4) * m / 3,
+                          (zl0 + zl1) / 2), (0.1, 0.09, zl1 - zl0), WOODS)
+            for zz in (zl0 + 0.05, (zl0 + zl1) / 2, zl1 - 0.05):
+                wood.box((sx * (hx1 - 0.1), y, zz), (0.1, celly - 0.4, 0.09), WOODS)
     # --- veranda etajului 2 (pardoseala iesita) + etajul 2 aur
     wood.box((0, 0, z1 + 0.15), (2 * hx1 + 1.6, 2 * hy1 + 1.6, 0.3), WOODS)
     z2 = z1 + 0.3
-    z3 = 7.0
+    z3 = 7.2
     h2 = z3 - z2
     hx2, hy2 = 4.9, 3.8
     gold.box((0, 0, z2 + h2 * 0.5), (2 * hx2, 2 * hy2, h2), GOLD)
@@ -116,9 +143,9 @@ def build_kinkakuji():
              thick=0.22, fascia_slot=BEAM, tile_step=0.9, rib=0.05, swell=0.3)
     # --- etajul 3 aur, mai mic
     z4 = z3 + 0.8
-    z5 = 9.9
+    z5 = 10.3
     h3 = z5 - z4
-    hx3, hy3 = 3.5, 2.7
+    hx3, hy3 = 2.9, 2.2
     gold.box((0, 0, z4 + h3 * 0.5), (2 * hx3, 2 * hy3, h3), GOLD)
     gold.box((0, 0, z4 + 0.1), (2 * hx3 + 1.5, 2 * hy3 + 1.5, 0.25), GOLD)
     frame_ring(gold, 0, 0, z5 - 0.3, hx3 + 0.1, hy3 + 0.1, 0.3, 0.22, GOLD)
@@ -136,9 +163,9 @@ def build_kinkakuji():
             sx_, sy_ = (0.6, 0.1) if side % 2 == 0 else (0.1, 0.6)
             win.box((px, py, z4 + h3 * 0.55), (sx_, sy_, 0.85), DARK)
     # --- acoperis 2: piramida mare
-    hip_roof(roof, 0, 0, z5, 5.3, 4.3, 2.2, TILE, ridge_half=0.5, lift=0.6,
+    hip_roof(roof, 0, 0, z5, 6.2, 5.0, 1.5, TILE, ridge_half=0.9, lift=0.65,
              thick=0.22, fascia_slot=BEAM, tile_step=0.9, rib=0.05, swell=0.3)
-    _phoenix(gold, z5 + 2.2 - 0.05)
+    _finial(gold, z5 + 1.5 - 0.05)
     return (wood.to_object("Kin_Wood"), gold.to_object("Kin_Gold"),
             roof.to_object("Kin_Roof"), win.to_object("Kin_Windows"),
             stone.to_object("Kin_Stone"))
@@ -146,5 +173,5 @@ def build_kinkakuji():
 
 if __name__ == "__main__" or True:
     emit(list(build_kinkakuji()), "structures/kinkakuji.glb", AO_KIN,
-         bevel=0.0, smooth_angle=None, budget=6000)
+         bevel=0.0, smooth_angle=None, budget=5600)
     report()

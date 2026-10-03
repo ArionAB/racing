@@ -123,6 +123,14 @@ Construite cu `_verm_pagoda(cfg)` din `build_kyoto_pagodas.py` (hip_roof, frame_
 - Comparatie: `docs/asset_briefs/img/kyoto_fidelity/kinkakuji.png`, 4 azimuturi: `kinkakuji_views.png`.
 - Abateri: parterul e perete intunecat cu stalpi si panouri (pe planșa, ferestre mari cu zabrele); acoperisul de sus pe planșa e mai larg si mai plat, cu varf curbat; fenixul e un grup de cutii aurii (se citeste "pasare" doar de aproape); etajul 3 mai putin retras decat pe desen.
 
+## Runda de corectura (dupa verdictul coordonatorului)
+
+- Tigla tuturor celor 4 piese: `VOLCANIC_BLACK` (#55535A) -> `ASPHALT_EDGE` 6 (#696765); pe randare primul iesea ~(79,77,84), violet. `yasaka_pagoda` re-verificata: 7 526 tri, cote 11,6 x 11,6 x 24,1 neschimbate. Contractul de sloturi din `kyoto_kit.md` actualizat.
+- Ferestre pagode: rotunjite (arc sus) cu inel alb gros, 3 pe fata (`_arch_window`). sanjunoto 7 146 tri, koyasu 6 698 tri (ferestrele cu arc dubleaza triunghiurile fata de runda 1).
+- koyasu: corp retras 0,5 din streasina, console joase (un inel + blocuri mici) care nu acopera ferestrele, streasini 3,7/3,65/3,55 cu `swell` 0,5 si colturi ridicate 0,7-0,8 (acoperis de sus mai lat si evazat), 8,4 x 8,4 x 14,1 m.
+- kinkakuji: parter cu ferestre mari cu zabrele (montanti + traverse peste fundal intunecat retras), acoperis de sus 6,2 x 5,0, rise 1,5 (mai lat, mai plat), etaj 3 retras 2,9 x 2,2 (fata de 4,9 x 3,8 la etajul 2), varf auriu mic (bulb + ou + flacara) in locul fenixului. 5 348 tri, 14,0 x 11,4 x 13,7 m.
+- Planșa comuna a pagodelor refacuta: `docs/asset_briefs/img/kyoto_fidelity_valkitb_pagode.png`.
+
 ## Stare la oprire (kit-b)
 
-Toate cele trei piese (sanjunoto, koyasu, kinkakuji) facute, verify OK, comise.
+Toate cele trei piese facute, verify OK, runda de corectura aplicata si comisa.

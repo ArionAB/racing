@@ -42,7 +42,7 @@ check "plants/momiji_a.glb"           3100 --origin=assembly
 echo "== grupa kit-b: pagode vermilion + Kinkaku-ji =="
 check "structures/sanjunoto_pagoda.glb" 7300 --origin=assembly --allow-car-slots=Pagoda_Spire
 check "structures/koyasu_pagoda.glb"    6800 --origin=assembly --allow-car-slots=Pagoda_Spire
-check "structures/kinkakuji.glb"        3800 --origin=assembly --allow-car-slots=Kin_Gold
+check "structures/kinkakuji.glb"        5600 --origin=assembly --allow-car-slots=Kin_Gold
 
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)

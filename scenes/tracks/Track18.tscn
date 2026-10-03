@@ -5,12 +5,12 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="4_branch"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
-[ext_resource type="Script" path="res://scenes/hazards/daruma_otoshi_hazard.gd" id="11_daruma"]
+[ext_resource type="Script" path="res://scenes/hazards/gion_matsuri_hazard.gd" id="11_gion"]
 [ext_resource type="Script" path="res://scenes/props/torii_tunnel.gd" id="12_torii"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_senbon.glb" id="13_senbon"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_large.glb" id="14_large"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
-[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/vehicles/gion_boko.glb" id="12_gion_glb"]
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
@@ -1422,12 +1422,12 @@ fade = 14.0
 label = "saritura de pe scena Kiyomizu"
 respawn_past_gap = true
 
-[node name="DarumaOtoshi" type="Node3D" parent="Hazarduri"]
+[node name="GionMatsuri" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-0.20230, 0, 0.97932, 0, 1, 0, -0.97932, 0, -0.20230, 185.993, 0.035, 343.126)
-script = ExtResource("11_daruma")
+script = ExtResource("11_gion")
 side = 1
 road_half_width = 5.5
-model = ExtResource("12_daruma_glb")
+model = ExtResource("12_gion_glb")
 
 [node name="Kogarashi" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 386.919, 12.000, 225.880)

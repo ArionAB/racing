@@ -328,6 +328,9 @@ var _shishi_blend: Dictionary = {}
 ## Doar pentru sonde: `false` = AI-ul ignora daruma-otoshi (garda trebuie sa prinda
 ## contacte cu discul — altfel nu e armata).
 var reads_daruma: bool = true
+## La fel pentru carul de festival (`gion_matsuri_hazard.gd`): `false` = AI-ul il ignora
+## (garda trebuie sa prinda contacte cu el). Citeste prin aceeasi cale ca daruma.
+var reads_gion: bool = true
 ## Per daruma (cheie: instance id): indexul de pista si decizia luata la intrarea in
 ## raza — {lift: bool, clear_at: float (ceas propriu, s)}.
 var _daruma_index: Dictionary = {}
@@ -989,9 +992,16 @@ const DARUMA_EXTRA_S: float = 0.2
 ## Citeste doar ce vede si un om: ciocanul tras (ceasul hazardului prin
 ## `window_rel`) si propria viteza. Intoarce plafonul de viteza (INF = niciunul).
 func _daruma_cap(idx: int, speed: float) -> float:
-	if not reads_daruma:
-		return INF
-	var nodes := get_tree().get_nodes_in_group(DarumaOtoshiHazard.AI_GROUP)
+	# Doua feluri de hazard cu ceas pe sosea citesc prin aceeasi cale: discul daruma
+	# (traverseaza intr-o secunda) si carul de festival Gion Matsuri (traverseaza incet,
+	# in ~5 s). Contractul e acelasi: `ai_decision_point`, `blocks_between`, `window_rel`,
+	# `ai_margin`. Apelurile merg prin `call`, fiindca cele doua clase nu au parinte comun
+	# (daruma ramane neatinsa).
+	var nodes: Array[Node] = []
+	if reads_daruma:
+		nodes.append_array(get_tree().get_nodes_in_group(DarumaOtoshiHazard.AI_GROUP))
+	if reads_gion:
+		nodes.append_array(get_tree().get_nodes_in_group(GionMatsuriHazard.AI_GROUP))
 	if nodes.is_empty():
 		return INF
 	var r := track.route_at(car.route)
@@ -1003,12 +1013,13 @@ func _daruma_cap(idx: int, speed: float) -> float:
 	var cap := INF
 	var cruise: float = car.max_speed * car.speed_scale
 	for node in nodes:
-		var hz := node as DarumaOtoshiHazard
+		var hz := node as Node3D
 		if hz == null:
 			continue
+		var margin: float = float(hz.get("ai_margin"))
 		var key := hz.get_instance_id()
 		if not _daruma_index.has(key):
-			_daruma_index[key] = track.closest_index_global(hz.ai_decision_point(), car.route)
+			_daruma_index[key] = track.closest_index_global(hz.call(&"ai_decision_point") as Vector3, car.route)
 		var d_idx: int = int(_daruma_index[key]) - idx
 		if d_idx < -n_pts / 2:
 			d_idx += n_pts
@@ -1023,9 +1034,9 @@ func _daruma_cap(idx: int, speed: float) -> float:
 			var eta_fast := ahead / maxf(maxf(speed, cruise * SHISHI_FAST), 10.0)
 			var eta_slow := ahead / maxf(maxf(speed * SHISHI_SLOW, cruise * SHISHI_SLOW_FLOOR), 8.0)
 			var st := {"lift": false, "clear_at": 0.0}
-			if hz.blocks_between(eta_fast, eta_slow):
-				var w := hz.window_rel(eta_fast)
-				var wait_v := ahead / maxf(w.y + hz.ai_margin + DARUMA_EXTRA_S, 0.1)
+			if bool(hz.call(&"blocks_between", eta_fast, eta_slow)):
+				var w: Vector2 = hz.call(&"window_rel", eta_fast)
+				var wait_v := ahead / maxf(w.y + margin + DARUMA_EXTRA_S, 0.1)
 				if wait_v >= cruise * DARUMA_FLOOR:
 					st["lift"] = true
 					st["clear_at"] = _daruma_now + w.y
@@ -1035,7 +1046,7 @@ func _daruma_cap(idx: int, speed: float) -> float:
 		var state: Dictionary = _daruma_state[key]
 		if not state["lift"] or along < 0.0:
 			continue
-		var left: float = float(state["clear_at"]) - _daruma_now + hz.ai_margin + DARUMA_EXTRA_S
+		var left: float = float(state["clear_at"]) - _daruma_now + margin + DARUMA_EXTRA_S
 		if left <= 0.0:
 			continue
 		cap = minf(cap, maxf(along / left, cruise * DARUMA_FLOOR))

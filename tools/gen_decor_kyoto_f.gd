@@ -225,9 +225,21 @@ func _pavilion_garden() -> void:
 	var fwd := Vector3(-sin(_pav_yaw), 0.0, -cos(_pav_yaw))
 	var right := Vector3(fwd.z, 0.0, -fwd.x)
 	# Doi pini mici la baza (brief kit 1.4: „nu fac parte din GLB").
-	for s in [-1.0, 1.0]:
-		var p: Vector3 = _pav + fwd * 1.0 + right * (12.5 * s)
-		_tree("niwaki_pine", "fPavPin", p, 0.85 + _rng.randf() * 0.15)
+	# Runda 3 (verdict: „pavilionul sa iasa din verde"): pini niwaki MARI (1,4-1,6)
+	# pe flancuri si in spate, tufe karikomi pe mal; nimic in fata fatadei (fwd > 6)
+	# si nimic intre flancuri pe fata, ca reflexia sa ramana curata.
+	# (inainte, dreapta, scara); dreapta se oglindeste pe flancuri.
+	for it in [[2.0, 11.5, 1.5], [-3.5, 13.5, 1.6], [5.0, 13.0, 1.4]]:
+		for s in [-1.0, 1.0]:
+			_pav_pine(_pav + fwd * float(it[0]) + right * (float(it[1]) * s), fwd, float(it[2]))
+	for it in [[-11.0, -7.5, 1.5], [-12.5, 0.0, 1.6], [-11.0, 7.5, 1.5], [-17.5, -4.0, 1.45], [-17.5, 4.5, 1.55]]:
+		_pav_pine(_pav + fwd * float(it[0]) + right * float(it[1]), fwd, float(it[2]))
+	for it in [[4.5, 8.8, 1.4], [3.0, 16.0, 1.3], [-6.5, 10.5, 1.3], [-1.0, 17.0, 1.35]]:
+		for s in [-1.0, 1.0]:
+			var q: Vector3 = _pav + fwd * float(it[0]) + right * (float(it[1]) * s)
+			if _sol_real(q.x, q.z) >= WATER_Y + 0.1:
+				var m := "karikomi_shrub_a" if s > 0.0 else "karikomi_shrub_b"
+				_ground_piece(m, "fPavTufa", q, _rng.randf() * TAU, float(it[2]))
 	# Pietre de mal la piciorul fatadei si doua felinare yukimi pe capete.
 	for k in 5:
 		var o := -8.0 + 4.0 * k + _rng.randf_range(-0.8, 0.8)
@@ -500,14 +512,23 @@ func _rock(p: Vector3, scl: float, base: String) -> void:
 	_ground_piece(m, base, p, _rng.randf() * TAU, scl, 0.18 * scl, 0.45)
 
 
-func _tree(m: String, base: String, p: Vector3, scl: float) -> void:
+func _tree(m: String, base: String, p: Vector3, scl: float) -> bool:
 	if _overlaps(p, 2.5):
-		return
+		return false
 	var g := _sol_real(p.x, p.z)
 	if g < WATER_Y + 0.1:
-		return
+		return false
 	_raw(m, base, Vector3(p.x, g - 0.1, p.z), _rng.randf() * TAU, scl, "")
 	_placed.append(Vector3(p.x, p.z, 2.5))
+	return true
+
+
+## Pin langa pavilion: daca locul cerut e in apa sau ocupat, se da inapoi (spre
+## spatele pavilionului) cu cate 3 m, de cel mult 4 ori.
+func _pav_pine(p: Vector3, fwd: Vector3, scl: float) -> void:
+	for k in 5:
+		if _tree("niwaki_pine", "fPavPin", p - fwd * (3.0 * k), scl):
+			return
 
 
 func _ground_piece(m: String, base: String, p: Vector3, yaw: float, scl: float, sink: float = 0.05, rf: float = 0.9) -> void:

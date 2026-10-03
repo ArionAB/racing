@@ -1827,9 +1827,17 @@ const CLASSES_BY_MODEL := {
 	"bamboo_crown": {"Bamboo_Leaves": Palette.TRI_PREFIX + "bamboo_lime"},
 	"leaf_pile": {"Leaf_Pile": Palette.TRI_PREFIX + "leaf_litter"},
 	# Muschiul: pe nodurile `*_Moss` ale pietrelor, zidului si movilei.
-	"moss_mound": {"Moss_Mound": Palette.TRI_PREFIX + "moss"},
-	"garden_rock_a": {"Rock_Moss": Palette.TRI_PREFIX + "moss"},
-	"garden_rock_c": {"RockC_Moss": Palette.TRI_PREFIX + "moss"},
+	"moss_mound": {"Moss_Mound": Palette.TRI_PREFIX + "moss",
+		"Moss_Stone": Palette.TRI_PREFIX + "garden_stone"},
+	# POI F r3 (verdictul coordonatorului: pietrele de mal ieseau albe): piatra
+	# bolovanilor de gradina pe `garden_stone`: dala de zid a lui `old_stone`, tenta
+	# mai inchisa si calda (Palette.CLASS_TINT), masurata pe captura. Cu
+	# `old_stone` pur iesea la fel de deschis ca atlasul (+1 material, nu +0).
+	"garden_rock_a": {"Rock_Moss": Palette.TRI_PREFIX + "moss",
+		"Rock_Stone": Palette.TRI_PREFIX + "garden_stone"},
+	"garden_rock_b": {"RockB_Stone": Palette.TRI_PREFIX + "garden_stone"},
+	"garden_rock_c": {"RockC_Moss": Palette.TRI_PREFIX + "moss",
+		"RockC_Stone": Palette.TRI_PREFIX + "garden_stone"},
 	"cyclopean_wall": {"Cyc_Moss": Palette.TRI_PREFIX + "moss",
 		"Cyc_Stone": Palette.TRI_PREFIX + "old_stone"},
 	# Piatra arhitecturala (felinare, vulpi, clopotnita, bazin, pavilion, pod):

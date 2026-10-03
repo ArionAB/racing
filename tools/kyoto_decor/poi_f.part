@@ -27,24 +27,57 @@
 transform = Transform3D(-0.625774, 0.000000, -1.139477, 0.000000, 1.300000, 0.000000, 1.139477, 0.000000, -0.625774, 117.556808, -0.863080, 285.010712)
 
 [node name="fPavPin2" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.313090, 0.000000, -0.924368, 0.000000, 0.975951, 0.000000, 0.924368, 0.000000, -0.313090, 112.416267, -0.587640, 296.448578)
+transform = Transform3D(0.801163, 0.000000, -1.268124, 0.000000, 1.500000, 0.000000, 1.268124, 0.000000, 0.801163, 113.774162, -0.654245, 296.053436)
 
-[node name="fPavPiatra3" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(1.049030, 0.000000, -0.902016, 0.000000, 1.383508, 0.000000, 0.902016, 0.000000, 1.049030, 121.524277, -1.206734, 296.503937)
+[node name="fPavPin3" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.481207, 0.000000, -1.420718, 0.000000, 1.500000, 0.000000, 1.420718, 0.000000, -0.481207, 116.956856, -0.986246, 271.561188)
 
-[node name="fPavPiatra4" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.591800, 0.000000, -1.044384, 0.000000, 1.200402, 0.000000, 1.044384, 0.000000, 0.591800, 123.148155, -1.214760, 293.546997)
+[node name="fPavPin4" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.556606, 0.000000, -1.500063, 0.000000, 1.600000, 0.000000, 1.500063, 0.000000, 0.556606, 107.990562, -0.479944, 295.158966)
 
-[node name="fPavPiatra5" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(1.353613, 0.000000, -0.196635, 0.000000, 1.367820, 0.000000, 0.196635, 0.000000, 1.353613, 125.286018, -1.303825, 289.654144)
+[node name="fPavPin5" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-1.278596, 0.000000, 0.961870, 0.000000, 1.600000, 0.000000, -0.961870, 0.000000, -1.278596, 113.098717, -0.872903, 267.160614)
 
-[node name="fPavPiatra6" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(0.987175, 0.000000, -0.785938, 0.000000, 1.261830, 0.000000, 0.785938, 0.000000, 0.987175, 127.221558, -1.309771, 286.129700)
+[node name="fPavPin6" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.384243, 0.000000, -1.449951, 0.000000, 1.500000, 0.000000, 1.449951, 0.000000, -0.384243, 104.304848, -0.540094, 286.289612)
 
-[node name="fPavPiatra7" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(1.334453, 0.000000, 0.406317, 0.000000, 1.394941, 0.000000, -0.406317, 0.000000, 1.334453, 129.644257, -1.344519, 281.718201)
+[node name="fPavPin7" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-1.268240, 0.000000, 0.975483, 0.000000, 1.600000, 0.000000, -0.975483, 0.000000, -1.268240, 106.600304, -0.635507, 278.993652)
 
-[node name="fPavYukimi8" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_yukimi_lantern")]
+[node name="fPavPin8" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-1.499460, 0.000000, -0.040228, 0.000000, 1.500000, 0.000000, 0.040228, 0.000000, -1.499460, 111.525322, -0.815820, 273.141785)
+
+[node name="fPavPin9" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.166166, 0.000000, 1.440447, 0.000000, 1.450000, 0.000000, -1.440447, 0.000000, 0.166166, 100.292236, -0.484003, 280.092896)
+
+[node name="fPavPin10" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(1.549723, 0.000000, 0.029276, 0.000000, 1.550000, 0.000000, -0.029276, 0.000000, 1.549723, 104.383835, -0.566873, 272.642487)
+
+[node name="fPavTufa11" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-0.256098, 0.000000, 1.274525, 0.000000, 1.300000, 0.000000, -1.274525, 0.000000, -0.256098, 112.484535, -0.547650, 300.479126)
+
+[node name="fPavTufa12" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-0.629491, 0.000000, -1.137428, 0.000000, 1.300000, 0.000000, 1.137428, 0.000000, -0.629491, 106.805099, -0.429761, 291.085297)
+
+[node name="fPavTufa13" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(1.233150, 0.000000, -0.549399, 0.000000, 1.350000, 0.000000, 0.549399, 0.000000, 1.233150, 108.497093, -0.427106, 299.430206)
+
+[node name="fPavPiatra14" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-1.416170, 0.000000, -0.188990, 0.000000, 1.428725, 0.000000, 0.188990, 0.000000, -1.416170, 121.853897, -1.223174, 295.903717)
+
+[node name="fPavPiatra15" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-1.431084, 0.000000, 0.183310, 0.000000, 1.442776, 0.000000, -0.183310, 0.000000, -1.431084, 123.786758, -1.274531, 292.384155)
+
+[node name="fPavPiatra16" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.034490, 0.000000, 1.223373, 0.000000, 1.223860, 0.000000, -1.223373, 0.000000, 0.034490, 125.654015, -1.290104, 288.984070)
+
+[node name="fPavPiatra17" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.619571, 0.000000, -1.013768, 0.000000, 1.188106, 0.000000, 1.013768, 0.000000, 0.619571, 127.631737, -1.298301, 285.382813)
+
+[node name="fPavPiatra18" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-1.320286, 0.000000, -0.590819, 0.000000, 1.446452, 0.000000, 0.590819, 0.000000, -1.320286, 129.572571, -1.353470, 281.848755)
+
+[node name="fPavYukimi19" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_yukimi_lantern")]
 transform = Transform3D(-0.553569, 0.000000, -1.007999, 0.000000, 1.150000, 0.000000, 1.007999, 0.000000, -0.553569, 116.033722, -0.678922, 301.287384)
 
 [node name="ReflexiePavilion" type="Node3D" parent="."]
@@ -54,720 +87,717 @@ model = ExtResource("poif_kinkakuji")
 water_y = -1.00
 strength = 0.80
 
-[node name="fInsulaMovila10" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.923530, 0.000000, 1.427268, 0.000000, 1.700000, 0.000000, -1.427268, 0.000000, -0.923530, 150.000000, -1.450000, 262.000000)
+[node name="fInsulaMovila21" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(1.447870, 0.000000, -0.890883, 0.000000, 1.700000, 0.000000, 0.890883, 0.000000, 1.447870, 150.000000, -1.450000, 262.000000)
 
-[node name="fInsulaPiatra11" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.746117, 0.000000, -1.064570, 0.000000, 1.300000, 0.000000, 1.064570, 0.000000, 0.746117, 152.199997, -1.400000, 261.000000)
+[node name="fInsulaPiatra22" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(0.791535, 0.000000, -1.031247, 0.000000, 1.300000, 0.000000, 1.031247, 0.000000, 0.791535, 152.199997, -1.400000, 261.000000)
 
-[node name="fInsulaPiatra12" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-0.015898, 0.000000, -1.099885, 0.000000, 1.100000, 0.000000, 1.099885, 0.000000, -0.015898, 148.000000, -1.450000, 263.399994)
+[node name="fInsulaPiatra23" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.888692, 0.000000, 0.648249, 0.000000, 1.100000, 0.000000, -0.648249, 0.000000, -0.888692, 148.000000, -1.450000, 263.399994)
 
-[node name="fInsulaPin13" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.022545, 0.000000, 0.799682, 0.000000, 0.800000, 0.000000, -0.799682, 0.000000, 0.022545, 150.000000, -0.950000, 262.000000)
+[node name="fInsulaPin24" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.493913, 0.000000, -0.629325, 0.000000, 0.800000, 0.000000, 0.629325, 0.000000, 0.493913, 150.000000, -0.950000, 262.000000)
 
-[node name="fInsulaMovila14" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.792930, 0.000000, -1.503749, 0.000000, 1.700000, 0.000000, 1.503749, 0.000000, 0.792930, 186.000000, -1.450000, 280.000000)
+[node name="fInsulaMovila25" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-0.445429, 0.000000, 1.640607, 0.000000, 1.700000, 0.000000, -1.640607, 0.000000, -0.445429, 186.000000, -1.450000, 280.000000)
 
-[node name="fInsulaPiatra15" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.241475, 0.000000, 1.277376, 0.000000, 1.300000, 0.000000, -1.277376, 0.000000, 0.241475, 188.199997, -1.400000, 279.000000)
+[node name="fInsulaPiatra26" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-1.299101, 0.000000, 0.048349, 0.000000, 1.300000, 0.000000, -0.048349, 0.000000, -1.299101, 188.199997, -1.400000, 279.000000)
 
-[node name="fInsulaPiatra16" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.085484, 0.000000, 0.178111, 0.000000, 1.100000, 0.000000, -0.178111, 0.000000, -1.085484, 184.000000, -1.450000, 281.399994)
+[node name="fInsulaPiatra27" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.912553, 0.000000, -0.614204, 0.000000, 1.100000, 0.000000, 0.614204, 0.000000, 0.912553, 184.000000, -1.450000, 281.399994)
 
-[node name="fInsulaPin17" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.783382, 0.000000, 0.162212, 0.000000, 0.800000, 0.000000, -0.162212, 0.000000, -0.783382, 186.000000, -0.950000, 280.000000)
+[node name="fInsulaPin28" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.710071, 0.000000, -0.368509, 0.000000, 0.800000, 0.000000, 0.368509, 0.000000, 0.710071, 186.000000, -0.950000, 280.000000)
 
-[node name="fMalArbore18" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_b")]
-transform = Transform3D(-0.985391, 0.000000, -0.440956, 0.000000, 1.079554, 0.000000, 0.440956, 0.000000, -0.985391, 116.184906, -0.969019, 266.656036)
+[node name="fMalArbore29" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_c")]
+transform = Transform3D(0.558769, 0.000000, 0.951535, 0.000000, 1.103468, 0.000000, -0.951535, 0.000000, 0.558769, 110.276993, 1.862906, 252.421021)
 
-[node name="fMalArbore19" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_c")]
-transform = Transform3D(-0.940032, 0.000000, 0.685699, 0.000000, 1.163547, 0.000000, -0.685699, 0.000000, -0.940032, 107.341957, 3.944602, 250.288589)
+[node name="fMalArbore30" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_ginkgo")]
+transform = Transform3D(-1.042740, 0.000000, -0.579811, 0.000000, 1.193100, 0.000000, 0.579811, 0.000000, -1.042740, 120.497658, 2.025916, 248.497650)
 
-[node name="fMalArbore20" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_ginkgo")]
-transform = Transform3D(-1.022341, 0.000000, 0.038049, 0.000000, 1.023049, 0.000000, -0.038049, 0.000000, -1.022341, 117.608170, 4.858191, 245.608170)
+[node name="fMalArbore31" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_a")]
+transform = Transform3D(0.571268, 0.000000, 0.932671, 0.000000, 1.093719, 0.000000, -0.932671, 0.000000, 0.571268, 128.994705, 3.803961, 244.572098)
 
-[node name="fMalArbore21" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_a")]
-transform = Transform3D(1.173320, 0.000000, 0.134050, 0.000000, 1.180953, 0.000000, -0.134050, 0.000000, 1.173320, 126.716087, 6.844092, 241.435867)
+[node name="fMalArbore32" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_b")]
+transform = Transform3D(0.437737, 0.000000, -0.984310, 0.000000, 1.077256, 0.000000, 0.984310, 0.000000, 0.437737, 136.162384, 6.630759, 239.290817)
 
-[node name="fMalArbore22" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_b")]
-transform = Transform3D(-0.752249, 0.000000, -0.653795, 0.000000, 0.996658, 0.000000, 0.653795, 0.000000, -0.752249, 135.908157, 6.854163, 238.791885)
+[node name="fMalArbore33" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_c")]
+transform = Transform3D(0.590093, 0.000000, -0.912064, 0.000000, 1.086311, 0.000000, 0.912064, 0.000000, 0.590093, 144.627121, 7.747946, 236.531769)
 
-[node name="fMalArbore23" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_c")]
-transform = Transform3D(0.945265, 0.000000, -0.165591, 0.000000, 0.959659, 0.000000, 0.165591, 0.000000, 0.945265, 144.902878, 7.158103, 237.380463)
+[node name="fMalArbore34" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_ginkgo")]
+transform = Transform3D(0.734500, 0.000000, 0.715388, 0.000000, 1.025315, 0.000000, -0.715388, 0.000000, 0.734500, 153.467438, 7.428916, 236.127548)
 
-[node name="fMalArbore24" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_ginkgo")]
-transform = Transform3D(-0.875848, 0.000000, -0.445410, 0.000000, 0.982598, 0.000000, 0.445410, 0.000000, -0.875848, 153.020065, 10.069708, 233.302902)
+[node name="fMalArbore35" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_a")]
+transform = Transform3D(0.839718, 0.000000, 0.802498, 0.000000, 1.161520, 0.000000, -0.802498, 0.000000, 0.839718, 162.000000, 10.397314, 230.470673)
 
-[node name="fMalArbore25" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_a")]
-transform = Transform3D(-0.994013, 0.000000, -0.056410, 0.000000, 0.995612, 0.000000, 0.056410, 0.000000, -0.994013, 162.000000, 9.335363, 233.187332)
+[node name="fMalArbore36" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_b")]
+transform = Transform3D(0.412026, 0.000000, 0.975633, 0.000000, 1.059067, 0.000000, -0.975633, 0.000000, 0.412026, 171.961044, 11.894583, 227.108429)
 
-[node name="fMalArbore26" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_b")]
-transform = Transform3D(-0.994413, 0.000000, -0.290553, 0.000000, 1.035991, 0.000000, 0.290553, 0.000000, -0.994413, 171.868347, 11.636496, 227.693665)
+[node name="fMalArbore37" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_c")]
+transform = Transform3D(0.966259, 0.000000, -0.440358, 0.000000, 1.061872, 0.000000, 0.440358, 0.000000, 0.966259, 181.351685, 8.568380, 230.441620)
 
-[node name="fMalArbore27" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_c")]
-transform = Transform3D(-0.301398, 0.000000, 0.903239, 0.000000, 0.952199, 0.000000, -0.903239, 0.000000, -0.301398, 182.304565, 10.666937, 227.508957)
+[node name="fMalArbore38" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_ginkgo")]
+transform = Transform3D(-1.069281, 0.000000, -0.136042, 0.000000, 1.077900, 0.000000, 0.136042, 0.000000, -1.069281, 193.752274, 10.087637, 227.682632)
 
-[node name="fMalArbore28" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_ginkgo")]
-transform = Transform3D(0.639467, 0.000000, -0.927366, 0.000000, 1.126466, 0.000000, 0.927366, 0.000000, 0.639467, 191.788361, 7.065085, 231.537048)
+[node name="fMalArbore39" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_a")]
+transform = Transform3D(-0.985675, 0.000000, -0.339101, 0.000000, 1.042375, 0.000000, 0.339101, 0.000000, -0.985675, 204.645416, 7.664237, 231.303604)
 
-[node name="fMalArbore29" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_a")]
-transform = Transform3D(-1.090132, 0.000000, 0.461451, 0.000000, 1.183776, 0.000000, -0.461451, 0.000000, -1.090132, 203.795624, 6.828604, 232.473251)
+[node name="fMalArbore40" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_b")]
+transform = Transform3D(0.390966, 0.000000, -1.090778, 0.000000, 1.158728, 0.000000, 1.090778, 0.000000, 0.390966, 215.509613, 4.554602, 236.490387)
 
-[node name="fMalArbore30" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_b")]
-transform = Transform3D(-0.951898, 0.000000, 0.325985, 0.000000, 1.006169, 0.000000, -0.325985, 0.000000, -0.951898, 216.045593, 5.068625, 235.954407)
+[node name="fMalArbore41" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_c")]
+transform = Transform3D(0.351995, 0.000000, 1.105481, 0.000000, 1.160168, 0.000000, -1.105481, 0.000000, 0.351995, 220.746017, 0.276404, 247.318527)
 
-[node name="fMalArbore31" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_momiji_c")]
-transform = Transform3D(-1.193842, 0.000000, -0.087174, 0.000000, 1.197021, 0.000000, 0.087174, 0.000000, -1.193842, 221.996475, 0.468771, 246.410019)
-
-[node name="fMalTufa32" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-0.833094, 0.000000, 0.892762, 0.000000, 1.221094, 0.000000, -0.892762, 0.000000, -0.833094, 213.780212, -0.462064, 290.000000)
-
-[node name="fMalStanca33" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(-1.232801, 0.000000, 1.774290, 0.000000, 2.160533, 0.000000, -1.774290, 0.000000, -1.232801, 209.140335, -1.401057, 294.954651)
-
-[node name="fMalStanca34" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-0.419000, 0.000000, 1.428630, 0.000000, 1.488807, 0.000000, -1.428630, 0.000000, -0.419000, 209.395477, -1.253016, 297.310425)
-
-[node name="fMalMovila35" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.121827, 0.000000, 1.239203, 0.000000, 1.245177, 0.000000, -1.239203, 0.000000, 0.121827, 212.396286, -0.650647, 296.503479)
-
-[node name="fMalPin36" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.910420, 0.000000, 0.419233, 0.000000, 1.002308, 0.000000, -0.419233, 0.000000, 0.910420, 216.667984, -0.154901, 295.745850)
-
-[node name="fMalStanca37" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-0.330632, 0.000000, -1.704877, 0.000000, 1.736641, 0.000000, 1.704877, 0.000000, -0.330632, 209.233765, -1.336430, 302.656250)
-
-[node name="fMalStanca38" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(1.248555, 0.000000, 0.237479, 0.000000, 1.270939, 0.000000, -0.237479, 0.000000, 1.248555, 209.170456, -1.263071, 304.824310)
-
-[node name="fMalStanca39" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-0.140969, 0.000000, -1.125658, 0.000000, 1.134450, 0.000000, 1.125658, 0.000000, -0.140969, 210.028336, -1.122399, 300.849945)
-
-[node name="fMalMovila40" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(1.133257, 0.000000, -0.605238, 0.000000, 1.284751, 0.000000, 0.605238, 0.000000, 1.133257, 212.207336, -0.687360, 304.695343)
-
-[node name="fMalStanca41" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.651775, 0.000000, 1.920824, 0.000000, 2.028392, 0.000000, -1.920824, 0.000000, 0.651775, 208.499466, -1.339552, 310.702881)
-
-[node name="fMalStanca42" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(1.086178, 0.000000, -0.587830, 0.000000, 1.235041, 0.000000, 0.587830, 0.000000, 1.086178, 208.151001, -1.183794, 312.714844)
+[node name="fMalTufa42" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-0.369023, 0.000000, 1.258228, 0.000000, 1.311227, 0.000000, -1.258228, 0.000000, -0.369023, 214.231979, -0.404813, 290.000000)
 
 [node name="fMalStanca43" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(0.382094, 0.000000, -1.237602, 0.000000, 1.295243, 0.000000, 1.237602, 0.000000, 0.382094, 209.523468, -1.115148, 309.140503)
+transform = Transform3D(-0.416217, 0.000000, 1.762625, 0.000000, 1.811100, 0.000000, -1.762625, 0.000000, -0.416217, 209.140335, -1.338159, 294.954651)
 
-[node name="fMalMovila44" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.690847, 0.000000, -0.819692, 0.000000, 1.071991, 0.000000, 0.819692, 0.000000, -0.690847, 211.117432, -0.595639, 313.182037)
+[node name="fMalStanca44" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(1.074730, 0.000000, -0.576586, 0.000000, 1.219630, 0.000000, 0.576586, 0.000000, 1.074730, 209.391678, -1.205205, 297.346558)
 
-[node name="fMalTufa45" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-1.208549, 0.000000, 0.693488, 0.000000, 1.393383, 0.000000, -0.693488, 0.000000, -1.208549, 210.843109, -0.521832, 318.199585)
+[node name="fMalStanca45" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-0.769864, 0.000000, 1.045937, 0.000000, 1.298721, 0.000000, -1.045937, 0.000000, -0.769864, 209.624329, -1.180929, 293.219849)
 
-[node name="fMalStanca46" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.510085, 0.000000, -2.245646, 0.000000, 2.302849, 0.000000, 2.245646, 0.000000, 0.510085, 206.785004, -1.402489, 319.083740)
+[node name="fMalMovila46" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-0.992749, 0.000000, 0.487513, 0.000000, 1.105993, 0.000000, -0.487513, 0.000000, -0.992749, 212.396286, -0.650647, 296.503479)
 
-[node name="fMalStanca47" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.197236, 0.000000, -1.412901, 0.000000, 1.426602, 0.000000, 1.412901, 0.000000, 0.197236, 206.086639, -1.252424, 321.077179)
+[node name="fMalPin47" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.787460, 0.000000, 0.730844, 0.000000, 1.074349, 0.000000, -0.730844, 0.000000, 0.787460, 216.391617, -0.190210, 295.716797)
 
-[node name="fMalMovila48" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-1.075500, 0.000000, 0.670528, 0.000000, 1.267403, 0.000000, -0.670528, 0.000000, -1.075500, 208.982925, -0.538754, 321.941925)
+[node name="fMalStanca48" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-1.396299, 0.000000, -1.975430, 0.000000, 2.419086, 0.000000, 1.975430, 0.000000, -1.396299, 209.233765, -1.459270, 302.656250)
 
-[node name="fMalStanca49" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(1.488630, 0.000000, -1.660569, 0.000000, 2.230137, 0.000000, 1.660569, 0.000000, 1.488630, 200.197632, -1.420071, 324.393311)
+[node name="fMalStanca49" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-1.050701, 0.000000, 0.686354, 0.000000, 1.255012, 0.000000, -0.686354, 0.000000, -1.050701, 209.220749, -1.253459, 304.636627)
 
-[node name="fMalStanca50" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(1.480648, 0.000000, -0.123332, 0.000000, 1.485776, 0.000000, 0.123332, 0.000000, 1.480648, 199.062302, -1.072417, 326.401459)
+[node name="fMalStanca50" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.350373, 0.000000, 1.032571, 0.000000, 1.090396, 0.000000, -1.032571, 0.000000, 0.350373, 209.973221, -1.121885, 301.055664)
 
 [node name="fMalMovila51" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-1.252714, 0.000000, 0.280071, 0.000000, 1.283640, 0.000000, -0.280071, 0.000000, -1.252714, 201.921356, -0.453473, 327.560150)
+transform = Transform3D(0.761626, 0.000000, 0.841572, 0.000000, 1.135041, 0.000000, -0.841572, 0.000000, 0.761626, 212.207336, -0.687360, 304.695343)
 
 [node name="fMalStanca52" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-1.826236, 0.000000, 0.522029, 0.000000, 1.899382, 0.000000, -0.522029, 0.000000, -1.826236, 137.433121, -1.307892, 345.178131)
+transform = Transform3D(-1.561738, 0.000000, 0.861710, 0.000000, 1.783696, 0.000000, -0.861710, 0.000000, -1.561738, 208.499466, -1.295507, 310.702881)
 
-[node name="fMalStanca53" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.994247, 0.000000, -0.768274, 0.000000, 1.256492, 0.000000, 0.768274, 0.000000, 0.994247, 135.216187, -1.225879, 344.738434)
+[node name="fMalStanca53" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-1.258639, 0.000000, 0.722230, 0.000000, 1.451133, 0.000000, -0.722230, 0.000000, -1.258639, 207.941422, -1.238941, 313.185547)
 
 [node name="fMalMovila54" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.772141, 0.000000, -1.130149, 0.000000, 1.368736, 0.000000, 1.130149, 0.000000, -0.772141, 134.953964, -0.754819, 347.796082)
+transform = Transform3D(0.041265, 0.000000, -1.311728, 0.000000, 1.312377, 0.000000, 1.311728, 0.000000, 0.041265, 211.117432, -0.595639, 313.182037)
 
-[node name="fMalTufa55" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(1.007890, 0.000000, 0.528338, 0.000000, 1.137974, 0.000000, -0.528338, 0.000000, 1.007890, 130.936981, -0.743588, 343.802704)
+[node name="fMalTufa55" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-1.075500, 0.000000, 0.670528, 0.000000, 1.267403, 0.000000, -0.670528, 0.000000, -1.075500, 211.500381, -0.428037, 318.579041)
 
-[node name="fMalStanca56" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.440501, 0.000000, -1.237835, 0.000000, 1.899284, 0.000000, 1.237835, 0.000000, -1.440501, 131.282364, -1.346311, 337.301025)
+[node name="fMalStanca56" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(0.866088, 0.000000, 1.539779, 0.000000, 1.766644, 0.000000, -1.539779, 0.000000, 0.866088, 206.785004, -1.305972, 319.083740)
 
 [node name="fMalStanca57" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.907768, 0.000000, 0.767999, 0.000000, 1.189060, 0.000000, -0.767999, 0.000000, 0.907768, 129.135986, -1.268032, 336.503326)
+transform = Transform3D(-0.441287, 0.000000, -1.362560, 0.000000, 1.432238, 0.000000, 1.362560, 0.000000, -0.441287, 205.862320, -1.232107, 321.422577)
 
 [node name="fMalStanca58" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-0.816329, 0.000000, 0.613903, 0.000000, 1.021405, 0.000000, -0.613903, 0.000000, -0.816329, 132.667633, -1.117477, 338.558319)
+transform = Transform3D(-0.133788, 0.000000, 1.197226, 0.000000, 1.204678, 0.000000, -1.197226, 0.000000, -0.133788, 208.134064, -1.059341, 317.557190)
 
 [node name="fMalMovila59" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-1.212958, 0.000000, -0.275899, 0.000000, 1.243940, 0.000000, 0.275899, 0.000000, -1.212958, 128.424179, -0.794812, 339.498932)
+transform = Transform3D(-0.178820, 0.000000, 1.326934, 0.000000, 1.338929, 0.000000, -1.326934, 0.000000, -0.178820, 208.982925, -0.538754, 321.941925)
 
-[node name="fMalStanca60" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(2.132248, 0.000000, 0.898481, 0.000000, 2.313817, 0.000000, -0.898481, 0.000000, 2.132248, 125.599297, -1.378889, 330.427063)
+[node name="fMalStanca60" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(1.844512, 0.000000, -0.236204, 0.000000, 1.859574, 0.000000, 0.236204, 0.000000, 1.844512, 200.197632, -1.353369, 324.393311)
 
 [node name="fMalStanca61" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-0.619804, 0.000000, -1.101483, 0.000000, 1.263891, 0.000000, 1.101483, 0.000000, -0.619804, 123.636490, -1.184516, 329.332581)
+transform = Transform3D(-1.197217, 0.000000, -0.650740, 0.000000, 1.362641, 0.000000, 0.650740, 0.000000, -1.197217, 199.073044, -1.051184, 326.389526)
 
 [node name="fMalStanca62" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-0.638651, 0.000000, -0.989213, 0.000000, 1.177462, 0.000000, 0.989213, 0.000000, -0.638651, 126.786095, -1.253783, 331.899323)
+transform = Transform3D(0.835989, 0.000000, -0.645986, 0.000000, 1.056492, 0.000000, 0.645986, 0.000000, 0.835989, 201.727676, -1.269850, 323.142365)
 
 [node name="fMalMovila63" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.970759, 0.000000, -0.367803, 0.000000, 1.038100, 0.000000, 0.367803, 0.000000, -0.970759, 122.432472, -0.701901, 332.150818)
+transform = Transform3D(0.973085, 0.000000, 0.731487, 0.000000, 1.217361, 0.000000, -0.731487, 0.000000, 0.973085, 201.921356, -0.453473, 327.560150)
 
-[node name="fMalPin64" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.434804, 0.000000, 1.059618, 0.000000, 1.145358, 0.000000, -1.059618, 0.000000, -0.434804, 120.698967, -0.520334, 335.869415)
+[node name="fMalStanca64" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.512842, 0.000000, 1.588422, 0.000000, 1.669159, 0.000000, -1.588422, 0.000000, 0.512842, 137.433121, -1.266452, 345.178131)
 
-[node name="fMalTufa65" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(0.558370, 0.000000, 1.068408, 0.000000, 1.205518, 0.000000, -1.068408, 0.000000, 0.558370, 119.614967, -0.666623, 332.385040)
+[node name="fMalStanca65" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.405052, 0.000000, -1.097494, 0.000000, 1.169855, 0.000000, 1.097494, 0.000000, -0.405052, 135.253052, -1.208834, 344.754822)
 
-[node name="fMalStanca66" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.854013, 0.000000, 1.653444, 0.000000, 1.860972, 0.000000, -1.653444, 0.000000, 0.854013, 118.168968, -1.306380, 325.493683)
+[node name="fMalMovila66" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(1.082978, 0.000000, 0.274590, 0.000000, 1.117247, 0.000000, -0.274590, 0.000000, 1.082978, 134.953964, -0.754819, 347.796082)
 
-[node name="fMalStanca67" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-0.616952, 0.000000, 1.306704, 0.000000, 1.445027, 0.000000, -1.306704, 0.000000, -0.616952, 116.396744, -0.789585, 324.099670)
+[node name="fMalTufa67" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-1.207778, 0.000000, 0.204277, 0.000000, 1.224931, 0.000000, -0.204277, 0.000000, -1.207778, 131.425461, -0.803815, 342.956635)
 
 [node name="fMalStanca68" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(0.279515, 0.000000, -1.003367, 0.000000, 1.041573, 0.000000, 1.003367, 0.000000, 0.279515, 119.263321, -1.201460, 327.321777)
+transform = Transform3D(0.612997, 0.000000, -2.206374, 0.000000, 2.289946, 0.000000, 2.206374, 0.000000, 0.612997, 131.282364, -1.416631, 337.301025)
 
-[node name="fMalMovila69" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(1.300579, 0.000000, -0.501502, 0.000000, 1.393919, 0.000000, 0.501502, 0.000000, 1.300579, 114.771484, -0.167538, 326.700775)
+[node name="fMalStanca69" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-1.181772, 0.000000, 0.752809, 0.000000, 1.401180, 0.000000, -0.752809, 0.000000, -1.181772, 129.267197, -1.306122, 336.588562)
 
-[node name="fMalPin70" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.654049, 0.000000, -1.049388, 0.000000, 1.236525, 0.000000, 1.049388, 0.000000, -0.654049, 111.449585, 0.129721, 332.188324)
+[node name="fMalMovila70" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(0.478815, 0.000000, 1.292165, 0.000000, 1.378026, 0.000000, -1.292165, 0.000000, 0.478815, 128.424179, -0.794812, 339.498932)
 
-[node name="fMalPin71" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.988432, 0.000000, -0.128118, 0.000000, 0.996700, 0.000000, 0.128118, 0.000000, 0.988432, 107.303085, 1.228018, 329.137543)
+[node name="fMalStanca71" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(0.474745, 0.000000, -1.632927, 0.000000, 1.700539, 0.000000, 1.632927, 0.000000, 0.474745, 125.599297, -1.268499, 330.427063)
 
-[node name="fMalTufa72" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(1.134215, 0.000000, 0.725216, 0.000000, 1.346247, 0.000000, -0.725216, 0.000000, 1.134215, 116.328751, -0.469861, 319.659241)
+[node name="fMalStanca72" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(0.534320, 0.000000, 1.022390, 0.000000, 1.153594, 0.000000, -1.022390, 0.000000, 0.534320, 123.801094, -1.149450, 329.480774)
 
-[node name="fMalPin73" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(1.070471, 0.000000, 0.641303, 0.000000, 1.247869, 0.000000, -0.641303, 0.000000, 1.070471, 112.592636, 0.395605, 323.218445)
+[node name="fMalStanca73" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-1.036687, 0.000000, 0.554021, 0.000000, 1.175440, 0.000000, -0.554021, 0.000000, -1.036687, 126.857170, -1.254823, 331.963348)
 
-[node name="fMalStanca74" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-0.998568, 0.000000, 2.072416, 0.000000, 2.300445, 0.000000, -2.072416, 0.000000, -0.998568, 123.115463, -1.387240, 312.450012)
+[node name="fMalMovila74" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(0.851751, 0.000000, 0.647046, 0.000000, 1.069648, 0.000000, -0.647046, 0.000000, 0.851751, 122.432472, -0.701901, 332.150818)
 
-[node name="fMalStanca75" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.042847, 0.000000, 1.324190, 0.000000, 1.324883, 0.000000, -1.324190, 0.000000, 0.042847, 121.527397, -1.092513, 310.699402)
+[node name="fMalPin75" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.224551, 0.000000, -0.879226, 0.000000, 0.907448, 0.000000, 0.879226, 0.000000, 0.224551, 119.694122, -0.408899, 336.985413)
 
-[node name="fMalStanca76" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(-0.284437, 0.000000, 1.145722, 0.000000, 1.180501, 0.000000, -1.145722, 0.000000, -0.284437, 123.801872, -1.305950, 314.238922)
+[node name="fMalTufa76" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(0.786592, 0.000000, -1.056666, 0.000000, 1.317296, 0.000000, 1.056666, 0.000000, 0.786592, 119.504486, -0.654416, 332.495514)
 
-[node name="fMalMovila77" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.754012, 0.000000, -0.763086, 0.000000, 1.072769, 0.000000, 0.763086, 0.000000, -0.754012, 119.570976, -0.784070, 313.110779)
+[node name="fMalStanca77" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.479685, 0.000000, -1.914469, 0.000000, 1.973649, 0.000000, 1.914469, 0.000000, 0.479685, 118.168968, -1.326662, 325.493683)
 
-[node name="fMalPin78" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(1.148126, 0.000000, -0.328746, 0.000000, 1.194264, 0.000000, 0.328746, 0.000000, 1.148126, 115.391518, -0.663950, 312.556366)
+[node name="fMalStanca78" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.701972, 0.000000, -1.126278, 0.000000, 1.327127, 0.000000, 1.126278, 0.000000, -0.701972, 116.306747, -0.745978, 323.988556)
 
-[node name="fMalPin79" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-1.250242, 0.000000, 0.314616, 0.000000, 1.289220, 0.000000, -0.314616, 0.000000, -1.250242, 109.841843, 0.213202, 316.003326)
+[node name="fMalStanca79" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-0.198513, 0.000000, 0.903970, 0.000000, 0.925510, 0.000000, -0.903970, 0.000000, -0.198513, 119.109482, -1.180462, 327.131805)
 
-[node name="fMalTufa80" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.956096, 0.000000, 1.239317, 0.000000, 1.565256, 0.000000, -1.239317, 0.000000, -0.956096, 119.524902, -0.754529, 308.911133)
+[node name="fMalMovila80" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-0.361610, 0.000000, 1.332478, 0.000000, 1.380674, 0.000000, -1.332478, 0.000000, -0.361610, 114.771484, -0.167538, 326.700775)
 
-[node name="fMalStanca81" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(-0.478855, 0.000000, 1.726458, 0.000000, 1.791636, 0.000000, -1.726458, 0.000000, -0.478855, 123.349777, -1.290207, 304.836426)
+[node name="fMalPin81" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.196407, 0.000000, -1.260474, 0.000000, 1.275685, 0.000000, 1.260474, 0.000000, 0.196407, 111.905914, 0.068900, 331.801910)
 
-[node name="fMalStanca82" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-0.858011, 0.000000, -1.214739, 0.000000, 1.487203, 0.000000, 1.214739, 0.000000, -0.858011, 122.068451, -1.156521, 302.893677)
+[node name="fMalPin82" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.282086, 0.000000, -1.232329, 0.000000, 1.264203, 0.000000, 1.232329, 0.000000, -0.282086, 111.017693, 0.783347, 325.271515)
 
-[node name="fMalStanca83" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.676919, 0.000000, -1.084256, 0.000000, 1.278214, 0.000000, 1.084256, 0.000000, 0.676919, 123.747078, -1.231574, 306.708557)
+[node name="fMalTufa83" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-0.547773, 0.000000, -1.494024, 0.000000, 1.591278, 0.000000, 1.494024, 0.000000, -0.547773, 116.240280, -0.448560, 319.716705)
 
-[node name="fMalMovila84" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(1.140874, 0.000000, -0.543344, 0.000000, 1.263652, 0.000000, 0.543344, 0.000000, 1.140874, 119.745567, -0.757962, 304.934570)
+[node name="fMalStanca84" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(1.741409, 0.000000, 0.094661, 0.000000, 1.743980, 0.000000, -0.094661, 0.000000, 1.741409, 123.115463, -1.287076, 312.450012)
 
-[node name="fMalPin85" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.674486, 0.000000, 0.963878, 0.000000, 1.176432, 0.000000, -0.963878, 0.000000, -0.674486, 114.543839, -0.622751, 307.207886)
+[node name="fMalStanca85" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(1.432422, 0.000000, -0.041915, 0.000000, 1.433035, 0.000000, 0.041915, 0.000000, 1.432422, 121.539665, -1.112911, 310.720642)
 
-[node name="fMalPin86" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(1.034827, 0.000000, -0.426597, 0.000000, 1.119308, 0.000000, 0.426597, 0.000000, 1.034827, 109.275414, 0.094321, 309.987000)
+[node name="fMalStanca86" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(0.795455, 0.000000, -0.483716, 0.000000, 0.930983, 0.000000, 0.483716, 0.000000, 0.795455, 123.851097, -1.268758, 314.324158)
 
-[node name="fMalTufa87" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(1.403865, 0.000000, 0.389803, 0.000000, 1.456977, 0.000000, -0.389803, 0.000000, 1.403865, 119.441330, -0.798261, 301.403564)
+[node name="fMalMovila87" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(0.331775, 0.000000, 1.335408, 0.000000, 1.376005, 0.000000, -1.335408, 0.000000, 0.331775, 119.570976, -0.784070, 313.110779)
 
-[node name="fMalStanca88" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(2.244608, 0.000000, 0.393178, 0.000000, 2.278783, 0.000000, -0.393178, 0.000000, 2.244608, 121.993767, -1.367578, 298.503571)
+[node name="fMalPin88" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.063355, 0.000000, -1.293323, 0.000000, 1.294874, 0.000000, 1.293323, 0.000000, -0.063355, 110.312416, 0.942313, 320.142700)
 
-[node name="fMalMovila89" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-1.317327, 0.000000, -0.184241, 0.000000, 1.330149, 0.000000, 0.184241, 0.000000, -1.317327, 118.418571, -0.817807, 298.036713)
+[node name="fMalPin89" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.608928, 0.000000, -0.917953, 0.000000, 1.101559, 0.000000, 0.917953, 0.000000, -0.608928, 115.516670, -0.656641, 312.877594)
 
-[node name="fMalPin90" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.025302, 0.000000, 1.051715, 0.000000, 1.052020, 0.000000, -1.051715, 0.000000, -0.025302, 108.600677, -0.482156, 302.754028)
+[node name="fMalTufa90" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-0.261900, 0.000000, 1.590515, 0.000000, 1.611934, 0.000000, -1.590515, 0.000000, -0.261900, 119.092590, -0.724027, 309.103607)
 
 [node name="fMalPin91" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.017254, 0.000000, -0.964350, 0.000000, 0.964504, 0.000000, 0.964350, 0.000000, 0.017254, 110.468437, -0.778894, 275.885101)
+transform = Transform3D(-1.180692, 0.000000, 0.002795, 0.000000, 1.180696, 0.000000, -0.002795, 0.000000, -1.180692, 109.241829, 0.098822, 312.079803)
 
 [node name="fMalStanca92" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.213300, 0.000000, 1.915640, 0.000000, 1.927478, 0.000000, -1.915640, 0.000000, 0.213300, 127.376625, -1.317115, 274.584686)
+transform = Transform3D(-1.794370, 0.000000, 1.631515, 0.000000, 2.425202, 0.000000, -1.631515, 0.000000, -1.794370, 123.349777, -1.404249, 304.836426)
 
-[node name="fMalStanca93" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(0.199780, 0.000000, -1.448814, 0.000000, 1.462523, 0.000000, 1.448814, 0.000000, 0.199780, 127.896835, -1.244745, 272.186981)
+[node name="fMalStanca93" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.824054, 0.000000, 1.177619, 0.000000, 1.437307, 0.000000, -1.177619, 0.000000, -0.824054, 122.169922, -1.153018, 303.158020)
 
-[node name="fMalStanca94" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.826775, 0.000000, -0.990801, 0.000000, 1.290443, 0.000000, 0.990801, 0.000000, 0.826775, 126.250832, -1.174129, 276.375702)
+[node name="fMalMovila94" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-1.051448, 0.000000, -0.564703, 0.000000, 1.193495, 0.000000, 0.564703, 0.000000, -1.051448, 119.745567, -0.757962, 304.934570)
 
-[node name="fMalMovila95" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-1.136946, 0.000000, -0.223338, 0.000000, 1.158674, 0.000000, 0.223338, 0.000000, -1.136946, 124.758652, -0.975140, 272.105530)
+[node name="fMalPin95" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.443186, 0.000000, -1.155545, 0.000000, 1.237618, 0.000000, 1.155545, 0.000000, -0.443186, 114.812874, -0.615442, 305.048676)
 
-[node name="fMalStanca96" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-1.043323, 0.000000, -1.602544, 0.000000, 1.912242, 0.000000, 1.602544, 0.000000, -1.043323, 127.279037, -1.310268, 267.451935)
+[node name="fMalTufa96" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-0.077875, 0.000000, 1.485174, 0.000000, 1.487215, 0.000000, -1.485174, 0.000000, -0.077875, 118.770760, -0.756604, 301.583221)
 
-[node name="fMalStanca97" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(1.274207, 0.000000, 0.201452, 0.000000, 1.290033, 0.000000, -0.201452, 0.000000, 1.274207, 127.931435, -1.223646, 265.529297)
+[node name="fMalPin97" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.938654, 0.000000, -0.808550, 0.000000, 1.238880, 0.000000, 0.808550, 0.000000, -0.938654, 108.812141, -0.485696, 304.182953)
 
-[node name="fMalStanca98" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.160189, 0.000000, 0.001921, 0.000000, 1.160190, 0.000000, -0.001921, 0.000000, -1.160189, 126.059738, -1.137667, 268.778656)
+[node name="fMalStanca98" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(0.716946, 0.000000, 1.618928, 0.000000, 1.770576, 0.000000, -1.618928, 0.000000, 0.716946, 121.993767, -1.276101, 298.503571)
 
-[node name="fMalMovila99" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.764208, 0.000000, -0.665373, 0.000000, 1.013279, 0.000000, 0.665373, 0.000000, 0.764208, 125.081123, -1.011166, 264.593750)
+[node name="fMalStanca99" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-0.612390, 0.000000, -0.792492, 0.000000, 1.001531, 0.000000, 0.792492, 0.000000, -0.612390, 122.084076, -1.100121, 300.371368)
 
-[node name="fMalPin100" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.250045, 0.000000, -1.205356, 0.000000, 1.231018, 0.000000, 1.205356, 0.000000, 0.250045, 114.652687, -0.929773, 261.038574)
+[node name="fMalMovila100" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-0.735101, 0.000000, -0.763785, 0.000000, 1.060067, 0.000000, 0.763785, 0.000000, -0.735101, 118.418571, -0.817807, 298.036713)
 
-[node name="fMalTufa101" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(0.910286, 0.000000, -1.142193, 0.000000, 1.460556, 0.000000, 1.142193, 0.000000, 0.910286, 115.441895, -0.560315, 256.173553)
+[node name="fMalStanca101" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.514344, 0.000000, -1.888217, 0.000000, 1.957016, 0.000000, 1.888217, 0.000000, 0.514344, 127.376625, -1.322432, 274.584686)
 
-[node name="fMalPin102" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(1.008960, 0.000000, -0.055598, 0.000000, 1.010491, 0.000000, 0.055598, 0.000000, 1.008960, 112.660500, 1.083884, 252.808121)
+[node name="fMalStanca102" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.300815, 0.000000, -1.204329, 0.000000, 1.241330, 0.000000, 1.204329, 0.000000, -0.300815, 127.735443, -1.198827, 272.549469)
 
-[node name="fMalTufa103" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-1.315254, 0.000000, -0.191500, 0.000000, 1.329122, 0.000000, 0.191500, 0.000000, -1.315254, 117.767502, 0.081470, 254.181244)
+[node name="fMalStanca103" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-0.061677, 0.000000, 1.289355, 0.000000, 1.290829, 0.000000, -1.289355, 0.000000, -0.061677, 126.246002, -1.174244, 276.386536)
 
-[node name="fMalStanca104" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.198529, 0.000000, -1.258228, 0.000000, 1.737702, 0.000000, 1.258228, 0.000000, -1.198529, 124.545502, -1.282559, 256.275818)
+[node name="fMalMovila104" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-0.958851, 0.000000, 0.609286, 0.000000, 1.136057, 0.000000, -0.609286, 0.000000, -0.958851, 124.758652, -0.975140, 272.105530)
 
-[node name="fMalStanca105" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(1.187005, 0.000000, -0.428086, 0.000000, 1.261840, 0.000000, 0.428086, 0.000000, 1.187005, 125.606354, -0.880558, 254.350388)
+[node name="fMalStanca105" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-1.055938, 0.000000, 1.241571, 0.000000, 1.629878, 0.000000, -1.241571, 0.000000, -1.055938, 127.279037, -1.259443, 267.451935)
 
-[node name="fMalStanca106" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-0.559967, 0.000000, -0.830006, 0.000000, 1.001236, 0.000000, 0.830006, 0.000000, -0.559967, 122.969475, -1.296647, 257.577820)
+[node name="fMalStanca106" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-1.160287, 0.000000, -0.445959, 0.000000, 1.243039, 0.000000, 0.445959, 0.000000, -1.160287, 128.002686, -1.217811, 265.419586)
 
-[node name="fMalMovila107" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(1.278181, 0.000000, -0.326097, 0.000000, 1.319123, 0.000000, 0.326097, 0.000000, 1.278181, 122.821762, -0.372937, 253.109009)
+[node name="fMalStanca107" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-0.434407, 0.000000, 0.788511, 0.000000, 0.900255, 0.000000, -0.788511, 0.000000, -0.434407, 125.967796, -1.090726, 268.920258)
 
-[node name="fMalPin108" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.744788, 0.000000, -0.670984, 0.000000, 1.002461, 0.000000, 0.670984, 0.000000, 0.744788, 112.695595, 4.534064, 247.494934)
+[node name="fMalMovila108" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-0.616239, 0.000000, 0.806282, 0.000000, 1.014811, 0.000000, -0.806282, 0.000000, -0.616239, 125.081123, -1.011166, 264.593750)
 
-[node name="fMalTufa109" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.686414, 0.000000, 1.411178, 0.000000, 1.569263, 0.000000, -1.411178, 0.000000, -0.686414, 127.109367, -0.242856, 251.250031)
+[node name="fMalPin109" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.185012, 0.000000, 0.942746, 0.000000, 0.960729, 0.000000, -0.942746, 0.000000, -0.185012, 115.125954, -0.944070, 260.756927)
 
-[node name="fMalPin110" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.081118, 0.000000, 1.165770, 0.000000, 1.168589, 0.000000, -1.165770, 0.000000, -0.081118, 123.574631, 1.104239, 248.903732)
+[node name="fMalTufa110" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(1.070568, 0.000000, -0.839835, 0.000000, 1.360676, 0.000000, 0.839835, 0.000000, 1.070568, 115.862343, -0.667249, 256.479004)
 
-[node name="fMalStanca111" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-0.135947, 0.000000, -1.937650, 0.000000, 1.942413, 0.000000, 1.937650, 0.000000, -0.135947, 133.114197, -1.330515, 254.329010)
+[node name="fMalTufa111" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-1.140695, 0.000000, 0.815634, 0.000000, 1.402300, 0.000000, -0.815634, 0.000000, -1.140695, 117.991104, 0.018359, 254.362305)
 
-[node name="fMalStanca112" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(1.119054, 0.000000, 0.413110, 0.000000, 1.192871, 0.000000, -0.413110, 0.000000, 1.119054, 134.308014, -1.086375, 252.718887)
+[node name="fMalPin112" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.171794, 0.000000, 1.135317, 0.000000, 1.148241, 0.000000, -1.135317, 0.000000, 0.171794, 115.923325, 1.359457, 250.929855)
 
-[node name="fMalStanca113" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.670383, 0.000000, 1.030269, 0.000000, 1.229173, 0.000000, -1.030269, 0.000000, 0.670383, 131.382172, -1.286315, 255.345551)
+[node name="fMalStanca113" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.852723, 0.000000, 2.155483, 0.000000, 2.318026, 0.000000, -2.155483, 0.000000, 0.852723, 124.545502, -1.387017, 256.275818)
 
-[node name="fMalMovila114" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.213713, 0.000000, -1.029779, 0.000000, 1.051721, 0.000000, 1.029779, 0.000000, -0.213713, 131.907074, -0.677304, 250.931519)
+[node name="fMalStanca114" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-0.267410, 0.000000, 1.258144, 0.000000, 1.286248, 0.000000, -1.258144, 0.000000, -0.267410, 125.472809, -0.907458, 254.498703)
 
-[node name="fMalPin115" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.093088, 0.000000, 1.140775, 0.000000, 1.144567, 0.000000, -1.140775, 0.000000, -0.093088, 130.342102, 2.353690, 246.050079)
+[node name="fMalMovila115" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(0.257304, 0.000000, -0.979618, 0.000000, 1.012846, 0.000000, 0.979618, 0.000000, 0.257304, 122.821762, -0.372937, 253.109009)
 
-[node name="fMalStanca116" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.560247, 0.000000, 0.956262, 0.000000, 1.829975, 0.000000, -0.956262, 0.000000, -1.560247, 138.550003, -1.588001, 249.383423)
+[node name="fMalTufa116" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-1.026767, 0.000000, -0.801555, 0.000000, 1.302589, 0.000000, 0.801555, 0.000000, -1.026767, 127.343513, -0.314877, 251.510071)
 
-[node name="fMalStanca117" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.421875, 0.000000, 1.206054, 0.000000, 1.277711, 0.000000, -1.206054, 0.000000, 0.421875, 140.320038, -0.585945, 247.784134)
+[node name="fMalStanca117" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(1.780204, 0.000000, -0.848832, 0.000000, 1.972218, 0.000000, 0.848832, 0.000000, 1.780204, 133.114197, -1.335880, 254.329010)
 
-[node name="fMalStanca118" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-0.532001, 0.000000, -1.112984, 0.000000, 1.233596, 0.000000, 1.112984, 0.000000, -0.532001, 136.629623, -1.275575, 250.145737)
+[node name="fMalStanca118" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-0.486126, 0.000000, -1.056831, 0.000000, 1.163276, 0.000000, 1.056831, 0.000000, -0.486126, 134.402359, -1.090676, 252.642487)
 
 [node name="fMalMovila119" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-1.366965, 0.000000, 0.219373, 0.000000, 1.384456, 0.000000, -0.219373, 0.000000, -1.366965, 137.889236, 1.456729, 245.838928)
+transform = Transform3D(-1.221720, 0.000000, 0.124432, 0.000000, 1.228040, 0.000000, -0.124432, 0.000000, -1.221720, 131.907074, -0.677304, 250.931519)
 
 [node name="fMalPin120" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.621879, 0.000000, -0.820029, 0.000000, 1.029165, 0.000000, 0.820029, 0.000000, 0.621879, 130.515472, 8.139776, 237.257614)
+transform = Transform3D(0.037454, 0.000000, 1.298272, 0.000000, 1.298812, 0.000000, -1.298272, 0.000000, 0.037454, 123.521515, 4.994208, 244.351456)
 
-[node name="fMalTufa121" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-1.054920, 0.000000, -0.591184, 0.000000, 1.209279, 0.000000, 0.591184, 0.000000, -1.054920, 141.533752, 2.202152, 244.032043)
+[node name="fMalTufa121" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(0.880494, 0.000000, -1.281878, 0.000000, 1.555146, 0.000000, 1.281878, 0.000000, 0.880494, 133.717926, 1.746799, 246.449432)
 
-[node name="fMalStanca122" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-0.812407, 0.000000, -1.853794, 0.000000, 2.023996, 0.000000, 1.853794, 0.000000, -0.812407, 145.730103, -1.420136, 247.615448)
+[node name="fMalPin122" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.199009, 0.000000, -1.076124, 0.000000, 1.094371, 0.000000, 1.076124, 0.000000, -0.199009, 126.899826, 7.616721, 238.629868)
 
-[node name="fMalStanca123" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.994078, 0.000000, 0.487325, 0.000000, 1.107103, 0.000000, -0.487325, 0.000000, 0.994078, 147.745148, -0.603301, 246.306366)
+[node name="fMalStanca123" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(0.660311, 0.000000, 1.887693, 0.000000, 1.999849, 0.000000, -1.887693, 0.000000, 0.660311, 138.550003, -1.618579, 249.383423)
 
-[node name="fMalStanca124" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(-0.667838, 0.000000, 0.851639, 0.000000, 1.082264, 0.000000, -0.851639, 0.000000, -0.667838, 143.811295, -1.351760, 248.030670)
+[node name="fMalStanca124" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(0.754534, 0.000000, -1.149966, 0.000000, 1.375407, 0.000000, 1.149966, 0.000000, 0.754534, 140.003952, -0.687484, 247.966629)
 
 [node name="fMalMovila125" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-1.366965, 0.000000, 0.219373, 0.000000, 1.384456, 0.000000, -0.219373, 0.000000, -1.366965, 137.889236, 1.456729, 245.838928)
+
+[node name="fMalTufa126" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(0.619350, 0.000000, -1.355890, 0.000000, 1.490648, 0.000000, 1.355890, 0.000000, 0.619350, 141.538742, 2.192889, 244.043289)
+
+[node name="fMalPin127" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.207250, 0.000000, 0.959378, 0.000000, 0.981508, 0.000000, -0.959378, 0.000000, -0.207250, 138.209854, 9.150885, 234.213333)
+
+[node name="fMalStanca128" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.812407, 0.000000, -1.853794, 0.000000, 2.023996, 0.000000, 1.853794, 0.000000, -0.812407, 145.730103, -1.420136, 247.615448)
+
+[node name="fMalStanca129" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.994078, 0.000000, 0.487325, 0.000000, 1.107103, 0.000000, -0.487325, 0.000000, 0.994078, 147.745148, -0.603301, 246.306366)
+
+[node name="fMalStanca130" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-0.667838, 0.000000, 0.851639, 0.000000, 1.082264, 0.000000, -0.851639, 0.000000, -0.667838, 143.811295, -1.351760, 248.030670)
+
+[node name="fMalMovila131" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
 transform = Transform3D(-0.764395, 0.000000, 0.940335, 0.000000, 1.211829, 0.000000, -0.940335, 0.000000, -0.764395, 145.631958, 1.393298, 244.011230)
 
-[node name="fMalPin126" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.322391, 0.000000, -1.035926, 0.000000, 1.084932, 0.000000, 1.035926, 0.000000, -0.322391, 140.067688, 8.859732, 235.034790)
-
-[node name="fMalTufa127" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(1.321486, 0.000000, -0.318651, 0.000000, 1.359362, 0.000000, 0.318651, 0.000000, 1.321486, 149.468277, 1.325656, 243.230927)
-
-[node name="fMalStanca128" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.437742, 0.000000, 1.959315, 0.000000, 2.007619, 0.000000, -1.959315, 0.000000, 0.437742, 152.768707, -1.699232, 246.570236)
-
-[node name="fMalStanca129" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(1.387729, 0.000000, -0.263936, 0.000000, 1.412605, 0.000000, 0.263936, 0.000000, 1.387729, 154.544174, -1.303555, 245.681671)
-
-[node name="fMalMovila130" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.531340, 0.000000, 1.151363, 0.000000, 1.268053, 0.000000, -1.151363, 0.000000, -0.531340, 153.235596, 0.747577, 242.995041)
-
-[node name="fMalTufa131" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-1.196788, 0.000000, 1.054523, 0.000000, 1.595093, 0.000000, -1.054523, 0.000000, -1.196788, 156.883072, 1.140659, 241.315643)
-
-[node name="fMalStanca132" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(1.667909, 0.000000, 1.836332, 0.000000, 2.480733, 0.000000, -1.836332, 0.000000, 1.667909, 159.623947, -1.603530, 244.662231)
+[node name="fMalTufa132" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-1.467650, 0.000000, 0.819962, 0.000000, 1.681171, 0.000000, -0.819962, 0.000000, -1.467650, 149.436737, 1.401798, 243.113235)
 
 [node name="fMalStanca133" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.331695, 0.000000, 1.242109, 0.000000, 1.285635, 0.000000, -1.242109, 0.000000, 0.331695, 161.622437, -1.545196, 244.056808)
+transform = Transform3D(-0.337523, 0.000000, 2.357967, 0.000000, 2.382001, 0.000000, -2.357967, 0.000000, -0.337523, 152.768707, -1.766620, 246.570236)
 
 [node name="fMalStanca134" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-0.980620, 0.000000, 0.752220, 0.000000, 1.235901, 0.000000, -0.752220, 0.000000, -0.980620, 157.821106, -0.897542, 244.456299)
+transform = Transform3D(0.453604, 0.000000, -1.017768, 0.000000, 1.114275, 0.000000, 1.017768, 0.000000, 0.453604, 154.649414, -1.245964, 245.659302)
 
 [node name="fMalMovila135" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.763694, 0.000000, -1.054190, 0.000000, 1.301747, 0.000000, 1.054190, 0.000000, 0.763694, 160.644348, 0.484622, 241.204086)
+transform = Transform3D(-0.468325, 0.000000, -1.025663, 0.000000, 1.127525, 0.000000, 1.025663, 0.000000, -0.468325, 153.235596, 0.747577, 242.995041)
 
-[node name="fMalTufa136" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(0.975457, 0.000000, -0.816904, 0.000000, 1.272340, 0.000000, 0.816904, 0.000000, 0.975457, 164.715912, 3.388919, 238.177399)
+[node name="fMalPin136" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.539915, 0.000000, -0.993726, 0.000000, 1.130929, 0.000000, 0.993726, 0.000000, 0.539915, 153.096375, 10.571112, 230.874908)
 
-[node name="fMalPin137" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.820636, 0.000000, -0.497864, 0.000000, 0.959850, 0.000000, 0.497864, 0.000000, 0.820636, 165.422806, 11.244833, 227.518539)
+[node name="fMalTufa137" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-1.196788, 0.000000, 1.054523, 0.000000, 1.595093, 0.000000, -1.054523, 0.000000, -1.196788, 156.883072, 1.140659, 241.315643)
 
-[node name="fMalStanca138" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(2.085949, 0.000000, 0.307724, 0.000000, 2.108525, 0.000000, -0.307724, 0.000000, 2.085949, 167.059174, -1.665927, 241.865143)
+[node name="fMalStanca138" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(1.667909, 0.000000, 1.836332, 0.000000, 2.480733, 0.000000, -1.836332, 0.000000, 1.667909, 159.623947, -1.603530, 244.662231)
 
-[node name="fMalStanca139" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.241752, 0.000000, 0.588514, 0.000000, 1.374153, 0.000000, -0.588514, 0.000000, -1.241752, 169.575607, -1.697348, 241.626877)
+[node name="fMalStanca139" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(0.331695, 0.000000, 1.242109, 0.000000, 1.285635, 0.000000, -1.242109, 0.000000, 0.331695, 161.622437, -1.545196, 244.056808)
 
 [node name="fMalStanca140" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-1.077462, 0.000000, 0.455641, 0.000000, 1.169844, 0.000000, -0.455641, 0.000000, -1.077462, 164.913361, -0.797654, 241.337952)
+transform = Transform3D(-0.980620, 0.000000, 0.752220, 0.000000, 1.235901, 0.000000, -0.752220, 0.000000, -0.980620, 157.821106, -0.897542, 244.456299)
 
 [node name="fMalMovila141" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(1.114037, 0.000000, 0.057991, 0.000000, 1.115546, 0.000000, -0.057991, 0.000000, 1.114037, 168.607986, 2.063724, 238.609192)
+transform = Transform3D(0.763694, 0.000000, -1.054190, 0.000000, 1.301747, 0.000000, 1.054190, 0.000000, 0.763694, 160.644348, 0.484622, 241.204086)
 
-[node name="fMalTufa142" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-0.718995, 0.000000, 1.080751, 0.000000, 1.298066, 0.000000, -1.080751, 0.000000, -0.718995, 170.445938, 4.149676, 236.674423)
+[node name="fMalPin142" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.764047, 0.000000, -0.664506, 0.000000, 1.012589, 0.000000, 0.664506, 0.000000, 0.764047, 158.478378, 7.581534, 235.310562)
 
-[node name="fMalTufa143" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(0.198774, 0.000000, -1.610846, 0.000000, 1.623064, 0.000000, 1.610846, 0.000000, 0.198774, 173.317963, 3.681842, 236.753143)
+[node name="fMalTufa143" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(0.896391, 0.000000, 1.150839, 0.000000, 1.458748, 0.000000, -1.150839, 0.000000, 0.896391, 164.741837, 4.006305, 237.682755)
 
-[node name="fMalStanca144" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(2.306439, 0.000000, 0.581201, 0.000000, 2.378541, 0.000000, -0.581201, 0.000000, 2.306439, 175.173889, -1.748328, 240.834381)
+[node name="fMalStanca144" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(2.085949, 0.000000, 0.307724, 0.000000, 2.108525, 0.000000, -0.307724, 0.000000, 2.085949, 167.059174, -1.665927, 241.865143)
 
 [node name="fMalStanca145" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(1.029806, 0.000000, 1.089602, 0.000000, 1.499244, 0.000000, -1.089602, 0.000000, 1.029806, 177.465134, -1.719864, 240.930679)
+transform = Transform3D(-1.241752, 0.000000, 0.588514, 0.000000, 1.374153, 0.000000, -0.588514, 0.000000, -1.241752, 169.575607, -1.697348, 241.626877)
 
-[node name="fMalStanca146" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-0.467095, 0.000000, -0.898286, 0.000000, 1.012471, 0.000000, 0.898286, 0.000000, -0.467095, 173.446320, -0.409265, 240.060898)
+[node name="fMalStanca146" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-1.077462, 0.000000, 0.455641, 0.000000, 1.169844, 0.000000, -0.455641, 0.000000, -1.077462, 164.913361, -0.797654, 241.337952)
 
 [node name="fMalMovila147" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.721992, 0.000000, 0.907515, 0.000000, 1.159680, 0.000000, -0.907515, 0.000000, 0.721992, 177.212997, 1.813068, 237.860809)
+transform = Transform3D(1.114037, 0.000000, 0.057991, 0.000000, 1.115546, 0.000000, -0.057991, 0.000000, 1.114037, 168.607986, 2.063724, 238.609192)
 
 [node name="fMalPin148" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.735157, 0.000000, -0.799423, 0.000000, 1.086064, 0.000000, 0.799423, 0.000000, 0.735157, 178.842682, 7.581748, 232.265762)
+transform = Transform3D(0.314025, 0.000000, -0.907900, 0.000000, 0.960673, 0.000000, 0.907900, 0.000000, 0.314025, 166.603928, 8.711218, 233.573074)
 
-[node name="fMalTufa149" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-1.362059, 0.000000, -0.176499, 0.000000, 1.373447, 0.000000, 0.176499, 0.000000, -1.362059, 182.482697, 2.861774, 236.640762)
+[node name="fMalTufa149" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(0.748197, 0.000000, -1.084338, 0.000000, 1.317417, 0.000000, 1.084338, 0.000000, 0.748197, 173.283279, 3.491534, 236.916382)
 
 [node name="fMalPin150" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.303066, 0.000000, 1.185669, 0.000000, 1.223789, 0.000000, -1.185669, 0.000000, -0.303066, 185.376770, 6.155997, 233.230743)
+transform = Transform3D(1.087440, 0.000000, 0.550839, 0.000000, 1.218995, 0.000000, -0.550839, 0.000000, 1.087440, 172.904984, 8.066946, 232.733948)
 
-[node name="fMalStanca151" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.833784, 0.000000, 1.336860, 0.000000, 2.269352, 0.000000, -1.336860, 0.000000, -1.833784, 184.126465, -1.521429, 240.303131)
+[node name="fMalStanca151" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(1.767288, 0.000000, -0.020991, 0.000000, 1.767413, 0.000000, 0.020991, 0.000000, 1.767288, 175.173889, -1.638325, 240.834381)
 
-[node name="fMalStanca152" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.766793, 0.000000, 0.967463, 0.000000, 1.234487, 0.000000, -0.967463, 0.000000, 0.766793, 186.247101, -1.672208, 240.699982)
+[node name="fMalStanca152" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-0.581252, 0.000000, 0.944248, 0.000000, 1.108809, 0.000000, -0.944248, 0.000000, -0.581252, 177.348465, -1.649586, 240.899429)
 
-[node name="fMalMovila153" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.800464, 0.000000, 0.687920, 0.000000, 1.055451, 0.000000, -0.687920, 0.000000, -0.800464, 186.605621, 1.454959, 237.685165)
+[node name="fMalStanca153" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-0.783222, 0.000000, 0.575089, 0.000000, 0.971681, 0.000000, -0.575089, 0.000000, -0.783222, 173.419357, -0.389960, 240.053665)
 
-[node name="fMalTufa154" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(1.423602, 0.000000, 0.601948, 0.000000, 1.545634, 0.000000, -0.601948, 0.000000, 1.423602, 192.707748, 2.410938, 236.812607)
+[node name="fMalMovila154" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-1.284749, 0.000000, -0.060358, 0.000000, 1.286166, 0.000000, 0.060358, 0.000000, -1.284749, 177.212997, 1.813068, 237.860809)
 
-[node name="fMalPin155" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.240834, 0.000000, 1.055239, 0.000000, 1.082372, 0.000000, -1.055239, 0.000000, 0.240834, 197.806213, 9.143744, 228.915070)
+[node name="fMalTufa155" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-0.811533, 0.000000, 1.164081, 0.000000, 1.419038, 0.000000, -1.164081, 0.000000, -0.811533, 182.434326, 2.728748, 236.766769)
 
-[node name="fMalStanca156" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(-0.166372, 0.000000, -1.958125, 0.000000, 1.965181, 0.000000, 1.958125, 0.000000, -0.166372, 194.079239, -1.559436, 240.602310)
+[node name="fMalPin156" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.041807, 0.000000, -1.059831, 0.000000, 1.060655, 0.000000, 1.059831, 0.000000, -0.041807, 186.009140, 10.709372, 227.325439)
 
 [node name="fMalStanca157" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.582383, 0.000000, 1.257976, 0.000000, 1.386244, 0.000000, -1.257976, 0.000000, 0.582383, 196.326294, -1.699524, 241.465378)
+transform = Transform3D(-0.875134, 0.000000, 1.564456, 0.000000, 1.792591, 0.000000, -1.564456, 0.000000, -0.875134, 184.126465, -1.435612, 240.303131)
 
-[node name="fMalMovila158" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.081095, 0.000000, -1.025422, 0.000000, 1.028623, 0.000000, 1.025422, 0.000000, 0.081095, 196.937424, 0.998416, 238.404388)
+[node name="fMalStanca158" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.113441, 0.000000, -1.356787, 0.000000, 1.361521, 0.000000, 1.356787, 0.000000, 0.113441, 186.249863, -1.695074, 240.701202)
 
-[node name="fMalTufa159" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.836352, 0.000000, 1.179954, 0.000000, 1.446297, 0.000000, -1.179954, 0.000000, -0.836352, 200.329483, 2.347507, 237.243988)
+[node name="fMalStanca159" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(0.800431, 0.000000, 0.423931, 0.000000, 0.905763, 0.000000, -0.423931, 0.000000, 0.800431, 182.632141, -0.174268, 239.309418)
 
-[node name="fMalTufa160" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-1.469277, 0.000000, 0.421982, 0.000000, 1.528674, 0.000000, -0.421982, 0.000000, -1.469277, 203.928558, 1.629459, 238.222534)
+[node name="fMalMovila160" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-0.838489, 0.000000, -1.055899, 0.000000, 1.348327, 0.000000, 1.055899, 0.000000, -0.838489, 186.605621, 1.454959, 237.685165)
 
 [node name="fMalPin161" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.901571, 0.000000, -0.789521, 0.000000, 1.198405, 0.000000, 0.789521, 0.000000, -0.901571, 211.567612, 8.532476, 230.591324)
+transform = Transform3D(-0.644447, 0.000000, 0.764406, 0.000000, 0.999814, 0.000000, -0.764406, 0.000000, -0.644447, 188.711212, 6.703406, 232.175186)
 
-[node name="fMalStanca162" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(-0.322608, 0.000000, -2.097216, 0.000000, 2.121883, 0.000000, 2.097216, 0.000000, -0.322608, 205.761154, -1.669354, 241.398331)
+[node name="fMalTufa162" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-1.327314, 0.000000, 0.218573, 0.000000, 1.345190, 0.000000, -0.218573, 0.000000, -1.327314, 189.131989, 2.402866, 236.750473)
 
-[node name="fMalStanca163" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(1.237320, 0.000000, -0.058863, 0.000000, 1.238719, 0.000000, 0.058863, 0.000000, 1.237320, 207.637161, -1.343102, 242.414688)
+[node name="fMalTufa163" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-1.483735, 0.000000, 0.541721, 0.000000, 1.579535, 0.000000, -0.541721, 0.000000, -1.483735, 192.311813, 1.722003, 237.498383)
 
-[node name="fMalMovila164" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-1.000931, 0.000000, 0.593430, 0.000000, 1.163624, 0.000000, -0.593430, 0.000000, -1.000931, 208.927963, 0.808231, 239.674606)
+[node name="fMalPin164" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.101704, 0.000000, -1.197016, 0.000000, 1.201329, 0.000000, 1.197016, 0.000000, -0.101704, 194.467606, 5.674475, 233.473923)
 
-[node name="fMalTufa165" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(1.130533, 0.000000, 0.854736, 0.000000, 1.417278, 0.000000, -0.854736, 0.000000, 1.130533, 211.269775, 0.245776, 240.730225)
+[node name="fMalStanca165" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.166050, 0.000000, -2.099653, 0.000000, 2.106209, 0.000000, 2.099653, 0.000000, 0.166050, 194.079239, -1.584821, 240.602310)
 
-[node name="fMalTufa166" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(1.572296, 0.000000, -0.160965, 0.000000, 1.580514, 0.000000, 0.160965, 0.000000, 1.572296, 212.754837, -0.406049, 244.300156)
+[node name="fMalStanca166" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.997703, 0.000000, 0.876490, 0.000000, 1.328023, 0.000000, -0.876490, 0.000000, 0.997703, 195.981049, -1.689044, 241.241165)
 
-[node name="fMalPin167" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(0.012178, 0.000000, -1.117485, 0.000000, 1.117551, 0.000000, 1.117485, 0.000000, 0.012178, 216.869812, 0.409720, 241.204178)
+[node name="fMalMovila167" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(0.994208, 0.000000, -0.783412, 0.000000, 1.265774, 0.000000, 0.783412, 0.000000, 0.994208, 196.937424, 0.998416, 238.404388)
 
-[node name="fMalStanca168" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-2.139827, 0.000000, 1.116874, 0.000000, 2.413766, 0.000000, -1.116874, 0.000000, -2.139827, 210.493896, -1.441939, 250.730408)
+[node name="fMalTufa168" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-1.469277, 0.000000, 0.421982, 0.000000, 1.528674, 0.000000, -0.421982, 0.000000, -1.469277, 199.985703, 1.862659, 237.717148)
 
-[node name="fMalStanca169" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(1.136808, 0.000000, -0.941410, 0.000000, 1.476003, 0.000000, 0.941410, 0.000000, 1.136808, 212.350998, -1.002894, 252.229218)
+[node name="fMalTufa169" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-1.348217, 0.000000, -0.739759, 0.000000, 1.537834, 0.000000, 0.739759, 0.000000, -1.348217, 204.236496, 2.021732, 237.842255)
 
-[node name="fMalMovila170" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.548614, 0.000000, 0.984483, 0.000000, 1.127025, 0.000000, -0.984483, 0.000000, 0.548614, 213.891388, -0.597119, 249.523285)
+[node name="fMalPin170" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.921219, 0.000000, 0.592279, 0.000000, 1.095189, 0.000000, -0.592279, 0.000000, -0.921219, 211.648880, 8.936193, 229.857117)
 
-[node name="fMalTufa171" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(0.922441, 0.000000, 0.828468, 0.000000, 1.239862, 0.000000, -0.828468, 0.000000, 0.922441, 214.135681, -0.547604, 252.121216)
+[node name="fMalStanca171" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-1.549066, 0.000000, 1.647891, 0.000000, 2.261670, 0.000000, -1.647891, 0.000000, -1.549066, 205.761154, -1.694515, 241.398331)
 
-[node name="fMalPin172" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.710485, 0.000000, 0.673550, 0.000000, 0.979009, 0.000000, -0.673550, 0.000000, -0.710485, 217.461349, -0.188074, 250.284454)
+[node name="fMalStanca172" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-0.875925, 0.000000, 1.179124, 0.000000, 1.468870, 0.000000, -1.179124, 0.000000, -0.875925, 207.552002, -1.397117, 242.337997)
 
-[node name="fMalTufa173" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(1.048362, 0.000000, -1.092340, 0.000000, 1.514025, 0.000000, 1.092340, 0.000000, 1.048362, 213.202087, -0.635602, 256.748993)
+[node name="fMalStanca173" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-1.049052, 0.000000, -0.535782, 0.000000, 1.177952, 0.000000, 0.535782, 0.000000, -1.049052, 204.696182, -0.258784, 240.035721)
 
-[node name="fMalStanca174" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-0.380033, 0.000000, -2.368188, 0.000000, 2.398487, 0.000000, 2.368188, 0.000000, -0.380033, 209.977798, -1.441173, 262.299988)
+[node name="fMalMovila174" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-1.020619, 0.000000, 0.445249, 0.000000, 1.113512, 0.000000, -0.445249, 0.000000, -1.020619, 208.927963, 0.808231, 239.674606)
 
-[node name="fMalStanca175" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.082926, 0.000000, -1.448887, 0.000000, 1.451258, 0.000000, 1.448887, 0.000000, 0.082926, 211.577148, -1.034374, 264.070160)
+[node name="fMalTufa175" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(0.210561, 0.000000, 1.460236, 0.000000, 1.475339, 0.000000, -1.460236, 0.000000, 0.210561, 211.487503, 0.484805, 240.512497)
 
-[node name="fMalStanca176" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-0.256350, 0.000000, 0.973635, 0.000000, 1.006817, 0.000000, -0.973635, 0.000000, -0.256350, 209.275330, -1.299223, 260.483276)
+[node name="fMalPin176" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.188828, 0.000000, -1.081848, 0.000000, 1.098204, 0.000000, 1.081848, 0.000000, -0.188828, 219.063782, 7.682379, 232.888794)
 
-[node name="fMalMovila177" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.233671, 0.000000, 1.207191, 0.000000, 1.229598, 0.000000, -1.207191, 0.000000, -0.233671, 213.522293, -0.563763, 261.639221)
+[node name="fMalTufa177" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-1.141967, 0.000000, 1.035436, 0.000000, 1.541498, 0.000000, -1.035436, 0.000000, -1.141967, 212.860840, -0.384885, 244.204697)
 
-[node name="fMalPin178" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(1.047321, 0.000000, 0.509749, 0.000000, 1.164785, 0.000000, -0.509749, 0.000000, 1.047321, 218.806976, 0.044119, 258.554901)
+[node name="fMalStanca178" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-1.075606, 0.000000, -1.730962, 0.000000, 2.037930, 0.000000, 1.730962, 0.000000, -1.075606, 210.493896, -1.374289, 250.730408)
 
-[node name="fMalPin179" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-0.889598, 0.000000, -0.440581, 0.000000, 0.992722, 0.000000, 0.440581, 0.000000, -0.889598, 223.032990, 0.573050, 254.963333)
+[node name="fMalStanca179" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.748121, 0.000000, -0.890997, 0.000000, 1.163427, 0.000000, 0.890997, 0.000000, -0.748121, 212.191193, -0.970449, 252.031876)
 
-[node name="fMalStanca180" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(-1.502770, 0.000000, -1.284949, 0.000000, 1.977223, 0.000000, 1.284949, 0.000000, -1.502770, 209.986023, -1.325047, 271.579895)
+[node name="fMalStanca180" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.709858, 0.000000, -1.062686, 0.000000, 1.277967, 0.000000, 1.062686, 0.000000, -0.709858, 209.564743, -1.351677, 249.106293)
 
-[node name="fMalStanca181" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.069181, 0.000000, 0.333520, 0.000000, 1.119992, 0.000000, -0.333520, 0.000000, -1.069181, 211.284744, -0.977508, 273.567963)
+[node name="fMalMovila181" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(0.999030, 0.000000, 0.573017, 0.000000, 1.151698, 0.000000, -0.573017, 0.000000, 0.999030, 213.891388, -0.597119, 249.523285)
 
-[node name="fMalMovila182" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.541667, 0.000000, 0.866575, 0.000000, 1.021937, 0.000000, -0.866575, 0.000000, 0.541667, 213.590240, -0.507169, 271.481750)
+[node name="fMalPin182" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(1.044285, 0.000000, -0.403028, 0.000000, 1.119358, 0.000000, 0.403028, 0.000000, 1.044285, 222.172455, 0.806464, 241.280548)
 
-[node name="fMalPin183" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
-transform = Transform3D(-1.072459, 0.000000, -0.361608, 0.000000, 1.131781, 0.000000, 0.361608, 0.000000, -1.072459, 217.410263, -0.056604, 271.996124)
+[node name="fMalTufa183" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-0.173696, 0.000000, 1.615987, 0.000000, 1.625295, 0.000000, -1.615987, 0.000000, -0.173696, 213.535583, -0.592450, 256.532410)
 
-[node name="fMalTufa184" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.186464, 0.000000, -1.127680, 0.000000, 1.142992, 0.000000, 1.127680, 0.000000, -0.186464, 214.550903, -0.365384, 275.919037)
+[node name="fMalStanca184" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-1.580297, 0.000000, -1.369960, 0.000000, 2.091442, 0.000000, 1.369960, 0.000000, -1.580297, 209.977798, -1.385905, 262.299988)
 
 [node name="fMalStanca185" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(2.215559, 0.000000, -0.586851, 0.000000, 2.291963, 0.000000, 0.586851, 0.000000, 2.215559, 209.831421, -1.383516, 279.833130)
+transform = Transform3D(-1.348251, 0.000000, -0.597926, 0.000000, 1.474888, 0.000000, 0.597926, 0.000000, -1.348251, 211.382446, -1.068092, 263.732910)
 
-[node name="fMalStanca186" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.336012, 0.000000, -0.111401, 0.000000, 1.340649, 0.000000, 0.111401, 0.000000, -1.336012, 210.816147, -1.049895, 282.061005)
+[node name="fMalMovila186" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-0.512037, 0.000000, -1.301986, 0.000000, 1.399053, 0.000000, 1.301986, 0.000000, -0.512037, 213.522293, -0.563763, 261.639221)
 
-[node name="fMalStanca187" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(-0.865197, 0.000000, 0.421975, 0.000000, 0.962616, 0.000000, -0.421975, 0.000000, -0.865197, 209.742554, -1.162681, 277.972168)
+[node name="fMalPin187" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(1.065493, 0.000000, -0.536641, 0.000000, 1.193004, 0.000000, 0.536641, 0.000000, 1.065493, 217.735458, -0.091608, 258.770905)
 
-[node name="fMalMovila188" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.823557, 0.000000, -0.926908, 0.000000, 1.239921, 0.000000, 0.926908, 0.000000, 0.823557, 213.406616, -0.502072, 280.299988)
+[node name="fMalPin188" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(-0.001253, 0.000000, 1.029588, 0.000000, 1.029588, 0.000000, -1.029588, 0.000000, -0.001253, 221.835953, 0.403326, 254.107559)
 
-[node name="fMalStanca189" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(1.171337, 0.000000, -1.532990, 0.000000, 1.929272, 0.000000, 1.532990, 0.000000, 1.171337, 209.335037, -1.318781, 287.519287)
+[node name="fMalStanca189" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-2.295331, 0.000000, -0.773930, 0.000000, 2.422295, 0.000000, 0.773930, 0.000000, -2.295331, 209.986023, -1.405160, 271.579895)
 
-[node name="fMalStanca190" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.073965, 0.000000, 1.274545, 0.000000, 1.276690, 0.000000, -1.274545, 0.000000, 0.073965, 209.940063, -1.127433, 289.510193)
+[node name="fMalStanca190" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(0.328738, 0.000000, 1.273202, 0.000000, 1.314957, 0.000000, -1.273202, 0.000000, 0.328738, 211.335083, -1.005278, 273.699066)
 
-[node name="fMalStanca191" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.908419, 0.000000, -0.501867, 0.000000, 1.037832, 0.000000, 0.501867, 0.000000, 0.908419, 209.522797, -1.132382, 285.369751)
+[node name="fMalMovila191" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-1.375182, 0.000000, -0.056729, 0.000000, 1.376351, 0.000000, 0.056729, 0.000000, -1.375182, 213.590240, -0.507169, 271.481750)
 
-[node name="fGard192" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.037287, 0.000000, -0.999305, 0.000000, 1.000000, 0.000000, 0.999305, 0.000000, -0.037287, 230.750839, 2.596835, 337.048492)
+[node name="fMalPin192" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.902525, 0.000000, 0.039072, 0.000000, 0.903370, 0.000000, -0.039072, 0.000000, 0.902525, 218.430984, 0.075018, 271.664459)
 
-[node name="fGard193" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.060772, 0.000000, -0.998152, 0.000000, 1.000000, 0.000000, 0.998152, 0.000000, -0.060772, 227.559708, 2.292651, 336.903687)
+[node name="fMalTufa193" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-1.210003, 0.000000, 0.590144, 0.000000, 1.346246, 0.000000, -0.590144, 0.000000, -1.210003, 214.223526, -0.407956, 276.006744)
 
-[node name="fGard194" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.060632, 0.000000, -0.998160, 0.000000, 1.000000, 0.000000, 0.998160, 0.000000, -0.060632, 224.204269, 1.963947, 336.699554)
+[node name="fMalStanca194" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-1.616307, 0.000000, -1.431441, 0.000000, 2.159044, 0.000000, 1.431441, 0.000000, -1.616307, 209.831421, -1.359590, 279.833130)
 
-[node name="fGard195" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.061004, 0.000000, -0.998138, 0.000000, 1.000000, 0.000000, 0.998138, 0.000000, -0.061004, 218.935837, 1.463840, 336.379089)
+[node name="fMalStanca195" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-0.821763, 0.000000, -1.230450, 0.000000, 1.479628, 0.000000, 1.230450, 0.000000, -0.821763, 210.823196, -1.073309, 282.094208)
 
-[node name="fGard196" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.061355, 0.000000, -0.998116, 0.000000, 1.000000, 0.000000, 0.998116, 0.000000, -0.061355, 215.584030, 1.151813, 336.173950)
+[node name="fMalStanca196" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-1.115457, 0.000000, 0.427719, 0.000000, 1.194650, 0.000000, -0.427719, 0.000000, -1.115457, 209.738708, -1.205042, 277.954010)
 
-[node name="fGard197" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.061875, 0.000000, -0.998084, 0.000000, 1.000000, 0.000000, 0.998084, 0.000000, -0.061875, 212.233154, 0.838794, 335.967590)
+[node name="fMalMovila197" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(1.378757, 0.000000, 0.091132, 0.000000, 1.381765, 0.000000, -0.091132, 0.000000, 1.378757, 213.406616, -0.502072, 280.299988)
 
-[node name="fGard198" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.061605, 0.000000, -0.998101, 0.000000, 1.000000, 0.000000, 0.998101, 0.000000, -0.061605, 206.928543, 0.358585, 336.139679)
+[node name="fMalStanca198" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.617036, 0.000000, -2.295995, 0.000000, 2.377462, 0.000000, 2.295995, 0.000000, -0.617036, 209.335037, -1.399455, 287.519287)
 
-[node name="fGard199" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.076295, 0.000000, -0.997085, 0.000000, 1.000000, 0.000000, 0.997085, 0.000000, -0.076295, 203.676422, 0.033420, 335.940125)
+[node name="fMalStanca199" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
+transform = Transform3D(-0.786758, 0.000000, 1.089322, 0.000000, 1.343730, 0.000000, -1.089322, 0.000000, -0.786758, 209.947418, -1.138951, 289.650635)
 
-[node name="fGard200" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.119686, 0.000000, -0.992812, 0.000000, 1.000000, 0.000000, 0.992812, 0.000000, -0.119686, 200.616501, -0.288968, 335.669312)
+[node name="fMalStanca200" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(1.222298, 0.000000, 0.277558, 0.000000, 1.253416, 0.000000, -0.277558, 0.000000, 1.222298, 209.524643, -1.171019, 285.405060)
 
 [node name="fGard201" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
+transform = Transform3D(-0.037287, 0.000000, -0.999305, 0.000000, 1.000000, 0.000000, 0.999305, 0.000000, -0.037287, 230.750839, 2.596835, 337.048492)
+
+[node name="fGard202" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
+transform = Transform3D(-0.060772, 0.000000, -0.998152, 0.000000, 1.000000, 0.000000, 0.998152, 0.000000, -0.060772, 227.559708, 2.292651, 336.903687)
+
+[node name="fGard203" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
+transform = Transform3D(-0.060632, 0.000000, -0.998160, 0.000000, 1.000000, 0.000000, 0.998160, 0.000000, -0.060632, 224.204269, 1.963947, 336.699554)
+
+[node name="fGard204" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
+transform = Transform3D(-0.061004, 0.000000, -0.998138, 0.000000, 1.000000, 0.000000, 0.998138, 0.000000, -0.061004, 218.935837, 1.463840, 336.379089)
+
+[node name="fGard205" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
+transform = Transform3D(-0.061355, 0.000000, -0.998116, 0.000000, 1.000000, 0.000000, 0.998116, 0.000000, -0.061355, 215.584030, 1.151813, 336.173950)
+
+[node name="fGard206" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
+transform = Transform3D(-0.061875, 0.000000, -0.998084, 0.000000, 1.000000, 0.000000, 0.998084, 0.000000, -0.061875, 212.233154, 0.838794, 335.967590)
+
+[node name="fGard207" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
+transform = Transform3D(-0.061605, 0.000000, -0.998101, 0.000000, 1.000000, 0.000000, 0.998101, 0.000000, -0.061605, 206.928543, 0.358585, 336.139679)
+
+[node name="fGard208" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
+transform = Transform3D(-0.076295, 0.000000, -0.997085, 0.000000, 1.000000, 0.000000, 0.997085, 0.000000, -0.076295, 203.676422, 0.033420, 335.940125)
+
+[node name="fGard209" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
+transform = Transform3D(-0.119686, 0.000000, -0.992812, 0.000000, 1.000000, 0.000000, 0.992812, 0.000000, -0.119686, 200.616501, -0.288968, 335.669312)
+
+[node name="fGard210" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
 transform = Transform3D(0.420634, 0.000000, -0.907230, 0.000000, 1.000000, 0.000000, 0.907230, 0.000000, 0.420634, 138.371384, -0.853207, 346.909576)
 
-[node name="fMalFelinar202" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stone_lantern_b")]
-transform = Transform3D(-0.234597, 0.000000, -0.972093, 0.000000, 1.000000, 0.000000, 0.972093, 0.000000, -0.234597, 217.468079, 1.295886, 335.087158)
+[node name="fMalFelinar211" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stone_lantern_b")]
+transform = Transform3D(0.088960, 0.000000, -0.996035, 0.000000, 1.000000, 0.000000, 0.996035, 0.000000, 0.088960, 217.468079, 1.295886, 335.087158)
 
-[node name="fEstMovila203" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.506578, 0.000000, -1.468495, 0.000000, 1.553416, 0.000000, 1.468495, 0.000000, 0.506578, 230.820587, 2.543277, 335.179413)
+[node name="fEstMovila212" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(1.404290, 0.000000, -0.088228, 0.000000, 1.407059, 0.000000, 0.088228, 0.000000, 1.404290, 230.850220, 2.532245, 334.385101)
 
-[node name="fEstTufa204" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-0.334066, 0.000000, 1.364074, 0.000000, 1.404385, 0.000000, -1.364074, 0.000000, -0.334066, 231.004517, 2.463596, 330.249786)
+[node name="fEstTufa213" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(0.634661, 0.000000, -1.183465, 0.000000, 1.342902, 0.000000, 1.183465, 0.000000, 0.634661, 231.032959, 2.450946, 329.487701)
 
-[node name="fEstPiatra205" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(2.261668, 0.000000, 0.021471, 0.000000, 2.261770, 0.000000, -0.021471, 0.000000, 2.261668, 231.270767, 1.887132, 323.114410)
+[node name="fEstPiatra214" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.684955, 0.000000, -2.191038, 0.000000, 2.295607, 0.000000, 2.191038, 0.000000, -0.684955, 233.726563, 2.215346, 323.486267)
 
-[node name="fEstTufa206" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.636015, 0.000000, 1.293619, 0.000000, 1.441514, 0.000000, -1.293619, 0.000000, -0.636015, 224.333740, 1.923129, 334.568176)
+[node name="fEstTufa215" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-1.394912, 0.000000, 0.006228, 0.000000, 1.394926, 0.000000, -0.006228, 0.000000, -1.394912, 225.905029, 2.059833, 334.192810)
 
-[node name="fEstMovila207" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(1.489945, 0.000000, 0.234099, 0.000000, 1.508224, 0.000000, -0.234099, 0.000000, 1.489945, 224.639099, 1.827731, 329.541138)
+[node name="fEstMovila216" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(-0.075641, 0.000000, 1.210102, 0.000000, 1.212463, 0.000000, -1.210102, 0.000000, -0.075641, 226.267258, 1.942691, 328.233368)
 
-[node name="fEstTufa208" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(0.915902, 0.000000, -1.349686, 0.000000, 1.631113, 0.000000, 1.349686, 0.000000, 0.915902, 225.010406, 1.539539, 323.428558)
+[node name="fEstTufa217" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(0.327627, 0.000000, 1.248415, 0.000000, 1.290689, 0.000000, -1.248415, 0.000000, 0.327627, 226.530670, 1.756274, 323.899414)
 
-[node name="fEstPiatra209" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
-transform = Transform3D(-1.606724, 0.000000, 1.331707, 0.000000, 2.086865, 0.000000, -1.331707, 0.000000, -1.606724, 226.829468, 1.215993, 318.983673)
+[node name="fEstPiatra218" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(-0.309440, 0.000000, -2.266259, 0.000000, 2.287288, 0.000000, 2.266259, 0.000000, -0.309440, 226.923950, 1.175980, 317.429077)
 
-[node name="fEstTufa210" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(0.394797, 0.000000, 1.347790, 0.000000, 1.404423, 0.000000, -1.347790, 0.000000, 0.394797, 219.342255, 1.326099, 329.729187)
+[node name="fEstTufa219" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(0.776214, 0.000000, -1.462314, 0.000000, 1.655558, 0.000000, 1.462314, 0.000000, 0.776214, 217.882965, 1.132999, 328.317749)
 
-[node name="fEstMovila211" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-1.484404, 0.000000, 0.479719, 0.000000, 1.559996, 0.000000, -0.479719, 0.000000, -1.484404, 219.696106, 0.957416, 323.939545)
+[node name="fEstMovila220" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(0.527175, 0.000000, 1.471371, 0.000000, 1.562960, 0.000000, -1.471371, 0.000000, 0.527175, 219.731308, 0.915347, 323.363586)
 
-[node name="fEstTufa212" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-1.326591, 0.000000, -0.182491, 0.000000, 1.339085, 0.000000, 0.182491, 0.000000, -1.326591, 218.492340, 0.472095, 318.374969)
+[node name="fEstTufa221" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-1.065550, 0.000000, 1.241689, 0.000000, 1.636212, 0.000000, -1.241689, 0.000000, -1.065550, 220.100922, 0.660007, 317.315948)
 
-[node name="fEstPiatra213" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(1.649479, 0.000000, -1.030642, 0.000000, 1.944994, 0.000000, 1.030642, 0.000000, 1.649479, 213.873764, 0.647063, 334.440369)
+[node name="fEstPiatra222" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(-0.033966, 0.000000, -2.255247, 0.000000, 2.255503, 0.000000, 2.255247, 0.000000, -0.033966, 212.359283, 0.437607, 333.933136)
 
-[node name="fEstTufa214" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(0.099651, 0.000000, 1.571526, 0.000000, 1.574682, 0.000000, -1.571526, 0.000000, 0.099651, 214.630600, 0.177386, 322.174255)
+[node name="fEstTufa223" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-0.780407, 0.000000, -1.225121, 0.000000, 1.452569, 0.000000, 1.225121, 0.000000, -0.780407, 214.551605, 0.309451, 323.454590)
 
-[node name="fEstMovila215" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(-0.658520, 0.000000, -1.221468, 0.000000, 1.387672, 0.000000, 1.221468, 0.000000, -0.658520, 214.965012, -0.008282, 316.754517)
+[node name="fEstTufa224" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(0.490908, 0.000000, -1.532236, 0.000000, 1.608956, 0.000000, 1.532236, 0.000000, 0.490908, 205.604660, 0.120532, 332.470123)
 
-[node name="fEstTufa216" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-1.222171, 0.000000, -0.338725, 0.000000, 1.268241, 0.000000, 0.338725, 0.000000, -1.222171, 205.508636, 0.160709, 334.031494)
+[node name="fEstPiatra225" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(2.155534, 0.000000, 0.248792, 0.000000, 2.169844, 0.000000, -0.248792, 0.000000, 2.155534, 205.922714, -0.493813, 327.297913)
 
-[node name="fEstPiatra217" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-2.340699, 0.000000, -0.075601, 0.000000, 2.341919, 0.000000, 0.075601, 0.000000, -2.340699, 210.020874, 0.058542, 328.969666)
+[node name="fEstMovila226" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+transform = Transform3D(1.372445, 0.000000, 0.391633, 0.000000, 1.427229, 0.000000, -0.391633, 0.000000, 1.372445, 202.354630, -0.196866, 332.940979)
 
-[node name="fEstMovila218" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.465952, 0.000000, -1.454345, 0.000000, 1.527165, 0.000000, 1.454345, 0.000000, 0.465952, 201.045090, -0.334164, 332.114014)
+[node name="fEstPin227" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
+transform = Transform3D(0.600301, 0.000000, 0.861475, 0.000000, 1.050000, 0.000000, -0.861475, 0.000000, 0.600301, 221.940720, 1.538168, 330.450806)
 
-[node name="fPasuneTufa219" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(0.590364, 0.000000, 0.975447, 0.000000, 1.140187, 0.000000, -0.975447, 0.000000, 0.590364, 251.136719, 5.884494, 357.249481)
-
-[node name="fPasuneTufa220" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-0.153990, 0.000000, 1.314639, 0.000000, 1.323627, 0.000000, -1.314639, 0.000000, -0.153990, 248.463547, 5.469668, 355.711792)
-
-[node name="fPasuneTufa221" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.471576, 0.000000, -1.333222, 0.000000, 1.414165, 0.000000, 1.333222, 0.000000, -0.471576, 239.766266, 4.357623, 353.449677)
-
-[node name="fPasuneTufa222" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.763086, 0.000000, 0.822498, 0.000000, 1.121964, 0.000000, -0.822498, 0.000000, -0.763086, 235.282852, 3.864368, 353.565887)
-
-[node name="fPasuneTufa223" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(1.248267, 0.000000, 0.065336, 0.000000, 1.249975, 0.000000, -0.065336, 0.000000, 1.248267, 226.602188, 3.000186, 352.630768)
-
-[node name="fPasuneTufa224" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.982333, 0.000000, -0.705783, 0.000000, 1.209590, 0.000000, 0.705783, 0.000000, -0.982333, 223.195160, 2.709155, 353.312286)
-
-[node name="fPasuneTufa225" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-1.428017, 0.000000, 0.226301, 0.000000, 1.445837, 0.000000, -0.226301, 0.000000, -1.428017, 220.576187, 2.467105, 352.854767)
-
-[node name="fPasuneTufa226" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-1.298171, 0.000000, 0.303655, 0.000000, 1.333212, 0.000000, -0.303655, 0.000000, -1.298171, 208.630630, 1.369296, 351.391876)
-
-[node name="fPasuneTufa227" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(0.903150, 0.000000, 0.911441, 0.000000, 1.283123, 0.000000, -0.911441, 0.000000, 0.903150, 205.987793, 1.129916, 351.381317)
-
-[node name="fPasuneTufa228" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-1.348889, 0.000000, -0.238073, 0.000000, 1.369738, 0.000000, 0.238073, 0.000000, -1.348889, 167.753769, -0.338574, 355.816681)
+[node name="fPasuneTufa228" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(0.893007, 0.000000, -0.709278, 0.000000, 1.140411, 0.000000, 0.709278, 0.000000, 0.893007, 251.233887, 5.883136, 356.940643)
 
 [node name="fPasuneTufa229" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(1.319919, 0.000000, 0.348798, 0.000000, 1.365227, 0.000000, -0.348798, 0.000000, 1.319919, 163.596680, -0.340100, 356.392639)
+transform = Transform3D(0.644562, 0.000000, -1.291454, 0.000000, 1.443369, 0.000000, 1.291454, 0.000000, 0.644562, 248.557983, 5.468829, 355.365417)
 
 [node name="fPasuneTufa230" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.116786, 0.000000, -1.254556, 0.000000, 1.259980, 0.000000, 1.254556, 0.000000, -0.116786, 161.179367, -0.339886, 357.706207)
+transform = Transform3D(1.342933, 0.000000, 0.428038, 0.000000, 1.409499, 0.000000, -0.428038, 0.000000, 1.342933, 239.757858, 4.358584, 353.511719)
 
-[node name="fPasuneTufa231" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-0.960047, 0.000000, 0.907315, 0.000000, 1.320951, 0.000000, -0.907315, 0.000000, -0.960047, 151.761154, -0.343976, 359.647003)
+[node name="fPasuneTufa231" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(1.170093, 0.000000, 0.734631, 0.000000, 1.381593, 0.000000, -0.734631, 0.000000, 1.170093, 235.268402, 3.869144, 353.831573)
 
 [node name="fPasuneTufa232" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
-transform = Transform3D(-1.290789, 0.000000, 0.711497, 0.000000, 1.473894, 0.000000, -0.711497, 0.000000, -1.290789, 148.955582, -0.341473, 360.109436)
+transform = Transform3D(0.034452, 0.000000, -1.170202, 0.000000, 1.170709, 0.000000, 1.170202, 0.000000, 0.034452, 226.553146, 3.009021, 353.436188)
 
 [node name="fPasuneTufa233" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(0.351707, 0.000000, -1.451164, 0.000000, 1.493176, 0.000000, 1.451164, 0.000000, 0.351707, 142.822891, -0.293622, 362.172821)
+transform = Transform3D(1.126458, 0.000000, -0.720175, 0.000000, 1.336996, 0.000000, 0.720175, 0.000000, 1.126458, 223.249588, 2.699420, 352.416290)
 
-[node name="fPasuneTufa234" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
-transform = Transform3D(-0.315819, 0.000000, 1.108579, 0.000000, 1.152688, 0.000000, -1.108579, 0.000000, -0.315819, 140.275116, -0.248410, 363.864349)
+[node name="fPasuneTufa234" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(0.476500, 0.000000, 0.998886, 0.000000, 1.106718, 0.000000, -0.998886, 0.000000, 0.476500, 220.620285, 2.462833, 352.130707)
 
-[node name="fCalugar235" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_monk_sweeper")]
+[node name="fPasuneTufa235" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(1.318699, 0.000000, -0.243292, 0.000000, 1.340955, 0.000000, 0.243292, 0.000000, 1.318699, 208.617310, 1.369418, 351.606873)
+
+[node name="fPasuneTufa236" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-0.505121, 0.000000, 1.330261, 0.000000, 1.422935, 0.000000, -1.330261, 0.000000, -0.505121, 205.940872, 1.131015, 352.141388)
+
+[node name="fPasuneTufa237" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-0.734049, 0.000000, -1.242857, 0.000000, 1.443441, 0.000000, 1.242857, 0.000000, -0.734049, 167.903687, -0.336179, 356.511627)
+
+[node name="fPasuneTufa238" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-1.098232, 0.000000, 0.909261, 0.000000, 1.425787, 0.000000, -0.909261, 0.000000, -1.098232, 163.680649, -0.338559, 356.781982)
+
+[node name="fPasuneTufa239" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(-1.379266, 0.000000, 0.574344, 0.000000, 1.494070, 0.000000, -0.574344, 0.000000, -1.379266, 161.203979, -0.339444, 357.820282)
+
+[node name="fPasuneTufa240" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-0.204035, 0.000000, 1.252298, 0.000000, 1.268810, 0.000000, -1.252298, 0.000000, -0.204035, 151.682968, -0.344678, 359.258759)
+
+[node name="fPasuneTufa241" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_a")]
+transform = Transform3D(-0.374693, 0.000000, -1.076330, 0.000000, 1.139685, 0.000000, 1.076330, 0.000000, -0.374693, 148.951279, -0.341473, 360.097321)
+
+[node name="fPasuneTufa242" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(0.469553, 0.000000, -1.257540, 0.000000, 1.342344, 0.000000, 1.257540, 0.000000, 0.469553, 142.983810, -0.291303, 362.356628)
+
+[node name="fPasuneTufa243" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_karikomi_shrub_b")]
+transform = Transform3D(0.386448, 0.000000, -1.360386, 0.000000, 1.414211, 0.000000, 1.360386, 0.000000, 0.386448, 141.138000, -0.246579, 364.503326)
+
+[node name="fCalugar244" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_monk_sweeper")]
 transform = Transform3D(0.879971, 0.000000, 0.475028, 0.000000, 1.000000, 0.000000, -0.475028, 0.000000, 0.879971, 158.392029, -0.321912, 361.753082)
 
-[node name="fFrunze236" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_leaf_pile")]
-transform = Transform3D(1.322455, 0.000000, -0.280600, 0.000000, 1.351896, 0.000000, 0.280600, 0.000000, 1.322455, 156.909439, -0.340009, 358.901733)
+[node name="fFrunze245" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_leaf_pile")]
+transform = Transform3D(0.039654, 0.000000, 1.348938, 0.000000, 1.349520, 0.000000, -1.348938, 0.000000, 0.039654, 155.262009, -0.331494, 360.975769)
 
-[node name="fCalugar237" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_monk_sweeper")]
+[node name="fFrunze246" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_leaf_pile")]
+transform = Transform3D(1.154986, 0.000000, -0.729806, 0.000000, 1.366239, 0.000000, 0.729806, 0.000000, 1.154986, 160.871719, -0.314404, 362.057404)
+
+[node name="fCalugar247" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_monk_sweeper")]
 transform = Transform3D(0.971625, 0.000000, 0.236525, 0.000000, 1.000000, 0.000000, -0.236525, 0.000000, 0.971625, 216.146729, 2.120715, 356.646698)
 
-[node name="fFrunze238" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_leaf_pile")]
-transform = Transform3D(-0.783327, 0.000000, 0.781042, 0.000000, 1.106177, 0.000000, -0.781042, 0.000000, -0.783327, 218.862122, 2.354923, 355.700195)
+[node name="fFrunze248" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_leaf_pile")]
+transform = Transform3D(-1.030323, 0.000000, 0.636250, 0.000000, 1.210941, 0.000000, -0.636250, 0.000000, -1.030323, 218.849686, 2.364780, 356.373108)
 
-[node name="fFrunze239" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_leaf_pile")]
-transform = Transform3D(-0.020701, 0.000000, 1.114303, 0.000000, 1.114496, 0.000000, -1.114303, 0.000000, -0.020701, 217.862732, 2.322086, 359.338287)
+[node name="fFrunze249" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_leaf_pile")]
+transform = Transform3D(-1.019121, 0.000000, 0.266731, 0.000000, 1.053449, 0.000000, -0.266731, 0.000000, -1.019121, 218.162125, 2.333560, 358.347137)
 
-[node name="fPasPietre240" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stepping_stones")]
-transform = Transform3D(0.979876, 0.000000, 0.199608, 0.000000, 1.000000, 0.000000, -0.199608, 0.000000, 0.979876, 172.691498, -0.343182, 354.061340)
+[node name="fFrunze250" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_leaf_pile")]
+transform = Transform3D(-1.053212, 0.000000, 0.548330, 0.000000, 1.187401, 0.000000, -0.548330, 0.000000, -1.053212, 214.139526, 1.959918, 358.110718)
 
-[node name="fPasPietre241" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stepping_stones")]
-transform = Transform3D(0.999685, 0.000000, 0.025094, 0.000000, 1.000000, 0.000000, -0.025094, 0.000000, 0.999685, 173.310547, -0.312970, 356.894501)
+[node name="fPasPietre251" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stepping_stones")]
+transform = Transform3D(0.999833, 0.000000, 0.018254, 0.000000, 1.000000, 0.000000, -0.018254, 0.000000, 0.999833, 172.691498, -0.343182, 354.061340)
 
-[node name="fPasPietre242" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stepping_stones")]
-transform = Transform3D(0.967354, 0.000000, 0.253429, 0.000000, 1.000000, 0.000000, -0.253429, 0.000000, 0.967354, 173.929611, -0.283368, 359.727631)
+[node name="fPasPietre252" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stepping_stones")]
+transform = Transform3D(0.998814, 0.000000, 0.048696, 0.000000, 1.000000, 0.000000, -0.048696, 0.000000, 0.998814, 173.310547, -0.312970, 356.894501)
 
-[node name="fPasPietre243" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stepping_stones")]
-transform = Transform3D(0.951080, 0.000000, 0.308946, 0.000000, 1.000000, 0.000000, -0.308946, 0.000000, 0.951080, 174.548660, -0.236111, 362.560791)
+[node name="fPasPietre253" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stepping_stones")]
+transform = Transform3D(0.962336, 0.000000, 0.271864, 0.000000, 1.000000, 0.000000, -0.271864, 0.000000, 0.962336, 173.929611, -0.283368, 359.727631)
 
-[node name="fPasuneFelinar244" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stone_lantern_a")]
-transform = Transform3D(-0.210820, 0.000000, 0.977525, 0.000000, 1.000000, 0.000000, -0.977525, 0.000000, -0.210820, 169.808197, -0.333981, 356.735229)
+[node name="fPasPietre254" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stepping_stones")]
+transform = Transform3D(0.967224, 0.000000, 0.253926, 0.000000, 1.000000, 0.000000, -0.253926, 0.000000, 0.967224, 174.548660, -0.236111, 362.560791)
 
-[node name="fPasuneFelinar245" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stone_lantern_a")]
+[node name="fPasuneFelinar255" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_stone_lantern_a")]
 transform = Transform3D(0.145650, 0.000000, 0.989336, 0.000000, 1.000000, 0.000000, -0.989336, 0.000000, 0.145650, 240.787872, 4.566348, 356.367371)
 
-[node name="fPasuneMovila246" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
+[node name="fPasuneMovila256" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
 transform = Transform3D(1.289485, 0.000000, 0.545186, 0.000000, 1.400000, 0.000000, -0.545186, 0.000000, 1.289485, 232.672913, 3.793826, 360.512390)
 
-[node name="fPasunePiatra247" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.357992, 0.000000, 0.340377, 0.000000, 1.400000, 0.000000, -0.340377, 0.000000, -1.357992, 235.072906, 3.826751, 359.712402)
+[node name="fPasunePiatra257" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
+transform = Transform3D(0.398434, 0.000000, 1.342107, 0.000000, 1.400000, 0.000000, -1.342107, 0.000000, 0.398434, 235.072906, 3.826751, 359.712402)
 
-[node name="fPasunePiatra248" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(0.733309, 0.000000, -0.679896, 0.000000, 1.000000, 0.000000, 0.679896, 0.000000, 0.733309, 230.872910, 3.514183, 362.012390)
+[node name="fPasunePiatra258" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_b")]
+transform = Transform3D(0.872152, 0.000000, 0.489234, 0.000000, 1.000000, 0.000000, -0.489234, 0.000000, 0.872152, 230.872910, 3.514183, 362.012390)
 

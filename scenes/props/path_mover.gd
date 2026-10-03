@@ -92,6 +92,18 @@ const PLACEHOLDER_SIZE := Vector3(1.9, 1.7, 3.4)
 ## exportat pentru 1.5 m/s arata a patinaj la 4 m/s — de aici se potriveste.
 @export_range(0.1, 4.0, 0.05) var animation_speed: float = 1.0
 
+## Corp fizic de coliziune. true (implicit) = comportamentul de pana acum:
+## masina care intra in figurant se ciocneste cinstit. false = TEATRU: corpul
+## cinematic ramane (pozitia, sync), dar fara forma de coliziune — ricsa de pe
+## trotuarul Sannenzaka (Kyoto, POI B), pe langa care treci, nu in care te
+## opresti; contractul brief-ului cere „fara coliziune".
+@export var collide: bool = true
+## Traseul ca lista de puncte LOCALE (optional). Gol = curba nodului, ca pana
+## acum. Nevid = curba se construieste din puncte la _ready: un generator de
+## decor (tools/gen_decor_kyoto_b.gd) scrie nodul in .tscn fara sub-resursa
+## Curve3D (blocul DECOR MANUAL lipeste doar ext_resource-uri si noduri).
+@export var points: PackedVector3Array = PackedVector3Array()
+
 @export_group("Miscare")
 ## m/s. 0 = parcat pe traiectorie (util cat asezi curba).
 @export_range(0.0, 30.0, 0.1) var speed: float = 4.0
@@ -165,6 +177,11 @@ func _model_animation_names() -> PackedStringArray:
 
 
 func _ready() -> void:
+	if not points.is_empty() and (curve == null or curve.point_count < 2):
+		var c := Curve3D.new()
+		for q in points:
+			c.add_point(q)
+		curve = c
 	_build_body()
 
 
@@ -267,7 +284,10 @@ func _build_model() -> void:
 		col.size = PLACEHOLDER_SIZE
 		shape.position = Vector3.UP * (PLACEHOLDER_SIZE.y * 0.5)
 	shape.shape = col
-	_body.add_child(shape)
+	if collide:
+		_body.add_child(shape)
+	else:
+		shape.free()
 
 
 func _build_placeholder() -> void:
@@ -285,7 +305,10 @@ func _build_placeholder() -> void:
 	col.size = PLACEHOLDER_SIZE
 	shape.shape = col
 	shape.position = Vector3.UP * (PLACEHOLDER_SIZE.y * 0.5)
-	_body.add_child(shape)
+	if collide:
+		_body.add_child(shape)
+	else:
+		shape.free()
 
 
 ## Instantiaza GLB-ul si pastreaza o singura piesa, anuland offsetul ei din

@@ -85,6 +85,11 @@ python tools/blender/check_glb_anims.py "$ROOT/animals/sika_deer.glb" Stand Graz
 python tools/blender/check_glb_anims.py "$ROOT/animals/crow.glb" Fly || fail=1
 
 echo
+echo "== hazardul shishimai (leul, POI H) =="
+# FLAMINGO_PINK (31) = limba leului; slotul e pictat in atlas (palette.gd, Jodhpur).
+check "props/shishimai.glb"           11000 --origin=assembly --allow-slots=31
+
+echo
 echo "== gradina si bambus (kit §1.8, grupa kit-g) =="
 check "props/shiba_fence.glb"            400 --origin=assembly
 check "plants/karikomi_shrub_a.glb"      120 --origin=assembly

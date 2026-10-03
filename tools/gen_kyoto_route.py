@@ -687,6 +687,18 @@ if len(sys.argv) > 1:
     print(f"kogarashi: busola drum {kog_bearing:.1f} deg => path_yaw_deg {kog_yaw:.1f}")
     print(f"kogarashi: frac {f_kog:.4f} axa ({kog_road[0]:.1f},{kog_road[1]:.1f}) cota {kog_road[2]:.1f}")
 
+    # SHISHIMAI (POI H): leul care danseaza peste soseaua dreptei finale. Pe esantionul
+    # 170 al axei (frac 0,955): ultimul tronson DREPT (167-171, directia 83,7 deg, 48 m)
+    # dupa curbura de la iesirea din Togetsukyo (0,894) si inainte de arcul usor spre
+    # grila (0,966+), cu 24 m de dreapta in spatele lui pentru citirea telegrafului si
+    # ~47 m pana la primul loc din grila (0,977), deci nu atinge startul. Pozitia e pe un
+    # esantion al axei, nu la o fractie rotunjita (road_at_frac ia esantionul de DEDESUBT).
+    SHI_I = 170
+    shi_road = rs[SHI_I]
+    shi_g = godot((shi_road[0], shi_road[1]), shi_road[2])
+    shi_xf = godot_basis_row_text((SHI_I + 0.5) / n_rs, *shi_g)
+    print(f"shishimai: esantion {SHI_I} frac {SHI_I / n_rs:.4f} axa ({shi_road[0]:.1f},{shi_road[1]:.1f}) cota {shi_road[2]:.1f}")
+
 
     # --- GRUPA PADUREA IN MASA (MeshForest, scenes/props/mesh_forest.gd) ---------
     # Arborii kitului in MultiMesh feliat, dincolo de primul rand de langa drum
@@ -957,6 +969,8 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
+[ext_resource type="Script" path="res://scenes/hazards/shishimai_hazard.gd" id="18_shishimai"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/shishimai.glb" id="19_shishimai_glb"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
 [ext_resource type="Script" path="res://scenes/props/module_placer.gd" id="intc_placer"]
@@ -1095,6 +1109,12 @@ dust_amount = 30
 debris_amount = 14
 cone_alpha = 0.3
 cone_color = Color(0.66, 0.41, 0.23, 1)
+
+[node name="Shishimai" type="Node3D" parent="Hazarduri"]
+transform = {shi_xf}
+script = ExtResource("18_shishimai")
+road_half_width = 7.0
+model = ExtResource("19_shishimai_glb")
 """
     tscn += f"""
 [node name="CameraTsutenkyo" type="Area3D" parent="Hazarduri"]

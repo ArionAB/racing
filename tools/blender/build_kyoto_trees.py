@@ -118,65 +118,59 @@ def build_momiji_b():
 
 
 def build_momiji_c():
-    """`momiji_c.png` + contract: SILUETA TABULARA, ASIMETRICA.
+    """`momiji_c.png` (runda 5: decuparea castiga contractul): DOM LARG, aerisit.
 
-    - trunchi INCLINAT spre +X (se pleaca ~1,5 m pe 3 m), evazat la radacina;
-    - doua "brate": unul LUNG spre -X (3 ciorchini turtiti in sir, coborat) si
-      unul SCURT spre +X, mai sus (2 ciorchini); intre ele, peste furca, un
-      ciorchine central plat; un ciorchine spate;
-    - ciorchini LATI si PLATI (rz/rx ~0,4 -> aspect de platouri);
-    - ansamblu ~7 m inalt x ~11 m lat (h/l ~0,65), centrul de masa deplasat.
+    - ansamblu ~8,8 m lat x ~7,3 m inalt (l/h ~1,2), aproape simetric;
+    - trunchi SCURT si GROS (Ø baza ~2,2 m, evazare puternica), furca la 2,2 m
+      in 5 crengi groase care se vad prin goluri;
+    - 9 ciorchini mai MICI decat la `a`, in 3 nivele: 3 jos (coborati spre 35%
+      din inaltime, iesiti lateral), 3 la mijloc cu GOL mare in centru unde se
+      vad crengile, 3 sus; fiecare ciorchine zimtat, suprapunere mica;
     - un singur slot pe coroana (LARCH_RUST).
     """
-    def trunk(tr, bark):
-        tr.frustum((0.1, 0, 0.2), 1.0, 0.7, 0.4, bark, segments=8)
-        tr.beam((0.1, 0, 0.3), (0.6, 0, 1.6), (0.95, 0.95), bark)
-        tr.beam((0.6, 0, 1.5), (1.0, 0, 2.7), (0.8, 0.8), bark)
-        return (1.0, 0.0, 2.7)
-
     b = [
-        (-4.0, 0.3, 3.2, 1.8, 1.9, 1.1),    # brat stang jos, capat
-        (-1.9, -0.6, 4.2, 1.9, 2.0, 1.15),  # brat stang, mijloc, mai sus
-        (0.5, 0.5, 5.4, 1.8, 1.8, 1.1),     # central sus
-        (3.1, -0.3, 4.9, 1.7, 1.7, 1.0),    # brat drept scurt
-        (-0.9, -2.0, 3.8, 1.8, 1.8, 1.05),  # spate
+        (-3.7, 0.2, 2.9, 1.5, 1.4, 0.9),    # jos stanga, lateral
+        (3.8, 0.0, 2.8, 1.5, 1.4, 0.9),     # jos dreapta, lateral
+        (0.2, -1.9, 3.0, 1.5, 1.4, 0.9),    # jos spate
+        (-2.7, 0.1, 4.5, 1.5, 1.4, 0.9),    # mijloc stanga
+        (2.7, 0.2, 4.6, 1.5, 1.4, 0.9),     # mijloc dreapta
+        (0.1, -1.3, 4.7, 1.4, 1.3, 0.9),    # mijloc spate (centrul fata ramane gol)
+        (-1.2, 0.2, 6.0, 1.5, 1.4, 0.9),    # sus stanga
+        (1.3, 0.0, 6.1, 1.5, 1.4, 0.9),     # sus dreapta
+        (0.1, -0.6, 6.5, 1.2, 1.2, 0.8),    # varf
     ]
-    limbs = [(-3.7, 0.2, 2.7), (-1.8, -0.4, 3.6), (0.5, 0.3, 4.7), (2.9, -0.2, 4.2)]
-    return _tree("Maple", b, limbs, RUST, trunk_r=0.5, seed=11, subdiv=3, jag=0.34,
-                 trunk_fn=trunk, limb_w=(0.5, 0.34))
+    limbs = [(-3.4, 0.2, 2.5), (3.5, 0.0, 2.4), (-2.4, 0.1, 4.0),
+             (2.5, 0.2, 4.1), (0.1, -0.8, 4.2)]
+    return _tree("Maple", b, limbs, RUST, trunk_r=0.8, fork_z=2.2, seed=11,
+                 subdiv=3, jag=0.34, limb_w=(0.7, 0.45))
 
 
 def build_ginkgo():
-    """`ginkgo.png` + contract: CON auriu, ciorchini in TREPTE.
+    """`ginkgo.png` (runda 5: decuparea castiga contractul): TRIUNGHI LAT.
 
-    - coroana in con, 5 trepte: jos 4 ciorchini in inel (r ~2,0 m), apoi 3, 3,
-      2 mici, varf 1; fiecare treapta mai ingusta (conicitate ~35 grade);
-    - trunchi drept, ~2,6 m vizibil sub coroana, apoi urca prin con (se vad
-      doua-trei crengi laterale prin golurile treptei de jos);
-    - ~11 m inalt x ~7 m lat (h/l ~1,5);
+    - coroana triunghiulara larga, l/h ~1,0 (~9,6 x 9,8 m); baza cea mai lata,
+      coborata la ~2,1 m (~22% din inaltime);
+    - 9 ciorchini TURTITI si lati (rz/rx ~0,5), zimtati, suprapusi, in 4 nivele
+      lateral: 3 jos (ies mult pe laturi), 3, 2, 1 sus -- nu sfere stivuite;
+    - trunchi scurt (2,2 m) care se desface in 5 crengi vizibile in jumatatea
+      de jos, plus un fus central care urca in con;
     - un singur slot pe coroana (CAR_YELLOW).
     """
-    def ring(n, r, z, rx, rz, phase=0.0):
-        out = []
-        for i in range(n):
-            a = phase + 2 * math.pi * i / n
-            out.append((r * math.cos(a), r * math.sin(a), z, rx, rx * 0.95, rz))
-        return out
-
-    b = (ring(4, 2.2, 3.4, 1.8, 1.1, 0.5) + ring(3, 1.6, 5.3, 1.55, 1.0, 0.2)
-         + ring(3, 1.0, 7.3, 1.3, 0.95, 0.9) + ring(2, 0.55, 8.8, 1.1, 0.9, 0.3)
-         + [(0.0, 0.0, 10.1, 0.95, 0.9, 0.85)])
-
-    def trunk(tr, bark):
-        tr.frustum((0, 0, 0.2), 1.0, 0.7, 0.4, bark, segments=8)
-        tr.frustum((0, 0, 3.0), 0.7, 0.42, 5.6, bark, segments=8)
-        tr.beam((0, 0, 2.6), (-1.9, 0.5, 3.4), (0.34, 0.34), bark)
-        tr.beam((0, 0, 2.9), (1.8, -0.4, 3.6), (0.34, 0.34), bark)
-        tr.beam((0, 0, 4.3), (-1.2, -0.9, 5.0), (0.28, 0.28), bark)
-        return (0.0, 0.0, 5.0)
-
-    return _tree("Ginkgo", b, [], GINKGO_GOLD, seed=21, subdiv=3, jag=0.30,
-                 trunk_fn=trunk)
+    b = [
+        (-3.0, 0.2, 2.9, 1.8, 1.7, 0.9),    # nivel 1 stanga
+        (3.1, 0.0, 2.9, 1.8, 1.7, 0.9),     # nivel 1 dreapta
+        (0.1, -2.0, 3.0, 1.8, 1.7, 0.9),    # nivel 1 spate
+        (-2.0, 0.3, 4.8, 1.7, 1.6, 0.9),    # nivel 2 stanga
+        (2.1, 0.1, 4.8, 1.7, 1.6, 0.9),     # nivel 2 dreapta
+        (0.0, -1.3, 4.9, 1.6, 1.5, 0.9),    # nivel 2 spate
+        (-0.9, 0.2, 6.7, 1.5, 1.4, 0.9),    # nivel 3 stanga
+        (1.0, -0.1, 6.7, 1.5, 1.4, 0.9),    # nivel 3 dreapta
+        (0.0, 0.0, 8.6, 1.4, 1.3, 1.1),     # varf
+    ]
+    limbs = [(-2.7, 0.2, 2.5), (2.8, 0.0, 2.5), (0.1, -1.8, 2.6),
+             (-1.8, 0.3, 4.3), (1.9, 0.1, 4.3), (0.0, 0.0, 7.0)]
+    return _tree("Ginkgo", b, limbs, GINKGO_GOLD, trunk_r=0.6, fork_z=2.2, seed=21,
+                 subdiv=3, jag=0.34, limb_w=(0.55, 0.4))
 
 
 def build_niwaki_pine():
@@ -228,6 +222,6 @@ def _emit_tree(fn, name, budget):
 _emit_tree(build_momiji_a, "momiji_a", 3500)
 _emit_tree(build_momiji_b, "momiji_b", 3500)
 _emit_tree(build_momiji_c, "momiji_c", 3500)
-_emit_tree(build_ginkgo, "ginkgo", 4500)
+_emit_tree(build_ginkgo, "ginkgo", 3100)
 _emit_tree(build_niwaki_pine, "niwaki_pine", 1500)
 report()

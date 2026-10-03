@@ -41,8 +41,8 @@ check "plants/momiji_a.glb"           3100 --origin=assembly
 
 echo "== arborii (kit §1.2, grupa kit-c) =="
 check "plants/momiji_b.glb"           2500 --origin=assembly
-check "plants/momiji_c.glb"           1800 --origin=assembly
-check "plants/ginkgo.glb"             4300 --origin=assembly --allow-car-slots=Ginkgo_Crown
+check "plants/momiji_c.glb"           3100 --origin=assembly
+check "plants/ginkgo.glb"             3100 --origin=assembly --allow-car-slots=Ginkgo_Crown
 check "plants/niwaki_pine.glb"         750 --origin=assembly
 
 echo

@@ -115,8 +115,8 @@ neschimbat, 3 056 tri, 8,58 m). `_tree` are doar parametri noi opționali
 | piesă | tri (trunchi+coroană) | cote măsurate (L×A×H m) | noduri / slot | comparație | runde |
 |---|---|---|---|---|---:|
 | `momiji_b` | 2 440 (200+2 240) | 10,35 × 5,35 × 8,28 | `Maple_Trunk` WOOD, `Maple_Crown` LAVA_ORANGE | `momiji_b.png` | 3 |
-| `momiji_c` | 1 748 (148+1 600) | 11,34 × 6,89 × 6,64 | `Maple_Trunk`, `Maple_Crown` LARCH_RUST | `momiji_c.png`, `_views` | 3 |
-| `ginkgo` | 4 252 (92+4 160) | 8,34 × 8,09 × 11,01 | `Ginkgo_Trunk`, `Ginkgo_Crown` CAR_YELLOW | `ginkgo.png` | 2 |
+| `momiji_c` | 3 056 (176+2 880) | 11,32 × 5,54 × 7,38 | `Maple_Trunk`, `Maple_Crown` LARCH_RUST | `momiji_c.png`, `_views` | 3 |
+| `ginkgo` | 3 080 (200+2 880) | 10,40 × 6,44 × 9,83 | `Ginkgo_Trunk`, `Ginkgo_Crown` CAR_YELLOW | `ginkgo.png` | 2 |
 | `niwaki_pine` | 712 (312 trunchi + 400 coroană) | 8,71 × 3,18 × 5,14 | `Pine_Trunk` WOOD, `Pine_Crown` TROPICAL_GREEN | `niwaki_pine.png` | 3 |
 
 Fidelitate (verdict sincer):
@@ -140,3 +140,12 @@ Contract ambiguu: `momiji_b/c` decupările contrazic contractul de siluetă
 
 Stare la oprire (kit-c): toate cele 4 piese verify OK + comparații făcute; nimic
 în așteptare.
+
+**Runda 5 (verdictul coordonatorului: decuparea castiga contractul).**
+`momiji_c` refacut ca dom larg aerisit (9 ciorchini mai mici in 3 nivele, gol in
+centru cu 5 crengi groase vizibile, trunchi scurt gros evazat; jos coborat la
+~35%); `ginkgo` refacut ca triunghi lat (9 ciorchini turtiti in 4 nivele, baza la
+~22%, trunchi scurt cu 5 crengi vizibile, l/h ~1,0, 3 080 tri). Verdict sincer:
+ambele seamana acum cu decuparea ca siluetă si golurile; zimtarea ramane
+"piatra sparta", nu lobi; `momiji_c` e inca putin mai simetric/rotund decat
+planșa si fara nuanta sus/jos. Planșa `arbori_scara.png` refacuta.

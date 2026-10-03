@@ -23,6 +23,9 @@ signal spun(car: Car)
 ## Frecventele (Hz) pe cele doua axe; raportul lor iregular = nu se repeta vizibil.
 @export var frequency: Vector2 = Vector2(0.041, 0.027)
 @export_range(0.0, TAU, 0.01) var phase_z: float = 1.2
+## Rotirea figurii in jurul lui Y (grade). 0 = pe axele lumii (Serengeti). Kogarashi
+## o roteste ca axa X locala a figurii sa taie soseaua, nu sa mearga pe ea.
+@export_range(-180.0, 180.0, 1.0) var path_yaw_deg: float = 0.0
 
 @export_group("Sabotaj")
 @export_range(30.0, 360.0, 5.0) var spin_deg: float = 180.0
@@ -46,6 +49,22 @@ signal spun(car: Car)
 @export_range(0.0, 6.0, 0.1) var lift_m: float = 2.5
 ## Cat pastrezi din viteza orizontala cand te ridica.
 @export_range(0.3, 1.0, 0.01) var speed_keep: float = 0.82
+
+@export_group("Aspect")
+## FRUNZE in loc de praf (Kyoto, kogarashi: vantul rece de toamna). Particulele
+## devin placi billboard colorate din `leaf_colors`, iar coloana de praf se
+## stinge la `cone_alpha`. Cu `false` (implicit) hazardul arata exact ca la Serengeti.
+@export var leaf_mode: bool = false
+## Culorile frunzelor (sRGB), alese la intamplare per particula.
+@export var leaf_colors: PackedColorArray = PackedColorArray([
+	Color("#BB3522"), Color("#E54839"), Color("#A8683A")])
+## Cate particule are corpul si cate bucatile mari (0 = implicit: 46 / 16).
+@export_range(0, 64, 1) var dust_amount: int = 0
+@export_range(0, 64, 1) var debris_amount: int = 0
+## Opacitatea coloanei (inmulteste gradientul). 1 = Serengeti.
+@export_range(0.0, 1.0, 0.05) var cone_alpha: float = 1.0
+## Tenta coloanei; alpha-ul ei e ignorat (vezi `cone_alpha`).
+@export var cone_color: Color = Color(0.52, 0.44, 0.34, 1.0)
 
 var _area: Area3D
 var _cone: MeshInstance3D
@@ -90,7 +109,7 @@ func _ready() -> void:
 	# Mai INCHISA decat savana din spate (masurat pe captura: iarba iese
 	# ~(205,178,91), iar o coloana la 0.78/0.66/0.46 cadea peste ea fara
 	# contrast). Praful in suspensie e cenusiu-brun, nu nisip luminat.
-	mat.albedo_color = Color(0.52, 0.44, 0.34, 1.0)
+	mat.albedo_color = Color(cone_color.r, cone_color.g, cone_color.b, cone_alpha)
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -131,9 +150,11 @@ func _ready() -> void:
 ## obiect: nisipul jos (mult, mic, repede) e corpul coloanei, iar bucatile mari
 ## si lenese care urca pe langa palnie spun ca vartejul RIDICA lucruri.
 func _build_particles() -> void:
-	_dust = _spin_emitter(46, Palette.color(Palette.SAND_MID),
+	var n_dust := dust_amount if dust_amount > 0 else 46
+	var n_debris := debris_amount if debris_amount > 0 else 16
+	_dust = _spin_emitter(n_dust, Palette.color(Palette.SAND_MID),
 		1.6, 1.5, 9.0, 0.3, radius * 1.1)
-	_debris = _spin_emitter(16, Palette.color(Palette.DRY_VEGETATION),
+	_debris = _spin_emitter(n_debris, Palette.color(Palette.DRY_VEGETATION),
 		2.4, 2.2, 6.5, 0.8, radius * 1.5)
 
 
@@ -157,19 +178,45 @@ func _spin_emitter(count: int, tint: Color, life: float, size: float,
 	p.gravity = Vector3(0.0, -2.5, 0.0)
 	p.scale_amount_min = size * 0.6
 	p.scale_amount_max = size
+	if leaf_mode:
+		tint = Color.WHITE
+		# Culoarea frunzei se alege o data per particula (initial ramp); ramp-ul
+		# de viata ramane alb si poarta doar alpha.
+		var pick := Gradient.new()
+		var cols := leaf_colors
+		if cols.is_empty():
+			cols = PackedColorArray([Color("#BB3522")])
+		pick.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
+		pick.offsets = PackedFloat32Array()
+		pick.colors = PackedColorArray()
+		for ci in cols.size():
+			pick.add_point(float(ci) / float(cols.size()), cols[ci])
+		p.color_initial_ramp = pick
+		p.angle_min = -180.0
+		p.angle_max = 180.0
+		p.angular_velocity_min = -240.0
+		p.angular_velocity_max = 240.0
 	var fade := Gradient.new()
 	fade.set_color(0, Color(tint.r, tint.g, tint.b, 0.0))
 	fade.set_color(1, Color(tint.r, tint.g, tint.b, 0.0))
 	fade.add_point(0.18, Color(tint.r, tint.g, tint.b, 0.72))
 	fade.add_point(0.70, Color(tint.r, tint.g, tint.b, 0.45))
 	p.color_ramp = fade
-	var bit := SphereMesh.new()
-	bit.radius = 0.30
-	bit.height = 0.60
-	# Rezolutia implicita a unei sfere Godot e 64x32 = 4224 de triunghiuri
-	# (CLAUDE.md): cu 46 de particule ar fi 194.000 de triunghiuri de praf.
-	bit.radial_segments = 5
-	bit.rings = 3
+	var bit: PrimitiveMesh
+	if leaf_mode:
+		# O frunza = o placa de 2 triunghiuri, care priveste mereu camera.
+		var q := QuadMesh.new()
+		q.size = Vector2(0.5, 0.36)
+		bit = q
+	else:
+		var sph := SphereMesh.new()
+		sph.radius = 0.30
+		sph.height = 0.60
+		# Rezolutia implicita a unei sfere Godot e 64x32 = 4224 de triunghiuri
+		# (CLAUDE.md): cu 46 de particule ar fi 194.000 de triunghiuri de praf.
+		sph.radial_segments = 5
+		sph.rings = 3
+		bit = sph
 	var dm := StandardMaterial3D.new()
 	dm.vertex_color_use_as_albedo = true
 	# Culorile proiectului sunt sRGB; fara steag ies cu ~1.5 trepte mai deschise.
@@ -177,6 +224,10 @@ func _spin_emitter(count: int, tint: Color, life: float, size: float,
 	dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	dm.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	if leaf_mode:
+		dm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+		dm.billboard_keep_scale = true
+		dm.cull_mode = BaseMaterial3D.CULL_DISABLED
 	bit.material = dm
 	p.mesh = bit
 	add_child(p)
@@ -187,9 +238,12 @@ func _physics_process(delta: float) -> void:
 	_time += delta
 	for key: Variant in _cooldown.keys():
 		_cooldown[key] = maxf(float(_cooldown[key]) - delta, 0.0)
-	global_position = _origin + Vector3(
+	var off := Vector3(
 		amplitude.x * sin(TAU * frequency.x * _time), 0.0,
 		amplitude.y * sin(TAU * frequency.y * _time + phase_z))
+	if path_yaw_deg != 0.0:
+		off = off.rotated(Vector3.UP, deg_to_rad(path_yaw_deg))
+	global_position = _origin + off
 	_cone.rotate_y(delta * 6.0)
 	for body in _area.get_overlapping_bodies():
 		var car := body as Car

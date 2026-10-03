@@ -38,6 +38,8 @@ const ITEMS := [
 	["maple_orange", Palette.CAR_RED],
 	["ginkgo_gold", Palette.CAR_YELLOW],
 	["leaf_litter", Palette.LARCH_RUST],
+	["maple_rust", Palette.LARCH_RUST],
+	["bamboo_lime", Palette.CACTUS_GREEN],
 	["machiya_wood", Palette.LOG_DARK],
 	["moss", Palette.TROPICAL_GREEN],
 ]

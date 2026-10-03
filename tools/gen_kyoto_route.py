@@ -367,7 +367,9 @@ for w in WPTS:
 PAGODA_XY = (4.0, 200.0)          # Yasaka: 15-25 m de coltul B, pe axa gridului
 SCENE_XY = (324.0, 137.0)         # mijlocul puntii Kiyomizu
 KOYASU_XY = (348.0, 30.0)         # pagoda Koyasu, pe versantul de aterizare
-KINKAKU_XY = (150.0, -300.0)      # pavilionul, pe malul de nord al iazului
+# POI F r2: pozitia REALA (tools/gen_decor_kyoto_f.gd): malul de VEST al iazului
+# (iazul real ~100 x 100 m; vechiul (150, -300) cadea in mijlocul apei).
+KINKAKU_XY = (117.6, -285.0)      # pavilionul, pe malul de vest al iazului
 CENTROID_XY = (centroid_x, centroid_y)
 
 def heading_deg(dx, dy):
@@ -443,12 +445,15 @@ ok = sum(1 for i in sel if abs(azimut_to(i, KOYASU_XY)) <= 15.0)
 report(len(sel) > 0 and ok == len(sel),
        f"C2 Koyasu in fata de pe scena: {ok}/{len(sel)} puncte la 60-110 m cu |azimut| <= 15")
 
-# 4. Pavilionul in dreapta pe F, 20-45 deg la 70-110 m.
+# 4. Pavilionul in dreapta pe F. POI F r2 (pozitia reala, acceptata de
+# coordonator pe captura): de pe apropierea de daruma pavilionul e la 100-150 m,
+# 15-45 deg dreapta (vazut peste apa); sub 100 m drumul a trecut deja de el si
+# azimutul sare peste 45 (iese din cadru lateral, corect: decizia e la daruma).
 f_idx = frac_range_indices(frac["F intrare (spre V)"], frac["F curba stanga sfarsit"])
-sel = [i for i in f_idx if 70.0 <= dist_to(i, KINKAKU_XY) <= 110.0]
-ok = sum(1 for i in sel if 20.0 <= azimut_to(i, KINKAKU_XY) <= 45.0)
+sel = [i for i in f_idx if 100.0 <= dist_to(i, KINKAKU_XY) <= 150.0]
+ok = sum(1 for i in sel if 15.0 <= azimut_to(i, KINKAKU_XY) <= 45.0)
 report(len(sel) > 0 and ok / len(sel) >= 0.6,
-       f"F pavilionul in dreapta (20-45 deg) la 70-110 m: {ok}/{len(sel)} puncte "
+       f"F pavilionul in dreapta (15-45 deg) la 100-150 m: {ok}/{len(sel)} puncte "
        f"({100*ok/max(1,len(sel)):.0f}%, prag 60%)")
 
 # 5. Turnul daruma-otoshi (inainte: tubul): pe exteriorul unei curbe la STANGA, cu
@@ -641,6 +646,261 @@ if len(sys.argv) > 1:
     kog_g = godot((kog_road[0], kog_road[1]), kog_road[2])
     print(f"kogarashi: frac {f_kog:.3f} axa ({kog_road[0]:.1f},{kog_road[1]:.1f}) cota {kog_road[2]:.1f}")
 
+
+    # --- GRUPA PADUREA IN MASA (MeshForest, scenes/props/mesh_forest.gd) ---------
+    # Arborii kitului in MultiMesh feliat, dincolo de primul rand de langa drum
+    # (brief §2, §5.6). Zonele sunt DATE (resurse MeshForestZone); plasarea pe
+    # teren real, distanta fata de drum, marea si zidul lumii se rezolva la rulare.
+    # Petele de ginkgo vin PRIMELE: au `claim` si scot artarii din pata.
+    def _patch_center(f, lat_signed):
+        # lat_signed > 0 = dreapta fata de sens (harta: (hy, -hx)), < 0 = stanga.
+        rp = road_at_frac(f)
+        hx, hy = heading_vec_at_frac(f)
+        mx = rp[0] + hy * lat_signed
+        my = rp[1] - hx * lat_signed
+        return (mx, -my)   # Godot: gx = x, gz = -y
+
+    MAPLES = ("momiji_a", "momiji_b", "momiji_c")
+    forest_zones = []   # dictionare, scrise mai jos ca sub_resource-uri
+
+    def fz(label, kind, species, weights, **kw):
+        d = dict(label=label, kind=kind, species=species, weights=weights)
+        d.update(kw)
+        forest_zones.append(d)
+
+    # === POI C (Kiyomizu) === LUMINISURI: discuri cu `claim` si fara specii
+    # (MeshForest le citeste ca rezervare), PRIMELE in lista, ca sa goleasca
+    # zonele de artari de dupa ele. Centrele sunt cele din
+    # tools/gen_decor_kyoto_c.gd (DecorManual/ZoneC_Kiyomizu).
+    for lbl, cx_, cz_, rad in (("luminis C sala N", 384.0, -160.0, 13.0),
+                               ("luminis C sala S", 384.0, -144.0, 13.0),
+                               ("luminis C2 Koyasu", 350.0, -42.0, 11.0),
+                               # culoarul de vedere buza scenei -> Koyasu (r2)
+                               ("luminis C2 culoar 1", 361.0, -95.0, 7.0),
+                               ("luminis C2 culoar 2", 358.0, -81.0, 7.0),
+                               ("luminis C2 culoar 3", 355.0, -67.0, 7.0),
+                               ("luminis C2 culoar 4", 352.5, -54.0, 7.0),
+                               ("luminis C sanjunoto", 288.0, -216.0, 9.0),
+                               ("luminis C clopotnita", 312.0, -215.5, 6.0),
+                               ("luminis C1 vedere scena", 305.0, -172.0, 16.0),
+                               ("luminis C1 vedere colt", 330.0, -184.0, 9.0),
+                               ("luminis C1 buza rapei", 322.0, -164.0, 12.0),
+                               # coroanele de la colt, pe liniile C1 -> scena/sala (r2)
+                               ("luminis C1 colt 1", 340.0, -177.0, 10.0),
+                               ("luminis C1 colt 2", 355.0, -168.0, 7.0),
+                               ("luminis C1 dreapta 1", 312.0, -182.0, 8.0),
+                               ("luminis C1 dreapta 2", 324.0, -183.0, 8.0),
+                               ("luminis C1 dreapta 3", 340.0, -186.0, 8.0),
+                               ("luminis C1 incinta 1", 302.0, -216.0, 6.0),
+                               ("luminis C1 incinta 2", 323.0, -218.0, 7.0),
+                               ("luminis C1 incinta 3", 337.0, -218.0, 7.0),
+                               # pe axa lui C1: discul „versant Higashiyama" punea
+                               # coroane peste carosabil in cadrul de la 0.235 (r2)
+                               ("luminis C1 ax 1", 302.0, -199.0, 9.0),
+                               ("luminis C1 ax 2", 316.0, -200.0, 9.0),
+                               ("luminis C1 ax 3", 330.0, -201.0, 9.0),
+                               ("luminis C1 ax 4", 344.0, -200.0, 9.0),
+                               ("luminis C1 colt 3", 352.0, -186.0, 7.0)):
+        fz(lbl, 1, (), (), center=(cx_, 0.0, cz_), radius=rad, claim=True)
+    # === sfarsit POI C ===
+    # Petele de ginkgo: 4, pe EXTERIORUL buclei (stanga la D/F, dreapta la C/H
+    # dupa cum curge soseaua), ca sa se vada in fata-lateral din camera de joc.
+    for lbl, f, lat, rad in (("pata ginkgo C", 0.222, -40.0, 24.0),
+                             ("pata ginkgo D", 0.372, -44.0, 26.0),
+                             ("pata ginkgo F", 0.600, -34.0, 20.0),
+                             ("pata ginkgo H", 0.905, 40.0, 22.0)):
+        cx_, cz_ = _patch_center(f, lat)
+        fz(lbl, 1, ("ginkgo",), (1.0,), center=(cx_, 0.0, cz_), radius=rad,
+           spacing=5.2, edge_clear_m=12.0, claim=True, scale_min=0.9, scale_max=1.25,
+           max_below_road_m=3.0, seed=11 + int(f * 1000))
+    # C / C2: versantul Higashiyama si rapa de sub scena (artari rosii densi).
+    fz("rapa C artari", 0, MAPLES, (0.36, 0.34, 0.30), frac_from=F["C1 inainte de colt"],
+       frac_to=F["D aterizare coborare"], lat_min=9.0, lat_max=72.0, spacing=5.0, edge_clear_m=10.5, seed=21)
+    fz("versant Higashiyama", 1, MAPLES, (0.34, 0.33, 0.33), center=(372.0, 0.0, -150.0),
+       radius=88.0, spacing=7.0, seed=22)
+    # D: valea de artari (cea mai deasa), pana la gura podului si sub el.
+    # POI D (runda 2, dupa reparatia MeshForest 97be100b: edge_clear_m e viu).
+    # Tunelul des din diorama: trunchiurile la >= margine + 5,5 (printre
+    # piesele primului rand manual, margine + 5..6,8), coroanele (semilatime
+    # 5-7 m) ajung pana la ~margine + 0..1,5, dar nu pe banda. lat_min 9 lasa
+    # regula de margine sa decida (pe exteriorul curbelor drumul se departeaza
+    # de ax). Pas 3,8 (era 4,6): cu separarea minima vie (0,35 x pas) valea
+    # iesea livada. Cedrii inchisi (10%): coniferele verzi din diorama.
+    fz("valea D artari", 0, MAPLES + ("cedar_dark",), (0.33, 0.27, 0.30, 0.10), frac_from=F["D aterizare coborare"],
+       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=3.8, edge_clear_m=5.5, seed=31)
+    # Rapa de sub Tsutenkyo: coroanele urca pana la nivelul podului (brief §2 D).
+    # Fundul e la -8..-11 sub punte pe portiunea adanca; artarii de 8,6 m (scala
+    # <= 1,05) ajung la +-1,5 m de cota puntii, iar trunchiul la >= 10,4 m de
+    # ax tine coroana (semilatime <= 6,1) in afara tablierului (hw 4,5).
+    fz("rapa Tsutenkyo artari", 0, MAPLES, (0.40, 0.28, 0.32), frac_from=F["D pod Tsutenkyo intrare"] + 0.002,
+       frac_to=F["D pod Tsutenkyo iesire"] - 0.002, lat_min=12.5, lat_max=18.0, spacing=4.2, edge_clear_m=5.0,
+       scale_min=0.85, scale_max=1.05, seed=32)
+    # === POI E: poienile Inari (gen_decor_kyoto_e.gd, „; poiana" la iesire) ===
+    # Cedrii fasiei (edge_clear 9, coroana pana la ~5 m) acopereau altarasele,
+    # sirurile de torii votive si vulpile din DecorManual (captura r1). Fiecare
+    # grup primeste o poiana DISC cu `claim`, emisa INAINTEA zonelor de cedru:
+    # in ea cresc cativa cedri (70%) si artari rosii ca accent, dincolo de piese
+    # (edge_clear 14).
+    for k_, (px_, pz_, pr_) in enumerate((
+            (401.6, 356.8, 12.0), (379.9, 336.1, 12.0), (393.3, 260.5, 9.0),
+            (428.2, 291.4, 10.0), (394.2, 311.2, 10.5), (419.3, 332.9, 10.0),
+            (364.8, 348.0, 10.0), (370.8, 379.8, 10.0), (351.0, 385.4, 10.0),
+            (326.3, 387.1, 10.0), (389.7, 367.8, 10.0), (350.6, 354.1, 10.0),
+            (360.6, 382.4, 10.0))):
+        # Poiana furcii (a treia) ramane GOALA: artarii din pana dintre bucla si
+        # banda ascundeau poarta mare si vulpile (captura r1b 0,478).
+        gol_ = (k_ == 2)
+        fz("Inari poiana %d" % k_, 1, ("cedar_dark",) + MAPLES, (0.7, 0.1, 0.1, 0.1),
+           center=(px_, 0.0, pz_), radius=pr_, spacing=40.0 if gol_ else 9.0,
+           edge_clear_m=60.0 if gol_ else 14.0, claim=True, scale_min=0.8,
+           scale_max=1.0, seed=440 + k_)
+    # === /POI E ===
+    # E: muntele Inari, cedru inchis, cu cate un artar rosu printre ei.
+    fz("Inari cedru fasie", 0, ("cedar_dark", "momiji_b"), (0.88, 0.12),
+       frac_from=F["E arc intrare (E' se desprinde)"] - 0.008,
+       frac_to=F["E arc iesire (E' revine)"] + 0.006, lat_min=12.0, lat_max=72.0,
+       spacing=3.7, scale_min=0.95, scale_max=1.45, seed=41)
+    fz("Inari cedru disc", 1, ("cedar_dark", "momiji_b"), (0.88, 0.12), center=(332.72, 0.0, 292.0),
+       radius=70.0, spacing=4.0, scale_min=0.95, scale_max=1.45, seed=42)
+    # F: gradina, niwaki cu cativa artari; nimic in iaz (sol sub cota soselei).
+    # POI F: pe DREAPTA (spre iaz) fasia se opreste la 0,595, de unde incepe
+    # vederea spre pavilion peste apa; malul drept il imbraca DecorManual (ZoneF).
+    fz("gradina F", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
+       frac_from=F["F intrare (spre V)"] - 0.012, frac_to=F["G S1 intrare"] + 0.004,
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=51, side=-1)
+    fz("gradina F dreapta", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
+       frac_from=F["F intrare (spre V)"] - 0.012, frac_to=0.595,
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=53, side=1)
+    fz("gradina F dreapta 2", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
+       frac_from=0.656, frac_to=F["G S1 intrare"] + 0.004,
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=54, side=1)
+    # POI F: dealul gradinii (+24, in spatele pavilionului, vazut din drum pe
+    # cadrul-erou): artari in trei rosuri, niwaki si cativa ginkgo, ca aurul
+    # pavilionului sa stea pe rosu si verde, nu pe un con de iarba.
+    fz("deal gradina F", 1, MAPLES + ("niwaki_pine", "ginkgo"), (0.26, 0.24, 0.24, 0.16, 0.10),
+       center=(hill_f_g[0], 0.0, hill_f_g[2]), radius=46.0, spacing=6.0,
+       edge_clear_m=10.5, scale_min=0.95, scale_max=1.3, seed=52)
+    # G2 (POI G, tools/gen_decor_kyoto_g.gd): culoarul VIADUCTULUI trenuletului.
+    # Podul de fier (ModulePlacer, PodulTrenului) e prelungit de DecorManual cu
+    # cate o travee pe fiecare parte (axa X a podului, +-21,16 m), ca trenul de
+    # 25,5 m sa nu atarne peste culee. Discurile REVENDICA banda liniei (raza
+    # 4,5 = puntea + culeea) inaintea zonelor de bambus, ca tulpinile sa nu
+    # strapunga traveele; edge_clear 60 = nu pun nimic, doar revendica.
+    # Origine si axa MASURATE (gen_decor_kyoto_g.gd --scan verifica abaterea):
+    # (-65.70, 411.02), X = (0.9956, -0.0933).
+    for _k, _xa in enumerate((-32.0, -25.0, -18.0, -11.5, 11.5, 18.0, 25.0, 32.0)):
+        fz(f"G2 culoar viaduct {_k}", 1, ("bamboo_crown",), (1.0,),
+           center=(round(-65.70 + 0.9956 * _xa, 2), 0.0, round(411.02 - 0.0933 * _xa, 2)),
+           radius=4.5, spacing=3.0, edge_clear_m=60.0, claim=True, seed=70 + _k)
+    # G: padurea de bambus (mii de tulpini moso) cu tufe de bambus la margine.
+    fz("bambus G tulpini", 0, ("moso_culm",), (1.0,), frac_from=F["G S1 intrare"] - 0.012,
+       frac_to=F["G2 sub podul trenului"] + 0.006, lat_min=6.5, lat_max=44.0, spacing=2.0,
+       edge_clear_m=3.0, scale_min=0.9, scale_max=1.15, max_below_road_m=6.0, seed=61, view_m=140.0)
+    fz("bambus G margine", 0, ("bamboo_crown", "moso_culm"), (0.8, 0.2),
+       frac_from=F["G S1 intrare"] - 0.012, frac_to=F["G2 sub podul trenului"] + 0.006,
+       lat_min=40.0, lat_max=62.0, spacing=5.0, edge_clear_m=3.0, scale_min=0.9,
+       scale_max=1.3, max_below_road_m=6.0, seed=62)
+    # H (POI H, kyoto/poi-h): EXTERIORUL dreptei finale (stanga, vest) era camp
+    # gol pana la orizont; diorama are acolo malul raului si dealuri impadurite
+    # (artari rosii, conifere inchise). O singura FASIE pe stanga, dincolo de
+    # primul rand manual (gen_decor_kyoto_h.gd, 20-45 m de ax), de la 30 m de
+    # ax (randul doi de case al lui A sta la 21-27 m), departe de linia de vedere
+    # spre pagoda (<= 5 m de ax pe ultima treime). `max_below_road_m` 3 tine
+    # copacii afara din bazinul raului (apa la -3, drumul la +3).
+    # Runda 2 (desene): r1 avea 4 discuri x 5 specii x felii de 90 m x umbra
+    # = +88 felii (~+176 desene). Acum o zona, 3 specii, fara umbra (copacii
+    # sunt la >= 30 m de ax; primul rand manual o arunca).
+    fz("H vest fasie", 0, ("momiji_a", "momiji_b", "cedar_dark"), (0.36, 0.34, 0.30),
+       frac_from=F["H pod Togetsukyo intrare"] - 0.004, frac_to=0.985, side=-1,
+       lat_min=30.0, lat_max=110.0, spacing=6.0, edge_clear_m=14.0, shadow_m=0.0,
+       max_below_road_m=3.0, seed=81)
+    # (runda 2: discul "H deal gradina vest" scos - dealul il acopera acum
+    # "deal gradina F", al lui F, cu r 46 pe tot dealul.)
+
+    FOREST_GLBS = (("momiji_a", "plants"), ("momiji_b", "plants"), ("momiji_c", "plants"),
+                   ("ginkgo", "plants"), ("niwaki_pine", "plants"), ("moso_culm", "plants"),
+                   ("bamboo_crown", "plants"), ("cedar_dark", "trees"))
+    forest_ext = ('[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]\n'
+                  '[ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]\n')
+    for stem, folder in FOREST_GLBS:
+        forest_ext += (f'[ext_resource type="PackedScene" path="res://assets/models/kyoto/'
+                       f'{folder}/{stem}.glb" id="mf_{stem}"]\n')
+    forest_sub = ""
+    for k, d in enumerate(forest_zones):
+        sp_txt = ", ".join('"%s"' % x for x in d['species'])
+        fw_txt = ", ".join(str(x) for x in d["weights"])
+        claim_txt = "true" if d.get('claim') else "false"
+        forest_sub += f"""
+[sub_resource type="Resource" id="MFZ_{k}"]
+script = ExtResource("mf_zone")
+label = "{d['label']}"
+kind = {d['kind']}
+species = PackedStringArray({sp_txt})
+weights = PackedFloat32Array({fw_txt})
+spacing = {d.get('spacing', 4.0)}
+edge_clear_m = {d.get('edge_clear_m', 9.0)}
+shadow_m = {d.get('shadow_m', 25.0)}
+view_m = {d.get('view_m', 330.0)}
+max_below_road_m = {d.get('max_below_road_m', 200.0)}
+claim = {claim_txt}
+scale_min = {d.get('scale_min', 0.85)}
+scale_max = {d.get('scale_max', 1.2)}
+seed_value = {d.get('seed', 1)}
+"""
+        if d['kind'] == 0:
+            forest_sub += (f"frac_from = {r3(d['frac_from'])}\nfrac_to = {r3(d['frac_to'])}\n"
+                           f"lat_min = {d['lat_min']}\nlat_max = {d['lat_max']}\n")
+            if 'side' in d:
+                forest_sub += f"side = {d['side']}\n"
+        else:
+            c_ = d['center']
+            forest_sub += (f"center = Vector3({c_[0]:.2f}, {c_[1]:.2f}, {c_[2]:.2f})\n"
+                           f"radius = {d['radius']}\n")
+    scenes_txt = ", ".join(f'ExtResource("mf_{s}")' for s, _ in FOREST_GLBS)
+    zones_txt = ", ".join(f'SubResource("MFZ_{k}")' for k in range(len(forest_zones)))
+    forest_node = f"""
+[node name="PadureMasa" type="Node3D" parent="."]
+script = ExtResource("mf_script")
+scenes = Array[PackedScene]([{scenes_txt}])
+zones = Array[ExtResource("mf_zone")]([{zones_txt}])
+"""
+    # --- sfarsit GRUPA PADUREA IN MASA ---------------------------------------
+
+    # === DECOR MANUAL (POI-uri) ==============================================
+    # Generatorul asta rescrie TOT Track18.tscn, deci decorul manual al POI-urilor
+    # (noduri sub `DecorManual`, memoria decor-manual-sursa-de-adevar) nu poate
+    # sta doar in .tscn: ar disparea la prima regenerare. Fiecare POI isi emite
+    # blocul cu generatorul lui (`tools/gen_decor_kyoto_<x>.gd --out=...`) in
+    # `tools/kyoto_decor/poi_<x>.part`, cu doua sectiuni: `;;EXT` (ext_resource-uri,
+    # id-uri cu prefixul POI-ului) si `;;NODES` (zona + piesele). Aici se lipesc
+    # toate, in ordinea numelui; un POI nou = un fisier nou, fara cod aici.
+    import glob as _glob
+    import os as _os
+    decor_ext = ""
+    decor_nodes = ""
+    _parts = sorted(_glob.glob(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                                             "kyoto_decor", "poi_*.part")))
+    for _pp in _parts:
+        _sec = None
+        for _ln in open(_pp, encoding="utf-8").read().splitlines():
+            if _ln.strip() == ";;EXT":
+                _sec = "ext"
+                continue
+            if _ln.strip() == ";;NODES":
+                _sec = "nodes"
+                continue
+            if _sec == "ext" and _ln.strip():
+                decor_ext += _ln + "\n"
+            elif _sec == "nodes":
+                decor_nodes += _ln + "\n"
+    if _parts:
+        decor_ext = ('[ext_resource type="Script" uid="uid://twspgftscxb4" '
+                     'path="res://scenes/props/world_prop.gd" id="dm_prop"]\n') + decor_ext
+        decor_nodes = ('\n[node name="DecorManual" type="Node3D" parent="."]\n'
+                       'script = ExtResource("dm_prop")\n\n') + decor_nodes
+    print(f"decor manual: {len(_parts)} blocuri POI")
+    # === /DECOR MANUAL ===
+
     # CameraZone-uri: Tsutenkyo (3,2 / 5,5 / 4) pe fractie, tunel (2,4 / 5,2) in cutie.
     tscn = f"""[gd_scene format=3]
 
@@ -658,12 +918,18 @@ if len(sys.argv) > 1:
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
-"""
+[ext_resource type="Script" path="res://scenes/props/module_placer.gd" id="intc_placer"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/tsutenkyo_roof_module.glb" id="intc_tsu"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/togetsukyo_module.glb" id="intc_toget"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kakezukuri_scaffold.glb" id="intc_scaffold"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/iron_truss_bridge.glb" id="intc_truss"]
+{forest_ext}{decor_ext}"""
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
 [sub_resource type="BoxShape3D" id="BoxShape3D_zone{k}"]
 size = Vector3({sz[0]:.2f}, {sz[1]:.2f}, {sz[2]:.2f})
 """
+    tscn += forest_sub   # GRUPA PADUREA IN MASA
     tscn += f"""
 [sub_resource type="Curve3D" id="Curve3D_kyoto"]
 closed = true
@@ -739,6 +1005,8 @@ branch_index = 1
 gate_scene = ExtResource("13_senbon")
 large_gate_scene = ExtResource("14_large")
 cedar_scene = ExtResource("15_cedar")
+foxes_enabled = false
+mouth_clearing = true
 
 [node name="CovorFrunze" type="Node3D" parent="."]
 script = ExtResource("16_carpet")
@@ -746,7 +1014,7 @@ zones = Array[Vector3]([{carpet_zones}])
 
 [node name="FrunzeCazatoare" type="GPUParticles3D" parent="."]
 script = ExtResource("17_leaffall")
-
+{forest_node}
 [node name="Hazarduri" type="Node3D" parent="."]
 
 [node name="SaritaScena" type="Marker3D" parent="Hazarduri"]
@@ -809,6 +1077,56 @@ look_height = 0.6
 fov_bonus = 3.0
 ceiling = 5.2
 """
+    # === GRUPA INT-C: PODURILE SI SCENA (ModulePlacer) ===
+    # Modulele GLB repetate pe curba de scenes/props/module_placer.gd (origine in
+    # centrul modulului pe axa, puntea la y = 0, -Z inainte).
+    #  * Tsutenkyo: 6 m, pe intervalul de latime ingusta (frac D pod intrare..iesire).
+    #    `Tsu_Rail` ascuns: dubleaza parapetul procedural (deck_rails), care RAMANE.
+    #  * Togetsukyo: 10 m, pe H (frac 0,832-0,894).
+    #  * Esafodajul scenei: 6 m pas, doua randuri (+-3 m) sub puntea de 12 m, cu
+    #    baza la 16 m sub drum (podeaua rapei C2 = +16, puntea = +32), coliziune mesh.
+    #  * Podul trenului (G2): o singura piesa pe drum, travee peste drum (gol 15,15).
+    tscn += f"""
+[node name="Poduri" type="Node3D" parent="."]
+
+[node name="Tsutenkyo" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_tsu")
+frac_from = {r3(f_bridge_a)}
+frac_to = {r3(f_bridge_b)}
+module_length = 6.0
+seam_half_width = 6.9
+hide_nodes = PackedStringArray("Tsu_Rail")
+
+[node name="Togetsukyo" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_toget")
+frac_from = {r3(f_togetsu_a)}
+frac_to = {r3(f_togetsu_b)}
+module_length = 10.0
+seam_half_width = 7.6
+
+[node name="EsafodajScena" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_scaffold")
+frac_from = {r3(f_scene_a)}
+frac_to = {r3(f_scene_b)}
+module_length = 6.0
+lateral_offsets = PackedFloat32Array(-3, 3)
+ground_fit = true
+module_height = 15.92
+collision_mode = "mesh"
+seam_half_width = 3.4
+
+[node name="PodulTrenului" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_truss")
+frac_from = {r3(F["G2 sub podul trenului"])}
+frac_to = 0.0
+module_length = 5.8
+collision_mode = "mesh"
+"""
+    # === /GRUPA INT-C ===
     for k, (nm, g, sz) in enumerate(zones):
         tscn += f"""
 [node name="{nm}" type="Area3D" parent="Hazarduri"]
@@ -819,6 +1137,7 @@ script = ExtResource("10_respawn")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})
 shape = SubResource("BoxShape3D_zone{k}")
 """
+    tscn += decor_nodes   # DECOR MANUAL (POI-uri)
     with open(sys.argv[1], "w", encoding="utf-8", newline="\n") as f:
         f.write(tscn)
     print(f"\nscris: {sys.argv[1]}")

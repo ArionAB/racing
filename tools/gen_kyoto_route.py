@@ -629,7 +629,7 @@ if len(sys.argv) > 1:
     # Figura Lissajous e rotita cu 30 grade ca axa X locala sa fie TRANSVERSALA
     # pe sosea (directia mersului la pod: 150 grade busola); perioada pe axa
     # transversala 1/0,0345 = ~29 s (brief §3).
-    f_kog = f_bridge_b + 0.012
+    f_kog = f_bridge_b + 0.004
     kog_road = road_at_frac(f_kog)
     kog_g = godot((kog_road[0], kog_road[1]), kog_road[2])
     print(f"kogarashi: frac {f_kog:.3f} axa ({kog_road[0]:.1f},{kog_road[1]:.1f}) cota {kog_road[2]:.1f}")
@@ -757,13 +757,13 @@ model = ExtResource("12_daruma_glb")
 [node name="Kogarashi" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {kog_g[0]:.3f}, {kog_g[1]:.3f}, {kog_g[2]:.3f})
 script = ExtResource("16_devil")
-amplitude = Vector2(9, 5)
+amplitude = Vector2(9, 2)
 frequency = Vector2(0.0345, 0.0213)
 path_yaw_deg = 30.0
-spin_deg = 108.0
+spin_deg = 72.0
 blind_time = 0.35
 lift_m = 1.5
-radius = 2.0
+radius = 1.8
 height = 9.0
 leaf_mode = true
 dust_amount = 30

@@ -396,6 +396,11 @@ func _physics_process(delta: float) -> void:
 
 	var pos := to_global(curve.sample_baked(_dist, true))
 	var target_yaw := _travel_yaw(length, pos)
+	# Primul tick porneste DIRECT pe directia de mers: `_yaw` incepe la 0
+	# (-Z global), iar trenuletul Kyoto G2, pornit pe pod cu linia pe E-V,
+	# statea ~0,7 s rasucit peste drum, cu jumatate de vagon in aer.
+	if _time <= delta:
+		_yaw = target_yaw
 	_yaw = lerp_angle(_yaw, target_yaw, minf(TURN_RATE * delta, 1.0))
 	if stick_to_ground:
 		pos.y = _ground_y(pos)

@@ -20,6 +20,9 @@ signal build_step(step: StringName)
 const BUILD_STEPS: Array[StringName] = [&"pregatire", &"drum", &"obstacole",
 	&"umeri", &"decor", &"teren", &"umbre", &"apa"]
 
+## Tenta petelor de muschi din zonele de sol cu alfa < 1 (Kyoto POI D).
+const GROUND_MOSS_TINT := Color(0.34, 0.42, 0.16)
+
 const WALL_HEIGHT: float = 1.3
 ## Cate repetitii de textura de suprafata intra intr-un metru de lume.
 ## 0.08 = o dala la 12.5m — destul de mare cat sa nu se vada tiparul repetandu-se,
@@ -1168,7 +1171,7 @@ static func themes() -> Dictionary:
 			# duce spre ei urca gradual — 32° prinde fata propriu-zisa fara sa
 			# inghita taluzul de iarba de la baza (Machu Picchu foloseste 28,
 			# dar acolo geometria era o cadere abrupta fara taluz de tranzitie).
-			"scarp_tint": Color(0.196, 0.190, 0.182),
+			"scarp_tint": Color(0.52, 0.48, 0.43),
 			"scarp_slope_deg": 32.0,
 			"scarp_fade_deg": 10.0,
 			# Cer inchis, printre nori (brief §4: sky_cover_alpha mare) —
@@ -1362,7 +1365,7 @@ static func themes() -> Dictionary:
 			# Picchu): riolit roz-brun (brief §1, #9A6A5A), aproape neutru dupa
 			# randare -- stanca sub fort si coborarea G sunt fete de panta
 			# mare, nu platouri.
-			"scarp_tint": Color(0.46, 0.30, 0.24),
+			"scarp_tint": Color(0.52, 0.48, 0.43),
 			"scarp_slope_deg": 30.0,
 			"scarp_fade_deg": 10.0,
 			# Cer de amurg: portocaliu-roz la orizont -> violet sus (brief §0,
@@ -1635,6 +1638,8 @@ static func themes() -> Dictionary:
 			"sun_energy": 1.0,
 			"exposure": 1.0,
 			"sun_rotation_deg": Vector3(-22, -45, 0),
+			# POI F: fara stalpi de bordura / chevron in iaz (_skip_wet_marker).
+			"markers_skip_water": true,
 			# AMBIENT 0,35, albastru rece de cer: umbrele trag spre albastru, nu
 			# spre negru (memoria umbra-fara-culoare-e-negru-mort).
 			"ambient_color": Color.html("B4C8E6"),
@@ -1675,11 +1680,45 @@ static func themes() -> Dictionary:
 			"hill_color": Color(0.30, 0.38, 0.22),
 			"terrain_alt_class": "leaf_litter",
 			"ground_zones": [
-				# D: valea de artari, de la aterizarea de pe scena pana la gura
-				# podului Tsutenkyo (fractii din tools/gen_kyoto_route.py).
-				{"from": 0.331, "to": 0.449, "max_m": 45.0, "fade_m": 18.0,
-					"tint": Color(0.8626, 0.54, 0.3079)},
+				# D (POI D runda 2): humus de frunze ruginiu-INCHIS sub coroane, cu
+				# pete de muschi. Tenta veche (#DC8A4E, a clasei leaf_litter) iesea
+				# nisip bej patat (captura r1): acum brun mai inchis decat covorul
+				# rosu de pe drum, ca drumul sa se desparta de sol. ALFA < 1 =
+				# pete de muschi (vezi `_build_terrain`, zona de sol): pe 1 - a
+				# din pete solul revine la solul temei (oliv, muschi). Sta INAINTEA
+				# zonei vechi D si are raza mai mare, deci aceea nu mai castiga
+				# nicaieri (`zw > w` strict); stearsa la integrare. Pana la
+				# iesirea de pe pod: fundul rapei Tsutenkyo e tot padure.
+				{"from": 0.331, "to": 0.468, "max_m": 60.0, "fade_m": 18.0,
+					"tint": Color(0.42, 0.21, 0.11, 0.4)},
+				# C: rapa de sub scena Kiyomizu (POI C runda 2). Fundul ei e in
+				# umbra peretelui de vest toata dupa-amiaza (soarele de 22° din SV),
+				# deci lumina doar de ambientul albastru: solul oliv iesea TURCOAZ
+				# si se citea ca apa printre artari. Covorul de frunze il trage in
+				# ruginiu, si in umbra ramane brun-rosu („sub tine e rosu", §2.0).
+				# r3: doar SUB buza (≥ 6 m sub puntea/coltul cel mai apropiat), ca
+				# platoul lui C1 si incinta templului sa ramana pe solul temei.
+				{"from": 0.258, "to": 0.314, "max_m": 80.0, "fade_m": 20.0,
+					"under_road_m": 6.0, "tint": Color(0.82, 0.40, 0.20)},
 			],
+			# TROTUARUL de pe Yasaka-dori (POI A, runda 2, aprobat de
+			# coordonator): fasia dintre bordura si fatadele machiya (peretele
+			# la bordura + 3,4 m) iesea iarba inchisa. Mecanismul Jodhpur, fara
+			# cod nou: umarul se lateste la 3,4 m pe fereastra startului (de pe
+			# dreapta H, s ~ -80, pana la coltul lui B, s ~ 155) si poarta dala
+			# `alpine_granite` (lespezi plate, citite caldaram de sus). Textura
+			# umarului e pe TEMA, deci si umarul ingust de 1,3 m de pe restul
+			# turului devine piatra in loc de pietris. `shoulder_zones_are_road`
+			# NU se pune: trotuarul ramane in afara drumului (felinarele de
+			# hartie, cu corp, stau pe el la bordura + 2,1). Latimea 4,0 > 3,4:
+			# lespezile intra 0,6 m sub fatada, altfel ramanea o fasie de iarba.
+			"shoulder_texture": "res://assets/textures/classes/alpine_granite.png",
+			"shoulder_color": Color(0.80, 0.80, 0.80),
+			"shoulder_tile": 6.0,
+			# POI B (Sannenzaka): fereastra continua pe urcare pana la 0,200
+			# (~15 m inaintea portii Niomon), cat tin randurile de machiya si
+			# treptele de pe trotuarul din dreapta.
+			"shoulder_width_zones": [Vector3(0.962, 0.200, 4.0)],
 			# ORIZONTUL (kit int-a): dealurile Higashiyama in toamna, muntele
 			# Arashiyama si banda de acoperisuri din pacla (`kyoto_horizon.glb`,
 			# brief §5.4). Inelele stau sub fog_end 340 < FAR_PLANE 380 (memoria
@@ -1713,6 +1752,16 @@ static func themes() -> Dictionary:
 			# iese pe marginea unui tablier fara parapet. Mesh-ul e placeholderul
 			# CONCRETE din `_build_walls`; modulele de pod din kit il inlocuiesc.
 			"deck_rails": true,
+			# PUNTEA SCENEI KIYOMIZU (POI C): fata de lemn deschis cald (scandurile
+			# clasei `wood`, ridicate spre hinoki) pe fasia inaltata 0,255-0,304,
+			# trambulina de la capat din aceleasi scanduri, iar parapetul si
+			# fusta tablierelor in lemn inchis in loc de beton. Inainte: asfalt pe
+			# punte, fusta verde-oliv (`hill_color`), trambulina portocalie — „blocul
+			# galben cu latura turcoaz" de pe esafodaj. Zero materiale noi: lemnul
+			# deschis inlocuieste portocaliul trambulinei, lemnul inchis betonul.
+			"wood_deck_ranges": [Vector2(0.255, 0.304)],
+			"wood_deck_color": Color(1.35, 1.22, 1.08),
+			"deck_color": Color(0.36, 0.25, 0.17),
 			"kerbs": false,
 			"cliffs": false,
 			"decor": "none",
@@ -5096,11 +5145,14 @@ func _build_center_line() -> void:
 	var lift := Vector3.UP * 0.045
 	var d := 4.0
 	var idx := 0
+	# Puntea de lemn (scena Kiyomizu) nu poarta marcaj de sosea.
+	var wood := _wood_deck_ranges()
 	while d < total - 5.0:
 		while idx + 1 < _dists.size() and _dists[idx + 1] < d:
 			idx += 1
 		var i := idx % n
-		if _road_gap(i) or _road_ice(i):
+		if _road_gap(i) or _road_ice(i) or (not wood.is_empty()
+				and _frac_in_ranges(frac_at(i), wood)):
 			d += 6.5
 			continue
 		var dir := (baked[(i + 1) % n] - baked[i]).normalized()
@@ -6050,6 +6102,12 @@ func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
 		var reach := float(zd.get("max_m", 30.0))
 		var fade := maxf(float(zd.get("fade_m", 10.0)), 0.001)
 		var tint: Color = zd.get("tint", Color.WHITE)
+		# `under_road_m` (optional, Kyoto POI C): zona prinde doar solul aflat cu
+		# cel putin atatia metri SUB soseaua cea mai apropiata din fereastra
+		# (fundul si pantele unei rape), cu o trecere de 3 m; platoul de la cota
+		# drumului ramane pe solul temei. Fara cheie: comportamentul vechi.
+		var under := float(zd.get("under_road_m", -1.0))
+		var pys := PackedFloat32Array()
 		# Punctele de sosea din fereastra, din 2 in 2 (bake ~1-2 m: eroarea de
 		# distanta ramane sub un metru, fata de un fade de zeci).
 		var pts := PackedVector2Array()
@@ -6060,6 +6118,7 @@ func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
 				continue
 			var p := Vector2(baked[i].x, baked[i].z)
 			pts.append(p)
+			pys.append(baked[i].y)
 			lo = lo.min(p)
 			hi = hi.max(p)
 		if pts.is_empty():
@@ -6075,12 +6134,21 @@ func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
 			for gx in range(gx0, gx1 + 1):
 				var q := Vector2(origin.x + float(gx) * step, origin.z + float(gz) * step)
 				var best := INF
-				for p in pts:
-					best = minf(best, q.distance_squared_to(p))
+				var best_y := 0.0
+				for pi in pts.size():
+					var dq := q.distance_squared_to(pts[pi])
+					if dq < best:
+						best = dq
+						best_y = pys[pi]
 				if best > reach2:
 					continue
 				var zw := 1.0 - smoothstep(reach - fade, reach, sqrt(best))
 				var gi := gz * row + gx
+				if under >= 0.0 and gi < _terr_heights.size():
+					var below := best_y - _terr_heights[gi]
+					zw *= smoothstep(under, under + 3.0, below)
+					if zw <= 0.0:
+						continue
 				if zw > w[gi]:
 					# Doua zone care se ating: castiga cea mai prezenta, cu
 					# tenta amestecata, ca granita sa nu sara intre doua culori.
@@ -6226,6 +6294,12 @@ func _build_terrain() -> void:
 	dirt_noise.seed = _world_seed() ^ 0xD127
 	dirt_noise.frequency = 0.035 # perioada ~28 m: pete de 8-15 m, ca in referinta
 	dirt_noise.fractal_octaves = 2
+	# Petele de muschi din zonele de sol cu alfa < 1 (5-8 m, mai dese decat
+	# petele de pamant).
+	var moss_noise := FastNoiseLite.new()
+	moss_noise.seed = _world_seed() ^ 0x3055
+	moss_noise.frequency = 0.08
+	moss_noise.fractal_octaves = 2
 	# SOLUL PE ZONE DE TUR (cheia `ground_zones`). Vezi `_ground_zone_field`.
 	# Null pe orice tema fara cheie: restul pistelor nu se schimba cu un pixel.
 	var zone_field: Array = _ground_zone_field(cells, step, origin)
@@ -6465,9 +6539,20 @@ func _build_terrain() -> void:
 						if zw > 0.0:
 							zw = smoothstep(0.0, 1.0, clampf(zw + dirt_noise.get_noise_2d(
 								v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0))
-							tint = tint.lerp(zone_tints[gi], zw)
+							var zt: Color = zone_tints[gi]
+							tint = tint.lerp(zt, zw)
 							if zone_alt:
 								grass_w = lerpf(grass_w, 1.0, zw)
+							# PETE DE MUSCHI (Kyoto POI D): alfa tentei de zona < 1
+							# vopseste petele (zgomot de 5-8 m) in verde de muschi,
+							# cu taria (1 - a). Solul temei (oliv pe dala de nisip)
+							# iesea gri in captura, deci tenta e explicita, pe
+							# aceeasi dala a zonei. Alfa 1 (toate celelalte zone) =
+							# nimic schimbat.
+							if zt.a < 0.999:
+								var mp := smoothstep(0.05, 0.3, moss_noise.get_noise_2d(
+									v.x, v.z)) * (1.0 - zt.a) * zw
+								tint = tint.lerp(GROUND_MOSS_TINT, mp)
 					if snow_tint != null:
 						var snow_w := clampf(
 							(v.y - snow_line) / snow_fade, 0.0, 1.0)
@@ -10049,6 +10134,12 @@ func _build_road() -> void:
 	var ice_top := SurfaceTool.new()
 	ice_top.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var has_ice := not _ice_ranges().is_empty()
+	# PUNTEA DE LEMN (Kyoto, scena Kiyomizu): aceeasi geometrie si aceeasi
+	# coliziune ca soseaua, alt mesh si alt material — tiparul ghetii de mai sus.
+	# Pe o tema fara `wood_deck_ranges` lista e goala si nimic nu se schimba.
+	var wood_top := SurfaceTool.new()
+	wood_top.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var has_wood := not _wood_deck_ranges().is_empty()
 	var down := Vector3.DOWN * ROAD_THICKNESS
 	var n := baked.size()
 	# UV-uri PATRATE: acelasi numar de metri pe ambele axe.
@@ -10132,7 +10223,8 @@ func _build_road() -> void:
 		if _road_gap(i):
 			continue
 		var on_ice := has_ice and _road_ice(i, j)
-		var dst := ice_top if on_ice else top
+		var on_wood := has_wood and _frac_in_ranges(frac_at(i), _wood_deck_ranges())
+		var dst := ice_top if on_ice else (wood_top if on_wood else top)
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
 		var s0v := _side_at(i)
@@ -10247,7 +10339,7 @@ func _build_road() -> void:
 		var u0 := _dists[i] / side_tile
 		var u1 := _dists[i + 1] / side_tile
 		var skirt := deck_sides \
-			if _bridge_mix(i) > 0.5 or _overpass_mix(i) > 0.5 else sides
+			if _bridge_mix(i) > 0.5 or _overpass_mix(i) > 0.5 or on_wood else sides
 		if on_ice:
 			skirt = ice_top
 		skirt.set_uv(Vector2(u0, 0)); skirt.add_vertex(l0)
@@ -10381,6 +10473,16 @@ func _build_road() -> void:
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 		null, null, true, null, "RoadSides")
+	if has_wood:
+		wood_top.index()
+		wood_top.generate_normals()
+		var wood_mesh := wood_top.commit()
+		if wood_mesh != null and wood_mesh.get_surface_count() > 0:
+			var winst := MeshInstance3D.new()
+			winst.name = "StageDeckTop"
+			winst.mesh = wood_mesh
+			winst.material_override = _wood_deck_material()
+			add_child(winst)
 	if has_ice:
 		ice_top.index()
 		ice_top.generate_normals()
@@ -10394,7 +10496,7 @@ func _build_road() -> void:
 	if not _channels.is_empty():
 		var deck_mesh := deck_sides.commit()
 		if deck_mesh != null and deck_mesh.get_surface_count() > 0:
-			_add_mesh_with_collision(deck_mesh, Palette.color(Palette.CONCRETE),
+			_add_mesh_with_collision(deck_mesh, _deck_color(),
 				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 				null, null, true, null, "ChannelDeckSides")
 
@@ -10623,7 +10725,7 @@ func _build_walls() -> void:
 		if deck_emitted:
 			deck.generate_normals()
 			_add_mesh_with_collision(deck.commit(),
-				Palette.color(Palette.CONCRETE),
+				_deck_color(),
 				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 				null, null, true, null, "WallDeck")
 	_build_rail_posts(post_spots)
@@ -12048,28 +12150,37 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 	var hw := width_at_index(near_i)
 	var run := 9.0
 	var base := lip - dir * run
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var bl := base - side * hw
 	var br := base + side * hw
 	var tl := lip - side * hw + Vector3.UP * CHANNEL_JUMP_HEIGHT
 	var tr := lip + side * hw + Vector3.UP * CHANNEL_JUMP_HEIGHT
-	# Panta de urcare.
-	st.add_vertex(bl); st.add_vertex(br); st.add_vertex(tl)
-	st.add_vertex(br); st.add_vertex(tr); st.add_vertex(tl)
-	# Peretele de la buza, ca trambulina sa nu fie o pana transparenta lateral.
-	st.add_vertex(tl); st.add_vertex(tr); st.add_vertex(lip - side * hw)
-	st.add_vertex(tr); st.add_vertex(lip + side * hw)
-	st.add_vertex(lip - side * hw)
-	# Laturile.
-	st.add_vertex(bl); st.add_vertex(tl); st.add_vertex(lip - side * hw)
-	st.add_vertex(br); st.add_vertex(lip + side * hw); st.add_vertex(tr)
+	var verts: Array[Vector3] = [
+		# Panta de urcare.
+		bl, br, tl, br, tr, tl,
+		# Peretele de la buza, ca trambulina sa nu fie o pana transparenta lateral.
+		tl, tr, lip - side * hw, tr, lip + side * hw, lip - side * hw,
+		# Laturile.
+		bl, tl, lip - side * hw, br, lip + side * hw, tr,
+	]
+	# Pe puntea de lemn (Kyoto) trambulina e din aceleasi scanduri ca scena, nu
+	# portocaliul rampelor: altfel capatul scenei iesea un bloc galben peste
+	# esafodaj. UV-urile au aceeasi scara ca soseaua (3,5 m) si scandurile de-a
+	# latul; fara tema de lemn mesh-ul e exact cel de dinainte.
+	var on_wood := _frac_in_ranges(frac_at(near_i), _wood_deck_ranges())
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for v in verts:
+		if on_wood:
+			var rel := v - base
+			st.set_uv(Vector2(rel.dot(side), rel.dot(dir) + rel.y) / 3.5)
+		st.add_vertex(v)
 	st.generate_normals()
 	# Acelasi portocaliu ca rampele si creasta: jucatorul stie ca portocaliu
 	# inseamna "sari", si e singurul cod de culoare cu care e antrenat.
 	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
-		null, null, true, null, "ChannelKicker")
+		null, null, true, _wood_deck_material() if on_wood else null,
+		"ChannelKicker")
 
 	var kicker := FlyoffKicker.new()
 	kicker.name = "Trambulina_%s" % String(ch.get("label", "canal"))
@@ -14304,8 +14415,37 @@ func _build_markers() -> void:
 			# sus sare peste sloturile inaltate, care erau exact cele afectate.
 			# Acum stau pe sol prin constructie, nu prin coincidenta.
 			spot.y = _sampler.ground_y(spot.x, spot.z) + 0.2
+			if _skip_wet_marker(i, spot - Vector3.UP * 0.2):
+				marker.queue_free()
+				continue
 			marker.global_position = spot
 			placed += 1
+
+
+## Opt-in pe tema (`markers_skip_water`, implicit false): stalpii de bordura si
+## chevron-urile NU se pun unde solul e sub apa unei rape declarate
+## (`custom_ravine_water`): pe Kyoto POI F stateau in iaz. Markerii se construiesc
+## INAINTEA apei, deci regula se judeca pe intervalul rapei si pe cota, nu pe
+## celulele ude (`_ravine_wet` e inca gol aici). Pe pistele fara cheie nu ruleaza.
+func _skip_wet_marker(i: int, p: Vector3) -> bool:
+	if not bool(theme_flag("markers_skip_water", false)):
+		return false
+	var specs := _ravine_water()
+	if specs.is_empty():
+		return false
+	var ravines := _ravines()
+	var total := _dists[baked.size()]
+	var g := _sampler.ground_y(p.x, p.z)
+	for spec in specs:
+		var ri := int(spec.x)
+		if ri < 0 or ri >= ravines.size():
+			continue
+		var r: Vector4 = ravines[ri]
+		if TrackSideSampler._ring_window(_dists[i] / total, r.x, r.y, 0.0001) <= 0.0:
+			continue
+		if g < spec.y + 0.05:
+			return true
+	return false
 
 
 func _marker_variant(rng: RandomNumberGenerator) -> String:
@@ -14477,6 +14617,8 @@ func _place_chevron(scene: PackedScene, rng: RandomNumberGenerator,
 			if absf(ground - baked[i].y) > 2.0:
 				continue # sectiune inaltata: ar pluti sau ar cadea sub drum
 			if not _chevron_spot_clear(stand, i, obstacles):
+				continue
+			if _skip_wet_marker(i, Vector3(stand.x, ground, stand.z)):
 				continue
 			var variant := "Chevron_A"
 			if absf(turn) < CHEVRON_TURN_TRIPLE:
@@ -14965,6 +15107,50 @@ func is_wet_at(frac: float) -> bool:
 ## Un interval poate trece peste linia de start, ca la ud.
 func _ice_ranges() -> Array[Vector2]:
 	return []
+
+
+## Intervalele (fractii de tur) pe care carosabilul e PUNTE DE LEMN: scena
+## Kiyomizu de pe Kyoto (brief kyoto.md §2 randul C: „o punte de lemn de 12 m").
+## Vin din tema (`wood_deck_ranges`); o tema fara cheie da lista goala, deci
+## soseaua celorlalte piste ramane bit-identica. Coliziunea si fizica nu se
+## schimba: doar mesh-ul vizibil al fasiei trece pe [method _wood_deck_material],
+## iar fusta ei intra in `ChannelDeckSides` (lemn inchis, [method _deck_color]).
+func _wood_deck_ranges() -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for r in theme_flag("wood_deck_ranges", []):
+		out.append(r as Vector2)
+	return out
+
+
+## Culoarea tablierului (parapetul `WallDeck` si fusta `ChannelDeckSides`).
+## Implicit betonul CONCRETE de pana acum; Kyoto cere lemn inchis
+## (`deck_color`). Acelasi material pentru amandoua, deci zero materiale noi.
+func _deck_color() -> Color:
+	return theme_flag("deck_color", Palette.color(Palette.CONCRETE)) as Color
+
+
+## Lemnul deschis al puntii (fata scenei Kiyomizu) si al trambulinei de la
+## capatul ei: UN material, impartit de amandoua (vezi garda de materiale).
+## Scandurile din clasa `wood` (assets/textures/classes/wood.png, media sRGB
+## 0,49/0,39/0,28) ridicate spre hinoki cald cu `wood_deck_color`. Scara:
+## textura are 5 scanduri pe repetitie, iar UV-ul soselei repeta la 3,5 m —
+## `uv1_scale` 1,9 da scanduri de ~37 cm, de-a latul drumului.
+var _wood_deck_mat: StandardMaterial3D = null
+
+func _wood_deck_material() -> StandardMaterial3D:
+	if _wood_deck_mat != null:
+		return _wood_deck_mat
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = theme_flag("wood_deck_color", Color.WHITE) as Color
+	mat.albedo_texture = _tex("res://assets/textures/classes/wood.png")
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	mat.uv1_scale = Vector3(1.9, 1.9, 1.0)
+	mat.roughness = 0.9
+	mat.metallic_specular = 0.2
+	mat.vertex_color_use_as_albedo = true
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_wood_deck_mat = mat
+	return mat
 
 
 ## Intervalele de suprafata AFANATA de pe traseul principal (cenusa, nisip

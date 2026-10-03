@@ -194,6 +194,8 @@ func _build() -> void:
 	_bridge_lanterns()
 	_straight()
 	_temple()
+	_temple_right()
+	_town()
 
 
 ## yaw care intoarce -Z local spre directia d (orizontala).
@@ -448,6 +450,125 @@ func _temple() -> void:
 			_rng.randf_range(0.0, TAU), _rng.randf_range(0.85, 1.0), "")
 
 
+## ------------------------------------------------------------ runda 2
+## Partea DREAPTA a dreptei (interiorul buclei) era camp gol intre drum si
+## orasul lui A (`OrasVechi`, x >= 32). Tranzitia: un zid de templu cu poarta
+## la hw + 10, apoi case machiya in siruri (CityFill `row_mode`) care se pierd
+## spre interior, de la 26 m de banda pana la orasul lui A, cu curti cu artari.
+## Nordul (z > 186) e pata de ginkgo H (PadureMasa), sudul (z < 80) e strada lui
+## A. Linia de vedere spre pagoda (<= 5 m de ax pe ultima treime) nu e atinsa:
+## nimic din dreapta nu e la < 15 m de ax.
+const TOWN_H := [Vector2(-34.0, 186.0), Vector2(31.0, 186.0), Vector2(31.0, 80.0),
+	Vector2(-4.0, 80.0)]
+const MM_ROAD_M := 15.0
+const NODE_ONLY := ["stone_lantern_a", "stone_lantern_b", "temple_wall", "small_shrine"]
+const NO_BODY := ["leaf_pile", "karikomi_shrub_a", "karikomi_shrub_b"]
+var _cf_lines: Array[String] = []
+var _mm_models: Array[String] = []
+var _mm_xf := PackedFloat32Array()
+
+
+func _mm_add(stem: String, folder: String, b: Basis, pos: Vector3) -> void:
+	if not _mm_models.has(stem):
+		_mm_models.append(stem)
+		_res_id(stem, "res://assets/models/kyoto/%s/%s.glb" % [folder, stem])
+	for v in [float(_mm_models.find(stem)), b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z,
+			b.z.x, b.z.y, b.z.z, pos.x, pos.y, pos.z]:
+		_mm_xf.append(v)
+
+
+func _mm_lines() -> Array[String]:
+	var out: Array[String] = []
+	if _mm_xf.is_empty():
+		return out
+	var ms: Array[String] = []
+	for m in _mm_models:
+		ms.append('ExtResource("poih_%s")' % m)
+	var vs: Array[String] = []
+	for v in _mm_xf:
+		vs.append("%.5f" % v)
+	out.append('[node name="FaraCorpH" type="Node3D" parent="."]')
+	out.append('script = ExtResource("poih_cityfill")')
+	out.append("models = Array[PackedScene]([%s])" % ", ".join(ms))
+	out.append("indigo_ratio = 0.0")
+	out.append("explicit_xforms = PackedFloat32Array(%s)" % ", ".join(vs))
+	out.append("")
+	return out
+
+
+## Zid de templu pe dreapta, la s -128..-104: doua module la hw + 10, poarta
+## de 6 m intre ele cu felinare, artari in spatele zidului.
+func _temple_right() -> void:
+	var s0 := -128.0
+	for i in 2:
+		var f := _frame(s0 + 4.0 + float(i) * 14.0)
+		var tan: Vector3 = f[1]
+		var p: Vector3 = (f[0] as Vector3) + (f[2] as Vector3) * (HW + 10.0)
+		_raw("temple_wall", "structures", "hTempluDZid", Vector3(p.x, _sol_min(p.x, p.z, 4.0) - 0.15, p.z),
+			atan2(tan.x, tan.z), 1.0, "")
+	var fm := _frame(s0 + 11.0)
+	var rt: Vector3 = fm[2]
+	var tn: Vector3 = fm[1]
+	var gate: Vector3 = (fm[0] as Vector3) + rt * (HW + 10.0)
+	for dx in [-2.2, 2.2]:
+		var lp: Vector3 = gate + tn * dx - rt * 1.6
+		_raw("stone_lantern_b", "props", "hTempluDFelinar", Vector3(lp.x, _sol_min(lp.x, lp.z, 0.65) - 0.05, lp.z),
+			_yaw_face(-rt), 1.0, "")
+	for it in [[-9.0, 5.0], [8.0, 6.0], [0.0, 9.0]]:
+		var q: Vector3 = gate + tn * float(it[0]) + rt * float(it[1])
+		_raw(MAPLES[_rng.randi_range(0, 2)], "plants", "hTempluDArtar", Vector3(q.x, _sol_real(q.x, q.z) - 0.05, q.z),
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 0.95), "")
+
+
+## Casele dintre drum si orasul lui A: CityFill row_mode pe TOWN_H, cu curti
+## (exclude_xz, raza 5 m) care primesc cate un artar/ginkgo.
+func _town() -> void:
+	var models := ["machiya_a", "machiya_b", "machiya_c", "machiya_d", "machiya_e"]
+	for m in models:
+		_res_id(m, "res://assets/models/kyoto/buildings/%s.glb" % m)
+	var poly := PackedVector2Array(TOWN_H)
+	var courts: Array[Vector3] = []
+	var tries := 0
+	while courts.size() < 7 and tries < 4000:
+		tries += 1
+		var c := Vector2(_rng.randf_range(-34.0, 31.0), _rng.randf_range(80.0, 186.0))
+		if not Geometry2D.is_point_in_polygon(c, poly) or _road_dist(c.x, c.y) < 30.0:
+			continue
+		var ok := true
+		for q in courts:
+			if c.distance_to(Vector2(q.x, q.y)) < 16.0:
+				ok = false
+				break
+		if ok:
+			courts.append(Vector3(c.x, c.y, 5.0))
+	var trees := ["momiji_a", "momiji_b", "momiji_c", "momiji_b", "ginkgo"]
+	for q in courts:
+		_raw(trees[_rng.randi_range(0, trees.size() - 1)], "plants", "hOrasCopac",
+			Vector3(q.x, _sol_real(q.x, q.y) - 0.05, q.y), _rng.randf_range(0.0, TAU),
+			_rng.randf_range(0.75, 0.9), "")
+	var ms: Array[String] = []
+	for m in models:
+		ms.append('ExtResource("poih_%s")' % m)
+	var pv: Array[String] = []
+	for q in poly:
+		pv.append("%.1f, %.1f" % [q.x, q.y])
+	var ev: Array[String] = []
+	for e in courts:
+		ev.append("%.1f, %.1f, %.1f" % [e.x, e.y, e.z])
+	_cf_lines.append('[node name="OrasDreaptaH" type="Node3D" parent="."]')
+	_cf_lines.append('script = ExtResource("poih_cityfill")')
+	_cf_lines.append("models = Array[PackedScene]([%s])" % ", ".join(ms))
+	_cf_lines.append("weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)")
+	_cf_lines.append("indigo_ratio = 0.0")
+	_cf_lines.append("row_mode = true")
+	_cf_lines.append("min_road_m = 26.0")
+	_cf_lines.append("seed_value = 20261018")
+	_cf_lines.append("exclude_xz = PackedVector3Array(%s)" % ", ".join(ev))
+	_cf_lines.append("region_xz = PackedVector2Array(%s)" % ", ".join(pv))
+	_cf_lines.append("")
+	print("; oras dreapta H: %d curti" % courts.size())
+
+
 ## Cota minima a solului sub o amprenta patrata de semilatura r.
 func _sol_min(x: float, z: float, r: float) -> float:
 	var m := _sol_real(x, z)
@@ -469,6 +590,13 @@ func _raw(stem: String, folder: String, base: String, pos: Vector3, yaw: float,
 	var path := "res://assets/models/kyoto/%s/%s.glb" % [folder, stem]
 	var b := Basis.from_euler(Vector3(0.0, yaw, 0.0)).scaled(Vector3(scl, scl, scl))
 	_n += 1
+	# Runda 2 (coordonator: +476 desene in r1, tinta <= +150): tot ce nu are
+	# corp, sau sta la >= MM_ROAD_M de drum, intra in MultiMesh-ul unui
+	# CityFill `explicit_xforms` (fara corp). Raman noduri doar felinarele,
+	# zidurile, altarul si ce e la < 15 m de banda.
+	if mode == "" and not NODE_ONLY.has(stem) 			and (NO_BODY.has(stem) or _road_dist(pos.x, pos.z) >= MM_ROAD_M):
+		_mm_add(stem, folder, b, pos)
+		return
 	_out.append('[node name="%s%d" parent="%s" instance=ExtResource("%s")]'
 		% [base, _n, ZONE, _res_id(stem, path)])
 	# RANDURILE bazei, nu coloanele (memoria tscn-transform-e-pe-randuri).
@@ -487,12 +615,15 @@ func _write() -> void:
 	for s in stems:
 		lines.append('[ext_resource type="PackedScene" path="%s" id="poih_%s"]' % [_ext[s], s])
 	lines.append('[ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="poih_pathmover"]')
+	lines.append('[ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="poih_cityfill"]')
 	lines.append(";;NODES")
 	lines.append('[node name="ZoneH_Togetsukyo" type="Node3D" parent="DecorManual"]')
 	lines.append("")
 	lines.append_array(_out)
 	lines.append_array(_boat_lines)
-	print("; asezate %d piese, %d modele" % [_n, stems.size()])
+	lines.append_array(_mm_lines())
+	lines.append_array(_cf_lines)
+	print("; asezate %d piese (%d in MultiMesh), %d modele" % [_n, _mm_xf.size() / 13, stems.size()])
 	if _out_path.is_empty():
 		for l in lines:
 			print(l)

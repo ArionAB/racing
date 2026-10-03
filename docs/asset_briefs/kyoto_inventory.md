@@ -120,5 +120,9 @@ transformarile nodurilor aplicate), nu AABB.
 - **Fidelitate (ambele), runda 3:** OK: 2 etaje, acoperis gri 4 ape cu streasina curbata, galerie cu balustrada vermilion, ferestre intunecate, panouri albe in travee, gol larg, socluri de piatra, culori pe zone. **Abateri:** fara fronton (irimoya) vizibil pe latura, acoperisul e yosemune simplu; consolele sub streasina sunt mai rare si mai simple decat „ciorchinii" de pe planșă; travee laterale mai usoare decat masivele de pe planșă; Romon: o „ureche" de arete in dreapta acoperisului (artefact de colt cu creasta scurta); inaltimea Niomon 13,55 vs 13 (ornamentele de creasta).
 - Comparatii: `img/kyoto_fidelity/niomon_gate.png`, `inari_romon.png` (+ `_views`).
 
+## `structures/kakezukuri_scaffold.glb` (runda 3)
+- **Triunghiuri:** 816 (un nod `Scaffold_Wood`: `WOOD` stalpi/punte/balustrada, `LOG_DARK` grinzi, `CONCRETE` talpi). **Cote:** 6,00 x 6,00 x 15,92 m, origine la baza, centrat. Capetele la x = ±3 sunt plane (stalpii de capat lipiti de plan, grinzile 5 cm mai scurte, ascunse in stalp); 3 module alaturate la pas 6 m se imbina: `img/kyoto_fidelity/kakezukuri_scaffold_chain.png` (balustrada continua, punte continua; la cusatura stalpii se dubleaza — 2 x 0,62 m).
+- Fidelitate: 3 randuri x 4 coloane de stalpi, 4 niveluri de grinzi pe ambele directii, punte cu balustrada pe laturile lungi: OK. **Abateri:** stalpii sunt patrati si drepti (planșa: rotunji, cu capete de consola curbate si grinzi care ies in afara stalpilor); grinzile stau inapoiate intre stalpi (citite doar ca bare intunecate), nu ies; fara bratari/diagonale; planșa are modulul lung si adanc ~2:1, aici 1:1 (cerinta de repetare).
+
 ## Stare la oprire (halls)
-- Facut: niomon_gate, inari_romon. Urmeaza: kakezukuri_scaffold, kiyomizu_hondo.
+- Facut: niomon_gate, inari_romon, kakezukuri_scaffold. Urmeaza: kiyomizu_hondo.

@@ -213,3 +213,61 @@ if __name__ == "__main__" or True:
     emit(list(objs), "structures/inari_romon.glb", AO_GATE, bevel=0.0,
          smooth_angle=None, budget=14000)
     report()
+
+
+# ---------------------------------------------------------------------------
+# kakezukuri_scaffold: modul de schela (lemn), 6 m lat (X) x 6 adanc (Y) x 16 m
+# ---------------------------------------------------------------------------
+
+def build_kakezukuri_scaffold():
+    """`kakezukuri_scaffold.png` -- lista de elemente (inainte de modelare):
+
+    - retea de stalpi patrati de lemn, 3 randuri pe adancime x 4 coloane pe
+      latime, de la sol la punte (~15 m); la sol blocuri-talpa.
+    - 4 niveluri de grinzi orizontale (la 3.5, 6.5, 9.5, 12.5 m), pe ambele
+      directii, ale căror capete ies putin din stalp (bloc intunecat).
+    - sus o punte de scanduri si, pe cele doua laturi lungi, o balustrada
+      (stalpisori + 2 lise); capetele la ±3 m deschise.
+    - Inlantuire: capetele (x = ±3) sunt PLANE: stalpii de capat stau lipiti
+      de plan (jumatatea lor interioara), grinzile si lisele ajung exact la ±3.
+    Cote: 6 m lat, 6 m adanc, 16 m inalt (cu balustrada).
+    """
+    b = Builder()
+    L = 3.0                                   # semilatime modul (X)
+    D = 3.0                                   # semiadancime (Y)
+    pw = 0.62
+    deck_z = 14.5
+    cols = [-L + pw / 2, -L / 3 + 0.0, L / 3, L - pw / 2]
+    rows = [-D + pw / 2, 0.0, D - pw / 2]
+    # stalpi + talpi
+    for x in cols:
+        for y in rows:
+            b.box((x, y, 0.25), (pw + 0.3 if abs(x) < L - 0.4 else pw, pw + 0.3 if abs(y) < D - 0.4 else pw, 0.5), STONE)
+            b.box((x, y, 0.5 + (deck_z - 0.5) * 0.5), (pw, pw, deck_z - 0.5), TIMBER)
+    # grinzi orizontale
+    for zb in (3.5, 6.5, 9.5, 12.5):
+        for y in rows:                       # pe X, capete exact la ±L
+            b.box((0, y, zb), (2 * L - 0.06, 0.5, 0.55), BEAM)
+        for x in cols:                       # pe Y, intre randuri
+            b.box((x, 0, zb + 0.05), (0.5, 2 * D - 0.06, 0.55), BEAM)
+    # punte
+    b.box((0, 0, deck_z + 0.2), (2 * L, 2 * D, 0.4), TIMBER)
+    b.box((0, 0, deck_z - 0.15), (2 * L, 2 * D - 0.6, 0.3), BEAM)
+    # balustrada pe laturile lungi (X), capete deschise
+    rz0 = deck_z + 0.4
+    for sy in (-1, 1):
+        y = sy * (D - 0.14)
+        b.box((0, y, rz0 + 0.95), (2 * L, 0.14, 0.14), TIMBER)
+        b.box((0, y, rz0 + 0.5), (2 * L, 0.12, 0.12), TIMBER)
+        for k in range(5):
+            x = -L + 0.09 + (2 * L - 0.18) * k / 4.0
+            b.box((x, y, rz0 + 0.5), (0.18, 0.18, 1.0), TIMBER)
+    return (b.to_object("Scaffold_Wood"),)
+
+
+if True:
+    clear_built()
+    emit(list(build_kakezukuri_scaffold()), "structures/kakezukuri_scaffold.glb",
+         dict(samples=8, dist=3.0, gradient="vertical", low=0.7, high=1.0,
+              power=0.8, floor=0.3), bevel=0.0, smooth_angle=None, budget=3000)
+    report()

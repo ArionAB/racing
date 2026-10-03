@@ -54,6 +54,8 @@ const RES := {
 ## Cotele de amplasare (lume). Luminisurile din gen_kyoto_route.py au aceleasi
 ## centre — daca se muta ceva aici, se muta si acolo.
 const GATE_X := 250.0
+## Scara portii (r2): golul 14,30 -> 17,9 m, inaltimea libera 7,10 -> 8,9 m.
+const GATE_SCALE := 1.25
 const SANJU := Vector2(288.0, -216.0)
 const BELL := Vector2(312.0, -215.5)
 const HONDO := Vector2(383.5, -152.0)
@@ -104,11 +106,32 @@ func _gate() -> void:
 	var lo := INF
 	for s in [-4.5, 4.5]:
 		for side in [-1.0, 1.0]:
-			var q: Vector3 = p + d * float(s) + _left(d) * 7.6 * float(side)
+			var q: Vector3 = p + d * float(s) * GATE_SCALE + _left(d) * 7.6 * GATE_SCALE * float(side)
 			lo = minf(lo, _sol_real(q.x, q.z))
 	lo = minf(lo, p.y)
-	_raw("niomon_gate", "PoartaNiomon", Vector3(p.x, lo - 0.05, p.z), yaw, 1.0, "")
+	_raw("niomon_gate", "PoartaNiomon", Vector3(p.x, lo - 0.05, p.z), yaw, GATE_SCALE, "")
 	_meta_last("metadata/camera_blocker = true")
+	# CAMERA SUB POARTA (r2). Masurat cu ProbeCameraSolid (--verbose) la scara 1:
+	# camera de 10 m (cota ~30-31) intra in grinda portii, `_unclip` o trage pe
+	# fata grinzii (0.212: y 28,0; 0.214: y 27,0, „langa PoartaNiomon1_col"),
+	# iar golul liber se termina la 19,6 + 7,1 = 26,7. Scara 1,25 ridica golul la
+	# ~28,5 si zona coboara camera la 5 m peste drum cat masina trece pe sub
+	# poarta, ca in tunelul de torii. Fractiile sunt ale MASINII: camera e cu
+	# 12,5 m in urma, deci zona incepe inainte si se termina dupa poarta.
+	var f0 := _frac_at_x(p.x - 9.0 * GATE_SCALE - 20.0)
+	var f1 := _frac_at_x(p.x + 9.0 * GATE_SCALE + 14.0)
+	_out.append('[node name="CameraNiomon" type="Area3D" parent="Hazarduri"]')
+	_out.append("monitorable = false")
+	_out.append('script = ExtResource("9_camzone")')
+	_out.append("size = Vector3(2, 2, 2)")
+	_out.append("frac_from = %.4f" % f0)
+	_out.append("frac_to = %.4f" % f1)
+	_out.append("height = 5.0")
+	_out.append("look_height = 1.0")
+	_out.append("fov_bonus = 2.0")
+	_out.append("ceiling = 8.5")
+	_out.append("")
+	print("; CameraNiomon %.4f-%.4f" % [f0, f1])
 	print("; Niomon la (%.1f, %.2f, %.1f), yaw %.1f, drum y %.2f" % [p.x, lo, p.z, rad_to_deg(yaw), p.y])
 
 
@@ -124,8 +147,8 @@ func _precinct() -> void:
 		_raw("cyclopean_wall", "cZidCiclopic", Vector3(q.x, _sol_min(q, d, 3.6) - 0.15, q.z), yaw, 1.0, "")
 		x += 8.0
 	# Zidul de templu pe dreapta, doar langa poarta (3 module, 258-282).
-	x = 262.0
-	while x <= 278.1:
+	x = 266.0
+	while x <= 282.1:
 		var r := _c1_at(x)
 		var p: Vector3 = r[0]
 		var d: Vector3 = r[1]
@@ -169,7 +192,9 @@ func _hall() -> void:
 
 
 func _koyasu() -> void:
-	_raw("koyasu_pagoda", "cKoyasu", _on_ground(KOYASU, 3.2), 0.15, 1.0, "")
+	# Scara 1,25 (r2): la 1,0 pagoda se citea ca un varf mic intre artari din
+	# capatul scenei; tinta sariturii trebuie sa spuna „acolo aterizez".
+	_raw("koyasu_pagoda", "cKoyasu", _on_ground(KOYASU, 4.0), 0.15, 1.25, "")
 	# Felinarele aterizarii: doua perechi la 13,5 m de ax (la 10,5 m, ProbeRace
 	# seed 1: [blocaj] al jucatorului iesit larg la aterizare, frac 0.319, lat 9,9).
 	for z in [-80.0, -64.0]:
@@ -202,6 +227,22 @@ func _c1_at(x: float) -> Array:
 			return [a.lerp(b, t), d.normalized()]
 	push_error("C1: nu gasesc x %.1f" % x)
 	return [Vector3(x, 0, -200), Vector3(1, 0, 0)]
+
+
+## Fractia de tur a punctului copt de pe C1 cel mai apropiat de abscisa x.
+func _frac_at_x(x: float) -> float:
+	var pts := _track.baked
+	var n := pts.size()
+	var best := INF
+	var bi := 0
+	for i in n:
+		var a: Vector3 = pts[i]
+		if a.z > -185.0 or a.z < -210.0:
+			continue
+		if absf(a.x - x) < best:
+			best = absf(a.x - x)
+			bi = i
+	return _track._dists[bi] / _track._dists[n]
 
 
 ## Stanga fata de sensul de mers (pe C1, spre E, stanga e nordul, -Z).

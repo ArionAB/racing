@@ -669,12 +669,33 @@ if len(sys.argv) > 1:
     # tools/gen_decor_kyoto_c.gd (DecorManual/ZoneC_Kiyomizu).
     for lbl, cx_, cz_, rad in (("luminis C sala N", 384.0, -160.0, 13.0),
                                ("luminis C sala S", 384.0, -144.0, 13.0),
-                               ("luminis C2 Koyasu", 350.0, -42.0, 9.0),
+                               ("luminis C2 Koyasu", 350.0, -42.0, 11.0),
+                               # culoarul de vedere buza scenei -> Koyasu (r2)
+                               ("luminis C2 culoar 1", 361.0, -95.0, 7.0),
+                               ("luminis C2 culoar 2", 358.0, -81.0, 7.0),
+                               ("luminis C2 culoar 3", 355.0, -67.0, 7.0),
+                               ("luminis C2 culoar 4", 352.5, -54.0, 7.0),
                                ("luminis C sanjunoto", 288.0, -216.0, 9.0),
                                ("luminis C clopotnita", 312.0, -215.5, 6.0),
                                ("luminis C1 vedere scena", 305.0, -172.0, 16.0),
                                ("luminis C1 vedere colt", 330.0, -184.0, 9.0),
-                               ("luminis C1 buza rapei", 322.0, -164.0, 12.0)):
+                               ("luminis C1 buza rapei", 322.0, -164.0, 12.0),
+                               # coroanele de la colt, pe liniile C1 -> scena/sala (r2)
+                               ("luminis C1 colt 1", 340.0, -177.0, 10.0),
+                               ("luminis C1 colt 2", 355.0, -168.0, 7.0),
+                               ("luminis C1 dreapta 1", 312.0, -182.0, 8.0),
+                               ("luminis C1 dreapta 2", 324.0, -183.0, 8.0),
+                               ("luminis C1 dreapta 3", 340.0, -186.0, 8.0),
+                               ("luminis C1 incinta 1", 302.0, -216.0, 6.0),
+                               ("luminis C1 incinta 2", 323.0, -218.0, 7.0),
+                               ("luminis C1 incinta 3", 337.0, -218.0, 7.0),
+                               # pe axa lui C1: discul „versant Higashiyama" punea
+                               # coroane peste carosabil in cadrul de la 0.235 (r2)
+                               ("luminis C1 ax 1", 302.0, -199.0, 9.0),
+                               ("luminis C1 ax 2", 316.0, -200.0, 9.0),
+                               ("luminis C1 ax 3", 330.0, -201.0, 9.0),
+                               ("luminis C1 ax 4", 344.0, -200.0, 9.0),
+                               ("luminis C1 colt 3", 352.0, -186.0, 7.0)):
         fz(lbl, 1, (), (), center=(cx_, 0.0, cz_), radius=rad, claim=True)
     # === sfarsit POI C ===
     # Petele de ginkgo: 4, pe EXTERIORUL buclei (stanga la D/F, dreapta la C/H

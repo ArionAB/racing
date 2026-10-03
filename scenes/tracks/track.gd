@@ -1168,7 +1168,7 @@ static func themes() -> Dictionary:
 			# duce spre ei urca gradual — 32° prinde fata propriu-zisa fara sa
 			# inghita taluzul de iarba de la baza (Machu Picchu foloseste 28,
 			# dar acolo geometria era o cadere abrupta fara taluz de tranzitie).
-			"scarp_tint": Color(0.196, 0.190, 0.182),
+			"scarp_tint": Color(0.52, 0.48, 0.43),
 			"scarp_slope_deg": 32.0,
 			"scarp_fade_deg": 10.0,
 			# Cer inchis, printre nori (brief §4: sky_cover_alpha mare) —
@@ -1362,7 +1362,7 @@ static func themes() -> Dictionary:
 			# Picchu): riolit roz-brun (brief §1, #9A6A5A), aproape neutru dupa
 			# randare -- stanca sub fort si coborarea G sunt fete de panta
 			# mare, nu platouri.
-			"scarp_tint": Color(0.46, 0.30, 0.24),
+			"scarp_tint": Color(0.52, 0.48, 0.43),
 			"scarp_slope_deg": 30.0,
 			"scarp_fade_deg": 10.0,
 			# Cer de amurg: portocaliu-roz la orizont -> violet sus (brief §0,
@@ -1679,6 +1679,13 @@ static func themes() -> Dictionary:
 				# podului Tsutenkyo (fractii din tools/gen_kyoto_route.py).
 				{"from": 0.331, "to": 0.449, "max_m": 45.0, "fade_m": 18.0,
 					"tint": Color(0.8626, 0.54, 0.3079)},
+				# C: rapa de sub scena Kiyomizu (POI C runda 2). Fundul ei e in
+				# umbra peretelui de vest toata dupa-amiaza (soarele de 22° din SV),
+				# deci lumina doar de ambientul albastru: solul oliv iesea TURCOAZ
+				# si se citea ca apa printre artari. Covorul de frunze il trage in
+				# ruginiu, si in umbra ramane brun-rosu („sub tine e rosu", §2.0).
+				{"from": 0.258, "to": 0.314, "max_m": 95.0, "fade_m": 30.0,
+					"tint": Color(0.82, 0.40, 0.20)},
 			],
 			# ORIZONTUL (kit int-a): dealurile Higashiyama in toamna, muntele
 			# Arashiyama si banda de acoperisuri din pacla (`kyoto_horizon.glb`,
@@ -5106,11 +5113,14 @@ func _build_center_line() -> void:
 	var lift := Vector3.UP * 0.045
 	var d := 4.0
 	var idx := 0
+	# Puntea de lemn (scena Kiyomizu) nu poarta marcaj de sosea.
+	var wood := _wood_deck_ranges()
 	while d < total - 5.0:
 		while idx + 1 < _dists.size() and _dists[idx + 1] < d:
 			idx += 1
 		var i := idx % n
-		if _road_gap(i) or _road_ice(i):
+		if _road_gap(i) or _road_ice(i) or (not wood.is_empty()
+				and _frac_in_ranges(frac_at(i), wood)):
 			d += 6.5
 			continue
 		var dir := (baked[(i + 1) % n] - baked[i]).normalized()

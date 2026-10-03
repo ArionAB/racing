@@ -17,8 +17,19 @@
 [node name="ZoneC_Kiyomizu" type="Node3D" parent="DecorManual"]
 
 [node name="PoartaNiomon1" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_niomon")]
-transform = Transform3D(0.093140, 0.000000, -0.995653, 0.000000, 1.000000, 0.000000, 0.995653, 0.000000, 0.093140, 250.000000, 19.583500, -195.981964)
+transform = Transform3D(0.116425, 0.000000, -1.244566, 0.000000, 1.250000, 0.000000, 1.244566, 0.000000, 0.116425, 250.000000, 19.485966, -195.981964)
 metadata/camera_blocker = true
+
+[node name="CameraNiomon" type="Area3D" parent="Hazarduri"]
+monitorable = false
+script = ExtResource("9_camzone")
+size = Vector3(2, 2, 2)
+frac_from = 0.1933
+frac_to = 0.2196
+height = 5.0
+look_height = 1.0
+fov_bonus = 2.0
+ceiling = 8.5
 
 [node name="cZidCiclopic2" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
 transform = Transform3D(-0.996849, 0.000000, -0.079327, 0.000000, 1.000000, 0.000000, 0.079327, 0.000000, -0.996849, 269.127411, 21.274836, -208.569870)
@@ -48,13 +59,13 @@ transform = Transform3D(-0.999585, 0.000000, 0.028795, 0.000000, 1.000000, 0.000
 transform = Transform3D(-0.997835, 0.000000, 0.065763, 0.000000, 1.000000, 0.000000, -0.065763, 0.000000, -0.997835, 334.723389, 26.733591, -212.065231)
 
 [node name="cZidTemplu11" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_temple_wall")]
-transform = Transform3D(-0.081082, 0.000000, 0.996707, 0.000000, 1.000000, 0.000000, -0.996707, 0.000000, -0.081082, 262.827026, 20.622442, -186.796326)
+transform = Transform3D(-0.079995, 0.000000, 0.996795, 0.000000, 1.000000, 0.000000, -0.996795, 0.000000, -0.079995, 266.815948, 20.964010, -187.118225)
 
 [node name="cZidTemplu12" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_temple_wall")]
-transform = Transform3D(-0.079327, 0.000000, 0.996849, 0.000000, 1.000000, 0.000000, -0.996849, 0.000000, -0.079327, 270.809143, 21.305487, -187.436676)
+transform = Transform3D(-0.079449, 0.000000, 0.996839, 0.000000, 1.000000, 0.000000, -0.996839, 0.000000, -0.079449, 274.810364, 21.647314, -187.755493)
 
 [node name="cZidTemplu13" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_temple_wall")]
-transform = Transform3D(-0.078949, 0.000000, 0.996879, 0.000000, 1.000000, 0.000000, -0.996879, 0.000000, -0.078949, 278.805267, 21.988913, -188.072632)
+transform = Transform3D(-0.079233, 0.000000, 0.996856, 0.000000, 1.000000, 0.000000, -0.996856, 0.000000, -0.079233, 282.808167, 22.330786, -188.389847)
 
 [node name="cSanjunoto14" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_sanjunoto")]
 transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, 288.000000, 22.962894, -216.000000)
@@ -183,7 +194,7 @@ transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.0000
 transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 383.500000, 32.236225, -152.000000)
 
 [node name="cKoyasu56" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_koyasu")]
-transform = Transform3D(0.988771, 0.000000, 0.149438, 0.000000, 1.000000, 0.000000, -0.149438, 0.000000, 0.988771, 350.000000, 22.014591, -42.000000)
+transform = Transform3D(1.235964, 0.000000, 0.186798, 0.000000, 1.250000, 0.000000, -0.186798, 0.000000, 1.235964, 350.000000, 22.005543, -42.000000)
 
 [node name="cFelinarAterizare57" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
 transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 350.500000, 23.661930, -80.000000)

@@ -658,6 +658,11 @@ if len(sys.argv) > 1:
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
+[ext_resource type="Script" path="res://scenes/props/module_placer.gd" id="intc_placer"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/tsutenkyo_roof_module.glb" id="intc_tsu"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/togetsukyo_module.glb" id="intc_toget"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kakezukuri_scaffold.glb" id="intc_scaffold"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/iron_truss_bridge.glb" id="intc_truss"]
 """
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
@@ -809,6 +814,56 @@ look_height = 0.6
 fov_bonus = 3.0
 ceiling = 5.2
 """
+    # === GRUPA INT-C: PODURILE SI SCENA (ModulePlacer) ===
+    # Modulele GLB repetate pe curba de scenes/props/module_placer.gd (origine in
+    # centrul modulului pe axa, puntea la y = 0, -Z inainte).
+    #  * Tsutenkyo: 6 m, pe intervalul de latime ingusta (frac D pod intrare..iesire).
+    #    `Tsu_Rail` ascuns: dubleaza parapetul procedural (deck_rails), care RAMANE.
+    #  * Togetsukyo: 10 m, pe H (frac 0,832-0,894).
+    #  * Esafodajul scenei: 6 m pas, doua randuri (+-3 m) sub puntea de 12 m, cu
+    #    baza la 16 m sub drum (podeaua rapei C2 = +16, puntea = +32), coliziune mesh.
+    #  * Podul trenului (G2): o singura piesa pe drum, travee peste drum (gol 15,15).
+    tscn += f"""
+[node name="Poduri" type="Node3D" parent="."]
+
+[node name="Tsutenkyo" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_tsu")
+frac_from = {r3(f_bridge_a)}
+frac_to = {r3(f_bridge_b)}
+module_length = 6.0
+seam_half_width = 6.9
+hide_nodes = PackedStringArray("Tsu_Rail")
+
+[node name="Togetsukyo" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_toget")
+frac_from = {r3(f_togetsu_a)}
+frac_to = {r3(f_togetsu_b)}
+module_length = 10.0
+seam_half_width = 7.6
+
+[node name="EsafodajScena" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_scaffold")
+frac_from = {r3(f_scene_a)}
+frac_to = {r3(f_scene_b)}
+module_length = 6.0
+lateral_offsets = PackedFloat32Array(-3, 3)
+ground_fit = true
+module_height = 15.92
+collision_mode = "mesh"
+seam_half_width = 3.4
+
+[node name="PodulTrenului" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_truss")
+frac_from = {r3(F["G2 sub podul trenului"])}
+frac_to = 0.0
+module_length = 5.8
+collision_mode = "mesh"
+"""
+    # === /GRUPA INT-C ===
     for k, (nm, g, sz) in enumerate(zones):
         tscn += f"""
 [node name="{nm}" type="Area3D" parent="Hazarduri"]

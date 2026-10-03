@@ -14,6 +14,11 @@
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
+[ext_resource type="Script" path="res://scenes/props/module_placer.gd" id="intc_placer"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/tsutenkyo_roof_module.glb" id="intc_tsu"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/togetsukyo_module.glb" id="intc_toget"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kakezukuri_scaffold.glb" id="intc_scaffold"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/iron_truss_bridge.glb" id="intc_truss"]
 
 [sub_resource type="Curve3D" id="Curve3D_kyoto"]
 closed = true
@@ -157,3 +162,42 @@ height = 2.4
 look_height = 0.6
 fov_bonus = 3.0
 ceiling = 5.2
+
+[node name="Poduri" type="Node3D" parent="."]
+
+[node name="Tsutenkyo" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_tsu")
+frac_from = 0.449
+frac_to = 0.466
+module_length = 6.0
+seam_half_width = 6.9
+hide_nodes = PackedStringArray("Tsu_Rail")
+
+[node name="Togetsukyo" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_toget")
+frac_from = 0.832
+frac_to = 0.894
+module_length = 10.0
+seam_half_width = 7.6
+
+[node name="EsafodajScena" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_scaffold")
+frac_from = 0.275
+frac_to = 0.303
+module_length = 6.0
+lateral_offsets = PackedFloat32Array(-3, 3)
+ground_fit = true
+module_height = 15.92
+collision_mode = "mesh"
+seam_half_width = 3.4
+
+[node name="PodulTrenului" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_truss")
+frac_from = 0.804
+frac_to = 0.0
+module_length = 5.8
+collision_mode = "mesh"

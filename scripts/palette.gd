@@ -567,6 +567,9 @@ const CLASS_TEXTURES := {
 	# cere piatra veche uzata („treptele sunt geometrie, textura da uzura"),
 	# deci tinta e piatra CENUSIE la luminanta dalei.
 	"old_stone": "res://assets/textures/classes/stone_wall.png",
+	# Kyoto POI F r3: bolovanii de gradina (garden_rock_a/b/c) pe ACEEASI dala de
+	# zid, cu tenta mai inchisa si calda (vezi CLASS_TINT). Zero texturi noi.
+	"garden_stone": "res://assets/textures/classes/stone_wall.png",
 	# Insula (Okinawa): calcar coraligen si scoarta tropicala.
 	"coral_rock": "res://assets/textures/classes/coral_rock.png",
 	"bark": "res://assets/textures/classes/bark.png",
@@ -860,6 +863,12 @@ const CLASS_TEXTURES := {
 	"maple_orange": "res://assets/textures/classes/autumn_foliage.png",
 	"ginkgo_gold": "res://assets/textures/classes/autumn_foliage.png",
 	"leaf_litter": "res://assets/textures/classes/autumn_foliage.png",
+	# Integrarea kitului (grupa int-a): arțarul RUGINIU are coroana pe aceeasi
+	# tenta ca `leaf_litter`, dar la scara COROANEI (0.1), nu a covorului (0.25),
+	# si bambusul are frunze lime — atlasul nu are slot lime (cel mai deschis verde,
+	# CACTUS_GREEN, iese oliv). Doua materiale noi, ZERO imagini noi in memorie.
+	"maple_rust": "res://assets/textures/classes/autumn_foliage.png",
+	"bamboo_lime": "res://assets/textures/classes/autumn_foliage.png",
 	# Lemnul de machiya si muschiul: clase NOI pe dalele lui `wood` si `macchia`,
 	# NU tente pe ele (memoria `tenta-pe-clasa-partajata`: `wood` e folosit pe
 	# Dunele/Okinawa, `macchia` pe Okinawa/Stromboli).
@@ -923,6 +932,13 @@ const CLASS_TINT := {
 	# <= 1 pe toate canalele si nu mai e nevoie de nicio ridicare. Sub lumina
 	# temei iese (59,63,74), R-B = -15: piatra rece de oras noaptea.
 	"old_stone": Color(0.895, 0.933, 1.0),
+	# garden_stone: masurat pe captura de joc (r3, cadrul-erou F). Atlas/old_stone:
+	# fata luminata a bolovanilor ~(195, 170, 140); diorama ~(139, 119, 108), gri
+	# mediu-cald. Prima tenta (0,64; 0,65; 0,77) dadea fata luminata (165, 144, 125)
+	# dar umbrele VIOLET (68, 67, 81) sub ambientul rece; (0,54; 0,54; 0,56) le
+	# facea carbune (58, 56, 57), (0,62; 0,60; 0,58) maro-inchis (96, 84, 68).
+	# Albastrul tinut sub rosu (B/R ~0,95), luminozitatea spre tinta:
+	"garden_stone": Color(0.84, 0.81, 0.80),
 	# Valea Rosie: dala alpine_granite (166, 156, 137) impinsa pe rosul
 	# caramiziu al referintei. Multiplicatorul NU e ales din ochi — e
 	# masurat din docs/track_briefs/img/v3_crops/D_canyon.png (media zonei
@@ -1092,6 +1108,15 @@ const CLASS_TINT := {
 	"maple_orange": Color(1.0, 0.3318, 0.2642),       # #E54839 (R: 220.6 din 229)
 	"ginkgo_gold": Color(1.0, 0.9434, 0.2777),        # #F2D03C (R: 220.6 din 242)
 	"leaf_litter": Color(0.8626, 0.5400, 0.3079),     # #A8683A (LARCH_RUST 27)
+	# Aceeasi tenta ca leaf_litter, alta scara (CLASS_TRIPLANAR_SCALE): coroana de
+	# arțar ruginiu `momiji_c` (LARCH_RUST 27 in GLB).
+	"maple_rust": Color(0.8626, 0.5400, 0.3079),      # #A8683A
+	# Lime-ul frunzelor de bambus: media pixelilor verzi-galbeni (S>0.35, H 0.15-
+	# 0.30) din decuparea `bamboo_crown.png` = (117, 145, 62) = #75913E. Aceeasi
+	# bisectie in spatiu liniar ca mai sus, pe aceeasi dala neutra (verificata:
+	# reproduce exact tenta lui maple_crimson). Nicio ridicare: toate canalele
+	# sub media dalei (195).
+	"bamboo_lime": Color(0.6055, 0.7467, 0.3281),     # #75913E
 	# Lemn de machiya (74, 53, 38) pe dala `wood` (124.1, 99.0, 71.7), NERIDICATA:
 	# toate canalele sub 1, nu cere CLASS_LIFT.
 	"machiya_wood": Color(0.6171, 0.5707, 0.5841),
@@ -1371,6 +1396,7 @@ const CLASS_TRIPLANAR_SCALE := {
 	# 0.35 = o repetitie la 2.86 m: pe scara de 10x12 m intra ~4 randuri de
 	# zidarie pe latime, adica se citeste ca zidarie si nu ca tapet.
 	"old_stone": 0.35,
+	"garden_stone": 0.35,
 	# Lemnaria: bena tricicletei Ape, busteni de rulare, bordaj. Sursa e o
 	# scanare de scanduri; la 0.7 (o repetitie la 1.43 m) fibra cade aproape
 	# la scara reala pe piese de 1-3 m. Prim consumator REAL (Fiordland,
@@ -1463,6 +1489,10 @@ const CLASS_TRIPLANAR_SCALE := {
 	# Covorul de frunze: acelasi PNG la scara de 2.5x mai deasa (o repetitie la
 	# 4 m, frunza ~20 cm — frunze cazute pe sol, nu coroana).
 	"leaf_litter": 0.25,
+	"maple_rust": 0.1,
+	# Frunza de bambus e ingusta si deasa: scara covorului (frunza ~20 cm), nu a
+	# coroanei de arțar.
+	"bamboo_lime": 0.25,
 	# Aceeasi scara ca dala-sursa (`wood` 0.7, `macchia` 1.4).
 	"machiya_wood": 0.7,
 	"moss": 1.4,

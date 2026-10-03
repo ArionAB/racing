@@ -60,6 +60,12 @@ extends Node3D
 @export_range(1.0, 8.0, 0.1, "suffix:m") var forest_step: float = 2.6
 ## Stinge padurea (sabotajul sondei ProbeFlicker: cer prin goluri).
 @export var forest_enabled: bool = true
+## Luminis la gura (Kyoto POI E, runda 2): fara cedri INAINTEA primei porti de
+## tunel (esantioanele < `first`), adica in dreptul portii mari si al vulpilor.
+## Cedrii de la ±6,6 m stateau exact pe stalpii portii mari (scara 1,6, ±8,8 m)
+## si o mascau din apropierea de furca. Peretii, portile si cedrii din dreptul
+## peretilor (golurile fara cer, ProbeFlicker) raman neatinsi.
+@export var mouth_clearing: bool = false
 
 var _track: Track = null
 var gate_count: int = 0
@@ -324,6 +330,9 @@ func _build_forest(track: Track, main: TrackRoute, pts: Array[Vector3],
 			var i := first - 2 * stride + (row_k / 2) * stride
 			var shift := float(row_k % 2) * 0.5 * float(stride) * spacing
 			while i <= last + 2 * stride:
+				if mouth_clearing and i < first:
+					i += stride
+					continue
 				var k := clampi(i, 0, pts.size() - 1)
 				var p := pts[k] + dirs[k] * shift 						+ dirs[k].cross(Vector3.UP) * (lat + rng.randf_range(-0.6, 0.6)) * sgn
 				p.y = pts[k].y - 1.2

@@ -700,6 +700,31 @@ if len(sys.argv) > 1:
        frac_from=F["G S1 intrare"] - 0.012, frac_to=F["G2 sub podul trenului"] + 0.006,
        lat_min=40.0, lat_max=62.0, spacing=5.0, edge_clear_m=3.0, scale_min=0.9,
        scale_max=1.3, max_below_road_m=6.0, seed=62)
+    # H (POI H, kyoto/poi-h): EXTERIORUL dreptei finale (stanga, vest) era camp
+    # gol pana la orizont; diorama are acolo malul raului si dealuri impadurite
+    # (artari rosii, conifere inchise, cate un ginkgo). Patru discuri dincolo de
+    # primul rand manual (gen_decor_kyoto_h.gd, 20-45 m de ax): de la 14 m de
+    # MARGINE (21 m de ax), departe de axa pagodei (azimut ~4,5 grade stanga de la iesirea de
+    # pe pod). `max_below_road_m` 3 tine copacii afara din bazinul raului (apa
+    # la -3, drumul la +3).
+    H_WEST = ("momiji_a", "momiji_b", "momiji_c", "cedar_dark", "ginkgo")
+    H_WEST_W = (0.22, 0.22, 0.20, 0.26, 0.10)
+    fz("H vest deal pod", 1, H_WEST, H_WEST_W, center=(-150.0, 0.0, 285.0), radius=50.0,
+       spacing=6.0, max_below_road_m=3.0, seed=81)
+    fz("H vest mal", 1, H_WEST, H_WEST_W, center=(-95.0, 0.0, 205.0), radius=35.0,
+       spacing=6.0, edge_clear_m=14.0, max_below_road_m=3.0, seed=84)
+    fz("H vest deal dreapta", 1, H_WEST, H_WEST_W, center=(-90.0, 0.0, 130.0), radius=65.0,
+       spacing=6.0, edge_clear_m=14.0, max_below_road_m=3.0, seed=82)
+    # spre strada lui A: randul doi de case sta la ~21-27 m de ax, deci 24 m.
+    fz("H vest spre oras", 1, H_WEST, H_WEST_W, center=(-110.0, 0.0, 20.0), radius=60.0,
+       spacing=6.5, edge_clear_m=24.0, max_below_road_m=3.0, seed=83)
+    # Dealul gradinii (Peaks/DealGradina, +24 la (60, 300)): fata de VEST, spre
+    # pod, era iarba goala in dreapta-fata (contractul H: "dealurile colorate de
+    # toamna in dreapta-fata"). Doar fata dinspre rau, ca Pavilionul lui F sa
+    # ramana liber.
+    fz("H deal gradina vest", 1, ("momiji_a", "momiji_b", "momiji_c", "ginkgo", "cedar_dark"),
+       (0.26, 0.26, 0.22, 0.14, 0.12), center=(28.0, 0.0, 292.0), radius=36.0,
+       spacing=6.0, max_below_road_m=3.0, seed=85)
 
     FOREST_GLBS = (("momiji_a", "plants"), ("momiji_b", "plants"), ("momiji_c", "plants"),
                    ("ginkgo", "plants"), ("niwaki_pine", "plants"), ("moso_culm", "plants"),

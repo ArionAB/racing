@@ -1,0 +1,475 @@
+;;EXT
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/garden_rock_a.glb" id="poih_garden_rock_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/garden_rock_b.glb" id="poih_garden_rock_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/garden_rock_c.glb" id="poih_garden_rock_c"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/ginkgo.glb" id="poih_ginkgo"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/karikomi_shrub_a.glb" id="poih_karikomi_shrub_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/karikomi_shrub_b.glb" id="poih_karikomi_shrub_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/leaf_pile.glb" id="poih_leaf_pile"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_a.glb" id="poih_momiji_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_b.glb" id="poih_momiji_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_c.glb" id="poih_momiji_c"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/moss_mound.glb" id="poih_moss_mound"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/niwaki_pine.glb" id="poih_niwaki_pine"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/small_shrine.glb" id="poih_small_shrine"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_a.glb" id="poih_stone_lantern_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_b.glb" id="poih_stone_lantern_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/temple_wall.glb" id="poih_temple_wall"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/vehicles/yakatabune.glb" id="poih_yakatabune"]
+[ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="poih_pathmover"]
+;;NODES
+[node name="ZoneH_Togetsukyo" type="Node3D" parent="DecorManual"]
+
+[node name="hMalCopac1" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(-0.472761, 0.000000, 0.670356, 0.000000, 0.820292, 0.000000, -0.670356, 0.000000, -0.472761, -98.170898, -1.091275, 220.912720)
+
+[node name="hMalCopac2" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(1.022611, 0.000000, -0.356849, 0.000000, 1.083086, 0.000000, 0.356849, 0.000000, 1.022611, -100.814507, -1.859021, 328.506287)
+
+[node name="hMalCopac3" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.837906, 0.000000, 0.169429, 0.000000, 0.854864, 0.000000, -0.169429, 0.000000, 0.837906, -79.165268, -0.678784, 340.839172)
+
+[node name="hMalTufa4" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_a")]
+transform = Transform3D(1.210752, 0.000000, 0.609183, 0.000000, 1.355369, 0.000000, -0.609183, 0.000000, 1.210752, -77.071892, -0.673185, 342.086945)
+
+[node name="hMalCopac5" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(-0.704610, 0.000000, -0.380345, 0.000000, 0.800710, 0.000000, 0.380345, 0.000000, -0.704610, -91.201279, -0.134396, 342.467529)
+
+[node name="hPiatraRau6" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(-0.565131, 0.000000, 1.677019, 0.000000, 1.769680, 0.000000, -1.677019, 0.000000, -0.565131, -104.150040, -3.527639, 241.693237)
+
+[node name="hMalCopac7" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(-0.815316, 0.000000, 0.154001, 0.000000, 0.829732, 0.000000, -0.154001, 0.000000, -0.815316, -62.739429, 0.494281, 210.627731)
+
+[node name="hMalCopac8" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(-0.494715, 0.000000, -0.784374, 0.000000, 0.927354, 0.000000, 0.784374, 0.000000, -0.494715, -6.044291, 1.096454, 220.116196)
+
+[node name="hMalCopac9" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.071584, 0.000000, 0.807025, 0.000000, 0.810194, 0.000000, -0.807025, 0.000000, 0.071584, -116.574951, -0.624844, 336.542633)
+
+[node name="hMalCopac10" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(1.069639, 0.000000, -0.417718, 0.000000, 1.148310, 0.000000, 0.417718, 0.000000, 1.069639, -65.899704, -2.044659, 233.197281)
+
+[node name="hMalTufa11" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_b")]
+transform = Transform3D(-1.149302, 0.000000, 0.794165, 0.000000, 1.396994, 0.000000, -0.794165, 0.000000, -1.149302, -67.028381, -1.851500, 230.645187)
+
+[node name="hMalCopac12" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.883663, 0.000000, -0.379546, 0.000000, 0.961726, 0.000000, 0.379546, 0.000000, 0.883663, -3.018115, -2.061780, 342.932220)
+
+[node name="hPiatraRau13" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(1.887131, 0.000000, 0.907102, 0.000000, 2.093823, 0.000000, -0.907102, 0.000000, 1.887131, -58.379295, -3.286751, 239.157822)
+
+[node name="hMalCopac14" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(-1.014845, 0.000000, 0.108771, 0.000000, 1.020657, 0.000000, -0.108771, 0.000000, -1.014845, 3.275023, -1.643994, 242.091293)
+
+[node name="hMalCopac15" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(0.864883, 0.000000, -0.549314, 0.000000, 1.024583, 0.000000, 0.549314, 0.000000, 0.864883, -82.287239, -0.149258, 215.051254)
+
+[node name="hPiatraRau16" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(0.466564, 0.000000, 1.667529, 0.000000, 1.731570, 0.000000, -1.667529, 0.000000, 0.466564, -84.950851, -3.103876, 235.176987)
+
+[node name="hMalCopac17" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(0.868797, 0.000000, -0.217266, 0.000000, 0.895552, 0.000000, 0.217266, 0.000000, 0.868797, -9.175187, 2.306949, 207.695450)
+
+[node name="hMalTufa18" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_a")]
+transform = Transform3D(-1.187681, 0.000000, -0.293335, 0.000000, 1.223369, 0.000000, 0.293335, 0.000000, -1.187681, -6.459681, 2.211626, 205.787155)
+
+[node name="hMalCopac19" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.200335, 0.000000, -0.891125, 0.000000, 0.913367, 0.000000, 0.891125, 0.000000, 0.200335, 28.210415, 0.410571, 235.710678)
+
+[node name="hPiatraRau20" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(-0.229500, 0.000000, 1.621878, 0.000000, 1.638034, 0.000000, -1.621878, 0.000000, -0.229500, -34.092842, -3.050217, 334.072083)
+
+[node name="hMalCopac21" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(0.537405, 0.000000, -0.988200, 0.000000, 1.124875, 0.000000, 0.988200, 0.000000, 0.537405, -57.165474, -1.136883, 226.621353)
+
+[node name="hMalTufa22" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_a")]
+transform = Transform3D(1.014795, 0.000000, -0.477795, 0.000000, 1.121649, 0.000000, 0.477795, 0.000000, 1.014795, -54.779213, -1.039915, 224.930252)
+
+[node name="hMalCopac23" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(-0.722500, 0.000000, -0.391698, 0.000000, 0.821847, 0.000000, 0.391698, 0.000000, -0.722500, 2.989179, 2.198795, 210.551575)
+
+[node name="hMalTufa24" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_a")]
+transform = Transform3D(-0.039411, 0.000000, -1.035751, 0.000000, 1.036500, 0.000000, 1.035751, 0.000000, -0.039411, 2.604350, 1.742372, 214.044495)
+
+[node name="hPiatraRau25" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(2.047785, 0.000000, 0.601688, 0.000000, 2.134351, 0.000000, -0.601688, 0.000000, 2.047785, -67.099289, -3.349918, 325.320343)
+
+[node name="hPiatraRau26" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(-1.222815, 0.000000, 0.849588, 0.000000, 1.488985, 0.000000, -0.849588, 0.000000, -1.222815, -113.669609, -3.272489, 316.189178)
+
+[node name="hMalCopac27" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(-0.568559, 0.000000, -0.622307, 0.000000, 0.842927, 0.000000, 0.622307, 0.000000, -0.568559, 4.163654, 1.380954, 221.999985)
+
+[node name="hMalTufa28" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_b")]
+transform = Transform3D(-0.813779, 0.000000, -0.877635, 0.000000, 1.196862, 0.000000, 0.877635, 0.000000, -0.813779, 4.620165, 0.959658, 223.053970)
+
+[node name="hPiatraRau29" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(1.073852, 0.000000, -0.926749, 0.000000, 1.418458, 0.000000, 0.926749, 0.000000, 1.073852, -64.602943, -3.282077, 240.221481)
+
+[node name="hPiatraRau30" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(0.704756, 0.000000, 0.764409, 0.000000, 1.039713, 0.000000, -0.764409, 0.000000, 0.704756, -80.344299, -3.071543, 324.636322)
+
+[node name="hMalCopac31" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.619685, 0.000000, -0.664151, 0.000000, 0.908354, 0.000000, 0.664151, 0.000000, 0.619685, -11.403970, -2.060132, 241.109924)
+
+[node name="hMalCopac32" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(-0.869554, 0.000000, 0.293604, 0.000000, 0.917784, 0.000000, -0.293604, 0.000000, -0.869554, -37.576141, -1.431180, 344.095703)
+
+[node name="hMalCopac33" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(0.965051, 0.000000, 0.351368, 0.000000, 1.027027, 0.000000, -0.351368, 0.000000, 0.965051, -12.083076, -1.961240, 343.596497)
+
+[node name="hPiatraRau34" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(-1.818557, 0.000000, 1.217924, 0.000000, 2.188719, 0.000000, -1.217924, 0.000000, -1.818557, 15.749161, -3.556881, 310.350464)
+
+[node name="hMalCopac35" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.972702, 0.000000, 0.145584, 0.000000, 0.983536, 0.000000, -0.145584, 0.000000, 0.972702, -23.212940, -1.814725, 341.117889)
+
+[node name="hMalTufa36" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_b")]
+transform = Transform3D(-0.220458, 0.000000, -1.003738, 0.000000, 1.027664, 0.000000, 1.003738, 0.000000, -0.220458, -26.660015, -2.283964, 339.044556)
+
+[node name="hMalCopac37" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(0.190862, 0.000000, -0.866118, 0.000000, 0.886898, 0.000000, 0.866118, 0.000000, 0.190862, -0.848160, -0.367520, 229.891556)
+
+[node name="hPiatraRau38" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(-0.494013, 0.000000, 0.809716, 0.000000, 0.948519, 0.000000, -0.809716, 0.000000, -0.494013, -4.619398, -3.157813, 335.964172)
+
+[node name="hMalCopac39" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_ginkgo")]
+transform = Transform3D(-0.286162, 0.000000, 0.806978, 0.000000, 0.856214, 0.000000, -0.806978, 0.000000, -0.286162, -82.396942, 0.557880, 205.180466)
+
+[node name="hMalTufa40" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_a")]
+transform = Transform3D(-1.095512, 0.000000, -0.316082, 0.000000, 1.140199, 0.000000, 0.316082, 0.000000, -1.095512, -85.749687, 0.554903, 203.913605)
+
+[node name="hMalCopac41" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(-0.637882, 0.000000, -0.537509, 0.000000, 0.834152, 0.000000, 0.537509, 0.000000, -0.637882, -94.359985, 0.008594, 210.751465)
+
+[node name="hMalCopac42" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(0.362895, 0.000000, 0.965124, 0.000000, 1.031095, 0.000000, -0.965124, 0.000000, 0.362895, 23.856316, 2.374118, 219.167664)
+
+[node name="hMalCopac43" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(0.089193, 0.000000, 1.111701, 0.000000, 1.115274, 0.000000, -1.111701, 0.000000, 0.089193, -73.550308, -0.638943, 222.081268)
+
+[node name="hMalTufa44" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_a")]
+transform = Transform3D(1.115198, 0.000000, 0.473593, 0.000000, 1.211592, 0.000000, -0.473593, 0.000000, 1.115198, -72.409691, -0.291960, 218.612747)
+
+[node name="hPiatraRau45" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(0.836346, 0.000000, -0.661798, 0.000000, 1.066514, 0.000000, 0.661798, 0.000000, 0.836346, -103.104156, -3.015677, 322.348022)
+
+[node name="hMalCopac46" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_ginkgo")]
+transform = Transform3D(0.453774, 0.000000, 0.869813, 0.000000, 0.981063, 0.000000, -0.869813, 0.000000, 0.453774, -53.223877, 1.138126, 207.131393)
+
+[node name="hMalTufa47" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_a")]
+transform = Transform3D(-0.907397, 0.000000, 0.899475, 0.000000, 1.277664, 0.000000, -0.899475, 0.000000, -0.907397, -54.791912, 0.737291, 210.500946)
+
+[node name="hMalCopac48" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(0.696956, 0.000000, -0.628191, 0.000000, 0.938281, 0.000000, 0.628191, 0.000000, 0.696956, 19.436674, 2.257541, 210.342987)
+
+[node name="hPiatraRau49" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(-0.812989, 0.000000, 1.139320, 0.000000, 1.399643, 0.000000, -1.139320, 0.000000, -0.812989, -20.282963, -3.212040, 331.871918)
+
+[node name="hMalCopac50" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(-0.494070, 0.000000, -0.717173, 0.000000, 0.870886, 0.000000, 0.717173, 0.000000, -0.494070, 9.068272, -0.620679, 234.291321)
+
+[node name="hMalCopac51" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(-0.590465, 0.000000, 0.624888, 0.000000, 0.859729, 0.000000, -0.624888, 0.000000, -0.590465, -55.850357, 0.127704, 217.537415)
+
+[node name="hPiatraRau52" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(1.963503, 0.000000, -0.244469, 0.000000, 1.978663, 0.000000, 0.244469, 0.000000, 1.963503, 4.632098, -3.267194, 252.234222)
+
+[node name="hMalCopac53" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(0.005686, 0.000000, 0.959198, 0.000000, 0.959215, 0.000000, -0.959198, 0.000000, 0.005686, -17.389357, 1.398364, 216.798676)
+
+[node name="hMalTufa54" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_b")]
+transform = Transform3D(0.479202, 0.000000, 0.957845, 0.000000, 1.071029, 0.000000, -0.957845, 0.000000, 0.479202, -19.174957, 1.335329, 215.402496)
+
+[node name="hMalCopac55" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(-0.960312, 0.000000, 0.166005, 0.000000, 0.974555, 0.000000, -0.166005, 0.000000, -0.960312, -71.967987, 0.400546, 210.952011)
+
+[node name="hMalTufa56" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_karikomi_shrub_b")]
+transform = Transform3D(1.363548, 0.000000, -0.013061, 0.000000, 1.363611, 0.000000, 0.013061, 0.000000, 1.363548, -72.478592, 0.411775, 209.209503)
+
+[node name="hPiatraRau57" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(-0.383954, 0.000000, 2.034481, 0.000000, 2.070395, 0.000000, -2.034481, 0.000000, -0.383954, -109.090202, -3.554264, 252.372635)
+
+[node name="hMalCopac58" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_ginkgo")]
+transform = Transform3D(0.970450, 0.000000, 0.221606, 0.000000, 0.995431, 0.000000, -0.221606, 0.000000, 0.970450, -115.514954, -2.119015, 324.883423)
+
+[node name="hMalCopac59" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(-0.121737, 0.000000, -0.858790, 0.000000, 0.867376, 0.000000, 0.858790, 0.000000, -0.121737, -100.816254, -0.163678, 339.999054)
+
+[node name="hMalCopac60" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.912044, 0.000000, 0.078411, 0.000000, 0.915408, 0.000000, -0.078411, 0.000000, 0.912044, 21.647139, 0.830524, 229.054932)
+
+[node name="hPiatraRau61" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(1.183943, 0.000000, -0.330000, 0.000000, 1.229073, 0.000000, 0.330000, 0.000000, 1.183943, -95.105171, -3.023649, 322.905243)
+
+[node name="hPiatraRau62" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(1.170338, 0.000000, 0.450929, 0.000000, 1.254204, 0.000000, -0.450929, 0.000000, 1.170338, -113.322128, -3.434745, 297.899139)
+
+[node name="hPiatraRau63" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(0.822623, 0.000000, -0.852530, 0.000000, 1.184701, 0.000000, 0.852530, 0.000000, 0.822623, -100.407066, -3.188886, 237.408264)
+
+[node name="hPiatraRau64" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(-1.168713, 0.000000, -1.566999, 0.000000, 1.954834, 0.000000, 1.566999, 0.000000, -1.168713, 15.676702, -3.523032, 316.809509)
+
+[node name="hPiatraRau65" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(-0.924950, 0.000000, 1.253028, 0.000000, 1.557437, 0.000000, -1.253028, 0.000000, -0.924950, -39.841785, -3.074924, 333.752228)
+
+[node name="hPiatraRau66" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(1.245706, 0.000000, -1.335882, 0.000000, 1.826572, 0.000000, 1.335882, 0.000000, 1.245706, 16.513653, -3.490322, 255.133820)
+
+[node name="hPiatraRau67" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(-0.744117, 0.000000, -1.812250, 0.000000, 1.959071, 0.000000, 1.812250, 0.000000, -0.744117, 21.185701, -3.374157, 282.871490)
+
+[node name="hPiatraRau68" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(-1.243594, 0.000000, 0.757381, 0.000000, 1.456074, 0.000000, -0.757381, 0.000000, -1.243594, -9.896080, -3.274125, 333.900574)
+
+[node name="hPiatraRau69" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(-0.048944, 0.000000, -1.733152, 0.000000, 1.733843, 0.000000, 1.733152, 0.000000, -0.048944, -9.075895, -3.232094, 247.156067)
+
+[node name="hPiatraRau70" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(-1.320202, 0.000000, 1.303776, 0.000000, 1.855469, 0.000000, -1.303776, 0.000000, -1.320202, 16.108273, -3.523727, 291.218414)
+
+[node name="hPiatraRau71" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(-1.865078, 0.000000, 0.007568, 0.000000, 1.865093, 0.000000, -0.007568, 0.000000, -1.865078, -119.588951, -3.492457, 307.628693)
+
+[node name="hPiatraRau72" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(-0.639048, 0.000000, 0.806881, 0.000000, 1.029291, 0.000000, -0.806881, 0.000000, -0.639048, -16.958477, -2.985652, 246.596466)
+
+[node name="hPiatraRau73" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(-0.802746, 0.000000, 0.673208, 0.000000, 1.047668, 0.000000, -0.673208, 0.000000, -0.802746, -88.154556, -2.950763, 325.620361)
+
+[node name="hPiatraRau74" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(2.048181, 0.000000, -0.082513, 0.000000, 2.049842, 0.000000, 0.082513, 0.000000, 2.048181, -94.011513, -3.331140, 237.154541)
+
+[node name="hPiatraRau75" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(0.991865, 0.000000, 0.925714, 0.000000, 1.356740, 0.000000, -0.925714, 0.000000, 0.991865, 23.914698, -3.369184, 258.274170)
+
+[node name="hPiatraRau76" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(0.955617, 0.000000, -1.134578, 0.000000, 1.483399, 0.000000, 1.134578, 0.000000, 0.955617, 15.921062, -3.477538, 297.192688)
+
+[node name="hPiatraRau77" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(-0.453819, 0.000000, 1.203279, 0.000000, 1.286014, 0.000000, -1.203279, 0.000000, -0.453819, -2.746638, -3.108240, 252.003098)
+
+[node name="hPiatraRau78" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(0.312215, 0.000000, 1.822059, 0.000000, 1.848615, 0.000000, -1.822059, 0.000000, 0.312215, -25.878334, -3.136430, 245.935577)
+
+[node name="hPiatraRau79" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(-0.831741, 0.000000, 0.701265, 0.000000, 1.087918, 0.000000, -0.701265, 0.000000, -0.831741, -106.141983, -3.237453, 318.297241)
+
+[node name="hPiatraRau80" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(1.341913, 0.000000, -0.848077, 0.000000, 1.587440, 0.000000, 0.848077, 0.000000, 1.341913, -25.341496, -3.289034, 331.561890)
+
+[node name="hPiatraRau81" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_a")]
+transform = Transform3D(0.557074, 0.000000, 1.420528, 0.000000, 1.525854, 0.000000, -1.420528, 0.000000, 0.557074, -71.964622, -3.163434, 238.918732)
+
+[node name="hPiatraRau82" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_b")]
+transform = Transform3D(0.079815, 0.000000, 2.176406, 0.000000, 2.177869, 0.000000, -2.176406, 0.000000, 0.079815, -106.214676, -3.250129, 246.856293)
+
+[node name="hPiatraRau83" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(1.046460, 0.000000, 0.611809, 0.000000, 1.212183, 0.000000, -0.611809, 0.000000, 1.046460, 6.042426, -3.180511, 336.508209)
+
+[node name="hPiatraRau84" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_b")]
+transform = Transform3D(0.707695, 0.000000, 1.196075, 0.000000, 1.389759, 0.000000, -1.196075, 0.000000, 0.707695, -111.888397, -3.460884, 290.881134)
+
+[node name="hPiatraRau85" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(-1.023016, 0.000000, -0.007928, 0.000000, 1.023047, 0.000000, 0.007928, 0.000000, -1.023016, 13.174622, -3.302438, 332.031036)
+
+[node name="hPiatraRau86" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(-0.478971, 0.000000, 1.092169, 0.000000, 1.192580, 0.000000, -1.092169, 0.000000, -0.478971, -53.719143, -3.249768, 243.188721)
+
+[node name="hPiatraRau87" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(0.667069, 0.000000, 1.902107, 0.000000, 2.015687, 0.000000, -1.902107, 0.000000, 0.667069, 10.043466, -3.413895, 253.827942)
+
+[node name="hPiatraRau88" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(-1.997989, 0.000000, -0.377846, 0.000000, 2.033403, 0.000000, 0.377846, 0.000000, -1.997989, 13.941027, -3.150304, 250.613251)
+
+[node name="hPiatraRau89" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(-1.121582, 0.000000, -0.598462, 0.000000, 1.271260, 0.000000, 0.598462, 0.000000, -1.121582, -111.922867, -3.450693, 282.033478)
+
+[node name="hPiatraRau90" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(-1.590204, 0.000000, 0.866807, 0.000000, 1.811106, 0.000000, -0.866807, 0.000000, -1.590204, -110.373314, -3.212297, 322.147919)
+
+[node name="hPiatraRau91" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_garden_rock_c")]
+transform = Transform3D(1.590346, 0.000000, -0.904419, 0.000000, 1.829528, 0.000000, 0.904419, 0.000000, 1.590346, -119.875526, -3.358200, 315.296021)
+
+[node name="hPiatraRau92" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_moss_mound")]
+transform = Transform3D(-0.756157, 0.000000, 0.492343, 0.000000, 0.902317, 0.000000, -0.492343, 0.000000, -0.756157, -73.614838, -2.975328, 325.423828)
+
+[node name="hPodFelinar93" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_a")]
+transform = Transform3D(-0.147455, 0.000000, -0.989069, 0.000000, 1.000000, 0.000000, 0.989069, 0.000000, -0.147455, -70.266586, 1.873294, 363.741516)
+
+[node name="hPodArtar94" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(0.132710, 0.000000, 0.890162, 0.000000, 0.900000, 0.000000, -0.890162, 0.000000, 0.132710, -76.747696, 1.806278, 359.742126)
+
+[node name="hPodFelinar95" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_a")]
+transform = Transform3D(0.147456, 0.000000, 0.989069, 0.000000, 1.000000, 0.000000, -0.989069, 0.000000, 0.147456, -48.507072, 2.012805, 366.985535)
+
+[node name="hPodArtar96" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(0.132710, 0.000000, 0.890162, 0.000000, 0.900000, 0.000000, -0.890162, 0.000000, 0.132710, -41.141228, 1.612964, 365.050537)
+
+[node name="hPodFelinar97" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_a")]
+transform = Transform3D(-0.300445, 0.000000, -0.953799, 0.000000, 1.000000, 0.000000, 0.953799, 0.000000, -0.300445, -43.648315, 1.739124, 204.318680)
+
+[node name="hPodArtar98" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.270401, 0.000000, 0.858419, 0.000000, 0.900000, 0.000000, -0.858419, 0.000000, 0.270401, -49.423573, 1.738055, 199.354156)
+
+[node name="hPodFelinar99" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_a")]
+transform = Transform3D(0.300445, 0.000000, 0.953799, 0.000000, 1.000000, 0.000000, -0.953799, 0.000000, 0.300445, -22.664734, 1.554706, 210.928482)
+
+[node name="hPodArtar100" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.270401, 0.000000, 0.858419, 0.000000, 0.900000, 0.000000, -0.858419, 0.000000, 0.270401, -15.086804, 2.344882, 210.170197)
+
+[node name="hDreaptaCopac101" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_ginkgo")]
+transform = Transform3D(0.432737, 0.000000, 0.837927, 0.000000, 0.943071, 0.000000, -0.837927, 0.000000, 0.432737, -58.724800, 1.890842, 197.166260)
+
+[node name="hDreaptaCopac102" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(-0.759237, 0.000000, 0.462779, 0.000000, 0.889160, 0.000000, -0.462779, 0.000000, -0.759237, -70.942200, 1.604465, 192.589844)
+
+[node name="hDreaptaCopac103" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.220113, 0.000000, 1.060386, 0.000000, 1.082991, 0.000000, -1.060386, 0.000000, 0.220113, -47.518604, 2.145221, 184.741455)
+
+[node name="hFrunze104" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_leaf_pile")]
+transform = Transform3D(-0.009033, 0.000000, -0.877201, 0.000000, 0.877247, 0.000000, 0.877201, 0.000000, -0.009033, -42.789169, 2.155795, 186.363953)
+
+[node name="hDreaptaCopac105" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(-0.005280, 0.000000, 1.055151, 0.000000, 1.055165, 0.000000, -1.055151, 0.000000, -0.005280, -47.130188, 1.923267, 171.760117)
+
+[node name="hDreaptaCopac106" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(0.642325, 0.000000, 0.790310, 0.000000, 1.018416, 0.000000, -0.790310, 0.000000, 0.642325, -46.366173, 1.669132, 157.623444)
+
+[node name="hDreaptaCopac107" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.898573, 0.000000, 0.455041, 0.000000, 1.007221, 0.000000, -0.455041, 0.000000, 0.898573, -56.930809, 1.733630, 158.128586)
+
+[node name="hDreaptaCopac108" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.136674, 0.000000, 0.942772, 0.000000, 0.952627, 0.000000, -0.942772, 0.000000, 0.136674, -37.185352, 1.439273, 147.668900)
+
+[node name="hDreaptaCopac109" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(-0.614201, 0.000000, -0.838086, 0.000000, 1.039053, 0.000000, 0.838086, 0.000000, -0.614201, -49.788216, 1.336490, 138.691818)
+
+[node name="hDreaptaCopac110" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.250866, 0.000000, 0.862836, 0.000000, 0.898565, 0.000000, -0.862836, 0.000000, 0.250866, -33.239861, 1.241962, 137.997467)
+
+[node name="hDreaptaCopac111" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(-0.823399, 0.000000, -0.527387, 0.000000, 0.977816, 0.000000, 0.527387, 0.000000, -0.823399, -45.158573, 1.194049, 132.238739)
+
+[node name="hDreaptaCopac112" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(-0.153954, 0.000000, 1.068500, 0.000000, 1.079534, 0.000000, -1.068500, 0.000000, -0.153954, -29.730755, 1.084735, 130.309601)
+
+[node name="hDreaptaCopac113" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.599800, 0.000000, -0.778851, 0.000000, 0.983040, 0.000000, 0.778851, 0.000000, 0.599800, -40.666397, 1.114459, 128.974747)
+
+[node name="hFrunze114" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_leaf_pile")]
+transform = Transform3D(0.361657, 0.000000, -0.812671, 0.000000, 0.889511, 0.000000, 0.812671, 0.000000, 0.361657, -24.750242, 1.059345, 130.750610)
+
+[node name="hDreaptaCopac115" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(0.302151, 0.000000, 1.025172, 0.000000, 1.068772, 0.000000, -1.025172, 0.000000, 0.302151, -29.882263, 0.851245, 115.625214)
+
+[node name="hFrunze116" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_leaf_pile")]
+transform = Transform3D(-0.544616, 0.000000, -0.815653, 0.000000, 0.980764, 0.000000, 0.815653, 0.000000, -0.544616, -24.912151, 0.843372, 116.171089)
+
+[node name="hDreaptaCopac117" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_ginkgo")]
+transform = Transform3D(0.288528, 0.000000, 0.941169, 0.000000, 0.984402, 0.000000, -0.941169, 0.000000, 0.288528, -35.096336, 0.644458, 100.968300)
+
+[node name="hDreaptaCopac118" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.553277, 0.000000, -0.758458, 0.000000, 0.938816, 0.000000, 0.758458, 0.000000, 0.553277, -48.703423, 0.604953, 95.978485)
+
+[node name="hDreaptaCopac119" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.380435, 0.000000, 0.951507, 0.000000, 1.024742, 0.000000, -0.951507, 0.000000, 0.380435, -31.857235, 0.442828, 87.576042)
+
+[node name="hDreaptaCopac120" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(1.033483, 0.000000, -0.160335, 0.000000, 1.045846, 0.000000, 0.160335, 0.000000, 1.033483, -46.652351, 0.478091, 88.067635)
+
+[node name="hDreaptaCopac121" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.322413, 0.000000, 0.932223, 0.000000, 0.986402, 0.000000, -0.932223, 0.000000, 0.322413, -13.299740, 2.283008, 203.910858)
+
+[node name="hDreaptaCopac122" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.285548, 0.000000, 0.833454, 0.000000, 0.881013, 0.000000, -0.833454, 0.000000, 0.285548, 1.181322, 1.782520, 179.489883)
+
+[node name="hDreaptaCopac123" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(0.314808, 0.000000, 0.840691, 0.000000, 0.897700, 0.000000, -0.840691, 0.000000, 0.314808, 7.283528, 1.362109, 156.043442)
+
+[node name="hDreaptaCopac124" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(0.097441, 0.000000, 0.889007, 0.000000, 0.894331, 0.000000, -0.889007, 0.000000, 0.097441, 7.709888, 0.912677, 125.376808)
+
+[node name="hDreaptaCopac125" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_niwaki_pine")]
+transform = Transform3D(0.105044, 0.000000, 0.941940, 0.000000, 0.947779, 0.000000, -0.941940, 0.000000, 0.105044, 13.949343, 0.524677, 98.617645)
+
+[node name="hDreaptaFelinar126" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_a")]
+transform = Transform3D(-0.324501, 0.000000, -0.945885, 0.000000, 1.000000, 0.000000, 0.945885, 0.000000, -0.324501, -37.716629, 2.129489, 187.030258)
+
+[node name="hDreaptaFelinar127" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_b")]
+transform = Transform3D(0.324441, 0.000000, 0.945906, 0.000000, 1.000000, 0.000000, -0.945906, 0.000000, 0.324441, -9.786935, 1.720966, 173.352722)
+
+[node name="hDreaptaFelinar128" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_a")]
+transform = Transform3D(-0.343174, 0.000000, -0.939272, 0.000000, 1.000000, 0.000000, 0.939272, 0.000000, -0.343174, -23.375401, 1.304813, 145.202896)
+
+[node name="hDreaptaFelinar129" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_a")]
+transform = Transform3D(0.118389, 0.000000, 0.992967, 0.000000, 1.000000, 0.000000, -0.992967, 0.000000, 0.118389, 2.314233, 0.959247, 128.840179)
+
+[node name="hDreaptaFelinar130" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_b")]
+transform = Transform3D(-0.110841, 0.000000, -0.993838, 0.000000, 1.000000, 0.000000, 0.993838, 0.000000, -0.110841, -17.118460, 0.646396, 104.452652)
+
+[node name="hTempluZid131" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_temple_wall")]
+transform = Transform3D(-0.948054, 0.000000, 0.318109, 0.000000, 1.000000, 0.000000, -0.318109, 0.000000, -0.948054, -29.526438, 1.205087, 147.665924)
+
+[node name="hTempluZid132" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_temple_wall")]
+transform = Transform3D(-0.978212, 0.000000, 0.207609, 0.000000, 1.000000, 0.000000, -0.207609, 0.000000, -0.978212, -25.742619, 0.972055, 136.115921)
+
+[node name="hTempluFelinar133" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_b")]
+transform = Transform3D(-0.350683, 0.000000, -0.936494, 0.000000, 1.000000, 0.000000, 0.936494, 0.000000, -0.350683, -26.252077, 1.284732, 143.177414)
+
+[node name="hTempluFelinar134" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_stone_lantern_b")]
+transform = Transform3D(-0.350683, 0.000000, -0.936494, 0.000000, 1.000000, 0.000000, 0.936494, 0.000000, -0.350683, -24.709070, 1.201526, 139.056839)
+
+[node name="hTempluAltar135" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_small_shrine")]
+transform = Transform3D(-0.350683, 0.000000, -0.936494, 0.000000, 1.000000, 0.000000, 0.936494, 0.000000, -0.350683, -36.343906, 1.199374, 137.049194)
+
+[node name="hTempluArtar136" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(-0.177389, 0.000000, 0.962734, 0.000000, 0.978940, 0.000000, -0.962734, 0.000000, -0.177389, -35.403393, 1.398517, 145.943893)
+
+[node name="hTempluArtar137" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_c")]
+transform = Transform3D(-0.886023, 0.000000, 0.103874, 0.000000, 0.892091, 0.000000, -0.103874, 0.000000, -0.886023, -31.079641, 1.114459, 131.545776)
+
+[node name="hTempluArtar138" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_b")]
+transform = Transform3D(0.703731, 0.000000, 0.512123, 0.000000, 0.870349, 0.000000, -0.512123, 0.000000, 0.703731, -42.078426, 1.287509, 138.105255)
+
+[node name="hTempluArtar139" parent="DecorManual/ZoneH_Togetsukyo" instance=ExtResource("poih_momiji_a")]
+transform = Transform3D(0.557180, 0.000000, 0.696177, 0.000000, 0.891690, 0.000000, -0.696177, 0.000000, 0.557180, -41.145950, 1.133106, 129.911957)
+
+[node name="BarcaKatsuraVest1" type="Path3D" parent="."]
+script = ExtResource("poih_pathmover")
+model = ExtResource("poih_yakatabune")
+collide = false
+points = PackedVector3Array(-79.00, -3.30, 254.00, -78.71, -3.30, 257.71, -78.43, -3.30, 261.43, -78.14, -3.30, 265.14, -77.86, -3.30, 268.86, -77.57, -3.30, 272.57, -77.29, -3.30, 276.29, -77.00, -3.30, 280.00, -77.71, -3.30, 283.71, -78.43, -3.30, 287.43, -79.14, -3.30, 291.14, -79.86, -3.30, 294.86, -80.57, -3.30, 298.57, -81.29, -3.30, 302.29, -82.00, -3.30, 306.00)
+speed = 2.0
+travel_mode = 1
+phase = 0.00
+stick_to_ground = false
+bob_amplitude = 0.05
+rock_amplitude = 0.02
+
+[node name="BarcaKatsuraVest2" type="Path3D" parent="."]
+script = ExtResource("poih_pathmover")
+model = ExtResource("poih_yakatabune")
+collide = false
+points = PackedVector3Array(-97.00, -3.30, 302.00, -96.50, -3.30, 298.33, -96.00, -3.30, 294.67, -95.50, -3.30, 291.00, -95.00, -3.30, 287.33, -94.50, -3.30, 283.67, -94.00, -3.30, 280.00, -94.33, -3.30, 276.33, -94.67, -3.30, 272.67, -95.00, -3.30, 269.00, -95.33, -3.30, 265.33, -95.67, -3.30, 261.67, -96.00, -3.30, 258.00)
+speed = 1.6
+travel_mode = 1
+phase = 0.55
+stick_to_ground = false
+bob_amplitude = 0.05
+rock_amplitude = 0.02
+
+[node name="BarcaKatsuraEst" type="Path3D" parent="."]
+script = ExtResource("poih_pathmover")
+model = ExtResource("poih_yakatabune")
+collide = false
+points = PackedVector3Array(-6.00, -3.30, 262.00, -5.57, -3.30, 265.43, -5.14, -3.30, 268.86, -4.71, -3.30, 272.29, -4.29, -3.30, 275.71, -3.86, -3.30, 279.14, -3.43, -3.30, 282.57, -3.00, -3.30, 286.00, -3.71, -3.30, 289.43, -4.43, -3.30, 292.86, -5.14, -3.30, 296.29, -5.86, -3.30, 299.71, -6.57, -3.30, 303.14, -7.29, -3.30, 306.57, -8.00, -3.30, 310.00)
+speed = 1.8
+travel_mode = 1
+phase = 0.30
+stick_to_ground = false
+bob_amplitude = 0.05
+rock_amplitude = 0.02
+

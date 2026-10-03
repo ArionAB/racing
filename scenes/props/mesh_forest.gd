@@ -211,9 +211,11 @@ func _add_segment(a: Vector2, b: Vector2, hw_a: float, hw_b: float) -> void:
 	for cx in range(lo.x, hi.x + 1):
 		for cy in range(lo.y, hi.y + 1):
 			var key := Vector2i(cx, cy)
-			if not _seg_grid.has(key):
-				_seg_grid[key] = PackedInt32Array()
-			(_seg_grid[key] as PackedInt32Array).append(id)
+			# Packed*Array se copiaza la citirea din Dictionary: append pe copie
+			# lasa grila goala (edge_clear si pe_drum ar fi moarte). Rescrie cheia.
+			var ids: PackedInt32Array = _seg_grid.get(key, PackedInt32Array())
+			ids.append(id)
+			_seg_grid[key] = ids
 
 
 ## Distanta de la `p` la cea mai apropiata MARGINE de sosea (negativa = pe ea),
@@ -381,7 +383,7 @@ func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 	var rng := RandomNumberGenerator.new()
 	rng.seed = z.seed_value
 	var cands := _candidates(z, main, rng)
-	var min_sep := z.spacing * 0.55
+	var min_sep := z.spacing * 0.35
 	var placed := 0
 	var zone_centers := PackedVector2Array()
 	for c in cands:
@@ -518,9 +520,10 @@ func _check(c: Vector2, z: MeshForestZone, min_sep: float) -> String:
 
 func _occupy(c: Vector2) -> void:
 	var key := Vector2i(floori(c.x / _OCC_CELL), floori(c.y / _OCC_CELL))
-	if not _occ.has(key):
-		_occ[key] = PackedVector2Array()
-	(_occ[key] as PackedVector2Array).append(c)
+	# Aceeasi capcana ca la _seg_grid: append pe copie, deci rescriem cheia.
+	var pts: PackedVector2Array = _occ.get(key, PackedVector2Array())
+	pts.append(c)
+	_occ[key] = pts
 
 
 func _occupied(c: Vector2, min_sep: float) -> bool:

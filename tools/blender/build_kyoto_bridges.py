@@ -110,8 +110,8 @@ def build_tsutenkyo():
     px = 5.4                      # axa stalpilor (drumul real +-4,5 m + parapet; liber interior 10,5 m)
 
     # --- acoperis: profil concav, coama la z=5.0, streasina 4.5 m ---
-    half = [(0.0, 5.9), (1.5, 5.55), (3.15, 4.7), (4.95, 3.75), (6.3, 3.05),
-            (6.9, 3.25)]
+    half = [(0.0, 8.3), (1.5, 7.9), (3.15, 6.85), (4.95, 5.75), (6.3, 5.1),
+            (6.9, 5.3)]
     thick = [0.34, 0.34, 0.36, 0.40, 0.46, 0.5]
     top = [(-x, z) for x, z in reversed(half[1:])] + half
     thk = [t for t in reversed(thick[1:])] + thick
@@ -124,27 +124,27 @@ def build_tsutenkyo():
             (xa, za), (xb, zb) = top[i], top[i + 1]
             roof.beam((xa, y, za + 0.03), (xb, y, zb + 0.03), (0.10, 0.07), TILE)
     # coama: baza groasa + creasta
-    roof.box((0, 0, 6.02), (1.1, L, 0.34), TILE)
-    roof.box((0, 0, 6.28), (0.6, L, 0.2), BEAM)
+    roof.box((0, 0, 8.42), (1.1, L, 0.34), TILE)
+    roof.box((0, 0, 8.68), (0.6, L, 0.2), BEAM)
 
     # --- stalpi, grinzi, console (Tsu_Wood) ---
     pys = [-h + 0.075, -1.5, 0.0, 1.5, h - 0.075]
     for y in pys:
         d = 0.15 if abs(y) > 2.9 else 0.30
         for sx in (-1, 1):
-            wood.box((sx * px, y, 1.35), (0.30, d, 2.7), POST)           # stalp
+            wood.box((sx * px, y, 2.475), (0.30, d, 4.95), POST)           # stalp
             # consola de la stalp la streasina
-            wood.beam((sx * px, y, 2.4), (sx * 6.2, y, 2.95), (d, 0.22), BEAM)
+            wood.beam((sx * px, y, 4.3), (sx * 6.2, y, 5.05), (d, 0.22), BEAM)
             # contrafisa spre interior
-            wood.beam((sx * px, y, 2.2), (sx * 3.8, y, 3.0), (d, 0.20), BEAM)
+            wood.beam((sx * px, y, 4.4), (sx * 3.8, y, 5.1), (d, 0.20), BEAM)
         # grinda transversala sub coama
-        wood.box((0, y, 2.88), (2 * px + 0.5, d, 0.34), BEAM)
-        wood.box((0, y, 4.3), (0.26, d, 2.5), BEAM)
+        wood.box((0, y, 5.0), (2 * px + 0.5, d, 0.34), BEAM)
+        wood.box((0, y, 6.57), (0.26, d, 2.8), BEAM)
         for sx in (-1, 1):
-            wood.box((sx * 2.7, y, 3.75), (0.22, d, 1.5), BEAM)                       # popa
+            wood.box((sx * 2.7, y, 5.98), (0.22, d, 1.62), BEAM)                       # popa
     for sx in (-1, 1):
-        wood.box((sx * px, 0, 2.88), (0.38, L, 0.34), BEAM)               # pana
-        wood.box((sx * 6.2, 0, 2.95), (0.30, L, 0.22), BEAM)             # pana streasina
+        wood.box((sx * px, 0, 5.0), (0.38, L, 0.34), BEAM)               # pana
+        wood.box((sx * 6.2, 0, 5.05), (0.30, L, 0.22), BEAM)             # pana streasina
     # punte: talpi laterale, grinzi transversale, piloni
     for sx in (-1, 1):
         wood.box((sx * px, 0, -0.22), (0.50, L, 0.44), POST)

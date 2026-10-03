@@ -114,7 +114,7 @@ trenului +-6,0 m (frac 0,804), togetsukyo +-7,0 m (frac 0,832-0,894).
 
 | piesa | tri | cote (m) | gol/liber masurat (`measure_gap.py`, banda 0,15-2,0) | noduri | comparatie |
 |---|---:|---|---|---|---|
-| `tsutenkyo_roof_module` | 2460 | 13,82 lat (streasina +-6,9) x 6,00 lung x 7,63 (coama +6,3, piloni la -1,0); stalpi la x=+-5,4 | liber intre fetele stalpilor **10,45 m** (x -5,21..+5,24) | `Tsu_Roof`, `Tsu_Wood`, `Tsu_Rail` | `img/kyoto_fidelity/tsutenkyo_roof_module.png` (+`_chain`, `_views`) |
+| `tsutenkyo_roof_module` | 2460 | 13,82 lat (streasina +-6,9) x 6,00 lung x 10,03 (coama +8,3..8,8, piloni la -1,0); stalpi la x=+-5,4, inalti 4,95 m | liber lateral intre stalpi **10,45 m**; **inaltime libera >= 4,65 m pe toata latimea drumului +-4,5 m** (mediana 4,85; muchia de jos a grinzilor ~4,83, a streasinii la x=6,9 ~4,8) | `Tsu_Roof`, `Tsu_Wood`, `Tsu_Rail` | `img/kyoto_fidelity/tsutenkyo_roof_module.png` (+`_chain`, `_views`) |
 | `togetsukyo_module` | 1188 | 15,26 lat (punte +-7,6, balustrada +-7,4) x 10,00 lung x 3,38 | liber intre balustrade **14,35 m** (+-7,17) | `Toget_Wood`, `Toget_Rail` | `img/kyoto_fidelity/togetsukyo_module.png` (+`_chain`, `_views`) |
 | `iron_truss_bridge` | 1524 | 21,16 (X; travee ~20,8 m) x 5,80 (Y) x 10,55 | **gol 15,15 m** (x -7,58..+7,57), **inaltime libera min 6,25 m** (mediana 6,40) | `Truss_Iron` (CAR_RED, exceptie), `Truss_Stone`, `Truss_Deck` | `img/kyoto_fidelity/iron_truss_bridge.png` (+`_views`) |
 
@@ -130,4 +130,4 @@ Z=-0,04 (sub drum). Verify: `--origin=waterline` (module), `--origin=assembly
 podului putin mai aprins (CAR_RED); balustrada togetsukyo mai putin densa; culeele nu
 sunt in decupare.
 
-**Stare la oprire:** v2 cu latimile reale, verify OK, comparatii refacute.
+**Stare la oprire:** v3 (tsutenkyo cu streasina sus, liber >= 4,5 m); v2 cu latimile reale, verify OK, comparatii refacute.

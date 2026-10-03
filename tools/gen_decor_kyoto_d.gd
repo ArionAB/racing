@@ -349,16 +349,16 @@ func _fences() -> void:
 			s += 3.02
 
 
-## CERBUL SIKA: frac ~0,384, pe stanga, la margine + 2,4 (fara corp, `none`
-## din PROP_COLLISION), inaintea curbei la stanga de la 0,39: camera il are in
-## fata-stanga pe dreapta. Capul (-Z) spre masina care vine si spre drum.
-## Nodul copil `Bow` (SikaBow) il inclina cand trece o masina.
+## CERBII SIKA: grup de 4 la frac ~0,384, pe stanga, la margine + 3,2..5,4
+## (fara corp, `none` din PROP_COLLISION), inaintea curbei la stanga de la
+## 0,39: camera ii are in fata-stanga pe dreapta. Nodul copil `Bow` (SikaBow)
+## inclina ciutele cand trece o masina.
 const DEER_F := 0.384
 const DEER_SIDE := -1.0
 
 
 func _deer_gap(s: float, side: float) -> bool:
-	return side == DEER_SIDE and absf(s - _s_of(DEER_F)) < 9.0
+	return side == DEER_SIDE and absf(s - _s_of(DEER_F)) < 11.0
 
 
 func _deer() -> void:
@@ -366,40 +366,46 @@ func _deer() -> void:
 	var f := _frame(s)
 	var tan: Vector3 = f[1]
 	var right: Vector3 = f[2]
-	var p := _at(s, DEER_SIDE, 2.4)
-	var look := (-tan * 0.55 + (-right * DEER_SIDE) * 0.85).normalized()
-	_raw("sika_deer", "animals", "dCerb", Vector3(p.x, _sol_real(p.x, p.z) - 0.03, p.z),
-		_yaw_face(look), 1.0, "")
-	var deer_name := "dCerb%d" % _n
-	_out.append('[node name="Bow" type="Node" parent="%s/%s"]' % [ZONE, deer_name])
-	_out.append('script = ExtResource("poid_sika_bow")')
-	_out.append("")
 	_scripts["poid_sika_bow"] = "res://scenes/props/sika_bow.gd"
-	# A doua, o ciuta care paste (Graze; coarnele au scala 0,001 in clip), mai
-	# in fata si mai departe de drum, cu spatele spre masina.
-	var s2 := s + 6.0
-	var f2 := _frame(s2)
-	var p2 := _at(s2, DEER_SIDE, 4.2)
-	var look2 := ((f2[1] as Vector3) * 0.8 + (f2[2] as Vector3) * DEER_SIDE * 0.6).normalized()
-	_raw("sika_deer", "animals", "dCerb", Vector3(p2.x, _sol_real(p2.x, p2.z) - 0.03, p2.z),
-		_yaw_face(look2), 0.95, "")
-	_out.append('[node name="Bow" type="Node" parent="%s/dCerb%d"]' % [ZONE, _n])
-	_out.append('script = ExtResource("poid_sika_bow")')
-	_out.append('idle_clip = &"Graze"')
-	_out.append("")
-	# Fundal inchis in spatele lor: pe solul nisipiu cerbul (SAND_MID) se
-	# pierdea (captura r1, 0,379). Doua movile de muschi la margine + 5..6.
-	for k in [[-1.0, 5.6], [4.0, 6.4]]:
+	# GRUPUL (runda 2, coordonatorul): scala 1,3 (licenta de dioramă: la 1,0
+	# cerbul de 1,7 m era o silueta de ~40 px din camera de 10 m), un mascul
+	# in `Stand` si trei ciute in `Graze`. Doar ciutele se inclina: clipul
+	# `Bow` pune coarnele la scala 0,001 (corectura de asset e separata), deci
+	# masculul nu primeste nod `Bow` si ramane in poza de repaus (= Stand).
+	# Toti la >= margine + 2,4 cu corpul (lungimea 1,67 x 1,3 = 2,2 m).
+	# [ds, margine, privire spre masina (-tan), privire spre drum, scala, ciuta]
+	var herd := [
+		[0.0, 3.2, 0.55, 0.85, 1.3, false],
+		[-3.5, 5.0, -0.2, 1.0, 1.25, true],
+		[4.0, 3.4, 0.9, 0.3, 1.25, true],
+		[7.5, 5.4, -0.8, 0.6, 1.2, true],
+	]
+	for h in herd:
+		var sh: float = s + float(h[0])
+		var fh := _frame(sh)
+		var ph := _at(sh, DEER_SIDE, float(h[1]))
+		var lk := (-(fh[1] as Vector3) * float(h[2])
+			+ (-(fh[2] as Vector3) * DEER_SIDE) * float(h[3])).normalized()
+		_raw("sika_deer", "animals", "dCerb", Vector3(ph.x, _sol_real(ph.x, ph.z) - 0.03, ph.z),
+			_yaw_face(lk), float(h[4]), "")
+		if bool(h[5]):
+			_out.append('[node name="Bow" type="Node" parent="%s/dCerb%d"]' % [ZONE, _n])
+			_out.append('script = ExtResource("poid_sika_bow")')
+			_out.append('idle_clip = &"Graze"')
+			_out.append("")
+	# Peticul de muschi: movile in spatele si printre ei (pe solul brun
+	# cerbul SAND_MID se pierdea, captura r1 0,379).
+	for k in [[-1.5, 7.0], [3.0, 7.4], [8.5, 8.0], [-6.0, 6.6]]:
 		var mp := _at(s + float(k[0]), DEER_SIDE, float(k[1]))
 		_raw("moss_mound", "rocks", "dPiatra", Vector3(mp.x, _sol_min(mp.x, mp.z, 0.9) - 0.12, mp.z),
 			_rng.randf_range(0.0, TAU), 1.0, "")
 	# frunze la picioarele lui, un felinar si un artar in spate
 	var lp := _at(s + 2.5, DEER_SIDE, 1.6)
 	_raw("leaf_pile", "props", "dFrunze", Vector3(lp.x, _sol_real(lp.x, lp.z) - 0.06, lp.z), 0.7, 0.9, "")
-	var fp := _at(s - 5.0, DEER_SIDE, 4.5)
+	var fp := _at(s - 8.0, DEER_SIDE, 3.4)
 	_raw("stone_lantern_b", "props", "dFelinar", Vector3(fp.x, _sol_min(fp.x, fp.z, 0.65) - 0.05, fp.z),
 		_yaw_face(-right * DEER_SIDE), 1.0, "")
-	var tp := _at(s + 1.0, DEER_SIDE, 8.0)
+	var tp := _at(s + 1.0, DEER_SIDE, 10.0)
 	_raw("momiji_a", "plants", "dArtar", Vector3(tp.x, _sol_real(tp.x, tp.z) - 0.05, tp.z),
 		_yaw_x_along(tan), 0.9, "")
 

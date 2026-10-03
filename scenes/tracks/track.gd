@@ -20,6 +20,9 @@ signal build_step(step: StringName)
 const BUILD_STEPS: Array[StringName] = [&"pregatire", &"drum", &"obstacole",
 	&"umeri", &"decor", &"teren", &"umbre", &"apa"]
 
+## Tenta petelor de muschi din zonele de sol cu alfa < 1 (Kyoto POI D).
+const GROUND_MOSS_TINT := Color(0.34, 0.42, 0.16)
+
 const WALL_HEIGHT: float = 1.3
 ## Cate repetitii de textura de suprafata intra intr-un metru de lume.
 ## 0.08 = o dala la 12.5m — destul de mare cat sa nu se vada tiparul repetandu-se,
@@ -1686,7 +1689,7 @@ static func themes() -> Dictionary:
 				# nu atinga aceleasi randuri (de sters la integrare). Pana la
 				# iesirea de pe pod: fundul rapei Tsutenkyo e tot padure.
 				{"from": 0.331, "to": 0.468, "max_m": 60.0, "fade_m": 18.0,
-					"tint": Color(0.52, 0.27, 0.14, 0.45)},
+					"tint": Color(0.42, 0.21, 0.11, 0.4)},
 				# D: valea de artari, de la aterizarea de pe scena pana la gura
 				# podului Tsutenkyo (fractii din tools/gen_kyoto_route.py).
 				{"from": 0.331, "to": 0.449, "max_m": 45.0, "fade_m": 18.0,
@@ -6483,20 +6486,20 @@ func _build_terrain() -> void:
 						if zw > 0.0:
 							zw = smoothstep(0.0, 1.0, clampf(zw + dirt_noise.get_noise_2d(
 								v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0))
-							var pre_tint := tint
-							var pre_grass := grass_w
 							var zt: Color = zone_tints[gi]
 							tint = tint.lerp(zt, zw)
 							if zone_alt:
 								grass_w = lerpf(grass_w, 1.0, zw)
 							# PETE DE MUSCHI (Kyoto POI D): alfa tentei de zona < 1
-							# lasa pe (1 - a) din pete solul de dinainte de zona
-							# (solul temei). Alfa 1 (toate celelalte zone) = nimic.
+							# vopseste petele (zgomot de 5-8 m) in verde de muschi,
+							# cu taria (1 - a). Solul temei (oliv pe dala de nisip)
+							# iesea gri in captura, deci tenta e explicita, pe
+							# aceeasi dala a zonei. Alfa 1 (toate celelalte zone) =
+							# nimic schimbat.
 							if zt.a < 0.999:
 								var mp := smoothstep(0.05, 0.3, moss_noise.get_noise_2d(
 									v.x, v.z)) * (1.0 - zt.a) * zw
-								tint = tint.lerp(pre_tint, mp)
-								grass_w = lerpf(grass_w, pre_grass, mp)
+								tint = tint.lerp(GROUND_MOSS_TINT, mp)
 					if snow_tint != null:
 						var snow_w := clampf(
 							(v.y - snow_line) / snow_fade, 0.0, 1.0)

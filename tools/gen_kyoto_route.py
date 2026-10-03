@@ -679,19 +679,15 @@ if len(sys.argv) > 1:
     fz("versant Higashiyama", 1, MAPLES, (0.34, 0.33, 0.33), center=(372.0, 0.0, -150.0),
        radius=88.0, spacing=7.0, seed=22)
     # D: valea de artari (cea mai deasa), pana la gura podului si sub el.
-    # POI D: lat_min 9 -> 14. `edge_clear_m` NU se aplica azi
-    # (MeshForest._seg_grid are listele goale: append pe copia PackedInt32Array,
-    # deci _edge_dist = INF), asa ca singura distanta reala e lat_min de la AXA,
-    # cu jitter +-0,45*spacing (2,1 m): trunchiuri la 1-5 m de margine si coroane
-    # de 12 m latime peste banda. 14 = trunchi la >= 11,9 m de ax (margine + 5,9
-    # cu hw 6): coroana (semilatime <= 7,3 la scala 1,2) poate atinge umarul,
-    # dar nu banda. Cu 18,5 (runda 1) ramanea o fasie de sol gol intre primul
-    # rand si padure, iar diorama nu arata deloc sol sub coroane.
-    # Primul rand (margine + 5..6, coroana cu axa ingusta spre drum) e al
-    # DecorManual (tools/gen_decor_kyoto_d.gd). Cedrii inchisi (10%): diorama
-    # are conifere verzi printre artarii vaii.
+    # POI D (runda 2, dupa reparatia MeshForest 97be100b: edge_clear_m e viu).
+    # Tunelul des din diorama: trunchiurile la >= margine + 5,5 (printre
+    # piesele primului rand manual, margine + 5..6,8), coroanele (semilatime
+    # 5-7 m) ajung pana la ~margine + 0..1,5, dar nu pe banda. lat_min 9 lasa
+    # regula de margine sa decida (pe exteriorul curbelor drumul se departeaza
+    # de ax). Pas 3,8 (era 4,6): cu separarea minima vie (0,35 x pas) valea
+    # iesea livada. Cedrii inchisi (10%): coniferele verzi din diorama.
     fz("valea D artari", 0, MAPLES + ("cedar_dark",), (0.33, 0.27, 0.30, 0.10), frac_from=F["D aterizare coborare"],
-       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=14.0, lat_max=78.0, spacing=4.6, edge_clear_m=5.5, seed=31)
+       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=3.8, edge_clear_m=5.5, seed=31)
     # Rapa de sub Tsutenkyo: coroanele urca pana la nivelul podului (brief §2 D).
     # Fundul e la -8..-11 sub punte pe portiunea adanca; artarii de 8,6 m (scala
     # <= 1,05) ajung la +-1,5 m de cota puntii, iar trunchiul la >= 10,4 m de

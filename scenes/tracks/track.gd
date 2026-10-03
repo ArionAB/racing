@@ -1684,8 +1684,10 @@ static func themes() -> Dictionary:
 				# deci lumina doar de ambientul albastru: solul oliv iesea TURCOAZ
 				# si se citea ca apa printre artari. Covorul de frunze il trage in
 				# ruginiu, si in umbra ramane brun-rosu („sub tine e rosu", §2.0).
-				{"from": 0.258, "to": 0.314, "max_m": 95.0, "fade_m": 30.0,
-					"tint": Color(0.82, 0.40, 0.20)},
+				# r3: doar SUB buza (≥ 6 m sub puntea/coltul cel mai apropiat), ca
+				# platoul lui C1 si incinta templului sa ramana pe solul temei.
+				{"from": 0.258, "to": 0.314, "max_m": 80.0, "fade_m": 20.0,
+					"under_road_m": 6.0, "tint": Color(0.82, 0.40, 0.20)},
 			],
 			# ORIZONTUL (kit int-a): dealurile Higashiyama in toamna, muntele
 			# Arashiyama si banda de acoperisuri din pacla (`kyoto_horizon.glb`,
@@ -6070,6 +6072,12 @@ func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
 		var reach := float(zd.get("max_m", 30.0))
 		var fade := maxf(float(zd.get("fade_m", 10.0)), 0.001)
 		var tint: Color = zd.get("tint", Color.WHITE)
+		# `under_road_m` (optional, Kyoto POI C): zona prinde doar solul aflat cu
+		# cel putin atatia metri SUB soseaua cea mai apropiata din fereastra
+		# (fundul si pantele unei rape), cu o trecere de 3 m; platoul de la cota
+		# drumului ramane pe solul temei. Fara cheie: comportamentul vechi.
+		var under := float(zd.get("under_road_m", -1.0))
+		var pys := PackedFloat32Array()
 		# Punctele de sosea din fereastra, din 2 in 2 (bake ~1-2 m: eroarea de
 		# distanta ramane sub un metru, fata de un fade de zeci).
 		var pts := PackedVector2Array()
@@ -6080,6 +6088,7 @@ func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
 				continue
 			var p := Vector2(baked[i].x, baked[i].z)
 			pts.append(p)
+			pys.append(baked[i].y)
 			lo = lo.min(p)
 			hi = hi.max(p)
 		if pts.is_empty():
@@ -6095,12 +6104,21 @@ func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
 			for gx in range(gx0, gx1 + 1):
 				var q := Vector2(origin.x + float(gx) * step, origin.z + float(gz) * step)
 				var best := INF
-				for p in pts:
-					best = minf(best, q.distance_squared_to(p))
+				var best_y := 0.0
+				for pi in pts.size():
+					var dq := q.distance_squared_to(pts[pi])
+					if dq < best:
+						best = dq
+						best_y = pys[pi]
 				if best > reach2:
 					continue
 				var zw := 1.0 - smoothstep(reach - fade, reach, sqrt(best))
 				var gi := gz * row + gx
+				if under >= 0.0 and gi < _terr_heights.size():
+					var below := best_y - _terr_heights[gi]
+					zw *= smoothstep(under, under + 3.0, below)
+					if zw <= 0.0:
+						continue
 				if zw > w[gi]:
 					# Doua zone care se ating: castiga cea mai prezenta, cu
 					# tenta amestecata, ca granita sa nu sara intre doua culori.

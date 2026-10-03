@@ -1680,6 +1680,24 @@ static func themes() -> Dictionary:
 				{"from": 0.331, "to": 0.449, "max_m": 45.0, "fade_m": 18.0,
 					"tint": Color(0.8626, 0.54, 0.3079)},
 			],
+			# TROTUARUL de pe Yasaka-dori (POI A, runda 2, aprobat de
+			# coordonator): fasia dintre bordura si fatadele machiya (peretele
+			# la bordura + 3,4 m) iesea iarba inchisa. Mecanismul Jodhpur, fara
+			# cod nou: umarul se lateste la 3,4 m pe fereastra startului (de pe
+			# dreapta H, s ~ -80, pana la coltul lui B, s ~ 155) si poarta dala
+			# `alpine_granite` (lespezi plate, citite caldaram de sus). Textura
+			# umarului e pe TEMA, deci si umarul ingust de 1,3 m de pe restul
+			# turului devine piatra in loc de pietris. `shoulder_zones_are_road`
+			# NU se pune: trotuarul ramane in afara drumului (felinarele de
+			# hartie, cu corp, stau pe el la bordura + 2,1). Latimea 4,0 > 3,4:
+			# lespezile intra 0,6 m sub fatada, altfel ramanea o fasie de iarba.
+			"shoulder_texture": "res://assets/textures/classes/alpine_granite.png",
+			"shoulder_color": Color(0.80, 0.80, 0.80),
+			"shoulder_tile": 6.0,
+			# POI B (Sannenzaka): fereastra continua pe urcare pana la 0,200
+			# (~15 m inaintea portii Niomon), cat tin randurile de machiya si
+			# treptele de pe trotuarul din dreapta.
+			"shoulder_width_zones": [Vector3(0.962, 0.200, 4.0)],
 			# ORIZONTUL (kit int-a): dealurile Higashiyama in toamna, muntele
 			# Arashiyama si banda de acoperisuri din pacla (`kyoto_horizon.glb`,
 			# brief §5.4). Inelele stau sub fog_end 340 < FAR_PLANE 380 (memoria

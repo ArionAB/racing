@@ -65,6 +65,12 @@ check "structures/tsutenkyo_roof_module.glb" 6000 --origin=waterline
 check "structures/togetsukyo_module.glb"     4000 --origin=waterline
 check "structures/iron_truss_bridge.glb"     3000 --origin=assembly --allow-car-slots=Truss_Iron
 
+echo "== sala, scena, portile (kit §1.3) =="
+check "structures/niomon_gate.glb"    7000 --origin=assembly
+check "structures/inari_romon.glb"    6600 --origin=assembly
+check "structures/kakezukuri_scaffold.glb" 1000 --origin=assembly
+check "structures/kiyomizu_hondo.glb"  5600 --origin=assembly
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total (5 existente, nu ale kitului)"

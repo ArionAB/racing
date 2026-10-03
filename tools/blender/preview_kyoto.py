@@ -96,6 +96,16 @@ SPECS = {
                     "camera": {"azimuth": 30.0, "elevation": 14.0, "lens": 70.0, "margin": 1.1}},
     "temple_wall_x3": {"category": "structures", "glb": "temple_wall", "repeat": (3, 8.0),
                        "camera": {"azimuth": 30.0, "elevation": 16.0, "lens": 60.0, "margin": 1.1}},
+
+    # --- halls (build_kyoto_halls.py) ---
+    "niomon_gate": {"category": "structures",
+                    "camera": {"azimuth": 105.0, "elevation": 9.0, "lens": 80.0, "margin": 1.1}},
+    "inari_romon": {"category": "structures",
+                    "camera": {"azimuth": 105.0, "elevation": 9.0, "lens": 80.0, "margin": 1.1}},
+    "kakezukuri_scaffold": {"category": "structures", "chain_camera": {"azimuth": 115.0, "elevation": 14.0, "lens": 60.0},
+                    "camera": {"azimuth": 130.0, "elevation": 18.0, "lens": 80.0, "margin": 1.1}},
+    "kiyomizu_hondo": {"category": "structures",
+                    "camera": {"azimuth": 110.0, "elevation": 17.0, "lens": 70.0, "margin": 1.1}},
 }
 
 
@@ -376,10 +386,30 @@ def solo(name, res_height=900):
                 **_camera_for(spec))
 
 
+def chain(name, n=3, step=6.0, res_height=800):
+    """n module alaturate pe X (capetele trebuie sa se imbine) -> <nume>_chain.png"""
+    spec = SPECS[name]
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    allm = []
+    for i in range(n):
+        ms = _import(spec, name)
+        for o in ms:
+            o.location.x += (i - (n - 1) / 2.0) * step
+        allm += ms
+    bpy.context.view_layer.update()
+    cam = dict(_camera_for(spec))
+    cam.update(spec.get("chain_camera", {}))
+    _render(allm, os.path.join(FID_DIR, name + "_chain.png"), res_height=res_height,
+            aspect=1.5, **cam)
+
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
 if "--compare" in args:
     compare(args[args.index("--compare") + 1])
+elif "--chain" in args:
+    chain(args[args.index("--chain") + 1])
 elif "--views" in args:
     views(args[args.index("--views") + 1])
 elif "--solo" in args:

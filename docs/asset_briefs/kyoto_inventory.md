@@ -276,3 +276,27 @@ podului putin mai aprins (CAR_RED); balustrada togetsukyo mai putin densa; culee
 sunt in decupare.
 
 **Stare la oprire:** v3 (tsutenkyo cu streasina sus, liber >= 4,5 m); v2 cu latimile reale, verify OK, comparatii refacute.
+
+# Grupa halls (`build_kyoto_halls.py`, kit §1.3) -- runda 2 (dupa verdictul „pica pe forma")
+
+Unealta: `tools/blender/measure_gap.py <glb> [--band=0.15,2.0] [--need=h]` -- golul
+de trecere ca GOL (proiectie pe planul transversal, 5 cm, transformarile
+nodurilor aplicate), nu AABB. Comparatii: `docs/asset_briefs/img/kyoto_fidelity/<nume>.png`
+(+ `<nume>_views.png`; schela: `kakezukuri_scaffold_chain.png`).
+
+## `structures/niomon_gate.glb` (runda 3, contract de gol corectat)
+- 6 694 tri (`Gate_Wood` 4 340, `Gate_Roof` 1 166, `Gate_Plaster` 1 188), **30,5 lat x 14,1 adanc x 18,65 inalt, h/l 0,61**. Stalpi grosi (1,0 m) de 8 m, travei laterale de ~6 m inchise cu panouri albe (jos si sus, 3 nuki), etaj 2 de ~3,4 m cu galerie pe 4 laturi, banda de console vermilion cu accente albe, acoperis irimoya: 4 ape concave (rise 5,2, sag 2,2) + fronton vermilion pe laturile scurte.
+- **Contract inghetat (GOL, measure_gap.py, banda 0,15–2,0 m): gol liber 14,30 m (x −7,15…+7,15), inaltime libera minima 7,10 m** (cerut: ≥ 14,0 m si ≥ 6 m). Motiv: drumul principal are pana la ±6,0 m si coliziunea e `mesh` solida.
+## `structures/inari_romon.glb` (runda 3)
+- 6 170 tri, **28,5 x 12,5 x 19,25 m, h/l 0,675** (poarta-turn, mai compacta si mai inalta relativ). Galerie doar fata/spate, 4 ferestre, creasta scurta (6,5 m), travei de ~4,8 m, fara usa laterala cu zabrele.
+- **Contract inghetat: gol liber 14,10 m (x −7,05…+7,05), inaltime libera minima 7,50 m.**
+- Abateri ambele: acoperisul are ~32–35% din inaltime (decupari ~40%) si frontonul vermilion e un pentagon plin sub un hood drept, nu curbat; consolele sunt blocuri nu ciorchini; panourile albe din travei sunt mari si plate; proportia latime/adancime (30 x 14) face traveele lungi.
+## `structures/kakezukuri_scaffold.glb` (runda 2)
+- 720 tri, 6,8 x 6,8 x 15,92 m (stalpii/puntea 6,0 x 6,0; grinzile ies 0,4 m in toate directiile). Stalpi drepti (`LARCH_RUST`, mai deschis), 4 niveluri de grinzi `WOOD` (mai inchis) CONTINUE prin toti stalpii pe toata latimea si iesind 0,4 m; stalpii de capat sunt jumatati (0,31 m), doua module dau un stalp intreg. Lant de 3: grinzile se continua peste cusaturi.
+- Nota: capetele nu mai sunt strict plane in grinzi (ies 0,4 m, suprapunere identica cu vecinul); AABB-ul modulului e 6,8 pe X, deci placerul pune pasul la 6,0.
+## `structures/kiyomizu_hondo.glb` (runda 2)
+- 5 372 tri, 31,9 x 22,1 x 14,3 m. Acoperis principal abrupt (rise 6,4, sag 2,5), coama inalta; ACOPERIS TRANSVERSAL cu fronton de lemn triunghiular dreapta-fata deasupra unui portic, fronton mai mic pe mijloc-fata, anexa-fusta in stanga; pereti albi adusi in planul verandei (vizibili); veranda pe 45 piloni; SCARA LATA (8,4 m, 10 trepte joase, palier).
+- Abateri: frontoanele sunt mai simple (fara curbura karahafu); acoperisul transversal intra in cel principal fara racordare; anexa din stanga e un singur hip, nu un inel de fuste; scara fara balustrade pe palier.
+
+## Stare la oprire (halls)
+- Facut: toate 4; portile in runda 3 (gol 14,3/14,1 m, h libera 7,1/7,5 m, h/l 0,61/0,675). Verify OK (buget gates 7000/6600). Verdictul de fidelitate e al coordonatorului.

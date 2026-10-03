@@ -104,3 +104,21 @@ ciorchini. Vocabular nou: `kyoto_shapes.leaf_blob`.
   --python tools/blender/run_build.py -- build_kyoto_pagodas.py`; comparație
   `… -- preview_kyoto.py -- --compare yasaka_pagoda` (cu `mkdir
   D:/GameDev/.render_lock` înainte, `rmdir` după).
+
+# Grupa halls (`build_kyoto_halls.py`, kit §1.3)
+
+Unealta noua: `tools/blender/measure_gap.py <glb> [--band=0.15,2.0] [--need=h]` —
+golul de trecere ca GOL (proiectie pe planul transversal, rasterizata la 5 cm,
+transformarile nodurilor aplicate), nu AABB.
+
+## `structures/niomon_gate.glb` (runda 3)
+- **Triunghiuri:** 3 738 (`Gate_Wood` 2 796, `Gate_Roof` 882, `Gate_Plaster` 60). Noduri: `Gate_Wood` (`LAVA_ORANGE`, `LOG_DARK`, `WOOD`, `CONCRETE` socluri), `Gate_Roof` (`VOLCANIC_BLACK` + `LOG_DARK`), `Gate_Plaster` (`FOAM_WHITE`).
+- **Cote:** 20,9 lat x 13,1 adanc x 13,55 inalt. **Contract inghetat (masurat ca GOL, banda 0,15–2,0 m): gol liber 11,80 m (x −5,90…+5,90), inaltime libera minima 4,10 m peste tot golul.** Directia de mers = Y Blender (−Z Godot); golul e centrat pe x = 0. Stalpii laterali (cate 2 pe adancime, x = ±6,6 si ±8,7) pot fi solizi; nimic nu intra in banda golului sub 4,1 m.
+## `structures/inari_romon.glb` (runda 3)
+- **Triunghiuri:** 3 218. Aceleasi noduri. **Cote:** 18,5 x 11,7 x 12,65 m. **Contract inghetat: gol 11,50 m (x ±5,75), inaltime libera minima 3,80 m.**
+- Diferit de Niomon (nu e copie): galerie doar fata/spate, etaj mai ingust si mai inalt, 4 ferestre vs 3, creasta scurta (3 m vs 5 m), panta mai abrupta, stalpi mai scurti, fara usa cu zabrele laterala.
+- **Fidelitate (ambele), runda 3:** OK: 2 etaje, acoperis gri 4 ape cu streasina curbata, galerie cu balustrada vermilion, ferestre intunecate, panouri albe in travee, gol larg, socluri de piatra, culori pe zone. **Abateri:** fara fronton (irimoya) vizibil pe latura, acoperisul e yosemune simplu; consolele sub streasina sunt mai rare si mai simple decat „ciorchinii" de pe planșă; travee laterale mai usoare decat masivele de pe planșă; Romon: o „ureche" de arete in dreapta acoperisului (artefact de colt cu creasta scurta); inaltimea Niomon 13,55 vs 13 (ornamentele de creasta).
+- Comparatii: `img/kyoto_fidelity/niomon_gate.png`, `inari_romon.png` (+ `_views`).
+
+## Stare la oprire (halls)
+- Facut: niomon_gate, inari_romon. Urmeaza: kakezukuri_scaffold, kiyomizu_hondo.

@@ -106,6 +106,16 @@ SPECS = {
                     "camera": {"azimuth": 130.0, "elevation": 18.0, "lens": 80.0, "margin": 1.1}},
     "kiyomizu_hondo": {"category": "structures",
                     "camera": {"azimuth": 110.0, "elevation": 17.0, "lens": 70.0, "margin": 1.1}},
+
+    # --- fundalul (build_kyoto_horizon.py): un GLB, patru noduri; "only" = nodul
+    "horizon_Higashiyama_A": {"category": "rocks", "glb": "kyoto_horizon", "only": "Higashiyama_A",
+                              "camera": {"azimuth": 270.0, "elevation": 6.0, "lens": 50.0, "margin": 1.04}},
+    "horizon_Higashiyama_B": {"category": "rocks", "glb": "kyoto_horizon", "only": "Higashiyama_B",
+                              "camera": {"azimuth": 270.0, "elevation": 6.0, "lens": 50.0, "margin": 1.04}},
+    "horizon_Arashiyama_A": {"category": "rocks", "glb": "kyoto_horizon", "only": "Arashiyama_A",
+                             "camera": {"azimuth": 270.0, "elevation": 6.0, "lens": 50.0, "margin": 1.04}},
+    "horizon_FarRoofs_A": {"category": "rocks", "glb": "kyoto_horizon", "only": "FarRoofs_A",
+                           "camera": {"azimuth": 270.0, "elevation": 6.0, "lens": 50.0, "margin": 1.04}},
 }
 
 
@@ -198,6 +208,12 @@ def _import(spec, name):
             if o.parent is None:
                 o.location.y += (_i - (reps - 1) / 2.0) * step
         meshes += [o for o in got if o.type == "MESH"]
+    only = spec.get("only")
+    if only:                       # GLB cu mai multe noduri: pastreaza unul
+        for o in list(meshes):
+            if o.name.split(".")[0] != only:
+                bpy.data.objects.remove(o, do_unlink=True)
+                meshes.remove(o)
     bpy.context.view_layer.update()
     import re
     for o in meshes:
@@ -351,7 +367,7 @@ def compare(name, res_height=900):
     img = bpy.data.images.load(crop)
     cw, ch = img.size
     bpy.data.images.remove(img)
-    aspect = max(0.5, min(3.0, cw / float(ch)))
+    aspect = max(0.5, min(8.0, cw / float(ch)))
     _render(meshes, tmp, res_height=res_height, aspect=aspect, **_camera_for(spec))
     out = os.path.join(FID_DIR, name + ".png")
     _compose(["--compare", name, "--crop", crop, "--render", tmp, "--out", out,

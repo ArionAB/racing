@@ -300,3 +300,22 @@ nodurilor aplicate), nu AABB. Comparatii: `docs/asset_briefs/img/kyoto_fidelity/
 
 ## Stare la oprire (halls)
 - Facut: toate 4; portile in runda 3 (gol 14,3/14,1 m, h libera 7,1/7,5 m, h/l 0,61/0,675). Verify OK (buget gates 7000/6600). Verdictul de fidelitate e al coordonatorului.
+
+# Grupa kit-h: fundalul (`build_kyoto_horizon.py`, kit §1.11)
+
+`rocks/kyoto_horizon.glb`, 4 noduri copii directi ai radacinii, origine la baza, fara coliziune, fara clasa, zero sloturi noi/de masina. 5 134 tri total (verify: `VERDICT: OK`, buget 7500).
+
+| nod | tri | cote masurate L x A x I (m) | culori | comparatie |
+|---|---:|---|---|---|
+| `Higashiyama_A` | 1946 | 200 x 45 x 30 | `TROPICAL_GREEN` (vai), `KERB_RED`, `LAVA_ORANGE`, `SAND_MID` (auriu), `LARCH_RUST` | `img/kyoto_fidelity/horizon_Higashiyama_A.png` (+`_views`) |
+| `Higashiyama_B` | 1946 | 200 x 45 x 30 | idem; varfuri (conuri) rosu stanga / auriu-rosu dreapta | `horizon_Higashiyama_B.png` (+`_views`) |
+| `Arashiyama_A` | 2454 | 220,8 x 70 x 55 | `TROPICAL_GREEN` + `CACTUS_GREEN` pe petice; 26 tufe de poale | `horizon_Arashiyama_A.png` (+`_views`) |
+| `FarRoofs_A` | 520 | 151,4 x 13,4 x 9,6 | `ASPHALT`/`ASPHALT_EDGE` (acoperisuri), `LOG_DARK`/`SAND_MID` (pereti), tufe verzi | `horizon_FarRoofs_A.png` (+`_views`) |
+
+Ansamblu langa `yasaka_pagoda`: `horizon_overview.png`. Comparatiile sunt randate din directia -Y (camera la azimut 270), orientarea in care X creste spre dreapta ca pe decupare. Randarea arata si cei 4 m care se ingroapa in joc.
+
+**Verdict propriu:** silueta si dominanta de culoare trec la Higashiyama A/B si Arashiyama. Abateri: (1) Higashiyama_A are cupole mai putin distincte decat pe decupare (se contopesc intr-o masa rosie; fara textura de frunze, doar fatete); (2) muntele albastru-pal din spatele dealurilor si ceata nu sunt modelate (sunt ceata/teren); (3) Arashiyama: o singura masa cu 2 creste, fara planul secundar albastru; verdele atlasului e mai galbui decat verde-albastrul decuparii; tufele de la poale sunt icosfere fatetate, nu rotunde, fara stancile bej de mal; (4) FarRoofs: acoperisuri gri corecte, dar doar 2-3 tufe mari (decuparea are mai multe, mai dese) si acoperisurile sunt mai mici/joase decat pe decupare, fara dungi de tigla; dealurile hazii din spate nu sunt modelate. Petele de culoare sunt pe triunghi (fatete mari), nu pe ciorchini.
+
+**Contract:** in §1.11 cotele sunt L x A x I (deduse: 55 m = inaltimea muntelui); `Higashiyama` 200 x 45 x 30 = adancime 45, inaltime 30. Recomand `horizon_class: ""`. Decuparile contin planuri de fundal (munte albastru, ceata) pe care un singur volum nu le poate da.
+
+**Stare la oprire:** toate 4 noduri livrate, verify OK, comparatii si views facute; preview: spec-uri `horizon_*` in `preview_kyoto.py` (cheia `only` filtreaza nodul).

@@ -71,6 +71,9 @@ check "structures/inari_romon.glb"    6600 --origin=assembly
 check "structures/kakezukuri_scaffold.glb" 1000 --origin=assembly
 check "structures/kiyomizu_hondo.glb"  5600 --origin=assembly
 
+echo "== fundalul (kit §1.11, grupa kit-h) =="
+check "rocks/kyoto_horizon.glb"         7500 --origin=assembly
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total (5 existente, nu ale kitului)"

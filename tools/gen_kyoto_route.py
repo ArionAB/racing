@@ -641,6 +641,113 @@ if len(sys.argv) > 1:
     kog_g = godot((kog_road[0], kog_road[1]), kog_road[2])
     print(f"kogarashi: frac {f_kog:.3f} axa ({kog_road[0]:.1f},{kog_road[1]:.1f}) cota {kog_road[2]:.1f}")
 
+
+    # --- GRUPA PADUREA IN MASA (MeshForest, scenes/props/mesh_forest.gd) ---------
+    # Arborii kitului in MultiMesh feliat, dincolo de primul rand de langa drum
+    # (brief §2, §5.6). Zonele sunt DATE (resurse MeshForestZone); plasarea pe
+    # teren real, distanta fata de drum, marea si zidul lumii se rezolva la rulare.
+    # Petele de ginkgo vin PRIMELE: au `claim` si scot artarii din pata.
+    def _patch_center(f, lat_signed):
+        # lat_signed > 0 = dreapta fata de sens (harta: (hy, -hx)), < 0 = stanga.
+        rp = road_at_frac(f)
+        hx, hy = heading_vec_at_frac(f)
+        mx = rp[0] + hy * lat_signed
+        my = rp[1] - hx * lat_signed
+        return (mx, -my)   # Godot: gx = x, gz = -y
+
+    MAPLES = ("momiji_a", "momiji_b", "momiji_c")
+    forest_zones = []   # dictionare, scrise mai jos ca sub_resource-uri
+
+    def fz(label, kind, species, weights, **kw):
+        d = dict(label=label, kind=kind, species=species, weights=weights)
+        d.update(kw)
+        forest_zones.append(d)
+
+    # Petele de ginkgo: 4, pe EXTERIORUL buclei (stanga la D/F, dreapta la C/H
+    # dupa cum curge soseaua), ca sa se vada in fata-lateral din camera de joc.
+    for lbl, f, lat, rad in (("pata ginkgo C", 0.222, -40.0, 24.0),
+                             ("pata ginkgo D", 0.372, -44.0, 26.0),
+                             ("pata ginkgo F", 0.600, -34.0, 20.0),
+                             ("pata ginkgo H", 0.905, 40.0, 22.0)):
+        cx_, cz_ = _patch_center(f, lat)
+        fz(lbl, 1, ("ginkgo",), (1.0,), center=(cx_, 0.0, cz_), radius=rad,
+           spacing=5.2, edge_clear_m=12.0, claim=True, scale_min=0.9, scale_max=1.25,
+           max_below_road_m=3.0, seed=11 + int(f * 1000))
+    # C / C2: versantul Higashiyama si rapa de sub scena (artari rosii densi).
+    fz("rapa C artari", 0, MAPLES, (0.36, 0.34, 0.30), frac_from=F["C1 inainte de colt"],
+       frac_to=F["D aterizare coborare"], lat_min=9.0, lat_max=72.0, spacing=5.0, seed=21)
+    fz("versant Higashiyama", 1, MAPLES, (0.34, 0.33, 0.33), center=(372.0, 0.0, -150.0),
+       radius=88.0, spacing=7.0, seed=22)
+    # D: valea de artari (cea mai deasa), pana la gura podului si sub el.
+    fz("valea D artari", 0, MAPLES, (0.36, 0.30, 0.34), frac_from=F["D aterizare coborare"],
+       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=4.6, seed=31)
+    # E: muntele Inari, cedru inchis, cu cate un artar rosu printre ei.
+    fz("Inari cedru fasie", 0, ("cedar_dark", "momiji_b"), (0.88, 0.12),
+       frac_from=F["E arc intrare (E' se desprinde)"] - 0.008,
+       frac_to=F["E arc iesire (E' revine)"] + 0.006, lat_min=12.0, lat_max=72.0,
+       spacing=3.7, scale_min=0.95, scale_max=1.45, seed=41)
+    fz("Inari cedru disc", 1, ("cedar_dark", "momiji_b"), (0.88, 0.12), center=(332.72, 0.0, 292.0),
+       radius=70.0, spacing=4.0, scale_min=0.95, scale_max=1.45, seed=42)
+    # F: gradina, niwaki cu cativa artari; nimic in iaz (sol sub cota soselei).
+    fz("gradina F", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
+       frac_from=F["F intrare (spre V)"] - 0.012, frac_to=F["G S1 intrare"] + 0.004,
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=51)
+    # G: padurea de bambus (mii de tulpini moso) cu tufe de bambus la margine.
+    fz("bambus G tulpini", 0, ("moso_culm",), (1.0,), frac_from=F["G S1 intrare"] - 0.012,
+       frac_to=F["G2 sub podul trenului"] + 0.006, lat_min=6.5, lat_max=44.0, spacing=2.0,
+       edge_clear_m=3.0, scale_min=0.9, scale_max=1.15, max_below_road_m=6.0, seed=61, view_m=140.0)
+    fz("bambus G margine", 0, ("bamboo_crown", "moso_culm"), (0.8, 0.2),
+       frac_from=F["G S1 intrare"] - 0.012, frac_to=F["G2 sub podul trenului"] + 0.006,
+       lat_min=40.0, lat_max=62.0, spacing=5.0, edge_clear_m=3.0, scale_min=0.9,
+       scale_max=1.3, max_below_road_m=6.0, seed=62)
+
+    FOREST_GLBS = (("momiji_a", "plants"), ("momiji_b", "plants"), ("momiji_c", "plants"),
+                   ("ginkgo", "plants"), ("niwaki_pine", "plants"), ("moso_culm", "plants"),
+                   ("bamboo_crown", "plants"), ("cedar_dark", "trees"))
+    forest_ext = ('[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]\n'
+                  '[ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]\n')
+    for stem, folder in FOREST_GLBS:
+        forest_ext += (f'[ext_resource type="PackedScene" path="res://assets/models/kyoto/'
+                       f'{folder}/{stem}.glb" id="mf_{stem}"]\n')
+    forest_sub = ""
+    for k, d in enumerate(forest_zones):
+        sp_txt = ", ".join('"%s"' % x for x in d['species'])
+        fw_txt = ", ".join(str(x) for x in d["weights"])
+        claim_txt = "true" if d.get('claim') else "false"
+        forest_sub += f"""
+[sub_resource type="Resource" id="MFZ_{k}"]
+script = ExtResource("mf_zone")
+label = "{d['label']}"
+kind = {d['kind']}
+species = PackedStringArray({sp_txt})
+weights = PackedFloat32Array({fw_txt})
+spacing = {d.get('spacing', 4.0)}
+edge_clear_m = {d.get('edge_clear_m', 9.0)}
+shadow_m = {d.get('shadow_m', 25.0)}
+view_m = {d.get('view_m', 330.0)}
+max_below_road_m = {d.get('max_below_road_m', 200.0)}
+claim = {claim_txt}
+scale_min = {d.get('scale_min', 0.85)}
+scale_max = {d.get('scale_max', 1.2)}
+seed_value = {d.get('seed', 1)}
+"""
+        if d['kind'] == 0:
+            forest_sub += (f"frac_from = {r3(d['frac_from'])}\nfrac_to = {r3(d['frac_to'])}\n"
+                           f"lat_min = {d['lat_min']}\nlat_max = {d['lat_max']}\n")
+        else:
+            c_ = d['center']
+            forest_sub += (f"center = Vector3({c_[0]:.2f}, {c_[1]:.2f}, {c_[2]:.2f})\n"
+                           f"radius = {d['radius']}\n")
+    scenes_txt = ", ".join(f'ExtResource("mf_{s}")' for s, _ in FOREST_GLBS)
+    zones_txt = ", ".join(f'SubResource("MFZ_{k}")' for k in range(len(forest_zones)))
+    forest_node = f"""
+[node name="PadureMasa" type="Node3D" parent="."]
+script = ExtResource("mf_script")
+scenes = Array[PackedScene]([{scenes_txt}])
+zones = Array[ExtResource("mf_zone")]([{zones_txt}])
+"""
+    # --- sfarsit GRUPA PADUREA IN MASA ---------------------------------------
+
     # CameraZone-uri: Tsutenkyo (3,2 / 5,5 / 4) pe fractie, tunel (2,4 / 5,2) in cutie.
     tscn = f"""[gd_scene format=3]
 
@@ -658,12 +765,13 @@ if len(sys.argv) > 1:
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
-"""
+{forest_ext}"""
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
 [sub_resource type="BoxShape3D" id="BoxShape3D_zone{k}"]
 size = Vector3({sz[0]:.2f}, {sz[1]:.2f}, {sz[2]:.2f})
 """
+    tscn += forest_sub   # GRUPA PADUREA IN MASA
     tscn += f"""
 [sub_resource type="Curve3D" id="Curve3D_kyoto"]
 closed = true
@@ -746,7 +854,7 @@ zones = Array[Vector3]([{carpet_zones}])
 
 [node name="FrunzeCazatoare" type="GPUParticles3D" parent="."]
 script = ExtResource("17_leaffall")
-
+{forest_node}
 [node name="Hazarduri" type="Node3D" parent="."]
 
 [node name="SaritaScena" type="Marker3D" parent="Hazarduri"]

@@ -23,7 +23,8 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                        "kyoto_shapes.py")).read())
 
 TILE = VOLCANIC_BLACK      # tigla kawara, din atlas
-TRIM = LOG_DARK            # rame, zabrele, goluri, fateta streasinii
+TRIM = WOOD                # rame, stalpi, brauri, zabrele: lemn DESCHIS (contrast cu scandurile)
+RFB = LOG_DARK             # grinzi de streasina/creasta (nodul Roof)
 WOODS = WOOD               # lemn de machiya (clasa machiya_wood)
 PLASTER = FOAM_WHITE       # var (clasa village_plaster)
 STONE_SILL = CONCRETE      # soclu de casa
@@ -42,12 +43,12 @@ clear_built()
 HX, HY = 3.25, 2.6            # semi-latimea fatadei (6,5 m) si semi-adancimea
 Z_PLINTH = 0.35
 XSCALE = 0.8                  # latimea reala = 6,5 m cu streasina (decuparea e mai ingusta decat contractul)
-GT = 2.78                    # varful golurilor parterului
-UP0, UP1 = 3.7, 5.5        # deschiderile etajului (jos, sus)
-Z_MID = 3.2                   # brau intre parter si etaj
-Z_WALL = 5.9                  # varful peretilor
-Z_EAVE = 5.85                 # streasina mare, la margine
-Z_RIDGE = 7.5
+GT = 3.1                    # varful golurilor parterului
+UP0, UP1 = 4.25, 6.2        # deschiderile etajului (jos, sus)
+Z_MID = 3.75                   # brau intre parter si etaj
+Z_WALL = 6.55                  # varful peretilor
+Z_EAVE = 6.5                 # streasina mare, la margine
+Z_RIDGE = 8.7
 EAVE_Y = 3.4                  # streasina mare iese cu 0,8 m fata si spate
 EAVE_X = 3.85                 # si cu 0,6 m pe lateral
 
@@ -93,7 +94,7 @@ class _H:
         self._face_box(self.tr, x1 - t, x1, z0, z1, proud, TRIM)
 
     def dark(self, x0, x1, z0, z1, proud=0.05):
-        self._face_box(self.tr, x0, x1, z0, z1, proud, TRIM)
+        self._face_box(self.wd, x0, x1, z0, z1, proud, WOODS)   # gol intunecat = nodul cu clasa
 
     # -- deschideri
     def shoji(self, x0, x1, z0, z1, cols=2, rows=2, t=0.1, pane=PLASTER):
@@ -114,10 +115,10 @@ class _H:
         self.frame(x0, x1, z0, z1, t, 0.12)
         for i in range(1, cols):
             x = x0 + (x1 - x0) * i / cols
-            self._face_box(self.wd, x - 0.04, x + 0.04, z0, z1, 0.1, WOODS)
+            self._face_box(self.tr, x - 0.04, x + 0.04, z0, z1, 0.1, TRIM)
         for j in range(1, rows):
             z = z0 + (z1 - z0) * j / rows
-            self._face_box(self.wd, x0, x1, z - 0.04, z + 0.04, 0.1, WOODS)
+            self._face_box(self.tr, x0, x1, z - 0.04, z + 0.04, 0.1, TRIM)
 
     def lattice(self, x0, x1, z0, z1, pitch=0.16, rails=0, t=0.1):
         """Zabrele koshi: sipci verticale de lemn pe fond intunecat."""
@@ -125,7 +126,7 @@ class _H:
         n = max(int((x1 - x0) / pitch), 2)
         for i in range(n):
             x = x0 + t + (x1 - x0 - 2 * t) * (i + 0.5) / n
-            self._face_box(self.wd, x - 0.028, x + 0.028, z0 + t, z1 - t, 0.11, WOODS)
+            self._face_box(self.tr, x - 0.03, x + 0.03, z0 + t, z1 - t, 0.12, TRIM)
         for j in range(rails):
             z = z0 + (z1 - z0) * (j + 1) / (rails + 1)
             self._face_box(self.tr, x0, x1, z - 0.04, z + 0.04, 0.13, TRIM)
@@ -138,7 +139,7 @@ class _H:
         for i in range(n):
             xa = x0 + (x1 - x0) * i / n + 0.018
             xb = x0 + (x1 - x0) * (i + 1) / n - 0.018
-            self._face_box(self.wd, xa, xb, z0 + t, z1 - t, 0.09, WOODS)
+            self._face_box(self.tr, xa, xb, z0 + t, z1 - t, 0.09, TRIM)
         self.frame(x0, x1, z0, z1, t, 0.13)
 
     def doorway(self, x0, x1, z0, z1):
@@ -150,8 +151,8 @@ class _H:
         self._face_box(self.tr, x0 - 0.05, x1 + 0.05, ztop - 0.05, ztop + 0.03, 0.2, TRIM)
         w = (x1 - x0) / flaps
         for i in range(flaps):
-            xa = x0 + w * i + 0.035
-            xb = x0 + w * (i + 1) - 0.035
+            xa = x0 + w * i + 0.06
+            xb = x0 + w * (i + 1) - 0.06
             self._face_box(builder, xa, xb, ztop - drop, ztop - 0.05, 0.035, slot, off=0.17)
 
     def bamboo_blind(self, x0, x1, z0, z1, pitch=0.2):
@@ -181,7 +182,7 @@ class _H:
             _course(rf, HY + 0.02 + (y_out - 0.02) * f, ze + 0.62 * (1 - f) + 0.1,
                     HX + 0.28, 0.12, 0.07, TILE)
         # fateta streasinii
-        _course(tr, HY + y_out + 0.03, ze - 0.06, HX + 0.3, 0.1, 0.2, TRIM)
+        _course(rf, HY + y_out + 0.03, ze - 0.06, HX + 0.3, 0.1, 0.2, RFB)
         # console (4) sub streasina
         for x in (-HX + 0.2, -HX / 3, HX / 3, HX - 0.2):
             tr.beam((x, HY + 0.02, ze - 0.15), (x, HY + y_out - 0.12, ze - 0.12),
@@ -198,14 +199,14 @@ class _H:
                 _course(rf, sgn * EAVE_Y * (1 - f), Z_EAVE + (Z_RIDGE - Z_EAVE) * f + 0.11,
                         half, 0.2, 0.09, TILE)
             # fateta streasinii (grinda de capat) + capete de tigla
-            _course(tr, sgn * (EAVE_Y + 0.03), Z_EAVE - 0.07, half, 0.14, 0.26, TRIM)
+            _course(rf, sgn * (EAVE_Y + 0.03), Z_EAVE - 0.07, half, 0.14, 0.26, RFB)
         # creasta
-        _course(tr, 0.0, Z_RIDGE + 0.12, half + 0.05, 0.36, 0.3, TRIM)
+        _course(rf, 0.0, Z_RIDGE + 0.12, half + 0.05, 0.36, 0.3, RFB)
         # frontoanele: sipci de vant (barge) pe laturile scurte
         for sx in (-1, 1):
             for sgn in (1, -1):
-                tr.beam((sx * (half + 0.02), sgn * EAVE_Y, Z_EAVE - 0.05),
-                        (sx * (half + 0.02), 0.0, Z_RIDGE + 0.05), (0.1, 0.22), TRIM)
+                rf.beam((sx * (half + 0.02), sgn * EAVE_Y, Z_EAVE - 0.05),
+                        (sx * (half + 0.02), 0.0, Z_RIDGE + 0.05), (0.1, 0.22), RFB)
 
     def walls(self, plaster_upper=False):
         """Miezul: lemn pe tot corpul, timpane, brauri si stalpi pe laturi/spate."""
@@ -213,7 +214,7 @@ class _H:
         zc = (Z_PLINTH + Z_WALL) / 2.0
         wd.box((0, 0, zc), (2 * HX, 2 * HY, Z_WALL - Z_PLINTH), WOODS)
         # soclu
-        tr.box((0, 0, Z_PLINTH / 2.0), (2 * HX + 0.16, 2 * HY + 0.16, Z_PLINTH), STONE_SILL)
+        tr.box((0, 0, Z_PLINTH / 2.0), (2 * HX + 0.34, 2 * HY + 0.34, Z_PLINTH), STONE_SILL)
         # timpanele (lemn) sub acoperis
         for sx in (-1, 1):
             xa, xb = (HX - 0.02, HX) if sx > 0 else (-HX, -HX + 0.02)
@@ -270,7 +271,7 @@ def _machiya_a():
     # parter
     h.boards(-3.0, -1.75, Z_PLINTH, GT)
     h.doorway(-1.5, 0.95, Z_PLINTH, GT)
-    h.noren(-1.4, 0.85, GT - 0.1, 2.0, 2, NOREN_WHITE, h.nr)
+    h.noren(-1.4, 0.85, GT, 2.0, 2, NOREN_WHITE, h.nr)
     h.lattice(1.25, 3.0, 0.75, GT, pitch=0.15)
     # etaj
     h.shoji(-3.0, -2.05, UP0, UP1, cols=1, rows=1)
@@ -296,7 +297,7 @@ def _machiya_b():
     # parter
     h.boards(-3.0, -1.55, Z_PLINTH, GT)
     h.doorway(-1.3, 1.35, Z_PLINTH, GT)
-    h.noren(-1.2, 1.25, GT - 0.1, 2.0, 3, NOREN_BLUE, h.nr)
+    h.noren(-1.2, 1.25, GT, 2.0, 3, NOREN_BLUE, h.nr)
     h.boards(1.65, 3.0, Z_PLINTH, GT, pitch=0.22)
     h.shoji(1.95, 2.7, 1.5, 2.6, cols=1, rows=2)
     # etaj: perete alb + fereastra mare cu 3 panouri
@@ -322,8 +323,8 @@ def _machiya_c():
     h.roof()
     bays = ((-3.0, -1.2), (-0.95, 0.95), (1.2, 3.0))
     for x0, x1 in bays:
-        h.lattice(x0, x1, 1.45, GT, pitch=0.1, t=0.1)
-        h.boards(x0, x1, Z_PLINTH, 1.4, pitch=0.3)
+        h.lattice(x0, x1, 1.7, GT, pitch=0.1, t=0.1)
+        h.boards(x0, x1, Z_PLINTH, 1.65, pitch=0.3)
         h.shoji(x0, x1, UP0, UP1, cols=2, rows=2, t=0.12)
     for x in (-3.25, -1.075, 1.075, 3.25):
         h.post(x, Z_MID + 0.13, Z_WALL - 0.24, 0.22)
@@ -377,8 +378,8 @@ def _machiya_e():
     h.rail(-HX, HX, UP0 - 0.08, 0.14, 0.16)
     h.rail(-HX, HX, UP1 + 0.1, 0.14, 0.16)
     for x0, x1 in ((-3.0, -1.0), (-0.85, 0.85), (1.0, 3.0)):
-        h.lattice(x0, x1, 1.45, GT, pitch=0.33, rails=1, t=0.1)
-        h.boards(x0, x1, Z_PLINTH, 1.4, pitch=0.3)
+        h.lattice(x0, x1, 1.7, GT, pitch=0.33, rails=1, t=0.1)
+        h.boards(x0, x1, Z_PLINTH, 1.65, pitch=0.3)
     # streasina laterala (dreapta spre -X in randare: capatul de -X)
     rf, tr = h.rf, h.tr
     xo = -HX - 1.0
@@ -388,7 +389,7 @@ def _machiya_e():
         rf.beam((-HX - 0.02 - (1.0 - 0.02) * f, -HY - 0.2, Z_MID + 0.3 - 0.6 * f + 0.1),
                 (-HX - 0.02 - (1.0 - 0.02) * f, HY + 0.2, Z_MID + 0.3 - 0.6 * f + 0.1),
                 (0.12, 0.07), TILE)
-    tr.box((xo - 0.03, 0.0, Z_MID - 0.36), (0.1, 2 * HY + 0.5, 0.2), TRIM)
+    rf.box((xo - 0.03, 0.0, Z_MID - 0.36), (0.1, 2 * HY + 0.5, 0.2), RFB)
     return h.objs("Machiya")
 
 

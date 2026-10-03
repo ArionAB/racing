@@ -166,3 +166,11 @@ Culoarea albastra a norenului cere exceptia `--allow-car-slots=Machiya_Noren` (d
 Toate cele 8 piese construite, verificate si comparate; casele ar mai castiga in rundele 5+
 inclinarea acoperisului/ornamente si lemnul mai deschis (clasa). Comenzi: build
 `D:/Blender/blender.exe --background --factory-startup --python tools/blender/run_build.py -- build_kyoto_town.py [machiya_a ...]`.
+
+## kit-d, runda dupa verdictul coordonatorului (case + ceainarie)
+
+- Proportie: parter 3,4 m, etaj 2,8 m, panta ~33 grade; casele au acum 6,27 x 7,23 x **8,97 m** (amprenta peretilor 5,2 x 5,2). Tri neschimbati ca ordin (1336-2260).
+- Contrast: `Machiya_Trim` = `WOOD` (deschis: stalpi, brauri, rame, zabrele, scanduri de usa), `Machiya_Wood` (clasa `machiya_wood`) = miezul peretilor, timpanele si fondul intunecat al golurilor. Grinzile de streasina/creasta au trecut pe nodul `Machiya_Roof` (`LOG_DARK`).
+- Soclu de piatra (`CONCRETE`) mai lat, in Trim. Noren (a, b): bara sub streasina intermediara, 2/3 fasii cu fante, coboara 2 m; usa intunecata se vede dedesubt.
+- teahouse_front: banca mutata in stanga (ca pe decupare), randata. 
+- Ramas: randarea pastreaza acoperisul mai greu decat planșa, noren-ul alb inca se poate citi ca geam (stau sub streasina), soclul tot mai subtire decat pe decupari.

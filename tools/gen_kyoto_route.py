@@ -780,6 +780,18 @@ if len(sys.argv) > 1:
     fz("deal gradina F", 1, MAPLES + ("niwaki_pine", "ginkgo"), (0.26, 0.24, 0.24, 0.16, 0.10),
        center=(hill_f_g[0], 0.0, hill_f_g[2]), radius=46.0, spacing=6.0,
        edge_clear_m=10.5, scale_min=0.95, scale_max=1.3, seed=52)
+    # G2 (POI G, tools/gen_decor_kyoto_g.gd): culoarul VIADUCTULUI trenuletului.
+    # Podul de fier (ModulePlacer, PodulTrenului) e prelungit de DecorManual cu
+    # cate o travee pe fiecare parte (axa X a podului, +-21,16 m), ca trenul de
+    # 25,5 m sa nu atarne peste culee. Discurile REVENDICA banda liniei (raza
+    # 4,5 = puntea + culeea) inaintea zonelor de bambus, ca tulpinile sa nu
+    # strapunga traveele; edge_clear 60 = nu pun nimic, doar revendica.
+    # Origine si axa MASURATE (gen_decor_kyoto_g.gd --scan verifica abaterea):
+    # (-65.70, 411.02), X = (0.9956, -0.0933).
+    for _k, _xa in enumerate((-32.0, -25.0, -18.0, -11.5, 11.5, 18.0, 25.0, 32.0)):
+        fz(f"G2 culoar viaduct {_k}", 1, ("bamboo_crown",), (1.0,),
+           center=(round(-65.70 + 0.9956 * _xa, 2), 0.0, round(411.02 - 0.0933 * _xa, 2)),
+           radius=4.5, spacing=3.0, edge_clear_m=60.0, claim=True, seed=70 + _k)
     # G: padurea de bambus (mii de tulpini moso) cu tufe de bambus la margine.
     fz("bambus G tulpini", 0, ("moso_culm",), (1.0,), frac_from=F["G S1 intrare"] - 0.012,
        frac_to=F["G2 sub podul trenului"] + 0.006, lat_min=6.5, lat_max=44.0, spacing=2.0,

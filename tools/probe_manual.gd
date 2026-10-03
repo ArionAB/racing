@@ -193,6 +193,18 @@ const SPANS_ROAD_PREFIXES: Array[String] = [
 ## Recalculata aici (nu apelata direct pe instanta WorldProp, care nu exista
 ## la acest nivel) ca sa citim intentia FARA sa depindem de un nume de prefix.
 static func _effective_collision_mode(n3: Node3D) -> String:
+	# Piesa carata de un PathMover cu `collide = false` (teatru: trenuletul de
+	# pe podul de fier al Kyoto G2, la 7 m peste drum) n-are corp de coliziune:
+	# PathMover nu-i adauga forma. Fapt STRUCTURAL (stramosul concret si flagul
+	# lui), ca la `_under_airborne_mover`, nu prefix de nume.
+	var cur: Node = n3
+	while cur != null:
+		var mover := cur as PathMover
+		if mover != null:
+			if not mover.collide:
+				return "none"
+			break
+		cur = cur.get_parent()
 	if n3.has_meta(WorldProp.COLLISION_META):
 		var m := String(n3.get_meta(WorldProp.COLLISION_META))
 		if WorldProp.COLLISION_MODES.has(m):

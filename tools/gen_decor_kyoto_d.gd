@@ -266,9 +266,10 @@ func _lanterns() -> void:
 		s += 24.0
 
 
-## Primul rand de artari (cu trunchi solid): la margine + 6,5..7,5, scala
-## 0,8-0,95, cu axa INGUSTA a coroanei spre drum (+X local pe tangenta), ca
-## sa incadreze drumul fara sa-l acopere.
+## Primul rand de artari (cu trunchi solid): la margine + 5..6, scala
+## 0,8-0,95, cu axa INGUSTA a coroanei spre drum (+X local pe tangenta):
+## semiadancimea coroanei e 3,35 x 0,95 = 3,2 m, deci coroana ajunge la
+## margine + 1,8 si incadreaza drumul fara sa-l acopere. Din 9 in 13 m.
 func _maples_row() -> void:
 	var trees := ["momiji_a", "momiji_b", "momiji_c", "momiji_a", "momiji_c", "momiji_b"]
 	for side in [-1.0, 1.0]:
@@ -278,15 +279,15 @@ func _maples_row() -> void:
 			if _deer_gap(s, side):
 				s += 6.0
 				continue
-			var edge := _rng.randf_range(6.5, 7.5)
+			var edge := _rng.randf_range(5.0, 6.0)
 			if _outside(s) == side:
-				edge += 1.0
+				edge += 0.8
 			var p := _at(s, side, edge)
 			var tan: Vector3 = _frame(s)[1]
 			var tm: String = trees[_rng.randi_range(0, trees.size() - 1)]
 			_raw(tm, "plants", "dArtar", Vector3(p.x, _sol_real(p.x, p.z) - 0.05, p.z),
 				_yaw_x_along(tan) + _rng.randf_range(-0.15, 0.15), _rng.randf_range(0.8, 0.95), "")
-			s += _rng.randf_range(13.0, 19.0)
+			s += _rng.randf_range(9.0, 13.0)
 
 
 ## Pietre si muschi la piciorul artarilor (margine + 4,6..6), rare.
@@ -307,8 +308,17 @@ func _rocks() -> void:
 			s += _rng.randf_range(26.0, 38.0)
 
 
-## Gramezi de frunze pe umar (fara corp).
+## Gramezi de frunze pe umar (fara corp) si, mai rar, sub coroane (margine
+## + 3..9): diorama nu arata sol gol sub artari.
 func _leaf_piles() -> void:
+	for side in [-1.0, 1.0]:
+		var t := _s_of(0.322) + (5.0 if side > 0.0 else 0.0)
+		while t < _s_of(VALLEY_END_F):
+			if not _deer_gap(t, side):
+				var q := _at(t, side, _rng.randf_range(3.0, 9.0))
+				_raw("leaf_pile", "props", "dFrunze", Vector3(q.x, _sol_real(q.x, q.z) - 0.06, q.z),
+					_rng.randf_range(0.0, TAU), _rng.randf_range(0.9, 1.3), "")
+			t += _rng.randf_range(10.0, 16.0)
 	var s := _s_of(0.318)
 	var s_end := _s_of(VALLEY_END_F)
 	var side := -1.0
@@ -339,7 +349,7 @@ func _fences() -> void:
 			s += 3.02
 
 
-## CERBUL SIKA: frac ~0,384, pe stanga, la margine + 3,2 (fara corp, `none`
+## CERBUL SIKA: frac ~0,384, pe stanga, la margine + 2,4 (fara corp, `none`
 ## din PROP_COLLISION), inaintea curbei la stanga de la 0,39: camera il are in
 ## fata-stanga pe dreapta. Capul (-Z) spre masina care vine si spre drum.
 ## Nodul copil `Bow` (SikaBow) il inclina cand trece o masina.
@@ -356,7 +366,7 @@ func _deer() -> void:
 	var f := _frame(s)
 	var tan: Vector3 = f[1]
 	var right: Vector3 = f[2]
-	var p := _at(s, DEER_SIDE, 3.2)
+	var p := _at(s, DEER_SIDE, 2.4)
 	var look := (-tan * 0.55 + (-right * DEER_SIDE) * 0.85).normalized()
 	_raw("sika_deer", "animals", "dCerb", Vector3(p.x, _sol_real(p.x, p.z) - 0.03, p.z),
 		_yaw_face(look), 1.0, "")
@@ -365,10 +375,28 @@ func _deer() -> void:
 	_out.append('script = ExtResource("poid_sika_bow")')
 	_out.append("")
 	_scripts["poid_sika_bow"] = "res://scenes/props/sika_bow.gd"
+	# A doua, o ciuta care paste (Graze; coarnele au scala 0,001 in clip), mai
+	# in fata si mai departe de drum, cu spatele spre masina.
+	var s2 := s + 6.0
+	var f2 := _frame(s2)
+	var p2 := _at(s2, DEER_SIDE, 4.2)
+	var look2 := ((f2[1] as Vector3) * 0.8 + (f2[2] as Vector3) * DEER_SIDE * 0.6).normalized()
+	_raw("sika_deer", "animals", "dCerb", Vector3(p2.x, _sol_real(p2.x, p2.z) - 0.03, p2.z),
+		_yaw_face(look2), 0.95, "")
+	_out.append('[node name="Bow" type="Node" parent="%s/dCerb%d"]' % [ZONE, _n])
+	_out.append('script = ExtResource("poid_sika_bow")')
+	_out.append('idle_clip = &"Graze"')
+	_out.append("")
+	# Fundal inchis in spatele lor: pe solul nisipiu cerbul (SAND_MID) se
+	# pierdea (captura r1, 0,379). Doua movile de muschi la margine + 5..6.
+	for k in [[-1.0, 5.6], [4.0, 6.4]]:
+		var mp := _at(s + float(k[0]), DEER_SIDE, float(k[1]))
+		_raw("moss_mound", "rocks", "dPiatra", Vector3(mp.x, _sol_min(mp.x, mp.z, 0.9) - 0.12, mp.z),
+			_rng.randf_range(0.0, TAU), 1.0, "")
 	# frunze la picioarele lui, un felinar si un artar in spate
 	var lp := _at(s + 2.5, DEER_SIDE, 1.6)
 	_raw("leaf_pile", "props", "dFrunze", Vector3(lp.x, _sol_real(lp.x, lp.z) - 0.06, lp.z), 0.7, 0.9, "")
-	var fp := _at(s - 4.0, DEER_SIDE, 5.5)
+	var fp := _at(s - 5.0, DEER_SIDE, 4.5)
 	_raw("stone_lantern_b", "props", "dFelinar", Vector3(fp.x, _sol_min(fp.x, fp.z, 0.65) - 0.05, fp.z),
 		_yaw_face(-right * DEER_SIDE), 1.0, "")
 	var tp := _at(s + 1.0, DEER_SIDE, 8.0)

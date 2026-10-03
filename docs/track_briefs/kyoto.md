@@ -331,7 +331,7 @@ est și spre V pe latura de sud.
 | **E′** | 0.45–0.53 (buclă) | **Scurtătura: tunelul de torii** (*senbon torii*). E o `TrackBranch` dreaptă prin coastă, cu **~125 de porți** la 1,2 m una de alta, un culoar de **6,4 m liber** și **5,2 m sub grinzi**, cu ~25% mai scurtă decât bucla. Stâlpii fac un perete continuu, cu nervuri | **riscul e de precizie, nu de ceas**: atingerea peretelui = frecare mare și ricoșeu, fără oprire. Fără gardian și fără vacă: precizia e poarta. Recompensa se reglează pe sondă la 0,5–1,5 s, ca la ulicioara din Jodhpur. `CameraZone` joasă, plus **garda de fotosensibilitate** (§3) | 3,2 m (`branch_half_width`) |
 | **F** | 0.56–0.68 | **Grădina cu iaz și Pavilionul de Aur.** Cobori la iaz (cota 0). Drumul merge spre V pe malul de sud, pe pietriș compactat cu margini de mușchi, pini *niwaki*, pietre de grădină și tufe *karikomi*, cu **Kinkaku-ji în dreapta, peste apă**. Pe malul iazului, pe exteriorul unei curbe lungi la stânga, stă **daruma-otoshi-ul uriaș** (§3; a înlocuit shishi-odoshi pe 3 oct 2026): un turn de discuri colorate, cu un ciocan care se trage înapoi și lovește discul de jos peste drum | **hazardul-semnătură**: citești ciocanul tras și treci înainte de lovitură sau după disc (nu există bandă liberă: se scapă prin timing) | 5,5 m (la tub) / 6,5 m |
 | **G** | 0.68–0.80 | **Pădurea de bambus de la Arashiyama.** Un culoar de tulpini *moso* de 20 m, cu **garduri de nuiele** (*shiba-gaki*) pe ambele părți, două S-uri și lumina în pete pe drum. O ricșă oprită pe margine (decor) | **respiro-ul verde** (regula de dozaj, §0.1). S-urile cu drift încarcă bara pentru H | 5 m |
-| **G2** | 0.80–0.82 | **Sub podul trenulețului.** Un pod de fier peste defileu, la ~9 m deasupra drumului. **Trenulețul de epocă** trece pe deasupra pe un ciclu (teatru), iar umbra lui trece peste drum | fără efect asupra cursei; reperul sonor e fluierul | 6 m |
+| **G2** | 0.80–0.82 | **Sub podul trenulețului.** Un pod de fier peste defileu, la ~9 m deasupra drumului. **Trenulețul de epocă** trece pe deasupra, **chemat de sosirea jucătorului** (teatru, `TrainCue`, §5.1.2: centrul trenului e peste drum când camera mai are 80 m; măsurat din camera reală: **3,2 s vizibil pe tur, 2,0 s citit**, față de 1,0 s / 0,3 s înainte), iar umbra lui trece peste drum | fără efect asupra cursei; reperul sonor e fluierul | 6 m |
 | **H** | 0.82–1.00 | **Podul Togetsukyō și dreapta finală.** Drumul iese din defileu pe **podul lung de lemn** (150 m, la +3) peste râul Katsura, cu **dealurile colorate de toamnă** în dreapta-față și **bărci acoperite** (*yakatabune*) pe râu. Apoi continuă drept spre N, pe Yasaka-dōri. **Pagoda apare din pâclă** pe ultima treime | **cea mai lungă dreaptă**: turbo-ul strâns în bambus și în valea de arțari se arde aici | 7 m |
 
 **Ritmul turului:**
@@ -637,7 +637,7 @@ regenerată e identică cu cea din repo).
 
 | parametru | Serengeti | Kogarashi | de ce |
 |---|---|---|---|
-| poziție | câmp deschis | frac **0,470**, la 8 m după capătul podului (cota 12) | vezi mai jos |
+| poziție | câmp deschis | frac **0,4743** (d = 1012,6 m), la **17,7 m** după capătul podului (cota 12); era 0,4686 = 5,6 m (3 oct, ramura `kyoto/frunze-vartej-tren`) | vezi „Mutarea de la 5,6 la 17,7 m” mai jos |
 | figura (m) / perioadă | 14 × 26 | 9 (transversal) × 2, perioadă ~29 s (0,0345 Hz) | taie șoseaua, nu o urmează |
 | răsucire | 180° / 0,8 s | **72°** / 0,8 s | **abatere de la „kick ×0,6"** |
 | ridicare / orbire | 2,5 m / 0,6 s | 1,5 m / 0,35 s | ×0,6 |
@@ -667,6 +667,40 @@ Vârtejul a răsucit 102 mașini în 16 rulări (~6 per cursă).
 AI-ul nu îl vede (ca la Serengeti, decor mobil fără citire): masurătoarea de mai
 sus spune că și așa nu produce blocaje. **Aspectul frunzelor nu e verificat vizual**
 (fără capturi, GPU-ul ocupat).
+
+**Mutarea de la 5,6 la 17,7 m după pod (3 oct 2026, `kyoto/frunze-vartej-tren`).**
+Dezvoltatorul: „e chiar la ieșirea din pod și câteodată nu se citește bine”, vrea
+~10 m mai departe. **Măsurat, nu estimat** (`tools/ProbeKyotoFix.tscn`, distanța pe
+curba coaptă de 2135,1 m, capătul podului = `frac_to` 0,466 = 994,9 m): vechiul
+„0,470” era de fapt la **5,6 m** după pod, nu la 8: `road_at_frac` din generator
+ia eșantionul `rs` de dedesubt, la pas de 12 m, deci rotunjea poziția cu până la 12
+m. Generatorul interpolează acum pe lungimea de arc (`road_at_arc`) și poziția e un
+parametru în metri (`KOG_DUPA_POD_M`, implicit 14 nominal = **17,7 m măsurat**), iar
+`path_yaw_deg` se deduce din busola șoselei în punct (150,0° → 30,0°; măsurat
+**90,0°** între axa lungă a figurii și tangenta șoselei, ca înainte). Intrarea în
+arcul E (0,4833) rămâne la ~17 m mai departe.
+
+ProbeRace `--track=11 --ai=7 --seconds=260`, 16 seed-uri, 8 mașini (repuneri în
+zona kogarashi 0,45–0,51 / în afara ei; `[blocaj]`; tur mediu; treceri de vârtej):
+
+| poziție (m după pod, măsurat) | repuneri în zonă | în afara zonei | `[blocaj]` | tur mediu | treceri vârtej |
+|---|---|---|---|---|---|
+| 5,6 (baza, vechea) | 2 (0,462; 0,489) | 1 (0,310, C2) | 0 | 75,62 s | 99 |
+| 14,3 (`KOG_DUPA_POD_M` 10) | 2 (0,462; 0,507) | 1 (0,297) | 2 (0,317, 0,318: C2) | 75,56 s | 103 |
+| **17,7 (14) — aleasă** | **1 (0,462)** | 1 (0,316, C2) | **0** | **75,55 s** | 111 |
+| 22,9 (18,5) | 1 (0,462) | 5 (4 × C2) | 0 | 75,54 s | 117 |
+
+Citire: 0,462 (Tu Muscle, seed 13, pe pod) apare în **toate** variantele, deci nu e
+al vârtejului. Repunerile de la 0,31 sunt aterizarea de la C2 (zgomot Jolt, între 1 și
+5 pe aceeași scenă). Niciuna din pozițiile încercate nu readuce blocajele de la
+0,484–0,503 din istoric: cu răsucirea de 72° rămân ~17 m liberi până la gura
+tunelului (0,48326). Rularea finală (poziția aleasă + zona de frunze din §5.1.1 +
+trenul din §5.1.2) a dat, pe două serii de 16 seed-uri: 5 repuneri + 5 `[blocaj]`
+(75,72 s) și 4 + 0 (75,51 s); cele 5 blocaje sunt toate la 0,528–0,553 (apexul arcului
+E, seeds 2 și 13) și **se reproduc cu `--no-leaves`**, iar două reluări ale seed-ului 2
+au dat 0, deci sunt zgomot Jolt, nu efectul covorului (memoria
+`proberace-nedeterminism`). Aspectul vârtejului la poziția nouă nu e verificat vizual
+(fără capturi).
 
 **Sunet daruma-otoshi.** Două WAV-uri procedurale, adăugate **la sfârșitul**
 `tools/generate_sfx.gd` (sirul `rng` e unic): `daruma_toc` (0,3 s, trei moduri de
@@ -909,8 +943,25 @@ Categorie nouă `assets/models/kyoto/`, cu subfolderele `buildings/`,
 **Ce e.** `LeafCarpet` (`scenes/props/leaf_carpet.gd`, shader
 `assets/shaders/leaf_carpet.gdshader`): un panou transparent la 4 cm peste
 asfalt (3.264 triunghiuri), pe două zone scrise de `tools/gen_kyoto_route.py`:
-**D** 0.335–0.440 (densitate 1,0, de la aterizare până înainte de gura podului)
-și **E** 0.472–0.560 (densitate 0,6, după pod până la Inari). Zonele se topesc
+**D** 0.335–0.440 (densitate 1,0, de la aterizare până înainte de gura podului),
+**E** 0.472–0.560 (densitate 0,6, după pod până la Inari) și, din 3 oct 2026
+(`kyoto/frunze-vartej-tren`), **F** 0.560–0.674 (densitate 0,4, de la ieșirea din
+arcul lui E, pe lângă iaz și pavilion, **până la prima tulpină de bambus**). F e
+lipită de E: la îmbinare panoul nu se mai topește (ar fi gaură goală), ci
+densitatea trece lin de la 0,6 la 0,4 pe `fade_m` (22 m); doar capetele libere se
+topesc. 0,674 = începutul zonei „bambus G tulpini” din `PadureMasa` (măsurat:
+`ProbeKyotoFix` reface candidații zonei cu aceeași semanță, prima tulpină la
+d = 1438,8 m = frac 0,6739; prima tufă manuală la 0,6827), deci frunzele se topesc
+exact unde începe bambusul. `FrunzeCazatoare` citește aceleași zone, deci cade
+continuu de la aterizarea D până la bambus (+12 m). **Acoperirea efectivă pe drum**
+(pragul din shader reprodus pe textura frunzei, fără uzura mașinilor, pe felii de
+frac, `ProbeKyotoFix`): D **95%**, E **85%**, F **69%** (densitate de vârf 0,30),
+20% la 0,670, 0 la 0,674 (și 0 pe pod, 0,44–0,47). Covorul e doar pe carosabil
+(panoul urmărește lățimea șoselei), nu pe apă. Cost: +1 panou (~1.900 triunghiuri),
+același material (29/38 materiale pe pistă după `probe_decor --track=18`,
+neschimbat), plafonul de 64 de particule neschimbat, foaia de uzură rămâne
+128×4096 (de la 9,4 la 6 px/m; amprenta unei roți are 0,7×2,8 m). Valorile de mai jos
+din „Cifre” sunt cele de dinaintea zonei F. Zonele se topesc
 pe 22 m la capete; tablierul podului și tunelul de torii nu au covor. Frunzele
 vin din clasa `leaf_litter` (`autumn_foliage.png`, scara 0,25; niciun fișier
 de textură nou), în trei tente din clasele paletei (`maple_crimson`,
@@ -971,6 +1022,54 @@ contrastul final cu decorul nu e judecat). (c) Cost GPU: panoul e transparent pe
 (`ProbePerf`/§6). Dacă depășește bugetul, primul de stins e `FrunzeCazatoare`
 (§6, ordinea de tăiere), apoi `center_cover` mai mic. (d) Grip pe frunze: NU,
 conform §3.1.
+
+#### 5.1.2 Trenul Sagano la chemare (G2, 3 oct 2026, `kyoto/frunze-vartej-tren`)
+
+**Problema (măsurată, nu bănuită).** `gTren96` rula o buclă liberă de 351 m la 8,75
+m/s (40 s), din care ~10 s peste drum, fără legătură cu sosirea jucătorului.
+Instrumentul: `tools/train_cam_meter.gd`, atașat de ProbeRace cu `--train-cam`: la
+fiecare cadru fizic proiectează cutia trenului în **camera reală** a jucătorului
+(`unproject_position`, `is_position_in_frustum`) și trage raycast de ocluzie spre
+centru și acoperiș (mașinile excluse); raportează pe tur secundele **în cadru**,
+**vizibil** (în cadru și neocluzat) și **citit** (vizibil și ≥ 6% din înălțimea
+ecranului). Baza, 16 seed-uri, 8 mașini, 62 de ture: **0,97 s vizibil pe tur** (37
+din 62 de ture sub 1 s, minim 0), **0,30 s citit**, înălțime maximă pe ecran 5%.
+„În cadru” singur minte: erau 6–8 s pe tur, dar trenul stă sub teren (cota −20) sau
+după desiș jumătate din buclă și e doar în frustum.
+
+*Ipoteze verificate:* (a) **adevărată**: ferestrele nu se suprapun. (b) **parțial**:
+la 35 m/s vezi viaductul din drum doar de la ~108 m (S-ul de la G2 îl ascunde mai
+devreme) până sub el, adică ~3,3 s; trenul deasupra camerei iese din frustum, deci
+tavanul metodei e ~3,3 s vizibil pe tur. (c) **falsă**: calea e pe punte (cota
+12,5–14,1, `Path3D` fără transform în părinte). (d) **falsă**: `path_mover` pornește
+și merge.
+
+**Remediul.** `scenes/props/train_cue.gd` (`TrainCue`, nod frate al trenului):
+trenul stă **parcat sub teren** (capul rampei, punctul 7 al curbei) și e lansat de
+camera activă proiectată pe rută. ETA = (distanța camerei până la viaduct − `lead_m`)
+/ viteza camerei (netezită, limitată la 29–38 m/s: cu 20 subestima, v_est 25,5
+față de 31,1 real); trenul pornește de la poziția pe curbă din care ajunge la
+centrul punții exact atunci. Dincolo de punte intră în desiș (punctul 4) și se
+teleportează înapoi în parcare (între două puncte ascunse, nu se vede). Se re-armează
+la fiecare tur. `PathMover` a primit `seek()` / `offset()`. Trenul are tot
+`collide = false`: cursa nu se schimbă. Faza veche (0,135) rămâne în `.part` și
+contează doar cu `TrainCue.enabled = false` (baseline-ul `TRAIN_CUE_OFF=1` al
+măsurătorii). `lead_m`, 2 seed-uri `--ai=0`: 40 → 2,4 s vizibil; 60 → 2,4; **80 →
+3,0**; 100 → 2,0; 130 → 1,6; 160 → 1,5 (mai mult lead = trenul trece prea devreme,
+înainte să-l vezi).
+
+| (ProbeRace, 16 seed-uri × ~4 ture) | vizibil / tur | ture sub 1 s | citit / tur | înălțime max |
+|---|---|---|---|---|
+| înainte (buclă liberă) | 0,97 s | 37 din 62 | 0,30 s | 5% |
+| după (`TrainCue`, lead 80 m) | **3,16 s** (min 1,9) | **0 din 125** | **2,01 s** | **21%** |
+
+*(`--ai=0`, 8 seed-uri: 1,29 s → 3,13 s vizibil, 16 din 32 de ture sub 1 s → 0.)*
+
+**Nefăcut.** Șinele de dincolo de viaduct (brieful notează că lipsesc): n-am
+adăugat, fiindcă tavanul e geometria drumului (S-ul ascunde viaductul dincolo de
+~108 m), nu lungimea liniei vizibile. Vizualul nu e verificat (fără capturi): ce
+intră în frustum și nu e ocluzat e măsurat, cum arată trenul pe punte nu. Fluierul
+(reperul sonor din tabelul G2) nu există încă.
 
 ### 5.2 Hero (unice)
 | asset | note |

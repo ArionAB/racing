@@ -104,3 +104,33 @@ ciorchini. Vocabular nou: `kyoto_shapes.leaf_blob`.
   --python tools/blender/run_build.py -- build_kyoto_pagodas.py`; comparație
   `… -- preview_kyoto.py -- --compare yasaka_pagoda` (cu `mkdir
   D:/GameDev/.render_lock` înainte, `rmdir` după).
+
+## Poduri (kit-e, `build_kyoto_bridges.py`)
+
+| piesa | tri | cote (m) | noduri | comparatie |
+|---|---:|---|---|---|
+| `tsutenkyo_roof_module` | 2340 | 9,23 lat x 6,00 lung (Y) x 6,68 (de la -1,0 piloni la +5,6 coama); puntea la Z=0 | `Tsu_Roof` (ASPHALT_EDGE + fateta LOG_DARK), `Tsu_Wood`, `Tsu_Rail` | `img/kyoto_fidelity/tsutenkyo_roof_module.png`, `_chain`, `_views` |
+| `togetsukyo_module` | 1164 | 7,86 lat x 10,00 lung x 3,37; puntea la Z=0, piloni la -1,4, balustrada la +1,5 | `Toget_Wood`, `Toget_Rail` | `img/kyoto_fidelity/togetsukyo_module.png`, `_chain`, `_views` |
+| `iron_truss_bridge` | 1380 | 18,20 (X, travee 16 m + culee) x 5,80 (Y) x 10,55; drumul pe Y, la Z=0 | `Truss_Iron` (CAR_RED, exceptie), `Truss_Stone`, `Truss_Deck` | `img/kyoto_fidelity/iron_truss_bridge.png`, `_views` |
+
+**Contract inghetat (iron_truss_bridge), masurat ca GOL cu `tools/blender/measure_gap.py`
+(banda 0,15-2,0 m):** gol lateral **12,35 m** (x -6,15 .. +6,20), inaltime libera
+minima **6,25 m** (mediana 6,40), gol utilizabil la >= 6 m: 12,35 m. Drumul trece pe
+Y; podul traverseaza pe X.
+
+Module: capete plane la Y=+-L/2, verificat pe `_chain` (3 module): cusaturile se
+inchid (stalpii si grinzile de capat sunt jumatati; spatierea pilonilor/sipcilor
+continua peste cusatura). Pe tsutenkyo acoperisul e in doua ape cu capete
+*frontoane deschise* (nu hip: capul de pod, cu hip, e cod/alt asset). Podina
+(`Tsu_Wood`/`Toget_Wood`) are fata de sus la Z=-0,04: sub drum, nu z-fighting.
+Verify: `--origin=waterline` (modulele), `--origin=assembly --allow-car-slots=Truss_Iron`.
+Previzualizare: `preview_kyoto_bridges.py` (`--compare/--views/--chain`, nu atinge `preview_kyoto.py`).
+
+**Verdict:** silueta si numarul de elemente seamana. Abateri ramase: tsutenkyo - decupara
+are colturi de streasina mai ridicate si hip la capat (imposibil in modul); lemnul iese
+mai maro decat portocaliul decuparii (culoarea o da slotul WOOD); togetsukyo - decupara
+are balustrada mai dens panelata si piloni in grupuri mai late; truss - rosul iese putin
+mai aprins (CAR_RED), culeele de piatra nu sunt in decupare (ea are balast pe sol).
+
+**Stare la oprire:** cele 3 piese livrate, verify OK, comparatii facute (1 runda majora
+de reglaj pe tsutenkyo si truss, 1 pe togetsukyo).

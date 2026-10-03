@@ -1,75 +1,77 @@
 # Inventar assets — Kyoto (`Track18`), val 0: pilotul
 
-Contract: `docs/asset_briefs/kyoto_kit.md` §1.1, §1.2, §3 val 0. Verdict kit:
-`bash tools/blender/verify_kyoto.sh` → `VERDICT KIT: OK` (2/2 GLB, pe 3 oct 2026).
+Contract: `docs/asset_briefs/kyoto_kit.md` §1.1, §1.2, §3 val 0. Runda 4 (aprobată după verdictul „pică" al coordonatorului) înlocuiește rundele 1–3. Verdict kit:
+`bash tools/blender/verify_kyoto.sh` → `VERDICT KIT: OK` (2/2 GLB, pe 3 oct 2026, după runda 4).
 
 Comparațiile alăturate (decupare | randare din GLB exportat, culoare reală din
 atlas, fundal `#CFCFCF`):
 - `docs/asset_briefs/img/kyoto_fidelity/yasaka_pagoda.png`
 - `docs/asset_briefs/img/kyoto_fidelity/momiji_a.png`
-- control propriu, 4 azimuturi: `…/yasaka_pagoda_views.png`
+- control propriu, 4 azimuturi: `…/momiji_a_views.png`
 
-**Verdict propriu, sever:** ambele piese au silueta și numărul de elemente
-corecte, dar **nu sunt la nivelul planșei la detaliu** (vezi „Abateri"). Nu le
-declar „trec" fără ochii coordonatorului.
+Verdictul final e al coordonatorului; abaterile rămase sunt în tabelele de mai jos.
 
-## `structures/yasaka_pagoda.glb` (runda 2 din max 3; 3 randări de comparație)
+## `structures/yasaka_pagoda.glb` (runda 4, aprobată de coordonator)
 
-- **Triunghiuri:** 9 534 (`Pagoda_Body` 5 352, `Pagoda_Roof` 2 390,
-  `Pagoda_Windows` 1 440, `Pagoda_Spire` 352). Fără plafon (CLAUDE.md); buget
-  declarat în `verify_kyoto.sh`: 9 600.
-- **Noduri / materiale:** 4 noduri, un material fiecare la integrare.
-  `Pagoda_Body` conține patru sloturi (`WOOD`, `FOAM_WHITE`, `LOG_DARK`,
-  `MARBLE_GREY`) — **nu primește clasă** (atlas); `Pagoda_Roof` e `VOLCANIC_BLACK`
-  + fațetele streașinii pe `LOG_DARK` (atlas, fără clasă); `Pagoda_Spire`
-  `CAR_YELLOW` (verify cu `--allow-car-slots=Pagoda_Spire`).
-- **Cote măsurate din GLB:**
-  - înălțime totală **24,10 m** (contract 24 m, +0,4%); sorin **4,6 m** (19%);
-  - streașina de jos **12,6 × 12,6 m** (nodul `Pagoda_Roof`: ±6,3); corpul
-    etajului de jos 6,9 × 6,9 m; soclul 9,2 × 9,2 × 0,55 m;
-  - cele 5 streșini (semilățime, cotă): 6,0 @ 4,5 m; 5,5 @ 7,6; 4,95 @ 10,7;
-    4,35 @ 13,8; 3,65 @ 16,9; vârful acoperișului de sus la 19,5 m;
-  - origine la bază, centrată (`--origin=assembly` OK; bbox ±6,3 pe X/Z).
-- **Orientare:** piesa are simetrie de 4 ori; „fața" (golul și ușa mare a
-  parterului) e pe +Y Blender = −Z Godot. `verify_glb --front=-Z` marchează doar
-  sorin-ul (cilindru rotund); nu e o eroare de orientare.
-- **h/l siluetă (3/4):** decupare ≈ 1,66, randare ≈ 1,50 (**−10%**, în ±15%).
+Runda 4 după verdictul „pică": corpuri retrase (perete ≈ 0,53 din streașină),
+console vermilion, lemn roșu-maroniu (`RUST`), parter cu panouri albe în rame
+vermilion + ușă închisă pe soclu de piatră deschisă, fără ferestre albăstrui,
+fără balustrade, colțuri ridicate 0,55–0,65 m, muchie de streașină subțiată.
+
+- **Triunghiuri:** 7 526 (`Pagoda_Body` 3 792, `Pagoda_Roof` 2 230,
+  `Pagoda_Windows` 1 152, `Pagoda_Spire` 352). Buget verify 7 700.
+- **Noduri:** `Pagoda_Body` (`CONCRETE`, `RUST`, `FOAM_WHITE`, `LOG_DARK`,
+  `LAVA_ORANGE`: fără clasă), `Pagoda_Roof` (`VOLCANIC_BLACK` + fațete `LOG_DARK`),
+  `Pagoda_Windows` (`LOG_DARK`, `RUST`), `Pagoda_Spire` (`CAR_YELLOW`, verify cu
+  `--allow-car-slots=Pagoda_Spire`).
+- **Cote măsurate:** 24,10 m înălțime; streașina de jos **11,6 × 11,6 m**
+  (±5,8); streașini (semilățime @ cotă): 5,5 @ 4,5; 5,05 @ 7,6; 4,55 @ 10,7;
+  4,0 @ 13,8; 3,4 @ 16,9; vârf acoperiș 19,5; sorin 4,6 m. Pereții:
+  semilățime 2,9 / 2,65 / 2,4 / 2,1 / 1,8 (raport 0,53 față de streașina
+  etajului). Soclu 7,8 × 7,8 × 0,55. Origine la bază, centrată, fără scală pe
+  rădăcină; fața (ușa) pe +Y Blender = −Z Godot.
+- **h/l siluetă (3/4):** decupare ≈ 1,66, randare ≈ 1,67.
 - **Tabel de fidelitate:**
 
   | element | pe planșă | în GLB | verdict |
   |---|---|---|---|
-  | acoperișuri | 5, în patru ape, colțuri ridicate, gri-albăstrui | 5, patru ape, colțuri ridicate, nervuri de țiglă | OK (acoperișurile mele sunt ceva mai groase și mai întunecate) |
-  | raport streașini jos:sus | ≈ 1 : .60 | 1 : .61 | OK |
-  | console sub fiecare acoperiș | rând dublu, brun-roșcat, aglomerat | 2 inele + blocuri de capăt pe fiecare latură | abatere: mai puțin „aglomerat" decât pe planșă |
-  | pereți etaje 2–5 | benzi înalte brun-roșcat cu grile/ferestre | benzi brun cu 3 goluri/latură, balustradă joasă | abatere: planșa n-are balustradă vizibilă; benzile mele sunt mai joase |
-  | parter | stâlpi roșu-brun, panouri albe și goluri întunecate, ușă dreaptă | stâlpi brun, panouri albe proeminente, goluri | abatere: panouri mai subțiri/mai întunecate, ușă mai puțin lizibilă |
-  | sorin | aurit, lung, subțire, bulb jos | aurit, bol + ou + 9 inele + flacără, ~19% din înălțime | OK (planșa îl arată puțin mai gros) |
-  | soclu | scund, de piatră | 0,55 m, de piatră | OK |
+  | acoperișuri | 5, patru ape, colțuri ridicate, gri-albăstrui | 5, patru ape, colțuri 0,6 m, nervuri | OK (ale mele sunt mai netede și mai uniform întunecate) |
+  | corpuri | retrase mult, benzi înalte roșu-maroniu | retrase (0,53), `RUST` | OK |
+  | console | bandă vermilion sub fiecare streașină + blocuri | 2 inele vermilion + blocuri pe fiecare latură | OK ca poziție și culoare; planșa are un „țesut" mai fin de console |
+  | goluri etaje 2–5 | grile/ferestre întunecate | 3 goluri/latură `LOG_DARK` | OK |
+  | parter | panouri albe în rame vermilion, ușă închisă la mijloc, soclu de piatră | 2 panouri albe/latură (fața din față), ușă maro în ramă vermilion, soclu `CONCRETE` | OK; panourile par gri-verzui în randare (lumina), nu alb pur |
+  | sorin | aurit, lung, cu bulb jos | `CAR_YELLOW`, bol+ou+9 inele+flacără, 19% | OK (planșa îl are puțin mai gros) |
+  | balustrade | absente | absente | OK |
 
-- **Abateri cunoscute:** vezi coloana „verdict". Fără cifre de culoare măsurate
-  (comparația e vizuală; culoarea compusă în joc rămâne pentru integrare).
+## `plants/momiji_a.glb` (runda 4, aprobată de coordonator)
 
-## `plants/momiji_a.glb` (3 runde; 4 randări de comparație)
+Runda 4: coroana schimbată din lentile turtite („farfurii") în **ciorchini
+volumetrici**: icosferă subdiv 3 (320 tri) turtită la ~0,72 pe verticală, cu
+fiecare vârf împins radial aleator, 9 ciorchini care se suprapun parțial.
+Trunchi scurt cu evazare, furcă la 2 m în 5 crengi groase care intră în
+ciorchini. Vocabular nou: `kyoto_shapes.leaf_blob`.
 
-- **Triunghiuri:** 1 620 (`Maple_Crown` 1 404, `Maple_Trunk` 216). Buget în
-  verify: 1 700.
+- **Triunghiuri:** 3 056 (`Maple_Crown` 2 880, `Maple_Trunk` 176). Buget verify 3 100.
 - **Noduri:** `Maple_Trunk` (`WOOD`), `Maple_Crown` (`KERB_RED`, clasă
-  `maple_crimson` la integrare). Fără scală pe rădăcină.
-- **Cote măsurate:** înălțime **8,03 m**; lățime coroană **10,94 m** (±5,47),
-  adâncime 6,0 m; trunchiul 0–5,6 m (cu crengile din coroană), baza Ø ~1,9 m la
-  flare, furcă la 2,5 m; origine la bază (`--origin=assembly` OK).
-- **Contract de coliziune la integrare (`trunk`):** raza trunchiului ~0,55 m
-  (nu 0,95 cât are flare-ul).
-- **h/l siluetă:** decupare ≈ 0,83, randare ≈ 0,83 (în bandă).
+  `maple_crimson`). Fără scală pe rădăcină, origine la bază.
+- **Cote măsurate:** 8,58 m înălțime, **12,2 m** lățime coroană, 6,7 m
+  adâncime; trunchi vizibil 0–2,0 m (23% din înălțime), baza Ø ~1,9 m (evazare),
+  Ø ~1,0 m sub furcă. Raza trunchiului pentru coliziunea `trunk`: ~0,5 m.
+- **h/l siluetă:** decupare ≈ 0,83, randare ≈ 0,70 (**−16%, ușor peste bandă**:
+  coroana e mai lată decât pe planșă; se corectează strângând x cu ~10% dacă
+  coordonatorul vrea).
+- **Verificat din 4 azimuturi** (`momiji_a_views.png`): se citește „copac cu
+  ciorchini" din toate; crengile se văd între ciorchinii de jos.
 - **Tabel de fidelitate:**
 
   | element | pe planșă | în GLB | verdict |
   |---|---|---|---|
-  | trunchi | gros, scurt (~25% din înălțime), crengi vizibile prin coroană | con drept, curat 2,5 m + furcă, crengi scurte | **abatere:** trunchiul meu e mai înalt (31%) și mai drept; crengile se văd puțin |
-  | coroană | ~8 mase mari de frunze lobate, foarte suprapuse, margini zimțate adânc | 13 ciorchini turtiți cu 9 lobi, în 4 etaje, goluri între ei | **abatere:** la mine ciorchinii sunt mai separați și mai „farfurii" (orizontali), planșa e mai voluminoasă/verticală |
-  | goluri | puține, prin care se văd crengile | goluri între etaje | OK, dar mai multe decât pe planșă |
-  | culoare | roșu-portocaliu, fețele de sus mai luminoase | `#BB3522` plat × AO, fără variație sus/jos | **abatere:** o singură nuanță pe nod (clasa unică); variația vine doar din AO |
-  | siluetă | coroană „în pom" (umflată sus) | coroană tabulară | abatere moderată: nu e glob (corect), dar mai plată |
+  | ciorchini | 8–10, voluminoși, suprapuși, margine zimțată | 9, icosferă subdiv 3 turtită, vârfuri aleatoare | OK ca volum și suprapunere; zimțarea e „piatră spartă", nu lobi de frunză (limita uneltei: o icosferă nu face lobi simetrici) |
+  | trunchi | scurt (~22%), evazat, se desface în 3–4 crengi | 23%, evazat, 5 crengi groase | OK |
+  | crengi vizibile | 2–3 prin goluri | 3–4 între ciorchinii de jos și laterali | OK |
+  | goluri | câteva | câteva (între cei de jos și cei laterali) | OK |
+  | formă generală | dom mai lat decât înalt | dom, ~1,4 lat/înalt | usor prea lat |
+  | culoare | roșu-portocaliu, fețe sus mai luminoase | `#BB3522` × AO (interior și dedesubt întunecat) | OK pentru un slot; fără nuanță sus/jos |
 
 ## Contracte înghețate în geometrie
 
@@ -85,13 +87,12 @@ declar „trec" fără ochii coordonatorului.
 - `.blend` sursă (`assets/blender/`): nu se salvează încă;
 - variația de nuanță sus/jos pe coroană (cere al doilea slot pe nod, deci
   pierde clasa — de decis la integrare);
-- a 4-a rundă pe `momiji_a` (limita e 3): trunchiul și volumul coroanei.
 
 ## Stare la oprire
 
 *Actualizată la ultimul commit.*
 
-- Făcut: decupările (59, `kyoto_assets_v1/`), `kyoto_kit.md`, uneltele
+- Făcut (runda 4 inclusă): decupările (59, `kyoto_assets_v1/`), `kyoto_kit.md`, uneltele
   (`kyoto_shapes.py`, `preview_kyoto.py`, `compose_kyoto.py`,
   `verify_kyoto.sh`, `crop_kyoto_sheet.py`), pilotul (`yasaka_pagoda`,
   `momiji_a`), ambele cu verify OK și comparație alăturată.

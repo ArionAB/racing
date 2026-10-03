@@ -23,70 +23,68 @@ CRIMSON = KERB_RED         # -> clasa maple_crimson (#BB3522)
 ORANGE_RED = CAR_RED       # -> clasa maple_orange (#E54839); exceptie --allow-car-slots=Maple
 RUST = LARCH_RUST          # -> clasa leaf_litter / ruginiu (#A8683A)
 
-AO_TREE = dict(samples=14, dist=2.5, gradient="vertical",
-               low=0.78, high=1.0, power=0.9, floor=0.5)
+AO_TREE = dict(gradient="vertical",
+               samples=20, dist=3.2, low=0.62, high=1.0, power=0.8, floor=0.32)
 
 clear_built()
 
 
-def _tree(prefix, clusters, limbs, crown_slot, height, trunk_r=0.55, fork_z=2.5,
-          seed=1):
-    """clusters: (x, y, z, rx, rz, lobes) in metri; limbs: (cluster index) ->
-    crengile pornesc din furca spre fiecare ciorchine din `limbs`."""
+def _tree(prefix, blobs, limbs, crown_slot, trunk_r=0.5, fork_z=2.0, seed=1,
+          subdiv=2, jag=0.24):
+    """blobs: (x, y, z, rx, ry, rz); limbs: puncte (x, y, z) spre care pleaca
+    crengile groase din furca (intra in ciorchini)."""
     tr = Builder()
     cr = Builder()
-    tr.frustum((0, 0, fork_z * 0.5), trunk_r * 1.35, trunk_r * 0.78, fork_z, BARK,
-               segments=7)
-    tr.frustum((0, 0, 0.18), trunk_r * 1.7, trunk_r * 1.35, 0.36, BARK, segments=7)
-    for li in limbs:
-        x, y, z, rx, rz, lobes = clusters[li]
-        a = Vector((0.0, 0.0, fork_z - 0.1))
-        tgt = Vector((x * 0.55, y * 0.55, max(fork_z + 0.6, z - rz * 1.1)))
-        mid = (a + tgt) * 0.5 + Vector((x * 0.1, y * 0.1, 0.0))
-        tr.beam(a, mid, (0.46, 0.46), BARK)
-        tr.beam(mid, tgt, (0.3, 0.3), BARK)
-    for k, (x, y, z, rx, rz, lobes) in enumerate(clusters):
-        leaf_cluster(cr, (x, y, z), rx, rx * 0.92, rz, crown_slot, lobes=lobes,
-                     seed=seed * 31 + k, notch=0.74)
+    # trunchi scurt cu evazare la radacina, furca la ~1/4 din inaltime
+    tr.frustum((0, 0, 0.2), trunk_r * 1.9, trunk_r * 1.3, 0.4, BARK, segments=8)
+    tr.frustum((0, 0, fork_z * 0.5 + 0.2), trunk_r * 1.3, trunk_r * 0.85,
+               fork_z - 0.2, BARK, segments=8)
+    fork = Vector((0.0, 0.0, fork_z))
+    for tgt in limbs:
+        t = Vector(tgt)
+        mid = fork.lerp(t, 0.5) + Vector((0, 0, 0.0))
+        tr.beam(fork - Vector((0, 0, 0.15)), mid, (0.46, 0.46), BARK)
+        tr.beam(mid, t, (0.32, 0.32), BARK)
+    for k, (x, y, z, rx, ry, rz) in enumerate(blobs):
+        leaf_blob(cr, (x, y, z), rx, ry, rz, crown_slot, subdiv=subdiv, jag=jag,
+                  seed=seed * 31 + k)
     return tr.to_object(prefix + "_Trunk"), cr.to_object(prefix + "_Crown")
 
 
 def build_momiji_a():
-    """`momiji_a.png` -- lista de elemente (inainte de modelare):
+    """`momiji_a.png` -- lista de elemente (runda 4, dupa verdictul coordonatorului):
 
-    - 1 trunchi gros, scurt, cu baza evazata, care se desparte la ~2 m in 3
-      crengi principale.
-    - Coroana de ~10 ciorchini turtiti (frunze lobate, ca de arțar), asezati in
-      ETAJE: unul sus in centru, doi mai jos pe laturi, 3 pe etajul de mijloc,
-      4 pe etajul de jos, cei de jos aproape de trunchi; intre ciorchini se
-      vede cerul si crengile (goluri).
-    - Latura coroanei mai mare decat inaltimea (h/l ~ 0,8).
-    - Roșu-carmin (#BB3522); fetele de sus mai luminoase, dedesubt mai inchis
-      (din AO). Iese din contur: ciorchinii laterali, lobii.
-    Cote: 8,5 m inalt, ~10,5 m lat.
+    - coroana = 9 CIORCHINI VOLUMINOSI (icosfera subdiv 2 turtita la ~0,7 pe
+      verticala), cu margine zimtata (varfuri impinse aleator), foarte
+      suprapusi: 1 sus, 2 pe etajul 2 (stanga/dreapta), 1 central mare, 1 in
+      spate, 2 laterali mijlocii coborati spre exterior, 2 jos langa trunchi.
+    - ansamblu = dom mai LAT decat inalt (latime totala ~ 1,2 x inaltimea).
+    - trunchi SCURT (~24% din inaltime), evazat la radacina, furca la 2 m in 5
+      crengi groase care INTRA in ciorchini; intre ciorchinii de jos se vad 2-3
+      crengi (goluri).
+    - un singur slot pe coroana (KERB_RED); AO coace umbra sub si in interiorul
+      ciorchinilor.
+    Cote: ~8,4 m inalt, ~10 m lat.
     """
-    # (x, y, z, rx, rz, lobes), metri; z = centrul ciorchinelui
-    c = [
-        (0.4, 0.0, 7.2, 2.7, 1.2, 8),       # 0 varf
-        (-2.7, 0.3, 6.1, 2.5, 1.15, 8),     # 1 etaj 2 stanga
-        (2.9, -0.2, 5.8, 2.6, 1.15, 8),     # 2 etaj 2 dreapta
-        (-4.3, 0.0, 4.3, 2.4, 1.1, 8),      # 3 mijloc stanga
-        (0.2, 0.6, 4.7, 2.9, 1.2, 9),       # 4 mijloc centru
-        (4.3, 0.3, 4.0, 2.4, 1.1, 8),       # 5 mijloc dreapta
-        (-3.2, -0.4, 2.9, 2.0, 0.95, 7),    # 6 jos stanga
-        (2.7, 0.6, 2.8, 2.2, 1.0, 7),       # 7 jos dreapta
-        (-5.1, 0.3, 3.0, 1.5, 0.8, 6),      # 8 jos stanga extern
-        (5.3, -0.3, 2.9, 1.4, 0.75, 6),     # 9 jos dreapta extern
+    b = [
+        (0.3, 0.0, 6.9, 2.6, 2.4, 1.9),     # 0 varf
+        (-3.0, 0.3, 5.9, 2.8, 2.5, 1.9),    # 1 etaj 2 stanga
+        (3.1, -0.2, 5.6, 2.9, 2.5, 1.9),    # 2 etaj 2 dreapta
+        (-4.1, 0.0, 3.9, 2.4, 2.2, 1.6),    # 3 mijloc stanga, coborat
+        (0.2, 0.7, 5.0, 3.0, 2.6, 2.0),     # 4 central mare
+        (4.2, 0.3, 3.7, 2.4, 2.2, 1.6),     # 5 mijloc dreapta
+        (-2.5, -0.4, 3.2, 2.0, 1.9, 1.3),   # 6 jos stanga
+        (2.4, 0.5, 3.0, 2.1, 1.9, 1.3),     # 7 jos dreapta
+        (0.5, -1.7, 5.7, 2.5, 2.2, 1.7),    # 8 spate
     ]
-    c = [(x * 0.74, y, z + 0.25, rx * 0.95, rz * 0.62, 9)
-         for (x, y, z, rx, rz, lobes) in c]
-    c += [(-1.6, -0.8, 5.6, 2.3, 0.7, 9), (2.0, -0.7, 3.9, 2.2, 0.7, 9),
-          (-0.5, 0.9, 6.6, 2.1, 0.7, 9)]
-    return _tree("Maple", c, limbs=(1, 2, 3, 5, 4, 6, 7), crown_slot=CRIMSON,
-                 height=8.5, seed=1)
+    b = [(x * 0.98, y, z * 1.02, rx * 0.7, ry * 0.7, rz * 0.72) for (x, y, z, rx, ry, rz) in b]
+    limbs = [(-2.9, 0.2, 5.0), (3.0, -0.1, 4.8), (-3.9, 0.0, 3.6),
+             (4.1, 0.2, 3.4), (0.2, 0.5, 4.4)]
+    return _tree("Maple", b, limbs, CRIMSON, trunk_r=0.5, fork_z=2.0, seed=1,
+                 subdiv=3, jag=0.34)
 
 
 tr, cr = build_momiji_a()
 emit([tr, cr], "plants/momiji_a.glb", AO_TREE, bevel=0.0, smooth_angle=None,
-     budget=2000)
+     budget=3500)
 report()

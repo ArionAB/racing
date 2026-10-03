@@ -213,6 +213,23 @@ def leaf_cluster(b, center, rx, ry, rz, slot, lobes=8, seed=0, top_slot=None,
     return set(faces)
 
 
+def leaf_blob(b, center, rx, ry, rz, slot, subdiv=2, jag=0.24, seed=0):
+    """Ciorchine VOLUMINOS de frunze de arțar: icosfera (subdiv 1-2) turtita
+    pe Z la `rz/rx`, cu fiecare varf impins radial aleator (+/- `jag`), deci
+    margine zimtata si fete mari neregulate, nu disc si nu glob neted. Se
+    suprapune cu vecinii. 80 (subdiv 1) / 320 (subdiv 2) triunghiuri."""
+    rnd = _lcg(seed)
+    cx, cy, cz = center
+    res = bmesh.ops.create_icosphere(b.bm, subdivisions=subdiv, radius=1.0)
+    faces = set()
+    verts = res["verts"]
+    for v in verts:
+        k = (1.0 - jag * 0.6) + rnd() * jag * 1.6
+        v.co = Vector((cx + v.co.x * rx * k, cy + v.co.y * ry * k,
+                       cz + v.co.z * rz * (0.5 + 0.5 * k)))
+    return b._tag(verts, slot)
+
+
 # ---------------------------------------------------------------------------
 # emit -- comun tuturor build-urilor Kyoto
 # ---------------------------------------------------------------------------

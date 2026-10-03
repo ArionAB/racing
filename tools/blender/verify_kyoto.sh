@@ -36,8 +36,8 @@ check() {  # check <cale> <buget> [flag...]
 }
 
 echo "== pilotul (kit §3, val 0) =="
-check "structures/yasaka_pagoda.glb"  9600 --origin=assembly --allow-car-slots=Pagoda_Spire
-check "plants/momiji_a.glb"           1700 --origin=assembly
+check "structures/yasaka_pagoda.glb"  7700 --origin=assembly --allow-car-slots=Pagoda_Spire
+check "plants/momiji_a.glb"           3100 --origin=assembly
 
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)

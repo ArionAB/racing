@@ -679,8 +679,22 @@ if len(sys.argv) > 1:
     fz("versant Higashiyama", 1, MAPLES, (0.34, 0.33, 0.33), center=(372.0, 0.0, -150.0),
        radius=88.0, spacing=7.0, seed=22)
     # D: valea de artari (cea mai deasa), pana la gura podului si sub el.
+    # POI D (runda 1): lat_min 9 -> 18,5. `edge_clear_m` NU se aplica azi
+    # (MeshForest._seg_grid are listele goale: append pe copia PackedInt32Array,
+    # deci _edge_dist = INF), asa ca singura distanta reala e lat_min de la AXA,
+    # cu jitter +-0,45*spacing (2,1 m): trunchiuri la 1-5 m de margine si coroane
+    # de 12 m latime peste banda. 18,5 = hw 6 + 10,5 (marja voita) + 2 de jitter.
+    # Primul rand (margine + 6,5..8, coroana cu axa ingusta spre drum) e al
+    # DecorManual (tools/gen_decor_kyoto_d.gd).
     fz("valea D artari", 0, MAPLES, (0.36, 0.30, 0.34), frac_from=F["D aterizare coborare"],
-       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=4.6, edge_clear_m=10.5, seed=31)
+       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=18.5, lat_max=78.0, spacing=4.6, edge_clear_m=10.5, seed=31)
+    # Rapa de sub Tsutenkyo: coroanele urca pana la nivelul podului (brief §2 D).
+    # Fundul e la -8..-11 sub punte pe portiunea adanca; artarii de 8,6 m (scala
+    # <= 1,05) ajung la +-1,5 m de cota puntii, iar trunchiul la >= 10,4 m de
+    # ax tine coroana (semilatime <= 6,1) in afara tablierului (hw 4,5).
+    fz("rapa Tsutenkyo artari", 0, MAPLES, (0.40, 0.28, 0.32), frac_from=F["D pod Tsutenkyo intrare"] + 0.002,
+       frac_to=F["D pod Tsutenkyo iesire"] - 0.002, lat_min=12.5, lat_max=18.0, spacing=4.2, edge_clear_m=5.0,
+       scale_min=0.85, scale_max=1.05, seed=32)
     # E: muntele Inari, cedru inchis, cu cate un artar rosu printre ei.
     fz("Inari cedru fasie", 0, ("cedar_dark", "momiji_b"), (0.88, 0.12),
        frac_from=F["E arc intrare (E' se desprinde)"] - 0.008,
@@ -748,6 +762,41 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 """
     # --- sfarsit GRUPA PADUREA IN MASA ---------------------------------------
 
+    # === DECOR MANUAL (POI-uri) ==============================================
+    # Generatorul asta rescrie TOT Track18.tscn, deci decorul manual al POI-urilor
+    # (noduri sub `DecorManual`, memoria decor-manual-sursa-de-adevar) nu poate
+    # sta doar in .tscn: ar disparea la prima regenerare. Fiecare POI isi emite
+    # blocul cu generatorul lui (`tools/gen_decor_kyoto_<x>.gd --out=...`) in
+    # `tools/kyoto_decor/poi_<x>.part`, cu doua sectiuni: `;;EXT` (ext_resource-uri,
+    # id-uri cu prefixul POI-ului) si `;;NODES` (zona + piesele). Aici se lipesc
+    # toate, in ordinea numelui; un POI nou = un fisier nou, fara cod aici.
+    import glob as _glob
+    import os as _os
+    decor_ext = ""
+    decor_nodes = ""
+    _parts = sorted(_glob.glob(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                                             "kyoto_decor", "poi_*.part")))
+    for _pp in _parts:
+        _sec = None
+        for _ln in open(_pp, encoding="utf-8").read().splitlines():
+            if _ln.strip() == ";;EXT":
+                _sec = "ext"
+                continue
+            if _ln.strip() == ";;NODES":
+                _sec = "nodes"
+                continue
+            if _sec == "ext" and _ln.strip():
+                decor_ext += _ln + "\n"
+            elif _sec == "nodes":
+                decor_nodes += _ln + "\n"
+    if _parts:
+        decor_ext = ('[ext_resource type="Script" uid="uid://twspgftscxb4" '
+                     'path="res://scenes/props/world_prop.gd" id="dm_prop"]\n') + decor_ext
+        decor_nodes = ('\n[node name="DecorManual" type="Node3D" parent="."]\n'
+                       'script = ExtResource("dm_prop")\n\n') + decor_nodes
+    print(f"decor manual: {len(_parts)} blocuri POI")
+    # === /DECOR MANUAL ===
+
     # CameraZone-uri: Tsutenkyo (3,2 / 5,5 / 4) pe fractie, tunel (2,4 / 5,2) in cutie.
     tscn = f"""[gd_scene format=3]
 
@@ -770,7 +819,7 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/togetsukyo_module.glb" id="intc_toget"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kakezukuri_scaffold.glb" id="intc_scaffold"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/iron_truss_bridge.glb" id="intc_truss"]
-{forest_ext}"""
+{forest_ext}{decor_ext}"""
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
 [sub_resource type="BoxShape3D" id="BoxShape3D_zone{k}"]
@@ -982,6 +1031,7 @@ script = ExtResource("10_respawn")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})
 shape = SubResource("BoxShape3D_zone{k}")
 """
+    tscn += decor_nodes   # DECOR MANUAL (POI-uri)
     with open(sys.argv[1], "w", encoding="utf-8", newline="\n") as f:
         f.write(tscn)
     print(f"\nscris: {sys.argv[1]}")

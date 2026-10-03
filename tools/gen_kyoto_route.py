@@ -545,11 +545,16 @@ if len(sys.argv) > 1:
     f_bridge_b = F["D pod Tsutenkyo iesire"]
     # Covorul de frunze (LeafCarpet, brief §3): D de la aterizare pana inainte de
     # gura podului (podul acoperit nu are frunze pe tablier), E de dupa pod pana
-    # la Inari (frunzele mai rare: altare, cedri). (de la, pana la, densitate.)
+    # la Inari (frunzele mai rare: altare, cedri), F pana la bambus (0,4). (de la, pana la, densitate.)
     carpet_zones = ", ".join(
         f"Vector3({r3(a)}, {r3(b)}, {d})" for a, b, d in (
             (F["D aterizare coborare"] + 0.004, f_bridge_a - 0.009, 1.0),
-            (f_bridge_b + 0.006, 0.56, 0.6)))
+            (f_bridge_b + 0.006, 0.56, 0.6),
+            # F: iazul si pavilionul, pana la prima tulpina de bambus (G): frunzele
+            # se subtiaza de la 0,6 la 0,4 si se topesc la 0,674 (masurat cu
+            # tools/ProbeKyotoFix.tscn: PadureMasa "bambus G tulpini" incepe la
+            # frac 0,6739, prima tufa manuala la 0,6827). Lipita de zona E.
+            (0.56, 0.674, 0.4)))
     f_togetsu_a = F["H pod Togetsukyo intrare"]
     f_togetsu_b = F["H pod Togetsukyo iesire"]
     f_f_a = F["F intrare (spre V)"]

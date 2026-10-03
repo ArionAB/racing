@@ -40,6 +40,14 @@ check "structures/yasaka_pagoda.glb"  7700 --origin=assembly --allow-car-slots=P
 check "plants/momiji_a.glb"           3100 --origin=assembly
 
 echo
+echo "== orasul (kit §1.6, grupa kit-d) =="
+for m in a c d e; do check "buildings/machiya_$m.glb" 3200 --origin=assembly; done
+check "buildings/machiya_b.glb"       3200 --origin=assembly --allow-car-slots=Machiya_Noren
+check "props/teahouse_front.glb"      1800 --origin=assembly --allow-car-slots=Tea_Red
+check "props/paper_lantern.glb"        800 --origin=assembly
+check "structures/temple_wall.glb"    2000 --origin=assembly
+
+echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total (5 existente, nu ale kitului)"
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi

@@ -282,3 +282,47 @@ def report():
         print("%-42s tris=%6d%s  %.2f x %.2f x %.2f m  %.0f kB" %
               (path, tris, flag, dims.x, dims.y, dims.z, kb))
         print("    noduri:", per_node)
+
+
+# --- Orasul (build_kyoto_town.py): origine pe AXA constructiei -----------------
+
+def emit_keep_xy(objs, path, ao, bevel=0.0, smooth_angle=None, budget=None,
+                 bevel_angle=30.0):
+    """Ca `emit`, dar PASTREAZA XY asa cum a fost construit si coboara doar pe Z
+    (offset calculat o data pe ansamblu). Pentru piesele a caror origine trebuie
+    sa fie axa constructiei, nu centrul bbox-ului: casa cu streasina fata mai
+    lunga decat spatele, stalpul cu brat al felinarului (origine la stalp)."""
+    objs = [o for o in objs if o is not None and len(o.data.vertices) > 0]
+    zs = [v.co.z for o in objs for v in o.data.vertices]
+    dz = -min(zs)
+    total = 0
+    per_node = {}
+    for o in objs:
+        for v in o.data.vertices:
+            v.co.z += dz
+        st = finish(o, bevel=bevel, bevel_angle=bevel_angle, ao=ao,
+                    origin=None, smooth_angle=smooth_angle)
+        total += st["tris"]
+        per_node[o.name] = st["tris"]
+    xs, ys, zs = [], [], []
+    for o in objs:
+        for v in o.data.vertices:
+            xs.append(v.co.x); ys.append(v.co.y); zs.append(v.co.z)
+    dims = Vector((max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs)))
+    _, sz = export_glb(objs, "kyoto/" + path)
+    RESULTS.append((path, total, dims, budget, per_node, sz / 1024.0))
+    return total
+
+
+def tri_prism_x(b, x0, x1, pts_yz, slot):
+    """Prisma triunghiulara/poligonala cu conturul in planul YZ, extrudata pe X
+    intre x0 si x1 (timpanul unui fronton)."""
+    n = len(pts_yz)
+    a = [b.bm.verts.new((x0, y, z)) for (y, z) in pts_yz]
+    c = [b.bm.verts.new((x1, y, z)) for (y, z) in pts_yz]
+    b.bm.faces.new(tuple(reversed(a)))
+    b.bm.faces.new(tuple(c))
+    for i in range(n):
+        j = (i + 1) % n
+        b.bm.faces.new((a[i], a[j], c[j], c[i]))
+    return b._tag(a + c, slot)

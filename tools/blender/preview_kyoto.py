@@ -62,6 +62,25 @@ SPECS = {
                       "camera": {"azimuth": 125.0, "elevation": 14.0, "lens": 90.0, "margin": 1.1}},
     "momiji_a": {"category": "plants", "tints": {"Maple_Crown": "maple_crimson"},
                  "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 70.0, "margin": 1.1}},
+    # --- grupa town (kit-d)
+    "machiya_a": {"category": "buildings", "tints": {"Machiya_Wood": "machiya_wood"},
+                  "camera": {"azimuth": 112.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "machiya_b": {"category": "buildings", "tints": {"Machiya_Wood": "machiya_wood"},
+                  "camera": {"azimuth": 112.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "machiya_c": {"category": "buildings", "tints": {"Machiya_Wood": "machiya_wood"},
+                  "camera": {"azimuth": 112.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "machiya_d": {"category": "buildings", "tints": {"Machiya_Wood": "machiya_wood"},
+                  "camera": {"azimuth": 112.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "machiya_e": {"category": "buildings", "tints": {"Machiya_Wood": "machiya_wood"},
+                  "camera": {"azimuth": 112.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "teahouse_front": {"category": "props",
+                       "camera": {"azimuth": 125.0, "elevation": 14.0, "lens": 70.0, "margin": 1.1}},
+    "paper_lantern": {"category": "props",
+                      "camera": {"azimuth": 125.0, "elevation": 8.0, "lens": 70.0, "margin": 1.1}},
+    "temple_wall": {"category": "structures",
+                    "camera": {"azimuth": 30.0, "elevation": 14.0, "lens": 70.0, "margin": 1.1}},
+    "temple_wall_x3": {"category": "structures", "glb": "temple_wall", "repeat": (3, 8.0),
+                       "camera": {"azimuth": 30.0, "elevation": 16.0, "lens": 60.0, "margin": 1.1}},
 }
 
 
@@ -145,8 +164,16 @@ def _import(spec, name):
     if not os.path.exists(path):
         print("LIPSA GLB:", path)
         return []
-    bpy.ops.import_scene.gltf(filepath=path)
-    meshes = [o for o in bpy.context.selected_objects if o.type == "MESH"]
+    reps, step = spec.get("repeat", (1, 0.0))
+    meshes = []
+    for _i in range(reps):
+        bpy.ops.import_scene.gltf(filepath=path)
+        got = [o for o in bpy.context.selected_objects if o.type in ("MESH", "EMPTY")]
+        for o in got:
+            if o.parent is None:
+                o.location.y += (_i - (reps - 1) / 2.0) * step
+        meshes += [o for o in got if o.type == "MESH"]
+    bpy.context.view_layer.update()
     import re
     for o in meshes:
         _fix_ao_layer_name(o)

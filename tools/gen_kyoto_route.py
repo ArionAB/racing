@@ -689,9 +689,23 @@ if len(sys.argv) > 1:
     fz("Inari cedru disc", 1, ("cedar_dark", "momiji_b"), (0.88, 0.12), center=(332.72, 0.0, 292.0),
        radius=70.0, spacing=4.0, scale_min=0.95, scale_max=1.45, seed=42)
     # F: gradina, niwaki cu cativa artari; nimic in iaz (sol sub cota soselei).
+    # POI F: pe DREAPTA (spre iaz) fasia se opreste la 0,595, de unde incepe
+    # vederea spre pavilion peste apa; malul drept il imbraca DecorManual (ZoneF).
     fz("gradina F", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
        frac_from=F["F intrare (spre V)"] - 0.012, frac_to=F["G S1 intrare"] + 0.004,
-       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=51)
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=51, side=-1)
+    fz("gradina F dreapta", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
+       frac_from=F["F intrare (spre V)"] - 0.012, frac_to=0.595,
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=53, side=1)
+    fz("gradina F dreapta 2", 0, ("niwaki_pine", "momiji_a", "momiji_c"), (0.72, 0.14, 0.14),
+       frac_from=0.656, frac_to=F["G S1 intrare"] + 0.004,
+       lat_min=11.0, lat_max=56.0, spacing=7.0, max_below_road_m=1.6, seed=54, side=1)
+    # POI F: dealul gradinii (+24, in spatele pavilionului, vazut din drum pe
+    # cadrul-erou): artari in trei rosuri, niwaki si cativa ginkgo, ca aurul
+    # pavilionului sa stea pe rosu si verde, nu pe un con de iarba.
+    fz("deal gradina F", 1, MAPLES + ("niwaki_pine", "ginkgo"), (0.26, 0.24, 0.24, 0.16, 0.10),
+       center=(hill_f_g[0], 0.0, hill_f_g[2]), radius=46.0, spacing=6.0,
+       edge_clear_m=10.5, scale_min=0.95, scale_max=1.3, seed=52)
     # G: padurea de bambus (mii de tulpini moso) cu tufe de bambus la margine.
     fz("bambus G tulpini", 0, ("moso_culm",), (1.0,), frac_from=F["G S1 intrare"] - 0.012,
        frac_to=F["G2 sub podul trenului"] + 0.006, lat_min=6.5, lat_max=44.0, spacing=2.0,
@@ -734,6 +748,8 @@ seed_value = {d.get('seed', 1)}
         if d['kind'] == 0:
             forest_sub += (f"frac_from = {r3(d['frac_from'])}\nfrac_to = {r3(d['frac_to'])}\n"
                            f"lat_min = {d['lat_min']}\nlat_max = {d['lat_max']}\n")
+            if 'side' in d:
+                forest_sub += f"side = {d['side']}\n"
         else:
             c_ = d['center']
             forest_sub += (f"center = Vector3({c_[0]:.2f}, {c_[1]:.2f}, {c_[2]:.2f})\n"
@@ -747,6 +763,41 @@ scenes = Array[PackedScene]([{scenes_txt}])
 zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 """
     # --- sfarsit GRUPA PADUREA IN MASA ---------------------------------------
+
+    # === DECOR MANUAL (POI-uri) ==============================================
+    # Generatorul asta rescrie TOT Track18.tscn, deci decorul manual al POI-urilor
+    # (noduri sub `DecorManual`, memoria decor-manual-sursa-de-adevar) nu poate
+    # sta doar in .tscn: ar disparea la prima regenerare. Fiecare POI isi emite
+    # blocul cu generatorul lui (`tools/gen_decor_kyoto_<x>.gd --out=...`) in
+    # `tools/kyoto_decor/poi_<x>.part`, cu doua sectiuni: `;;EXT` (ext_resource-uri,
+    # id-uri cu prefixul POI-ului) si `;;NODES` (zona + piesele). Aici se lipesc
+    # toate, in ordinea numelui; un POI nou = un fisier nou, fara cod aici.
+    import glob as _glob
+    import os as _os
+    decor_ext = ""
+    decor_nodes = ""
+    _parts = sorted(_glob.glob(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                                             "kyoto_decor", "poi_*.part")))
+    for _pp in _parts:
+        _sec = None
+        for _ln in open(_pp, encoding="utf-8").read().splitlines():
+            if _ln.strip() == ";;EXT":
+                _sec = "ext"
+                continue
+            if _ln.strip() == ";;NODES":
+                _sec = "nodes"
+                continue
+            if _sec == "ext" and _ln.strip():
+                decor_ext += _ln + "\n"
+            elif _sec == "nodes":
+                decor_nodes += _ln + "\n"
+    if _parts:
+        decor_ext = ('[ext_resource type="Script" uid="uid://twspgftscxb4" '
+                     'path="res://scenes/props/world_prop.gd" id="dm_prop"]\n') + decor_ext
+        decor_nodes = ('\n[node name="DecorManual" type="Node3D" parent="."]\n'
+                       'script = ExtResource("dm_prop")\n\n') + decor_nodes
+    print(f"decor manual: {len(_parts)} blocuri POI")
+    # === /DECOR MANUAL ===
 
     # CameraZone-uri: Tsutenkyo (3,2 / 5,5 / 4) pe fractie, tunel (2,4 / 5,2) in cutie.
     tscn = f"""[gd_scene format=3]
@@ -770,7 +821,7 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/togetsukyo_module.glb" id="intc_toget"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kakezukuri_scaffold.glb" id="intc_scaffold"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/iron_truss_bridge.glb" id="intc_truss"]
-{forest_ext}"""
+{forest_ext}{decor_ext}"""
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
 [sub_resource type="BoxShape3D" id="BoxShape3D_zone{k}"]
@@ -982,6 +1033,7 @@ script = ExtResource("10_respawn")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})
 shape = SubResource("BoxShape3D_zone{k}")
 """
+    tscn += decor_nodes   # DECOR MANUAL (POI-uri)
     with open(sys.argv[1], "w", encoding="utf-8", newline="\n") as f:
         f.write(tscn)
     print(f"\nscris: {sys.argv[1]}")

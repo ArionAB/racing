@@ -328,6 +328,69 @@ func _build() -> void:
 		_crowns(side)
 	_rickshaw()
 	_train()
+	_camera_zone()
+	_mm_node()
+
+
+## ZONA DE CAMERA sub podul trenului (runda 2, aprobata). Camera de joc (10 m)
+## trecea prin grinda podului (ProbeCameraSolid: iron_truss_bridge_col intre
+## masina si camera la 0,808 si 0,810, langa la 0,812) si prin tren. Golul liber
+## sub pod e 6,25 m; presetul coboara camera sub tavanul de 5,5 m, ca la
+## Tsutenkyo. Fractiile sunt ale MASINII: camera e cu 12,5 m in urma.
+const CAM_FRAC := Vector2(0.797, 0.815)
+
+func _camera_zone() -> void:
+	_out.append('[node name="CameraPodTren" type="Area3D" parent="Hazarduri"]')
+	_out.append("monitorable = false")
+	_out.append('script = ExtResource("9_camzone")')
+	_out.append("size = Vector3(2, 2, 2)")
+	_out.append("frac_from = %.4f" % CAM_FRAC.x)
+	_out.append("frac_to = %.4f" % CAM_FRAC.y)
+	_out.append("height = 3.6")
+	_out.append("look_height = 0.8")
+	_out.append("fov_bonus = 3.0")
+	_out.append("ceiling = 5.5")
+	_out.append("")
+
+
+# ------------------------------------------------------------------ MultiMesh
+## Piesele FARA corp (gardul, desisul de la capetele viaductului) intr-un
+## singur CityFill cu `explicit_xforms` (schimbarea copiata identic de pe
+## kyoto/poi-b): runda 1 le avea noduri, +413 desene pe pista.
+var _mm_models: Array[String] = []
+var _mm_xf := PackedFloat32Array()
+
+
+func _mm_add(stem: String, folder: String, b: Basis, pos: Vector3) -> void:
+	if not _mm_models.has(stem):
+		_mm_models.append(stem)
+		_res_id(stem, "res://assets/models/kyoto/%s/%s.glb" % [folder, stem])
+	for v in [float(_mm_models.find(stem)), b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z,
+			b.z.x, b.z.y, b.z.z, pos.x, pos.y, pos.z]:
+		_mm_xf.append(v)
+
+
+func _mm_node() -> void:
+	if _mm_xf.is_empty():
+		return
+	var ms: Array[String] = []
+	for m in _mm_models:
+		ms.append('ExtResource("poig_%s")' % m)
+	var vs: Array[String] = []
+	for v in _mm_xf:
+		vs.append("%.5f" % v)
+	if not _ext_extra.has(CF_EXT):
+		_ext_extra.append(CF_EXT)
+	_out.append('[node name="BambusFaraCorpG" type="Node3D" parent="."]')
+	_out.append('script = ExtResource("poig_cityfill")')
+	_out.append("models = Array[PackedScene]([%s])" % ", ".join(ms))
+	_out.append("indigo_ratio = 0.0")
+	_out.append("explicit_xforms = PackedFloat32Array(%s)" % ", ".join(vs))
+	_out.append("")
+	print("; MultiMesh fara corp: %d piese (%s)" % [_mm_xf.size() / 13, ", ".join(ms)])
+
+
+const CF_EXT := '[ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="poig_cityfill"]'
 
 
 func _in_gap(side: float, s: float) -> bool:
@@ -368,7 +431,8 @@ func _fence(side: float) -> void:
 			var y := z.cross(x).normalized()
 			# Infipt 6 cm sub capatul mai jos al coardei (solul e aproape plat).
 			var pos := Vector3(mid.x, minf(a.y, b.y) - 0.06 + absf(a.y - b.y) * 0.5, mid.z)
-			_node_basis("shiba_fence", "props", "gGard", Basis(x, y, z), pos, "")
+			# Runda 2: gardul e `none` -> MultiMesh (CityFill explicit_xforms).
+			_mm_add("shiba_fence", "props", Basis(x, y, z), pos)
 			count += 1
 		s = s2
 		a = b
@@ -384,6 +448,11 @@ func _crowns(side: float) -> void:
 		var y := _sol_min(p.x, p.z, 1.4)
 		_raw("bamboo_crown", "plants", "gTufa", Vector3(p.x, y - 0.05, p.z), _rng.randf_range(0.0, TAU),
 			_rng.randf_range(0.85, 1.1), "")
+		# Fara discul de contact (track.gd, PROP_AO): sub fiecare tufa iesea o
+		# pata octogonala neagra de ~6 m, citita ca balta (r2, A/B pe captura
+		# 0,721 cu si fara tufe). Tulpinile din MultiMesh n-au disc nici ele;
+		# contactul il da umbra dinamica.
+		_out.insert(_out.size() - 1, 'metadata/contact = "none"')
 		count += 1
 		s += _rng.randf_range(4.6, 6.0)
 	print("; tufe %s: %d" % ["dreapta" if side > 0.0 else "stanga", count])
@@ -417,6 +486,10 @@ func _train() -> void:
 		var c: Vector3 = o + ax * (sx * SPAN)
 		_node_basis("iron_truss_bridge", "structures", "gViaduct", hx.basis,
 			Vector3(c.x, o.y - 0.15, c.z), "")
+		# Fara discul de contact (PROP_AO, raza plafonata la 6 m): sub fiecare
+		# travee iesea un octogon negru de 12 m pe iarba, langa culee. Podul
+		# principal (ModulePlacer) nu are disc; contactul il face umbra.
+		_out.insert(_out.size() - 1, 'metadata/contact = "none"')
 	# [x de-a lungul podului, z lateral (de-a lungul drumului), cota absoluta]
 	var under := o.y - 25.0
 	var pts_local := [
@@ -473,8 +546,12 @@ func _train() -> void:
 				var w: Vector3 = o + ax * (sx * (xa + _rng.randf_range(-0.8, 0.8))) 					+ az * (zl + _rng.randf_range(-0.7, 0.7))
 				if _road_edge(Vector2(w.x, w.z)) < 5.0:
 					continue
-				_raw("bamboo_crown", "plants", "gTufaTren", Vector3(w.x, _sol_min(w.x, w.z, 1.4) - 0.05, w.z),
-					_rng.randf_range(0.0, TAU), _rng.randf_range(1.25, 1.45), "")
+				# Runda 2: la 20+ m de bordura corpul `trunk` nu e atins de nimeni
+				# (trenul n-are coliziune) -> MultiMesh, fara corp.
+				var sc := _rng.randf_range(1.25, 1.45)
+				_mm_add("bamboo_crown", "plants",
+					Basis.from_euler(Vector3(0.0, _rng.randf_range(0.0, TAU), 0.0)).scaled(Vector3(sc, sc, sc)),
+					Vector3(w.x, _sol_min(w.x, w.z, 1.4) - 0.05, w.z))
 				nt += 1
 	print("; desis la capetele podului: %d tufe" % nt)
 

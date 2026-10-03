@@ -49,6 +49,10 @@ const SFX: Dictionary = {
 	# atacul) si clampanitul falcii.
 	&"shishimai_music": preload("res://assets/audio/shishimai_music.wav"),
 	&"shishimai_clack": preload("res://assets/audio/shishimai_clack.wav"),
+	# Carul de festival Gion Matsuri (Kyoto): doua BUCLE pozitionale, muzica de
+	# telegraf (taiko + kane) si scartaitul rotilor la traversare.
+	&"gion_bayashi": preload("res://assets/audio/gion_bayashi.wav"),
+	&"gion_wheels": preload("res://assets/audio/gion_wheels.wav"),
 }
 
 ## Fluxul brut al unui sunet, pentru cine si-l reda singur.
@@ -72,7 +76,8 @@ func _ready() -> void:
 	_create_bus(&"Engine")
 	apply_volumes()
 	for loop_stream: AudioStream in [ENGINE_LOOP, SKID_LOOP, SFX[&"typhoon_roar"],
-			SFX[&"wave_wash"], SFX[&"avalanche_rumble"], SFX[&"shishimai_music"]]:
+			SFX[&"wave_wash"], SFX[&"avalanche_rumble"], SFX[&"shishimai_music"],
+			SFX[&"gion_bayashi"], SFX[&"gion_wheels"]]:
 		var wav := loop_stream as AudioStreamWAV
 		if wav != null:
 			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD

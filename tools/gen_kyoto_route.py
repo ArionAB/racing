@@ -473,11 +473,11 @@ def heading_at(i):
     a, b = rs[i % n_rs], rs[(i + 1) % n_rs]
     return heading_deg(b[0] - a[0], b[1] - a[1])
 dh = (heading_at(tub_i + 3) - heading_at(tub_i - 3) + 180) % 360 - 180
-report(dh < -10.0, f"F turnul daruma pe exteriorul unei curbe la STANGA: schimbare de directie {dh:+.0f} deg pe 72 m (negativ = stanga)")
+report(dh < -10.0, f"F carul Gion pe exteriorul unei curbe la STANGA: schimbare de directie {dh:+.0f} deg pe 72 m (negativ = stanga)")
 sel = [i for i in range(tub_i - 14, tub_i) if 35.0 <= math.hypot(rs[i][0] - rs[tub_i][0], rs[i][1] - rs[tub_i][1]) <= 150.0]
 ok = sum(1 for i in sel if abs(azimut_to(i, TUB_XY)) <= 30.0)
 report(len(sel) > 0 and ok / len(sel) >= 0.8,
-       f"F turnul daruma intreg in cadru pe [150,35] m: {ok}/{len(sel)} puncte cu |azimut| <= 30 ({100*ok/max(1,len(sel)):.0f}%, prag 80%)")
+       f"F carul Gion intreg in cadru pe [150,35] m: {ok}/{len(sel)} puncte cu |azimut| <= 30 ({100*ok/max(1,len(sel)):.0f}%, prag 80%)")
 
 all_ok = all(guard_results)
 print(f"\nGARDA DE AZIMUT: {'TOATE TREC' if all_ok else 'CEL PUTIN O LINIE A PICAT'}")
@@ -962,12 +962,12 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="4_branch"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
-[ext_resource type="Script" path="res://scenes/hazards/daruma_otoshi_hazard.gd" id="11_daruma"]
+[ext_resource type="Script" path="res://scenes/hazards/gion_matsuri_hazard.gd" id="11_gion"]
 [ext_resource type="Script" path="res://scenes/props/torii_tunnel.gd" id="12_torii"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_senbon.glb" id="13_senbon"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_large.glb" id="14_large"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
-[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/vehicles/gion_boko.glb" id="12_gion_glb"]
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/hazards/shishimai_hazard.gd" id="18_shishimai"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/shishimai.glb" id="19_shishimai_glb"]
@@ -1086,12 +1086,12 @@ fade = 14.0
 label = "saritura de pe scena Kiyomizu"
 respawn_past_gap = true
 
-[node name="DarumaOtoshi" type="Node3D" parent="Hazarduri"]
+[node name="GionMatsuri" type="Node3D" parent="Hazarduri"]
 transform = {tub_xf}
-script = ExtResource("11_daruma")
+script = ExtResource("11_gion")
 side = 1
 road_half_width = 5.5
-model = ExtResource("12_daruma_glb")
+model = ExtResource("12_gion_glb")
 
 [node name="Kogarashi" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {kog_g[0]:.3f}, {kog_g[1]:.3f}, {kog_g[2]:.3f})

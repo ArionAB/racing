@@ -1320,6 +1320,32 @@ func can_respawn() -> bool:
 	return track != null and _respawn_cooldown <= 0.0 and not finished
 
 
+## Daca masina sta in afara unei benzi deschise (fara poarta) si in afara soselei,
+## la cel mult `BRANCH_FLANK_M` de axa benzii, intoarce (ruta, index) de repunere pe
+## banda; altfel (0, 0). Vezi comentariul din `respawn`.
+const BRANCH_FLANK_M: float = 16.0
+
+func _branch_flank_trap() -> Vector2i:
+	if track == null or track.routes.size() < 2:
+		return Vector2i.ZERO
+	var main_i := track.closest_index_global(global_position, 0)
+	if track.is_on_road(main_i, global_position, 0):
+		return Vector2i.ZERO
+	for bi in range(1, track.routes.size()):
+		var br := track.route_at(bi)
+		if br == null or br.baked.is_empty() or not track.branch_is_open(bi):
+			continue
+		if track.branch_gate(bi) != null:
+			continue
+		var bidx := br.closest_index_global(global_position)
+		if bidx == 0 or br.is_other_level(bidx, global_position):
+			continue
+		var lat := br.lateral_distance(bidx, global_position)
+		if lat > br.half_width and lat < BRANCH_FLANK_M:
+			return Vector2i(bi, bidx)
+	return Vector2i.ZERO
+
+
 func respawn(backoff_m: float = 14.0) -> void:
 	if track == null or _respawn_cooldown > 0.0:
 		return
@@ -1344,6 +1370,18 @@ func respawn(backoff_m: float = 14.0) -> void:
 			if sd < float(gate.gate_dist_m) + 3.0:
 				last_safe_index = track.closest_index_global(gbr.baked[0], 0)
 				last_safe_route = 0
+	# Prinsa PE FLANCUL DE AFARA al unei benzi (peretele palniei tunelului de torii,
+	# Kyoto E'): masina sta intre sosea si peretele benzii, pe cota terenului, fara
+	# niciun checkpoint luat pe banda (`last_safe_route` ramane 0, la furca). Repusa
+	# la furca, aceeasi apropiere (viteza de dupa repunere + coltul taiat spre gura)
+	# o ducea iar pe flanc: 7 repuneri la rand la ~0,49 pe ProbeRace
+	# `--track=11 --seed=5`, ~15 s una. Se repune pe AXA benzii, la 14 m in urma
+	# locului unde a ramas — in palnie, nu in fata ei. Banda inchisa si banda cu
+	# poarta ingustata au regulile lor, mai sus; pistele fara banda: neatinse.
+	var trap := _branch_flank_trap()
+	if trap.x != 0:
+		last_safe_route = trap.x
+		last_safe_index = trap.y
 	global_transform = track.recovery_transform(last_safe_index, backoff_m,
 		last_safe_route)
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei

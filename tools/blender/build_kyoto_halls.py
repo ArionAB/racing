@@ -255,70 +255,99 @@ if __name__ == "__main__" or True:
 def build_kakezukuri_scaffold():
     """`kakezukuri_scaffold.png` -- lista de elemente (inainte de modelare):
 
-    - retea de stalpi patrati de lemn, 3 randuri pe adancime x 4 coloane pe
-      latime, de la sol la punte (~15 m); la sol blocuri-talpa.
-    - 4 niveluri de grinzi orizontale (la 3.5, 6.5, 9.5, 12.5 m), pe ambele
-      directii, ale căror capete ies putin din stalp (bloc intunecat).
-    - sus o punte de scanduri si, pe cele doua laturi lungi, o balustrada
-      (stalpisori + 2 lise); capetele la ±3 m deschise.
-    - Inlantuire: capetele (x = ±3) sunt PLANE: stalpii de capat stau lipiti
-      de plan (jumatatea lor interioara), grinzile si lisele ajung exact la ±3.
-    Cote: 6 m lat, 6 m adanc, 16 m inalt (cu balustrada).
+    - retea de stalpi drepti de lemn deschis: 3 randuri pe adancime x 4
+      coloane pe latime, de la sol la punte (~14,5 m), talpi de piatra.
+    - 4 niveluri de grinzi orizontale (nuki, la 3.5/6.5/9.5/12.5 m), mai
+      inchise la culoare, care TREC CONTINUU prin toti stalpii pe toata
+      latimea modulului si ies ~0,4 m dincolo de stalpii de capat; pe
+      adancime la fel (ies 0,4 m in fata si in spate).
+    - sus o punte de scanduri si, pe laturile lungi, o balustrada.
+    - Inlantuire: stalpii de capat sunt JUMATATI (0,31 m, lipiti de planul
+      x = +-3) deci doua module alaturate dau un stalp intreg 0,62 m; grinzile
+      se suprapun peste cusatura (aceeasi culoare, acelasi profil).
+    Cote: 6 m lat (stalpi/punte), 6 m adanc (+0,8 grinzi), ~16 m inalt.
     """
     b = Builder()
-    L = 3.0                                   # semilatime modul (X)
-    D = 3.0                                   # semiadancime (Y)
+    L = 3.0
+    D = 3.0
     pw = 0.62
     deck_z = 14.5
-    cols = [-L + pw / 2, -L / 3 + 0.0, L / 3, L - pw / 2]
+    POSTS = LARCH_RUST          # stalpi: lemn deschis
+    NUKI = WOOD                 # grinzi: lemn putin mai inchis
     rows = [-D + pw / 2, 0.0, D - pw / 2]
-    # stalpi + talpi
-    for x in cols:
+    cols = [-L + pw / 4, -L / 3, L / 3, L - pw / 4]      # capetele: jumatati
+    for ix, x in enumerate(cols):
+        half = ix in (0, 3)
+        w_ = pw * 0.5 if half else pw
+        xc = x
         for y in rows:
-            b.box((x, y, 0.25), (pw + 0.3 if abs(x) < L - 0.4 else pw, pw + 0.3 if abs(y) < D - 0.4 else pw, 0.5), STONE)
-            b.box((x, y, 0.5 + (deck_z - 0.5) * 0.5), (pw, pw, deck_z - 0.5), TIMBER)
-    # grinzi orizontale
+            b.box((xc, y, 0.25), (w_ + 0.3, pw + 0.3, 0.5), STONE)
+            b.box((xc, y, 0.5 + (deck_z - 0.5) * 0.5), (w_, pw, deck_z - 0.5), POSTS)
     for zb in (3.5, 6.5, 9.5, 12.5):
-        for y in rows:                       # pe X, capete exact la ±L
-            b.box((0, y, zb), (2 * L - 0.06, 0.5, 0.55), BEAM)
-        for x in cols:                       # pe Y, intre randuri
-            b.box((x, 0, zb + 0.05), (0.5, 2 * D - 0.06, 0.55), BEAM)
+        for y in rows:                       # pe X, continue, ies 0,4 m in afara capetelor
+            b.box((0, y, zb), (2 * L + 0.8, 0.78, 0.6), NUKI)
+        for x in cols[1:3]:                  # pe Y, ies 0,4 m in fata/spate
+            b.box((x, 0, zb + 0.05), (0.78, 2 * D + 0.8, 0.6), NUKI)
     # punte
-    b.box((0, 0, deck_z + 0.2), (2 * L, 2 * D, 0.4), TIMBER)
-    b.box((0, 0, deck_z - 0.15), (2 * L, 2 * D - 0.6, 0.3), BEAM)
-    # balustrada pe laturile lungi (X), capete deschise
+    b.box((0, 0, deck_z + 0.2), (2 * L, 2 * D, 0.4), POSTS)
+    b.box((0, 0, deck_z - 0.15), (2 * L, 2 * D - 0.6, 0.3), NUKI)
     rz0 = deck_z + 0.4
     for sy in (-1, 1):
         y = sy * (D - 0.14)
-        b.box((0, y, rz0 + 0.95), (2 * L, 0.14, 0.14), TIMBER)
-        b.box((0, y, rz0 + 0.5), (2 * L, 0.12, 0.12), TIMBER)
+        b.box((0, y, rz0 + 0.95), (2 * L, 0.14, 0.14), POSTS)
+        b.box((0, y, rz0 + 0.5), (2 * L, 0.12, 0.12), POSTS)
         for k in range(5):
             x = -L + 0.09 + (2 * L - 0.18) * k / 4.0
-            b.box((x, y, rz0 + 0.5), (0.18, 0.18, 1.0), TIMBER)
+            b.box((x, y, rz0 + 0.5), (0.18, 0.18, 1.0), POSTS)
     return (b.to_object("Scaffold_Wood"),)
+
+
+def _gable_y(roof, wood, gx, ya, yb, z0, w, rise, zb, ov=0.9, front_ov=1.0):
+    """Acoperis transversal (creasta pe Y) cu fronton triunghiular de lemn la
+    y = yb (spre +Y). Planuri de tigla rotite in jurul lui Y."""
+    th = math.atan2(rise, w)
+    Ls = math.hypot(w, rise) + ov
+    t = 0.35
+    ylen = (yb - ya) + front_ov
+    yc = (ya + yb + front_ov) * 0.5
+    for sx in (-1, 1):
+        mx = gx + sx * (w * 0.5 + 0.2)
+        mz = z0 + rise * 0.5 - 0.2
+        nrm = Vector((sx * math.sin(th), 0, math.cos(th)))
+        c = Vector((mx, yc, mz)) + nrm * (t * 0.5)
+        rot = Matrix.Rotation(sx * th, 3, 'Y')
+        roof.box(c, (Ls, ylen, t), TILE, rotation=rot)
+        c2 = Vector((mx, yc, mz)) - nrm * 0.02
+        roof.box(c2, (Ls - 0.1, ylen + 0.1, 0.12), BEAM, rotation=rot)
+    roof.box((gx, yc, z0 + rise + 0.28), (0.6, ylen + 0.4, 0.5), BEAM)
+    outline = [(gx - w, zb), (gx + w, zb), (gx + w, z0), (gx, z0 + rise), (gx - w, z0)]
+    wood.prism(outline, 0.45, TIMBER, center=(0, yb, 0))
+    # grinda si montanti pe fronton (lemn inchis)
+    wood.box((gx, yb + 0.25, z0 + 0.35), (2 * w, 0.2, 0.3), BEAM)
+    wood.box((gx, yb + 0.25, z0 + rise * 0.35), (0.3, 0.2, rise * 0.7), BEAM)
 
 
 def build_kiyomizu_hondo():
     """`kiyomizu_hondo.png` -- lista de elemente (inainte de modelare):
 
-    - un acoperis mare in patru ape (creasta lunga), gri-inchis, streasina larga
-      si curbata; el domina silueta (~45% din inaltime).
-    - sub el, trupul sălii: pereti albi cu stalpi bruni, in mijloc 3 travee
-      deschise (intunecate, shoji); veranda de lemn pe tot perimetrul, la
-      ~3,8 m, ridicata pe piloni (stilts) cu grinzi de legatura.
-    - fata (+Y): o scara de lemn lata, cu balustrade inclinate, coboara din
-      veranda in stanga; balustrada pe veranda, goala la scara; stalpi de
-      streasina pe marginea verandei.
-    - in dreapta, fata: un portic mic cu acoperis propriu in patru ape; in
-      stanga o anexa joasa cu acoperis mic.
-    Cote: ~30 lat, ~21 adanc, ~14 inalt (cu veranda pe piloni).
+    - acoperis principal MARE si abrupt (ridica ~7 m), concav pronuntat, coama
+      inalta si lunga, gri-inchis; domina silueta.
+    - la dreapta-fata un ACOPERIS TRANSVERSAL cu fronton triunghiular de lemn
+      spre fata, deasupra unui portic pe verandă; la mijloc-fata un FRONTON
+      MAI MIC pe acoperisul principal.
+    - in stanga un acoperis-fusta mai jos (anexa), jur-imprejur streasina.
+    - fatada: pereti ALBI cu stalpi bruni, 3 travee deschise intunecate la
+      mijloc, peretii aproape de marginea verandei (vizibili sub streasina).
+    - veranda de lemn pe piloni, balustrada; SCARA LATA (~1/3 din fatada) si
+      joasa in stanga, cu trepte late.
+    Cote: ~30 lat, ~21 adanc, ~14 inalt.
     """
     wood, roof, plaster = Builder(), Builder(), Builder()
-    zd = 3.0                          # cota verandei
-    bx, by0, by1 = 11.0, -7.0, 4.4    # trupul: x +-12, y de la by0 la by1
-    vx, vy0, vy1 = 12.6, -8.4, 5.6    # veranda
-    ze, rise = 7.9, 5.6
-    # piloni sub veranda + grinzi de legatura
+    zd = 3.0
+    bx, by0, by1 = 10.8, -7.0, 5.0       # trupul
+    vx, vy0, vy1 = 12.4, -8.4, 6.0       # veranda
+    cy_v = (vy0 + vy1) * 0.5
+    # piloni sub veranda + grinzi
     xs = [-vx + 0.4 + k * (2 * vx - 0.8) / 8 for k in range(9)]
     ys = [vy0 + 0.4, -4.5, -1.0, 2.5, vy1 - 0.4]
     for x in xs:
@@ -329,89 +358,100 @@ def build_kiyomizu_hondo():
         for y in ys:
             wood.box((0, y, zb), (2 * vx - 0.4, 0.34, 0.4), BEAM)
         for x in xs:
-            wood.box((x, (vy0 + vy1) * 0.5, zb), (0.34, vy1 - vy0 - 0.4, 0.4), BEAM)
-    # puntea verandei
-    wood.box((0, (vy0 + vy1) * 0.5, zd - 0.2), (2 * vx, vy1 - vy0, 0.4), TIMBER)
-    frame_ring(wood, 0, (vy0 + vy1) * 0.5, zd - 0.75, vx - 0.1,
-               (vy1 - vy0) * 0.5 - 0.1, 0.5, 0.45, BEAM)
-    # balustrada verandei (goala la scara, x in [-7.6, -2.4])
-    cy_v = (vy0 + vy1) * 0.5
-    wood.railing((-vx + 0.15, vy0 + 0.15, zd), (vx - 0.15, vy0 + 0.15, zd), 1.0, 1.4, 0.2, 0.16, TIMBER)
-    wood.railing((-vx + 0.15, vy0 + 0.15, zd), (-vx + 0.15, vy1 - 0.15, zd), 1.0, 1.4, 0.2, 0.16, TIMBER)
-    wood.railing((vx - 0.15, vy0 + 0.15, zd), (vx - 0.15, vy1 - 0.15, zd), 1.0, 1.4, 0.2, 0.16, TIMBER)
-    wood.railing((vx - 0.15, vy1 - 0.15, zd), (-1.2, vy1 - 0.15, zd), 1.0, 1.4, 0.2, 0.16, TIMBER)
-    wood.railing((-7.8, vy1 - 0.15, zd), (-vx + 0.15, vy1 - 0.15, zd), 1.0, 1.4, 0.2, 0.16, TIMBER)
-    # trupul: pereti albi, stalpi, travee deschise in mijloc (fata)
-    wh = ze - 0.4 - zd
+            wood.box((x, cy_v, zb), (0.34, vy1 - vy0 - 0.4, 0.4), BEAM)
+    wood.box((0, cy_v, zd - 0.2), (2 * vx, vy1 - vy0, 0.4), TIMBER)
+    frame_ring(wood, 0, cy_v, zd - 0.75, vx - 0.1, (vy1 - vy0) * 0.5 - 0.1, 0.5, 0.45, BEAM)
+    # portic dreapta-fata: platforma extinsa + piloni
+    pxc, pw_ = 7.0, 4.9
+    wood.box((pxc, 7.7, zd - 0.2), (2 * pw_, 3.4, 0.4), TIMBER)
+    for dx in (-pw_ + 0.4, 0.0, pw_ - 0.4):
+        wood.box((pxc + dx, 9.1, zd * 0.5 - 0.1), (0.6, 0.6, zd - 0.2), TIMBER)
+        wood.box((pxc + dx, 9.1, 0.2), (0.95, 0.95, 0.4), STONE)
+    # balustrade veranda (golita la scara si la portic)
+    st_x0, st_x1 = -9.9, -1.1
+    R = dict(height=1.0, post_step=1.4, post_t=0.2, rail_t=0.16, slot=TIMBER)
+
+    def rail(p1, p2):
+        wood.railing(p1, p2, R["height"], R["post_step"], R["post_t"], R["rail_t"], R["slot"])
+
+    rail((-vx + 0.15, vy0 + 0.15, zd), (vx - 0.15, vy0 + 0.15, zd))
+    rail((-vx + 0.15, vy0 + 0.15, zd), (-vx + 0.15, vy1 - 0.15, zd))
+    rail((vx - 0.15, vy0 + 0.15, zd), (vx - 0.15, vy1 - 0.15, zd))
+    rail((st_x0 - 0.0, vy1 - 0.15, zd), (-vx + 0.15, vy1 - 0.15, zd))
+    rail((st_x1, vy1 - 0.15, zd), (2.0, vy1 - 0.15, zd))
+    rail((pxc + pw_ - 0.15, vy1 - 0.15, zd), (pxc + pw_ - 0.15, 9.3, zd))
+    rail((pxc + pw_ - 0.15, 9.3, zd), (pxc - pw_ + 0.15, 9.3, zd))
+    rail((pxc - pw_ + 0.15, 9.3, zd), (pxc - pw_ + 0.15, vy1 - 0.15, zd))
+    # trupul: pereti albi in plan avansat, stalpi bruni
+    ze = 7.0
+    wh = ze - 0.2 - zd
     plaster.box((0, (by0 + by1) * 0.5, zd + wh * 0.5), (2 * bx, by1 - by0, wh), PLASTER)
-    wood.box((0, (by0 + by1) * 0.5, zd + 0.15), (2 * bx + 0.5, by1 - by0 + 0.5, 0.3), BEAM)   # talpa
-    wood.box((0, (by0 + by1) * 0.5, zd + wh - 0.2), (2 * bx + 0.7, by1 - by0 + 0.7, 0.4), BEAM)  # centura
-    nb = 10
+    wood.box((0, (by0 + by1) * 0.5, zd + 0.15), (2 * bx + 0.5, by1 - by0 + 0.5, 0.3), BEAM)
+    wood.box((0, (by0 + by1) * 0.5, zd + wh - 0.2), (2 * bx + 0.7, by1 - by0 + 0.7, 0.4), BEAM)
+    wood.box((0, (by0 + by1) * 0.5, zd + wh * 0.5 + 0.2), (2 * bx + 0.5, by1 - by0 + 0.5, 0.25), BEAM)   # brau median
+    nb = 9
     for k in range(nb + 1):
         x = -bx + 2 * bx * k / nb
-        wood.box((x, by1 + 0.05, zd + wh * 0.5), (0.5, 0.4, wh), TIMBER)
-        wood.box((x, by0 - 0.05, zd + wh * 0.5), (0.5, 0.4, wh), TIMBER)
+        wood.box((x, by1 + 0.05, zd + wh * 0.5), (0.55, 0.45, wh), TIMBER)
+        wood.box((x, by0 - 0.05, zd + wh * 0.5), (0.55, 0.45, wh), TIMBER)
     for y in (by0, -2.0, by1):
         for sx in (-1, 1):
-            wood.box((sx * (bx + 0.05), y, zd + wh * 0.5), (0.4, 0.5, wh), TIMBER)
-    # 3 travee deschise la mijloc (fata): gol intunecat + rama
+            wood.box((sx * (bx + 0.05), y, zd + wh * 0.5), (0.45, 0.55, wh), TIMBER)
+    # 3 travee deschise la mijloc (fata)
     for k in (-1, 0, 1):
-        x = k * 2.4
-        wood.box((x, by1 + 0.12, zd + wh * 0.45), (1.9, 0.14, wh * 0.78), BEAM)
-        wood.box((x, by1 + 0.2, zd + wh * 0.45), (0.1, 0.12, wh * 0.78), TIMBER)
-    # feronerii laterale: ferestre pe laturi
+        wood.box((k * 2.4, by1 + 0.12, zd + wh * 0.42), (1.8, 0.14, wh * 0.72), BEAM)
+        wood.box((k * 2.4, by1 + 0.2, zd + wh * 0.42), (0.1, 0.12, wh * 0.72), TIMBER)
     for sx in (-1, 1):
         for y in (-5.0, 1.0):
             wood.box((sx * (bx + 0.12), y, zd + wh * 0.5), (0.12, 2.0, wh * 0.6), BEAM)
-    # stalpi de streasina pe marginea verandei (liberi la scara)
+    # stalpi de streasina pe marginea verandei
     for x in xs:
-        if -7.8 < x < -1.2:
+        if st_x0 - 0.2 < x < st_x1 + 0.2 or x > pxc - pw_ - 0.2:
             continue
-        wood.box((x, vy1 - 0.45, zd + (ze - 0.9 - zd) * 0.5), (0.55, 0.55, ze - 0.9 - zd), VERM if False else TIMBER)
+        wood.box((x, vy1 - 0.3, zd + (ze - 0.9 - zd) * 0.5), (0.5, 0.5, ze - 0.9 - zd), TIMBER)
     for y in (-4.5, -1.0, 2.5):
         for sx in (-1, 1):
-            wood.box((sx * (vx - 0.45), y, zd + (ze - 0.9 - zd) * 0.5), (0.55, 0.55, ze - 0.9 - zd), TIMBER)
-    # console sub streasina
-    frame_ring(wood, 0, -1.5, ze - 1.0, vx + 0.4, 9.1, 0.4, 0.55, BEAM)
-    frame_ring(wood, 0, -1.5, ze - 0.55, vx + 1.1, 9.1 + 0.4, 0.3, 0.55, BEAM)
-    # scara de lemn (la stanga, coboara spre +Y)
-    sxc, sw, n = -4.5, 6.6, 12
-    run, rise_s = 0.42, zd / 12
+            wood.box((sx * (vx - 0.35), y, zd + (ze - 0.9 - zd) * 0.5), (0.5, 0.5, ze - 0.9 - zd), TIMBER)
+    # console sub streasina principala
+    frame_ring(wood, 0, -1.5, ze - 0.95, bx + 1.4, 8.4, 0.4, 0.55, BEAM)
+    frame_ring(wood, 0, -1.5, ze - 0.5, bx + 2.0, 8.9, 0.3, 0.55, BEAM)
+    # scara LATA si joasa (cu palier jos)
+    sxc, sw, n = -5.5, 8.4, 10
+    run, rise_s = 0.45, zd / 10
     for i in range(n):
         top = zd - (i + 1) * rise_s + 0.02
         wood.box((sxc, vy1 + (i + 0.5) * run, top * 0.5), (sw, run, max(top, 0.05)), TIMBER)
     y_end = vy1 + n * run
+    wood.box((sxc, y_end + 0.6, 0.1), (sw, 1.2, 0.2), STONE)                  # palier
     for sx in (-1, 1):
         x = sxc + sx * (sw * 0.5 + 0.1)
         wood.beam((x, vy1, zd + 1.0), (x, y_end, 1.0), 0.2, TIMBER)
         wood.beam((x, vy1, zd + 0.55), (x, y_end, 0.55), 0.15, TIMBER)
-        for k in range(0, n + 1, 3):
+        for k in range(0, n + 1, 2):
             yk = vy1 + k * run
             zk = zd - k * rise_s
             wood.box((x, yk, zk * 0.5 + 0.5), (0.2, 0.2, zk + 1.0), TIMBER)
-        wood.box((x, vy1, zd * 0.5), (0.35, 0.35, zd), TIMBER)
-    # acoperisul principal
-    hip_roof(roof, 0, -1.5, ze, 14.2, 8.8, rise, TILE, ridge_half=7.4, lift=1.2,
-             thick=0.3, fascia_slot=BEAM, tile_step=0.85, rib=0.06, sag=1.9, swell=0.3)
-    top = ze + rise
-    roof.box((0, -1.5, top + 0.1), (2 * 7.4 + 1.0, 0.6, 0.5), BEAM)
+    # acoperisul principal: mare, abrupt, concav
+    ze_r, rise = 7.0, 6.4
+    hip_roof(roof, 0, -1.5, ze_r, 13.0, 8.5, rise, TILE, ridge_half=6.2, lift=1.5,
+             thick=0.3, fascia_slot=BEAM, tile_step=0.85, rib=0.06, sag=2.5, swell=0.4)
+    top = ze_r + rise
+    roof.box((0, -1.5, top + 0.1), (2 * 6.2 + 1.0, 0.6, 0.5), BEAM)
     for sx in (-1, 1):
-        roof.box((sx * 7.9, -1.5, top + 0.4), (0.5, 0.7, 0.7), BEAM)
-    # portic mic in dreapta, fata
-    px, py = 7.4, 3.2
-    ze2 = 6.3
-    for dx in (-3.0, 3.0):
-        for dy in (-2.2, 2.2):
-            wood.box((px + dx, py + dy + 1.0, zd + (ze2 - 0.7 - zd) * 0.5), (0.5, 0.5, ze2 - 0.7 - zd), TIMBER)
-    wood.box((px, py + 1.0, ze2 - 0.9), (6.6, 4.8, 0.4), BEAM)
-    hip_roof(roof, px, py + 1.0, ze2, 4.3, 3.3, 2.7, TILE, ridge_half=1.6, lift=0.7,
-             thick=0.25, fascia_slot=BEAM, tile_step=0.8, rib=0.05, sag=1.8, swell=0.2)
-    # anexa joasa in stanga
-    ax, ay = -12.9, 1.5
-    wood.box((ax, ay, zd + 1.0), (3.4, 4.2, 2.0), BEAM)
-    plaster.box((ax, ay, zd + 1.2), (3.2, 4.0, 2.4), PLASTER)
-    hip_roof(roof, ax, ay, 5.0, 3.5, 3.1, 1.7, TILE, ridge_half=1.0, lift=0.6,
-             thick=0.25, fascia_slot=BEAM, tile_step=0.8, rib=0.05, sag=1.8, swell=0.2)
+        roof.box((sx * 6.7, -1.5, top + 0.45), (0.5, 0.7, 0.8), BEAM)
+    # acoperis transversal cu fronton (dreapta-fata) deasupra porticului
+    for dx in (-pw_ + 0.3, pw_ - 0.3):
+        wood.box((pxc + dx, 9.1, zd + (6.2 - zd) * 0.5), (0.5, 0.5, 6.2 - zd), TIMBER)
+    wood.box((pxc, 9.1, 6.0), (2 * pw_, 0.5, 0.4), BEAM)
+    _gable_y(roof, wood, pxc, 0.0, 9.1, 6.4, pw_ - 0.2, 3.7, 5.3, front_ov=0.9)
+    # fronton mai mic pe acoperisul principal, la mijloc-fata
+    _gable_y(roof, wood, -0.5, 0.5, 6.6, 8.3, 2.5, 2.1, 7.4, front_ov=0.7)
+    # anexa joasa (acoperis-fusta) in stanga
+    ax, ay = -13.6, -1.5
+    plaster.box((ax, ay, zd + 1.3), (3.4, 6.0, 2.6), PLASTER)
+    wood.box((ax, ay, zd + 0.2), (3.8, 6.4, 0.4), BEAM)
+    hip_roof(roof, ax, ay, 5.4, 4.6, 5.4, 2.4, TILE, ridge_half=1.0, lift=0.9,
+             thick=0.25, fascia_slot=BEAM, tile_step=0.8, rib=0.05, sag=2.0, swell=0.3)
     return (wood.to_object("Hondo_Wood"), roof.to_object("Hondo_Roof"),
             plaster.to_object("Hondo_Plaster"))
 

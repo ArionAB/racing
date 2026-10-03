@@ -105,29 +105,27 @@ ciorchini. Vocabular nou: `kyoto_shapes.leaf_blob`.
   `… -- preview_kyoto.py -- --compare yasaka_pagoda` (cu `mkdir
   D:/GameDev/.render_lock` înainte, `rmdir` după).
 
-# Grupa halls (`build_kyoto_halls.py`, kit §1.3)
+# Grupa halls (`build_kyoto_halls.py`, kit §1.3) -- runda 2 (dupa verdictul „pica pe forma")
 
-Unealta noua: `tools/blender/measure_gap.py <glb> [--band=0.15,2.0] [--need=h]` —
-golul de trecere ca GOL (proiectie pe planul transversal, rasterizata la 5 cm,
-transformarile nodurilor aplicate), nu AABB.
+Unealta: `tools/blender/measure_gap.py <glb> [--band=0.15,2.0] [--need=h]` -- golul
+de trecere ca GOL (proiectie pe planul transversal, 5 cm, transformarile
+nodurilor aplicate), nu AABB. Comparatii: `docs/asset_briefs/img/kyoto_fidelity/<nume>.png`
+(+ `<nume>_views.png`; schela: `kakezukuri_scaffold_chain.png`).
 
-## `structures/niomon_gate.glb` (runda 3)
-- **Triunghiuri:** 3 738 (`Gate_Wood` 2 796, `Gate_Roof` 882, `Gate_Plaster` 60). Noduri: `Gate_Wood` (`LAVA_ORANGE`, `LOG_DARK`, `WOOD`, `CONCRETE` socluri), `Gate_Roof` (`VOLCANIC_BLACK` + `LOG_DARK`), `Gate_Plaster` (`FOAM_WHITE`).
-- **Cote:** 20,9 lat x 13,1 adanc x 13,55 inalt. **Contract inghetat (masurat ca GOL, banda 0,15–2,0 m): gol liber 11,80 m (x −5,90…+5,90), inaltime libera minima 4,10 m peste tot golul.** Directia de mers = Y Blender (−Z Godot); golul e centrat pe x = 0. Stalpii laterali (cate 2 pe adancime, x = ±6,6 si ±8,7) pot fi solizi; nimic nu intra in banda golului sub 4,1 m.
-## `structures/inari_romon.glb` (runda 3)
-- **Triunghiuri:** 3 218. Aceleasi noduri. **Cote:** 18,5 x 11,7 x 12,65 m. **Contract inghetat: gol 11,50 m (x ±5,75), inaltime libera minima 3,80 m.**
-- Diferit de Niomon (nu e copie): galerie doar fata/spate, etaj mai ingust si mai inalt, 4 ferestre vs 3, creasta scurta (3 m vs 5 m), panta mai abrupta, stalpi mai scurti, fara usa cu zabrele laterala.
-- **Fidelitate (ambele), runda 3:** OK: 2 etaje, acoperis gri 4 ape cu streasina curbata, galerie cu balustrada vermilion, ferestre intunecate, panouri albe in travee, gol larg, socluri de piatra, culori pe zone. **Abateri:** fara fronton (irimoya) vizibil pe latura, acoperisul e yosemune simplu; consolele sub streasina sunt mai rare si mai simple decat „ciorchinii" de pe planșă; travee laterale mai usoare decat masivele de pe planșă; Romon: o „ureche" de arete in dreapta acoperisului (artefact de colt cu creasta scurta); inaltimea Niomon 13,55 vs 13 (ornamentele de creasta).
-- Comparatii: `img/kyoto_fidelity/niomon_gate.png`, `inari_romon.png` (+ `_views`).
-
-## `structures/kakezukuri_scaffold.glb` (runda 3)
-- **Triunghiuri:** 816 (un nod `Scaffold_Wood`: `WOOD` stalpi/punte/balustrada, `LOG_DARK` grinzi, `CONCRETE` talpi). **Cote:** 6,00 x 6,00 x 15,92 m, origine la baza, centrat. Capetele la x = ±3 sunt plane (stalpii de capat lipiti de plan, grinzile 5 cm mai scurte, ascunse in stalp); 3 module alaturate la pas 6 m se imbina: `img/kyoto_fidelity/kakezukuri_scaffold_chain.png` (balustrada continua, punte continua; la cusatura stalpii se dubleaza — 2 x 0,62 m).
-- Fidelitate: 3 randuri x 4 coloane de stalpi, 4 niveluri de grinzi pe ambele directii, punte cu balustrada pe laturile lungi: OK. **Abateri:** stalpii sunt patrati si drepti (planșa: rotunji, cu capete de consola curbate si grinzi care ies in afara stalpilor); grinzile stau inapoiate intre stalpi (citite doar ca bare intunecate), nu ies; fara bratari/diagonale; planșa are modulul lung si adanc ~2:1, aici 1:1 (cerinta de repetare).
-
-## `structures/kiyomizu_hondo.glb` (runda 3)
-- **Triunghiuri:** 5 398 (`Hondo_Wood` 3 408, `Hondo_Roof` 1 966, `Hondo_Plaster` 24). **Cote:** 31,1 lat x 21,7 adanc x 14,3 inalt (veranda la 3,0 m pe 45 piloni). Fata bogata pe +Y: veranda cu balustrada, scara de lemn lata (6,6 m, 12 trepte) in stanga, 3 travee deschise la mijloc, portic mic cu acoperis propriu in dreapta, anexa joasa in stanga; spatele: veranda + peretii simpli.
-- Fidelitate: acoperis mare 4 ape inchis la culoare dominand silueta, veranda pe piloni, scara, pereti albi cu stalpi, portic: OK ca ansamblu. **Abateri:** lipsesc frontoanele (karahafu/irimoya cu fronton lemnos in V) si acoperisul transversal din dreapta fata, deci silueta e mai simpla (un singur acoperis mare + 2 mici); acoperisul principal e mai turtit decat pe planșă; scara e mai ingusta si mai abrupta decat treptele late cu palier; pereti albi prea putin vizibili de sub streasina (plasterul apare gri-albastrui); balustrada verandei mai subtire.
-- Comparatie: `img/kyoto_fidelity/kiyomizu_hondo.png` (+ `_views`).
+## `structures/niomon_gate.glb` (runda 2)
+- 6 322 tri (`Gate_Wood`, `Gate_Roof`, `Gate_Plaster`), 28,5 lat x 13,3 adanc x 13,75 inalt (poarta latita, traveile laterale de ~6 m inchise).
+- Parter: stalpi grosi (1,0 m) vermilion pe socluri, a treia linie de stalpi in fiecare travee, grinzi orizontale, panouri ALBE jos si sus, panou alb pe latura. Etaj 2 mai inalt: galerie cu balustrada pe 4 laturi, trup alb cu stalpi si ferestre; banda densa de console vermilion cu accente albe. Acoperis irimoya: hip jos cu streasina curbata + acoperis superior cu FRONTON vermilion pe laturile scurte.
+- **Contract inghetat (remasurat ca GOL): gol liber 11,80 m (x −5,90…+5,90), inaltime libera minima 4,10 m.**
+## `structures/inari_romon.glb` (runda 2)
+- 5 874 tri, 26,9 x 11,9 x 13,05 m. Diferit de Niomon: galerie doar fata/spate, etaj mai ingust, 4 ferestre, coama mai scurta, stalpi mai scurti, fara usa laterala cu zabrele.
+- **Contract inghetat: gol 11,50 m (x ±5,75), inaltime libera minima 3,80 m.**
+- Abateri ambele: frontonul e un pentagon plin, planurile superioare drepte (fara curbura), consolele sunt blocuri nu ciorchini; h/l ~0,47-0,48 fata de ~0,6-0,65 pe planșa (efect al latirii cerute pentru traveile laterale).
+## `structures/kakezukuri_scaffold.glb` (runda 2)
+- 720 tri, 6,8 x 6,8 x 15,92 m (stalpii/puntea 6,0 x 6,0; grinzile ies 0,4 m in toate directiile). Stalpi drepti (`LARCH_RUST`, mai deschis), 4 niveluri de grinzi `WOOD` (mai inchis) CONTINUE prin toti stalpii pe toata latimea si iesind 0,4 m; stalpii de capat sunt jumatati (0,31 m), doua module dau un stalp intreg. Lant de 3: grinzile se continua peste cusaturi.
+- Nota: capetele nu mai sunt strict plane in grinzi (ies 0,4 m, suprapunere identica cu vecinul); AABB-ul modulului e 6,8 pe X, deci placerul pune pasul la 6,0.
+## `structures/kiyomizu_hondo.glb` (runda 2)
+- 5 372 tri, 31,9 x 22,1 x 14,3 m. Acoperis principal abrupt (rise 6,4, sag 2,5), coama inalta; ACOPERIS TRANSVERSAL cu fronton de lemn triunghiular dreapta-fata deasupra unui portic, fronton mai mic pe mijloc-fata, anexa-fusta in stanga; pereti albi adusi in planul verandei (vizibili); veranda pe 45 piloni; SCARA LATA (8,4 m, 10 trepte joase, palier).
+- Abateri: frontoanele sunt mai simple (fara curbura karahafu); acoperisul transversal intra in cel principal fara racordare; anexa din stanga e un singur hip, nu un inel de fuste; scara fara balustrade pe palier.
 
 ## Stare la oprire (halls)
-- Facut: niomon_gate, inari_romon, kakezukuri_scaffold, kiyomizu_hondo (toate verify OK, 3 runde fiecare). Grupa completa; verdictul de fidelitate e al coordonatorului.
+- Facut: toate 4, runda 2 dupa verdictul coordonatorului. Verify OK (buget gates ridicat la 6400/6000 pentru geometria noua). Verdictul de fidelitate e al coordonatorului.

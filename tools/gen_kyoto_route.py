@@ -675,12 +675,12 @@ if len(sys.argv) > 1:
            max_below_road_m=3.0, seed=11 + int(f * 1000))
     # C / C2: versantul Higashiyama si rapa de sub scena (artari rosii densi).
     fz("rapa C artari", 0, MAPLES, (0.36, 0.34, 0.30), frac_from=F["C1 inainte de colt"],
-       frac_to=F["D aterizare coborare"], lat_min=9.0, lat_max=72.0, spacing=5.0, seed=21)
+       frac_to=F["D aterizare coborare"], lat_min=9.0, lat_max=72.0, spacing=5.0, edge_clear_m=10.5, seed=21)
     fz("versant Higashiyama", 1, MAPLES, (0.34, 0.33, 0.33), center=(372.0, 0.0, -150.0),
        radius=88.0, spacing=7.0, seed=22)
     # D: valea de artari (cea mai deasa), pana la gura podului si sub el.
     fz("valea D artari", 0, MAPLES, (0.36, 0.30, 0.34), frac_from=F["D aterizare coborare"],
-       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=4.6, seed=31)
+       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=4.6, edge_clear_m=10.5, seed=31)
     # E: muntele Inari, cedru inchis, cu cate un artar rosu printre ei.
     fz("Inari cedru fasie", 0, ("cedar_dark", "momiji_b"), (0.88, 0.12),
        frac_from=F["E arc intrare (E' se desprinde)"] - 0.008,

@@ -373,3 +373,30 @@ Contracte înghețate: gard pe Y cu capete plane; piese multi-nod (`Rock_*`, `Ro
 6,27 x 5,17 x 9,04 m, h/l 1,44). Buget verify: 300 / 2 500. Abatere: nu exista slot lime in atlas;
 frunzele sunt `CACTUS_GREEN` (cel mai deschis verde), 3 evantaie de varf `DRY_VEGETATION` (cel mai aproape in RGB,
 dar galben-ocru): lime-ul decuparii trebuie dat de o clasa/tenta pe `Bamboo_Leaves` la integrare.
+
+# Inventar assets — Kyoto, grupa F: templele (`build_kyoto_shrine.py`)
+
+Contract: `kyoto_kit.md` §1.7. Verdict kit: `bash tools/blender/verify_kyoto.sh` -> `VERDICT KIT: OK` (13/13 GLB, 3 oct 2026).
+Reguli aplicate: unde contractul contrazice decuparea castiga decuparea (exceptie: cote de gabarit); tigla gri = `ASPHALT_EDGE` 6; lemn deschis `WOOD` vs inchis `LOG_DARK`; kasagi/baze negre = `ASPHALT` 5 (decuparea e neagra, `LOG_DARK` iese maro).
+Comparatii: `docs/asset_briefs/img/kyoto_fidelity/<nume>.png`; planse de grup langa randurile din inventar: `grup_templele_A_cu_inventar.png` (randurile 3-4), `grup_templele_B_cu_inventar.png` (randul 7); `cyclopean_wall_chain.png` (3 module cap la cap).
+
+| piesa | tri | cote masurate (L x A x H, m) | noduri | h/l decupare -> randare | verdict |
+|---|---:|---|---|---|---|
+| `structures/votive_torii_cluster` | 1 960 | 11,5 x 1,14 x 4,26 | `Torii_Wood`, `Torii_Black` | ~0,39 -> ~0,37 | OK. 7 porti (decuparea arata 7, contractul 6), 4,2 -> 1,25 m, sirul spre -X (randat din az 72). Kasagi ceva mai subtire decat pe decupare |
+| `props/stone_lantern_a` | 380 | 1,28 x 1,28 x 2,37 | `Lantern_Stone`, `Lantern_Window` | 1,6 -> ~1,85 | Abatere: fus drept-conic, decuparea il are cu talie; roata de sus plata, fara ghizduri |
+| `props/stone_lantern_b` | 380 | 1,28 x 1,28 x 1,89 | idem | 1,1 -> ~1,5 | Abatere: ~0,2 m mai inalt decat contractul 1,7 (soclul tronconic gros din decupare); acoperis mai lat decat pe desen |
+| `props/yukimi_lantern` | 376 | 1,08 x 1,08 x 1,38 | idem | 1,17 -> ~1,28 | Abatere: arcada e un gol dreptunghiular (decuparea: arc rotunjit); talie fara profil |
+| `props/kitsune_statue_a` / `_b` | 438 | 1,48 x 1,14 x 2,04 | `Fox_Body`, `Fox_Bib` (`CAR_RED`), `Fox_Stone` | 1,2 -> ~1,4 | Abatere: gabarit 1,48 x 1,14 fata de contractul 0,9 x 0,9 (soclul larg din decupare); vulpea e mai unghiulara/zvelta decat desenul, bavetele par barba din fata; cheia in gura OMISA (optionala, nu apare pe decupari). a: capul spre dreapta, coada stanga; b: oglindit |
+| `structures/small_shrine` | 1 204 | 3,40 x 2,78 x 3,59 | `Shrine_Wood`, `Shrine_Roof`, `Shrine_Stone` | 1,13 -> ~1,15 | Abatere: acoperis in doua ape cu frontoane vermilion pline (decuparea: frontoane cu cadru si console), soclul din blocuri plate, nu bolovani rotunjiti; ~0,15 m peste 3,4 |
+| `props/ema_rack` | 1 252 | 3,50 x 0,78 x 2,28 | `Ema_Wood`, `Ema_Rails`, `Ema_Roof`, `Ema_Plaques` | 0,88 -> ~0,8 | OK. 4 randuri x 6 placute goale (decuparea; contractul 3x4). Placutele nu se suprapun ca pe desen |
+| `structures/bell_tower` | 1 130 | 6,90 x 5,52 x 6,08 | `Bell_Wood`, `Bell_Beams`, `Bell_Roof`, `Bell_Bronze` (`TROPICAL_GREEN`), `Bell_Stone` | 0,82 -> ~0,85 | Abatere: gabarit stalpi 4,5 m / acoperis 6,9 (contract 5 x 5; decuparea cere acoperis mai lat decat stalpii); clopot verde prea viu |
+| `props/chozuya` | 800 | 3,44 x 2,38 x 3,26 | `Choz_Wood`, `Choz_Beams`, `Choz_Roof`, `Choz_Stone`, `Choz_Ladles` | 0,76 -> ~0,8 | OK ca siluet; abatere: 3,26 m fata de 2,8 (acoperis mai inalt ca pe decupare); bazinul e mai deschis si mai scund |
+| `structures/cyclopean_wall` (runda 5-6, dupa verdictul coordonatorului) | 2 816 | 8,00 x 2,64 x 4,18 | `Cyc_Stone`, `Cyc_Moss` | 0,52 -> ~0,5 | Pietre gri (`MARBLE_GREY`), poligonale, imbinate strans, 4 randuri + rand de lespezi sus (5 total), muschi in rosturi (fasii orizontale, limbi verticale, limbi pe capac). Abatere: pietrele raman mai plate/uniforme decat desenul, rosturile inca lasa vizibil miezul inchis (`ASPHALT_EDGE`) in cateva locuri, umbrire cu mici denivelari unde pietrele se suprapun |
+
+Contracte inghetate: toate piesele cu origine la baza, centrata (`--origin=assembly`), fata spre +Y Blender; sirul de torii se intinde spre -X; zidul are capetele plane la x = +-4; musch doar in `Cyc_Moss`.
+
+Ambiguitati de contract: (1) numarul de torii (6 vs 7 pe decupare), (2) gabaritele vulpilor/clopotnitei (0,9/5 m) contrazic proportia de pe decupare, (3) `kasagi` negru: contractul zice `LOG_DARK`, decuparea e neagra (folosit `ASPHALT`).
+
+## Stare la oprire (grupa F)
+
+Toate cele 11 fisiere (+ perechile a/b) sunt livrate, cu verify OK si comparatii; 4 runde pe zid, 3-4 pe restul. Nerezolvat: bolovani rotunjiti si profil cu talie la felinare, frontoane cu cadru la altarel, cheia vulpii. Comenzi: build `-- build_kyoto_shrine.py`; comparatie `-- preview_kyoto.py -- --compare <nume>`; grup `-- preview_kyoto_shrine_group.py -- --group A|B`, apoi `python tools/blender/compose_kyoto_group.py --render ... --row 316,443 --out ...`.

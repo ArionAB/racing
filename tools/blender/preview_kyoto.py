@@ -143,6 +143,30 @@ SPECS = {
                   "camera": {"azimuth": 125.0, "elevation": 4.0, "lens": 70.0, "margin": 1.1}},
     "bamboo_crown": {"category": "plants",
                      "camera": {"azimuth": 125.0, "elevation": 10.0, "lens": 70.0, "margin": 1.1}},
+
+    # --- val F: templele (build_kyoto_shrine.py) ---
+    "votive_torii_cluster": {"category": "structures",
+                             "camera": {"azimuth": 72.0, "elevation": 8.0, "lens": 70.0, "margin": 1.08}},
+    "kitsune_statue_a": {"category": "props",
+                         "camera": {"azimuth": 105.0, "elevation": 10.0, "lens": 90.0, "margin": 1.1}},
+    "kitsune_statue_b": {"category": "props",
+                         "camera": {"azimuth": 75.0, "elevation": 10.0, "lens": 90.0, "margin": 1.1}},
+    "stone_lantern_a": {"category": "props",
+                        "camera": {"azimuth": 125.0, "elevation": 10.0, "lens": 90.0, "margin": 1.1}},
+    "stone_lantern_b": {"category": "props",
+                        "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 90.0, "margin": 1.1}},
+    "yukimi_lantern": {"category": "props",
+                       "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 90.0, "margin": 1.1}},
+    "small_shrine": {"category": "structures",
+                     "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 80.0, "margin": 1.1}},
+    "ema_rack": {"category": "props",
+                 "camera": {"azimuth": 105.0, "elevation": 12.0, "lens": 80.0, "margin": 1.1}},
+    "bell_tower": {"category": "structures",
+                   "camera": {"azimuth": 28.0, "elevation": 10.0, "lens": 70.0, "margin": 1.08}},
+    "chozuya": {"category": "props",
+                "camera": {"azimuth": 125.0, "elevation": 14.0, "lens": 80.0, "margin": 1.1}},
+    "cyclopean_wall": {"category": "structures",
+                       "camera": {"azimuth": 60.0, "elevation": 14.0, "lens": 70.0, "margin": 1.08}},
 }
 
 

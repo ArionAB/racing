@@ -321,3 +321,22 @@ Ansamblu langa `yasaka_pagoda`: `horizon_overview.png`. Comparatiile sunt randat
 **Stare la oprire:** toate 4 noduri livrate, verify OK, comparatii si views facute; preview: spec-uri `horizon_*` in `preview_kyoto.py` (cheia `only` filtreaza nodul).
 
 **Runda 2 (verdictul coordonatorului):** Higashiyama A/B colorate pe 8 PETE MARI contigue (o culoare per pata, baza cedru ~50%, margine cu 1 fata din 4 pe verde), nu pe triunghi; FarRoofs_A refacut cu 3 randuri decalate lipite, streasini +0,5 m in X si +0,9 m in Y, pereti 0,3-0,7 m peste cei 4 ingropati, 7 tufe pe randurile din fata. Vedere de departe (camera la 250 m): `horizon_far.png`. Ramas: tufele din FarRoofs sunt partial acoperite de acoperisuri; peretii se vad in randari fiindca nu e teren (in joc sunt ingropati 4 m).
+
+# Grupa kit-i: vehicule, oameni, animale (`build_kyoto_people.py`, `build_kyoto_animals.py`, kit §1.9-1.10)
+
+Verify: `bash tools/blender/verify_kyoto.sh` (sectiunea kit-i) + `tools/blender/check_glb_anims.py` (numele actiunilor citite DIN glTF). Comparatii: `docs/asset_briefs/img/kyoto_fidelity/`.
+
+| piesa | tri | cote masurate (X x Y x Z Blender) | noduri | comparatie |
+|---|---:|---|---|---|
+| `vehicles/sagano_train` | 4012 | 2,60 x 25,5 x 3,28 | `Train_Body` (CAR_RED, exceptie), `Train_Trim`, `Train_Roof`, `Train_Under`, `Train_Glass` | `sagano_train.png` (+`_views`) |
+| `vehicles/jinrikisha` | 1114 | 1,28 x 2,66 x 1,95 | `Rick_Frame`, `Rick_Red` (CAR_RED, exceptie), `Rick_Wheels`, `Rick_Runner` | `jinrikisha.png` |
+| `vehicles/yakatabune` | 870 | 2,20 x 9,37 x 2,50 (baza = fundul coca) | `Boat_Hull`, `Boat_Wood`, `Boat_Posts`, `Boat_Roof`, `Boat_Dark` | `yakatabune.png` (+`_views`) |
+| `props/monk_sweeper` | 414 | 0,83 x 1,24 x 1,82 | `Monk` | `monk_sweeper.png` |
+| `animals/sika_deer` | 982 | 0,44 x 1,67 x 1,70 (spinare ~1,1) | `Sika_Deer_Mesh` + armatura 14 oase | `sika_deer.png` (Stand/Graze/Bow langa decupari) |
+| `animals/crow` | 474 | 1,60 x 0,99 x 0,27 | `Crow_Mesh` + armatura 7 oase | `crow.png` (Fly cadrele 1 si 7) |
+
+**Contracte inghetate:** inainte = +Y Blender = -Z Godot, masurat pe GLB (locomotiva si alergatorul au z negativ). Cerb: actiuni exact `Stand`, `Graze`, `Bow`; rest pose = `Stand` (oasele la zero, `Stand` incepe/se inchide pe zero); capul spre +Y; actiunile sunt one-shot in GLB, bucla la runtime. Cioara: actiunea `Fly` (24 cadre, 24 fps, inchisa), origine in centru.
+
+**Abateri (verdict propriu, sincer):** tren: rosu CAR_RED mai aprins decat caramiziul decuparii, boghiuri simplificate (fara bielete), acoperis cu mai putine detalii, vagoanele au 4/5/6 ferestre ca pe desen. Ricsa: capota e un tub inchis, nu cadrul deschis cu panza de pe desen; alergatorul e rigid, aplecat doar 10 grade, ~1,4 m (figurina mica ca pe desen, nu 1,7 m); caroseria neagra mai masiva. Barca: acoperisul in patru ape cu rise 0,52 e mai plat decat frontonul inalt al desenului; coca mai putin adanca. Calugar: fara maneci largi, snopul matutii e un con evazat si nu e inclinat. Cerb: pete cuburi mici (CORAL_SAND, mai cenusii decat albul desenului), capul mic, la Graze botul nu atinge solul (~0,15 m), gatul ramane gros la baza; coarnele se vad si in Graze/Bow (desenul are cerbi fara). Cioara: pene primare doar 5 lame late, fara texturare, picioare mici ascunse.
+
+**Stare la oprire:** toate 6 livrate, verify OK, anim-check OK. Nerandat: `--views` pentru ricsa, calugar, cerb, cioara (axele masurate din GLB).

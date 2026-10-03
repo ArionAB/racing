@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_a.glb" id="poie_stone_lantern_a"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_b.glb" id="poie_stone_lantern_b"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/votive_torii_cluster.glb" id="poie_votive_torii_cluster"]
+[ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="poie_camzone"]
 ;;NODES
 [node name="ZoneE_Inari" type="Node3D" parent="DecorManual"]
 
@@ -120,4 +121,15 @@ transform = Transform3D(0.953681, 0.000000, 0.300821, 0.000000, 1.000000, 0.0000
 
 [node name="eArtar35" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_momiji_a")]
 transform = Transform3D(-0.128377, 0.000000, 0.924968, 0.000000, 0.933835, 0.000000, -0.924968, 0.000000, -0.128377, 363.838898, 19.117481, 382.941315)
+
+[node name="CameraRomon" type="Area3D" parent="."]
+monitorable = false
+script = ExtResource("poie_camzone")
+size = Vector3(2, 2, 2)
+frac_from = 0.52536
+frac_to = 0.54133
+height = 5.0
+look_height = 0.4
+fov_bonus = 0.0
+ceiling = 0.0
 

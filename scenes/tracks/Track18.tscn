@@ -42,6 +42,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_a.glb" id="poie_stone_lantern_a"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_b.glb" id="poie_stone_lantern_b"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/votive_torii_cluster.glb" id="poie_votive_torii_cluster"]
+[ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="poie_camzone"]
 
 [sub_resource type="Resource" id="MFZ_0"]
 script = ExtResource("mf_zone")
@@ -175,6 +176,240 @@ lat_max = 78.0
 
 [sub_resource type="Resource" id="MFZ_7"]
 script = ExtResource("mf_zone")
+label = "Inari poiana 0"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 440
+center = Vector3(401.60, 0.00, 356.80)
+radius = 12.0
+
+[sub_resource type="Resource" id="MFZ_8"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 1"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 441
+center = Vector3(379.90, 0.00, 336.10)
+radius = 12.0
+
+[sub_resource type="Resource" id="MFZ_9"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 2"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 40.0
+edge_clear_m = 60.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 442
+center = Vector3(393.30, 0.00, 260.50)
+radius = 9.0
+
+[sub_resource type="Resource" id="MFZ_10"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 3"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 443
+center = Vector3(428.20, 0.00, 291.40)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_11"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 4"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 444
+center = Vector3(394.20, 0.00, 311.20)
+radius = 10.5
+
+[sub_resource type="Resource" id="MFZ_12"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 5"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 445
+center = Vector3(419.30, 0.00, 332.90)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_13"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 6"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 446
+center = Vector3(364.80, 0.00, 348.00)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_14"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 7"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 447
+center = Vector3(370.80, 0.00, 379.80)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_15"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 8"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 448
+center = Vector3(351.00, 0.00, 385.40)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_16"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 9"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 449
+center = Vector3(326.30, 0.00, 387.10)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_17"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 10"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 450
+center = Vector3(389.70, 0.00, 367.80)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_18"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 11"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 451
+center = Vector3(350.60, 0.00, 354.10)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_19"]
+script = ExtResource("mf_zone")
+label = "Inari poiana 12"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.5, 0.17, 0.17, 0.16)
+spacing = 9.0
+edge_clear_m = 14.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.8
+scale_max = 1.0
+seed_value = 452
+center = Vector3(360.60, 0.00, 382.40)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_20"]
+script = ExtResource("mf_zone")
 label = "Inari cedru fasie"
 kind = 0
 species = PackedStringArray("cedar_dark", "momiji_b")
@@ -193,7 +428,7 @@ frac_to = 0.585
 lat_min = 12.0
 lat_max = 72.0
 
-[sub_resource type="Resource" id="MFZ_8"]
+[sub_resource type="Resource" id="MFZ_21"]
 script = ExtResource("mf_zone")
 label = "Inari cedru disc"
 kind = 1
@@ -211,7 +446,7 @@ seed_value = 42
 center = Vector3(332.72, 0.00, 292.00)
 radius = 70.0
 
-[sub_resource type="Resource" id="MFZ_9"]
+[sub_resource type="Resource" id="MFZ_22"]
 script = ExtResource("mf_zone")
 label = "gradina F"
 kind = 0
@@ -231,7 +466,7 @@ frac_to = 0.69
 lat_min = 11.0
 lat_max = 56.0
 
-[sub_resource type="Resource" id="MFZ_10"]
+[sub_resource type="Resource" id="MFZ_23"]
 script = ExtResource("mf_zone")
 label = "bambus G tulpini"
 kind = 0
@@ -251,7 +486,7 @@ frac_to = 0.81
 lat_min = 6.5
 lat_max = 44.0
 
-[sub_resource type="Resource" id="MFZ_11"]
+[sub_resource type="Resource" id="MFZ_24"]
 script = ExtResource("mf_zone")
 label = "bambus G margine"
 kind = 0
@@ -357,7 +592,7 @@ script = ExtResource("17_leaffall")
 [node name="PadureMasa" type="Node3D" parent="."]
 script = ExtResource("mf_script")
 scenes = Array[PackedScene]([ExtResource("mf_momiji_a"), ExtResource("mf_momiji_b"), ExtResource("mf_momiji_c"), ExtResource("mf_ginkgo"), ExtResource("mf_niwaki_pine"), ExtResource("mf_moso_culm"), ExtResource("mf_bamboo_crown"), ExtResource("mf_cedar_dark")])
-zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11")])
+zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11"), SubResource("MFZ_12"), SubResource("MFZ_13"), SubResource("MFZ_14"), SubResource("MFZ_15"), SubResource("MFZ_16"), SubResource("MFZ_17"), SubResource("MFZ_18"), SubResource("MFZ_19"), SubResource("MFZ_20"), SubResource("MFZ_21"), SubResource("MFZ_22"), SubResource("MFZ_23"), SubResource("MFZ_24")])
 
 [node name="Hazarduri" type="Node3D" parent="."]
 
@@ -570,4 +805,15 @@ transform = Transform3D(0.953681, 0.000000, 0.300821, 0.000000, 1.000000, 0.0000
 
 [node name="eArtar35" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_momiji_a")]
 transform = Transform3D(-0.128377, 0.000000, 0.924968, 0.000000, 0.933835, 0.000000, -0.924968, 0.000000, -0.128377, 363.838898, 19.117481, 382.941315)
+
+[node name="CameraRomon" type="Area3D" parent="."]
+monitorable = false
+script = ExtResource("poie_camzone")
+size = Vector3(2, 2, 2)
+frac_from = 0.52536
+frac_to = 0.54133
+height = 5.0
+look_height = 0.4
+fov_bonus = 0.0
+ceiling = 0.0
 

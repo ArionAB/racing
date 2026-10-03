@@ -172,6 +172,9 @@ const LAT_CLEAR := 3.5     # marja minima fata de bordura pentru piese cu corp
 
 var _cum: PackedFloat32Array
 var _total := 0.0
+## Poienile cerute padurii (x, z, raza): cedrii de langa drum acopereau piesele
+## (captura r1). Se copiaza in gen_kyoto_route.py (zonele DISC cu claim).
+var _clearings: Array[Vector3] = []
 
 
 func _build() -> void:
@@ -180,6 +183,8 @@ func _build() -> void:
 	_mouth_foxes()
 	_votive_rows()
 	_shrines()
+	for c in _clearings:
+		print("; poiana (%.1f, %.1f) r %.1f" % [c.x, c.y, c.z])
 
 
 func _prep() -> void:
@@ -260,6 +265,10 @@ func _romon() -> void:
 	# yaw: +Z local pe tangenta (trecerea), X peste drum.
 	_raw("inari_romon", "structures", "PoartaRomon", Vector3(c.x, y - 0.05, c.z),
 		atan2(tan.x, tan.z), 1.0, "")
+	for side: float in [-1.0, 1.0]:
+		var rc: Vector3 = c + right * side * (float(fr[3]) + 9.0)
+		_clearings.append(Vector3(rc.x, rc.z, 12.0))
+	_romon_camera()
 	print("; romon la (%.1f, %.2f, %.1f), drum %.2f, hw %.1f" % [c.x, y, c.z, c.y, float(fr[3])])
 	# Vulpile Romonului: inainte de poarta (spre masina care vine), la 3,5 m
 	# de bordura, cu fata spre masina si intoarse ~20° spre ax.
@@ -284,6 +293,32 @@ func _romon() -> void:
 	var cp: Vector3 = ch[0]
 	_raw("chozuya", "props", "eChozuya", Vector3(cp.x, _sol_min(cp.x, cp.z, 1.6) - 0.05, cp.z),
 		_yaw_face(-(ch[2] as Vector3)), 1.0, "")
+
+
+## Camera sub Romon: golul are 7,5 m peste baza, iar baza e la 1,1 m sub
+## asfalt (solul de sub aripi e mai jos) -> 6,4 m liberi peste drum. Camera de
+## joc (10 m sus, 12,5 m in spate) ar trece prin galeria portii cand masina e
+## la +8,6..+16,4 m dupa centru. Precedent: Jodhpur POI E (CameraPoarta*,
+## 6,5 m). Aici 5,0 m, ca sa treaca pe sub buiandrug; lerp-ul zonei e pe timp
+## (~0,5 s), deci zona incepe cu ~12 m inainte si tine pana la +22 m.
+var _cam_lines: Array[String] = []
+
+
+func _romon_camera() -> void:
+	var n := float(_track.baked.size())
+	var f0 := ROMON_F - 12.0 / (_total / n) / n
+	var f1 := ROMON_F + 22.0 / (_total / n) / n
+	_cam_lines.append('[node name="CameraRomon" type="Area3D" parent="."]')
+	_cam_lines.append("monitorable = false")
+	_cam_lines.append('script = ExtResource("poie_camzone")')
+	_cam_lines.append("size = Vector3(2, 2, 2)")
+	_cam_lines.append("frac_from = %.5f" % f0)
+	_cam_lines.append("frac_to = %.5f" % f1)
+	_cam_lines.append("height = 5.0")
+	_cam_lines.append("look_height = 0.4")
+	_cam_lines.append("fov_bonus = 0.0")
+	_cam_lines.append("ceiling = 0.0")
+	_cam_lines.append("")
 
 
 ## Perechea de la gura E′: in fata portii mari, pe ambele parti ale benzii,
@@ -322,6 +357,7 @@ func _mouth_foxes() -> void:
 			_raw(stem, "props", "eVulpeTunel", Vector3(q.x, _sol_min(q.x, q.z, 0.75) - 0.04, q.z),
 				_yaw_face(-fdir), 1.25, "none")
 		print("; vulpi la gura E′: d %.1f" % d)
+		_clearings.append(Vector3(p.x, p.z, 9.0))
 		return
 	print("; vulpi la gura E′: nu incap (bucla prea aproape)")
 
@@ -362,6 +398,8 @@ func _votive_rows() -> void:
 		# poarta mare (-X local) langa drum, cele mici urca in cedri: +X pe dir.
 		_raw("votive_torii_cluster", "structures", "eToriiVotive", Vector3(c.x, y - 0.08, c.z),
 			_yaw_x_along(dir), 1.0, "")
+		var cc: Vector3 = c + r * side * 3.0
+		_clearings.append(Vector3(cc.x, cc.z, 10.0))
 
 
 ## Altarase in grupuri: [f, parte, ds] -> altarel cu fata spre drum, doua
@@ -382,6 +420,8 @@ func _shrines() -> void:
 		var to_road: Vector3 = -r * side
 		_raw("small_shrine", "structures", "eAltar", Vector3(p.x, _sol_min(p.x, p.z, 1.7) - 0.06, p.z),
 			_yaw_face(to_road), 1.0, "")
+		var sc: Vector3 = p - to_road * 3.0 + t * 1.5
+		_clearings.append(Vector3(sc.x, sc.z, 10.0))
 		for sg: float in [-1.0, 1.0]:
 			var lp: Vector3 = p + t * (2.6 * sg) + to_road * 1.8
 			_raw("stone_lantern_b", "props", "eFelinarAltar",
@@ -427,10 +467,12 @@ func _write() -> void:
 	stems.sort()
 	for s in stems:
 		lines.append('[ext_resource type="PackedScene" path="%s" id="poie_%s"]' % [_ext[s], s])
+	lines.append('[ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="poie_camzone"]')
 	lines.append(";;NODES")
 	lines.append('[node name="ZoneE_Inari" type="Node3D" parent="DecorManual"]')
 	lines.append("")
 	lines.append_array(_out)
+	lines.append_array(_cam_lines)
 	print("; asezate %d piese, %d modele" % [_n, stems.size()])
 	if _out_path.is_empty():
 		for l in lines:

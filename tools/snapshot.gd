@@ -758,7 +758,8 @@ func _ready() -> void:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		var darumas := 0
-		for node in get_tree().get_nodes_in_group(&"daruma_otoshi"):
+		# acelasi flag fixeaza si carul Gion Matsuri (care a inlocuit daruma pe pista)
+		for node in get_tree().get_nodes_in_group(&"daruma_otoshi") + get_tree().get_nodes_in_group(&"gion_matsuri"):
 			if node.has_method("force_clock"):
 				var secs := daruma_clock
 				if secs < 0.0:
@@ -791,7 +792,7 @@ func _ready() -> void:
 					await get_tree().process_frame
 				print("--leaf-wear=%d: %d stampile in foaie" % [leaf_passes, leaf_carpet.stamps_received])
 	if daruma_dist > 0.0:
-		for node in get_tree().get_nodes_in_group(&"daruma_otoshi"):
+		for node in get_tree().get_nodes_in_group(&"daruma_otoshi") + get_tree().get_nodes_in_group(&"gion_matsuri"):
 			var rt := track.route_at(0)
 			var ti := track.closest_index_global((node as Node3D).global_position, 0)
 			var acc := 0.0

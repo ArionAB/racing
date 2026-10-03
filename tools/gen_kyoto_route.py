@@ -765,16 +765,12 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
-<<<<<<< HEAD
 [ext_resource type="Script" path="res://scenes/props/module_placer.gd" id="intc_placer"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/tsutenkyo_roof_module.glb" id="intc_tsu"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/togetsukyo_module.glb" id="intc_toget"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kakezukuri_scaffold.glb" id="intc_scaffold"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/iron_truss_bridge.glb" id="intc_truss"]
-"""
-=======
 {forest_ext}"""
->>>>>>> kyoto/int-b
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
 [sub_resource type="BoxShape3D" id="BoxShape3D_zone{k}"]

@@ -103,8 +103,11 @@ signal car_thrown(car: Car)
 @export_range(2.0, 6.5, 0.1) var max_center: float = 4.8
 ## Un model de la Blender; gol = placeholder.
 @export var model: PackedScene
-## Scara vizuala SI a gabaritului (1 = modelul asa cum e: ~7,4 m lungime).
-@export_range(0.5, 2.0, 0.05) var model_scale: float = 1.0
+## Scara vizuala SI a gabaritului (1 = modelul asa cum e: ~7,4 m lungime). 1,2 pentru ca
+## leul sa se citeasca de pe camera de joc (10 m sus, 12,5 m in spate): la 25 m de masina
+## capul de 2,6 m are ~55 px din 1280, deci ~1/4 din latimea soselei. Daca la volan se
+## vede prea mare/mic, se schimba aici: zona, AI-ul si sonda urmeaza.
+@export_range(0.5, 2.0, 0.05) var model_scale: float = 1.2
 ## Cate clampaniri pe secunda face falca in timpul dansului.
 @export_range(0.5, 4.0, 0.1) var clack_hz: float = 1.8
 

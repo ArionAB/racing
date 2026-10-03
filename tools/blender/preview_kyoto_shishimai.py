@@ -102,3 +102,47 @@ for d in (70, 45, 25):
 # lateral stanga (flancul -X)
 _look((-18.0, -0.4, 2.4), (0.0, -0.4, 2.0), fov=40)
 _render("lateral_stanga")
+
+
+# ---------------------------------------------------------------------------
+# Pozele din joc (aceleasi cifre ca `_apply_state` din shishimai_hazard.gd). Rotatiile in
+# jurul lui X si Y(Godot)=Z(Blender) au acelasi semn in cele doua sisteme (transformarea
+# e proprie); jos = + pe X. Falca devine copil al capului ca in joc.
+def _pose(pitch, look, jaw_open, drop, hop, legs_scale, shift_x=0.0, body_yaw=0.0):
+    names = {o.name: o for o in objs}
+    head, jaw = names["Head"], names["Jaw"]
+    for o in objs:
+        o.rotation_mode = "YXZ"
+        o.rotation_euler = (0.0, 0.0, 0.0)
+        o.scale = (1.0, 1.0, 1.0)
+    base = {o.name: o.location.copy() for o in objs}
+    if jaw.parent is None:
+        jaw.parent = head
+        jaw.matrix_parent_inverse = head.matrix_world.inverted()
+    for o in objs:
+        dz = hop - drop if o.name.startswith(("Head", "Body")) else 0.0
+        if o.name.startswith("Leg"):
+            dz = hop - drop
+            o.scale = (1.0, 1.0, legs_scale)
+        if o.name != "Jaw":
+            o.location = base[o.name] + Vector((shift_x, 0.0, dz))
+        if o.name.startswith("Body"):
+            o.rotation_euler = (0.0, 0.0, body_yaw)
+    head.rotation_euler = (pitch, 0.0, look)
+    jaw.rotation_euler = (jaw_open, 0.0, 0.0)
+    bpy.context.view_layer.update()
+
+
+_pose(-0.42, 0.62, 0.62, 0.28, 0.0, (0.95 - 0.28) / 0.95)
+_look((0.0, -12.0, 4.2), (0.0, 0.0, 2.6), fov=50)
+_render("poza_telegraf_fata")
+_look((-9.0, -11.0, 4.2), (0.0, 0.0, 2.2), fov=50)
+_render("poza_telegraf_34")
+_look((0.0, -(25 + 12.5), 10.0), (0.0, -25 + 5.0, 1.2), fov=68)
+_render("poza_telegraf_sofer25")
+_pose(0.34, 0.30, 0.0, 0.0, 0.9 * 0.7, 1.0, shift_x=3.0)
+_look((3.0, -12.0, 4.2), (3.0, 0.0, 2.6), fov=50)
+_render("poza_atac_fata")
+_pose(0.0, 0.0, 0.42, 0.0, 0.0, 1.0)
+_look((0.0, -12.0, 4.2), (0.0, 0.0, 2.6), fov=50)
+_render("poza_dans_fata")

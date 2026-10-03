@@ -42,6 +42,9 @@ const SFX: Dictionary = {
 	# Stropul de apa la intrarea in vad / parau / mare (Car._enter_water):
 	# pitch inalt la pas, jos la o cadere de la inaltime.
 	&"splash": preload("res://assets/audio/splash.wav"),
+	# Daruma-otoshi (Kyoto): „TOC"-ul ciocanului de lemn si frecarea discului.
+	&"daruma_toc": preload("res://assets/audio/daruma_toc.wav"),
+	&"daruma_slide": preload("res://assets/audio/daruma_slide.wav"),
 }
 
 ## Fluxul brut al unui sunet, pentru cine si-l reda singur.

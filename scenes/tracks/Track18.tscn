@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_large.glb" id="14_large"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
+[ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
 
@@ -118,6 +119,23 @@ script = ExtResource("11_daruma")
 side = 1
 road_half_width = 5.5
 model = ExtResource("12_daruma_glb")
+
+[node name="Kogarashi" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 386.919, 12.000, 225.880)
+script = ExtResource("16_devil")
+amplitude = Vector2(9, 2)
+frequency = Vector2(0.0345, 0.0213)
+path_yaw_deg = 30.0
+spin_deg = 72.0
+blind_time = 0.35
+lift_m = 1.5
+radius = 1.8
+height = 9.0
+leaf_mode = true
+dust_amount = 30
+debris_amount = 14
+cone_alpha = 0.3
+cone_color = Color(0.66, 0.41, 0.23, 1)
 
 [node name="CameraTsutenkyo" type="Area3D" parent="Hazarduri"]
 monitorable = false

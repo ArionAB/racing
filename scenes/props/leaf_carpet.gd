@@ -52,6 +52,8 @@ var zone_spans: Array[Vector3] = []
 var built: bool = false
 var triangle_count: int = 0
 var stamps_received: int = 0
+## Pentru sonde: stampilele pe benzi laterale de 1 m (de la -8 m la +8 m).
+var lateral_hist: PackedInt32Array = PackedInt32Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 var lane_len: float = 1.0
 var lane_span: float = 1.0
 
@@ -230,6 +232,7 @@ func stamp_road(dist_m: float, lateral_m: float) -> void:
 		return
 	var s := zone_spans[k]
 	stamps_received += 1
+	lateral_hist[clampi(int(floor(lateral_m)) + 8, 0, 15)] += 1
 	_wear.stamp(s.z + (dist_m - s.x), lateral_m, stamp_strength / 0.2)
 
 
@@ -244,9 +247,10 @@ func simulate_passes(passes: int, gauge: float = 0.85) -> void:
 			var s := zone_spans[k]
 			var d := s.x + 2.0
 			while d < s.y - 2.0:
-				# Linia de cursa serpuieste (pluton: fiecare trecere usor altfel).
-				var wander := 0.9 * sin(d * 0.021 + float(pass_i) * 0.9) \
-					+ 0.35 * sin(d * 0.057 + 1.3 + float(pass_i))
+				# Linia de cursa serpuieste; plutonul o tine, cu o abatere mica
+				# de la o trecere la alta.
+				var wander := 0.9 * sin(d * 0.021) + 0.35 * sin(d * 0.057 + 1.3) \
+					+ 0.25 * sin(d * 0.31 + float(pass_i) * 2.1)
 				for side: float in [-1.0, 1.0]:
 					_wear.stamp(s.z + (d - s.x), wander + gauge * side, stamp_strength / 0.2)
 					stamps_received += 1

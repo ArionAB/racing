@@ -36,6 +36,18 @@ uniform float center_cover = 0.55;
 
 varying vec2 wpos;
 
+float hash21(vec2 p) {
+	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+float vnoise(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x),
+		mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+
 void vertex() {
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
 }
@@ -58,13 +70,18 @@ void fragment() {
 	// Uzura: foaia e in spatiul benzii; UV.x = metri laterali, UV.y = metri.
 	vec2 lane = vec2(UV.x / lane_span + 0.5, UV.y / lane_len);
 	float wear = texture(wear_tex, lane).a;
-	float swept = 1.0 - smoothstep(0.04, 0.70, wear);
+	float swept = 1.0 - smoothstep(0.03, 0.40, wear);
 	float a = leaf * swept * 0.94;
-	// Tenta: carmin -> portocaliu -> ruginiu dupa zgomotul de joasa frecventa.
-	float k = clamp((low - 0.55) / 0.45, 0.0, 1.0);
-	vec3 tint = mix(col_a, col_b, smoothstep(0.0, 0.45, k));
-	tint = mix(tint, col_c, smoothstep(0.45, 1.0, k));
-	ALBEDO = tint * (0.45 + 0.65 * lum);
+	// Tenta: carmin / portocaliu / ruginiu, amestecate moale prin trei zgomote de
+	// valoare decorelate (palcuri de ~2 m): niciuna nu domina drumul pe toata
+	// lungimea, iar trecerile n-au muchii drepte.
+	float n1 = vnoise(wpos * 0.42);
+	float n2 = vnoise(wpos * 0.42 + vec2(17.3, 5.1));
+	float n3 = vnoise(wpos * 0.42 + vec2(-9.7, 23.9));
+	vec3 w = pow(vec3(n1, n2, n3) + 0.05, vec3(3.0)) * vec3(1.0, 0.6, 1.5);
+	w /= (w.x + w.y + w.z);
+	vec3 tint = col_a * w.x + col_b * w.y + col_c * w.z;
+	ALBEDO = tint * (0.26 + 0.40 * lum);
 	ALPHA = a;
 	ROUGHNESS = 1.0;
 }

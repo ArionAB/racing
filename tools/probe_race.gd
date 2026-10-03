@@ -220,6 +220,8 @@ var _no_torii: bool = false
 var _no_tub: bool = false
 ## `--no-daruma`: scoate `DarumaOtoshiHazard` din scena (A/B-ul turnului, Kyoto).
 var _no_daruma: bool = false
+## `--no-leaves`: scoate covorul de frunze si frunzele care cad (A/B-ul covorului, Kyoto).
+var _no_leaves: bool = false
 ## Hazardurile daruma-otoshi gasite in scena (goale cu --no-daruma).
 var _daruma: Array[DarumaOtoshiHazard] = []
 var _daruma_throws: int = 0
@@ -367,6 +369,8 @@ func _ready() -> void:
 			_no_tub = true
 		elif arg == "--no-daruma":
 			_no_daruma = true
+		elif arg == "--no-leaves":
+			_no_leaves = true
 		elif arg == "--blind":
 			_blind = true
 		elif arg == "--no-turbo":
@@ -521,6 +525,14 @@ func _start_race() -> void:
 ## pista fara ele (`_jump_near` ramane -1).
 func _setup_kyoto() -> void:
 	var track: Track = _race.track
+	if _no_leaves:
+		for nm in ["CovorFrunze", "FrunzeCazatoare"]:
+			var ln := track.get_node_or_null(nm)
+			if ln != null:
+				track.wear_sinks.erase(ln)
+				ln.get_parent().remove_child(ln)
+				ln.free()
+		print("--no-leaves: covorul de frunze si frunzele scoase din scena")
 	if _no_torii:
 		var tt := track.get_node_or_null("ToriiTunel")
 		if tt != null:
@@ -1211,6 +1223,12 @@ func _report_race() -> void:
 
 ## Kyoto (brief §7 pasul 3): timpi pe tur, saritura C2, banda E', tubul.
 func _report_kyoto(cars: Array[Car]) -> void:
+	var carpet := _race.track.get_node_or_null("CovorFrunze") as LeafCarpet
+	if carpet != null:
+		# Stampilele reale ale rotilor din cursa, pe benzi laterale de 1 m: o linie
+		# de cursa formata = varfuri, nu o distributie plata.
+		print("--- covor de frunze: %d stampile de la masini · lateral (m, ecart 1 m): %s" % [
+			carpet.stamps_received, carpet.lateral_hist])
 	var all_laps: Array[float] = []
 	print("--- ture (s): masina | ture complete | minim | mediu")
 	for i in cars.size():

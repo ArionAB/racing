@@ -15,9 +15,9 @@ extends GPUParticles3D
 
 ## Plafonul de particule vii (si al tuturor frunzelor care cad pe pista).
 const MAX_LEAVES: int = 64
-const LEAF_TEX_SIZE: int = 64
-## Latura panzei (m). La 10-25 m de camera: ~15-35 px pe un ecran de 1080p.
-const LEAF_SIZE: float = 0.5
+const LEAF_TEX_SIZE: int = 128
+## Latura panzei (m). La 10-25 m de camera: ~12-28 px pe un ecran de 1080p.
+const LEAF_SIZE: float = 0.4
 
 ## Calea catre covor (sursa zonelor).
 @export var carpet_path: NodePath = ^"../CovorFrunze"
@@ -133,10 +133,10 @@ func _process_material() -> ParticleProcessMaterial:
 	var grad := Gradient.new()
 	grad.set_offsets(PackedFloat32Array([0.0, 0.34, 0.68, 1.0]))
 	grad.set_colors(PackedColorArray([
-		LeafCarpet._class_color("maple_crimson"),
-		LeafCarpet._class_color("maple_orange"),
-		LeafCarpet._class_color("leaf_litter"),
-		Palette.color(Palette.CAR_YELLOW)]))
+		LeafCarpet._class_color("maple_crimson").srgb_to_linear(),
+		LeafCarpet._class_color("maple_orange").srgb_to_linear(),
+		LeafCarpet._class_color("leaf_litter").srgb_to_linear(),
+		Palette.color(Palette.CAR_YELLOW).srgb_to_linear()]))
 	grad.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
 	var gt := GradientTexture1D.new()
 	gt.gradient = grad
@@ -194,13 +194,17 @@ static func _leaf_image() -> Image:
 			var edge_r := 0.78 * (1.0 + 0.22 * cos(5.0 * a - 1.5708))
 			var d := r / edge_r
 			var alpha := 0.0
-			if d < 1.0:
-				var c := cos(d * 1.5707963)
-				alpha = c * c * pow(1.0 - d, 0.5)
+			# Miez plin pana la 0.5 din raza, apoi cadere cos^2 pana la zero (panta
+			# zero la capat: fara umar). 128 px: tranzitia se intinde pe ~20 px.
+			if d < 0.5:
+				alpha = 1.0
+			elif d < 1.0:
+				var c := cos((d - 0.5) * 2.0 * 1.5707963)
+				alpha = c * c
 			# Nervura mediana: un pic mai inchis pe axa verticala a frunzei.
 			var rib := exp(-pow(dx / 0.05, 2.0)) * 0.25
 			var shade := 1.0 - rib
-			img.set_pixel(px, py, Color(shade, shade, shade, clampf(alpha * 1.15, 0.0, 1.0)))
+			img.set_pixel(px, py, Color(shade, shade, shade, clampf(alpha, 0.0, 1.0)))
 	img.generate_mipmaps()
 	return img
 

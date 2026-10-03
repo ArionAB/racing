@@ -146,11 +146,18 @@ var _rows: Array[Dictionary] = []
 var _empty: bool = false
 
 
+## `--no-leaves`: scoate covorul de frunze (Kyoto) inainte de numarare — linia de
+## baza a materialelor fara el, ca sa se vada cat adauga.
+var _no_leaves: bool = false
+
+
 func _initialize() -> void:
 	var only := -1
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			only = int(arg.trim_prefix("--track="))
+		elif arg == "--no-leaves":
+			_no_leaves = true
 	for i in range(1, 20):
 		var path := "res://scenes/tracks/Track%02d.tscn" % i
 		if not ResourceLoader.exists(path):
@@ -177,6 +184,12 @@ func _process(_delta: float) -> bool:
 	_frames += 1
 	if _frames < 3:
 		return false # lasam rebuild() sa termine
+	if _no_leaves:
+		for nm in ["CovorFrunze", "FrunzeCazatoare"]:
+			var ln := _track.get_node_or_null(nm)
+			if ln != null:
+				ln.get_parent().remove_child(ln)
+				ln.free()
 
 	_rows.append(_measure(_paths[_index], _track))
 	root.remove_child(_track)

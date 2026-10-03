@@ -12,6 +12,8 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
+[ext_resource type="Script" path="res://scenes/hazards/shishimai_hazard.gd" id="18_shishimai"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/shishimai.glb" id="19_shishimai_glb"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
 [ext_resource type="Script" path="res://scenes/props/module_placer.gd" id="intc_placer"]
@@ -1445,6 +1447,12 @@ dust_amount = 30
 debris_amount = 14
 cone_alpha = 0.3
 cone_color = Color(0.66, 0.41, 0.23, 1)
+
+[node name="Shishimai" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(0.99388, 0, -0.11043, 0, 1, 0, 0.11043, 0, 0.99388, -3.965, 0.716, 85.683)
+script = ExtResource("18_shishimai")
+road_half_width = 7.0
+model = ExtResource("19_shishimai_glb")
 
 [node name="CameraTsutenkyo" type="Area3D" parent="Hazarduri"]
 monitorable = false

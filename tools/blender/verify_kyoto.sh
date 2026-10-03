@@ -44,6 +44,12 @@ check "structures/sanjunoto_pagoda.glb" 7300 --origin=assembly --allow-car-slots
 check "structures/koyasu_pagoda.glb"    6800 --origin=assembly --allow-car-slots=Pagoda_Spire
 check "structures/kinkakuji.glb"        5600 --origin=assembly --allow-car-slots=Kin_Gold
 
+echo "== arborii (kit §1.2, grupa kit-c) =="
+check "plants/momiji_b.glb"           2500 --origin=assembly
+check "plants/momiji_c.glb"           3100 --origin=assembly
+check "plants/ginkgo.glb"             3100 --origin=assembly --allow-car-slots=Ginkgo_Crown
+check "plants/niwaki_pine.glb"         750 --origin=assembly
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total (5 existente, nu ale kitului)"

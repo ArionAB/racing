@@ -634,22 +634,26 @@ def build_chozuya():
 # ---------------------------------------------------------------------------
 
 def build_cyclopean_wall():
-    """`cyclopean_wall.png` -- lista de elemente:
+    """`cyclopean_wall.png` -- lista de elemente (runda 5, dupa verdictul):
     - zid taluzat lung de 8 m, ~4 m inalt, 2.5 m la baza si ~1.2 sus; capete
-      PLANE la x = +-4 (se inlantuie), miez inchis la culoare (rosturi/capat);
-    - 4 randuri de pietre poligonale MARI, rotunjite, aproape lipite (rosturi
-      subtiri), pe ambele fete; sus un rand de lespezi dreptunghiulare;
-    - MUSCHI (nod separat Cyc_Moss) in rosturi, mai mult la baza.
+      PLANE la x = +-4 (se inlantuie);
+    - pietre GRI (MARBLE_GREY), poligonale, IMBINATE STRANS (se suprapun
+      usor, rosturi subtiri, miezul aproape nevazut), 5 randuri de marimi
+      variate: 4 de bolovani + sus un rand de lespezi dreptunghiulare;
+    - MUSCHI (nod Cyc_Moss) crescut in rosturi: fasii pe orizontalele dintre
+      randuri si limbi verticale intre pietre, mai mult jos.
     """
     bs, bm_ = Builder(), Builder()
     L, H = 8.0, 4.0
     yb, yt = 1.25, 0.60
     slope = (yt - yb) / H
     extrude_x(bs, [(-yb, 0.0), (yb, 0.0), (yt, H - 0.2), (-yt, H - 0.2)], -L / 2, L / 2, ASPHALT_EDGE)
-    rnd = _lcg(11)
-    row_h = [0.98, 0.94, 0.90, 0.84]
+    rnd = _lcg(23)
+    row_h = [1.02, 0.92, 0.84, 0.74]
+    cap_h = 0.48
     z = 0.0
-    moss_spots = []
+    joints_h = []          # (z, x, y_plane) pe orizontalele dintre randuri
+    joints_v = []          # (z, x, y_plane) rosturi verticale
     for ri, rh in enumerate(row_h):
         zc = z + rh * 0.5
         y_plane = yb + slope * zc
@@ -657,37 +661,59 @@ def build_cyclopean_wall():
             x = -L / 2
             wl = []
             while x < L / 2 - 0.3:
-                w = 1.25 + rnd() * 0.75
+                w = 0.95 + rnd() * 1.0
                 w = min(w, L / 2 - x)
-                if L / 2 - (x + w) < 0.9:
+                if L / 2 - (x + w) < 0.8:
                     w = L / 2 - x
                 wl.append(w)
                 x += w
             x = -L / 2
             for si, w in enumerate(wl):
-                hz = rh * (0.98 + rnd() * 0.06)
-                sl = STONE if rnd() > 0.3 else STONE2
-                poly_block(bs, (x + w * 0.5, side * (y_plane - 0.08), zc + (rnd() - 0.5) * 0.05),
-                           min(w * 0.5 * 1.12, L / 2 - abs(x + w * 0.5)), hz * 0.5 * 1.14, 0.34, sl, n=7 if rnd() > 0.4 else 8,
+                hz = rh * (0.94 + rnd() * 0.14)
+                zz = zc + (rnd() - 0.5) * 0.10
+                cx_ = x + w * 0.5
+                poly_block(bs, (cx_, side * (y_plane - 0.08 + (rnd() - 0.5) * 0.08), zz),
+                           min(w * 0.5 * 1.26, L / 2 - abs(cx_)), hz * 0.5 * 1.30, 0.34,
+                           MARBLE_GREY, n=8 if rnd() > 0.4 else 7,
                            seed=ri * 100 + si * 2 + (side > 0), slope=slope * side,
-                           round_f=0.90, jit=0.05, facing=side)
-                if side == 1 and rnd() < 0.95 - ri * 0.1:
-                    moss_spots.append((x + w, z + 0.15 + rnd() * 0.3, y_plane))
+                           round_f=0.93, jit=0.07, facing=side)
+                if side == 1:
+                    if si > 0:
+                        joints_v.append((zz, x, y_plane, ri))
+                    joints_h.append((z + rh, x + w * 0.5, y_plane, ri))
                 x += w
         z += rh
     nc = 5
     cw = L / nc
+    zcap = z
     for k in range(nc):
-        bs.box((-L / 2 + cw * (k + 0.5), 0, H - 0.17), (cw - 0.06, 2 * yt + 0.06, 0.46), STONE2)
+        wk = cw - 0.05
+        bs.box((-L / 2 + cw * (k + 0.5), 0, zcap + cap_h * 0.5), (wk, 2 * (yt + slope * 0 ) + 0.05, cap_h), MARBLE_GREY)
     mrnd = _lcg(5)
-    for (mx, mz, yp) in moss_spots:
-        r = 0.30 + mrnd() * 0.20
-        mx = max(-L / 2 + r, min(L / 2 - r, mx))
-        mz = max(mz, r * 0.8 + 0.03)
-        for side in (1, -1):
-            if side == 1 or mrnd() < 0.5:
-                poly_block(bm_, (mx, side * (yp + 0.02), mz), r, r * 0.8, 0.14, MOSS, n=7,
-                           seed=int(mx * 100) + side, slope=slope * side, round_f=0.8, facing=side)
+    # fasii pe orizontale (mai multe jos), limbi verticale in rosturi
+    for (zj, xj, yp, ri) in joints_h:
+        if mrnd() < 0.85 - ri * 0.18:
+            rx = 0.35 + mrnd() * 0.30
+            xj = max(-L / 2 + rx, min(L / 2 - rx, xj))
+            yy = yb + slope * zj
+            for side in (1, -1):
+                if side == 1 or mrnd() < 0.5:
+                    poly_block(bm_, (xj, side * yy, zj - 0.04), rx, 0.10 + mrnd() * 0.06, 0.12,
+                               MOSS, n=6, seed=int(xj * 97) + side + ri, slope=slope * side,
+                               round_f=0.85, jit=0.12, facing=side)
+    for (zj, xj, yp, ri) in joints_v:
+        if mrnd() < 0.6 - ri * 0.12:
+            rz = 0.22 + mrnd() * 0.22
+            xj = max(-L / 2 + 0.1, min(L / 2 - 0.1, xj))
+            poly_block(bm_, (xj, yp, zj), 0.08 + mrnd() * 0.05, rz, 0.12, MOSS, n=6,
+                       seed=int(xj * 53) + ri, slope=slope, round_f=0.85, jit=0.12, facing=1)
+    # muschi pe muchia de sus a capacului (limbi care curg peste fata)
+    for k in range(nc):
+        if mrnd() < 0.6:
+            xj = -L / 2 + cw * (k + 0.5) + (mrnd() - 0.5) * 0.4
+            xj = max(-L / 2 + 0.3, min(L / 2 - 0.3, xj))
+            poly_block(bm_, (xj, yt + 0.0 + 0.0, zcap + cap_h - 0.08), 0.3, 0.1, 0.12, MOSS, n=6,
+                       seed=k + 900, slope=0.0, round_f=0.85, jit=0.1, facing=1)
     return (bs.to_object("Cyc_Stone"), bm_.to_object("Cyc_Moss"))
 
 

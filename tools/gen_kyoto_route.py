@@ -714,8 +714,22 @@ if len(sys.argv) > 1:
     fz("versant Higashiyama", 1, MAPLES, (0.34, 0.33, 0.33), center=(372.0, 0.0, -150.0),
        radius=88.0, spacing=7.0, seed=22)
     # D: valea de artari (cea mai deasa), pana la gura podului si sub el.
-    fz("valea D artari", 0, MAPLES, (0.36, 0.30, 0.34), frac_from=F["D aterizare coborare"],
-       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=4.6, edge_clear_m=10.5, seed=31)
+    # POI D (runda 2, dupa reparatia MeshForest 97be100b: edge_clear_m e viu).
+    # Tunelul des din diorama: trunchiurile la >= margine + 5,5 (printre
+    # piesele primului rand manual, margine + 5..6,8), coroanele (semilatime
+    # 5-7 m) ajung pana la ~margine + 0..1,5, dar nu pe banda. lat_min 9 lasa
+    # regula de margine sa decida (pe exteriorul curbelor drumul se departeaza
+    # de ax). Pas 3,8 (era 4,6): cu separarea minima vie (0,35 x pas) valea
+    # iesea livada. Cedrii inchisi (10%): coniferele verzi din diorama.
+    fz("valea D artari", 0, MAPLES + ("cedar_dark",), (0.33, 0.27, 0.30, 0.10), frac_from=F["D aterizare coborare"],
+       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=3.8, edge_clear_m=5.5, seed=31)
+    # Rapa de sub Tsutenkyo: coroanele urca pana la nivelul podului (brief §2 D).
+    # Fundul e la -8..-11 sub punte pe portiunea adanca; artarii de 8,6 m (scala
+    # <= 1,05) ajung la +-1,5 m de cota puntii, iar trunchiul la >= 10,4 m de
+    # ax tine coroana (semilatime <= 6,1) in afara tablierului (hw 4,5).
+    fz("rapa Tsutenkyo artari", 0, MAPLES, (0.40, 0.28, 0.32), frac_from=F["D pod Tsutenkyo intrare"] + 0.002,
+       frac_to=F["D pod Tsutenkyo iesire"] - 0.002, lat_min=12.5, lat_max=18.0, spacing=4.2, edge_clear_m=5.0,
+       scale_min=0.85, scale_max=1.05, seed=32)
     # E: muntele Inari, cedru inchis, cu cate un artar rosu printre ei.
     fz("Inari cedru fasie", 0, ("cedar_dark", "momiji_b"), (0.88, 0.12),
        frac_from=F["E arc intrare (E' se desprinde)"] - 0.008,

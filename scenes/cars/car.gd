@@ -1320,6 +1320,32 @@ func can_respawn() -> bool:
 	return track != null and _respawn_cooldown <= 0.0 and not finished
 
 
+## Daca masina sta in afara unei benzi deschise (fara poarta) si in afara soselei,
+## la cel mult `BRANCH_FLANK_M` de axa benzii, intoarce (ruta, index) de repunere pe
+## banda; altfel (0, 0). Vezi comentariul din `respawn`.
+const BRANCH_FLANK_M: float = 16.0
+
+func _branch_flank_trap() -> Vector2i:
+	if track == null or track.routes.size() < 2:
+		return Vector2i.ZERO
+	var main_i := track.closest_index_global(global_position, 0)
+	if track.is_on_road(main_i, global_position, 0):
+		return Vector2i.ZERO
+	for bi in range(1, track.routes.size()):
+		var br := track.route_at(bi)
+		if br == null or br.baked.is_empty() or not track.branch_is_open(bi):
+			continue
+		if track.branch_gate(bi) != null:
+			continue
+		var bidx := br.closest_index_global(global_position)
+		if bidx == 0 or br.is_other_level(bidx, global_position):
+			continue
+		var lat := br.lateral_distance(bidx, global_position)
+		if lat > br.half_width and lat < BRANCH_FLANK_M:
+			return Vector2i(bi, bidx)
+	return Vector2i.ZERO
+
+
 func respawn(backoff_m: float = 14.0) -> void:
 	if track == null or _respawn_cooldown > 0.0:
 		return
@@ -1344,6 +1370,18 @@ func respawn(backoff_m: float = 14.0) -> void:
 			if sd < float(gate.gate_dist_m) + 3.0:
 				last_safe_index = track.closest_index_global(gbr.baked[0], 0)
 				last_safe_route = 0
+	# Prinsa PE FLANCUL DE AFARA al unei benzi (peretele palniei tunelului de torii,
+	# Kyoto E'): masina sta intre sosea si peretele benzii, pe cota terenului, fara
+	# niciun checkpoint luat pe banda (`last_safe_route` ramane 0, la furca). Repusa
+	# la furca, aceeasi apropiere (viteza de dupa repunere + coltul taiat spre gura)
+	# o ducea iar pe flanc: 7 repuneri la rand la ~0,49 pe ProbeRace
+	# `--track=11 --seed=5`, ~15 s una. Se repune pe AXA benzii, la 14 m in urma
+	# locului unde a ramas — in palnie, nu in fata ei. Banda inchisa si banda cu
+	# poarta ingustata au regulile lor, mai sus; pistele fara banda: neatinse.
+	var trap := _branch_flank_trap()
+	if trap.x != 0:
+		last_safe_route = trap.x
+		last_safe_index = trap.y
 	global_transform = track.recovery_transform(last_safe_index, backoff_m,
 		last_safe_route)
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei
@@ -1731,6 +1769,7 @@ func _update_effects(delta: float) -> void:
 		_fire_particles.emitting = burn_time > 0.0
 	_update_dust(on_road, loose, on_branch)
 	_drop_trail(delta, loose)
+	_drop_leaf_wear(delta, on_road)
 	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
 	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
 	_engine_audio.pitch_scale = lerpf(0.7, 1.9, speed_frac) \
@@ -1955,6 +1994,35 @@ func _drop_trail(delta: float, loose: bool) -> void:
 		# din spatele masinii; masca e istoria batatorita a intregii curse.
 		if route == 0:
 			track.stamp_wear(road_index, wheel)
+
+## Uzura pentru consumatorii externi ai pistei (covorul de frunze de la Kyoto):
+## rotile din spate stampileaza in `Track.wear_sinks`, la cadenta TRAIL_SPACING,
+## DOAR pe bucla principala si DOAR la sol — si independent de `loose`, fiindca
+## covorul sta pe asfalt, unde `_drop_trail` nu ruleaza. Pe pistele fara
+## consumatori iese din prima: zero cost.
+var _leaf_accum: float = 0.0
+
+func _drop_leaf_wear(delta: float, on_road: bool) -> void:
+	if track == null or route != 0 or not on_road or not track.has_wear_sinks():
+		return
+	var speed := horizontal_speed()
+	if speed < TRAIL_MIN_SPEED:
+		return
+	_leaf_accum += speed * delta
+	if _leaf_accum < TRAIL_SPACING:
+		return
+	_leaf_accum = 0.0
+	var fwd := -global_transform.basis.z
+	fwd.y = 0.0
+	if fwd.length_squared() < 0.001:
+		return
+	fwd = fwd.normalized()
+	var right := fwd.cross(Vector3.UP).normalized()
+	var half_track_w := data.body_width * 0.38 if data != null else 0.85
+	var rear_z := data.body_length * 0.34 if data != null else 1.3
+	var base := global_position - fwd * rear_z
+	for side: float in [-1.0, 1.0]:
+		track.stamp_wear_sinks(road_index, base + right * half_track_w * side)
 
 ## Textura de fum, incarcata o singura data pentru toate masinile.
 ##

@@ -612,6 +612,7 @@ func _test_cycle() -> void:
 	var ok_levels := true
 	var ok_head := true
 	var flights := 0
+	var knocks0 := _hz.knocks
 	var prev_fly := false
 	var cycles := 0
 	var prev_clock := 0.0
@@ -667,6 +668,8 @@ func _test_cycle() -> void:
 	print("  cicluri complete %d, lovituri (discuri zburate) %d, reconstructii OK %d" % [cycles, flights, rebuilt_ok])
 	_verdict(cycles >= 2, "cel putin 2 cicluri mari complete (%d)" % cycles)
 	_verdict(flights >= 10, "5 lovituri pe ciclu: %d discuri zburate pe %d cicluri (minim 10)" % [flights, cycles])
+	var knocks := _hz.knocks - knocks0
+	_verdict(knocks == flights, "sunet: un TOC la fiecare lovitura (%d TOC-uri pentru %d discuri zburate)" % [knocks, flights])
 	_verdict(ok_levels and seen.size() >= 10, "turnul pierde cate un disc pe perioada (5, 4, 3, 2, 1 la fiecare ciclu)")
 	_verdict(ok_head, "capul coboara cu un etaj (%.2f m) pe perioada, pana la %.2f m" % [h, min_h_seen])
 	_verdict(rebuilt_ok >= 2, "reconstructia readuce turnul intreg (5 discuri, capul la repaus) de %d ori (minim 2)" % rebuilt_ok)

@@ -600,7 +600,7 @@ doar *dacă* vine. Iar tubul e pe drumul principal, nu pe scurtătură, deci îl
 | **Tunelul de torii** (E′) | Are ~125 de porți vermilion cu grinda *kasagi* neagră, un culoar de 6,4 m liber, 5,2 m sub grinzi, și ~150 m lungime față de ~200 m pe buclă. Pereții sunt **un colizor continuu pe fiecare parte**, nu 250 de stâlpi, cu frecare mare și ricoșeu mic: atingerea te încetinește, nu te oprește. La gură stă o poartă mare, cu **gol ≥ 6,4 m**. AI-ul alege tunelul după aceleași reguli ca la orice `TrackBranch` (ca ulicioara de la Jodhpur); **niciun AI nu trebuie să rămână lipit de perete** (`[blocaj]`). **Fotosensibilitate:** 125 de porți la 1,2 m, parcurse la 30 m/s, înseamnă **25 de treceri pe secundă** în benzile laterale ale cadrului. Ghidurile de accesibilitate (WCAG 2.3.1, testul Harding din televiziune) pun pragul la **3 flash-uri pe secundă**, iar flash-urile de **roșu saturat** sunt clasa cea mai riscantă. Regula de artă a tunelului: **ritmul e de culoare, nu de luminanță**. (1) Golurile dintre porți nu arată cer sau soare: în spatele lor e pădure deasă și umbră, cu luminanță apropiată de a stâlpilor. (2) Porțile sunt dese, cu golul mai îngust decât stâlpul, ca în realitate. (3) **Fără raze de soare prin goluri** | **reutilizare:** `TrackBranch` + `CameraZone`. **Mic nou:** porțile se așază ca MultiMesh pe curba benzii (`FlockProp` lipește de teren, nu de bandă; vezi §5.6). **Gardă nouă, `ProbeFlicker`** (§6): pe treimile laterale ale cadrului, la 60 fps și la viteza maximă, **≤ 3 perechi pe secundă de schimbări opuse ≥ 10% în luminanța relativă**. Armată prin sabotaj: porți rare cu cer în spate trebuie să o pice. Dacă tunelul nu trece, **se scade contrastul, nu se încetinește jocul** |
 | **Podul acoperit Tsūten-kyō** (D) | 70 m la +12, peste o râpă de arțari. Are stâlpi la 3 m, parapet și acoperiș de țiglă, iar camera coboară înăuntru (§2.0) | **reutilizare:** secțiune înălțată + `CameraZone`. Modulele de acoperiș urmăresc curba (§5.6) |
 | **Covorul de frunze** (D, E) | Drumul din valea de arțari pornește **acoperit de frunze** (un decal de frunze peste caldarâm), iar roțile curăță linia. **După trei tururi se vede linia de cursă a plutonului**, ca o dâră de piatră curată prin roșu. În v0.1 e doar vizual | **reutilizare:** `RoadWear` (foaia de uzură), folosită invers: urmele *scot* frunzele în loc să pună praf. E un shader mic pe decal: `alpha × (1 − uzură)`. Capcanele `RoadWear` sunt în memoria `roadwear-foaia-de-uzura` (SubViewport necurățat). Grip-ul diferit pe frunze e opțional (§3.1) |
-| ***Kogarashi*** (D, la ieșirea de pe pod) | Un vârtej de frunze roșii traversează drumul pe un ciclu de ~29 s. Te răsucește puțin (`Car.apply_yaw_kick`), nu te oprește. **E mai slab decât la Serengeti** (kick ×0,6) și are altă culoare | **reutilizare:** `DustDevilHazard` cu particule de frunze (billboard, plafon ≤ 48 — memoria `particule-muchia-nu-numarul`). **De confirmat (§3.1)** |
+| ***Kogarashi*** (D, la ieșirea de pe pod) | Un vârtej de frunze roșii traversează drumul pe un ciclu de ~29 s. Te răsucește puțin (`Car.apply_yaw_kick`), nu te oprește. **E mai slab decât la Serengeti** (kick ×0,6) și are altă culoare | **reutilizare:** `DustDevilHazard` cu particule de frunze (billboard, plafon ≤ 48 — memoria `particule-muchia-nu-numarul`). **Confirmat (§3.1); implementat și măsurat în §3.0 (răsucire 72°, nu ×0,6)** |
 | **Pavilionul de Aur și reflexia** (F) | Pavilionul e decor. **Reflexia e aprobată de dezvoltator (§3.1), cu +1 material.** Problema tehnică: apa v12 e **opacă și unshaded** (memoria `apa-iluminata-v12`), deci o copie oglindită pusă sub apă nu se vede. Ar fi nevoie de o **pânză de apă transparentă locală** sub pavilion, cu copia oglindită dedesubt | Copia oglindită e un **nod** cu `scale.y = −1`, pe care Godot îl compensează pe noduri; într-un MultiMesh ar fi tăiată (memoria `multimesh-oglindire-culling`). Costă **+1 material** și overdraw pe o suprafață mică. Se decide pe captură (§3.1) |
 
 **Ce NU e nou:** săritura (`TrackChannel`), podurile (secțiuni înălțate),
@@ -612,6 +612,63 @@ urmele (`RoadWear`) și decorul mobil (`PathMover` pentru tren, bărci, ricșe
 **Un singur lucru nou și mare: `ShishiOdoshiHazard`.** Plus două mici: garda
 de fotosensibilitate (`ProbeFlicker`) și foaia de uzură folosită invers.
 Identitatea pistei e **frunzișul + tubul + scena**, nu numărul de mecanici.
+
+### 3.0 Kogarashi și sunetul daruma-otoshi (3 oct 2026, ramura `kyoto/kogarashi-sunet`)
+
+**Kogarashi** reutilizează `DustDevilHazard` (decizia dezvoltatorului, §3.1 nr. 1).
+Clasa a primit export vars: `leaf_mode` (particule = plăci billboard, nu sfere),
+`leaf_colors` (`#BB3522`, `#E54839`, `#A8683A`, câte una la întâmplare per
+particulă), `dust_amount` / `debris_amount` (30 + 14 = 44 ≤ 48), `cone_alpha`,
+`cone_color` și `path_yaw_deg` (rotește figura Lissajous, ca axa ei lungă să taie
+șoseaua). Valorile implicite dau **exact** Serengeti: `ProbeRace --track=7`, 8 seed-uri
+× 200 s, vechi vs nou: 166 vs 162 repuneri, aceleași felii, 21 vs 20 treceri de vârtej
+(zgomotul Jolt). Nodul `Kogarashi` e scris de `tools/gen_kyoto_route.py` (scena
+regenerată e identică cu cea din repo).
+
+| parametru | Serengeti | Kogarashi | de ce |
+|---|---|---|---|
+| poziție | câmp deschis | frac **0,470**, la 8 m după capătul podului (cota 12) | vezi mai jos |
+| figura (m) / perioadă | 14 × 26 | 9 (transversal) × 2, perioadă ~29 s (0,0345 Hz) | taie șoseaua, nu o urmează |
+| răsucire | 180° / 0,8 s | **72°** / 0,8 s | **abatere de la „kick ×0,6"** |
+| ridicare / orbire | 2,5 m / 0,6 s | 1,5 m / 0,35 s | ×0,6 |
+| rază / înălțime | 2,4 / 14 | 1,8 / 9 | |
+
+**Abatere: răsucirea e ×0,4, nu ×0,6.** Măsurat (ProbeRace `--track=11 --ai=7`,
+260 s, 16–32 seed-uri, în zona D a pistei = frac 0,45–0,51; fără kogarashi: 0 `[blocaj]`):
+
+| configurație | repuneri în zona D | `[blocaj]` | tur mediu |
+|---|---|---|---|
+| fără (`--no-kogarashi`), 16 seed-uri | 0 (+ 7 în afara zonei, la 0,31 = aterizarea de la C2) | 0 | 75,40 s |
+| 108°, frac 0,478 | 24 pe 16 seed-uri (0,47–0,50) | 42 (PereteTunel, RoadSides la 0,488) | 76,11 s (+0,71 s) |
+| 108°, frac 0,472–0,474 | 6–16 (0,488–0,50) | 4–16 | 75,8–76,1 s |
+| 108°, frac 0,470 | 2 (0,452 și 0,463: ejectări de perete la 36–39 m/s, pe pod, lângă vârtej) | 0–1 | 75,6 s |
+| 90°, frac 0,470, 32 seed-uri | 11, din care 9 la 0,484–0,503 | 8 | 75,70 s |
+| **72°, frac 0,470, 32 seed-uri** | **1** (0,496), în plus 2 × 0,452 care apar și fără kogarashi (zgomot) | **0** | **75,47 s** |
+
+Citire: după o răsucire la 30 m/s mașina are nevoie de ~25 m ca să se aducă; la
+0,478 aterizează în începutul arcului lui E și în gura tunelului (0,483), unde
+rămâne lipită de `RoadSides` / `PereteTunel` (de aceea `[blocaj]`, nu doar repuneri).
+La 0,470 e destul loc, dar 108° la capătul podului aruncă mașina în parapet.
+Rezultatul final pe **16 seed-uri**, 8 mașini: cu kogarashi **75,47 s** pe tur și
+7 repuneri (0,31 × 6 = C2, 0,451 × 1); fără: **75,48 s** și 6 repuneri (toate la 0,31).
+Cost pe tur ≈ 0 s (< +1 s). Rezumat tabel `lent`/`invers`/`carusel`/`deviat` pe 128
+mașini-rulări: lent 163 s vs 175 s, invers 19 s vs 24 s, carusel 0 / 0, deviat 0 / 0.
+Vârtejul a răsucit 102 mașini în 16 rulări (~6 per cursă).
+AI-ul nu îl vede (ca la Serengeti, decor mobil fără citire): masurătoarea de mai
+sus spune că și așa nu produce blocaje. **Aspectul frunzelor nu e verificat vizual**
+(fără capturi, GPU-ul ocupat).
+
+**Sunet daruma-otoshi.** Două WAV-uri procedurale, adăugate **la sfârșitul**
+`tools/generate_sfx.gd` (sirul `rng` e unic): `daruma_toc` (0,3 s, trei moduri de
+lemn nearmonice 410 / 780 / 1270 Hz + corp de 150 Hz + click de 2 ms: „TOC" sec)
+și `daruma_slide` (1,3 s, zgomot filtrat cu tăietura care coboară, cu stick-slip
+la ~23 Hz). Hazardul le cântă prin două `AudioStreamPlayer3D` pe busul `SFX`
+(deci volumul din setări se aplică), cu `max_distance` 140 m și `unit_size` 14
+(exporturi `knock_*`, `slide_db`). TOC-ul pornește pe **marginea** `hit_at` în
+`_physics_process` (nu în `_apply_state`, care e pură și rulează și la `seek`), deci
+sondele și capturile cu `force_clock` nu cântă. `ProbeKyotoDaruma` verifică acum
+un TOC per lovitură (10 TOC-uri pentru 10 discuri zburate) și tot restul rămâne
+PASS. Nu s-a ascultat în joc: tonul și volumul rămân de ales la volan.
 
 ### 3.1 Decizii pentru dezvoltator
 
@@ -832,9 +889,78 @@ Categorie nouă `assets/models/kyoto/`, cu subfolderele `buildings/`,
   `macchia`).
 - **Reutilizate:** `old_stone`, `granite`, `village_plaster`.
 - **Apa:** v12, pentru iaz și râu.
-- **Decalul `leaf_carpet`** (D, E), cu `RoadWear` folosit invers.
-- **Particule:** frunze care cad (billboard, un material, plafon) și stropii
-  tubului (reutilizați, memoria `strop-apa-particule`).
+- **Covorul de frunze** (D, E), cu `RoadWear` folosit invers: **făcut**, vezi
+  §5.1.1.
+- **Particule:** frunze care cad (billboard, un material, plafon 64): **făcut**,
+  vezi §5.1.1; stropii tubului (reutilizați, memoria `strop-apa-particule`).
+
+#### 5.1.1 Covorul de frunze și frunzele care cad (3 oct 2026, `kyoto/covor-frunze`)
+
+**Ce e.** `LeafCarpet` (`scenes/props/leaf_carpet.gd`, shader
+`assets/shaders/leaf_carpet.gdshader`): un panou transparent la 4 cm peste
+asfalt (3.264 triunghiuri), pe două zone scrise de `tools/gen_kyoto_route.py`:
+**D** 0.335–0.440 (densitate 1,0, de la aterizare până înainte de gura podului)
+și **E** 0.472–0.560 (densitate 0,6, după pod până la Inari). Zonele se topesc
+pe 22 m la capete; tablierul podului și tunelul de torii nu au covor. Frunzele
+vin din clasa `leaf_litter` (`autumn_foliage.png`, scara 0,25; niciun fișier
+de textură nou), în trei tente din clasele paletei (`maple_crimson`,
+`maple_orange`, `leaf_litter`), amestecate moale. Acoperirea e mai deasă la
+margini (centrul 0,55 din margine), deci pe ax se citește asfaltul. **Doar
+vizual:** nimic din fizică nu citește covorul (decizia §3.1 pct. 3).
+`FrunzeCazatoare` (`leaf_fall.gd`): un `GPUParticles3D`, **plafon 64 de
+particule** (`LeafFall.MAX_LEAVES`), un material, billboard cu alfa care cade
+continuu (miez plin până la 0,5 din rază, apoi cos², 128 px; salt maxim de alfa
+între pixeli vecini 0,106, sub pragul 0,12 al sondei). Emitatorul urmează
+camera, în față, doar cât camera e în zonele covorului (+45 m înainte, +12 m
+după), deci pe tot turul sunt cel mult 64 de frunze, nu 64 pe zonă.
+
+**Premisa „RoadWear invers" — ce ține și ce nu (măsurat pe cod).**
+- *Ține:* clasa `RoadWear` (foaia de uzură, SubViewport necurățat în spațiul
+  benzii) se refolosește **neschimbată**; doar shaderul citește invers:
+  `alfa_frunză *= 1 − uzură`.
+- *Nu ține ca atare:* (1) `Track._snow_road_material` creează foaia doar pentru
+  `road_surface == "snow"`, iar Kyoto e asfalt; (2) `Car._drop_trail` scrie în
+  foaie doar când terenul e `loose`, deci pe asfalt nu se apela niciodată
+  `stamp_wear`. Soluția mică: `Track.wear_sinks` (registru de consumatori cu
+  `stamp_road(dist, lateral)`) și `Car._drop_leaf_wear` (rotile din spate, la
+  2,2 m, doar pe bucla principală și la sol, ieșire imediată pe piste fără
+  consumatori). O singură foaie (128×4096, 2 MB) pentru ambele zone, „cusute"
+  una după alta; o stampilă = 0,30 alfă, deci ~2 treceri pe aceeași linie curăță
+  complet.
+
+**Cifre.**
+- Materiale pe Track18 (`probe_decor --track=18`): **17 → 18** (+1 covorul,
+  `--no-leaves` dă linia de bază). Materialul frunzelor care cad e încă +1, dar
+  garda numără doar `MeshInstance3D`/`MultiMeshInstance3D`, nu particule: total
+  real **19** din plafonul de 38. Desene +2 (câte un panou pe zonă).
+- ProbeRace `--track=11 --ai=7 --seconds=260`, 4 seed-uri, cu și fără covor
+  (`--no-leaves`), 8 mașini, 260 s: **fără regresie**. Cu covor: 0 repuneri și
+  0 ejectări pe toate 4 seed-urile; ture globale 23/24/23/23, tur mediu
+  75,11/75,89/75,23/74,68 s. Fără covor: repuneri 1/0/0/0, ture 24/23/23/23,
+  tur mediu 74,94/75,67/75,27/74,57 s. Diferențele sunt în zgomotul Jolt
+  (memoria `proberace-nedeterminism`; tur minim 63,67–64,07 s în ambele).
+- Masinile stampilează chiar: 8.000–9.000 de stampile per cursă de 260 s,
+  grupate lateral în jurul liniei de cursă (histograma pe benzi de 1 m din
+  ProbeRace, seed 1: vârf de 2.045 la banda [−1, 0), sub 20 la ±6 m).
+- Sonda `ProbeLeafCarpet` (cu fereastră): un material, plafon de particule,
+  muchia frunzei, lanțul `Track.stamp_wear_sinks → foaie`, alfa citit înapoi
+  din foaie pe linia stampilată (0,88) și 0,000 pe două puncte de control.
+
+**Capturi** (camera de joc, `--gamecam --car`): `docs/track_briefs/img/kyoto_covor/`
+`d_inainte_dupa_uzura.jpg` (D, fără covor / proaspăt / după 8 treceri) și
+`e_inainte_dupa_uzura.jpg` (E, fără covor / proaspăt / după 5 treceri).
+Comenzi: `--no-leaves`, fără flag, `--leaf-wear=N` (treceri **simulate** ale
+plutonului pe linia de cursă, nu ture reale: `LeafCarpet.simulate_passes`).
+
+**Nefăcut / de verificat.** (a) Capturile „după N tururi" sunt cu uzură
+simulată; stampilele reale sunt dovedite pe sondă și pe histogramă, nu pe
+captură de curse. (b) Feelul și lizibilitatea la volan (roșul e saturat
+deliberat; solul din jur e încă placeholder, fără arțarii din §5.3, deci
+contrastul final cu decorul nu e judecat). (c) Cost GPU: panoul e transparent pe
+~225 m + ~190 m de drum (overdraw pe carosabil) și nu e măsurat pe device
+(`ProbePerf`/§6). Dacă depășește bugetul, primul de stins e `FrunzeCazatoare`
+(§6, ordinea de tăiere), apoi `center_cover` mai mic. (d) Grip pe frunze: NU,
+conform §3.1.
 
 ### 5.2 Hero (unice)
 | asset | note |

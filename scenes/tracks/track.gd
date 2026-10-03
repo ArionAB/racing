@@ -4876,6 +4876,8 @@ func rebuild() -> void:
 	# referinta trebuie sa moara odata cu ea, altfel stamp_wear ar scrie
 	# intr-un viewport eliberat.
 	_road_wear = null
+	# Acelasi motiv pentru consumatorii externi de uzura (LeafCarpet).
+	wear_sinks.clear()
 	# Profilul de latime se recalculeaza: la Regenerate in editor, declaratiile
 	# se pot fi schimbat de sub noi, iar lungimea pistei (deci si lungimea
 	# rampelor, in fractii) se schimba la orice retus de traseu.
@@ -15215,6 +15217,31 @@ func stamp_wear(index: int, pos: Vector3, strength: float = 1.0) -> void:
 	if absf(rc.y) > width_at_index(index) + 0.5:
 		return
 	_road_wear.stamp(rc.x, rc.y, strength)
+
+## Consumatori EXTERNI de uzura (ex. LeafCarpet, Kyoto): noduri cu
+## `stamp_road(dist_m, lateral_m)`. Spre deosebire de foaia de zapada de mai sus
+## (legata de `road_surface == "snow"` si scrisa doar pe teren `loose`), asta
+## merge pe orice suprafata: masina cheama `stamp_wear_sinks` indiferent de sosea.
+var wear_sinks: Array[Node] = []
+
+func register_wear_sink(sink: Node) -> void:
+	if sink != null and not wear_sinks.has(sink):
+		wear_sinks.append(sink)
+
+func has_wear_sinks() -> bool:
+	return not wear_sinks.is_empty()
+
+## Depune roata la `pos` (lume) in toti consumatorii inregistrati. Doar pe
+## carosabil (aceeasi regula ca stamp_wear).
+func stamp_wear_sinks(index: int, pos: Vector3) -> void:
+	if wear_sinks.is_empty():
+		return
+	var rc := road_coords(index, pos)
+	if absf(rc.y) > width_at_index(index) + 0.5:
+		return
+	for sink in wear_sinks:
+		if is_instance_valid(sink):
+			sink.call("stamp_road", rc.x, rc.y)
 
 ## Esti pe asfalt, sau pe iarba lenta?
 ##

@@ -1675,6 +1675,18 @@ static func themes() -> Dictionary:
 			"hill_color": Color(0.30, 0.38, 0.22),
 			"terrain_alt_class": "leaf_litter",
 			"ground_zones": [
+				# D (POI D runda 2): humus de frunze ruginiu-INCHIS sub coroane, cu
+				# pete de muschi. Tenta veche (#DC8A4E, a clasei leaf_litter) iesea
+				# nisip bej patat (captura r1): acum brun mai inchis decat covorul
+				# rosu de pe drum, ca drumul sa se desparta de sol. ALFA < 1 =
+				# pete de muschi (vezi `_build_terrain`, zona de sol): pe 1 - a
+				# din pete solul revine la solul temei (oliv, muschi). Sta INAINTEA
+				# zonei vechi D si are raza mai mare, deci aceea nu mai castiga
+				# nicaieri (`zw > w` strict); ramasa doar ca merge-ul cu POI C sa
+				# nu atinga aceleasi randuri (de sters la integrare). Pana la
+				# iesirea de pe pod: fundul rapei Tsutenkyo e tot padure.
+				{"from": 0.331, "to": 0.468, "max_m": 60.0, "fade_m": 18.0,
+					"tint": Color(0.52, 0.27, 0.14, 0.45)},
 				# D: valea de artari, de la aterizarea de pe scena pana la gura
 				# podului Tsutenkyo (fractii din tools/gen_kyoto_route.py).
 				{"from": 0.331, "to": 0.449, "max_m": 45.0, "fade_m": 18.0,
@@ -6226,6 +6238,12 @@ func _build_terrain() -> void:
 	dirt_noise.seed = _world_seed() ^ 0xD127
 	dirt_noise.frequency = 0.035 # perioada ~28 m: pete de 8-15 m, ca in referinta
 	dirt_noise.fractal_octaves = 2
+	# Petele de muschi din zonele de sol cu alfa < 1 (5-8 m, mai dese decat
+	# petele de pamant).
+	var moss_noise := FastNoiseLite.new()
+	moss_noise.seed = _world_seed() ^ 0x3055
+	moss_noise.frequency = 0.08
+	moss_noise.fractal_octaves = 2
 	# SOLUL PE ZONE DE TUR (cheia `ground_zones`). Vezi `_ground_zone_field`.
 	# Null pe orice tema fara cheie: restul pistelor nu se schimba cu un pixel.
 	var zone_field: Array = _ground_zone_field(cells, step, origin)
@@ -6465,9 +6483,20 @@ func _build_terrain() -> void:
 						if zw > 0.0:
 							zw = smoothstep(0.0, 1.0, clampf(zw + dirt_noise.get_noise_2d(
 								v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0))
-							tint = tint.lerp(zone_tints[gi], zw)
+							var pre_tint := tint
+							var pre_grass := grass_w
+							var zt: Color = zone_tints[gi]
+							tint = tint.lerp(zt, zw)
 							if zone_alt:
 								grass_w = lerpf(grass_w, 1.0, zw)
+							# PETE DE MUSCHI (Kyoto POI D): alfa tentei de zona < 1
+							# lasa pe (1 - a) din pete solul de dinainte de zona
+							# (solul temei). Alfa 1 (toate celelalte zone) = nimic.
+							if zt.a < 0.999:
+								var mp := smoothstep(0.05, 0.3, moss_noise.get_noise_2d(
+									v.x, v.z)) * (1.0 - zt.a) * zw
+								tint = tint.lerp(pre_tint, mp)
+								grass_w = lerpf(grass_w, pre_grass, mp)
 					if snow_tint != null:
 						var snow_w := clampf(
 							(v.y - snow_line) / snow_fade, 0.0, 1.0)

@@ -9,7 +9,7 @@ extends Node3D
 ## din curba benzii, apoi se predau unor [FlockProp] (MultiMesh) copii.
 ##
 ## Ce construieste:
-##  1. [b]Portile[/b]: una la `spacing` (1,2 m) pe curba benzii, perpendiculara
+##  1. [b]Portile[/b]: una la `spacing` (2,4 m) pe curba benzii, perpendiculara
 ##     pe tangenta. Golul dintre ele (spacing - grosimea portii) e mai ingust
 ##     decat stalpul, ca in realitate: tunelul se citeste ca un perete de
 ##     stalpi, nu ca o succesiune de ferestre cu cer (ProbeFlicker, §3.2).
@@ -29,8 +29,8 @@ extends Node3D
 @export var gate_scene: PackedScene = null
 @export var large_gate_scene: PackedScene = null
 @export var cedar_scene: PackedScene = null
-## Pasul portilor pe curba (m). Adancimea portii e 0,7, deci golul e 0,5.
-@export_range(0.6, 6.0, 0.05, "suffix:m") var spacing: float = 1.2
+## Pasul portilor pe curba (m). Adancimea portii e 0,7, deci golul e 1,7.
+@export_range(0.6, 6.0, 0.05, "suffix:m") var spacing: float = 2.4
 ## Jumatatea culoarului liber (m): fata interioara a stalpilor.
 @export_range(2.0, 6.0, 0.05, "suffix:m") var half_gap: float = 3.2
 ## Cat de departe de axa buclei principale (peste jumatatea latimii soselei)
@@ -319,10 +319,13 @@ func _build_forest(track: Track, main: TrackRoute, pts: Array[Vector3],
 		for sgn: float in [-1.0, 1.0]:
 			# Fiecare rand pe fiecare parte porneste la alt decalaj: nu un zid de
 			# trunchiuri aliniate, ci o masa.
-			var i := first - 2 * stride + ((row_k * stride) / 2)
+			# Decalajul se tine in METRI (nu in indici): cu portile rare, stride=1
+			# n-ar mai putea face jumatati de pas, deci jumatatea o da `shift`.
+			var i := first - 2 * stride + (row_k / 2) * stride
+			var shift := float(row_k % 2) * 0.5 * float(stride) * spacing
 			while i <= last + 2 * stride:
 				var k := clampi(i, 0, pts.size() - 1)
-				var p := pts[k] + dirs[k].cross(Vector3.UP) * (lat + rng.randf_range(-0.6, 0.6)) * sgn
+				var p := pts[k] + dirs[k] * shift 						+ dirs[k].cross(Vector3.UP) * (lat + rng.randf_range(-0.6, 0.6)) * sgn
 				p.y = pts[k].y - 1.2
 				if _clear_of_main(track, main, p, 4.5):
 					pos.append(p)

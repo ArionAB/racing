@@ -106,6 +106,33 @@ SPECS = {
                     "camera": {"azimuth": 130.0, "elevation": 18.0, "lens": 80.0, "margin": 1.1}},
     "kiyomizu_hondo": {"category": "structures",
                     "camera": {"azimuth": 110.0, "elevation": 17.0, "lens": 70.0, "margin": 1.1}},
+
+    # --- gradina si bambus (build_kyoto_garden.py) ---
+    "shiba_fence": {"category": "props",
+                    "camera": {"azimuth": 20.0, "elevation": 12.0, "lens": 70.0, "margin": 1.1}},
+    "shiba_fence_x3": {"category": "props", "glb": "shiba_fence", "crop": "shiba_fence",
+                       "repeat": (3, 3.0),
+                       "camera": {"azimuth": 20.0, "elevation": 14.0, "lens": 60.0, "margin": 1.1}},
+    "karikomi_shrub_a": {"category": "plants",
+                         "camera": {"azimuth": 125.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "karikomi_shrub_b": {"category": "plants",
+                         "camera": {"azimuth": 125.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "garden_rock_a": {"category": "rocks", "tints": {"Rock_Moss": "moss"},
+                      "camera": {"azimuth": 125.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "garden_rock_b": {"category": "rocks",
+                      "camera": {"azimuth": 125.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "garden_rock_c": {"category": "rocks", "tints": {"RockC_Moss": "moss"},
+                      "camera": {"azimuth": 125.0, "elevation": 20.0, "lens": 70.0, "margin": 1.1}},
+    "stepping_stones": {"category": "rocks",
+                        "camera": {"azimuth": 125.0, "elevation": 32.0, "lens": 70.0, "margin": 1.1}},
+    "moss_mound": {"category": "rocks", "tints": {"Moss_Mound": "moss"},
+                   "camera": {"azimuth": 125.0, "elevation": 24.0, "lens": 70.0, "margin": 1.1}},
+    "leaf_pile": {"category": "props",
+                  "camera": {"azimuth": 125.0, "elevation": 22.0, "lens": 70.0, "margin": 1.1}},
+    "moso_culm": {"category": "plants",
+                  "camera": {"azimuth": 125.0, "elevation": 4.0, "lens": 70.0, "margin": 1.1}},
+    "bamboo_crown": {"category": "plants",
+                     "camera": {"azimuth": 125.0, "elevation": 10.0, "lens": 70.0, "margin": 1.1}},
 }
 
 

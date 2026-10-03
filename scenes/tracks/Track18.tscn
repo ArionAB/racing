@@ -1160,92 +1160,207 @@ transform = Transform3D(-0.431817, 0.000000, 0.564986, 0.000000, 0.711108, 0.000
 [node name="aFrunze210" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_leaf_pile")]
 transform = Transform3D(0.839569, 0.000000, -0.356662, 0.000000, 0.912186, 0.000000, 0.356662, 0.000000, 0.839569, 9.698485, 1.410632, -87.988678)
 
-[node name="aOrasCopac211" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(0.632545, 0.000000, 0.667705, 0.000000, 0.919752, 0.000000, -0.667705, 0.000000, 0.632545, 67.222855, 0.885760, 10.563705)
+[node name="aOrasCopac211" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.523190, 0.000000, 0.643612, 0.000000, 0.829436, 0.000000, -0.643612, 0.000000, -0.523190, 67.222855, 0.885760, 10.563705)
 
-[node name="aOrasCopac212" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
-transform = Transform3D(-0.739356, 0.000000, -0.348486, 0.000000, 0.817367, 0.000000, 0.348486, 0.000000, -0.739356, 116.960884, 10.561862, -87.521744)
+[node name="aOrasCopac212" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.060925, 0.000000, -0.751504, 0.000000, 0.753970, 0.000000, 0.751504, 0.000000, 0.060925, 116.960884, 10.561862, -87.521744)
 
-[node name="aOrasCopac213" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
-transform = Transform3D(-0.269872, 0.000000, -0.856566, 0.000000, 0.898074, 0.000000, 0.856566, 0.000000, -0.269872, 38.734142, 2.248630, 187.980988)
+[node name="aOrasCopac213" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(-0.489700, 0.000000, -0.724803, 0.000000, 0.874726, 0.000000, 0.724803, 0.000000, -0.489700, 38.734142, 2.248630, 187.980988)
 
-[node name="aOrasCopac214" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(0.948078, 0.000000, -0.024475, 0.000000, 0.948394, 0.000000, 0.024475, 0.000000, 0.948078, 105.911049, 9.080279, -146.630417)
+[node name="aOrasCopac214" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.308569, 0.000000, -0.803041, 0.000000, 0.860285, 0.000000, 0.803041, 0.000000, 0.308569, 105.911049, 9.080279, -146.630417)
 
 [node name="aOrasCopac215" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(-0.671141, 0.000000, -0.669482, 0.000000, 0.947964, 0.000000, 0.669482, 0.000000, -0.671141, 102.197357, 8.944140, 225.895996)
+transform = Transform3D(-0.643416, 0.000000, 0.563515, 0.000000, 0.855297, 0.000000, -0.563515, 0.000000, -0.643416, 102.197357, 8.944140, 225.895996)
 
-[node name="aOrasCopac216" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
-transform = Transform3D(0.025797, 0.000000, 0.894209, 0.000000, 0.894581, 0.000000, -0.894209, 0.000000, 0.025797, 58.213928, 0.953296, 87.711609)
+[node name="aOrasCopac216" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.068066, 0.000000, -0.760729, 0.000000, 0.763768, 0.000000, 0.760729, 0.000000, 0.068066, 58.213928, 0.953296, 87.711609)
 
-[node name="aOrasCopac217" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(-0.788188, 0.000000, -0.288836, 0.000000, 0.839444, 0.000000, 0.288836, 0.000000, -0.788188, 124.277283, 9.079532, 2.938675)
+[node name="aOrasCopac217" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.434872, 0.000000, 0.693830, 0.000000, 0.818849, 0.000000, -0.693830, 0.000000, 0.434872, 124.277283, 9.079532, 2.938675)
 
-[node name="aOrasCopac218" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(-0.094886, 0.000000, 0.936690, 0.000000, 0.941484, 0.000000, -0.936690, 0.000000, -0.094886, 77.533173, 7.552829, 211.143372)
+[node name="aOrasCopac218" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+transform = Transform3D(-0.190793, 0.000000, -0.772620, 0.000000, 0.795829, 0.000000, 0.772620, 0.000000, -0.190793, 77.533173, 7.552829, 211.143372)
 
-[node name="aOrasCopac219" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(0.697525, 0.000000, -0.427769, 0.000000, 0.818246, 0.000000, 0.427769, 0.000000, 0.697525, 162.272858, 10.649295, -64.534828)
+[node name="aOrasCopac219" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(-0.786331, 0.000000, -0.205883, 0.000000, 0.812837, 0.000000, 0.205883, 0.000000, -0.786331, 162.272858, 10.649295, -64.534828)
 
-[node name="aOrasCopac220" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
-transform = Transform3D(0.833902, 0.000000, -0.404590, 0.000000, 0.926868, 0.000000, 0.404590, 0.000000, 0.833902, 252.856003, 11.794040, 151.571075)
+[node name="aOrasCopac220" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.772571, 0.000000, -0.086244, 0.000000, 0.777370, 0.000000, 0.086244, 0.000000, 0.772571, 252.856003, 11.794040, 151.571075)
 
 [node name="aOrasCopac221" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(0.519456, 0.000000, 0.615236, 0.000000, 0.805202, 0.000000, -0.615236, 0.000000, 0.519456, 176.955612, 10.122790, -36.013290)
+transform = Transform3D(0.591667, 0.000000, -0.572805, 0.000000, 0.823514, 0.000000, 0.572805, 0.000000, 0.591667, 176.955612, 10.122790, -36.013290)
 
-[node name="aOrasCopac222" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
-transform = Transform3D(0.907394, 0.000000, 0.191910, 0.000000, 0.927466, 0.000000, -0.191910, 0.000000, 0.907394, 244.778015, 8.998935, -15.742432)
+[node name="aOrasCopac222" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.083701, 0.000000, -0.755500, 0.000000, 0.760122, 0.000000, 0.755500, 0.000000, 0.083701, 244.778015, 8.998935, -15.742432)
 
-[node name="aOrasCopac223" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(0.412224, 0.000000, -0.799080, 0.000000, 0.899142, 0.000000, 0.799080, 0.000000, 0.412224, 97.166191, 9.063663, 205.299438)
+[node name="aOrasCopac223" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.807452, 0.000000, 0.246130, 0.000000, 0.844132, 0.000000, -0.246130, 0.000000, -0.807452, 97.166191, 9.063663, 205.299438)
 
 [node name="aOrasCopac224" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
-transform = Transform3D(-0.762658, 0.000000, 0.278496, 0.000000, 0.811916, 0.000000, -0.278496, 0.000000, -0.762658, 213.902374, 16.221607, -137.860977)
+transform = Transform3D(0.845518, 0.000000, 0.192828, 0.000000, 0.867227, 0.000000, -0.192828, 0.000000, 0.845518, 213.902374, 16.221607, -137.860977)
 
-[node name="aOrasCopac225" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
-transform = Transform3D(0.686514, 0.000000, 0.587033, 0.000000, 0.903277, 0.000000, -0.587033, 0.000000, 0.686514, 66.474586, 5.431476, 183.883301)
+[node name="aOrasCopac225" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.837266, 0.000000, -0.159241, 0.000000, 0.852274, 0.000000, 0.159241, 0.000000, 0.837266, 66.474586, 5.431476, 183.883301)
 
 [node name="aOrasCopac226" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(0.494749, 0.000000, -0.754033, 0.000000, 0.901855, 0.000000, 0.754033, 0.000000, 0.494749, 113.708893, 8.275928, 37.994781)
+transform = Transform3D(0.494082, 0.000000, 0.611016, 0.000000, 0.785785, 0.000000, -0.611016, 0.000000, 0.494082, 113.708893, 8.275928, 37.994781)
 
-[node name="aOrasCopac227" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(0.844159, 0.000000, -0.106772, 0.000000, 0.850884, 0.000000, 0.106772, 0.000000, 0.844159, 109.969940, 7.916873, -47.401260)
+[node name="aOrasCopac227" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.780748, 0.000000, -0.168237, 0.000000, 0.798668, 0.000000, 0.168237, 0.000000, 0.780748, 109.969940, 7.916873, -47.401260)
 
 [node name="aOrasCopac228" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(-0.823760, 0.000000, -0.000490, 0.000000, 0.823760, 0.000000, 0.000490, 0.000000, -0.823760, 101.541550, 6.536273, 56.242523)
+transform = Transform3D(-0.878203, 0.000000, 0.024297, 0.000000, 0.878539, 0.000000, -0.024297, 0.000000, -0.878203, 101.541550, 6.536273, 56.242523)
 
-[node name="aOrasCopac229" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
-transform = Transform3D(-0.876632, 0.000000, -0.097914, 0.000000, 0.882083, 0.000000, 0.097914, 0.000000, -0.876632, 106.072052, 9.937030, 129.162994)
+[node name="aOrasCopac229" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.783012, 0.000000, -0.172279, 0.000000, 0.801741, 0.000000, 0.172279, 0.000000, 0.783012, 106.072052, 9.937030, 129.162994)
 
 [node name="aOrasCopac230" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
-transform = Transform3D(-0.210226, 0.000000, -0.803183, 0.000000, 0.830240, 0.000000, 0.803183, 0.000000, -0.210226, 99.459351, 6.990542, 78.876587)
+transform = Transform3D(0.822775, 0.000000, 0.215790, 0.000000, 0.850602, 0.000000, -0.215790, 0.000000, 0.822775, 175.644150, 10.933414, -51.320580)
 
 [node name="aOrasCopac231" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(-0.868497, 0.000000, -0.158164, 0.000000, 0.882781, 0.000000, 0.158164, 0.000000, -0.868497, 79.191162, 2.176822, -6.186523)
+transform = Transform3D(-0.253860, 0.000000, 0.770062, 0.000000, 0.810827, 0.000000, -0.770062, 0.000000, -0.253860, 99.459351, 6.990542, 78.876587)
 
 [node name="aOrasCopac232" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(-0.566882, 0.000000, 0.576740, 0.000000, 0.808693, 0.000000, -0.576740, 0.000000, -0.566882, 221.736969, 13.593020, -91.946419)
+transform = Transform3D(-0.549888, 0.000000, -0.687107, 0.000000, 0.880053, 0.000000, 0.687107, 0.000000, -0.549888, 79.191162, 2.176822, -6.186523)
 
-[node name="aOrasCopac233" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(-0.040850, 0.000000, 0.894354, 0.000000, 0.895287, 0.000000, -0.894354, 0.000000, -0.040850, 42.649345, 0.147571, -21.894836)
+[node name="aOrasCopac233" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.869433, 0.000000, -0.092894, 0.000000, 0.874382, 0.000000, 0.092894, 0.000000, -0.869433, 221.736969, 13.593020, -91.946419)
 
 [node name="aOrasCopac234" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(-0.422032, 0.000000, 0.749935, 0.000000, 0.860531, 0.000000, -0.749935, 0.000000, -0.422032, 44.945251, -0.146939, 6.331482)
+transform = Transform3D(-0.811891, 0.000000, 0.223676, 0.000000, 0.842139, 0.000000, -0.223676, 0.000000, -0.811891, 42.649345, 0.147571, -21.894836)
 
 [node name="aOrasCopac235" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(-0.810151, 0.000000, 0.272148, 0.000000, 0.854640, 0.000000, -0.272148, 0.000000, -0.810151, 163.448608, 10.181705, 161.068848)
+transform = Transform3D(0.706287, 0.000000, -0.287539, 0.000000, 0.762575, 0.000000, 0.287539, 0.000000, 0.706287, 44.945251, -0.146939, 6.331482)
 
-[node name="aOrasCopac236" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
-transform = Transform3D(0.804361, 0.000000, 0.094217, 0.000000, 0.809860, 0.000000, -0.094217, 0.000000, 0.804361, 199.381653, 13.951770, -97.455688)
+[node name="aOrasCopac236" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.742917, 0.000000, 0.467971, 0.000000, 0.878022, 0.000000, -0.467971, 0.000000, 0.742917, 163.448608, 10.181705, 161.068848)
+
+[node name="aOrasCopac237" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.498314, 0.000000, -0.745596, 0.000000, 0.896789, 0.000000, 0.745596, 0.000000, -0.498314, 199.381653, 13.951770, -97.455688)
+
+[node name="aOrasCopac238" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.525678, 0.000000, 0.578760, 0.000000, 0.781857, 0.000000, -0.578760, 0.000000, 0.525678, 188.718353, 11.752124, 220.139313)
+
+[node name="aOrasCopac239" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.605401, 0.000000, 0.493835, 0.000000, 0.781270, 0.000000, -0.493835, 0.000000, -0.605401, 143.284546, 9.152301, 65.498032)
+
+[node name="aOrasCopac240" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.364506, 0.000000, -0.779199, 0.000000, 0.860242, 0.000000, 0.779199, 0.000000, -0.364506, 58.630028, 2.806674, 157.975403)
+
+[node name="aOrasCopac241" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.450879, 0.000000, -0.683495, 0.000000, 0.818815, 0.000000, 0.683495, 0.000000, 0.450879, 66.495964, 2.122562, -83.801231)
+
+[node name="aOrasCopac242" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.023501, 0.000000, -0.856368, 0.000000, 0.856690, 0.000000, 0.856368, 0.000000, 0.023501, 111.451492, 9.969806, -109.155533)
+
+[node name="aOrasCopac243" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.425294, 0.000000, 0.723966, 0.000000, 0.839644, 0.000000, -0.723966, 0.000000, -0.425294, 177.024094, 13.068942, -117.238121)
+
+[node name="aOrasCopac244" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.154236, 0.000000, 0.761359, 0.000000, 0.776824, 0.000000, -0.761359, 0.000000, -0.154236, 234.129425, 11.036456, 111.259583)
+
+[node name="aOrasCopac245" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.785337, 0.000000, 0.436727, 0.000000, 0.898602, 0.000000, -0.436727, 0.000000, -0.785337, 75.343330, 2.223056, -42.699921)
+
+[node name="aOrasCopac246" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.794393, 0.000000, 0.226913, 0.000000, 0.826166, 0.000000, -0.226913, 0.000000, 0.794393, 171.884705, 11.068286, 200.824310)
+
+[node name="aOrasCopac247" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.810278, 0.000000, 0.328533, 0.000000, 0.874348, 0.000000, -0.328533, 0.000000, -0.810278, 160.201981, 12.387897, -136.761032)
+
+[node name="aOrasCopac248" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.556793, 0.000000, 0.657325, 0.000000, 0.861449, 0.000000, -0.657325, 0.000000, 0.556793, 39.629494, 1.756503, 171.215240)
+
+[node name="aOrasCopac249" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.094562, 0.000000, 0.801299, 0.000000, 0.806860, 0.000000, -0.801299, 0.000000, 0.094562, 197.806076, 11.795505, 17.936554)
+
+[node name="aOrasCopac250" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.591636, 0.000000, -0.495470, 0.000000, 0.771702, 0.000000, 0.495470, 0.000000, 0.591636, 50.271130, 0.557803, -39.782372)
+
+[node name="aOrasCopac251" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.757218, 0.000000, 0.140175, 0.000000, 0.770083, 0.000000, -0.140175, 0.000000, 0.757218, 141.175110, 9.390079, 213.310516)
+
+[node name="aOrasCopac252" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.194226, 0.000000, -0.809427, 0.000000, 0.832403, 0.000000, 0.809427, 0.000000, 0.194226, 210.342728, 12.014773, 39.035782)
+
+[node name="aOrasCopac253" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.712091, 0.000000, 0.374996, 0.000000, 0.804796, 0.000000, -0.374996, 0.000000, -0.712091, 195.129013, 12.633365, -73.796364)
+
+[node name="aOrasCopac254" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.764767, 0.000000, 0.157631, 0.000000, 0.780843, 0.000000, -0.157631, 0.000000, 0.764767, 84.022858, 8.371676, 172.534088)
+
+[node name="aOrasCopac255" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(-0.299380, 0.000000, -0.696419, 0.000000, 0.758042, 0.000000, 0.696419, 0.000000, -0.299380, 45.329075, 1.367252, 145.011444)
+
+[node name="aOrasCopac256" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.168831, 0.000000, 0.880714, 0.000000, 0.896750, 0.000000, -0.880714, 0.000000, 0.168831, 108.263489, 7.344958, 2.538300)
+
+[node name="aOrasCopac257" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.227897, 0.000000, -0.782956, 0.000000, 0.815449, 0.000000, 0.782956, 0.000000, 0.227897, 217.355774, 8.866885, 159.277710)
+
+[node name="aOrasCopac258" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.755491, 0.000000, 0.136272, 0.000000, 0.767682, 0.000000, -0.136272, 0.000000, 0.755491, 47.118938, 1.228366, -77.590492)
+
+[node name="aOrasCopac259" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(-0.810933, 0.000000, -0.297559, 0.000000, 0.863801, 0.000000, 0.297559, 0.000000, -0.810933, 152.452789, 8.963153, 49.491348)
+
+[node name="aOrasCopac260" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.750781, 0.000000, 0.348983, 0.000000, 0.827925, 0.000000, -0.348983, 0.000000, 0.750781, 50.567474, 2.889514, -122.578842)
+
+[node name="aOrasCopac261" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.283235, 0.000000, -0.818880, 0.000000, 0.866480, 0.000000, 0.818880, 0.000000, 0.283235, 40.933067, -0.166898, 31.559906)
+
+[node name="aOrasCopac262" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.549459, 0.000000, 0.612818, 0.000000, 0.823075, 0.000000, -0.612818, 0.000000, 0.549459, 136.802048, 8.999499, 18.373169)
+
+[node name="aOrasCopac263" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.007491, 0.000000, -0.818554, 0.000000, 0.818588, 0.000000, 0.818554, 0.000000, 0.007491, 157.644333, 10.509112, -272.864471)
+
+[node name="aOrasCopac264" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.790071, 0.000000, 0.269597, 0.000000, 0.834802, 0.000000, -0.269597, 0.000000, -0.790071, -74.796631, 8.396014, -230.358032)
+
+[node name="aOrasCopac265" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+transform = Transform3D(-0.636883, 0.000000, -0.536748, 0.000000, 0.832897, 0.000000, 0.536748, 0.000000, -0.636883, 17.160782, 6.875415, -266.156494)
+
+[node name="aOrasCopac266" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(-0.463370, 0.000000, -0.686294, 0.000000, 0.828076, 0.000000, 0.686294, 0.000000, -0.463370, 79.924683, 7.731738, -272.666504)
+
+[node name="aOrasCopac267" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.147931, 0.000000, 0.778674, 0.000000, 0.792601, 0.000000, -0.778674, 0.000000, 0.147931, -8.909821, 6.098605, -258.269775)
+
+[node name="aOrasCopac268" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(0.159710, 0.000000, -0.777235, 0.000000, 0.793474, 0.000000, 0.777235, 0.000000, 0.159710, 174.527420, 13.390964, -251.104034)
+
+[node name="aOrasCopac269" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_b")]
+transform = Transform3D(0.505536, 0.000000, -0.638100, 0.000000, 0.814087, 0.000000, 0.638100, 0.000000, 0.505536, -69.494263, 3.973178, -172.887756)
+
+[node name="aOrasCopac270" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.030827, 0.000000, -0.781491, 0.000000, 0.782098, 0.000000, 0.781491, 0.000000, -0.030827, -26.994816, 10.942950, -292.698364)
+
+[node name="aOrasCopac271" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(-0.390767, 0.000000, 0.698565, 0.000000, 0.800433, 0.000000, -0.698565, 0.000000, -0.390767, 93.421005, 8.095996, -280.689270)
+
+[node name="aOrasCopac272" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_ginkgo")]
+transform = Transform3D(0.536973, 0.000000, 0.677499, 0.000000, 0.864491, 0.000000, -0.677499, 0.000000, 0.536973, 103.853851, 8.477191, -298.274994)
+
+[node name="aOrasCopac273" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_c")]
+transform = Transform3D(-0.293198, 0.000000, -0.773571, 0.000000, 0.827271, 0.000000, 0.773571, 0.000000, -0.293198, 15.442451, 9.529071, -286.865875)
+
+[node name="aOrasCopac274" parent="DecorManual/ZoneA_Yasaka" instance=ExtResource("poia_momiji_a")]
+transform = Transform3D(-0.662813, 0.000000, -0.374585, 0.000000, 0.761338, 0.000000, 0.374585, 0.000000, -0.662813, 171.246506, 12.213367, -266.268341)
 
 [node name="OrasVechi" type="Node3D" parent="."]
 script = ExtResource("poia_cityfill")
 models = Array[PackedScene]([ExtResource("poia_machiya_a"), ExtResource("poia_machiya_b"), ExtResource("poia_machiya_c"), ExtResource("poia_machiya_d"), ExtResource("poia_machiya_e")])
 weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)
 indigo_ratio = 0.0
+row_mode = true
 min_road_m = 32.0
 seed_value = 20261003
-exclude_xz = PackedVector3Array(67.2, 10.6, 6.5, 117.0, -87.5, 6.5, 38.7, 188.0, 6.5, 105.9, -146.6, 6.5, 102.2, 225.9, 6.5, 58.2, 87.7, 6.5, 124.3, 2.9, 6.5, 77.5, 211.1, 6.5, 162.3, -64.5, 6.5, 252.9, 151.6, 6.5, 177.0, -36.0, 6.5, 244.8, -15.7, 6.5, 97.2, 205.3, 6.5, 213.9, -137.9, 6.5, 66.5, 183.9, 6.5, 113.7, 38.0, 6.5, 110.0, -47.4, 6.5, 101.5, 56.2, 6.5, 106.1, 129.2, 6.5, 99.5, 78.9, 6.5, 79.2, -6.2, 6.5, 221.7, -91.9, 6.5, 42.6, -21.9, 6.5, 44.9, 6.3, 6.5, 163.4, 161.1, 6.5, 199.4, -97.5, 6.5)
+exclude_xz = PackedVector3Array(67.2, 10.6, 5.0, 117.0, -87.5, 5.0, 38.7, 188.0, 5.0, 105.9, -146.6, 5.0, 102.2, 225.9, 5.0, 58.2, 87.7, 5.0, 124.3, 2.9, 5.0, 77.5, 211.1, 5.0, 162.3, -64.5, 5.0, 252.9, 151.6, 5.0, 177.0, -36.0, 5.0, 244.8, -15.7, 5.0, 97.2, 205.3, 5.0, 213.9, -137.9, 5.0, 66.5, 183.9, 5.0, 113.7, 38.0, 5.0, 110.0, -47.4, 5.0, 101.5, 56.2, 5.0, 106.1, 129.2, 5.0, 175.6, -51.3, 5.0, 99.5, 78.9, 5.0, 79.2, -6.2, 5.0, 221.7, -91.9, 5.0, 42.6, -21.9, 5.0, 44.9, 6.3, 5.0, 163.4, 161.1, 5.0, 199.4, -97.5, 5.0, 188.7, 220.1, 5.0, 143.3, 65.5, 5.0, 58.6, 158.0, 5.0, 66.5, -83.8, 5.0, 111.5, -109.2, 5.0, 177.0, -117.2, 5.0, 234.1, 111.3, 5.0, 75.3, -42.7, 5.0, 171.9, 200.8, 5.0, 160.2, -136.8, 5.0, 39.6, 171.2, 5.0, 197.8, 17.9, 5.0, 50.3, -39.8, 5.0, 141.2, 213.3, 5.0, 210.3, 39.0, 5.0, 195.1, -73.8, 5.0, 84.0, 172.5, 5.0, 45.3, 145.0, 5.0, 108.3, 2.5, 5.0, 217.4, 159.3, 5.0, 47.1, -77.6, 5.0, 152.5, 49.5, 5.0, 50.6, -122.6, 5.0, 40.9, 31.6, 5.0, 136.8, 18.4, 5.0)
 region_xz = PackedVector2Array(32.0, -150.0, 170.0, -150.0, 258.0, -140.0, 262.0, 40.0, 255.0, 200.0, 200.0, 228.0, 40.0, 228.0, 32.0, 180.0)
 
 [node name="OrasPagoda" type="Node3D" parent="."]
@@ -1253,8 +1368,9 @@ script = ExtResource("poia_cityfill")
 models = Array[PackedScene]([ExtResource("poia_machiya_a"), ExtResource("poia_machiya_b"), ExtResource("poia_machiya_c"), ExtResource("poia_machiya_d"), ExtResource("poia_machiya_e")])
 weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)
 indigo_ratio = 0.0
+row_mode = true
 min_road_m = 26.0
 seed_value = 20261004
-exclude_xz = PackedVector3Array(4.0, -200.0, 26.0)
+exclude_xz = PackedVector3Array(157.6, -272.9, 5.0, -74.8, -230.4, 5.0, 17.2, -266.2, 5.0, 79.9, -272.7, 5.0, -8.9, -258.3, 5.0, 174.5, -251.1, 5.0, -69.5, -172.9, 5.0, -27.0, -292.7, 5.0, 93.4, -280.7, 5.0, 103.9, -298.3, 5.0, 15.4, -286.9, 5.0, 171.2, -266.3, 5.0, 4.0, -200.0, 26.0)
 region_xz = PackedVector2Array(-75.0, -165.0, -30.0, -165.0, -28.0, -232.0, 40.0, -236.0, 175.0, -246.0, 175.0, -300.0, -75.0, -300.0)
 

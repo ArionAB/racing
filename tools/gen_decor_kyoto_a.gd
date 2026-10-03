@@ -451,33 +451,41 @@ func _old_town() -> void:
 	var models := ["machiya_a", "machiya_b", "machiya_c", "machiya_d", "machiya_e"]
 	for m in models:
 		_res_id(m, "res://assets/models/kyoto/buildings/%s.glb" % m)
-	# Curtile din interior: puncte la >= 16 m unul de altul si >= 40 m de banda.
+	# Curtile (runda 3): ~1 la 15 case, puncte la >= 14 m unul de altul si
+	# departe de banda; fiecare scoate din siruri ~1-2 case (raza 5 m) si
+	# primeste un artar/ginkgo.
+	var courts := _courts(PackedVector2Array(TOWN_IN), Rect2(32, -150, 230, 378), 40.0, 52)
+	var courts_p := _courts(PackedVector2Array(TOWN_PAGODA), Rect2(-75, -300, 250, 135), 32.0, 12)
+	courts_p.append(Vector3(PAGODA.x, PAGODA.z, 26.0))
+	_cityfill("OrasVechi", PackedVector2Array(TOWN_IN), 32.0, courts, 20261003)
+	_cityfill("OrasPagoda", PackedVector2Array(TOWN_PAGODA), 26.0, courts_p, 20261004)
+	print("; curti cu copac: %d + %d" % [courts.size(), courts_p.size() - 1])
+
+
+func _courts(poly: PackedVector2Array, box: Rect2, road_m: float, want: int) -> Array[Vector3]:
 	var courts: Array[Vector3] = []
-	var poly := PackedVector2Array(TOWN_IN)
 	var tries := 0
-	while courts.size() < 26 and tries < 4000:
+	while courts.size() < want and tries < 6000:
 		tries += 1
-		var c := Vector2(_rng.randf_range(32.0, 262.0), _rng.randf_range(-150.0, 228.0))
+		var c := Vector2(_rng.randf_range(box.position.x, box.end.x),
+			_rng.randf_range(box.position.y, box.end.y))
 		if not Geometry2D.is_point_in_polygon(c, poly):
 			continue
-		if _road_dist(c) < 40.0:
+		if _road_dist(c) < road_m:
 			continue
 		var ok := true
 		for q in courts:
-			if c.distance_to(Vector2(q.x, q.y)) < 16.0:
+			if c.distance_to(Vector2(q.x, q.y)) < 14.0:
 				ok = false
 				break
 		if ok:
-			courts.append(Vector3(c.x, c.y, 6.5))
+			courts.append(Vector3(c.x, c.y, 5.0))
 	var trees := ["momiji_a", "momiji_b", "momiji_c", "momiji_b", "momiji_a", "ginkgo"]
 	for q in courts:
 		var tm: String = trees[_rng.randi_range(0, trees.size() - 1)]
 		_raw(tm, "plants", "aOrasCopac", Vector3(q.x, _sol_real(q.x, q.y) - 0.05, q.y),
-			_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 0.95), "")
-	var pag_ex: Array[Vector3] = [Vector3(PAGODA.x, PAGODA.z, 26.0)]
-	_cityfill("OrasVechi", PackedVector2Array(TOWN_IN), 32.0, courts, 20261003)
-	_cityfill("OrasPagoda", PackedVector2Array(TOWN_PAGODA), 26.0, pag_ex, 20261004)
-	print("; curti cu copac: %d" % courts.size())
+			_rng.randf_range(0.0, TAU), _rng.randf_range(0.75, 0.9), "")
+	return courts
 
 
 func _cityfill(nm: String, poly: PackedVector2Array, min_road: float,
@@ -496,6 +504,8 @@ func _cityfill(nm: String, poly: PackedVector2Array, min_road: float,
 	_cf_lines.append("models = Array[PackedScene]([%s])" % ", ".join(ms))
 	_cf_lines.append("weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)")
 	_cf_lines.append("indigo_ratio = 0.0")
+	# Runda 3: siruri lipite pe ulite (modul opt-in din city_fill.gd).
+	_cf_lines.append("row_mode = true")
 	_cf_lines.append("min_road_m = %.1f" % min_road)
 	_cf_lines.append("seed_value = %d" % sd)
 	_cf_lines.append("exclude_xz = PackedVector3Array(%s)" % ", ".join(ev))

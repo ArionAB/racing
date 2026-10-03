@@ -117,6 +117,12 @@ Construite cu `_verm_pagoda(cfg)` din `build_kyoto_pagodas.py` (hip_roof, frame_
 - Abateri ramase: ferestrele sunt patrate cu rama alba (pe planșa sunt rotunjite, cu inel alb gros); la koyasu consolele ascund ferestrele; acoperisul e mai inchis/violaceu decat gri-ul planșei (slotul `VOLCANIC_BLACK` e cerut); galeria e un sort plin vermilion + lisa, fara balustrada fina; planșa are corpurile mai inalte vizibil intre streasini.
 - Diferente intre cele doua: sanjunoto mai lata, streasini descrescatoare, sorin gros; koyasu mai ingusta, streasini aproape egale, varf mai inalt, sorin subtire.
 
+## `structures/kinkakuji.glb` (2 runde)
+
+- 3 632 tri, 14,0 x 11,4 x 13,6 m (streasina etajului 2 = 13,2 m lat; fenixul urca pana la 13,6). Noduri: `Kin_Wood` (`BEAM`/`WOOD`, 600), `Kin_Gold` (`CAR_YELLOW`, 1 724; verify cu `--allow-car-slots=Kin_Gold`), `Kin_Roof` (1 008), plus `Kin_Windows` (goluri) si `Kin_Stone` (platforma) in plus fata de contract. Fara `SAND_LIGHT` pe fetele de sus.
+- Comparatie: `docs/asset_briefs/img/kyoto_fidelity/kinkakuji.png`, 4 azimuturi: `kinkakuji_views.png`.
+- Abateri: parterul e perete intunecat cu stalpi si panouri (pe planșa, ferestre mari cu zabrele); acoperisul de sus pe planșa e mai larg si mai plat, cu varf curbat; fenixul e un grup de cutii aurii (se citeste "pasare" doar de aproape); etajul 3 mai putin retras decat pe desen.
+
 ## Stare la oprire (kit-b)
 
-Pagodele facute si comise; urmeaza `kinkakuji`.
+Toate cele trei piese (sanjunoto, koyasu, kinkakuji) facute, verify OK, comise.

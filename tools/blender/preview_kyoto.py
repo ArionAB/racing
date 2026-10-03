@@ -64,6 +64,8 @@ SPECS = {
                          "camera": {"azimuth": 125.0, "elevation": 14.0, "lens": 90.0, "margin": 1.1}},
     "koyasu_pagoda": {"category": "structures",
                       "camera": {"azimuth": 125.0, "elevation": 14.0, "lens": 90.0, "margin": 1.1}},
+    "kinkakuji": {"category": "structures",
+                  "camera": {"azimuth": 125.0, "elevation": 14.0, "lens": 80.0, "margin": 1.1}},
     "momiji_a": {"category": "plants", "tints": {"Maple_Crown": "maple_crimson"},
                  "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 70.0, "margin": 1.1}},
 }

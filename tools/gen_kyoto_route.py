@@ -663,6 +663,20 @@ if len(sys.argv) > 1:
         d.update(kw)
         forest_zones.append(d)
 
+    # === POI C (Kiyomizu) === LUMINISURI: discuri cu `claim` si fara specii
+    # (MeshForest le citeste ca rezervare), PRIMELE in lista, ca sa goleasca
+    # zonele de artari de dupa ele. Centrele sunt cele din
+    # tools/gen_decor_kyoto_c.gd (DecorManual/ZoneC_Kiyomizu).
+    for lbl, cx_, cz_, rad in (("luminis C sala N", 384.0, -160.0, 13.0),
+                               ("luminis C sala S", 384.0, -144.0, 13.0),
+                               ("luminis C2 Koyasu", 350.0, -42.0, 9.0),
+                               ("luminis C sanjunoto", 288.0, -216.0, 9.0),
+                               ("luminis C clopotnita", 312.0, -215.5, 6.0),
+                               ("luminis C1 vedere scena", 305.0, -172.0, 16.0),
+                               ("luminis C1 vedere colt", 330.0, -184.0, 9.0),
+                               ("luminis C1 buza rapei", 322.0, -164.0, 12.0)):
+        fz(lbl, 1, (), (), center=(cx_, 0.0, cz_), radius=rad, claim=True)
+    # === sfarsit POI C ===
     # Petele de ginkgo: 4, pe EXTERIORUL buclei (stanga la D/F, dreapta la C/H
     # dupa cum curge soseaua), ca sa se vada in fata-lateral din camera de joc.
     for lbl, f, lat, rad in (("pata ginkgo C", 0.222, -40.0, 24.0),
@@ -748,6 +762,41 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 """
     # --- sfarsit GRUPA PADUREA IN MASA ---------------------------------------
 
+    # === DECOR MANUAL (POI-uri) ==============================================
+    # Generatorul asta rescrie TOT Track18.tscn, deci decorul manual al POI-urilor
+    # (noduri sub `DecorManual`, memoria decor-manual-sursa-de-adevar) nu poate
+    # sta doar in .tscn: ar disparea la prima regenerare. Fiecare POI isi emite
+    # blocul cu generatorul lui (`tools/gen_decor_kyoto_<x>.gd --out=...`) in
+    # `tools/kyoto_decor/poi_<x>.part`, cu doua sectiuni: `;;EXT` (ext_resource-uri,
+    # id-uri cu prefixul POI-ului) si `;;NODES` (zona + piesele). Aici se lipesc
+    # toate, in ordinea numelui; un POI nou = un fisier nou, fara cod aici.
+    import glob as _glob
+    import os as _os
+    decor_ext = ""
+    decor_nodes = ""
+    _parts = sorted(_glob.glob(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                                             "kyoto_decor", "poi_*.part")))
+    for _pp in _parts:
+        _sec = None
+        for _ln in open(_pp, encoding="utf-8").read().splitlines():
+            if _ln.strip() == ";;EXT":
+                _sec = "ext"
+                continue
+            if _ln.strip() == ";;NODES":
+                _sec = "nodes"
+                continue
+            if _sec == "ext" and _ln.strip():
+                decor_ext += _ln + "\n"
+            elif _sec == "nodes":
+                decor_nodes += _ln + "\n"
+    if _parts:
+        decor_ext = ('[ext_resource type="Script" uid="uid://twspgftscxb4" '
+                     'path="res://scenes/props/world_prop.gd" id="dm_prop"]\n') + decor_ext
+        decor_nodes = ('\n[node name="DecorManual" type="Node3D" parent="."]\n'
+                       'script = ExtResource("dm_prop")\n\n') + decor_nodes
+    print(f"decor manual: {len(_parts)} blocuri POI")
+    # === /DECOR MANUAL ===
+
     # CameraZone-uri: Tsutenkyo (3,2 / 5,5 / 4) pe fractie, tunel (2,4 / 5,2) in cutie.
     tscn = f"""[gd_scene format=3]
 
@@ -770,7 +819,7 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/togetsukyo_module.glb" id="intc_toget"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kakezukuri_scaffold.glb" id="intc_scaffold"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/iron_truss_bridge.glb" id="intc_truss"]
-{forest_ext}"""
+{forest_ext}{decor_ext}"""
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
 [sub_resource type="BoxShape3D" id="BoxShape3D_zone{k}"]
@@ -982,6 +1031,7 @@ script = ExtResource("10_respawn")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})
 shape = SubResource("BoxShape3D_zone{k}")
 """
+    tscn += decor_nodes   # DECOR MANUAL (POI-uri)
     with open(sys.argv[1], "w", encoding="utf-8", newline="\n") as f:
         f.write(tscn)
     print(f"\nscris: {sys.argv[1]}")

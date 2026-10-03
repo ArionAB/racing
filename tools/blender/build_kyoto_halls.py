@@ -32,81 +32,89 @@ AO_GATE = dict(samples=10, dist=4.0, gradient="vertical",
 clear_built()
 
 
+def _prism_x(b, outline, x0, x1, slot):
+    """Prisma extrudata pe X dintr-un contur (y, z) -- profilul frontonului."""
+    bm = b.bm
+    f0 = [bm.verts.new((x0, y, z)) for (y, z) in outline]
+    f1 = [bm.verts.new((x1, y, z)) for (y, z) in outline]
+    n = len(outline)
+    faces = [bm.faces.new(tuple(reversed(f0))), bm.faces.new(tuple(f1))]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append(bm.faces.new((f0[i], f0[j], f1[j], f1[i])))
+    for f in faces:
+        f[b.slot] = slot
+    return set(faces)
+
+
 def _gate(P):
     """Poarta cu doua etaje, comuna Niomon/Romon; parametrii dau ce le
-    deosebeste. Intoarce (wood, roof, plaster) -- trei Builder."""
+    deosebeste. Travei laterale masive inchise (stalpi grosi, panouri albe),
+    gol liber la mijloc, acoperis irimoya (hip jos + fronton triunghiular
+    vermilion pe laturile scurte). Intoarce (wood, roof, plaster)."""
     wood, roof, plaster = Builder(), Builder(), Builder()
-    xi, xo, pd = P["x_in"], P["x_out"], P["post_d"]   # stalpi: interior/exterior, adancime
+    xi, xm, xo, pd = P["x_in"], P["x_mid"], P["x_out"], P["post_d"]
     pw = P["post_w"]
-    zp = P["post_h"]                                    # varful stalpilor parterului
-    zg = P["gallery_z"]
-    zu = P["upper_h"]                                   # inaltimea etajului 2
-    ze = P["eave_z"]
+    zp, zg, zu, ze = P["post_h"], P["gallery_z"], P["upper_h"], P["eave_z"]
 
-    # --- parter: stalpi pe socluri de piatra -------------------------------
+    # --- parter: stalpi grosi pe socluri de piatra ---------------------------
     for sx in (-1, 1):
-        for x in (xi, xo):
+        for x, w_ in ((xi, pw), (xm, pw * 0.8), (xo, pw)):
             for sy in (-1, 1):
                 px, py = sx * x, sy * pd
-                wood.box((px, py, 0.25), (pw + 0.3, pw + 0.3, 0.5), STONE)
-                wood.box((px, py, 0.5 + (zp - 0.5) * 0.5), (pw, pw, zp - 0.5), VERM)
-                # cap de stalp: kasagi sub grinda
-                wood.box((px, py, zp - 0.2), (pw + 0.18, pw + 0.18, 0.4), VERM)
-    # grinzi transversale (peste gol): kamoi + nuki, doar peste fata si spatele
+                wood.box((px, py, 0.25), (w_ + 0.3, w_ + 0.3, 0.5), STONE)
+                wood.box((px, py, 0.5 + (zp - 0.5) * 0.5), (w_, w_, zp - 0.5), VERM)
+                wood.box((px, py, zp - 0.2), (w_ + 0.18, w_ + 0.18, 0.4), VERM)
     for sy in (-1, 1):
         wood.box((0, sy * pd, zp + 0.2), (2 * xo + pw + 0.6, 0.9, 0.6), BEAM)    # kasagi negru
         wood.box((0, sy * pd, zp - 0.6), (2 * xi, 0.7, 0.55), VERM)               # peste gol
         for sx in (-1, 1):
-            wood.box((sx * (xi + xo) * 0.5, sy * pd, zp - 0.55),
-                     (xo - xi, 0.45, 0.42), VERM)
-            wood.box((sx * (xi + xo) * 0.5, sy * pd, 1.1), (xo - xi, 0.4, 0.3), VERM)
-    # grinzi pe adancime (leaga randul din fata de cel din spate)
+            cx_ = sx * (xi + xo) * 0.5
+            L_ = xo - xi
+            wood.box((cx_, sy * pd, zp - 0.6), (L_, 0.7, 0.55), VERM)              # nuki sus
+            wood.box((cx_, sy * pd, zp - 2.2), (L_, 0.6, 0.45), VERM)              # nuki mijloc
+            wood.box((cx_, sy * pd, 1.0), (L_, 0.6, 0.45), VERM)                   # talpa jos
     for sx in (-1, 1):
-        for x in (xi, xo):
-            wood.box((sx * x, 0, zp + 0.05), (0.5, 2 * pd, 0.5), VERM)
-
-    # --- panouri albe + usi cu zabrele in cele doua travee laterale --------
-    bay_c = (xi + xo) * 0.5
-    bay_w = xo - xi - pw
+        for x in (xi, xm, xo):
+            wood.box((sx * x, 0, zp + 0.05), (0.55, 2 * pd, 0.55), VERM)           # grinzi pe adancime
+    # --- panouri albe in travei (jos si sus), pe fata, spate si latura ----------
     for sx in (-1, 1):
-        for sy in (-1, 1):
-            plaster.box((sx * bay_c, sy * (pd + 0.02), 0.5 + (zp - 1.5) * 0.5 + 0.35),
-                        (bay_w, 0.14, zp - 1.7), PLASTER)
-            # rame pe panou
-            wood.box((sx * bay_c, sy * (pd + 0.1), 1.0), (bay_w, 0.1, 0.18), VERM)
-            wood.box((sx * bay_c, sy * (pd + 0.1), zp - 1.4), (bay_w, 0.1, 0.18), VERM)
+        for (xa, xb) in ((xi, xm), (xm, xo)):
+            cxp = sx * (xa + xb) * 0.5
+            wp = (xb - xa) - (pw + 0.2)
+            for sy in (-1, 1):
+                yy = sy * (pd + 0.02)
+                plaster.box((cxp, yy, (1.25 + zp - 2.45) * 0.5 + 0.0), (wp, 0.16, zp - 3.7), PLASTER)
+                plaster.box((cxp, yy, zp - 1.45), (wp, 0.16, 0.95), PLASTER)
+        plaster.box((sx * (xo + 0.02), 0, (1.25 + zp - 0.9) * 0.5), (0.16, 2 * pd - pw - 0.3, zp - 2.2), PLASTER)
         if P.get("side_lattice", True):
-            # usa cu zabrele pe partea dinspre drum a travei (in planul stalpului
-            # interior, in afara golului)
             wx = sx * (xi + pw * 0.5 + 0.06)
-            wood.box((wx, 0, 0.5 + (zp - 1.6) * 0.5 + 0.2), (0.1, 2 * pd - pw, zp - 1.6), BEAM)
+            wood.box((wx, 0, (0.5 + zp - 1.8) * 0.5 + 0.2), (0.1, 2 * pd - pw, zp - 1.8), BEAM)
             for k in range(-3, 4):
-                wood.box((wx + sx * 0.06, k * (pd - pw) / 3.5, 0.5 + (zp - 1.6) * 0.5 + 0.2),
-                         (0.08, 0.14, zp - 1.5), VERM)
+                wood.box((wx + sx * 0.06, k * (pd - pw) / 3.5, (0.5 + zp - 1.8) * 0.5 + 0.2),
+                         (0.08, 0.14, zp - 1.7), VERM)
 
     # --- galeria etajului 2 ----------------------------------------------
     gx, gy = P["gallery_hx"], P["gallery_hy"]
     wood.box((0, 0, zg - 0.18), (2 * gx, 2 * gy, 0.36), TIMBER)
     frame_ring(wood, 0, 0, zg - 1.15, gx - 0.15, gy - 0.15, 0.95, 0.7, VERM)
-    # console sub galerie
     for sy in (-1, 1):
         wood.pickets((-gx + 0.6, sy * (gy - 0.55), zg - 1.25),
-                     (gx - 0.6, sy * (gy - 0.55), zg - 1.25), 1.25,
+                     (gx - 0.6, sy * (gy - 0.55), zg - 1.25), 1.0,
                      (0.4, 0.4, 0.75), VERM, endpoints=True)
-    sides = P.get("gallery_sides", True)
     rh = 1.0
     wood.railing((-gx + 0.2, gy - 0.2, zg), (gx - 0.2, gy - 0.2, zg), rh, 1.3, 0.16, 0.14, VERM, rails=2)
     wood.railing((-gx + 0.2, -gy + 0.2, zg), (gx - 0.2, -gy + 0.2, zg), rh, 1.3, 0.16, 0.14, VERM, rails=2)
-    if sides:
+    if P.get("gallery_sides", True):
         wood.railing((gx - 0.2, -gy + 0.2, zg), (gx - 0.2, gy - 0.2, zg), rh, 1.3, 0.16, 0.14, VERM, rails=2)
         wood.railing((-gx + 0.2, -gy + 0.2, zg), (-gx + 0.2, gy - 0.2, zg), rh, 1.3, 0.16, 0.14, VERM, rails=2)
 
-    # --- etajul 2: miez alb, stalpi vermilion, ferestre intunecate ---------
+    # --- etajul 2: miez alb cu stalpi vermilion, ferestre intunecate -------
     ux, uy = P["upper_hx"], P["upper_hy"]
     uh = zu - zg
     plaster.box((0, 0, zg + uh * 0.5), (2 * ux, 2 * uy, uh), PLASTER)
-    wood.box((0, 0, zg + 0.18), (2 * ux + 0.4, 2 * uy + 0.4, 0.36), VERM)          # talpa
-    wood.box((0, 0, zu - 0.2), (2 * ux + 0.5, 2 * uy + 0.5, 0.4), VERM)            # centura sus
+    wood.box((0, 0, zg + 0.18), (2 * ux + 0.4, 2 * uy + 0.4, 0.36), VERM)
+    wood.box((0, 0, zu - 0.2), (2 * ux + 0.5, 2 * uy + 0.5, 0.4), VERM)
     nposts = P["upper_posts"]
     for sy in (-1, 1):
         for k in range(nposts + 1):
@@ -126,45 +134,70 @@ def _gate(P):
     for sx in (-1, 1):
         wood.box((sx * (ux + 0.12), 0, zg + uh * 0.55), (0.12, 2.2, uh * 0.5), BEAM)
 
-    # --- console sub streasina ---------------------------------------------
-    frame_ring(wood, 0, 0, ze - 0.95, ux + 0.55, uy + 0.55, 0.36, 0.5, VERM)
-    frame_ring(wood, 0, 0, ze - 0.55, ux + 1.2, uy + 1.2, 0.3, 0.5, VERM)
+    # --- banda densa de console vermilion cu accente albe sub streasina -------
+    frame_ring(wood, 0, 0, ze - 1.05, ux + 0.55, uy + 0.55, 0.4, 0.55, VERM)
+    frame_ring(wood, 0, 0, ze - 0.6, ux + 1.4, uy + 1.4, 0.3, 0.55, VERM)
+    stp = P["bracket_step"]
     for sy in (-1, 1):
-        wood.pickets((-ux - 0.5, sy * (uy + 0.6), ze - 1.15),
-                     (ux + 0.5, sy * (uy + 0.6), ze - 1.15), P["bracket_step"],
-                     (0.36, 0.36, 0.55), VERM, endpoints=True)
+        wood.pickets((-ux - 0.5, sy * (uy + 0.65), ze - 1.25),
+                     (ux + 0.5, sy * (uy + 0.65), ze - 1.25), stp, (0.42, 0.42, 0.62), VERM, endpoints=True)
+        plaster.pickets((-ux - 0.5 + stp * 0.5, sy * (uy + 0.62), ze - 1.15),
+                        (ux + 0.5 - stp * 0.5, sy * (uy + 0.62), ze - 1.15), stp,
+                        (0.3, 0.3, 0.3), PLASTER, endpoints=True)
     for sx in (-1, 1):
-        wood.pickets((sx * (ux + 0.6), -uy - 0.5, ze - 1.15),
-                     (sx * (ux + 0.6), uy + 0.5, ze - 1.15), 1.6,
-                     (0.36, 0.36, 0.55), VERM, endpoints=True)
+        wood.pickets((sx * (ux + 0.65), -uy - 0.5, ze - 1.25),
+                     (sx * (ux + 0.65), uy + 0.5, ze - 1.25), 1.0,
+                     (0.42, 0.42, 0.62), VERM, endpoints=True)
 
-    # --- acoperis in patru ape (irimoya simplificat), creasta pe X ----------
+    # --- acoperis irimoya: hip jos (streasina curba) + fronton vermilion sus --
+    Rh = P["ridge_half"]
     hip_roof(roof, 0, 0, ze, P["roof_hx"], P["roof_hy"], P["roof_rise"], TILE,
-             ridge_half=P["ridge_half"], lift=P["roof_lift"], thick=0.22,
-             fascia_slot=BEAM, tile_step=0.85, rib=0.06, sag=P["roof_sag"],
-             swell=0.25)
-    top = ze + P["roof_rise"]
-    rh_ = P["ridge_half"]
-    roof.box((0, 0, top + 0.12), (2 * rh_ + 0.9, 0.55, 0.5), BEAM)                  # creasta
-    for sx in (-1, 1):                                                              # onigawara
-        roof.box((sx * (rh_ + 0.35), 0, top + 0.3), (0.45, 0.6, 0.55), BEAM)
-        roof.box((sx * (rh_ + 0.5), 0, top + 0.7), (0.35, 0.45, 0.3), BEAM)
+             ridge_half=Rh, lift=P["roof_lift"], thick=0.22, fascia_slot=BEAM,
+             tile_step=0.85, rib=0.06, sag=P["roof_sag"], swell=0.25)
+    w = P["gable_w"]
+    z0 = ze + P["gable_z"]
+    r2 = P["gable_rise"]
+    Rg = Rh + P["gable_out"]
+    zb = ze - 0.6
+    pent = [(-w, zb), (w, zb), (w, z0), (0.0, z0 + r2), (-w, z0)]
+    for sx in (-1, 1):
+        _prism_x(wood, pent, sx * Rg - 0.25, sx * Rg + 0.25, VERM)
+        plaster.box((sx * (Rg + 0.27), 0, z0 + r2 * 0.3), (0.1, w * 0.9, r2 * 0.45), PLASTER)
+    th = math.atan2(r2, w)
+    Ls = math.hypot(w, r2) + 0.9
+    plate_t = 0.35
+    ov = P["gable_ov"]
+    for sy in (-1, 1):
+        mid_y = sy * (w * 0.5 + 0.2)
+        mid_z = z0 + r2 * 0.5 - 0.2
+        nrm = Vector((0, sy * math.sin(th), math.cos(th)))
+        c = Vector((0, mid_y, mid_z)) + nrm * (plate_t * 0.5)
+        rot = Matrix.Rotation(-sy * th, 3, 'X')
+        roof.box(c, (2 * (Rg + ov), Ls, plate_t), TILE, rotation=rot)
+        c2 = Vector((0, mid_y, mid_z)) - nrm * 0.02
+        roof.box(c2, (2 * (Rg + ov) + 0.1, Ls - 0.1, 0.12), BEAM, rotation=rot)
+    top = z0 + r2
+    roof.box((0, 0, top + 0.28), (2 * (Rg + ov) + 0.4, 0.6, 0.5), BEAM)
+    for sx in (-1, 1):
+        roof.box((sx * (Rg + ov + 0.1), 0, top + 0.6), (0.5, 0.7, 0.7), BEAM)
     return wood, roof, plaster
 
 
-NIOMON = dict(x_in=6.6, x_out=8.7, post_d=2.7, post_w=1.0, post_h=5.0,
-              gallery_z=5.5, gallery_hx=8.9, gallery_hy=4.5, gallery_sides=True,
-              upper_h=8.3, upper_hx=7.8, upper_hy=2.5, upper_posts=7, windows=3,
-              window_span=3.6, eave_z=8.4, roof_hx=10.2, roof_hy=6.3,
-              roof_rise=4.3, ridge_half=5.0, roof_lift=0.95, roof_sag=1.7,
-              bracket_step=1.25)
+NIOMON = dict(x_in=6.6, x_mid=9.6, x_out=12.6, post_d=2.7, post_w=1.0, post_h=5.0,
+              gallery_z=5.5, gallery_hx=13.3, gallery_hy=4.5, gallery_sides=True,
+              upper_h=7.9, upper_hx=12.0, upper_hy=2.5, upper_posts=10, windows=3,
+              window_span=3.8, eave_z=8.2, roof_hx=14.0, roof_hy=6.4,
+              roof_rise=1.8, ridge_half=9.5, roof_lift=1.0, roof_sag=1.7,
+              bracket_step=0.7, gable_w=4.9, gable_z=0.6, gable_rise=4.0,
+              gable_out=1.0, gable_ov=1.2)
 
-ROMON = dict(x_in=6.4, x_out=8.0, post_d=2.3, post_w=0.95, post_h=4.8,
-             gallery_z=5.1, gallery_hx=8.3, gallery_hy=3.9, gallery_sides=False,
-             upper_h=7.8, upper_hx=7.2, upper_hy=2.3, upper_posts=6, windows=4,
-             window_span=4.0, eave_z=7.9, roof_hx=9.0, roof_hy=5.6,
-             roof_rise=3.9, ridge_half=3.0, roof_lift=1.15, roof_sag=2.0,
-             bracket_step=1.0, side_lattice=False)
+ROMON = dict(x_in=6.4, x_mid=9.0, x_out=11.7, post_d=2.3, post_w=0.95, post_h=4.8,
+             gallery_z=5.1, gallery_hx=12.4, gallery_hy=3.9, gallery_sides=False,
+             upper_h=7.6, upper_hx=11.0, upper_hy=2.3, upper_posts=9, windows=4,
+             window_span=4.6, eave_z=7.7, roof_hx=13.2, roof_hy=5.7,
+             roof_rise=1.7, ridge_half=7.5, roof_lift=1.25, roof_sag=2.0,
+             bracket_step=0.6, gable_w=4.3, gable_z=0.6, gable_rise=3.8,
+             gable_out=1.0, gable_ov=1.2, side_lattice=False)
 
 
 def build_niomon_gate():

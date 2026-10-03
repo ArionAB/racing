@@ -1431,7 +1431,7 @@ road_half_width = 5.5
 model = ExtResource("12_daruma_glb")
 
 [node name="Kogarashi" type="Node3D" parent="Hazarduri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 392.919, 12.000, 236.272)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 391.387, 12.000, 233.618)
 script = ExtResource("16_devil")
 amplitude = Vector2(9, 2)
 frequency = Vector2(0.0345, 0.0213)

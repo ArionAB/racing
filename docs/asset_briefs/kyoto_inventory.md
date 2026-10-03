@@ -303,14 +303,14 @@ nodurilor aplicate), nu AABB. Comparatii: `docs/asset_briefs/img/kyoto_fidelity/
 
 # Grupa kit-h: fundalul (`build_kyoto_horizon.py`, kit §1.11)
 
-`rocks/kyoto_horizon.glb`, 4 noduri copii directi ai radacinii, origine la baza, fara coliziune, fara clasa, zero sloturi noi/de masina. 6 866 tri total (verify: `VERDICT: OK`, buget 7500).
+`rocks/kyoto_horizon.glb`, 4 noduri copii directi ai radacinii, origine la baza, fara coliziune, fara clasa, zero sloturi noi/de masina. 6 300 tri total (verify: `VERDICT: OK`, buget 7500).
 
 | nod | tri | cote masurate L x A x I (m) | culori | comparatie |
 |---|---:|---|---|---|
 | `Higashiyama_A` | 1946 | 200 x 45 x 30 | `TROPICAL_GREEN` (vai), `KERB_RED`, `LAVA_ORANGE`, `SAND_MID` (auriu), `LARCH_RUST` | `img/kyoto_fidelity/horizon_Higashiyama_A.png` (+`_views`) |
 | `Higashiyama_B` | 1946 | 200 x 45 x 30 | idem; varfuri (conuri) rosu stanga / auriu-rosu dreapta | `horizon_Higashiyama_B.png` (+`_views`) |
 | `Arashiyama_A` | 2454 | 220,8 x 70 x 55 | `TROPICAL_GREEN` + `CACTUS_GREEN` pe petice; 26 tufe de poale | `horizon_Arashiyama_A.png` (+`_views`) |
-| `FarRoofs_A` | 520 | 151,4 x 13,4 x 9,6 | `ASPHALT`/`ASPHALT_EDGE` (acoperisuri), `LOG_DARK`/`SAND_MID` (pereti), tufe verzi | `horizon_FarRoofs_A.png` (+`_views`) |
+| `FarRoofs_A` | 900 | 151 x 12,6 x 9,7 | `ASPHALT`/`ASPHALT_EDGE` (acoperisuri), `LOG_DARK`/`SAND_MID` (pereti), tufe verzi | `horizon_FarRoofs_A.png` (+`_views`) |
 
 Ansamblu langa `yasaka_pagoda`: `horizon_overview.png`. Comparatiile sunt randate din directia -Y (camera la azimut 270), orientarea in care X creste spre dreapta ca pe decupare. Randarea arata si cei 4 m care se ingroapa in joc.
 
@@ -319,3 +319,5 @@ Ansamblu langa `yasaka_pagoda`: `horizon_overview.png`. Comparatiile sunt randat
 **Contract:** in §1.11 cotele sunt L x A x I (deduse: 55 m = inaltimea muntelui); `Higashiyama` 200 x 45 x 30 = adancime 45, inaltime 30. Recomand `horizon_class: ""`. Decuparile contin planuri de fundal (munte albastru, ceata) pe care un singur volum nu le poate da.
 
 **Stare la oprire:** toate 4 noduri livrate, verify OK, comparatii si views facute; preview: spec-uri `horizon_*` in `preview_kyoto.py` (cheia `only` filtreaza nodul).
+
+**Runda 2 (verdictul coordonatorului):** Higashiyama A/B colorate pe 8 PETE MARI contigue (o culoare per pata, baza cedru ~50%, margine cu 1 fata din 4 pe verde), nu pe triunghi; FarRoofs_A refacut cu 3 randuri decalate lipite, streasini +0,5 m in X si +0,9 m in Y, pereti 0,3-0,7 m peste cei 4 ingropati, 7 tufe pe randurile din fata. Vedere de departe (camera la 250 m): `horizon_far.png`. Ramas: tufele din FarRoofs sunt partial acoperite de acoperisuri; peretii se vad in randari fiindca nu e teren (in joc sunt ingropati 4 m).

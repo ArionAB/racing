@@ -184,6 +184,26 @@ def build_relief(name, seed, L, D, H, seeds, mode, nx, ny, base_frac=0.0,
     return b.to_object(name)
 
 
+def _patch_paint(patches, margin_slot=None):
+    """Culoare pe PETE MARI contigue (zgomot de joasa frecventa): fiecare pata
+    (x, y, raza, slot) are o singura culoare; in afara petelor ramane verdele de
+    cedru. Pe margine (d > 0,8) cate o fata din patru trece pe culoarea de baza,
+    ca marginea sa nu fie o linie dreapta; in rest nicio alegere aleatoare pe
+    fata (fara camuflaj/confetti, nu sclipeste la distanta)."""
+    def paint(c, f, r):
+        best, slot = 9.0, CEDAR
+        for (px, py, rad, sl) in patches:
+            d = math.hypot((c.x - px) / rad, (c.y - py) / (rad * 0.9))
+            if d < best:
+                best, slot = d, sl
+        if best >= 1.0:
+            return CEDAR
+        if best > 0.8 and r() < 0.25:
+            return CEDAR
+        return slot
+    return paint
+
+
 # --- Higashiyama_A / Higashiyama_B --------------------------------------------
 
 def _env(pts, x):
@@ -227,8 +247,13 @@ def build_higashiyama_a():
     env = [(-100, 8), (-80, 16), (-55, 17), (-30, 21), (-14, 31), (4, 24),
            (24, 17), (44, 24), (60, 27), (78, 20), (92, 14), (100, 7)]
     seeds = _hill_seeds(2201, env, palette, 11.5, 10.0, 14.5, 1.2)
+    patches = [(-72.0, 0.0, 15.0, ORANGE), (-48.0, 5.0, 11.0, GOLD),
+               (-16.0, 0.0, 21.0, RED), (10.0, -4.0, 11.0, GOLD),
+               (32.0, 3.0, 12.0, ORANGE), (56.0, -2.0, 15.0, RED),
+               (78.0, 4.0, 11.0, GOLD), (92.0, -3.0, 8.0, RED)]
     return build_relief("Higashiyama_A", 2201, 200.0, 45.0, 30.0, seeds, "sum",
-                        64, 14, base_frac=0.08, thresh=0.05)
+                        64, 14, base_frac=0.08, thresh=0.05,
+                        paint=_patch_paint(patches))
 
 
 def build_higashiyama_b():
@@ -253,9 +278,13 @@ def build_higashiyama_b():
          [(GOLD, 0.4), (ORANGE, 0.3), (RED, 0.3)]),
         (66.0, -3.0, 20.0, 16.0, 1.1, [(RED, 0.7), (ORANGE, 0.3)]),
     ]
+    patches = [(-66.0, 0.0, 19.0, RED), (-84.0, -3.0, 9.0, ORANGE),
+               (-30.0, 4.0, 10.0, GOLD), (-6.0, -3.0, 9.0, ORANGE),
+               (36.0, 0.0, 15.0, GOLD), (52.0, 4.0, 10.0, ORANGE),
+               (68.0, -3.0, 12.0, RED), (90.0, 2.0, 8.0, ORANGE)]
     return build_relief("Higashiyama_B", 2273, 200.0, 45.0, 30.0,
                         peaks + small, "sum", 64, 14, base_frac=0.10,
-                        thresh=0.05)
+                        thresh=0.05, paint=_patch_paint(patches))
 
 
 # --- Arashiyama_A -------------------------------------------------------------
@@ -340,40 +369,35 @@ def _hip(b, cx, cy, ze, hx, hy, rise, slot):
 
 
 def build_far_roofs():
-    """FarRoofs_A, 150 x 12 x 10 m: DOUA RANDURI de case spate in spate (volum
-    inchis din orice azimut), fiecare o cutie de perete intunecat (1,5-2,5 m
-    vizibili peste cei 4 ingropati) sub un acoperis in patru ape gri
-    (ASPHALT / ASPHALT_EDGE) cu streasina iesita; latimi 9-15 m, cateva case cu
-    etaj (acoperis pana la ~9,5 m), si tufe mari de padure (~1 din 4 locuri) in loc de casa, ca pe decupare. Fara ferestre: la 200+ m sunt sub un pixel."""
+    """FarRoofs_A, 150 x 12 x 10 m: TREI RANDURI de case decalate (y = -2,8 / 0 / +2,8,
+    adancimi 4,8-5,2 m, latimi 9-14 m, decalate in X), LIPITE, deci de la
+    distanta se vad numai ACOPERISURI gri in patru ape cu streasini largi
+    (+1,5 m; ASPHALT / ASPHALT_EDGE); peretii (LOG_DARK / SAND_MID) abia 0,3-0,7
+    m peste cei 4 ingropati. Randul din mijloc e mai inalt (acoperisurile din
+    spate se vad deasupra). 7 tufe mari de padure (cedru / verde galbui) printre
+    case, pe randurile din fata. Volum inchis, fara ferestre."""
     rnd = _lcg(2417)
     b = Builder()
     half = 75.0
-    for side in (-1.0, 1.0):
-        x = -half
+    for ri, yc in enumerate((-2.8, 0.0, 2.8)):
+        x = -half + (0.0, 6.0, 3.0)[ri]
         while x < half - 0.1:
-            w = 9.0 + rnd() * 6.0
-            if half - (x + w) < 7.0:
+            w = 9.0 + rnd() * 5.0
+            if half - (x + w) < 6.0:
                 w = half - x
-            d = 5.5 + rnd() * 0.5
-            if x > -half + 12.0 and x + w < half - 12.0 and rnd() < 0.24:
-                # in loc de casa: o tufa mare de padure (ca cedrii de pe decupare)
-                leaf_blob(b, (x + w * 0.5, side * 2.2, 5.2), w * 0.55, 3.7, 4.0,
-                          CEDAR if rnd() < 0.6 else GREEN_B, subdiv=1, jag=0.22,
-                          seed=int(x * 7) % 997 + 11)
-                x += w
-                continue
-            y0, y1 = (0.0, d) if side > 0 else (-d, 0.0)
-            two = rnd() < 0.22
-            wall_top = BURY + (3.0 if two else 0.7 + rnd() * 0.7)
-            wslot = WALL_DARK if rnd() < 0.7 else WALL_LIGHT
-            b.box(((x + x + w) * 0.5, (y0 + y1) * 0.5, wall_top * 0.5),
-                  (w, y1 - y0, wall_top), wslot)
-            rise = 3.4 + rnd() * 1.2
-            rise = min(rise, 9.6 - wall_top)
-            _hip(b, x + w * 0.5, (y0 + y1) * 0.5, wall_top,
-                 w * 0.5 + 0.7, (y1 - y0) * 0.5 + 0.7, rise,
+            d = 4.8 + rnd() * 0.4
+            wall_top = BURY + 0.3 + rnd() * 0.4 + (1.0 if ri == 1 else 0.0)
+            wslot = WALL_DARK if rnd() < 0.8 else WALL_LIGHT
+            b.box((x + w * 0.5, yc, wall_top * 0.5), (w, d, wall_top), wslot)
+            rise = min(4.0 + rnd() * 1.0, 9.6 - wall_top)
+            _hip(b, x + w * 0.5, yc, wall_top, w * 0.5 + 0.5, d * 0.5 + 0.9, rise,
                  ROOF_DARK if rnd() < 0.55 else ROOF_GREY)
             x += w
+    for k, tx in enumerate((-62.0, -40.0, -17.0, 6.0, 27.0, 48.0, 66.0)):
+        side = 1.0 if k % 2 else -1.0
+        leaf_blob(b, (tx, side * 2.2, 5.4), 6.5 + rnd() * 1.5, 3.7, 3.9,
+                  CEDAR if k % 2 == 0 else GREEN_B, subdiv=1, jag=0.22,
+                  seed=90 + k)
     return b.to_object("FarRoofs_A")
 
 

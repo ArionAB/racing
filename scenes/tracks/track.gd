@@ -8315,6 +8315,9 @@ const PROP_AO_STRENGTH: float = 0.26
 const PROP_AO_FOOT_BAND: float = 0.18
 ## Cat se mai umfla amprenta bazei, ca discul sa iasa putin de sub piesa.
 const PROP_AO_FOOT_SCALE: float = 1.6
+## Piese cu trunchi masurat (WorldProp.TRUNK_RADIUS): raza discului = raza
+## trunchiului x acest factor, centrat pe originea modelului.
+const PROP_AO_TRUNK_MULT: float = 2.0
 
 
 ## Pozitiile (doar XZ) ale falezelor deja construite.
@@ -8379,11 +8382,24 @@ func _prop_contact_discs() -> PackedVector4Array:
 		# (vezi nota de la PROP_AO_FOOT_BAND). Cand piesa n-are vertecsi in
 		# banda de jos — panouri, pasari, orice fara picior — se cade inapoi
 		# pe vechea socoteala, ca sa nu ramana piese fara contact.
-		var half := _prop_foot_radius(n3, aabb)
-		if half <= 0.0:
-			half = Vector2(aabb.size.x, aabb.size.z).length() * 0.5
-		var r := clampf(half * PROP_AO_RADIUS_SCALE,
-				PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
+		var r: float
+		var stem := n3.scene_file_path.get_file().get_basename()
+		if WorldProp.TRUNK_RADIUS.has(stem):
+			# Piesa cu trunchi MASURAT (WorldProp.TRUNK_RADIUS, azi doar Kyoto):
+			# discul sta la piciorul TRUNCHIULUI, nu sub coroana. Amprenta bazei
+			# a unui artar cu coroana de 10-12 m iesea un octogon negru de 6 m
+			# (banda de 18% din inaltime prinde ramurile joase). Pistele fara
+			# intrari in tabel trec pe calea de mai jos, neschimbate.
+			var gs := n3.global_transform.basis.get_scale()
+			var sc := maxf(gs.x, gs.z)
+			r = clampf(float(WorldProp.TRUNK_RADIUS[stem]) * sc * PROP_AO_TRUNK_MULT,
+					PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
+		else:
+			var half := _prop_foot_radius(n3, aabb)
+			if half <= 0.0:
+				half = Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+			r = clampf(half * PROP_AO_RADIUS_SCALE,
+					PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
 		# Cota BAZEI, nu a originii: originile kitului stau pe pivot (vezi
 		# memoria "Kit assets Cappadocia"), deci originea unui horn poate fi la
 		# mijlocul lui. Ce trebuie sa atinga solul e fundul gabaritului.

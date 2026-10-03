@@ -14,6 +14,249 @@
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
+[ext_resource type="Script" path="res://scenes/props/module_placer.gd" id="intc_placer"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/tsutenkyo_roof_module.glb" id="intc_tsu"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/togetsukyo_module.glb" id="intc_toget"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kakezukuri_scaffold.glb" id="intc_scaffold"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/iron_truss_bridge.glb" id="intc_truss"]
+[ext_resource type="Script" path="res://scenes/props/mesh_forest.gd" id="mf_script"]
+[ext_resource type="Script" path="res://scenes/props/mesh_forest_zone.gd" id="mf_zone"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_a.glb" id="mf_momiji_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_b.glb" id="mf_momiji_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_c.glb" id="mf_momiji_c"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/ginkgo.glb" id="mf_ginkgo"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/niwaki_pine.glb" id="mf_niwaki_pine"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/moso_culm.glb" id="mf_moso_culm"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/bamboo_crown.glb" id="mf_bamboo_crown"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="mf_cedar_dark"]
+
+[sub_resource type="Resource" id="MFZ_0"]
+script = ExtResource("mf_zone")
+label = "pata ginkgo C"
+kind = 1
+species = PackedStringArray("ginkgo")
+weights = PackedFloat32Array(1.0)
+spacing = 5.2
+edge_clear_m = 12.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 3.0
+claim = true
+scale_min = 0.9
+scale_max = 1.25
+seed_value = 233
+center = Vector3(272.61, 0.00, -237.94)
+radius = 24.0
+
+[sub_resource type="Resource" id="MFZ_1"]
+script = ExtResource("mf_zone")
+label = "pata ginkgo D"
+kind = 1
+species = PackedStringArray("ginkgo")
+weights = PackedFloat32Array(1.0)
+spacing = 5.2
+edge_clear_m = 12.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 3.0
+claim = true
+scale_min = 0.9
+scale_max = 1.25
+seed_value = 383
+center = Vector3(418.66, 0.00, 61.31)
+radius = 26.0
+
+[sub_resource type="Resource" id="MFZ_2"]
+script = ExtResource("mf_zone")
+label = "pata ginkgo F"
+kind = 1
+species = PackedStringArray("ginkgo")
+weights = PackedFloat32Array(1.0)
+spacing = 5.2
+edge_clear_m = 12.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 3.0
+claim = true
+scale_min = 0.9
+scale_max = 1.25
+seed_value = 611
+center = Vector3(247.87, 0.00, 382.35)
+radius = 20.0
+
+[sub_resource type="Resource" id="MFZ_3"]
+script = ExtResource("mf_zone")
+label = "pata ginkgo H"
+kind = 1
+species = PackedStringArray("ginkgo")
+weights = PackedFloat32Array(1.0)
+spacing = 5.2
+edge_clear_m = 12.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 3.0
+claim = true
+scale_min = 0.9
+scale_max = 1.25
+seed_value = 916
+center = Vector3(10.57, 0.00, 203.46)
+radius = 22.0
+
+[sub_resource type="Resource" id="MFZ_4"]
+script = ExtResource("mf_zone")
+label = "rapa C artari"
+kind = 0
+species = PackedStringArray("momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.36, 0.34, 0.3)
+spacing = 5.0
+edge_clear_m = 10.5
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 21
+frac_from = 0.241
+frac_to = 0.331
+lat_min = 9.0
+lat_max = 72.0
+
+[sub_resource type="Resource" id="MFZ_5"]
+script = ExtResource("mf_zone")
+label = "versant Higashiyama"
+kind = 1
+species = PackedStringArray("momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.34, 0.33, 0.33)
+spacing = 7.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 22
+center = Vector3(372.00, 0.00, -150.00)
+radius = 88.0
+
+[sub_resource type="Resource" id="MFZ_6"]
+script = ExtResource("mf_zone")
+label = "valea D artari"
+kind = 0
+species = PackedStringArray("momiji_a", "momiji_b", "momiji_c")
+weights = PackedFloat32Array(0.36, 0.3, 0.34)
+spacing = 4.6
+edge_clear_m = 10.5
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 31
+frac_from = 0.331
+frac_to = 0.47
+lat_min = 9.0
+lat_max = 78.0
+
+[sub_resource type="Resource" id="MFZ_7"]
+script = ExtResource("mf_zone")
+label = "Inari cedru fasie"
+kind = 0
+species = PackedStringArray("cedar_dark", "momiji_b")
+weights = PackedFloat32Array(0.88, 0.12)
+spacing = 3.7
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.95
+scale_max = 1.45
+seed_value = 41
+frac_from = 0.475
+frac_to = 0.585
+lat_min = 12.0
+lat_max = 72.0
+
+[sub_resource type="Resource" id="MFZ_8"]
+script = ExtResource("mf_zone")
+label = "Inari cedru disc"
+kind = 1
+species = PackedStringArray("cedar_dark", "momiji_b")
+weights = PackedFloat32Array(0.88, 0.12)
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = false
+scale_min = 0.95
+scale_max = 1.45
+seed_value = 42
+center = Vector3(332.72, 0.00, 292.00)
+radius = 70.0
+
+[sub_resource type="Resource" id="MFZ_9"]
+script = ExtResource("mf_zone")
+label = "gradina F"
+kind = 0
+species = PackedStringArray("niwaki_pine", "momiji_a", "momiji_c")
+weights = PackedFloat32Array(0.72, 0.14, 0.14)
+spacing = 7.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 1.6
+claim = false
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 51
+frac_from = 0.595
+frac_to = 0.69
+lat_min = 11.0
+lat_max = 56.0
+
+[sub_resource type="Resource" id="MFZ_10"]
+script = ExtResource("mf_zone")
+label = "bambus G tulpini"
+kind = 0
+species = PackedStringArray("moso_culm")
+weights = PackedFloat32Array(1.0)
+spacing = 2.0
+edge_clear_m = 3.0
+shadow_m = 25.0
+view_m = 140.0
+max_below_road_m = 6.0
+claim = false
+scale_min = 0.9
+scale_max = 1.15
+seed_value = 61
+frac_from = 0.674
+frac_to = 0.81
+lat_min = 6.5
+lat_max = 44.0
+
+[sub_resource type="Resource" id="MFZ_11"]
+script = ExtResource("mf_zone")
+label = "bambus G margine"
+kind = 0
+species = PackedStringArray("bamboo_crown", "moso_culm")
+weights = PackedFloat32Array(0.8, 0.2)
+spacing = 5.0
+edge_clear_m = 3.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 6.0
+claim = false
+scale_min = 0.9
+scale_max = 1.3
+seed_value = 62
+frac_from = 0.674
+frac_to = 0.81
+lat_min = 40.0
+lat_max = 62.0
 
 [sub_resource type="Curve3D" id="Curve3D_kyoto"]
 closed = true
@@ -97,6 +340,11 @@ zones = Array[Vector3]([Vector3(0.335, 0.44, 1.0), Vector3(0.472, 0.56, 0.6)])
 [node name="FrunzeCazatoare" type="GPUParticles3D" parent="."]
 script = ExtResource("17_leaffall")
 
+[node name="PadureMasa" type="Node3D" parent="."]
+script = ExtResource("mf_script")
+scenes = Array[PackedScene]([ExtResource("mf_momiji_a"), ExtResource("mf_momiji_b"), ExtResource("mf_momiji_c"), ExtResource("mf_ginkgo"), ExtResource("mf_niwaki_pine"), ExtResource("mf_moso_culm"), ExtResource("mf_bamboo_crown"), ExtResource("mf_cedar_dark")])
+zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11")])
+
 [node name="Hazarduri" type="Node3D" parent="."]
 
 [node name="SaritaScena" type="Marker3D" parent="Hazarduri"]
@@ -157,3 +405,42 @@ height = 2.4
 look_height = 0.6
 fov_bonus = 3.0
 ceiling = 5.2
+
+[node name="Poduri" type="Node3D" parent="."]
+
+[node name="Tsutenkyo" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_tsu")
+frac_from = 0.449
+frac_to = 0.466
+module_length = 6.0
+seam_half_width = 6.9
+hide_nodes = PackedStringArray("Tsu_Rail")
+
+[node name="Togetsukyo" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_toget")
+frac_from = 0.832
+frac_to = 0.894
+module_length = 10.0
+seam_half_width = 7.6
+
+[node name="EsafodajScena" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_scaffold")
+frac_from = 0.275
+frac_to = 0.303
+module_length = 6.0
+lateral_offsets = PackedFloat32Array(-3, 3)
+ground_fit = true
+module_height = 15.92
+collision_mode = "mesh"
+seam_half_width = 3.4
+
+[node name="PodulTrenului" type="Node3D" parent="Poduri"]
+script = ExtResource("intc_placer")
+model = ExtResource("intc_truss")
+frac_from = 0.804
+frac_to = 0.0
+module_length = 5.8
+collision_mode = "mesh"

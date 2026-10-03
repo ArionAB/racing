@@ -427,6 +427,7 @@ func _ready() -> void:
 	# lateral — piesele mari (portile de 32,7 m, fatadele de 40-45 m) puse
 	# langa masina ies din cadrul camerei de joc (jumatate de cadru ~50 grade).
 	var vitrina_ahead := 0.0
+	var vitrina_step := 8.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--vitrina="):
 			vitrina_stem = arg.trim_prefix("--vitrina=")
@@ -441,6 +442,9 @@ func _ready() -> void:
 			vitrina_anim = arg.trim_prefix("--vitrina-anim=")
 		if arg.begins_with("--vitrina-ahead="):
 			vitrina_ahead = float(arg.trim_prefix("--vitrina-ahead="))
+			continue
+		if arg.begins_with("--vitrina-step="):
+			vitrina_step = float(arg.trim_prefix("--vitrina-step="))
 			continue
 		if arg == "--car":
 			show_car = true
@@ -959,8 +963,14 @@ func _ready() -> void:
 			car.on_start_grid = true
 			_seat_car_on_rope_bridge(track, car)
 			if vitrina_stem != "":
-				_place_vitrina(track, focus + dir * vitrina_ahead, dir,
-					vitrina_stem, vitrina_side, vitrina_yaw, vitrina_anim)
+				# Lista cu virgula (`--vitrina=momiji_a,momiji_b`): piesele se
+				# aseaza una dupa alta pe drum, la `--vitrina-step` metri, ca un
+				# rand de kit intr-o singura captura (int-a, Kyoto).
+				var stems := vitrina_stem.split(",", false)
+				for si in stems.size():
+					_place_vitrina(track,
+						focus + dir * (vitrina_ahead + float(si) * vitrina_step),
+						dir, stems[si], vitrina_side, vitrina_yaw, vitrina_anim)
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
@@ -1568,13 +1578,30 @@ func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
 ## asezata pe teren cu Track._terrain_mesh_y (aceeasi interpolare pe care o
 ## foloseste generatorul, nu un raycast fizic separat), rotita cu `yaw_deg`
 ## fata de directia drumului (`dir`).
+## Calea unui stem de vitrina: din tabel, iar pentru kitul Kyoto (assets/models/
+## kyoto/<categorie>/<stem>.glb) cautata pe disc, ca sa nu tina cineva un tabel
+## de 60 de piese la zi. Gol daca nu o gaseste.
+func _vitrina_path(stem: String) -> String:
+	if _VITRINA_MODEL_PATHS.has(stem):
+		return String(_VITRINA_MODEL_PATHS[stem])
+	var root := "res://assets/models/kyoto"
+	var d := DirAccess.open(root)
+	if d == null:
+		return ""
+	for sub in d.get_directories():
+		var cand := "%s/%s/%s.glb" % [root, sub, stem]
+		if ResourceLoader.exists(cand):
+			return cand
+	return ""
+
+
 func _place_vitrina(track: Track, focus: Vector3, dir: Vector3, stem: String,
 		side: float, yaw_deg: float, anim_name: String = "") -> void:
-	if not _VITRINA_MODEL_PATHS.has(stem):
+	var path := _vitrina_path(stem)
+	if path.is_empty():
 		push_error("--vitrina=%s: stem necunoscut. Vezi _VITRINA_MODEL_PATHS in tools/snapshot.gd."
 			% stem)
 		return
-	var path: String = _VITRINA_MODEL_PATHS[stem]
 	if not ResourceLoader.exists(path):
 		push_error("--vitrina=%s: fisierul nu exista: %s" % [stem, path])
 		return

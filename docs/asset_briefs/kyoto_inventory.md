@@ -179,3 +179,73 @@ centru cu 5 crengi groase vizibile, trunchi scurt gros evazat; jos coborat la
 ambele seamana acum cu decuparea ca siluetă si golurile; zimtarea ramane
 "piatra sparta", nu lobi; `momiji_c` e inca putin mai simetric/rotund decat
 planșa si fara nuanta sus/jos. Planșa `arbori_scara.png` refacuta.
+
+---
+
+# Grupa kit-d: orasul (`build_kyoto_town.py`, kit §1.6)
+
+Verdict: `bash tools/blender/verify_kyoto.sh` -> OK pe cele 8 GLB. Comparatii:
+`img/kyoto_fidelity/{machiya_a..e,teahouse_front,paper_lantern,temple_wall}.png`
+(+ `*_views.png` pentru case/felinar/zid), **planșa celor 5 case langa decuparile lor:
+`machiya_row.png`** (sus decuparile, jos randarile), **zid x3: `temple_wall_x3.png`**.
+Toate sunt construite cu `emit_keep_xy` (kyoto_shapes.py): XY pastrat, doar Z coborat;
+originea e pe axa constructiei (casa: centrul peretilor; felinar: baza stalpului).
+
+| fisier | tri | cote masurate (X x Y x Z) | noduri |
+|---|---:|---|---|
+| buildings/machiya_a | 1468 | 6,27 x 7,23 x 7,77 | Machiya_Wood/Trim/Plaster/Roof/Noren(alb) |
+| buildings/machiya_b | 1336 | idem | idem, Noren = CAR_BLUE (`--allow-car-slots=Machiya_Noren`) |
+| buildings/machiya_c | 2260 | idem | Wood/Trim/Plaster/Roof |
+| buildings/machiya_d | 1840 | idem | Wood/Trim/Plaster/Roof/Bamboo (SAND_MID) |
+| buildings/machiya_e | 1912 | 6,6 x 7,23 x 7,77 (cu streasina laterala) | Wood/Trim/Plaster/Roof |
+| props/teahouse_front | 728 | 4,20 x 3,00 x 3,17 | Tea_Red (CAR_RED), Tea_Wood |
+| props/paper_lantern | 404 | 1,45 x 0,77 x 3,60 | Lantern_Wood, Lantern_Paper, Lantern_Band (ICE_CRACK, negrul cel mai apropiat) |
+| structures/temple_wall | 1176 | 1,22 x 8,00 x 3,31 | Wall_Stone, Wall_Plaster, Wall_Roof |
+
+**Fata spre drum (masurat pe GLB):** nodurile fatadei (noren, jaluzele, ferestre) stau la
+z glTF = -2,6..-2,8, deci fata bogata e **-Z Godot = +Y Blender**; spatele (z +) are doar
+stalpi si brauri. Verificat si cu `--views` (azimuturile 35/125 arata fata, 215/305 spatele).
+Coliziunea: toate nodurile cer corp doar pe `Machiya_Wood` (miezul), nu pe streasina.
+Pozitia in lot: fatada e simetrica pe X, hisashi iese 1,05 m in +Y (Y bbox 7,23 = adancimea
+peretilor 5,2 + streasini); axa casei ramane la origine.
+
+**Cum se citesc cele 5 case (functie comuna `_H`, difera pe fatada):** a = noren alb + 4
+ferestre albe; b = noren ALBASTRU + perete alb sus cu fereastra cu 3 panouri; c = trei
+ferestre inalte sus + trei travei de zabrele fine jos, FARA noren; d = 4 jaluzele de
+bambus ocru; e = perete alb cu cadru aparent + geam divizat + streasina laterala.
+
+| element | pe planșă | in GLB | verdict |
+|---|---|---|---|
+| silueta, h/l | ~0,95-1,0 | ~1,05 (randare) | OK |
+| acoperis 2 ape + streasina intermediara | da | da, creasta paralela cu strada | OK; la noi acoperisul pare putin mai inalt/greu |
+| noren a (alb) / b (albastru) | 2 panze albe / 3 albastre | 2 / 3 fasii | OK ca pozitie si culoare; a se citeste cam "geam" (alb cenusiu sub streasina) |
+| jaluzele d | 4 panouri inclinate ocru | 4 panouri drepte ocru | OK (fara inclinare) |
+| e: half-timber + streasina laterala | da | da, simplificat | OK |
+| culoarea lemnului | brun cald, mediu | `machiya_wood` #4A3526 = aceeasi cu Trim -> randarea e mai intunecata si cu contrast mai mic decat planșa | ABATERE de clasa (se decide la integrare, textura clasei trebuie sa ridice lemnul) |
+| fatada pe 3D | planse pictate | zabrele/rame ca geometrie fina | OK |
+
+teahouse_front: banca rosie cu spatar de zabrele, cutie, stalp, umbrela rosie cu 16 fete.
+Abateri: umbrela mai mica relativ la banca decat pe planșă; banca/cutia sunt cutii drepte;
+lungimea totala 4,2 m depaseste cota ~3 m din contract (decuparea castiga: umbrela mare).
+paper_lantern: fara semn rosu, fara text; bandele sunt ICE_CRACK. Lantern ovala cu 4 inele.
+temple_wall: soclu 3 randuri de pietre CUBICE (planșa le are rotunjite, poligonale, cu
+muschi: abatere; muschiul vine din clasa/nodul separat la integrare), perete alb, capac in
+doua ape cu 16 nervuri pe parte; capete plane la +-4 m, nervurile cad simetric
+(pas 0,5, offset 0,25 de la capat) -> 3 module alaturate se imbina fara cusatura (`temple_wall_x3.png`).
+
+Ambiguitati de contract: casele "6,5 x 9 m" nu se potrivesc cu decuparea (fatada ~6,3 m
+cu streasina, adancime mica); am urmat decuparea (fatada 6,27, adancime 7,2 cu hisashi).
+Culoarea albastra a norenului cere exceptia `--allow-car-slots=Machiya_Noren` (declarata).
+
+## Stare la oprire (kit-d)
+Toate cele 8 piese construite, verificate si comparate; casele ar mai castiga in rundele 5+
+inclinarea acoperisului/ornamente si lemnul mai deschis (clasa). Comenzi: build
+`D:/Blender/blender.exe --background --factory-startup --python tools/blender/run_build.py -- build_kyoto_town.py [machiya_a ...]`.
+
+## kit-d, runda dupa verdictul coordonatorului (case + ceainarie)
+
+- Proportie: parter 3,4 m, etaj 2,8 m, panta ~33 grade; casele au acum 6,27 x 7,23 x **8,97 m** (amprenta peretilor 5,2 x 5,2). Tri neschimbati ca ordin (1336-2260).
+- Contrast: `Machiya_Trim` = `WOOD` (deschis: stalpi, brauri, rame, zabrele, scanduri de usa), `Machiya_Wood` (clasa `machiya_wood`) = miezul peretilor, timpanele si fondul intunecat al golurilor. Grinzile de streasina/creasta au trecut pe nodul `Machiya_Roof` (`LOG_DARK`).
+- Soclu de piatra (`CONCRETE`) mai lat, in Trim. Noren (a, b): bara sub streasina intermediara, 2/3 fasii cu fante, coboara 2 m; usa intunecata se vede dedesubt.
+- teahouse_front: banca mutata in stanga (ca pe decupare), randata. 
+- Ramas: randarea pastreaza acoperisul mai greu decat planșa, noren-ul alb inca se poate citi ca geam (stau sub streasina), soclul tot mai subtire decat pe decupari.

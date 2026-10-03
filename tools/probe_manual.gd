@@ -180,6 +180,7 @@ const SPANS_ROAD_PREFIXES: Array[String] = [
 	"chasmBridgeRail",
 	# Jodhpur POI E: portile fortului (coliziune `mesh`, drumul trece prin gol).
 	"PoartaFort",
+	"PoartaNiomon", # Kyoto POI C: poarta peste C1, golul de 14,30 m
 ]
 
 ## Modul de coliziune REZOLVAT pentru un prop asezat de mana: metadata proprie

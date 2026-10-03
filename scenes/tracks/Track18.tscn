@@ -66,8 +66,472 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/temple_wall.glb" id="poib_temple_wall"]
 [ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="poib_cityfill"]
 [ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="poib_pathmover"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/niomon_gate.glb" id="poic_niomon"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/sanjunoto_pagoda.glb" id="poic_sanjunoto"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/koyasu_pagoda.glb" id="poic_koyasu"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kiyomizu_hondo.glb" id="poic_hondo"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/kakezukuri_scaffold.glb" id="poic_scaffold"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/cyclopean_wall.glb" id="poic_cyclopean"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/temple_wall.glb" id="poic_temple_wall"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/bell_tower.glb" id="poic_bell"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/chozuya.glb" id="poic_chozuya"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_a.glb" id="poic_lantern_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_b.glb" id="poic_lantern_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_a.glb" id="poic_momiji_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_b.glb" id="poic_momiji_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_c.glb" id="poic_momiji_c"]
 
 [sub_resource type="Resource" id="MFZ_0"]
+script = ExtResource("mf_zone")
+label = "luminis C sala N"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(384.00, 0.00, -160.00)
+radius = 13.0
+
+[sub_resource type="Resource" id="MFZ_1"]
+script = ExtResource("mf_zone")
+label = "luminis C sala S"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(384.00, 0.00, -144.00)
+radius = 13.0
+
+[sub_resource type="Resource" id="MFZ_2"]
+script = ExtResource("mf_zone")
+label = "luminis C2 Koyasu"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(350.00, 0.00, -42.00)
+radius = 11.0
+
+[sub_resource type="Resource" id="MFZ_3"]
+script = ExtResource("mf_zone")
+label = "luminis C2 culoar 1"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(361.00, 0.00, -95.00)
+radius = 7.0
+
+[sub_resource type="Resource" id="MFZ_4"]
+script = ExtResource("mf_zone")
+label = "luminis C2 culoar 2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(358.00, 0.00, -81.00)
+radius = 7.0
+
+[sub_resource type="Resource" id="MFZ_5"]
+script = ExtResource("mf_zone")
+label = "luminis C2 culoar 3"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(355.00, 0.00, -67.00)
+radius = 7.0
+
+[sub_resource type="Resource" id="MFZ_6"]
+script = ExtResource("mf_zone")
+label = "luminis C2 culoar 4"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(352.50, 0.00, -54.00)
+radius = 7.0
+
+[sub_resource type="Resource" id="MFZ_7"]
+script = ExtResource("mf_zone")
+label = "luminis C sanjunoto"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(288.00, 0.00, -216.00)
+radius = 9.0
+
+[sub_resource type="Resource" id="MFZ_8"]
+script = ExtResource("mf_zone")
+label = "luminis C clopotnita"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(312.00, 0.00, -215.50)
+radius = 6.0
+
+[sub_resource type="Resource" id="MFZ_9"]
+script = ExtResource("mf_zone")
+label = "luminis C1 vedere scena"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(305.00, 0.00, -172.00)
+radius = 16.0
+
+[sub_resource type="Resource" id="MFZ_10"]
+script = ExtResource("mf_zone")
+label = "luminis C1 vedere colt"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(330.00, 0.00, -184.00)
+radius = 9.0
+
+[sub_resource type="Resource" id="MFZ_11"]
+script = ExtResource("mf_zone")
+label = "luminis C1 buza rapei"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(322.00, 0.00, -164.00)
+radius = 12.0
+
+[sub_resource type="Resource" id="MFZ_12"]
+script = ExtResource("mf_zone")
+label = "luminis C1 colt 1"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(340.00, 0.00, -177.00)
+radius = 10.0
+
+[sub_resource type="Resource" id="MFZ_13"]
+script = ExtResource("mf_zone")
+label = "luminis C1 colt 2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(355.00, 0.00, -168.00)
+radius = 7.0
+
+[sub_resource type="Resource" id="MFZ_14"]
+script = ExtResource("mf_zone")
+label = "luminis C1 dreapta 1"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(312.00, 0.00, -182.00)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_15"]
+script = ExtResource("mf_zone")
+label = "luminis C1 dreapta 2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(324.00, 0.00, -183.00)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_16"]
+script = ExtResource("mf_zone")
+label = "luminis C1 dreapta 3"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(340.00, 0.00, -186.00)
+radius = 8.0
+
+[sub_resource type="Resource" id="MFZ_17"]
+script = ExtResource("mf_zone")
+label = "luminis C1 incinta 1"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(302.00, 0.00, -216.00)
+radius = 6.0
+
+[sub_resource type="Resource" id="MFZ_18"]
+script = ExtResource("mf_zone")
+label = "luminis C1 incinta 2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(323.00, 0.00, -218.00)
+radius = 7.0
+
+[sub_resource type="Resource" id="MFZ_19"]
+script = ExtResource("mf_zone")
+label = "luminis C1 incinta 3"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(337.00, 0.00, -218.00)
+radius = 7.0
+
+[sub_resource type="Resource" id="MFZ_20"]
+script = ExtResource("mf_zone")
+label = "luminis C1 ax 1"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(302.00, 0.00, -199.00)
+radius = 9.0
+
+[sub_resource type="Resource" id="MFZ_21"]
+script = ExtResource("mf_zone")
+label = "luminis C1 ax 2"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(316.00, 0.00, -200.00)
+radius = 9.0
+
+[sub_resource type="Resource" id="MFZ_22"]
+script = ExtResource("mf_zone")
+label = "luminis C1 ax 3"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(330.00, 0.00, -201.00)
+radius = 9.0
+
+[sub_resource type="Resource" id="MFZ_23"]
+script = ExtResource("mf_zone")
+label = "luminis C1 ax 4"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(344.00, 0.00, -200.00)
+radius = 9.0
+
+[sub_resource type="Resource" id="MFZ_24"]
+script = ExtResource("mf_zone")
+label = "luminis C1 colt 3"
+kind = 1
+species = PackedStringArray()
+weights = PackedFloat32Array()
+spacing = 4.0
+edge_clear_m = 9.0
+shadow_m = 25.0
+view_m = 330.0
+max_below_road_m = 200.0
+claim = true
+scale_min = 0.85
+scale_max = 1.2
+seed_value = 1
+center = Vector3(352.00, 0.00, -186.00)
+radius = 7.0
+
+[sub_resource type="Resource" id="MFZ_25"]
 script = ExtResource("mf_zone")
 label = "pata ginkgo C"
 kind = 1
@@ -85,7 +549,7 @@ seed_value = 233
 center = Vector3(272.61, 0.00, -237.94)
 radius = 24.0
 
-[sub_resource type="Resource" id="MFZ_1"]
+[sub_resource type="Resource" id="MFZ_26"]
 script = ExtResource("mf_zone")
 label = "pata ginkgo D"
 kind = 1
@@ -103,7 +567,7 @@ seed_value = 383
 center = Vector3(418.66, 0.00, 61.31)
 radius = 26.0
 
-[sub_resource type="Resource" id="MFZ_2"]
+[sub_resource type="Resource" id="MFZ_27"]
 script = ExtResource("mf_zone")
 label = "pata ginkgo F"
 kind = 1
@@ -121,7 +585,7 @@ seed_value = 611
 center = Vector3(247.87, 0.00, 382.35)
 radius = 20.0
 
-[sub_resource type="Resource" id="MFZ_3"]
+[sub_resource type="Resource" id="MFZ_28"]
 script = ExtResource("mf_zone")
 label = "pata ginkgo H"
 kind = 1
@@ -139,7 +603,7 @@ seed_value = 916
 center = Vector3(10.57, 0.00, 203.46)
 radius = 22.0
 
-[sub_resource type="Resource" id="MFZ_4"]
+[sub_resource type="Resource" id="MFZ_29"]
 script = ExtResource("mf_zone")
 label = "rapa C artari"
 kind = 0
@@ -159,7 +623,7 @@ frac_to = 0.331
 lat_min = 9.0
 lat_max = 72.0
 
-[sub_resource type="Resource" id="MFZ_5"]
+[sub_resource type="Resource" id="MFZ_30"]
 script = ExtResource("mf_zone")
 label = "versant Higashiyama"
 kind = 1
@@ -177,7 +641,7 @@ seed_value = 22
 center = Vector3(372.00, 0.00, -150.00)
 radius = 88.0
 
-[sub_resource type="Resource" id="MFZ_6"]
+[sub_resource type="Resource" id="MFZ_31"]
 script = ExtResource("mf_zone")
 label = "valea D artari"
 kind = 0
@@ -197,7 +661,7 @@ frac_to = 0.47
 lat_min = 9.0
 lat_max = 78.0
 
-[sub_resource type="Resource" id="MFZ_7"]
+[sub_resource type="Resource" id="MFZ_32"]
 script = ExtResource("mf_zone")
 label = "Inari cedru fasie"
 kind = 0
@@ -217,7 +681,7 @@ frac_to = 0.585
 lat_min = 12.0
 lat_max = 72.0
 
-[sub_resource type="Resource" id="MFZ_8"]
+[sub_resource type="Resource" id="MFZ_33"]
 script = ExtResource("mf_zone")
 label = "Inari cedru disc"
 kind = 1
@@ -235,7 +699,7 @@ seed_value = 42
 center = Vector3(332.72, 0.00, 292.00)
 radius = 70.0
 
-[sub_resource type="Resource" id="MFZ_9"]
+[sub_resource type="Resource" id="MFZ_34"]
 script = ExtResource("mf_zone")
 label = "gradina F"
 kind = 0
@@ -255,7 +719,7 @@ frac_to = 0.69
 lat_min = 11.0
 lat_max = 56.0
 
-[sub_resource type="Resource" id="MFZ_10"]
+[sub_resource type="Resource" id="MFZ_35"]
 script = ExtResource("mf_zone")
 label = "bambus G tulpini"
 kind = 0
@@ -275,7 +739,7 @@ frac_to = 0.81
 lat_min = 6.5
 lat_max = 44.0
 
-[sub_resource type="Resource" id="MFZ_11"]
+[sub_resource type="Resource" id="MFZ_36"]
 script = ExtResource("mf_zone")
 label = "bambus G margine"
 kind = 0
@@ -380,7 +844,7 @@ script = ExtResource("17_leaffall")
 [node name="PadureMasa" type="Node3D" parent="."]
 script = ExtResource("mf_script")
 scenes = Array[PackedScene]([ExtResource("mf_momiji_a"), ExtResource("mf_momiji_b"), ExtResource("mf_momiji_c"), ExtResource("mf_ginkgo"), ExtResource("mf_niwaki_pine"), ExtResource("mf_moso_culm"), ExtResource("mf_bamboo_crown"), ExtResource("mf_cedar_dark")])
-zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11")])
+zones = Array[ExtResource("mf_zone")]([SubResource("MFZ_0"), SubResource("MFZ_1"), SubResource("MFZ_2"), SubResource("MFZ_3"), SubResource("MFZ_4"), SubResource("MFZ_5"), SubResource("MFZ_6"), SubResource("MFZ_7"), SubResource("MFZ_8"), SubResource("MFZ_9"), SubResource("MFZ_10"), SubResource("MFZ_11"), SubResource("MFZ_12"), SubResource("MFZ_13"), SubResource("MFZ_14"), SubResource("MFZ_15"), SubResource("MFZ_16"), SubResource("MFZ_17"), SubResource("MFZ_18"), SubResource("MFZ_19"), SubResource("MFZ_20"), SubResource("MFZ_21"), SubResource("MFZ_22"), SubResource("MFZ_23"), SubResource("MFZ_24"), SubResource("MFZ_25"), SubResource("MFZ_26"), SubResource("MFZ_27"), SubResource("MFZ_28"), SubResource("MFZ_29"), SubResource("MFZ_30"), SubResource("MFZ_31"), SubResource("MFZ_32"), SubResource("MFZ_33"), SubResource("MFZ_34"), SubResource("MFZ_35"), SubResource("MFZ_36")])
 
 [node name="Hazarduri" type="Node3D" parent="."]
 
@@ -1289,4 +1753,207 @@ points = PackedVector3Array(77.37, 6.77, -187.26, 79.59, 6.85, -188.63, 81.74, 6
 speed = 3.0
 travel_mode = 1
 phase = 0.3
+
+[node name="ZoneC_Kiyomizu" type="Node3D" parent="DecorManual"]
+
+[node name="PoartaNiomon1" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_niomon")]
+transform = Transform3D(0.116425, 0.000000, -1.244566, 0.000000, 1.250000, 0.000000, 1.244566, 0.000000, 0.116425, 250.000000, 19.485966, -195.981964)
+metadata/camera_blocker = true
+
+[node name="CameraNiomon" type="Area3D" parent="Hazarduri"]
+monitorable = false
+script = ExtResource("9_camzone")
+size = Vector3(2, 2, 2)
+frac_from = 0.1933
+frac_to = 0.2196
+height = 5.0
+look_height = 1.0
+fov_bonus = 2.0
+ceiling = 8.5
+
+[node name="cZidCiclopic2" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
+transform = Transform3D(-0.996849, 0.000000, -0.079327, 0.000000, 1.000000, 0.000000, 0.079327, 0.000000, -0.996849, 269.127411, 21.274836, -208.569870)
+
+[node name="cZidCiclopic3" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
+transform = Transform3D(-0.996879, 0.000000, -0.078949, 0.000000, 1.000000, 0.000000, 0.078949, 0.000000, -0.996879, 277.131561, 21.956171, -209.206467)
+
+[node name="cZidCiclopic4" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
+transform = Transform3D(-0.996821, 0.000000, -0.079669, 0.000000, 1.000000, 0.000000, 0.079669, 0.000000, -0.996821, 285.123657, 22.637644, -209.841736)
+
+[node name="cZidCiclopic5" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
+transform = Transform3D(-0.996782, 0.000000, -0.080155, 0.000000, 1.000000, 0.000000, 0.080155, 0.000000, -0.996782, 293.118286, 23.319788, -210.483643)
+
+[node name="cZidCiclopic6" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
+transform = Transform3D(-0.996779, 0.000000, -0.080200, 0.000000, 1.000000, 0.000000, 0.080200, 0.000000, -0.996779, 301.117798, 24.000895, -211.126663)
+
+[node name="cZidCiclopic7" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
+transform = Transform3D(-0.996250, 0.000000, -0.086526, 0.000000, 1.000000, 0.000000, 0.086526, 0.000000, -0.996250, 309.048218, 24.673914, -211.770782)
+
+[node name="cZidCiclopic8" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
+transform = Transform3D(-0.998654, 0.000000, -0.051875, 0.000000, 1.000000, 0.000000, 0.051875, 0.000000, -0.998654, 317.429382, 25.373774, -212.536499)
+
+[node name="cZidCiclopic9" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
+transform = Transform3D(-0.999585, 0.000000, 0.028795, 0.000000, 1.000000, 0.000000, -0.028795, 0.000000, -0.999585, 326.316742, 26.074183, -212.613876)
+
+[node name="cZidCiclopic10" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_cyclopean")]
+transform = Transform3D(-0.997835, 0.000000, 0.065763, 0.000000, 1.000000, 0.000000, -0.065763, 0.000000, -0.997835, 334.723389, 26.733591, -212.065231)
+
+[node name="cZidTemplu11" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_temple_wall")]
+transform = Transform3D(-0.079995, 0.000000, 0.996795, 0.000000, 1.000000, 0.000000, -0.996795, 0.000000, -0.079995, 266.815948, 20.964010, -187.118225)
+
+[node name="cZidTemplu12" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_temple_wall")]
+transform = Transform3D(-0.079449, 0.000000, 0.996839, 0.000000, 1.000000, 0.000000, -0.996839, 0.000000, -0.079449, 274.810364, 21.647314, -187.755493)
+
+[node name="cZidTemplu13" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_temple_wall")]
+transform = Transform3D(-0.079233, 0.000000, 0.996856, 0.000000, 1.000000, 0.000000, -0.996856, 0.000000, -0.079233, 282.808167, 22.330786, -188.389847)
+
+[node name="cSanjunoto14" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_sanjunoto")]
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, 288.000000, 22.962894, -216.000000)
+
+[node name="cClopotnita15" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_bell")]
+transform = Transform3D(-0.995004, 0.000000, -0.099833, 0.000000, 1.000000, 0.000000, 0.099833, 0.000000, -0.995004, 312.000000, 25.109135, -215.500000)
+
+[node name="cChozuya16" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_chozuya")]
+transform = Transform3D(-1.000000, 0.000000, -0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, -1.000000, 260.824310, 20.862492, -211.414993)
+
+[node name="cFelinar17" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(0.996707, 0.000000, 0.081082, 0.000000, 1.000000, 0.000000, -0.081082, 0.000000, 0.996707, 261.335114, 20.942616, -205.135742)
+
+[node name="cFelinar18" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(-0.996707, 0.000000, -0.081082, 0.000000, 1.000000, 0.000000, 0.081082, 0.000000, -0.996707, 262.664886, 20.941669, -188.789734)
+
+[node name="cFelinar19" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_b")]
+transform = Transform3D(0.996857, 0.000000, 0.079228, 0.000000, 1.000000, 0.000000, -0.079228, 0.000000, 0.996857, 274.350342, 22.050663, -206.177094)
+
+[node name="cFelinar20" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_b")]
+transform = Transform3D(-0.996857, 0.000000, -0.079228, 0.000000, 1.000000, 0.000000, 0.079228, 0.000000, -0.996857, 275.649658, 22.051075, -189.828644)
+
+[node name="cFelinar21" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(0.996810, 0.000000, 0.079813, 0.000000, 1.000000, 0.000000, -0.079813, 0.000000, 0.996810, 287.345551, 23.159290, -207.210602)
+
+[node name="cFelinar22" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(-0.996810, 0.000000, -0.079813, 0.000000, 1.000000, 0.000000, 0.079813, 0.000000, -0.996810, 288.654449, 23.162373, -190.862915)
+
+[node name="cFelinar23" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_b")]
+transform = Transform3D(0.996779, 0.000000, 0.080200, 0.000000, 1.000000, 0.000000, -0.080200, 0.000000, 0.996779, 300.342377, 24.267857, -208.255219)
+
+[node name="cFelinar24" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_b")]
+transform = Transform3D(-0.996779, 0.000000, -0.080200, 0.000000, 1.000000, 0.000000, 0.080200, 0.000000, -0.996779, 301.657623, 24.281147, -191.908051)
+
+[node name="cFelinar25" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(0.994302, 0.000000, 0.106596, 0.000000, 1.000000, 0.000000, -0.106596, 0.000000, 0.994302, 313.125916, 25.355076, -209.372208)
+
+[node name="cFelinar26" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(-0.994302, 0.000000, -0.106596, 0.000000, 1.000000, 0.000000, 0.106596, 0.000000, -0.994302, 314.874084, 25.413532, -193.065659)
+
+[node name="cFelinar27" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_b")]
+transform = Transform3D(0.997960, 0.000000, -0.063842, 0.000000, 1.000000, 0.000000, 0.063842, 0.000000, 0.997960, 327.523499, 26.507053, -209.760513)
+
+[node name="cFelinar28" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_b")]
+transform = Transform3D(-0.997960, 0.000000, 0.063842, 0.000000, 1.000000, 0.000000, -0.063842, 0.000000, -0.997960, 326.476501, 26.468769, -193.393967)
+
+[node name="cFelinar29" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(0.993615, 0.000000, -0.112828, 0.000000, 1.000000, 0.000000, 0.112828, 0.000000, 0.993615, 340.925201, 27.572224, -208.815292)
+
+[node name="cFelinar30" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(-0.993615, 0.000000, 0.112828, 0.000000, 1.000000, 0.000000, -0.112828, 0.000000, -0.993615, 339.074799, 27.623920, -192.520004)
+
+[node name="cEsafodajSala31" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 375.399994, 16.316227, -165.500000)
+
+[node name="cEsafodajSala32" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 375.399994, 15.656329, -159.500000)
+
+[node name="cEsafodajSala33" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 375.399994, 15.657413, -153.500000)
+
+[node name="cEsafodajSala34" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 375.399994, 15.650012, -147.500000)
+
+[node name="cEsafodajSala35" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 375.399994, 15.650012, -141.500000)
+
+[node name="cEsafodajSala36" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 375.399994, 15.650012, -135.500000)
+
+[node name="cEsafodajSala37" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 381.399994, 16.292072, -165.500000)
+
+[node name="cEsafodajSala38" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 381.399994, 15.649981, -159.500000)
+
+[node name="cEsafodajSala39" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 381.399994, 15.649997, -153.500000)
+
+[node name="cEsafodajSala40" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 381.399994, 15.649997, -147.500000)
+
+[node name="cEsafodajSala41" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 381.399994, 15.649997, -141.500000)
+
+[node name="cEsafodajSala42" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 381.399994, 15.649997, -135.500000)
+
+[node name="cEsafodajSala43" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 387.399994, 16.271809, -165.500000)
+
+[node name="cEsafodajSala44" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 387.399994, 15.649981, -159.500000)
+
+[node name="cEsafodajSala45" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 387.399994, 15.649997, -153.500000)
+
+[node name="cEsafodajSala46" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 387.399994, 15.649997, -147.500000)
+
+[node name="cEsafodajSala47" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 387.399994, 15.649997, -141.500000)
+
+[node name="cEsafodajSala48" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 387.399994, 15.649997, -135.500000)
+
+[node name="cEsafodajSala49" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 393.399994, 16.263371, -165.500000)
+
+[node name="cEsafodajSala50" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 393.399994, 15.649981, -159.500000)
+
+[node name="cEsafodajSala51" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 393.399994, 15.650012, -153.500000)
+
+[node name="cEsafodajSala52" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 393.399994, 15.650012, -147.500000)
+
+[node name="cEsafodajSala53" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 393.399994, 15.650012, -141.500000)
+
+[node name="cEsafodajSala54" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_scaffold")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 393.399994, 15.650012, -135.500000)
+
+[node name="cSalaHondo55" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_hondo")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 383.500000, 32.236225, -152.000000)
+
+[node name="cKoyasu56" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_koyasu")]
+transform = Transform3D(1.235964, 0.000000, 0.186798, 0.000000, 1.250000, 0.000000, -0.186798, 0.000000, 1.235964, 350.000000, 22.005543, -42.000000)
+
+[node name="cFelinarAterizare57" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 350.500000, 23.661930, -80.000000)
+
+[node name="cFelinarAterizare58" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 377.500000, 23.684589, -80.000000)
+
+[node name="cFelinarAterizare59" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 350.500000, 22.375965, -64.000000)
+
+[node name="cFelinarAterizare60" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_lantern_a")]
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 377.500000, 22.374210, -64.000000)
+
+[node name="cArtar61" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_momiji_a")]
+transform = Transform3D(0.563326, 0.000000, -0.891663, 0.000000, 1.054703, 0.000000, 0.891663, 0.000000, 0.563326, 341.000000, 22.330967, -50.000000)
+
+[node name="cArtar62" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_momiji_c")]
+transform = Transform3D(0.351219, 0.000000, -0.946542, 0.000000, 1.009603, 0.000000, 0.946542, 0.000000, 0.351219, 343.000000, 22.037983, -33.000000)
+
+[node name="cArtar63" parent="DecorManual/ZoneC_Kiyomizu" instance=ExtResource("poic_momiji_b")]
+transform = Transform3D(-0.258556, 0.000000, -0.975669, 0.000000, 1.009347, 0.000000, 0.975669, 0.000000, -0.258556, 357.500000, 21.945621, -30.000000)
 

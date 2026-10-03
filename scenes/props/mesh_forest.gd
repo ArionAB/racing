@@ -372,6 +372,14 @@ func _reject(why: String) -> void:
 
 func _fill_zone(zi: int, z: MeshForestZone, track: Track, main: TrackRoute,
 		groups: Dictionary) -> void:
+	# LUMINISUL: un disc cu `claim` si FARA specii nu pune nimic, doar isi
+	# rezerva suprafata pentru decorul manual (sala Kiyomizu pe esafodaj,
+	# pagodele, deschiderea de vedere spre scena de pe C1). Trebuie asezat in
+	# lista INAINTEA zonelor pe care le goleste.
+	if z.species.is_empty() and z.claim and z.kind == MeshForestZone.Kind.DISC:
+		_claims.append(Vector3(z.center.x, z.center.z, z.radius))
+		counts_by_zone[z.label] = 0
+		return
 	if z.species.is_empty() or z.species.size() != z.weights.size():
 		push_warning("MeshForest: zona %s are specii/ponderi nepotrivite" % z.label)
 		return

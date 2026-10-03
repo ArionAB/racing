@@ -1,0 +1,537 @@
+;;EXT
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/garden_rock_a.glb" id="poid_garden_rock_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/garden_rock_b.glb" id="poid_garden_rock_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/garden_rock_c.glb" id="poid_garden_rock_c"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/leaf_pile.glb" id="poid_leaf_pile"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_a.glb" id="poid_momiji_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_b.glb" id="poid_momiji_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_c.glb" id="poid_momiji_c"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/moss_mound.glb" id="poid_moss_mound"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/shiba_fence.glb" id="poid_shiba_fence"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/animals/sika_deer.glb" id="poid_sika_deer"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/small_shrine.glb" id="poid_small_shrine"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_a.glb" id="poid_stone_lantern_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_b.glb" id="poid_stone_lantern_b"]
+[ext_resource type="Script" path="res://scenes/props/sika_bow.gd" id="poid_sika_bow"]
+;;NODES
+[node name="ZoneD_Valea" type="Node3D" parent="DecorManual"]
+
+[node name="dFelinar1" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_a")]
+transform = Transform3D(-0.046141, 0.000000, 0.998935, 0.000000, 1.000000, 0.000000, -0.998935, 0.000000, -0.046141, 374.077484, 22.061924, -51.507473)
+
+[node name="dFelinar2" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_b")]
+transform = Transform3D(-0.484286, 0.000000, 0.874910, 0.000000, 1.000000, 0.000000, -0.874910, 0.000000, -0.484286, 380.358490, 21.898075, -33.108253)
+
+[node name="dFelinar3" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_a")]
+transform = Transform3D(0.408578, 0.000000, -0.912723, 0.000000, 1.000000, 0.000000, 0.912723, 0.000000, 0.408578, 375.601471, 21.724720, -3.922084)
+
+[node name="dFelinar4" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_b")]
+transform = Transform3D(-0.084287, 0.000000, -0.996441, 0.000000, 1.000000, 0.000000, 0.996441, 0.000000, -0.084287, 380.194305, 21.274845, 14.775597)
+
+[node name="dFelinar5" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_a")]
+transform = Transform3D(-0.520134, 0.000000, -0.854085, 0.000000, 1.000000, 0.000000, 0.854085, 0.000000, -0.520134, 373.840515, 20.325031, 33.341278)
+
+[node name="dFelinar6" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_a")]
+transform = Transform3D(0.423013, 0.000000, 0.906124, 0.000000, 1.000000, 0.000000, -0.906124, 0.000000, 0.423013, 364.701233, 18.440891, 82.799561)
+
+[node name="dFelinar7" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_b")]
+transform = Transform3D(0.001295, 0.000000, 0.999999, 0.000000, 1.000000, 0.000000, -0.999999, 0.000000, 0.001295, 360.866211, 17.328968, 102.260773)
+
+[node name="dFelinar8" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_a")]
+transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 342.700012, 16.093327, 126.247658)
+
+[node name="dFelinar9" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_b")]
+transform = Transform3D(0.016052, 0.000000, 0.999871, 0.000000, 1.000000, 0.000000, -0.999871, 0.000000, 0.016052, 361.205109, 14.847430, 150.395370)
+
+[node name="dArtar10" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(0.061104, 0.000000, -0.817028, 0.000000, 0.819310, 0.000000, 0.817028, 0.000000, 0.061104, 376.736298, 22.085728, -49.836639)
+
+[node name="dArtar11" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(0.211148, 0.000000, -0.802899, 0.000000, 0.830199, 0.000000, 0.802899, 0.000000, 0.211148, 378.182770, 21.983463, -41.721413)
+
+[node name="dArtar12" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(0.409430, 0.000000, -0.711014, 0.000000, 0.820472, 0.000000, 0.711014, 0.000000, 0.409430, 382.321777, 21.907825, -33.777931)
+
+[node name="dArtar13" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(0.442561, 0.000000, -0.800299, 0.000000, 0.914515, 0.000000, 0.800299, 0.000000, 0.442561, 387.418182, 21.832447, -25.257153)
+
+[node name="dArtar14" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(0.479959, 0.000000, -0.777491, 0.000000, 0.913703, 0.000000, 0.777491, 0.000000, 0.479959, 393.971771, 21.747272, -14.033398)
+
+[node name="dArtar15" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(0.142034, 0.000000, -0.892184, 0.000000, 0.903419, 0.000000, 0.892184, 0.000000, 0.142034, 398.455902, 21.648930, -2.965707)
+
+[node name="dArtar16" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(-0.017525, 0.000000, -0.860596, 0.000000, 0.860775, 0.000000, 0.860596, 0.000000, -0.017525, 401.037903, 21.413212, 10.670715)
+
+[node name="dArtar17" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(-0.206509, 0.000000, -0.906238, 0.000000, 0.929469, 0.000000, 0.906238, 0.000000, -0.206509, 400.143311, 21.003880, 25.157644)
+
+[node name="dArtar18" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(-0.426437, 0.000000, -0.696710, 0.000000, 0.816855, 0.000000, 0.696710, 0.000000, -0.426437, 395.038208, 20.537357, 39.547798)
+
+[node name="dArtar19" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(-0.384827, 0.000000, -0.787790, 0.000000, 0.876758, 0.000000, 0.787790, 0.000000, -0.384827, 388.880310, 20.150959, 48.318638)
+
+[node name="dArtar20" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(-0.488305, 0.000000, -0.702695, 0.000000, 0.855699, 0.000000, 0.702695, 0.000000, -0.488305, 372.947693, 18.981892, 73.598885)
+
+[node name="dArtar21" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(-0.314212, 0.000000, -0.886468, 0.000000, 0.940507, 0.000000, 0.886468, 0.000000, -0.314212, 366.955139, 18.473362, 83.406815)
+
+[node name="dArtar22" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(-0.146276, 0.000000, -0.839782, 0.000000, 0.852426, 0.000000, 0.839782, 0.000000, -0.146276, 363.780823, 17.972523, 91.725479)
+
+[node name="dArtar23" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(-0.128841, 0.000000, -0.843928, 0.000000, 0.853706, 0.000000, 0.843928, 0.000000, -0.128841, 363.851746, 17.486851, 100.133278)
+
+[node name="dArtar24" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(0.142839, 0.000000, -0.885785, 0.000000, 0.897228, 0.000000, 0.885785, 0.000000, 0.142839, 363.798737, 16.970234, 109.627258)
+
+[node name="dArtar25" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(-0.116003, 0.000000, -0.941962, 0.000000, 0.949078, 0.000000, 0.941962, 0.000000, -0.116003, 363.866516, 16.334705, 122.122879)
+
+[node name="dArtar26" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(0.083428, 0.000000, -0.872202, 0.000000, 0.876183, 0.000000, 0.872202, 0.000000, 0.083428, 363.654907, 15.810702, 132.420593)
+
+[node name="dArtar27" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(-0.076309, 0.000000, -0.886766, 0.000000, 0.890043, 0.000000, 0.886766, 0.000000, -0.076309, 363.504425, 15.322787, 141.871353)
+
+[node name="dArtar28" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(-0.012620, 0.000000, -0.935881, 0.000000, 0.935966, 0.000000, 0.935881, 0.000000, -0.012620, 363.773499, 14.760638, 152.316788)
+
+[node name="dArtar29" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(0.123537, 0.000000, -0.862812, 0.000000, 0.871611, 0.000000, 0.862812, 0.000000, 0.123537, 363.526520, 14.138629, 161.040512)
+
+[node name="dArtar30" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(0.144271, 0.000000, -0.812085, 0.000000, 0.824801, 0.000000, 0.812085, 0.000000, 0.144271, 353.441864, 22.109013, -55.551060)
+
+[node name="dArtar31" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(-0.014502, 0.000000, -0.809931, 0.000000, 0.810061, 0.000000, 0.809931, 0.000000, -0.014502, 352.832703, 22.051899, -43.439526)
+
+[node name="dArtar32" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(0.349955, 0.000000, -0.806189, 0.000000, 0.878869, 0.000000, 0.806189, 0.000000, 0.349955, 357.532379, 21.949238, -30.085104)
+
+[node name="dArtar33" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(0.387805, 0.000000, -0.771339, 0.000000, 0.863340, 0.000000, 0.771339, 0.000000, 0.387805, 364.521393, 21.857258, -18.588854)
+
+[node name="dArtar34" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(0.420435, 0.000000, -0.695921, 0.000000, 0.813063, 0.000000, 0.695921, 0.000000, 0.420435, 370.216522, 21.769062, -9.276304)
+
+[node name="dArtar35" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(0.441037, 0.000000, -0.746125, 0.000000, 0.866727, 0.000000, 0.746125, 0.000000, 0.441037, 374.374451, 21.677830, -0.970706)
+
+[node name="dArtar36" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(0.211811, 0.000000, -0.844059, 0.000000, 0.870230, 0.000000, 0.844059, 0.000000, 0.211811, 376.986755, 21.571079, 5.776764)
+
+[node name="dArtar37" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(0.003179, 0.000000, -0.844743, 0.000000, 0.844749, 0.000000, 0.844743, 0.000000, 0.003179, 377.501923, 21.341511, 13.269613)
+
+[node name="dArtar38" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(-0.208591, 0.000000, -0.876828, 0.000000, 0.901298, 0.000000, 0.876828, 0.000000, -0.208591, 377.021423, 20.996983, 20.502502)
+
+[node name="dArtar39" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(-0.502964, 0.000000, -0.803170, 0.000000, 0.947658, 0.000000, 0.803170, 0.000000, -0.502964, 373.375977, 20.535450, 29.137815)
+
+[node name="dArtar40" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(-0.404446, 0.000000, -0.763254, 0.000000, 0.863790, 0.000000, 0.763254, 0.000000, -0.404446, 367.304688, 20.055607, 38.583900)
+
+[node name="dArtar41" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(-0.540223, 0.000000, -0.662172, 0.000000, 0.854583, 0.000000, 0.662172, 0.000000, -0.540223, 360.563446, 19.565098, 49.039890)
+
+[node name="dArtar42" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(-0.346948, 0.000000, -0.774019, 0.000000, 0.848221, 0.000000, 0.774019, 0.000000, -0.346948, 355.675018, 19.168110, 57.820763)
+
+[node name="dArtar43" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(-0.469213, 0.000000, -0.767991, 0.000000, 0.899984, 0.000000, 0.767991, 0.000000, -0.469213, 349.530640, 18.778934, 65.841400)
+
+[node name="dArtar44" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(-0.405772, 0.000000, -0.749985, 0.000000, 0.852718, 0.000000, 0.749985, 0.000000, -0.405772, 344.308441, 18.357899, 76.685570)
+
+[node name="dArtar45" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(-0.156613, 0.000000, -0.936798, 0.000000, 0.949799, 0.000000, 0.936798, 0.000000, -0.156613, 339.989014, 17.865971, 89.772491)
+
+[node name="dArtar46" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(0.000890, 0.000000, -0.838747, 0.000000, 0.838747, 0.000000, 0.838747, 0.000000, 0.000890, 339.533997, 17.350407, 101.473663)
+
+[node name="dArtar47" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(-0.048868, 0.000000, -0.880753, 0.000000, 0.882108, 0.000000, 0.880753, 0.000000, -0.048868, 340.634277, 16.733555, 114.193909)
+
+[node name="dArtar48" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(0.084640, 0.000000, -0.884909, 0.000000, 0.888947, 0.000000, 0.884909, 0.000000, 0.084640, 340.318481, 16.147297, 125.813339)
+
+[node name="dArtar49" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_c")]
+transform = Transform3D(-0.026220, 0.000000, -0.819284, 0.000000, 0.819703, 0.000000, 0.819284, 0.000000, -0.026220, 340.861328, 15.583835, 137.017319)
+
+[node name="dArtar50" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(-0.008655, 0.000000, -0.810899, 0.000000, 0.810945, 0.000000, 0.810899, 0.000000, -0.008655, 340.878357, 15.088717, 146.735733)
+
+[node name="dArtar51" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(0.074815, 0.000000, -0.884030, 0.000000, 0.887190, 0.000000, 0.884030, 0.000000, 0.074815, 339.521576, 14.442111, 160.334915)
+
+[node name="dArtar52" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_b")]
+transform = Transform3D(0.406732, 0.000000, -0.753685, 0.000000, 0.856430, 0.000000, 0.753685, 0.000000, 0.406732, 343.137604, 13.719913, 173.719208)
+
+[node name="dPiatra53" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_c")]
+transform = Transform3D(-0.703921, 0.000000, 0.706520, 0.000000, 0.997334, 0.000000, -0.706520, 0.000000, -0.703921, 376.497559, 22.051020, -53.739288)
+
+[node name="dPiatra54" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_c")]
+transform = Transform3D(-0.218083, 0.000000, -1.001627, 0.000000, 1.025094, 0.000000, 1.001627, 0.000000, -0.218083, 383.496765, 21.828058, -33.000751)
+
+[node name="dPiatra55" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_c")]
+transform = Transform3D(0.579976, 0.000000, -0.825350, 0.000000, 1.008749, 0.000000, 0.825350, 0.000000, 0.579976, 395.921570, 21.632746, -7.998608)
+
+[node name="dPiatra56" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_moss_mound")]
+transform = Transform3D(0.044857, 0.000000, 1.026078, 0.000000, 1.027058, 0.000000, -1.026078, 0.000000, 0.044857, 396.223877, 20.624262, 34.304810)
+
+[node name="dPiatra57" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_c")]
+transform = Transform3D(0.054921, 0.000000, -0.843295, 0.000000, 0.845081, 0.000000, 0.843295, 0.000000, 0.054921, 363.796875, 17.635447, 95.580673)
+
+[node name="dPiatra58" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_a")]
+transform = Transform3D(0.264642, 0.000000, -0.900796, 0.000000, 0.938866, 0.000000, 0.900796, 0.000000, 0.264642, 363.649445, 16.134928, 123.972679)
+
+[node name="dPiatra59" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_b")]
+transform = Transform3D(-0.986234, 0.000000, -0.111673, 0.000000, 0.992536, 0.000000, 0.111673, 0.000000, -0.986234, 362.761505, 14.687175, 151.729980)
+
+[node name="dPiatra60" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_a")]
+transform = Transform3D(-0.890158, 0.000000, -0.236789, 0.000000, 0.921113, 0.000000, 0.236789, 0.000000, -0.890158, 353.692719, 21.959330, -43.956493)
+
+[node name="dPiatra61" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_a")]
+transform = Transform3D(0.679841, 0.000000, -0.647340, 0.000000, 0.938740, 0.000000, 0.647340, 0.000000, 0.679841, 367.369873, 21.744944, -15.148074)
+
+[node name="dPiatra62" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_b")]
+transform = Transform3D(-0.833620, 0.000000, 0.392655, 0.000000, 0.921466, 0.000000, -0.392655, 0.000000, -0.833620, 377.278900, 21.427942, 7.203053)
+
+[node name="dPiatra63" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_a")]
+transform = Transform3D(-0.799185, 0.000000, 0.413523, 0.000000, 0.899832, 0.000000, -0.413523, 0.000000, -0.799185, 373.033142, 20.343378, 30.908615)
+
+[node name="dPiatra64" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_a")]
+transform = Transform3D(0.628126, 0.000000, 0.660888, 0.000000, 0.911765, 0.000000, -0.660888, 0.000000, 0.628126, 356.860626, 19.143457, 56.072773)
+
+[node name="dPiatra65" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_moss_mound")]
+transform = Transform3D(0.623020, 0.000000, -0.546389, 0.000000, 0.828670, 0.000000, 0.546389, 0.000000, 0.623020, 341.035339, 17.593576, 93.943954)
+
+[node name="dPiatra66" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_a")]
+transform = Transform3D(-0.830909, 0.000000, -0.439370, 0.000000, 0.939924, 0.000000, 0.439370, 0.000000, -0.830909, 340.416656, 16.272699, 121.208801)
+
+[node name="dPiatra67" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_garden_rock_b")]
+transform = Transform3D(0.762179, 0.000000, -0.325364, 0.000000, 0.828721, 0.000000, 0.325364, 0.000000, 0.762179, 340.680298, 14.800227, 150.534241)
+
+[node name="dFrunze68" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(1.061127, 0.000000, -0.651563, 0.000000, 1.245201, 0.000000, 0.651563, 0.000000, 1.061127, 373.708740, 22.224440, -63.768169)
+
+[node name="dFrunze69" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.721516, 0.000000, -0.760662, 0.000000, 1.048424, 0.000000, 0.760662, 0.000000, -0.721516, 376.361145, 22.099012, -52.170036)
+
+[node name="dFrunze70" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.935228, 0.000000, -0.395873, 0.000000, 1.015562, 0.000000, 0.395873, 0.000000, -0.935228, 378.572723, 21.973448, -41.809376)
+
+[node name="dFrunze71" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-1.244054, 0.000000, 0.017765, 0.000000, 1.244180, 0.000000, -0.017765, 0.000000, -1.244054, 384.526947, 21.885527, -32.052471)
+
+[node name="dFrunze72" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.434668, 0.000000, -0.961855, 0.000000, 1.055510, 0.000000, 0.961855, 0.000000, 0.434668, 387.319244, 21.802015, -21.640703)
+
+[node name="dFrunze73" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.683251, 0.000000, 0.595719, 0.000000, 0.906483, 0.000000, -0.595719, 0.000000, -0.683251, 396.514526, 21.710310, -11.383933)
+
+[node name="dFrunze74" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-1.096285, 0.000000, -0.490740, 0.000000, 1.201110, 0.000000, 0.490740, 0.000000, -1.096285, 399.171997, 21.571745, 2.174016)
+
+[node name="dFrunze75" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.236105, 0.000000, 1.241729, 0.000000, 1.263976, 0.000000, -1.241729, 0.000000, -0.236105, 403.274597, 21.165815, 19.840872)
+
+[node name="dFrunze76" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.142425, 0.000000, 1.052192, 0.000000, 1.061787, 0.000000, -1.052192, 0.000000, 0.142425, 397.261688, 20.575453, 38.569260)
+
+[node name="dFrunze77" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.815809, 0.000000, -0.997393, 0.000000, 1.288540, 0.000000, 0.997393, 0.000000, 0.815809, 384.529907, 19.971922, 50.931648)
+
+[node name="dFrunze78" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.571106, 0.000000, 0.844930, 0.000000, 1.019838, 0.000000, -0.844930, 0.000000, -0.571106, 371.369293, 18.528090, 83.050682)
+
+[node name="dFrunze79" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.185341, 0.000000, -1.241639, 0.000000, 1.255396, 0.000000, 1.241639, 0.000000, 0.185341, 365.087738, 17.950956, 92.161560)
+
+[node name="dFrunze80" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(1.141286, 0.000000, 0.210458, 0.000000, 1.160528, 0.000000, -0.210458, 0.000000, 1.141286, 366.505402, 17.398497, 102.053940)
+
+[node name="dFrunze81" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.583474, 0.000000, -0.790594, 0.000000, 0.982589, 0.000000, 0.790594, 0.000000, -0.583474, 362.213501, 16.773573, 113.320313)
+
+[node name="dFrunze82" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.587624, 0.000000, -0.798465, 0.000000, 0.991388, 0.000000, 0.798465, 0.000000, -0.587624, 363.484070, 16.067167, 127.193390)
+
+[node name="dFrunze83" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.116063, 0.000000, -1.222370, 0.000000, 1.227868, 0.000000, 1.222370, 0.000000, -0.116063, 365.582672, 15.503034, 137.938934)
+
+[node name="dFrunze84" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.596586, 0.000000, -0.810075, 0.000000, 1.006050, 0.000000, 0.810075, 0.000000, -0.596586, 366.651245, 14.826062, 149.939697)
+
+[node name="dFrunze85" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.400834, 0.000000, -1.123177, 0.000000, 1.192558, 0.000000, 1.123177, 0.000000, 0.400834, 366.226715, 14.201123, 158.981522)
+
+[node name="dFrunze86" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.131828, 0.000000, -0.990771, 0.000000, 0.999503, 0.000000, 0.990771, 0.000000, 0.131828, 366.268616, 13.407163, 168.080490)
+
+[node name="dFrunze87" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.932852, 0.000000, 0.610354, 0.000000, 1.114785, 0.000000, -0.610354, 0.000000, -0.932852, 352.411072, 22.147657, -57.173798)
+
+[node name="dFrunze88" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-1.239549, 0.000000, 0.123738, 0.000000, 1.245709, 0.000000, -0.123738, 0.000000, -1.239549, 353.973358, 22.030378, -43.951839)
+
+[node name="dFrunze89" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.042208, 0.000000, -0.904383, 0.000000, 0.905367, 0.000000, 0.904383, 0.000000, -0.042208, 360.617859, 21.924009, -29.045355)
+
+[node name="dFrunze90" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(1.130383, 0.000000, -0.523403, 0.000000, 1.245679, 0.000000, 0.523403, 0.000000, 1.130383, 365.865631, 21.848875, -19.214657)
+
+[node name="dFrunze91" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(1.173046, 0.000000, -0.471118, 0.000000, 1.264116, 0.000000, 0.471118, 0.000000, 1.173046, 372.461548, 21.745436, -6.717288)
+
+[node name="dFrunze92" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.542042, 0.000000, -0.790582, 0.000000, 0.958555, 0.000000, 0.790582, 0.000000, -0.542042, 377.154816, 21.646498, 2.040623)
+
+[node name="dFrunze93" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.925964, 0.000000, 0.812417, 0.000000, 1.231841, 0.000000, -0.812417, 0.000000, -0.925964, 379.916962, 21.491575, 9.772398)
+
+[node name="dFrunze94" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.913335, 0.000000, -0.747090, 0.000000, 1.179967, 0.000000, 0.747090, 0.000000, -0.913335, 378.540070, 21.042952, 19.829231)
+
+[node name="dFrunze95" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.936053, 0.000000, -0.764742, 0.000000, 1.208729, 0.000000, 0.764742, 0.000000, -0.936053, 371.397125, 20.473280, 29.641891)
+
+[node name="dFrunze96" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.987229, 0.000000, 0.243514, 0.000000, 1.016818, 0.000000, -0.243514, 0.000000, 0.987229, 368.660187, 20.002577, 40.437752)
+
+[node name="dFrunze97" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.939680, 0.000000, 0.300841, 0.000000, 0.986663, 0.000000, -0.300841, 0.000000, 0.939680, 361.691650, 19.456343, 52.539276)
+
+[node name="dFrunze98" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.633013, 0.000000, 0.791850, 0.000000, 1.013771, 0.000000, -0.791850, 0.000000, -0.633013, 350.769623, 18.972364, 60.634529)
+
+[node name="dFrunze99" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.265200, 0.000000, -1.000746, 0.000000, 1.035289, 0.000000, 1.000746, 0.000000, 0.265200, 347.547058, 18.445158, 74.858292)
+
+[node name="dFrunze100" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.765414, 0.000000, 1.001380, 0.000000, 1.260405, 0.000000, -1.001380, 0.000000, -0.765414, 339.148987, 17.900785, 88.173828)
+
+[node name="dFrunze101" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.011064, 0.000000, 1.034293, 0.000000, 1.034352, 0.000000, -1.034293, 0.000000, 0.011064, 339.846588, 17.317701, 102.028130)
+
+[node name="dFrunze102" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-1.088828, 0.000000, 0.060558, 0.000000, 1.090511, 0.000000, -0.060558, 0.000000, -1.088828, 339.914337, 16.739683, 113.863358)
+
+[node name="dFrunze103" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.939406, 0.000000, 0.464711, 0.000000, 1.048065, 0.000000, -0.464711, 0.000000, 0.939406, 339.227234, 16.228910, 123.969368)
+
+[node name="dFrunze104" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.318923, 0.000000, -0.951078, 0.000000, 1.003126, 0.000000, 0.951078, 0.000000, -0.318923, 342.577087, 15.706464, 134.401352)
+
+[node name="dFrunze105" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.875014, 0.000000, 0.338336, 0.000000, 0.938147, 0.000000, -0.338336, 0.000000, -0.875014, 339.919006, 14.927701, 149.845520)
+
+[node name="dFrunze106" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(1.033106, 0.000000, -0.709990, 0.000000, 1.253552, 0.000000, 0.709990, 0.000000, 1.033106, 343.707001, 14.132245, 166.003403)
+
+[node name="dFrunze107" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.125139, 0.000000, 0.752633, 0.000000, 0.762966, 0.000000, -0.752633, 0.000000, -0.125139, 371.734253, 22.457792, -70.243149)
+
+[node name="dFrunze108" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.844829, 0.000000, -0.216401, 0.000000, 0.872104, 0.000000, 0.216401, 0.000000, -0.844829, 371.915039, 22.042204, -55.144245)
+
+[node name="dFrunze109" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.109702, 0.000000, 0.809791, 0.000000, 0.817187, 0.000000, -0.809791, 0.000000, 0.109702, 374.142426, 21.967451, -41.444000)
+
+[node name="dFrunze110" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.618045, 0.000000, 0.560534, 0.000000, 0.834373, 0.000000, -0.560534, 0.000000, 0.618045, 380.959991, 21.857420, -28.181396)
+
+[node name="dFrunze111" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.291377, 0.000000, -0.849695, 0.000000, 0.898266, 0.000000, 0.849695, 0.000000, 0.291377, 377.720490, 21.707884, -2.647505)
+
+[node name="dFrunze112" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.793982, 0.000000, 0.424623, 0.000000, 0.900396, 0.000000, -0.424623, 0.000000, 0.793982, 396.809052, 21.293455, 16.028267)
+
+[node name="dFrunze113" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.694000, 0.000000, 0.299322, 0.000000, 0.755797, 0.000000, -0.299322, 0.000000, -0.694000, 378.952850, 20.666960, 27.885050)
+
+[node name="dFrunze114" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.988666, 0.000000, -0.282288, 0.000000, 1.028176, 0.000000, 0.282288, 0.000000, 0.988666, 381.849243, 19.943663, 50.201782)
+
+[node name="dFrunze115" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.032687, 0.000000, -0.923189, 0.000000, 0.923768, 0.000000, 0.923189, 0.000000, 0.032687, 356.521057, 18.951002, 64.387985)
+
+[node name="dFrunze116" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.411704, 0.000000, 0.682340, 0.000000, 0.796924, 0.000000, -0.682340, 0.000000, -0.411704, 346.857361, 18.200010, 82.896973)
+
+[node name="dFrunze117" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(1.006359, 0.000000, 0.189172, 0.000000, 1.023984, 0.000000, -0.189172, 0.000000, 1.006359, 344.652008, 16.903196, 110.745529)
+
+[node name="dFrunze118" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.034025, 0.000000, 0.923324, 0.000000, 0.923951, 0.000000, -0.923324, 0.000000, 0.034025, 345.195587, 15.748593, 133.586349)
+
+[node name="dFrunze119" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(-0.811137, 0.000000, -0.481190, 0.000000, 0.943126, 0.000000, 0.481190, 0.000000, -0.811137, 358.589569, 14.759748, 152.986603)
+
+[node name="dFrunze120" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.830790, 0.000000, -0.280892, 0.000000, 0.876990, 0.000000, 0.280892, 0.000000, 0.830790, 347.316986, 13.881604, 169.723969)
+
+[node name="dGard121" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.886963, 0.000000, 0.461840, 0.000000, 1.000000, 0.000000, -0.461840, 0.000000, 0.886963, 375.025360, 21.761482, -7.312808)
+
+[node name="dGard122" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.904420, 0.000000, 0.426644, 0.000000, 1.000000, 0.000000, -0.426644, 0.000000, 0.904420, 376.230438, 21.752632, -4.890310)
+
+[node name="dGard123" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.912723, 0.000000, 0.408578, 0.000000, 1.000000, 0.000000, -0.408578, 0.000000, 0.912723, 377.483795, 21.712135, -2.318556)
+
+[node name="dGard124" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.933776, 0.000000, 0.357858, 0.000000, 1.000000, 0.000000, -0.357858, 0.000000, 0.933776, 378.473969, 21.693443, 0.063902)
+
+[node name="dGard125" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.946523, 0.000000, 0.322637, 0.000000, 1.000000, 0.000000, -0.322637, 0.000000, 0.946523, 379.323547, 21.676338, 2.647934)
+
+[node name="dGard126" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.970516, 0.000000, 0.241036, 0.000000, 1.000000, 0.000000, -0.241036, 0.000000, 0.970516, 379.997162, 21.635674, 4.888328)
+
+[node name="dGard127" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.978537, 0.000000, 0.206072, 0.000000, 1.000000, 0.000000, -0.206072, 0.000000, 0.978537, 380.673767, 21.558830, 7.535955)
+
+[node name="dGard128" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.992396, 0.000000, 0.123082, 0.000000, 1.000000, 0.000000, -0.123082, 0.000000, 0.992396, 380.995605, 21.492805, 9.859698)
+
+[node name="dGard129" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.997518, 0.000000, 0.070407, 0.000000, 1.000000, 0.000000, -0.070407, 0.000000, 0.997518, 381.139801, 21.408501, 12.452306)
+
+[node name="dGard130" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.999145, 0.000000, -0.041337, 0.000000, 1.000000, 0.000000, 0.041337, 0.000000, 0.999145, 381.186676, 21.309105, 14.577568)
+
+[node name="dGard131" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.991251, 0.000000, -0.131987, 0.000000, 1.000000, 0.000000, 0.131987, 0.000000, 0.991251, 381.086578, 21.201927, 16.866911)
+
+[node name="dGard132" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.984725, 0.000000, -0.174117, 0.000000, 1.000000, 0.000000, 0.174117, 0.000000, 0.984725, 380.625580, 21.081993, 19.505255)
+
+[node name="dGard133" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.959402, 0.000000, -0.282041, 0.000000, 1.000000, 0.000000, 0.282041, 0.000000, 0.959402, 380.123260, 20.979118, 21.578245)
+
+[node name="dGard134" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.944118, 0.000000, -0.329608, 0.000000, 1.000000, 0.000000, 0.329608, 0.000000, 0.944118, 379.416168, 20.848167, 24.101154)
+
+[node name="dGard135" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.917219, 0.000000, -0.398383, 0.000000, 1.000000, 0.000000, 0.398383, 0.000000, 0.917219, 378.551086, 20.726540, 26.369978)
+
+[node name="dGard136" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.905346, 0.000000, -0.424675, 0.000000, 1.000000, 0.000000, 0.424675, 0.000000, 0.905346, 377.335999, 20.595497, 28.880512)
+
+[node name="dGard137" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.875778, 0.000000, -0.482713, 0.000000, 1.000000, 0.000000, 0.482713, 0.000000, 0.875778, 376.200226, 20.482414, 31.106377)
+
+[node name="dGard138" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.854336, 0.000000, -0.519722, 0.000000, 1.000000, 0.000000, 0.519722, 0.000000, 0.854336, 353.662292, 18.785530, 67.667564)
+
+[node name="dGard139" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.871341, 0.000000, -0.490678, 0.000000, 1.000000, 0.000000, 0.490678, 0.000000, 0.871341, 365.945892, 18.658989, 78.358528)
+
+[node name="dGard140" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.882152, 0.000000, -0.470965, 0.000000, 1.000000, 0.000000, 0.470965, 0.000000, 0.882152, 364.612579, 18.541069, 80.866249)
+
+[node name="dGard141" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.906124, 0.000000, -0.423013, 0.000000, 1.000000, 0.000000, 0.423013, 0.000000, 0.906124, 363.395813, 18.431831, 83.153893)
+
+[node name="dGard142" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.920682, 0.000000, -0.390313, 0.000000, 1.000000, 0.000000, 0.390313, 0.000000, 0.920682, 362.242401, 18.288521, 85.629761)
+
+[node name="dGard143" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.954159, 0.000000, -0.299302, 0.000000, 1.000000, 0.000000, 0.299302, 0.000000, 0.954159, 361.488678, 18.164146, 87.741043)
+
+[node name="dGard144" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.973590, 0.000000, -0.228304, 0.000000, 1.000000, 0.000000, 0.228304, 0.000000, 0.973590, 360.848816, 18.027565, 90.086006)
+
+[node name="dGard145" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.991008, 0.000000, -0.133805, 0.000000, 1.000000, 0.000000, 0.133805, 0.000000, 0.991008, 360.444885, 17.903450, 92.298386)
+
+[node name="dGard146" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.995059, 0.000000, -0.099289, 0.000000, 1.000000, 0.000000, 0.099289, 0.000000, 0.995059, 360.190857, 17.752586, 95.026466)
+
+[node name="dGard147" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.999997, 0.000000, 0.002306, 0.000000, 1.000000, 0.000000, -0.002306, 0.000000, 0.999997, 359.770294, 14.679818, 154.139236)
+
+[node name="dGard148" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.997908, 0.000000, 0.064651, 0.000000, 1.000000, 0.000000, -0.064651, 0.000000, 0.997908, 359.851044, 14.525689, 156.657013)
+
+[node name="dGard149" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.993422, 0.000000, 0.114510, 0.000000, 1.000000, 0.000000, -0.114510, 0.000000, 0.993422, 360.125092, 14.332620, 159.262054)
+
+[node name="dGard150" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.979837, 0.000000, 0.199797, 0.000000, 1.000000, 0.000000, -0.199797, 0.000000, 0.979837, 360.440002, 14.145318, 161.569107)
+
+[node name="dGard151" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.969734, 0.000000, 0.244166, 0.000000, 1.000000, 0.000000, -0.244166, 0.000000, 0.969734, 361.033661, 13.939797, 164.154114)
+
+[node name="dGard152" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_shiba_fence")]
+transform = Transform3D(0.937527, 0.000000, 0.347913, 0.000000, 1.000000, 0.000000, -0.347913, 0.000000, 0.937527, 361.742126, 13.736123, 166.183304)
+
+[node name="dCerb153" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_sika_deer")]
+transform = Transform3D(1.171861, 0.000000, 0.562797, 0.000000, 1.300000, 0.000000, -0.562797, 0.000000, 1.171861, 376.886078, 19.446180, 62.916203)
+
+[node name="dCerb154" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_sika_deer")]
+transform = Transform3D(0.430193, 0.000000, 1.173641, 0.000000, 1.250000, 0.000000, -1.173641, 0.000000, 0.430193, 380.247742, 19.579786, 60.868790)
+
+[node name="Bow" type="Node" parent="DecorManual/ZoneD_Valea/dCerb154"]
+script = ExtResource("poid_sika_bow")
+idle_clip = &"Graze"
+
+[node name="dCerb155" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_sika_deer")]
+transform = Transform3D(1.217946, 0.000000, -0.281260, 0.000000, 1.250000, 0.000000, 0.281260, 0.000000, 1.217946, 374.970245, 19.287199, 66.432571)
+
+[node name="Bow" type="Node" parent="DecorManual/ZoneD_Valea/dCerb155"]
+script = ExtResource("poid_sika_bow")
+idle_clip = &"Graze"
+
+[node name="dCerb156" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_sika_deer")]
+transform = Transform3D(-0.437901, 0.000000, 1.117248, 0.000000, 1.200000, 0.000000, -1.117248, 0.000000, -0.437901, 374.821320, 19.143019, 70.511154)
+
+[node name="Bow" type="Node" parent="DecorManual/ZoneD_Valea/dCerb156"]
+script = ExtResource("poid_sika_bow")
+idle_clip = &"Graze"
+
+[node name="dPiatra157" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_moss_mound")]
+transform = Transform3D(0.994240, 0.000000, 0.107180, 0.000000, 1.000000, 0.000000, -0.107180, 0.000000, 0.994240, 380.910522, 19.357080, 63.618969)
+
+[node name="dPiatra158" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_moss_mound")]
+transform = Transform3D(0.999967, 0.000000, -0.008188, 0.000000, 1.000000, 0.000000, 0.008188, 0.000000, 0.999967, 378.904694, 19.178736, 67.665726)
+
+[node name="dPiatra159" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_moss_mound")]
+transform = Transform3D(0.830057, 0.000000, -0.557679, 0.000000, 1.000000, 0.000000, 0.557679, 0.000000, 0.830057, 376.511444, 18.946558, 72.731812)
+
+[node name="dPiatra160" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_moss_mound")]
+transform = Transform3D(0.234971, 0.000000, -0.972002, 0.000000, 1.000000, 0.000000, 0.972002, 0.000000, 0.234971, 382.916931, 19.535578, 59.570133)
+
+[node name="dFrunze161" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_leaf_pile")]
+transform = Transform3D(0.688358, 0.000000, 0.579796, 0.000000, 0.900000, 0.000000, -0.579796, 0.000000, 0.688358, 374.216675, 19.320250, 64.214363)
+
+[node name="dFelinar162" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_b")]
+transform = Transform3D(0.521631, 0.000000, 0.853171, 0.000000, 1.000000, 0.000000, -0.853171, 0.000000, 0.521631, 381.229858, 19.704823, 56.194622)
+
+[node name="dArtar163" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_momiji_a")]
+transform = Transform3D(-0.469468, 0.000000, -0.767854, 0.000000, 0.900000, 0.000000, 0.767854, 0.000000, -0.469468, 382.165924, 19.362110, 67.316399)
+
+[node name="dPodFelinar164" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_a")]
+transform = Transform3D(-0.497088, 0.000000, 0.867700, 0.000000, 1.000000, 0.000000, -0.867700, 0.000000, -0.497088, 364.617767, 13.049212, 169.841721)
+
+[node name="dPodFelinar165" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_a")]
+transform = Transform3D(0.497087, 0.000000, -0.867700, 0.000000, 1.000000, 0.000000, 0.867700, 0.000000, 0.497087, 348.999176, 13.071429, 178.789291)
+
+[node name="dPodAltar166" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_small_shrine")]
+transform = Transform3D(0.347913, 0.000000, -0.937527, 0.000000, 1.000000, 0.000000, 0.937527, 0.000000, 0.347913, 342.861145, 13.524496, 174.197327)
+
+[node name="dPodFelinar167" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_a")]
+transform = Transform3D(-0.500015, 0.000000, 0.866017, 0.000000, 1.000000, 0.000000, -0.866017, 0.000000, -0.500015, 402.432709, 11.673770, 232.356339)
+
+[node name="dPodFelinar168" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_stone_lantern_a")]
+transform = Transform3D(0.500015, 0.000000, -0.866017, 0.000000, 1.000000, 0.000000, 0.866017, 0.000000, 0.500015, 384.785492, 11.673434, 242.545395)
+
+[node name="dPodAltar169" parent="DecorManual/ZoneD_Valea" instance=ExtResource("poid_small_shrine")]
+transform = Transform3D(-0.503035, 0.000000, 0.864266, 0.000000, 1.000000, 0.000000, -0.864266, 0.000000, -0.503035, 407.902679, 11.700354, 236.073608)
+

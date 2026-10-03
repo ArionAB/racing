@@ -567,6 +567,9 @@ const CLASS_TEXTURES := {
 	# cere piatra veche uzata („treptele sunt geometrie, textura da uzura"),
 	# deci tinta e piatra CENUSIE la luminanta dalei.
 	"old_stone": "res://assets/textures/classes/stone_wall.png",
+	# Kyoto POI F r3: bolovanii de gradina (garden_rock_a/b/c) pe ACEEASI dala de
+	# zid, cu tenta mai inchisa si calda (vezi CLASS_TINT). Zero texturi noi.
+	"garden_stone": "res://assets/textures/classes/stone_wall.png",
 	# Insula (Okinawa): calcar coraligen si scoarta tropicala.
 	"coral_rock": "res://assets/textures/classes/coral_rock.png",
 	"bark": "res://assets/textures/classes/bark.png",
@@ -929,6 +932,13 @@ const CLASS_TINT := {
 	# <= 1 pe toate canalele si nu mai e nevoie de nicio ridicare. Sub lumina
 	# temei iese (59,63,74), R-B = -15: piatra rece de oras noaptea.
 	"old_stone": Color(0.895, 0.933, 1.0),
+	# garden_stone: masurat pe captura de joc (r3, cadrul-erou F). Atlas/old_stone:
+	# fata luminata a bolovanilor ~(195, 170, 140); diorama ~(139, 119, 108), gri
+	# mediu-cald. Prima tenta (0,64; 0,65; 0,77) dadea fata luminata (165, 144, 125)
+	# dar umbrele VIOLET (68, 67, 81) sub ambientul rece; (0,54; 0,54; 0,56) le
+	# facea carbune (58, 56, 57), (0,62; 0,60; 0,58) maro-inchis (96, 84, 68).
+	# Albastrul tinut sub rosu (B/R ~0,95), luminozitatea spre tinta:
+	"garden_stone": Color(0.84, 0.81, 0.80),
 	# Valea Rosie: dala alpine_granite (166, 156, 137) impinsa pe rosul
 	# caramiziu al referintei. Multiplicatorul NU e ales din ochi — e
 	# masurat din docs/track_briefs/img/v3_crops/D_canyon.png (media zonei
@@ -1386,6 +1396,7 @@ const CLASS_TRIPLANAR_SCALE := {
 	# 0.35 = o repetitie la 2.86 m: pe scara de 10x12 m intra ~4 randuri de
 	# zidarie pe latime, adica se citeste ca zidarie si nu ca tapet.
 	"old_stone": 0.35,
+	"garden_stone": 0.35,
 	# Lemnaria: bena tricicletei Ape, busteni de rulare, bordaj. Sursa e o
 	# scanare de scanduri; la 0.7 (o repetitie la 1.43 m) fibra cade aproape
 	# la scara reala pe piese de 1-3 m. Prim consumator REAL (Fiordland,

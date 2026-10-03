@@ -213,6 +213,16 @@ Tabelul se scrie **înaintea** traseului, ca la Jodhpur.
   - Reflexia (dacă o facem, §3.1) cade la 6–9° sub orizontală, în cadru.
   - **Soarele din SV luminează fața de sud a pavilionului**, adică exact fața
     dinspre drum (§4).
+  - **Poziția reală (POI F, 3 oct 2026, acceptată de coordonator pe captură):**
+    iazul construit are ~100 × 100 m, iar punctul de schiță (Godot 150, 300)
+    cădea în mijlocul apei. Pavilionul stă pe **malul de vest** (centrul la
+    117,6 / 285,0, scara 1,3), cu dealul grădinii în spate și reflexia pe apă
+    (`PondReflection`). Garda de azimut din `gen_kyoto_route.py` s-a mutat pe
+    banda măsurată: **100–150 m, azimut 15–45°** (de pe apropierea de daruma,
+    frac 0,600–0,625: 150→103 m, 11→31°, ~88→125 px la 1080p). Banda veche
+    (70–110 m, 20–45°) nu mai are sens: sub 100 m drumul a trecut deja de
+    pavilion și azimutul sare peste 45° (iese lateral din cadru, corect: atunci
+    decizia e la daruma).
 - **Daruma-otoshi (a înlocuit tubul): turnul e întreg în cadru de la 150 m până la 35 m.** *(Cifrele de mai jos sunt ale tubului, ISTORIC; turnul a trecut aceeași gardă: 58/58 puncte la azimut ≤ 30°, vârful la 9,34 m sub plafonul camerei de 10 m. Vezi §3.)*
   - Gura în repaus e la +12,9 (§3), iar camera o prinde de la
     d ≥ (12,9 − 10) / 0,092 ≈ 32 m.

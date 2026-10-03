@@ -258,11 +258,11 @@ func _yaw_x_along(d: Vector3) -> float:
 ##   Lespedea e `cyclopean_wall` turtit (piatra cu muschi a kitului, fara asset
 ##   nou); coliziune `none` CU MOTIV: e o treapta de 0,2 m pe trotuar, un hull
 ##   ar fi un prag de bordura in care se agata masina iesita din drum.
-## - RICSA (`jinrikisha`) statica pe trotuarul din dreapta, cu fata la deal,
-##   coliziune `none`: PathMover face corp solid mereu (AnimatableBody3D, fara
-##   optiune), iar contractul cere teatru fara coliziune -> propunere in raport.
-## - RANDUL DOI (fara corp) la +8 m; pe dreapta (interiorul buclei) si randul
-##   trei la +16, pana la CityFill-ul lui A (care incepe la 32 m de drum).
+## - RANDUL DOI (fara corp) la +8 m pe ambele parti, ca MultiMesh (r2: CityFill
+##   cu `explicit_xforms`, orientarea de strada calculata aici), apoi orasul
+##   din spate (CityFill row_mode, de la 26 m).
+## - RICSA: PathMover dus-intors pe trotuarul din dreapta, `collide = false`.
+## - Curtile de pe viraje (R < 60 m) fara zid alb (r1_0.124: „scandura").
 
 const HOUSES := ["machiya_a", "machiya_b", "machiya_c", "machiya_d", "machiya_e"]
 const WALL_FACE := 3.4
@@ -286,7 +286,6 @@ func _build() -> void:
 		_row(side)
 	for side in [1.0, -1.0]:
 		_row_back(side, 8.0, "bCasaSpate")
-	_row_back(1.0, 16.0, "bCasaRand3")
 	_stairs()
 	_stair_lanterns()
 	_rickshaw()
@@ -412,9 +411,17 @@ func _court(sc: float, side: float) -> bool:
 	var poly := _rect(p, wyaw, 1.22, 8.0)
 	if _rect_clear(poly) < CLEAR_HOUSE or _overlaps(poly, 0.2):
 		return false
-	_raw("temple_wall", "structures", "bCurteZid", Vector3(p.x, _sol_min(p.x, p.z, 4.0) - 0.15, p.z),
-		wyaw, Vector3.ONE, "")
-	_placed.append(poly)
+	# r2: pe viraj (R < 60 m) camera trece pe deasupra zidului, aproape, si
+	# l-a citit ca o scandura alba culcata (r1_0.124, acelasi defect ca la A).
+	# Acolo curtea ramane deschisa: felinar de piatra in loc de zid.
+	if absf(_tight(sc, 14.0)) > 1.0 / 60.0:
+		_raw("stone_lantern_b", "props", "bCurteFelinar", Vector3(p.x, _sol_min(p.x, p.z, 0.6) - 0.05, p.z),
+			_yaw_face(-right * side), Vector3.ONE, "")
+		_placed.append(_rect(p, wyaw, 1.2, 1.2))
+	else:
+		_raw("temple_wall", "structures", "bCurteZid", Vector3(p.x, _sol_min(p.x, p.z, 4.0) - 0.15, p.z),
+			wyaw, Vector3.ONE, "")
+		_placed.append(poly)
 	var trees := ["momiji_a", "momiji_b", "momiji_c", "momiji_a", "momiji_c", "ginkgo"]
 	var tm: String = trees[_rng.randi_range(0, trees.size() - 1)]
 	var tp: Vector3 = (f[0] as Vector3) + right * (side * (lat + 3.6))
@@ -422,8 +429,8 @@ func _court(sc: float, side: float) -> bool:
 	_raw(tm, "plants", "bCurteCopac", Vector3(tp.x, _sol_real(tp.x, tp.z) - 0.05, tp.z), tyaw,
 		Vector3.ONE * _rng.randf_range(0.75, 0.85), "")
 	var lp: Vector3 = (f[0] as Vector3) + right * (side * (hw + WALL_FACE - 0.9)) + tan * _rng.randf_range(-2.5, 2.5)
-	_raw("leaf_pile", "props", "bFrunze", Vector3(lp.x, _surf(lp.x, lp.z) - 0.05, lp.z),
-		_rng.randf_range(0.0, TAU), Vector3.ONE * _rng.randf_range(0.8, 1.1), "")
+	_mm_add("leaf_pile", Vector3(lp.x, _surf(lp.x, lp.z) - 0.05, lp.z),
+		_rng.randf_range(0.0, TAU), "props", _rng.randf_range(0.8, 1.1))
 	return true
 
 
@@ -451,7 +458,8 @@ func _row_back(side: float, back: float, base: String) -> void:
 		if not ok:
 			s += 1.5
 			continue
-		_raw(m, "buildings", base, Vector3(p.x, _sol_min(p.x, p.z, 2.6) - 0.08, p.z), yaw, Vector3.ONE, "none")
+		# r2: fara corp -> MultiMesh (CityFill `explicit_xforms`), nu nod
+		_mm_add(m, Vector3(p.x, _sol_min(p.x, p.z, 2.6) - 0.08, p.z), yaw)
 		mine.append(poly)
 		prev = m
 		s += HOUSE_W + _rng.randf_range(0.05, 0.6)
@@ -524,14 +532,36 @@ func _stair_lanterns() -> void:
 				_yaw_face(-(f[2] as Vector3)), Vector3.ONE, "")
 
 
+## Ricsa in miscare (r2, aprobat): PathMover dus-intors pe trotuarul din
+## dreapta, s RICK_S0..RICK_S1 (~70 m, prin S1, unde dreapta e interiorul),
+## la bordura + RICK_LAT (latimea ricsei 1,28 -> 0,56..1,84 m, sub stalpii
+## felinarelor de la +2,1), cu viteza de alergator si `collide = false`.
+## Modelul are -Z inainte (kit §5), deci alergatorul merge in fata.
+const RICK_S0 := 252.0
+const RICK_S1 := 322.0
+const RICK_LAT := 1.2
+var _rick_lines: Array[String] = []
+
+
 func _rickshaw() -> void:
-	var f := _frame(RICKSHAW_S)
-	var hw: float = f[3]
-	var tan: Vector3 = f[1]
-	var right: Vector3 = f[2]
-	var p: Vector3 = (f[0] as Vector3) + right * (hw + 1.7)
-	_raw("jinrikisha", "vehicles", "bRicsa", Vector3(p.x, _surf(p.x, p.z) - 0.02, p.z),
-		_yaw_face(tan) + 0.05, Vector3.ONE, "none")
+	_res_id("jinrikisha", "res://assets/models/kyoto/vehicles/jinrikisha.glb")
+	var pts: Array[String] = []
+	var s := RICK_S0
+	while s <= RICK_S1 + 0.01:
+		var f := _frame(s)
+		var p: Vector3 = (f[0] as Vector3) + (f[2] as Vector3) * ((f[3] as float) + RICK_LAT)
+		pts.append("%.2f, %.2f, %.2f" % [p.x, _surf(p.x, p.z), p.z])
+		_dbg.append("P jinrikisha bRicsa %.2f %.2f 0 1" % [p.x, p.z])
+		s += 2.0
+	_rick_lines.append('[node name="RicsaSannenzaka" type="Path3D" parent="."]')
+	_rick_lines.append('script = ExtResource("poib_pathmover")')
+	_rick_lines.append('model = ExtResource("poib_jinrikisha")')
+	_rick_lines.append("collide = false")
+	_rick_lines.append("points = PackedVector3Array(%s)" % ", ".join(pts))
+	_rick_lines.append("speed = 3.0")
+	_rick_lines.append("travel_mode = 1")
+	_rick_lines.append("phase = 0.3")
+	_rick_lines.append("")
 
 
 func _leaves() -> void:
@@ -541,8 +571,8 @@ func _leaves() -> void:
 		var f := _frame(s)
 		var hw: float = f[3]
 		var p: Vector3 = (f[0] as Vector3) + (f[2] as Vector3) * (side * (hw + _rng.randf_range(0.9, 2.2)))
-		_raw("leaf_pile", "props", "bFrunze", Vector3(p.x, _surf(p.x, p.z) - 0.05, p.z),
-			_rng.randf_range(0.0, TAU), Vector3.ONE * _rng.randf_range(0.7, 1.0), "")
+		_mm_add("leaf_pile", Vector3(p.x, _surf(p.x, p.z) - 0.05, p.z),
+			_rng.randf_range(0.0, TAU), "props", _rng.randf_range(0.7, 1.0))
 
 
 func _sol_min(x: float, z: float, r: float) -> float:
@@ -577,26 +607,56 @@ func _raw(stem: String, folder: String, base: String, pos: Vector3, yaw: float,
 	_out.append("")
 
 
-## ORASUL DIN SPATE (runda 1): doua `CityFill` in row_mode, ca la A, pe
-## benzile ramase goale intre randurile lui B si orasele lui A (capturile r1
-## aratau iarba pana la padure in spatele randului doi):
-##  * nord: intre randul doi (~20 m de ax) si OrasPagoda (z -236..-246), plus
-##    tot cartierul dintre x 175 si 225 (OrasPagoda se opreste la x 175);
-##  * sud: intre randul trei (~28 m) si OrasVechi (z -150), x 25..235.
-## x <= 225/235: dincolo e poarta Niomon si versantul lui C.
-const TOWN_N := [Vector2(30, -200), Vector2(225, -200), Vector2(225, -300),
-	Vector2(175, -300), Vector2(175, -246), Vector2(40, -236), Vector2(30, -236)]
-const TOWN_S := [Vector2(25, -150), Vector2(170, -150), Vector2(235, -143),
-	Vector2(235, -200), Vector2(25, -200)]
+## ORASUL DIN SPATE: un `CityFill` in row_mode pe benzile ramase goale intre
+## randurile lui B si orasele lui A (r1: iarba pana la padure in spatele
+## randului doi). r1 avea doua noduri (N la 25 m, S la 33 m) plus un rand
+## trei de noduri pe dreapta; r2 le uneste intr-un singur poligon care trece
+## peste drum (banda il scoate prin min_road_m 26: fata casei la ~23 m, imediat
+## dupa spatele randului doi, ~22 m) -> un set de buffere in loc de doua.
+## x <= 230: dincolo e poarta Niomon si versantul lui C.
+const TOWN := [Vector2(25, -150), Vector2(170, -150), Vector2(230, -143),
+	Vector2(230, -300), Vector2(175, -300), Vector2(175, -246), Vector2(40, -236),
+	Vector2(30, -236), Vector2(25, -200)]
 
 var _cf_lines: Array[String] = []
+var _mm_models: Array[String] = []
+var _mm_xf := PackedFloat32Array()
+
+
+## O piesa fara corp in MultiMesh-ul randurilor din spate (CityFill
+## `explicit_xforms`, runda 2: ~4 desene pe casa ca nod DecorManual).
+func _mm_add(stem: String, pos: Vector3, yaw: float, folder := "buildings", scl := 1.0) -> void:
+	if not _mm_models.has(stem):
+		_mm_models.append(stem)
+		_res_id(stem, "res://assets/models/kyoto/%s/%s.glb" % [folder, stem])
+	_dbg.append("P %s %s %.2f %.2f %.4f %.3f" % [stem, "bCasaSpate" if folder == "buildings" else "bFrunze", pos.x, pos.z, yaw, scl])
+	var b := Basis.from_euler(Vector3(0.0, yaw, 0.0)).scaled(Vector3(scl, scl, scl))
+	for v in [float(_mm_models.find(stem)), b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z,
+			b.z.x, b.z.y, b.z.z, pos.x, pos.y, pos.z]:
+		_mm_xf.append(v)
+
+
+func _mm_node() -> void:
+	if _mm_xf.is_empty():
+		return
+	var ms: Array[String] = []
+	for m in _mm_models:
+		ms.append('ExtResource("poib_%s")' % m)
+	var vs: Array[String] = []
+	for v in _mm_xf:
+		vs.append("%.5f" % v)
+	_cf_lines.append('[node name="RanduriSpateB" type="Node3D" parent="."]')
+	_cf_lines.append('script = ExtResource("poib_cityfill")')
+	_cf_lines.append("models = Array[PackedScene]([%s])" % ", ".join(ms))
+	_cf_lines.append("indigo_ratio = 0.0")
+	_cf_lines.append("explicit_xforms = PackedFloat32Array(%s)" % ", ".join(vs))
+	_cf_lines.append("")
 
 
 func _town() -> void:
 	for m in HOUSES:
 		_res_id(m, "res://assets/models/kyoto/buildings/%s.glb" % m)
-	_cityfill("OrasSannenzakaN", PackedVector2Array(TOWN_N), 25.0, 20261013)
-	_cityfill("OrasSannenzakaS", PackedVector2Array(TOWN_S), 33.0, 20261014)
+	_cityfill("OrasSannenzaka", PackedVector2Array(TOWN), 26.0, 20261013)
 
 
 func _cityfill(nm: String, poly: PackedVector2Array, min_road: float, sd: int) -> void:
@@ -612,6 +672,8 @@ func _cityfill(nm: String, poly: PackedVector2Array, min_road: float, sd: int) -
 	_cf_lines.append("weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)")
 	_cf_lines.append("indigo_ratio = 0.0")
 	_cf_lines.append("row_mode = true")
+	# o felie: poligonul (z -143..-300) cadea pe doua celule de 250 m
+	_cf_lines.append("cell_m = 400.0")
 	_cf_lines.append("min_road_m = %.1f" % min_road)
 	_cf_lines.append("seed_value = %d" % sd)
 	_cf_lines.append("region_xz = PackedVector2Array(%s)" % ", ".join(pv))
@@ -619,17 +681,20 @@ func _cityfill(nm: String, poly: PackedVector2Array, min_road: float, sd: int) -
 
 
 func _write() -> void:
+	_mm_node()
 	var lines: Array[String] = [";;EXT"]
 	var stems := _ext.keys()
 	stems.sort()
 	for s in stems:
 		lines.append('[ext_resource type="PackedScene" path="%s" id="poib_%s"]' % [_ext[s], s])
 	lines.append('[ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="poib_cityfill"]')
+	lines.append('[ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="poib_pathmover"]')
 	lines.append(";;NODES")
 	lines.append('[node name="ZoneB_Sannenzaka" type="Node3D" parent="DecorManual"]')
 	lines.append("")
 	lines.append_array(_out)
 	lines.append_array(_cf_lines)
+	lines.append_array(_rick_lines)
 	print("; asezate %d piese, %d modele" % [_n, stems.size()])
 	if not _dbg_path.is_empty():
 		var fd := FileAccess.open(_dbg_path, FileAccess.WRITE)

@@ -329,8 +329,8 @@ func _court(sc: float, side: float) -> void:
 		_rng.randf_range(0.75, 0.85), "")
 	# frunze cazute la piciorul zidului
 	var lp: Vector3 = (f[0] as Vector3) + right * (side * (hw + WALL_FACE - 0.9)) + tan * _rng.randf_range(-2.5, 2.5)
-	_raw("leaf_pile", "props", "aFrunze", Vector3(lp.x, _sol_real(lp.x, lp.z) - 0.05, lp.z),
-		_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 1.1), "")
+	_mm_add("leaf_pile", Vector3(lp.x, _sol_real(lp.x, lp.z) - 0.05, lp.z),
+		_rng.randf_range(0.0, TAU), "props", _rng.randf_range(0.8, 1.1))
 
 
 func _teahouse(sc: float, side: float) -> void:
@@ -356,7 +356,9 @@ func _row2(side: float) -> void:
 		var lat := hw + WALL_FACE + HOUSE_FRONT_Z + ROW2_BACK + _rng.randf_range(-0.4, 0.6)
 		var p: Vector3 = (f[0] as Vector3) + right * (side * lat)
 		var yaw := _yaw_face(-right * side) + _rng.randf_range(-0.03, 0.03)
-		_raw(m, "buildings", "aCasaSpate", Vector3(p.x, _sol_min(p.x, p.z, 2.6) - 0.08, p.z), yaw, 1.0, "none")
+		# Runda 2 a lui B: randul doi (fara corp) e MultiMesh, nu noduri
+		# (CityFill cu `explicit_xforms`, ~4 desene pe casa economisite).
+		_mm_add(m, Vector3(p.x, _sol_min(p.x, p.z, 2.6) - 0.08, p.z), yaw)
 		prev = m
 		s += HOUSE_W + _rng.randf_range(0.05, 0.6)
 
@@ -373,8 +375,8 @@ func _monks() -> void:
 		_raw("monk_sweeper", "props", "aCalugar", Vector3(p.x, _sol_real(p.x, p.z) - 0.03, p.z),
 			_yaw_face(tan) + float(it[2]), 1.0, "")
 		var lp: Vector3 = p + tan * 1.3 - right * 0.4
-		_raw("leaf_pile", "props", "aFrunze", Vector3(lp.x, _sol_real(lp.x, lp.z) - 0.05, lp.z),
-			_rng.randf_range(0.0, TAU), 0.9, "")
+		_mm_add("leaf_pile", Vector3(lp.x, _sol_real(lp.x, lp.z) - 0.05, lp.z),
+			_rng.randf_range(0.0, TAU), "props", 0.9)
 	# cateva gramezi in lungul bordurilor
 	for k in 6:
 		var s := _rng.randf_range(-30.0, 140.0)
@@ -382,8 +384,8 @@ func _monks() -> void:
 		var f := _frame(s)
 		var hw: float = f[3]
 		var p: Vector3 = (f[0] as Vector3) + (f[2] as Vector3) * (side * (hw + _rng.randf_range(0.9, 1.8)))
-		_raw("leaf_pile", "props", "aFrunze", Vector3(p.x, _sol_real(p.x, p.z) - 0.05, p.z),
-			_rng.randf_range(0.0, TAU), _rng.randf_range(0.7, 1.0), "")
+		_mm_add("leaf_pile", Vector3(p.x, _sol_real(p.x, p.z) - 0.05, p.z),
+			_rng.randf_range(0.0, TAU), "props", _rng.randf_range(0.7, 1.0))
 
 
 ## Cota minima a solului sub o amprenta patrata de semilatura r (ca nimic sa
@@ -436,6 +438,38 @@ const TOWN_PAGODA := [Vector2(-75, -165), Vector2(-30, -165), Vector2(-28, -232)
 	Vector2(40, -236), Vector2(175, -246), Vector2(175, -300), Vector2(-75, -300)]
 
 var _cf_lines: Array[String] = []
+var _mm_models: Array[String] = []
+var _mm_xf := PackedFloat32Array()
+
+
+## O casa fara corp in MultiMesh-ul randului doi (CityFill `explicit_xforms`).
+## `_n` creste ca la `_raw`, ca numele celorlalte noduri sa nu se mute.
+func _mm_add(stem: String, pos: Vector3, yaw: float, folder := "buildings", scl := 1.0) -> void:
+	_n += 1
+	if not _mm_models.has(stem):
+		_mm_models.append(stem)
+		_res_id(stem, "res://assets/models/kyoto/%s/%s.glb" % [folder, stem])
+	var b := Basis.from_euler(Vector3(0.0, yaw, 0.0)).scaled(Vector3(scl, scl, scl))
+	for v in [float(_mm_models.find(stem)), b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z,
+			b.z.x, b.z.y, b.z.z, pos.x, pos.y, pos.z]:
+		_mm_xf.append(v)
+
+
+func _mm_node() -> void:
+	if _mm_xf.is_empty():
+		return
+	var ms: Array[String] = []
+	for m in _mm_models:
+		ms.append('ExtResource("poia_%s")' % m)
+	var vs: Array[String] = []
+	for v in _mm_xf:
+		vs.append("%.5f" % v)
+	_cf_lines.append('[node name="RanduriSpateA" type="Node3D" parent="."]')
+	_cf_lines.append('script = ExtResource("poia_cityfill")')
+	_cf_lines.append("models = Array[PackedScene]([%s])" % ", ".join(ms))
+	_cf_lines.append("indigo_ratio = 0.0")
+	_cf_lines.append("explicit_xforms = PackedFloat32Array(%s)" % ", ".join(vs))
+	_cf_lines.append("")
 
 
 func _road_dist(c: Vector2) -> float:
@@ -483,8 +517,11 @@ func _courts(poly: PackedVector2Array, box: Rect2, road_m: float, want: int) -> 
 	var trees := ["momiji_a", "momiji_b", "momiji_c", "momiji_b", "momiji_a", "ginkgo"]
 	for q in courts:
 		var tm: String = trees[_rng.randi_range(0, trees.size() - 1)]
-		_raw(tm, "plants", "aOrasCopac", Vector3(q.x, _sol_real(q.x, q.y) - 0.05, q.y),
-			_rng.randf_range(0.0, TAU), _rng.randf_range(0.75, 0.9), "")
+		# Runda 2 a lui B: copacii din curtile orasului stau la >= 26-32 m de
+		# banda (corpul de trunchi nu-l atinge nimeni) -> MultiMesh, nu noduri.
+		var tpos := Vector3(q.x, _sol_real(q.x, q.y) - 0.05, q.y)
+		var tyaw := _rng.randf_range(0.0, TAU)
+		_mm_add(tm, tpos, tyaw, "plants", _rng.randf_range(0.75, 0.9))
 	return courts
 
 
@@ -514,6 +551,7 @@ func _cityfill(nm: String, poly: PackedVector2Array, min_road: float,
 
 
 func _write() -> void:
+	_mm_node()
 	var lines: Array[String] = [";;EXT"]
 	var stems := _ext.keys()
 	stems.sort()

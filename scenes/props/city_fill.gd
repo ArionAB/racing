@@ -120,6 +120,17 @@ class_name CityFill
 ## fata de −Z: 0 = fata pe −Z, −90 = fata pe +X. Gol = toate pe −Z.
 @export var front_yaw_deg: PackedFloat32Array = PackedFloat32Array()
 
+## INSTANTE EXPLICITE (opt-in; gol = generarea de mai sus, comportamentul
+## dinainte, Jodhpur neschimbat). Kyoto, POI B r2: randurile de case FARA corp
+## din spatele primului rand (A si B) erau noduri DecorManual, ~4 desene pe
+## casa (+854 desene pe pista). Generatorul POI-ului isi calculeaza el
+## transformarile — orientarea de strada ramane exact cea aleasa acolo — si le
+## da aici; nodul doar le deseneaza ca MultiMesh feliat, cu aceleasi sabloane
+## de material. Pas de 13 numere pe instanta: indicele modelului in `models`,
+## coloanele bazei (x, y, z: 9 numere) si originea (3). Cu lista nevida,
+## regiunea, min_road_m, exclude_xz si row_mode se ignora.
+@export var explicit_xforms: PackedFloat32Array = PackedFloat32Array()
+
 var stats := {}
 
 
@@ -141,7 +152,11 @@ func _build() -> void:
 	await get_tree().physics_frame
 	var space := get_world_3d().direct_space_state
 	var t0 := Time.get_ticks_msec()
-	var places := _generate_rows(track, space) if row_mode else _generate(track, space)
+	var places: Array
+	if not explicit_xforms.is_empty():
+		places = _explicit()
+	else:
+		places = _generate_rows(track, space) if row_mode else _generate(track, space)
 	var parts := await _templates()
 	var groups := {}
 	var rng := RandomNumberGenerator.new()
@@ -150,7 +165,7 @@ func _build() -> void:
 	counts.resize(models.size())
 	var indigo_n := 0
 	for p: Dictionary in places:
-		var mi: int = _pick(rng)
+		var mi: int = int(p["mi"]) if p.has("mi") else _pick(rng)
 		var ind := rng.randf() < indigo_ratio
 		if ind:
 			indigo_n += 1
@@ -159,6 +174,11 @@ func _build() -> void:
 		if face_xz.z > 0.0:
 			xf = _faced(xf, mi)
 		var cell := Vector2i(floori(xf.origin.x / cell_m), floori(xf.origin.z / cell_m))
+		if not explicit_xforms.is_empty():
+			# Randurile explicite sunt o fasie de cateva sute de metri langa
+			# drum: o singura felie (altfel axele x = 0 / z = 0 le taie in
+			# patru si dubleaza desenele fara castig de culling).
+			cell = Vector2i.ZERO
 		for part: Dictionary in parts[mi]:
 			if part["variant"] != -1 and int(part["variant"]) != int(ind):
 				continue
@@ -197,6 +217,22 @@ func _build() -> void:
 	print("CityFill %s: %d case (%d indigo, raport %.2f), %d buffere, %d tri, %d ms, centroid (%.0f, %.1f, %.0f), respinse %s" % [
 		name, places.size(), indigo_n, indigo_ratio, batches, tris, stats["ms"],
 		cen.x, cen.y, cen.z, str(stats.get("rejected", {}))])
+
+
+## Instantele date de generator (vezi `explicit_xforms`).
+func _explicit() -> Array:
+	var out: Array = []
+	var f := explicit_xforms
+	var i := 0
+	while i + 13 <= f.size():
+		var b := Basis(Vector3(f[i + 1], f[i + 2], f[i + 3]),
+			Vector3(f[i + 4], f[i + 5], f[i + 6]), Vector3(f[i + 7], f[i + 8], f[i + 9]))
+		var mi := clampi(int(f[i]), 0, models.size() - 1)
+		out.append({"mi": mi, "xf": Transform3D(b, Vector3(f[i + 10], f[i + 11], f[i + 12]))})
+		i += 13
+	stats["rejected"] = {}
+	stats["below_road"] = 0
+	return out
 
 
 ## Rotirea spre `face_xz` (vezi exportul): pasul de 90° cel mai apropiat de

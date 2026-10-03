@@ -12,9 +12,11 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_c.glb" id="poib_momiji_c"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/paper_lantern.glb" id="poib_paper_lantern"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_a.glb" id="poib_stone_lantern_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_b.glb" id="poib_stone_lantern_b"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/teahouse_front.glb" id="poib_teahouse_front"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/temple_wall.glb" id="poib_temple_wall"]
 [ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="poib_cityfill"]
+[ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="poib_pathmover"]
 ;;NODES
 [node name="ZoneB_Sannenzaka" type="Node3D" parent="DecorManual"]
 
@@ -66,716 +68,344 @@ transform = Transform3D(0.999978, 0.000000, 0.006623, 0.000000, 1.000000, 0.0000
 [node name="bCeainarie16" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
 transform = Transform3D(0.999912, 0.000000, -0.013258, 0.000000, 1.000000, 0.000000, 0.013258, 0.000000, 0.999912, 57.283081, 5.733279, -179.200500)
 
-[node name="bCurteZid17" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_temple_wall")]
-transform = Transform3D(-0.143000, 0.000000, 0.989723, 0.000000, 1.000000, 0.000000, -0.989723, 0.000000, -0.143000, 66.210114, 5.868112, -180.663803)
+[node name="bCurteFelinar17" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_b")]
+transform = Transform3D(0.989723, 0.000000, 0.143000, 0.000000, 1.000000, 0.000000, -0.143000, 0.000000, 0.989723, 66.210114, 6.115771, -180.663803)
 
 [node name="bCurteCopac18" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_momiji_c")]
 transform = Transform3D(0.784052, 0.000000, 0.032797, 0.000000, 0.784737, 0.000000, -0.032797, 0.000000, 0.784052, 66.724915, 6.125262, -177.100815)
 
-[node name="bFrunze19" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(0.705155, 0.000000, -0.517375, 0.000000, 0.874597, 0.000000, 0.517375, 0.000000, 0.705155, 65.513649, 6.174000, -182.129272)
-
-[node name="bCasa20" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
+[node name="bCasa19" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
 transform = Transform3D(0.921978, 0.000000, 0.387241, 0.000000, 1.000000, 0.000000, -0.387241, 0.000000, 0.921978, 76.566956, 6.352770, -181.389160)
 
-[node name="bFelinar21" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar20" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.870518, 0.000000, -0.492137, 0.000000, 1.000000, 0.000000, 0.492137, 0.000000, -0.870518, 77.983757, 6.533000, -185.309921)
 
-[node name="bCasa22" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa21" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(0.744854, 0.000000, 0.667227, 0.000000, 1.000000, 0.000000, -0.667227, 0.000000, 0.744854, 85.078796, 6.670778, -186.689194)
 
-[node name="bCasa23" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
+[node name="bCasa22" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
 transform = Transform3D(0.816203, 0.000000, 0.577765, 0.000000, 1.000000, 0.000000, -0.577765, 0.000000, 0.816203, 90.088303, 6.898119, -191.054398)
 
-[node name="bFelinar24" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar23" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.808841, 0.000000, -0.588028, 0.000000, 1.000000, 0.000000, 0.588028, 0.000000, -0.808841, 89.514709, 7.195000, -195.508621)
 
-[node name="bCasa25" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
+[node name="bCasa24" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
 transform = Transform3D(0.874895, 0.000000, 0.484312, 0.000000, 1.000000, 0.000000, -0.484312, 0.000000, 0.874895, 96.343422, 7.293718, -193.855865)
 
-[node name="bCasa26" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa25" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(0.938775, 0.000000, -0.344532, 0.000000, 1.000000, 0.000000, 0.344532, 0.000000, 0.938775, 103.898300, 7.971910, -193.424484)
 
-[node name="bFelinar27" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar26" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.887140, 0.000000, 0.461501, 0.000000, 1.000000, 0.000000, -0.461501, 0.000000, -0.887140, 106.454124, 8.507000, -197.767227)
 
-[node name="bCurteZid28" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_temple_wall")]
-transform = Transform3D(0.498442, 0.000000, 0.866923, 0.000000, 1.000000, 0.000000, -0.866923, 0.000000, 0.498442, 111.231216, 8.387659, -192.488129)
+[node name="bCurteFelinar27" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_b")]
+transform = Transform3D(0.866923, 0.000000, -0.498442, 0.000000, 1.000000, 0.000000, 0.498442, 0.000000, 0.866923, 111.231216, 8.871264, -192.488129)
 
-[node name="bCurteCopac29" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_ginkgo")]
+[node name="bCurteCopac28" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_ginkgo")]
 transform = Transform3D(0.627339, 0.000000, -0.455339, 0.000000, 0.775169, 0.000000, 0.455339, 0.000000, 0.627339, 109.436829, 8.832278, -189.367203)
 
-[node name="bFrunze30" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.698324, 0.000000, 0.700201, 0.000000, 0.988907, 0.000000, -0.700201, 0.000000, -0.698324, 110.263260, 8.829000, -194.832596)
-
-[node name="bCasa31" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
+[node name="bCasa29" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
 transform = Transform3D(0.832084, 0.000000, -0.554650, 0.000000, 1.000000, 0.000000, 0.554650, 0.000000, 0.832084, 115.980591, 9.060808, -187.087494)
 
-[node name="bCasa32" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
+[node name="bCasa30" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
 transform = Transform3D(0.835035, 0.000000, -0.550196, 0.000000, 1.000000, 0.000000, 0.550196, 0.000000, 0.835035, 121.403305, 9.568911, -183.687820)
 
-[node name="bFelinar33" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar31" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.826904, 0.000000, 0.562344, 0.000000, 1.000000, 0.000000, -0.562344, 0.000000, -0.826904, 125.111977, 10.069000, -185.972366)
 
-[node name="bCasa34" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa32" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(0.824238, 0.000000, -0.566244, 0.000000, 1.000000, 0.000000, 0.566244, 0.000000, 0.824238, 126.518204, 9.973818, -180.102692)
 
-[node name="bCurteZid35" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_temple_wall")]
-transform = Transform3D(0.643042, 0.000000, 0.765831, 0.000000, 1.000000, 0.000000, -0.765831, 0.000000, 0.643042, 134.286865, 10.373056, -176.797455)
+[node name="bCurteFelinar33" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_b")]
+transform = Transform3D(0.765831, 0.000000, -0.643042, 0.000000, 1.000000, 0.000000, 0.643042, 0.000000, 0.765831, 134.286865, 10.810199, -176.797455)
 
-[node name="bCurteCopac36" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_momiji_c")]
+[node name="bCurteCopac34" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_momiji_c")]
 transform = Transform3D(0.591831, 0.000000, -0.559175, 0.000000, 0.814211, 0.000000, 0.559175, 0.000000, 0.591831, 131.971924, 10.774066, -174.040466)
 
-[node name="bFrunze37" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(0.253655, 0.000000, 0.821102, 0.000000, 0.859389, 0.000000, -0.821102, 0.000000, 0.253655, 136.495697, 11.004000, -176.966721)
-
-[node name="bCasa38" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
+[node name="bCasa35" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
 transform = Transform3D(0.891669, 0.000000, -0.452688, 0.000000, 1.000000, 0.000000, 0.452688, 0.000000, 0.891669, 141.511688, 11.170443, -169.729828)
 
-[node name="bFelinar39" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar36" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.909350, 0.000000, 0.416031, 0.000000, 1.000000, 0.000000, -0.416031, 0.000000, -0.909350, 144.877350, 11.565000, -171.241074)
 
-[node name="bCasa40" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
+[node name="bCasa37" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
 transform = Transform3D(0.998832, 0.000000, 0.048313, 0.000000, 1.000000, 0.000000, -0.048313, 0.000000, 0.998832, 153.279510, 11.852297, -166.039459)
 
-[node name="bCasa41" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa38" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(0.869461, 0.000000, 0.494002, 0.000000, 1.000000, 0.000000, -0.494002, 0.000000, 0.869461, 164.722748, 12.368471, -168.610794)
 
-[node name="bFelinar42" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar39" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.876638, 0.000000, -0.481151, 0.000000, 1.000000, 0.000000, 0.481151, 0.000000, -0.876638, 164.946930, 12.568000, -172.151245)
 
-[node name="bCasa43" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa40" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(0.857667, 0.000000, 0.514206, 0.000000, 1.000000, 0.000000, -0.514206, 0.000000, 0.857667, 170.657700, 12.700487, -172.259018)
 
-[node name="bCasa44" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
+[node name="bCasa41" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
 transform = Transform3D(0.890833, 0.000000, 0.454331, 0.000000, 1.000000, 0.000000, -0.454331, 0.000000, 0.890833, 177.022293, 13.200686, -175.393295)
 
-[node name="bFelinar45" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar42" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.915738, 0.000000, -0.401777, 0.000000, 1.000000, 0.000000, 0.401777, 0.000000, -0.915738, 176.424164, 13.599000, -179.648727)
 
-[node name="bCasa46" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa43" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(0.999062, 0.000000, 0.043311, 0.000000, 1.000000, 0.000000, -0.043311, 0.000000, 0.999062, 184.413803, 13.840670, -173.265778)
 
-[node name="bCeainarie47" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
+[node name="bCeainarie44" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
 transform = Transform3D(0.996889, 0.000000, 0.078817, 0.000000, 1.000000, 0.000000, -0.078817, 0.000000, 0.996889, 183.922089, 13.969928, -177.655212)
 
-[node name="bCasa48" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa45" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(0.995034, 0.000000, 0.099538, 0.000000, 1.000000, 0.000000, -0.099538, 0.000000, 0.995034, 191.530228, 14.501116, -174.800323)
 
-[node name="bCasa49" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa46" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(0.994621, 0.000000, 0.103581, 0.000000, 1.000000, 0.000000, -0.103581, 0.000000, 0.994621, 197.701920, 15.046831, -175.346756)
 
-[node name="bCasa50" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa47" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(0.994548, 0.000000, 0.104282, 0.000000, 1.000000, 0.000000, -0.104282, 0.000000, 0.994548, 204.130310, 15.608889, -175.909622)
 
-[node name="bCasa51" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa48" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(0.992558, 0.000000, 0.121772, 0.000000, 1.000000, 0.000000, -0.121772, 0.000000, 0.992558, 210.545792, 16.168947, -176.565552)
 
-[node name="bCeainarie52" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
+[node name="bCeainarie49" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
 transform = Transform3D(0.985583, 0.000000, 0.169191, 0.000000, 1.000000, 0.000000, -0.169191, 0.000000, 0.985583, 210.511337, 16.307774, -180.997528)
 
-[node name="bCurteZid53" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_temple_wall")]
+[node name="bCurteZid50" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_temple_wall")]
 transform = Transform3D(-0.107389, 0.000000, 0.994217, 0.000000, 1.000000, 0.000000, -0.994217, 0.000000, -0.107389, 217.455917, 16.629816, -183.376938)
 
-[node name="bCurteCopac54" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_momiji_b")]
+[node name="bCurteCopac51" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_momiji_b")]
 transform = Transform3D(0.818978, 0.000000, -0.009495, 0.000000, 0.819033, 0.000000, 0.009495, 0.000000, 0.818978, 217.842514, 17.105198, -179.797760)
 
-[node name="bFrunze55" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.646938, 0.000000, 0.655837, 0.000000, 0.921223, 0.000000, -0.655837, 0.000000, -0.646938, 216.602264, 17.098000, -184.843750)
-
-[node name="bCasa56" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
+[node name="bCasa52" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
 transform = Transform3D(0.993282, 0.000000, 0.115722, 0.000000, 1.000000, 0.000000, -0.115722, 0.000000, 0.993282, 225.232376, 17.478441, -182.158569)
 
-[node name="bFelinar57" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar53" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.994208, 0.000000, -0.107469, 0.000000, 1.000000, 0.000000, 0.107469, 0.000000, -0.994208, 226.692108, 17.938000, -186.336151)
 
-[node name="bCasa58" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa54" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(0.994517, 0.000000, 0.104574, 0.000000, 1.000000, 0.000000, -0.104574, 0.000000, 0.994517, 231.805481, 18.042406, -182.887863)
 
-[node name="bCasa59" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa55" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(-0.992609, 0.000000, -0.121354, 0.000000, 1.000000, 0.000000, 0.121354, 0.000000, -0.992609, 24.384014, 4.490419, -200.215683)
 
-[node name="bCasa60" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa56" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(-0.999807, 0.000000, -0.019655, 0.000000, 1.000000, 0.000000, 0.019655, 0.000000, -0.999807, 31.976561, 4.741640, -200.785751)
 
-[node name="bFelinar61" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar57" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.999823, 0.000000, 0.018821, 0.000000, 1.000000, 0.000000, -0.018821, 0.000000, -0.999823, 34.257763, 4.955000, -197.798187)
 
-[node name="bCasa62" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
+[node name="bCasa58" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
 transform = Transform3D(-0.999817, 0.000000, -0.019115, 0.000000, 1.000000, 0.000000, 0.019115, 0.000000, -0.999817, 38.385902, 4.987108, -200.858307)
 
-[node name="bCasa63" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
+[node name="bCasa59" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
 transform = Transform3D(-0.999134, 0.000000, -0.041604, 0.000000, 1.000000, 0.000000, 0.041604, 0.000000, -0.999134, 44.966793, 5.248857, -201.021759)
 
-[node name="bFelinar64" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar60" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.999568, 0.000000, -0.029388, 0.000000, 1.000000, 0.000000, 0.029388, 0.000000, -0.999568, 46.987358, 5.544000, -196.949051)
 
-[node name="bCasa65" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa61" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(-0.999985, 0.000000, -0.005488, 0.000000, 1.000000, 0.000000, 0.005488, 0.000000, -0.999985, 51.586727, 5.510195, -201.136780)
 
-[node name="bCasa66" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
+[node name="bCasa62" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
 transform = Transform3D(-0.999688, 0.000000, -0.024991, 0.000000, 1.000000, 0.000000, 0.024991, 0.000000, -0.999688, 58.070942, 5.766481, -201.145981)
 
-[node name="bFelinar67" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar63" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.996702, 0.000000, -0.081146, 0.000000, 1.000000, 0.000000, 0.081146, 0.000000, -0.996702, 59.557205, 6.062000, -197.091263)
 
-[node name="bCasa68" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
+[node name="bCasa64" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
 transform = Transform3D(-0.981610, 0.000000, -0.190899, 0.000000, 1.000000, 0.000000, 0.190899, 0.000000, -0.981610, 65.353142, 6.112535, -203.013290)
 
-[node name="bCurteZid69" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_temple_wall")]
-transform = Transform3D(-0.686439, 0.000000, 0.727188, 0.000000, 1.000000, 0.000000, -0.727188, 0.000000, -0.686439, 72.698303, 6.413202, -204.078339)
+[node name="bCurteFelinar65" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_b")]
+transform = Transform3D(-0.727188, 0.000000, -0.686439, 0.000000, 1.000000, 0.000000, 0.686439, 0.000000, -0.727188, 72.698303, 6.729877, -204.078339)
 
-[node name="bCurteCopac70" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_ginkgo")]
+[node name="bCurteCopac66" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_ginkgo")]
 transform = Transform3D(0.650758, 0.000000, 0.532421, 0.000000, 0.840808, 0.000000, -0.532421, 0.000000, 0.650758, 70.227127, 6.674762, -206.696213)
 
-[node name="bFrunze71" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-1.014030, 0.000000, -0.397146, 0.000000, 1.089028, 0.000000, 0.397146, 0.000000, -1.014030, 72.676956, 6.769000, -201.926697)
-
-[node name="bCasa72" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
+[node name="bCasa67" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
 transform = Transform3D(-0.816215, 0.000000, -0.577749, 0.000000, 1.000000, 0.000000, 0.577749, 0.000000, -0.816215, 78.280678, 6.886766, -211.097168)
 
-[node name="bFelinar73" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar68" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.815806, 0.000000, -0.578325, 0.000000, 1.000000, 0.000000, 0.578325, 0.000000, -0.815806, 81.623100, 7.133000, -209.907349)
 
-[node name="bCasa74" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
+[node name="bCasa69" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
 transform = Transform3D(-0.924885, 0.000000, -0.380247, 0.000000, 1.000000, 0.000000, 0.380247, 0.000000, -0.924885, 86.338165, 7.203814, -216.047150)
 
-[node name="bCasa75" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa70" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(-0.992528, 0.000000, -0.122015, 0.000000, 1.000000, 0.000000, 0.122015, 0.000000, -0.992528, 95.637146, 7.529512, -218.446564)
 
-[node name="bFelinar76" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar71" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.994084, 0.000000, -0.108615, 0.000000, 1.000000, 0.000000, 0.108615, 0.000000, -0.994084, 97.842125, 7.736000, -215.758759)
 
-[node name="bCasa77" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
+[node name="bCasa72" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
 transform = Transform3D(-0.987402, 0.000000, 0.158233, 0.000000, 1.000000, 0.000000, -0.158233, 0.000000, -0.987402, 105.240051, 7.903749, -218.204254)
 
-[node name="bCurteZid78" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_temple_wall")]
-transform = Transform3D(0.461501, 0.000000, 0.887140, 0.000000, 1.000000, 0.000000, -0.887140, 0.000000, 0.461501, 114.792351, 8.192225, -212.761383)
+[node name="bCurteFelinar73" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_b")]
+transform = Transform3D(-0.887140, 0.000000, 0.461501, 0.000000, 1.000000, 0.000000, -0.461501, 0.000000, -0.887140, 114.792351, 8.489612, -212.761383)
 
-[node name="bCurteCopac79" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_ginkgo")]
+[node name="bCurteCopac74" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_ginkgo")]
 transform = Transform3D(0.756700, 0.000000, -0.368601, 0.000000, 0.841702, 0.000000, 0.368601, 0.000000, 0.756700, 116.453758, 8.577868, -215.955093)
 
-[node name="bFrunze80" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(0.770024, 0.000000, -0.472995, 0.000000, 0.903693, 0.000000, 0.472995, 0.000000, 0.770024, 114.592400, 8.583000, -211.118225)
-
-[node name="bCasa81" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
+[node name="bCasa75" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
 transform = Transform3D(-0.864229, 0.000000, 0.503098, 0.000000, 1.000000, 0.000000, -0.503098, 0.000000, -0.864229, 122.510742, 8.781740, -210.467148)
 
-[node name="bFelinar82" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar76" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.861634, 0.000000, 0.507531, 0.000000, 1.000000, 0.000000, -0.507531, 0.000000, -0.861634, 122.756493, 9.127000, -206.899277)
 
-[node name="bCasa83" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa77" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(-0.845212, 0.000000, 0.534432, 0.000000, 1.000000, 0.000000, -0.534432, 0.000000, -0.845212, 130.167725, 9.265871, -209.359985)
 
-[node name="bCeainarie84" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
+[node name="bCeainarie78" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
 transform = Transform3D(-0.845928, 0.000000, 0.533298, 0.000000, 1.000000, 0.000000, -0.533298, 0.000000, -0.845928, 127.995590, 9.291354, -205.512436)
 
-[node name="bCasa85" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa79" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(-0.834836, 0.000000, 0.550499, 0.000000, 1.000000, 0.000000, -0.550499, 0.000000, -0.834836, 135.704468, 9.712465, -205.751663)
 
-[node name="bCeainarie86" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
+[node name="bCeainarie80" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
 transform = Transform3D(-0.818929, 0.000000, 0.573894, 0.000000, 1.000000, 0.000000, -0.573894, 0.000000, -0.818929, 133.477005, 9.731814, -201.936783)
 
-[node name="bCasa87" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa81" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(-0.817680, 0.000000, 0.575673, 0.000000, 1.000000, 0.000000, -0.575673, 0.000000, -0.817680, 141.199509, 10.191576, -201.942780)
 
-[node name="bCeainarie88" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
+[node name="bCeainarie82" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
 transform = Transform3D(-0.802262, 0.000000, 0.596972, 0.000000, 1.000000, 0.000000, -0.596972, 0.000000, -0.802262, 138.243195, 10.120440, -198.628952)
 
-[node name="bCasa89" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa83" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(-0.779678, 0.000000, 0.626181, 0.000000, 1.000000, 0.000000, -0.626181, 0.000000, -0.779678, 147.189056, 10.762575, -197.672333)
 
-[node name="bCeainarie90" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
+[node name="bCeainarie84" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_teahouse_front")]
 transform = Transform3D(-0.813512, 0.000000, 0.581548, 0.000000, 1.000000, 0.000000, -0.581548, 0.000000, -0.813512, 144.743393, 10.659518, -193.982147)
 
-[node name="bCasa91" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa85" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(-0.883774, 0.000000, 0.467915, 0.000000, 1.000000, 0.000000, -0.467915, 0.000000, -0.883774, 151.151764, 11.128618, -191.006531)
 
-[node name="bCurteZid92" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_temple_wall")]
-transform = Transform3D(-0.519264, 0.000000, 0.854614, 0.000000, 1.000000, 0.000000, -0.854614, 0.000000, -0.519264, 158.543030, 11.896784, -189.746872)
+[node name="bCurteFelinar86" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_b")]
+transform = Transform3D(-0.854614, 0.000000, -0.519264, 0.000000, 1.000000, 0.000000, 0.519264, 0.000000, -0.854614, 158.543030, 12.555423, -189.746872)
 
-[node name="bCurteCopac93" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_ginkgo")]
+[node name="bCurteCopac87" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_ginkgo")]
 transform = Transform3D(0.648597, 0.000000, 0.435421, 0.000000, 0.781198, 0.000000, -0.435421, 0.000000, 0.648597, 156.673676, 12.360217, -192.823486)
 
-[node name="bFrunze94" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.172699, 0.000000, 0.976518, 0.000000, 0.991671, 0.000000, -0.976518, 0.000000, -0.172699, 159.228638, 12.689000, -188.349762)
-
-[node name="bCasa95" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa88" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(-0.887360, 0.000000, -0.461078, 0.000000, 1.000000, 0.000000, 0.461078, 0.000000, -0.887360, 164.763596, 12.817156, -195.358566)
 
-[node name="bFelinar96" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar89" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.915738, 0.000000, -0.401777, 0.000000, 1.000000, 0.000000, 0.401777, 0.000000, -0.915738, 168.281036, 13.319000, -193.875809)
 
-[node name="bCasa97" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
+[node name="bCasa90" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
 transform = Transform3D(-0.955257, 0.000000, -0.295779, 0.000000, 1.000000, 0.000000, 0.295779, 0.000000, -0.955257, 172.702820, 13.426012, -198.713394)
 
-[node name="bCasa98" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
+[node name="bCasa91" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
 transform = Transform3D(-0.993567, 0.000000, -0.113243, 0.000000, 1.000000, 0.000000, 0.113243, 0.000000, -0.993567, 180.920212, 13.968630, -200.553528)
 
-[node name="bFelinar99" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar92" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.998454, 0.000000, -0.055589, 0.000000, 1.000000, 0.000000, 0.055589, 0.000000, -0.998454, 183.627991, 14.393000, -197.772659)
 
-[node name="bCasa100" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa93" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(-0.996332, 0.000000, -0.085570, 0.000000, 1.000000, 0.000000, 0.085570, 0.000000, -0.996332, 187.393814, 14.468019, -201.115540)
 
-[node name="bCurteZid101" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_temple_wall")]
-transform = Transform3D(-0.104351, 0.000000, 0.994541, 0.000000, 1.000000, 0.000000, -0.994541, 0.000000, -0.104351, 195.070389, 14.893885, -199.987427)
+[node name="bCurteFelinar94" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_b")]
+transform = Transform3D(-0.994541, 0.000000, -0.104351, 0.000000, 1.000000, 0.000000, 0.104351, 0.000000, -0.994541, 195.070389, 15.313190, -199.987427)
 
-[node name="bCurteCopac102" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_momiji_c")]
+[node name="bCurteCopac95" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_momiji_c")]
 transform = Transform3D(0.768726, 0.000000, 0.171930, 0.000000, 0.787718, 0.000000, -0.171930, 0.000000, 0.768726, 194.694733, 15.377673, -203.567764)
 
-[node name="bFrunze103" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.107877, 0.000000, 1.028232, 0.000000, 1.033875, 0.000000, -1.028232, 0.000000, -0.107877, 194.127853, 15.324000, -198.330032)
-
-[node name="bCasa104" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa96" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(-0.994944, 0.000000, -0.100427, 0.000000, 1.000000, 0.000000, 0.100427, 0.000000, -0.994944, 202.189514, 15.725206, -203.063004)
 
-[node name="bFelinar105" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar97" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.994202, 0.000000, -0.107524, 0.000000, 1.000000, 0.000000, 0.107524, 0.000000, -0.994202, 204.516434, 16.250000, -199.217697)
 
-[node name="bCasa106" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
+[node name="bCasa98" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
 transform = Transform3D(-0.993657, 0.000000, -0.112457, 0.000000, 1.000000, 0.000000, 0.112457, 0.000000, -0.993657, 208.532364, 16.266634, -203.661057)
 
-[node name="bCasa107" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
+[node name="bCasa99" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
 transform = Transform3D(-0.993009, 0.000000, -0.118042, 0.000000, 1.000000, 0.000000, 0.118042, 0.000000, -0.993009, 215.137177, 16.822405, -203.457504)
 
-[node name="bFelinar108" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar100" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.994217, 0.000000, -0.107389, 0.000000, 1.000000, 0.000000, 0.107389, 0.000000, -0.994217, 217.462936, 17.347000, -199.621628)
 
-[node name="bCasa109" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
+[node name="bCasa101" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
 transform = Transform3D(-0.993707, 0.000000, -0.112007, 0.000000, 1.000000, 0.000000, 0.112007, 0.000000, -0.993707, 221.702454, 17.382906, -204.126465)
 
-[node name="bCasa110" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
+[node name="bCasa102" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
 transform = Transform3D(-0.994020, 0.000000, -0.109201, 0.000000, 1.000000, 0.000000, 0.109201, 0.000000, -0.994020, 228.019211, 17.923586, -204.920776)
 
-[node name="bFelinar111" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
+[node name="bFelinar103" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_paper_lantern")]
 transform = Transform3D(-0.994202, 0.000000, -0.107524, 0.000000, 1.000000, 0.000000, 0.107524, 0.000000, -0.994202, 230.352570, 18.358999, -201.014664)
 
-[node name="bCasaSpate112" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.043607, 0.000000, 0.999049, 0.000000, 1.000000, 0.000000, -0.999049, 0.000000, 0.043607, 19.982403, 3.093599, -153.737228)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate113" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(-0.004457, 0.000000, 0.999990, 0.000000, 1.000000, 0.000000, -0.999990, 0.000000, -0.004457, 19.490353, 3.334169, -161.081375)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate114" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(0.999072, 0.000000, 0.043078, 0.000000, 1.000000, 0.000000, -0.043078, 0.000000, 0.999072, 31.253658, 4.214220, -169.303955)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate115" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.999757, 0.000000, 0.022054, 0.000000, 1.000000, 0.000000, -0.022054, 0.000000, 0.999757, 37.966049, 4.551912, -169.314697)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate116" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(0.999595, 0.000000, 0.028461, 0.000000, 1.000000, 0.000000, -0.028461, 0.000000, 0.999595, 44.678364, 4.900789, -169.318100)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate117" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.999790, 0.000000, 0.020489, 0.000000, 1.000000, 0.000000, -0.020489, 0.000000, 0.999790, 51.132160, 5.231127, -169.542679)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate118" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.999861, 0.000000, 0.016700, 0.000000, 1.000000, 0.000000, -0.016700, 0.000000, 0.999861, 57.698639, 5.543627, -169.998428)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate119" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.991721, 0.000000, 0.128414, 0.000000, 1.000000, 0.000000, -0.128414, 0.000000, 0.991721, 66.613838, 5.913958, -170.597458)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate120" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.960407, 0.000000, 0.278601, 0.000000, 1.000000, 0.000000, -0.278601, 0.000000, 0.960407, 76.062439, 6.309862, -172.481339)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate121" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.829690, 0.000000, 0.558225, 0.000000, 1.000000, 0.000000, -0.558225, 0.000000, 0.829690, 87.109756, 6.796022, -178.250931)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate122" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.780677, 0.000000, 0.624934, 0.000000, 1.000000, 0.000000, -0.624934, 0.000000, 0.780677, 93.252220, 7.154848, -183.642883)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate123" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(0.813177, 0.000000, 0.582017, 0.000000, 1.000000, 0.000000, -0.582017, 0.000000, 0.813177, 98.942123, 7.586885, -186.954636)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate124" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(0.870769, 0.000000, -0.491692, 0.000000, 1.000000, 0.000000, 0.491692, 0.000000, 0.870769, 105.764191, 8.260790, -184.460571)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate125" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(0.839081, 0.000000, -0.544007, 0.000000, 1.000000, 0.000000, 0.544007, 0.000000, 0.839081, 111.434128, 8.848818, -180.020676)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate126" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.829940, 0.000000, -0.557852, 0.000000, 1.000000, 0.000000, 0.557852, 0.000000, 0.829940, 117.005508, 9.367403, -176.944901)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate127" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.800860, 0.000000, -0.598851, 0.000000, 1.000000, 0.000000, 0.598851, 0.000000, 0.800860, 122.109978, 9.859240, -173.261383)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate128" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.761764, 0.000000, -0.647855, 0.000000, 1.000000, 0.000000, 0.647855, 0.000000, 0.761764, 127.047249, 10.291338, -169.343155)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate129" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.885683, 0.000000, -0.464291, 0.000000, 1.000000, 0.000000, 0.464291, 0.000000, 0.885683, 135.921982, 10.957216, -163.932770)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate130" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.979941, 0.000000, -0.199287, 0.000000, 1.000000, 0.000000, 0.199287, 0.000000, 0.979941, 147.074295, 11.556429, -159.188202)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate131" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.938970, 0.000000, 0.344000, 0.000000, 1.000000, 0.000000, -0.344000, 0.000000, 0.938970, 163.726685, 12.336443, -159.889404)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate132" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.813576, 0.000000, 0.581459, 0.000000, 1.000000, 0.000000, -0.581459, 0.000000, 0.813576, 174.174530, 12.965181, -165.224335)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate133" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.993659, 0.000000, 0.112438, 0.000000, 1.000000, 0.000000, -0.112438, 0.000000, 0.993659, 191.586182, 14.430681, -169.834961)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate134" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.996956, 0.000000, 0.077966, 0.000000, 1.000000, 0.000000, -0.077966, 0.000000, 0.996956, 197.910217, 14.991808, -170.334198)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate135" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(0.991400, 0.000000, 0.130867, 0.000000, 1.000000, 0.000000, -0.130867, 0.000000, 0.991400, 207.386292, 15.829500, -171.043655)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate136" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.996684, 0.000000, 0.081369, 0.000000, 1.000000, 0.000000, -0.081369, 0.000000, 0.996684, 218.125565, 16.787340, -173.754593)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate137" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.995555, 0.000000, 0.094182, 0.000000, 1.000000, 0.000000, -0.094182, 0.000000, 0.995555, 224.916992, 17.367830, -173.679443)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate138" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.993883, 0.000000, 0.110434, 0.000000, 1.000000, 0.000000, -0.110434, 0.000000, 0.993883, 231.416275, 17.937075, -175.117783)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate139" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(-0.992410, 0.000000, -0.122969, 0.000000, 1.000000, 0.000000, 0.122969, 0.000000, -0.992410, 23.980011, 4.560808, -208.324646)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate140" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(-0.999905, 0.000000, 0.013765, 0.000000, 1.000000, 0.000000, -0.013765, 0.000000, -0.999905, 33.467278, 4.868822, -209.236282)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate141" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(-0.999983, 0.000000, -0.005765, 0.000000, 1.000000, 0.000000, 0.005765, 0.000000, -0.999983, 40.560585, 5.133669, -209.298569)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate142" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(-0.999030, 0.000000, -0.044024, 0.000000, 1.000000, 0.000000, 0.044024, 0.000000, -0.999030, 46.959763, 5.390306, -208.839081)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate143" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(-0.999816, 0.000000, 0.019170, 0.000000, 1.000000, 0.000000, -0.019170, 0.000000, -0.999816, 54.528744, 5.714128, -208.651382)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate144" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(-0.989905, 0.000000, -0.141729, 0.000000, 1.000000, 0.000000, 0.141729, 0.000000, -0.989905, 60.695496, 6.004351, -209.556213)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate145" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(-0.770540, 0.000000, -0.637391, 0.000000, 1.000000, 0.000000, 0.637391, 0.000000, -0.770540, 68.756142, 6.473711, -213.651535)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate146" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(-0.805840, 0.000000, -0.592133, 0.000000, 1.000000, 0.000000, 0.592133, 0.000000, -0.805840, 75.041649, 6.822527, -218.560669)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate147" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(-0.959923, 0.000000, -0.280265, 0.000000, 1.000000, 0.000000, 0.280265, 0.000000, -0.959923, 86.163200, 7.285906, -224.325851)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate148" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(-0.991320, 0.000000, -0.131468, 0.000000, 1.000000, 0.000000, 0.131468, 0.000000, -0.991320, 96.336388, 7.639940, -227.098999)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate149" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(-0.981457, 0.000000, 0.191683, 0.000000, 1.000000, 0.000000, -0.191683, 0.000000, -0.981457, 109.301346, 8.102175, -226.081299)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate150" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(-0.837427, 0.000000, 0.546549, 0.000000, 1.000000, 0.000000, -0.546549, 0.000000, -0.837427, 121.835510, 8.657885, -220.691483)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate151" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(-0.850064, 0.000000, 0.526679, 0.000000, 1.000000, 0.000000, -0.526679, 0.000000, -0.850064, 127.885757, 9.030367, -216.795700)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate152" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(-0.826689, 0.000000, 0.562658, 0.000000, 1.000000, 0.000000, -0.562658, 0.000000, -0.826689, 136.514542, 9.666704, -211.162064)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate153" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(-0.812914, 0.000000, 0.582384, 0.000000, 1.000000, 0.000000, -0.582384, 0.000000, -0.812914, 142.388031, 10.209795, -206.996948)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate154" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(-0.783078, 0.000000, 0.621924, 0.000000, 1.000000, 0.000000, -0.621924, 0.000000, -0.783078, 149.744812, 10.974810, -201.697128)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate155" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(-0.881664, 0.000000, 0.471878, 0.000000, 1.000000, 0.000000, -0.471878, 0.000000, -0.881664, 155.521469, 11.631899, -197.830368)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate156" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(-0.895850, 0.000000, -0.444358, 0.000000, 1.000000, 0.000000, 0.444358, 0.000000, -0.895850, 161.401230, 12.281633, -202.326645)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate157" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(-0.951927, 0.000000, -0.306325, 0.000000, 1.000000, 0.000000, 0.306325, 0.000000, -0.951927, 170.541336, 13.200930, -206.691971)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate158" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(-0.992377, 0.000000, -0.123236, 0.000000, 1.000000, 0.000000, 0.123236, 0.000000, -0.992377, 180.336533, 14.052050, -208.951447)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate159" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(-0.994721, 0.000000, -0.102613, 0.000000, 1.000000, 0.000000, 0.102613, 0.000000, -0.994721, 187.155594, 14.554125, -208.775421)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate160" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(-0.996886, 0.000000, -0.078853, 0.000000, 1.000000, 0.000000, 0.078853, 0.000000, -0.996886, 193.540680, 15.091677, -210.323883)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate161" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(-0.990607, 0.000000, -0.136736, 0.000000, 1.000000, 0.000000, 0.136736, 0.000000, -0.990607, 200.164734, 15.645693, -211.264450)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate162" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(-0.990931, 0.000000, -0.134371, 0.000000, 1.000000, 0.000000, 0.134371, 0.000000, -0.990931, 206.944946, 16.212481, -211.630722)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate163" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(-0.992807, 0.000000, -0.119727, 0.000000, 1.000000, 0.000000, 0.119727, 0.000000, -0.992807, 213.580429, 16.763674, -211.104080)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate164" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(-0.992060, 0.000000, -0.125762, 0.000000, 1.000000, 0.000000, 0.125762, 0.000000, -0.992060, 220.142715, 17.324999, -212.073608)
-metadata/coliziune = "none"
-
-[node name="bCasaSpate165" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(-0.992259, 0.000000, -0.124189, 0.000000, 1.000000, 0.000000, 0.124189, 0.000000, -0.992259, 226.806458, 17.890276, -212.548691)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3166" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.009276, 0.000000, 0.999957, 0.000000, 1.000000, 0.000000, -0.999957, 0.000000, 0.009276, 28.065027, 3.408495, -154.822708)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3167" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.095704, 0.000000, 0.995410, 0.000000, 1.000000, 0.000000, -0.995410, 0.000000, 0.095704, 27.593437, 3.714449, -161.967392)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3168" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.998939, 0.000000, -0.046049, 0.000000, 1.000000, 0.000000, 0.046049, 0.000000, 0.998939, 34.306404, 4.029284, -161.689407)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3169" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.998682, 0.000000, 0.051324, 0.000000, 1.000000, 0.000000, -0.051324, 0.000000, 0.998682, 42.322121, 4.460909, -161.177292)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3170" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(0.998936, 0.000000, 0.046116, 0.000000, 1.000000, 0.000000, -0.046116, 0.000000, 0.998936, 48.778721, 4.868044, -161.937393)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3171" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(0.999840, 0.000000, -0.017907, 0.000000, 1.000000, 0.000000, 0.017907, 0.000000, 0.999840, 55.575581, 5.231752, -162.092560)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3172" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.993671, 0.000000, 0.112328, 0.000000, 1.000000, 0.000000, -0.112328, 0.000000, 0.993671, 66.631454, 5.785128, -162.207458)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3173" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(0.961102, 0.000000, 0.276194, 0.000000, 1.000000, 0.000000, -0.276194, 0.000000, 0.961102, 77.313522, 6.324358, -164.669327)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3174" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(0.884227, 0.000000, 0.467057, 0.000000, 1.000000, 0.000000, -0.467057, 0.000000, 0.884227, 88.294746, 6.923632, -169.801270)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3175" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.739049, 0.000000, 0.673652, 0.000000, 1.000000, 0.000000, -0.673652, 0.000000, 0.739049, 99.044319, 7.711809, -177.220490)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3176" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.838230, 0.000000, -0.545316, 0.000000, 1.000000, 0.000000, 0.545316, 0.000000, 0.838230, 106.010658, 8.399828, -175.071915)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3177" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(0.839431, 0.000000, -0.543467, 0.000000, 1.000000, 0.000000, 0.543467, 0.000000, 0.839431, 110.713715, 8.908495, -171.286133)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3178" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.813865, 0.000000, -0.581054, 0.000000, 1.000000, 0.000000, 0.581054, 0.000000, 0.813865, 116.670555, 9.522722, -167.439758)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3179" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.768297, 0.000000, -0.640094, 0.000000, 1.000000, 0.000000, 0.640094, 0.000000, 0.768297, 121.164764, 9.972826, -163.602737)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3180" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.891783, 0.000000, -0.452464, 0.000000, 1.000000, 0.000000, 0.452464, 0.000000, 0.891783, 131.583328, 10.775545, -156.764999)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3181" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(0.977586, 0.000000, -0.210537, 0.000000, 1.000000, 0.000000, 0.210537, 0.000000, 0.977586, 144.885635, 11.503130, -151.258942)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3182" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.946656, 0.000000, 0.322245, 0.000000, 1.000000, 0.000000, -0.322245, 0.000000, 0.946656, 166.333908, 12.495562, -151.639465)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3183" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(0.818023, 0.000000, 0.575186, 0.000000, 1.000000, 0.000000, -0.575186, 0.000000, 0.818023, 178.404648, 13.252672, -158.527374)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3184" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.904454, 0.000000, 0.426572, 0.000000, 1.000000, 0.000000, -0.426572, 0.000000, 0.904454, 184.272217, 13.704165, -161.252350)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3185" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_a")]
-transform = Transform3D(0.997582, 0.000000, 0.069501, 0.000000, 1.000000, 0.000000, -0.069501, 0.000000, 0.997582, 190.907120, 14.266771, -161.612946)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3186" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.993965, 0.000000, 0.109702, 0.000000, 1.000000, 0.000000, -0.109702, 0.000000, 0.993965, 197.830978, 14.876513, -162.260147)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3187" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_d")]
-transform = Transform3D(0.992873, 0.000000, 0.119176, 0.000000, 1.000000, 0.000000, -0.119176, 0.000000, 0.992873, 204.743698, 15.485598, -162.473892)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3188" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_e")]
-transform = Transform3D(0.993643, 0.000000, 0.112581, 0.000000, 1.000000, 0.000000, -0.112581, 0.000000, 0.993643, 211.458008, 16.087664, -163.398834)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3189" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(0.996238, 0.000000, 0.086663, 0.000000, 1.000000, 0.000000, -0.086663, 0.000000, 0.996238, 217.645691, 16.655077, -165.650864)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3190" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_b")]
-transform = Transform3D(0.992010, 0.000000, 0.126160, 0.000000, 1.000000, 0.000000, -0.126160, 0.000000, 0.992010, 224.003189, 17.213091, -166.299301)
-metadata/coliziune = "none"
-
-[node name="bCasaRand3191" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_machiya_c")]
-transform = Transform3D(0.991690, 0.000000, 0.128650, 0.000000, 1.000000, 0.000000, -0.128650, 0.000000, 0.991690, 230.417358, 17.769426, -166.657578)
-metadata/coliziune = "none"
-
-[node name="bTreapta192" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta104" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.055886, 0.000000, 0.098990, 0.000000, 0.177904, 0.000000, -0.006391, 0.000000, 0.865570, 27.735554, 4.337363, -181.493103)
 metadata/coliziune = "none"
 
-[node name="bTreapta193" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta105" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.055886, 0.000000, 0.098990, 0.000000, 0.211049, 0.000000, -0.006391, 0.000000, 0.865570, 28.182642, 4.358817, -181.544235)
 metadata/coliziune = "none"
 
-[node name="bTreapta194" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta106" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.055886, 0.000000, 0.098990, 0.000000, 0.244194, 0.000000, -0.006391, 0.000000, 0.865570, 28.629728, 4.380270, -181.595352)
 metadata/coliziune = "none"
 
-[node name="bTreapta195" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta107" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.055886, 0.000000, 0.098990, 0.000000, 0.277335, 0.000000, -0.006391, 0.000000, 0.865570, 29.076815, 4.401740, -181.646484)
 metadata/coliziune = "none"
 
-[node name="bTreapta196" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta108" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.056091, 0.000000, 0.065447, 0.000000, 0.313725, 0.000000, -0.004226, 0.000000, 0.868750, 29.242065, 4.409628, -181.658646)
 metadata/coliziune = "none"
 
-[node name="bTreapta197" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta109" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(2.062215, 0.000000, 0.014476, 0.000000, 0.234704, 0.000000, -0.034269, 0.000000, 0.871092, 37.282570, 4.739935, -181.727432)
 metadata/coliziune = "none"
 
-[node name="bTreapta198" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta110" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.056226, 0.000000, 0.025603, 0.000000, 0.176179, 0.000000, -0.001653, 0.000000, 0.870836, 45.848251, 5.078574, -181.959091)
 metadata/coliziune = "none"
 
-[node name="bTreapta199" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta111" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.056226, 0.000000, 0.025603, 0.000000, 0.210156, 0.000000, -0.001653, 0.000000, 0.870836, 46.298058, 5.096549, -181.972321)
 metadata/coliziune = "none"
 
-[node name="bTreapta200" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta112" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.056226, 0.000000, 0.025603, 0.000000, 0.244130, 0.000000, -0.001653, 0.000000, 0.870836, 46.747864, 5.114539, -181.985550)
 metadata/coliziune = "none"
 
-[node name="bTreapta201" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta113" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.056226, 0.000000, 0.025603, 0.000000, 0.278121, 0.000000, -0.001653, 0.000000, 0.870836, 47.197670, 5.132452, -181.998779)
 metadata/coliziune = "none"
 
-[node name="bTreapta202" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta114" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(0.056226, 0.000000, 0.025347, 0.000000, 0.312161, 0.000000, -0.001637, 0.000000, 0.870843, 47.645317, 5.150168, -182.011871)
 metadata/coliziune = "none"
 
-[node name="bTreapta203" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
+[node name="bTreapta115" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_cyclopean_wall")]
 transform = Transform3D(2.061915, 0.000000, -0.020743, 0.000000, 0.235155, 0.000000, 0.049107, 0.000000, 0.870965, 55.729313, 5.472052, -182.068878)
 metadata/coliziune = "none"
 
-[node name="bTreaptaFelinar204" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_a")]
+[node name="bTreaptaFelinar116" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_a")]
 transform = Transform3D(0.992326, 0.000000, 0.123651, 0.000000, 1.000000, 0.000000, -0.123651, 0.000000, 0.992326, 26.313507, 4.530383, -179.555161)
 
-[node name="bTreaptaFelinar205" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_a")]
+[node name="bTreaptaFelinar117" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_stone_lantern_a")]
 transform = Transform3D(0.982871, 0.000000, 0.184293, 0.000000, 1.000000, 0.000000, -0.184293, 0.000000, 0.982871, 69.247810, 6.224505, -181.641846)
 
-[node name="bRicsa206" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_jinrikisha")]
-transform = Transform3D(-0.501590, 0.000000, -0.865105, 0.000000, 1.000000, 0.000000, 0.865105, 0.000000, -0.501590, 117.476685, 9.487000, -191.478317)
-metadata/coliziune = "none"
-
-[node name="bFrunze207" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.615280, 0.000000, 0.521935, 0.000000, 0.806837, 0.000000, -0.521935, 0.000000, -0.615280, 42.979622, 5.430000, -196.373993)
-
-[node name="bFrunze208" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.731057, 0.000000, 0.252076, 0.000000, 0.773296, 0.000000, -0.252076, 0.000000, -0.731057, 147.384521, 11.847000, -172.594513)
-
-[node name="bFrunze209" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(0.675260, 0.000000, 0.553764, 0.000000, 0.873287, 0.000000, -0.553764, 0.000000, 0.675260, 115.903313, 8.856000, -208.593567)
-
-[node name="bFrunze210" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.707490, 0.000000, -0.469095, 0.000000, 0.848877, 0.000000, 0.469095, 0.000000, -0.707490, 210.862061, 16.714001, -185.195801)
-
-[node name="bFrunze211" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.401373, 0.000000, -0.629081, 0.000000, 0.746219, 0.000000, 0.629081, 0.000000, -0.401373, 24.483532, 4.747000, -195.517502)
-
-[node name="bFrunze212" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.974381, 0.000000, 0.216156, 0.000000, 0.998069, 0.000000, -0.216156, 0.000000, -0.974381, 196.346298, 15.444000, -182.629272)
-
-[node name="bFrunze213" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.860603, 0.000000, -0.145631, 0.000000, 0.872838, 0.000000, 0.145631, 0.000000, -0.860603, 15.589447, 4.468000, -193.445435)
-
-[node name="bFrunze214" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(0.634259, 0.000000, 0.358023, 0.000000, 0.728330, 0.000000, -0.358023, 0.000000, 0.634259, 159.553177, 12.448000, -171.667816)
-
-[node name="bFrunze215" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.400552, 0.000000, 0.780366, 0.000000, 0.877162, 0.000000, -0.780366, 0.000000, -0.400552, 82.446907, 7.320000, -207.727432)
-
-[node name="bFrunze216" parent="DecorManual/ZoneB_Sannenzaka" instance=ExtResource("poib_leaf_pile")]
-transform = Transform3D(-0.901942, 0.000000, 0.234539, 0.000000, 0.931938, 0.000000, -0.234539, 0.000000, -0.901942, 51.103092, 5.785000, -182.860031)
-
-[node name="OrasSannenzakaN" type="Node3D" parent="."]
+[node name="OrasSannenzaka" type="Node3D" parent="."]
 script = ExtResource("poib_cityfill")
 models = Array[PackedScene]([ExtResource("poib_machiya_a"), ExtResource("poib_machiya_b"), ExtResource("poib_machiya_c"), ExtResource("poib_machiya_d"), ExtResource("poib_machiya_e")])
 weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)
 indigo_ratio = 0.0
 row_mode = true
-min_road_m = 25.0
+cell_m = 400.0
+min_road_m = 26.0
 seed_value = 20261013
-region_xz = PackedVector2Array(30.0, -200.0, 225.0, -200.0, 225.0, -300.0, 175.0, -300.0, 175.0, -246.0, 40.0, -236.0, 30.0, -236.0)
+region_xz = PackedVector2Array(25.0, -150.0, 170.0, -150.0, 230.0, -143.0, 230.0, -300.0, 175.0, -300.0, 175.0, -246.0, 40.0, -236.0, 30.0, -236.0, 25.0, -200.0)
 
-[node name="OrasSannenzakaS" type="Node3D" parent="."]
+[node name="RanduriSpateB" type="Node3D" parent="."]
 script = ExtResource("poib_cityfill")
-models = Array[PackedScene]([ExtResource("poib_machiya_a"), ExtResource("poib_machiya_b"), ExtResource("poib_machiya_c"), ExtResource("poib_machiya_d"), ExtResource("poib_machiya_e")])
-weights = PackedFloat32Array(0.2, 0.2, 0.2, 0.2, 0.2)
+models = Array[PackedScene]([ExtResource("poib_leaf_pile"), ExtResource("poib_machiya_b"), ExtResource("poib_machiya_a"), ExtResource("poib_machiya_d"), ExtResource("poib_machiya_e"), ExtResource("poib_machiya_c")])
 indigo_ratio = 0.0
-row_mode = true
-min_road_m = 33.0
-seed_value = 20261014
-region_xz = PackedVector2Array(25.0, -150.0, 170.0, -150.0, 235.0, -143.0, 235.0, -200.0, 25.0, -200.0)
+explicit_xforms = PackedFloat32Array(0.00000, 0.70515, 0.00000, 0.51737, 0.00000, 0.87460, 0.00000, -0.51737, 0.00000, 0.70515, 65.51365, 6.17400, -182.12927, 0.00000, -0.69832, 0.00000, -0.70020, 0.00000, 0.98891, 0.00000, 0.70020, 0.00000, -0.69832, 110.26326, 8.82900, -194.83260, 0.00000, 0.25365, 0.00000, -0.82110, 0.00000, 0.85939, 0.00000, 0.82110, 0.00000, 0.25365, 136.49570, 11.00400, -176.96672, 0.00000, -0.64694, 0.00000, -0.65584, 0.00000, 0.92122, 0.00000, 0.65584, 0.00000, -0.64694, 216.60226, 17.09800, -184.84375, 0.00000, -1.01403, 0.00000, 0.39715, 0.00000, 1.08903, 0.00000, -0.39715, 0.00000, -1.01403, 72.67696, 6.76900, -201.92670, 0.00000, 0.77002, 0.00000, 0.47299, 0.00000, 0.90369, 0.00000, -0.47299, 0.00000, 0.77002, 114.59240, 8.58300, -211.11823, 0.00000, -0.17270, 0.00000, -0.97652, 0.00000, 0.99167, 0.00000, 0.97652, 0.00000, -0.17270, 159.22864, 12.68900, -188.34976, 0.00000, -0.10788, 0.00000, -1.02823, 0.00000, 1.03387, 0.00000, 1.02823, 0.00000, -0.10788, 194.12785, 15.32400, -198.33003, 1.00000, 0.04361, 0.00000, -0.99905, 0.00000, 1.00000, 0.00000, 0.99905, 0.00000, 0.04361, 19.98240, 3.09360, -153.73723, 2.00000, -0.00446, 0.00000, -0.99999, 0.00000, 1.00000, 0.00000, 0.99999, 0.00000, -0.00446, 19.49035, 3.33417, -161.08138, 3.00000, 0.99907, 0.00000, -0.04308, 0.00000, 1.00000, 0.00000, 0.04308, 0.00000, 0.99907, 31.25366, 4.21422, -169.30396, 4.00000, 0.99976, 0.00000, -0.02205, 0.00000, 1.00000, 0.00000, 0.02205, 0.00000, 0.99976, 37.96605, 4.55191, -169.31470, 5.00000, 0.99959, 0.00000, -0.02846, 0.00000, 1.00000, 0.00000, 0.02846, 0.00000, 0.99959, 44.67836, 4.90079, -169.31810, 2.00000, 0.99979, 0.00000, -0.02049, 0.00000, 1.00000, 0.00000, 0.02049, 0.00000, 0.99979, 51.13216, 5.23113, -169.54268, 4.00000, 0.99986, 0.00000, -0.01670, 0.00000, 1.00000, 0.00000, 0.01670, 0.00000, 0.99986, 57.69864, 5.54363, -169.99843, 2.00000, 0.99172, 0.00000, -0.12841, 0.00000, 1.00000, 0.00000, 0.12841, 0.00000, 0.99172, 66.61384, 5.91396, -170.59746, 1.00000, 0.96041, 0.00000, -0.27860, 0.00000, 1.00000, 0.00000, 0.27860, 0.00000, 0.96041, 76.06244, 6.30986, -172.48134, 4.00000, 0.82969, 0.00000, -0.55822, 0.00000, 1.00000, 0.00000, 0.55822, 0.00000, 0.82969, 87.10976, 6.79602, -178.25093, 2.00000, 0.78068, 0.00000, -0.62493, 0.00000, 1.00000, 0.00000, 0.62493, 0.00000, 0.78068, 93.25222, 7.15485, -183.64288, 3.00000, 0.81318, 0.00000, -0.58202, 0.00000, 1.00000, 0.00000, 0.58202, 0.00000, 0.81318, 98.94212, 7.58689, -186.95464, 5.00000, 0.87077, 0.00000, 0.49169, 0.00000, 1.00000, 0.00000, -0.49169, 0.00000, 0.87077, 105.76419, 8.26079, -184.46057, 3.00000, 0.83908, 0.00000, 0.54401, 0.00000, 1.00000, 0.00000, -0.54401, 0.00000, 0.83908, 111.43413, 8.84882, -180.02068, 2.00000, 0.82994, 0.00000, 0.55785, 0.00000, 1.00000, 0.00000, -0.55785, 0.00000, 0.82994, 117.00551, 9.36740, -176.94490, 4.00000, 0.80086, 0.00000, 0.59885, 0.00000, 1.00000, 0.00000, -0.59885, 0.00000, 0.80086, 122.10998, 9.85924, -173.26138, 1.00000, 0.76176, 0.00000, 0.64785, 0.00000, 1.00000, 0.00000, -0.64785, 0.00000, 0.76176, 127.04725, 10.29134, -169.34315, 2.00000, 0.88568, 0.00000, 0.46429, 0.00000, 1.00000, 0.00000, -0.46429, 0.00000, 0.88568, 135.92198, 10.95722, -163.93277, 4.00000, 0.97994, 0.00000, 0.19929, 0.00000, 1.00000, 0.00000, -0.19929, 0.00000, 0.97994, 147.07430, 11.55643, -159.18820, 1.00000, 0.93897, 0.00000, -0.34400, 0.00000, 1.00000, 0.00000, 0.34400, 0.00000, 0.93897, 163.72668, 12.33644, -159.88940, 4.00000, 0.81358, 0.00000, -0.58146, 0.00000, 1.00000, 0.00000, 0.58146, 0.00000, 0.81358, 174.17453, 12.96518, -165.22433, 1.00000, 0.99366, 0.00000, -0.11244, 0.00000, 1.00000, 0.00000, 0.11244, 0.00000, 0.99366, 191.58618, 14.43068, -169.83496, 2.00000, 0.99696, 0.00000, -0.07797, 0.00000, 1.00000, 0.00000, 0.07797, 0.00000, 0.99696, 197.91022, 14.99181, -170.33420, 3.00000, 0.99140, 0.00000, -0.13087, 0.00000, 1.00000, 0.00000, 0.13087, 0.00000, 0.99140, 207.38629, 15.82950, -171.04366, 2.00000, 0.99668, 0.00000, -0.08137, 0.00000, 1.00000, 0.00000, 0.08137, 0.00000, 0.99668, 218.12556, 16.78734, -173.75459, 4.00000, 0.99555, 0.00000, -0.09418, 0.00000, 1.00000, 0.00000, 0.09418, 0.00000, 0.99555, 224.91699, 17.36783, -173.67944, 1.00000, 0.99388, 0.00000, -0.11043, 0.00000, 1.00000, 0.00000, 0.11043, 0.00000, 0.99388, 231.41628, 17.93707, -175.11778, 1.00000, -0.99241, 0.00000, 0.12297, 0.00000, 1.00000, 0.00000, -0.12297, 0.00000, -0.99241, 23.98001, 4.56081, -208.32465, 3.00000, -0.99991, 0.00000, -0.01376, 0.00000, 1.00000, 0.00000, 0.01376, 0.00000, -0.99991, 33.46728, 4.86882, -209.23628, 1.00000, -0.99998, 0.00000, 0.00577, 0.00000, 1.00000, 0.00000, -0.00577, 0.00000, -0.99998, 40.56059, 5.13367, -209.29857, 2.00000, -0.99903, 0.00000, 0.04402, 0.00000, 1.00000, 0.00000, -0.04402, 0.00000, -0.99903, 46.95976, 5.39031, -208.83908, 4.00000, -0.99982, 0.00000, -0.01917, 0.00000, 1.00000, 0.00000, 0.01917, 0.00000, -0.99982, 54.52874, 5.71413, -208.65138, 1.00000, -0.98991, 0.00000, 0.14173, 0.00000, 1.00000, 0.00000, -0.14173, 0.00000, -0.98991, 60.69550, 6.00435, -209.55621, 3.00000, -0.77054, 0.00000, 0.63739, 0.00000, 1.00000, 0.00000, -0.63739, 0.00000, -0.77054, 68.75614, 6.47371, -213.65154, 1.00000, -0.80584, 0.00000, 0.59213, 0.00000, 1.00000, 0.00000, -0.59213, 0.00000, -0.80584, 75.04165, 6.82253, -218.56067, 2.00000, -0.95992, 0.00000, 0.28027, 0.00000, 1.00000, 0.00000, -0.28027, 0.00000, -0.95992, 86.16320, 7.28591, -224.32585, 3.00000, -0.99132, 0.00000, 0.13147, 0.00000, 1.00000, 0.00000, -0.13147, 0.00000, -0.99132, 96.33639, 7.63994, -227.09900, 5.00000, -0.98146, 0.00000, -0.19168, 0.00000, 1.00000, 0.00000, 0.19168, 0.00000, -0.98146, 109.30135, 8.10217, -226.08130, 3.00000, -0.83743, 0.00000, -0.54655, 0.00000, 1.00000, 0.00000, 0.54655, 0.00000, -0.83743, 121.83551, 8.65788, -220.69148, 2.00000, -0.85006, 0.00000, -0.52668, 0.00000, 1.00000, 0.00000, 0.52668, 0.00000, -0.85006, 127.88576, 9.03037, -216.79570, 3.00000, -0.82669, 0.00000, -0.56266, 0.00000, 1.00000, 0.00000, 0.56266, 0.00000, -0.82669, 136.51454, 9.66670, -211.16206, 2.00000, -0.81291, 0.00000, -0.58238, 0.00000, 1.00000, 0.00000, 0.58238, 0.00000, -0.81291, 142.38803, 10.20979, -206.99695, 5.00000, -0.78308, 0.00000, -0.62192, 0.00000, 1.00000, 0.00000, 0.62192, 0.00000, -0.78308, 149.74481, 10.97481, -201.69713, 4.00000, -0.88166, 0.00000, -0.47188, 0.00000, 1.00000, 0.00000, 0.47188, 0.00000, -0.88166, 155.52147, 11.63190, -197.83037, 3.00000, -0.89585, 0.00000, 0.44436, 0.00000, 1.00000, 0.00000, -0.44436, 0.00000, -0.89585, 161.40123, 12.28163, -202.32664, 2.00000, -0.95193, 0.00000, 0.30633, 0.00000, 1.00000, 0.00000, -0.30633, 0.00000, -0.95193, 170.54134, 13.20093, -206.69197, 3.00000, -0.99238, 0.00000, 0.12324, 0.00000, 1.00000, 0.00000, -0.12324, 0.00000, -0.99238, 180.33653, 14.05205, -208.95145, 2.00000, -0.99472, 0.00000, 0.10261, 0.00000, 1.00000, 0.00000, -0.10261, 0.00000, -0.99472, 187.15559, 14.55412, -208.77542, 5.00000, -0.99689, 0.00000, 0.07885, 0.00000, 1.00000, 0.00000, -0.07885, 0.00000, -0.99689, 193.54068, 15.09168, -210.32388, 4.00000, -0.99061, 0.00000, 0.13674, 0.00000, 1.00000, 0.00000, -0.13674, 0.00000, -0.99061, 200.16473, 15.64569, -211.26445, 2.00000, -0.99093, 0.00000, 0.13437, 0.00000, 1.00000, 0.00000, -0.13437, 0.00000, -0.99093, 206.94495, 16.21248, -211.63072, 3.00000, -0.99281, 0.00000, 0.11973, 0.00000, 1.00000, 0.00000, -0.11973, 0.00000, -0.99281, 213.58043, 16.76367, -211.10408, 2.00000, -0.99206, 0.00000, 0.12576, 0.00000, 1.00000, 0.00000, -0.12576, 0.00000, -0.99206, 220.14272, 17.32500, -212.07361, 3.00000, -0.99226, 0.00000, 0.12419, 0.00000, 1.00000, 0.00000, -0.12419, 0.00000, -0.99226, 226.80646, 17.89028, -212.54869, 0.00000, -0.88796, 0.00000, -0.44264, 0.00000, 0.99217, 0.00000, 0.44264, 0.00000, -0.88796, 176.62610, 13.92400, -195.69308, 0.00000, -0.67152, 0.00000, -0.64714, 0.00000, 0.93259, 0.00000, 0.64714, 0.00000, -0.67152, 189.32359, 14.85800, -182.20679, 0.00000, -0.68523, 0.00000, 0.62589, 0.00000, 0.92805, 0.00000, -0.62589, 0.00000, -0.68523, 56.81326, 5.98400, -196.45883, 0.00000, -0.78306, 0.00000, -0.49208, 0.00000, 0.92484, 0.00000, 0.49208, 0.00000, -0.78306, 63.16378, 6.12800, -182.21982, 0.00000, -0.53221, 0.00000, 0.69436, 0.00000, 0.87486, 0.00000, -0.69436, 0.00000, -0.53221, 160.60809, 12.87300, -187.93861, 0.00000, 0.85748, 0.00000, -0.23769, 0.00000, 0.88982, 0.00000, 0.23769, 0.00000, 0.85748, 22.14252, 4.48400, -180.51808, 0.00000, 0.68028, 0.00000, 0.35325, 0.00000, 0.76653, 0.00000, -0.35325, 0.00000, 0.68028, 42.72662, 5.37600, -196.83086, 0.00000, -0.96137, 0.00000, 0.04497, 0.00000, 0.96242, 0.00000, -0.04497, 0.00000, -0.96137, 28.83468, 4.78700, -181.38199, 0.00000, 0.40634, 0.00000, 0.68491, 0.00000, 0.79638, 0.00000, -0.68491, 0.00000, 0.40634, 207.91261, 16.56100, -198.71080, 0.00000, -0.94829, 0.00000, -0.29863, 0.00000, 0.99420, 0.00000, 0.29863, 0.00000, -0.94829, 139.96043, 11.32200, -176.10854)
+
+[node name="RicsaSannenzaka" type="Path3D" parent="."]
+script = ExtResource("poib_pathmover")
+model = ExtResource("poib_jinrikisha")
+collide = false
+points = PackedVector3Array(77.37, 6.77, -187.26, 79.59, 6.85, -188.63, 81.74, 6.95, -190.34, 83.42, 7.03, -191.85, 84.88, 7.11, -193.23, 85.75, 7.16, -193.94, 87.27, 7.24, -195.03, 89.02, 7.32, -196.26, 90.58, 7.41, -197.38, 91.59, 7.47, -198.09, 93.35, 7.58, -199.06, 93.96, 7.61, -199.27, 95.58, 7.71, -199.75, 97.24, 7.83, -200.16, 98.54, 7.93, -200.34, 99.36, 8.01, -200.44, 101.36, 8.17, -200.31, 102.34, 8.26, -200.11, 103.95, 8.40, -199.75, 105.32, 8.53, -199.33, 106.34, 8.63, -198.84, 107.50, 8.73, -198.20, 109.18, 8.88, -197.11, 111.10, 9.04, -195.88, 112.92, 9.18, -194.81, 114.59, 9.31, -193.84, 116.18, 9.44, -192.87, 117.75, 9.56, -191.90, 119.43, 9.71, -190.81, 121.06, 9.84, -189.73, 122.73, 9.98, -188.64, 124.37, 10.11, -187.55, 125.98, 10.25, -186.47, 127.55, 10.38, -185.39, 129.19, 10.52, -184.25, 130.80, 10.65, -183.11)
+speed = 3.0
+travel_mode = 1
+phase = 0.3
 

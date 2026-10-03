@@ -40,8 +40,8 @@ check "structures/yasaka_pagoda.glb"  7700 --origin=assembly --allow-car-slots=P
 check "plants/momiji_a.glb"           3100 --origin=assembly
 
 echo "== grupa kit-b: pagode vermilion + Kinkaku-ji =="
-check "structures/sanjunoto_pagoda.glb" 4500 --origin=assembly --allow-car-slots=Pagoda_Spire
-check "structures/koyasu_pagoda.glb"    4100 --origin=assembly --allow-car-slots=Pagoda_Spire
+check "structures/sanjunoto_pagoda.glb" 7300 --origin=assembly --allow-car-slots=Pagoda_Spire
+check "structures/koyasu_pagoda.glb"    6800 --origin=assembly --allow-car-slots=Pagoda_Spire
 check "structures/kinkakuji.glb"        3800 --origin=assembly --allow-car-slots=Kin_Gold
 
 echo

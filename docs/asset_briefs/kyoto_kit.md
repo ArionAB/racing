@@ -81,7 +81,7 @@ clasele Kyoto existente (`palette.gd:858-867, 1091-1099`).
 | grinzi *kasagi*, lemn de templu, console, fațete de streașină | `LOG_DARK` 28 | — |
 | stâlpi/balustrade brun-roșcat (pagodă, poduri, scenă) | `WOOD` 9 | `machiya_wood` pe casele de oraș (la pagodă/pod: fără clasă) |
 | lemn de machiya | `WOOD` 9 (nod `Machiya_Wood`), `LOG_DARK` 28 (rame, nod `Machiya_Trim`) | `machiya_wood` pe `Machiya_Wood` |
-| țigla kawara | `VOLCANIC_BLACK` 20, nervuri în geometrie | — |
+| țigla kawara | `ASPHALT_EDGE` 6 (#696765), nervuri în geometrie. **Schimbat de la `VOLCANIC_BLACK` 20 (#55535A)**: pe randare #55535A iese negru-violet (măsurat ~(79,77,84) vs ~(100,95,98) pe decupare); #696765 e gri neutru și iese gri kawara | — |
 | tencuiala albă (machiya, `temple_wall`, panouri) | `FOAM_WHITE` 22 | `village_plaster` (reutilizat, netentat) pe nodul `*_Plaster` |
 | piatră (felinare, zidul ciclopic, socluri, vulpi) | `MARBLE_GREY` 29, `CONCRETE` 8, `ROCK_LIGHT` 3 | `old_stone` / `granite` pe nodul `*_Stone` |
 | aur (Kinkaku-ji, sorin) | `CAR_YELLOW` 16 (+ `SAND_LIGHT` 0 pe fețele de sus) | — ; exceptie `--allow-car-slots=<Nod>` |

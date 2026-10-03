@@ -13,7 +13,7 @@ from mathutils import Vector, Matrix
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                        "kyoto_shapes.py")).read())
 
-TILE = VOLCANIC_BLACK
+TILE = ASPHALT_EDGE  # gri neutru #696765, nu violetul #55535A
 BEAM = LOG_DARK
 WOODS = WOOD
 GOLD = CAR_YELLOW

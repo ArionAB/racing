@@ -15,7 +15,7 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                        "kyoto_shapes.py")).read())
 
 # Sloturi (brief kyoto_kit §0.4)
-TILE = VOLCANIC_BLACK      # tigla kawara, din atlas, nervuri in geometrie
+TILE = ASPHALT_EDGE        # tigla kawara: gri neutru #696765 (VOLCANIC_BLACK #55535A iese violet pe randare)
 BEAM = LOG_DARK            # grinzi, console, fateta streasinii
 POST = RUST                # stalpi/pereti etaje: lemn rosu-maroniu
 VERM = LAVA_ORANGE         # vermilion: console, rame, stalpii parterului
@@ -182,6 +182,22 @@ def _pagoda_spire(sp, apex, length, rings, cfg_r0=0.44):
     sp.frustum((0, 0, apex + length - 0.45), 0.26, 0.0, 0.9, GOLD, segments=6)
 
 
+def _arch_window(bw, bd, side, o, ly, zc, ww, hh, ring):
+    """Fereastra rotunjita (arc sus) cu INEL ALB gros: `bw` primeste inelul
+    (PLASTER), `bd` golul intunecat. ww x hh = golul; inelul adauga `ring`."""
+    def shape(b, x_off, wd, ht, slot, dep, lyy):
+        R = wd * 0.5
+        # parte dreapta (jos) + semicerc sus
+        cx_, cy_ = _pt(side, x_off, lyy)
+        bx = (wd, dep) if side % 2 == 0 else (dep, wd)
+        zb = zc - ht * 0.5
+        b.box((cx_, cy_, zb + (ht - R) * 0.5), (bx[0], bx[1], ht - R), slot)
+        b.cylinder((cx_, cy_, zb + ht - R), R, dep, slot, segments=10,
+                   axis="Y" if side % 2 == 0 else "X")
+    shape(bw, o, ww + 2 * ring, hh + 2 * ring, PLASTER, 0.12, ly)
+    shape(bd, o, ww, hh, DARK, 0.12, ly + 0.06)
+
+
 def _verm_pagoda(cfg):
     """Corpul comun al pagodelor vermilion cu 3 etaje. Intoarce nodurile
     (roof, body, windows, spire)."""
@@ -216,34 +232,42 @@ def _verm_pagoda(cfg):
                 px, py = _pt(side, 0.0, w + 0.03)
                 sx_, sy_ = (2 * w - 0.5, 0.07) if side % 2 == 0 else (0.07, 2 * w - 0.5)
                 body.box((px, py, base_z + 0.3), (sx_, sy_, 0.4), PLASTER)
-        # ferestre: rama alba groasa + gol intunecat; 2 pe fata, 3 (cu usa) pe
-        # fata din fata a parterului
+        # ferestre rotunjite cu inel alb gros: 3 pe fiecare fata (pe fata din
+        # fata a parterului: usa la mijloc, flancata de doua)
+        cell = 2 * w / 3.0
+        ring = cfg.get("ring", 0.17)
         wh = h * cfg["win_h"]
         zc = base_z + h * cfg["win_zc"]
         for side in range(4):
-            offs = (-0.62 * w, 0.0, 0.62 * w) if (i == 0 and side == 0) else (-0.5 * w, 0.5 * w)
-            for o in offs:
-                door = (i == 0 and side == 0 and o == 0.0)
-                ww = w * (0.5 if door else cfg["win_w"])
-                hh = h * 0.62 if door else wh
-                zz = base_z + 0.2 + hh * 0.5 if door else zc
-                px, py = _pt(side, o, w + 0.04)
-                qx, qy = _pt(side, o, w + 0.10)
-                fw = 0.18 if not door else 0.2
-                fx, fy = (ww + fw, 0.10) if side % 2 == 0 else (0.10, ww + fw)
-                dk = 1.0 if door else 0.66
-                gx, gy = (ww * dk, 0.10) if side % 2 == 0 else (0.10, ww * dk)
-                body.box((px, py, zz), (fx, fy, hh + fw), VERM if door else PLASTER)
-                glow.box((qx, qy, zz), (gx, gy, hh * (1.0 if door else 0.66)), DARK)
-        # console: doua inele + blocuri pe fiecare latura
-        frame_ring(body, 0, 0, eave_z[i] - 0.75, w + 0.4, w + 0.4, 0.32, 0.45, VERM)
-        frame_ring(body, 0, 0, eave_z[i] - 0.43, w + 0.8, w + 0.8, 0.28, 0.45, VERM)
+            for k, o in enumerate((-cell, 0.0, cell)):
+                if i == 0 and side == 0 and k == 1:
+                    dw, dh = cell * 0.62, h * 0.62
+                    px, py = _pt(side, 0.0, w + 0.04)
+                    bx = (dw + 0.3, 0.1) if side % 2 == 0 else (0.1, dw + 0.3)
+                    body.box((px, py, base_z + 0.2 + dh * 0.5), (bx[0], bx[1], dh + 0.3), VERM)
+                    qx, qy = _pt(side, 0.0, w + 0.10)
+                    gx = (dw, 0.1) if side % 2 == 0 else (0.1, dw)
+                    glow.box((qx, qy, base_z + 0.2 + dh * 0.5), (gx[0], gx[1], dh), DARK)
+                    continue
+                _arch_window(body, glow, side, o, w + 0.04, zc, cell * cfg["win_w"], wh, ring)
+        # console: doua inele + blocuri pe fiecare latura (varianta joasa
+        # `low_console` NU acopera ferestrele: un singur inel si blocuri mici)
         cw = w + 0.45
-        for sgn in (-1, 1):
-            body.pickets((-cw, sgn * cw, eave_z[i] - 0.95), (cw, sgn * cw, eave_z[i] - 0.95),
-                         0.95, (0.34, 0.34, 0.5), VERM, endpoints=True)
-            body.pickets((sgn * cw, -cw, eave_z[i] - 0.95), (sgn * cw, cw, eave_z[i] - 0.95),
-                         0.95, (0.34, 0.34, 0.5), VERM, endpoints=True)
+        if cfg.get("low_console"):
+            frame_ring(body, 0, 0, eave_z[i] - 0.5, w + 0.5, w + 0.5, 0.3, 0.4, VERM)
+            for sgn in (-1, 1):
+                body.pickets((-cw, sgn * cw, eave_z[i] - 0.72), (cw, sgn * cw, eave_z[i] - 0.72),
+                             0.95, (0.3, 0.3, 0.22), VERM, endpoints=True)
+                body.pickets((sgn * cw, -cw, eave_z[i] - 0.72), (sgn * cw, cw, eave_z[i] - 0.72),
+                             0.95, (0.3, 0.3, 0.22), VERM, endpoints=True)
+        else:
+            frame_ring(body, 0, 0, eave_z[i] - 0.75, w + 0.4, w + 0.4, 0.32, 0.45, VERM)
+            frame_ring(body, 0, 0, eave_z[i] - 0.43, w + 0.8, w + 0.8, 0.28, 0.45, VERM)
+            for sgn in (-1, 1):
+                body.pickets((-cw, sgn * cw, eave_z[i] - 0.95), (cw, sgn * cw, eave_z[i] - 0.95),
+                             0.95, (0.34, 0.34, 0.5), VERM, endpoints=True)
+                body.pickets((sgn * cw, -cw, eave_z[i] - 0.95), (sgn * cw, cw, eave_z[i] - 0.95),
+                             0.95, (0.34, 0.34, 0.5), VERM, endpoints=True)
         # galerie: sort plin vermilion lat pe tigla + lisa sus (etajele 2-3)
         if cfg["rail"] and i > 0:
             R = w + 0.6
@@ -255,7 +279,7 @@ def _verm_pagoda(cfg):
                     body.box((sx * R, sy * R, rz + 0.55), (0.3, 0.3, 1.1), cfg["rail_slot"])
         hip_roof(roof, 0, 0, eave_z[i], eave_hw[i], eave_hw[i], rise[i], TILE,
                  lift=lift[i], thick=0.18, fascia_slot=BEAM, tile_step=0.85,
-                 rib=0.05, swell=0.3)
+                 rib=0.05, swell=cfg.get("swell", 0.3))
     apex = eave_z[n - 1] + rise[n - 1]
     _pagoda_spire(sp, apex, cfg["spire_len"], cfg["spire_rings"], cfg["spire_r"])
     return (roof.to_object("Pagoda_Roof"), body.to_object("Pagoda_Body"),
@@ -280,7 +304,7 @@ def build_sanjunoto_pagoda():
         eave_hw=[4.7, 4.35, 4.0], eave_z=[3.7, 7.2, 10.5], rise=[1.1, 1.1, 3.0],
         lift=[0.65, 0.65, 0.6], wall_k=0.55, plinth_h=0.5, plinth_hw=3.7,
         plinth_slot=PLASTER, wall_slot=VERM, band_slot=BEAM, post_slot=VERM,
-        rail=True, rail_slot=VERM, win_h=0.42, win_w=0.48, win_zc=0.45,
+        rail=True, rail_slot=VERM, win_h=0.42, win_w=0.5, win_zc=0.45, ring=0.27,
         spire_len=4.5, spire_rings=12, spire_r=0.55))
 
 
@@ -298,19 +322,19 @@ def build_koyasu_pagoda():
     Cote: 14 m total, streasina de jos ~6,8 m.
     """
     return _verm_pagoda(dict(
-        eave_hw=[3.5, 3.4, 3.25], eave_z=[2.8, 5.5, 8.0], rise=[0.8, 0.8, 2.6],
-        lift=[0.5, 0.5, 0.5], wall_k=0.55, plinth_h=0.4, plinth_hw=2.8,
+        eave_hw=[3.7, 3.65, 3.55], eave_z=[2.9, 5.7, 8.3], rise=[0.8, 0.8, 2.4],
+        lift=[0.7, 0.7, 0.8], swell=0.5, wall_k=0.5, plinth_h=0.4, plinth_hw=2.8,
         plinth_slot=PLASTER, wall_slot=VERM, band_slot=BEAM, post_slot=VERM,
-        rail=True, rail_slot=VERM, win_h=0.44, win_w=0.52, win_zc=0.45,
-        spire_len=3.4, spire_rings=12, spire_r=0.5))
+        rail=True, rail_slot=VERM, win_h=0.38, win_w=0.46, win_zc=0.40, ring=0.24,
+        low_console=True, spire_len=3.4, spire_rings=12, spire_r=0.5))
 
 
 if __name__ == "__main__" or True:
     r, b_, g_, s_ = build_yasaka_pagoda()
     emit([r, b_, g_, s_], "structures/yasaka_pagoda.glb", AO_PAGODA,
          bevel=0.0, smooth_angle=None, budget=7700)
-    for fn, name, bud in ((build_sanjunoto_pagoda, "sanjunoto_pagoda", 9000),
-                          (build_koyasu_pagoda, "koyasu_pagoda", 9000)):
+    for fn, name, bud in ((build_sanjunoto_pagoda, "sanjunoto_pagoda", 7300),
+                          (build_koyasu_pagoda, "koyasu_pagoda", 6800)):
         clear_built()
         emit(list(fn()), "structures/%s.glb" % name, AO_PAGODA,
              bevel=0.0, smooth_angle=None, budget=bud)

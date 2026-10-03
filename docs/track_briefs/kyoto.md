@@ -370,7 +370,7 @@ Acoperirea celor cinci clase din `ref_notes/sisteme.md` §3:
 | frecare | covorul de frunze (vizual; grip opțional, §3.1), pietrișul de pe malul iazului (0,92×), petecul ud lăsat de shishi-odoshi (`WaterHazard`), caldarâmul (0,95×) |
 | **oprire** | **niciuna** (lecția semaforului Fiordland) |
 | sabotaj de control | ***kogarashi***, dacă se confirmă (§3.1); altfel niciunul |
-| **aruncare** | **daruma-otoshi** (discul lovit; înainte, lovitura tubului), **săritura de pe scenă**, ricoșeul din pereții tunelului de torii |
+| **aruncare** | **daruma-otoshi** (discul lovit; înainte, lovitura tubului), **shishimai** (leul care dansează pe dreapta finală, §3.0b), **săritura de pe scenă**, ricoșeul din pereții tunelului de torii |
 
 ### Daruma-otoshi (F) — înlocuiește shishi-odoshi (decizia dezvoltatorului, 3 oct 2026: tubul nu se citea, „arată ca o pompă”)
 
@@ -679,6 +679,147 @@ la ~23 Hz). Hazardul le cântă prin două `AudioStreamPlayer3D` pe busul `SFX`
 sondele și capturile cu `force_clock` nu cântă. `ProbeKyotoDaruma` verifică acum
 un TOC per lovitură (10 TOC-uri pentru 10 discuri zburate) și tot restul rămâne
 PASS. Nu s-a ascultat în joc: tonul și volumul rămân de ales la volan.
+
+### 3.0b Shishimai — leul care dansează (H, 3 oct 2026, ramura `kyoto/shishimai`)
+
+Cerut explicit de dezvoltator ca hazard: **shishimai**, dansul leului de festival.
+Un cap mare de lemn lăcuit roșu (*shishigashira*: ochi aurii, sprâncene negre, nas
+auriu, corn, coamă albă, falcă mobilă) și o pânză verde cu spirale albe *karakusa*
+atârnată peste doi dansatori, din care se văd doar picioarele (pantaloni albi,
+încălțări negre). Dansează **lateral peste șoseaua dreptei finale** și, o dată la 9 s,
+face un **atac** într-o parte. Nu închide niciodată drumul: ocupă o fâșie de ~3,4 m
+dintr-o șosea de 14 m. E hazardul **de citire a mișcării** al pistei (daruma-otoshi
+e de timing, kogarashi de control): jucătorul alege *partea* pe care trece.
+
+![leul, 3/4 din față](img/kyoto_shishimai/fata_34.jpg)
+![telegraful, poza din joc](img/kyoto_shishimai/poza_telegraf_fata.jpg)
+![lateral, panza cu spirale](img/kyoto_shishimai/lateral_stanga.jpg)
+![atacul](img/kyoto_shishimai/poza_atac_fata.jpg)
+
+(Randări Blender cu atlasul și AO-ul din export; pozele cap-înapoi / atac folosesc
+aceleași cifre ca `_apply_state`. **Nu sunt capturi din joc.**)
+
+**Poziția: eșantionul 170 al axei (frac 0,955 în generator; `ProbeRace` o măsoară la
+0,960 în fracția de pistă).** Dreapta finală are semilățimea 7,0 m
+(`custom_width_segments`) de la podul Togetsukyo (0,894) la grilă. Alegerea s-a făcut
+pe geometria axei, nu pe ochi:
+
+| candidat | geometria axei | verdict |
+|---|---|---|
+| 0,91–0,93 (eșantioanele 164–165) | direcția 71° → 78°, **12° de viraj pe ±40 m**; leul ar ieși din spatele curbei | respins: telegraful trebuie citit pe dreaptă |
+| **eșantion 170 (0,955)** | **dreaptă de 48 m (eșantioanele 167–171) la 83,7°**, 24 m de dreaptă *înaintea* lui, `d_hdg` = 2° pe ±40 m | **ales** |
+| 0,97+ (eșantioanele 172–174) | arc de 6° spre grilă; ~20 m de grila de start (0,977) | respins: leul ar sta peste plutonul care pornește |
+
+Cel mai apropiat loc din grilă e la ~47 m în urma leului; prima trecere pe lângă el e la
+sfârșitul turului 1. Camera de joc (10 m sus, 12,5 m în spate) vede leul întreg abia de
+la ~45 m, deci avertismentul stă în ghemuire și în capul întors, nu în distanță (de
+aici și `model_scale` 1,2, vezi mai jos).
+
+**Mecanica** (`scenes/hazards/shishimai_hazard.gd`; contractul modelului e în antet,
+codul câștigă). Tiparul e de 4 cicluri × 9 s = 36 s, direcția atacului pe ciclu
+dreapta / stânga / stânga / dreapta; tot ce se vede e o funcție **pură** de ceas
+(`seek` / `force_clock`, ca la daruma).
+
+| fază (s în ciclu) | ce face leul |
+|---|---|
+| 0 – 5,2 **dans** | centrul oscilează pe axa transversală, `A` = 3,2 m, perioada 4,5 s, plus o a doua armonică (Lissajous) și avans/retragere de 0,7 m pe mers; capul se leagănă, falca clampănește la 1,8 Hz, picioarele pășesc în diagonală, pânza se unduiește în trei segmente |
+| 5,2 – 6,8 **telegraf** (1,6 s) | dansul se liniștește (amplitudinea → 0,35), leul se ghemuiește 0,28 m, capul se dă înapoi (−0,42 rad) și se **întoarce spre partea atacului** (0,62 rad), falca se deschide larg; se trage 0,8 m în partea opusă |
+| 6,8 – 7,2 **atac** (0,4 s) | se repede `lunge_reach` = 3,4 m spre partea anunțată (față de dans: 3,7–4,7 m măsurat), cu un salt de 0,9 m, avansează 1,2 m spre mașină, falca se închide cu un clămpănit mare |
+| 7,2 – 7,5 pauză, 7,5 – 9,0 revenire | rămâne în poziție, apoi dansul reia amplitudinea plină |
+
+**Contact.** Fără corp solid (memoria `corp-cinematic-aparut-in-masina`): o zonă
+`Area3D` pe gabaritul leului (±1,4 m lățime, +3,9 / −3,9 m lungime, la scara modelului)
+care se mișcă odată cu el. Mașina prinsă în zonă e **aruncată lateral**, în partea în
+care e față de centrul leului (pe sensul atacului dacă e fix pe axă), cu un salt mic,
+prin `HazardThrow` (orizontala se *scrie*, verticala trece prin `Car.launch`).
+`ratio = masa_de_referință / masa_mașinii` taie și viteza laterală (8,5 m/s la masa
+100) și săritura (1,0 m); masa grea **păstrează** din viteza înainte (`keep` 0,55 +
+0,25 · (masa/ref − 1)). Distanța laterală e plafonată ca mașina să aterizeze cel mult
+1,5 m dincolo de marginea șoselei: la 35–40 m/s nu are voie să fie ejectată peste gard
+sau în râu. Fără oprire, fără distrugere, fără repunere.
+
+**Model** (`tools/blender/build_kyoto_shishimai.py` →
+`assets/models/kyoto/props/shishimai.glb`): 10.480 de triunghiuri, 9 noduri (`Head`,
+`Jaw`, `Body_1..3`, `Leg_FL/FR/BL/BR`), doar sloturi de paletă existente (`KERB_RED`
+capul, `SAND_LIGHT` ochii/nasul/cornul, `LOG_DARK` sprâncenele/nările/barba,
+`FOAM_WHITE` dinții/coama/spiralele/pantalonii, `TROPICAL_GREEN` pânza,
+`FLAMINGO_PINK` limba), fără scală neaplicată pe rădăcină, fără sloturi `CAR_*`, zero
+materiale proprii (`Palette.apply_world_material`). `verify_glb` e OK (cu
+`--allow-slots=31` pentru limbă, adăugat în `verify_kyoto.sh`). Lungime 7,4 m, lățime
+2,6 m (3,7 cu coama), înălțime 4,8 m la scara 1; **în scenă `model_scale` = 1,2** (8,9 ×
+3,1 × 5,8 m): pe camera de joc, la 25 m de mașină, capul de 2,6 m la scara 1 are ~55
+px din 1280, adică ~1/4 din lățimea șoselei. Dacă la volan e prea mare sau prea mic,
+se schimbă *un* număr (zona, AI-ul și sonda urmează).
+
+**Sunet** (procedural, la sfârșitul `tools/generate_sfx.gd`; `AudioStreamPlayer3D` pe
+busul `SFX`, deci volumul din setări se aplică): `shishimai_music` — o **buclă de exact
+un ciclu (9,0 s)**: taiko pe 80 BPM, flaut *fue* pe o pentatonică, o rulada de tobă și
+un tril tot mai strâns în telegraf (5,45–6,7 s), **tăcere de un timp și DON-ul mare
+exact la 6,8 s** (atacul). Hazardul o pornește la poziția ciclului
+(`play(cycle_time)`). `shishimai_clack` — clămpănitul falcii de lemn (două lovituri,
+45 ms), cântat pe *marginea* ritmului (nu în `_apply_state`), la dans și, mai jos de
+ton, la atac. **Nu s-a ascultat în joc**: sincronul buclă-atac poate deriva după zeci
+de secunde (sunetul rulează pe ceasul audio, hazardul pe cel de fizică), iar volumul
+rămâne de ales la volan.
+
+**AI onest** (`ai_controller.gd::_shishimai_line`, `reads_shishimai`). Citește ce vede
+și un om: ritmul dansului și, **abia după ce telegraful a început**, direcția
+atacului (`center_seen_at`: un atac neanunțat nu intră în predicție). Nu folosește
+viteza curentă ca pe un moment: calculează fereastra de sosire **[rapid, lent]**
+(`SHISHI_FAST`, `SHISHI_SLOW`; memoria
+`eta-cu-viteza-curenta-minte-pe-banda-cu-viraje`), ia intervalul lateral ocupat de leu
+pe toată fereastra și își alege banda liberă cea mai apropiată de linia lui, cu 0,9 m
+liberi și histerezis. **Nu frânează** (sonda cere cel puțin 80% din croazieră în
+ultimii 60 m).
+
+#### Cifre măsurate
+
+`ProbeKyotoShishimai` (`tools/probe_kyoto_shishimai.gd`, rulează ca scenă): drum de
+test cu semilățimea 7,0 m ca pe dreaptă; **fiecare verdict a fost văzut picând sub
+sabotaj**.
+
+| contract | măsurat | sabotaj (trebuie să pice) |
+|---|---|---|
+| **(a) culoar liber**, fizică pe zona de lovire (nu din `center_at_clock`), mașină de 1,8 × 3,7 m, la fiecare 0,1 s pe tot tiparul de 36 s, 360 de cadre | **minim 5,20 m** (ceas 4,0 s, faza dans), p5 5,60, mediană 7,00, maxim 9,60 | dans 6 m + atac 6 m + gabarit ±3,5 m: minim 3,40 m → PICAT |
+| **(b) telegraf**, pe nodurile vizute (cap, ghemuire, centrul nodului) | ghemuit + cap înapoi (< −0,2 rad și ≥ 6 cm) de la s = 5,62; leul se mișcă > 8 m/s abia de la 6,82 → **avertisment 1,20 s**, în toate cele 4 cicluri; capul întors +0,54 / −0,70 rad spre partea atacului; atac +3,72 / −4,68 m; viteza maximă înaintea avertismentului 5,1 m/s | telegraf 0,1 s: avertisment 0,07 s și cap sub 0,4 rad → PICAT (2 verdicte) |
+| **(c) aruncarea**, 6 mașini × 25 / 38 m/s, leul trece prin axă în clipa trecerii | lovită **exact o dată** în 12/12; 0 repuneri, 0 opriri; lateral \|x\|max **0,79 m (Autobuzul) – 4,89 m (Politia)** (marginea e la 7,0); urcare 0,36 – 1,02 m; v_min după lovitură 13,6 (Politia, masa 90) – 22,9 m/s (Autobuzul, 260); pierdere de timp medie 0,37 s (0,00–1,03) | masă deconectată: urcare ±0,00, v_min 13,7 vs 14,0 → PICAT (3 verdicte) |
+| **(d) poziția corpului față de axă**, vârfurile mesh-urilor (nu AABB), 144 de cadre | centrul nodului \|x\| ≤ **4,47 m** (plafon 4,8); tot corpul vizibil în x ∈ [−6,84; +4,73] (coama poate atârna 0,6 m peste margine); iese din zona de lovire doar cu coama (0,67 m) | — |
+| **(e) AI**, 5 seed-uri × 180 s × 6 mașini | **citește: 5 contacte pe 168 treceri (3%)**, 0 opriri, viteza cea mai joasă la leu 86% din croazieră; **orb (`reads_shishimai = false`): 123 pe 169 (73%)** — garda e armată | orbul e însuși martorul |
+
+**`ProbeRace` pe Kyoto** (`--mode=race --track=11 --ai=7 --seconds=260`), **32 de
+seed-uri** (două serii de 16), A/B pe aceeași ramură: cu leul vs `--no-shishimai`
+(restul codului e cel din main). S-au citit și coloanele din
+`zero-repuneri-ascunde-blocajul`.
+
+| | fără leu | cu leul |
+|---|---|---|
+| tur mediu (media seed-urilor, abaterea) | **75,45 s** (0,51) | **75,86 s** (0,59), **+0,41 s** pe tur |
+| repuneri (32 × 8 mașini) | 10 | 10 |
+| `[blocaj]` | 5 | 5 |
+| ejectări | 6 | 7 |
+| `lent` / `invers` / carusel / deviat | 1058 s / 151 s / 0 / 0 | 1066 s / 164 s / 0 / 0 |
+| unde cad repunerile și blocajele | 0,27–0,32 (aterizarea de la C2) și 0,45–0,55 (gura tunelului de torii) | exact aceleași două zone; **niciuna la ≥ 0,9** |
+| felia 0,90–0,95 (viteza medie) | 30,78 m/s | **29,67 m/s** (−1,1 m/s, ≈ +0,13 s pe tur) |
+| contacte AI–leu | 0 | **27 aruncări pe 750 treceri (3,6%)**, 0–3 pe cursă |
+
+Citire. (1) **Nimic nou în zona H**: toate repunerile și blocajele sunt la C2 și la gura
+tunelului, ca pe baza fără leu (prima serie: 2 vs 5 blocaje la gura tunelului, a doua:
+3 vs 0; împreună 5 vs 5, adică zgomotul Jolt, `proberace-nedeterminism`). (2) Contactele
+AI–leu **există, dar nu sunt regulă**: 27 pe 750 (un AI e lovit în medie o dată la ~28
+treceri), câte 0–3 pe cursă. AI-ul cititor se ferește de dans și de atacul anunțat; îl
+prind atacurile la care telegraful n-a apucat să-l facă să schimbe banda. (3) Costul pe
+tur e ~0,4 s (0,5%), din care ~0,13 s în felia leului (benzi schimbate, nu frână) și
+restul zgomot / aruncări. (4) Felia 0,95–1,00 (21 m/s, 26% „lent") e la fel cu și fără
+leu: e plecarea de pe grilă din numărătoarea inversă.
+
+**Ce n-am putut verifica.** (1) Nicio captură Godot (GPU-ul era al altor agenți):
+poza cap-înapoi / atac e verificată doar în Blender, iar `model_scale` 1,2 e o estimare
+din unghiul camerei, nu din captură. (2) Sunetul nu s-a ascultat; sincronul buclă-atac
+pe durate lungi, volumul și raza (130 m) rămân de verificat. (3) Cum se simte aruncarea
+la volan, mai ales la 38 m/s din turbo. (4) Cântăreții / toboșarii statici de pe margine
+(opțional în cerere) nu s-au făcut. (5) Aterizarea unei mașini aruncate pe marginea
+reală a dreptei (iarbă, gard) s-a văzut doar indirect, prin lipsa repunerilor la ≥ 0,9
+în 750 de treceri.
 
 ### 3.1 Decizii pentru dezvoltator
 

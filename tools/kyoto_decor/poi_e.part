@@ -1,0 +1,123 @@
+;;EXT
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/chozuya.glb" id="poie_chozuya"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/ema_rack.glb" id="poie_ema_rack"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/inari_romon.glb" id="poie_inari_romon"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/kitsune_statue_a.glb" id="poie_kitsune_statue_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/kitsune_statue_b.glb" id="poie_kitsune_statue_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_a.glb" id="poie_momiji_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_b.glb" id="poie_momiji_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/plants/momiji_c.glb" id="poie_momiji_c"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/small_shrine.glb" id="poie_small_shrine"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_a.glb" id="poie_stone_lantern_a"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/stone_lantern_b.glb" id="poie_stone_lantern_b"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/votive_torii_cluster.glb" id="poie_votive_torii_cluster"]
+;;NODES
+[node name="ZoneE_Inari" type="Node3D" parent="DecorManual"]
+
+[node name="PoartaRomon1" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_inari_romon")]
+transform = Transform3D(0.723165, 0.000000, -0.690675, 0.000000, 1.000000, 0.000000, 0.690675, 0.000000, 0.723165, 390.796112, 22.376041, 346.429565)
+
+[node name="eVulpeRomon2" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_kitsune_statue_a")]
+transform = Transform3D(1.101117, 0.000000, -0.331725, 0.000000, 1.150000, 0.000000, 0.331725, 0.000000, 1.101117, 406.215332, 22.181297, 344.211121)
+
+[node name="eVulpeRomon3" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_kitsune_statue_b")]
+transform = Transform3D(0.637013, 0.000000, -0.957452, 0.000000, 1.150000, 0.000000, 0.957452, 0.000000, 0.637013, 389.750000, 22.067955, 331.998718)
+
+[node name="eFelinarRomon4" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_a")]
+transform = Transform3D(0.496534, 0.000000, 0.868017, 0.000000, 1.000000, 0.000000, -0.868017, 0.000000, 0.496534, 410.173798, 21.479115, 338.187775)
+
+[node name="eFelinarRomon5" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_a")]
+transform = Transform3D(0.758950, 0.000000, 0.651149, 0.000000, 1.000000, 0.000000, -0.651149, 0.000000, 0.758950, 390.558350, 22.379398, 360.716766)
+
+[node name="eFelinarRomon6" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_a")]
+transform = Transform3D(0.496534, 0.000000, 0.868017, 0.000000, 1.000000, 0.000000, -0.868017, 0.000000, 0.496534, 392.466217, 21.435825, 328.058502)
+
+[node name="eFelinarRomon7" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_a")]
+transform = Transform3D(0.758950, 0.000000, 0.651149, 0.000000, 1.000000, 0.000000, -0.651149, 0.000000, 0.758950, 377.274902, 22.333057, 345.234161)
+
+[node name="eChozuya8" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_chozuya")]
+transform = Transform3D(-0.803579, 0.000000, -0.595197, 0.000000, 1.000000, 0.000000, 0.595197, 0.000000, -0.803579, 371.465363, 21.336308, 347.064575)
+
+[node name="eVulpeTunel9" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_kitsune_statue_a")]
+transform = Transform3D(1.236792, 0.000000, -0.181233, 0.000000, 1.250000, 0.000000, 0.181233, 0.000000, 1.236792, 397.376038, 11.557839, 264.304321)
+metadata/coliziune = "none"
+
+[node name="eVulpeTunel10" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_kitsune_statue_b")]
+transform = Transform3D(1.236792, 0.000000, -0.181233, 0.000000, 1.250000, 0.000000, 0.181233, 0.000000, 1.236792, 389.185303, 11.451898, 256.665466)
+metadata/coliziune = "none"
+
+[node name="eToriiVotive11" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_votive_torii_cluster")]
+transform = Transform3D(0.577505, 0.000000, -0.816387, 0.000000, 1.000000, 0.000000, 0.816387, 0.000000, 0.577505, 425.228821, 16.005968, 291.594452)
+
+[node name="eToriiVotive12" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_votive_torii_cluster")]
+transform = Transform3D(-0.669481, 0.000000, -0.742829, 0.000000, 1.000000, 0.000000, 0.742829, 0.000000, -0.669481, 396.889862, 18.762178, 312.642487)
+
+[node name="eToriiVotive13" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_votive_torii_cluster")]
+transform = Transform3D(0.247959, 0.000000, -0.968770, 0.000000, 1.000000, 0.000000, 0.968770, 0.000000, 0.247959, 416.528137, 20.224962, 331.842957)
+
+[node name="eToriiVotive14" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_votive_torii_cluster")]
+transform = Transform3D(-0.996801, 0.000000, -0.079921, 0.000000, 1.000000, 0.000000, 0.079921, 0.000000, -0.996801, 366.507843, 20.044634, 350.515839)
+
+[node name="eToriiVotive15" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_votive_torii_cluster")]
+transform = Transform3D(-0.501913, 0.000000, -0.864918, 0.000000, 1.000000, 0.000000, 0.864918, 0.000000, -0.501913, 369.520325, 19.376299, 377.052399)
+
+[node name="eToriiVotive16" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_votive_torii_cluster")]
+transform = Transform3D(-0.718580, 0.000000, -0.695444, 0.000000, 1.000000, 0.000000, 0.695444, 0.000000, -0.718580, 350.240051, 17.335375, 382.498810)
+
+[node name="eToriiVotive17" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_votive_torii_cluster")]
+transform = Transform3D(-0.888733, 0.000000, -0.458425, 0.000000, 1.000000, 0.000000, 0.458425, 0.000000, -0.888733, 326.359528, 14.898607, 384.075378)
+
+[node name="eAltar18" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_small_shrine")]
+transform = Transform3D(-0.280112, 0.000000, -0.959967, 0.000000, 1.000000, 0.000000, 0.959967, 0.000000, -0.280112, 397.830811, 18.814054, 310.038361)
+
+[node name="eFelinarAltar19" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_b")]
+transform = Transform3D(-0.280112, 0.000000, -0.959967, 0.000000, 1.000000, 0.000000, 0.959967, 0.000000, -0.280112, 400.287048, 18.668308, 308.046661)
+
+[node name="eFelinarAltar20" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_b")]
+transform = Transform3D(-0.280112, 0.000000, -0.959967, 0.000000, 1.000000, 0.000000, 0.959967, 0.000000, -0.280112, 398.830444, 19.317463, 313.038483)
+
+[node name="eEma21" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_ema_rack")]
+transform = Transform3D(-0.280112, 0.000000, -0.959967, 0.000000, 1.000000, 0.000000, 0.959967, 0.000000, -0.280112, 396.838165, 19.550556, 315.582245)
+
+[node name="eArtar22" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_momiji_a")]
+transform = Transform3D(-0.676935, 0.000000, -0.441533, 0.000000, 0.808203, 0.000000, 0.441533, 0.000000, -0.676935, 393.237213, 19.135105, 309.715973)
+
+[node name="eAltar23" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_small_shrine")]
+transform = Transform3D(0.771885, 0.000000, 0.635763, 0.000000, 1.000000, 0.000000, -0.635763, 0.000000, 0.771885, 388.920166, 21.860212, 364.531982)
+
+[node name="eFelinarAltar24" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_b")]
+transform = Transform3D(0.771885, 0.000000, 0.635763, 0.000000, 1.000000, 0.000000, -0.635763, 0.000000, 0.771885, 389.782684, 22.293888, 361.489594)
+
+[node name="eFelinarAltar25" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_b")]
+transform = Transform3D(0.771885, 0.000000, 0.635763, 0.000000, 1.000000, 0.000000, -0.635763, 0.000000, 0.771885, 385.768890, 21.808033, 364.795563)
+
+[node name="eArtar26" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_momiji_b")]
+transform = Transform3D(0.810567, 0.000000, 0.270686, 0.000000, 0.854570, 0.000000, -0.270686, 0.000000, 0.810567, 392.404236, 21.867756, 367.492218)
+
+[node name="eAltar27" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_small_shrine")]
+transform = Transform3D(-0.953681, 0.000000, -0.300821, 0.000000, 1.000000, 0.000000, 0.300821, 0.000000, -0.953681, 352.886444, 18.603834, 356.485382)
+
+[node name="eFelinarAltar28" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_b")]
+transform = Transform3D(-0.953681, 0.000000, -0.300821, 0.000000, 1.000000, 0.000000, 0.300821, 0.000000, -0.953681, 355.907501, 19.105854, 357.419861)
+
+[node name="eFelinarAltar29" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_b")]
+transform = Transform3D(-0.953681, 0.000000, -0.300821, 0.000000, 1.000000, 0.000000, 0.300821, 0.000000, -0.953681, 350.948334, 18.448643, 358.984131)
+
+[node name="eEma30" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_ema_rack")]
+transform = Transform3D(-0.953681, 0.000000, -0.300821, 0.000000, 1.000000, 0.000000, 0.300821, 0.000000, -0.953681, 347.726318, 17.895176, 358.742188)
+
+[node name="eArtar31" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_momiji_c")]
+transform = Transform3D(0.846784, 0.000000, -0.179394, 0.000000, 0.865578, 0.000000, 0.179394, 0.000000, 0.846784, 350.511108, 18.668858, 352.516083)
+
+[node name="eAltar32" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_small_shrine")]
+transform = Transform3D(0.953681, 0.000000, 0.300821, 0.000000, 1.000000, 0.000000, -0.300821, 0.000000, 0.953681, 361.168488, 18.777815, 379.065094)
+
+[node name="eFelinarAltar33" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_b")]
+transform = Transform3D(0.953681, 0.000000, 0.300821, 0.000000, 1.000000, 0.000000, -0.300821, 0.000000, 0.953681, 363.106598, 19.181965, 376.566345)
+
+[node name="eFelinarAltar34" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_stone_lantern_b")]
+transform = Transform3D(0.953681, 0.000000, 0.300821, 0.000000, 1.000000, 0.000000, -0.300821, 0.000000, 0.953681, 358.147430, 18.650517, 378.130615)
+
+[node name="eArtar35" parent="DecorManual/ZoneE_Inari" instance=ExtResource("poie_momiji_a")]
+transform = Transform3D(-0.128377, 0.000000, 0.924968, 0.000000, 0.933835, 0.000000, -0.924968, 0.000000, -0.128377, 363.838898, 19.117481, 382.941315)
+

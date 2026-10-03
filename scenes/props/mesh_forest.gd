@@ -211,9 +211,15 @@ func _add_segment(a: Vector2, b: Vector2, hw_a: float, hw_b: float) -> void:
 	for cx in range(lo.x, hi.x + 1):
 		for cy in range(lo.y, hi.y + 1):
 			var key := Vector2i(cx, cy)
-			if not _seg_grid.has(key):
-				_seg_grid[key] = PackedInt32Array()
-			(_seg_grid[key] as PackedInt32Array).append(id)
+			# Citire-modificare-SCRIERE: un Packed*Array e tip-valoare, deci
+			# `(_seg_grid[key] as PackedInt32Array).append(id)` adauga intr-o
+			# COPIE si grila ramane goala — `_edge_dist` intorcea INF peste tot,
+			# `edge_clear_m` nu se aplica nicaieri si tulpinile de bambus de pe G
+			# ieseau pe carosabil (48 masurate, pana la 0,39 m inauntru). Memoria
+			# append-pe-copie-in-array-netipizat.
+			var ids: PackedInt32Array = _seg_grid.get(key, PackedInt32Array())
+			ids.append(id)
+			_seg_grid[key] = ids
 
 
 ## Distanta de la `p` la cea mai apropiata MARGINE de sosea (negativa = pe ea),

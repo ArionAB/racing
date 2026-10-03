@@ -1731,6 +1731,7 @@ func _update_effects(delta: float) -> void:
 		_fire_particles.emitting = burn_time > 0.0
 	_update_dust(on_road, loose, on_branch)
 	_drop_trail(delta, loose)
+	_drop_leaf_wear(delta, on_road)
 	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
 	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
 	_engine_audio.pitch_scale = lerpf(0.7, 1.9, speed_frac) \
@@ -1955,6 +1956,35 @@ func _drop_trail(delta: float, loose: bool) -> void:
 		# din spatele masinii; masca e istoria batatorita a intregii curse.
 		if route == 0:
 			track.stamp_wear(road_index, wheel)
+
+## Uzura pentru consumatorii externi ai pistei (covorul de frunze de la Kyoto):
+## rotile din spate stampileaza in `Track.wear_sinks`, la cadenta TRAIL_SPACING,
+## DOAR pe bucla principala si DOAR la sol — si independent de `loose`, fiindca
+## covorul sta pe asfalt, unde `_drop_trail` nu ruleaza. Pe pistele fara
+## consumatori iese din prima: zero cost.
+var _leaf_accum: float = 0.0
+
+func _drop_leaf_wear(delta: float, on_road: bool) -> void:
+	if track == null or route != 0 or not on_road or not track.has_wear_sinks():
+		return
+	var speed := horizontal_speed()
+	if speed < TRAIL_MIN_SPEED:
+		return
+	_leaf_accum += speed * delta
+	if _leaf_accum < TRAIL_SPACING:
+		return
+	_leaf_accum = 0.0
+	var fwd := -global_transform.basis.z
+	fwd.y = 0.0
+	if fwd.length_squared() < 0.001:
+		return
+	fwd = fwd.normalized()
+	var right := fwd.cross(Vector3.UP).normalized()
+	var half_track_w := data.body_width * 0.38 if data != null else 0.85
+	var rear_z := data.body_length * 0.34 if data != null else 1.3
+	var base := global_position - fwd * rear_z
+	for side: float in [-1.0, 1.0]:
+		track.stamp_wear_sinks(road_index, base + right * half_track_w * side)
 
 ## Textura de fum, incarcata o singura data pentru toate masinile.
 ##

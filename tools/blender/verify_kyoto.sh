@@ -74,6 +74,16 @@ check "structures/kiyomizu_hondo.glb"  5600 --origin=assembly
 echo "== fundalul (kit §1.11, grupa kit-h) =="
 check "rocks/kyoto_horizon.glb"         7500 --origin=assembly
 
+echo "== vehicule, oameni, animale (kit §1.9-1.10, grupa kit-i) =="
+check "vehicles/sagano_train.glb"     4200 --origin=assembly --allow-car-slots=Train_Body
+check "vehicles/jinrikisha.glb"       1800 --origin=assembly --allow-car-slots=Rick_Red
+check "vehicles/yakatabune.glb"       3600 --origin=assembly
+check "props/monk_sweeper.glb"        1000 --origin=assembly
+check "animals/sika_deer.glb"         1500 --origin=assembly
+check "animals/crow.glb"               700 --origin=center
+python tools/blender/check_glb_anims.py "$ROOT/animals/sika_deer.glb" Stand Graze Bow || fail=1
+python tools/blender/check_glb_anims.py "$ROOT/animals/crow.glb" Fly || fail=1
+
 echo
 echo "== gradina si bambus (kit §1.8, grupa kit-g) =="
 check "props/shiba_fence.glb"            400 --origin=assembly

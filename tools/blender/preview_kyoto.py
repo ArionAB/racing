@@ -169,6 +169,18 @@ SPECS = {
                        "camera": {"azimuth": 60.0, "elevation": 14.0, "lens": 70.0, "margin": 1.08}},
 }
 
+# --- grupa kit-i (build_kyoto_people.py / build_kyoto_animals.py) ---
+SPECS.update({
+    "sagano_train": {"category": "vehicles",
+                     "camera": {"azimuth": 160.0, "elevation": 10.0, "lens": 70.0, "margin": 1.06}},
+    "jinrikisha": {"category": "vehicles",
+                   "camera": {"azimuth": 150.0, "elevation": 10.0, "lens": 70.0, "margin": 1.1}},
+    "yakatabune": {"category": "vehicles",
+                   "camera": {"azimuth": 20.0, "elevation": 14.0, "lens": 70.0, "margin": 1.08}},
+    "monk_sweeper": {"category": "props",
+                     "camera": {"azimuth": 150.0, "elevation": 8.0, "lens": 70.0, "margin": 1.1}},
+})
+
 
 def _srgb_to_linear(c):
     return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4

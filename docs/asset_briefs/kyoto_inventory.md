@@ -124,5 +124,10 @@ transformarile nodurilor aplicate), nu AABB.
 - **Triunghiuri:** 816 (un nod `Scaffold_Wood`: `WOOD` stalpi/punte/balustrada, `LOG_DARK` grinzi, `CONCRETE` talpi). **Cote:** 6,00 x 6,00 x 15,92 m, origine la baza, centrat. Capetele la x = ±3 sunt plane (stalpii de capat lipiti de plan, grinzile 5 cm mai scurte, ascunse in stalp); 3 module alaturate la pas 6 m se imbina: `img/kyoto_fidelity/kakezukuri_scaffold_chain.png` (balustrada continua, punte continua; la cusatura stalpii se dubleaza — 2 x 0,62 m).
 - Fidelitate: 3 randuri x 4 coloane de stalpi, 4 niveluri de grinzi pe ambele directii, punte cu balustrada pe laturile lungi: OK. **Abateri:** stalpii sunt patrati si drepti (planșa: rotunji, cu capete de consola curbate si grinzi care ies in afara stalpilor); grinzile stau inapoiate intre stalpi (citite doar ca bare intunecate), nu ies; fara bratari/diagonale; planșa are modulul lung si adanc ~2:1, aici 1:1 (cerinta de repetare).
 
+## `structures/kiyomizu_hondo.glb` (runda 3)
+- **Triunghiuri:** 5 398 (`Hondo_Wood` 3 408, `Hondo_Roof` 1 966, `Hondo_Plaster` 24). **Cote:** 31,1 lat x 21,7 adanc x 14,3 inalt (veranda la 3,0 m pe 45 piloni). Fata bogata pe +Y: veranda cu balustrada, scara de lemn lata (6,6 m, 12 trepte) in stanga, 3 travee deschise la mijloc, portic mic cu acoperis propriu in dreapta, anexa joasa in stanga; spatele: veranda + peretii simpli.
+- Fidelitate: acoperis mare 4 ape inchis la culoare dominand silueta, veranda pe piloni, scara, pereti albi cu stalpi, portic: OK ca ansamblu. **Abateri:** lipsesc frontoanele (karahafu/irimoya cu fronton lemnos in V) si acoperisul transversal din dreapta fata, deci silueta e mai simpla (un singur acoperis mare + 2 mici); acoperisul principal e mai turtit decat pe planșă; scara e mai ingusta si mai abrupta decat treptele late cu palier; pereti albi prea putin vizibili de sub streasina (plasterul apare gri-albastrui); balustrada verandei mai subtire.
+- Comparatie: `img/kyoto_fidelity/kiyomizu_hondo.png` (+ `_views`).
+
 ## Stare la oprire (halls)
-- Facut: niomon_gate, inari_romon, kakezukuri_scaffold. Urmeaza: kiyomizu_hondo.
+- Facut: niomon_gate, inari_romon, kakezukuri_scaffold, kiyomizu_hondo (toate verify OK, 3 runde fiecare). Grupa completa; verdictul de fidelitate e al coordonatorului.

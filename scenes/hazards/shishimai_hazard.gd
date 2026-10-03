@@ -67,7 +67,7 @@ signal car_thrown(car: Car)
 ## Durata unui ciclu dans + atac (s). Impartit la `dance_period` da un numar intreg.
 @export_range(4.0, 20.0, 0.5) var cycle_seconds: float = 9.0
 ## Telegraful: se ghemuieste si da capul inapoi inainte de atac.
-@export_range(0.4, 3.0, 0.1) var telegraph_seconds: float = 1.4
+@export_range(0.4, 3.0, 0.1) var telegraph_seconds: float = 1.6
 ## Momentul atacului in ciclu (s).
 @export_range(2.0, 20.0, 0.05) var lunge_at: float = 6.8
 @export_range(0.1, 1.0, 0.01) var lunge_seconds: float = 0.4
@@ -112,8 +112,8 @@ signal car_thrown(car: Car)
 ## Semilatimea gabaritului care loveste (m, la scara 1): capul si panza.
 @export_range(0.8, 2.5, 0.05) var hit_half_width: float = 1.4
 ## Gabaritul pe sensul de mers: cat in fata de origine (nasul) si in spate (coada).
-@export_range(1.0, 6.0, 0.1) var hit_front: float = 3.5
-@export_range(1.0, 6.0, 0.1) var hit_back: float = 3.7
+@export_range(1.0, 6.0, 0.1) var hit_front: float = 3.9
+@export_range(1.0, 6.0, 0.1) var hit_back: float = 3.9
 ## Masa de referinta (Buggy = 100): raportul ei la masa masinii scaleaza efectul.
 @export var reference_mass: float = 100.0
 ## Impinsul lateral pentru masa de referinta (m/s).
@@ -518,6 +518,14 @@ func _clack_index(g: float) -> int:
 	return int(floorf(g * clack_hz - 0.6))
 
 
+## Rampa vizuala a telegrafului: ease-out, ca ghemuirea si capul sa se VADA din prima
+## jumatate de secunda (o rampa smoothstep e aproape plata primele 0,4 s si ar manca din
+## avertisment exact cand conteaza).
+func _tele_ease(u: float) -> float:
+	var v := clampf(u, 0.0, 1.0)
+	return 1.0 - (1.0 - v) * (1.0 - v)
+
+
 ## Starea vizuala si fizica ca functie PURA de `_clock`.
 func _apply_state() -> void:
 	if _rig == null:
@@ -539,7 +547,7 @@ func _apply_state() -> void:
 	var hop := 0.0
 	var le := lunge_at + lunge_seconds
 	if s >= ts and s < lunge_at:
-		crouch = smoothstep(0.0, 1.0, (s - ts) / telegraph_seconds)
+		crouch = _tele_ease((s - ts) / telegraph_seconds)
 	elif s >= lunge_at and s < le:
 		var v := (s - lunge_at) / lunge_seconds
 		crouch = 1.0 - smoothstep(0.0, 0.35, v)
@@ -550,7 +558,7 @@ func _apply_state() -> void:
 	var look := 0.0
 	var pitch := 0.10 * sin(2.0 * w * g)
 	if s >= ts and s < lunge_at:
-		var u := smoothstep(0.0, 1.0, (s - ts) / telegraph_seconds)
+		var u := _tele_ease((s - ts) / telegraph_seconds)
 		look = d * 0.62 * u
 		pitch = lerpf(pitch, -0.42, u) + 0.03 * sin(s * 40.0) * u
 	elif s >= lunge_at and s < le + hold_seconds:
@@ -570,7 +578,7 @@ func _apply_state() -> void:
 	var p := fposmod(g * clack_hz, 1.0)
 	jaw_open = 0.42 * smoothstep(0.0, 0.15, p) * (1.0 - smoothstep(0.58, 0.64, p))
 	if s >= ts and s < lunge_at:
-		var u2 := smoothstep(0.0, 1.0, (s - ts) / telegraph_seconds)
+		var u2 := _tele_ease((s - ts) / telegraph_seconds)
 		jaw_open = lerpf(jaw_open, 0.62 + 0.05 * sin(s * 36.0), u2)
 	elif s >= lunge_at and s < le:
 		jaw_open = lerpf(0.62, 0.0, smoothstep(0.55, 1.0, (s - lunge_at) / lunge_seconds))

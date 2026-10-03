@@ -70,7 +70,10 @@ def _key(arm, frame, pose):
         if not isinstance(ops, list):
             ops = [ops]
         for op in ops:
-            if isinstance(op, tuple):
+            if isinstance(op, tuple) and op[0] == "scale":
+                pb.scale = (op[1],) * 3
+                pb.keyframe_insert("scale", frame=frame)
+            elif isinstance(op, tuple):
                 pose_move(pb, op[1])
                 pb.keyframe_insert("location", frame=frame)
             else:
@@ -83,6 +86,7 @@ def _reset(arm):
         pb.rotation_mode = "QUATERNION"
         pb.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
         pb.location = (0.0, 0.0, 0.0)
+        pb.scale = (1.0, 1.0, 1.0)
 
 
 # ===========================================================================
@@ -90,6 +94,7 @@ def _reset(arm):
 # ===========================================================================
 DEER_BODY = SAND_MID
 DEER_SPOT = CORAL_SAND
+SPOT_WHITE = FOAM_WHITE
 DEER_ANTLER = WOOD
 DEER_DARK = VOLCANIC_BLACK
 DEER_HOOF = ROCK_DARK
@@ -151,10 +156,12 @@ def deer_geometry():
         phi = math.radians(8 + 78 * rnd())
         zc = 0.85
         rx_, rz_ = 0.20, 0.26
-        x = side * rx_ * 0.97 * math.cos(phi)
-        z = zc + rz_ * 0.93 * math.sin(phi)
-        s = 0.05 + 0.012 * rnd()
-        b.box((x, y, z), (s, s * 1.15, s), DEER_SPOT)
+        x = side * rx_ * 0.995 * math.cos(phi)
+        z = zc + rz_ * 0.995 * math.sin(phi)
+        s = 0.06 + 0.02 * rnd()
+        nx, nz = side * math.cos(phi) / rx_, math.sin(phi) / rz_
+        th = math.atan2(-nz, nx)
+        b.box((x, y, z), (0.014, s * 1.2, s), SPOT_WHITE, rotation=Matrix.Rotation(th, 3, 'Y'))
     return b
 
 
@@ -179,6 +186,9 @@ def deer_rig(obj, shift):
             dict(name="R%s2" % side, head=P(sx * 0.11, -0.50, 0.42), tail=P(sx * 0.10, -0.45, 0.04),
                  parent="R%s1" % side),
         ]
+    for sx, side in ((-1, "L"), (1, "R")):
+        bones.append(dict(name="Antler" + side, head=P(sx * 0.07, 0.62, 1.42),
+                          tail=P(sx * 0.1, 0.58, 1.70), parent="Head"))
     arm = make_armature("Sika_Deer", bones, mesh=obj)
 
     def zc(co):
@@ -202,6 +212,9 @@ def deer_rig(obj, shift):
                 weight_ramp(obj, island, leg + "2", leg + "1", lambda co: -zc(co),
                             -(knee + 0.07), -(knee - 0.07))
                 name = leg + "1/2"
+        elif c.y > 0.55 and c.z > 1.5:
+            name = "Antler" + ("L" if c.x < 0 else "R")
+            weight_ramp(obj, island, name, "Head", lambda co: 10.0, 0.0, 1.0)
         elif c.y > 0.55:
             name = "Head"
             weight_ramp(obj, island, "Head", "Neck", lambda co: 10.0, 0.0, 1.0)
@@ -216,7 +229,7 @@ def deer_rig(obj, shift):
             weight_ramp(obj, island, "Body", "Body", None, 0.0, 1.0)
         counts[name] = counts.get(name, 0) + 1
     print("  insule pe oase:", counts)
-    for need in ("Body", "Neck", "Head", "Tail", "FL1/2", "FR1/2", "RL1/2", "RR1/2"):
+    for need in ("AntlerL", "AntlerR", "Body", "Neck", "Head", "Tail", "FL1/2", "FR1/2", "RL1/2", "RR1/2"):
         assert need in counts, "regiune goala: %s %r" % (need, counts)
     return arm
 
@@ -239,16 +252,18 @@ def deer_animate(arm):
     for f, br, nk, hd, tl in ((1, 0, 0, 0, 0), (13, 0.006, 1.5, -2.5, 7), (25, 0, 0, 0, 0),
                               (37, 0.006, -1.0, 2.0, -6), (49, 0, 0, 0, 0)):
         _key(arm, f, {"Body": ("move", Vector((0, 0, br))), "Neck": rx(nk), "Head": rx(hd),
-                      "Tail": rz(tl)})
+                      "Tail": rz(tl),
+                      "AntlerL": ("scale", 1.0), "AntlerR": ("scale", 1.0)})
 
     # GRAZE: capul jos la iarba, mestecat usor, urechea/coada; bucla 1,5 s.
     action("Graze")
     legs_f = {"FL1": rx(9), "FR1": rx(9), "FL2": rx(-8), "FR2": rx(-8)}
-    for f, hd, nk, tl in ((1, -48, -112, 4), (10, -54, -112, -4), (19, -46, -114, 4),
-                          (28, -55, -111, -4), (37, -48, -112, 4)):
+    for f, hd, nk, tl in ((1, -14, -96, 4), (10, -19, -96, -4), (19, -12, -98, 4),
+                          (28, -20, -95, -4), (37, -14, -96, 4)):
         pose = {"Body": [("move", Vector((0, 0, 0.02))), rx(-9)], "Neck": rx(nk), "Head": rx(hd),
                 "Tail": rz(tl)}
         pose.update(legs_f)
+        pose.update({"AntlerL": ("scale", 0.001), "AntlerR": ("scale", 0.001)})   # fara coarne (decupare)
         _key(arm, f, pose)
 
     # BOW: se apleca adanc (genunchii fata se indoaie), tine, se ridica; 3 s.
@@ -256,12 +271,16 @@ def deer_animate(arm):
     def bow(depth):
         d = depth
         pose = {"Body": [("move", Vector((0, 0, -0.16 * d))), rx(-14 * d)],
-                "Neck": rx(-58 * d), "Head": rx(-40 * d), "Tail": rz(0),
+                "Neck": rx(-50 * d), "Head": rx(-18 * d), "Tail": rz(0),
                 "FL1": rx(18 * d), "FR1": rx(18 * d), "FL2": rx(-48 * d), "FR2": rx(-48 * d),
                 "RL1": rx(6 * d), "RR1": rx(6 * d), "RL2": rx(-6 * d), "RR2": rx(-6 * d)}
         return pose
-    for f, d in ((1, 0.0), (15, 0.55), (28, 1.0), (46, 1.0), (60, 0.45), (73, 0.0)):
-        _key(arm, f, bow(d))
+    sc = {1: 1.0, 9: 0.001, 64: 0.001, 73: 1.0}      # coarnele dispar la plecare, revin la capat
+    for f, d in ((1, 0.0), (15, 0.55), (28, 1.0), (46, 1.0), (60, 0.45), (73, 0.0)):  # coarne: 0.001 pe tot parcursul, 1 la capete
+        pose = bow(d)
+        sv = 1.0 if f == 1 else (0.001 if f < 73 else 1.0)
+        pose.update({"AntlerL": ("scale", sv), "AntlerR": ("scale", sv)})
+        _key(arm, f, pose)
 
     stash_actions(arm, ("Stand", "Graze", "Bow"))
     _reset(arm)

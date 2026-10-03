@@ -193,47 +193,46 @@ def jinrikisha():
             wheels.beam((x, wy, R), (x, wy + (R - 0.04) * math.cos(a), R + (R - 0.04) * math.sin(a)),
                         0.03, ASPHALT_EDGE)
     wheels.cylinder((0, wy, R), 0.04, 1.1, RICK_BLACK, segments=6, axis="X")   # axa
-    # caseta
-    frame.box((0, 0.55, 0.62), (0.92, 1.1, 0.1), RICK_BLACK)                    # podea
+    # caseta joasa, deschisa: bancheta rosie mare e elementul distinctiv
+    frame.box((0, 0.55, 0.58), (0.92, 1.2, 0.08), RICK_BLACK)                   # podea
     for sx in (-1, 1):
-        frame.box((sx * 0.45, 0.45, 0.88), (0.06, 0.86, 0.4), RICK_BLACK)       # lateral
-    frame.box((0, 1.07, 0.86), (0.96, 0.07, 0.46), RICK_BLACK)                  # parapet fata
-    frame.box((0, 1.12, 0.55), (0.9, 0.3, 0.07), RICK_BLACK)                    # scandura picioare
-    red.box((0, 0.42, 0.78), (0.78, 0.7, 0.14), RICK_CUSHION)                   # perna
-    red.box((0, 0.04, 1.15), (0.78, 0.13, 0.68), RICK_CUSHION)                  # spatar
-    # capota: tub arcuit (sectiune in C) loftat pe Y, mai inalt in spate, coborat in fata
-    stations = ((-0.10, 1.95, 0.55), (0.25, 1.88, 0.55), (0.65, 1.74, 0.54), (1.0, 1.58, 0.50))
+        frame.box((sx * 0.46, 0.5, 0.74), (0.05, 1.0, 0.16), RICK_BLACK)        # bord lateral jos
+        frame.beam((sx * 0.46, 0.0, 0.8), (sx * 0.46, -0.05, 1.5), 0.04, RICK_BLACK)  # montant spate
+    frame.box((0, 1.15, 0.52), (0.9, 0.3, 0.06), RICK_BLACK)                    # scandura picioare
+    red.box((0, 0.45, 0.8), (0.86, 0.85, 0.18), RICK_CUSHION)                   # perna
+    red.box((0, 0.06, 1.12), (0.86, 0.16, 0.7), RICK_CUSHION)                   # spatar
+    # capota pliabila: arc/cupola pe spate si deasupra (y<0.5), fata complet deschisa
+    stations = ((-0.12, 1.95, 0.55), (0.12, 1.93, 0.56), (0.34, 1.86, 0.55), (0.52, 1.76, 0.52))
     prev = None
     for (y, ztop, w) in stations:
-        zb = 1.0
+        zb = 1.2
         outer = []
-        for k in range(7):                       # arc exterior stanga -> dreapta
+        for k in range(7):
             a = math.pi * k / 6.0
             outer.append((-w * math.cos(a), y, zb + (ztop - zb) * math.sin(a)))
-        inner = [(x * 0.9 if abs(x) > 1e-6 else 0.0, yy, zb + (z - zb) * 0.93 - (0.0 if z == zb else 0.04))
-                 for (x, yy, z) in outer]
+        inner = [(x * 0.9, yy, zb + (z - zb) * 0.93 - (0.0 if z == zb else 0.04)) for (x, yy, z) in outer]
         ring = [frame.bm.verts.new(p) for p in outer] + [frame.bm.verts.new(p) for p in reversed(inner)]
         if prev is not None:
             n = len(ring)
             for i in range(n):
                 j = (i + 1) % n
-                f = frame.bm.faces.new((prev[i], prev[j], ring[j], ring[i]))
-                f[frame.slot] = RICK_BLACK
+                frame.bm.faces.new((prev[i], prev[j], ring[j], ring[i]))[frame.slot] = RICK_BLACK
         else:
-            f = frame.bm.faces.new(tuple(ring)); f[frame.slot] = RICK_BLACK
+            frame.bm.faces.new(tuple(ring))[frame.slot] = RICK_BLACK
         prev = ring
-    f = frame.bm.faces.new(tuple(reversed(prev))); f[frame.slot] = RICK_BLACK
-    for sx in (-1, 1):
-        frame.beam((sx * 0.46, 0.98, 0.9), (sx * 0.46, 1.0, 1.55), 0.04, RICK_BLACK)
+    frame.bm.faces.new(tuple(reversed(prev)))[frame.slot] = RICK_BLACK
+    for sx in (-1, 1):                                   # sprijine subtiri ale capotei
+        frame.beam((sx * 0.52, 0.5, 1.2), (sx * 0.5, 0.92, 0.86), 0.03, RICK_BLACK)
     # oistea + manerul
     for sx in (-1, 1):
         frame.beam((sx * 0.38, 0.9, 0.62), (sx * 0.38, 2.3, 0.92), 0.05, RICK_BLACK)
     frame.beam((-0.42, 2.3, 0.92), (0.42, 2.3, 0.92), 0.05, RICK_BLACK)
     frame.box((0, -0.18, 0.55), (0.1, 0.3, 0.06), RICK_BLACK)                   # sprijin
-    # alergatorul (~1,4 m), usor aplecat
-    yr = 1.85
-    for sx, dy in ((-1, 0.14), (1, -0.14)):
-        runner.taper_sweep([(sx * 0.1, yr, 0.74), (sx * 0.1, yr + dy * 0.7, 0.4),
+    # alergatorul (~1,4 m), APLECAT ~28 grade, un picior in fata (pas)
+    yr = 1.62
+    LEAN = -28.0
+    for sx, dy in ((-1, 0.34), (1, -0.26)):
+        runner.taper_sweep([(sx * 0.1, yr, 0.74), (sx * 0.1, yr + dy * 0.6, 0.4),
                             (sx * 0.1, yr + dy, 0.05)], [0.075, 0.06, 0.05],
                            RICK_CLOTH, segments=6)
         runner.box((sx * 0.1, yr + dy + 0.07, 0.03), (0.1, 0.26, 0.06), WOOD)
@@ -243,10 +242,10 @@ def jinrikisha():
     hat = runner.frustum((0, yr, 1.35), 0.31, 0.01, 0.22, RICK_HAT, segments=10)
     pivot = (0, yr, 0.72)
     for fs in (torso, head, hat):
-        _rot(runner, fs, pivot, -10.0, "X")
+        _rot(runner, fs, pivot, LEAN, "X")
     for sx in (-1, 1):
-        sh = _lp((sx * 0.17, yr, 1.1), pivot, -10.0)
-        hand = (sx * 0.38, 2.15, 0.9)
+        sh = _lp((sx * 0.17, yr, 1.1), pivot, LEAN)
+        hand = (sx * 0.38, 2.05, 0.9)
         runner.beam(sh, hand, 0.075, RICK_CLOTH)
         runner.box(hand, (0.08, 0.08, 0.08), RICK_SKIN)
     return [frame.to_object("Rick_Frame"), red.to_object("Rick_Red"),

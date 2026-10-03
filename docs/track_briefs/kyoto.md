@@ -329,7 +329,7 @@ est și spre V pe latura de sud.
 | **D** | 0.30–0.42 | **Valea de arțari și podul Tsūten-kyō.** Cobori spre S printr-o pădure de arțari pe versant, cu **covor de frunze pe drum** (§3), felinare de piatră și un **cerb sika** care se înclină pe margine. Urmează **podul acoperit de lemn** (70 m, la +12), peste o râpă cu fundul la −4, plină de coroane roșii până la nivelul podului. Înăuntru e `CameraZone` (§2.0). La ieșire vine *kogarashi*, dacă se confirmă (§3.1) | coborâre rapidă de 5,3%, cu S-uri largi: **locul unde se simte viteza**. Podul are stâlpi și parapet, deci de pe el nu se cade | 6 m / 4,5 m (pod) |
 | **E** | 0.42–0.56 | **Fushimi Inari.** Poarta **Rōmon** (gol ≥ 11 m), două **vulpi de piatră** cu bavete roșii pe socluri, apoi drumul principal urcă în jurul flancului muntelui Inari (+10 → +24 → +6), printre altare mici, mănunchiuri de torii votive mici și felinare de piatră | urcare de 9%, ac larg pe flanc, coborâre de 11% | 6 m |
 | **E′** | 0.45–0.53 (buclă) | **Scurtătura: tunelul de torii** (*senbon torii*). E o `TrackBranch` dreaptă prin coastă, cu **~125 de porți** la 1,2 m una de alta, un culoar de **6,4 m liber** și **5,2 m sub grinzi**, cu ~25% mai scurtă decât bucla. Stâlpii fac un perete continuu, cu nervuri | **riscul e de precizie, nu de ceas**: atingerea peretelui = frecare mare și ricoșeu, fără oprire. Fără gardian și fără vacă: precizia e poarta. Recompensa se reglează pe sondă la 0,5–1,5 s, ca la ulicioara din Jodhpur. `CameraZone` joasă, plus **garda de fotosensibilitate** (§3) | 3,2 m (`branch_half_width`) |
-| **F** | 0.56–0.68 | **Grădina cu iaz și Pavilionul de Aur.** Cobori la iaz (cota 0). Drumul merge spre V pe malul de sud, pe pietriș compactat cu margini de mușchi, pini *niwaki*, pietre de grădină și tufe *karikomi*, cu **Kinkaku-ji în dreapta, peste apă**. Pe malul iazului, pe exteriorul unei curbe lungi la stânga, stă **daruma-otoshi-ul uriaș** (§3; a înlocuit shishi-odoshi pe 3 oct 2026): un turn de discuri colorate, cu un ciocan care se trage înapoi și lovește discul de jos peste drum | **hazardul-semnătură**: citești ciocanul tras și treci înainte de lovitură sau după disc (nu există bandă liberă: se scapă prin timing) | 5,5 m (la tub) / 6,5 m |
+| **F** | 0.56–0.68 | **Grădina cu iaz și Pavilionul de Aur.** Cobori la iaz (cota 0). Drumul merge spre V pe malul de sud, pe pietriș compactat cu margini de mușchi, pini *niwaki*, pietre de grădină și tufe *karikomi*, cu **Kinkaku-ji în dreapta, peste apă**. Pe malul iazului, pe exteriorul unei curbe lungi la stânga, stă **carul de festival Gion Matsuri** (§3; a înlocuit daruma-otoshi pe 3 oct 2026, care la rândul lui înlocuise shishi-odoshi): un turn de lemn lăcuit pe patru roți, cu un catarg de ~21 m, care **traversează încet drumul** după un telegraf de tobe | **hazardul-semnătură**: citești tobele și carul care se pune în mișcare și treci înainte de el sau după el, ori prin culoarul rămas (se scapă prin timing) | 5,5 m (la tub) / 6,5 m |
 | **G** | 0.68–0.80 | **Pădurea de bambus de la Arashiyama.** Un culoar de tulpini *moso* de 20 m, cu **garduri de nuiele** (*shiba-gaki*) pe ambele părți, două S-uri și lumina în pete pe drum. O ricșă oprită pe margine (decor) | **respiro-ul verde** (regula de dozaj, §0.1). S-urile cu drift încarcă bara pentru H | 5 m |
 | **G2** | 0.80–0.82 | **Sub podul trenulețului.** Un pod de fier peste defileu, la ~9 m deasupra drumului. **Trenulețul de epocă** trece pe deasupra pe un ciclu (teatru), iar umbra lui trece peste drum | fără efect asupra cursei; reperul sonor e fluierul | 6 m |
 | **H** | 0.82–1.00 | **Podul Togetsukyō și dreapta finală.** Drumul iese din defileu pe **podul lung de lemn** (150 m, la +3) peste râul Katsura, cu **dealurile colorate de toamnă** în dreapta-față și **bărci acoperite** (*yakatabune*) pe râu. Apoi continuă drept spre N, pe Yasaka-dōri. **Pagoda apare din pâclă** pe ultima treime | **cea mai lungă dreaptă**: turbo-ul strâns în bambus și în valea de arțari se arde aici | 7 m |
@@ -349,7 +349,8 @@ est și spre V pe latura de sud.
 
 | ceas | perioadă |
 |---|---|
-| daruma-otoshi | **13 s** pe lovitură, 5 lovituri + reconstrucție = **71 s** (shishi-odoshi, ISTORIC: 16,6 s) |
+| car Gion Matsuri | **26 s** (două etape de 13 s: 4 s odihnă + 3,5 s telegraf + 5,5 s traversare) |
+| daruma-otoshi (ISTORIC) | 13 s pe lovitură, 5 lovituri + reconstrucție = 71 s (shishi-odoshi, ISTORIC: 16,6 s) |
 | trenulețul | **~41 s** |
 | clopotul templului (*bonshō*, teatru sonor) | **~53 s** |
 | *kogarashi* (dacă se confirmă) | **~29 s** |
@@ -370,9 +371,140 @@ Acoperirea celor cinci clase din `ref_notes/sisteme.md` §3:
 | frecare | covorul de frunze (vizual; grip opțional, §3.1), pietrișul de pe malul iazului (0,92×), petecul ud lăsat de shishi-odoshi (`WaterHazard`), caldarâmul (0,95×) |
 | **oprire** | **niciuna** (lecția semaforului Fiordland) |
 | sabotaj de control | ***kogarashi***, dacă se confirmă (§3.1); altfel niciunul |
-| **aruncare** | **daruma-otoshi** (discul lovit; înainte, lovitura tubului), **săritura de pe scenă**, ricoșeul din pereții tunelului de torii |
+| **aruncare** | **carul Gion Matsuri** (zona din fața lui; înainte, discul daruma, iar înainte lovitura tubului), **săritura de pe scenă**, ricoșeul din pereții tunelului de torii |
 
-### Daruma-otoshi (F) — înlocuiește shishi-odoshi (decizia dezvoltatorului, 3 oct 2026: tubul nu se citea, „arată ca o pompă”)
+### Car Gion Matsuri (F) — înlocuiește daruma-otoshi (decizia dezvoltatorului, 3 oct 2026: o jucărie nu se potrivește jocului)
+
+Dezvoltatorul a respins și daruma-otoshi: un hazard-jucărie nu se potrivește
+jocului. L-a ales în loc pe **carul de festival Gion Matsuri** (*yamaboko*, tipul
+*naginata-boko*) și a spus explicit că nu contează că în realitate carul nu
+stă într-o grădină: îl vrea acolo, ca hazard. Nodul `DarumaOtoshi` a dispărut din
+`Track18.tscn` (acum e `GionMatsuri`); clasa `DarumaOtoshiHazard`, modelul și
+sunetele ei rămân în repo, neatinse (la fel ca `ShishiOdoshiHazard`), iar
+secțiunea următoare e **ISTORIC**.
+
+**Ipoteza de lizibilitate:** o siluetă verticală unică (catarg de 21 m cu lance
+aurie, două acoperișuri negre cu creastă aurie) se citește de la sute de metri;
+**tobele și clopoțeii** („kon-chiki-chin") care pornesc cu 3,5 s înainte spun
+„urmează să se miște", iar trăgătorii care se opintesc și turnul care se leagănă
+arată că urmează un efort. Spre deosebire de disc (o secundă), carul e **un zid
+greu care traversează încet** (~3,8 m/s în medie, 5,5 m/s la vârf): nu te ia pe
+nepregătite, te obligă să alegi. E o ipoteză; verdictul rămâne al dezvoltatorului,
+la volan.
+
+**Ce e** (cotele sunt `@export`-uri în `scenes/hazards/gion_matsuri_hazard.gd`):
+- **Carul:** caroserie de 6 × 3,8 m (5,3 m cu roțile), patru roți de lemn Ø 2 m cu
+  spițe, lăcuit negru cu tapiserii roșii / aurii / bleumarin pe laterale,
+  platformă cu balustradă aurie, doi muzicanți și două tobe taiko, sanctuar,
+  **două acoperișuri în două ape** cu streașină ridicată și creastă aurie,
+  felinare albe cu capace roșii, **catarg (*shingi*) cu inele aurii și roșii**,
+  traversă cu ciucuri și **lance aurie** în vârf. **21,2 m în total.** Patru
+  trăgători (siluete low-poly) pe flancuri, câte unul pe fiecare colț.
+- **Mișcarea:** stă în odihnă pe o margine (capătul carului la 1,6 m de asfalt),
+  apoi traversează drumul (smoothstep: pornește și se oprește blând) până pe
+  cealaltă margine, unde rămâne; la etapa următoare se întoarce. Două traversări
+  pe ciclu, **fără teleportare** (poziția e o funcție continuă de ceas). Cota
+  urmărește terenul (profil prin raycast: pe partea iazului malul coboară la
+  −1,1 m, iar carul coboară odată cu el).
+- **Telegraful (3,5 s):** buclă de tobe taiko + kane (`gion_bayashi`, pozițională,
+  se aude de la 150 m), trăgătorii se opintesc spre spate, turnul se leagănă tot mai
+  tare (~0,8°, adică ~0,3 m în vârful catargului), muzicanții saltă. În mișcare,
+  scârțâitul roților de lemn (`gion_wheels`), cu volumul legat de viteză. Ambele
+  sunete sunt generate procedural în `tools/generate_sfx.gd` (la sfârșit, `rng` e
+  unic).
+
+**Ciclul** (26 s; nu împarte turul de ~75 s, deci carul te prinde altfel la
+fiecare trecere):
+
+| fază | interval în etapă | ce se vede |
+|---|---|---|
+| odihnă | 0 → 4 s | carul stă pe margine, în afara drumului |
+| **telegraful** | 4 → 7,5 s | tobe și kane, trăgătorii se opintesc, turnul se leagănă |
+| **traversarea** | 7,5 → 13 s | zid în mișcare, 20,2 m între cele două odihne; vârf 5,5 m/s, medie 3,8 m/s |
+| (etapa următoare) | 13 → 26 s | același lucru, înapoi |
+
+**Ce te costă:** zona din fața carului (`zone_lead` = 1,2 m, lățimea carului plus
+trăgătorii) te prinde și te **aruncă pe sensul lui de mers**, prin `HazardThrow`:
+orizontala e scrisă, înălțimea e în metri, cu excepție de coliziune cât ține zborul.
+**Fără oprire și fără distrugere.** Masa contează (`ratio = masa_ref / masa`, iar
+masa grea păstrează mai mult din viteza înainte). La întoarcere (spre iaz) împinsul
+e 60% (`push_outward_factor`), că acolo nu e loc ca pe gazon.
+
+**AI onest:** același contract ca la daruma (`blocks_between`, `window_rel`,
+`ai_margin`, `ai_decision_point`); `AIController._daruma_cap` citește acum ambele
+grupuri. Fereastra de pericol a carului e **4,1 s** (de la 0,46 s după pornire
+până când a eliberat asfaltul), nu 1,4 s, așa că ridicarea piciorului trebuie să
+meargă mai jos: `ai_floor` = 35% din croazieră (la daruma, 50%). Tot fără viteză
+trișată și fără oprire; carul se citește prin ceasul lui, ca ciocanul tras.
+
+**Modelul:** `assets/models/kyoto/vehicles/gion_boko.glb`, 13,1k triunghiuri
+(corp 7,3k, roți 4 × 0,6k, trăgători 4 × 0,4k, muzicanți 1,7k), doar sloturi de
+atlas (`LOG_DARK`, `KERB_RED`, `SEA_DEEP`, `SAND_LIGHT`, `WOOD`, `FOAM_WHITE`,
+`SAND_MID`; fără `CAR_*`), AO copt, nicio scară neaplicată pe rădăcină;
+`verify_glb --origin=assembly`: OK. Noduri (contractul e în antetul hazardului):
+`Body`, `Wheel_1..4` (origine = centrul osiei, `rotation.z` = rostogolirea, unghiul
+urmează poziția), `Puller_P1/P2/N1/N2`, `Musicians`. Simetric pe lungime: carul nu se
+rotește niciodată, nu are „față". Sursa: `tools/blender/build_kyoto_gion_boko.py`;
+previzualizare: `tools/blender/preview_kyoto_gion_boko.py`. Garda de materiale nu
+crește: `probe_decor --track=18`: 29 de materiale (max 38), cum era.
+
+**Contracte, măsurate** (`tools/ProbeKyotoGion.tscn`, drum drept de test):
+
+| contract | rezultat |
+|---|---|
+| **(a)** lovitura pe 6 mașini × 20/30 m/s × 2 sensuri | PASS: 24/24 lovite, 0 repuneri, nimeni oprit, toți la < 20 m de drum; pierdere medie **1,32 s** spre interior și **1,19 s** spre exterior (ținta 0,8–2,2 s). Urcare **0,39 m** (Autobuzul, masă 260) … **1,13 m** (Poliția, 90); lateral la 20 m/s: 0,76 m … 10,35 m. Cifrele **diferă** între mașini. **Armat prin sabotaj de masă** (`--sabotage-mass`): urcarea iese 0,39 m la toate, 3 verdicte PICAT |
+| **(b)** AI citește vs orb, 180 s × 5 seed-uri, 6 mașini | PASS: cititorul **0 contacte pe 158 treceri**, 89 cu piciorul ridicat (cea mai joasă viteză 42% din croazieră), **0 opriri**; orbul **28 de contacte pe 170 treceri** (garda e armată). Cu podeaua de 50% (fără `ai_floor`) cititorul avea 1 contact pe 166 |
+| **(c)** fereastra de trecere, ca GOL pe gabaritul caroseriei (interogări de fizică pe corp și zonă) | PASS: carul acoperă cel mult **7,3 m din 11**, cel mai mic culoar liber de pe tot ciclul e **2,2 m**, timpul ca zid pe toată lățimea e **0 s**; cel mai lung interval fără nicio acoperire **9,0 s** (odihnă + telegraf = 7,5 s); atinge șoseaua 8,2 s din 26 (32%). **Armat prin sabotaj** (`--sabotage-wide`, car de 13 m): acoperire 11,1 m, culoar 0,0 m, 2 verdicte PICAT |
+| **(d)** ciclul, timp real, 2 cicluri | PASS: 4 telegrafe, 4 traversări, 4 schimbări de sens; vârf 5,51 m/s, medie 3,77 m/s; **salt maxim pe cadru 0,092 m** (fără teleportare); x de la −10,10 la +10,10 m |
+| poziția pe Track18 (`ProbeKyotoGionPos`) | PASS: origine pe axă (−0,31 m), −Z pe sensul de mers (cos 0,9987); în odihnă și telegraf colțul amprentei cel mai apropiat e la **1,39 m** de asfalt (ambele margini); corpul pe linia lui (\|z\| 0,000 m); roțile pe sol (raycast independent: plutesc cel mult 0,06 m, îngropate cel mult 0,11 m); **58/58 puncte pe [150, 35] m la azimut ≤ 30°** spre ambele odihne (cel mai rău 23°); **0 obstacole solide din decor** pe tot traseul (armat prin `--sabotage`) |
+
+**Camera de joc** (10 m sus, 12,5 m în spate, fov 68 repaus / 76 la viteză; tabelul
+tipărit de `ProbeKyotoGionPos`): acoperișul de 10,6 m e în cadru de la orice distanță
+de decizie; **vârful catargului (21,2 m) intră în cadru doar de la ~110 m** (plafon
+22,2 m la 120 m), iar de aproape (sub ~100 m) e tăiat, corect: se văd baza,
+tapiseriile și coloana care urcă din cadru. Silueta verticală se citește deci de
+departe; de aproape rămâne un zid colorat cu catargul ieșit din cadru. **Nemăsurat:**
+cum arată în joc (capturile le face coordonatorul la integrare), mișcarea la viteza
+reală (balansul, trăgătorii) și sunetul pe device.
+
+**Gărzi pe Track18** (3 oct 2026): `probe_decor --track=18`: 29 materiale (max 38),
+OK. `probe_kyoto_f_disc` (nicio piesă de decor pe traseul carului) citește acum carul:
+PASS, cea mai apropiată piesă la 15,2 m; sabotajul pică.
+
+**ProbeRace** (`--track=11 --ai=7 --seconds=260`, 8 mașini × 16 seed-uri; Jolt e
+nedeterminist, deci se compară distribuții, memoria `proberace-nedeterminism`):
+
+| configurație | tur mediu | `[blocaj]` | repuneri (frac) | aruncări |
+|---|---|---|---|---|
+| cu car, AI citește | 76,59 s (342 ture) | **0** | 9 (0,129 · 0,237 · 0,310 ×2 · 0,312 · 0,315 ×2 · 0,453 · 0,463) | **0** |
+| fără car (`--no-gion`), același cod | 74,91 s (368 ture) | 1 (0,494, tunelul E′) | 9 (0,129 · 0,237 · 0,310 · 0,453 · 0,454 · 0,460 · 0,463 · 0,491 · 0,807) | 0 |
+
+Carul e la frac 0,633: **nicio repunere și niciun `[blocaj]` în zona F (0,56–0,68)**
+în niciuna din cele 32 de rulări, iar contactele solide cu caroseria sunt 0. Cele 9
+repuneri sunt la aterizarea C2 (0,31), intrarea în tunelul E′ (0,45–0,46) și două la
+start (0,129 · 0,237, t = 27 s, la fel fără car). Costul AI-ului care citește:
+**+1,68 s pe tur** (2,2%) față de fără car (daruma costa +0,58 s): fereastra de 4,1 s
+obligă mai des la piciorul ridicat (viteza medie pe felia 0,60–0,65 coboară de la
+31,4 la 22,2 m/s). Coloana `invers` urcă de la ~3 s la ~9 s pe seed, dar e timp cu
+accelerația < −0,5 (frâna pentru plafonul de viteză), nu mers înapoi. **Costul e al
+hazardului, nu un defect**: un zid care traversează încet trebuie să coste, iar
+jucătorul care nimerește fereastra (7,5 s din 13 sunt libere: odihna + telegraful)
+nu pierde nimic.
+
+**Abateri față de cerere (cu motiv):**
+1. **Carul stă unde stătea turnul** (frac 0,633, aceeași transformare), nu s-a mutat:
+   lizibilitatea a ieșit bună (58/58 în cadru) și decorul din zona F avea deja
+   culoarul liber.
+2. **Trăgătorii sunt pe flancuri, nu în față pe funii lungi**: în față ar fi intrat pe
+   șosea înaintea corpului. Zona de lovire acoperă totuși lățimea lor (+0,9 m).
+3. **`ai_floor` 35%**, nu 50% ca la daruma (vezi mai sus).
+4. **Aruncarea spre exterior (iaz) nu e măsurată pe terenul real**: pe drumul de test
+   nimeni nu iese din lume (max 10,35 m), iar pe Track18 AI-ul nu e aruncat niciodată
+   (0 aruncări în 16 seed-uri). Terenul în dreptul carului coboară lent (−1,1 m la
+   10 m, −1,5 m la 16 m), iar impinsul spre exterior e redus la 60%, dar o aruncare
+   reală a jucătorului pe întoarcere nu a fost simulată.
+
+### Daruma-otoshi (F) — ISTORIC: înlocuit de carul Gion Matsuri (3 oct 2026). A înlocuit shishi-odoshi (decizia dezvoltatorului, 3 oct 2026: tubul nu se citea, „arată ca o pompă”)
 
 Dezvoltatorul a condus tubul și l-a respins: „nu-mi dau seama ce se întâmplă,
 arată ca o pompă, nu e interesant”. L-a ales în loc pe **daruma-otoshi**:
@@ -1073,7 +1205,8 @@ se leagă **per nod** (`CLASSES_BY_MODEL[stem][prefix]`,
 | podurile: modulele `tsutenkyo_roof_module`, `togetsukyo_module` | „probabil ARE CONSUMATOR; de verificat cum urmăresc curba" | **CORECTAT: NECESITĂ COD NOU** (placer mic) | nu există placer generic pe curbă pe ruta principală. Precedente: `torii_tunnel.gd` (poziție + yaw din tangentă **per instanță**, doar pe `Track.routes[branch]`, `_yaw = atan2(-dir.x, -dir.z)`); `tools/gen_decor_fiord_d.gd:379-470` (`_bridge_rail`: două jumătăți de modul pe tangenta locală, săgeată de ~0,54 m recunoscută în comentariu) | placer în stilul ToriiTunnel pe ruta 0 (module de 6 m / 10 m, yaw din tangentă, origine în centrul modulului pe axă, nivelul punții la y = 0). **Dublura:** parapetul procedural există deja (`deck_rails: true`, `track.gd:1692`, `10513`); fără el ProbeRace a repus 47 de mașini (comentariu `track.gd:1688-1691`). GLB-ul de pod aduce acoperiș, stâlpi și piloni cu `coliziune = none`; parapetul rămâne procedural |
 | `torii_senbon`, `torii_large` | CONSUMATOR NOU MIC | **EXISTĂ (făcut)** | `scenes/props/torii_tunnel.gd` (`gate_scene`, `large_gate_scene`); `assets/models/kyoto/structures/` | scoase din planșa §9.1. Pereții tunelului sunt colizor propriu; porțile n-au coliziune |
 | `shishi_odoshi.glb` | CONSUMATOR NOU | **ÎNLOCUIT** | `Track18.tscn` are `DarumaOtoshi`, nu tubul; `ShishiOdoshiHazard` nu e în scenă | nu se mai face nimic; GLB-ul din repo rămâne orfan (ștergerea e decizie separată) |
-| `daruma_otoshi.glb` | (nu exista) | EXISTĂ | `daruma_otoshi_hazard.gd` (`model`, contract de noduri în antet) | făcut |
+| `daruma_otoshi.glb` | (nu exista) | EXISTĂ (ISTORIC) | `daruma_otoshi_hazard.gd` (`model`, contract de noduri în antet); **nu mai e în scenă** (3 oct 2026) | GLB-ul și clasa rămân în repo, neatinse |
+| `gion_boko.glb` | (nu exista) | EXISTĂ | `gion_matsuri_hazard.gd` (`model`, contract de noduri în antet); `Track18.tscn` nodul `GionMatsuri` | făcut (`tools/blender/build_kyoto_gion_boko.py`) |
 | `kinkakuji` + reflexia | decor + nod oglindit | **CONFIRMAT, nuanțat:** clădirea e DECOR PUR; reflexia e cod nou, nu GLB | nu există `scale.y = -1` în `scenes/`; designul e doar în `tools/probe_kyoto_reflexie.gd:21-31` (copie oglindită ca nod, gaură în apă, pânză transparentă = +1 material) | GLB singur, fără variantă oglindită. Reflexia se construiește după primul build (§3.2) |
 | `sika_deer` | CONSUMATOR NOU MIC | **CONFIRMAT: COD NOU, dar nu e „pipeline-ul vacii"** | `cow_pose.gd:27-31` redă clipuri după starea `CowGate` (cronometrată, nu proximitate); nicio proximitate în `scenes/`; `path_mover.gd:192-199` doar buclează un clip | nod nou mic: `Area3D`/sondă de distanță care joacă `Bow`, apoi revine la `Graze`/`Stand`. Șablon: `CowPose` |
 | `momiji_a/b/c`, `ginkgo`, `moso_culm` | „MultiMesh feliat; de verificat TrackDecorBatch" | **CORECTAT: `TrackDecorBatch` NU consumă GLB-uri** | `track_decor_batch.gd:152-163` (strânge `MeshInstance3D` deja instanțiate, grupate pe mesh + material + celulă de 250 m); apelat doar pe `cliffs`/`decor`/`scen` (`track.gd:13504-13506`), nu pe `DecorManual`. `flock.gd:15-17`: `FlockProp` folosește doar **primul** `MeshInstance3D` și o singură clasă. Singurul consumator multi-clasă e `CityFill` (`city_fill.gd:122-140, 319-370`), dar e făcut pentru case pe grilă | primul rând de lângă drum: `DecorManual` (cu `trunk`). Masa: **cod nou** (un `FlockProp` per variantă a/b/c, sau `CityFill` generalizat). Fără mapări Kyoto în `CLASSES_BY_MODEL`/`CLASSES_BY_THEME` (`world_prop.gd:1773`): rânduri noi. Un copac = **un nod pentru coroană, unul pentru trunchi** |
@@ -1267,8 +1400,10 @@ concept. Diferențe față de v0.1:
 - **Sala Kiyomizu e la DREAPTA scenei** (în afara buclei, pe versantul înalt),
   nu în spatele ei. Scena iese spre privitor (în jos pe plan), iar
   drumul coboară de pe capătul ei.
-- **Daruma-otoshi în loc de shishi-odoshi** (3 oct 2026): turn de discuri
+- **Daruma-otoshi în loc de shishi-odoshi** (3 oct 2026, ISTORIC): turn de discuri
   colorate cu ciocan de lemn, pe malul iazului.
+- **Car Gion Matsuri în loc de daruma-otoshi** (3 oct 2026): turn de lemn lăcuit
+  pe roți, cu catarg de 21 m, care traversează încet drumul la POI F.
 - **Tunelul de torii e rărit 50%** (porți la 2,4 m, nu 1,2 m): ~60 de porți
   cu pădure de cedri în spate, nu un perete portocaliu continuu.
 - Paleta, stilul și lista de piese rămân ale v0.1 (v0.1 a fost doar

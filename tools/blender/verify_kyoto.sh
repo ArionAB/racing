@@ -39,6 +39,10 @@ echo "== pilotul (kit §3, val 0) =="
 check "structures/yasaka_pagoda.glb"  7700 --origin=assembly --allow-car-slots=Pagoda_Spire
 check "plants/momiji_a.glb"           3100 --origin=assembly
 
+echo "== grupa kit-b: pagode vermilion + Kinkaku-ji =="
+check "structures/sanjunoto_pagoda.glb" 4500 --origin=assembly --allow-car-slots=Pagoda_Spire
+check "structures/koyasu_pagoda.glb"    4100 --origin=assembly --allow-car-slots=Pagoda_Spire
+
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total (5 existente, nu ale kitului)"

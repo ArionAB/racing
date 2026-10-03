@@ -148,8 +148,170 @@ def build_yasaka_pagoda():
             glow.to_object("Pagoda_Windows"), sp.to_object("Pagoda_Spire"))
 
 
+# ---------------------------------------------------------------------------
+# Pagodele vermilion cu 3 etaje (sanjunoto, koyasu). Refolosesc vocabularul
+# pilotului (hip_roof, frame_ring, ring_stack, corp retras ~0,5 din streasina,
+# banda de console vermilion, colturi ridicate); yasaka_pagoda NU se atinge.
+# ---------------------------------------------------------------------------
+
+def _roof_z(ze, rise, eave, r, lift=0.0, f=0.0, sag=1.6):
+    """Cota suprafetei acoperisului `hip_roof` la raza `r` (f=0 mijloc de
+    latura, f=1 colt) -- ca sa stea corpul si balustrada pe tigla."""
+    s = min(1.0, r / eave)
+    return ze + rise * (1.0 - s) ** sag + lift * f * s * s
+
+
+def _pt(side, lx, ly, cx=0.0, cy=0.0):
+    ang = side * math.pi / 2
+    c, s_ = math.cos(ang), math.sin(ang)
+    return cx + lx * c - ly * s_, cy + lx * s_ + ly * c
+
+
+def _pagoda_spire(sp, apex, length, rings, cfg_r0=0.44):
+    """Sorin aurit: bol rasturnat, ou, stalp cu `rings` inele care se subtiaza,
+    flacara de apa. `length` = inaltimea totala a sorin-ului."""
+    k_ = cfg_r0 / 0.44
+    sp.frustum((0, 0, apex + 0.22), 0.62 * k_, 0.42 * k_, 0.44, GOLD, segments=8)
+    sp.frustum((0, 0, apex + 0.62), 0.34 * k_, 0.5 * k_, 0.36, GOLD, segments=8)
+    sp.frustum((0, 0, apex + 0.98), 0.5 * k_, 0.0, 0.4, GOLD, segments=8)
+    sp.cylinder((0, 0, apex + length * 0.5), 0.12 * k_, length, GOLD, segments=6)
+    z0 = apex + 1.35
+    step = (length - 1.35 - 0.9) / max(rings, 1)
+    radii = [cfg_r0 - 0.5 * cfg_r0 * k / max(rings - 1, 1) for k in range(rings)]
+    ring_stack(sp, 0, 0, z0, radii, step, min(0.12, step * 0.45), GOLD, segments=8)
+    sp.frustum((0, 0, apex + length - 0.45), 0.26, 0.0, 0.9, GOLD, segments=6)
+
+
+def _verm_pagoda(cfg):
+    """Corpul comun al pagodelor vermilion cu 3 etaje. Intoarce nodurile
+    (roof, body, windows, spire)."""
+    roof, body, glow, sp = Builder(), Builder(), Builder(), Builder()
+    n = 3
+    eave_hw, eave_z, rise, lift = cfg["eave_hw"], cfg["eave_z"], cfg["rise"], cfg["lift"]
+    wall_hw = [e * cfg["wall_k"] for e in eave_hw]
+    ph = cfg["plinth_h"]
+    body.box((0, 0, ph * 0.5), (2 * cfg["plinth_hw"], 2 * cfg["plinth_hw"], ph),
+             cfg["plinth_slot"])
+    body.box((0, 0, ph + 0.12), (2 * (cfg["plinth_hw"] - 0.3), 2 * (cfg["plinth_hw"] - 0.3), 0.24),
+             cfg["plinth_slot"])
+    for i in range(n):
+        w = wall_hw[i]
+        if i == 0:
+            base_z = ph + 0.2
+        else:
+            base_z = _roof_z(eave_z[i - 1], rise[i - 1], eave_hw[i - 1], w + 0.05) - 0.06
+        top_z = eave_z[i] - 0.15
+        h = top_z - base_z
+        body.box((0, 0, base_z + h * 0.5), (2 * w, 2 * w, h), cfg["wall_slot"])
+        # brau de lemn sus (sub console) si jos
+        frame_ring(body, 0, 0, top_z - 0.5, w + 0.1, w + 0.1, 0.5, 0.2, cfg["band_slot"])
+        frame_ring(body, 0, 0, base_z, w + 0.1, w + 0.1, 0.3, 0.2, cfg["band_slot"])
+        # stalpi de colt (iesiti); fetele raman pline (vermilion), ca pe planșa
+        for sx in (-1, 1):
+            for sy in (-1, 1):
+                body.box((sx * w, sy * w, base_z + h * 0.5), (0.4, 0.4, h), cfg["post_slot"])
+        if i == 0:
+            # brau alb de var jos pe parter
+            for side in range(4):
+                px, py = _pt(side, 0.0, w + 0.03)
+                sx_, sy_ = (2 * w - 0.5, 0.07) if side % 2 == 0 else (0.07, 2 * w - 0.5)
+                body.box((px, py, base_z + 0.3), (sx_, sy_, 0.4), PLASTER)
+        # ferestre: rama alba groasa + gol intunecat; 2 pe fata, 3 (cu usa) pe
+        # fata din fata a parterului
+        wh = h * cfg["win_h"]
+        zc = base_z + h * cfg["win_zc"]
+        for side in range(4):
+            offs = (-0.62 * w, 0.0, 0.62 * w) if (i == 0 and side == 0) else (-0.5 * w, 0.5 * w)
+            for o in offs:
+                door = (i == 0 and side == 0 and o == 0.0)
+                ww = w * (0.5 if door else cfg["win_w"])
+                hh = h * 0.62 if door else wh
+                zz = base_z + 0.2 + hh * 0.5 if door else zc
+                px, py = _pt(side, o, w + 0.04)
+                qx, qy = _pt(side, o, w + 0.10)
+                fw = 0.18 if not door else 0.2
+                fx, fy = (ww + fw, 0.10) if side % 2 == 0 else (0.10, ww + fw)
+                dk = 1.0 if door else 0.66
+                gx, gy = (ww * dk, 0.10) if side % 2 == 0 else (0.10, ww * dk)
+                body.box((px, py, zz), (fx, fy, hh + fw), VERM if door else PLASTER)
+                glow.box((qx, qy, zz), (gx, gy, hh * (1.0 if door else 0.66)), DARK)
+        # console: doua inele + blocuri pe fiecare latura
+        frame_ring(body, 0, 0, eave_z[i] - 0.75, w + 0.4, w + 0.4, 0.32, 0.45, VERM)
+        frame_ring(body, 0, 0, eave_z[i] - 0.43, w + 0.8, w + 0.8, 0.28, 0.45, VERM)
+        cw = w + 0.45
+        for sgn in (-1, 1):
+            body.pickets((-cw, sgn * cw, eave_z[i] - 0.95), (cw, sgn * cw, eave_z[i] - 0.95),
+                         0.95, (0.34, 0.34, 0.5), VERM, endpoints=True)
+            body.pickets((sgn * cw, -cw, eave_z[i] - 0.95), (sgn * cw, cw, eave_z[i] - 0.95),
+                         0.95, (0.34, 0.34, 0.5), VERM, endpoints=True)
+        # galerie: sort plin vermilion lat pe tigla + lisa sus (etajele 2-3)
+        if cfg["rail"] and i > 0:
+            R = w + 0.6
+            rz = _roof_z(eave_z[i - 1], rise[i - 1], eave_hw[i - 1], R) - 0.15
+            body.box((0, 0, rz + 0.45), (2 * R, 2 * R, 0.9), cfg["rail_slot"])
+            frame_ring(body, 0, 0, rz + 0.8, R + 0.12, R + 0.12, 0.2, 0.3, cfg["rail_slot"])
+            for sx in (-1, 1):
+                for sy in (-1, 1):
+                    body.box((sx * R, sy * R, rz + 0.55), (0.3, 0.3, 1.1), cfg["rail_slot"])
+        hip_roof(roof, 0, 0, eave_z[i], eave_hw[i], eave_hw[i], rise[i], TILE,
+                 lift=lift[i], thick=0.18, fascia_slot=BEAM, tile_step=0.85,
+                 rib=0.05, swell=0.3)
+    apex = eave_z[n - 1] + rise[n - 1]
+    _pagoda_spire(sp, apex, cfg["spire_len"], cfg["spire_rings"], cfg["spire_r"])
+    return (roof.to_object("Pagoda_Roof"), body.to_object("Pagoda_Body"),
+            glow.to_object("Pagoda_Windows"), sp.to_object("Pagoda_Spire"))
+
+
+def build_sanjunoto_pagoda():
+    """`sanjunoto_pagoda.png` -- lista de elemente (inainte de modelare):
+
+    - 3 etaje, fiecare cu acoperis in patru ape gri-inchis, colturi ridicate;
+      acoperisurile sunt LARGI si aproape egale (1 : .93 : .85); cel de sus
+      e o piramida inalta.
+    - Corpuri vermilion retrase (~0,55 din streasina), cu o BANDA de console
+      vermilion sub fiecare streasina si ferestre cu rama ALBA (3 pe fata),
+      gol intunecat; pe parter usa intunecata la mijloc pe fata din fata.
+    - Etajele 2-3 au balustrada vermilion in jurul corpului, pe tigla.
+    - Soclu ALB larg, scund, cu o treapta; var alb jos pe parter.
+    - Sorin aurit LUNG (~27% din inaltime), cu multe inele care se subtiaza.
+    Cote: ~18 m total, streasina de jos ~8,8 m.
+    """
+    return _verm_pagoda(dict(
+        eave_hw=[4.7, 4.35, 4.0], eave_z=[3.7, 7.2, 10.5], rise=[1.1, 1.1, 3.0],
+        lift=[0.65, 0.65, 0.6], wall_k=0.55, plinth_h=0.5, plinth_hw=3.7,
+        plinth_slot=PLASTER, wall_slot=VERM, band_slot=BEAM, post_slot=VERM,
+        rail=True, rail_slot=VERM, win_h=0.42, win_w=0.48, win_zc=0.45,
+        spire_len=4.5, spire_rings=12, spire_r=0.55))
+
+
+def build_koyasu_pagoda():
+    """`koyasu_pagoda.png` -- lista de elemente (inainte de modelare):
+
+    - 3 etaje mai INGUSTE si mai apropiate decat sanjunoto (raport streasini
+      1 : .85 : .70), acoperisuri gri foarte inchise, colturi ridicate; cel de
+      sus piramida inalta.
+    - Corpuri portocaliu-vermilion retrase (~0,55), banda de console, ferestre
+      cu rama alba, galerie JOASA inchisa la culoare (balustrada LOG_DARK) la
+      baza etajelor 2-3; nuki intunecate.
+    - Soclu scund de piatra, usa intunecata pe parter.
+    - Sorin aurit lung (~26%), subtire.
+    Cote: 14 m total, streasina de jos ~6,8 m.
+    """
+    return _verm_pagoda(dict(
+        eave_hw=[3.5, 3.4, 3.25], eave_z=[2.8, 5.5, 8.0], rise=[0.8, 0.8, 2.6],
+        lift=[0.5, 0.5, 0.5], wall_k=0.55, plinth_h=0.4, plinth_hw=2.8,
+        plinth_slot=PLASTER, wall_slot=VERM, band_slot=BEAM, post_slot=VERM,
+        rail=True, rail_slot=VERM, win_h=0.44, win_w=0.52, win_zc=0.45,
+        spire_len=3.4, spire_rings=12, spire_r=0.5))
+
+
 if __name__ == "__main__" or True:
     r, b_, g_, s_ = build_yasaka_pagoda()
     emit([r, b_, g_, s_], "structures/yasaka_pagoda.glb", AO_PAGODA,
          bevel=0.0, smooth_angle=None, budget=7700)
+    for fn, name, bud in ((build_sanjunoto_pagoda, "sanjunoto_pagoda", 9000),
+                          (build_koyasu_pagoda, "koyasu_pagoda", 9000)):
+        clear_built()
+        emit(list(fn()), "structures/%s.glb" % name, AO_PAGODA,
+             bevel=0.0, smooth_angle=None, budget=bud)
     report()

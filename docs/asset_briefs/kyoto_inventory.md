@@ -104,3 +104,19 @@ ciorchini. Vocabular nou: `kyoto_shapes.leaf_blob`.
   --python tools/blender/run_build.py -- build_kyoto_pagodas.py`; comparație
   `… -- preview_kyoto.py -- --compare yasaka_pagoda` (cu `mkdir
   D:/GameDev/.render_lock` înainte, `rmdir` după).
+
+# Grupa kit-b: pagode vermilion + Kinkaku-ji (ramura `kyoto/kit-b`)
+
+## `structures/sanjunoto_pagoda.glb` si `structures/koyasu_pagoda.glb` (3 runde)
+
+Construite cu `_verm_pagoda(cfg)` din `build_kyoto_pagodas.py` (hip_roof, frame_ring, ring_stack, corp retras 0,55, console vermilion, colturi ridicate). `yasaka_pagoda.glb` neschimbat (7 526 tri, git fara diff).
+
+- sanjunoto: 4 362 tri, 10,0 x 10,0 x 18,0 m, streasini 4,7/4,35/4,0 semilatime, sorin 4,5 m (25%). koyasu: 3 898 tri, 7,6 x 7,6 x 14,0 m, streasini 3,5/3,4/3,25, sorin 3,4 m (24%).
+- Noduri: `Pagoda_Roof`, `Pagoda_Body`, `Pagoda_Windows`, `Pagoda_Spire` (verify cu `--allow-car-slots=Pagoda_Spire`).
+- Comparatii: `docs/asset_briefs/img/kyoto_fidelity/{sanjunoto,koyasu}_pagoda.png`, planșa comuna cu yasaka: `docs/asset_briefs/img/kyoto_fidelity_valkitb_pagode.png`.
+- Abateri ramase: ferestrele sunt patrate cu rama alba (pe planșa sunt rotunjite, cu inel alb gros); la koyasu consolele ascund ferestrele; acoperisul e mai inchis/violaceu decat gri-ul planșei (slotul `VOLCANIC_BLACK` e cerut); galeria e un sort plin vermilion + lisa, fara balustrada fina; planșa are corpurile mai inalte vizibil intre streasini.
+- Diferente intre cele doua: sanjunoto mai lata, streasini descrescatoare, sorin gros; koyasu mai ingusta, streasini aproape egale, varf mai inalt, sorin subtire.
+
+## Stare la oprire (kit-b)
+
+Pagodele facute si comise; urmeaza `kinkakuji`.

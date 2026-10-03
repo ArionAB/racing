@@ -62,6 +62,14 @@ SPECS = {
                       "camera": {"azimuth": 125.0, "elevation": 14.0, "lens": 90.0, "margin": 1.1}},
     "momiji_a": {"category": "plants", "tints": {"Maple_Crown": "maple_crimson"},
                  "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 70.0, "margin": 1.1}},
+    "momiji_b": {"category": "plants", "tints": {"Maple_Crown": "maple_orange"},
+                 "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 70.0, "margin": 1.1}},
+    "momiji_c": {"category": "plants", "tints": {"Maple_Crown": "leaf_litter"},
+                 "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 70.0, "margin": 1.1}},
+    "ginkgo": {"category": "plants", "tints": {"Ginkgo_Crown": "ginkgo_gold"},
+               "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 70.0, "margin": 1.1}},
+    "niwaki_pine": {"category": "plants",
+                    "camera": {"azimuth": 125.0, "elevation": 12.0, "lens": 70.0, "margin": 1.1}},
 }
 
 

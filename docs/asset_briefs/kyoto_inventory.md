@@ -104,3 +104,39 @@ ciorchini. Vocabular nou: `kyoto_shapes.leaf_blob`.
   --python tools/blender/run_build.py -- build_kyoto_pagodas.py`; comparație
   `… -- preview_kyoto.py -- --compare yasaka_pagoda` (cu `mkdir
   D:/GameDev/.render_lock` înainte, `rmdir` după).
+
+## Grupa kit-c: arborii (`build_kyoto_trees.py`, kit §1.2)
+
+Planșa de scară comună (aceeași cameră, 5 copaci): `img/kyoto_fidelity/arbori_scara.png`
+(`preview_kyoto_trees.py`). `momiji_a` verificat identic după refactor (md5 GLB
+neschimbat, 3 056 tri, 8,58 m). `_tree` are doar parametri noi opționali
+(`trunk_fn`, `limb_w`); calea veche e neatinsă.
+
+| piesă | tri (trunchi+coroană) | cote măsurate (L×A×H m) | noduri / slot | comparație | runde |
+|---|---|---|---|---|---:|
+| `momiji_b` | 2 440 (200+2 240) | 10,35 × 5,35 × 8,28 | `Maple_Trunk` WOOD, `Maple_Crown` LAVA_ORANGE | `momiji_b.png` | 3 |
+| `momiji_c` | 1 748 (148+1 600) | 11,34 × 6,89 × 6,64 | `Maple_Trunk`, `Maple_Crown` LARCH_RUST | `momiji_c.png`, `_views` | 3 |
+| `ginkgo` | 4 252 (92+4 160) | 8,34 × 8,09 × 11,01 | `Ginkgo_Trunk`, `Ginkgo_Crown` CAR_YELLOW | `ginkgo.png` | 2 |
+| `niwaki_pine` | 712 (312 trunchi + 400 coroană) | 8,71 × 3,18 × 5,14 | `Pine_Trunk` WOOD, `Pine_Crown` TROPICAL_GREEN | `niwaki_pine.png` | 3 |
+
+Fidelitate (verdict sincer):
+- `momiji_b`: 3 etaje înguste, trunchi vizibil sub coroană, h/l ≈ 0,8; silueta
+  „pagodă" diferă clar de `a`. Decuparea e însă un dom lat și plin (contractul și
+  decuparea se contrazic; am urmat contractul). Zimțarea e „piatră spartă", nu lobi.
+- `momiji_c`: tabular, asimetric, trunchi înclinat (cerut de contract); decuparea
+  e un dom rotund simetric, deci **abatere mare față de planșă**, asumată din
+  contract. Se citește ca acacia/arțar-bonsai, nu ca pe planșă.
+- `ginkgo`: con în 5 trepte, bun ca siluetă; planșa are conul mai asimetric și cu
+  crengi vizibile prin goluri (la noi doar trunchiul sub coroană). 4 252 tri.
+- `niwaki_pine`: 5 nori plați pe crengi orizontale, trunchi sinuos; trunchiul
+  din frustumuri suprapuse arată în trepte (nu neted); norii sunt mai netezi
+  decât pe planșă. h/l ≈ 0,6 (contract 0,7).
+- Cele 3 arțari au siluete distincte pe planșa de scară (dom / pagodă / tabular).
+
+Contract ambiguu: `momiji_b/c` decupările contrazic contractul de siluetă
+(ambele sunt domuri late pe planșă); `ginkgo` cere `--allow-car-slots`
+(adăugat în `verify_kyoto.sh`). `preview_kyoto.py --sheet` pică pe Windows
+(UnicodeEncodeError cp1252 la tipărire) — nefolosit.
+
+Stare la oprire (kit-c): toate cele 4 piese verify OK + comparații făcute; nimic
+în așteptare.

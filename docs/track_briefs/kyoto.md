@@ -1,4 +1,4 @@
-# Track brief — Kyoto în toamnă (`Track18`, temă `kyoto`) — v0.1 (concept)
+# Track brief — Kyoto în toamnă (`Track18`, temă `kyoto`) — v0.1 (concept), cu §9 v0.2 (3 oct 2026)
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `jodhpur.md`. Secțiunile de assets (§5) sunt schițate, nu complete: se
@@ -846,7 +846,7 @@ Categorie nouă `assets/models/kyoto/`, cu subfolderele `buildings/`,
 | `inari_romon.glb` (poartă-turn, gol ≥ 11 m), `torii_senbon.glb` (o poartă de ~6,8 × 5,6 m pentru MultiMesh, cu `kasagi` negru), `torii_large.glb` (poarta de la gura tunelului) | E și E′. **Stâlpii NU au coliziune proprie:** peretele e un colizor continuu (§3) |
 | `kitsune_statue.glb` (vulpe pe soclu, cheie în gură, bavetă roșie), 2 variante | perechi la porți |
 | `kinkakuji.glb` (3 etaje, 14 m, cu fenix; etajul de jos în lemn natural, cele de sus în aur) | F. Varianta oglindită e un **nod**, nu o instanță MultiMesh (§3) |
-| `shishi_odoshi.glb` — `Frame` (cadrul de piatră), `Tube` (bambus de 16 m, Ø 1,8, cu noduri de bambus; **originea pe axa pivotului, gura pe −Z**, de confirmat pe cod la trecerea de contracte), `Kakei` (jgheabul), `StrikeStone` | **CONSUMATOR NOU** (`ShishiOdoshiHazard`). Export `model` de la început, nu hardcodat (lecția `AvalancheHazard._boulder_shapes`). Fața și axele se verifică cu `verify_glb --origin` înainte de montare (memoria `fata-casei-nu-e-plus-z`) |
+| `shishi_odoshi.glb` — `Frame` (cadrul de piatră), `Tube` (bambus de 16 m, Ø 1,8, cu noduri de bambus; **originea pe axa pivotului, gura pe −Z**, de confirmat pe cod la trecerea de contracte), `Kakei` (jgheabul), `StrikeStone` | **ÎNLOCUIT de `daruma_otoshi.glb` (3 oct 2026), nu se mai face**; textul vechi: CONSUMATOR NOU (`ShishiOdoshiHazard`). Export `model` de la început, nu hardcodat (lecția `AvalancheHazard._boulder_shapes`). Fața și axele se verifică cu `verify_glb --origin` înainte de montare (memoria `fata-casei-nu-e-plus-z`) |
 | `togetsukyo_module.glb` (modul de 10 m: parapet și piloni de lemn) | H; puntea e cod |
 | `sagano_train.glb` (locomotivă + 3 vagoane de epocă, fără livrea reală) + `iron_truss_bridge.glb` | G2; teatru pe `PathMover` |
 | `sika_deer.glb` (animat: `Stand`, `Bow`, `Graze`) | pipeline-ul vacii (PR #270, memoria `asset-animat-pipeline`) |
@@ -916,24 +916,40 @@ respectă < `fog_end` 340 < FAR_PLANE 380.
 - scândurile podurilor sub roți: un sunet surd la Tsūten-kyō, altul pe
   Togetsukyō.
 
-### 5.6 Trecerea de contracte — **de făcut înainte de primul build**
+### 5.6 Trecerea de contracte — **făcută pe cod citit, 3 oct 2026**
 Memoria `brief-cere-glb-cod-il-face-deja`: la Machu Picchu 4 piese n-aveau
 consumator, iar la Fiordland s-au găsit 8 CONFLICT-uri abia după brief.
-Verdictele de mai jos sunt preliminare și **trebuie confirmate pe cod
-citit**:
 
-| piesă | verdict preliminar | ce se face |
-|---|---|---|
-| puntea scenei Kiyomizu | CONFLICT dacă se cere GLB | secțiune înălțată (cod); `kakezukuri_scaffold` e decor sub ea |
-| râpele (sub scenă, sub Tsūten-kyō) | CONFLICT dacă se cere GLB | teren (`custom_ravines` / `TerrainHollow`) |
-| podurile (Tsūten-kyō, Togetsukyō) | puntea e CONFLICT; modulele probabil ARE CONSUMATOR | de verificat cum urmăresc modulele curba: parapetele de la Chongqing sau `DecorManual` pe curbă? |
-| `torii_senbon` | CONSUMATOR NOU MIC (așezare pe curba unei `TrackBranch`) | `FlockProp` lipește de teren, nu de bandă, deci probabil un mic cod nou |
-| `shishi_odoshi.glb` | CONSUMATOR NOU | contractul de noduri scris înainte de Blender (§5.2) |
-| `kinkakuji` + reflexia | decor + nod oglindit | depinde de decizia din §3.1 |
-| `sika_deer` | CONSUMATOR NOU MIC (înclinare la proximitate) | pipeline-ul vacii |
-| `momiji`, `ginkgo`, `moso_culm` | MultiMesh feliat (memoria `decor-in-masa-cere-multimesh`) | de verificat dacă `TrackDecorBatch` primește GLB-uri cu mai multe clase (memoria `clase-pe-piese-de-kit`) |
-| orizontul | ARE CONSUMATOR (`horizon_model`) | cheie de temă nouă |
-| `PROP_COLLISION` | intrări noi | `niwaki_pine` / `momiji` / `ginkgo`: `trunk`; `stone_lantern` / `kitsune_statue`: `hull`; `leaf_pile` / `monk_sweeper` / `jinrikisha` / `crow` / `sika_deer`: `none` |
+**Trecerea de contracte, făcută pe cod citit (3 oct 2026, `kyoto/plansa-v02`).**
+Verdictul preliminar din v0.1 e păstrat în coloana a doua, ca să se vadă ce
+s-a schimbat. Convenția de export pentru tot ce se așază pe curbă sau pe
+traseu: **−Z înainte, origine la bază (y = 0), pe axă**. Clasele de textură
+se leagă **per nod** (`CLASSES_BY_MODEL[stem][prefix]`,
+`world_prop.gd:2795-2848`), deci fiecare piesă multi-material se exportă cu
+**un nod pe material** (memoria `clase-pe-piese-de-kit`).
+
+| piesă | preliminar | verdict pe cod | dovadă | ce se face |
+|---|---|---|---|---|
+| puntea scenei Kiyomizu | CONFLICT | **CONFIRMAT: CONFLICT** | `Track18.tscn:40-46` (`custom_ravines`, `custom_viaduct_ravines [0,1,2]`); `track.gd:4396-4401`; `track.gd:10508-10540` (`_build_walls` face „WallDeck", parapet continuu cu coliziune) | secțiune înălțată + parapet, toate din cod. Fără GLB |
+| `SaritaScena` (golul C2) | (nu era în tabel) | CONFLICT | `Track18.tscn:92-104`, `track_channel.gd` (gap/bank/depth/reach ca export-uri) | din cod; fără GLB |
+| râpele, apa din râpe | CONFLICT | **CONFIRMAT: CONFLICT** | `Track18.tscn:40-46` (`custom_ravine_water`, `_floors`, `_widths`) | teren, nu asset |
+| stâlpii de sub scenă, `kakezukuri_scaffold` | „decor sub ea" | **CORECTAT: DECOR PUR, cu intrare nouă `PROP_COLLISION`** | niciun cod nu generează pile (`track.gd:4396-4399` zice „pilele și arcadele din kit (DecorManual)"); nicio referință la `kakezukuri` în `.gd`/`.tscn` | piesă de `DecorManual`, repetată sub punte. Implicitul pentru o piesă fără intrare e `hull` (`world_prop.gd:3610`): un bloc solid sub punte. Intrare `mesh` (precedent `viaduct_arch`, `wooden_pier`, `world_prop.gd:65-68`) |
+| podurile: modulele `tsutenkyo_roof_module`, `togetsukyo_module` | „probabil ARE CONSUMATOR; de verificat cum urmăresc curba" | **CORECTAT: NECESITĂ COD NOU** (placer mic) | nu există placer generic pe curbă pe ruta principală. Precedente: `torii_tunnel.gd` (poziție + yaw din tangentă **per instanță**, doar pe `Track.routes[branch]`, `_yaw = atan2(-dir.x, -dir.z)`); `tools/gen_decor_fiord_d.gd:379-470` (`_bridge_rail`: două jumătăți de modul pe tangenta locală, săgeată de ~0,54 m recunoscută în comentariu) | placer în stilul ToriiTunnel pe ruta 0 (module de 6 m / 10 m, yaw din tangentă, origine în centrul modulului pe axă, nivelul punții la y = 0). **Dublura:** parapetul procedural există deja (`deck_rails: true`, `track.gd:1692`, `10513`); fără el ProbeRace a repus 47 de mașini (comentariu `track.gd:1688-1691`). GLB-ul de pod aduce acoperiș, stâlpi și piloni cu `coliziune = none`; parapetul rămâne procedural |
+| `torii_senbon`, `torii_large` | CONSUMATOR NOU MIC | **EXISTĂ (făcut)** | `scenes/props/torii_tunnel.gd` (`gate_scene`, `large_gate_scene`); `assets/models/kyoto/structures/` | scoase din planșa §9.1. Pereții tunelului sunt colizor propriu; porțile n-au coliziune |
+| `shishi_odoshi.glb` | CONSUMATOR NOU | **ÎNLOCUIT** | `Track18.tscn` are `DarumaOtoshi`, nu tubul; `ShishiOdoshiHazard` nu e în scenă | nu se mai face nimic; GLB-ul din repo rămâne orfan (ștergerea e decizie separată) |
+| `daruma_otoshi.glb` | (nu exista) | EXISTĂ | `daruma_otoshi_hazard.gd` (`model`, contract de noduri în antet) | făcut |
+| `kinkakuji` + reflexia | decor + nod oglindit | **CONFIRMAT, nuanțat:** clădirea e DECOR PUR; reflexia e cod nou, nu GLB | nu există `scale.y = -1` în `scenes/`; designul e doar în `tools/probe_kyoto_reflexie.gd:21-31` (copie oglindită ca nod, gaură în apă, pânză transparentă = +1 material) | GLB singur, fără variantă oglindită. Reflexia se construiește după primul build (§3.2) |
+| `sika_deer` | CONSUMATOR NOU MIC | **CONFIRMAT: COD NOU, dar nu e „pipeline-ul vacii"** | `cow_pose.gd:27-31` redă clipuri după starea `CowGate` (cronometrată, nu proximitate); nicio proximitate în `scenes/`; `path_mover.gd:192-199` doar buclează un clip | nod nou mic: `Area3D`/sondă de distanță care joacă `Bow`, apoi revine la `Graze`/`Stand`. Șablon: `CowPose` |
+| `momiji_a/b/c`, `ginkgo`, `moso_culm` | „MultiMesh feliat; de verificat TrackDecorBatch" | **CORECTAT: `TrackDecorBatch` NU consumă GLB-uri** | `track_decor_batch.gd:152-163` (strânge `MeshInstance3D` deja instanțiate, grupate pe mesh + material + celulă de 250 m); apelat doar pe `cliffs`/`decor`/`scen` (`track.gd:13504-13506`), nu pe `DecorManual`. `flock.gd:15-17`: `FlockProp` folosește doar **primul** `MeshInstance3D` și o singură clasă. Singurul consumator multi-clasă e `CityFill` (`city_fill.gd:122-140, 319-370`), dar e făcut pentru case pe grilă | primul rând de lângă drum: `DecorManual` (cu `trunk`). Masa: **cod nou** (un `FlockProp` per variantă a/b/c, sau `CityFill` generalizat). Fără mapări Kyoto în `CLASSES_BY_MODEL`/`CLASSES_BY_THEME` (`world_prop.gd:1773`): rânduri noi. Un copac = **un nod pentru coroană, unul pentru trunchi** |
+| orizontul | ARE CONSUMATOR (`horizon_model`) | **CONFIRMAT, dar tema are cheia goală** | `track.gd:1683` (`"horizon_model": ""` la tema `kyoto`); `_build_horizon` `track.gd:5423-5457`; model Jodhpur `track.gd:1471-1500` | tema cere 3-4 chei: `horizon_model`, `horizon_picks`, `horizon_rings` (cu `far` < 340), `horizon_classes`. Nume de noduri: `Higashiyama_A/B`, `Arashiyama_A`, `FarRoofs_A` |
+| `PROP_COLLISION` | intrări noi | **CONFIRMAT: 0 intrări Kyoto** | `world_prop.gd:61`, lookup `3610` (`PROP_COLLISION.get(stem, "hull")`); moduri `hull/trunk/mesh/none` (`3589`); override per instanță: metadata `coliziune` | adaugă: `niwaki_pine`/`momiji_*`/`ginkgo`: `trunk`; `stone_lantern_*`/`kitsune_statue`: `hull`; `kakezukuri_scaffold`, `niomon_gate`, `inari_romon`: `mesh`; `leaf_pile`/`monk_sweeper`/`crow`/`sika_deer`: `none`. `jinrikisha`/`yakatabune`/`sagano_train` merg pe `PathMover` |
+| `sagano_train` (G2) | ARE CONSUMATOR (teatru pe `PathMover`) | **CONFIRMAT, cu o restricție** | `path_mover.gd`: `model`, `model_yaw`, `speed`, `travel_mode`, `stick_to_ground`; corp `AnimatableBody3D`, **solid**, coliziune din AABB (`:258-270`). `TrainHazard` cere noduri `Train_Loco/Tender/Wagon` (`train_hazard.gd:44-46`) și e trecere la nivel, deci nu se potrivește | un singur corp rigid cu locomotiva + 3 vagoane în linie dreaptă, `stick_to_ground = false` pe curba de la ~9 m deasupra drumului; nu se îndoaie în viraje (G2 e dreaptă) |
+| `iron_truss_bridge` | (nu era în tabel) | DECOR PUR | niciun consumator în cod | `DecorManual`, `mesh` (drumul trece pe dedesubt) |
+| `jinrikisha`, `yakatabune` | (nu erau în tabel) | ARE CONSUMATOR (`PathMover`) | `path_mover.gd:32-35, 53-114, 427-438`; fără opțiune de coliziune `none` | bărcile folosesc `stick_to_ground = false` (plutire); ricșa e solidă pe trotuar, deci ține-o în afara benzii |
+| `crow` | (nu era) | COD NOU sau corp solid | `path_mover.gd:258-270, 377-378` | `PathMover` la înălțime de zbor are un corp solid pe curbă: ori decor static, ori mic cod fără coliziune |
+| `leaf_pile` | (nu era) | **COD NOU** (burst la trecere) | nu există prop cu burst la trecere; șablon: splash-ul din `daruma_otoshi_hazard.gd:167, 515` | `Area3D` + `CPUParticles3D` cu plafon; meshul GLB e doar grămada |
+| `monk_sweeper` | (nu era) | DECOR PUR | `docs/decor_manual.md` | `DecorManual`, `none` |
+| `kiyomizu_hondo`, pagodele, `niomon_gate`, `inari_romon`, `kitsune_statue`, kitul de oraș și de templu | (nu erau) | DECOR PUR | `Track18.tscn` nu are încă `DecorManual`; convenția e în `docs/decor_manual.md:14-23` | `DecorManual`, sau `custom_landmarks` pentru piese cu distanță/orientare fixe |
 
 **Scara decorului:** pădurea de bambus înseamnă **mii de tulpini**, iar
 valea de arțari sute de coroane. Peste ~1000 de piese, nodurile de scenă
@@ -1093,7 +1109,298 @@ despre timpul de încărcare). Deci tot ce e dincolo de primul rând e
   - **porțile torii fără inscripții**: pe cele reale sunt numele firmelor
     donatoare, exact textul care nu trebuie copiat.
 
-## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.2, paste-ready
+
+**Se atașează doar `docs/track_briefs/img/kyoto_plan/kyoto_plan.png`**, într-o
+**conversație nouă** (nu în cea cu v0.1: ar moșteni stilul și topologia
+conceptului). Planul e captura REALĂ de sus din Godot
+(`Snapshot.tscn -- --track=11 --no-fog`, apoi
+`python tools/annotate_kyoto_plan.py`), cu legenda peste ea. Pista e sursa de
+adevăr (memoria `diorama-din-geometria-reala`).
+
+### 9.0 Ce corectează v0.2 față de v0.1
+
+Topologia de mai jos e **citită de pe captura pistei construite**, nu din
+concept. Diferențe față de v0.1:
+- **Startul e pe latura STÂNGĂ, la o treime de sus**, nu „near the front”;
+  strada urcă (spre fundalul planșei) până la pagoda din **colțul stânga-sus**.
+  Sensul orar e același, dar colțurile nu: **Kiyomizu e în colțul dreapta-sus,
+  Fushimi Inari în dreapta-jos, bambusul în stânga-jos**, iar iazul stă pe
+  **marginea de jos, în interiorul buclei**, nu „near the front edge” a unei
+  forme pătrate. Bucla e un dreptunghi **mai înalt decât lat** (~3:4).
+- **Sala Kiyomizu e la DREAPTA scenei** (în afara buclei, pe versantul înalt),
+  nu în spatele ei. Scena iese spre privitor (în jos pe plan), iar
+  drumul coboară de pe capătul ei.
+- **Daruma-otoshi în loc de shishi-odoshi** (3 oct 2026): turn de discuri
+  colorate cu ciocan de lemn, pe malul iazului.
+- **Tunelul de torii e rărit 50%** (porți la 2,4 m, nu 1,2 m): ~60 de porți
+  cu pădure de cedri în spate, nu un perete portocaliu continuu.
+- Paleta, stilul și lista de piese rămân ale v0.1 (v0.1 a fost doar
+  un concept; nu există încă generări de referință acceptate).
+
+> Create a stylized low-poly **tabletop diorama** of a toy-car racing track in
+> **Kyoto, Japan, in late November, at the peak of the red autumn maple
+> season, on a clear late afternoon**. **Use the attached top-down plan as the
+> exact layout: same loop shape, same position of every landmark.** The
+> letters A–H, G2 and C2, the circles, red arrows, text boxes and the legend
+> strip under the plan are a legend: do not draw them. On the plan: the thin
+> white line is the road and the red triangles show the driving direction;
+> the thick **orange** band is the wooden stage; the thick **violet** band is
+> a covered bridge; the thick **teal** band is a river bridge; the **dashed
+> orange line** is a shortcut tunnel of torii gates; the black circles are
+> hills; the black rectangle is a temple hall; orange triangles are pagodas;
+> the yellow triangle is the golden pavilion; the red dot at the bottom is a
+> giant toy tower. The dark patches are a **pond** (bottom centre) and a
+> **river** (bottom left). The bare olive terrain, the big green blobs and the
+> orange band beside the right side of the road are placeholders: dress them
+> as described below.
+>
+> **THE ROAD IS ONE CLOSED LOOP. READ THIS FIRST [!]**
+> - There is **exactly one closed loop of road**, shaped like a tall
+>   rectangle with rounded corners (about 3 wide to 4 tall on the plan), plus
+>   **one straight shortcut** (a tunnel of orange torii gates) that leaves the
+>   loop and rejoins it a short way later. No other roads, no dead ends, no
+>   parking lots.
+> - The loop runs **clockwise on the plan** (up the LEFT side, right along the
+>   TOP, down the RIGHT side, left along the BOTTOM).
+> - **Start/finish: on the LEFT side, about one third of the way down.** A
+>   straight cobbled street leads **up the plan** to a **five-storey wooden
+>   pagoda in the TOP-LEFT corner**, standing exactly on the axis of the
+>   street. At the pagoda the road bends **right** around its base (the road
+>   passes about 18 m, or 4–5 car lengths, from it) and runs **right along the TOP edge**.
+> - **Along the top**: the road climbs through two tight S-bends between tea
+>   houses, then reaches the **TOP-RIGHT corner**, the highest point. There it
+>   turns **right (down the plan)** and runs onto a **wide wooden stage on
+>   tall pillars** that juts **toward the viewer** over a ravine of red maples.
+>   The **temple hall** stands on the high hillside **to the right of the
+>   stage** (outside the loop). The stage has railings on its sides but
+>   **none at its far end: the road jumps off the end** and lands on a stone
+>   ramp on the other side of the ravine, next to a small three-storey
+>   pagoda on the **left** of the landing.
+> - **Down the RIGHT side**: the road descends through a valley of red maples
+>   in wide S-bends, then crosses a long **covered wooden bridge** over a
+>   deep ravine, and reaches the **BOTTOM-RIGHT corner**, where it makes a
+>   **wide clockwise U-turn around a forested hill covered in orange torii
+>   gates**. The shortcut tunnel of torii gates runs **straight across the
+>   inside of that U-turn**, from its upper-right end to its lower-left end.
+> - **Along the BOTTOM edge, heading left**: a **pond** lies right next to the
+>   road on its **upper side (inside the loop)**. On the pond bank, between
+>   road and water, stands a **giant daruma-otoshi toy tower**. A **golden
+>   pavilion** stands on the far (upper) bank of the pond. Between the pond
+>   and the left side there is a low green **garden hill** with clipped pines.
+> - At the **BOTTOM-LEFT corner** the road bends down-left and winds through
+>   a tall **bamboo forest** in two S-bends, then turns **up the plan** along
+>   the LEFT edge: it passes **under a small iron railway bridge**, then
+>   crosses a **long straight wooden bridge** over a calm river that enters
+>   from the left edge of the base and ends in a quiet backwater just inside
+>   the loop. After the bridge the road runs straight **up the plan** back to
+>   the start line, with the pagoda ahead.
+> - **The inside of the loop is the old town**: rows of dark wooden
+>   townhouses with grey tiled roofs, red maples in the courtyards, with the
+>   pond and garden hill at the bottom of the town.
+>
+> **CAMERA AND BASE:** raised 3/4 view **from the bottom edge of the plan
+> looking toward the top**, so the bamboo forest (bottom-left), the pond
+> (bottom-centre) and the torii hill (bottom-right) are nearest, the pagoda
+> is at the back-left and the temple stage at the back-right, high above
+> everything. The diorama sits on a thin dark rounded-rectangle base with a
+> matte edge and **no scenery outside the base** except, softly out of
+> focus behind it, low hills covered in red, gold and dark-green autumn
+> forest fading into warm haze.
+>
+> **STYLE (strict) [!]:** **flat-shaded low-poly, like a game-asset render in a
+> Blender viewport. Every face is one flat colour.** Big facets, 1–3 m wide
+> at model scale. No painted texture, no photorealism, no tilt-shift look.
+> Maple crowns are **layered, flattened tiers with gaps between them** (not
+> round balls). Use **about 250 trees in total**, not thousands. Houses are
+> simple boxes with a few cut-out lattice fronts. Soft baked ambient
+> occlusion under every object. Toy proportions: cars are stubby and about
+> 1.3× wider than real cars.
+>
+> **PALETTE (strict) [!]:**
+> - **maples in THREE reds, mixed tree by tree: crimson `#BB3522`,
+>   red-orange `#E54839`, rust `#A8683A`**. NOT pink, NOT purple;
+> - **ginkgo trees: gold `#F2D03C`**, a few big patches;
+> - **gates, pagodas and the temple gate: orange vermilion `#E8622D` with
+>   near-black top beams `#4A3526`** (NOT car red, NOT pink);
+> - townhouse wood: near-black brown; **roof tiles: blue-grey `#55535A`**;
+>   white plaster walls `#E9F2F0`;
+> - **moss and clipped pines stay green `#3F7A3C`**, so the red has
+>   something to contrast with; bamboo is green-yellow;
+> - stone paving and lanterns `#B8B4AC`; **water: deep green-teal
+>   `#2E5F6B`**;
+> - the pavilion's upper two floors are **gold**; its ground floor is
+>   natural dark wood;
+> - sky: clear blue `#8DB8E8` at the top, pale gold `#F2E2C2` at the
+>   horizon.
+>
+> **The red is NOT everywhere:** the bamboo forest is green, the old town is
+> mostly grey roofs and dark wood, and the strongest red is on the temple
+> hillside, the valley on the right and the ravine under the covered bridge.
+>
+> **LIGHT [!]:** low late-afternoon sun, **about 22°, from the FRONT-LEFT
+> (the lower-left of the plan)**. Long soft shadows fall toward the
+> back-right. Maples in the ravine under the stage glow where the light comes
+> through their leaves. **No lanterns lit, no night, no neon.**
+>
+> **THE ROUTE, in driving order:**
+> 1. **A: start on a sloping stone-paved street** lined with two-storey dark
+>    wooden townhouses with lattice fronts and cloth door curtains. The
+>    **five-storey pagoda** (about 6 cars tall) stands at the top end of the
+>    street, **exactly on the axis of the road**. Two monks sweep red leaves
+>    on the pavement.
+> 2. **B: the tea-house street.** The road bends around the pagoda base and
+>    climbs between tea houses with **red parasols and red benches**, through
+>    two tight S-bends. A **rickshaw pulled by a running man** climbs the
+>    pavement. Real stone steps run beside the road.
+> 3. **C: the temple on pillars [!], the biggest feature.** A **two-storey
+>    vermilion gate** the road passes through, a small vermilion three-storey
+>    pagoda, and a **huge temple hall with a dark, steep hipped roof** on the
+>    hillside to the right of the stage. The **wide wooden stage** (about 3
+>    cars wide, 15 cars long) stands on a **tall lattice of wooden pillars and
+>    cross-beams** (about 4 cars tall) **over a ravine full of red maples**.
+>    Railings on its sides, **none at its far end**: **one toy car is in the
+>    air, jumping off the end of the stage** over the maples toward the **small
+>    vermilion three-storey pagoda** on the opposite slope, where the road
+>    lands on a stone ramp.
+> 4. **D: the maple valley.** The road descends through dense red and orange
+>    maples, with **red leaves carpeting the road** (a cleaner dark line where
+>    the cars drive), stone lanterns, and a deer bowing at the roadside. It
+>    crosses a **long covered wooden bridge (roofed, open sides, about 17 cars
+>    long)** over a deep ravine whose maples rise up to the level of the
+>    bridge.
+> 5. **E: the hill of gates [!].** At the bottom-right U-turn: a **big
+>    vermilion tower gate**, two **stone fox statues with red bibs** on
+>    pedestals, and a few widely spaced gates leading to a **narrow tunnel of
+>    about 60 orange torii gates**, one every 2.4 m (about half a car
+>    length), running **straight through the hill** across the U-turn, one
+>    car wide, with a car inside it. **Dark cedar forest stands behind the
+>    gates: no sky is visible between them.** The rest of the hill has small
+>    shrines, stone lanterns and maples.
+> 6. **F: the pond garden [!].** The road runs west along the lower bank of a
+>    still pond with mossy edges, cloud-pruned pines, garden rocks and a
+>    stone lantern. On the far bank, **a three-storey pavilion whose upper
+>    floors are covered in gold**, reflected in the water. **On the pond
+>    bank beside the road stands the GIANT DARUMA-OTOSHI [!]**, a Japanese
+>    toy: a **tower of five round, flat, colourful discs** (orange,
+>    dark teal, gold, green, turquoise) with a **round red daruma head with a
+>    white face, black eyes and eyebrows** on top, standing on a stone slab
+>    and a stone plinth. The tower is about **2.3 cars tall** and each disc is
+>    about one car wide. Its **face looks toward the approaching cars**. Behind
+>    it, a **wooden timber frame carries a long-handled round wooden mallet,
+>    pulled back high and about to swing down on the BOTTOM disc**, which
+>    would knock it sideways across the road. A car is lifting off the
+>    throttle in front of it.
+> 7. **G: the bamboo forest.** The road winds between **walls of very tall,
+>    straight green bamboo stalks** with low brushwood fences, sunlight
+>    falling in patches on the road. On the left edge, a small **iron railway
+>    bridge** crosses above the road with a short **vintage train**
+>    (red-brown, no logos).
+> 8. **H: the river bridge.** A **long low wooden bridge** crosses a calm
+>    river with two roofed wooden boats on it, then the road runs straight up
+>    to the start street.
+>
+> **SCALE [!]:** a toy car is about 4 m long. The townhouses are **2 storeys,
+> each storey about as tall as a car is long**. The torii tunnel is about
+> **1.5 cars wide** inside. The pagoda at the start is **about 6 cars tall**.
+> The golden pavilion is **about 3.5 cars tall**. The daruma tower is
+> **about 2.3 cars tall**. A deer is **half a car** long. Bamboo stalks are
+> **5 cars tall**.
+>
+> **CARS:** 6–8 chunky toy cars in saturated colours (blue, yellow, green, a
+> white police car, a big red fire truck, a long yellow bus) spread around
+> the loop: one in the air off the temple stage, one inside the torii
+> tunnel, one lifting off the throttle before the daruma tower.
+> **No text, no kanji, no logos anywhere.**
+
+### 9.1 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.2, paste-ready
+
+**Cum se folosește:**
+- Se dă **după** dioramă (v0.2 acceptată), în aceeași conversație, ca să
+  moștenească stilul, cu diorama generată atașată.
+- **Repetă regulile de stil și paletă**: la Fiordland, stilul „moștenit” de
+  la o dioramă greșită a ieșit greșit.
+- Planșa e sursa de **siluete și culori, NU de dimensiuni**. Cotele vin din §5.
+- Rândurile urmează §5 **după trecerea de contracte (§5.6)**. **Scoase:**
+  `daruma_otoshi`, `torii_senbon`, `torii_large`, `cedar` (există în
+  `assets/models/kyoto/`), `shishi_odoshi` (hazard înlocuit) și piesele pe
+  care le face codul (puntea scenei, râpele, puntea podurilor, apa,
+  particulele și decalul de frunze).
+
+> Using the exact same low-poly, flat-shaded, faceted style, palette and
+> lighting as the diorama above, create an **asset inventory sheet**: a single
+> tall image on a neutral light-grey background, **12 rows**, each item
+> isolated in 3/4 view with soft baked ambient occlusion, **lit by neutral
+> daylight** (not late-afternoon: this sheet is for shapes and base
+> colours), drawn at a consistent scale within its row, with a small 4 m
+> toy-car silhouette in the corner of each row, and **its file name written in
+> small monospace letters under each item**. No text other than the file
+> names. **Where the diorama disagrees with the following rules, the rules
+> win:** every face is one flat colour, with big facets and no painted
+> texture. Vermilion `#E8622D` with near-black beams `#4A3526`; maples only
+> `#BB3522`, `#E54839`, `#A8683A`; ginkgo `#F2D03C`; roof tiles `#55535A`;
+> plaster `#E9F2F0`; moss `#3F7A3C`; stone `#B8B4AC`. **No text, no kanji, no
+> logos on any gate, plaque, train or boat.** Maple crowns are **layered flat
+> tiers with gaps**, never round balls. **Each building and tree is built
+> from separate parts by material (roof, walls, wood, stone, foliage, trunk):
+> draw the parts clearly distinct.**
+> 1. **Pagodas** — `yasaka_pagoda` (five-storey, 24 m, dark wood and white
+>    plaster, grey tiled roofs with upturned corners, bronze spire),
+>    `sanjunoto_pagoda` (three-storey, vermilion), `koyasu_pagoda`
+>    (three-storey, vermilion, 14 m).
+> 2. **Temple on pillars** — `kiyomizu_hondo` (huge temple hall with a steep
+>    dark hipped roof; the front, which faces the stage, is the richest
+>    side), `kakezukuri_scaffold` (a 6 m wide, 16 m tall **lattice of wooden
+>    pillars and cross-beams** that holds up the stage; it repeats side by
+>    side), `niomon_gate` (two-storey vermilion gate with an 11 m wide
+>    opening).
+> 3. **Gates and foxes** — `inari_romon` (vermilion tower gate, 11 m
+>    opening), `votive_torii_cluster` (a bunch of small torii),
+>    `kitsune_statue` (stone fox on a pedestal with a key in its mouth and a
+>    **red bib**; two variants).
+> 4. **Golden pavilion** — `kinkakuji` (three storeys: dark natural wood on
+>    the ground floor, **gold** on the upper two, a small golden phoenix on
+>    the roof ridge), `yukimi_lantern` (low stone lantern with a wide cap,
+>    for the pond edge).
+> 5. **Bridges** — `tsutenkyo_roof_module` (a 6 m section of a covered
+>    wooden bridge: tiled roof, posts and railing, open sides, ends
+>    identical so sections can repeat), `togetsukyo_module` (a 10 m section
+>    of a low wooden bridge: railing and posts on wooden piers, ends
+>    identical), `iron_truss_bridge` (small riveted iron railway bridge,
+>    one span).
+> 6. **Old town** — `machiya_a` … `machiya_e` (two-storey dark wooden
+>    townhouses, lattice fronts, cloth door curtains, grey tiled roofs; the
+>    street side is rich, the back is plain), `teahouse_front` (red bench
+>    under a big red parasol), `paper_lantern` (unlit), `temple_wall` (white
+>    plaster wall with a tiled cap, 8 m).
+> 7. **Temple props** — `stone_lantern_a`, `stone_lantern_b`,
+>    `small_shrine`, `ema_rack` (wooden votive plaques, **blank**),
+>    `bell_tower` (open bell pavilion with a big bronze bell), `chozuya`
+>    (stone water basin under a small roof), `cyclopean_wall` (large fitted
+>    stones).
+> 8. **Trees** — `momiji_a`, `momiji_b`, `momiji_c` (Japanese maples in the
+>    three reds, layered flat crowns with gaps, three different
+>    silhouettes), `ginkgo` (golden cone-shaped crown), `niwaki_pine`
+>    (cloud-pruned pine).
+> 9. **Bamboo and garden** — `moso_culm` (one very tall straight bamboo
+>    stalk), `bamboo_crown`, `shiba_fence` (low brushwood fence),
+>    `karikomi_shrub_a`, `karikomi_shrub_b` (clipped round shrubs),
+>    `garden_rock_a/b/c`, `stepping_stones`, `moss_mound`, `leaf_pile` (a
+>    raked pile of red leaves).
+> 10. **Vehicles and people** — `sagano_train` (vintage locomotive and three
+>     wooden coaches coupled in one straight line, red-brown, **no livery, no
+>     logo**), `jinrikisha` (rickshaw with a running puller), `yakatabune`
+>     (roofed wooden river boat), `monk_sweeper` (monk with a bamboo broom).
+> 11. **Animals** — `sika_deer` (spotted deer; three poses: standing /
+>     grazing / bowing), `crow` (large black crow, wings spread).
+> 12. **Horizon** — `kyoto_horizon`: a strip of four low distant silhouettes
+>     side by side, **no detail, only big facets**: `Higashiyama_A` and
+>     `Higashiyama_B` (low hills with autumn forest: red and gold patches on
+>     dark-green cedar), `Arashiyama_A` (a taller green mountain),
+>     `FarRoofs_A` (a long band of grey tiled roofs fading into haze).
+
+
+### 9.2 ISTORIC: dioramă v0.1 (concept, înaintea pistei; descrie tubul shishi-odoshi, topologia și colțurile sunt GREȘITE față de pista construită, NU se mai folosește)
 
 **v0.1 e diorama de concept, înaintea pistei.** Lecția de la Fiordland
 (memoria `diorama-din-geometria-reala`) e că referința bună vine din
@@ -1239,7 +1546,8 @@ v0.2 a greșit sensul buclei.
 > the loop: one in the air off the temple stage, one inside the torii
 > tunnel, one swerving around the bamboo seesaw.
 
-### 9.1 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.1, paste-ready
+
+### 9.3 ISTORIC: planșa de inventar v0.1 (are shishi_odoshi, torii_senbon, torii_large, cedar; înlocuită de §9.1)
 
 **Cum se folosește:**
 - Se dă **după** dioramă, în aceeași conversație, ca să moștenească stilul,

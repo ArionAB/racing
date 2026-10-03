@@ -800,6 +800,22 @@ if len(sys.argv) > 1:
        frac_from=F["G S1 intrare"] - 0.012, frac_to=F["G2 sub podul trenului"] + 0.006,
        lat_min=40.0, lat_max=62.0, spacing=5.0, edge_clear_m=3.0, scale_min=0.9,
        scale_max=1.3, max_below_road_m=6.0, seed=62)
+    # H (POI H, kyoto/poi-h): EXTERIORUL dreptei finale (stanga, vest) era camp
+    # gol pana la orizont; diorama are acolo malul raului si dealuri impadurite
+    # (artari rosii, conifere inchise). O singura FASIE pe stanga, dincolo de
+    # primul rand manual (gen_decor_kyoto_h.gd, 20-45 m de ax), de la 30 m de
+    # ax (randul doi de case al lui A sta la 21-27 m), departe de linia de vedere
+    # spre pagoda (<= 5 m de ax pe ultima treime). `max_below_road_m` 3 tine
+    # copacii afara din bazinul raului (apa la -3, drumul la +3).
+    # Runda 2 (desene): r1 avea 4 discuri x 5 specii x felii de 90 m x umbra
+    # = +88 felii (~+176 desene). Acum o zona, 3 specii, fara umbra (copacii
+    # sunt la >= 30 m de ax; primul rand manual o arunca).
+    fz("H vest fasie", 0, ("momiji_a", "momiji_b", "cedar_dark"), (0.36, 0.34, 0.30),
+       frac_from=F["H pod Togetsukyo intrare"] - 0.004, frac_to=0.985, side=-1,
+       lat_min=30.0, lat_max=110.0, spacing=6.0, edge_clear_m=14.0, shadow_m=0.0,
+       max_below_road_m=3.0, seed=81)
+    # (runda 2: discul "H deal gradina vest" scos - dealul il acopera acum
+    # "deal gradina F", al lui F, cu r 46 pe tot dealul.)
 
     FOREST_GLBS = (("momiji_a", "plants"), ("momiji_b", "plants"), ("momiji_c", "plants"),
                    ("ginkgo", "plants"), ("niwaki_pine", "plants"), ("moso_culm", "plants"),

@@ -719,6 +719,7 @@ if len(sys.argv) > 1:
     fz("versant Higashiyama", 1, MAPLES, (0.34, 0.33, 0.33), center=(372.0, 0.0, -150.0),
        radius=88.0, spacing=7.0, seed=22)
     # D: valea de artari (cea mai deasa), pana la gura podului si sub el.
+<<<<<<< HEAD
     # POI D (runda 2, dupa reparatia MeshForest 97be100b: edge_clear_m e viu).
     # Tunelul des din diorama: trunchiurile la >= margine + 5,5 (printre
     # piesele primului rand manual, margine + 5..6,8), coroanele (semilatime
@@ -735,6 +736,30 @@ if len(sys.argv) > 1:
     fz("rapa Tsutenkyo artari", 0, MAPLES, (0.40, 0.28, 0.32), frac_from=F["D pod Tsutenkyo intrare"] + 0.002,
        frac_to=F["D pod Tsutenkyo iesire"] - 0.002, lat_min=12.5, lat_max=18.0, spacing=4.2, edge_clear_m=5.0,
        scale_min=0.85, scale_max=1.05, seed=32)
+=======
+    fz("valea D artari", 0, MAPLES, (0.36, 0.30, 0.34), frac_from=F["D aterizare coborare"],
+       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=4.6, edge_clear_m=10.5, seed=31)
+    # === POI E: poienile Inari (gen_decor_kyoto_e.gd, „; poiana" la iesire) ===
+    # Cedrii fasiei (edge_clear 9, coroana pana la ~5 m) acopereau altarasele,
+    # sirurile de torii votive si vulpile din DecorManual (captura r1). Fiecare
+    # grup primeste o poiana DISC cu `claim`, emisa INAINTEA zonelor de cedru:
+    # in ea cresc cativa cedri (70%) si artari rosii ca accent, dincolo de piese
+    # (edge_clear 14).
+    for k_, (px_, pz_, pr_) in enumerate((
+            (401.6, 356.8, 12.0), (379.9, 336.1, 12.0), (393.3, 260.5, 9.0),
+            (428.2, 291.4, 10.0), (394.2, 311.2, 10.5), (419.3, 332.9, 10.0),
+            (364.8, 348.0, 10.0), (370.8, 379.8, 10.0), (351.0, 385.4, 10.0),
+            (326.3, 387.1, 10.0), (389.7, 367.8, 10.0), (350.6, 354.1, 10.0),
+            (360.6, 382.4, 10.0))):
+        # Poiana furcii (a treia) ramane GOALA: artarii din pana dintre bucla si
+        # banda ascundeau poarta mare si vulpile (captura r1b 0,478).
+        gol_ = (k_ == 2)
+        fz("Inari poiana %d" % k_, 1, ("cedar_dark",) + MAPLES, (0.7, 0.1, 0.1, 0.1),
+           center=(px_, 0.0, pz_), radius=pr_, spacing=40.0 if gol_ else 9.0,
+           edge_clear_m=60.0 if gol_ else 14.0, claim=True, scale_min=0.8,
+           scale_max=1.0, seed=440 + k_)
+    # === /POI E ===
+>>>>>>> kyoto/poi-e
     # E: muntele Inari, cedru inchis, cu cate un artar rosu printre ei.
     fz("Inari cedru fasie", 0, ("cedar_dark", "momiji_b"), (0.88, 0.12),
        frac_from=F["E arc intrare (E' se desprinde)"] - 0.008,
@@ -957,6 +982,8 @@ branch_index = 1
 gate_scene = ExtResource("13_senbon")
 large_gate_scene = ExtResource("14_large")
 cedar_scene = ExtResource("15_cedar")
+foxes_enabled = false
+mouth_clearing = true
 
 [node name="CovorFrunze" type="Node3D" parent="."]
 script = ExtResource("16_carpet")

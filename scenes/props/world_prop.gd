@@ -3736,6 +3736,12 @@ func _add_trunk(body: StaticBody3D, model: Node3D) -> bool:
 	col.shape = cyl
 	col.position = aabb.position + Vector3(aabb.size.x * 0.5,
 		aabb.size.y * 0.5, aabb.size.z * 0.5)
+	# Cu raza masurata (TRUNK_RADIUS) axa e a MODELULUI, nu centrul AABB: o
+	# coroana asimetrica (ramura lunga intr-o parte) muta centrul casetei de pe
+	# trunchi, si un cilindru subtire centrat pe caseta rateaza lemnul.
+	if TRUNK_RADIUS.has(stem):
+		col.position.x = model.transform.origin.x
+		col.position.z = model.transform.origin.z
 	body.add_child(col)
 	return true
 

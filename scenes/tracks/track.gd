@@ -1680,7 +1680,30 @@ static func themes() -> Dictionary:
 				{"from": 0.331, "to": 0.449, "max_m": 45.0, "fade_m": 18.0,
 					"tint": Color(0.8626, 0.54, 0.3079)},
 			],
-			"horizon_model": "",
+			# ORIZONTUL (kit int-a): dealurile Higashiyama in toamna, muntele
+			# Arashiyama si banda de acoperisuri din pacla (`kyoto_horizon.glb`,
+			# brief §5.4). Inelele stau sub fog_end 340 < FAR_PLANE 380 (memoria
+			# efecte-de-fundal-cote-legate): ceata de 0,85 la 340 le topeste in
+			# pacla calda, nu le taie. Scarile sunt legate de CADRU, nu de
+			# dimensiunea din GLB: camera de joc (10 m sus) vede la distanta d
+			# pana la ~10 + 0,092 d m peste drum, adica ~35-40 m la 300 m, deci
+			# Arashiyama (70 m) intra la scara 0,5 si Higashiyama (45 m) la 0,7
+			# (memoria inaltimea-obiectelor-si-camera). Fara umbra aruncata
+			# (`_build_horizon` o stinge pe toate: caster-departat-fura-umbra).
+			# Culorile raman pe atlas (petice rosii/aurii pictate pe verde-inchis;
+			# o clasa de roca le-ar sterge): `horizon_class` gol.
+			"horizon_model": "res://assets/models/kyoto/rocks/kyoto_horizon.glb",
+			"horizon_picks": [["Higashiyama_A", "Higashiyama_B"],
+				["Arashiyama_A"], ["FarRoofs_A"]],
+			"horizon_class": "",
+			"horizon_rings": [
+				{"near": 340.0, "far": 460.0, "count": 5, "scale": 0.8,
+					"clear": 170.0, "picks": ["Higashiyama_A", "Higashiyama_B"]},
+				{"near": 360.0, "far": 470.0, "count": 2, "scale": 0.45,
+					"clear": 190.0, "picks": ["Arashiyama_A"]},
+				{"near": 330.0, "far": 450.0, "count": 3, "scale": 1.3,
+					"clear": 150.0, "picks": ["FarRoofs_A"]},
+			],
 			"walls": false,
 			# Balustrada de tablier pe viaducte (scena Kiyomizu, Tsutenkyo,
 			# Togetsukyo), ca Chongqing: brief §2 „pe laturi scena are balustrada,

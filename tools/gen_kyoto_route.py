@@ -719,7 +719,6 @@ if len(sys.argv) > 1:
     fz("versant Higashiyama", 1, MAPLES, (0.34, 0.33, 0.33), center=(372.0, 0.0, -150.0),
        radius=88.0, spacing=7.0, seed=22)
     # D: valea de artari (cea mai deasa), pana la gura podului si sub el.
-<<<<<<< HEAD
     # POI D (runda 2, dupa reparatia MeshForest 97be100b: edge_clear_m e viu).
     # Tunelul des din diorama: trunchiurile la >= margine + 5,5 (printre
     # piesele primului rand manual, margine + 5..6,8), coroanele (semilatime
@@ -736,9 +735,6 @@ if len(sys.argv) > 1:
     fz("rapa Tsutenkyo artari", 0, MAPLES, (0.40, 0.28, 0.32), frac_from=F["D pod Tsutenkyo intrare"] + 0.002,
        frac_to=F["D pod Tsutenkyo iesire"] - 0.002, lat_min=12.5, lat_max=18.0, spacing=4.2, edge_clear_m=5.0,
        scale_min=0.85, scale_max=1.05, seed=32)
-=======
-    fz("valea D artari", 0, MAPLES, (0.36, 0.30, 0.34), frac_from=F["D aterizare coborare"],
-       frac_to=F["D pod Tsutenkyo iesire"] + 0.004, lat_min=9.0, lat_max=78.0, spacing=4.6, edge_clear_m=10.5, seed=31)
     # === POI E: poienile Inari (gen_decor_kyoto_e.gd, „; poiana" la iesire) ===
     # Cedrii fasiei (edge_clear 9, coroana pana la ~5 m) acopereau altarasele,
     # sirurile de torii votive si vulpile din DecorManual (captura r1). Fiecare
@@ -759,7 +755,6 @@ if len(sys.argv) > 1:
            edge_clear_m=60.0 if gol_ else 14.0, claim=True, scale_min=0.8,
            scale_max=1.0, seed=440 + k_)
     # === /POI E ===
->>>>>>> kyoto/poi-e
     # E: muntele Inari, cedru inchis, cu cate un artar rosu printre ei.
     fz("Inari cedru fasie", 0, ("cedar_dark", "momiji_b"), (0.88, 0.12),
        frac_from=F["E arc intrare (E' se desprinde)"] - 0.008,

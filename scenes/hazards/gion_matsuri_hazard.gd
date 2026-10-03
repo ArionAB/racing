@@ -116,6 +116,10 @@ signal car_thrown(car: Car)
 @export_range(0.1, 4.0, 0.1) var hit_cooldown: float = 1.5
 ## Marja pe fereastra de pericol pentru AI (s), de fiecare parte.
 @export_range(0.0, 1.5, 0.05) var ai_margin: float = 0.35
+## Cat de jos (fractie din croaziera) poate cobori plafonul de viteza al AI-ului ca sa
+## treaca DUPA car. Mai jos decat la daruma (0,5): fereastra de pericol dureaza ~4 s,
+## nu ~1,4 s. Niciodata oprire.
+@export_range(0.2, 0.8, 0.05) var ai_floor: float = 0.35
 
 ## Latimea soselei (m) la tur; `road_half_width` o suprascrie.
 var road_width: float = 11.0

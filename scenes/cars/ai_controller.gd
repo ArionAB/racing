@@ -1017,6 +1017,12 @@ func _daruma_cap(idx: int, speed: float) -> float:
 		if hz == null:
 			continue
 		var margin: float = float(hz.get("ai_margin"))
+		# Podeaua plafonului de viteza: fiecare hazard o poate cobori (carul de festival
+		# ocupa soseaua ~4 s, nu ~1 s ca discul, deci ridicarea trebuie sa mearga mai jos).
+		var floor_frac := DARUMA_FLOOR
+		var own_floor: Variant = hz.get("ai_floor")
+		if own_floor != null:
+			floor_frac = float(own_floor)
 		var key := hz.get_instance_id()
 		if not _daruma_index.has(key):
 			_daruma_index[key] = track.closest_index_global(hz.call(&"ai_decision_point") as Vector3, car.route)
@@ -1037,7 +1043,7 @@ func _daruma_cap(idx: int, speed: float) -> float:
 			if bool(hz.call(&"blocks_between", eta_fast, eta_slow)):
 				var w: Vector2 = hz.call(&"window_rel", eta_fast)
 				var wait_v := ahead / maxf(w.y + margin + DARUMA_EXTRA_S, 0.1)
-				if wait_v >= cruise * DARUMA_FLOOR:
+				if wait_v >= cruise * floor_frac:
 					st["lift"] = true
 					st["clear_at"] = _daruma_now + w.y
 				if OS.get_environment("DARUMA_TRACE") == "1":
@@ -1049,7 +1055,7 @@ func _daruma_cap(idx: int, speed: float) -> float:
 		var left: float = float(state["clear_at"]) - _daruma_now + margin + DARUMA_EXTRA_S
 		if left <= 0.0:
 			continue
-		cap = minf(cap, maxf(along / left, cruise * DARUMA_FLOOR))
+		cap = minf(cap, maxf(along / left, cruise * floor_frac))
 	return cap
 
 

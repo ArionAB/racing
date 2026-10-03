@@ -59,6 +59,13 @@ check "props/paper_lantern.glb"        800 --origin=assembly
 check "structures/temple_wall.glb"    2000 --origin=assembly
 
 echo
+echo "== poduri (kit §1.5) =="
+# waterline: modulele au puntea la Y=0 (glTF), piloni dedesubt, acoperis deasupra
+check "structures/tsutenkyo_roof_module.glb" 6000 --origin=waterline
+check "structures/togetsukyo_module.glb"     4000 --origin=waterline
+check "structures/iron_truss_bridge.glb"     3000 --origin=assembly --allow-car-slots=Truss_Iron
+
+echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total (5 existente, nu ale kitului)"
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi

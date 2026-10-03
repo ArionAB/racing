@@ -158,9 +158,9 @@ nod separat `*_Rail`, ca să poată fi stinsă.
 
 | fișier | cote | h/l | contract |
 |---|---|---:|---|
-| `structures/tsutenkyo_roof_module.glb` | **6 m** lung (Y), lat ~9, înalt ~5 | 0,3 | acoperiș de țiglă pe stâlpi, părți deschise, capete identice; `Tsu_Roof`, `Tsu_Wood`, `Tsu_Rail`; coliziune `none` |
-| `structures/togetsukyo_module.glb` | **10 m** lung, lat ~8, înalt (cu piloni) ~3 | 0,25 | punte joasă pe piloni de lemn; `Toget_Wood`, `Toget_Rail`; `none` |
-| `structures/iron_truss_bridge.glb` | travee **~16 m**, lat 4,5, ~7 m deasupra drumului | 0,4 | pod feroviar cu zăbrele, roșu-ruginiu (`RUST`/`CAR_RED` cu excepție), **drumul trece pe dedesubt**: deschiderea liberă ≥ 11 m lat, ≥ 6 m înălțime, măsurată ca GOL; `mesh` |
+| `structures/tsutenkyo_roof_module.glb` | **6 m** lung (Y); drumul real **±4,5 m** + parapet procedural; stâlpi la ±5,4, liber interior **≥10,4 m**, **înălțime liberă ≥4,5 m deasupra punții pe tot ±4,5 m** (stâlpi 4,95 m, grinzi la ~5,0; măsurat 4,65 m; autobuzul/pompierii depășesc 2 m și modulul e fără coliziune), streașină ±6,9, coama ~+8,3 (sursa: `Track18.tscn` `custom_width_segments`, frac 0,449–0,466) | 0,3 | acoperiș de țiglă pe stâlpi, părți deschise, capete identice; `Tsu_Roof`, `Tsu_Wood`, `Tsu_Rail`; coliziune `none` |
+| `structures/togetsukyo_module.glb` | **10 m** lung; drumul real **±7,0 m** (frac 0,832–0,894): punte ±7,6, balustradă ±7,4, liber interior 14,3 m; înalt (cu piloni) ~3,4 | 0,25 | punte joasă pe piloni de lemn; `Toget_Wood`, `Toget_Rail`; `none` |
+| `structures/iron_truss_bridge.glb` | travee **~20,8 m**, lat 4,5; drumul real **±6,0 m** (frac 0,804); **gol înghețat 15,15 m × ≥6,25 m** (culee la |x|≥7,6), ~6,3 m deasupra drumului | 0,4 | pod feroviar cu zăbrele, roșu-ruginiu (`RUST`/`CAR_RED` cu excepție), **drumul trece pe dedesubt**: deschiderea liberă ≥ 11 m lat, ≥ 6 m înălțime, măsurată ca GOL; `mesh` |
 
 ### 1.6 Orașul — `build_kyoto_town.py`
 

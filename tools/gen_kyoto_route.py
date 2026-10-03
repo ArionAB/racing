@@ -367,7 +367,9 @@ for w in WPTS:
 PAGODA_XY = (4.0, 200.0)          # Yasaka: 15-25 m de coltul B, pe axa gridului
 SCENE_XY = (324.0, 137.0)         # mijlocul puntii Kiyomizu
 KOYASU_XY = (348.0, 30.0)         # pagoda Koyasu, pe versantul de aterizare
-KINKAKU_XY = (150.0, -300.0)      # pavilionul, pe malul de nord al iazului
+# POI F r2: pozitia REALA (tools/gen_decor_kyoto_f.gd): malul de VEST al iazului
+# (iazul real ~100 x 100 m; vechiul (150, -300) cadea in mijlocul apei).
+KINKAKU_XY = (117.6, -285.0)      # pavilionul, pe malul de vest al iazului
 CENTROID_XY = (centroid_x, centroid_y)
 
 def heading_deg(dx, dy):
@@ -443,12 +445,15 @@ ok = sum(1 for i in sel if abs(azimut_to(i, KOYASU_XY)) <= 15.0)
 report(len(sel) > 0 and ok == len(sel),
        f"C2 Koyasu in fata de pe scena: {ok}/{len(sel)} puncte la 60-110 m cu |azimut| <= 15")
 
-# 4. Pavilionul in dreapta pe F, 20-45 deg la 70-110 m.
+# 4. Pavilionul in dreapta pe F. POI F r2 (pozitia reala, acceptata de
+# coordonator pe captura): de pe apropierea de daruma pavilionul e la 100-150 m,
+# 15-45 deg dreapta (vazut peste apa); sub 100 m drumul a trecut deja de el si
+# azimutul sare peste 45 (iese din cadru lateral, corect: decizia e la daruma).
 f_idx = frac_range_indices(frac["F intrare (spre V)"], frac["F curba stanga sfarsit"])
-sel = [i for i in f_idx if 70.0 <= dist_to(i, KINKAKU_XY) <= 110.0]
-ok = sum(1 for i in sel if 20.0 <= azimut_to(i, KINKAKU_XY) <= 45.0)
+sel = [i for i in f_idx if 100.0 <= dist_to(i, KINKAKU_XY) <= 150.0]
+ok = sum(1 for i in sel if 15.0 <= azimut_to(i, KINKAKU_XY) <= 45.0)
 report(len(sel) > 0 and ok / len(sel) >= 0.6,
-       f"F pavilionul in dreapta (20-45 deg) la 70-110 m: {ok}/{len(sel)} puncte "
+       f"F pavilionul in dreapta (15-45 deg) la 100-150 m: {ok}/{len(sel)} puncte "
        f"({100*ok/max(1,len(sel)):.0f}%, prag 60%)")
 
 # 5. Turnul daruma-otoshi (inainte: tubul): pe exteriorul unei curbe la STANGA, cu

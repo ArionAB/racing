@@ -59,6 +59,10 @@ const POND_C := Vector2(162.0, 290.0)
 const PAVILION_Z := 288.0
 ## Punctul de pe drum spre care priveste fatada pavilionului (cadrul-erou).
 const FACE_FRAC := 0.615
+## Scara de jucarie a pavilionului (runda 2: la 1,0 avea ~40 px pe cadrul-erou).
+const PAV_SCALE := 1.3
+## Reflexia: cat din culoarea pavilionului trece in apa.
+const REFLECT_STRENGTH := 0.8
 ## Insulitele (Godot x, z): la ~45-50 m de linia de vedere spre pavilion.
 const ISLETS := [Vector2(150.0, 262.0), Vector2(186.0, 280.0)]
 
@@ -99,11 +103,11 @@ func _ready() -> void:
 		return
 	_pavilion_garden()
 	_islets()
+	_back_trees()
 	_shore()
 	_near_bank()
 	_east_bank()
 	_pasture()
-	_back_trees()
 	_write()
 	get_tree().quit(0)
 
@@ -174,7 +178,7 @@ func _pavilion() -> void:
 	var face_to: Vector3 = _track.baked[fi]
 	# Centrul: fatada (adancimea 11,4 / 2) iese ~1 m peste apa.
 	var dir := Vector2(face_to.x - shore_x, face_to.z - PAVILION_Z).normalized()
-	var c := Vector2(shore_x, PAVILION_Z) - dir * (5.7 - 1.2)
+	var c := Vector2(shore_x, PAVILION_Z) - dir * (5.7 * PAV_SCALE - 1.2)
 	var y := _sol_real(c.x, c.y)
 	_pav = Vector3(c.x, maxf(y, WATER_Y + 0.1) - 0.05, c.y)
 	# -Z local spre camera: (-sin, -cos) = dir.
@@ -188,7 +192,7 @@ func _pavilion() -> void:
 ## camera -> mijlocul pavilionului loveste terenul?).
 func _report_pavilion() -> void:
 	var n := _track.baked.size()
-	var top := _pav.y + 13.7
+	var top := _pav.y + 13.7 * PAV_SCALE
 	print("; frac   dist   azimut  plafon   varf   ocluzie")
 	var f := 0.59
 	while f <= 0.665:
@@ -207,37 +211,41 @@ func _report_pavilion() -> void:
 		q.collide_with_areas = false
 		var hit := _space.intersect_ray(q)
 		var occ := "-" if hit.is_empty() else "%.0f m" % cam.distance_to(hit["position"])
-		print(";  %.3f  %5.1f  %+6.1f  %6.1f  %5.1f   %s" % [f, dist, -az, ceil_y, top, occ])
+		# Inaltimea pe ecran (1080 px verticali, fov 68), de la camera.
+		var dcam := Vector2(_pav.x - cam.x, _pav.z - cam.z).length()
+		var px := 1080.0 * 0.5 / tan(deg_to_rad(34.0)) * (13.7 * PAV_SCALE) / dcam
+		print(";  %.3f  %5.1f  %+6.1f  %6.1f  %5.1f   %-6s %4.0f px" % [f, dist, -az, ceil_y, top, occ, px])
 		f += 0.005
 
 
 # ------------------------------------------------------------------ piese
 
 func _pavilion_garden() -> void:
-	_raw("kinkakuji", "fPavilion", _pav, _pav_yaw, 1.0, "")
+	_raw("kinkakuji", "fPavilion", _pav, _pav_yaw, PAV_SCALE, "")
 	var fwd := Vector3(-sin(_pav_yaw), 0.0, -cos(_pav_yaw))
 	var right := Vector3(fwd.z, 0.0, -fwd.x)
 	# Doi pini mici la baza (brief kit 1.4: „nu fac parte din GLB").
 	for s in [-1.0, 1.0]:
-		var p: Vector3 = _pav + fwd * 1.0 + right * (10.0 * s)
+		var p: Vector3 = _pav + fwd * 1.0 + right * (12.5 * s)
 		_tree("niwaki_pine", "fPavPin", p, 0.85 + _rng.randf() * 0.15)
 	# Pietre de mal la piciorul fatadei si doua felinare yukimi pe capete.
 	for k in 5:
 		var o := -8.0 + 4.0 * k + _rng.randf_range(-0.8, 0.8)
-		var p: Vector3 = _pav + fwd * 7.4 + right * o
+		var p: Vector3 = _pav + fwd * (5.7 * PAV_SCALE + 1.6) + right * o
 		_rock(p, 1.1 + _rng.randf() * 0.4, "fPavPiatra")
 	for s in [-1.0, 1.0]:
-		var p: Vector3 = _pav + fwd * 6.0 + right * (12.5 * s)
+		var p: Vector3 = _pav + fwd * 6.5 + right * (15.0 * s)
 		_ground_piece("yukimi_lantern", "fPavYukimi", p, _pav_yaw, 1.15)
 	_placed.append(Vector3(_pav.x, _pav.z, 8.5))
 	# Reflexia: nod frate cu DecorManual, aceeasi transformare.
 	_n += 1
-	var b := Basis.from_euler(Vector3(0.0, _pav_yaw, 0.0))
+	var b := Basis.from_euler(Vector3(0.0, _pav_yaw, 0.0)).scaled(Vector3.ONE * PAV_SCALE)
 	_nodes.append('[node name="ReflexiePavilion" type="Node3D" parent="."]')
 	_nodes.append("transform = %s" % _xf(b, _pav))
 	_nodes.append('script = ExtResource("poif_pond_reflection")')
 	_nodes.append('model = ExtResource("poif_kinkakuji")')
 	_nodes.append("water_y = %.2f" % WATER_Y)
+	_nodes.append("strength = %.2f" % REFLECT_STRENGTH)
 	_nodes.append("")
 
 
@@ -276,6 +284,32 @@ func _shore_points() -> Array[Vector3]:
 	return out
 
 
+## Linia vederii spre pavilion: de pe cadrul-erou (frac 0,600-0,628, camera la
+## 12,5 m in spate si 10 m sus) pana la pavilion. Ce e inalt nu sta pe ea.
+func _blocks_view(p: Vector3, r: float) -> bool:
+	var n := _track.baked.size()
+	var f := 0.600
+	while f <= 0.628:
+		var i := int(f * float(n)) % n
+		var a: Vector3 = _track.baked[i]
+		var t := _track.point_at(i + 6) - a
+		t.y = 0.0
+		t = t.normalized()
+		var cam := a - t * 12.5
+		var q := Geometry2D.get_closest_point_to_segment(Vector2(p.x, p.z),
+			Vector2(cam.x, cam.z), Vector2(_pav.x, _pav.z))
+		# Doar INAINTEA pavilionului (in spatele lui, pinii il ancoreaza).
+		if q.distance_to(Vector2(_pav.x, _pav.z)) > 9.0 and q.distance_to(Vector2(p.x, p.z)) < 9.0 + r:
+			return true
+		f += 0.004
+	return false
+
+
+## Malul iazului. Runda 2 (verdict: „pietris alb marunt"): STANCI de gradina in
+## grupuri de 2-3 cu una mare (scara 1,6-2,5), muschi la baza, un grup la ~3
+## puncte de mal; pe malul de vest si de nord (in jurul si in spatele
+## pavilionului) pini niwaki DESI si tufe karikomi, ca pavilionul sa iasa din
+## verde, dar nimic inalt pe linia de vedere.
 func _shore() -> void:
 	var pts := _shore_points()
 	print("; linia apei: %d puncte" % pts.size())
@@ -284,23 +318,38 @@ func _shore() -> void:
 		k += 1
 		var p: Vector3 = Vector3(s.x, 0.0, s.z)
 		var out := Vector3(p.x - POND_C.x, 0.0, p.z - POND_C.y).normalized()
+		var tang := Vector3(-out.z, 0.0, out.x)
 		if _on_road(p, 1.5) or _forbidden(p, 2.0):
 			continue
-		if Vector2(p.x - _pav.x, p.z - _pav.z).length() < 16.0:
-			continue
-		if k % 4 == 0:
-			_ground_piece("moss_mound", "fMalMovila", p + out * 0.6, _rng.randf() * TAU,
-				1.1 + _rng.randf() * 0.4)
+		var near_pav := Vector2(p.x - _pav.x, p.z - _pav.z).length() < 13.0
+		if k % 3 == 0 and not near_pav:
+			var c := p - out * 0.6
+			_rock(c, 1.6 + _rng.randf() * 0.9, "fMalStanca")
+			_rock(c + tang * (1.9 + _rng.randf() * 0.6) + out * 0.5, 1.1 + _rng.randf() * 0.4, "fMalStanca")
+			if _rng.randf() < 0.6:
+				_rock(c - tang * (1.7 + _rng.randf() * 0.5) + out * 0.3, 0.9 + _rng.randf() * 0.4, "fMalStanca")
+			_ground_piece("moss_mound", "fMalMovila", c + out * 3.4 + tang * 1.2, _rng.randf() * TAU,
+				1.0 + _rng.randf() * 0.4)
+		var a: float = s.y
+		var back := a > 140.0 and a < 335.0 # malul de vest si de nord
+		if back:
+			# Doua randuri: tufe la 3-4 m, pini la 6-9 m si la 11-14 m.
+			var sh := p + out * (3.0 + _rng.randf())
+			if not _forbidden(sh, 1.5) and not _on_road(sh, 2.0) and Vector2(sh.x - _pav.x, sh.z - _pav.z).length() > 9.0:
+				var m := "karikomi_shrub_a" if k % 2 == 0 else "karikomi_shrub_b"
+				_ground_piece(m, "fMalTufa", sh, _rng.randf() * TAU, 1.2 + _rng.randf() * 0.5)
+			for d in [7.0, 12.5]:
+				var pn: Vector3 = p + out * (float(d) + _rng.randf() * 2.0) + tang * _rng.randf_range(-1.5, 1.5)
+				if not _on_road(pn, 4.0) and not _forbidden(pn, 3.0) and not _blocks_view(pn, 3.0):
+					_tree("niwaki_pine", "fMalPin", pn, 0.95 + _rng.randf() * 0.35)
 		else:
-			_rock(p - out * 0.4, 1.3 + _rng.randf() * 0.9, "fMalPiatra")
-		# Al doilea rand, pe uscat: tufe tunse in perechi, pini rari.
-		var inland := p + out * (3.0 + _rng.randf() * 1.5)
-		if k % 5 == 1 and not _on_road(inland, 2.0) and not _forbidden(inland, 1.5):
-			var m := "karikomi_shrub_a" if _rng.randf() < 0.5 else "karikomi_shrub_b"
-			_ground_piece(m, "fMalTufa", inland, _rng.randf() * TAU, 1.0 + _rng.randf() * 0.4)
-		var pine := p + out * (6.5 + _rng.randf() * 2.0)
-		if k % 7 == 3 and not _on_road(pine, 4.0) and not _forbidden(pine, 3.0):
-			_tree("niwaki_pine", "fMalPin", pine, 0.9 + _rng.randf() * 0.25)
+			var inland := p + out * (3.0 + _rng.randf() * 1.5)
+			if k % 5 == 1 and not _on_road(inland, 2.0) and not _forbidden(inland, 1.5):
+				var m2 := "karikomi_shrub_a" if _rng.randf() < 0.5 else "karikomi_shrub_b"
+				_ground_piece(m2, "fMalTufa", inland, _rng.randf() * TAU, 1.0 + _rng.randf() * 0.4)
+			var pine := p + out * (6.5 + _rng.randf() * 2.0)
+			if k % 7 == 3 and not _on_road(pine, 4.0) and not _forbidden(pine, 3.0) and not _blocks_view(pine, 3.0):
+				_tree("niwaki_pine", "fMalPin", pine, 0.9 + _rng.randf() * 0.25)
 
 
 ## Malul de langa drum (dreapta, intre asfalt si apa): gardul shiba-gaki si
@@ -356,7 +405,7 @@ func _east_bank() -> void:
 					1:
 						_ground_piece("moss_mound", "fEstMovila", p, _rng.randf() * TAU, 1.2 + _rng.randf() * 0.4)
 					3:
-						_rock(p, 1.3 + _rng.randf() * 0.6, "fEstPiatra")
+						_rock(p, 1.8 + _rng.randf() * 0.6, "fEstPiatra")
 			lat += 5.5
 		f += 0.0028
 	for it in [[0.615, 15.0, "stone_lantern_b"], [0.626, 12.0, "yukimi_lantern"]]:
@@ -419,7 +468,7 @@ func _back_trees() -> void:
 		var p: Vector3 = Vector3(s.x, 0.0, s.z)
 		var out := Vector3(p.x - POND_C.x, 0.0, p.z - POND_C.y).normalized()
 		var q: Vector3 = p + out * (9.0 + _rng.randf() * 5.0)
-		if _on_road(q, 6.0) or _forbidden(q, 4.0):
+		if _on_road(q, 6.0) or _forbidden(q, 4.0) or _blocks_view(q, 4.0):
 			continue
 		var m: String = ["momiji_a", "momiji_b", "momiji_c", "ginkgo"][k / 3 % 4]
 		_tree(m, "fMalArbore", q, 0.95 + _rng.randf() * 0.25)
@@ -445,8 +494,10 @@ func _yaw_road(f: float) -> float:
 
 
 func _rock(p: Vector3, scl: float, base: String) -> void:
+	if _on_road(p, 2.3) or _forbidden(p, 1.0):
+		return
 	var m: String = ["garden_rock_a", "garden_rock_b", "garden_rock_c"][_rng.randi() % 3]
-	_ground_piece(m, base, p, _rng.randf() * TAU, scl, 0.18 * scl)
+	_ground_piece(m, base, p, _rng.randf() * TAU, scl, 0.18 * scl, 0.45)
 
 
 func _tree(m: String, base: String, p: Vector3, scl: float) -> void:
@@ -459,8 +510,8 @@ func _tree(m: String, base: String, p: Vector3, scl: float) -> void:
 	_placed.append(Vector3(p.x, p.z, 2.5))
 
 
-func _ground_piece(m: String, base: String, p: Vector3, yaw: float, scl: float, sink: float = 0.05) -> void:
-	if _overlaps(p, 0.9 * scl):
+func _ground_piece(m: String, base: String, p: Vector3, yaw: float, scl: float, sink: float = 0.05, rf: float = 0.9) -> void:
+	if _overlaps(p, rf * scl):
 		return
 	var g := _sol_real(p.x, p.z)
 	# Doar pietrele si movilele pot sta in apa (mal, insulite); restul nu.
@@ -471,7 +522,7 @@ func _ground_piece(m: String, base: String, p: Vector3, yaw: float, scl: float, 
 	if g < WATER_Y:
 		y = maxf(g, WATER_Y - 0.45) - sink
 	_raw(m, base, Vector3(p.x, y, p.z), yaw, scl, "")
-	_placed.append(Vector3(p.x, p.z, 0.9 * scl))
+	_placed.append(Vector3(p.x, p.z, rf * scl))
 
 
 func _xf(b: Basis, pos: Vector3) -> String:

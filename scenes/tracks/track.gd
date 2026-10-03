@@ -1694,7 +1694,10 @@ static func themes() -> Dictionary:
 			"shoulder_texture": "res://assets/textures/classes/alpine_granite.png",
 			"shoulder_color": Color(0.80, 0.80, 0.80),
 			"shoulder_tile": 6.0,
-			"shoulder_width_zones": [Vector3(0.962, 0.072, 4.0)],
+			# POI B (Sannenzaka): fereastra continua pe urcare pana la 0,200
+			# (~15 m inaintea portii Niomon), cat tin randurile de machiya si
+			# treptele de pe trotuarul din dreapta.
+			"shoulder_width_zones": [Vector3(0.962, 0.200, 4.0)],
 			# ORIZONTUL (kit int-a): dealurile Higashiyama in toamna, muntele
 			# Arashiyama si banda de acoperisuri din pacla (`kyoto_horizon.glb`,
 			# brief §5.4). Inelele stau sub fog_end 340 < FAR_PLANE 380 (memoria

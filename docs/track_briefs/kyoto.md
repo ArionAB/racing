@@ -889,9 +889,78 @@ Categorie nouă `assets/models/kyoto/`, cu subfolderele `buildings/`,
   `macchia`).
 - **Reutilizate:** `old_stone`, `granite`, `village_plaster`.
 - **Apa:** v12, pentru iaz și râu.
-- **Decalul `leaf_carpet`** (D, E), cu `RoadWear` folosit invers.
-- **Particule:** frunze care cad (billboard, un material, plafon) și stropii
-  tubului (reutilizați, memoria `strop-apa-particule`).
+- **Covorul de frunze** (D, E), cu `RoadWear` folosit invers: **făcut**, vezi
+  §5.1.1.
+- **Particule:** frunze care cad (billboard, un material, plafon 64): **făcut**,
+  vezi §5.1.1; stropii tubului (reutilizați, memoria `strop-apa-particule`).
+
+#### 5.1.1 Covorul de frunze și frunzele care cad (3 oct 2026, `kyoto/covor-frunze`)
+
+**Ce e.** `LeafCarpet` (`scenes/props/leaf_carpet.gd`, shader
+`assets/shaders/leaf_carpet.gdshader`): un panou transparent la 4 cm peste
+asfalt (3.264 triunghiuri), pe două zone scrise de `tools/gen_kyoto_route.py`:
+**D** 0.335–0.440 (densitate 1,0, de la aterizare până înainte de gura podului)
+și **E** 0.472–0.560 (densitate 0,6, după pod până la Inari). Zonele se topesc
+pe 22 m la capete; tablierul podului și tunelul de torii nu au covor. Frunzele
+vin din clasa `leaf_litter` (`autumn_foliage.png`, scara 0,25; niciun fișier
+de textură nou), în trei tente din clasele paletei (`maple_crimson`,
+`maple_orange`, `leaf_litter`), amestecate moale. Acoperirea e mai deasă la
+margini (centrul 0,55 din margine), deci pe ax se citește asfaltul. **Doar
+vizual:** nimic din fizică nu citește covorul (decizia §3.1 pct. 3).
+`FrunzeCazatoare` (`leaf_fall.gd`): un `GPUParticles3D`, **plafon 64 de
+particule** (`LeafFall.MAX_LEAVES`), un material, billboard cu alfa care cade
+continuu (miez plin până la 0,5 din rază, apoi cos², 128 px; salt maxim de alfa
+între pixeli vecini 0,106, sub pragul 0,12 al sondei). Emitatorul urmează
+camera, în față, doar cât camera e în zonele covorului (+45 m înainte, +12 m
+după), deci pe tot turul sunt cel mult 64 de frunze, nu 64 pe zonă.
+
+**Premisa „RoadWear invers" — ce ține și ce nu (măsurat pe cod).**
+- *Ține:* clasa `RoadWear` (foaia de uzură, SubViewport necurățat în spațiul
+  benzii) se refolosește **neschimbată**; doar shaderul citește invers:
+  `alfa_frunză *= 1 − uzură`.
+- *Nu ține ca atare:* (1) `Track._snow_road_material` creează foaia doar pentru
+  `road_surface == "snow"`, iar Kyoto e asfalt; (2) `Car._drop_trail` scrie în
+  foaie doar când terenul e `loose`, deci pe asfalt nu se apela niciodată
+  `stamp_wear`. Soluția mică: `Track.wear_sinks` (registru de consumatori cu
+  `stamp_road(dist, lateral)`) și `Car._drop_leaf_wear` (rotile din spate, la
+  2,2 m, doar pe bucla principală și la sol, ieșire imediată pe piste fără
+  consumatori). O singură foaie (128×4096, 2 MB) pentru ambele zone, „cusute"
+  una după alta; o stampilă = 0,30 alfă, deci ~2 treceri pe aceeași linie curăță
+  complet.
+
+**Cifre.**
+- Materiale pe Track18 (`probe_decor --track=18`): **17 → 18** (+1 covorul,
+  `--no-leaves` dă linia de bază). Materialul frunzelor care cad e încă +1, dar
+  garda numără doar `MeshInstance3D`/`MultiMeshInstance3D`, nu particule: total
+  real **19** din plafonul de 38. Desene +2 (câte un panou pe zonă).
+- ProbeRace `--track=11 --ai=7 --seconds=260`, 4 seed-uri, cu și fără covor
+  (`--no-leaves`), 8 mașini, 260 s: **fără regresie**. Cu covor: 0 repuneri și
+  0 ejectări pe toate 4 seed-urile; ture globale 23/24/23/23, tur mediu
+  75,11/75,89/75,23/74,68 s. Fără covor: repuneri 1/0/0/0, ture 24/23/23/23,
+  tur mediu 74,94/75,67/75,27/74,57 s. Diferențele sunt în zgomotul Jolt
+  (memoria `proberace-nedeterminism`; tur minim 63,67–64,07 s în ambele).
+- Masinile stampilează chiar: 8.000–9.000 de stampile per cursă de 260 s,
+  grupate lateral în jurul liniei de cursă (histograma pe benzi de 1 m din
+  ProbeRace, seed 1: vârf de 2.045 la banda [−1, 0), sub 20 la ±6 m).
+- Sonda `ProbeLeafCarpet` (cu fereastră): un material, plafon de particule,
+  muchia frunzei, lanțul `Track.stamp_wear_sinks → foaie`, alfa citit înapoi
+  din foaie pe linia stampilată (0,88) și 0,000 pe două puncte de control.
+
+**Capturi** (camera de joc, `--gamecam --car`): `docs/track_briefs/img/kyoto_covor/`
+`d_inainte_dupa_uzura.jpg` (D, fără covor / proaspăt / după 8 treceri) și
+`e_inainte_dupa_uzura.jpg` (E, fără covor / proaspăt / după 5 treceri).
+Comenzi: `--no-leaves`, fără flag, `--leaf-wear=N` (treceri **simulate** ale
+plutonului pe linia de cursă, nu ture reale: `LeafCarpet.simulate_passes`).
+
+**Nefăcut / de verificat.** (a) Capturile „după N tururi" sunt cu uzură
+simulată; stampilele reale sunt dovedite pe sondă și pe histogramă, nu pe
+captură de curse. (b) Feelul și lizibilitatea la volan (roșul e saturat
+deliberat; solul din jur e încă placeholder, fără arțarii din §5.3, deci
+contrastul final cu decorul nu e judecat). (c) Cost GPU: panoul e transparent pe
+~225 m + ~190 m de drum (overdraw pe carosabil) și nu e măsurat pe device
+(`ProbePerf`/§6). Dacă depășește bugetul, primul de stins e `FrunzeCazatoare`
+(§6, ordinea de tăiere), apoi `center_cover` mai mic. (d) Grip pe frunze: NU,
+conform §3.1.
 
 ### 5.2 Hero (unice)
 | asset | note |

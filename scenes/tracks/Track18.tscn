@@ -12,6 +12,8 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
+[ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
+[ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
 
 [sub_resource type="Curve3D" id="Curve3D_kyoto"]
 closed = true
@@ -87,6 +89,13 @@ branch_index = 1
 gate_scene = ExtResource("13_senbon")
 large_gate_scene = ExtResource("14_large")
 cedar_scene = ExtResource("15_cedar")
+
+[node name="CovorFrunze" type="Node3D" parent="."]
+script = ExtResource("16_carpet")
+zones = Array[Vector3]([Vector3(0.335, 0.44, 1.0), Vector3(0.472, 0.56, 0.6)])
+
+[node name="FrunzeCazatoare" type="GPUParticles3D" parent="."]
+script = ExtResource("17_leaffall")
 
 [node name="Hazarduri" type="Node3D" parent="."]
 

@@ -519,6 +519,13 @@ if len(sys.argv) > 1:
     f_land = F["C2 aterizare"]
     f_bridge_a = F["D pod Tsutenkyo intrare"]
     f_bridge_b = F["D pod Tsutenkyo iesire"]
+    # Covorul de frunze (LeafCarpet, brief §3): D de la aterizare pana inainte de
+    # gura podului (podul acoperit nu are frunze pe tablier), E de dupa pod pana
+    # la Inari (frunzele mai rare: altare, cedri). (de la, pana la, densitate.)
+    carpet_zones = ", ".join(
+        f"Vector3({r3(a)}, {r3(b)}, {d})" for a, b, d in (
+            (F["D aterizare coborare"] + 0.004, f_bridge_a - 0.009, 1.0),
+            (f_bridge_b + 0.006, 0.56, 0.6)))
     f_togetsu_a = F["H pod Togetsukyo intrare"]
     f_togetsu_b = F["H pod Togetsukyo iesire"]
     f_f_a = F["F intrare (spre V)"]
@@ -649,6 +656,8 @@ if len(sys.argv) > 1:
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
+[ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
+[ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
 """
     for k, (_, _, sz) in enumerate(zones):
         tscn += f"""
@@ -730,6 +739,13 @@ branch_index = 1
 gate_scene = ExtResource("13_senbon")
 large_gate_scene = ExtResource("14_large")
 cedar_scene = ExtResource("15_cedar")
+
+[node name="CovorFrunze" type="Node3D" parent="."]
+script = ExtResource("16_carpet")
+zones = Array[Vector3]([{carpet_zones}])
+
+[node name="FrunzeCazatoare" type="GPUParticles3D" parent="."]
+script = ExtResource("17_leaffall")
 
 [node name="Hazarduri" type="Node3D" parent="."]
 

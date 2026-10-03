@@ -20,6 +20,9 @@ extends Node
 ##                             camerei de urmarire
 ##   --shishi-phase=0.72       (Kyoto) ceasul shishi-odoshi la fractia data din ciclu:
 ##                             0.02 sus, 0.72 aproape orizontal, 0.90 lovit.
+##   --leaf-wear=N             (Kyoto) covorul de frunze cu N treceri simulate ale plutonului
+##                             pe linia de cursa; `--no-leaves` = fara covor si fara frunze
+##                             care cad (starea "inainte"); `--no-leaf-fall` = doar covorul.
 ##   --daruma-phase=0.15       (Kyoto) ceasul daruma-otoshi la fractia data din ciclul
 ##                             MARE (71 s): 0.15 = turn plin, ciocanul tras inapoi
 ##                             (telegraful); 0.16 = discul in mijlocul drumului;
@@ -344,6 +347,8 @@ func _ready() -> void:
 	var daruma_phase := -1.0 # >= 0: DarumaOtoshiHazard.force_clock(faza * ciclu mare)
 	var daruma_clock := -1.0 # >= 0: la fel, direct in secunde
 	var daruma_dist := -1.0 # > 0: camera de joc la atatia metri inaintea turnului
+	var leaf_passes := -1 # >= 0: LeafCarpet cu N treceri simulate ale plutonului; -2 = covor si frunze OFF
+	var leaf_fall := true # --no-leaf-fall: stinge doar frunzele care cad
 	var shishi_backdrop := false # SONDA: panou verde inchis in spatele tubului (simuleaza padurea)
 	var overdraw := false
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
@@ -474,6 +479,12 @@ func _ready() -> void:
 			daruma_clock = float(arg.trim_prefix("--daruma-clock="))
 		elif arg.begins_with("--daruma-dist="):
 			daruma_dist = float(arg.trim_prefix("--daruma-dist="))
+		elif arg.begins_with("--leaf-wear="):
+			leaf_passes = int(arg.trim_prefix("--leaf-wear="))
+		elif arg == "--no-leaves":
+			leaf_passes = -2
+		elif arg == "--no-leaf-fall":
+			leaf_fall = false
 		elif arg == "--shishi-backdrop":
 			shishi_backdrop = true
 		elif arg.begins_with("--shishi-phase="):
@@ -752,6 +763,29 @@ func _ready() -> void:
 				darumas += 1
 		print("--daruma: %d DarumaOtoshiHazard fortate la ceasul %.2f s" % [darumas,
 			daruma_clock if daruma_clock >= 0.0 else daruma_phase * 71.0])
+	# Covorul de frunze (Kyoto): `--no-leaves` = fara covor si fara frunzele care
+	# cad (starea "inainte"); `--leaf-wear=N` = N treceri simulate ale plutonului
+	# pe linia de cursa (starea "dupa N tururi"). Fara flag: covorul proaspat.
+	var leaf_carpet := track.get_node_or_null("CovorFrunze") as LeafCarpet
+	var leaf_node := track.get_node_or_null("FrunzeCazatoare") as Node3D
+	if leaf_carpet != null:
+		if leaf_passes == -2:
+			leaf_carpet.visible = false
+			if leaf_node != null:
+				leaf_node.queue_free()
+			print("--no-leaves: covorul si frunzele stinse")
+		else:
+			if not leaf_fall and leaf_node != null:
+				leaf_node.queue_free()
+			if leaf_passes > 0:
+				for _i in 20:
+					await get_tree().process_frame
+					if leaf_carpet.built:
+						break
+				await leaf_carpet.simulate_passes(leaf_passes)
+				for _i in 3:
+					await get_tree().process_frame
+				print("--leaf-wear=%d: %d stampile in foaie" % [leaf_passes, leaf_carpet.stamps_received])
 	if daruma_dist > 0.0:
 		for node in get_tree().get_nodes_in_group(&"daruma_otoshi"):
 			var rt := track.route_at(0)

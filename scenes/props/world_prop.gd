@@ -38,6 +38,16 @@ extends Node3D
 const TRUNK_FRACTION: float = 0.13
 const TRUNK_MIN_RADIUS: float = 0.22
 
+## Raza cilindrului `trunk` PER MODEL, acolo unde latimea AABB minte: o coroana
+## de 12 m ar da 12 x 0,13 = 1,6 m raza (stalp invizibil de 3,2 m). Valorile sunt
+## masurate pe nodul de trunchi din GLB (baza evazata, Ø ~1-1,9 m la artar).
+const TRUNK_RADIUS := {
+	"momiji_a": 0.6, "momiji_b": 0.55, "momiji_c": 0.55,
+	"ginkgo": 0.6, "niwaki_pine": 0.5,
+	"moso_culm": 0.16, "bamboo_crown": 1.2,
+	"paper_lantern": 0.15,
+}
+
 ## Numele metadatei prin care o INSTANTA anume iese din regula generala.
 ## In editor: Inspector -> Add Metadata -> `coliziune`, cu una din valorile
 ## "hull" / "trunk" / "mesh" / "none".
@@ -322,6 +332,37 @@ const PROP_COLLISION := {
 	# tuk-tuk-ul e `Car` (nu decor), orizontul e fundal de 150-200 m.
 	"rooftop_tank": "none", "rooftop_clutter": "none", "tuktuk": "none",
 	"jodhpur_horizon": "none",
+	# --- Kyoto (Track18), brief §5.6 -----------------------------------------
+	# Copaci: cilindru pe trunchi (raza din TRUNK_RADIUS, nu din latimea AABB:
+	# coroana unui artar e de 10-12 m si dadea un stalp invizibil de 1,6 m raza).
+	"momiji_a": "trunk", "momiji_b": "trunk", "momiji_c": "trunk",
+	"ginkgo": "trunk", "niwaki_pine": "trunk",
+	"moso_culm": "trunk", "bamboo_crown": "trunk",
+	"paper_lantern": "trunk",  # stalp de lemn cu brat de 1 m; hull = bloc
+	# Se trece PRIN ele / pe sub ele: colizor exact. Golul portilor (>= 14 m) e
+	# contract de kit; stalpii laterali sunt solizi, golul nu.
+	"kakezukuri_scaffold": "mesh", "niomon_gate": "mesh", "inari_romon": "mesh",
+	"iron_truss_bridge": "mesh",  # drumul trece pe dedesubt (kit §1.5)
+	# Piese mici si solide, aproape de banda: hull (implicitul, scris ca sa fie
+	# inventarul complet). Felinarele si vulpile se simt ca un obstacol real.
+	"stone_lantern_a": "hull", "stone_lantern_b": "hull",
+	"yukimi_lantern": "hull", "kitsune_statue_a": "hull",
+	"kitsune_statue_b": "hull",
+	# Fantome: frunzele sparg in particule la trecere (cod propriu), figurantii
+	# nu opresc masina, orizontul e fundal, placile de trecere sunt plate, iar
+	# modulele de pod/portile torii sunt acoperis/arcade fara corp (coliziunea
+	# podului e terenul, a tunelului e peretele continuu al TrackBranch).
+	"leaf_pile": "none", "monk_sweeper": "none", "crow": "none",
+	"sika_deer": "none", "kyoto_horizon": "none", "stepping_stones": "none",
+	"tsutenkyo_roof_module": "none", "togetsukyo_module": "none",
+	"torii_senbon": "none", "torii_large": "none",
+	"votive_torii_cluster": "none",  # sir de 7 porti peste poteca: se trece pe sub ele
+	"shiba_fence": "none",  # nuiele de 1,1 m, panou subtire: capcana de colt, nu obstacol
+	"daruma_otoshi": "none",  # corpul il face DarumaOtoshiHazard
+	# Restul kitului ramane hull implicit, corect: pagodele, hondo, kinkakuji,
+	# altarul, clopotnita, bazinul, ema, ceainaria, zidul de templu si cel
+	# ciclopic, stancile si movila de gradina, tufele karikomi. Casele machiya:
+	# hull doar pe miezul `Machiya_Wood`, vezi HULL_SKIP_PARTS.
 	# Restul (implicit hull, corect): casele a-e, haveli, ghanta_ghar, zidul
 	# si turnul de zid (bloc plin: hull = zidul; brief-ul zicea "mesh", pe un
 	# corp convex e identic si mai ieftin), bastionul, fatadele, cenotaful,
@@ -1746,6 +1787,63 @@ const CLASSES_BY_MODEL := {
 	"rock_slab": {
 		"Rock_Slab": Palette.TRI_PREFIX + "rhyolite",
 	},
+
+	# --- Kyoto (Track18): kitul din assets/models/kyoto/ (integrare int-a) ------
+	#
+	# Cheie pe STEM de fisier, nu pe nume de nod: `Gate_Wood`, `Wall_Stone`,
+	# `Lantern_Stone` sunt nume generice (memoria `nume-noduri-nu-sunt-unice`),
+	# iar maparea din `prop_classes()` e globala. Fiecare piesa e sparta la export
+	# in noduri cu UN singur material (memoria `clase-pe-piese-de-kit`), iar o
+	# clasa se pune DOAR pe nodurile monocrome (masurat pe UV-uri, aria pe slot:
+	# Machiya_Wood 100% WOOD, *_Plaster 100% FOAM_WHITE, Maple_Crown 100% un slot).
+	# Nodurile MIXTE (Pagoda_Body 30/22/28, Machiya_Trim 9/8, Gate_Wood 30/9/28,
+	# Rock_Stone 8/29/6, tigla) raman pe atlas: o clasa le-ar sterge culorile.
+	#
+	# Lemnul de machiya e singurul lemn de oras care ia `machiya_wood`; trunchiurile
+	# (WOOD 9) raman pe atlas, ca sa nu platim un material pentru ele.
+	"machiya_a": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+	"machiya_b": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+	"machiya_c": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+	"machiya_d": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+	"machiya_e": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+	# Varul portilor, salii si zidului de templu (FOAM_WHITE 100% pe nod).
+	"niomon_gate": {"Gate_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+	"inari_romon": {"Gate_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+	"kiyomizu_hondo": {"Hondo_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+	"temple_wall": {"Wall_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Wall_Stone": Palette.TRI_PREFIX + "old_stone"},
+	# Frunzisul de toamna: o coroana = o clasa, trei nuante de artar (siluete
+	# diferite in GLB, culori diferite aici). Trunchiurile raman pe atlas.
+	"momiji_a": {"Maple_Crown": Palette.TRI_PREFIX + "maple_crimson"},
+	"momiji_b": {"Maple_Crown": Palette.TRI_PREFIX + "maple_orange"},
+	"momiji_c": {"Maple_Crown": Palette.TRI_PREFIX + "maple_rust"},
+	"ginkgo": {"Ginkgo_Crown": Palette.TRI_PREFIX + "ginkgo_gold"},
+	# Frunzele de bambus: lime, pe care atlasul nu-l are (CACTUS_GREEN iese oliv).
+	"bamboo_crown": {"Bamboo_Leaves": Palette.TRI_PREFIX + "bamboo_lime"},
+	"leaf_pile": {"Leaf_Pile": Palette.TRI_PREFIX + "leaf_litter"},
+	# Muschiul: pe nodurile `*_Moss` ale pietrelor, zidului si movilei.
+	"moss_mound": {"Moss_Mound": Palette.TRI_PREFIX + "moss"},
+	"garden_rock_a": {"Rock_Moss": Palette.TRI_PREFIX + "moss"},
+	"garden_rock_c": {"RockC_Moss": Palette.TRI_PREFIX + "moss"},
+	"cyclopean_wall": {"Cyc_Moss": Palette.TRI_PREFIX + "moss",
+		"Cyc_Stone": Palette.TRI_PREFIX + "old_stone"},
+	# Piatra arhitecturala (felinare, vulpi, clopotnita, bazin, pavilion, pod):
+	# gri neutru pe 29/8/6, deci monocrom ca nuanta. Bolovanii de gradina NU intra
+	# (rosturi de zid pe o piatra de rau ar citi gresit).
+	"stone_lantern_a": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"stone_lantern_b": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"yukimi_lantern": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"kitsune_statue_a": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"kitsune_statue_b": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"bell_tower": {"Bell_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"chozuya": {"Choz_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"kinkakuji": {"Kin_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"iron_truss_bridge": {"Truss_Stone": Palette.TRI_PREFIX + "old_stone"},
 	# Restul kitului ramane pe atlas (masurat, jodhpur_masuratori.md §1):
 	# cenotaful (22/29, marmura), animalele, bazarul, candelele, tuk-tuk-ul,
 	# copacii (`Crown`/`Trunk` — niciun prefix global nu-i prinde, verificat
@@ -1795,7 +1893,7 @@ const CLASSES_BY_THEME := {
 ## orizont). `_build_horizon` din track.gd face acelasi lucru pe siluetele
 ## procedurale; aici e varianta pentru orizontul asezat de mana.
 const NO_SHADOW_MODELS := {
-	"lengai": true, "crater_far_wall": true,
+	"lengai": true, "crater_far_wall": true, "kyoto_horizon": true,
 }
 
 
@@ -3037,6 +3135,19 @@ func _glow_spec(model: Node3D) -> String:
 const HULL_SKIP_PARTS := {
 	"fort_wall_segment": ["Wall_Glow"],
 	"fort_wall_turret": ["Turret_Glow"],
+	# Kyoto: casele de oras au hull doar pe miezul de lemn (peretii). Acoperisul
+	# (streasina iese 1,1 m dincolo de perete), zabrelele din fata (pana la 0,9 m
+	# in strada), norenul si jaluzelele nu sunt obstacole: un hull pe ele ar
+	# fi un bloc mai lat decat casa, la inaltimea capotei in dreptul streasinii
+	# intermediare.
+	"machiya_a": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster",
+		"Machiya_Noren"],
+	"machiya_b": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster",
+		"Machiya_Noren"],
+	"machiya_c": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster"],
+	"machiya_d": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster",
+		"Machiya_Bamboo"],
+	"machiya_e": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster"],
 }
 
 
@@ -3618,7 +3729,9 @@ func _add_trunk(body: StaticBody3D, model: Node3D) -> bool:
 		return false
 	var cyl := CylinderShape3D.new()
 	cyl.height = aabb.size.y
-	cyl.radius = maxf(aabb.size.x * TRUNK_FRACTION, TRUNK_MIN_RADIUS)
+	var stem := model.scene_file_path.get_file().get_basename()
+	cyl.radius = float(TRUNK_RADIUS[stem]) if TRUNK_RADIUS.has(stem) \
+		else maxf(aabb.size.x * TRUNK_FRACTION, TRUNK_MIN_RADIUS)
 	var col := CollisionShape3D.new()
 	col.shape = cyl
 	col.position = aabb.position + Vector3(aabb.size.x * 0.5,

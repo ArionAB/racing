@@ -860,6 +860,12 @@ const CLASS_TEXTURES := {
 	"maple_orange": "res://assets/textures/classes/autumn_foliage.png",
 	"ginkgo_gold": "res://assets/textures/classes/autumn_foliage.png",
 	"leaf_litter": "res://assets/textures/classes/autumn_foliage.png",
+	# Integrarea kitului (grupa int-a): arțarul RUGINIU are coroana pe aceeasi
+	# tenta ca `leaf_litter`, dar la scara COROANEI (0.1), nu a covorului (0.25),
+	# si bambusul are frunze lime — atlasul nu are slot lime (cel mai deschis verde,
+	# CACTUS_GREEN, iese oliv). Doua materiale noi, ZERO imagini noi in memorie.
+	"maple_rust": "res://assets/textures/classes/autumn_foliage.png",
+	"bamboo_lime": "res://assets/textures/classes/autumn_foliage.png",
 	# Lemnul de machiya si muschiul: clase NOI pe dalele lui `wood` si `macchia`,
 	# NU tente pe ele (memoria `tenta-pe-clasa-partajata`: `wood` e folosit pe
 	# Dunele/Okinawa, `macchia` pe Okinawa/Stromboli).
@@ -1092,6 +1098,15 @@ const CLASS_TINT := {
 	"maple_orange": Color(1.0, 0.3318, 0.2642),       # #E54839 (R: 220.6 din 229)
 	"ginkgo_gold": Color(1.0, 0.9434, 0.2777),        # #F2D03C (R: 220.6 din 242)
 	"leaf_litter": Color(0.8626, 0.5400, 0.3079),     # #A8683A (LARCH_RUST 27)
+	# Aceeasi tenta ca leaf_litter, alta scara (CLASS_TRIPLANAR_SCALE): coroana de
+	# arțar ruginiu `momiji_c` (LARCH_RUST 27 in GLB).
+	"maple_rust": Color(0.8626, 0.5400, 0.3079),      # #A8683A
+	# Lime-ul frunzelor de bambus: media pixelilor verzi-galbeni (S>0.35, H 0.15-
+	# 0.30) din decuparea `bamboo_crown.png` = (117, 145, 62) = #75913E. Aceeasi
+	# bisectie in spatiu liniar ca mai sus, pe aceeasi dala neutra (verificata:
+	# reproduce exact tenta lui maple_crimson). Nicio ridicare: toate canalele
+	# sub media dalei (195).
+	"bamboo_lime": Color(0.6055, 0.7467, 0.3281),     # #75913E
 	# Lemn de machiya (74, 53, 38) pe dala `wood` (124.1, 99.0, 71.7), NERIDICATA:
 	# toate canalele sub 1, nu cere CLASS_LIFT.
 	"machiya_wood": Color(0.6171, 0.5707, 0.5841),
@@ -1463,6 +1478,10 @@ const CLASS_TRIPLANAR_SCALE := {
 	# Covorul de frunze: acelasi PNG la scara de 2.5x mai deasa (o repetitie la
 	# 4 m, frunza ~20 cm — frunze cazute pe sol, nu coroana).
 	"leaf_litter": 0.25,
+	"maple_rust": 0.1,
+	# Frunza de bambus e ingusta si deasa: scara covorului (frunza ~20 cm), nu a
+	# coroanei de arțar.
+	"bamboo_lime": 0.25,
 	# Aceeasi scara ca dala-sursa (`wood` 0.7, `macchia` 1.4).
 	"machiya_wood": 0.7,
 	"moss": 1.4,

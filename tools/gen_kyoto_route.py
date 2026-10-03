@@ -641,7 +641,11 @@ if len(sys.argv) > 1:
     # Figura Lissajous e rotita cu 30 grade ca axa X locala sa fie TRANSVERSALA
     # pe sosea (directia mersului la pod: 150 grade busola); perioada pe axa
     # transversala 1/0,0345 = ~29 s (brief §3).
-    f_kog = f_bridge_b + 0.004
+    # Distanta dupa capatul podului, in metri pe lungimea curbei (total, m).
+    # 3 oct 2026: 8,5 m -> 18,5 m (dezvoltatorul: "la iesirea din pod nu se citeste").
+    import os
+    KOG_DUPA_POD_M = float(os.environ.get("KOG_DUPA_POD_M", "18.5"))
+    f_kog = f_bridge_b + KOG_DUPA_POD_M / total
     kog_road = road_at_frac(f_kog)
     kog_g = godot((kog_road[0], kog_road[1]), kog_road[2])
     print(f"kogarashi: frac {f_kog:.3f} axa ({kog_road[0]:.1f},{kog_road[1]:.1f}) cota {kog_road[2]:.1f}")

@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/vehicles/sagano_train.glb" id="poig_sagano_train"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/shiba_fence.glb" id="poig_shiba_fence"]
 [ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="poig_pathmover"]
+[ext_resource type="Script" path="res://scenes/props/train_cue.gd" id="poig_traincue"]
 [ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="poig_cityfill"]
 ;;NODES
 [node name="ZoneG_Bambus" type="Node3D" parent="DecorManual"]
@@ -398,6 +399,9 @@ speed = 8.75
 travel_mode = 0
 phase = 0.135
 stick_to_ground = false
+
+[node name="TrenLaChemare" type="Node3D" parent="DecorManual/ZoneG_Bambus"]
+script = ExtResource("poig_traincue")
 
 [node name="CameraPodTren" type="Area3D" parent="Hazarduri"]
 monitorable = false

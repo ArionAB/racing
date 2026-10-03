@@ -216,6 +216,9 @@ var _force_dusk: float = -1.0
 ## `--no-torii`: scoate `ToriiTunnel` (portile, peretii colizori, padurea) din scena
 ## INAINTE de prima fizica: A/B-ul costului tunelului de torii (banda E' goala).
 var _no_torii: bool = false
+## `--train-cam`: masoara cat se vede trenul Sagano (Kyoto G2) din camera jucatorului.
+var _train_cam: bool = false
+var _train_meter: Node = null
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
 ## `--no-daruma`: scoate `DarumaOtoshiHazard` din scena (A/B-ul turnului, Kyoto).
@@ -383,6 +386,8 @@ func _ready() -> void:
 			_no_turbo = true
 		elif arg == "--no-torii":
 			_no_torii = true
+		elif arg == "--train-cam":
+			_train_cam = true
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -531,6 +536,10 @@ func _start_race() -> void:
 ## pista fara ele (`_jump_near` ramane -1).
 func _setup_kyoto() -> void:
 	var track: Track = _race.track
+	if _train_cam:
+		_train_meter = preload("res://tools/train_cam_meter.gd").new()
+		add_child(_train_meter)
+		_train_meter.setup(_race)
 	if _no_leaves:
 		for nm in ["CovorFrunze", "FrunzeCazatoare"]:
 			var ln := track.get_node_or_null(nm)
@@ -1140,6 +1149,8 @@ func _on_wall(car: Car, impact: float, index: int) -> void:
 
 func _report_race() -> void:
 	var track: Track = _race.track
+	if _train_meter != null:
+		_train_meter.report()
 	var cars: Array[Car] = _race.cars
 	print("\n=== CURSA: %s — %.0fs, %d masini ===" % [
 		track.track_name, _elapsed, cars.size()])

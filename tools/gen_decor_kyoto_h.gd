@@ -452,8 +452,8 @@ func _temple() -> void:
 
 ## ------------------------------------------------------------ runda 2
 ## Partea DREAPTA a dreptei (interiorul buclei) era camp gol intre drum si
-## orasul lui A (`OrasVechi`, x >= 32). Tranzitia: un zid de templu cu poarta
-## la hw + 10, apoi case machiya in siruri (CityFill `row_mode`) care se pierd
+## orasul lui A (`OrasVechi`, x >= 32). Tranzitia: o incinta de templu fara
+## zid (felinare in pereche, altar, artari) la hw + 10, apoi case machiya in siruri (CityFill `row_mode`) care se pierd
 ## spre interior, de la 26 m de banda pana la orasul lui A, cu curti cu artari.
 ## Nordul (z > 186) e pata de ginkgo H (PadureMasa), sudul (z < 80) e strada lui
 ## A. Linia de vedere spre pagoda (<= 5 m de ax pe ultima treime) nu e atinsa:
@@ -496,25 +496,24 @@ func _mm_lines() -> Array[String]:
 	return out
 
 
-## Zid de templu pe dreapta, la s -128..-104: doua module la hw + 10, poarta
-## de 6 m intre ele cu felinare, artari in spatele zidului.
+## Incinta de templu pe dreapta, la s -117 (runda 3: FARA zid - zidul alb
+## jos, vazut oblic din camera de 10 m, iesea placi albe rupte/inclinate, ca
+## la A si B). Incinta se citeste prin felinare de piatra in pereche la
+## poarta, un altar mic in ax si artari in jur.
 func _temple_right() -> void:
-	var s0 := -128.0
-	for i in 2:
-		var f := _frame(s0 + 4.0 + float(i) * 14.0)
-		var tan: Vector3 = f[1]
-		var p: Vector3 = (f[0] as Vector3) + (f[2] as Vector3) * (HW + 10.0)
-		_raw("temple_wall", "structures", "hTempluDZid", Vector3(p.x, _sol_min(p.x, p.z, 4.0) - 0.15, p.z),
-			atan2(tan.x, tan.z), 1.0, "")
-	var fm := _frame(s0 + 11.0)
+	var fm := _frame(-117.0)
 	var rt: Vector3 = fm[2]
 	var tn: Vector3 = fm[1]
 	var gate: Vector3 = (fm[0] as Vector3) + rt * (HW + 10.0)
-	for dx in [-2.2, 2.2]:
-		var lp: Vector3 = gate + tn * dx - rt * 1.6
-		_raw("stone_lantern_b", "props", "hTempluDFelinar", Vector3(lp.x, _sol_min(lp.x, lp.z, 0.65) - 0.05, lp.z),
-			_yaw_face(-rt), 1.0, "")
-	for it in [[-9.0, 5.0], [8.0, 6.0], [0.0, 9.0]]:
+	for dx in [-2.4, 2.4]:
+		for dd in [-1.6, 3.4]:
+			var lp: Vector3 = gate + tn * dx + rt * dd
+			_raw("stone_lantern_b" if dd > 0.0 else "stone_lantern_a", "props", "hTempluDFelinar",
+				Vector3(lp.x, _sol_min(lp.x, lp.z, 0.65) - 0.05, lp.z), _yaw_face(-rt), 1.0, "")
+	var sh: Vector3 = gate + rt * 9.0
+	_raw("small_shrine", "structures", "hTempluDAltar", Vector3(sh.x, _sol_min(sh.x, sh.z, 1.8) - 0.05, sh.z),
+		_yaw_face(-rt), 1.0, "")
+	for it in [[-8.0, 6.0], [8.0, 7.0], [-5.0, 15.0], [6.0, 16.0]]:
 		var q: Vector3 = gate + tn * float(it[0]) + rt * float(it[1])
 		_raw(MAPLES[_rng.randi_range(0, 2)], "plants", "hTempluDArtar", Vector3(q.x, _sol_real(q.x, q.z) - 0.05, q.z),
 			_rng.randf_range(0.0, TAU), _rng.randf_range(0.8, 0.95), "")

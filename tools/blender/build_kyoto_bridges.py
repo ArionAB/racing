@@ -107,11 +107,11 @@ def build_tsutenkyo():
     L = 6.0
     h = L / 2
     roof, wood, rail = Builder(), Builder(), Builder()
-    px = 3.1                      # axa stalpilor / balustradei
+    px = 5.4                      # axa stalpilor (drumul real +-4,5 m + parapet; liber interior 10,5 m)
 
     # --- acoperis: profil concav, coama la z=5.0, streasina 4.5 m ---
-    half = [(0.0, 5.0), (1.0, 4.72), (2.1, 4.05), (3.3, 3.38), (4.2, 3.02),
-            (4.6, 3.22)]
+    half = [(0.0, 5.9), (1.5, 5.55), (3.15, 4.7), (4.95, 3.75), (6.3, 3.05),
+            (6.9, 3.25)]
     thick = [0.34, 0.34, 0.36, 0.40, 0.46, 0.5]
     top = [(-x, z) for x, z in reversed(half[1:])] + half
     thk = [t for t in reversed(thick[1:])] + thick
@@ -124,8 +124,8 @@ def build_tsutenkyo():
             (xa, za), (xb, zb) = top[i], top[i + 1]
             roof.beam((xa, y, za + 0.03), (xb, y, zb + 0.03), (0.10, 0.07), TILE)
     # coama: baza groasa + creasta
-    roof.box((0, 0, 5.12), (0.9, L, 0.30), TILE)
-    roof.box((0, 0, 5.34), (0.5, L, 0.18), BEAM)
+    roof.box((0, 0, 6.02), (1.1, L, 0.34), TILE)
+    roof.box((0, 0, 6.28), (0.6, L, 0.2), BEAM)
 
     # --- stalpi, grinzi, console (Tsu_Wood) ---
     pys = [-h + 0.075, -1.5, 0.0, 1.5, h - 0.075]
@@ -134,15 +134,17 @@ def build_tsutenkyo():
         for sx in (-1, 1):
             wood.box((sx * px, y, 1.35), (0.30, d, 2.7), POST)           # stalp
             # consola de la stalp la streasina
-            wood.beam((sx * px, y, 2.4), (sx * 4.1, y, 2.95), (d, 0.22), BEAM)
+            wood.beam((sx * px, y, 2.4), (sx * 6.2, y, 2.95), (d, 0.22), BEAM)
             # contrafisa spre interior
-            wood.beam((sx * px, y, 2.2), (sx * 2.3, y, 2.8), (d, 0.20), BEAM)
+            wood.beam((sx * px, y, 2.2), (sx * 3.8, y, 3.0), (d, 0.20), BEAM)
         # grinda transversala sub coama
         wood.box((0, y, 2.88), (2 * px + 0.5, d, 0.34), BEAM)
-        wood.box((0, y, 3.7), (0.22, d, 1.5), BEAM)                       # popa
+        wood.box((0, y, 4.3), (0.26, d, 2.5), BEAM)
+        for sx in (-1, 1):
+            wood.box((sx * 2.7, y, 3.75), (0.22, d, 1.5), BEAM)                       # popa
     for sx in (-1, 1):
         wood.box((sx * px, 0, 2.88), (0.38, L, 0.34), BEAM)               # pana
-        wood.box((sx * 4.1, 0, 2.95), (0.30, L, 0.22), BEAM)             # pana streasina
+        wood.box((sx * 6.2, 0, 2.95), (0.30, L, 0.22), BEAM)             # pana streasina
     # punte: talpi laterale, grinzi transversale, piloni
     for sx in (-1, 1):
         wood.box((sx * px, 0, -0.22), (0.50, L, 0.44), POST)
@@ -186,8 +188,8 @@ def build_togetsukyo():
     L = 10.0
     h = L / 2
     wood, rail = Builder(), Builder()
-    dx = 3.9                      # semi-latimea puntii
-    rx = 3.74                     # axa balustradei
+    dx = 7.6                      # semi-latimea puntii (drumul real +-7,0 m)
+    rx = 7.4                      # axa balustradei (liber interior 7,25 m)
 
     # punte: podina cu margini ingrosate (sub nivelul drumului)
     wood.box((0, 0, -0.10), (2 * dx, L, 0.12), POST)
@@ -197,16 +199,16 @@ def build_togetsukyo():
         y = -h + 0.625 + 1.25 * k
         wood.box((0, y, -0.45), (2 * dx - 0.8, 0.28, 0.28), BEAM)         # grinda transversala
     for sx in (-1, 1):
-        for x in (sx * 2.7, sx * 0.0):
+        for x in (sx * 5.6, sx * 2.8, 0.0):
             wood.box((x, 0, -0.50), (0.30, L, 0.30), BEAM)                # lungerine
     # bente de piloni: la +-1,25 si +-3,75 (spatiere 2,5 si peste cusatura)
     for y in (-3.75, -1.25, 1.25, 3.75):
-        for x in (-2.9, -1.0, 1.0, 2.9):
+        for x in (-6.4, -2.2, 2.2, 6.4):
             wood.box((x, y, -1.15), (0.62, 0.62, 1.30), POST)             # pilon
-        wood.box((0, y, -0.72), (2 * 3.3, 0.40, 0.34), BEAM)              # grinda de capat
+        wood.box((0, y, -0.72), (2 * 7.0, 0.40, 0.34), BEAM)              # grinda de capat
         for sx in (-1, 1):                                               # contrafise X
-            wood.beam((sx * 2.9, y, -1.7), (sx * 1.0, y, -0.8), (0.16, 0.30), BEAM)
-        wood.box((0, y, -1.62), (2 * 3.3, 0.34, 0.18), BEAM)              # talpa jos
+            wood.beam((sx * 6.4, y, -1.7), (sx * 2.2, y, -0.8), (0.16, 0.30), BEAM)
+        wood.box((0, y, -1.62), (2 * 7.0, 0.34, 0.18), BEAM)              # talpa jos
 
     # balustrada: stalpi la 2,5 m (jumatati la capete), lise, sipci
     for sx in (-1, 1):
@@ -233,7 +235,7 @@ AO_TRUSS = dict(samples=12, dist=3.5, gradient="vertical", low=0.78, high=1.0,
                 power=0.8, floor=0.35)
 
 # Contract inghetat (masurat ca GOL cu tools/blender/measure_gap.py):
-GAP_X_HALF = 6.2        # fetele interioare ale culeelor, x = +-6.2 -> gol 12,4 m
+GAP_X_HALF = 7.6        # fetele interioare ale culeelor, x = +-7.6 (drumul real +-6,0 m) -> gol 15,2 m
 DECK_BOTTOM = 6.3       # intradosul podului, deasupra drumului (z = 0)
 
 
@@ -253,16 +255,16 @@ def build_truss():
     zd = DECK_BOTTOM              # intrados (fata de jos a grinzii)
     z_chord = zd + 0.45           # axa talpii de jos
     z_top = zd + 4.0              # axa talpii de sus
-    xs = [-5.5, -3.7, -1.85, 0.0, 1.85, 3.7, 5.5]
+    xs = [-6.9, -4.6, -2.3, 0.0, 2.3, 4.6, 6.9]
 
     for sy in (-1, 1):
         y = sy * yT
         # talpa de jos (grinda cutie) pe toata lungimea
-        iron.box((0, y, z_chord), (17.0, 0.5, 0.7), IRON)
+        iron.box((0, y, z_chord), (21.0, 0.5, 0.7), IRON)
         # talpa de sus + montanti inclinati de capat
-        iron.box((0, y, z_top), (11.0, 0.5, 0.5), IRON)
+        iron.box((0, y, z_top), (13.8, 0.5, 0.5), IRON)
         for sx in (-1, 1):
-            iron.beam((sx * 8.3, y, z_chord), (sx * 5.5, y, z_top), (0.5, 0.5), IRON)
+            iron.beam((sx * 10.4, y, z_chord), (sx * 6.9, y, z_top), (0.5, 0.5), IRON)
         # montanti verticali
         for x in xs:
             iron.box((x, y, (z_chord + z_top) / 2), (0.36, 0.36, z_top - z_chord), IRON)
@@ -274,12 +276,12 @@ def build_truss():
             elif xa >= 0:
                 iron.beam((xa, y, z_chord), (xb, y, z_top), (0.32, 0.32), IRON)
         for sx in (-1, 1):                                  # panouri de capat
-            xe = sx * 5.5
-            xi = sx * 5.5
-            iron.beam((sx * 8.3, y, z_chord), (xi, y, z_top - 0.0), (0.28, 0.28), IRON)
+            xe = sx * 6.9
+            xi = sx * 6.9
+            iron.beam((sx * 10.4, y, z_chord), (xi, y, z_top - 0.0), (0.28, 0.28), IRON)
         # X central (contra-diagonale)
-        iron.beam((-1.85, y, z_chord), (0.0, y, z_top), (0.28, 0.28), IRON)
-        iron.beam((0.0, y, z_chord), (1.85, y, z_top), (0.28, 0.28), IRON)
+        iron.beam((-2.3, y, z_chord), (0.0, y, z_top), (0.28, 0.28), IRON)
+        iron.beam((0.0, y, z_chord), (2.3, y, z_top), (0.28, 0.28), IRON)
 
     # contravantuiri sus: traverse la fiecare nod + X de vant
     for x in xs:
@@ -288,19 +290,19 @@ def build_truss():
         iron.beam((xs[i], -yT, z_top), (xs[i + 1], yT, z_top), (0.18, 0.18), IRON)
     # portal la capete (talpa de sus intre ferme, jos)
     for sx in (-1, 1):
-        iron.box((sx * 5.9, 0, z_top - 0.9), (0.30, 2 * yT, 0.30), IRON)
+        iron.box((sx * 7.4, 0, z_top - 0.9), (0.30, 2 * yT, 0.30), IRON)
     # grinzi transversale sub tablier
-    for k in range(17):
-        x = -8.0 + k
+    for k in range(21):
+        x = -10.0 + k
         iron.box((x, 0, zd + 0.15), (0.30, 2 * yT, 0.30), IRON)
 
     # tablier: balast + traverse + sine
-    deck.box((0, 0, zd + 0.62), (17.0, 3.6, 0.34), STONE)                # balast
-    for k in range(32):
-        x = -7.75 + 0.5 * k
+    deck.box((0, 0, zd + 0.62), (21.0, 3.6, 0.34), STONE)                # balast
+    for k in range(40):
+        x = -9.75 + 0.5 * k
         deck.box((x, 0, zd + 0.88), (0.26, 3.0, 0.20), TIE)
     for ry in (-0.72, 0.72):
-        deck.box((0, ry, zd + 1.06), (17.0, 0.16, 0.18), STEEL)
+        deck.box((0, ry, zd + 1.06), (21.0, 0.16, 0.18), STEEL)
 
     # culee de piatra: fata dinspre drum la x = +-GAP_X_HALF
     for sx in (-1, 1):

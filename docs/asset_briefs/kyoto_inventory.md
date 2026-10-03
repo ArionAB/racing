@@ -107,30 +107,27 @@ ciorchini. Vocabular nou: `kyoto_shapes.leaf_blob`.
 
 ## Poduri (kit-e, `build_kyoto_bridges.py`)
 
-| piesa | tri | cote (m) | noduri | comparatie |
-|---|---:|---|---|---|
-| `tsutenkyo_roof_module` | 2340 | 9,23 lat x 6,00 lung (Y) x 6,68 (de la -1,0 piloni la +5,6 coama); puntea la Z=0 | `Tsu_Roof` (ASPHALT_EDGE + fateta LOG_DARK), `Tsu_Wood`, `Tsu_Rail` | `img/kyoto_fidelity/tsutenkyo_roof_module.png`, `_chain`, `_views` |
-| `togetsukyo_module` | 1164 | 7,86 lat x 10,00 lung x 3,37; puntea la Z=0, piloni la -1,4, balustrada la +1,5 | `Toget_Wood`, `Toget_Rail` | `img/kyoto_fidelity/togetsukyo_module.png`, `_chain`, `_views` |
-| `iron_truss_bridge` | 1380 | 18,20 (X, travee 16 m + culee) x 5,80 (Y) x 10,55; drumul pe Y, la Z=0 | `Truss_Iron` (CAR_RED, exceptie), `Truss_Stone`, `Truss_Deck` | `img/kyoto_fidelity/iron_truss_bridge.png`, `_views` |
+**Latimile sunt ale DRUMULUI REAL** (`Track18.tscn` `custom_width_segments`, semilatimi, si
+fractiunile din `tools/gen_kyoto_route.py`; v2 dupa verdictul coordonatorului):
+tsutenkyo +-4,5 m (frac 0,449-0,466, plus parapet procedural imediat in afara), podul
+trenului +-6,0 m (frac 0,804), togetsukyo +-7,0 m (frac 0,832-0,894).
 
-**Contract inghetat (iron_truss_bridge), masurat ca GOL cu `tools/blender/measure_gap.py`
-(banda 0,15-2,0 m):** gol lateral **12,35 m** (x -6,15 .. +6,20), inaltime libera
-minima **6,25 m** (mediana 6,40), gol utilizabil la >= 6 m: 12,35 m. Drumul trece pe
-Y; podul traverseaza pe X.
+| piesa | tri | cote (m) | gol/liber masurat (`measure_gap.py`, banda 0,15-2,0) | noduri | comparatie |
+|---|---:|---|---|---|---|
+| `tsutenkyo_roof_module` | 2460 | 13,82 lat (streasina +-6,9) x 6,00 lung x 7,63 (coama +6,3, piloni la -1,0); stalpi la x=+-5,4 | liber intre fetele stalpilor **10,45 m** (x -5,21..+5,24) | `Tsu_Roof`, `Tsu_Wood`, `Tsu_Rail` | `img/kyoto_fidelity/tsutenkyo_roof_module.png` (+`_chain`, `_views`) |
+| `togetsukyo_module` | 1188 | 15,26 lat (punte +-7,6, balustrada +-7,4) x 10,00 lung x 3,38 | liber intre balustrade **14,35 m** (+-7,17) | `Toget_Wood`, `Toget_Rail` | `img/kyoto_fidelity/togetsukyo_module.png` (+`_chain`, `_views`) |
+| `iron_truss_bridge` | 1524 | 21,16 (X; travee ~20,8 m) x 5,80 (Y) x 10,55 | **gol 15,15 m** (x -7,58..+7,57), **inaltime libera min 6,25 m** (mediana 6,40) | `Truss_Iron` (CAR_RED, exceptie), `Truss_Stone`, `Truss_Deck` | `img/kyoto_fidelity/iron_truss_bridge.png` (+`_views`) |
 
-Module: capete plane la Y=+-L/2, verificat pe `_chain` (3 module): cusaturile se
-inchid (stalpii si grinzile de capat sunt jumatati; spatierea pilonilor/sipcilor
-continua peste cusatura). Pe tsutenkyo acoperisul e in doua ape cu capete
-*frontoane deschise* (nu hip: capul de pod, cu hip, e cod/alt asset). Podina
-(`Tsu_Wood`/`Toget_Wood`) are fata de sus la Z=-0,04: sub drum, nu z-fighting.
-Verify: `--origin=waterline` (modulele), `--origin=assembly --allow-car-slots=Truss_Iron`.
-Previzualizare: `preview_kyoto_bridges.py` (`--compare/--views/--chain`, nu atinge `preview_kyoto.py`).
+**Contract inghetat (iron_truss_bridge):** drumul +-6,0 m trece pe Y; golul liber 15,15 m
+(culeele solide la |x| >= 7,6, deci 1,6 m fata de marginea drumului) x >= 6,25 m inaltime.
 
-**Verdict:** silueta si numarul de elemente seamana. Abateri ramase: tsutenkyo - decupara
-are colturi de streasina mai ridicate si hip la capat (imposibil in modul); lemnul iese
-mai maro decat portocaliul decuparii (culoarea o da slotul WOOD); togetsukyo - decupara
-are balustrada mai dens panelata si piloni in grupuri mai late; truss - rosul iese putin
-mai aprins (CAR_RED), culeele de piatra nu sunt in decupare (ea are balast pe sol).
+Module: capete plane la Y=+-L/2, cusaturi verificate pe `_chain`. Tsutenkyo are
+frontoane deschise (hipul de capat e in afara modulului). Podina are fata de sus la
+Z=-0,04 (sub drum). Verify: `--origin=waterline` (module), `--origin=assembly
+--allow-car-slots=Truss_Iron` (pod). Preview: `preview_kyoto_bridges.py`.
 
-**Stare la oprire:** cele 3 piese livrate, verify OK, comparatii facute (1 runda majora
-de reglaj pe tsutenkyo si truss, 1 pe togetsukyo).
+**Verdict:** forma ok. Abateri: lemnul mai maro decat decuparea (slotul `WOOD`); roșul
+podului putin mai aprins (CAR_RED); balustrada togetsukyo mai putin densa; culeele nu
+sunt in decupare.
+
+**Stare la oprire:** v2 cu latimile reale, verify OK, comparatii refacute.

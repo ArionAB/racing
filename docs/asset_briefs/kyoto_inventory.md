@@ -321,3 +321,55 @@ Ansamblu langa `yasaka_pagoda`: `horizon_overview.png`. Comparatiile sunt randat
 **Stare la oprire:** toate 4 noduri livrate, verify OK, comparatii si views facute; preview: spec-uri `horizon_*` in `preview_kyoto.py` (cheia `only` filtreaza nodul).
 
 **Runda 2 (verdictul coordonatorului):** Higashiyama A/B colorate pe 8 PETE MARI contigue (o culoare per pata, baza cedru ~50%, margine cu 1 fata din 4 pe verde), nu pe triunghi; FarRoofs_A refacut cu 3 randuri decalate lipite, streasini +0,5 m in X si +0,9 m in Y, pereti 0,3-0,7 m peste cei 4 ingropati, 7 tufe pe randurile din fata. Vedere de departe (camera la 250 m): `horizon_far.png`. Ramas: tufele din FarRoofs sunt partial acoperite de acoperisuri; peretii se vad in randari fiindca nu e teren (in joc sunt ingropati 4 m).
+
+## Grupa kit-g: grădina și bambusul (kit §1.8) — `build_kyoto_garden.py`
+
+Verdict kit: `bash tools/blender/verify_kyoto.sh` → toate cele 11 GLB `OK`. Planșa de grup
+(sub rândul lor din inventar, la scară metrică; bambusul înalt separat):
+`docs/asset_briefs/img/kyoto_fidelity/garden_group.png` (`preview_kyoto_garden.py`).
+Comparații: `…/kyoto_fidelity/<nume>.png`; modulul de gard în lanț: `shiba_fence_x3.png`;
+4 azimuturi: `shiba_fence_views`, `garden_rock_a_views`, `moss_mound_views`, `leaf_pile_views`,
+`bamboo_crown_views`. Patru runde de comparație (rock_b: 3, vezi abaterile).
+
+| piesă | tri | cote măsurate (X×Y×Z) | noduri |
+|---|---:|---|---|
+| `props/shiba_fence` | 328 | 0,19 × 3,00 × 1,12 (lungime pe Y, capete plane la ±1,5, jumătăți de stâlp de 0,13) | `Shiba_Fence` |
+| `plants/karikomi_shrub_a` | 64 | 1,61 × 1,52 × 0,86 | `Karikomi_A` |
+| `plants/karikomi_shrub_b` | 70 | 1,96 × 1,60 × 0,85 | `Karikomi_B` |
+| `rocks/garden_rock_a` | 132 | 2,07 × 1,57 × 1,02 | `Rock_Stone`, `Rock_Moss` |
+| `rocks/garden_rock_b` | 28 | 1,49 × 0,94 × 0,62 | `RockB_Stone` |
+| `rocks/garden_rock_c` | 106 | 1,31 × 1,41 × 0,97 | `RockC_Stone`, `RockC_Moss` |
+| `rocks/stepping_stones` | 252 | 1,61 × 2,75 × 0,24 | `Stepping_Stone` |
+| `rocks/moss_mound` | 302 | 3,16 × 2,35 × 0,96 | `Moss_Mound`, `Moss_Stone` |
+| `props/leaf_pile` | 2 326 | 1,85 × 1,77 × 0,51 | `Leaf_Pile` |
+| `plants/moso_culm` | 860 | 2,64 × 2,46 × 19,65 (tulpina Ø 0,26→0,15; 6 segmente) | `Moso_Culm` |
+| `plants/bamboo_crown` | 7 564 | 5,52 × 4,37 × 9,23 (13 tulpini) | `Bamboo_Culms` 2 884, `Bamboo_Leaves` 4 680 |
+
+Abateri față de decupare / contract (sincer):
+- rocile: fețe mari (hull de ~11 puncte), culoare pe față după normală; `garden_rock_b` rămâne
+  cel mai slab: crește unghiular, fără benzile paralele de pe decupare. Muschiul e petice
+  rotunjite, nu limbi pe fețe.
+- `garden_rock_a`/`c`: cota din contract luată ca dimensiunea cea mai mare; `a` are în plus o
+  piatră mică sprijinită (decuparea o are).
+- gardul: nuiele hexagonale groase în perechi, fără legăturile rotunjite și fără gura de nuiele
+  ieșită din lisa de sus; culori `SAND_MID`/`TROPICAL_GREEN`/`CACTUS_GREEN`.
+- karikomi: ~36 fețe (contract ~20), fără petecul ruginiu discret din `b`.
+- bambus: tulpina e `CACTUS_GREEN` + inele `DRY_VEGETATION` (decuparea e verde-gălbui; contractul
+  zicea `TROPICAL_GREEN`). `bamboo_crown`: frunzele mai mici/ascuțite și mai întunecate decât lime
+  de pe decupare; decuparea e cvasi-pătrată (h/l ~1), contractul 2,2: cotele de gabarit (9 m) păstrate,
+  rezultă h/l ~1,7; tulpini Ø 0,34→0,22, mai groase decât `moso_culm`.
+- `leaf_pile`: sloturi mixte `LAVA_ORANGE`/`KERB_RED`/`LARCH_RUST` (după decupare); clasa
+  `leaf_litter` le va uniformiza. Plăcuțe rombice, nu frunze lobate.
+- `moss_mound`: preview-ul îl vopsește cu clasa `moss` plată; decuparea are petice lime variate (vin din clasă).
+
+Contracte înghețate: gard pe Y cu capete plane; piese multi-nod (`Rock_*`, `RockC_*`, `Moss_*`,
+`Bamboo_*`) cu offset de origine pe ansamblu; `moso_culm` cu XY păstrat pe axa tulpinii.
+
+**Stare la oprire (kit-g):** toate cele 11 piese livrate și comise; nimic de reluat.
+
+**Runda 5 (verdict coordonator: bambusul merge in MultiMesh):** `moso_culm` 292 tri (10 noduri ca benzi
+`DRY_VEGETATION` pe un singur tub de 6 laturi + 3 placi de frunza; 2,56 x 2,45 x 19,66 m) si `bamboo_crown`
+2 304 tri (`Bamboo_Culms` 1 224 + `Bamboo_Leaves` 1 080; 9 tulpini Ø 0,34 -> 0,22, evantaie mari de 3 placi,
+6,27 x 5,17 x 9,04 m, h/l 1,44). Buget verify: 300 / 2 500. Abatere: nu exista slot lime in atlas;
+frunzele sunt `CACTUS_GREEN` (cel mai deschis verde), 3 evantaie de varf `DRY_VEGETATION` (cel mai aproape in RGB,
+dar galben-ocru): lime-ul decuparii trebuie dat de o clasa/tenta pe `Bamboo_Leaves` la integrare.

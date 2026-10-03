@@ -148,8 +148,18 @@ signal car_thrown(car: Car)
 ## Latimea soselei (m) la tur; `road_half_width` o suprascrie.
 var road_width: float = 11.0
 
+@export_group("Sunet")
+## Pana unde se aude „TOC"-ul (m): din toata gradina, ca un metronom.
+@export_range(20.0, 300.0, 5.0) var knock_max_distance: float = 140.0
+## Distanta la care „TOC"-ul inca are volum intreg (m).
+@export_range(1.0, 60.0, 1.0) var knock_unit_size: float = 14.0
+@export_range(-24.0, 6.0, 0.5) var knock_db: float = 0.0
+@export_range(-24.0, 6.0, 0.5) var slide_db: float = -5.0
+
 ## Contoare pentru sonde.
 var throws: int = 0
+## Cate „TOC"-uri a cantat (pentru sonde).
+var knocks: int = 0
 
 var _clock: float = 0.0
 var _tower: Node3D # radacina modelului (centrul turnului, la sol)
@@ -165,6 +175,8 @@ var _body_shape: CollisionShape3D
 var _zone: Area3D
 var _zone_shape: CollisionShape3D
 var _splash: CPUParticles3D
+var _knock_audio: AudioStreamPlayer3D
+var _slide_audio: AudioStreamPlayer3D
 var _splashed_period: int = -1
 var _cooldown: Dictionary = {}
 var _win_lo: float = 0.0 # fata de `hit_at`: de cand incepe pericolul (s, <= 0)
@@ -177,6 +189,7 @@ func _ready() -> void:
 	_clock = fposmod(start_clock, total_seconds())
 	add_to_group(AI_GROUP)
 	_build_rig()
+	_build_audio()
 	recompute_windows()
 	_apply_state()
 
@@ -618,11 +631,73 @@ func _cyl_instance(radius: float, height: float, slot: int, at: Vector3) -> Mesh
 # ------------------------------------------------------------------ starea
 
 func _physics_process(delta: float) -> void:
+	var prev := _clock
 	_clock = fposmod(_clock + delta, total_seconds())
 	_apply_state()
+	_tick_audio(prev)
 	_tick_cooldown(delta)
 	if _zone_shape != null and not _zone_shape.disabled:
 		_hit_cars()
+
+
+# ------------------------------------------------------------------ sunet
+
+## Doua sunete pozitionale (bus SFX, deci volumul din setari le tine): „TOC"-ul
+## (lemn pe lemn) in momentul exact al contactului, si frecarea discului pe
+## sosea, care il urmeaza cat aluneca. Evenimentul se prinde PE MARGINE, in
+## `_physics_process` (nu in `_apply_state`, care e pura si o apeleaza si
+## `seek` pentru sonde si capturi), deci un `seek` nu cheama niciun sunet.
+## Stream-ul se cere prin ARBORE, nu prin identificatorul autoload
+## (`avalanche_hazard.gd::_start_rumble`: in modul `--script` identificatorul nu
+## se rezolva si clasa n-ar compila).
+func _build_audio() -> void:
+	_knock_audio = AudioStreamPlayer3D.new()
+	_knock_audio.bus = &"SFX"
+	_knock_audio.max_distance = knock_max_distance
+	_knock_audio.unit_size = knock_unit_size
+	_knock_audio.volume_db = knock_db
+	add_child(_knock_audio)
+	_slide_audio = AudioStreamPlayer3D.new()
+	_slide_audio.bus = &"SFX"
+	_slide_audio.max_distance = knock_max_distance * 0.6
+	_slide_audio.unit_size = knock_unit_size * 0.5
+	_slide_audio.volume_db = slide_db
+	add_child(_slide_audio)
+
+
+func _sfx(sfx_name: StringName) -> AudioStream:
+	var manager := get_node_or_null(^"/root/AudioManager")
+	if manager == null:
+		return null
+	return manager.call("stream", sfx_name)
+
+
+## Prinde trecerea ceasului peste `hit_at` in aceeasi perioada de lovitura.
+func _tick_audio(prev_clock: float) -> void:
+	if _knock_audio == null:
+		return
+	var k := period_index(_clock)
+	if k >= LEVELS or period_index(prev_clock) != k:
+		return
+	if period_time(prev_clock) < hit_at and period_time(_clock) >= hit_at:
+		knocks += 1
+		var knock := _sfx(&"daruma_toc")
+		if knock != null:
+			_knock_audio.global_position = _hammer_head_world()
+			_knock_audio.stream = knock
+			_knock_audio.pitch_scale = randf_range(0.96, 1.04)
+			_knock_audio.play()
+		var slide := _sfx(&"daruma_slide")
+		if slide != null:
+			_slide_audio.stream = slide
+			_slide_audio.pitch_scale = randf_range(0.97, 1.03)
+			_slide_audio.play()
+	if _slide_audio.playing and k < _discs.size():
+		_slide_audio.global_position = _discs[k].global_position
+
+
+func _hammer_head_world() -> Vector3:
+	return _tower.global_position + Vector3.UP * (base_height + disc_height * 0.5)
 
 
 ## Starea vizuala si fizica ca functie PURA de `_clock`.

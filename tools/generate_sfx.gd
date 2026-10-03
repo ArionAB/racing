@@ -61,8 +61,56 @@ func _init() -> void:
 	# Stropul de apa (intrarea in vad / parau / mare, vezi Car._enter_water).
 	# TOT LA SFARSIT, din acelasi motiv: `rng` e un singur sir semanat o data.
 	_save("splash", _splash())
+	# Daruma-otoshi (Kyoto, Track18 POI F). TOT LA SFARSIT, acelasi motiv: `rng`
+	# e un singur sir. „TOC"-ul ciocanului de lemn si frecarea discului.
+	_save("daruma_toc", _daruma_toc())
+	_save("daruma_slide", _daruma_slide())
 	print("SFX generate in res://assets/audio/")
 	quit()
+
+## „TOC" de lemn pe lemn: un bloc de lemn, nu o bubuitura. Trei moduri
+## NEARMONICE (raport ~1 : 1,9 : 3,1), care se sting repede (mai repede cele
+## inalte), peste un click de 2 ms si un corp jos de 150 Hz. Atac instantaneu,
+## coada de ~0,15 s: „sec".
+func _daruma_toc() -> PackedFloat32Array:
+	const DUR := 0.3
+	var n := int(RATE * DUR)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var m1 := sin(TAU * 410.0 * t) * exp(-t * 38.0)
+		var m2 := sin(TAU * 780.0 * t) * exp(-t * 55.0) * 0.6
+		var m3 := sin(TAU * 1270.0 * t) * exp(-t * 80.0) * 0.4
+		var body := sin(TAU * lerpf(190.0, 120.0, minf(t / 0.05, 1.0)) * t) * exp(-t * 30.0) * 0.55
+		lp = lp * 0.55 + (rng.randf() * 2.0 - 1.0) * 0.45
+		var click := lp * exp(-t * 600.0) * 1.1
+		out[i] = clampf((m1 + m2 + m3 + body + click) * 0.7, -1.0, 1.0)
+	return out
+
+
+## Discul de lemn care aluneca pe sosea: frecare, adica zgomot filtrat cu taietura
+## care coboara pe masura ce discul incetineste, modulat in amplitudine de un
+## „stick-slip" lent (~23 Hz) si cu o coborare de volum in 1,3 s. Fara inaltime.
+func _daruma_slide() -> PackedFloat32Array:
+	const DUR := 1.3
+	var n := int(RATE * DUR)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	var lp2 := 0.0
+	for i in n:
+		var u := float(i) / float(n)
+		var white := rng.randf() * 2.0 - 1.0
+		var k := lerpf(0.55, 0.9, u)
+		lp = lp * k + white * (1.0 - k)
+		lp2 = lp2 * 0.8 + lp * 0.2
+		var stick := 0.65 + 0.35 * sin(TAU * lerpf(30.0, 14.0, u) * float(i) / float(RATE))
+		var env := minf(u / 0.03, 1.0) * pow(1.0 - u, 1.6)
+		out[i] = clampf((lp + lp2 * 0.6) * stick * env * 1.6, -1.0, 1.0)
+	return out
+
 
 ## Trosnet de gheata: pocnetul (atac de zgomot de 8 ms) urmat de „coborarea"
 ## fisurii — un sweep rezonant 340->70 Hz care se stinge in ~0.35 s, cu un

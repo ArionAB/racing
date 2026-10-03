@@ -629,6 +629,18 @@ if len(sys.argv) > 1:
     print(f"tub: axa ({tub_road[0]:.1f},{tub_road[1]:.1f}) cota {tub_road[2]:.1f} frac {f_tub:.3f}; "
           f"pivot (dreapta, {PIVOT_OFFSET} m): ({TUB_XY[0]:.1f},{TUB_XY[1]:.1f})")
 
+    # KOGARASHI (§3.1 decizia 1): vartejul de frunze, la iesirea de pe Tsutenkyo
+    # (~25 m dupa capatul podului, unde incepe arcul lui E). Reutilizeaza
+    # DustDevilHazard (Serengeti) cu leaf_mode; kick x0,6 fata de Serengeti
+    # (spin 180 -> 108 grade, ridicare 2,5 -> 1,5 m, orbire 0,6 -> 0,35 s).
+    # Figura Lissajous e rotita cu 30 grade ca axa X locala sa fie TRANSVERSALA
+    # pe sosea (directia mersului la pod: 150 grade busola); perioada pe axa
+    # transversala 1/0,0345 = ~29 s (brief §3).
+    f_kog = f_bridge_b + 0.004
+    kog_road = road_at_frac(f_kog)
+    kog_g = godot((kog_road[0], kog_road[1]), kog_road[2])
+    print(f"kogarashi: frac {f_kog:.3f} axa ({kog_road[0]:.1f},{kog_road[1]:.1f}) cota {kog_road[2]:.1f}")
+
     # CameraZone-uri: Tsutenkyo (3,2 / 5,5 / 4) pe fractie, tunel (2,4 / 5,2) in cutie.
     tscn = f"""[gd_scene format=3]
 
@@ -643,6 +655,7 @@ if len(sys.argv) > 1:
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_large.glb" id="14_large"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
+[ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
 """
@@ -756,6 +769,23 @@ script = ExtResource("11_daruma")
 side = 1
 road_half_width = 5.5
 model = ExtResource("12_daruma_glb")
+
+[node name="Kogarashi" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {kog_g[0]:.3f}, {kog_g[1]:.3f}, {kog_g[2]:.3f})
+script = ExtResource("16_devil")
+amplitude = Vector2(9, 2)
+frequency = Vector2(0.0345, 0.0213)
+path_yaw_deg = 30.0
+spin_deg = 72.0
+blind_time = 0.35
+lift_m = 1.5
+radius = 1.8
+height = 9.0
+leaf_mode = true
+dust_amount = 30
+debris_amount = 14
+cone_alpha = 0.3
+cone_color = Color(0.66, 0.41, 0.23, 1)
 """
     tscn += f"""
 [node name="CameraTsutenkyo" type="Area3D" parent="Hazarduri"]

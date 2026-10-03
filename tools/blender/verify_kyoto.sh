@@ -82,8 +82,8 @@ check "rocks/garden_rock_c.glb"          200 --origin=assembly
 check "rocks/stepping_stones.glb"        300 --origin=assembly
 check "rocks/moss_mound.glb"             400 --origin=assembly
 check "props/leaf_pile.glb"             2800 --origin=assembly
-check "plants/moso_culm.glb"             900 --origin=assembly
-check "plants/bamboo_crown.glb"         8000 --origin=assembly
+check "plants/moso_culm.glb"             300 --origin=assembly
+check "plants/bamboo_crown.glb"        2500 --origin=assembly
 
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)
 echo "GLB-uri in $ROOT: $total (5 existente, nu ale kitului)"

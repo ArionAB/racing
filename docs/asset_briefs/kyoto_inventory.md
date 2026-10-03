@@ -345,3 +345,10 @@ Contracte înghețate: gard pe Y cu capete plane; piese multi-nod (`Rock_*`, `Ro
 `Bamboo_*`) cu offset de origine pe ansamblu; `moso_culm` cu XY păstrat pe axa tulpinii.
 
 **Stare la oprire (kit-g):** toate cele 11 piese livrate și comise; nimic de reluat.
+
+**Runda 5 (verdict coordonator: bambusul merge in MultiMesh):** `moso_culm` 292 tri (10 noduri ca benzi
+`DRY_VEGETATION` pe un singur tub de 6 laturi + 3 placi de frunza; 2,56 x 2,45 x 19,66 m) si `bamboo_crown`
+2 304 tri (`Bamboo_Culms` 1 224 + `Bamboo_Leaves` 1 080; 9 tulpini Ø 0,34 -> 0,22, evantaie mari de 3 placi,
+6,27 x 5,17 x 9,04 m, h/l 1,44). Buget verify: 300 / 2 500. Abatere: nu exista slot lime in atlas;
+frunzele sunt `CACTUS_GREEN` (cel mai deschis verde), 3 evantaie de varf `DRY_VEGETATION` (cel mai aproape in RGB,
+dar galben-ocru): lime-ul decuparii trebuie dat de o clasa/tenta pe `Bamboo_Leaves` la integrare.

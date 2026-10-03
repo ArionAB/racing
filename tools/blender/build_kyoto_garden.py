@@ -420,40 +420,88 @@ def _spray(lb, base, azim_deg, count, length, width, droop=0.3, spread=34.0, slo
                    fold_deg=22.0, stations=3, thick=0.02, droop=droop)
 
 
+def _culm_lod(cb, base, height, r0, r1, nodes, lean=(0.0, 0.0), band_dr=0.03,
+              cap_start=False, stalk=None):
+    """Tulpina ieftina pentru MultiMesh: UN tub de 6 laturi cu doua inele la
+    fiecare nod, putin mai late; fetele dintre ele (banda nodului) trec pe
+    `NODE_RING`. Fara inele separate. tri = 12 * (2*nodes + 1) + 4. Intoarce
+    punctele traseului (ultimul = varful)."""
+    zs = [0.0]
+    for k in range(1, nodes + 1):
+        zc = height * k / (nodes + 0.6)
+        zs += [zc - 0.04, zc + 0.04]
+    zs.append(height)
+    pts, radii = [], []
+    for i, z in enumerate(zs):
+        t = z / height
+        kk = t * t
+        pts.append(Vector((base[0] + lean[0] * kk * height,
+                           base[1] + lean[1] * kk * height, base[2] + z)))
+        r = r0 + (r1 - r0) * t
+        radii.append(r + (band_dr if (i % 2 == 1 or (i % 2 == 0 and 0 < i < len(zs) - 1)) else 0.0))
+    faces = cb.taper_sweep(pts, radii, STALK if stalk is None else stalk, segments=6,
+                           cap_start=cap_start, cap_end=True)
+    for f in faces:
+        zc = f.calc_center_median().z - base[2]
+        for k in range(1, nodes + 1):
+            zn = height * k / (nodes + 0.6)
+            if abs(zc - zn) < 0.045 and abs(f.normal.z) < 0.5:
+                f[cb.slot] = NODE_RING
+    return pts
+
+
+def _fan(lb, base, azim_deg, count, length, width, rise, slot, spread=38.0):
+    """Evantai de `count` placi late, ridicate si cazand la varf (3 statii)."""
+    for k in range(count):
+        a = math.radians(azim_deg + (k - (count - 1) / 2.0) * spread)
+        d = Vector((math.cos(a), math.sin(a), 0.0))
+        bs = Vector(base)
+        path = [bs, bs + d * (length * 0.5) + Vector((0, 0, rise)),
+                bs + d * length + Vector((0, 0, rise * 0.4))]
+        lb.blade(path, [0.12 * width, width, 0.0], 0.03, slot, up=(0, 0, 1))
+
+
 def build_moso_culm():
-    """`moso_culm.png` -- lista de elemente: o tulpina dreapta de 20 m, Ø 0,26 m
-    la baza si 0,15 m sus, 6 segmente, 16 noduri la ~1,2 m (inele mai groase,
-    `DRY_VEGETATION`), nimic in ramuri; la varf 3 stropi de frunze (2-3 lame
-    pliate in V) in trei directii. Un singur nod `Moso_Culm`; bbox simetric
-    in jurul axei, originea la baza."""
+    """`moso_culm.png` (runda 5, pentru MultiMesh cu mii de instante, <= 300 tri):
+    tulpina dreapta de 19,2 m, Ø 0,26 -> 0,15, 6 laturi, 10 noduri (la ~1,8 m)
+    facute ca benzi usor mai late pe tub, `DRY_VEGETATION` (verde-galbui de la
+    distanta), fara inele separate; la varf 3 placi de frunza in trei directii.
+    Un nod `Moso_Culm`; originea la baza, XY pe axa."""
     b = Builder()
-    _culm(b, (0, 0, 0), 19.2, 0.13, 0.075, 1.2)
-    for z, az in ((18.0, 20.0), (18.9, 140.0), (19.5, 260.0)):
-        _spray(b, (0.04 * math.cos(math.radians(az)), 0.04 * math.sin(math.radians(az)), z),
-               az, 3, 1.3, 0.2)
+    pts = _culm_lod(b, (0, 0, 0), 19.2, 0.13, 0.075, 10)
+    top = pts[-1]
+    for k, az in enumerate((20.0, 140.0, 260.0)):
+        a = math.radians(az)
+        d = Vector((math.cos(a), math.sin(a), 0.0))
+        bs = Vector((0.0, 0.0, 18.9 + 0.25 * k))
+        b.blade([bs, bs + d * 1.5 + Vector((0, 0, 0.25))], [0.5, 0.0], 0.02, LEAF_BAMBOO,
+                up=(0, 0, 1))
     return [b.to_object("Moso_Culm")]
 
 
 def build_bamboo_crown():
-    """`bamboo_crown.png` -- lista de elemente: tufa DENSA de 13 tulpini GROASE
-    (Ø baza 0,30 m, Ø sus 0,2 m) in 3 randuri, baza ~3,2 x 2,2 m, inalte 7-9 m,
-    aproape verticale, cu noduri; pe jumatatea de sus 2-3 evantaie de frunze mari
-    (3 lame late pliate in V), doar pe treimea de sus. Noduri `Bamboo_Culms`,
-    `Bamboo_Leaves`."""
+    """`bamboo_crown.png` (runda 5, <= 2500 tri, MultiMesh): 9 tulpini groase
+    (Ø 0,34 -> 0,22) pe o baza ~2,6 x 1,8 m, inalte 6,8-8,8 m, 5 noduri facute
+    ca benzi pe tub; frunzele sunt EVANTAIE MARI (3 placi late de ~1,9 m): unul
+    in varf si unul pe treimea de sus pe fiecare tulpina, deschise la culoare
+    (`CACTUS_GREEN`, cel mai deschis verde din atlas; 3 evantaie de varf pe
+    `DRY_VEGETATION`, cel mai aproape de lime in RGB dar prea galben pe toate). Latime totala ~6,4 m pentru ~8,8 m => h/l ~1,4.
+    Noduri `Bamboo_Culms`, `Bamboo_Leaves`."""
     cb, lb = Builder(), Builder()
     rnd = _lcg(5)
-    spots = [(-1.45, 0.55), (-0.85, -0.6), (-0.5, 0.65), (-0.05, -0.35), (0.3, 0.7),
-             (0.55, -0.7), (0.95, 0.2), (1.45, -0.25), (1.25, 0.8), (-1.1, 0.0),
-             (-0.2, 0.15), (0.75, -0.05), (0.05, -0.85)]
+    spots = [(-1.3, 0.4), (-0.8, -0.55), (-0.3, 0.6), (0.2, -0.3), (0.6, 0.6),
+             (1.0, -0.6), (1.3, 0.1), (-1.0, 0.0), (0.2, 0.2)]
     for i, (x, y) in enumerate(spots):
-        h = 7.0 + 2.0 * rnd()
-        lean = ((rnd() - 0.5) * 0.04, (rnd() - 0.5) * 0.04)
-        pts, _ = _culm(cb, (x, y, 0), h, 0.17, 0.11, 1.0, lean=lean, node_dr=0.03)
-        for j, zf in enumerate((0.74, 0.88, 1.0)):
-            idx = min(len(pts) - 1, int(round(zf * (len(pts) - 1))))
-            az = 360.0 * rnd() if j < 2 else 90.0 * j
-            _spray(lb, pts[idx], az, 3, 1.15 + 0.3 * rnd(), 0.46, spread=55.0,
-                   slot=(TROPICAL_GREEN if j == 0 else LEAF_BAMBOO))
+        h = 6.8 + 2.0 * rnd()
+        pts = _culm_lod(cb, (x, y, 0), h, 0.17, 0.11, 5,
+                        lean=((rnd() - 0.5) * 0.04, (rnd() - 0.5) * 0.04),
+                        band_dr=0.035, stalk=TROPICAL_GREEN)
+        az0 = math.degrees(math.atan2(y, x)) if (x or y) else 0.0
+        lime = DRY_VEGETATION if i % 3 == 0 else CACTUS_GREEN
+        _fan(lb, pts[-1], az0 + (rnd() - 0.5) * 60, 3, 1.9, 0.9, 0.45, lime)
+        low = pts[int(len(pts) * 0.72)]
+        _fan(lb, low, az0 + 180.0 + (rnd() - 0.5) * 60, 3, 1.6, 0.8, 0.35,
+             CACTUS_GREEN)
     return [cb.to_object("Bamboo_Culms"), lb.to_object("Bamboo_Leaves")]
 
 
@@ -477,6 +525,6 @@ _emit(build_rock_c, "rocks/garden_rock_c.glb", AO_SMALL, 400)
 _emit(build_stepping_stones, "rocks/stepping_stones.glb", AO_SMALL, 300)
 _emit(build_moss_mound, "rocks/moss_mound.glb", AO_SMALL, 700)
 _emit(build_leaf_pile, "props/leaf_pile.glb", AO_SMALL, 2800)
-_emit(build_moso_culm, "plants/moso_culm.glb", AO_TALL, 900, keep_xy=True)
-_emit(build_bamboo_crown, "plants/bamboo_crown.glb", AO_TALL, 9000)
+_emit(build_moso_culm, "plants/moso_culm.glb", AO_TALL, 300, keep_xy=True)
+_emit(build_bamboo_crown, "plants/bamboo_crown.glb", AO_TALL, 2500)
 report()

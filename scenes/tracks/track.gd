@@ -8318,6 +8318,16 @@ const PROP_AO_FOOT_SCALE: float = 1.6
 ## Piese cu trunchi masurat (WorldProp.TRUNK_RADIUS): raza discului = raza
 ## trunchiului x acest factor, centrat pe originea modelului.
 const PROP_AO_TRUNK_MULT: float = 2.0
+## Modele fara disc de contact, pe stem (azi doar Kyoto): piese LUNGI sau
+## inlantuite, a caror amprenta de baza e toata lungimea (siruri de torii,
+## modulele esafodajului, zidurile, viaductul si trenul). Discul de 6 m iesea
+## octogon negru sub ele (finisarea Kyoto, captura 0,545); umbra lor o face
+## lumina directionala, ca la zidurile din nota de mai jos.
+const PROP_AO_SKIP_MODELS := {
+	"votive_torii_cluster": true, "kakezukuri_scaffold": true,
+	"cyclopean_wall": true, "temple_wall": true,
+	"iron_truss_bridge": true, "sagano_train": true,
+}
 
 
 ## Pozitiile (doar XZ) ale falezelor deja construite.
@@ -8373,6 +8383,8 @@ func _prop_contact_discs() -> PackedVector4Array:
 		# un punct, iar umbra lui o face lumina directionala — care are forma
 		# si directie. Discul era menit sa lipeasca de sol o piesa IZOLATA.
 		if n3.has_meta("contact") and str(n3.get_meta("contact")) == "none":
+			continue
+		if PROP_AO_SKIP_MODELS.has(n3.scene_file_path.get_file().get_basename()):
 			continue
 		var aabb := _visual_aabb(n3)
 		if aabb.size == Vector3.ZERO:

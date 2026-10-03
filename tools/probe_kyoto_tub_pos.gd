@@ -1,4 +1,7 @@
 extends Node
+## ISTORIC (3 oct 2026): tubul shishi-odoshi a fost scos din Track18 (inlocuit de
+## daruma-otoshi, vezi brieful §3); pe Track18 aceasta garda nu mai gaseste niciun tub si
+## iese 1 prin constructie. Pozitia turnului o verifica `ProbeKyotoDarumaPos`.
 ## GARDA: e tubul shishi-odoshi ASEZAT pe axa soselei reale a lui Track18?
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeKyotoTubPos.tscn

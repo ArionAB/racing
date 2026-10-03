@@ -132,7 +132,7 @@ dreptei finale.
 Cerul e **albastru limpede de toamnă** (*aki-bare*) sus, spre auriu pal la
 orizont. Lumina e în §4: soare jos de după-amiază, din sud-vest.
 
-## 2.0 Verificarea cu camera (de ce scena iese spre interior și de ce tubul te privește)
+## 2.0 Verificarea cu camera (de ce scena iese spre interior și de ce turnul te privește)
 
 Parametrii `ChaseCamera`: **10 m sus, 12,5 m în spate, 28,7° în jos, FOV 68°**
 (memoria `verifica-cu-parametrii-lui`).
@@ -213,7 +213,7 @@ Tabelul se scrie **înaintea** traseului, ca la Jodhpur.
   - Reflexia (dacă o facem, §3.1) cade la 6–9° sub orizontală, în cadru.
   - **Soarele din SV luminează fața de sud a pavilionului**, adică exact fața
     dinspre drum (§4).
-- **Shishi-odoshi: tubul e întreg în cadru de la 150 m până la 35 m.**
+- **Daruma-otoshi (a înlocuit tubul): turnul e întreg în cadru de la 150 m până la 35 m.** *(Cifrele de mai jos sunt ale tubului, ISTORIC; turnul a trecut aceeași gardă: 58/58 puncte la azimut ≤ 30°, vârful la 9,34 m sub plafonul camerei de 10 m. Vezi §3.)*
   - Gura în repaus e la +12,9 (§3), iar camera o prinde de la
     d ≥ (12,9 − 10) / 0,092 ≈ 32 m.
   - Ca tubul (pivot + gură) să rămână în cadru pe tot intervalul
@@ -319,7 +319,7 @@ est și spre V pe latura de sud.
 | **D** | 0.30–0.42 | **Valea de arțari și podul Tsūten-kyō.** Cobori spre S printr-o pădure de arțari pe versant, cu **covor de frunze pe drum** (§3), felinare de piatră și un **cerb sika** care se înclină pe margine. Urmează **podul acoperit de lemn** (70 m, la +12), peste o râpă cu fundul la −4, plină de coroane roșii până la nivelul podului. Înăuntru e `CameraZone` (§2.0). La ieșire vine *kogarashi*, dacă se confirmă (§3.1) | coborâre rapidă de 5,3%, cu S-uri largi: **locul unde se simte viteza**. Podul are stâlpi și parapet, deci de pe el nu se cade | 6 m / 4,5 m (pod) |
 | **E** | 0.42–0.56 | **Fushimi Inari.** Poarta **Rōmon** (gol ≥ 11 m), două **vulpi de piatră** cu bavete roșii pe socluri, apoi drumul principal urcă în jurul flancului muntelui Inari (+10 → +24 → +6), printre altare mici, mănunchiuri de torii votive mici și felinare de piatră | urcare de 9%, ac larg pe flanc, coborâre de 11% | 6 m |
 | **E′** | 0.45–0.53 (buclă) | **Scurtătura: tunelul de torii** (*senbon torii*). E o `TrackBranch` dreaptă prin coastă, cu **~125 de porți** la 1,2 m una de alta, un culoar de **6,4 m liber** și **5,2 m sub grinzi**, cu ~25% mai scurtă decât bucla. Stâlpii fac un perete continuu, cu nervuri | **riscul e de precizie, nu de ceas**: atingerea peretelui = frecare mare și ricoșeu, fără oprire. Fără gardian și fără vacă: precizia e poarta. Recompensa se reglează pe sondă la 0,5–1,5 s, ca la ulicioara din Jodhpur. `CameraZone` joasă, plus **garda de fotosensibilitate** (§3) | 3,2 m (`branch_half_width`) |
-| **F** | 0.56–0.68 | **Grădina cu iaz și Pavilionul de Aur.** Cobori la iaz (cota 0). Drumul merge spre V pe malul de sud, pe pietriș compactat cu margini de mușchi, pini *niwaki*, pietre de grădină și tufe *karikomi*, cu **Kinkaku-ji în dreapta, peste apă**. Pe malul iazului, pe exteriorul unei curbe lungi la stânga, stă **shishi-odoshi-ul uriaș** (§3): se umple dintr-un jgheab de bambus și se apleacă peste drum | **hazardul-semnătură**: alegi linia după unghiul tubului. Interiorul curbei e linia rapidă și e exact linia pe care bate tubul | 5,5 m (la tub) / 6,5 m |
+| **F** | 0.56–0.68 | **Grădina cu iaz și Pavilionul de Aur.** Cobori la iaz (cota 0). Drumul merge spre V pe malul de sud, pe pietriș compactat cu margini de mușchi, pini *niwaki*, pietre de grădină și tufe *karikomi*, cu **Kinkaku-ji în dreapta, peste apă**. Pe malul iazului, pe exteriorul unei curbe lungi la stânga, stă **daruma-otoshi-ul uriaș** (§3; a înlocuit shishi-odoshi pe 3 oct 2026): un turn de discuri colorate, cu un ciocan care se trage înapoi și lovește discul de jos peste drum | **hazardul-semnătură**: citești ciocanul tras și treci înainte de lovitură sau după disc (nu există bandă liberă: se scapă prin timing) | 5,5 m (la tub) / 6,5 m |
 | **G** | 0.68–0.80 | **Pădurea de bambus de la Arashiyama.** Un culoar de tulpini *moso* de 20 m, cu **garduri de nuiele** (*shiba-gaki*) pe ambele părți, două S-uri și lumina în pete pe drum. O ricșă oprită pe margine (decor) | **respiro-ul verde** (regula de dozaj, §0.1). S-urile cu drift încarcă bara pentru H | 5 m |
 | **G2** | 0.80–0.82 | **Sub podul trenulețului.** Un pod de fier peste defileu, la ~9 m deasupra drumului. **Trenulețul de epocă** trece pe deasupra pe un ciclu (teatru), iar umbra lui trece peste drum | fără efect asupra cursei; reperul sonor e fluierul | 6 m |
 | **H** | 0.82–1.00 | **Podul Togetsukyō și dreapta finală.** Drumul iese din defileu pe **podul lung de lemn** (150 m, la +3) peste râul Katsura, cu **dealurile colorate de toamnă** în dreapta-față și **bărci acoperite** (*yakatabune*) pe râu. Apoi continuă drept spre N, pe Yasaka-dōri. **Pagoda apare din pâclă** pe ultima treime | **cea mai lungă dreaptă**: turbo-ul strâns în bambus și în valea de arțari se arde aici | 7 m |
@@ -339,7 +339,7 @@ est și spre V pe latura de sud.
 
 | ceas | perioadă |
 |---|---|
-| shishi-odoshi | **16,6 s** (umplere 14 / aplecare 0,5 / golire 1,5 / revenire 0,6) |
+| daruma-otoshi | **13 s** pe lovitură, 5 lovituri + reconstrucție = **71 s** (shishi-odoshi, ISTORIC: 16,6 s) |
 | trenulețul | **~41 s** |
 | clopotul templului (*bonshō*, teatru sonor) | **~53 s** |
 | *kogarashi* (dacă se confirmă) | **~29 s** |
@@ -360,9 +360,165 @@ Acoperirea celor cinci clase din `ref_notes/sisteme.md` §3:
 | frecare | covorul de frunze (vizual; grip opțional, §3.1), pietrișul de pe malul iazului (0,92×), petecul ud lăsat de shishi-odoshi (`WaterHazard`), caldarâmul (0,95×) |
 | **oprire** | **niciuna** (lecția semaforului Fiordland) |
 | sabotaj de control | ***kogarashi***, dacă se confirmă (§3.1); altfel niciunul |
-| **aruncare** | **shishi-odoshi** (lovitura tubului), **săritura de pe scenă**, ricoșeul din pereții tunelului de torii |
+| **aruncare** | **daruma-otoshi** (discul lovit; înainte, lovitura tubului), **săritura de pe scenă**, ricoșeul din pereții tunelului de torii |
 
-### Shishi-odoshi (F) — hazardul nou
+### Daruma-otoshi (F) — înlocuiește shishi-odoshi (decizia dezvoltatorului, 3 oct 2026: tubul nu se citea, „arată ca o pompă”)
+
+Dezvoltatorul a condus tubul și l-a respins: „nu-mi dau seama ce se întâmplă,
+arată ca o pompă, nu e interesant”. L-a ales în loc pe **daruma-otoshi**:
+jucăria japoneză cu un ciocănel, adică un turn de discuri colorate cu un cap de
+daruma deasupra. Lovești discul de jos, acesta zboară, iar turnul coboară cu un
+etaj. Secțiunea shishi-odoshi de mai jos rămâne ca **ISTORIC** (clasa
+`ShishiOdoshiHazard` și sonda ei rămân în repo; ștergerea e o decizie separată).
+
+**Ipoteza de lizibilitate:** o jucărie pe care o recunoști (turn de discuri
+colorate, cap roșu cu față), cu un telegraf care nu cere interpretare (un ciocan
+**tras înapoi**, ținut, tremurând), iar rezultatul e un obiect plat, portocaliu,
+care traversează asfaltul. Tubul cerea să înțelegi un mecanism (umplere, apoi
+balans); aici cauza și efectul sunt în același cadru. E o ipoteză: verdictul
+rămâne al dezvoltatorului, la volan (vezi „Lizibilitate”).
+
+**Ce e** (cotele sunt `@export`-uri în `scenes/hazards/daruma_otoshi_hazard.gd`):
+- **Turnul:** 5 discuri cilindrice Ø 4 m × 1,4 m (portocaliu, albastru-verde
+  închis, auriu, verde, turcoaz), cap de daruma roșu cu fața albă, ochi și
+  sprâncene negre, pe o placă de piatră cu pilon de 3 m sub cotă. Înălțime
+  **9,3 m**. Stă pe exteriorul curbei, cu **fața spre mașina care vine**; fața
+  dinspre drum e la **1,4 m** de marginea asfaltului (măsurat pe drumul real).
+- **Ciocanul (*kizuchi*):** o maciucă de lemn Ø 1,9 × 2,8 m pe un braț de 5 m, cu
+  pivot pe un cadru de lemn **în spatele turnului** (pe exterior). Se trage
+  înapoi **72°** (capul ajunge la ~6 m înălțime) și lovește discul de jos,
+  împingându-l spre interior.
+- **Discul lovit:** alunecă peste drum, perpendicular, ca o pușcă (22 m în
+  2,0 s, decelerând; se rotește), iese pe partea opusă, în iarbă, și se strânge
+  la nimic cu un nor de praf. Turnul coboară un etaj, cu o săritură de jucărie.
+
+**Ciclul** (13 s pe lovitură, 5 lovituri + reconstrucție = 71 s):
+
+| fază | interval în perioadă | ce se vede |
+|---|---|---|
+| repaus | 0 → 7,25 s | ciocanul atârnă lângă discul de jos; turnul stă |
+| **telegraful** | 7,25 → 10,25 s | ciocanul se trage înapoi încet, la 72° |
+| tensiune | 10,25 → 10,75 s | ținut sus, **tremură** (≈ 1,6°) |
+| **lovitura** | 10,75 → 11,0 s | cade accelerat, contact la 11,0 s |
+| alunecarea | 11,0 → 13,0 s | discul acoperă tot drumul în **~1,0 s** (coada lui eliberează asfaltul la 1,02 s), ajunge în iarbă și se strânge |
+| coborârea | 11,25 → 11,75 s | turnul coboară un etaj (cade, sare, se așază) |
+| reconstrucția | după al 5-lea disc, 6 s | rămâne doar capul; turnul **crește** de jos în sus, disc cu disc, cu depășire de resort |
+
+13 s nu împarte turul (75,3 s măsurat, 5,8 perioade), iar ciclul mare de 71 s
+alunecă ~4 s pe tur față de tur: turnul te prinde altfel la fiecare trecere.
+**Înălțimea turnului spune unde ești în ciclul mare** (5 discuri = abia a
+început, doar capul = urmează reconstrucția).
+
+**Ce te costă:** prins de disc ești **aruncat în direcția lui** (spre interior):
+orizontala e scrisă, înălțimea e în metri, cu excepție de coliziune cât ține
+zborul (`HazardThrow.throw`). **Fără oprire și fără distrugere.** Masa
+contează: Autobuzul e împins puțin, Buggy-ul zboară.
+
+| mașină | masă | pierdere de timp | urcare | lateral |
+|---|---|---|---|---|
+| Politia (20 m/s) | 90 | 1,62 s | 1,45 m | 5,6 m |
+| Buggy | 100 | 1,23 s | 1,33 m | 3,6 m |
+| Taxi | 115 | 1,20 s | 1,21 m | 3,3 m |
+| Muscle | 135 | 1,28 s | 1,02 m | 3,4 m |
+| Pompierii | 200 | 0,87 s | 0,64 m | 2,0 m |
+| Autobuzul | 260 | 0,73 s | 0,51 m | 1,2 m |
+| (la 30 m/s, aceleași 6) | 90–260 | 1,28–1,78 s | 0,51–1,49 m | 1,2–4,5 m |
+
+Media pe cele 12 treceri: **1,39 s** (ținta 1–2 s). Nimeni repus, nimeni oprit.
+
+**AI onest:** AI-ul citește ciclul (ciocanul tras = lovitura vine) și **nu
+frânează până la oprire**. Când fereastra lui de sosire `[rapid, lent]` se
+suprapune cu fereastra de pericol (de la 0,3 s înainte de contact până când
+discul a eliberat asfaltul, 1,4 s în total), alege o singură dată și ține
+alegerea: **ridică piciorul** (plafon de viteză, cu podea la 50% din croazieră)
+ca să treacă DUPĂ disc, sau, dacă viteza necesară ar coborî sub podea, **trece
+înainte**. Ca la `_shishi_line`, sosirea e o fereastră, nu un moment (memoria
+`eta-cu-viteza-curenta-minte-pe-banda-cu-viraje`). Aici **nu există bandă
+liberă**: discul traversează tot drumul, deci se scapă doar prin timing. Codul
+e `_daruma_cap` în `ai_controller.gd`; pe pistele fără daruma iese imediat.
+
+**Ce cere în cod:** `DarumaOtoshiHazard` (stare **pură** de ceasul mare, deci
+`force_clock` pune orice fază, pentru sonde și capturi) plus citirea în AI.
+Discul în mișcare e un `AnimatableBody3D`, dar **aruncarea nu o face solverul**:
+o zonă merge cu 1,8 m în fața discului, prinde mașina și o aruncă (memoria
+`corp-cinematic-aparut-in-masina`: un corp cinematic apărut într-o mașină o
+scoate din lume). Discul pornește din turn, de pe marginea drumului.
+
+**Modelul:** `assets/models/kyoto/props/daruma_otoshi.glb`, 3,4k triunghiuri,
+doar sloturi de atlas (`LAVA_ORANGE`, `SEA_DEEP`, `SAND_LIGHT`,
+`TROPICAL_GREEN`, `REEF_SHALLOW`, `KERB_RED`, `FOAM_WHITE`, `LOG_DARK`, lemn și
+piatră; fără `CAR_*`), AO copt, fără texturi proprii; `verify_glb`: OK. Contractul
+de noduri e în antetul hazardului: `Base`, `Disc_1`..`Disc_5` (origine la baza
+discului), `Head`, `Hammer` (origine = axa pivotului, `rotation.z`), `Frame`.
+Sursa: `tools/blender/build_kyoto_daruma.py`. Montarea: `tools/gen_kyoto_route.py`
+(nodul `DarumaOtoshi` în locul lui `ShishiOdoshi`, aceeași zonă F).
+
+**Contracte, măsurate** (`tools/ProbeKyotoDaruma.tscn`, drum drept de test):
+
+| contract | rezultat |
+|---|---|
+| **(a)** lovitura pe 6 mașini × 20/30 m/s | PASS: 12/12 lovite, 0 repuneri, nimeni oprit, toți la < 15 m de drum și deasupra solului, pierdere medie 1,39 s; cifrele **diferă** între mașini (la 20 m/s: timp ±0,88 s, urcare ±0,94 m, lateral ±4,4 m). **Armat prin sabotaj de masă** (`--sabotage-mass`): urcarea iese 0,51 m la toate, 3 verdicte PICAT |
+| **(b)** AI citește vs orb, 180 s × 5 seed-uri, 6 mașini | PASS: cititorul **0 contacte** pe 170 treceri, 37 treceri cu piciorul ridicat (cea mai joasă viteză 59% din croazieră), **0 opriri**; orbul **6 contacte** pe 172 treceri |
+| **(c)** traversarea, ca GOL pe gabaritul caroseriei | PASS: golul neacoperit de disc pe lățimea de 11 m = **0,00 m** (corp și corp+zonă), în 38 de cadre; **0 atingeri** disc–asfalt după traversare (45 de cadre, corpul și discul vizibil); turnul și stâlpii nu intră în bandă (0 atingeri pe 7 faze). **Armat prin sabotaj** (`--sabotage-short`, alunecare de 9 m): gol 1,90 m, 42 de atingeri, 3 verdicte PICAT |
+| **(d)** ciclul mare, timp real, 2 cicluri | PASS: 10 discuri zburate; la începutul fiecărei perioade turnul are 5, 4, 3, 2, 1 discuri și capul la 6,62 / 5,32 / 4,02 / 2,72 / 1,42 m; reconstrucția readuce turnul întreg (5 discuri la scara 1, capul la 6,62 m) de 2 ori din 2 |
+| poziția pe Track18 (`ProbeKyotoDarumaPos`) | PASS: origine pe axă (−0,31 m), −Z pe sensul de mers (cos 0,9987), fața turnului la 1,4 m de asfalt, **58/58 puncte pe [150, 35] m la azimut ≤ 30°** (cel mai rău 12°), fața spre mașină la ≤ 27°, vârful la 9,34 m, sub plafonul camerei |
+
+**Gărzi pe Track18** (3 oct 2026): `ProbeLayout --track=11`: OK.
+`ProbeLaneClear --track=11`: 3 probe blocate, exact linia de bază (turnul și
+ciocanul nu intră în bandă). `probe_decor --track=18`: 17 materiale (max 38), OK.
+
+**ProbeRace** (`--track=11 --ai=7 --seconds=260`, 8 mașini × 16 seed-uri; Jolt e
+nedeterminist, deci se compară distribuții, memoria `proberace-nedeterminism`):
+
+| configurație | tur mediu | `[blocaj]` | repuneri (frac) | aruncări |
+|---|---|---|---|---|
+| cu daruma, AI citește | 75,42 s (371 ture) | 2 (ambele la 0,317, aterizarea de la C2) | 2 (0,294 · 0,495) | **0** |
+| fără daruma (`--no-daruma`) | 74,84 s (371 ture) | 1 (0,492, tunelul E′) | 3 (0,310 · 0,495 · 0,495) | 0 |
+| cu daruma, AI orb (`--blind`) | 74,95 s (373 ture) | 2 (ambele la 0,317) | 4 (0,294 · 0,310 · 0,495 · 0,495) | **28** |
+
+Turnul e la frac 0,633: **nicio repunere și niciun `[blocaj]` în zona F** în
+niciuna din cele 48 de rulări, iar contactele solide cu turnul sau cu ciocanul
+sunt 0. Costul AI-ului care citește: **+0,58 s pe tur** (0,8%) față de fără
+daruma, din piciorul ridicat (rulările au un ecart de ~±1 s între seed-uri, deci
+diferența e aproape de zgomot). Orbul e lovit de 28 de ori în 373 de ture, deci
+garda e armată.
+
+**Abateri față de propunerea inițială (cu motiv):**
+1. **Discul nu intră în iaz, iese în iarbă.** Pe Track18 iazul e pe **exteriorul**
+   curbei (partea turnului), iar interiorul e pășune. Turnul rămâne pe exterior
+   (cerința), deci discul traversează spre iarbă: efectul de final e un nor de
+   praf, nu un plescăit. Avantaj: mașinile aruncate aterizează pe iarbă, nu în
+   apă, deci nu apar repuneri din lovitură.
+2. **Turnul stă la 1,7 m de asfalt** (nu 1,4): cu 1,4, poziția reală a drumului
+   copt (0,3 m față de generator) lăsa 1,08 m între fața turnului și asfalt.
+3. **Fereastra de pericol e 1,4 s** (de la 0,3 s înainte de contact până la 1,1 s
+   după), nu „~0,8–1,0 s”: marginea din față trece drumul în ~0,9 s, dar coada
+   discului (Ø 4 m) mai ocupă asfaltul ~0,15 s.
+4. **Piciorul ridicat al AI** în loc de „sau accelerează”: un AI la croazieră nu
+   mai poate accelera, deci alege între a ridica piciorul și a trece înainte.
+5. **Pilon de piatră de 3 m** sub placă și sub picioarele cadrului: pe malul
+   iazului turnul părea că plutește.
+
+**Lizibilitate** (capturile din camera de joc, pe F, în `snapshots/` — în
+`.gitignore`, deci doar local: `kyoto_daruma_<fază>_<dist>.png` cu fază
+`telegraf` / `disc` / `scazut` și dist 120 / 50 m): turn plin cu ciocanul tras,
+discul în mijlocul drumului, turn scăzut cu ciocanul tras. **Întrebarea: se
+înțelege din viteză, fără explicații, ce urmează?** Din capturi, **parțial da**:
+la 50 m ciocanul ridicat deasupra turnului colorat spune „urmează să lovească”
+fără text, iar discul portocaliu de pe asfalt se citește imediat ca un obiect
+care traversează. La 120 m telegraful e o siluetă (turn colorat + braț ridicat),
+dar maciuca are ~12 px. **Nemăsurat:** mișcarea la viteza reală (tremurul,
+căderea ciocanului, săritura turnului), verdictul la volan și dacă un jucător
+care n-a văzut încă o lovitură asociază ciocanul cu discul. Camera de 120 m
+prinde și un petic de teren care intră în drum la frac 0,585 (cele 3 probe din
+linia de bază a `ProbeLaneClear`, nu ține de turn).
+
+### Shishi-odoshi (F) — ISTORIC: înlocuit de daruma-otoshi (3 oct 2026), vezi mai sus
+
+> Secțiune păstrată ca istoric. Tubul a fost scos din `Track18`; clasa
+> `ShishiOdoshiHazard`, sonda `ProbeKyotoTub` și modelul `shishi_odoshi.glb` rămân
+> în repo până la o decizie separată de ștergere.
+
 
 **Ce e:** un tub de bambus de **16 m**, cu Ø 1,8 m, pe un pivot la **6,6 m** (brief v0.1: 6 m — corectat de sondă, vezi „Starea sondelor tehnice”)
 înălțime, montat pe un cadru de piatră pe **malul iazului** (marginea dinspre

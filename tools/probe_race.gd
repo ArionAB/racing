@@ -218,6 +218,11 @@ var _force_dusk: float = -1.0
 var _no_torii: bool = false
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
+## `--no-daruma`: scoate `DarumaOtoshiHazard` din scena (A/B-ul turnului, Kyoto).
+var _no_daruma: bool = false
+## Hazardurile daruma-otoshi gasite in scena (goale cu --no-daruma).
+var _daruma: Array[DarumaOtoshiHazard] = []
+var _daruma_throws: int = 0
 ## `--blind`: AI-ul IGNORA tubul (`reads_shishi = false`). Martorul garzii: cu el
 ## contactele AI-tub trebuie sa fie > 0, altfel garda nu e armata (memoria
 ## `garda-fara-linie-de-baza-iese-zero`).
@@ -360,6 +365,8 @@ func _ready() -> void:
 			_force_dusk = float(arg.trim_prefix("--dusk="))
 		elif arg == "--no-tub":
 			_no_tub = true
+		elif arg == "--no-daruma":
+			_no_daruma = true
 		elif arg == "--blind":
 			_blind = true
 		elif arg == "--no-turbo":
@@ -470,7 +477,7 @@ func _start_race() -> void:
 			"stuck_t": 0.0, "stuck_reports": 0,
 			"branch_laps": 0, "branch_s": 0.0, "last_route": 0,
 			"lap_t": [], "last_total": 0.0,
-			"jump_armed": false, "jump_ok": 0, "jump_fail": 0, "tub_hits": 0,
+			"jump_armed": false, "jump_ok": 0, "jump_fail": 0, "tub_hits": 0, "daruma_hits": 0,
 			"jump_v": [], "jump_v_taken": false,
 		})
 		car.respawned.connect(_on_respawn.bind(i))
@@ -502,6 +509,7 @@ func _start_race() -> void:
 			var ai_c := car.controller as AIController
 			if ai_c != null:
 				ai_c.reads_shishi = false
+				ai_c.reads_daruma = false
 	if _force_rain >= 0:
 		_force_rain_cycle_deferred(float(_force_rain))
 	if _force_dusk >= 0.0:
@@ -532,6 +540,18 @@ func _setup_kyoto() -> void:
 		else:
 			_shishi.append(hz)
 			hz.car_thrown.connect(func(_c: Car, _strike: bool) -> void: _tub_throws += 1)
+	for n in get_tree().get_nodes_in_group(DarumaOtoshiHazard.AI_GROUP):
+		var dz := n as DarumaOtoshiHazard
+		if dz == null:
+			continue
+		if _no_daruma:
+			dz.remove_from_group(DarumaOtoshiHazard.AI_GROUP)
+			dz.get_parent().remove_child(dz)
+			dz.free()
+			print("--no-daruma: DarumaOtoshi scos din scena")
+		else:
+			_daruma.append(dz)
+			dz.car_thrown.connect(func(_c: Car) -> void: _daruma_throws += 1)
 	for ch in track._channels:
 		if bool(ch.get("jump", false)) and not bool(ch.get("ford", false)):
 			_jump_near = track.frac_at(int(ch["near"]))
@@ -756,6 +776,8 @@ func _tick_race(delta: float) -> void:
 				st.deflector_hits = int(st.deflector_hits) + 1
 			elif _is_under(hit as Node, "ShishiOdoshiHazard"):
 				st.tub_hits = int(st.tub_hits) + 1
+			elif _is_under(hit as Node, "DarumaOtoshiHazard"):
+				st.daruma_hits = int(st.daruma_hits) + 1
 			elif _is_under(hit as Node, "BusHazard"):
 				# Autobuzul de pe serpentine (Machu Picchu): corp cinematic
 				# pe traseu; contactul se numara ca la minge/deviator.
@@ -1240,6 +1262,13 @@ func _report_kyoto(cars: Array[Car]) -> void:
 		print("--- tub shishi-odoshi: aruncari=%d contact-cadre=%d" % [_tub_throws, tub_hits])
 	elif _no_tub:
 		print("--- tub shishi-odoshi: DEZACTIVAT (--no-tub)")
+	var daruma_hits := 0
+	for i in cars.size():
+		daruma_hits += int(_stats[i].daruma_hits)
+	if not _daruma.is_empty():
+		print("--- daruma-otoshi: aruncari=%d contact-cadre (turn/ciocan/disc solid)=%d" % [_daruma_throws, daruma_hits])
+	elif _no_daruma:
+		print("--- daruma-otoshi: DEZACTIVAT (--no-daruma)")
 
 
 # ---------------------------------------------------------------- mod bump

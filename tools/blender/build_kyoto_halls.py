@@ -74,6 +74,7 @@ def _gate(P):
             wood.box((cx_, sy * pd, zp - 0.6), (L_, 0.7, 0.55), VERM)              # nuki sus
             wood.box((cx_, sy * pd, zp - 2.2), (L_, 0.6, 0.45), VERM)              # nuki mijloc
             wood.box((cx_, sy * pd, 1.0), (L_, 0.6, 0.45), VERM)                   # talpa jos
+            wood.box((cx_, sy * pd, zp * 0.5 - 0.3), (L_, 0.6, 0.4), VERM)         # nuki median
     for sx in (-1, 1):
         for x in (xi, xm, xo):
             wood.box((sx * x, 0, zp + 0.05), (0.55, 2 * pd, 0.55), VERM)           # grinzi pe adancime
@@ -176,28 +177,28 @@ def _gate(P):
         roof.box(c, (2 * (Rg + ov), Ls, plate_t), TILE, rotation=rot)
         c2 = Vector((0, mid_y, mid_z)) - nrm * 0.02
         roof.box(c2, (2 * (Rg + ov) + 0.1, Ls - 0.1, 0.12), BEAM, rotation=rot)
-    top = z0 + r2
-    roof.box((0, 0, top + 0.28), (2 * (Rg + ov) + 0.4, 0.6, 0.5), BEAM)
-    for sx in (-1, 1):
-        roof.box((sx * (Rg + ov + 0.1), 0, top + 0.6), (0.5, 0.7, 0.7), BEAM)
+    top = ze + P["roof_rise"]
+    roof.box((0, 0, top + 0.12), (2 * Rh + 0.8, 0.6, 0.45), BEAM)                  # creasta
+    for sx in (-1, 1):                                                              # onigawara
+        roof.box((sx * (Rh + 0.3), 0, top + 0.5), (0.5, 0.7, 0.7), BEAM)
     return wood, roof, plaster
 
 
-NIOMON = dict(x_in=6.6, x_mid=9.6, x_out=12.6, post_d=2.7, post_w=1.0, post_h=5.0,
-              gallery_z=5.5, gallery_hx=13.3, gallery_hy=4.5, gallery_sides=True,
-              upper_h=7.9, upper_hx=12.0, upper_hy=2.5, upper_posts=10, windows=3,
-              window_span=3.8, eave_z=8.2, roof_hx=14.0, roof_hy=6.4,
-              roof_rise=1.8, ridge_half=9.5, roof_lift=1.0, roof_sag=1.7,
-              bracket_step=0.7, gable_w=4.9, gable_z=0.6, gable_rise=4.0,
-              gable_out=1.0, gable_ov=1.2)
+NIOMON = dict(x_in=7.8, x_mid=10.8, x_out=13.8, post_d=2.7, post_w=1.0, post_h=8.0,
+              gallery_z=8.8, gallery_hx=14.5, gallery_hy=4.5, gallery_sides=True,
+              upper_h=12.2, upper_hx=13.2, upper_hy=2.5, upper_posts=11, windows=3,
+              window_span=4.6, eave_z=12.6, roof_hx=15.0, roof_hy=6.8,
+              roof_rise=5.2, ridge_half=9.0, roof_lift=1.1, roof_sag=2.2,
+              bracket_step=0.7, gable_w=3.6, gable_z=0.7, gable_rise=3.4,
+              gable_out=1.2, gable_ov=1.0)
 
-ROMON = dict(x_in=6.4, x_mid=9.0, x_out=11.7, post_d=2.3, post_w=0.95, post_h=4.8,
-             gallery_z=5.1, gallery_hx=12.4, gallery_hy=3.9, gallery_sides=False,
-             upper_h=7.6, upper_hx=11.0, upper_hy=2.3, upper_posts=9, windows=4,
-             window_span=4.6, eave_z=7.7, roof_hx=13.2, roof_hy=5.7,
-             roof_rise=1.7, ridge_half=7.5, roof_lift=1.25, roof_sag=2.0,
-             bracket_step=0.6, gable_w=4.3, gable_z=0.6, gable_rise=3.8,
-             gable_out=1.0, gable_ov=1.2, side_lattice=False)
+ROMON = dict(x_in=7.7, x_mid=10.1, x_out=12.5, post_d=2.3, post_w=0.95, post_h=8.4,
+             gallery_z=9.2, gallery_hx=13.2, gallery_hy=3.9, gallery_sides=False,
+             upper_h=13.0, upper_hx=11.7, upper_hy=2.3, upper_posts=10, windows=4,
+             window_span=5.2, eave_z=13.4, roof_hx=14.0, roof_hy=6.0,
+             roof_rise=5.0, ridge_half=6.5, roof_lift=1.3, roof_sag=2.3,
+             bracket_step=0.6, gable_w=3.4, gable_z=0.7, gable_rise=3.2,
+             gable_out=1.2, gable_ov=1.0, side_lattice=False)
 
 
 def build_niomon_gate():

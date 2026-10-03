@@ -40,8 +40,8 @@ check "structures/yasaka_pagoda.glb"  7700 --origin=assembly --allow-car-slots=P
 check "plants/momiji_a.glb"           3100 --origin=assembly
 
 echo "== sala, scena, portile (kit §1.3) =="
-check "structures/niomon_gate.glb"    6400 --origin=assembly
-check "structures/inari_romon.glb"    6000 --origin=assembly
+check "structures/niomon_gate.glb"    7000 --origin=assembly
+check "structures/inari_romon.glb"    6600 --origin=assembly
 check "structures/kakezukuri_scaffold.glb" 1000 --origin=assembly
 check "structures/kiyomizu_hondo.glb"  5600 --origin=assembly
 

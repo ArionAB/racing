@@ -112,14 +112,13 @@ de trecere ca GOL (proiectie pe planul transversal, 5 cm, transformarile
 nodurilor aplicate), nu AABB. Comparatii: `docs/asset_briefs/img/kyoto_fidelity/<nume>.png`
 (+ `<nume>_views.png`; schela: `kakezukuri_scaffold_chain.png`).
 
-## `structures/niomon_gate.glb` (runda 2)
-- 6 322 tri (`Gate_Wood`, `Gate_Roof`, `Gate_Plaster`), 28,5 lat x 13,3 adanc x 13,75 inalt (poarta latita, traveile laterale de ~6 m inchise).
-- Parter: stalpi grosi (1,0 m) vermilion pe socluri, a treia linie de stalpi in fiecare travee, grinzi orizontale, panouri ALBE jos si sus, panou alb pe latura. Etaj 2 mai inalt: galerie cu balustrada pe 4 laturi, trup alb cu stalpi si ferestre; banda densa de console vermilion cu accente albe. Acoperis irimoya: hip jos cu streasina curbata + acoperis superior cu FRONTON vermilion pe laturile scurte.
-- **Contract inghetat (remasurat ca GOL): gol liber 11,80 m (x −5,90…+5,90), inaltime libera minima 4,10 m.**
-## `structures/inari_romon.glb` (runda 2)
-- 5 874 tri, 26,9 x 11,9 x 13,05 m. Diferit de Niomon: galerie doar fata/spate, etaj mai ingust, 4 ferestre, coama mai scurta, stalpi mai scurti, fara usa laterala cu zabrele.
-- **Contract inghetat: gol 11,50 m (x ±5,75), inaltime libera minima 3,80 m.**
-- Abateri ambele: frontonul e un pentagon plin, planurile superioare drepte (fara curbura), consolele sunt blocuri nu ciorchini; h/l ~0,47-0,48 fata de ~0,6-0,65 pe planșa (efect al latirii cerute pentru traveile laterale).
+## `structures/niomon_gate.glb` (runda 3, contract de gol corectat)
+- 6 694 tri (`Gate_Wood` 4 340, `Gate_Roof` 1 166, `Gate_Plaster` 1 188), **30,5 lat x 14,1 adanc x 18,65 inalt, h/l 0,61**. Stalpi grosi (1,0 m) de 8 m, travei laterale de ~6 m inchise cu panouri albe (jos si sus, 3 nuki), etaj 2 de ~3,4 m cu galerie pe 4 laturi, banda de console vermilion cu accente albe, acoperis irimoya: 4 ape concave (rise 5,2, sag 2,2) + fronton vermilion pe laturile scurte.
+- **Contract inghetat (GOL, measure_gap.py, banda 0,15–2,0 m): gol liber 14,30 m (x −7,15…+7,15), inaltime libera minima 7,10 m** (cerut: ≥ 14,0 m si ≥ 6 m). Motiv: drumul principal are pana la ±6,0 m si coliziunea e `mesh` solida.
+## `structures/inari_romon.glb` (runda 3)
+- 6 170 tri, **28,5 x 12,5 x 19,25 m, h/l 0,675** (poarta-turn, mai compacta si mai inalta relativ). Galerie doar fata/spate, 4 ferestre, creasta scurta (6,5 m), travei de ~4,8 m, fara usa laterala cu zabrele.
+- **Contract inghetat: gol liber 14,10 m (x −7,05…+7,05), inaltime libera minima 7,50 m.**
+- Abateri ambele: acoperisul are ~32–35% din inaltime (decupari ~40%) si frontonul vermilion e un pentagon plin sub un hood drept, nu curbat; consolele sunt blocuri nu ciorchini; panourile albe din travei sunt mari si plate; proportia latime/adancime (30 x 14) face traveele lungi.
 ## `structures/kakezukuri_scaffold.glb` (runda 2)
 - 720 tri, 6,8 x 6,8 x 15,92 m (stalpii/puntea 6,0 x 6,0; grinzile ies 0,4 m in toate directiile). Stalpi drepti (`LARCH_RUST`, mai deschis), 4 niveluri de grinzi `WOOD` (mai inchis) CONTINUE prin toti stalpii pe toata latimea si iesind 0,4 m; stalpii de capat sunt jumatati (0,31 m), doua module dau un stalp intreg. Lant de 3: grinzile se continua peste cusaturi.
 - Nota: capetele nu mai sunt strict plane in grinzi (ies 0,4 m, suprapunere identica cu vecinul); AABB-ul modulului e 6,8 pe X, deci placerul pune pasul la 6,0.
@@ -128,4 +127,4 @@ nodurilor aplicate), nu AABB. Comparatii: `docs/asset_briefs/img/kyoto_fidelity/
 - Abateri: frontoanele sunt mai simple (fara curbura karahafu); acoperisul transversal intra in cel principal fara racordare; anexa din stanga e un singur hip, nu un inel de fuste; scara fara balustrade pe palier.
 
 ## Stare la oprire (halls)
-- Facut: toate 4, runda 2 dupa verdictul coordonatorului. Verify OK (buget gates ridicat la 6400/6000 pentru geometria noua). Verdictul de fidelitate e al coordonatorului.
+- Facut: toate 4; portile in runda 3 (gol 14,3/14,1 m, h libera 7,1/7,5 m, h/l 0,61/0,675). Verify OK (buget gates 7000/6600). Verdictul de fidelitate e al coordonatorului.

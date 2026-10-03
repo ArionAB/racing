@@ -138,8 +138,8 @@ nod). Coliziune `trunk` la integrare; trunchiul are rază 0,5–0,7 m.
 
 | fișier | cote | h/l | contract |
 |---|---|---:|---|
-| `structures/niomon_gate.glb` | ~**20 m** lat, **13 m** înalt; **golul ≥ 11 m** liber | 0,6 | poartă vermilion cu 2 etaje: acoperiș mare gri cu streașină curbată, galerie cu balustradă la etajul 2, stâlpi vermilion, **gol măsurat ca GOL ≥ 11 m lățime, pe înălțimea caroseriei (2 m)**. Noduri `Gate_Wood` (`LAVA_ORANGE` + `LOG_DARK`), `Gate_Roof`, `Gate_Plaster`. Coliziune `mesh`: stâlpii laterali pot fi solizi, golul nu |
-| `structures/inari_romon.glb` | ~**18 m** lat, **12 m** înalt; **gol ≥ 11 m** | 0,65 | poartă-turn vermilion, același contract de gol |
+| `structures/niomon_gate.glb` | ~**30 m** lat, **~18 m** înalt (h/l ≥ 0,6); **golul ≥ 14 m** liber, înălțime liberă ≥ 6 m | 0,6 | poartă vermilion cu 2 etaje: acoperiș mare gri cu streașină curbată, galerie cu balustradă la etajul 2, stâlpi vermilion, **gol măsurat ca GOL ≥ 14 m lățime (±7,0 m), pe înălțimea caroseriei (2 m), înălțime liberă ≥ 6 m** (corectat din 11 m: drumul principal are până la ±6,0 m, iar coliziunea e `mesh` solidă — stâlpii nu pot intra în carosabil). Noduri `Gate_Wood` (`LAVA_ORANGE` + `LOG_DARK`), `Gate_Roof`, `Gate_Plaster`. Coliziune `mesh`: stâlpii laterali pot fi solizi, golul nu |
+| `structures/inari_romon.glb` | ~**28 m** lat, **~19 m** înalt; **gol ≥ 14 m**, înălțime liberă ≥ 6 m | 0,65 | poartă-turn vermilion (mai compactă și mai înaltă relativ), același contract de gol (corectat din 11 m, vezi Niomon) |
 | `structures/kakezukuri_scaffold.glb` | **6 m** lat × **16 m** înalt (modul, adânc ~6) | 2,3 | rețea de stâlpi și grinzi de lemn (`WOOD`/`LOG_DARK`), repetabilă; **coliziune `mesh`** (decor pur, nu bloc solid); capete plane pentru înlănțuire; nod `Scaffold_Wood` |
 | `structures/kiyomizu_hondo.glb` | ~**30 m** lat × 20 adânc × 14 înalt (cu scena) | 0,5 | sala principală: acoperiș în patru ape mare, gri-închis, pe `LOG_DARK`; **fața dinspre scenă (+Y) e cea bogată**: verandă pe piloni, scară de lemn, pereți albi cu stâlpi. Noduri `Hondo_Roof`, `Hondo_Wood`, `Hondo_Plaster`. Puntea scenei e drum (cod), nu GLB |
 

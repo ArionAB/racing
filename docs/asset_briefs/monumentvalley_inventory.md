@@ -51,29 +51,32 @@ fusta e mai joasă și mai netedă decât desenul; gol la nivelul calotei 2,85 m
   și restul pot folosi aceleași funcții.
 - `preview_monument.py` pune clasa `mv_sandstone` (#B8552E) pe nodurile `*_Rock`.
 
-## Grupa mv-b: plante (`build_monument_plants.py`)
+## Grupa mv-b: plante (`build_monument_plants.py`, revizia 3 dupa verdictul coordonatorului)
 
-Verdict: `bash tools/blender/verify_monumentvalley.sh` -> `VERDICT KIT: OK`
-(juniper si rabbitbrush cu `--origin=assembly`, rabbitbrush cu
-`--allow-car-slots=Rabbitbrush_Bloom`). Comparatii: `img/monumentvalley_fidelity/<nume>.png`,
-planșa: `img/monumentvalley_fidelity_valb.png`. Cote masurate din GLB (X x Y x Z Blender).
+Verdict: `bash tools/blender/verify_monumentvalley.sh` -> `VERDICT KIT: OK` (juniper si
+rabbitbrush cu `--origin=assembly`, rabbitbrush cu `--allow-car-slots=Rabbitbrush_Bloom`).
+Comparatii: `img/monumentvalley_fidelity/<nume>.png`; planșa: `img/monumentvalley_fidelity_valb.png`.
+Yucca acceptata (neschimbata).
 
-| fisier | noduri (slot) | tri | cote | h/l |
-|---|---|---:|---|---:|
-| `plants/sagebrush.glb` | `Sagebrush` (CACTUS_GREEN 12 + DRY 13 tulpini) | 1146 | 1,32 x 1,43 x 0,99 m | 0,72 |
-| `plants/juniper.glb` | `Juniper_Trunk` (WOOD 9), `Juniper_Crown` (TROPICAL_GREEN 21) | 3066 | 4,67 x 3,97 x 4,05 m | 0,87 |
-| `plants/yucca.glb` | `Yucca` (CACTUS_GREEN 12 + DRY 13) | 1388 | 1,37 x 1,41 x 1,21 m | 0,88 |
-| `plants/rabbitbrush.glb` | `Rabbitbrush` (DRY 13), `Rabbitbrush_Bloom` (CAR_YELLOW 16) | 3416 | 1,50 x 1,33 x 1,17 m | 0,78 |
-| `plants/tumbleweed.glb` | `Tumbleweed` (DRY 13) | 2726 | 0,93 x 0,94 x 0,96 m | 1,0 |
+**Verificarea culorilor (punctul 0).** Tabelul `PALETTE_HEX` din `preview_monument.py` e
+IDENTIC cu `HEX` din `scripts/palette.gd` (verificat pe toate cele 32 de intrari). UV-urile din
+GLB-uri (citite din fisier) cad exact pe sloturile intentionate, vezi coloana "sloturi (fete)".
+Deci verdele "ierbos" NU e o eroare de mapare: slotul 12 chiar e `#5B7C34` (91,124,52),
+iar randarea preview il da (70-77, 96-105, 39-43) dupa AO+lumina. Pe `juniper` randarea
+masurata e (70,96,39), oliv-verde si nu mai palid; am pastrat 12 (nu 21) fiindca
+TROPICAL_GREEN `#3F7A3C` e mai albastrui. Slotul 12 e "oliv sters" doar in comparatie cu 21.
+
+| fisier | noduri (sloturi, fete) | tri | cote (m) | RGB randat masurat |
+|---|---|---:|---|---|
+| sagebrush | `Sagebrush`: WOOD 9 x631, CACTUS 12 x323, MARBLE 29 x322, DRY 13 x192 | 1345 | 1,38 x 1,33 x 1,12 | pale (158,154,147), olive (77,105,43) |
+| juniper | `Juniper_Trunk` WOOD 9; `Juniper_Crown` CACTUS 12 | 2089 | 4,37 x 3,88 x 4,21 | coroana (70,96,39) |
+| rabbitbrush | `Rabbitbrush` CACTUS 12 + DRY 13; `Rabbitbrush_Bloom` CAR_YELLOW 16 | 2424 | 1,54 x 1,53 x 1,21 | flori (163,141,43) |
+| tumbleweed | `Tumbleweed` LARCH_RUST 27 | 2726 | 0,93 x 0,94 x 0,96 | (132,82,45) |
 
 | piesa / element | pe decupare | in GLB | verdict |
 |---|---|---|---|
-| sagebrush: smocuri | 7-8 ciorchini gri-verzi, contur festonat | 8 smocuri x 3 lobi inclinati spre exterior, tulpini DRY + 6 frunzulite pe sol | OK ca structura; culoarea slotului 12 iese verde, nu gri palid (slot, nu geometrie) |
-| juniper: trunchi | scurt, rasucit, 3-4 brate | trunchi rasucit 1,1 m, 4 brate + 8 ramuri laterale | OK; trunchiul e mai neted si mai drept decat desenul |
-| juniper: coroane | ciorchini cu goluri, nu glob | 12 ciorchini x 5 bulgari rotunjiti, goluri intre ei | OK; desenul are coroane mai jos pe laturi si mai mari |
-| yucca | 25-35 frunze lanceolate, galben la baza | 34 frunze, cele de jos cu varf DRY, ciot + frunze moarte | OK; frunzele sunt mai verzi decat olive-ul planșei |
-| rabbitbrush | cupola densa de ciorchini galbeni | 16 tulpini, 32 ciorchini x 3 lobi, tulpini vizibile intre ei | OK; desenul e mai dens si cu frunzis verde la baza (lipseste) |
-| tumbleweed | retea deschisa, crengute ramificate | 20 bucle + 7 crengute drepte, deschisa | OK ca volum; buclele sunt poligonale si fara ramificatii, culoare DRY mai oliv decat aramiu |
-
-Abateri: culorile vin din sloturi existente (zero sloturi noi), deci salvia/yucca
-sunt mai verzi decat planșa; arborele n-are coroane joase pe laturi.
+| sagebrush | smocuri fine, gri-verzi, vf. festonat | 15 smocuri-flacara pe 5 tulpini lemnoase ramificate (3/tulpina), culori alternate 29/12 cu varf pe culoarea opusa, goluri intre ele | structura OK; MARBLE 29 iese mai alb si mai plat decat gri-verdele texturat al desenului |
+| juniper trunchi | tulpini rasucite din pamant | 3 tulpini rasucite pornite din baza comuna, ramificate la 1,2-1,5 m, 2 ramuri joase orizontale | OK |
+| juniper coroane | ciorchini la inaltimi diferite | 8 ciorchini turtiti (2 joase pe laturi), 5 bulgari fiecare | OK; desenul are volume mai mari si mai dese |
+| rabbitbrush | perna densa, frunzis verde dedesubt | 48 ciorchini x 2 bulgari pe dom (treimile de sus/mijloc), inel de 18 frunzulite CACTUS 12, tulpini ascunse | perna OK; frunzisul e mai rar decat pe desen |
+| tumbleweed | retea de crengute arama | neschimbat ca forma, culoare LARCH_RUST 27 | OK; bucle poligonale |

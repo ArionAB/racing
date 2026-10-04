@@ -21,8 +21,10 @@ from mathutils import Vector, Matrix
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                        "monument_shapes.py")).read())
 
-SAGE = CACTUS_GREEN        # 12 gri-verde
-JUNI = TROPICAL_GREEN      # 21
+SAGE = CACTUS_GREEN        # 12 oliv (varfuri / smocuri interioare)
+PALE = MARBLE_GREY         # 29 gri-verde palid (corpul smocurilor)
+COPPER = LARCH_RUST        # 27 arama (tumbleweed)
+JUNI = CACTUS_GREEN        # 12 oliv (decis pe randarea masurata)
 BARK = WOOD                # 9
 DRY = DRY_VEGETATION       # 13
 BLOOM = CAR_YELLOW         # 16 (--allow-car-slots=Rabbitbrush_Bloom)
@@ -65,36 +67,43 @@ def polar(r, az_deg, z):
 
 # ---------------------------------------------------------------------------
 def build_sagebrush():
-    """`sagebrush.png` -- elemente numarate pe decupare, inainte de modelare:
+    """`sagebrush.png` -- elemente numarate pe decupare (revizia 3, dupa verdictul
+    coordonatorului: identitatea e GRI-VERDE PALID si textura fina):
 
-    - 7 smocuri (cel mult 8) gri-verzi, FIECARE un ciorchine ridicat, alungit,
-      cu contur festonat (ca o frunza de stejar): se inclina spre exterior din
-      centru, cele din fata mai joase, cel din mijloc cel mai inalt;
-    - tufa rotunjita, mai lata decat inalta (h/l ~0,7), cu varful neregulat;
-    - la baza: tulpini scurte, subtiri, portocalii-uscate (DRY) care se vad intre
-      smocuri, plus cateva frunzulite uscate intinse pe sol, in jurul bazei;
-    - culoare: gri-verde palid, fara contrast intre smocuri, umbra la baza.
+    - 15 smocuri mici, verticale, usor in forma de flacara (alungite, ingustate
+      spre varf), pe TULPINI LEMNOASE scurte care se ramifica (WOOD, 5 tulpini
+      de la baza, cate 3 smocuri pe tulpina), nu 5 bulgari rotunzi;
+    - culoare: gri-verde palid (MARBLE_GREY 29) pe cea mai mare parte a
+      smocurilor; CACTUS_GREEN 12 doar pe varfuri (calota mica a fiecarui smoc)
+      si pe smocurile din interior;
+    - domul tufei 1,0 x 1,4 m, cu GOLURI intre smocuri prin care se vad tulpinile;
+    - la baza: cateva frunzulite uscate pe sol.
     Cote: 1,0 m inalt, 1,4 m lat."""
     b = Builder()
-    tufts = [(0.00, 0, 0.58, 0.80, 4), (0.34, 25, 0.48, 0.76, 16),
-             (0.52, 85, 0.40, 0.62, 28), (0.56, 145, 0.34, 0.54, 34),
-             (0.56, 205, 0.36, 0.56, 34), (0.52, 265, 0.40, 0.62, 28),
-             (0.46, 320, 0.44, 0.70, 22), (0.62, 115, 0.28, 0.42, 44)]
-    for k, (r, a, z, h, tilt) in enumerate(tufts):
-        c0 = polar(r, a, z)
-        # smocul = un ciorchine: tulpina mare + 2 lobi laterali (contur festonat)
-        lump(b, c0, (0.34, 0.28, h), SAGE, 10 + k, tilt_deg=tilt, azim_deg=a,
-             segments=6, rings=3, deviation=0.22)
-        lump(b, c0 + polar(0.17, a + 90, h * 0.10), (0.22, 0.20, h * 0.55), SAGE,
-             30 + k, tilt_deg=tilt + 12, azim_deg=a + 90, deviation=0.22)
-        lump(b, c0 + polar(0.17, a - 90, h * 0.20), (0.22, 0.20, h * 0.5), SAGE,
-             50 + k, tilt_deg=tilt + 12, azim_deg=a - 90, deviation=0.22)
-    # tulpini scurte la baza (portocaliu uscat)
-    for k in range(9):
-        a = k * 40 + 10
-        stem(b, [polar(0.04, a, 0.0), polar(0.20, a, 0.20),
-                 polar(0.34, a, 0.30)], 0.028, 0.016, DRY, segments=4)
-    # frunzulite uscate pe sol
+    for i in range(5):
+        a = i * 72 + 15
+        base = polar(0.04, a, 0.0)
+        fork = polar(0.14, a, 0.30)
+        stem(b, [base, polar(0.08, a, 0.15), fork], 0.032, 0.022, BARK, segments=5)
+        for j, da in enumerate((-38, 0, 38)):
+            aa = a + da
+            outer = 0.50 if j != 1 else 0.30
+            top_z = 0.64 if j != 1 else 0.88
+            top_z -= 0.14 * (i % 2)
+            end = polar(outer + 0.06 * (i % 3), aa, top_z)
+            stem(b, [fork, (fork + end) * 0.5 + Vector((0, 0, 0.03)),
+                     end - Vector((0, 0, 0.22))], 0.020, 0.012, BARK, segments=4)
+            inner = ((i + j) % 2 == 0)
+            body = SAGE if inner else PALE
+            h = 0.46 if j != 1 else 0.52
+            tilt = 20 if j != 1 else 6
+            c0 = end - Vector((0, 0, 0.02))
+            lump(b, c0, (0.23, 0.18, h * 0.92), body, 10 + 4 * i + j, tilt_deg=tilt,
+                 azim_deg=aa, segments=6, rings=3, deviation=0.20)
+            if True:   # varful: calota mica pe culoarea opusa
+                lump(b, c0 + Vector((0, 0, h * 0.30)), (0.13, 0.11, 0.20), PALE if inner else SAGE,
+                     60 + 4 * i + j, tilt_deg=tilt, azim_deg=aa, segments=5,
+                     rings=2, deviation=0.18)
     for k in range(6):
         a = k * 60 + 25
         b.blade([polar(0.28, a, 0.03), polar(0.50, a, 0.05), polar(0.66, a, 0.03)],
@@ -104,64 +113,59 @@ def build_sagebrush():
 
 # ---------------------------------------------------------------------------
 def build_juniper():
-    """`juniper.png` -- elemente numarate pe decupare, inainte de modelare:
+    """`juniper.png` -- elemente numarate pe decupare (revizia 3):
 
-    - TRUNCHI: gros si scurt la baza (evazat), RASUCIT, se desparte la ~1/4 din
-      inaltime in 4 brate (3 mari + unul mai subtire), brate ondulate care
-      urca si se deschid spre exterior; maro-rosietic (WOOD);
-    - CROANE: 8 ciorchini de frunzis (nu glob): cate 4 bulgari mici turtiti
-      fiecare, asezati la capetele bratelor si pe crengi laterale, GOLURI de
-      cer intre ciorchini prin care se vad crengile; verde oliv saturat;
-    - silueta: latime ~ inaltime (h/l ~0,9);
-    - ramuri subtiri (4) care duc la ciorchinii mici de pe laturi.
+    - TRUNCHI: NOROS, 3 tulpini rasucite care pornesc din pamant impreuna (baza
+      comuna ingusta), se desfac jos si se ramifica la 0,9-1,4 m; maro-rosietic
+      (WOOD), cu 2 ramuri joase aproape orizontale spre laturi;
+    - CROANE: 8 ciorchini TURTITI la inaltimi diferite (2 joase pe laturi, 3 la
+      mijloc, 3 sus), fiecare 5 bulgari, goluri de cer intre ei; oliv
+      (CACTUS_GREEN 12, fetele de jos inchise de AO);
+    - silueta: latime ~ inaltime (h/l ~0,9), varfuri neregulate.
     Cote: 4 m inalt, ~4,5 m lat."""
     t = Builder()
     c = Builder()
+    ends = []     # (punct, azimut, scara ciorchinelui)
 
-    # trunchi rasucit: spirala usoara, raza 0,46 la baza -> 0,22 la furca
-    trunk = [Vector((0.10 * math.cos(1.5 * z), 0.10 * math.sin(1.5 * z), z))
-             for z in (0.0, 0.3, 0.6, 0.85, 1.1)]
-    trunk[0] = Vector((0, 0, -0.05))
-    stem(t, trunk, 0.50, 0.26, BARK, segments=8)
-    fork = trunk[-1]
-    # radacini evazate (3 lobi mici la sol)
-    for a in (30, 150, 270):
-        stem(t, [polar(0.1, a, 0.15), polar(0.42, a, 0.14), polar(0.62, a, 0.0)],
-             0.17, 0.05, BARK, segments=6)
+    def twisted(a, lean, top_z, r0, r1, phase):
+        pts = []
+        n = 6
+        for i in range(n):
+            u = i / (n - 1.0)
+            ang = a + 55 * u * math.sin(phase + u)           # rasucire
+            rad = 0.22 + lean * u * u
+            pts.append(polar(rad, ang, top_z * u))
+        stem(t, pts, r0, r1, BARK, segments=7)
+        return pts
 
-    arms = [  # azimut, raza finala, cota finala, grosime
-        (195, 1.60, 2.30, 0.15),
-        (330, 1.70, 2.45, 0.15),
-        (85, 1.20, 1.85, 0.13),
-        (25, 0.55, 3.15, 0.12)]
-    ends = []
-    for k, (a, r, z, th) in enumerate(arms):
-        p0 = fork
-        p1 = p0 + polar(0.35 * r, a + 14, 0.35)
-        p2 = polar(0.75 * r, a - 10, fork.z + 0.55 * (z - fork.z))
-        p3 = polar(r, a, z)
-        pts = [p0, p1, p2, (p2 + p3) * 0.5 + Vector((0.05, 0.05, 0)), p3]
-        stem(t, pts, 0.24 - 0.02 * k, th * 0.7, BARK, segments=6)
-        ends.append((p3, a, 1.0))
-        # doua ramuri laterale spre ciorchini mai mici
-        mid = pts[2]
-        for sgn, up in ((1, 0.55), (-1, 1.00)):
-            side_a = a + 60 * sgn
-            end2 = mid + polar(0.95, side_a, up)
-            stem(t, [mid, mid + polar(0.40, side_a, 0.30 * up), end2], 0.07,
-                 0.03, BARK, segments=5)
-            ends.append((end2, side_a, 0.62))
+    stems = [(15, 0.55, 1.40, 0.0), (135, 0.60, 1.15, 2.1), (255, 0.50, 1.50, 4.0)]
+    for k, (a, lean, tz, ph) in enumerate(stems):
+        pts = twisted(a, lean, tz, 0.20, 0.12, ph)
+        top = pts[-1]
+        for sgn, (dr, dz, scl) in zip((1, -1), ((0.95, 1.25 + 0.4 * k, 1.0),
+                                                (0.7, 1.0 + 0.5 * k, 0.9))):
+            aa = a + 50 * sgn
+            end = top + polar(dr, aa, dz)
+            stem(t, [top, top + polar(0.5 * dr, aa + 15 * sgn, 0.4 * dz), end],
+                 0.11, 0.045, BARK, segments=5)
+            ends.append((end, aa, scl))
+    # doua ramuri joase, aproape orizontale, spre laturi
+    for a, dr, z0 in ((190, 1.30, 0.55), (335, 1.40, 0.70)):
+        p0 = polar(0.35, a, z0)
+        end = polar(dr + 0.35, a, z0 + 0.55)
+        stem(t, [p0, polar(0.9, a + 10, z0 + 0.15), end], 0.12, 0.05, BARK,
+             segments=5)
+        ends.append((end, a, 0.85))
 
-    # ciorchini (NU placi): 12, cate 4-5 bulgari rotunjiti, cu goluri intre ei
     for k, (p, a, scl) in enumerate(ends):
-        R = 0.78 * scl + 0.1
+        R = 0.74 * scl + 0.1
         for j, (da, dr, dz, sz) in enumerate(
                 [(0, 0.0, 0.10, 1.0), (80, 0.55, -0.02, 0.72),
-                 (190, 0.55, -0.04, 0.70), (290, 0.50, 0.18, 0.62),
-                 (140, 0.30, 0.50, 0.55)]):
+                 (190, 0.55, -0.04, 0.70), (290, 0.50, 0.16, 0.62),
+                 (140, 0.30, 0.42, 0.55)]):
             cen = p + polar(dr * R, a + da, dz * R + 0.10)
-            lump(c, cen, (R * 1.15 * sz, R * 1.0 * sz, R * 0.85 * sz), JUNI,
-                 seed=50 + 7 * k + j, tilt_deg=6, azim_deg=a,
+            lump(c, cen, (R * 1.30 * sz, R * 1.15 * sz, R * 0.85 * sz), JUNI,
+                 seed=50 + 7 * k + j, tilt_deg=5, azim_deg=a,
                  segments=7, rings=3, deviation=0.30)
     return [t.to_object("Juniper_Trunk"), c.to_object("Juniper_Crown")]
 
@@ -214,44 +218,40 @@ def build_yucca():
 
 # ---------------------------------------------------------------------------
 def build_rabbitbrush():
-    """`rabbitbrush.png` -- elemente numarate pe decupare, inainte de modelare:
+    """`rabbitbrush.png` -- elemente numarate pe decupare (revizia 3: o PERNA,
+    nu un buchet):
 
-    - TULPINI: ~14 tulpini subtiri (DRY) pornite dintr-un punct de la sol, in
-      evantai deschis, curbate spre exterior;
-    - FLORI: ~18 ciorchini galbeni (CAR_YELLOW), fiecare 2-3 bulgarasi, asezati
-      deasupra si pe laturile cupolei, la capetele tulpinilor, desprinsi unii
-      de altii (se vad tulpinile intre ei);
-    - frunzulite subtiri la baza;
-    - silueta: cupola joasa, mai lata decat inalta (h/l ~0,85).
+    - CUPOLA DENSA de ~48 ciorchini galbeni (CAR_YELLOW), fiecare 2 bulgarasi,
+      impachetati strans pe suprafata cupolei, pe treimile de sus si de mijloc;
+    - INEL de frunzis verde-oliv (CACTUS_GREEN 12) vizibil dedesubt: ~18
+      frunzulite alungite, inclinate spre exterior, in jurul bazei cupolei;
+    - tulpinile (DRY) aproape ascunse: cateva scurte, sub cupola;
+    - silueta: perna joasa, mai lata decat inalta (h/l ~0,85).
     Cote: 1,2 m inalt, 1,4 m lat."""
     s = Builder()
     f = Builder()
-    rnd = _lcg(8)
-    n = 16
-    for k in range(n):
-        a = k * 137.5
-        t = k / float(n - 1)              # 0 = exterior, 1 = central
-        reach = 0.70 * (1.0 - 0.85 * t) + 0.04
-        h = 0.68 + 0.52 * t * (1.0 - 0.3 * t) + (rnd() - 0.5) * 0.06
-        p0 = polar(0.02, a, 0.0)
-        p1 = polar(reach * 0.35, a, h * 0.38)
-        p2 = polar(reach * 0.78, a, h * 0.74)
-        p3 = polar(reach, a, h)
-        stem(s, [p0, p1, p2, p3], 0.020, 0.012, DRY, segments=4)
-        # 3 ciorchini pe fiecare tulpina (varf, 2/3, 1/3), fiecare 3 lobi
-        for (pc, scl) in ((p3, 1.0), (p2, 0.85)):
-            for q, (da, dr, dz, sz) in enumerate(
-                    [(0, 0.0, 0.03, 1.0), (110, 0.09, -0.03, 0.8),
-                     (230, 0.09, 0.01, 0.8)]):
-                lump(f, pc + polar(dr * scl, a + da, dz),
-                     (0.21 * sz * scl, 0.19 * sz * scl, 0.17 * sz * scl),
-                     BLOOM, seed=100 + k * 11 + q + int(scl * 7), segments=5,
-                     rings=3, deviation=0.25)
-    # frunze subtiri la baza
-    for k in range(6):
-        a = k * 60 + 15
-        s.blade([polar(0.1, a, 0.03), polar(0.35, a, 0.12), polar(0.58, a, 0.05)],
-                [0.0, 0.06, 0.0], 0.010, DRY)
+    N = 48
+    for i in range(N):
+        tt = (i + 0.5) / N
+        cth = 1.0 - 0.78 * tt            # de la varf (cos=1) spre cos=0,22
+        sth = math.sqrt(1.0 - cth * cth)
+        a = i * 137.5
+        pos = Vector((0.64 * sth * math.cos(math.radians(a)),
+                      0.64 * sth * math.sin(math.radians(a)), 0.36 + 0.74 * cth))
+        for q, (da, dr, dz, sz) in enumerate([(0, 0.0, 0.0, 1.0),
+                                              (140, 0.10, -0.05, 0.75)]):
+            lump(f, pos + polar(dr, a + da, dz), (0.26 * sz, 0.24 * sz, 0.21 * sz),
+                 BLOOM, seed=100 + i * 3 + q, segments=5, rings=2, deviation=0.25)
+    for k in range(8):
+        a = k * 45 + 10
+        stem(s, [polar(0.02, a, 0.0), polar(0.20, a, 0.22), polar(0.34, a, 0.42)],
+             0.024, 0.016, DRY, segments=4)
+    for k in range(18):
+        a = k * 20 + 6
+        r = 0.46 + 0.10 * (k % 3)
+        lump(s, polar(r, a, 0.20 + 0.04 * (k % 2)), (0.10, 0.07, 0.36), SAGE,
+             200 + k, tilt_deg=48 + 8 * (k % 2), azim_deg=a, segments=5, rings=2,
+             deviation=0.2)
     return [s.to_object("Rabbitbrush"), f.to_object("Rabbitbrush_Bloom")]
 
 
@@ -264,7 +264,7 @@ def build_tumbleweed():
     - ~18 bucle subtiri care se intretaie, fiecare un arc de cerc cu raza usor
       diferita si inclinare diferita;
     - capete libere de crengute care ies din contur (silueta zimtata);
-    - un singur ton: brun-auriu uscat (DRY), crengute de ~1-1,5 cm.
+    - un singur ton: arama (LARCH_RUST 27), crengute de ~1-1,5 cm.
     Cote: diametru 0,9 m, aproximativ sferic (h/l ~0,9)."""
     b = Builder()
     rnd = _lcg(21)
@@ -290,7 +290,7 @@ def build_tumbleweed():
             p = (e1 * math.cos(a) + e2 * math.sin(a)) * (r0 * wob) \
                 + nrm * (0.05 * math.sin(2.3 * a + k * 1.7)) + off
             pts.append(Vector((p.x, p.y, p.z + cz)))
-        stem(b, pts, 0.011, 0.005, DRY, segments=4)
+        stem(b, pts, 0.011, 0.005, COPPER, segments=4)
     # cateva crengute drepte care ies din bila
     for k in range(7):
         u = rnd() * 2 - 1
@@ -300,7 +300,7 @@ def build_tumbleweed():
         jit = Vector(((rnd() - 0.5) * 0.06,) * 3)
         c0 = Vector((0, 0, cz))
         stem(b, [d * (R * 0.6) + c0, d * R + c0, d * (R * 1.12) + jit + c0],
-             0.009, 0.004, DRY, segments=4)
+             0.009, 0.004, COPPER, segments=4)
     return [b.to_object("Tumbleweed")]
 
 

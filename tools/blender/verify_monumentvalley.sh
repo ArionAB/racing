@@ -54,5 +54,14 @@ check "structures/corral.glb" 5000 --origin=assembly
 check "structures/shade_ramada.glb" 4000 --origin=assembly
 
 echo
+echo "== grupa mv-d: cladiri, vehicule, oameni =="
+check "buildings/trading_post.glb" 9000 --origin=assembly
+check "buildings/homestead_house.glb" 9000 --origin=assembly
+check "buildings/hogan.glb" 9000 --origin=assembly
+check "vehicles/pickup_old.glb" 6000 --origin=assembly
+check "vehicles/tour_truck.glb" 8000 --origin=assembly --allow-car-slots=Truck_Body
+check "props/tourist_group.glb" 8000 --origin=assembly --allow-car-slots=Tourist_Clothes
+
+echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi
 exit "$fail"

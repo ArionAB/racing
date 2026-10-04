@@ -87,3 +87,56 @@ Fidelitate (element | planșa | GLB | verdict):
 Abateri: corral 10,06 x 8,06 (stalpii de colt ies cu 3 cm); wire_fence are stalpii flush pe
 capete, deci doua segmente inlantuite dau un stalp dublu de 0,36 m; cattle_guard fara text si
 fara fire intre stalpi.
+
+## Grupa mv-d: cladiri, vehicule, oameni
+
+Build: `build_monument_buildings.py`, `build_monument_vehicles.py` (vocabular nou: `monument_pen.py`, penita
+cu transformare pentru piese compuse). Camere: `preview_specs_d.py`. Comparatii:
+`docs/asset_briefs/img/monumentvalley_fidelity/<nume>.png`; planșa grupei:
+`docs/asset_briefs/img/monumentvalley_fidelity_vald.png`. `verify_monumentvalley.sh` -> `VERDICT KIT: OK`
+(`--origin=assembly` la toate; `--allow-car-slots=Truck_Body` si `=Tourist_Clothes` conform brief §0).
+
+| fisier | noduri | tri | cote masurate (X x Y x Z, m) |
+|---|---|---:|---|
+| buildings/trading_post | Post_Stone, Post_Wood, Post_Roof, Post_Openings | 1064 | 12,06 x 9,25 x 7,54; parapet 5,0; cos 7,5 |
+| buildings/homestead_house | Home_Walls, Home_Stone, Home_Wood, Home_Roof, Home_Openings | 1184 | 7,16 x 9,24 x 6,62; coama ~5,5, cosul pana la 6,6 |
+| buildings/hogan | Hogan_Logs, Hogan_Roof, Hogan_Openings | 1846 | 7,34 x 7,56 x 3,54; EXACT 8 laturi (apotema 3,5), 56 busteni |
+| vehicles/pickup_old | Pickup_Body, Pickup_Glass, Pickup_Trim, Pickup_Wheels | 772 | 2,05 x 5,23 x 1,90; roti 10 segmente, botul pe +Y |
+| vehicles/tour_truck | Truck_Body (CAR_BLUE), Truck_Glass, Truck_Trim, Truck_Seats, Truck_Wheels | 1092 | 2,25 x 5,49 x 2,60; roti 10 segmente, botul pe +Y |
+| props/tourist_group | Tourist_Clothes (CAR_BLUE/CAR_RED/SAND_MID), Tourist_Skin, Tourist_Gear | 1524 | 3,64 x 0,74 x 1,81; 4 oameni 1,58-1,75 m (+palarii) |
+
+**Fata cladirilor, MASURATA pe GLB** (`tools/blender/measure_front_glb.py`: aria goluri `*_Openings` orientate spre
+exterior, in coordonate Godot): trading_post **-Z** (7,5 m2 fata de ~2,0 pe laturi), homestead_house **-Z**
+(4,5 fata de 2,3), hogan **-Z** (1,9, usa; fereastra 0,5 pe latura vecina -X/-Z). Adica +Y in Blender, cum cere brief-ul.
+
+Fidelitate (element | planșa | GLB | verdict):
+
+| piesa | element | planșa | GLB | verdict |
+|---|---|---|---|---|
+| trading_post | corp | zid de piatra mare, caramiziu-bej | volum 11,6 x 6,8, SAND_MID, 4 colturi cu pietre alternante | OK (zidaria fina vine din clasa) |
+| | prispa | 4-5 stalpi, acoperis lean-to jos, treapta | 5 stalpi rotunzi, lean-to, treapta | OK |
+| | fata | usa la mijloc, 2 ferestre | usa + 2 ferestre, 1 pe fiecare latura | OK |
+| | acoperis | **inclinat, in trepte, bej** | **plat cu parapet** (contract §1.5), tabla gri ASPHALT_EDGE | **abatere decisa** de contract; culoarea gri (slot) cade pe tonul planșei doar cu clasa |
+| | cos | mare, central-spate, blocuri | 1,3 m patrat, 7,5 m, 2 sloturi alternante, gura neagra, spate-stanga | OK ca forma; mai subtire decat pe planșa |
+| homestead_house | siluet | doua ape, fronton pe fata, prispa lean-to | idem | OK |
+| | pereti | scanduri orizontale gri-bej | CONCRETE + 6 nervuri SAND_LIGHT | OK |
+| | ferestre | 2 pe lateral dreapta, 1 in fronton | 2 pe fiecare lateral, 1 in fronton | OK |
+| | cos | pe panta dreapta, caramiziu | pe panta dreapta, 2 sloturi | OK |
+| | acoperis | maro-gri | tabla gri inchis | OK (mai inchis) |
+| hogan | pereti | busteni orizontali, capete iesite | 7 randuri x 8 laturi, capete iesite, 2 sloturi | OK |
+| | acoperis | dom in trepte cu panouri, horn de lemn | 2 trepte SAND_MID + guler + gaura neagra | OK; fara nervuri radiale (mai neted), ton mai galben |
+| | usa/fereastra | usa de lemn inchis, fereastra pe stanga | usa neagra cu rama + treapta, fereastra pe latura vecina | OK; usa gri-inchis in loc de maro (slot VOLCANIC_BLACK) |
+| pickup_old | silueta | capota lunga rotunjita, cabina, bena | capota/cabina/bena din volume cu colturi tesite | **abatere**: mai colturos, aripile rotunde doar ca bombe interioare |
+| | detalii | grila, bara bej, faruri rotunde | grila + bara CONCRETE, 2 faruri 10 laturi | OK |
+| | culoare | rugina portocalie | RUST (10), geamuri VOLCANIC_BLACK | OK |
+| tour_truck | silueta | 4x4 box, bena lunga, cadru de bare | capota + caroserie cu pereti + cadru 4 x 2 stalpi | OK; capota mai colturoasa |
+| | cadru | bare negre, ~3 arcuri | 4 arcuri de bare (6 laturi), 2 sine | OK |
+| | banchete | 3 randuri x 2, caramel | 3 x 2, WOOD | OK; spatare mai joase decat pe planșa |
+| | caroserie | albastru, aripi gri-negre | CAR_BLUE; **fara aripi negre** | **abatere** minora |
+| tourist_group | oameni | 4, doi cu aparat foto, rucsaci | 4, aparate ridicate la P1 si P4, rucsaci | OK |
+| | proportii | naturale, picioare lungi | trunchi dreptunghiular, membre drepte (low-poly) | OK ca nivel cerut; **abatere**: fara mers/inclinari |
+| | haine | albastru/portocaliu/kaki, palarii | CAR_BLUE/CAR_RED/SAND_MID, sapci + palarii | OK |
+
+Abateri: camionul si pickup-ul n-au caroserie rotunjita fina (primitive cu muchii tesite);
+trading_post-ul are acoperis plat conform contractului, nu cel in trepte de pe planșa; dimensiunile `X` ale
+hoganului (7,34) includ capetele de busteni la colturi, nu doar apotema de 7,0.

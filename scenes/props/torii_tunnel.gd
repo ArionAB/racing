@@ -210,7 +210,8 @@ func _clear_of_main(track: Track, main: TrackRoute, p: Vector3, margin: float) -
 
 
 func _add_flock(nm: String, scene: PackedScene, pos: PackedVector3Array,
-		yaw: PackedFloat32Array, smin: float, smax: float) -> FlockProp:
+		yaw: PackedFloat32Array, smin: float, smax: float,
+		tri_class: String = "") -> FlockProp:
 	if scene == null or pos.is_empty():
 		return null
 	var f := FlockProp.new()
@@ -220,6 +221,7 @@ func _add_flock(nm: String, scene: PackedScene, pos: PackedVector3Array,
 	f.yaws = yaw
 	f.scale_min = smin
 	f.scale_max = smax
+	f.tri_class = tri_class
 	add_child(f)
 	return f
 
@@ -342,4 +344,7 @@ func _build_forest(track: Track, main: TrackRoute, pts: Array[Vector3],
 				i += stride
 			row_k += 1
 	forest_count = pos.size()
-	_add_flock("PadureCedri", cedar_scene, pos, yaw, 0.95, 1.35)
+	# Aceeasi clasa ca cedrii din MeshForest (`WorldProp.CLASSES_BY_MODEL`):
+	# stolul nu trece prin WorldProp, deci clasa se da explicit. Portile raman pe
+	# atlas — un stol are UN material, iar o clasa ar sterge kasagi-ul negru.
+	_add_flock("PadureCedri", cedar_scene, pos, yaw, 0.95, 1.35, "cedar_needles")

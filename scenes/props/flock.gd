@@ -34,6 +34,12 @@ class_name FlockProp
 ## (flamingi, crusta): niciun MultiMesh existent nu foloseste asta, deci
 ## implicitul pastreaza exact aspectul de dinainte.
 @export var tri_class: String = ""
+## Ruptura pe slot (ca `Palette.split_accents` pe decorul manual): sloturile din
+## lista raman pe stolul acesta, cu `tri_class`; restul pleaca intr-un stol-copil
+## `<nume>_Accente` cu ACELEASI transformari, pe atlas. Nascut pe tunelul de torii
+## (Kyoto): vermilionul ia lacul, kasagi-ul negru si soclul raman pictate. Gol =
+## comportament vechi (un singur material pe tot stolul).
+@export var split_keep: Array = []
 ## AO-ul copt in COLOR_0 al modelului, neutralizat partial.
 ##
 ## Masurat pe flamingo.glb: COLOR_0 are luminanta mediana 0.760 si minim
@@ -216,6 +222,34 @@ func _build() -> void:
 				halo_radius_m * 0.7, halo_reflect_stretch, halo_flicker, seed_value)
 	material_override = Palette.triplanar_class_material(tri_class) if tri_class != "" else Palette.world_material()
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	if not split_keep.is_empty():
+		_split_flock(mm)
+
+
+## Vezi `split_keep`. Transformarile se copiaza instanta cu instanta, deci
+## stolul-copil sta exact peste piesele stolului parinte. NU `duplicate()` si nu
+## `buffer`: pe randarea headless (sondele) bufferul citit e gol si Godot refuza
+## scrierea; stolurile rupte au zeci de piese, nu mii.
+func _split_flock(mm: MultiMesh) -> void:
+	var tmp := MeshInstance3D.new()
+	tmp.name = "Split"
+	tmp.mesh = mm.mesh
+	if Palette.split_accents(tmp, split_keep):
+		var acc := tmp.get_node(NodePath("Split" + Palette.ACCENT_SUFFIX)) as MeshInstance3D
+		var mm2 := MultiMesh.new()
+		mm2.transform_format = mm.transform_format
+		mm2.instance_count = mm.instance_count
+		for i in mm.instance_count:
+			mm2.set_instance_transform(i, mm.get_instance_transform(i))
+		mm2.mesh = acc.mesh
+		mm.mesh = tmp.mesh
+		var child := MultiMeshInstance3D.new()
+		child.name = String(name) + Palette.ACCENT_SUFFIX
+		child.multimesh = mm2
+		child.material_override = Palette.world_material()
+		child.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		add_child(child)
+	tmp.free()
 
 
 ## Samplerul pistei din care vine cota terenului, urcand in ierarhie.

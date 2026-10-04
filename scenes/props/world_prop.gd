@@ -1854,7 +1854,12 @@ const CLASSES_BY_MODEL := {
 	"tsutenkyo_roof_module": {"Tsu_Roof": Palette.TRI_PREFIX + "kawara",
 		"Tsu_Rail": Palette.TRI_PREFIX + "wood"},
 	"togetsukyo_module": {"Toget_Rail": Palette.TRI_PREFIX + "wood"},
-	"teahouse_front": {"Tea_Wood": Palette.TRI_PREFIX + "wood"},
+	"teahouse_front": {"Tea_Wood": Palette.TRI_PREFIX + "wood",
+		"Tea_Red": Palette.TRI_PREFIX + "shu_red"},
+	# Valul 2: rosul 100% pe nod, fara ruptura.
+	"votive_torii_cluster": {"Torii_Wood": Palette.TRI_PREFIX + "shu_vermilion"},
+	"iron_truss_bridge": {"Truss_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Truss_Iron": Palette.TRI_PREFIX + "shu_red"},
 	# Frunzisul de toamna: o coroana = o clasa, trei nuante de artar (siluete
 	# diferite in GLB, culori diferite aici). Trunchiurile (100% slot 9) iau
 	# scoarta `bark_kyoto`.
@@ -1899,8 +1904,10 @@ const CLASSES_BY_MODEL := {
 	"stone_lantern_a": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
 	"stone_lantern_b": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
 	"yukimi_lantern": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
-	"kitsune_statue_a": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone"},
-	"kitsune_statue_b": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"kitsune_statue_a": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Fox_Bib": Palette.TRI_PREFIX + "shu_red"},
+	"kitsune_statue_b": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Fox_Bib": Palette.TRI_PREFIX + "shu_red"},
 	"bell_tower": {"Bell_Stone": Palette.TRI_PREFIX + "old_stone",
 		"Bell_Roof": Palette.TRI_PREFIX + "kawara",
 		"Bell_Beams": Palette.TRI_PREFIX + "machiya_wood",
@@ -1915,7 +1922,6 @@ const CLASSES_BY_MODEL := {
 	"kinkakuji": {"Kin_Stone": Palette.TRI_PREFIX + "old_stone",
 		"Kin_Roof": Palette.TRI_PREFIX + "kawara",
 		"Kin_Windows": Palette.TRI_PREFIX + "machiya_wood"},
-	"iron_truss_bridge": {"Truss_Stone": Palette.TRI_PREFIX + "old_stone"},
 	# Restul kitului ramane pe atlas (masurat, jodhpur_masuratori.md §1):
 	# cenotaful (22/29, marmura), animalele, bazarul, candelele, tuk-tuk-ul,
 	# copacii (`Crown`/`Trunk` — niciun prefix global nu-i prinde, verificat
@@ -1941,6 +1947,37 @@ const CLASSES_BY_MODEL := {
 ## deja clasa corecta (stirling_ledge.Wall, torrent_chute.Rock, acelasi verdict
 ## de brief) si costa ZERO materiale noi: e cache pe clasa, nu pe model.
 const CLASSES_BY_THEME := {
+	# Kyoto, valul 2: clasele pieselor RUPTE de SPLIT_MODELS_BY_THEME. Aici, nu in
+	# CLASSES_BY_MODEL, fiindca ruptura e amanata (call_deferred) si clasele de
+	# model se pun SINCRON, inaintea ei — pe nodul nerupt ar fi sters accentele.
+	# Accentele numite explicit (`*_Accente`) primesc clasa lor; celelalte raman
+	# pe atlas (garda din `_apply_classes_mapping`).
+	"kyoto": {
+		"koyasu_pagoda": {"Pagoda_Body": Palette.TRI_PREFIX + "shu_vermilion"},
+		"sanjunoto_pagoda": {"Pagoda_Body": Palette.TRI_PREFIX + "shu_vermilion"},
+		"yasaka_pagoda": {"Pagoda_Body": Palette.TRI_PREFIX + "shu_vermilion"},
+		"niomon_gate": {"Gate_Wood": Palette.TRI_PREFIX + "shu_vermilion"},
+		"inari_romon": {"Gate_Wood": Palette.TRI_PREFIX + "shu_vermilion"},
+		"torii_large": {"Torii_Large": Palette.TRI_PREFIX + "shu_vermilion"},
+		"torii_senbon": {"Torii_Senbon": Palette.TRI_PREFIX + "shu_vermilion"},
+		"small_shrine": {"Shrine_Wood": Palette.TRI_PREFIX + "shu_vermilion",
+			"Shrine_Roof": Palette.TRI_PREFIX + "kawara",
+			"Shrine_Roof_Accente": Palette.TRI_PREFIX + "shu_vermilion"},
+		# Kiyomizu: stalpii scenei (28) lemn inchis, grinzile (9) lemn deschis.
+		"kiyomizu_hondo": {"Hondo_Wood": Palette.TRI_PREFIX + "machiya_wood",
+			"Hondo_Wood_Accente": Palette.TRI_PREFIX + "wood"},
+		# Esafodajul kakezukuri: lemnul 9 ia `wood`; stalpii LARCH_RUST 27 raman
+		# pictati (mai deschisi decat orice clasa de lemn de pe pista).
+		"kakezukuri_scaffold": {"Scaffold_Wood": Palette.TRI_PREFIX + "wood"},
+		"kinkakuji": {"Kin_Wood": Palette.TRI_PREFIX + "wood",
+			"Kin_Wood_Accente": Palette.TRI_PREFIX + "machiya_wood"},
+		"togetsukyo_module": {"Toget_Wood": Palette.TRI_PREFIX + "wood",
+			"Toget_Wood_Accente": Palette.TRI_PREFIX + "machiya_wood"},
+		"tsutenkyo_roof_module": {"Tsu_Wood": Palette.TRI_PREFIX + "wood",
+			"Tsu_Wood_Accente": Palette.TRI_PREFIX + "machiya_wood"},
+		"moso_culm": {"Moso_Culm": Palette.TRI_PREFIX + "bamboo_culm"},
+		"bamboo_crown": {"Bamboo_Culms": Palette.TRI_PREFIX + "bamboo_culm"},
+	},
 	"fiordland": {
 		"chasm_rock": {
 			"Rock_001": Palette.TRI_PREFIX + "wet_gneiss",
@@ -2220,6 +2257,20 @@ const SPLIT_MODELS_BY_THEME := {
 	"fiordland": {
 		"moss_boulder_b": true,
 	},
+	# Kyoto, valul 2 de materiale (docs/track_briefs/kyoto_materiale.md §Valul 2):
+	# nodurile MIXTE ale templelor si podurilor se rup PE SLOT, ca vermilionul /
+	# lemnul / tulpina sa ia clasa fara sa stearga restul. Ruptura e pe triunghi
+	# (`Palette.split_accents`), iar piesele de arhitectura au sloturile pe fete
+	# separate (panouri, grinzi, stalpi), deci ruptura e exacta — testul de
+	# suprapunere pe y al rocilor cu muschi nu se aplica aici.
+	"kyoto": {
+		"koyasu_pagoda": true, "sanjunoto_pagoda": true, "yasaka_pagoda": true,
+		"niomon_gate": true, "inari_romon": true,
+		"kiyomizu_hondo": true, "kakezukuri_scaffold": true,
+		"kinkakuji": true, "togetsukyo_module": true, "tsutenkyo_roof_module": true,
+		"torii_large": true, "torii_senbon": true, "small_shrine": true,
+		"moso_culm": true, "bamboo_crown": true,
+	},
 }
 
 ## Ca [constant ACCENT_SPLIT], dar consultat DOAR de [method
@@ -2232,6 +2283,23 @@ const ACCENT_SPLIT_BY_THEME := {
 		# VOLCANIC_BLACK (3 si 29 mutate acolo); capacul de muschi ramane pe 21
 		# TROPICAL_GREEN si pleaca in `_Accente`.
 		"Moss_Boulder_B": Palette.VOLCANIC_BLACK,
+	},
+	# Valoarea = sloturile care raman pe CORP (si primesc clasa corpului); restul
+	# pleaca in `_Accente` (atlas, sau clasa numita explicit in CLASSES_BY_THEME).
+	"kyoto": {
+		"Pagoda_Body": Palette.LAVA_ORANGE,     # vermilion; var 22 + lemn 28 raman
+		"Gate_Wood": Palette.LAVA_ORANGE,       # vermilion; grinda 9 + 28 raman
+		"Torii_Large": Palette.LAVA_ORANGE,     # vermilion; kasagi 28 + soclu 20
+		"Torii_Senbon": Palette.LAVA_ORANGE,
+		"Shrine_Wood": Palette.LAVA_ORANGE,
+		"Shrine_Roof": [Palette.ASPHALT_EDGE, Palette.LOG_DARK],  # tigla; fascia 30 -> accent
+		"Hondo_Wood": Palette.LOG_DARK,         # stalpii scenei 28; grinzile 9 -> accent
+		"Kin_Wood": Palette.WOOD_WEATHERED,
+		"Toget_Wood": Palette.WOOD_WEATHERED,
+		"Tsu_Wood": Palette.WOOD_WEATHERED,
+		"Scaffold_Wood": Palette.WOOD_WEATHERED,
+		"Moso_Culm": Palette.CACTUS_GREEN,      # tulpina 12; inelele 13 raman
+		"Bamboo_Culms": Palette.TROPICAL_GREEN, # tulpina 21; inelele 13 raman
 	},
 }
 
@@ -3869,6 +3937,16 @@ static func _trimesh_faces(mesh: Mesh) -> PackedVector3Array:
 ## PUBLICA dinadins: acelasi tabel il foloseste si [PathMover], pentru
 ## modelele care se misca (vezi `Palette.apply_object_class_materials`). O a
 ## doua lista scrisa de mana ar fi ramas in urma la primul asset nou.
+## Kyoto, valul 2: piesele care se MISCA (trenul Sagano, ricsa). Un [PathMover]
+## citeste doar `prop_classes()` (global, pe nume de nod) si aplica clasele in
+## spatiul OBIECTULUI, ca textura sa nu „inoate" pe caroserie. Numele sunt unice
+## in tot `assets/models/` (verificat cu grep pe .glb), deci intrarea globala nu
+## prinde alt kit.
+const KYOTO_MOVING_CLASSES := {
+	"Train_Body": Palette.TRI_PREFIX + "shu_red",
+	"Rick_Red": Palette.TRI_PREFIX + "shu_red",
+}
+
 static func prop_classes() -> Dictionary:
 	var out := {}
 	out.merge(TrackDecor.ISLAND_CLASSES)
@@ -3877,6 +3955,7 @@ static func prop_classes() -> Dictionary:
 	out.merge(TrackDecor.CHONGQING_CLASSES)
 	out.merge(TrackDecor.CAPPADOCIA_CLASSES)
 	out.merge(TrackDecor.FIORDLAND_AIRSTRIP_CLASSES)
+	out.merge(KYOTO_MOVING_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

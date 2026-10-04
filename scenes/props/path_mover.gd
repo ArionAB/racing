@@ -254,14 +254,9 @@ func _build_push() -> void:
 	_pivot.add_child(_plume)
 
 
-func _build_model() -> void:
-	var inst := _extract_node(model, model_node)
-	if inst == null:
-		_build_placeholder()
+func _apply_object_classes(inst: Node3D) -> void:
+	if not is_instance_valid(inst):
 		return
-	inst.scale = Vector3.ONE * model_scale
-	inst.rotation.y = deg_to_rad(model_yaw)
-	_pivot.add_child(inst)
 	if tri_class.is_empty():
 		# Pe PARTI, nu pe tot corpul: trenul are caroseria pe atlas (verdele si
 		# dunga galbena sunt sloturi), dar sasiul pe `rust_metal` si gheata de
@@ -271,6 +266,42 @@ func _build_model() -> void:
 			model_scale)
 	else:
 		Palette.apply_object_triplanar_class(inst, tri_class, model_scale)
+
+
+func _reapply_mapped_classes(inst: Node3D) -> void:
+	if not is_instance_valid(inst) or not tri_class.is_empty():
+		return
+	var mapping: Dictionary = WorldProp.KYOTO_MOVING_CLASSES
+	for node in Palette._walk(inst):
+		var mi := node as MeshInstance3D
+		if mi == null:
+			continue
+		var cls := Palette._class_for(String(mi.name), mapping)
+		if cls.begins_with(Palette.TRI_PREFIX):
+			mi.material_override = Palette.object_triplanar_class_material(
+				cls.trim_prefix(Palette.TRI_PREFIX), model_scale)
+
+
+func _build_model() -> void:
+	var inst := _extract_node(model, model_node)
+	if inst == null:
+		_build_placeholder()
+		return
+	inst.scale = Vector3.ONE * model_scale
+	inst.rotation.y = deg_to_rad(model_yaw)
+	_pivot.add_child(inst)
+	_apply_object_classes(inst)
+	# A DOUA oara, amanat: modelul se construieste in `_ready`, INAINTEA
+	# parintelui, iar un `WorldProp` stramos (DecorManual) aplica apoi
+	# `prop_classes()` pe tot subarborele in varianta DE LUME — pe o piesa care
+	# se misca, textura „inoata". Masurat pe trenul Sagano (Kyoto, sub
+	# DecorManual/ZoneG_Bambus): `Train_Body` iesea pe materialul de lume, iar
+	# ricsa din afara DecorManual pe cel de obiect.
+	# Doar partile Kyoto (`WorldProp.KYOTO_MOVING_CLASSES`), nu tot `prop_classes()`:
+	# reaplicarea generala muta si piesele mobile de pe Baikal si Stromboli pe
+	# varianta de obiect (masurat: Track10 si Track11 cu +1 material fiecare) —
+	# corect ca principiu, dar o schimbare pe alte piste, de decis separat.
+	_reapply_mapped_classes.call_deferred(inst)
 	_autoplay_animation(inst)
 	# Cutia de coliziune se MASOARA pe model (tiparul din sliding_hazard):
 	# scrisa de mana, ar ramane in urma la primul model schimbat din Inspector.

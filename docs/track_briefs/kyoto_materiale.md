@@ -7,7 +7,8 @@
 
 ## Bilant
 
-- Garda de materiale (`tools/probe_decor.gd`, toate pistele): **Track18 29 -> 33 / 38**.
+- Garda de materiale (`tools/probe_decor.gd`, toate pistele): **Track18 29 -> 33 / 38**
+  dupa valul 1, **-> 37 / 38 dupa valul 2** (vezi mai jos).
   Celelalte piste identice cu linia de baza (01 23, 08 21, 09 26, 10 23, 11 32,
   12 32, 13 21, 14 31, 15 16, 16 30, 17 24). Triunghiuri neschimbate.
 - Zero PNG nou: `kawara` (dala `roof_tiles`), `bark_kyoto` (`bark`),
@@ -49,23 +50,66 @@ pe padurea Inari detaliu fin +17%, mediu -5% fata de atlas (masurat pe f0.47,
 diferente de blur 1 px / 4 px). La 0.3: fin +25%, mediu la nivelul atlasului.
 Castig mic — acesta e cel mai slab lot al valului.
 
+## Valul 2: rosul, bambusul, Kiyomizu
+
+Cererea dezvoltatorului dupa capturile din joc: „peste tot unde avem materialul
+rosu (pagoda, umbrele, pod, tren), padurea de bambus Arashiyama, Kiyomizu".
+Erau exact nodurile MIXTE refuzate in valul 1. Rezolvarea: **ruptura pe slot**
+(`Palette.split_accents`, pe triunghi), scopata pe tema
+(`WorldProp.SPLIT_MODELS_BY_THEME` / `ACCENT_SPLIT_BY_THEME["kyoto"]`), cu
+clasele in `CLASSES_BY_THEME["kyoto"]` (se aplica DUPA ruptura amanata).
+Piesele de arhitectura au sloturile pe fete separate, deci ruptura e exacta.
+
+| piesa · nod | ruptura (corp / accent) | clasa corp / accent |
+|---|---|---|
+| pagode · `Pagoda_Body` | 30 / var 22 + lemn 28 | `shu_vermilion` / atlas |
+| `niomon_gate`, `inari_romon` · `Gate_Wood` | 30 / 9 + 28 | `shu_vermilion` / atlas |
+| `torii_senbon`, `torii_large` (tunel + bulevard + portile mari) | 30 / kasagi 28 + soclu 20 | `shu_vermilion` / atlas |
+| `small_shrine` · `Shrine_Wood`; `Shrine_Roof` | 30 / rest; 6+28 / fascia 30 | `shu_vermilion` / atlas; `kawara` / `shu_vermilion` |
+| `votive_torii_cluster` · `Torii_Wood` | — (100% 30) | `shu_vermilion` |
+| `kiyomizu_hondo` · `Hondo_Wood` (stalpii scenei) | 28 / 9 | `machiya_wood` / `wood` |
+| `kakezukuri_scaffold` · `Scaffold_Wood` | 9 / 27 + 8 | `wood` / atlas |
+| `kinkakuji` · `Kin_Wood`; `togetsukyo` · `Toget_Wood`; `tsutenkyo` · `Tsu_Wood` | 9 / 28 | `wood` / `machiya_wood` |
+| `moso_culm` (9 154 in MeshForest) · `Moso_Culm` | 12 / inelele 13 | `bamboo_culm` / atlas |
+| `bamboo_crown` · `Bamboo_Culms` | 21 / inelele 13 | `bamboo_culm` / atlas |
+| `iron_truss_bridge` · `Truss_Iron`; `teahouse_front` · `Tea_Red` (umbrelele); `kitsune` · `Fox_Bib` | — (100% 14) | `shu_red` |
+| `sagano_train` · `Train_Body`; `jinrikisha` · `Rick_Red` (MOBILE) | — | `shu_red`, in spatiul OBIECTULUI |
+
+**Cod nou.** `MeshForest` si `FlockProp` nu stiau de ruptura: `mesh_forest.gd`
+rupe acum nodul in doua suprafete (`_split_part`), iar `FlockProp.split_keep`
+pune accentul intr-un stol-copil `_Accente` cu aceleasi transformari (portile
+din tunel). Piesele mobile intra prin `WorldProp.KYOTO_MOVING_CLASSES` (in
+`prop_classes()`, nume unice in tot `assets/models/`, verificat cu grep), iar
+`PathMover` le reaplica AMANAT: trenul sta sub `DecorManual`, al carui
+`apply_class_materials` rescria subarborele in varianta DE LUME (textura ar fi
+„inotat" pe vagoane). Reaplicarea e scopata pe lista Kyoto: generala, muta si
+piesele mobile de pe Baikal/Stromboli (masurat: Track10 si Track11 +1 material).
+
+**Dala.** Prima incercare a fost `concrete` ridicata (pata de lac fara fibra) si
+a dat MAI PUTIN detaliu decat atlasul cu stratul de detaliu partajat — masurat
+pe capturi, diferenta de blur 1 px: pod 4.85 -> 4.65, bambus 3.11 -> 2.74. Pe o
+culoare saturata ridicata, R se taie si variatia ramane doar pe G/B. Cu dala
+`wood` ridicata la 0.65 (deviatia de luminanta a rezultatului 27.5 fata de
+14.6): pod **4.85 -> 5.91**, bambus **3.11 -> 3.89**, tunelul de torii 2.13 ->
+2.27. Pentru rosu imaginea e ROTITA 90 de grade (`CLASS_LIFT_ROTATE`): cu
+scandurile orizontale stalpii toriilor pareau din discuri stivuite; pe bambus
+rosturile orizontale raman — la scara 0.5 cad la ~0.33 m si se citesc noduri.
+Rosul iese cu 14% sub slot (R 200 din 232): lac invechit, ales in locul a 32%
+pixeli taiati la ridicarea care ar fi atins tinta.
+
+**Buget.** +3 clase de lume (`shu_vermilion`, `shu_red`, `bamboo_culm`) + 1
+varianta de obiect (`shu_red` pe tren/ricsa) = 37 / 38. Doua imagini ridicate
+noi in memorie (rosu rotit, bambus), 512² fiecare.
+
 ## Refuzate, cu cifra
 
 | piesa | motiv |
 |---|---|
-| `torii_senbon`, `torii_large` (tunelul, gimmick-ul E') | 57-60% slot 30 + 33-35% slot 28 (kasagi) + 7-8% slot 20 (soclu), intervale separate — ruptura ar fi curata, DAR portile sunt `FlockProp` (un MultiMesh, UN material). O clasa pe stol ar sterge kasagi-ul negru. In plus, lacul vermilion e o suprafata neteda: culoarea plata e chiar materialul. Vezi Deschis 1. |
-| `votive_torii_cluster` · `Torii_Wood` | 100% slot 30, dar acelasi argument de lac; o clasa vermilion ar cere CLASS_LIFT (R tinta 232 > media dalei `wood`). |
-| `niomon_gate`/`inari_romon` · `Gate_Wood` | 74-77% slot 30, plus grinda 9 (8,4-9,2 m) si 28 pe aproape toata inaltimea. Mixt. |
-| `kiyomizu_hondo` · `Hondo_Wood` | 59/38 slot 28/9 pe acelasi y (stalpii scenei). O clasa ar sterge contrastul stalp/grinda. |
-| `kinkakuji` · `Kin_Wood`, `togetsukyo` · `Toget_Wood`, `kakezukuri_scaffold` | 9/28 (sau 9/27) intercalate pe acelasi y. |
-| `tsutenkyo` · `Tsu_Wood` | 9 la -1,25..4,95, 28 la 4,22..7,97: suprapunere 0,73 m (8%). Ruptura posibila, nefacuta in valul asta (6 instante). |
-| pagode · `Pagoda_Body` | vermilion + var + lemn intercalate (30/22/28). |
 | `kinkakuji` · `Kin_Gold` | foita de aur e neteda: culoarea plata e materialul. |
-| `bamboo_crown` · `Bamboo_Culms`, `moso_culm` | tulpini de 10-16 cm: textura cade in mipmap. |
 | `paper_lantern` · `Lantern_Wood`, `ema_rack`, `shiba_fence` | piese sub 0,3 m sau panouri subtiri (mipmap). |
-| `small_shrine` | acoperisul are fascia vermilion (21%) pe acelasi y; piatra are var pe capac. |
-| vehicule (`gion_boko`, `jinrikisha`, `sagano_train`, `yakatabune`), `shishimai`, `daruma_otoshi`, animale | vopsite/pictate, multe sloturi; hazardele isi tin culorile de citire. |
+| vehicule `gion_boko`, `yakatabune`, `shishimai`, `daruma_otoshi`, animale | pictate, multe sloturi pe acelasi nod; hazardele isi tin culorile de citire. |
 | `kyoto_horizon` | petice de toamna pictate intentionat (`horizon_class: ""`). |
+| esafodajul kakezukuri · stalpii LARCH_RUST 27 | mai deschisi decat orice clasa de lemn de pe pista; raman pictati. |
 
 ## Sonde (raman in repo)
 
@@ -78,15 +122,14 @@ Castig mic — acesta e cel mai slab lot al valului.
 
 ## Deschis
 
-1. **Tunelul de torii.** Daca se vrea textura pe stalpii vermilion: `FlockProp`
-   ar trebui sa accepte o ruptura (corp cu clasa + stol-copil `_Accente` pe
-   atlas, aceleasi transformari) si o clasa vermilion cu CLASS_LIFT. Intai
-   verdict la volan: lacul plat poate fi exact ce trebuie.
-2. **Reflexia Pavilionului de Aur** are propriile materiale (`alt` in sonda):
-   acoperisul reflectat ramane pe culoarea veche. La distanta jocului nu se
-   distinge; de verificat pe captura de aproape daca deranjeaza.
-3. **Nuanta kawara** iese gri-mov sub lumina temei (soare #FFD8A8 + ambient
-   albastru) — acoperisurile vechi pe slotul 20 ieseau bleumarin sub aceeasi
-   lumina. Verdictul dezvoltatorului pe captura.
-4. `Tsu_Wood` (ruptura 8%) si `Hondo_Wood` (scena Kiyomizu, hero) — candidate
-   pentru un val urmator, cu ruptura sau re-export pe noduri separate.
+1. **Bugetul: 37 / 38.** Urmatoarea clasa pe Kyoto cere sa scoata una. Prima
+   candidata e `cedar_needles` (cel mai slab castig masurat, fin +25%, mediu
+   egal cu atlasul).
+2. **Podul de fier** poarta fibra de lemn rosie (`shu_red` pe `wood`): mai bogat
+   decat rosul plat, dar e lemn, nu metal. Verdict la volan.
+3. **Nuanta kawara** iese gri-mov sub lumina temei. Verdictul dezvoltatorului.
+4. **Reflexia Pavilionului de Aur** are propriile materiale (`alt` in sonda) si
+   ramane pe culorile vechi.
+5. Piesele mobile de pe Baikal/Stromboli primesc clasele in varianta de LUME
+   cand stau sub un `DecorManual` (acelasi mecanism ca trenul Kyoto). Nu e
+   reparat aici — schimba alte piste.

@@ -327,18 +327,60 @@ func _species_array_mesh(ps: PackedScene, stem: String, theme: String) -> ArrayM
 		var src: Mesh = mi.mesh
 		if not remap.is_empty():
 			src = WorldProp._mesh_with_slots_moved(src, remap)
-		var mat := _part_material(stem, theme, String(mi.name))
-		for si in src.get_surface_count():
-			var st := SurfaceTool.new()
-			st.append_from(src, si, xf)
-			out = st.commit(out)
-			mats.append(mat)
+		var pieces: Array = [[src, _part_material(stem, theme, String(mi.name))]]
+		var accent: Variant = _split_part(stem, theme, mi, src)
+		if accent != null:
+			pieces = [[accent[0], pieces[0][1]], [accent[1], accent[2]]]
+		for piece: Array in pieces:
+			var pm: Mesh = piece[0]
+			for si in pm.get_surface_count():
+				var st := SurfaceTool.new()
+				st.append_from(pm, si, xf)
+				out = st.commit(out)
+				mats.append(piece[1])
 	root.free()
 	if out == null:
 		return null
 	for i in mats.size():
 		out.surface_set_material(i, mats[i])
 	return out
+
+
+## Ruptura de accente pe TEMA (`WorldProp.SPLIT_MODELS_BY_THEME` /
+## `ACCENT_SPLIT_BY_THEME`), aceeasi ca pe decorul manual: altfel tulpinile de
+## bambus din padure ar fi luat clasa pe tot nodul si ar fi pierdut inelele.
+## Intoarce [corp, accente, material_accente] sau null daca nu se rupe. Accentul
+## ia clasa doar daca e NUMIT explicit in tabele (ca in `_apply_classes_mapping`).
+static func _split_part(stem: String, theme: String, mi: MeshInstance3D,
+		src: Mesh) -> Variant:
+	var models: Dictionary = WorldProp.SPLIT_MODELS_BY_THEME.get(theme, {})
+	if not models.has(stem):
+		return null
+	var rules: Dictionary = WorldProp.ACCENT_SPLIT_BY_THEME.get(theme, {})
+	var nm := String(mi.name)
+	for prefix: String in rules:
+		if not nm.begins_with(prefix):
+			continue
+		var tmp := MeshInstance3D.new()
+		tmp.name = nm
+		tmp.mesh = src
+		if not Palette.split_accents(tmp, rules[prefix]):
+			tmp.free()
+			return null
+		var acc := tmp.get_node(NodePath(nm + Palette.ACCENT_SUFFIX)) as MeshInstance3D
+		var out: Array = [tmp.mesh, acc.mesh, _accent_material(stem, theme,
+			nm + Palette.ACCENT_SUFFIX)]
+		tmp.free()
+		return out
+	return null
+
+
+static func _accent_material(stem: String, theme: String, name: String) -> Material:
+	for table: Dictionary in [WorldProp.CLASSES_BY_MODEL,
+			WorldProp.CLASSES_BY_THEME.get(theme, {})]:
+		if table.has(stem) and (table[stem] as Dictionary).has(name):
+			return _part_material(stem, theme, name)
+	return Palette.world_material()
 
 
 ## Materialul unei parti (nume de nod) a unei specii. Aceleasi tabele ca

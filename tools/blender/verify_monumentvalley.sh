@@ -35,5 +35,12 @@ echo "== pilotul (kit §3, val 0) =="
 check "rocks/west_mitten.glb" 12000 --origin=assembly
 
 echo
+echo "== grupa mv-a =="
+check "rocks/sandstone_arch.glb" 12000 --origin=assembly
+check "rocks/east_mitten.glb" 12000 --origin=assembly
+check "rocks/merrick_butte.glb" 14000 --origin=assembly
+check "rocks/mesa_wall_module.glb" 8000 --origin=assembly
+
+echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi
 exit "$fail"

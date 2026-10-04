@@ -60,6 +60,19 @@ ROCK_CLASS = "mv_sandstone"
 SPECS = {
     "west_mitten": {"category": "rocks",
                     "camera": {"azimuth": 82.0, "elevation": 14.0, "lens": 70.0, "margin": 1.08}},
+    # East Mitten: degetul e pe +X, deci pe decupare (dreapta) camera e din spate
+    # (azimut 262: dreapta = +X)
+    "east_mitten": {"category": "rocks",
+                    "camera": {"azimuth": 262.0, "elevation": 14.0, "lens": 70.0, "margin": 1.08}},
+    "merrick_butte": {"category": "rocks",
+                      "camera": {"azimuth": 82.0, "elevation": 14.0, "lens": 70.0, "margin": 1.08}},
+    # peretele de masa: fata (+X) spre camera, usor din lateral
+    "mesa_wall_module": {"category": "rocks",
+                         "camera": {"azimuth": 22.0, "elevation": 12.0, "lens": 70.0, "margin": 1.08},
+                         "chain_axis": "y", "chain_step": 12.0,
+                         "chain_camera": {"azimuth": 28.0, "elevation": 12.0, "lens": 60.0}},
+    "sandstone_arch": {"category": "rocks",
+                       "camera": {"azimuth": 70.0, "elevation": 9.0, "lens": 60.0, "margin": 1.08}},
 }
 
 
@@ -352,10 +365,12 @@ def chain(name, n=3, step=6.0, res_height=800):
     os.makedirs(FID_DIR, exist_ok=True)
     _clear()
     allm = []
+    axis = spec.get("chain_axis", "x")
+    step = spec.get("chain_step", step)
     for i in range(n):
         ms = _import(spec, name)
         for o in ms:
-            o.location.x += (i - (n - 1) / 2.0) * step
+            setattr(o.location, axis, getattr(o.location, axis) + (i - (n - 1) / 2.0) * step)
         allm += ms
     bpy.context.view_layer.update()
     cam = dict(_camera_for(spec))

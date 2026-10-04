@@ -67,13 +67,18 @@ def shade_by_x(lit, shade, thr=-0.35):
     return lambda n: shade if n.x < thr else lit
 
 
-def chamfer(poly, c):
+def chamfer(poly, c, skip=()):
     """Teseste fiecare colt al unui contur 2D antiorar: fiecare varf devine 3
     puncte (inceput de teseala, mijloc impins spre colt, sfarsit), deci 2
-    fatete pe colt. `c` = cat se taie pe fiecare latura (cel mult 40% din ea)."""
+    fatete pe colt. `c` = cat se taie pe fiecare latura (cel mult 40% din ea).
+    `skip` = indici de colturi lasate ascutite (un singur punct): capetele plane
+    ale modulelor inlantuibile."""
     n = len(poly)
     out = []
     for i in range(n):
+        if i in skip:
+            out.append((poly[i][0], poly[i][1]))
+            continue
         P = Vector(poly[i])
         e1 = Vector(poly[i - 1]) - P
         e2 = Vector(poly[(i + 1) % n]) - P
@@ -350,6 +355,192 @@ def tapered_spire(b, cx, cy, segs, lit, shade, seed=0):
         sd = seed * 1000 + n
         loft(b, _oct(cx, cy, hw0, hd0, _lcg(sd)), z0,
              _oct(cx, cy, hw1, hd1, _lcg(sd)), z1, sl)
+
+
+# ---------------------------------------------------------------------------
+# Grupa mv-a: arc, bloc cu contraforturi, perete de masa inlantuibil
+# ---------------------------------------------------------------------------
+
+def prism_xz(b, poly, y0, y1, slot):
+    """Prisma inchisa: conturul `poly` (x, z) extrudat pe Y intre y0 si y1.
+    Orientarea fetelor se decide analitic (normala exterioara a laturii), deci
+    merge si pe contururi concave (intradosul unui arc)."""
+    n = len(poly)
+    area = sum(poly[i][0] * poly[(i + 1) % n][1] - poly[(i + 1) % n][0] * poly[i][1]
+               for i in range(n)) * 0.5
+    sg = 1.0 if area > 0 else -1.0
+    for i in range(n):
+        j = (i + 1) % n
+        dx, dz = poly[j][0] - poly[i][0], poly[j][1] - poly[i][1]
+        if abs(dx) + abs(dz) < 1e-7:
+            continue
+        f = _face(b, [(poly[i][0], y0, poly[i][1]), (poly[j][0], y0, poly[j][1]),
+                      (poly[j][0], y1, poly[j][1]), (poly[i][0], y1, poly[i][1])], slot)
+        want = Vector((dz * sg, 0.0, -dx * sg))
+        if f.normal.dot(want) < 0:
+            bmesh.ops.reverse_faces(b.bm, faces=[f])
+    for yy, ny in ((y1, 1.0), (y0, -1.0)):
+        f = _face(b, [(p[0], yy, p[1]) for p in poly], slot)
+        res = bmesh.ops.triangulate(b.bm, faces=[f], quad_method="BEAUTY", ngon_method="EAR_CLIP")
+        for t in res["faces"]:
+            t.normal_update()
+            if t.normal.y * ny < 0:
+                bmesh.ops.reverse_faces(b.bm, faces=[t])
+
+
+def buttress(b, cx, y_face, w, d, h, lit, shade, seed=0, foot=0.9):
+    """Contrafort: stalp lat de `w` m care iese `d` m din fata peretelui (y_face),
+    inalt de `h`, evazat jos, in 4 segmente care se ingusteaza spre varf."""
+    rnd = _lcg(seed)
+    sl = shade_by_x(lit, shade)
+    j1, j2 = 0.35 * (0.6 + 0.8 * rnd()), 0.35 * (0.6 + 0.8 * rnd())
+
+    def plan(sc, grow):
+        hw = w * 0.5 * sc + grow
+        y_out = y_face + d * sc + grow * 0.6
+        y_in = y_face - 1.5
+        return [(cx - hw, y_in), (cx + hw, y_in), (cx + hw * 0.92, y_out),
+                (cx + hw * 0.35, y_out + j1), (cx - hw * 0.35, y_out + j2),
+                (cx - hw * 0.92, y_out)]
+    zs = [0.0, h * 0.30, h * 0.62, h * 0.88, h]
+    scs = [1.0, 0.94, 0.88, 0.80, 0.55]
+    loft(b, chamfer(plan(1.0, foot), 0.35), 0.0, chamfer(plan(1.0, 0.0), 0.35),
+         min(4.0, h * 0.2), sl)
+    for k in range(4):
+        loft(b, chamfer(plan(scs[k], 0.0), 0.35), zs[k],
+             chamfer(plan(scs[k + 1], 0.0), 0.35), zs[k + 1], sl)
+
+
+def scree_boulders(b, half_x, half_y, D, h_top, slots, n_big, n_small, zmax,
+                   seed=0, pts=56, cx=0.0, skip=None):
+    """Bolovanii fustei de grohotis (aceeasi regula ca la West Mitten): mari
+    pe margine si in vai, mici imprastiati dincolo de margine. `skip(x, y)`
+    -> True exclude pozitia (ex. golul unui arc). `cx` = deplasarea fustei."""
+    rnd = _lcg(seed)
+    nb = 0
+    tries = 0
+    while nb < n_big and tries < 6000:
+        tries += 1
+        i = 2 * int(rnd() * pts / 2)
+        th = 2 * math.pi * (i + (rnd() - 0.5) * 0.8) / pts
+        d = 1.5 + (D - 1.0) * (rnd() ** 0.55)
+        x, y = _super_pt(half_x + d, half_y + d, th)
+        if abs(x) < half_x + 1.0 and abs(y) < half_y + 1.5:
+            continue
+        if skip and skip(x + cx, y):
+            continue
+        sz = 1.2 + rnd() * 2.2
+        z = scree_height(x, y, half_x, half_y, D, h_top, pts=pts)
+        if z + sz * 0.75 > zmax:
+            continue
+        boulder(b, (x + cx, y, z + sz * 0.12), (sz * 1.2, sz, sz * 0.8),
+                slots[nb % 2], seed=seed * 7 + 100 + nb)
+        nb += 1
+    ns = 0
+    while ns < n_small:
+        th = rnd() * 2 * math.pi
+        d = D - 0.5 + rnd() * 3.2
+        x, y = _super_pt(half_x + d, half_y + d, th)
+        if skip and skip(x + cx, y):
+            continue
+        sz = 0.35 + rnd() * 0.55
+        z = scree_height(x, y, half_x, half_y, D, h_top, pts=pts)
+        boulder(b, (x + cx, y, z + sz * 0.15), (sz * 1.3, sz, sz * 0.7),
+                slots[ns % 2], seed=seed * 7 + 300 + ns)
+        ns += 1
+
+
+def mesa_run(b, half_l, xf, xb, h, lit, shade, seed=0, n_mid=3, w_end=2.0,
+             taper=0.07, ledges=(0.0, 0.03, 0.05), prot=0.5, recess=(0.5, 0.9),
+             chamfer_c=0.35, foot=0.8, flare_h=3.0, vfront=0.35, h_var=0.3):
+    """Perete de masa INLANTUIBIL pe Y (de la -half_l la +half_l): coloane
+    verticale, fata (+X) si spatele (-X) in V. Cele doua coloane de capat sunt
+    IDENTICE (acelasi plan, aceeasi inaltime, aceleasi praguri), cu capetele
+    plane la y = +-half_l si fara teseala pe colturile de capat, deci doua
+    module puse cap la cap se imbina fara fisura. Taperul/pragurile scaleaza
+    doar X. Intoarce (x_min, x_max) al iesirilor (cu talpa), pentru calota."""
+    rnd = _lcg(seed)
+    L = 2 * half_l
+    mids = [1.0 + rnd() * 0.6 for _ in range(n_mid)]
+    k = (L - 2 * w_end) / sum(mids)
+    mids = [m * k for m in mids]
+    sl = shade_by_x(lit, shade)
+
+    def pick():
+        if rnd() > 0.3:
+            return -0.1 + prot * rnd()
+        return -(recess[0] + (recess[1] - recess[0]) * rnd())
+
+    def params(is_end):
+        return dict(fo=pick(), bo=pick(), vf=vfront * (0.6 + 0.8 * rnd()),
+                    vb=vfront * (0.5 + 0.6 * rnd()),
+                    hc=h - (0.15 if is_end else rnd() * h_var),
+                    b1=0.30 + 0.08 * rnd(), b2=0.62 + 0.08 * rnd(),
+                    led=[ledges[0], ledges[1] * (0.6 + 0.8 * rnd()),
+                         ledges[2] * (0.6 + 0.8 * rnd())],
+                    fh=min(flare_h * (0.85 + 0.3 * rnd()), h * 0.25))
+    end_p = params(True)
+    plist = ([(w_end, end_p, "L")] + [(w, params(False), "M") for w in mids]
+             + [(w_end, end_p, "R")])
+    xmin, xmax = 1e9, -1e9
+    s0 = -half_l
+    for w, P, kind in plist:
+        s1 = s0 + w
+        sm = (s0 + s1) * 0.5
+        F = xf + P["fo"]
+        B = xb - P["bo"]
+        xmin, xmax = min(xmin, B - P["vb"]), max(xmax, F + P["vf"])
+        skip = (5, 0) if kind == "L" else ((2, 3) if kind == "R" else ())
+
+        def plan(sx, extra=0.0, F=F, B=B, P=P, s0=s0, s1=s1, sm=sm):
+            raw = [(F + extra, s0), (F + P["vf"] + extra, sm), (F + extra, s1),
+                   (B - extra, s1), (B - P["vb"] - extra, sm), (B - extra, s0)]
+            return [(x * sx, y) for x, y in raw]
+        hc = P["hc"]
+        zs = [0.0, hc * P["b1"], hc * P["b2"], hc]
+        for kk in range(3):
+            sb = (1.0 - taper * zs[kk] / hc) * (1.0 - P["led"][kk])
+            st = (1.0 - taper * zs[kk + 1] / hc) * (1.0 - P["led"][kk])
+            loft(b, chamfer(plan(sb), chamfer_c, skip), zs[kk],
+                 chamfer(plan(st), chamfer_c, skip), zs[kk + 1], sl)
+        loft(b, chamfer(plan(1.0, foot), chamfer_c, skip), 0.0,
+             chamfer(plan(1.0, foot * 0.08), chamfer_c, skip), P["fh"], sl)
+        s0 = s1
+    return xmin - foot, xmax + foot
+
+
+def mesa_scree(b, half_l, x_wall, side, D, h_top, slots, period=3.0, gully=0.55,
+               ledge=0.2, ystep=0.75):
+    """Grohotis de masa pe o parte a peretelui (side = +1 fata / -1 spate): coaste
+    perpendiculare pe perete cu perioada `period` (care divide 2*half_l, deci
+    profilul la y = -half_l si +half_l e identic: valea) si capete inchise plat."""
+    ny = int(round(2 * half_l / ystep))
+    ys = [-half_l + i * (2 * half_l / ny) for i in range(ny + 1)]
+    grid = []
+    for (s, cnt) in SKIRT_RINGS:
+        xr = x_wall + side * (D * (1.0 - s) - 1.2 * s)
+        row = []
+        for y in ys:
+            crest = 0.5 - 0.5 * math.cos(2 * math.pi * y / period)
+            fc = gully + (1.0 - gully) * crest
+            fcr = 1.0 - (1.0 - fc) * (1.0 - s * s)
+            row.append((xr, y, (h_top * s ** 1.25 + ledge * cnt) * fcr))
+        grid.append(row)
+    flip = None
+    for r in range(len(grid) - 1):
+        for i in range(ny):
+            quad = [grid[r][i], grid[r][i + 1], grid[r + 1][i + 1], grid[r + 1][i]]
+            f = _face(b, quad, slots[i % 2])
+            if flip is None and abs(f.normal.z) > 0.5:
+                flip = f.normal.z < 0
+            if flip:
+                bmesh.ops.reverse_faces(b.bm, faces=[f])
+    for i, ysg in ((0, -1.0), (ny, 1.0)):
+        for r in range(len(grid) - 1):
+            a, c = grid[r][i], grid[r + 1][i]
+            f = _face(b, [a, c, (c[0], c[1], 0.0), (a[0], a[1], 0.0)], slots[0])
+            if f.normal.y * ysg < 0:
+                bmesh.ops.reverse_faces(b.bm, faces=[f])
 
 
 # ---------------------------------------------------------------------------

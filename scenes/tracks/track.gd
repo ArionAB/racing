@@ -13586,7 +13586,8 @@ var _decor_roots: Array[Node3D] = []
 func _build_world_decor() -> void:
 	_decor_roots.clear()
 	var cliffs := TrackCliffs.build(_sampler, theme_flag("cliffs", false),
-		_world_seed(), _cliff_clearings(), _gorge_ranges())
+		_world_seed(), _cliff_clearings(), _gorge_ranges(),
+		String(theme_flag("rock_class", "")))
 	add_child(cliffs)
 	_decor_roots.append(cliffs)
 	# FALEZELE DECLARATE ca noduri [CliffFace]: geometrie reala, nu versant de

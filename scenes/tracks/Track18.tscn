@@ -1352,6 +1352,7 @@ custom_viaduct_net_backoffs = Array[Vector2]([Vector2(0, 70.0)])
 custom_ravine_floors = Array[Vector2]([Vector2(0, 16.0), Vector2(1, -4.0), Vector2(2, -6.0), Vector2(3, -3.0)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 50.0), Vector2(1, 45.0), Vector2(2, 70.0), Vector2(3, 90.0)])
 custom_ravine_water = Array[Vector3]([Vector3(2, -3.0, 14.0), Vector3(3, -1.0, 10.0)])
+custom_ravine_capes = Array[Vector4]([Vector4(3, 0.6329, 7.0, 12.0)])
 custom_width_segments = Array[Vector3]([Vector3(0.0, 0.055, 8.0), Vector3(0.055, 0.174, 5.5), Vector3(0.174, 0.271, 5.0), Vector3(0.271, 0.331, 6.0), Vector3(0.331, 0.443, 6.0), Vector3(0.443, 0.472, 4.5), Vector3(0.472, 0.607, 6.0), Vector3(0.607, 0.657, 5.5), Vector3(0.657, 0.748, 5.0), Vector3(0.748, 0.832, 6.0), Vector3(0.832, 0.999, 7.0)])
 traffic_count = 0
 terrain_pad_m = 260.0
@@ -1433,11 +1434,11 @@ road_half_width = 5.5
 model = ExtResource("12_gion_glb")
 
 [node name="Kogarashi" type="Node3D" parent="Hazarduri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 391.387, 12.000, 233.618)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 395.150, 11.750, 243.150)
 script = ExtResource("16_devil")
-amplitude = Vector2(9, 2)
-frequency = Vector2(0.0345, 0.0213)
-path_yaw_deg = 30.0
+amplitude = Vector2(17.56, 0)
+frequency = Vector2(0.04, 0.0213)
+path_yaw_deg = -96.4
 spin_deg = 72.0
 blind_time = 0.35
 lift_m = 1.5
@@ -3351,16 +3352,16 @@ transform = Transform3D(-0.133788, 0.000000, 1.197226, 0.000000, 1.204678, 0.000
 transform = Transform3D(-0.178820, 0.000000, 1.326934, 0.000000, 1.338929, 0.000000, -1.326934, 0.000000, -0.178820, 208.982925, -0.538754, 321.941925)
 
 [node name="fMalStanca60" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(1.844512, 0.000000, -0.236204, 0.000000, 1.859574, 0.000000, 0.236204, 0.000000, 1.844512, 200.197632, -1.353369, 324.393311)
+transform = Transform3D(1.844512, 0.000000, -0.236204, 0.000000, 1.859574, 0.000000, 0.236204, 0.000000, 1.844512, 200.197632, -0.904369, 324.393311)
 
 [node name="fMalStanca61" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
-transform = Transform3D(-1.197217, 0.000000, -0.650740, 0.000000, 1.362641, 0.000000, 0.650740, 0.000000, -1.197217, 199.073044, -1.051184, 326.389526)
+transform = Transform3D(-1.197217, 0.000000, -0.650740, 0.000000, 1.362641, 0.000000, 0.650740, 0.000000, -1.197217, 199.073044, -0.533184, 326.389526)
 
 [node name="fMalStanca62" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_a")]
-transform = Transform3D(0.835989, 0.000000, -0.645986, 0.000000, 1.056492, 0.000000, 0.645986, 0.000000, 0.835989, 201.727676, -1.269850, 323.142365)
+transform = Transform3D(0.835989, 0.000000, -0.645986, 0.000000, 1.056492, 0.000000, 0.645986, 0.000000, 0.835989, 201.727676, -0.946850, 323.142365)
 
 [node name="fMalMovila63" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(0.973085, 0.000000, 0.731487, 0.000000, 1.217361, 0.000000, -0.731487, 0.000000, 0.973085, 201.921356, -0.453473, 327.560150)
+transform = Transform3D(0.973085, 0.000000, 0.731487, 0.000000, 1.217361, 0.000000, -0.731487, 0.000000, 0.973085, 201.921356, -0.175473, 327.560150)
 
 [node name="fMalStanca64" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_garden_rock_c")]
 transform = Transform3D(0.512842, 0.000000, 1.588422, 0.000000, 1.669159, 0.000000, -1.588422, 0.000000, 0.512842, 137.433121, -1.266452, 345.178131)
@@ -3795,10 +3796,10 @@ transform = Transform3D(-0.061875, 0.000000, -0.998084, 0.000000, 1.000000, 0.00
 transform = Transform3D(-0.061605, 0.000000, -0.998101, 0.000000, 1.000000, 0.000000, 0.998101, 0.000000, -0.061605, 206.928543, 0.358585, 336.139679)
 
 [node name="fGard208" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.076295, 0.000000, -0.997085, 0.000000, 1.000000, 0.000000, 0.997085, 0.000000, -0.076295, 203.676422, 0.033420, 335.940125)
+transform = Transform3D(-0.076295, 0.000000, -0.997085, 0.000000, 1.000000, 0.000000, 0.997085, 0.000000, -0.076295, 203.676422, 0.138420, 335.940125)
 
 [node name="fGard209" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
-transform = Transform3D(-0.119686, 0.000000, -0.992812, 0.000000, 1.000000, 0.000000, 0.992812, 0.000000, -0.119686, 200.616501, -0.288968, 335.669312)
+transform = Transform3D(-0.119686, 0.000000, -0.992812, 0.000000, 1.000000, 0.000000, 0.992812, 0.000000, -0.119686, 200.616501, -0.005968, 335.669312)
 
 [node name="fGard210" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_shiba_fence")]
 transform = Transform3D(0.420634, 0.000000, -0.907230, 0.000000, 1.000000, 0.000000, 0.907230, 0.000000, 0.420634, 138.371384, -0.853207, 346.909576)
@@ -3849,7 +3850,7 @@ transform = Transform3D(0.490908, 0.000000, -1.532236, 0.000000, 1.608956, 0.000
 transform = Transform3D(2.155534, 0.000000, 0.248792, 0.000000, 2.169844, 0.000000, -0.248792, 0.000000, 2.155534, 205.922714, -0.493813, 327.297913)
 
 [node name="fEstMovila226" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_moss_mound")]
-transform = Transform3D(1.372445, 0.000000, 0.391633, 0.000000, 1.427229, 0.000000, -0.391633, 0.000000, 1.372445, 202.354630, -0.196866, 332.940979)
+transform = Transform3D(1.372445, 0.000000, 0.391633, 0.000000, 1.427229, 0.000000, -0.391633, 0.000000, 1.372445, 202.354630, -0.014866, 332.940979)
 
 [node name="fEstPin227" parent="DecorManual/ZoneF_Gradina" instance=ExtResource("poif_niwaki_pine")]
 transform = Transform3D(0.600301, 0.000000, 0.861475, 0.000000, 1.050000, 0.000000, -0.861475, 0.000000, 0.600301, 221.940720, 1.538168, 330.450806)

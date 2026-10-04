@@ -274,6 +274,21 @@ var late_peaks: Array[Vector4] = []
 ## ca [member late_peaks]: goala pe orice pista fara ele, deci `ground_y` nu se
 ## schimba cu nimic acolo.
 var cuttings: Array[Vector4] = []
+## LIMBILE DE MAL: (indice de rapa, fractia centrului, semilungime pe sosea m,
+## latime dincolo de marginea asfaltului m). Pe portiunea declarata rapa NU
+## sapa deloc, deci terenul ramane la cota umarului, ca o peninsula de iarba in
+## lac. Se racordeaza pe [constant CAPE_BLEND] si pe sosea, si lateral. Se
+## seteaza de Track dupa constructie, ca [member cuttings]: goala pe orice pista
+## fara ele, deci `ground_y` nu se schimba cu nimic acolo.
+##
+## De ce nu ajunge sa muti buza (`inner`) mai departe: chiar cu tinta egala cu
+## terenul, `_smin` cu k = 3 coboara cota cu k/4 = 0,75 m. Pe Kyoto POI F asta
+## punea malul de langa asfalt fix la cota iazului (-1,0), iar carul Gion
+## Matsuri statea in odihna in apa. Limba scoate sapatura cu totul.
+var ravine_capes: Array[Vector4] = []
+## Racordul limbii de mal (m), pe sosea si lateral: o celula de grila (7,92 m),
+## altfel marginea iese o treapta pe o singura coarda.
+const CAPE_BLEND: float = 8.0
 ## ABRUPTURILE declarate ([TerrainBluff]): cate 15 numere pe abrupt, in ordinea
 ## din [method TerrainBluff.spec]. Se seteaza de Track dupa constructie, ca
 ## [member cuttings]: goala pe orice pista fara noduri, deci `ground_y` nu se
@@ -1540,6 +1555,8 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		# singurul "mal" ramanea o panza de faleza. Fara latime declarata, fade
 		# e 1 si comportamentul e cel dinainte.
 		var carved := _smin(y, target, SMOOTH_SCARP_K if scarp else SMOOTH_RAVINE_K)
+		if not ravine_capes.is_empty():
+			fade *= 1.0 - _cape_weight(ri, near_i, dist)
 		y = lerpf(y, carved, fade)
 	# Vezi garda de mai sus: in tot coridorul benzii (branch_room -> 0 in plat,
 	# lerp spre 1 in banda de racord), rapa nu are voie sa coboare terenul sub
@@ -1550,6 +1567,23 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 	if branch_floor > -INF and branch_room < 1.0:
 		y = lerpf(maxf(y, branch_floor), y, branch_room)
 	return y
+
+
+## Cat din rapa `ri` scoate limba de mal in punctul dat (1 = deloc sapat). Vezi
+## [member ravine_capes].
+func _cape_weight(ri: int, near_i: int, dist: float) -> float:
+	var w := 0.0
+	for c in ravine_capes:
+		if int(c.x) != ri:
+			continue
+		var d := absf(_dists[near_i] - c.y * _total_len)
+		d = minf(d, _total_len - d)
+		var along := 1.0 - smoothstep(0.0, 1.0,
+			clampf((d - c.z) / CAPE_BLEND, 0.0, 1.0))
+		var lat := 1.0 - smoothstep(0.0, 1.0,
+			clampf((dist - half_width_at(near_i) - c.w) / CAPE_BLEND, 0.0, 1.0))
+		w = maxf(w, along * lat)
+	return w
 
 
 ## Pe ce parte a drumului cade un punct, fata de indexul dat.

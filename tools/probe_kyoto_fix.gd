@@ -6,7 +6,8 @@ extends Node
 ## Raporteaza, in METRI pe curba coapta reala (route.dists), nu din fractii
 ## rotunjite: lungimea totala, capatul podului Tsutenkyo, kogarashi (distanta
 ## dupa pod, pana la intrarea in arcul E / tunelul de torii) si unghiul dintre
-## axa lunga a figurii Lissajous si tangenta soselei (tinta: 90 grade).
+## axa lunga a figurii Lissajous si tangenta soselei (pana la naveta din 4 oct 2026
+## tinta era 90 grade); capetele navetei fata de sosea si de banda E'.
 
 const TRACK := "res://scenes/tracks/Track18.tscn"
 
@@ -39,9 +40,22 @@ func _ready() -> void:
 		var ax := Vector2(cos(yaw), -sin(yaw))
 		var ang := rad_to_deg(acos(clampf(absf(ax.dot(tan2)), 0.0, 1.0)))
 		var lat: float = Vector2(kog.global_position.x - route.baked[i].x, kog.global_position.z - route.baked[i].z).length()
-		print("kogarashi: d=%.1f m (frac %.4f) = %.1f m dupa capatul podului; abatere laterala fata de axa %.1f m; unghi axa-Lissajous/tangenta = %.1f grade (tinta 90)" % [
+		print("kogarashi: d=%.1f m (frac %.4f) = %.1f m dupa capatul podului; abatere laterala fata de axa %.1f m; unghi axa-Lissajous/tangenta = %.1f grade" % [
 			d, d / total, d - d_end, lat, ang])
 		print("  pana la intrarea in arcul E (0.4833): %.1f m" % (0.4833 * total - d))
+		# NAVETA (4 oct 2026): figura e o linie din iarba din stanga pana in gura
+		# tunelului de torii, deci unghiul de mai sus nu mai are tinta 90. Contractul
+		# e la capete: A in afara asfaltului, B pe axa benzii E', in afara asfaltului.
+		var amp: Vector2 = kog.get("amplitude")
+		var ax3 := Vector3(ax.x, 0.0, ax.y) * amp.x
+		var br := track.route_at(1)
+		for end: Array in [["A (stanga)", kog.global_position - ax3], ["B (gura)", kog.global_position + ax3]]:
+			var pe: Vector3 = end[1]
+			var mi := route.closest_index_global(pe)
+			var bi := br.closest_index_global(pe)
+			print("  capat %s (%.1f,%.1f): d=%.1f m, %.1f m de axa (asfalt %.1f), %.1f m de axa benzii E'" % [
+				end[0], pe.x, pe.z, route.dists[mi], route.lateral_distance(mi, pe),
+				track.width_at_index(mi), br.lateral_distance(bi, pe)])
 	# Unde incep tulpinile de bambus pe marginea soselei (POI G): minimul distantei pe
 	# ruta (in fractie) peste tulpinile la <= LAT_MAX m lateral de axa. Manual
 	# (gTufa*, coroane) si masa (MultiMesh moso_culm din PadureMasa).

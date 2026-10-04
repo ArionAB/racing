@@ -4488,6 +4488,12 @@ func _ravine_floors() -> Array[Vector2]:
 func _ravine_widths() -> Array[Vector2]:
 	return []
 
+## LIMBILE DE MAL: (indice in [method _ravines], fractia centrului, semilungime
+## pe sosea m, latime dincolo de asfalt m). Pe ele rapa nu sapa — vezi
+## TrackSideSampler.ravine_capes.
+func _ravine_capes() -> Array[Vector4]:
+	return []
+
 ## PANTA podelei unei rape: (indice in [method _ravines], metri de cadere la
 ## fiecare 100 m dincolo de buza). Fara ea podeaua e o masa plata si, din ochiul
 ## soferului, valea citeste ca o treapta urmata de ses — vezi
@@ -5012,6 +5018,7 @@ func rebuild() -> void:
 	_sampler.late_peaks = _island_peaks
 	# Debleele, tot dupa constructie: lista goala pe orice pista fara ele.
 	_sampler.cuttings = _cuttings()
+	_sampler.ravine_capes = _ravine_capes()
 	_sampler.cutting_shape = _cutting_shape()
 	# Abrupturile (TerrainBluff), tot dupa constructie: goale pe orice pista
 	# fara noduri, deci ground_y nu se schimba acolo.

@@ -503,6 +503,24 @@ nu pierde nimic.
    (0 aruncări în 16 seed-uri). Terenul în dreptul carului coboară lent (−1,1 m la
    10 m, −1,5 m la 16 m), iar impinsul spre exterior e redus la 60%, dar o aruncare
    reală a jucătorului pe întoarcere nu a fost simulată.
+   **Actualizat 4 oct 2026:** terenul de mai sus era, de fapt, sub apă. Vezi
+   „Limba de mal sub car” mai jos.
+
+**Limba de mal sub car (4 oct 2026, ramura `kyoto/kogarashi-naveta`).** Dezvoltatorul, de
+la volan: „hazardul pare că plutește peste lac”. Măsurat (raycast pe teren, pe X local al
+carului): pe partea iazului malul era la **−1,0 … −1,2 m chiar de la marginea
+asfaltului**, iar apa e la −1,0, deci odihna carului (x 7–13 m) stătea în iaz. Cauza
+nu e lățimea râpei: `_carve_ravines` începe săpătura la 4 m de asfalt, dar racordul ei
+(`_smin`, k = 3) coboară terenul cu k/4 = 0,75 m chiar și acolo unde ținta e egală cu
+terenul. Mutarea buzei nu ajungea deci. Mecanismul nou, `custom_ravine_capes`
+(`TrackSideSampler.ravine_capes`): pe o porțiune declarată (râpa 3, fracția carului
+0,6329, ±7 m pe șosea, 12 m dincolo de asfalt, racord de 8 m = o celulă de grilă),
+râpa nu sapă deloc. Rezultat, pe același profil: **−0,18 … −0,30 m** până la 18 m de
+axă, adică 0,7 m deasupra apei. `ProbeKyotoGionPos` trece integral (roțile plutesc cel
+mult 0,05 m, iar nimic solid nu e pe traseu). Șapte piese din `ZoneF_Gradina` (pietre
+de mal 60–62, movilele 63 și 226, gardurile 208–209) au fost ridicate exact cu
+diferența de teren măsurată sub ele (+0,11 … +0,52 m). Pe celelalte piste lista e
+goală, deci `ground_y` nu se schimbă.
 
 ### Daruma-otoshi (F) — ISTORIC: înlocuit de carul Gion Matsuri (3 oct 2026). A înlocuit shishi-odoshi (decizia dezvoltatorului, 3 oct 2026: tubul nu se citea, „arată ca o pompă”)
 
@@ -769,8 +787,8 @@ regenerată e identică cu cea din repo).
 
 | parametru | Serengeti | Kogarashi | de ce |
 |---|---|---|---|
-| poziție | câmp deschis | frac **0,4743** (d = 1012,6 m), la **17,7 m** după capătul podului (cota 12); era 0,4686 = 5,6 m (3 oct, ramura `kyoto/frunze-vartej-tren`) | vezi „Mutarea de la 5,6 la 17,7 m” mai jos |
-| figura (m) / perioadă | 14 × 26 | 9 (transversal) × 2, perioadă ~29 s (0,0345 Hz) | taie șoseaua, nu o urmează |
+| poziție | câmp deschis | **navetă (4 oct)**: din iarba din stânga (d = 1007 m, 8,7 m de axă) în gura tunelului de torii (pe axa benzii E′, 11,9 m de axa șoselei); înainte frac 0,4743, transversal | vezi „Naveta până în gura tunelului” mai jos |
+| figura (m) / perioadă | 14 × 26 | linie de 35,1 m (amplitudine 17,56 × 0), perioadă 25 s (0,04 Hz); înainte 9 × 2 la ~29 s | scurtătura se ia doar când vârtejul nu e în gură |
 | răsucire | 180° / 0,8 s | **72°** / 0,8 s | **abatere de la „kick ×0,6"** |
 | ridicare / orbire | 2,5 m / 0,6 s | 1,5 m / 0,35 s | ×0,6 |
 | rază / înălțime | 2,4 / 14 | 1,8 / 9 | |
@@ -833,6 +851,39 @@ E, seeds 2 și 13) și **se reproduc cu `--no-leaves`**, iar două reluări ale 
 au dat 0, deci sunt zgomot Jolt, nu efectul covorului (memoria
 `proberace-nedeterminism`). Aspectul vârtejului la poziția nouă nu e verificat vizual
 (fără capturi).
+
+**Naveta până în gura tunelului (4 oct 2026, ramura `kyoto/kogarashi-naveta`).**
+Dezvoltatorul, cu o săgeată pe captură: vârtejul să meargă „înainte și înapoi” din iarba
+din stânga până în gura scurtăturii, „ca s-o putem lua doar când tornada nu trece pe
+acolo”. Figura Lissajous devine o **linie**: amplitudine (17,56; 0), `path_yaw_deg`
+−96,4, centru (395,15; 11,75; 243,15), perioadă 25 s (0,04 Hz, cel mult 4,4 m/s). Capetele
+sunt măsurate pe rutele coapte (`ProbeKyotoFix` le tipărește): **A** la d = 1007 m, 8,7 m
+în stânga axei (asfaltul are 4,5), pe iarbă; **B** pe axa benzii E′ (0,3 m), la 11,9 m de
+axa șoselei, deci în afara asfaltului. Sinusul ține vârtejul mai mult la capete: ~5 s
+din 25 în gură. Cota de 11,75 lasă baza conului cu cel mult 0,5 m deasupra ierbii la
+capătul A (terenul e la 11,2), iar acolo gradientul de alpha al conului e oricum 0.
+Generatorul scrie aceleași valori (`KOG_A` / `KOG_B`).
+
+ProbeRace `--track=11 --ai=7 --seconds=260`, 16 seed-uri pe configurație, pe aceeași
+ramură (zona 0,45–0,53):
+
+| configurație | repuneri în zonă | `[blocaj]` în zonă | tur mediu | treceri prin tunel |
+|---|---|---|---|---|
+| vârtejul vechi (transversal, 17,7 m după pod) | 5 | 4 | 76,57 s | 251 |
+| **navetă (aleasă)** | 4 | 7 | 76,68 s | 221 |
+| navetă + AI care o ocolește (respinsă) | 21 | 41 | 78,40 s | 202 |
+
+Citire: **blocajele de la gura tunelului (0,49–0,53) există și cu vârtejul vechi**: pe
+`main` ele nu mai sunt 0, cum le măsura §3.0. Naveta nu le-a adus, iar 7 față de 4 e în
+zgomotul Jolt (memoria `proberace-nedeterminism`). **Încercarea respinsă:** vârtejul a
+primit contractul torentului din Fiordland (`branch_index`, `blocks_between`,
+`ai_decision_point`), iar `AIController._torrent_blocks_branch` / `_torrent_lane_keep`
+l-au citit. Rezultatul a fost de 6× mai multe blocaje. Furca de aici e lungă și în unghi
+mic, așa că AI-ul care renunța aproape de ea era tras spre partea opusă și rămânea prins
+între bandă și șosea (lat 9–12 m, (389–393, 279)) sau intra strâmb în tunel. Codul a
+fost scos. AI-ul nu vede vârtejul, ca pe Serengeti, și uneori e răsucit în gură: e
+aceeași fizică pe care o are jucătorul. Aspectul în joc al navetei nu e verificat
+vizual (fără captură cu vârtejul în gură).
 
 **Sunet daruma-otoshi.** Două WAV-uri procedurale, adăugate **la sfârșitul**
 `tools/generate_sfx.gd` (sirul `rng` e unic): `daruma_toc` (0,3 s, trei moduri de

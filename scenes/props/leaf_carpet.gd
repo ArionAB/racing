@@ -26,7 +26,8 @@ extends Node3D
 @export var zones: Array[Vector3] = []
 ## Cat sta panoul peste suprafata vizibila a soselei (care are coroana de 3 cm).
 @export_range(0.01, 0.2, 0.005, "suffix:m") var lift: float = 0.04
-## Pe cati metri se topeste panoul la capetele fiecarei zone.
+## Pe cati metri se topeste panoul la capetele LIBERE ale fiecarei zone (si pe
+## cati metri trece densitatea de la o zona la urmatoarea, cand sunt lipite).
 @export_range(2.0, 80.0, 1.0, "suffix:m") var fade_m: float = 22.0
 ## Cat de aproape de marginea soselei se opreste panoul (m).
 @export_range(0.0, 1.0, 0.05, "suffix:m") var edge_inset: float = 0.15
@@ -151,6 +152,13 @@ static func _class_color(cls: String) -> Color:
 func _build_zone(track: Track, route: TrackRoute, k: int, r: Vector2i) -> void:
 	var span := zone_spans[k]
 	var density := zones[k].z
+	# Zone LIPITE (sfarsitul uneia = inceputul urmatoarei): panoul nu se mai topeste
+	# la imbinare (ar face o gaura goala in covor), ci densitatea trece lin de la
+	# cea a zonei dinainte la a acesteia, pe `fade_m` metri. Capetele libere se
+	# topesc ca pana acum.
+	var joined_prev := k > 0 and absf(zones[k - 1].y - zones[k].x) < 0.0005
+	var joined_next := k < zones.size() - 1 and absf(zones[k].y - zones[k + 1].x) < 0.0005
+	var prev_density := zones[k - 1].z if joined_prev else density
 	var baked := route.baked
 	var n := baked.size()
 	var cols := columns
@@ -174,7 +182,13 @@ func _build_zone(track: Track, route: TrackRoute, k: int, r: Vector2i) -> void:
 			normal = -normal
 		var w := maxf(track.width_at_index(i) - edge_inset, 1.0)
 		var d := route.dists[i]
-		var fade := smoothstep(0.0, fade_m, minf(d - span.x, span.y - d))
+		var d_in := d - span.x
+		var d_out := span.y - d
+		var fade := smoothstep(0.0, fade_m, minf(1.0e9 if joined_prev else d_in,
+			1.0e9 if joined_next else d_out))
+		var dens := density
+		if joined_prev:
+			dens = lerpf(prev_density, density, smoothstep(0.0, fade_m, d_in))
 		for c in cols + 1:
 			var t := float(c) / float(cols) * 2.0 - 1.0
 			var lat := t * w
@@ -183,7 +197,7 @@ func _build_zone(track: Track, route: TrackRoute, k: int, r: Vector2i) -> void:
 			verts.append(p)
 			norms.append(normal)
 			uvs.append(Vector2(lat, span.z + (d - span.x)))
-			cols_arr.append(Color(fade * density, absf(t), 0.0, 1.0))
+			cols_arr.append(Color(fade * dens, absf(t), 0.0, 1.0))
 		if rows > 0:
 			var base := (rows - 1) * (cols + 1)
 			for c in cols:

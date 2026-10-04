@@ -494,6 +494,22 @@ func _apply_sway() -> void:
 	_pivot.rotation.x = cos(w * 0.61) * rock_amplitude * 0.5
 
 
+## Muta figurantul pe curba la `offset` metri de inceput, pe loc (teleportare).
+## Pentru figuranti "la chemare" (TrainCue): muta intre doua puncte ascunse.
+func seek(offset: float) -> void:
+	_started = true
+	_dist = offset
+	if curve != null:
+		var length := curve.get_baked_length()
+		if length > 0.5:
+			_dist = fposmod(_dist, length)
+
+
+## Distanta curenta pe curba (m de la inceput).
+func offset() -> float:
+	return _dist
+
+
 ## Corpul fizic, pentru sonde (tools/probe_path_mover.gd) — expus printr-o
 ## functie, ca la SwayDriver.tracked_instances: interiorul e detaliu de
 ## implementare.

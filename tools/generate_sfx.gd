@@ -65,6 +65,16 @@ func _init() -> void:
 	# e un singur sir. „TOC"-ul ciocanului de lemn si frecarea discului.
 	_save("daruma_toc", _daruma_toc())
 	_save("daruma_slide", _daruma_slide())
+	# Shishimai (Kyoto, Track18 POI H). TOT LA SFARSIT, acelasi motiv: `rng` e un singur
+	# sir. Muzica (flaut fue + taiko, bucla de exact un ciclu de 9 s: toba mare cade pe
+	# atac) si clampanitul falcii de lemn.
+	_save("shishimai_music", _shishimai_music())
+	_save("shishimai_clack", _shishimai_clack())
+	# Carul de festival Gion Matsuri (Kyoto, Track18 POI F). TOT LA SFARSIT, acelasi
+	# motiv: `rng` e un singur sir. Doua bucle: muzica de telegraf (taiko + kane) si
+	# scartaitul rotilor de lemn la traversare.
+	_save("gion_bayashi", _gion_bayashi())
+	_save("gion_wheels", _gion_wheels())
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -90,6 +100,119 @@ func _daruma_toc() -> PackedFloat32Array:
 	return out
 
 
+## Clampanitul falcii de lemn a leului: doua lovituri iuti (KA-CHIK, 45 ms intre ele),
+## moduri inalte si nearmonice care se sting repede -- mai uscat si mai ascutit decat
+## „TOC"-ul daruma. Fara corp jos: lemn subtire pe lemn subtire.
+func _shishimai_clack() -> PackedFloat32Array:
+	const DUR := 0.22
+	var n := int(RATE * DUR)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	for hit in 2:
+		var t0 := 0.0 if hit == 0 else 0.045
+		var gain := 1.0 if hit == 0 else 0.7
+		var i0 := int(t0 * float(RATE))
+		for i in range(i0, n):
+			var t := float(i - i0) / float(RATE)
+			var m1 := sin(TAU * 920.0 * t) * exp(-t * 75.0)
+			var m2 := sin(TAU * 1730.0 * t) * exp(-t * 110.0) * 0.6
+			var m3 := sin(TAU * 2640.0 * t) * exp(-t * 150.0) * 0.4
+			lp = lp * 0.4 + (rng.randf() * 2.0 - 1.0) * 0.6
+			var click := lp * exp(-t * 900.0) * 0.9
+			out[i] = clampf(out[i] + (m1 + m2 + m3 + click) * 0.55 * gain, -1.0, 1.0)
+	return out
+
+
+## Muzica leului, bucla de EXACT 9 s (= `cycle_seconds` din ShishimaiHazard, deci
+## `play(cycle_time)` o pastreaza in faza cu atacul): taiko pe pulsul de 80 BPM, flaut
+## fue pe o pentatonica, o rulada de toba si un tril tot mai strans in telegraf
+## (5,4-6,8 s), tacere de un timp si DON-ul mare exact la 6,8 s (atacul).
+func _shishimai_music() -> PackedFloat32Array:
+	const DUR := 9.0
+	var n := int(RATE * DUR)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	# taiko: pulsul (DON la inceput de masura, don la mijloc)
+	for bar in 3:
+		_add_taiko(out, float(bar) * 3.0, 1.0, 100.0, 52.0, 6.5)
+		_add_taiko(out, float(bar) * 3.0 + 1.5, 0.55, 130.0, 70.0, 9.0)
+	# rulada din telegraf: lovituri tot mai dese si mai tari
+	var t := 5.45
+	var gap := 0.26
+	while t < 6.72:
+		var u := (t - 5.45) / (6.72 - 5.45)
+		_add_taiko(out, t, lerpf(0.35, 0.85, u), 150.0, 95.0, 14.0)
+		t += gap
+		gap = maxf(gap * 0.88, 0.075)
+	# DON-ul mare al atacului
+	_add_taiko(out, 6.8, 1.35, 88.0, 40.0, 3.6)
+	# flaut fue: [start, durata, frecventa]
+	var notes := [
+		[0.05, 0.70, 880.0], [0.80, 0.30, 784.0], [1.15, 0.30, 659.0], [1.50, 0.95, 587.0],
+		[2.65, 0.32, 587.0], [3.02, 0.32, 659.0], [3.40, 0.70, 784.0], [4.18, 0.70, 880.0],
+		[4.95, 0.42, 988.0],
+		[7.25, 0.50, 880.0], [7.80, 0.40, 784.0], [8.28, 0.65, 659.0],
+	]
+	for nt in notes:
+		_add_fue(out, nt[0], nt[1], nt[2], 0.34)
+	# trilul din telegraf: B5 <-> D6, tot mai iute, crescendo, taiat inainte de DON
+	var tt := 5.45
+	var step := 0.22
+	var hi := false
+	while tt < 6.72:
+		var uu := (tt - 5.45) / (6.72 - 5.45)
+		_add_fue(out, tt, minf(step * 1.05, 6.72 - tt), 1175.0 if hi else 988.0,
+			lerpf(0.22, 0.42, uu))
+		hi = not hi
+		tt += step
+		step = maxf(step * 0.9, 0.07)
+	return out
+
+
+## Adauga o lovitura de taiko in `out` la `start` secunde: corp cu cadere de
+## frecventa + pocnitura de atac, `decay` = cat de repede se stinge.
+func _add_taiko(out: PackedFloat32Array, start: float, gain: float, f0: float,
+		f1: float, decay: float) -> void:
+	var i0 := int(start * float(RATE))
+	var len := int(RATE * minf(0.9, 6.0 / decay))
+	var phase := 0.0
+	var lp := 0.0
+	for j in len:
+		var i := i0 + j
+		if i >= out.size():
+			break
+		var t := float(j) / float(RATE)
+		phase += TAU * lerpf(f0, f1, minf(t / 0.08, 1.0)) / float(RATE)
+		lp = lp * 0.7 + (rng.randf() * 2.0 - 1.0) * 0.3
+		var v := sin(phase) * exp(-t * decay) * 0.8 + lp * exp(-t * 55.0) * 0.5
+		out[i] = clampf(out[i] + v * gain * 0.8, -1.0, 1.0)
+
+
+## Adauga o nota de flaut fue: sinus + armonica a 2-a, vibrato lent, atac suflat
+## (zgomot filtrat scurt) si o inflorire a amplitudinii.
+func _add_fue(out: PackedFloat32Array, start: float, dur: float, freq: float,
+		gain: float) -> void:
+	var i0 := int(start * float(RATE))
+	var len := int(RATE * dur)
+	var phase := 0.0
+	var lp := 0.0
+	for j in len:
+		var i := i0 + j
+		if i >= out.size():
+			break
+		var t := float(j) / float(RATE)
+		var u := float(j) / float(maxi(len, 1))
+		var vib := 1.0 + 0.012 * sin(TAU * 5.2 * t) * minf(t / 0.2, 1.0)
+		phase += TAU * freq * vib / float(RATE)
+		lp = lp * 0.8 + (rng.randf() * 2.0 - 1.0) * 0.2
+		var env := minf(t / 0.05, 1.0) * minf((dur - t) / 0.06, 1.0)
+		env *= 0.85 + 0.15 * sin(PI * u)
+		var tone := sin(phase) + 0.35 * sin(2.0 * phase) + 0.12 * sin(3.0 * phase)
+		var breath := lp * (0.35 * exp(-t * 14.0) + 0.06)
+		out[i] = clampf(out[i] + (tone * 0.5 + breath) * env * gain, -1.0, 1.0)
+
+
 ## Discul de lemn care aluneca pe sosea: frecare, adica zgomot filtrat cu taietura
 ## care coboara pe masura ce discul incetineste, modulat in amplitudine de un
 ## „stick-slip" lent (~23 Hz) si cu o coborare de volum in 1,3 s. Fara inaltime.
@@ -109,6 +232,104 @@ func _daruma_slide() -> PackedFloat32Array:
 		var stick := 0.65 + 0.35 * sin(TAU * lerpf(30.0, 14.0, u) * float(i) / float(RATE))
 		var env := minf(u / 0.03, 1.0) * pow(1.0 - u, 1.6)
 		out[i] = clampf((lp + lp2 * 0.6) * stick * env * 1.6, -1.0, 1.0)
+	return out
+
+
+## Muzica de telegraf a carului (Gion bayashi, redusa la esential): 4 batai de 0,75 s,
+## adica o bucla de 3 s. Kane (gong mic de bronz) „kon-chiki-chin" cu trei moduri
+## nearmonice, peste taiko: „don" jos (cade de la 95 la 62 Hz) pe 1 si 3, „ka" de
+## margine (zgomot filtrat scurt) pe 2 si pe sincopa. Cozile care depasesc bucla se
+## aduna la inceput, ca sa nu pocneasca la intoarcere.
+func _gion_bayashi() -> PackedFloat32Array:
+	const DUR := 3.0
+	const TAIL := 1.2
+	var n := int(RATE * DUR)
+	var total := n + int(RATE * TAIL)
+	var buf := PackedFloat32Array()
+	buf.resize(total)
+	# kane: (moment, inaltime Hz, volum)
+	var kane := [[0.0, 1480.0, 0.9], [0.375, 1960.0, 0.5], [0.75, 1480.0, 0.7],
+		[1.5, 1960.0, 0.9], [1.875, 1480.0, 0.5], [2.25, 1960.0, 0.8]]
+	for k in kane:
+		var i0 := int(RATE * float(k[0]))
+		var f: float = k[1]
+		for j in int(RATE * 1.1):
+			var t := float(j) / float(RATE)
+			var m := sin(TAU * f * t) * exp(-t * 6.5)
+			m += sin(TAU * f * 2.41 * t) * exp(-t * 9.0) * 0.55
+			m += sin(TAU * f * 3.93 * t) * exp(-t * 14.0) * 0.3
+			var click := (rng.randf() * 2.0 - 1.0) * exp(-t * 400.0) * 0.5
+			buf[i0 + j] += (m + click) * float(k[2]) * 0.34
+	# taiko „don" (pe 1 si 3) si „ka" (pe 2, 4 si sincopa)
+	for t0 in [0.0, 1.5]:
+		var i0 := int(RATE * t0)
+		var phase := 0.0
+		for j in int(RATE * 0.9):
+			var t := float(j) / float(RATE)
+			var freq := lerpf(95.0, 62.0, minf(t / 0.18, 1.0))
+			phase += TAU * freq / float(RATE)
+			var body := sin(phase) * exp(-t * 5.5)
+			var skin := (rng.randf() * 2.0 - 1.0) * exp(-t * 60.0) * 0.35
+			buf[i0 + j] += (body * 0.95 + skin) * 0.85
+	var lp := 0.0
+	for t0 in [0.75, 2.25, 2.625]:
+		var i0 := int(RATE * t0)
+		for j in int(RATE * 0.12):
+			var t := float(j) / float(RATE)
+			var white := rng.randf() * 2.0 - 1.0
+			lp = lp * 0.45 + white * 0.55
+			buf[i0 + j] += lp * exp(-t * 38.0) * 0.55 + sin(TAU * 240.0 * t) * exp(-t * 45.0) * 0.4
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in total:
+		out[i % n] += buf[i]
+	return _peak_norm(out, 0.8)
+
+
+## Roti de lemn pe pamant batut: huruit jos cu pulsatia rotatiei (~3,3 Hz), peste el
+## un scartait cu un glissando lent si vibrato, modulat in amplitudine neregulat.
+## Fara inaltime clara. Capatul se topeste in inceput (bucla fara pocnet).
+func _gion_wheels() -> PackedFloat32Array:
+	const DUR := 2.4
+	var n := int(RATE * DUR)
+	var raw := PackedFloat32Array()
+	raw.resize(n)
+	var lp := 0.0
+	var lp2 := 0.0
+	var phase := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var white := rng.randf() * 2.0 - 1.0
+		lp = lp * 0.97 + white * 0.03
+		lp2 = lp2 * 0.8 + white * 0.2
+		var roll := 0.55 + 0.45 * sin(TAU * 3.3 * t)
+		var rumble := lp * 11.0 * roll
+		var freq := 210.0 + 70.0 * sin(TAU * 0.42 * t) + 6.0 * sin(TAU * 7.0 * t)
+		phase += TAU * freq / float(RATE)
+		# unda aproape dreptunghiulara: armonice impare, ca lemnul care scartaie
+		var creak := sin(phase) + sin(phase * 3.0) * 0.45 + sin(phase * 5.0) * 0.2
+		var gate := clampf(0.5 + 0.9 * sin(TAU * 0.83 * t + 1.3) * sin(TAU * 0.31 * t), 0.0, 1.0)
+		raw[i] = rumble * 0.8 + creak * gate * 0.22 + lp2 * 0.05
+	var fade := int(n * 0.15)
+	var out := PackedFloat32Array()
+	out.resize(n - fade)
+	for i in out.size():
+		out[i] = raw[i]
+	for i in fade:
+		var k := float(i) / float(fade)
+		out[i] = raw[i] * k + raw[out.size() + i] * (1.0 - k)
+	return _peak_norm(out, 0.5)
+
+
+## Scaleaza la un varf dat: sinteza de mai sus aduna straturi si ar taia la +-1.
+func _peak_norm(a: PackedFloat32Array, peak: float) -> PackedFloat32Array:
+	var m := 0.0001
+	for v in a:
+		m = maxf(m, absf(v))
+	var out := PackedFloat32Array()
+	out.resize(a.size())
+	for i in a.size():
+		out[i] = a[i] * peak / m
 	return out
 
 

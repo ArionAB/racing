@@ -130,12 +130,15 @@ func _load_track_without_block() -> Track:
 # ------------------------------------------------------------------ repere
 
 func _daruma() -> void:
-	var hz: DarumaOtoshiHazard = _track.get_node("Hazarduri/DarumaOtoshi") as DarumaOtoshiHazard
+	# Din oct 2026 hazardul e carul Gion Matsuri (inlocuieste daruma-otoshi): „turnul" =
+	# centrul carului in odihna pe `side`, „discul" = tot drumul lui pana la cealalta
+	# odihna. Culoarul are latimea carului (cu trasatorii) plus marja.
+	var hz: GionMatsuriHazard = _track.get_node("Hazarduri/GionMatsuri") as GionMatsuriHazard
 	_outward = hz.outward()
-	_tower = hz.global_position + _outward * absf(hz.tower_center_x())
-	_disc_len = hz.slide_distance
-	_disc_half = hz.disc_diameter * 0.5 + hz.hit_margin_along + 1.0
-	print("; daruma: turn (%.1f, %.1f, %.1f), exterior (%.2f, %.2f), disc %.0f m spre interior" % [
+	_tower = hz.global_position + _outward * hz.rest_x()
+	_disc_len = 2.0 * hz.rest_x()
+	_disc_half = hz.cart_width * 0.5 + hz.hit_margin_along + 1.0
+	print("; car Gion: odihna (%.1f, %.1f, %.1f), exterior (%.2f, %.2f), drum %.0f m spre interior" % [
 		_tower.x, _tower.y, _tower.z, _outward.x, _outward.z, _disc_len])
 
 

@@ -5,13 +5,15 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="4_branch"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
-[ext_resource type="Script" path="res://scenes/hazards/daruma_otoshi_hazard.gd" id="11_daruma"]
+[ext_resource type="Script" path="res://scenes/hazards/gion_matsuri_hazard.gd" id="11_gion"]
 [ext_resource type="Script" path="res://scenes/props/torii_tunnel.gd" id="12_torii"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_senbon.glb" id="13_senbon"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_large.glb" id="14_large"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
-[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/vehicles/gion_boko.glb" id="12_gion_glb"]
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
+[ext_resource type="Script" path="res://scenes/hazards/shishimai_hazard.gd" id="18_shishimai"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/shishimai.glb" id="19_shishimai_glb"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
 [ext_resource type="Script" path="res://scenes/props/module_placer.gd" id="intc_placer"]
@@ -133,6 +135,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/vehicles/sagano_train.glb" id="poig_sagano_train"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/props/shiba_fence.glb" id="poig_shiba_fence"]
 [ext_resource type="Script" path="res://scenes/props/path_mover.gd" id="poig_pathmover"]
+[ext_resource type="Script" path="res://scenes/props/train_cue.gd" id="poig_traincue"]
 [ext_resource type="Script" path="res://scenes/props/city_fill.gd" id="poig_cityfill"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/garden_rock_a.glb" id="poih_garden_rock_a"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/rocks/garden_rock_b.glb" id="poih_garden_rock_b"]
@@ -1396,7 +1399,7 @@ mouth_clearing = true
 
 [node name="CovorFrunze" type="Node3D" parent="."]
 script = ExtResource("16_carpet")
-zones = Array[Vector3]([Vector3(0.335, 0.44, 1.0), Vector3(0.472, 0.56, 0.6)])
+zones = Array[Vector3]([Vector3(0.335, 0.44, 1.0), Vector3(0.472, 0.56, 0.6), Vector3(0.56, 0.674, 0.4)])
 
 [node name="FrunzeCazatoare" type="GPUParticles3D" parent="."]
 script = ExtResource("17_leaffall")
@@ -1422,15 +1425,15 @@ fade = 14.0
 label = "saritura de pe scena Kiyomizu"
 respawn_past_gap = true
 
-[node name="DarumaOtoshi" type="Node3D" parent="Hazarduri"]
+[node name="GionMatsuri" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-0.20230, 0, 0.97932, 0, 1, 0, -0.97932, 0, -0.20230, 185.993, 0.035, 343.126)
-script = ExtResource("11_daruma")
+script = ExtResource("11_gion")
 side = 1
 road_half_width = 5.5
-model = ExtResource("12_daruma_glb")
+model = ExtResource("12_gion_glb")
 
 [node name="Kogarashi" type="Node3D" parent="Hazarduri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 386.919, 12.000, 225.880)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 391.387, 12.000, 233.618)
 script = ExtResource("16_devil")
 amplitude = Vector2(9, 2)
 frequency = Vector2(0.0345, 0.0213)
@@ -1445,6 +1448,12 @@ dust_amount = 30
 debris_amount = 14
 cone_alpha = 0.3
 cone_color = Color(0.66, 0.41, 0.23, 1)
+
+[node name="Shishimai" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(0.99388, 0, -0.11043, 0, 1, 0, 0.11043, 0, 0.99388, -3.965, 0.716, 85.683)
+script = ExtResource("18_shishimai")
+road_half_width = 7.0
+model = ExtResource("19_shishimai_glb")
 
 [node name="CameraTsutenkyo" type="Area3D" parent="Hazarduri"]
 monitorable = false
@@ -4329,6 +4338,9 @@ speed = 8.75
 travel_mode = 0
 phase = 0.135
 stick_to_ground = false
+
+[node name="TrenLaChemare" type="Node3D" parent="DecorManual/ZoneG_Bambus"]
+script = ExtResource("poig_traincue")
 
 [node name="CameraPodTren" type="Area3D" parent="Hazarduri"]
 monitorable = false

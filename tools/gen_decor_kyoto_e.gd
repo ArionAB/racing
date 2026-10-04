@@ -88,7 +88,7 @@ func _do_scan() -> void:
 				for k in mini(fp.positions.size(), 4):
 					s += " (%.1f,%.1f,%.1f)" % [fp.positions[k].x, fp.positions[k].y, fp.positions[k].z]
 				print(s)
-	for nm in ["Hazarduri/Kogarashi", "Hazarduri/DarumaOtoshi", "Peaks/Inari"]:
+	for nm in ["Hazarduri/Kogarashi", "Hazarduri/GionMatsuri", "Peaks/Inari"]:
 		var nd := _track.get_node_or_null(nm) as Node3D
 		if nd != null:
 			print("; %s la %s" % [nm, str(nd.global_position)])

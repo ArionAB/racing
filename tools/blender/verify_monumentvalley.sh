@@ -42,5 +42,18 @@ check "rocks/merrick_butte.glb" 14000 --origin=assembly
 check "rocks/mesa_wall_module.glb" 8000 --origin=assembly
 
 echo
+echo "== grupa mv-f (stanci mici, grohotis, fundal) =="
+check "rocks/butte_small_a.glb" 6000 --origin=assembly
+check "rocks/butte_small_b.glb" 6000 --origin=assembly
+check "rocks/butte_small_c.glb" 9000 --origin=assembly
+check "rocks/rock_fin.glb" 3000 --origin=assembly
+check "rocks/hoodoo.glb" 3000 --origin=assembly
+check "rocks/talus_boulders_a.glb" 1500 --origin=assembly
+check "rocks/talus_boulders_b.glb" 1800 --origin=assembly
+# fundalul: 7 noduri copii directe, TOATE cu originea la baza in acelasi punct
+# (consumatorul le extrage pe rand); numarul de triunghiuri se raporteaza, fara plafon
+check "rocks/horizon_mesas.glb" 60000 --origin=assembly
+
+echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi
 exit "$fail"

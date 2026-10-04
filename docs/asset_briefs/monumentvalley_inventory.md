@@ -129,3 +129,66 @@ scund): coordonatorul îl rotește la montare.
   tot conturul (rev. 3: sectoare pe arc, taper, recese), `cap_slab`, `scree_ribs`, `tapered_spire`); `east_mitten`
   și restul pot folosi aceleași funcții.
 - `preview_monument.py` pune clasa `mv_sandstone` (#B8552E) pe nodurile `*_Rock`.
+
+
+## Grupa mv-f (stanci mici, grohotis, fundal)
+
+Build: `tools/blender/build_monument_rocks_small.py` si `build_monument_horizon.py`
+(vocabular din `monument_shapes.py`, nemodificat; bolovanii teșiti `faceted_rock`
+sunt locali in scriptul stancilor mici). Camere: `preview_specs_f.py` (incarcat cu
+un `exec` din `preview_monument.py`, plus `spread` pentru GLB cu mai multe siluete
+la origine). Verify: `VERDICT KIT: OK` (`--origin=assembly`). Planșa: `img/monumentvalley_fidelity_valf.png`.
+
+| fisier | noduri | tri | cote masurate |
+|---|---|---:|---|
+| `rocks/butte_small_a.glb` | `ButteA_Rock/_Scree/_Cap` | 4674 | 14,0 m, amprenta 13,4 x 12,7 m (turn ~7,4 m + con) |
+| `rocks/butte_small_b.glb` | `ButteB_Rock/_Scree/_Cap` | 3208 | 18,0 m, amprenta 9,5 x 7,9 m |
+| `rocks/butte_small_c.glb` | `ButteC_Rock/_Scree/_Cap` | 8592 | 12,3 m, amprenta 13,0 x 13,3 m |
+| `rocks/rock_fin.glb` | `Fin_Rock/_Scree` | 1856 | 12,0 m, 7,2 x 6,5 m cu umarul si grohotisul (peretele 4 x 2,5) |
+| `rocks/hoodoo.glb` | `Hoodoo_Rock/_Scree/_Cap` | 1142 | 7,7 m, 6,5 x 6,2 m cu conul |
+| `rocks/talus_boulders_a.glb` | `Talus_Scree` | 276 | 4,3 x 3,1 x 2,6 m, 7 bolovani |
+| `rocks/talus_boulders_b.glb` | `Talus_Scree` | 390 | 5,7 x 4,5 x 2,5 m, 10 bolovani |
+| `rocks/horizon_mesas.glb` | 7 noduri copii directe (vezi mai jos) | 46242 | vezi mai jos |
+
+Orizontul (`Track._build_horizon`): consumatorul face `_extract_glb_node(scene,
+nume)` = copil direct al radacinii, nume EXACT (din `horizon_picks` in tema),
+containerul se recentreaza cu `-kept.position`, apoi nodul se aseaza la 190-340 m,
+ingropat 4 m, rotit pe Y la intamplare, scalat 1,3-2,4x, `cast_shadow` OFF, iar
+`horizon_class` (mv_sandstone) se aplica pe TOT nodul. De aceea: un nod per
+silueta, originea la baza (XY centrat, Z min 0), volum inchis pe patru fete, o
+singura clasa per nod (roca + calota + grohotis in acelasi mesh).
+
+| nod | tri | bbox X x Z x inaltime (m, cu fusta) | contract |
+|---|---:|---|---|
+| `EagleMesa_A` | 6572 | 108 x 48 x 28,9 | ~90 x 30 x 28: peretele 90 x 30, fusta +9 m |
+| `BrighamsTomb_A` | 8262 | 60 x 44 x 36,7 | ~40 x 25 x 35: turn 35 x 22 pe soclu 46 x 30 (ajunge 36,7) |
+| `Stagecoach_A` | 7294 | (vezi verify) x 28,9..30 | ~50 x 20 x 30: masa 50 x 20 + umar jos |
+| `KingOnThrone_A` | 6326 | tron 32 x 22 + turn | ~30 x 20 x 32 |
+| `Spires_A` | 1502 | 3 turle 34 / 27 / 30 m pe soclu comun ~44 x 20 | turle 25-35 m |
+| `FarMesa_A` | 7298 | 162 x 53 x 15,9 | ~150 x 20 x 15 |
+| `FarMesa_B` | 8988 | idem, profil in doua cote (14 / 10,2 m) | ~150 x 20 x 15 |
+
+Fidelitate: `img/monumentvalley_fidelity/<nume>.png` (decupare | randare) pentru cele
+sapte stanci mici; orizontul: `horizon_mesas.png` (panoramica | cele 7 siluete in
+rand, prea mici) si `horizon_mesas_views.png` (decuparea deasupra, cele 7 siluete
+mari dedesubt).
+
+| piesa | element | pe planșă | in GLB | verdict |
+|---|---|---|---|---|
+| butte_small_a | turn | con trunchiat larg, ~9 coloane late, varf plat | ~9 coloane, taper 36%, talpa evazata 4,5 m | OK; coloanele mai regulate |
+| | calota | placa bej mare in varf | 2 trepte SAND_LIGHT, mai mica decat pe planșă | abatere mica |
+| | con | lat, cu bolovani mari in fata | fusta cu coaste (32 de puncte), ~14 bolovani + 1 mare in fata | OK |
+| butte_small_b | turla | bloc masiv, h/l ~1,8 in imagine (cu con) | 18 m / 7,9 m amprenta (turn ~4,6 m lat): mai suplu | ABATERE: tabelul (18 x 7 m) bate planșa; ramane mai subtire |
+| | bolovan lipit | mare, la stanga jos | 1 bolovan de 2,8 m in stanga | OK |
+| butte_small_c | etaje | 2-3 blocuri care se strang, cel de sus cubic | 3 etaje (6 / 4,4 / 2,9 m), fiecare cu coloane, decalate spre stanga | OK; blocul de sus mai ingust, benzile orizontale (praguri) mai regulate |
+| rock_fin | arip | tuna ascutita, fete in V, umar in dreapta | turla din 6 segmente + 2 coaste verticale + umar de 7,5 m | OK; mai neted decat desenul |
+| hoodoo | coloana | 3 segmente cu gat, cap de piatra | 4 segmente (cu burta la ~3 m), gat 1,6 m | OK |
+| | cap | bolovan poliedric rotunjit, maro-bej | bolovan cu fete late, SAND_LIGHT (galben mai viu) | ABATERE: citeste ca bloc turtit, nu poliedru rotunjit; 3 runde |
+| talus_a / b | grup | bolovani colturosi, 1 central inalt, mici in fata | 7 / 10 bolovani cu varf (peak), fete de sus pe LARCH_RUST | OK; fatetele sunt mai putine si mai plate decat pe planșă |
+| horizon_mesas | siluete | mese late, turn inalt, turle, benzi palide in spate | 7 noduri: masa, turn pe soclu, masa cu umar, tron cu turn, 3 turle, 2 benzi | OK ca siluete; fara aerul albastru de departare (il da ceata), fara contraforturi interne |
+
+Abateri generale: tri ridicati la `butte_small_c` (8592) si `horizon_mesas` (46242
+pe 7 noduri, fara plafon, se instantiaza cate un nod); grohotisul orizontului
+e o fusta de fatete mari, fara bolovani individuali; nodurile orizontului sunt toate la
+origine in GLB (se vad suprapuse intr-un viewer: e asteptat, consumatorul pastreaza
+doar unul).

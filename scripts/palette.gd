@@ -588,6 +588,13 @@ const CLASS_TEXTURES := {
 	# Nu se putea tenta "alpine_granite" direct: e clasa stancilor de pe
 	# Alpi (Track09) si le-ar fi facut rosii.
 	"red_valley_tuff": "res://assets/textures/classes/alpine_granite.png",
+	# GRESIA MONUMENT VALLEY (Track19, brief monument_valley.md §4): peretele
+	# monoliturilor si al meselor, rosu-portocaliu #B8552E. ACEEASI dala ca
+	# `red_valley_tuff` (stratificata, zero VRAM nou), alta ridicare si alta tenta:
+	# tinta (0.722, 0.333, 0.180) are R PESTE media dalei (0.651), deci tenta
+	# singura nu ajunge — vezi CLASS_LIFT. Clasa e NOUA: nicio alta pista n-o
+	# foloseste, deci `rock` / `red_valley_tuff` raman neschimbate.
+	"mv_sandstone": "res://assets/textures/classes/alpine_granite.png",
 	# TUFUL CREM al Cappadociei: hornurile, poarta geamana, gura de pestera si
 	# fatada bisericii rupestre. ACEEASI dala ca `red_valley_tuff` — nu se
 	# dubleaza in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica
@@ -945,6 +952,11 @@ const CLASS_TINT := {
 	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
 	# canale ies SUB 1, deci nu cere CLASS_LIFT.
 	"red_valley_tuff": Color(0.822, 0.568, 0.479),
+	# Gresia Monument Valley (#B8552E): dala alpina ridicata la luminanta 0.672
+	# (k ~ 1.12 fata de 0.600, deci media dalei ~ (0.729, 0.685, 0.601)), apoi
+	# tenta = tinta / media = (0.990, 0.486, 0.299). INCEPUT DE CALIBRARE: de
+	# masurat in joc, dupa remap (memoria monocromia-se-masoara-dupa-remap).
+	"mv_sandstone": Color(0.990, 0.486, 0.299),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
@@ -1137,6 +1149,8 @@ const CLASS_TINT := {
 ## alb, e o schimbare de expunere. Ce depaseste 1.0 se retează, deci tinta se
 ## alege sub alb pur.
 const CLASS_LIFT := {
+	# Gresia Monument Valley: vezi CLASS_TINT (R tinta > media dalei).
+	"mv_sandstone": 0.672,
 	"village_plaster": 0.88,
 	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
 	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:
@@ -1254,6 +1268,8 @@ const CLASS_TRIPLANAR_SCALE := {
 	# benzi, deci fiecare treapta de 12 m arata ca un teanc de straturi,
 	# nu ca doua dungi.
 	"red_valley_tuff": 0.08,
+	# Gresia Monument Valley: aceeasi scara ca faleza rosie (aceeasi dala).
+	"mv_sandstone": 0.08,
 	# ACEEASI scara ca faleza rosie, si nu din lene: hornurile masoara 11-18 m
 	# pe verticala (masurat pe cele 12 .glb-uri — chimney_a 11.3, chimney_c 17.3,
 	# triple 18.5, twin_gate 21.6), adica exact plaja modulului de faleza de

@@ -34,7 +34,7 @@ clear_built()
 
 
 def _tree(prefix, blobs, limbs, crown_slot, trunk_r=0.5, fork_z=2.0, seed=1,
-          subdiv=2, jag=0.24, trunk_fn=None, limb_w=(0.46, 0.32)):
+          subdiv=2, jag=0.24, trunk_fn=None, limb_w=(0.46, 0.32), pads=False):
     """blobs: (x, y, z, rx, ry, rz); limbs: puncte (x, y, z) spre care pleaca
     crengile groase din furca (intra in ciorchini)."""
     tr = Builder()
@@ -53,8 +53,12 @@ def _tree(prefix, blobs, limbs, crown_slot, trunk_r=0.5, fork_z=2.0, seed=1,
         tr.beam(fork - Vector((0, 0, 0.15)), mid, (limb_w[0], limb_w[0]), BARK)
         tr.beam(mid, t, (limb_w[1], limb_w[1]), BARK)
     for k, (x, y, z, rx, ry, rz) in enumerate(blobs):
-        leaf_blob(cr, (x, y, z), rx, ry, rz, crown_slot, subdiv=subdiv, jag=jag,
-                  seed=seed * 31 + k)
+        if pads:     # arțarii: contur lobat (leaf_pad), nu icosfera zimtata
+            leaf_pad(cr, (x, y, z), rx * 1.12, ry * 1.12, rz * 0.85, crown_slot,
+                     seed=seed * 31 + k)
+        else:
+            leaf_blob(cr, (x, y, z), rx, ry, rz, crown_slot, subdiv=subdiv, jag=jag,
+                      seed=seed * 31 + k)
     return tr.to_object(prefix + "_Trunk"), cr.to_object(prefix + "_Crown")
 
 
@@ -88,7 +92,7 @@ def build_momiji_a():
     limbs = [(-2.9, 0.2, 5.0), (3.0, -0.1, 4.8), (-3.9, 0.0, 3.6),
              (4.1, 0.2, 3.4), (0.2, 0.5, 4.4)]
     return _tree("Maple", b, limbs, CRIMSON, trunk_r=0.5, fork_z=2.0, seed=1,
-                 subdiv=3, jag=0.34)
+                 subdiv=3, jag=0.34, pads=True)
 
 
 def build_momiji_b():
@@ -114,7 +118,7 @@ def build_momiji_b():
     limbs = [(-2.5, 0.0, 3.0), (2.6, 0.1, 2.9), (0.0, -1.2, 3.1),
              (-0.9, 0.1, 4.9), (1.1, 0.0, 4.8), (0.0, 0.0, 6.5)]
     return _tree("Maple", b, limbs, LAVA_ORANGE, trunk_r=0.5, fork_z=2.4, seed=7,
-                 subdiv=3, jag=0.34)
+                 subdiv=3, jag=0.34, pads=True)
 
 
 def build_momiji_c():
@@ -142,7 +146,7 @@ def build_momiji_c():
     limbs = [(-3.4, 0.2, 2.5), (3.5, 0.0, 2.4), (-2.4, 0.1, 4.0),
              (2.5, 0.2, 4.1), (0.1, -0.8, 4.2)]
     return _tree("Maple", b, limbs, RUST, trunk_r=0.8, fork_z=2.2, seed=11,
-                 subdiv=3, jag=0.34, limb_w=(0.7, 0.45))
+                 subdiv=3, jag=0.34, limb_w=(0.7, 0.45), pads=True)
 
 
 def build_ginkgo():

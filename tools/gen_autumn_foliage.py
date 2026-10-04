@@ -19,7 +19,11 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 N = 512
-GAMMA = 0.80
+TARGET_MEAN = 195.2   # media dalei v1, pe care sunt calculate tentele
+# Umbra de contact a fiecarei frunze (lumina din stanga-sus a dalei).
+SHADOW_STRENGTH = 0.55
+SHADOW_GROW = 1.10
+SHADOW_OFFSET = (3.0, 4.0)
 rng = np.random.default_rng(1117)
 
 
@@ -148,14 +152,32 @@ def main() -> None:
             c = clump_n[int(y), int(x)]
             fn = fine_n[int(y), int(x)]
             v = base * (1.00 + gain * (c - 0.5) * 0.9 + 0.12 * (fn - 0.5)) * rng.uniform(0.80, 1.06)
-            stamp(canvas, x, y, rng.uniform(0, 360), rng.uniform(s0, s1), min(v, 252.0), 1.0)
+            rot, sc = rng.uniform(0, 360), rng.uniform(s0, s1)
+            # umbra de contact pe frunzele de dedesubt: fara ea, trei straturi
+            # aproape la fel de deschise se topesc intr-o pata si conturul
+            # lobat nu se mai citeste din camera (decupajul de joc, oct 2026)
+            shadow(canvas, x, y, rot, sc * SHADOW_GROW, SHADOW_STRENGTH,
+                   SHADOW_OFFSET[0], SHADOW_OFFSET[1])
+            stamp(canvas, x, y, rot, sc, min(v, 252.0), 1.0)
 
     # tonul final: usor desfocat sub-pixel, apoi normalizare a mediei
     img = Image.fromarray(np.clip(canvas, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.5))
     a = np.asarray(img).astype(float)
     # curba de ton: ridica mediul fara sa taie luminile (tenta doar inmulteste,
     # deci dala trebuie sa fie deschisa cat mai uniform, cu golurile ca singur intuneric)
-    a = 255.0 * (a / 255.0) ** GAMMA
+    # Gamma rezolvata pe MEDIE: umbrele de contact coboara media, iar tentele
+    # claselor (CLASS_TINT, CLASS_LIFT) sunt calculate pe media dalei. Curba o
+    # readuce la TARGET_MEAN fara sa atinge tentele; contrastul frunza/umbra
+    # ramane (umbrele sunt sub p10, luminile se strang spre alb).
+    lo_g, hi_g = 0.2, 1.0
+    for _ in range(40):
+        g = 0.5 * (lo_g + hi_g)
+        if (255.0 * (a / 255.0) ** g).mean() > TARGET_MEAN:
+            lo_g = g
+        else:
+            hi_g = g
+    a = 255.0 * (a / 255.0) ** g
+    print("gamma %.3f" % g)
     print("medie %.1f  std %.1f  p1 %.0f p50 %.0f p99 %.0f  max %.0f" % (
         a.mean(), a.std(), *np.percentile(a, [1, 50, 99]), a.max()))
     rgb = np.stack([a, a, a], axis=-1).astype(np.uint8)

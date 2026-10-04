@@ -255,8 +255,16 @@ func _build_species(theme: String) -> void:
 		if mesh == null:
 			push_warning("MeshForest: %s nu are mesh" % stem)
 			continue
+		var far := _simplified(mesh) if lod_m > 0.0 else mesh
+		# Netezirea coroanei (Palette.SMOOTH_FOLIAGE) DUPA LOD: simplificarea
+		# facuta pe normale netede sudeaza varfurile altfel si lasa coroana
+		# departata in cioburi plate (vazut pe captura, oct 2026).
+		var foliage := Palette.foliage_surfaces(mesh)
+		if not foliage.is_empty():
+			mesh = Palette.smoothed_mesh(mesh, foliage)
+			far = mesh if lod_m <= 0.0 else Palette.smoothed_mesh(far, foliage)
 		_species_mesh[stem] = mesh
-		_species_far[stem] = _simplified(mesh) if lod_m > 0.0 else mesh
+		_species_far[stem] = far
 		var tris := 0
 		for s in mesh.get_surface_count():
 			var arr := mesh.surface_get_arrays(s)

@@ -473,11 +473,11 @@ def heading_at(i):
     a, b = rs[i % n_rs], rs[(i + 1) % n_rs]
     return heading_deg(b[0] - a[0], b[1] - a[1])
 dh = (heading_at(tub_i + 3) - heading_at(tub_i - 3) + 180) % 360 - 180
-report(dh < -10.0, f"F turnul daruma pe exteriorul unei curbe la STANGA: schimbare de directie {dh:+.0f} deg pe 72 m (negativ = stanga)")
+report(dh < -10.0, f"F carul Gion pe exteriorul unei curbe la STANGA: schimbare de directie {dh:+.0f} deg pe 72 m (negativ = stanga)")
 sel = [i for i in range(tub_i - 14, tub_i) if 35.0 <= math.hypot(rs[i][0] - rs[tub_i][0], rs[i][1] - rs[tub_i][1]) <= 150.0]
 ok = sum(1 for i in sel if abs(azimut_to(i, TUB_XY)) <= 30.0)
 report(len(sel) > 0 and ok / len(sel) >= 0.8,
-       f"F turnul daruma intreg in cadru pe [150,35] m: {ok}/{len(sel)} puncte cu |azimut| <= 30 ({100*ok/max(1,len(sel)):.0f}%, prag 80%)")
+       f"F carul Gion intreg in cadru pe [150,35] m: {ok}/{len(sel)} puncte cu |azimut| <= 30 ({100*ok/max(1,len(sel)):.0f}%, prag 80%)")
 
 all_ok = all(guard_results)
 print(f"\nGARDA DE AZIMUT: {'TOATE TREC' if all_ok else 'CEL PUTIN O LINIE A PICAT'}")
@@ -491,6 +491,25 @@ def r3(x):
 
 def road_at_frac(f):
     return rs[int(f * n_rs) % n_rs]
+
+# Lungimea curbei COAPTE in joc (Track18, masurata cu tools/train_cam_meter.gd /
+# route.dists[n]); poligonul de control are 2126 m, curba Catmull-Rom 2135.1 m.
+# Fractiile din .tscn sunt pe curba coapta, deci metrii se convertesc cu ea.
+BAKED_TOTAL_M = 2135.1
+_rs_cum = cum_lengths(rs)
+
+def road_at_arc(f):
+    """Ca road_at_frac, dar INTERPOLAT pe lungimea de arc (road_at_frac ia
+    esantionul rs de dedesubt, la pas de 12 m, deci rotunjeste cu pana la 12 m)."""
+    sd = (f % 1.0) * _rs_cum[-1]
+    j = 0
+    while j < len(rs) - 1 and _rs_cum[j + 1] < sd:
+        j += 1
+    a, b = rs[j], rs[(j + 1) % len(rs)]
+    t = (sd - _rs_cum[j]) / max(1e-6, _rs_cum[j + 1] - _rs_cum[j])
+    pos = tuple(a[k] + (b[k] - a[k]) * t for k in range(3))
+    l = math.hypot(b[0] - a[0], b[1] - a[1])
+    return pos, ((b[0] - a[0]) / l, (b[1] - a[1]) / l)
 
 def heading_vec_at_frac(f):
     i = int(f * n_rs) % n_rs
@@ -526,11 +545,16 @@ if len(sys.argv) > 1:
     f_bridge_b = F["D pod Tsutenkyo iesire"]
     # Covorul de frunze (LeafCarpet, brief §3): D de la aterizare pana inainte de
     # gura podului (podul acoperit nu are frunze pe tablier), E de dupa pod pana
-    # la Inari (frunzele mai rare: altare, cedri). (de la, pana la, densitate.)
+    # la Inari (frunzele mai rare: altare, cedri), F pana la bambus (0,4). (de la, pana la, densitate.)
     carpet_zones = ", ".join(
         f"Vector3({r3(a)}, {r3(b)}, {d})" for a, b, d in (
             (F["D aterizare coborare"] + 0.004, f_bridge_a - 0.009, 1.0),
-            (f_bridge_b + 0.006, 0.56, 0.6)))
+            (f_bridge_b + 0.006, 0.56, 0.6),
+            # F: iazul si pavilionul, pana la prima tulpina de bambus (G): frunzele
+            # se subtiaza de la 0,6 la 0,4 si se topesc la 0,674 (masurat cu
+            # tools/ProbeKyotoFix.tscn: PadureMasa "bambus G tulpini" incepe la
+            # frac 0,6739, prima tufa manuala la 0,6827). Lipita de zona E.
+            (0.56, 0.674, 0.4)))
     f_togetsu_a = F["H pod Togetsukyo intrare"]
     f_togetsu_b = F["H pod Togetsukyo iesire"]
     f_f_a = F["F intrare (spre V)"]
@@ -641,10 +665,39 @@ if len(sys.argv) > 1:
     # Figura Lissajous e rotita cu 30 grade ca axa X locala sa fie TRANSVERSALA
     # pe sosea (directia mersului la pod: 150 grade busola); perioada pe axa
     # transversala 1/0,0345 = ~29 s (brief §3).
-    f_kog = f_bridge_b + 0.004
-    kog_road = road_at_frac(f_kog)
+    # Distanta dupa capatul podului, in metri pe lungimea curbei (total, m).
+    # 3 oct 2026 (dezvoltatorul: "la iesirea din pod nu se citeste"): era la 5,6 m
+    # MASURAT dupa capatul podului (road_at_frac rotunjea la esantionul de 12 m);
+    # acum 14 m nominal = 17,7 m masurat pe curba coapta cu tools/ProbeKyotoFix.tscn.
+    # Candidatii 10 / 14 / 18,5 m, 16 seed-uri ProbeRace: vezi brief §3.0.
+    import os
+    KOG_DUPA_POD_M = float(os.environ.get("KOG_DUPA_POD_M", "14"))
+    # Capatul podului in .tscn e r3(f_bridge_b) (frac_to), in metri pe curba coapta.
+    f_kog = r3(f_bridge_b) + KOG_DUPA_POD_M / BAKED_TOTAL_M
+    kog_road, kog_head = road_at_arc(f_kog)
+    # Axa lunga a figurii Lissajous (X local, rotita cu yaw in jurul lui Y) trebuie
+    # sa fie TRANSVERSALA pe sosea. Rotatia Godot cu yaw: X local -> bearing
+    # (90 - yaw) busola; transversala la mers (bearing H) = H + 90 => yaw = 180 - H.
+    kog_bearing = math.degrees(math.atan2(kog_head[0], kog_head[1])) % 360.0
+    kog_yaw = (180.0 - kog_bearing) % 180.0
     kog_g = godot((kog_road[0], kog_road[1]), kog_road[2])
-    print(f"kogarashi: frac {f_kog:.3f} axa ({kog_road[0]:.1f},{kog_road[1]:.1f}) cota {kog_road[2]:.1f}")
+    _bb = road_at_frac(f_bridge_b)
+    print(f"capat pod Tsutenkyo: frac {f_bridge_b:.4f} axa ({_bb[0]:.1f},{_bb[1]:.1f}) cota {_bb[2]:.1f}; "
+          f"kogarashi la {KOG_DUPA_POD_M:.1f} m dupa el")
+    print(f"kogarashi: busola drum {kog_bearing:.1f} deg => path_yaw_deg {kog_yaw:.1f}")
+    print(f"kogarashi: frac {f_kog:.4f} axa ({kog_road[0]:.1f},{kog_road[1]:.1f}) cota {kog_road[2]:.1f}")
+
+    # SHISHIMAI (POI H): leul care danseaza peste soseaua dreptei finale. Pe esantionul
+    # 170 al axei (frac 0,955): ultimul tronson DREPT (167-171, directia 83,7 deg, 48 m)
+    # dupa curbura de la iesirea din Togetsukyo (0,894) si inainte de arcul usor spre
+    # grila (0,966+), cu 24 m de dreapta in spatele lui pentru citirea telegrafului si
+    # ~47 m pana la primul loc din grila (0,977), deci nu atinge startul. Pozitia e pe un
+    # esantion al axei, nu la o fractie rotunjita (road_at_frac ia esantionul de DEDESUBT).
+    SHI_I = 170
+    shi_road = rs[SHI_I]
+    shi_g = godot((shi_road[0], shi_road[1]), shi_road[2])
+    shi_xf = godot_basis_row_text((SHI_I + 0.5) / n_rs, *shi_g)
+    print(f"shishimai: esantion {SHI_I} frac {SHI_I / n_rs:.4f} axa ({shi_road[0]:.1f},{shi_road[1]:.1f}) cota {shi_road[2]:.1f}")
 
 
     # --- GRUPA PADUREA IN MASA (MeshForest, scenes/props/mesh_forest.gd) ---------
@@ -909,13 +962,15 @@ zones = Array[ExtResource("mf_zone")]([{zones_txt}])
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="4_branch"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="8_channel"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="9_camzone"]
-[ext_resource type="Script" path="res://scenes/hazards/daruma_otoshi_hazard.gd" id="11_daruma"]
+[ext_resource type="Script" path="res://scenes/hazards/gion_matsuri_hazard.gd" id="11_gion"]
 [ext_resource type="Script" path="res://scenes/props/torii_tunnel.gd" id="12_torii"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_senbon.glb" id="13_senbon"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/structures/torii_large.glb" id="14_large"]
 [ext_resource type="PackedScene" path="res://assets/models/kyoto/trees/cedar_dark.glb" id="15_cedar"]
-[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/daruma_otoshi.glb" id="12_daruma_glb"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/vehicles/gion_boko.glb" id="12_gion_glb"]
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="16_devil"]
+[ext_resource type="Script" path="res://scenes/hazards/shishimai_hazard.gd" id="18_shishimai"]
+[ext_resource type="PackedScene" path="res://assets/models/kyoto/props/shishimai.glb" id="19_shishimai_glb"]
 [ext_resource type="Script" path="res://scenes/props/leaf_carpet.gd" id="16_carpet"]
 [ext_resource type="Script" path="res://scenes/props/leaf_fall.gd" id="17_leaffall"]
 [ext_resource type="Script" path="res://scenes/props/module_placer.gd" id="intc_placer"]
@@ -1031,19 +1086,19 @@ fade = 14.0
 label = "saritura de pe scena Kiyomizu"
 respawn_past_gap = true
 
-[node name="DarumaOtoshi" type="Node3D" parent="Hazarduri"]
+[node name="GionMatsuri" type="Node3D" parent="Hazarduri"]
 transform = {tub_xf}
-script = ExtResource("11_daruma")
+script = ExtResource("11_gion")
 side = 1
 road_half_width = 5.5
-model = ExtResource("12_daruma_glb")
+model = ExtResource("12_gion_glb")
 
 [node name="Kogarashi" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {kog_g[0]:.3f}, {kog_g[1]:.3f}, {kog_g[2]:.3f})
 script = ExtResource("16_devil")
 amplitude = Vector2(9, 2)
 frequency = Vector2(0.0345, 0.0213)
-path_yaw_deg = 30.0
+path_yaw_deg = {kog_yaw:.1f}
 spin_deg = 72.0
 blind_time = 0.35
 lift_m = 1.5
@@ -1054,6 +1109,12 @@ dust_amount = 30
 debris_amount = 14
 cone_alpha = 0.3
 cone_color = Color(0.66, 0.41, 0.23, 1)
+
+[node name="Shishimai" type="Node3D" parent="Hazarduri"]
+transform = {shi_xf}
+script = ExtResource("18_shishimai")
+road_half_width = 7.0
+model = ExtResource("19_shishimai_glb")
 """
     tscn += f"""
 [node name="CameraTsutenkyo" type="Area3D" parent="Hazarduri"]

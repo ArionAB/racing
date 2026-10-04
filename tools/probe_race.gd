@@ -216,15 +216,33 @@ var _force_dusk: float = -1.0
 ## `--no-torii`: scoate `ToriiTunnel` (portile, peretii colizori, padurea) din scena
 ## INAINTE de prima fizica: A/B-ul costului tunelului de torii (banda E' goala).
 var _no_torii: bool = false
+## `--train-cam`: masoara cat se vede trenul Sagano (Kyoto G2) din camera jucatorului.
+var _train_cam: bool = false
+var _train_meter: Node = null
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
 ## `--no-daruma`: scoate `DarumaOtoshiHazard` din scena (A/B-ul turnului, Kyoto).
 var _no_daruma: bool = false
+## `--no-gion`: scoate `GionMatsuriHazard` (carul de festival) din scena (A/B-ul carului).
+var _no_gion: bool = false
+## Carurile Gion Matsuri gasite in scena (goale cu --no-gion).
+var _gion: Array[GionMatsuriHazard] = []
+var _gion_throws: int = 0
 ## `--no-leaves`: scoate covorul de frunze si frunzele care cad (A/B-ul covorului, Kyoto).
 var _no_leaves: bool = false
 ## Hazardurile daruma-otoshi gasite in scena (goale cu --no-daruma).
 var _daruma: Array[DarumaOtoshiHazard] = []
 var _daruma_throws: int = 0
+## `--no-shishimai`: scoate `ShishimaiHazard` din scena (A/B-ul leului, Kyoto).
+var _no_shishimai: bool = false
+## Leii gasiti in scena (goi cu --no-shishimai). Pentru fiecare masina: cate treceri pe
+## langa leu (fractia lui, nu timp) si cate aruncari; `_shi_pilots` = aruncarile pe nume.
+var _shishimai: Array[ShishimaiHazard] = []
+var _shi_throws: int = 0
+var _shi_frac: float = -1.0
+var _shi_prev: Array[float] = []
+var _shi_passes: Array[int] = []
+var _shi_hits: Array[int] = []
 ## `--no-kogarashi`: scoate `DustDevilHazard` din scena (A/B-ul vartejului de frunze, Kyoto).
 var _no_kogarashi: bool = false
 ## Vartejurile gasite in scena (goale cu --no-kogarashi); `spins` = trecerile masinilor.
@@ -373,6 +391,10 @@ func _ready() -> void:
 			_no_tub = true
 		elif arg == "--no-daruma":
 			_no_daruma = true
+		elif arg == "--no-shishimai":
+			_no_shishimai = true
+		elif arg == "--no-gion":
+			_no_gion = true
 		elif arg == "--no-kogarashi":
 			_no_kogarashi = true
 		elif arg == "--no-leaves":
@@ -383,6 +405,8 @@ func _ready() -> void:
 			_no_turbo = true
 		elif arg == "--no-torii":
 			_no_torii = true
+		elif arg == "--train-cam":
+			_train_cam = true
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -487,7 +511,7 @@ func _start_race() -> void:
 			"stuck_t": 0.0, "stuck_reports": 0,
 			"branch_laps": 0, "branch_s": 0.0, "last_route": 0,
 			"lap_t": [], "last_total": 0.0,
-			"jump_armed": false, "jump_ok": 0, "jump_fail": 0, "tub_hits": 0, "daruma_hits": 0,
+			"jump_armed": false, "jump_ok": 0, "jump_fail": 0, "tub_hits": 0, "daruma_hits": 0, "gion_hits": 0,
 			"jump_v": [], "jump_v_taken": false,
 		})
 		car.respawned.connect(_on_respawn.bind(i))
@@ -520,6 +544,8 @@ func _start_race() -> void:
 			if ai_c != null:
 				ai_c.reads_shishi = false
 				ai_c.reads_daruma = false
+				ai_c.reads_shishimai = false
+				ai_c.reads_gion = false
 	if _force_rain >= 0:
 		_force_rain_cycle_deferred(float(_force_rain))
 	if _force_dusk >= 0.0:
@@ -531,6 +557,10 @@ func _start_race() -> void:
 ## pista fara ele (`_jump_near` ramane -1).
 func _setup_kyoto() -> void:
 	var track: Track = _race.track
+	if _train_cam:
+		_train_meter = preload("res://tools/train_cam_meter.gd").new()
+		add_child(_train_meter)
+		_train_meter.setup(_race)
 	if _no_leaves:
 		for nm in ["CovorFrunze", "FrunzeCazatoare"]:
 			var ln := track.get_node_or_null(nm)
@@ -570,6 +600,40 @@ func _setup_kyoto() -> void:
 		else:
 			_daruma.append(dz)
 			dz.car_thrown.connect(func(_c: Car) -> void: _daruma_throws += 1)
+	for n in get_tree().get_nodes_in_group(ShishimaiHazard.AI_GROUP):
+		var sh := n as ShishimaiHazard
+		if sh == null:
+			continue
+		if _no_shishimai:
+			sh.remove_from_group(ShishimaiHazard.AI_GROUP)
+			sh.get_parent().remove_child(sh)
+			sh.free()
+			print("--no-shishimai: Shishimai scos din scena")
+		else:
+			_shishimai.append(sh)
+			_shi_frac = track.frac_at(track.closest_index_global(sh.global_position, 0), 0)
+			sh.car_thrown.connect(func(c: Car) -> void:
+				_shi_throws += 1
+				var ci: int = _race.cars.find(c)
+				if ci >= 0 and ci < _shi_hits.size():
+					_shi_hits[ci] += 1)
+			print("shishimai: frac %.4f, ciclu %.1f s, tipar %.0f s" % [_shi_frac, sh.cycle_seconds, sh.pattern_seconds()])
+	for _ci in _race.cars.size():
+		_shi_prev.append(-1.0)
+		_shi_passes.append(0)
+		_shi_hits.append(0)
+	for n in get_tree().get_nodes_in_group(GionMatsuriHazard.AI_GROUP):
+		var gz := n as GionMatsuriHazard
+		if gz == null:
+			continue
+		if _no_gion:
+			gz.remove_from_group(GionMatsuriHazard.AI_GROUP)
+			gz.get_parent().remove_child(gz)
+			gz.free()
+			print("--no-gion: GionMatsuri scos din scena")
+		else:
+			_gion.append(gz)
+			gz.car_thrown.connect(func(_c: Car) -> void: _gion_throws += 1)
 	for dv in track.find_children("*", "Node3D", true, false):
 		var devil := dv as DustDevilHazard
 		if devil == null:
@@ -806,6 +870,8 @@ func _tick_race(delta: float) -> void:
 				st.tub_hits = int(st.tub_hits) + 1
 			elif _is_under(hit as Node, "DarumaOtoshiHazard"):
 				st.daruma_hits = int(st.daruma_hits) + 1
+			elif _is_under(hit as Node, "GionMatsuriHazard"):
+				st.gion_hits = int(st.gion_hits) + 1
 			elif _is_under(hit as Node, "BusHazard"):
 				# Autobuzul de pe serpentine (Machu Picchu): corp cinematic
 				# pe traseu; contactul se numara ca la minge/deviator.
@@ -816,6 +882,11 @@ func _tick_race(delta: float) -> void:
 		# pentru un hazard local (autobuzul de pe serpentine) media pe tot turul
 		# ascunde tot ce conteaza.
 		var fr_here: float = _race.track.frac_at(car.road_index, car.route)
+		if _shi_frac >= 0.0 and car.route == 0:
+			var pf: float = _shi_prev[i]
+			if pf >= 0.0 and pf < _shi_frac and fr_here >= _shi_frac and fr_here - pf < 0.05:
+				_shi_passes[i] += 1
+			_shi_prev[i] = fr_here
 		if _in_slice(fr_here):
 			st.sl_speed = float(st.sl_speed) + speed
 			st.sl_samples = int(st.sl_samples) + 1
@@ -1140,6 +1211,8 @@ func _on_wall(car: Car, impact: float, index: int) -> void:
 
 func _report_race() -> void:
 	var track: Track = _race.track
+	if _train_meter != null:
+		_train_meter.report()
 	var cars: Array[Car] = _race.cars
 	print("\n=== CURSA: %s — %.0fs, %d masini ===" % [
 		track.track_name, _elapsed, cars.size()])
@@ -1303,6 +1376,23 @@ func _report_kyoto(cars: Array[Car]) -> void:
 		print("--- daruma-otoshi: aruncari=%d contact-cadre (turn/ciocan/disc solid)=%d" % [_daruma_throws, daruma_hits])
 	elif _no_daruma:
 		print("--- daruma-otoshi: DEZACTIVAT (--no-daruma)")
+	if not _shishimai.is_empty():
+		var passes_total := 0
+		var line := ""
+		for i in cars.size():
+			passes_total += _shi_passes[i]
+			line += "  %s:%d/%d" % [cars[i].pilot_name, _shi_hits[i], _shi_passes[i]]
+		var rate := 100.0 * float(_shi_throws) / maxf(float(passes_total), 1.0)
+		print("--- shishimai: aruncari=%d pe %d treceri (%.0f%%)  (masina:aruncari/treceri)%s" % [_shi_throws, passes_total, rate, line])
+	elif _no_shishimai:
+		print("--- shishimai: DEZACTIVAT (--no-shishimai)")
+	var gion_hits := 0
+	for i in cars.size():
+		gion_hits += int(_stats[i].gion_hits)
+	if not _gion.is_empty():
+		print("--- car Gion Matsuri: aruncari=%d contact-cadre (caroserie solida)=%d" % [_gion_throws, gion_hits])
+	elif _no_gion:
+		print("--- car Gion Matsuri: DEZACTIVAT (--no-gion)")
 	if not _devils.is_empty():
 		var spins := 0
 		for dv in _devils:

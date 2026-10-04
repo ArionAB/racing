@@ -207,7 +207,7 @@ func _sol_min(x: float, z: float, r: float) -> float:
 ##   0,345-0,375, stanga 0,390-0,405 si 0,429-0,441. hw 6;
 ## - solul lateral e plat fata de drum (+-0,5 m pana la margine + 18) pe toata
 ##   valea; rapa podului incepe la 0,444 (-2) si coboara la -11 sub punte;
-## - podul (ModulePlacer) 0,449-0,466, hw 4,5; kogarashi la 0,470.
+## - podul (ModulePlacer) 0,449-0,466, hw 4,5; kogarashi la 0,4726 (17,7 m dupa pod, mutat de la 0,470 = 5,6 m; brief §3.0).
 ##
 ## Primul rand (cu corp) e la >= margine + 3,0 pe INTERIORUL curbelor si pe
 ## drepte, si >= margine + 4,5 pe exterior (regula vitezei: nimic cu corp la
@@ -412,7 +412,7 @@ func _deer() -> void:
 
 ## CAPETELE PODULUI: la intrare (inainte de rapa, sol plat) cate un felinar
 ## mare pe fiecare parte la margine + 3,0 si un altar mic pe dreapta. La
-## iesire (dupa kogarashi, 0,470) felinarele stau la margine + 5,5: dupa
+## iesire (langa kogarashi, 0,4726) felinarele stau la margine + 5,5: dupa
 ## rasucirea de 72° masina are nevoie de ~25 m (brief §3.0), deci nimic solid
 ## aproape de banda acolo. Altarul de iesire pe stanga, la margine + 8.
 func _bridge_ends() -> void:

@@ -13,11 +13,16 @@ func _process(_d: float) -> bool:
 	_f += 1
 	if _f < 3:
 		return false
-	var hz := _t.get_node("Hazarduri/DarumaOtoshi") as DarumaOtoshiHazard
+	# Din oct 2026 hazardul e carul Gion Matsuri: traiectoria = tot drumul lui de la o
+	# odihna la cealalta (capetele caroseriei incluse), nu alunecarea discului daruma.
+	var hz := _t.get_node("Hazarduri/GionMatsuri") as GionMatsuriHazard
 	var o := hz.outward()
-	var tower := hz.global_position + o * absf(hz.tower_center_x())
-	var a := Vector2(tower.x, tower.z)
-	var b := a - Vector2(o.x, o.z) * hz.slide_distance
+	var reach := hz.rest_x() + hz.cart_length * 0.5
+	var a_w := hz.global_position + o * reach
+	var b_w := hz.global_position - o * reach
+	var tower := hz.global_position + o * hz.rest_x()
+	var a := Vector2(a_w.x, a_w.z)
+	var b := Vector2(b_w.x, b_w.z)
 	var zone := _t.get_node("DecorManual/ZoneF_Gradina")
 	if "--sabotage" in OS.get_cmdline_user_args():
 		var c := zone.get_child(0) as Node3D
@@ -33,8 +38,8 @@ func _process(_d: float) -> bool:
 		if d < min_path:
 			min_path = d
 			worst = str(c.name)
-		min_tower = minf(min_tower, p.distance_to(a))
-	var lim := hz.disc_diameter * 0.5 + 1.5
+		min_tower = minf(min_tower, p.distance_to(Vector2(tower.x, tower.z)))
+	var lim := hz.cart_width * 0.5 + 1.5
 	var ok := min_path >= lim and min_tower >= 10.0
 	print("piese: %d; cea mai apropiata de traiectoria discului: %s la %.1f m (minim %.1f); de turn %.1f m (minim 10)" % [
 		zone.get_child_count(), worst, min_path, lim, min_tower])

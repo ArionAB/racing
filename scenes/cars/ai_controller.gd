@@ -328,11 +328,25 @@ var _shishi_blend: Dictionary = {}
 ## Doar pentru sonde: `false` = AI-ul ignora daruma-otoshi (garda trebuie sa prinda
 ## contacte cu discul — altfel nu e armata).
 var reads_daruma: bool = true
+## La fel pentru carul de festival (`gion_matsuri_hazard.gd`): `false` = AI-ul il ignora
+## (garda trebuie sa prinda contacte cu el). Citeste prin aceeasi cale ca daruma.
+var reads_gion: bool = true
 ## Per daruma (cheie: instance id): indexul de pista si decizia luata la intrarea in
 ## raza — {lift: bool, clear_at: float (ceas propriu, s)}.
 var _daruma_index: Dictionary = {}
 var _daruma_state: Dictionary = {}
 var _daruma_now: float = 0.0
+## Doar pentru sonde: `false` = AI-ul ignora leul shishimai (garda trebuie sa prinda
+## contacte cu el — altfel nu e armata).
+var reads_shishimai: bool = true
+## Per leu (cheie: instance id): indexul de pista, semnul lateral al lui +X local fata
+## de dreapta soselei, banda aleasa (m, + = dreapta), cat de instalata e (0..1) si
+## timpul pana la urmatoarea re-evaluare (s).
+var _shishimai_index: Dictionary = {}
+var _shishimai_sign: Dictionary = {}
+var _shishimai_lane: Dictionary = {}
+var _shishimai_blend: Dictionary = {}
+var _shishimai_timer: Dictionary = {}
 var _unstick_timer: float = 0.0
 var _unstick_reversing: bool = false
 var _unstick_steer: float = 0.0
@@ -473,6 +487,10 @@ func update(delta: float) -> void:
 	# Shishi-odoshi (Kyoto): tubul care bate peste interiorul drumului. NU se
 	# franeaza pentru el — doar trece pe banda exterioara (vezi `_shishi_line`).
 	line = _shishi_line(idx, speed, line)
+	# Shishimai (Kyoto, POI H): leul danseaza lateral peste sosea, dar nu o inchide —
+	# ramane mereu un culoar. NU se franeaza: se alege banda libera pe fereastra de
+	# sosire (vezi `_shishimai_line`).
+	line = _shishimai_line(idx, speed, line)
 	# CULOARUL UNIC are ultimul cuvant. Pe restul pistei ocolirea poate folosi
 	# toata latimea; intr-un blocaj cu o singura fanta, orice metru in afara
 	# fantei e zid, deci linia se strange inapoi in ea. Fereastra e ingusta
@@ -989,9 +1007,16 @@ const DARUMA_EXTRA_S: float = 0.2
 ## Citeste doar ce vede si un om: ciocanul tras (ceasul hazardului prin
 ## `window_rel`) si propria viteza. Intoarce plafonul de viteza (INF = niciunul).
 func _daruma_cap(idx: int, speed: float) -> float:
-	if not reads_daruma:
-		return INF
-	var nodes := get_tree().get_nodes_in_group(DarumaOtoshiHazard.AI_GROUP)
+	# Doua feluri de hazard cu ceas pe sosea citesc prin aceeasi cale: discul daruma
+	# (traverseaza intr-o secunda) si carul de festival Gion Matsuri (traverseaza incet,
+	# in ~5 s). Contractul e acelasi: `ai_decision_point`, `blocks_between`, `window_rel`,
+	# `ai_margin`. Apelurile merg prin `call`, fiindca cele doua clase nu au parinte comun
+	# (daruma ramane neatinsa).
+	var nodes: Array[Node] = []
+	if reads_daruma:
+		nodes.append_array(get_tree().get_nodes_in_group(DarumaOtoshiHazard.AI_GROUP))
+	if reads_gion:
+		nodes.append_array(get_tree().get_nodes_in_group(GionMatsuriHazard.AI_GROUP))
 	if nodes.is_empty():
 		return INF
 	var r := track.route_at(car.route)
@@ -1003,12 +1028,19 @@ func _daruma_cap(idx: int, speed: float) -> float:
 	var cap := INF
 	var cruise: float = car.max_speed * car.speed_scale
 	for node in nodes:
-		var hz := node as DarumaOtoshiHazard
+		var hz := node as Node3D
 		if hz == null:
 			continue
+		var margin: float = float(hz.get("ai_margin"))
+		# Podeaua plafonului de viteza: fiecare hazard o poate cobori (carul de festival
+		# ocupa soseaua ~4 s, nu ~1 s ca discul, deci ridicarea trebuie sa mearga mai jos).
+		var floor_frac := DARUMA_FLOOR
+		var own_floor: Variant = hz.get("ai_floor")
+		if own_floor != null:
+			floor_frac = float(own_floor)
 		var key := hz.get_instance_id()
 		if not _daruma_index.has(key):
-			_daruma_index[key] = track.closest_index_global(hz.ai_decision_point(), car.route)
+			_daruma_index[key] = track.closest_index_global(hz.call(&"ai_decision_point") as Vector3, car.route)
 		var d_idx: int = int(_daruma_index[key]) - idx
 		if d_idx < -n_pts / 2:
 			d_idx += n_pts
@@ -1023,10 +1055,10 @@ func _daruma_cap(idx: int, speed: float) -> float:
 			var eta_fast := ahead / maxf(maxf(speed, cruise * SHISHI_FAST), 10.0)
 			var eta_slow := ahead / maxf(maxf(speed * SHISHI_SLOW, cruise * SHISHI_SLOW_FLOOR), 8.0)
 			var st := {"lift": false, "clear_at": 0.0}
-			if hz.blocks_between(eta_fast, eta_slow):
-				var w := hz.window_rel(eta_fast)
-				var wait_v := ahead / maxf(w.y + hz.ai_margin + DARUMA_EXTRA_S, 0.1)
-				if wait_v >= cruise * DARUMA_FLOOR:
+			if bool(hz.call(&"blocks_between", eta_fast, eta_slow)):
+				var w: Vector2 = hz.call(&"window_rel", eta_fast)
+				var wait_v := ahead / maxf(w.y + margin + DARUMA_EXTRA_S, 0.1)
+				if wait_v >= cruise * floor_frac:
 					st["lift"] = true
 					st["clear_at"] = _daruma_now + w.y
 				if OS.get_environment("DARUMA_TRACE") == "1":
@@ -1035,11 +1067,97 @@ func _daruma_cap(idx: int, speed: float) -> float:
 		var state: Dictionary = _daruma_state[key]
 		if not state["lift"] or along < 0.0:
 			continue
-		var left: float = float(state["clear_at"]) - _daruma_now + hz.ai_margin + DARUMA_EXTRA_S
+		var left: float = float(state["clear_at"]) - _daruma_now + margin + DARUMA_EXTRA_S
 		if left <= 0.0:
 			continue
-		cap = minf(cap, maxf(along / left, cruise * DARUMA_FLOOR))
+		cap = minf(cap, maxf(along / left, cruise * floor_frac))
 	return cap
+
+
+## Shishimai (Kyoto, `shishimai_hazard.gd`): de cat de departe (m) se vede leul si pana
+## cat dupa el (m) tine decizia. La ~25 m/s, 90 m = 3,5 s: destul sa vezi dansul si,
+## in ultimele 1,4 s, ghemuirea dinaintea atacului.
+const SHISHIMAI_REACH_M: float = 90.0
+const SHISHIMAI_PASSED_M: float = 6.0
+## Cat de repede se muta linia pe banda aleasa (1/s).
+const SHISHIMAI_BLEND_RATE: float = 3.5
+## La cat timp re-evaluez banda (s): leul se misca, fereastra mea se ingusteaza.
+const SHISHIMAI_REEVAL_S: float = 0.12
+## Semilatimea masinii + eroarea de urmarire a liniei (m).
+const SHISHIMAI_CAR_HALF_M: float = 1.6
+
+## Shishimai: leul ocupa o fasie de ~3 m dintr-o sosea de 14 m si se misca dupa un
+## ritm pe care il vede si un om (dansul lateral; ghemuirea si capul intors anunta
+## atacul). Citesc doar atat: unde va fi fasia in FEREASTRA mea de sosire [rapid,
+## lent] (nu la un singur moment: `eta-cu-viteza-curenta-minte-pe-banda-cu-viraje`)
+## si aleg banda libera cea mai apropiata de linia mea. Nu franez. Atacul intra in
+## prezicere doar dupa ce telegraful lui a inceput (`center_seen_at`).
+func _shishimai_line(idx: int, speed: float, line: float) -> float:
+	if not reads_shishimai:
+		return line
+	var nodes := get_tree().get_nodes_in_group(ShishimaiHazard.AI_GROUP)
+	if nodes.is_empty():
+		return line
+	var r := track.route_at(car.route)
+	if r == null or r.count() == 0:
+		return line
+	var n_pts := r.count()
+	var bake: float = track.curve.bake_interval
+	var dt := get_physics_process_delta_time()
+	var cruise: float = car.max_speed * car.speed_scale
+	for node in nodes:
+		var hz := node as ShishimaiHazard
+		if hz == null:
+			continue
+		var key := hz.get_instance_id()
+		if not _shishimai_index.has(key):
+			var hi := track.closest_index_global(hz.ai_decision_point(), car.route)
+			_shishimai_index[key] = hi
+			var sg := signf(r.side_at(hi).dot(hz.global_transform.basis.x))
+			_shishimai_sign[key] = sg if sg != 0.0 else 1.0
+		var d_idx: int = int(_shishimai_index[key]) - idx
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := _arc_to(r, idx, d_idx, bake)
+		if along > SHISHIMAI_REACH_M or along < -SHISHIMAI_PASSED_M:
+			_shishimai_lane.erase(key)
+			_shishimai_blend.erase(key)
+			_shishimai_timer.erase(key)
+			continue
+		var hw: float = maxf(track.width_at_index(idx) if car.route == 0 			else r.half_width, 0.001)
+		var sgn: float = _shishimai_sign[key]
+		var timer: float = float(_shishimai_timer.get(key, 0.0)) - dt
+		if timer <= 0.0 or not _shishimai_lane.has(key):
+			timer = SHISHIMAI_REEVAL_S
+			# Fereastra de sosire in gabaritul leului: intru cand botul meu ajunge la
+			# nasul lui, ies cand coada mea trece de coada lui; cel mai repede = viteza
+			# de croaziera, cel mai lent = o fractie din viteza de acum.
+			var scale := hz.model_scale
+			var enter := maxf(along - (hz.hit_front * scale + 1.5), 0.0)
+			var leave := maxf(along + (hz.hit_back * scale + 1.5), 0.0)
+			var v_fast := maxf(maxf(speed, cruise * SHISHI_FAST), 10.0)
+			var v_slow := maxf(maxf(speed * SHISHI_SLOW, cruise * SHISHI_SLOW_FLOOR), 8.0)
+			var t0 := enter / v_fast
+			var t1 := leave / v_slow
+			var lane_max := LINE_MAX * hw
+			var mine := line * hw * sgn # linia mea, in cadrul leului (+X local)
+			var occ := hz.occupied_interval(t0, t1)
+			var prev: float = float(_shishimai_lane.get(key, mine))
+			# histerezis: raman pe banda aleasa cat timp ramane (macar pe jumatate) libera
+			if _shishimai_lane.has(key) and hz.clearance(prev, SHISHIMAI_CAR_HALF_M, occ) >= hz.ai_lane_margin * 0.5:
+				_shishimai_lane[key] = prev
+			else:
+				_shishimai_lane[key] = hz.ai_choose_lane(mine, SHISHIMAI_CAR_HALF_M, t0, t1, lane_max)
+			if OS.get_environment("SHISHIMAI_TRACE") == "1":
+				print("[shishimai] %s along=%.1f v=%.1f t=[%.2f, %.2f] ocupat=[%.1f, %.1f] linia=%.1f -> banda=%.1f ceas=%.2f" % [car.pilot_name, along, speed, t0, t1, occ.x, occ.y, mine, float(_shishimai_lane[key]), hz.clock()])
+		_shishimai_timer[key] = timer
+		var blend: float = move_toward(float(_shishimai_blend.get(key, 0.0)), 1.0, dt * SHISHIMAI_BLEND_RATE)
+		_shishimai_blend[key] = blend
+		var target := clampf(float(_shishimai_lane[key]) * sgn / hw, -LINE_MAX, LINE_MAX)
+		return lerpf(line, target, blend)
+	return line
 
 
 func _avoid_line(idx: int, speed: float, line: float, keep_off: float) -> float:

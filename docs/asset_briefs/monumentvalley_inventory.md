@@ -183,7 +183,7 @@ mari dedesubt).
 | butte_small_c | etaje | 2-3 blocuri care se strang, cel de sus cubic | 3 etaje (6 / 4,4 / 2,9 m), fiecare cu coloane, decalate spre stanga | OK; blocul de sus mai ingust, benzile orizontale (praguri) mai regulate |
 | rock_fin | arip | tuna ascutita, fete in V, umar in dreapta | turla din 6 segmente + 2 coaste verticale + umar de 7,5 m | OK; mai neted decat desenul |
 | hoodoo | coloana | 3 segmente cu gat, cap de piatra | 4 segmente (cu burta la ~3 m), gat 1,6 m | OK |
-| | cap | bolovan poliedric rotunjit, maro-bej | bolovan cu fete late, SAND_LIGHT (galben mai viu) | ABATERE: citeste ca bloc turtit, nu poliedru rotunjit; 3 runde |
+| | cap | bolovan poliedric rotunjit, maro-bej | bolovan cu fete late de ~2,2 x 2 x 1,3 m (rev. dupa verdict), sus ROCK_LIGHT 3, laturi SAND_SHADOW 2 | culoare si slot corectate (maro-bej); forma ramane mai blocata decat poliedrul rotunjit, ~1,5x mai lat decat gatul |
 | talus_a / b | grup | bolovani colturosi, 1 central inalt, mici in fata | 7 / 10 bolovani cu varf (peak), fete de sus pe LARCH_RUST | OK; fatetele sunt mai putine si mai plate decat pe planșă |
 | horizon_mesas | siluete | mese late, turn inalt, turle, benzi palide in spate | 7 noduri: masa, turn pe soclu, masa cu umar, tron cu turn, 3 turle, 2 benzi | OK ca siluete; fara aerul albastru de departare (il da ceata), fara contraforturi interne |
 

@@ -291,8 +291,9 @@ def build_hoodoo():
 
     - COLOANA: 3 segmente cu fete late teșite (octogon), baza groasa (3 m) care
       se ingusteaza la ~2,2 m, apoi un GAT subtire (1,6 m) la ~5,2 m.
-    - CAP: un bolovan de piatra mult mai lat decat gatul (3,4 m x 3,1 m x 1,7 m),
-      colturos, SAND_LIGHT (palid, ca pe decupare), sta pe gat, nu e fuzionat.
+    - CAP: bolovan poliedric rotunjit (~10-14 fete), putin mai lat decat gatul
+      (~1,6 x 1,4 x 1,3 m), maro-bej: fetele de sus ROCK_LIGHT 3, cele din
+      umbra SAND_SHADOW 2 (decizia coordonatorului, nu SAND_LIGHT).
     - CON MIC: la baza, cu coaste radiale, ~7 bolovani 0,3-0,7 m, ~4 mici.
     Cote: 7 m, h/l ~2,3, origine la baza.
     """
@@ -303,8 +304,8 @@ def build_hoodoo():
             (5.0, 0.8, 0.75, 5.6, 0.7, 0.65)]
     tapered_spire(rock, 0.0, 0.0, segs, ROCK, ROCK_SHADE, seed=111)
     cap = Builder()
-    faceted_rock(cap, (0.0, 0.0, 5.35), (3.6, 3.4, 2.1), (CAP, CAP), seed=112,
-                 jag=0.14, flat=0.0, peak=0.25, foot=0.3, tilt=0.1)
+    faceted_rock(cap, (0.0, 0.0, 5.45), (3.0, 2.7, 1.55), (SAND_SHADOW, ROCK_LIGHT),
+                 seed=112, jag=0.22, flat=0.0, peak=0.4, foot=0.35, tilt=0.2)
     scree = Builder()
     D, HT = 1.2, 0.9
     scree_ribs(scree, 1.5, 1.4, D, HT, [SCREE_A, SCREE_B], seed=113, pts=24,

@@ -560,11 +560,25 @@ static func _add_shrub_clump(parent: Node3D, pos: Vector3,
 	return placed
 
 
+## Cat de departe de marginea LOCALA a asfaltului incepe decorul Monument
+## Valley: raza celei mai late piese mici (Fan_A scalat ~1.1) plus o margine.
+const MV_ROAD_CLEAR_M: float = 1.4
+
+
 static func _place_monumentvalley_prop(parent: Node3D, spec: TrackDecorSpec,
 		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
 		satellite: bool, sampler: TrackSideSampler, solids: Array[Vector3],
 		blockers: Array) -> void:
 	var pos := spec.position
+	# Marginea benzii se calculeaza in amonte cu `sampler.half_width()`, adica
+	# MEDIA latimii. Pe Track19 G are 8 m fata de media de 7, deci sateliti si
+	# smocuri ajungeau cu pana la 0.60 m peste asfalt (probe_decor_overlap, 8
+	# piese). Aici se masoara fata de latimea LOCALA. Garda sta doar pe ramura
+	# asta: mutata in `_place_satellites` ar schimba consumul de RNG si ar
+	# reaseza decorul validat pe toate pistele cu `custom_width_segments`.
+	if sampler != null and sampler.clearance_at(pos) \
+			< sampler.half_width_at(spec.index) + MV_ROAD_CLEAR_M:
+		return
 	match band["name"]:
 		"hug":
 			# Lipit de asfalt: pietre mici (solide, cu umarul de 2 m) si smocuri.

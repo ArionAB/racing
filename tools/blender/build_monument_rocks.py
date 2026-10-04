@@ -52,12 +52,11 @@ def build_west_mitten():
     3 m de corp pe -X, fusta pana la raza ~22 m si <= 5 m, origine la baza
     turnului.
     """
-    HX, HY = 12.0, 6.5
+    HX, HY = 11.6, 6.2
     TOP = 29.1                       # coloanele; calota 28.6..29.6 + 29.6..30.0
-    heights = [29.1, 28.9, 29.1, 29.0, 28.8, 29.1, 29.0, 28.9]
 
     rock = Builder()
-    cols = wall_columns(rock, HX, HY, heights, ROCK, ROCK_SHADE, seed=11)
+    cols = wall_columns(rock, HX, HY, TOP, ROCK, ROCK_SHADE, seed=11)
 
     # degetul (centru x = -18.2, margine dreapta -15.3 => 3,3 m de corp)
     tiers = [(0.0, 2.9, 2.6, 8.0, 2.5, 2.3),
@@ -74,13 +73,13 @@ def build_west_mitten():
 
     # grohotisul: coaste radiale
     scree = Builder()
-    D, HT = 9.8, 3.9
+    D, HT = 9.8, 6.8
     PTS = 56
     scree_ribs(scree, HX, HY, D, HT, [SCREE_A, SCREE_B], seed=2, pts=PTS)
     rnd = _lcg(9)
     n_big = 0
     tries = 0
-    while n_big < 70 and tries < 4000:
+    while n_big < 90 and tries < 4000:
         tries += 1
         i = 2 * int(rnd() * PTS / 2)                  # unghi de vale (indice par)
         th = 2 * math.pi * (i + (rnd() - 0.5) * 0.8) / PTS
@@ -90,7 +89,7 @@ def build_west_mitten():
             continue
         sz = 1.2 + rnd() * 2.2
         z = scree_height(x, y, HX, HY, D, HT, pts=PTS)
-        if z + sz * 0.75 > 4.9:
+        if z + sz * 0.75 > 8.0:
             continue
         boulder(scree, (x, y, z + sz * 0.12), (sz * 1.2, sz, sz * 0.8),
                 SCREE_A if n_big % 2 == 0 else SCREE_B, seed=100 + n_big)

@@ -122,13 +122,13 @@ memoria `cota-de-contract-se-masoara-ca-gol`).
 **Scara e decizie, nu defect** (brief §2.0): Mittens reali au ~300 m; aici au
 45 m, ca să intre întregi în cadru de pe coamă. În pistă, conul mare de
 grohotiș e **teren** (`TerrainPeak`, rază 28 m, ~15 m înalt). GLB-ul aduce
-**turnul plus o fustă de grohotiș de 0–5 m** cu bolovani, care ascunde
+**turnul plus o fustă de grohotiș de 0–8 m (inaltimea maxima lângă perete)** cu bolovani, care ascunde
 îmbinarea cu terenul. **Originea e la baza turnului** (pe cota la care
 `TerrainPeak` se termină), nu la baza conului.
 
 | fișier | cote | h/l | contract |
 |---|---|---:|---|
-| `rocks/west_mitten.glb` **(pilot)** | turn **30 m** înalt, amprentă ~24 × 13 m; „degetul” **26 m**, lat 4–5 m, la **3 m** de corp pe −X; fusta de grohotiș până la raza ~22 m, înaltă ≤ 5 m | ~1,1 (turn) | corp cu ~10–14 coloane verticale pe fața lungă, calotă în 2 trepte; **degetul e o piesă separată, cu gol de cer între ea și corp** (silueta e reperul pistei: fără gol, testul de 3 secunde pică). Noduri `Mitten_Rock`, `Mitten_Scree`, `Mitten_Cap` |
+| `rocks/west_mitten.glb` **(pilot)** | turn **30 m** înalt, amprentă ~24 × 13 m; „degetul” **26 m**, lat 4–5 m, la **3 m** de corp pe −X; fusta de grohotiș până la raza ~22 m, înaltă ≤ 8 m lângă perete, scăzând la 0 la margine | ~1,1 (turn) | corp cu ~24 coloane late (2–4 m) pe tot conturul (patru fețe, colțuri rotunjite), peretele se îngustează ~15% spre vârf, calotă în 2 trepte; **degetul e o piesă separată, cu gol de cer între ea și corp** (silueta e reperul pistei: fără gol, testul de 3 secunde pică). Noduri `Mitten_Rock`, `Mitten_Scree`, `Mitten_Cap` |
 | `rocks/east_mitten.glb` | turn **27 m**, amprentă ~22 × 12 m; deget **23 m** pe **+X** | ~1,1 | oglinda lui West Mitten, cu altă împărțire a coloanelor (să nu fie copie) |
 | `rocks/merrick_butte.glb` | turn **24 m**, amprentă ~30 × 18 m, fără deget | ~0,8 | bloc lat, calotă plată în trepte, 2–3 contraforturi pe fața lungă |
 | `rocks/mesa_wall_module.glb` | **12 m** lung (Y), **14 m** înalt, 6 m adânc, grohotiș la picior ≤ 3 m | ~1,2 | perete de masă înlănțuibil: **capete plane identice la ±6 m pe Y**, 4–5 coloane, calota continuă. Pentru trecătoarea E și cornișa F |

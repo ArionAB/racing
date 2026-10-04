@@ -86,73 +86,116 @@ def chamfer(poly, c):
     return out
 
 
-def wall_columns(b, half_x, half_y, heights, lit, shade, seed=0, flare_h=5.8,
-                 widths=None, jut=0.5, foot=1.4, draft=0.97, vfront=0.5,
-                 tier=0.07, chamfer_c=0.45):
-    """Perete de coloane late pe latimea [-half_x, +half_x] (X), adancime
-    +-half_y, cu varful PLAN (variatia de inaltime a coloanelor e a
-    caller-ului, <= 0,5 m, calota o acopera).
+def _perimeter(half_x, half_y, n=4.0, samples=400):
+    """Conturul superelipsei (half_x, half_y) esantionat dens, cu lungimea
+    cumulata: intoarce (puncte, lungimi_cumulate, lungime_totala). Parcurs
+    ANTIORAR."""
+    pts = [_super_pt(half_x, half_y, 2 * math.pi * i / samples - math.pi * 0.5, n)
+           for i in range(samples + 1)]
+    cum = [0.0]
+    for i in range(1, len(pts)):
+        cum.append(cum[-1] + math.hypot(pts[i][0] - pts[i - 1][0],
+                                        pts[i][1] - pts[i - 1][1]))
+    return pts, cum, cum[-1]
 
-    heights   lista de inaltimi, una per coloana (numarul coloanelor = len)
-    widths    latimi relative (implicit 2,4..3,6, normalizate la 2*half_x)
-    jut       cat variaza iesirea frontului/spatelui per coloana (+-)
-    foot      cat iese talpa evazata (z 0..flare_h) pe Y fata de coloana
-    tier      retragerea pe Y a fiecarui segment (3 segmente, praguri la ~1/3
-              si ~2/3 din inaltime), ca fractie din semi-adancime
+
+def _at(pts, cum, s):
+    """Punctul de pe contur la distanta cumulata `s`."""
+    lo, hi = 0, len(cum) - 1
+    while hi - lo > 1:
+        mid = (lo + hi) // 2
+        if cum[mid] <= s:
+            lo = mid
+        else:
+            hi = mid
+    t = (s - cum[lo]) / max(cum[hi] - cum[lo], 1e-9)
+    return (pts[lo][0] + (pts[hi][0] - pts[lo][0]) * t,
+            pts[lo][1] + (pts[hi][1] - pts[lo][1]) * t)
+
+
+def wall_columns(b, half_x, half_y, h, lit, shade, seed=0, flare_h=5.8,
+                 foot=1.4, vfront=0.5, taper=0.10, ledges=(0.0, 0.03, 0.05),
+                 chamfer_c=0.45, wmin=2.0, wmax=4.0, recess=(0.8, 1.2),
+                 prot=0.6, h_var=0.3):
+    """Perete din coloane pe TOT conturul (patru fete, colturi rotunjite).
+
+    Planul e o superelipsa rotunjita (half_x, half_y); conturul se imparte in
+    coloane late de `wmin`..`wmax` m (lungime de arc), fiecare un sector cu
+    marginea exterioara in V. Fiecare coloana are iesirea ei: unele ies cu
+    pana la `prot`, ~30% stau in recese de `recess` m (goluri intunecate
+    intre coloane). Coloanele inchid colturile (2-3 pe colt, din arc).
+
+    h        inaltimea (fiecare coloana: h - rnd*h_var)
+    taper    cat se ingusteaza peretele pe toata inaltimea (ambele axe, fractie)
+    ledges   retragerea (fractie din scara) a segmentelor 1/2/3: praguri la ~1/3
+             si ~2/3 din inaltime
+    foot     cat iese talpa evazata (ultimele `flare_h` m), radial
     chamfer_c teseala verticala a muchiilor (2 fatete pe colt)
 
-    Intoarce lista de dict {x0, x1, h, poly} (poly = conturul 5-puncte al
-    capului coloanei, in ordinea [spate-st, spate-dr, fata-dr, V, fata-st])."""
+    Intoarce lista de dict {h, outer} (outer = conturul exterior al capului
+    coloanei, puncte antiorar, pentru calota)."""
     rnd = _lcg(seed)
-    n = len(heights)
-    if widths is None:
-        widths = [2.4 + 1.2 * rnd() for _ in range(n)]
-    tot = float(sum(widths))
-    xs = [-half_x]
-    for w in widths:
-        xs.append(xs[-1] + w / tot * 2 * half_x)
-    cols = []
+    pts, cum, L = _perimeter(half_x, half_y)
+    ws = []
+    while sum(ws) < L:
+        ws.append(wmin + (wmax - wmin) * rnd())
+    k = L / sum(ws)
+    ws = [w * k for w in ws]
     sl = shade_by_x(lit, shade)
-    for i in range(n):
-        x0, x1 = xs[i], xs[i + 1]
-        xm = x0 + (x1 - x0) * (0.35 + 0.3 * rnd())
-        yf0 = half_y + (rnd() - 0.5) * 2 * jut
-        yf1 = half_y + (rnd() - 0.5) * 2 * jut
-        yb0 = -half_y + (rnd() - 0.5) * 2 * jut
-        yb1 = -half_y + (rnd() - 0.5) * 2 * jut
-        ym = max(yf0, yf1) + vfront * (0.6 + 0.8 * rnd())
-        bot = [(x0, yb0), (x1, yb1), (x1, yf1), (xm, ym), (x0, yf0)]
-        h = heights[i]
-        b1 = h * (0.30 + 0.08 * rnd())
-        b2 = h * (0.62 + 0.08 * rnd())
-        zs = [0.0, b1, b2, h]
-        sc = [1.0, 1.0 - tier * (0.6 + 0.6 * rnd()),
-              1.0 - 2 * tier * (0.6 + 0.6 * rnd())]
-        top = bot
-        for k in range(3):
-            sb = [(x, y * sc[k]) for (x, y) in bot]
-            st = sb if k < 2 else [(x, y * sc[k] * draft) for (x, y) in bot]
-            loft(b, chamfer(sb, chamfer_c), zs[k], chamfer(st, chamfer_c),
-                 zs[k + 1], sl)
-            top = st
-        # talpa evazata (ultimele ~20%): iese in Y, nu in X (nu intra in vecini)
-        fh = min(flare_h * (0.85 + 0.3 * rnd()), h * 0.25)
-        f0 = [(x, y + math.copysign(foot, y)) for (x, y) in bot]
-        f1 = [(x, y + math.copysign(foot * 0.08, y)) for (x, y) in bot]
-        loft(b, chamfer(f0, chamfer_c), 0.0, chamfer(f1, chamfer_c), fh, sl)
-        cols.append(dict(x0=x0, x1=x1, h=h, poly=top))
+
+    def out_dir(p):
+        d = Vector((p[0] / (half_x * half_x), p[1] / (half_y * half_y)))
+        return d.normalized() if d.length > 0 else Vector((1, 0))
+
+    def at(s, off):
+        p = _at(pts, cum, s % L)
+        d = out_dir(p)
+        return (p[0] + d.x * off, p[1] + d.y * off)
+
+    cols = []
+    s0 = 0.0
+    for w in ws:
+        s1 = s0 + w
+        sm = s0 + w * (0.35 + 0.3 * rnd())
+        if rnd() < 0.3:
+            off = -(recess[0] + (recess[1] - recess[0]) * rnd())
+        else:
+            off = -0.2 + (prot + 0.2) * rnd()
+        vf = vfront * (0.6 + 0.8 * rnd())
+        hc = h - rnd() * h_var
+
+        def plan(extra, scale):
+            o0, om, o1 = at(s0, off + extra), at(sm, off + extra + vf), at(s1, off + extra)
+            i1 = at(s1, -half_x * 0.45)
+            i0 = at(s0, -half_x * 0.45)
+            return [(p[0] * scale, p[1] * scale) for p in (o0, om, o1, i1, i0)]
+        b1 = hc * (0.30 + 0.08 * rnd())
+        b2 = hc * (0.62 + 0.08 * rnd())
+        zs = [0.0, b1, b2, hc]
+        led = [ledges[0], ledges[1] * (0.6 + 0.8 * rnd()), ledges[2] * (0.6 + 0.8 * rnd())]
+        top = None
+        for kk in range(3):
+            sb = (1.0 - taper * zs[kk] / hc) * (1.0 - led[kk])
+            st = (1.0 - taper * zs[kk + 1] / hc) * (1.0 - led[kk])
+            loft(b, chamfer(plan(0.0, sb), chamfer_c), zs[kk],
+                 chamfer(plan(0.0, st), chamfer_c), zs[kk + 1], sl)
+            top = plan(0.0, st)
+        # talpa evazata (ultimii ~5-6 m): iese radial
+        fh = min(flare_h * (0.85 + 0.3 * rnd()), hc * 0.25)
+        loft(b, chamfer(plan(foot, 1.0), chamfer_c), 0.0,
+             chamfer(plan(foot * 0.08, 1.0), chamfer_c), fh, sl)
+        cols.append(dict(h=hc, outer=top[:3]))
+        s0 = s1
     return cols
 
 
 def cap_slab(b, cols, slot, z0, z1, ox, oy):
-    """Calota: O SINGURA placa care urmareste conturul coloanelor (lant spate
-    st->dr, apoi fata dr->st), largita cu `ox`/`oy` m (negativ = retrasa), de la
-    z0 la z1. Fata de sus e un n-gon concav, triangulat aici."""
+    """Calota: O SINGURA placa care urmareste conturul exterior al coloanelor
+    (antiorar), largita cu `ox`/`oy` m (negativ = retrasa), de la z0 la z1.
+    Fata de sus e un n-gon concav, triangulat aici."""
     pts = []
     for c in cols:
-        pts += [c["poly"][0], c["poly"][1]]
-    for c in reversed(cols):
-        pts += [c["poly"][2], c["poly"][3], c["poly"][4]]
+        pts += list(c["outer"])
     hx = max(abs(p[0]) for p in pts)
     hy = max(abs(p[1]) for p in pts)
     pts = [(p[0] * (1 + ox / hx), p[1] * (1 + oy / hy)) for p in pts]

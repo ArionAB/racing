@@ -874,6 +874,15 @@ const CLASS_TEXTURES := {
 	# Dunele/Okinawa, `macchia` pe Okinawa/Stromboli).
 	"machiya_wood": "res://assets/textures/classes/wood.png",
 	"moss": "res://assets/textures/classes/macchia.png",
+	# Valul de materiale Kyoto (docs/track_briefs/kyoto_materiale.md): trei clase
+	# NOI pe dale deja in VRAM, ZERO imagini noi. Clase separate, nu tente pe
+	# `roof_tiles`/`bark`/`pine_needles`, din acelasi motiv ca machiya_wood.
+	#   kawara        - acoperisurile (machiya, temple, pagode, clopotnita)
+	#   bark_kyoto    - trunchiurile de arțar, ginkgo, pin niwaki
+	#   cedar_needles - coroana cedrilor (padurea Inari) si a pinilor niwaki
+	"kawara": "res://assets/textures/classes/roof_tiles.png",
+	"bark_kyoto": "res://assets/textures/classes/bark.png",
+	"cedar_needles": "res://assets/textures/classes/pine_needles.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -1122,6 +1131,19 @@ const CLASS_TINT := {
 	"machiya_wood": Color(0.6171, 0.5707, 0.5841),
 	# Muschi (63, 122, 60) pe dala `macchia` (86.7, 122.6, 73.3), NERIDICATA.
 	"moss": Color(0.7520, 0.9954, 0.8392),
+	# Valul de materiale Kyoto: aceeasi bisectie in spatiu liniar (verificata:
+	# reproduce exact machiya_wood de mai sus). Tintele sunt sloturile GLB-urilor.
+	# Kawara: VOLCANIC_BLACK 20 (85, 83, 90) pe dala `roof_tiles` (154.4, 113.4,
+	# 82.1). B atinge plafonul (82.1 din 90): rezultatul e gri neutru, nu
+	# albastrui. Prima versiune tintea media pe arie cu cei 15% de LOG_DARK 28
+	# (83.4, 78.5, 82.2) si iesea MOV pe captura (R > G); slotul 28 nu e umbrire,
+	# e coama si streasina (vezi CLASSES_BY_MODEL), deci nu intra in medie.
+	"kawara": Color(0.5653, 0.7481, 1.0),
+	# Trunchiuri: WOOD_WEATHERED 9 (131, 92, 52) pe dala `bark` (171.7, 140.7, 107.7).
+	"bark_kyoto": Color(0.7690, 0.6680, 0.5173),
+	# Cedri/pini: TROPICAL_GREEN 21 (63, 122, 60) pe dala `pine_needles`
+	# (103.1, 131.4, 67.9).
+	"cedar_needles": Color(0.6386, 0.9317, 0.8979),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1495,6 +1517,12 @@ const CLASS_TRIPLANAR_SCALE := {
 	"bamboo_lime": 0.25,
 	# Aceeasi scara ca dala-sursa (`wood` 0.7, `macchia` 1.4).
 	"machiya_wood": 0.7,
+	# Kawara: dala are ~26 de coloane de tigla pe latime. La 0.15 o repetitie
+	# acopera 6.7 m, deci coloana ~0.26 m: tigla de jucarie, citita la 10-30 m.
+	"kawara": 0.15,
+	# Aceeasi scara ca dalele-sursa (`bark` 0.77, `pine_needles` 0.6).
+	"bark_kyoto": 0.77,
+	"cedar_needles": 0.3,
 	"moss": 1.4,
 }
 

@@ -7,11 +7,10 @@ sus. Functiile de aici le fac pe toate trei:
 
   wall_columns   perete din coloane verticale late de 1-3 m, fiecare cu inaltime
                  si iesire proprie, frontul in V (doua fatete), talpa evazata
-  cap_steps      calota palida in trepte, pe coloanele inalte
-  scree_skirt    fusta de grohotis: terase concentrice, riser vertical, fata de
-                 sus usor inclinata pe puncte alternante (caneluri radiale)
+  cap_slab       calota palida: o placa continua pe conturul coloanelor
+  scree_ribs     fusta de grohotis cu coaste radiale + 2 praguri slabe
   boulder        bolovan colturos (icosfera jitterata)
-  spire          deget/turla: coloane cu inaltimi diferite, varf ingustat
+  tapered_spire  deget/turla in segmente cu praguri, varf bont
   to_obj         bmesh -> obiect FARA recalc de normale (infasurarea e a noastra)
 
 Se incarca cu exec, dupa dio_lib (vezi build_monument_*.py). Axe: X latime,
@@ -68,23 +67,46 @@ def shade_by_x(lit, shade, thr=-0.35):
     return lambda n: shade if n.x < thr else lit
 
 
-def wall_columns(b, half_x, half_y, heights, lit, shade, seed=0, flare_h=6.0,
-                 widths=None, jut=0.7, foot=0.8, draft=0.96, vfront=0.5, tier=0.035):
-    """Perete de coloane pe latimea [-half_x, +half_x] (X), adancime +-half_y.
+def chamfer(poly, c):
+    """Teseste fiecare colt al unui contur 2D antiorar: fiecare varf devine 3
+    puncte (inceput de teseala, mijloc impins spre colt, sfarsit), deci 2
+    fatete pe colt. `c` = cat se taie pe fiecare latura (cel mult 40% din ea)."""
+    n = len(poly)
+    out = []
+    for i in range(n):
+        P = Vector(poly[i])
+        e1 = Vector(poly[i - 1]) - P
+        e2 = Vector(poly[(i + 1) % n]) - P
+        l1, l2 = e1.length or 1.0, e2.length or 1.0
+        a = P + e1 / l1 * min(c, l1 * 0.4)
+        bp = P + e2 / l2 * min(c, l2 * 0.4)
+        m = (a + bp) * 0.5
+        m = m + (P - m) * 0.5
+        out += [(a.x, a.y), (m.x, m.y), (bp.x, bp.y)]
+    return out
+
+
+def wall_columns(b, half_x, half_y, heights, lit, shade, seed=0, flare_h=5.8,
+                 widths=None, jut=0.5, foot=1.4, draft=0.97, vfront=0.5,
+                 tier=0.07, chamfer_c=0.45):
+    """Perete de coloane late pe latimea [-half_x, +half_x] (X), adancime
+    +-half_y, cu varful PLAN (variatia de inaltime a coloanelor e a
+    caller-ului, <= 0,5 m, calota o acopera).
 
     heights   lista de inaltimi, una per coloana (numarul coloanelor = len)
-    widths    latimi relative (implicit aleatoare 1.4..3.0, normalizate la
-              2*half_x)
+    widths    latimi relative (implicit 2,4..3,6, normalizate la 2*half_x)
     jut       cat variaza iesirea frontului/spatelui per coloana (+-)
-    foot      cat iese talpa evazata (z 0..flare_h) fata de coloana, doar pe Y
-    draft     factorul pe Y al capului coloanei (peretele se ingusteaza usor)
-    vfront    cat iese varful V-ului de pe fata fata de colturi
+    foot      cat iese talpa evazata (z 0..flare_h) pe Y fata de coloana
+    tier      retragerea pe Y a fiecarui segment (3 segmente, praguri la ~1/3
+              si ~2/3 din inaltime), ca fractie din semi-adancime
+    chamfer_c teseala verticala a muchiilor (2 fatete pe colt)
 
-    Intoarce lista de dict {x0, x1, h, poly} pentru calota."""
+    Intoarce lista de dict {x0, x1, h, poly} (poly = conturul 5-puncte al
+    capului coloanei, in ordinea [spate-st, spate-dr, fata-dr, V, fata-st])."""
     rnd = _lcg(seed)
     n = len(heights)
     if widths is None:
-        widths = [1.4 + 1.6 * rnd() for _ in range(n)]
+        widths = [2.4 + 1.2 * rnd() for _ in range(n)]
     tot = float(sum(widths))
     xs = [-half_x]
     for w in widths:
@@ -101,56 +123,48 @@ def wall_columns(b, half_x, half_y, heights, lit, shade, seed=0, flare_h=6.0,
         ym = max(yf0, yf1) + vfront * (0.6 + 0.8 * rnd())
         bot = [(x0, yb0), (x1, yb1), (x1, yf1), (xm, ym), (x0, yf0)]
         h = heights[i]
-        # TREPTE de perete: 3 segmente suprapuse, fiecare mai tras pe Y decat cel
-        # de jos (prag/ledge vizibil, ca sirurile de roca din decupare)
-        b1 = h * (0.36 + 0.14 * rnd())
-        b2 = h * (0.66 + 0.14 * rnd())
+        b1 = h * (0.30 + 0.08 * rnd())
+        b2 = h * (0.62 + 0.08 * rnd())
         zs = [0.0, b1, b2, h]
-        sc = [1.0, 1.0 - tier * (0.5 + rnd()), 1.0 - 2 * tier * (0.5 + rnd())]
-        top = None
+        sc = [1.0, 1.0 - tier * (0.6 + 0.6 * rnd()),
+              1.0 - 2 * tier * (0.6 + 0.6 * rnd())]
+        top = bot
         for k in range(3):
             sb = [(x, y * sc[k]) for (x, y) in bot]
             st = sb if k < 2 else [(x, y * sc[k] * draft) for (x, y) in bot]
-            loft(b, sb, zs[k], st, zs[k + 1], sl)
+            loft(b, chamfer(sb, chamfer_c), zs[k], chamfer(st, chamfer_c),
+                 zs[k + 1], sl)
             top = st
-        # talpa evazata: iese in Y, nu in X (nu intra in vecini)
-        fh = min(flare_h * (0.7 + 0.6 * rnd()), h * 0.4)
-        bot2 = [(x0, yb0 - foot), (x1, yb1 - foot), (x1, yf1 + foot),
-                (xm, ym + foot), (x0, yf0 + foot)]
-        top2 = [(x0, yb0 - foot * 0.2), (x1, yb1 - foot * 0.2),
-                (x1, yf1 + foot * 0.2), (xm, ym + foot * 0.2),
-                (x0, yf0 + foot * 0.2)]
-        loft(b, bot2, 0.0, top2, fh, sl)
+        # talpa evazata (ultimele ~20%): iese in Y, nu in X (nu intra in vecini)
+        fh = min(flare_h * (0.85 + 0.3 * rnd()), h * 0.25)
+        f0 = [(x, y + math.copysign(foot, y)) for (x, y) in bot]
+        f1 = [(x, y + math.copysign(foot * 0.08, y)) for (x, y) in bot]
+        loft(b, chamfer(f0, chamfer_c), 0.0, chamfer(f1, chamfer_c), fh, sl)
         cols.append(dict(x0=x0, x1=x1, h=h, poly=top))
     return cols
 
 
-def cap_steps(b, cols, slot, top_h, t1=0.5, t2=0.4, inset=0.18, inset2=0.9,
-              every=2):
-    """Calota palida in doua trepte pe coloanele care ajung la `top_h`.
-    Treapta 1 (`t1`) pe fiecare, treapta 2 (`t2`, mai ingusta) pe fiecare a
-    `every`-a. Intoarce numarul de coloane acoperite."""
-    k = 0
+def cap_slab(b, cols, slot, z0, z1, ox, oy):
+    """Calota: O SINGURA placa care urmareste conturul coloanelor (lant spate
+    st->dr, apoi fata dr->st), largita cu `ox`/`oy` m (negativ = retrasa), de la
+    z0 la z1. Fata de sus e un n-gon concav, triangulat aici."""
+    pts = []
     for c in cols:
-        if c["h"] < top_h - 1e-6:
+        pts += [c["poly"][0], c["poly"][1]]
+    for c in reversed(cols):
+        pts += [c["poly"][2], c["poly"][3], c["poly"][4]]
+    hx = max(abs(p[0]) for p in pts)
+    hy = max(abs(p[1]) for p in pts)
+    pts = [(p[0] * (1 + ox / hx), p[1] * (1 + oy / hy)) for p in pts]
+    n = len(pts)
+    for i in range(n):
+        j = (i + 1) % n
+        if abs(pts[i][0] - pts[j][0]) + abs(pts[i][1] - pts[j][1]) < 1e-6:
             continue
-        cx = sum(p[0] for p in c["poly"]) / len(c["poly"])
-        cy = sum(p[1] for p in c["poly"]) / len(c["poly"])
-
-        def shrink(poly, d):
-            out = []
-            for (x, y) in poly:
-                vx, vy = cx - x, cy - y
-                L = math.hypot(vx, vy) or 1.0
-                out.append((x + vx / L * d, y + vy / L * d))
-            return out
-        p1 = shrink(c["poly"], inset)
-        loft(b, p1, top_h, p1, top_h + t1, slot)
-        if k % every == 0:
-            p2 = shrink(c["poly"], inset2)
-            loft(b, p2, top_h + t1, p2, top_h + t1 + t2, slot)
-        k += 1
-    return k
+        _face(b, [(pts[i][0], pts[i][1], z0), (pts[j][0], pts[j][1], z0),
+                  (pts[j][0], pts[j][1], z1), (pts[i][0], pts[i][1], z1)], slot)
+    f = _face(b, [(p[0], p[1], z1) for p in pts], slot)
+    bmesh.ops.triangulate(b.bm, faces=[f])
 
 
 def _super_pt(a, bb, th, n=3.0):
@@ -172,64 +186,81 @@ def skirt_d(x, y, half_x, half_y, n=3.0):
     return (lo + hi) * 0.5
 
 
-def skirt_levels(D, steps, h_top, inner):
-    ds = [D - (D - inner) * j / max(steps - 1, 1) for j in range(steps)]
-    hs = [h_top * (j + 1) / steps for j in range(steps)]
-    return ds, hs
+# inele (s, nr. praguri): s=0 exterior (pe sol), s=1 langa perete. Doua praguri
+# concentrice slabe = inelele duble de la 0,45 si 0,78 (riser vertical).
+SKIRT_RINGS = [(0.0, 0), (0.12, 0), (0.25, 0), (0.38, 0), (0.45, 0), (0.45, 1),
+               (0.58, 1), (0.70, 1), (0.78, 1), (0.78, 2), (0.90, 2), (1.0, 2)]
 
 
-def scree_skirt(b, half_x, half_y, D, steps, h_top, slots, seed=0, pts=44,
-                tilt=0.22, inner=1.2):
-    """Fusta de grohotis in `steps` terase, de la d=D (exterior) la d=inner.
+def _rib_z(s, cnt, crest, h_top, ledge, gully, power=1.25):
+    fc = 1.0 if crest else gully
+    fcr = 1.0 - (1.0 - fc) * (1.0 - s * s)
+    return (h_top * s ** power + ledge * cnt) * fcr
 
-    Terasa j are inaltimea h_top*(j+1)/steps. Contururile sunt superelipse
-    (half_x+d, half_y+d); punctele alterneaza +-`tilt` pe Z si +-0.25 m in d,
-    deci fetele de sus sunt inclinate si apar caneluri radiale. Slotul
-    alterneaza pe terasa. Ultima coroana se opreste sub perete (ascunsa)."""
+
+def scree_ribs(b, half_x, half_y, D, h_top, slots, seed=0, pts=56, inner=1.2,
+               ledge=0.3, gully=0.55):
+    """Fusta de grohotis cu COASTE RADIALE (ca faldurile unei fuste): `pts`
+    puncte pe unghi, alternand vale (par) si creasta (impar), deci pts/2
+    coaste care coboara de la baza peretelui spre exterior; doua praguri
+    concentrice slabe (`ledge` m). Inaltimea maxima ~ h_top + 2*ledge, langa
+    perete. Slotul alterneaza pe fata coastei (dreapta/stanga a crestei)."""
     rnd = _lcg(seed + 7)
-    ds, hs = skirt_levels(D, steps, h_top, inner)
-    off = [(rnd() - 0.5) * 0.5 for _ in range(pts)]
-    tl = [tilt * (1 if i % 2 else -1) * (0.6 + 0.8 * rnd()) for i in range(pts)]
+    off = [(rnd() - 0.5) * 0.8 for _ in range(pts)]
 
-    def xy(j, i, inset=None):
+    def ring_pts(s, cnt):
+        out = []
+        for i in range(pts):
+            d = D - (D - inner) * s + off[i] * (1.0 - s)
+            th = 2 * math.pi * i / pts
+            x, y = _super_pt(half_x + d, half_y + d, th)
+            out.append((x, y, _rib_z(s, cnt, i % 2 == 1, h_top, ledge, gully)))
+        return out
+    rings = [ring_pts(s, c) for (s, c) in SKIRT_RINGS]
+    # inel ascuns sub perete, la cota ultimului inel
+    last = rings[-1]
+    inside = []
+    for i in range(pts):
         th = 2 * math.pi * i / pts
-        if inset is None:
-            d = ds[j] + off[i] * (0.4 + 0.6 * j / steps) + (0.25 if i % 2 else -0.25)
-            return _super_pt(half_x + d, half_y + d, th)
-        return _super_pt(half_x - inset, half_y - inset, th)
-
-    prev = 0.0
-    for j in range(steps):
-        sl = slots[j % len(slots)]
-        zlo = [0.0 if prev == 0.0 else prev + tl[i] for i in range(pts)]
-        zhi = [hs[j] + tl[i] for i in range(pts)]
-        P = [xy(j, i) for i in range(pts)]
+        x, y = _super_pt(half_x - 1.5, half_y - 1.5, th)
+        inside.append((x, y, last[i][2]))
+    rings.append(inside)
+    for r in range(len(rings) - 1):
+        A, B = rings[r], rings[r + 1]
         for i in range(pts):
             k = (i + 1) % pts
-            _face(b, [(P[i][0], P[i][1], zlo[i]), (P[k][0], P[k][1], zlo[k]),
-                      (P[k][0], P[k][1], zhi[k]), (P[i][0], P[i][1], zhi[i])], sl)
-        Q = [xy(j + 1, i) if j + 1 < steps else xy(j, i, inset=1.5)
-             for i in range(pts)]
-        for i in range(pts):
-            k = (i + 1) % pts
-            _face(b, [(P[i][0], P[i][1], zhi[i]), (P[k][0], P[k][1], zhi[k]),
-                      (Q[k][0], Q[k][1], zhi[k]), (Q[i][0], Q[i][1], zhi[i])], sl)
-        prev = hs[j]
-    return list(zip(ds, hs))
+            _face(b, [A[i], A[k], B[k], B[i]], slots[i % 2])
 
 
-def scree_height(x, y, half_x, half_y, D, steps, h_top, inner=1.2):
-    """Cota suprafetei fustei in (x, y), aceeasi regula ca `scree_skirt`
-    (fara inclinarea fina)."""
+def scree_height(x, y, half_x, half_y, D, h_top, inner=1.2, ledge=0.3,
+                 gully=0.55, pts=56):
+    """Cota suprafetei fustei in (x, y) (aceeasi regula ca `scree_ribs`, fara
+    jitterul fin), cu valea/creasta dupa unghiul punctului."""
     d = skirt_d(x, y, half_x, half_y)
     if d > D:
         return 0.0
-    ds, hs = skirt_levels(D, steps, h_top, inner)
-    for j in range(steps):
-        nxt = ds[j + 1] if j + 1 < steps else -99.0
-        if d > nxt:
-            return hs[j]
-    return hs[-1]
+    a, bb = half_x + d, half_y + d
+    c = math.copysign((abs(x) / a) ** 1.5, x)
+    sn = math.copysign((abs(y) / bb) ** 1.5, y)
+    th = math.atan2(sn, c) % (2 * math.pi)
+    u = th / (2 * math.pi / pts)
+    fi = u - math.floor(u)
+    k = int(math.floor(u)) % 2
+    crestness = fi if k == 0 else 1.0 - fi
+    s = max(0.0, min(1.0, (D - d) / (D - inner)))
+    zs = []
+    for (sr, cnt) in SKIRT_RINGS:
+        zg = _rib_z(sr, cnt, False, h_top, ledge, gully)
+        zc = _rib_z(sr, cnt, True, h_top, ledge, gully)
+        zs.append((sr, zg + (zc - zg) * crestness))
+    z = zs[-1][1]
+    for j in range(len(zs) - 1):
+        s0, z0 = zs[j]
+        s1, z1 = zs[j + 1]
+        if s0 <= s <= s1 and s1 > s0:
+            z = z0 + (z1 - z0) * (s - s0) / (s1 - s0)
+            break
+    return z
 
 
 def boulder(b, center, size, slot, seed=0, jag=0.28, tilt=True):
@@ -255,28 +286,27 @@ def boulder(b, center, size, slot, seed=0, jag=0.28, tilt=True):
     return b._tag(res["verts"], slot)
 
 
-def spire(b, parts, lit, shade, seed=0, draft=0.8):
-    """Deget/turla din coloane verticale. `parts` = lista de
-    (x0, x1, y0, y1, h): fiecare coloana e un loft cu 6 puncte, varful mai
-    ingust cu `draft` (silueta de ac). Intoarce lista pentru calota (acelasi
-    format ca `wall_columns`)."""
-    rnd = _lcg(seed + 31)
+def _oct(cx, cy, hw, hd, rnd):
+    """Octogon (8 puncte antiorar) cu semi-latimile hw/hd, usor neregulat."""
     out = []
-    sl = shade_by_x(lit, shade)
-    for part in parts:
-        x0, x1, y0, y1, h = part[:5]
-        dr = part[5] if len(part) > 5 else draft
-        xm = (x0 + x1) * 0.5
-        ym = (y0 + y1) * 0.5
-
-        def j():
-            return (rnd() - 0.5) * 0.35
-        bot = [(x0 + j(), y0), (xm + j(), y0 - 0.3), (x1 + j(), y0 + 0.2),
-               (x1 + j(), y1 - 0.2), (xm + j(), y1 + 0.3), (x0 + j(), y1)]
-        top = [(xm + (p[0] - xm) * dr, ym + (p[1] - ym) * dr) for p in bot]
-        loft(b, bot, 0.0, top, h, sl)
-        out.append(dict(x0=x0, x1=x1, h=h, poly=top))
+    k0 = math.cos(math.radians(22.5))
+    for k in range(8):
+        a = math.radians(22.5 + 45 * k)
+        r = 1.0 + (rnd() - 0.5) * 0.06
+        out.append((cx + hw * math.cos(a) / k0 * r, cy + hd * math.sin(a) / k0 * r))
     return out
+
+
+def tapered_spire(b, cx, cy, segs, lit, shade, seed=0):
+    """Turla/deget: sir de segmente (z0, hw0, hd0, z1, hw1, hd1), fiecare un
+    loft de octogoane (fetele din umbra pe -X). Pragul dintre segmente = hw1
+    al unuia mai mare decat hw0 al urmatorului; ultimele segmente ingustate
+    fac varful bont."""
+    sl = shade_by_x(lit, shade)
+    for n, (z0, hw0, hd0, z1, hw1, hd1) in enumerate(segs):
+        sd = seed * 1000 + n
+        loft(b, _oct(cx, cy, hw0, hd0, _lcg(sd)), z0,
+             _oct(cx, cy, hw1, hd1, _lcg(sd)), z1, sl)
 
 
 # ---------------------------------------------------------------------------

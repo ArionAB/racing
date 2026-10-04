@@ -83,7 +83,7 @@ Doar sloturi existente (`scripts/palette.gd`, constantele din `dio_lib.py`).
 |---|---|---|
 | peretele de gresie (monoliți, mese, arc, turle) | `TILE_TERRACOTTA` 23, fețele din umbră `RUST_METAL` 10 | `mv_sandstone` pe `*_Rock` |
 | grohotișul și bolovanii | `RUST_METAL` 10 + `LARCH_RUST` 27 în trepte alternante | `mv_sandstone` (sau nimic) pe `*_Scree`, decide coordonatorul |
-| calota palidă | `MARBLE_GREY` 29 | — |
+| calota palidă | `SAND_LIGHT` 0 | — |
 | salvia | `CACTUS_GREEN` 12 (gri-verde) | — |
 | ienupărul (coroana) | `TROPICAL_GREEN` 21 | — |
 | trunchiuri, scânduri, stâlpi de lemn, gard, țarc | `WOOD` 9, fețele vechi/umbrite `LOG_DARK` 28 | — |

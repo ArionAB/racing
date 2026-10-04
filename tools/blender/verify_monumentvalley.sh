@@ -54,5 +54,15 @@ check "structures/corral.glb" 5000 --origin=assembly
 check "structures/shade_ramada.glb" 4000 --origin=assembly
 
 echo
+echo "== grupa mv-e: animale =="
+# --origin=assembly: nodurile Pose_Stand/Pose_Walk (si Raven_Body/Raven_Wings)
+# stau in acelasi sistem; ansamblul trebuie doar sa atinga solul.
+check "animals/horse_bay.glb" 3200 --origin=assembly
+check "animals/horse_pinto.glb" 3200 --origin=assembly
+check "animals/horse_black.glb" 3200 --origin=assembly
+check "animals/sheep.glb" 2400 --origin=assembly
+check "animals/raven.glb" 1800 --origin=assembly
+
+echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi
 exit "$fail"

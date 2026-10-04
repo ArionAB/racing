@@ -87,3 +87,37 @@ Fidelitate (element | planșa | GLB | verdict):
 Abateri: corral 10,06 x 8,06 (stalpii de colt ies cu 3 cm); wire_fence are stalpii flush pe
 capete, deci doua segmente inlantuite dau un stalp dublu de 0,36 m; cattle_guard fara text si
 fara fire intre stalpi.
+
+## Grupa mv-e: animale (`build_monument_animals.py`)
+
+Comparatii: `docs/asset_briefs/img/monumentvalley_fidelity/<nume>.png` (+ `horse_bay_views.png`, 4 azimuturi);
+planșa grupei: `docs/asset_briefs/img/monumentvalley_fidelity_vale.png`. `verify_monumentvalley.sh` -> `VERDICT KIT: OK`
+(toate cu `--origin=assembly`). v1 STATICE: doua poze ca noduri separate (`Pose_Stand`, `Pose_Walk`), fata = +Y.
+Cei trei cai ies din ACEEASI functie (`build_horse(coat, pose)`); difera doar slotul/petele. Fara sa, calaret, frau.
+Mers: stanga-fata + dreapta-spate inainte (ridicate), cealalta pereche inapoi, pe sol.
+
+| fisier | noduri | tri (total) | cote masurate (X x Y x Z, m) |
+|---|---|---:|---|
+| animals/horse_bay | Pose_Stand, Pose_Walk | 2880 | 0,72 x 2,41 x 2,19 (cu urechi/coama); greaban ~1,6 prin constructie |
+| animals/horse_pinto | Pose_Stand, Pose_Walk | 2880 | idem |
+| animals/horse_black | Pose_Stand, Pose_Walk | 2880 | idem |
+| animals/sheep | Pose_Stand, Pose_Walk | 1202 | 0,54 x 1,29 x 0,92 |
+| animals/raven | Raven_Body, **Raven_Wings** | 344 | 1,04 x 0,79 x 0,69 (anvergura 1,04) |
+
+Fidelitate (rundele: cai 3, oaie 3, corb 3):
+
+| piesa / element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| horse_bay: silueta | gat arcuit lung, cap lung, piept adanc, coada atarnata | idem, citeste ca un cal la profil | OK |
+| horse_bay: culoare | maro-rosiatic, picioare/coama/coada negre | LARCH_RUST, burta WOOD, ciorapi/coama/coada LOG_DARK | OK; **abatere**: negrul = LOG_DARK (maro foarte inchis), VOLCANIC_BLACK iese gri-albastru |
+| horse_bay: detaliu | muschi, coama in smocuri, ochi | coama = lama neteda, ochi = cub, picioare drepte-prismatice | **abatere** (low-poly, mai rigid) |
+| horse_pinto: pete | sa mare maro pe spinare, crupa maro, gat/cap maro cu dunga alba, picioare albe | 7 pete elipsoidale pe fete (marginile in trepte), cap maro cu dunga, picioare albe | OK ca distributie; **abatere**: peticele au contur in trepte, planșa le are organice; slotul pete = LARCH_RUST (nu WOOD din tabel: WOOD iese prea inchis fata de decupare) |
+| horse_pinto: mers | pas lung, o diagonala inainte | idem (picior ridicat cu genunchi indoit) | OK |
+| horse_black | maro-gri inchis cald | LOG_DARK pe tot corpul (coama/coada/copite la fel) | OK; mai plat decat planșa |
+| sheep: corp | masa de lana crem rotunjita, bulgari pe contur | corp rotunjit CORAL_SAND (crem), fara bulgari | **abatere**: bulgarii de lana nu s-au modelat (conurile citeau ca ghimpi); culoare CORAL_SAND, nu FOAM_WHITE (decuparea e crem, FOAM_WHITE iese albastrui) |
+| sheep: cap/picioare | cap maro-inchis, urechi laterale, picioare inchise | idem (LOG_DARK); picioare mai lungi si drepte | OK; **abatere** picioarele sunt cilindri subtiri, planșa le are mai groase |
+| raven: aripi/corp | aripi larg deschise in V, penaj cu 6+ pene primare, cioc, gheare | 2 placi (nod Raven_Wings) cu 4 pene primare in evantai, cioc RUST, 2 gheare | **abatere**: penele sunt scalopuri pe contur, nu pene individuale; aripile ies drepte ca niste padele |
+
+Abateri de cote: calul 2,41 m lung (tinta 2,4); inaltimea 2,19 m include urechile/coama, greabanul e ~1,6 m
+doar prin constructie (nu masurat separat pe GLB). Oaia a fost scalata pe Y cu 0,92 la sfarsitul functiei ca sa
+iasa 1,3 m. Corbul are anvergura 1,04 m (tinta 1,0). Primitivele rotunde au 4-12 segmente.

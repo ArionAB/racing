@@ -18,6 +18,14 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			only = int(arg.trim_prefix("--track="))
+	# `--track=` ia pozitia din lista SAU numarul scenei (Track18 = 18) — vezi
+	# GameState.resolve_track_index. Indexul brut nu vedea decat pozitiile, deci un
+	# numar de scena iesea din tablou sau, la clampi, devenea TACUT alta pista.
+	only = GameState.resolve_track_index(only)
+	if only < 0:
+		printerr("export_track_map: --track nu e nici pozitie in lista, nici numar de scena din GameState.TRACK_SCENES")
+		get_tree().quit(1)
+		return
 
 	var scene := load(GameState.TRACK_SCENES[only]) as PackedScene
 	var track := scene.instantiate() as Track

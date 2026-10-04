@@ -15,6 +15,14 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			idx = int(arg.trim_prefix("--track="))
+	# `--track=` ia pozitia din lista SAU numarul scenei (Track18 = 18) — vezi
+	# GameState.resolve_track_index. Indexul brut nu vedea decat pozitiile, deci un
+	# numar de scena iesea din tablou sau, la clampi, devenea TACUT alta pista.
+	idx = GameState.resolve_track_index(idx)
+	if idx < 0:
+		printerr("probe_path_fracs: --track nu e nici pozitie in lista, nici numar de scena din GameState.TRACK_SCENES")
+		get_tree().quit(1)
+		return
 	var scene := load(GameState.TRACK_SCENES[idx]) as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)

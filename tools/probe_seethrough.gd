@@ -83,6 +83,14 @@ func _ready() -> void:
 			track_index = int(arg.trim_prefix("--track="))
 		elif arg == "--save":
 			save = true
+	# `--track=` ia pozitia din lista SAU numarul scenei (Track18 = 18) — vezi
+	# GameState.resolve_track_index. Indexul brut nu vedea decat pozitiile, deci un
+	# numar de scena iesea din tablou sau, la clampi, devenea TACUT alta pista.
+	track_index = GameState.resolve_track_index(track_index)
+	if track_index < 0:
+		printerr("probe_seethrough: --track nu e nici pozitie in lista, nici numar de scena din GameState.TRACK_SCENES")
+		get_tree().quit(1)
+		return
 
 	var name: String = GameState.TRACK_NAMES[track_index]
 	print("\n=== SE VEDE PRIN GEOMETRIE: %s ===" % name)

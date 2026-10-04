@@ -139,6 +139,15 @@ extends Track
 ## Track._loose_ranges. Pe Stromboli: plaja de la B si buza+coborarea D-E.
 @export var custom_loose_ranges: Array[Vector2] = []
 
+## Intervalele de DRUM DE PAMANT pe o pista cu asfalt: (frac_start, frac_end), cu
+## trecere peste linia de start permisa. Spre deosebire de `custom_road_surface`
+## (toata pista) si de `custom_loose_ranges` (doar grip), schimba si ce se vede:
+## soseaua primeste materialul drumului de pamant, dispar linia de mijloc,
+## bordurile si urmele coapte, iar masinile ridica praf si lasa urme pe interval.
+## Grip-ul vine din `loose_grip` al temei, pe aceeasi cale ca la loose. Vezi
+## Track._dirt_ranges. Lista goala = pista nu se schimba cu un bit.
+@export var custom_dirt_ranges: Array[Vector2] = []
+
 ## Intervalele de TREPTE (ruina ca si carosabil, Machu Picchu POI B). Vezi
 ## Track._step_ranges: coliziunea ramane panta lina, treptele sunt doar in
 ## vizual + vibratia de ±3 cm pe raycast-ul suspensiei (Car.STEP_NOISE_M).
@@ -336,6 +345,9 @@ func _ice_ranges() -> Array[Vector2]:
 
 func _loose_ranges() -> Array[Vector2]:
 	return custom_loose_ranges
+
+func _dirt_ranges() -> Array[Vector2]:
+	return custom_dirt_ranges
 
 func _step_ranges() -> Array[Vector2]:
 	return custom_step_ranges

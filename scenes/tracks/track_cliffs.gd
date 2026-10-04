@@ -161,8 +161,13 @@ const VARIANT_TOLERANCE: float = 0.18
 ## AMBELE laturi (si pe interior neinaltat, unde altfel nu se pun), inalti si
 ## traşi aproape de asfalt, fara ferestrele de "respiro". Momentul-semnatura al
 ## pistei (#28) — 80-120 m in care lumea se inchide peste tine.
+## `rock_class` = clasa triplanara de roca a LUMII (cheia `rock_class` din tema,
+## aceeasi pe care o citeste arcada). Gol = gresia canionului (`rock`), adica
+## exact ce primeau falezele inainte de parametrul asta — Dunele n-are cheia si
+## iese bit-identica; o lume cu alta piatra (gresia rosie, granitul) o cere aici.
 static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
-		landmarks: Array[Vector3], gorges: Array[Vector2] = []) -> Node3D:
+		landmarks: Array[Vector3], gorges: Array[Vector2] = [],
+		rock_class: String = "") -> Node3D:
 	var root := Node3D.new()
 	root.name = "Cliffs"
 	# Amprentele sectiunilor asezate, publicate pe nodul-radacina ca metadata.
@@ -233,13 +238,14 @@ static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 				if gorge <= 0.0 and _skip_slot(spec):
 					continue
 				_place(root, body, scene, sampler, spec, rng, gorge,
-					Kind.FILL if low else Kind.MAIN)
+					Kind.FILL if low else Kind.MAIN, rock_class)
 			elif not _skip_fill(spec):
 				# Marginea descoperita prin constructie (interior neinaltat).
 				# Pana acum nu se punea NIMIC aici; de-aia banda cea mai densa de
 				# decor tot citea ca „pietre presarate" — piesele mari lipseau de
 				# pe portiuni intregi.
-				_place(root, body, scene, sampler, spec, rng, 0.0, Kind.FILL)
+				_place(root, body, scene, sampler, spec, rng, 0.0, Kind.FILL,
+					rock_class)
 
 		# Al doilea plan, retras. Se sampleaza separat: are pas propriu si nu
 		# imparte niciun filtru cu randul de la drum in afara degajarilor.
@@ -258,7 +264,8 @@ static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 			# Golul se muta cu 30 m in spate, nu dispare.
 			if not _skip_slot(spec) and _skip_terrace(spec):
 				continue
-			_place(root, null, scene, sampler, spec, rng, 0.0, Kind.TERRACE)
+			_place(root, null, scene, sampler, spec, rng, 0.0, Kind.TERRACE,
+				rock_class)
 	return root
 
 
@@ -315,7 +322,8 @@ static func _near_landmark(d: float, side_sign: float, total: float,
 static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 		sampler: TrackSideSampler,
 		spec: TrackDecorSpec, rng: RandomNumberGenerator,
-		gorge: float = 0.0, kind: Kind = Kind.MAIN) -> void:
+		gorge: float = 0.0, kind: Kind = Kind.MAIN,
+		rock_class: String = "") -> void:
 	var wanted := _wanted_height(spec, rng)
 	if kind == Kind.TERRACE:
 		wanted = _terrace_height(spec, rng)
@@ -518,7 +526,13 @@ static func _place(root: Node3D, body: StaticBody3D, scene: PackedScene,
 	# Materialul de CLASA al rocii (trim sheet triplanar), nu cel de atlas:
 	# falezele sunt suprafata de roca dominanta din cadru — vezi
 	# Palette.rock_material() pentru de ce si de ce nu prin UV unwrap.
-	Palette.apply_rock_material(holder)
+	# Pe temele cu `rock_class` declarat piatra e a LUMII (ca la arcada, in
+	# Track._build_arch): gresia rosie a vaii nu poate purta clasa canionului
+	# de nisip. Fara cheie ramane `rock`, deci Dunele nu se schimba.
+	if rock_class.is_empty():
+		Palette.apply_rock_material(holder)
+	else:
+		Palette.apply_triplanar_class(holder, rock_class)
 
 	# Treapta a doua NU primeste coliziune, din acelasi motiv pentru care banda
 	# `far` din TrackDecor n-are: la 26-34 m de margine esti demult in afara

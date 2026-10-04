@@ -22,7 +22,6 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                        "monument_shapes.py")).read())
 
 SAGE = CACTUS_GREEN        # 12 oliv (varfuri / smocuri interioare)
-PALE = MARBLE_GREY         # 29 gri-verde palid (corpul smocurilor)
 COPPER = LARCH_RUST        # 27 arama (tumbleweed)
 JUNI = CACTUS_GREEN        # 12 oliv (decis pe randarea masurata)
 BARK = WOOD                # 9
@@ -73,13 +72,14 @@ def build_sagebrush():
     - 15 smocuri mici, verticale, usor in forma de flacara (alungite, ingustate
       spre varf), pe TULPINI LEMNOASE scurte care se ramifica (WOOD, 5 tulpini
       de la baza, cate 3 smocuri pe tulpina), nu 5 bulgari rotunzi;
-    - culoare: gri-verde palid (MARBLE_GREY 29) pe cea mai mare parte a
-      smocurilor; CACTUS_GREEN 12 doar pe varfuri (calota mica a fiecarui smoc)
-      si pe smocurile din interior;
+    - culoare: TOATE smocurile pe CACTUS_GREEN 12 intr-un nod separat
+      `Sagebrush_Foliage`; paloarea gri-verde o da o tenta de clasa la
+      integrare (coordonatorul), nu amestecul de sloturi;
     - domul tufei 1,0 x 1,4 m, cu GOLURI intre smocuri prin care se vad tulpinile;
     - la baza: cateva frunzulite uscate pe sol.
     Cote: 1,0 m inalt, 1,4 m lat."""
-    b = Builder()
+    b = Builder()      # tulpini WOOD + frunze uscate DRY
+    fo = Builder()     # smocurile, TOATE pe CACTUS_GREEN 12 (nod separat)
     for i in range(5):
         a = i * 72 + 15
         base = polar(0.04, a, 0.0)
@@ -93,22 +93,20 @@ def build_sagebrush():
             end = polar(outer + 0.06 * (i % 3), aa, top_z)
             stem(b, [fork, (fork + end) * 0.5 + Vector((0, 0, 0.03)),
                      end - Vector((0, 0, 0.22))], 0.020, 0.012, BARK, segments=4)
-            inner = ((i + j) % 2 == 0)
-            body = SAGE if inner else PALE
             h = 0.46 if j != 1 else 0.52
             tilt = 20 if j != 1 else 6
             c0 = end - Vector((0, 0, 0.02))
-            lump(b, c0, (0.23, 0.18, h * 0.92), body, 10 + 4 * i + j, tilt_deg=tilt,
+            lump(fo, c0, (0.23, 0.18, h * 0.92), SAGE, 10 + 4 * i + j, tilt_deg=tilt,
                  azim_deg=aa, segments=6, rings=3, deviation=0.20)
-            if True:   # varful: calota mica pe culoarea opusa
-                lump(b, c0 + Vector((0, 0, h * 0.30)), (0.13, 0.11, 0.20), PALE if inner else SAGE,
+            if True:   # varful: calota mica (aceeasi culoare, da relief)
+                lump(fo, c0 + Vector((0, 0, h * 0.30)), (0.13, 0.11, 0.20), SAGE,
                      60 + 4 * i + j, tilt_deg=tilt, azim_deg=aa, segments=5,
                      rings=2, deviation=0.18)
     for k in range(6):
         a = k * 60 + 25
         b.blade([polar(0.28, a, 0.03), polar(0.50, a, 0.05), polar(0.66, a, 0.03)],
                 [0.0, 0.07, 0.0], 0.015, DRY)
-    return [b.to_object("Sagebrush")]
+    return [b.to_object("Sagebrush"), fo.to_object("Sagebrush_Foliage")]
 
 
 # ---------------------------------------------------------------------------

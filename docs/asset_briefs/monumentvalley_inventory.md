@@ -68,14 +68,14 @@ TROPICAL_GREEN `#3F7A3C` e mai albastrui. Slotul 12 e "oliv sters" doar in compa
 
 | fisier | noduri (sloturi, fete) | tri | cote (m) | RGB randat masurat |
 |---|---|---:|---|---|
-| sagebrush | `Sagebrush`: WOOD 9 x631, CACTUS 12 x323, MARBLE 29 x322, DRY 13 x192 | 1345 | 1,38 x 1,33 x 1,12 | pale (158,154,147), olive (77,105,43) |
+| sagebrush | `Sagebrush`: WOOD 9 + DRY 13 (tulpini, frunze pe sol, 505 tri); `Sagebrush_Foliage`: CACTUS 12 (toate smocurile, 840 tri) | 1345 | 1,38 x 1,33 x 1,12 | verde slot 12 (tenta gri-verde = clasa la integrare) |
 | juniper | `Juniper_Trunk` WOOD 9; `Juniper_Crown` CACTUS 12 | 2089 | 4,37 x 3,88 x 4,21 | coroana (70,96,39) |
 | rabbitbrush | `Rabbitbrush` CACTUS 12 + DRY 13; `Rabbitbrush_Bloom` CAR_YELLOW 16 | 2424 | 1,54 x 1,53 x 1,21 | flori (163,141,43) |
 | tumbleweed | `Tumbleweed` LARCH_RUST 27 | 2726 | 0,93 x 0,94 x 0,96 | (132,82,45) |
 
 | piesa / element | pe decupare | in GLB | verdict |
 |---|---|---|---|
-| sagebrush | smocuri fine, gri-verzi, vf. festonat | 15 smocuri-flacara pe 5 tulpini lemnoase ramificate (3/tulpina), culori alternate 29/12 cu varf pe culoarea opusa, goluri intre ele | structura OK; MARBLE 29 iese mai alb si mai plat decat gri-verdele texturat al desenului |
+| sagebrush | smocuri fine, gri-verzi | 15 smocuri-flacara pe 5 tulpini lemnoase ramificate, toate pe CACTUS 12 in `Sagebrush_Foliage` (rev. 4: fara amestec 29/12; paloarea vine din tenta de clasa) | structura OK; culoarea finala depinde de clasa/tenta coordonatorului |
 | juniper trunchi | tulpini rasucite din pamant | 3 tulpini rasucite pornite din baza comuna, ramificate la 1,2-1,5 m, 2 ramuri joase orizontale | OK |
 | juniper coroane | ciorchini la inaltimi diferite | 8 ciorchini turtiti (2 joase pe laturi), 5 bulgari fiecare | OK; desenul are volume mai mari si mai dese |
 | rabbitbrush | perna densa, frunzis verde dedesubt | 48 ciorchini x 2 bulgari pe dom (treimile de sus/mijloc), inel de 18 frunzulite CACTUS 12, tulpini ascunse | perna OK; frunzisul e mai rar decat pe desen |

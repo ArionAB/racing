@@ -213,6 +213,14 @@ const BASELINE := {
 	"Stromboli (Track11)": 2,
 	"Chongqing (Track12)": 0,
 	"Cappadocia (Track13)": 1,
+	# Monument Valley (Track19), armat la traseul gol (4 oct 2026): UN incident,
+	# identic la 3 rulari — `ChannelKicker` la frac 0.836, trambulina sariturii
+	# peste albia secata G2 taie linia masina-camera cat masina e pe ea (aceeasi
+	# clasa ca ChannelKicker/RampNear de la Fiordland si Jodhpur G2). Trecatoarea
+	# E (pereti `TrackCliffs`) si arcul (0.434) trec curate: zero incidente acolo.
+	# Baza = cifra masurata, FARA marja (memoria garda-fara-linie-de-baza). Sabotaj
+	# (`--sabotaj`) verificat la armare.
+	"Monument Valley (Track19)": 1,
 }
 
 

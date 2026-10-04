@@ -53,10 +53,15 @@ const TRACK_SCENES: Array[String] = [
 	# `snapshot`/`probe_race`/`probe_layout` vor 11, `probe_decor`/`probe_manual`
 	# vor 18 (memoria `probe-decor-numar-de-scena`).
 	"res://scenes/tracks/Track18.tscn", # Kyoto = INDEXUL 11
+	# Track19 = INDEXUL 12 (Monument Valley, brief monument_valley.md §7): la
+	# COADA listei; Dunele (Track01) ramane pe indexul 0 pana la swap. Uneltele
+	# o adreseaza cu --track=19 (resolve_track_index o gaseste dupa numarul scenei).
+	"res://scenes/tracks/Track19.tscn", # Monument Valley = INDEXUL 12
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Alpii", "Baikal", "Stromboli", "Chongqing",
 	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland", "Jodhpur", "Kyoto",
+	"Monument Valley",
 ]
 const CHAMP_ROUNDS: int = 3
 

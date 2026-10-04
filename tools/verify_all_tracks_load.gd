@@ -17,6 +17,7 @@ const TRACKS := [
 	"res://scenes/tracks/Track14.tscn",
 	"res://scenes/tracks/Track15.tscn",
 	"res://scenes/tracks/Track16.tscn",
+	"res://scenes/tracks/Track19.tscn",
 ]
 
 func _ready() -> void:

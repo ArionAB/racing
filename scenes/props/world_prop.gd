@@ -1801,28 +1801,81 @@ const CLASSES_BY_MODEL := {
 	#
 	# Lemnul de machiya e singurul lemn de oras care ia `machiya_wood`; trunchiurile
 	# (WOOD 9) raman pe atlas, ca sa nu platim un material pentru ele.
+	#
+	# VALUL DE MATERIALE (oct 2026, docs/track_briefs/kyoto_materiale.md, sonde
+	# tools/probe_kyoto_kit_clase.gd + ProbeKyotoClase.tscn): acoperisurile iau
+	# `kawara` (dala de tigla tentata pe slotul 20). Pe acoperisuri slotul 28
+	# (LOG_DARK, 15% la machiya, ~48% la porti si sala) e COAMA si STREASINA:
+	# intervalul lui de y il cuprinde pe al slotului 20 la ambele capete, deci
+	# nu se poate rupe ca accent. Clasa il sterge DELIBERAT — un acoperis de
+	# kawara e tigla si pe coama; pe captura dunga bruna de coama citea
+	# „scandura", nu „tigla". Grinzile 100% LOG_DARK iau `machiya_wood` (+0:
+	# tenta lui e exact LOG_DARK), lemnul deschis 100% slot 9 ia `wood`,
+	# trunchiurile `bark_kyoto`, cedrii si pinii `cedar_needles`.
 	"machiya_a": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
-		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
 	"machiya_b": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
-		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
 	"machiya_c": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
-		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
 	"machiya_d": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
-		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
 	"machiya_e": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
-		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
 	# Varul portilor, salii si zidului de templu (FOAM_WHITE 100% pe nod).
-	"niomon_gate": {"Gate_Plaster": Palette.TRI_PREFIX + "village_plaster"},
-	"inari_romon": {"Gate_Plaster": Palette.TRI_PREFIX + "village_plaster"},
-	"kiyomizu_hondo": {"Hondo_Plaster": Palette.TRI_PREFIX + "village_plaster"},
+	"niomon_gate": {"Gate_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Gate_Roof": Palette.TRI_PREFIX + "kawara"},
+	"inari_romon": {"Gate_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Gate_Roof": Palette.TRI_PREFIX + "kawara"},
+	"kiyomizu_hondo": {"Hondo_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Hondo_Roof": Palette.TRI_PREFIX + "kawara"},
+	# `Wall_Roof` numit EXPLICIT: fara intrare, prefixul GLOBAL `Wall_` al varului
+	# de Stromboli (`prop_classes()` -> STROMBOLI_CLASSES) il prindea, si
+	# acoperisul zidului de templu iesea ALB (village_plaster) — masurat cu
+	# ProbeKyotoClase inainte de valul de materiale (memoria
+	# `nume-noduri-nu-sunt-unice`).
 	"temple_wall": {"Wall_Plaster": Palette.TRI_PREFIX + "village_plaster",
-		"Wall_Stone": Palette.TRI_PREFIX + "old_stone"},
+		"Wall_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Wall_Roof": Palette.TRI_PREFIX + "kawara"},
+	# Pagodele: acoperisul (6/28 sau 20/28, acelasi interval de y) ia tigla,
+	# ferestrele 100% LOG_DARK lemnul inchis. Corpul (vermilion 30 + var 22 +
+	# 28, intercalate pe toata inaltimea) ramane pe atlas. La Yasaka ferestrele
+	# sunt 72/28 cu RUST_METAL 10 pe acelasi y: raman pe atlas.
+	"koyasu_pagoda": {"Pagoda_Roof": Palette.TRI_PREFIX + "kawara",
+		"Pagoda_Windows": Palette.TRI_PREFIX + "machiya_wood"},
+	"sanjunoto_pagoda": {"Pagoda_Roof": Palette.TRI_PREFIX + "kawara",
+		"Pagoda_Windows": Palette.TRI_PREFIX + "machiya_wood"},
+	"yasaka_pagoda": {"Pagoda_Roof": Palette.TRI_PREFIX + "kawara"},
+	"tsutenkyo_roof_module": {"Tsu_Roof": Palette.TRI_PREFIX + "kawara",
+		"Tsu_Rail": Palette.TRI_PREFIX + "wood"},
+	"togetsukyo_module": {"Toget_Rail": Palette.TRI_PREFIX + "wood"},
+	"teahouse_front": {"Tea_Wood": Palette.TRI_PREFIX + "wood"},
 	# Frunzisul de toamna: o coroana = o clasa, trei nuante de artar (siluete
-	# diferite in GLB, culori diferite aici). Trunchiurile raman pe atlas.
-	"momiji_a": {"Maple_Crown": Palette.TRI_PREFIX + "maple_crimson"},
-	"momiji_b": {"Maple_Crown": Palette.TRI_PREFIX + "maple_orange"},
-	"momiji_c": {"Maple_Crown": Palette.TRI_PREFIX + "maple_rust"},
-	"ginkgo": {"Ginkgo_Crown": Palette.TRI_PREFIX + "ginkgo_gold"},
+	# diferite in GLB, culori diferite aici). Trunchiurile (100% slot 9) iau
+	# scoarta `bark_kyoto`.
+	"momiji_a": {"Maple_Crown": Palette.TRI_PREFIX + "maple_crimson",
+		"Maple_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	"momiji_b": {"Maple_Crown": Palette.TRI_PREFIX + "maple_orange",
+		"Maple_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	"momiji_c": {"Maple_Crown": Palette.TRI_PREFIX + "maple_rust",
+		"Maple_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	"ginkgo": {"Ginkgo_Crown": Palette.TRI_PREFIX + "ginkgo_gold",
+		"Ginkgo_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	"niwaki_pine": {"Pine_Crown": Palette.TRI_PREFIX + "cedar_needles",
+		"Pine_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	# Cedrul: 97% slot 21 + 3% slot 28 (piciorul trunchiului, sub prag — ca
+	# `beech_dead`, 5.6%). Tot nodul ia acele.
+	"cedar_dark": {"Cedar_Dark": Palette.TRI_PREFIX + "cedar_needles"},
+	# Tufele tunse karikomi: 63% slot 21 + 37% slot 12 pe ACELASI y (umbrirea
+	# tufei). `moss` e deja pe pista (+0) si are tenta slotului 21.
+	"karikomi_shrub_a": {"Karikomi_A": Palette.TRI_PREFIX + "moss"},
+	"karikomi_shrub_b": {"Karikomi_B": Palette.TRI_PREFIX + "moss"},
+	"stepping_stones": {"Stepping_Stone": Palette.TRI_PREFIX + "garden_stone"},
 	# Frunzele de bambus: lime, pe care atlasul nu-l are (CACTUS_GREEN iese oliv).
 	"bamboo_crown": {"Bamboo_Leaves": Palette.TRI_PREFIX + "bamboo_lime"},
 	"leaf_pile": {"Leaf_Pile": Palette.TRI_PREFIX + "leaf_litter"},
@@ -1848,9 +1901,20 @@ const CLASSES_BY_MODEL := {
 	"yukimi_lantern": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
 	"kitsune_statue_a": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone"},
 	"kitsune_statue_b": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone"},
-	"bell_tower": {"Bell_Stone": Palette.TRI_PREFIX + "old_stone"},
-	"chozuya": {"Choz_Stone": Palette.TRI_PREFIX + "old_stone"},
-	"kinkakuji": {"Kin_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"bell_tower": {"Bell_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Bell_Roof": Palette.TRI_PREFIX + "kawara",
+		"Bell_Beams": Palette.TRI_PREFIX + "machiya_wood",
+		"Bell_Wood": Palette.TRI_PREFIX + "wood"},
+	"chozuya": {"Choz_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Choz_Roof": Palette.TRI_PREFIX + "kawara",
+		"Choz_Beams": Palette.TRI_PREFIX + "machiya_wood",
+		"Choz_Wood": Palette.TRI_PREFIX + "wood"},
+	# Pavilionul de Aur: aurul (16, 100%) ramane pe atlas — foita de aur e o
+	# suprafata neteda, culoarea plata ESTE materialul. Lemnul de jos (9/28 pe
+	# acelasi y) ramane pe atlas.
+	"kinkakuji": {"Kin_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Kin_Roof": Palette.TRI_PREFIX + "kawara",
+		"Kin_Windows": Palette.TRI_PREFIX + "machiya_wood"},
 	"iron_truss_bridge": {"Truss_Stone": Palette.TRI_PREFIX + "old_stone"},
 	# Restul kitului ramane pe atlas (masurat, jodhpur_masuratori.md §1):
 	# cenotaful (22/29, marmura), animalele, bazarul, candelele, tuk-tuk-ul,

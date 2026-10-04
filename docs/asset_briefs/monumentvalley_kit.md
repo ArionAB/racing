@@ -182,7 +182,7 @@ MultiMesh, deci **un singur mesh compact**, fără noduri inutile.
 
 | fișier | cote | h/l | contract |
 |---|---|---:|---|
-| `buildings/trading_post.glb` | **12 × 9 m**, 5 m la streașină, coș 7,5 m | ~0,55 | piatră, prispă de lemn pe fața **+Y** cu 4–5 stâlpi, 2 ferestre și ușă pe față, acoperiș plat cu parapet, coș de piatră. **Fără firmă și fără text** |
+| `buildings/trading_post.glb` | **12 × 9 m**, 5 m la streașină, coș 7,5 m | ~0,55 | piatră, prispă de lemn pe fața **+Y** cu 4–5 stâlpi, 2 ferestre și ușă pe față, acoperiș în patru ape, jos, tan (SAND_MID, ~20°, streașină ~0,6 m; cel al prispei îl continuă), coș de piatră gros (~1,6 × 1,6 m, calotă în trepte). **Fără firmă și fără text** |
 | `buildings/homestead_house.glb` | **9 × 7 m**, 5,5 m la coamă | ~0,7 | casă modulară de scânduri, acoperiș în două ape, prispă mică, coș |
 | `buildings/hogan.glb` | **Ø 7 m**, 3,5 m | ~0,5 | **exact 8 laturi** din bușteni orizontali, acoperiș de pământ în dom turtit, ușa spre +Y (spre est la integrare). **Locuință, nu loc de ceremonie**: fără nimic decorat |
 

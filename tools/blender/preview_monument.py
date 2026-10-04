@@ -60,6 +60,11 @@ ROCK_CLASS = "mv_sandstone"
 SPECS = {
     "west_mitten": {"category": "rocks",
                     "camera": {"azimuth": 82.0, "elevation": 14.0, "lens": 70.0, "margin": 1.08}},
+    "sagebrush": {"category": "plants", "camera": {"azimuth": 90.0, "elevation": 12.0, "lens": 85.0, "margin": 1.15}},
+    "juniper": {"category": "plants", "camera": {"azimuth": 90.0, "elevation": 8.0, "lens": 85.0, "margin": 1.12}},
+    "yucca": {"category": "plants", "camera": {"azimuth": 90.0, "elevation": 12.0, "lens": 85.0, "margin": 1.15}},
+    "rabbitbrush": {"category": "plants", "camera": {"azimuth": 90.0, "elevation": 12.0, "lens": 85.0, "margin": 1.15}},
+    "tumbleweed": {"category": "plants", "camera": {"azimuth": 90.0, "elevation": 12.0, "lens": 85.0, "margin": 1.15}},
 }
 
 

@@ -13,6 +13,10 @@
 #                       originea e la baza TURNULUI, nu la centrul bbox-ului:
 #                       fusta si degetul fac bbox-ul asimetric.
 
+#   plante cu 2 noduri (juniper, rabbitbrush): --origin=assembly, ca monolitii
+#   (baza ansamblului la Y=0; coroana/floarea stau deasupra bazei trunchiului).
+#   rabbitbrush: --allow-car-slots=Rabbitbrush_Bloom (CAR_YELLOW = floarea).
+
 set -u
 cd "$(dirname "$0")/../.." || exit 1
 ROOT="assets/models/monumentvalley"
@@ -33,6 +37,14 @@ check() {  # check <cale> <buget> [flag...]
 
 echo "== pilotul (kit §3, val 0) =="
 check "rocks/west_mitten.glb" 12000 --origin=assembly
+
+echo
+echo "== grupa mv-b: plante =="
+check "plants/sagebrush.glb" 4000
+check "plants/juniper.glb" 6000 --origin=assembly
+check "plants/yucca.glb" 3000
+check "plants/rabbitbrush.glb" 4000 --origin=assembly --allow-car-slots=Rabbitbrush_Bloom
+check "plants/tumbleweed.glb" 3000
 
 echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi

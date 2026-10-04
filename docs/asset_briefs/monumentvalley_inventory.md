@@ -50,3 +50,30 @@ fusta e mai joasă și mai netedă decât desenul; gol la nivelul calotei 2,85 m
   teșire + 3 segmente, `cap_slab`, `scree_ribs`, `tapered_spire`); `east_mitten`
   și restul pot folosi aceleași funcții.
 - `preview_monument.py` pune clasa `mv_sandstone` (#B8552E) pe nodurile `*_Rock`.
+
+## Grupa mv-b: plante (`build_monument_plants.py`)
+
+Verdict: `bash tools/blender/verify_monumentvalley.sh` -> `VERDICT KIT: OK`
+(juniper si rabbitbrush cu `--origin=assembly`, rabbitbrush cu
+`--allow-car-slots=Rabbitbrush_Bloom`). Comparatii: `img/monumentvalley_fidelity/<nume>.png`,
+planșa: `img/monumentvalley_fidelity_valb.png`. Cote masurate din GLB (X x Y x Z Blender).
+
+| fisier | noduri (slot) | tri | cote | h/l |
+|---|---|---:|---|---:|
+| `plants/sagebrush.glb` | `Sagebrush` (CACTUS_GREEN 12 + DRY 13 tulpini) | 1146 | 1,32 x 1,43 x 0,99 m | 0,72 |
+| `plants/juniper.glb` | `Juniper_Trunk` (WOOD 9), `Juniper_Crown` (TROPICAL_GREEN 21) | 3066 | 4,67 x 3,97 x 4,05 m | 0,87 |
+| `plants/yucca.glb` | `Yucca` (CACTUS_GREEN 12 + DRY 13) | 1388 | 1,37 x 1,41 x 1,21 m | 0,88 |
+| `plants/rabbitbrush.glb` | `Rabbitbrush` (DRY 13), `Rabbitbrush_Bloom` (CAR_YELLOW 16) | 3416 | 1,50 x 1,33 x 1,17 m | 0,78 |
+| `plants/tumbleweed.glb` | `Tumbleweed` (DRY 13) | 2726 | 0,93 x 0,94 x 0,96 m | 1,0 |
+
+| piesa / element | pe decupare | in GLB | verdict |
+|---|---|---|---|
+| sagebrush: smocuri | 7-8 ciorchini gri-verzi, contur festonat | 8 smocuri x 3 lobi inclinati spre exterior, tulpini DRY + 6 frunzulite pe sol | OK ca structura; culoarea slotului 12 iese verde, nu gri palid (slot, nu geometrie) |
+| juniper: trunchi | scurt, rasucit, 3-4 brate | trunchi rasucit 1,1 m, 4 brate + 8 ramuri laterale | OK; trunchiul e mai neted si mai drept decat desenul |
+| juniper: coroane | ciorchini cu goluri, nu glob | 12 ciorchini x 5 bulgari rotunjiti, goluri intre ei | OK; desenul are coroane mai jos pe laturi si mai mari |
+| yucca | 25-35 frunze lanceolate, galben la baza | 34 frunze, cele de jos cu varf DRY, ciot + frunze moarte | OK; frunzele sunt mai verzi decat olive-ul planșei |
+| rabbitbrush | cupola densa de ciorchini galbeni | 16 tulpini, 32 ciorchini x 3 lobi, tulpini vizibile intre ei | OK; desenul e mai dens si cu frunzis verde la baza (lipseste) |
+| tumbleweed | retea deschisa, crengute ramificate | 20 bucle + 7 crengute drepte, deschisa | OK ca volum; buclele sunt poligonale si fara ramificatii, culoare DRY mai oliv decat aramiu |
+
+Abateri: culorile vin din sloturi existente (zero sloturi noi), deci salvia/yucca
+sunt mai verzi decat planșa; arborele n-are coroane joase pe laturi.

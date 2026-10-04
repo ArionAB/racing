@@ -114,52 +114,80 @@ def build_west_mitten():
 
 
 
-def build_sandstone_arch():
-    """`sandstone_arch.png` -- elemente numarate pe decupare (rev. 2: limbaj de
-    BLOCURI, nu coloane; arc natural, nu viaduct):
+def _simplify(pts, eps):
+    """Scoate punctele aproape coliniare (Douglas-Peucker); capetele raman."""
+    if len(pts) < 3:
+        return list(pts)
+    (x0, z0), (x1, z1) = pts[0], pts[-1]
+    dx, dz = x1 - x0, z1 - z0
+    ln = math.hypot(dx, dz) or 1.0
+    best, bi = -1.0, 0
+    for i in range(1, len(pts) - 1):
+        d = abs((pts[i][0] - x0) * dz - (pts[i][1] - z0) * dx) / ln
+        if d > best:
+            best, bi = d, i
+    if best <= eps:
+        return [pts[0], pts[-1]]
+    return _simplify(pts[:bi + 1], eps)[:-1] + _simplify(pts[bi:], eps)
 
-    - DOUA PICIOARE masive, ~7 m late la baza (talpa evazata, rev. 3: A_O 13,8), din blocuri
-      stivuite (randuri de 2,4-4,4 m; unde grosimea > 4,3 m un rand are 2 blocuri
-      pe grosime), fiecare bloc teșit, decalat inauntru/in afara cu 0,3-0,8 m.
-    - PUNTE: grosime variabila, ~5 m la umeri, ~3 m la coama; intradosul NU e un
-      semicerc curat: fiecare bloc il coboara/ridica, deci e in trepte usoare.
-    - Fiecare celula de bloc are 2 felii pe adancime (Y) cu iesiri diferite.
-    - CALOTA: 5 placi separate, cu goluri intre ele si inaltimi diferite.
+
+def build_sandstone_arch():
+    """`sandstone_arch.png` -- elemente numarate pe decupare (rev. 4: masa de
+    piatra cu o GAURA, nu o banda curbata de dovezi):
+
+    - SILUETA: o placa lata cu varful ~orizontal la ~12,5 m pe toata latimea
+      (mai jos cu ~0,5 m spre capete, neregulat +-0,5 m); deasupra golului
+      ~3,5-4 m de piatra, deasupra umerilor mult mai mult (timpanele sunt
+      umplute cu blocuri).
+    - BLOCURI: 4 randuri orizontale grosiere (3-3,8 m, fiecare mai retras cu 0,55 m) de blocuri late de 3,5-6,5 m,
+      fiecare teșit si decalat 0,3-0,8 m; in jurul golului un inel de blocuri
+      (3,2 m) care da intradosul; fiecare celula are 2 felii pe adancime (Y) cu
+      iesiri diferite.
+    - PICIOARE: ~7 m late la baza (talpa evazata), din aceleasi blocuri.
+    - INTRADOS: nu e semicerc curat: blocurile intra in gol cu max 0,4 m (jos) /
+      0,7 m; nominal a=7,9 b=9,4.
+    - CALOTA: 5 placi plate separate (goluri 0,3 m, inaltimi 12,8-13,1 m).
     - GROHOTIS: bolovani si falduri la picioare, doar pe EXTERIOR (golul liber).
-    - GOL: >= 14 m la h 0-2 m si >= 7,5 m liber (measure_arch_gap.py). Intrados
-      nominal a=7,9 b=9,4; blocurile pot intra in gol cu max 0,4 m (jos) / 0,7 m.
-    Cote: ~27 m lat (cu talpa), 13 m inalt, ~7,4 m adancime (Y), origine la baza.
+    - GOL: >= 14 m la h 0-2 m si >= 7,5 m liber (measure_arch_gap.py).
+    Cote: ~28 m lat (cu talpa), 13 m inalt, ~7,4 m adancime (Y), origine la baza.
     """
     A_I, B_I, N_I = 7.9, 9.4, 2.4          # intradosul nominal
-    A_O, B_O, N_O = 13.8, 12.6, 2.7        # extradosul
-    FLARE = 1.3
+    X_OUT, FLARE = 13.8, 1.3               # marginea exterioara a picioarelor
+    RING = 3.2                             # grosimea inelului din jurul golului
 
     def I_pt(th):
         return _super_pt(A_I, B_I, th, N_I)
 
-    def O_pt(th):
-        x, z = _super_pt(A_O, B_O, th, N_O)
-        x += math.copysign(1.0, x) * FLARE * max(0.0, 1.0 - z / 4.5) ** 1.5
+    def O_pt(th):                            # directia radiala (doar directie)
+        x, z = _super_pt(X_OUT, 12.6, th, 2.7)
         return (x, z)
 
-    def outer_top(x):                        # extradosul ca z(x), pentru calota
-        r = min(abs(x) / A_O, 0.999)
-        return B_O * (1.0 - r ** N_O) ** (1.0 / N_O)
+    def R_pt(th):                            # marginea exterioara a inelului
+        I, O = I_pt(th), O_pt(th)
+        d = (O[0] - I[0], O[1] - I[1])
+        ln = math.hypot(*d) or 1.0
+        return (I[0] + d[0] / ln * RING, I[1] + d[1] / ln * RING)
+
+    def x_out(z):                            # talpa evazata pe exterior
+        return X_OUT + FLARE * max(0.0, 1.0 - z / 4.5) ** 1.5
+
+    def top_nom(x):                          # varful ~plat, putin mai jos la capete
+        return 12.5 - 0.6 * (abs(x) / (X_OUT + FLARE)) ** 2
 
     rock = Builder()
     sl = shade_by_x(ROCK, ROCK_SHADE)
     rnd = _lcg(52)
 
-    # randurile: capete pe lungimea liniei mediane
+    # ---- inelul din jurul golului (blocuri pe linia mediana) ----
     ths = [math.pi * i / 400.0 for i in range(401)]
-    mid = [((I_pt(t)[0] + O_pt(t)[0]) * 0.5, (I_pt(t)[1] + O_pt(t)[1]) * 0.5) for t in ths]
+    mid = [((I_pt(t)[0] + R_pt(t)[0]) * 0.5, (I_pt(t)[1] + R_pt(t)[1]) * 0.5) for t in ths]
     cum = [0.0]
     for i in range(1, len(mid)):
         cum.append(cum[-1] + math.hypot(mid[i][0] - mid[i - 1][0], mid[i][1] - mid[i - 1][1]))
     total = cum[-1]
     ws = []
     while sum(ws) < total:
-        ws.append(3.0 + 2.4 * rnd())
+        ws.append(2.8 + 1.8 * rnd())
     k = total / sum(ws)
     breaks = [0.0]
     for w in ws:
@@ -176,95 +204,123 @@ def build_sandstone_arch():
         t = (s - cum[lo]) / max(cum[hi] - cum[lo], 1e-9)
         return ths[lo] + (ths[hi] - ths[lo]) * t
 
-    def lerp(a, b, t):
-        return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
-
-    def cell(ta, tb, rho0, rho1, in_cap, rr):
-        """Poligon (x, z): intre rho0..rho1 din grosime (0 = intrados), cu
-        decalaj radial aleator (intrados: max 0,4/0,7 m spre gol)."""
-        pts_in, pts_out = [], []
+    def ring_cell(ta, tb, rr):
+        pin, pout = [], []
         tm = (ta + tb) * 0.5
         for t in (ta, tm, tb):
             tj = t + (rr() - 0.5) * 0.05 if t != tm else t
-            I, O = I_pt(tj), O_pt(tj)
-            d = (O[0] - I[0], O[1] - I[1])
+            I, R = I_pt(tj), R_pt(tj)
+            d = (R[0] - I[0], R[1] - I[1])
             ln = math.hypot(*d) or 1.0
             d = (d[0] / ln, d[1] / ln)
-            a = lerp(I, O, rho0)
-            b = lerp(I, O, rho1)
-            if rho0 <= 0.0:                          # fata dinspre gol
-                lim = 0.4 if I[1] < 3.0 else 0.7
-                s = -lim + (lim + 0.3) * rr()        # negativ = spre gol
-                a = (a[0] + d[0] * s, a[1] + d[1] * s)
+            lim = 0.4 if I[1] < 3.0 else 0.7
+            s = -lim + (lim + 0.3) * rr()            # negativ = spre gol
+            pin.append((I[0] + d[0] * s, I[1] + d[1] * s))
+            s = -0.5 + 1.1 * rr()
+            pout.append((R[0] + d[0] * s, R[1] + d[1] * s))
+        for idx in (0, 2):                          # baza plata la sol
+            if pin[idx][1] < 0.05:
+                pin[idx] = (pin[idx][0], 0.0)
+                pout[idx] = (pout[idx][0], 0.0)
+        return pin + list(reversed(pout))
+
+    def slabs(poly, rr, ysplit):
+        """doua felii pe adancime, cu iesiri diferite"""
+        for (y0, y1, side) in ((-3.7, ysplit, -1), (ysplit, 3.7, 1)):
+            if side < 0:
+                y0 -= (rr() - 0.35) * 0.9
             else:
-                s = (rr() - 0.5) * 0.6
-                a = (a[0] + d[0] * s, a[1] + d[1] * s)
-            if rho1 >= 1.0:                          # fata exterioara
-                top = O[1] > 8.0
-                s = -0.8 + (1.6 if not top else 1.0) * rr()
-                b = (b[0] + d[0] * s, b[1] + d[1] * s)
-            else:
-                s = (rr() - 0.5) * 0.6
-                b = (b[0] + d[0] * s, b[1] + d[1] * s)
-            pts_in.append(a)
-            pts_out.append(b)
-        if pts_in[0][1] < 0.05:                      # picior: baza plata la sol
-            pts_in[0] = (pts_in[0][0], 0.0)
-            pts_out[0] = (pts_out[0][0], 0.0)
-        if pts_in[2][1] < 0.05:
-            pts_in[2] = (pts_in[2][0], 0.0)
-            pts_out[2] = (pts_out[2][0], 0.0)
-        return pts_in + list(reversed(pts_out))
+                y1 += (rr() - 0.35) * 0.9
+            prism_xz(rock, poly, y0, y1, sl)
 
     for ri in range(len(breaks) - 1):
         ta, tb = th_at(breaks[ri]), th_at(breaks[ri + 1])
-        tm = (ta + tb) * 0.5
-        thick = math.hypot(I_pt(tm)[0] - O_pt(tm)[0], I_pt(tm)[1] - O_pt(tm)[1])
-        if thick > 5.4:
-            sp = 0.42 + 0.16 * rnd()
-            rhos = [(0.0, sp), (sp, 1.0)]
-        else:
-            rhos = [(0.0, 1.0)]
-        for (r0, r1) in rhos:
-            ysp = (rnd() - 0.5) * 2.0
-            for (y0, y1, side) in ((-3.7, ysp, -1), (ysp, 3.7, 1)):
-                rr = _lcg(int(rnd() * 1e6))
-                poly = chamfer(cell(ta, tb, r0, r1, False, rr), 0.5)
-                if side < 0:
-                    y0 -= (rr() - 0.35) * 0.9
-                else:
-                    y1 += (rr() - 0.35) * 0.9
-                prism_xz(rock, poly, y0, y1, sl)
+        rr = _lcg(int(rnd() * 1e6))
+        slabs(chamfer(ring_cell(ta, tb, rr), 0.45), rr, (rnd() - 0.5) * 2.0)
 
-    # calota: 5 placi separate, cu goluri si inaltimi diferite
+    # ---- umplutura: randuri orizontale grosiere deasupra/in afara inelului ----
+    rt = []                                          # marginea inelului ca z(x)
+    for t in ths:
+        x, z = R_pt(t)
+        rt.append((x, z))
+    rt.sort()
+
+    def g(x):                                        # cota marginii exterioare a inelului
+        if x <= rt[0][0] or x >= rt[-1][0]:
+            return 0.0
+        lo, hi = 0, len(rt) - 1
+        while hi - lo > 1:
+            m = (lo + hi) // 2
+            if rt[m][0] <= x:
+                lo = m
+            else:
+                hi = m
+        t = (x - rt[lo][0]) / max(rt[hi][0] - rt[lo][0], 1e-9)
+        return rt[lo][1] + (rt[hi][1] - rt[lo][1]) * t
+
+    zc = [0.0, 3.8, 7.4, 10.4]
+    for ci, z0 in enumerate(zc):
+        last = ci == len(zc) - 1
+        xe = X_OUT - 0.55 * ci                   # fiecare rand putin mai retras (praguri)
+        edges = [-xe]
+        while edges[-1] < xe - 3.0:
+            edges.append(edges[-1] + 3.5 + 3.0 * rnd())
+        edges.append(xe)
+        for xa, xb in zip(edges[:-1], edges[1:]):
+            rr = _lcg(int(rnd() * 1e6))
+            ztop = zc[ci + 1] + (rr() - 0.5) * 0.5 if not last else 0.0
+            jit = (rr() - 0.5) * 1.3
+            n = max(4, int((xb - xa) / 0.25))
+            xs = [xa + (xb - xa) * j / n for j in range(n + 1)]
+            lo = [max(z0, g(x) - 0.9) for x in xs]
+            hi = [(top_nom(x) + jit) if last else ztop for x in xs]
+            runs, run = [], []
+            for j in range(n + 1):
+                if hi[j] - lo[j] > 0.3:
+                    run.append(j)
+                else:
+                    if len(run) > 1:
+                        runs.append(run)
+                    run = []
+            if len(run) > 1:
+                runs.append(run)
+            for run in runs:
+                low = _simplify([(xs[j], lo[j]) for j in run], 0.06)
+                upp = _simplify([(xs[j], hi[j]) for j in run], 0.06)
+                poly = low + list(reversed(upp))
+                if ci == 0 and run[-1] == n and xb >= xe - 1e-6:      # picior dreapta: talpa
+                    zz = [lo[n] + (hi[n] - lo[n]) * q / 5.0 for q in range(6)]
+                    poly = low + [(x_out(z), z) for z in zz] + list(reversed(upp))[1:]
+                if ci == 0 and run[0] == 0 and xa <= -xe + 1e-6:      # picior stanga: talpa
+                    zz = [hi[0] - (hi[0] - lo[0]) * q / 5.0 for q in range(6)]
+                    poly = [(-x_out(z), z) for z in zz] + low + list(reversed(upp))[:-1]
+                if len(poly) < 4:
+                    continue
+                slabs(chamfer(poly, 0.45), rr, (rr() - 0.5) * 2.0)
+
+    # ---- calota: 5 placi PLATE, separate, inaltimi diferite ----
     cap = Builder()
-    cuts = [-11.5, -6.8, -2.4, 1.8, 6.0, 10.2]
-    cuts = [c + (rnd() - 0.5) * 0.8 for c in cuts] + [11.8]
-    cuts[0] = -11.5
+    cuts = [-12.4, -7.6, -2.9, 1.9, 6.4, 12.4]
+    cuts = [cuts[0]] + [c + (rnd() - 0.5) * 0.8 for c in cuts[1:-1]] + [cuts[-1]]
     for i in range(5):
         a, b = cuts[i] + 0.15, cuts[i + 1] - 0.15
-        n = max(3, int((b - a) / 0.8))
-        xs = [a + (b - a) * j / n for j in range(n + 1)]
-        up = 0.25 + 0.35 * rnd()
-        dn = 0.9 + 0.2 * rnd()
-        zt = 12.75 + 0.35 * rnd()               # plafon plat per placa (inaltimi diferite)
-        bot = [(x, outer_top(x) - dn) for x in xs]
-        top = [(x, min(outer_top(x) + up, zt)) for x in xs]
+        zt = 12.8 + 0.3 * rnd()
+        zb = 11.4 + 0.4 * rnd()
         yb = -(3.2 + 1.0 * rnd())
         yf = 3.2 + 1.0 * rnd()
-        poly = chamfer(bot + list(reversed(top)), 0.18, skip=())
+        poly = chamfer([(a, zb), (b, zb), (b, zt), (a, zt)], 0.25)
         prism_xz(cap, poly, yb, yf, CAP)
 
     scree = Builder()
     D, HT = 4.2, 3.2
     PTS = 40
-    LEGX = 11.4
+    LEGX = 11.6
     gap_x = A_I
     for side in (-1.0, 1.0):
         tmp = Builder()
-        scree_ribs(tmp, 3.6, 3.6, D, HT, [SCREE_A, SCREE_B], seed=5 + int(side + 1),
+        scree_ribs(tmp, 3.8, 3.6, D, HT, [SCREE_A, SCREE_B], seed=5 + int(side + 1),
                    pts=PTS)
-        scree_boulders(tmp, 3.6, 3.6, D, HT, [SCREE_A, SCREE_B], 14, 8, 4.2,
+        scree_boulders(tmp, 3.8, 3.6, D, HT, [SCREE_A, SCREE_B], 14, 8, 4.2,
                        seed=6 + int(side + 1), pts=PTS, cx=0.0,
                        skip=lambda x, y, s=side: abs(x + s * LEGX) < gap_x + 2.7)
         for v in tmp.bm.verts:

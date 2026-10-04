@@ -55,35 +55,36 @@ West Mitten nemodificat: 9432 tri, aceleași noduri. Verify: `VERDICT KIT: OK`
 | `rocks/merrick_butte.glb` | `Butte_Rock/_Scree/_Cap` | 11928 | 24,0 m, amprentă ~30 x 18 m, 3 contraforturi (13/18/11 m) pe fața +Y |
 | `rocks/mesa_wall_module.glb` | `Mesa_Rock/_Scree/_Cap` | 2224 | 12,0 m pe Y, 14,0 m înalt, 6 m adânc (X −3..+3; 8,6 cu ieșirile și talpa), grohotiș 2,9 m (+X) / 1,9 m (−X) |
 
-### CONTRACT ÎNGHEȚAT: golul arcului (`sandstone_arch.glb`, rev. 3 — blocuri)
+### CONTRACT ÎNGHEȚAT: golul arcului (`sandstone_arch.glb`, rev. 4 — masă plată cu gaură)
 
 Măsurat cu `tools/blender/measure_arch_gap.py` pe GLB-ul exportat (re-importat),
 proiecție pe planul XZ (drumul merge pe Y), TOATE nodurile (rocă + grohotiș +
 calotă), grilă 5 cm; gol = regiune liberă de la sol, conectată la axa drumului.
 
-- **lățime gol pe fereastra caroseriei (h 0–2 m): 15,35 m** (minim pe rânduri; contract ≥ 14)
-- **înălțime liberă pe |x| ≤ 1,1 m: 8,85 m** (contract ≥ 7,5)
-- lățimea golului: h 0,5 m 15,65 | h 2 m 15,35 | h 4 m 14,30 | h 6 m 12,30 | h 7,5 m 10,45
-- intrados nominal superelipsă a = 7,9, b = 9,4, n = 2,4; fiecare bloc îl poate coborî în gol cu max 0,4 m (jos) / 0,7 m (sus), deci nu e un semicerc curat; nimic din grohotiș nu trece de x = ±7,9.
+- **lățime gol pe fereastra caroseriei (h 0–2 m): 15,45 m** (minim pe rânduri; contract ≥ 14)
+- **înălțime liberă pe |x| ≤ 1,1 m: 8,95 m** (contract ≥ 7,5)
+- lățimea golului: h 0,5 m 15,75 | h 2 m 15,45 | h 4 m 14,20 | h 6 m 12,30 | h 7,5 m 10,45
+- intrados nominal superelipsă a = 7,9, b = 9,4, n = 2,4; blocurile inelului îl pot coborî în gol cu max 0,4 m (jos) / 0,7 m, deci nu e semicerc curat; nimic din grohotiș nu trece de x = ±7,9.
 Orice modificare a arcului se re-măsoară cu scriptul (`VERDICT GOL: OK`).
-Cote: 13,09 m înalt, picioarele ~7 m late la bază (talpă evazată), adâncime Y ~7,4 m (rock), 4648 tri.
+Cote: 13,10 m înalt, ~28 m lat + talpă (42,7 m cu fusta), picioare ~7 m la bază, adâncime Y ~7,4 m (rock), 5836 tri.
 
 ### Fidelitate (decupare vs randare)
 
-**sandstone_arch** (rev. 3, după verdictul coordonatorului: viaduct neted → limbaj de blocuri)
+**sandstone_arch** (rev. 4, după al doilea verdict: extradosul nu mai urmează curba golului)
 
 | element | pe planșă | în GLB | verdict |
 |---|---|---|---|
-| picioare | masive, late jos, din blocuri | ~7 m la bază, blocuri stivuite (rânduri 3–5,4 m; 2 blocuri pe grosime unde > 5,4 m), teșite, decalate ±0,4–0,8 m, 2 felii pe adâncime cu ieșiri diferite | OK, dar mai zvelte decât pe planșă |
-| punte | grosime variabilă (5 m umeri, 3 m coamă) | ~3,2 m la coamă, ~5–6 m la umeri | OK |
-| intrados | nu e semicerc | trepte ±0,4–0,7 m între blocuri | OK, abatere mică (rămâne lizibil ca arc) |
-| calotă | 3–5 plăci separate, goluri, înălțimi diferite | 5 plăci, goluri 0,3 m, plafoane la 12,75–13,1 m | OK; plăcile urmăresc curba la umeri |
+| siluetă | placă lată cu vârful ~orizontal, golul = gaură prin masă | vârf ~orizontal la ~12,5 m (±0,65 m per bloc, mai jos spre capete), timpanele pline | OK |
+| blocuri | neregulate 2–5 m, teșite, decalate | 4 rânduri orizontale grosiere (3–3,8 m, fiecare mai retras cu 0,55 m) de blocuri late 3,5–6,5 m + inel de blocuri (3,2 m) în jurul golului; teșite, 2 felii pe adâncime cu ieșiri diferite | OK, dar rândurile rămân regulate (aspect de zid) |
+| picioare | late, masive | ~7 m la bază, talpă evazată | OK |
+| punte | ~5 m umeri, ~3 m coamă | ~3,5 m la coamă, mult mai mult la umeri (umplutură) | OK |
+| intrados | trepte/neregulat | trepte 0,4–0,7 m între blocurile inelului | OK |
+| calotă | 3–5 plăci separate, înălțimi diferite | 5 plăci PLATE (12,8–13,1 m), goluri 0,3 m | OK; dreptunghiuri teșite, fără contur festonat |
 | grohotiș | bolovani la picioare | fustă + bolovani doar pe exterior | OK |
-| h/l | ~0,55 | 13/28 = 0,47 | la limita; lățimea a crescut (picioare late, contract: ~24 m) |
 
-Abateri: arcul e mai larg (~28 m + talpă) decât ~24 m din tabel, ca să iasă picioare de ~7 m
-lățime cu golul păstrat; blocurile sunt mai netede și mai rotunjite decât roca din decupare;
-puntea rămâne mai subțire/regulată decât pe planșă.
+Abateri: arcul e ~28 m lat (tabel ~24 m) ca să iasă picioare de ~7 m cu golul păstrat;
+blocurile sunt netede și rotunjite, rândurile prea regulate (zid); pe câteva fețe se văd
+crăpături întunecate între inel și umplutură (felii cu ieșiri diferite).
 
 **east_mitten** (runda 1)
 

@@ -577,11 +577,17 @@ if len(sys.argv) > 1:
     RAVINE_FLOOR = [(0, 16.0), (1, -4.0), (2, -6.0), (3, -3.0)]
     RAVINE_WIDTH = [(0, 50.0), (1, 45.0), (2, 70.0), (3, 90.0)]
     RAVINE_WATER = [(2, -3.0, 14.0), (3, -1.0, 10.0)]
+    # LIMBA DE MAL sub odihna carului Gion Matsuri (4 oct 2026, dezvoltatorul: "pare
+    # ca pluteste peste lac"): pe iaz (rapa 3) netezirea sapaturii punea malul de
+    # langa asfalt la -1,0 = cota apei. (rapa, fractia carului, semilungime 7 m,
+    # 12 m dincolo de asfalt; racord 8 m): odihna la x 7-13 m sta pe -0,2..-0,3.
+    RAVINE_CAPES = [(3, 0.6329, 7.0, 12.0)]
     VIADUCTS = [0, 1, 2]
     rav_txt = ", ".join(f"Vector4({a}, {b}, {c}, {d})" for a, b, c, d, _ in ravines)
     fl_txt = ", ".join(f"Vector2({a}, {b})" for a, b in RAVINE_FLOOR)
     rw_txt = ", ".join(f"Vector2({a}, {b})" for a, b in RAVINE_WIDTH)
     wt_txt = ", ".join(f"Vector3({a}, {b}, {c})" for a, b, c in RAVINE_WATER)
+    cp_txt = ", ".join(f"Vector4({a}, {b}, {c}, {d})" for a, b, c, d in RAVINE_CAPES)
 
     # LATIMI (semilatimi, tabelul din brief §2):
     # A 8, B 5.5, C 5 (rampa) / 6 (scena), C2 6, D 6 / 4.5 (pod), E 6,
@@ -686,6 +692,21 @@ if len(sys.argv) > 1:
           f"kogarashi la {KOG_DUPA_POD_M:.1f} m dupa el")
     print(f"kogarashi: busola drum {kog_bearing:.1f} deg => path_yaw_deg {kog_yaw:.1f}")
     print(f"kogarashi: frac {f_kog:.4f} axa ({kog_road[0]:.1f},{kog_road[1]:.1f}) cota {kog_road[2]:.1f}")
+    # NAVETA (4 oct 2026, dezvoltatorul, sageata pe captura): vartejul nu mai taie
+    # soseaua pe loc, ci face naveta pe o diagonala din iarba din STANGA pana in GURA
+    # tunelului de torii: scurtatura se ia doar cand vartejul nu e acolo. Suprascrie
+    # pozitia de mai sus. Capetele sunt masurate in Godot pe rutele COAPTE (banda E'
+    # exista doar acolo), nu calculate aici. Figura e o linie (amplitudine pe Z = 0),
+    # deci sinusul o tine mai mult la capete: ~5 s din 25 s in gura.
+    KOG_A = (397.1, 225.7)  # Godot x,z: d=1007 m, 8,9 m in stanga axei (iarba, teren 11,2)
+    KOG_B = (393.2, 260.6)  # Godot x,z: pe axa benzii E' (0,5 m), 5,8 m dincolo de asfalt
+    KOG_Y = 11.75           # terenul pe linie e 11,6-11,7; la capatul A 11,2
+    kog_g = ((KOG_A[0] + KOG_B[0]) / 2, KOG_Y, (KOG_A[1] + KOG_B[1]) / 2)
+    _kl = math.hypot(KOG_B[0] - KOG_A[0], KOG_B[1] - KOG_A[1])
+    kog_half = _kl / 2
+    # X local rotit cu yaw (Vector3.rotated pe UP): (cos, -sin) in (x, z).
+    kog_yaw = math.degrees(math.atan2(-(KOG_B[1] - KOG_A[1]) / _kl, (KOG_B[0] - KOG_A[0]) / _kl))
+    print(f"kogarashi naveta: centru ({kog_g[0]:.2f},{kog_g[2]:.2f}) semilungime {kog_half:.2f} m yaw {kog_yaw:.1f}")
 
     # SHISHIMAI (POI H): leul care danseaza peste soseaua dreptei finale. Pe esantionul
     # 170 al axei (frac 0,955): ultimul tronson DREPT (167-171, directia 83,7 deg, 48 m)
@@ -1018,6 +1039,7 @@ custom_viaduct_net_backoffs = Array[Vector2]([Vector2(0, 70.0)])
 custom_ravine_floors = Array[Vector2]([{fl_txt}])
 custom_ravine_widths = Array[Vector2]([{rw_txt}])
 custom_ravine_water = Array[Vector3]([{wt_txt}])
+custom_ravine_capes = Array[Vector4]([{cp_txt}])
 custom_width_segments = Array[Vector3]([{w_txt}])
 traffic_count = 0
 terrain_pad_m = 260.0
@@ -1096,8 +1118,8 @@ model = ExtResource("12_gion_glb")
 [node name="Kogarashi" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {kog_g[0]:.3f}, {kog_g[1]:.3f}, {kog_g[2]:.3f})
 script = ExtResource("16_devil")
-amplitude = Vector2(9, 2)
-frequency = Vector2(0.0345, 0.0213)
+amplitude = Vector2({kog_half:.2f}, 0)
+frequency = Vector2(0.04, 0.0213)
 path_yaw_deg = {kog_yaw:.1f}
 spin_deg = 72.0
 blind_time = 0.35

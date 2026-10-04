@@ -206,6 +206,11 @@ extends Track
 ## Track._ravine_widths. Fara ea saparea se intinde lateral la infinit si valea
 ## n-are mal opus — faleza citeste ca bordura de sant.
 @export var custom_ravine_widths: Array[Vector2] = []
+## LIMBI DE MAL: (indice de rapa, fractia centrului, semilungime pe sosea m,
+## latime dincolo de marginea asfaltului m). Acolo rapa nu sapa: terenul ramane
+## la cota umarului (Kyoto F: odihna carului Gion Matsuri pe malul iazului).
+## Vezi TrackSideSampler.ravine_capes.
+@export var custom_ravine_capes: Array[Vector4] = []
 ## Vezi [method Track._ravine_floor_slopes].
 @export var custom_ravine_floor_slopes: Array[Vector2] = []
 ## APA intr-o rapa: (indice in `custom_ravines`, cota ABSOLUTA a apei, metri
@@ -388,6 +393,10 @@ func _ravine_floors() -> Array[Vector2]:
 
 func _ravine_widths() -> Array[Vector2]:
 	return custom_ravine_widths
+
+
+func _ravine_capes() -> Array[Vector4]:
+	return custom_ravine_capes
 
 
 func _ravine_floor_slopes() -> Array[Vector2]:

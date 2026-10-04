@@ -53,9 +53,10 @@ turnul de apă, virezi spre sud și **treci peste buza platoului: toată valea
 se deschide sub tine, cu cele două Mittens și Merrick Butte în capătul
 dreptei US-163**. Cobori pe asfalt printre stâlpi de telegraf, treci huruind
 **grila pentru vite** și intri pe **Valley Drive**, pământ roșu, unde **caii
-în libertate** traversează drumul. **Ocolești piciorul lui West Mitten**,
-peretele de 30 m crescând în parbriz, pe grohotișul de unde se desprind
-bolovani, intri în **trecătoarea dintre mese**, un defileu de 12 m în
+în libertate** traversează drumul. **Treci prin poarta dintre cele două
+Mittens**, doi pereți de 30 m care cresc în parbriz de o parte și de alta,
+pe grohotișul de unde se desprind bolovani, virezi spre vest și intri în
+**trecătoarea dintre mese**, un defileu de 12 m în
 contralumină, și ieși **pe sub arcul de gresie**. Urci pe cornișa de la
 **Artist's Point** și de acolo **vezi haboob-ul**, zidul maro de praf de
 50 m care traversează valea. Cobori în valea deschisă **chiar în calea lui**
@@ -103,7 +104,7 @@ Nu trei palete.
 | loc real | ce luăm |
 |---|---|
 | **US-163 dinspre nord**, cu ridicătura de la mila 13 (locul „Forrest Gump Point”, numele nu se folosește, §8): un drum drept care coboară spre monoliți | **POI B, testul de 3 secunde**: coama de pe buza platoului, apoi dreapta cu Mittens-urile **în capăt, pe ax**. Coama e și răspunsul la camera de urmărire (§2.0) |
-| **West Mitten și East Mitten** (~300 m peste câmpie), cu „degetul mare” ca o turlă lipită de corp | **reperul pistei**: hero GLB pe un `TerrainPeak` de grohotiș, scalate la ~45 m (§2.0). West Mitten se vede întreg de pe coamă, apoi drumul îl ocolește pe la picior (POI D) |
+| **West Mitten și East Mitten** (~300 m peste câmpie), cu „degetul mare” ca o turlă lipită de corp | **reperul pistei**: hero GLB pe un `TerrainPeak` de grohotiș, scalate la ~45 m (§2.0). amândoi se văd întregi de pe coamă, apoi drumul **trece printre ei** (POI D, poarta) |
 | **Merrick Butte**, lângă Mittens | al treilea monolit din trio. Fără el, silueta e „două stânci”, nu Monument Valley |
 | **Valley Drive**: bucla de pământ de 27 km, roșie, cu făgașe, deschisă și mașinilor turiștilor (restul văii doar cu ghid navajo) | **POI C–G pe pământ**: suprafață `dirt`, grip mai mic (`loose_grip`), praf roșu în urma mașinilor |
 | **Rain God Mesa / Spearhead Mesa**: mesele pe lângă care trece Valley Drive | **POI E, trecătoarea**: defileul de 12 m al Dunelor (`custom_gorge_ranges`) devine culoarul dintre două mese |
@@ -158,23 +159,37 @@ orientarea buclei se derivă din el.
   380 m. Pe dreaptă sunt mai aproape, așa că vârful se taie progresiv. **E
   corect așa** (precedentul e fortul din Jodhpur): *stânca devine prea mare
   ca să încapă*. Nu se micșorează și nu se ridică marginea camerei.
-- **D ocolește monolitul cu el pe INTERIORUL curbei.** Memoria
-  `perete-paralel-nu-se-vede`: un perete paralel cu drumul e la 90°, adică
-  în afara cadrului. Doar o curbă care se strânge spre interior ține peretele
-  în parbriz. Contract: pe ≥ 70% din punctele lui D, peretele lui West Mitten
-  e la ≤ 50° de direcție. Drumul trece la **30–40 m** de piciorul peretelui,
-  pe grohotiș (memoria `munte-flanc-nu-fundal`: un masiv se simte doar la
-  < 40 m).
+- **D trece PRIN poarta dintre Mittens, nu în jurul unuia. Asta e
+  măsurat, nu ales.** Prima schiță (v0.1) ocolea West Mitten pe un arc de
+  rază constantă (78 m, apoi 52 m) în jurul lui. Generatorul de probă a dat
+  **0 din 19 puncte** cu monolitul în cadru: pe un cerc centrat pe obiect,
+  obiectul stă **exact la 90°**. Turnul (rază 25 m) apare abia la ≥ 61° de
+  direcție, adică mereu în afara cadrului de ±50° (memoria
+  `perete-paralel-nu-se-vede`, aici cu cifre). Varianta adoptată: Mittens
+  stau **de o parte și de alta a axei dreptei** (West Mitten la +7°, East
+  Mitten la −7,5° de pe coamă), deci drumul merge **spre ei** și trece
+  printre ei. Măsurat: **ambii în cadru pe 22 din 28 de puncte (79%)** de la
+  coamă până la poartă, iar centrele lor sunt la 38 m de axă. Cu turnul de
+  rază ~14 m și semilățimea de 6,5 m, pereții sunt la **~18 m de marginea
+  drumului** de fiecare parte (memoria `munte-flanc-nu-fundal`: un masiv se
+  simte doar la < 40 m). Grohotișul (`TerrainPeak`, rază ≤ 28 m) se oprește
+  la ~3,5 m de marginea drumului. Se verifică cu `ProbeBuried`. Contract:
+  ambii Mittens la ≤ 50° de direcție pe ≥ 70% din punctele dintre coamă și
+  poartă.
 - **Trecătoarea E e în contralumină.** E merge spre vest, cu soarele de
   18° în față, dar soarele e **peste** marginea de sus a cadrului (+5,25°),
   deci nu intră în cadru și nu orbește. Pereții sunt în umbră, cu muchia
   aprinsă. **Asta e intenția**: singurul loc întunecat al pistei. Se
   verifică pe captură că asfaltul nu devine o pată (memoria
   `umbra-fara-culoare-e-negru-mort`).
-- **Haboob-ul se vede de pe F.** Cornișa F e la **+14** față de câmpie și
-  merge spre nord, cu valea G în dreapta-față. Zidul are **50 m** de la cota
-  câmpiei, deci +36 față de drumul de pe cornișă. Calculul: 10 + 0,092·d ≥ 36
-  ⇒ **d ≥ 283 m** ca să încapă întreg. Între 150 și 280 m se vede tăiat sus,
+- **Haboob-ul se vede de pe F.** Cornișa F e la **+12…+13,5** față de câmpie
+  și merge spre nord, cu valea G în față și în dreapta. Zidul vine **dinspre
+  vest, din afara buclei**, peste masa din stânga cornișei, și traversează G
+  spre est. De pe cornișă e în **stânga-față, la ~30°, la ~300 m** (schița:
+  punctul F de la (−200, −360) vede centrul frontului de la (−350, −90) la
+  309 m și −29°). Zidul are **50 m** de la cota câmpiei, deci ~+37 față de
+  drumul de pe cornișă. Calculul: 10 + 0,092·d ≥ 37 ⇒ **d ≥ 293 m** ca să
+  încapă întreg. Între 150 și 280 m se vede tăiat sus,
   ca un zid mai înalt decât cadrul, și **asta e senzația căutată**. Contract:
   zidul e la **≤ 50° de direcție** pe ≥ 60% din punctele lui F, timp de
   **≥ 8 s înainte să atingă drumul din G**. Altfel telegraful nu există.
@@ -189,8 +204,8 @@ orientarea buclei se derivă din el.
   `caster-departat-fura-umbra`).
 
 Consecința: **platoul e respiro-ul, coama e dezvăluirea, dreapta e viteza
-spre siluete, Valley Drive e intrarea în tablou, ocolul lui West Mitten e
-peretele care te înghite, trecătoarea e umbra, cornișa e telegraful,
+spre siluete, Valley Drive e intrarea în tablou, poarta dintre Mittens e
+locul unde siluetele devin pereți, trecătoarea e umbra, cornișa e telegraful,
 câmpia e furtuna, albia e saltul, US-163 înapoi e drumul acasă.**
 
 ## 2. Traseul și punctele de interes (POI)
@@ -202,28 +217,35 @@ decide în §3.1 dacă e acceptabil pentru prima impresie.
 
 **Sens orar pe plan:**
 - A spre est, pe latura de nord;
-- B spre sud, pe latura de est;
-- C, D și E spre vest, pe latura de sud;
+- B, C și D spre sud, pe latura de est (drept prin poarta Mittens);
+- E spre vest, pe latura de sud;
 - F și G spre nord, pe latura de vest;
 - H spre est, înapoi pe latura de nord.
 
-Interiorul buclei e valea, cu Mittens-urile în colțul de SE. Convenția de
+Interiorul buclei e valea. Mittens-urile stau pe latura de est, de o parte și
+de alta a axei lui B–D. Merrick Butte e în afara buclei, la est. Convenția de
 hartă e cea din `gen_kyoto_route.py` (gx = x, gz = −y, **fără oglindire**):
 „dreapta” din brief e dreapta din cadru.
 
-Cote: platoul **+12 m**, câmpia **0 m**, trecătoarea **+4 → +10**, cornișa F
-**+14** (punctul cel mai înalt), fundul albiei **−5**, apoi înapoi pe platou
-la +12.
+Cote: platoul **+12 m**, câmpia **0 m**, trecătoarea **+3 → +9**, cornișa F
+**+12 → +13,5** (punctul cel mai înalt), fundul albiei **−5**, apoi înapoi
+pe platou la +12.
 
-Pante (de remăsurat):
+**Schița măsurată** (4 oct 2026, generator de probă pe tiparul
+`gen_kyoto_route.py`, fillet-uri pe arc, pas 12 m):
+- **2 100 m**, sens orar;
+- rază minimă **23,5 m** (colțul lui A);
+- pantă maximă **8,4%** (coborârea B);
+- separare minimă **94 m** între două porțiuni ale buclei;
+- centroid la (67, −199), Cebîșev **263 m** (zidul lumii e la 420).
 
 | porțiune | cote | lungime | pantă |
 |---|---|---|---|
-| coborârea B | 12 m | ~260 m | **4,6%** |
-| urcarea E | +4 → +10 | ~200 m | **3%** |
-| urcarea F | +10 → +14 | ~120 m | **3,3%** |
-| coborârea G | +14 → 0 | ~180 m | **7,8%** |
-| urcarea H | 0 → +12 | ~250 m | **4,8%** |
+| coborârea B (de pe coamă) | 12 → 0 | ~145 m | **8,4%** |
+| urcarea E (trecătoarea) | +3 → +9 | ~290 m | **~2%** |
+| urcarea F (cornișa) | +10 → +13,5 | ~270 m | **~1,3%** |
+| coborârea G | +13,5 → 0 | ~230 m | **~5,9%** |
+| urcarea H | 0 → +12 | ~320 m | **~3,7%** |
 
 **De măsurat cu ProbeLayout:** pantă < 13%, rază ≥ 9 m, apropiere de sine
 ≥ 20 m. Bucla stă la **< 420 m de centroid** și nimic sub plasa de mare
@@ -241,33 +263,73 @@ Pante (de remăsurat):
     │   ┌─[G′] scurtătura „Dunele”                ▼
     │   │   dunele roșii, Sand Springs         [C] grila pentru vite → Valley Drive
     │   └─────────┘                               │   pământ roșu, caii în libertate
-   [F] cornișa Artist's Point (+14)               ▼
-    ▲   valea în dreapta, haboob-ul vine       [D] ocolul lui West Mitten
-    │                                             │   peretele pe interior, grohotiș
-   [E′] arcul de gresie ◄── [E] trecătoarea dintre mese (+4→+10) ◄─┘
+   [F] cornișa Artist's Point (+13,5)             ▼
+    ▲   haboob-ul vine din stânga-față         [D] POARTA dintre Mittens
+    │                                          WM ▓│▓ EM  pereți la ~18 m, grohotiș
+   [E′] arcul de gresie ◄── [E] trecătoarea dintre mese (+3→+9) ◄──┘ viraj spre V
                                 defileu de 12 m în contralumină
 ```
 
 | # | frac | POI | ce se întâmplă | semilățime |
 |---|---|---|---|---|
-| **A** | 0.00–0.04 | **Start pe platou.** Asfalt, grila de start pe linia dublă galbenă. În stânga, postul de negoț de piatră cu prispă, un pickup vechi parcat, moara de vânt, turnul de apă. Câmpia **nu se vede încă**: buza platoului o ascunde | respiro; viraj larg la dreapta pe buză | 7 m |
-| **B** | 0.04–0.17 | **Coama și dreapta US-163.** Treci peste buza platoului și **valea se deschide**: Mittens și Merrick în capăt, pe ax, la 260–320 m (§2.0). Apoi o dreaptă de ~260 m în coborâre, cu stâlpi de telegraf pe dreapta, gard de sârmă și salvie | **momentul-semnătură vizual**. Prima dreaptă de turbo. Coama dă **airtime** dacă geometria o permite (§3, de măsurat); altfel e doar dezvăluire, și e destul | 7 m |
-| **C** | 0.17–0.26 | **Grila pentru vite și Valley Drive.** Viraj la dreapta de pe asfalt pe **pământ roșu**, peste grila pentru vite (huruit, §3). Semnul galben cu calul. **Doi cai** traversează drumul la ~37 s | **pragul de suprafață**: grip mai mic, praf roșu. Caii sunt hazardul de traversare | 6,5 m |
-| **D** | 0.26–0.40 | **Ocolul lui West Mitten.** Curbă lungă la dreapta (~120°, rază ~70 m) cu **monolitul pe interior**, pe grohotiș, la 30–40 m de piciorul peretelui de 30 m. **Rockfall #1** din grohotiș, pe un traseu desenat (`Path3D`) | **peretele care te înghite** (§2.0). Drift lung, deci **bara de turbo se încarcă**. Bolovanul vine din interiorul curbei, pe linia ideală | 6,5 m |
-| **E** | 0.40–0.51 | **Trecătoarea dintre mese.** Culoar spre vest între două mese, pereții `TrackCliffs` de 12 m la 0,8 m de drum (`custom_gorge_ranges`), în contralumină. **Rockfall #2** de pe peretele din stânga | **umbra**, singurul loc închis. Defileul Dunelor, cu un loc real | 5,5 m |
-| **E′** | 0.51 | **Arcul de gresie** peste drum, la ieșirea din trecătoare (`custom_arch_fracs`, `rocks/rock_arch.glb` recolorat pe clasa `mv_sandstone`) | **poarta**: ieșirea din umbră în lumină. Libertate declarată (§1) | 5,5 m |
-| **F** | 0.51–0.62 | **Cornișa de la Artist's Point.** Urcare scurtă pe buza unei mese (+14), drum de cornișă **fără parapet spre dreapta**, cu valea dedesubt (`custom_cornice_ravines`, cădere de ~14 m). **Haboob-ul se vede** traversând valea, în dreapta-față | **telegraful**: aici decizi dacă tai prin dune sau ocolești. Căzut = repunere (~2 s), cu `RespawnZone` | 6 m |
-| **G** | 0.62–0.84 | **Câmpia deschisă.** Coborâre de pe cornișă și drum de pământ peste câmpie, cu S-uri largi. **Haboob-ul traversează porțiunea asta** (§3). Un **vârtej de praf** (`DustDevilHazard`) rătăcește pe câmpie. **Al doilea grup de cai** la ~53 s | **furtuna**: vizibilitate scurtă și vânt lateral când te prinde. Altfel e cea mai rapidă porțiune pe pământ | 8 m (deschis) |
-| **G′** | 0.66–0.79 (buclă) | **Scurtătura „Dunele”**: `TrackBranch` peste dunele roșii de la Sand Springs, pe interiorul S-urilor din G, **~25% mai scurtă**. Suprafață `SAND`, `speed_factor` ~0,8, cocoașe de dună care dau salturi mici. Gura e la ieșirea din F, vizibilă de pe cornișă | **risc/recompensă** (principiul 3, **prima scurtătură** a pistei). Câștigul se reglează pe sondă la 0,5–1,5 s, ca la Chasm. Cu haboob-ul peste dune, gura nu se mai vede | 3,5 m (`branch_half_width`) |
-| **G2** | 0.80–0.83 | **Săritura peste albia secată.** Wash cu maluri tăiate, adânc de 5 m și lat de ~12 m, peste care drumul sare (`TrackChannel jump`, **fără apă**). Aterizare pe pământ, pe malul opus | **airtime** (principiul 1). Ratat = în albie = repunere (~2 s) | 7 m |
-| **H** | 0.84–1.00 | **US-163 înapoi.** Grila pentru vite înapoi pe asfalt, apoi o dreaptă lungă spre est, **în urcare spre platou**, cu soarele în spate. Stâlpi de telegraf, turnul de apă și moara pe ax | **a doua dreaptă de turbo**: aici se arde bara încărcată în D și în dune | 7 m |
+| **A** | 0.000–0.040 | **Start pe platou.** Asfalt, grila de start pe linia dublă galbenă. În stânga, postul de negoț de piatră cu prispă, un pickup vechi parcat, moara de vânt, turnul de apă. Câmpia **nu se vede încă**: buza platoului o ascunde | respiro; viraj larg la dreapta pe buză | 7 m |
+| **B** | 0.040–0.131 | **Coama și dreapta US-163.** Treci peste buza platoului (coama la 0.063) și **valea se deschide**: Mittens și Merrick în capăt, pe ax, la 260–310 m (§2.0). Apoi o dreaptă de ~150 m în coborâre, cu stâlpi de telegraf pe dreapta, gard de sârmă și salvie | **momentul-semnătură vizual**. Prima dreaptă de turbo. Coama dă **airtime** dacă geometria o permite (§3, de măsurat); altfel e doar dezvăluire, și e destul | 7 m |
+| **C** | 0.131–0.206 | **Grila pentru vite și Valley Drive.** Asfaltul se termină drept, la 0.137, peste grila pentru vite (huruit, §3), și dreapta continuă pe **pământ roșu**, spre Mittens. Semnul galben cu calul. **Doi cai** traversează drumul la ~37 s | **pragul de suprafață**: grip mai mic, praf roșu. Caii sunt hazardul de traversare | 6,5 m |
+| **D** | 0.206–0.297 | **Poarta dintre Mittens.** Dreapta trece printre West Mitten (dreapta) și East Mitten (stânga), cu pereții de 30 m la ~18 m de marginea drumului, pe grohotiș. **Rockfall #1** din grohotișul lui West Mitten, pe un traseu desenat (`Path3D`), peste drum în poartă. Apoi un **viraj larg la dreapta** (rază ~46 m, la 0.257), spre vest | **siluetele devin pereți** (§2.0). Virajul de după poartă cere drift, deci **bara de turbo se încarcă** | 6,5 m |
+| **E** | 0.297–0.434 | **Trecătoarea dintre mese.** Culoar spre vest între două mese, pereții `TrackCliffs` de 12 m la 0,8 m de drum (`custom_gorge_ranges`), în contralumină. **Rockfall #2** de pe peretele din stânga | **umbra**, singurul loc închis. Defileul Dunelor, cu un loc real | 5,5 m |
+| **E′** | 0.434 | **Arcul de gresie** peste drum, la ieșirea din trecătoare (`custom_arch_fracs`, `rocks/rock_arch.glb` recolorat pe clasa `mv_sandstone`) | **poarta**: ieșirea din umbră în lumină. Libertate declarată (§1) | 5,5 m |
+| **F** | 0.434–0.600 | **Cornișa de la Artist's Point.** Colț spre nord și urcare lină pe buza unei mese (+10 → +13,5), două curbe largi ale cornișei, **fără parapet spre dreapta**, cu valea dedesubt (`custom_cornice_ravines`, cădere de ~13 m). **Haboob-ul se vede** venind dinspre vest, în stânga-față | **telegraful**: aici decizi dacă tai prin dune sau ocolești. Căzut = repunere (~2 s), cu `RespawnZone` | 6 m |
+| **G** | 0.600–0.834 | **Câmpia deschisă.** Coborâre de pe cornișă și drum de pământ peste câmpie, cu S-uri largi. **Haboob-ul traversează porțiunea asta** (§3). Un **vârtej de praf** (`DustDevilHazard`) rătăcește pe câmpie. **Al doilea grup de cai** la ~53 s | **furtuna**: vizibilitate scurtă și vânt lateral când te prinde. Altfel e cea mai rapidă porțiune pe pământ | 8 m (deschis) |
+| **G′** | ~0.64–0.80 (buclă, de așezat la generator) | **Scurtătura „Dunele”**: `TrackBranch` peste dunele roșii de la Sand Springs, pe interiorul S-urilor din G, **~25% mai scurtă**. Suprafață `SAND`, `speed_factor` ~0,8, cocoașe de dună care dau salturi mici. Gura e la ieșirea din F, vizibilă de pe cornișă | **risc/recompensă** (principiul 3, **prima scurtătură** a pistei). Câștigul se reglează pe sondă la 0,5–1,5 s, ca la Chasm. Cu haboob-ul peste dune, gura nu se mai vede | 3,5 m (`branch_half_width`) |
+| **G2** | 0.834–0.846 | **Săritura peste albia secată.** Wash cu maluri tăiate, adânc de 5 m și lat de ~12 m, peste care drumul sare (`TrackChannel jump`, **fără apă**). Aterizare pe pământ, pe malul opus | **airtime** (principiul 1). Ratat = în albie = repunere (~2 s) | 7 m |
+| **H** | 0.846–1.000 | **US-163 înapoi.** Grila pentru vite înapoi pe asfalt, apoi o dreaptă lungă spre est, **în urcare spre platou**, cu soarele în spate. Stâlpi de telegraf, turnul de apă și moara pe ax | **a doua dreaptă de turbo**: aici se arde bara încărcată în D și în dune | 7 m |
+
+### 2.1 Schița de waypoint-uri (sursa generatorului)
+
+Măsurată pe 4 oct 2026 cu funcțiile din `gen_kyoto_route.py` (`fillet_loop`,
+`assign_elev`, `resample` la 12 m). Coordonate de hartă: x est, y nord, în metri;
+tuplu = (x, y, rază de fillet, cotă sau `None`, etichetă). Reperele sunt
+**puncte fixe ale schiței**, nu derivate din traseu, ca garda de azimut să nu se
+auto-confirme (memoria `garda-circulara-propria-functie`).
+
+```python
+WM = (262.0, -300.0)   # West Mitten
+EM = (338.0, -318.0)   # East Mitten
+MB = (372.0, -262.0)   # Merrick Butte (la est, in afara buclei)
+
+WPTS = [
+    (210, 40, 0, 12.0, "A start"),
+    (300, 40, 34, 12.0, "A colt spre S"),
+    (302, -8, 0, 12.0, "B coama"),
+    (300, -150, 0, 0.0, "B capat asfalt"),
+    (300, -166, 0, 0.0, "C grila"),
+    (300, -228, 0, 0.0, "C cai"),
+    (300, -309, 0, 0.5, "D poarta Mittens"),
+    (300, -428, 46, 1.5, "D viraj spre V"),
+    (210, -444, 0, 3.0, "E intrare trecatoare"),
+    (120, -436, 0, 4.5, "E1"),
+    (20, -450, 0, 6.5, "E2 defileu"),
+    (-80, -444, 0, 9.0, "E' arcul"),
+    (-150, -450, 44, 10.0, "F colt spre N"),
+    (-200, -360, 40, 12.0, "F cornisa 1"),
+    (-176, -258, 40, 13.5, "F cornisa 2"),
+    (-198, -186, 34, 14.0, "F capat cornisa"),
+    (-100, -160, 44, 6.0, "G S1 est"),
+    (40, -180, 46, 1.0, "G S1 apex"),
+    (80, -96, 44, 0.5, "G S1 iesire"),
+    (-70, -60, 44, 0.0, "G S2 vest"),
+    (-96, -14, 0, -0.5, "G2 albia"),
+    (-96, 12, 30, 0.0, "G2 aterizare"),
+    (-60, 40, 0, 1.0, "H inceput"),
+]
+```
 
 **Ritmul turului:**
 1. platou (respiro);
 2. coama (dezvăluirea);
 3. dreapta (turbo, siluetele cresc);
 4. grila (pragul de suprafață, caii);
-5. ocolul lui West Mitten (drift, peretele, bolovanul);
+5. poarta dintre Mittens (pereții, bolovanul), apoi virajul (drift);
 6. trecătoarea (umbra, bolovanul);
 7. arcul (poarta spre lumină);
 8. cornișa (telegraful, decizia);
@@ -567,7 +629,7 @@ consumator. Verdictele de aici sunt preliminare și se confirmă pe cod citit.
 2. **`Track19.tscn` din `tools/gen_monument_route.py`** (copie de
    `gen_kyoto_route.py`: pas 12 m, fillet-uri pe arc, **fără oglindire**):
    - garda de azimut scrisă **înaintea** traseului, pentru Mittens de pe coamă
-     (≤ 15°, 260–320 m), peretele din D (≤ 50° pe ≥ 70%) și soarele față de B
+     (≤ 15°, 260–320 m), ambii Mittens în cadru între coamă și poartă (≤ 50° pe ≥ 70%) și soarele față de B
      și E;
    - tema `monumentvalley` în `Track.themes()` (după structura temei kyoto),
      cheia în enum-ul `track_from_path.gd:26-27`, `info/Track19.tres`
@@ -598,7 +660,7 @@ consumator. Verdictele de aici sunt preliminare și se confirmă pe cod citit.
    `garda-circulara-propria-functie`).
 6. **Sonda de feel:** un tur singur, cu capturi `--gamecam` de pe coamă, din
    D și din trecătoare. **Verdictul dezvoltatorului la volan** pe pista goală:
-   se simte dezvăluirea de pe coamă? Ocolul lui West Mitten? Scurtătura prin
+   se simte dezvăluirea de pe coamă? Poarta dintre Mittens? Scurtătura prin
    dune e tentantă?
 7. **Haboob-ul**, după verdict:
    - `ProbeHaboob` pe o dreaptă: ceas determinist, mediu bit-identic la
@@ -624,7 +686,7 @@ consumator. Verdictele de aici sunt preliminare și se confirmă pe cod citit.
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
-- **Patru axe, scrise înaintea traseului.** Coama, ocolul pe interior și
+- **Patru axe, scrise înaintea traseului.** Coama, poarta dintre Mittens și
   cornișa spre vale sunt **derivate** din tabelul de frustum, nu descoperite
   după construcție.
 - **Scara e decizie, nu defect.** Mittens de 45 m în loc de 300 m, asumat.
@@ -691,6 +753,10 @@ Planșa de inventar are numele de fișier = contractul (categoria
 
 ## Istoric
 
+- **v0.1.1 (4 oct 2026):** traseul schițat și măsurat (2 100 m). POI D
+  devine **poarta dintre Mittens**: ocolul pe arc de rază constantă dădea 0
+  din 19 puncte în cadru (§2.0). Fracțiile, cotele și pantele sunt acum
+  măsurate.
 - **v0.1 (4 oct 2026):** concept. Aleasă dintre Monument Valley / Wadi Rum
   → Petra / Sahara marocană, cu traseul redesenat de la zero (~2,1 km), ca
   înlocuitor al Dunelor pe indexul 0. Hazard unic: haboob-ul. Structura

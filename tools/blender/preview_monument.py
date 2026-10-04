@@ -364,6 +364,8 @@ def chain(name, n=3, step=6.0, res_height=800):
             aspect=1.5, **cam)
 
 
+exec(open(os.path.join(HERE_P, "preview_specs_c.py")).read())   # mv-c
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
 if "--compare" in args:

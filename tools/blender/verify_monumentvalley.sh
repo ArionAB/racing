@@ -12,6 +12,14 @@
 #   --origin=assembly   monolitii au mai multe noduri (Rock/Scree/Cap) si
 #                       originea e la baza TURNULUI, nu la centrul bbox-ului:
 #                       fusta si degetul fac bbox-ul asimetric.
+#   --origin=assembly   (grupa mv-c) piesele de drum/gard/semne au mai multe noduri
+#                       pe rol (otel / lemn / izolatori): rotorul morii are PIVOT
+#                       propriu (butucul), semnul are rombul la 2 m. Ansamblul
+#                       trebuie doar sa atinga solul.
+#   --allow-car-slots=Sign_Face  rombul semnului "open range" e CAR_YELLOW (16):
+#                       galbenul de avertizare rutiera e singurul accent saturat
+#                       al grupei; stalpii cattle_guard NU il folosesc (galben
+#                       SAND_LIGHT + negru VOLCANIC_BLACK), deci n-au exceptie.
 
 set -u
 cd "$(dirname "$0")/../.." || exit 1
@@ -33,6 +41,17 @@ check() {  # check <cale> <buget> [flag...]
 
 echo "== pilotul (kit §3, val 0) =="
 check "rocks/west_mitten.glb" 12000 --origin=assembly
+
+echo
+echo "== grupa mv-c: drum, gard, semne =="
+check "props/cattle_guard.glb" 2500 --origin=assembly
+check "props/open_range_sign.glb" 1500 --origin=assembly --allow-car-slots=Sign_Face
+check "structures/telegraph_pole.glb" 1500 --origin=assembly
+check "structures/wire_fence.glb" 1500 --origin=assembly
+check "structures/windmill_pump.glb" 4000 --origin=assembly
+check "structures/water_tower.glb" 4000 --origin=assembly
+check "structures/corral.glb" 5000 --origin=assembly
+check "structures/shade_ramada.glb" 4000 --origin=assembly
 
 echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi

@@ -89,12 +89,34 @@ func _initialize() -> void:
 			_dump_id = arg.trim_prefix("--dump=")
 		elif arg.begins_with("--track="):
 			only = int(arg.trim_prefix("--track="))
-	for i in range(1, 10):
-		var path := "res://scenes/tracks/Track%02d.tscn" % i
-		if not ResourceLoader.exists(path):
-			continue
+	# Numerele de scena vin de PE DISC, nu dintr-un interval scris aici: `range(1, 10)`
+	# acoperea Track01..Track09 si lasa pistele de peste 9 nemasurate, iar un
+	# `--track=` care nu nimerea nimic tipara „OK" pe zero piste. Aici `--track=`
+	# e NUMARUL SCENEI (Track18 = 18), nu pozitia din GameState.TRACK_SCENES —
+	# scriptul ruleaza cu --script, unde autoload-urile nu exista.
+	var available := _scene_numbers()
+	for i in available:
 		if only < 0 or only == i:
-			_paths.append(path)
+			_paths.append("res://scenes/tracks/Track%02d.tscn" % i)
+	if _paths.is_empty():
+		printerr("probe_rock_fit: nicio pista selectata (--track=%d, scene pe disc: %s) — "
+			% [only, available] + "iese cu 1, fiindca o garda pe zero piste nu masoara nimic.")
+		# quit() din _initialize doar ridica un steag; _process verifica _done pe
+		# prima linie, altfel ar rula mai departe si ar tipari un verdict gol.
+		_done = true
+		quit(1)
+
+
+## Numerele de scena ale pistelor existente (Track01.tscn -> 1), crescator.
+func _scene_numbers() -> Array[int]:
+	var out: Array[int] = []
+	var re := RegEx.create_from_string("^Track(\\d+)\\.tscn$")
+	for f in DirAccess.get_files_at("res://scenes/tracks"):
+		var m := re.search(f)
+		if m != null:
+			out.append(int(m.get_string(1)))
+	out.sort()
+	return out
 
 
 func _process(_delta: float) -> bool:

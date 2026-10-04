@@ -1897,12 +1897,15 @@ static func themes() -> Dictionary:
 			"horizon_model": "res://assets/models/monumentvalley/rocks/horizon_mesas.glb",
 			"horizon_class": "mv_sandstone",
 			"horizon_rings": [
+				# Inelul apropiat: piesele joase/inguste (Stagecoach 30 m, King 32 m,
+				# Spires 34 m). Brigham (37 m x 60 m latime) e la 250+ m: masurat, la
+				# 59 m de sosea un bloc de 33 m citea ca geometrie apropiata, nu ca zare.
 				{"near": 190.0, "far": 260.0, "count": 5, "scale": 1.0,
 					"clear": 100.0, "picks": ["Stagecoach_A", "KingOnThrone_A",
-					"Spires_A", "BrighamsTomb_A"]},
-				{"near": 250.0, "far": 340.0, "count": 6, "scale": 1.2,
-					"clear": 140.0, "picks": ["EagleMesa_A", "FarMesa_A",
-					"FarMesa_B", "BrighamsTomb_A"]},
+					"Spires_A"]},
+				{"near": 250.0, "far": 340.0, "count": 6, "scale": 1.1,
+					"clear": 140.0, "picks": ["EagleMesa_A", "BrighamsTomb_A",
+					"FarMesa_A", "FarMesa_B"]},
 			],
 			# Arcul E': kitul are propriul (`sandstone_arch.glb`, golul masurat
 			# 15,45 m x 8,95 m — docs/asset_briefs/monumentvalley_inventory.md). Clasa

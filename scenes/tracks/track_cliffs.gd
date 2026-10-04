@@ -167,9 +167,13 @@ const VARIANT_TOLERANCE: float = 0.18
 ## iese bit-identica; o lume cu alta piatra (gresia rosie, granitul) o cere aici.
 static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 		landmarks: Array[Vector3], gorges: Array[Vector2] = [],
-		rock_class: String = "") -> Node3D:
+		rock_class: String = "", gorge_only: bool = false) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Cliffs"
+	# `gorge_only` (tema, cheia `cliffs_gorge_only`; Monument Valley): faleze DOAR in
+	# intervalele de defileu. Valea deschisa nu are zid pe marginea drumului — zidurile
+	# lipite de asfalt pe toata bucla ascundeau Mittens-urile chiar de pe coama (captura
+	# 0.063). Fals (implicit) = comportamentul vechi, bit-identic pe celelalte piste.
 	# Amprentele sectiunilor asezate, publicate pe nodul-radacina ca metadata.
 	# Decorul se construieste DUPA faleze si le citeste de aici ca sa nu-si
 	# planteze tufele in interiorul peretelui — vezi TrackDecor.build.
@@ -217,6 +221,8 @@ static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 				continue
 			var d := spec.frac * total
 			var gorge := _gorge_blend(spec.frac, gorges)
+			if gorge_only and gorge <= 0.0:
+				continue
 			if _near_landmark(d, side_sign, total, clear_at):
 				continue
 			# Culoarul de apropiere: perete, dar jos. Defileul bate regula —
@@ -253,6 +259,8 @@ static func build(sampler: TrackSideSampler, enabled: bool, seed_value: int,
 			if spec.side_sign != side_sign:
 				continue
 			var d := spec.frac * total
+			if gorge_only and _gorge_blend(spec.frac, gorges) <= 0.0:
+				continue
 			if _near_landmark(d, side_sign, total, clear_at,
 					TERRACE_CLEAR_AHEAD, TERRACE_CLEAR_BEHIND):
 				continue

@@ -401,6 +401,10 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 	if props == "stromboli":
 		_place_stromboli_prop(parent, spec, band, rng, mat_provider, satellite)
 		return
+	if props == "monumentvalley":
+		_place_monumentvalley_prop(parent, spec, band, rng, mat_provider,
+			satellite, sampler, solids, blockers)
+		return
 	var pos := spec.position
 	match band["name"]:
 		"hug":
@@ -527,6 +531,106 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 				if not _add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS,
 						1.00, 1.45):
 					_add_cactus(parent, pos, rng, mat_provider)
+
+
+## --- Set de prop-uri: Monument Valley (Track19) -----------------------------
+##
+## Pana aici o tema cu `props` necunoscut cadea pe ramura de desert (saguaro,
+## gard de ranch din Track.gd). Monument Valley n-are saguaro (cresc la 400 km
+## sud, brief §0.1) si nici ranch: aici cresc salvia, ienuparul si
+## rabbitbrush-ul, in TUFE grupate, si bolovani de gresie.
+##
+## Piesele vin din kiturile existente (zero GLB nou): bolovanii prin
+## `_add_canyon_rock` (clasa de roca a temei = `mv_sandstone`), tufele uscate din
+## `cappadocia/plants/shrub_dry.glb` (84 de triunghiuri) si smocurile din
+## megakit. Placeholder pana vin `sagebrush`/`rabbitbrush`/`juniper` din brief §5.3.
+const MV_SHRUB_PATH: String = "res://assets/models/cappadocia/plants/shrub_dry.glb"
+
+## Un CIOC de tufe uscate (2-4 bucati in 2.2 m): vegetatia de aici nu creste
+## singura, ci in petice, ca in poze. Fantoma (treci prin ea), ca tot frunzisul.
+static func _add_shrub_clump(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, s_min: float, s_max: float) -> bool:
+	var n := rng.randi_range(2, 4)
+	var placed := false
+	for i in n:
+		var off := Vector3(rng.randf_range(-2.2, 2.2), 0.0, rng.randf_range(-2.2, 2.2))
+		if _add_simple_prop(parent, MV_SHRUB_PATH, "Shrub_Dry", pos + off, rng,
+				s_min, s_max, -0.08):
+			placed = true
+	return placed
+
+
+## Cat de departe de marginea LOCALA a asfaltului incepe decorul Monument
+## Valley: raza celei mai late piese mici (Fan_A scalat ~1.1) plus o margine.
+const MV_ROAD_CLEAR_M: float = 1.4
+
+
+static func _place_monumentvalley_prop(parent: Node3D, spec: TrackDecorSpec,
+		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
+		satellite: bool, sampler: TrackSideSampler, solids: Array[Vector3],
+		blockers: Array) -> void:
+	var pos := spec.position
+	# Marginea benzii se calculeaza in amonte cu `sampler.half_width()`, adica
+	# MEDIA latimii. Pe Track19 G are 8 m fata de media de 7, deci sateliti si
+	# smocuri ajungeau cu pana la 0.60 m peste asfalt (probe_decor_overlap, 8
+	# piese). Aici se masoara fata de latimea LOCALA. Garda sta doar pe ramura
+	# asta: mutata in `_place_satellites` ar schimba consumul de RNG si ar
+	# reaseza decorul validat pe toate pistele cu `custom_width_segments`.
+	if sampler != null and sampler.clearance_at(pos) \
+			< sampler.half_width_at(spec.index) + MV_ROAD_CLEAR_M:
+		return
+	match band["name"]:
+		"hug":
+			# Lipit de asfalt: pietre mici (solide, cu umarul de 2 m) si smocuri.
+			if rng.randf() < 0.30 and _add_canyon_rock(parent, pos, rng, "S",
+					not satellite, 0.70, 1.20, 0.80, 1.20,
+					_shoulder(sampler, spec, solids, blockers)):
+				return
+			if rng.randf() < 0.45 and _add_kit_plant(parent, pos, rng,
+					KIT_SMALL_PLANTS, 0.70, 1.10):
+				return
+			_add_scatter(parent, pos, rng, mat)
+		"mid":
+			var roll := rng.randf()
+			if satellite or roll < 0.22:
+				# Fantoma: banda e coridorul de reintrare pe sosea.
+				if not _add_canyon_rock(parent, pos, rng, "S", false):
+					_add_cluster(parent, pos, rng, ["Cluster_S1", "Cluster_S2"],
+						false, mat)
+			elif roll < 0.62:
+				if not _add_shrub_clump(parent, pos, rng, 0.9, 1.5):
+					_add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS, 0.90, 1.35)
+			elif roll < 0.76:
+				_add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS, 0.90, 1.35)
+			else:
+				if not _add_canyon_rock(parent, pos, rng, "M", true,
+						0.80, 1.30, 0.85, 1.25,
+						_shoulder(sampler, spec, solids, blockers)):
+					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
+						true, mat)
+		"far":
+			# Plan intermediar: mase mari si rare (siluete), cu cate un peteci
+			# de tufe printre ele.
+			if rng.randf() < 0.25 and _add_shrub_clump(parent, pos, rng, 1.2, 1.9):
+				return
+			if not _add_canyon_rock(parent, pos, rng, "L", false,
+					1.05, 1.85, 1.35, 2.10):
+				_add_cluster(parent, pos, rng, ["Cluster_L1"], false, mat)
+		_:
+			var roll2 := rng.randf()
+			if satellite or roll2 < 0.40:
+				if not _add_canyon_rock(parent, pos, rng, "M", not satellite,
+						0.80, 1.30, 0.85, 1.25,
+						_shoulder(sampler, spec, solids, blockers)):
+					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
+						true, mat)
+			elif roll2 < 0.80:
+				if not _add_canyon_rock(parent, pos, rng, "L", true,
+						0.85, 1.25, 0.85, 1.25,
+						_shoulder(sampler, spec, solids, blockers)):
+					_add_cluster(parent, pos, rng, ["Cluster_L1"], true, mat)
+			else:
+				_add_shrub_clump(parent, pos, rng, 1.0, 1.6)
 
 
 ## --- Set de prop-uri: insula de recif ---------------------------------------

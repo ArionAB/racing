@@ -1,0 +1,265 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_bluff.gd" id="3_bluff"]
+[ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="4_branch"]
+[ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="5_channel"]
+[ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="6_hzm"]
+[ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="7_devil"]
+[ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="8_respawn"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/rocks/butte.glb" id="10_butte"]
+[ext_resource type="PackedScene" path="res://assets/models/jodhpur/animals/baraat_horse.glb" id="11_horse"]
+
+[sub_resource type="BoxShape3D" id="Box_cornisa"]
+size = Vector3(130.0, 12.0, 270.0)
+
+[sub_resource type="Curve3D" id="Curve3D_main"]
+closed = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 210.0, 12.0, -40.0, 0, 0, 0, 0, 0, 0, 222.0, 12.0, -40.0, 0, 0, 0, 0, 0, 0, 234.0, 12.0, -40.0, 0, 0, 0, 0, 0, 0, 246.0, 12.0, -40.0, 0, 0, 0, 0, 0, 0, 258.0, 12.0, -40.0, 0, 0, 0, 0, 0, 0, 270.0, 12.0, -40.0, 0, 0, 0, 0, 0, 0, 281.89, 12.0, -38.86, 0, 0, 0, 0, 0, 0, 292.47, 12.0, -33.58, 0, 0, 0, 0, 0, 0, 299.15, 12.0, -23.82, 0, 0, 0, 0, 0, 0, 301.16, 12.0, -12.04, 0, 0, 0, 0, 0, 0, 301.66, 12.0, -0.05, 0, 0, 0, 0, 0, 0, 301.94, 11.67, 11.94, 0, 0, 0, 0, 0, 0, 301.78, 10.65, 23.94, 0, 0, 0, 0, 0, 0, 301.61, 9.64, 35.94, 0, 0, 0, 0, 0, 0, 301.44, 8.63, 47.93, 0, 0, 0, 0, 0, 0, 301.27, 7.61, 59.93, 0, 0, 0, 0, 0, 0, 301.1, 6.6, 71.93, 0, 0, 0, 0, 0, 0, 300.93, 5.58, 83.93, 0, 0, 0, 0, 0, 0, 300.76, 4.57, 95.93, 0, 0, 0, 0, 0, 0, 300.59, 3.56, 107.93, 0, 0, 0, 0, 0, 0, 300.42, 2.54, 119.93, 0, 0, 0, 0, 0, 0, 300.25, 1.53, 131.93, 0, 0, 0, 0, 0, 0, 300.09, 0.51, 143.93, 0, 0, 0, 0, 0, 0, 300.0, 0.0, 155.92, 0, 0, 0, 0, 0, 0, 300.0, 0.0, 167.92, 0, 0, 0, 0, 0, 0, 300.0, 0.0, 179.92, 0, 0, 0, 0, 0, 0, 300.0, 0.0, 191.92, 0, 0, 0, 0, 0, 0, 300.0, 0.0, 203.92, 0, 0, 0, 0, 0, 0, 300.0, 0.0, 215.92, 0, 0, 0, 0, 0, 0, 300.0, 0.0, 227.92, 0, 0, 0, 0, 0, 0, 300.0, 0.07, 239.92, 0, 0, 0, 0, 0, 0, 300.0, 0.15, 251.92, 0, 0, 0, 0, 0, 0, 300.0, 0.22, 263.92, 0, 0, 0, 0, 0, 0, 300.0, 0.3, 275.92, 0, 0, 0, 0, 0, 0, 300.0, 0.37, 287.92, 0, 0, 0, 0, 0, 0, 300.0, 0.44, 299.92, 0, 0, 0, 0, 0, 0, 300.0, 0.53, 311.92, 0, 0, 0, 0, 0, 0, 300.0, 0.63, 323.92, 0, 0, 0, 0, 0, 0, 300.0, 0.74, 335.92, 0, 0, 0, 0, 0, 0, 300.0, 0.85, 347.92, 0, 0, 0, 0, 0, 0, 300.0, 0.95, 359.92, 0, 0, 0, 0, 0, 0, 300.0, 1.06, 371.92, 0, 0, 0, 0, 0, 0, 300.0, 1.17, 383.92, 0, 0, 0, 0, 0, 0, 298.88, 1.27, 395.83, 0, 0, 0, 0, 0, 0, 295.98, 1.38, 407.35, 0, 0, 0, 0, 0, 0, 289.98, 1.49, 417.74, 0, 0, 0, 0, 0, 0, 281.18, 1.69, 425.79, 0, 0, 0, 0, 0, 0, 270.85, 1.9, 431.53, 0, 0, 0, 0, 0, 0, 259.46, 2.11, 435.21, 0, 0, 0, 0, 0, 0, 247.65, 2.32, 437.31, 0, 0, 0, 0, 0, 0, 235.83, 2.54, 439.41, 0, 0, 0, 0, 0, 0, 224.02, 2.75, 441.51, 0, 0, 0, 0, 0, 0, 212.2, 2.96, 443.61, 0, 0, 0, 0, 0, 0, 200.28, 3.16, 443.14, 0, 0, 0, 0, 0, 0, 188.32, 3.36, 442.07, 0, 0, 0, 0, 0, 0, 176.37, 3.56, 441.01, 0, 0, 0, 0, 0, 0, 164.42, 3.76, 439.95, 0, 0, 0, 0, 0, 0, 152.47, 3.96, 438.89, 0, 0, 0, 0, 0, 0, 140.51, 4.16, 437.82, 0, 0, 0, 0, 0, 0, 128.56, 4.36, 436.76, 0, 0, 0, 0, 0, 0, 116.63, 4.57, 436.47, 0, 0, 0, 0, 0, 0, 104.74, 4.81, 438.14, 0, 0, 0, 0, 0, 0, 92.86, 5.04, 439.8, 0, 0, 0, 0, 0, 0, 80.97, 5.28, 441.46, 0, 0, 0, 0, 0, 0, 69.09, 5.52, 443.13, 0, 0, 0, 0, 0, 0, 57.21, 5.76, 444.79, 0, 0, 0, 0, 0, 0, 45.32, 5.99, 446.46, 0, 0, 0, 0, 0, 0, 33.44, 6.23, 448.12, 0, 0, 0, 0, 0, 0, 21.55, 6.47, 449.78, 0, 0, 0, 0, 0, 0, 9.59, 6.76, 449.38, 0, 0, 0, 0, 0, 0, -2.39, 7.06, 448.66, 0, 0, 0, 0, 0, 0, -14.37, 7.36, 447.94, 0, 0, 0, 0, 0, 0, -26.35, 7.66, 447.22, 0, 0, 0, 0, 0, 0, -38.33, 7.96, 446.5, 0, 0, 0, 0, 0, 0, -50.31, 8.26, 445.78, 0, 0, 0, 0, 0, 0, -62.28, 8.56, 445.06, 0, 0, 0, 0, 0, 0, -74.26, 8.86, 444.34, 0, 0, 0, 0, 0, 0, -86.23, 9.11, 444.53, 0, 0, 0, 0, 0, 0, -98.19, 9.31, 445.56, 0, 0, 0, 0, 0, 0, -110.14, 9.52, 446.58, 0, 0, 0, 0, 0, 0, -122.1, 9.72, 447.52, 0, 0, 0, 0, 0, 0, -134.03, 9.93, 446.25, 0, 0, 0, 0, 0, 0, -145.1, 10.14, 442.16, 0, 0, 0, 0, 0, 0, -154.98, 10.37, 435.64, 0, 0, 0, 0, 0, 0, -162.7, 10.59, 426.45, 0, 0, 0, 0, 0, 0, -168.8, 10.82, 416.16, 0, 0, 0, 0, 0, 0, -174.63, 11.04, 405.67, 0, 0, 0, 0, 0, 0, -180.46, 11.26, 395.18, 0, 0, 0, 0, 0, 0, -186.29, 11.49, 384.69, 0, 0, 0, 0, 0, 0, -192.11, 11.71, 374.2, 0, 0, 0, 0, 0, 0, -196.05, 11.94, 362.87, 0, 0, 0, 0, 0, 0, -196.74, 12.12, 351.06, 0, 0, 0, 0, 0, 0, -195.11, 12.3, 339.22, 0, 0, 0, 0, 0, 0, -192.36, 12.47, 327.54, 0, 0, 0, 0, 0, 0, -189.61, 12.64, 315.86, 0, 0, 0, 0, 0, 0, -186.87, 12.82, 304.18, 0, 0, 0, 0, 0, 0, -184.12, 12.99, 292.5, 0, 0, 0, 0, 0, 0, -181.37, 13.17, 280.82, 0, 0, 0, 0, 0, 0, -178.62, 13.34, 269.14, 0, 0, 0, 0, 0, 0, -177.57, 13.51, 257.22, 0, 0, 0, 0, 0, 0, -179.84, 13.6, 245.45, 0, 0, 0, 0, 0, 0, -183.34, 13.7, 233.97, 0, 0, 0, 0, 0, 0, -186.85, 13.8, 222.49, 0, 0, 0, 0, 0, 0, -188.92, 13.9, 210.7, 0, 0, 0, 0, 0, 0, -187.27, 13.99, 198.9, 0, 0, 0, 0, 0, 0, -181.51, 13.08, 188.43, 0, 0, 0, 0, 0, 0, -172.39, 12.11, 180.75, 0, 0, 0, 0, 0, 0, -161.29, 11.13, 176.26, 0, 0, 0, 0, 0, 0, -149.69, 10.16, 173.18, 0, 0, 0, 0, 0, 0, -138.09, 9.19, 170.11, 0, 0, 0, 0, 0, 0, -126.49, 8.21, 167.03, 0, 0, 0, 0, 0, 0, -114.89, 7.24, 163.95, 0, 0, 0, 0, 0, 0, -103.18, 6.27, 161.42, 0, 0, 0, 0, 0, 0, -91.23, 5.68, 161.26, 0, 0, 0, 0, 0, 0, -79.35, 5.24, 162.95, 0, 0, 0, 0, 0, 0, -67.47, 4.8, 164.65, 0, 0, 0, 0, 0, 0, -55.59, 4.36, 166.34, 0, 0, 0, 0, 0, 0, -43.71, 3.92, 168.04, 0, 0, 0, 0, 0, 0, -31.83, 3.48, 169.74, 0, 0, 0, 0, 0, 0, -19.95, 3.04, 171.44, 0, 0, 0, 0, 0, 0, -8.07, 2.6, 173.13, 0, 0, 0, 0, 0, 0, 3.81, 2.16, 174.83, 0, 0, 0, 0, 0, 0, 15.78, 1.72, 175.06, 0, 0, 0, 0, 0, 0, 27.41, 1.28, 172.76, 0, 0, 0, 0, 0, 0, 38.11, 0.97, 167.66, 0, 0, 0, 0, 0, 0, 47.27, 0.88, 160.02, 0, 0, 0, 0, 0, 0, 54.08, 0.79, 150.13, 0, 0, 0, 0, 0, 0, 59.35, 0.71, 139.37, 0, 0, 0, 0, 0, 0, 62.76, 0.62, 127.88, 0, 0, 0, 0, 0, 0, 62.7, 0.53, 116.02, 0, 0, 0, 0, 0, 0, 58.96, 0.47, 104.8, 0, 0, 0, 0, 0, 0, 51.94, 0.43, 95.3, 0, 0, 0, 0, 0, 0, 42.31, 0.39, 88.45, 0, 0, 0, 0, 0, 0, 31.11, 0.34, 84.27, 0, 0, 0, 0, 0, 0, 19.44, 0.3, 81.47, 0, 0, 0, 0, 0, 0, 7.77, 0.26, 78.66, 0, 0, 0, 0, 0, 0, -3.9, 0.22, 75.86, 0, 0, 0, 0, 0, 0, -15.57, 0.17, 73.06, 0, 0, 0, 0, 0, 0, -27.24, 0.13, 70.26, 0, 0, 0, 0, 0, 0, -38.9, 0.09, 67.46, 0, 0, 0, 0, 0, 0, -50.57, 0.05, 64.66, 0, 0, 0, 0, 0, 0, -61.78, 0.0, 60.41, 0, 0, 0, 0, 0, 0, -71.48, -0.1, 53.38, 0, 0, 0, 0, 0, 0, -78.91, -0.2, 44.0, 0, 0, 0, 0, 0, 0, -84.91, -0.3, 33.61, 0, 0, 0, 0, 0, 0, -90.82, -0.41, 23.17, 0, 0, 0, 0, 0, 0, -96.0, -0.47, 12.53, 0, 0, 0, 0, 0, 0, -95.93, -0.18, 0.54, 0, 0, 0, 0, 0, 0, -92.84, 0.09, -10.93, 0, 0, 0, 0, 0, 0, -85.44, 0.34, -20.21, 0, 0, 0, 0, 0, 0, -75.97, 0.58, -27.58, 0, 0, 0, 0, 0, 0, -66.49, 0.83, -34.95, 0, 0, 0, 0, 0, 0, -56.23, 1.15, -40.0, 0, 0, 0, 0, 0, 0, -44.23, 1.64, -40.0, 0, 0, 0, 0, 0, 0, -32.23, 2.13, -40.0, 0, 0, 0, 0, 0, 0, -20.23, 2.62, -40.0, 0, 0, 0, 0, 0, 0, -8.23, 3.11, -40.0, 0, 0, 0, 0, 0, 0, 3.77, 3.6, -40.0, 0, 0, 0, 0, 0, 0, 15.77, 4.09, -40.0, 0, 0, 0, 0, 0, 0, 27.77, 4.58, -40.0, 0, 0, 0, 0, 0, 0, 39.77, 5.06, -40.0, 0, 0, 0, 0, 0, 0, 51.77, 5.55, -40.0, 0, 0, 0, 0, 0, 0, 63.77, 6.04, -40.0, 0, 0, 0, 0, 0, 0, 75.77, 6.53, -40.0, 0, 0, 0, 0, 0, 0, 87.77, 7.02, -40.0, 0, 0, 0, 0, 0, 0, 99.77, 7.51, -40.0, 0, 0, 0, 0, 0, 0, 111.77, 8.0, -40.0, 0, 0, 0, 0, 0, 0, 123.77, 8.49, -40.0, 0, 0, 0, 0, 0, 0, 135.77, 8.98, -40.0, 0, 0, 0, 0, 0, 0, 147.77, 9.46, -40.0, 0, 0, 0, 0, 0, 0, 159.77, 9.95, -40.0, 0, 0, 0, 0, 0, 0, 171.77, 10.44, -40.0, 0, 0, 0, 0, 0, 0, 183.77, 10.93, -40.0, 0, 0, 0, 0, 0, 0, 195.77, 11.42, -40.0, 0, 0, 0, 0, 0, 0, 207.77, 11.91, -40.0),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 175
+
+[sub_resource type="Curve3D" id="Curve3D_dunele"]
+closed = false
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -57.84, 4.36, 143.06, 0, 0, 0, 0, 0, 0, -24.46, 3.03, 124.86, 0, 0, 0, 0, 0, 0, 8.92, 1.71, 106.66),
+"tilts": PackedFloat32Array(0, 0, 0)
+}
+point_count = 3
+
+[sub_resource type="Curve3D" id="Curve3D_rf1"]
+closed = false
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, -3, -2, 0, 0, 0, 0, 0, 0, 22, -5.5, -3, 0, 0, 0, 0, 0, 0, 30, -6, -3, 0, 0, 0, 0, 0, 0, 44, -5.5, -4),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[sub_resource type="Curve3D" id="Curve3D_rf2"]
+closed = false
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -2, -14, 0, 0, 0, 0, 0, 0, -2, -5, -26, 0, 0, 0, 0, 0, 0, -3, -6, -37, 0, 0, 0, 0, 0, 0, -3, -6, -52),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[node name="Track19" type="Node3D"]
+script = ExtResource("1_track")
+custom_name = "Monument Valley"
+custom_theme = "monumentvalley"
+custom_world_seed_name = "monumentvalley"
+custom_half_width = 7.0
+custom_road_surface = "asphalt"
+custom_gate_model = "none"
+custom_sun_rotation_deg = Vector3(-18, -70, 0)
+custom_sea_level_offset = -27.58
+custom_width_segments = Array[Vector3]([Vector3(0.131, 0.297, 6.5), Vector3(0.297, 0.434, 5.5), Vector3(0.434, 0.6, 6.0), Vector3(0.6, 0.834, 8.0)])
+custom_dirt_ranges = Array[Vector2]([Vector2(0.137, 0.86)])
+custom_gorge_ranges = Array[Vector2]([Vector2(0.33, 0.42)])
+custom_arch_fracs = Array[float]([0.434])
+custom_ravines = Array[Vector4]([Vector4(0.47, 0.6, 13.0, 1)])
+custom_cornice_ravines = Array[int]([0])
+custom_ravine_widths = Array[Vector2]([Vector2(0, 45.0)])
+custom_landmarks = Array[Vector3]([Vector3(0.012, -1, 0), Vector3(0.028, -1, 2)])
+traffic_count = 0
+terrain_pad_m = 260.0
+
+[node name="Path" type="Path3D" parent="."]
+curve = SubResource("Curve3D_main")
+
+[node name="Peaks" type="Node3D" parent="."]
+
+[node name="WestMitten" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 262.00, 15.00, 300.00)
+gizmo_extents = 28.0
+script = ExtResource("2_peak")
+radius_m = 28.0
+
+[node name="EastMitten" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 338.00, 15.00, 318.00)
+gizmo_extents = 28.0
+script = ExtResource("2_peak")
+radius_m = 28.0
+
+[node name="Merrick" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 372.00, 15.00, 262.00)
+gizmo_extents = 28.0
+script = ExtResource("2_peak")
+radius_m = 28.0
+
+[node name="EscarpaA" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 270.00, 12.00, 6.00)
+gizmo_extents = 40.0
+script = ExtResource("3_bluff")
+half_width_m = 90.0
+side_fade_m = 30.0
+run_m = 24.0
+drop_m = 12.0
+terrace_count = 1
+terrace_tread_m = 40.0
+terrace_rise_m = 0.0
+length_m = 190.0
+end_fade_m = 40.0
+road_clear_m = 8.0
+
+[node name="Dunele" type="Path3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+curve = SubResource("Curve3D_dunele")
+script = ExtResource("4_branch")
+branch_half_width = 3.5
+label = "Scurtatura Dunele"
+entry_at = 0.64571
+exit_at = 0.75429
+speed_factor = 0.8
+surface = 1
+bumpiness = 0.06
+
+[node name="Hazarduri" type="Node3D" parent="."]
+
+[node name="AlbiaG2" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95.78, -0.46, 12.99)
+gizmo_extents = 40.0
+script = ExtResource("5_channel")
+gap = 8.0
+water_half = 6.0
+bank = 8.0
+depth = 5.0
+reach = 40.0
+fade = 14.0
+jump = true
+dry = true
+build_towers = false
+build_ships = false
+respawn_past_gap = true
+label = "albia secata G2"
+
+[node name="BolovanD" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 278.00, 6.00, 306.00)
+gizmo_extents = 3.0
+script = ExtResource("6_hzm")
+kind = 1
+rock_pause = 13.0
+
+[node name="Traseu" type="Path3D" parent="Hazarduri/BolovanD"]
+curve = SubResource("Curve3D_rf1")
+
+[node name="BolovanE" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.00, 9.00, 478.00)
+gizmo_extents = 3.0
+script = ExtResource("6_hzm")
+kind = 1
+rock_pause = 17.0
+
+[node name="Traseu" type="Path3D" parent="Hazarduri/BolovanE"]
+curve = SubResource("Curve3D_rf2")
+
+[node name="CalC1" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300.000, 0.000, 226.654)
+gizmo_extents = 3.0
+script = ExtResource("6_hzm")
+model = ExtResource("11_horse")
+model_node = "Horse"
+face_travel = true
+motion = 1
+sweep_speed = 2.0
+
+[node name="CalC2" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300.000, 0.014, 230.130)
+gizmo_extents = 3.0
+script = ExtResource("6_hzm")
+model = ExtResource("11_horse")
+model_node = "Horse"
+face_travel = true
+motion = 1
+sweep_speed = 2.0
+
+[node name="CalG1" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.214, 0.222, 76.269)
+gizmo_extents = 3.0
+script = ExtResource("6_hzm")
+model = ExtResource("11_horse")
+model_node = "Horse"
+face_travel = true
+motion = 1
+sweep_speed = 2.0
+
+[node name="CalG2" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.595, 0.210, 75.457)
+gizmo_extents = 3.0
+script = ExtResource("6_hzm")
+model = ExtResource("11_horse")
+model_node = "Horse"
+face_travel = true
+motion = 1
+sweep_speed = 2.0
+
+[node name="VartejG" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.00, 1.00, 125.00)
+script = ExtResource("7_devil")
+amplitude = Vector2(30, 18)
+dust_amount = 24
+debris_amount = 10
+cone_color = Color(0.62, 0.34, 0.2, 1)
+
+[node name="PlasaCornisa" type="Area3D" parent="Hazarduri"]
+monitorable = false
+script = ExtResource("8_respawn")
+
+[node name="Cutie" type="CollisionShape3D" parent="Hazarduri/PlasaCornisa"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120.0, -2.0, 320.0)
+shape = SubResource("Box_cornisa")
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("9_prop")
+
+[node name="WM_Turn" parent="DecorManual" instance=ExtResource("10_butte")]
+transform = Transform3D(0.80814, 0, -0.29414, 0, 0.86, 0, 0.29414, 0, 0.80814, 262.00, 16.90, 300.00)
+metadata/clasa_triplanara = "mv_sandstone"
+
+[node name="Butte_A" parent="DecorManual/WM_Turn" index="0"]
+visible = false
+
+[node name="Butte_C" parent="DecorManual/WM_Turn" index="2"]
+visible = false
+
+[node name="Mesa_A" parent="DecorManual/WM_Turn" index="3"]
+visible = false
+
+[node name="Mesa_B" parent="DecorManual/WM_Turn" index="4"]
+visible = false
+
+[node name="EM_Turn" parent="DecorManual" instance=ExtResource("10_butte")]
+transform = Transform3D(-0.75175, 0, 0.27362, 0, 0.8, 0, -0.27362, 0, -0.75175, 338.00, 16.40, 318.00)
+metadata/clasa_triplanara = "mv_sandstone"
+
+[node name="Butte_A" parent="DecorManual/EM_Turn" index="0"]
+visible = false
+
+[node name="Butte_C" parent="DecorManual/EM_Turn" index="2"]
+visible = false
+
+[node name="Mesa_A" parent="DecorManual/EM_Turn" index="3"]
+visible = false
+
+[node name="Mesa_B" parent="DecorManual/EM_Turn" index="4"]
+visible = false
+
+[node name="MB_Turn" parent="DecorManual" instance=ExtResource("10_butte")]
+transform = Transform3D(-0.21205, 0, -0.58261, 0, 0.62, 0, 0.58261, 0, -0.21205, 372.00, 15.90, 262.00)
+metadata/clasa_triplanara = "mv_sandstone"
+
+[node name="Butte_A" parent="DecorManual/MB_Turn" index="0"]
+visible = false
+
+[node name="Butte_B" parent="DecorManual/MB_Turn" index="1"]
+visible = false
+
+[node name="Mesa_A" parent="DecorManual/MB_Turn" index="3"]
+visible = false
+
+[node name="Mesa_B" parent="DecorManual/MB_Turn" index="4"]
+visible = false

@@ -1823,6 +1823,86 @@ static func themes() -> Dictionary:
 			"water_lit_normal": 0.20,
 			"water_lit_wave_len": 1.4,
 		},
+		"monumentvalley": {
+			# MONUMENT VALLEY, DUPA-AMIAZA TARZIE (docs/track_briefs/monument_valley.md
+			# §0.1, §4). Pasul 1-2 din §7: lumina, cerul, solul, clasa de gresie si
+			# fundalul provizoriu. Decorul procedural e doar rar (props
+			# `monumentvalley`: bolovani + tufe uscate, fara saguaro); reperele (turnurile
+			# Mittens, post de negot) sunt DecorManual pe POI.
+			#
+			# SOARELE: 18 grade, din VSV. Unghiul real vine din
+			# `custom_sun_rotation_deg` al pistei (se remasoara la fiecare redesenare a
+			# traseului); cel din tema e doar implicitul (-18, -70, 0).
+			"sun_color": Color.html("FFD2A0"),
+			"sun_energy": 1.0,
+			# DE CALIBRAT: 1.0 e un punct de pornire, NU 1.30 din desert (acolo
+			# valoarea e masurata pe nisip auriu cu soare de 42 grade). Se masoara
+			# gresia si asfaltul pe captura --gamecam (memoria
+			# monocromia-se-masoara-dupa-remap).
+			"exposure": 1.0,
+			"sun_rotation_deg": Vector3(-18, -70, 0),
+			# AMBIENT rece: umbrele lungi trag spre albastru, nu spre negru (memoria
+			# umbra-fara-culoare-e-negru-mort).
+			"ambient_color": Color.html("A9BEDD"),
+			"ambient_energy": 0.30,
+			# Cer albastru adanc sus, cald la orizont (brief §4).
+			"sky_top": Color.html("3F79C9"),
+			"sky_horizon": Color.html("F1D3AA"),
+			"sky_cover_alpha": 0.0,
+			# Ceata calda: 120 -> 360 m. fog_end 360 < ChaseCamera.FAR_PLANE 380
+			# (memoria efecte-de-fundal-cote-legate); inelele de orizont stau sub
+			# fog_end, la 190-340 m.
+			"fog": Color.html("E4C7A4"),
+			"fog_sky_affect": 0.10,
+			"fog_depth": true,
+			"fog_begin": 120.0,
+			"fog_end": 360.0,
+			"fog_curve": 1.4,
+			"fog_max": 0.80,
+			# Umbre PORNITE, shadow_distance 90 (CLAUDE.md: prima setare de stins
+			# pe device). La 18 grade umbra are ~3x inaltimea obiectului.
+			"shadows": true,
+			"shadow_opacity": 0.65,
+			"shadow_distance": 90.0,
+			"shadow_blur": 1.0,
+			# Nisipul campiei: TILE_TERRACOTTA citit ca culoare de pornire (#C4784F
+			# in brief), de impins spre rosu prin tenta dupa captura.
+			"ground_tint": Palette.color(Palette.TILE_TERRACOTTA),
+			"hill_color": Color(0.54, 0.29, 0.20),
+			# Drumul de pamant (Valley Drive): rosu-portocaliu (brief §4). Pista
+			# declara `custom_dirt_ranges` pe C-G; grip-ul vine din `loose_grip`.
+			"dirt_road_tint": Color(0.72, 0.42, 0.28),
+			"loose_grip": 7.0,
+			"dust_color": Color(0.62, 0.34, 0.20),
+			# Scurtatura Dunele (G'): nisip rosu, SAND implicit.
+			"branch_tint": Color(0.80, 0.50, 0.34),
+			# Gresia: clasa NOUA `mv_sandstone` (Palette) pe falezele trecatorii, pe
+			# arc, pe bolovanii care cad si pe siluetele de orizont. `rock`,
+			# `red_valley_tuff` & co raman neatinse: alte piste, aceeasi dala.
+			"rock_class": "mv_sandstone",
+			"rockfall_class": "mv_sandstone",
+			# ORIZONT PROVIZORIU: butte.glb (Butte_A..C, Mesa_A/B) pe inele la
+			# 190-340 m, sub fog_end 360 < FAR_PLANE 380. `mv_horizon.glb` (brief
+			# §5.4) il inlocuieste cand vine kitul. Fara umbra aruncata
+			# (`_build_horizon` o stinge: caster-departat-fura-umbra).
+			"horizon_model": "res://assets/models/rocks/butte.glb",
+			"horizon_class": "mv_sandstone",
+			"horizon_rings": [
+				{"near": 190.0, "far": 250.0, "count": 5, "scale": 1.3,
+					"clear": 100.0, "picks": ["Butte_A", "Butte_B", "Mesa_A"]},
+				{"near": 250.0, "far": 340.0, "count": 6, "scale": 2.0,
+					"clear": 140.0, "picks": ["Butte_C", "Butte_B", "Mesa_B"]},
+			],
+			"walls": false,
+			"kerbs": false,
+			"cliffs": true,
+			# Faleze doar in defileu (E): valea deschisa n-are zid pe marginea drumului.
+			"cliffs_gorge_only": true,
+			"decor": "bands",
+			"props": "monumentvalley",
+			"hazard_model": "",
+			"water": false,
+		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
 			"sky_top": Color(0.22, 0.48, 0.9),
@@ -13709,7 +13789,7 @@ func _build_world_decor() -> void:
 	_decor_roots.clear()
 	var cliffs := TrackCliffs.build(_sampler, theme_flag("cliffs", false),
 		_world_seed(), _cliff_clearings(), _gorge_ranges(),
-		String(theme_flag("rock_class", "")))
+		String(theme_flag("rock_class", "")), bool(theme_flag("cliffs_gorge_only", false)))
 	add_child(cliffs)
 	_decor_roots.append(cliffs)
 	# FALEZELE DECLARATE ca noduri [CliffFace]: geometrie reala, nu versant de

@@ -362,13 +362,14 @@ PEAK_R = 28.0
 PEAK_H = 15.0
 peaks = [("WestMitten", WM_REAL), ("EastMitten", EM), ("Merrick", MB)]
 # turnurile: Butte_B/Butte_C din rocks/butte.glb, scalate la ~30 m (placeholder, §5.2)
-TOWERS = [  # nume, pozitie harta, varianta pastrata, scala, rotatie y (grade)
-    ("WM_Turn", WM_REAL, "Butte_B", 0.86, 20.0),
-    ("EM_Turn", EM, "Butte_B", 0.80, 200.0),
-    ("MB_Turn", MB, "Butte_C", 0.62, 110.0),
+# Cota bazei = cota terenului MASURATA cu probe_manual (talusul iese la 15.9-16.8, nu la
+# PEAK_H=15: banda de protectie a asfaltului ridica varful); sub ea turnul e INGROPAT.
+TOWERS = [  # nume, pozitie harta, varianta pastrata, scala, rotatie y (grade), cota bazei
+    ("WM_Turn", WM_REAL, "Butte_B", 0.86, 20.0, 16.9),
+    ("EM_Turn", EM, "Butte_B", 0.80, 200.0, 16.4),
+    ("MB_Turn", MB, "Butte_C", 0.62, 110.0, 15.9),
 ]
 VARIANTS = ["Butte_A", "Butte_B", "Butte_C", "Mesa_A", "Mesa_B"]
-TOWER_Y = 13.0
 
 # --- Bluff: escarpa de la sud de A ---------------------------------------------------
 bluff_g = (270.0, 12.0, 6.0)
@@ -614,8 +615,8 @@ shape = SubResource("Box_cornisa")
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("9_prop")
 """
-for nm, xy, keep, sc, rot in TOWERS:
-    g = (xy[0], TOWER_Y, -xy[1])
+for nm, xy, keep, sc, rot, ty in TOWERS:
+    g = (xy[0], ty, -xy[1])
     c, s_ = math.cos(math.radians(rot)), math.sin(math.radians(rot))
     tscn += f"""
 [node name="{nm}" parent="DecorManual" instance=ExtResource("10_butte")]

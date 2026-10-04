@@ -217,7 +217,7 @@ shape = SubResource("Box_cornisa")
 script = ExtResource("9_prop")
 
 [node name="WM_Turn" parent="DecorManual" instance=ExtResource("10_butte")]
-transform = Transform3D(0.80814, 0, -0.29414, 0, 0.86, 0, 0.29414, 0, 0.80814, 262.00, 13.00, 300.00)
+transform = Transform3D(0.80814, 0, -0.29414, 0, 0.86, 0, 0.29414, 0, 0.80814, 262.00, 16.90, 300.00)
 
 [node name="Butte_A" parent="DecorManual/WM_Turn" index="0"]
 visible = false
@@ -232,7 +232,7 @@ visible = false
 visible = false
 
 [node name="EM_Turn" parent="DecorManual" instance=ExtResource("10_butte")]
-transform = Transform3D(-0.75175, 0, 0.27362, 0, 0.8, 0, -0.27362, 0, -0.75175, 338.00, 13.00, 318.00)
+transform = Transform3D(-0.75175, 0, 0.27362, 0, 0.8, 0, -0.27362, 0, -0.75175, 338.00, 16.40, 318.00)
 
 [node name="Butte_A" parent="DecorManual/EM_Turn" index="0"]
 visible = false
@@ -247,7 +247,7 @@ visible = false
 visible = false
 
 [node name="MB_Turn" parent="DecorManual" instance=ExtResource("10_butte")]
-transform = Transform3D(-0.21205, 0, -0.58261, 0, 0.62, 0, 0.58261, 0, -0.21205, 372.00, 13.00, 262.00)
+transform = Transform3D(-0.21205, 0, -0.58261, 0, 0.62, 0, 0.58261, 0, -0.21205, 372.00, 15.90, 262.00)
 
 [node name="Butte_A" parent="DecorManual/MB_Turn" index="0"]
 visible = false

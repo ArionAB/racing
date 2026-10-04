@@ -81,6 +81,8 @@ SPECS = {
 }
 
 
+exec(open(os.path.join(HERE_P, "preview_specs_f.py")).read())   # mv-f
+
 def _srgb_to_linear(c):
     return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
 
@@ -177,6 +179,16 @@ def _import(spec, name):
                 bpy.data.objects.remove(o, do_unlink=True)
                 meshes.remove(o)
     bpy.context.view_layer.update()
+    if spec.get("spread"):         # GLB cu siluete separate, toate la origine: le asezam in rand
+        order = spec["spread"]
+        meshes.sort(key=lambda o: order.index(o.name.split(".")[0])
+                    if o.name.split(".")[0] in order else 99)
+        x = 0.0
+        for o in meshes:
+            lo, hi = _bounds([o])
+            o.location.x += x - lo.x
+            x += (hi.x - lo.x) + spec.get("spread_gap", 25.0)
+        bpy.context.view_layer.update()
     import re
     for o in meshes:
         _fix_ao_layer_name(o)

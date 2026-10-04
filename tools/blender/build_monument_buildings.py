@@ -30,17 +30,19 @@ AO_BLD = dict(samples=16, dist=1.6, gradient="vertical",
               low=0.62, high=1.0, power=0.8, floor=0.30)
 
 
-def opening_pair(ph, pw, cx, cz, w, h, y, bars=True, frame=0.12):
+def opening_pair(ph, pw, cx, cz, w, h, y, bars=True, frame=0.12, dark=None, fslot=None):
     """Gol (fereastra/usa) pe un perete a carui fata locala e la `y` (+Y spre
     exterior): panoul intunecat pe `ph` (nodul de goluri), rama de lemn pe 4
     laturi si (optional) un montant pe `pw`."""
-    ph.box((cx, y + 0.03, cz), (w, 0.08, h), HOLE)
-    pw.box((cx, y + 0.07, cz + h / 2 + frame / 2), (w + 2 * frame, 0.14, frame), TIMBER)
-    pw.box((cx, y + 0.07, cz - h / 2 - frame / 2), (w + 2 * frame, 0.14, frame), TIMBER)
+    dark = HOLE if dark is None else dark
+    fs = TIMBER if fslot is None else fslot
+    ph.box((cx, y + 0.03, cz), (w, 0.08, h), dark)
+    pw.box((cx, y + 0.07, cz + h / 2 + frame / 2), (w + 2 * frame, 0.14, frame), fs)
+    pw.box((cx, y + 0.07, cz - h / 2 - frame / 2), (w + 2 * frame, 0.14, frame), fs)
     for sx in (-1, 1):
-        pw.box((cx + sx * (w / 2 + frame / 2), y + 0.07, cz), (frame, 0.14, h + 2 * frame), TIMBER)
+        pw.box((cx + sx * (w / 2 + frame / 2), y + 0.07, cz), (frame, 0.14, h + 2 * frame), fs)
     if bars:
-        pw.box((cx, y + 0.09, cz), (0.07, 0.12, h), TIMBER)
+        pw.box((cx, y + 0.09, cz), (0.07, 0.12, h), fs)
 
 
 def side_pens(bh, bw, y, x_face, yaw):
@@ -65,50 +67,62 @@ def stone_stack(pen, cx, cy, size, z0, z1, course, slots):
 # ---------------------------------------------------------------------------
 
 def build_trading_post():
-    """`trading_post.png`. Lista de elemente (numarata pe decupare):
-    - CORP: 1 volum de piatra gal-bruna 11,6 x 6,8 m (decupare: zid de blocuri
+    """`trading_post.png` (acoperis in patru ape, jos, tan: corectura coordonatorului
+    fata de contractul initial, vezi kit §1.5). Lista de elemente (numarata pe decupare):
+    - CORP: 1 volum de piatra deschisa 11,0 x 6,4 m (decupare: zid de blocuri
       mari), pe un soclu, cu pietre de colt alternante (7 randuri x 4 colturi);
+    - ACOPERIS in PATRU APE, jos (pante ~20 grade), streasina de ~0,6 m, mijloc
+      plat, tan (SAND_MID); acoperisul prispei il continua (lean-to);
     - PRISPA pe fata +Y: duscheata de lemn, 5 stalpi rotunzi (decupare: 5),
-      grinda continua, acoperis INCLINAT spre exterior (lean-to) mai jos decat
-      cel principal, 1 treapta in fata;
+      grinda continua, 1 treapta in fata;
     - FATA: 1 usa la mijloc (intunecata, rama de lemn), 2 ferestre (cate una de
       o parte si de alta a usii), 1 fereastra pe fiecare perete lateral;
-    - ACOPERIS principal PLAT (contract) cu parapet de piatra, tabla gri;
-    - COS: 1 cos de piatra patrat, ~2,5 m peste parapet, felii pe 2 sloturi,
-      calota si gura neagra, in spatele-stanga (decupare: central-spate).
+    - COS: 1 cos de piatra ~1,6 x 1,6 m, gros, felii pe ROCK_LIGHT/SAND_LIGHT,
+      calota in 2 trepte si gura neagra, spate-stanga pe acoperis (decupare: central-spate).
     Fara firma si fara text. Noduri: Post_Stone, Post_Wood, Post_Roof, Post_Openings.
     """
     st, wd, rf, ho = Builder(), Builder(), Builder(), Builder()
     S, W_, R, H = Pen(st), Pen(wd), Pen(rf), Pen(ho)
-    cy = -1.0                                      # centrul corpului pe Y (corp y -4.4..2.4)
-    S.box((0, cy - 0.1, 0.15), (12.0, 7.2, 0.3), STONE_LT)                  # soclu
-    S.box((0, cy, 0.3 + 2.075), (11.6, 6.8, 4.15), STONE)                   # pereti
+    cy = -1.0                                      # centrul corpului pe Y (corp y -4.2..2.2)
+    FW = 2.2                                       # fata corpului (spre +Y)
+    S.box((0, cy, 0.15), (11.4, 6.8, 0.3), ROCK_LIGHT)                      # soclu
+    S.box((0, cy, 0.3 + 2.075), (11.0, 6.4, 4.15), SAND_LIGHT)              # pereti
     for sx in (-1, 1):                                                      # pietre de colt
         for sy in (-1, 1):
             for k in range(7):
-                S.box((sx * 5.78, cy + sy * 3.38, 0.6 + k * 0.6), (0.5, 0.5, 0.58),
-                      STONE_LT if k % 2 == 0 else STONE)
-    R.box((0, cy, 4.53), (12.0, 7.2, 0.16), ROOF_TIN)                       # acoperis plat
-    for (px, py, sx_, sy_) in ((0, cy + 3.5, 12.0, 0.25), (0, cy - 3.5, 12.0, 0.25),
-                               (-5.875, cy, 0.25, 7.2), (5.875, cy, 0.25, 7.2)):
-        S.box((px, py, 4.81), (sx_, sy_, 0.4), STONE_LT)                    # parapet
-    stone_stack(S, -3.0, cy - 1.6, 1.3, 4.6, 7.2, 0.4, (STONE, STONE_LT))   # cos
-    S.box((-3.0, cy - 1.6, 7.4), (1.55, 1.55, 0.2), STONE_LT)
-    H.box((-3.0, cy - 1.6, 7.51), (0.8, 0.8, 0.06), HOLE)
-    W_.box((0, 3.3, 0.2), (12.0, 1.8, 0.4), TIMBER)                         # prispa y 2.4..4.2
-    W_.box((0, 4.35, 0.1), (3.0, 0.3, 0.2), TIMBER_OLD)                     # treapta pana la y 4.5
-    for px in (-5.6, -2.8, 0.0, 2.8, 5.6):
-        W_.tube((px, 4.0, 0.4), (px, 4.0, 3.88), 0.15, 0.13, TIMBER, seg=8)
-    W_.box((0, 4.0, 3.95), (12.0, 0.3, 0.26), TIMBER_OLD)
-    R.box((0, 3.45, 4.12), (12.0, 2.2, 0.14), ROOF_TIN, rot=Matrix.Rotation(-0.13, 3, "X"))
-    opening_pair(H, W_, 0.0, 1.6, 1.5, 2.4, 2.4, bars=False)                # usa (fata +Y)
+                S.box((sx * 5.48, cy + sy * 3.18, 0.6 + k * 0.6), (0.5, 0.5, 0.58),
+                      ROCK_LIGHT if k % 2 == 0 else SAND_MID)
+    # acoperis in patru ape: streasina (fascie) + panta ~20 grade + mijloc plat
+    hx, hy = 5.5 + 0.6, 3.2 + 0.6
+    R.loft(rect_(hx, hy), 4.36, rect_(hx, hy), 4.52, SAND_MID, cap_bottom=True)
+    ix, iy = hx - 1.9, hy - 1.9
+    R.loft(rect_(hx, hy), 4.52, rect_(ix, iy), 4.52 + 1.9 * math.tan(math.radians(20.0)),
+           SAND_MID, cap_bottom=False)
+    ztop = 4.52 + 1.9 * math.tan(math.radians(20.0))
+    cx_, cy_ = -2.6, cy - 0.7
+    stone_stack(S, cx_, cy_, 1.6, 4.7, 7.0, 0.4, (ROCK_LIGHT, SAND_LIGHT))
+    S.box((cx_, cy_, 7.1), (1.95, 1.95, 0.2), SAND_LIGHT)                   # calota, treapta 1
+    S.box((cx_, cy_, 7.28), (1.75, 1.75, 0.16), ROCK_LIGHT)                 # calota, treapta 2
+    H.box((cx_, cy_, 7.37), (0.9, 0.9, 0.05), HOLE)
+    W_.box((0, 3.1, 0.2), (11.4, 1.8, 0.4), TIMBER)                         # prispa y 2.2..4.0
+    W_.box((0, 4.15, 0.1), (3.0, 0.3, 0.2), TIMBER_OLD)                     # treapta pana la y 4.3
+    for px in (-5.2, -2.6, 0.0, 2.6, 5.2):
+        W_.tube((px, 3.8, 0.4), (px, 3.8, 3.88), 0.15, 0.13, TIMBER, seg=8)
+    W_.box((0, 3.8, 3.95), (11.4, 0.3, 0.26), TIMBER_OLD)
+    R.box((0, 3.3, 4.12), (12.2, 2.3, 0.14), SAND_MID, rot=Matrix.Rotation(-0.13, 3, "X"))
+    opening_pair(H, W_, 0.0, 1.6, 1.5, 2.4, FW, bars=False)                 # usa (fata +Y)
     for fx in (-3.4, 3.4):
-        opening_pair(H, W_, fx, 2.0, 1.4, 1.4, 2.4, bars=True)              # 2 ferestre
+        opening_pair(H, W_, fx, 2.0, 1.4, 1.4, FW, bars=True)               # 2 ferestre
     for yaw in (-90.0, 90.0):                                               # ferestre laterale
-        ph, pw = side_pens(ho, wd, cy, 5.8, yaw)
+        ph, pw = side_pens(ho, wd, cy, 5.5, yaw)
         opening_pair(ph, pw, 0.0, 2.1, 1.3, 1.3, 0.0, bars=True)
     return [st.to_object("Post_Stone"), wd.to_object("Post_Wood"),
             rf.to_object("Post_Roof"), ho.to_object("Post_Openings")]
+
+
+def rect_(hx, hy):
+    """Dreptunghi centrat, antiorar (semi-latimi hx, hy)."""
+    return [(-hx, -hy), (hx, -hy), (hx, hy), (-hx, hy)]
 
 
 # ---------------------------------------------------------------------------
@@ -142,9 +156,13 @@ def build_homestead_house():
     wl.prism(gable, 0.12, CONCRETE, center=(0, 3.0, 0))                   # fronton +Y
     wl.prism(gable, 0.12, CONCRETE, center=(0, -4.5, 0))                  # fronton spate
     th = math.atan2(2.5, 3.5)
+    NS = 8                                                                # benzi de sindrila pe panta
     for sx in (-1, 1):                                                    # 2 ape
-        R.box((sx * 1.75, cy, 4.15), (4.3 + 0.1, 7.6, 0.14), ROOF_TIN,
-              rot=Matrix.Rotation(sx * th, 3, "Y"))
+        for i in range(NS):
+            t = (i + 0.5) / NS
+            pc = (sx * 3.5 * (1 - t), cy, 2.9 + 2.5 * t)
+            R.box(pc, (4.3 / NS * 1.04, 7.6, 0.14 if i % 2 == 0 else 0.17), WOOD if i % 2 == 0 else LOG_DARK,
+                  rot=Matrix.Rotation(sx * th, 3, "Y"))
     W_.box((0, cy, 5.45), (0.3, 7.7, 0.18), TIMBER_OLD)                   # capac de coama
     stone_stack(S, 2.1, -2.6, 0.85, 3.3, 6.4, 0.38, (STONE, STONE_LT))    # cos
     S.box((2.1, -2.6, 6.5), (1.05, 1.05, 0.18), STONE_LT)
@@ -153,7 +171,9 @@ def build_homestead_house():
     for px in (-2.4, -0.8, 0.8, 2.4):
         W_.tube((px, 4.35, 0.3), (px, 4.35, 2.62), 0.09, 0.08, TIMBER, seg=8)
     W_.box((0, 4.35, 2.68), (5.2, 0.2, 0.18), TIMBER_OLD)
-    R.box((0, 3.75, 2.82), (5.6, 1.7, 0.1), ROOF_TIN, rot=Matrix.Rotation(-0.2, 3, "X"))
+    for i in range(4):                                                    # acoperis prispa, sindrila
+        R.box((0, 3.15 + 0.4 * i, 2.9 - 0.08 * i + 0.0), (5.6, 0.42, 0.1), WOOD if i % 2 == 0 else LOG_DARK,
+              rot=Matrix.Rotation(-0.2, 3, "X"))
     opening_pair(H, W_, 0.0, 1.4, 1.0, 2.2, 3.0, bars=False)              # usa
     for fx in (-2.0, 2.0):
         opening_pair(H, W_, fx, 1.7, 0.9, 1.1, 3.0, bars=True)            # 2 ferestre
@@ -213,7 +233,8 @@ def build_hogan():
     R.loft(_oct_ring(2.5), 2.98, _oct_ring(0.8), 3.32, SAND_MID, cap_bottom=False)
     G.loft(_oct_ring(0.8), 3.32, _oct_ring(0.7), 3.48, TIMBER)               # guler
     H.loft(_oct_ring(0.5), 3.47, _oct_ring(0.5), 3.5, HOLE)                  # gaura de fum
-    opening_pair(H, G, 0.0, 0.1 + 0.95, 1.0, 1.9, HOG_A + 0.02, bars=False, frame=0.14)   # usa +Y
+    opening_pair(G, G, 0.0, 0.1 + 0.95, 1.0, 1.9, HOG_A + 0.02, bars=True, frame=0.14,
+                 dark=TIMBER, fslot=TIMBER_OLD)                                    # usa +Y: scandura de lemn
     G.box((0, HOG_A + 0.22, 0.09), (1.4, 0.35, 0.18), TIMBER_OLD)             # treapta
     M = at(0, 0, 0.0, 45.0) @ Matrix.Translation((0, HOG_A + 0.02, 0))        # latura vecina
     opening_pair(Pen(ho, M), Pen(lg, M), 0.0, 1.35, 0.7, 0.7, 0.0, bars=True, frame=0.1)

@@ -98,8 +98,8 @@ cu transformare pentru piese compuse). Camere: `preview_specs_d.py`. Comparatii:
 
 | fisier | noduri | tri | cote masurate (X x Y x Z, m) |
 |---|---|---:|---|
-| buildings/trading_post | Post_Stone, Post_Wood, Post_Roof, Post_Openings | 1064 | 12,06 x 9,25 x 7,54; parapet 5,0; cos 7,5 |
-| buildings/homestead_house | Home_Walls, Home_Stone, Home_Wood, Home_Roof, Home_Openings | 1184 | 7,16 x 9,24 x 6,62; coama ~5,5, cosul pana la 6,6 |
+| buildings/trading_post | Post_Stone, Post_Wood, Post_Roof, Post_Openings | 1026 | 12,20 x 8,88 x 7,39; streasina 4,5, creasta plata ~5,2, cos ~7,4 |
+| buildings/homestead_house | Home_Walls, Home_Stone, Home_Wood, Home_Roof, Home_Openings | 1388 | 7,10 x 9,22 x 6,62; coama ~5,5, cosul pana la 6,6 |
 | buildings/hogan | Hogan_Logs, Hogan_Roof, Hogan_Openings | 1846 | 7,34 x 7,56 x 3,54; EXACT 8 laturi (apotema 3,5), 56 busteni |
 | vehicles/pickup_old | Pickup_Body, Pickup_Glass, Pickup_Trim, Pickup_Wheels | 772 | 2,05 x 5,23 x 1,90; roti 10 segmente, botul pe +Y |
 | vehicles/tour_truck | Truck_Body (CAR_BLUE), Truck_Glass, Truck_Trim, Truck_Seats, Truck_Wheels | 1092 | 2,25 x 5,49 x 2,60; roti 10 segmente, botul pe +Y |
@@ -113,19 +113,19 @@ Fidelitate (element | planșa | GLB | verdict):
 
 | piesa | element | planșa | GLB | verdict |
 |---|---|---|---|---|
-| trading_post | corp | zid de piatra mare, caramiziu-bej | volum 11,6 x 6,8, SAND_MID, 4 colturi cu pietre alternante | OK (zidaria fina vine din clasa) |
+| trading_post | corp | zid de piatra mare, caramiziu-bej | volum 11,0 x 6,4, SAND_LIGHT, 4 colturi cu pietre alternante ROCK_LIGHT/SAND_MID | OK (zidaria fina vine din clasa) |
 | | prispa | 4-5 stalpi, acoperis lean-to jos, treapta | 5 stalpi rotunzi, lean-to, treapta | OK |
 | | fata | usa la mijloc, 2 ferestre | usa + 2 ferestre, 1 pe fiecare latura | OK |
-| | acoperis | **inclinat, in trepte, bej** | **plat cu parapet** (contract §1.5), tabla gri ASPHALT_EDGE | **abatere decisa** de contract; culoarea gri (slot) cade pe tonul planșei doar cu clasa |
-| | cos | mare, central-spate, blocuri | 1,3 m patrat, 7,5 m, 2 sloturi alternante, gura neagra, spate-stanga | OK ca forma; mai subtire decat pe planșa |
+| | acoperis | in trepte, bej, jos | **patru ape** ~20 grade, streasina 0,6, mijloc plat, SAND_MID; prispa il continua (corectura coordonatorului) | OK (mai putine trepte decat pe planșa) |
+| | cos | mare, central-spate, blocuri | 1,6 x 1,6 m, 2,3 m inaltime, felii ROCK_LIGHT/SAND_LIGHT, calota in 2 trepte, gura neagra, spate-stanga | OK |
 | homestead_house | siluet | doua ape, fronton pe fata, prispa lean-to | idem | OK |
 | | pereti | scanduri orizontale gri-bej | CONCRETE + 6 nervuri SAND_LIGHT | OK |
 | | ferestre | 2 pe lateral dreapta, 1 in fronton | 2 pe fiecare lateral, 1 in fronton | OK |
 | | cos | pe panta dreapta, caramiziu | pe panta dreapta, 2 sloturi | OK |
-| | acoperis | maro-gri | tabla gri inchis | OK (mai inchis) |
+| | acoperis | maro-gri | sindrila de lemn, 8 randuri WOOD/LOG_DARK pe panta, prispa la fel | OK (randuri mai late si mai contrastante) |
 | hogan | pereti | busteni orizontali, capete iesite | 7 randuri x 8 laturi, capete iesite, 2 sloturi | OK |
 | | acoperis | dom in trepte cu panouri, horn de lemn | 2 trepte SAND_MID + guler + gaura neagra | OK; fara nervuri radiale (mai neted), ton mai galben |
-| | usa/fereastra | usa de lemn inchis, fereastra pe stanga | usa neagra cu rama + treapta, fereastra pe latura vecina | OK; usa gri-inchis in loc de maro (slot VOLCANIC_BLACK) |
+| | usa/fereastra | usa de lemn inchis, fereastra pe stanga | usa WOOD cu rama LOG_DARK + treapta, fereastra pe latura vecina | OK; usa de scanduri WOOD cu rama LOG_DARK |
 | pickup_old | silueta | capota lunga rotunjita, cabina, bena | capota/cabina/bena din volume cu colturi tesite | **abatere**: mai colturos, aripile rotunde doar ca bombe interioare |
 | | detalii | grila, bara bej, faruri rotunde | grila + bara CONCRETE, 2 faruri 10 laturi | OK |
 | | culoare | rugina portocalie | RUST (10), geamuri VOLCANIC_BLACK | OK |
@@ -138,5 +138,5 @@ Fidelitate (element | planșa | GLB | verdict):
 | | haine | albastru/portocaliu/kaki, palarii | CAR_BLUE/CAR_RED/SAND_MID, sapci + palarii | OK |
 
 Abateri: camionul si pickup-ul n-au caroserie rotunjita fina (primitive cu muchii tesite);
-trading_post-ul are acoperis plat conform contractului, nu cel in trepte de pe planșa; dimensiunile `X` ale
+trading_post-ul are acoperis in patru ape (contract corectat), mai simplu decat cel in trepte de pe planșa; dimensiunile `X` ale
 hoganului (7,34) includ capetele de busteni la colturi, nu doar apotema de 7,0.

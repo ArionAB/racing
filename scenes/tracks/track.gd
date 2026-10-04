@@ -1896,6 +1896,8 @@ static func themes() -> Dictionary:
 			"walls": false,
 			"kerbs": false,
 			"cliffs": true,
+			# Faleze doar in defileu (E): valea deschisa n-are zid pe marginea drumului.
+			"cliffs_gorge_only": true,
 			"decor": "bands",
 			"props": "monumentvalley",
 			"hazard_model": "",
@@ -13787,7 +13789,7 @@ func _build_world_decor() -> void:
 	_decor_roots.clear()
 	var cliffs := TrackCliffs.build(_sampler, theme_flag("cliffs", false),
 		_world_seed(), _cliff_clearings(), _gorge_ranges(),
-		String(theme_flag("rock_class", "")))
+		String(theme_flag("rock_class", "")), bool(theme_flag("cliffs_gorge_only", false)))
 	add_child(cliffs)
 	_decor_roots.append(cliffs)
 	# FALEZELE DECLARATE ca noduri [CliffFace]: geometrie reala, nu versant de

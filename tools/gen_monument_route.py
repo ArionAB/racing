@@ -628,6 +628,7 @@ for nm, xy, keep, sc, rot, ty in TOWERS:
     tscn += f"""
 [node name="{nm}" parent="DecorManual" instance=ExtResource("10_butte")]
 transform = Transform3D({c*sc:.5f}, 0, {-s_*sc:.5f}, 0, {sc}, 0, {s_*sc:.5f}, 0, {c*sc:.5f}, {g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})
+metadata/clasa_triplanara = "mv_sandstone"
 """
     for k, vn in enumerate(VARIANTS):
         if vn != keep:

@@ -283,14 +283,16 @@ const BASELINE := {
 	# pice garda. Sabotaj (`--sabotaj`) verificat la armare.
 	"Kyoto (Track18)": 3,
 	# Monument Valley (Track19), armat la traseul gol cu hazardele (4 oct 2026):
-	# 4 raportari, masurate de 3 ori, identic — 1 la frac 0.780 pe lateral
+	# 3 raportari, masurate de 3 ori, identic — 1 la frac 0.780 pe lateral
 	# (`@AnimatableBody3D`, calul din G aflat la ceasul 0: hazard de traversare
-	# INTENTIONAT, corp cinematic cu fanta pe banda larga de 8 m) si 3 la
-	# 0.830-0.835 pe INAINTE (`ChannelKicker`, trambulina sariturii peste albia
-	# secata G2, ca RampNear/RampFar la Fiordland). Nimic pe bucla in rest. Baza =
+	# INTENTIONAT, corp cinematic cu fanta pe banda larga de 8 m) si 2 la 0.835
+	# pe INAINTE (`ChannelKicker`, trambulina sariturii peste albia secata G2 —
+	# gol 8 m —, ca RampNear/RampFar la Fiordland). Era 4 cu golul de 12 m
+	# (3 pe kicker); falezele DOAR in defileu (`cliffs_gorge_only`) n-au schimbat
+	# cifra. Nimic pe bucla in rest. Baza =
 	# cifra masurata, FARA marja: prima piesa de decor pusa in banda trebuie sa
 	# pice garda. Sabotaj (`--sabotaj`) verificat la armare.
-	"Monument Valley (Track19)": 4,
+	"Monument Valley (Track19)": 3,
 }
 
 

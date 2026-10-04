@@ -2826,6 +2826,30 @@ func _split_theme_accents() -> void:
 ## `apply_class_materials`, ca sa aiba ultimul cuvant pe partile ambigue.
 func _apply_model_classes() -> void:
 	_apply_classes_mapping(CLASSES_BY_MODEL)
+	_apply_meta_class()
+
+
+## Clasa triplanara ceruta de INSTANTA, nu de model: metadata `clasa_triplanara` =
+## "mv_sandstone" pe instanta sau pe un container (se mosteneste in jos), ca la
+## `racire`/`lumina`. Exista fiindca `CLASSES_BY_MODEL` e pe fisier-model, deci
+## global: un `butte.glb` imbracat acolo ar schimba si Dunele. Aici turnurile
+## Mittens (Track19) isi iau gresia fara sa atinga nicio alta pista. Fara
+## metadata nu se intampla nimic (bit-identic).
+const CLASS_META := "clasa_triplanara"
+
+func _apply_meta_class() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var cls := ""
+		var p: Node = model
+		while p != null and p != self.get_parent():
+			if p.has_meta(CLASS_META):
+				cls = String(p.get_meta(CLASS_META))
+				break
+			p = p.get_parent()
+		if not cls.is_empty():
+			Palette.apply_triplanar_class(model, cls)
 
 
 ## Metadata care muta varul unei case albastre (Jodhpur) de pe tenta deschisa

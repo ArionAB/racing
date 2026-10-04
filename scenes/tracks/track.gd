@@ -1881,18 +1881,36 @@ static func themes() -> Dictionary:
 			# `red_valley_tuff` & co raman neatinse: alte piste, aceeasi dala.
 			"rock_class": "mv_sandstone",
 			"rockfall_class": "mv_sandstone",
-			# ORIZONT PROVIZORIU: butte.glb (Butte_A..C, Mesa_A/B) pe inele la
-			# 190-340 m, sub fog_end 360 < FAR_PLANE 380. `mv_horizon.glb` (brief
-			# §5.4) il inlocuieste cand vine kitul. Fara umbra aruncata
-			# (`_build_horizon` o stinge: caster-departat-fura-umbra).
-			"horizon_model": "res://assets/models/rocks/butte.glb",
+			# ORIZONT: `monumentvalley/rocks/horizon_mesas.glb` (brief §5.4 / kit §1.8),
+			# volume inchise cu noduri copii directe ale radacinii: EagleMesa_A,
+			# BrighamsTomb_A, Stagecoach_A, KingOnThrone_A, Spires_A, FarMesa_A/B.
+			# Fara umbra aruncata (`_build_horizon` o stinge: caster-departat-fura-
+			# umbra) si fara coliziune (PROP_COLLISION "none"). Inelele stau sub
+			# fog_end 360 < FAR_PLANE 380 (memoria efecte-de-fundal-cote-legate), iar
+			# scarile tin varfurile sub tavanul cadrului la distanta lor: camera
+			# vede cel mult 10 + 0,092 x d metri peste drum (d = 250 -> 33 m,
+			# d = 300 -> 38 m; Brigham 36,7 m si Spires 34 m sunt cele inalte).
+			#
+			# Clasa: `mv_sandstone` pe tot nodul. Orizontul e O SINGURA suprafata
+			# (1 material) fara noduri `_Rock`/`_Cap` separate, deci calota palida nu
+			# se poate scutura de clasa; la 190-340 m sub ceata nu se vede.
+			"horizon_model": "res://assets/models/monumentvalley/rocks/horizon_mesas.glb",
 			"horizon_class": "mv_sandstone",
 			"horizon_rings": [
-				{"near": 190.0, "far": 250.0, "count": 5, "scale": 1.3,
-					"clear": 100.0, "picks": ["Butte_A", "Butte_B", "Mesa_A"]},
-				{"near": 250.0, "far": 340.0, "count": 6, "scale": 2.0,
-					"clear": 140.0, "picks": ["Butte_C", "Butte_B", "Mesa_B"]},
+				{"near": 190.0, "far": 260.0, "count": 5, "scale": 1.0,
+					"clear": 100.0, "picks": ["Stagecoach_A", "KingOnThrone_A",
+					"Spires_A", "BrighamsTomb_A"]},
+				{"near": 250.0, "far": 340.0, "count": 6, "scale": 1.2,
+					"clear": 140.0, "picks": ["EagleMesa_A", "FarMesa_A",
+					"FarMesa_B", "BrighamsTomb_A"]},
 			],
+			# Arcul E': kitul are propriul (`sandstone_arch.glb`, golul masurat
+			# 15,45 m x 8,95 m — docs/asset_briefs/monumentvalley_inventory.md). Clasa
+			# pe PARTI: peretele si grohotisul pe gresie, calota ramane pe atlas (vezi
+			# `_build_arch`; acelasi motiv ca `WorldProp.MV_ROCK_*`). Celelalte teme nu declara cheile: raman pe `rock_arch.glb`.
+			"arch_model": "res://assets/models/monumentvalley/rocks/sandstone_arch.glb",
+			"arch_classes": {"Arch_Rock": Palette.TRI_PREFIX + "mv_sandstone",
+				"Arch_Scree": Palette.TRI_PREFIX + "mv_sandstone"},
 			"walls": false,
 			"kerbs": false,
 			"cliffs": true,
@@ -11122,6 +11140,7 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 	if not hazard_model.is_empty() and ResourceLoader.exists(hazard_model):
 		var ball := SlidingHazard.new()
 		ball.model_scene = load(hazard_model)
+		ball.model_node = String(kind.get("model_node", ""))
 		# 0.52 vine din bolovanul de 5 m diametru -> 2.6 m in joc. O barca de
 		# 5 m lungime insa TREBUIE sa ramana de 5 m: la 0.52 ar fi fost o
 		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
@@ -13969,7 +13988,10 @@ func _scatter_bones(scene: PackedScene, center: Vector3, frac: float) -> void:
 ## conventie ca la cliff_wall. Traversa NU primeste coliziune: nicio masina
 ## n-ar trebui s-o atinga, iar o forma concava acolo e o capcana.
 func _build_arch(frac: float) -> void:
-	const PATH := "res://assets/models/rocks/rock_arch.glb"
+	# Modelul arcadei e cheie de tema (`arch_model`); implicitul e vechiul
+	# `rock_arch.glb`, deci toate celelalte piste raman bit-identice.
+	var PATH := String(theme_flag("arch_model",
+		"res://assets/models/rocks/rock_arch.glb"))
 	if not ResourceLoader.exists(PATH):
 		return
 	var n := baked.size()
@@ -13995,14 +14017,41 @@ func _build_arch(frac: float) -> void:
 			shape.position = mi.position + aabb.position + aabb.size * 0.5
 			body.add_child(shape)
 		child.queue_free()
+	# Un arc fara proxy-uri `_col` (kitul Monument Valley) isi ia colizorul din
+	# mesh-ul lui: trimesh pe perete si grohotis, FARA calota (placa de sus, la
+	# 11,5+ m, peste golul de 8,95 m). Concav e ok aici: golul masurat e 15,45 m,
+	# iar soseaua (semilatime 5,5 m) trece la 2,4 m de intradosul picioarelor.
+	if body.get_child_count() == 0:
+		for mi: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+			if String(mi.name).ends_with("_Cap") or mi.mesh == null:
+				continue
+			var trimesh := mi.mesh.create_trimesh_shape()
+			if trimesh == null:
+				continue
+			var tshape := CollisionShape3D.new()
+			tshape.shape = trimesh
+			tshape.transform = mi.transform
+			body.add_child(tshape)
+		# Si CAMERA trebuie oprita de arc: puntea (9-13 m) e peste capul masinii
+		# dar sub camera de joc (10 m sus, 12,5 m in spate), iar fara asta
+		# `ProbeCameraSolid` gaseste camera in spatele puntii la frac 0.438-0.442
+		# (masina iese de sub arc si dispare in perete). Pe layerul de blocare,
+		# `ChaseCamera._unclip` o trage in fata puntii, ca la portile din Kyoto.
+		body.collision_layer |= CAMERA_BLOCKER_LAYER
 	body.add_child(model)
 	add_child(body)
 	# Arcada e integral roca — primeste trim sheet-ul de clasa. Piatra
 	# LOCULUI: pe temele cu `rock_class` declarat (granitul alpin, pe Baikal)
 	# ia clasa aia, altfel gresia canionului — o arcada de gresie portocalie
 	# peste un lac inghetat se vedea din prima captura.
+	#
+	# `arch_classes` (prefix -> clasa) bate `rock_class`: un arc spart pe noduri
+	# (perete / grohotis / calota) isi ia clasa pe parti, ca orizontul.
+	var arch_classes: Dictionary = theme_flag("arch_classes", {})
 	var arch_cls := String(theme_flag("rock_class", ""))
-	if arch_cls.is_empty():
+	if not arch_classes.is_empty():
+		Palette.apply_class_materials(model, arch_classes)
+	elif arch_cls.is_empty():
 		Palette.apply_rock_material(model)
 	else:
 		Palette.apply_triplanar_class(model, arch_cls)

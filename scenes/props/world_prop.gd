@@ -46,6 +46,9 @@ const TRUNK_RADIUS := {
 	"ginkgo": 0.6, "niwaki_pine": 0.5,
 	"moso_culm": 0.16, "bamboo_crown": 1.2,
 	"paper_lantern": 0.15,
+	# Monument Valley: latimea AABB minte (coroana de 4,4 m, bratul de 2 m, rombul
+	# de 1,4 m); raza reala vine de pe nodul de trunchi/stalp din GLB.
+	"juniper": 0.45, "telegraph_pole": 0.16, "open_range_sign": 0.12,
 }
 
 ## Numele metadatei prin care o INSTANTA anume iese din regula generala.
@@ -368,6 +371,53 @@ const PROP_COLLISION := {
 	# corp convex e identic si mai ieftin), bastionul, fatadele, cenotaful,
 	# tarabele (brief: "pereti cu masa, nu decor fantoma"), thela, sacii,
 	# bolovanii de riolit si lespedea.
+	# --- Monument Valley (kitul din assets/models/monumentvalley/, PR #455) --------
+	# Inventarul COMPLET, 37 de piese, scris explicit si cand modul e implicitul
+	# (hull), ca sa nu mai fie nimic „probabil bun". Cheia e fisierul (stem), deci
+	# `water_tower` de aici imparte cheia cu `buildings/water_tower.glb` (Dunele):
+	# nicio intrare noua, fiindca ambele sunt hull — vezi comentariul de la
+	# `water_tower` mai jos.
+	#
+	# Monolitii Mittens: `mesh`, NU hull. Un hull convex peste turn + deget ar umple
+	# golul de cer dintre ele (3-4 m la baza, 5 m la mijloc) si ar lipi un perete
+	# invizibil intre varful degetului si corp; mai grav, hull-ul ar acoperi si
+	# punctul de pornire al `BolovanD` (rockfall #1, pe grohotisul degetului West
+	# Mitten). Se ajunge la ei doar la 14+ m de banda (poarta D), deci formele
+	# concave nu prind nicio masina. `Mitten_Scree`/`Cap` sunt sarite din colizor
+	# (HULL_SKIP_PARTS): fusta e acoperita de terenul `TerrainPeak` de dedesubt.
+	"west_mitten": "mesh", "east_mitten": "mesh",
+	# Blocuri compacte, raport silueta/baza ~1 (nu au gol): hull, ieftin si corect.
+	"merrick_butte": "hull", "mesa_wall_module": "hull",
+	"butte_small_a": "hull", "butte_small_b": "hull", "butte_small_c": "hull",
+	"rock_fin": "hull", "hoodoo": "hull",
+	"talus_boulders_a": "hull", "talus_boulders_b": "hull",
+	# Arcul: prin gol (>= 14 m) se TRECE. Il pune `Track._build_arch` (nu
+	# DecorManual), cu colizor propriu din mesh; intrarea ramane pentru cine il
+	# asaza de mana, ca sa nu iasa hull peste sosea.
+	"sandstone_arch": "mesh",
+	# Orizontul: panze de zeci de metri la 190+ m, fara corp.
+	"horizon_mesas": "none",
+	# Plantele: ienuparul e singurul cu trunchi destul de gros ca sa opreasca o
+	# masina (raza din TRUNK_RADIUS); restul sunt vegetatie moale, prin care se trece.
+	"juniper": "trunk",
+	"sagebrush": "none", "rabbitbrush": "none", "yucca": "none",
+	"tumbleweed": "none",
+	# Grila pentru vite: PLATA (<= 0,15 m), se trece peste ea; stalpii de capat
+	# sunt la 7,3 m de axa, adica pe margine. Sarma gardului: panou subtire, ca
+	# `shiba_fence` / `wooden_fence`. Semnul si stalpul de telegraf: cilindru pe
+	# stalp (bratul si traversa nu opresc masina).
+	"cattle_guard": "none", "wire_fence": "none",
+	"open_range_sign": "trunk", "telegraph_pole": "trunk",
+	# Structuri si cladiri: solide (hull). Morii ii ramane hull-ul pe turn, iar
+	# jgheabul de 0,6 m e sub linia capotei dar nu stinge niciun traseu.
+	"windmill_pump": "hull", "water_tower": "hull", "corral": "hull",
+	"shade_ramada": "hull",
+	"trading_post": "hull", "homestead_house": "hull", "hogan": "hull",
+	"pickup_old": "hull", "tour_truck": "hull",
+	# Figuranti: oameni si animale nu opresc masina (caii care traverseaza sunt
+	# `SlidingHazard`, cu corpul lui).
+	"tourist_group": "none", "raven": "none", "sheep": "none",
+	"horse_bay": "none", "horse_pinto": "none", "horse_black": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -1928,6 +1978,31 @@ const CLASSES_BY_MODEL := {
 	# cu tools/ProbeJodClase.tscn), orizontul (clasa lui vine din tema).
 }
 
+## Clasele pieselor de stanca Monument Valley (vezi `CLASSES_BY_THEME`).
+##
+## `*_Rock` si `*_Scree` iau AMBELE `mv_sandstone`, si e decizie masurata, nu
+## comoditate. Pe atlas, grohotisul (RUST_METAL 10 + LARCH_RUST 27 in coaste
+## alternante) iese in captura ca dungi galben-maro, „carton ondulat", la 20 m
+## de camera (frac 0.2, Mitten-ul din stanga). Incercat si `red_valley_tuff`
+## (maro-inchis, 136/89/65): iese aproape negru pe partea din umbra si costa un
+## material in plus pe pista. `mv_sandstone` pe fusta ramane cel mai curat:
+## aceeasi nuanta ca peretele, iar etajul de jos se citeste din FORMA (coaste,
+## bolovani, AO copt in vertex colors), nu dintr-o a doua culoare. Zero materiale
+## noi: clasa e deja pe pista prin falezele trecatorii.
+## `*_Cap` (calota, SAND_LIGHT) ramane pe atlas: palida, a treia treapta.
+const _MV: String = Palette.TRI_PREFIX + "mv_sandstone"
+const MV_ROCK_WEST := {"Mitten_Rock": _MV, "Mitten_Scree": _MV}
+const MV_ROCK_EAST := {"EastMitten_Rock": _MV, "EastMitten_Scree": _MV}
+const MV_ROCK_MERRICK := {"Butte_Rock": _MV, "Butte_Scree": _MV}
+const MV_ROCK_MESA := {"Mesa_Rock": _MV, "Mesa_Scree": _MV}
+const MV_ROCK_ARCH := {"Arch_Rock": _MV, "Arch_Scree": _MV}
+const MV_ROCK_BUTTE_A := {"ButteA_Rock": _MV, "ButteA_Scree": _MV}
+const MV_ROCK_BUTTE_B := {"ButteB_Rock": _MV, "ButteB_Scree": _MV}
+const MV_ROCK_BUTTE_C := {"ButteC_Rock": _MV, "ButteC_Scree": _MV}
+const MV_ROCK_FIN := {"Fin_Rock": _MV, "Fin_Scree": _MV}
+const MV_ROCK_HOODOO := {"Hoodoo_Rock": _MV, "Hoodoo_Scree": _MV}
+const MV_ROCK_TALUS := {"Talus_Scree": _MV}
+
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),
 ## nu global — la fel cum [constant SLOT_REMAP_BY_THEME] exista langa
 ## [constant SLOT_REMAP_BY_MODEL].
@@ -1993,6 +2068,27 @@ const CLASSES_BY_THEME := {
 			"Moss_Boulder_B": Palette.TRI_PREFIX + "wet_gneiss",
 		},
 	},
+	# Monument Valley (Track19): gresia `mv_sandstone` pe nodurile `*_Rock` ale
+	# kitului, SALVIA gri-verde pe `Sagebrush_Foliage`. Cheia e pe FISIER (stem),
+	# nu pe numele nodului (memoria `nume-noduri-nu-sunt-unice`), si scopata pe
+	# TEMA: `rock_arch.glb`, `butte.glb` & co de pe celelalte piste nu se ating.
+	#
+	# `*_Cap` ramane pe atlas, `*_Scree` ia gresia: vezi `MV_ROCK_*` mai sus.
+	"monumentvalley": {
+		"west_mitten": MV_ROCK_WEST,
+		"east_mitten": MV_ROCK_EAST,
+		"merrick_butte": MV_ROCK_MERRICK,
+		"mesa_wall_module": MV_ROCK_MESA,
+		"sandstone_arch": MV_ROCK_ARCH,
+		"butte_small_a": MV_ROCK_BUTTE_A,
+		"butte_small_b": MV_ROCK_BUTTE_B,
+		"butte_small_c": MV_ROCK_BUTTE_C,
+		"rock_fin": MV_ROCK_FIN,
+		"hoodoo": MV_ROCK_HOODOO,
+		"talus_boulders_a": MV_ROCK_TALUS,
+		"talus_boulders_b": MV_ROCK_TALUS,
+		"sagebrush": {"Sagebrush_Foliage": Palette.TRI_PREFIX + "mv_sage"},
+	},
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -2003,6 +2099,7 @@ const CLASSES_BY_THEME := {
 ## procedurale; aici e varianta pentru orizontul asezat de mana.
 const NO_SHADOW_MODELS := {
 	"lengai": true, "crater_far_wall": true, "kyoto_horizon": true,
+	"horizon_mesas": true,
 }
 
 
@@ -3301,6 +3398,15 @@ func _glow_spec(model: Node3D) -> String:
 const HULL_SKIP_PARTS := {
 	"fort_wall_segment": ["Wall_Glow"],
 	"fort_wall_turret": ["Turret_Glow"],
+	# Monument Valley: la monolitii mari fusta de grohotis si calota nu au corp
+	# fizic propriu — fusta e deja terenul `TerrainPeak` de dedesubt (un colizor
+	# pe ea ar schimba traseul bolovanilor care se rostogolesc pe teren), iar
+	# calota e o placa subtire sus. Lista e citita si de `_add_trimesh` (Mittens
+	# sunt `mesh`). Piesele mici (butte_small_*, hoodoo, fin) isi pastreaza fusta:
+	# conul lor E sprijinul lor, nu exista teren sub el.
+	"west_mitten": ["Mitten_Scree", "Mitten_Cap"],
+	"east_mitten": ["EastMitten_Scree", "EastMitten_Cap"],
+	"merrick_butte": ["Butte_Scree", "Butte_Cap"],
 	# Kyoto: casele de oras au hull doar pe miezul de lemn (peretii). Acoperisul
 	# (streasina iese 1,1 m dincolo de perete), zabrelele din fata (pana la 0,9 m
 	# in strada), norenul si jaluzelele nu sunt obstacole: un hull pe ele ar
@@ -3917,9 +4023,15 @@ func _add_trunk(body: StaticBody3D, model: Node3D) -> bool:
 ## depinda de scalarea nodului de forma.
 func _add_trimesh(body: StaticBody3D, model: Node3D) -> bool:
 	var added := false
+	# Aceeasi lista de parti sarite ca la hull (`HULL_SKIP_PARTS`): Mittens-urile
+	# (`mesh`) isi lasa fusta de grohotis si calota fara corp propriu.
+	var skip: Array = HULL_SKIP_PARTS.get(
+		model.scene_file_path.get_file().get_basename(), [])
 	for entry in TrackDecor.visible_meshes(model, model.transform):
 		var mi: MeshInstance3D = entry[0]
 		var xform: Transform3D = entry[1]
+		if not skip.is_empty() and skip.has(String(mi.name)):
+			continue
 		var src := _trimesh_faces(mi.mesh)
 		if src.is_empty():
 			continue

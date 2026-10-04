@@ -9,8 +9,11 @@
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="7_devil"]
 [ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="8_respawn"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
-[ext_resource type="PackedScene" path="res://assets/models/rocks/butte.glb" id="10_butte"]
-[ext_resource type="PackedScene" path="res://assets/models/jodhpur/animals/baraat_horse.glb" id="11_horse"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/west_mitten.glb" id="10_wm"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/east_mitten.glb" id="10_em"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/merrick_butte.glb" id="10_mb"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/animals/horse_bay.glb" id="11_horse_bay"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/animals/horse_pinto.glb" id="11_horse_pinto"]
 
 [sub_resource type="BoxShape3D" id="Box_cornisa"]
 size = Vector3(130.0, 12.0, 270.0)
@@ -74,19 +77,19 @@ curve = SubResource("Curve3D_main")
 [node name="Peaks" type="Node3D" parent="."]
 
 [node name="WestMitten" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 262.00, 15.00, 300.00)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 262.00, 4.00, 300.00)
 gizmo_extents = 28.0
 script = ExtResource("2_peak")
 radius_m = 28.0
 
 [node name="EastMitten" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 338.00, 15.00, 318.00)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 338.00, 4.00, 318.00)
 gizmo_extents = 28.0
 script = ExtResource("2_peak")
 radius_m = 28.0
 
 [node name="Merrick" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 372.00, 15.00, 262.00)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 372.00, 4.00, 262.00)
 gizmo_extents = 28.0
 script = ExtResource("2_peak")
 radius_m = 28.0
@@ -161,8 +164,8 @@ curve = SubResource("Curve3D_rf2")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300.000, 0.000, 226.654)
 gizmo_extents = 3.0
 script = ExtResource("6_hzm")
-model = ExtResource("11_horse")
-model_node = "Horse"
+model = ExtResource("11_horse_bay")
+model_node = "Pose_Walk"
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -171,8 +174,8 @@ sweep_speed = 2.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300.000, 0.014, 230.130)
 gizmo_extents = 3.0
 script = ExtResource("6_hzm")
-model = ExtResource("11_horse")
-model_node = "Horse"
+model = ExtResource("11_horse_pinto")
+model_node = "Pose_Walk"
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -181,8 +184,8 @@ sweep_speed = 2.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.214, 0.222, 76.269)
 gizmo_extents = 3.0
 script = ExtResource("6_hzm")
-model = ExtResource("11_horse")
-model_node = "Horse"
+model = ExtResource("11_horse_pinto")
+model_node = "Pose_Walk"
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -191,8 +194,8 @@ sweep_speed = 2.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.595, 0.210, 75.457)
 gizmo_extents = 3.0
 script = ExtResource("6_hzm")
-model = ExtResource("11_horse")
-model_node = "Horse"
+model = ExtResource("11_horse_bay")
+model_node = "Pose_Walk"
 face_travel = true
 motion = 1
 sweep_speed = 2.0
@@ -216,50 +219,44 @@ shape = SubResource("Box_cornisa")
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("9_prop")
 
-[node name="WM_Turn" parent="DecorManual" instance=ExtResource("10_butte")]
-transform = Transform3D(0.80814, 0, -0.29414, 0, 0.86, 0, 0.29414, 0, 0.80814, 262.00, 16.90, 300.00)
-metadata/clasa_triplanara = "mv_sandstone"
+[node name="WM_Turn" parent="DecorManual" instance=ExtResource("10_wm")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 262.00, 0.90, 300.00)
+metadata/scufundat = true
 
-[node name="Butte_A" parent="DecorManual/WM_Turn" index="0"]
-visible = false
+[node name="EM_Turn" parent="DecorManual" instance=ExtResource("10_em")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 338.00, 1.00, 318.00)
+metadata/scufundat = true
 
-[node name="Butte_C" parent="DecorManual/WM_Turn" index="2"]
-visible = false
+[node name="MB_Turn" parent="DecorManual" instance=ExtResource("10_mb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 372.00, 1.70, 262.00)
+metadata/scufundat = true
 
-[node name="Mesa_A" parent="DecorManual/WM_Turn" index="3"]
-visible = false
+[node name="ZonaA" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.000-0.040 · A · Start pe platou (+12 m): postul de negot, pickup parcat, moara, turnul de apa; campia nu se vede inca"
 
-[node name="Mesa_B" parent="DecorManual/WM_Turn" index="4"]
-visible = false
+[node name="ZonaB" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.040-0.131 · B · Coama (0.063) si dreapta US-163: telegraf, gard de sarma, salvie; Mittens + Merrick in capat, pe ax"
 
-[node name="EM_Turn" parent="DecorManual" instance=ExtResource("10_butte")]
-transform = Transform3D(-0.75175, 0, 0.27362, 0, 0.8, 0, -0.27362, 0, -0.75175, 338.00, 16.40, 318.00)
-metadata/clasa_triplanara = "mv_sandstone"
+[node name="ZonaC" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.131-0.206 · C · Grila pentru vite (0.137) si Valley Drive: semnul cu calul, caii (CalC1/CalC2)"
 
-[node name="Butte_A" parent="DecorManual/EM_Turn" index="0"]
-visible = false
+[node name="ZonaD" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.206-0.297 · D · Poarta dintre Mittens (WM_Turn/EM_Turn): peretii la ~18 m de marginea drumului, grohotis, Rockfall #1 (BolovanD)"
 
-[node name="Butte_C" parent="DecorManual/EM_Turn" index="2"]
-visible = false
+[node name="ZonaE" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.297-0.434 · E · Trecatoarea dintre mese (gorge 0.33-0.42): mesa_wall_module, Rockfall #2 (BolovanE)"
 
-[node name="Mesa_A" parent="DecorManual/EM_Turn" index="3"]
-visible = false
+[node name="ZonaEArc" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.434 · E' · Arcul de gresie (custom_arch_fracs, tema: sandstone_arch.glb); decorul de la picioarele arcului"
 
-[node name="Mesa_B" parent="DecorManual/EM_Turn" index="4"]
-visible = false
+[node name="ZonaF" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.434-0.600 · F · Cornisa de la Artist's Point (+10 -> +13,5), camionul de tur parcat, turistii; haboob-ul in stanga-fata"
 
-[node name="MB_Turn" parent="DecorManual" instance=ExtResource("10_butte")]
-transform = Transform3D(-0.21205, 0, -0.58261, 0, 0.62, 0, 0.58261, 0, -0.21205, 372.00, 15.90, 262.00)
-metadata/clasa_triplanara = "mv_sandstone"
+[node name="ZonaG" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.600-0.834 · G · Campia deschisa (si scurtatura G', ~0.64-0.80): bolovani, salvie, rabbitbrush, caii (CalG1/CalG2), vartejul"
 
-[node name="Butte_A" parent="DecorManual/MB_Turn" index="0"]
-visible = false
+[node name="ZonaG2" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.834-0.846 · G2 · Albia secata (saritura): malurile, bolovani, nimic pe banda"
 
-[node name="Butte_B" parent="DecorManual/MB_Turn" index="1"]
-visible = false
-
-[node name="Mesa_A" parent="DecorManual/MB_Turn" index="3"]
-visible = false
-
-[node name="Mesa_B" parent="DecorManual/MB_Turn" index="4"]
-visible = false
+[node name="ZonaH" type="Node3D" parent="DecorManual"]
+metadata/fractii = "0.846-1.000 · H · US-163 inapoi (urcare 0 -> +12): grila, telegraf, turnul de apa si moara pe ax, postul de negot"

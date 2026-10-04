@@ -602,6 +602,10 @@ const CLASS_TEXTURES := {
 	# slot si nici din `macchia` (verde sezonier). Vezi CLASS_TINT / CLASS_LIFT.
 	# Se aplica DOAR pe nodul `Sagebrush_Foliage` (WorldProp.CLASSES_BY_THEME).
 	"mv_sage": "res://assets/textures/classes/macchia.png",
+	# CALOTA stancilor Monument Valley (#B9A08C, gri-roz palid, brief §4). Pe atlas
+	# (SAND_LIGHT) iesea galben-oliv la umbra (galben x ambient rece). Aceeasi dala
+	# `alpine_granite` ca gresia, deci zero VRAM nou; +1 material pe pista.
+	"mv_cap": "res://assets/textures/classes/alpine_granite.png",
 	# TUFUL CREM al Cappadociei: hornurile, poarta geamana, gura de pestera si
 	# fatada bisericii rupestre. ACEEASI dala ca `red_valley_tuff` — nu se
 	# dubleaza in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica
@@ -999,7 +1003,9 @@ const CLASS_TINT := {
 	# `macchia` ridicata la 0.72 are media liniara (0.31, 0.53, 0.21), tinta liniara
 	# (0.27, 0.31, 0.20) => multiplicator liniar (0.87, 0.58, 0.95) = in sRGB
 	# (0.93, 0.78, 0.97). Verificat apoi pe captura de joc.
-	"mv_sage": Color(0.930, 0.780, 0.970),
+	"mv_sage": Color(0.880, 0.850, 0.780),
+	# Calota: tinta liniara (0.49, 0.35, 0.26) / dala ridicata la 0.70 => (0.955, 0.872, 0.861).
+	"mv_cap": Color(1.000, 0.850, 0.740),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
@@ -1221,6 +1227,7 @@ const CLASS_LIFT := {
 	"mv_sandstone": 0.820,
 	# Salvia: vezi CLASS_TINT (R tinta 142 > media dalei 86.7, deci ridicare).
 	"mv_sage": 0.720,
+	"mv_cap": 0.700,
 	"village_plaster": 0.88,
 	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
 	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:
@@ -1353,6 +1360,8 @@ const CLASS_TRIPLANAR_SCALE := {
 	"mv_sandstone": 0.08,
 	# Salvia: ca `macchia` (aceeasi dala, tufe de ~1 m).
 	"mv_sage": 1.4,
+	# Calota: aceeasi scara ca gresia (aceeasi dala).
+	"mv_cap": 0.08,
 	# ACEEASI scara ca faleza rosie, si nu din lene: hornurile masoara 11-18 m
 	# pe verticala (masurat pe cele 12 .glb-uri — chimney_a 11.3, chimney_c 17.3,
 	# triple 18.5, twin_gate 21.6), adica exact plaja modulului de faleza de

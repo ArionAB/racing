@@ -1852,13 +1852,13 @@ static func themes() -> Dictionary:
 			# Ceata calda: 120 -> 360 m. fog_end 360 < ChaseCamera.FAR_PLANE 380
 			# (memoria efecte-de-fundal-cote-legate); inelele de orizont stau sub
 			# fog_end, la 190-340 m.
-			"fog": Color.html("E4C7A4"),
+			"fog": Color.html("D9A57A"),
 			"fog_sky_affect": 0.10,
 			"fog_depth": true,
 			"fog_begin": 120.0,
 			"fog_end": 360.0,
 			"fog_curve": 1.4,
-			"fog_max": 0.80,
+			"fog_max": 0.62,
 			# Umbre PORNITE, shadow_distance 90 (CLAUDE.md: prima setare de stins
 			# pe device). La 18 grade umbra are ~3x inaltimea obiectului.
 			"shadows": true,
@@ -1867,13 +1867,13 @@ static func themes() -> Dictionary:
 			"shadow_blur": 1.0,
 			# Nisipul campiei: TILE_TERRACOTTA citit ca culoare de pornire (#C4784F
 			# in brief), de impins spre rosu prin tenta dupa captura.
-			"ground_tint": Palette.color(Palette.TILE_TERRACOTTA),
+			"ground_tint": Color(0.80, 0.36, 0.20),
 			"hill_color": Color(0.54, 0.29, 0.20),
 			# Drumul de pamant (Valley Drive): rosu-portocaliu (brief §4). Pista
 			# declara `custom_dirt_ranges` pe C-G; grip-ul vine din `loose_grip`.
-			"dirt_road_tint": Color(0.72, 0.42, 0.28),
+			"dirt_road_tint": Color(0.62, 0.46, 0.38),
 			"loose_grip": 7.0,
-			"dust_color": Color(0.62, 0.34, 0.20),
+			"dust_color": Color(0.82, 0.42, 0.25),
 			# Scurtatura Dunele (G'): nisip rosu, SAND implicit.
 			"branch_tint": Color(0.80, 0.50, 0.34),
 			# Gresia: clasa NOUA `mv_sandstone` (Palette) pe falezele trecatorii, pe
@@ -1913,7 +1913,8 @@ static func themes() -> Dictionary:
 			# `_build_arch`; acelasi motiv ca `WorldProp.MV_ROCK_*`). Celelalte teme nu declara cheile: raman pe `rock_arch.glb`.
 			"arch_model": "res://assets/models/monumentvalley/rocks/sandstone_arch.glb",
 			"arch_classes": {"Arch_Rock": Palette.TRI_PREFIX + "mv_sandstone",
-				"Arch_Scree": Palette.TRI_PREFIX + "mv_sandstone"},
+				"Arch_Scree": Palette.TRI_PREFIX + "mv_sandstone",
+				"Arch_Cap": Palette.TRI_PREFIX + "mv_cap"},
 			"walls": false,
 			"kerbs": false,
 			"cliffs": true,

@@ -1989,18 +1989,19 @@ const CLASSES_BY_MODEL := {
 ## aceeasi nuanta ca peretele, iar etajul de jos se citeste din FORMA (coaste,
 ## bolovani, AO copt in vertex colors), nu dintr-o a doua culoare. Zero materiale
 ## noi: clasa e deja pe pista prin falezele trecatorii.
-## `*_Cap` (calota, SAND_LIGHT) ramane pe atlas: palida, a treia treapta.
+## `*_Cap` (calota) ia `mv_cap` (gri-roz #B9A08C): pe atlas (SAND_LIGHT) iesea galben-oliv la umbra.
 const _MV: String = Palette.TRI_PREFIX + "mv_sandstone"
-const MV_ROCK_WEST := {"Mitten_Rock": _MV, "Mitten_Scree": _MV}
-const MV_ROCK_EAST := {"EastMitten_Rock": _MV, "EastMitten_Scree": _MV}
-const MV_ROCK_MERRICK := {"Butte_Rock": _MV, "Butte_Scree": _MV}
-const MV_ROCK_MESA := {"Mesa_Rock": _MV, "Mesa_Scree": _MV}
-const MV_ROCK_ARCH := {"Arch_Rock": _MV, "Arch_Scree": _MV}
-const MV_ROCK_BUTTE_A := {"ButteA_Rock": _MV, "ButteA_Scree": _MV}
-const MV_ROCK_BUTTE_B := {"ButteB_Rock": _MV, "ButteB_Scree": _MV}
-const MV_ROCK_BUTTE_C := {"ButteC_Rock": _MV, "ButteC_Scree": _MV}
+const _MVC: String = Palette.TRI_PREFIX + "mv_cap"
+const MV_ROCK_WEST := {"Mitten_Rock": _MV, "Mitten_Scree": _MV, "Mitten_Cap": _MVC}
+const MV_ROCK_EAST := {"EastMitten_Rock": _MV, "EastMitten_Scree": _MV, "EastMitten_Cap": _MVC}
+const MV_ROCK_MERRICK := {"Butte_Rock": _MV, "Butte_Scree": _MV, "Butte_Cap": _MVC}
+const MV_ROCK_MESA := {"Mesa_Rock": _MV, "Mesa_Scree": _MV, "Mesa_Cap": _MVC}
+const MV_ROCK_ARCH := {"Arch_Rock": _MV, "Arch_Scree": _MV, "Arch_Cap": _MVC}
+const MV_ROCK_BUTTE_A := {"ButteA_Rock": _MV, "ButteA_Scree": _MV, "ButteA_Cap": _MVC}
+const MV_ROCK_BUTTE_B := {"ButteB_Rock": _MV, "ButteB_Scree": _MV, "ButteB_Cap": _MVC}
+const MV_ROCK_BUTTE_C := {"ButteC_Rock": _MV, "ButteC_Scree": _MV, "ButteC_Cap": _MVC}
 const MV_ROCK_FIN := {"Fin_Rock": _MV, "Fin_Scree": _MV}
-const MV_ROCK_HOODOO := {"Hoodoo_Rock": _MV, "Hoodoo_Scree": _MV}
+const MV_ROCK_HOODOO := {"Hoodoo_Rock": _MV, "Hoodoo_Scree": _MV, "Hoodoo_Cap": _MVC}
 const MV_ROCK_TALUS := {"Talus_Scree": _MV}
 
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),

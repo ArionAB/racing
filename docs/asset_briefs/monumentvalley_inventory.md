@@ -55,31 +55,35 @@ West Mitten nemodificat: 9432 tri, aceleași noduri. Verify: `VERDICT KIT: OK`
 | `rocks/merrick_butte.glb` | `Butte_Rock/_Scree/_Cap` | 11928 | 24,0 m, amprentă ~30 x 18 m, 3 contraforturi (13/18/11 m) pe fața +Y |
 | `rocks/mesa_wall_module.glb` | `Mesa_Rock/_Scree/_Cap` | 2224 | 12,0 m pe Y, 14,0 m înalt, 6 m adânc (X −3..+3; 8,6 cu ieșirile și talpa), grohotiș 2,9 m (+X) / 1,9 m (−X) |
 
-### CONTRACT ÎNGHEȚAT: golul arcului (`sandstone_arch.glb`)
+### CONTRACT ÎNGHEȚAT: golul arcului (`sandstone_arch.glb`, rev. 3 — blocuri)
 
 Măsurat cu `tools/blender/measure_arch_gap.py` pe GLB-ul exportat (re-importat),
 proiecție pe planul XZ (drumul merge pe Y), TOATE nodurile (rocă + grohotiș +
 calotă), grilă 5 cm; gol = regiune liberă de la sol, conectată la axa drumului.
 
-- **lățime gol pe fereastra caroseriei (h 0–2 m): 15,40 m** (minim pe rânduri; contract ≥ 14)
+- **lățime gol pe fereastra caroseriei (h 0–2 m): 15,35 m** (minim pe rânduri; contract ≥ 14)
 - **înălțime liberă pe |x| ≤ 1,1 m: 8,85 m** (contract ≥ 7,5)
-- lățimea golului: h 0,5 m 15,8 | h 2 m 15,4 | h 4 m 14,8 | h 6 m 12,9 | h 7,5 m 10,0
-- intrados superelipsă a = 8,0, b = 8,9, n = 2,4; nimic din grohotiș nu trece de x = ±8,0 (tăiat la fața golului).
-Orice modificare a arcului se re-măsoară cu scriptul (`VERDICT GOL: OK`). Grosimea
-punții la coamă: 3,2 m piatră + 0,9 m calotă.
+- lățimea golului: h 0,5 m 15,65 | h 2 m 15,35 | h 4 m 14,30 | h 6 m 12,30 | h 7,5 m 10,45
+- intrados nominal superelipsă a = 7,9, b = 9,4, n = 2,4; fiecare bloc îl poate coborî în gol cu max 0,4 m (jos) / 0,7 m (sus), deci nu e un semicerc curat; nimic din grohotiș nu trece de x = ±7,9.
+Orice modificare a arcului se re-măsoară cu scriptul (`VERDICT GOL: OK`).
+Cote: 13,09 m înalt, picioarele ~7 m late la bază (talpă evazată), adâncime Y ~7,4 m (rock), 4648 tri.
 
 ### Fidelitate (decupare vs randare)
 
-**sandstone_arch** (runda 2; runda 1 era o cutie de 11 m adâncime cu fustă mare:
-adâncime redusă la 7,4 m, umeri rotunjiți, fustă redusă și tăiată la fața golului)
+**sandstone_arch** (rev. 3, după verdictul coordonatorului: viaduct neted → limbaj de blocuri)
 
 | element | pe planșă | în GLB | verdict |
 |---|---|---|---|
-| picioare | 2 masive, talpă evazată | 2 picioare de 4 m cu talpă evazată, 3 felii pe Y cu ieșiri/recese | OK; planșa e mai bolovănoasă/asimetrică |
-| punte | groasă, intrados curbat | ~7 blocuri late pe deschidere, intrados curbat, 3,2 m | OK |
-| calotă | placă palidă, bucăți | 2 trepte SAND_LIGHT pe coamă | OK; netedă, fără festoane |
+| picioare | masive, late jos, din blocuri | ~7 m la bază, blocuri stivuite (rânduri 3–5,4 m; 2 blocuri pe grosime unde > 5,4 m), teșite, decalate ±0,4–0,8 m, 2 felii pe adâncime cu ieșiri diferite | OK, dar mai zvelte decât pe planșă |
+| punte | grosime variabilă (5 m umeri, 3 m coamă) | ~3,2 m la coamă, ~5–6 m la umeri | OK |
+| intrados | nu e semicerc | trepte ±0,4–0,7 m între blocuri | OK, abatere mică (rămâne lizibil ca arc) |
+| calotă | 3–5 plăci separate, goluri, înălțimi diferite | 5 plăci, goluri 0,3 m, plafoane la 12,75–13,1 m | OK; plăcile urmăresc curba la umeri |
 | grohotiș | bolovani la picioare | fustă + bolovani doar pe exterior | OK |
-| h/l | ~0,55 | 13/24 = 0,54 | OK |
+| h/l | ~0,55 | 13/28 = 0,47 | la limita; lățimea a crescut (picioare late, contract: ~24 m) |
+
+Abateri: arcul e mai larg (~28 m + talpă) decât ~24 m din tabel, ca să iasă picioare de ~7 m
+lățime cu golul păstrat; blocurile sunt mai netede și mai rotunjite decât roca din decupare;
+puntea rămâne mai subțire/regulată decât pe planșă.
 
 **east_mitten** (runda 1)
 

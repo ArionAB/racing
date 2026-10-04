@@ -45,19 +45,57 @@ def sq_loft(b, cx, cy, hw0, z0, hw1, z1, slot):
     loft(b, bot, z0, top, z1, slot)
 
 
-def _extrude(b, pts3_front, pts3_back, slot):
-    """Placa din doua contururi 3D (fata si spate, aceeasi ordine): n-gon fata,
-    n-gon spate, laterale; fetele concave se triunghiulaza."""
+def _ear_clip(pts2):
+    """Triangulare 2D proprie (ear clipping) pentru contururi concave; intoarce
+    triplete de indici in ordinea ANTIORARA. Folosita fiindca triangularea din
+    bmesh umplea golurile dintre picioare la silueta calului."""
+    n = len(pts2)
+    area = sum(pts2[i][0] * pts2[(i + 1) % n][1] - pts2[(i + 1) % n][0] * pts2[i][1] for i in range(n))
+    idx = list(range(n)) if area > 0 else list(range(n - 1, -1, -1))
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    def inside(p, a, b, c):
+        return cross(a, b, p) >= -1e-12 and cross(b, c, p) >= -1e-12 and cross(c, a, p) >= -1e-12
+
+    tris = []
+    guard = 0
+    while len(idx) > 3 and guard < 10000:
+        guard += 1
+        for k in range(len(idx)):
+            i0, i1, i2 = idx[k - 1], idx[k], idx[(k + 1) % len(idx)]
+            a, b, c = pts2[i0], pts2[i1], pts2[i2]
+            if cross(a, b, c) <= 1e-12:
+                continue
+            if any(inside(pts2[j], a, b, c) for j in idx if j not in (i0, i1, i2)):
+                continue
+            tris.append((i0, i1, i2))
+            idx.pop(k)
+            break
+        else:
+            break
+    if len(idx) == 3:
+        tris.append(tuple(idx))
+    return tris
+
+
+def _extrude(b, pts3_front, pts3_back, slot, plane_xy=None):
+    """Placa din doua contururi 3D (fata si spate, aceeasi ordine). `plane_xy` =
+    lista 2D (in planul placii) pentru triangulare; fetele plate se fac din
+    triunghiuri proprii, laterale din quad-uri."""
     n = len(pts3_front)
     fv = [b.bm.verts.new(p) for p in pts3_front]
     bv = [b.bm.verts.new(p) for p in pts3_back]
-    faces = [b.bm.faces.new(fv), b.bm.faces.new(list(reversed(bv)))]
+    faces = []
+    for (i, j, k) in _ear_clip(plane_xy):
+        faces.append(b.bm.faces.new((fv[i], fv[j], fv[k])))
+        faces.append(b.bm.faces.new((bv[k], bv[j], bv[i])))
     for i in range(n):
         j = (i + 1) % n
         faces.append(b.bm.faces.new((bv[i], bv[j], fv[j], fv[i])))
     for f in faces:
         f[b.slot] = slot
-    bmesh.ops.triangulate(b.bm, faces=faces[:2])
 
 
 def extrude_xz(b, pts, y0, y1, slot, mirror=True, off=(0.0, 0.0), scale=1.0):
@@ -65,12 +103,12 @@ def extrude_xz(b, pts, y0, y1, slot, mirror=True, off=(0.0, 0.0), scale=1.0):
     din +Y (fata): ecranul-dreapta e -X in lume, deci `mirror` rastoarna sx.
     Extrudata intre y0 si y1."""
     p = [((-sx if mirror else sx) * scale + off[0], z * scale + off[1]) for sx, z in pts]
-    _extrude(b, [(x, y1, z) for x, z in p], [(x, y0, z) for x, z in p], slot)
+    _extrude(b, [(x, y1, z) for x, z in p], [(x, y0, z) for x, z in p], slot, plane_xy=p)
 
 
 def extrude_yz(b, pts, x0, x1, slot):
     """Placa subtire in planul YZ (pts = (y, z)), extrudata intre x0 si x1."""
-    _extrude(b, [(x1, y, z) for y, z in pts], [(x0, y, z) for y, z in pts], slot)
+    _extrude(b, [(x1, y, z) for y, z in pts], [(x0, y, z) for y, z in pts], slot, plane_xy=list(pts))
 
 
 # emit local: ca `emit` din monument_shapes, dar nodurile cu pivot propriu
@@ -93,6 +131,8 @@ def emit_road(objs, path, ao, budget=None, keep_xy=True):
             for v in o.data.vertices:
                 v.co += place
         a = dict(ao)
+        if o.name == "Sign_Horse":      # placa plata: AO per vertex pe triunghiuri lungi = dungi
+            a.update(gradient="none", strength=0.0)
         if o.get("ao_radial_y"):
             a.update(gradient="radial", radial_axis="Y")
         st = finish(o, bevel=0.0, ao=a, origin=None, smooth_angle=None)
@@ -156,17 +196,29 @@ def build_cattle_guard():
 # 2. open_range_sign
 # ---------------------------------------------------------------------------
 
-HORSE_BODY = [(-0.36, 0.05), (-0.35, 0.11), (-0.29, 0.18), (-0.27, 0.26), (-0.24, 0.18),
-              (-0.20, 0.17), (-0.12, 0.13), (-0.04, 0.09), (0.12, 0.07), (0.21, 0.09), (0.26, 0.03),
-              (0.24, -0.07), (0.10, -0.07), (-0.10, -0.07), (-0.15, -0.03), (-0.20, 0.05),
-              (-0.28, 0.04)]
-HORSE_LEGS = [
-    [(-0.15, -0.05), (-0.105, -0.05), (-0.12, -0.29), (-0.165, -0.29)],
-    [(-0.09, -0.05), (-0.045, -0.05), (-0.01, -0.29), (-0.055, -0.29)],
-    [(0.12, -0.05), (0.17, -0.05), (0.15, -0.29), (0.105, -0.29)],
-    [(0.19, -0.05), (0.24, -0.05), (0.29, -0.29), (0.245, -0.29)],
+# Silueta de cal in vedere laterala, in coordonate de ecran (sx dreapta, z sus),
+# capul spre stanga: gat arcuit la ~40 grade, cap lung si ingust spre inainte-jos,
+# coama pe creasta gatului, piept adanc, coada atarnata, 4 picioare subtiri cu o
+# pereche in pas (fata-stanga intinsa inainte, spate-dreapta intinsa inapoi).
+# Lungimea trunchiului (piept -> crupa) ~0,74 = 2,2 x inaltimea la greaban (0,34).
+HORSE_OUTLINE = [
+    (-0.52, 0.08), (-0.51, 0.12), (-0.47, 0.17), (-0.42, 0.23), (-0.38, 0.30),
+    (-0.355, 0.25), (-0.33, 0.28), (-0.26, 0.21), (-0.18, 0.14), (-0.10, 0.08),
+    (-0.05, 0.07), (0.12, 0.05), (0.28, 0.07), (0.39, 0.05), (0.43, -0.01),
+    (0.47, -0.06), (0.51, -0.19), (0.50, -0.28), (0.465, -0.26), (0.455, -0.15),
+    (0.41, -0.08),
+    (0.38, -0.15), (0.405, -0.21), (0.425, -0.29), (0.375, -0.29), (0.35, -0.21),
+    (0.32, -0.16),
+    (0.27, -0.16), (0.25, -0.21), (0.215, -0.29), (0.165, -0.29), (0.185, -0.21),
+    (0.20, -0.15),
+    (0.08, -0.16),
+    (0.00, -0.16), (0.005, -0.29), (-0.045, -0.29), (-0.05, -0.16),
+    (-0.12, -0.19),
+    (-0.14, -0.20), (-0.18, -0.22), (-0.215, -0.29), (-0.265, -0.29), (-0.245, -0.21),
+    (-0.20, -0.17),
+    (-0.22, -0.08), (-0.21, 0.03), (-0.29, 0.09), (-0.36, 0.14), (-0.43, 0.10),
+    (-0.49, 0.05),
 ]
-HORSE_TAIL = [(0.23, 0.08), (0.27, 0.05), (0.31, -0.10), (0.30, -0.22), (0.27, -0.22), (0.26, -0.08)]
 
 
 def build_open_range_sign():
@@ -177,7 +229,7 @@ def build_open_range_sign():
       la 1,95 m, ancorata pe stalp, cu chenar subtire de lemn pe cele 4 laturi;
     - CAL: siluet negru in relief (corp+gat+cap cu 2 urechi, 4 picioare, coada),
       orientat spre stanga ecranului, ocupa ~65% din latimea rombului, FARA text.
-    Noduri: Sign_Post (stalp + chenar), Sign_Face (CAR_YELLOW), Sign_Horse (relief).
+    Noduri: Sign_Post (stalp + chenar), Sign_Face (CAR_YELLOW), Sign_Horse (relief, VOLCANIC_BLACK, contur 2D de ~50 puncte extrudat 3 cm).
     """
     cz, fy = 1.95, 0.06
     post = Builder()
@@ -194,12 +246,9 @@ def build_open_range_sign():
                center=(0.0, fy, cz))
 
     horse = Builder()
-    off = (-0.02, cz + 0.05)
-    y0, y1 = fy + 0.025, fy + 0.075
-    extrude_xz(horse, HORSE_BODY, y0, y1, TIMBER_OLD, off=off, scale=1.0)
-    for leg in HORSE_LEGS:
-        extrude_xz(horse, leg, y0, y1, TIMBER_OLD, off=off, scale=1.0)
-    extrude_xz(horse, HORSE_TAIL, y0, y1, TIMBER_OLD, off=off, scale=1.0)
+    y0 = fy + 0.025
+    outline = [(sx, z if z >= -0.17 else -0.17 + (z + 0.17) * 1.6) for sx, z in HORSE_OUTLINE]   # picioare alungite
+    extrude_xz(horse, outline, y0, y0 + 0.03, HAZ_BLACK, off=(-0.11, cz + 0.05), scale=0.88)
     return [post.to_object("Sign_Post"), face.to_object("Sign_Face"), horse.to_object("Sign_Horse")]
 
 
@@ -236,25 +285,23 @@ def build_telegraph_pole():
 
 def build_wire_fence():
     """`wire_fence.png`:
-    - 2 STALPI de lemn la capete (0,18 x 0,18 m, 1,2 m), cu fetele exterioare
-      FLUSH la y = +-2,0 (modul inlantuibil: capetele plane);
-    - 4 FIRE intinse intre stalpi (decupara: 4 randuri, la 0,28 / 0,55 / 0,82 /
-      1,08 m), pe fata +X a stalpilor, taiate plan la y = +-2,0;
-    - 4 TEPI (noduri mici in diamant) pe fiecare fir.
-    Contractul spune 3 fire, decupara 4: aleg decupara (numarul de elemente de
-    pe planse castiga). Noduri: Fence_Posts, Fence_Wire.
+    - 2 STALPI rotunzi de lemn (8 laturi, Ø 0,18 m, usor conici), 1,17 si 1,23 m,
+      cu fetele exterioare FLUSH la y = +-2,0 (modul inlantuibil);
+    - 4 FIRE SUBTIRI de otel (raza 0,018 m, 4 laturi), la 0,28 / 0,55 / 0,82 /
+      1,08 m, pe fata +X a stalpilor, taiate plan la y = +-2,0;
+    - TEPI: cruci mici (2 bare de 0,08 m) la fiecare 0,5 m pe fiecare fir.
+    Fire LOG_DARK (gri-inchis), tepii CONCRETE. Noduri: Fence_Posts, Fence_Wire.
     """
     p = Builder()
-    for sy in (-1.91, 1.91):
-        p.box((0.0, sy, 0.6), (0.18, 0.18, 1.2), TIMBER)
+    for sy, h in ((-1.905, 1.17), (1.905, 1.23)):
+        p.frustum((0.0, sy, h * 0.5), 0.095, 0.082, h, TIMBER, segments=8)
     w = Builder()
-    rnd = _lcg(5)
-    for zi, wz in enumerate((0.28, 0.55, 0.82, 1.08)):
-        w.beam((0.12, -2.0, wz), (0.12, 2.0, wz), (0.045, 0.045), RUSTY, up=(1, 0, 0))
-        for k in range(4):
-            y = -1.2 + 0.8 * k + (rnd() - 0.5) * 0.15
-            w.box((0.12, y, wz), (0.085, 0.085, 0.085), RUSTY,
-                  rotation=Matrix.Rotation(math.radians(45), 3, "Y"))
+    for wz in (0.28, 0.55, 0.82, 1.08):
+        w.cylinder((0.1, 0.0, wz), 0.018, 4.0, TIMBER_OLD, segments=4, axis="Y")
+        for k in range(8):
+            y = -1.75 + 0.5 * k
+            w.box((0.1, y, wz), (0.08, 0.02, 0.02), STEEL)
+            w.box((0.1, y, wz), (0.02, 0.02, 0.08), STEEL)
     return [p.to_object("Fence_Posts"), w.to_object("Fence_Wire")]
 
 

@@ -893,6 +893,20 @@ Interdicțiile din §8 rămân: fără saguaro, tipi, text, logo-uri sau oameni
 > cowboys, no saloons, no stagecoaches, no trains, no hot-air balloons, no
 > Route 66 signs.
 
+### 9.0b Diorama acceptată (4 oct 2026)
+
+**Referința = `img/monument_plan/diorama_v02.jpg`** (a doua generare). Prima
+(`diorama_v02_iter1.jpg`) avea densitatea bună, dar asfaltul continua după
+grilă și pe cornișă, Mittens erau „castele” generice, prin vale treceau 2–3
+drumuri în plus, iar platoul de start nu era ridicat. A doua le corectează pe
+toate patru.
+
+Ce **nu** e în referință și se ia din alte surse:
+- **Scurtătura G′ peste dune** a dispărut odată cu drumurile în plus. Poziția
+  ei vine din `Track19.tscn` (`Dunele`, 0.6457 → 0.7543).
+- **Monoliții mici și turlele din interiorul văii**, aproape de drum: v2 i-a
+  rărit. Densitatea apropiată de drum se ia din `diorama_v02_iter1.jpg`.
+
 ### 9.1 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.2, paste-ready
 
 Se dă **în aceeași conversație**, după ce diorama e acceptată. Numele de

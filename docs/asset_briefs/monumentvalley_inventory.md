@@ -1,0 +1,345 @@
+# Inventar — kitul Monument Valley (Track19)
+
+Contract: `docs/asset_briefs/monumentvalley_kit.md`. Cotele sunt MASURATE din GLB
+(`verify_glb.py`, Godot Y-up; Blender +Y = Godot -Z).
+
+## rocks/west_mitten.glb (pilot, revizia 3 — volum: tapering, coloane pe patru fete, fusta inalta)
+
+| nod | slot(uri) | tri |
+|---|---|---:|
+| `Mitten_Rock` | TILE_TERRACOTTA 23 + RUST_METAL 10 (fetele cu normala spre -X) | 5096 |
+| `Mitten_Scree` | RUST_METAL 10 + LARCH_RUST 27 (fetele coastelor alternante, bolovani alternanti) | 3944 |
+| `Mitten_Cap` | SAND_LIGHT 0 (contract schimbat din MARBLE_GREY 29) | 392 |
+| total | `VERDICT KIT: OK` (`--origin=assembly`) | 9432 |
+
+Cote masurate: peretele 29,1 m + calota 0,9 m = **30,0 m**, varf plat (coloane
+28,8-29,1 m); la baza X -12..+13 (cu talpa si iesirile coloanelor), ~13-14 m
+adancime, **se ingusteaza ~15%** spre varf (placa calotei X -10,6..+10,9); calota
+depaseste cu ~0,45 m pe X si ~0,7 m pe Y; deget x **-21,1..-15,3** (5,8 m la
+baza), **26,0 m**, gol ~2,2 m la baza (talpa coloanelor), ~4,6 m la mijloc;
+fusta x -23,9..+23,9 (raza ~22-24 m), **7,4 m** inalta langa perete (bolovani
+incluși), scade la 0 la margine; origine la baza turnului (XY pastrat, Z min = 0).
+
+Fidelitate: `docs/asset_briefs/img/monumentvalley_fidelity/west_mitten.png`
+(decupare | randare), 4 azimuturi: `west_mitten_views.png`.
+
+| element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| vârf | bloc cu vârf plat, calotă continuă | toate coloanele la 29,1 ±0,3 m, o placă continuă | OK |
+| coloane | ~8 late pe fata lunga, teșite | ~24 pe TOT conturul (4 fete, colturi rotunjite din 2-3 coloane), 2-4 m, iesiri variate (+0,6 / -0,8..-1,2 m: ~30% in recese), muchii teșite, fata in V | OK; planșa are mai putine coloane, mai late |
+| taper + praguri | masa mai larga jos, 2-3 retrageri | ingustare ~15% spre varf pe ambele axe, 2 praguri (~1/3, ~2/3) | OK |
+| talpă | evazată ~20% | evazată pe Y ~1,4 m în ultimii ~5,8 m | OK (doar pe Y, nu pe X) |
+| calotă | placă bej care depășește peretele, 2 trepte | o singură placă pe conturul coloanelor, +0,45/0,7 m, 2 trepte (0,9 + 0,4 m), SAND_LIGHT | OK; conturul planșei e mai festonat |
+| fustă | coaste radiale, turnul asezat IN ea | 28 coaste radiale, 2 praguri de 0,3 m, urca la ~7,4 m langa perete, ~90 bolovani mari (margine/vai) + 40 mici | OK; coastele sunt mai netede decât pe planșă |
+| deget | separat, bază groasă, 2 praguri, vârf rotunjit-ascuțit | separat, baza 5,8 m -> ~3 m, 2 praguri orizontale (8 și 17 m), ultimii ~2 m în 2 fatete -> vârf bont, 26 m | OK |
+| gol de cer | vizibil până jos | 3,3 m la bază; vizibil din față și din 3 azimuturi; din spate degetul se suprapune corpului (acceptat) | OK |
+| luminozități | stânga umbrită | fețele -X pe RUST_METAL | OK |
+| proporție h/l turn | ~1,1-1,2 | 30/24 = 1,25 | la limita ±15% |
+
+Abateri rămase: coloanele sunt tot prisme regulate (fara rupturi interne ca pe
+planșă); taper-ul se citeste moderat din 3/4; degetul are doar ~2,2 m
+fata de talpa coloanelor la baza (contract 3 m masurat de la perete); fusta e
+mai neteda decat desenul, iar bolovanii mari sunt putini pe fata de jos.
+
+## Grupa mv-a (sandstone_arch, east_mitten, merrick_butte, mesa_wall_module)
+
+Build: `tools/blender/build_monument_rocks.py` (vocabular extins în `monument_shapes.py`:
+`prism_xz`, `buttress`, `scree_boulders`, `mesa_run`, `mesa_scree`, `chamfer(skip=)`).
+West Mitten nemodificat: 9432 tri, aceleași noduri. Verify: `VERDICT KIT: OK`
+(`--origin=assembly`). Planșa grupei: `img/monumentvalley_fidelity_vala.png`.
+
+| fișier | noduri | tri | cote măsurate |
+|---|---|---:|---|
+| `rocks/sandstone_arch.glb` | `Arch_Rock/_Scree/_Cap` | 5190 | 13,0 m înalt; puntea x ±12 (+1,1 talpa); adâncime Y ~7,4 m (rock), ~8,6 m cu calota; fusta până la x ±18 |
+| `rocks/east_mitten.glb` | `EastMitten_Rock/_Scree/_Cap` | 8910 | turn 27,0 m, amprentă ~22 x 12 m, deget pe **+X** (centru x = 17,1), 23 m, fusta ≤ ~7,5 m |
+| `rocks/merrick_butte.glb` | `Butte_Rock/_Scree/_Cap` | 11928 | 24,0 m, amprentă ~30 x 18 m, 3 contraforturi (13/18/11 m) pe fața +Y |
+| `rocks/mesa_wall_module.glb` | `Mesa_Rock/_Scree/_Cap` | 2224 | 12,0 m pe Y, 14,0 m înalt, 6 m adânc (X −3..+3; 8,6 cu ieșirile și talpa), grohotiș 2,9 m (+X) / 1,9 m (−X) |
+
+### CONTRACT ÎNGHEȚAT: golul arcului (`sandstone_arch.glb`, rev. 4 — masă plată cu gaură)
+
+Măsurat cu `tools/blender/measure_arch_gap.py` pe GLB-ul exportat (re-importat),
+proiecție pe planul XZ (drumul merge pe Y), TOATE nodurile (rocă + grohotiș +
+calotă), grilă 5 cm; gol = regiune liberă de la sol, conectată la axa drumului.
+
+- **lățime gol pe fereastra caroseriei (h 0–2 m): 15,45 m** (minim pe rânduri; contract ≥ 14)
+- **înălțime liberă pe |x| ≤ 1,1 m: 8,95 m** (contract ≥ 7,5)
+- lățimea golului: h 0,5 m 15,75 | h 2 m 15,45 | h 4 m 14,20 | h 6 m 12,30 | h 7,5 m 10,45
+- intrados nominal superelipsă a = 7,9, b = 9,4, n = 2,4; blocurile inelului îl pot coborî în gol cu max 0,4 m (jos) / 0,7 m, deci nu e semicerc curat; nimic din grohotiș nu trece de x = ±7,9.
+Orice modificare a arcului se re-măsoară cu scriptul (`VERDICT GOL: OK`).
+Cote: 13,10 m înalt, ~28 m lat + talpă (42,7 m cu fusta), picioare ~7 m la bază, adâncime Y ~7,4 m (rock), 5836 tri.
+
+### Fidelitate (decupare vs randare)
+
+**sandstone_arch** (rev. 4, după al doilea verdict: extradosul nu mai urmează curba golului)
+
+| element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| siluetă | placă lată cu vârful ~orizontal, golul = gaură prin masă | vârf ~orizontal la ~12,5 m (±0,65 m per bloc, mai jos spre capete), timpanele pline | OK |
+| blocuri | neregulate 2–5 m, teșite, decalate | 4 rânduri orizontale grosiere (3–3,8 m, fiecare mai retras cu 0,55 m) de blocuri late 3,5–6,5 m + inel de blocuri (3,2 m) în jurul golului; teșite, 2 felii pe adâncime cu ieșiri diferite | OK, dar rândurile rămân regulate (aspect de zid) |
+| picioare | late, masive | ~7 m la bază, talpă evazată | OK |
+| punte | ~5 m umeri, ~3 m coamă | ~3,5 m la coamă, mult mai mult la umeri (umplutură) | OK |
+| intrados | trepte/neregulat | trepte 0,4–0,7 m între blocurile inelului | OK |
+| calotă | 3–5 plăci separate, înălțimi diferite | 5 plăci PLATE (12,8–13,1 m), goluri 0,3 m | OK; dreptunghiuri teșite, fără contur festonat |
+| grohotiș | bolovani la picioare | fustă + bolovani doar pe exterior | OK |
+
+Abateri: arcul e ~28 m lat (tabel ~24 m) ca să iasă picioare de ~7 m cu golul păstrat;
+blocurile sunt netede și rotunjite, rândurile prea regulate (zid); pe câteva fețe se văd
+crăpături întunecate între inel și umplutură (felii cu ieșiri diferite).
+
+**east_mitten** (runda 1)
+
+| element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| turn | bloc cu coloane late, vârf plat | ~16 coloane pe patru fețe, seed 23, 1,8–3,6 m (altă împărțire decât West) | OK |
+| deget | pe dreapta, turlă, gol de cer | pe +X (oglindă), 23 m, gol ~3 m; din față (+Y) apare în STÂNGA, deci randarea de comparație e din spate (azimut 262) | OK, oglindirea declarată |
+| calotă | placă bej în trepte | 2 trepte SAND_LIGHT | OK |
+| fustă | coaste radiale, praguri | 28 coaste, 2 praguri, ~116 bolovani | OK; mai netedă |
+| h/l | ~1,2 | 27/22 = 1,23 | OK |
+
+**merrick_butte** (runda 1)
+
+| element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| bloc | lat, vârf plat, coloane | 24 m, ~14 coloane, taper 8% | OK |
+| contraforturi | 2–3 pe fața lungă | 3 stâlpi (13/18/11 m), evazați, umăr înclinat | OK; mai netezi decât pe planșă |
+| calotă | plată, în trepte | 2 trepte SAND_LIGHT | OK |
+| grohotiș | fustă joasă, bolovani mulți | 64 coaste, ~130 bolovani | OK |
+| h/l | ~0,8 | 24/30 = 0,8 | OK |
+
+**mesa_wall_module** (runda 1)
+
+| element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| coloane | 4–5 pe modul | 5 (2 de capăt identice + 3), V pe față și spate | OK; mai uniforme decât planșa |
+| capete | — | **identice**: aceleași puncte (x, z) la y = −6 și +6 (verificat pe GLB: 16/16 vârfuri Rock, 8/8 Cap, 42/42 Scree), plane, fără teșire pe colțurile de capăt; 3 module cap la cap în `mesa_wall_module_chain.png`: fără fisură | OK |
+| calotă | continuă, bucăți | placă continuă în 2 trepte, capete plane | OK |
+| grohotiș | bolovani la picior | coaste perpendiculare (perioadă 3 m) ≤ 3 m + 9 bolovani | OK; mai puțini bolovani decât planșa |
+
+Abateri: coloanele rămân prisme netede (fără rupturi interne); grohotișul modulului e o
+rampă cu coaste, puțini bolovani. Fața peretelui de masă e pe **+X** (spatele −X, mai
+scund): coordonatorul îl rotește la montare.
+
+## Stare la oprire
+
+- Pilotul `west_mitten` livrat, revizia 3 făcută (volum: coloane pe patru fete cu
+  taper si recese, fustă înaltă; păstrate vârful plat, calota SAND_LIGHT, coastele, degetul). Harnasul
+  (`monument_shapes.py`, `preview_monument.py` + `compose_monument.py`,
+  `verify_monumentvalley.sh`) funcționează.
+- Vocabularul `monument_shapes.py` a fost refăcut la revizie (`wall_columns` pe
+  tot conturul (rev. 3: sectoare pe arc, taper, recese), `cap_slab`, `scree_ribs`, `tapered_spire`); `east_mitten`
+  și restul pot folosi aceleași funcții.
+- `preview_monument.py` pune clasa `mv_sandstone` (#B8552E) pe nodurile `*_Rock`.
+
+## Grupa mv-b: plante (`build_monument_plants.py`, revizia 3 dupa verdictul coordonatorului)
+
+Verdict: `bash tools/blender/verify_monumentvalley.sh` -> `VERDICT KIT: OK` (juniper si
+rabbitbrush cu `--origin=assembly`, rabbitbrush cu `--allow-car-slots=Rabbitbrush_Bloom`).
+Comparatii: `img/monumentvalley_fidelity/<nume>.png`; planșa: `img/monumentvalley_fidelity_valb.png`.
+Yucca acceptata (neschimbata).
+
+**Verificarea culorilor (punctul 0).** Tabelul `PALETTE_HEX` din `preview_monument.py` e
+IDENTIC cu `HEX` din `scripts/palette.gd` (verificat pe toate cele 32 de intrari). UV-urile din
+GLB-uri (citite din fisier) cad exact pe sloturile intentionate, vezi coloana "sloturi (fete)".
+Deci verdele "ierbos" NU e o eroare de mapare: slotul 12 chiar e `#5B7C34` (91,124,52),
+iar randarea preview il da (70-77, 96-105, 39-43) dupa AO+lumina. Pe `juniper` randarea
+masurata e (70,96,39), oliv-verde si nu mai palid; am pastrat 12 (nu 21) fiindca
+TROPICAL_GREEN `#3F7A3C` e mai albastrui. Slotul 12 e "oliv sters" doar in comparatie cu 21.
+
+| fisier | noduri (sloturi, fete) | tri | cote (m) | RGB randat masurat |
+|---|---|---:|---|---|
+| sagebrush | `Sagebrush`: WOOD 9 + DRY 13 (tulpini, frunze pe sol, 505 tri); `Sagebrush_Foliage`: CACTUS 12 (toate smocurile, 840 tri) | 1345 | 1,38 x 1,33 x 1,12 | verde slot 12 (tenta gri-verde = clasa la integrare) |
+| juniper | `Juniper_Trunk` WOOD 9; `Juniper_Crown` CACTUS 12 | 2089 | 4,37 x 3,88 x 4,21 | coroana (70,96,39) |
+| rabbitbrush | `Rabbitbrush` CACTUS 12 + DRY 13; `Rabbitbrush_Bloom` CAR_YELLOW 16 | 2424 | 1,54 x 1,53 x 1,21 | flori (163,141,43) |
+| tumbleweed | `Tumbleweed` LARCH_RUST 27 | 2726 | 0,93 x 0,94 x 0,96 | (132,82,45) |
+
+| piesa / element | pe decupare | in GLB | verdict |
+|---|---|---|---|
+| sagebrush | smocuri fine, gri-verzi | 15 smocuri-flacara pe 5 tulpini lemnoase ramificate, toate pe CACTUS 12 in `Sagebrush_Foliage` (rev. 4: fara amestec 29/12; paloarea vine din tenta de clasa) | structura OK; culoarea finala depinde de clasa/tenta coordonatorului |
+| juniper trunchi | tulpini rasucite din pamant | 3 tulpini rasucite pornite din baza comuna, ramificate la 1,2-1,5 m, 2 ramuri joase orizontale | OK |
+| juniper coroane | ciorchini la inaltimi diferite | 8 ciorchini turtiti (2 joase pe laturi), 5 bulgari fiecare | OK; desenul are volume mai mari si mai dese |
+| rabbitbrush | perna densa, frunzis verde dedesubt | 48 ciorchini x 2 bulgari pe dom (treimile de sus/mijloc), inel de 18 frunzulite CACTUS 12, tulpini ascunse | perna OK; frunzisul e mai rar decat pe desen |
+| tumbleweed | retea de crengute arama | neschimbat ca forma, culoare LARCH_RUST 27 | OK; bucle poligonale |
+## Grupa mv-c: drum, gard, semne (`build_monument_road.py`)
+
+Comparatii: `docs/asset_briefs/img/monumentvalley_fidelity/<nume>.png`; planșa grupei:
+`docs/asset_briefs/img/monumentvalley_fidelity_valc.png`. `verify_monumentvalley.sh` -> `VERDICT KIT: OK`
+(toate cu `--origin=assembly`; singura exceptie de slot de masina: `Sign_Face` CAR_YELLOW).
+
+| fisier | noduri | tri | cote masurate (X x Y x Z, m) |
+|---|---|---:|---|
+| props/cattle_guard | Guard_Steel, Guard_Posts | 704 | 14,85 x 2,40 x 1,20; bare sus la 0,148 m; **stalpi la x = +-7,3** (1,2 m, 0,25 m), grila x +-7,0 |
+| props/open_range_sign | Sign_Post, Sign_Face (CAR_YELLOW), Sign_Horse (VOLCANIC_BLACK) | 272 | 1,37 x 0,20 x 2,63 |
+| structures/telegraph_pole | Pole_Wood, Pole_Insulators | 216 | 2,02 x 0,32 x 8,04 (3 izolatori, fara fire) |
+| structures/wire_fence | Fence_Posts, Fence_Wire | 872 | 0,27 x **4,00** x 1,20 (capete plane la y = +-2,0) |
+| structures/windmill_pump | Mill_Steel, Mill_Trough, **Windmill_Rotor** (pivot la butuc, 0; 0,55; 9,0) | 1364 | 3,0 x 6,1 x 10,27; rotor Ø 2,5, jgheab Ø 3 |
+| structures/water_tower | Tower_Timber, Tank_Wood, Tank_Hoops | 1046 | 4,48 x 4,83 x 11,06; rezervor Ø 3,2 |
+| structures/corral | Corral_Wood, Corral_Gate | 696 | 10,06 x 8,06 x 1,50 |
+| structures/shade_ramada | Ramada_Frame, Ramada_Roof | 1080 | 5,14 x 4,34 x 3,05 |
+
+Fidelitate (element | planșa | GLB | verdict):
+
+| piesa | element | planșa | GLB | verdict |
+|---|---|---|---|---|
+| cattle_guard | forma | rampa in trepte | PLAT, corectura coordonatorului | abatere decisa |
+| | bare | ~9-10 busteni | 11 bare tubulare de otel | OK |
+| | capete | cadre galbene inclinate | blocuri galben/negru plate + 2 stalpi | OK |
+| open_range_sign | romb + stalp | romb galben cu chenar | romb CAR_YELLOW, chenar lemn, stalp 2,6 m | OK |
+| | cal | siluet negru, mers | contur 2D de 51 puncte extrudat 3 cm: gat arcuit ~40 grade, cap lung, coama, piept adanc, coada atarnata, 4 picioare subtiri (o pereche in pas), VOLCANIC_BLACK | OK (citeste ca cal; colturos, coada atinge marginea rombului) |
+| telegraph_pole | stalp, traversa, V, izolatori | 1 stalp, traversa groasa, 2 sprijine, 2 izolatori albi | la fel + al 3-lea izolator in varf | OK |
+| wire_fence | stalpi + fire | 2 stalpi, 4 fire cu tepi | 2 stalpi rotunzi 8 laturi (1,17 / 1,23 m), 4 fire subtiri (r 0,018, 4 laturi, LOG_DARK), tepi in cruce CONCRETE la 0,5 m | OK |
+| windmill_pump | turn, rotor, coada, jgheab | turn mai scurt si lat, jgheab mare inalt (~0,8 m), pale intunecate | turn 9 m mai zvelt, jgheab 0,6 m, pale pale | **abatere** de proportie (cotele contractului), culoare |
+| water_tower | rezervor cu cercuri, capac conic, X, scara | idem | idem (2 deschideri X, 4 cercuri, 12 laturi) | OK; fara arcul de jos |
+| corral | 3 bare, stalpi, poarta | busteni rotunjiti, colturi suprapuse | stalpi 0,26, bare Ø 0,17, poarta inchisa cu diagonala | OK ca structura, mai drept/curat |
+| shade_ramada | 4+ stalpi, acoperis haotic, masa | stalpi rotunzi, acoperis dens neregulat | 6 stalpi patrati, 17 chirpici + 10 pane, masa+2 banci | **abatere**: acoperisul e mai rar si mai regulat |
+
+Abateri: corral 10,06 x 8,06 (stalpii de colt ies cu 3 cm); wire_fence are stalpii flush pe
+capete, deci doua segmente inlantuite dau un stalp dublu de 0,36 m; cattle_guard fara text si
+fara fire intre stalpi.
+
+## Grupa mv-d: cladiri, vehicule, oameni
+
+Build: `build_monument_buildings.py`, `build_monument_vehicles.py` (vocabular nou: `monument_pen.py`, penita
+cu transformare pentru piese compuse). Camere: `preview_specs_d.py`. Comparatii:
+`docs/asset_briefs/img/monumentvalley_fidelity/<nume>.png`; planșa grupei:
+`docs/asset_briefs/img/monumentvalley_fidelity_vald.png`. `verify_monumentvalley.sh` -> `VERDICT KIT: OK`
+(`--origin=assembly` la toate; `--allow-car-slots=Truck_Body` si `=Tourist_Clothes` conform brief §0).
+
+| fisier | noduri | tri | cote masurate (X x Y x Z, m) |
+|---|---|---:|---|
+| buildings/trading_post | Post_Stone, Post_Wood, Post_Roof, Post_Openings | 1026 | 12,20 x 8,88 x 7,39; streasina 4,5, creasta plata ~5,2, cos ~7,4 |
+| buildings/homestead_house | Home_Walls, Home_Stone, Home_Wood, Home_Roof, Home_Openings | 1388 | 7,10 x 9,22 x 6,62; coama ~5,5, cosul pana la 6,6 |
+| buildings/hogan | Hogan_Logs, Hogan_Roof, Hogan_Openings | 1846 | 7,34 x 7,56 x 3,54; EXACT 8 laturi (apotema 3,5), 56 busteni |
+| vehicles/pickup_old | Pickup_Body, Pickup_Glass, Pickup_Trim, Pickup_Wheels | 772 | 2,05 x 5,23 x 1,90; roti 10 segmente, botul pe +Y |
+| vehicles/tour_truck | Truck_Body (CAR_BLUE), Truck_Glass, Truck_Trim, Truck_Seats, Truck_Wheels | 1092 | 2,25 x 5,49 x 2,60; roti 10 segmente, botul pe +Y |
+| props/tourist_group | Tourist_Clothes (CAR_BLUE/CAR_RED/SAND_MID), Tourist_Skin, Tourist_Gear | 1524 | 3,64 x 0,74 x 1,81; 4 oameni 1,58-1,75 m (+palarii) |
+
+**Fata cladirilor, MASURATA pe GLB** (`tools/blender/measure_front_glb.py`: aria goluri `*_Openings` orientate spre
+exterior, in coordonate Godot): trading_post **-Z** (7,5 m2 fata de ~2,0 pe laturi), homestead_house **-Z**
+(4,5 fata de 2,3), hogan **-Z** (1,9, usa; fereastra 0,5 pe latura vecina -X/-Z). Adica +Y in Blender, cum cere brief-ul.
+
+Fidelitate (element | planșa | GLB | verdict):
+
+| piesa | element | planșa | GLB | verdict |
+|---|---|---|---|---|
+| trading_post | corp | zid de piatra mare, caramiziu-bej | volum 11,0 x 6,4, SAND_LIGHT, 4 colturi cu pietre alternante ROCK_LIGHT/SAND_MID | OK (zidaria fina vine din clasa) |
+| | prispa | 4-5 stalpi, acoperis lean-to jos, treapta | 5 stalpi rotunzi, lean-to, treapta | OK |
+| | fata | usa la mijloc, 2 ferestre | usa + 2 ferestre, 1 pe fiecare latura | OK |
+| | acoperis | in trepte, bej, jos | **patru ape** ~20 grade, streasina 0,6, mijloc plat, SAND_MID; prispa il continua (corectura coordonatorului) | OK (mai putine trepte decat pe planșa) |
+| | cos | mare, central-spate, blocuri | 1,6 x 1,6 m, 2,3 m inaltime, felii ROCK_LIGHT/SAND_LIGHT, calota in 2 trepte, gura neagra, spate-stanga | OK |
+| homestead_house | siluet | doua ape, fronton pe fata, prispa lean-to | idem | OK |
+| | pereti | scanduri orizontale gri-bej | CONCRETE + 6 nervuri SAND_LIGHT | OK |
+| | ferestre | 2 pe lateral dreapta, 1 in fronton | 2 pe fiecare lateral, 1 in fronton | OK |
+| | cos | pe panta dreapta, caramiziu | pe panta dreapta, 2 sloturi | OK |
+| | acoperis | maro-gri | sindrila de lemn, 8 randuri WOOD/LOG_DARK pe panta, prispa la fel | OK (randuri mai late si mai contrastante) |
+| hogan | pereti | busteni orizontali, capete iesite | 7 randuri x 8 laturi, capete iesite, 2 sloturi | OK |
+| | acoperis | dom in trepte cu panouri, horn de lemn | 2 trepte SAND_MID + guler + gaura neagra | OK; fara nervuri radiale (mai neted), ton mai galben |
+| | usa/fereastra | usa de lemn inchis, fereastra pe stanga | usa WOOD cu rama LOG_DARK + treapta, fereastra pe latura vecina | OK; usa de scanduri WOOD cu rama LOG_DARK |
+| pickup_old | silueta | capota lunga rotunjita, cabina, bena | capota/cabina/bena din volume cu colturi tesite | **abatere**: mai colturos, aripile rotunde doar ca bombe interioare |
+| | detalii | grila, bara bej, faruri rotunde | grila + bara CONCRETE, 2 faruri 10 laturi | OK |
+| | culoare | rugina portocalie | RUST (10), geamuri VOLCANIC_BLACK | OK |
+| tour_truck | silueta | 4x4 box, bena lunga, cadru de bare | capota + caroserie cu pereti + cadru 4 x 2 stalpi | OK; capota mai colturoasa |
+| | cadru | bare negre, ~3 arcuri | 4 arcuri de bare (6 laturi), 2 sine | OK |
+| | banchete | 3 randuri x 2, caramel | 3 x 2, WOOD | OK; spatare mai joase decat pe planșa |
+| | caroserie | albastru, aripi gri-negre | CAR_BLUE; **fara aripi negre** | **abatere** minora |
+| tourist_group | oameni | 4, doi cu aparat foto, rucsaci | 4, aparate ridicate la P1 si P4, rucsaci | OK |
+| | proportii | naturale, picioare lungi | trunchi dreptunghiular, membre drepte (low-poly) | OK ca nivel cerut; **abatere**: fara mers/inclinari |
+| | haine | albastru/portocaliu/kaki, palarii | CAR_BLUE/CAR_RED/SAND_MID, sapci + palarii | OK |
+
+Abateri: camionul si pickup-ul n-au caroserie rotunjita fina (primitive cu muchii tesite);
+trading_post-ul are acoperis in patru ape (contract corectat), mai simplu decat cel in trepte de pe planșa; dimensiunile `X` ale
+hoganului (7,34) includ capetele de busteni la colturi, nu doar apotema de 7,0.
+## Grupa mv-e: animale (`build_monument_animals.py`)
+
+Comparatii: `docs/asset_briefs/img/monumentvalley_fidelity/<nume>.png` (+ `horse_bay_views.png`, 4 azimuturi);
+planșa grupei: `docs/asset_briefs/img/monumentvalley_fidelity_vale.png`. `verify_monumentvalley.sh` -> `VERDICT KIT: OK`
+(toate cu `--origin=assembly`). v1 STATICE: doua poze ca noduri separate (`Pose_Stand`, `Pose_Walk`), fata = +Y.
+Cei trei cai ies din ACEEASI functie (`build_horse(coat, pose)`); difera doar slotul/petele. Fara sa, calaret, frau.
+Mers: stanga-fata + dreapta-spate inainte (ridicate), cealalta pereche inapoi, pe sol.
+
+| fisier | noduri | tri (total) | cote masurate (X x Y x Z, m) |
+|---|---|---:|---|
+| animals/horse_bay | Pose_Stand, Pose_Walk | 2880 | 0,72 x 2,41 x 2,19 (cu urechi/coama); greaban ~1,6 prin constructie |
+| animals/horse_pinto | Pose_Stand, Pose_Walk | 2880 | idem |
+| animals/horse_black | Pose_Stand, Pose_Walk | 2880 | idem |
+| animals/sheep | Pose_Stand, Pose_Walk | 1202 | 0,54 x 1,29 x 0,92 |
+| animals/raven | Raven_Body, **Raven_Wings** | 344 | 1,04 x 0,79 x 0,69 (anvergura 1,04) |
+
+Fidelitate (rundele: cai 3, oaie 3, corb 3):
+
+| piesa / element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| horse_bay: silueta | gat arcuit lung, cap lung, piept adanc, coada atarnata | idem, citeste ca un cal la profil | OK |
+| horse_bay: culoare | maro-rosiatic, picioare/coama/coada negre | LARCH_RUST, burta WOOD, ciorapi/coama/coada LOG_DARK | OK; **abatere**: negrul = LOG_DARK (maro foarte inchis), VOLCANIC_BLACK iese gri-albastru |
+| horse_bay: detaliu | muschi, coama in smocuri, ochi | coama = lama neteda, ochi = cub, picioare drepte-prismatice | **abatere** (low-poly, mai rigid) |
+| horse_pinto: pete | sa mare maro pe spinare, crupa maro, gat/cap maro cu dunga alba, picioare albe | 7 pete elipsoidale pe fete (marginile in trepte), cap maro cu dunga, picioare albe | OK ca distributie; **abatere**: peticele au contur in trepte, planșa le are organice; slotul pete = LARCH_RUST (nu WOOD din tabel: WOOD iese prea inchis fata de decupare) |
+| horse_pinto: mers | pas lung, o diagonala inainte | idem (picior ridicat cu genunchi indoit) | OK |
+| horse_black | maro-gri inchis cald | LOG_DARK pe tot corpul (coama/coada/copite la fel) | OK; mai plat decat planșa |
+| sheep: corp | masa de lana crem rotunjita, bulgari pe contur | corp rotunjit CORAL_SAND (crem), fara bulgari | **abatere**: bulgarii de lana nu s-au modelat (conurile citeau ca ghimpi); culoare CORAL_SAND, nu FOAM_WHITE (decuparea e crem, FOAM_WHITE iese albastrui) |
+| sheep: cap/picioare | cap maro-inchis, urechi laterale, picioare inchise | idem (LOG_DARK); picioare mai lungi si drepte | OK; **abatere** picioarele sunt cilindri subtiri, planșa le are mai groase |
+| raven: aripi/corp | aripi larg deschise in V, penaj cu 6+ pene primare, cioc, gheare | 2 placi (nod Raven_Wings) cu 4 pene primare in evantai, cioc RUST, 2 gheare | **abatere**: penele sunt scalopuri pe contur, nu pene individuale; aripile ies drepte ca niste padele |
+
+Abateri de cote: calul 2,41 m lung (tinta 2,4); inaltimea 2,19 m include urechile/coama, greabanul e ~1,6 m
+doar prin constructie (nu masurat separat pe GLB). Oaia a fost scalata pe Y cu 0,92 la sfarsitul functiei ca sa
+iasa 1,3 m. Corbul are anvergura 1,04 m (tinta 1,0). Primitivele rotunde au 4-12 segmente.
+
+## Grupa mv-f (stanci mici, grohotis, fundal)
+
+Build: `tools/blender/build_monument_rocks_small.py` si `build_monument_horizon.py`
+(vocabular din `monument_shapes.py`, nemodificat; bolovanii teșiti `faceted_rock`
+sunt locali in scriptul stancilor mici). Camere: `preview_specs_f.py` (incarcat cu
+un `exec` din `preview_monument.py`, plus `spread` pentru GLB cu mai multe siluete
+la origine). Verify: `VERDICT KIT: OK` (`--origin=assembly`). Planșa: `img/monumentvalley_fidelity_valf.png`.
+
+| fisier | noduri | tri | cote masurate |
+|---|---|---:|---|
+| `rocks/butte_small_a.glb` | `ButteA_Rock/_Scree/_Cap` | 4674 | 14,0 m, amprenta 13,4 x 12,7 m (turn ~7,4 m + con) |
+| `rocks/butte_small_b.glb` | `ButteB_Rock/_Scree/_Cap` | 3208 | 18,0 m, amprenta 9,5 x 7,9 m |
+| `rocks/butte_small_c.glb` | `ButteC_Rock/_Scree/_Cap` | 8592 | 12,3 m, amprenta 13,0 x 13,3 m |
+| `rocks/rock_fin.glb` | `Fin_Rock/_Scree` | 1856 | 12,0 m, 7,2 x 6,5 m cu umarul si grohotisul (peretele 4 x 2,5) |
+| `rocks/hoodoo.glb` | `Hoodoo_Rock/_Scree/_Cap` | 1142 | 7,7 m, 6,5 x 6,2 m cu conul |
+| `rocks/talus_boulders_a.glb` | `Talus_Scree` | 276 | 4,3 x 3,1 x 2,6 m, 7 bolovani |
+| `rocks/talus_boulders_b.glb` | `Talus_Scree` | 390 | 5,7 x 4,5 x 2,5 m, 10 bolovani |
+| `rocks/horizon_mesas.glb` | 7 noduri copii directe (vezi mai jos) | 46242 | vezi mai jos |
+
+Orizontul (`Track._build_horizon`): consumatorul face `_extract_glb_node(scene,
+nume)` = copil direct al radacinii, nume EXACT (din `horizon_picks` in tema),
+containerul se recentreaza cu `-kept.position`, apoi nodul se aseaza la 190-340 m,
+ingropat 4 m, rotit pe Y la intamplare, scalat 1,3-2,4x, `cast_shadow` OFF, iar
+`horizon_class` (mv_sandstone) se aplica pe TOT nodul. De aceea: un nod per
+silueta, originea la baza (XY centrat, Z min 0), volum inchis pe patru fete, o
+singura clasa per nod (roca + calota + grohotis in acelasi mesh).
+
+| nod | tri | bbox X x Z x inaltime (m, cu fusta) | contract |
+|---|---:|---|---|
+| `EagleMesa_A` | 6572 | 108 x 48 x 28,9 | ~90 x 30 x 28: peretele 90 x 30, fusta +9 m |
+| `BrighamsTomb_A` | 8262 | 60 x 44 x 36,7 | ~40 x 25 x 35: turn 35 x 22 pe soclu 46 x 30 (ajunge 36,7) |
+| `Stagecoach_A` | 7294 | (vezi verify) x 28,9..30 | ~50 x 20 x 30: masa 50 x 20 + umar jos |
+| `KingOnThrone_A` | 6326 | tron 32 x 22 + turn | ~30 x 20 x 32 |
+| `Spires_A` | 1502 | 3 turle 34 / 27 / 30 m pe soclu comun ~44 x 20 | turle 25-35 m |
+| `FarMesa_A` | 7298 | 162 x 53 x 15,9 | ~150 x 20 x 15 |
+| `FarMesa_B` | 8988 | idem, profil in doua cote (14 / 10,2 m) | ~150 x 20 x 15 |
+
+Fidelitate: `img/monumentvalley_fidelity/<nume>.png` (decupare | randare) pentru cele
+sapte stanci mici; orizontul: `horizon_mesas.png` (panoramica | cele 7 siluete in
+rand, prea mici) si `horizon_mesas_views.png` (decuparea deasupra, cele 7 siluete
+mari dedesubt).
+
+| piesa | element | pe planșă | in GLB | verdict |
+|---|---|---|---|---|
+| butte_small_a | turn | con trunchiat larg, ~9 coloane late, varf plat | ~9 coloane, taper 36%, talpa evazata 4,5 m | OK; coloanele mai regulate |
+| | calota | placa bej mare in varf | 2 trepte SAND_LIGHT, mai mica decat pe planșă | abatere mica |
+| | con | lat, cu bolovani mari in fata | fusta cu coaste (32 de puncte), ~14 bolovani + 1 mare in fata | OK |
+| butte_small_b | turla | bloc masiv, h/l ~1,8 in imagine (cu con) | 18 m / 7,9 m amprenta (turn ~4,6 m lat): mai suplu | ABATERE: tabelul (18 x 7 m) bate planșa; ramane mai subtire |
+| | bolovan lipit | mare, la stanga jos | 1 bolovan de 2,8 m in stanga | OK |
+| butte_small_c | etaje | 2-3 blocuri care se strang, cel de sus cubic | 3 etaje (6 / 4,4 / 2,9 m), fiecare cu coloane, decalate spre stanga | OK; blocul de sus mai ingust, benzile orizontale (praguri) mai regulate |
+| rock_fin | arip | tuna ascutita, fete in V, umar in dreapta | turla din 6 segmente + 2 coaste verticale + umar de 7,5 m | OK; mai neted decat desenul |
+| hoodoo | coloana | 3 segmente cu gat, cap de piatra | 4 segmente (cu burta la ~3 m), gat 1,6 m | OK |
+| | cap | bolovan poliedric rotunjit, maro-bej | bolovan cu fete late de ~2,2 x 2 x 1,3 m (rev. dupa verdict), sus ROCK_LIGHT 3, laturi SAND_SHADOW 2 | culoare si slot corectate (maro-bej); forma ramane mai blocata decat poliedrul rotunjit, ~1,5x mai lat decat gatul |
+| talus_a / b | grup | bolovani colturosi, 1 central inalt, mici in fata | 7 / 10 bolovani cu varf (peak), fete de sus pe LARCH_RUST | OK; fatetele sunt mai putine si mai plate decat pe planșă |
+| horizon_mesas | siluete | mese late, turn inalt, turle, benzi palide in spate | 7 noduri: masa, turn pe soclu, masa cu umar, tron cu turn, 3 turle, 2 benzi | OK ca siluete; fara aerul albastru de departare (il da ceata), fara contraforturi interne |
+
+Abateri generale: tri ridicati la `butte_small_c` (8592) si `horizon_mesas` (46242
+pe 7 noduri, fara plafon, se instantiaza cate un nod); grohotisul orizontului
+e o fusta de fatete mari, fara bolovani individuali; nodurile orizontului sunt toate la
+origine in GLB (se vad suprapuse intr-un viewer: e asteptat, consumatorul pastreaza
+doar unul).

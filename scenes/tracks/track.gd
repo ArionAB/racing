@@ -7117,6 +7117,15 @@ func _build_channel_water() -> void:
 		return
 	var mat := _water_material()
 	for ch in _channels:
+		# ALBIE USCATA (TrackChannel.dry): nu se randeaza apa, dar plasa de
+		# cadere ramane. Ramura sta INAINTEA testului de mai jos fiindca
+		# `continue`-ul lui (canal la nivelul marii) sare si peste zona de
+		# repunere — un canal fara apa nu are voie sa ramana fara ea.
+		if bool(ch.get("dry", false)):
+			var o_dry: Vector3 = ch["origin"]
+			_build_channel_respawn(ch,
+				o_dry.y - float(ch["depth"]) + CHANNEL_DRY_SURFACE_M)
+			continue
 		var drop := float(ch.get("water_y_drop", -1.0))
 		var is_ford := bool(ch.get("ford", false))
 		if drop < 0.0 and not is_ford:
@@ -7369,7 +7378,8 @@ func _cell_lowest(gx: int, gz: int) -> float:
 
 func _channel_water_covers(pos: Vector3) -> bool:
 	for ch in _channels:
-		if bool(ch.get("ford", false)) or bool(ch.get("pit", false)):
+		if bool(ch.get("ford", false)) or bool(ch.get("pit", false)) \
+				or bool(ch.get("dry", false)):
 			continue
 		if float(ch.get("water_y_drop", -1.0)) < 0.0:
 			continue
@@ -7418,7 +7428,7 @@ func _channel_water_depth(ch: Dictionary) -> float:
 func water_level_at(pos: Vector3) -> float:
 	var best := -INF
 	for ch in _channels:
-		if bool(ch.get("pit", false)):
+		if bool(ch.get("pit", false)) or bool(ch.get("dry", false)):
 			continue
 		var drop := float(ch.get("water_y_drop", -1.0))
 		if drop < 0.0 and not bool(ch.get("ford", false)):
@@ -7489,6 +7499,14 @@ func water_splash_color(pos: Vector3 = Vector3.ZERO) -> Color:
 ## dreptei, AI-ul il ia cu frana si ajunge la trambulina mai incet decat cel
 ## repus la 70 m, care sta pe dreapta finala cu pedala la fund.
 const CHANNEL_FALL_BACKOFF: float = 70.0
+## Cota ECHIVALENTA a apei intr-o albie uscata (`TrackChannel.dry`), masurata
+## de la fundul albiei in sus. Albia n-are apa, dar plasa ei de cadere se
+## calculeaza din cota apei ([method _build_channel_respawn]: plafonul sta 0.6 m
+## sub ea). 3 m = stratul de apa al paraului de munte masurat pe Alpi/Chasm
+## (adancime 18, apa la 15), deci zona incepe la 2.4 m peste fund: destul de
+## sus ca o masina cazuta pe nisip sa fie prinsa, destul de jos ca sa nu
+## atinga nimic din ce circula pe mal.
+const CHANNEL_DRY_SURFACE_M: float = 3.0
 
 ## Cine rateaza saritura peste canal cade in apa si e repus pe traseu.
 ##

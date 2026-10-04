@@ -90,8 +90,6 @@ Doar sloturi existente (`scripts/palette.gd`, constantele din `dio_lib.py`).
 | yucca | `CACTUS_GREEN` 12 + `DRY_VEGETATION` 13 la vârfuri | — |
 | *rabbitbrush* (florile) | `CAR_YELLOW` 16 (`--allow-car-slots=Rabbitbrush_Bloom`), tulpini `DRY_VEGETATION` 13 | — |
 | tumbleweed | `LARCH_RUST` 27 (arama, ca decuparea) | — |
-| semnul (rombul) | `CAR_YELLOW` 16 (`--allow-car-slots=Sign_Face`), calul `LOG_DARK` 28 | — |
-| tumbleweed | `DRY_VEGETATION` 13 | — |
 | semnul (rombul) | `CAR_YELLOW` 16 (`--allow-car-slots=Sign_Face`), calul `VOLCANIC_BLACK` 20 | — |
 | oțelul (grila, moara, cadrul turnului de apă) | `CONCRETE` 8, rugina `RUST_METAL` 10 | — |
 | piatra postului de negoț, coșurile | `ROCK_LIGHT` 3 / `SAND_LIGHT` 0 | — |

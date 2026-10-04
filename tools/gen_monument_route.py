@@ -422,6 +422,10 @@ rf2 = [(0, 0, 0), (-1, -2, -14), (-2, -5, -26), (-3, -6, -37), (-3, -6, -52)]   
 
 HORSE_C = 0.166
 HORSE_G = 0.78
+import os as _os
+HORSES_ON = _os.environ.get("MV_NO_HORSES", "0") != "1"   # A/B pentru ProbeRace
+GAP_M = float(_os.environ.get("MV_GAP", "8"))   # 12 din brief cade bus-ul (21-25 m/s la buza): vezi raportul ProbeRace
+N_HORSES = int(_os.environ.get("MV_HORSES", "2"))   # cai per traversare (brief: 2)
 DEVIL_MAP = (-10.0, -125.0)
 
 # landmarks A: turn de apa (id 0) si moara (id 2), pe stanga (nord) startului
@@ -548,7 +552,7 @@ bumpiness = 0.06
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {g2_g[0]:.2f}, {g2_g[1]:.2f}, {g2_g[2]:.2f})
 gizmo_extents = 40.0
 script = ExtResource("5_channel")
-gap = 12.0
+gap = {GAP_M}
 water_half = 6.0
 bank = 8.0
 depth = 5.0
@@ -581,8 +585,11 @@ rock_pause = 17.0
 [node name="Traseu" type="Path3D" parent="Hazarduri/BolovanE"]
 curve = SubResource("Curve3D_rf2")
 """
-for nm, f, along in (("CalC1", HORSE_C, 0.0), ("CalC2", HORSE_C, 3.5),
-                     ("CalG1", HORSE_G, 0.0), ("CalG2", HORSE_G, 3.5)):
+_HORSES = [("CalC1", HORSE_C, 0.0), ("CalC2", HORSE_C, 3.5),
+           ("CalG1", HORSE_G, 0.0), ("CalG2", HORSE_G, 3.5)]
+if N_HORSES == 1:
+    _HORSES = [h for h in _HORSES if h[0].endswith("1")]
+for nm, f, along in (_HORSES if HORSES_ON else ()):
     tscn += f"""
 [node name="{nm}" type="Marker3D" parent="Hazarduri"]
 transform = {marker_xf(f, along)}

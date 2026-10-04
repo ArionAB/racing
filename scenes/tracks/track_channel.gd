@@ -181,6 +181,31 @@ extends Marker3D
 ## se sapa cu [code]TrackSideSampler.FORD_BED_SINK[/code] sub drum.
 @export var water_over_road: float = 0.3
 
+## Albie USCATA: aceeasi taietura, acelasi gol, aceeasi trambulina, dar FARA
+## suprafata de apa. Pentru un uadi/o albie secata (Track19 monumentvalley,
+## docs/track_briefs/monument_valley.md §3, „Saritura peste albie"), unde golul
+## e prapastia, nu un rau.
+##
+## Pana la steagul asta un canal avea doua feluri de apa si niciunul uscat:
+## `water_y_drop` pozitiv aducea suprafata proprie ([method
+## Track._build_channel_water]), iar unul NEGATIV facea canalul „la nivelul
+## marii" — adica tot apa, a grilei de tarm. Si ocolirea evidenta
+## (`water_y_drop = -1` pe o tema fara mare) nu mergea: plasa [RespawnZone] a
+## albiei se construieste in aceeasi bucla cu apa, deci canalul ramanea uscat SI
+## fara repunere — cine rateaza aterizarea cadea pe nisip si ramanea acolo.
+##
+## Cu `dry` pornit: se sapa albia ([method TrackSideSampler._carve_channel]),
+## golul si trambulina raman, [RespawnZone]-ul din albie ramane (zona incepe la
+## `Track.CHANNEL_DRY_SURFACE_M` − 0.6 m peste fundul albiei, ca la un parau de
+## 3 m adancime), si NU se mai construieste apa. Nici stropul, nici franarea in
+## apa ([method Track.water_level_at]) nu mai vad canalul, iar [member
+## water_y_drop] e ignorat. Se potriveste cu `jump = true`: podul mobil
+## ([LiftBridgeHazard]) isi calculeaza plasa de cadere din cota apei, pe care o
+## albie uscata n-o are. Turnurile si corabiile raman la steagurile lor
+## ([member build_towers], [member build_ships]) si nu conteaza cu `jump`.
+## Oprit (implicit) = bit-identic pe toate canalele existente.
+@export var dry: bool = false
+
 ## Numele afisat in sonde si in mesaje de eroare.
 @export var label: String = ""
 
@@ -207,6 +232,7 @@ func to_spec(track: Node3D) -> Dictionary:
 		"jump": jump,
 		"pit": pit,
 		"ford": ford,
+		"dry": dry,
 		"flow_sign": flow_sign,
 		"label": label if label != "" else name,
 		"static_deck": static_deck,
@@ -223,6 +249,10 @@ func to_spec(track: Node3D) -> Dictionary:
 		# e obligatorie, altfel n-ar exista rau.
 		spec["water_y_drop"] = -water_over_road
 		spec["water_over_road"] = water_over_road
+	elif dry:
+		# Albie uscata: nicio cota de apa de declarat. Cheia lipseste cu buna
+		# stiinta, ca nimic care citeste `water_y_drop` sa nu o ia drept apa.
+		pass
 	elif water_y_drop >= 0.0:
 		spec["water_y_drop"] = water_y_drop
 	return spec

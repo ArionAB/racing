@@ -48,6 +48,14 @@ func _ready() -> void:
 			_avoid = false
 		elif arg.begins_with("--scenarios="):
 			_scenarios = int(arg.trim_prefix("--scenarios="))
+	# `--track=` ia pozitia din lista SAU numarul scenei (Track18 = 18) — vezi
+	# GameState.resolve_track_index. Indexul brut nu vedea decat pozitiile, deci un
+	# numar de scena iesea din tablou sau, la clampi, devenea TACUT alta pista.
+	_track_index = GameState.resolve_track_index(_track_index)
+	if _track_index < 0:
+		printerr("probe_overtake: --track nu e nici pozitie in lista, nici numar de scena din GameState.TRACK_SCENES")
+		get_tree().quit(1)
+		return
 	var track_scene := load(GameState.TRACK_SCENES[_track_index]) as PackedScene
 	var track := track_scene.instantiate() as Track
 	add_child(track)

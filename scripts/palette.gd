@@ -1498,6 +1498,85 @@ const CLASS_TRIPLANAR_SCALE := {
 	"moss": 1.4,
 }
 
+## Ascutimea amestecului triplanar, pe clasele unde implicitul (1.0) strica
+## tiparul. La 1.0 o fata la 45 de grade ia 50/50 din doua proiectii, deci doua
+## seturi de frunze suprapuse decalat: conturul lobat se dubleaza si se topeste
+## in pata (masurat din camera de joc pe coroanele de arțar, oct 2026). Coroana
+## e o icosfera zimtata, cu fete in toate directiile, deci cazul e peste tot.
+## La 8 fiecare fata ia practic o singura proiectie; cusatura dintre proiectii
+## cade pe muchia dintre fete, unde umbrirea plata o ascunde oricum.
+const CLASS_TRIPLANAR_SHARPNESS := {
+	"maple_crimson": 8.0,
+	"maple_orange": 8.0,
+	"maple_rust": 8.0,
+	"ginkgo_gold": 8.0,
+}
+
+## Umbrire NETEDA pe coroanele de frunzis (aceleasi clase ca mai sus). Coroana e
+## din icosfere zimtate cu umbrire plata: fiecare fata e o placa de lumina, deci
+## ciorchinele se citeste „piatra sparta", nu frunzis. Normalele mediate pe pozitie
+## fac lumina sa curga peste ciorchine, iar detaliul il duce textura. Zero
+## triunghiuri in plus; trunchiurile raman cu fatete. Comutator pentru A/B la volan.
+const SMOOTH_FOLIAGE := true
+
+static var _smoothed_meshes: Dictionary = {}
+
+static func is_smooth_foliage(cls: String) -> bool:
+	return SMOOTH_FOLIAGE and CLASS_TRIPLANAR_SHARPNESS.has(cls.trim_prefix(TRI_PREFIX))
+
+## Suprafetele unui mesh care poarta un material de coroana (gol daca
+## SMOOTH_FOLIAGE e stins).
+static func foliage_surfaces(mesh: Mesh) -> Dictionary:
+	var out := {}
+	if not SMOOTH_FOLIAGE or mesh == null:
+		return out
+	for si in mesh.get_surface_count():
+		for cls in CLASS_TRIPLANAR_SHARPNESS:
+			if mesh.surface_get_material(si) == triplanar_class_material(cls):
+				out[si] = true
+	return out
+
+## Copie a mesh-ului cu normale mediate pe pozitie (cuantizata la 5 mm), pe
+## suprafetele din `only` (gol = toate). Cache pe mesh: instantele aceluiasi
+## GLB impart rezultatul.
+static func smoothed_mesh(mesh: Mesh, only: Dictionary = {}) -> Mesh:
+	if mesh == null:
+		return null
+	if _smoothed_meshes.has(mesh):
+		return _smoothed_meshes[mesh]
+	var out := ArrayMesh.new()
+	for si in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(si)
+		if not only.is_empty() and not only.has(si):
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+			out.surface_set_material(si, mesh.surface_get_material(si))
+			continue
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var idx := PackedInt32Array()
+		if arrays[Mesh.ARRAY_INDEX] != null:
+			idx = arrays[Mesh.ARRAY_INDEX]
+		var acc := {}
+		var tri_count := idx.size() / 3 if idx.size() > 0 else verts.size() / 3
+		for t in tri_count:
+			var i0: int = idx[t * 3] if idx.size() > 0 else t * 3
+			var i1: int = idx[t * 3 + 1] if idx.size() > 0 else t * 3 + 1
+			var i2: int = idx[t * 3 + 2] if idx.size() > 0 else t * 3 + 2
+			var fn := (verts[i1] - verts[i0]).cross(verts[i2] - verts[i0])
+			for i in [i0, i1, i2]:
+				var key := (verts[i] * 200.0).round()
+				acc[key] = acc.get(key, Vector3.ZERO) + fn
+		var old_n: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var normals := PackedVector3Array()
+		normals.resize(verts.size())
+		for i in verts.size():
+			normals[i] = (acc.get((verts[i] * 200.0).round(), old_n[i]) as Vector3).normalized()
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		arrays[Mesh.ARRAY_TANGENT] = null
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		out.surface_set_material(si, mesh.surface_get_material(si))
+	_smoothed_meshes[mesh] = out
+	return out
+
 static var _tri_mats: Dictionary = {}
 
 ## Textura unei clase, cu ridicarea din CLASS_LIFT aplicata daca e ceruta.
@@ -1568,6 +1647,7 @@ static func triplanar_class_material(cls: String) -> StandardMaterial3D:
 	mat.uv1_world_triplanar = true
 	var s: float = CLASS_TRIPLANAR_SCALE[cls]
 	mat.uv1_scale = Vector3(s, s, s)
+	mat.uv1_triplanar_sharpness = CLASS_TRIPLANAR_SHARPNESS.get(cls, 1.0)
 	if CLASS_TINT.has(cls):
 		mat.albedo_color = CLASS_TINT[cls]
 	_tri_mats[cls] = mat

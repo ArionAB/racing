@@ -2951,6 +2951,8 @@ func _apply_classes_mapping(by_stem: Dictionary) -> void:
 			if is_accent and not cls.begins_with(Palette.GLOW_PREFIX) 					and not mapping.has(nm):
 				continue
 			mi.material_override = _model_class_material(cls)
+			if Palette.is_smooth_foliage(cls):
+				mi.mesh = Palette.smoothed_mesh(mi.mesh)
 
 
 ## Materialul unei clase din `CLASSES_BY_MODEL`, dupa prefix.

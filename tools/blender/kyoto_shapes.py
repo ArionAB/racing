@@ -230,6 +230,72 @@ def leaf_blob(b, center, rx, ry, rz, slot, subdiv=2, jag=0.24, seed=0):
     return b._tag(verts, slot)
 
 
+def leaf_pad(b, center, rx, ry, rz, slot, lobes=7, seg_per_lobe=5, rings=5,
+             base=0.60, droop=0.45, seed=0):
+    """Ciorchine de arțar cu CONTUR LOBAT: perna turtita a carei margine e o
+    stea cu `lobes` varfuri ascutite (ca frunza de arțar), lasate usor in jos.
+    Inlocuieste `leaf_blob` pe arțari: icosfera zimtata aleator se citea glob
+    din camera de joc (oct 2026) -- conturul, nu textura, spune „arțar".
+
+    Inele de la polul de sus la cel de jos; raza orizontala a fiecarui inel e
+    inmultita cu profilul de lobi m(theta), plin la ecuator si stins spre poli,
+    deci lobii sunt creste care coboara din crestet spre varfurile ascutite.
+    Dedesubtul e mai plat decat crestetul. Triunghiuri: 2*S*(rings-1), cu
+    S = lobes*seg_per_lobe (7x5, 5 inele -> 280, sub icosfera subdiv 3 de 320)."""
+    rnd = _lcg(seed)
+    cx, cy, cz = center
+    S = lobes * seg_per_lobe
+    yaw = rnd() * 2.0 * math.pi
+    half = math.pi / lobes * 1.05
+    lob = []
+    for k in range(lobes):
+        # varful lobului cade EXACT pe un varf de inel (k*seg_per_lobe), deci
+        # ramane ascutit; varietatea vine din yaw si din lungimea lobului
+        lob.append((2.0 * math.pi * k / lobes, 1.0 + (rnd() - 0.3) * 0.22))
+
+    def m_of(th):
+        best = base
+        for (c, ln) in lob:
+            d = (th - c + math.pi) % (2.0 * math.pi) - math.pi
+            u = abs(d) / half
+            if u < 1.0:
+                best = max(best, base + (ln - base) * (1.0 - u) ** 1.25)
+        return best + 0.035 * math.sin(th * lobes * 3.0)   # dinti fini
+
+    bm = b.bm
+    top = bm.verts.new((cx, cy, cz + rz))
+    rows = []
+    for i in range(1, rings):
+        phi = math.pi * i / rings
+        sp, cp = math.sin(phi), math.cos(phi)
+        zr = cp * (rz if cp > 0 else rz * 0.45)          # burta mai plata
+        row = []
+        for j in range(S):
+            th = 2.0 * math.pi * j / S
+            m = m_of(th)
+            w = sp ** 1.5
+            k = 1.0 + (m - 1.0) * w
+            tip = max(0.0, (m - base) / (1.0 - base + 1e-6))
+            z = zr - droop * rz * tip * sp * sp
+            a = th + yaw
+            row.append(bm.verts.new((cx + math.cos(a) * rx * sp ** 0.8 * k,
+                                     cy + math.sin(a) * ry * sp ** 0.8 * k,
+                                     cz + z)))
+        rows.append(row)
+    bot = bm.verts.new((cx, cy, cz - rz * 0.45))
+    for j in range(S):
+        j2 = (j + 1) % S
+        bm.faces.new((top, rows[0][j], rows[0][j2]))
+        for r in range(len(rows) - 1):
+            a0, a1 = rows[r][j], rows[r][j2]
+            b0, b1 = rows[r + 1][j], rows[r + 1][j2]
+            bm.faces.new((a0, b0, b1))
+            bm.faces.new((a0, b1, a1))
+        bm.faces.new((bot, rows[-1][j2], rows[-1][j]))
+    verts = [top, bot] + [v for row in rows for v in row]
+    return b._tag(verts, slot)
+
+
 # ---------------------------------------------------------------------------
 # emit -- comun tuturor build-urilor Kyoto
 # ---------------------------------------------------------------------------

@@ -45,6 +45,11 @@ extends Node
 ##                             lateral, deci ies din cadru la cea mai mica
 ##                             eroare. Poza asta e pentru VERIFICAREA unui
 ##                             asset, nu pentru compozitia pistei.
+##   --dirt=0.2,0.4[;0.6,0.7]  pune intervale de DRUM DE PAMANT (`custom_dirt_ranges`)
+##                             pe o pista cu asfalt, inainte sa se construiasca:
+##                             asa se vede tranzitia asfalt/pamant fara sa
+##                             editezi scena. Ex.: --track=0 --frac=0.2 --gamecam
+##                             --dirt=0.2,0.4 prinde inceputul portiunii de pamant.
 ##   --train-at=0.55           muta ceasul trecerii de cale ferata la fractia
 ##                             ceruta din ciclu, ca trenul sa fie IN cadru la
 ##                             momentul capturii (implicit e parcat, invizibil)
@@ -376,6 +381,7 @@ func _ready() -> void:
 	var bridge_at := -1.0
 	var typhoon_at := -1.0
 	var wave_at := -1.0
+	var dirt_ranges: Array[Vector2] = []
 	var rock_at := -1.0
 	var avalanche_at := -1.0
 	var door_at := -1.0
@@ -477,6 +483,11 @@ func _ready() -> void:
 			typhoon_at = float(arg.trim_prefix("--typhoon-at="))
 		elif arg.begins_with("--wave-at="):
 			wave_at = float(arg.trim_prefix("--wave-at="))
+		elif arg.begins_with("--dirt="):
+			for seg in arg.trim_prefix("--dirt=").split(";"):
+				var ab := seg.split(",")
+				if ab.size() == 2:
+					dirt_ranges.append(Vector2(float(ab[0]), float(ab[1])))
 		elif arg.begins_with("--daruma-phase="):
 			daruma_phase = float(arg.trim_prefix("--daruma-phase="))
 		elif arg.begins_with("--daruma-clock="):
@@ -593,6 +604,13 @@ func _ready() -> void:
 
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
+	if not dirt_ranges.is_empty():
+		# Inainte de add_child: rebuild() ruleaza in _ready si citeste intervalele.
+		if "custom_dirt_ranges" in track:
+			track.set("custom_dirt_ranges", dirt_ranges)
+			print("--dirt: %s" % [dirt_ranges])
+		else:
+			push_error("snapshot: --dirt cere o pista TrackFromPath (custom_dirt_ranges)")
 	add_child(track)
 	if no_fog:
 		var envs := track.find_children("*", "WorldEnvironment", true, false)

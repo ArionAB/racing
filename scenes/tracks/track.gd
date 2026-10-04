@@ -96,6 +96,14 @@ var road_surface: String = "asphalt"
 func road_is_loose() -> bool:
 	return road_surface != "asphalt"
 
+## Drumul e afanat LA FRACTIA asta? Varianta pe fractie a lui [method road_is_loose],
+## pentru pistele cu asfalt pe o parte din bucla si pamant pe alta
+## ([method _dirt_ranges]): linia de mijloc, bordurile, praful si urmele masinii
+## intreaba de unde se afla roata, nu de toata pista. Pe o pista fara intervale
+## de pamant raspunsul e exact cel al lui `road_is_loose()`.
+func road_is_loose_at(frac: float) -> bool:
+	return road_is_loose() or is_dirt_at(frac)
+
 ## Culoarea prafului ridicat DE PE SOSEA.
 ##
 ## Praful de pe teren isi ia culoarea din theme_ground_tint (vezi
@@ -105,7 +113,11 @@ func road_is_loose() -> bool:
 func road_dust_color() -> Color:
 	if road_surface == "snow":
 		return SNOW_ROAD_COLOR
-	return dirt_road_color() if road_is_loose() else asphalt_color()
+	# Pe o pista cu asfalt si portiuni de pamant (`_dirt_ranges`), masina ridica
+	# praf de pe SOSEA doar unde e pamant (vezi Car._on_loose_ground), deci orice
+	# praf "de pe sosea" are culoarea pamantului, nu a asfaltului.
+	return dirt_road_color() if (road_is_loose() or has_dirt_ranges()) \
+		else asphalt_color()
 
 ## Suprafata pe care masinile lasa brazde rulind (vezi SandTrail).
 ##
@@ -116,7 +128,11 @@ func road_dust_color() -> Color:
 func trail_surface_color() -> Color:
 	if road_surface == "snow":
 		return SNOW_ROAD_COLOR
-	return dirt_road_color() if road_is_loose() else theme_ground_tint
+	# Pista cu portiuni de pamant: pe ele chiar drumul poarta urme, iar pe
+	# asfalt nu se depune nimic — aceeasi regula "cele mai multe urme", deci
+	# culoarea drumului de pamant, nu a terenului.
+	return dirt_road_color() if (road_is_loose() or has_dirt_ranges()) \
+		else theme_ground_tint
 
 ## Cat de INCHISA e brazda fata de suprafata pe care e lasata, pe drumurile de
 ## pamant/nisip. Tinta e o brazda, nu vopsea: nisipul rascolit isi pierde din
@@ -169,7 +185,7 @@ func trail_profile() -> Dictionary:
 	var lit := dirt_road_color()
 	var road_l := lit.r * 0.2126 + lit.g * 0.7152 + lit.b * 0.0722
 	var lip_scale := clampf(road_l / 0.62, 0.06, 1.0)
-	if road_surface == "dirt":
+	if road_surface == "dirt" or (road_surface == "asphalt" and has_dirt_ranges()):
 		# Pamantul afanat tine cel mai bine amprenta: bazin adanc, model clar.
 		return {"width": 0.60, "core": 0.66, "basin": 0.34, "tread": 0.48, "lip": 2 * lip_scale}
 	# Pamant tare: urma abia se vede, si nu retine modelul anvelopei.
@@ -5158,8 +5174,11 @@ func _build_center_line() -> void:
 		while idx + 1 < _dists.size() and _dists[idx + 1] < d:
 			idx += 1
 		var i := idx % n
-		if _road_gap(i) or _road_ice(i) or (not wood.is_empty()
-				and _frac_in_ranges(frac_at(i), wood)):
+		# Nici portiunile de pamant ale unei bucle mixte (`_dirt_ranges`): linia
+		# se opreste exact unde incepe drumul nepavat, ca pe un drum de pamant
+		# intreg.
+		if _road_gap(i) or _road_ice(i) or _road_dirt(i, (i + 1) % n) \
+				or (not wood.is_empty() and _frac_in_ranges(frac_at(i), wood)):
 			d += 6.5
 			continue
 		var dir := (baked[(i + 1) % n] - baked[i]).normalized()
@@ -10055,8 +10074,10 @@ const WEAR_CENTER_DARK: Color = Color(0.74, 0.66, 0.56)
 ##
 ## `base` e nuanta deja calculata (mijloc -> margine); functia o modifica, nu o
 ## inlocuieste, ca gradientul de praf de la margine sa ramana.
-func _wear_shade(base: Color, t: float) -> Color:
-	if not road_is_loose():
+func _wear_shade(base: Color, t: float, dirt_here: bool = false) -> Color:
+	# `dirt_here`: segment de pamant pe o bucla cu asfalt (`_dirt_ranges`) —
+	# aceeasi uzura ca pe un drum de pamant intreg, doar pe segmentul asta.
+	if not (road_is_loose() or dirt_here):
 		return base
 	var a := absf(t)
 	# 1. Fagasul: o gaussiana in jurul lui WEAR_TRACK_POS.
@@ -10175,6 +10196,14 @@ func _build_road() -> void:
 	var wood_top := SurfaceTool.new()
 	wood_top.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var has_wood := not _wood_deck_ranges().is_empty()
+	# PAMANT PE FRACTII (`_dirt_ranges`: asfalt pe o parte din bucla, drum de
+	# pamant pe alta): aceeasi geometrie, aceeasi coliziune, alt mesh si alt
+	# material — tiparul ghetii si al puntii. Daca TOATA pista e drum nepavat
+	# (`road_surface`), intervalele n-au obiect si nu se imparte nimic: ar costa
+	# un material pentru o suprafata identica cu a soselei.
+	var dirt_top := SurfaceTool.new()
+	dirt_top.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var has_dirt := has_dirt_ranges() and not road_is_loose()
 	var down := Vector3.DOWN * ROAD_THICKNESS
 	var n := baked.size()
 	# UV-uri PATRATE: acelasi numar de metri pe ambele axe.
@@ -10211,6 +10240,16 @@ func _build_road() -> void:
 			minf(drc.r / SAND_MACRO_MEAN, 1.0),
 			minf(drc.g / SAND_MACRO_MEAN, 1.0),
 			minf(drc.b / SAND_MACRO_MEAN, 1.0))
+	# Aceeasi tinta, pentru segmentele de pamant ale unei bucle cu asfalt
+	# (`has_dirt`): identica cu cea a unui drum de pamant intreg, calculata o
+	# singura data. Pe pistele fara intervale ramane alb si nu se atinge.
+	var dirt_seg_tint := Color.WHITE
+	if has_dirt:
+		var dtc := dirt_road_color()
+		dirt_seg_tint = Color(
+			minf(dtc.r / SAND_MACRO_MEAN, 1.0),
+			minf(dtc.g / SAND_MACRO_MEAN, 1.0),
+			minf(dtc.b / SAND_MACRO_MEAN, 1.0))
 	# Peticele de zapada de pe asfalt (vezi "road_snow_low" in themes()). Null pe
 	# orice tema fara munte, deci restul pistelor nu se schimba cu un pixel.
 	var snow_tint: Variant = theme_flag("road_snow_tint", null)
@@ -10259,7 +10298,12 @@ func _build_road() -> void:
 			continue
 		var on_ice := has_ice and _road_ice(i, j)
 		var on_wood := has_wood and _frac_in_ranges(frac_at(i), _wood_deck_ranges())
-		var dst := ice_top if on_ice else (wood_top if on_wood else top)
+		# Gheata si puntea de lemn sunt suprafete DECLARATE explicit, deci castiga
+		# in fata pamantului daca intervalele se suprapun.
+		var on_dirt := has_dirt and not on_ice and not on_wood \
+			and _road_dirt(i, j)
+		var dst := ice_top if on_ice else (wood_top if on_wood \
+			else (dirt_top if on_dirt else top))
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
 		var s0v := _side_at(i)
@@ -10292,13 +10336,20 @@ func _build_road() -> void:
 			# 0.45): intre fagas si acostament trebuie sa ramana drum curat,
 			# altfel banda de rulare se termina direct in praf si drumul se
 			# ingusteaza optic.
-			var edge_lo := 0.66 if road_is_loose() else 0.45
+			#
+			# Segmentul de pamant al unei bucle cu asfalt (`on_dirt`) primeste
+			# EXACT paleta unui drum de pamant intreg: mijloc alb, margini ocru,
+			# aceeasi uzura si aceeasi tinta (`dirt_seg_tint`).
+			var seg_loose := road_is_loose() or on_dirt
+			var seg_mid := Color.WHITE if on_dirt else mid_shade
+			var seg_edge := DIRT_EDGE_SHADE if on_dirt else edge_shade
+			var edge_lo := 0.66 if seg_loose else 0.45
 			var ca := _wear_shade(
-				mid_shade.lerp(edge_shade, smoothstep(edge_lo, 1.0, absf(ta))),
-				ta)
+				seg_mid.lerp(seg_edge, smoothstep(edge_lo, 1.0, absf(ta))),
+				ta, on_dirt)
 			var cb := _wear_shade(
-				mid_shade.lerp(edge_shade, smoothstep(edge_lo, 1.0, absf(tb))),
-				tb)
+				seg_mid.lerp(seg_edge, smoothstep(edge_lo, 1.0, absf(tb))),
+				tb, on_dirt)
 			# Pe drumul AFANAT culoarea nu mai vine din material: shader-ul de
 			# teren (vezi `road_material`) n-are `albedo_color`, deci nuanta
 			# drumului se inmulteste AICI, in vertex color. Se compune peste
@@ -10308,7 +10359,10 @@ func _build_road() -> void:
 			# Se incadreaza in clamp-ul [0,1] prin constructie: tenta temei e
 			# #D3CBBD (0.83, 0.80, 0.74), toate sub 1. O tema care ar cere un
 			# drum mai deschis decat alb ar trebui sa ridice textura, nu asta.
-			if road_is_loose():
+			if on_dirt:
+				ca *= dirt_seg_tint
+				cb *= dirt_seg_tint
+			elif road_is_loose():
 				ca *= _loose_road_tint
 				cb *= _loose_road_tint
 			# UV-ul urmareste latimea LOCALA, ca dala sa ramana patrata si acolo
@@ -10337,13 +10391,16 @@ func _build_road() -> void:
 			# `road_shade` INTUNECA de la culoarea materialului (care e zapada, pe
 			# temele cu zapada) inapoi spre asfalt — vezi _road_snow_weight pentru
 			# de ce sensul e inversat.
-			var c0 := _road_shade(ca, road_dark, _road_snow_weight(
+			# Pamantul nu e asfalt: zapada de pe asfalt (`road_dark`) nu-l atinge,
+			# iar materialul lui nu e ridicat spre alb ca sa-i faca loc.
+			var seg_dark := Color.WHITE if on_dirt else road_dark
+			var c0 := _road_shade(ca, seg_dark, _road_snow_weight(
 				w0, snow_low, snow_high, snow_amount, snow_noise, ta)) * wet0
-			var c1 := _road_shade(ca, road_dark, _road_snow_weight(
+			var c1 := _road_shade(ca, seg_dark, _road_snow_weight(
 				w1, snow_low, snow_high, snow_amount, snow_noise, ta)) * wet1
-			var c0b := _road_shade(cb, road_dark, _road_snow_weight(
+			var c0b := _road_shade(cb, seg_dark, _road_snow_weight(
 				w0b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet0
-			var c1b := _road_shade(cb, road_dark, _road_snow_weight(
+			var c1b := _road_shade(cb, seg_dark, _road_snow_weight(
 				w1b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet1
 			if on_ice:
 				# Gheata n-are uzura de margine si nici petice: culoarea vine
@@ -10528,6 +10585,16 @@ func _build_road() -> void:
 			inst.mesh = ice_mesh
 			inst.material_override = _ice_road_material()
 			add_child(inst)
+	if has_dirt:
+		dirt_top.index()
+		dirt_top.generate_normals()
+		var dirt_mesh := dirt_top.commit()
+		if dirt_mesh != null and dirt_mesh.get_surface_count() > 0:
+			var dinst := MeshInstance3D.new()
+			dinst.name = "DirtRoad"
+			dinst.mesh = dirt_mesh
+			dinst.material_override = _dirt_road_material()
+			add_child(dinst)
 	if not _channels.is_empty():
 		var deck_mesh := deck_sides.commit()
 		if deck_mesh != null and deck_mesh.get_surface_count() > 0:
@@ -12588,7 +12655,7 @@ var _road_fade_mat: ShaderMaterial
 ## Carosabilul cu granulatie care se stinge cu distanta. Vezi
 ## road_detail_fade.gdshader pentru de ce nu se poate cere din StandardMaterial3D.
 func _road_fade_material(color: Color, micro: String, macro: String,
-		rough: float, spec: float) -> ShaderMaterial:
+		rough: float, spec: float, force_sand: bool = false) -> ShaderMaterial:
 	if _road_fade_mat == null:
 		_road_fade_mat = ShaderMaterial.new()
 		_road_fade_mat.shader = load(
@@ -12600,7 +12667,7 @@ func _road_fade_material(color: Color, micro: String, macro: String,
 	var macro_mean := ASPHALT_MACRO_MEAN
 	if road_surface == "snow":
 		macro_mean = SNOW_MACRO_MEAN
-	elif road_is_loose():
+	elif road_is_loose() or force_sand:
 		macro_mean = SAND_MACRO_MEAN
 	rm.set_shader_parameter("base_color", Color(color.r / macro_mean,
 		color.g / macro_mean, color.b / macro_mean))
@@ -12609,6 +12676,25 @@ func _road_fade_material(color: Color, micro: String, macro: String,
 	rm.set_shader_parameter("roughness_v", rough)
 	rm.set_shader_parameter("specular_v", spec)
 	return rm
+
+
+## Materialul fasiilor de pamant ale unei bucle cu asfalt (`_dirt_ranges`).
+##
+## Nu e un material nou ca CONCEPT: e exact cel pe care l-ar primi soseaua daca
+## toata pista ar fi `road_surface = "dirt"` — acelasi shader cu stingere
+## (`_road_fade_material`), aceleasi texturi de nisip, fara luciu, aceeasi
+## culoare (`dirt_road_color`, deci `dirt_road_tint` din tema), cu aceeasi
+## impartire la media macro-ului. Costul pe garda de materiale e UNUL, si
+## doar pe pistele care declara intervale. `road_material()` de mai jos NU e
+## calea asta: il cere doar RotatingSpanHazard (podul rotitor), soseaua
+## propriu-zisa trece prin `_build_road`.
+func _dirt_road_material() -> ShaderMaterial:
+	var base := dirt_road_color()
+	var color := Color(base.r / SAND_MACRO_MEAN, base.g / SAND_MACRO_MEAN,
+		base.b / SAND_MACRO_MEAN)
+	return _road_fade_material(color,
+		"res://assets/textures/surface_sand.png",
+		"res://assets/textures/surface_sand_macro.png", 1.0, 0.0, true)
 
 
 func road_material() -> Material:
@@ -13384,6 +13470,14 @@ func _build_tire_marks() -> void:
 			var idx := (i + k + n) % n
 			strength[idx] = 1.0
 			offset_sign[idx] = turn
+	# Pe portiunile de PAMANT ale unei bucle cu asfalt (`_dirt_ranges`) nu se
+	# coace nimic, ca pe un drum de pamant intreg (vezi antetul). Se scoate
+	# INAINTE de rampele de alpha, ca urmele de pe asfalt sa se stinga gradual
+	# la marginea intervalului, nu taiate.
+	if has_dirt_ranges():
+		for i in n:
+			if _road_dirt(i):
+				strength[i] = 0.0
 	# 2. Rampa de alpha la capete: 4 pasi de aparitie/disparitie.
 	var alpha: Array[float] = []
 	alpha.resize(n)
@@ -13411,7 +13505,7 @@ func _build_tire_marks() -> void:
 		var j := (i + 1) % n
 		if alpha[i] <= 0.0 and alpha[j] <= 0.0:
 			continue
-		if _road_gap(i, j) or _road_ice(i, j):
+		if _road_gap(i, j) or _road_ice(i, j) or _road_dirt(i, j):
 			continue
 		# Linia de apex: spre interiorul virajului, nu pe axa drumului.
 		var lane0 := -offset_sign[i] * width_at_index(i) * 0.35
@@ -13542,7 +13636,10 @@ func _build_kerbs() -> void:
 		if before.angle_to(after) < 0.08:
 			continue
 		var j := (i + 2) % n
-		if _road_gap(i, j) or _road_ice(i, j):
+		# Fara borduri nici pe portiunile de pamant ale unei bucle cu asfalt
+		# (`_dirt_ranges`): bordura rosu-alb e mobilier turnat, ca pe un drum de
+		# pamant intreg (vezi sus).
+		if _road_gap(i, j) or _road_ice(i, j) or _road_dirt(i, j):
 			continue
 		var v0 := _dists[i] / KERB_TILE
 		var v1 := _dists[mini(i + 2, n)] / KERB_TILE
@@ -15216,8 +15313,57 @@ func loose_grip() -> float:
 	return float(theme_flag("loose_grip", 0.0))
 
 
+## `is_loose_at` raspunde pe grip: intervalele de PAMANT (`_dirt_ranges`) sunt
+## afanate prin definitie, deci intra aici si primesc `loose_grip` pe aceeasi
+## cale din Car — nu exista un al doilea mecanism de grip pentru pamant.
 func is_loose_at(frac: float) -> bool:
-	return _frac_in_ranges(frac, _loose_ranges())
+	return _frac_in_ranges(frac, _loose_ranges()) \
+		or _frac_in_ranges(frac, _dirt_ranges())
+
+
+## Intervalele (fractii de tur) pe care soseaua e DRUM DE PAMANT, pe o pista al
+## carei carosabil de baza e asfalt: (frac_start, frac_end), ca la
+## `_ice_ranges`, cu trecere peste linia de start permisa. Monument Valley:
+## asfalt pe A, B, H si pamant rosu pe C-G, pe ACEEASI bucla.
+##
+## Spre deosebire de `road_surface` (o alegere pe toata pista) si de
+## `_loose_ranges` (doar grip, nimic vizibil), intervalul asta schimba TOT ce
+## tine de suprafata, pe portiune:
+##   - mesh-ul soselei — materialul drumului de pamant, in `DirtRoad`
+##     (`_build_road`, +1 material, doar daca lista nu e goala);
+##   - marcajele — fara linie de mijloc, borduri sau urme coapte (marcajele
+##     unui drum nepavat n-au sens, ca pe `road_surface = "dirt"`);
+##   - masinile — praf si urme de rulare cat timp ruleaza pe interval
+##     (`Car._on_loose_ground`, via `road_is_loose_at`) si `loose_grip` din tema
+##     (via `is_loose_at`).
+##
+## Lista goala (implicitul) lasa pista bit-identica cu cea de dinainte.
+func _dirt_ranges() -> Array[Vector2]:
+	return []
+
+
+## E drumul de pamant la fractia asta? (intervalele din `_dirt_ranges`)
+func is_dirt_at(frac: float) -> bool:
+	return _frac_in_ranges(frac, _dirt_ranges())
+
+
+## Pista are cel putin un interval de pamant?
+func has_dirt_ranges() -> bool:
+	return not _dirt_ranges().is_empty()
+
+
+## Segmentul dintre indicii `i` si `j` e pe pamant (vezi `_dirt_ranges`)? Pe
+## INDICI ca `_road_ice`: generatorii de „mobilier" (linie, borduri, urme) il
+## intreaba cu aceleasi capete ca mesh-ul soselei, deci marcajul se opreste
+## exact unde se schimba materialul, nu cu un segment mai devreme sau mai tarziu.
+## Pe o pista cu drum de pamant INTREG (`road_is_loose`) intoarce false: acolo
+## mobilierul se opreste din alt loc si intervalele n-au obiect.
+func _road_dirt(i: int, j: int = -1) -> bool:
+	if road_is_loose() or _dirt_ranges().is_empty():
+		return false
+	if is_dirt_at(frac_at(i)):
+		return true
+	return j >= 0 and is_dirt_at(frac_at(j))
 
 
 ## Portiunile de TREPTE de pe traseul principal: (frac_start, frac_end).

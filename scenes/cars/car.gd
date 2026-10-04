@@ -1838,6 +1838,16 @@ func _on_loose_ground(on_road: bool) -> bool:
 	# ar intinde brazdele albastrui si peste autostrada de gheata.
 	if route == 0 and track.is_ice_at(track.frac_at(road_index)):
 		return false
+	return _road_loose_here()
+
+
+## Soseaua de sub roti e drum afanat? Pe fractia curenta, nu pe toata pista: o
+## bucla cu asfalt si portiuni de pamant (Track.is_dirt_at) are praf si urme doar
+## pe pamant. Pe o scurtatura (route != 0) nu exista intervale, ramane
+## raspunsul pistei. Pe o pista fara intervale e exact `road_is_loose()`.
+func _road_loose_here() -> bool:
+	if route == 0:
+		return track.road_is_loose_at(track.frac_at(road_index))
 	return track.road_is_loose()
 
 ## Culorile prafului, coapte o data cand masina afla pe ce pista e: una a
@@ -1850,10 +1860,25 @@ var _dust_colors_ready: bool = false
 ## 2 banda secundara (ruta curenta; se recalculeaza la schimbarea rutei).
 var _dust_source: int = -1
 var _dust_route: int = -1
+## Roata e pe un interval de pamant al pistei (Track.is_dirt_at)? Doar ca sa
+## stim cand sa recolorez fumul de drift la trecerea pamant <-> asfalt.
+var _drift_on_dirt: bool = false
 
 func _update_dust(on_road: bool, loose: bool, on_branch: bool = false) -> void:
 	if _dust_particles == null or track == null:
 		return
+	# Bucla cu asfalt si portiuni de pamant (Track.is_dirt_at): culoarea fumului
+	# de drift se alege doar cand se schimba SURSA prafului (mai jos), iar pe asfalt
+	# praful nu porneste niciodata — deci fumul ramanea colorat cu pamantul de
+	# dinainte. La trecerea pamant <-> asfalt se reseteaza aici. Pe pistele fara
+	# intervale ramura nu ruleaza.
+	if track.has_dirt_ranges():
+		var on_dirt := route == 0 and track.is_dirt_at(track.frac_at(road_index))
+		if on_dirt != _drift_on_dirt:
+			_drift_on_dirt = on_dirt
+			_dust_source = -1
+			if not on_dirt:
+				_drift_particles.color = DRIFT_SMOKE_COLOR
 	if not _dust_colors_ready:
 		_dust_colors_ready = true
 		# Praful de pe TEREN: mai INCHIS decat solul, nu mai deschis. Prima
@@ -1892,7 +1917,7 @@ func _update_dust(on_road: bool, loose: bool, on_branch: bool = false) -> void:
 		# Si fumul de drift: pe pamant nu arde cauciucul, se ridica solul. Gri de
 		# anvelopa peste o dara rosie ar fi singurul lucru din cadru care spune
 		# ca dedesubt e tot asfalt.
-		_drift_particles.color = tint if track.road_is_loose() \
+		_drift_particles.color = tint if _road_loose_here() \
 			else DRIFT_SMOKE_COLOR
 	# Norul creste cu viteza: la 6 m/s e o adiere, la plafon e o dara adevarata.
 	var k := clampf(horizontal_speed() / maxf(max_speed, 1.0), 0.0, 1.0)

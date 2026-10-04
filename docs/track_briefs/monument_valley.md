@@ -735,24 +735,200 @@ consumator. Verdictele de aici sunt preliminare și se confirmă pe cod citit.
     geografic sau cultural);
   - **John Wayne și citatele din filme western** (mărci, trade dress).
 
-## 9. Prompturile pentru ChatGPT (dioramă + planșă de inventar)
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.2, paste-ready
 
-**Se scriu după ce există `Track19.tscn`**, direct în varianta v0.2: pe
-captura reală de sus a pistei construite, adnotată, nu pe un plan schematic
-(memoria `diorama-din-geometria-reala`; la Kyoto, dioramă v0.1 avea
-topologia greșită față de pista construită). Ce trebuie să conțină:
-- planul real cu POI A–H și G′;
-- regula de artă din §0.1 (diorama stilizată din `style_bible.md`, nu foto);
-- cele trei etaje ale monoliților, lumina de 18° din VSV, haboob-ul în
-  faza de traversare peste G;
-- interdicțiile din §8 (fără text, fără logo-uri, fără saguaro, fără tipi,
-  fără oameni în costum).
+**Se atașează doar `docs/track_briefs/img/monument_plan/monument_plan.png`**,
+într-o **conversație nouă**. Planul e captura REALĂ de sus din Godot
+(`Snapshot.tscn -- --track=19 --no-fog`, cu fereastră, apoi
+`python tools/annotate_monument_plan.py`), cu legenda peste ea. Pista e
+sursa de adevăr (memoria `diorama-din-geometria-reala`).
 
-Planșa de inventar are numele de fișier = contractul (categoria
-`assets/models/monumentvalley/`), cu cotele din §2.0 și §5.2.
+### 9.0 De ce v0.2 cere densitate (verdictul de la volan, 4 oct 2026)
+
+Dezvoltatorul a condus fundația (PR #451): **„săracă; Dunele era mai
+lively”**. Cauza se vede pe plan, deci nu ține de gust:
+
+| Dunele | Track19 la fundație |
+|---|---|
+| pereți de canion pe ~130 de secțiuni, de-a lungul întregii bucle | pereți doar în trecătoarea E (`cliffs_gorge_only`), restul e câmpie deschisă |
+| 7 repere pe tur (turn de apă, benzinărie, drive-in, stâlp GAS, moară, baracă, indicator), plus mina și scheletul de dinozaur | 2 repere la start, 3 turnuri placeholder palide |
+| butte-uri și stânci la 10–40 m de drum | stâncile mici sunt rare și departe; câmpia e goală |
+
+Valea reală e într-adevăr goală la scară de kilometri. Diorama trebuie însă
+să **comprime** viața locului lângă drum, cum face orice pistă de jucărie:
+monoliți și mese **aproape**, de mărimi diferite, plus urmele oamenilor
+(drum, gard, stâlpi, gospodării, turiști, cai). Prompturile de mai jos o
+cer cu **cifre**, nu cu adjective, fiindcă „rich” fără număr iese tot gol.
+Interdicțiile din §8 rămân: fără saguaro, tipi, text, logo-uri sau oameni
+în costum.
+
+> Create a stylized low-poly **tabletop diorama** of a toy-car racing track in
+> **Monument Valley, on the Utah–Arizona border, USA, on a clear late
+> afternoon in October**. **Use the attached top-down plan as the exact
+> layout: same loop shape, same position of every landmark.** The letters
+> A–H, E', G', G2, the circles, red arrows, text boxes and the legend strip
+> under the plan are a legend: do not draw them. On the plan: the dark grey
+> line is **asphalt road**, the orange line is a **red dirt road**, the red
+> triangles show the driving direction, the thick dark-red band (bottom) is a
+> **narrow canyon pass**, the thick violet band (left) is a **cliff-edge road**
+> with the drop on its right, the orange dashed line (upper middle) is a
+> **sandy shortcut over red dunes**, the three dark circles on the right are
+> the bases of three **giant rock monoliths**. The pale boxes, the scattered
+> small rock cubes and the flat uniform sand colour are placeholders: dress
+> everything as described below.
+>
+> **THE ROAD IS ONE CLOSED LOOP. READ THIS FIRST [!]**
+> - There is **exactly one closed loop of road**, shaped like a rounded
+>   rectangle about as wide as it is tall, plus **one short sandy shortcut**
+>   (G') that leaves the loop and rejoins it. No other roads, no parking lots.
+> - The loop runs **clockwise on the plan** (right along the TOP, down the
+>   RIGHT side, left along the BOTTOM, up the LEFT side).
+> - **Start/finish: on the TOP edge, right of centre**, on a **raised flat
+>   plateau** (about 12 m above the valley). The top road (H then A) is
+>   **asphalt with a double yellow centre line**, lined with **wooden
+>   telegraph poles** and a barbed-wire fence.
+> - **TOP-RIGHT corner**: the road turns **down the plan** and drops off the
+>   edge of the plateau. **From that crest the whole valley opens up: three
+>   huge red rock monoliths stand ahead, slightly to both sides of the road.**
+> - **Down the RIGHT side**: a long straight asphalt descent, then a **metal
+>   cattle guard** across the road, after which the road becomes **red dirt
+>   with tyre ruts** and continues **straight between the two "Mittens"**:
+>   **West Mitten on the right of the road, East Mitten on the left**, each a
+>   tall flat-topped rock tower with a thin separate spire (the "thumb") on
+>   one side, standing on a cone of red scree. **Merrick Butte**, a wider
+>   flat-topped tower, stands behind East Mitten, outside the loop. The road
+>   passes **between** the Mittens with the rock walls close on both sides.
+> - **BOTTOM-RIGHT corner**: the dirt road bends right and runs **left along
+>   the BOTTOM edge** through a **narrow canyon between two red mesas**:
+>   vertical red walls about 3 car lengths tall on both sides, in shade. At
+>   the left end of the canyon the road passes **under a natural sandstone
+>   arch** (E').
+> - **BOTTOM-LEFT corner**: the road turns **up the plan** and runs along the
+>   **edge of a mesa** (violet band): flat mesa top on its left, a steep drop
+>   of about 13 m into the valley on its **right**, no guardrail. A small
+>   **viewpoint** with a few parked tourist jeeps and tourists with cameras.
+> - **Upper LEFT / middle**: the road descends into the **open valley** in wide
+>   S-bends (G). The sandy shortcut G' cuts across **red sand dunes** between
+>   them. A **dry wash** (a narrow sandy gully with cut banks) crosses the road
+>   near the TOP-LEFT corner; the road **jumps over it** on a small earthen
+>   ramp (G2). Then the road turns right, becomes asphalt again at a second
+>   cattle guard and climbs gently **right along the TOP edge** back to the
+>   plateau and the start.
+>
+> **THE WEATHER EVENT [!]:** a **haboob**, a towering wall of red-brown dust
+> about 50 m tall, is rolling in **from the LEFT edge of the base** across the
+> upper-left part of the valley, toward the S-bends of G. It has a sharp,
+> billowing front lit orange by the low sun and fades to transparent toward
+> its back. Show it **half-way in**: it has swallowed the left third of G and
+> the shortcut, while the rest of the diorama is in clear sun. Tumbleweeds
+> roll ahead of it.
+>
+> **DENSITY: THIS MUST LOOK ALIVE, NOT EMPTY [!]** (counts are mandatory):
+> - **Rock monoliths and mesas of many sizes, close to the road**: besides the
+>   three big ones, **12–16 smaller buttes, rock fins and hoodoos** placed
+>   10–60 m from the road all around the loop, some in pairs and clusters;
+>   **6–8 long flat-topped mesas** forming the background ring of the base.
+>   Every monolith stands on a cone of scree with **30+ fallen boulders**.
+> - **Vegetation in clusters, never spread evenly**: about **120 low
+>   grey-green sagebrush**, **40 dark-green junipers** (twisted, low),
+>   **25 yuccas**, and **30 rabbitbrush bushes in bright yellow bloom** (the
+>   brightest accent). No cacti of any kind.
+> - **Signs of people** (all real to the place, all small): **at the start**,
+>   a stone **trading post** with a wooden porch and a rusty pickup in front,
+>   a **steel water tower**, a **windmill water pump** with a round steel
+>   trough and a few horses drinking; **along the asphalt**, **30+ wooden
+>   telegraph poles** with wires and a barbed-wire fence; **2 cattle guards**
+>   with yellow diamond signs showing a horse silhouette; **in the valley**,
+>   **one family homestead** far from the road (a small modular house, an
+>   eight-sided log-and-earth dwelling, a horse corral, a pickup, a water
+>   tank); **at the viewpoint** (left side), **3 open-top tour trucks** and
+>   **6–8 tourists with cameras**, a **shade ramada** of poles and branches
+>   with a table under it; **2 dirt side tracks** wandering off into the
+>   desert; **old tyre tracks** across the sand.
+> - **Animals**: **8–10 free-roaming horses** (bay, black, pinto) in small
+>   groups, two of them crossing the dirt road near the cattle guard; **a flock
+>   of 10 sheep** with no shepherd near the homestead; **ravens** on poles and
+>   circling; **2 small dust devils** far out in the valley.
+> - **Race elements**: **4 toy racing cars** on the track (one on the crest,
+>   one between the Mittens, one in the canyon, one in the air over the wash),
+>   each trailing a **red dust plume** on dirt.
+>
+> **CAMERA AND BASE:** raised 3/4 view **from the TOP-RIGHT corner of the
+> plan looking toward the bottom-left**, so the start plateau and the crest
+> are nearest, the long straight leads the eye to the **Mittens in the middle
+> of the image**, the canyon and arch are behind them, and the cliff-edge road
+> and the haboob are at the back-left. The diorama sits on a thin dark
+> rounded-rectangle base with a matte edge. Behind the base, softly out of
+> focus, more mesas and buttes fade into warm haze under a big sky with a few
+> large white cumulus clouds.
+>
+> **STYLE (strict) [!]:** **flat-shaded low-poly, like a game-asset render in a
+> Blender viewport. Every face is one flat colour.** Big facets, 1–3 m wide at
+> model scale. No painted texture, no photorealism, no tilt-shift look. The
+> monoliths read in **three layers**: a **scree slope** at the bottom (striped
+> red-brown), a **vertical wall** above it (orange-red, with **vertical
+> cracks** and darker drip streaks of desert varnish), and a **thin pale cap**
+> on top. Soft baked ambient occlusion under every object. Toy proportions:
+> cars are stubby and about 1.3× wider than real cars.
+>
+> **PALETTE (strict) [!]:**
+> - **valley sand: brick red `#C2683A`**, darker `#8E4426` in shade; the dirt
+>   road is the **same red**, slightly darker in the ruts (NOT bright orange,
+>   NOT a different colour from the ground);
+> - monolith walls: orange-red `#B8552E`, glowing `#D9784A` where the sun
+>   hits; scree `#8A4A33` with horizontal stripes; caps pale `#B9A08C`;
+> - asphalt: blue-black with a **double yellow** centre line;
+> - sagebrush `#8E977C`, juniper `#4B5A3C`, rabbitbrush yellow `#D9B23A`;
+> - wood and poles weathered grey-brown; trading post stone `#B9A08C`;
+> - haboob: red-brown `#A8673E`, lighter at the top;
+> - sky: deep blue `#3F79C9` at the top, warm `#F1D3AA` at the horizon.
+>
+> **LIGHT [!]:** low late-afternoon sun, **about 18°, from the LEFT of the
+> plan, slightly toward the bottom**. The west faces of every monolith glow
+> orange; **long shadows** fall to the right across the valley floor; the
+> canyon pass is in deep shade with sunlit rims.
+>
+> **FORBIDDEN:** no text or numbers anywhere, no logos, no brand names, no
+> saguaro or any cactus, no tipis, no people in costume or feathers, no
+> cowboys, no saloons, no stagecoaches, no trains, no hot-air balloons, no
+> Route 66 signs.
+
+### 9.1 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.2, paste-ready
+
+Se dă **în aceeași conversație**, după ce diorama e acceptată. Numele de
+fișier sunt contractul (categoria `assets/models/monumentvalley/`). Cotele
+vin din §2.0 și §5.2 și se remăsoară pe drum la integrare (memoria
+`contract-de-kit-cere-latimea-drumului`).
+
+> Now make an **asset inventory sheet** for this diorama, in the same
+> flat-shaded low-poly style and palette: every distinct object drawn **once,
+> isolated, on a plain light-grey background**, in a neat grid, in a 3/4
+> view, all at the **same scale** (a toy car shown for scale in one corner),
+> with **small simple text labels under each object using exactly these file
+> names** (labels are the only text allowed):
+>
+> **Hero rocks:** `west_mitten` (45 m incl. scree, with the thumb spire),
+> `east_mitten` (42 m), `merrick_butte` (38 m), `mesa_wall_module` (12 × 14 m
+> straight cliff section with scree at the foot), `sandstone_arch` (spans a
+> 14 m road), `butte_small_a`, `butte_small_b`, `butte_small_c`, `rock_fin`,
+> `hoodoo`, `talus_boulders_a`, `talus_boulders_b`.
+> **Plants:** `sagebrush`, `juniper`, `yucca`, `rabbitbrush` (yellow bloom),
+> `tumbleweed`.
+> **Road and people:** `cattle_guard` (steel grid with two end posts, 14 m
+> wide), `open_range_sign` (yellow diamond with a horse, no text),
+> `telegraph_pole` (with crossbar and wires stub), `wire_fence` (one segment),
+> `trading_post` (stone, wooden porch), `water_tower`, `windmill_pump` (with
+> round trough), `homestead_house`, `hogan` (eight-sided log-and-earth
+> dwelling), `corral`, `shade_ramada`, `pickup_old`, `tour_truck` (open-top),
+> `tourist_group` (4 people with cameras, one piece).
+> **Animals:** `horse_bay`, `horse_pinto`, `horse_black` (each standing, one
+> walking pose), `sheep`, `raven` (wings open).
+> **Background:** `horizon_mesas` (a strip of 6 distant mesas and buttes for
+> the edge of the world).
 
 ## Istoric
 
+- **v0.2 (4 oct 2026):** §9 scris pe planul REAL al lui Track19 (`img/monument_plan/monument_plan.png`), după verdictul la volan „săracă; Dunele era mai lively”. Prompturile cer densitatea cu cifre (monoliți apropiați, vegetație în pâlcuri, urmele oamenilor, cai) și haboob-ul la jumătatea traversării.
 - **v0.1.1 (4 oct 2026):** traseul schițat și măsurat (2 100 m). POI D
   devine **poarta dintre Mittens**: ocolul pe arc de rază constantă dădea 0
   din 19 puncte în cadru (§2.0). Fracțiile, cotele și pantele sunt acum

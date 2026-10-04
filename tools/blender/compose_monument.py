@@ -70,7 +70,7 @@ def sheet(fid_dir, names, out_path):
         y += i.height + 22
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     img.save(out_path)
-    print("planșa:", out_path)
+    print("sheet:", out_path)
 
 
 def main():

@@ -159,3 +159,39 @@ TROPICAL_GREEN `#3F7A3C` e mai albastrui. Slotul 12 e "oliv sters" doar in compa
 | juniper coroane | ciorchini la inaltimi diferite | 8 ciorchini turtiti (2 joase pe laturi), 5 bulgari fiecare | OK; desenul are volume mai mari si mai dese |
 | rabbitbrush | perna densa, frunzis verde dedesubt | 48 ciorchini x 2 bulgari pe dom (treimile de sus/mijloc), inel de 18 frunzulite CACTUS 12, tulpini ascunse | perna OK; frunzisul e mai rar decat pe desen |
 | tumbleweed | retea de crengute arama | neschimbat ca forma, culoare LARCH_RUST 27 | OK; bucle poligonale |
+## Grupa mv-c: drum, gard, semne (`build_monument_road.py`)
+
+Comparatii: `docs/asset_briefs/img/monumentvalley_fidelity/<nume>.png`; planșa grupei:
+`docs/asset_briefs/img/monumentvalley_fidelity_valc.png`. `verify_monumentvalley.sh` -> `VERDICT KIT: OK`
+(toate cu `--origin=assembly`; singura exceptie de slot de masina: `Sign_Face` CAR_YELLOW).
+
+| fisier | noduri | tri | cote masurate (X x Y x Z, m) |
+|---|---|---:|---|
+| props/cattle_guard | Guard_Steel, Guard_Posts | 704 | 14,85 x 2,40 x 1,20; bare sus la 0,148 m; **stalpi la x = +-7,3** (1,2 m, 0,25 m), grila x +-7,0 |
+| props/open_range_sign | Sign_Post, Sign_Face (CAR_YELLOW), Sign_Horse (VOLCANIC_BLACK) | 272 | 1,37 x 0,20 x 2,63 |
+| structures/telegraph_pole | Pole_Wood, Pole_Insulators | 216 | 2,02 x 0,32 x 8,04 (3 izolatori, fara fire) |
+| structures/wire_fence | Fence_Posts, Fence_Wire | 872 | 0,27 x **4,00** x 1,20 (capete plane la y = +-2,0) |
+| structures/windmill_pump | Mill_Steel, Mill_Trough, **Windmill_Rotor** (pivot la butuc, 0; 0,55; 9,0) | 1364 | 3,0 x 6,1 x 10,27; rotor Ø 2,5, jgheab Ø 3 |
+| structures/water_tower | Tower_Timber, Tank_Wood, Tank_Hoops | 1046 | 4,48 x 4,83 x 11,06; rezervor Ø 3,2 |
+| structures/corral | Corral_Wood, Corral_Gate | 696 | 10,06 x 8,06 x 1,50 |
+| structures/shade_ramada | Ramada_Frame, Ramada_Roof | 1080 | 5,14 x 4,34 x 3,05 |
+
+Fidelitate (element | planșa | GLB | verdict):
+
+| piesa | element | planșa | GLB | verdict |
+|---|---|---|---|---|
+| cattle_guard | forma | rampa in trepte | PLAT, corectura coordonatorului | abatere decisa |
+| | bare | ~9-10 busteni | 11 bare tubulare de otel | OK |
+| | capete | cadre galbene inclinate | blocuri galben/negru plate + 2 stalpi | OK |
+| open_range_sign | romb + stalp | romb galben cu chenar | romb CAR_YELLOW, chenar lemn, stalp 2,6 m | OK |
+| | cal | siluet negru, mers | contur 2D de 51 puncte extrudat 3 cm: gat arcuit ~40 grade, cap lung, coama, piept adanc, coada atarnata, 4 picioare subtiri (o pereche in pas), VOLCANIC_BLACK | OK (citeste ca cal; colturos, coada atinge marginea rombului) |
+| telegraph_pole | stalp, traversa, V, izolatori | 1 stalp, traversa groasa, 2 sprijine, 2 izolatori albi | la fel + al 3-lea izolator in varf | OK |
+| wire_fence | stalpi + fire | 2 stalpi, 4 fire cu tepi | 2 stalpi rotunzi 8 laturi (1,17 / 1,23 m), 4 fire subtiri (r 0,018, 4 laturi, LOG_DARK), tepi in cruce CONCRETE la 0,5 m | OK |
+| windmill_pump | turn, rotor, coada, jgheab | turn mai scurt si lat, jgheab mare inalt (~0,8 m), pale intunecate | turn 9 m mai zvelt, jgheab 0,6 m, pale pale | **abatere** de proportie (cotele contractului), culoare |
+| water_tower | rezervor cu cercuri, capac conic, X, scara | idem | idem (2 deschideri X, 4 cercuri, 12 laturi) | OK; fara arcul de jos |
+| corral | 3 bare, stalpi, poarta | busteni rotunjiti, colturi suprapuse | stalpi 0,26, bare Ø 0,17, poarta inchisa cu diagonala | OK ca structura, mai drept/curat |
+| shade_ramada | 4+ stalpi, acoperis haotic, masa | stalpi rotunzi, acoperis dens neregulat | 6 stalpi patrati, 17 chirpici + 10 pane, masa+2 banci | **abatere**: acoperisul e mai rar si mai regulat |
+
+Abateri: corral 10,06 x 8,06 (stalpii de colt ies cu 3 cm); wire_fence are stalpii flush pe
+capete, deci doua segmente inlantuite dau un stalp dublu de 0,36 m; cattle_guard fara text si
+fara fire intre stalpi.

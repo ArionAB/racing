@@ -110,12 +110,24 @@ func _process(_delta: float) -> bool:
 func _measure(path: String, track: Node) -> Dictionary:
 	var pieces: Array[Dictionary] = []
 	_collect(track, pieces)
-	var half: float = track.half_width
 	var baked: PackedVector3Array = track.baked
+	# Semilatimea la fiecare punct copt: MINIMUL dintre cea locala si medie.
+	# Cu media singura (`track.half_width`), o pista cu sectoare inguste
+	# raporta decor de pe nisip ca „peste asfalt" (Track19: 8 alarme false pe
+	# sectoarele de 5.5-6.5 m fata de media de 7). Latimea locala pura ar fi
+	# corecta si pe sectoarele LATE, dar acolo gaseste defecte reale pe piste
+	# deja livrate (4 oct 2026: Stromboli Basalt_C 1.03 m, Baikal ShrubSnow
+	# 0.13 m) si ar inrosi verify_local pentru toata echipa — decizie separata,
+	# vezi PR-ul Monument Valley etapa 3. Fara sectoare: identic cu inainte.
+	var base_half: float = track.half_width
+	var halves := PackedFloat32Array()
+	halves.resize(baked.size())
+	for i in baked.size():
+		halves[i] = minf(base_half, track.width_at_index(i))
 
 	var over: Array[Dictionary] = []
 	for piece in pieces:
-		var deep := _over_road(piece, baked, half)
+		var deep := _over_road(piece, baked, halves)
 		if deep >= OVER_MIN:
 			piece["over"] = deep
 			over.append(piece)
@@ -131,7 +143,7 @@ func _measure(path: String, track: Node) -> Dictionary:
 ## Cat de mult intra piesa peste asfalt, in metri masurati de la margine spre
 ## axa. 0 daca sta cuminte pe langa drum.
 func _over_road(piece: Dictionary, baked: PackedVector3Array,
-		half: float) -> float:
+		halves: PackedFloat32Array) -> float:
 	var aabb: AABB = piece["aabb"]
 	var c := aabb.get_center()
 	var reach := maxf(aabb.size.x, aabb.size.z) * 0.5
@@ -146,7 +158,7 @@ func _over_road(piece: Dictionary, baked: PackedVector3Array,
 		if d < box_near:
 			box_near = d
 			near_i = i
-	if box_near - reach > half:
+	if box_near - reach > halves[near_i] + 2.0:
 		return 0.0
 
 	var deepest := 0.0
@@ -158,12 +170,14 @@ func _over_road(piece: Dictionary, baked: PackedVector3Array,
 		i2 += step
 		var near := 1e12
 		var road_y := 0.0
+		var half := 0.0
 		for k in range(-WINDOW, WINDOW + 1):
 			var j := posmod(near_i + k, n)
 			var d := Vector2(baked[j].x - v.x, baked[j].z - v.z).length()
 			if d < near:
 				near = d
 				road_y = baked[j].y
+				half = halves[j]
 		if near >= half:
 			continue
 		if v.y < road_y + OVER_LOW or v.y > road_y + OVER_HIGH:

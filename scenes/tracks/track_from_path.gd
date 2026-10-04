@@ -24,8 +24,14 @@ extends Track
 
 @export var custom_name: String = "Pista noua"
 @export_enum("forest", "desert", "island", "baikal", "stromboli", "chongqing",
-	"cappadocia", "serengeti", "machupicchu", "fiordland", "jodhpur", "kyoto") var custom_theme: String = "forest"
+	"cappadocia", "serengeti", "machupicchu", "fiordland", "jodhpur", "kyoto",
+	"monumentvalley") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
+## Samanta lumii procedurale, separata de numele de afisare. Gol = samanta vine
+## din `custom_name` (comportamentul vechi, bit-identic). Se pune cand numele de
+## afisare poate sa se schimbe (Monument Valley: nume de UI de decis, brief
+## §3.1.1) fara sa remestece decorul. Vezi Track.world_seed_name.
+@export var custom_world_seed_name: String = ""
 ## Unghiul soarelui pentru pista asta, cand tema nu-l nimereste.
 ##
 ## (0,0,0) = lasa tema in pace, deci pistele care nu-l ating nu se schimba.
@@ -289,6 +295,8 @@ func _ready() -> void:
 
 func _apply_custom() -> void:
 	track_name = custom_name
+	if not custom_world_seed_name.is_empty():
+		world_seed_name = custom_world_seed_name
 	half_width = custom_half_width
 	road_surface = custom_road_surface
 	sea_level_offset = custom_sea_level_offset

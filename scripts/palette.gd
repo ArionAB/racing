@@ -883,6 +883,19 @@ const CLASS_TEXTURES := {
 	"kawara": "res://assets/textures/classes/roof_tiles.png",
 	"bark_kyoto": "res://assets/textures/classes/bark.png",
 	"cedar_needles": "res://assets/textures/classes/pine_needles.png",
+	# Valul 2 (cererea dezvoltatorului dupa captura: „peste tot unde avem rosul,
+	# bambusul, Kiyomizu"). Lacul vermilion, rosul trenului/podului si tulpinile
+	# de bambus pe dala `wood` RIDICATA (rosul: o imagine rotita, impartita prin
+	# CLASS_LIFT_SHARED; bambusul: una nerotita).
+	# Prima incercare a fost `concrete` (pata fara fibra) si a dat MAI PUTIN
+	# detaliu decat atlasul cu stratul de detaliu partajat (pe captura: pod
+	# 4.85 -> 4.65, bambus 3.11 -> 2.74, diferenta de blur 1 px): pe o culoare
+	# saturata ridicata, R se taie si variatia ramane doar pe G/B, mici. Masurat
+	# pe rezultatul tentat: deviatia de luminanta 14.6 cu `concrete`, 27.5 cu
+	# `wood` la ridicarea 0.65.
+	"shu_vermilion": "res://assets/textures/classes/wood.png",
+	"shu_red": "res://assets/textures/classes/wood.png",
+	"bamboo_culm": "res://assets/textures/classes/wood.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -1144,6 +1157,18 @@ const CLASS_TINT := {
 	# Cedri/pini: TROPICAL_GREEN 21 (63, 122, 60) pe dala `pine_needles`
 	# (103.1, 131.4, 67.9).
 	"cedar_needles": Color(0.6386, 0.9317, 0.8979),
+	# Valul 2. Dala `wood` ridicata la luminanta 0.65 (CLASS_LIFT), apoi bisectia
+	# obisnuita. R atinge plafonul la 200 din 232 (86%): lac invechit, cu 7.6%
+	# din pixeli taiati. La 0.75 R ar ajunge 224, dar se taie 31.8% si fibra
+	# dispare in luminile dalei — acelasi compromis ca la maple_orange.
+	# LAVA_ORANGE 30 (232, 98, 45): torii, porti, pagode, altare.
+	"shu_vermilion": Color(1.0, 0.6231, 0.4227),
+	# CAR_RED 14 (229, 72, 57): trenul Sagano, podul de fier, umbrelele ceainariei,
+	# ricsa, bavetele vulpilor. Aceeasi imagine ridicata (CLASS_LIFT_SHARED).
+	"shu_red": Color(1.0, 0.4657, 0.5204),
+	# CACTUS_GREEN 12 (91, 124, 52), aceeasi ridicare (imagine proprie, NErotita:
+	# rosturile orizontale sunt nodurile tulpinii): atinsa exact.
+	"bamboo_culm": Color(0.4630, 0.7804, 0.4797),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1233,6 +1258,17 @@ const CLASS_LIFT := {
 	# imparte imaginea (CLASS_LIFT_SHARED); maple_crimson/leaf_litter NU se
 	# ridica — folosesc dala originala.
 	"maple_orange": 0.8805,
+	"shu_vermilion": 0.65,
+	"bamboo_culm": 0.65,
+}
+
+## Clasele a caror dala ridicata se ROTESTE cu 90 de grade. Triplanarul pune dala
+## `wood` cu scandurile ORIZONTALE pe fetele verticale: pe tulpina de bambus
+## rosturile se citesc noduri (corect), dar pe stalpul unei porti torii il fac
+## sa para din discuri stivuite (captura f0.50 pe tunel). Rotita, fibra urca pe
+## stalp. Doar pe clase cu CLASS_LIFT: rotirea se face pe imaginea deja copiata.
+const CLASS_LIFT_ROTATE := {
+	"shu_vermilion": true,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -1523,6 +1559,12 @@ const CLASS_TRIPLANAR_SCALE := {
 	# Aceeasi scara ca dalele-sursa (`bark` 0.77, `pine_needles` 0.6).
 	"bark_kyoto": 0.77,
 	"cedar_needles": 0.3,
+	# Scara dalei-sursa (`wood` 0.7).
+	"shu_vermilion": 0.7,
+	"shu_red": 0.7,
+	# Bambus: la 0.5 rosturile dalei (6 scanduri pe repetitie) cad la ~0.33 m,
+	# cat distanta dintre nodurile unei tulpini moso — se citesc ca noduri.
+	"bamboo_culm": 0.5,
 	"moss": 1.4,
 }
 
@@ -1621,6 +1663,7 @@ const CLASS_LIFT_SHARED := {
 	"blue_lime_indigo": "blue_lime_light",
 	"red_sandstone": "rose_sandstone",
 	"ginkgo_gold": "maple_orange",
+	"shu_red": "shu_vermilion",
 }
 
 static func _class_texture(cls: String) -> Texture2D:
@@ -1654,6 +1697,8 @@ static func _class_texture(cls: String) -> Texture2D:
 			var c := img.get_pixel(x, y)
 			img.set_pixel(x, y, Color(minf(c.r * gain, 1.0),
 				minf(c.g * gain, 1.0), minf(c.b * gain, 1.0)))
+	if CLASS_LIFT_ROTATE.has(cls):
+		img.rotate_90(CLOCKWISE)
 	img.generate_mipmaps()
 	var tex := ImageTexture.create_from_image(img)
 	_lifted[cls] = tex

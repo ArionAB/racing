@@ -135,7 +135,8 @@ func _place() -> void:
 		gate_pos.append(pts[i])
 		gate_yaw.append(_yaw(dirs[i]))
 	gate_count = gate_pos.size()
-	_add_flock("PortiTorii", gate_scene, gate_pos, gate_yaw, 1.0, 1.0)
+	_add_flock("PortiTorii", gate_scene, gate_pos, gate_yaw, 1.0, 1.0,
+		"shu_vermilion", [Palette.LAVA_ORANGE])
 	# Furca: poarta mare la inceputul real al benzii (la `gate_clear_m` de bucla).
 	var big_first := first
 	for i in first:
@@ -150,7 +151,8 @@ func _place() -> void:
 		av_pos.append(pts[k])
 		av_yaw.append(_yaw(dirs[k]))
 		k += step
-	_add_flock("PortiBulevard", gate_scene, av_pos, av_yaw, 1.0, 1.0)
+	_add_flock("PortiBulevard", gate_scene, av_pos, av_yaw, 1.0, 1.0,
+		"shu_vermilion", [Palette.LAVA_ORANGE])
 	avenue_count = av_pos.size()
 	var big_pos := PackedVector3Array([pts[big_first], pts[last]])
 	# Poarta de la furca se roteste spre masina care vine pe bucla (60% spre tangenta
@@ -166,7 +168,8 @@ func _place() -> void:
 	big_gate_dist = dists[big_first]
 	if foxes_enabled:
 		_build_foxes(track, main, pts[big_first], dirs[big_first])
-	_add_flock("PortiMari", large_gate_scene, big_pos, big_yaw, big_scale, big_scale)
+	_add_flock("PortiMari", large_gate_scene, big_pos, big_yaw, big_scale, big_scale,
+		"shu_vermilion", [Palette.LAVA_ORANGE])
 	_build_walls(pts, dirs, first, last)
 	if forest_enabled:
 		_build_forest(track, main, pts, dirs, first, last)
@@ -211,7 +214,7 @@ func _clear_of_main(track: Track, main: TrackRoute, p: Vector3, margin: float) -
 
 func _add_flock(nm: String, scene: PackedScene, pos: PackedVector3Array,
 		yaw: PackedFloat32Array, smin: float, smax: float,
-		tri_class: String = "") -> FlockProp:
+		tri_class: String = "", split_keep: Array = []) -> FlockProp:
 	if scene == null or pos.is_empty():
 		return null
 	var f := FlockProp.new()
@@ -222,6 +225,7 @@ func _add_flock(nm: String, scene: PackedScene, pos: PackedVector3Array,
 	f.scale_min = smin
 	f.scale_max = smax
 	f.tri_class = tri_class
+	f.split_keep = split_keep
 	add_child(f)
 	return f
 
@@ -345,6 +349,7 @@ func _build_forest(track: Track, main: TrackRoute, pts: Array[Vector3],
 			row_k += 1
 	forest_count = pos.size()
 	# Aceeasi clasa ca cedrii din MeshForest (`WorldProp.CLASSES_BY_MODEL`):
-	# stolul nu trece prin WorldProp, deci clasa se da explicit. Portile raman pe
-	# atlas — un stol are UN material, iar o clasa ar sterge kasagi-ul negru.
+	# stolul nu trece prin WorldProp, deci clasa se da explicit. Portile (mai
+	# sus) se rup pe slot: vermilionul ia lacul, kasagi-ul negru si soclul raman
+	# pictate in stolul-copil `_Accente`.
 	_add_flock("PadureCedri", cedar_scene, pos, yaw, 0.95, 1.35, "cedar_needles")

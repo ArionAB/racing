@@ -386,6 +386,7 @@ def chain(name, n=3, step=6.0, res_height=800):
 
 exec(open(os.path.join(HERE_P, "preview_specs_c.py")).read())   # mv-c
 exec(open(os.path.join(HERE_P, "preview_specs_d.py")).read())   # mv-d
+exec(open(os.path.join(HERE_P, "preview_specs_e.py")).read())   # mv-e
 
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []

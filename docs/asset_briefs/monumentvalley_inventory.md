@@ -129,3 +129,33 @@ scund): coordonatorul îl rotește la montare.
   tot conturul (rev. 3: sectoare pe arc, taper, recese), `cap_slab`, `scree_ribs`, `tapered_spire`); `east_mitten`
   și restul pot folosi aceleași funcții.
 - `preview_monument.py` pune clasa `mv_sandstone` (#B8552E) pe nodurile `*_Rock`.
+
+## Grupa mv-b: plante (`build_monument_plants.py`, revizia 3 dupa verdictul coordonatorului)
+
+Verdict: `bash tools/blender/verify_monumentvalley.sh` -> `VERDICT KIT: OK` (juniper si
+rabbitbrush cu `--origin=assembly`, rabbitbrush cu `--allow-car-slots=Rabbitbrush_Bloom`).
+Comparatii: `img/monumentvalley_fidelity/<nume>.png`; planșa: `img/monumentvalley_fidelity_valb.png`.
+Yucca acceptata (neschimbata).
+
+**Verificarea culorilor (punctul 0).** Tabelul `PALETTE_HEX` din `preview_monument.py` e
+IDENTIC cu `HEX` din `scripts/palette.gd` (verificat pe toate cele 32 de intrari). UV-urile din
+GLB-uri (citite din fisier) cad exact pe sloturile intentionate, vezi coloana "sloturi (fete)".
+Deci verdele "ierbos" NU e o eroare de mapare: slotul 12 chiar e `#5B7C34` (91,124,52),
+iar randarea preview il da (70-77, 96-105, 39-43) dupa AO+lumina. Pe `juniper` randarea
+masurata e (70,96,39), oliv-verde si nu mai palid; am pastrat 12 (nu 21) fiindca
+TROPICAL_GREEN `#3F7A3C` e mai albastrui. Slotul 12 e "oliv sters" doar in comparatie cu 21.
+
+| fisier | noduri (sloturi, fete) | tri | cote (m) | RGB randat masurat |
+|---|---|---:|---|---|
+| sagebrush | `Sagebrush`: WOOD 9 + DRY 13 (tulpini, frunze pe sol, 505 tri); `Sagebrush_Foliage`: CACTUS 12 (toate smocurile, 840 tri) | 1345 | 1,38 x 1,33 x 1,12 | verde slot 12 (tenta gri-verde = clasa la integrare) |
+| juniper | `Juniper_Trunk` WOOD 9; `Juniper_Crown` CACTUS 12 | 2089 | 4,37 x 3,88 x 4,21 | coroana (70,96,39) |
+| rabbitbrush | `Rabbitbrush` CACTUS 12 + DRY 13; `Rabbitbrush_Bloom` CAR_YELLOW 16 | 2424 | 1,54 x 1,53 x 1,21 | flori (163,141,43) |
+| tumbleweed | `Tumbleweed` LARCH_RUST 27 | 2726 | 0,93 x 0,94 x 0,96 | (132,82,45) |
+
+| piesa / element | pe decupare | in GLB | verdict |
+|---|---|---|---|
+| sagebrush | smocuri fine, gri-verzi | 15 smocuri-flacara pe 5 tulpini lemnoase ramificate, toate pe CACTUS 12 in `Sagebrush_Foliage` (rev. 4: fara amestec 29/12; paloarea vine din tenta de clasa) | structura OK; culoarea finala depinde de clasa/tenta coordonatorului |
+| juniper trunchi | tulpini rasucite din pamant | 3 tulpini rasucite pornite din baza comuna, ramificate la 1,2-1,5 m, 2 ramuri joase orizontale | OK |
+| juniper coroane | ciorchini la inaltimi diferite | 8 ciorchini turtiti (2 joase pe laturi), 5 bulgari fiecare | OK; desenul are volume mai mari si mai dese |
+| rabbitbrush | perna densa, frunzis verde dedesubt | 48 ciorchini x 2 bulgari pe dom (treimile de sus/mijloc), inel de 18 frunzulite CACTUS 12, tulpini ascunse | perna OK; frunzisul e mai rar decat pe desen |
+| tumbleweed | retea de crengute arama | neschimbat ca forma, culoare LARCH_RUST 27 | OK; bucle poligonale |

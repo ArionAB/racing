@@ -84,12 +84,12 @@ Doar sloturi existente (`scripts/palette.gd`, constantele din `dio_lib.py`).
 | peretele de gresie (monoliți, mese, arc, turle) | `TILE_TERRACOTTA` 23, fețele din umbră `RUST_METAL` 10 | `mv_sandstone` pe `*_Rock` |
 | grohotișul și bolovanii | `RUST_METAL` 10 + `LARCH_RUST` 27 în trepte alternante | `mv_sandstone` (sau nimic) pe `*_Scree`, decide coordonatorul |
 | calota palidă | `SAND_LIGHT` 0 | — |
-| salvia | `CACTUS_GREEN` 12 (gri-verde) | — |
-| ienupărul (coroana) | `TROPICAL_GREEN` 21 | — |
+| salvia | smocurile `Sagebrush_Foliage`: `CACTUS_GREEN` 12 (toate); tulpinile `Sagebrush`: `WOOD` 9, frunze uscate `DRY_VEGETATION` 13 | o tentă gri-verde pe `Sagebrush_Foliage` (decide coordonatorul) |
+| ienupărul (coroana) | `CACTUS_GREEN` 12 (oliv, decis pe randarea masurata) | — |
 | trunchiuri, scânduri, stâlpi de lemn, gard, țarc | `WOOD` 9, fețele vechi/umbrite `LOG_DARK` 28 | — |
 | yucca | `CACTUS_GREEN` 12 + `DRY_VEGETATION` 13 la vârfuri | — |
 | *rabbitbrush* (florile) | `CAR_YELLOW` 16 (`--allow-car-slots=Rabbitbrush_Bloom`), tulpini `DRY_VEGETATION` 13 | — |
-| tumbleweed | `DRY_VEGETATION` 13 | — |
+| tumbleweed | `LARCH_RUST` 27 (arama, ca decuparea) | — |
 | semnul (rombul) | `CAR_YELLOW` 16 (`--allow-car-slots=Sign_Face`), calul `LOG_DARK` 28 | — |
 | oțelul (grila, moara, cadrul turnului de apă) | `CONCRETE` 8, rugina `RUST_METAL` 10 | — |
 | piatra postului de negoț, coșurile | `ROCK_LIGHT` 3 / `SAND_LIGHT` 0 | — |
@@ -157,7 +157,7 @@ MultiMesh, deci **un singur mesh compact**, fără noduri inutile.
 
 | fișier | cote | h/l | contract |
 |---|---|---:|---|
-| `plants/sagebrush.glb` | **1,0 m** înalt, 1,4 m lat | ~0,7 | tufă rotunjită din 6–8 smocuri gri-verzi, tulpini scurte |
+12–16 smocuri mici, verticale, în formă de flacără, pe tulpini lemnoase ramificate (WOOD 9, nod `Sagebrush`); toate smocurile pe CACTUS_GREEN 12 în nodul `Sagebrush_Foliage` (clasă la integrare: tentă gri-verde); dom cu goluri |
 | `plants/juniper.glb` | **4 m** înalt, ~4,5 m lat | ~0,9 | trunchi răsucit care se ramifică în 3–4 brațe, coroane în ciorchini turtiți, cu goluri (nu glob) |
 | `plants/yucca.glb` | **1,2 m** | ~1,1 | rozetă de 25–35 de frunze lanceolate pe un ciot scurt |
 | `plants/rabbitbrush.glb` | **1,2 m**, 1,4 m lat | ~0,85 | tufă de tulpini cu **ciorchini galbeni** deasupra; nod `Rabbitbrush_Bloom` |

@@ -121,6 +121,7 @@ func _build() -> void:
 	_talus()
 	_clusters()
 	_patches()
+	_heaps()
 
 
 ## Yaw care roteste -Z local (fata pieselor) spre directia (dx, dz) in plan.
@@ -334,6 +335,34 @@ func _patches() -> void:
 			if (q["p"] as Vector3).y - p.y > 0.8:
 				continue
 			_raw("rabbitbrush", "cPetic", p, r.randf() * TAU, r.randf_range(1.0, 1.4), "")
+
+
+## Gramezi de bolovani rosii (talus, `none`, mici-mijlocii) la 8-15 m de bordura,
+## langa palcuri, pe ambele parti: 3-5 bucati lipite, scara 0,5-0,9.
+func _heaps() -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = 12703
+	var s := 0.127 * _len + 6.0
+	var side := 1.0
+	while s < 0.185 * _len - 4.0:
+		var m: float = r.randf_range(8.0, 15.0)
+		var q := _at(s)
+		var d: Vector2 = q["d"]
+		var half: float = q["half"]
+		var cnt := r.randi_range(3, 5)
+		for k in cnt:
+			var lat: float = side * (half + m + r.randf_range(-1.2, 1.2))
+			var bp := _off(q, lat)
+			var ox := r.randf_range(-1.8, 1.8)
+			bp.x += d.x * ox
+			bp.z += d.y * ox
+			bp.y = _sol(bp.x, bp.z)
+			if absf(s + ox - _s_grid) < 6.0 and absf(lat) < 12.0:
+				continue
+			var pick := "talus_boulders_a" if r.randf() < 0.5 else "talus_boulders_b"
+			_raw(pick, "cGramada", bp, r.randf() * TAU, r.randf_range(0.5, 0.9), "none")
+		side = -side
+		s += r.randf_range(9.0, 14.0)
 
 
 func _raw(model: String, base: String, pos: Vector3, yaw: float, scl: float,

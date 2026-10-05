@@ -3194,7 +3194,7 @@ transform = Transform3D(1.3833723, 0, -0.98972094, 0, 1.7009604, 0, 0.98972094, 
 metadata/coliziune = "none"
 
 [node name="E_Ciorchine137" parent="DecorManual/ZonaE" instance=ExtResource("s_juniper")]
-transform = Transform3D(-1.1848351, 0, -0.36514083, 0, 1.2398233, 0, 0.36514083, 0, -1.1848351, 240.50128, 2.1276886, 446.4901)
+transform = Transform3D(-1.1848351, 0, -0.36514083, 0, 1.2398233, 0, 0.36514083, 0, -1.1848351, 240.59, 2.1276886, 446.98)
 metadata/coliziune = "none"
 
 [node name="E_Ciorchine138" parent="DecorManual/ZonaE" instance=ExtResource("s_sagebrush")]

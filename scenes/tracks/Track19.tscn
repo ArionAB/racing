@@ -273,6 +273,114 @@ metadata/fractii = "REAL 0.127-0.185 (grila 0.1368 la (300,166); caii 0.166) · 
 [node name="ZonaD" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.185-0.260 (poarta 0.2048 la (300,309); pereti la 10,4/11,8 m de MARGINE, nu 18) · 0.206-0.297 · D · Poarta dintre Mittens (WM_Turn/EM_Turn): peretii la ~18 m de marginea drumului, grohotis, Rockfall #1 (BolovanD)"
 
+[node name="TalusW1_1" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(-0.75234383, 0, -0.6587706, 0, 1, 0, 0.6587706, 0, -0.75234383, 285.5, -0.11017824, 276)
+
+[node name="TalusW1_2" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(0.6290184, 0, -0.74658406, 0, 0.9762438, 0, 0.74658406, 0, 0.6290184, 286.7, -0.14939961, 271.6)
+
+[node name="TalusW2_1" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(0.29119295, 0, -0.9566643, 0, 1, 0, 0.9566643, 0, 0.29119295, 284, 0.20767447, 323)
+
+[node name="TalusW2_2" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(0.73203886, 0, 0.36550596, 0, 0.81821483, 0, -0.36550596, 0, 0.73203886, 283.2, 0.25165886, 328)
+
+[node name="TalusW3_1" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(0.6207818, 0, 0.7839834, 0, 1, 0, -0.7839834, 0, 0.6207818, 286.5, 0.3305796, 337)
+
+[node name="TalusW3_2" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(-0.8061071, 0, 0.11760243, 0, 0.8146404, 0, -0.11760243, 0, -0.8061071, 287.1, 0.38135275, 342.6)
+
+[node name="TalusE1_1" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(0.31138253, 0, -0.95028466, 0, 1, 0, 0.95028466, 0, 0.31138253, 314.5, -0.09019424, 281)
+
+[node name="TalusE1_2" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(0.8540621, 0, 0.19500802, 0, 0.8760423, 0, -0.19500802, 0, 0.8540621, 315.3, -0.12194181, 275.8)
+
+[node name="TalusE2_1" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(-0.3905715, 0, 0.9205726, 0, 1, 0, -0.9205726, 0, -0.3905715, 313.5, 0.26667634, 325)
+
+[node name="TalusE2_2" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(-0.93914473, 0, -0.05883747, 0, 0.94098604, 0, 0.05883747, 0, -0.93914473, 314.4, 0.31084442, 329.6)
+
+[node name="TalusE3_1" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(-0.2745553, 0, -0.96157134, 0, 1, 0, 0.96157134, 0, -0.2745553, 315.5, 0.3721509, 340)
+
+[node name="TalusE3_2" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(0.85244656, 0, -0.20899403, 0, 0.8776922, 0, 0.20899403, 0, 0.85244656, 315, 0.4060444, 345.4)
+
+[node name="TalusM1_1" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(-0.52006125, 0, -0.85412896, 0, 1, 0, 0.85412896, 0, -0.52006125, 343, 0.46738708, 252)
+
+[node name="TalusM1_2" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(0.82704, 0, -0.2828141, 0, 0.8740589, 0, 0.2828141, 0, 0.82704, 344.4, 0.8340316, 257.2)
+
+[node name="TalusM2_1" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(-0.7934084, 0, -0.6086897, 0, 1, 0, 0.6086897, 0, -0.7934084, 341, 0.31947193, 272)
+
+[node name="TalusM2_2" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(0.7569169, 0, -0.3637302, 0, 0.83977544, 0, 0.3637302, 0, 0.7569169, 341.8, -0.10592447, 277.6)
+
+[node name="TalusM3_1" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(-0.93734616, 0, -0.34839937, 0, 1, 0, 0.34839937, 0, -0.93734616, 346, 0.19142812, 289)
+
+[node name="TalusM3_2" parent="DecorManual/ZonaD" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(-0.16788143, 0, -0.8823918, 0, 0.8982202, 0, 0.8823918, 0, -0.16788143, 345, 1.0620846, 294.4)
+
+[node name="RockFin" parent="DecorManual/ZonaD" instance=ExtResource("s_rock_fin")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 388, 1.7141504, 330)
+
+[node name="ButteSpateMerrick" parent="DecorManual/ZonaD" instance=ExtResource("s_butte_small_b")]
+transform = Transform3D(0.34202015, 0, -0.9396926, 0, 1, 0, 0.9396926, 0, 0.34202015, 414, 5.9972997, 238)
+
+[node name="RabbitW_1" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.6322473, 0, 1.0458002, 0, 1.2220616, 0, -1.0458002, 0, -0.6322473, 278.16632, 0.47571293, 345.06912)
+
+[node name="RabbitW_2" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(0.4826954, 0, 0.76549006, 0, 0.9049696, 0, -0.76549006, 0, 0.4826954, 279.59006, 0.5086103, 348.68558)
+
+[node name="RabbitW_3" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.88094544, 0, 0.0546446, 0, 0.88263863, 0, -0.0546446, 0, -0.88094544, 278.51355, 0.490293, 346.6916)
+
+[node name="RabbitW_4" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(0.53944963, 0, -0.9791204, 0, 1.117892, 0, 0.9791204, 0, 0.53944963, 278.08478, 0.4771658, 345.22748)
+
+[node name="RabbitW_5" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.19302809, 0, -1.1169409, 0, 1.1334975, 0, 1.1169409, 0, -0.19302809, 279.0796, 0.49157473, 346.84766)
+
+[node name="RabbitE_1" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(0.9014633, 0, 0.50448614, 0, 1.0330259, 0, -0.50448614, 0, 0.9014633, 322.45453, 0.09892406, 292.44867)
+
+[node name="RabbitE_2" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.6826698, 0, -0.8504624, 0, 1.0905615, 0, 0.8504624, 0, -0.6826698, 321.25388, 0.08407297, 293.3764)
+
+[node name="RabbitE_3" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.53661615, 0, -1.076619, 0, 1.2029403, 0, 1.076619, 0, -0.53661615, 321.73523, 0.20146844, 294.3994)
+
+[node name="RabbitE_4" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-1.181902, 0, 0.120289825, 0, 1.1880076, 0, -0.120289825, 0, -1.181902, 324.64703, 0.38649055, 292.11432)
+
+[node name="RabbitM_1" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.48022142, 0, -0.8494472, 0, 0.9757936, 0, 0.8494472, 0, -0.48022142, 331.8243, 0.5316628, 352.01254)
+
+[node name="RabbitM_2" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.53734016, 0, 0.7480838, 0, 0.92106664, 0, -0.7480838, 0, -0.53734016, 331.33124, 0.5276588, 351.54367)
+
+[node name="RabbitM_3" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.5393987, 0, 1.0151316, 0, 1.1495404, 0, -1.0151316, 0, -0.5393987, 332.2598, 0.5363026, 352.5546)
+
+[node name="RabbitM_4" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(0.6288588, 0, -1.0091585, 0, 1.1890602, 0, 1.0091585, 0, 0.6288588, 333.61804, 0.53899366, 352.89426)
+
+[node name="RabbitM_5" parent="DecorManual/ZonaD" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.9121199, 0, -0.14474396, 0, 0.9235332, 0, 0.14474396, 0, -0.9121199, 330.26398, 0.5450154, 353.53876)
+
+[node name="JuniperW" parent="DecorManual/ZonaD" instance=ExtResource("s_juniper")]
+transform = Transform3D(0.62161, 0, 0.7833269, 0, 1, 0, -0.7833269, 0, 0.62161, 281, 0.48773876, 352)
+
+[node name="JuniperE" parent="DecorManual/ZonaD" instance=ExtResource("s_juniper")]
+transform = Transform3D(-0.7373938, 0, 0.67546314, 0, 1, 0, -0.67546314, 0, -0.7373938, 322, 0.473979, 351)
+
 [node name="ZonaE" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.260-0.434 (defileu 0.329-0.419; bolovanul E 0.368), fara cercul r 30 m din jurul arcului · 0.297-0.434 · E · Trecatoarea dintre mese (gorge 0.33-0.42): mesa_wall_module, Rockfall #2 (BolovanE)"
 

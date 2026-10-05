@@ -216,14 +216,71 @@ func _scatter() -> void:
 	for g in [[158.0, -(SEMI + 15.0)], [186.0, SEMI + 30.0], [214.0, -(SEMI + 22.0)]]:
 		_raw("juniper", "bIenupar", _on(g[0], g[1]), _rng.randf() * TAU,
 			_rng.randf_range(0.9, 1.15), "")
-	# Salvie in 7 palcuri (s, lat, n), mai dese spre drum.
-	for c in [[128.0, -(SEMI + 5.0), 3], [146.0, SEMI + 18.0, 3], [176.0, -(SEMI + 6.0), 4],
-			[196.0, SEMI + 11.0, 3], [210.0, -(SEMI + 18.0), 3], [236.0, SEMI + 20.0, 3],
-			[246.0, -(SEMI + 7.0), 3]]:
-		_clump("sagebrush", "bSalvie", c[0], c[1], c[2], 2.4, 1.6)
-	# Rabbitbrush galben: 3 petice, neregulate.
-	for c in [[134.0, -(SEMI + 9.0), 4], [172.0, SEMI + 14.0, 3], [216.0, -(SEMI + 9.0), 3]]:
-		_clump("rabbitbrush", "bRabbit", c[0], c[1], c[2], 2.0, 1.5)
+	_vegetation()
+
+
+## Runda 2: palcuri MIXTE pe ambele parti, pe 3 adancimi fata de margine
+## (3, 10, 20 m), in loc de tufe izolate. Pozitiile prin raza pe teren (_on),
+## deci stau pe taluz acolo unde rambleul cade. Ienuperi doar de la adancimea
+## a doua (trunchiul are coliziune, nu la < 2,5 m de margine). Pietrele mici sunt
+## fara coliziune. RNG separat: nu muta zarurile gospodariei.
+func _vegetation() -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = 90210
+	var margins := [3.0, 10.0, 20.0]
+	var s := 118.0
+	var n_cl := 0
+	while s < 262.0:
+		for side in [1.0, -1.0]:
+			var layer: int = r.randi_range(0, 2)
+			# Fiecare 3-4 palcuri pastram un strat apropiat; primele randuri deasa.
+			if n_cl % 2 == 0:
+				layer = 0
+			var m: float = margins[layer] + r.randf_range(-1.0, 1.5)
+			var lat: float = side * (SEMI + m)
+			if side > 0.0 and layer == 1:
+				lat = SEMI + 12.0 + r.randf_range(0.0, 2.0)  # dincolo de stalpi/gard
+			var ss: float = s + r.randf_range(-2.5, 2.5)
+			_mixed_clump(r, ss, lat, layer)
+			n_cl += 1
+			# Piatra mica printre palcuri, la fiecare al treilea.
+			if n_cl % 4 == 1:
+				var rl: float = side * (SEMI + r.randf_range(6.0, 24.0))
+				var rs: float = ss + r.randf_range(3.0, 6.0)
+				var pick := "talus_boulders_a" if r.randf() < 0.5 else "talus_boulders_b"
+				_raw(pick, "bPiatra", _on(rs, rl), r.randf() * TAU, r.randf_range(0.45, 0.7), "none")
+		s += 6.5
+
+
+func _mixed_clump(r: RandomNumberGenerator, s: float, lat: float, layer: int) -> void:
+	var q := _at(s)
+	var n: Vector2 = q["n"]
+	var d: Vector2 = q["d"]
+	var kinds: Array[String] = []
+	var scales: Array[float] = []
+	# 2-3 baza: ienupar mic (de la stratul 2) sau salvie mare.
+	for i in r.randi_range(1, 2):
+		if layer > 0 and r.randf() < 0.55:
+			kinds.append("juniper")
+			scales.append(r.randf_range(0.55, 0.8))
+		else:
+			kinds.append("sagebrush")
+			scales.append(r.randf_range(1.3, 1.6))
+	for i in r.randi_range(1, 2):
+		kinds.append("rabbitbrush")
+		scales.append(r.randf_range(0.95, 1.25))
+	for i in r.randi_range(1, 2):
+		kinds.append("sagebrush")
+		scales.append(r.randf_range(0.9, 1.15))
+	for i in kinds.size():
+		var ox := r.randf_range(-2.4, 2.4)
+		var oz := r.randf_range(-1.8, 1.8)
+		var p := _off(q, lat)
+		p.x += n.x * oz + d.x * ox
+		p.z += n.y * oz + d.y * ox
+		p.y = _sol(p.x, p.z)
+		var base := "bIenupar" if kinds[i] == "juniper" else ("bRabbit" if kinds[i] == "rabbitbrush" else "bSalvie")
+		_raw(kinds[i], base, p, r.randf() * TAU, scales[i], "")
 
 
 func _clump(model: String, base: String, s: float, lat: float, count: int,

@@ -225,7 +225,7 @@ func _vegetation() -> void:
 			if side < 0.0 and s > 976.0 and s < 1250.0:
 				continue
 			# gol neregulat: ~25% din pozitii lipsesc
-			if r.randf() < 0.25:
+			if r.randf() < 0.12:
 				continue
 			var layer: int = r.randi_range(0, 3)
 			if n_cl % 2 == 0:
@@ -246,17 +246,23 @@ func _vegetation() -> void:
 					continue
 				var pick := "talus_boulders_a" if r.randf() < 0.5 else "talus_boulders_b"
 				_raw(pick, "fPiatra", _on(rs, rl), r.randf() * TAU, r.randf_range(0.45, 0.7), "none")
-		s += 6.5
+		s += 4.6
 	# Malul indepartat al rapei (la ~55-75 m dreapta, plat): pete de verde
 	# si galben care dau a doua treapta a cadrului peste sant.
 	s = 1000.0
 	while s < 1240.0:
 		var lat2: float = -(SEMI + r.randf_range(50.0, 70.0))
-		_mixed_clump(r, s + r.randf_range(-3.0, 3.0), lat2, 2)
-		s += r.randf_range(9.0, 15.0)
+		_mixed_clump(r, s + r.randf_range(-3.0, 3.0), lat2, 2, true)
+		s += r.randf_range(6.0, 11.0)
+	# Fundul rapei (-13 m): pete rare de salvie/rabbitbrush, cat sa nu para goala.
+	s = 1000.0
+	while s < 1240.0:
+		_mixed_clump(r, s + r.randf_range(-3.0, 3.0), -(SEMI + r.randf_range(14.0, 30.0)), 0, true)
+		s += r.randf_range(12.0, 20.0)
 
 
-func _mixed_clump(r: RandomNumberGenerator, s: float, lat: float, layer: int) -> void:
+func _mixed_clump(r: RandomNumberGenerator, s: float, lat: float, layer: int,
+		strict := false) -> void:
 	var q := _at(s)
 	var n: Vector2 = q["n"]
 	var d: Vector2 = q["d"]
@@ -284,7 +290,7 @@ func _mixed_clump(r: RandomNumberGenerator, s: float, lat: float, layer: int) ->
 		p.y = _sol(p.x, p.z)
 		# Taluzul rapei: raza pe teren si esantionul terenului nu se potrivesc;
 		# piesa s-ar ingropa (probe_manual). O sarim.
-		if absf(p.y - _track._sampler.ground_y(p.x, p.z)) > 0.4:
+		if strict and absf(p.y - _track._sampler.ground_y(p.x, p.z)) > 0.4:
 			continue
 		var base := "fIenupar" if kinds[i] == "juniper" else ("fRabbit" if kinds[i] == "rabbitbrush" else "fSalvie")
 		_raw(kinds[i], base, p, r.randf() * TAU, scales[i], "")

@@ -14,6 +14,36 @@
 [ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/merrick_butte.glb" id="10_mb"]
 [ext_resource type="PackedScene" path="res://assets/models/monumentvalley/animals/horse_bay.glb" id="11_horse_bay"]
 [ext_resource type="PackedScene" path="res://assets/models/monumentvalley/animals/horse_pinto.glb" id="11_horse_pinto"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/butte_small_a.glb" id="s_butte_small_a"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/butte_small_b.glb" id="s_butte_small_b"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/butte_small_c.glb" id="s_butte_small_c"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/hoodoo.glb" id="s_hoodoo"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/mesa_wall_module.glb" id="s_mesa_wall_module"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/rock_fin.glb" id="s_rock_fin"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/talus_boulders_a.glb" id="s_talus_boulders_a"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/talus_boulders_b.glb" id="s_talus_boulders_b"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/buildings/hogan.glb" id="s_hogan"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/buildings/homestead_house.glb" id="s_homestead_house"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/buildings/trading_post.glb" id="s_trading_post"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/plants/juniper.glb" id="s_juniper"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/plants/rabbitbrush.glb" id="s_rabbitbrush"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/plants/sagebrush.glb" id="s_sagebrush"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/plants/tumbleweed.glb" id="s_tumbleweed"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/plants/yucca.glb" id="s_yucca"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/props/cattle_guard.glb" id="s_cattle_guard"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/props/open_range_sign.glb" id="s_open_range_sign"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/props/tourist_group.glb" id="s_tourist_group"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/animals/horse_black.glb" id="s_horse_black"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/animals/raven.glb" id="s_raven"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/animals/sheep.glb" id="s_sheep"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/structures/corral.glb" id="s_corral"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/structures/shade_ramada.glb" id="s_shade_ramada"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/structures/telegraph_pole.glb" id="s_telegraph_pole"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/structures/water_tower.glb" id="s_water_tower"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/structures/windmill_pump.glb" id="s_windmill_pump"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/structures/wire_fence.glb" id="s_wire_fence"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/vehicles/pickup_old.glb" id="s_pickup_old"]
+[ext_resource type="PackedScene" path="res://assets/models/monumentvalley/vehicles/tour_truck.glb" id="s_tour_truck"]
 
 [sub_resource type="BoxShape3D" id="Box_cornisa"]
 size = Vector3(130.0, 12.0, 270.0)
@@ -232,31 +262,34 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 372.00, 1.70, 262.00)
 metadata/scufundat = true
 
 [node name="ZonaA" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.000-0.040 · A · Start pe platou (+12 m): postul de negot, pickup parcat, moara, turnul de apa; campia nu se vede inca"
+metadata/fractii = "REAL 0.985-1.000 + 0.000-0.056, x >= 190 (masurat de pe curba; vezi docs/track_briefs/monument_poi_gauntlet.md) · 0.000-0.040 · A · Start pe platou (+12 m): postul de negot, pickup parcat, moara, turnul de apa; campia nu se vede inca"
 
 [node name="ZonaB" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.040-0.131 · B · Coama (0.063) si dreapta US-163: telegraf, gard de sarma, salvie; Mittens + Merrick in capat, pe ax"
+metadata/fractii = "REAL 0.056-0.127 (coborarea; coama = virajul 0.040-0.050, NU o creasta) · 0.040-0.131 · B · Coama (0.063) si dreapta US-163: telegraf, gard de sarma, salvie; Mittens + Merrick in capat, pe ax"
 
 [node name="ZonaC" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.131-0.206 · C · Grila pentru vite (0.137) si Valley Drive: semnul cu calul, caii (CalC1/CalC2)"
+metadata/fractii = "REAL 0.127-0.185 (grila 0.1368 la (300,166); caii 0.166) · 0.131-0.206 · C · Grila pentru vite (0.137) si Valley Drive: semnul cu calul, caii (CalC1/CalC2)"
 
 [node name="ZonaD" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.206-0.297 · D · Poarta dintre Mittens (WM_Turn/EM_Turn): peretii la ~18 m de marginea drumului, grohotis, Rockfall #1 (BolovanD)"
+metadata/fractii = "REAL 0.185-0.260 (poarta 0.2048 la (300,309); pereti la 10,4/11,8 m de MARGINE, nu 18) · 0.206-0.297 · D · Poarta dintre Mittens (WM_Turn/EM_Turn): peretii la ~18 m de marginea drumului, grohotis, Rockfall #1 (BolovanD)"
 
 [node name="ZonaE" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.297-0.434 · E · Trecatoarea dintre mese (gorge 0.33-0.42): mesa_wall_module, Rockfall #2 (BolovanE)"
+metadata/fractii = "REAL 0.260-0.434 (defileu 0.329-0.419; bolovanul E 0.368), fara cercul r 30 m din jurul arcului · 0.297-0.434 · E · Trecatoarea dintre mese (gorge 0.33-0.42): mesa_wall_module, Rockfall #2 (BolovanE)"
 
 [node name="ZonaEArc" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.434 · E' · Arcul de gresie (custom_arch_fracs, tema: sandstone_arch.glb); decorul de la picioarele arcului"
+metadata/fractii = "REAL 0.4335 la (-68.3,444.6) y +8.7, cerc r 30 m (arcul il remodeleaza alt agent in Blender) · 0.434 · E' · Arcul de gresie (custom_arch_fracs, tema: sandstone_arch.glb); decorul de la picioarele arcului"
 
 [node name="ZonaF" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.434-0.600 · F · Cornisa de la Artist's Point (+10 -> +13,5), camionul de tur parcat, turistii; haboob-ul in stanga-fata"
+metadata/fractii = "REAL 0.442-0.600 (cornisa 0.470-0.600, caderea pe DREAPTA; stanga plata +-0,5 m pe >= 70 m) · 0.434-0.600 · F · Cornisa de la Artist's Point (+10 -> +13,5), camionul de tur parcat, turistii; haboob-ul in stanga-fata"
 
 [node name="ZonaG" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.600-0.834 · G · Campia deschisa (si scurtatura G', ~0.64-0.80): bolovani, salvie, rabbitbrush, caii (CalG1/CalG2), vartejul"
+metadata/fractii = "REAL 0.600-0.826 (scurtatura Dunele 0.645-0.754, gura la 25 m pe banda = 0.6555) · 0.600-0.834 · G · Campia deschisa (si scurtatura G', ~0.64-0.80): bolovani, salvie, rabbitbrush, caii (CalG1/CalG2), vartejul"
 
 [node name="ZonaG2" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.834-0.846 · G2 · Albia secata (saritura): malurile, bolovani, nimic pe banda"
+metadata/fractii = "REAL 0.826-0.866 (albia 0.834-0.846 la (-96,13), grila H 0.8593) · 0.834-0.846 · G2 · Albia secata (saritura): malurile, bolovani, nimic pe banda"
 
 [node name="ZonaH" type="Node3D" parent="DecorManual"]
-metadata/fractii = "0.846-1.000 · H · US-163 inapoi (urcare 0 -> +12): grila, telegraf, turnul de apa si moara pe ax, postul de negot"
+metadata/fractii = "REAL 0.866-0.985 (dreapta z = -40, x -68 -> 190; teren plat lateral, rampa 0,8 -> 12 m) · 0.846-1.000 · H · US-163 inapoi (urcare 0 -> +12): grila, telegraf, turnul de apa si moara pe ax, postul de negot"
+
+[node name="ZonaGospodarie" type="Node3D" parent="DecorManual"]
+metadata/fractii = "vizibila din 0.965-0.05 (grila, A) si 0.035-0.105 (B) · Gospodaria din vale (est de B, x 420-460, z 50-150, la 120-160 m de drum): casa modulara, hogan, tarc, oi, pickup; NU in axa drumului"

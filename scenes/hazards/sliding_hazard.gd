@@ -134,6 +134,12 @@ var turn_around: bool = false
 
 ## Model optional + configuratia lui.
 var model_scene: PackedScene
+## Ce PIESA din GLB se pastreaza (celelalte copii directe ai radacinii se
+## arunca). Gol = tot fisierul, ca pana acum. Exista fiindca kitul Monument
+## Valley tine ambele poze ale calului (`Pose_Stand`, `Pose_Walk`) in acelasi
+## GLB: fara filtru s-ar randa suprapuse. Acelasi nume de camp ca la
+## `RockfallHazard.model_node` / `DeflectorHazard.model_node`.
+var model_node: String = ""
 var model_scale: float = 1.0
 var roll_radius: float = 0.0 # >0 = sfera care se rostogoleste
 ## Clasa de textura a modelului ("" = atlasul comun). Se aplica TRIPLANAR IN
@@ -236,6 +242,11 @@ func _readable_period() -> float:
 
 func _build_model() -> void:
 	var model := model_scene.instantiate() as Node3D
+	if not model_node.is_empty():
+		for child in model.get_children():
+			if child.name != model_node:
+				model.remove_child(child)
+				child.queue_free()
 	model.scale = Vector3.ONE * model_scale
 	# `roll_radius` primit de la apelant e o INTENTIE ("obiectul asta se
 	# rostogoleste"), nu o masuratoare. Raza efectiva se ia din model, ca un GLB

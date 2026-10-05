@@ -540,22 +540,102 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 ## sud, brief §0.1) si nici ranch: aici cresc salvia, ienuparul si
 ## rabbitbrush-ul, in TUFE grupate, si bolovani de gresie.
 ##
-## Piesele vin din kiturile existente (zero GLB nou): bolovanii prin
-## `_add_canyon_rock` (clasa de roca a temei = `mv_sandstone`), tufele uscate din
-## `cappadocia/plants/shrub_dry.glb` (84 de triunghiuri) si smocurile din
-## megakit. Placeholder pana vin `sagebrush`/`rabbitbrush`/`juniper` din brief §5.3.
-const MV_SHRUB_PATH: String = "res://assets/models/cappadocia/plants/shrub_dry.glb"
+## Vegetatia si bolovanii vin din kitul `monumentvalley/` (PR #455): salvia,
+## ienuparul, yucca si rabbitbrush din `plants/`, grupurile de bolovani din
+## `rocks/talus_boulders_*`. Pana la kit, scatterul folosea piese de imprumut:
+## smocurile din megakit (conuri verde-galbui plate), `cappadocia/plants/
+## shrub_dry.glb` si `rock_cluster.glb` pe clasa `rock` (alta nuanta decat
+## gresia pistei). Bolovanii mari prin `_add_canyon_rock` (clasa de roca a temei
+## = `mv_sandstone`) raman neschimbati.
+##
+## Piesele kitului sunt GLB cu MAI MULTE noduri (trunchi + frunzis, tulpina +
+## flori), deci nu trec prin `pick_from_glb` (care pastreaza un singur nod): se
+## instantiaza intregi, iar clasele pe noduri vin din `MV_PLANT_CLASSES`. Restul
+## nodurilor raman pe materialul lumii (atlasul), deja pe pista. Fantome, ca tot
+## frunzisul (treci prin ele): ienuparul nu are corp aici, spre deosebire de
+## DecorManual, fiindca sta la 1.4+ m de asfalt cu sutele.
+const MV_KIT_DIR: String = "res://assets/models/monumentvalley/"
 
-## Un CIOC de tufe uscate (2-4 bucati in 2.2 m): vegetatia de aici nu creste
-## singura, ci in petice, ca in poze. Fantoma (treci prin ea), ca tot frunzisul.
+## (fisier, pondere). Salvia domina (e planta locului), rabbitbrush e accentul
+## galben, yucca rar.
+const MV_SMALL_PLANTS: Array = [
+	["plants/sagebrush.glb", 5.0], ["plants/rabbitbrush.glb", 2.0],
+	["plants/yucca.glb", 1.0],
+]
+## Banda de mijloc si mai departe: si ienuparul (4 m, singura umbra a pistei).
+const MV_BIG_PLANTS: Array = [
+	["plants/sagebrush.glb", 4.0], ["plants/rabbitbrush.glb", 2.0],
+	["plants/juniper.glb", 2.0], ["plants/yucca.glb", 1.0],
+]
+const MV_TALUS: Array[String] = ["rocks/talus_boulders_a.glb",
+	"rocks/talus_boulders_b.glb"]
+
+## Aceeasi clasa de salvie ca la DecorManual (`WorldProp.CLASSES_BY_THEME`), ca
+## scatterul si piesele puse de mana sa fie aceeasi planta.
+const MV_PLANT_CLASSES := {
+	"sagebrush": {"Sagebrush_Foliage": Palette.TRI_PREFIX + "mv_sage"},
+}
+const MV_TALUS_CLASSES := {"Talus_Scree": Palette.TRI_PREFIX + "mv_sandstone"}
+
+
+## O planta din kit, aleasa ponderat. `false` daca fisierul lipseste, ca
+## apelantul sa cada pe vechiul prop.
+static func _add_mv_plant(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, picks: Array, s_min: float,
+		s_max: float) -> bool:
+	var total := 0.0
+	for pick: Array in picks:
+		total += float(pick[1])
+	var roll := rng.randf() * total
+	var path := String((picks[picks.size() - 1] as Array)[0])
+	for pick: Array in picks:
+		roll -= float(pick[1])
+		if roll <= 0.0:
+			path = String(pick[0])
+			break
+	var full := MV_KIT_DIR + path
+	if not ResourceLoader.exists(full):
+		return false
+	var kept := (load(full) as PackedScene).instantiate() as Node3D
+	parent.add_child(kept)
+	# Infipta 10 cm, ca `_add_kit_plant`: baza plata pe panta lasa o muchie de aer.
+	kept.position = pos + Vector3.UP * -0.10
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(s_min, s_max)
+	Palette.apply_class_materials(kept, MV_PLANT_CLASSES.get(
+		path.get_file().get_basename(), {}))
+	return true
+
+
+## Un grup de bolovani din kit, pe clasa `mv_sandstone`. Cu `collide`, hull pe
+## grup (un singur corp, ca la `_add_cluster`).
+static func _add_mv_talus(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, collide: bool) -> bool:
+	var full := MV_KIT_DIR + MV_TALUS[rng.randi_range(0, MV_TALUS.size() - 1)]
+	if not ResourceLoader.exists(full):
+		return false
+	var kept := (load(full) as PackedScene).instantiate() as Node3D
+	var holder: Node3D = StaticBody3D.new() if collide else Node3D.new()
+	parent.add_child(holder)
+	holder.add_child(kept)
+	kept.scale = Vector3.ONE * rng.randf_range(0.9, 1.4)
+	Palette.apply_class_materials(kept, MV_TALUS_CLASSES)
+	if collide:
+		add_hull_collision(holder as StaticBody3D, kept)
+	holder.rotation.y = rng.randf_range(0.0, TAU)
+	holder.position = pos + Vector3.UP * -0.2
+	return true
+
+
+## Un CIOC de tufe (2-4 bucati in 2.2 m): vegetatia de aici nu creste singura, ci
+## in petice, ca in poze. Fantoma (treci prin ea), ca tot frunzisul.
 static func _add_shrub_clump(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, s_min: float, s_max: float) -> bool:
 	var n := rng.randi_range(2, 4)
 	var placed := false
 	for i in n:
 		var off := Vector3(rng.randf_range(-2.2, 2.2), 0.0, rng.randf_range(-2.2, 2.2))
-		if _add_simple_prop(parent, MV_SHRUB_PATH, "Shrub_Dry", pos + off, rng,
-				s_min, s_max, -0.08):
+		if _add_mv_plant(parent, pos + off, rng, MV_SMALL_PLANTS, s_min, s_max):
 			placed = true
 	return placed
 
@@ -586,36 +666,41 @@ static func _place_monumentvalley_prop(parent: Node3D, spec: TrackDecorSpec,
 					not satellite, 0.70, 1.20, 0.80, 1.20,
 					_shoulder(sampler, spec, solids, blockers)):
 				return
-			if rng.randf() < 0.45 and _add_kit_plant(parent, pos, rng,
-					KIT_SMALL_PLANTS, 0.70, 1.10):
+			if rng.randf() < 0.45 and _add_mv_plant(parent, pos, rng,
+					MV_SMALL_PLANTS, 0.90, 1.40):
 				return
-			_add_scatter(parent, pos, rng, mat)
+			if not _add_mv_plant(parent, pos, rng, MV_SMALL_PLANTS, 0.90, 1.40):
+				_add_scatter(parent, pos, rng, mat)
 		"mid":
 			var roll := rng.randf()
 			if satellite or roll < 0.22:
 				# Fantoma: banda e coridorul de reintrare pe sosea.
 				if not _add_canyon_rock(parent, pos, rng, "S", false):
-					_add_cluster(parent, pos, rng, ["Cluster_S1", "Cluster_S2"],
-						false, mat)
+					if not _add_mv_talus(parent, pos, rng, false):
+						_add_cluster(parent, pos, rng,
+							["Cluster_S1", "Cluster_S2"], false, mat)
 			elif roll < 0.62:
-				if not _add_shrub_clump(parent, pos, rng, 0.9, 1.5):
+				if not _add_shrub_clump(parent, pos, rng, 1.0, 1.6):
 					_add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS, 0.90, 1.35)
 			elif roll < 0.76:
-				_add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS, 0.90, 1.35)
+				if not _add_mv_plant(parent, pos, rng, MV_BIG_PLANTS, 1.00, 1.50):
+					_add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS, 0.90, 1.35)
 			else:
 				if not _add_canyon_rock(parent, pos, rng, "M", true,
 						0.80, 1.30, 0.85, 1.25,
 						_shoulder(sampler, spec, solids, blockers)):
-					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
-						true, mat)
+					if not _add_mv_talus(parent, pos, rng, true):
+						_add_cluster(parent, pos, rng,
+							["Cluster_M1", "Cluster_M2"], true, mat)
 		"far":
 			# Plan intermediar: mase mari si rare (siluete), cu cate un peteci
 			# de tufe printre ele.
-			if rng.randf() < 0.25 and _add_shrub_clump(parent, pos, rng, 1.2, 1.9):
+			if rng.randf() < 0.25 and _add_shrub_clump(parent, pos, rng, 1.3, 2.0):
 				return
 			if not _add_canyon_rock(parent, pos, rng, "L", false,
 					1.05, 1.85, 1.35, 2.10):
-				_add_cluster(parent, pos, rng, ["Cluster_L1"], false, mat)
+				if not _add_mv_talus(parent, pos, rng, false):
+					_add_cluster(parent, pos, rng, ["Cluster_L1"], false, mat)
 		_:
 			var roll2 := rng.randf()
 			if satellite or roll2 < 0.40:
@@ -628,9 +713,10 @@ static func _place_monumentvalley_prop(parent: Node3D, spec: TrackDecorSpec,
 				if not _add_canyon_rock(parent, pos, rng, "L", true,
 						0.85, 1.25, 0.85, 1.25,
 						_shoulder(sampler, spec, solids, blockers)):
-					_add_cluster(parent, pos, rng, ["Cluster_L1"], true, mat)
+					if not _add_mv_talus(parent, pos, rng, true):
+						_add_cluster(parent, pos, rng, ["Cluster_L1"], true, mat)
 			else:
-				_add_shrub_clump(parent, pos, rng, 1.0, 1.6)
+				_add_shrub_clump(parent, pos, rng, 1.1, 1.8)
 
 
 ## --- Set de prop-uri: insula de recif ---------------------------------------

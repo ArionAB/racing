@@ -44,6 +44,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/monumentvalley/structures/wire_fence.glb" id="s_wire_fence"]
 [ext_resource type="PackedScene" path="res://assets/models/monumentvalley/vehicles/pickup_old.glb" id="s_pickup_old"]
 [ext_resource type="PackedScene" path="res://assets/models/monumentvalley/vehicles/tour_truck.glb" id="s_tour_truck"]
+[ext_resource type="Script" path="res://scenes/props/telegraph_wires.gd" id="tw_wires"]
 
 [sub_resource type="BoxShape3D" id="Box_cornisa"]
 size = Vector3(130.0, 12.0, 270.0)
@@ -97,7 +98,7 @@ custom_arch_fracs = Array[float]([0.434])
 custom_ravines = Array[Vector4]([Vector4(0.47, 0.6, 13.0, 1)])
 custom_cornice_ravines = Array[int]([0])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 45.0)])
-custom_landmarks = Array[Vector3]([Vector3(0.012, -1, 0), Vector3(0.028, -1, 2)])
+custom_landmarks = Array[Vector3]([])
 traffic_count = 0
 terrain_pad_m = 260.0
 
@@ -263,6 +264,160 @@ metadata/scufundat = true
 
 [node name="ZonaA" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.985-1.000 + 0.000-0.056, x >= 190 (masurat de pe curba; vezi docs/track_briefs/monument_poi_gauntlet.md) · 0.000-0.040 · A · Start pe platou (+12 m): postul de negot, pickup parcat, moara, turnul de apa; campia nu se vede inca"
+
+[node name="aStalp1" parent="DecorManual/ZonaA" instance=ExtResource("s_telegraph_pole")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 192.014832, 10.937424, -54.000000)
+
+[node name="aStalp2" parent="DecorManual/ZonaA" instance=ExtResource("s_telegraph_pole")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 217.999985, 11.646240, -54.000000)
+
+[node name="aStalp3" parent="DecorManual/ZonaA" instance=ExtResource("s_telegraph_pole")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 243.999985, 11.692871, -54.000000)
+
+[node name="aStalp4" parent="DecorManual/ZonaA" instance=ExtResource("s_telegraph_pole")]
+transform = Transform3D(0.039794, 0.000000, 0.999208, 0.000000, 1.000000, 0.000000, -0.999208, 0.000000, 0.039794, 270.554382, 11.698898, -53.989021)
+
+[node name="aStalp5" parent="DecorManual/ZonaA" instance=ExtResource("s_telegraph_pole")]
+transform = Transform3D(0.707600, 0.000000, 0.706613, 0.000000, 1.000000, 0.000000, -0.706613, 0.000000, 0.707600, 303.882874, 11.695801, -42.089687)
+
+[node name="aStalp6" parent="DecorManual/ZonaA" instance=ExtResource("s_telegraph_pole")]
+transform = Transform3D(0.999199, 0.000000, 0.040023, 0.000000, 1.000000, 0.000000, -0.040023, 0.000000, 0.999199, 315.463654, 11.646713, -8.565681)
+
+[node name="aCorb7" parent="DecorManual/ZonaA" instance=ExtResource("s_raven")]
+transform = Transform3D(-1.395349, 0.000000, -0.114026, 0.000000, 1.400000, 0.000000, 0.114026, 0.000000, -1.395349, 217.999985, 19.166241, -53.250000)
+metadata/ancora_sol = Vector3(0, -5.371, 0)
+
+[node name="aCorb8" parent="DecorManual/ZonaA" instance=ExtResource("s_raven")]
+transform = Transform3D(-1.177445, 0.000000, 0.757380, 0.000000, 1.400000, 0.000000, -0.757380, 0.000000, -1.177445, 303.352173, 19.215801, -41.559727)
+metadata/ancora_sol = Vector3(0, -5.371, 0)
+
+[node name="aGard9" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 198.000000, 11.149078, -56.000000)
+
+[node name="aGard10" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 202.000000, 11.279388, -56.000000)
+
+[node name="aGard11" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 206.000000, 11.403580, -56.000000)
+
+[node name="aGard12" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 210.000000, 11.497849, -56.000000)
+
+[node name="aGard13" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 214.000000, 11.574493, -56.000000)
+
+[node name="aGard14" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 218.000000, 11.612839, -56.000000)
+
+[node name="aGard15" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 222.000000, 11.634918, -56.000000)
+
+[node name="aGard16" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 226.000000, 11.655304, -56.000000)
+
+[node name="aGard17" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 230.000000, 11.666656, -56.000000)
+
+[node name="aGard18" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 234.000000, 11.677277, -56.000000)
+
+[node name="aGard19" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 238.000000, 11.683136, -56.000000)
+
+[node name="aGard20" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 242.000000, 11.688583, -56.000000)
+
+[node name="aGard21" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 246.000000, 11.691498, -56.000000)
+
+[node name="aGard22" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 250.000000, 11.694275, -56.000000)
+
+[node name="aGard23" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 254.000000, 11.695694, -56.000000)
+
+[node name="aGard24" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 258.000000, 11.697037, -56.000000)
+
+[node name="aGard25" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 262.000000, 11.697647, -56.000000)
+
+[node name="aGard26" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 266.000000, 11.698273, -56.000000)
+
+[node name="aGard27" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 270.000000, 11.698456, -56.000000)
+
+[node name="aGard28" parent="DecorManual/ZonaA" instance=ExtResource("s_wire_fence")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 274.000000, 11.698563, -56.000000)
+
+[node name="aPost29" parent="DecorManual/ZonaA" instance=ExtResource("s_trading_post")]
+transform = Transform3D(-0.998201, 0.000000, -0.059964, 0.000000, 1.000000, 0.000000, 0.059964, 0.000000, -0.998201, 286.000000, 11.698288, -78.000000)
+
+[node name="aPickup30" parent="DecorManual/ZonaA" instance=ExtResource("s_pickup_old")]
+transform = Transform3D(0.877583, 0.000000, 0.479426, 0.000000, 1.000000, 0.000000, -0.479426, 0.000000, 0.877583, 271.000000, 11.696823, -66.000000)
+
+[node name="aTurn31" parent="DecorManual/ZonaA" instance=ExtResource("s_water_tower")]
+transform = Transform3D(0.921061, 0.000000, 0.389418, 0.000000, 1.000000, 0.000000, -0.389418, 0.000000, 0.921061, 325.000000, 11.666412, -40.000000)
+
+[node name="aMoara32" parent="DecorManual/ZonaA" instance=ExtResource("s_windmill_pump")]
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 337.000000, 11.664581, -50.000000)
+
+[node name="aCal33" parent="DecorManual/ZonaA" instance=ExtResource("11_horse_bay")]
+transform = Transform3D(0.823554, 0.000000, -0.567238, 0.000000, 1.000000, 0.000000, 0.567238, 0.000000, 0.823554, 333.598389, 11.666321, -46.838760)
+metadata/coliziune = "none"
+
+[node name="Pose_Walk" parent="DecorManual/ZonaA/aCal33" index="1"]
+visible = false
+
+[node name="aCal34" parent="DecorManual/ZonaA" instance=ExtResource("11_horse_pinto")]
+transform = Transform3D(-0.106910, 0.000000, -0.994269, 0.000000, 1.000000, 0.000000, 0.994269, 0.000000, -0.106910, 331.426208, 11.674271, -51.112461)
+metadata/coliziune = "none"
+
+[node name="Pose_Walk" parent="DecorManual/ZonaA/aCal34" index="1"]
+visible = false
+
+[node name="aCal35" parent="DecorManual/ZonaA" instance=ExtResource("s_horse_black")]
+transform = Transform3D(-0.977276, 0.000000, 0.211972, 0.000000, 1.000000, 0.000000, -0.211972, 0.000000, -0.977276, 335.397522, 11.660889, -53.456909)
+metadata/coliziune = "none"
+
+[node name="Pose_Walk" parent="DecorManual/ZonaA/aCal35" index="1"]
+visible = false
+
+[node name="aTalus36" parent="DecorManual/ZonaA" instance=ExtResource("s_talus_boulders_a")]
+transform = Transform3D(0.944995, 0.000000, -0.327083, 0.000000, 1.000000, 0.000000, 0.327083, 0.000000, 0.944995, 238.000000, 11.645691, -72.000000)
+
+[node name="aTalus37" parent="DecorManual/ZonaA" instance=ExtResource("s_talus_boulders_b")]
+transform = Transform3D(0.783780, 0.000000, -0.621038, 0.000000, 1.000000, 0.000000, 0.621038, 0.000000, 0.783780, 304.000000, 11.695633, -64.000000)
+
+[node name="aIenupar38" parent="DecorManual/ZonaA" instance=ExtResource("s_juniper")]
+transform = Transform3D(0.999585, 0.000000, -0.028818, 0.000000, 1.000000, 0.000000, 0.028818, 0.000000, 0.999585, 222.000000, 11.516190, -76.000000)
+
+[node name="aIenupar39" parent="DecorManual/ZonaA" instance=ExtResource("s_juniper")]
+transform = Transform3D(-0.690078, 0.000000, 0.723735, 0.000000, 1.000000, 0.000000, -0.723735, 0.000000, -0.690078, 318.000000, 11.689972, -66.000000)
+
+[node name="aRabbit40" parent="DecorManual/ZonaA" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(0.865050, 0.000000, -0.554286, 0.000000, 1.027397, 0.000000, 0.554286, 0.000000, 0.865050, 253.432297, 11.689514, -63.792305)
+
+[node name="aRabbit41" parent="DecorManual/ZonaA" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.404756, 0.000000, -0.911274, 0.000000, 0.997120, 0.000000, 0.911274, 0.000000, -0.404756, 256.409973, 11.691803, -63.822594)
+
+[node name="aRabbit42" parent="DecorManual/ZonaA" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(0.825339, 0.000000, 0.275277, 0.000000, 0.870036, 0.000000, -0.275277, 0.000000, 0.825339, 256.164185, 11.691452, -63.989899)
+
+[node name="aRabbit43" parent="DecorManual/ZonaA" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(0.050398, 0.000000, 0.852248, 0.000000, 0.853736, 0.000000, -0.852248, 0.000000, 0.050398, 294.879150, 11.697174, -53.901897)
+
+[node name="aRabbit44" parent="DecorManual/ZonaA" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.815788, 0.000000, 0.366736, 0.000000, 0.894430, 0.000000, -0.366736, 0.000000, -0.815788, 296.562469, 11.696381, -55.695076)
+
+[node name="aRabbit45" parent="DecorManual/ZonaA" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.496959, 0.000000, 0.866779, 0.000000, 0.999136, 0.000000, -0.866779, 0.000000, -0.496959, 296.925110, 11.696152, -58.218040)
+
+[node name="Fire" type="Node3D" parent="DecorManual/ZonaA"]
+script = ExtResource("tw_wires")
+poles = PackedVector3Array(192.015, 10.937, -54.000, 218.000, 11.646, -54.000, 244.000, 11.693, -54.000, 270.554, 11.699, -53.989, 303.883, 11.696, -42.090, 315.464, 11.647, -8.566)
+yaws = PackedFloat32Array(1.5708, 1.5708, 1.5708, 1.5310, 0.7847, 0.0400)
 
 [node name="ZonaB" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.056-0.127 (coborarea; coama = virajul 0.040-0.050, NU o creasta) · 0.040-0.131 · B · Coama (0.063) si dreapta US-163: telegraf, gard de sarma, salvie; Mittens + Merrick in capat, pe ax"

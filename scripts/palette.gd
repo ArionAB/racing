@@ -588,13 +588,19 @@ const CLASS_TEXTURES := {
 	# Nu se putea tenta "alpine_granite" direct: e clasa stancilor de pe
 	# Alpi (Track09) si le-ar fi facut rosii.
 	"red_valley_tuff": "res://assets/textures/classes/alpine_granite.png",
+	# DALA gresiei: `olkhon_marble` (fisuri verticale, fete late), NU `alpine_granite` — aceea e un
+	# zid de piatra uscata, cu blocuri mici si rosturi, si pe peretii de 14 m dadea zidarie de
+	# caramida (numit de 4 ori independent). Masurat pe 6 cadre (docs/track_briefs/img/
+	# monument_materiale): muchii orizontale dupa blur 1 px 0.449 -> 0.266, gy/gx 1.40 -> 0.92,
+	# culoarea neschimbata (HSV median la +-1 grad). Zero VRAM nou pe pista: dala ridicata era deja
+	# una singura pentru mv_sandstone. Tenta recalculata in spatiu liniar ca sa pastreze media.
 	# GRESIA MONUMENT VALLEY (Track19, brief monument_valley.md §4): peretele
 	# monoliturilor si al meselor, rosu-portocaliu #B8552E. ACEEASI dala ca
 	# `red_valley_tuff` (stratificata, zero VRAM nou), alta ridicare si alta tenta:
 	# tinta (0.722, 0.333, 0.180) are R PESTE media dalei (0.651), deci tenta
 	# singura nu ajunge — vezi CLASS_LIFT. Clasa e NOUA: nicio alta pista n-o
 	# foloseste, deci `rock` / `red_valley_tuff` raman neschimbate.
-	"mv_sandstone": "res://assets/textures/classes/alpine_granite.png",
+	"mv_sandstone": "res://assets/textures/classes/olkhon_marble.png",
 	# SALVIA MONUMENT VALLEY (Track19, brief monument_valley.md §4: #8E977C, gri-verde
 	# prafuit). ACEEASI dala ca `macchia`/`macchia_dry` — zero VRAM nou, doar alta
 	# ridicare si alta tenta. Exista fiindca slotul `CACTUS_GREEN` (12, #5B7C34) e
@@ -996,7 +1002,7 @@ const CLASS_TINT := {
 	# (18 grade, 0.78, 0.76), jumatate de umbra (150, 65, 34) = #964122 (16 grade),
 	# umbra (134, 52, 25). Tinta #B8552E = (184, 85, 46), 16 grade, 0.75, 0.72.
 	# R ramane la 1.0: ridicarea (0.82) e cea care urca canalul, nu tenta.
-	"mv_sandstone": Color(1.000, 0.600, 0.460),
+	"mv_sandstone": Color(0.964, 0.592, 0.444),
 	# Salvia (#8E977C = 142, 151, 124). Calculata in spatiu LINIAR (multiplicarea
 	# `albedo_color` x textura e liniara; prima varianta, in sRGB, dadea albedo
 	# (150, 140, 130) si pe captura frunzisul iesea albastru-cenusiu): dala
@@ -1357,7 +1363,7 @@ const CLASS_TRIPLANAR_SCALE := {
 	# nu ca doua dungi.
 	"red_valley_tuff": 0.08,
 	# Gresia Monument Valley: aceeasi scara ca faleza rosie (aceeasi dala).
-	"mv_sandstone": 0.08,
+	"mv_sandstone": 0.065,
 	# Salvia: ca `macchia` (aceeasi dala, tufe de ~1 m).
 	"mv_sage": 1.4,
 	# Calota: aceeasi scara ca gresia (aceeasi dala).

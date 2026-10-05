@@ -49,7 +49,7 @@ const END_X := -31.0            # cercul arcului: centrul (-68,3, 444,6) r 30
 const RES := {
 	"mesa": "s_mesa_wall_module", "butte_a": "s_butte_small_a",
 	"talus_a": "s_talus_boulders_a", "talus_b": "s_talus_boulders_b",
-	"rabbit": "s_rabbitbrush",
+	"rabbit": "s_rabbitbrush", "sage": "s_sagebrush", "juniper": "s_juniper",
 }
 
 var _track: Track
@@ -91,6 +91,7 @@ func _ready() -> void:
 		_talus()
 		_buttes()
 		_rabbit()
+		_clusters()
 		if _out_path != "":
 			var f := FileAccess.open(_out_path, FileAccess.WRITE)
 			for line in _out:
@@ -192,28 +193,67 @@ func _hw_eff(i: int) -> float:
 	return h
 
 
-## Grupuri de talus pe valea deschisa, la 3-4,6 m de MARGINE (hull, regula 2,5 m).
+## GRAMEZI de bolovani lipite de baza peretelui (runda 2): 3-5 blocuri de marimi
+## diferite per gramada (talus_a/b, hull), cu marginea dinspre drum la >= 2,7 m de
+## margine, si 1-2 tufe printre ele. 3 gramezi pe parte, pe valea deschisa.
 func _talus() -> void:
 	var n := _track.baked.size()
 	var made := 0
 	for sg in [1.0, -1.0]:
-		var f0 := 0.2665 if sg > 0.0 else 0.2700
-		var pitch := 0.0095
+		var f0 := 0.2685 if sg > 0.0 else 0.2730
+		for k in 3:
+			var fc := f0 + float(k) * 0.0185 + _rng.randf_range(-0.003, 0.003)
+			var cnt := _rng.randi_range(3, 5)
+			for b in cnt:
+				var f := fc + _rng.randf_range(-0.0022, 0.0022)
+				var i := int(f * float(n))
+				var model := "talus_a" if _rng.randf() < 0.6 else "talus_b"
+				var scl := _rng.randf_range(0.55, 1.15)
+				var r := (2.2 if model == "talus_a" else 2.9) * scl
+				var d := _hw_eff(i) + _rng.randf_range(2.7, 3.6) + r + float(b) * _rng.randf_range(0.0, 0.9)
+				var q: Vector3 = _track.baked[i] + _track._side_at(i) * sg * d
+				q.y = _sol_real(q.x, q.z, true) - 0.15
+				_emit(model, "Talus", q, _rng.randf_range(0.0, TAU), Vector3.ONE * scl)
+				made += 1
+			# 1-2 tufe printre blocuri
+			for t in _rng.randi_range(1, 2):
+				var f := fc + _rng.randf_range(-0.002, 0.002)
+				var i := int(f * float(n))
+				var d := _hw_eff(i) + _rng.randf_range(3.0, 5.5)
+				var q: Vector3 = _track.baked[i] + _track._side_at(i) * sg * d
+				q.y = _sol_real(q.x, q.z, true) - 0.05
+				var m := "sage" if t == 1 else "rabbit"
+				_emit(m, "Tufa", q, _rng.randf_range(0.0, TAU), Vector3.ONE * _rng.randf_range(1.3, 1.9), "none")
+	print("; talus: %d blocuri in 6 gramezi" % made)
+
+
+## CIORCHINI de vegetatie (runda 2): 3-5 plante = 1 ienupar/tufa inalta + 1-2 salvii
+## + 1 rabbitbrush. 6 pe parte pe valea deschisa; 3 chiar la 1-3 m de bordura
+## (intra in cadrul camerei). Toate fara coliziune.
+func _clusters() -> void:
+	var n := _track.baked.size()
+	var made := 0
+	for sg in [1.0, -1.0]:
+		var near_slots := [1, 3, 5]
 		for k in 6:
-			var f := f0 + float(k) * pitch + _rng.randf_range(-0.0035, 0.0035)
-			if f > 0.3255:
-				continue
-			var i := int(f * float(n))
-			var model := "talus_a" if _rng.randf() < 0.5 else "talus_b"
-			var scl := _rng.randf_range(0.9, 1.3)
-			var r := (2.2 if model == "talus_a" else 2.9) * scl
-			var gap := _rng.randf_range(3.0, 4.6)
-			var d := _hw_eff(i) + gap + r
-			var q: Vector3 = _track.baked[i] + _track._side_at(i) * sg * d
-			q.y = _sol_real(q.x, q.z, true) - 0.15
-			_emit(model, "Talus", q, _rng.randf_range(0.0, TAU), Vector3.ONE * scl)
-			made += 1
-	print("; talus: %d grupuri" % made)
+			var fc := 0.2655 + float(k) * 0.0108 + _rng.randf_range(-0.003, 0.003)
+			var near: bool = near_slots.has(k) if sg > 0.0 else (k == 0 or k == 2 or k == 4)
+			var base_gap := _rng.randf_range(1.0, 2.6) if near else _rng.randf_range(4.5, 9.0)
+			var plants: Array[String] = ["juniper"]
+			for q in _rng.randi_range(1, 2):
+				plants.append("sage")
+			plants.append("rabbit")
+			for pl in plants:
+				var f := fc + _rng.randf_range(-0.0025, 0.0025)
+				var i := int(f * float(n))
+				var d := _hw_eff(i) + base_gap + _rng.randf_range(-0.6, 2.2)
+				d = maxf(d, _hw_eff(i) + 1.0)
+				var qq: Vector3 = _track.baked[i] + _track._side_at(i) * sg * d
+				qq.y = _sol_real(qq.x, qq.z, true) - 0.05
+				var sc := _rng.randf_range(0.9, 1.3) if pl == "juniper" else _rng.randf_range(1.3, 2.0)
+				_emit(pl, "Ciorchine", qq, _rng.randf_range(0.0, TAU), Vector3.ONE * sc, "none")
+				made += 1
+	print("; ciorchini: %d plante in 12 ciorchini" % made)
 
 
 ## Butte-ul din coltul de intrare: pe EXTERIORUL virajului (sud), la 30-60 m.

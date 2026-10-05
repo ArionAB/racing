@@ -1,0 +1,19 @@
+* = din diorama_v02_iter1.jpg (doar densitate/aranjament)
+A            v02  box (780, 50, 1230, 235)   -> 1800x740 (x4.0)  startul pe platou: postul de negot de piatra cu prispa de lemn, pickup vechi in fata, turnul de apa de lemn, moara de vant cu jgheab rotund si cai la jgheab, stalpi de telegraf cu fire, gard de sarma; platoul se rupe intr-un perete rosu spre vale
+B            v02  box (1010, 150, 1400, 540) -> 1799x1799 (x4.6)  coama si dreapta US-163: asfalt negru cu linie dubla galbena, stalpi de telegraf pe o parte, gard de sarma, salvie in tufe, rabbitbrush galben; in capat cele doua turnuri cu deget
+B_iter1      it1  box (800, 140, 1330, 540)  -> 1800x1358 (x3.4)  DENSITATE lateral de B (iter1): butte-uri mici si ace de stanca in perechi si grupari la 10-60 m de asfalt, grohotis la picior, salvie si ienupar intre ele (asfaltul din iter1 NU se ia)
+C            v02  box (1010, 470, 1260, 720) -> 1800x1800 (x7.2)  grila pentru vite si inceputul Valley Drive: bare peste drum, doi stalpi de capat, romb galben cu cal, asfalt care se termina drept, pamant rosu cu urme, praf de la masina
+D            v02  box (880, 380, 1450, 740)  -> 1800x1136 (x3.2)  poarta dintre Mittens: doua turnuri cu coloane, deget de piatra separat cu gol de cer, fusta de grohotis cu bolovani, calota palida; drumul de pamant trece printre ele; Merrick lat in spate
+WM           v02  box (890, 430, 1100, 640)  -> 1800x1800 (x8.6)  West Mitten singur: turn cu coloane late, deget subtire cu gol de cer, trei etaje (grohotis dungat jos, perete cu fisuri verticale, calota palida)
+EM_MB        v02  box (1150, 380, 1450, 690) -> 1741x1800 (x5.8)  East Mitten si Merrick: turn cu deget pe dreapta, bloc lat cu contraforturi; trei etaje
+E            v02  box (500, 690, 1310, 1000) -> 1800x688 (x2.2)  trecatoarea dintre mese: pereti verticali rosii cu muchii aprinse, in umbra adanca, grohotis la picior, drum de pamant pe fund; in dreapta mesele mari de la intrare
+E_iter1      it1  box (500, 690, 1310, 1000) -> 1800x688 (x2.2)  trecatoarea (iter1): acelasi cadru, pentru comparatia de densitate
+EArc         v02  box (320, 620, 620, 810)   -> 1800x1140 (x6.0)  arcul de gresie peste drum: masa plata cu gaura, blocuri mari, calota palida, picioare cu grohotis; masina verde trece pe sub el
+F            v02  box (0, 380, 470, 830)     -> 1800x1723 (x3.8)  cornisa: drum de pamant pe buza unei mese, perete vertical cu cadere spre dreapta, fara parapet; mesa plata pe stanga cu belvederul
+F_belvedere  v02  box (30, 370, 330, 500)    -> 1800x780 (x6.0)  belvederul: ramada de stalpi si crengi cu masa, trei camioane de tur deschise, un grup de turisti cu aparate, pe mesa plata
+G            v02  box (240, 230, 800, 560)   -> 1800x1060 (x3.2)  campia deschisa: S-urile drumului de pamant, vegetatie in tufe (nu uniform), rabbitbrush galben ca accent, bolovani rari, butte-uri la marginea din stanga
+G_iter1      it1  box (240, 230, 800, 560)   -> 1800x1060 (x3.2)  campia (iter1): butte-uri mici, ace de stanca si hoodoo-uri langa S-uri, perechi si grupari — densitatea de luat
+G2           v02  box (430, 150, 740, 350)   -> 1800x1161 (x5.8)  albia secata: ravena ingusta cu maluri taiate de nisip palid, cai la marginea ei, masina in aer pe o rampa de pamant, a doua grila + romb galben in spate
+H            v02  box (500, 40, 1010, 230)   -> 1800x670 (x3.5)  dreapta H: asfalt cu linie dubla galbena, stalpi de telegraf cu fire, gard de sarma, perete rosu de platou pe sub drum, mese de orizont in spate
+GOSPODARIE   v02  box (1250, 240, 1530, 400) -> 1800x1028 (x6.4)  gospodaria din vale: casa modulara de scanduri, hogan cu opt laturi, tarc de lemn cu cai, 10 oi, rezervor, pickup, gard
+ORIZONT      v02  box (420, 0, 1536, 130)    -> 2232x260 (x2.0)  orizontul: mese lungi de gresie, turle, cumulus mari, cerul albastru adanc cald la linia orizontului

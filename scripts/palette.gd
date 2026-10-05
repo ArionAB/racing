@@ -1010,7 +1010,7 @@ const CLASS_TINT := {
 	# `macchia` ridicata la 0.72 are media liniara (0.31, 0.53, 0.21), tinta liniara
 	# (0.27, 0.31, 0.20) => multiplicator liniar (0.87, 0.58, 0.95) = in sRGB
 	# (0.93, 0.78, 0.97). Verificat apoi pe captura de joc.
-	"mv_sage": Color(0.880, 0.850, 0.780),
+	"mv_sage": Color(1.130, 0.920, 0.880),
 	# Calota: tinta liniara (0.49, 0.35, 0.26) / dala ridicata la 0.70 => (0.955, 0.872, 0.861).
 	"mv_cap": Color(0.900, 0.830, 0.800),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
@@ -1233,7 +1233,7 @@ const CLASS_LIFT := {
 	# Gresia Monument Valley: vezi CLASS_TINT (R tinta > media dalei).
 	"mv_sandstone": 0.820,
 	# Salvia: vezi CLASS_TINT (R tinta 142 > media dalei 86.7, deci ridicare).
-	"mv_sage": 0.720,
+	"mv_sage": 0.950,
 	"village_plaster": 0.88,
 	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
 	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:

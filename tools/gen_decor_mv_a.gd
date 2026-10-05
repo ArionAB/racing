@@ -20,7 +20,7 @@ const RES := {
 	"horse_black": "s_horse_black", "telegraph_pole": "s_telegraph_pole",
 	"wire_fence": "s_wire_fence", "raven": "s_raven",
 	"talus_boulders_a": "s_talus_boulders_a", "talus_boulders_b": "s_talus_boulders_b",
-	"juniper": "s_juniper", "rabbitbrush": "s_rabbitbrush",
+	"juniper": "s_juniper", "sagebrush": "s_sagebrush", "rabbitbrush": "s_rabbitbrush",
 	"mesa_wall_module": "s_mesa_wall_module",
 }
 
@@ -105,15 +105,16 @@ func _print_terrain() -> void:
 
 # ------------------------------------------------------------------ piese
 
-## 6 stalpi pe partea STANGA (nord pe dreapta, exteriorul virajului), la 7 m de
-## margine (14 m de axa), spatiere ~26 m, de la x 190 pana inaintea lui B.
+## 8 stalpi pe partea STANGA (nord pe dreapta, exteriorul virajului), la 10 m de
+## margine (17 m de axa), spatiere 18 m, de la x 190 pana inaintea lui B.
+## Runda 2: mai deci si mai departe de drum decat gardul (care trece prin fata).
 func _poles() -> void:
-	var ss := [-18.0, 8.0, 34.0, 60.0, 86.0, 112.0]
+	var ss := [-18.0, 0.0, 18.0, 36.0, 54.0, 72.0, 90.0, 108.0]
 	for s: float in ss:
 		var q := _at(s)
 		var n: Vector2 = q["n"]
 		var p3: Vector3 = q["p"]
-		var lat := SEMI + 7.0
+		var lat := SEMI + 10.0
 		var x := p3.x + n.x * lat
 		var z := p3.z + n.y * lat
 		var yaw := atan2(-n.y, n.x)
@@ -125,8 +126,8 @@ func _poles() -> void:
 		_raw("telegraph_pole", "aStalp", Vector3(x, y, z), yaw, 1.0, "")
 		_pole_pos.append(Vector3(x, y, z))
 		_pole_yaw.append(yaw)
-	# Doi corbi pe traversele stalpilor 1 si 4 (varful izolatorului stang).
-	for k in [1, 4]:
+	# Doi corbi pe traversele stalpilor 2 si 5 (varful izolatorului stang).
+	for k in [2, 5]:
 		var base := _pole_pos[k]
 		var yw := _pole_yaw[k]
 		var tip := base + Basis.from_euler(Vector3(0, yw, 0)) * Vector3(-0.75, 7.52, 0.0)
@@ -135,39 +136,49 @@ func _poles() -> void:
 		_meta_last("metadata/ancora_sol = Vector3(0, %.3f, 0)" % (-7.52 / 1.4))
 
 
-## Gard de sarma 80 m (20 de segmente de 4 m) la 9 m de margine = 16 m de axa,
-## pe nord; capetele plane se inlantuie. Segmentul merge pe Z local: yaw PI/2
-## il pune pe X.
+## Gard de sarma paralel cu drumul, la 6,5 m de margine (13,5 m de axa), pe
+## curba (corzi de 4 m), de la s = -10 la s = 94: 26 de segmente (~104 m).
+## Segmentul merge pe Z local: yaw = atan2(dx, dz).
 func _fence() -> void:
-	var z := -40.0 - (SEMI + 9.0)
-	var x := 196.0
-	while x < 276.0 - 0.1:
-		var xc := x + 2.0
-		_raw("wire_fence", "aGard", Vector3(xc, _sol(xc, z), z), PI * 0.5, 1.0, "")
-		x += 4.0
+	var s := -10.0
+	while s < 94.0:
+		var q0 := _at(s)
+		var q1 := _at(s + 4.0)
+		var a := _off(q0, SEMI + 6.5)
+		var b := _off(q1, SEMI + 6.5)
+		var m := (a + b) * 0.5
+		var yaw := atan2(b.x - a.x, b.z - a.z)
+		_raw("wire_fence", "aGard", Vector3(m.x, _sol(m.x, m.z), m.z), yaw, 1.0, "")
+		s += 4.0
 
 
+## Punct decalat lateral (stanga) fata de axa la arclength dat de `q`.
+func _off(q: Dictionary, lat: float) -> Vector3:
+	var n: Vector2 = q["n"]
+	var p3: Vector3 = q["p"]
+	return Vector3(p3.x + n.x * lat, 0.0, p3.z + n.y * lat)
+
+
+## Catunul compact la 10-20 m de margine, 25-50 m in fata camerei de pe grila
+## (x 262-300, z -58..-72): postul cu prispa spre drum, pickup-ul in fata lui,
+## turnul de apa in dreapta, grup liber de 4 cai intre ei si drum.
 func _post_and_pickup() -> void:
-	# Postul de negot la x 280-295, z -70..-85, prispa (fata -Z local) spre drum
-	# (sud, +Z): yaw = PI intoarce -Z local in +Z lume.
-	var pp := Vector3(286.0, 0.0, -78.0)
+	var pp := Vector3(281.0, 0.0, -70.0)
 	pp.y = _sol(pp.x, pp.z)
-	_raw("trading_post", "aPost", pp, PI + 0.06, 1.0, "")
-	# Pickup parcat la ~15 m de post spre vest, botul spre drum, usor strambat.
-	var pk := Vector3(271.0, 0.0, -66.0)
+	_raw("trading_post", "aPost", pp, PI + 0.12, 1.0, "")
+	var pk := Vector3(266.0, 0.0, -64.0)
 	pk.y = _sol(pk.x, pk.z)
-	_raw("pickup_old", "aPickup", pk, 0.5, 1.0, "")
+	_raw("pickup_old", "aPickup", pk, 0.55, 1.0, "")
+	var tw := Vector3(299.0, 0.0, -64.0)
+	tw.y = _sol(tw.x, tw.z)
+	_raw("water_tower", "aTurn", tw, 0.4, 1.0, "")
 
 
 func _water() -> void:
-	# Turnul pe axa lui H, moara la dreapta lui; jgheabul (-Z local) spre drum
-	# (vest), caii in jurul lui, boturile spre apa.
-	var tw := Vector3(325.0, 0.0, -40.0)
-	tw.y = _sol(tw.x, tw.z)
-	_raw("water_tower", "aTurn", tw, 0.4, 1.0, "")
+	# Moara cu jgheab ramane reper de fundal pe axa lui H, cu cai in jurul
+	# jgheabului (jgheabul, -Z local, spre vest).
 	var mw := Vector3(337.0, 0.0, -50.0)
 	mw.y = _sol(mw.x, mw.z)
-	# jgheabul (z -3.58..-0.72 local) -> spre vest (-X): yaw = PI/2.
 	var myaw := PI * 0.5
 	var chk := Basis.from_euler(Vector3(0, myaw, 0)) * Vector3(0, 0, -1)
 	assert(chk.x < -0.99)
@@ -180,30 +191,44 @@ func _water() -> void:
 		var a: float = angs[k]
 		var hp: Vector3 = trough + Vector3(cos(a), 0, sin(a)) * rads[k]
 		hp.y = _sol(hp.x, hp.z)
-		# boturile (-Z local) spre jgheab: directia (trough - hp).
 		var tdir: Vector3 = trough - hp
 		var yaw := atan2(-tdir.x, -tdir.z) + _rng.randf_range(-0.3, 0.3)
 		_raw(kinds[k], "aCal", hp, yaw, 1.0, "none")
 		_hide_pose()
+	# Grupul nou de 4 cai, liber, intre post si drum (8-15 m de asfalt).
+	var spots := [Vector3(272.0, 0, -60.0), Vector3(277.5, 0, -63.0),
+		Vector3(283.0, 0, -59.5), Vector3(289.0, 0, -62.0)]
+	var hk := ["horse_pinto", "horse_bay", "horse_black", "horse_pinto"]
+	for k in 4:
+		var hp: Vector3 = spots[k]
+		hp.y = _sol(hp.x, hp.z)
+		_raw(hk[k], "aCalG", hp, _rng.randf() * TAU, 1.0, "none")
+		_hide_pose()
 
 
 func _scatter() -> void:
-	# 2 grupuri de talus, 2 ienuperi, 2 petice de rabbitbrush (3-4 tufe, jitter).
-	for g in [[238.0, -72.0, "talus_boulders_a"], [304.0, -64.0, "talus_boulders_b"]]:
+	# Grohotis (2), ienuperi (2) si tufe la picioarele catunului, in pâlcuri.
+	for g in [[287.0, -78.0, "talus_boulders_a"], [263.0, -73.0, "talus_boulders_b"]]:
 		var p := Vector3(g[0], 0.0, g[1])
 		p.y = _sol(p.x, p.z)
 		_raw(g[2], "aTalus", p, _rng.randf() * TAU, 1.0, "")
-	for g in [[222.0, -76.0], [318.0, -66.0]]:
+	for g in [[272.0, -76.0], [306.0, -70.0]]:
 		var p := Vector3(g[0], 0.0, g[1])
 		p.y = _sol(p.x, p.z)
 		_raw("juniper", "aIenupar", p, _rng.randf() * TAU, 1.0, "")
-	for c in [Vector2(254.0, -62.0), Vector2(296.0, -56.0)]:
-		var k := _rng.randi_range(3, 4)
-		for i in k:
-			var o := Vector2(_rng.randf_range(-3.2, 3.2), _rng.randf_range(-2.4, 2.4))
+	# 5 tufe de salvie in 2 pâlcuri (la post si la turn), 3 rabbitbrush.
+	for c in [Vector3(274.0, -57.0, 3.0), Vector3(293.0, -57.5, 2.0)]:
+		for i in int(c.z):
+			var o := Vector2(_rng.randf_range(-2.6, 2.6), _rng.randf_range(-1.8, 1.8))
 			var p := Vector3(c.x + o.x, 0.0, c.y + o.y)
 			p.y = _sol(p.x, p.z)
-			_raw("rabbitbrush", "aRabbit", p, _rng.randf() * TAU, _rng.randf_range(0.85, 1.2), "")
+			_raw("sagebrush", "aSalvie", p, _rng.randf() * TAU, _rng.randf_range(0.9, 1.3), "")
+	for c in [Vector3(268.0, -68.0, 2.0), Vector3(297.0, -72.0, 1.0)]:
+		for i in int(c.z):
+			var o := Vector2(_rng.randf_range(-1.8, 1.8), _rng.randf_range(-1.4, 1.4))
+			var p := Vector3(c.x + o.x, 0.0, c.y + o.y)
+			p.y = _sol(p.x, p.z)
+			_raw("rabbitbrush", "aRabbit", p, _rng.randf() * TAU, _rng.randf_range(0.9, 1.2), "")
 
 
 func _wires_node() -> void:

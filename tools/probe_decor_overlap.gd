@@ -134,6 +134,8 @@ func _measure(path: String, track: Node) -> Dictionary:
 
 	var over: Array[Dictionary] = []
 	for piece in pieces:
+		if piece["road_ok"]:
+			continue
 		var deep := _over_road(piece, baked, halves)
 		if deep >= OVER_MIN:
 			piece["over"] = deep
@@ -281,9 +283,23 @@ func _gather(node: Node, out: Array[Dictionary]) -> void:
 			var box := AABB(tris[0], Vector3.ZERO)
 			for v in tris:
 				box = box.expand(v)
-			out.append({"id": _piece_name(mi), "aabb": box, "tris": tris})
+			out.append({"id": _piece_name(mi), "aabb": box, "tris": tris,
+				"road_ok": _declared_on_road(mi)})
 	for c in node.get_children():
 		_gather(c, out)
+
+
+## O piesa care sta INTENTIONAT pe sosea (grila pentru vite: bare plate peste
+## drum, prin care treci) se declara pe nod cu `metadata/peste_asfalt = true`,
+## pe ea sau pe un stramos. Declaratia sta in scena, langa piesa, nu intr-o lista
+## de nume aici — altfel orice nume nou ar trebui adaugat in sonda.
+func _declared_on_road(node: Node) -> bool:
+	var cur := node
+	while cur != null:
+		if cur.has_meta("peste_asfalt") and bool(cur.get_meta("peste_asfalt")):
+			return true
+		cur = cur.get_parent()
+	return false
 
 
 ## Numele care spune ceva: primul stramos (sau el insusi) fara nume generat.

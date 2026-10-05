@@ -264,7 +264,19 @@ func _talus() -> void:
 				r.randf_range(1.1, 1.4), "none")
 
 
-func _ok_spot(p: Vector3, road_y: float, s: float, lat: float) -> bool:
+## Distanta minima in plan pana la axa (puncte coapte, pe tot parcursul zonei).
+func _axis_dist(p: Vector3) -> float:
+	var best := 1e9
+	for i in _pts.size():
+		if _cum[i] < 1650.0 or _cum[i] > 1860.0:
+			continue
+		best = minf(best, Vector2(_pts[i].x - p.x, _pts[i].z - p.z).length())
+	return best
+
+
+func _ok_spot(p: Vector3, road_y: float, s: float, lat: float, rad: float = 0.0) -> bool:
+	if _axis_dist(p) < 7.6 + rad:
+		return false
 	# nu in albie, nu pe grila (|ds| < 5 m, |lat| < 9.5)
 	if road_y - p.y > 0.8:
 		return false
@@ -282,7 +294,7 @@ func _clusters() -> void:
 	r.seed = 90226
 	var n_cl := 0
 	for side in [1.0, -1.0]:
-		var s := 1727.0 + (3.0 if side < 0.0 else 0.0)
+		var s := 1697.0 + (3.0 if side < 0.0 else 0.0)
 		while s < 1809.0:
 			# gol neregulat: ~30 % din pozitii raman goale
 			if r.randf() < 0.2:
@@ -291,10 +303,12 @@ func _clusters() -> void:
 			var layer := r.randi_range(0, 3)
 			if n_cl % 2 == 0:
 				layer = r.randi_range(0, 1)
-			var m: float = [3.0, 7.0, 13.0, 21.0][layer] + r.randf_range(-1.0, 1.5)
+			elif r.randf() < 0.5:
+				layer = r.randi_range(0, 1)
+			var m: float = [2.0, 3.5, 8.0, 16.0][layer] + r.randf_range(-1.0, 1.5)
 			_mixed_clump(r, s + r.randf_range(-2.0, 2.0), side, m)
 			n_cl += 1
-			s += r.randf_range(5.0, 8.0)
+			s += r.randf_range(3.5, 6.0)
 	print("; palcuri: %d" % n_cl)
 
 
@@ -304,18 +318,18 @@ func _mixed_clump(r: RandomNumberGenerator, s: float, side: float, margin: float
 	var half: float = q["half"]
 	var kinds: Array[String] = []
 	var scales: Array[float] = []
-	var count := r.randi_range(3, 6)
+	var count := r.randi_range(4, 8)
 	for i in count:
 		var roll := r.randf()
 		if roll < 0.28:
 			kinds.append("juniper")
-			scales.append(r.randf_range(0.55, 0.8))
+			scales.append(r.randf_range(0.8, 1.1))
 		elif roll < 0.62:
 			kinds.append("sagebrush")
-			scales.append(r.randf_range(1.0, 1.5))
+			scales.append(r.randf_range(1.4, 1.9))
 		else:
 			kinds.append("rabbitbrush")
-			scales.append(r.randf_range(0.95, 1.25))
+			scales.append(r.randf_range(1.2, 1.6))
 	for i in kinds.size():
 		var ox := r.randf_range(-2.6, 2.6)
 		var oz := r.randf_range(-1.8, 1.8)
@@ -329,16 +343,29 @@ func _mixed_clump(r: RandomNumberGenerator, s: float, side: float, margin: float
 		var in_fly := s > FLY_S0 and s < FLY_S1
 		if kind == "juniper" and in_fly and absf(lat) < FLY_LAT + 1.5:
 			kind = "sagebrush"
-			sc = r.randf_range(1.0, 1.3)
+			sc = r.randf_range(1.3, 1.6)
 		var p := _off(q, lat)
 		p.x += d.x * ox
 		p.z += d.y * ox
 		p.y = _sol(p.x, p.z)
 		var road_y: float = (q["p"] as Vector3).y
-		if not _ok_spot(p, road_y, s + ox, lat):
+		if not _ok_spot(p, road_y, s + ox, lat, 4.0 if kind == "juniper" else 0.0):
 			continue
 		var base := "g2Ienupar" if kind == "juniper" else ("g2Rabbit" if kind == "rabbitbrush" else "g2Salvie")
 		_raw(kind, base, p, r.randf() * TAU, sc, "")
+	# 1-3 bolovani mici in aceeasi palca (fara coliziune)
+	for k in r.randi_range(1, 3):
+		var bl: float = side * (half + margin + r.randf_range(-1.0, 1.0))
+		if absf(bl) < half + 1.2:
+			bl = side * (half + 1.2)
+		var bp := _off(q, bl)
+		bp.x += d.x * r.randf_range(-3.0, 3.0)
+		bp.z += d.y * r.randf_range(-3.0, 3.0)
+		bp.y = _sol(bp.x, bp.z)
+		if not _ok_spot(bp, (q["p"] as Vector3).y, s, bl, 0.4):
+			continue
+		var pick := "talus_boulders_a" if r.randf() < 0.5 else "talus_boulders_b"
+		_raw(pick, "g2Piatra", bp, r.randf() * TAU, r.randf_range(0.3, 0.45), "none")
 
 
 ## 3 petice de rabbitbrush (accentul galben) pe buzele albiei si pe campul din

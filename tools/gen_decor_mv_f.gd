@@ -225,11 +225,9 @@ func _vegetation() -> void:
 			if side < 0.0 and s > 976.0 and s < 1250.0:
 				continue
 			# gol neregulat: ~25% din pozitii lipsesc
-			if r.randf() < 0.12:
+			if r.randf() < 0.5:
 				continue
-			var layer: int = r.randi_range(0, 3)
-			if n_cl % 2 == 0:
-				layer = 0
+			var layer: int = r.randi_range(1, 3)
 			var m: float = margins[layer] + r.randf_range(-0.6, 1.8)
 			var lat: float = side * (SEMI + m)
 			var ss: float = s + r.randf_range(-2.5, 2.5)
@@ -247,13 +245,14 @@ func _vegetation() -> void:
 				var pick := "talus_boulders_a" if r.randf() < 0.5 else "talus_boulders_b"
 				_raw(pick, "fPiatra", _on(rs, rl), r.randf() * TAU, r.randf_range(0.45, 0.7), "none")
 		s += 4.6
+	_near_strip(r)
 	# Malul indepartat al rapei (la ~55-75 m dreapta, plat): pete de verde
 	# si galben care dau a doua treapta a cadrului peste sant.
 	s = 1000.0
 	while s < 1240.0:
 		var lat2: float = -(SEMI + r.randf_range(50.0, 70.0))
 		_mixed_clump(r, s + r.randf_range(-3.0, 3.0), lat2, 2, true)
-		s += r.randf_range(6.0, 11.0)
+		s += r.randf_range(12.0, 20.0)
 	# Fundul rapei (-13 m): pete rare de salvie/rabbitbrush, cat sa nu para goala.
 	s = 1000.0
 	while s < 1240.0:
@@ -358,3 +357,43 @@ func _sol(x: float, z: float) -> float:
 		if not hit.is_empty() and hit["rid"] == _terrain_rid:
 			return float(hit["position"].y)
 	return _track._sampler.ground_y(x, z)
+
+
+## Fasia de 3-6 m de la bordura, ambele parti: palcuri de 5-8 tufe lipite,
+## la scara mare (salvie/rabbitbrush 1,4-1,9, ienupar 0,8-1,1 de la 3 m), ca o
+## margine continua. Dreapta doar unde terenul e inca plat (nu pe cadere).
+func _near_strip(r: RandomNumberGenerator) -> void:
+	var s := S0 - 2.0
+	while s < S1 + 6.0:
+		for side in [1.0, -1.0]:
+			if side < 0.0 and s > 976.0 and s < 1250.0:
+				continue
+			var lat: float = side * (SEMI + r.randf_range(3.8, 5.6))
+			var q := _at(s + r.randf_range(-1.0, 1.0))
+			var n: Vector2 = q["n"]
+			var d: Vector2 = q["d"]
+			var cnt := r.randi_range(5, 8)
+			for i in cnt:
+				var kind := "sagebrush"
+				var sc := r.randf_range(1.4, 1.9)
+				var roll := r.randf()
+				if roll < 0.3:
+					kind = "rabbitbrush"
+					sc = r.randf_range(1.4, 1.8)
+				elif roll < 0.38:
+					kind = "juniper"
+					sc = r.randf_range(0.7, 0.95)
+				var ox := r.randf_range(-2.6, 2.6)
+				var oz: float = r.randf_range(-0.9, 1.2) * float(side)
+				var p := _off(q, lat)
+				p.x += n.x * oz + d.x * ox
+				p.z += n.y * oz + d.y * ox
+				p.y = _sol(p.x, p.z)
+				var base := "fIenupar" if kind == "juniper" else ("fRabbit" if kind == "rabbitbrush" else "fSalvie")
+				_raw(kind, base, p, r.randf() * TAU, sc, "")
+			if r.randf() < 0.6:
+				var bp := _off(q, lat + float(side) * r.randf_range(-0.8, 1.6))
+				bp.y = _sol(bp.x, bp.z)
+				_raw("talus_boulders_a" if r.randf() < 0.5 else "talus_boulders_b", "fPiatra", bp,
+					r.randf() * TAU, r.randf_range(0.4, 0.6), "none")
+		s += 5.5

@@ -1876,6 +1876,12 @@ static func themes() -> Dictionary:
 			"dust_color": Color(0.82, 0.42, 0.25),
 			# Asfaltul US-163: linie dubla galbena, nu placute albe (brief §4).
 			"center_line_double_yellow": true,
+			# Decor manual cu mii de piese: discurile de contact memoreaza amprenta
+			# per (mesh, transformare relativa) si sar peste vegetatia de talie mica
+			# (`prop_contact_skip`). Vezi `_prop_foot_radius` / `_prop_contact_discs`.
+			"kicker_dirt_color": true,
+			"prop_foot_cache": true,
+			"prop_contact_skip": ["sagebrush", "rabbitbrush", "tumbleweed", "yucca", "wire_fence"],
 			# Scurtatura Dunele (G'): nisip rosu, SAND implicit.
 			"branch_tint": Color(0.80, 0.50, 0.34),
 			# Gresia: clasa NOUA `mv_sandstone` (Palette) pe falezele trecatorii, pe
@@ -8545,6 +8551,8 @@ func _prop_contact_discs() -> PackedVector4Array:
 			continue
 		if PROP_AO_SKIP_MODELS.has(n3.scene_file_path.get_file().get_basename()):
 			continue
+		if not _contact_skip.is_empty() and _in_skipped_model(n3, root):
+			continue
 		var aabb := _visual_aabb(n3)
 		if aabb.size == Vector3.ZERO:
 			continue
@@ -8577,6 +8585,18 @@ func _prop_contact_discs() -> PackedVector4Array:
 		var base_y := gp.y + aabb.position.y
 		out.append(Vector4(gp.x, gp.z, r, base_y))
 	return out
+
+
+## Nodul sau un stramos al lui (pana la `root`) e instanta unui model din
+## `_contact_skip`. Mesh-urile din interiorul unui .glb nu au `scene_file_path`,
+## deci stem-ul se cauta in sus.
+func _in_skipped_model(n: Node, root: Node) -> bool:
+	var cur := n
+	while cur != null and cur != root:
+		if not cur.scene_file_path.is_empty():
+			return _contact_skip.has(cur.scene_file_path.get_file().get_basename())
+		cur = cur.get_parent()
+	return false
 
 
 ## Modelele din DecorManual care stau PE SOL si merita pamant batatorit in
@@ -8707,6 +8727,29 @@ func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
 		if absf(mi.global_transform.basis.determinant()) < 0.000001:
 			continue
 		var rel := inv * mi.global_transform
+		if _foot_cache_on:
+			# Raza depinde doar de structura INTERNA a piesei (rel e relativ la n,
+			# banda vine din AABB-ul in spatiul lui n), nu de unde sta in lume:
+			# 1000 de tufe din acelasi .glb au aceeasi cheie. Rotunjit la 1e-4 ca
+			# zgomotul de virgula mobila al pozitiei in lume sa nu rateze cache-ul.
+			var fk := "%d|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f" % [
+				mi.mesh.get_rid().get_id(),
+				rel.basis.x.x, rel.basis.x.y, rel.basis.x.z,
+				rel.basis.y.x, rel.basis.y.y, rel.basis.y.z,
+				rel.basis.z.x, rel.basis.z.y, rel.basis.z.z,
+				rel.origin.x, rel.origin.y, rel.origin.z, band]
+			if _foot_best.has(fk):
+				best = maxf(best, float(_foot_best[fk]))
+				continue
+			var mbest := 0.0
+			for v in _mesh_vertices(mi.mesh):
+				var lv := rel * v
+				if lv.y > band:
+					continue
+				mbest = maxf(mbest, Vector2(lv.x, lv.z).length())
+			_foot_best[fk] = mbest
+			best = maxf(best, mbest)
+			continue
 		for v in _mesh_vertices(mi.mesh):
 			var lv := rel * v
 			if lv.y > band:
@@ -8728,6 +8771,12 @@ func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
 ## Suprafetele se pun cap la cap: rezultatul e un maxim, deci ordinea nu
 ## schimba nimic — discurile ies identice la bit.
 var _foot_verts: Dictionary = {}
+## Memoria amprentei per (mesh, transformare relativa, banda); opt-in prin
+## tema (`prop_foot_cache`), golita odata cu `_foot_verts`.
+var _foot_best: Dictionary = {}
+var _foot_cache_on: bool = false
+## Stem-uri fara disc de contact (tema, `prop_contact_skip`): vegetatie joasa.
+var _contact_skip: Dictionary = {}
 
 func _mesh_vertices(mesh: Mesh) -> PackedVector3Array:
 	var key := mesh.get_rid()
@@ -8771,9 +8820,16 @@ const PROP_AO_LIFT: float = 0.04
 const PROP_AO_SEAT_TOL: float = 1.2
 
 func _build_prop_contact() -> void:
+	_foot_cache_on = bool(theme_flag("prop_foot_cache", false))
+	_contact_skip.clear()
+	for stem in theme_flag("prop_contact_skip", []):
+		_contact_skip[String(stem)] = true
 	var discs := _prop_contact_discs()
 	# Vertecsii au servit doar razelor de amprenta: nu-i tinem in memorie.
 	_foot_verts.clear()
+	_foot_best.clear()
+	_foot_cache_on = false
+	_contact_skip.clear()
 	if discs.is_empty():
 		return
 	var st := SurfaceTool.new()
@@ -12413,7 +12469,12 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 	st.generate_normals()
 	# Acelasi portocaliu ca rampele si creasta: jucatorul stie ca portocaliu
 	# inseamna "sari", si e singurul cod de culoare cu care e antrenat.
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
+	# Opt-in pe tema (`kicker_dirt_color`): pe drumul de pamant (Monument) rampa
+	# ia culoarea drumului, nu portocaliul aprins care iesea o placa straina.
+	var kicker_color := Color(0.95, 0.6, 0.1)
+	if bool(theme_flag("kicker_dirt_color", false)):
+		kicker_color = dirt_road_color()
+	_add_mesh_with_collision(st.commit(), kicker_color,
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 		null, null, true, _wood_deck_material() if on_wood else null,
 		"ChannelKicker")

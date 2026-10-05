@@ -801,6 +801,48 @@ static func _in_veg_exclusion(p: Vector3, pad: float) -> bool:
 	return false
 
 
+## `sampler.clearance_at` scaneaza TOATE punctele coapte (~1100 + scurtaturile)
+## la fiecare apel; covorul il cheama de ~8.000 de ori, adica ~0.8 s din
+## incarcarea pistei. Aici: grila de 16 m peste aceleasi puncte, iar intrebarea
+## "mai aproape de `thresh` decat soseaua?" se rezolva in 3x3 celule. Acelasi
+## raspuns ca `clearance_at(p) < thresh` cat timp thresh <= MV_GRID_CELL.
+const MV_GRID_CELL: float = 16.0
+static var _mv_road_grid: Dictionary = {}
+
+
+static func _mv_road_grid_build(sampler: TrackSideSampler) -> void:
+	_mv_road_grid.clear()
+	var pts: Array[Vector3] = []
+	for i in sampler.point_count():
+		pts.append(sampler.baked_point(i))
+	for e in sampler.extra_points():
+		pts.append(e)
+	for q in pts:
+		var k := Vector2i(int(floorf(q.x / MV_GRID_CELL)), int(floorf(q.z / MV_GRID_CELL)))
+		# Pachetele de tip Packed* se copiaza la citire din Dictionary: se
+		# scoate, se completeaza si se pune la loc.
+		var cell: PackedVector2Array = _mv_road_grid.get(k, PackedVector2Array())
+		cell.append(Vector2(q.x, q.z))
+		_mv_road_grid[k] = cell
+
+
+static func _mv_near_road(p: Vector3, thresh: float) -> bool:
+	var cx := int(floorf(p.x / MV_GRID_CELL))
+	var cz := int(floorf(p.z / MV_GRID_CELL))
+	var t2 := thresh * thresh
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			var arr = _mv_road_grid.get(Vector2i(cx + dx, cz + dz))
+			if arr == null:
+				continue
+			for v: Vector2 in arr:
+				var ax := v.x - p.x
+				var az := v.y - p.z
+				if ax * ax + az * az < t2:
+					return true
+	return false
+
+
 static func _in_veg_window(d: float) -> bool:
 	for w in _veg_windows:
 		if d >= w.x and d <= w.y:
@@ -836,15 +878,16 @@ static func _mv_clump(parent: Node3D, sampler: TrackSideSampler,
 		picks.append("plants/sagebrush.glb")
 	for i in count - 1:
 		var r2 := rng.randf()
-		if r2 < 0.50:
+		if r2 < 0.74:
 			picks.append("plants/sagebrush.glb")
-		elif r2 < 0.86:
+		elif r2 < 0.88:
 			picks.append("plants/rabbitbrush.glb")
 		else:
 			picks.append("plants/yucca.glb")
-	# Galbenul nu are voie sa lipseasca dintr-un palc de 4+: acolo se citeste
-	# "palc mixt" fata de "gramada de salvie".
-	if count >= 4 and not picks.has("plants/rabbitbrush.glb"):
+	# Rabbitbrush-ul e ACCENTUL (punct galben viu, ~15% din plante), niciodata
+	# planta mare a palcului; baza e salvia gri-verde si ienuparul inchis. Un
+	# palc de 5+ fara galben primeste unul in jumatate din cazuri.
+	if count >= 5 and not picks.has("plants/rabbitbrush.glb") and rng.randf() < 0.5:
 		picks[picks.size() - 1] = "plants/rabbitbrush.glb"
 	var placed: Array[Vector3] = []
 	var center := spec.position
@@ -862,7 +905,7 @@ static func _mv_clump(parent: Node3D, sampler: TrackSideSampler,
 			p.y = sampler.ground_y(p.x, p.z)
 		var is_juniper := path.ends_with("juniper.glb")
 		var margin := 4.0 if is_juniper else 2.2
-		if sampler.clearance_at(p) < hw + margin:
+		if _mv_near_road(p, hw + margin):
 			continue
 		if sampler.channel_mix(p.x, p.z) > 0.3:
 			continue
@@ -893,7 +936,7 @@ static func _mv_clump(parent: Node3D, sampler: TrackSideSampler,
 		elif path.ends_with("yucca.glb"):
 			s_lo = 1.4
 			s_hi = 2.0
-		_add_mv_plant_real(parent, p, rng, path, s_lo, s_hi)
+		_mv_emit_plant(p, rng, path, s_lo, s_hi)
 		placed.append(p)
 		i += 1
 	if placed.is_empty():
@@ -905,47 +948,136 @@ static func _mv_clump(parent: Node3D, sampler: TrackSideSampler,
 		var d2 := rng.randf_range(1.8, 4.6)
 		var sp := center + Vector3(cos(ang2), 0.0, sin(ang2)) * d2
 		sp.y = sampler.ground_y(sp.x, sp.z)
-		if sampler.clearance_at(sp) < hw + 1.4 or sampler.channel_mix(sp.x, sp.z) > 0.3:
+		if _mv_near_road(sp, hw + 1.4) or sampler.channel_mix(sp.x, sp.z) > 0.3:
 			continue
 		if _inside_blocker(sp, blockers) or _in_veg_exclusion(sp, 0.3):
 			continue
-		_mv_add_stone(parent, sp, rng)
+		_mv_add_stone(sp, rng)
 	return placed.size()
 
 
-## `_add_mv_plant` cu `_mv_dry` stins: covorul e singurul care instantiaza.
-static func _add_mv_plant_real(parent: Node3D, pos: Vector3,
-		rng: RandomNumberGenerator, path: String, s_min: float,
-		s_max: float) -> void:
-	var was := _mv_dry
-	_mv_dry = false
-	_add_mv_plant(parent, pos, rng, [[path, 1.0]], s_min, s_max)
-	_mv_dry = was
+## --- Emisie directa in MultiMesh ----------------------------------------------
+##
+## Covorul are ~3.000 de piese, iar ca noduri (instantiate + clase de material +
+## coacere in TrackDecorBatch) costa ~3 s la incarcarea pistei. Aici NU se
+## creeaza noduri: fiecare tip de piesa se instantiaza O SINGURA DATA ca sablon
+## (se culeg partile: mesh, material, transformarea lui in radacina), iar
+## instantele se aduna in buffere pe (parte x celula de 120 m). Celula tine
+## culling-ul de frustum util (un MultiMesh se deseneaza intreg sau deloc).
+## Oglindire nu exista (scale pozitiva), deci nu se aplica `_flipped_mesh`.
+## Instantele astea nu mai trec prin TrackDecorBatch (nu sunt MeshInstance3D).
+const MV_CELL_M: float = 120.0
+static var _mv_tpl: Dictionary = {}
+static var _mv_buf: Dictionary = {}
 
 
-## Piatra mica: blocuri de talus la 0.20-0.36 din scara (un maldar de ~1 m) pe
-## clasa gresiei, sau pietricele din scatter (material de lume, ca in banda hug).
-static func _mv_add_stone(parent: Node3D, pos: Vector3,
-		rng: RandomNumberGenerator) -> void:
-	if rng.randf() < 0.55:
-		var full := MV_KIT_DIR + MV_TALUS[rng.randi_range(0, MV_TALUS.size() - 1)]
+## Partile unui sablon: [{name, mesh, mat, xf, shadow}], `xf` relativ la radacina
+## (transformarea radacinii nu intra: plasarea o inlocuieste, ca pe noduri).
+static func _mv_parts(key: String) -> Array:
+	if _mv_tpl.has(key):
+		return _mv_tpl[key]
+	var parts: Array = []
+	var node: Node3D = null
+	if key.begins_with("peb:"):
+		node = pick_from_glb("res://assets/models/scatter/desert_scatter.glb",
+			key.trim_prefix("peb:"))
+		if node != null:
+			Palette.apply_world_material(node)
+	else:
+		var full := MV_KIT_DIR + key
 		if ResourceLoader.exists(full):
-			var kept := (load(full) as PackedScene).instantiate() as Node3D
-			parent.add_child(kept)
-			kept.scale = Vector3.ONE * rng.randf_range(0.28, 0.50)
-			Palette.apply_class_materials(kept, MV_TALUS_CLASSES)
-			kept.rotation.y = rng.randf_range(0.0, TAU)
-			kept.position = pos + Vector3.UP * -0.08
+			node = (load(full) as PackedScene).instantiate() as Node3D
+			if key.begins_with("rocks/"):
+				Palette.apply_class_materials(node, MV_TALUS_CLASSES)
+			else:
+				Palette.apply_class_materials(node, MV_PLANT_CLASSES.get(
+					key.get_file().get_basename(), {}))
+	if node != null:
+		_mv_collect(node, Transform3D.IDENTITY, true, parts)
+		node.free()
+	_mv_tpl[key] = parts
+	return parts
+
+
+static func _mv_collect(n: Node3D, xf: Transform3D, is_root: bool,
+		out: Array) -> void:
+	var here := xf if is_root else xf * n.transform
+	if n is MeshInstance3D and n.visible:
+		var mi := n as MeshInstance3D
+		if mi.mesh != null and mi.material_override != null:
+			out.append({"name": String(mi.name), "mesh": mi.mesh,
+				"mat": mi.material_override, "xf": here,
+				"shadow": mi.cast_shadow})
+	for c in n.get_children():
+		if c is Node3D:
+			_mv_collect(c as Node3D, here, false, out)
+
+
+static func _mv_emit(key: String, pos: Vector3, rot_y: float, scale: float) -> void:
+	var parts := _mv_parts(key)
+	var place := Transform3D(Basis(Vector3.UP, rot_y) * Basis.from_scale(
+		Vector3(scale, scale, scale)), pos)
+	var cx := int(floorf(pos.x / MV_CELL_M))
+	var cz := int(floorf(pos.z / MV_CELL_M))
+	for i in parts.size():
+		var part: Dictionary = parts[i]
+		var gk := "%s|%d|%d|%d" % [key, i, cx, cz]
+		if not _mv_buf.has(gk):
+			_mv_buf[gk] = {"part": part, "cell": "%d_%d" % [cx, cz],
+				"xforms": []}
+		(_mv_buf[gk]["xforms"] as Array).append(place * (part["xf"] as Transform3D))
+
+
+## Aceleasi extrageri de rng ca vechiul `_add_mv_plant` (pick, unghi, scara),
+## ca layout-ul sa ramana cel validat.
+static func _mv_emit_plant(pos: Vector3, rng: RandomNumberGenerator, path: String,
+		s_min: float, s_max: float) -> void:
+	rng.randf()
+	var rot := rng.randf_range(0.0, TAU)
+	var sc := rng.randf_range(s_min, s_max)
+	_mv_emit(path, pos + Vector3.UP * -0.10, rot, sc)
+
+
+## Piatra mica: blocuri de talus la 0.28-0.50 din scara (un maldar de ~1.5 m) pe
+## clasa gresiei, sau pietricele din scatter (material de lume, ca in banda hug).
+static func _mv_add_stone(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	if rng.randf() < 0.55:
+		var tkey := String(MV_TALUS[rng.randi_range(0, MV_TALUS.size() - 1)])
+		if not _mv_parts(tkey).is_empty():
+			var sc := rng.randf_range(0.28, 0.50)
+			var rot := rng.randf_range(0.0, TAU)
+			_mv_emit(tkey, pos + Vector3.UP * -0.08, rot, sc)
 			return
-	var peb := pick_from_glb("res://assets/models/scatter/desert_scatter.glb",
-		MV_PEBBLES[rng.randi_range(0, MV_PEBBLES.size() - 1)])
-	if peb == null:
+	var pkey := "peb:" + MV_PEBBLES[rng.randi_range(0, MV_PEBBLES.size() - 1)]
+	if _mv_parts(pkey).is_empty():
 		return
-	parent.add_child(peb)
-	peb.position = pos + Vector3.UP * -0.08
-	peb.rotation.y = rng.randf_range(0.0, TAU)
-	peb.scale = Vector3.ONE * rng.randf_range(1.8, 3.0)
-	Palette.apply_world_material(peb)
+	var rot2 := rng.randf_range(0.0, TAU)
+	var sc2 := rng.randf_range(1.8, 3.0)
+	_mv_emit(pkey, pos + Vector3.UP * -0.08, rot2, sc2)
+
+
+## Buffer -> MultiMeshInstance3D-uri (unul per parte x celula).
+static func _mv_flush(parent: Node3D) -> void:
+	for gk: String in _mv_buf:
+		var g: Dictionary = _mv_buf[gk]
+		var xforms: Array = g["xforms"]
+		var part: Dictionary = g["part"]
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = part["mesh"]
+		mm.instance_count = xforms.size()
+		for i in xforms.size():
+			mm.set_instance_transform(i, xforms[i])
+		var mmi := MultiMeshInstance3D.new()
+		# Numele pastreaza partea sursa: probe_decor atribuie dupa prefix.
+		mmi.name = "%s_%s" % [part["name"], g["cell"]]
+		mmi.multimesh = mm
+		mmi.material_override = part["mat"]
+		mmi.cast_shadow = part["shadow"]
+		parent.add_child(mmi)
+	# Bufferul NU se goleste aici: `tools/probe_scatter_bands.gd` il citeste
+	# (transformarile din MultiMesh se citesc zero in headless). Se goleste la
+	# inceputul urmatorului covor.
 
 
 ## Parcurge drumul pe fiecare parte cu pasi neregulati si aseaza palcuri.
@@ -957,6 +1089,8 @@ static func _build_mv_carpet(root: Node3D, sampler: TrackSideSampler,
 	var container := Node3D.new()
 	container.name = "Band_carpet"
 	root.add_child(container)
+	_mv_buf.clear()
+	_mv_road_grid_build(sampler)
 	var total := sampler.total_length()
 	if total <= 0.0:
 		return
@@ -992,10 +1126,11 @@ static func _build_mv_carpet(root: Node3D, sampler: TrackSideSampler,
 					continue
 				if _frac_veto.is_valid() and bool(_frac_veto.call(spec.frac)):
 					continue
-				if sampler.clearance_at(spec.position) \
-						< sampler.half_width_at(spec.index) + MV_ROAD_CLEAR_M:
+				if _mv_near_road(spec.position,
+						sampler.half_width_at(spec.index) + MV_ROAD_CLEAR_M):
 					continue
 				_mv_clump(container, sampler, spec, off, rng, blockers, far)
+	_mv_flush(container)
 
 
 ## --- Set de prop-uri: insula de recif ---------------------------------------

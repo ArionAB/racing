@@ -52,7 +52,7 @@ func _collect(node: Node, out: Array) -> void:
 	for c in node.get_children():
 		if c is Node3D and String(c.name).begins_with("Band_"):
 			for p in c.get_children():
-				if p is Node3D:
+				if p is Node3D and not (p is MultiMeshInstance3D):
 					out.append(p)
 		elif c is Node3D and String(c.name) == "Decor":
 			_collect(c, out)
@@ -78,6 +78,27 @@ func _report() -> void:
 		if k in PLANTS:
 			plant_pts.append(Vector2(o.x, o.z))
 			plant_off.append(off)
+	# Covorul Monument Valley: emis direct in MultiMesh, deci citit din buffer.
+	for gk: String in TrackDecor._mv_buf:
+		if not gk.contains("|0|"):
+			continue
+		var key := gk.get_slice("|", 0)
+		var k2 := key.get_file().get_basename().capitalize().replace(" ", "")
+		if key.begins_with("peb:"):
+			k2 = "other:" + key.trim_prefix("peb:")
+		elif key.begins_with("rocks/"):
+			k2 = "rock"
+		for xf: Transform3D in TrackDecor._mv_buf[gk]["xforms"]:
+			var o := xf.origin
+			var off2: float = sampler.clearance_at(o) - hw
+			var b2 := 0 if off2 < 10.0 else (1 if off2 < 30.0 else (2 if off2 < 60.0 else 3))
+			if not by_type.has(k2):
+				by_type[k2] = [0, 0, 0, 0]
+			by_type[k2][b2] += 1
+			props.append(null)
+			if k2 in PLANTS:
+				plant_pts.append(Vector2(o.x, o.z))
+				plant_off.append(off2)
 	print("PROBE_SCATTER track=%d props=%d" % [_idx, props.size()])
 	var names := by_type.keys()
 	names.sort()

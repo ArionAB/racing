@@ -13850,6 +13850,7 @@ func _build_world_decor() -> void:
 	# Callable gol pe pistele fara gheata, deci nimic nu se schimba acolo.
 	TrackDecor.set_frac_veto(Callable(self, "is_ice_at")
 		if not _ice_ranges().is_empty() else Callable())
+	_set_decor_veg_exclusions()
 	var decor := TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
 		_world_seed(), Callable(self, "_flat_material"),
 		theme_flag("props", "desert"),
@@ -13881,6 +13882,76 @@ func _build_world_decor() -> void:
 			bool(theme_flag("dense_grass_carpet", false)),
 			prop_clear)
 		add_child(grass)
+
+
+## Ce nu are voie sa acopere covorul de vegetatie Monument Valley (vezi
+## `TrackDecor._build_mv_carpet`): cercuri (x, z, raza) si ferestre pe traseu.
+## Pe orice alta tema le GOLESTE (statice: altfel o pista ar mosteni ce a lasat
+## cealalta in acelasi proces, cum face probe_decor care le parcurge pe toate).
+##
+## - culoarele bolovanilor care cad (`Traseu` sub fiecare marker din
+##   Hazarduri): cerc de 6 m la fiecare 3 m de traseu;
+## - arcul (`_arch_fracs`): cerc de 14 m pe axa drumului;
+## - albia G2 (marker cu `water_half`): cerc de 16 m;
+## - piesele mari din DecorManual (cladiri, turnuri, mese): jumatate de diagonala
+##   x 0.8 + 1 m. Plantele, pietrele, gardurile, stalpii, caii NU resping covorul
+##   (palcurile de mana si covorul se aduna, nu se exclud);
+## - grila de start: d in [-15, +30] m fata de linia de start.
+const VEG_SOFT_STEMS: Array[String] = ["sagebrush", "juniper", "rabbitbrush",
+	"yucca", "tumbleweed", "talus", "horse", "raven", "sheep", "fence",
+	"telegraph", "pole", "boulder", "rock", "hoodoo"]
+
+func _set_decor_veg_exclusions() -> void:
+	var circles := PackedVector3Array()
+	var windows: Array[Vector2] = []
+	if String(theme_flag("props", "desert")) == "monumentvalley" and _sampler != null:
+		var total := _sampler.total_length()
+		windows.append(Vector2(total - 15.0, total))
+		windows.append(Vector2(0.0, 30.0))
+		var haz := get_node_or_null("Hazarduri")
+		if haz != null:
+			for m in haz.get_children():
+				var tr := m.get_node_or_null("Traseu") as Path3D
+				if tr != null and tr.curve != null:
+					var pts := tr.curve.get_baked_points()
+					var last := Vector3(INF, 0.0, INF)
+					for pt in pts:
+						var g := tr.global_transform * pt
+						if last.x == INF or Vector2(g.x - last.x, g.z - last.z).length() >= 3.0:
+							circles.append(Vector3(g.x, g.z, 6.0))
+							last = g
+				elif m is Marker3D and m.get("water_half") != null:
+					var gm := (m as Marker3D).global_position
+					circles.append(Vector3(gm.x, gm.z, 16.0))
+		for frac in _arch_fracs():
+			var ai := clampi(int(frac * float(_sampler.point_count())), 0,
+				_sampler.point_count() - 1)
+			var ap := _sampler.baked_point(ai)
+			circles.append(Vector3(ap.x, ap.z, 14.0))
+		var man := get_node_or_null("DecorManual")
+		if man != null:
+			var stack: Array[Node] = [man]
+			while not stack.is_empty():
+				var n: Node = stack.pop_back()
+				var n3 := n as Node3D
+				if n3 != null and n3 != man and n3.visible \
+						and not n3.scene_file_path.is_empty():
+					var stem := n3.scene_file_path.get_file().get_basename().to_lower()
+					var soft := false
+					for sub in VEG_SOFT_STEMS:
+						if stem.contains(sub):
+							soft = true
+							break
+					if not soft:
+						var aabb := _visual_aabb(n3)
+						if aabb.size != Vector3.ZERO:
+							var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+							var gp := n3.global_position
+							circles.append(Vector3(gp.x, gp.z, half * 0.8 + 1.0))
+					continue # un GLB instantiat se trateaza ca un singur obiect
+				for c in n.get_children():
+					stack.append(c)
+	TrackDecor.set_veg_exclusions(circles, windows)
 
 
 ## Coace vizualul falezelor si al decorului in MultiMesh-uri.

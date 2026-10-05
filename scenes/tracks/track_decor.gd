@@ -762,9 +762,9 @@ static var _veg_circles: PackedVector3Array = PackedVector3Array()
 static var _veg_windows: Array[Vector2] = []
 
 ## Pasul dintre palcuri, pe o parte a drumului: (pondere, min, max) in metri.
-## Mediu ~10 m, dar 55% sunt palcuri strans legate (3-8 m), 15% goluri de 18-36 m
+## Mediu ~7 m, dar 60% sunt palcuri strans legate (2.5-6 m), 12% goluri de 14-30 m
 ## — neregularitatea e continutul, nu zgomotul.
-const MV_GAP_MIX: Array = [[0.55, 3.0, 8.0], [0.30, 8.0, 18.0], [0.15, 18.0, 36.0]]
+const MV_GAP_MIX: Array = [[0.60, 2.5, 6.0], [0.28, 6.0, 14.0], [0.12, 14.0, 30.0]]
 ## Distanta palcului fata de MARGINEA asfaltului: (pondere, min, max).
 const MV_OFFSET_MIX: Array = [[0.38, 2.8, 6.0], [0.37, 6.0, 13.0], [0.25, 13.0, 25.0]]
 ## Stratul departat, rar: (min, max) pentru offset si pas.
@@ -856,11 +856,12 @@ static func _mv_clump(parent: Node3D, sampler: TrackSideSampler,
 		var p := center
 		if i > 0:
 			var ang := rng.randf_range(0.0, TAU)
-			var dist := rng.randf_range(1.5, 3.8)
+			# Aproape de drum palcul e STRANS (plante mari lipite), departe se rareste.
+			var dist := rng.randf_range(1.5, 2.8) if off < 10.0 else rng.randf_range(1.8, 4.0)
 			p = center + Vector3(cos(ang), 0.0, sin(ang)) * dist
 			p.y = sampler.ground_y(p.x, p.z)
 		var is_juniper := path.ends_with("juniper.glb")
-		var margin := 3.0 if is_juniper else 2.2
+		var margin := 4.0 if is_juniper else 2.2
 		if sampler.clearance_at(p) < hw + margin:
 			continue
 		if sampler.channel_mix(p.x, p.z) > 0.3:
@@ -884,8 +885,8 @@ static func _mv_clump(parent: Node3D, sampler: TrackSideSampler,
 		var s_lo := 1.9 if i == 0 else 1.2
 		var s_hi := 2.6 if i == 0 else 1.9
 		if is_juniper:
-			s_lo = 0.60
-			s_hi = 0.80
+			s_lo = 0.75
+			s_hi = 1.00
 		elif path.ends_with("rabbitbrush.glb"):
 			s_lo = 1.5
 			s_hi = 2.2
@@ -977,7 +978,7 @@ static func _build_mv_carpet(root: Node3D, sampler: TrackSideSampler,
 					gap = _mix_pick(rng, MV_GAP_MIX)
 					# Zgomot -> factor 0.65 (des) .. 1.9 (rar), pe ~90 m.
 					gap *= remap(noise.get_noise_1d(d + side_sign * 400.0),
-						-1.0, 1.0, 0.65, 1.9)
+						-1.0, 1.0, 0.6, 1.5)
 				d += gap
 				if d >= total:
 					break

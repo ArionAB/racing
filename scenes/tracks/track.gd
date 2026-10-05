@@ -12489,10 +12489,16 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 	# Opt-in pe tema (`kicker_dirt_color`): pe drumul de pamant (Monument) rampa
 	# ia culoarea drumului, nu portocaliul aprins care iesea o placa straina.
 	var kicker_color := Color(0.95, 0.6, 0.1)
+	var kicker_spec := 0.5
 	if bool(theme_flag("kicker_dirt_color", false)):
-		kicker_color = dirt_road_color()
+		# Culoarea drumului, mai inchisa: materialul plat nu imparte la media
+		# texturii macro ca soseaua de pamant, deci la aceeasi valoare iese mai
+		# luminos. Fara luciu (specular 0): fetele laterale reflectau cerul gri.
+		kicker_color = dirt_road_color() * 0.72
+		kicker_color.a = 1.0
+		kicker_spec = 0.0
 	_add_mesh_with_collision(st.commit(), kicker_color,
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+		null, 1.0, kicker_spec, BaseMaterial3D.CULL_DISABLED,
 		null, null, true, _wood_deck_material() if on_wood else null,
 		"ChannelKicker")
 

@@ -20,7 +20,7 @@ const RES := {
 	"horse_black": "s_horse_black", "telegraph_pole": "s_telegraph_pole",
 	"wire_fence": "s_wire_fence", "raven": "s_raven",
 	"talus_boulders_a": "s_talus_boulders_a", "talus_boulders_b": "s_talus_boulders_b",
-	"juniper": "s_juniper", "sagebrush": "s_sagebrush", "rabbitbrush": "s_rabbitbrush",
+	"juniper": "s_juniper", "corral": "s_corral", "sagebrush": "s_sagebrush", "rabbitbrush": "s_rabbitbrush",
 	"mesa_wall_module": "s_mesa_wall_module",
 }
 
@@ -163,13 +163,13 @@ func _off(q: Dictionary, lat: float) -> Vector3:
 ## (x 262-300, z -58..-72): postul cu prispa spre drum, pickup-ul in fata lui,
 ## turnul de apa in dreapta, grup liber de 4 cai intre ei si drum.
 func _post_and_pickup() -> void:
-	var pp := Vector3(281.0, 0.0, -70.0)
+	var pp := Vector3(252.0, 0.0, -65.0)
 	pp.y = _sol(pp.x, pp.z)
 	_raw("trading_post", "aPost", pp, PI + 0.12, 1.0, "")
-	var pk := Vector3(266.0, 0.0, -64.0)
+	var pk := Vector3(233.0, 0.0, -68.0)
 	pk.y = _sol(pk.x, pk.z)
 	_raw("pickup_old", "aPickup", pk, 0.55, 1.0, "")
-	var tw := Vector3(299.0, 0.0, -64.0)
+	var tw := Vector3(268.0, 0.0, -66.0)
 	tw.y = _sol(tw.x, tw.z)
 	_raw("water_tower", "aTurn", tw, 0.4, 1.0, "")
 
@@ -196,8 +196,8 @@ func _water() -> void:
 		_raw(kinds[k], "aCal", hp, yaw, 1.0, "none")
 		_hide_pose()
 	# Grupul nou de 4 cai, liber, intre post si drum (8-15 m de asfalt).
-	var spots := [Vector3(272.0, 0, -60.0), Vector3(277.5, 0, -63.0),
-		Vector3(283.0, 0, -59.5), Vector3(289.0, 0, -62.0)]
+	var spots := [Vector3(239.5, 0, -60.0), Vector3(243.5, 0, -62.5),
+		Vector3(247.0, 0, -59.5), Vector3(236.0, 0, -59.5)]
 	var hk := ["horse_pinto", "horse_bay", "horse_black", "horse_pinto"]
 	for k in 4:
 		var hp: Vector3 = spots[k]
@@ -206,29 +206,48 @@ func _water() -> void:
 		_hide_pose()
 
 
+## Tarc mic de busteni (corral.glb, 10 x 8 m), intre catun si drum, in stanga
+## grupului de cai; poarta (-Z local) spre drum (+Z lume): yaw PI.
+func _corral() -> void:
+	var p := Vector3(219.0, 0.0, -65.0)
+	p.y = _sol(p.x, p.z)
+	_raw("corral", "aTarc", p, PI, 1.0, "")
+
+
 func _scatter() -> void:
+	_corral()
 	# Grohotis (2), ienuperi (2) si tufe la picioarele catunului, in pâlcuri.
-	for g in [[287.0, -78.0, "talus_boulders_a"], [263.0, -73.0, "talus_boulders_b"]]:
+	for g in [[262.0, -77.0, "talus_boulders_a"], [229.0, -77.0, "talus_boulders_b"]]:
 		var p := Vector3(g[0], 0.0, g[1])
 		p.y = _sol(p.x, p.z)
 		_raw(g[2], "aTalus", p, _rng.randf() * TAU, 1.0, "")
-	for g in [[272.0, -76.0], [306.0, -70.0]]:
+	for g in [[241.0, -75.0], [277.0, -73.0]]:
 		var p := Vector3(g[0], 0.0, g[1])
 		p.y = _sol(p.x, p.z)
 		_raw("juniper", "aIenupar", p, _rng.randf() * TAU, 1.0, "")
 	# 5 tufe de salvie in 2 pâlcuri (la post si la turn), 3 rabbitbrush.
-	for c in [Vector3(274.0, -57.0, 3.0), Vector3(293.0, -57.5, 2.0)]:
+	for c in [Vector3(262.0, -60.0, 3.0), Vector3(226.0, -58.0, 2.0)]:
 		for i in int(c.z):
 			var o := Vector2(_rng.randf_range(-2.6, 2.6), _rng.randf_range(-1.8, 1.8))
 			var p := Vector3(c.x + o.x, 0.0, c.y + o.y)
 			p.y = _sol(p.x, p.z)
 			_raw("sagebrush", "aSalvie", p, _rng.randf() * TAU, _rng.randf_range(0.9, 1.3), "")
-	for c in [Vector3(268.0, -68.0, 2.0), Vector3(297.0, -72.0, 1.0)]:
+	for c in [Vector3(245.0, -72.0, 2.0), Vector3(270.0, -71.0, 1.0)]:
 		for i in int(c.z):
 			var o := Vector2(_rng.randf_range(-1.8, 1.8), _rng.randf_range(-1.4, 1.4))
 			var p := Vector3(c.x + o.x, 0.0, c.y + o.y)
 			p.y = _sol(p.x, p.z)
 			_raw("rabbitbrush", "aRabbit", p, _rng.randf() * TAU, _rng.randf_range(0.9, 1.2), "")
+	# Prim-plan DREAPTA (sud): 2 pâlcuri compacte, la 16 m de axa (grila libera).
+	for c in [Vector3(224.0, -23.5, 3.0), Vector3(244.0, -23.5, 2.0)]:
+		for i in int(c.z):
+			var o := Vector2(_rng.randf_range(-1.8, 1.8), _rng.randf_range(-1.2, 1.2))
+			var p := Vector3(c.x + o.x, 0.0, c.y + o.y)
+			p.y = _sol(p.x, p.z)
+			_raw("sagebrush", "aSalvieD", p, _rng.randf() * TAU, _rng.randf_range(0.9, 1.3), "")
+		var rp := Vector3(c.x + _rng.randf_range(-1.5, 1.5), 0.0, c.y + 2.2)
+		rp.y = _sol(rp.x, rp.z)
+		_raw("rabbitbrush", "aRabbitD", rp, _rng.randf() * TAU, 1.1, "")
 
 
 func _wires_node() -> void:

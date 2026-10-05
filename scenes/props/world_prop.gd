@@ -2089,6 +2089,8 @@ const CLASSES_BY_THEME := {
 		"talus_boulders_a": MV_ROCK_TALUS,
 		"talus_boulders_b": MV_ROCK_TALUS,
 		"sagebrush": {"Sagebrush_Foliage": Palette.TRI_PREFIX + "mv_sage"},
+		# Postul de negot: piatra pe clasa calotei (#B9A08C), nu pe SAND_LIGHT (galben).
+		"trading_post": {"Post_Stone": _MVC},
 	},
 }
 

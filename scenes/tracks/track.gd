@@ -1874,6 +1874,8 @@ static func themes() -> Dictionary:
 			"dirt_road_tint": Color(0.62, 0.46, 0.38),
 			"loose_grip": 7.0,
 			"dust_color": Color(0.82, 0.42, 0.25),
+			# Asfaltul US-163: linie dubla galbena, nu placute albe (brief §4).
+			"center_line_double_yellow": true,
 			# Scurtatura Dunele (G'): nisip rosu, SAND implicit.
 			"branch_tint": Color(0.80, 0.50, 0.34),
 			# Gresia: clasa NOUA `mv_sandstone` (Palette) pe falezele trecatorii, pe
@@ -5270,6 +5272,15 @@ func _build_center_line() -> void:
 	var lift := Vector3.UP * 0.045
 	var d := 4.0
 	var idx := 0
+	# Tema poate cere LINIE DUBLA GALBENA continua (US-163, Monument Valley,
+	# brief §4: CAR_YELLOW 16): doua benzi de 0.14 m la +-0.15 m de axa, in bucati
+	# de 3.25 m (coarda mica pe viraje). Implicit (false): placutele albe de 2.8 m
+	# la 6.5 m, bit-identice pe toate celelalte piste.
+	var dbl := bool(theme_flag("center_line_double_yellow", false))
+	var step := 3.25 if dbl else 6.5
+	var seg_len := 3.3 if dbl else 2.8
+	var hw := 0.07 if dbl else 0.18
+	var offs := PackedFloat32Array([-0.15, 0.15]) if dbl else PackedFloat32Array([0.0])
 	# Puntea de lemn (scena Kiyomizu) nu poarta marcaj de sosea.
 	var wood := _wood_deck_ranges()
 	while d < total - 5.0:
@@ -5281,19 +5292,21 @@ func _build_center_line() -> void:
 		# intreg.
 		if _road_gap(i) or _road_ice(i) or _road_dirt(i, (i + 1) % n) \
 				or (not wood.is_empty() and _frac_in_ranges(frac_at(i), wood)):
-			d += 6.5
+			d += step
 			continue
 		var dir := (baked[(i + 1) % n] - baked[i]).normalized()
 		var side := _side_at(i)
-		var a := baked[i] + dir * (d - _dists[i]) + lift
-		var b := a + dir * 2.8
-		st.add_vertex(a - side * 0.18); st.add_vertex(a + side * 0.18)
-		st.add_vertex(b - side * 0.18)
-		st.add_vertex(a + side * 0.18); st.add_vertex(b + side * 0.18)
-		st.add_vertex(b - side * 0.18)
-		d += 6.5
+		for o in offs:
+			var a := baked[i] + dir * (d - _dists[i]) + lift + side * o
+			var b := a + dir * seg_len
+			st.add_vertex(a - side * hw); st.add_vertex(a + side * hw)
+			st.add_vertex(b - side * hw)
+			st.add_vertex(a + side * hw); st.add_vertex(b + side * hw)
+			st.add_vertex(b - side * hw)
+		d += step
 	st.generate_normals()
-	_add_visual_mesh(st.commit(), Color(0.92, 0.9, 0.78))
+	_add_visual_mesh(st.commit(), Palette.color(Palette.CAR_YELLOW) if dbl
+		else Color(0.92, 0.9, 0.78))
 
 ## Lumea pistei: cer, soare, teren si dealuri/dune de fundal — tematice.
 func _build_environment() -> void:

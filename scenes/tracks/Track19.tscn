@@ -2437,99 +2437,180 @@ transform = Transform3D(0.036922, 0.000000, -1.208408, 0.000000, 1.208972, 0.000
 transform = Transform3D(0.916758, 0.000000, -0.454969, 0.000000, 1.023446, 0.000000, 0.454969, 0.000000, 0.916758, -97.938309, -0.589447, 41.565838)
 
 [node name="g2Salvie28" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
-transform = Transform3D(1.237149, 0.000000, -0.016374, 0.000000, 1.237257, 0.000000, 0.016374, 0.000000, 1.237149, -124.354202, -0.440384, -1.651230)
+transform = Transform3D(-0.769681, 0.000000, -0.769204, 0.000000, 1.088156, 0.000000, 0.769204, 0.000000, -0.769681, -111.979225, -0.583862, 44.468937)
 
-[node name="g2Ienupar29" parent="DecorManual/ZonaG2" instance=ExtResource("s_juniper")]
-transform = Transform3D(0.139160, 0.000000, -0.550492, 0.000000, 0.567809, 0.000000, 0.550492, 0.000000, 0.139160, -126.311089, -0.612396, 0.045310)
+[node name="g2Rabbit29" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.736590, 0.000000, 0.839498, 0.000000, 1.116835, 0.000000, -0.839498, 0.000000, -0.736590, -111.994385, -0.583557, 44.555485)
 
-[node name="g2Rabbit30" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(0.718656, 0.000000, 0.701099, 0.000000, 1.003995, 0.000000, -0.701099, 0.000000, 0.718656, -126.399261, -0.439240, -1.750730)
+[node name="g2Ienupar30" parent="DecorManual/ZonaG2" instance=ExtResource("s_juniper")]
+transform = Transform3D(-0.276389, 0.000000, -0.596693, 0.000000, 0.657597, 0.000000, 0.596693, 0.000000, -0.276389, -111.860916, -0.585388, 44.030209)
 
-[node name="g2Rabbit31" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(1.157595, 0.000000, -0.469963, 0.000000, 1.249356, 0.000000, 0.469963, 0.000000, 1.157595, -125.937927, -0.423004, -3.248579)
+[node name="g2Ienupar31" parent="DecorManual/ZonaG2" instance=ExtResource("s_juniper")]
+transform = Transform3D(0.253249, 0.000000, 0.560719, 0.000000, 0.615256, 0.000000, -0.560719, 0.000000, 0.253249, -112.440681, -0.595520, 41.239857)
 
-[node name="g2Salvie32" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
-transform = Transform3D(0.907797, 0.000000, -0.455442, 0.000000, 1.015640, 0.000000, 0.455442, 0.000000, 0.907797, -101.988129, -0.211746, -15.348111)
+[node name="g2Rabbit32" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.389767, 0.000000, 0.984254, 0.000000, 1.058619, 0.000000, -0.984254, 0.000000, -0.389767, -100.940773, -0.677078, 30.795210)
 
-[node name="g2Rabbit33" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(-0.996443, 0.000000, -0.111131, 0.000000, 1.002620, 0.000000, 0.111131, 0.000000, -0.996443, -101.027191, -0.212814, -14.655374)
+[node name="g2Salvie33" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(0.815006, 0.000000, 0.737429, 0.000000, 1.099107, 0.000000, -0.737429, 0.000000, 0.815006, -108.731606, -0.323059, -9.608201)
 
 [node name="g2Salvie34" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
-transform = Transform3D(0.685459, 0.000000, 0.785022, 0.000000, 1.042168, 0.000000, -0.785022, 0.000000, 0.685459, -99.848259, -0.169022, -17.332607)
+transform = Transform3D(-1.112792, 0.000000, 0.929192, 0.000000, 1.449725, 0.000000, -0.929192, 0.000000, -1.112792, -109.343658, -0.285431, -12.761459)
 
-[node name="g2Rabbit35" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(-0.358875, 0.000000, -1.004605, 0.000000, 1.066782, 0.000000, 1.004605, 0.000000, -0.358875, -97.961777, 0.075424, -34.322311)
+[node name="g2Salvie35" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(0.899609, 0.000000, 0.766248, 0.000000, 1.181707, 0.000000, -0.766248, 0.000000, 0.899609, -108.540466, -0.303192, -11.092839)
 
-[node name="g2Rabbit36" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(-1.059954, 0.000000, 0.097610, 0.000000, 1.064439, 0.000000, -0.097610, 0.000000, -1.059954, -99.651764, 0.079056, -35.707035)
+[node name="g2Salvie36" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(0.738955, 0.000000, -0.956401, 0.000000, 1.208618, 0.000000, 0.956401, 0.000000, 0.738955, -107.046043, -0.287598, -11.780559)
 
 [node name="g2Salvie37" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
-transform = Transform3D(0.701890, 0.000000, 0.789170, 0.000000, 1.056143, 0.000000, -0.789170, 0.000000, 0.701890, -99.325104, 0.077408, -35.367939)
+transform = Transform3D(0.998073, 0.000000, 0.342619, 0.000000, 1.055243, 0.000000, -0.342619, 0.000000, 0.998073, -102.549034, -0.191284, -17.304991)
 
-[node name="g2Salvie38" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
-transform = Transform3D(-0.855563, 0.000000, -0.669475, 0.000000, 1.086363, 0.000000, 0.669475, 0.000000, -0.855563, -84.663803, 0.244064, -35.504932)
+[node name="g2Rabbit38" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(1.213341, 0.000000, -0.163430, 0.000000, 1.224298, 0.000000, 0.163430, 0.000000, 1.213341, -100.310883, -0.135010, -20.025572)
 
 [node name="g2Rabbit39" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(0.837405, 0.000000, -0.481146, 0.000000, 0.965789, 0.000000, 0.481146, 0.000000, 0.837405, -84.453926, 0.246780, -35.453205)
+transform = Transform3D(0.747867, 0.000000, 0.662732, 0.000000, 0.999259, 0.000000, -0.662732, 0.000000, 0.747867, -100.002205, -0.132416, -20.031256)
 
-[node name="g2Rabbit40" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(0.171024, 0.000000, 1.146009, 0.000000, 1.158700, 0.000000, -1.146009, 0.000000, 0.171024, -84.467438, 0.251678, -35.836189)
+[node name="g2Salvie40" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-0.935519, 0.000000, 1.118939, 0.000000, 1.458500, 0.000000, -1.118939, 0.000000, -0.935519, -105.314743, 0.070938, -39.559921)
 
-[node name="g2Rabbit41" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(1.149232, 0.000000, 0.448606, 0.000000, 1.233686, 0.000000, -0.448606, 0.000000, 1.149232, -85.100281, 0.230469, -35.013058)
+[node name="g2Salvie41" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-0.451098, 0.000000, 1.208401, 0.000000, 1.289854, 0.000000, -1.208401, 0.000000, -0.451098, -107.601357, 0.067932, -41.121166)
 
-[node name="g2Rabbit42" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(0.382790, 0.000000, -0.907167, 0.000000, 0.984622, 0.000000, 0.907167, 0.000000, 0.382790, -84.501663, 0.239685, -34.982048)
+[node name="g2Ienupar42" parent="DecorManual/ZonaG2" instance=ExtResource("s_juniper")]
+transform = Transform3D(-0.617475, 0.000000, 0.016201, 0.000000, 0.617688, 0.000000, -0.016201, 0.000000, -0.617475, -108.242859, 0.043671, -39.372459)
 
 [node name="g2Salvie43" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
-transform = Transform3D(-0.619071, 0.000000, 1.050828, 0.000000, 1.219627, 0.000000, -1.050828, 0.000000, -0.619071, -72.603676, -0.575729, 26.208603)
+transform = Transform3D(-1.128157, 0.000000, -0.286686, 0.000000, 1.164014, 0.000000, 0.286686, 0.000000, -1.128157, -85.790695, 0.246979, -36.912811)
 
 [node name="g2Rabbit44" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(0.005731, 0.000000, 1.110765, 0.000000, 1.110780, 0.000000, -1.110765, 0.000000, 0.005731, -72.935806, -0.583984, 23.009747)
+transform = Transform3D(0.806845, 0.000000, 0.531419, 0.000000, 0.966129, 0.000000, -0.531419, 0.000000, 0.806845, -88.478935, 0.231552, -38.375381)
 
-[node name="g2Salvie45" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
-transform = Transform3D(-0.811535, 0.000000, 1.148099, 0.000000, 1.405959, 0.000000, -1.148099, 0.000000, -0.811535, -74.765129, -0.652405, 23.974207)
+[node name="g2Rabbit45" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.181858, 0.000000, -0.980453, 0.000000, 0.997176, 0.000000, 0.980453, 0.000000, -0.181858, -85.645966, 0.259491, -37.604511)
 
 [node name="g2Salvie46" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
-transform = Transform3D(-0.641796, 0.000000, -1.060658, 0.000000, 1.239717, 0.000000, 1.060658, 0.000000, -0.641796, -78.792587, -1.172379, 23.117874)
+transform = Transform3D(0.310049, 0.000000, 1.177944, 0.000000, 1.218065, 0.000000, -1.177944, 0.000000, 0.310049, -85.381203, 0.257217, -37.200165)
 
-[node name="g2Rabbit47" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(0.946716, 0.000000, 0.148995, 0.000000, 0.958369, 0.000000, -0.148995, 0.000000, 0.946716, -80.786804, -0.160721, -9.008186)
+[node name="g2Salvie47" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-0.402728, 0.000000, -1.416048, 0.000000, 1.472203, 0.000000, 1.416048, 0.000000, -0.402728, -83.537331, 0.297623, -38.117615)
 
-[node name="g2Rabbit48" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
-transform = Transform3D(0.081675, 0.000000, 1.243916, 0.000000, 1.246595, 0.000000, -1.243916, 0.000000, 0.081675, -70.558823, -0.027679, -9.232068)
+[node name="g2Salvie48" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(0.412561, 0.000000, -1.295786, 0.000000, 1.359878, 0.000000, 1.295786, 0.000000, 0.412561, -88.227478, 0.283325, -41.753220)
 
-[node name="g2Petic49" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Rabbit49" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.072980, 0.000000, -1.095646, 0.000000, 1.098074, 0.000000, 1.095646, 0.000000, -0.072980, -86.124298, 0.344589, -44.211269)
+
+[node name="g2Ienupar50" parent="DecorManual/ZonaG2" instance=ExtResource("s_juniper")]
+transform = Transform3D(-0.697022, 0.000000, 0.194159, 0.000000, 0.723558, 0.000000, -0.194159, 0.000000, -0.697022, -87.778694, 0.287003, -41.539436)
+
+[node name="g2Ienupar51" parent="DecorManual/ZonaG2" instance=ExtResource("s_juniper")]
+transform = Transform3D(-0.627660, 0.000000, 0.034622, 0.000000, 0.628614, 0.000000, -0.034622, 0.000000, -0.627660, -88.803223, 0.300964, -43.696369)
+
+[node name="g2Ienupar52" parent="DecorManual/ZonaG2" instance=ExtResource("s_juniper")]
+transform = Transform3D(0.313199, 0.000000, 0.655627, 0.000000, 0.726595, 0.000000, -0.655627, 0.000000, 0.313199, -88.570801, 0.299530, -43.363728)
+
+[node name="g2Salvie53" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(0.436444, 0.000000, -1.329320, 0.000000, 1.399134, 0.000000, 1.329320, 0.000000, 0.436444, -79.438545, 0.443085, -44.306934)
+
+[node name="g2Salvie54" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-0.723880, 0.000000, 0.939945, 0.000000, 1.186381, 0.000000, -0.939945, 0.000000, -0.723880, -78.167557, 0.489120, -46.402752)
+
+[node name="g2Ienupar55" parent="DecorManual/ZonaG2" instance=ExtResource("s_juniper")]
+transform = Transform3D(-0.618016, 0.000000, 0.482031, 0.000000, 0.783772, 0.000000, -0.482031, 0.000000, -0.618016, -76.814850, 0.477921, -43.955784)
+
+[node name="g2Salvie56" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-1.201807, 0.000000, 0.810132, 0.000000, 1.449363, 0.000000, -0.810132, 0.000000, -1.201807, -81.999428, -0.395630, -7.853890)
+
+[node name="g2Salvie57" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(1.073700, 0.000000, 0.579790, 0.000000, 1.220241, 0.000000, -0.579790, 0.000000, 1.073700, -82.471840, -0.097244, -9.585404)
+
+[node name="g2Salvie58" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-0.785066, 0.000000, 0.662866, 0.000000, 1.027482, 0.000000, -0.662866, 0.000000, -0.785066, -84.916519, -0.631744, -6.834288)
+
+[node name="g2Salvie59" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-1.183187, 0.000000, 0.091757, 0.000000, 1.186740, 0.000000, -0.091757, 0.000000, -1.183187, -81.893364, -0.190262, -8.942002)
+
+[node name="g2Salvie60" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(0.715311, 0.000000, 0.948070, 0.000000, 1.187647, 0.000000, -0.948070, 0.000000, 0.715311, -76.201973, -0.229477, -8.813133)
+
+[node name="g2Salvie61" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-0.069273, 0.000000, 1.165227, 0.000000, 1.167284, 0.000000, -1.165227, 0.000000, -0.069273, -77.374489, -0.197083, -8.962210)
+
+[node name="g2Rabbit62" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.397980, 0.000000, 1.029515, 0.000000, 1.103762, 0.000000, -1.029515, 0.000000, -0.397980, -77.896408, -0.293564, -8.717972)
+
+[node name="g2Salvie63" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(1.202409, 0.000000, -0.008666, 0.000000, 1.202441, 0.000000, 0.008666, 0.000000, 1.202409, -77.135582, -0.072861, -9.298243)
+
+[node name="g2Salvie64" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(0.697646, 0.000000, 0.834073, 0.000000, 1.087377, 0.000000, -0.834073, 0.000000, 0.697646, -76.969543, -0.006134, -9.493896)
+
+[node name="g2Ienupar65" parent="DecorManual/ZonaG2" instance=ExtResource("s_juniper")]
+transform = Transform3D(-0.708749, 0.000000, 0.242854, 0.000000, 0.749202, 0.000000, -0.242854, 0.000000, -0.708749, -68.069054, 0.120682, -9.400826)
+
+[node name="g2Rabbit66" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-1.083621, 0.000000, 0.475787, 0.000000, 1.183473, 0.000000, -0.475787, 0.000000, -1.083621, -70.287743, 0.105103, -9.453137)
+
+[node name="g2Salvie67" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-0.264782, 0.000000, -1.396458, 0.000000, 1.421339, 0.000000, 1.396458, 0.000000, -0.264782, -67.550537, 0.296341, -16.717442)
+
+[node name="g2Salvie68" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(1.312546, 0.000000, -0.427656, 0.000000, 1.380459, 0.000000, 0.427656, 0.000000, 1.312546, -67.384926, 0.302673, -16.895597)
+
+[node name="g2Salvie69" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-1.002574, 0.000000, 0.120601, 0.000000, 1.009802, 0.000000, -0.120601, 0.000000, -1.002574, -66.651688, 0.300888, -16.006983)
+
+[node name="g2Salvie70" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(0.830681, 0.000000, 0.949882, 0.000000, 1.261866, 0.000000, -0.949882, 0.000000, 0.830681, -66.982773, 0.319229, -17.404448)
+
+[node name="g2Rabbit71" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.556061, 0.000000, -0.876219, 0.000000, 1.037769, 0.000000, 0.876219, 0.000000, -0.556061, -61.856930, 0.475067, -20.471336)
+
+[node name="g2Rabbit72" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.972495, 0.000000, -0.255845, 0.000000, 1.005586, 0.000000, 0.255845, 0.000000, -0.972495, -64.182930, 0.396423, -19.900272)
+
+[node name="g2Salvie73" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-0.036717, 0.000000, 1.234876, 0.000000, 1.235422, 0.000000, -1.234876, 0.000000, -0.036717, -63.783787, 0.414703, -20.587372)
+
+[node name="g2Salvie74" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
+transform = Transform3D(-1.098158, 0.000000, 0.430128, 0.000000, 1.179390, 0.000000, -0.430128, 0.000000, -1.098158, -60.256992, 0.536697, -21.788631)
+
+[node name="g2Rabbit75" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+transform = Transform3D(-0.156209, 0.000000, 1.054580, 0.000000, 1.066087, 0.000000, -1.054580, 0.000000, -0.156209, -64.596825, 0.383926, -19.749014)
+
+[node name="g2Petic76" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(-1.118348, 0.000000, 0.485081, 0.000000, 1.219018, 0.000000, -0.485081, 0.000000, -1.118348, -112.032578, -0.579025, 45.860691)
 
-[node name="g2Petic50" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic77" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(-0.067138, 0.000000, 0.984842, 0.000000, 0.987127, 0.000000, -0.984842, 0.000000, -0.067138, -112.862762, -0.585297, 44.246933)
 
-[node name="g2Petic51" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic78" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(-0.154823, 0.000000, 1.166694, 0.000000, 1.176922, 0.000000, -1.166694, 0.000000, -0.154823, -113.673439, -0.590469, 42.939442)
 
-[node name="g2Petic52" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic79" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(0.897371, 0.000000, -0.591146, 0.000000, 1.074583, 0.000000, 0.591146, 0.000000, 0.897371, -110.427582, -0.580566, 45.263916)
 
-[node name="g2Petic53" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic80" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(-1.262001, 0.000000, -0.011048, 0.000000, 1.262050, 0.000000, 0.011048, 0.000000, -1.262001, -113.733192, -0.586349, 44.130329)
 
-[node name="g2Petic54" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic81" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(0.664219, 0.000000, -1.101605, 0.000000, 1.286359, 0.000000, 1.101605, 0.000000, 0.664219, -113.757393, -0.585892, 44.268276)
 
-[node name="g2Petic55" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic82" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(0.859037, 0.000000, 0.503885, 0.000000, 0.995913, 0.000000, -0.503885, 0.000000, 0.859037, -96.784241, 0.339752, -56.279041)
 
-[node name="g2Petic56" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic83" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(1.014171, 0.000000, -0.366585, 0.000000, 1.078391, 0.000000, 0.366585, 0.000000, 1.014171, -95.723778, 0.362259, -57.281418)
 
-[node name="g2Petic57" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic84" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(0.911467, 0.000000, 0.880333, 0.000000, 1.267185, 0.000000, -0.880333, 0.000000, 0.911467, -93.807053, 0.391144, -57.688805)
 
-[node name="g2Petic58" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic85" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(0.639586, 0.000000, -0.940348, 0.000000, 1.137244, 0.000000, 0.940348, 0.000000, 0.639586, -95.919983, 0.355011, -56.793320)
 
-[node name="g2Petic59" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
+[node name="g2Petic86" parent="DecorManual/ZonaG2" instance=ExtResource("s_rabbitbrush")]
 transform = Transform3D(0.820162, 0.000000, -0.688984, 0.000000, 1.071150, 0.000000, 0.688984, 0.000000, 0.820162, -97.526161, 0.336899, -56.850632)
 
 [node name="ZonaH" type="Node3D" parent="DecorManual"]

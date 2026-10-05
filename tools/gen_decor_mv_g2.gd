@@ -284,8 +284,8 @@ func _clusters() -> void:
 		var s := 1727.0 + (3.0 if side < 0.0 else 0.0)
 		while s < 1809.0:
 			# gol neregulat: ~30 % din pozitii raman goale
-			if r.randf() < 0.3:
-				s += r.randf_range(5.0, 9.0)
+			if r.randf() < 0.2:
+				s += r.randf_range(4.0, 7.0)
 				continue
 			var layer := r.randi_range(0, 3)
 			if n_cl % 2 == 0:
@@ -293,7 +293,7 @@ func _clusters() -> void:
 			var m: float = [3.0, 7.0, 13.0, 21.0][layer] + r.randf_range(-1.0, 1.5)
 			_mixed_clump(r, s + r.randf_range(-2.0, 2.0), side, m)
 			n_cl += 1
-			s += r.randf_range(7.0, 11.0)
+			s += r.randf_range(5.0, 8.0)
 	print("; palcuri: %d" % n_cl)
 
 

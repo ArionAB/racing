@@ -1394,9 +1394,6 @@ transform = Transform3D(0.999993, 0.000000, -0.003788, 0.000000, 1.000000, 0.000
 [node name="cGard14" parent="DecorManual/ZonaC" instance=ExtResource("s_wire_fence")]
 transform = Transform3D(1.000000, 0.000000, -0.000670, 0.000000, 1.000000, 0.000000, 0.000670, 0.000000, 1.000000, 311.493713, -0.203735, 159.499237)
 
-[node name="cTalus15" parent="DecorManual/ZonaC" instance=ExtResource("s_talus_boulders_b")]
-transform = Transform3D(0.486106, 0.000000, -0.873900, 0.000000, 1.000000, 0.000000, 0.873900, 0.000000, 0.486106, 281.500000, -0.286697, 214.083008)
-
 [node name="cTalus16" parent="DecorManual/ZonaC" instance=ExtResource("s_talus_boulders_a")]
 transform = Transform3D(1.086579, 0.000000, -0.171304, 0.000000, 1.100000, 0.000000, 0.171304, 0.000000, 1.086579, 326.744446, 0.000000, 132.511734)
 

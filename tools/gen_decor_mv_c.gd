@@ -211,7 +211,6 @@ func _fence() -> void:
 func _talus() -> void:
 	var r := RandomNumberGenerator.new()
 	r.seed = 12701
-	_raw("talus_boulders_b", "cTalus", _on(_s_grid + 48.0, -(6.5 + 12.0)), r.randf() * TAU, 1.0, "")
 	_raw("talus_boulders_a", "cTalus", _on(_s_grid - 34.0, 6.5 + 20.0), r.randf() * TAU, 1.1, "")
 
 

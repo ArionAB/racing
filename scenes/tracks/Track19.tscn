@@ -2332,6 +2332,7 @@ metadata/fractii = "REAL 0.826-0.866 (albia 0.834-0.846 la (-96,13), grila H 0.8
 
 [node name="g2Grila1" parent="DecorManual/ZonaG2" instance=ExtResource("s_cattle_guard")]
 transform = Transform3D(-0.570916, 0.000000, 0.821008, 0.000000, 1.000000, 0.000000, -0.821008, 0.000000, -0.570916, -79.188629, 0.510219, -25.226364)
+metadata/peste_asfalt = true
 
 [node name="g2Semn2" parent="DecorManual/ZonaG2" instance=ExtResource("s_open_range_sign")]
 transform = Transform3D(-0.773713, 0.000000, 0.633536, 0.000000, 1.000000, 0.000000, -0.633536, 0.000000, -0.773713, -82.696785, -0.107147, -9.452304)

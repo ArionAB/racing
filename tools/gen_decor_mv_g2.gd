@@ -176,6 +176,7 @@ func _grid() -> void:
 	print("; grila H: s=%.1f p=%s h=%.1f deg  dot(X,d)=%.4f" % [s, p3,
 		fposmod(rad_to_deg(atan2(d.x, -d.y)), 360.0), xl.x * d.x + xl.z * d.y])
 	_raw("cattle_guard", "g2Grila", Vector3(p3.x, p3.y + 0.01, p3.z), yaw, 1.0, "")
+	_meta_last("metadata/peste_asfalt = true")
 	# Semnul cu calul, pe latura interioara a virajului (dreapta), la 2,5 m de
 	# bordura, cu fata spre masinile care vin (spre punctul de la s - 25).
 	var ss := s - 14.0

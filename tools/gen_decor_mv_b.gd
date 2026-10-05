@@ -275,6 +275,14 @@ func _mixed_clump(r: RandomNumberGenerator, s: float, lat: float, layer: int) ->
 	for i in kinds.size():
 		var ox := r.randf_range(-2.4, 2.4)
 		var oz := r.randf_range(-1.8, 1.8)
+		# Coroana (raza x scara) ramane la >= 0,3 m de bordura (garda
+		# probe_decor_overlap --manual): impinge spre exterior daca intra.
+		var rad: float = (1.3 if kinds[i] == "juniper" else (1.0 if kinds[i] == "rabbitbrush" else 1.2)) * scales[i]
+		var side := signf(lat)
+		var lat_p: float = lat + oz
+		var lat_min: float = SEMI + 0.3 + rad
+		if absf(lat_p) < lat_min:
+			oz += side * (lat_min - absf(lat_p))
 		var p := _off(q, lat)
 		p.x += n.x * oz + d.x * ox
 		p.z += n.y * oz + d.y * ox

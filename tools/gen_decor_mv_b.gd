@@ -118,7 +118,18 @@ func _on(s: float, lat: float) -> Vector3:
 	return p
 
 
+func _grand(n: Node) -> void:
+	for c in n.get_children():
+		if c is MeshInstance3D:
+			var m := c as MeshInstance3D
+			var bb := m.global_transform * m.get_aabb()
+			if bb.size.y > 14.0 and bb.position.x > 380.0 and bb.position.x < 600.0 					and bb.position.z > 20.0 and bb.position.z < 230.0:
+				print("GRAND %s/%s aabb=%s" % [m.get_parent().name, m.name, bb])
+		_grand(c)
+
+
 func _print_terrain() -> void:
+	_grand(_track)
 	for x in [420.0, 430.0, 440.0, 450.0, 460.0, 470.0]:
 		var line := "x=%d: " % int(x)
 		for z in [60.0, 70.0, 85.0, 100.0, 115.0, 130.0, 145.0, 160.0, 170.0]:
@@ -259,34 +270,37 @@ func _g(x: float, z: float) -> Vector3:
 	return Vector3(x, _sol(x, z), z)
 
 
-## Grup strans pe raftul y ~ +4,3 (x 425-470, z 70-170), citit la 125-170 m:
-## casa si hoganul in rand (fata casei spre vest = spre drum si grila),
-## pickup-ul intre ele si tarc, tarcul cu cai, turma de oi, umbrar, gard.
+## Grup strans pe raftul y ~ +4,3, citit la 125-170 m. Siluetele de orizont
+## din track.gd pun `FarMesa_B` (AABB x 418-465, z 101-268, 17 m) chiar pe
+## jumatatea de sud a ploturilor (x 425-470, z 70-170): gospodaria sta deci in
+## partea de NORD a raftului (z 62-100), cu mesa in spate (ca in dioram, unde
+## sta la poalele unei mese). Hoganul sta la NE de casa, nu in spatele ei: dinspre drum si grila (azimut
+## ~ ESE) casa l-ar fi ascuns. Fata casei spre vest = spre drum si grila, pickup-ul intre ele si tarc, tarcul cu cai, oile, umbrar.
 func _homestead() -> void:
-	_raw("homestead_house", "gCasa", _g(441.0, 100.0), _face(-1.0, 0.25), 1.0, "")
+	_raw("homestead_house", "gCasa", _g(440.0, 79.0), _face(-1.0, 0.25), 1.0, "")
 	# Usa hoganului spre EST (rotatie -90 grade pe Y, derivata din produs scalar).
-	_raw("hogan", "gHogan", _g(456.0, 106.0), _face(1.0, 0.0), 1.0, "")
-	_raw("pickup_old", "gPickup", _g(437.0, 114.0), _face(-0.4, 1.0), 1.0, "")
+	_raw("hogan", "gHogan", _g(453.0, 63.0), _face(1.0, 0.0), 1.0, "")
+	_raw("pickup_old", "gPickup", _g(434.0, 89.0), _face(-0.4, 1.0), 1.0, "")
 	# Tarc: poarta (-Z local) spre vest.
-	_raw("corral", "gTarc", _g(444.0, 126.0), _face(-1.0, 0.0), 1.0, "")
-	_raw("shade_ramada", "gUmbrar", _g(462.0, 92.0), _face(-1.0, 0.0), 1.0, "")
+	_raw("corral", "gTarc", _g(447.0, 93.0), _face(-1.0, 0.0), 1.0, "")
+	_raw("shade_ramada", "gUmbrar", _g(468.0, 79.0), _face(-1.0, 0.0), 1.0, "")
 	# 3 cai statici: doi in tarc, unul in fata lui.
 	var hk := ["horse_bay", "horse_black", "horse_pinto"]
-	var hp := [_g(443.0, 125.0), _g(446.0, 128.0), _g(428.0, 126.0)]
+	var hp := [_g(445.0, 92.0), _g(449.0, 95.0), _g(431.0, 92.0)]
 	for k in 3:
 		_raw(hk[k], "gCal", hp[k], _rng.randf() * TAU, 1.0, "none")
 		_hide_pose()
-	# 10 oi in turma, la sud-vest de tarc.
+	# 10 oi in turma, la vest de tarc (pe sub mesa din spate, z < 100).
 	for i in 10:
-		var p := _g(428.0 + _rng.randf_range(-5.5, 5.5), 142.0 + _rng.randf_range(-4.5, 4.5))
+		var p := _g(430.0 + _rng.randf_range(-5.0, 5.0), 96.0 + _rng.randf_range(-2.5, 2.5))
 		_raw("sheep", "gOaie", p, _rng.randf() * TAU, _rng.randf_range(0.95, 1.1), "none")
 		_hide_pose()
 	# Gard ~40 m: linie pe Z, la vest de casa (10 segmente).
 	for i in 10:
-		var z := 94.0 + 4.0 * i + 2.0
-		_raw("wire_fence", "gGard", _g(430.0, z), 0.0, 1.0, "")
+		var z := 60.0 + 4.0 * i + 2.0
+		_raw("wire_fence", "gGard", _g(427.0, z), 0.0, 1.0, "")
 	# 3 ienuperi.
-	for p0 in [_g(434.0, 92.0), _g(466.0, 118.0), _g(450.0, 140.0)]:
+	for p0 in [_g(419.0, 80.0), _g(472.0, 68.0), _g(463.0, 58.0)]:
 		_raw("juniper", "gIenupar", p0, _rng.randf() * TAU, 1.1, "")
 
 

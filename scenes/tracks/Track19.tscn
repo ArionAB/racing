@@ -1325,147 +1325,147 @@ metadata/fractii = "REAL 0.866-0.985 (dreapta z = -40, x -68 -> 190; teren plat 
 metadata/fractii = "vizibila din 0.965-0.05 (grila, A) si 0.035-0.105 (B) · Gospodaria din vale (est de B, x 420-460, z 50-150, la 120-160 m de drum): casa modulara, hogan, tarc, oi, pickup; NU in axa drumului"
 
 [node name="gCasa90" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_homestead_house")]
-transform = Transform3D(-0.242536, 0.000000, 0.970142, 0.000000, 1.000000, 0.000000, -0.970142, 0.000000, -0.242536, 441.000000, 4.406845, 100.000000)
+transform = Transform3D(-0.242536, 0.000000, 0.970142, 0.000000, 1.000000, 0.000000, -0.970142, 0.000000, -0.242536, 440.000000, 4.245544, 79.000000)
 
 [node name="gHogan91" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_hogan")]
-transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 456.000000, 4.277435, 106.000000)
+transform = Transform3D(-0.000000, 0.000000, -1.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -0.000000, 453.000000, 4.573502, 63.000000)
 
 [node name="gPickup92" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_pickup_old")]
-transform = Transform3D(-0.928477, 0.000000, 0.371391, 0.000000, 1.000000, 0.000000, -0.371391, 0.000000, -0.928477, 437.000000, 4.227875, 114.000000)
+transform = Transform3D(-0.928477, 0.000000, 0.371391, 0.000000, 1.000000, 0.000000, -0.371391, 0.000000, -0.928477, 434.000000, 4.267746, 89.000000)
 
 [node name="gTarc93" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_corral")]
-transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 444.000000, 4.232834, 126.000000)
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 447.000000, 4.350204, 93.000000)
 
 [node name="gUmbrar94" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_shade_ramada")]
-transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 462.000000, 4.486038, 92.000000)
+transform = Transform3D(-0.000000, 0.000000, 1.000000, 0.000000, 1.000000, 0.000000, -1.000000, 0.000000, -0.000000, 468.000000, 4.831604, 79.000000)
 
 [node name="gCal95" parent="DecorManual/ZonaGospodarie" instance=ExtResource("11_horse_bay")]
-transform = Transform3D(0.638897, 0.000000, -0.769292, 0.000000, 1.000000, 0.000000, 0.769292, 0.000000, 0.638897, 443.000000, 4.304001, 125.000000)
+transform = Transform3D(0.638897, 0.000000, -0.769292, 0.000000, 1.000000, 0.000000, 0.769292, 0.000000, 0.638897, 445.000000, 4.448914, 92.000000)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gCal95" index="1"]
 visible = false
 
 [node name="gCal96" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_horse_black")]
-transform = Transform3D(0.545179, 0.000000, -0.838319, 0.000000, 1.000000, 0.000000, 0.838319, 0.000000, 0.545179, 446.000000, 4.090637, 128.000000)
+transform = Transform3D(0.545179, 0.000000, -0.838319, 0.000000, 1.000000, 0.000000, 0.838319, 0.000000, 0.545179, 449.000000, 4.271622, 95.000000)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gCal96" index="1"]
 visible = false
 
 [node name="gCal97" parent="DecorManual/ZonaGospodarie" instance=ExtResource("11_horse_pinto")]
-transform = Transform3D(0.413555, 0.000000, 0.910479, 0.000000, 1.000000, 0.000000, -0.910479, 0.000000, 0.413555, 428.000000, 4.241211, 126.000000)
+transform = Transform3D(0.413555, 0.000000, 0.910479, 0.000000, 1.000000, 0.000000, -0.910479, 0.000000, 0.413555, 431.000000, 4.276031, 92.000000)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gCal97" index="1"]
 visible = false
 
 [node name="gOaie98" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(0.099004, 0.000000, 0.961614, 0.000000, 0.966697, 0.000000, -0.961614, 0.000000, 0.099004, 433.156860, 4.082352, 141.110977)
+transform = Transform3D(0.099004, 0.000000, 0.961614, 0.000000, 0.966697, 0.000000, -0.961614, 0.000000, 0.099004, 434.688049, 4.460785, 95.506104)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie98" index="1"]
 visible = false
 
 [node name="gOaie99" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(-0.942433, 0.000000, 0.363865, 0.000000, 1.010237, 0.000000, -0.363865, 0.000000, -0.942433, 425.281403, 4.251572, 137.750717)
+transform = Transform3D(-0.942433, 0.000000, 0.363865, 0.000000, 1.010237, 0.000000, -0.363865, 0.000000, -0.942433, 427.528564, 4.181915, 93.639282)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie99" index="1"]
 visible = false
 
 [node name="gOaie100" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(0.392143, 0.000000, 0.893996, 0.000000, 0.976219, 0.000000, -0.893996, 0.000000, 0.392143, 426.792908, 4.298248, 143.091263)
+transform = Transform3D(0.392143, 0.000000, 0.893996, 0.000000, 0.976219, 0.000000, -0.893996, 0.000000, 0.392143, 428.902649, 4.299149, 96.606262)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie100" index="1"]
 visible = false
 
 [node name="gOaie101" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(-0.314361, 0.000000, 0.955605, 0.000000, 1.005984, 0.000000, -0.955605, 0.000000, -0.314361, 423.314636, 4.290176, 139.863708)
+transform = Transform3D(-0.314361, 0.000000, 0.955605, 0.000000, 1.005984, 0.000000, -0.955605, 0.000000, -0.314361, 425.740570, 4.121582, 94.813171)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie101" index="1"]
 visible = false
 
 [node name="gOaie102" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(1.062412, 0.000000, -0.124151, 0.000000, 1.069641, 0.000000, 0.124151, 0.000000, 1.062412, 429.257751, 4.405533, 138.278198)
+transform = Transform3D(1.062412, 0.000000, -0.124151, 0.000000, 1.069641, 0.000000, 0.124151, 0.000000, 1.062412, 431.143402, 4.362808, 93.932327)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie102" index="1"]
 visible = false
 
 [node name="gOaie103" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(0.901984, 0.000000, 0.431155, 0.000000, 0.999735, 0.000000, -0.431155, 0.000000, 0.901984, 429.987366, 4.396484, 137.946198)
+transform = Transform3D(0.901984, 0.000000, 0.431155, 0.000000, 0.999735, 0.000000, -0.431155, 0.000000, 0.901984, 431.806702, 4.391937, 93.747887)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie103" index="1"]
 visible = false
 
 [node name="gOaie104" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(-0.950900, 0.000000, 0.061104, 0.000000, 0.952861, 0.000000, -0.061104, 0.000000, -0.950900, 422.540344, 4.398438, 143.068558)
+transform = Transform3D(-0.950900, 0.000000, 0.061104, 0.000000, 0.952861, 0.000000, -0.061104, 0.000000, -0.950900, 425.036682, 4.135834, 96.593643)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie104" index="1"]
 visible = false
 
 [node name="gOaie105" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(-0.415533, 0.000000, 0.896967, 0.000000, 0.988543, 0.000000, -0.896967, 0.000000, -0.415533, 431.499023, 4.124741, 144.793427)
+transform = Transform3D(-0.415533, 0.000000, 0.896967, 0.000000, 0.988543, 0.000000, -0.896967, 0.000000, -0.415533, 433.180939, 4.422516, 97.551903)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie105" index="1"]
 visible = false
 
 [node name="gOaie106" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(0.990632, 0.000000, -0.336027, 0.000000, 1.046072, 0.000000, 0.336027, 0.000000, 0.990632, 428.327820, 4.281067, 141.009338)
+transform = Transform3D(0.990632, 0.000000, -0.336027, 0.000000, 1.046072, 0.000000, 0.336027, 0.000000, 0.990632, 430.298035, 4.347412, 95.449631)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie106" index="1"]
 visible = false
 
 [node name="gOaie107" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_sheep")]
-transform = Transform3D(0.782534, 0.000000, -0.762441, 0.000000, 1.092554, 0.000000, 0.762441, 0.000000, 0.782534, 424.793091, 4.399246, 142.202087)
+transform = Transform3D(0.782534, 0.000000, -0.762441, 0.000000, 1.092554, 0.000000, 0.762441, 0.000000, 0.782534, 427.084625, 4.202286, 96.112274)
 metadata/coliziune = "none"
 
 [node name="Pose_Walk" parent="DecorManual/ZonaGospodarie/gOaie107" index="1"]
 visible = false
 
 [node name="gGard108" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.342270, 96.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.599304, 62.000000)
 
 [node name="gGard109" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.330627, 100.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.518204, 66.000000)
 
 [node name="gGard110" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.335220, 104.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.366516, 70.000000)
 
 [node name="gGard111" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.232162, 108.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.274994, 74.000000)
 
 [node name="gGard112" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.183807, 112.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.211899, 78.000000)
 
 [node name="gGard113" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.202789, 116.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.299927, 82.000000)
 
 [node name="gGard114" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.198288, 120.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.325684, 86.000000)
 
 [node name="gGard115" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.248840, 124.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.183731, 90.000000)
 
 [node name="gGard116" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.201981, 128.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.162292, 94.000000)
 
 [node name="gGard117" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_wire_fence")]
-transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 430.000000, 4.289322, 132.000000)
+transform = Transform3D(1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 427.000000, 4.230225, 98.000000)
 
 [node name="gIenupar118" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_juniper")]
-transform = Transform3D(-0.695920, 0.000000, -0.851877, 0.000000, 1.100000, 0.000000, 0.851877, 0.000000, -0.695920, 434.000000, 4.422287, 92.000000)
+transform = Transform3D(-0.695920, 0.000000, -0.851877, 0.000000, 1.100000, 0.000000, 0.851877, 0.000000, -0.695920, 419.000000, 4.403061, 80.000000)
 
 [node name="gIenupar119" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_juniper")]
-transform = Transform3D(-0.017158, 0.000000, 1.099866, 0.000000, 1.100000, 0.000000, -1.099866, 0.000000, -0.017158, 466.000000, 4.233078, 118.000000)
+transform = Transform3D(-0.017158, 0.000000, 1.099866, 0.000000, 1.100000, 0.000000, -1.099866, 0.000000, -0.017158, 472.000000, 5.248917, 68.000000)
 
 [node name="gIenupar120" parent="DecorManual/ZonaGospodarie" instance=ExtResource("s_juniper")]
-transform = Transform3D(0.019025, 0.000000, 1.099836, 0.000000, 1.100000, 0.000000, -1.099836, 0.000000, 0.019025, 450.000000, 4.186142, 140.000000)
+transform = Transform3D(0.019025, 0.000000, 1.099836, 0.000000, 1.100000, 0.000000, -1.099836, 0.000000, 0.019025, 463.000000, 5.432220, 58.000000)
 

@@ -140,6 +140,10 @@ func _generate(path: String) -> void:
 	_group("TalusM1", 343.0, 252.0, B, A, 5.2, 1.4)
 	_group("TalusM2", 341.0, 272.0, A, B, 5.6, 0.8)
 	_group("TalusM3", 346.0, 289.0, B, A, 5.4, -1.0)
+	# dupa poarta (z 355-415): densitatea scade spre E, dar nu la zero
+	_group("TalusW4", 281.5, 372.0, A, A, 4.2, 1.0)
+	_group("TalusE4", 319.0, 384.0, B, A, 5.0, -0.6)
+	_group("TalusW5", 279.0, 402.0, B, A, -5.4, 0.8)
 	# formatiuni
 	_emit("RockFin", "s_rock_fin", Transform3D(Basis(Vector3.UP, deg_to_rad(90.0)), Vector3(388.0, _gy(388.0, 330.0) - 0.15, 330.0)))
 	_emit("ButteSpateMerrick", "s_butte_small_b", Transform3D(Basis(Vector3.UP, deg_to_rad(-70.0)), Vector3(414.0, _gy(414.0, 238.0) - 0.2, 238.0)))
@@ -147,6 +151,8 @@ func _generate(path: String) -> void:
 	_patch("RabbitW", 279.0, 346.0, 5)
 	_patch("RabbitE", 322.0, 292.0, 4)
 	_patch("RabbitM", 331.0, 352.0, 5)
+	_patch("RabbitW2", 276.0, 392.0, 4)
+	_patch("RabbitE2", 326.0, 372.0, 4)
 	# ienuperi
 	_emit("JuniperW", "s_juniper", Transform3D(Basis(Vector3.UP, 0.9), Vector3(281.0, _gy(281.0, 352.0) - 0.1, 352.0)))
 	_emit("JuniperE", "s_juniper", Transform3D(Basis(Vector3.UP, 2.4), Vector3(322.0, _gy(322.0, 351.0) - 0.1, 351.0)))

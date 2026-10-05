@@ -1876,12 +1876,15 @@ static func themes() -> Dictionary:
 			"dust_color": Color(0.82, 0.42, 0.25),
 			# Asfaltul US-163: linie dubla galbena, nu placute albe (brief §4).
 			"center_line_double_yellow": true,
-			# Decor manual cu mii de piese: discurile de contact memoreaza amprenta
-			# per (mesh, transformare relativa) si sar peste vegetatia de talie mica
-			# (`prop_contact_skip`). Vezi `_prop_foot_radius` / `_prop_contact_discs`.
+			# Rampa G2 ia culoarea drumului de pamant, nu portocaliul aprins.
 			"kicker_dirt_color": true,
+			# Decor manual cu mii de piese: discurile de contact memoreaza amprenta
+			# per (mesh, transformare relativa), iar vegetatia de talie mica primeste
+			# discuri PLANE (`prop_contact_flat`: o cota de sol, nu cercul de 11).
+			# Vezi `_prop_foot_radius` / `_build_prop_contact`.
 			"prop_foot_cache": true,
-			"prop_contact_skip": ["sagebrush", "rabbitbrush", "tumbleweed", "yucca", "wire_fence"],
+			"prop_contact_flat": ["sagebrush", "rabbitbrush", "tumbleweed", "yucca", "wire_fence",
+				"juniper", "telegraph_pole"],
 			# Scurtatura Dunele (G'): nisip rosu, SAND implicit.
 			"branch_tint": Color(0.80, 0.50, 0.34),
 			# Gresia: clasa NOUA `mv_sandstone` (Palette) pe falezele trecatorii, pe
@@ -8551,8 +8554,7 @@ func _prop_contact_discs() -> PackedVector4Array:
 			continue
 		if PROP_AO_SKIP_MODELS.has(n3.scene_file_path.get_file().get_basename()):
 			continue
-		if not _contact_skip.is_empty() and _in_skipped_model(n3, root):
-			continue
+		var flat_disc := not _contact_flat.is_empty() and _in_flat_model(n3, root)
 		var aabb := _visual_aabb(n3)
 		if aabb.size == Vector3.ZERO:
 			continue
@@ -8584,17 +8586,19 @@ func _prop_contact_discs() -> PackedVector4Array:
 		# mijlocul lui. Ce trebuie sa atinga solul e fundul gabaritului.
 		var base_y := gp.y + aabb.position.y
 		out.append(Vector4(gp.x, gp.z, r, base_y))
+		if not _contact_flat.is_empty():
+			_disc_flat.append(1 if flat_disc else 0)
 	return out
 
 
 ## Nodul sau un stramos al lui (pana la `root`) e instanta unui model din
-## `_contact_skip`. Mesh-urile din interiorul unui .glb nu au `scene_file_path`,
+## `_contact_flat`. Mesh-urile din interiorul unui .glb nu au `scene_file_path`,
 ## deci stem-ul se cauta in sus.
-func _in_skipped_model(n: Node, root: Node) -> bool:
+func _in_flat_model(n: Node, root: Node) -> bool:
 	var cur := n
 	while cur != null and cur != root:
 		if not cur.scene_file_path.is_empty():
-			return _contact_skip.has(cur.scene_file_path.get_file().get_basename())
+			return _contact_flat.has(cur.scene_file_path.get_file().get_basename())
 		cur = cur.get_parent()
 	return false
 
@@ -8775,8 +8779,11 @@ var _foot_verts: Dictionary = {}
 ## tema (`prop_foot_cache`), golita odata cu `_foot_verts`.
 var _foot_best: Dictionary = {}
 var _foot_cache_on: bool = false
-## Stem-uri fara disc de contact (tema, `prop_contact_skip`): vegetatie joasa.
-var _contact_skip: Dictionary = {}
+## Stem-uri cu disc de contact PLAN (tema, `prop_contact_flat`): vegetatie joasa,
+## unde marginea de 11 cote de sol nu se vede, dar costa 11 `ground_y` pe tufa.
+var _contact_flat: Dictionary = {}
+## Paralel cu discurile intoarse de `_prop_contact_discs`: 1 = disc plan.
+var _disc_flat := PackedByteArray()
 
 func _mesh_vertices(mesh: Mesh) -> PackedVector3Array:
 	var key := mesh.get_rid()
@@ -8821,15 +8828,15 @@ const PROP_AO_SEAT_TOL: float = 1.2
 
 func _build_prop_contact() -> void:
 	_foot_cache_on = bool(theme_flag("prop_foot_cache", false))
-	_contact_skip.clear()
-	for stem in theme_flag("prop_contact_skip", []):
-		_contact_skip[String(stem)] = true
+	_contact_flat.clear()
+	_disc_flat.clear()
+	for stem in theme_flag("prop_contact_flat", []):
+		_contact_flat[String(stem)] = true
 	var discs := _prop_contact_discs()
 	# Vertecsii au servit doar razelor de amprenta: nu-i tinem in memorie.
 	_foot_verts.clear()
 	_foot_best.clear()
 	_foot_cache_on = false
-	_contact_skip.clear()
 	if discs.is_empty():
 		return
 	var st := SurfaceTool.new()
@@ -8839,7 +8846,9 @@ func _build_prop_contact() -> void:
 	# radacina, si pentru nodul de mesh dinauntru, deci acelasi disc vine de
 	# mai multe ori — iar fiecare cota de margine e un `ground_y`.
 	var rim_cache: Dictionary = {}
+	var di := -1
 	for d in discs:
+		di += 1
 		var cx: float = d.x
 		var cz: float = d.y
 		var r: float = d.z
@@ -8881,10 +8890,18 @@ func _build_prop_contact() -> void:
 			rim = PackedFloat64Array()
 			rim.resize(PROP_AO_SEGMENTS + 2)
 			rim[0] = gy
-			for k in PROP_AO_SEGMENTS + 1:
-				var a := TAU * float(k) / float(PROP_AO_SEGMENTS)
-				var pk := Vector2(cos(a), sin(a)) * r
-				rim[k + 1] = _rim_y(cx + pk.x, cz + pk.y, cy)
+			if not _disc_flat.is_empty() and _disc_flat[di] == 1:
+				# Disc plan: toata marginea la cota centrului, cu aceeasi limitare
+				# ca `_rim_y`. 1 `ground_y` pe tufa in loc de 12.
+				var fy := clampf(gy + PROP_AO_LIFT, cy - PROP_AO_RELIEF,
+					cy + PROP_AO_RELIEF)
+				for k in PROP_AO_SEGMENTS + 1:
+					rim[k + 1] = fy
+			else:
+				for k in PROP_AO_SEGMENTS + 1:
+					var a := TAU * float(k) / float(PROP_AO_SEGMENTS)
+					var pk := Vector2(cos(a), sin(a)) * r
+					rim[k + 1] = _rim_y(cx + pk.x, cz + pk.y, cy)
 			rim_cache[d] = rim
 		for i in PROP_AO_SEGMENTS:
 			var a0 := TAU * float(i) / float(PROP_AO_SEGMENTS)

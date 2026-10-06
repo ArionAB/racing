@@ -366,6 +366,10 @@ static func themes() -> Dictionary:
 		return _themes_cache
 	_themes_cache = {
 		"desert": {
+			# DUNELE = banc de test: contactul ramane pe vechiul disc MUL (octogon
+			# inchis), bit-identic. Restul temelor au `prop_contact_soft` implicit
+			# (vezi `_build_prop_contact`).
+			"prop_contact_soft": false,
 			# sand_mid din paleta (style_bible §1). Era #EDC177, mai deschis decat
 			# spec-ul; cu textura peste, valoarea aia impingea canalul rosu in
 			# saturatie si stergea granulatia.
@@ -995,6 +999,9 @@ static func themes() -> Dictionary:
 			"lagoon_shore_out": 5.0,
 		},
 		"machupicchu": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["rope_rail", "water_channel"],
 			# CETATE DE GRANIT PE CREASTA VERDE, SUB CER ANDIN, CU NORUL IN VALE
 			# (docs/track_briefs/machu_picchu.md §4). Prima trecere (pasul 2 din
 			# §7): doar lumina, cerul, ceata si solul; kitul de cetate, clasele
@@ -1148,6 +1155,9 @@ static func themes() -> Dictionary:
 			"water": false,
 		},
 		"fiordland": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["chasm_bridge_rail"],
 			# FIORD DE GRANIT UD, DIMINEATA DUPA PLOAIE (docs/track_briefs/
 			# fiordland.md §4). Pasul 2 din §7: doar lumina, cerul, ceata si
 			# solul; kitul de perete ud (`wet_gneiss`), cascadele si hazardele
@@ -1361,6 +1371,9 @@ static func themes() -> Dictionary:
 			"water": true,
 		},
 		"jodhpur": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["laundry_line", "textile_strip"],
 			# Farurile urmeaza ceasul de apus (DuskCycle): -1 = „dupa ceas".
 			"headlights": -1.0,
 			# ORASUL ALBASTRU DIN JODHPUR, SEARA DE DIWALI (docs/track_briefs/
@@ -1641,6 +1654,9 @@ static func themes() -> Dictionary:
 			"water_dusk_dim": 0.55,
 		},
 		"kyoto": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["shiba_fence"],
 			# KYOTO LA SFARSITUL LUI NOIEMBRIE, LA VARFUL TOAMNEI (docs/track_briefs/
 			# kyoto.md §0.1, §4). Pasul 2 din §7: doar lumina, cerul, ceata si solul
 			# de baza; kitul (machiya, artari, bambus), hero-urile si orizontul vin
@@ -1890,9 +1906,10 @@ static func themes() -> Dictionary:
 			# discuri PLANE (`prop_contact_flat`: o cota de sol, nu cercul de 11).
 			# Vezi `_prop_foot_radius` / `_build_prop_contact`.
 			"prop_foot_cache": true,
-			# Contact MOALE: un disc per pata (nu 3 stivuite), centru ~0.7, marginea
-			# se topeste radial. Vezi `_dedupe_contact_discs`. Alte piste: neatinse.
-			"prop_contact_soft": true,
+			# Contact MOALE (implicit pe toate temele, mai putin desert): un disc per
+			# pata, marginea se topeste radial. Culoarea ramane maroul de aici, cel
+			# validat pe Track19 (celelalte teme o iau din `ground_tint`).
+			"prop_contact_tint": Color(0.04, 0.012, 0.006),
 			# Gardul de sarma e o LINIE, nu un punct: discurile lui (raza plafonata)
 			# se inlantuie si se inmultesc in placa neagra pe toata lungimea.
 			"prop_contact_skip": ["wire_fence"],
@@ -1992,6 +2009,9 @@ static func themes() -> Dictionary:
 		# incidenta mai buna si se supraexpun la aceeasi energie. Diferenta
 		# e vizibila pe umarul masivului, unde panta e de 35-40%.
 		"alpine": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["stream_bridge", "mountain_tunnel"],
 			# Pajiste de munte in august, NU gazon: verdele lui "forest"
 			# (0.45, 0.72, 0.33) iesea fluorescent pe prima randare — e acordat
 			# pentru o padure in umbra, iar aici cade pe pante intregi luminate
@@ -2270,6 +2290,9 @@ static func themes() -> Dictionary:
 		#   godot --path . res://tools/Snapshot.tscn -- --track=1 --size=300
 		# si compara nisipul cu #E9DCC0.
 		"island": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["fence_ranch"],
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
 			"sky_top": Color(0.20, 0.50, 0.88),
 			"sky_horizon": Color(0.80, 0.92, 0.95), # palid marin, nu auriu ca desertul
@@ -2374,6 +2397,9 @@ static func themes() -> Dictionary:
 		# flori, fan, garduri) e PROVIZORIU pana vine kitul de larici/mesteceni. Fara pereti si borduri pe gheata
 		# (le taie `_road_ice`), cu borduri pe mal.
 		"baikal": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["fence_ranch", "rail_track"],
 			"ground_tint": Palette.color(Palette.DRY_VEGETATION),
 			"sky_top": Color(0.52, 0.66, 0.84),
 			"sky_horizon": Color(0.95, 0.88, 0.86),
@@ -2450,6 +2476,9 @@ static func themes() -> Dictionary:
 		# integrarea celor 12 piese de flanc; a stat provizoriu pe props insulare
 		# — palmieri si coral — exact cum Baikal a stat pe props alpine.
 		"stromboli": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["vine_row"],
 			"ground_tint": Palette.color(Palette.VOLCANIC_BLACK),
 			"sky_top": Color(0.28, 0.50, 0.82),
 			"sky_horizon": Color(0.86, 0.89, 0.88),
@@ -2598,6 +2627,9 @@ static func themes() -> Dictionary:
 			"branch_surface": "gravel",
 		},
 		"chongqing": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["cliff_railing", "laundry_line"],
 			# NOAPTE CU BURNITA, ORAS CONSTRUIT PESTE EL INSUSI (brief §0.1, §4).
 			# Prima tema de noapte: lumina nu vine de la soare, ci de la oras —
 			# ambientul gri-violaceu e "cerul luminat de jos", iar "soarele" e o
@@ -3279,6 +3311,9 @@ static func themes() -> Dictionary:
 		#    canale de cremul cerut in brief (#E8D9B8): sub pragul de 12 din
 		#    style_bible §5, deci cea mai buna potrivire din paleta existenta.
 		"cappadocia": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["vine_row"],
 			# Stratul de detaliu al lumii: CANELURI VERTICALE, nu strate
 			# orizontale. Singura tema care si-l schimba, si e o reparatie, nu
 			# un gust: detail_rock.png (implicit) are benzi pe Y, autorate
@@ -8868,7 +8903,7 @@ func _build_prop_contact() -> void:
 	for stem in theme_flag("prop_contact_flat", []):
 		_contact_flat[String(stem)] = true
 	var discs := _prop_contact_discs()
-	var soft := bool(theme_flag("prop_contact_soft", false))
+	var soft := bool(theme_flag("prop_contact_soft", true))
 	if soft:
 		discs = _dedupe_contact_discs(discs)
 	# Vertecsii au servit doar razelor de amprenta: nu-i tinem in memorie.
@@ -8986,7 +9021,8 @@ func _build_prop_contact() -> void:
 	add_child(inst)
 
 
-## CONTACT MOALE (tema `prop_contact_soft`, azi doar Monument Valley).
+## CONTACT MOALE (tema `prop_contact_soft`, implicit pornit; doar `desert`/Dunele
+## il opreste ca sa ramana bit-identica).
 ##
 ## Defecte ale discului vechi, masurate pe Track19 (frac 0.09, cadrul de joc):
 ## luminanta in disc 12-29 din 255 fata de ~120 pe sol luminat (aproape negru,
@@ -9008,8 +9044,20 @@ func _build_prop_contact() -> void:
 ## la suprapunere (1-(1-a)^n), deci vecinii nu mai fac placa neagra.
 const PROP_SOFT_SEGMENTS: int = 10
 const PROP_SOFT_STRENGTH: float = 0.6
-const PROP_SOFT_TINT := Color(0.04, 0.012, 0.006)
+const PROP_SOFT_GROUND_MULT: float = 0.05
 const PROP_SOFT_RINGS := [0.5, 0.75, 1.0]
+
+## Culoarea contactului moale: tema o poate fixa (`prop_contact_tint`), altfel e
+## culoarea solului temei, foarte intunecata. Un maro fix pe zapada (Baikal) sau
+## pe iarba (Fiordland) iesea pata de rugina; solul inchis ramane in familia lui.
+func _prop_contact_soft_tint() -> Color:
+	var t: Variant = theme_flag("prop_contact_tint", null)
+	if t is Color:
+		return t
+	var g := theme_ground_tint
+	return Color(g.r * PROP_SOFT_GROUND_MULT, g.g * PROP_SOFT_GROUND_MULT,
+			g.b * PROP_SOFT_GROUND_MULT)
+
 
 ## Un singur disc per pata de 0,5 m (si cota bazei la 0,25 m): cel mai larg.
 ## Pastreaza ordinea primei aparitii, ca rezultatul sa fie determinist.
@@ -9057,7 +9105,7 @@ func _soft_discs_mesh(discs: PackedVector4Array) -> ArrayMesh:
 	var verts := PackedVector3Array()
 	var cols := PackedColorArray()
 	var idx := PackedInt32Array()
-	var tint := PROP_SOFT_TINT
+	var tint := _prop_contact_soft_tint()
 	var di := -1
 	var flat_on := not _disc_flat.is_empty()
 	var rim_y := PackedFloat64Array()

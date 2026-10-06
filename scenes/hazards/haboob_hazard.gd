@@ -125,7 +125,7 @@ var _cover: float = 0.0
 var _front_s: float = 0.0
 var _inside: Dictionary = {}
 var _weed_ground_y: float = 0.0
-static var _wall_material: StandardMaterial3D
+static var _wall_material: ShaderMaterial
 static var _dust_material: StandardMaterial3D
 
 
@@ -238,7 +238,44 @@ func _ensure_path() -> void:
 const TEX_W: int = 512
 const TEX_H: int = 256
 
-static func wall_material() -> StandardMaterial3D:
+## Shaderul zidului (UN singur material, partajat de foi si capace). Echivalent cu
+## fostul StandardMaterial3D (unshaded, alfa, fara cull, fara scriere de adancime,
+## culoare de varf, distance fade, proximity fade) plus fade dupa UNGHIUL de privire:
+## o foaie vazuta aproape din profil (camera in planul ei) isi are creasta ca o
+## coloana verticala subtire; alfa *= smoothstep(0.15, 0.45, |dot(VIEW, NORMAL)|)
+## o topeste. `fade` e per instanta (`instance uniform`): cresterea/scaderea zidului.
+const WALL_SHADER: String = """
+shader_type spatial;
+render_mode unshaded, blend_mix, cull_disabled, depth_draw_never;
+uniform sampler2D tex : source_color, filter_linear_mipmap, repeat_disable;
+uniform sampler2D depth_tex : hint_depth_texture, repeat_disable, filter_nearest;
+uniform float fade_min = 5.0;
+uniform float fade_max = 40.0;
+uniform float prox_dist = 20.0;
+uniform float ang_lo = 0.15;
+uniform float ang_hi = 0.45;
+instance uniform float fade = 1.0;
+void fragment() {
+	vec4 t = texture(tex, UV) * COLOR;
+	ALBEDO = t.rgb;
+	float a = t.a * fade;
+	// distance fade (aproape de camera zidul se topeste)
+	float d = length(VERTEX);
+	a *= smoothstep(fade_min, fade_max, d);
+	// proximity fade (intersectia cu terenul nu mai e o linie)
+	float depth = texture(depth_tex, SCREEN_UV).x;
+	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth);
+	vec4 vp = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
+	vp.xyz /= vp.w;
+	a *= clamp((-vp.z - (-VERTEX.z)) / prox_dist, 0.0, 1.0);
+	// fade dupa unghi (foaie vazuta din profil)
+	float nd = abs(dot(normalize(VERTEX), normalize(NORMAL)));
+	a *= smoothstep(ang_lo, ang_hi, nd);
+	ALPHA = a;
+}
+"""
+
+static func wall_material() -> ShaderMaterial:
 	if _wall_material == null:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 101101 # deterministic: aceeasi creasta la fiecare rulare
@@ -291,25 +328,11 @@ static func wall_material() -> StandardMaterial3D:
 				if below >= 0.0:
 					c = c.lerp(Color(1.0, 0.78, 0.55), (1.0 - smoothstep(0.0, 12.0, below)) * 0.3)
 				img.set_pixel(x, y, Color(c.r, c.g, c.b, a))
-		var m := StandardMaterial3D.new()
-		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		m.cull_mode = BaseMaterial3D.CULL_DISABLED
-		m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
-		m.albedo_texture = ImageTexture.create_from_image(img)
-		m.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
-		# Culoarea varfurilor inmulteste albedo (capacele au alfa 0 la capete);
-		# QuadMesh n-are culori, deci foile raman albe = neschimbate.
-		m.vertex_color_use_as_albedo = true
-		# Aproape de camera zidul se topeste: inauntru nu te inconjoara o
-		# panza opaca, ceata mediului face treaba.
-		m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
-		m.distance_fade_min_distance = 5.0
-		m.distance_fade_max_distance = 40.0
-		# Planul vertical taie soseaua intr-o linie dreapta. Proximity fade o
-		# topeste pe 20 m. Cost de masurat pe device: citeste textura de adancime.
-		m.proximity_fade_enabled = true
-		m.proximity_fade_distance = 20.0
+		var sh := Shader.new()
+		sh.code = WALL_SHADER
+		var m := ShaderMaterial.new()
+		m.shader = sh
+		m.set_shader_parameter("tex", ImageTexture.create_from_image(img))
 		_wall_material = m
 	return _wall_material
 
@@ -368,6 +391,7 @@ func _cap_mesh(z0: float, z1: float, h: float, u0: float, u1: float) -> ArrayMes
 			[Vector3(0, h * ha, za), Vector2(ua, 1.0 - ha), al[c]],
 		]
 		for k in [0, 1, 2, 0, 2, 3]:
+			st.set_normal(Vector3.RIGHT)
 			st.set_color(Color(1, 1, 1, quad[k][2]))
 			st.set_uv(quad[k][1])
 			st.add_vertex(quad[k][0])
@@ -591,11 +615,11 @@ func _place_wall() -> void:
 		var hk := grow * (1.0 - 0.07 * float(qi))
 		q.scale = Vector3(-1.0 if qi % 2 == 1 else 1.0, hk, 1.0)
 		q.position.y = visual_height * 0.5 * hk - 6.0
-		q.transparency = 1.0 - alpha
+		q.set_instance_shader_parameter(&"fade", alpha)
 	for cap in _caps:
 		cap.scale = Vector3(1.0, grow, 1.0)
 		cap.position.y = -6.0 * grow
-		cap.transparency = 1.0 - alpha
+		cap.set_instance_shader_parameter(&"fade", alpha)
 	if _dust != null:
 		var want := _cover > 0.05
 		if want and not _dust.emitting:

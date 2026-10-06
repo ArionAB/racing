@@ -212,12 +212,12 @@ static func wall_material() -> StandardMaterial3D:
 		for x in w:
 			var u := float(x) / float(w - 1)
 			# Marginea de sus nu e o linie: ondulata, ca un nor de praf.
-			var top := 0.80 + 0.10 * sin(u * 19.0 + 1.3) + 0.06 * sin(u * 47.0 + 0.4)
+			var top := 0.90 + 0.06 * sin(u * 19.0 + 1.3) + 0.04 * sin(u * 47.0 + 0.4)
 			var side := smoothstep(0.0, 0.10, u) * smoothstep(0.0, 0.10, 1.0 - u)
 			for y in h:
 				var v := 1.0 - float(y) / float(h - 1) # 0 jos, 1 sus
-				var up := 1.0 - smoothstep(top - 0.30, top, v)
-				var foot := lerpf(0.55, 1.0, smoothstep(0.0, 0.10, v))
+				var up := 1.0 - smoothstep(top - 0.16, top, v)
+				var foot := lerpf(0.8, 1.0, smoothstep(0.0, 0.08, v))
 				var a := side * up * foot
 				var c := low.lerp(high, smoothstep(0.1, 0.95, v))
 				img.set_pixel(x, y, Color(c.r, c.g, c.b, a))
@@ -227,12 +227,17 @@ static func wall_material() -> StandardMaterial3D:
 		m.cull_mode = BaseMaterial3D.CULL_DISABLED
 		m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 		m.albedo_texture = ImageTexture.create_from_image(img)
-		m.albedo_color = Color(1.0, 1.0, 1.0, 0.62)
+		m.albedo_color = Color(1.0, 1.0, 1.0, 0.85)
 		# Aproape de camera zidul se topeste: inauntru nu te inconjoara o
 		# panza opaca, ceata mediului face treaba.
 		m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
 		m.distance_fade_min_distance = 5.0
 		m.distance_fade_max_distance = 40.0
+		# Fara asta, planul vertical taie soseaua intr-o linie dreapta (vazut pe
+		# captura din interior). Proximity fade o topeste pe ~4 m. Cost de masurat
+		# pe device: citeste textura de adancime.
+		m.proximity_fade_enabled = true
+		m.proximity_fade_distance = 4.0
 		_wall_material = m
 	return _wall_material
 
@@ -309,8 +314,11 @@ func _build_visuals() -> void:
 		ramp.add_point(0.7, Color(fog_color.r, fog_color.g, fog_color.b, 0.38))
 		_dust.color_ramp = ramp
 		_wall.add_child(_dust)
-	# --- tumbleweeds (doar vizuale)
-	_build_weeds()
+	# --- tumbleweeds (doar vizuale). Deferit: copiii isi fac `_ready` INAINTE de
+	# parinte, deci pe pista, la acest moment Palette n-are inca tema (memoria
+	# `decor-ready-inaintea-temei`): prima chemare `world_material()` esua
+	# (D3D12 CreateResource) si clasele ramaneau fara textura de detaliu.
+	_build_weeds.call_deferred(_wall)
 	# --- vuietul
 	_audio = AudioStreamPlayer3D.new()
 	_audio.name = "Roar"
@@ -321,7 +329,9 @@ func _build_visuals() -> void:
 	_wall.add_child(_audio)
 
 
-func _build_weeds() -> void:
+func _build_weeds(wall: Node3D) -> void:
+	if wall != _wall or _wall == null or not is_instance_valid(_wall):
+		return
 	var scene := tumbleweed_model if tumbleweed_model != null \
 		else load(TUMBLEWEED_MODEL) as PackedScene
 	if scene == null or tumbleweed_count <= 0:

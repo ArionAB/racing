@@ -72,6 +72,11 @@ var force_clock: float = -1.0
 ## inalt decat zona care te pedepseste, ca sa citeasca de pe F ca un zid.
 @export_range(50.0, 800.0, 10.0) var visual_width: float = 400.0
 @export_range(20.0, 120.0, 1.0) var visual_height: float = 60.0
+## Pe cati metri de la foaia din fata se ingroasa ceata de joc pana la plin. Mic:
+## ceata trebuie sa fie deja groasa cand treci de prima foaie, nu abia la mijloc.
+@export_range(1.0, 40.0, 0.5) var fog_ramp_in: float = 8.0
+## Pe cati metri de marginea laterala VIZUALA se subtiaza ceata.
+@export_range(0.0, 100.0, 1.0) var visual_edge_ramp: float = 20.0
 ## Pe cati metri de la marginea laterala se subtiaza efectul (ceata/vant).
 @export_range(0.0, 100.0, 1.0) var edge_ramp: float = 30.0
 ## Cate quad-uri verticale (2-3).
@@ -107,6 +112,8 @@ var force_clock: float = -1.0
 @export var tumbleweed_ahead: Vector2 = Vector2(14.0, 80.0)
 
 var _wall: Node3D
+var _fog_zone: Area3D
+var _caps: Array[MeshInstance3D] = []
 var _quads: Array[MeshInstance3D] = []
 var _dust: CPUParticles3D
 var _audio: AudioStreamPlayer3D
@@ -164,6 +171,8 @@ func _free_wall() -> void:
 		_wall.queue_free()
 	_wall = null
 	_zone = null
+	_fog_zone = null
+	_caps.clear()
 	_quads.clear()
 	_weeds.clear()
 	_dust = null
@@ -183,6 +192,19 @@ func _build_zone() -> void:
 	shape.position = Vector3.UP * (wall_height * 0.5)
 	_zone.add_child(shape)
 	_wall.add_child(_zone)
+	# Zona VIZUALA (ceata): tot volumul zidului, cat se vede. Vantul, albirea si
+	# incetinirea AI raman pe `_zone` (gameplay, G); ceata e doar vizibilitate,
+	# deci se aplica oriunde esti in praf — altfel treci prin foi cu aer limpede.
+	_fog_zone = Area3D.new()
+	_fog_zone.name = "HaboobFogZone"
+	_fog_zone.monitorable = false
+	var fshape := CollisionShape3D.new()
+	var fbox := BoxShape3D.new()
+	fbox.size = Vector3(visual_width, visual_height + 6.0, length)
+	fshape.shape = fbox
+	fshape.position = Vector3.UP * (visual_height * 0.5 - 3.0)
+	_fog_zone.add_child(fshape)
+	_wall.add_child(_fog_zone)
 
 
 ## Fara repere: zidul nu e un culoar permanent.
@@ -272,6 +294,9 @@ static func wall_material() -> StandardMaterial3D:
 		m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 		m.albedo_texture = ImageTexture.create_from_image(img)
 		m.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
+		# Culoarea varfurilor inmulteste albedo (capacele au alfa 0 la capete);
+		# QuadMesh n-are culori, deci foile raman albe = neschimbate.
+		m.vertex_color_use_as_albedo = true
 		# Aproape de camera zidul se topeste: inauntru nu te inconjoara o
 		# panza opaca, ceata mediului face treaba.
 		m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
@@ -314,6 +339,33 @@ static func dust_material() -> StandardMaterial3D:
 	return _dust_material
 
 
+## Plan in YZ (normala pe X) de la z0 la z1, inalt de `h`, cu UV pe felia [u0, u1].
+## Alfa prin culoarea varfurilor: 0 la capete, 1 in interior, ca marginea verticala
+## a capacului sa fie moale (altfel volumul se citeste ca o cutie cu muchii dure).
+func _cap_mesh(z0: float, z1: float, h: float, u0: float, u1: float) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var soft := minf(14.0, (z1 - z0) * 0.3)
+	var zs: Array[float] = [z0, z0 + soft, z1 - soft, z1]
+	var al: Array[float] = [0.0, 1.0, 1.0, 0.0]
+	for c in 3:
+		var za := zs[c]
+		var zb := zs[c + 1]
+		var ua := lerpf(u0, u1, (za - z0) / (z1 - z0))
+		var ub := lerpf(u0, u1, (zb - z0) / (z1 - z0))
+		var quad: Array = [
+			[Vector3(0, 0, za), Vector2(ua, 1), al[c]],
+			[Vector3(0, 0, zb), Vector2(ub, 1), al[c + 1]],
+			[Vector3(0, h, zb), Vector2(ub, 0), al[c + 1]],
+			[Vector3(0, h, za), Vector2(ua, 0), al[c]],
+		]
+		for k in [0, 1, 2, 0, 2, 3]:
+			st.set_color(Color(1, 1, 1, quad[k][2]))
+			st.set_uv(quad[k][1])
+			st.add_vertex(quad[k][0])
+	return st.commit()
+
+
 func _build_visuals() -> void:
 	# --- quad-urile zidului: fata, mijloc, spate (in cadrul zidului)
 	var zs: Array[float] = [-length * 0.5, -length * 0.05, length * 0.40]
@@ -328,6 +380,18 @@ func _build_visuals() -> void:
 		q.position = Vector3(0.0, visual_height * 0.5 - 6.0, zs[i] if quad_count == 3 else (zs[0] if i == 0 else zs[2]))
 		_wall.add_child(q)
 		_quads.append(q)
+	# --- capace laterale: inchid volumul vazut din lateral/oblic (fara ele, cele 3
+	# foi paralele se citesc ca panouri cu aer intre ele). Doua plane mici, acelasi
+	# material, UV pe o felie din textura (nu intinsa pe tot 400 m).
+	for sgn in [-1.0, 1.0]:
+		var cap := MeshInstance3D.new()
+		cap.name = "Cap%s" % ("W" if sgn < 0.0 else "E")
+		cap.mesh = _cap_mesh(zs[0], zs[2], visual_height, 0.40, 0.40 + (zs[2] - zs[0]) / visual_width)
+		cap.material_override = wall_material()
+		cap.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		cap.position = Vector3(sgn * visual_width * 0.5, -6.0, 0.0)
+		_wall.add_child(cap)
+		_caps.append(cap)
 	# --- praful: <= 32 particule pe fata zidului
 	if dust_count > 0:
 		_dust = CPUParticles3D.new()
@@ -520,6 +584,10 @@ func _place_wall() -> void:
 		q.scale = Vector3(-1.0 if qi % 2 == 1 else 1.0, hk, 1.0)
 		q.position.y = visual_height * 0.5 * hk - 6.0
 		q.transparency = 1.0 - alpha
+	for cap in _caps:
+		cap.scale = Vector3(1.0, grow, 1.0)
+		cap.position.y = -6.0 * grow
+		cap.transparency = 1.0 - alpha
 	if _dust != null:
 		var want := _cover > 0.05
 		if want and not _dust.emitting:
@@ -668,15 +736,37 @@ func _affect_cars() -> void:
 
 ## Cat de „in ceata" e masina jucatorului, 0..1 (suprascrie culoarul).
 func _depth_amount() -> float:
-	if _zone == null or _cover <= 0.001 or not _zone.monitoring:
+	if _fog_zone == null or _cover <= 0.001 or not _fog_zone.monitoring:
 		return 0.0
 	var best := 0.0
-	for body in _zone.get_overlapping_bodies():
+	for body in _fog_zone.get_overlapping_bodies():
 		var car := body as Car
 		if car == null or not car.is_player:
 			continue
-		best = maxf(best, amount_at(car.global_position))
+		best = maxf(best, fog_amount_at(car.global_position))
 	return best
+
+
+## Cat de „in praf" e un punct pentru CEATA (0..1): tot volumul VIZUAL
+## (`visual_width` x `visual_height` x adancimea zidului), cu rampa scurta
+## `fog_ramp_in` de la foaia din fata. Doar vizibilitate: vantul, albirea si AI-ul
+## raman pe `amount_at` (zona de gameplay).
+func fog_amount_at(pos: Vector3) -> float:
+	if _wall == null or _cover <= 0.001 or not _wall.is_inside_tree():
+		return 0.0
+	var local := _wall.global_transform.affine_inverse() * pos
+	if local.y > visual_height or local.y < -30.0:
+		return 0.0
+	var depth := length * 0.5 - local.z
+	if depth <= 0.0 or depth >= length:
+		return 0.0
+	var rise := clampf(depth / maxf(fog_ramp_in, 0.01), 0.0, 1.0)
+	var fall := 1.0 if ramp_out <= 0.01 else clampf((length - depth) / ramp_out, 0.0, 1.0)
+	var lat := visual_width * 0.5 - absf(local.x)
+	if lat <= 0.0:
+		return 0.0
+	var side := 1.0 if visual_edge_ramp <= 0.01 else clampf(lat / visual_edge_ramp, 0.0, 1.0)
+	return minf(rise, fall) * side * _cover
 
 
 ## Carligul AI-ului (grupul `ai_speed_zones`): cu cat se inmulteste tinta de

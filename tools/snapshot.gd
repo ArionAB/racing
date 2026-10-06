@@ -115,6 +115,9 @@ extends Node
 ##                             (zid plin), 80-95 risipire, 95-101 LINISTE (nimic
 ##                             pe ecran). Fara el zidul ruleaza de la `start_clock`
 ##                             (liniste la start).
+##   --rim-at=T [--rim-hit]    BOLOVANUL DE PE BUZA (RimBoulderHazard, Track19, culoarul E)
+##                             cu ceasul INGHETAT la T s din ciclul de 19 s. Cu `--car --rim-hit`
+##                             masina sta pe punctul de impact, strivita + <=> inversat.
 ##   --no-haboob               scoate HaboobHazard din scena INAINTE de captura
 ##                             (cadrul de control fara zid, pentru A/B/overdraw).
 ##   --tuk-at=0.93,0.96[:-2.2] TUK-TUK-URI (Jodhpur) la fractiile date din
@@ -401,6 +404,8 @@ func _ready() -> void:
 	var cloud_at := -1.0
 	var haboob_at := -1.0
 	var no_haboob := false
+	var rim_at := -1.0
+	var rim_hit := false
 	var bus_at := -1.0
 	var tuk_at := ""
 	var cow_mode := ""
@@ -531,6 +536,10 @@ func _ready() -> void:
 			haboob_at = float(arg.trim_prefix("--haboob-at="))
 		elif arg == "--no-haboob":
 			no_haboob = true
+		elif arg.begins_with("--rim-at="):
+			rim_at = float(arg.trim_prefix("--rim-at="))
+		elif arg == "--rim-hit":
+			rim_hit = true
 		elif arg.begins_with("--bus-at="):
 			bus_at = float(arg.trim_prefix("--bus-at="))
 		elif arg.begins_with("--tuk-at="):
@@ -658,6 +667,8 @@ func _ready() -> void:
 		await _remove_haboob(track)
 	elif haboob_at >= 0.0:
 		await _set_haboob_time(track, haboob_at)
+	if rim_at >= 0.0:
+		await _set_rim_time(track, rim_at)
 	if bus_at >= 0.0:
 		await _set_bus_time(track, bus_at)
 	if tuk_at != "":
@@ -1000,6 +1011,21 @@ func _ready() -> void:
 			car.road_index = idx
 			car.on_start_grid = true
 			_seat_car_on_rope_bridge(track, car)
+			if rim_hit:
+				# `--car --rim-at=T --rim-hit`: masina sta pe punctul de impact al
+				# bolovanului de pe buza, strivita + directie inversata (starea de
+				# dupa lovitura, cu turtirea si "<=>" deasupra).
+				var rims := track.find_children("*", "RimBoulderHazard", true, false)
+				if not rims.is_empty():
+					var rz := rims[0] as RimBoulderHazard
+					car.global_transform = Transform3D(car.global_transform.basis,
+						rz.global_position + Vector3.UP * 0.45)
+					car.crush(RimBoulderHazard.CRUSH_SECONDS, RimBoulderHazard.CRUSH_FACTOR,
+						RimBoulderHazard.CRUSH_SQUASH, RimBoulderHazard.CRUSH_KEEP_SPEED,
+						true, true)
+					for _rf in 12:
+						await get_tree().physics_frame
+					print("--rim-hit: masina strivita, inversare %.2f s" % car.steer_invert_left)
 			if haboob_at >= 0.0:
 				# `--car --haboob-at`: masina e JUCATORUL (ceata de joc se aplica doar
 				# lui) si hazardul o vede dupa cateva cadre de fizica.
@@ -1459,6 +1485,23 @@ func _set_haboob_time(root: Node, at: float) -> void:
 				str(w.visible) if w != null else "?"])
 	if found == 0:
 		print("--haboob-at: NICIUN haboob pe pista asta")
+
+
+## `--rim-at=T`: bolovanul de pe buza (RimBoulderHazard) cu ceasul INGHETAT la T
+## secunde din ciclul de 19 s (0-15.9 liniste, ~15.95-17.35 telegraf, ~17.35-18.35
+## cade, 18.35-18.7 pe asfalt, apoi se sparge). Ca la haboob, deferit.
+func _set_rim_time(root: Node, at: float) -> void:
+	await get_tree().process_frame
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "RimBoulderHazard", true, false):
+		var rz := node as RimBoulderHazard
+		rz.force_clock = at
+		found += 1
+		print("--rim-at=%.2f: %s faza %d, impact la %s" % [at, rz.name,
+			rz.phase_at(at), str(rz.global_position)])
+	if found == 0:
+		print("--rim-at: NICIUN RimBoulderHazard pe pista asta")
 
 
 ## `--no-haboob`: scos din scena (si din grupul AI) INAINTE de captura.

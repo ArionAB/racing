@@ -659,6 +659,7 @@ func _physics_process(delta: float) -> void:
 	slip_time = maxf(slip_time - delta, 0.0)
 	crush_time = maxf(crush_time - delta, 0.0)
 	steer_invert_left = maxf(steer_invert_left - delta, 0.0)
+	_update_invert_marker()
 	blind_time = maxf(blind_time - delta, 0.0)
 	if crush_time <= 0.0:
 		crush_factor = 1.0
@@ -1189,6 +1190,38 @@ func ignite(seconds: float, factor: float, keep_speed: float) -> void:
 	# Semnalul de strivire ramane cel care zguduie camera (race.gd il asculta
 	# deja). Severitate moderata: te-a lovit un jet, nu ti-a cazut muntele.
 	crushed.emit(self, 0.55)
+
+
+## Indiciul vizual al directiei inversate: un "<=>" galben care pulseaza
+## deasupra masinii (billboard), vizibil pentru toti — si pentru jucator (chase
+## cam), si pentru cine il depaseste. Un singur Label3D, creat la prima
+## inversare si doar aratat/ascuns dupa aceea. Nu aduce niciun material nou
+## (Label3D isi deseneaza propriul text), deci nu intra in numaratoarea de
+## materiale a pistei.
+var _invert_marker: Label3D = null
+
+func _update_invert_marker() -> void:
+	if steer_invert_left <= 0.0:
+		if _invert_marker != null:
+			_invert_marker.visible = false
+		return
+	if _invert_marker == null:
+		_invert_marker = Label3D.new()
+		_invert_marker.text = "<=>"
+		_invert_marker.font_size = 72
+		_invert_marker.pixel_size = 0.012
+		_invert_marker.outline_size = 14
+		_invert_marker.modulate = Color(1.0, 0.85, 0.15)
+		_invert_marker.outline_modulate = Color(0.25, 0.1, 0.0)
+		_invert_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_invert_marker.no_depth_test = true
+		_invert_marker.top_level = false
+		_invert_marker.position = Vector3(0.0, 2.3, 0.0)
+		_invert_marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_invert_marker)
+	_invert_marker.visible = true
+	var pulse := 1.0 + 0.2 * sin(float(Time.get_ticks_msec()) * 0.018)
+	_invert_marker.scale = Vector3.ONE * pulse
 
 
 func apply_sweep(push: Vector3) -> void:

@@ -227,6 +227,9 @@ var _no_tub: bool = false
 ## memoria `ceasul-porneste-in-prima-faza`).
 var _no_haboob: bool = false
 var _haboob_at: float = -1.0
+## `--no-rim`: scoate `RimBoulderHazard` (bolovanul care cade de pe buza, culoarul E
+## din Monument Valley) din scena INAINTE de prima fizica — A/B-ul costului lui.
+var _no_rim: bool = false
 ## `--no-daruma`: scoate `DarumaOtoshiHazard` din scena (A/B-ul turnului, Kyoto).
 var _no_daruma: bool = false
 ## `--no-gion`: scoate `GionMatsuriHazard` (carul de festival) din scena (A/B-ul carului).
@@ -395,6 +398,8 @@ func _ready() -> void:
 			_force_dusk = float(arg.trim_prefix("--dusk="))
 		elif arg == "--no-tub":
 			_no_tub = true
+		elif arg == "--no-rim":
+			_no_rim = true
 		elif arg == "--no-haboob":
 			_no_haboob = true
 		elif arg.begins_with("--haboob-at="):
@@ -547,6 +552,8 @@ func _start_race() -> void:
 	_setup_kyoto()
 	if _no_haboob or _haboob_at >= 0.0:
 		_setup_haboob.call_deferred()
+	if _no_rim:
+		_setup_rim.call_deferred()
 	if _no_turbo:
 		for car in cars:
 			car.turbo_fill_time = 1.0e9
@@ -584,6 +591,17 @@ func _setup_haboob() -> void:
 		print("--no-haboob: %d haboob-uri scoase din scena" % found)
 	else:
 		print("--haboob-at=%.1f: ceasul a %d haboob-uri inghetat" % [_haboob_at, found])
+
+
+## `--no-rim`: scoate bolovanul de pe buza. Deferit ca haboob-ul; raporteaza cate a
+## gasit (`0` = flagul n-a facut nimic).
+func _setup_rim() -> void:
+	var found := 0
+	for node in _race.track.find_children("*", "RimBoulderHazard", true, false):
+		found += 1
+		node.get_parent().remove_child(node)
+		node.free()
+	print("--no-rim: %d bolovani de pe buza scosi din scena" % found)
 
 
 ## Kyoto: tubul shishi-odoshi (numarat sau scos cu `--no-tub`) si buzele
@@ -1293,6 +1311,13 @@ func _report_race() -> void:
 	print("--- banda secundara: %d treceri%s" % [branch_total,
 		branch_line if branch_total > 0 else " (nimeni n-a luat-o)"])
 	_report_kyoto(cars)
+	# Bolovanul de pe buza (Track19): cate masini a strivit (inversare de directie).
+	var rim_nodes := track.find_children("*", "RimBoulderHazard", true, false)
+	if not rim_nodes.is_empty():
+		var rim_hits := 0
+		for rn in rim_nodes:
+			rim_hits += (rn as RimBoulderHazard).hits
+		print("--- bolovan de pe buza (RimBoulderHazard): %d masini strivite+inversate" % rim_hits)
 	var bus_total := 0
 	for i in cars.size():
 		bus_total += int(_stats[i].bus_hits)

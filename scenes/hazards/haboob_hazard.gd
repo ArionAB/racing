@@ -67,6 +67,11 @@ var force_clock: float = -1.0
 @export_range(1.0, 20.0, 0.1) var wall_speed: float = 7.0
 ## Inaltimea zidului (m). Brief: ~50.
 @export_range(5.0, 120.0, 1.0) var wall_height: float = 50.0
+## Dimensiunile VIZUALE ale zidului (m), separate de zona de gameplay (`half_width`
+## si `wall_height` comanda ceata, vantul si albirea): zidul se vede mai lat si mai
+## inalt decat zona care te pedepseste, ca sa citeasca de pe F ca un zid.
+@export_range(50.0, 800.0, 10.0) var visual_width: float = 400.0
+@export_range(20.0, 120.0, 1.0) var visual_height: float = 60.0
 ## Pe cati metri de la marginea laterala se subtiaza efectul (ceata/vant).
 @export_range(0.0, 100.0, 1.0) var edge_ramp: float = 30.0
 ## Cate quad-uri verticale (2-3).
@@ -202,24 +207,66 @@ func _ensure_path() -> void:
 	add_child(_path)
 
 
+## Zidul vizual: textura 512x256 pentru 400 m x 60 m (1 px = 0,78 m x 0,23 m).
+## Creasta e uniunea unor LOBI ROTUNJITI (cercuri de 10-24 m pe marginea de sus,
+## ca un cumulus culcat), nu un zgomot cu fuioare. Corpul e dens pana sus; jos e
+## inchis (`#8A5230`), sus cald (`#E0A672`), iar fiecare lob e mai luminat spre
+## fata lui de vest. Pe jos alfa coboara pe ~4 m, ca intersectia cu terenul sa nu
+## fie o muchie dura.
+const TEX_W: int = 512
+const TEX_H: int = 256
+
 static func wall_material() -> StandardMaterial3D:
 	if _wall_material == null:
-		var w := 256
-		var h := 128
-		var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-		var low := Color(0.659, 0.404, 0.243)
-		var high := Color(0.851, 0.620, 0.420) # mai deschis sus
-		for x in w:
-			var u := float(x) / float(w - 1)
-			# Marginea de sus nu e o linie: ondulata, ca un nor de praf.
-			var top := 0.90 + 0.06 * sin(u * 19.0 + 1.3) + 0.04 * sin(u * 47.0 + 0.4)
-			var side := smoothstep(0.0, 0.10, u) * smoothstep(0.0, 0.10, 1.0 - u)
-			for y in h:
-				var v := 1.0 - float(y) / float(h - 1) # 0 jos, 1 sus
-				var up := 1.0 - smoothstep(top - 0.16, top, v)
-				var foot := lerpf(0.8, 1.0, smoothstep(0.0, 0.08, v))
-				var a := side * up * foot
-				var c := low.lerp(high, smoothstep(0.1, 0.95, v))
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 101101 # deterministic: aceeasi creasta la fiecare rulare
+		var w_m := 400.0
+		var h_m := 60.0
+		# Lobii: (centru x m, centru y m, raza m).
+		var lobes: Array[Vector3] = []
+		var cx := -10.0
+		while cx < w_m + 10.0:
+			var r := rng.randf_range(10.0, 24.0)
+			lobes.append(Vector3(cx, rng.randf_range(34.0, 42.0) + (r - 17.0) * 0.5, r))
+			cx += r * rng.randf_range(0.9, 1.5)
+		# Si lobi mai mici, mai jos, intre cei mari (umflaturi secundare).
+		var cx2 := 0.0
+		while cx2 < w_m:
+			var r2 := rng.randf_range(7.0, 13.0)
+			lobes.append(Vector3(cx2, rng.randf_range(26.0, 32.0), r2))
+			cx2 += r2 * rng.randf_range(1.6, 2.6)
+		var low := Color(0.541, 0.322, 0.188)  # #8A5230
+		var high := Color(0.878, 0.651, 0.447) # #E0A672
+		var img := Image.create(TEX_W, TEX_H, false, Image.FORMAT_RGBA8)
+		for x in TEX_W:
+			var xm := float(x) / float(TEX_W - 1) * w_m
+			# Marginea de sus la coloana asta + lobul care o da (pentru lumina).
+			var top_m := 0.0
+			var best_i := 0
+			for i in lobes.size():
+				var l := lobes[i]
+				var dx := xm - l.x
+				if absf(dx) < l.z:
+					var yy := l.y + sqrt(l.z * l.z - dx * dx)
+					if yy > top_m:
+						top_m = yy
+						best_i = i
+			var lobe := lobes[best_i]
+			var side := smoothstep(0.0, 14.0, xm) * smoothstep(0.0, 14.0, w_m - xm)
+			for y in TEX_H:
+				var ym := (1.0 - float(y) / float(TEX_H - 1)) * h_m
+				var edge := 1.0 - smoothstep(top_m - 1.8, top_m + 0.6, ym)
+				var foot := smoothstep(0.0, 4.0, ym)
+				var a := 0.95 * edge * foot * side
+				# Culoare: gradient pe inaltime + lumina de pe fata de vest a lobului
+				# (stanga-sus a cercului), + umbra la baza.
+				var k := smoothstep(2.0, 52.0, ym)
+				var c := low.lerp(high, k * k * 0.6 + k * 0.4)
+				var lx := (xm - lobe.x) / lobe.z
+				var ly := (ym - lobe.y) / lobe.z
+				var lit := clampf(0.5 - 0.35 * lx + 0.35 * ly, 0.0, 1.0)
+				if ym > top_m - 9.0:
+					c = c.lerp(Color(1.0, 0.78, 0.55), lit * 0.35)
 				img.set_pixel(x, y, Color(c.r, c.g, c.b, a))
 		var m := StandardMaterial3D.new()
 		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -227,17 +274,16 @@ static func wall_material() -> StandardMaterial3D:
 		m.cull_mode = BaseMaterial3D.CULL_DISABLED
 		m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
 		m.albedo_texture = ImageTexture.create_from_image(img)
-		m.albedo_color = Color(1.0, 1.0, 1.0, 0.85)
+		m.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
 		# Aproape de camera zidul se topeste: inauntru nu te inconjoara o
 		# panza opaca, ceata mediului face treaba.
 		m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
 		m.distance_fade_min_distance = 5.0
 		m.distance_fade_max_distance = 40.0
-		# Fara asta, planul vertical taie soseaua intr-o linie dreapta (vazut pe
-		# captura din interior). Proximity fade o topeste pe ~4 m. Cost de masurat
-		# pe device: citeste textura de adancime.
+		# Planul vertical taie soseaua intr-o linie dreapta. Proximity fade o
+		# topeste pe 20 m. Cost de masurat pe device: citeste textura de adancime.
 		m.proximity_fade_enabled = true
-		m.proximity_fade_distance = 4.0
+		m.proximity_fade_distance = 20.0
 		_wall_material = m
 	return _wall_material
 
@@ -278,11 +324,11 @@ func _build_visuals() -> void:
 		var q := MeshInstance3D.new()
 		q.name = "Quad%d" % i
 		var quad := QuadMesh.new()
-		quad.size = Vector2(half_width * 2.0, wall_height)
+		quad.size = Vector2(visual_width, visual_height)
 		q.mesh = quad
 		q.material_override = wall_material()
 		q.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		q.position = Vector3(0.0, wall_height * 0.5 - 2.0, zs[i] if quad_count == 3 else (zs[0] if i == 0 else zs[2]))
+		q.position = Vector3(0.0, visual_height * 0.5 - 6.0, zs[i] if quad_count == 3 else (zs[0] if i == 0 else zs[2]))
 		_wall.add_child(q)
 		_quads.append(q)
 	# --- praful: <= 32 particule pe fata zidului
@@ -299,8 +345,8 @@ func _build_visuals() -> void:
 		pm.material = dust_material()
 		_dust.mesh = pm
 		_dust.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-		_dust.emission_box_extents = Vector3(minf(half_width, 140.0), wall_height * 0.35, 6.0)
-		_dust.position = Vector3(0.0, wall_height * 0.35, -length * 0.5)
+		_dust.emission_box_extents = Vector3(minf(visual_width * 0.5, 160.0), visual_height * 0.3, 6.0)
+		_dust.position = Vector3(0.0, visual_height * 0.3, -length * 0.5)
 		_dust.direction = Vector3(0.0, 0.15, -1.0)
 		_dust.spread = 12.0
 		_dust.initial_velocity_min = 3.0
@@ -470,8 +516,12 @@ func _place_wall() -> void:
 	var grow := lerpf(0.35, 1.0, _cover)
 	var alpha := clampf(_cover, 0.0, 1.0)
 	for q in _quads:
-		q.scale = Vector3(1.0, grow, 1.0)
-		q.position.y = wall_height * 0.5 * grow - 2.0
+		var qi := _quads.find(q)
+		# Fiecare strat are alta inaltime, iar cele impare sunt oglindite: crestele
+		# nu se suprapun la fel si silueta ramane una singura, nu trei identice.
+		var hk := grow * (1.0 - 0.07 * float(qi))
+		q.scale = Vector3(-1.0 if qi % 2 == 1 else 1.0, hk, 1.0)
+		q.position.y = visual_height * 0.5 * hk - 6.0
 		q.transparency = 1.0 - alpha
 	if _dust != null:
 		var want := _cover > 0.05

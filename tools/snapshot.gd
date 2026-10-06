@@ -1000,6 +1000,12 @@ func _ready() -> void:
 			car.road_index = idx
 			car.on_start_grid = true
 			_seat_car_on_rope_bridge(track, car)
+			if haboob_at >= 0.0:
+				# `--car --haboob-at`: masina e JUCATORUL (ceata de joc se aplica doar
+				# lui) si hazardul o vede dupa cateva cadre de fizica.
+				car.is_player = true
+				for _hf in 6:
+					await get_tree().physics_frame
 			if vitrina_stem != "":
 				# Lista cu virgula (`--vitrina=momiji_a,momiji_b`): piesele se
 				# aseaza una dupa alta pe drum, la `--vitrina-step` metri, ca un

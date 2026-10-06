@@ -600,7 +600,16 @@ func update(delta: float) -> void:
 	# libera — se scapa prin timing. Ridic piciorul ca sa trec DUPA disc (niciodata
 	# pana la oprire: plafonul are podea), sau trec inainte de lovitura.
 	target = minf(target, _daruma_cap(idx, speed))
-	if speed > target * 1.06:
+	# Zid de praf (Monument Valley, HaboobHazard): in miezul lui un sofer prudent
+	# ridica piciorul cu ~10%. Fara viteza trisata si fara vedere speciala — vezi
+	# `speed_zone_scale`.
+	var zone_scale := speed_zone_scale()
+	target *= zone_scale
+	# In zona de prudenta banda de toleranta de 6% dispare: viteza reala a masinilor
+	# sta sub `max_speed` (drag), deci cu banda tinta redusa cu 10% nu ar fi
+	# frant niciodata (masurat pe ProbeHaboob: -2,6% fata de -10% cerut).
+	var brake_band := 1.0 if zone_scale < 0.999 else 1.06
+	if speed > target * brake_band:
 		# Franare proportionala cu depasirea, nu o smucitura fixa.
 		_throttle = clampf(-(speed - target) / 6.0, -1.0, -0.15)
 	else:
@@ -630,6 +639,10 @@ func update(delta: float) -> void:
 		if car.turbo_charge > 0.6 and severity <= 0.0 and _throttle > 0.0:
 			_turbo = true
 	elif car.turbo_charge < 0.05 or severity > 0.25:
+		_turbo = false
+	# Un sofer prudent in zid nu arde turbo: altfel tinta redusa nu s-ar vedea in
+	# viteza reala (turbo-ul depaseste plafonul).
+	if zone_scale < 0.999:
 		_turbo = false
 
 # --------------------------------------------------------------- depasirea
@@ -998,6 +1011,23 @@ const DARUMA_FLOOR: float = 0.5
 const DARUMA_PASSED_M: float = 8.0
 ## Marja de siguranta peste sfarsitul ferestrei de pericol (s).
 const DARUMA_EXTRA_S: float = 0.2
+
+## Inmultitorul tintei de viteza din zonele care cer prudenta (grupul
+## `ai_speed_zones`, metoda `ai_speed_scale_at(pos) -> float`). 1.0 cand nu e nicio
+## zona in scena (grup gol = zero cost). Citeste doar ce poate simti si un om:
+## unde se afla masina fata de zona.
+const AI_SPEED_ZONE_GROUP: StringName = &"ai_speed_zones"
+
+func speed_zone_scale() -> float:
+	var nodes := get_tree().get_nodes_in_group(AI_SPEED_ZONE_GROUP)
+	if nodes.is_empty():
+		return 1.0
+	var scale := 1.0
+	for node in nodes:
+		if node.has_method("ai_speed_scale_at"):
+			scale = minf(scale, float(node.call("ai_speed_scale_at", car.global_position)))
+	return scale
+
 
 ## Daruma-otoshi: cand discul va traversa in FEREASTRA mea de sosire [rapid, lent]
 ## (`blocks_between`), aleg intre doua lucruri, o singura data, si tin alegerea:

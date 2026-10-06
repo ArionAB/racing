@@ -108,6 +108,15 @@ extends Node
 ##                             `phase` ignorat): 0-3.5 urca de sub banda,
 ##                             3.5-7.5 ACOPERA drumul, 7.5-10 se retrage,
 ##                             restul = ascuns. Fara el norul e in defileu.
+##   --haboob-at=57.0          HABOOB-UL (HaboobHazard, Monument Valley) la N
+##                             SECUNDE in ciclul lui (~101 s; `start_clock` si
+##                             `phase` ignorate, ceasul INGHETAT): 0-25 telegraf
+##                             (pacla creste, zidul se apropie), 25-80 traversare
+##                             (zid plin), 80-95 risipire, 95-101 LINISTE (nimic
+##                             pe ecran). Fara el zidul ruleaza de la `start_clock`
+##                             (liniste la start).
+##   --no-haboob               scoate HaboobHazard din scena INAINTE de captura
+##                             (cadrul de control fara zid, pentru A/B/overdraw).
 ##   --tuk-at=0.93,0.96[:-2.2] TUK-TUK-URI (Jodhpur) la fractiile date din
 ##                             bucla, pe banda STANGA (lat -2,2 = offsetul
 ##                             TrafficController; `:lat` il suprascrie per
@@ -390,6 +399,8 @@ func _ready() -> void:
 	var rope_load := -1.0
 	var rope_u := 0.5
 	var cloud_at := -1.0
+	var haboob_at := -1.0
+	var no_haboob := false
 	var bus_at := -1.0
 	var tuk_at := ""
 	var cow_mode := ""
@@ -516,6 +527,10 @@ func _ready() -> void:
 			hippo_at = float(arg.trim_prefix("--hippo-at="))
 		elif arg.begins_with("--cloud-at="):
 			cloud_at = float(arg.trim_prefix("--cloud-at="))
+		elif arg.begins_with("--haboob-at="):
+			haboob_at = float(arg.trim_prefix("--haboob-at="))
+		elif arg == "--no-haboob":
+			no_haboob = true
 		elif arg.begins_with("--bus-at="):
 			bus_at = float(arg.trim_prefix("--bus-at="))
 		elif arg.begins_with("--tuk-at="):
@@ -639,6 +654,10 @@ func _ready() -> void:
 		await _set_rope_load(track, rope_load, rope_u)
 	if cloud_at >= 0.0:
 		await _set_cloud_time(track, cloud_at)
+	if no_haboob:
+		await _remove_haboob(track)
+	elif haboob_at >= 0.0:
+		await _set_haboob_time(track, haboob_at)
 	if bus_at >= 0.0:
 		await _set_bus_time(track, bus_at)
 	if tuk_at != "":
@@ -1412,6 +1431,40 @@ func _set_cloud_time(root: Node, at: float) -> void:
 			% [at, cloud.name, cloud.cover(), cloud.get_node("Cloud").position.y])
 	if found == 0:
 		print("--cloud-at: NICIUN nor pe pista asta")
+
+
+## Haboob-ul: la N secunde in ciclu, cu ceasul INGHETAT (`force_clock`: fizica
+## continua sa ruleze, deci ceata si praful se aplica, dar timpul nu avanseaza).
+## Un process_frame in plus, ca la `--bus-at`: hazardurile cu `call_deferred` in
+## `_ready` nu exista inca la primul physics_frame.
+func _set_haboob_time(root: Node, at: float) -> void:
+	await get_tree().process_frame
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "HaboobHazard", true, false):
+		var hb := node as HaboobHazard
+		hb.force_clock = at
+		hb.set_cycle_time(at)
+		found += 1
+		var w := hb.wall()
+		print("--haboob-at=%.1f: %s acoperire %.2f, front la %.0f m pe cale, zid la %s (vizibil=%s)"
+			% [at, hb.name, hb.cover(), hb.front_distance_at(at),
+				str(w.global_position) if w != null else "?",
+				str(w.visible) if w != null else "?"])
+	if found == 0:
+		print("--haboob-at: NICIUN haboob pe pista asta")
+
+
+## `--no-haboob`: scos din scena (si din grupul AI) INAINTE de captura.
+func _remove_haboob(root: Node) -> void:
+	await get_tree().process_frame
+	var n := 0
+	for node in root.find_children("*", "HaboobHazard", true, false):
+		node.remove_from_group(HaboobHazard.AI_SPEED_GROUP)
+		node.get_parent().remove_child(node)
+		node.free()
+		n += 1
+	print("--no-haboob: %d haboob-uri scoase din scena" % n)
 
 
 ## Autobuzul: la N secunde de coborare pe curba lui, cu botul pe directia de

@@ -117,6 +117,8 @@ run_step "Reintrarea pe sosea dupa iesirea pe nisip" reentry.log 'VERDICT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeReentry.tscn -- --mode=drive --track=0
 run_step "Camera in caverna (tot intervalul de slidere)" cavecam.log 'TOATE OK|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeCavecam.tscn
+run_step "Strivit: turbo-ul nu scoate masina din strivire" crush_turbo.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeCrushTurbo.tscn
+run_step "Bolovanul de pe buza + directie inversata" rim_boulder.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeRimBoulder.tscn
 run_step "Registrul MeshCpu (citiri GPU refolosite)" meshcpu.log 'MeshCpu:' -- \
 	--headless --path . res://tools/ProbeMeshCpu.tscn
 

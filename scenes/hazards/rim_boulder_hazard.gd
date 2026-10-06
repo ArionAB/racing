@@ -39,6 +39,8 @@ const IMPACT_MARGIN: float = 0.95
 const FALL_GRAVITY: float = 22.0
 ## Cat mai e activa zona de impact dupa aterizare, apoi piatra se sparge.
 const HOLD_AFTER_LAND: float = 0.35
+## Cat se vede piatra clatinandu-se pe creasta, la finalul telegrafului.
+const ROCK_WOBBLE_TIME: float = 0.8
 const CRUMBLE_TIME: float = 0.3
 const HIT_COOLDOWN: float = 1.0
 ## Cat de puternic e shake-ul la lovitura nu e aici (il da `crushed`, ca la restul).
@@ -185,6 +187,13 @@ func _apply(t: float) -> void:
 		Phase.TELEGRAPH:
 			var k := clampf((t - t0) / telegraph_time, 0.0, 1.0)
 			_shadow.scale = Vector3.ONE * lerpf(0.15, 1.0, k)
+			# Ultima clipa a telegrafului: piatra se vede pe creasta si se clatina,
+			# gata sa cada — avertismentul cel mai usor de citit din chase cam.
+			if t - t0 > telegraph_time - ROCK_WOBBLE_TIME:
+				_rock.visible = true
+				_rock.position = rock_local_at(landing_time() - fall_time())
+				_rock.scale = Vector3.ONE
+				_pivot.rotation = Vector3(0.0, 0.0, 0.09 * sin(t * 34.0))
 		Phase.FALL:
 			_shadow.scale = Vector3.ONE
 			_rock.position = rock_local_at(t)
@@ -249,7 +258,7 @@ func _build() -> void:
 	_shadow.mesh = disc
 	if _shadow_mat == null:
 		_shadow_mat = StandardMaterial3D.new()
-		_shadow_mat.albedo_color = Color(0.05, 0.03, 0.02, 0.55)
+		_shadow_mat.albedo_color = Color(0.04, 0.02, 0.01, 0.72)
 		_shadow_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		_shadow_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		_shadow_mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
@@ -272,7 +281,9 @@ func _build() -> void:
 			_radius = maxf(box.size.x, box.size.z) * 0.5
 	_rock.visible = false
 
-	disc.top_radius = _radius + IMPACT_MARGIN
+	# Umbra e ceva mai larga decat zona de impact (x1.3): se citeste de la distanta
+	# de franare, iar marginea ei e deja "in afara" zonei care te striveste.
+	disc.top_radius = (_radius + IMPACT_MARGIN) * 1.3
 	disc.bottom_radius = disc.top_radius
 
 	_impact = Area3D.new()
@@ -286,16 +297,16 @@ func _build() -> void:
 
 	if _dust_mat == null:
 		_dust_mat = StandardMaterial3D.new()
-		_dust_mat.albedo_color = Color(0.78, 0.55, 0.38)
+		_dust_mat.albedo_color = Color(0.84, 0.66, 0.46)
 		_dust_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	var bit := BoxMesh.new()
-	bit.size = Vector3(0.16, 0.16, 0.16)
+	bit.size = Vector3(0.5, 0.5, 0.5)
 
 	# Pietricele si praf care curg de pe creasta: avertismentul vizibil de la distanta.
 	_rim_dust = CPUParticles3D.new()
 	_rim_dust.mesh = bit
 	_rim_dust.material_override = _dust_mat
-	_rim_dust.amount = 28
+	_rim_dust.amount = 64
 	_rim_dust.lifetime = 1.1
 	_rim_dust.local_coords = false
 	_rim_dust.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
@@ -305,8 +316,8 @@ func _build() -> void:
 	_rim_dust.initial_velocity_min = 0.6
 	_rim_dust.initial_velocity_max = 2.2
 	_rim_dust.gravity = Vector3(0.0, -9.0, 0.0)
-	_rim_dust.scale_amount_min = 0.5
-	_rim_dust.scale_amount_max = 1.6
+	_rim_dust.scale_amount_min = 0.7
+	_rim_dust.scale_amount_max = 2.0
 	_rim_dust.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_rim_dust.position = Vector3(rim_offset + 0.3, rim_height - 0.7, 0.0)
 	_rim_dust.emitting = false

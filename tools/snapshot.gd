@@ -1500,6 +1500,9 @@ func _set_rim_time(root: Node, at: float) -> void:
 		found += 1
 		print("--rim-at=%.2f: %s faza %d, impact la %s" % [at, rz.name,
 			rz.phase_at(at), str(rz.global_position)])
+	# Praful cere timp de incalzire: ceasul e inghetat, dar particulele curg.
+	for _i in 100:
+		await get_tree().physics_frame
 	if found == 0:
 		print("--rim-at: NICIUN RimBoulderHazard pe pista asta")
 

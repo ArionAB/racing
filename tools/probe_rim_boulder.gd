@@ -155,7 +155,7 @@ func _cycle(track: Track) -> Dictionary:
 	var hit_car := _car(track, Vector3(IMPACT_X, 0.7, 0.0), 1.0, 0.0)
 	var other := _car(track, Vector3(LANE_OTHER_X, 0.7, 0.0), 1.0, 0.0)
 	var ev := {"shadow": -1.0, "rock": -1.0, "hit": -1.0, "hit_other": -1.0,
-		"inv_end": -1.0, "dust_t": -1.0}
+		"inv_end": -1.0, "dust_t": -1.0, "fall": -1.0}
 	var steer_before := 0.0
 	var steer_during := 0.0
 	var steer_after := 0.0
@@ -179,6 +179,8 @@ func _cycle(track: Track) -> Dictionary:
 			ev["rock"] = t
 			rock_y_start = hz._rock.position.y
 			rock_x_start = hz._rock.position.x
+		if ev["rock"] > 0.0 and ev["fall"] < 0.0 and hz._rock.position.y < rock_y_start - 0.05:
+			ev["fall"] = t
 		if hz._rock.visible and hz._rock.position.y < rock_y_land:
 			rock_y_land = hz._rock.position.y
 		if ev["hit"] < 0.0 and hit_car.crush_time > 0.0:
@@ -248,10 +250,13 @@ func _run_synthetic() -> void:
 	_verdict(a["rock_y_start"] >= 10.3 and a["rock_x_start"] >= 6.0,
 		"piatra apare pe creasta (y %.1f >= 10.3, x %.1f >= 6.0)" % [a["rock_y_start"], a["rock_x_start"]])
 	_verdict(a["rock_y_land"] < 1.6, "ajunge pe asfalt (centrul coboara la y %.2f)" % a["rock_y_land"])
-	var fall_t: float = a["hit"] - a["rock"]
-	var fall_expect := sqrt(2.0 * (float(a["rock_y_start"]) - 1.25) / 22.0)
-	_verdict(absf(fall_t - fall_expect) < 0.25,
+	var fall_t: float = a["hit"] - a["fall"]
+	var fall_expect := sqrt(2.0 * (float(a["rock_y_start"]) - 1.25) / 22.0) - 0.067
+	_verdict(a["fall"] > 0.0 and absf(fall_t - fall_expect) < 0.25,
 		"cadere libera: %.2f s masurat vs %.2f s din inaltimea masurata" % [fall_t, fall_expect])
+	var wobble_lead: float = a["hit"] - a["rock"]
+	_verdict(wobble_lead >= 1.2 and wobble_lead <= 2.4,
+		"piatra se vede pe creasta cu %.2f s inainte de impact (clatinare + cadere)" % wobble_lead)
 
 	print("--- (3) strivire")
 	_verdict(a["hit"] > 0.0 and absf(float(a["hit"]) - LANDING_EXPECT) <= 0.2,

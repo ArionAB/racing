@@ -221,6 +221,12 @@ var _train_cam: bool = false
 var _train_meter: Node = null
 ## `--no-tub`: scoate `ShishiOdoshiHazard` din scena (A/B-ul tubului, Kyoto).
 var _no_tub: bool = false
+## `--no-haboob`: scoate `HaboobHazard` din scena INAINTE de prima fizica (A/B-ul
+## zidului de praf, Monument Valley). `--haboob-at=<t>`: ceasul lui INGHETAT la t
+## secunde din ciclu (>= 0); fara el ruleaza de la `start_clock` (liniste la start,
+## memoria `ceasul-porneste-in-prima-faza`).
+var _no_haboob: bool = false
+var _haboob_at: float = -1.0
 ## `--no-daruma`: scoate `DarumaOtoshiHazard` din scena (A/B-ul turnului, Kyoto).
 var _no_daruma: bool = false
 ## `--no-gion`: scoate `GionMatsuriHazard` (carul de festival) din scena (A/B-ul carului).
@@ -389,6 +395,10 @@ func _ready() -> void:
 			_force_dusk = float(arg.trim_prefix("--dusk="))
 		elif arg == "--no-tub":
 			_no_tub = true
+		elif arg == "--no-haboob":
+			_no_haboob = true
+		elif arg.begins_with("--haboob-at="):
+			_haboob_at = float(arg.trim_prefix("--haboob-at="))
 		elif arg == "--no-daruma":
 			_no_daruma = true
 		elif arg == "--no-shishimai":
@@ -535,6 +545,8 @@ func _start_race() -> void:
 			car.bumped.connect(_on_bumped.bind(i))
 	_setup_signal_hazards()
 	_setup_kyoto()
+	if _no_haboob or _haboob_at >= 0.0:
+		_setup_haboob.call_deferred()
 	if _no_turbo:
 		for car in cars:
 			car.turbo_fill_time = 1.0e9
@@ -550,6 +562,28 @@ func _start_race() -> void:
 		_force_rain_cycle_deferred(float(_force_rain))
 	if _force_dusk >= 0.0:
 		_force_dusk_cycle_deferred(_force_dusk)
+
+
+## Haboob (Monument Valley): `--no-haboob` il scoate (si din grupul AI), iar
+## `--haboob-at=<t>` ii ingheata ceasul la t secunde din ciclu. Deferit: hazardul
+## poate fi construit de generatorul pistei in acelasi cadru cu cursa. Raporteaza
+## cate a gasit — `0` inseamna ca flagul n-a facut nimic (pista fara haboob).
+func _setup_haboob() -> void:
+	var found := 0
+	for node in _race.track.find_children("*", "HaboobHazard", true, false):
+		var hb := node as HaboobHazard
+		found += 1
+		if _no_haboob:
+			hb.remove_from_group(HaboobHazard.AI_SPEED_GROUP)
+			hb.get_parent().remove_child(hb)
+			hb.free()
+		else:
+			hb.force_clock = _haboob_at
+			hb.set_cycle_time(_haboob_at)
+	if _no_haboob:
+		print("--no-haboob: %d haboob-uri scoase din scena" % found)
+	else:
+		print("--haboob-at=%.1f: ceasul a %d haboob-uri inghetat" % [_haboob_at, found])
 
 
 ## Kyoto: tubul shishi-odoshi (numarat sau scos cu `--no-tub`) si buzele

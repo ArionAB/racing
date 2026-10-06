@@ -233,6 +233,9 @@ var last_safe_route: int = 0
 # --- Drift/turbo ---
 var is_drifting: bool = false
 var drift_dir: float = 0.0
+## Stopurile aprinse: frana de serviciu (inapoi cu viteza inainte) sau
+## handbrake-ul de drift. Citit de [CarLights]; scris o data pe tick.
+var brake_lamp: bool = false
 var turbo_charge: float = 0.0 # 0..1, bara din UI
 var is_boosting: bool = false
 var slip_time: float = 0.0 # aquaplanare (setata de WaterHazard sau de o banda uda)
@@ -259,6 +262,16 @@ var crush_time: float = 0.0
 ## in volan (vezi FumaroleHazard).
 var blind_time: float = 0.0
 var crush_factor: float = 1.0
+## Directia inversata (stanga <-> dreapta) cat mai tine, in secunde. Se pune DOAR
+## prin `crush(..., invert_steer = true)` (bolovanul care cade din culoarul E de
+## pe Track19); restul hazardelor cu crush n-o ating. Se aplica in Car, pe comanda
+## de viraj, deci o simte si AI-ul (fara viteza trisata, fara vedere speciala).
+var steer_invert_left: float = 0.0
+## Cat strivit (`crush_time` > 0) turbo-ul nu porneste (vezi `_update_turbo`).
+## Mereu true in joc; exista ca garda `ProbeCrushTurbo --sabotaj` sa poata scoate
+## fix-ul la runtime si sa dovedeasca ca masoara ceva.
+var crush_blocks_turbo: bool = true
+signal steer_inverted(seconds: float)
 ## Ars de o coloana de foc (gheizerele din craterul Stromboli, vezi
 ## `ignite`). Se tine SEPARAT de `crush_time` desi amandoua taie plafonul:
 ## strivirea e o forma turtita care se vede pe caroserie, arderea e un nor de
@@ -521,6 +534,13 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	# colors), ca orice alt asset al lumii. FBX-urile RgsDev raman cu ale lor.
 	if data.palette_model and _visual.get_child_count() > 0:
 		Palette.apply_world_material(_visual.get_child(0))
+	# Stopuri si faruri, din nodurile `*_Lamp_*` ale modelului (dupa materialul
+	# de clasa, care le-ar fi acoperit lentilele).
+	if data.model != null and _visual.get_child_count() > 0:
+		var lights := CarLights.new()
+		lights.name = "Lights"
+		_visual.add_child(lights)
+		lights.setup(self, _visual.get_child(0) as Node3D)
 	# Soferul, doar pe caroserii deschise (vezi CarData.open_cockpit).
 	_driver = null
 	is_ejected = false
@@ -625,6 +645,8 @@ func _physics_process(delta: float) -> void:
 	if controller != null and race_active and not finished:
 		controller.update(delta)
 		steer = clampf(controller.get_steer(), -1.0, 1.0)
+		if steer_invert_left > 0.0:
+			steer = -steer
 		throttle = clampf(controller.get_throttle(), -1.0, 1.0)
 		drift_pressed = controller.is_drift_pressed()
 		turbo_pressed = controller.is_turbo_pressed()
@@ -648,11 +670,14 @@ func _physics_process(delta: float) -> void:
 
 	_update_drift(drift_pressed, steer, fwd_speed)
 	_update_turbo(turbo_pressed, delta)
+	brake_lamp = (throttle < 0.0 and fwd_speed > 1.0) or is_drifting
 
 	_apply_driving(steer, throttle, fwd_h, fwd_speed)
 
 	slip_time = maxf(slip_time - delta, 0.0)
 	crush_time = maxf(crush_time - delta, 0.0)
+	steer_invert_left = maxf(steer_invert_left - delta, 0.0)
+	_update_invert_marker()
 	blind_time = maxf(blind_time - delta, 0.0)
 	if crush_time <= 0.0:
 		crush_factor = 1.0
@@ -1027,7 +1052,16 @@ func _update_turbo(turbo_pressed: bool, delta: float) -> void:
 	if burn_time > 0.0:
 		is_boosting = _forced_boost > 0.0
 		return
-	if turbo_pressed and can_fire:
+	# Strivit = turbo BLOCAT (4-B, 6 oct 2026). `crush()` stinge boost-ul o
+	# singura data, dar daca butonul ramane apasat, tick-ul urmator il reaprindea:
+	# `_current_max_speed` adauga +turbo_speed_bonus INAINTE sa inmulteasca cu
+	# `crush_factor` (deci plafonul urca de la 0.7*vmax la 0.7*(vmax+11)), accelerarea
+	# primea +turbo_accel_bonus, `_start_boost` dadea +4 m/s si `_punch_scale`
+	# suprascria turtirea tinuta. Jucatorul iesea din strivire cu un buton. Cat
+	# `crush_time` > 0 turbo-ul nu porneste; bara NU se goleste (nu ai ars nimic) si
+	# continua sa se incarce, ca sa-l ai gata cand expira strivirea.
+	var crush_blocked := crush_blocks_turbo and crush_time > 0.0
+	if turbo_pressed and can_fire and not crush_blocked:
 		if not is_boosting:
 			_start_boost()
 		turbo_charge = maxf(turbo_charge - delta / turbo_burn_time, 0.0)
@@ -1100,8 +1134,15 @@ func blind(seconds: float = 0.5) -> void:
 ## (#242), turtirea e chiar EXPLICATIA pentru care mergi mai incet trei secunde:
 ## masina e latita, deci se tarie. Daca sare inapoi la forma normala in doua
 ## zecimi si tu ramai lent, penalizarea devine invizibila si se citeste ca bug.
+##
+## `invert_steer` (implicit false) inverseaza directia (stanga <-> dreapta) cat
+## tine strivirea (`seconds`). Il activeaza doar bolovanul din culoarul E.
 func crush(seconds: float, factor: float, squash: Vector3,
-		keep_speed: float, hold_squash: bool = false) -> void:
+		keep_speed: float, hold_squash: bool = false,
+		invert_steer: bool = false) -> void:
+	if invert_steer and seconds > 0.0:
+		steer_invert_left = maxf(steer_invert_left, seconds)
+		steer_inverted.emit(seconds)
 	crush_time = maxf(crush_time, seconds)
 	crush_factor = minf(crush_factor, factor)
 	velocity.x *= keep_speed
@@ -1168,6 +1209,38 @@ func ignite(seconds: float, factor: float, keep_speed: float) -> void:
 	# Semnalul de strivire ramane cel care zguduie camera (race.gd il asculta
 	# deja). Severitate moderata: te-a lovit un jet, nu ti-a cazut muntele.
 	crushed.emit(self, 0.55)
+
+
+## Indiciul vizual al directiei inversate: un "<=>" galben care pulseaza
+## deasupra masinii (billboard), vizibil pentru toti — si pentru jucator (chase
+## cam), si pentru cine il depaseste. Un singur Label3D, creat la prima
+## inversare si doar aratat/ascuns dupa aceea. Nu aduce niciun material nou
+## (Label3D isi deseneaza propriul text), deci nu intra in numaratoarea de
+## materiale a pistei.
+var _invert_marker: Label3D = null
+
+func _update_invert_marker() -> void:
+	if steer_invert_left <= 0.0:
+		if _invert_marker != null:
+			_invert_marker.visible = false
+		return
+	if _invert_marker == null:
+		_invert_marker = Label3D.new()
+		_invert_marker.text = "<=>"
+		_invert_marker.font_size = 72
+		_invert_marker.pixel_size = 0.012
+		_invert_marker.outline_size = 14
+		_invert_marker.modulate = Color(1.0, 0.85, 0.15)
+		_invert_marker.outline_modulate = Color(0.25, 0.1, 0.0)
+		_invert_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_invert_marker.no_depth_test = true
+		_invert_marker.top_level = false
+		_invert_marker.position = Vector3(0.0, 2.3, 0.0)
+		_invert_marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_invert_marker)
+	_invert_marker.visible = true
+	var pulse := 1.0 + 0.2 * sin(float(Time.get_ticks_msec()) * 0.018)
+	_invert_marker.scale = Vector3.ONE * pulse
 
 
 func apply_sweep(push: Vector3) -> void:
@@ -1328,6 +1401,32 @@ func can_respawn() -> bool:
 	return track != null and _respawn_cooldown <= 0.0 and not finished
 
 
+## Daca masina sta in afara unei benzi deschise (fara poarta) si in afara soselei,
+## la cel mult `BRANCH_FLANK_M` de axa benzii, intoarce (ruta, index) de repunere pe
+## banda; altfel (0, 0). Vezi comentariul din `respawn`.
+const BRANCH_FLANK_M: float = 16.0
+
+func _branch_flank_trap() -> Vector2i:
+	if track == null or track.routes.size() < 2:
+		return Vector2i.ZERO
+	var main_i := track.closest_index_global(global_position, 0)
+	if track.is_on_road(main_i, global_position, 0):
+		return Vector2i.ZERO
+	for bi in range(1, track.routes.size()):
+		var br := track.route_at(bi)
+		if br == null or br.baked.is_empty() or not track.branch_is_open(bi):
+			continue
+		if track.branch_gate(bi) != null:
+			continue
+		var bidx := br.closest_index_global(global_position)
+		if bidx == 0 or br.is_other_level(bidx, global_position):
+			continue
+		var lat := br.lateral_distance(bidx, global_position)
+		if lat > br.half_width and lat < BRANCH_FLANK_M:
+			return Vector2i(bi, bidx)
+	return Vector2i.ZERO
+
+
 ## `main_road`: repunerea ceruta de jucator merge mereu pe bucla principala.
 ## Pe o scurtatura `last_safe_route` e traseul ei — adesea pamant — iar
 ## dezvoltatorul a cerut explicit ca butonul sa te puna "tot timpul pe drum".
@@ -1360,6 +1459,19 @@ func respawn(backoff_m: float = 14.0, main_road: bool = false) -> void:
 		var p := track.recovery_transform(last_safe_index, 0.0, last_safe_route).origin
 		last_safe_index = track.closest_index_global(p, 0)
 		last_safe_route = 0
+	# Prinsa PE FLANCUL DE AFARA al unei benzi (peretele palniei tunelului de torii,
+	# Kyoto E'): masina sta intre sosea si peretele benzii, pe cota terenului, fara
+	# niciun checkpoint luat pe banda (`last_safe_route` ramane 0, la furca). Repusa
+	# la furca, aceeasi apropiere (viteza de dupa repunere + coltul taiat spre gura)
+	# o ducea iar pe flanc: 7 repuneri la rand la ~0,49 pe ProbeRace
+	# `--track=11 --seed=5`, ~15 s una. Se repune pe AXA benzii, la 14 m in urma
+	# locului unde a ramas — in palnie, nu in fata ei. Banda inchisa si banda cu
+	# poarta ingustata au regulile lor, mai sus; pistele fara banda: neatinse.
+	# Butonul jucatorului (`main_road`) cere drumul principal: fara banda.
+	var trap := Vector2i.ZERO if main_road else _branch_flank_trap()
+	if trap.x != 0:
+		last_safe_route = trap.x
+		last_safe_index = trap.y
 	global_transform = track.recovery_transform(last_safe_index, backoff_m,
 		last_safe_route)
 	if is_player and not _respawn_retry:
@@ -1384,6 +1496,7 @@ func respawn(backoff_m: float = 14.0, main_road: bool = false) -> void:
 	slip_time = 0.0
 	crush_time = 0.0
 	crush_factor = 1.0
+	steer_invert_left = 0.0 # repusa pe sosea, directia revine la normal
 	# Si turtirea care tinea cat incetinirea: repusa pe sosea, masina apare
 	# intreaga. Fara asta ar rasari latita si ar ramane asa pana expira tween-ul.
 	if _squash_tween != null and _squash_tween.is_valid():
@@ -1764,6 +1877,7 @@ func _update_effects(delta: float) -> void:
 		_fire_particles.emitting = burn_time > 0.0
 	_update_dust(on_road, loose, on_branch)
 	_drop_trail(delta, loose)
+	_drop_leaf_wear(delta, on_road)
 	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
 	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
 	_engine_audio.pitch_scale = lerpf(0.7, 1.9, speed_frac) \
@@ -1832,6 +1946,16 @@ func _on_loose_ground(on_road: bool) -> bool:
 	# ar intinde brazdele albastrui si peste autostrada de gheata.
 	if route == 0 and track.is_ice_at(track.frac_at(road_index)):
 		return false
+	return _road_loose_here()
+
+
+## Soseaua de sub roti e drum afanat? Pe fractia curenta, nu pe toata pista: o
+## bucla cu asfalt si portiuni de pamant (Track.is_dirt_at) are praf si urme doar
+## pe pamant. Pe o scurtatura (route != 0) nu exista intervale, ramane
+## raspunsul pistei. Pe o pista fara intervale e exact `road_is_loose()`.
+func _road_loose_here() -> bool:
+	if route == 0:
+		return track.road_is_loose_at(track.frac_at(road_index))
 	return track.road_is_loose()
 
 ## Culorile prafului, coapte o data cand masina afla pe ce pista e: una a
@@ -1844,10 +1968,25 @@ var _dust_colors_ready: bool = false
 ## 2 banda secundara (ruta curenta; se recalculeaza la schimbarea rutei).
 var _dust_source: int = -1
 var _dust_route: int = -1
+## Roata e pe un interval de pamant al pistei (Track.is_dirt_at)? Doar ca sa
+## stim cand sa recolorez fumul de drift la trecerea pamant <-> asfalt.
+var _drift_on_dirt: bool = false
 
 func _update_dust(on_road: bool, loose: bool, on_branch: bool = false) -> void:
 	if _dust_particles == null or track == null:
 		return
+	# Bucla cu asfalt si portiuni de pamant (Track.is_dirt_at): culoarea fumului
+	# de drift se alege doar cand se schimba SURSA prafului (mai jos), iar pe asfalt
+	# praful nu porneste niciodata — deci fumul ramanea colorat cu pamantul de
+	# dinainte. La trecerea pamant <-> asfalt se reseteaza aici. Pe pistele fara
+	# intervale ramura nu ruleaza.
+	if track.has_dirt_ranges():
+		var on_dirt := route == 0 and track.is_dirt_at(track.frac_at(road_index))
+		if on_dirt != _drift_on_dirt:
+			_drift_on_dirt = on_dirt
+			_dust_source = -1
+			if not on_dirt:
+				_drift_particles.color = DRIFT_SMOKE_COLOR
 	if not _dust_colors_ready:
 		_dust_colors_ready = true
 		# Praful de pe TEREN: mai INCHIS decat solul, nu mai deschis. Prima
@@ -1886,7 +2025,7 @@ func _update_dust(on_road: bool, loose: bool, on_branch: bool = false) -> void:
 		# Si fumul de drift: pe pamant nu arde cauciucul, se ridica solul. Gri de
 		# anvelopa peste o dara rosie ar fi singurul lucru din cadru care spune
 		# ca dedesubt e tot asfalt.
-		_drift_particles.color = tint if track.road_is_loose() \
+		_drift_particles.color = tint if _road_loose_here() \
 			else DRIFT_SMOKE_COLOR
 	# Norul creste cu viteza: la 6 m/s e o adiere, la plafon e o dara adevarata.
 	var k := clampf(horizontal_speed() / maxf(max_speed, 1.0), 0.0, 1.0)
@@ -1988,6 +2127,35 @@ func _drop_trail(delta: float, loose: bool) -> void:
 		# din spatele masinii; masca e istoria batatorita a intregii curse.
 		if route == 0:
 			track.stamp_wear(road_index, wheel)
+
+## Uzura pentru consumatorii externi ai pistei (covorul de frunze de la Kyoto):
+## rotile din spate stampileaza in `Track.wear_sinks`, la cadenta TRAIL_SPACING,
+## DOAR pe bucla principala si DOAR la sol — si independent de `loose`, fiindca
+## covorul sta pe asfalt, unde `_drop_trail` nu ruleaza. Pe pistele fara
+## consumatori iese din prima: zero cost.
+var _leaf_accum: float = 0.0
+
+func _drop_leaf_wear(delta: float, on_road: bool) -> void:
+	if track == null or route != 0 or not on_road or not track.has_wear_sinks():
+		return
+	var speed := horizontal_speed()
+	if speed < TRAIL_MIN_SPEED:
+		return
+	_leaf_accum += speed * delta
+	if _leaf_accum < TRAIL_SPACING:
+		return
+	_leaf_accum = 0.0
+	var fwd := -global_transform.basis.z
+	fwd.y = 0.0
+	if fwd.length_squared() < 0.001:
+		return
+	fwd = fwd.normalized()
+	var right := fwd.cross(Vector3.UP).normalized()
+	var half_track_w := data.body_width * 0.38 if data != null else 0.85
+	var rear_z := data.body_length * 0.34 if data != null else 1.3
+	var base := global_position - fwd * rear_z
+	for side: float in [-1.0, 1.0]:
+		track.stamp_wear_sinks(road_index, base + right * half_track_w * side)
 
 ## Textura de fum, incarcata o singura data pentru toate masinile.
 ##

@@ -49,10 +49,19 @@ const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track15.tscn", # Machu Picchu = INDEXUL 8
 	"res://scenes/tracks/Track16.tscn", # Fiordland = INDEXUL 9
 	"res://scenes/tracks/Track17.tscn", # Jodhpur = INDEXUL 10
+	# Track18 = INDEXUL 11, nu 18 (aceeasi capcana ca la Track13/Track17):
+	# `snapshot`/`probe_race`/`probe_layout` vor 11, `probe_decor`/`probe_manual`
+	# vor 18 (memoria `probe-decor-numar-de-scena`).
+	"res://scenes/tracks/Track18.tscn", # Kyoto = INDEXUL 11
+	# Track19 = INDEXUL 12 (Monument Valley, brief monument_valley.md §7): la
+	# COADA listei; Dunele (Track01) ramane pe indexul 0 pana la swap. Uneltele
+	# o adreseaza cu --track=19 (resolve_track_index o gaseste dupa numarul scenei).
+	"res://scenes/tracks/Track19.tscn", # Monument Valley = INDEXUL 12
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Alpii", "Baikal", "Stromboli", "Chongqing",
-	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland", "Jodhpur",
+	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland", "Jodhpur", "Kyoto",
+	"Monument Valley",
 ]
 const CHAMP_ROUNDS: int = 3
 
@@ -143,6 +152,12 @@ var cam_follow_scale: float = 1.0
 ## are cifra, iar cifra e singura care spune DACA sunt umbrele, ceata sau
 ## particulele. Persistat ca sa nu-l repornesti la fiecare build.
 var show_perf: bool = false
+
+## TEST (optiunea D din oct 2026): un SpotLight3D adevarat pe farurile
+## masinii jucatorului, pe pistele de noapte, in locul baltii de lumina false.
+## Setare ca sa se poata compara la volan, din pauza; prima de stins daca
+## device-ul nu tine 60 fps (vezi CarLights).
+var real_headlight: bool = true
 
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
 var touch_steer: float = 0.0
@@ -268,6 +283,7 @@ func load_settings() -> void:
 	cam_follow_scale = clampf(
 		float(cfg.get_value("camera", "follow_scale", 1.0)), 0.4, 2.5)
 	show_perf = bool(cfg.get_value("debug", "show_perf", false))
+	real_headlight = bool(cfg.get_value("debug", "real_headlight", true))
 
 func save_settings() -> void:
 	var cfg := ConfigFile.new()
@@ -280,6 +296,7 @@ func save_settings() -> void:
 	cfg.set_value("camera", "fov_scale", cam_fov_scale)
 	cfg.set_value("camera", "follow_scale", cam_follow_scale)
 	cfg.set_value("debug", "show_perf", show_perf)
+	cfg.set_value("debug", "real_headlight", real_headlight)
 	cfg.save(SETTINGS_PATH)
 
 

@@ -175,6 +175,13 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 	# Evidenta stancilor SOLIDE deja asezate (x, z, raza siluetei). Traverseaza
 	# toate benzile fiindca un buzunar se poate forma si intre benzi.
 	var solids: Array[Vector3] = []
+	# Monument Valley: plantele benzii se "usuca" (extrageri de rng fara
+	# instante), covorul de dupa bucla e singura vegetatie. Vezi `_mv_dry`.
+	# `--mv-legacy-scatter`: vechea vegetatie (slot cu un singur tip), pentru
+	# capturi A/B inainte/dupa si pentru sonde. Fara steag, covorul.
+	var carpet := props == "monumentvalley" and \
+		not OS.get_cmdline_user_args().has("--mv-legacy-scatter")
+	_mv_dry = carpet
 	for band in BANDS:
 		# Benzile cerute de un anumit set de prop-uri (vezi `far`) nu apar pe
 		# celelalte teme.
@@ -215,6 +222,9 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 				_place_satellites(container, sampler, spec, band, rng, mat_provider,
 					props, solids, blockers)
 				skip = 2
+	if carpet:
+		_mv_dry = false
+		_build_mv_carpet(root, sampler, seed_value, blockers)
 
 
 ## Cati metri liberi trebuie sa ramana intre marginea asfaltului si silueta unei
@@ -401,6 +411,10 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 	if props == "stromboli":
 		_place_stromboli_prop(parent, spec, band, rng, mat_provider, satellite)
 		return
+	if props == "monumentvalley":
+		_place_monumentvalley_prop(parent, spec, band, rng, mat_provider,
+			satellite, sampler, solids, blockers)
+		return
 	var pos := spec.position
 	match band["name"]:
 		"hug":
@@ -527,6 +541,596 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 				if not _add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS,
 						1.00, 1.45):
 					_add_cactus(parent, pos, rng, mat_provider)
+
+
+## --- Set de prop-uri: Monument Valley (Track19) -----------------------------
+##
+## Pana aici o tema cu `props` necunoscut cadea pe ramura de desert (saguaro,
+## gard de ranch din Track.gd). Monument Valley n-are saguaro (cresc la 400 km
+## sud, brief §0.1) si nici ranch: aici cresc salvia, ienuparul si
+## rabbitbrush-ul, in TUFE grupate, si bolovani de gresie.
+##
+## Vegetatia si bolovanii vin din kitul `monumentvalley/` (PR #455): salvia,
+## ienuparul, yucca si rabbitbrush din `plants/`, grupurile de bolovani din
+## `rocks/talus_boulders_*`. Pana la kit, scatterul folosea piese de imprumut:
+## smocurile din megakit (conuri verde-galbui plate), `cappadocia/plants/
+## shrub_dry.glb` si `rock_cluster.glb` pe clasa `rock` (alta nuanta decat
+## gresia pistei). Bolovanii mari prin `_add_canyon_rock` (clasa de roca a temei
+## = `mv_sandstone`) raman neschimbati.
+##
+## Piesele kitului sunt GLB cu MAI MULTE noduri (trunchi + frunzis, tulpina +
+## flori), deci nu trec prin `pick_from_glb` (care pastreaza un singur nod): se
+## instantiaza intregi, iar clasele pe noduri vin din `MV_PLANT_CLASSES`. Restul
+## nodurilor raman pe materialul lumii (atlasul), deja pe pista. Fantome, ca tot
+## frunzisul (treci prin ele): ienuparul nu are corp aici, spre deosebire de
+## DecorManual, fiindca sta la 1.4+ m de asfalt cu sutele.
+const MV_KIT_DIR: String = "res://assets/models/monumentvalley/"
+
+## (fisier, pondere). Salvia domina (e planta locului), rabbitbrush e accentul
+## galben, yucca rar.
+const MV_SMALL_PLANTS: Array = [
+	["plants/sagebrush.glb", 5.0], ["plants/rabbitbrush.glb", 2.0],
+	["plants/yucca.glb", 1.0],
+]
+## Banda de mijloc si mai departe: si ienuparul (4 m, singura umbra a pistei).
+const MV_BIG_PLANTS: Array = [
+	["plants/sagebrush.glb", 4.0], ["plants/rabbitbrush.glb", 2.0],
+	["plants/juniper.glb", 2.0], ["plants/yucca.glb", 1.0],
+]
+const MV_TALUS: Array[String] = ["rocks/talus_boulders_a.glb",
+	"rocks/talus_boulders_b.glb"]
+
+## Aceeasi clasa de salvie ca la DecorManual (`WorldProp.CLASSES_BY_THEME`), ca
+## scatterul si piesele puse de mana sa fie aceeasi planta.
+const MV_PLANT_CLASSES := {
+	"sagebrush": {"Sagebrush_Foliage": Palette.TRI_PREFIX + "mv_sage"},
+}
+const MV_TALUS_CLASSES := {"Talus_Scree": Palette.TRI_PREFIX + "mv_sandstone"}
+
+
+## O planta din kit, aleasa ponderat. `false` daca fisierul lipseste, ca
+## apelantul sa cada pe vechiul prop.
+static func _add_mv_plant(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, picks: Array, s_min: float,
+		s_max: float) -> bool:
+	var total := 0.0
+	for pick: Array in picks:
+		total += float(pick[1])
+	var roll := rng.randf() * total
+	var path := String((picks[picks.size() - 1] as Array)[0])
+	for pick: Array in picks:
+		roll -= float(pick[1])
+		if roll <= 0.0:
+			path = String(pick[0])
+			break
+	var full := MV_KIT_DIR + path
+	if not ResourceLoader.exists(full):
+		return false
+	if _mv_dry:
+		# Aceleasi doua extrageri ca mai jos (unghi, scara), ca sirul de rng al
+		# benzii sa nu se mute: vezi covorul de vegetatie.
+		rng.randf_range(0.0, TAU)
+		rng.randf_range(s_min, s_max)
+		return true
+	var kept := (load(full) as PackedScene).instantiate() as Node3D
+	parent.add_child(kept)
+	# Infipta 10 cm, ca `_add_kit_plant`: baza plata pe panta lasa o muchie de aer.
+	kept.position = pos + Vector3.UP * -0.10
+	kept.rotation.y = rng.randf_range(0.0, TAU)
+	kept.scale = Vector3.ONE * rng.randf_range(s_min, s_max)
+	Palette.apply_class_materials(kept, MV_PLANT_CLASSES.get(
+		path.get_file().get_basename(), {}))
+	return true
+
+
+## Un grup de bolovani din kit, pe clasa `mv_sandstone`. Cu `collide`, hull pe
+## grup (un singur corp, ca la `_add_cluster`).
+static func _add_mv_talus(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, collide: bool) -> bool:
+	var full := MV_KIT_DIR + MV_TALUS[rng.randi_range(0, MV_TALUS.size() - 1)]
+	if not ResourceLoader.exists(full):
+		return false
+	var kept := (load(full) as PackedScene).instantiate() as Node3D
+	var holder: Node3D = StaticBody3D.new() if collide else Node3D.new()
+	parent.add_child(holder)
+	holder.add_child(kept)
+	kept.scale = Vector3.ONE * rng.randf_range(0.9, 1.4)
+	Palette.apply_class_materials(kept, MV_TALUS_CLASSES)
+	if collide:
+		add_hull_collision(holder as StaticBody3D, kept)
+	holder.rotation.y = rng.randf_range(0.0, TAU)
+	holder.position = pos + Vector3.UP * -0.2
+	return true
+
+
+## Un CIOC de tufe (2-4 bucati in 2.2 m): vegetatia de aici nu creste singura, ci
+## in petice, ca in poze. Fantoma (treci prin ea), ca tot frunzisul.
+static func _add_shrub_clump(parent: Node3D, pos: Vector3,
+		rng: RandomNumberGenerator, s_min: float, s_max: float) -> bool:
+	var n := rng.randi_range(2, 4)
+	var placed := false
+	for i in n:
+		var off := Vector3(rng.randf_range(-2.2, 2.2), 0.0, rng.randf_range(-2.2, 2.2))
+		if _add_mv_plant(parent, pos + off, rng, MV_SMALL_PLANTS, s_min, s_max):
+			placed = true
+	return placed
+
+
+## Cat de departe de marginea LOCALA a asfaltului incepe decorul Monument
+## Valley: raza celei mai late piese mici (Fan_A scalat ~1.1) plus o margine.
+const MV_ROAD_CLEAR_M: float = 1.4
+
+
+static func _place_monumentvalley_prop(parent: Node3D, spec: TrackDecorSpec,
+		band: Dictionary, rng: RandomNumberGenerator, mat: Callable,
+		satellite: bool, sampler: TrackSideSampler, solids: Array[Vector3],
+		blockers: Array) -> void:
+	var pos := spec.position
+	# Marginea benzii se calculeaza in amonte cu `sampler.half_width()`, adica
+	# MEDIA latimii. Pe Track19 G are 8 m fata de media de 7, deci sateliti si
+	# smocuri ajungeau cu pana la 0.60 m peste asfalt (probe_decor_overlap, 8
+	# piese). Aici se masoara fata de latimea LOCALA. Garda sta doar pe ramura
+	# asta: mutata in `_place_satellites` ar schimba consumul de RNG si ar
+	# reaseza decorul validat pe toate pistele cu `custom_width_segments`.
+	if sampler != null and sampler.clearance_at(pos) \
+			< sampler.half_width_at(spec.index) + MV_ROAD_CLEAR_M:
+		return
+	match band["name"]:
+		"hug":
+			# Lipit de asfalt: pietre mici (solide, cu umarul de 2 m) si smocuri.
+			if rng.randf() < 0.30 and _add_canyon_rock(parent, pos, rng, "S",
+					not satellite, 0.70, 1.20, 0.80, 1.20,
+					_shoulder(sampler, spec, solids, blockers)):
+				return
+			if rng.randf() < 0.45 and _add_mv_plant(parent, pos, rng,
+					MV_SMALL_PLANTS, 0.90, 1.40):
+				return
+			if not _add_mv_plant(parent, pos, rng, MV_SMALL_PLANTS, 0.90, 1.40):
+				_add_scatter(parent, pos, rng, mat)
+		"mid":
+			var roll := rng.randf()
+			if satellite or roll < 0.22:
+				# Fantoma: banda e coridorul de reintrare pe sosea.
+				if not _add_canyon_rock(parent, pos, rng, "S", false):
+					if not _add_mv_talus(parent, pos, rng, false):
+						_add_cluster(parent, pos, rng,
+							["Cluster_S1", "Cluster_S2"], false, mat)
+			elif roll < 0.62:
+				if not _add_shrub_clump(parent, pos, rng, 1.0, 1.6):
+					_add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS, 0.90, 1.35)
+			elif roll < 0.76:
+				if not _add_mv_plant(parent, pos, rng, MV_BIG_PLANTS, 1.00, 1.50):
+					_add_kit_plant(parent, pos, rng, KIT_BIG_PLANTS, 0.90, 1.35)
+			else:
+				if not _add_canyon_rock(parent, pos, rng, "M", true,
+						0.80, 1.30, 0.85, 1.25,
+						_shoulder(sampler, spec, solids, blockers)):
+					if not _add_mv_talus(parent, pos, rng, true):
+						_add_cluster(parent, pos, rng,
+							["Cluster_M1", "Cluster_M2"], true, mat)
+		"far":
+			# Plan intermediar: mase mari si rare (siluete), cu cate un peteci
+			# de tufe printre ele.
+			if rng.randf() < 0.25 and _add_shrub_clump(parent, pos, rng, 1.3, 2.0):
+				return
+			if not _add_canyon_rock(parent, pos, rng, "L", false,
+					1.05, 1.85, 1.35, 2.10):
+				if not _add_mv_talus(parent, pos, rng, false):
+					_add_cluster(parent, pos, rng, ["Cluster_L1"], false, mat)
+		_:
+			var roll2 := rng.randf()
+			if satellite or roll2 < 0.40:
+				if not _add_canyon_rock(parent, pos, rng, "M", not satellite,
+						0.80, 1.30, 0.85, 1.25,
+						_shoulder(sampler, spec, solids, blockers)):
+					_add_cluster(parent, pos, rng, ["Cluster_M1", "Cluster_M2"],
+						true, mat)
+			elif roll2 < 0.80:
+				if not _add_canyon_rock(parent, pos, rng, "L", true,
+						0.85, 1.25, 0.85, 1.25,
+						_shoulder(sampler, spec, solids, blockers)):
+					if not _add_mv_talus(parent, pos, rng, true):
+						_add_cluster(parent, pos, rng, ["Cluster_L1"], true, mat)
+			else:
+				_add_shrub_clump(parent, pos, rng, 1.1, 1.8)
+
+
+## --- Covorul de vegetatie Monument Valley ------------------------------------
+##
+## PROBLEMA (4 critici orbi, 4 POI-uri diferite): langa drum vegetatia era rara si
+## la intervale aproape egale, "linie punctata". Cauza era chiar aici: benzile
+## `hug`/`mid` dau un slot la ~9/17 m pe fiecare parte, cu un zar de grupare de
+## 30-50% si UN singur tip de planta per slot. Diorama (brief §9.0) are alt
+## ritm: PALCURI de 3-6 plante MIXTE (ienupar inchis + salvie gri-verde +
+## rabbitbrush galben, una mare si cateva mici), cu goluri neregulate intre ele,
+## incepand la 2-4 m de bordura si continuand la 8-12 si 15-25 m.
+##
+## Asa ca vegetatia asta NU mai vine din slotul benzii. `_place_monumentvalley_prop`
+## isi pastreaza TOATE extragerile de rng (piatra, zar, satelit — deci stancile
+## raman exact unde erau), dar plantele lui sunt "uscate" (`_mv_dry`: consuma
+## aceleasi extrageri, nu instantiaza nimic), iar covorul de mai jos e singura
+## sursa de vegetatie. Doar pe Monument Valley: nicio alta tema nu trece pe aici.
+##
+## Totul e fantoma (fara coliziune): covorul nu poate schimba nici fizica, nici
+## ProbeRace.
+static var _mv_dry: bool = false
+## Cercuri (x, z, raza) unde covorul nu planteaza: culoarele bolovanilor care
+## cad, cercul arcului, albia G2, piesele mari din DecorManual. Le pune Track
+## inainte de `build` (vezi `set_veg_exclusions`); goale pe alte piste.
+static var _veg_circles: PackedVector3Array = PackedVector3Array()
+## Ferestre (d_min, d_max) in metri PE TRASEU unde nu planteaza (grila de start).
+static var _veg_windows: Array[Vector2] = []
+
+## Pasul dintre palcuri, pe o parte a drumului: (pondere, min, max) in metri.
+## Mediu ~7 m, dar 60% sunt palcuri strans legate (2.5-6 m), 12% goluri de 14-30 m
+## — neregularitatea e continutul, nu zgomotul.
+const MV_GAP_MIX: Array = [[0.60, 2.5, 6.0], [0.28, 6.0, 14.0], [0.12, 14.0, 30.0]]
+## Distanta palcului fata de MARGINEA asfaltului: (pondere, min, max).
+const MV_OFFSET_MIX: Array = [[0.38, 2.8, 6.0], [0.37, 6.0, 13.0], [0.25, 13.0, 25.0]]
+## Stratul departat, rar: (min, max) pentru offset si pas.
+const MV_FAR_OFFSET: Vector2 = Vector2(25.0, 46.0)
+const MV_FAR_GAP: Vector2 = Vector2(16.0, 44.0)
+## Cat de strans pot sta doua plante dintr-un palc (m, centru la centru).
+const MV_PLANT_SEP: float = 1.5
+const MV_PEBBLES: Array[String] = ["Pebbles_A", "Pebbles_B"]
+
+
+static func set_veg_exclusions(circles: PackedVector3Array,
+		windows: Array[Vector2]) -> void:
+	_veg_circles = circles
+	_veg_windows = windows
+
+
+static func _mix_pick(rng: RandomNumberGenerator, mix: Array) -> float:
+	var roll := rng.randf()
+	for row: Array in mix:
+		roll -= float(row[0])
+		if roll <= 0.0:
+			return rng.randf_range(float(row[1]), float(row[2]))
+	var last: Array = mix[mix.size() - 1]
+	return rng.randf_range(float(last[1]), float(last[2]))
+
+
+static func _in_veg_exclusion(p: Vector3, pad: float) -> bool:
+	for c in _veg_circles:
+		var dx := p.x - c.x
+		var dz := p.z - c.y
+		var r := c.z + pad
+		if dx * dx + dz * dz < r * r:
+			return true
+	return false
+
+
+## `sampler.clearance_at` scaneaza TOATE punctele coapte (~1100 + scurtaturile)
+## la fiecare apel; covorul il cheama de ~8.000 de ori, adica ~0.8 s din
+## incarcarea pistei. Aici: grila de 16 m peste aceleasi puncte, iar intrebarea
+## "mai aproape de `thresh` decat soseaua?" se rezolva in 3x3 celule. Acelasi
+## raspuns ca `clearance_at(p) < thresh` cat timp thresh <= MV_GRID_CELL.
+const MV_GRID_CELL: float = 16.0
+static var _mv_road_grid: Dictionary = {}
+
+
+static func _mv_road_grid_build(sampler: TrackSideSampler) -> void:
+	_mv_road_grid.clear()
+	var pts: Array[Vector3] = []
+	for i in sampler.point_count():
+		pts.append(sampler.baked_point(i))
+	for e in sampler.extra_points():
+		pts.append(e)
+	for q in pts:
+		var k := Vector2i(int(floorf(q.x / MV_GRID_CELL)), int(floorf(q.z / MV_GRID_CELL)))
+		# Pachetele de tip Packed* se copiaza la citire din Dictionary: se
+		# scoate, se completeaza si se pune la loc.
+		var cell: PackedVector2Array = _mv_road_grid.get(k, PackedVector2Array())
+		cell.append(Vector2(q.x, q.z))
+		_mv_road_grid[k] = cell
+
+
+static func _mv_near_road(p: Vector3, thresh: float) -> bool:
+	var cx := int(floorf(p.x / MV_GRID_CELL))
+	var cz := int(floorf(p.z / MV_GRID_CELL))
+	var t2 := thresh * thresh
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			var arr = _mv_road_grid.get(Vector2i(cx + dx, cz + dz))
+			if arr == null:
+				continue
+			for v: Vector2 in arr:
+				var ax := v.x - p.x
+				var az := v.y - p.z
+				if ax * ax + az * az < t2:
+					return true
+	return false
+
+
+static func _in_veg_window(d: float) -> bool:
+	for w in _veg_windows:
+		if d >= w.x and d <= w.y:
+			return true
+	return false
+
+
+## Un palc: o planta mare in centru + 2-5 mai mici in 0.9-2.6 m, mixate pe
+## culori (verde inchis = ienupar, gri-verde = salvie, galben = rabbitbrush),
+## plus 0-3 pietricele/blocuri mici in jur. Intoarce cate plante a asezat.
+static func _mv_clump(parent: Node3D, sampler: TrackSideSampler,
+		spec: TrackDecorSpec, off: float, rng: RandomNumberGenerator,
+		blockers: Array, far: bool) -> int:
+	var hw := sampler.half_width_at(spec.index)
+	var inner_apex := spec.is_apex and not spec.is_exterior
+	var count := 3
+	var roll := rng.randf()
+	if roll > 0.30:
+		count = 4
+	if roll > 0.65:
+		count = 5
+	if roll > 0.90:
+		count = 6
+	if far:
+		count = mini(count, 4)
+	# Anchor-ul: ienuparul (4 m, singura umbra a pistei) doar la distanta si nu
+	# pe interiorul unui apex (acolo se citeste iesirea din viraj); altfel o
+	# salvie mare. Unul din trei palcuri are ienupar.
+	var picks: Array[String] = []
+	if off >= 5.5 and not inner_apex and rng.randf() < 0.34:
+		picks.append("plants/juniper.glb")
+	else:
+		picks.append("plants/sagebrush.glb")
+	for i in count - 1:
+		var r2 := rng.randf()
+		if r2 < 0.74:
+			picks.append("plants/sagebrush.glb")
+		elif r2 < 0.88:
+			picks.append("plants/rabbitbrush.glb")
+		else:
+			picks.append("plants/yucca.glb")
+	# Rabbitbrush-ul e ACCENTUL (punct galben viu, ~15% din plante), niciodata
+	# planta mare a palcului; baza e salvia gri-verde si ienuparul inchis. Un
+	# palc de 5+ fara galben primeste unul in jumatate din cazuri.
+	if count >= 5 and not picks.has("plants/rabbitbrush.glb") and rng.randf() < 0.5:
+		picks[picks.size() - 1] = "plants/rabbitbrush.glb"
+	var placed: Array[Vector3] = []
+	var center := spec.position
+	var tries := 0
+	var i := 0
+	while i < picks.size() and tries < 24:
+		tries += 1
+		var path := picks[i]
+		var p := center
+		if i > 0:
+			var ang := rng.randf_range(0.0, TAU)
+			# Aproape de drum palcul e STRANS (plante mari lipite), departe se rareste.
+			var dist := rng.randf_range(1.5, 2.8) if off < 10.0 else rng.randf_range(1.8, 4.0)
+			p = center + Vector3(cos(ang), 0.0, sin(ang)) * dist
+			p.y = sampler.ground_y(p.x, p.z)
+		var is_juniper := path.ends_with("juniper.glb")
+		var margin := 4.0 if is_juniper else 2.2
+		if _mv_near_road(p, hw + margin):
+			continue
+		if sampler.channel_mix(p.x, p.z) > 0.3:
+			continue
+		if _inside_blocker(p, blockers) or _in_veg_exclusion(p, 0.5):
+			continue
+		var too_close := false
+		for q in placed:
+			var ddx := q.x - p.x
+			var ddz := q.z - p.z
+			if ddx * ddx + ddz * ddz < MV_PLANT_SEP * MV_PLANT_SEP:
+				too_close = true
+				break
+		if too_close:
+			continue
+		# Scara tinta e a dioramei, nu a kitului: acolo o salvie e ~1/4 din latimea
+		# soselei (3.5 m); kitul vine la 1.4 m. Cu scara 1.0 capturile aratau tufe
+		# de jucarie lipite de nisip. Ienuparul, dimpotriva, ramane MIC si jos
+		# (verdictul criticului D: un ienupar mare, verde saturat, in prim-plan
+		# racea toata scena) — 2.6-3.5 m, nu 6.
+		var s_lo := 1.9 if i == 0 else 1.2
+		var s_hi := 2.6 if i == 0 else 1.9
+		if is_juniper:
+			s_lo = 0.75
+			s_hi = 1.00
+		elif path.ends_with("rabbitbrush.glb"):
+			s_lo = 1.5
+			s_hi = 2.2
+		elif path.ends_with("yucca.glb"):
+			s_lo = 1.4
+			s_hi = 2.0
+		_mv_emit_plant(p, rng, path, s_lo, s_hi)
+		placed.append(p)
+		i += 1
+	if placed.is_empty():
+		return 0
+	# Pietricele si blocuri mici printre tufe (talusul pistei, la scara mica).
+	var stones := rng.randi_range(0, 3)
+	for k in stones:
+		var ang2 := rng.randf_range(0.0, TAU)
+		var d2 := rng.randf_range(1.8, 4.6)
+		var sp := center + Vector3(cos(ang2), 0.0, sin(ang2)) * d2
+		sp.y = sampler.ground_y(sp.x, sp.z)
+		if _mv_near_road(sp, hw + 1.4) or sampler.channel_mix(sp.x, sp.z) > 0.3:
+			continue
+		if _inside_blocker(sp, blockers) or _in_veg_exclusion(sp, 0.3):
+			continue
+		_mv_add_stone(sp, rng)
+	return placed.size()
+
+
+## --- Emisie directa in MultiMesh ----------------------------------------------
+##
+## Covorul are ~3.000 de piese, iar ca noduri (instantiate + clase de material +
+## coacere in TrackDecorBatch) costa ~3 s la incarcarea pistei. Aici NU se
+## creeaza noduri: fiecare tip de piesa se instantiaza O SINGURA DATA ca sablon
+## (se culeg partile: mesh, material, transformarea lui in radacina), iar
+## instantele se aduna in buffere pe (parte x celula de 120 m). Celula tine
+## culling-ul de frustum util (un MultiMesh se deseneaza intreg sau deloc).
+## Oglindire nu exista (scale pozitiva), deci nu se aplica `_flipped_mesh`.
+## Instantele astea nu mai trec prin TrackDecorBatch (nu sunt MeshInstance3D).
+const MV_CELL_M: float = 120.0
+static var _mv_tpl: Dictionary = {}
+static var _mv_buf: Dictionary = {}
+
+
+## Partile unui sablon: [{name, mesh, mat, xf, shadow}], `xf` relativ la radacina
+## (transformarea radacinii nu intra: plasarea o inlocuieste, ca pe noduri).
+static func _mv_parts(key: String) -> Array:
+	if _mv_tpl.has(key):
+		return _mv_tpl[key]
+	var parts: Array = []
+	var node: Node3D = null
+	if key.begins_with("peb:"):
+		node = pick_from_glb("res://assets/models/scatter/desert_scatter.glb",
+			key.trim_prefix("peb:"))
+		if node != null:
+			Palette.apply_world_material(node)
+	else:
+		var full := MV_KIT_DIR + key
+		if ResourceLoader.exists(full):
+			node = (load(full) as PackedScene).instantiate() as Node3D
+			if key.begins_with("rocks/"):
+				Palette.apply_class_materials(node, MV_TALUS_CLASSES)
+			else:
+				Palette.apply_class_materials(node, MV_PLANT_CLASSES.get(
+					key.get_file().get_basename(), {}))
+	if node != null:
+		_mv_collect(node, Transform3D.IDENTITY, true, parts)
+		node.free()
+	_mv_tpl[key] = parts
+	return parts
+
+
+static func _mv_collect(n: Node3D, xf: Transform3D, is_root: bool,
+		out: Array) -> void:
+	var here := xf if is_root else xf * n.transform
+	if n is MeshInstance3D and n.visible:
+		var mi := n as MeshInstance3D
+		if mi.mesh != null and mi.material_override != null:
+			out.append({"name": String(mi.name), "mesh": mi.mesh,
+				"mat": mi.material_override, "xf": here,
+				"shadow": mi.cast_shadow})
+	for c in n.get_children():
+		if c is Node3D:
+			_mv_collect(c as Node3D, here, false, out)
+
+
+static func _mv_emit(key: String, pos: Vector3, rot_y: float, scale: float) -> void:
+	var parts := _mv_parts(key)
+	var place := Transform3D(Basis(Vector3.UP, rot_y) * Basis.from_scale(
+		Vector3(scale, scale, scale)), pos)
+	var cx := int(floorf(pos.x / MV_CELL_M))
+	var cz := int(floorf(pos.z / MV_CELL_M))
+	for i in parts.size():
+		var part: Dictionary = parts[i]
+		var gk := "%s|%d|%d|%d" % [key, i, cx, cz]
+		if not _mv_buf.has(gk):
+			_mv_buf[gk] = {"part": part, "cell": "%d_%d" % [cx, cz],
+				"xforms": []}
+		(_mv_buf[gk]["xforms"] as Array).append(place * (part["xf"] as Transform3D))
+
+
+## Aceleasi extrageri de rng ca vechiul `_add_mv_plant` (pick, unghi, scara),
+## ca layout-ul sa ramana cel validat.
+static func _mv_emit_plant(pos: Vector3, rng: RandomNumberGenerator, path: String,
+		s_min: float, s_max: float) -> void:
+	rng.randf()
+	var rot := rng.randf_range(0.0, TAU)
+	var sc := rng.randf_range(s_min, s_max)
+	_mv_emit(path, pos + Vector3.UP * -0.10, rot, sc)
+
+
+## Piatra mica: blocuri de talus la 0.28-0.50 din scara (un maldar de ~1.5 m) pe
+## clasa gresiei, sau pietricele din scatter (material de lume, ca in banda hug).
+static func _mv_add_stone(pos: Vector3, rng: RandomNumberGenerator) -> void:
+	if rng.randf() < 0.55:
+		var tkey := String(MV_TALUS[rng.randi_range(0, MV_TALUS.size() - 1)])
+		if not _mv_parts(tkey).is_empty():
+			var sc := rng.randf_range(0.28, 0.50)
+			var rot := rng.randf_range(0.0, TAU)
+			_mv_emit(tkey, pos + Vector3.UP * -0.08, rot, sc)
+			return
+	var pkey := "peb:" + MV_PEBBLES[rng.randi_range(0, MV_PEBBLES.size() - 1)]
+	if _mv_parts(pkey).is_empty():
+		return
+	var rot2 := rng.randf_range(0.0, TAU)
+	var sc2 := rng.randf_range(1.8, 3.0)
+	_mv_emit(pkey, pos + Vector3.UP * -0.08, rot2, sc2)
+
+
+## Buffer -> MultiMeshInstance3D-uri (unul per parte x celula).
+static func _mv_flush(parent: Node3D) -> void:
+	for gk: String in _mv_buf:
+		var g: Dictionary = _mv_buf[gk]
+		var xforms: Array = g["xforms"]
+		var part: Dictionary = g["part"]
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = part["mesh"]
+		mm.instance_count = xforms.size()
+		for i in xforms.size():
+			mm.set_instance_transform(i, xforms[i])
+		var mmi := MultiMeshInstance3D.new()
+		# Numele pastreaza partea sursa: probe_decor atribuie dupa prefix.
+		mmi.name = "%s_%s" % [part["name"], g["cell"]]
+		mmi.multimesh = mm
+		mmi.material_override = part["mat"]
+		mmi.cast_shadow = part["shadow"]
+		parent.add_child(mmi)
+	# Bufferul NU se goleste aici: `tools/probe_scatter_bands.gd` il citeste
+	# (transformarile din MultiMesh se citesc zero in headless). Se goleste la
+	# inceputul urmatorului covor.
+
+
+## Parcurge drumul pe fiecare parte cu pasi neregulati si aseaza palcuri.
+## Densitatea e modulata de un zgomot de joasa frecventa (palcuri dese vs goluri
+## lungi), peste amestecul de pasi. Doua treceri pe parte: strat apropiat (2.8-25 m)
+## si strat departat, rar (25-46 m).
+static func _build_mv_carpet(root: Node3D, sampler: TrackSideSampler,
+		seed_value: int, blockers: Array) -> void:
+	var container := Node3D.new()
+	container.name = "Band_carpet"
+	root.add_child(container)
+	_mv_buf.clear()
+	_mv_road_grid_build(sampler)
+	var total := sampler.total_length()
+	if total <= 0.0:
+		return
+	var noise := FastNoiseLite.new()
+	noise.seed = seed_value + 7919
+	noise.frequency = 1.0 / 90.0
+	var si := 0
+	for side_sign: float in [-1.0, 1.0]:
+		for far: bool in [false, true]:
+			var rng := RandomNumberGenerator.new()
+			rng.seed = seed_value + hash("mv_carpet_%d" % si)
+			si += 1
+			var d := rng.randf_range(0.0, 8.0)
+			while d < total:
+				var gap: float
+				if far:
+					gap = rng.randf_range(MV_FAR_GAP.x, MV_FAR_GAP.y)
+				else:
+					gap = _mix_pick(rng, MV_GAP_MIX)
+					# Zgomot -> factor 0.65 (des) .. 1.9 (rar), pe ~90 m.
+					gap *= remap(noise.get_noise_1d(d + side_sign * 400.0),
+						-1.0, 1.0, 0.6, 1.5)
+				d += gap
+				if d >= total:
+					break
+				if _in_veg_window(d):
+					continue
+				var off := _mix_pick(rng, MV_OFFSET_MIX)
+				if far:
+					off = rng.randf_range(MV_FAR_OFFSET.x, MV_FAR_OFFSET.y)
+				var spec := sampler._make_spec(d, side_sign, off)
+				if spec == null or spec.is_ravine:
+					continue
+				if _frac_veto.is_valid() and bool(_frac_veto.call(spec.frac)):
+					continue
+				if _mv_near_road(spec.position,
+						sampler.half_width_at(spec.index) + MV_ROAD_CLEAR_M):
+					continue
+				_mv_clump(container, sampler, spec, off, rng, blockers, far)
+	_mv_flush(container)
 
 
 ## --- Set de prop-uri: insula de recif ---------------------------------------

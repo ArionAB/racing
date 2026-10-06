@@ -49,6 +49,11 @@ var _frames: int = 0
 var _track: Node = null
 var _rows: Array[Dictionary] = []
 var _done: bool = false
+## `--manual`: intra si in `DecorManual`. Opt-in, nu implicit: pe pistele vechi
+## decorul pus de mana are 339 de piese care trec INTENTIONAT peste asfalt
+## (balustrade de pod, ziduri de poarta, apa), deci garda globala ar pica.
+## Pistele noi (Track19) il cer explicit in contractul lor de POI.
+var _manual: bool = false
 
 
 func _initialize() -> void:
@@ -56,12 +61,36 @@ func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			only = int(arg.trim_prefix("--track="))
-	for i in range(1, 10):
-		var path := "res://scenes/tracks/Track%02d.tscn" % i
-		if not ResourceLoader.exists(path):
-			continue
+		elif arg == "--manual":
+			_manual = true
+	# Numerele de scena vin de PE DISC, nu dintr-un interval scris aici: `range(1, 10)`
+	# acoperea Track01..Track09 si lasa pistele de peste 9 nemasurate, iar un
+	# `--track=` care nu nimerea nimic tipara „OK" pe zero piste. Aici `--track=`
+	# e NUMARUL SCENEI (Track18 = 18), nu pozitia din GameState.TRACK_SCENES —
+	# scriptul ruleaza cu --script, unde autoload-urile nu exista.
+	var available := _scene_numbers()
+	for i in available:
 		if only < 0 or only == i:
-			_paths.append(path)
+			_paths.append("res://scenes/tracks/Track%02d.tscn" % i)
+	if _paths.is_empty():
+		printerr("probe_decor_overlap: nicio pista selectata (--track=%d, scene pe disc: %s) — "
+			% [only, available] + "iese cu 1, fiindca o garda pe zero piste nu masoara nimic.")
+		# quit() din _initialize doar ridica un steag; _process verifica _done pe
+		# prima linie, altfel ar rula mai departe si ar tipari un verdict gol.
+		_done = true
+		quit(1)
+
+
+## Numerele de scena ale pistelor existente (Track01.tscn -> 1), crescator.
+func _scene_numbers() -> Array[int]:
+	var out: Array[int] = []
+	var re := RegEx.create_from_string("^Track(\\d+)\\.tscn$")
+	for f in DirAccess.get_files_at("res://scenes/tracks"):
+		var m := re.search(f)
+		if m != null:
+			out.append(int(m.get_string(1)))
+	out.sort()
+	return out
 
 
 func _process(_delta: float) -> bool:
@@ -88,12 +117,26 @@ func _process(_delta: float) -> bool:
 func _measure(path: String, track: Node) -> Dictionary:
 	var pieces: Array[Dictionary] = []
 	_collect(track, pieces)
-	var half: float = track.half_width
 	var baked: PackedVector3Array = track.baked
+	# Semilatimea la fiecare punct copt: MINIMUL dintre cea locala si medie.
+	# Cu media singura (`track.half_width`), o pista cu sectoare inguste
+	# raporta decor de pe nisip ca „peste asfalt" (Track19: 8 alarme false pe
+	# sectoarele de 5.5-6.5 m fata de media de 7). Latimea locala pura ar fi
+	# corecta si pe sectoarele LATE, dar acolo gaseste defecte reale pe piste
+	# deja livrate (4 oct 2026: Stromboli Basalt_C 1.03 m, Baikal ShrubSnow
+	# 0.13 m) si ar inrosi verify_local pentru toata echipa — decizie separata,
+	# vezi PR-ul Monument Valley etapa 3. Fara sectoare: identic cu inainte.
+	var base_half: float = track.half_width
+	var halves := PackedFloat32Array()
+	halves.resize(baked.size())
+	for i in baked.size():
+		halves[i] = minf(base_half, track.width_at_index(i))
 
 	var over: Array[Dictionary] = []
 	for piece in pieces:
-		var deep := _over_road(piece, baked, half)
+		if piece["road_ok"]:
+			continue
+		var deep := _over_road(piece, baked, halves)
 		if deep >= OVER_MIN:
 			piece["over"] = deep
 			over.append(piece)
@@ -109,7 +152,7 @@ func _measure(path: String, track: Node) -> Dictionary:
 ## Cat de mult intra piesa peste asfalt, in metri masurati de la margine spre
 ## axa. 0 daca sta cuminte pe langa drum.
 func _over_road(piece: Dictionary, baked: PackedVector3Array,
-		half: float) -> float:
+		halves: PackedFloat32Array) -> float:
 	var aabb: AABB = piece["aabb"]
 	var c := aabb.get_center()
 	var reach := maxf(aabb.size.x, aabb.size.z) * 0.5
@@ -124,7 +167,7 @@ func _over_road(piece: Dictionary, baked: PackedVector3Array,
 		if d < box_near:
 			box_near = d
 			near_i = i
-	if box_near - reach > half:
+	if box_near - reach > halves[near_i] + 2.0:
 		return 0.0
 
 	var deepest := 0.0
@@ -136,12 +179,14 @@ func _over_road(piece: Dictionary, baked: PackedVector3Array,
 		i2 += step
 		var near := 1e12
 		var road_y := 0.0
+		var half := 0.0
 		for k in range(-WINDOW, WINDOW + 1):
 			var j := posmod(near_i + k, n)
 			var d := Vector2(baked[j].x - v.x, baked[j].z - v.z).length()
 			if d < near:
 				near = d
 				road_y = baked[j].y
+				half = halves[j]
 		if near >= half:
 			continue
 		if v.y < road_y + OVER_LOW or v.y > road_y + OVER_HIGH:
@@ -214,12 +259,13 @@ func _buried(pieces: Array[Dictionary]) -> Array[Dictionary]:
 
 ## Fiecare mesh de DECOR devine o piesa: nume, cutie in lume, triunghiuri.
 ##
-## Se intra DOAR sub nodurile de decor si de faleze, nu peste toata scena:
+## Se intra DOAR sub nodurile de decor si de faleze, nu peste toata scena (cu
+## `--manual`, si sub `DecorManual`, decorul pus de mana):
 ## soseaua, terenul si orizontul sunt construite cu nume generate, deci o lista
 ## de exceptii dupa nume ar fi ratat exact ce nu trebuie masurat.
 func _collect(node: Node, out: Array[Dictionary]) -> void:
 	var nm := String(node.name)
-	if nm == "Decor" or nm == "Cliffs":
+	if nm == "Decor" or nm == "Cliffs" or (_manual and nm == "DecorManual"):
 		_gather(node, out)
 		return
 	for c in node.get_children():
@@ -237,9 +283,23 @@ func _gather(node: Node, out: Array[Dictionary]) -> void:
 			var box := AABB(tris[0], Vector3.ZERO)
 			for v in tris:
 				box = box.expand(v)
-			out.append({"id": _piece_name(mi), "aabb": box, "tris": tris})
+			out.append({"id": _piece_name(mi), "aabb": box, "tris": tris,
+				"road_ok": _declared_on_road(mi)})
 	for c in node.get_children():
 		_gather(c, out)
+
+
+## O piesa care sta INTENTIONAT pe sosea (grila pentru vite: bare plate peste
+## drum, prin care treci) se declara pe nod cu `metadata/peste_asfalt = true`,
+## pe ea sau pe un stramos. Declaratia sta in scena, langa piesa, nu intr-o lista
+## de nume aici — altfel orice nume nou ar trebui adaugat in sonda.
+func _declared_on_road(node: Node) -> bool:
+	var cur := node
+	while cur != null:
+		if cur.has_meta("peste_asfalt") and bool(cur.get_meta("peste_asfalt")):
+			return true
+		cur = cur.get_parent()
+	return false
 
 
 ## Numele care spune ceva: primul stramos (sau el insusi) fara nume generat.
@@ -262,7 +322,8 @@ func _report() -> bool:
 		var ov: Array = row["over"]
 		print("  PESTE ASFALT (>= %.2f m peste margine): %d" % [OVER_MIN, ov.size()])
 		for w in ov.slice(0, 12):
-			print("    %-14s intra %.2f m peste asfalt" % [w["id"], w["over"]])
+			var c: Vector3 = (w["aabb"] as AABB).get_center()
+			print("    %-14s intra %.2f m peste asfalt  la (%.0f, %.0f)" % [w["id"], w["over"], c.x, c.z])
 		var ins: Array = row["inside"]
 		print("  INGROPATE IN ALTA PIESA (>= %d%% din cutie): %d"
 			% [int(INSIDE_MIN * 100.0), ins.size()])

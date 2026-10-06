@@ -51,6 +51,14 @@ func _ready() -> void:
 			_run_up = float(arg.trim_prefix("--runup="))
 		elif arg == "--open":
 			_force_open = true
+	# `--track=` ia pozitia din lista SAU numarul scenei (Track18 = 18) — vezi
+	# GameState.resolve_track_index. Indexul brut nu vedea decat pozitiile, deci un
+	# numar de scena iesea din tablou sau, la clampi, devenea TACUT alta pista.
+	_track_index = GameState.resolve_track_index(_track_index)
+	if _track_index < 0:
+		printerr("probe_bridge_drive: --track nu e nici pozitie in lista, nici numar de scena din GameState.TRACK_SCENES")
+		get_tree().quit(1)
+		return
 	_track = (load(GameState.TRACK_SCENES[_track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(_track)

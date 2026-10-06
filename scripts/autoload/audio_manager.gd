@@ -42,6 +42,17 @@ const SFX: Dictionary = {
 	# Stropul de apa la intrarea in vad / parau / mare (Car._enter_water):
 	# pitch inalt la pas, jos la o cadere de la inaltime.
 	&"splash": preload("res://assets/audio/splash.wav"),
+	# Daruma-otoshi (Kyoto): „TOC"-ul ciocanului de lemn si frecarea discului.
+	&"daruma_toc": preload("res://assets/audio/daruma_toc.wav"),
+	&"daruma_slide": preload("res://assets/audio/daruma_slide.wav"),
+	# Shishimai (Kyoto): muzica leului (bucla de exact un ciclu de 9 s, in faza cu
+	# atacul) si clampanitul falcii.
+	&"shishimai_music": preload("res://assets/audio/shishimai_music.wav"),
+	&"shishimai_clack": preload("res://assets/audio/shishimai_clack.wav"),
+	# Carul de festival Gion Matsuri (Kyoto): doua BUCLE pozitionale, muzica de
+	# telegraf (taiko + kane) si scartaitul rotilor la traversare.
+	&"gion_bayashi": preload("res://assets/audio/gion_bayashi.wav"),
+	&"gion_wheels": preload("res://assets/audio/gion_wheels.wav"),
 }
 
 ## Fluxul brut al unui sunet, pentru cine si-l reda singur.
@@ -65,7 +76,8 @@ func _ready() -> void:
 	_create_bus(&"Engine")
 	apply_volumes()
 	for loop_stream: AudioStream in [ENGINE_LOOP, SKID_LOOP, SFX[&"typhoon_roar"],
-			SFX[&"wave_wash"], SFX[&"avalanche_rumble"]]:
+			SFX[&"wave_wash"], SFX[&"avalanche_rumble"], SFX[&"shishimai_music"],
+			SFX[&"gion_bayashi"], SFX[&"gion_wheels"]]:
 		var wav := loop_stream as AudioStreamWAV
 		if wav != null:
 			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD

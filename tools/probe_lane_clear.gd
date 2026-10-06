@@ -272,6 +272,27 @@ const BASELINE := {
 	# pe INAINTE la 0.875-0.880 — rampa sariturii Devkund (G2), obstacolul
 	# intentionat pe care se sare, ca RampNear/RampFar la Fiordland.
 	"Jodhpur (Track17)": 31,
+	# Kyoto (Track18), armat la traseul gol (§7 pasul 2-3, fara decor): 3
+	# raportari, masurate de 3 ori, identic — 2 la frac 0.305 pe INAINTE
+	# (`ChannelKicker`, trambulina sariturii de pe scena Kiyomizu, h=0.4 si
+	# 1.0, obstacolul pe care se sare, ca la Devkund) si 1 la 0.585 pe INAINTE
+	# (`TerrainBody` la 5,1 m, h=0.4: iesirea din arcul lui E, unde soseaua
+	# coboara 10% si terenul de 7,9 m al grilei sta cu pana la 0,9 m peste
+	# asfalt — vezi ProbeBuried, +0.93 m). Nimic in tunelul de torii. Baza =
+	# cifra masurata, fara marja: prima piesa de decor pusa in banda trebuie sa
+	# pice garda. Sabotaj (`--sabotaj`) verificat la armare.
+	"Kyoto (Track18)": 3,
+	# Monument Valley (Track19), armat la traseul gol cu hazardele (4 oct 2026):
+	# 3 raportari, masurate de 3 ori, identic — 1 la frac 0.780 pe lateral
+	# (`@AnimatableBody3D`, calul din G aflat la ceasul 0: hazard de traversare
+	# INTENTIONAT, corp cinematic cu fanta pe banda larga de 8 m) si 2 la 0.835
+	# pe INAINTE (`ChannelKicker`, trambulina sariturii peste albia secata G2 —
+	# gol 8 m —, ca RampNear/RampFar la Fiordland). Era 4 cu golul de 12 m
+	# (3 pe kicker); falezele DOAR in defileu (`cliffs_gorge_only`) n-au schimbat
+	# cifra. Nimic pe bucla in rest. Baza =
+	# cifra masurata, FARA marja: prima piesa de decor pusa in banda trebuie sa
+	# pice garda. Sabotaj (`--sabotaj`) verificat la armare.
+	"Monument Valley (Track19)": 3,
 }
 
 
@@ -328,6 +349,16 @@ func _sweep(space: PhysicsDirectSpaceState3D, track: Track,
 				if body == null:
 					continue
 				var nm := String(body.name)
+				# PERETELE TUNELULUI DE TORII (`ToriiTunnel`) e MARGINEA culoarului, nu un
+				# obstacol in el: sta la +-3,2 m, chiar la semilatimea benzii. Firele laterale
+				# ale sondei se iau din profilul BUCLEI (`width_at_index`: 7,5 pe E'), deci
+				# cad la +-2,5 m si caroseria (+-1,1) ajunge in zid desi masina centrata nu-l
+				# atinge. Se scuza DOAR pe firele laterale: pe axa si in coridorul din fata
+				# peretele ramane urmarit, deci un perete cazut in mijlocul culoarului pica.
+				# (Nu s-a corectat latimea firelor: ar muta rezultatele celorlalte piste —
+				# Alpii 21 -> 23 pe proba — si garda nu e locul unei astfel de schimbari.)
+				if nm == "PereteTunel" and lat != 0.0:
+					continue
 				# Lista de suprafete de rulare scuza numele, NU orice forma cu
 				# numele ala. `Shoulders` e chiar corpul care a blocat elicea
 				# (o perdea de 38 m atarnata peste gura stancii): daca l-am

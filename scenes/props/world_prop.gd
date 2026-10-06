@@ -38,6 +38,19 @@ extends Node3D
 const TRUNK_FRACTION: float = 0.13
 const TRUNK_MIN_RADIUS: float = 0.22
 
+## Raza cilindrului `trunk` PER MODEL, acolo unde latimea AABB minte: o coroana
+## de 12 m ar da 12 x 0,13 = 1,6 m raza (stalp invizibil de 3,2 m). Valorile sunt
+## masurate pe nodul de trunchi din GLB (baza evazata, Ø ~1-1,9 m la artar).
+const TRUNK_RADIUS := {
+	"momiji_a": 0.6, "momiji_b": 0.55, "momiji_c": 0.55,
+	"ginkgo": 0.6, "niwaki_pine": 0.5,
+	"moso_culm": 0.16, "bamboo_crown": 1.2,
+	"paper_lantern": 0.15,
+	# Monument Valley: latimea AABB minte (coroana de 4,4 m, bratul de 2 m, rombul
+	# de 1,4 m); raza reala vine de pe nodul de trunchi/stalp din GLB.
+	"juniper": 0.45, "telegraph_pole": 0.16, "open_range_sign": 0.12,
+}
+
 ## Numele metadatei prin care o INSTANTA anume iese din regula generala.
 ## In editor: Inspector -> Add Metadata -> `coliziune`, cu una din valorile
 ## "hull" / "trunk" / "mesh" / "none".
@@ -322,11 +335,89 @@ const PROP_COLLISION := {
 	# tuk-tuk-ul e `Car` (nu decor), orizontul e fundal de 150-200 m.
 	"rooftop_tank": "none", "rooftop_clutter": "none", "tuktuk": "none",
 	"jodhpur_horizon": "none",
+	# --- Kyoto (Track18), brief §5.6 -----------------------------------------
+	# Copaci: cilindru pe trunchi (raza din TRUNK_RADIUS, nu din latimea AABB:
+	# coroana unui artar e de 10-12 m si dadea un stalp invizibil de 1,6 m raza).
+	"momiji_a": "trunk", "momiji_b": "trunk", "momiji_c": "trunk",
+	"ginkgo": "trunk", "niwaki_pine": "trunk",
+	"moso_culm": "trunk", "bamboo_crown": "trunk",
+	"paper_lantern": "trunk",  # stalp de lemn cu brat de 1 m; hull = bloc
+	# Se trece PRIN ele / pe sub ele: colizor exact. Golul portilor (>= 14 m) e
+	# contract de kit; stalpii laterali sunt solizi, golul nu.
+	"kakezukuri_scaffold": "mesh", "niomon_gate": "mesh", "inari_romon": "mesh",
+	"iron_truss_bridge": "mesh",  # drumul trece pe dedesubt (kit §1.5)
+	# Piese mici si solide, aproape de banda: hull (implicitul, scris ca sa fie
+	# inventarul complet). Felinarele si vulpile se simt ca un obstacol real.
+	"stone_lantern_a": "hull", "stone_lantern_b": "hull",
+	"yukimi_lantern": "hull", "kitsune_statue_a": "hull",
+	"kitsune_statue_b": "hull",
+	# Fantome: frunzele sparg in particule la trecere (cod propriu), figurantii
+	# nu opresc masina, orizontul e fundal, placile de trecere sunt plate, iar
+	# modulele de pod/portile torii sunt acoperis/arcade fara corp (coliziunea
+	# podului e terenul, a tunelului e peretele continuu al TrackBranch).
+	"leaf_pile": "none", "monk_sweeper": "none", "crow": "none",
+	"sika_deer": "none", "kyoto_horizon": "none", "stepping_stones": "none",
+	"tsutenkyo_roof_module": "none", "togetsukyo_module": "none",
+	"torii_senbon": "none", "torii_large": "none",
+	"votive_torii_cluster": "none",  # sir de 7 porti peste poteca: se trece pe sub ele
+	"shiba_fence": "none",  # nuiele de 1,1 m, panou subtire: capcana de colt, nu obstacol
+	"daruma_otoshi": "none",  # corpul il face DarumaOtoshiHazard
+	# Restul kitului ramane hull implicit, corect: pagodele, hondo, kinkakuji,
+	# altarul, clopotnita, bazinul, ema, ceainaria, zidul de templu si cel
+	# ciclopic, stancile si movila de gradina, tufele karikomi. Casele machiya:
+	# hull doar pe miezul `Machiya_Wood`, vezi HULL_SKIP_PARTS.
 	# Restul (implicit hull, corect): casele a-e, haveli, ghanta_ghar, zidul
 	# si turnul de zid (bloc plin: hull = zidul; brief-ul zicea "mesh", pe un
 	# corp convex e identic si mai ieftin), bastionul, fatadele, cenotaful,
 	# tarabele (brief: "pereti cu masa, nu decor fantoma"), thela, sacii,
 	# bolovanii de riolit si lespedea.
+	# --- Monument Valley (kitul din assets/models/monumentvalley/, PR #455) --------
+	# Inventarul COMPLET, 37 de piese, scris explicit si cand modul e implicitul
+	# (hull), ca sa nu mai fie nimic „probabil bun". Cheia e fisierul (stem), deci
+	# `water_tower` de aici imparte cheia cu `buildings/water_tower.glb` (Dunele):
+	# nicio intrare noua, fiindca ambele sunt hull — vezi comentariul de la
+	# `water_tower` mai jos.
+	#
+	# Monolitii Mittens: `mesh`, NU hull. Un hull convex peste turn + deget ar umple
+	# golul de cer dintre ele (3-4 m la baza, 5 m la mijloc) si ar lipi un perete
+	# invizibil intre varful degetului si corp; mai grav, hull-ul ar acoperi si
+	# punctul de pornire al `BolovanD` (rockfall #1, pe grohotisul degetului West
+	# Mitten). Se ajunge la ei doar la 14+ m de banda (poarta D), deci formele
+	# concave nu prind nicio masina. `Mitten_Scree`/`Cap` sunt sarite din colizor
+	# (HULL_SKIP_PARTS): fusta e acoperita de terenul `TerrainPeak` de dedesubt.
+	"west_mitten": "mesh", "east_mitten": "mesh",
+	# Blocuri compacte, raport silueta/baza ~1 (nu au gol): hull, ieftin si corect.
+	"merrick_butte": "hull", "mesa_wall_module": "hull",
+	"butte_small_a": "hull", "butte_small_b": "hull", "butte_small_c": "hull",
+	"rock_fin": "hull", "hoodoo": "hull",
+	"talus_boulders_a": "hull", "talus_boulders_b": "hull",
+	# Arcul: prin gol (>= 14 m) se TRECE. Il pune `Track._build_arch` (nu
+	# DecorManual), cu colizor propriu din mesh; intrarea ramane pentru cine il
+	# asaza de mana, ca sa nu iasa hull peste sosea.
+	"sandstone_arch": "mesh",
+	# Orizontul: panze de zeci de metri la 190+ m, fara corp.
+	"horizon_mesas": "none",
+	# Plantele: ienuparul e singurul cu trunchi destul de gros ca sa opreasca o
+	# masina (raza din TRUNK_RADIUS); restul sunt vegetatie moale, prin care se trece.
+	"juniper": "trunk",
+	"sagebrush": "none", "rabbitbrush": "none", "yucca": "none",
+	"tumbleweed": "none",
+	# Grila pentru vite: PLATA (<= 0,15 m), se trece peste ea; stalpii de capat
+	# sunt la 7,3 m de axa, adica pe margine. Sarma gardului: panou subtire, ca
+	# `shiba_fence` / `wooden_fence`. Semnul si stalpul de telegraf: cilindru pe
+	# stalp (bratul si traversa nu opresc masina).
+	"cattle_guard": "none", "wire_fence": "none",
+	"open_range_sign": "trunk", "telegraph_pole": "trunk",
+	# Structuri si cladiri: solide (hull). Morii ii ramane hull-ul pe turn, iar
+	# jgheabul de 0,6 m e sub linia capotei dar nu stinge niciun traseu.
+	"windmill_pump": "hull", "water_tower": "hull", "corral": "hull",
+	"shade_ramada": "hull",
+	"trading_post": "hull", "homestead_house": "hull", "hogan": "hull",
+	"pickup_old": "hull", "tour_truck": "hull",
+	# Figuranti: oameni si animale nu opresc masina (caii care traverseaza sunt
+	# `SlidingHazard`, cu corpul lui).
+	"tourist_group": "none", "raven": "none", "sheep": "none",
+	"horse_bay": "none", "horse_pinto": "none", "horse_black": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -1746,11 +1837,176 @@ const CLASSES_BY_MODEL := {
 	"rock_slab": {
 		"Rock_Slab": Palette.TRI_PREFIX + "rhyolite",
 	},
+
+	# --- Kyoto (Track18): kitul din assets/models/kyoto/ (integrare int-a) ------
+	#
+	# Cheie pe STEM de fisier, nu pe nume de nod: `Gate_Wood`, `Wall_Stone`,
+	# `Lantern_Stone` sunt nume generice (memoria `nume-noduri-nu-sunt-unice`),
+	# iar maparea din `prop_classes()` e globala. Fiecare piesa e sparta la export
+	# in noduri cu UN singur material (memoria `clase-pe-piese-de-kit`), iar o
+	# clasa se pune DOAR pe nodurile monocrome (masurat pe UV-uri, aria pe slot:
+	# Machiya_Wood 100% WOOD, *_Plaster 100% FOAM_WHITE, Maple_Crown 100% un slot).
+	# Nodurile MIXTE (Pagoda_Body 30/22/28, Machiya_Trim 9/8, Gate_Wood 30/9/28,
+	# Rock_Stone 8/29/6, tigla) raman pe atlas: o clasa le-ar sterge culorile.
+	#
+	# Lemnul de machiya e singurul lemn de oras care ia `machiya_wood`; trunchiurile
+	# (WOOD 9) raman pe atlas, ca sa nu platim un material pentru ele.
+	#
+	# VALUL DE MATERIALE (oct 2026, docs/track_briefs/kyoto_materiale.md, sonde
+	# tools/probe_kyoto_kit_clase.gd + ProbeKyotoClase.tscn): acoperisurile iau
+	# `kawara` (dala de tigla tentata pe slotul 20). Pe acoperisuri slotul 28
+	# (LOG_DARK, 15% la machiya, ~48% la porti si sala) e COAMA si STREASINA:
+	# intervalul lui de y il cuprinde pe al slotului 20 la ambele capete, deci
+	# nu se poate rupe ca accent. Clasa il sterge DELIBERAT — un acoperis de
+	# kawara e tigla si pe coama; pe captura dunga bruna de coama citea
+	# „scandura", nu „tigla". Grinzile 100% LOG_DARK iau `machiya_wood` (+0:
+	# tenta lui e exact LOG_DARK), lemnul deschis 100% slot 9 ia `wood`,
+	# trunchiurile `bark_kyoto`, cedrii si pinii `cedar_needles`.
+	"machiya_a": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
+	"machiya_b": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
+	"machiya_c": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
+	"machiya_d": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
+	"machiya_e": {"Machiya_Wood": Palette.TRI_PREFIX + "machiya_wood",
+		"Machiya_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Machiya_Roof": Palette.TRI_PREFIX + "kawara"},
+	# Varul portilor, salii si zidului de templu (FOAM_WHITE 100% pe nod).
+	"niomon_gate": {"Gate_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Gate_Roof": Palette.TRI_PREFIX + "kawara"},
+	"inari_romon": {"Gate_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Gate_Roof": Palette.TRI_PREFIX + "kawara"},
+	"kiyomizu_hondo": {"Hondo_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Hondo_Roof": Palette.TRI_PREFIX + "kawara"},
+	# `Wall_Roof` numit EXPLICIT: fara intrare, prefixul GLOBAL `Wall_` al varului
+	# de Stromboli (`prop_classes()` -> STROMBOLI_CLASSES) il prindea, si
+	# acoperisul zidului de templu iesea ALB (village_plaster) — masurat cu
+	# ProbeKyotoClase inainte de valul de materiale (memoria
+	# `nume-noduri-nu-sunt-unice`).
+	"temple_wall": {"Wall_Plaster": Palette.TRI_PREFIX + "village_plaster",
+		"Wall_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Wall_Roof": Palette.TRI_PREFIX + "kawara"},
+	# Pagodele: acoperisul (6/28 sau 20/28, acelasi interval de y) ia tigla,
+	# ferestrele 100% LOG_DARK lemnul inchis. Corpul (vermilion 30 + var 22 +
+	# 28, intercalate pe toata inaltimea) ramane pe atlas. La Yasaka ferestrele
+	# sunt 72/28 cu RUST_METAL 10 pe acelasi y: raman pe atlas.
+	"koyasu_pagoda": {"Pagoda_Roof": Palette.TRI_PREFIX + "kawara",
+		"Pagoda_Windows": Palette.TRI_PREFIX + "machiya_wood"},
+	"sanjunoto_pagoda": {"Pagoda_Roof": Palette.TRI_PREFIX + "kawara",
+		"Pagoda_Windows": Palette.TRI_PREFIX + "machiya_wood"},
+	"yasaka_pagoda": {"Pagoda_Roof": Palette.TRI_PREFIX + "kawara"},
+	"tsutenkyo_roof_module": {"Tsu_Roof": Palette.TRI_PREFIX + "kawara",
+		"Tsu_Rail": Palette.TRI_PREFIX + "wood"},
+	"togetsukyo_module": {"Toget_Rail": Palette.TRI_PREFIX + "wood"},
+	"teahouse_front": {"Tea_Wood": Palette.TRI_PREFIX + "wood",
+		"Tea_Red": Palette.TRI_PREFIX + "shu_red"},
+	# Valul 2: rosul 100% pe nod, fara ruptura.
+	"votive_torii_cluster": {"Torii_Wood": Palette.TRI_PREFIX + "shu_vermilion"},
+	"iron_truss_bridge": {"Truss_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Truss_Iron": Palette.TRI_PREFIX + "shu_red"},
+	# Frunzisul de toamna: o coroana = o clasa, trei nuante de artar (siluete
+	# diferite in GLB, culori diferite aici). Trunchiurile (100% slot 9) iau
+	# scoarta `bark_kyoto`.
+	"momiji_a": {"Maple_Crown": Palette.TRI_PREFIX + "maple_crimson",
+		"Maple_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	"momiji_b": {"Maple_Crown": Palette.TRI_PREFIX + "maple_orange",
+		"Maple_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	"momiji_c": {"Maple_Crown": Palette.TRI_PREFIX + "maple_rust",
+		"Maple_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	"ginkgo": {"Ginkgo_Crown": Palette.TRI_PREFIX + "ginkgo_gold",
+		"Ginkgo_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	"niwaki_pine": {"Pine_Crown": Palette.TRI_PREFIX + "cedar_needles",
+		"Pine_Trunk": Palette.TRI_PREFIX + "bark_kyoto"},
+	# Cedrul: 97% slot 21 + 3% slot 28 (piciorul trunchiului, sub prag — ca
+	# `beech_dead`, 5.6%). Tot nodul ia acele.
+	"cedar_dark": {"Cedar_Dark": Palette.TRI_PREFIX + "cedar_needles"},
+	# Tufele tunse karikomi: 63% slot 21 + 37% slot 12 pe ACELASI y (umbrirea
+	# tufei). `moss` e deja pe pista (+0) si are tenta slotului 21.
+	"karikomi_shrub_a": {"Karikomi_A": Palette.TRI_PREFIX + "moss"},
+	"karikomi_shrub_b": {"Karikomi_B": Palette.TRI_PREFIX + "moss"},
+	"stepping_stones": {"Stepping_Stone": Palette.TRI_PREFIX + "garden_stone"},
+	# Frunzele de bambus: lime, pe care atlasul nu-l are (CACTUS_GREEN iese oliv).
+	"bamboo_crown": {"Bamboo_Leaves": Palette.TRI_PREFIX + "bamboo_lime"},
+	"leaf_pile": {"Leaf_Pile": Palette.TRI_PREFIX + "leaf_litter"},
+	# Muschiul: pe nodurile `*_Moss` ale pietrelor, zidului si movilei.
+	"moss_mound": {"Moss_Mound": Palette.TRI_PREFIX + "moss",
+		"Moss_Stone": Palette.TRI_PREFIX + "garden_stone"},
+	# POI F r3 (verdictul coordonatorului: pietrele de mal ieseau albe): piatra
+	# bolovanilor de gradina pe `garden_stone`: dala de zid a lui `old_stone`, tenta
+	# mai inchisa si calda (Palette.CLASS_TINT), masurata pe captura. Cu
+	# `old_stone` pur iesea la fel de deschis ca atlasul (+1 material, nu +0).
+	"garden_rock_a": {"Rock_Moss": Palette.TRI_PREFIX + "moss",
+		"Rock_Stone": Palette.TRI_PREFIX + "garden_stone"},
+	"garden_rock_b": {"RockB_Stone": Palette.TRI_PREFIX + "garden_stone"},
+	"garden_rock_c": {"RockC_Moss": Palette.TRI_PREFIX + "moss",
+		"RockC_Stone": Palette.TRI_PREFIX + "garden_stone"},
+	"cyclopean_wall": {"Cyc_Moss": Palette.TRI_PREFIX + "moss",
+		"Cyc_Stone": Palette.TRI_PREFIX + "old_stone"},
+	# Piatra arhitecturala (felinare, vulpi, clopotnita, bazin, pavilion, pod):
+	# gri neutru pe 29/8/6, deci monocrom ca nuanta. Bolovanii de gradina NU intra
+	# (rosturi de zid pe o piatra de rau ar citi gresit).
+	"stone_lantern_a": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"stone_lantern_b": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"yukimi_lantern": {"Lantern_Stone": Palette.TRI_PREFIX + "old_stone"},
+	"kitsune_statue_a": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Fox_Bib": Palette.TRI_PREFIX + "shu_red"},
+	"kitsune_statue_b": {"Fox_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Fox_Bib": Palette.TRI_PREFIX + "shu_red"},
+	"bell_tower": {"Bell_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Bell_Roof": Palette.TRI_PREFIX + "kawara",
+		"Bell_Beams": Palette.TRI_PREFIX + "machiya_wood",
+		"Bell_Wood": Palette.TRI_PREFIX + "wood"},
+	"chozuya": {"Choz_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Choz_Roof": Palette.TRI_PREFIX + "kawara",
+		"Choz_Beams": Palette.TRI_PREFIX + "machiya_wood",
+		"Choz_Wood": Palette.TRI_PREFIX + "wood"},
+	# Pavilionul de Aur: aurul (16, 100%) ramane pe atlas — foita de aur e o
+	# suprafata neteda, culoarea plata ESTE materialul. Lemnul de jos (9/28 pe
+	# acelasi y) ramane pe atlas.
+	"kinkakuji": {"Kin_Stone": Palette.TRI_PREFIX + "old_stone",
+		"Kin_Roof": Palette.TRI_PREFIX + "kawara",
+		"Kin_Windows": Palette.TRI_PREFIX + "machiya_wood"},
 	# Restul kitului ramane pe atlas (masurat, jodhpur_masuratori.md §1):
 	# cenotaful (22/29, marmura), animalele, bazarul, candelele, tuk-tuk-ul,
 	# copacii (`Crown`/`Trunk` — niciun prefix global nu-i prinde, verificat
 	# cu tools/ProbeJodClase.tscn), orizontul (clasa lui vine din tema).
 }
+
+## Clasele pieselor de stanca Monument Valley (vezi `CLASSES_BY_THEME`).
+##
+## `*_Rock` si `*_Scree` iau AMBELE `mv_sandstone`, si e decizie masurata, nu
+## comoditate. Pe atlas, grohotisul (RUST_METAL 10 + LARCH_RUST 27 in coaste
+## alternante) iese in captura ca dungi galben-maro, „carton ondulat", la 20 m
+## de camera (frac 0.2, Mitten-ul din stanga). Incercat si `red_valley_tuff`
+## (maro-inchis, 136/89/65): iese aproape negru pe partea din umbra si costa un
+## material in plus pe pista. `mv_sandstone` pe fusta ramane cel mai curat:
+## aceeasi nuanta ca peretele, iar etajul de jos se citeste din FORMA (coaste,
+## bolovani, AO copt in vertex colors), nu dintr-o a doua culoare. Zero materiale
+## noi: clasa e deja pe pista prin falezele trecatorii.
+## `*_Cap` (calota) ia `mv_cap` (gri-roz #B9A08C): pe atlas (SAND_LIGHT) iesea galben-oliv la umbra.
+## EXCEPTIE: `Mesa_Cap` (peretii culoarului E, `mesa_wall_module`) ia `mv_sandstone`, ca
+## peretele. Calota gri-roz pe un zid de 48 de module citea ca placa de marmura pusa
+## peste gresie (observatia dezvoltatorului dupa tur); pe monoliti (Mitten, Butte, arc)
+## calota palida ramane decizia de culoare de mai sus.
+const _MV: String = Palette.TRI_PREFIX + "mv_sandstone"
+const _MVC: String = Palette.TRI_PREFIX + "mv_cap"
+const MV_ROCK_WEST := {"Mitten_Rock": _MV, "Mitten_Scree": _MV, "Mitten_Cap": _MVC}
+const MV_ROCK_EAST := {"EastMitten_Rock": _MV, "EastMitten_Scree": _MV, "EastMitten_Cap": _MVC}
+const MV_ROCK_MERRICK := {"Butte_Rock": _MV, "Butte_Scree": _MV, "Butte_Cap": _MVC}
+const MV_ROCK_MESA := {"Mesa_Rock": _MV, "Mesa_Scree": _MV, "Mesa_Cap": _MV}
+const MV_ROCK_ARCH := {"Arch_Rock": _MV, "Arch_Scree": _MV, "Arch_Cap": _MVC}
+const MV_ROCK_BUTTE_A := {"ButteA_Rock": _MV, "ButteA_Scree": _MV, "ButteA_Cap": _MVC}
+const MV_ROCK_BUTTE_B := {"ButteB_Rock": _MV, "ButteB_Scree": _MV, "ButteB_Cap": _MVC}
+const MV_ROCK_BUTTE_C := {"ButteC_Rock": _MV, "ButteC_Scree": _MV, "ButteC_Cap": _MVC}
+const MV_ROCK_FIN := {"Fin_Rock": _MV, "Fin_Scree": _MV}
+const MV_ROCK_HOODOO := {"Hoodoo_Rock": _MV, "Hoodoo_Scree": _MV, "Hoodoo_Cap": _MVC}
+const MV_ROCK_TALUS := {"Talus_Scree": _MV}
 
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),
 ## nu global — la fel cum [constant SLOT_REMAP_BY_THEME] exista langa
@@ -1771,6 +2027,37 @@ const CLASSES_BY_MODEL := {
 ## deja clasa corecta (stirling_ledge.Wall, torrent_chute.Rock, acelasi verdict
 ## de brief) si costa ZERO materiale noi: e cache pe clasa, nu pe model.
 const CLASSES_BY_THEME := {
+	# Kyoto, valul 2: clasele pieselor RUPTE de SPLIT_MODELS_BY_THEME. Aici, nu in
+	# CLASSES_BY_MODEL, fiindca ruptura e amanata (call_deferred) si clasele de
+	# model se pun SINCRON, inaintea ei — pe nodul nerupt ar fi sters accentele.
+	# Accentele numite explicit (`*_Accente`) primesc clasa lor; celelalte raman
+	# pe atlas (garda din `_apply_classes_mapping`).
+	"kyoto": {
+		"koyasu_pagoda": {"Pagoda_Body": Palette.TRI_PREFIX + "shu_vermilion"},
+		"sanjunoto_pagoda": {"Pagoda_Body": Palette.TRI_PREFIX + "shu_vermilion"},
+		"yasaka_pagoda": {"Pagoda_Body": Palette.TRI_PREFIX + "shu_vermilion"},
+		"niomon_gate": {"Gate_Wood": Palette.TRI_PREFIX + "shu_vermilion"},
+		"inari_romon": {"Gate_Wood": Palette.TRI_PREFIX + "shu_vermilion"},
+		"torii_large": {"Torii_Large": Palette.TRI_PREFIX + "shu_vermilion"},
+		"torii_senbon": {"Torii_Senbon": Palette.TRI_PREFIX + "shu_vermilion"},
+		"small_shrine": {"Shrine_Wood": Palette.TRI_PREFIX + "shu_vermilion",
+			"Shrine_Roof": Palette.TRI_PREFIX + "kawara",
+			"Shrine_Roof_Accente": Palette.TRI_PREFIX + "shu_vermilion"},
+		# Kiyomizu: stalpii scenei (28) lemn inchis, grinzile (9) lemn deschis.
+		"kiyomizu_hondo": {"Hondo_Wood": Palette.TRI_PREFIX + "machiya_wood",
+			"Hondo_Wood_Accente": Palette.TRI_PREFIX + "wood"},
+		# Esafodajul kakezukuri: lemnul 9 ia `wood`; stalpii LARCH_RUST 27 raman
+		# pictati (mai deschisi decat orice clasa de lemn de pe pista).
+		"kakezukuri_scaffold": {"Scaffold_Wood": Palette.TRI_PREFIX + "wood"},
+		"kinkakuji": {"Kin_Wood": Palette.TRI_PREFIX + "wood",
+			"Kin_Wood_Accente": Palette.TRI_PREFIX + "machiya_wood"},
+		"togetsukyo_module": {"Toget_Wood": Palette.TRI_PREFIX + "wood",
+			"Toget_Wood_Accente": Palette.TRI_PREFIX + "machiya_wood"},
+		"tsutenkyo_roof_module": {"Tsu_Wood": Palette.TRI_PREFIX + "wood",
+			"Tsu_Wood_Accente": Palette.TRI_PREFIX + "machiya_wood"},
+		"moso_culm": {"Moso_Culm": Palette.TRI_PREFIX + "bamboo_culm"},
+		"bamboo_crown": {"Bamboo_Culms": Palette.TRI_PREFIX + "bamboo_culm"},
+	},
 	"fiordland": {
 		"chasm_rock": {
 			"Rock_001": Palette.TRI_PREFIX + "wet_gneiss",
@@ -1786,6 +2073,29 @@ const CLASSES_BY_THEME := {
 			"Moss_Boulder_B": Palette.TRI_PREFIX + "wet_gneiss",
 		},
 	},
+	# Monument Valley (Track19): gresia `mv_sandstone` pe nodurile `*_Rock` ale
+	# kitului, SALVIA gri-verde pe `Sagebrush_Foliage`. Cheia e pe FISIER (stem),
+	# nu pe numele nodului (memoria `nume-noduri-nu-sunt-unice`), si scopata pe
+	# TEMA: `rock_arch.glb`, `butte.glb` & co de pe celelalte piste nu se ating.
+	#
+	# `*_Cap` ramane pe atlas, `*_Scree` ia gresia: vezi `MV_ROCK_*` mai sus.
+	"monumentvalley": {
+		"west_mitten": MV_ROCK_WEST,
+		"east_mitten": MV_ROCK_EAST,
+		"merrick_butte": MV_ROCK_MERRICK,
+		"mesa_wall_module": MV_ROCK_MESA,
+		"sandstone_arch": MV_ROCK_ARCH,
+		"butte_small_a": MV_ROCK_BUTTE_A,
+		"butte_small_b": MV_ROCK_BUTTE_B,
+		"butte_small_c": MV_ROCK_BUTTE_C,
+		"rock_fin": MV_ROCK_FIN,
+		"hoodoo": MV_ROCK_HOODOO,
+		"talus_boulders_a": MV_ROCK_TALUS,
+		"talus_boulders_b": MV_ROCK_TALUS,
+		"sagebrush": {"Sagebrush_Foliage": Palette.TRI_PREFIX + "mv_sage"},
+		# Postul de negot: piatra pe clasa calotei (#B9A08C), nu pe SAND_LIGHT (galben).
+		"trading_post": {"Post_Stone": _MVC},
+	},
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -1795,7 +2105,8 @@ const CLASSES_BY_THEME := {
 ## orizont). `_build_horizon` din track.gd face acelasi lucru pe siluetele
 ## procedurale; aici e varianta pentru orizontul asezat de mana.
 const NO_SHADOW_MODELS := {
-	"lengai": true, "crater_far_wall": true,
+	"lengai": true, "crater_far_wall": true, "kyoto_horizon": true,
+	"horizon_mesas": true,
 }
 
 
@@ -2050,6 +2361,20 @@ const SPLIT_MODELS_BY_THEME := {
 	"fiordland": {
 		"moss_boulder_b": true,
 	},
+	# Kyoto, valul 2 de materiale (docs/track_briefs/kyoto_materiale.md §Valul 2):
+	# nodurile MIXTE ale templelor si podurilor se rup PE SLOT, ca vermilionul /
+	# lemnul / tulpina sa ia clasa fara sa stearga restul. Ruptura e pe triunghi
+	# (`Palette.split_accents`), iar piesele de arhitectura au sloturile pe fete
+	# separate (panouri, grinzi, stalpi), deci ruptura e exacta — testul de
+	# suprapunere pe y al rocilor cu muschi nu se aplica aici.
+	"kyoto": {
+		"koyasu_pagoda": true, "sanjunoto_pagoda": true, "yasaka_pagoda": true,
+		"niomon_gate": true, "inari_romon": true,
+		"kiyomizu_hondo": true, "kakezukuri_scaffold": true,
+		"kinkakuji": true, "togetsukyo_module": true, "tsutenkyo_roof_module": true,
+		"torii_large": true, "torii_senbon": true, "small_shrine": true,
+		"moso_culm": true, "bamboo_crown": true,
+	},
 }
 
 ## Ca [constant ACCENT_SPLIT], dar consultat DOAR de [method
@@ -2062,6 +2387,23 @@ const ACCENT_SPLIT_BY_THEME := {
 		# VOLCANIC_BLACK (3 si 29 mutate acolo); capacul de muschi ramane pe 21
 		# TROPICAL_GREEN si pleaca in `_Accente`.
 		"Moss_Boulder_B": Palette.VOLCANIC_BLACK,
+	},
+	# Valoarea = sloturile care raman pe CORP (si primesc clasa corpului); restul
+	# pleaca in `_Accente` (atlas, sau clasa numita explicit in CLASSES_BY_THEME).
+	"kyoto": {
+		"Pagoda_Body": Palette.LAVA_ORANGE,     # vermilion; var 22 + lemn 28 raman
+		"Gate_Wood": Palette.LAVA_ORANGE,       # vermilion; grinda 9 + 28 raman
+		"Torii_Large": Palette.LAVA_ORANGE,     # vermilion; kasagi 28 + soclu 20
+		"Torii_Senbon": Palette.LAVA_ORANGE,
+		"Shrine_Wood": Palette.LAVA_ORANGE,
+		"Shrine_Roof": [Palette.ASPHALT_EDGE, Palette.LOG_DARK],  # tigla; fascia 30 -> accent
+		"Hondo_Wood": Palette.LOG_DARK,         # stalpii scenei 28; grinzile 9 -> accent
+		"Kin_Wood": Palette.WOOD_WEATHERED,
+		"Toget_Wood": Palette.WOOD_WEATHERED,
+		"Tsu_Wood": Palette.WOOD_WEATHERED,
+		"Scaffold_Wood": Palette.WOOD_WEATHERED,
+		"Moso_Culm": Palette.CACTUS_GREEN,      # tulpina 12; inelele 13 raman
+		"Bamboo_Culms": Palette.TROPICAL_GREEN, # tulpina 21; inelele 13 raman
 	},
 }
 
@@ -2720,6 +3062,30 @@ func _split_theme_accents() -> void:
 ## `apply_class_materials`, ca sa aiba ultimul cuvant pe partile ambigue.
 func _apply_model_classes() -> void:
 	_apply_classes_mapping(CLASSES_BY_MODEL)
+	_apply_meta_class()
+
+
+## Clasa triplanara ceruta de INSTANTA, nu de model: metadata `clasa_triplanara` =
+## "mv_sandstone" pe instanta sau pe un container (se mosteneste in jos), ca la
+## `racire`/`lumina`. Exista fiindca `CLASSES_BY_MODEL` e pe fisier-model, deci
+## global: un `butte.glb` imbracat acolo ar schimba si Dunele. Aici turnurile
+## Mittens (Track19) isi iau gresia fara sa atinga nicio alta pista. Fara
+## metadata nu se intampla nimic (bit-identic).
+const CLASS_META := "clasa_triplanara"
+
+func _apply_meta_class() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		var cls := ""
+		var p: Node = model
+		while p != null and p != self.get_parent():
+			if p.has_meta(CLASS_META):
+				cls = String(p.get_meta(CLASS_META))
+				break
+			p = p.get_parent()
+		if not cls.is_empty():
+			Palette.apply_triplanar_class(model, cls)
 
 
 ## Metadata care muta varul unei case albastre (Jodhpur) de pe tenta deschisa
@@ -2845,6 +3211,8 @@ func _apply_classes_mapping(by_stem: Dictionary) -> void:
 			if is_accent and not cls.begins_with(Palette.GLOW_PREFIX) 					and not mapping.has(nm):
 				continue
 			mi.material_override = _model_class_material(cls)
+			if Palette.is_smooth_foliage(cls):
+				mi.mesh = Palette.smoothed_mesh(mi.mesh)
 
 
 ## Materialul unei clase din `CLASSES_BY_MODEL`, dupa prefix.
@@ -3037,6 +3405,28 @@ func _glow_spec(model: Node3D) -> String:
 const HULL_SKIP_PARTS := {
 	"fort_wall_segment": ["Wall_Glow"],
 	"fort_wall_turret": ["Turret_Glow"],
+	# Monument Valley: la monolitii mari fusta de grohotis si calota nu au corp
+	# fizic propriu — fusta e deja terenul `TerrainPeak` de dedesubt (un colizor
+	# pe ea ar schimba traseul bolovanilor care se rostogolesc pe teren), iar
+	# calota e o placa subtire sus. Lista e citita si de `_add_trimesh` (Mittens
+	# sunt `mesh`). Piesele mici (butte_small_*, hoodoo, fin) isi pastreaza fusta:
+	# conul lor E sprijinul lor, nu exista teren sub el.
+	"west_mitten": ["Mitten_Scree", "Mitten_Cap"],
+	"east_mitten": ["EastMitten_Scree", "EastMitten_Cap"],
+	"merrick_butte": ["Butte_Scree", "Butte_Cap"],
+	# Kyoto: casele de oras au hull doar pe miezul de lemn (peretii). Acoperisul
+	# (streasina iese 1,1 m dincolo de perete), zabrelele din fata (pana la 0,9 m
+	# in strada), norenul si jaluzelele nu sunt obstacole: un hull pe ele ar
+	# fi un bloc mai lat decat casa, la inaltimea capotei in dreptul streasinii
+	# intermediare.
+	"machiya_a": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster",
+		"Machiya_Noren"],
+	"machiya_b": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster",
+		"Machiya_Noren"],
+	"machiya_c": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster"],
+	"machiya_d": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster",
+		"Machiya_Bamboo"],
+	"machiya_e": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster"],
 }
 
 
@@ -3618,11 +4008,19 @@ func _add_trunk(body: StaticBody3D, model: Node3D) -> bool:
 		return false
 	var cyl := CylinderShape3D.new()
 	cyl.height = aabb.size.y
-	cyl.radius = maxf(aabb.size.x * TRUNK_FRACTION, TRUNK_MIN_RADIUS)
+	var stem := model.scene_file_path.get_file().get_basename()
+	cyl.radius = float(TRUNK_RADIUS[stem]) if TRUNK_RADIUS.has(stem) \
+		else maxf(aabb.size.x * TRUNK_FRACTION, TRUNK_MIN_RADIUS)
 	var col := CollisionShape3D.new()
 	col.shape = cyl
 	col.position = aabb.position + Vector3(aabb.size.x * 0.5,
 		aabb.size.y * 0.5, aabb.size.z * 0.5)
+	# Cu raza masurata (TRUNK_RADIUS) axa e a MODELULUI, nu centrul AABB: o
+	# coroana asimetrica (ramura lunga intr-o parte) muta centrul casetei de pe
+	# trunchi, si un cilindru subtire centrat pe caseta rateaza lemnul.
+	if TRUNK_RADIUS.has(stem):
+		col.position.x = model.transform.origin.x
+		col.position.z = model.transform.origin.z
 	body.add_child(col)
 	return true
 
@@ -3632,9 +4030,15 @@ func _add_trunk(body: StaticBody3D, model: Node3D) -> bool:
 ## depinda de scalarea nodului de forma.
 func _add_trimesh(body: StaticBody3D, model: Node3D) -> bool:
 	var added := false
+	# Aceeasi lista de parti sarite ca la hull (`HULL_SKIP_PARTS`): Mittens-urile
+	# (`mesh`) isi lasa fusta de grohotis si calota fara corp propriu.
+	var skip: Array = HULL_SKIP_PARTS.get(
+		model.scene_file_path.get_file().get_basename(), [])
 	for entry in TrackDecor.visible_meshes(model, model.transform):
 		var mi: MeshInstance3D = entry[0]
 		var xform: Transform3D = entry[1]
+		if not skip.is_empty() and skip.has(String(mi.name)):
+			continue
 		var src := _trimesh_faces(mi.mesh)
 		if src.is_empty():
 			continue
@@ -3676,6 +4080,16 @@ static func _trimesh_faces(mesh: Mesh) -> PackedVector3Array:
 ## PUBLICA dinadins: acelasi tabel il foloseste si [PathMover], pentru
 ## modelele care se misca (vezi `Palette.apply_object_class_materials`). O a
 ## doua lista scrisa de mana ar fi ramas in urma la primul asset nou.
+## Kyoto, valul 2: piesele care se MISCA (trenul Sagano, ricsa). Un [PathMover]
+## citeste doar `prop_classes()` (global, pe nume de nod) si aplica clasele in
+## spatiul OBIECTULUI, ca textura sa nu „inoate" pe caroserie. Numele sunt unice
+## in tot `assets/models/` (verificat cu grep pe .glb), deci intrarea globala nu
+## prinde alt kit.
+const KYOTO_MOVING_CLASSES := {
+	"Train_Body": Palette.TRI_PREFIX + "shu_red",
+	"Rick_Red": Palette.TRI_PREFIX + "shu_red",
+}
+
 static func prop_classes() -> Dictionary:
 	var out := {}
 	out.merge(TrackDecor.ISLAND_CLASSES)
@@ -3684,6 +4098,7 @@ static func prop_classes() -> Dictionary:
 	out.merge(TrackDecor.CHONGQING_CLASSES)
 	out.merge(TrackDecor.CAPPADOCIA_CLASSES)
 	out.merge(TrackDecor.FIORDLAND_AIRSTRIP_CLASSES)
+	out.merge(KYOTO_MOVING_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

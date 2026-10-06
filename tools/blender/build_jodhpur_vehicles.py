@@ -188,6 +188,11 @@ def build_tuktuk():
     """
     body = Builder()
     roof = Builder()
+    # farul si stopurile: obiecte separate (`Tuktuk_Lamp_Head` / `_Lamp_Tail`),
+    # ca jocul sa le dea un material emisiv fara sa aprinda caroseria. Cele
+    # doua semnalizatoare AMBER raman in bot (nu sunt lampi de frana/far).
+    lamp_head_b = Builder()
+    lamp_tail_b = Builder()
     P = lambda hw, z0, z1, rt, rb=0.0: _rrect(hw, z0, z1, rt, rb, n=4)
 
     # 1/9/11. ACOPERISUL + sfertul din spate (galben), un singur loft pe Y.
@@ -234,7 +239,7 @@ def build_tuktuk():
     _loft(body, [_sec(y, P(hw, 0.66, zt, min(0.16, (zt - 0.66) * 0.9), 0.0))
                  for y, hw, _, zt in nose], YELLOW)
     # lumini pe marginea neagra de sus a botului
-    body.cylinder((0.0, -1.232, 0.60), 0.06, 0.03, YELLOW, segments=10, axis="Y")
+    lamp_head_b.cylinder((0.0, -1.232, 0.60), 0.06, 0.03, YELLOW, segments=10, axis="Y")
     for sx in (-1.0, 1.0):
         body.cylinder((sx * 0.15, -1.222, 0.60), 0.035, 0.03, AMBER, segments=8, axis="Y")
 
@@ -267,7 +272,7 @@ def build_tuktuk():
 
     # 12. stopurile, 13. bara galbena, 14. catadioptrii
     for sx in (-1.0, 1.0):
-        body.box((sx * 0.38, REAR_FACE_Y + 0.012, 0.74), (0.09, 0.03, 0.15), TAIL)
+        lamp_tail_b.box((sx * 0.38, REAR_FACE_Y + 0.012, 0.74), (0.09, 0.03, 0.15), TAIL)
     body.box((0.0, REAR_FACE_Y + 0.02, 0.44), (0.50, 0.05, 0.08), YELLOW)
     for sx in (-1.0, 1.0):
         body.box((sx * (ROOF_HW - 0.013), 0.95, BELT_Z - 0.04), (0.02, 0.28, 0.05), AMBER)
@@ -289,12 +294,14 @@ def build_tuktuk():
 
     body_obj = body.to_object("Tuktuk_Body")
     roof_obj = roof.to_object("Tuktuk_Roof")
+    head_obj = lamp_head_b.to_object("Tuktuk_Lamp_Head")
+    tail_obj = lamp_tail_b.to_object("Tuktuk_Lamp_Tail")
     wheels = [
         (_wheel("Wheel_Front", (0.0, FRONT_Y, WHEEL_R), 0.12), (0.0, FRONT_Y, WHEEL_R)),
         (_wheel("Wheel_Rear_L", (REAR_X, REAR_Y, WHEEL_R), 0.14), (REAR_X, REAR_Y, WHEEL_R)),
         (_wheel("Wheel_Rear_R", (-REAR_X, REAR_Y, WHEEL_R), 0.14), (-REAR_X, REAR_Y, WHEEL_R)),
     ]
-    return body_obj, roof_obj, wheels
+    return body_obj, roof_obj, head_obj, tail_obj, wheels
 
 
 def emit_car(body_objs, wheels, path, budget=None):
@@ -330,8 +337,8 @@ def emit_car(body_objs, wheels, path, budget=None):
 clear_built()
 results = []
 
-tt_body, tt_roof, tt_wheels = build_tuktuk()
-tt = emit_car([tt_body, tt_roof], tt_wheels, "vehicles/tuktuk.glb", budget=5200)
+tt_body, tt_roof, tt_head, tt_tail, tt_wheels = build_tuktuk()
+tt = emit_car([tt_body, tt_roof, tt_head, tt_tail], tt_wheels, "vehicles/tuktuk.glb", budget=5200)
 
 print()
 for path, tris, kb, ao_lo, ao_hi, budget, place in results:

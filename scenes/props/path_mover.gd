@@ -92,6 +92,18 @@ const PLACEHOLDER_SIZE := Vector3(1.9, 1.7, 3.4)
 ## exportat pentru 1.5 m/s arata a patinaj la 4 m/s — de aici se potriveste.
 @export_range(0.1, 4.0, 0.05) var animation_speed: float = 1.0
 
+## Corp fizic de coliziune. true (implicit) = comportamentul de pana acum:
+## masina care intra in figurant se ciocneste cinstit. false = TEATRU: corpul
+## cinematic ramane (pozitia, sync), dar fara forma de coliziune — ricsa de pe
+## trotuarul Sannenzaka (Kyoto, POI B), pe langa care treci, nu in care te
+## opresti; contractul brief-ului cere „fara coliziune".
+@export var collide: bool = true
+## Traseul ca lista de puncte LOCALE (optional). Gol = curba nodului, ca pana
+## acum. Nevid = curba se construieste din puncte la _ready: un generator de
+## decor (tools/gen_decor_kyoto_b.gd) scrie nodul in .tscn fara sub-resursa
+## Curve3D (blocul DECOR MANUAL lipeste doar ext_resource-uri si noduri).
+@export var points: PackedVector3Array = PackedVector3Array()
+
 @export_group("Miscare")
 ## m/s. 0 = parcat pe traiectorie (util cat asezi curba).
 @export_range(0.0, 30.0, 0.1) var speed: float = 4.0
@@ -165,6 +177,11 @@ func _model_animation_names() -> PackedStringArray:
 
 
 func _ready() -> void:
+	if not points.is_empty() and (curve == null or curve.point_count < 2):
+		var c := Curve3D.new()
+		for q in points:
+			c.add_point(q)
+		curve = c
 	_build_body()
 
 
@@ -237,14 +254,9 @@ func _build_push() -> void:
 	_pivot.add_child(_plume)
 
 
-func _build_model() -> void:
-	var inst := _extract_node(model, model_node)
-	if inst == null:
-		_build_placeholder()
+func _apply_object_classes(inst: Node3D) -> void:
+	if not is_instance_valid(inst):
 		return
-	inst.scale = Vector3.ONE * model_scale
-	inst.rotation.y = deg_to_rad(model_yaw)
-	_pivot.add_child(inst)
 	if tri_class.is_empty():
 		# Pe PARTI, nu pe tot corpul: trenul are caroseria pe atlas (verdele si
 		# dunga galbena sunt sloturi), dar sasiul pe `rust_metal` si gheata de
@@ -254,6 +266,42 @@ func _build_model() -> void:
 			model_scale)
 	else:
 		Palette.apply_object_triplanar_class(inst, tri_class, model_scale)
+
+
+func _reapply_mapped_classes(inst: Node3D) -> void:
+	if not is_instance_valid(inst) or not tri_class.is_empty():
+		return
+	var mapping: Dictionary = WorldProp.KYOTO_MOVING_CLASSES
+	for node in Palette._walk(inst):
+		var mi := node as MeshInstance3D
+		if mi == null:
+			continue
+		var cls := Palette._class_for(String(mi.name), mapping)
+		if cls.begins_with(Palette.TRI_PREFIX):
+			mi.material_override = Palette.object_triplanar_class_material(
+				cls.trim_prefix(Palette.TRI_PREFIX), model_scale)
+
+
+func _build_model() -> void:
+	var inst := _extract_node(model, model_node)
+	if inst == null:
+		_build_placeholder()
+		return
+	inst.scale = Vector3.ONE * model_scale
+	inst.rotation.y = deg_to_rad(model_yaw)
+	_pivot.add_child(inst)
+	_apply_object_classes(inst)
+	# A DOUA oara, amanat: modelul se construieste in `_ready`, INAINTEA
+	# parintelui, iar un `WorldProp` stramos (DecorManual) aplica apoi
+	# `prop_classes()` pe tot subarborele in varianta DE LUME — pe o piesa care
+	# se misca, textura „inoata". Masurat pe trenul Sagano (Kyoto, sub
+	# DecorManual/ZoneG_Bambus): `Train_Body` iesea pe materialul de lume, iar
+	# ricsa din afara DecorManual pe cel de obiect.
+	# Doar partile Kyoto (`WorldProp.KYOTO_MOVING_CLASSES`), nu tot `prop_classes()`:
+	# reaplicarea generala muta si piesele mobile de pe Baikal si Stromboli pe
+	# varianta de obiect (masurat: Track10 si Track11 cu +1 material fiecare) —
+	# corect ca principiu, dar o schimbare pe alte piste, de decis separat.
+	_reapply_mapped_classes.call_deferred(inst)
 	_autoplay_animation(inst)
 	# Cutia de coliziune se MASOARA pe model (tiparul din sliding_hazard):
 	# scrisa de mana, ar ramane in urma la primul model schimbat din Inspector.
@@ -267,7 +315,10 @@ func _build_model() -> void:
 		col.size = PLACEHOLDER_SIZE
 		shape.position = Vector3.UP * (PLACEHOLDER_SIZE.y * 0.5)
 	shape.shape = col
-	_body.add_child(shape)
+	if collide:
+		_body.add_child(shape)
+	else:
+		shape.free()
 
 
 func _build_placeholder() -> void:
@@ -285,7 +336,10 @@ func _build_placeholder() -> void:
 	col.size = PLACEHOLDER_SIZE
 	shape.shape = col
 	shape.position = Vector3.UP * (PLACEHOLDER_SIZE.y * 0.5)
-	_body.add_child(shape)
+	if collide:
+		_body.add_child(shape)
+	else:
+		shape.free()
 
 
 ## Instantiaza GLB-ul si pastreaza o singura piesa, anuland offsetul ei din
@@ -373,6 +427,11 @@ func _physics_process(delta: float) -> void:
 
 	var pos := to_global(curve.sample_baked(_dist, true))
 	var target_yaw := _travel_yaw(length, pos)
+	# Primul tick porneste DIRECT pe directia de mers: `_yaw` incepe la 0
+	# (-Z global), iar trenuletul Kyoto G2, pornit pe pod cu linia pe E-V,
+	# statea ~0,7 s rasucit peste drum, cu jumatate de vagon in aer.
+	if _time <= delta:
+		_yaw = target_yaw
 	_yaw = lerp_angle(_yaw, target_yaw, minf(TURN_RATE * delta, 1.0))
 	if stick_to_ground:
 		pos.y = _ground_y(pos)
@@ -464,6 +523,22 @@ func _apply_sway() -> void:
 	# singura axa citeste ca metronom, nu ca leganare.
 	_pivot.rotation.z = sin(w * 0.83) * rock_amplitude
 	_pivot.rotation.x = cos(w * 0.61) * rock_amplitude * 0.5
+
+
+## Muta figurantul pe curba la `offset` metri de inceput, pe loc (teleportare).
+## Pentru figuranti "la chemare" (TrainCue): muta intre doua puncte ascunse.
+func seek(offset: float) -> void:
+	_started = true
+	_dist = offset
+	if curve != null:
+		var length := curve.get_baked_length()
+		if length > 0.5:
+			_dist = fposmod(_dist, length)
+
+
+## Distanta curenta pe curba (m de la inceput).
+func offset() -> float:
+	return _dist
 
 
 ## Corpul fizic, pentru sonde (tools/probe_path_mover.gd) — expus printr-o

@@ -63,6 +63,42 @@ class_name CityFill
 ## Zone fara case (centru XZ in coordonate de lume + raza), pe langa
 ## golurile `TerrainHollow` (fantana) care se exclud singure.
 @export var exclude_xz: PackedVector3Array = PackedVector3Array()
+## ZONA PROPRIE (opt-in; gol = interiorul buclei, comportamentul dinainte):
+## poligon XZ in coordonate de lume care INLOCUIESTE bucla ca zona de umplut.
+## Kyoto (Track18, POI A): orasul vechi e doar o parte din interior (iazul F,
+## dealul gradinii si padurile raman libere), iar cartierul din jurul pagodei
+## Yasaka e in AFARA buclei, la nord de B. Restul regulilor (distanta de banda,
+## goluri, treapta de teren) raman aceleasi.
+@export var region_xz: PackedVector2Array = PackedVector2Array()
+
+## SIRURI LIPITE (opt-in; false = grila de case izolate, comportamentul de
+## dinainte, Jodhpur neschimbat). Kyoto, POI A r3: grila de 10 m cu case
+## izolate citea „cartier de blocuri". Machiya reale sunt LIPITE in siruri de-a
+## lungul ulitelor inguste, doua siruri spate in spate intre doua ulite, cu fata
+## spre ulita. Regiunea se imparte in CARTIERE patrate de `row_district_m`;
+## fiecare cartier are directia lui de ulite (din `row_angles_deg`, plus
+## +-6 grade), iar intre cartiere ramane o ulita de margine (`row_district_gap_m`).
+## Fata casei e -Z local (front_yaw_deg se ignora in modul asta).
+@export var row_mode: bool = false
+## Pasul in lungul sirului = latimea casei (fara gol lateral).
+@export var row_house_w: float = 6.3
+## Distanta intre axele celor doua siruri spate in spate (streasinile din
+## spate se ating la 2 x 3,5 m pe machiya).
+@export var row_back_to_back_m: float = 7.0
+## Distanta intre axa casei si fata ei (peretele de lemn).
+@export var row_front_m: float = 2.66
+## Latimea ulitei dintre doua blocuri (perete la perete).
+@export var row_alley_m: float = 7.0
+@export var row_district_m: float = 90.0
+@export var row_district_gap_m: float = 7.0
+@export var row_angles_deg: PackedFloat32Array = PackedFloat32Array([0.0, 14.0, -18.0, 32.0, -35.0])
+@export var row_yaw_jitter_deg: float = 4.0
+@export var row_scale_min: float = 0.92
+@export var row_scale_max: float = 1.08
+## Ulita transversala: din `row_break_min`..`row_break_max` case, un loc de
+## casa ramane gol (sirurile reale se rup la 30-50 m). 0 = siruri continue.
+@export var row_break_min: int = 5
+@export var row_break_max: int = 8
 
 ## CASE SUB DRUM (opt-in; 0 = oprit, comportamentul dinainte): o casa poate sta
 ## mai aproape de `min_road_m` — dar nu sub `below_road_m` — de orice punct de
@@ -83,6 +119,17 @@ class_name CityFill
 ## Unde e FATA fiecarui model (aceeasi ordine ca `models`), ca unghi Y in grade
 ## fata de −Z: 0 = fata pe −Z, −90 = fata pe +X. Gol = toate pe −Z.
 @export var front_yaw_deg: PackedFloat32Array = PackedFloat32Array()
+
+## INSTANTE EXPLICITE (opt-in; gol = generarea de mai sus, comportamentul
+## dinainte, Jodhpur neschimbat). Kyoto, POI B r2: randurile de case FARA corp
+## din spatele primului rand (A si B) erau noduri DecorManual, ~4 desene pe
+## casa (+854 desene pe pista). Generatorul POI-ului isi calculeaza el
+## transformarile — orientarea de strada ramane exact cea aleasa acolo — si le
+## da aici; nodul doar le deseneaza ca MultiMesh feliat, cu aceleasi sabloane
+## de material. Pas de 13 numere pe instanta: indicele modelului in `models`,
+## coloanele bazei (x, y, z: 9 numere) si originea (3). Cu lista nevida,
+## regiunea, min_road_m, exclude_xz si row_mode se ignora.
+@export var explicit_xforms: PackedFloat32Array = PackedFloat32Array()
 
 var stats := {}
 
@@ -105,7 +152,11 @@ func _build() -> void:
 	await get_tree().physics_frame
 	var space := get_world_3d().direct_space_state
 	var t0 := Time.get_ticks_msec()
-	var places := _generate(track, space)
+	var places: Array
+	if not explicit_xforms.is_empty():
+		places = _explicit()
+	else:
+		places = _generate_rows(track, space) if row_mode else _generate(track, space)
 	var parts := await _templates()
 	var groups := {}
 	var rng := RandomNumberGenerator.new()
@@ -114,7 +165,7 @@ func _build() -> void:
 	counts.resize(models.size())
 	var indigo_n := 0
 	for p: Dictionary in places:
-		var mi: int = _pick(rng)
+		var mi: int = int(p["mi"]) if p.has("mi") else _pick(rng)
 		var ind := rng.randf() < indigo_ratio
 		if ind:
 			indigo_n += 1
@@ -123,6 +174,11 @@ func _build() -> void:
 		if face_xz.z > 0.0:
 			xf = _faced(xf, mi)
 		var cell := Vector2i(floori(xf.origin.x / cell_m), floori(xf.origin.z / cell_m))
+		if not explicit_xforms.is_empty():
+			# Randurile explicite sunt o fasie de cateva sute de metri langa
+			# drum: o singura felie (altfel axele x = 0 / z = 0 le taie in
+			# patru si dubleaza desenele fara castig de culling).
+			cell = Vector2i.ZERO
 		for part: Dictionary in parts[mi]:
 			if part["variant"] != -1 and int(part["variant"]) != int(ind):
 				continue
@@ -161,6 +217,22 @@ func _build() -> void:
 	print("CityFill %s: %d case (%d indigo, raport %.2f), %d buffere, %d tri, %d ms, centroid (%.0f, %.1f, %.0f), respinse %s" % [
 		name, places.size(), indigo_n, indigo_ratio, batches, tris, stats["ms"],
 		cen.x, cen.y, cen.z, str(stats.get("rejected", {}))])
+
+
+## Instantele date de generator (vezi `explicit_xforms`).
+func _explicit() -> Array:
+	var out: Array = []
+	var f := explicit_xforms
+	var i := 0
+	while i + 13 <= f.size():
+		var b := Basis(Vector3(f[i + 1], f[i + 2], f[i + 3]),
+			Vector3(f[i + 4], f[i + 5], f[i + 6]), Vector3(f[i + 7], f[i + 8], f[i + 9]))
+		var mi := clampi(int(f[i]), 0, models.size() - 1)
+		out.append({"mi": mi, "xf": Transform3D(b, Vector3(f[i + 10], f[i + 11], f[i + 12]))})
+		i += 13
+	stats["rejected"] = {}
+	stats["below_road"] = 0
+	return out
 
 
 ## Rotirea spre `face_xz` (vezi exportul): pasul de 90° cel mai apropiat de
@@ -207,6 +279,13 @@ func _generate(track: Track, space: PhysicsDirectSpaceState3D) -> Array:
 		loop.append(q)
 		lo = lo.min(q)
 		hi = hi.max(q)
+	if not region_xz.is_empty():
+		loop = region_xz
+		lo = Vector2(INF, INF)
+		hi = Vector2(-INF, -INF)
+		for q in region_xz:
+			lo = lo.min(q)
+			hi = hi.max(q)
 	var roads := PackedVector2Array()
 	var road_y := PackedFloat32Array()
 	for r: TrackRoute in track.routes:
@@ -290,6 +369,118 @@ func _generate(track: Track, space: PhysicsDirectSpaceState3D) -> Array:
 		y += spacing_m
 	stats["rejected"] = rejected
 	stats["below_road"] = below_n
+	return out
+
+
+## Modul SIRURI (vezi `row_mode`): cartiere rotite, blocuri de doua siruri
+## spate in spate, case lipite cu fata spre ulita. Aceleasi filtre ca grila:
+## zona, distanta de banda, goluri/excluderi, treapta de teren.
+func _generate_rows(track: Track, space: PhysicsDirectSpaceState3D) -> Array:
+	var loop := PackedVector2Array()
+	if not region_xz.is_empty():
+		loop = region_xz
+	else:
+		for p in track.baked:
+			loop.append(Vector2(p.x, p.z))
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for q in loop:
+		lo = lo.min(q)
+		hi = hi.max(q)
+	var roads := PackedVector2Array()
+	for r: TrackRoute in track.routes:
+		var b: PackedVector3Array = r.baked
+		for i in range(0, b.size(), 2):
+			roads.append(Vector2(b[i].x, b[i].z))
+	var holes: Array[Vector3] = []
+	for n in _all(track):
+		if n is TerrainHollow:
+			var h := n as TerrainHollow
+			holes.append(Vector3(h.global_position.x, h.global_position.z,
+				h.radius_m + h.wall_m + 6.0))
+	for e in exclude_xz:
+		holes.append(e)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var out: Array = []
+	var rejected := {"road": 0, "hole": 0, "step": 0, "nohit": 0}
+	var min2 := min_road_m * min_road_m
+	var pitch := 2.0 * row_front_m + row_back_to_back_m + row_alley_m
+	var half_d := row_district_m * 0.5 - row_district_gap_m * 0.5
+	var dz := lo.y
+	while dz < hi.y:
+		var dx := lo.x
+		while dx < hi.x:
+			var cen := Vector2(dx + row_district_m * 0.5, dz + row_district_m * 0.5)
+			dx += row_district_m
+			var ang := deg_to_rad(row_angles_deg[rng.randi_range(0, row_angles_deg.size() - 1)]
+				+ rng.randf_range(-6.0, 6.0))
+			var ax := Vector2(cos(ang), -sin(ang))   # in lungul sirului (X local)
+			var az := Vector2(sin(ang), cos(ang))    # peste siruri (Z local)
+			var off := rng.randf_range(0.0, pitch)
+			var v := -half_d * 1.42 + off
+			while v < half_d * 1.42:
+				# doua siruri: fata spre -Z (ulita din „spate" a lui v) si spre +Z
+				for k in 2:
+					var row_v := v + (row_front_m if k == 0 else row_front_m + row_back_to_back_m)
+					var row_yaw := ang + (0.0 if k == 0 else PI)
+					var u := -half_d * 1.42 + rng.randf_range(0.0, row_house_w)
+					var run := 0
+					var brk := rng.randi_range(row_break_min, row_break_max) if row_break_max > 0 else 1 << 30
+					while u < half_d * 1.42:
+						var c := cen + ax * u + az * row_v
+						u += row_house_w
+						run += 1
+						if run > brk:
+							run = 0
+							brk = rng.randi_range(row_break_min, row_break_max)
+							continue
+						var lc := c - cen
+						if absf(lc.x) > half_d or absf(lc.y) > half_d:
+							continue
+						if not Geometry2D.is_point_in_polygon(c, loop):
+							continue
+						var near := false
+						for q in roads:
+							if c.distance_squared_to(q) < min2:
+								near = true
+								break
+						if near:
+							rejected["road"] += 1
+							continue
+						var in_hole := false
+						for h in holes:
+							if c.distance_to(Vector2(h.x, h.y)) < h.z:
+								in_hole = true
+								break
+						if in_hole:
+							rejected["hole"] += 1
+							continue
+						var hmin := INF
+						var hmax := -INF
+						var ok := true
+						for o: Vector2 in [Vector2.ZERO, Vector2(3.2, 3.2), Vector2(-3.2, 3.2),
+								Vector2(3.2, -3.2), Vector2(-3.2, -3.2)]:
+							var g := _ground(space, track, c + o)
+							if is_nan(g):
+								ok = false
+								break
+							hmin = minf(hmin, g)
+							hmax = maxf(hmax, g)
+						if not ok:
+							rejected["nohit"] += 1
+							continue
+						if hmax - hmin > max_step_m:
+							rejected["step"] += 1
+							continue
+						var yaw := row_yaw + deg_to_rad(rng.randf_range(-row_yaw_jitter_deg, row_yaw_jitter_deg))
+						var sc := rng.randf_range(row_scale_min, row_scale_max)
+						out.append({"xf": Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3(sc, sc, sc)),
+							Vector3(c.x, hmin - sink_m, c.y))})
+				v += pitch
+		dz += row_district_m
+	stats["rejected"] = rejected
+	stats["below_road"] = 0
 	return out
 
 

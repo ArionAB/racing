@@ -30,7 +30,14 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_index = int(arg.trim_prefix("--track="))
-	track_index = clampi(track_index, 0, GameState.TRACK_SCENES.size() - 1)
+	# `--track=` ia pozitia din lista SAU numarul scenei (Track18 = 18) — vezi
+	# GameState.resolve_track_index. Indexul brut nu vedea decat pozitiile, deci un
+	# numar de scena iesea din tablou sau, la clampi, devenea TACUT alta pista.
+	track_index = GameState.resolve_track_index(track_index)
+	if track_index < 0:
+		printerr("probe_sway: --track nu e nici pozitie in lista, nici numar de scena din GameState.TRACK_SCENES")
+		get_tree().quit(1)
+		return
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
 	add_child(track)

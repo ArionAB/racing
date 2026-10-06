@@ -107,19 +107,51 @@ def vehicle_wheels(prefix, radius, width, half_track, y_front, y_rear,
     return out
 
 
+# Farurile si stopurile NU intra in corp: codul jocului le da un material
+# emisiv, iar slotul de paleta e partajat cu vopseaua (stopuri CAR_RED pe
+# caroserie rosie). `export_vehicle` pune aici cate un Builder gol inainte sa
+# cheme corpul; corpul adauga cu `lamp_tail` / `lamp_head`. Contract Godot:
+# noduri `<Prefix>_Lamp_Tail` / `<Prefix>_Lamp_Head`, copii directi ai radacinii,
+# in pozitia de ansamblu (origin=None), fara "wheel" in nume.
+LAMP_TAIL = None
+LAMP_HEAD = None
+
+
+def lamp_tail(center, size, slot=None, **kw):
+    LAMP_TAIL.box(center, size, CAR_RED if slot is None else slot, **kw)
+
+
+def lamp_head(center, size, slot=None, **kw):
+    LAMP_HEAD.box(center, size, FOAM_WHITE if slot is None else slot, **kw)
+
+
+def lamp_head_round(center, radius, depth, segments=8):
+    LAMP_HEAD.cylinder(center, radius, depth, FOAM_WHITE, segments=segments, axis="Y")
+
+
 def export_vehicle(prefix, build_body, wheel_spec, filename, seat, bevel=0.03):
-    """Un vehicul: corpul (o singura piesa, origine la sol) + 4 roti.
+    """Un vehicul: corpul (o singura piesa, origine la sol) + 4 roti + cele doua
+    obiecte de lampi (`_Lamp_Tail`, `_Lamp_Head`; vezi LAMP_TAIL mai sus).
     `wheel_spec` = dict(radius, width, half_track, y_front, y_rear[, half_track_rear]).
     Tipareste `driver_seat` gata de pus in .tres."""
     print("%s:" % prefix)
+    global LAMP_TAIL, LAMP_HEAD
     b = Builder()
+    LAMP_TAIL, LAMP_HEAD = Builder(), Builder()
     build_body(b)
     body = b.to_object("%s_Body" % prefix)
     st = finish(body, bevel=bevel, ao=AO_BODY, origin=None)
     print("  %-26s %5d tris  AO %.2f..%.2f" % (body.name, st["tris"],
                                                st["ao_min"], st["ao_max"]))
+    lamps = []
+    for lb, tag in ((LAMP_TAIL, "Tail"), (LAMP_HEAD, "Head")):
+        lo_ = lb.to_object("%s_Lamp_%s" % (prefix, tag))
+        ls = finish(lo_, bevel=0.01, ao=AO_PART, origin=None)
+        print("  %-26s %5d tris  AO %.2f..%.2f" % (lo_.name, ls["tris"],
+                                                   ls["ao_min"], ls["ao_max"]))
+        lamps.append(lo_)
     wheels = vehicle_wheels(prefix, **wheel_spec)
-    objs = [body] + wheels
+    objs = [body] + lamps + wheels
     bpy.context.view_layer.update()
     lo = Vector((1e9, 1e9, 1e9))
     hi = Vector((-1e9, -1e9, -1e9))

@@ -41,9 +41,14 @@ func _ready() -> void:
 	GameState.selected_track = 0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			GameState.selected_track = clampi(
-				int(arg.trim_prefix("--track=")), 0,
-				GameState.TRACK_SCENES.size() - 1)
+			# Pozitie in lista SAU numar de scena (Track18 = 18); inainte un
+			# clampi() tacut muta orice numar gresit pe alta pista.
+			GameState.selected_track = GameState.resolve_track_index(
+				int(arg.trim_prefix("--track=")))
+			if GameState.selected_track < 0:
+				printerr("probe_fx: --track nu e nici pozitie in lista, nici numar de scena din GameState.TRACK_SCENES")
+				get_tree().quit(1)
+				return
 	GameState.selected_car = 0
 	GameState.champ_active = false
 	GameState.total_laps = 99

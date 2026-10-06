@@ -63,6 +63,11 @@ signal car_thrown(car: Car, on_strike: bool)
 @export_group("Geometrie")
 ## +1 = pivotul pe dreapta sensului de mers (+X local), -1 = stanga.
 @export_range(-1, 1, 2) var side: int = 1
+## Semilatimea soselei in punctul tubului (m), cand hazardul e asezat in scena
+## pistei (`road_width` e un `var` al bazei, nu se salveaza in .tscn). 0 = nu
+## se atinge `road_width` (sondele il scriu direct). Pivotul sta pe margine:
+## `pivot_offset` implicit = `road_width / 2`.
+@export var road_half_width: float = 0.0
 ## Distanta pivotului fata de axa soselei (m). Negativ = jumatatea latimii.
 @export var pivot_offset: float = -1.0
 ## 6,6 m, nu 6,0 din brief: cu 6,0 golul exterior MASURAT e 6,22 m (tubul are raza
@@ -134,6 +139,8 @@ var _placed: bool = false
 
 
 func _ready() -> void:
+	if road_half_width > 0.0:
+		road_width = road_half_width * 2.0
 	if pivot_offset < 0.0:
 		pivot_offset = road_width * 0.5
 	_clock = fposmod(start_clock, cycle_seconds())
@@ -376,11 +383,17 @@ func _build_rig() -> void:
 		# Contractul: originea modelului = axa pivotului, deci modelul sta in
 		# pivot, nu pe sol.
 		_pivot.add_child(root)
+		# Materialul lumii (atlasul de paleta + AO din vertex color): zero
+		# materiale in plus fata de placeholder.
+		Palette.apply_world_material(root)
 		_tube = root.find_child("Tube", true, false) as Node3D
 	if _tube == null:
 		if root == null:
 			root = _placeholder()
 			_pivot.add_child(root)
+		# Materialul lumii (atlasul de paleta + AO din vertex color): zero
+		# materiale in plus fata de placeholder.
+		Palette.apply_world_material(root)
 		_tube = root.find_child("Tube", true, false) as Node3D
 	_tube.rotation.x = angle_at(_clock)
 
@@ -470,6 +483,11 @@ func _apply_state() -> void:
 	var box := _hit_shape.shape as BoxShape3D
 	var reach := strike_reach if in_strike() else rest_reach
 	box.size.y = tube_diameter + reach * 2.0
+	# `seek`/`force_clock` opresc `_physics_process`, deci petecul ud nu s-ar mai
+	# actualiza: o captura la o faza fortata ar arata balta starii initiale.
+	if _puddle != null and is_wet() != _wet:
+		_wet = is_wet()
+		_puddle.visible = _wet
 
 
 func _advance(delta: float) -> bool:

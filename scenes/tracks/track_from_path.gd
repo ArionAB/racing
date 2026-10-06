@@ -24,8 +24,14 @@ extends Track
 
 @export var custom_name: String = "Pista noua"
 @export_enum("forest", "desert", "island", "baikal", "stromboli", "chongqing",
-	"cappadocia", "serengeti", "machupicchu", "fiordland", "jodhpur") var custom_theme: String = "forest"
+	"cappadocia", "serengeti", "machupicchu", "fiordland", "jodhpur", "kyoto",
+	"monumentvalley") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
+## Samanta lumii procedurale, separata de numele de afisare. Gol = samanta vine
+## din `custom_name` (comportamentul vechi, bit-identic). Se pune cand numele de
+## afisare poate sa se schimbe (Monument Valley: nume de UI de decis, brief
+## §3.1.1) fara sa remestece decorul. Vezi Track.world_seed_name.
+@export var custom_world_seed_name: String = ""
 ## Unghiul soarelui pentru pista asta, cand tema nu-l nimereste.
 ##
 ## (0,0,0) = lasa tema in pace, deci pistele care nu-l ating nu se schimba.
@@ -139,6 +145,15 @@ extends Track
 ## Track._loose_ranges. Pe Stromboli: plaja de la B si buza+coborarea D-E.
 @export var custom_loose_ranges: Array[Vector2] = []
 
+## Intervalele de DRUM DE PAMANT pe o pista cu asfalt: (frac_start, frac_end), cu
+## trecere peste linia de start permisa. Spre deosebire de `custom_road_surface`
+## (toata pista) si de `custom_loose_ranges` (doar grip), schimba si ce se vede:
+## soseaua primeste materialul drumului de pamant, dispar linia de mijloc,
+## bordurile si urmele coapte, iar masinile ridica praf si lasa urme pe interval.
+## Grip-ul vine din `loose_grip` al temei, pe aceeasi cale ca la loose. Vezi
+## Track._dirt_ranges. Lista goala = pista nu se schimba cu un bit.
+@export var custom_dirt_ranges: Array[Vector2] = []
+
 ## Intervalele de TREPTE (ruina ca si carosabil, Machu Picchu POI B). Vezi
 ## Track._step_ranges: coliziunea ramane panta lina, treptele sunt doar in
 ## vizual + vibratia de ±3 cm pe raycast-ul suspensiei (Car.STEP_NOISE_M).
@@ -183,6 +198,14 @@ extends Track
 ## din kit se pun sub el (Baikal, viaductul Circum-Baikal). Se combina cu
 ## `custom_cornice_ravines` (cazi de pe margine). Vezi Track._viaduct_ravines.
 @export var custom_viaduct_ravines: Array[int] = []
+## Marja plasei de repunere a viaductelor (m dincolo de amprenta tablierului).
+## Negativ (implicit) = [constant Track.VIADUCT_NET_MARGIN], deci nicio pista
+## existenta nu se schimba. Vezi [method Track._viaduct_net_margin].
+@export var custom_viaduct_net_margin: float = -1.0
+## Elanul plasei de repunere, per viaduct: (indice in `custom_ravines`, metri
+## inapoi). Fara intrare = 16 (comportamentul vechi). Vezi
+## [method Track._viaduct_net_backoff].
+@export var custom_viaduct_net_backoffs: Array[Vector2] = []
 ## Care dintre CORNISE sunt taiate VERTICAL (indici in `custom_ravines`):
 ## peretele de sub buza cade drept, nu in panta. Se cere doar unde ceva urca pe
 ## langa faleza — baloanele ancorate de sub cornisa Vaii Rosii. Vezi
@@ -198,6 +221,11 @@ extends Track
 ## Track._ravine_widths. Fara ea saparea se intinde lateral la infinit si valea
 ## n-are mal opus — faleza citeste ca bordura de sant.
 @export var custom_ravine_widths: Array[Vector2] = []
+## LIMBI DE MAL: (indice de rapa, fractia centrului, semilungime pe sosea m,
+## latime dincolo de marginea asfaltului m). Acolo rapa nu sapa: terenul ramane
+## la cota umarului (Kyoto F: odihna carului Gion Matsuri pe malul iazului).
+## Vezi TrackSideSampler.ravine_capes.
+@export var custom_ravine_capes: Array[Vector4] = []
 ## Vezi [method Track._ravine_floor_slopes].
 @export var custom_ravine_floor_slopes: Array[Vector2] = []
 ## APA intr-o rapa: (indice in `custom_ravines`, cota ABSOLUTA a apei, metri
@@ -267,6 +295,8 @@ func _ready() -> void:
 
 func _apply_custom() -> void:
 	track_name = custom_name
+	if not custom_world_seed_name.is_empty():
+		world_seed_name = custom_world_seed_name
 	half_width = custom_half_width
 	road_surface = custom_road_surface
 	sea_level_offset = custom_sea_level_offset
@@ -324,6 +354,9 @@ func _ice_ranges() -> Array[Vector2]:
 func _loose_ranges() -> Array[Vector2]:
 	return custom_loose_ranges
 
+func _dirt_ranges() -> Array[Vector2]:
+	return custom_dirt_ranges
+
 func _step_ranges() -> Array[Vector2]:
 	return custom_step_ranges
 
@@ -362,6 +395,15 @@ func _cornice_ravines() -> Array[int]:
 func _viaduct_ravines() -> Array[int]:
 	return custom_viaduct_ravines
 
+func _viaduct_net_backoff(ri: int) -> float:
+	for v in custom_viaduct_net_backoffs:
+		if int(v.x) == ri:
+			return v.y
+	return 16.0
+
+func _viaduct_net_margin() -> float:
+	return custom_viaduct_net_margin if custom_viaduct_net_margin >= 0.0 		else VIADUCT_NET_MARGIN
+
 func _scarp_ravines() -> Array[int]:
 	return custom_scarp_ravines
 
@@ -371,6 +413,10 @@ func _ravine_floors() -> Array[Vector2]:
 
 func _ravine_widths() -> Array[Vector2]:
 	return custom_ravine_widths
+
+
+func _ravine_capes() -> Array[Vector4]:
+	return custom_ravine_capes
 
 
 func _ravine_floor_slopes() -> Array[Vector2]:

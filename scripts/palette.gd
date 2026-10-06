@@ -567,6 +567,9 @@ const CLASS_TEXTURES := {
 	# cere piatra veche uzata („treptele sunt geometrie, textura da uzura"),
 	# deci tinta e piatra CENUSIE la luminanta dalei.
 	"old_stone": "res://assets/textures/classes/stone_wall.png",
+	# Kyoto POI F r3: bolovanii de gradina (garden_rock_a/b/c) pe ACEEASI dala de
+	# zid, cu tenta mai inchisa si calda (vezi CLASS_TINT). Zero texturi noi.
+	"garden_stone": "res://assets/textures/classes/stone_wall.png",
 	# Insula (Okinawa): calcar coraligen si scoarta tropicala.
 	"coral_rock": "res://assets/textures/classes/coral_rock.png",
 	"bark": "res://assets/textures/classes/bark.png",
@@ -585,6 +588,31 @@ const CLASS_TEXTURES := {
 	# Nu se putea tenta "alpine_granite" direct: e clasa stancilor de pe
 	# Alpi (Track09) si le-ar fi facut rosii.
 	"red_valley_tuff": "res://assets/textures/classes/alpine_granite.png",
+	# DALA gresiei: `olkhon_marble` (fisuri verticale, fete late), NU `alpine_granite` — aceea e un
+	# zid de piatra uscata, cu blocuri mici si rosturi, si pe peretii de 14 m dadea zidarie de
+	# caramida (numit de 4 ori independent). Masurat pe 6 cadre (docs/track_briefs/img/
+	# monument_materiale): muchii orizontale dupa blur 1 px 0.449 -> 0.266, gy/gx 1.40 -> 0.92,
+	# culoarea neschimbata (HSV median la +-1 grad). Zero VRAM nou pe pista: dala ridicata era deja
+	# una singura pentru mv_sandstone. Tenta recalculata in spatiu liniar ca sa pastreze media.
+	# GRESIA MONUMENT VALLEY (Track19, brief monument_valley.md §4): peretele
+	# monoliturilor si al meselor, rosu-portocaliu #B8552E. ACEEASI dala ca
+	# `red_valley_tuff` (stratificata, zero VRAM nou), alta ridicare si alta tenta:
+	# tinta (0.722, 0.333, 0.180) are R PESTE media dalei (0.651), deci tenta
+	# singura nu ajunge — vezi CLASS_LIFT. Clasa e NOUA: nicio alta pista n-o
+	# foloseste, deci `rock` / `red_valley_tuff` raman neschimbate.
+	"mv_sandstone": "res://assets/textures/classes/olkhon_marble.png",
+	# SALVIA MONUMENT VALLEY (Track19, brief monument_valley.md §4: #8E977C, gri-verde
+	# prafuit). ACEEASI dala ca `macchia`/`macchia_dry` — zero VRAM nou, doar alta
+	# ridicare si alta tenta. Exista fiindca slotul `CACTUS_GREEN` (12, #5B7C34) e
+	# oliv saturat, iar nicio culoare din atlas nu e gri-verde: nu se obtine din
+	# slot si nici din `macchia` (verde sezonier). Vezi CLASS_TINT / CLASS_LIFT.
+	# Se aplica DOAR pe nodul `Sagebrush_Foliage` (WorldProp.CLASSES_BY_THEME).
+	"mv_sage": "res://assets/textures/classes/macchia.png",
+	# CALOTA stancilor Monument Valley (#B9A08C, gri-roz palid, brief §4). Pe atlas
+	# (SAND_LIGHT) iesea galben-oliv la umbra (galben x ambient rece). Acum dala
+	# `olkhon_marble` a gresiei (imparte imaginea ridicata, CLASS_LIFT_SHARED): fara modelul de
+	# zid de piatra al lui alpine_granite, care pe calota iesea mozaic gri-verzui. +1 material.
+	"mv_cap": "res://assets/textures/classes/olkhon_marble.png",
 	# TUFUL CREM al Cappadociei: hornurile, poarta geamana, gura de pestera si
 	# fatada bisericii rupestre. ACEEASI dala ca `red_valley_tuff` — nu se
 	# dubleaza in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica
@@ -860,11 +888,39 @@ const CLASS_TEXTURES := {
 	"maple_orange": "res://assets/textures/classes/autumn_foliage.png",
 	"ginkgo_gold": "res://assets/textures/classes/autumn_foliage.png",
 	"leaf_litter": "res://assets/textures/classes/autumn_foliage.png",
+	# Integrarea kitului (grupa int-a): arțarul RUGINIU are coroana pe aceeasi
+	# tenta ca `leaf_litter`, dar la scara COROANEI (0.1), nu a covorului (0.25),
+	# si bambusul are frunze lime — atlasul nu are slot lime (cel mai deschis verde,
+	# CACTUS_GREEN, iese oliv). Doua materiale noi, ZERO imagini noi in memorie.
+	"maple_rust": "res://assets/textures/classes/autumn_foliage.png",
+	"bamboo_lime": "res://assets/textures/classes/autumn_foliage.png",
 	# Lemnul de machiya si muschiul: clase NOI pe dalele lui `wood` si `macchia`,
 	# NU tente pe ele (memoria `tenta-pe-clasa-partajata`: `wood` e folosit pe
 	# Dunele/Okinawa, `macchia` pe Okinawa/Stromboli).
 	"machiya_wood": "res://assets/textures/classes/wood.png",
 	"moss": "res://assets/textures/classes/macchia.png",
+	# Valul de materiale Kyoto (docs/track_briefs/kyoto_materiale.md): trei clase
+	# NOI pe dale deja in VRAM, ZERO imagini noi. Clase separate, nu tente pe
+	# `roof_tiles`/`bark`/`pine_needles`, din acelasi motiv ca machiya_wood.
+	#   kawara        - acoperisurile (machiya, temple, pagode, clopotnita)
+	#   bark_kyoto    - trunchiurile de arțar, ginkgo, pin niwaki
+	#   cedar_needles - coroana cedrilor (padurea Inari) si a pinilor niwaki
+	"kawara": "res://assets/textures/classes/roof_tiles.png",
+	"bark_kyoto": "res://assets/textures/classes/bark.png",
+	"cedar_needles": "res://assets/textures/classes/pine_needles.png",
+	# Valul 2 (cererea dezvoltatorului dupa captura: „peste tot unde avem rosul,
+	# bambusul, Kiyomizu"). Lacul vermilion, rosul trenului/podului si tulpinile
+	# de bambus pe dala `wood` RIDICATA (rosul: o imagine rotita, impartita prin
+	# CLASS_LIFT_SHARED; bambusul: una nerotita).
+	# Prima incercare a fost `concrete` (pata fara fibra) si a dat MAI PUTIN
+	# detaliu decat atlasul cu stratul de detaliu partajat (pe captura: pod
+	# 4.85 -> 4.65, bambus 3.11 -> 2.74, diferenta de blur 1 px): pe o culoare
+	# saturata ridicata, R se taie si variatia ramane doar pe G/B, mici. Masurat
+	# pe rezultatul tentat: deviatia de luminanta 14.6 cu `concrete`, 27.5 cu
+	# `wood` la ridicarea 0.65.
+	"shu_vermilion": "res://assets/textures/classes/wood.png",
+	"shu_red": "res://assets/textures/classes/wood.png",
+	"bamboo_culm": "res://assets/textures/classes/wood.png",
 }
 
 ## Tente de albedo per clasa, inmultite peste textura. Pentru clasele care
@@ -923,12 +979,40 @@ const CLASS_TINT := {
 	# <= 1 pe toate canalele si nu mai e nevoie de nicio ridicare. Sub lumina
 	# temei iese (59,63,74), R-B = -15: piatra rece de oras noaptea.
 	"old_stone": Color(0.895, 0.933, 1.0),
+	# garden_stone: masurat pe captura de joc (r3, cadrul-erou F). Atlas/old_stone:
+	# fata luminata a bolovanilor ~(195, 170, 140); diorama ~(139, 119, 108), gri
+	# mediu-cald. Prima tenta (0,64; 0,65; 0,77) dadea fata luminata (165, 144, 125)
+	# dar umbrele VIOLET (68, 67, 81) sub ambientul rece; (0,54; 0,54; 0,56) le
+	# facea carbune (58, 56, 57), (0,62; 0,60; 0,58) maro-inchis (96, 84, 68).
+	# Albastrul tinut sub rosu (B/R ~0,95), luminozitatea spre tinta:
+	"garden_stone": Color(0.84, 0.81, 0.80),
 	# Valea Rosie: dala alpine_granite (166, 156, 137) impinsa pe rosul
 	# caramiziu al referintei. Multiplicatorul NU e ales din ochi — e
 	# masurat din docs/track_briefs/img/v3_crops/D_canyon.png (media zonei
 	# de faleza: 136, 89, 65) impartit la media dalei. Toate cele trei
 	# canale ies SUB 1, deci nu cere CLASS_LIFT.
 	"red_valley_tuff": Color(0.822, 0.568, 0.479),
+	# Gresia Monument Valley (#B8552E). CALIBRATA IN JOC, pe captura de joc (memoria
+	# monocromia-se-masoara-dupa-remap), nu din socoteli pe dala. Prima tenta
+	# (0.990, 0.486, 0.299, ridicare 0.672) era calculata in sRGB si multiplicarea
+	# `albedo_color` x textura se face in spatiu LINIAR: pe captura iesea
+	# (171, 48, 9) pe fata luminata, saturatie 0.95, B aproape zero — rosu de
+	# cuptor, nu gresie, iar umbrele (111, 28, 4) erau negru-ruginiu.
+	# Valorile de acum, masurate pe captura `--eye=210,60,230 --look=300,14,300`
+	# (mediana pe patch-uri de perete, HSV): fata luminata (195, 88, 42) = #C3582A
+	# (18 grade, 0.78, 0.76), jumatate de umbra (150, 65, 34) = #964122 (16 grade),
+	# umbra (134, 52, 25). Tinta #B8552E = (184, 85, 46), 16 grade, 0.75, 0.72.
+	# R ramane la 1.0: ridicarea (0.82) e cea care urca canalul, nu tenta.
+	"mv_sandstone": Color(0.964, 0.592, 0.444),
+	# Salvia (#8E977C = 142, 151, 124). Calculata in spatiu LINIAR (multiplicarea
+	# `albedo_color` x textura e liniara; prima varianta, in sRGB, dadea albedo
+	# (150, 140, 130) si pe captura frunzisul iesea albastru-cenusiu): dala
+	# `macchia` ridicata la 0.72 are media liniara (0.31, 0.53, 0.21), tinta liniara
+	# (0.27, 0.31, 0.20) => multiplicator liniar (0.87, 0.58, 0.95) = in sRGB
+	# (0.93, 0.78, 0.97). Verificat apoi pe captura de joc.
+	"mv_sage": Color(1.130, 0.920, 0.880),
+	# Calota: tinta liniara (0.49, 0.35, 0.26) / dala ridicata la 0.70 => (0.955, 0.872, 0.861).
+	"mv_cap": Color(0.900, 0.830, 0.800),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
@@ -1092,11 +1176,45 @@ const CLASS_TINT := {
 	"maple_orange": Color(1.0, 0.3318, 0.2642),       # #E54839 (R: 220.6 din 229)
 	"ginkgo_gold": Color(1.0, 0.9434, 0.2777),        # #F2D03C (R: 220.6 din 242)
 	"leaf_litter": Color(0.8626, 0.5400, 0.3079),     # #A8683A (LARCH_RUST 27)
+	# Aceeasi tenta ca leaf_litter, alta scara (CLASS_TRIPLANAR_SCALE): coroana de
+	# arțar ruginiu `momiji_c` (LARCH_RUST 27 in GLB).
+	"maple_rust": Color(0.8626, 0.5400, 0.3079),      # #A8683A
+	# Lime-ul frunzelor de bambus: media pixelilor verzi-galbeni (S>0.35, H 0.15-
+	# 0.30) din decuparea `bamboo_crown.png` = (117, 145, 62) = #75913E. Aceeasi
+	# bisectie in spatiu liniar ca mai sus, pe aceeasi dala neutra (verificata:
+	# reproduce exact tenta lui maple_crimson). Nicio ridicare: toate canalele
+	# sub media dalei (195).
+	"bamboo_lime": Color(0.6055, 0.7467, 0.3281),     # #75913E
 	# Lemn de machiya (74, 53, 38) pe dala `wood` (124.1, 99.0, 71.7), NERIDICATA:
 	# toate canalele sub 1, nu cere CLASS_LIFT.
 	"machiya_wood": Color(0.6171, 0.5707, 0.5841),
 	# Muschi (63, 122, 60) pe dala `macchia` (86.7, 122.6, 73.3), NERIDICATA.
 	"moss": Color(0.7520, 0.9954, 0.8392),
+	# Valul de materiale Kyoto: aceeasi bisectie in spatiu liniar (verificata:
+	# reproduce exact machiya_wood de mai sus). Tintele sunt sloturile GLB-urilor.
+	# Kawara: VOLCANIC_BLACK 20 (85, 83, 90) pe dala `roof_tiles` (154.4, 113.4,
+	# 82.1). B atinge plafonul (82.1 din 90): rezultatul e gri neutru, nu
+	# albastrui. Prima versiune tintea media pe arie cu cei 15% de LOG_DARK 28
+	# (83.4, 78.5, 82.2) si iesea MOV pe captura (R > G); slotul 28 nu e umbrire,
+	# e coama si streasina (vezi CLASSES_BY_MODEL), deci nu intra in medie.
+	"kawara": Color(0.5653, 0.7481, 1.0),
+	# Trunchiuri: WOOD_WEATHERED 9 (131, 92, 52) pe dala `bark` (171.7, 140.7, 107.7).
+	"bark_kyoto": Color(0.7690, 0.6680, 0.5173),
+	# Cedri/pini: TROPICAL_GREEN 21 (63, 122, 60) pe dala `pine_needles`
+	# (103.1, 131.4, 67.9).
+	"cedar_needles": Color(0.6386, 0.9317, 0.8979),
+	# Valul 2. Dala `wood` ridicata la luminanta 0.65 (CLASS_LIFT), apoi bisectia
+	# obisnuita. R atinge plafonul la 200 din 232 (86%): lac invechit, cu 7.6%
+	# din pixeli taiati. La 0.75 R ar ajunge 224, dar se taie 31.8% si fibra
+	# dispare in luminile dalei — acelasi compromis ca la maple_orange.
+	# LAVA_ORANGE 30 (232, 98, 45): torii, porti, pagode, altare.
+	"shu_vermilion": Color(1.0, 0.6231, 0.4227),
+	# CAR_RED 14 (229, 72, 57): trenul Sagano, podul de fier, umbrelele ceainariei,
+	# ricsa, bavetele vulpilor. Aceeasi imagine ridicata (CLASS_LIFT_SHARED).
+	"shu_red": Color(1.0, 0.4657, 0.5204),
+	# CACTUS_GREEN 12 (91, 124, 52), aceeasi ridicare (imagine proprie, NErotita:
+	# rosturile orizontale sunt nodurile tulpinii): atinsa exact.
+	"bamboo_culm": Color(0.4630, 0.7804, 0.4797),
 }
 
 ## Clasele a caror DALA trebuie luminata inainte de folosire, cu luminanta
@@ -1112,6 +1230,10 @@ const CLASS_TINT := {
 ## alb, e o schimbare de expunere. Ce depaseste 1.0 se retează, deci tinta se
 ## alege sub alb pur.
 const CLASS_LIFT := {
+	# Gresia Monument Valley: vezi CLASS_TINT (R tinta > media dalei).
+	"mv_sandstone": 0.820,
+	# Salvia: vezi CLASS_TINT (R tinta 142 > media dalei 86.7, deci ridicare).
+	"mv_sage": 0.950,
 	"village_plaster": 0.88,
 	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
 	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:
@@ -1186,6 +1308,17 @@ const CLASS_LIFT := {
 	# imparte imaginea (CLASS_LIFT_SHARED); maple_crimson/leaf_litter NU se
 	# ridica — folosesc dala originala.
 	"maple_orange": 0.8805,
+	"shu_vermilion": 0.65,
+	"bamboo_culm": 0.65,
+}
+
+## Clasele a caror dala ridicata se ROTESTE cu 90 de grade. Triplanarul pune dala
+## `wood` cu scandurile ORIZONTALE pe fetele verticale: pe tulpina de bambus
+## rosturile se citesc noduri (corect), dar pe stalpul unei porti torii il fac
+## sa para din discuri stivuite (captura f0.50 pe tunel). Rotita, fibra urca pe
+## stalp. Doar pe clase cu CLASS_LIFT: rotirea se face pe imaginea deja copiata.
+const CLASS_LIFT_ROTATE := {
+	"shu_vermilion": true,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -1229,6 +1362,12 @@ const CLASS_TRIPLANAR_SCALE := {
 	# benzi, deci fiecare treapta de 12 m arata ca un teanc de straturi,
 	# nu ca doua dungi.
 	"red_valley_tuff": 0.08,
+	# Gresia Monument Valley: aceeasi scara ca faleza rosie (aceeasi dala).
+	"mv_sandstone": 0.065,
+	# Salvia: ca `macchia` (aceeasi dala, tufe de ~1 m).
+	"mv_sage": 1.4,
+	# Calota: aceeasi scara ca gresia (aceeasi dala).
+	"mv_cap": 0.065,
 	# ACEEASI scara ca faleza rosie, si nu din lene: hornurile masoara 11-18 m
 	# pe verticala (masurat pe cele 12 .glb-uri — chimney_a 11.3, chimney_c 17.3,
 	# triple 18.5, twin_gate 21.6), adica exact plaja modulului de faleza de
@@ -1371,6 +1510,7 @@ const CLASS_TRIPLANAR_SCALE := {
 	# 0.35 = o repetitie la 2.86 m: pe scara de 10x12 m intra ~4 randuri de
 	# zidarie pe latime, adica se citeste ca zidarie si nu ca tapet.
 	"old_stone": 0.35,
+	"garden_stone": 0.35,
 	# Lemnaria: bena tricicletei Ape, busteni de rulare, bordaj. Sursa e o
 	# scanare de scanduri; la 0.7 (o repetitie la 1.43 m) fibra cade aproape
 	# la scara reala pe piese de 1-3 m. Prim consumator REAL (Fiordland,
@@ -1463,10 +1603,105 @@ const CLASS_TRIPLANAR_SCALE := {
 	# Covorul de frunze: acelasi PNG la scara de 2.5x mai deasa (o repetitie la
 	# 4 m, frunza ~20 cm — frunze cazute pe sol, nu coroana).
 	"leaf_litter": 0.25,
+	"maple_rust": 0.1,
+	# Frunza de bambus e ingusta si deasa: scara covorului (frunza ~20 cm), nu a
+	# coroanei de arțar.
+	"bamboo_lime": 0.25,
 	# Aceeasi scara ca dala-sursa (`wood` 0.7, `macchia` 1.4).
 	"machiya_wood": 0.7,
+	# Kawara: dala are ~26 de coloane de tigla pe latime. La 0.15 o repetitie
+	# acopera 6.7 m, deci coloana ~0.26 m: tigla de jucarie, citita la 10-30 m.
+	"kawara": 0.15,
+	# Aceeasi scara ca dalele-sursa (`bark` 0.77, `pine_needles` 0.6).
+	"bark_kyoto": 0.77,
+	"cedar_needles": 0.3,
+	# Scara dalei-sursa (`wood` 0.7).
+	"shu_vermilion": 0.7,
+	"shu_red": 0.7,
+	# Bambus: la 0.5 rosturile dalei (6 scanduri pe repetitie) cad la ~0.33 m,
+	# cat distanta dintre nodurile unei tulpini moso — se citesc ca noduri.
+	"bamboo_culm": 0.5,
 	"moss": 1.4,
 }
+
+## Ascutimea amestecului triplanar, pe clasele unde implicitul (1.0) strica
+## tiparul. La 1.0 o fata la 45 de grade ia 50/50 din doua proiectii, deci doua
+## seturi de frunze suprapuse decalat: conturul lobat se dubleaza si se topeste
+## in pata (masurat din camera de joc pe coroanele de arțar, oct 2026). Coroana
+## e o icosfera zimtata, cu fete in toate directiile, deci cazul e peste tot.
+## La 8 fiecare fata ia practic o singura proiectie; cusatura dintre proiectii
+## cade pe muchia dintre fete, unde umbrirea plata o ascunde oricum.
+const CLASS_TRIPLANAR_SHARPNESS := {
+	"maple_crimson": 8.0,
+	"maple_orange": 8.0,
+	"maple_rust": 8.0,
+	"ginkgo_gold": 8.0,
+}
+
+## Umbrire NETEDA pe coroanele de frunzis (aceleasi clase ca mai sus). Coroana e
+## din icosfere zimtate cu umbrire plata: fiecare fata e o placa de lumina, deci
+## ciorchinele se citeste „piatra sparta", nu frunzis. Normalele mediate pe pozitie
+## fac lumina sa curga peste ciorchine, iar detaliul il duce textura. Zero
+## triunghiuri in plus; trunchiurile raman cu fatete. Comutator pentru A/B la volan.
+const SMOOTH_FOLIAGE := true
+
+static var _smoothed_meshes: Dictionary = {}
+
+static func is_smooth_foliage(cls: String) -> bool:
+	return SMOOTH_FOLIAGE and CLASS_TRIPLANAR_SHARPNESS.has(cls.trim_prefix(TRI_PREFIX))
+
+## Suprafetele unui mesh care poarta un material de coroana (gol daca
+## SMOOTH_FOLIAGE e stins).
+static func foliage_surfaces(mesh: Mesh) -> Dictionary:
+	var out := {}
+	if not SMOOTH_FOLIAGE or mesh == null:
+		return out
+	for si in mesh.get_surface_count():
+		for cls in CLASS_TRIPLANAR_SHARPNESS:
+			if mesh.surface_get_material(si) == triplanar_class_material(cls):
+				out[si] = true
+	return out
+
+## Copie a mesh-ului cu normale mediate pe pozitie (cuantizata la 5 mm), pe
+## suprafetele din `only` (gol = toate). Cache pe mesh: instantele aceluiasi
+## GLB impart rezultatul.
+static func smoothed_mesh(mesh: Mesh, only: Dictionary = {}) -> Mesh:
+	if mesh == null:
+		return null
+	if _smoothed_meshes.has(mesh):
+		return _smoothed_meshes[mesh]
+	var out := ArrayMesh.new()
+	for si in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(si)
+		if not only.is_empty() and not only.has(si):
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+			out.surface_set_material(si, mesh.surface_get_material(si))
+			continue
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var idx := PackedInt32Array()
+		if arrays[Mesh.ARRAY_INDEX] != null:
+			idx = arrays[Mesh.ARRAY_INDEX]
+		var acc := {}
+		var tri_count := idx.size() / 3 if idx.size() > 0 else verts.size() / 3
+		for t in tri_count:
+			var i0: int = idx[t * 3] if idx.size() > 0 else t * 3
+			var i1: int = idx[t * 3 + 1] if idx.size() > 0 else t * 3 + 1
+			var i2: int = idx[t * 3 + 2] if idx.size() > 0 else t * 3 + 2
+			var fn := (verts[i1] - verts[i0]).cross(verts[i2] - verts[i0])
+			for i in [i0, i1, i2]:
+				var key := (verts[i] * 200.0).round()
+				acc[key] = acc.get(key, Vector3.ZERO) + fn
+		var old_n: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var normals := PackedVector3Array()
+		normals.resize(verts.size())
+		for i in verts.size():
+			normals[i] = (acc.get((verts[i] * 200.0).round(), old_n[i]) as Vector3).normalized()
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		arrays[Mesh.ARRAY_TANGENT] = null
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		out.surface_set_material(si, mesh.surface_get_material(si))
+	_smoothed_meshes[mesh] = out
+	return out
 
 static var _tri_mats: Dictionary = {}
 
@@ -1484,6 +1719,9 @@ const CLASS_LIFT_SHARED := {
 	"blue_lime_indigo": "blue_lime_light",
 	"red_sandstone": "rose_sandstone",
 	"ginkgo_gold": "maple_orange",
+	"shu_red": "shu_vermilion",
+	# Calota imparte dala ridicata a gresiei (aceeasi imagine, alta tenta): zero VRAM.
+	"mv_cap": "mv_sandstone",
 }
 
 static func _class_texture(cls: String) -> Texture2D:
@@ -1517,6 +1755,8 @@ static func _class_texture(cls: String) -> Texture2D:
 			var c := img.get_pixel(x, y)
 			img.set_pixel(x, y, Color(minf(c.r * gain, 1.0),
 				minf(c.g * gain, 1.0), minf(c.b * gain, 1.0)))
+	if CLASS_LIFT_ROTATE.has(cls):
+		img.rotate_90(CLOCKWISE)
 	img.generate_mipmaps()
 	var tex := ImageTexture.create_from_image(img)
 	_lifted[cls] = tex
@@ -1538,6 +1778,7 @@ static func triplanar_class_material(cls: String) -> StandardMaterial3D:
 	mat.uv1_world_triplanar = true
 	var s: float = CLASS_TRIPLANAR_SCALE[cls]
 	mat.uv1_scale = Vector3(s, s, s)
+	mat.uv1_triplanar_sharpness = CLASS_TRIPLANAR_SHARPNESS.get(cls, 1.0)
 	if CLASS_TINT.has(cls):
 		mat.albedo_color = CLASS_TINT[cls]
 	_tri_mats[cls] = mat

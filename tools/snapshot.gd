@@ -18,6 +18,18 @@ extends Node
 ##                             sosea: viaductul din lateral, de pe gheata.
 ##                             vederea reala de JOC, cu parametrii curenti ai
 ##                             camerei de urmarire
+##   --shishi-phase=0.72       (Kyoto) ceasul shishi-odoshi la fractia data din ciclu:
+##                             0.02 sus, 0.72 aproape orizontal, 0.90 lovit.
+##   --leaf-wear=N             (Kyoto) covorul de frunze cu N treceri simulate ale plutonului
+##                             pe linia de cursa; `--no-leaves` = fara covor si fara frunze
+##                             care cad (starea "inainte"); `--no-leaf-fall` = doar covorul.
+##   --daruma-phase=0.15       (Kyoto) ceasul daruma-otoshi la fractia data din ciclul
+##                             MARE (71 s): 0.15 = turn plin, ciocanul tras inapoi
+##                             (telegraful); 0.16 = discul in mijlocul drumului;
+##                             0.45 = turn scazut la 3 etaje. `--daruma-clock=S` da
+##                             direct secunde (11.5 = discul la ~1/3 din drum).
+##   --daruma-dist=120         (Kyoto) cu --gamecam: pune CAMERA la atatia metri pe
+##                             axa, inaintea turnului (fractia se deduce, nu se ghiceste).
 ##   --track=0 --frac=0.5 --gamecam --route=1
 ##                             la fel, dar pe BANDA SECUNDARA cu indexul dat
 ##                             (1 = prima scurtatura, in ordinea din
@@ -33,6 +45,11 @@ extends Node
 ##                             lateral, deci ies din cadru la cea mai mica
 ##                             eroare. Poza asta e pentru VERIFICAREA unui
 ##                             asset, nu pentru compozitia pistei.
+##   --dirt=0.2,0.4[;0.6,0.7]  pune intervale de DRUM DE PAMANT (`custom_dirt_ranges`)
+##                             pe o pista cu asfalt, inainte sa se construiasca:
+##                             asa se vede tranzitia asfalt/pamant fara sa
+##                             editezi scena. Ex.: --track=0 --frac=0.2 --gamecam
+##                             --dirt=0.2,0.4 prinde inceputul portiunii de pamant.
 ##   --train-at=0.55           muta ceasul trecerii de cale ferata la fractia
 ##                             ceruta din ciclu, ca trenul sa fie IN cadru la
 ##                             momentul capturii (implicit e parcat, invizibil)
@@ -91,6 +108,18 @@ extends Node
 ##                             `phase` ignorat): 0-3.5 urca de sub banda,
 ##                             3.5-7.5 ACOPERA drumul, 7.5-10 se retrage,
 ##                             restul = ascuns. Fara el norul e in defileu.
+##   --haboob-at=57.0          HABOOB-UL (HaboobHazard, Monument Valley) la N
+##                             SECUNDE in ciclul lui (~101 s; `start_clock` si
+##                             `phase` ignorate, ceasul INGHETAT): 0-25 telegraf
+##                             (pacla creste, zidul se apropie), 25-80 traversare
+##                             (zid plin), 80-95 risipire, 95-101 LINISTE (nimic
+##                             pe ecran). Fara el zidul ruleaza de la `start_clock`
+##                             (liniste la start).
+##   --rim-at=T [--rim-hit]    BOLOVANUL DE PE BUZA (RimBoulderHazard, Track19, culoarul E)
+##                             cu ceasul INGHETAT la T s din ciclul de 19 s. Cu `--car --rim-hit`
+##                             masina sta pe punctul de impact, strivita + <=> inversat.
+##   --no-haboob               scoate HaboobHazard din scena INAINTE de captura
+##                             (cadrul de control fara zid, pentru A/B/overdraw).
 ##   --tuk-at=0.93,0.96[:-2.2] TUK-TUK-URI (Jodhpur) la fractiile date din
 ##                             bucla, pe banda STANGA (lat -2,2 = offsetul
 ##                             TrafficController; `:lat` il suprascrie per
@@ -187,6 +216,11 @@ extends Node
 ##                             = 2 x (5 s parcat + 1,2 s telegraf + traversare);
 ##                             sonda tipareste pentru fiecare unde e si daca e
 ##                             pe carosabil.
+##   --cross-phase=0.25        (cu --cross-at) faza ciclului de mers, 0..1, pentru
+##                             modelele CU SCHELET (caii din Monument Valley:
+##                             Walk/Idle): animatia aleasa dupa viteza reala,
+##                             pusa pe faza data si INGHETATA. Fara el, fizica
+##                             e oprita cu delta 0 si caii raman in poza de repaus.
 ##
 ## Vederile ortografice de sus turtesc tot ce e vertical, deci mint despre
 ## densitatea decorului de pe margine: ceva ce arata presarat de sus poate
@@ -331,6 +365,13 @@ func _ready() -> void:
 	var rain_clock := -1.0 # >= 0: RainCycle.force_clock() dupa doua cadre
 	var dusk_force := -1.0 # >= 0: DuskCycle.force_value() dupa doua cadre
 	var torrent_at := -1.0 # >= 0: TorrentCycle.force_clock() (secunde in ciclu)
+	var shishi_phase := -1.0 # >= 0: ShishiOdoshiHazard.force_clock(faza * ciclu), faza 0..1
+	var daruma_phase := -1.0 # >= 0: DarumaOtoshiHazard.force_clock(faza * ciclu mare)
+	var daruma_clock := -1.0 # >= 0: la fel, direct in secunde
+	var daruma_dist := -1.0 # > 0: camera de joc la atatia metri inaintea turnului
+	var leaf_passes := -1 # >= 0: LeafCarpet cu N treceri simulate ale plutonului; -2 = covor si frunze OFF
+	var leaf_fall := true # --no-leaf-fall: stinge doar frunzele care cad
+	var shishi_backdrop := false # SONDA: panou verde inchis in spatele tubului (simuleaza padurea)
 	var overdraw := false
 	# --cine: dupa captura, listeaza CE obiect cade pe fiecare coloana de ecran.
 	# Sonda de silueta raporteaza conuri dupa X; asta spune al cui e conul.
@@ -357,6 +398,7 @@ func _ready() -> void:
 	var bridge_at := -1.0
 	var typhoon_at := -1.0
 	var wave_at := -1.0
+	var dirt_ranges: Array[Vector2] = []
 	var rock_at := -1.0
 	var avalanche_at := -1.0
 	var door_at := -1.0
@@ -365,10 +407,15 @@ func _ready() -> void:
 	var rope_load := -1.0
 	var rope_u := 0.5
 	var cloud_at := -1.0
+	var haboob_at := -1.0
+	var no_haboob := false
+	var rim_at := -1.0
+	var rim_hit := false
 	var bus_at := -1.0
 	var tuk_at := ""
 	var cow_mode := ""
 	var cross_at := -1.0
+	var cross_phase := 0.0
 	var burner_at := -1.0
 	# Teatrul bastionului (Jodhpur, POI F): ceasurile BastionTheatre, inghetate.
 	var salute_at := -1.0
@@ -382,6 +429,8 @@ func _ready() -> void:
 	# cadrul de joc — referintele de diorama au masina in prim-plan, iar o
 	# captura fara ea compara un peisaj cu o scena. Fara fizica (on_start_grid).
 	var show_car := false
+	var car_player := false
+	var car_data_name := "muscle"
 	# --wipers-demo: instantiaza WindshieldWipers (brief Fiordland pasul 4) si
 	# il umple cu N picaturi FORTATE pentru o captura de verificare — Race nu
 	# ruleaza aici (Snapshot nu porneste o cursa), deci nu exista alt mod de-a
@@ -408,6 +457,7 @@ func _ready() -> void:
 	# lateral — piesele mari (portile de 32,7 m, fatadele de 40-45 m) puse
 	# langa masina ies din cadrul camerei de joc (jumatate de cadru ~50 grade).
 	var vitrina_ahead := 0.0
+	var vitrina_step := 8.0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--vitrina="):
 			vitrina_stem = arg.trim_prefix("--vitrina=")
@@ -423,8 +473,23 @@ func _ready() -> void:
 		if arg.begins_with("--vitrina-ahead="):
 			vitrina_ahead = float(arg.trim_prefix("--vitrina-ahead="))
 			continue
+		if arg.begins_with("--vitrina-step="):
+			vitrina_step = float(arg.trim_prefix("--vitrina-step="))
+			continue
 		if arg == "--car":
 			show_car = true
+			continue
+		# Stopurile si farurile (CarLights): `--brake` aprinde stopurile ca la
+		# franare, `--car-player` face masina JUCATORUL (farul real, optiunea D,
+		# daca GameState.real_headlight), `--car-data=taxi` alege presetarea.
+		if arg == "--brake":
+			CarLights.force_brake = true
+			continue
+		if arg == "--car-player":
+			car_player = true
+			continue
+		if arg.begins_with("--car-data="):
+			car_data_name = arg.trim_prefix("--car-data=")
 			continue
 		if arg.begins_with("--wipers-demo="):
 			wipers_demo = int(arg.trim_prefix("--wipers-demo="))
@@ -454,6 +519,27 @@ func _ready() -> void:
 			typhoon_at = float(arg.trim_prefix("--typhoon-at="))
 		elif arg.begins_with("--wave-at="):
 			wave_at = float(arg.trim_prefix("--wave-at="))
+		elif arg.begins_with("--dirt="):
+			for seg in arg.trim_prefix("--dirt=").split(";"):
+				var ab := seg.split(",")
+				if ab.size() == 2:
+					dirt_ranges.append(Vector2(float(ab[0]), float(ab[1])))
+		elif arg.begins_with("--daruma-phase="):
+			daruma_phase = float(arg.trim_prefix("--daruma-phase="))
+		elif arg.begins_with("--daruma-clock="):
+			daruma_clock = float(arg.trim_prefix("--daruma-clock="))
+		elif arg.begins_with("--daruma-dist="):
+			daruma_dist = float(arg.trim_prefix("--daruma-dist="))
+		elif arg.begins_with("--leaf-wear="):
+			leaf_passes = int(arg.trim_prefix("--leaf-wear="))
+		elif arg == "--no-leaves":
+			leaf_passes = -2
+		elif arg == "--no-leaf-fall":
+			leaf_fall = false
+		elif arg == "--shishi-backdrop":
+			shishi_backdrop = true
+		elif arg.begins_with("--shishi-phase="):
+			shishi_phase = float(arg.trim_prefix("--shishi-phase="))
 		elif arg.begins_with("--rock-at="):
 			rock_at = float(arg.trim_prefix("--rock-at="))
 		elif arg.begins_with("--avalanche-at="):
@@ -466,6 +552,14 @@ func _ready() -> void:
 			hippo_at = float(arg.trim_prefix("--hippo-at="))
 		elif arg.begins_with("--cloud-at="):
 			cloud_at = float(arg.trim_prefix("--cloud-at="))
+		elif arg.begins_with("--haboob-at="):
+			haboob_at = float(arg.trim_prefix("--haboob-at="))
+		elif arg == "--no-haboob":
+			no_haboob = true
+		elif arg.begins_with("--rim-at="):
+			rim_at = float(arg.trim_prefix("--rim-at="))
+		elif arg == "--rim-hit":
+			rim_hit = true
 		elif arg.begins_with("--bus-at="):
 			bus_at = float(arg.trim_prefix("--bus-at="))
 		elif arg.begins_with("--tuk-at="):
@@ -479,6 +573,8 @@ func _ready() -> void:
 				rope_u = float(parts[1])
 		elif arg.begins_with("--cross-at="):
 			cross_at = float(arg.trim_prefix("--cross-at="))
+		elif arg.begins_with("--cross-phase="):
+			cross_phase = float(arg.trim_prefix("--cross-phase="))
 		elif arg.begins_with("--burner-at="):
 			burner_at = float(arg.trim_prefix("--burner-at="))
 		elif arg.begins_with("--balloon-at="):
@@ -554,6 +650,13 @@ func _ready() -> void:
 
 	var track := (load(GameState.TRACK_SCENES[track_index]) as PackedScene) \
 		.instantiate() as Track
+	if not dirt_ranges.is_empty():
+		# Inainte de add_child: rebuild() ruleaza in _ready si citeste intervalele.
+		if "custom_dirt_ranges" in track:
+			track.set("custom_dirt_ranges", dirt_ranges)
+			print("--dirt: %s" % [dirt_ranges])
+		else:
+			push_error("snapshot: --dirt cere o pista TrackFromPath (custom_dirt_ranges)")
 	add_child(track)
 	if no_fog:
 		var envs := track.find_children("*", "WorldEnvironment", true, false)
@@ -582,6 +685,12 @@ func _ready() -> void:
 		await _set_rope_load(track, rope_load, rope_u)
 	if cloud_at >= 0.0:
 		await _set_cloud_time(track, cloud_at)
+	if no_haboob:
+		await _remove_haboob(track)
+	elif haboob_at >= 0.0:
+		await _set_haboob_time(track, haboob_at)
+	if rim_at >= 0.0:
+		await _set_rim_time(track, rim_at)
 	if bus_at >= 0.0:
 		await _set_bus_time(track, bus_at)
 	if tuk_at != "":
@@ -589,7 +698,7 @@ func _ready() -> void:
 	if cow_mode != "":
 		await _set_cow(track, cow_mode)
 	if cross_at >= 0.0:
-		await _set_cross_time(track, cross_at)
+		await _set_cross_time(track, cross_at, cross_phase)
 	if burner_at >= 0.0:
 		await _set_burner_phase(track, burner_at)
 	if balloon_at >= 0.0:
@@ -683,6 +792,90 @@ func _ready() -> void:
 				node.call("force_clock", torrent_at)
 				torrents += 1
 		print("--torrent-at=%.2f: %d TorrentCycle fortate" % [torrent_at, torrents])
+	# Shishi-odoshi (Kyoto, POI F): ceasul tubului e UNGHIUL, deci o captura fara
+	# asta prinde tubul in faza in care a pornit pista. Faza e fractia din ciclu
+	# (16,6 s): ~0.02 = sus (inceput de umplere), ~0.72 = aproape orizontal
+	# (~85% din umplere), ~0.90 = lovit (gura pe drum).
+	if shishi_phase >= 0.0:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var tubs := 0
+		for node in get_tree().get_nodes_in_group(&"shishi_odoshi"):
+			if node.has_method("force_clock"):
+				node.call("force_clock", shishi_phase * float(node.call("cycle_seconds")))
+				tubs += 1
+		print("--shishi-phase=%.2f: %d ShishiOdoshiHazard fortate" % [shishi_phase, tubs])
+		if shishi_backdrop:
+			# Panou doar de masurare (NU in scena): 60x40 m, 6 m dincolo de tub pe sensul
+			# de mers, verde inchis de pin la umbra: contrastul se masoara si pe fundal
+			# de padure, nu doar pe ceata.
+			for node in get_tree().get_nodes_in_group(&"shishi_odoshi"):
+				var q := MeshInstance3D.new()
+				var qm := QuadMesh.new()
+				qm.size = Vector2(60.0, 40.0)
+				q.mesh = qm
+				var bm := StandardMaterial3D.new()
+				bm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				bm.cull_mode = BaseMaterial3D.CULL_DISABLED
+				bm.albedo_color = Color(0.13, 0.24, 0.13)
+				q.material_override = bm
+				q.position = Vector3(0.0, 8.0, -6.0)
+				node.add_child(q)
+			print("--shishi-backdrop: panou adaugat")
+	# Daruma-otoshi (Kyoto, POI F): tot ce se vede e o functie pura de ceasul mare,
+	# deci faza se fixeaza direct (`force_clock` opreste avansul).
+	if daruma_phase >= 0.0 or daruma_clock >= 0.0:
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var darumas := 0
+		# acelasi flag fixeaza si carul Gion Matsuri (care a inlocuit daruma pe pista)
+		for node in get_tree().get_nodes_in_group(&"daruma_otoshi") + get_tree().get_nodes_in_group(&"gion_matsuri"):
+			if node.has_method("force_clock"):
+				var secs := daruma_clock
+				if secs < 0.0:
+					secs = daruma_phase * float(node.call("total_seconds"))
+				node.call("force_clock", secs)
+				darumas += 1
+		print("--daruma: %d DarumaOtoshiHazard fortate la ceasul %.2f s" % [darumas,
+			daruma_clock if daruma_clock >= 0.0 else daruma_phase * 71.0])
+	# Covorul de frunze (Kyoto): `--no-leaves` = fara covor si fara frunzele care
+	# cad (starea "inainte"); `--leaf-wear=N` = N treceri simulate ale plutonului
+	# pe linia de cursa (starea "dupa N tururi"). Fara flag: covorul proaspat.
+	var leaf_carpet := track.get_node_or_null("CovorFrunze") as LeafCarpet
+	var leaf_node := track.get_node_or_null("FrunzeCazatoare") as Node3D
+	if leaf_carpet != null:
+		if leaf_passes == -2:
+			leaf_carpet.visible = false
+			if leaf_node != null:
+				leaf_node.queue_free()
+			print("--no-leaves: covorul si frunzele stinse")
+		else:
+			if not leaf_fall and leaf_node != null:
+				leaf_node.queue_free()
+			if leaf_passes > 0:
+				for _i in 20:
+					await get_tree().process_frame
+					if leaf_carpet.built:
+						break
+				await leaf_carpet.simulate_passes(leaf_passes)
+				for _i in 3:
+					await get_tree().process_frame
+				print("--leaf-wear=%d: %d stampile in foaie" % [leaf_passes, leaf_carpet.stamps_received])
+	if daruma_dist > 0.0:
+		for node in get_tree().get_nodes_in_group(&"daruma_otoshi") + get_tree().get_nodes_in_group(&"gion_matsuri"):
+			var rt := track.route_at(0)
+			var ti := track.closest_index_global((node as Node3D).global_position, 0)
+			var acc := 0.0
+			var bi := ti
+			var m := rt.baked.size()
+			# camera de joc sta cu DEFAULT_DISTANCE in spatele masinii pusa la `--frac`
+			var want := daruma_dist - ChaseCamera.DEFAULT_DISTANCE
+			while acc < want:
+				var nb := (bi - 1 + m) % m
+				acc += (rt.baked[bi] as Vector3).distance_to(rt.baked[nb])
+				bi = nb
+			zoom_frac = float(bi) / float(m)
+			print("--daruma-dist=%.0f: masina la %.0f m inaintea turnului (frac %.4f)" % [daruma_dist, acc, zoom_frac])
 	if overdraw:
 		get_viewport().debug_draw = Viewport.DEBUG_DRAW_OVERDRAW
 	# Stadiul limbii de lava (Stromboli): 0 = turul 1 ... 2 = zid. Fara el,
@@ -834,15 +1027,43 @@ func _ready() -> void:
 			var car := (load("res://scenes/cars/Car.tscn") as PackedScene).instantiate() as Car
 			car.track = track
 			add_child(car)
-			car.apply_data(load("res://scenes/cars/data/muscle.tres") as CarData)
+			car.apply_data(load("res://scenes/cars/data/%s.tres" % car_data_name) as CarData)
+			car.is_player = car_player
 			car.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP),
 				focus + Vector3.UP * 0.45)
 			car.road_index = idx
 			car.on_start_grid = true
 			_seat_car_on_rope_bridge(track, car)
+			if rim_hit:
+				# `--car --rim-at=T --rim-hit`: masina sta pe punctul de impact al
+				# bolovanului de pe buza, strivita + directie inversata (starea de
+				# dupa lovitura, cu turtirea si "<=>" deasupra).
+				var rims := track.find_children("*", "RimBoulderHazard", true, false)
+				if not rims.is_empty():
+					var rz := rims[0] as RimBoulderHazard
+					car.global_transform = Transform3D(car.global_transform.basis,
+						rz.global_position + Vector3.UP * 0.45)
+					car.crush(RimBoulderHazard.CRUSH_SECONDS, RimBoulderHazard.CRUSH_FACTOR,
+						RimBoulderHazard.CRUSH_SQUASH, RimBoulderHazard.CRUSH_KEEP_SPEED,
+						true, true)
+					for _rf in 12:
+						await get_tree().physics_frame
+					print("--rim-hit: masina strivita, inversare %.2f s" % car.steer_invert_left)
+			if haboob_at >= 0.0:
+				# `--car --haboob-at`: masina e JUCATORUL (ceata de joc se aplica doar
+				# lui) si hazardul o vede dupa cateva cadre de fizica.
+				car.is_player = true
+				for _hf in 6:
+					await get_tree().physics_frame
 			if vitrina_stem != "":
-				_place_vitrina(track, focus + dir * vitrina_ahead, dir,
-					vitrina_stem, vitrina_side, vitrina_yaw, vitrina_anim)
+				# Lista cu virgula (`--vitrina=momiji_a,momiji_b`): piesele se
+				# aseaza una dupa alta pe drum, la `--vitrina-step` metri, ca un
+				# rand de kit intr-o singura captura (int-a, Kyoto).
+				var stems := vitrina_stem.split(",", false)
+				for si in stems.size():
+					_place_vitrina(track,
+						focus + dir * (vitrina_ahead + float(si) * vitrina_step),
+						dir, stems[si], vitrina_side, vitrina_yaw, vitrina_anim)
 		cam.projection = Camera3D.PROJECTION_PERSPECTIVE
 		cam.fov = fov
 		cam.far = 400.0
@@ -1223,7 +1444,7 @@ func _set_herd_time(root: Node, seconds: float) -> void:
 ## (vezi `--cross-at`). Cursa si perioada se configureaza la primul tick
 ## (`_configure`, dupa ce pista a pus `travel`), deci se cere un cadru de
 ## fizica inainte; apoi se INGHEATA, ca la turma.
-func _set_cross_time(root: Node, seconds: float) -> void:
+func _set_cross_time(root: Node, seconds: float, anim_phase: float = 0.0) -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var found := 0
@@ -1235,6 +1456,21 @@ func _set_cross_time(root: Node, seconds: float) -> void:
 		hz._physics_process(0.0)
 		hz.set_physics_process(false)
 		found += 1
+		if hz._anim != null:
+			# Model cu schelet: animatia dupa viteza REALA din acest moment (ca
+			# in joc), pusa pe faza ceruta si inghetata.
+			var v := absf(hz._offset_at(seconds + 0.05) - hz._offset_at(seconds)) 				/ 0.05 * hz.travel.length()
+			hz._animate(v)
+			var cur := hz._anim.get_animation(hz._anim.current_animation)
+			hz._anim.speed_scale = 1.0
+			# fara amestec: cu ANIM_BLEND poza ceruta ar ramane pe jumatate
+			# amestecata cu repausul
+			hz._anim.play(hz._anim.current_animation, 0.0)
+			hz._anim.seek(cur.length * anim_phase, true)
+			hz._anim.advance(0.0)
+			hz._anim.pause()
+			print("--cross-at: %s anim '%s' la faza %.2f (viteza %.2f m/s)"
+				% [hz.name, hz._anim.assigned_animation, anim_phase, v])
 		var off: float = hz.call("_offset_now")
 		var lateral := off * hz.travel.length()
 		var hw := hz.road_half_width
@@ -1265,6 +1501,60 @@ func _set_cloud_time(root: Node, at: float) -> void:
 			% [at, cloud.name, cloud.cover(), cloud.get_node("Cloud").position.y])
 	if found == 0:
 		print("--cloud-at: NICIUN nor pe pista asta")
+
+
+## Haboob-ul: la N secunde in ciclu, cu ceasul INGHETAT (`force_clock`: fizica
+## continua sa ruleze, deci ceata si praful se aplica, dar timpul nu avanseaza).
+## Un process_frame in plus, ca la `--bus-at`: hazardurile cu `call_deferred` in
+## `_ready` nu exista inca la primul physics_frame.
+func _set_haboob_time(root: Node, at: float) -> void:
+	await get_tree().process_frame
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "HaboobHazard", true, false):
+		var hb := node as HaboobHazard
+		hb.force_clock = at
+		hb.set_cycle_time(at)
+		found += 1
+		var w := hb.wall()
+		print("--haboob-at=%.1f: %s acoperire %.2f, front la %.0f m pe cale, zid la %s (vizibil=%s)"
+			% [at, hb.name, hb.cover(), hb.front_distance_at(at),
+				str(w.global_position) if w != null else "?",
+				str(w.visible) if w != null else "?"])
+	if found == 0:
+		print("--haboob-at: NICIUN haboob pe pista asta")
+
+
+## `--rim-at=T`: bolovanul de pe buza (RimBoulderHazard) cu ceasul INGHETAT la T
+## secunde din ciclul de 19 s (0-15.9 liniste, ~15.95-17.35 telegraf, ~17.35-18.35
+## cade, 18.35-18.7 pe asfalt, apoi se sparge). Ca la haboob, deferit.
+func _set_rim_time(root: Node, at: float) -> void:
+	await get_tree().process_frame
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "RimBoulderHazard", true, false):
+		var rz := node as RimBoulderHazard
+		rz.force_clock = at
+		found += 1
+		print("--rim-at=%.2f: %s faza %d, impact la %s" % [at, rz.name,
+			rz.phase_at(at), str(rz.global_position)])
+	# Praful cere timp de incalzire: ceasul e inghetat, dar particulele curg.
+	for _i in 100:
+		await get_tree().physics_frame
+	if found == 0:
+		print("--rim-at: NICIUN RimBoulderHazard pe pista asta")
+
+
+## `--no-haboob`: scos din scena (si din grupul AI) INAINTE de captura.
+func _remove_haboob(root: Node) -> void:
+	await get_tree().process_frame
+	var n := 0
+	for node in root.find_children("*", "HaboobHazard", true, false):
+		node.remove_from_group(HaboobHazard.AI_SPEED_GROUP)
+		node.get_parent().remove_child(node)
+		node.free()
+		n += 1
+	print("--no-haboob: %d haboob-uri scoase din scena" % n)
 
 
 ## Autobuzul: la N secunde de coborare pe curba lui, cu botul pe directia de
@@ -1450,13 +1740,30 @@ func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
 ## asezata pe teren cu Track._terrain_mesh_y (aceeasi interpolare pe care o
 ## foloseste generatorul, nu un raycast fizic separat), rotita cu `yaw_deg`
 ## fata de directia drumului (`dir`).
+## Calea unui stem de vitrina: din tabel, iar pentru kitul Kyoto (assets/models/
+## kyoto/<categorie>/<stem>.glb) cautata pe disc, ca sa nu tina cineva un tabel
+## de 60 de piese la zi. Gol daca nu o gaseste.
+func _vitrina_path(stem: String) -> String:
+	if _VITRINA_MODEL_PATHS.has(stem):
+		return String(_VITRINA_MODEL_PATHS[stem])
+	var root := "res://assets/models/kyoto"
+	var d := DirAccess.open(root)
+	if d == null:
+		return ""
+	for sub in d.get_directories():
+		var cand := "%s/%s/%s.glb" % [root, sub, stem]
+		if ResourceLoader.exists(cand):
+			return cand
+	return ""
+
+
 func _place_vitrina(track: Track, focus: Vector3, dir: Vector3, stem: String,
 		side: float, yaw_deg: float, anim_name: String = "") -> void:
-	if not _VITRINA_MODEL_PATHS.has(stem):
+	var path := _vitrina_path(stem)
+	if path.is_empty():
 		push_error("--vitrina=%s: stem necunoscut. Vezi _VITRINA_MODEL_PATHS in tools/snapshot.gd."
 			% stem)
 		return
-	var path: String = _VITRINA_MODEL_PATHS[stem]
 	if not ResourceLoader.exists(path):
 		push_error("--vitrina=%s: fisierul nu exista: %s" % [stem, path])
 		return

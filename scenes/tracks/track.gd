@@ -20,6 +20,9 @@ signal build_step(step: StringName)
 const BUILD_STEPS: Array[StringName] = [&"pregatire", &"drum", &"obstacole",
 	&"umeri", &"decor", &"teren", &"umbre", &"apa"]
 
+## Tenta petelor de muschi din zonele de sol cu alfa < 1 (Kyoto POI D).
+const GROUND_MOSS_TINT := Color(0.34, 0.42, 0.16)
+
 const WALL_HEIGHT: float = 1.3
 ## Cate repetitii de textura de suprafata intra intr-un metru de lume.
 ## 0.08 = o dala la 12.5m — destul de mare cat sa nu se vada tiparul repetandu-se,
@@ -93,6 +96,14 @@ var road_surface: String = "asphalt"
 func road_is_loose() -> bool:
 	return road_surface != "asphalt"
 
+## Drumul e afanat LA FRACTIA asta? Varianta pe fractie a lui [method road_is_loose],
+## pentru pistele cu asfalt pe o parte din bucla si pamant pe alta
+## ([method _dirt_ranges]): linia de mijloc, bordurile, praful si urmele masinii
+## intreaba de unde se afla roata, nu de toata pista. Pe o pista fara intervale
+## de pamant raspunsul e exact cel al lui `road_is_loose()`.
+func road_is_loose_at(frac: float) -> bool:
+	return road_is_loose() or is_dirt_at(frac)
+
 ## Culoarea prafului ridicat DE PE SOSEA.
 ##
 ## Praful de pe teren isi ia culoarea din theme_ground_tint (vezi
@@ -102,7 +113,11 @@ func road_is_loose() -> bool:
 func road_dust_color() -> Color:
 	if road_surface == "snow":
 		return SNOW_ROAD_COLOR
-	return dirt_road_color() if road_is_loose() else asphalt_color()
+	# Pe o pista cu asfalt si portiuni de pamant (`_dirt_ranges`), masina ridica
+	# praf de pe SOSEA doar unde e pamant (vezi Car._on_loose_ground), deci orice
+	# praf "de pe sosea" are culoarea pamantului, nu a asfaltului.
+	return dirt_road_color() if (road_is_loose() or has_dirt_ranges()) \
+		else asphalt_color()
 
 ## Suprafata pe care masinile lasa brazde rulind (vezi SandTrail).
 ##
@@ -113,7 +128,11 @@ func road_dust_color() -> Color:
 func trail_surface_color() -> Color:
 	if road_surface == "snow":
 		return SNOW_ROAD_COLOR
-	return dirt_road_color() if road_is_loose() else theme_ground_tint
+	# Pista cu portiuni de pamant: pe ele chiar drumul poarta urme, iar pe
+	# asfalt nu se depune nimic — aceeasi regula "cele mai multe urme", deci
+	# culoarea drumului de pamant, nu a terenului.
+	return dirt_road_color() if (road_is_loose() or has_dirt_ranges()) \
+		else theme_ground_tint
 
 ## Cat de INCHISA e brazda fata de suprafata pe care e lasata, pe drumurile de
 ## pamant/nisip. Tinta e o brazda, nu vopsea: nisipul rascolit isi pierde din
@@ -166,7 +185,7 @@ func trail_profile() -> Dictionary:
 	var lit := dirt_road_color()
 	var road_l := lit.r * 0.2126 + lit.g * 0.7152 + lit.b * 0.0722
 	var lip_scale := clampf(road_l / 0.62, 0.06, 1.0)
-	if road_surface == "dirt":
+	if road_surface == "dirt" or (road_surface == "asphalt" and has_dirt_ranges()):
 		# Pamantul afanat tine cel mai bine amprenta: bazin adanc, model clar.
 		return {"width": 0.60, "core": 0.66, "basin": 0.34, "tread": 0.48, "lip": 2 * lip_scale}
 	# Pamant tare: urma abia se vede, si nu retine modelul anvelopei.
@@ -243,6 +262,11 @@ var theme_shadows: bool = true
 ## Acelasi contract ca theme_shadows: daca device-ul nu tine 60fps, asta e a
 ## doua setare de stins (dupa umbre).
 var theme_glow: bool = true
+
+## Farurile masinilor (CarLights): 0 = stinse (zi), 1 = aprinse toata cursa
+## (noapte), negativ = urmeaza `DuskCycle.lamps_value` (apus). Cheia de tema
+## `"headlights"`. Stopurile merg pe orice pista, indiferent de ea.
+var theme_headlights: float = 0.0
 
 ## Pana unde arunca soarele umbre. Peste, preia ceata (depth 90->250), deci
 ## lipsa lor nu se vede. O singura cascada pana aici = configuratia cea mai
@@ -342,6 +366,10 @@ static func themes() -> Dictionary:
 		return _themes_cache
 	_themes_cache = {
 		"desert": {
+			# DUNELE = banc de test: contactul ramane pe vechiul disc MUL (octogon
+			# inchis), bit-identic. Restul temelor au `prop_contact_soft` implicit
+			# (vezi `_build_prop_contact`).
+			"prop_contact_soft": false,
 			# sand_mid din paleta (style_bible §1). Era #EDC177, mai deschis decat
 			# spec-ul; cu textura peste, valoarea aia impingea canalul rosu in
 			# saturatie si stergea granulatia.
@@ -971,6 +999,9 @@ static func themes() -> Dictionary:
 			"lagoon_shore_out": 5.0,
 		},
 		"machupicchu": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["rope_rail", "water_channel"],
 			# CETATE DE GRANIT PE CREASTA VERDE, SUB CER ANDIN, CU NORUL IN VALE
 			# (docs/track_briefs/machu_picchu.md §4). Prima trecere (pasul 2 din
 			# §7): doar lumina, cerul, ceata si solul; kitul de cetate, clasele
@@ -1124,6 +1155,9 @@ static func themes() -> Dictionary:
 			"water": false,
 		},
 		"fiordland": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["chasm_bridge_rail"],
 			# FIORD DE GRANIT UD, DIMINEATA DUPA PLOAIE (docs/track_briefs/
 			# fiordland.md §4). Pasul 2 din §7: doar lumina, cerul, ceata si
 			# solul; kitul de perete ud (`wet_gneiss`), cascadele si hazardele
@@ -1168,7 +1202,7 @@ static func themes() -> Dictionary:
 			# duce spre ei urca gradual — 32° prinde fata propriu-zisa fara sa
 			# inghita taluzul de iarba de la baza (Machu Picchu foloseste 28,
 			# dar acolo geometria era o cadere abrupta fara taluz de tranzitie).
-			"scarp_tint": Color(0.196, 0.190, 0.182),
+			"scarp_tint": Color(0.52, 0.48, 0.43),
 			"scarp_slope_deg": 32.0,
 			"scarp_fade_deg": 10.0,
 			# Cer inchis, printre nori (brief §4: sky_cover_alpha mare) —
@@ -1337,6 +1371,11 @@ static func themes() -> Dictionary:
 			"water": true,
 		},
 		"jodhpur": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["laundry_line", "textile_strip"],
+			# Farurile urmeaza ceasul de apus (DuskCycle): -1 = „dupa ceas".
+			"headlights": -1.0,
 			# ORASUL ALBASTRU DIN JODHPUR, SEARA DE DIWALI (docs/track_briefs/
 			# jodhpur.md §2.0, §4). Pasul 2 din §7: doar lumina, cerul, ceata
 			# si solul de baza -- kitul de oras, fantana, portile si fortul
@@ -1362,7 +1401,7 @@ static func themes() -> Dictionary:
 			# Picchu): riolit roz-brun (brief §1, #9A6A5A), aproape neutru dupa
 			# randare -- stanca sub fort si coborarea G sunt fete de panta
 			# mare, nu platouri.
-			"scarp_tint": Color(0.46, 0.30, 0.24),
+			"scarp_tint": Color(0.52, 0.48, 0.43),
 			"scarp_slope_deg": 30.0,
 			"scarp_fade_deg": 10.0,
 			# Cer de amurg: portocaliu-roz la orizont -> violet sus (brief §0,
@@ -1614,6 +1653,319 @@ static func themes() -> Dictionary:
 			"water_lit_wave_len": 1.2,
 			"water_dusk_dim": 0.55,
 		},
+		"kyoto": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["shiba_fence"],
+			# KYOTO LA SFARSITUL LUI NOIEMBRIE, LA VARFUL TOAMNEI (docs/track_briefs/
+			# kyoto.md §0.1, §4). Pasul 2 din §7: doar lumina, cerul, ceata si solul
+			# de baza; kitul (machiya, artari, bambus), hero-urile si orizontul vin
+			# cu POI-urile (§5). `decor` stins ca la Jodhpur/Fiordland: decorul se
+			# pune manual pe POI. Lumina e FIXA, nu un ceas (brief §0): fara
+			# DuskCycle, ca sa nu dubleze Jodhpur.
+			#
+			# SOARELE: 22 de grade, din SV (azimut ~225 busola), #FFD8A8. Harta lui
+			# Kyoto ajunge in Godot fara oglindire (gx = x, gz = -y, vezi
+			# tools/gen_kyoto_route.py), deci sursa la busola 180 - y_rot =>
+			# y_rot = -45. Verificat pe directia de mers:
+			# C (scena, spre S) il are in fata-dreapta (arțarii din rapa in
+			# contralumina — intentia), F (spre V) il are in stanga-fata si
+			# lumineaza fata de S a pavilionului, H (spre N) il are in spate-stanga
+			# (pagoda luminata din fata). Se remasoara la fiecare redesenare a
+			# traseului (memoria azimutul-soarelui-fata-de-drum).
+			"sun_color": Color.html("FFD8A8"),
+			"sun_energy": 1.0,
+			"exposure": 1.0,
+			"sun_rotation_deg": Vector3(-22, -45, 0),
+			# POI F: fara stalpi de bordura / chevron in iaz (_skip_wet_marker).
+			"markers_skip_water": true,
+			# AMBIENT 0,35, albastru rece de cer: umbrele trag spre albastru, nu
+			# spre negru (memoria umbra-fara-culoare-e-negru-mort).
+			"ambient_color": Color.html("B4C8E6"),
+			"ambient_energy": 0.35,
+			# Cer limpede de toamna (aki-bare): #8DB8E8 sus -> #F2E2C2 la orizont.
+			"sky_top": Color.html("8DB8E8"),
+			"sky_horizon": Color.html("F2E2C2"),
+			"sky_cover_alpha": 0.0,
+			# Ceata: pacla calda a unei dupa-amiezi senine, fog_end 340 (mai
+			# limpede ca Jodhpur, 300). Inelele de fundal vor respecta
+			# < 340 < FAR_PLANE 380 (memoria efecte-de-fundal-cote-legate).
+			"fog": Color.html("E9D6BC"),
+			"fog_sky_affect": 0.10,
+			"fog_depth": true,
+			"fog_begin": 100.0,
+			"fog_end": 340.0,
+			"fog_curve": 1.4,
+			"fog_max": 0.85,
+			# Umbre PORNITE, shadow_distance 90 (CLAUDE.md: prima setare de scurtat
+			# daca device-ul nu tine 60 fps). La 22 de grade umbra are ~2,5x
+			# inaltimea obiectului: umbrele lungi ale caselor si ale tulpinilor de
+			# bambus pe drum sunt identitatea luminii (brief §4).
+			"shadows": true,
+			"shadow_opacity": 0.65,
+			"shadow_distance": 90.0,
+			"shadow_blur": 1.0,
+			# SOLUL: pamant de padure cu muschi, olive cald. Sub decor se vede
+			# pe versant; covorul de frunze din D vine din perechea a doua de
+			# texturi (`terrain_alt_class` + `ground_zones`, mecanismul
+			# Jodhpur): clasa `leaf_litter` ia tenta ei de clasa, deci zona
+			# trage spre ruginiu-carmin. Muschiul de pe malul iazului NU e pe
+			# teren: perechea a doua e una singura pe tema, deci `moss` ramane
+			# pentru decor/prop-uri (de decis pe captura, pasul 9).
+			"ground_tint": Color(0.46, 0.50, 0.28),
+			"scarp_tint": Color(0.52, 0.48, 0.43),
+			"scarp_slope_deg": 32.0,
+			"scarp_fade_deg": 10.0,
+			"hill_color": Color(0.30, 0.38, 0.22),
+			"terrain_alt_class": "leaf_litter",
+			"ground_zones": [
+				# D (POI D runda 2): humus de frunze ruginiu-INCHIS sub coroane, cu
+				# pete de muschi. Tenta veche (#DC8A4E, a clasei leaf_litter) iesea
+				# nisip bej patat (captura r1): acum brun mai inchis decat covorul
+				# rosu de pe drum, ca drumul sa se desparta de sol. ALFA < 1 =
+				# pete de muschi (vezi `_build_terrain`, zona de sol): pe 1 - a
+				# din pete solul revine la solul temei (oliv, muschi). Sta INAINTEA
+				# zonei vechi D si are raza mai mare, deci aceea nu mai castiga
+				# nicaieri (`zw > w` strict); stearsa la integrare. Pana la
+				# iesirea de pe pod: fundul rapei Tsutenkyo e tot padure.
+				{"from": 0.331, "to": 0.468, "max_m": 60.0, "fade_m": 18.0,
+					"tint": Color(0.42, 0.21, 0.11, 0.4)},
+				# C: rapa de sub scena Kiyomizu (POI C runda 2). Fundul ei e in
+				# umbra peretelui de vest toata dupa-amiaza (soarele de 22° din SV),
+				# deci lumina doar de ambientul albastru: solul oliv iesea TURCOAZ
+				# si se citea ca apa printre artari. Covorul de frunze il trage in
+				# ruginiu, si in umbra ramane brun-rosu („sub tine e rosu", §2.0).
+				# r3: doar SUB buza (≥ 6 m sub puntea/coltul cel mai apropiat), ca
+				# platoul lui C1 si incinta templului sa ramana pe solul temei.
+				{"from": 0.258, "to": 0.314, "max_m": 80.0, "fade_m": 20.0,
+					"under_road_m": 6.0, "tint": Color(0.82, 0.40, 0.20)},
+			],
+			# TROTUARUL de pe Yasaka-dori (POI A, runda 2, aprobat de
+			# coordonator): fasia dintre bordura si fatadele machiya (peretele
+			# la bordura + 3,4 m) iesea iarba inchisa. Mecanismul Jodhpur, fara
+			# cod nou: umarul se lateste la 3,4 m pe fereastra startului (de pe
+			# dreapta H, s ~ -80, pana la coltul lui B, s ~ 155) si poarta dala
+			# `alpine_granite` (lespezi plate, citite caldaram de sus). Textura
+			# umarului e pe TEMA, deci si umarul ingust de 1,3 m de pe restul
+			# turului devine piatra in loc de pietris. `shoulder_zones_are_road`
+			# NU se pune: trotuarul ramane in afara drumului (felinarele de
+			# hartie, cu corp, stau pe el la bordura + 2,1). Latimea 4,0 > 3,4:
+			# lespezile intra 0,6 m sub fatada, altfel ramanea o fasie de iarba.
+			"shoulder_texture": "res://assets/textures/classes/alpine_granite.png",
+			"shoulder_color": Color(0.80, 0.80, 0.80),
+			"shoulder_tile": 6.0,
+			# POI B (Sannenzaka): fereastra continua pe urcare pana la 0,200
+			# (~15 m inaintea portii Niomon), cat tin randurile de machiya si
+			# treptele de pe trotuarul din dreapta.
+			"shoulder_width_zones": [Vector3(0.962, 0.200, 4.0)],
+			# ORIZONTUL (kit int-a): dealurile Higashiyama in toamna, muntele
+			# Arashiyama si banda de acoperisuri din pacla (`kyoto_horizon.glb`,
+			# brief §5.4). Inelele stau sub fog_end 340 < FAR_PLANE 380 (memoria
+			# efecte-de-fundal-cote-legate): ceata de 0,85 la 340 le topeste in
+			# pacla calda, nu le taie. Scarile sunt legate de CADRU, nu de
+			# dimensiunea din GLB: camera de joc (10 m sus) vede la distanta d
+			# pana la ~10 + 0,092 d m peste drum, adica ~35-40 m la 300 m, deci
+			# Arashiyama (70 m) intra la scara 0,5 si Higashiyama (45 m) la 0,7
+			# (memoria inaltimea-obiectelor-si-camera). Fara umbra aruncata
+			# (`_build_horizon` o stinge pe toate: caster-departat-fura-umbra).
+			# Culorile raman pe atlas (petice rosii/aurii pictate pe verde-inchis;
+			# o clasa de roca le-ar sterge): `horizon_class` gol.
+			"horizon_model": "res://assets/models/kyoto/rocks/kyoto_horizon.glb",
+			"horizon_picks": [["Higashiyama_A", "Higashiyama_B"],
+				["Arashiyama_A"], ["FarRoofs_A"]],
+			"horizon_class": "",
+			"horizon_rings": [
+				{"near": 340.0, "far": 460.0, "count": 5, "scale": 0.8,
+					"clear": 170.0, "picks": ["Higashiyama_A", "Higashiyama_B"]},
+				{"near": 360.0, "far": 470.0, "count": 2, "scale": 0.45,
+					"clear": 190.0, "picks": ["Arashiyama_A"]},
+				{"near": 330.0, "far": 450.0, "count": 3, "scale": 1.3,
+					"clear": 150.0, "picks": ["FarRoofs_A"]},
+			],
+			"walls": false,
+			# Balustrada de tablier pe viaducte (scena Kiyomizu, Tsutenkyo,
+			# Togetsukyo), ca Chongqing: brief §2 „pe laturi scena are balustrada,
+			# nu cazi decat pe capat", „de pe pod nu se cade". Fara ea, ProbeRace
+			# (16 seed-uri, 8 masini) repunea 47 de masini la iesirea de pe pod
+			# (frac 0.46): AI-ul taie interiorul arcului de dupa pod la 35 m/s si
+			# iese pe marginea unui tablier fara parapet. Mesh-ul e placeholderul
+			# CONCRETE din `_build_walls`; modulele de pod din kit il inlocuiesc.
+			"deck_rails": true,
+			# PUNTEA SCENEI KIYOMIZU (POI C): fata de lemn deschis cald (scandurile
+			# clasei `wood`, ridicate spre hinoki) pe fasia inaltata 0,255-0,304,
+			# trambulina de la capat din aceleasi scanduri, iar parapetul si
+			# fusta tablierelor in lemn inchis in loc de beton. Inainte: asfalt pe
+			# punte, fusta verde-oliv (`hill_color`), trambulina portocalie — „blocul
+			# galben cu latura turcoaz" de pe esafodaj. Zero materiale noi: lemnul
+			# deschis inlocuieste portocaliul trambulinei, lemnul inchis betonul.
+			"wood_deck_ranges": [Vector2(0.255, 0.304)],
+			"wood_deck_color": Color(1.35, 1.22, 1.08),
+			"deck_color": Color(0.36, 0.25, 0.17),
+			"kerbs": false,
+			"cliffs": false,
+			"decor": "none",
+			"props": "forest",
+			"hazard_model": "",
+			"dust_color": Color(0.62, 0.56, 0.46),
+			# Caldaram de oras vechi: gri cald, aproape neutru (ROAD_COLOR e
+			# albastrui si sub ambientul rece ar iesi violet — lectia Jodhpur).
+			"road_tint": Color(0.30, 0.29, 0.27),
+			# Tunelul de torii (E'): pamant batatorit de poteca de pelerinaj.
+			"branch_surface": "gravel",
+			"branch_tint": Color(0.72, 0.64, 0.54),
+			# APA (iazul pavilionului F, raul Katsura H): verde-inchis, calma,
+			# `SEA_DEEP` (#2E5F6B), cu luciu de iaz (rugozitate mica — memoria
+			# apa-iluminata-v12: lumina se vede doar pe o apa lucioasa). Chei
+			# luate de la Jodhpur (aceeasi apa calma, fara spuma), de retuat pe
+			# captura la pasul 9. Runda 2: iazul iesea gri-pal (Fresnel din chase cam
+			# reflecta cerul pe toata suprafata) => Fresnel 0,22, culoare de Fresnel
+			# verde-inchis, dim mai mare.
+			"water": false,
+			"water_shallow_slot": Palette.SEA_DEEP,
+			"water_deep_slot": Palette.SEA_DEEP,
+			"water_shore_slot": Palette.SEA_DEEP,
+			"water_dim": 0.45,
+			"water_desat": 0.05,
+			"water_mul": Color(0.60, 0.92, 0.82),
+			"water_deep_gain": 1.0,
+			"water_foam": 0.0,
+			"water_foam_mix": 1.0,
+			"water_crest": 0.0,
+			"water_band": 0.0,
+			"water_glint": 0.0,
+			"water_ripple": 0.06,
+			"water_fresnel": 0.22,
+			"water_fresnel_sharp": 3.5,
+			"water_fresnel_color": Color(0.20, 0.34, 0.36),
+			"water_view_lo": 1.0,
+			"water_view_hi": 0.75,
+			"water_view_ref": 0.60,
+			"water_lit_rough": 0.06,
+			"water_lit_fresnel": 0.35,
+			"water_lit_spec": 0.60,
+			"water_lit_normal": 0.20,
+			"water_lit_wave_len": 1.4,
+		},
+		"monumentvalley": {
+			# MONUMENT VALLEY, DUPA-AMIAZA TARZIE (docs/track_briefs/monument_valley.md
+			# §0.1, §4). Pasul 1-2 din §7: lumina, cerul, solul, clasa de gresie si
+			# fundalul provizoriu. Decorul procedural e doar rar (props
+			# `monumentvalley`: bolovani + tufe uscate, fara saguaro); reperele (turnurile
+			# Mittens, post de negot) sunt DecorManual pe POI.
+			#
+			# SOARELE: 18 grade, din VSV. Unghiul real vine din
+			# `custom_sun_rotation_deg` al pistei (se remasoara la fiecare redesenare a
+			# traseului); cel din tema e doar implicitul (-18, -70, 0).
+			"sun_color": Color.html("FFD2A0"),
+			"sun_energy": 1.0,
+			# DE CALIBRAT: 1.0 e un punct de pornire, NU 1.30 din desert (acolo
+			# valoarea e masurata pe nisip auriu cu soare de 42 grade). Se masoara
+			# gresia si asfaltul pe captura --gamecam (memoria
+			# monocromia-se-masoara-dupa-remap).
+			"exposure": 1.0,
+			"sun_rotation_deg": Vector3(-18, -70, 0),
+			# AMBIENT rece: umbrele lungi trag spre albastru, nu spre negru (memoria
+			# umbra-fara-culoare-e-negru-mort).
+			"ambient_color": Color.html("A9BEDD"),
+			"ambient_energy": 0.30,
+			# Cer albastru adanc sus, cald la orizont (brief §4).
+			"sky_top": Color.html("3F79C9"),
+			"sky_horizon": Color.html("F1D3AA"),
+			"sky_cover_alpha": 0.0,
+			# Ceata calda: 120 -> 360 m. fog_end 360 < ChaseCamera.FAR_PLANE 380
+			# (memoria efecte-de-fundal-cote-legate); inelele de orizont stau sub
+			# fog_end, la 190-340 m.
+			"fog": Color.html("D9A57A"),
+			"fog_sky_affect": 0.10,
+			"fog_depth": true,
+			"fog_begin": 120.0,
+			"fog_end": 360.0,
+			"fog_curve": 1.4,
+			"fog_max": 0.62,
+			# Umbre PORNITE, shadow_distance 90 (CLAUDE.md: prima setare de stins
+			# pe device). La 18 grade umbra are ~3x inaltimea obiectului.
+			"shadows": true,
+			"shadow_opacity": 0.65,
+			"shadow_distance": 90.0,
+			"shadow_blur": 1.0,
+			# Nisipul campiei: TILE_TERRACOTTA citit ca culoare de pornire (#C4784F
+			# in brief), de impins spre rosu prin tenta dupa captura.
+			"ground_tint": Color(0.80, 0.36, 0.20),
+			"hill_color": Color(0.54, 0.29, 0.20),
+			# Drumul de pamant (Valley Drive): rosu-portocaliu (brief §4). Pista
+			# declara `custom_dirt_ranges` pe C-G; grip-ul vine din `loose_grip`.
+			"dirt_road_tint": Color(0.62, 0.46, 0.38),
+			"loose_grip": 7.0,
+			"dust_color": Color(0.82, 0.42, 0.25),
+			# Asfaltul US-163: linie dubla galbena, nu placute albe (brief §4).
+			"center_line_double_yellow": true,
+			# Rampa G2 ia culoarea drumului de pamant, nu portocaliul aprins.
+			"kicker_dirt_color": true,
+			# Decor manual cu mii de piese: discurile de contact memoreaza amprenta
+			# per (mesh, transformare relativa), iar vegetatia de talie mica primeste
+			# discuri PLANE (`prop_contact_flat`: o cota de sol, nu cercul de 11).
+			# Vezi `_prop_foot_radius` / `_build_prop_contact`.
+			"prop_foot_cache": true,
+			# Contact MOALE (implicit pe toate temele, mai putin desert): un disc per
+			# pata, marginea se topeste radial. Culoarea ramane maroul de aici, cel
+			# validat pe Track19 (celelalte teme o iau din `ground_tint`).
+			"prop_contact_tint": Color(0.04, 0.012, 0.006),
+			# Gardul de sarma e o LINIE, nu un punct: discurile lui (raza plafonata)
+			# se inlantuie si se inmultesc in placa neagra pe toata lungimea.
+			"prop_contact_skip": ["wire_fence"],
+			"prop_contact_flat": ["sagebrush", "rabbitbrush", "tumbleweed", "yucca", "wire_fence",
+				"juniper", "telegraph_pole"],
+			# Scurtatura Dunele (G'): nisip rosu, SAND implicit.
+			"branch_tint": Color(0.80, 0.50, 0.34),
+			# Gresia: clasa NOUA `mv_sandstone` (Palette) pe falezele trecatorii, pe
+			# arc, pe bolovanii care cad si pe siluetele de orizont. `rock`,
+			# `red_valley_tuff` & co raman neatinse: alte piste, aceeasi dala.
+			"rock_class": "mv_sandstone",
+			"rockfall_class": "mv_sandstone",
+			# ORIZONT: `monumentvalley/rocks/horizon_mesas.glb` (brief §5.4 / kit §1.8),
+			# volume inchise cu noduri copii directe ale radacinii: EagleMesa_A,
+			# BrighamsTomb_A, Stagecoach_A, KingOnThrone_A, Spires_A, FarMesa_A/B.
+			# Fara umbra aruncata (`_build_horizon` o stinge: caster-departat-fura-
+			# umbra) si fara coliziune (PROP_COLLISION "none"). Inelele stau sub
+			# fog_end 360 < FAR_PLANE 380 (memoria efecte-de-fundal-cote-legate), iar
+			# scarile tin varfurile sub tavanul cadrului la distanta lor: camera
+			# vede cel mult 10 + 0,092 x d metri peste drum (d = 250 -> 33 m,
+			# d = 300 -> 38 m; Brigham 36,7 m si Spires 34 m sunt cele inalte).
+			#
+			# Clasa: `mv_sandstone` pe tot nodul. Orizontul e O SINGURA suprafata
+			# (1 material) fara noduri `_Rock`/`_Cap` separate, deci calota palida nu
+			# se poate scutura de clasa; la 190-340 m sub ceata nu se vede.
+			"horizon_model": "res://assets/models/monumentvalley/rocks/horizon_mesas.glb",
+			"horizon_class": "mv_sandstone",
+			"horizon_rings": [
+				# Inelul apropiat: piesele joase/inguste (Stagecoach 30 m, King 32 m,
+				# Spires 34 m). Brigham (37 m x 60 m latime) e la 250+ m: masurat, la
+				# 59 m de sosea un bloc de 33 m citea ca geometrie apropiata, nu ca zare.
+				{"near": 190.0, "far": 260.0, "count": 5, "scale": 1.0,
+					"clear": 100.0, "picks": ["Stagecoach_A", "KingOnThrone_A",
+					"Spires_A"]},
+				{"near": 250.0, "far": 340.0, "count": 6, "scale": 1.1,
+					"clear": 140.0, "picks": ["EagleMesa_A", "BrighamsTomb_A",
+					"FarMesa_A", "FarMesa_B"]},
+			],
+			# Arcul E': kitul are propriul (`sandstone_arch.glb`, golul masurat
+			# 15,45 m x 8,95 m — docs/asset_briefs/monumentvalley_inventory.md). Clasa
+			# pe PARTI: peretele si grohotisul pe gresie, calota ramane pe atlas (vezi
+			# `_build_arch`; acelasi motiv ca `WorldProp.MV_ROCK_*`). Celelalte teme nu declara cheile: raman pe `rock_arch.glb`.
+			"arch_model": "res://assets/models/monumentvalley/rocks/sandstone_arch.glb",
+			"arch_classes": {"Arch_Rock": Palette.TRI_PREFIX + "mv_sandstone",
+				"Arch_Scree": Palette.TRI_PREFIX + "mv_sandstone",
+				"Arch_Cap": Palette.TRI_PREFIX + "mv_cap"},
+			"walls": false,
+			"kerbs": false,
+			"cliffs": true,
+			# Faleze doar in defileu (E): valea deschisa n-are zid pe marginea drumului.
+			"cliffs_gorge_only": true,
+			"decor": "bands",
+			"props": "monumentvalley",
+			"hazard_model": "",
+			"water": false,
+		},
 		"forest": {
 			"ground_tint": Color(0.45, 0.72, 0.33), # verde viu, nu pastel
 			"sky_top": Color(0.22, 0.48, 0.9),
@@ -1657,6 +2009,9 @@ static func themes() -> Dictionary:
 		# incidenta mai buna si se supraexpun la aceeasi energie. Diferenta
 		# e vizibila pe umarul masivului, unde panta e de 35-40%.
 		"alpine": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["stream_bridge", "mountain_tunnel"],
 			# Pajiste de munte in august, NU gazon: verdele lui "forest"
 			# (0.45, 0.72, 0.33) iesea fluorescent pe prima randare — e acordat
 			# pentru o padure in umbra, iar aici cade pe pante intregi luminate
@@ -1935,6 +2290,9 @@ static func themes() -> Dictionary:
 		#   godot --path . res://tools/Snapshot.tscn -- --track=1 --size=300
 		# si compara nisipul cu #E9DCC0.
 		"island": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["fence_ranch"],
 			"ground_tint": Palette.color(Palette.CORAL_SAND),
 			"sky_top": Color(0.20, 0.50, 0.88),
 			"sky_horizon": Color(0.80, 0.92, 0.95), # palid marin, nu auriu ca desertul
@@ -2039,6 +2397,9 @@ static func themes() -> Dictionary:
 		# flori, fan, garduri) e PROVIZORIU pana vine kitul de larici/mesteceni. Fara pereti si borduri pe gheata
 		# (le taie `_road_ice`), cu borduri pe mal.
 		"baikal": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["fence_ranch", "rail_track"],
 			"ground_tint": Palette.color(Palette.DRY_VEGETATION),
 			"sky_top": Color(0.52, 0.66, 0.84),
 			"sky_horizon": Color(0.95, 0.88, 0.86),
@@ -2115,6 +2476,9 @@ static func themes() -> Dictionary:
 		# integrarea celor 12 piese de flanc; a stat provizoriu pe props insulare
 		# — palmieri si coral — exact cum Baikal a stat pe props alpine.
 		"stromboli": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["vine_row"],
 			"ground_tint": Palette.color(Palette.VOLCANIC_BLACK),
 			"sky_top": Color(0.28, 0.50, 0.82),
 			"sky_horizon": Color(0.86, 0.89, 0.88),
@@ -2263,6 +2627,9 @@ static func themes() -> Dictionary:
 			"branch_surface": "gravel",
 		},
 		"chongqing": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["cliff_railing", "laundry_line"],
 			# NOAPTE CU BURNITA, ORAS CONSTRUIT PESTE EL INSUSI (brief §0.1, §4).
 			# Prima tema de noapte: lumina nu vine de la soare, ci de la oras —
 			# ambientul gri-violaceu e "cerul luminat de jos", iar "soarele" e o
@@ -2303,6 +2670,8 @@ static func themes() -> Dictionary:
 			"ambient_color": Color.html("66667A"),
 			"ambient_energy": 0.40,
 			"shadows": false,
+			# Noapte: farurile si luminile de pozitie arse toata cursa (CarLights).
+			"headlights": 1.0,
 			"fog_depth": true,
 			"fog_begin": 150.0,
 			"fog_end": 250.0,
@@ -2942,6 +3311,9 @@ static func themes() -> Dictionary:
 		#    canale de cremul cerut in brief (#E8D9B8): sub pragul de 12 din
 		#    style_bible §5, deci cea mai buna potrivire din paleta existenta.
 		"cappadocia": {
+			# Contact moale: liniile subtiri (garduri, sine, balustrade, sarme, randuri)
+			# n-au disc; un disc de 2-6 m sub ele e o placa, nu contact.
+			"prop_contact_skip": ["vine_row"],
 			# Stratul de detaliu al lumii: CANELURI VERTICALE, nu strate
 			# orizontale. Singura tema care si-l schimba, si e o reparatie, nu
 			# un gust: detail_rock.png (implicit) are benzi pe Y, autorate
@@ -3612,6 +3984,7 @@ func apply_theme(theme: String) -> void:
 	# tema de NOAPTE nu are ce umbri: soarele e o luna palida aproape verticala,
 	# iar o umbra dura ar contrazice lumina. "shadows": false le stinge pe tema.
 	theme_shadows = bool(_theme.get("shadows", true))
+	theme_headlights = float(_theme.get("headlights", 0.0))
 	# Stratul de detaliu triplanar al lumii: implicit strate orizontale, dar
 	# Cappadocia cere caneluri verticale (vezi cheia `detail_texture`). Se
 	# aseaza AICI, inainte ca decorul sa ceara primul material — `_shared` din
@@ -4295,6 +4668,12 @@ func _ravine_floors() -> Array[Vector2]:
 func _ravine_widths() -> Array[Vector2]:
 	return []
 
+## LIMBILE DE MAL: (indice in [method _ravines], fractia centrului, semilungime
+## pe sosea m, latime dincolo de asfalt m). Pe ele rapa nu sapa — vezi
+## TrackSideSampler.ravine_capes.
+func _ravine_capes() -> Array[Vector4]:
+	return []
+
 ## PANTA podelei unei rape: (indice in [method _ravines], metri de cadere la
 ## fiecare 100 m dincolo de buza). Fara ea podeaua e o masa plata si, din ochiul
 ## soferului, valea citeste ca o treapta urmata de ses — vezi
@@ -4755,6 +5134,8 @@ func rebuild() -> void:
 	# referinta trebuie sa moara odata cu ea, altfel stamp_wear ar scrie
 	# intr-un viewport eliberat.
 	_road_wear = null
+	# Acelasi motiv pentru consumatorii externi de uzura (LeafCarpet).
+	wear_sinks.clear()
 	# Profilul de latime se recalculeaza: la Regenerate in editor, declaratiile
 	# se pot fi schimbat de sub noi, iar lungimea pistei (deci si lungimea
 	# rampelor, in fractii) se schimba la orice retus de traseu.
@@ -4817,6 +5198,7 @@ func rebuild() -> void:
 	_sampler.late_peaks = _island_peaks
 	# Debleele, tot dupa constructie: lista goala pe orice pista fara ele.
 	_sampler.cuttings = _cuttings()
+	_sampler.ravine_capes = _ravine_capes()
 	_sampler.cutting_shape = _cutting_shape()
 	# Abrupturile (TerrainBluff), tot dupa constructie: goale pe orice pista
 	# fara noduri, deci ground_y nu se schimba acolo.
@@ -4950,24 +5332,41 @@ func _build_center_line() -> void:
 	var lift := Vector3.UP * 0.045
 	var d := 4.0
 	var idx := 0
+	# Tema poate cere LINIE DUBLA GALBENA continua (US-163, Monument Valley,
+	# brief §4: CAR_YELLOW 16): doua benzi de 0.14 m la +-0.15 m de axa, in bucati
+	# de 3.25 m (coarda mica pe viraje). Implicit (false): placutele albe de 2.8 m
+	# la 6.5 m, bit-identice pe toate celelalte piste.
+	var dbl := bool(theme_flag("center_line_double_yellow", false))
+	var step := 3.25 if dbl else 6.5
+	var seg_len := 3.3 if dbl else 2.8
+	var hw := 0.07 if dbl else 0.18
+	var offs := PackedFloat32Array([-0.15, 0.15]) if dbl else PackedFloat32Array([0.0])
+	# Puntea de lemn (scena Kiyomizu) nu poarta marcaj de sosea.
+	var wood := _wood_deck_ranges()
 	while d < total - 5.0:
 		while idx + 1 < _dists.size() and _dists[idx + 1] < d:
 			idx += 1
 		var i := idx % n
-		if _road_gap(i) or _road_ice(i):
-			d += 6.5
+		# Nici portiunile de pamant ale unei bucle mixte (`_dirt_ranges`): linia
+		# se opreste exact unde incepe drumul nepavat, ca pe un drum de pamant
+		# intreg.
+		if _road_gap(i) or _road_ice(i) or _road_dirt(i, (i + 1) % n) \
+				or (not wood.is_empty() and _frac_in_ranges(frac_at(i), wood)):
+			d += step
 			continue
 		var dir := (baked[(i + 1) % n] - baked[i]).normalized()
 		var side := _side_at(i)
-		var a := baked[i] + dir * (d - _dists[i]) + lift
-		var b := a + dir * 2.8
-		st.add_vertex(a - side * 0.18); st.add_vertex(a + side * 0.18)
-		st.add_vertex(b - side * 0.18)
-		st.add_vertex(a + side * 0.18); st.add_vertex(b + side * 0.18)
-		st.add_vertex(b - side * 0.18)
-		d += 6.5
+		for o in offs:
+			var a := baked[i] + dir * (d - _dists[i]) + lift + side * o
+			var b := a + dir * seg_len
+			st.add_vertex(a - side * hw); st.add_vertex(a + side * hw)
+			st.add_vertex(b - side * hw)
+			st.add_vertex(a + side * hw); st.add_vertex(b + side * hw)
+			st.add_vertex(b - side * hw)
+		d += step
 	st.generate_normals()
-	_add_visual_mesh(st.commit(), Color(0.92, 0.9, 0.78))
+	_add_visual_mesh(st.commit(), Palette.color(Palette.CAR_YELLOW) if dbl
+		else Color(0.92, 0.9, 0.78))
 
 ## Lumea pistei: cer, soare, teren si dealuri/dune de fundal — tematice.
 func _build_environment() -> void:
@@ -5904,6 +6303,12 @@ func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
 		var reach := float(zd.get("max_m", 30.0))
 		var fade := maxf(float(zd.get("fade_m", 10.0)), 0.001)
 		var tint: Color = zd.get("tint", Color.WHITE)
+		# `under_road_m` (optional, Kyoto POI C): zona prinde doar solul aflat cu
+		# cel putin atatia metri SUB soseaua cea mai apropiata din fereastra
+		# (fundul si pantele unei rape), cu o trecere de 3 m; platoul de la cota
+		# drumului ramane pe solul temei. Fara cheie: comportamentul vechi.
+		var under := float(zd.get("under_road_m", -1.0))
+		var pys := PackedFloat32Array()
 		# Punctele de sosea din fereastra, din 2 in 2 (bake ~1-2 m: eroarea de
 		# distanta ramane sub un metru, fata de un fade de zeci).
 		var pts := PackedVector2Array()
@@ -5914,6 +6319,7 @@ func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
 				continue
 			var p := Vector2(baked[i].x, baked[i].z)
 			pts.append(p)
+			pys.append(baked[i].y)
 			lo = lo.min(p)
 			hi = hi.max(p)
 		if pts.is_empty():
@@ -5929,12 +6335,21 @@ func _ground_zone_field(cells: int, step: float, origin: Vector3) -> Array:
 			for gx in range(gx0, gx1 + 1):
 				var q := Vector2(origin.x + float(gx) * step, origin.z + float(gz) * step)
 				var best := INF
-				for p in pts:
-					best = minf(best, q.distance_squared_to(p))
+				var best_y := 0.0
+				for pi in pts.size():
+					var dq := q.distance_squared_to(pts[pi])
+					if dq < best:
+						best = dq
+						best_y = pys[pi]
 				if best > reach2:
 					continue
 				var zw := 1.0 - smoothstep(reach - fade, reach, sqrt(best))
 				var gi := gz * row + gx
+				if under >= 0.0 and gi < _terr_heights.size():
+					var below := best_y - _terr_heights[gi]
+					zw *= smoothstep(under, under + 3.0, below)
+					if zw <= 0.0:
+						continue
 				if zw > w[gi]:
 					# Doua zone care se ating: castiga cea mai prezenta, cu
 					# tenta amestecata, ca granita sa nu sara intre doua culori.
@@ -6080,6 +6495,12 @@ func _build_terrain() -> void:
 	dirt_noise.seed = _world_seed() ^ 0xD127
 	dirt_noise.frequency = 0.035 # perioada ~28 m: pete de 8-15 m, ca in referinta
 	dirt_noise.fractal_octaves = 2
+	# Petele de muschi din zonele de sol cu alfa < 1 (5-8 m, mai dese decat
+	# petele de pamant).
+	var moss_noise := FastNoiseLite.new()
+	moss_noise.seed = _world_seed() ^ 0x3055
+	moss_noise.frequency = 0.08
+	moss_noise.fractal_octaves = 2
 	# SOLUL PE ZONE DE TUR (cheia `ground_zones`). Vezi `_ground_zone_field`.
 	# Null pe orice tema fara cheie: restul pistelor nu se schimba cu un pixel.
 	var zone_field: Array = _ground_zone_field(cells, step, origin)
@@ -6319,9 +6740,20 @@ func _build_terrain() -> void:
 						if zw > 0.0:
 							zw = smoothstep(0.0, 1.0, clampf(zw + dirt_noise.get_noise_2d(
 								v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0))
-							tint = tint.lerp(zone_tints[gi], zw)
+							var zt: Color = zone_tints[gi]
+							tint = tint.lerp(zt, zw)
 							if zone_alt:
 								grass_w = lerpf(grass_w, 1.0, zw)
+							# PETE DE MUSCHI (Kyoto POI D): alfa tentei de zona < 1
+							# vopseste petele (zgomot de 5-8 m) in verde de muschi,
+							# cu taria (1 - a). Solul temei (oliv pe dala de nisip)
+							# iesea gri in captura, deci tenta e explicita, pe
+							# aceeasi dala a zonei. Alfa 1 (toate celelalte zone) =
+							# nimic schimbat.
+							if zt.a < 0.999:
+								var mp := smoothstep(0.05, 0.3, moss_noise.get_noise_2d(
+									v.x, v.z)) * (1.0 - zt.a) * zw
+								tint = tint.lerp(GROUND_MOSS_TINT, mp)
 					if snow_tint != null:
 						var snow_w := clampf(
 							(v.y - snow_line) / snow_fade, 0.0, 1.0)
@@ -6886,6 +7318,15 @@ func _build_channel_water() -> void:
 		return
 	var mat := _water_material()
 	for ch in _channels:
+		# ALBIE USCATA (TrackChannel.dry): nu se randeaza apa, dar plasa de
+		# cadere ramane. Ramura sta INAINTEA testului de mai jos fiindca
+		# `continue`-ul lui (canal la nivelul marii) sare si peste zona de
+		# repunere — un canal fara apa nu are voie sa ramana fara ea.
+		if bool(ch.get("dry", false)):
+			var o_dry: Vector3 = ch["origin"]
+			_build_channel_respawn(ch,
+				o_dry.y - float(ch["depth"]) + CHANNEL_DRY_SURFACE_M)
+			continue
 		var drop := float(ch.get("water_y_drop", -1.0))
 		var is_ford := bool(ch.get("ford", false))
 		if drop < 0.0 and not is_ford:
@@ -7138,7 +7579,8 @@ func _cell_lowest(gx: int, gz: int) -> float:
 
 func _channel_water_covers(pos: Vector3) -> bool:
 	for ch in _channels:
-		if bool(ch.get("ford", false)) or bool(ch.get("pit", false)):
+		if bool(ch.get("ford", false)) or bool(ch.get("pit", false)) \
+				or bool(ch.get("dry", false)):
 			continue
 		if float(ch.get("water_y_drop", -1.0)) < 0.0:
 			continue
@@ -7187,7 +7629,7 @@ func _channel_water_depth(ch: Dictionary) -> float:
 func water_level_at(pos: Vector3) -> float:
 	var best := -INF
 	for ch in _channels:
-		if bool(ch.get("pit", false)):
+		if bool(ch.get("pit", false)) or bool(ch.get("dry", false)):
 			continue
 		var drop := float(ch.get("water_y_drop", -1.0))
 		if drop < 0.0 and not bool(ch.get("ford", false)):
@@ -7258,6 +7700,14 @@ func water_splash_color(pos: Vector3 = Vector3.ZERO) -> Color:
 ## dreptei, AI-ul il ia cu frana si ajunge la trambulina mai incet decat cel
 ## repus la 70 m, care sta pe dreapta finala cu pedala la fund.
 const CHANNEL_FALL_BACKOFF: float = 70.0
+## Cota ECHIVALENTA a apei intr-o albie uscata (`TrackChannel.dry`), masurata
+## de la fundul albiei in sus. Albia n-are apa, dar plasa ei de cadere se
+## calculeaza din cota apei ([method _build_channel_respawn]: plafonul sta 0.6 m
+## sub ea). 3 m = stratul de apa al paraului de munte masurat pe Alpi/Chasm
+## (adancime 18, apa la 15), deci zona incepe la 2.4 m peste fund: destul de
+## sus ca o masina cazuta pe nisip sa fie prinsa, destul de jos ca sa nu
+## atinga nimic din ce circula pe mal.
+const CHANNEL_DRY_SURFACE_M: float = 3.0
 
 ## Cine rateaza saritura peste canal cade in apa si e repus pe traseu.
 ##
@@ -8084,6 +8534,19 @@ const PROP_AO_STRENGTH: float = 0.26
 const PROP_AO_FOOT_BAND: float = 0.18
 ## Cat se mai umfla amprenta bazei, ca discul sa iasa putin de sub piesa.
 const PROP_AO_FOOT_SCALE: float = 1.6
+## Piese cu trunchi masurat (WorldProp.TRUNK_RADIUS): raza discului = raza
+## trunchiului x acest factor, centrat pe originea modelului.
+const PROP_AO_TRUNK_MULT: float = 2.0
+## Modele fara disc de contact, pe stem (azi doar Kyoto): piese LUNGI sau
+## inlantuite, a caror amprenta de baza e toata lungimea (siruri de torii,
+## modulele esafodajului, zidurile, viaductul si trenul). Discul de 6 m iesea
+## octogon negru sub ele (finisarea Kyoto, captura 0,545); umbra lor o face
+## lumina directionala, ca la zidurile din nota de mai jos.
+const PROP_AO_SKIP_MODELS := {
+	"votive_torii_cluster": true, "kakezukuri_scaffold": true,
+	"cyclopean_wall": true, "temple_wall": true,
+	"iron_truss_bridge": true, "sagano_train": true,
+}
 
 
 ## Pozitiile (doar XZ) ale falezelor deja construite.
@@ -8140,6 +8603,11 @@ func _prop_contact_discs() -> PackedVector4Array:
 		# si directie. Discul era menit sa lipeasca de sol o piesa IZOLATA.
 		if n3.has_meta("contact") and str(n3.get_meta("contact")) == "none":
 			continue
+		if PROP_AO_SKIP_MODELS.has(n3.scene_file_path.get_file().get_basename()):
+			continue
+		if not _contact_skip.is_empty() and _contact_skip.has(_instance_stem(n3, root)):
+			continue
+		var flat_disc := not _contact_flat.is_empty() and _in_flat_model(n3, root)
 		var aabb := _visual_aabb(n3)
 		if aabb.size == Vector3.ZERO:
 			continue
@@ -8148,17 +8616,58 @@ func _prop_contact_discs() -> PackedVector4Array:
 		# (vezi nota de la PROP_AO_FOOT_BAND). Cand piesa n-are vertecsi in
 		# banda de jos — panouri, pasari, orice fara picior — se cade inapoi
 		# pe vechea socoteala, ca sa nu ramana piese fara contact.
-		var half := _prop_foot_radius(n3, aabb)
-		if half <= 0.0:
-			half = Vector2(aabb.size.x, aabb.size.z).length() * 0.5
-		var r := clampf(half * PROP_AO_RADIUS_SCALE,
-				PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
+		var r: float
+		var stem := n3.scene_file_path.get_file().get_basename()
+		if WorldProp.TRUNK_RADIUS.has(stem):
+			# Piesa cu trunchi MASURAT (WorldProp.TRUNK_RADIUS, azi doar Kyoto):
+			# discul sta la piciorul TRUNCHIULUI, nu sub coroana. Amprenta bazei
+			# a unui artar cu coroana de 10-12 m iesea un octogon negru de 6 m
+			# (banda de 18% din inaltime prinde ramurile joase). Pistele fara
+			# intrari in tabel trec pe calea de mai jos, neschimbate.
+			var gs := n3.global_transform.basis.get_scale()
+			var sc := maxf(gs.x, gs.z)
+			r = clampf(float(WorldProp.TRUNK_RADIUS[stem]) * sc * PROP_AO_TRUNK_MULT,
+					PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
+		else:
+			var half := _prop_foot_radius(n3, aabb)
+			if half <= 0.0:
+				half = Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+			r = clampf(half * PROP_AO_RADIUS_SCALE,
+					PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
 		# Cota BAZEI, nu a originii: originile kitului stau pe pivot (vezi
 		# memoria "Kit assets Cappadocia"), deci originea unui horn poate fi la
 		# mijlocul lui. Ce trebuie sa atinga solul e fundul gabaritului.
 		var base_y := gp.y + aabb.position.y
 		out.append(Vector4(gp.x, gp.z, r, base_y))
+		if not _contact_flat.is_empty():
+			_disc_flat.append(1 if flat_disc else 0)
 	return out
+
+
+## Stem-ul modelului instantiat din care face parte nodul (primul stramos cu
+## `scene_file_path`, pana la `root`); "" daca nu exista.
+func _instance_stem(n: Node, root: Node) -> String:
+	var cur := n
+	while cur != null and cur != root:
+		if not cur.scene_file_path.is_empty():
+			return cur.scene_file_path.get_file().get_basename()
+		cur = cur.get_parent()
+	return ""
+
+
+## Stem-uri fara disc de contact, pe tema (`prop_contact_skip`, implicit gol).
+var _contact_skip: Dictionary = {}
+
+## Nodul sau un stramos al lui (pana la `root`) e instanta unui model din
+## `_contact_flat`. Mesh-urile din interiorul unui .glb nu au `scene_file_path`,
+## deci stem-ul se cauta in sus.
+func _in_flat_model(n: Node, root: Node) -> bool:
+	var cur := n
+	while cur != null and cur != root:
+		if not cur.scene_file_path.is_empty():
+			return _contact_flat.has(cur.scene_file_path.get_file().get_basename())
+		cur = cur.get_parent()
+	return false
 
 
 ## Modelele din DecorManual care stau PE SOL si merita pamant batatorit in
@@ -8289,6 +8798,29 @@ func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
 		if absf(mi.global_transform.basis.determinant()) < 0.000001:
 			continue
 		var rel := inv * mi.global_transform
+		if _foot_cache_on:
+			# Raza depinde doar de structura INTERNA a piesei (rel e relativ la n,
+			# banda vine din AABB-ul in spatiul lui n), nu de unde sta in lume:
+			# 1000 de tufe din acelasi .glb au aceeasi cheie. Rotunjit la 1e-4 ca
+			# zgomotul de virgula mobila al pozitiei in lume sa nu rateze cache-ul.
+			var fk := "%d|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f" % [
+				mi.mesh.get_rid().get_id(),
+				rel.basis.x.x, rel.basis.x.y, rel.basis.x.z,
+				rel.basis.y.x, rel.basis.y.y, rel.basis.y.z,
+				rel.basis.z.x, rel.basis.z.y, rel.basis.z.z,
+				rel.origin.x, rel.origin.y, rel.origin.z, band]
+			if _foot_best.has(fk):
+				best = maxf(best, float(_foot_best[fk]))
+				continue
+			var mbest := 0.0
+			for v in _mesh_vertices(mi.mesh):
+				var lv := rel * v
+				if lv.y > band:
+					continue
+				mbest = maxf(mbest, Vector2(lv.x, lv.z).length())
+			_foot_best[fk] = mbest
+			best = maxf(best, mbest)
+			continue
 		for v in _mesh_vertices(mi.mesh):
 			var lv := rel * v
 			if lv.y > band:
@@ -8310,6 +8842,15 @@ func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
 ## Suprafetele se pun cap la cap: rezultatul e un maxim, deci ordinea nu
 ## schimba nimic — discurile ies identice la bit.
 var _foot_verts: Dictionary = {}
+## Memoria amprentei per (mesh, transformare relativa, banda); opt-in prin
+## tema (`prop_foot_cache`), golita odata cu `_foot_verts`.
+var _foot_best: Dictionary = {}
+var _foot_cache_on: bool = false
+## Stem-uri cu disc de contact PLAN (tema, `prop_contact_flat`): vegetatie joasa,
+## unde marginea de 11 cote de sol nu se vede, dar costa 11 `ground_y` pe tufa.
+var _contact_flat: Dictionary = {}
+## Paralel cu discurile intoarse de `_prop_contact_discs`: 1 = disc plan.
+var _disc_flat := PackedByteArray()
 
 func _mesh_vertices(mesh: Mesh) -> PackedVector3Array:
 	var key := mesh.get_rid()
@@ -8353,19 +8894,45 @@ const PROP_AO_LIFT: float = 0.04
 const PROP_AO_SEAT_TOL: float = 1.2
 
 func _build_prop_contact() -> void:
+	_foot_cache_on = bool(theme_flag("prop_foot_cache", false))
+	_contact_flat.clear()
+	_disc_flat.clear()
+	_contact_skip.clear()
+	for stem in theme_flag("prop_contact_skip", []):
+		_contact_skip[String(stem)] = true
+	for stem in theme_flag("prop_contact_flat", []):
+		_contact_flat[String(stem)] = true
 	var discs := _prop_contact_discs()
+	var soft := bool(theme_flag("prop_contact_soft", true))
+	if soft:
+		discs = _dedupe_contact_discs(discs)
 	# Vertecsii au servit doar razelor de amprenta: nu-i tinem in memorie.
 	_foot_verts.clear()
+	_foot_best.clear()
+	_foot_cache_on = false
 	if discs.is_empty():
 		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	if soft:
+		var smesh := _soft_discs_mesh(discs)
+		if smesh == null:
+			return
+		var sinst := MeshInstance3D.new()
+		sinst.name = "PropContact"
+		sinst.mesh = smesh
+		sinst.material_override = _prop_contact_soft_material()
+		sinst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(sinst)
+		return
 	# Cotele de margine ale discurilor deja calculate, pe discul EXACT (aceeasi
 	# pozitie, raza si baza, la bit). Un model din .glb da un disc si pentru
 	# radacina, si pentru nodul de mesh dinauntru, deci acelasi disc vine de
 	# mai multe ori — iar fiecare cota de margine e un `ground_y`.
 	var rim_cache: Dictionary = {}
+	var di := -1
 	for d in discs:
+		di += 1
 		var cx: float = d.x
 		var cz: float = d.y
 		var r: float = d.z
@@ -8407,10 +8974,18 @@ func _build_prop_contact() -> void:
 			rim = PackedFloat64Array()
 			rim.resize(PROP_AO_SEGMENTS + 2)
 			rim[0] = gy
-			for k in PROP_AO_SEGMENTS + 1:
-				var a := TAU * float(k) / float(PROP_AO_SEGMENTS)
-				var pk := Vector2(cos(a), sin(a)) * r
-				rim[k + 1] = _rim_y(cx + pk.x, cz + pk.y, cy)
+			if not _disc_flat.is_empty() and _disc_flat[di] == 1:
+				# Disc plan: toata marginea la cota centrului, cu aceeasi limitare
+				# ca `_rim_y`. 1 `ground_y` pe tufa in loc de 12.
+				var fy := clampf(gy + PROP_AO_LIFT, cy - PROP_AO_RELIEF,
+					cy + PROP_AO_RELIEF)
+				for k in PROP_AO_SEGMENTS + 1:
+					rim[k + 1] = fy
+			else:
+				for k in PROP_AO_SEGMENTS + 1:
+					var a := TAU * float(k) / float(PROP_AO_SEGMENTS)
+					var pk := Vector2(cos(a), sin(a)) * r
+					rim[k + 1] = _rim_y(cx + pk.x, cz + pk.y, cy)
 			rim_cache[d] = rim
 		for i in PROP_AO_SEGMENTS:
 			var a0 := TAU * float(i) / float(PROP_AO_SEGMENTS)
@@ -8446,6 +9021,149 @@ func _build_prop_contact() -> void:
 	add_child(inst)
 
 
+## CONTACT MOALE (tema `prop_contact_soft`, implicit pornit; doar `desert`/Dunele
+## il opreste ca sa ramana bit-identica).
+##
+## Defecte ale discului vechi, masurate pe Track19 (frac 0.09, cadrul de joc):
+## luminanta in disc 12-29 din 255 fata de ~120 pe sol luminat (aproape negru,
+## mai inchis decat umbra reala de soare, ~50-100) si muchie dura de octogon.
+##   1. DISCURI STIVUITE. `_prop_contact_discs` emite un disc pentru FIECARE
+##      nod Node3D cu mesh vizibil: radacina instantei, nodul de mesh din .glb,
+##      grupurile. Pe Track19: 7007 de discuri in 2359 de pete de 0,5 m, modul 3
+##      discuri pe aceeasi pata, inmultite intre ele.
+##   2. BLEND_MODE_MUL NU SE COMPORTA CA IN NOTA DE MAI SUS. Masurat: un disc cu
+##      vertex ALB (identitatea inmultirii) intunecat tot solul la 0,46 din
+##      luminanta (47 vs 101 fara disc), iar centrul 0,98 / 0,85 / 0,70 / 0,40 a
+##      dat 44 / 43 / 42 / 38 — adica valoarea de vertex abia conteaza. Nu am
+##      gasit mecanismul (nu e ceata: la fel cu --no-fog); cum 3 discuri
+##      stivuite dau ~0,1, de-aici "pata neagra". Nu se poate regla un lucru
+##      care nu raspunde, deci contactul moale foloseste ALFA clasica.
+## Aici: un disc per pata (cel cu raza maxima), maro de sol cu alfa
+## PROP_SOFT_STRENGTH la centru si platou pana la t=0,4 apoi smoothstep pana la 0 la margine, pe 3
+## inele si 10 felii: marginea se topeste, fara contur. Alfa nu se inmulteste
+## la suprapunere (1-(1-a)^n), deci vecinii nu mai fac placa neagra.
+const PROP_SOFT_SEGMENTS: int = 10
+const PROP_SOFT_STRENGTH: float = 0.6
+const PROP_SOFT_GROUND_MULT: float = 0.05
+const PROP_SOFT_RINGS := [0.5, 0.75, 1.0]
+
+## Culoarea contactului moale: tema o poate fixa (`prop_contact_tint`), altfel e
+## culoarea solului temei, foarte intunecata. Un maro fix pe zapada (Baikal) sau
+## pe iarba (Fiordland) iesea pata de rugina; solul inchis ramane in familia lui.
+func _prop_contact_soft_tint() -> Color:
+	var t: Variant = theme_flag("prop_contact_tint", null)
+	if t is Color:
+		return t
+	var g := theme_ground_tint
+	return Color(g.r * PROP_SOFT_GROUND_MULT, g.g * PROP_SOFT_GROUND_MULT,
+			g.b * PROP_SOFT_GROUND_MULT)
+
+
+## Un singur disc per pata de 0,5 m (si cota bazei la 0,25 m): cel mai larg.
+## Pastreaza ordinea primei aparitii, ca rezultatul sa fie determinist.
+func _dedupe_contact_discs(discs: PackedVector4Array) -> PackedVector4Array:
+	var best: Dictionary = {}
+	var order: Array[String] = []
+	for i in discs.size():
+		var d := discs[i]
+		var k := "%d|%d|%d" % [roundi(d.x * 2.0), roundi(d.y * 2.0), roundi(d.w * 4.0)]
+		if not best.has(k):
+			best[k] = i
+			order.append(k)
+		elif discs[int(best[k])].z < d.z:
+			best[k] = i
+	var out := PackedVector4Array()
+	var flat := PackedByteArray()
+	for k in order:
+		var i: int = best[k]
+		out.append(discs[i])
+		if not _disc_flat.is_empty():
+			flat.append(_disc_flat[i])
+	_disc_flat = flat
+	return out
+
+
+## Mesh-ul contactului moale, INDEXAT si construit direct in vectori impachetati:
+## SurfaceTool cu 3 apeluri pe varf (esalonat pe ~140k de triunghiuri) a costat
+## +0,4 s la incarcarea Track19; un varf partajat intre felii si fara normale
+## (materialul e neluminat) taie munca de cateva ori.
+func _soft_discs_mesh(discs: PackedVector4Array) -> ArrayMesh:
+	var seg := PROP_SOFT_SEGMENTS
+	var ring_t: Array[float] = [0.0]
+	for t in PROP_SOFT_RINGS:
+		ring_t.append(float(t))
+	var rings := ring_t.size()
+	var ring_a := PackedFloat32Array()
+	for t in ring_t:
+		ring_a.append(PROP_SOFT_STRENGTH * (1.0 - smoothstep(0.4, 1.0, t)))
+	var cs := PackedFloat32Array()
+	var sn := PackedFloat32Array()
+	for k in seg:
+		var ang := TAU * float(k) / float(seg)
+		cs.append(cos(ang))
+		sn.append(sin(ang))
+	var verts := PackedVector3Array()
+	var cols := PackedColorArray()
+	var idx := PackedInt32Array()
+	var tint := _prop_contact_soft_tint()
+	var di := -1
+	var flat_on := not _disc_flat.is_empty()
+	var rim_y := PackedFloat64Array()
+	rim_y.resize(seg)
+	for d in discs:
+		di += 1
+		var cx: float = d.x
+		var cz: float = d.y
+		var r: float = d.z
+		var gy: float = _sampler.ground_y(cx, cz)
+		if absf(d.w - gy) > PROP_AO_SEAT_TOL:
+			continue
+		var cy := gy + PROP_AO_LIFT
+		if flat_on and _disc_flat[di] == 1:
+			rim_y.fill(cy)
+		else:
+			for k in seg:
+				rim_y[k] = _rim_y(cx + cs[k] * r, cz + sn[k] * r, cy)
+		var base := verts.size()
+		# Varful 0 = centrul; apoi inelele 1..rings-1, `seg` varfuri fiecare.
+		verts.append(Vector3(cx, cy, cz))
+		cols.append(Color(tint.r, tint.g, tint.b, ring_a[0]))
+		for ri in range(1, rings):
+			var t: float = ring_t[ri]
+			var col := Color(tint.r, tint.g, tint.b, ring_a[ri])
+			for k in seg:
+				verts.append(Vector3(cx + cs[k] * r * t, lerpf(cy, rim_y[k], t),
+						cz + sn[k] * r * t))
+				cols.append(col)
+		# Evantai central + fasii intre inele; fata in sus (CULL_BACK).
+		for k in seg:
+			var k2 := (k + 1) % seg
+			idx.append(base)
+			idx.append(base + 1 + k)
+			idx.append(base + 1 + k2)
+		for ri in range(1, rings - 1):
+			var in0 := base + 1 + (ri - 1) * seg
+			var out0 := base + 1 + ri * seg
+			for k in seg:
+				var k2 := (k + 1) % seg
+				idx.append(in0 + k)
+				idx.append(out0 + k)
+				idx.append(out0 + k2)
+				idx.append(in0 + k)
+				idx.append(out0 + k2)
+				idx.append(in0 + k2)
+	if verts.is_empty():
+		return null
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_COLOR] = cols
+	arrays[Mesh.ARRAY_INDEX] = idx
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
 ## Cota unui vertex de pe marginea discului: urmareste terenul, dar nu se
 ## departeaza de centru mai mult decat PROP_AO_RELIEF. Asa discul ramane o pata
 ## intinsa pe sol si pe teren frant, in loc sa devina o panza verticala.
@@ -8457,6 +9175,18 @@ func _rim_y(wx: float, wz: float, center_y: float) -> float:
 
 
 var _prop_ao_mat: StandardMaterial3D
+
+## Materialul contactului moale: alfa clasica, neluminat, culoarea si alfa din
+## vertecsi. Nu scrie adancime (suprafata lipita de sol).
+func _prop_contact_soft_material() -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.vertex_color_use_as_albedo = true
+	m.albedo_color = Color.WHITE
+	m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	m.cull_mode = BaseMaterial3D.CULL_BACK
+	return m
 
 func _prop_contact_material() -> StandardMaterial3D:
 	if _prop_ao_mat != null:
@@ -9789,8 +10519,10 @@ const WEAR_CENTER_DARK: Color = Color(0.74, 0.66, 0.56)
 ##
 ## `base` e nuanta deja calculata (mijloc -> margine); functia o modifica, nu o
 ## inlocuieste, ca gradientul de praf de la margine sa ramana.
-func _wear_shade(base: Color, t: float) -> Color:
-	if not road_is_loose():
+func _wear_shade(base: Color, t: float, dirt_here: bool = false) -> Color:
+	# `dirt_here`: segment de pamant pe o bucla cu asfalt (`_dirt_ranges`) —
+	# aceeasi uzura ca pe un drum de pamant intreg, doar pe segmentul asta.
+	if not (road_is_loose() or dirt_here):
 		return base
 	var a := absf(t)
 	# 1. Fagasul: o gaussiana in jurul lui WEAR_TRACK_POS.
@@ -9903,6 +10635,20 @@ func _build_road() -> void:
 	var ice_top := SurfaceTool.new()
 	ice_top.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var has_ice := not _ice_ranges().is_empty()
+	# PUNTEA DE LEMN (Kyoto, scena Kiyomizu): aceeasi geometrie si aceeasi
+	# coliziune ca soseaua, alt mesh si alt material — tiparul ghetii de mai sus.
+	# Pe o tema fara `wood_deck_ranges` lista e goala si nimic nu se schimba.
+	var wood_top := SurfaceTool.new()
+	wood_top.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var has_wood := not _wood_deck_ranges().is_empty()
+	# PAMANT PE FRACTII (`_dirt_ranges`: asfalt pe o parte din bucla, drum de
+	# pamant pe alta): aceeasi geometrie, aceeasi coliziune, alt mesh si alt
+	# material — tiparul ghetii si al puntii. Daca TOATA pista e drum nepavat
+	# (`road_surface`), intervalele n-au obiect si nu se imparte nimic: ar costa
+	# un material pentru o suprafata identica cu a soselei.
+	var dirt_top := SurfaceTool.new()
+	dirt_top.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var has_dirt := has_dirt_ranges() and not road_is_loose()
 	var down := Vector3.DOWN * ROAD_THICKNESS
 	var n := baked.size()
 	# UV-uri PATRATE: acelasi numar de metri pe ambele axe.
@@ -9939,6 +10685,16 @@ func _build_road() -> void:
 			minf(drc.r / SAND_MACRO_MEAN, 1.0),
 			minf(drc.g / SAND_MACRO_MEAN, 1.0),
 			minf(drc.b / SAND_MACRO_MEAN, 1.0))
+	# Aceeasi tinta, pentru segmentele de pamant ale unei bucle cu asfalt
+	# (`has_dirt`): identica cu cea a unui drum de pamant intreg, calculata o
+	# singura data. Pe pistele fara intervale ramane alb si nu se atinge.
+	var dirt_seg_tint := Color.WHITE
+	if has_dirt:
+		var dtc := dirt_road_color()
+		dirt_seg_tint = Color(
+			minf(dtc.r / SAND_MACRO_MEAN, 1.0),
+			minf(dtc.g / SAND_MACRO_MEAN, 1.0),
+			minf(dtc.b / SAND_MACRO_MEAN, 1.0))
 	# Peticele de zapada de pe asfalt (vezi "road_snow_low" in themes()). Null pe
 	# orice tema fara munte, deci restul pistelor nu se schimba cu un pixel.
 	var snow_tint: Variant = theme_flag("road_snow_tint", null)
@@ -9986,7 +10742,13 @@ func _build_road() -> void:
 		if _road_gap(i):
 			continue
 		var on_ice := has_ice and _road_ice(i, j)
-		var dst := ice_top if on_ice else top
+		var on_wood := has_wood and _frac_in_ranges(frac_at(i), _wood_deck_ranges())
+		# Gheata si puntea de lemn sunt suprafete DECLARATE explicit, deci castiga
+		# in fata pamantului daca intervalele se suprapun.
+		var on_dirt := has_dirt and not on_ice and not on_wood \
+			and _road_dirt(i, j)
+		var dst := ice_top if on_ice else (wood_top if on_wood \
+			else (dirt_top if on_dirt else top))
 		var v0 := _dists[i] / tile
 		var v1 := _dists[i + 1] / tile
 		var s0v := _side_at(i)
@@ -10019,13 +10781,20 @@ func _build_road() -> void:
 			# 0.45): intre fagas si acostament trebuie sa ramana drum curat,
 			# altfel banda de rulare se termina direct in praf si drumul se
 			# ingusteaza optic.
-			var edge_lo := 0.66 if road_is_loose() else 0.45
+			#
+			# Segmentul de pamant al unei bucle cu asfalt (`on_dirt`) primeste
+			# EXACT paleta unui drum de pamant intreg: mijloc alb, margini ocru,
+			# aceeasi uzura si aceeasi tinta (`dirt_seg_tint`).
+			var seg_loose := road_is_loose() or on_dirt
+			var seg_mid := Color.WHITE if on_dirt else mid_shade
+			var seg_edge := DIRT_EDGE_SHADE if on_dirt else edge_shade
+			var edge_lo := 0.66 if seg_loose else 0.45
 			var ca := _wear_shade(
-				mid_shade.lerp(edge_shade, smoothstep(edge_lo, 1.0, absf(ta))),
-				ta)
+				seg_mid.lerp(seg_edge, smoothstep(edge_lo, 1.0, absf(ta))),
+				ta, on_dirt)
 			var cb := _wear_shade(
-				mid_shade.lerp(edge_shade, smoothstep(edge_lo, 1.0, absf(tb))),
-				tb)
+				seg_mid.lerp(seg_edge, smoothstep(edge_lo, 1.0, absf(tb))),
+				tb, on_dirt)
 			# Pe drumul AFANAT culoarea nu mai vine din material: shader-ul de
 			# teren (vezi `road_material`) n-are `albedo_color`, deci nuanta
 			# drumului se inmulteste AICI, in vertex color. Se compune peste
@@ -10035,7 +10804,10 @@ func _build_road() -> void:
 			# Se incadreaza in clamp-ul [0,1] prin constructie: tenta temei e
 			# #D3CBBD (0.83, 0.80, 0.74), toate sub 1. O tema care ar cere un
 			# drum mai deschis decat alb ar trebui sa ridice textura, nu asta.
-			if road_is_loose():
+			if on_dirt:
+				ca *= dirt_seg_tint
+				cb *= dirt_seg_tint
+			elif road_is_loose():
 				ca *= _loose_road_tint
 				cb *= _loose_road_tint
 			# UV-ul urmareste latimea LOCALA, ca dala sa ramana patrata si acolo
@@ -10064,13 +10836,16 @@ func _build_road() -> void:
 			# `road_shade` INTUNECA de la culoarea materialului (care e zapada, pe
 			# temele cu zapada) inapoi spre asfalt — vezi _road_snow_weight pentru
 			# de ce sensul e inversat.
-			var c0 := _road_shade(ca, road_dark, _road_snow_weight(
+			# Pamantul nu e asfalt: zapada de pe asfalt (`road_dark`) nu-l atinge,
+			# iar materialul lui nu e ridicat spre alb ca sa-i faca loc.
+			var seg_dark := Color.WHITE if on_dirt else road_dark
+			var c0 := _road_shade(ca, seg_dark, _road_snow_weight(
 				w0, snow_low, snow_high, snow_amount, snow_noise, ta)) * wet0
-			var c1 := _road_shade(ca, road_dark, _road_snow_weight(
+			var c1 := _road_shade(ca, seg_dark, _road_snow_weight(
 				w1, snow_low, snow_high, snow_amount, snow_noise, ta)) * wet1
-			var c0b := _road_shade(cb, road_dark, _road_snow_weight(
+			var c0b := _road_shade(cb, seg_dark, _road_snow_weight(
 				w0b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet0
-			var c1b := _road_shade(cb, road_dark, _road_snow_weight(
+			var c1b := _road_shade(cb, seg_dark, _road_snow_weight(
 				w1b, snow_low, snow_high, snow_amount, snow_noise, tb)) * wet1
 			if on_ice:
 				# Gheata n-are uzura de margine si nici petice: culoarea vine
@@ -10101,7 +10876,7 @@ func _build_road() -> void:
 		var u0 := _dists[i] / side_tile
 		var u1 := _dists[i + 1] / side_tile
 		var skirt := deck_sides \
-			if _bridge_mix(i) > 0.5 or _overpass_mix(i) > 0.5 else sides
+			if _bridge_mix(i) > 0.5 or _overpass_mix(i) > 0.5 or on_wood else sides
 		if on_ice:
 			skirt = ice_top
 		skirt.set_uv(Vector2(u0, 0)); skirt.add_vertex(l0)
@@ -10235,6 +11010,16 @@ func _build_road() -> void:
 	_add_mesh_with_collision(sides.commit(), theme_hill_color.darkened(0.2),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 		null, null, true, null, "RoadSides")
+	if has_wood:
+		wood_top.index()
+		wood_top.generate_normals()
+		var wood_mesh := wood_top.commit()
+		if wood_mesh != null and wood_mesh.get_surface_count() > 0:
+			var winst := MeshInstance3D.new()
+			winst.name = "StageDeckTop"
+			winst.mesh = wood_mesh
+			winst.material_override = _wood_deck_material()
+			add_child(winst)
 	if has_ice:
 		ice_top.index()
 		ice_top.generate_normals()
@@ -10245,10 +11030,20 @@ func _build_road() -> void:
 			inst.mesh = ice_mesh
 			inst.material_override = _ice_road_material()
 			add_child(inst)
+	if has_dirt:
+		dirt_top.index()
+		dirt_top.generate_normals()
+		var dirt_mesh := dirt_top.commit()
+		if dirt_mesh != null and dirt_mesh.get_surface_count() > 0:
+			var dinst := MeshInstance3D.new()
+			dinst.name = "DirtRoad"
+			dinst.mesh = dirt_mesh
+			dinst.material_override = _dirt_road_material()
+			add_child(dinst)
 	if not _channels.is_empty():
 		var deck_mesh := deck_sides.commit()
 		if deck_mesh != null and deck_mesh.get_surface_count() > 0:
-			_add_mesh_with_collision(deck_mesh, Palette.color(Palette.CONCRETE),
+			_add_mesh_with_collision(deck_mesh, _deck_color(),
 				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 				null, null, true, null, "ChannelDeckSides")
 
@@ -10477,7 +11272,7 @@ func _build_walls() -> void:
 		if deck_emitted:
 			deck.generate_normals()
 			_add_mesh_with_collision(deck.commit(),
-				Palette.color(Palette.CONCRETE),
+				_deck_color(),
 				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 				null, null, true, null, "WallDeck")
 	_build_rail_posts(post_spots)
@@ -10674,6 +11469,7 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 	if not hazard_model.is_empty() and ResourceLoader.exists(hazard_model):
 		var ball := SlidingHazard.new()
 		ball.model_scene = load(hazard_model)
+		ball.model_node = String(kind.get("model_node", ""))
 		# 0.52 vine din bolovanul de 5 m diametru -> 2.6 m in joc. O barca de
 		# 5 m lungime insa TREBUIE sa ramana de 5 m: la 0.52 ar fi fost o
 		# jucarie de 2.6 m tarata peste sosea. De-aia e steag de tema.
@@ -11902,28 +12698,48 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 	var hw := width_at_index(near_i)
 	var run := 9.0
 	var base := lip - dir * run
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var bl := base - side * hw
 	var br := base + side * hw
 	var tl := lip - side * hw + Vector3.UP * CHANNEL_JUMP_HEIGHT
 	var tr := lip + side * hw + Vector3.UP * CHANNEL_JUMP_HEIGHT
-	# Panta de urcare.
-	st.add_vertex(bl); st.add_vertex(br); st.add_vertex(tl)
-	st.add_vertex(br); st.add_vertex(tr); st.add_vertex(tl)
-	# Peretele de la buza, ca trambulina sa nu fie o pana transparenta lateral.
-	st.add_vertex(tl); st.add_vertex(tr); st.add_vertex(lip - side * hw)
-	st.add_vertex(tr); st.add_vertex(lip + side * hw)
-	st.add_vertex(lip - side * hw)
-	# Laturile.
-	st.add_vertex(bl); st.add_vertex(tl); st.add_vertex(lip - side * hw)
-	st.add_vertex(br); st.add_vertex(lip + side * hw); st.add_vertex(tr)
+	var verts: Array[Vector3] = [
+		# Panta de urcare.
+		bl, br, tl, br, tr, tl,
+		# Peretele de la buza, ca trambulina sa nu fie o pana transparenta lateral.
+		tl, tr, lip - side * hw, tr, lip + side * hw, lip - side * hw,
+		# Laturile.
+		bl, tl, lip - side * hw, br, lip + side * hw, tr,
+	]
+	# Pe puntea de lemn (Kyoto) trambulina e din aceleasi scanduri ca scena, nu
+	# portocaliul rampelor: altfel capatul scenei iesea un bloc galben peste
+	# esafodaj. UV-urile au aceeasi scara ca soseaua (3,5 m) si scandurile de-a
+	# latul; fara tema de lemn mesh-ul e exact cel de dinainte.
+	var on_wood := _frac_in_ranges(frac_at(near_i), _wood_deck_ranges())
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for v in verts:
+		if on_wood:
+			var rel := v - base
+			st.set_uv(Vector2(rel.dot(side), rel.dot(dir) + rel.y) / 3.5)
+		st.add_vertex(v)
 	st.generate_normals()
 	# Acelasi portocaliu ca rampele si creasta: jucatorul stie ca portocaliu
 	# inseamna "sari", si e singurul cod de culoare cu care e antrenat.
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
-		null, null, true, null, "ChannelKicker")
+	# Opt-in pe tema (`kicker_dirt_color`): pe drumul de pamant (Monument) rampa
+	# ia culoarea drumului, nu portocaliul aprins care iesea o placa straina.
+	var kicker_color := Color(0.95, 0.6, 0.1)
+	var kicker_spec := 0.5
+	if bool(theme_flag("kicker_dirt_color", false)):
+		# Culoarea drumului, mai inchisa: materialul plat nu imparte la media
+		# texturii macro ca soseaua de pamant, deci la aceeasi valoare iese mai
+		# luminos. Fara luciu (specular 0): fetele laterale reflectau cerul gri.
+		kicker_color = dirt_road_color() * 0.72
+		kicker_color.a = 1.0
+		kicker_spec = 0.0
+	_add_mesh_with_collision(st.commit(), kicker_color,
+		null, 1.0, kicker_spec, BaseMaterial3D.CULL_DISABLED,
+		null, null, true, _wood_deck_material() if on_wood else null,
+		"ChannelKicker")
 
 	var kicker := FlyoffKicker.new()
 	kicker.name = "Trambulina_%s" % String(ch.get("label", "canal"))
@@ -12192,11 +13008,12 @@ func _build_viaduct_nets() -> void:
 		var bottom := top - 25.0
 		var zone := RespawnZone.new()
 		zone.name = "ViaductNet%d" % ri
-		zone.backoff_m = 16.0
+		zone.backoff_m = _viaduct_net_backoff(ri)
 		var shape := CollisionShape3D.new()
 		var box := BoxShape3D.new()
-		box.size = Vector3(hi.x - lo.x + VIADUCT_NET_MARGIN * 2.0,
-			top - bottom, hi.y - lo.y + VIADUCT_NET_MARGIN * 2.0)
+		var margin := _viaduct_net_margin()
+		box.size = Vector3(hi.x - lo.x + margin * 2.0,
+			top - bottom, hi.y - lo.y + margin * 2.0)
 		shape.shape = box
 		zone.add_child(shape)
 		zone.position = Vector3((lo.x + hi.x) * 0.5, (top + bottom) * 0.5,
@@ -12205,6 +13022,23 @@ func _build_viaduct_nets() -> void:
 
 ## Cat dincolo de amprenta XZ a tablierului se intinde plasa viaductului.
 const VIADUCT_NET_MARGIN: float = 45.0
+
+## Marja plasei, pe pista. Implicit [constant VIADUCT_NET_MARGIN]. O pista cu un
+## tablier IN AER langa propria rampa de urcare (Kyoto: puntea scenei la +32,
+## rampa C1 la +23..+27 la 40 m de ea) o coboara, altfel plasa prinde si soseaua
+## de langa tablier: masurat cu ProbeRace pe Track18, toate cele 8 masini erau
+## repuse la 0.239, pe asfalt, cu 33 m/s, de `ViaductNet0`.
+func _viaduct_net_margin() -> float:
+	return VIADUCT_NET_MARGIN
+
+## Cat de departe INAPOI repune plasa viaductului `ri` (m). Implicit 16. Un
+## viaduct care poarta o SARITURA (Kyoto, scena Kiyomizu) cere elan: repusa cu
+## 16 m inainte de buza si cu 9 m/s, masina nu mai ajunge la viteza de
+## trecere, cade iar si bucla tine toata cursa (masurat cu ProbeRace pe Track18:
+## 185 de repuneri intr-o cursa, autobuzul 83). Aceeasi cifra si acelasi motiv
+## ca [constant CHANNEL_FALL_BACKOFF].
+func _viaduct_net_backoff(_ri: int) -> float:
+	return 16.0
 
 ## Nodurile (Node3D) care cer plasei de viaduct un plafon mai jos.
 func _net_drop_nodes() -> Array[Node]:
@@ -12278,7 +13112,7 @@ var _road_fade_mat: ShaderMaterial
 ## Carosabilul cu granulatie care se stinge cu distanta. Vezi
 ## road_detail_fade.gdshader pentru de ce nu se poate cere din StandardMaterial3D.
 func _road_fade_material(color: Color, micro: String, macro: String,
-		rough: float, spec: float) -> ShaderMaterial:
+		rough: float, spec: float, force_sand: bool = false) -> ShaderMaterial:
 	if _road_fade_mat == null:
 		_road_fade_mat = ShaderMaterial.new()
 		_road_fade_mat.shader = load(
@@ -12290,7 +13124,7 @@ func _road_fade_material(color: Color, micro: String, macro: String,
 	var macro_mean := ASPHALT_MACRO_MEAN
 	if road_surface == "snow":
 		macro_mean = SNOW_MACRO_MEAN
-	elif road_is_loose():
+	elif road_is_loose() or force_sand:
 		macro_mean = SAND_MACRO_MEAN
 	rm.set_shader_parameter("base_color", Color(color.r / macro_mean,
 		color.g / macro_mean, color.b / macro_mean))
@@ -12299,6 +13133,25 @@ func _road_fade_material(color: Color, micro: String, macro: String,
 	rm.set_shader_parameter("roughness_v", rough)
 	rm.set_shader_parameter("specular_v", spec)
 	return rm
+
+
+## Materialul fasiilor de pamant ale unei bucle cu asfalt (`_dirt_ranges`).
+##
+## Nu e un material nou ca CONCEPT: e exact cel pe care l-ar primi soseaua daca
+## toata pista ar fi `road_surface = "dirt"` — acelasi shader cu stingere
+## (`_road_fade_material`), aceleasi texturi de nisip, fara luciu, aceeasi
+## culoare (`dirt_road_color`, deci `dirt_road_tint` din tema), cu aceeasi
+## impartire la media macro-ului. Costul pe garda de materiale e UNUL, si
+## doar pe pistele care declara intervale. `road_material()` de mai jos NU e
+## calea asta: il cere doar RotatingSpanHazard (podul rotitor), soseaua
+## propriu-zisa trece prin `_build_road`.
+func _dirt_road_material() -> ShaderMaterial:
+	var base := dirt_road_color()
+	var color := Color(base.r / SAND_MACRO_MEAN, base.g / SAND_MACRO_MEAN,
+		base.b / SAND_MACRO_MEAN)
+	return _road_fade_material(color,
+		"res://assets/textures/surface_sand.png",
+		"res://assets/textures/surface_sand_macro.png", 1.0, 0.0, true)
 
 
 func road_material() -> Material:
@@ -13074,6 +13927,14 @@ func _build_tire_marks() -> void:
 			var idx := (i + k + n) % n
 			strength[idx] = 1.0
 			offset_sign[idx] = turn
+	# Pe portiunile de PAMANT ale unei bucle cu asfalt (`_dirt_ranges`) nu se
+	# coace nimic, ca pe un drum de pamant intreg (vezi antetul). Se scoate
+	# INAINTE de rampele de alpha, ca urmele de pe asfalt sa se stinga gradual
+	# la marginea intervalului, nu taiate.
+	if has_dirt_ranges():
+		for i in n:
+			if _road_dirt(i):
+				strength[i] = 0.0
 	# 2. Rampa de alpha la capete: 4 pasi de aparitie/disparitie.
 	var alpha: Array[float] = []
 	alpha.resize(n)
@@ -13101,7 +13962,7 @@ func _build_tire_marks() -> void:
 		var j := (i + 1) % n
 		if alpha[i] <= 0.0 and alpha[j] <= 0.0:
 			continue
-		if _road_gap(i, j) or _road_ice(i, j):
+		if _road_gap(i, j) or _road_ice(i, j) or _road_dirt(i, j):
 			continue
 		# Linia de apex: spre interiorul virajului, nu pe axa drumului.
 		var lane0 := -offset_sign[i] * width_at_index(i) * 0.35
@@ -13232,7 +14093,10 @@ func _build_kerbs() -> void:
 		if before.angle_to(after) < 0.08:
 			continue
 		var j := (i + 2) % n
-		if _road_gap(i, j) or _road_ice(i, j):
+		# Fara borduri nici pe portiunile de pamant ale unei bucle cu asfalt
+		# (`_dirt_ranges`): bordura rosu-alb e mobilier turnat, ca pe un drum de
+		# pamant intreg (vezi sus).
+		if _road_gap(i, j) or _road_ice(i, j) or _road_dirt(i, j):
 			continue
 		var v0 := _dists[i] / KERB_TILE
 		var v1 := _dists[mini(i + 2, n)] / KERB_TILE
@@ -13283,7 +14147,8 @@ var _decor_roots: Array[Node3D] = []
 func _build_world_decor() -> void:
 	_decor_roots.clear()
 	var cliffs := TrackCliffs.build(_sampler, theme_flag("cliffs", false),
-		_world_seed(), _cliff_clearings(), _gorge_ranges())
+		_world_seed(), _cliff_clearings(), _gorge_ranges(),
+		String(theme_flag("rock_class", "")), bool(theme_flag("cliffs_gorge_only", false)))
 	add_child(cliffs)
 	_decor_roots.append(cliffs)
 	# FALEZELE DECLARATE ca noduri [CliffFace]: geometrie reala, nu versant de
@@ -13308,6 +14173,7 @@ func _build_world_decor() -> void:
 	# Callable gol pe pistele fara gheata, deci nimic nu se schimba acolo.
 	TrackDecor.set_frac_veto(Callable(self, "is_ice_at")
 		if not _ice_ranges().is_empty() else Callable())
+	_set_decor_veg_exclusions()
 	var decor := TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
 		_world_seed(), Callable(self, "_flat_material"),
 		theme_flag("props", "desert"),
@@ -13339,6 +14205,76 @@ func _build_world_decor() -> void:
 			bool(theme_flag("dense_grass_carpet", false)),
 			prop_clear)
 		add_child(grass)
+
+
+## Ce nu are voie sa acopere covorul de vegetatie Monument Valley (vezi
+## `TrackDecor._build_mv_carpet`): cercuri (x, z, raza) si ferestre pe traseu.
+## Pe orice alta tema le GOLESTE (statice: altfel o pista ar mosteni ce a lasat
+## cealalta in acelasi proces, cum face probe_decor care le parcurge pe toate).
+##
+## - culoarele bolovanilor care cad (`Traseu` sub fiecare marker din
+##   Hazarduri): cerc de 6 m la fiecare 3 m de traseu;
+## - arcul (`_arch_fracs`): cerc de 14 m pe axa drumului;
+## - albia G2 (marker cu `water_half`): cerc de 16 m;
+## - piesele mari din DecorManual (cladiri, turnuri, mese): jumatate de diagonala
+##   x 0.8 + 1 m. Plantele, pietrele, gardurile, stalpii, caii NU resping covorul
+##   (palcurile de mana si covorul se aduna, nu se exclud);
+## - grila de start: d in [-15, +30] m fata de linia de start.
+const VEG_SOFT_STEMS: Array[String] = ["sagebrush", "juniper", "rabbitbrush",
+	"yucca", "tumbleweed", "talus", "horse", "raven", "sheep", "fence",
+	"telegraph", "pole", "boulder", "rock", "hoodoo"]
+
+func _set_decor_veg_exclusions() -> void:
+	var circles := PackedVector3Array()
+	var windows: Array[Vector2] = []
+	if String(theme_flag("props", "desert")) == "monumentvalley" and _sampler != null:
+		var total := _sampler.total_length()
+		windows.append(Vector2(total - 15.0, total))
+		windows.append(Vector2(0.0, 30.0))
+		var haz := get_node_or_null("Hazarduri")
+		if haz != null:
+			for m in haz.get_children():
+				var tr := m.get_node_or_null("Traseu") as Path3D
+				if tr != null and tr.curve != null:
+					var pts := tr.curve.get_baked_points()
+					var last := Vector3(INF, 0.0, INF)
+					for pt in pts:
+						var g := tr.global_transform * pt
+						if last.x == INF or Vector2(g.x - last.x, g.z - last.z).length() >= 3.0:
+							circles.append(Vector3(g.x, g.z, 6.0))
+							last = g
+				elif m is Marker3D and m.get("water_half") != null:
+					var gm := (m as Marker3D).global_position
+					circles.append(Vector3(gm.x, gm.z, 16.0))
+		for frac in _arch_fracs():
+			var ai := clampi(int(frac * float(_sampler.point_count())), 0,
+				_sampler.point_count() - 1)
+			var ap := _sampler.baked_point(ai)
+			circles.append(Vector3(ap.x, ap.z, 14.0))
+		var man := get_node_or_null("DecorManual")
+		if man != null:
+			var stack: Array[Node] = [man]
+			while not stack.is_empty():
+				var n: Node = stack.pop_back()
+				var n3 := n as Node3D
+				if n3 != null and n3 != man and n3.visible \
+						and not n3.scene_file_path.is_empty():
+					var stem := n3.scene_file_path.get_file().get_basename().to_lower()
+					var soft := false
+					for sub in VEG_SOFT_STEMS:
+						if stem.contains(sub):
+							soft = true
+							break
+					if not soft:
+						var aabb := _visual_aabb(n3)
+						if aabb.size != Vector3.ZERO:
+							var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+							var gp := n3.global_position
+							circles.append(Vector3(gp.x, gp.z, half * 0.8 + 1.0))
+					continue # un GLB instantiat se trateaza ca un singur obiect
+				for c in n.get_children():
+					stack.append(c)
+	TrackDecor.set_veg_exclusions(circles, windows)
 
 
 ## Coace vizualul falezelor si al decorului in MultiMesh-uri.
@@ -13463,7 +14399,10 @@ func _scatter_bones(scene: PackedScene, center: Vector3, frac: float) -> void:
 ## conventie ca la cliff_wall. Traversa NU primeste coliziune: nicio masina
 ## n-ar trebui s-o atinga, iar o forma concava acolo e o capcana.
 func _build_arch(frac: float) -> void:
-	const PATH := "res://assets/models/rocks/rock_arch.glb"
+	# Modelul arcadei e cheie de tema (`arch_model`); implicitul e vechiul
+	# `rock_arch.glb`, deci toate celelalte piste raman bit-identice.
+	var PATH := String(theme_flag("arch_model",
+		"res://assets/models/rocks/rock_arch.glb"))
 	if not ResourceLoader.exists(PATH):
 		return
 	var n := baked.size()
@@ -13489,14 +14428,41 @@ func _build_arch(frac: float) -> void:
 			shape.position = mi.position + aabb.position + aabb.size * 0.5
 			body.add_child(shape)
 		child.queue_free()
+	# Un arc fara proxy-uri `_col` (kitul Monument Valley) isi ia colizorul din
+	# mesh-ul lui: trimesh pe perete si grohotis, FARA calota (placa de sus, la
+	# 11,5+ m, peste golul de 8,95 m). Concav e ok aici: golul masurat e 15,45 m,
+	# iar soseaua (semilatime 5,5 m) trece la 2,4 m de intradosul picioarelor.
+	if body.get_child_count() == 0:
+		for mi: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+			if String(mi.name).ends_with("_Cap") or mi.mesh == null:
+				continue
+			var trimesh := mi.mesh.create_trimesh_shape()
+			if trimesh == null:
+				continue
+			var tshape := CollisionShape3D.new()
+			tshape.shape = trimesh
+			tshape.transform = mi.transform
+			body.add_child(tshape)
+		# Si CAMERA trebuie oprita de arc: puntea (9-13 m) e peste capul masinii
+		# dar sub camera de joc (10 m sus, 12,5 m in spate), iar fara asta
+		# `ProbeCameraSolid` gaseste camera in spatele puntii la frac 0.438-0.442
+		# (masina iese de sub arc si dispare in perete). Pe layerul de blocare,
+		# `ChaseCamera._unclip` o trage in fata puntii, ca la portile din Kyoto.
+		body.collision_layer |= CAMERA_BLOCKER_LAYER
 	body.add_child(model)
 	add_child(body)
 	# Arcada e integral roca — primeste trim sheet-ul de clasa. Piatra
 	# LOCULUI: pe temele cu `rock_class` declarat (granitul alpin, pe Baikal)
 	# ia clasa aia, altfel gresia canionului — o arcada de gresie portocalie
 	# peste un lac inghetat se vedea din prima captura.
+	#
+	# `arch_classes` (prefix -> clasa) bate `rock_class`: un arc spart pe noduri
+	# (perete / grohotis / calota) isi ia clasa pe parti, ca orizontul.
+	var arch_classes: Dictionary = theme_flag("arch_classes", {})
 	var arch_cls := String(theme_flag("rock_class", ""))
-	if arch_cls.is_empty():
+	if not arch_classes.is_empty():
+		Palette.apply_class_materials(model, arch_classes)
+	elif arch_cls.is_empty():
 		Palette.apply_rock_material(model)
 	else:
 		Palette.apply_triplanar_class(model, arch_cls)
@@ -14140,8 +15106,37 @@ func _build_markers() -> void:
 			# sus sare peste sloturile inaltate, care erau exact cele afectate.
 			# Acum stau pe sol prin constructie, nu prin coincidenta.
 			spot.y = _sampler.ground_y(spot.x, spot.z) + 0.2
+			if _skip_wet_marker(i, spot - Vector3.UP * 0.2):
+				marker.queue_free()
+				continue
 			marker.global_position = spot
 			placed += 1
+
+
+## Opt-in pe tema (`markers_skip_water`, implicit false): stalpii de bordura si
+## chevron-urile NU se pun unde solul e sub apa unei rape declarate
+## (`custom_ravine_water`): pe Kyoto POI F stateau in iaz. Markerii se construiesc
+## INAINTEA apei, deci regula se judeca pe intervalul rapei si pe cota, nu pe
+## celulele ude (`_ravine_wet` e inca gol aici). Pe pistele fara cheie nu ruleaza.
+func _skip_wet_marker(i: int, p: Vector3) -> bool:
+	if not bool(theme_flag("markers_skip_water", false)):
+		return false
+	var specs := _ravine_water()
+	if specs.is_empty():
+		return false
+	var ravines := _ravines()
+	var total := _dists[baked.size()]
+	var g := _sampler.ground_y(p.x, p.z)
+	for spec in specs:
+		var ri := int(spec.x)
+		if ri < 0 or ri >= ravines.size():
+			continue
+		var r: Vector4 = ravines[ri]
+		if TrackSideSampler._ring_window(_dists[i] / total, r.x, r.y, 0.0001) <= 0.0:
+			continue
+		if g < spec.y + 0.05:
+			return true
+	return false
 
 
 func _marker_variant(rng: RandomNumberGenerator) -> String:
@@ -14313,6 +15308,8 @@ func _place_chevron(scene: PackedScene, rng: RandomNumberGenerator,
 			if absf(ground - baked[i].y) > 2.0:
 				continue # sectiune inaltata: ar pluti sau ar cadea sub drum
 			if not _chevron_spot_clear(stand, i, obstacles):
+				continue
+			if _skip_wet_marker(i, Vector3(stand.x, ground, stand.z)):
 				continue
 			var variant := "Chevron_A"
 			if absf(turn) < CHEVRON_TURN_TRIPLE:
@@ -14803,6 +15800,50 @@ func _ice_ranges() -> Array[Vector2]:
 	return []
 
 
+## Intervalele (fractii de tur) pe care carosabilul e PUNTE DE LEMN: scena
+## Kiyomizu de pe Kyoto (brief kyoto.md §2 randul C: „o punte de lemn de 12 m").
+## Vin din tema (`wood_deck_ranges`); o tema fara cheie da lista goala, deci
+## soseaua celorlalte piste ramane bit-identica. Coliziunea si fizica nu se
+## schimba: doar mesh-ul vizibil al fasiei trece pe [method _wood_deck_material],
+## iar fusta ei intra in `ChannelDeckSides` (lemn inchis, [method _deck_color]).
+func _wood_deck_ranges() -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for r in theme_flag("wood_deck_ranges", []):
+		out.append(r as Vector2)
+	return out
+
+
+## Culoarea tablierului (parapetul `WallDeck` si fusta `ChannelDeckSides`).
+## Implicit betonul CONCRETE de pana acum; Kyoto cere lemn inchis
+## (`deck_color`). Acelasi material pentru amandoua, deci zero materiale noi.
+func _deck_color() -> Color:
+	return theme_flag("deck_color", Palette.color(Palette.CONCRETE)) as Color
+
+
+## Lemnul deschis al puntii (fata scenei Kiyomizu) si al trambulinei de la
+## capatul ei: UN material, impartit de amandoua (vezi garda de materiale).
+## Scandurile din clasa `wood` (assets/textures/classes/wood.png, media sRGB
+## 0,49/0,39/0,28) ridicate spre hinoki cald cu `wood_deck_color`. Scara:
+## textura are 5 scanduri pe repetitie, iar UV-ul soselei repeta la 3,5 m —
+## `uv1_scale` 1,9 da scanduri de ~37 cm, de-a latul drumului.
+var _wood_deck_mat: StandardMaterial3D = null
+
+func _wood_deck_material() -> StandardMaterial3D:
+	if _wood_deck_mat != null:
+		return _wood_deck_mat
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = theme_flag("wood_deck_color", Color.WHITE) as Color
+	mat.albedo_texture = _tex("res://assets/textures/classes/wood.png")
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	mat.uv1_scale = Vector3(1.9, 1.9, 1.0)
+	mat.roughness = 0.9
+	mat.metallic_specular = 0.2
+	mat.vertex_color_use_as_albedo = true
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_wood_deck_mat = mat
+	return mat
+
+
 ## Intervalele de suprafata AFANATA de pe traseul principal (cenusa, nisip
 ## negru adanc). Acelasi tipar ca `_ice_ranges`, si dinadins: e acelasi fel de
 ## lucru — o portiune pe care grip-ul e altul — deci merita acelasi mecanism,
@@ -14831,8 +15872,57 @@ func loose_grip() -> float:
 	return float(theme_flag("loose_grip", 0.0))
 
 
+## `is_loose_at` raspunde pe grip: intervalele de PAMANT (`_dirt_ranges`) sunt
+## afanate prin definitie, deci intra aici si primesc `loose_grip` pe aceeasi
+## cale din Car — nu exista un al doilea mecanism de grip pentru pamant.
 func is_loose_at(frac: float) -> bool:
-	return _frac_in_ranges(frac, _loose_ranges())
+	return _frac_in_ranges(frac, _loose_ranges()) \
+		or _frac_in_ranges(frac, _dirt_ranges())
+
+
+## Intervalele (fractii de tur) pe care soseaua e DRUM DE PAMANT, pe o pista al
+## carei carosabil de baza e asfalt: (frac_start, frac_end), ca la
+## `_ice_ranges`, cu trecere peste linia de start permisa. Monument Valley:
+## asfalt pe A, B, H si pamant rosu pe C-G, pe ACEEASI bucla.
+##
+## Spre deosebire de `road_surface` (o alegere pe toata pista) si de
+## `_loose_ranges` (doar grip, nimic vizibil), intervalul asta schimba TOT ce
+## tine de suprafata, pe portiune:
+##   - mesh-ul soselei — materialul drumului de pamant, in `DirtRoad`
+##     (`_build_road`, +1 material, doar daca lista nu e goala);
+##   - marcajele — fara linie de mijloc, borduri sau urme coapte (marcajele
+##     unui drum nepavat n-au sens, ca pe `road_surface = "dirt"`);
+##   - masinile — praf si urme de rulare cat timp ruleaza pe interval
+##     (`Car._on_loose_ground`, via `road_is_loose_at`) si `loose_grip` din tema
+##     (via `is_loose_at`).
+##
+## Lista goala (implicitul) lasa pista bit-identica cu cea de dinainte.
+func _dirt_ranges() -> Array[Vector2]:
+	return []
+
+
+## E drumul de pamant la fractia asta? (intervalele din `_dirt_ranges`)
+func is_dirt_at(frac: float) -> bool:
+	return _frac_in_ranges(frac, _dirt_ranges())
+
+
+## Pista are cel putin un interval de pamant?
+func has_dirt_ranges() -> bool:
+	return not _dirt_ranges().is_empty()
+
+
+## Segmentul dintre indicii `i` si `j` e pe pamant (vezi `_dirt_ranges`)? Pe
+## INDICI ca `_road_ice`: generatorii de „mobilier" (linie, borduri, urme) il
+## intreaba cu aceleasi capete ca mesh-ul soselei, deci marcajul se opreste
+## exact unde se schimba materialul, nu cu un segment mai devreme sau mai tarziu.
+## Pe o pista cu drum de pamant INTREG (`road_is_loose`) intoarce false: acolo
+## mobilierul se opreste din alt loc si intervalele n-au obiect.
+func _road_dirt(i: int, j: int = -1) -> bool:
+	if road_is_loose() or _dirt_ranges().is_empty():
+		return false
+	if is_dirt_at(frac_at(i)):
+		return true
+	return j >= 0 and is_dirt_at(frac_at(j))
 
 
 ## Portiunile de TREPTE de pe traseul principal: (frac_start, frac_end).
@@ -15076,6 +16166,31 @@ func stamp_wear(index: int, pos: Vector3, strength: float = 1.0) -> void:
 	if absf(rc.y) > width_at_index(index) + 0.5:
 		return
 	_road_wear.stamp(rc.x, rc.y, strength)
+
+## Consumatori EXTERNI de uzura (ex. LeafCarpet, Kyoto): noduri cu
+## `stamp_road(dist_m, lateral_m)`. Spre deosebire de foaia de zapada de mai sus
+## (legata de `road_surface == "snow"` si scrisa doar pe teren `loose`), asta
+## merge pe orice suprafata: masina cheama `stamp_wear_sinks` indiferent de sosea.
+var wear_sinks: Array[Node] = []
+
+func register_wear_sink(sink: Node) -> void:
+	if sink != null and not wear_sinks.has(sink):
+		wear_sinks.append(sink)
+
+func has_wear_sinks() -> bool:
+	return not wear_sinks.is_empty()
+
+## Depune roata la `pos` (lume) in toti consumatorii inregistrati. Doar pe
+## carosabil (aceeasi regula ca stamp_wear).
+func stamp_wear_sinks(index: int, pos: Vector3) -> void:
+	if wear_sinks.is_empty():
+		return
+	var rc := road_coords(index, pos)
+	if absf(rc.y) > width_at_index(index) + 0.5:
+		return
+	for sink in wear_sinks:
+		if is_instance_valid(sink):
+			sink.call("stamp_road", rc.x, rc.y)
 
 ## Esti pe asfalt, sau pe iarba lenta?
 ##

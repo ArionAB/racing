@@ -19,8 +19,25 @@ extends Node
 ## un "flash" = pereche de schimbari OPUSE de >= 0.10 (10% din maximul 1.0). Se numara pe
 ## fereastra glisanta de 1 s: n schimbari = n/2 flash-uri. Contract: <= 3 pe regiune.
 ## Se raporteaza si pragul strans de 0.05 (marja), nu doar cel normativ.
-## NEMASURAT: pragul special de rosu saturat al WCAG, si conditia "luminanta celei mai
-## intunecate imagini < 0.8" (ignorata: ar scadea doar numarul de flash-uri).
+## ROSU SATURAT (WCAG 2.3.1, a doua regula): se raporteaza SEPARAT, in doua feluri.
+## (a) pe MEDIA regiunii: starea e "rosu saturat" cand R/(R+G+B) >= 0.8 pe media
+## liniara a regiunii, valoarea e max(0, (R-G-B)*320), o pereche de tranzitii opuse
+## de >= 20 intr-o fereastra de 1 s e un flash. (b) pe SUPRAFATA: fractia de pixeli
+## (dupa medierea 4x4) cu R/(R+G+B) >= 0.8, flash = pereche de variatii opuse ale
+## fractiei de >= 0.25 din regiune (pragul de 25% al ghidurilor), plus 0.10 strans.
+## Contract: <= 3 pe regiune, ca la luminanta.
+## NEMASURAT: conditia "luminanta celei mai intunecate imagini < 0.8" (ignorata:
+## ar scadea doar numarul de flash-uri) si unghiul solid real (10 grade) al ochiului.
+##
+## [b]MOD REAL[/b] (`--track=11`, brief §7 pasul 6): in loc de culoarul sintetic ruleaza
+## PE PISTA (Track18, banda E' = ruta 1): masina condusa pe axa benzii la viteza maxima,
+## ChaseCamera + CameraZone-ul tunelului, portile/peretii/padurea din `ToriiTunnel`.
+##   ... -- --track=11                       (tinta: trebuie sa treaca)
+##   ... -- --track=11 --sabotage=forest_off (padurea stinsa: cer prin goluri, trebuie sa pice)
+##   ... -- --track=11 --sabotage=gap24      (pas 2,4 m, cer in goluri; de la decizia de raritate 50% e chiar pasul tintei, deci nu mai pica pe E' real)
+##   ... -- --track=11 --sabotage=both       (ambele)
+##   ... -- --track=11 --sabotage=bright     (perete luminos in locul padurii: trebuie sa pice)
+##   ... -- --track=11 --sabotage=red_flash  (porti la 6 m pe fundal negru: arma regula rosului saturat)
 ##
 ## Iese cu 1 daca pica un verdict (CI), cu 2 daca sonda e moarta.
 
@@ -36,6 +53,7 @@ const FLASH_THR_STRICT: float = 0.05
 const CONTRACT: float = 3.0
 const REDUCE_W: int = 240
 const SPEED: float = 32.0
+const RED_RATIO: float = 0.8
 
 var variant: String = "dense_dark"
 var spacing: float = 1.2
@@ -46,16 +64,43 @@ var sun_energy: float = 1.7
 var amb_energy: float = 0.55
 var forest: bool = true
 var shots: bool = false
+## Mod real: indexul pistei (>= 0) si sabotajul cerut pe ea.
+var real_idx: int = -1
+var sabotage: String = ""
+var _track: Track = null
+var _tunnel: ToriiTunnel = null
 
 var _car: Car
 var _cam: ChaseCamera
 var _mat: StandardMaterial3D
+## Ultimele valori de rosu pe regiune [stanga, tot, dreapta]: [valoare, raport, fractie].
+var _last_red: Array = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
 
 
 class SteerBot extends CarController:
 	func get_steer() -> float:
 		var fwd := -car.global_basis.z
 		return clampf(1.6 * fwd.x + 0.25 * car.global_position.x, -1.0, 1.0)
+
+
+## Sofer de sonda pentru modul REAL: tine axa benzii (ruta 1) cu un punct-tinta la 14 m.
+class LaneBot extends CarController:
+	var route: TrackRoute
+	var idx: int = 0
+	func get_steer() -> float:
+		idx = route.closest_index(idx, car.global_position)
+		var d: float = route.dists[idx] + 14.0
+		var j := idx
+		while j < route.baked.size() - 1 and route.dists[j] < d:
+			j += 1
+		var to := route.baked[j] - car.global_position
+		to.y = 0.0
+		var fwd := -car.global_basis.z
+		fwd.y = 0.0
+		if to.length_squared() < 1e-4 or fwd.length_squared() < 1e-4:
+			return 0.0
+		var c := fwd.normalized().cross(to.normalized()).y
+		return clampf(c * 2.5, -1.0, 1.0)
 
 
 func _ready() -> void:
@@ -68,6 +113,13 @@ func _parse() -> void:
 	for a in args:
 		if a.begins_with("--variant="):
 			variant = a.get_slice("=", 1)
+		elif a.begins_with("--track="):
+			real_idx = GameState.resolve_track_index(int(a.get_slice("=", 1)))
+			if real_idx < 0:
+				push_error("ProbeFlicker: --track necunoscut")
+				get_tree().quit(2)
+		elif a.begins_with("--sabotage="):
+			sabotage = a.get_slice("=", 1)
 	if variant == "sparse_sky":
 		# Martorul: porti rare, subtiri, cer si soare in goluri, fara padure.
 		spacing = 6.0
@@ -93,41 +145,74 @@ func _parse() -> void:
 
 
 func _run() -> void:
-	_mat = Palette.world_material()
-	_build_world()
+	if real_idx < 0:
+		_mat = Palette.world_material()
+	if real_idx >= 0:
+		await _build_real()
+	else:
+		_build_world()
 	await get_tree().physics_frame
+	var real := real_idx >= 0
 	var n_gates := int(floor(LENGTH / spacing))
-	print("=== PROBE FLICKER: %s | %d porti, pas %.2f m, adancime %.2f m (gol %.2f m) ===" %
-		[variant, n_gates, spacing, depth, spacing - depth])
+	if real:
+		n_gates = _tunnel.gate_count
+		print("=== PROBE FLICKER REAL: %s | %s | %d porti, pas %.2f m, %d cedri, tunel %.0f..%.0f m pe banda ===" %
+			[GameState.track_label(real_idx), "sabotaj=" + sabotage if sabotage != "" else "tinta",
+			n_gates, _tunnel.spacing, _tunnel.forest_count, _tunnel.tunnel_start_dist, _tunnel.tunnel_end_dist])
+	else:
+		print("=== PROBE FLICKER: %s | %d porti, pas %.2f m, adancime %.2f m (gol %.2f m) ===" %
+			[variant, n_gates, spacing, depth, spacing - depth])
 	var zs: Array[float] = []
 	var vs: Array[float] = []
 	var xs: Array[float] = []
 	var lum_l: Array[float] = []
 	var lum_r: Array[float] = []
 	var lum_a: Array[float] = []
+	# [regiune] -> serii: valoare rosu pe medie, raport R/(R+G+B) pe medie, fractie suprafata
+	var red_val: Array = [[], [], []]
+	var red_ratio: Array = [[], [], []]
+	var red_frac: Array = [[], [], []]
 	var shot_marks: Array[float] = [-20.0, -50.0, -80.0, -110.0]
 	var frame := 0
-	while frame < 1500:
+	var route: TrackRoute = null
+	var bidx := 0
+	if real:
+		route = _track.route_at(1)
+	while frame < 2400:
 		await RenderingServer.frame_post_draw
 		frame += 1
 		var z := _car.global_position.z
-		if z < -(LENGTH - 8.0):
-			break
-		if z > -12.0:
+		var in_run := false
+		if real:
+			bidx = route.closest_index(bidx, _car.global_position)
+			var dd: float = route.dists[bidx]
+			if dd > _tunnel.tunnel_end_dist - 6.0:
+				break
+			in_run = dd >= _tunnel.tunnel_start_dist + 6.0
+			z = -dd
+		else:
+			if z < -(LENGTH - 8.0):
+				break
+			in_run = z <= -12.0
+		if not in_run:
 			continue
 		var img := get_viewport().get_texture().get_image()
 		var l := _regions(img)
 		lum_l.append(l[0])
 		lum_a.append(l[1])
 		lum_r.append(l[2])
+		for k in 3:
+			red_val[k].append(_last_red[k][0])
+			red_ratio[k].append(_last_red[k][1])
+			red_frac[k].append(_last_red[k][2])
 		zs.append(z)
 		vs.append(_car.linear_velocity.length())
-		xs.append(_car.global_position.x)
+		xs.append(_lat_of(route, bidx) if real else _car.global_position.x)
 		if shots and not shot_marks.is_empty() and z < shot_marks[0]:
 			shot_marks.pop_front()
 			var dir := ProjectSettings.globalize_path("res://snapshots")
 			DirAccess.make_dir_recursive_absolute(dir)
-			img.save_png("%s/flicker_%s_%d.png" % [dir, variant, int(-z)])
+			img.save_png("%s/flicker_%s_%d.png" % [dir, variant if not real else "real" + sabotage, int(-z)])
 	var n := lum_a.size()
 	if n < 60:
 		print("SONDA MOARTA: doar %d cadre in culoar (frame=%d, z=%.1f)" % [n, frame, _car.global_position.z])
@@ -135,7 +220,7 @@ func _run() -> void:
 		return
 	var fails := 0
 	var dead := _dead(lum_l) or _dead(lum_r) or _dead(lum_a)
-	print("cadre analizate: %d (%.2f s) | viteza %.1f..%.1f m/s | |x| max %.2f m"
+	print("cadre analizate: %d (%.2f s) | viteza %.1f..%.1f m/s | |lateral| max %.2f m"
 		% [n, n / 60.0, _min(vs), _max(vs), maxf(absf(_min(xs)), absf(_max(xs)))])
 	print("%-8s %8s %8s %8s %6s | %11s %11s | %9s %8s %8s"
 		% ["regiune", "L medie", "L min", "L max", "unice", "flash/s .10", "flash/s .05",
@@ -152,12 +237,68 @@ func _run() -> void:
 		print("%-8s %8.4f %8.4f %8.4f %6d | %11.1f %11.1f | %9.3f %8.1f %8.1f  %s"
 			% [names[i], _mean(s), _min(s), _max(s), _unique(s), r10[0], r05[0], r10[1],
 				float(r10[2]) / (n / 60.0), _dom_freq(s), "OK" if ok else "PICAT"])
+	# ROSU SATURAT, raportat separat (vezi antetul).
+	print("--- ROSU SATURAT (WCAG): R/(R+G+B) >= %.1f ---" % RED_RATIO)
+	print("%-8s %9s %9s %9s | %12s | %10s %10s %10s"
+		% ["regiune", "raport med", "raport max", "frac suprf", "flash/s medie", "suprf .25", "suprf .10", "suprf max"])
+	var red_fails := 0
+	for i in 3:
+		var rv: Array[float] = []
+		rv.assign(red_val[i])
+		var rr: Array[float] = []
+		rr.assign(red_ratio[i])
+		var rf: Array[float] = []
+		rf.assign(red_frac[i])
+		# (a) pe medie: tranzitie doar daca una din stari e "rosu saturat" (raport >= 0.8)
+		var fl_mean := _red_mean_flashes(rv, rr)
+		var f25 := _flashes(rf, 0.25)
+		var f10 := _flashes(rf, 0.10)
+		var ok_r := fl_mean <= CONTRACT and (f25[0] as float) <= CONTRACT
+		if not ok_r:
+			red_fails += 1
+		print("%-8s %9.3f %9.3f %9.3f | %12.1f | %10.1f %10.1f %10.3f  %s"
+			% [names[i], _mean(rr), _max(rr), _mean(rf), fl_mean, f25[0], f10[0], _max(rf),
+				"OK" if ok_r else "PICAT"])
 	if dead:
 		print("SONDA MOARTA: luminanta e constanta pe cadre (imagine goala/neconectata)")
 		get_tree().quit(2)
 		return
-	print("=== %s: %s ===" % [variant, "PICAT (%d regiuni)" % fails if fails > 0 else "PASS"])
-	get_tree().quit(1 if fails > 0 else 0)
+	var tag := variant if not real else "real %s" % (sabotage if sabotage != "" else "tinta")
+	print("=== %s: luminanta %s | rosu saturat %s ===" % [tag,
+		"PICAT (%d regiuni)" % fails if fails > 0 else "PASS",
+		"PICAT (%d regiuni)" % red_fails if red_fails > 0 else "PASS"])
+	get_tree().quit(1 if (fails > 0 or red_fails > 0) else 0)
+
+
+func _lat_of(route: TrackRoute, i: int) -> float:
+	var p := route.baked[i]
+	var q := _car.global_position - p
+	return q.dot(route.side_at(i))
+
+
+## WCAG, rosu saturat, pe MEDIA regiunii: numara perechile de tranzitii opuse ale
+## valorii max(0,(R-G-B)*320) de >= 20, doar cand una din stari are R/(R+G+B) >= 0.8.
+## Fereastra glisanta de 1 s; rezultat in flash-uri/s (n tranzitii / 2).
+func _red_mean_flashes(val: Array[float], ratio: Array[float]) -> float:
+	var times: Array[float] = []
+	var pivot := 0
+	var dir := 0
+	for i in range(1, val.size()):
+		var d := val[i] - val[pivot]
+		var red_state := ratio[i] >= RED_RATIO or ratio[pivot] >= RED_RATIO
+		if absf(d) >= 20.0 and red_state:
+			var nd := 1 if d > 0.0 else -1
+			if dir != 0 and nd != dir:
+				times.append(i / 60.0)
+			dir = nd
+			pivot = i
+	var best := 0
+	var j := 0
+	for i in times.size():
+		while times[i] - times[j] >= 1.0:
+			j += 1
+		best = maxi(best, i - j + 1)
+	return best / 2.0
 
 
 # ----------------------------------------------------------------- masuratoare
@@ -176,19 +317,44 @@ func _regions(img: Image) -> Array[float]:
 	var d := im.get_data()
 	var sums := [0.0, 0.0, 0.0]
 	var cnt := [0, 0, 0]
+	# rosu: sume liniare R,G,B si pixeli cu raport >= RED_RATIO, per regiune (stanga, tot, dreapta)
+	var rs := [0.0, 0.0, 0.0]
+	var gs := [0.0, 0.0, 0.0]
+	var bs := [0.0, 0.0, 0.0]
+	var redpx := [0, 0, 0]
 	var third := w / 3
 	for y in h:
 		for x in w:
 			var o := (y * w + x) * 3
-			var lum := 0.2126 * _LIN[d[o]] + 0.7152 * _LIN[d[o + 1]] + 0.0722 * _LIN[d[o + 2]]
-			sums[1] += lum
-			cnt[1] += 1
+			var lr: float = _LIN[d[o]]
+			var lg: float = _LIN[d[o + 1]]
+			var lb: float = _LIN[d[o + 2]]
+			var lum := 0.2126 * lr + 0.7152 * lg + 0.0722 * lb
+			var tot := lr + lg + lb
+			var is_red := tot > 1e-6 and lr / tot >= RED_RATIO and (lr - lg - lb) * 320.0 >= 20.0
+			var regs: Array[int] = [1]
 			if x < third:
-				sums[0] += lum
-				cnt[0] += 1
+				regs.append(0)
 			elif x >= w - third:
-				sums[2] += lum
-				cnt[2] += 1
+				regs.append(2)
+			for k in regs:
+				sums[k] += lum
+				cnt[k] += 1
+				rs[k] += lr
+				gs[k] += lg
+				bs[k] += lb
+				if is_red:
+					redpx[k] += 1
+	# _last_red in ordinea numelor din raport: [stanga, dreapta, tot]
+	var order := [0, 2, 1]
+	for oi in 3:
+		var k: int = order[oi]
+		var mr: float = rs[k] / cnt[k]
+		var mg: float = gs[k] / cnt[k]
+		var mb: float = bs[k] / cnt[k]
+		var mt := mr + mg + mb
+		_last_red[oi] = [maxf(0.0, (mr - mg - mb) * 320.0), mr / mt if mt > 1e-6 else 0.0,
+			float(redpx[k]) / float(cnt[k])]
 	var out: Array[float] = [sums[0] / cnt[0], sums[1] / cnt[1], sums[2] / cnt[2]]
 	return out
 
@@ -386,6 +552,99 @@ func _build_world() -> void:
 	zone.look_height = 1.4
 	add_child(zone)
 	zone.global_position = Vector3(0, 0, zc)
+
+
+## MOD REAL: pista Track18 intreaga, masina pe axa benzii E' cu camera de joc.
+func _build_real() -> void:
+	var packed := load(GameState.TRACK_SCENES[real_idx]) as PackedScene
+	_track = packed.instantiate() as Track
+	_tunnel = _track.get_node_or_null("ToriiTunel") as ToriiTunnel
+	if _tunnel == null:
+		push_error("ProbeFlicker: pista nu are ToriiTunel")
+		get_tree().quit(2)
+		return
+	if sabotage == "forest_off" or sabotage == "both" or sabotage == "bright" or sabotage == "red_flash":
+		_tunnel.forest_enabled = false
+	if sabotage == "red_flash":
+		_tunnel.spacing = 6.0
+	if sabotage == "gap24" or sabotage == "both":
+		_tunnel.spacing = 2.4
+	add_child(_track)
+	var waited := 0
+	while not _tunnel.built and waited < 900:
+		await get_tree().process_frame
+		waited += 1
+	for _i in 10:
+		await get_tree().physics_frame
+	if not _tunnel.built:
+		push_error("ProbeFlicker: ToriiTunnel nu s-a construit")
+		get_tree().quit(2)
+		return
+	var route := _track.route_at(1)
+	if sabotage == "bright":
+		_add_bright_wall(route, Color(0.92, 0.95, 1.0))
+	elif sabotage == "red_flash":
+		# fundal negru + porti rare: rosul saturat apare si dispare in benzile laterale
+		_add_bright_wall(route, Color(0.0, 0.0, 0.0))
+	var start_d := maxf(_tunnel.tunnel_start_dist - 45.0, 1.0)
+	var i0 := 0
+	while i0 < route.baked.size() - 2 and route.dists[i0] < start_d:
+		i0 += 1
+	var dir := (route.baked[i0 + 1] - route.baked[i0])
+	dir.y = 0.0
+	dir = dir.normalized()
+	_car = (load(CAR_SCENE) as PackedScene).instantiate() as Car
+	_car.track = _track
+	add_child(_car)
+	_car.apply_data(GameState.CAR_DATA[0])
+	_car.is_player = true
+	var bot := LaneBot.new()
+	bot.route = route
+	bot.idx = i0
+	_car.set_controller(bot)
+	_car.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP),
+		route.baked[i0] + Vector3.UP * 0.6)
+	_car.route = 1
+	_car.road_index = i0
+	_car.race_active = true
+	_car.linear_velocity = dir * SPEED
+	GameState.cam_distance_scale = 1.0
+	GameState.cam_height_scale = 1.0
+	GameState.cam_fov_scale = 1.0
+	GameState.cam_follow_scale = 1.0
+	_cam = ChaseCamera.new()
+	add_child(_cam)
+	_cam.target = _car
+	_cam.apply_settings_for(ChaseCamera.REFERENCE_LENGTH)
+	_cam.snap_behind()
+
+
+## Sabotajul `bright`: in locul padurii, un perete luminos (alb, fara umbrire) la
+## 4,6 m de axa pe ambele parti — golurile dintre porti dau intr-o lumina plata,
+## ca si cum in spatele tunelului ar fi cer. Sonda trebuie sa PICE: altfel masuratoarea
+## pe pista reala e oarba (acelasi rol ca `sparse_sky` pe culoarul sintetic).
+func _add_bright_wall(route: TrackRoute, color: Color) -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for sgn: float in [-1.0, 1.0]:
+		for i in route.baked.size() - 1:
+			if route.dists[i] < _tunnel.tunnel_start_dist - 10.0 or route.dists[i] > _tunnel.tunnel_end_dist + 10.0:
+				continue
+			var a := route.baked[i] + route.side_at(i) * 4.6 * sgn
+			var b := route.baked[i + 1] + route.side_at(i + 1) * 4.6 * sgn
+			var a1 := a + Vector3.UP * 16.0
+			var b1 := b + Vector3.UP * 16.0
+			for v in [a, a1, b, a1, b1, b]:
+				st.add_vertex(v)
+	st.generate_normals()
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_color = color
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var mi := MeshInstance3D.new()
+	mi.mesh = st.commit()
+	mi.material_override = m
+	_track.add_child(mi)
 
 
 ## Portile ca UN MultiMesh (un mesh, un material de paleta): doi stalpi + kasagi.

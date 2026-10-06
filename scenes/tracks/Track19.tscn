@@ -261,6 +261,7 @@ transform = Transform3D(0.049869, 0, 0.998756, 0, 1, 0, -0.998756, 0, 0.049869, 
 script = ExtResource("13_rim")
 rim_offset = 7.2
 rim_height = 11.0
+period = 9.5
 
 [node name="PlasaCornisa" type="Area3D" parent="Hazarduri"]
 monitorable = false

@@ -216,6 +216,11 @@ extends Node
 ##                             = 2 x (5 s parcat + 1,2 s telegraf + traversare);
 ##                             sonda tipareste pentru fiecare unde e si daca e
 ##                             pe carosabil.
+##   --cross-phase=0.25        (cu --cross-at) faza ciclului de mers, 0..1, pentru
+##                             modelele CU SCHELET (caii din Monument Valley:
+##                             Walk/Idle): animatia aleasa dupa viteza reala,
+##                             pusa pe faza data si INGHETATA. Fara el, fizica
+##                             e oprita cu delta 0 si caii raman in poza de repaus.
 ##
 ## Vederile ortografice de sus turtesc tot ce e vertical, deci mint despre
 ## densitatea decorului de pe margine: ceva ce arata presarat de sus poate
@@ -410,6 +415,7 @@ func _ready() -> void:
 	var tuk_at := ""
 	var cow_mode := ""
 	var cross_at := -1.0
+	var cross_phase := 0.0
 	var burner_at := -1.0
 	# Teatrul bastionului (Jodhpur, POI F): ceasurile BastionTheatre, inghetate.
 	var salute_at := -1.0
@@ -567,6 +573,8 @@ func _ready() -> void:
 				rope_u = float(parts[1])
 		elif arg.begins_with("--cross-at="):
 			cross_at = float(arg.trim_prefix("--cross-at="))
+		elif arg.begins_with("--cross-phase="):
+			cross_phase = float(arg.trim_prefix("--cross-phase="))
 		elif arg.begins_with("--burner-at="):
 			burner_at = float(arg.trim_prefix("--burner-at="))
 		elif arg.begins_with("--balloon-at="):
@@ -690,7 +698,7 @@ func _ready() -> void:
 	if cow_mode != "":
 		await _set_cow(track, cow_mode)
 	if cross_at >= 0.0:
-		await _set_cross_time(track, cross_at)
+		await _set_cross_time(track, cross_at, cross_phase)
 	if burner_at >= 0.0:
 		await _set_burner_phase(track, burner_at)
 	if balloon_at >= 0.0:
@@ -1436,7 +1444,7 @@ func _set_herd_time(root: Node, seconds: float) -> void:
 ## (vezi `--cross-at`). Cursa si perioada se configureaza la primul tick
 ## (`_configure`, dupa ce pista a pus `travel`), deci se cere un cadru de
 ## fizica inainte; apoi se INGHEATA, ca la turma.
-func _set_cross_time(root: Node, seconds: float) -> void:
+func _set_cross_time(root: Node, seconds: float, anim_phase: float = 0.0) -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var found := 0
@@ -1448,6 +1456,21 @@ func _set_cross_time(root: Node, seconds: float) -> void:
 		hz._physics_process(0.0)
 		hz.set_physics_process(false)
 		found += 1
+		if hz._anim != null:
+			# Model cu schelet: animatia dupa viteza REALA din acest moment (ca
+			# in joc), pusa pe faza ceruta si inghetata.
+			var v := absf(hz._offset_at(seconds + 0.05) - hz._offset_at(seconds)) 				/ 0.05 * hz.travel.length()
+			hz._animate(v)
+			var cur := hz._anim.get_animation(hz._anim.current_animation)
+			hz._anim.speed_scale = 1.0
+			# fara amestec: cu ANIM_BLEND poza ceruta ar ramane pe jumatate
+			# amestecata cu repausul
+			hz._anim.play(hz._anim.current_animation, 0.0)
+			hz._anim.seek(cur.length * anim_phase, true)
+			hz._anim.advance(0.0)
+			hz._anim.pause()
+			print("--cross-at: %s anim '%s' la faza %.2f (viteza %.2f m/s)"
+				% [hz.name, hz._anim.assigned_animation, anim_phase, v])
 		var off: float = hz.call("_offset_now")
 		var lateral := off * hz.travel.length()
 		var hw := hz.road_half_width

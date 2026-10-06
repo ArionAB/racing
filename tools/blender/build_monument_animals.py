@@ -10,7 +10,8 @@ Rulare:
     D:/Blender/blender.exe --background --factory-startup \\
         --python tools/blender/run_build.py -- build_monument_animals.py [-- --only horse_bay]
 
-v1 STATICE (tiparul Serengeti): cele doua poze sunt noduri separate in acelasi
+CAII au schelet + animatii Walk/Idle (oct 2026, monument_horse_rig.py); restul
+(oaie, corb) ramane static. v1 STATICE (tiparul Serengeti): cele doua poze sunt noduri separate in acelasi
 GLB (`Pose_Stand`, `Pose_Walk`), integrarea alege. Cei trei cai ies din ACEEASI
 functie de corp (`build_horse`), parametrizata pe model de culoare si poza, deci
 silueta si proportiile sunt identice si difera doar culoarea. Fata = +Y in
@@ -393,10 +394,17 @@ def _two_poses(make):
     return [make("stand").to_object("Pose_Stand"), make("walk").to_object("Pose_Walk")]
 
 
+# Caii (din oct 2026) ies cu schelet si animatii Walk/Idle: vezi
+# monument_horse_rig.py. `Pose_Stand` ramane static (caii de decor), iar
+# `Pose_Walk` e armatura calului in poza de stand. Marcajul "rig" cere
+# emisia speciala (`emit_horse_rigged`) in loc de `emit`.
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "monument_horse_rig.py")).read())
+
 PIECES = [
-    ("animals/horse_bay.glb", lambda: _two_poses(lambda p: build_horse("bay", p)), 3200),
-    ("animals/horse_pinto.glb", lambda: _two_poses(lambda p: build_horse("pinto", p)), 3200),
-    ("animals/horse_black.glb", lambda: _two_poses(lambda p: build_horse("black", p)), 3200),
+    ("animals/horse_bay.glb", ("rig", "bay"), 3200),
+    ("animals/horse_pinto.glb", ("rig", "pinto"), 3200),
+    ("animals/horse_black.glb", ("rig", "black"), 3200),
     ("animals/sheep.glb", lambda: _two_poses(build_sheep), 2400),
     ("animals/raven.glb", lambda: [o for o, n in zip(
         (lambda bw: (bw[0].to_object("Raven_Body"), bw[1].to_object("Raven_Wings")))(build_raven()),
@@ -412,6 +420,9 @@ for _path, _fn, _bud in PIECES:
     if _only and os.path.basename(_path)[:-4] not in _only:
         continue
     clear_built()
+    if isinstance(_fn, tuple) and _fn[0] == "rig":
+        emit_horse_rigged(_path, _fn[1], AO_ANIMAL, budget=_bud)
+        continue
     emit(list(_fn()), _path, AO_ANIMAL, keep_xy=False, bevel=0.0,
          smooth_angle=None, budget=_bud)
 report()

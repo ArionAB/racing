@@ -1883,6 +1883,12 @@ static func themes() -> Dictionary:
 			# discuri PLANE (`prop_contact_flat`: o cota de sol, nu cercul de 11).
 			# Vezi `_prop_foot_radius` / `_build_prop_contact`.
 			"prop_foot_cache": true,
+			# Contact MOALE: un disc per pata (nu 3 stivuite), centru ~0.7, marginea
+			# se topeste radial. Vezi `_dedupe_contact_discs`. Alte piste: neatinse.
+			"prop_contact_soft": true,
+			# Gardul de sarma e o LINIE, nu un punct: discurile lui (raza plafonata)
+			# se inlantuie si se inmultesc in placa neagra pe toata lungimea.
+			"prop_contact_skip": ["wire_fence"],
 			"prop_contact_flat": ["sagebrush", "rabbitbrush", "tumbleweed", "yucca", "wire_fence",
 				"juniper", "telegraph_pole"],
 			# Scurtatura Dunele (G'): nisip rosu, SAND implicit.
@@ -8554,6 +8560,8 @@ func _prop_contact_discs() -> PackedVector4Array:
 			continue
 		if PROP_AO_SKIP_MODELS.has(n3.scene_file_path.get_file().get_basename()):
 			continue
+		if not _contact_skip.is_empty() and _contact_skip.has(_instance_stem(n3, root)):
+			continue
 		var flat_disc := not _contact_flat.is_empty() and _in_flat_model(n3, root)
 		var aabb := _visual_aabb(n3)
 		if aabb.size == Vector3.ZERO:
@@ -8590,6 +8598,20 @@ func _prop_contact_discs() -> PackedVector4Array:
 			_disc_flat.append(1 if flat_disc else 0)
 	return out
 
+
+## Stem-ul modelului instantiat din care face parte nodul (primul stramos cu
+## `scene_file_path`, pana la `root`); "" daca nu exista.
+func _instance_stem(n: Node, root: Node) -> String:
+	var cur := n
+	while cur != null and cur != root:
+		if not cur.scene_file_path.is_empty():
+			return cur.scene_file_path.get_file().get_basename()
+		cur = cur.get_parent()
+	return ""
+
+
+## Stem-uri fara disc de contact, pe tema (`prop_contact_skip`, implicit gol).
+var _contact_skip: Dictionary = {}
 
 ## Nodul sau un stramos al lui (pana la `root`) e instanta unui model din
 ## `_contact_flat`. Mesh-urile din interiorul unui .glb nu au `scene_file_path`,
@@ -8830,9 +8852,15 @@ func _build_prop_contact() -> void:
 	_foot_cache_on = bool(theme_flag("prop_foot_cache", false))
 	_contact_flat.clear()
 	_disc_flat.clear()
+	_contact_skip.clear()
+	for stem in theme_flag("prop_contact_skip", []):
+		_contact_skip[String(stem)] = true
 	for stem in theme_flag("prop_contact_flat", []):
 		_contact_flat[String(stem)] = true
 	var discs := _prop_contact_discs()
+	var soft := bool(theme_flag("prop_contact_soft", false))
+	if soft:
+		discs = _dedupe_contact_discs(discs)
 	# Vertecsii au servit doar razelor de amprenta: nu-i tinem in memorie.
 	_foot_verts.clear()
 	_foot_best.clear()
@@ -8841,6 +8869,17 @@ func _build_prop_contact() -> void:
 		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	if soft:
+		var smesh := _soft_discs_mesh(discs)
+		if smesh == null:
+			return
+		var sinst := MeshInstance3D.new()
+		sinst.name = "PropContact"
+		sinst.mesh = smesh
+		sinst.material_override = _prop_contact_soft_material()
+		sinst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(sinst)
+		return
 	# Cotele de margine ale discurilor deja calculate, pe discul EXACT (aceeasi
 	# pozitie, raza si baza, la bit). Un model din .glb da un disc si pentru
 	# radacina, si pentru nodul de mesh dinauntru, deci acelasi disc vine de
@@ -8937,6 +8976,136 @@ func _build_prop_contact() -> void:
 	add_child(inst)
 
 
+## CONTACT MOALE (tema `prop_contact_soft`, azi doar Monument Valley).
+##
+## Defecte ale discului vechi, masurate pe Track19 (frac 0.09, cadrul de joc):
+## luminanta in disc 12-29 din 255 fata de ~120 pe sol luminat (aproape negru,
+## mai inchis decat umbra reala de soare, ~50-100) si muchie dura de octogon.
+##   1. DISCURI STIVUITE. `_prop_contact_discs` emite un disc pentru FIECARE
+##      nod Node3D cu mesh vizibil: radacina instantei, nodul de mesh din .glb,
+##      grupurile. Pe Track19: 7007 de discuri in 2359 de pete de 0,5 m, modul 3
+##      discuri pe aceeasi pata, inmultite intre ele.
+##   2. BLEND_MODE_MUL NU SE COMPORTA CA IN NOTA DE MAI SUS. Masurat: un disc cu
+##      vertex ALB (identitatea inmultirii) intunecat tot solul la 0,46 din
+##      luminanta (47 vs 101 fara disc), iar centrul 0,98 / 0,85 / 0,70 / 0,40 a
+##      dat 44 / 43 / 42 / 38 — adica valoarea de vertex abia conteaza. Nu am
+##      gasit mecanismul (nu e ceata: la fel cu --no-fog); cum 3 discuri
+##      stivuite dau ~0,1, de-aici "pata neagra". Nu se poate regla un lucru
+##      care nu raspunde, deci contactul moale foloseste ALFA clasica.
+## Aici: un disc per pata (cel cu raza maxima), maro de sol cu alfa
+## PROP_SOFT_STRENGTH la centru si platou pana la t=0,4 apoi smoothstep pana la 0 la margine, pe 3
+## inele si 10 felii: marginea se topeste, fara contur. Alfa nu se inmulteste
+## la suprapunere (1-(1-a)^n), deci vecinii nu mai fac placa neagra.
+const PROP_SOFT_SEGMENTS: int = 10
+const PROP_SOFT_STRENGTH: float = 0.6
+const PROP_SOFT_TINT := Color(0.04, 0.012, 0.006)
+const PROP_SOFT_RINGS := [0.5, 0.75, 1.0]
+
+## Un singur disc per pata de 0,5 m (si cota bazei la 0,25 m): cel mai larg.
+## Pastreaza ordinea primei aparitii, ca rezultatul sa fie determinist.
+func _dedupe_contact_discs(discs: PackedVector4Array) -> PackedVector4Array:
+	var best: Dictionary = {}
+	var order: Array[String] = []
+	for i in discs.size():
+		var d := discs[i]
+		var k := "%d|%d|%d" % [roundi(d.x * 2.0), roundi(d.y * 2.0), roundi(d.w * 4.0)]
+		if not best.has(k):
+			best[k] = i
+			order.append(k)
+		elif discs[int(best[k])].z < d.z:
+			best[k] = i
+	var out := PackedVector4Array()
+	var flat := PackedByteArray()
+	for k in order:
+		var i: int = best[k]
+		out.append(discs[i])
+		if not _disc_flat.is_empty():
+			flat.append(_disc_flat[i])
+	_disc_flat = flat
+	return out
+
+
+## Mesh-ul contactului moale, INDEXAT si construit direct in vectori impachetati:
+## SurfaceTool cu 3 apeluri pe varf (esalonat pe ~140k de triunghiuri) a costat
+## +0,4 s la incarcarea Track19; un varf partajat intre felii si fara normale
+## (materialul e neluminat) taie munca de cateva ori.
+func _soft_discs_mesh(discs: PackedVector4Array) -> ArrayMesh:
+	var seg := PROP_SOFT_SEGMENTS
+	var ring_t: Array[float] = [0.0]
+	for t in PROP_SOFT_RINGS:
+		ring_t.append(float(t))
+	var rings := ring_t.size()
+	var ring_a := PackedFloat32Array()
+	for t in ring_t:
+		ring_a.append(PROP_SOFT_STRENGTH * (1.0 - smoothstep(0.4, 1.0, t)))
+	var cs := PackedFloat32Array()
+	var sn := PackedFloat32Array()
+	for k in seg:
+		var ang := TAU * float(k) / float(seg)
+		cs.append(cos(ang))
+		sn.append(sin(ang))
+	var verts := PackedVector3Array()
+	var cols := PackedColorArray()
+	var idx := PackedInt32Array()
+	var tint := PROP_SOFT_TINT
+	var di := -1
+	var flat_on := not _disc_flat.is_empty()
+	var rim_y := PackedFloat64Array()
+	rim_y.resize(seg)
+	for d in discs:
+		di += 1
+		var cx: float = d.x
+		var cz: float = d.y
+		var r: float = d.z
+		var gy: float = _sampler.ground_y(cx, cz)
+		if absf(d.w - gy) > PROP_AO_SEAT_TOL:
+			continue
+		var cy := gy + PROP_AO_LIFT
+		if flat_on and _disc_flat[di] == 1:
+			rim_y.fill(cy)
+		else:
+			for k in seg:
+				rim_y[k] = _rim_y(cx + cs[k] * r, cz + sn[k] * r, cy)
+		var base := verts.size()
+		# Varful 0 = centrul; apoi inelele 1..rings-1, `seg` varfuri fiecare.
+		verts.append(Vector3(cx, cy, cz))
+		cols.append(Color(tint.r, tint.g, tint.b, ring_a[0]))
+		for ri in range(1, rings):
+			var t: float = ring_t[ri]
+			var col := Color(tint.r, tint.g, tint.b, ring_a[ri])
+			for k in seg:
+				verts.append(Vector3(cx + cs[k] * r * t, lerpf(cy, rim_y[k], t),
+						cz + sn[k] * r * t))
+				cols.append(col)
+		# Evantai central + fasii intre inele; fata in sus (CULL_BACK).
+		for k in seg:
+			var k2 := (k + 1) % seg
+			idx.append(base)
+			idx.append(base + 1 + k)
+			idx.append(base + 1 + k2)
+		for ri in range(1, rings - 1):
+			var in0 := base + 1 + (ri - 1) * seg
+			var out0 := base + 1 + ri * seg
+			for k in seg:
+				var k2 := (k + 1) % seg
+				idx.append(in0 + k)
+				idx.append(out0 + k)
+				idx.append(out0 + k2)
+				idx.append(in0 + k)
+				idx.append(out0 + k2)
+				idx.append(in0 + k2)
+	if verts.is_empty():
+		return null
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_COLOR] = cols
+	arrays[Mesh.ARRAY_INDEX] = idx
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
 ## Cota unui vertex de pe marginea discului: urmareste terenul, dar nu se
 ## departeaza de centru mai mult decat PROP_AO_RELIEF. Asa discul ramane o pata
 ## intinsa pe sol si pe teren frant, in loc sa devina o panza verticala.
@@ -8948,6 +9117,18 @@ func _rim_y(wx: float, wz: float, center_y: float) -> float:
 
 
 var _prop_ao_mat: StandardMaterial3D
+
+## Materialul contactului moale: alfa clasica, neluminat, culoarea si alfa din
+## vertecsi. Nu scrie adancime (suprafata lipita de sol).
+func _prop_contact_soft_material() -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.vertex_color_use_as_albedo = true
+	m.albedo_color = Color.WHITE
+	m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	m.cull_mode = BaseMaterial3D.CULL_BACK
+	return m
 
 func _prop_contact_material() -> StandardMaterial3D:
 	if _prop_ao_mat != null:

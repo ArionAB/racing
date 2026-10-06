@@ -60,6 +60,12 @@ def build_buggy_body(b):
     b.box((0.0, -1.78, TUB_Z0 + 0.22), (TUB_W + 0.1, 0.10, 0.12), BUGGY_CAGE)
     for sx in (-1, 1):
         b.box((sx * 0.42, -1.70, TUB_Z0 + 0.40), (0.20, 0.08, 0.16), BUGGY_TRIM)
+    # faruri pe placutele albe din bot (fata e -Y) si stopuri pe spatele cuvei:
+    # obiecte separate (`Buggy_Lamp_Head` / `_Lamp_Tail`), ca jocul sa le
+    # aprinda. Fata lor iese ~8 mm in fata suprafetei din spate.
+    for sx in (-1, 1):
+        lamp_head((sx * 0.42, -1.733, TUB_Z0 + 0.40), (0.14, 0.03, 0.10))
+        lamp_tail((sx * 0.50, TUB_L * 0.5 - 0.007, TUB_Z0 + 0.26), (0.20, 0.03, 0.10))
     b.box((0.0, -1.20, TUB_Z0 + TUB_H + 0.005), (0.44, 0.34, 0.02), BUGGY_TRIM)
     b.box((0.0, 1.05, TUB_Z0 + TUB_H + 0.12), (TUB_W - 0.30, 0.62, 0.36), BUGGY_CAGE)
     b.box((0.0, 1.05, TUB_Z0 + TUB_H + 0.34), (0.5, 0.36, 0.12), RIM)

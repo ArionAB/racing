@@ -90,7 +90,7 @@ def roadster(b):
     # botul: grila si bara
     b.box((0.0, -L * 0.5 + 0.22, z0 + 0.22), (W - 0.4, 0.10, 0.22), DARK)
     for sx in (-1, 1):
-        b.box((sx * (W * 0.5 - 0.22), -L * 0.5 + 0.20, z0 + 0.30), (0.22, 0.08, 0.16), STRIPE)
+        lamp_head((sx * (W * 0.5 - 0.22), -L * 0.5 + 0.20, z0 + 0.30), (0.22, 0.08, 0.16))
     bumper(b, -L * 0.5 + 0.02, z0 + 0.10, W + 0.1, DARK)
     # cockpit: podea joasa, doua scaune, parbriz scurt, tablou de bord
     b.box((0.0, 0.55, z0 + 0.12), (W - 0.3, 1.2, 0.06), DARK)
@@ -107,7 +107,7 @@ def roadster(b):
     b.box((0.0, L * 0.5 - 0.55, z0 + body_h + 0.03), (W - 0.2, 0.7, 0.08), paint)
     for sx in (-1, 1):
         b.box((sx * (W * 0.5 - 0.10), L * 0.5 - 0.45, z0 + body_h + 0.16), (0.10, 0.6, 0.22), paint)
-        b.box((sx * (W * 0.5 - 0.25), L * 0.5 - 0.06, z0 + 0.34), (0.26, 0.06, 0.12), CAR_RED)
+        lamp_tail((sx * (W * 0.5 - 0.25), L * 0.5 - 0.06, z0 + 0.34), (0.26, 0.06, 0.12))
     bumper(b, L * 0.5 - 0.02, z0 + 0.10, W + 0.1, DARK)
     # tevi de esapament
     for sx in (-1, 1):
@@ -134,7 +134,7 @@ def police(b):
     b.box((0.0, -1.1, z0 + body_h + 0.03), (W - 0.14, 1.3, 0.08), STRIPE)
     b.box((0.0, -L * 0.5 + 0.22, z0 + 0.24), (W - 0.36, 0.10, 0.24), DARK)
     for sx in (-1, 1):
-        b.box((sx * (W * 0.5 - 0.22), -L * 0.5 + 0.20, z0 + 0.32), (0.22, 0.08, 0.16), STRIPE)
+        lamp_head((sx * (W * 0.5 - 0.22), -L * 0.5 + 0.20, z0 + 0.32), (0.22, 0.08, 0.16))
     # bara de impingere („push bar") in fata — semnul masinii de politie
     bumper(b, -L * 0.5 + 0.02, z0 + 0.12, W + 0.1, DARK)
     for sx in (-1, 1):
@@ -157,7 +157,7 @@ def police(b):
     # spate
     b.box((0.0, L * 0.5 - 0.5, z0 + body_h + 0.03), (W - 0.2, 0.6, 0.08), CAR_BLUE)
     for sx in (-1, 1):
-        b.box((sx * (W * 0.5 - 0.25), L * 0.5 - 0.19, z0 + 0.36), (0.26, 0.06, 0.12), CAR_RED)
+        lamp_tail((sx * (W * 0.5 - 0.25), L * 0.5 - 0.19, z0 + 0.36), (0.26, 0.06, 0.12))
     bumper(b, L * 0.5 - 0.02, z0 + 0.12, W + 0.1, DARK)
     # antena
     b.beam((-0.6, 1.4, z0 + body_h), (-0.6, 1.45, z0 + 1.2), 0.03, DARK)
@@ -186,8 +186,7 @@ def taxi(b):
     b.box((0.0, -1.45, z0 + body_h - 0.10), (W - 0.2, 0.7, 0.12), CAR_YELLOW)
     b.box((0.0, -L * 0.5 + 0.22, z0 + 0.28), (W - 0.5, 0.10, 0.26), DARK)
     for sx in (-1, 1):
-        b.cylinder((sx * (W * 0.5 - 0.28), -L * 0.5 + 0.17, z0 + 0.42), 0.12, 0.10, STRIPE,
-                   segments=8, axis="Y")
+        lamp_head_round((sx * (W * 0.5 - 0.28), -L * 0.5 + 0.17, z0 + 0.42), 0.12, 0.10)
     bumper(b, -L * 0.5 + 0.02, z0 + 0.12, W + 0.1, RIM)
     bumper(b, L * 0.5 - 0.02, z0 + 0.12, W + 0.1, RIM)
     # cabina deschisa: doua randuri de banci, bord, parbriz
@@ -207,7 +206,7 @@ def taxi(b):
     # portbagaj mic
     b.box((0.0, L * 0.5 - 0.45, z0 + body_h - 0.08), (W - 0.2, 0.5, 0.10), CAR_YELLOW)
     for sx in (-1, 1):
-        b.box((sx * (W * 0.5 - 0.25), L * 0.5 - 0.29, z0 + 0.40), (0.24, 0.06, 0.14), CAR_RED)
+        lamp_tail((sx * (W * 0.5 - 0.25), L * 0.5 - 0.29, z0 + 0.40), (0.24, 0.06, 0.14))
 
 
 # =============================================================================
@@ -235,14 +234,14 @@ def bus(b):
     b.box((0.0, -L * 0.5 + 0.15, z0 + 0.20 + wall_h * 0.5), (W - 0.1, 0.12, wall_h), green)
     b.box((0.0, -L * 0.5 + 0.09, z0 + 0.92), (W - 0.5, 0.03, 0.42), GLASS)
     for sx in (-1, 1):
-        b.box((sx * (W * 0.5 - 0.26), -L * 0.5 + 0.08, z0 + 0.42), (0.26, 0.06, 0.18), STRIPE)
+        lamp_head((sx * (W * 0.5 - 0.26), -L * 0.5 + 0.08, z0 + 0.42), (0.26, 0.06, 0.18))
     b.box((0.0, -L * 0.5 + 0.08, z0 + 0.36), (0.8, 0.06, 0.16), DARK)
     bumper(b, -L * 0.5 + 0.02, z0 + 0.14, W + 0.1, DARK)
     # spate: perete, motor, stopuri
     b.box((0.0, L * 0.5 - 0.15, z0 + 0.20 + wall_h * 0.5), (W - 0.1, 0.12, wall_h), green)
     b.box((0.0, L * 0.5 - 0.04, z0 + 0.62), (W - 0.6, 0.06, 0.36), DARK)     # grila motor
     for sx in (-1, 1):
-        b.box((sx * (W * 0.5 - 0.26), L * 0.5 - 0.06, z0 + 0.40), (0.26, 0.06, 0.16), CAR_RED)
+        lamp_tail((sx * (W * 0.5 - 0.26), L * 0.5 - 0.06, z0 + 0.40), (0.26, 0.06, 0.16))
     bumper(b, L * 0.5 - 0.02, z0 + 0.14, W + 0.1, DARK)
     # postul soferului: platforma ridicata, scaun, bord, volan
     b.box((0.0, -1.85, z0 + 0.5), (W - 0.3, 1.0, 0.6), DARK)
@@ -280,8 +279,7 @@ def firetruck(b):
     b.box((0.0, -L * 0.5 + 0.5, z0 + 0.55), (W - 0.2, 0.9, 0.7), red)
     b.box((0.0, -L * 0.5 + 0.06, z0 + 0.6), (W - 0.7, 0.06, 0.5), RIM)
     for sx in (-1, 1):
-        b.cylinder((sx * (W * 0.5 - 0.3), -L * 0.5 + 0.06, z0 + 0.72), 0.12, 0.08, STRIPE,
-                   segments=8, axis="Y")
+        lamp_head_round((sx * (W * 0.5 - 0.3), -L * 0.5 + 0.06, z0 + 0.72), 0.12, 0.08)
     bumper(b, -L * 0.5 + 0.02, z0 + 0.16, W + 0.1, STRIPE)
     # cabina deschisa: podea, doua scaune, bord, parbriz, portiere joase
     b.box((0.0, -1.3, z0 + 0.45), (W - 0.2, 1.1, 0.5), red)
@@ -313,7 +311,7 @@ def firetruck(b):
     # spate: platforma, stopuri, bara alba
     b.box((0.0, L * 0.5 - 0.2, z0 + 0.32), (W - 0.2, 0.3, 0.2), DARK)
     for sx in (-1, 1):
-        b.box((sx * (W * 0.5 - 0.26), L * 0.5 - 0.05, z0 + 0.5), (0.26, 0.06, 0.16), CAR_RED)
+        lamp_tail((sx * (W * 0.5 - 0.26), L * 0.5 - 0.05, z0 + 0.5), (0.26, 0.06, 0.16))
     bumper(b, L * 0.5 - 0.02, z0 + 0.16, W + 0.1, STRIPE)
 
 

@@ -263,6 +263,11 @@ var theme_shadows: bool = true
 ## doua setare de stins (dupa umbre).
 var theme_glow: bool = true
 
+## Farurile masinilor (CarLights): 0 = stinse (zi), 1 = aprinse toata cursa
+## (noapte), negativ = urmeaza `DuskCycle.lamps_value` (apus). Cheia de tema
+## `"headlights"`. Stopurile merg pe orice pista, indiferent de ea.
+var theme_headlights: float = 0.0
+
 ## Pana unde arunca soarele umbre. Peste, preia ceata (depth 90->250), deci
 ## lipsa lor nu se vede. O singura cascada pana aici = configuratia cea mai
 ## ieftina care da totusi contact real cu solul.
@@ -1356,6 +1361,8 @@ static func themes() -> Dictionary:
 			"water": true,
 		},
 		"jodhpur": {
+			# Farurile urmeaza ceasul de apus (DuskCycle): -1 = „dupa ceas".
+			"headlights": -1.0,
 			# ORASUL ALBASTRU DIN JODHPUR, SEARA DE DIWALI (docs/track_briefs/
 			# jodhpur.md §2.0, §4). Pasul 2 din §7: doar lumina, cerul, ceata
 			# si solul de baza -- kitul de oras, fantana, portile si fortul
@@ -2625,6 +2632,8 @@ static func themes() -> Dictionary:
 			"ambient_color": Color.html("66667A"),
 			"ambient_energy": 0.40,
 			"shadows": false,
+			# Noapte: farurile si luminile de pozitie arse toata cursa (CarLights).
+			"headlights": 1.0,
 			"fog_depth": true,
 			"fog_begin": 150.0,
 			"fog_end": 250.0,
@@ -3934,6 +3943,7 @@ func apply_theme(theme: String) -> void:
 	# tema de NOAPTE nu are ce umbri: soarele e o luna palida aproape verticala,
 	# iar o umbra dura ar contrazice lumina. "shadows": false le stinge pe tema.
 	theme_shadows = bool(_theme.get("shadows", true))
+	theme_headlights = float(_theme.get("headlights", 0.0))
 	# Stratul de detaliu triplanar al lumii: implicit strate orizontale, dar
 	# Cappadocia cere caneluri verticale (vezi cheia `detail_texture`). Se
 	# aseaza AICI, inainte ca decorul sa ceara primul material — `_shared` din

@@ -233,6 +233,9 @@ var last_safe_route: int = 0
 # --- Drift/turbo ---
 var is_drifting: bool = false
 var drift_dir: float = 0.0
+## Stopurile aprinse: frana de serviciu (inapoi cu viteza inainte) sau
+## handbrake-ul de drift. Citit de [CarLights]; scris o data pe tick.
+var brake_lamp: bool = false
 var turbo_charge: float = 0.0 # 0..1, bara din UI
 var is_boosting: bool = false
 var slip_time: float = 0.0 # aquaplanare (setata de WaterHazard sau de o banda uda)
@@ -514,6 +517,13 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	# colors), ca orice alt asset al lumii. FBX-urile RgsDev raman cu ale lor.
 	if data.palette_model and _visual.get_child_count() > 0:
 		Palette.apply_world_material(_visual.get_child(0))
+	# Stopuri si faruri, din nodurile `*_Lamp_*` ale modelului (dupa materialul
+	# de clasa, care le-ar fi acoperit lentilele).
+	if data.model != null and _visual.get_child_count() > 0:
+		var lights := CarLights.new()
+		lights.name = "Lights"
+		_visual.add_child(lights)
+		lights.setup(self, _visual.get_child(0) as Node3D)
 	# Soferul, doar pe caroserii deschise (vezi CarData.open_cockpit).
 	_driver = null
 	is_ejected = false
@@ -641,6 +651,7 @@ func _physics_process(delta: float) -> void:
 
 	_update_drift(drift_pressed, steer, fwd_speed)
 	_update_turbo(turbo_pressed, delta)
+	brake_lamp = (throttle < 0.0 and fwd_speed > 1.0) or is_drifting
 
 	_apply_driving(steer, throttle, fwd_h, fwd_speed)
 

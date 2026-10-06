@@ -244,7 +244,10 @@ func _build_model() -> void:
 	var model := model_scene.instantiate() as Node3D
 	if not model_node.is_empty():
 		for child in model.get_children():
-			if child.name != model_node:
+			# AnimationPlayer-ul GLB-ului (calul Monument Valley: armatura e
+			# nodul `Pose_Walk`, playerul ii e frate) ramane: fara el, filtrul
+			# ar arunca animatiile odata cu poza statica.
+			if child.name != model_node and not child is AnimationPlayer:
 				model.remove_child(child)
 				child.queue_free()
 	model.scale = Vector3.ONE * model_scale
@@ -465,7 +468,13 @@ func _physics_process(delta: float) -> void:
 			_pivot.global_rotate(axis, -flat.length() / roll_radius)
 	if _anim != null and delta > 0.0:
 		_animate(moved.length() / delta)
-	_last_pos = global_position
+	# `next_pos`, NU `global_position`: cu sync_to_physics getterul intoarce
+	# transformul de acum UN PAS (scrierea de mai sus ajunge in nod abia la
+	# sincronizarea fizicii), deci `moved` de la pasul urmator ar fi acoperit
+	# DOUA pasi si `_speed` ar fi iesit dublu fata de viteza reala (masurat pe
+	# caii din Track19: 3,88 m/s la 1,94 m/s adevarat). Ritmul pasilor
+	# (`_animate`) se calculeaza din ea.
+	_last_pos = next_pos
 	if not Engine.is_editor_hint():
 		_shove_cars(delta)
 

@@ -153,6 +153,12 @@ var cam_follow_scale: float = 1.0
 ## particulele. Persistat ca sa nu-l repornesti la fiecare build.
 var show_perf: bool = false
 
+## TEST (optiunea D din oct 2026): un SpotLight3D adevarat pe farurile
+## masinii jucatorului, pe pistele de noapte, in locul baltii de lumina false.
+## Setare ca sa se poata compara la volan, din pauza; prima de stins daca
+## device-ul nu tine 60 fps (vezi CarLights).
+var real_headlight: bool = true
+
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
 var touch_steer: float = 0.0
 var touch_drift: bool = false
@@ -276,6 +282,7 @@ func load_settings() -> void:
 	cam_follow_scale = clampf(
 		float(cfg.get_value("camera", "follow_scale", 1.0)), 0.4, 2.5)
 	show_perf = bool(cfg.get_value("debug", "show_perf", false))
+	real_headlight = bool(cfg.get_value("debug", "real_headlight", true))
 
 func save_settings() -> void:
 	var cfg := ConfigFile.new()
@@ -288,6 +295,7 @@ func save_settings() -> void:
 	cfg.set_value("camera", "fov_scale", cam_fov_scale)
 	cfg.set_value("camera", "follow_scale", cam_follow_scale)
 	cfg.set_value("debug", "show_perf", show_perf)
+	cfg.set_value("debug", "real_headlight", real_headlight)
 	cfg.save(SETTINGS_PATH)
 
 

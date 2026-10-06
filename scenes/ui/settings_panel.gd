@@ -92,6 +92,10 @@ func _build() -> void:
 		func(on: bool) -> void:
 			GameState.show_perf = on
 			GameState.save_settings())
+	_add_toggle(box, "Far real pe noapte (test)", GameState.real_headlight,
+		func(on: bool) -> void:
+			GameState.real_headlight = on
+			GameState.save_settings())
 
 	var reset_cam := Button.new()
 	reset_cam.text = "RESETEAZA CAMERA"

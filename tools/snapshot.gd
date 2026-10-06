@@ -418,6 +418,8 @@ func _ready() -> void:
 	# cadrul de joc — referintele de diorama au masina in prim-plan, iar o
 	# captura fara ea compara un peisaj cu o scena. Fara fizica (on_start_grid).
 	var show_car := false
+	var car_player := false
+	var car_data_name := "muscle"
 	# --wipers-demo: instantiaza WindshieldWipers (brief Fiordland pasul 4) si
 	# il umple cu N picaturi FORTATE pentru o captura de verificare — Race nu
 	# ruleaza aici (Snapshot nu porneste o cursa), deci nu exista alt mod de-a
@@ -465,6 +467,18 @@ func _ready() -> void:
 			continue
 		if arg == "--car":
 			show_car = true
+			continue
+		# Stopurile si farurile (CarLights): `--brake` aprinde stopurile ca la
+		# franare, `--car-player` face masina JUCATORUL (farul real, optiunea D,
+		# daca GameState.real_headlight), `--car-data=taxi` alege presetarea.
+		if arg == "--brake":
+			CarLights.force_brake = true
+			continue
+		if arg == "--car-player":
+			car_player = true
+			continue
+		if arg.begins_with("--car-data="):
+			car_data_name = arg.trim_prefix("--car-data=")
 			continue
 		if arg.begins_with("--wipers-demo="):
 			wipers_demo = int(arg.trim_prefix("--wipers-demo="))
@@ -994,7 +1008,8 @@ func _ready() -> void:
 			var car := (load("res://scenes/cars/Car.tscn") as PackedScene).instantiate() as Car
 			car.track = track
 			add_child(car)
-			car.apply_data(load("res://scenes/cars/data/muscle.tres") as CarData)
+			car.apply_data(load("res://scenes/cars/data/%s.tres" % car_data_name) as CarData)
+			car.is_player = car_player
 			car.global_transform = Transform3D(Basis.looking_at(dir, Vector3.UP),
 				focus + Vector3.UP * 0.45)
 			car.road_index = idx

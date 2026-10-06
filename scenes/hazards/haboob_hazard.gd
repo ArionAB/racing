@@ -76,8 +76,10 @@ var force_clock: float = -1.0
 
 @export_group("Vant")
 ## Acceleratia laterala a vantului in zid (m/s^2), cu rafale intre cele doua.
-@export_range(0.0, 10.0, 0.1) var wind_min: float = 2.5
-@export_range(0.0, 10.0, 0.1) var wind_max: float = 3.5
+## Pe asfalt grip-ul lateral mananca vantul: 2,5-3,5 dadea doar +0,2 m/s lateral
+## (masurat pe ProbeHaboob), 12 m/s^2 da ~+0,7 m/s si ~1,5 m deplasare.
+@export_range(0.0, 40.0, 0.1) var wind_min: float = 10.0
+@export_range(0.0, 40.0, 0.1) var wind_max: float = 14.0
 
 @export_group("Efecte asupra masinii")
 ## Albirea de la trecerea frontului, doar jucator (s).
@@ -286,6 +288,7 @@ func _build_visuals() -> void:
 		_dust.lifetime = 4.0
 		_dust.local_coords = false
 		_dust.emitting = false
+		_dust.preprocess = 4.0
 		var pm := QuadMesh.new()
 		pm.size = Vector2(22.0, 22.0)
 		pm.material = dust_material()
@@ -461,7 +464,14 @@ func _place_wall() -> void:
 		q.position.y = wall_height * 0.5 * grow - 2.0
 		q.transparency = 1.0 - alpha
 	if _dust != null:
-		_dust.emitting = _cover > 0.05
+		var want := _cover > 0.05
+		if want and not _dust.emitting:
+			# `preprocess` + `restart`: praful apare deja raspandit din primul cadru
+			# (snapshot --haboob-at nu mai asteapta cateva secunde de simulare).
+			_dust.emitting = true
+			_dust.restart()
+		elif not want and _dust.emitting:
+			_dust.emitting = false
 	if _audio != null and _audio.stream != null:
 		if _cover > 0.02:
 			_audio.volume_db = lerpf(-28.0, -4.0, _cover)

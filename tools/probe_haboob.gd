@@ -51,9 +51,9 @@ const PATH_X: float = 300.0
 ## Momentul din ciclu la care centrul zidului e pe x=0 (`wall_speed` * t = PATH_X).
 const T_CENTER: float = PATH_X / 7.0
 ## Cat de mult trebuie sa depaseasca viteza laterala medie din zid pe cea din
-## control ca sa socotim ca vantul se simte (m/s). Pe asfalt grip-ul lateral il
-## mananca aproape tot (vezi raport), deci pragul e mic dar sub el controlul e 0.00.
-const WIND_MIN_GAIN: float = 0.08
+## control ca sa socotim ca vantul se simte (m/s). Cu 12 m/s^2 (implicit) se
+## masoara ~+0.6..0.8; controlul pentru jucator/coast e 0.00.
+const WIND_MIN_GAIN: float = 0.3
 
 ## Sofer care TINE viteza si nu virează: volan zero, gaz doar cat sa nu piarda
 ## viteza (fara gaz o masina de 30 m/s se opreste in cateva secunde din drag).

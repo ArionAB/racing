@@ -109,6 +109,21 @@ const RUN_SPEED: float = 3.0
 ## speed_scale = viteza reala / viteza ciclului. Gasite la ochi pe sonda.
 const WALK_CYCLE_SPEED: float = 1.5
 const RUN_CYCLE_SPEED: float = 8.0
+## Viteza naturala a ciclului PE MODEL (m/s la `model_scale` 1 si ritm 1): cat de
+## repede sta talpa inapoi in sprijin, masurat din clip cu
+## `tools/probe_foot_slide.gd` (ritmul care da patinare minima, v / rate*). Un
+## model absent din tabel foloseste constantele de mai sus. Se inmulteste cu
+## `model_scale`: piciorul unui elefant de 1,1x parcurge cu 10% mai mult pe ciclu
+## (masurat: S* 1,72 la 1,0x si 1,89 la 1,1x).
+const WALK_CYCLE_SPEED_BY_MODEL := {
+	&"horse_bay": 1.55, &"horse_pinto": 1.55, &"horse_black": 1.55,
+	&"elephant": 1.72, &"cow": 0.94,
+	# lama: 2,34 m/s masurat la model_scale 3,135 (Track15) -> 0,746 la 1,0
+	&"llama": 0.746, &"llama_b": 0.746, &"llama_c": 0.746,
+}
+## Galop: vaca din cireada Serengeti (12 m/s) are S* = 4,06 (patinare minima
+## 3,3 m/s la ritm 2,87; cu constanta globala 8,0 ritmul ar fi 1,46).
+const RUN_CYCLE_SPEED_BY_MODEL := {&"cow": 4.06}
 const ANIM_BLEND: float = 0.4
 
 var center: Vector3
@@ -157,6 +172,8 @@ var _pivot: Node3D
 ## AnimationPlayer-ul modelului, daca GLB-ul are schelet. Vezi ANIM_* sus.
 var _anim: AnimationPlayer
 var _anim_rest: StringName = &""
+var _walk_cycle_speed: float = WALK_CYCLE_SPEED
+var _run_cycle_speed: float = RUN_CYCLE_SPEED
 var _last_pos: Vector3
 var _area: Area3D
 var _half_extent: float = 1.3
@@ -385,6 +402,9 @@ func _hook_animation(model: Node3D) -> void:
 	if not player.has_animation(ANIM_WALK):
 		return
 	_anim = player
+	var stem := StringName(model_scene.resource_path.get_file().get_basename())
+	_walk_cycle_speed = float(WALK_CYCLE_SPEED_BY_MODEL.get(stem, WALK_CYCLE_SPEED)) * model_scale
+	_run_cycle_speed = float(RUN_CYCLE_SPEED_BY_MODEL.get(stem, RUN_CYCLE_SPEED)) * model_scale
 	for rest: StringName in ANIM_REST:
 		if _anim.has_animation(rest):
 			_anim_rest = rest
@@ -399,10 +419,10 @@ func _animate(speed: float) -> void:
 	var rate := 1.0
 	if speed > RUN_SPEED and _anim.has_animation(ANIM_RUN):
 		target = ANIM_RUN
-		rate = clampf(speed / RUN_CYCLE_SPEED, 0.7, 1.6)
+		rate = clampf(speed / _run_cycle_speed, 0.7, 3.0)
 	elif speed > 0.15:
 		target = ANIM_WALK
-		rate = clampf(speed / WALK_CYCLE_SPEED, 0.75, 2.2)
+		rate = clampf(speed / _walk_cycle_speed, 0.75, 2.2)
 	if target == &"":
 		# Fara animatie de repaus (elefantul are doar Walk/Trumpet): parcat pe
 		# acostament STA, nu merge pe loc. Se reia de unde a ramas la urnire.

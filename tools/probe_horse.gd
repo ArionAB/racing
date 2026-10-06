@@ -139,12 +139,12 @@ func _probe_horse(hz: SlidingHazard) -> void:
 		await get_tree().physics_frame
 		if OS.get_environment("PROBE_VERBOSE") != "":
 			print("     [dbg] t=%.2f speed=%.3f rate=%.2f pos=%s last=%s" % [hz._time, hz._speed, hz._anim.speed_scale, hz.global_position, hz._last_pos])
-	var want_rate := clampf(v_max / SlidingHazard.WALK_CYCLE_SPEED, 0.75, 2.2)
+	var want_rate := clampf(v_max / hz._walk_cycle_speed, 0.75, 2.2)
 	_check(hz._anim.current_animation == "Walk" and hz._anim.is_playing(),
 		"%s: in traversare -> Walk ruleaza (e '%s', playing=%s)"
 		% [tag, hz._anim.current_animation, hz._anim.is_playing()])
 	_check(absf(hz._anim.speed_scale - want_rate) < 0.2,
-		"%s: ritm = viteza/WALK_CYCLE_SPEED (%.2f, asteptat %.2f)"
+		"%s: ritm = viteza/viteza ciclului pe model (%.2f, asteptat %.2f)"
 		% [tag, hz._anim.speed_scale, want_rate])
 
 	# Pasii: esantionam ciclul Walk cu hazardul oprit, citim oasele Upper.

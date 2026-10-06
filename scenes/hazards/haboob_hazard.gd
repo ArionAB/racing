@@ -271,7 +271,11 @@ static func wall_material() -> StandardMaterial3D:
 					var yy := l.y + sqrt(l.z * l.z - dx * dx)
 					if yy > top_m:
 						top_m = yy
-			var side := smoothstep(0.0, 14.0, xm) * smoothstep(0.0, 14.0, w_m - xm)
+			# Spre marginile laterale (ultimii ~80 m) si alfa, si inaltimea crestei
+			# scad: colturile foilor nu mai ies ca spini deasupra norului.
+			var edge_k := smoothstep(0.0, 80.0, minf(xm, w_m - xm))
+			top_m *= lerpf(0.3, 1.0, edge_k)
+			var side := edge_k
 			for y in TEX_H:
 				var ym := (1.0 - float(y) / float(TEX_H - 1)) * h_m
 				var edge := 1.0 - smoothstep(top_m - 1.8, top_m + 0.6, ym)
@@ -353,11 +357,15 @@ func _cap_mesh(z0: float, z1: float, h: float, u0: float, u1: float) -> ArrayMes
 		var zb := zs[c + 1]
 		var ua := lerpf(u0, u1, (za - z0) / (z1 - z0))
 		var ub := lerpf(u0, u1, (zb - z0) / (z1 - z0))
+		# Inaltimea scade spre capete (la fel ca alfa): altfel creasta ramane intreaga
+		# deasupra unei margini aproape transparente si iese ca un spin.
+		var ha: float = 0.35 + 0.65 * al[c]
+		var hb: float = 0.35 + 0.65 * al[c + 1]
 		var quad: Array = [
 			[Vector3(0, 0, za), Vector2(ua, 1), al[c]],
 			[Vector3(0, 0, zb), Vector2(ub, 1), al[c + 1]],
-			[Vector3(0, h, zb), Vector2(ub, 0), al[c + 1]],
-			[Vector3(0, h, za), Vector2(ua, 0), al[c]],
+			[Vector3(0, h * hb, zb), Vector2(ub, 1.0 - hb), al[c + 1]],
+			[Vector3(0, h * ha, za), Vector2(ua, 1.0 - ha), al[c]],
 		]
 		for k in [0, 1, 2, 0, 2, 3]:
 			st.set_color(Color(1, 1, 1, quad[k][2]))

@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="6_hzm"]
 [ext_resource type="Script" path="res://scenes/hazards/dust_devil_hazard.gd" id="7_devil"]
 [ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="8_respawn"]
+[ext_resource type="Script" path="res://scenes/hazards/haboob_hazard.gd" id="12_haboob"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/west_mitten.glb" id="10_wm"]
 [ext_resource type="PackedScene" path="res://assets/models/monumentvalley/rocks/east_mitten.glb" id="10_em"]
@@ -80,6 +81,14 @@ _data = {
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0)
 }
 point_count = 5
+
+[sub_resource type="Curve3D" id="Curve3D_haboob"]
+closed = false
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -480, 0, 108, 0, 0, 0, 0, 0, 0, 250, 0, 108),
+"tilts": PackedFloat32Array(0, 0)
+}
+point_count = 2
 
 [node name="Track19" type="Node3D"]
 script = ExtResource("1_track")
@@ -238,6 +247,13 @@ amplitude = Vector2(30, 18)
 dust_amount = 24
 debris_amount = 10
 cone_color = Color(0.62, 0.34, 0.2, 1)
+
+[node name="Haboob" type="Node3D" parent="Hazarduri"]
+script = ExtResource("12_haboob")
+half_width = 83.0
+
+[node name="Path" type="Path3D" parent="Hazarduri/Haboob"]
+curve = SubResource("Curve3D_haboob")
 
 [node name="PlasaCornisa" type="Area3D" parent="Hazarduri"]
 monitorable = false

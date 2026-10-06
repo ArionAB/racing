@@ -236,6 +236,8 @@ func _drive(kind: String, data_idx: int, speed: float, hz: HaboobHazard,
 	var in_n := 0
 	var out_vx_abs := 0.0
 	var out_n := 0
+	var out_fog := 0.0
+	var in_fog := 0.0
 	var max_x := 0.0
 	var min_speed := INF
 	var min_fog_end := INF
@@ -261,6 +263,12 @@ func _drive(kind: String, data_idx: int, speed: float, hz: HaboobHazard,
 		elif outside and t > 1.5:
 			out_vx_abs = maxf(out_vx_abs, absf(vx))
 			out_n += 1
+		# Ceata din Environment (nu din hazard) in afara zonei de gameplay, dar in
+		# volumul vizual: aici vantul trebuie sa fie zero, ceata nu.
+		if outside and p.z > WALL_Z + WALL_HALF_WIDTH + 18.0 and p.z < WALL_Z + 190.0:
+			out_fog = maxf(out_fog, _env.fog_density)
+		if inside:
+			in_fog = maxf(in_fog, _env.fog_density)
 		if _env.fog_mode == Environment.FOG_MODE_DEPTH:
 			min_fog_end = minf(min_fog_end, _env.fog_depth_end)
 		else:
@@ -271,10 +279,15 @@ func _drive(kind: String, data_idx: int, speed: float, hz: HaboobHazard,
 		"in_vx_mean": in_vx_sum / maxf(float(in_n), 1.0), "in_n": in_n,
 		"out_vx_abs": out_vx_abs, "out_n": out_n, "max_x": max_x,
 		"min_speed": min_speed, "fog_end": min_fog_end, "fog_dens": max_fog_dens,
-		"respawns": respawned[0], "race_active": car.race_active,
+		"respawns": respawned[0], "out_fog": out_fog, "race_active": car.race_active,
 	}
 	car.queue_free()
-	await get_tree().physics_frame
+	# Masina iese din scena inauntrul volumului vizual (ceata ajunge pana la
+	# z=-180): lista de suprapuneri a zonei ramane veche un cadru, deci mediul se
+	# restaureaza cu cateva cadre intarziere. Sabotajul (fara restaurare) ramane
+	# prins: nu restaureaza NICIODATA.
+	for _f in 6:
+		await get_tree().physics_frame
 	return res
 
 
@@ -393,6 +406,9 @@ func _run_normal() -> void:
 		if c[0] == "player":
 			# Ceata: pe mediul exponential al temei de test.
 			var target := _hazard.fog_density_inside
+			_verdict(float(r["out_fog"]) > target * 0.9,
+				"%s: ceata se aplica si in volumul VIZUAL din afara zonei de gameplay (dens %.4f, cerut %.4f)"
+				% [label, r["out_fog"], target])
 			_verdict(float(r["fog_dens"]) > target * 0.9,
 				"%s: ceata camerei s-a ingrosat in zid (dens %.4f, cerut %.4f)"
 				% [label, r["fog_dens"], target])

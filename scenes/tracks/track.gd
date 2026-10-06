@@ -1874,6 +1874,17 @@ static func themes() -> Dictionary:
 			"dirt_road_tint": Color(0.62, 0.46, 0.38),
 			"loose_grip": 7.0,
 			"dust_color": Color(0.82, 0.42, 0.25),
+			# Asfaltul US-163: linie dubla galbena, nu placute albe (brief §4).
+			"center_line_double_yellow": true,
+			# Rampa G2 ia culoarea drumului de pamant, nu portocaliul aprins.
+			"kicker_dirt_color": true,
+			# Decor manual cu mii de piese: discurile de contact memoreaza amprenta
+			# per (mesh, transformare relativa), iar vegetatia de talie mica primeste
+			# discuri PLANE (`prop_contact_flat`: o cota de sol, nu cercul de 11).
+			# Vezi `_prop_foot_radius` / `_build_prop_contact`.
+			"prop_foot_cache": true,
+			"prop_contact_flat": ["sagebrush", "rabbitbrush", "tumbleweed", "yucca", "wire_fence",
+				"juniper", "telegraph_pole"],
 			# Scurtatura Dunele (G'): nisip rosu, SAND implicit.
 			"branch_tint": Color(0.80, 0.50, 0.34),
 			# Gresia: clasa NOUA `mv_sandstone` (Palette) pe falezele trecatorii, pe
@@ -5270,6 +5281,15 @@ func _build_center_line() -> void:
 	var lift := Vector3.UP * 0.045
 	var d := 4.0
 	var idx := 0
+	# Tema poate cere LINIE DUBLA GALBENA continua (US-163, Monument Valley,
+	# brief §4: CAR_YELLOW 16): doua benzi de 0.14 m la +-0.15 m de axa, in bucati
+	# de 3.25 m (coarda mica pe viraje). Implicit (false): placutele albe de 2.8 m
+	# la 6.5 m, bit-identice pe toate celelalte piste.
+	var dbl := bool(theme_flag("center_line_double_yellow", false))
+	var step := 3.25 if dbl else 6.5
+	var seg_len := 3.3 if dbl else 2.8
+	var hw := 0.07 if dbl else 0.18
+	var offs := PackedFloat32Array([-0.15, 0.15]) if dbl else PackedFloat32Array([0.0])
 	# Puntea de lemn (scena Kiyomizu) nu poarta marcaj de sosea.
 	var wood := _wood_deck_ranges()
 	while d < total - 5.0:
@@ -5281,19 +5301,21 @@ func _build_center_line() -> void:
 		# intreg.
 		if _road_gap(i) or _road_ice(i) or _road_dirt(i, (i + 1) % n) \
 				or (not wood.is_empty() and _frac_in_ranges(frac_at(i), wood)):
-			d += 6.5
+			d += step
 			continue
 		var dir := (baked[(i + 1) % n] - baked[i]).normalized()
 		var side := _side_at(i)
-		var a := baked[i] + dir * (d - _dists[i]) + lift
-		var b := a + dir * 2.8
-		st.add_vertex(a - side * 0.18); st.add_vertex(a + side * 0.18)
-		st.add_vertex(b - side * 0.18)
-		st.add_vertex(a + side * 0.18); st.add_vertex(b + side * 0.18)
-		st.add_vertex(b - side * 0.18)
-		d += 6.5
+		for o in offs:
+			var a := baked[i] + dir * (d - _dists[i]) + lift + side * o
+			var b := a + dir * seg_len
+			st.add_vertex(a - side * hw); st.add_vertex(a + side * hw)
+			st.add_vertex(b - side * hw)
+			st.add_vertex(a + side * hw); st.add_vertex(b + side * hw)
+			st.add_vertex(b - side * hw)
+		d += step
 	st.generate_normals()
-	_add_visual_mesh(st.commit(), Color(0.92, 0.9, 0.78))
+	_add_visual_mesh(st.commit(), Palette.color(Palette.CAR_YELLOW) if dbl
+		else Color(0.92, 0.9, 0.78))
 
 ## Lumea pistei: cer, soare, teren si dealuri/dune de fundal — tematice.
 func _build_environment() -> void:
@@ -8532,6 +8554,7 @@ func _prop_contact_discs() -> PackedVector4Array:
 			continue
 		if PROP_AO_SKIP_MODELS.has(n3.scene_file_path.get_file().get_basename()):
 			continue
+		var flat_disc := not _contact_flat.is_empty() and _in_flat_model(n3, root)
 		var aabb := _visual_aabb(n3)
 		if aabb.size == Vector3.ZERO:
 			continue
@@ -8563,7 +8586,21 @@ func _prop_contact_discs() -> PackedVector4Array:
 		# mijlocul lui. Ce trebuie sa atinga solul e fundul gabaritului.
 		var base_y := gp.y + aabb.position.y
 		out.append(Vector4(gp.x, gp.z, r, base_y))
+		if not _contact_flat.is_empty():
+			_disc_flat.append(1 if flat_disc else 0)
 	return out
+
+
+## Nodul sau un stramos al lui (pana la `root`) e instanta unui model din
+## `_contact_flat`. Mesh-urile din interiorul unui .glb nu au `scene_file_path`,
+## deci stem-ul se cauta in sus.
+func _in_flat_model(n: Node, root: Node) -> bool:
+	var cur := n
+	while cur != null and cur != root:
+		if not cur.scene_file_path.is_empty():
+			return _contact_flat.has(cur.scene_file_path.get_file().get_basename())
+		cur = cur.get_parent()
+	return false
 
 
 ## Modelele din DecorManual care stau PE SOL si merita pamant batatorit in
@@ -8694,6 +8731,29 @@ func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
 		if absf(mi.global_transform.basis.determinant()) < 0.000001:
 			continue
 		var rel := inv * mi.global_transform
+		if _foot_cache_on:
+			# Raza depinde doar de structura INTERNA a piesei (rel e relativ la n,
+			# banda vine din AABB-ul in spatiul lui n), nu de unde sta in lume:
+			# 1000 de tufe din acelasi .glb au aceeasi cheie. Rotunjit la 1e-4 ca
+			# zgomotul de virgula mobila al pozitiei in lume sa nu rateze cache-ul.
+			var fk := "%d|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f|%.4f" % [
+				mi.mesh.get_rid().get_id(),
+				rel.basis.x.x, rel.basis.x.y, rel.basis.x.z,
+				rel.basis.y.x, rel.basis.y.y, rel.basis.y.z,
+				rel.basis.z.x, rel.basis.z.y, rel.basis.z.z,
+				rel.origin.x, rel.origin.y, rel.origin.z, band]
+			if _foot_best.has(fk):
+				best = maxf(best, float(_foot_best[fk]))
+				continue
+			var mbest := 0.0
+			for v in _mesh_vertices(mi.mesh):
+				var lv := rel * v
+				if lv.y > band:
+					continue
+				mbest = maxf(mbest, Vector2(lv.x, lv.z).length())
+			_foot_best[fk] = mbest
+			best = maxf(best, mbest)
+			continue
 		for v in _mesh_vertices(mi.mesh):
 			var lv := rel * v
 			if lv.y > band:
@@ -8715,6 +8775,15 @@ func _prop_foot_radius(n: Node3D, aabb: AABB) -> float:
 ## Suprafetele se pun cap la cap: rezultatul e un maxim, deci ordinea nu
 ## schimba nimic — discurile ies identice la bit.
 var _foot_verts: Dictionary = {}
+## Memoria amprentei per (mesh, transformare relativa, banda); opt-in prin
+## tema (`prop_foot_cache`), golita odata cu `_foot_verts`.
+var _foot_best: Dictionary = {}
+var _foot_cache_on: bool = false
+## Stem-uri cu disc de contact PLAN (tema, `prop_contact_flat`): vegetatie joasa,
+## unde marginea de 11 cote de sol nu se vede, dar costa 11 `ground_y` pe tufa.
+var _contact_flat: Dictionary = {}
+## Paralel cu discurile intoarse de `_prop_contact_discs`: 1 = disc plan.
+var _disc_flat := PackedByteArray()
 
 func _mesh_vertices(mesh: Mesh) -> PackedVector3Array:
 	var key := mesh.get_rid()
@@ -8758,9 +8827,16 @@ const PROP_AO_LIFT: float = 0.04
 const PROP_AO_SEAT_TOL: float = 1.2
 
 func _build_prop_contact() -> void:
+	_foot_cache_on = bool(theme_flag("prop_foot_cache", false))
+	_contact_flat.clear()
+	_disc_flat.clear()
+	for stem in theme_flag("prop_contact_flat", []):
+		_contact_flat[String(stem)] = true
 	var discs := _prop_contact_discs()
 	# Vertecsii au servit doar razelor de amprenta: nu-i tinem in memorie.
 	_foot_verts.clear()
+	_foot_best.clear()
+	_foot_cache_on = false
 	if discs.is_empty():
 		return
 	var st := SurfaceTool.new()
@@ -8770,7 +8846,9 @@ func _build_prop_contact() -> void:
 	# radacina, si pentru nodul de mesh dinauntru, deci acelasi disc vine de
 	# mai multe ori — iar fiecare cota de margine e un `ground_y`.
 	var rim_cache: Dictionary = {}
+	var di := -1
 	for d in discs:
+		di += 1
 		var cx: float = d.x
 		var cz: float = d.y
 		var r: float = d.z
@@ -8812,10 +8890,18 @@ func _build_prop_contact() -> void:
 			rim = PackedFloat64Array()
 			rim.resize(PROP_AO_SEGMENTS + 2)
 			rim[0] = gy
-			for k in PROP_AO_SEGMENTS + 1:
-				var a := TAU * float(k) / float(PROP_AO_SEGMENTS)
-				var pk := Vector2(cos(a), sin(a)) * r
-				rim[k + 1] = _rim_y(cx + pk.x, cz + pk.y, cy)
+			if not _disc_flat.is_empty() and _disc_flat[di] == 1:
+				# Disc plan: toata marginea la cota centrului, cu aceeasi limitare
+				# ca `_rim_y`. 1 `ground_y` pe tufa in loc de 12.
+				var fy := clampf(gy + PROP_AO_LIFT, cy - PROP_AO_RELIEF,
+					cy + PROP_AO_RELIEF)
+				for k in PROP_AO_SEGMENTS + 1:
+					rim[k + 1] = fy
+			else:
+				for k in PROP_AO_SEGMENTS + 1:
+					var a := TAU * float(k) / float(PROP_AO_SEGMENTS)
+					var pk := Vector2(cos(a), sin(a)) * r
+					rim[k + 1] = _rim_y(cx + pk.x, cz + pk.y, cy)
 			rim_cache[d] = rim
 		for i in PROP_AO_SEGMENTS:
 			var a0 := TAU * float(i) / float(PROP_AO_SEGMENTS)
@@ -12400,8 +12486,19 @@ func _build_channel_kicker(ch: Dictionary) -> void:
 	st.generate_normals()
 	# Acelasi portocaliu ca rampele si creasta: jucatorul stie ca portocaliu
 	# inseamna "sari", si e singurul cod de culoare cu care e antrenat.
-	_add_mesh_with_collision(st.commit(), Color(0.95, 0.6, 0.1),
-		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
+	# Opt-in pe tema (`kicker_dirt_color`): pe drumul de pamant (Monument) rampa
+	# ia culoarea drumului, nu portocaliul aprins care iesea o placa straina.
+	var kicker_color := Color(0.95, 0.6, 0.1)
+	var kicker_spec := 0.5
+	if bool(theme_flag("kicker_dirt_color", false)):
+		# Culoarea drumului, mai inchisa: materialul plat nu imparte la media
+		# texturii macro ca soseaua de pamant, deci la aceeasi valoare iese mai
+		# luminos. Fara luciu (specular 0): fetele laterale reflectau cerul gri.
+		kicker_color = dirt_road_color() * 0.72
+		kicker_color.a = 1.0
+		kicker_spec = 0.0
+	_add_mesh_with_collision(st.commit(), kicker_color,
+		null, 1.0, kicker_spec, BaseMaterial3D.CULL_DISABLED,
 		null, null, true, _wood_deck_material() if on_wood else null,
 		"ChannelKicker")
 
@@ -13837,6 +13934,7 @@ func _build_world_decor() -> void:
 	# Callable gol pe pistele fara gheata, deci nimic nu se schimba acolo.
 	TrackDecor.set_frac_veto(Callable(self, "is_ice_at")
 		if not _ice_ranges().is_empty() else Callable())
+	_set_decor_veg_exclusions()
 	var decor := TrackDecor.build(_sampler, theme_flag("decor", "scatter"),
 		_world_seed(), Callable(self, "_flat_material"),
 		theme_flag("props", "desert"),
@@ -13868,6 +13966,76 @@ func _build_world_decor() -> void:
 			bool(theme_flag("dense_grass_carpet", false)),
 			prop_clear)
 		add_child(grass)
+
+
+## Ce nu are voie sa acopere covorul de vegetatie Monument Valley (vezi
+## `TrackDecor._build_mv_carpet`): cercuri (x, z, raza) si ferestre pe traseu.
+## Pe orice alta tema le GOLESTE (statice: altfel o pista ar mosteni ce a lasat
+## cealalta in acelasi proces, cum face probe_decor care le parcurge pe toate).
+##
+## - culoarele bolovanilor care cad (`Traseu` sub fiecare marker din
+##   Hazarduri): cerc de 6 m la fiecare 3 m de traseu;
+## - arcul (`_arch_fracs`): cerc de 14 m pe axa drumului;
+## - albia G2 (marker cu `water_half`): cerc de 16 m;
+## - piesele mari din DecorManual (cladiri, turnuri, mese): jumatate de diagonala
+##   x 0.8 + 1 m. Plantele, pietrele, gardurile, stalpii, caii NU resping covorul
+##   (palcurile de mana si covorul se aduna, nu se exclud);
+## - grila de start: d in [-15, +30] m fata de linia de start.
+const VEG_SOFT_STEMS: Array[String] = ["sagebrush", "juniper", "rabbitbrush",
+	"yucca", "tumbleweed", "talus", "horse", "raven", "sheep", "fence",
+	"telegraph", "pole", "boulder", "rock", "hoodoo"]
+
+func _set_decor_veg_exclusions() -> void:
+	var circles := PackedVector3Array()
+	var windows: Array[Vector2] = []
+	if String(theme_flag("props", "desert")) == "monumentvalley" and _sampler != null:
+		var total := _sampler.total_length()
+		windows.append(Vector2(total - 15.0, total))
+		windows.append(Vector2(0.0, 30.0))
+		var haz := get_node_or_null("Hazarduri")
+		if haz != null:
+			for m in haz.get_children():
+				var tr := m.get_node_or_null("Traseu") as Path3D
+				if tr != null and tr.curve != null:
+					var pts := tr.curve.get_baked_points()
+					var last := Vector3(INF, 0.0, INF)
+					for pt in pts:
+						var g := tr.global_transform * pt
+						if last.x == INF or Vector2(g.x - last.x, g.z - last.z).length() >= 3.0:
+							circles.append(Vector3(g.x, g.z, 6.0))
+							last = g
+				elif m is Marker3D and m.get("water_half") != null:
+					var gm := (m as Marker3D).global_position
+					circles.append(Vector3(gm.x, gm.z, 16.0))
+		for frac in _arch_fracs():
+			var ai := clampi(int(frac * float(_sampler.point_count())), 0,
+				_sampler.point_count() - 1)
+			var ap := _sampler.baked_point(ai)
+			circles.append(Vector3(ap.x, ap.z, 14.0))
+		var man := get_node_or_null("DecorManual")
+		if man != null:
+			var stack: Array[Node] = [man]
+			while not stack.is_empty():
+				var n: Node = stack.pop_back()
+				var n3 := n as Node3D
+				if n3 != null and n3 != man and n3.visible \
+						and not n3.scene_file_path.is_empty():
+					var stem := n3.scene_file_path.get_file().get_basename().to_lower()
+					var soft := false
+					for sub in VEG_SOFT_STEMS:
+						if stem.contains(sub):
+							soft = true
+							break
+					if not soft:
+						var aabb := _visual_aabb(n3)
+						if aabb.size != Vector3.ZERO:
+							var half := Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+							var gp := n3.global_position
+							circles.append(Vector3(gp.x, gp.z, half * 0.8 + 1.0))
+					continue # un GLB instantiat se trateaza ca un singur obiect
+				for c in n.get_children():
+					stack.append(c)
+	TrackDecor.set_veg_exclusions(circles, windows)
 
 
 ## Coace vizualul falezelor si al decorului in MultiMesh-uri.

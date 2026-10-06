@@ -49,6 +49,11 @@ var _frames: int = 0
 var _track: Node = null
 var _rows: Array[Dictionary] = []
 var _done: bool = false
+## `--manual`: intra si in `DecorManual`. Opt-in, nu implicit: pe pistele vechi
+## decorul pus de mana are 339 de piese care trec INTENTIONAT peste asfalt
+## (balustrade de pod, ziduri de poarta, apa), deci garda globala ar pica.
+## Pistele noi (Track19) il cer explicit in contractul lor de POI.
+var _manual: bool = false
 
 
 func _initialize() -> void:
@@ -56,6 +61,8 @@ func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			only = int(arg.trim_prefix("--track="))
+		elif arg == "--manual":
+			_manual = true
 	# Numerele de scena vin de PE DISC, nu dintr-un interval scris aici: `range(1, 10)`
 	# acoperea Track01..Track09 si lasa pistele de peste 9 nemasurate, iar un
 	# `--track=` care nu nimerea nimic tipara „OK" pe zero piste. Aici `--track=`
@@ -127,6 +134,8 @@ func _measure(path: String, track: Node) -> Dictionary:
 
 	var over: Array[Dictionary] = []
 	for piece in pieces:
+		if piece["road_ok"]:
+			continue
 		var deep := _over_road(piece, baked, halves)
 		if deep >= OVER_MIN:
 			piece["over"] = deep
@@ -250,12 +259,13 @@ func _buried(pieces: Array[Dictionary]) -> Array[Dictionary]:
 
 ## Fiecare mesh de DECOR devine o piesa: nume, cutie in lume, triunghiuri.
 ##
-## Se intra DOAR sub nodurile de decor si de faleze, nu peste toata scena:
+## Se intra DOAR sub nodurile de decor si de faleze, nu peste toata scena (cu
+## `--manual`, si sub `DecorManual`, decorul pus de mana):
 ## soseaua, terenul si orizontul sunt construite cu nume generate, deci o lista
 ## de exceptii dupa nume ar fi ratat exact ce nu trebuie masurat.
 func _collect(node: Node, out: Array[Dictionary]) -> void:
 	var nm := String(node.name)
-	if nm == "Decor" or nm == "Cliffs":
+	if nm == "Decor" or nm == "Cliffs" or (_manual and nm == "DecorManual"):
 		_gather(node, out)
 		return
 	for c in node.get_children():
@@ -273,9 +283,23 @@ func _gather(node: Node, out: Array[Dictionary]) -> void:
 			var box := AABB(tris[0], Vector3.ZERO)
 			for v in tris:
 				box = box.expand(v)
-			out.append({"id": _piece_name(mi), "aabb": box, "tris": tris})
+			out.append({"id": _piece_name(mi), "aabb": box, "tris": tris,
+				"road_ok": _declared_on_road(mi)})
 	for c in node.get_children():
 		_gather(c, out)
+
+
+## O piesa care sta INTENTIONAT pe sosea (grila pentru vite: bare plate peste
+## drum, prin care treci) se declara pe nod cu `metadata/peste_asfalt = true`,
+## pe ea sau pe un stramos. Declaratia sta in scena, langa piesa, nu intr-o lista
+## de nume aici — altfel orice nume nou ar trebui adaugat in sonda.
+func _declared_on_road(node: Node) -> bool:
+	var cur := node
+	while cur != null:
+		if cur.has_meta("peste_asfalt") and bool(cur.get_meta("peste_asfalt")):
+			return true
+		cur = cur.get_parent()
+	return false
 
 
 ## Numele care spune ceva: primul stramos (sau el insusi) fara nume generat.
@@ -298,7 +322,8 @@ func _report() -> bool:
 		var ov: Array = row["over"]
 		print("  PESTE ASFALT (>= %.2f m peste margine): %d" % [OVER_MIN, ov.size()])
 		for w in ov.slice(0, 12):
-			print("    %-14s intra %.2f m peste asfalt" % [w["id"], w["over"]])
+			var c: Vector3 = (w["aabb"] as AABB).get_center()
+			print("    %-14s intra %.2f m peste asfalt  la (%.0f, %.0f)" % [w["id"], w["over"], c.x, c.z])
 		var ins: Array = row["inside"]
 		print("  INGROPATE IN ALTA PIESA (>= %d%% din cutie): %d"
 			% [int(INSIDE_MIN * 100.0), ins.size()])

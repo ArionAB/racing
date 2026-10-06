@@ -588,13 +588,19 @@ const CLASS_TEXTURES := {
 	# Nu se putea tenta "alpine_granite" direct: e clasa stancilor de pe
 	# Alpi (Track09) si le-ar fi facut rosii.
 	"red_valley_tuff": "res://assets/textures/classes/alpine_granite.png",
+	# DALA gresiei: `olkhon_marble` (fisuri verticale, fete late), NU `alpine_granite` — aceea e un
+	# zid de piatra uscata, cu blocuri mici si rosturi, si pe peretii de 14 m dadea zidarie de
+	# caramida (numit de 4 ori independent). Masurat pe 6 cadre (docs/track_briefs/img/
+	# monument_materiale): muchii orizontale dupa blur 1 px 0.449 -> 0.266, gy/gx 1.40 -> 0.92,
+	# culoarea neschimbata (HSV median la +-1 grad). Zero VRAM nou pe pista: dala ridicata era deja
+	# una singura pentru mv_sandstone. Tenta recalculata in spatiu liniar ca sa pastreze media.
 	# GRESIA MONUMENT VALLEY (Track19, brief monument_valley.md §4): peretele
 	# monoliturilor si al meselor, rosu-portocaliu #B8552E. ACEEASI dala ca
 	# `red_valley_tuff` (stratificata, zero VRAM nou), alta ridicare si alta tenta:
 	# tinta (0.722, 0.333, 0.180) are R PESTE media dalei (0.651), deci tenta
 	# singura nu ajunge — vezi CLASS_LIFT. Clasa e NOUA: nicio alta pista n-o
 	# foloseste, deci `rock` / `red_valley_tuff` raman neschimbate.
-	"mv_sandstone": "res://assets/textures/classes/alpine_granite.png",
+	"mv_sandstone": "res://assets/textures/classes/olkhon_marble.png",
 	# SALVIA MONUMENT VALLEY (Track19, brief monument_valley.md §4: #8E977C, gri-verde
 	# prafuit). ACEEASI dala ca `macchia`/`macchia_dry` — zero VRAM nou, doar alta
 	# ridicare si alta tenta. Exista fiindca slotul `CACTUS_GREEN` (12, #5B7C34) e
@@ -603,9 +609,10 @@ const CLASS_TEXTURES := {
 	# Se aplica DOAR pe nodul `Sagebrush_Foliage` (WorldProp.CLASSES_BY_THEME).
 	"mv_sage": "res://assets/textures/classes/macchia.png",
 	# CALOTA stancilor Monument Valley (#B9A08C, gri-roz palid, brief §4). Pe atlas
-	# (SAND_LIGHT) iesea galben-oliv la umbra (galben x ambient rece). Aceeasi dala
-	# `alpine_granite` ca gresia, deci zero VRAM nou; +1 material pe pista.
-	"mv_cap": "res://assets/textures/classes/alpine_granite.png",
+	# (SAND_LIGHT) iesea galben-oliv la umbra (galben x ambient rece). Acum dala
+	# `olkhon_marble` a gresiei (imparte imaginea ridicata, CLASS_LIFT_SHARED): fara modelul de
+	# zid de piatra al lui alpine_granite, care pe calota iesea mozaic gri-verzui. +1 material.
+	"mv_cap": "res://assets/textures/classes/olkhon_marble.png",
 	# TUFUL CREM al Cappadociei: hornurile, poarta geamana, gura de pestera si
 	# fatada bisericii rupestre. ACEEASI dala ca `red_valley_tuff` — nu se
 	# dubleaza in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica
@@ -996,16 +1003,16 @@ const CLASS_TINT := {
 	# (18 grade, 0.78, 0.76), jumatate de umbra (150, 65, 34) = #964122 (16 grade),
 	# umbra (134, 52, 25). Tinta #B8552E = (184, 85, 46), 16 grade, 0.75, 0.72.
 	# R ramane la 1.0: ridicarea (0.82) e cea care urca canalul, nu tenta.
-	"mv_sandstone": Color(1.000, 0.600, 0.460),
+	"mv_sandstone": Color(0.964, 0.592, 0.444),
 	# Salvia (#8E977C = 142, 151, 124). Calculata in spatiu LINIAR (multiplicarea
 	# `albedo_color` x textura e liniara; prima varianta, in sRGB, dadea albedo
 	# (150, 140, 130) si pe captura frunzisul iesea albastru-cenusiu): dala
 	# `macchia` ridicata la 0.72 are media liniara (0.31, 0.53, 0.21), tinta liniara
 	# (0.27, 0.31, 0.20) => multiplicator liniar (0.87, 0.58, 0.95) = in sRGB
 	# (0.93, 0.78, 0.97). Verificat apoi pe captura de joc.
-	"mv_sage": Color(0.880, 0.850, 0.780),
+	"mv_sage": Color(1.130, 0.920, 0.880),
 	# Calota: tinta liniara (0.49, 0.35, 0.26) / dala ridicata la 0.70 => (0.955, 0.872, 0.861).
-	"mv_cap": Color(1.000, 0.850, 0.740),
+	"mv_cap": Color(0.900, 0.830, 0.800),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
@@ -1226,8 +1233,7 @@ const CLASS_LIFT := {
 	# Gresia Monument Valley: vezi CLASS_TINT (R tinta > media dalei).
 	"mv_sandstone": 0.820,
 	# Salvia: vezi CLASS_TINT (R tinta 142 > media dalei 86.7, deci ridicare).
-	"mv_sage": 0.720,
-	"mv_cap": 0.700,
+	"mv_sage": 0.950,
 	"village_plaster": 0.88,
 	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
 	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:
@@ -1357,11 +1363,11 @@ const CLASS_TRIPLANAR_SCALE := {
 	# nu ca doua dungi.
 	"red_valley_tuff": 0.08,
 	# Gresia Monument Valley: aceeasi scara ca faleza rosie (aceeasi dala).
-	"mv_sandstone": 0.08,
+	"mv_sandstone": 0.065,
 	# Salvia: ca `macchia` (aceeasi dala, tufe de ~1 m).
 	"mv_sage": 1.4,
 	# Calota: aceeasi scara ca gresia (aceeasi dala).
-	"mv_cap": 0.08,
+	"mv_cap": 0.065,
 	# ACEEASI scara ca faleza rosie, si nu din lene: hornurile masoara 11-18 m
 	# pe verticala (masurat pe cele 12 .glb-uri — chimney_a 11.3, chimney_c 17.3,
 	# triple 18.5, twin_gate 21.6), adica exact plaja modulului de faleza de
@@ -1714,6 +1720,8 @@ const CLASS_LIFT_SHARED := {
 	"red_sandstone": "rose_sandstone",
 	"ginkgo_gold": "maple_orange",
 	"shu_red": "shu_vermilion",
+	# Calota imparte dala ridicata a gresiei (aceeasi imagine, alta tenta): zero VRAM.
+	"mv_cap": "mv_sandstone",
 }
 
 static func _class_texture(cls: String) -> Texture2D:

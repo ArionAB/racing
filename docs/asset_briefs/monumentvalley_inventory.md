@@ -50,12 +50,12 @@ West Mitten nemodificat: 9432 tri, aceleași noduri. Verify: `VERDICT KIT: OK`
 
 | fișier | noduri | tri | cote măsurate |
 |---|---|---:|---|
-| `rocks/sandstone_arch.glb` | `Arch_Rock/_Scree/_Cap` | 5190 | 13,0 m înalt; puntea x ±12 (+1,1 talpa); adâncime Y ~7,4 m (rock), ~8,6 m cu calota; fusta până la x ±18 |
+| `rocks/sandstone_arch.glb` | `Arch_Rock/_Scree/_Cap` | 5108 (rev. 5; Rock 2678, Scree 2210, Cap 220; rev. 4 avea 5190) | 13,06 m înalt; 42,9 × 18,2 m cu fusta; puntea x ±12,45 (+1,3 talpa); adâncime Y ~7,4 m (rock), ~8,6 m cu calota |
 | `rocks/east_mitten.glb` | `EastMitten_Rock/_Scree/_Cap` | 8910 | turn 27,0 m, amprentă ~22 x 12 m, deget pe **+X** (centru x = 17,1), 23 m, fusta ≤ ~7,5 m |
 | `rocks/merrick_butte.glb` | `Butte_Rock/_Scree/_Cap` | 11928 | 24,0 m, amprentă ~30 x 18 m, 3 contraforturi (13/18/11 m) pe fața +Y |
 | `rocks/mesa_wall_module.glb` | `Mesa_Rock/_Scree/_Cap` | 2224 | 12,0 m pe Y, 14,0 m înalt, 6 m adânc (X −3..+3; 8,6 cu ieșirile și talpa), grohotiș 2,9 m (+X) / 1,9 m (−X) |
 
-### CONTRACT ÎNGHEȚAT: golul arcului (`sandstone_arch.glb`, rev. 4 — masă plată cu gaură)
+### CONTRACT ÎNGHEȚAT: golul arcului (`sandstone_arch.glb`, rev. 4 — masă plată cu gaură; rev. 5 îl păstrează, valori noi mai jos)
 
 Măsurat cu `tools/blender/measure_arch_gap.py` pe GLB-ul exportat (re-importat),
 proiecție pe planul XZ (drumul merge pe Y), TOATE nodurile (rocă + grohotiș +
@@ -66,7 +66,12 @@ calotă), grilă 5 cm; gol = regiune liberă de la sol, conectată la axa drumul
 - lățimea golului: h 0,5 m 15,75 | h 2 m 15,45 | h 4 m 14,20 | h 6 m 12,30 | h 7,5 m 10,45
 - intrados nominal superelipsă a = 7,9, b = 9,4, n = 2,4; blocurile inelului îl pot coborî în gol cu max 0,4 m (jos) / 0,7 m, deci nu e semicerc curat; nimic din grohotiș nu trece de x = ±7,9.
 Orice modificare a arcului se re-măsoară cu scriptul (`VERDICT GOL: OK`).
-Cote: 13,10 m înalt, ~28 m lat + talpă (42,7 m cu fusta), picioare ~7 m la bază, adâncime Y ~7,4 m (rock), 5836 tri.
+
+**Rev. 5 (gol re-măsurat pe GLB-ul re-importat, `measure_arch_gap.py`):** lățime h 0–2 m
+**15,25 m** (≥ 14), înălțime liberă |x| ≤ 1,1 m **9,35 m** (≥ 7,5); h 0,5 m 15,90 | h 2 m 15,25 |
+h 4 m 14,35 | h 6 m 13,60 | h 7,5 m 10,90. Intradosul nu mai e un inel de blocuri, ci 8 fațete
+planare late (coarda superelipsei a = 8,1, b = 9,5, n = 2,4, câte una pe coloană).
+Cote (rev. 4): 13,10 m înalt, ~28 m lat + talpă (42,7 m cu fusta), picioare ~7 m la bază, adâncime Y ~7,4 m (rock), 5836 tri.
 
 ### Fidelitate (decupare vs randare)
 
@@ -85,6 +90,33 @@ Cote: 13,10 m înalt, ~28 m lat + talpă (42,7 m cu fusta), picioare ~7 m la baz
 Abateri: arcul e ~28 m lat (tabel ~24 m) ca să iasă picioare de ~7 m cu golul păstrat;
 blocurile sunt netede și rotunjite, rândurile prea regulate (zid); pe câteva fețe se văd
 crăpături întunecate între inel și umplutură (felii cu ieșiri diferite).
+
+**sandstone_arch rev. 5** (verdict coordonator: în joc se citea ca zidărie, pod din blocuri cu rosturi;
+refăcut cu vocabularul Mittens: coloane verticale, nu rânduri). `Arch_Rock` = 14 coloane pe X
+(2 × 3 pe picioare, 8 deasupra golului; lățimi 1,7–2,9 m), fiecare cu plan în 6 puncte și față în V
+pe ambele laturi (+Y/−Y), 3 etaje cu praguri în Y (retrageri 0–0,6 m la cote diferite pe coloană),
+recese de ~1,0–1,4 m pe ~40% din fețe, teșiri verticale pe muchii, talpă evazată 0–4 m; vârfuri
+12,0–12,45 m (extradosul rămâne plat, corectura rev. 4); la baza picioarelor exterioare taper de
+1,3 m. Intradosul = tăiere cu planul fațetei (`clip_faces`, poliedru convex). Calota (5 plăci) și
+grohotișul (fustă + bolovani doar pe exterior) nemodificate. `MV_ONLY=sandstone_arch` reface doar
+piesa (restul GLB-urilor rămân binar neschimbate).
+
+| element | pe planșă | în GLB rev. 5 | verdict |
+|---|---|---|---|
+| siluetă | placă lată, vârf ~orizontal, golul = gaură prin masă | vârf plat 12,0–12,45 m, golul ca gaură; picioarele cu taper pe exterior | OK; mai dreptunghiulară decât planșa (care are picioare înclinate) |
+| coloane/blocuri | fațete late neregulate, crăpături | 14 coloane verticale 1,7–2,9 m, V pe față/spate, recese, jgheaburi de ~0,9 m între coloane (teșiri) | OK; vocabular Mittens; nu mai sunt rânduri de blocuri |
+| praguri | 2–3 rânduri orizontale slabe | 2 praguri/coloană, la cote diferite (24–40% și 56–72% din înălțime) | OK |
+| picioare | late, masive | ~5,7 m + talpă evazată, fustă de grohotiș | OK |
+| punte | ~3 m la coamă | ~3,1 m deasupra intradosului la coamă (12,45 − 9,35) | OK; mai subțire ca rev. 4 |
+| intrados | neregulat | 8 fațete late planare (unghiuri vizibile) | OK |
+| calotă | 3–5 plăci, înălțimi diferite | 5 plăci plate bej | OK; dreptunghiuri teșite, fără contur festonat |
+| grohotiș | bolovani la picioare | neschimbat | OK |
+
+Abateri: capetele picioarelor (privite lateral, pe axa Y) au etaje late și netede, cu aspect de
+„strat" (nu coloane); în joc detaliul fin al clasei `mv_sandstone` (triplanar) mai sugerează rosturi
+de cărămidă pe fețele late, dar asta ține de textura clasei, nu de geometrie. Capturi din joc:
+`docs/track_briefs/img/monument_integrare/arc_v2_0430.png` (față de `06_arc_0430.png`),
+`arc_v2_liber_40m.png`, `arc_v2_lateral_apropiat.png`; comparația: `monumentvalley_fidelity/sandstone_arch.png`.
 
 **east_mitten** (runda 1)
 
@@ -120,6 +152,12 @@ rampă cu coaste, puțini bolovani. Fața peretelui de masă e pe **+X** (spatel
 scund): coordonatorul îl rotește la montare.
 
 ## Stare la oprire
+
+- **sandstone_arch rev. 5 (octombrie 2026, ramura `monument/arc-v2`):** refăcut din coloane verticale
+  (vezi tabelul de fidelitate); golul 15,25 × 9,35 m; 5108 tri; `VERDICT KIT: OK`; ProbeCameraSolid
+  --track=19: 1 incident, ChannelKicker 0,836 (linia de bază); probe_solid --track=19: gabaritul trece
+  liber pe toată linia (arcul are colizor trimesh); ProbeLaneClear: 3 probe blocate, linia de bază.
+  Neacceptat încă la volan.
 
 - Pilotul `west_mitten` livrat, revizia 3 făcută (volum: coloane pe patru fete cu
   taper si recese, fustă înaltă; păstrate vârful plat, calota SAND_LIGHT, coastele, degetul). Harnasul

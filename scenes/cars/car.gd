@@ -262,6 +262,16 @@ var crush_time: float = 0.0
 ## in volan (vezi FumaroleHazard).
 var blind_time: float = 0.0
 var crush_factor: float = 1.0
+## Directia inversata (stanga <-> dreapta) cat mai tine, in secunde. Se pune DOAR
+## prin `crush(..., invert_steer = true)` (bolovanul care cade din culoarul E de
+## pe Track19); restul hazardelor cu crush n-o ating. Se aplica in Car, pe comanda
+## de viraj, deci o simte si AI-ul (fara viteza trisata, fara vedere speciala).
+var steer_invert_left: float = 0.0
+## Cat strivit (`crush_time` > 0) turbo-ul nu porneste (vezi `_update_turbo`).
+## Mereu true in joc; exista ca garda `ProbeCrushTurbo --sabotaj` sa poata scoate
+## fix-ul la runtime si sa dovedeasca ca masoara ceva.
+var crush_blocks_turbo: bool = true
+signal steer_inverted(seconds: float)
 ## Ars de o coloana de foc (gheizerele din craterul Stromboli, vezi
 ## `ignite`). Se tine SEPARAT de `crush_time` desi amandoua taie plafonul:
 ## strivirea e o forma turtita care se vede pe caroserie, arderea e un nor de
@@ -628,6 +638,8 @@ func _physics_process(delta: float) -> void:
 	if controller != null and race_active and not finished:
 		controller.update(delta)
 		steer = clampf(controller.get_steer(), -1.0, 1.0)
+		if steer_invert_left > 0.0:
+			steer = -steer
 		throttle = clampf(controller.get_throttle(), -1.0, 1.0)
 		drift_pressed = controller.is_drift_pressed()
 		turbo_pressed = controller.is_turbo_pressed()
@@ -657,6 +669,8 @@ func _physics_process(delta: float) -> void:
 
 	slip_time = maxf(slip_time - delta, 0.0)
 	crush_time = maxf(crush_time - delta, 0.0)
+	steer_invert_left = maxf(steer_invert_left - delta, 0.0)
+	_update_invert_marker()
 	blind_time = maxf(blind_time - delta, 0.0)
 	if crush_time <= 0.0:
 		crush_factor = 1.0
@@ -1030,7 +1044,16 @@ func _update_turbo(turbo_pressed: bool, delta: float) -> void:
 	if burn_time > 0.0:
 		is_boosting = _forced_boost > 0.0
 		return
-	if turbo_pressed and can_fire:
+	# Strivit = turbo BLOCAT (4-B, 6 oct 2026). `crush()` stinge boost-ul o
+	# singura data, dar daca butonul ramane apasat, tick-ul urmator il reaprindea:
+	# `_current_max_speed` adauga +turbo_speed_bonus INAINTE sa inmulteasca cu
+	# `crush_factor` (deci plafonul urca de la 0.7*vmax la 0.7*(vmax+11)), accelerarea
+	# primea +turbo_accel_bonus, `_start_boost` dadea +4 m/s si `_punch_scale`
+	# suprascria turtirea tinuta. Jucatorul iesea din strivire cu un buton. Cat
+	# `crush_time` > 0 turbo-ul nu porneste; bara NU se goleste (nu ai ars nimic) si
+	# continua sa se incarce, ca sa-l ai gata cand expira strivirea.
+	var crush_blocked := crush_blocks_turbo and crush_time > 0.0
+	if turbo_pressed and can_fire and not crush_blocked:
 		if not is_boosting:
 			_start_boost()
 		turbo_charge = maxf(turbo_charge - delta / turbo_burn_time, 0.0)
@@ -1103,8 +1126,15 @@ func blind(seconds: float = 0.5) -> void:
 ## (#242), turtirea e chiar EXPLICATIA pentru care mergi mai incet trei secunde:
 ## masina e latita, deci se tarie. Daca sare inapoi la forma normala in doua
 ## zecimi si tu ramai lent, penalizarea devine invizibila si se citeste ca bug.
+##
+## `invert_steer` (implicit false) inverseaza directia (stanga <-> dreapta) cat
+## tine strivirea (`seconds`). Il activeaza doar bolovanul din culoarul E.
 func crush(seconds: float, factor: float, squash: Vector3,
-		keep_speed: float, hold_squash: bool = false) -> void:
+		keep_speed: float, hold_squash: bool = false,
+		invert_steer: bool = false) -> void:
+	if invert_steer and seconds > 0.0:
+		steer_invert_left = maxf(steer_invert_left, seconds)
+		steer_inverted.emit(seconds)
 	crush_time = maxf(crush_time, seconds)
 	crush_factor = minf(crush_factor, factor)
 	velocity.x *= keep_speed
@@ -1171,6 +1201,38 @@ func ignite(seconds: float, factor: float, keep_speed: float) -> void:
 	# Semnalul de strivire ramane cel care zguduie camera (race.gd il asculta
 	# deja). Severitate moderata: te-a lovit un jet, nu ti-a cazut muntele.
 	crushed.emit(self, 0.55)
+
+
+## Indiciul vizual al directiei inversate: un "<=>" galben care pulseaza
+## deasupra masinii (billboard), vizibil pentru toti — si pentru jucator (chase
+## cam), si pentru cine il depaseste. Un singur Label3D, creat la prima
+## inversare si doar aratat/ascuns dupa aceea. Nu aduce niciun material nou
+## (Label3D isi deseneaza propriul text), deci nu intra in numaratoarea de
+## materiale a pistei.
+var _invert_marker: Label3D = null
+
+func _update_invert_marker() -> void:
+	if steer_invert_left <= 0.0:
+		if _invert_marker != null:
+			_invert_marker.visible = false
+		return
+	if _invert_marker == null:
+		_invert_marker = Label3D.new()
+		_invert_marker.text = "<=>"
+		_invert_marker.font_size = 72
+		_invert_marker.pixel_size = 0.012
+		_invert_marker.outline_size = 14
+		_invert_marker.modulate = Color(1.0, 0.85, 0.15)
+		_invert_marker.outline_modulate = Color(0.25, 0.1, 0.0)
+		_invert_marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_invert_marker.no_depth_test = true
+		_invert_marker.top_level = false
+		_invert_marker.position = Vector3(0.0, 2.3, 0.0)
+		_invert_marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_invert_marker)
+	_invert_marker.visible = true
+	var pulse := 1.0 + 0.2 * sin(float(Time.get_ticks_msec()) * 0.018)
+	_invert_marker.scale = Vector3.ONE * pulse
 
 
 func apply_sweep(push: Vector3) -> void:
@@ -1415,6 +1477,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	slip_time = 0.0
 	crush_time = 0.0
 	crush_factor = 1.0
+	steer_invert_left = 0.0 # repusa pe sosea, directia revine la normal
 	# Si turtirea care tinea cat incetinirea: repusa pe sosea, masina apare
 	# intreaga. Fara asta ar rasari latita si ar ramane asa pana expira tween-ul.
 	if _squash_tween != null and _squash_tween.is_valid():

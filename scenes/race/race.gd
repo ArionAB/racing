@@ -189,6 +189,11 @@ func _setup_race() -> void:
 	# bolovani (#242), dar nu fusese legat la camera; lava il refoloseste.
 	player.crushed.connect(func(_c: Car, severity: float) -> void:
 		camera.add_trauma(clampf(0.25 + severity * 0.35, 0.25, 0.6)))
+	# Directia inversata (bolovanul de pe buza, Track19): flash-ul tine cam cat
+	# inversarea (1.2 s + 0.5 s fade vs 1.75 s), deci jucatorul stie DE CE vireaza
+	# invers. Pe masina apare si "<=>" (vezi Car._update_invert_marker).
+	player.steer_inverted.connect(func(_s: float) -> void:
+		hud.flash_message("DIRECTIE INVERSATA  <=>"))
 	# Aprins de o coloana de foc: mesajul spune de ce vezi prost, ca sa nu se
 	# citeasca drept bug grafic. Shake-ul il da deja `crushed`, emis din
 	# `Car.ignite` — nu-l dublam aici.

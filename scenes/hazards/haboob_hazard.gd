@@ -242,7 +242,6 @@ static func wall_material() -> StandardMaterial3D:
 			var xm := float(x) / float(TEX_W - 1) * w_m
 			# Marginea de sus la coloana asta + lobul care o da (pentru lumina).
 			var top_m := 0.0
-			var best_i := 0
 			for i in lobes.size():
 				var l := lobes[i]
 				var dx := xm - l.x
@@ -250,8 +249,6 @@ static func wall_material() -> StandardMaterial3D:
 					var yy := l.y + sqrt(l.z * l.z - dx * dx)
 					if yy > top_m:
 						top_m = yy
-						best_i = i
-			var lobe := lobes[best_i]
 			var side := smoothstep(0.0, 14.0, xm) * smoothstep(0.0, 14.0, w_m - xm)
 			for y in TEX_H:
 				var ym := (1.0 - float(y) / float(TEX_H - 1)) * h_m
@@ -262,11 +259,11 @@ static func wall_material() -> StandardMaterial3D:
 				# (stanga-sus a cercului), + umbra la baza.
 				var k := smoothstep(2.0, 52.0, ym)
 				var c := low.lerp(high, k * k * 0.6 + k * 0.4)
-				var lx := (xm - lobe.x) / lobe.z
-				var ly := (ym - lobe.y) / lobe.z
-				var lit := clampf(0.5 - 0.35 * lx + 0.35 * ly, 0.0, 1.0)
-				if ym > top_m - 9.0:
-					c = c.lerp(Color(1.0, 0.78, 0.55), lit * 0.35)
+				# Lumina de pe crestă: doar functie de distanta pana la marginea de sus,
+				# NU de lobul care o da (cu lumina per lob, corpul avea cercuri vizibile).
+				var below := top_m - ym
+				if below >= 0.0:
+					c = c.lerp(Color(1.0, 0.78, 0.55), (1.0 - smoothstep(0.0, 12.0, below)) * 0.3)
 				img.set_pixel(x, y, Color(c.r, c.g, c.b, a))
 		var m := StandardMaterial3D.new()
 		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -356,8 +353,8 @@ func _build_visuals() -> void:
 		var ramp := Gradient.new()
 		ramp.set_color(0, Color(fog_color.r, fog_color.g, fog_color.b, 0.0))
 		ramp.set_color(1, Color(fog_color.r, fog_color.g, fog_color.b, 0.0))
-		ramp.add_point(0.3, Color(fog_color.r, fog_color.g, fog_color.b, 0.38))
-		ramp.add_point(0.7, Color(fog_color.r, fog_color.g, fog_color.b, 0.38))
+		ramp.add_point(0.3, Color(fog_color.r, fog_color.g, fog_color.b, 0.16))
+		ramp.add_point(0.7, Color(fog_color.r, fog_color.g, fog_color.b, 0.16))
 		_dust.color_ramp = ramp
 		_wall.add_child(_dust)
 	# --- tumbleweeds (doar vizuale). Deferit: copiii isi fac `_ready` INAINTE de

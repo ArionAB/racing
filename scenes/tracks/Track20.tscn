@@ -28,9 +28,10 @@ custom_sun_rotation_deg = Vector3(-25, -70, 0)
 custom_sea_level_offset = -10.57
 custom_width_segments = Array[Vector3]([Vector3(0.103, 0.203, 5.5), Vector3(0.333, 0.442, 6.0), Vector3(0.625, 0.718, 6.5), Vector3(0.82, 0.971, 6.5)])
 custom_dirt_ranges = Array[Vector2]([Vector2(0.103, 0.203)])
-custom_ravines = Array[Vector4]([Vector4(0.517, 0.61, 30.0, -1), Vector4(0.633, 0.71, 12.5, 0), Vector4(0.735, 0.805, 5.0, -1), Vector4(0.835, 0.946, 6.0, 0)])
+custom_ravines = Array[Vector4]([Vector4(0.517, 0.61, 30.0, -1), Vector4(0.635, 0.7, 12.5, 0), Vector4(0.735, 0.805, 5.0, -1), Vector4(0.835, 0.946, 6.0, 0)])
 custom_cornice_ravines = Array[int]([0])
 custom_viaduct_ravines = Array[int]([1])
+custom_viaduct_net_margin = 12.0
 custom_lagoon = Array[Vector2]([Vector2(225, 58), Vector2(292, 105), Vector2(330, 150), Vector2(372, 195), Vector2(405, 250), Vector2(392, 322), Vector2(320, 360), Vector2(232, 326), Vector2(150, 252), Vector2(108, 178), Vector2(112, 128), Vector2(160, 88)])
 traffic_count = 0
 lagoon_depth = 14.6
@@ -51,12 +52,13 @@ depth = 13.0
 reach = 100.0
 fade = 40.0
 jump = false
+water_y_drop = -1.0
 label = "Podul de la Kouri"
 ship_model = "res://assets/models/fiordland/vehicles/cruise_boat.glb"
 ship_node = "Boat"
-ship_scale = 1.0
+ship_scale = 2.0
 ship_draft = 0.0
-ship_bow_neg_z = true
+ship_bow_neg_z = false
 
 [node name="Tromba" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 397.165, 2.985, 330.268)
@@ -76,7 +78,7 @@ script = ExtResource("9_prop")
 [node name="Dig_tetrapozi" type="Node3D" parent="DecorManual"]
 
 [node name="Tetra00" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.24406, 0, -1.00613, 0, 1.6, 0, 1.00613, 0, -1.24406, 264.01, 2.04, 364.79)
+transform = Transform3D(-1.24406, 0, -1.00613, 0, 1.6, 0, 1.00613, 0, -1.24406, 263.01, 2.04, 367.09)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra00" index="1"]
 visible = false
@@ -85,7 +87,7 @@ visible = false
 visible = false
 
 [node name="Tetra01" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.59899, 0, 0.05684, 0, 1.6, 0, -0.05684, 0, -1.59899, 260.16, 2.03, 368.03)
+transform = Transform3D(-1.59899, 0, 0.05684, 0, 1.6, 0, -0.05684, 0, -1.59899, 259.16, 2.03, 370.32)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra01" index="1"]
 visible = false
@@ -94,7 +96,7 @@ visible = false
 visible = false
 
 [node name="Tetra02" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.16948, 0, 1.09193, 0, 1.6, 0, -1.09193, 0, -1.16948, 255.79, 2.01, 361.22)
+transform = Transform3D(-1.16948, 0, 1.09193, 0, 1.6, 0, -1.09193, 0, -1.16948, 254.79, 2.01, 363.51)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra02" index="1"]
 visible = false
@@ -103,7 +105,7 @@ visible = false
 visible = false
 
 [node name="Tetra03" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.16625, 0, 1.59134, 0, 1.6, 0, -1.59134, 0, -0.16625, 251.94, 2.00, 364.45)
+transform = Transform3D(-0.16625, 0, 1.59134, 0, 1.6, 0, -1.59134, 0, -0.16625, 250.95, 2.00, 366.74)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra03" index="1"]
 visible = false
@@ -112,7 +114,7 @@ visible = false
 visible = false
 
 [node name="Tetra04" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.91854, 0, 1.31007, 0, 1.6, 0, -1.31007, 0, 0.91854, 247.58, 1.97, 357.64)
+transform = Transform3D(0.91854, 0, 1.31007, 0, 1.6, 0, -1.31007, 0, 0.91854, 246.58, 1.97, 359.94)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra04" index="1"]
 visible = false
@@ -121,7 +123,7 @@ visible = false
 visible = false
 
 [node name="Tetra05" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.55272, 0, 0.38610, 0, 1.6, 0, -0.38610, 0, 1.55272, 243.73, 1.96, 360.88)
+transform = Transform3D(1.55272, 0, 0.38610, 0, 1.6, 0, -0.38610, 0, 1.55272, 242.73, 1.96, 363.17)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra05" index="1"]
 visible = false
@@ -130,7 +132,7 @@ visible = false
 visible = false
 
 [node name="Tetra06" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.42516, 0, -0.72728, 0, 1.6, 0, 0.72728, 0, 1.42516, 239.37, 1.93, 354.07)
+transform = Transform3D(1.42516, 0, -0.72728, 0, 1.6, 0, 0.72728, 0, 1.42516, 238.37, 1.93, 356.36)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra06" index="1"]
 visible = false
@@ -139,7 +141,7 @@ visible = false
 visible = false
 
 [node name="Tetra07" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.59844, 0, -1.48387, 0, 1.6, 0, 1.48387, 0, 0.59844, 235.52, 1.92, 357.30)
+transform = Transform3D(0.59844, 0, -1.48387, 0, 1.6, 0, 1.48387, 0, 0.59844, 234.52, 1.92, 359.59)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra07" index="1"]
 visible = false
@@ -148,7 +150,7 @@ visible = false
 visible = false
 
 [node name="Tetra08" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.52186, 0, -1.51250, 0, 1.6, 0, 1.51250, 0, -0.52186, 231.15, 1.89, 350.49)
+transform = Transform3D(-0.52186, 0, -1.51250, 0, 1.6, 0, 1.51250, 0, -0.52186, 230.15, 1.89, 352.79)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra08" index="1"]
 visible = false
@@ -157,7 +159,7 @@ visible = false
 visible = false
 
 [node name="Tetra09" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.55669, 0, -0.36974, 0, 1.6, 0, 0.36974, 0, -1.55669, 226.39, 1.89, 353.19)
+transform = Transform3D(-1.55669, 0, -0.36974, 0, 1.6, 0, 0.36974, 0, -1.55669, 225.21, 1.89, 355.39)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra09" index="1"]
 visible = false
@@ -166,7 +168,7 @@ visible = false
 visible = false
 
 [node name="Tetra10" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.41742, 0, 0.74224, 0, 1.6, 0, -0.74224, 0, -1.41742, 222.57, 1.86, 346.06)
+transform = Transform3D(-1.41742, 0, 0.74224, 0, 1.6, 0, -0.74224, 0, -1.41742, 221.40, 1.86, 348.27)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra10" index="1"]
 visible = false
@@ -175,7 +177,7 @@ visible = false
 visible = false
 
 [node name="Tetra11" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.58279, 0, 1.49008, 0, 1.6, 0, -1.49008, 0, -0.58279, 218.48, 1.86, 348.98)
+transform = Transform3D(-0.58279, 0, 1.49008, 0, 1.6, 0, -1.49008, 0, -0.58279, 217.31, 1.86, 351.19)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra11" index="1"]
 visible = false
@@ -184,7 +186,7 @@ visible = false
 visible = false
 
 [node name="Tetra12" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.59046, 0, 0.17447, 0, 1.6, 0, -0.17447, 0, 1.59046, 213.37, 1.85, 339.04)
+transform = Transform3D(1.59046, 0, 0.17447, 0, 1.6, 0, -0.17447, 0, 1.59046, 211.60, 1.85, 340.80)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra12" index="1"]
 visible = false
@@ -193,7 +195,7 @@ visible = false
 visible = false
 
 [node name="Tetra13" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.31480, 0, -0.91176, 0, 1.6, 0, 0.91176, 0, 1.31480, 208.60, 1.85, 340.61)
+transform = Transform3D(1.31480, 0, -0.91176, 0, 1.6, 0, 0.91176, 0, 1.31480, 206.82, 1.85, 342.37)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra13" index="1"]
 visible = false
@@ -202,7 +204,7 @@ visible = false
 visible = false
 
 [node name="Tetra14" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.39412, 0, -1.55070, 0, 1.6, 0, 1.55070, 0, 0.39412, 207.08, 1.85, 332.67)
+transform = Transform3D(0.39412, 0, -1.55070, 0, 1.6, 0, 1.55070, 0, 0.39412, 205.30, 1.85, 334.43)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra14" index="1"]
 visible = false
@@ -211,7 +213,7 @@ visible = false
 visible = false
 
 [node name="Tetra15" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.71990, 0, -1.42890, 0, 1.6, 0, 1.42890, 0, -0.71990, 202.30, 1.85, 334.24)
+transform = Transform3D(-0.71990, 0, -1.42890, 0, 1.6, 0, 1.42890, 0, -0.71990, 200.52, 1.85, 336.00)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra15" index="1"]
 visible = false
@@ -220,7 +222,7 @@ visible = false
 visible = false
 
 [node name="Tetra16" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.48076, 0, -0.60610, 0, 1.6, 0, 0.60610, 0, -1.48076, 200.78, 1.85, 326.30)
+transform = Transform3D(-1.48076, 0, -0.60610, 0, 1.6, 0, 0.60610, 0, -1.48076, 199.00, 1.85, 328.06)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra16" index="1"]
 visible = false
@@ -229,7 +231,7 @@ visible = false
 visible = false
 
 [node name="Tetra17" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.51518, 0, 0.51403, 0, 1.6, 0, -0.51403, 0, -1.51518, 196.01, 1.85, 327.87)
+transform = Transform3D(-1.51518, 0, 0.51403, 0, 1.6, 0, -0.51403, 0, -1.51518, 194.23, 1.85, 329.63)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra17" index="1"]
 visible = false
@@ -238,7 +240,7 @@ visible = false
 visible = false
 
 [node name="Tetra18" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.80629, 0, 1.38199, 0, 1.6, 0, -1.38199, 0, -0.80629, 194.48, 1.85, 319.93)
+transform = Transform3D(-0.80629, 0, 1.38199, 0, 1.6, 0, -1.38199, 0, -0.80629, 192.71, 1.85, 321.68)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra18" index="1"]
 visible = false
@@ -247,7 +249,7 @@ visible = false
 visible = false
 
 [node name="Tetra19" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.29816, 0, 1.57197, 0, 1.6, 0, -1.57197, 0, 0.29816, 189.71, 1.85, 321.50)
+transform = Transform3D(0.29816, 0, 1.57197, 0, 1.6, 0, -1.57197, 0, 0.29816, 187.93, 1.85, 323.26)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra19" index="1"]
 visible = false
@@ -256,7 +258,7 @@ visible = false
 visible = false
 
 [node name="Tetra20" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.25633, 0, 0.99078, 0, 1.6, 0, -0.99078, 0, 1.25633, 188.19, 1.85, 313.56)
+transform = Transform3D(1.25633, 0, 0.99078, 0, 1.6, 0, -0.99078, 0, 1.25633, 186.41, 1.85, 315.31)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra20" index="1"]
 visible = false
@@ -265,7 +267,7 @@ visible = false
 visible = false
 
 [node name="Tetra21" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.59817, 0, -0.07648, 0, 1.6, 0, 0.07648, 0, 1.59817, 183.41, 1.85, 315.13)
+transform = Transform3D(1.59817, 0, -0.07648, 0, 1.6, 0, 0.07648, 0, 1.59817, 181.63, 1.85, 316.88)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra21" index="1"]
 visible = false
@@ -274,7 +276,7 @@ visible = false
 visible = false
 
 [node name="Tetra22" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.15598, 0, -1.10621, 0, 1.6, 0, 1.10621, 0, 1.15598, 181.89, 1.85, 307.19)
+transform = Transform3D(1.15598, 0, -1.10621, 0, 1.6, 0, 1.10621, 0, 1.15598, 180.11, 1.85, 308.94)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra22" index="1"]
 visible = false
@@ -283,7 +285,7 @@ visible = false
 visible = false
 
 [node name="Tetra23" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.14669, 0, -1.59326, 0, 1.6, 0, 1.59326, 0, 0.14669, 177.11, 1.85, 308.76)
+transform = Transform3D(0.14669, 0, -1.59326, 0, 1.6, 0, 1.59326, 0, 0.14669, 175.34, 1.85, 310.51)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra23" index="1"]
 visible = false
@@ -292,7 +294,7 @@ visible = false
 visible = false
 
 [node name="Tetra24" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.93457, 0, -1.29869, 0, 1.6, 0, 1.29869, 0, -0.93457, 175.59, 1.85, 300.81)
+transform = Transform3D(-0.93457, 0, -1.29869, 0, 1.6, 0, 1.29869, 0, -0.93457, 173.81, 1.85, 302.57)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra24" index="1"]
 visible = false
@@ -301,7 +303,7 @@ visible = false
 visible = false
 
 [node name="Tetra25" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.55734, 0, -0.36700, 0, 1.6, 0, 0.36700, 0, -1.55734, 170.82, 1.85, 302.38)
+transform = Transform3D(-1.55734, 0, -0.36700, 0, 1.6, 0, 0.36700, 0, -1.55734, 169.04, 1.85, 304.14)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra25" index="1"]
 visible = false
@@ -310,7 +312,7 @@ visible = false
 visible = false
 
 [node name="Tetra26" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.41611, 0, 0.74473, 0, 1.6, 0, -0.74473, 0, -1.41611, 169.30, 1.85, 294.44)
+transform = Transform3D(-1.41611, 0, 0.74473, 0, 1.6, 0, -0.74473, 0, -1.41611, 167.52, 1.85, 296.20)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra26" index="1"]
 visible = false
@@ -319,7 +321,7 @@ visible = false
 visible = false
 
 [node name="Tetra27" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.58017, 0, 1.49111, 0, 1.6, 0, -1.49111, 0, -0.58017, 164.52, 1.85, 296.01)
+transform = Transform3D(-0.58017, 0, 1.49111, 0, 1.6, 0, -1.49111, 0, -0.58017, 162.74, 1.85, 297.77)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra27" index="1"]
 visible = false
@@ -328,7 +330,7 @@ visible = false
 visible = false
 
 [node name="Tetra28" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.54040, 0, 1.50598, 0, 1.6, 0, -1.50598, 0, 0.54040, 163.00, 1.85, 288.07)
+transform = Transform3D(0.54040, 0, 1.50598, 0, 1.6, 0, -1.50598, 0, 0.54040, 161.22, 1.85, 289.83)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra28" index="1"]
 visible = false
@@ -337,7 +339,7 @@ visible = false
 visible = false
 
 [node name="Tetra29" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.39585, 0, 0.78204, 0, 1.6, 0, -0.78204, 0, 1.39585, 158.22, 1.85, 289.64)
+transform = Transform3D(1.39585, 0, 0.78204, 0, 1.6, 0, -0.78204, 0, 1.39585, 156.45, 1.85, 291.40)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra29" index="1"]
 visible = false
@@ -346,7 +348,7 @@ visible = false
 visible = false
 
 [node name="Tetra30" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.56653, 0, -0.32555, 0, 1.6, 0, 0.32555, 0, 1.56653, 156.70, 1.85, 281.70)
+transform = Transform3D(1.56653, 0, -0.32555, 0, 1.6, 0, 0.32555, 0, 1.56653, 154.92, 1.85, 283.46)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra30" index="1"]
 visible = false
@@ -355,7 +357,7 @@ visible = false
 visible = false
 
 [node name="Tetra31" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.96870, 0, -1.27343, 0, 1.6, 0, 1.27343, 0, 0.96870, 151.93, 1.85, 283.27)
+transform = Transform3D(0.96870, 0, -1.27343, 0, 1.6, 0, 1.27343, 0, 0.96870, 150.15, 1.85, 285.03)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra31" index="1"]
 visible = false
@@ -364,7 +366,7 @@ visible = false
 visible = false
 
 [node name="Tetra32" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.10436, 0, -1.59659, 0, 1.6, 0, 1.59659, 0, -0.10436, 150.40, 1.85, 275.33)
+transform = Transform3D(-0.10436, 0, -1.59659, 0, 1.6, 0, 1.59659, 0, -0.10436, 148.63, 1.85, 277.09)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra32" index="1"]
 visible = false
@@ -373,7 +375,7 @@ visible = false
 visible = false
 
 [node name="Tetra33" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.12622, 0, -1.13650, 0, 1.6, 0, 1.13650, 0, -1.12622, 145.63, 1.85, 276.90)
+transform = Transform3D(-1.12622, 0, -1.13650, 0, 1.6, 0, 1.13650, 0, -1.12622, 143.85, 1.85, 278.66)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra33" index="1"]
 visible = false
@@ -382,7 +384,7 @@ visible = false
 visible = false
 
 [node name="Tetra34" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.59558, 0, -0.11886, 0, 1.6, 0, 0.11886, 0, -1.59558, 144.11, 1.85, 268.96)
+transform = Transform3D(-1.59558, 0, -0.11886, 0, 1.6, 0, 0.11886, 0, -1.59558, 142.33, 1.85, 270.72)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra34" index="1"]
 visible = false
@@ -391,7 +393,7 @@ visible = false
 visible = false
 
 [node name="Tetra35" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.28218, 0, 0.95709, 0, 1.6, 0, -0.95709, 0, -1.28218, 139.33, 1.85, 270.53)
+transform = Transform3D(-1.28218, 0, 0.95709, 0, 1.6, 0, -0.95709, 0, -1.28218, 137.55, 1.85, 272.29)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra35" index="1"]
 visible = false
@@ -400,7 +402,7 @@ visible = false
 visible = false
 
 [node name="Tetra36" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.03425, 0, 1.59963, 0, 1.6, 0, -1.59963, 0, 0.03425, 137.63, 1.85, 261.98)
+transform = Transform3D(0.03425, 0, 1.59963, 0, 1.6, 0, -1.59963, 0, 0.03425, 135.74, 1.85, 263.62)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra36" index="1"]
 visible = false
@@ -409,7 +411,7 @@ visible = false
 visible = false
 
 [node name="Tetra37" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.07531, 0, 1.18479, 0, 1.6, 0, -1.18479, 0, 1.07531, 132.76, 1.85, 263.24)
+transform = Transform3D(1.07531, 0, 1.18479, 0, 1.6, 0, -1.18479, 0, 1.07531, 130.88, 1.85, 264.88)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra37" index="1"]
 visible = false
@@ -418,7 +420,7 @@ visible = false
 visible = false
 
 [node name="Tetra38" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.30263, 0, -0.92907, 0, 1.6, 0, 0.92907, 0, 1.30263, 130.94, 1.86, 253.59)
+transform = Transform3D(1.30263, 0, -0.92907, 0, 1.6, 0, 0.92907, 0, 1.30263, 128.77, 1.86, 254.83)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra38" index="1"]
 visible = false
@@ -427,7 +429,7 @@ visible = false
 visible = false
 
 [node name="Tetra39" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.37358, 0, -1.55578, 0, 1.6, 0, 1.55578, 0, 0.37358, 125.92, 1.86, 253.87)
+transform = Transform3D(0.37358, 0, -1.55578, 0, 1.6, 0, 1.55578, 0, 0.37358, 123.75, 1.86, 255.10)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra39" index="1"]
 visible = false
@@ -436,7 +438,7 @@ visible = false
 visible = false
 
 [node name="Tetra40" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.73874, 0, -1.41925, 0, 1.6, 0, 1.41925, 0, -0.73874, 126.52, 1.88, 245.80)
+transform = Transform3D(-0.73874, 0, -1.41925, 0, 1.6, 0, 1.41925, 0, -0.73874, 124.34, 1.88, 247.04)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra40" index="1"]
 visible = false
@@ -445,7 +447,7 @@ visible = false
 visible = false
 
 [node name="Tetra41" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.53600, 0, -0.44802, 0, 1.6, 0, 0.44802, 0, -1.53600, 121.35, 1.88, 245.78)
+transform = Transform3D(-1.53600, 0, -0.44802, 0, 1.6, 0, 0.44802, 0, -1.53600, 119.15, 1.88, 246.96)
 
 [node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra41" index="1"]
 visible = false

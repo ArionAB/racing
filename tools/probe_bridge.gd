@@ -263,6 +263,10 @@ func _report_channel(track: Track, sampler: TrackSideSampler, ch: Dictionary,
 	# vizibila e (inaltime * scara) minus pescajul.
 	var mast := 9.96 * LiftBridgeHazard.SHIP_SCALE \
 		- LiftBridgeHazard.SHIP_DRAFT * LiftBridgeHazard.SHIP_SCALE + sea_y
+	if not bridge.ship_model.is_empty():
+		# Vapor propriu (Track20): inaltimea vine din AABB-ul modelului extras, nu
+		# din constantele corabiei cu panze.
+		mast = _ship_top(bridge) + sea_y
 	print("  travee jos %.2f m · sus %.2f m · varf de catarg %.2f m"
 		% [span_top, span_open, mast])
 	print("  degajare sub traveea ridicata: %.2f m" % (span_open - mast))

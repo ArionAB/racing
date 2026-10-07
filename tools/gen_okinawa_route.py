@@ -351,7 +351,13 @@ dirt_txt = ", ".join(f"Vector2({a}, {b})" for a, b in DIRT)
 # --- rape: 0 = cornisa E (stanga = est = marea), 1 = podul (viaduct, ambele laturi),
 #           2 = digul H (ambele laturi) -------------------------------------------------
 fE0, fE1 = r3(F["E cornisa far"]), r3(F["F cap pod"])
-fV0, fV1 = r3(F["F pod start"] - 0.012), r3(F["F pod capat"] + 0.012)
+# Fereastra viaductului = doar partea PLANA a podului (+8.5). Dincolo de capat soseaua coboara
+# spre insula mica (+5), iar plasa de repunere a viaductului (`ViaductNet`) se pune sub cota
+# cea mai joasa din fereastra, ca o cutie cu margine: cu 45 m (implicit) si fereastra prelungita
+# peste capat, cutia prindea SOSEAUA de la coltul G (ProbeRace seed 1: 22 de repuneri la 0.723,
+# "ViaductNet1"). Marja se coboara la 12 m, ca la Kyoto (Track18).
+fV0, fV1 = r3(F["F pod start"] - 0.01), r3(F["F pod capat"] + 0.002)
+VIADUCT_NET_MARGIN_M = 12.0
 fG0, fG1 = r3(F["G3"] + 0.015), r3(F["H colt port"] - 0.025)
 RAVINES = [
     (fE0, fE1, 30.0, -1),     # cornisa E: buza la 0.5 m de asfalt, marea la picior
@@ -418,7 +424,7 @@ f_a, f_b = fG0 + 0.01, fG1 - 0.01
 k = 0
 ft = f_a
 while ft < f_b:
-    for row, lat in enumerate((-9.0, -13.5)):
+    for row, lat in enumerate((-11.5, -16.0)):
         g, yaw = offset_from_road(ft + (0.5 * 4.5 / tot if row else 0.0), lat)
         tetra.append((f"Tetra{k:02d}", g, yaw * 3.7 + k * 41.0))
         k += 1
@@ -440,6 +446,11 @@ gate_pos, gate_yaw = offset_from_road(F_GATE, 0.0)
 
 main_pts = [godot(p, p[2]) for p in rs]
 
+# Feribot PROVIZORIU: cruise_boat.glb din kitul Fiordland (14 x 4,8 x 6,2 m, originea la linia de
+# plutire, prova pe +Z, MASURAT pe geometrie: capatul +Z se ingusteaza la 1,8 m si e jos (0,9 m), capatul -Z e bont
+# cu cos (4,6 m) -- contrar brief-ului Fiordland care o da pe -Z). Scalat 2x (28 m, varf +9,4 m peste mare) ca sa depaseasca asfaltul de la
+# +8,5 m: la 1x (varf +4,7 m) podul nu mai avea de ce sa se ridice (probe_bridge: "catargele chiar
+# depasesc asfaltul" = FAIL). Il inlocuieste `island_ferry` / `coastal_freighter` (brief par. 5.2).
 SHIP_MODEL = "res://assets/models/fiordland/vehicles/cruise_boat.glb"
 
 tscn = f"""[gd_scene format=3]
@@ -475,6 +486,7 @@ custom_dirt_ranges = Array[Vector2]([{dirt_txt}])
 custom_ravines = Array[Vector4]([{rav_txt}])
 custom_cornice_ravines = Array[int]([0])
 custom_viaduct_ravines = Array[int]([1])
+custom_viaduct_net_margin = {VIADUCT_NET_MARGIN_M}
 custom_lagoon = Array[Vector2]([{lag_txt}])
 traffic_count = 0
 lagoon_depth = {lagoon_depth}
@@ -495,12 +507,13 @@ depth = 13.0
 reach = 100.0
 fade = 40.0
 jump = false
+water_y_drop = -1.0
 label = "Podul de la Kouri"
 ship_model = "{SHIP_MODEL}"
 ship_node = "Boat"
-ship_scale = 1.0
+ship_scale = 2.0
 ship_draft = 0.0
-ship_bow_neg_z = true
+ship_bow_neg_z = false
 
 [node name="Tromba" type="Marker3D" parent="Hazarduri"]
 transform = {marker_xf(F_TYPHOON)}

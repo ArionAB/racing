@@ -188,6 +188,21 @@ const FALL_BACKOFF: float = 70.0
 ## fara canal (cornisa): acolo nu are ce sa ridice si nu are pe ce sa pluteasca.
 @export var build_towers: bool = true
 @export var build_ships: bool = true
+## Vaporul care traverseaza canalul. GOL (implicit) = corabia cu panze din
+## kit (`SHIP_PATH` / `SHIP_NODE` / `SHIP_SCALE` / `SHIP_DRAFT`, prova pe +Z),
+## bit-identic pe Track08 si Track15. Pe Okinawa (Track20, brief §3) vine un
+## feribot: `ship_model` e calea GLB, `ship_node` numele nodului-radacina de
+## extras. Celelalte trei se citesc doar cand `ship_model` e setat, fiindca un
+## alt model are alta scara, alta origine si alta prova:
+##  - `ship_scale`: scara pe holder;
+##  - `ship_draft`: cat din coca sta sub origine (0 = originea e la linia de
+##    plutire, cum cere `--origin=waterline`; tall_ship are originea la CHILA);
+##  - `ship_bow_neg_z`: prova pe -Z (conventia proiectului), nu pe +Z.
+@export_file("*.glb") var ship_model: String = ""
+@export var ship_node: String = ""
+@export var ship_scale: float = 1.0
+@export var ship_draft: float = 0.0
+@export var ship_bow_neg_z: bool = true
 ## Declarat direct in scena, nu printr-un canal: isi cere singur gaura din
 ## carosabil (`road_hole_span()` = `gap`). FALS cand podul e construit de
 ## Track dintr-un TrackChannel — acolo canalul a taiat deja asfaltul, si o a
@@ -562,17 +577,19 @@ func _build_span() -> void:
 # ------------------------------------------------------------------ corabii
 
 func _build_ships() -> void:
-	if not ResourceLoader.exists(SHIP_PATH):
+	var path := SHIP_PATH if ship_model.is_empty() else ship_model
+	var node_name := SHIP_NODE if ship_model.is_empty() else ship_node
+	if not ResourceLoader.exists(path):
 		return
-	var scene := load(SHIP_PATH) as PackedScene
+	var scene := load(path) as PackedScene
 	for i in SHIP_COUNT:
-		var model := _extract(scene, SHIP_NODE)
+		var model := _extract(scene, node_name)
 		if model == null:
 			return
 		var holder := Node3D.new()
 		holder.name = "Ship%d" % i
 		holder.add_child(model)
-		holder.scale = Vector3.ONE * SHIP_SCALE
+		holder.scale = Vector3.ONE * _ship_scale()
 		# Canalul merge pe +X local, iar corabia are prova spre +Z, NU spre -Z
 		# cum cere conventia proiectului: masurat pe GLB (sonda temporara
 		# probe_ship_bow), capatul +Z e ingust si jos (bompresul, 0.4 m latime),
@@ -580,6 +597,8 @@ func _build_ships() -> void:
 		# versiune presupunea -Z si rotea cu -90°: corabiile navigau cu pupa
 		# inainte. +90° pe Y aduce prova pe +X, in sensul de mers.
 		model.rotation.y = PI * 0.5
+		if not ship_model.is_empty() and ship_bow_neg_z:
+			model.rotation.y = -PI * 0.5   # prova pe -Z: -90 o aduce pe +X
 		add_child(holder)
 		Palette.apply_world_material(model)
 		_ships.append(holder)
@@ -591,12 +610,24 @@ func _build_ships() -> void:
 		var hit := Area3D.new()
 		var hs := CollisionShape3D.new()
 		var hb := BoxShape3D.new()
-		hb.size = Vector3(15.1, 6.0, 5.6) * SHIP_SCALE
+		hb.size = Vector3(15.1, 6.0, 5.6) * _ship_scale()
 		hs.shape = hb
-		hs.position = Vector3(0.0, 2.0 * SHIP_SCALE, 0.0)
+		hs.position = Vector3(0.0, 2.0 * _ship_scale(), 0.0)
 		hit.add_child(hs)
 		holder.add_child(hit)
 		_ship_hits.append(hit)
+
+
+## Scara si pescajul EFECTIV al vaporului: constantele corabiei din kit cand
+## `ship_model` e gol (comportamentul vechi), exporturile cand e setat.
+func _ship_scale() -> float:
+	return SHIP_SCALE if ship_model.is_empty() else ship_scale
+
+
+func _ship_draft() -> float:
+	if ship_model.is_empty():
+		return SHIP_DRAFT * SHIP_SCALE
+	return ship_draft * ship_scale
 
 
 ## Unde e corabia `i` pe canal, in metri fata de gol.
@@ -682,7 +713,7 @@ func _apply_cycle(t: float) -> void:
 		lamp.visible = on
 	for i in _ships.size():
 		var s := _ship_offset(i)
-		_ships[i].position = Vector3(s, water_y - SHIP_DRAFT * SHIP_SCALE, 0.0)
+		_ships[i].position = Vector3(s, water_y - _ship_draft(), 0.0)
 		# Dincolo de apa canalului corabia n-are ce cauta: acolo terenul urca
 		# inapoi la cota insulei si ar naviga prin nisip.
 		_ships[i].visible = absf(s) < channel_reach

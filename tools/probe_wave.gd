@@ -106,12 +106,14 @@ func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			only = int(arg.trim_prefix("--track="))
-	for i in range(1, 10):
+	# `--track=N` e numarul din NUMELE FISIERULUI si merge si peste 9 (Track20 =
+	# Okinawa); fara argument ramane trecerea veche prin Track01..Track09.
+	var candidates: Array = [only] if only >= 0 else range(1, 10)
+	for i: int in candidates:
 		var path := "res://scenes/tracks/Track%02d.tscn" % i
 		if not ResourceLoader.exists(path):
 			continue
-		if only < 0 or only == i:
-			_paths.append(path)
+		_paths.append(path)
 	if _paths.is_empty():
 		push_error("probe_wave: nu am gasit nicio pista")
 		get_tree().quit(1)

@@ -293,6 +293,16 @@ const BASELINE := {
 	# cifra masurata, FARA marja: prima piesa de decor pusa in banda trebuie sa
 	# pice garda. Sabotaj (`--sabotaj`) verificat la armare.
 	"Monument Valley (Track19)": 3,
+	# Okinawa (Track20), fundatia (traseu + pod + hazarde + decor provizoriu, 7 oct
+	# 2026): 4 raportari, masurate de 3 ori, identic — toate la frac 0.665-0.670 pe
+	# INAINTE si toate PODUL RIDICATOR, obstacolul intentionat al pistei: `RampNear`
+	# (h=1.0, la 1.75 m), `LiftSpan` (h=1.6, la 3.67 m, traveea la ceasul de repaus) si
+	# `RampFar` (h=0.4 si h=1.0, la 5.5-5.8 m, cealalta buza). Poarta provizorie de la 0.43
+	# (torii scalat ca sa-i incapa 12 m de drum) a dat 18 raportari cat a fost la scara
+	# uniforma 3.2 (golul dintre picioare ~6 m): corectata, zero. Baza = cifra masurata,
+	# FARA marja: prima piesa de decor pusa in banda trebuie sa pice garda. Sabotaj
+	# (`--sabotaj`) verificat la armare.
+	"Okinawa (Track20)": 4,
 }
 
 

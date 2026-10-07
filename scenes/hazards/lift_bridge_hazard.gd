@@ -610,9 +610,13 @@ func _build_ships() -> void:
 		var hit := Area3D.new()
 		var hs := CollisionShape3D.new()
 		var hb := BoxShape3D.new()
-		hb.size = Vector3(15.1, 6.0, 5.6) * _ship_scale()
+		# Zona de contact NU creste cu `ship_scale`: la 2x ar urca pana la 10 m peste
+		# apa, adica peste tabliera (+8.5), si ar repune masinile de pe podul INCHIS
+		# cand coca (28 m) inca mai e sub el. Ramane volumul de apa din jurul coastei.
+		var hit_scale := SHIP_SCALE if ship_model.is_empty() else 1.0
+		hb.size = Vector3(15.1, 6.0, 5.6) * hit_scale
 		hs.shape = hb
-		hs.position = Vector3(0.0, 2.0 * _ship_scale(), 0.0)
+		hs.position = Vector3(0.0, 2.0 * hit_scale, 0.0)
 		hit.add_child(hs)
 		holder.add_child(hit)
 		_ship_hits.append(hit)

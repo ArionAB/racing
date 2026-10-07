@@ -94,7 +94,15 @@ var _fail: int = 0
 func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
-			_track_index = int(arg.trim_prefix("--track="))
+			# `resolve_track_index`: accepta si POZITIA din lista, si NUMARUL scenei
+			# (--track=20 = Track20), ca restul sondelor. Pozitiile existente
+			# (1 = Track08) se rezolva ca inainte.
+			_track_index = GameState.resolve_track_index(
+				int(arg.trim_prefix("--track=")))
+			if _track_index < 0:
+				printerr("probe_typhoon: --track nu e nici pozitie, nici numar de scena")
+				get_tree().quit(1)
+				return
 		elif arg == "--scan":
 			_scan = true
 	_track = (load(GameState.TRACK_SCENES[_track_index]) as PackedScene) \

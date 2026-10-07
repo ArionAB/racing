@@ -3914,6 +3914,26 @@ static func themes() -> Dictionary:
 			"water": false,
 		},
 	}
+	# OKINAWA (Track20, docs/track_briefs/okinawa.md §4, pasul 2 din §7): pleaca
+	# din COPIA lui "island" (marea, golful, ambientul, decorul de banda), cu
+	# override-uri minime. "island" NU se editeaza: Track08 il foloseste si
+	# trebuie sa ramana bit-identic. Cerul de furtuna si paleta fina vin mai
+	# tarziu; aici doar cele trei lucruri cerute de fundatie.
+	var oki: Dictionary = (_themes_cache["island"] as Dictionary).duplicate()
+	oki.merge({
+		# Nisip coraligen alb-crem pe aleea B (`custom_dirt_ranges`), nu ocrul
+		# prafuit al insulei de Track08.
+		"dirt_road_tint": Color(0.86, 0.82, 0.72),
+		# Soare de dupa-amiaza tarzie din VSV, ~25 grade. Aceeasi cifra ca
+		# `custom_sun_rotation_deg` din Track20.tscn (conventia busolei din
+		# gen_okinawa_route.py: 180 - y = 250 = VSV).
+		"sun_rotation_deg": Vector3(-25, -70, 0),
+		# Ceata 140 -> 350 m: castelul trebuie sa se vada intreg de la ~280 m
+		# (brief §2.0), iar ceata implicita (90 -> 250) il inghite.
+		"fog_begin": 140.0,
+		"fog_end": 350.0,
+	}, true)
+	_themes_cache["okinawa"] = oki
 	return _themes_cache
 
 
@@ -12656,6 +12676,12 @@ func _build_lift_bridge(ch: Dictionary) -> void:
 	bridge.deck_material_class = String(ch.get("deck_material_class", ""))
 	bridge.build_towers = bool(ch.get("build_towers", true))
 	bridge.build_ships = bool(ch.get("build_ships", true))
+	# Vaporul propriu al canalului (Okinawa Track20); gol = corabia din kit.
+	bridge.ship_model = String(ch.get("ship_model", ""))
+	bridge.ship_node = String(ch.get("ship_node", ""))
+	bridge.ship_scale = float(ch.get("ship_scale", 1.0))
+	bridge.ship_draft = float(ch.get("ship_draft", 0.0))
+	bridge.ship_bow_neg_z = bool(ch.get("ship_bow_neg_z", true))
 	add_child(bridge)
 
 

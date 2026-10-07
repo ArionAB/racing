@@ -146,6 +146,28 @@ func _measure_hole(state: String) -> void:
 				"cu traveea sus gaura e cat golul (%.2f m)" % gap)
 
 
+## Varful vaporului propriu al podului peste linia apei, in metri: AABB-ul
+## nodului `ship_node` din `ship_model`, la scara si cu pescajul declarate.
+func _ship_top(bridge: LiftBridgeHazard) -> float:
+	var scene := load(bridge.ship_model) as PackedScene
+	var root := scene.instantiate() as Node3D
+	var top := 0.0
+	for child in root.get_children():
+		if String(child.name) != bridge.ship_node:
+			continue
+		var stack: Array[Node] = [child]
+		while not stack.is_empty():
+			var nd: Node = stack.pop_back()
+			if nd is MeshInstance3D:
+				var mi := nd as MeshInstance3D
+				var bb := mi.get_aabb()
+				top = maxf(top, mi.position.y + bb.end.y * mi.scale.y)
+			for c in nd.get_children():
+				stack.append(c)
+	root.free()
+	return (top - bridge.ship_draft) * bridge.ship_scale
+
+
 func _check(ok: bool, text: String) -> void:
 	if not ok:
 		_fail += 1
@@ -173,8 +195,11 @@ func _report_channel(track: Track, sampler: TrackSideSampler, ch: Dictionary,
 	var along: Vector3 = ch["along"]
 	var gap: float = ch["gap"]
 	print("")
-	print("--- %s (frac %.3f) ---" % [String(ch.get("label", "canal")),
-		float(ch["frac"])])
+	# Canalul declarat ca NOD [TrackChannel] (Track20) n-are `frac`: are `at`, iar
+	# indexul copt rezolvat e in `index`. Fara asta sonda cadea cu eroare de script
+	# si tiparea totusi "toate verificarile trec".
+	var frac_txt: float = float(ch["frac"]) if ch.has("frac") 		else float(ch["index"]) / float(maxi(track.baked.size(), 1))
+	print("--- %s (frac %.3f) ---" % [String(ch.get("label", "canal")), frac_txt])
 	print("  sosea %.2f m · apa %.2f m · deci %.2f m de aer sub tabliera"
 		% [origin.y, sea_y, origin.y - sea_y])
 
@@ -238,6 +263,10 @@ func _report_channel(track: Track, sampler: TrackSideSampler, ch: Dictionary,
 	# vizibila e (inaltime * scara) minus pescajul.
 	var mast := 9.96 * LiftBridgeHazard.SHIP_SCALE \
 		- LiftBridgeHazard.SHIP_DRAFT * LiftBridgeHazard.SHIP_SCALE + sea_y
+	if not bridge.ship_model.is_empty():
+		# Vapor propriu (Track20): inaltimea vine din AABB-ul modelului extras, nu
+		# din constantele corabiei cu panze.
+		mast = _ship_top(bridge) + sea_y
 	print("  travee jos %.2f m · sus %.2f m · varf de catarg %.2f m"
 		% [span_top, span_open, mast])
 	print("  degajare sub traveea ridicata: %.2f m" % (span_open - mast))

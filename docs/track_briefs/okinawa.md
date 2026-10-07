@@ -574,19 +574,214 @@ verifică ce face deja codul.
     identitatea lui Chongqing;
   - **cireșii în floare** (ianuarie la Nakijin): pista e în octombrie.
 
-## 9. Prompturi pentru ChatGPT (dioramă + planșă de inventar)
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.2, paste-ready
 
-**Se scriu la pasul 7, pe planul REAL al lui Track20**, ca la Monument Valley
-(§9 acolo). Schița din §2 nu se dă lui ChatGPT. Din v0.2 de la Monument
-Valley se iau de la început:
-- **densitatea pe cifre**, nu pe adjective (verdictul „săracă” de la volan);
-- **„THE ROAD IS ONE CLOSED LOOP”** ca prim paragraf: o buclă, un pod, un dig,
-  o scurtătură (dacă §3.1.2 e acceptată), fără alte drumuri;
-- **cele trei hazarde surprinse în cadru**: traveea sus cu feribotul sub ea,
-  tromba pe plajă, valul peste dig;
-- interdicțiile din §8, ca listă **FORBIDDEN**.
+**Se atașează doar `docs/track_briefs/img/okinawa_plan/okinawa_plan.png`**,
+într-o **conversație nouă**. Planul e captura REALĂ de sus din Godot a
+fundației (`Snapshot.tscn -- --track=20 --no-fog`, cu fereastră), cu legenda
+desenată de `python tools/annotate_okinawa_plan.py` (scara corectată pe
+pixelii de asfalt, `PLAN_FIT`). Pista e sursa de adevăr (memoria
+`diorama-din-geometria-reala`).
+
+Ce se ia din Monument Valley v0.2 de la început: **densitatea pe cifre**
+(verdictul „săracă” de la volan), **„ONE CLOSED LOOP”** ca prim paragraf,
+**hazardele surprinse în cadru** și lista **FORBIDDEN** din §8. Camera e din
+**colțul de SV** al planului (stânga-jos): în prim-plan digul cu valul și
+satul, la mijloc golful și podul cu vaporul, iar în fund insula mică și
+tromba pe **peretele de furtună**. Soarele vine din stânga-spate, deci scena
+e luminată din față și tromba se aprinde pe norii închiși.
+
+> Create a stylized low-poly **tabletop diorama** of a toy-car racing track on
+> a **subtropical island in Okinawa, Japan (Ryukyu Islands), on a late
+> afternoon in October, the day before a typhoon**. **Use the attached
+> top-down plan as the exact layout: same loop shape, same coastline, same
+> bay, same position of every landmark.** The letters A–H, the circles, red
+> arrows, dashed white arrow, text boxes and the legend strip under the plan
+> are a legend: do not draw them. On the plan: the thin white line with the
+> dark grey band is the **asphalt road**; the cream band on the left (B) is a
+> **white coral-sand lane**; the violet band on the right (E) is a
+> **cliff-top road** with the sea far below on its left; the dark band (F) is
+> a **long low bridge**; the grey band at the bottom (H) is a **low seawall
+> causeway**. The grey boulders floating on the sea, the brown tetrapods, the
+> small walls, the flat green grass and the white ferries are placeholders:
+> dress everything as described below.
+>
+> **THE ROAD IS ONE CLOSED LOOP. READ THIS FIRST [!]**
+> - There is **exactly one closed loop of road**: no other roads, no parking
+>   lots, no second bridge.
+> - The loop runs **clockwise on the plan** (left along the BOTTOM of the big
+>   island, up the LEFT side, right along the TOP, down the RIGHT side, over
+>   the bridge onto the small island, back along the causeway).
+> - **Start/finish: bottom-centre of the big island**, at the **fishing
+>   harbour** in the corner of the bay: a concrete quay with steps, 6–8 small
+>   wooden fishing boats, nets and floats. The road runs **left (west)
+>   through a village** of low Ryukyu houses.
+> - **LEFT side (B)**: a **narrow lane of white coral sand** running through a
+>   **tunnel of dense fukugi trees** (tall, dark-green, column-shaped trees
+>   planted in tight rows as windbreaks), between **low walls of rounded
+>   coral stone**, with houses behind the walls.
+> - **Upper LEFT (C)**: the road climbs through **sugar-cane fields** (tall
+>   green-yellow cane) toward the hill.
+> - **TOP (D)**: on the ridge the road winds in gentle S-bends **alongside
+>   tall curving castle walls of pale grey limestone** (smooth curved walls
+>   6–10 m high with rounded corners, like a Ryukyu *gusuku*). At the highest
+>   point the road passes **under a red Ryukyu gate** (red lacquered pillars,
+>   a two-tiered roof of red tiles with white mortar). Just behind it, on a
+>   stone platform, stands a **red Ryukyu palace** (a wide two-storey hall,
+>   red walls, red-tiled curved roof with golden dragon ornaments).
+> - **RIGHT side (E)**: the road runs on the **edge of a limestone cliff**
+>   (violet band), grassy top on its right, **the sea about 15 m below on its
+>   left**, no guardrail. A **tall white lighthouse** stands on the cape tip
+>   (marked circle).
+> - **Lower RIGHT (F)**: the road descends and crosses a **long, low concrete
+>   bridge** just above turquoise water. In its middle is a **vertical-lift
+>   span between two slender towers**: show it **RAISED**, with a gap in the
+>   road, while an **island ferry** (white, two decks) **passes underneath**,
+>   coming from the open sea into the bay (dashed white arrow on the plan).
+> - **Small island (G)**: a white-sand beach road with **pandanus trees**, a
+>   natural **heart-shaped rock** standing in the shallow water, and a
+>   **waterspout** (see below).
+> - **BOTTOM (H)**: the road returns on a **low seawall causeway** to the
+>   harbour: the **open sea on its left (south-west)** lined with **large
+>   concrete tetrapods**, the calm turquoise **bay on its right**.
+> - The **bay** (turquoise, inside the loop) connects to the open sea **only
+>   through the channel under the bridge**.
+>
+> **THE WEATHER AND THE SEA [!]:** the sky over the **right/back
+> (south-east)** is a **towering slate-grey storm wall** of typhoon clouds,
+> while the rest of the sky is clear blue with big cumulus. A **waterspout**
+> (a twisting grey-white column of water and mist, about 18 m tall, wider at
+> its spraying base) rises from the sea and **crosses the beach road of the
+> small island**, lit by the low sun against the dark clouds. **Big swell**
+> breaks along the whole causeway: one **large wave is washing right over
+> the road** in white foam, and spray bursts off the tetrapods.
+>
+> **DENSITY: THIS MUST LOOK ALIVE, NOT EMPTY [!]** (counts are mandatory):
+> - **Village** (around the start and along the white lane): **25–30
+>   traditional Ryukyu houses**, single-storey, low **hipped roofs of red
+>   tiles with white mortar lines**, a small **shisa lion statue on each roof
+>   ridge**, each house inside a **low coral-stone wall** with a short screen
+>   wall in front of the door; plus **8–10 modern flat-roofed concrete
+>   houses** in white and pastel, each with a **round water tank on the
+>   roof** and laundry lines. A **pair of large shisa lions** flanks the road
+>   at the village entrance.
+> - **Vegetation in clusters, never spread evenly**: **150+ fukugi trees**
+>   (most of them in rows along the white lane and around houses), **12
+>   banyan trees** with hanging aerial roots, **20 Ryukyu pines** (twisted,
+>   flat-topped) on the hill and cliff, **30 pandanus** on the beaches, **25
+>   cycads**, **10 fan palms** near the harbour, **40 red hibiscus bushes**
+>   and **20 magenta bougainvillea** spilling over walls (the brightest
+>   accents), **3 large sugar-cane fields**. No coconut-palm forest.
+> - **Coast**: **white coral-sand beaches** around both islands, **10–14
+>   mushroom-shaped limestone rocks** (undercut by the waves at the bottom)
+>   standing in the shallow water, a **coral reef edge** where the turquoise
+>   turns to deep blue, **60+ tetrapods** along the causeway, small
+>   breakwaters at the harbour.
+> - **Signs of people** (all small, all real to the place): **2–3 vending
+>   machines** (plain, no text), a **bus-stop shelter**, **orange convex
+>   traffic mirrors** at bends, **fishing-net racks**, stacked floats and
+>   crates on the quay, **2 sabani canoes** pulled up on the beach, a **water
+>   buffalo** in a field.
+> - **Ships and animals**: the ferry under the bridge, **a small coastal
+>   freighter** waiting outside the channel, **6–8 fishing boats** in the
+>   harbour; **white egrets** in the cane fields, **seabirds** over the spray,
+>   **a sea turtle** crawling on the small island's beach.
+> - **Race elements**: **4 toy racing cars** on the track (one in the fukugi
+>   tunnel, one under the red gate, one in the air **jumping the gap of the
+>   raised bridge span**, one on the causeway **being hit by the wave**).
+>
+> **CAMERA AND BASE:** raised 3/4 view **from the BOTTOM-LEFT corner of the
+> plan looking toward the top-right**, so the causeway with the breaking wave
+> and the harbour village are nearest, the bay and the raised bridge with the
+> ferry are in the middle, the castle walls and red palace crown the hill on
+> the left-back, and the small island with the **waterspout against the storm
+> wall** is at the right-back. The diorama sits on a thin dark rounded base
+> with a matte edge, cut through the sea so the water depth shows in
+> turquoise-to-blue layers. Behind the base, softly in haze: a distant
+> **cone-shaped island** (left) and low green islands.
+>
+> **STYLE (strict) [!]:** **flat-shaded low-poly, like a game-asset render in a
+> Blender viewport. Every face is one flat colour.** Big facets, 1–3 m wide at
+> model scale. No painted texture, no photorealism, no tilt-shift look. The
+> water is faceted too: flat turquoise over sand, deep blue past the reef,
+> white foam as flat shapes. Soft baked ambient occlusion under every object.
+> Toy proportions: cars are stubby and about 1.3× wider than real cars.
+>
+> **PALETTE (strict) [!]:**
+> - shallow water turquoise-emerald `#3FC1C0` (greener near the shore
+>   `#7FD6C2`), open sea deep blue `#1F5E8E`, foam white;
+> - coral sand cream-white `#EDE6D2`, warmer in shade `#CDBFA0`;
+> - roof tiles brick red `#B8452E` with white mortar `#EEEAE0`;
+> - limestone walls, cliffs and rocks pale grey-cream `#CFC6B0`, darker in
+>   the undercuts `#8F8670`;
+> - gate and palace lacquer red `#B3261E`, gold ornaments `#D6A23A`;
+> - fukugi dark glossy green `#2E5A2C`, sugar cane yellow-green `#9CB34E`;
+> - hibiscus red `#D7263D`, bougainvillea magenta `#C2378F`;
+> - asphalt blue-grey with a **white** centre line; concrete light grey;
+> - sky blue `#4A90D9`, storm wall slate grey `#5E6878`.
+>
+> **LIGHT [!]:** low late-afternoon sun, **about 25°, from the LEFT of the
+> plan, slightly toward the bottom**. Warm light on the west faces of houses,
+> walls and the lighthouse; **dappled shade** in the fukugi tunnel; the storm
+> wall at the back-right is **lit warm against its own darkness**, so the
+> waterspout and the white ferry glow.
+>
+> **FORBIDDEN:** no text or numbers anywhere, no logos, no brand names, no
+> Shinto torii gates, no pagodas, no cherry blossoms, no Mount Fuji, no
+> coconut-palm forest, no tiki or Polynesian huts, no sailing ships, no
+> military bases or aircraft, no war memorials, no tombs, no shrines or
+> sacred groves, no people in costume, no traffic lights.
+
+### 9.1 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.2, paste-ready
+
+Se dă **în aceeași conversație**, după ce diorama e acceptată. Numele de
+fișier sunt contractul (categoria `assets/models/okinawa/`). Cotele vin din
+§2.0 și §5 și se remăsoară pe drum la integrare (memoria
+`contract-de-kit-cere-latimea-drumului`: poarta trece peste un drum de
+**12 m**, podul are **13 m**).
+
+> Now make an **asset inventory sheet** for this diorama, in the same
+> flat-shaded low-poly style and palette: every distinct object drawn **once,
+> isolated, on a plain light-grey background**, in a neat grid, in a 3/4
+> view, all at the **same scale** (a toy car shown for scale in one corner),
+> with **small simple text labels under each object using exactly these file
+> names** (labels are the only text allowed):
+>
+> **Hero:** `ryukyu_palace` (red hall on a stone platform, 16 m tall),
+> `ryukyu_gate` (red two-tier gate spanning a 12 m road),
+> `gusuku_wall_curve` (curved limestone wall module, 8 m tall),
+> `gusuku_wall_straight`, `gusuku_arch_gate` (stone wall with an arched
+> opening), `cape_lighthouse` (white, 20 m, with a small keeper's house),
+> `heart_rock`, `island_ferry` (two decks, 28 m long), `coastal_freighter`
+> (with a radar mast).
+> **Buildings:** `ryukyu_house_a`, `ryukyu_house_b`, `ryukyu_house_c` (red
+> tile roof with white mortar, shisa on the ridge, coral wall, screen wall),
+> `concrete_house_a`, `concrete_house_b` (flat roof, round water tank),
+> `harbour_quay` (quay module with steps and bollards), `bus_stop_shelter`.
+> **Rocks and coast:** `notch_rock_a`, `notch_rock_b`, `notch_rock_c`
+> (mushroom-shaped limestone, undercut at the base, 4–9 m),
+> `limestone_cliff_module` (12 m cliff section with a grassy top),
+> `coral_stone_wall` (low wall module of rounded coral stones), `tetrapod`.
+> **Plants:** `fukugi_tree_a`, `fukugi_tree_b`, `fukugi_tree_c` (dense
+> column-shaped crowns), `banyan` (with aerial roots), `ryukyu_pine`,
+> `pandanus`, `cycad`, `fan_palm`, `hibiscus`, `bougainvillea`,
+> `sugar_cane_field_patch`.
+> **Props and animals:** `vending_machine` (no text), `convex_mirror`,
+> `fishing_net_rack`, `float_pile`, `sabani_canoe`, `fishing_boat`,
+> `water_buffalo`, `egret`, `sea_turtle`, `shisa_pair` (two lions, one mouth
+> open, one closed).
+> **Effects and background:** `waterspout`, `wave_crest` (a breaking wave
+> 30 m long), `storm_wall` (a strip of typhoon clouds), `ie_island` (a
+> distant island with one cone-shaped peak), `kerama_islands` (a strip of
+> low distant islands).
 
 ## Istoric
+
+- **v0.2 (7 oct 2026):** §9 scris pe planul REAL al fundației Track20
+  (`img/okinawa_plan/okinawa_plan.png`, `tools/annotate_okinawa_plan.py`).
+  Diorama cere densitatea pe cifre, hazardele surprinse în cadru (traveea
+  sus cu feribotul sub ea, tromba pe peretele de furtună, valul peste dig) și
+  camera din SV. Planșa de inventar are 48 de nume de fișier.
 
 - **v0.1 (7 oct 2026):** concept. Okinawa refăcută ca Monument Valley:
   `Track20` nou, temă `okinawa`, traseu redesenat de la zero (~2 060 m,

@@ -119,6 +119,13 @@ extends Marker3D
 ## Corabiile care traverseaza canalul — opreste-le pe un parau de munte, fara
 ## canal navigabil. Fara efect cand `jump = true`.
 @export var build_ships: bool = true
+## Vaporul canalului navigabil; gol = corabia cu panze din kit. Vezi
+## [member LiftBridgeHazard.ship_model] si vecinele lui.
+@export_file("*.glb") var ship_model: String = ""
+@export var ship_node: String = ""
+@export var ship_scale: float = 1.0
+@export var ship_draft: float = 0.0
+@export var ship_bow_neg_z: bool = true
 ## Canalul nu sapa sub cota unei benzi secundare (`TrackBranch`) din raza ei.
 ## Opt-in: pe Alpii/Stromboli garda ar schimba terenul existent.
 @export var respect_branch: bool = false
@@ -239,6 +246,11 @@ func to_spec(track: Node3D) -> Dictionary:
 		"deck_material_class": deck_material_class,
 		"build_towers": build_towers,
 		"build_ships": build_ships,
+		"ship_model": ship_model,
+		"ship_node": ship_node,
+		"ship_scale": ship_scale,
+		"ship_draft": ship_draft,
+		"ship_bow_neg_z": ship_bow_neg_z,
 		"respect_branch": respect_branch,
 		"respawn_past_gap": respawn_past_gap,
 		"ai_keep_side_run_m": ai_keep_side_run_m,

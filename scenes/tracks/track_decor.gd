@@ -2455,7 +2455,14 @@ static func _add_coral_rock(parent: Node3D, pos: Vector3,
 		# (#67421F) — gresia canionului, adica exact culoarea de care fugim pe o
 		# insula. Prins pe snapshot de joc, nu in Blender: acolo previzualizarea
 		# aplica textura de clasa, deci arata corect.
-		Palette.apply_class_materials(kept, ISLAND_CLASSES)
+		# Okinawa: calcarul gri-crem al pistei (`ok_limestone`, deja pe pista), nu
+		# gresia inchisa a insulei generice. Doar pe tema okinawa (`_oki_dry` e
+		# adevarat doar cat se construiesc benzile ei): Track08 ramane identic.
+		var rock_classes := ISLAND_CLASSES
+		if _oki_dry:
+			rock_classes = ISLAND_CLASSES.duplicate()
+			rock_classes["Coral_Rock"] = Palette.TRI_PREFIX + "ok_limestone"
+		Palette.apply_class_materials(kept, rock_classes)
 		var mi_glb := _first_mesh(kept)
 		if mi_glb != null and mi_glb.mesh != null:
 			h = mi_glb.mesh.get_aabb().size.y

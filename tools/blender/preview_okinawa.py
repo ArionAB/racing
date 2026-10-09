@@ -336,9 +336,51 @@ def views(name, res_height=700):
             pass
 
 
+def chain(res_height=800):
+    """Lant de zid: drept + curb A + curb B + drept, inlantuite pe capete (cadrul
+    de capat al fiecarui modul = punctul si tangenta de la +-L/2), 3/4, ->
+    docs/asset_briefs/img/okinawa_fidelity/gusuku_wall_chain.png. Fara decupare."""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    straight = [o for o in _import("gusuku_wall_straight")]
+    curve = _import("gusuku_wall_curve")
+    obj_a = [o for o in curve if o.name.startswith("Wall_A")][0]
+    obj_b = [o for o in curve if o.name.startswith("Wall_B")][0]
+    obj_a.location = (0.0, 0.0, 0.0)
+    obj_b.location = (0.0, 0.0, 0.0)
+    s2 = straight[0].copy()
+    s2.data = straight[0].data
+    bpy.context.scene.collection.objects.link(s2)
+    # (obiect, semilungime coarda, deviere tangenta de capat, in radiani)
+    mods = [(straight[0], 6.0, 0.0), (obj_a, 8.0, math.asin(8.0 / 20.0)),
+            (obj_b, 8.0, math.asin(8.0 / 40.0)), (s2, 6.0, 0.0)]
+    H = 0.0                     # directia curenta (CCW fata de +Y)
+    E = Vector((0.0, 0.0))
+    placed = []
+    for o, half, phi in mods:
+        r = H + phi             # tangenta locala de inceput = -phi
+        c, sn = math.cos(r), math.sin(r)
+        S = Vector((0.0, -half))
+        rot = lambda v: Vector((c * v.x - sn * v.y, sn * v.x + c * v.y))
+        t = E - rot(S)
+        o.location = (t.x, t.y, 0.0)
+        o.rotation_mode = "XYZ"
+        o.rotation_euler = (0.0, 0.0, r)
+        E = rot(Vector((0.0, half))) + t
+        H = r + phi
+        placed.append(o)
+    bpy.context.view_layer.update()
+    out = os.path.join(FID_DIR, "gusuku_wall_chain.png")
+    _render(placed, out, azimuth=12.0, elevation=30.0, lens=55.0, margin=1.1,
+            res_height=res_height, aspect=2.0)
+    print("lant:", out)
+
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
-if "--compare" in args:
+if "--chain" in args:
+    chain()
+elif "--compare" in args:
     compare(args[args.index("--compare") + 1])
 elif "--views" in args:
     views(args[args.index("--views") + 1])

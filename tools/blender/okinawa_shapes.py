@@ -333,8 +333,8 @@ def report_ok():
 #  slab_grid         placa de olane pe grila, cu grosime (ca HipRoof, pozitie libera)
 #  karahafu          frontonul curbat peste intrare (olane + panou + bordura alba)
 #  gold_dragon       ornament de coama in forma de dragon (CAR_YELLOW)
-#  gusuku_wall       zid de calcar curb/drept, SECTIUNE trasa pe traseu: capete plane
-#                    identice, talus, asize cu rosturi, creasta rotunjita
+#  gusuku_wall       zid de calcar curb/drept: miez cu sectiune identica la capete +
+#                    blocuri fasonate (perne cu rosturi in relief), creasta plata
 #  gusuku_n          cota laterala a fetelor la inaltimea z (bolti, bolțari)
 #  arch_blocks       bolțari + sambure pentru poarta boltita
 
@@ -482,39 +482,15 @@ def gold_dragon(b, x, y, z, s=1.0, d=1.0, slot=OK_GOLD):
 # ---------------------------------------------------------------------------
 
 GUSUKU = dict(h=8.0, t_base=2.5, t_top=1.6, b_out=0.75, b_in=0.15,
-              courses=(2.3, 2.0, 1.75, 1.4), groove=0.09)
+              z_crest=7.55, cap_over=0.10, n_courses=11)
 
 
 def gusuku_n(z, sign, spec=GUSUKU):
-    """Cota laterala (fata fara rosturi) a fetei `sign` (+1 = exterioara,
-    convexa, cu talus; -1 = interioara) la inaltimea z."""
+    """Cota laterala (suprafata miezului, fara bombarea blocurilor) a fetei `sign`
+    (+1 = exterioara, convexa, cu talus; -1 = interioara) la inaltimea z."""
     half = spec["t_base"] * 0.5
     bb = spec["b_out"] if sign > 0 else spec["b_in"]
     return sign * (half - bb * z / spec["h"])
-
-
-def _gusuku_rows(spec=GUSUKU):
-    """Randurile unei fete, de jos in sus: (z, retragere_spre_centru, asiza|None).
-    `asiza` != None = randul poarta rosturile verticale ale asizei respective."""
-    g = spec["groove"]
-    zs = [0.0]
-    for c in spec["courses"]:
-        zs.append(zs[-1] + c)
-    rows = []
-    for k in range(len(spec["courses"])):
-        z0, z1 = zs[k], zs[k + 1]
-        rows.append((z0, 0.0 if k == 0 else g, None))
-        rows.append((z0 + 0.16, 0.0, k))
-        rows.append(((z0 + z1) * 0.5, -0.03, k))
-        rows.append((z1 - 0.16, 0.0, k))
-        rows.append((z1, g, None))
-    # randurile de rost comun (sfarsit asiza k = inceput asiza k+1) se dubleaza: le unim
-    out = []
-    for r in rows:
-        if out and abs(out[-1][0] - r[0]) < 1e-6:
-            continue
-        out.append(r)
-    return out, zs[-1]
 
 
 def _lcg_f(seed):
@@ -526,23 +502,37 @@ def _lcg_f(seed):
     return r
 
 
+def gusuku_course_z(spec=GUSUKU):
+    """Cotele asizelor (n+1 valori): 11 randuri de ~0,6-0,8 m, mai inalte jos."""
+    n = spec["n_courses"]
+    hs = [0.82 - 0.22 * k / (n - 1) for k in range(n)]
+    sc = spec["z_crest"] / sum(hs)
+    zs = [0.0]
+    for h_ in hs:
+        zs.append(zs[-1] + h_ * sc)
+    return zs
+
+
 def gusuku_wall(b, kind, length=12.0, R=None, chord=16.0, slot=OK_LIMESTONE,
-                seed=7, seam_dip=0.07, seams=True, spec=GUSUKU, ds=1.0,
-                crest_wave=0.12):
+                seed=7, spec=GUSUKU, ds=1.0, exclude=None, groove=0.05,
+                proud=0.055, block_len=1.15, core=True, blocks=True):
     """Zid de calcar gusuku pe un traseu: 'straight' (pe Y, `length`, axa la x=0)
     sau 'arc' (raza `R`, coarda `chord` pe Y, burta spre +X, capetele la
-    (0, +-chord/2)). Sectiunea e IDENTICA pe tot traseul si la cele doua capete:
-    capete plane, perpendiculare pe tangenta, deci modulele se inlantuie.
+    (0, +-chord/2)).
 
-    Sectiunea (de jos in sus): fata exterioara (+X) cu talus, asize cu rost
-    orizontal si bombare, creasta semi-eliptica rotunjita, fata interioara.
-    Rosturile verticale (alternate pe asize) nu ajung langa capete. Creasta
-    ondulata lin pe lungime (zero la capete). Return: dict cu cadrele capetelor."""
+    MIEZUL = sectiune identica pe tot traseul (capete plane, perpendiculare pe
+    tangenta, deci modulele se inlantuie): fata exterioara (+X) cu talus, fata
+    interioara aproape verticala, creasta PLATA cu un rand de capac iesit
+    `cap_over`. PESTE miez, pe ambele fete, blocuri fasonate (`n_courses` asize
+    de ~0,7 m, blocuri de 0,8-1,5 m, decalate de la un rand la altul), fiecare
+    o perna cu fete plate si rosturi in relief (`proud` m iesit, `groove` m
+    rost). Randurile pare au blocurile de capat FARA rost spre capat: doua
+    module vecine formeaza acolo un bloc continuu, cele impare au rost, deci
+    imbinarea e decalata ca restul zidariei. `exclude(a0, a1, za, zb, sign)` ->
+    True sare blocul (deschiderea de la poarta). Return: dict cu cadrele."""
     h = spec["h"]
-    rows, z_body = _gusuku_rows(spec)
-    crest_z0 = z_body + 0.10
-    bc = h - crest_z0 - crest_wave
-
+    zc = spec["z_crest"]
+    co = spec["cap_over"]
     if kind == "arc":
         phi0 = math.asin(chord * 0.5 / R)
         A = R * phi0
@@ -559,111 +549,147 @@ def gusuku_wall(b, kind, length=12.0, R=None, chord=16.0, slot=OK_LIMESTONE,
         def frame(a):
             return ((0.0, a), (1.0, 0.0))
 
-    rnd = _lcg_f(seed)
-    seam_pos = {k: [] for k in range(len(spec["courses"]))}
-    if seams:
-        for k in seam_pos:
-            a = -A + 0.9 + rnd() * 2.0
-            while a < A - 1.0:
-                seam_pos[k].append(a)
-                a += 2.6 + rnd() * 1.6
-    samples = set()
-    n_u = max(2, int(math.ceil(2 * A / ds)))
-    for i in range(n_u + 1):
-        samples.add(round(-A + 2 * A * i / n_u, 4))
-    for k, lst in seam_pos.items():
-        for a in lst:
-            for da in (-0.11, 0.0, 0.11):
-                samples.add(round(a + da, 4))
-    merged = []
-    for a in sorted(samples):
-        if merged and a - merged[-1] < 0.03:
-            continue
-        merged.append(a)
-    samples = merged
-    samples[0], samples[-1] = -A, A
-
-    def dip(course, a):
-        t = 0.0
-        for s0 in seam_pos.get(course, ()):
-            q = abs(a - s0) / 0.11
-            if q < 1.0:
-                t = max(t, 1.0 - q)
-        return t * seam_dip
-
-    def section(a):
-        und = crest_wave * math.sin(math.pi * (a + A) / (2 * A)) ** 2
-        loop = []
-        for (z, d, cs) in rows:                       # fata exterioara, in sus
-            n = gusuku_n(z, +1, spec) - d
-            if cs is not None:
-                n -= dip(cs, a)
-            loop.append((n, z))
-        n_o = gusuku_n(crest_z0, +1, spec) + 0.04
-        n_i = gusuku_n(crest_z0, -1, spec) - 0.04
-        loop.append((n_o, crest_z0 + und))            # buza proeminenta
-        n_c = (n_o + n_i) * 0.5
-        a_w = (n_o - n_i) * 0.5
-        for k in range(1, 6):                         # creasta rotunjita
-            th_ = math.pi * k / 6.0
-            loop.append((n_c + a_w * math.cos(th_),
-                         crest_z0 + und + bc * math.sin(th_)))
-        loop.append((n_i, crest_z0 + und))
-        for (z, d, cs) in reversed(rows):             # fata interioara, in jos
-            n = gusuku_n(z, -1, spec) + d
-            if cs is not None:
-                n += dip(cs, a)
-            loop.append((n, z))
-        return loop
-
-    made = []
-    rings = []
-    for a in samples:
-        (px, py), (nx, ny) = frame(a)
-        rings.append([b.bm.verts.new((px + nx * n, py + ny * n, z))
-                      for (n, z) in section(a)])
-    m = len(rings[0])
-    for r in range(len(rings) - 1):
-        for i in range(m):
-            j = (i + 1) % m
-            f = b.bm.faces.new([rings[r][i], rings[r][j], rings[r + 1][j], rings[r + 1][i]])
+    # --- miezul
+    if core:
+        n_o0, n_i0 = gusuku_n(0.0, +1, spec), gusuku_n(0.0, -1, spec)
+        n_oc, n_ic = gusuku_n(zc, +1, spec), gusuku_n(zc, -1, spec)
+        section = [(n_o0, 0.0), (n_oc, zc), (n_oc + co, zc), (n_oc + co, h),
+                   (n_ic - co, h), (n_ic - co, zc), (n_ic, zc), (n_i0, 0.0)]
+        n_u = max(2, int(math.ceil(2 * A / ds)))
+        samples = [-A + 2 * A * i / n_u for i in range(n_u + 1)]
+        made = []
+        rings = []
+        for a in samples:
+            (px, py), (nx, ny) = frame(a)
+            rings.append([b.bm.verts.new((px + nx * n, py + ny * n, z)) for (n, z) in section])
+        m = len(section)
+        for r in range(len(rings) - 1):
+            for i in range(m):
+                j = (i + 1) % m
+                f = b.bm.faces.new([rings[r][i], rings[r][j], rings[r + 1][j], rings[r + 1][i]])
+                f[b.slot] = slot
+                made.append(f)
+        for ring in (list(reversed(rings[0])), list(rings[-1])):
+            f = b.bm.faces.new(ring)
             f[b.slot] = slot
             made.append(f)
-    for ring in (list(reversed(rings[0])), list(rings[-1])):
-        f = b.bm.faces.new(ring)
-        f[b.slot] = slot
-        made.append(f)
-    bmesh.ops.recalc_face_normals(b.bm, faces=made)
-    return dict(A=A, loop_points=m, rings=len(rings),
+        bmesh.ops.recalc_face_normals(b.bm, faces=made)
+
+    # --- blocurile
+    nblocks = 0
+    if not blocks:
+        return dict(A=A, blocks=0, courses=0, end_tangent_deg=math.degrees(phi0))
+    rnd = _lcg_f(seed)
+    zs = gusuku_course_z(spec)
+
+    def pos(a, z, sign, off):
+        (px, py), (nx, ny) = frame(a)
+        n = gusuku_n(z, sign, spec) + sign * off
+        return (px + nx * n, py + ny * n, z)
+
+    def bounds(k):
+        if k % 2 == 0:
+            f0, f1 = 0.35 + rnd() * 0.45, 0.35 + rnd() * 0.45
+        else:
+            f0 = f1 = 0.0
+        mid = 2 * A - f0 - f1
+        nb = max(1, int(round(mid / block_len)))
+        ws = [0.75 + rnd() * 0.5 for _ in range(nb)]
+        sc = mid / sum(ws)
+        out = [-A]
+        if f0 > 0:
+            out.append(-A + f0)
+        for w_ in ws:
+            out.append(out[-1] + w_ * sc)
+        if f1 > 0:
+            out.append(A)
+        out[-1] = A
+        return out
+
+    nblocks = 0
+    for k in range(len(zs) - 1):
+        za, zb = zs[k], zs[k + 1]
+        bd = bounds(k)
+        flush = (k % 2 == 0)
+        for i in range(len(bd) - 1):
+            a0, a1 = bd[i], bd[i + 1]
+            fl0 = flush and i == 0
+            fl1 = flush and i == len(bd) - 2
+            for sign in (+1, -1):
+                if exclude and exclude(a0, a1, za, zb, sign):
+                    continue
+                jt = lambda: (rnd() - 0.5) * 0.03
+                pr = proud * (0.7 + 0.6 * rnd())
+                u0 = a0 + (0.0 if fl0 else groove + jt())
+                u1 = a1 - (0.0 if fl1 else groove + jt())
+                v0 = za + groove + jt()
+                v1 = zb - groove + jt()
+                base = [b.bm.verts.new(pos(a0, za, sign, 0)), b.bm.verts.new(pos(a1, za, sign, 0)),
+                        b.bm.verts.new(pos(a1, zb, sign, 0)), b.bm.verts.new(pos(a0, zb, sign, 0))]
+                top = [b.bm.verts.new(pos(u0, v0, sign, pr)), b.bm.verts.new(pos(u1, v0, sign, pr)),
+                       b.bm.verts.new(pos(u1, v1, sign, pr)), b.bm.verts.new(pos(u0, v1, sign, pr))]
+                (_, _), (nx, ny) = frame((a0 + a1) * 0.5)
+                outd = Vector((sign * nx, sign * ny, 0.0))
+                cen = sum((v.co for v in top), Vector()) / 4.0
+                faces = [(top, 0)]
+                for e in range(4):
+                    if (e == 3 and fl0) or (e == 1 and fl1):
+                        continue
+                    j = (e + 1) % 4
+                    faces.append(([base[e], base[j], top[j], top[e]], 1))
+                for vl, kind_ in faces:
+                    f = b.bm.faces.new(vl)
+                    f[b.slot] = slot
+                    f.normal_update()
+                    if kind_ == 0:
+                        want = outd
+                    else:
+                        fc = sum((v.co for v in vl), Vector()) / 4.0
+                        want = fc - cen
+                    if f.normal.dot(want) < 0:
+                        f.normal_flip()
+                nblocks += 1
+    return dict(A=A, blocks=nblocks, courses=len(zs) - 1,
                 end_tangent_deg=math.degrees(phi0))
 
 
-def arch_blocks(b, cy, zs, r_in, r_out, n, slot=OK_LIMESTONE, key_extra=0.22,
-                gap=0.018, proud=0.14, spec=GUSUKU, jamb_z=(0.0, 0.85, 1.7)):
+def arch_blocks(b, cy, zs, r_in, r_out, n, slot=OK_LIMESTONE, key_extra=0.2,
+                gap=0.014, proud=0.07, spec=GUSUKU, jamb_z=(0.0, 0.7, 1.4, 2.1),
+                pil=0.05, shrink=0.88):
     """Bolta de piatra: `n` bolțari in semicerc (centru la y=cy, z=zs), cu cheia
-    de bolta (cea din mijloc) mai inalta, plus samburele (blocuri sub linia de
-    nastere, pe fiecare parte). Adancimea urmeaza talusul zidului la cota
-    fiecarui colt, cu `proud` iesit pe fiecare fata. Cutii inchise."""
+    de bolta mai inalta, plus samburele (blocuri sub linia de nastere). Adancimea
+    urmeaza talusul cu `proud` iesit pe fiecare fata; fiecare fata are aceeasi
+    perna cu rost in relief ca zidaria (`pil` m, colturile trase spre centru cu
+    `shrink`). Cutii inchise."""
     def xs(z):
         return (gusuku_n(z, -1, spec) - proud, gusuku_n(z, +1, spec) + proud)
 
-    made = []
-
     def block(corners):
-        back, front = [], []
+        back, front, pb, pf = [], [], [], []
+        cy_ = sum(c[0] for c in corners) / 4.0
+        cz_ = sum(c[1] for c in corners) / 4.0
         for (y, z) in corners:
             xb, xf = xs(z)
             back.append(b.bm.verts.new((xb, y, z)))
             front.append(b.bm.verts.new((xf, y, z)))
-        for ring in (back, front):
-            f = b.bm.faces.new(ring)
+            yy, zz = cy_ + (y - cy_) * shrink, cz_ + (z - cz_) * shrink
+            pb.append(b.bm.verts.new((xb - pil, yy, zz)))
+            pf.append(b.bm.verts.new((xf + pil, yy, zz)))
+        allv = back + front + pb + pf
+        cen = sum((v.co for v in allv), Vector()) / len(allv)
+        lists = [pb, pf]
+        for e in range(4):
+            j = (e + 1) % 4
+            lists.append([back[e], back[j], front[j], front[e]])
+            lists.append([back[e], back[j], pb[j], pb[e]])
+            lists.append([front[e], front[j], pf[j], pf[e]])
+        for vl in lists:
+            f = b.bm.faces.new(vl)
             f[b.slot] = slot
-            made.append(f)
-        for i in range(4):
-            j = (i + 1) % 4
-            f = b.bm.faces.new([back[i], back[j], front[j], front[i]])
-            f[b.slot] = slot
-            made.append(f)
+            f.normal_update()
+            fc = sum((v.co for v in vl), Vector()) / len(vl)
+            if f.normal.dot(fc - cen) < 0:
+                f.normal_flip()
 
     for i in range(n):
         ta = math.pi * i / n + gap
@@ -679,7 +705,6 @@ def arch_blocks(b, cy, zs, r_in, r_out, n, slot=OK_LIMESTONE, key_extra=0.22,
             za, zb = zl[k] + 0.02, zl[k + 1] - 0.02
             ya, yb = cy + sg * r_in, cy + sg * r_out
             block([(ya, za), (ya, zb), (yb, zb), (yb, za)])
-    bmesh.ops.recalc_face_normals(b.bm, faces=made)
 
 
 def prism_yz(b, poly, x0, x1, slot):

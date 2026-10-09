@@ -109,28 +109,49 @@ Platforma 2,5 m, scara pe +Y (9 trepte), 12 coloane pe fata, doua acoperisuri in
 | pavilioane laterale mici | 2 | nu sunt | abatere (nelistate în contract) |
 | tufe, copaci | pe decupare | nu intră | OK |
 
-### structures/gusuku_wall_curve.glb — 10.242 tri (A 5490, B 4752), 4,15 x 17,0 x 8,0 m
+### Runda 4, ceruta de coordonator: zidariile refacute (zidurile si poarta boltita)
 
-Două rădăcini: `Wall_A_Limestone` (R 20 m) și `Wall_B_Limestone` (R 40 m, mutat +10 m pe X); numele
-nu sunt `Wall_Limestone` simplu (nume unice în Blender), dar se termină în `_Limestone`:
-clasa se mapează pe sufix. Origine fiecare = mijlocul corzii, baza la 0 (`keep_xy`).
-Capetele: la (0, ±8), plane, perpendiculare pe tangentă; tangenta e rotită ±23,58° (A) / ±11,54° (B)
-față de Y; secțiune identică cu a modulului drept (loop de 41 puncte, același cod).
-Extinderea pe Y (17,0) vine din planul de capăt înclinat.
+Coordonatorul a respins prima varianta (4 asize de ~2 m, umbrire moale, bulb rotunjit, bolta mica).
+Acum, pe `gusuku_wall`: **miez** cu sectiune identica (talus pe +X, creasta PLATA cu capac iesit 10 cm,
+colturi rotunjite doar in plan) + **blocuri fasonate pe ambele fete**: 11 asize de 0,6-0,8 m, blocuri de
+0,8-1,5 m decalate pe randuri, perne cu fete plate, rost 5 cm si relief 4-7 cm, usor neregulate (jitter
+de 1,5 cm). **Umbrire plata** (`smooth_angle=None`, fete plate, ca la Monument Valley). Pe randurile pare
+blocurile de la capete nu au rost spre capat (doua module vecine fac un bloc continuu), pe cele impare au:
+imbinarea e decalata ca restul zidariei. Nu am implementat blocul inalt cat doua asize (deviatie).
 
-### structures/gusuku_wall_straight.glb — 3850 tri, 2,51 x 12,0 x 8,0 m (h/l 0,67)
-Nod `Wall_Limestone`; capete la y = ±6, secțiune identică.
+### structures/gusuku_wall_curve.glb — 6.872 tri (A 3436, B 3436), 4,25 x 17,04 x 8,0 m
 
-### structures/gusuku_arch_gate.glb — 4126 tri (Arch_Limestone 3934, Arch_Wood 192), 2,85 x 14,0 x 8,0 m
-Deschidere tăiată boolean (r 2,05, linia de naștere 2,5 m), 11 bolțari (r 2,0–2,85 + cheie),
-3+3 blocuri de sâmbure, canat din două aripi (una închisă, una deschisă ~40° spre −X). Deschidere
-efectivă 4,0 m lățime x 4,5 m înălțime (proiectată, nemăsurată cu measure_gap).
+Doua radacini: `Wall_A_Limestone` (R 20 m) si `Wall_B_Limestone` (R 40 m, mutat +10 m pe X); numele nu pot
+fi ambele `Wall_Limestone` (nume unice in Blender), se termina in `_Limestone` (clasa pe sufix). Origine =
+mijlocul corzii, baza la 0. Capete la (0, +-8), plane, perpendiculare pe tangenta (rotita +-23,58 deg la A,
++-11,54 deg la B).
 
-| element | pe planșă | în GLB | verdict |
+### structures/gusuku_wall_straight.glb — 2.556 tri, 2,64 x 12,0 x 8,0 m
+Nod `Wall_Limestone`; capete la y = +-6.
+
+### Capete identice, MASURATE pe GLB (`tools/blender/measure_okinawa_castle.py`)
+Vertecsii din planul fiecarui capat (perpendicular pe tangenta) au fost comparati cu cele 8 puncte ale
+sectiunii de miez (baza 2,5 m, creasta ~1,65 m + capac 0,1 m pe parte, 8 m): drept (+/-), curb A (+/-),
+curb B (+/-): **abatere maxima 0,00000 m** pe toate cele 6 capete (136 vertecsi in plan fiecare).
+Captura de lant (drept + A + B + drept, 3/4): `img/okinawa_fidelity/gusuku_wall_chain.png`, imbinarile
+nu se vad, zidul se citeste ca unul singur.
+
+### structures/gusuku_arch_gate.glb — 2.788 tri (Arch_Limestone 2548, Arch_Wood 240), 3,31 x 14,0 x 8,0 m
+Deschidere **~5,5 x 5,5 m** (decizia coordonatorului, runda 4; contractul initial: 4 x 4,5 m): semicerc
+r 2,8 pe linia de nastere de 2,75 m, tunel taiat boolean pe axa X; 11 bolțari (r 2,75-3,55 + cheie),
+4+4 blocuri de sambure, canat din doua aripi (una inchisa, una ~40 deg spre -X). Canatul e decor, nu
+intra in gol. **`measure_gap.py`** pe copia rotita (doar piatra, tunel pe Y), banda 0,15-2,0 m:
+**gol lateral 5,45 m** (x -2,70..+2,75; grila de 5 cm), inaltime libera la axa **5,5 m** (la margini
+2,75 m = linia de nastere, e semicerc), mediana 5,05 m.
+
+| element | pe planșă | în GLB (runda 4) | verdict |
 |---|---|---|---|
-| secțiune zid | talus, creastă rotunjită | 2,5→1,6 m, talus ~5,4° pe fața +X (nu 8°), creastă semielipsă ondulată 12 cm | abatere minoră de unghi (grosimile de contract câștigă) |
-| asize | zidărie poligonală fină | 4 asize cu rost adânc, rosturi verticale ~3–4 m | formă mai grosolană; porii vin din clasa `ok_limestone` |
-| colțuri | rotunjite | creasta rotunjită; muchiile de capăt sunt drepte (cerința de înlănțuire) | OK |
-| bolta | arc cu bolțari mari | 11 bolțari + cheie, deschidere 4 m (mai îngustă decât pe desen, contract) | abatere de proporție |
-| canat | — | întredeschis | OK |
-| vegetație, dalaj | pe decupare | nu intră | OK |
+| asize | 10-12, blocuri ~0,6-0,8 m x 0,8-1,5 m, decalate | 11 asize 0,6-0,8 m, blocuri 0,8-1,5 m decalate, jitter | OK; lipsesc blocurile inalte pe doua asize |
+| rosturi | in relief, prind umbra | 5 cm rost, 4-7 cm relief, perne cu fete plate | OK |
+| umbrire | plata | fete plate, fara smooth | OK |
+| creasta | plata, margine usor iesita | plata + capac iesit 10 cm | OK |
+| colțuri | rotunjite in plan | rotunjite in plan (arc) ; capetele drepte, cerinta de inlantuire | OK |
+| talus | ~8 deg | ~5,4 deg pe fata exterioara (grosimile de contract) | abatere minora |
+| bolta | ~40% din lungime, ~60% din inaltime | 5,5/14 = 39%, 5,5/8 = 69% (cu cheia 6,5 m) | OK |
+| bolțari | perne in relief, scara zidariei | 11, aceeasi perna | OK |
+| vegetatie, dalaj, bolovani | pe decupare | nu intra | OK |

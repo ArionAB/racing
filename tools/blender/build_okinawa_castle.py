@@ -141,7 +141,7 @@ def build_ryukyu_gate():
 
 AO_PALACE = dict(samples=16, dist=2.6, gradient="vertical", low=0.60, high=1.0,
                  power=0.8, floor=0.30, z_range=(0.0, 16.5))
-AO_WALL = dict(samples=16, dist=2.4, gradient="vertical", low=0.58, high=1.0,
+AO_WALL = dict(samples=8, dist=1.6, gradient="vertical", low=0.58, high=1.0,
                power=0.8, floor=0.30, z_range=(0.0, 8.5))
 
 
@@ -320,16 +320,16 @@ def build_gusuku_wall_curve():
 
     LISTA DE ELEMENTE (din decuparea `okinawa_assets_v1/gusuku_wall_curve.png` si
     din contractul §1.1; fara tufele de pe creasta si de la baza):
-      a) corp de calcar CURB pe arc: coarda 16 m, raza 20 m (`Wall_A_Limestone`)
+      a) miez de calcar CURB pe arc: coarda 16 m, raza 20 m (`Wall_A_Limestone`)
          si 40 m (`Wall_B_Limestone`), doua radacini in acelasi GLB (B mutat cu +10 m
-         pe X ca sa nu se suprapuna; originea fiecaruia = mijlocul corzii, baza la 0)
-      b) 8 m inalt, 2,5 m gros la baza, 1,6 m la creasta; fata exterioara (convexa,
-         +X) cu talus ~5,4 deg, cea interioara aproape verticala (1,1 deg)
-      c) 4 asize vizibile ca forma (2,3 / 2,0 / 1,75 / 1,4 m), fiecare cu rost
-         orizontal adanc si bombare usoara; rosturi verticale alternate, ~3-4 m
-      d) creasta rotunjita (semielipsa), fara creneluri drepte, ondulata cu 12 cm pe
-         lungime (zero la capete)
-      e) capete PLANE, perpendiculare pe tangenta, cu sectiune identica (inlantuibile)
+         pe X; originea fiecaruia = mijlocul corzii, baza la 0)
+      b) 8 m inalt, 2,5 m gros la baza, ~1,65 m sub capac (+0,2 capacul); fata
+         exterioara (convexa, +X) cu talus ~5,4 deg, cea interioara aproape verticala
+      c) 11 asize de 0,6-0,8 m, pe ambele fete: blocuri de 0,8-1,5 m, decalate pe
+         randuri, perne cu fete plate si rosturi IN RELIEF (4-5 cm), usor neregulate
+      d) creasta PLATA cu un rand de capac iesit 10 cm, colturi rotunjite doar in plan
+      e) capete plane, perpendiculare pe tangenta, miez identic (inlantuibile);
+         blocurile de capat fara rost pe randurile pare (imbinare decalata)
     Fara vegetatie. Nod per radacina: `Wall_A_Limestone`, `Wall_B_Limestone`.
     """
     objs = []
@@ -346,38 +346,47 @@ def build_gusuku_wall_curve():
 def build_gusuku_wall_straight():
     """Modulul drept (`gusuku_wall_straight`): 12 m pe Y, aceeasi sectiune.
 
-    LISTA DE ELEMENTE (din decuparea `gusuku_wall_straight.png`): corp de calcar
-    drept 12 m x 8 m, aceeasi sectiune ca la modulul curb (2,5 -> 1,6 m, talus
-    ~5,4 deg pe fata +X, 4 asize cu rost si bombare, creasta rotunjita ondulata),
-    capete plane identice cu ale modulului curb. Fara vegetatie. `Wall_Limestone`.
+    LISTA DE ELEMENTE (din decuparea `gusuku_wall_straight.png`): miez drept 12 m x
+    8 m, aceeasi sectiune ca la modulul curb, 11 asize de blocuri fasonate cu rosturi
+    in relief pe ambele fete, creasta plata cu capac, capete identice cu ale
+    modulului curb. Fara vegetatie. `Wall_Limestone`.
     """
     b = Builder()
     gusuku_wall(b, "straight", length=12.0, seed=5)
     return [to_obj(b, "Wall_Limestone")]
 
 
-ARCH_Y_HALF = 2.0          # semilatimea boltii (raza interioara a bolțarilor)
-ARCH_Z_SPRING = 2.5        # linia de nastere
-ARCH_CUT = 2.05            # raza taieturii (bolțarii ies 5 cm in deschidere)
+ARCH_Y_HALF = 2.75          # semilatimea boltii (raza interioara a bolțarilor)
+ARCH_Z_SPRING = 2.75        # linia de nastere
+ARCH_CUT = 2.8            # raza taieturii (bolțarii ies 5 cm in deschidere)
 
 
 def build_gusuku_arch_gate():
     """Poarta boltita (`gusuku_arch_gate`): modul de zid cu bolta de piatra.
 
     LISTA DE ELEMENTE (din decuparea `gusuku_arch_gate.png` si din contractul §1.1):
-      a) modul de zid drept 14 m x 8 m (aceeasi sectiune gusuku, +X = fata exterioara)
-      b) deschidere boltita: 4 m latime, 4,5 m inalta (semicerc r 2,05 pe linia
-         de nastere de 2,5 m), taiata prin grosimea zidului (axa X)
-      c) 11 bolțari in semicerc, cu cheia de bolta mai inalta, adancimea
-         urmeaza talusul, ies 14 cm pe fiecare fata
-      d) sambure: 3 blocuri de piatra pe fiecare parte, sub linia de nastere
+      a) modul de zid drept 14 m x 8 m (acelasi miez gusuku, +X = fata exterioara, cu
+         aceleasi 11 asize de blocuri; blocurile din jurul bolții sunt omise)
+      b) deschidere boltita: ~5,5 m latime x 5,5 m inaltime libera (semicerc r 2,8
+         pe linia de nastere de 2,75 m; DECIZIA COORDONATORULUI, runda 4: contractul
+         spunea 4 x 4,5 m), taiata prin grosimea zidului (axa X)
+      c) 11 bolțari in semicerc (r 2,75-3,55 + cheie de bolta mai inalta), cu aceeasi
+         perna cu rost in relief ca zidaria; adancimea urmeaza talusul
+      d) sambure: 4 blocuri pe fiecare parte, sub linia de nastere
       e) canat de lemn din doua aripi: una inchisa (scanduri verticale, 2 bare de fier),
          cealalta intredeschisa ~40 deg spre interior (-X, spre platforma palatului)
       f) fara vegetatie (tufele de pe decupare), fara dalajul din fata
     Noduri: `Arch_Limestone`, `Arch_Wood`.
     """
     b = Builder()
-    gusuku_wall(b, "straight", length=14.0, seed=31)
+    r_ex = ARCH_Y_HALF + 0.8 + 0.12
+
+    def ex(a0, a1, za, zb, sign):
+        yc, zc_ = (a0 + a1) * 0.5, (za + zb) * 0.5
+        if abs(yc) < r_ex and zc_ < ARCH_Z_SPRING:
+            return True
+        return math.hypot(yc, zc_ - ARCH_Z_SPRING) < r_ex
+    gusuku_wall(b, "straight", length=14.0, seed=31, blocks=False)
     wall = to_obj(b, "Arch_Wall_tmp")
     # --- taietura
     cb = Builder()
@@ -416,7 +425,8 @@ def build_gusuku_arch_gate():
     for f in bm2.faces:
         f[lay] = OK_LIMESTONE
     bpy.data.objects.remove(wall, do_unlink=True)
-    arch_blocks(b2, 0.0, ARCH_Z_SPRING, ARCH_Y_HALF, ARCH_Y_HALF + 0.85, 11)
+    gusuku_wall(b2, "straight", length=14.0, seed=31, exclude=ex, core=False)
+    arch_blocks(b2, 0.0, ARCH_Z_SPRING, ARCH_Y_HALF, ARCH_Y_HALF + 0.8, 11)
     # --- canatul
     wd = Builder()
     XD = -0.15
@@ -425,7 +435,7 @@ def build_gusuku_arch_gate():
     def leaf(hinge_y, sgn, ang):
         """Aripa cu balama la y=hinge_y, intinsa spre `sgn` pe Y; `ang` = deschidere (Z)."""
         rot = Matrix.Rotation(ang, 3, "Z")
-        nb = 6
+        nb = 8
         wb = (ARCH_Y_HALF - 0.04) / nb
         for j in range(nb):
             yl = sgn * (wb * (j + 0.5))
@@ -434,7 +444,7 @@ def build_gusuku_arch_gate():
             cl = Vector((0.0, yl, hb * 0.5))
             cw = rot @ cl
             wd.box((XD + cw.x, hinge_y + cw.y, cw.z), (TH, wb * 0.94, hb), WOOD, rotation=rot)
-        for zb_ in (0.8, 2.3):
+        for zb_ in (0.9, 2.6):
             cl = Vector((0.0, sgn * (ARCH_Y_HALF - 0.04) * 0.5, zb_))
             cw = rot @ cl
             wd.box((XD + cw.x, hinge_y + cw.y, cw.z), (TH + 0.05, ARCH_Y_HALF - 0.1, 0.16),
@@ -484,17 +494,17 @@ if _want("ryukyu_palace"):
 if _want("gusuku_wall_curve"):
     objs = build_gusuku_wall_curve()
     emit_ok(objs, "structures/gusuku_wall_curve.glb", AO_WALL, keep_xy=True, bevel=0.0,
-            smooth_angle=40.0, budget=None)
+            smooth_angle=None, budget=None)
 
 if _want("gusuku_wall_straight"):
     objs = build_gusuku_wall_straight()
     emit_ok(objs, "structures/gusuku_wall_straight.glb", AO_WALL, keep_xy=True, bevel=0.0,
-            smooth_angle=40.0, budget=None)
+            smooth_angle=None, budget=None)
 
 if _want("gusuku_arch_gate"):
     objs = build_gusuku_arch_gate()
     _recalc(objs)
     emit_ok(objs, "structures/gusuku_arch_gate.glb", AO_WALL, keep_xy=True, bevel=0.0,
-            smooth_angle=40.0, budget=None)
+            smooth_angle=None, budget=None)
 
 report_ok()

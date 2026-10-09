@@ -410,7 +410,7 @@ if _want("cycad"):
     _emit(build_cycad(), "plants/cycad.glb", AO_SMALL, 2.4)
 if _want("fan_palm"):
     _emit(build_fan_palm(), "plants/fan_palm.glb", AO_PINE, 6.2)
-if _want("_fan_leaf_test"):
+if ONLY == "_fan_leaf_test":  # doar la cerere explicita, niciodata in build-ul complet
     _emit(build_fan_leaf_test(), "plants/_fan_leaf_test.glb", AO_PINE, 3.0)
 if _want("bougainvillea"):
     _emit(build_bougainvillea(), "plants/bougainvillea.glb", AO_SMALL, 1.7)

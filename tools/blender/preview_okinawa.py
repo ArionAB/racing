@@ -613,6 +613,20 @@ def horizon_compare(crop_name, glb_name, nodes, res_height=800, gap=1.12):
     except OSError:
         pass
 
+# --- ok-d: satul si portul (specs de camera; fata pieselor = +Y) ------------
+SPECS.update({
+    "ryukyu_house_a": {"camera": {"azimuth": 58.0, "elevation": 30.0, "lens": 60.0, "margin": 1.06}},
+    "ryukyu_house_b": {"camera": {"azimuth": 58.0, "elevation": 30.0, "lens": 60.0, "margin": 1.06}},
+    "ryukyu_house_c": {"camera": {"azimuth": 58.0, "elevation": 30.0, "lens": 60.0, "margin": 1.06}},
+    "concrete_house_a": {"camera": {"azimuth": 58.0, "elevation": 26.0, "lens": 60.0, "margin": 1.06}},
+    "concrete_house_b": {"camera": {"azimuth": 58.0, "elevation": 26.0, "lens": 60.0, "margin": 1.06}},
+    "harbour_quay": {"camera": {"azimuth": 200.0, "elevation": 28.0, "lens": 60.0, "margin": 1.06}},
+    "bus_stop_shelter": {"camera": {"azimuth": 58.0, "elevation": 20.0, "lens": 60.0, "margin": 1.06}},
+    "vending_machine": {"camera": {"azimuth": 58.0, "elevation": 12.0, "lens": 60.0, "margin": 1.06}},
+    "convex_mirror": {"camera": {"azimuth": 80.0, "elevation": 8.0, "lens": 60.0, "margin": 1.06}},
+    "fishing_net_rack": {"camera": {"azimuth": 62.0, "elevation": 14.0, "lens": 60.0, "margin": 1.06}},
+})
+
 
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []

@@ -1045,6 +1045,252 @@ def slab_grid(rb, nu, nv, pos, th, slot):
     def quad(a, b_, c, d):
         f = rb.bm.faces.new([a, b_, c, d])
         f[rb.slot] = slot
+
+
+# ---------------------------------------------------------------------------
+# satul si portul (kit v2 §1.4, ok-d): case Ryukyu, zid de corali pe segment,
+# paravan hinpun, shisa, emit per nod
+# ---------------------------------------------------------------------------
+
+def hip_seams(roof, mb, step=0.9, n=4, w=0.07, h=0.07, dz=0.05, slot=OK_MORTAR,
+              skip_edge=0.35):
+    """Rosturi albe IN RELIEF pe cele patru ape ale unui `HipRoof` (corectura de
+    coordonator: coame SI rosturi, nu doar culoare). Cate o fasie ingusta de la
+    streasina la coama/muchie, la fiecare `step` m de-a lungul streasinii; pe
+    apele late se aliniaza cu coama, pe cele de capat converg spre varful
+    coamei. `skip_edge` = cat se lasa liber langa colturi ca sa nu se
+    suprapuna cu muchiile albe. `n` = puncte pe fasie (panta e concava)."""
+    R, hu, hv = roof.R, roof.hu, roof.hv
+
+    def surf(u, v):
+        x, y = roof.to_world(u, v)
+        return (x, y, roof.z_local(u, v) + roof.tile_amp + dz)
+
+    def strip(u0, v0, u1, v1):
+        pts = [surf(u0 + (u1 - u0) * k / n, v0 + (v1 - v0) * k / n) for k in range(n + 1)]
+        for a, c in zip(pts, pts[1:]):
+            mb.beam(a, c, (w, h), slot)
+
+    m = int((hu - skip_edge) / step)
+    for sv in (-1, 1):
+        for i in range(-m, m + 1):
+            u = i * step
+            strip(u, sv * hv, max(-R, min(R, u)), 0.0)
+    mv = int((hv - skip_edge) / step)
+    for su in (-1, 1):
+        for i in range(-mv, mv + 1):
+            strip(su * hu, i * step, su * R, 0.0)
+
+
+def ellipsoid(b, c, r, slot, u=8, v=6):
+    """Elipsoid low-res (u x v segmente) cu semiaxele `r` = (rx, ry, rz)."""
+    res = bmesh.ops.create_uvsphere(b.bm, u_segments=u, v_segments=v, radius=1.0,
+                                    matrix=Matrix.Translation(Vector(c))
+                                    @ Matrix.Diagonal(Vector((r[0], r[1], r[2], 1.0))))
+    b._tag(res["verts"], slot)
+
+
+def shisa_lion(b, x, y, z, s=1.0, slot=OK_TILE):
+    """Leu shisa sezand, cu fata spre +Y (Blender). ~0,6*s inaltime, ~0,45*s lat:
+    soclu, sezut (pulpe), piept, cap cu bot, coama (disc in jurul capului), 2
+    urechi, coada. Se citeste din 30 m ca silueta cu cap mare (kit §1.4)."""
+    S = s
+    b.box((x, y, z + 0.04 * S), (0.40 * S, 0.34 * S, 0.08 * S), slot)
+    ellipsoid(b, (x, y - 0.05 * S, z + 0.20 * S), (0.17 * S, 0.17 * S, 0.14 * S), slot, 8, 5)
+    ellipsoid(b, (x, y + 0.07 * S, z + 0.29 * S), (0.12 * S, 0.10 * S, 0.19 * S), slot, 8, 5)
+    # coama: disc vertical in jurul capului
+    ellipsoid(b, (x, y + 0.06 * S, z + 0.46 * S), (0.20 * S, 0.06 * S, 0.19 * S), slot, 8, 5)
+    ellipsoid(b, (x, y + 0.11 * S, z + 0.46 * S), (0.12 * S, 0.11 * S, 0.11 * S), slot, 8, 5)
+    b.box((x, y + 0.20 * S, z + 0.43 * S), (0.13 * S, 0.09 * S, 0.07 * S), slot)
+    for sx in (-1, 1):
+        b.frustum((x + sx * 0.12 * S, y + 0.05 * S, z + 0.60 * S), 0.045 * S, 0.0,
+                  0.09 * S, slot, segments=5)
+    ellipsoid(b, (x, y - 0.20 * S, z + 0.22 * S), (0.06 * S, 0.09 * S, 0.10 * S), slot, 6, 4)
+
+
+def _coral_stones(b, L, height, thick, courses, seed, stone_len):
+    """Pietre rotunjite pe un modul de lungime `L` pe +X local (grosime pe Y).
+    Aceeasi retea de asize mici ca `coral_stone_wall`: decalate de la un rand la
+    altul, ultimul rand mai plat si cu o piatra mai putin (creasta)."""
+    rnd = _ok_rand(seed)
+    pitch = height / (courses + 0.5)
+    sd = seed * 7 + 400
+    for ri in range(courses):
+        n = max(1, int(round(L / stone_len)))
+        if ri == courses - 1 and n > 2:
+            n -= 1
+        ws = [0.8 + rnd() * 0.4 for _ in range(n)]
+        tot = sum(ws)
+        ws = [w / tot * (L + 0.1) for w in ws]
+        x = -0.05 + (0.12 if ri % 2 else 0.0)
+        zc = 0.5 * pitch + ri * pitch
+        for w in ws:
+            xc = x + w * 0.5
+            x += w
+            sd += 1
+            b.boulder((xc, (rnd() - 0.5) * 0.06, zc + (rnd() - 0.5) * 0.03),
+                      (w * 1.12, thick * (0.88 + rnd() * 0.1), pitch * (1.86 + rnd() * 0.22)),
+                      CORAL_SAND, seed=sd, segments=6, rings=2, deviation=0.14)
+    b.box((L * 0.5, 0.0, height * 0.42), (max(0.05, L - 0.06), thick * 0.5, height * 0.84),
+          SAND_SHADOW)
+
+
+def coral_wall_segment(b, p0, p1, height=1.25, thick=0.72, courses=4, seed=1,
+                       stone_len=0.85, ext0=0.0, ext1=0.0):
+    """Zid de corali uscat (pietre rotunjite, asize mici, fara mortar) de la
+    `p0` la `p1` (2D la sol), pe orice directie. Capetele se taie PLAN (cu
+    `ext0`/`ext1` se prelungesc, pentru colturi). Piciorul se taie la z = 0.
+    Aceeasi geometrie ca `coral_stone_wall.glb`, la lungime variabila."""
+    p0v, p1v = Vector(p0), Vector(p1)
+    d = p1v - p0v
+    L = d.length
+    if L < 1e-4:
+        return
+    d.normalize()
+    start = p0v - d * ext0
+    total = L + ext0 + ext1
+    before = set(b.bm.verts)
+    _coral_stones(b, total, height, thick, courses, seed, stone_len)
+    ang = math.atan2(d.y, d.x)
+    R = Matrix.Rotation(ang, 3, "Z")
+    for v in b.bm.verts:
+        if v in before:
+            continue
+        v.co.x = max(0.0, min(total, v.co.x))
+        v.co.z = max(0.0, v.co.z)
+        c = R @ Vector((v.co.x, v.co.y, 0.0))
+        v.co = Vector((start.x + c.x, start.y + c.y, v.co.z))
+
+
+def wall_under_roof(b, p0, p1, roofs, slot, thick=0.3, z0=0.0, step=0.45,
+                    clear=0.04, top_max=99.0):
+    """Perete plin (solid inchis, vertecsi comuni) de la `p0` la `p1`, a carui
+    creasta urmareste fata de jos a acoperisului (`roof.z - th - clear`): peretele
+    se opreste exact sub olane, nu le strapunge. `roofs` = lista de `HipRoof`;
+    la suprapunere se ia cota cea mai joasa."""
+    p0v, p1v = Vector(p0), Vector(p1)
+    d = p1v - p0v
+    L = d.length
+    if L < 1e-4:
+        return
+    t = d / L
+    nrm = Vector((-t.y, t.x)) * (thick * 0.5)
+    n = max(1, int(math.ceil(L / step)))
+    ring = []
+    for k in range(n + 1):
+        p = p0v + t * (L * k / n)
+        zs = []
+        for r in roofs:
+            u, v = r.to_local(p.x, p.y)
+            if abs(u) <= r.hu + 1e-3 and abs(v) <= r.hv + 1e-3:
+                zs.append(r.z(p.x, p.y) - r.th - clear)
+        zt = min(min(zs) if zs else top_max, top_max)
+        a = b.bm.verts.new((p.x - nrm.x, p.y - nrm.y, z0))
+        c = b.bm.verts.new((p.x + nrm.x, p.y + nrm.y, z0))
+        e = b.bm.verts.new((p.x + nrm.x, p.y + nrm.y, zt))
+        f = b.bm.verts.new((p.x - nrm.x, p.y - nrm.y, zt))
+        ring.append((a, c, e, f))
+
+    def quad(*vs):
+        fc = b.bm.faces.new(vs)
+        fc[b.slot] = slot
+
+    for k in range(n):
+        A, B = ring[k], ring[k + 1]
+        for i in range(4):
+            j = (i + 1) % 4
+            quad(A[i], A[j], B[j], B[i])
+    quad(*ring[0][::-1])
+    quad(*ring[n])
+
+
+def stair_wedge(b, x0, x1, y_lo, y_hi, z_hi, nsteps, slot, z_lo=0.0):
+    """Scara plina (sectiune in trepte, extrudata pe X de la `x0` la `x1`): urca
+    de la (y_lo, z_lo) la (y_hi, z_hi) in `nsteps` trepte. Un singur corp
+    inchis, vertecsi comuni; baza plata."""
+    prof = [(y_lo, z_lo)]
+    for i in range(nsteps):
+        y_a = y_lo + (y_hi - y_lo) * i / nsteps
+        y_b = y_lo + (y_hi - y_lo) * (i + 1) / nsteps
+        z = z_lo + (z_hi - z_lo) * (i + 1) / nsteps
+        prof.append((y_a, z))
+        prof.append((y_b, z))
+    prof.append((y_hi, z_lo))
+    A = [b.bm.verts.new((x0, y, z)) for y, z in prof]
+    B = [b.bm.verts.new((x1, y, z)) for y, z in prof]
+    n = len(prof)
+    fa = b.bm.faces.new(A)
+    fa[b.slot] = slot
+    fb = b.bm.faces.new(B[::-1])
+    fb[b.slot] = slot
+    for i in range(n):
+        j = (i + 1) % n
+        fc = b.bm.faces.new((A[i], A[j], B[j], B[i]))
+        fc[b.slot] = slot
+
+
+def emit_ok_nodes(objs, path, ao, flat_suffixes=(), keep_xy=True, keep_z=False,
+                  bevel=0.0, smooth_angle=None, budget=None, bevel_angle=30.0):
+    """Ca `emit_ok`, dar umbrirea PLATA (`flat_ao`) se aplica doar nodurilor al
+    caror nume se termina cu un sufix din `flat_suffixes` (piatra, corali) --
+    tencuiala si olanele isi pastreaza gradientul de AO. `keep_z=True` pastreaza
+    cota Z a modelului (originea la linia apei: cheiul); altfel baza la Z = 0."""
+    objs = [o for o in objs if o is not None and len(o.data.vertices) > 0]
+    xs, ys, zs = [], [], []
+    for o in objs:
+        for v in o.data.vertices:
+            xs.append(v.co.x); ys.append(v.co.y); zs.append(v.co.z)
+    place = Vector((0.0 if keep_xy else -(min(xs) + max(xs)) * 0.5,
+                    0.0 if keep_xy else -(min(ys) + max(ys)) * 0.5,
+                    0.0 if keep_z else -min(zs)))
+    total = 0
+    per_node = {}
+    for o in objs:
+        for v in o.data.vertices:
+            v.co += place
+        flat = any(o.name.endswith(s) for s in flat_suffixes)
+        if flat:
+            _split_all_edges(o)
+        st = finish(o, bevel=bevel, bevel_angle=bevel_angle, ao=ao, origin=None,
+                    smooth_angle=smooth_angle)
+        if flat:
+            _flatten_ao(o)
+        total += st["tris"]
+        per_node[o.name] = st["tris"]
+    xs, ys, zs = [], [], []
+    for o in objs:
+        for v in o.data.vertices:
+            xs.append(v.co.x); ys.append(v.co.y); zs.append(v.co.z)
+    dims = Vector((max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs)))
+    _, sz = export_glb(objs, "okinawa/" + path)
+    OK_RESULTS.append((path, total, dims, budget, per_node, sz / 1024.0))
+    return total
+
+
+def gable_roof(rb, mb, hu, hv, z0, rise, th=0.14, step=0.2, amp=0.08,
+               slot_tile=OK_TILE, slot_mortar=OK_MORTAR, cap=0.3):
+    """Acoperis simplu in doua ape (coama pe X, streasina dreapta, fara ridicare
+    la colturi), cu olane dese IN RELIEF (canale pe panta, perioada 2*`step`).
+    Albul (`mb`) doar pe coama si pe capetele coamei (`cap` = lungimea blocului
+    de capat). Grosime reala `th`; solid inchis. Coordonate: centrat pe (0,0),
+    streasina la z0, coama la z0 + rise."""
+    nu = max(4, 2 * int(round(hu / step)))
+    nv = max(4, 2 * int(round(hv / step)))
+    top, bot = {}, {}
+    for i in range(nu + 1):
+        u = -hu + 2 * hu * i / nu
+        for j in range(nv + 1):
+            v = -hv + 2 * hv * j / nv
+            z = z0 + rise * (1.0 - abs(v) / hv)
+            edge = i in (0, nu) or j in (0, nv)
+            a = 0.0 if edge else amp * (i % 2)
+            top[(i, j)] = rb.bm.verts.new((u, v, z + a))
+            bot[(i, j)] = rb.bm.verts.new((u, v, z - th))
+
+    def quad(a, b_, c, d):
+        f = rb.bm.faces.new([a, b_, c, d])
+        f[rb.slot] = slot_tile
+
     for i in range(nu):
         for j in range(nv):
             quad(top[(i, j)], top[(i + 1, j)], top[(i + 1, j + 1)], top[(i, j + 1)])
@@ -1710,3 +1956,8 @@ def emit_ok_placed(objs, path, ao, place=(0.0, 0.0, 0.0), root=None, bevel=0.0,
         bpy.data.objects.remove(holder, do_unlink=True)
     OK_RESULTS.append((path, total, dims, budget, per_node, sz / 1024.0))
     return total
+
+    zr = z0 + rise + amp
+    mb.beam((-hu, 0.0, zr + 0.04), (hu, 0.0, zr + 0.04), (0.2, 0.14), slot_mortar)
+    for su in (-1, 1):
+        mb.box((su * (hu - cap * 0.5), 0.0, zr + 0.08), (cap, 0.3, 0.2), slot_mortar)

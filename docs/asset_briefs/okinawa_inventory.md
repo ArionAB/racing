@@ -384,3 +384,99 @@ Toate cele 7 GLB livrate, `VERDICT KIT: OK`. Nerefacut: comparatia barcii dupa l
 | `okinawa_horizon.glb` / `IeIsland_A` (1.174 tri total; `IeIsland_A` 119,3 x 60,8 x 45,0 m; 2 comparații) | con masiv (~55–60% din lungime), flancuri concave, 2–3 creste, platou care urcă, bandă de faleză palidă 2–4 m | con 70 x 42 m la bază (~58%), vârf la 45 m, flancuri concave (r = R(1-t)^1,2), 3 creste (modulare pe unghi), platou care urcă spre con (11 m la inelul de sus), bandă de faleză `MARBLE_GREY` 3,5 m pe tot țărmul | conul e mai masiv ca în runda 1, dar tot **mai îngust în partea de sus decât desenul**: doar ~37 m din el depășesc platoul și latura de 45 m din contract nu lasă mai mult; abatere raportată, nu rezolvată |
 
 Verify neschimbat în structură: `VERDICT KIT: OK`.
+
+## Val 2, ok-d: satul si portul (`tools/blender/build_okinawa_village.py`, kit §1.4)
+
+Vocabular adaugat la FINALUL `okinawa_shapes.py` (semnaturile existente neatinse):
+`hip_seams` (rosturi albe in relief pe `HipRoof`), `ellipsoid`, `shisa_lion`,
+`coral_wall_segment` (zidul de corali la lungime/directie variabila; aceeasi retea de
+asize mici ca `coral_stone_wall`, care ramane NESCHIMBAT), `wall_under_roof`,
+`stair_wedge`, `emit_ok_nodes` (umbrire plata doar pe nodurile `_Coral`; `keep_z` pentru
+originea la linia apei). `tools/blender/measure_front.py` masoara fata (raza spre
+exterior din fiecare fata LOG_DARK a nodului `*_Wood`; spatele placilor ingropate nu
+conteaza). Verify: sectiune `== val 2, ok-d ==`.
+
+**Fata (masurata pe GLB, aria golurilor expuse): +Y la toate cele 5 case** —
+ryukyu a 3,03 m2 pe +Y (urmeaza -Y 2,27 = ferestrele din spate), b 5,94, c 3,26,
+concrete a 11,28, b 6,55.
+
+| piesa | cote masurate (X x Y x Z) | tri | noduri (tri) |
+|---|---|---:|---|
+| `buildings/ryukyu_house_a.glb` | 14,01 x 12,00 x 5,17 m (curtea 14x12; varf 5,17 cu shisa) | 11.724 | Roof 2696, Mortar 1968, Plaster 416, Wood 600, Coral 5712, Shisa 332 |
+| `buildings/ryukyu_house_b.glb` | 16,01 x 12,02 x 5,52 m | 17.852 | Roof 4952, Mortar 4968, Plaster 748, Wood 756, Coral 6096, Shisa 332 |
+| `buildings/ryukyu_house_c.glb` | 11,08 x 10,00 x 4,67 m | 10.004 | Roof 1760, Mortar 2400, Plaster 304, Wood 444, Coral 4764, Shisa 332 |
+| `buildings/concrete_house_a.glb` | 10,31 (cu scara) x 8,18 x 9,11 m (cladire 6,5 + rezervor) | 2.216 | Plaster 72, Concrete 548, Wood 1596 |
+| `buildings/concrete_house_b.glb` | 8,21 x 7,16 x 6,36 m (cladire 4,0 + rezervoare) | 1.296 | Plaster 60, Concrete 684, Wood 552 |
+| `structures/harbour_quay.glb` | 6,26 x 12,00 x 4,43 m; Z de la -1,5 la +2,2 (+babale); origine la linia apei | 884 | Concrete 384, Rubber 500 |
+| `structures/bus_stop_shelter.glb` | 4,31 x 2,31 x 3,11 m | 3.248 | Roof 608, Mortar 1344, Wood 120, Coral 1164, Concrete 12 |
+| `props/vending_machine.glb` | 1,00 x 0,91 x 1,85 m | 476 | Plaster 96, Glass 380 |
+| `props/convex_mirror.glb` | 0,86 x 0,74 x 3,15 m | 156 | Frame 112, Glass 44 |
+| `props/fishing_net_rack.glb` | 4,00 x 1,19 x 1,97 m | 576 | Wood 84, Net 492 |
+
+Casele Ryukyu depasesc bugetul orientativ de ~12k (b: 17,9k) din zidul de corali al curtii
+(~5-6k, cel mai mare consumator, 52 m de perimetru) — raportat, fara plafon.
+`verify`: bugete 20.000 (ryukyu) / contract (restul).
+
+### ryukyu_house_a (piesa-erou), 2 runde de `--compare`
+
+Comparatie: `docs/asset_briefs/img/okinawa_fidelity/ryukyu_house_a.png`; cele trei pe o
+planșa: `docs/asset_briefs/img/okinawa_fidelity_val2.png`.
+
+| element | pe planșă / corectură | în GLB | verdict |
+|---|---|---|---|
+| varf | manerul rosu (corectura: SHISA) | leu shisa de teracota 0,6 m pe coama, cu fata spre +Y (`House_Shisa`, 332 tri) | OK ca numar/loc; la vedere de ansamblu e mic (0,6 m din 14) |
+| olane | nervuri dese, rosu | nervuri in relief (pas 0,3 m, 0,1 m) pe `House_Roof`; rosul vine din clasa | OK; la 3/4 din sus nervurile se citesc slab (clasa le aduce) |
+| mortar alb | coame + rosturi in relief | `House_Mortar`: coama, 4 muchii, bordura si ~14 rosturi de la streasina la coama, in relief | OK (rosturile rare si subtiri: la pas 0,9 m erau prea dese, "umbrela") |
+| acoperis | 4 ape, streasina ridicata | 4 ape, coama scurta, colturi +0,15 | OK; coama mai scurta decat pe planșă |
+| hinpun | lipsea pe planșă | zid liber 3 x 1,6 x 0,45 la y = 4,0 (2 m in spatele intrarii) | OK, contract |
+| intrare | poarta de lemn | FARA poarta, flancata de 2 stalpi de corali 1,75 m | OK (corectura) |
+| prispa | — | podea de lemn, 5 stalpi sub streasina lata, usi glisante inchise | OK |
+| zid de corali | zid dreptunghiular alb | pietre rotunjite in 4 asize, 1,4 m, umbrire plata | OK; pietrele sunt mai mari/colturoase ca in desen |
+| vegetatie lipita | palmieri, flori, tufe | NU modelata (corectura) | OK |
+| zid vs casa | zid strans in jurul casei | curte 14 x 12 din contract: casa pare mica in ea | abatere de contract, nu de forma |
+
+b = doua corpuri in L (casa 10 m + anexa perpendiculara mai joasa, doua shisa... doar una pe
+corpul principal), intrarea decalata la x = -3,2; c = casa mica, acoperis mai abrupt
+(curbura 1,15), curte 11 x 10 cu coltul (-X,+Y) taiat, intrarea pe +X. Se disting net pe planșa
+`okinawa_fidelity_val2.png`. Abateri: b si c au o singura shisa; la c prispa e pe +Y
+(intrarea curtii e pe +X, contract).
+
+### Casele de beton, cheiul, refugiul, props (1-2 runde)
+
+Comparatii: `okinawa_fidelity/{concrete_house_a,concrete_house_b,harbour_quay,bus_stop_shelter,vending_machine,convex_mirror,fishing_net_rack}.png`,
+planșe `okinawa_fidelity_val3.png`, `okinawa_fidelity_val4.png`.
+
+| piesa | abateri cinstite |
+|---|---|
+| concrete_house_a | tencuiala `FOAM_WHITE` (cu clasa `plaster` iese ca pe planșă); 2 niveluri, rezervor 10 segmente pe picioare, scara exterioara pe +X, sarma cu 4 rufe, 3+1 ferestre cu jaluzele pe +Y. Parapetul e in `Concrete_Plaster` (alb ca pe planșă), coronamentul in `Concrete_Concrete` (contractul punea parapetul in Concrete). Planșa arata un singur nivel + curte cu trepte si zid: nu se modeleaza (contract: 2 niveluri) |
+| concrete_house_b | `FLAMINGO_PINK` 31 e mai violaceu (#D2A0BE) decat roz-somon-ul din desen: slot existent, culoarea finala o poate da clasa `plaster`. Doua rezervoare + iesire pe acoperis |
+| harbour_quay | bloc 6 x 12, scara in nisa de 7 trepte pe -X, 3 babale, 5 anvelope, rosturi de placi pe fata -X (benzi). Planșa are blocuri de piatra cu accente portocalii pe babale/scara: slotul e CONCRETE (contract); bordura/babalele nu au portocaliu. Capetele y=±6 plane |
+| bus_stop_shelter | acoperis HipRoof 4 x 2, 4 stalpi de lemn, perete de corali in spate + 2 jardiniere joase (fara plante), banca; acoperisul pare mult alb (mortar pe o suprafata mica) fata de planșă. Stalpi de lemn, nu de piatra ca in desen (contract) |
+| vending_machine | decuparea e un panou alb gol; contractul cere vitrina cu 8 sticle: urmeaza contractul (abatere declarata). Fara text/logo |
+| convex_mirror | stalp 3 m, rama portocalie 12 segmente, oglinda ICE_TURQUOISE; calota fara peisaj pictat (desenul are cer/drum) |
+| fishing_net_rack | 2 capre in A + bara (desenul: 2 bare, capete rotunde), 3 plase ca saci fatetati cu flotoare; **plasele nu au ochiuri** (saci plini, nu retea): abatere mare, retelele se citesc din clasa/textura la integrare |
+
+### Stare la oprire (ok-d)
+
+Toate cele 10 GLB exportate, `verify_okinawa_v2.sh` -> `VERDICT KIT: OK`. Comparatiile sunt de
+vazut de coordonator; cea mai slaba fidelitate: `fishing_net_rack` (fara ochiuri) si `harbour_quay`
+(fara accente, tonuri uniforme).
+
+### ok-d, runda 2, ceruta de coordonator (casele Ryukyu, cheiul, refugiul)
+
+Comparatii refacute (cate 1-2 pe piesa): `okinawa_fidelity/{ryukyu_house_a,ryukyu_house_b,ryukyu_house_c,harbour_quay,bus_stop_shelter}.png`,
+`ryukyu_house_a_views.png` (4 azimuturi: hinpun-ul apare in spatele intrarii), planșe `okinawa_fidelity_val2.png`, `val3.png`.
+Casele de beton, automatul, oglinda si suportul de plase au fost acceptate si NU au fost atinse.
+
+| piesa | schimbare | cote / tri |
+|---|---|---|
+| ryukyu_house_a/b/c | acoperis jos, ~drept: `HipRoof` cu `tile_step` 0,2 (perioada nervurilor 0,4 m, 0,1 m relief, ca la poarta), curbura 1,0, colturi ridicate cel mult 0,2 m; alb DOAR pe coama, cele 4 muchii de colt si bordura streasinii; `hip_seams` scos de pe case (ramane in vocabular) | a 14,00 x 12,00 x 5,17 m, 21.764 tri; b 16,00 x 12,00 x 5,52, 29.036; c 11,14 x 10,03 x 4,67, 16.476 |
+| zidul curtii | acelasi tipar ca `coral_stone_wall.glb`: 5 asize, pietre de ~0,5 m, proportii originale (nucleu SAND_SHADOW 0,4 din grosime), 1,35 m, creasta plata; stalpii de la intrare 1,8 m din 7 asize; fara goluri pe randarea de aproape | coralii = 13,2k (a) / 14,2k (b) / 10,5k (c) din total; peste ~14k, acceptat de coordonator |
+| hinpun | piatra de corali ca zidul, 3 x 1,6 m, grosime 0,6 | vizibil pe `ryukyu_house_a_views.png` |
+| harbour_quay | UN bloc continuu 6 x 12 m; scara sapata in fata -X (nisa 1,8 m, y -2,5..3,5, 8 trepte pe lungimea fetei, primele 3 sub apa); 3 babale pe muchie (y -4,8 / -3,0 / 4,5); 4 anvelope atarnate pe fata verticala la z = 1,2 (~1 m sub muchie), in afara scarii; fata -X din blocuri mari in relief (rand de 1,4-2,6 m, umbrire plata); capete plane la ±6, origine la linia apei | 6,29 x 12,00 x 4,43 m, 828 tri |
+| bus_stop_shelter | acoperis in doua ape (`gable_roof`, nou in shapes): streasina dreapta, olane dese in relief, alb DOAR pe coama si pe cele doua capete ale ei (`Shelter_Mortar` 36 tri); stalpi de lemn, perete de corali cu asizele zidului | 4,10 x 2,10 x 3,29 m (3,20 cu coama), 2.660 tri |
+
+Abateri ramase: olanele se citesc ca benzi la randarea neutra (rosul si textura vin din clasa `roof_tiles`);
+nucleul brun al zidului de corali se vede intre pietre, ca la modulul acceptat; scara cheiului e in
+umbra proprie a nisei (se citeste, dar mai greu decat pe decupare); fara accentele portocalii ale desenului
+(slot CONCRETE).

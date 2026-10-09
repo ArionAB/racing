@@ -274,3 +274,22 @@ planșe `okinawa_fidelity_val3.png`, `okinawa_fidelity_val4.png`.
 Toate cele 10 GLB exportate, `verify_okinawa_v2.sh` -> `VERDICT KIT: OK`. Comparatiile sunt de
 vazut de coordonator; cea mai slaba fidelitate: `fishing_net_rack` (fara ochiuri) si `harbour_quay`
 (fara accente, tonuri uniforme).
+
+### ok-d, runda 2, ceruta de coordonator (casele Ryukyu, cheiul, refugiul)
+
+Comparatii refacute (cate 1-2 pe piesa): `okinawa_fidelity/{ryukyu_house_a,ryukyu_house_b,ryukyu_house_c,harbour_quay,bus_stop_shelter}.png`,
+`ryukyu_house_a_views.png` (4 azimuturi: hinpun-ul apare in spatele intrarii), planșe `okinawa_fidelity_val2.png`, `val3.png`.
+Casele de beton, automatul, oglinda si suportul de plase au fost acceptate si NU au fost atinse.
+
+| piesa | schimbare | cote / tri |
+|---|---|---|
+| ryukyu_house_a/b/c | acoperis jos, ~drept: `HipRoof` cu `tile_step` 0,2 (perioada nervurilor 0,4 m, 0,1 m relief, ca la poarta), curbura 1,0, colturi ridicate cel mult 0,2 m; alb DOAR pe coama, cele 4 muchii de colt si bordura streasinii; `hip_seams` scos de pe case (ramane in vocabular) | a 14,00 x 12,00 x 5,17 m, 21.764 tri; b 16,00 x 12,00 x 5,52, 29.036; c 11,14 x 10,03 x 4,67, 16.476 |
+| zidul curtii | acelasi tipar ca `coral_stone_wall.glb`: 5 asize, pietre de ~0,5 m, proportii originale (nucleu SAND_SHADOW 0,4 din grosime), 1,35 m, creasta plata; stalpii de la intrare 1,8 m din 7 asize; fara goluri pe randarea de aproape | coralii = 13,2k (a) / 14,2k (b) / 10,5k (c) din total; peste ~14k, acceptat de coordonator |
+| hinpun | piatra de corali ca zidul, 3 x 1,6 m, grosime 0,6 | vizibil pe `ryukyu_house_a_views.png` |
+| harbour_quay | UN bloc continuu 6 x 12 m; scara sapata in fata -X (nisa 1,8 m, y -2,5..3,5, 8 trepte pe lungimea fetei, primele 3 sub apa); 3 babale pe muchie (y -4,8 / -3,0 / 4,5); 4 anvelope atarnate pe fata verticala la z = 1,2 (~1 m sub muchie), in afara scarii; fata -X din blocuri mari in relief (rand de 1,4-2,6 m, umbrire plata); capete plane la ±6, origine la linia apei | 6,29 x 12,00 x 4,43 m, 828 tri |
+| bus_stop_shelter | acoperis in doua ape (`gable_roof`, nou in shapes): streasina dreapta, olane dese in relief, alb DOAR pe coama si pe cele doua capete ale ei (`Shelter_Mortar` 36 tri); stalpi de lemn, perete de corali cu asizele zidului | 4,10 x 2,10 x 3,29 m (3,20 cu coama), 2.660 tri |
+
+Abateri ramase: olanele se citesc ca benzi la randarea neutra (rosul si textura vin din clasa `roof_tiles`);
+nucleul brun al zidului de corali se vede intre pietre, ca la modulul acceptat; scara cheiului e in
+umbra proprie a nisei (se citeste, dar mai greu decat pe decupare); fara accentele portocalii ale desenului
+(slot CONCRETE).

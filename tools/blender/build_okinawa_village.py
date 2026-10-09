@@ -76,8 +76,8 @@ def _offset_poly(poly, off):
     return pts
 
 
-def yard_walls(cr, poly, gap, height=1.4, thick=0.8, seed=11, pillar=0.85,
-               pillar_h=1.75):
+def yard_walls(cr, poly, gap, height=1.35, thick=0.8, seed=11, pillar=0.85,
+               pillar_h=1.8):
     """Zidul curtii pe poligonul CCW `poly`. `gap` = (index_latura, (x, y)
     centrul golului, latime): intrarea FARA POARTA, flancata de doi stalpi de
     corali mai inalti. Restul laturilor: zid continuu din pietre rotunjite."""
@@ -92,27 +92,27 @@ def yard_walls(cr, poly, gap, height=1.4, thick=0.8, seed=11, pillar=0.85,
         if i == gi:
             t = (Vector(gc) - a).dot(d)
             g0, g1 = t - gw * 0.5, t + gw * 0.5
-            coral_wall_segment(cr, a, a + d * (g0 - pillar), height, thick, 4,
-                               seed + i, ext0=thick * 0.5)
+            coral_wall_segment(cr, a, a + d * (g0 - pillar), height, thick, 5,
+                               seed + i, stone_len=0.5, ext0=thick * 0.5)
             coral_wall_segment(cr, a + d * (g0 - pillar), a + d * g0, pillar_h, pillar,
-                               5, seed + 40 + i, stone_len=0.5)
+                               7, seed + 40 + i, stone_len=0.4)
             coral_wall_segment(cr, a + d * g1, a + d * (g1 + pillar), pillar_h, pillar,
-                               5, seed + 50 + i, stone_len=0.5)
-            coral_wall_segment(cr, a + d * (g1 + pillar), c, height, thick, 4,
-                               seed + 20 + i, ext1=thick * 0.5)
+                               7, seed + 50 + i, stone_len=0.4)
+            coral_wall_segment(cr, a + d * (g1 + pillar), c, height, thick, 5,
+                               seed + 20 + i, stone_len=0.5, ext1=thick * 0.5)
         else:
-            coral_wall_segment(cr, a, c, height, thick, 4, seed + i, stone_len=1.0,
+            coral_wall_segment(cr, a, c, height, thick, 5, seed + i, stone_len=0.5,
                                ext0=thick * 0.5, ext1=thick * 0.5)
 
 
-def hinpun(cr, cx, cy, along, length=3.0, height=1.6, thick=0.45, seed=70):
+def hinpun(cr, cx, cy, along, length=3.0, height=1.6, thick=0.6, seed=70):
     """Paravanul *hinpun*: zid scurt, liber, intre intrare si usa (contract:
     3 x 1,6 m). `along` = 'x' sau 'y' (directia lungimii)."""
     if along == "x":
         p0, p1 = (cx - length * 0.5, cy), (cx + length * 0.5, cy)
     else:
         p0, p1 = (cx, cy - length * 0.5), (cx, cy + length * 0.5)
-    coral_wall_segment(cr, p0, p1, height, thick, 5, seed, stone_len=0.7)
+    coral_wall_segment(cr, p0, p1, height, thick, 6, seed, stone_len=0.45)
 
 
 # ---------------------------------------------------------------------------
@@ -159,10 +159,9 @@ def _ryukyu_parts():
 def _mk_roof(P, spec):
     r = HipRoof(spec["cx"], spec["cy"], spec["hu"], spec["hv"], spec["z0"], spec["rise"],
                 R=spec["R"], swap=spec.get("swap", False), lift=spec.get("lift", 0.3),
-                th=0.17, curve=spec.get("curve", 1.5), tile_step=spec.get("step", 0.3),
+                th=0.17, curve=spec.get("curve", 1.0), tile_step=spec.get("step", 0.2),
                 tile_amp=0.1)
     r.build(P["rb"], P["mb"], seams=False)
-    hip_seams(r, P["mb"], step=spec.get("seam", 0.95))
     return r
 
 
@@ -231,7 +230,7 @@ def build_ryukyu_house(key):
     roofs = []
     if key == "a":
         roofs = [_mk_roof(P, dict(cx=0.0, cy=-1.0, hu=4.0, hv=3.5, z0=2.2, rise=1.95,
-                                  R=0.8, lift=0.15, curve=1.2, seam=1.7))]
+                                  R=0.8, lift=0.2))]
         _house_walls(P, roofs, (-3.0, 3.0, -3.4, 1.3))
         _veranda(P, roofs, -3.4, 3.4, 1.3, 1.25)
         wy = 1.3 + 0.15
@@ -247,9 +246,9 @@ def build_ryukyu_house(key):
         shisa_roof = roofs[0]
     elif key == "b":
         main = _mk_roof(P, dict(cx=-2.25, cy=-1.5, hu=5.25, hv=3.5, z0=2.3, rise=2.2,
-                                R=2.0, lift=0.3))
+                                R=2.0, lift=0.2))
         ann = _mk_roof(P, dict(cx=4.8, cy=0.6, hu=3.0, hv=2.2, z0=2.1, rise=1.45,
-                               R=0.9, lift=0.25, swap=True, step=0.3, seam=0.9))
+                               R=0.9, lift=0.2, swap=True))
         roofs = [main, ann]
         _house_walls(P, roofs, (-6.5, 2.0, -4.0, 0.9))
         _house_walls(P, roofs, (2.0, 6.4, -1.6, 2.7), skip=("-X",))
@@ -268,7 +267,7 @@ def build_ryukyu_house(key):
         shisa_roof = main
     else:
         roofs = [_mk_roof(P, dict(cx=-0.5, cy=-0.7, hu=3.0, hv=3.0, z0=1.9, rise=1.75,
-                                  R=0.45, lift=0.22, curve=1.15, seam=0.85))]
+                                  R=0.45, lift=0.15))]
         _house_walls(P, roofs, (-2.45, 1.45, -2.7, 1.2))
         _veranda(P, roofs, -2.6, 1.6, 1.2, 1.05, posts=4)
         wy = 1.2 + 0.15
@@ -300,7 +299,7 @@ def _emit_house(key, budget):
     _drop(objs)
 
 
-for _k, _bud in (("a", 14000), ("b", 18000), ("c", 12000)):
+for _k, _bud in (("a", 24000), ("b", 32000), ("c", 22000)):
     if _want("ryukyu_house_" + _k):
         _emit_house(_k, _bud)
 
@@ -425,39 +424,52 @@ for _k, _bud in (("a", 6000), ("b", 5000)):
 # ---------------------------------------------------------------------------
 
 def build_quay():
-    """Modul de chei. LISTA DE ELEMENTE (decuparea `harbour_quay.png`, kit §1.4):
-    a) bloc de beton 6 x 12 m, 2,2 m peste apa + 1,5 m sub (originea la linia
-       apei: Z = 0); apa e pe -X, uscatul pe +X; capete plane identice la y = +-6;
-    b) scara de coborare in apa pe fata -X: 7 trepte (nisa 2,4 x 2 m la y 0,8..2,8),
-       prima treapta sub apa;
-    c) 3 babale de beton (cilindri, 8 segmente) la marginea apei, y = -4,0 / -1,0 /
-       4,5; bordura joasa pe margine, intrerupta la scara;
-    d) 5 anvelope de acostare (torus pe axa X, VOLCANIC_BLACK) pe fata -X;
-    e) rosturi de placi pe fata -X (benzi in relief); fara text.
+    """Modul de chei, RUNDA 2 (un singur bloc continuu). LISTA DE ELEMENTE
+    (decuparea `harbour_quay.png`, kit §1.4):
+    a) UN bloc de beton 6 x 12 m, 2,2 m peste apa + 1,5 m sub (Z = 0 la linia apei);
+       apa pe -X, uscatul pe +X; capete plane identice la y = +-6;
+    b) scara SAPATA in fata dinspre apa (-X): nisa de 1,8 m latime (x -3..-1,2),
+       y -2,5..3,5, 8 trepte care urca de-a lungul fetei (paralel cu ea), primele
+       3 sub apa; ultima treapta la cota platformei;
+    c) 3 babale de beton pe muchia de sus (y = -4,8 / -3,0 / 4,5);
+    d) 5 anvelope de acostare atarnate pe fata verticala -X, la ~1 m sub muchie
+       (z = 1,2), in afara scarii;
+    e) fata -X din blocuri mari in relief (asize de 0,9-1,0 m, 1,4-2,6 m lungime,
+       0,08 m iesite), umbrire plata.
     Noduri: Quay_Concrete (CONCRETE 8), Quay_Rubber (VOLCANIC_BLACK 20)."""
     cn, rb = Builder(), Builder()
     zt, zb = 2.2, -1.5
     xw = -3.0
-    n_x = 2.4
-    cn.box((0, -3.1, (zt + zb) * 0.5), (6.0, 5.8, zt - zb), CONCRETE)
-    cn.box((0, 4.4, (zt + zb) * 0.5), (6.0, 3.2, zt - zb), CONCRETE)
-    cn.box((xw + n_x + (6.0 - n_x) * 0.5, 1.8, (zt + zb) * 0.5), (6.0 - n_x, 2.0, zt - zb), CONCRETE)
-    ns = 7
-    for i in range(ns):
-        z_i = -0.9 + (zt + 0.9) * (i + 1) / ns
-        x0 = xw + n_x * i / ns
-        w = n_x - n_x * i / ns
-        cn.box((x0 + w * 0.5, 1.8, (zb + z_i) * 0.5), (w, 2.0, z_i - zb), CONCRETE)
-    for (ya, yb) in ((-6.0, 0.8), (2.8, 6.0)):
-        cn.box((xw + 0.15, (ya + yb) * 0.5, zt + 0.1), (0.3, yb - ya, 0.2), CONCRETE)
-    for yb in (-4.0, -1.0, 4.5):
-        cn.cylinder((xw + 0.7, yb, zt + 0.3), 0.26, 0.6, CONCRETE, segments=8)
-        cn.frustum((xw + 0.7, yb, zt + 0.66), 0.34, 0.26, 0.14, CONCRETE, segments=8)
-    for (ya, yb) in ((-6.0, 0.8), (2.8, 6.0)):
-        for zz in (-0.4, 0.8, 1.7):
-            cn.box((xw - 0.03, (ya + yb) * 0.5, zz), (0.06, yb - ya - 0.1, 0.1), CONCRETE)
-    for yy in (-4.8, -2.8, -0.9, 3.6, 5.0):
-        rb.torus((xw - 0.12, yy, 1.0), 0.42, 0.15, VOLCANIC_BLACK, major_seg=10, minor_seg=5, axis="X")
+    xs = -1.2
+    y0, y1 = -2.5, 3.5
+    # corp: spatele (x >= xs) pe toata lungimea + doua fasii de fata (-X) la capete
+    cn.box(((xs + 3.0) * 0.5, 0.0, (zt + zb) * 0.5), (3.0 - xs, 12.0, zt - zb), CONCRETE)
+    cn.box(((xw + xs) * 0.5, (-6.0 + y0) * 0.5, (zt + zb) * 0.5), (xs - xw, y0 + 6.0, zt - zb), CONCRETE)
+    cn.box(((xw + xs) * 0.5, (y1 + 6.0) * 0.5, (zt + zb) * 0.5), (xs - xw, 6.0 - y1, zt - zb), CONCRETE)
+    stair_wedge(cn, xw, xs, y0, y1, zt, 8, CONCRETE, z_lo=zb)
+    # blocuri mari in relief pe fata -X, in afara scarii
+    rnd = _ok_rand(61)
+    for (ya, yb) in ((-6.0, y0), (y1, 6.0)):
+        for zi, (za, zbk) in enumerate(((zb, -0.55), (-0.55, 0.4), (0.4, 1.3), (1.3, zt))):
+            y = ya + (0.0 if zi % 2 == 0 else -0.5 - rnd() * 0.3)
+            y = max(y, ya)
+            while y < yb - 0.05:
+                w = 1.4 + rnd() * 1.2
+                y2 = min(yb, y + w)
+                if yb - y2 < 0.8:
+                    y2 = yb
+                cn.box((xw - 0.02, (y + y2) * 0.5, (za + zbk) * 0.5),
+                       (0.1, y2 - y - 0.07, zbk - za - 0.07), CONCRETE)
+                y = y2
+    # babale pe muchia de sus (pe fasiile de fata, nu deasupra scarii)
+    for yb in (-4.8, -3.0, 4.5):
+        cn.cylinder((xw + 0.55, yb, zt + 0.3), 0.26, 0.6, CONCRETE, segments=8)
+        cn.frustum((xw + 0.55, yb, zt + 0.66), 0.34, 0.26, 0.14, CONCRETE, segments=8)
+    # anvelope pe fata verticala, ~1 m sub muchie
+    for yy in (-5.0, -3.6, 4.2, 5.2, 2.2 + 3.6 - 0.0 if False else 4.7):
+        pass
+    for yy in (-5.2, -3.8, 4.1, 5.3):
+        rb.torus((xw - 0.16, yy, 1.2), 0.38, 0.14, VOLCANIC_BLACK, major_seg=10, minor_seg=5, axis="X")
     return [cn.to_object("Quay_Concrete"), rb.to_object("Quay_Rubber")]
 
 
@@ -466,37 +478,43 @@ if _want("harbour_quay"):
     emit_ok_nodes(objs, "structures/harbour_quay.glb",
                   dict(samples=16, dist=1.8, gradient="vertical", low=0.6, high=1.0,
                        power=0.8, floor=0.35, z_range=(-1.5, 2.8)),
-                  keep_xy=True, keep_z=True, bevel=0.0, smooth_angle=None, budget=2500)
+                  flat_suffixes=("_Concrete",), keep_xy=True, keep_z=True, bevel=0.0,
+                  smooth_angle=None, budget=2500)
     _drop(objs)
 
 
 def build_shelter():
-    """Refugiu de autobuz. LISTA DE ELEMENTE (decuparea `bus_stop_shelter.png`):
-    a) acoperis de olane (HipRoof) 4 x 2 m cu coame si bordura albe, rosturi albe;
-    b) 4 stalpi de lemn (2 in fata, 2 in spate), grinda de lemn sub streasina;
-    c) perete din spate de corali (3,6 x 2,2 m) + doua ziduri joase de corali pe
-       laturi (parapet 1 m, ca jardinierele de pe plansa, FARA plante);
-    d) banca de lemn lunga 2,2 m pe doua picioare;
-    e) placa de beton la baza (0,12 m); FARA tablita, FARA orar.
-    Noduri: Shelter_Roof, Shelter_Mortar, Shelter_Wood, Shelter_Coral, Shelter_Concrete."""
+    """Refugiu de autobuz, RUNDA 2. LISTA DE ELEMENTE (decuparea
+    `bus_stop_shelter.png`):
+    a) acoperis simplu in DOUA APE (`gable_roof`), 4,1 x 2,1 m, streasina dreapta,
+       olane dese in relief (canale pe panta, perioada 0,5 m); alb DOAR pe coama si
+       pe cele doua capete ale coamei;
+    b) 4 stalpi de lemn (2 in fata, 2 in spate) + grinda de lemn sub streasina;
+    c) perete din spate de corali (asize ca la `coral_stone_wall`) + doua ziduri
+       joase de corali pe laturi (1 m, ca jardinierele, fara plante);
+    d) banca de lemn de 2,2 m pe doua picioare; placa de beton de 0,12 m;
+       FARA tablita, FARA orar.
+    Noduri: Shelter_Roof, Shelter_Mortar (coama), Shelter_Wood, Shelter_Coral,
+    Shelter_Concrete."""
     rb, mb, wd, cr, cn = Builder(), Builder(), Builder(), Builder(), Builder()
-    roof = HipRoof(0.0, 0.0, 2.0, 1.0, 2.2, 0.55, R=1.0, lift=0.18, th=0.13, curve=1.25,
-                   tile_step=0.25, tile_amp=0.07)
-    roof.build(rb, mb, seams=False)
-    hip_seams(roof, mb, step=0.8, w=0.06, h=0.06)
+    z0, rise, th = 2.35, 0.55, 0.13
+    gable_roof(rb, mb, 2.05, 1.05, z0, rise, th=th, step=0.2, amp=0.12)
     cn.box((0, 0, 0.06), (4.0, 2.0, 0.12), CONCRETE)
+
+    def zroof(y):
+        return z0 + rise * (1.0 - abs(y) / 1.05) - th - 0.03
+
     for x in (-1.8, 1.8):
         for y in (-0.7, 0.75):
-            zt = roof.z(x, y) - roof.th - 0.03
+            zt = zroof(y)
             wd.box((x, y, (0.12 + zt) * 0.5), (0.18, 0.18, zt - 0.12), WOOD)
     for y in (-0.7, 0.75):
-        wd.beam((-1.8, y, roof.z(-1.8, y) - roof.th - 0.15), (1.8, y, roof.z(1.8, y) - roof.th - 0.15),
-                (0.16, 0.2), LOG_DARK)
-    coral_wall_segment(cr, (-1.8, -0.72), (1.8, -0.72), 2.2, 0.36, 6, seed=5, stone_len=0.6)
+        wd.beam((-1.9, y, zroof(y) - 0.12), (1.9, y, zroof(y) - 0.12), (0.16, 0.2), LOG_DARK)
+    coral_wall_segment(cr, (-1.8, -0.72), (1.8, -0.72), 2.2, 0.4, 7, seed=5, stone_len=0.5)
     for sx in (-1, 1):
-        coral_wall_segment(cr, (sx * 1.8, -0.5), (sx * 1.8, 0.7), 1.0, 0.36, 3, seed=6 + sx, stone_len=0.6)
+        coral_wall_segment(cr, (sx * 1.8, -0.5), (sx * 1.8, 0.7), 1.0, 0.4, 4, seed=6 + sx, stone_len=0.5)
     wd.box((0.0, -0.35, 0.5), (2.2, 0.42, 0.07), WOOD)
-    wd.box((0.0, -0.58, 0.8), (2.2, 0.05, 0.4), WOOD)
+    wd.box((0.0, -0.45, 0.8), (2.2, 0.05, 0.4), WOOD)
     for x in (-0.9, 0.9):
         wd.box((x, -0.35, 0.25), (0.08, 0.36, 0.5), LOG_DARK)
     return [rb.to_object("Shelter_Roof"), mb.to_object("Shelter_Mortar"), wd.to_object("Shelter_Wood"),
@@ -506,7 +524,7 @@ def build_shelter():
 if _want("bus_stop_shelter"):
     objs = build_shelter()
     emit_ok_nodes(objs, "structures/bus_stop_shelter.glb", _ao(3.0, 1.6),
-                  flat_suffixes=("_Coral",), keep_xy=True, bevel=0.0, smooth_angle=48.0, budget=4500)
+                  flat_suffixes=("_Coral",), keep_xy=True, bevel=0.0, smooth_angle=48.0, budget=8000)
     _drop(objs)
 
 

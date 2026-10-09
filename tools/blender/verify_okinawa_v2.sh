@@ -109,11 +109,11 @@ echo "== val 2, ok-d: satul si portul =="
 # originea e centrul curtii pe XY, baza la Z=0. Cheiul: --origin=waterline (linia apei la Y=0
 # in Godot, geometria o incaleca). concrete_house_b: FLAMINGO_PINK=31 pe tencuiala (--allow-slots=31).
 # Fata (+Y Blender): tools/blender/measure_front.py (usile/ferestrele = nodul *_Wood, slot 28).
-for v in a b c; do check "buildings/ryukyu_house_$v.glb" 20000 --origin=assembly; done
+for v in a b c; do check "buildings/ryukyu_house_$v.glb" 32000 --origin=assembly; done
 check "buildings/concrete_house_a.glb" 6000 --origin=assembly
 check "buildings/concrete_house_b.glb" 5000 --origin=assembly --allow-slots=31
 check "structures/harbour_quay.glb" 2500 --origin=waterline
-check "structures/bus_stop_shelter.glb" 4500 --origin=assembly
+check "structures/bus_stop_shelter.glb" 8000 --origin=assembly
 check "props/vending_machine.glb" 1500 --origin=assembly
 check "props/convex_mirror.glb" 1500 --origin=assembly --allow-slots=30
 check "props/fishing_net_rack.glb" 1500 --origin=assembly

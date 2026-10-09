@@ -1054,9 +1054,9 @@ def _coral_stones(b, L, height, thick, courses, seed, stone_len):
             x += w
             sd += 1
             b.boulder((xc, (rnd() - 0.5) * 0.06, zc + (rnd() - 0.5) * 0.03),
-                      (w * 1.15, thick * (1.0 + rnd() * 0.1), pitch * (2.05 + rnd() * 0.25)),
+                      (w * 1.12, thick * (0.88 + rnd() * 0.1), pitch * (1.86 + rnd() * 0.22)),
                       CORAL_SAND, seed=sd, segments=6, rings=2, deviation=0.14)
-    b.box((L * 0.5, 0.0, height * 0.42), (max(0.05, L - 0.06), thick * 0.3, height * 0.8),
+    b.box((L * 0.5, 0.0, height * 0.42), (max(0.05, L - 0.06), thick * 0.5, height * 0.84),
           SAND_SHADOW)
 
 
@@ -1190,3 +1190,43 @@ def emit_ok_nodes(objs, path, ao, flat_suffixes=(), keep_xy=True, keep_z=False,
     _, sz = export_glb(objs, "okinawa/" + path)
     OK_RESULTS.append((path, total, dims, budget, per_node, sz / 1024.0))
     return total
+
+
+def gable_roof(rb, mb, hu, hv, z0, rise, th=0.14, step=0.2, amp=0.08,
+               slot_tile=OK_TILE, slot_mortar=OK_MORTAR, cap=0.3):
+    """Acoperis simplu in doua ape (coama pe X, streasina dreapta, fara ridicare
+    la colturi), cu olane dese IN RELIEF (canale pe panta, perioada 2*`step`).
+    Albul (`mb`) doar pe coama si pe capetele coamei (`cap` = lungimea blocului
+    de capat). Grosime reala `th`; solid inchis. Coordonate: centrat pe (0,0),
+    streasina la z0, coama la z0 + rise."""
+    nu = max(4, 2 * int(round(hu / step)))
+    nv = max(4, 2 * int(round(hv / step)))
+    top, bot = {}, {}
+    for i in range(nu + 1):
+        u = -hu + 2 * hu * i / nu
+        for j in range(nv + 1):
+            v = -hv + 2 * hv * j / nv
+            z = z0 + rise * (1.0 - abs(v) / hv)
+            edge = i in (0, nu) or j in (0, nv)
+            a = 0.0 if edge else amp * (i % 2)
+            top[(i, j)] = rb.bm.verts.new((u, v, z + a))
+            bot[(i, j)] = rb.bm.verts.new((u, v, z - th))
+
+    def quad(a, b_, c, d):
+        f = rb.bm.faces.new([a, b_, c, d])
+        f[rb.slot] = slot_tile
+
+    for i in range(nu):
+        for j in range(nv):
+            quad(top[(i, j)], top[(i + 1, j)], top[(i + 1, j + 1)], top[(i, j + 1)])
+            quad(bot[(i, j + 1)], bot[(i + 1, j + 1)], bot[(i + 1, j)], bot[(i, j)])
+    for i in range(nu):
+        quad(top[(i, 0)], bot[(i, 0)], bot[(i + 1, 0)], top[(i + 1, 0)])
+        quad(top[(i + 1, nv)], bot[(i + 1, nv)], bot[(i, nv)], top[(i, nv)])
+    for j in range(nv):
+        quad(top[(0, j + 1)], bot[(0, j + 1)], bot[(0, j)], top[(0, j)])
+        quad(top[(nu, j)], bot[(nu, j)], bot[(nu, j + 1)], top[(nu, j + 1)])
+    zr = z0 + rise + amp
+    mb.beam((-hu, 0.0, zr + 0.04), (hu, 0.0, zr + 0.04), (0.2, 0.14), slot_mortar)
+    for su in (-1, 1):
+        mb.box((su * (hu - cap * 0.5), 0.0, zr + 0.08), (cap, 0.3, 0.2), slot_mortar)

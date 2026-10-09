@@ -7,18 +7,22 @@ extends Node
 ## `DecorManual/ZonaC`), lipit in Track20.tscn de `tools/splice_ok_c.py`.
 ##
 ## Fapte masurate (contract §Premise 1): drumul urca (5-8 %) pe CRESTA, terenul
-## lateral e plat la cota drumului ±25 m, interiorul (DREAPTA) coboara incet
-## (-1.5 m la 60 m); stanga e plat pana la mare (86-100 m). Deci trestia sta la
-## cota drumului, pe teren, nu "pe deal".
+## lateral e plat la cota drumului ±25 m, interiorul (DREAPTA) coboara incet;
+## stanga e plat pana la mare. Deci trestia sta la cota drumului, nu "pe deal".
 ##
-## Trestia: `sugar_cane_clump` (kit vechi) ca FlockProp (MultiMesh), cate un
-## stol per camp, in RANDURI (transversale pe drum), margini neregulate.
-## Un clump are 1216 tri si 2,7 x 3,8 m.
+## RUNDA 2 (verdict orb: "petice izolate cu sol gol intre ele, vrem masa
+## continua"): cate un camp CONTINUU pe fiecare parte, de la ~2 m de bordura la
+## 36-42 m adancime, in RANDURI PARALELE cu drumul (coordonate (u, v) ale
+## drumului, deci randul urmeaza curba). Varianta de clump e `Cane_Clump_B`
+## (824 tri, cea mai ieftina), stolul e feliat in celule de ~26 m cu
+## `view_m` (nu se randeaza peste 180 m). Bordura dinspre drum: hibiscus,
+## cicade, bougainvillea, pini, garduri de corali intrerupte.
 
 const SCENE := "res://scenes/tracks/Track20.tscn"
 const ZONE := "DecorManual/ZonaC"
 const PALACE := Vector2(110.0, -285.0)
 const GATE := Vector2(142.8, -249.9)
+const LEN := 2058.3
 
 const M_OK := "res://assets/models/okinawa/"
 const RES := {
@@ -26,28 +30,26 @@ const RES := {
 	"hibiscus": "res://assets/models/plants/hibiscus_bush.glb",
 	"pine": M_OK + "plants/ryukyu_pine.glb",
 	"cycad": M_OK + "plants/cycad.glb",
+	"bougainvillea": M_OK + "plants/bougainvillea.glb",
 	"fukugi_a": M_OK + "plants/fukugi_tree_a.glb",
 	"fukugi_b": M_OK + "plants/fukugi_tree_b.glb",
 	"fukugi_c": M_OK + "plants/fukugi_tree_c.glb",
 	"house_a": M_OK + "buildings/concrete_house_a.glb",
 	"house_b": M_OK + "buildings/concrete_house_b.glb",
+	"ryukyu_c": M_OK + "buildings/ryukyu_house_c.glb",
 	"wall": M_OK + "structures/coral_stone_wall.glb",
 	"buffalo": M_OK + "animals/water_buffalo.glb",
 	"egret": M_OK + "animals/egret.glb",
 }
 const FLOCK_SCRIPT := "res://scenes/props/flock.gd"
 
-## [nume, u0, u1, v0, v1] ; v>0 dreapta (interior), v<0 stanga; v0 mai aproape de drum
-const FIELDS := [
-	["R1", 0.2285, 0.2615, 4.0, 44.0],
-	["R2", 0.2675, 0.3025, 4.0, 48.0],
-	["R3", 0.3075, 0.3345, 4.0, 36.0],
-	["L1", 0.2255, 0.2575, -4.0, -32.0],
-	["L2", 0.2725, 0.3025, -4.0, -36.0],
-	["L3", 0.3075, 0.3345, -4.0, -30.0],
-]
-const ROW_X := 3.2   # intre randuri (de-a lungul drumului)
-const PLANT_X := 2.5  # in rand (transversal)
+const U0 := 0.2090      # dupa colt (0.2047); punctele cu (u,v) nepotrivit se sar
+const U1 := 0.3375
+const CELL := 0.0125    # ~26 m per stol
+const V0 := 2.2         # primul rand: de la marginea asfaltului
+const ROW := 2.5
+const STEP := 2.4
+const WALL_V := 2.7
 
 var tr: Track
 var n: int
@@ -56,10 +58,11 @@ var noise := FastNoiseLite.new()
 var out := PackedStringArray()
 var used_res := {}
 var counts := {}
-## discuri ocupate (x, z, raza): case, luminis, pini -- trestia nu intra in ele
+## discuri ocupate (x, z, raza): case, luminis, pini, ziduri -- trestia nu intra
 var discs: Array[Vector3] = []
 var cams: Array[Vector3] = []
 var report := PackedStringArray()
+var cane_tris := 824
 
 
 func _ready() -> void:
@@ -69,9 +72,6 @@ func _ready() -> void:
 	for k in 4:
 		await get_tree().process_frame
 	n = tr.baked.size()
-	if "--inspect" in args:
-		for p in [RES["cane"], RES["egret"], RES["buffalo"]]:
-			_inspect(p)
 	for a in args:
 		if a.begins_with("--out="):
 			_generate(a.substr(6))
@@ -107,15 +107,13 @@ func _heading(u: float) -> Vector3:
 	return d.normalized()
 
 
-## (u, v) al unui punct de lume, dupa cel mai apropiat punct de drum.
+## (u, v) al unui punct de lume; pe asfalt v = 0.
 func _uv(p: Vector3) -> Vector2:
 	var i: int = tr.closest_index_global(p)
 	var q: Vector3 = tr.baked[i]
 	var s: Vector3 = tr._side_at(i)
 	var hw: float = tr.width_at_index(i)
 	var lat := (p - q).dot(s)
-	# pe asfalt v = 0 (nici dreapta, nici stanga): altfel jumatatea stanga a
-	# drumului ar iesi cu v pozitiv si ar primi trestie in mijlocul soselei
 	var v := signf(lat) * maxf(absf(lat) - hw, 0.0)
 	return Vector2(float(i) / float(n), v)
 
@@ -133,11 +131,9 @@ func _occupied(p: Vector3, extra := 0.0) -> bool:
 	return false
 
 
-## Piesa inalta in axa spre palat/poarta, vazuta din camera (10 m sus, 12,5 m in
-## spate) pe oricare punct al ferestrei C: respinsa.
+## Piesa inalta in axa spre palat/poarta (vazuta din camera ferestrei C) care
+## depaseste linia camera -> baza palatului (+33): respinsa.
 func _blocks_palace(p: Vector3, height: float) -> bool:
-	# fizic: piesa acopera palatul doar daca varful ei sta mai sus decat linia
-	# camera -> baza palatului (+30, platoul) si e in +-4 grade de azimut
 	var top := p.y + height
 	for c in cams:
 		for tgt: Vector2 in [PALACE, GATE]:
@@ -153,8 +149,6 @@ func _blocks_palace(p: Vector3, height: float) -> bool:
 	return false
 
 
-## Cea mai apropiata fractie u (cautare +-0.03) unde o piesa de `height` m nu
-## acopera palatul; -1 daca nu exista.
 func _free_u(u: float, v: float, height: float) -> float:
 	for off in [0.0, 0.006, -0.006, 0.012, -0.012, 0.02, -0.02, 0.03, -0.03]:
 		var p := _pos(u + off, v)
@@ -180,16 +174,17 @@ func _group(gname: String) -> void:
 	out.append("")
 
 
-func _prop(group: String, nname: String, key: String, p: Vector3, yaw: float, sc := 1.0, sink := 0.0) -> void:
+func _prop(group: String, nname: String, key: String, p: Vector3, yaw: float, sc := 1.0, sink := 0.0, extra := "") -> void:
 	var b := Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3.ONE * sc)
 	var xf := Transform3D(b, Vector3(p.x, p.y - sink, p.z))
 	out.append('[node name="%s" parent="%s/%s" instance=ExtResource("%s")]' % [nname, ZONE, group, _res_id(key)])
 	out.append("transform = " + var_to_str(xf))
+	if extra != "":
+		out.append(extra)
 	out.append("")
 	_count(key)
 
 
-## Poza nedorita a unui GLB cu doua poze ca noduri separate: ascunsa pe instanta.
 func _hide_pose(inst: String, pose: String) -> void:
 	out.append('[node name="%s" parent="%s/Fauna/%s"]' % [pose, ZONE, inst])
 	out.append("visible = false")
@@ -201,6 +196,8 @@ func _flock(nname: String, key: String, pos: PackedVector3Array, yaw: PackedFloa
 	out.append('[node name="%s" type="MultiMeshInstance3D" parent="%s/Trestia"]' % [nname, ZONE])
 	out.append('script = ExtResource("c_flock")')
 	out.append('model = ExtResource("%s")' % _res_id(key))
+	out.append('mesh_name = "Cane_Clump_B"')
+	out.append("view_m = 180.0")
 	out.append("positions = " + var_to_str(pos))
 	out.append("yaws = " + var_to_str(yaw))
 	out.append("scale3_list = " + var_to_str(sc3))
@@ -208,77 +205,61 @@ func _flock(nname: String, key: String, pos: PackedVector3Array, yaw: PackedFloa
 
 
 # ---------------------------------------------------------------------------
-# campurile
+# trestia: camp continuu, randuri paralele cu drumul
 
-func _in_field(f: Array, uv: Vector2) -> bool:
-	var u0: float = f[1]
-	var u1: float = f[2]
-	var v0: float = f[3]
-	var v1: float = f[4]
-	var sg := 1.0 if v1 > 0.0 else -1.0
-	if sg * uv.y <= 0.0:
-		return false
-	var a := absf(uv.y)
-	# margini neregulate: u se clatina cu v, v cu u (zgomot neted)
-	var du := noise.get_noise_2d(uv.y * 3.1, 11.0) * 0.0035
-	var dv := noise.get_noise_2d(uv.x * 900.0, 7.0) * 4.5
-	var dv0 := noise.get_noise_2d(uv.x * 700.0, 29.0) * 1.2
-	if uv.x < u0 + du or uv.x > u1 - du:
-		return false
-	return a > absf(v0) + 0.3 + dv0 and a < absf(v1) + dv
-
-
-func _build_field(f: Array, clear: Array) -> void:
-	var uc: float = (float(f[1]) + float(f[2])) * 0.5
-	var vc: float = (float(f[3]) + float(f[4])) * 0.5
-	var c := _pos(uc, vc)
-	var d0 := _heading(uc)
-	var s0 := Vector3(-d0.z, 0.0, d0.x) # dreapta
+func _build_cane(side: float, cell: int) -> void:
 	var pos := PackedVector3Array()
 	var yaw := PackedFloat32Array()
 	var sc3: Array[Vector3] = []
-	var span_u := (float(f[2]) - float(f[1])) * 2058.0 * 0.5 + 12.0
-	var span_v := absf(float(f[4]) - float(f[3])) * 0.5 + 14.0
-	var k_lim := int(span_u / ROW_X) + 3
-	var m_lim := int(span_v / PLANT_X) + 3
-	for k in range(-k_lim, k_lim + 1):
-		var roww := noise.get_noise_2d(float(k) * 2.7, 91.0) * 0.18  # randul se abate usor
-		for m in range(-m_lim, m_lim + 1):
-			var jx := rng.randf_range(-0.22, 0.22)
-			var jz := rng.randf_range(-0.35, 0.35)
-			var base := c + d0 * (float(k) * ROW_X + roww + jx) + s0 * (float(m) * PLANT_X + jz)
-			var uv := _uv(base)
-			if not _in_field(f, uv):
+	var ua := U0 + float(cell) * CELL
+	var ub := ua + CELL
+	if ua >= U1:
+		return
+	var k := 0
+	while true:
+		var v := V0 + float(k) * ROW
+		# adancimea: neregulata doar spre interior (zgomot pe u)
+		var vmax := 36.0 + noise.get_noise_2d(ua * 700.0, side * 5.0 + 3.0) * 7.0
+		if v > vmax:
+			break
+		var m := 0
+		var off := (STEP * 0.5) if k % 2 == 1 else 0.0
+		while true:
+			var du := (float(m) * STEP + off) / LEN
+			var u := ua + du
+			if u >= ub:
+				break
+			m += 1
+			# departe de drum randul se rareste (fiecare al doilea) ca sa
+			# nu se plateasca tris acolo unde nu conteaza
+			if v > 22.0 and (m + k) % 2 == 1:
 				continue
-			if _occupied(base, 2.0):
+			var jv := rng.randf_range(-0.3, 0.3)
+			var ju := rng.randf_range(-0.35, 0.35) / LEN
+			var p := _pos(u + ju, side * (v + jv))
+			var uv := _uv(p)
+			if absf(absf(uv.y) - (v + jv)) > 1.6 or absf(uv.x - u) > 0.005:
 				continue
-			var skip := false
-			for cl: Vector3 in clear:
-				if Vector2(base.x - cl.x, base.z - cl.y).length() < cl.z:
-					skip = true
-					break
-			if skip:
+			if _occupied(p, 0.0):
 				continue
-			base.y = tr._terrain_mesh_y(base.x, base.z)
-			if base.y < 0.8:
+			if p.y < 0.8:
 				continue
-			pos.append(Vector3(base.x, base.y - 0.05, base.z))
+			pos.append(Vector3(p.x, p.y - 0.05, p.z))
 			yaw.append(rng.randf() * TAU)
-			var w := rng.randf_range(0.95, 1.22)
-			sc3.append(Vector3(w, rng.randf_range(0.92, 1.12), w * rng.randf_range(0.9, 1.1)))
-	_flock("Camp_" + String(f[0]), "cane", pos, yaw, sc3)
+			var w := rng.randf_range(1.05, 1.35)
+			sc3.append(Vector3(w, rng.randf_range(0.95, 1.2), w * rng.randf_range(0.9, 1.1)))
+		k += 1
+	_flock("Camp_%s%02d" % ["R" if side > 0.0 else "L", cell], "cane", pos, yaw, sc3)
 	_count("cane", pos.size())
-	report.append("camp %s: %d clump-uri" % [f[0], pos.size()])
 
 
 # ---------------------------------------------------------------------------
 
 func _generate(path: String) -> void:
-	rng.seed = 20261010
-	noise.seed = 20261010
+	rng.seed = 20261011
+	noise.seed = 20261011
 	noise.frequency = 0.5
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	# camerele ferestrei C (10 m sus, 12,5 m in spate)
 	var u := 0.20
 	while u <= 0.335:
 		var li := _lerp_i(u)
@@ -293,40 +274,119 @@ func _generate(path: String) -> void:
 	_group("Fauna")
 	_group("Flori")
 
-	# --- case de beton (cu gradina): discuri ocupate inainte de trestie
-	var houses := [["a", 0.2455, 50.0], ["b", 0.2935, 61.0], ["b", 0.3195, 21.0],
-		["b", 0.2850, -36.0], ["a", 0.2400, -34.0], ["b", 0.2750, 76.0], ["a", 0.2330, 62.0]]
+	# --- case joase la 15-25 m de drum (prima reusita din lista; max 3)
+	var houses := [
+		["ryukyu_c", 0.2490, 19.0], ["house_a", 0.2860, -19.0], ["house_b", 0.3170, 17.0],
+		["ryukyu_c", 0.2420, -20.0], ["house_b", 0.2730, 22.0], ["house_a", 0.3050, -17.0],
+		["ryukyu_c", 0.2300, 20.0], ["house_b", 0.3290, -18.0],
+	]
 	var hn := 0
+	var hseen := {}
 	for h in houses:
 		if hn >= 3:
 			break
-		var hu := _free_u(float(h[1]), float(h[2]), 9.5)
+		var hp0 := _pos(float(h[1]), float(h[2]))
+		var ht := 9.5 if String(h[0]) != "ryukyu_c" else 5.5
+		var hu := _free_u(float(h[1]), float(h[2]), ht)
 		if hu < 0.0:
-			report.append("casa la u=%.3f respinsa (axa palat)" % float(h[1]))
+			report.append("casa %s la u=%.3f respinsa (axa palat)" % [h[0], float(h[1])])
 			continue
 		var hp := _pos(hu, float(h[2]))
-		var d := _pos(hu, -2.0) - hp
+		var d := _pos(hu, signf(float(h[2])) * 2.0) - hp
 		d.y = 0.0
 		d = d.normalized()
-		# fata casei = -Z local; vrem -Z -> spre drum
-		var yw := atan2(-d.x, -d.z) + rng.randf_range(-0.25, 0.25)
-		_prop("Case", "Casa%d" % hn, "house_" + String(h[0]), hp, yw, 1.0, 0.25)
+		var yw := atan2(-d.x, -d.z) + rng.randf_range(-0.2, 0.2)
+		_prop("Case", "Casa%d" % hn, String(h[0]), hp, yw, 1.0, 0.25)
 		discs.append(Vector3(hp.x, hp.z, 8.5))
+		hseen[hn] = hp0
 		hn += 1
 
-	# --- luminis (pasune) in campul R2 pentru bivol + 2 egrete
-	var cl_c := _pos(0.2865, 36.0)
-	var clear: Array = [Vector3(cl_c.x, cl_c.z, 8.0)]
-	for f in FIELDS:
-		_build_field(f, clear if f[0] == "R2" else [])
+	# --- luminis (pasune) pentru bivol + 2 egrete, in campul din dreapta
+	var cl_c := _pos(0.2865, 24.0)
+	discs.append(Vector3(cl_c.x, cl_c.z, 7.0))
 
-	# --- fauna
-	var bd := _heading(0.2865)
-	var bs := Vector3(-bd.z, 0, bd.x)
-	_prop("Fauna", "Bivol", "buffalo", cl_c + bd * 0.6, atan2(bd.x, bd.z) + 2.2, 1.35)
+	# --- garduri de corali: borduri de camp la ~2.7 m de asfalt, INTRERUPTE
+	var wn := 0
+	for side: float in [1.0, -1.0]:
+		var uu := U0 + (0.002 if side > 0.0 else 0.009)
+		while uu < U1 - 0.01:
+			var run_len := rng.randf_range(12.0, 24.0) / LEN
+			var ue := minf(uu + run_len, U1 - 0.005)
+			wn += _wall_line(wn, uu, ue, side * WALL_V, 2.4)
+			uu = ue + rng.randf_range(7.0, 16.0) / LEN
+	# despartituri transversale mai adanc in camp (v 12-36)
+	for dd in [[0.2400, 1.0], [0.2750, 1.0], [0.3100, 1.0], [0.2300, -1.0], [0.2600, -1.0], [0.2950, -1.0], [0.3250, -1.0]]:
+		wn += _wall_seg(wn, _pos(float(dd[0]), float(dd[1]) * 12.0), _pos(float(dd[0]), float(dd[1]) * 34.0), 4.5)
+
+	# --- bordura de camp: pini, hibiscus, cicade, bougainvillea in palcuri
+	var pn := 0
+	var cn := 0
+	var hbn := 0
+	var bn := 0
+	for side: float in [1.0, -1.0]:
+		var uu := U0 + rng.randf_range(0.0, 0.006)
+		var cluster := 0
+		while uu < U1:
+			var cu := uu
+			var v := side * rng.randf_range(1.9, 3.2)
+			var cp := _pos(cu, v)
+			# 2-3 hibiscus + 1-2 cicade, in palc
+			for k in rng.randi_range(2, 3):
+				var p := cp + Vector3(rng.randf_range(-2.0, 2.0), 0, rng.randf_range(-1.2, 1.2))
+				p.y = tr._terrain_mesh_y(p.x, p.z)
+				if _edge_dist(p) < 1.3:
+					continue
+				_prop("Flori", "Hibiscus%02d" % hbn, "hibiscus", p, rng.randf() * TAU, rng.randf_range(1.2, 1.7), 0.05)
+				hbn += 1
+			for k in rng.randi_range(1, 2):
+				var p := cp + Vector3(rng.randf_range(-2.4, 2.4), 0, rng.randf_range(-1.5, 1.5))
+				p.y = tr._terrain_mesh_y(p.x, p.z)
+				if _edge_dist(p) < 1.6:
+					continue
+				_prop("Arbori", "Cicada%02d" % cn, "cycad", p, rng.randf() * TAU, rng.randf_range(0.95, 1.35), 0.1)
+				cn += 1
+			if cluster % 5 == 2 and bn < 2:
+				var bp := _pos(cu + 4.0 / LEN, side * 3.0)
+				var bd := _pos(cu + 4.0 / LEN, side * 0.0) - bp
+				bd.y = 0.0
+				bd = bd.normalized()
+				_prop("Flori", "Bougainvillea%d" % bn, "bougainvillea", bp, atan2(-bd.x, -bd.z), 1.1, 0.05, 'metadata/coliziune = "none"')
+				bn += 1
+			# pin la cateva palcuri, la 3.4-5 m (trunchi cu coliziune)
+			if cluster % 3 == 1:
+				var pu := _free_u(cu + 6.0 / LEN, side * 4.2, 9.5)
+				if pu >= 0.0:
+					var pp := _pos(pu, side * rng.randf_range(3.6, 5.0))
+					_prop("Arbori", "Pin%02d" % pn, "pine", pp, rng.randf() * TAU, rng.randf_range(0.85, 1.1), 0.2)
+					discs.append(Vector3(pp.x, pp.z, 1.8))
+					pn += 1
+			cluster += 1
+			uu += rng.randf_range(16.0, 38.0) / LEN
+	# --- cativa fukugi pe marginea interioara a campului (fundal verde inchis)
+	var fuk := [
+		["a", 0.2330, 44.0], ["c", 0.2800, 47.0], ["b", 0.2560, 46.0], ["c", 0.3010, 45.0],
+		["a", 0.2500, -42.0], ["c", 0.2950, -44.0], ["b", 0.3220, 44.0],
+	]
+	var fnn := 0
+	for ff in fuk:
+		var fu := _free_u(float(ff[1]), float(ff[2]), 8.8)
+		if fu < 0.0:
+			continue
+		var p := _pos(fu, float(ff[2]))
+		if _occupied(p, 2.0):
+			continue
+		_prop("Arbori", "Fukugi%02d" % fnn, "fukugi_" + String(ff[0]), p, rng.randf() * TAU, rng.randf_range(0.9, 1.15), 0.2)
+		fnn += 1
+
+	# --- fauna in luminis
+	var bd2 := _heading(0.2865)
+	var bs := Vector3(-bd2.z, 0, bd2.x)
+	var bp2 := cl_c + bd2 * 0.6
+	bp2.y = tr._terrain_mesh_y(bp2.x, bp2.z)
+	_prop("Fauna", "Bivol", "buffalo", bp2, atan2(bd2.x, bd2.z) + 2.2, 1.35)
 	_hide_pose("Bivol", "Pose_Walk")
-	var e1 := cl_c - bd * 3.4 + bs * 3.0
-	var e2 := cl_c + bd * 2.8 - bs * 3.6
+	var e1 := cl_c - bd2 * 3.4 + bs * 3.0
+	var e2 := cl_c + bd2 * 2.8 - bs * 3.6
 	e1.y = tr._terrain_mesh_y(e1.x, e1.z)
 	e2.y = tr._terrain_mesh_y(e2.x, e2.z)
 	_prop("Fauna", "Egreta0", "egret", e1, rng.randf() * TAU, 1.7)
@@ -334,88 +394,13 @@ func _generate(path: String) -> void:
 	_hide_pose("Egreta0", "Pose_Fly")
 	_hide_pose("Egreta1", "Pose_Fly")
 
-	# --- garduri de corali: despartituri TRANSVERSALE intre campuri + capatul
-	#     lung (paralel cu drumul doar departe, v >= 56)
-	var wn := 0
-	wn += _wall_seg(wn, _pos(0.2645, 5.5), _pos(0.2645, 50.0))
-	wn += _wall_seg(wn, _pos(0.3050, 5.5), _pos(0.3050, 52.0))
-	wn += _wall_seg(wn, _pos(0.2650, -5.5), _pos(0.2650, -38.0))
-	wn += _wall_seg(wn, _pos(0.3050, -5.5), _pos(0.3050, -38.0))
-	wn += _wall_line_par(wn, 0.2675, 0.3025, 54.0)
-	wn += _wall_line_par(wn, 0.2285, 0.2615, 50.0)
+	# --- trestia (dupa ce toate discurile sunt cunoscute)
+	var ncell := int(ceil((U1 - U0) / CELL))
+	for cell in ncell:
+		_build_cane(1.0, cell)
+		_build_cane(-1.0, cell)
+	report.append("clump-uri trestie: %d x %d tri (Cane_Clump_B) = %d tri" % [int(counts.get("cane", 0)), cane_tris, int(counts.get("cane", 0)) * cane_tris])
 
-	# --- pini Ryukyu (8 in C): rari, la marginile campurilor, nu in axa palatului
-	var pines := [
-		[0.2270, 9.0], [0.2625, 12.0], [0.2660, 56.0], [0.3045, 10.0],
-		[0.3110, 46.0], [0.2400, -14.0], [0.2800, -22.0], [0.3150, -12.0],
-	]
-	var pn := 0
-	for pp in pines:
-		var pu := _free_u(float(pp[0]), float(pp[1]), 9.5)
-		if pu < 0.0:
-			report.append("pin la u=%.3f respins (axa palat)" % float(pp[0]))
-			continue
-		var p := _pos(pu, float(pp[1]))
-		p += Vector3(rng.randf_range(-1.5, 1.5), 0, rng.randf_range(-1.5, 1.5))
-		p.y = tr._terrain_mesh_y(p.x, p.z)
-		if _blocks_palace(p, 9.5):
-			report.append("pin la u=%.3f respins (axa palat)" % float(pp[0]))
-			continue
-		_prop("Arbori", "Pin%02d" % pn, "pine", p, rng.randf() * TAU, rng.randf_range(0.85, 1.1), 0.2)
-		discs.append(Vector3(p.x, p.z, 2.5))
-		pn += 1
-	# --- cativa fukugi la marginea de departe (fundal verde inchis)
-	var fuk := [
-		["a", 0.2330, 54.0], ["c", 0.2800, 78.0], ["b", 0.2560, 66.0], ["c", 0.3010, 80.0],
-		["a", 0.2500, -30.0], ["c", 0.2950, -34.0],
-	]
-	var fnn := 0
-	for ff in fuk:
-		var fu := _free_u(float(ff[1]), float(ff[2]), 8.8)
-		if fu < 0.0:
-			report.append("fukugi la u=%.3f respins" % float(ff[1]))
-			continue
-		var p := _pos(fu, float(ff[2]))
-		if _occupied(p, 2.0):
-			report.append("fukugi la u=%.3f respins" % float(ff[1]))
-			continue
-		_prop("Arbori", "Fukugi%02d" % fnn, "fukugi_" + String(ff[0]), p, rng.randf() * TAU, rng.randf_range(0.9, 1.15), 0.2)
-		discs.append(Vector3(p.x, p.z, 3.0))
-		fnn += 1
-
-	# --- cicade (~25): grupuri pe margini, langa case si ziduri
-	var cyc := [
-		[0.2290, 3.8, 3], [0.2630, 7.0, 4], [0.2680, 7.0, 3], [0.3035, 8.0, 4],
-		[0.2470, 44.0, 3], [0.2950, 56.0, 3], [0.3210, 14.0, 2], [0.2420, -9.0, 3], [0.2870, -12.0, 3],
-	]
-	var cn := 0
-	for cc in cyc:
-		var cp := _pos(float(cc[0]), float(cc[1]))
-		for k in int(cc[2]):
-			var p := cp + Vector3(rng.randf_range(-2.4, 2.4), 0, rng.randf_range(-2.4, 2.4))
-			p.y = tr._terrain_mesh_y(p.x, p.z)
-			if _edge_dist(p) < 3.2 or _occupied(p, 0.5):
-				continue
-			_prop("Arbori", "Cicada%02d" % cn, "cycad", p, rng.randf() * TAU, rng.randf_range(0.95, 1.4), 0.1)
-			cn += 1
-
-	# --- hibiscus: 6 petice (accentul rosu), niciodata aliniate
-	var hib := [
-		[0.2635, 9.0, 4], [0.3040, 7.5, 5], [0.2475, 44.0, 4], [0.3185, 18.0, 4],
-		[0.2400, -7.0, 4], [0.2860, -9.5, 5],
-	]
-	var hbn := 0
-	for hh in hib:
-		var hp := _pos(float(hh[0]), float(hh[1]))
-		for k in int(hh[2]):
-			var p := hp + Vector3(rng.randf_range(-2.0, 2.0), 0, rng.randf_range(-2.0, 2.0))
-			p.y = tr._terrain_mesh_y(p.x, p.z)
-			if _edge_dist(p) < 3.2 or _occupied(p, 0.5):
-				continue
-			_prop("Flori", "Hibiscus%02d" % hbn, "hibiscus", p, rng.randf() * TAU, rng.randf_range(1.2, 1.7), 0.05)
-			hbn += 1
-
-	# --- iesirea: ext_resource-urile intai
 	var head := PackedStringArray()
 	for k in used_res:
 		if k == "flock":
@@ -431,21 +416,20 @@ func _generate(path: String) -> void:
 	print("  piese: ", counts)
 
 
-## Gard paralel cu drumul, doar departe (>= 50 m): capatul de jos al campului.
-func _wall_line_par(wn: int, u0: float, u1: float, v: float) -> int:
+## Gard de la u0 la u1 la v fix (paralel cu drumul), segmente de ~4 m.
+func _wall_line(wn: int, u0: float, u1: float, v: float, min_edge: float) -> int:
 	var made := 0
-	var u := u0
-	var prev := _pos(u, v)
-	while u < u1:
-		u += 0.0018
-		var cur := _pos(u, v)
-		made += _wall_seg(wn + made, prev, cur)
+	var uu := u0
+	var prev := _pos(uu, v)
+	while uu < u1:
+		uu = minf(uu + 4.0 / LEN, u1)
+		var cur := _pos(uu, v)
+		made += _wall_seg(wn + made, prev, cur, min_edge)
 		prev = cur
 	return made
 
 
-## Gard de la a la b: segmente de ~4 m (scalate pe Z ca sa se prinda capetele).
-func _wall_seg(wn: int, a: Vector3, b: Vector3) -> int:
+func _wall_seg(wn: int, a: Vector3, b: Vector3, min_edge: float) -> int:
 	var d := b - a
 	d.y = 0.0
 	var length := d.length()
@@ -458,24 +442,14 @@ func _wall_seg(wn: int, a: Vector3, b: Vector3) -> int:
 	for k in cnt:
 		var c := a + dir * (step * (float(k) + 0.5))
 		c.y = tr._terrain_mesh_y(c.x, c.z)
-		if _edge_dist(c) < 4.5 or _occupied(c, 0.0):
+		if _edge_dist(c) < min_edge:
 			continue
 		var yaw := atan2(dir.x, dir.z) + rng.randf_range(-0.05, 0.05)
 		var b2 := Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(1.0, 1.0, step / 4.0))
 		out.append('[node name="Gard%03d" parent="%s/Garduri" instance=ExtResource("%s")]' % [wn + made, ZONE, _res_id("wall")])
 		out.append("transform = " + var_to_str(Transform3D(b2, Vector3(c.x, c.y - 0.12, c.z))))
 		out.append("")
+		discs.append(Vector3(c.x, c.z, 1.5))
 		_count("wall")
 		made += 1
 	return made
-
-
-# ---------------------------------------------------------------------------
-
-func _inspect(path: String) -> void:
-	var root := (load(path) as PackedScene).instantiate() as Node3D
-	add_child(root)
-	for mi in root.find_children("*", "MeshInstance3D", true, false):
-		var m := mi as MeshInstance3D
-		print("%s | %s | visible %s | path %s" % [path.get_file(), m.name, m.visible, root.get_path_to(m)])
-	root.queue_free()

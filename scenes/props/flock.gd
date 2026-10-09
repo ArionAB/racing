@@ -17,6 +17,13 @@ class_name FlockProp
 ## primeste materialul comun de lume, ca orice prop din atlas.
 
 @export var model: PackedScene = null
+## Numele nodului MeshInstance3D folosit din GLB (gol = primul gasit, ca inainte).
+## Nascut pe trestia Okinawei: `sugar_cane_clump.glb` are trei variante
+## (Cane_Clump_A/B/C, 1216/824/1488 tri) iar un MultiMesh poate desena una singura.
+@export var mesh_name: String = ""
+## Distanta peste care stolul nu se mai randeaza (visibility_range_end, m).
+## 0 = nelimitat (comportamentul vechi).
+@export var view_m: float = 0.0
 @export var positions: PackedVector3Array = PackedVector3Array()
 @export var yaws: PackedFloat32Array = PackedFloat32Array()
 ## Variatie de scara per instanta, ca stolul sa nu fie o stampila repetata.
@@ -165,7 +172,7 @@ func _ready() -> void:
 
 
 func _build() -> void:
-	var mesh: Mesh = _disc_mesh(disc_slot, disc_radius, disc_skirt, disc_skirt_slot) if model == null and disc_slot >= 0 else _mesh_of(model)
+	var mesh: Mesh = _disc_mesh(disc_slot, disc_radius, disc_skirt, disc_skirt_slot) if model == null and disc_slot >= 0 else _mesh_of(model, mesh_name)
 	if mesh != null and model != null and ao_keep < 1.0:
 		mesh = _lift_ao(mesh, ao_keep)
 	if mesh == null:
@@ -220,6 +227,8 @@ func _build() -> void:
 			LampHalo.build(self, name + "_Reflexie", refl_pts, halo_color,
 				halo_intensity * halo_reflect, halo_core_m * 0.8,
 				halo_radius_m * 0.7, halo_reflect_stretch, halo_flicker, seed_value)
+	if view_m > 0.0:
+		visibility_range_end = view_m
 	material_override = Palette.triplanar_class_material(tri_class) if tri_class != "" else Palette.world_material()
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	if not split_keep.is_empty():
@@ -280,7 +289,7 @@ func _find_sampler() -> Object:
 	return null
 
 
-static func _mesh_of(ps: PackedScene) -> Mesh:
+static func _mesh_of(ps: PackedScene, want: String = "") -> Mesh:
 	var root := ps.instantiate()
 	var found: MeshInstance3D = null
 	var stack: Array[Node] = [root]
@@ -288,7 +297,7 @@ static func _mesh_of(ps: PackedScene) -> Mesh:
 		var n: Node = stack.pop_back()
 		for c in n.get_children():
 			stack.append(c)
-		if n is MeshInstance3D:
+		if n is MeshInstance3D and (want == "" or n.name == want):
 			found = n as MeshInstance3D
 	var mesh: Mesh = null
 	if found != null and found.mesh != null:

@@ -103,5 +103,14 @@ check "rocks/limestone_cliff_module.glb" 3000 --origin=assembly
 check "buildings/cape_lighthouse.glb" 6000 --origin=assembly
 check "structures/coral_stone_wall.glb" 1000 --origin=assembly
 
+echo "== val 1, ok-a: castelul =="
+# palatul: 6 noduri, aurul e CAR_YELLOW (--allow-car-slots), ansamblu pe sol
+check "buildings/ryukyu_palace.glb" 80000 --origin=assembly --allow-car-slots=Palace_Gold
+# zidurile: origine = mijlocul corzii (keep_xy), baza pe sol; doua radacini la curb
+check "structures/gusuku_wall_curve.glb" 20000 --origin=assembly
+check "structures/gusuku_wall_straight.glb" 12000 --origin=assembly
+check "structures/gusuku_arch_gate.glb" 12000 --origin=assembly
+
+echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi
 exit "$fail"

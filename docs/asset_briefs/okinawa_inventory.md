@@ -300,3 +300,87 @@ Cap si gat masurate pe varfurile din GLB (banda de la buza capului +-0,9 m, resp
 **Faleza A + B (3 comparatii + lantul a-b-a-b, `limestone_cliff_module_chain.png`).** Masa din spate = loft pe 9 statii (pas 1,5 m) cu **nisa neregulata** (adancime 0,75-1,35 m, tavan z 2,4-3,6, variaza pe lungime), capetele ±6 m IDENTICE (sectiune si doua stive de coloane de capat, aceleasi seed-uri). Suprafata o fac **coloanele prismatice pe doua trepte** (jos 4 coloane de 1,6-2,6 m iesite peste nisa, sus 3-4 de ~2-2,7 m retrase, crapaturi care nu se aliniaza, cotitura la mijloc = prag, coloane in crapaturi). A: 4+3 coloane, B: 4+4 cu alt ritm si alte inaltimi. Lantul a-b-a-b nu mai repeta tiparul si nu mai citeste placa cu oua / jgheab drept. Abateri: **inca arata ca tuburi de orga / bazalt columnar**, nu masa de bolovani fatetati ca pe decupare (fatete verticale lungi, nu 1-2 m pe orizontala); iarba de pe coloane e placa turtita, nu frunzis; capetele plane arata la unirea a doua module o crapatura de ~0,2 m intre coloanele de capat (intentionat, citeste crapatura); in lant se vad usor liniile de triunghiulare pe capacul masei din spate (invizibil in joc); inaltimea 15,0-15,5 m cu iarba (contract 14 m + iarba).
 
 **Palmierul-evantai (3 comparatii + evantai izolat `fan_palm_leaf.png`, 4 azimuturi).** Evantaiul izolat construit si randat primul (disc plisat Ø ~1,9 m, 9 pliuri, pe petiol; planul discului are normala spre exterior ca sa se citeasca din fata). Coroana: 11 evantaie la pas egal de 32,7 grade, 3 inele alternate (3 sus 70, 5 oblice 40, 3 cazute -65), petioli 1,2-1,6 m, vazuta de la toate cele 4 azimuturi simetrica (`fan_palm_views.png`). Trunchi 3,5 m, Ø ~0,5 m, inele pana la 1,5 m, apoi 7 randuri x 8 **solzi in romb cu muchii** (rombul ridicat cu varf spre exterior). 3 frunze uscate (R 0,8) atarnate lipite de trunchi, plan tangent la trunchi (nu fusta). Abateri: coroana Ø ~4,2 m (cerut 4,5-5) si inaltime 5,5 m (cerut 6); evantaiele au marginea dintata mare si pliurile abia se disting la distanta (un singur verde pe fata, fara galbenul planșei); trunchiul e mai drept si mai subtire decat in desen; solzii se vad doar de aproape (frunzele uscate si coroana acopera partea de sus); evantaiele de pe inelul oblic se vad pe cant de la camera joasa din preview.
+
+## Val 2, ok-e: vapoare, animale, fundal
+
+Build: `build_okinawa_vessels.py`, `build_okinawa_animals.py`, `build_okinawa_horizon.py`
+(+ `emit_ok_placed` la finalul `okinawa_shapes.py`, `measure_okinawa_vessels.py`,
+moduri noi in `preview_okinawa.py`: `--poses <animal>`, `--horizon-compare <decupare> <glb> <noduri>`).
+Verify: sectiunea `val 2, ok-e` din `verify_okinawa_v2.sh`.
+
+### vehicles/island_ferry.glb — 1.559 tri — CONTRACT DE COD INGHETAT (masurat pe GLB)
+
+`python tools/blender/measure_okinawa_vessels.py island_ferry` (coordonate Godot):
+
+| cota | contract | masurat |
+|---|---|---|
+| lungime (Z) | 28 m | **28,00 m** (Z -14,00..+14,00) |
+| latime (X) | 8 m | **8,01 m** |
+| **varf (catarg) peste linia apei** | 11,0 +- 0,5 | **11,00 m** (Y max, apa = Y 0) |
+| pescaj | 2 m | **2,00 m** (Y min -2,00) |
+| **prova** | −Z Godot (`ship_bow_neg_z = true`) | **−Z**: coca are 0,00 m latime in primii 2 m pe −Z (varf ascutit) vs 7,44 m pe +Z |
+| origine | linia apei | `--origin=waterline` OK (geometria incaleca Y=0) |
+| scala/rotatie radacina | 1 / 0 | aplicate |
+
+Ierarhie: radacina `Island_Ferry` (Empty/Node3D) cu copiii reali `Ferry_Glass`, `Ferry_Hull`
+(CAR_BLUE 15, 112 tri), `Ferry_Plaster` (FOAM_WHITE 22, 919), `Ferry_Stripe` (KERB_RED 7, 50),
+`Ferry_Glass` (VOLCANIC_BLACK 20, 456). Coca 4 niveluri (z -2..+2,5), bord alb, doua punti
+(cabina lunga z 2,95..5,35 + salon z 5,5..7,6), timoneria in fata, cos albastru cu banda rosie,
+catarg de 3,2 m cu verga si radar; balustrade pe puntea deschisa. `measure` iese cu cod 1 si
+`verify_okinawa_v2.sh` pica daca oricare cota iese din contract.
+
+### vehicles/coastal_freighter.glb — 835 tri
+
+Masurat: 34,00 x 8,00 m, varf (radar) 12,05 m, pescaj 2,30 m, prova −Z (ascutita). Noduri
+radacina (fara parinte): `Freighter_Hull` (rosu sub z 0,5 / albastru deasupra, + cos), `Freighter_Deck`
+(RUST, pereti de magazie, 3 lazi + 2 paleti), `Freighter_Plaster` (parapet alb, cabina pe 2 nivele,
+catarg-radar, catarg de prova, macara), `Freighter_Glass`.
+
+### vehicles/fishing_boat.glb — 388 tri
+
+Masurat: 9,00 x 2,81 m, pescaj 0,90 m, acoperisul cabinei 3,2 m (catarg 4,45 m), prova −Z.
+Noduri: `Boat_Hull`, `Boat_Stripe` (CAR_BLUE), `Boat_Glass`.
+
+### animals/water_buffalo.glb — 1.934 tri; animals/egret.glb — 866 tri
+
+Bivol: `Pose_Stand`, `Pose_Walk` (967 tri fiecare), 2,8 m bot→crupa (2,94 cu coada), greaban ~1,5 m,
+coarne MARBLE_GREY pe spate, corp LOG_DARK. Starc: `Pose_Stand` (0,93 m inalt), `Pose_Fly`
+(anvergura 1,43 m, ridicat 0,9 m); ciocul CAR_YELLOW e in mesh-ul pozei, deci
+`--allow-car-slots=Pose_` (nu exista nod `Egret_Beak` separat; deviatie de la brief).
+Origine: picioarele pe z=0, XY pe corp, fara offset pe ansamblu.
+
+### effects/okinawa_horizon.glb — 1.028 tri
+
+Patru noduri copii directe ale radacinii, origine la baza, XY centrat pe bbox, umbrire plata:
+`IeIsland_A` 119,3 x 60,8 x 45,0 m (platou 8 m + UN con, varf la 45 m, excentric −20 m),
+`Kerama_A` 85,6 x 36,8 x 25 m, `Kerama_B` 66,2 x 38,4 x 18 m, `Kerama_C` 47,9 x 22,0 x 12 m.
+
+### Fidelitate (cinstit; comparatii in `docs/asset_briefs/img/okinawa_fidelity/<nume>.png`)
+
+Runde: feribot 2, restul 2 (bivol 2, starc 1, freighter 1, barca 1, Ie 1, Kerama 2).
+
+| piesa | element | pe decupare | in GLB | verdict |
+|---|---|---|---|---|
+| feribot | coca albastra + dunga rosie, 2 punti, comanda in fata, cos, catarg | da | da (dupa runda 2 coca mai inalta) | OK; abateri: mult mai lung si subtire (28 x 8 din contract, desenul e scurt si lat), pupa fara deschiderea de catamaran, barca fara valuri |
+| freighter | punte deschisa, cabina pe pupa, 2 catarge, macara | da | da | OK; desenul are containere colorate, aici 3 lazi + 2 paleti (corectura); coca mai joasa |
+| barca de pescuit | cabina in fata, catarg, dunga albastra | da | da | abatere: lipsesc cosul negru, plasa/lazile colorate, macaraua curba; dunga a fost largita dupa randare (comparatie nerefacuta) |
+| bivol | trunchi greu, cap jos, coarne | da | da | abateri: picioare prea lungi/subtiri, coarne mai subtiri si mai drepte decat semiluna din desen, culoarea LOG_DARK e maro (tenta se da la integrare) |
+| starc | gat S, cioc galben, picioare negre | da | da | abateri: picioare mai lungi si subtiri, corp mai mic decat in desen, fara creasta pe cap |
+| Ie | masiv ascutit cu coaste, falezele ruginii la mal | con mare | platou + con | contractul de cote castiga: conul domina mai putin, falezele de baza subtiri si gri-crem, nu portocalii |
+| Kerama | insule cu doua varfuri, faleze rosiatice | da | 3 insule (1–2 lobi) | OK ca siluete; falezele gri-crem in loc de rosiatice, creste mai rotunjite |
+
+Nota de proces: la o randare lacatul `D:/GameDev/.render_lock` era luat de alt constructor
+si am rulat o comparatie fara lacat, apoi am dat `rmdir` pe lacatul altuia; reluata corect ulterior.
+
+### Stare la oprire (ok-e)
+
+Toate cele 7 GLB livrate, `VERDICT KIT: OK`. Nerefacut: comparatia barcii dupa largirea dungii.
+
+### Runda 2, cerută de coordonator (ok-e): bivol și insula Ie
+
+| piesă | ce s-a cerut | ce s-a făcut | rezultat |
+|---|---|---|---|
+| `water_buffalo.glb` (2.108 tri, 1,80 x 2,97 x 1,89 m; 2 comparații) | cap orizontal la nivelul greabănului, bot scurt și lat, coarne în semilună groase, picioare scurte și groase, culoare ardezie | cap la z ~1,2 (greabăn 1,5), bot bont, coarne r 0,14→0 care pleacă lateral și se curbează în sus/înapoi, burta la ~0,72 m, picioare r 0,19–0,09; corp `VOLCANIC_BLACK` 20 (LOG_DARK ieșea maro), jos pe picioare și bot `LOG_DARK` 28, coarne `MARBLE_GREY` 29 | citește ca bivol (nu mai e tapir); abateri: vârfurile coarnelor sunt mai drepte decât semiluna din desen, fără cută pe frunte |
+| `okinawa_horizon.glb` / `IeIsland_A` (1.174 tri total; `IeIsland_A` 119,3 x 60,8 x 45,0 m; 2 comparații) | con masiv (~55–60% din lungime), flancuri concave, 2–3 creste, platou care urcă, bandă de faleză palidă 2–4 m | con 70 x 42 m la bază (~58%), vârf la 45 m, flancuri concave (r = R(1-t)^1,2), 3 creste (modulare pe unghi), platou care urcă spre con (11 m la inelul de sus), bandă de faleză `MARBLE_GREY` 3,5 m pe tot țărmul | conul e mai masiv ca în runda 1, dar tot **mai îngust în partea de sus decât desenul**: doar ~37 m din el depășesc platoul și latura de 45 m din contract nu lasă mai mult; abatere raportată, nu rezolvată |
+
+Verify neschimbat în structură: `VERDICT KIT: OK`.

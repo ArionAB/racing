@@ -113,5 +113,24 @@ check "structures/gusuku_wall_straight.glb" 12000 --origin=assembly
 check "structures/gusuku_arch_gate.glb" 12000 --origin=assembly
 
 echo
+echo "== val 2, ok-e: vapoare, animale, fundal =="
+# vapoarele: originea la LINIA APEI (coca coboara sub z=0); coca feribotului/vasului e CAR_BLUE (15)
+check "vehicles/island_ferry.glb" 6000 --origin=waterline --allow-car-slots=Ferry_Hull
+check "vehicles/coastal_freighter.glb" 6000 --origin=waterline --allow-car-slots=Freighter_Hull
+check "vehicles/fishing_boat.glb" 4000 --origin=waterline --allow-car-slots=Boat_Stripe
+# contractul feribotului (cod: LiftBridgeHazard): lungime 28, latime 8, varf 11,0 +- 0,5, pescaj 2, prova pe -Z Godot
+if python tools/blender/measure_okinawa_vessels.py island_ferry >/tmp/ferry_m.txt 2>&1; then
+  printf "%-34s CONTRACT: OK   %s
+" "island_ferry.glb" "$(grep -E 'varf peste apa' /tmp/ferry_m.txt | sed 's/ *(.*//;s/  */ /g')"
+else
+  printf "%-34s CONTRACT: SUB CONTRACT
+" "island_ferry.glb"; cat /tmp/ferry_m.txt; fail=1
+fi
+# animalele: doua poze statice; ciocul starcului e CAR_YELLOW (Pose_* poarta slotul); Pose_Fly e ridicata -> assembly
+check "animals/water_buffalo.glb" 3000 --origin=assembly
+check "animals/egret.glb" 1500 --origin=assembly --allow-car-slots=Pose_
+# fundalul: 4 siluete, nod copil direct al radacinii, baza pe sol
+check "effects/okinawa_horizon.glb" 3000 --origin=assembly
+echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi
 exit "$fail"

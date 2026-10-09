@@ -62,47 +62,51 @@ def _stub(b, h=1.25, r0=0.30):
 # ---------------------------------------------------------------------------
 
 def build_fukugi(variant):
-    """Fukugi (Garcinia subelliptica), 3 variante.
+    """Fukugi (Garcinia subelliptica), 3 variante. RUNDA 4 (cerere coordonator):
+    frunzisul = ANVELOPA DE CIORCHINI, nu mase netede cu cubulete.
 
     LISTA DE ELEMENTE (urmeaza CORECTURA de coordonator din kit §0.1/sus, nu
     decuparea: pe planse sunt foioase cu coroana rotunda, trunchi la vedere,
-    verde deschis, toate trei la fel -- GRESIT; din decupare iau doar textura
-    vizuala a frunzisului: mase fatetate cu ciorchini mici pe margine):
-      a) 7,0 x 2,8 m (h/l 2,5): 6 mase de frunzis suprapuse pe verticala (elipsoizi
-         ~1,8 m inalti, pas ~0,9 m), fiecare cu 3 ciorchini pe margine; laturile
-         aproape drepte cu valuri de +-7% intre mase pare/impare; varf ROTUNJIT
-         (ultima masa la 68% din raza); frunzisul incepe la 0,8 m de sol
-      b) 8,5 x 3,0 m (h/l 2,8): 7 mase, mai zvelt; ultimele trei se ingusteaza
-         (88/66/40%), masa de sus inalta (x1,45) -> varf ASCUTIT
-      c) 5,5 x 2,6 m (h/l 2,1): 5 mase PLINE (ciorchini 4 per masa, mai mari),
-         coloana de ~2,1 m + O MASA LATERALA iesita spre +X la ~2,3 m inaltime
-         (asimetric, bbox ajunge la 2,6 m)
-      d) trunchi: DOAR un ciot de ~0,8 m vizibil (WOOD jos, LOG_DARK sus), r 0,3 m
-      e) fara flori/fructe; fara vegetatie lipita; verde inchis lucios: slotul 21
-         e mai deschis decat tinta #2E5A2C, tenta de clasa il intuneca la integrare
-    Noduri: Fukugi_Bark (WOOD 9 / LOG_DARK 28), Fukugi_Leaves (TROPICAL_GREEN 21).
+    verde deschis -- GRESIT; din decupare iau textura frunzisului: zeci de
+    ciorchini fatetati de marime medie, vizibili pe contur, cu umbra intre ei):
+      a) 7,0 x 2,8 m (h/l 2,5): miez de 6 elipsoizi suprapusi pe verticala (pas
+         ~0,9 m, nevazut: 90% din raza) acoperit de ~45-54 CIORCHINI de ~0,65-1,1 m
+         (boulder fatetat turtit, 6 seg x 3 inele, spin aleator, seed fix pe
+         varianta), conturul ZIMTAT de ciorchini; varf rotunjit; frunzisul
+         incepe la 0,8 m de sol
+      b) 8,5 x 3,0 m (h/l 2,8): 7 elipsoizi, mai zvelt; ultimii trei se
+         ingusteaza (88/66/40%), masa de sus inalta -> varf ASCUTIT
+      c) 5,5 x 2,6 m (h/l 2,1): 5 elipsoizi + O MASA LATERALA spre +X la ~2,45 m
+         (asimetric), acoperite la fel
+      d) DOUA TONURI: ~28% din ciorchini, cei cu normala in sus, in nodul
+         Fukugi_Leaves_Tip (CACTUS_GREEN 12, galben-verzui); restul in
+         Fukugi_Leaves (TROPICAL_GREEN 21)
+      e) trunchi: DOAR un ciot de ~0,8 m (WOOD jos, LOG_DARK sus); fara cubulete,
+         flori, fructe sau vegetatie lipita
+    Noduri: Fukugi_Leaves (21), Fukugi_Leaves_Tip (12), Fukugi_Bark (9 / 28).
     """
     spec = {
-        "a": dict(H=7.0, W=2.6, n=6, tip="round", seed=11, sat=7, sat_scale=0.27),
-        "b": dict(H=8.5, W=2.85, n=7, tip="sharp", seed=23, sat=7, sat_scale=0.26),
-        "c": dict(H=5.5, W=2.0, n=5, tip="round", seed=37, sat=7, sat_scale=0.30,
-                  wobble=0.05),
+        "a": dict(H=6.7, W=2.5, n=6, tip="round", seed=11, per=14),
+        "b": dict(H=8.2, W=2.65, n=7, tip="sharp", seed=23, per=13),
+        "c": dict(H=5.3, W=1.95, n=5, tip="round", seed=37, per=15),
     }[variant]
-    bark, leaves = Builder(), Builder()
+    bark, leaves, tipb = Builder(), Builder(), Builder()
     _stub(bark, r0=0.20 if variant != "b" else 0.18)
-    # H se corecteaza usor in sus: polii boulder-ului scad cativa cm din cota
-    spec = dict(spec)
-    spec["H"] = spec["H"] + {"a": 0.10, "b": 0.12, "c": 0.08}[variant]
-    cols = foliage_column(leaves, slot=LEAF, **spec)
+    ells = column_ellipsoids(spec["H"], spec["W"], spec["n"], tip=spec["tip"],
+                             seed=spec["seed"])
     if variant == "c":
-        # masa laterala iesita (asimetric): elipsoid + ciorchini, spre +X
-        cx, cz = 0.80, 2.45
-        leaves.boulder((cx, 0.0, cz), (1.5, 1.4, 1.5), LEAF, seed=401,
-                       segments=9, rings=4, deviation=0.14)
-        for k, (dx, dz) in enumerate(((0.35, -0.35), (0.25, 0.4), (-0.1, 0.1))):
-            leaves.boulder((cx + dx, (k - 1) * 0.35, cz + dz), (0.9, 0.8, 0.7), LEAF,
-                           seed=410 + k, segments=7, rings=3, deviation=0.15)
-    return [leaves.to_object("Fukugi_Leaves"), bark.to_object("Fukugi_Bark")]
+        ells.append((0.72, 0.0, 2.3, 0.60, 0.58, 0.60))
+    for (cx, cy, cz, rx, ry, rz) in ells:      # miezul (nu se vede prin ciorchini)
+        leaves.boulder((cx, cy, cz), (2 * rx * 0.9, 2 * ry * 0.9, 2 * rz * 0.95),
+                       LEAF, seed=spec["seed"] + int(cz * 10), segments=8, rings=3,
+                       deviation=0.10)
+    anchors = ellipsoid_anchors(ells, spec["per"], spec["seed"], el_lo=-0.7,
+                                max_n=54)
+    print("fukugi", variant, "ciorchini:", len(anchors))
+    foliage_clumps(leaves, tipb, anchors, 0.36 * spec["W"], LEAF, LEAF2,
+                   spec["seed"], tip_frac=0.28, push=0.06)
+    return [leaves.to_object("Fukugi_Leaves"), tipb.to_object("Fukugi_Leaves_Tip"),
+            bark.to_object("Fukugi_Bark")]
 
 
 # ---------------------------------------------------------------------------
@@ -110,26 +114,25 @@ def build_fukugi(variant):
 # ---------------------------------------------------------------------------
 
 def build_pine():
-    """Pin Ryukyu (bonsai urias), `ryukyu_pine`.
+    """Pin Ryukyu (bonsai urias), `ryukyu_pine`. Runda 4: pernele = ciorchini.
 
     LISTA DE ELEMENTE (din decuparea `ryukyu_pine.png` + contractul §1.3):
-      a) 1 trunchi gros, rasucit si aplecat, 6 puncte pe traseu, r 0,75 -> 0,2,
-         radacina evazata la baza
-      b) 4 brate: stanga-jos (cel mai lung, orizontal, se ridica la capat),
-         dreapta-mijloc, spate/fata la ~5,9 m, plus lider vertical spre varf
-      c) 7 PERNE de frunzis turtite (h/l ~0,3) cu goluri intre ele: cate una la
-         capatul fiecaruia dintre cele 3 brate laterale + una mica deasupra
-         celei din stanga, 2 pe varf (coroana, cu gol intre ele) -- nu glob
-      d) FARA stanci, tufe si nisip de la baza (nu intra in GLB, kit §0.1)
-    Cote tinta: 9 m x ~9 m. Noduri: Pine_Bark (WOOD 9, LOG_DARK 28 pe brate
-    umbrite), Pine_Leaves (TROPICAL_GREEN 21).
+      a) 1 trunchi gros, rasucit (S) si aplecat, 7 puncte, r 0,8 -> 0,28,
+         radacina evazata (4 pinteni)
+      b) 5 brate: stanga-jos (lung, se ridica la capat), dreapta, spate, ramura
+         scurta spre fata, ramura sus-stanga, plus lider vertical
+      c) 7 PERNE turtite cu goluri intre ele; fiecare = miez turtit + 11
+         CIORCHINI (~0,3 din latimea pernei), ~28% (cei cu normala in sus) pe
+         al doilea ton (Pine_Leaves_Tip, CACTUS_GREEN 12)
+      d) FARA stanci/tufe/nisip de la baza (nu intra in GLB, kit §0.1)
+    Cote tinta: 9 m x ~9 m. Noduri: Pine_Bark (WOOD 9 / LOG_DARK 28),
+    Pine_Leaves (TROPICAL_GREEN 21), Pine_Leaves_Tip (CACTUS_GREEN 12).
     """
-    bark, leaves = Builder(), Builder()
+    bark, leaves, tipb = Builder(), Builder(), Builder()
     trunk = [(0, 0, 0.0), (0, 0, 0.35), (0.9, 0.3, 1.3), (1.6, 0.0, 2.6),
              (1.0, -0.4, 4.0), (1.3, 0.1, 5.4), (0.7, 0.0, 6.6)]
     bark.taper_sweep(trunk, [0.80, 0.74, 0.64, 0.52, 0.44, 0.36, 0.28], BARK,
                      segments=8)
-    # radacina evazata: pinteni scurti la baza
     for k in range(4):
         a = 0.8 + k * 1.6
         d = Vector((math.cos(a), math.sin(a), 0.0))
@@ -137,11 +140,9 @@ def build_pine():
                           d * 0.95 + Vector((0, 0, 0.05)),
                           d * 1.35 + Vector((0, 0, 0.0))],
                          [0.26, 0.24, 0.16, 0.0], BARK, segments=5)
-    # lider spre varf
     bark.taper_sweep([(0.7, 0.0, 6.5), (0.6, 0.0, 7.3), (0.5, 0.0, 8.2)],
                      [0.28, 0.2, 0.12], BARK_D, segments=6)
     arms = [
-        # (puncte, raze, perna: centru, w, d, h, tilt)
         ([(1.6, 0.0, 2.5), (0.3, 0.7, 3.3), (-1.6, 0.9, 3.9), (-2.9, 0.8, 4.4)],
          [0.30, 0.24, 0.17, 0.11]),
         ([(1.0, -0.4, 3.9), (1.9, -0.3, 3.9), (2.7, -0.4, 4.1)],
@@ -150,26 +151,33 @@ def build_pine():
          [0.22, 0.17, 0.11]),
         ([(-1.6, 0.9, 3.9), (-1.8, 0.6, 4.8), (-1.5, 0.3, 5.6)],
          [0.14, 0.11, 0.08]),
+        ([(1.0, -0.4, 3.9), (0.2, 1.0, 4.6), (-0.5, 1.8, 5.0)],
+         [0.17, 0.12, 0.08]),
     ]
     for pts, rad in arms:
         bark.taper_sweep([Vector(p) for p in pts], rad, BARK_D, segments=6)
     pillows = [
-        ((-3.0, 0.8, 4.95), 3.8, 3.3, 1.4, 5.0, 200),     # stanga-jos
-        ((-1.4, 0.3, 6.25), 2.8, 2.5, 1.2, -4.0, 210),    # stanga-sus (mica)
-        ((2.7, -0.4, 4.7), 3.4, 3.0, 1.4, -6.0, 220),     # dreapta
-        ((0.55, -2.4, 6.5), 3.1, 2.9, 1.3, 5.0, 230),     # spate
-        ((0.6, 0.1, 7.7), 4.6, 4.0, 1.7, 0.0, 240),       # coroana
-        ((0.7, 0.2, 8.5), 2.6, 2.3, 1.0, 4.0, 250),       # varf
-        ((-0.6, 1.9, 5.5), 2.4, 2.1, 1.0, 3.0, 260),      # fata, jos
+        ((-3.0, 0.8, 4.95), 3.8, 3.3, 1.4, 5.0, 200),
+        ((-1.4, 0.3, 6.25), 2.8, 2.5, 1.2, -4.0, 210),
+        ((2.7, -0.4, 4.7), 3.4, 3.0, 1.4, -6.0, 220),
+        ((0.55, -2.4, 6.5), 3.1, 2.9, 1.3, 5.0, 230),
+        ((0.6, 0.1, 7.7), 4.6, 4.0, 1.7, 0.0, 240),
+        ((0.7, 0.2, 8.5), 2.6, 2.3, 1.0, 4.0, 250),
+        ((-0.6, 1.9, 5.5), 2.4, 2.1, 1.0, 3.0, 260),
     ]
     for c, w, d, h, tilt, seed in pillows:
-        foliage_pillow(leaves, c, w, d, h, LEAF, seed=seed, bumps=2,
-                       tilt_deg=tilt, tilt_azim_deg=seed)
-    # ramura scurta pana la pernita din fata
-    bark.taper_sweep([Vector((1.0, -0.4, 3.9)), Vector((0.2, 1.0, 4.6)),
-                      Vector((-0.5, 1.8, 5.0))], [0.17, 0.12, 0.08], BARK_D,
-                     segments=6)
-    return [leaves.to_object("Pine_Leaves"), bark.to_object("Pine_Bark")]
+        # miezul turtit (mai mic ca pernea, ascuns sub ciorchini)
+        foliage_pillow(leaves, c, w * 0.78, d * 0.78, h * 0.8, LEAF, seed=seed,
+                       bumps=0, seg=8, rings=3, tilt_deg=tilt, tilt_azim_deg=seed)
+        a = math.radians(seed)
+        axis = Vector((-math.sin(a), math.cos(a), 0.0))
+        xf = Matrix.Translation(Vector(c)) @ Matrix.Rotation(math.radians(tilt), 4, axis)
+        anchors = ellipsoid_anchors([(0, 0, 0, w * 0.40, d * 0.40, h * 0.46)], 15,
+                                    seed, el_lo=-0.25, bury=0.0, max_n=11)
+        foliage_clumps(leaves, tipb, anchors, 0.30 * w, LEAF, LEAF2, seed,
+                       tip_frac=0.28, push=0.10, xform=xf)
+    return [leaves.to_object("Pine_Leaves"), tipb.to_object("Pine_Leaves_Tip"),
+            bark.to_object("Pine_Bark")]
 
 
 # ---------------------------------------------------------------------------
@@ -177,46 +185,46 @@ def build_pine():
 # ---------------------------------------------------------------------------
 
 def build_cycad():
-    """Cicada (sotetsu), `cycad`.
+    """Cicada (sotetsu), `cycad`. Runda 4: frunze PENATE, rozeta plina.
 
     LISTA DE ELEMENTE (din decuparea `cycad.png`):
-      a) trunchi scurt si gros (0,7 m, r 0,36), usor bombat
-      b) solzi in geometrie: 3 randuri x 8 bulgari (decalate cu 22 grade intre
-         randuri -> model in romburi), ca ananasul de pe planse
-      c) rozeta de 16 frunze rigide penate arcuite, in 3 etaje: 6 interioare
-         abrupte (urca la ~2,2 m), 6 intermediare, 4 exterioare joase cu varful
-         lasat; fiecare cu 9 statii, marginea dintata (alternanta de latime)
-      d) FARA stanci/nisip de la baza
+      a) trunchi scurt si gros (~1,05 m, r 0,4 -> 0,26), bombat
+      b) solzi in geometrie: 3 randuri x 8 bulgari decalati (romburi)
+      c) rozeta de 20 frunze PENATE: 7 interioare abrupte, 7 intermediare, 6
+         exterioare cu varful arcuit in jos; fiecare = O nervura arcuita cu
+         foliole inguste dese pe ambele parti (41 de statii alternante = ~20
+         perechi, pieptene dintr-o singura lama), plan inclinat
+      d) FARA stanci/nisip la baza
     Cote tinta: 2,2 m x 2,6 m. Noduri: Cycad_Bark (WOOD 9 / LOG_DARK 28),
     Cycad_Leaves (CACTUS_GREEN 12 + TROPICAL_GREEN 21).
     """
     bark, leaves = Builder(), Builder()
-    bark.taper_sweep([(0, 0, 0.0), (0, 0, 0.12), (0, 0, 0.55), (0, 0, 1.05)],
+    bark.taper_sweep([(0, 0, 0.0), (0, 0, 0.12), (0, 0, 0.62), (0, 0, 1.2)],
                      [0.40, 0.38, 0.34, 0.26], BARK_D, segments=8)
-    for row, z in enumerate((0.22, 0.50, 0.78)):
+    for row, z in enumerate((0.25, 0.57, 0.89)):
         r = 0.40 - row * 0.045
         off = math.radians(22.5) * (row % 2)
         for k in range(8):
             a = off + k * math.pi / 4
             bark.boulder((math.cos(a) * r, math.sin(a) * r, z),
                          (0.30, 0.30, 0.26), BARK, seed=500 + row * 8 + k,
-                         segments=6, rings=3, deviation=0.14)
+                         segments=5, rings=2, deviation=0.14)
     tiers = [  # (n, elev, length, droop, start_z, base_r)
-        (5, 72.0, 1.30, 0.25, 1.00, 0.08),
-        (5, 52.0, 1.45, 0.45, 0.96, 0.14),
-        (4, 32.0, 1.40, 0.70, 0.88, 0.22),
+        (7, 76.0, 1.45, 0.30, 1.20, 0.08),
+        (7, 52.0, 1.45, 0.65, 1.14, 0.14),
+        (6, 30.0, 1.30, 0.95, 1.05, 0.20),
     ]
     rnd = _lcg(77)
     fi = 0
     for ti, (n, elev, L, droop, z0, br) in enumerate(tiers):
         for k in range(n):
-            az = 360.0 * k / n + ti * 31.0 + (rnd() - 0.5) * 14.0
+            az = 360.0 * k / n + ti * 27.0 + (rnd() - 0.5) * 12.0
             ar = math.radians(az)
             base = (math.cos(ar) * br, math.sin(ar) * br, z0)
             slot = LEAF2 if fi % 2 else LEAF
-            serrated_frond(leaves, base, az, L * (0.93 + 0.14 * rnd()), 0.30,
-                           elev + (rnd() - 0.5) * 8.0, slot, droop=droop,
-                           stations=11, tooth=0.62)
+            pinnate_frond(leaves, base, az, L * (0.94 + 0.12 * rnd()), 0.55,
+                          elev + (rnd() - 0.5) * 8.0, slot, droop=droop, stations=31,
+                          roll_deg=8.0 + 12.0 * rnd())
             fi += 1
     return [leaves.to_object("Cycad_Leaves"), bark.to_object("Cycad_Bark")]
 
@@ -226,36 +234,49 @@ def build_cycad():
 # ---------------------------------------------------------------------------
 
 def build_fan_palm():
-    """Palmier-evantai (Livistona), `fan_palm` -- NU cocotier.
+    """Palmier-evantai (Livistona), `fan_palm` -- NU cocotier. Runda 4.
 
-    LISTA DE ELEMENTE (din decuparea `fan_palm.png`):
-      a) trunchi drept, usor subtiat (r 0,25 -> 0,17), 4,9 m, cu INELE in geometrie
-         la fiecare 0,36 m (14 inele), baza usor evazata
-      b) coroana de 11 frunze in EVANTAI ROTUND PLISAT (disc cu 7 pliuri, margine
-         dintata, raza ~1,05 m) pe petioli arcuiti, in 2 etaje: 5 ridicate
-         (intre 35 si 62 grade) + 6 mai plate si mai largi
-      c) 3 frunze USCATE atarnate sub coroana (DRY_VEGETATION 13), mai mici
+    LISTA DE ELEMENTE (din decuparea `fan_palm.png` + cerere coordonator):
+      a) trunchi mai gros (r 0,34 -> 0,22, Ø ~0,5 m), 4,3 m: INELE la 0,30 m pana
+         la 2,9 m; treimea de sus cu SOLZI IN ROMB (bazele petiolilor vechi:
+         4 randuri x 8 bulgari decalati)
+      b) coroana Ø ~4,6 m: 11 frunze in EVANTAI ROTUND PLISAT mare (R 0,95-1,0 m,
+         7 pliuri, margine dintata) pe PETIOLI VIZIBILI de ~1,5 m, radiind: 4
+         ridicate (~60 grade), 4 oblice (~25), 3 cazute (~-25)
+      c) 3 frunze USCATE (DRY_VEGETATION 13), MARI (R 0,85), atarnate SUB coroana
       d) FARA stanci/nisip la baza
-    Cote tinta: 6 m inalt, coroana ~4 m. Noduri: Palm_Bark (WOOD 9 / LOG_DARK 28
-    pe inele), Palm_Leaves (TROPICAL_GREEN 21 + CACTUS_GREEN 12 + DRY 13).
+    Cote tinta: 6 m. Noduri: Palm_Bark (WOOD 9 / LOG_DARK 28), Palm_Leaves
+    (TROPICAL_GREEN 21 + CACTUS_GREEN 12 + DRY 13).
     """
     bark, leaves = Builder(), Builder()
-    TH = 4.3
-    ring_trunk(bark, [(0, 0, 0.0), (0, 0, 0.3), (0.05, 0.0, 2.4), (0.0, 0.05, TH)],
-               [0.30, 0.25, 0.21, 0.16], BARK, BARK_D, ring_every=0.30, seg=7,
-               ring_grow=1.18, ring_h=0.13)
+    TH = 4.0
+    ring_trunk(bark, [(0, 0, 0.0), (0, 0, 0.3), (0.05, 0.0, 1.7), (0.04, 0.02, 2.7)],
+               [0.34, 0.29, 0.26, 0.24], BARK, BARK_D, ring_every=0.30, seg=8,
+               ring_grow=1.12, ring_h=0.13)
+    bark.taper_sweep([(0.04, 0.02, 2.68), (0.03, 0.04, 3.4), (0.0, 0.05, TH)],
+                     [0.24, 0.23, 0.22], BARK, segments=8)
+    for row, z in enumerate((2.85, 3.18, 3.50, 3.82)):
+        r = 0.25 - 0.005 * row
+        off = math.radians(22.5) * (row % 2)
+        for k in range(8):
+            a = off + k * math.pi / 4
+            bark.boulder((0.03 + math.cos(a) * r, 0.03 + math.sin(a) * r, z),
+                         (0.26, 0.26, 0.24), BARK_D if (row + k) % 2 else BARK,
+                         seed=900 + row * 8 + k, segments=6, rings=3,
+                         deviation=0.14)
     top = Vector((0.0, 0.05, TH))
     rnd = _lcg(91)
 
-    def petiole_fan(az_deg, elev_deg, plen, R, slot, spread_n_tilt, drop=0.0):
+    def petiole_fan(az_deg, elev_deg, plen, R, slot):
         a = math.radians(az_deg)
         dh = Vector((math.cos(a), math.sin(a), 0.0))
         e = math.radians(elev_deg)
         u = (dh * math.cos(e) + Vector((0, 0, math.sin(e)))).normalized()
-        end = top + u * plen + Vector((0, 0, -drop))
-        mid = top + u * plen * 0.5 + Vector((0, 0, plen * 0.14))
-        bark.taper_sweep([top, mid, end], [0.055, 0.045, 0.035], BARK_D, segments=4)
-        # normala evantaiului: perpendiculara pe u, spre sus si spre interior
+        end = top + u * plen
+        mid = top + u * plen * 0.5 + Vector((0, 0, plen * 0.12))
+        bark.taper_sweep([top, mid, end], [0.07, 0.055, 0.04], BARK_D, segments=5)
+        e2 = math.radians(min(80.0, elev_deg + 32.0))
+        u = (dh * math.cos(e2) + Vector((0, 0, math.sin(e2)))).normalized()
         side = Vector((-dh.y, dh.x, 0.0))
         n = u.cross(side).normalized() * -1.0
         if n.z < 0:
@@ -263,27 +284,22 @@ def build_fan_palm():
         pleated_fan(leaves, end, u, n, R, slot, pleats=7, span_deg=250.0,
                     depth=0.06)
 
-    # etajul inalt: 5 frunze
-    for k in range(5):
-        az = 360.0 * k / 5 + 12.0 + (rnd() - 0.5) * 16.0
-        petiole_fan(az, 38.0 + 22.0 * rnd(), 0.9, 1.05, LEAF if k % 2 else LEAF2, 0)
-    # etajul plat: 6 frunze, mai largi, mai jos
-    for k in range(6):
-        az = 360.0 * k / 6 + 40.0 + (rnd() - 0.5) * 16.0
-        petiole_fan(az, 6.0 + 16.0 * rnd(), 1.1, 1.15, LEAF2 if k % 2 else LEAF, 0)
-    # 3 frunze uscate care atarna
+    specs = ([(58.0, 1.7)] * 4) + ([(22.0, 1.8)] * 4) + ([(-22.0, 1.7)] * 3)
+    for k, (el, pl) in enumerate(specs):
+        az = 360.0 * k / len(specs) + 10.0 + (rnd() - 0.5) * 18.0
+        petiole_fan(az, el + (rnd() - 0.5) * 20.0, pl, 0.95 + 0.05 * rnd(),
+                    LEAF if k % 2 else LEAF2)
     for k in range(3):
         az = 360.0 * k / 3 + 70.0
         a = math.radians(az)
         dh = Vector((math.cos(a), math.sin(a), 0.0))
         start = top + Vector((0, 0, -0.1))
-        end = start + dh * 0.35 + Vector((0, 0, -0.55))
-        bark.taper_sweep([start, start + dh * 0.28 + Vector((0, 0, -0.1)), end],
-                         [0.05, 0.04, 0.03], BARK_D, segments=4)
-        u = Vector((dh.x * 0.25, dh.y * 0.25, -1.0)).normalized()
-        n = dh
-        pleated_fan(leaves, end, u, n, 0.6, DRY, pleats=5, span_deg=170.0,
-                    depth=0.04)
+        end = start + dh * 0.6 + Vector((0, 0, -0.5))
+        bark.taper_sweep([start, start + dh * 0.35 + Vector((0, 0, -0.05)), end],
+                         [0.06, 0.05, 0.04], BARK_D, segments=4)
+        u = Vector((dh.x * 0.2, dh.y * 0.2, -1.0)).normalized()
+        pleated_fan(leaves, end, u, dh, 0.85, DRY, pleats=5, span_deg=170.0,
+                    depth=0.05)
     return [leaves.to_object("Palm_Leaves"), bark.to_object("Palm_Bark")]
 
 
@@ -292,57 +308,50 @@ def build_fan_palm():
 # ---------------------------------------------------------------------------
 
 def build_bougainvillea():
-    """Bougainvillea, varianta cu spatele plat (se lipeste de zid), `bougainvillea`.
+    """Bougainvillea, varianta cu spatele plat (se lipeste de zid). Runda 4.
 
     LISTA DE ELEMENTE (din decuparea `bougainvillea.png`; fara nisipul de la
     baza):
-      a) tufa joasa si lata, 2,4 x 1,6 m, spatele TAIAT PLAT in planul y = 0
-         (peretele); adancimea ~0,9 m
-      b) ~8 mase de frunzis (TROPICAL_GREEN 21), dedesubt si printre flori, ca
-         ciorchinii sa stea PESTE frunzis, nu in loc
-      c) ~30 de ciorchini de flori magenta (FLAMINGO_PINK 31) pe fata dinspre +Y,
-         care domina: acopera ~85% din suprafata vizibila
-      d) 4 ciorchini care se REVARSA spre sol pe margini (curtina de jos)
+      a) tufa joasa si lata, 2,4 x 1,6 m, spatele TAIAT PLAT in y = 0 (zidul),
+         adancime ~0,9 m: 5 elipsoizi de miez verzi suprapusi
+      b) FRUNZIS VERDE VIZIBIL (~45% din suprafata): ~26 ciorchini de frunze
+         (~0,45-0,65 m) pe anvelopa, TROPICAL_GREEN 21
+      c) ~72 CIORCHINI MICI de flori (0,2-0,35 m) FLAMINGO_PINK 31, pe varfurile
+         ramurilor (normala spre +Y/sus), plus 10 revarsate peste marginea de
+         jos / laterala
+      d) fara nisip, fara zid
     Noduri: Bougainvillea_Leaves (21), Bougainvillea_Bloom (31,
-    --allow-slots=31). Origine: la baza peretelui, centrata pe X.
+    --allow-slots=31). Origine: baza peretelui, centrata pe X.
     """
     leaves, bloom = Builder(), Builder()
-    rnd = _lcg(133)
-    HW, HZ = 1.2, 1.55
-
-    def shell_y(x, z):
-        v = 1.0 - (x / (HW * 1.05)) ** 2 - ((z - 0.15) / (HZ * 1.1)) ** 2
-        return 0.78 * math.sqrt(max(0.04, v))
-
-    for k in range(10):
-        x = -0.85 + 1.7 * k / 9.0 + (rnd() - 0.5) * 0.2
-        z = 0.35 + 0.8 * rnd() * (1.0 - abs(x) / 1.3)
-        leaves.boulder((x, 0.30, z), (0.95, 0.7, 0.8), LEAF, seed=600 + k,
-                       segments=8, rings=4, deviation=0.16)
-    centers = []
-    for k in range(44):
-        for _try in range(30):
-            x = (rnd() * 2 - 1) * 0.92
-            zmax = 0.30 + 1.2 * math.sqrt(max(0.0, 1.0 - (x / 1.12) ** 2))
-            z = 0.22 + rnd() * (zmax - 0.1)
-            if all((x - cx) ** 2 + (z - cz) ** 2 > 0.07 for cx, cz in centers):
-                break
-        centers.append((x, z))
-        s = 0.36 + 0.16 * rnd()
-        bloom.boulder((x, shell_y(x, z) - 0.06, z), (s, s * 0.9, s * 0.8), BLOOM,
-                      seed=700 + k, segments=7, rings=3, deviation=0.17)
-    # curtina: se revarsa spre sol pe margini
-    for k, (x, z) in enumerate(((-1.0, 0.30), (0.98, 0.34), (-0.8, 0.18),
-                                (0.76, 0.2))):
-        bloom.boulder((x, 0.38, z), (0.38, 0.34, 0.38), BLOOM, seed=800 + k,
-                      segments=7, rings=3, deviation=0.17)
+    ells = [(-0.75, 0.38, 0.55, 0.62, 0.42, 0.50), (0.0, 0.40, 0.70, 0.72, 0.46, 0.65),
+            (0.78, 0.38, 0.52, 0.62, 0.42, 0.48), (-0.25, 0.30, 0.30, 0.8, 0.40, 0.32),
+            (0.35, 0.32, 1.0, 0.55, 0.36, 0.42)]
+    for (cx, cy, cz, rx, ry, rz) in ells:
+        leaves.boulder((cx, cy, cz), (2 * rx * 0.85, 2 * ry * 0.85, 2 * rz * 0.9),
+                       LEAF, seed=600 + int(cx * 10), segments=8, rings=3,
+                       deviation=0.12)
+    la = ellipsoid_anchors(ells, 12, 51, el_lo=-0.4, bury=0.88, max_n=20)
+    foliage_clumps(leaves, None, la, 0.55, LEAF, LEAF, 51, tip_frac=0.0,
+                   push=0.05, flat=0.55)
+    ba = [(p, n) for p, n in ellipsoid_anchors(ells, 46, 52, el_lo=-0.3, bury=0.88)
+          if n.y > 0.05 or p.z < 0.45]
+    ba = ba[:96]
+    foliage_clumps(bloom, None, ba, 0.31, BLOOM, BLOOM, 52, tip_frac=0.0,
+                   push=0.20, flat=0.7, seg=6, rings=2, size_var=0.3)
+    # revarsate: ciorchini care atarna peste marginea de jos / laterala
+    spill = [(Vector((x, 0.55, z)),
+              Vector((0.2 * math.copysign(1, x), 0.8, -0.3)).normalized())
+             for x, z in ((-1.12, 0.28), (-1.0, 0.12), (-0.55, 0.10), (0.1, 0.08),
+                          (0.6, 0.12), (1.0, 0.14), (1.12, 0.3), (-0.9, 0.5),
+                          (0.95, 0.5), (0.3, 0.1))]
+    foliage_clumps(bloom, None, spill, 0.26, BLOOM, BLOOM, 53, tip_frac=0.0,
+                   push=0.0, flat=0.7, seg=6, rings=2)
     objs = [leaves.to_object("Bougainvillea_Leaves"),
             bloom.to_object("Bougainvillea_Bloom")]
-    # spatele plat: taie tot ce trece de planul peretelui (y < 0)
     for o in objs:
         for v in o.data.vertices:
-            v.co.z *= 0.91
-            v.co.x *= 0.95
+            v.co.x *= 0.80
             if v.co.y < 0.0:
                 v.co.y = 0.0
     return objs

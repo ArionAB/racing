@@ -333,6 +333,8 @@ def views(name, res_height=700):
 
 
 # --- ok-c: plantele (specs de camera + captura de tunel) ---------------------
+# floarea bougainvillea: tinta magenta #C2378F (tenta de clasa la integrare)
+CLASS_BY_SUFFIX["_Bloom"] = "#C2378F"
 SPECS.update({
     "fukugi_tree_a": {"camera": {"azimuth": 58.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
     "fukugi_tree_b": {"camera": {"azimuth": 58.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},

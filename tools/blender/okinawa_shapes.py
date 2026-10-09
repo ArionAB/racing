@@ -509,3 +509,141 @@ def serrated_frond(b, base, azim_deg, length, width, elev_deg, slot,
     for sign in (1.0, -1.0):
         up = Matrix.Rotation(math.radians(fold_deg) * sign, 4, dh) @ Vector((0.0, 0.0, 1.0))
         b.blade(path, widths, thick, slot, up=up, side_bias=sign)
+
+
+# ---------------------------------------------------------------------------
+# runda 4 (cerere coordonator): frunzis din CIORCHINI fatetati
+# ---------------------------------------------------------------------------
+
+def column_ellipsoids(H, W, n, z0=0.8, tip="round", seed=1, wobble=0.04, fill=0.86):
+    """Aceeasi schema ca `foliage_column` (n mase pe verticala intre z0 si H,
+    varf rotunjit/ascutit), dar intoarce doar elipsoizii ca lista
+    (cx, cy, cz, rx, ry, rz): anvelopa pe care o acopera `foliage_clumps`.
+    `fill` = cat din W/2 ocupa masa (restul il dau ciorchinii care ies)."""
+    half = W * 0.5
+    S = H - z0
+    rz = 1.38 * S / (n + 1)
+    prof = [1.0] * n
+    rzs = [rz] * n
+    prof[0] = 0.9
+    if tip == "round":
+        prof[-1] = 0.78
+        if n > 2:
+            prof[-2] = 0.97
+    else:
+        prof[-1] = 0.40
+        rzs[-1] = rz * 1.45
+        if n > 2:
+            prof[-2] = 0.66
+        if n > 3:
+            prof[-3] = 0.88
+    cs = []
+    for i in range(n):
+        if i == 0:
+            cs.append(z0 + rzs[0])
+        elif i == n - 1:
+            cs.append(H - rzs[i])
+        else:
+            lo, hi = cs[0], H - rzs[-1]
+            cs.append(lo + (hi - lo) * i / (n - 1))
+    out = []
+    for i in range(n):
+        rx = half * fill * prof[i] * (1.0 + wobble * (1.0 if i % 2 else -1.0))
+        out.append((0.0, 0.0, cs[i], rx, rx * 0.95, rzs[i]))
+    return out
+
+
+def ellipsoid_anchors(ells, per, seed, el_lo=-0.6, el_hi=1.0, bury=0.9, max_n=None):
+    """Puncte pe suprafata unor elipsoizi (lista (cx,cy,cz,rx,ry,rz)), cu
+    normala lor; cele ingropate in alt elipsoid (`bury` = fractiunea razei) se
+    arunca. `per` candidati per elipsoid, elevatie aleatoare in [el_lo, el_hi]
+    (sinus), azimut pe spirala aurie + zgomot. `max_n` taie lista (determinist)."""
+    rnd = _lcg(seed * 13 + 1)
+    out = []
+    for ei, (cx, cy, cz, rx, ry, rz) in enumerate(ells):
+        ph = rnd() * 6.28
+        for k in range(per):
+            s = el_lo + (el_hi - el_lo) * ((k + rnd() * 0.8) / per)
+            c = math.sqrt(max(0.0, 1.0 - s * s))
+            th = ph + k * 2.399963 + rnd() * 0.5
+            d = Vector((rx * c * math.cos(th), ry * c * math.sin(th), rz * s))
+            p = Vector((cx, cy, cz)) + d
+            hidden = False
+            for j, (jx, jy, jz, jrx, jry, jrz) in enumerate(ells):
+                if j == ei:
+                    continue
+                q = ((p.x - jx) / jrx) ** 2 + ((p.y - jy) / jry) ** 2 + ((p.z - jz) / jrz) ** 2
+                if q < bury * bury:
+                    hidden = True
+                    break
+            if hidden:
+                continue
+            nrm = Vector((d.x / rx ** 2, d.y / ry ** 2, d.z / rz ** 2)).normalized()
+            out.append((p, nrm))
+    if max_n and len(out) > max_n:
+        keyed = sorted(range(len(out)), key=lambda i: _lcg(seed * 7 + i)())
+        keep = sorted(keyed[:max_n])
+        out = [out[i] for i in keep]
+    return out
+
+
+def foliage_clumps(b_main, b_tip, anchors, size, slot_main, slot_tip, seed,
+                   tip_frac=0.28, push=0.10, flat=0.5, seg=6, rings=3,
+                   xform=None, jitter=0.35, size_var=0.25, deviation=0.18):
+    """ENVELOPA de ciorchini: pe fiecare ancora (pozitie, normala) se pune un
+    ciorchine fatetat TURTIT (boulder `size` x ~`size` x `size*flat`, grosimea
+    pe normala), cu spin aleator in jurul normalei si normala usor zdruncinata
+    (`jitter`) -> conturul iese zimtat, cu umbra intre ciorchini. Ciorchinii cu
+    normala cea mai in sus (~`tip_frac`, ordonati dupa n.z + zgomot) merg in
+    `b_tip` pe `slot_tip` (al doilea ton); restul in `b_main`. `xform`
+    (Matrix 4x4) muta ancorele (ex. perna inclinata). Intoarce (n_main, n_tip)."""
+    rnd = _lcg(seed * 7 + 3)
+    items = []
+    for pos, nrm in anchors:
+        if xform is not None:
+            pos = xform @ pos
+            nrm = (xform.to_3x3() @ nrm).normalized()
+        items.append((pos, nrm))
+    order = sorted(range(len(items)), key=lambda i: -(items[i][1].z + (rnd() - 0.5) * 0.5))
+    n_tip = int(round(len(items) * tip_frac)) if b_tip is not None else 0
+    tips = set(order[:n_tip])
+    cm = ct = 0
+    for i, (pos, nrm) in enumerate(items):
+        bld, slot = (b_tip, slot_tip) if i in tips else (b_main, slot_main)
+        s = size * (1.0 + size_var * (rnd() * 2 - 1))
+        faces = bld.boulder((0, 0, 0), (s, s * (0.85 + 0.3 * rnd()), s * flat), slot,
+                            seed=seed * 101 + i, segments=seg, rings=rings,
+                            deviation=deviation)
+        verts = {v for f in faces for v in f.verts}
+        nj = (nrm + Vector((rnd() - 0.5, rnd() - 0.5, rnd() - 0.5)) * jitter).normalized()
+        rot = Matrix.Rotation(rnd() * 6.28, 3, nj) @ Vector((0, 0, 1)).rotation_difference(nj).to_matrix()
+        for v in verts:
+            v.co = rot @ v.co + pos + nj * (push * s)
+        if i in tips:
+            ct += 1
+        else:
+            cm += 1
+    return cm, ct
+
+
+def pinnate_frond(b, base, azim_deg, length, width, elev_deg, slot, stations=41,
+                  droop=0.6, roll_deg=25.0, thick=0.02, tooth=0.10):
+    """Frunza penata de cicada: O nervura arcuita (cade spre varf cu `droop`),
+    o singura lama a carei latime ALTERNEAZA mare/mica pe `stations` statii ->
+    foliole inguste, dese, ca un pieptene pe ambele parti (~stations/2 perechi),
+    pentru ~4*stations triunghiuri. `roll_deg` inclina planul lamei."""
+    a = math.radians(azim_deg)
+    e = math.radians(elev_deg)
+    dh = Vector((math.cos(a), math.sin(a), 0.0))
+    path, widths = [], []
+    for i in range(stations):
+        t = i / float(stations - 1)
+        path.append(Vector(base) + dh * (length * t * math.cos(e)) + Vector(
+            (0, 0, length * t * math.sin(e) - droop * length * t * t)))
+        env = width * min(1.0, t * 7.0 + 0.15) * (1.0 - t ** 2.3)
+        if i == stations - 1:
+            widths.append(0.0)
+        else:
+            widths.append(env if i % 2 else env * tooth)
+    up = Matrix.Rotation(math.radians(roll_deg), 4, dh) @ Vector((0.0, 0.0, 1.0))
+    b.blade(path, widths, thick, slot, up=up, side_bias=0.0)

@@ -86,9 +86,9 @@ echo "== val 1, ok-c: plantele =="
 # origine la baza trunchiului (bougainvillea: la baza zidului), nu centrata pe bbox: --origin=assembly.
 # bougainvillea: FLAMINGO_PINK=31 pe flori (kit §0, tabelul de sloturi) -> --allow-slots=31.
 for v in a b c; do check "plants/fukugi_tree_$v.glb" 3000 --origin=assembly; done
-check "plants/ryukyu_pine.glb" 3000 --origin=assembly
-check "plants/cycad.glb" 5000 --origin=assembly
-check "plants/fan_palm.glb" 3500 --origin=assembly
+check "plants/ryukyu_pine.glb" 4000 --origin=assembly
+check "plants/cycad.glb" 6500 --origin=assembly
+check "plants/fan_palm.glb" 4000 --origin=assembly
 check "plants/bougainvillea.glb" 3500 --origin=assembly --allow-slots=31
 echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi

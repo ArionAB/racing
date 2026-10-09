@@ -98,3 +98,24 @@ Toate cu origine la baza trunchiului (bougainvillea: la baza peretelui, spatele 
 
 ### Adaugiri la harnas
 `okinawa_shapes.py` (la final): `foliage_column`, `foliage_pillow`, `ring_trunk`, `pleated_fan`, `serrated_frond`. `preview_okinawa.py`: `SPECS` pentru cele 7 piese, `_scene_lights`, `_render_cam`, `tunnel()` si modul `--tunnel`. `verify_okinawa_v2.sh`: sectiunea `== val 1, ok-c: plantele ==`.
+
+### ok-c, runda 4 (ceruta de coordonator): ciorchini fatetati, pinnate, evantaie mari
+
+Vocabular nou in `okinawa_shapes.py`: `column_ellipsoids`, `ellipsoid_anchors`, `foliage_clumps` (anvelopa de ciorchini turtiti, doua tonuri dupa normala), `pinnate_frond`. Frunzisul fukugi/pin = miez nevazut + ciorchini; ~28% din ciorchini (normala in sus) in nodul `*_Leaves_Tip` pe CACTUS_GREEN 12. Capturi: `fukugi_tunnel.png` refacut; comparatii refacute pentru toate cele 7 (maxim 2 runde pe piesa).
+
+| piesa | cote (X x Y x Z, m) | h/l | tri | noduri |
+|---|---|---:|---:|---|
+| fukugi_tree_a | 2,77 x 2,67 x 7,07 | 2,55 | 2308 | Leaves 1692, Leaves_Tip 540, Bark 76 (54 ciorchini) |
+| fukugi_tree_b | 2,98 x 2,84 x 8,51 | 2,86 | 2248 | Leaves 1668, Leaves_Tip 504, Bark 76 (51) |
+| fukugi_tree_c | 2,59 x 2,04 x 5,42 | 2,09 | 2308 | Leaves 1656, Leaves_Tip 540, Bark 76 (53) |
+| ryukyu_pine | 9,07 x 6,86 x 9,28 | 1,02 | 3532 | Leaves 2352, Leaves_Tip 756, Bark 424 (7 perne x 11 ciorchini) |
+| cycad | 2,54 x 2,37 x 2,23 | 0,88 | 5420 | Leaves ~4500 (20 frunze x 31 statii), Bark ~900 |
+| fan_palm | 4,46 x 4,23 x 6,43 | 1,44 | 3438 | Leaves 1584, Bark 1854 |
+| bougainvillea | 2,45 x 1,02 x 1,62 | 0,66 | 3024 | Leaves ~1200, Bloom ~1800 (96 ciorchini + 10 revarsati) |
+
+Note si abateri:
+- **Fukugi:** contur zimtat de ciorchini, doua tonuri, fara cubulete. Tip-ul apare mai ales sus (normala in sus); pe laturi domina tonul 21. In tunel ramane un gol de ~0,5 m la sol intre trunchiuri, dar din axa citeste perete. Ciorchinii sunt poligoane netede, fara lumina galbena pe fiecare (planșa).
+- **Pin:** silueta pastrata, pernele sunt acum 11 ciorchini; pernele de sus par putin incarcate. 3532 tri.
+- **Cicada:** frunze penate (comb din 31 de statii alternante = ~15 perechi, sub cele 25-40 cerute, ca sa ramana sub 5500 tri), 20 de frunze; mai subtiri si mai putin pline decat pe planșa, trunchiul domina vizual. Verify: buget 6500.
+- **Palmier:** coroana ~4,5 m, 11 evantaie pe petioli de ~1,7 m, trunchi Ø ~0,5 m cu solzi in romb pe treimea de sus, 3 frunze uscate mari sub coroana. **Abatere:** coroana iese asimetrica (evantaiele se aduna in dreapta/sus, pare ciorchine si nu radiaza uniform), evantaiele (R ~1,0) se citesc mai mici decat Ø 1,6-2 m cerut; solzii sunt bulgari, nu romburi cu muchii. Nerezolvat in 2 runde.
+- **Bougainvillea:** frunzis verde ~40% vizibil, 96 + 10 ciorchini de flori de 0,25-0,36 m, revarsati peste marginea de jos. Preview randeaza `*_Bloom` pe **#C2378F**. **Tenta de clasa necesara la integrare:** slotul 31 e #D2A0BE (pal); tinta magenta #C2378F cere inmultire pe canale (0,92, 0,34, 0,75).

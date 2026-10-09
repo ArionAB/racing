@@ -4,7 +4,8 @@
   okinawa/rocks/notch_rock_b.glb          stanca-ciuperca lata si joasa
   okinawa/rocks/notch_rock_c.glb          stanca-ciuperca aplecata spre mare
   okinawa/rocks/heart_rock.glb            stanca-inima (doi lobi, varf in apa)
-  okinawa/rocks/limestone_cliff_module.glb  faleza inlantuibila 12 m
+  okinawa/rocks/limestone_cliff_module.glb  faleza inlantuibila 12 m (varianta A)
+  okinawa/rocks/limestone_cliff_module_b.glb  varianta B (aceleasi capete, alt interior)
   okinawa/buildings/cape_lighthouse.glb   farul, turn alb + casa paznicului
   okinawa/structures/coral_stone_wall.glb zid uscat din pietre rotunjite
 
@@ -38,74 +39,89 @@ def to_obj_nr(b, name):
     return b.to_object(name)
 
 
-def _mushroom(spec):
+def _mushroom(spec, zscale=1.0):
+    """`zscale`: compresia pe Z (dupa construire) ca inaltimea TOTALA (cu iarba)
+    sa intre in cota din contract; orizontalele (cap, gat) raman neatinse."""
     lime, grass = Builder(), Builder()
-    top = notch_cluster_rock(lime, grass, spec)
-    return [to_obj_nr(lime, "Notch_Limestone"), to_obj_nr(grass, "Notch_Grass")], top
+    top = mushroom_rock(lime, grass, spec)
+    objs = [to_obj_nr(lime, "Notch_Limestone"), to_obj_nr(grass, "Notch_Grass")]
+    if zscale != 1.0:
+        for o in objs:
+            for v in o.data.vertices:
+                v.co.z *= zscale
+    return objs, top * zscale
 
 
 def build_notch_rock_a():
-    """Stanca-ciuperca A (`notch_rock_a`): inalta si zvelta. RUNDA 4 (blocuri).
+    """Stanca-ciuperca A (`notch_rock_a`): inalta si zvelta. RUNDA 5 (ok-g):
+    SILUETA intai (profil de ciuperca), abia apoi fatetarea.
 
-    LISTA DE ELEMENTE (decuparea `notch_rock_a.png` + contractul §1.2; cele trei
-    variante au proportii DISTINCTE; runda 4: aglomerare de blocuri, nu revolutie):
-      a) CAP din 12 bolovani fatetati suprapusi: 7 in stratul de jos (burta,
-         fatete de ~2-3 m), 4 sus, 1 in centru; contur neregulat cu lobi; ~7,3 m lat
-      b) PICIOR cu sectiune neregulata (7 laturi, jag 0,16), ~3,5 m la gat (r 1,75),
-         cu NISA = scobitura sub burta capului, z 0,4..1,9, banda SAND_SHADOW
-      c) FUSTA: 7 bolovani + 2 liberi la baza, din care iese piciorul
-      d) iarba: 9 ciorchini de smocuri (0,8-1,4 m) pe crestet, cei de la margine
-         revarsati peste buza; 2 tonuri (TROPICAL_GREEN 21 / CACTUS_GREEN 12)
-      e) umbrire plata (AO mediat pe fata); inaltime totala ~8,5-9 m (h/l ~1,2)
+    LISTA DE ELEMENTE (decuparea `notch_rock_a.png` + verdictul de la runda 4):
+      a) GAT zvelt: r 1,4 (Ø 2,8 m) intre z 3,0 si 3,9, cu poala EVAZATA la baza
+         (r 3,3 la z 0 -> 1,4 la z 3,0)
+      b) NISA concava sub buza: raza creste de la 1,4 (z 3,9) la 3,9 (z 6,9)
+         dupa o curba de trompeta (banda SAND_SHADOW z 4,9..6,4)
+      c) CAP: buza la z 6,9, r 3,9 (Ø ~7,8 m), surplomba ~2,5 m pe toate partile;
+         grosime ~2 m; cupola turtita pana la z 8,5; 9 bolovani de 2,4 m pe
+         buza + 4 pe cupola (fatete de 1-2 m, umbrire plata)
+      d) FUSTA: 7 bolovani + 2 liberi la baza
+      e) iarba: piele joasa pe cupola + 10 ciorchini pe 2 tonuri (21 / 12),
+         cei de la margine revarsati peste buza
+      f) cap/gat = 7,8 / 2,8 = 2,8
     Noduri: Notch_Limestone (MARBLE_GREY 29 + nisa SAND_SHADOW 2), Notch_Grass.
     """
     return _mushroom(dict(
-        seed=21, neck=(0.4, 1.9), tufts=9,
-        stem=[(0, 2.3), (0.8, 2.0), (1.15, 1.85), (2.0, 1.8), (3.2, 1.9), (4.4, 2.1), (5.0, 2.3)],
-        cap=dict(n_lo=7, rho_lo=2.1, lo_z=5.4, lo_h=2.6, sx_lo=3.3,
-                 n_hi=4, rho_hi=1.2, hi_z=7.0, hi_h=2.0, sx_hi=2.4, center=(7.2, 1.8, 2.4)),
-        skirt=dict(n=7, rad=2.9, sx=1.9, h=1.7, loose=2)))
+        seed=21, neck=(4.7, 6.0), rim_z=6.7, rim_r=3.9, top_z=8.55, tufts=10,
+        prof=[(0, 3.3), (0.6, 2.7), (1.4, 2.0), (2.2, 1.55), (3.0, 1.4), (3.9, 1.4), (4.6, 1.5),
+              (5.1, 1.85), (5.5, 2.5), (5.85, 3.2), (6.2, 3.7), (6.6, 3.9), (7.2, 3.9),
+              (7.7, 3.6), (8.1, 2.9), (8.4, 1.9), (8.55, 0.9)],
+        rim_n=9, rim_size=2.6, top_n=4,
+        skirt=dict(n=7, rad=3.4, sx=1.9, h=1.7, loose=2)), zscale=0.88)
 
 
 def build_notch_rock_b():
-    """Stanca-ciuperca B (`notch_rock_b`): lata si joasa, ca o masa. RUNDA 4.
+    """Stanca-ciuperca B (`notch_rock_b`): lata si joasa, ca o masa. RUNDA 5.
 
     LISTA DE ELEMENTE:
-      a) CAP LAT ~9 m din 13 bolovani: 8 jos (rho 3,0), 4 sus, 1 centru; joase
-         si late (h/l ~0,55)
-      b) PICIOR scurt si gros, sectiune neregulata, gat r ~2,15 (4,3 m) cu nisa
-         z 0,3..1,4; stratul de jos al capului se lasa pe picior (o singura masa,
-         piciorul se largeste in cap, nu e desprins)
-      c) FUSTA: 8 bolovani + 2 liberi
-      d) iarba: 9 ciorchini pe crestet, 2 tonuri, revarsati peste buza
+      a) GAT scurt: r 2,0 (Ø 4 m) la z ~2, baza evazata r 3,9
+      b) NISA concava sub buza (z 2,4..3,3), raza 2,0 -> 4,5
+      c) CAP LAT: buza la z 3,5, r 4,5 (Ø 9 m), surplomba 2,5 m, cupola joasa
+         pana la z 4,65; 10 bolovani de 2,8 m pe buza + 4 pe cupola
+      d) FUSTA: 8 bolovani + 2 liberi
+      e) iarba: piele + 9 ciorchini, 2 tonuri
+      f) cap/gat = 9 / 4 = 2,25
     Noduri: Notch_Limestone, Notch_Grass.
     """
     return _mushroom(dict(
-        seed=22, neck=(0.3, 1.4), tufts=9,
-        stem=[(0, 2.6), (0.7, 2.3), (1.0, 2.05), (1.6, 2.1), (2.2, 2.5), (2.8, 2.8)],
-        cap=dict(n_lo=8, rho_lo=3.0, lo_z=3.2, lo_h=1.7, sx_lo=3.3,
-                 n_hi=4, rho_hi=1.6, hi_z=3.9, hi_h=1.4, sx_hi=3.0, center=(4.0, 1.3, 3.0)),
-        skirt=dict(n=7, rad=3.2, sx=2.0, h=1.1, loose=2)))
+        seed=22, neck=(2.2, 3.0), rim_z=3.5, rim_r=4.5, top_z=4.7, tufts=9,
+        prof=[(0, 3.3), (0.5, 2.6), (1.1, 2.15), (1.7, 2.0), (2.1, 2.05), (2.4, 2.4),
+              (2.7, 3.2), (3.0, 4.0), (3.3, 4.4), (3.7, 4.5), (4.1, 4.3), (4.4, 3.5),
+              (4.6, 2.4), (4.7, 1.1)],
+        rim_n=10, rim_size=2.4, top_n=4,
+        skirt=dict(n=5, rad=3.0, sx=1.5, h=0.8, loose=1)), zscale=0.86)
 
 
 def build_notch_rock_c():
-    """Stanca-ciuperca C (`notch_rock_c`): aplecata spre mare (+X). RUNDA 4.
+    """Stanca-ciuperca C (`notch_rock_c`): aplecata spre mare (+X). RUNDA 5.
 
     LISTA DE ELEMENTE:
-      a) CAP din 11 bolovani (7 jos + 3 sus + 1 centru), ~6,4 m lat, DEPLASAT
-         2,0 m pe +X fata de picior
-      b) PICIOR neregulat care se apleaca (cx ~ t^2 intre z 1,7 si 3,2), gat
-         r ~1,6; NISA roasa mai adanc pe +X (bite 20%) z 0,4..1,7
-      c) FUSTA: 6 bolovani + 2 liberi
-      d) iarba: 8 ciorchini, 2 tonuri
+      a) GAT aplecat: r 1,3 (Ø 2,6 m), axa se deplaseaza spre +X intre z 1,8 si
+         4,8 (smoothstep), baza evazata r 2,8
+      b) NISA concava sub buza (z 3,9..4,9), raza 1,3 -> 3,3
+      c) CAP: buza la z 5,0, r 3,3 (Ø ~6,5 m), DEPLASAT 2,0 m pe +X fata de axa
+         bazei; cupola pana la z 5,9; 8 bolovani de 2,1 m pe buza + 3 pe cupola
+      d) FUSTA: 6 bolovani + 2 liberi
+      e) iarba: piele + 8 ciorchini
     Noduri: Notch_Limestone, Notch_Grass.
     """
     return _mushroom(dict(
-        seed=23, neck=(0.4, 1.7), tufts=8, lean=2.0, lean_from=1.7, bite=(0.4, 1.7, 0.2, 0.0),
-        stem=[(0, 2.0), (0.8, 1.8), (1.15, 1.6), (1.7, 1.55), (2.6, 1.6), (3.2, 1.8)],
-        cap=dict(n_lo=7, rho_lo=1.9, lo_z=4.0, lo_h=2.0, sx_lo=2.6,
-                 n_hi=3, rho_hi=1.0, hi_z=5.2, hi_h=1.7, sx_hi=2.2, center=(5.4, 1.5, 2.2)),
-        skirt=dict(n=6, rad=2.4, sx=1.6, h=1.4, loose=2)))
+        seed=23, neck=(3.4, 4.2), rim_z=4.7, rim_r=3.6, top_z=5.75, tufts=8,
+        lean=2.0, lean_from=1.5, lean_to=4.4,
+        prof=[(0, 2.6), (0.5, 2.2), (1.0, 1.75), (1.5, 1.4), (2.2, 1.3), (2.9, 1.3),
+              (3.4, 1.4), (3.7, 1.8), (4.0, 2.6), (4.3, 3.3), (4.6, 3.6), (5.0, 3.6),
+              (5.35, 3.1), (5.6, 2.2), (5.75, 1.0)],
+        rim_n=8, rim_size=2.3, top_n=3,
+        skirt=dict(n=5, rad=2.4, sx=1.5, h=1.1, loose=1)), zscale=0.93)
 
 
 def build_heart_rock():
@@ -142,92 +158,92 @@ def build_heart_rock():
     return [lime.to_object("Heart_Limestone")], 7.0
 
 
-# statii (y, top): masa din spate are sectiune CONSTANTA (capete identice la
-# y = +-6,0); doar cota crestei difera putin in interior
-CLIFF_STATIONS = [(-6.0, 13.6), (-3.2, 14.0), (0.0, 13.4), (3.4, 13.9), (6.0, 13.6)]
+def _row(y0, y1, widths, gap=0.22):
+    """Centrele coloanelor puse cap la cap de la y0 la y1 (latimi `widths`,
+    crapaturi `gap`), scalate sa umple intervalul. Returneaza (centre, latimi,
+    centrele crapaturilor)."""
+    tot = sum(widths) + gap * (len(widths) - 1)
+    k = (y1 - y0) / tot
+    y, cs, cracks = y0, [], []
+    for i, w in enumerate(widths):
+        cs.append(y + w * k * 0.5)
+        y += w * k
+        if i < len(widths) - 1:
+            cracks.append(y + gap * k * 0.5)
+            y += gap * k
+    return cs, [w * k for w in widths], cracks
 
 
-def cliff_profile(top):
-    """Sectiunea XZ a masei din spate (x = spre mare = +X): spatele plat, poala,
-    NISA de val (z 0,5..3,0, scobita 1,0 m, ~2,5 m inalta), fata verticala,
-    creasta rotunjita. 13 puncte. Blocurile din fata se adauga separat."""
-    return [
-        (-2.5, 0.0), (1.6, 0.0), (1.6, 0.5), (0.9, 1.1), (0.55, 1.7), (0.7, 2.4),
-        (1.0, 3.0), (1.7, 3.4), (1.6, top - 1.2), (1.2, top), (-0.2, top + 0.3),
-        (-2.0, top - 0.1), (-2.5, top - 0.5),
-    ]
+def _cliff(seed, stations, lw, lz, lx, lk, uw, uz, ux, uk, rz):
+    """Treapta de jos (`lw` latimi, `lz` varfuri, `lx` pozitii x, `lk` cotituri),
+    treapta de sus (`uw`...), coloane din spate in crapaturile treptei de sus."""
+    lime, grass = Builder(), Builder()
+    cs, ws, _ = _row(-3.9, 3.9, lw, gap=0.1)
+    lower = [(cs[i], ws[i], lx[i], lz[i], lk[i][0], lk[i][1]) for i in range(len(cs))]
+    cs, ws, cracks = _row(-3.9, 3.9, uw, gap=0.3)
+    upper = [(cs[i], ws[i], ux[i], uz[i], uk[i][0], uk[i][1]) for i in range(len(cs))]
+    rear = [(cracks[i], 1.5 + 0.3 * ((i + seed) % 2), -0.2, rz[i], 0.12, 0.0)
+            for i in range(len(cracks))]
+    top = cliff_columns_module(lime, grass, seed, stations, lower, upper, rear)
+    return [lime.to_object("Cliff_Limestone"), grass.to_object("Cliff_Grass")], top
 
 
-def _stations_loft(b, profiles, ys, slot_of_edge, slot):
-    """Loft prin statii: profile (liste (x, z) cu acelasi numar de puncte) la
-    cotele `ys` (pe Y). Capete plane la ys[0] si ys[-1], triunghiulate."""
-    V = [[b.bm.verts.new((x, y, z)) for (x, z) in prof] for prof, y in zip(profiles, ys)]
-    n = len(profiles[0])
-    for k in range(len(V) - 1):
-        for i in range(n):
-            j = (i + 1) % n
-            f = b.bm.faces.new([V[k][i], V[k][j], V[k + 1][j], V[k + 1][i]])
-            f[b.slot] = slot_of_edge(i)
-    caps = []
-    for ring in (V[0], list(reversed(V[-1]))):
-        f = b.bm.faces.new(ring)
-        f[b.slot] = slot
-        caps.append(f)
-    bmesh.ops.triangulate(b.bm, faces=caps)
+# capetele (y = +-6) sunt IDENTICE in ambele variante: top 13,4, nisa 1,0 x 3,0
+_END = (13.4, 1.0, 3.0)
 
 
 def build_cliff():
-    """Modulul de faleza (`limestone_cliff_module`). RUNDA 4 (blocuri verticale).
+    """Modulul de faleza (`limestone_cliff_module`), varianta A. RUNDA 5 (ok-g).
 
-    LISTA DE ELEMENTE (din decuparea `limestone_cliff_module.png` + §1.2):
-      a) masa din spate: loft pe 5 statii, sectiune constanta, 12 m (Y) x ~4,1 m
-         x ~14 m; NISA de val la baza: z 0,5..3,0 (~2,5 m), scobita 1,0 m, banda
-         SAND_SHADOW; capete PLANE si IDENTICE la y = +-6,0
-      b) 6 COLOANE-BOLOVAN inalte in tierul de jos (z 2,8..9,2), care ies 0,8..1,5
-         m din perete (centre x 0,8..1,5 + semi-latime 1,6), deasupra nisei
-         (surplomba), cu crapaturi adanci intre ele (yc -4,5..+4,5, pas 1,8)
-      c) 5 blocuri in tierul de sus (z 8,5..13,7), ies 0,6..1,1 m, decalate pe Y
-      d) coloanele raman in |y| < 5,9: capetele modulului nu sunt atinse
-      e) creastet cu iarba: banda `Cliff_Grass` pe masa din spate + 9 ciorchini de
-         smocuri (2 tonuri) revarsati peste blocurile de sus
-      f) fara copaci/arbusti inalti; umbrire plata
+    LISTA DE ELEMENTE (decuparea `limestone_cliff_module.png` + verdictul de la
+    runda 4: coloane care formeaza SUPRAFATA, nu oua pe o placa):
+      a) masa din spate: loft pe 9 statii (pas 1,5 m), perete retras la x 0,4;
+         NISA de val NEREGULATA: adancime 0,75..1,35 m, tavan la z 2,4..3,5 m,
+         variaza de la o statie la alta; capete PLANE si IDENTICE la y = +-6
+      b) DOUA TREPTE de coloane prismatice (hexagoane/heptagoane neregulate, jag
+         0,3): jos 4 coloane late de 1,6-2,4 m, varfuri la z 6,4..8,8, care ies
+         peste nisa; sus 3 coloane de 2,4-2,7 m (z 11,4..14), retrase, cu crapaturi
+         care NU se aliniaza cu cele de jos; cotitura la mijloc = prag
+      c) 2 coloane din spate in crapaturile treptei de sus (z 9,8 / 10,4)
+      d) 2 stive de coloane de CAPAT identice in A si B (y = +-5,0, jag 0,04,
+         doua trepte)
+      e) iarba: banda pe masa din spate + cate o placa de iarba pe fiecare coloana
+         (+ ciorchini pe 2 tonuri)
+      f) fara arbori; umbrire plata
     Noduri: Cliff_Limestone (MARBLE_GREY 29 + nisa SAND_SHADOW 2), Cliff_Grass
     (TROPICAL_GREEN 21 + CACTUS_GREEN 12).
     """
-    lime, grass = Builder(), Builder()
-    profs = [cliff_profile(t) for (_, t) in CLIFF_STATIONS]
-    ys = [y for (y, _) in CLIFF_STATIONS]
-    _stations_loft(lime, profs, ys, lambda i: OK_NICHE if i in (2, 3, 4, 5) else OK_LIMESTONE,
-                   OK_LIMESTONE)
-    gprofs = []
-    for P in profs:
-        a, c, d_ = P[-4], P[-3], P[-2]
-        gprofs.append([(a[0] + 0.12, a[1] - 0.35), (a[0], a[1] + 0.22), (c[0], c[1] + 0.22),
-                       (d_[0], d_[1] + 0.2), (d_[0] - 0.3, d_[1] - 0.2),
-                       (d_[0] - 0.3, d_[1] - 0.5), (a[0] - 0.1, a[1] - 0.9)])
-    _stations_loft(grass, gprofs, ys, lambda i: GRASS, GRASS)
-    rnd = _ok_rand(55)
-    lo_y = (-4.5, -3.0, -1.2, 0.4, 2.3, 4.5)
-    lo_x = (1.5, 0.8, 1.3, 0.9, 1.5, 1.1)
-    for i, yc in enumerate(lo_y):
-        edge = abs(yc) > 4.0
-        sy = 2.5 if edge else 2.2 + rnd() * 1.0
-        chunk(lime, (lo_x[i], yc + (0.0 if edge else (rnd() - 0.5) * 0.5),
-                     6.0 + (rnd() - 0.5) * 1.4),
-              (2.6 + rnd() * 1.0, sy, 5.0 + rnd() * 2.4), 300 + i, OK_LIMESTONE, seg=7, nr=5,
-              jag=0.2, tilt=0.07, yaw=(rnd() - 0.5) * 1.0)
-    hi_y = (-3.9, -2.2, -0.1, 1.9, 3.8)
-    hi_x = (0.9, 0.6, 1.2, 0.7, 1.0)
-    for i, yc in enumerate(hi_y):
-        chunk(lime, (hi_x[i], yc + (rnd() - 0.5) * 0.6, 11.2 + (rnd() - 0.5) * 0.9),
-              (2.6 + rnd() * 1.0, 2.0 + rnd() * 1.0, 4.4 + rnd() * 1.6), 320 + i, OK_LIMESTONE,
-              seg=7, nr=5, jag=0.2, tilt=0.07, yaw=(rnd() - 0.5) * 1.0)
-    for i, (yc, xc) in enumerate(((-4.4, 0.9), (-3.0, -0.5), (-1.6, 0.8), (-0.2, -0.6),
-                                  (1.3, 0.9), (2.6, -0.3), (3.9, 0.8), (4.8, -0.5), (0.5, 1.4))):
-        s = 1.1 + rnd() * 0.5
-        chunk(grass, (xc, yc, 14.1 + s * 0.15), (s * 1.5, s * 1.3, s * 0.9), 340 + i,
-              GRASS if i % 3 != 2 else CACTUS_GREEN, seg=6, nr=3, jag=0.18)
-    return [lime.to_object("Cliff_Limestone"), grass.to_object("Cliff_Grass")], 14.9
+    st = [(-6.0,) + _END, (-4.5, 13.9, 1.25, 2.6), (-3.0, 14.2, 0.8, 3.4), (-1.5, 13.6, 1.3, 2.4),
+          (0.0, 14.0, 0.9, 3.2), (1.5, 13.5, 1.35, 2.7), (3.0, 14.1, 0.75, 3.5),
+          (4.5, 13.7, 1.15, 2.9), (6.0,) + _END]
+    return _cliff(55, st, [2.2, 1.7, 2.4, 1.6], [7.4, 8.8, 6.4, 8.2], [1.7, 1.5, 1.9, 1.4],
+                  [(0.2, 0.1), (-0.2, 0.0), (0.25, -0.1), (-0.15, 0.1)],
+                  [2.6, 2.4, 2.7], [13.6, 11.4, 14.0], [0.7, 0.5, 0.8],
+                  [(0.25, 0.1), (-0.2, 0.0), (0.2, -0.1)], [9.8, 10.4])
+
+
+def build_cliff_b():
+    """Modulul de faleza, varianta B (`limestone_cliff_module_b`): aceleasi capete
+    plane la +-6 m, aceeasi sectiune de capat si aceleasi coloane de capat ca A,
+    alt interior (RUNDA 5, ok-g).
+
+    LISTA DE ELEMENTE:
+      a) masa din spate: 9 statii cu alta nisa (adancime 0,75..1,35, tavan z
+         2,4..3,6) si alta creasta
+      b) treapta de jos: 4 coloane (1,6-2,6 m) cu alt ritm (2,6 m la a doua),
+         varfuri 6,6..8,6; treapta de sus: 4 coloane de ~2 m (11,6..14), cotituri
+         inverse fata de A
+      c) 3 coloane din spate; coloanele de capat identice cu A
+      d) iarba ca la A; fara arbori; umbrire plata
+    Noduri: Cliff_Limestone, Cliff_Grass.
+    """
+    st = [(-6.0,) + _END, (-4.5, 13.8, 0.9, 3.3), (-3.0, 13.5, 1.35, 2.5), (-1.5, 14.2, 0.75, 3.6),
+          (0.0, 13.7, 1.25, 2.6), (1.5, 14.1, 0.85, 3.3), (3.0, 13.6, 1.3, 2.4),
+          (4.5, 14.0, 1.0, 3.1), (6.0,) + _END]
+    return _cliff(61, st, [1.7, 2.6, 1.6, 2.3], [8.6, 6.6, 8.0, 7.2], [1.4, 1.9, 1.5, 1.8],
+                  [(-0.2, 0.1), (0.2, 0.0), (-0.25, -0.1), (0.2, 0.1)],
+                  [1.9, 2.2, 1.8, 2.0], [11.6, 14.0, 12.4, 13.4], [0.5, 0.8, 0.6, 0.7],
+                  [(-0.25, 0.1), (0.2, -0.1), (-0.15, 0.0), (0.25, 0.0)], [9.6, 10.6, 9.2])
 
 
 def build_lighthouse():
@@ -367,7 +383,10 @@ if _want("heart_rock"):
     _emit_rock("heart_rock", build_heart_rock, 2500)
 
 if _want("limestone_cliff_module"):
-    _emit_rock("limestone_cliff_module", build_cliff, 3500)
+    _emit_rock("limestone_cliff_module", build_cliff, 4500)
+
+if _want("limestone_cliff_module_b"):
+    _emit_rock("limestone_cliff_module_b", build_cliff_b, 4500)
 
 if _want("cape_lighthouse"):
     objs, h = build_lighthouse()

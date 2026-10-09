@@ -336,6 +336,7 @@ def views(name, res_height=700):
 # floarea bougainvillea: tinta magenta #C2378F (tenta de clasa la integrare)
 CLASS_BY_SUFFIX["_Bloom"] = "#C2378F"
 SPECS.update({
+    "limestone_cliff_module_b": {"crop": "limestone_cliff_module"},
     "fukugi_tree_a": {"camera": {"azimuth": 58.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
     "fukugi_tree_b": {"camera": {"azimuth": 58.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
     "fukugi_tree_c": {"camera": {"azimuth": 58.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
@@ -454,24 +455,26 @@ def tunnel(res_height=760, spacing=3.5, row_x=4.0):
 def chain(name, n=3, step=None, res_height=700):
     """`n` copii ale modulului puse cap la cap pe Y (pas = extinderea pe Y a
     modulului sau `step`): arata daca modulele inlantuite dau un tipar repetat.
-    -> docs/asset_briefs/img/okinawa_fidelity/<nume>_chain.png"""
+    `name` poate fi o lista separata prin virgula (a,b): piesele alterneaza
+    (a-b-a-b). -> docs/asset_briefs/img/okinawa_fidelity/<primul nume>_chain.png"""
     os.makedirs(FID_DIR, exist_ok=True)
     _clear()
+    names = name.split(",")
     allm = []
-    first = _import(name)
+    first = _import(names[0])
     if not first:
         return
     lo, hi = _bounds(first)
     L = step if step else (hi.y - lo.y)
     allm += first
     for i in range(1, n):
-        ms = _import(name)
+        ms = _import(names[i % len(names)])
         for o in ms:
             o.location.y += i * L
         allm += ms
     bpy.context.view_layer.update()
-    out = os.path.join(FID_DIR, name + "_chain.png")
-    cam = _camera_for(name)
+    out = os.path.join(FID_DIR, names[0] + "_chain.png")
+    cam = _camera_for(names[0])
     cam["azimuth"] = 25.0
     _render(allm, out, res_height=res_height, aspect=2.4, **cam)
     print("lant:", out)

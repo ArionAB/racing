@@ -5,9 +5,9 @@
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="6_hzm"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/structures/tetrapod.glb" id="10_tetra"]
-[ext_resource type="PackedScene" path="res://assets/models/structures/gusuku_wall.glb" id="11_gusuku"]
-[ext_resource type="PackedScene" path="res://assets/models/buildings/lighthouse.glb" id="12_light"]
-[ext_resource type="PackedScene" path="res://assets/models/structures/stone_gate_torii.glb" id="13_gate"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/gusuku_wall_straight.glb" id="11_gusuku"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/buildings/cape_lighthouse.glb" id="12_light"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/ryukyu_gate.glb" id="13_gate"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -54,11 +54,11 @@ fade = 40.0
 jump = false
 water_y_drop = -1.0
 label = "Podul de la Kouri"
-ship_model = "res://assets/models/fiordland/vehicles/cruise_boat.glb"
-ship_node = "Boat"
-ship_scale = 2.0
+ship_model = "res://assets/models/okinawa/vehicles/island_ferry.glb"
+ship_node = "Island_Ferry"
+ship_scale = 1.0
 ship_draft = 0.0
-ship_bow_neg_z = false
+ship_bow_neg_z = true
 
 [node name="Tromba" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 397.165, 2.985, 330.268)
@@ -458,106 +458,41 @@ visible = false
 [node name="Ziduri_D" type="Node3D" parent="DecorManual"]
 
 [node name="Gusuku00" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.27192, 0, 0.26875, 0, 1.3, 0, -0.26875, 0, 1.27192, -29.80, 25.56, -250.62)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku00" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku00" index="2"]
-visible = false
+transform = Transform3D(-0.20673, 0, 0.97840, 0, 1, 0, -0.97840, 0, -0.20673, -29.80, 25.05, -250.62)
 
 [node name="Gusuku01" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.29010, 0, -0.16010, 0, 1.3, 0, 0.16010, 0, 1.29010, -16.80, 26.18, -230.87)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku01" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku01" index="2"]
-visible = false
+transform = Transform3D(0.12315, 0, 0.99238, 0, 1, 0, -0.99238, 0, 0.12315, -16.80, 25.74, -230.87)
 
 [node name="Gusuku02" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.26514, 0, -0.29903, 0, 1.3, 0, 0.29903, 0, 1.26514, -1.43, 26.80, -246.83)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku02" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku02" index="2"]
-visible = false
+transform = Transform3D(0.23002, 0, 0.97318, 0, 1, 0, -0.97318, 0, 0.23002, -1.43, 26.35, -246.83)
 
 [node name="Gusuku03" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.26514, 0, -0.29903, 0, 1.3, 0, 0.29903, 0, 1.26514, 6.20, 27.42, -225.50)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku03" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku03" index="2"]
-visible = false
+transform = Transform3D(0.23002, 0, 0.97318, 0, 1, 0, -0.97318, 0, 0.23002, 6.20, 26.92, -225.50)
 
 [node name="Gusuku04" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.29788, 0, -0.07418, 0, 1.3, 0, 0.07418, 0, 1.29788, 21.22, 28.02, -243.45)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku04" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku04" index="2"]
-visible = false
+transform = Transform3D(0.05706, 0, 0.99837, 0, 1, 0, -0.99837, 0, 0.05706, 21.22, 27.63, -243.45)
 
 [node name="Gusuku05" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.15917, 0, 0.58850, 0, 1.3, 0, -0.58850, 0, 1.15917, 36.54, 28.37, -229.74)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku05" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku05" index="2"]
-visible = false
+transform = Transform3D(-0.45269, 0, 0.89167, 0, 1, 0, -0.89167, 0, -0.45269, 36.54, 27.93, -229.74)
 
 [node name="Gusuku06" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.15917, 0, 0.58850, 0, 1.3, 0, -0.58850, 0, 1.15917, 38.93, 28.72, -252.27)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku06" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku06" index="2"]
-visible = false
+transform = Transform3D(-0.45269, 0, 0.89167, 0, 1, 0, -0.89167, 0, -0.45269, 38.93, 28.26, -252.27)
 
 [node name="Gusuku07" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.15917, 0, 0.58850, 0, 1.3, 0, -0.58850, 0, 1.15917, 58.52, 29.06, -240.90)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku07" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku07" index="2"]
-visible = false
+transform = Transform3D(-0.45269, 0, 0.89167, 0, 1, 0, -0.89167, 0, -0.45269, 58.52, 28.61, -240.90)
 
 [node name="Gusuku08" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.23083, 0, 0.41839, 0, 1.3, 0, -0.41839, 0, 1.23083, 62.23, 29.41, -263.78)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku08" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku08" index="2"]
-visible = false
+transform = Transform3D(-0.32184, 0, 0.94679, 0, 1, 0, -0.94679, 0, -0.32184, 62.23, 28.97, -263.78)
 
 [node name="Gusuku09" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.26206, 0, 0.31176, 0, 1.3, 0, -0.31176, 0, 1.26206, 79.27, 29.75, -249.39)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku09" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku09" index="2"]
-visible = false
+transform = Transform3D(-0.23982, 0, 0.97082, 0, 1, 0, -0.97082, 0, -0.23982, 79.27, 29.28, -249.39)
 
 [node name="Gusuku10" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(1.29640, 0, -0.09664, 0, 1.3, 0, 0.09664, 0, 1.29640, 89.72, 30.00, -270.40)
-
-[node name="Gusuku_Wall_B" parent="DecorManual/Ziduri_D/Gusuku10" index="1"]
-visible = false
-
-[node name="Gusuku_Wall_C" parent="DecorManual/Ziduri_D/Gusuku10" index="2"]
-visible = false
+transform = Transform3D(0.07434, 0, 0.99723, 0, 1, 0, -0.99723, 0, 0.07434, 89.72, 29.54, -270.40)
 
 [node name="Far_capul_E" parent="DecorManual" instance=ExtResource("12_light")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 318.00, 22.00, -170.00)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 318.00, 21.40, -170.00)
 
 [node name="Poarta_D" parent="DecorManual" instance=ExtResource("13_gate")]
-transform = Transform3D(-1.72059, 0, -2.51539, 0, 2.6, 0, 6.57872, 0, -0.65787, 142.79, 30.00, -249.88)
+transform = Transform3D(0.2534, 0, 0.9676, 0, 1, 0, -0.9676, 0, 0.2534, 142.79, 30.00, -249.88)
+metadata/camera_blocker = true

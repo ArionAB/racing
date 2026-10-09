@@ -496,3 +496,27 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 318.00, 21.40, -170.00)
 [node name="Poarta_D" parent="DecorManual" instance=ExtResource("13_gate")]
 transform = Transform3D(0.2534, 0, 0.9676, 0, 1, 0, -0.9676, 0, 0.2534, 142.79, 30.00, -249.88)
 metadata/camera_blocker = true
+
+[node name="ZonaA" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.974-1.000 + 0.000-0.100 (corner H->A 0.9747, start 0.000, corner into B 0.0994); x -175..95, z 145..170; sea left at 66-72 m, flat land right; harbour = W end of bay at (95-125,150-170) just before the start (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="ZonaB" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.100-0.205 (dirt 0.103-0.203, semi 5.5); x -228..-170, z -55..146; sea left at 72-86 m, land right (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="ZonaC" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.205-0.333 (urcare +6.4 -> +24); x -225..-60, z -190..-50; sea left at 86-100 m, interior right (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="ZonaD" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.333-0.474 (walls from 0.339, Poarta_D 0.4298, culmea +30 la 0.4045); x -40..230, z -270..-220; flat +-50 m at road level, interior falls 10-13 m at +100 m (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="ZonaE" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.474-0.612 (cornisa 0.5175-0.6109, Far_capul_E 0.5166 la 54 m stanga); x 230..280, z -222..46; sea at 12 m left from 0.56 (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="ZonaF" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.612-0.737 (pod 0.6365-0.7018, travee 0.6696); x 255..410, z 46..252; water both sides on the bridge (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="ZonaG" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.737-0.824 (tromba 0.7758, viraje 0.7368/0.7778/0.8236); x 310..412, z 250..375; sea left 20-22 m, bay right 30 m (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="ZonaH" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.824-0.974 (dig, val 0.8811, width 6.5 0.82-0.971); x 95..310, z 170..372; sea 10-14 m left, bay right 10-24 m (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"

@@ -80,32 +80,44 @@ def settle(b, name):
 # ---------------------------------------------------------------------------
 
 def build_ie():
-    """`ie_island` (decuparea `ie_island.png`; contractul de cote castiga: platou
-    jos + UN con) -- LISTA DE ELEMENTE:
+    """`ie_island` (decuparea `ie_island.png`; RUNDA 2, ceruta de coordonator: conul e
+    MASIV) -- LISTA DE ELEMENTE:
 
-    1) PLATOU jos: 120 x 60 m, 8 m inaltime, 22 laturi, 4 inele: banda de jos
-       (0..2,5 m) FALEZA palida MARBLE_GREY, deasupra padure TROPICAL_GREEN cu
-       ~20% fatete de al doilea verde; capac plat sus.
-    2) UN SINGUR CON abrupt, excentric (cu 20 m spre -X si 4 m spre +Y fata de
-       centrul platoului): baza ~40 x 36 m la cota 7,5, varful la 45 m total
-       (37 m de con), 12 laturi, 6 inele (profil usor concav spre varf); ~28%
-       fatete de al doilea ton, ~14% pete de stanca MARBLE_GREY pe flancul de jos
-       (coastele din decupare). Varful usor deplasat (+1,5 m) fata de axa.
+    1) PLATOU: 120 x 60 m, 22 laturi, 5 inele; banda de jos (0..3,5 m) = FALEZA PALIDA
+       MARBLE_GREY pe tot tarmul (verde -> apa); deasupra padure TROPICAL_GREEN; platoul
+       SE RIDICA usor spre con (inelul de sus la 11 m, mai mic, deplasat spre con).
+    2) UN SINGUR CON MASIV, excentric (centru -18 m pe X, +3 m pe Y): baza 70 x 42 m
+       (~58% din lungimea insulei), varful la 45 m (inaltimea totala ramane 45),
+       FLANCURI CONCAVE (r = R (1-t)^1,2), 18 laturi, 7 inele; 3 CRESTE care coboara din
+       varf spre baza (modulatie 3 lobi pe unghi, mai tare spre baza); ~28% fatete de al
+       doilea ton, ~14% pete de stanca pe flancul de jos.
     Fara coliziune; origine la baza, XY centrat pe bbox.
     """
     b = Builder()
-    pl = [(0.0, 60.0, 30.0, 0.0, 0.0), (2.5, 59.0, 29.2, 0.0, 0.0), (6.0, 56.0, 27.5, 0.0, 0.0),
-          (8.0, 50.0, 24.0, 0.0, 0.0)]
+    pl = [(0.0, 60.0, 30.0, 0.0, 0.0), (3.5, 59.0, 29.3, 0.0, 0.0), (6.5, 55.5, 27.2, -2.0, 0.5),
+          (8.5, 48.0, 23.0, -8.0, 1.5), (11.0, 33.0, 18.0, -16.0, 3.0)]
     pts, _ = ring_points(pl, 22, 31, 0.05)
     faceted_shell(b, pts, FOREST, slot_of=lambda k, z: CLIFF if k == 0 else FOREST)
-    speckle(b, FOREST2, 0.2, 2.5, 7.9, 3, only_slot=FOREST)
-    cx, cy = -20.0, 4.0
-    cone = [(7.5, 20.0, 18.0, cx, cy), (15.0, 16.0, 14.5, cx, cy), (23.0, 12.0, 11.0, cx + 0.3, cy),
-            (31.0, 8.0, 7.6, cx + 0.8, cy), (38.0, 4.6, 4.3, cx + 1.2, cy), (43.0, 2.0, 1.9, cx + 1.5, cy)]
-    pts, _ = ring_points(cone, 12, 17, 0.12)
-    faceted_shell(b, pts, FOREST, cap_bottom=False, top_pt=Vector((cx + 1.5, cy, 45.0)))
-    speckle(b, FOREST2, 0.28, 9.0, 44.0, 5, only_slot=FOREST)
-    speckle(b, CLIFF, 0.14, 9.0, 22.0, 9, only_slot=FOREST)
+    speckle(b, FOREST2, 0.2, 3.5, 10.5, 3, only_slot=FOREST)
+    cx, cy, z0, top = -18.0, 3.0, 6.0, 45.0
+    R, RY = 35.0, 21.0
+    rings = []
+    for t in (0.0, 0.14, 0.30, 0.47, 0.64, 0.80, 0.92):
+        f = (1.0 - t) ** 1.2
+        rings.append((z0 + (top - z0) * t, R * f, RY * f, cx + 2.0 * t, cy))
+    seg = 18
+    cpts, cents = ring_points(rings, seg, 17, 0.07)
+    for k, ring in enumerate(cpts):
+        t = (rings[k][0] - z0) / (top - z0)
+        amp = 0.10 * (1.0 - t) + 0.03
+        for i, p in enumerate(ring):
+            a = 2.0 * math.pi * (i + (0.5 if k % 2 else 0.0)) / seg
+            m = 1.0 + amp * math.cos(3.0 * (a - 0.6))
+            c = cents[k]
+            ring[i] = Vector((c.x + (p.x - c.x) * m, c.y + (p.y - c.y) * m, p.z))
+    faceted_shell(b, cpts, FOREST, cap_bottom=False, top_pt=Vector((cx + 2.2, cy, top)))
+    speckle(b, FOREST2, 0.28, 11.5, 44.0, 5, only_slot=FOREST)
+    speckle(b, CLIFF, 0.07, 11.5, 20.0, 9, only_slot=FOREST)
     return settle(b, "IeIsland_A")
 
 

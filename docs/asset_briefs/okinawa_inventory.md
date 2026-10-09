@@ -354,3 +354,12 @@ si am rulat o comparatie fara lacat, apoi am dat `rmdir` pe lacatul altuia; relu
 ### Stare la oprire (ok-e)
 
 Toate cele 7 GLB livrate, `VERDICT KIT: OK`. Nerefacut: comparatia barcii dupa largirea dungii.
+
+### Runda 2, cerută de coordonator (ok-e): bivol și insula Ie
+
+| piesă | ce s-a cerut | ce s-a făcut | rezultat |
+|---|---|---|---|
+| `water_buffalo.glb` (2.108 tri, 1,80 x 2,97 x 1,89 m; 2 comparații) | cap orizontal la nivelul greabănului, bot scurt și lat, coarne în semilună groase, picioare scurte și groase, culoare ardezie | cap la z ~1,2 (greabăn 1,5), bot bont, coarne r 0,14→0 care pleacă lateral și se curbează în sus/înapoi, burta la ~0,72 m, picioare r 0,19–0,09; corp `VOLCANIC_BLACK` 20 (LOG_DARK ieșea maro), jos pe picioare și bot `LOG_DARK` 28, coarne `MARBLE_GREY` 29 | citește ca bivol (nu mai e tapir); abateri: vârfurile coarnelor sunt mai drepte decât semiluna din desen, fără cută pe frunte |
+| `okinawa_horizon.glb` / `IeIsland_A` (1.174 tri total; `IeIsland_A` 119,3 x 60,8 x 45,0 m; 2 comparații) | con masiv (~55–60% din lungime), flancuri concave, 2–3 creste, platou care urcă, bandă de faleză palidă 2–4 m | con 70 x 42 m la bază (~58%), vârf la 45 m, flancuri concave (r = R(1-t)^1,2), 3 creste (modulare pe unghi), platou care urcă spre con (11 m la inelul de sus), bandă de faleză `MARBLE_GREY` 3,5 m pe tot țărmul | conul e mai masiv ca în runda 1, dar tot **mai îngust în partea de sus decât desenul**: doar ~37 m din el depășesc platoul și latura de 45 m din contract nu lasă mai mult; abatere raportată, nu rezolvată |
+
+Verify neschimbat în structură: `VERDICT KIT: OK`.

@@ -83,63 +83,68 @@ BUF_WALK = {("F", -1): [26, -18, 6], ("F", 1): [-20, -6, 10],
 
 
 def build_buffalo(pose):
-    """`water_buffalo` (decuparea `water_buffalo.png` + contractul §1.6) --
-    LISTA DE ELEMENTE, inainte de primul vertex:
+    """`water_buffalo` (decuparea `water_buffalo.png` + contractul §1.6; RUNDA 2, ceruta
+    de coordonator: capul orizontal, bot scurt si lat, coarne in semiluna, picioare
+    scurte) -- LISTA DE ELEMENTE:
 
-    TRUNCHI: butoi greu, 7 statii, turtit pe X (0,8), greaban la ~1,5 m (cu cocoasa
-      usoara peste umeri), crupa mai joasa, burta la ~0,5 m.
-    GAT scurt si gros, coborat; CAP lung, plecat in jos-inainte (boul isi tine
-      capul jos), bot lat, 2 narine negre, 2 ochi negri, 2 URECHI laterale.
-    2 COARNE lungi (~1,1 m), MARBLE_GREY, plecate lateral din cap, curbate PE SPATE
-      si in sus (nu in fata, nu ca la bivolul african), varf ascutit; fara jug.
-    4 PICIOARE groase si scurte (brat / fluier / pastern + copita neagra).
+    TRUNCHI: butoi masiv, 7 statii, r ~0,40-0,45, greaban la ~1,5 m (cocoasa peste
+      umeri), crupa mai joasa, BURTA LA ~0,72 m de sol; latime ~0,9 m.
+    GAT scurt si gros, orizontal; CAP tinut ORIZONTAL, la nivelul greabanului sau
+      putin sub (z ~1,2), BOT SCURT SI LAT (capat bont), 2 narine, 2 ochi, 2 URECHI.
+    2 COARNE in SEMILUNA (~1,2 m), groase la baza (r 0,12): pleaca LATERAL din cap,
+      se curbeaza in SUS si inapoi (C vazut din fata), varf ascutit; MARBLE_GREY.
+    4 PICIOARE SCURTE SI GROASE (brat / fluier / pastern, r 0,18..0,09) + copita neagra.
     COADA subtire pana sub jaret, cu smoc.
-    CULORI: corp LOG_DARK 28 (gri-negru), coarne MARBLE_GREY 29, copite/narine/ochi
-      VOLCANIC_BLACK 20. POZE: `Pose_Stand` = 4 picioare drepte; `Pose_Walk` = o
-      pereche diagonala inainte, cealalta inapoi (ca la cai).
-    Cote: ~2,8 m bot -> crupa, greaban 1,5 m, fata = +Y.
+    CULORI: corp VOLCANIC_BLACK 20 (gri-ardezie; LOG_DARK iesea maro), partea de jos a
+      picioarelor si botul LOG_DARK 28, coarne MARBLE_GREY 29. POZE: `Pose_Stand` =
+      4 picioare drepte; `Pose_Walk` = o pereche diagonala inainte.
+    Cote: 2,8 m bot -> crupa, greaban 1,5 m, fata = +Y.
     """
     b = Builder()
-    tube(b, [(-1.05, 0.98, 0.14), (-0.92, 1.0, 0.36), (-0.5, 1.0, 0.52), (-0.05, 1.0, 0.56),
-             (0.4, 1.04, 0.56), (0.78, 1.0, 0.46), (0.95, 0.98, 0.2)], BODY, segments=8, sx=0.8, per=3)
-    tube(b, [(0.7, 1.05, 0.36), (0.95, 0.98, 0.30), (1.2, 0.88, 0.25)], BODY, segments=8, sx=0.85,
+    SLATE = VOLCANIC_BLACK
+    tube(b, [(-1.05, 1.02, 0.16), (-0.92, 1.05, 0.34), (-0.5, 1.10, 0.41), (-0.05, 1.12, 0.43),
+             (0.4, 1.14, 0.45), (0.78, 1.14, 0.40), (0.98, 1.14, 0.26)], SLATE, segments=8, sx=1.0, per=3)
+    tube(b, [(0.75, 1.15, 0.36), (0.98, 1.18, 0.31), (1.15, 1.18, 0.28)], SLATE, segments=8, sx=1.0,
          per=2, caps=(False, False))
-    tube(b, [(1.18, 0.88, 0.26), (1.42, 0.82, 0.23), (1.62, 0.70, 0.19), (1.78, 0.60, 0.15),
-             (1.84, 0.56, 0.0)], BODY, segments=7, sx=0.85, per=2, caps=(False, True))
+    tube(b, [(1.1, 1.18, 0.29), (1.3, 1.16, 0.27), (1.48, 1.10, 0.23), (1.60, 1.05, 0.19)],
+         SLATE, segments=8, sx=1.0, per=2, caps=(False, False))
+    tube(b, [(1.55, 1.07, 0.21), (1.62, 1.04, 0.19), (1.65, 1.03, 0.0)], BODY, segments=8, sx=1.0, per=1,
+         caps=(False, True))                                                    # botul scurt si lat
     for s in (-1, 1):
-        # coarne: din cap spre lateral, apoi pe spate si in sus
-        base = [(0.20, 1.17, 0.98), (0.34, 1.13, 1.02), (0.48, 1.02, 1.08),
-                (0.58, 0.84, 1.16), (0.62, 0.62, 1.28), (0.56, 0.44, 1.44)]
+        base = [(0.24, 1.10, 1.26), (0.46, 1.08, 1.26), (0.66, 1.04, 1.30), (0.80, 0.98, 1.42),
+                (0.84, 0.92, 1.60), (0.76, 0.88, 1.78), (0.62, 0.86, 1.90)]
         pts = [Vector((s * x, y, z)) for x, y, z in base]
-        b.taper_sweep(pts, [0.12, 0.115, 0.095, 0.07, 0.04, 0.0], HORN, segments=6,
+        b.taper_sweep(pts, [0.14, 0.13, 0.115, 0.09, 0.065, 0.035, 0.0], HORN, segments=6,
                       cap_start=True, cap_end=True)
-        b.box((s * 0.34, 1.04, 0.90), (0.22, 0.13, 0.07), BODY,
+        b.box((s * 0.36, 1.0, 1.24), (0.22, 0.13, 0.07), SLATE,
               rotation=Matrix.Rotation(math.radians(-s * 25), 3, "Z"))        # ureche
-        b.box((s * 0.19, 1.45, 0.90), (0.05, 0.05, 0.05), DARK)               # ochi
-        b.box((s * 0.07, 1.82, 0.575), (0.05, 0.05, 0.04), DARK)              # narina
-    # picioare
+        b.box((s * 0.24, 1.30, 1.30), (0.05, 0.05, 0.05), DARK)               # ochi
+        b.box((s * 0.09, 1.66, 1.07), (0.06, 0.05, 0.045), DARK)              # narina
     for s in (-1, 1):
         for kind in ("F", "H"):
             ang = BUF_STAND[kind] if pose == "stand" else BUF_WALK[(kind, s)]
             stance = pose == "stand" or (kind, s) in (("F", 1), ("H", -1))
             if kind == "F":
-                hip_y, hip_z, lens, rad = 0.50, 0.90, [0.40, 0.28, 0.12], [0.14, 0.10, 0.075, 0.07]
+                hip_y, hip_z, lens, rad = 0.52, 0.92, [0.36, 0.24, 0.12], [0.19, 0.14, 0.10, 0.09]
             else:
-                hip_y, hip_z, lens, rad = -0.68, 0.92, [0.42, 0.28, 0.12], [0.17, 0.105, 0.075, 0.07]
-            pts = leg_points(s * 0.23, hip_y, hip_z, lens, ang, ground=BUF_HOOF if stance else None)
-            b.taper_sweep(pts, rad, BODY, segments=6, cap_start=False, cap_end=True)
+                hip_y, hip_z, lens, rad = -0.68, 0.94, [0.38, 0.24, 0.12], [0.21, 0.15, 0.10, 0.09]
+            pts = leg_points(s * 0.27, hip_y, hip_z, lens, ang, ground=BUF_HOOF if stance else None)
+            mid = pts[1] + (pts[2] - pts[1]) * 0.4
+            b.taper_sweep([pts[0], pts[1], mid], [rad[0], rad[1], 0.105], SLATE, segments=6,
+                          cap_start=False, cap_end=False)
+            b.taper_sweep([mid] + pts[2:], [0.105] + rad[2:], BODY, segments=6, cap_start=False, cap_end=True)
             p = pts[-1]
-            b.frustum((p.x, p.y, p.z - BUF_HOOF * 0.5 + 0.01), 0.09, 0.075, BUF_HOOF, DARK, segments=6)
-    # coada
-    tube(b, [(-1.04, 0.95, 0.04), (-1.12, 0.80, 0.04), (-1.14, 0.52, 0.035), (-1.10, 0.30, 0.0)],
-         BODY, segments=5, sx=1.0, per=2)
-    b.box((0.0, -1.10, 0.28), (0.1, 0.1, 0.22), DARK)
-    k = 2.8 / 2.89                        # lungimea de contract (bot -> crupa)
+            b.frustum((p.x, p.y, p.z - BUF_HOOF * 0.5 + 0.01), 0.105, 0.09, BUF_HOOF, DARK, segments=6)
+    tube(b, [(-1.04, 1.0, 0.04), (-1.12, 0.86, 0.04), (-1.14, 0.58, 0.035), (-1.10, 0.36, 0.0)],
+         SLATE, segments=5, sx=1.0, per=2)
+    b.box((0.0, -1.10, 0.34), (0.1, 0.1, 0.22), DARK)
+    k = 2.8 / 2.70                        # lungimea de contract (bot -> crupa)
     for v in b.bm.verts:
         v.co.y *= k
     return b
 
 
+# ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
 # 2. STARCUL
 # ---------------------------------------------------------------------------

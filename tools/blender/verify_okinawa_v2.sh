@@ -91,5 +91,17 @@ check "plants/cycad.glb" 6500 --origin=assembly
 check "plants/fan_palm.glb" 4000 --origin=assembly
 check "plants/bougainvillea.glb" 3500 --origin=assembly --allow-slots=31
 echo
+
+echo "== val 1, ok-b: coasta =="
+# --origin=assembly: piesele au mai multe noduri (calcar / iarba / tencuiala / metal);
+# offsetul de origine e calculat o data pe ansamblu, ansamblul atinge solul.
+check "rocks/notch_rock_a.glb" 2500 --origin=assembly
+check "rocks/notch_rock_b.glb" 2500 --origin=assembly
+check "rocks/notch_rock_c.glb" 2500 --origin=assembly
+check "rocks/heart_rock.glb" 2500 --origin=assembly
+check "rocks/limestone_cliff_module.glb" 3000 --origin=assembly
+check "buildings/cape_lighthouse.glb" 6000 --origin=assembly
+check "structures/coral_stone_wall.glb" 1000 --origin=assembly
+
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi
 exit "$fail"

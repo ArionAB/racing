@@ -451,11 +451,39 @@ def tunnel(res_height=760, spacing=3.5, row_x=4.0):
         except OSError:
             pass
 
+def chain(name, n=3, step=None, res_height=700):
+    """`n` copii ale modulului puse cap la cap pe Y (pas = extinderea pe Y a
+    modulului sau `step`): arata daca modulele inlantuite dau un tipar repetat.
+    -> docs/asset_briefs/img/okinawa_fidelity/<nume>_chain.png"""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    allm = []
+    first = _import(name)
+    if not first:
+        return
+    lo, hi = _bounds(first)
+    L = step if step else (hi.y - lo.y)
+    allm += first
+    for i in range(1, n):
+        ms = _import(name)
+        for o in ms:
+            o.location.y += i * L
+        allm += ms
+    bpy.context.view_layer.update()
+    out = os.path.join(FID_DIR, name + "_chain.png")
+    cam = _camera_for(name)
+    cam["azimuth"] = 25.0
+    _render(allm, out, res_height=res_height, aspect=2.4, **cam)
+    print("lant:", out)
+
 
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
 if "--compare" in args:
     compare(args[args.index("--compare") + 1])
+elif "--chain" in args:
+    i = args.index("--chain")
+    chain(args[i + 1], int(args[i + 2]) if len(args) > i + 2 and args[i + 2].isdigit() else 3)
 elif "--views" in args:
     views(args[args.index("--views") + 1])
 elif "--sheet" in args:

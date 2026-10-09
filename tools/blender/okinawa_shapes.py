@@ -276,8 +276,31 @@ def limestone_wall(b, p0, p1, h, t_base, t_top, slot=OK_LIMESTONE, courses=3,
 OK_RESULTS = []
 
 
+def _split_all_edges(o):
+    """Fiecare fata isi are vertecsii ei (umbrire PLATA): AO-ul copt pe vertex
+    nu mai curge intre fete vecine."""
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bmesh.ops.split_edges(bm, edges=bm.edges[:])
+    bm.to_mesh(o.data)
+    bm.free()
+    o.data.update()
+
+
+def _flatten_ao(o):
+    """Dupa coacere: AO-ul fiecarei fete = media vertecsilor ei (o singura
+    valoare pe fata, ca facetele sa se citeasca drept plane)."""
+    me = o.data
+    ca = me.color_attributes["AO"]
+    for poly in me.polygons:
+        vs = list(poly.vertices)
+        v = sum(ca.data[i].color[0] for i in vs) / len(vs)
+        for i in vs:
+            ca.data[i].color = (v, v, v, 1.0)
+
+
 def emit_ok(objs, path, ao, keep_xy=False, bevel=0.0, smooth_angle=None,
-            budget=None, bevel_angle=30.0, bevels=None):
+            budget=None, bevel_angle=30.0, bevels=None, flat_ao=False):
     """Finish pe fiecare nod + export in assets/models/okinawa/<path>.
 
     Offsetul de origine se calculeaza O DATA pe ansamblu (memoria finish-
@@ -301,8 +324,12 @@ def emit_ok(objs, path, ao, keep_xy=False, bevel=0.0, smooth_angle=None,
         for suf, w in (bevels or {}).items():
             if o.name.endswith(suf):
                 bw = w
+        if flat_ao:
+            _split_all_edges(o)
         st = finish(o, bevel=bw, bevel_angle=bevel_angle, ao=ao,
                     origin=None, smooth_angle=smooth_angle)
+        if flat_ao:
+            _flatten_ao(o)
         total += st["tris"]
         per_node[o.name] = st["tris"]
     xs, ys, zs = [], [], []
@@ -647,3 +674,299 @@ def pinnate_frond(b, base, azim_deg, length, width, elev_deg, slot, stations=41,
             widths.append(env if i % 2 else env * tooth)
     up = Matrix.Rotation(math.radians(roll_deg), 4, dh) @ Vector((0.0, 0.0, 1.0))
     b.blade(path, widths, thick, slot, up=up, side_bias=0.0)
+
+# calcar roas de val: corp fatetat din inele (ok-b, coasta)
+# ---------------------------------------------------------------------------
+# Vocabular comun pentru stancile-ciuperca, stanca-inima si faleza: un corp din
+# INELE cu profil (z, raza), centru deplasabil (aplecare) si zgomot determinist.
+# Inelele alterneaza decalate cu jumatate de pas unghiular, iar fetele sunt
+# TRIUNGHIURI: iese suprafata fatetata (low-poly), nu cilindru neted.
+
+def _ok_rand(seed):
+    state = [(seed * 1103515245 + 12345) & 0x7FFFFFFF]
+
+    def rand():
+        state[0] = (state[0] * 1103515245 + 12345) & 0x7FFFFFFF
+        return state[0] / 0x7FFFFFFF
+    return rand
+
+
+def ring_points(rings, seg, seed=0, jag=0.06, bite=None):
+    """Punctele inelelor. `rings` = lista de (z, rx, ry, cx, cy). Returneaza
+    (puncte[k][i] ca Vector, centre[k]). Zgomotul: o deviatie per coloana
+    (continua pe verticala, ca fetele sa fie late) x una per inel. `bite` =
+    (z0, z1, adancime, unghi_rad): in intervalul de z, raza scade pana la
+    `adancime` (fractie) pe directia `unghi` (nisa roasa dintr-o parte)."""
+    rnd = _ok_rand(seed)
+    col = [1.0 + (rnd() * 2 - 1) * jag for _ in range(seg)]
+    pts, cents = [], []
+    for k, (z, rx, ry, cx, cy) in enumerate(rings):
+        rd = 1.0 + (rnd() * 2 - 1) * jag * 0.7
+        off = 0.5 if k % 2 else 0.0
+        ring = []
+        for i in range(seg):
+            a = 2.0 * math.pi * (i + off) / seg
+            s = col[i] * rd
+            if bite is not None and bite[0] <= z <= bite[1]:
+                w = 0.5 * (1.0 + math.cos(a - bite[3]))
+                tz = (z - bite[0]) / max(bite[1] - bite[0], 1e-6)
+                s *= 1.0 - bite[2] * w * math.sin(math.pi * tz)
+            ring.append(Vector((cx + math.cos(a) * rx * s,
+                                cy + math.sin(a) * ry * s, z)))
+        pts.append(ring)
+        cents.append(Vector((cx, cy, z)))
+    return pts, cents
+
+
+def faceted_shell(b, pts, slot, slot_of=None, cap_top=True, cap_bottom=True,
+                  top_pt=None):
+    """Triunghiuri intre inelele `pts` (decalate cu jumatate de pas pe randuri
+    alternante) + capace. Vertecsii sunt SUDATI (un vertex per punct). `slot_of
+    (k, z)` -> slot pentru banda k (intre inelele k si k+1); implicit `slot`.
+    Normalele se recalculeaza la `to_object`."""
+    def sl(k, z):
+        return slot_of(k, z) if slot_of else slot
+
+    V = [[b.bm.verts.new(p) for p in ring] for ring in pts]
+
+    def tri(a, c, d, s):
+        f = b.bm.faces.new([a, c, d])
+        f[b.slot] = s
+
+    for k in range(len(pts) - 1):
+        lo, hi = V[k], V[k + 1]
+        n = len(lo)
+        s = sl(k, (pts[k][0].z + pts[k + 1][0].z) * 0.5)
+        for i in range(n):
+            j = (i + 1) % n
+            if k % 2 == 0:   # hi decalat cu +0.5: hi[i] intre lo[i], lo[i+1]
+                tri(lo[i], lo[j], hi[i], s)
+                tri(hi[i], lo[j], hi[j], s)
+            else:            # lo decalat: lo[i] intre hi[i], hi[i+1]
+                tri(lo[i], lo[j], hi[j], s)
+                tri(lo[i], hi[j], hi[i], s)
+    if cap_top:
+        top = V[-1]
+        c = b.bm.verts.new(top_pt if top_pt is not None
+                           else sum(pts[-1], Vector()) / len(pts[-1]))
+        s = sl(len(pts) - 2, pts[-1][0].z)
+        for i in range(len(top)):
+            tri(top[i], top[(i + 1) % len(top)], c, s)
+    if cap_bottom:
+        bot = V[0]
+        c = b.bm.verts.new(sum(pts[0], Vector()) / len(pts[0]))
+        s = sl(0, pts[0][0].z)
+        for i in range(len(bot)):
+            tri(bot[(i + 1) % len(bot)], bot[i], c, s)
+
+
+def notch_profile(h, stem_r, neck_r, cap_r, notch, cap_under, cap_mid, flat=0.55):
+    """Profilul (z, raza) al unei stanci-ciuperca: poala evazata -> NISA roasa
+    de val (`notch` = (z0, z1), gatul `neck_r`) -> picior -> burta capului ->
+    umarul `cap_r` la `cap_mid` -> cupola turtita (`flat` = cat de lata ramane
+    fata superioara)."""
+    n0, n1 = notch
+    nm = 0.5 * (n0 + n1)
+    return [
+        (0.0, stem_r * 1.40),
+        (n0 * 0.55, stem_r * 1.22),
+        (n0, stem_r * 1.0),
+        (nm, neck_r),
+        (n1, neck_r * 1.12),
+        (n1 + (cap_under - n1) * 0.55, stem_r * 0.98),
+        (cap_under, stem_r * 1.22),
+        (cap_under + (cap_mid - cap_under) * 0.30, cap_r * 0.62),
+        (cap_under + (cap_mid - cap_under) * 0.65, cap_r * 0.88),
+        (cap_mid, cap_r),
+        (cap_mid + (h - cap_mid) * 0.42, cap_r * 0.96),
+        (h - (h - cap_mid) * 0.12, cap_r * (0.50 + 0.12 * flat)),
+        (h, cap_r * 0.20 * flat + 0.05),
+    ]
+
+
+def notch_rock(lime, grass, prof, seg=10, seed=1, ratio=0.86, lean=0.0,
+               lean_from=None, lean_to=None, notch=None, bite=None, jag=0.10,
+               tufts=3, tuft_seed=3, shoulder_z=None, rock_slot=OK_LIMESTONE,
+               niche_slot=OK_NICHE, grass_slot=21, grass_lift=0.2):
+    """Stanca-ciuperca fatetata: corp de calcar in `lime` (banda nisei pe
+    `niche_slot`), invelis de iarba pe creastet in `grass` (+ `tufts` tufe
+    joase). `prof` = notch_profile; `lean` = deplasarea capului pe +X intre
+    `lean_from` si `lean_to` (smoothstep). Returneaza (z_varf, inaltimea
+    umarului)."""
+    rings = []
+    for (z, r) in prof:
+        c = 0.0
+        if lean and lean_from is not None:
+            t = max(0.0, min(1.0, (z - lean_from) / max(lean_to - lean_from, 1e-6)))
+            c = lean * t * t * t
+        rings.append((z, r, r * ratio, c, 0.0))
+    pts, cents = ring_points(rings, seg, seed, jag, bite)
+
+    def slot_of(k, z):
+        if notch and notch[0] - 0.05 <= z <= notch[1] + 0.15:
+            return niche_slot
+        return rock_slot
+    faceted_shell(lime, pts, rock_slot, slot_of)
+
+    # invelisul de iarba: inelele de la umar in sus, impinse spre exterior si in sus
+    k0 = 0
+    for k, (z, _) in enumerate(prof):
+        if shoulder_z is not None and z >= shoulder_z - 1e-6:
+            k0 = k
+            break
+    gp = []
+    for k in range(k0, len(pts)):
+        ring = []
+        for p in pts[k]:
+            d = Vector((p.x - cents[k].x, p.y - cents[k].y, 0.0))
+            ring.append(Vector((p.x + d.x * 0.0, p.y + d.y * 0.0,
+                                p.z + grass_lift + (0.16 if k == len(pts) - 1 else 0.0))))
+        gp.append(ring)
+    faceted_shell(grass, gp, grass_slot, cap_bottom=True)
+    top_z = pts[-1][0].z + grass_lift + 0.16
+    rnd = _ok_rand(tuft_seed)
+    cx_top = cents[-1].x
+    cap_r = max(r for _, r in prof)
+    for i in range(tufts):
+        a = 2.0 * math.pi * (i + rnd() * 0.6) / max(tufts, 1) + 0.4
+        rr = cap_r * (0.28 + 0.22 * rnd())
+        sx = 1.5 + rnd() * 0.9
+        sh = 0.85 + rnd() * 0.45
+        grass.boulder((cx_top + math.cos(a) * rr, math.sin(a) * rr * ratio,
+                       top_z - 0.08 + sh * 0.18), (sx, sx * 0.85, sh), grass_slot,
+                      seed=tuft_seed * 7 + i, segments=7, rings=3, deviation=0.14)
+    return top_z, pts[k0][0].z
+
+
+def foot_boulders(lime, specs, slot=OK_LIMESTONE):
+    """Bolovani la picior: `specs` = [(x, y, marime, seed)], marime = (sx, sy, sz).
+    Se infig 30% in sol (baza ingropata nu se vede)."""
+    for (x, y, size, seed) in specs:
+        lime.boulder((x, y, size[2] * 0.2), size, slot, seed=seed, segments=7,
+                     rings=3, deviation=0.16)
+
+
+def lobe_profile(h, R, r0=0.45, shoulder=0.62):
+    """Profil de lob rotunjit (stanca-inima): varf subtire jos, burta larga
+    la `shoulder`, cupola sus. Lista (z, raza)."""
+    out = []
+    n = 11
+    for k in range(n + 1):
+        t = k / n
+        if t <= shoulder:
+            r = r0 + (R - r0) * (t / shoulder) ** 1.15
+        else:
+            u = (t - shoulder) / (1.0 - shoulder)
+            r = R * math.sqrt(max(0.0, 1.0 - u * u)) + 0.05
+        out.append((h * t, r))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# rocile din AGLOMERARI DE BLOCURI (runda 4, ceruta de coordonator)
+# ---------------------------------------------------------------------------
+
+def chunk(b, c, size, seed, slot, seg=7, nr=4, jag=0.16, yaw=None, tilt=0.30,
+          slot_of=None):
+    """Bolovan fatetat (elipsoid low-res, rotit aleator): `nr` inele fara poli,
+    capace plate. `size` = (sx, sy, sz) pe elipsoidul teoretic (varful real
+    iese ~0,75 din semi-inaltime). Umbrire plata la export (flat_ao)."""
+    rnd = _ok_rand(seed)
+    yv = rnd() * 2.0 * math.pi if yaw is None else yaw
+    tx, ty = (rnd() - 0.5) * 2.0 * tilt, (rnd() - 0.5) * 2.0 * tilt
+    R = Matrix.Rotation(yv, 3, "Z") @ Matrix.Rotation(tx, 3, "X") @ Matrix.Rotation(ty, 3, "Y")
+    rings = []
+    for k in range(nr):
+        t = -1.0 + 2.0 * (k + 0.5) / nr
+        rr = math.sqrt(max(0.0, 1.0 - t * t))
+        rings.append((t * size[2] * 0.5, rr * size[0] * 0.5, rr * size[1] * 0.5, 0.0, 0.0))
+    pts, _ = ring_points(rings, seg, seed + 7, jag)
+    cv = Vector(c)
+    pts = [[R @ p + cv for p in ring] for ring in pts]
+    faceted_shell(b, pts, slot, slot_of)
+
+
+def grass_clusters(grass, cx, cap_r, top_z, edge_z, n, seed, slot_a=21, slot_b=12,
+                   spill=0.25):
+    """Ciorchini de smocuri (0,6..1,3 m) pe crestetul unui cap: `n` ciorchini
+    de 2 bolovani, ~1/3 pe CACTUS_GREEN (12), restul TROPICAL_GREEN (21), cei
+    de la margine se revarsa peste buza (`spill`). `top_z` = cota fetei de sus
+    la centru, `edge_z` = la margine."""
+    rnd = _ok_rand(seed)
+    for i in range(n):
+        ang = 2.0 * math.pi * (i + rnd() * 0.5) / n * 1.0 + 0.7 * i
+        rho = cap_r * (0.12 + 0.86 * math.sqrt(rnd()))
+        z = top_z - (top_z - edge_z) * (rho / cap_r) ** 2
+        if rho > 0.74 * cap_r:
+            rho += spill
+            z -= spill
+        s = 0.6 + rnd() * 0.5
+        sl = slot_b if i % 3 == 2 else slot_a
+        x, y = cx + math.cos(ang) * rho, math.sin(ang) * rho
+        chunk(grass, (x, y, z + s * 0.25), (s * 1.3, s * 1.15, s * 0.95), seed * 13 + i, sl,
+              seg=6, nr=3, jag=0.18)
+        chunk(grass, (x + math.cos(ang + 1.9) * s * 0.7, y + math.sin(ang + 1.9) * s * 0.7,
+                      z + s * 0.1), (s * 0.8, s * 0.8, s * 0.6), seed * 17 + i, slot_a,
+              seg=6, nr=3, jag=0.18)
+
+
+def notch_cluster_rock(lime, grass, spec):
+    """Stanca-ciuperca din blocuri: picior cu sectiune neregulata (7 laturi,
+    jag) + NISA (scobitura sub cap) + cap din 7..12 bolovani fatetati in doua
+    straturi + fusta de bolovani la baza + ciorchini de iarba. `spec` e un dict
+    (vezi build_okinawa_coast.py). Returneaza cota varfului (cu iarba)."""
+    sd = spec["seed"]
+    lean = spec.get("lean", 0.0)
+    lf = spec.get("lean_from", 0.0)
+    ztop_stem = spec["stem"][-1][0]
+    rings = []
+    for (z, r) in spec["stem"]:
+        t = max(0.0, min(1.0, (z - lf) / max(ztop_stem - lf, 1e-6))) if lean else 0.0
+        rings.append((z, r, r * 0.92, lean * t * t, 0.0))
+    nz = spec["neck"]
+    pts, _ = ring_points(rings, 7, sd, 0.16, spec.get("bite"))
+    faceted_shell(lime, pts, OK_LIMESTONE,
+                  lambda k, z: OK_NICHE if nz[0] <= z <= nz[1] else OK_LIMESTONE,
+                  cap_top=True, cap_bottom=True)
+    rnd = _ok_rand(sd + 3)
+    cp = spec["cap"]
+    # strat inferior (burta) + superior + centru
+    n = cp["n_lo"]
+    for i in range(n):
+        a = 2.0 * math.pi * (i + rnd() * 0.5) / n
+        rho = cp["rho_lo"] * (0.88 + rnd() * 0.24)
+        sx = cp["sx_lo"] * (0.85 + rnd() * 0.3)
+        chunk(lime, (lean + math.cos(a) * rho, math.sin(a) * rho * 0.92,
+                     cp["lo_z"] + (rnd() - 0.5) * 0.5),
+              (sx, sx * 0.9, cp["lo_h"] * (0.85 + rnd() * 0.3)), sd * 31 + i, OK_LIMESTONE,
+              seg=6, nr=3, jag=0.2)
+    n = cp["n_hi"]
+    for i in range(n):
+        a = 2.0 * math.pi * (i + rnd() * 0.5) / n + 0.5
+        rho = cp["rho_hi"] * (0.8 + rnd() * 0.4)
+        sx = cp["sx_hi"] * (0.85 + rnd() * 0.3)
+        chunk(lime, (lean + math.cos(a) * rho, math.sin(a) * rho * 0.92,
+                     cp["hi_z"] + (rnd() - 0.5) * 0.4),
+              (sx, sx * 0.9, cp["hi_h"] * (0.85 + rnd() * 0.3)), sd * 37 + i, OK_LIMESTONE,
+              seg=6, nr=3, jag=0.2)
+    cz, ch, csx = cp["center"]
+    chunk(lime, (lean, 0.0, cz), (csx, csx * 0.9, ch), sd * 41, OK_LIMESTONE, seg=6, nr=3, jag=0.2)
+    # fusta de bolovani
+    sk = spec["skirt"]
+    for i in range(sk["n"]):
+        a = 2.0 * math.pi * (i + rnd() * 0.5) / sk["n"]
+        rho = sk["rad"] * (0.85 + rnd() * 0.3)
+        sx = sk["sx"] * (0.8 + rnd() * 0.45)
+        chunk(lime, (math.cos(a) * rho, math.sin(a) * rho * 0.92, sk["h"] * 0.28),
+              (sx, sx * (0.7 + rnd() * 0.3), sk["h"] * (0.75 + rnd() * 0.5)), sd * 43 + i,
+              OK_LIMESTONE, seg=6, nr=3, jag=0.2)
+    for i in range(sk.get("loose", 2)):
+        a = 2.0 * math.pi * (i + 0.3) / 2.0 + sd
+        rho = sk["rad"] * 1.3
+        chunk(lime, (math.cos(a) * rho, math.sin(a) * rho, 0.3), (1.3, 1.1, 0.9), sd * 47 + i,
+              OK_LIMESTONE, seg=6, nr=3)
+    top_z = cz + ch * 0.4
+    lo_top = cp["lo_z"] + cp["lo_h"] * 0.35
+    cap_r = cp["rho_lo"] + cp["sx_lo"] * 0.5
+    grass_clusters(grass, lean, cap_r * 0.85, top_z, lo_top, spec.get("tufts", 11), sd + 5)
+    return top_z + 1.0

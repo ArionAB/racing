@@ -120,3 +120,34 @@ Runde de comparatie: notch a/b/c 3 (impreuna), heart 3, faleza 2, far 3, zid 3.
 - Capcana: un `frustum` cu doar doua inele da AO intunecat pe tot turnul (normalele
   netezite ale capacelor); farul foloseste `revolve` cu inele intermediare.
 - Neverificat: cum arata cu clasele `ok_limestone`/`coral_rock` in Godot.
+
+### Runda 4, ceruta de coordonator (ok-b): aglomerari de blocuri + umbrire plata
+
+Cauza comuna a respingerii: profil rotit + AO coapt pe vertex = gradient moale
+(pahar / perna). Reparat: (1) `emit_ok(..., flat_ao=True)` (kwarg nou, optional):
+muchiile se sparg inainte de coacere, iar AO-ul fiecarei fete = media ei, deci
+fiecare fateta e un plan de o singura valoare; (2) forma din `chunk()` =
+bolovani fatetati rotiti (`okinawa_shapes.py`), nu din inele rotite. Piatra,
+iarba si zidul sunt umbrire plata; farul ramane neted (turn rotund). Max. 2
+comparatii pe piesa in aceasta runda.
+
+| piesa | cote (X x Y x Z) | tri | ce s-a schimbat |
+|---|---|---:|---|
+| notch_rock_a | 8,70 x 7,18 x 8,26 | 1502 | cap din 12 bolovani (7+4+1), picior neregulat 7 laturi, gat ~3,6 m, fusta 7+2 bolovani, 11 ciorchini de iarba pe 2 tonuri (21 / 12) |
+| notch_rock_b | 8,90 x 8,05 x 5,53 | 1524 | cap din 13 bolovani (8+4+1), picior scurt gros care se largeste in cap, fusta 7+2 |
+| notch_rock_c | 7,88 x 6,85 x 6,69 | 1344 | cap din 11 bolovani deplasat 2,0 m pe +X, picior aplecat (t^2), fusta 6+2 |
+| heart_rock | 8,86 x 8,39 x 7,41 | 780 | umbrire plata + 6 bolovani (2 noi) |
+| limestone_cliff_module | 5,72 x 12,04 x 15,03 | 1286 | masa din spate cu sectiune constanta + nisa ~2,5 m scobita 1 m; 6 coloane-bolovan jos si 5 sus care ies 0,6..1,5 m, crapaturi adanci; iarba cu 9 ciorchini |
+| coral_stone_wall | 0,82 x 4,00 x 1,32 | 948 | 5 asize (8/8/8/8/7 pietre, ~0,5 x 0,25 m), pebble 6 laturi x 2 inele, umbrire plata; putin peste ~900 tri |
+| cape_lighthouse | 12,55 x 7,25 x 20,20 | 1034 | nod nou `Lighthouse_Roof` (TILE_TERRACOTTA 23, placa 6,5 x 5,5 x 0,3), restul neschimbat |
+
+Captura inlantuita: `docs/asset_briefs/img/okinawa_fidelity/limestone_cliff_module_chain.png`
+(`preview_okinawa.py --chain limestone_cliff_module 3`). **Tiparul se repeta vizibil**
+(acelasi modul de 3 ori); capetele sunt simetrice, deci la integrare modulele se pot
+oglindi pe Y (scale.y = -1) si alterna; o a doua varianta de faleza ar rezolva de fapt.
+
+Abateri ramase (cinstit): la notch_rock_a/b capul se citeste ca un morman de bolovani
+rotunjiti (fatetele sunt mai mici si mai netede decat pe planșă), iar nisa e mai
+putin accentuata decat pe decupare (a are picior gros, 3,6 m, cum s-a cerut, deci
+surplomba capului e ~1,8 m pe fiecare parte). Ciorchinii de iarba sunt blocuri
+fatetate, nu frunzis. Pietrele zidului sunt mai netede decat blocurile planșei.

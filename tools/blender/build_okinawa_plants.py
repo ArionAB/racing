@@ -233,73 +233,86 @@ def build_cycad():
 # palmier-evantai
 # ---------------------------------------------------------------------------
 
-def build_fan_palm():
-    """Palmier-evantai (Livistona), `fan_palm` -- NU cocotier. Runda 4.
+def _fan_leaf(leaves, bark, top, az_deg, pet_elev, plen, blade_elev, R, slot, pleats=9):
+    """UN evantai pe petiol: petiolul pleaca din `top` spre `az_deg` sub
+    `pet_elev` (usor arcuit), iar discul plisat (Ø 2R) sta cu centrul in capatul
+    petiolului. Planul discului contine directia `blade_elev` (elevatia axei
+    evantaiului fata de orizontala) si tangenta, deci NORMALA lui arata spre
+    exterior (se citeste ca o palma deschisa din fata, nu pe cant)."""
+    a = math.radians(az_deg)
+    h = Vector((math.cos(a), math.sin(a), 0.0))
+    z = Vector((0.0, 0.0, 1.0))
+    e = math.radians(pet_elev)
+    up_ = (h * math.cos(e) + z * math.sin(e)).normalized()
+    end = top + up_ * plen
+    mid = top + up_ * plen * 0.5 + z * (plen * 0.10)
+    bark.taper_sweep([top, mid, end], [0.07, 0.055, 0.04], BARK_D, segments=5)
+    eb = math.radians(blade_elev)
+    u = (h * math.cos(eb) + z * math.sin(eb)).normalized()
+    n = (-h * math.sin(eb) + z * math.cos(eb)).normalized()
+    if n.dot(h) < 0:
+        n = -n
+    pleated_fan(leaves, end, u, n, R, slot, pleats=pleats, span_deg=265.0, depth=0.15,
+                th=0.04, valley=0.76)
 
-    LISTA DE ELEMENTE (din decuparea `fan_palm.png` + cerere coordonator):
-      a) trunchi mai gros (r 0,34 -> 0,22, Ø ~0,5 m), 4,3 m: INELE la 0,30 m pana
-         la 2,9 m; treimea de sus cu SOLZI IN ROMB (bazele petiolilor vechi:
-         4 randuri x 8 bulgari decalati)
-      b) coroana Ø ~4,6 m: 11 frunze in EVANTAI ROTUND PLISAT mare (R 0,95-1,0 m,
-         7 pliuri, margine dintata) pe PETIOLI VIZIBILI de ~1,5 m, radiind: 4
-         ridicate (~60 grade), 4 oblice (~25), 3 cazute (~-25)
-      c) 3 frunze USCATE (DRY_VEGETATION 13), MARI (R 0,85), atarnate SUB coroana
+
+def build_fan_leaf_test():
+    """UN evantai izolat (verificare inainte de coroana), pe petiol drept."""
+    bark, leaves = Builder(), Builder()
+    _fan_leaf(leaves, bark, Vector((0, 0, 0.0)), 0.0, 55.0, 1.5, 15.0, 0.95, LEAF)
+    return [leaves.to_object("Palm_Leaves"), bark.to_object("Palm_Bark")]
+
+
+def build_fan_palm():
+    """Palmier-evantai (Livistona), `fan_palm` -- NU cocotier. RUNDA 5 (ok-g).
+
+    LISTA DE ELEMENTE (decuparea `fan_palm.png` + verdictul de la runda 4:
+    coroana asimetrica si mica, evantaie ilizibile, fusta galbena):
+      a) trunchi Ø ~0,5 m (r 0,34 -> 0,22), 3,5 m, INELE la 0,30 m pana la 1,5 m;
+         partea de sus (z 1,5..3,5): SOLZI IN ROMB cu muchii (laticea de 7
+         randuri x 8 romburi decalate, varf spre exterior), nu bulgari
+      b) coroana Ø ~4,5-5 m: 11 EVANTAIE ROTUNDE PLISATE (Ø 1,8-1,9 m, 9 pliuri,
+         margine dintata) pe PETIOLI VIZIBILI, la PAS EGAL pe azimut (32,7 grade),
+         in TREI INELE: 3 sus (petiol 70 grade, evantai la 70), 5 oblice
+         (petiol 40, evantai la 40), 3 cazute (petiol 0, evantai la -65); ordinea
+         inelelor alterneaza (sus, orizontal, jos, orizontal, ...)
+      c) 3 frunze USCATE mari (DRY 13, R 0,8), atarnate lipite de trunchi sub
+         coroana (plan vertical tangent la trunchi), nu o fusta orizontala
       d) FARA stanci/nisip la baza
     Cote tinta: 6 m. Noduri: Palm_Bark (WOOD 9 / LOG_DARK 28), Palm_Leaves
     (TROPICAL_GREEN 21 + CACTUS_GREEN 12 + DRY 13).
     """
     bark, leaves = Builder(), Builder()
-    TH = 4.0
-    ring_trunk(bark, [(0, 0, 0.0), (0, 0, 0.3), (0.05, 0.0, 1.7), (0.04, 0.02, 2.7)],
-               [0.34, 0.29, 0.26, 0.24], BARK, BARK_D, ring_every=0.30, seg=8,
+    TH = 3.5
+    ring_trunk(bark, [(0, 0, 0.0), (0, 0, 0.3), (0.05, 0.0, 1.0), (0.045, 0.01, 1.5)],
+               [0.34, 0.29, 0.26, 0.25], BARK, BARK_D, ring_every=0.30, seg=8,
                ring_grow=1.12, ring_h=0.13)
-    bark.taper_sweep([(0.04, 0.02, 2.68), (0.03, 0.04, 3.4), (0.0, 0.05, TH)],
-                     [0.24, 0.23, 0.22], BARK, segments=8)
-    for row, z in enumerate((2.85, 3.18, 3.50, 3.82)):
-        r = 0.25 - 0.005 * row
-        off = math.radians(22.5) * (row % 2)
-        for k in range(8):
-            a = off + k * math.pi / 4
-            bark.boulder((0.03 + math.cos(a) * r, 0.03 + math.sin(a) * r, z),
-                         (0.26, 0.26, 0.24), BARK_D if (row + k) % 2 else BARK,
-                         seed=900 + row * 8 + k, segments=6, rings=3,
-                         deviation=0.14)
+    bark.taper_sweep([(0.045, 0.01, 1.48), (0.04, 0.02, 2.3), (0.0, 0.05, TH)],
+                     [0.25, 0.24, 0.22], BARK, segments=8)
+
+    def r_of_z(zz):
+        return 0.25 - 0.03 * (zz - 1.5) / 2.0
+
+    ring_trunk_cx = 0.03
+    rhomb_scales(bark, r_of_z, [1.65, 1.92, 2.19, 2.46, 2.73, 3.0, 3.27], 8, BARK_D, BARK,
+                 depth=0.12, cx=ring_trunk_cx, cy=0.04, w=1.15, h=0.42)
     top = Vector((0.0, 0.05, TH))
-    rnd = _lcg(91)
-
-    def petiole_fan(az_deg, elev_deg, plen, R, slot):
-        a = math.radians(az_deg)
-        dh = Vector((math.cos(a), math.sin(a), 0.0))
-        e = math.radians(elev_deg)
-        u = (dh * math.cos(e) + Vector((0, 0, math.sin(e)))).normalized()
-        end = top + u * plen
-        mid = top + u * plen * 0.5 + Vector((0, 0, plen * 0.12))
-        bark.taper_sweep([top, mid, end], [0.07, 0.055, 0.04], BARK_D, segments=5)
-        e2 = math.radians(min(80.0, elev_deg + 32.0))
-        u = (dh * math.cos(e2) + Vector((0, 0, math.sin(e2)))).normalized()
-        side = Vector((-dh.y, dh.x, 0.0))
-        n = u.cross(side).normalized() * -1.0
-        if n.z < 0:
-            n = -n
-        pleated_fan(leaves, end, u, n, R, slot, pleats=7, span_deg=250.0,
-                    depth=0.06)
-
-    specs = ([(58.0, 1.7)] * 4) + ([(22.0, 1.8)] * 4) + ([(-22.0, 1.7)] * 3)
-    for k, (el, pl) in enumerate(specs):
-        az = 360.0 * k / len(specs) + 10.0 + (rnd() - 0.5) * 18.0
-        petiole_fan(az, el + (rnd() - 0.5) * 20.0, pl, 0.95 + 0.05 * rnd(),
-                    LEAF if k % 2 else LEAF2)
+    pattern = [0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 2]       # 3 sus, 5 orizontal, 3 cazute
+    rings = {0: (70.0, 1.2, 70.0, 1.0), 1: (40.0, 1.6, 40.0, 1.05), 2: (0.0, 1.5, -65.0, 1.0)}
+    step = 360.0 / len(pattern)
+    for k, ringk in enumerate(pattern):
+        pe, pl, be, R = rings[ringk]
+        _fan_leaf(leaves, bark, top, 12.0 + step * k, pe, pl, be, R, LEAF if k % 2 else LEAF2)
     for k in range(3):
-        az = 360.0 * k / 3 + 70.0
+        az = 360.0 * k / 3 + 100.0
         a = math.radians(az)
-        dh = Vector((math.cos(a), math.sin(a), 0.0))
-        start = top + Vector((0, 0, -0.1))
-        end = start + dh * 0.6 + Vector((0, 0, -0.5))
-        bark.taper_sweep([start, start + dh * 0.35 + Vector((0, 0, -0.05)), end],
+        h = Vector((math.cos(a), math.sin(a), 0.0))
+        start = top + h * 0.2 + Vector((0, 0, -0.15))
+        hub = top + h * 0.40 + Vector((0, 0, -0.40))
+        bark.taper_sweep([start, start + h * 0.1 + Vector((0, 0, -0.15)), hub],
                          [0.06, 0.05, 0.04], BARK_D, segments=4)
-        u = Vector((dh.x * 0.2, dh.y * 0.2, -1.0)).normalized()
-        pleated_fan(leaves, end, u, dh, 0.85, DRY, pleats=5, span_deg=170.0,
-                    depth=0.05)
+        pleated_fan(leaves, hub, Vector((0.0, 0.0, -1.0)) + h * 0.15, h, 0.80, DRY, pleats=6,
+                    span_deg=200.0, depth=0.06, th=0.04)
     return [leaves.to_object("Palm_Leaves"), bark.to_object("Palm_Bark")]
 
 
@@ -397,6 +410,8 @@ if _want("cycad"):
     _emit(build_cycad(), "plants/cycad.glb", AO_SMALL, 2.4)
 if _want("fan_palm"):
     _emit(build_fan_palm(), "plants/fan_palm.glb", AO_PINE, 6.2)
+if _want("_fan_leaf_test"):
+    _emit(build_fan_leaf_test(), "plants/_fan_leaf_test.glb", AO_PINE, 3.0)
 if _want("bougainvillea"):
     _emit(build_bougainvillea(), "plants/bougainvillea.glb", AO_SMALL, 1.7)
 

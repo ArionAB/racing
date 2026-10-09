@@ -100,6 +100,7 @@ check "rocks/notch_rock_b.glb" 2500 --origin=assembly
 check "rocks/notch_rock_c.glb" 2500 --origin=assembly
 check "rocks/heart_rock.glb" 2500 --origin=assembly
 check "rocks/limestone_cliff_module.glb" 3000 --origin=assembly
+check "rocks/limestone_cliff_module_b.glb" 3000 --origin=assembly
 check "buildings/cape_lighthouse.glb" 6000 --origin=assembly
 check "structures/coral_stone_wall.glb" 1000 --origin=assembly
 

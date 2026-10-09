@@ -1398,3 +1398,50 @@ def wall_to_roof(b, roof, axis, c, a0, a1, z0, thick, slot=OK_LACQUER, step=0.8,
         prism_xz(b, poly, c - thick * 0.5, c + thick * 0.5, OK_LACQUER if slot is None else slot)
     else:
         prism_yz(b, poly, c - thick * 0.5, c + thick * 0.5, OK_LACQUER if slot is None else slot)
+
+
+# ---------------------------------------------------------------------------
+# ok-e (val 2): emit cu OFFSET EXPLICIT si, optional, nod-radacina cu copii.
+# Vapoarele au originea la LINIA APEI (`--origin=waterline`): `emit_ok` aseaza
+# baza ansamblului la z=0, ceea ce ar urca coca pe apa. Aici `place` e dat de
+# apelant; `root` (nume) creeaza un Empty-parinte cu copiii reali, ca
+# `LiftBridgeHazard._extract_ship` sa gaseasca nodul dupa nume (`ship_node`).
+# ---------------------------------------------------------------------------
+
+def emit_ok_placed(objs, path, ao, place=(0.0, 0.0, 0.0), root=None, bevel=0.0,
+                   smooth_angle=None, budget=None, bevel_angle=30.0, flat_ao=False):
+    objs = [o for o in objs if o is not None and len(o.data.vertices) > 0]
+    pl = Vector(place)
+    total = 0
+    per_node = {}
+    for o in objs:
+        for v in o.data.vertices:
+            v.co += pl
+        if flat_ao:
+            _split_all_edges(o)
+        st = finish(o, bevel=bevel, bevel_angle=bevel_angle, ao=ao,
+                    origin=None, smooth_angle=smooth_angle)
+        if flat_ao:
+            _flatten_ao(o)
+        total += st["tris"]
+        per_node[o.name] = st["tris"]
+    xs, ys, zs = [], [], []
+    for o in objs:
+        for v in o.data.vertices:
+            xs.append(v.co.x); ys.append(v.co.y); zs.append(v.co.z)
+    dims = Vector((max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs)))
+    exp = list(objs)
+    holder = None
+    if root:
+        holder = bpy.data.objects.new(root, None)
+        bpy.context.collection.objects.link(holder)
+        for o in objs:
+            o.parent = holder
+        exp = [holder] + objs
+    _, sz = export_glb(exp, "okinawa/" + path)
+    if holder is not None:
+        for o in objs:
+            o.parent = None
+        bpy.data.objects.remove(holder, do_unlink=True)
+    OK_RESULTS.append((path, total, dims, budget, per_node, sz / 1024.0))
+    return total

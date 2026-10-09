@@ -523,6 +523,94 @@ def wall_chain(res_height=800):
     print("lant:", out)
 
 
+# --- ok-e (val 2): vapoare, animale, fundal ----------------------------------
+# vasele au prova pe +Y: din azimut ~118 (camera spre -X) prova iese in stanga,
+# ca pe decupari; animalele din decupari privesc spre dreapta (bivol, azimut ~62)
+# sau spre stanga (starc, azimut ~118)
+SPECS.update({
+    "island_ferry": {"camera": {"azimuth": 118.0, "elevation": 20.0, "lens": 60.0, "margin": 1.08}},
+    "coastal_freighter": {"camera": {"azimuth": 118.0, "elevation": 20.0, "lens": 60.0, "margin": 1.08}},
+    "fishing_boat": {"camera": {"azimuth": 118.0, "elevation": 22.0, "lens": 60.0, "margin": 1.08}},
+    "water_buffalo": {"camera": {"azimuth": 28.0, "elevation": 12.0, "lens": 60.0, "margin": 1.08}},
+    "egret": {"camera": {"azimuth": 118.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
+    "okinawa_horizon": {"camera": {"azimuth": 30.0, "elevation": 9.0, "lens": 50.0, "margin": 1.06}},
+})
+
+
+def poses(name, gap=1.2, res_height=900):
+    """(ok-e) Cele doua poze `Pose_*` ale unui animal static, una langa alta pe
+    directia dreapta a camerei, comparate cu decuparea (poza 1 = cea din decupare).
+    -> docs/asset_briefs/img/okinawa_fidelity/<nume>.png"""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    meshes = _import(name)
+    byname = {re.sub(r"\.\d{3}$", "", o.name): o for o in meshes}
+    order = [byname[k] for k in sorted(byname) if k.startswith("Pose_")]
+    if len(order) < 2:
+        print("lipsesc pozele Pose_* in", name)
+        return
+    cam = _camera_for(name)
+    a = math.radians(cam["azimuth"])
+    right = Vector((-math.sin(a), math.cos(a), 0.0))
+    lo, hi = _bounds([order[0]])
+    step = max(hi.x - lo.x, hi.y - lo.y) * gap
+    for i, o in enumerate(order):
+        o.location += right * (step * (i - 0.5 * (len(order) - 1)))
+    bpy.context.view_layer.update()
+    crop = os.path.join(CROPS, SPECS.get(name, {}).get("crop", name) + ".png")
+    img = bpy.data.images.load(crop)
+    cw, ch = img.size
+    bpy.data.images.remove(img)
+    tmp = os.path.join(FID_DIR, "_render_" + name + ".png")
+    _render(order, tmp, res_height=res_height,
+            aspect=max(0.5, min(8.0, cw / float(ch))) * 1.7, **cam)
+    out = os.path.join(FID_DIR, name + ".png")
+    _compose(["--compare", name, "--crop", crop, "--render", tmp, "--out", out,
+              "--height", str(res_height)])
+    try:
+        os.remove(tmp)
+    except OSError:
+        pass
+
+
+def horizon_compare(crop_name, glb_name, nodes, res_height=800, gap=1.12):
+    """(ok-e) Nodurile numite (prefix) din GLB-ul de fundal, puse intr-un rand pe
+    directia dreapta a camerei (fiecare are originea in centrul bazei lui), fata
+    de decuparea `crop_name`. -> docs/asset_briefs/img/okinawa_fidelity/<crop>.png"""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    meshes = _import(glb_name)
+    pick = []
+    for pre in nodes:
+        pick += [o for o in meshes if re.sub(r"\.\d{3}$", "", o.name).startswith(pre)]
+    if not pick:
+        print("niciun nod din", nodes)
+        return
+    cam = _camera_for(glb_name)
+    a = math.radians(cam["azimuth"])
+    right = Vector((-math.sin(a), math.cos(a), 0.0))
+    cursor = 0.0
+    for o in pick:
+        lo, hi = _bounds([o])
+        w = max(hi.x - lo.x, hi.y - lo.y)
+        o.location += right * (cursor + w * 0.5)
+        cursor += w * gap
+    bpy.context.view_layer.update()
+    crop = os.path.join(CROPS, crop_name + ".png")
+    img = bpy.data.images.load(crop)
+    cw, ch = img.size
+    bpy.data.images.remove(img)
+    tmp = os.path.join(FID_DIR, "_render_" + crop_name + ".png")
+    _render(pick, tmp, res_height=res_height, aspect=max(0.5, min(8.0, cw / float(ch))), **cam)
+    out = os.path.join(FID_DIR, crop_name + ".png")
+    _compose(["--compare", crop_name, "--crop", crop, "--render", tmp, "--out", out,
+              "--height", str(res_height)])
+    try:
+        os.remove(tmp)
+    except OSError:
+        pass
+
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
 if "--wall-chain" in args:
@@ -542,5 +630,10 @@ elif "--sheet" in args:
                                     "okinawa_fidelity_val%s.png" % val)])
 elif "--tunnel" in args:
     tunnel()
+elif "--poses" in args:
+    poses(args[args.index("--poses") + 1])
+elif "--horizon-compare" in args:
+    i = args.index("--horizon-compare")
+    horizon_compare(args[i + 1], args[i + 2], args[i + 3].split(","))
 else:
     print(__doc__)

@@ -98,6 +98,12 @@ const BAND_OVERRIDES := {
 		"mid": {"spacing": 25.0, "cluster": 0.45},
 		"back": {"spacing": 42.0, "cluster": 0.35},
 	},
+	# Okinawa (Track20): ACELEASI sloturi ca insula (stancile de corali raman
+	# unde erau), vegetatia vine din covorul `_build_oki_carpet`.
+	"okinawa": {
+		"mid": {"spacing": 25.0, "cluster": 0.45},
+		"back": {"spacing": 42.0, "cluster": 0.35},
+	},
 	# Muntele merge in DIRECTIA OPUSA insulei: mai des, nu mai rar.
 	#
 	# O padure de conifere e, prin definitie, o masa continua — la densitatea
@@ -182,6 +188,11 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 	var carpet := props == "monumentvalley" and \
 		not OS.get_cmdline_user_args().has("--mv-legacy-scatter")
 	_mv_dry = carpet
+	# Okinawa: aceeasi idee ca la Monument — slotul benzii pastreaza stancile si
+	# maruntisurile, dar arborii/tufele lui sunt "uscate" (aceleasi extrageri de
+	# rng, nicio instanta), iar vegetatia o da covorul de dupa bucla.
+	var oki := props == "okinawa"
+	_oki_dry = oki
 	for band in BANDS:
 		# Benzile cerute de un anumit set de prop-uri (vezi `far`) nu apar pe
 		# celelalte teme.
@@ -225,6 +236,9 @@ static func _build_bands(root: Node3D, sampler: TrackSideSampler,
 	if carpet:
 		_mv_dry = false
 		_build_mv_carpet(root, sampler, seed_value, blockers)
+	if oki:
+		_oki_dry = false
+		_build_oki_carpet(root, sampler, seed_value, blockers)
 
 
 ## Cati metri liberi trebuie sa ramana intre marginea asfaltului si silueta unei
@@ -396,7 +410,7 @@ static func _place_band_prop(parent: Node3D, spec: TrackDecorSpec,
 		props: String, satellite: bool = false,
 		sampler: TrackSideSampler = null,
 		solids: Array[Vector3] = [], blockers: Array = []) -> void:
-	if props == "island":
+	if props == "island" or props == "okinawa":
 		# Fractia se transmite fiindca UN prop insular depinde de sector
 		# (trestia de zahar). Restul o ignora — vezi CANE_FRAC_MIN.
 		_place_island_prop(parent, spec.position, band, rng, mat_provider,
@@ -754,6 +768,8 @@ static func _place_monumentvalley_prop(parent: Node3D, spec: TrackDecorSpec,
 ## Totul e fantoma (fara coliziune): covorul nu poate schimba nici fizica, nici
 ## ProbeRace.
 static var _mv_dry: bool = false
+## Okinawa: arborii/tufele slotului de banda sunt "uscati" (vezi `_build_bands`).
+static var _oki_dry: bool = false
 ## Cercuri (x, z, raza) unde covorul nu planteaza: culoarele bolovanilor care
 ## cad, cercul arcului, albia G2, piesele mari din DecorManual. Le pune Track
 ## inainte de `build` (vezi `set_veg_exclusions`); goale pe alte piste.
@@ -983,6 +999,8 @@ static func _mv_parts(key: String) -> Array:
 			key.trim_prefix("peb:"))
 		if node != null:
 			Palette.apply_world_material(node)
+	elif key.begins_with("oki:") or key.begins_with("old:"):
+		node = _oki_template(key)
 	else:
 		var full := MV_KIT_DIR + key
 		if ResourceLoader.exists(full):
@@ -1616,7 +1634,8 @@ const CANE_FRAC_MAX: float = 0.88
 static func _place_island_prop(parent: Node3D, pos: Vector3, band: Dictionary,
 		rng: RandomNumberGenerator, mat: Callable, satellite: bool,
 		frac: float = -1.0) -> void:
-	var in_cane := frac >= CANE_FRAC_MIN and frac <= CANE_FRAC_MAX
+	# Sectorul trestiei e al lui Track08; pe Okinawa trestia o pune POI C, de mana.
+	var in_cane := frac >= CANE_FRAC_MIN and frac <= CANE_FRAC_MAX and not _oki_dry
 	match band["name"]:
 		"hug":
 			# Lipit de drum: iarba de plaja, lemn adus de apa, pietre de corali.
@@ -2250,6 +2269,10 @@ static func _add_island_scatter(parent: Node3D, pos: Vector3,
 static func _add_tropical_bush(parent: Node3D, pos: Vector3,
 		rng: RandomNumberGenerator, mat: Callable) -> void:
 	const HIBISCUS := "res://assets/models/plants/hibiscus_bush.glb"
+	if _oki_dry:
+		rng.randf_range(0.0, TAU)
+		rng.randf_range(0.75, 1.15)
+		return
 	if ResourceLoader.exists(HIBISCUS):
 		var model := (load(HIBISCUS) as PackedScene).instantiate() as Node3D
 		parent.add_child(model)
@@ -2340,6 +2363,12 @@ static func _add_island_tree(parent: Node3D, pos: Vector3,
 			spec = entry
 			break
 	var path: String = spec["path"]
+	if _oki_dry:
+		# Aceleasi trei extrageri ca pe calea cu instanta (scara, unghi): stancile
+		# vecine din banda raman unde erau.
+		rng.randf_range(float(spec["scale_min"]), float(spec["scale_max"]))
+		rng.randf_range(0.0, TAU)
+		return
 	if ResourceLoader.exists(path):
 		var model := (load(path) as PackedScene).instantiate() as Node3D
 		var s := rng.randf_range(float(spec["scale_min"]),
@@ -3293,3 +3322,473 @@ static func _add_dry_bush(parent: Node3D, pos: Vector3,
 	bush.material_override = mat.call(
 		Palette.color(Palette.DRY_VEGETATION).lightened(tint))
 	parent.add_child(bush)
+
+
+## --- Covorul de vegetatie Okinawa (Track20) ----------------------------------
+##
+## Tema `okinawa` pornise ca o copie a lui `island`, deci scatterul procedural
+## punea pe ea vegetatia insulei generice (36 cocotieri, 14 palmieri aplecati,
+## 8 banyani, 10 pandanusi, 95 hibiscusi). Brief-ul (okinawa.md §0.1) scoate
+## cocotierul ca arbore dominant. Aici vocabularul e al kitului nou, pe tiparul
+## covorului Monument Valley: slotul benzii isi pastreaza stancile de corali si
+## maruntisurile (`_oki_dry` consuma aceleasi extrageri de rng pentru arbori si
+## tufe, fara instante), iar vegetatia vine din palcuri emise direct in
+## MultiMesh, pe celule de 120 m (culling).
+##
+## Totul e FANTOMA (fara coliziune): covorul nu poate schimba nici fizica, nici
+## ProbeRace. Arborii cu corp (primul rand de langa drum) sunt piese de mana ale
+## POI-urilor, in DecorManual.
+##
+## ZONELE: POI-urile pun decor manual pe fractiile lor si covorul nu are voie sa
+## le umple. `OKI_ZONES` da, pe fiecare parte a drumului, distanta minima fata de
+## MARGINEA asfaltului si densitatea; ce e in DecorManual (cladiri, ziduri,
+## turnuri) respinge si el covorul, prin `Track._set_decor_veg_exclusions`.
+const OKI_KIT_DIR: String = "res://assets/models/okinawa/"
+const OKI_OLD_DIR: String = "res://assets/models/"
+const OKI_FUKUGI: Array[String] = ["oki:plants/fukugi_tree_a.glb",
+	"oki:plants/fukugi_tree_b.glb", "oki:plants/fukugi_tree_c.glb"]
+const OKI_PINE: String = "oki:plants/ryukyu_pine.glb"
+const OKI_CYCAD: String = "oki:plants/cycad.glb"
+const OKI_FAN: String = "oki:plants/fan_palm.glb"
+const OKI_BOUG: String = "oki:plants/bougainvillea.glb"
+const OKI_BANYAN: String = "old:trees/banyan.glb"
+const OKI_PANDANUS: String = "old:trees/pandanus.glb"
+const OKI_HIBISCUS: String = "old:plants/hibiscus_bush.glb"
+const OKI_NOTCH: Array[String] = ["oki:rocks/notch_rock_a.glb",
+	"oki:rocks/notch_rock_b.glb", "oki:rocks/notch_rock_c.glb"]
+
+## Pasul dintre palcuri (m, pe o parte a drumului): (pondere, min, max). Palcurile
+## de fukugi sunt mari, deci pasul e mai lung decat la salvia din Monument.
+const OKI_GAP_MIX: Array = [[0.55, 4.0, 9.0], [0.30, 9.0, 20.0], [0.15, 20.0, 45.0]]
+## Distanta palcului fata de MARGINEA asfaltului: (pondere, min, max).
+const OKI_OFFSET_MIX: Array = [[0.30, 3.0, 8.0], [0.40, 8.0, 16.0], [0.30, 16.0, 30.0]]
+const OKI_FAR_OFFSET: Vector2 = Vector2(30.0, 62.0)
+const OKI_FAR_GAP: Vector2 = Vector2(14.0, 34.0)
+## Cat de aproape de marginea LOCALA a asfaltului poate fi centrul unui tufis.
+const OKI_ROAD_CLEAR_M: float = 2.2
+## Sub cota asta (m peste mare) terenul e fasie de plaja: pandanus, cicade.
+const OKI_COAST_TOP: float = 2.6
+
+## Zonele (fractie pe distanta). `l`/`r` = stanga/dreapta in sensul cursei:
+## `min` = distanta minima fata de marginea asfaltului (palcurile mai apropiate
+## sunt mutate dincolo), `dens` = probabilitatea de a pastra un loc, `low` = doar
+## tufe/pandanus, fara arbori. Motivele (contractul okinawa_poi_gauntlet.md):
+##   A  satul/portul: dreapta e satul (case pana la ~60 m) -> covor doar dincolo;
+##      stanga e plaja de 60 m -> tufe si pandanus, nimic inalt.
+##   B  aleea de fukugi de mana (2 randuri la 10-13 m) + zid + case -> dincolo de 22 m.
+##   C  campurile de trestie pe dreapta la 8-60 m; palatul trebuie sa se vada.
+##   D  zidurile gusuku, palatul la 26 m stanga -> dincolo de 30 m.
+##   E  cornisa (stanga cade in mare de la ~0.55), farul la 54 m stanga.
+##   F  podul 0.6365-0.7018 (canal): nimic intre 0.630 si 0.710.
+##   G  fasia de plaja; tromba 0.755-0.80 (rataceste pe +-20 m) -> mai rar, mai departe.
+##   H  digul: stanga apa si tetrapozi, dreapta golful -> doar tufe joase.
+const OKI_ZONES: Array = [
+	{"f": [0.0, 0.1023],
+		"l": {"min": 6.0, "dens": 0.60, "low": true},
+		"r": {"min": 62.0, "dens": 0.55, "low": false}},
+	{"f": [0.1023, 0.205],
+		"l": {"min": 22.0, "dens": 0.65, "low": false},
+		"r": {"min": 22.0, "dens": 0.65, "low": false}},
+	{"f": [0.205, 0.333],
+		"l": {"min": 10.0, "dens": 0.55, "low": false},
+		"r": {"min": 62.0, "dens": 0.55, "low": false}},
+	{"f": [0.333, 0.474],
+		"l": {"min": 30.0, "dens": 0.50, "low": false},
+		"r": {"min": 30.0, "dens": 0.50, "low": false}},
+	{"f": [0.474, 0.55],
+		"l": {"min": 28.0, "dens": 0.55, "low": false},
+		"r": {"min": 14.0, "dens": 0.55, "low": false}},
+	{"f": [0.55, 0.63],
+		"l": {"min": 14.0, "dens": 0.45, "low": false},
+		"r": {"min": 14.0, "dens": 0.45, "low": false}},
+	{"f": [0.63, 0.71],
+		"l": {"min": 14.0, "dens": 0.0, "low": true},
+		"r": {"min": 14.0, "dens": 0.0, "low": true}},
+	{"f": [0.71, 0.737],
+		"l": {"min": 10.0, "dens": 0.55, "low": false},
+		"r": {"min": 10.0, "dens": 0.55, "low": false}},
+	{"f": [0.737, 0.755],
+		"l": {"min": 9.0, "dens": 0.55, "low": true},
+		"r": {"min": 9.0, "dens": 0.55, "low": true}},
+	{"f": [0.755, 0.80],
+		"l": {"min": 16.0, "dens": 0.40, "low": true},
+		"r": {"min": 16.0, "dens": 0.40, "low": true}},
+	{"f": [0.80, 0.824],
+		"l": {"min": 9.0, "dens": 0.55, "low": true},
+		"r": {"min": 9.0, "dens": 0.55, "low": true}},
+	{"f": [0.824, 0.974],
+		"l": {"min": 14.0, "dens": 0.35, "low": true},
+		"r": {"min": 14.0, "dens": 0.40, "low": true}},
+	{"f": [0.974, 1.001],
+		"l": {"min": 6.0, "dens": 0.60, "low": true},
+		"r": {"min": 62.0, "dens": 0.55, "low": false}},
+]
+## Cota marii (y absolut), pusa de Track inainte de `build`.
+static var _oki_sea_y: float = 0.05
+
+
+static func set_oki_sea(y: float) -> void:
+	_oki_sea_y = y
+
+
+static func _oki_zone(frac: float, side_sign: float) -> Dictionary:
+	for z: Dictionary in OKI_ZONES:
+		var f: Array = z["f"]
+		if frac >= float(f[0]) and frac < float(f[1]):
+			return z["l"] if side_sign < 0.0 else z["r"]
+	return {}
+
+
+## Sablonul unei piese (nod instantiat, cu clasele de material puse). Cheia:
+## "oki:<cale in assets/models/okinawa/>" sau "old:<cale in assets/models/>".
+static func _oki_template(key: String) -> Node3D:
+	var rel := key.substr(4)
+	var full := (OKI_KIT_DIR if key.begins_with("oki:") else OKI_OLD_DIR) + rel
+	if not ResourceLoader.exists(full):
+		return null
+	var node := (load(full) as PackedScene).instantiate() as Node3D
+	var stem := rel.get_file().get_basename()
+	if key.begins_with("oki:"):
+		# Nodurile marcate ATLAS_PREFIX raman pe materialul lumii (= atlasul): pentru
+		# `apply_class_materials` asta inseamna "fara intrare in mapare".
+		var cls: Dictionary = {}
+		var all: Dictionary = WorldProp.CLASSES_OKINAWA.get(stem, {})
+		for node_name: String in all:
+			if String(all[node_name]) != Palette.ATLAS_PREFIX:
+				cls[node_name] = all[node_name]
+		Palette.apply_class_materials(node, cls)
+	elif stem == "banyan" or stem == "pandanus":
+		Palette.apply_class_materials(node, ISLAND_CLASSES)
+	else:
+		Palette.apply_world_material(node)
+	return node
+
+
+## Un loc bun pentru o planta? (departe de asfalt, pe uscat, nu in canal, nu pe
+## o piesa de mana, nu lipit de alta planta din acelasi palc).
+static func _oki_try(sampler: TrackSideSampler, p: Vector3, hw: float,
+		margin: float, sep: float, placed: Array[Vector3],
+		blockers: Array) -> bool:
+	if _mv_near_road(p, hw + margin):
+		return false
+	if sampler.channel_mix(p.x, p.z) > 0.3:
+		return false
+	if p.y - _oki_sea_y < 0.4:
+		return false
+	if _inside_blocker(p, blockers) or _in_veg_exclusion(p, 0.5):
+		return false
+	for q in placed:
+		var dx := q.x - p.x
+		var dz := q.z - p.z
+		if dx * dx + dz * dz < sep * sep:
+			return false
+	return true
+
+
+static func _oki_put(sampler: TrackSideSampler, rng: RandomNumberGenerator,
+		key: String, center: Vector3, dist: float, hw: float, margin: float,
+		sep: float, s_lo: float, s_hi: float, placed: Array[Vector3],
+		blockers: Array) -> bool:
+	var p := center
+	if dist > 0.0:
+		var ang := rng.randf_range(0.0, TAU)
+		p = center + Vector3(cos(ang), 0.0, sin(ang)) * dist
+		p.y = sampler.ground_y(p.x, p.z)
+	if not _oki_try(sampler, p, hw, margin, sep, placed, blockers):
+		return false
+	_mv_emit_plant(p, rng, key, s_lo, s_hi)
+	placed.append(p)
+	return true
+
+
+static func _oki_fukugi(rng: RandomNumberGenerator) -> String:
+	return OKI_FUKUGI[rng.randi_range(0, OKI_FUKUGI.size() - 1)]
+
+
+## Tufele de subcrescut: cicade si hibiscus (cate un petec rosu), la scara
+## dioramei (kitul vechi vine mic: hibiscusul de 0.9 m nu se vede la 30 m).
+static func _oki_under(sampler: TrackSideSampler, rng: RandomNumberGenerator,
+		center: Vector3, dist: float, hw: float, placed: Array[Vector3],
+		blockers: Array) -> void:
+	if rng.randf() < 0.35:
+		_oki_put(sampler, rng, OKI_CYCAD, center, dist, hw, 2.6, 1.8, 1.1, 1.6,
+			placed, blockers)
+	else:
+		_oki_put(sampler, rng, OKI_HIBISCUS, center, dist, hw, 2.2, 1.4, 1.6, 2.3,
+			placed, blockers)
+
+
+## Un palc de fukugi (3-6 arbori in ~4.5 m, unul mai mare) cu subcrescut.
+static func _oki_grove(sampler: TrackSideSampler, rng: RandomNumberGenerator,
+		spec: TrackDecorSpec, hw: float, blockers: Array,
+		placed: Array[Vector3]) -> void:
+	var n := rng.randi_range(3, 6)
+	var c := spec.position
+	var tries := 0
+	var i := 0
+	while i < n and tries < 20:
+		tries += 1
+		var big := i == 0
+		var dist := 0.0 if i == 0 else rng.randf_range(1.8, 4.8)
+		if _oki_put(sampler, rng, _oki_fukugi(rng), c, dist, hw, 5.0, 2.3,
+				1.10 if big else 0.90, 1.35 if big else 1.20, placed, blockers):
+			i += 1
+	for k in rng.randi_range(1, 3):
+		_oki_under(sampler, rng, c, rng.randf_range(2.5, 6.0), hw, placed, blockers)
+
+
+## Un sir scurt de fukugi (3-5, la 3.6-5 m unul de altul), paralel cu drumul —
+## perdea de vant, nu gradina. Indoit usor, cu jitter, ca sa nu fie rigla.
+static func _oki_row(sampler: TrackSideSampler, rng: RandomNumberGenerator,
+		spec: TrackDecorSpec, hw: float, blockers: Array,
+		placed: Array[Vector3]) -> void:
+	var n := rng.randi_range(3, 5)
+	var step := rng.randf_range(3.6, 5.0)
+	var bend := rng.randf_range(-0.12, 0.12)
+	var start := -0.5 * step * float(n - 1)
+	for i in n:
+		var t := start + step * float(i)
+		var p := spec.position + spec.along * t \
+			+ spec.normal_out * (bend * t + rng.randf_range(-0.6, 0.6))
+		p.y = sampler.ground_y(p.x, p.z)
+		if _oki_try(sampler, p, hw, 5.0, 2.4, placed, blockers):
+			_mv_emit_plant(p, rng, _oki_fukugi(rng), 0.95, 1.30)
+			placed.append(p)
+	if rng.randf() < 0.5:
+		_oki_under(sampler, rng, spec.position, rng.randf_range(2.0, 5.0), hw,
+			placed, blockers)
+
+
+## Cicade/hibiscus in petec (3-5), cu cate o bougainvillea rara.
+static func _oki_shrubs(sampler: TrackSideSampler, rng: RandomNumberGenerator,
+		spec: TrackDecorSpec, hw: float, blockers: Array,
+		placed: Array[Vector3]) -> void:
+	var n := rng.randi_range(3, 5)
+	var tries := 0
+	var i := 0
+	while i < n and tries < 18:
+		tries += 1
+		var dist := 0.0 if i == 0 else rng.randf_range(1.5, 3.8)
+		var r := rng.randf()
+		var ok := false
+		if r < 0.28:
+			ok = _oki_put(sampler, rng, OKI_CYCAD, spec.position, dist, hw, 2.6,
+				1.8, 1.1, 1.7, placed, blockers)
+		elif r < 0.90:
+			ok = _oki_put(sampler, rng, OKI_HIBISCUS, spec.position, dist, hw, 2.2,
+				1.4, 1.6, 2.4, placed, blockers)
+		else:
+			ok = _oki_put(sampler, rng, OKI_BOUG, spec.position, dist, hw, 2.6,
+				2.0, 1.3, 1.8, placed, blockers)
+		if ok:
+			i += 1
+
+
+## Pandanus (kit vechi, ~1.6x) in grup de 2-4 cu cate o cicada.
+static func _oki_pandanus(sampler: TrackSideSampler, rng: RandomNumberGenerator,
+		spec: TrackDecorSpec, hw: float, blockers: Array,
+		placed: Array[Vector3]) -> void:
+	var n := rng.randi_range(2, 4)
+	var tries := 0
+	var i := 0
+	while i < n and tries < 14:
+		tries += 1
+		var dist := 0.0 if i == 0 else rng.randf_range(2.2, 4.5)
+		if _oki_put(sampler, rng, OKI_PANDANUS, spec.position, dist, hw, 3.2, 2.6,
+				1.40, 1.85, placed, blockers):
+			i += 1
+	if rng.randf() < 0.6:
+		_oki_put(sampler, rng, OKI_CYCAD, spec.position, rng.randf_range(3.0, 5.5),
+			hw, 2.6, 1.8, 1.1, 1.6, placed, blockers)
+
+
+## Un singur exemplar mare (pin / banyan / palmier-evantai), cu 1-2 tufe la poale.
+static func _oki_hero(sampler: TrackSideSampler, rng: RandomNumberGenerator,
+		key: String, spec: TrackDecorSpec, hw: float, blockers: Array,
+		placed: Array[Vector3]) -> void:
+	var s_lo := 1.0
+	var s_hi := 1.3
+	var margin := 7.0
+	if key == OKI_BANYAN:
+		s_lo = 1.4
+		s_hi = 1.75
+		margin = 9.0
+	elif key == OKI_PINE:
+		s_lo = 0.9
+		s_hi = 1.25
+	elif key == OKI_FAN:
+		margin = 5.0
+	if _oki_put(sampler, rng, key, spec.position, 0.0, hw, margin, 3.0, s_lo,
+			s_hi, placed, blockers):
+		for k in rng.randi_range(1, 2):
+			_oki_under(sampler, rng, spec.position, rng.randf_range(2.5, 5.0), hw,
+				placed, blockers)
+
+
+static func _oki_clump(sampler: TrackSideSampler, rng: RandomNumberGenerator,
+		spec: TrackDecorSpec, off: float, low_only: bool, blockers: Array) -> void:
+	var hw := sampler.half_width_at(spec.index)
+	var coastal := spec.position.y - _oki_sea_y < OKI_COAST_TOP
+	# Tabel de ponderi (nume, pondere), filtrat dupa distanta fata de asfalt:
+	# arbori de la 6 m, pini de la 9, banyan de la 14. Lipit de drum: tufe.
+	var table: Array = []
+	if low_only or off < 6.0:
+		table = [["shrubs", 2.4], ["boug", 0.35]]
+		if off >= 4.0:
+			table.append(["pandanus", 1.6 if coastal else 0.2])
+	elif coastal:
+		table = [["grove", 1.6], ["row", 0.8], ["shrubs", 2.2], ["pandanus", 2.0],
+			["pine", 0.5 if off >= 9.0 else 0.0], ["fan", 0.25], ["boug", 0.35]]
+	else:
+		table = [["grove", 3.0], ["row", 1.3], ["shrubs", 2.0], ["pandanus", 0.25],
+			["pine", 1.1 if off >= 9.0 else 0.0],
+			["banyan", 0.35 if off >= 14.0 else 0.0], ["fan", 0.15], ["boug", 0.45]]
+	var total := 0.0
+	for row: Array in table:
+		total += float(row[1])
+	var roll := rng.randf() * total
+	var kind: String = (table[table.size() - 1] as Array)[0]
+	for row: Array in table:
+		roll -= float(row[1])
+		if roll <= 0.0:
+			kind = row[0]
+			break
+	var placed: Array[Vector3] = []
+	match kind:
+		"grove":
+			_oki_grove(sampler, rng, spec, hw, blockers, placed)
+		"row":
+			_oki_row(sampler, rng, spec, hw, blockers, placed)
+		"pandanus":
+			_oki_pandanus(sampler, rng, spec, hw, blockers, placed)
+		"pine":
+			_oki_hero(sampler, rng, OKI_PINE, spec, hw, blockers, placed)
+		"banyan":
+			_oki_hero(sampler, rng, OKI_BANYAN, spec, hw, blockers, placed)
+		"fan":
+			_oki_hero(sampler, rng, OKI_FAN, spec, hw, blockers, placed)
+		"boug":
+			var n := rng.randi_range(2, 3)
+			for i in n:
+				_oki_put(sampler, rng, OKI_BOUG, spec.position,
+					0.0 if i == 0 else rng.randf_range(2.0, 3.2), hw, 2.6, 2.0,
+					1.3, 1.8, placed, blockers)
+		_:
+			_oki_shrubs(sampler, rng, spec, hw, blockers, placed)
+
+
+## Stanci-ciuperca rare in apa putin adanca de langa mal (nu pe drum, nu in canal,
+## nu intre 0.62 si 0.72 unde e podul). Fantoma, ca restul covorului; cele cu
+## corp sunt piesele de mana ale POI-urilor E/F/G/H.
+const OKI_NOTCH_MAX: int = 6
+
+
+static func _oki_notches(sampler: TrackSideSampler, seed_value: int,
+		total: float, blockers: Array) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + hash("oki_notch")
+	var placed: Array[Vector3] = []
+	var d := rng.randf_range(20.0, 60.0)
+	while d < total and placed.size() < OKI_NOTCH_MAX:
+		d += rng.randf_range(8.0, 22.0)
+		if d >= total:
+			break
+		var frac := d / total
+		if (frac > 0.62 and frac < 0.72) or _in_veg_window(d):
+			continue
+		var side_sign := -1.0 if rng.randf() < 0.65 else 1.0
+		var off := rng.randf_range(14.0, 110.0)
+		var spec := sampler._make_spec(d, side_sign, off)
+		if spec == null:
+			continue
+		var p := spec.position
+		var depth := _oki_sea_y - p.y
+		# apa de 0.4-6 m adancime (platforma se prabuseste repede: la G fundul e la
+		# -2.5 m la 20 m de asfalt, la H la -4.7 m; stanca sta pe nisa, nu pe fund)...
+		if depth < 0.4 or depth > 6.0:
+			continue
+		# ...cu uscat la <= 22 m spre drum ("langa mal", nu in larg)
+		var s1 := p - spec.normal_out * 10.0
+		var s2 := p - spec.normal_out * 22.0
+		if sampler.ground_y(s1.x, s1.z) - _oki_sea_y < 0.3 \
+				and sampler.ground_y(s2.x, s2.z) - _oki_sea_y < 0.3:
+			continue
+		if _mv_near_road(p, sampler.half_width_at(spec.index) + 10.0):
+			continue
+		if _inside_blocker(p, blockers) or _in_veg_exclusion(p, 6.0):
+			continue
+		var too_close := false
+		for q in placed:
+			if Vector2(q.x - p.x, q.z - p.z).length() < 45.0:
+				too_close = true
+				break
+		if too_close:
+			continue
+		var key := OKI_NOTCH[rng.randi_range(0, OKI_NOTCH.size() - 1)]
+		# Nisa de la baza sta la ~0.4 m: se aseaza cu nisa la linia apei.
+		_mv_emit(key, Vector3(p.x, _oki_sea_y - 0.35, p.z),
+			rng.randf_range(0.0, TAU), rng.randf_range(0.65, 1.0))
+		placed.append(p)
+
+
+static func _build_oki_carpet(root: Node3D, sampler: TrackSideSampler,
+		seed_value: int, blockers: Array) -> void:
+	var container := Node3D.new()
+	container.name = "Band_carpet"
+	root.add_child(container)
+	_mv_buf.clear()
+	_mv_road_grid_build(sampler)
+	var total := sampler.total_length()
+	if total <= 0.0:
+		return
+	var noise := FastNoiseLite.new()
+	noise.seed = seed_value + 7919
+	noise.frequency = 1.0 / 110.0
+	var si := 0
+	for side_sign: float in [-1.0, 1.0]:
+		for far: bool in [false, true]:
+			var rng := RandomNumberGenerator.new()
+			rng.seed = seed_value + hash("oki_carpet_%d" % si)
+			si += 1
+			var d := rng.randf_range(0.0, 10.0)
+			while d < total:
+				var gap: float
+				if far:
+					gap = rng.randf_range(OKI_FAR_GAP.x, OKI_FAR_GAP.y)
+				else:
+					gap = _mix_pick(rng, OKI_GAP_MIX)
+					# Zgomotul de joasa frecventa: pete dese / goluri lungi.
+					gap *= remap(noise.get_noise_1d(d + side_sign * 500.0),
+						-1.0, 1.0, 0.6, 1.6)
+				d += gap
+				if d >= total:
+					break
+				# Extragerile se fac INAINTE de orice `continue`, ca un veto sa nu
+				# mute restul sirului de rng.
+				var off := _mix_pick(rng, OKI_OFFSET_MIX)
+				if far:
+					off = rng.randf_range(OKI_FAR_OFFSET.x, OKI_FAR_OFFSET.y)
+				var keep_roll := rng.randf()
+				var shift := rng.randf_range(0.0, 14.0)
+				if _in_veg_window(d):
+					continue
+				var zone := _oki_zone(d / total, side_sign)
+				if zone.is_empty() or keep_roll > float(zone["dens"]):
+					continue
+				var zmin := float(zone["min"])
+				if off < zmin:
+					off = zmin + shift
+				var spec := sampler._make_spec(d, side_sign, off)
+				if spec == null or spec.is_ravine:
+					continue
+				if _mv_near_road(spec.position,
+						sampler.half_width_at(spec.index) + OKI_ROAD_CLEAR_M):
+					continue
+				if spec.position.y - _oki_sea_y < 0.4:
+					continue
+				if _inside_blocker(spec.position, blockers) \
+						or _in_veg_exclusion(spec.position, 0.5):
+					continue
+				_oki_clump(sampler, rng, spec, off, bool(zone["low"]), blockers)
+	_oki_notches(sampler, seed_value, total, blockers)
+	_mv_flush(container)

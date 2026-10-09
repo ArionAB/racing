@@ -5,6 +5,36 @@ Contract: `docs/asset_briefs/okinawa_kit_v2.md`. Cotele sunt MASURATE din GLB
 Build: `tools/blender/build_okinawa_castle.py` (vocabular: `okinawa_shapes.py`).
 Verdict: `bash tools/blender/verify_okinawa_v2.sh` -> `VERDICT KIT: OK`.
 
+## Stare la oprire (kitul intreg, 9 oct 2026, coordonator)
+
+**36 de GLB-uri**, toate `VERDICT: OK` in `verify_okinawa_v2.sh`, plus trei
+contracte de cod verificate de harnas: golul portii (14,35 x 6,20 m), varful
+feribotului (11,00 m peste apa) si fata caselor (+Y, masurata pe goluri).
+
+| verdict | piese |
+|---|---|
+| **acceptate** | ryukyu_gate, ryukyu_palace, gusuku_wall_curve/straight, gusuku_arch_gate (gol 5,45 x 5,5 m, abatere decisa de coordonator), notch_rock_a/b/c, heart_rock, cape_lighthouse, coral_stone_wall, fukugi_tree_a/b/c, ryukyu_pine, cycad, fan_palm, bougainvillea, ryukyu_house_a/b/c, concrete_house_a/b, harbour_quay, bus_stop_shelter, vending_machine, convex_mirror, fishing_net_rack (slab, prop mic), island_ferry, coastal_freighter, fishing_boat, water_buffalo, egret, okinawa_horizon |
+| **provizorii** | limestone_cliff_module, limestone_cliff_module_b: dupa 5 runde citesc bazalt columnar, nu calcar. Cornisa E o face terenul din cod; se decide la POI E daca modulul e nevoie |
+| **nefacute, cu motiv** | storm_wall (conditionat de cer, kit §1.8); cele 11 desene acoperite de kitul vechi sau de cod (kit §1.9) |
+
+**Ce trebuie stiut la integrare:**
+- **Culorile finale vin din clase/tente**, nu din sloturi: `roof_tiles` pe
+  `*_Roof` (olanele ies portocaliu-pal pe slotul 23), `ok_limestone` pe
+  `*_Limestone`, `ok_lacquer` pe `*_Lacquer` daca KERB_RED iese plastic, tenta
+  (0,92; 0,34; 0,75) pe `*_Bloom` pentru magenta, intunecare pe `*_Leaves`
+  (fukugi #2E5A2C), `plaster` pe casa de beton b (iese violet).
+- **Build-ul complet NU reproduce piesele revizuite** pentru casele Ryukyu,
+  refugiu, suportul de plase, notch_rock_b/c si faleza b: RNG-ul de modul e
+  consumat altfel decat in rularile `OK_ONLY` in care au fost revizuite.
+  GLB-urile comise sunt cele revizuite; o piesa se reface DOAR cu
+  `OK_ONLY=<piesa>`, iar dupa orice build complet se verifica `git status`.
+- Feribotul inlocuieste pe Track20 `cruise_boat` x2: `ship_model` =
+  `okinawa/vehicles/island_ferry.glb`, `ship_node` = `Island_Ferry`,
+  `ship_scale` = 1, `ship_draft` = 0, `ship_bow_neg_z` = true.
+- Poarta (14,7 m) e mai inalta decat camera de joc (10 m): la montare,
+  `ProbeCameraSolid` / zona de camera sub poarta.
+- Fukugi in tunelul B: pas 3,0-3,2 m (la 3,5 m ramane un gol de ~0,5 m la sol).
+
 ## structures/ryukyu_gate.glb (PILOT, revizia 4 — ierarhia de acoperisuri, ceruta de coordonator)
 
 | nod | slot | tri |

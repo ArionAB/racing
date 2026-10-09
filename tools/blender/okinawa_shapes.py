@@ -200,20 +200,21 @@ def bracket(b, x, y, z, w, slot=OK_LACQUER, layers=3, step=0.18, grow=0.34):
 
 
 def stone_plinth(b, cx, cy, hx, hy, h, slot=OK_LIMESTONE, flare=0.12, cap_h=0.16,
-                 cap_over=0.08):
+                 cap_over=0.08, z0=0.0):
     """Soclu de piatra: corp cu talpa evazata (se ingusteaza cu `flare` spre
-    varf) si placa de capat usor iesita. Taiat la colturi ca sa nu iasa cutie."""
+    varf) si placa de capat usor iesita. Taiat la colturi ca sa nu iasa cutie.
+    `z0` = cota talpii (implicit 0; adaugat de ok-a pentru socluri pe platforma)."""
     bot = chamfer([(cx - hx, cy - hy), (cx + hx, cy - hy),
                    (cx + hx, cy + hy), (cx - hx, cy + hy)], 0.12)
     top = chamfer([(cx - hx + flare, cy - hy + flare), (cx + hx - flare, cy - hy + flare),
                    (cx + hx - flare, cy + hy - flare), (cx - hx + flare, cy + hy - flare)], 0.12)
-    loft(b, bot, 0.0, top, h - cap_h, slot)
+    loft(b, bot, z0, top, z0 + h - cap_h, slot)
     capp = [(p[0], p[1]) for p in chamfer(
         [(cx - hx + flare - cap_over, cy - hy + flare - cap_over),
          (cx + hx - flare + cap_over, cy - hy + flare - cap_over),
          (cx + hx - flare + cap_over, cy + hy - flare + cap_over),
          (cx - hx + flare - cap_over, cy + hy - flare + cap_over)], 0.1)]
-    loft(b, capp, h - cap_h, capp, h, slot)
+    loft(b, capp, z0 + h - cap_h, capp, z0 + h, slot)
 
 
 def gold_finial(b, x, y, z, s=1.0, slot=OK_GOLD):
@@ -321,3 +322,406 @@ def report_ok():
         print("%-38s tris=%6d  %.2f x %.2f x %.2f m  %.0f kB" %
               (path, tris, dims.x, dims.y, dims.z, kb))
         print("    noduri:", per_node)
+
+
+# ===========================================================================
+# val 1, ok-a: castelul (palat, ziduri gusuku, poarta boltita)
+# ===========================================================================
+#
+#  inset_convex      contur convex antiorar, retras cu `d` (colturi cu miter)
+#  banded_prism      prisma de piatra pe contur: asize cu talus + placa de capat
+#  slab_grid         placa de olane pe grila, cu grosime (ca HipRoof, pozitie libera)
+#  karahafu          frontonul curbat peste intrare (olane + panou + bordura alba)
+#  gold_dragon       ornament de coama in forma de dragon (CAR_YELLOW)
+#  gusuku_wall       zid de calcar curb/drept, SECTIUNE trasa pe traseu: capete plane
+#                    identice, talus, asize cu rosturi, creasta rotunjita
+#  gusuku_n          cota laterala a fetelor la inaltimea z (bolti, bolțari)
+#  arch_blocks       bolțari + sambure pentru poarta boltita
+
+
+def inset_convex(poly, d):
+    """Contur convex ANTIORAR retras cu `d` spre interior (miter la colturi).
+    Pastreaza numarul de puncte, deci merge cu `loft` intre doua retrageri."""
+    n = len(poly)
+    out = []
+    for i in range(n):
+        P = Vector(poly[i])
+        e1 = (P - Vector(poly[i - 1]))
+        e2 = (Vector(poly[(i + 1) % n]) - P)
+        if e1.length < 1e-9 or e2.length < 1e-9:
+            out.append((P.x, P.y))
+            continue
+        e1.normalize()
+        e2.normalize()
+        n1 = Vector((-e1.y, e1.x))
+        n2 = Vector((-e2.y, e2.x))
+        m = n1 + n2
+        k = 1.0 + n1.dot(n2)
+        q = P + m * (d / max(k, 0.2))
+        out.append((q.x, q.y))
+    return out
+
+
+def banded_prism(b, outline, z0, h, courses=3, batter=0.05, groove=0.06,
+                 cap_h=0.2, cap_over=0.10, slot=OK_LIMESTONE):
+    """Soclu/platforma de piatra pe un contur convex antiorar: `courses` asize
+    suprapuse. Fiecare asiza porneste usor retrasa (rost de `groove`) si se
+    lateste spre varf (se citeste ca perna), iar talusul retrage tot corpul cu
+    `batter` m pe metru de inaltime. Deasupra: placa de capat iesita `cap_over`.
+    Capatul de sus e la z0 + h. Return: retragerea corpului la cota de sus."""
+    body = h - cap_h
+    hc = body / courses
+    for k in range(courses):
+        za, zb = z0 + k * hc, z0 + (k + 1) * hc
+        ia = batter * (k * hc) + (groove if k else 0.0)
+        ib = batter * ((k + 1) * hc) - 0.02
+        loft(b, inset_convex(outline, ia), za, inset_convex(outline, ib), zb, slot,
+             cap_bottom=(k == 0))
+    ic = batter * body - 0.02 - cap_over
+    cap = inset_convex(outline, ic)
+    loft(b, cap, z0 + body, cap, z0 + h, slot, cap_bottom=False)
+    return batter * body - 0.02
+
+
+def slab_grid(rb, nu, nv, pos, th, slot):
+    """Placa cu grosime pe grila (nu x nv): `pos(i, j)` -> (x, y, z_sus); `i` creste
+    pe X, `j` pe Y. Fata de sus, cea de jos si cantul pe acelasi slot."""
+    top, bot = {}, {}
+    for i in range(nu + 1):
+        for j in range(nv + 1):
+            x, y, z = pos(i, j)
+            top[(i, j)] = rb.bm.verts.new((x, y, z))
+            bot[(i, j)] = rb.bm.verts.new((x, y, z - th))
+
+    def quad(a, b_, c, d):
+        f = rb.bm.faces.new([a, b_, c, d])
+        f[rb.slot] = slot
+    for i in range(nu):
+        for j in range(nv):
+            quad(top[(i, j)], top[(i + 1, j)], top[(i + 1, j + 1)], top[(i, j + 1)])
+            quad(bot[(i, j + 1)], bot[(i + 1, j + 1)], bot[(i + 1, j)], bot[(i, j)])
+    for i in range(nu):
+        quad(top[(i, 0)], bot[(i, 0)], bot[(i + 1, 0)], top[(i + 1, 0)])
+        quad(top[(i + 1, nv)], bot[(i + 1, nv)], bot[(i, nv)], top[(i, nv)])
+    for j in range(nv):
+        quad(top[(0, j + 1)], bot[(0, j + 1)], bot[(0, j)], top[(0, j)])
+        quad(top[(nu, j)], bot[(nu, j)], bot[(nu, j + 1)], top[(nu, j + 1)])
+
+
+def _ogee(t):
+    t = max(0.0, min(1.0, t))
+    return t * t * (3.0 - 2.0 * t)
+
+
+def karahafu(rb, mb, fb, cx, y_front, y_back, z_e, w, hr, th=0.2, slope=0.18,
+             step=0.28, panel_drop=0.55, slot_face=OK_LACQUER):
+    """Fronton curbat (karahafu) peste intrare. Acoperis in doua ape cu coama pe
+    Y; marginea din fata e o curba in S (ogee): concava spre streasina, convexa
+    spre varf. `z_e` = cota streasinii (colturile), `hr` = inaltimea varfului,
+    `w` = semilatimea. Panoul rosu de sub curba (`fb`), bordura alba (`mb`).
+    Return: (x, y, z) al varfului din fata, pentru ornament."""
+    nu = max(8, 2 * int(round(w / step)))
+    nv = max(2, int(round((y_front - y_back) / 0.5)))
+
+    def zt(x, y):
+        return z_e + hr * _ogee(1.0 - abs(x) / w) + slope * (y_front - y)
+
+    def pos(i, j):
+        x = cx - w + 2.0 * w * i / nu
+        y = y_back + (y_front - y_back) * j / nv
+        return (x, y, zt(x - cx, y))
+    slab_grid(rb, nu, nv, pos, th, OK_TILE)
+    pts = []
+    for i in range(nu + 1):
+        x = -w + 2.0 * w * i / nu
+        pts.append((cx + x, y_front, zt(x, y_front) + 0.06))
+    for a, c in zip(pts, pts[1:]):
+        mb.beam(a, c, (0.2, 0.22), OK_MORTAR)
+    poly = []
+    for i in range(nu + 1):
+        x = -w + 2.0 * w * i / nu
+        poly.append((cx + x, zt(x, y_front) - th - 0.02))
+    poly.append((cx + w - 0.1, z_e - panel_drop))
+    poly.append((cx - w + 0.1, z_e - panel_drop))
+    prism_xz(fb, poly, y_front - 0.45, y_front - 0.12, slot_face)
+    return (cx, y_front - 0.05, zt(0.0, y_front) + 0.04)
+
+
+def gold_dragon(b, x, y, z, s=1.0, d=1.0, slot=OK_GOLD):
+    """Dragon de coama (CAR_YELLOW): soclu, corp in S care urca si se arcuieste
+    spre exterior (`d` = +1 capul spre +X, -1 spre -X), cap cu bot si coarne,
+    coada rasucita spre interior, trei aripioare pe spate. ~1,6*s inaltime."""
+    b.box((x, y, z + 0.14 * s), (0.9 * s, 0.6 * s, 0.28 * s), slot)
+
+    def P(px, pz):
+        return (x + px * d * s, y, z + pz * s)
+    body = [P(-0.05, 0.25), P(-0.05, 0.65), P(0.10, 1.05), P(0.42, 1.38),
+            P(0.82, 1.40), P(1.08, 1.18)]
+    b.taper_sweep(body, [0.42 * s, 0.40 * s, 0.36 * s, 0.30 * s, 0.26 * s, 0.22 * s],
+                  slot, segments=8, cap_start=False, cap_end=True)
+    tail = [P(-0.10, 0.45), P(-0.50, 0.62), P(-0.78, 1.00), P(-0.66, 1.42),
+            P(-0.34, 1.52), P(-0.16, 1.40)]
+    b.taper_sweep(tail, [0.28 * s, 0.24 * s, 0.20 * s, 0.15 * s, 0.09 * s, 0.0],
+                  slot, segments=6, cap_start=False, cap_end=True)
+    b.frustum((x + 1.28 * d * s, y, z + 1.04 * s), 0.20 * s, 0.12 * s, 0.52 * s, slot,
+              segments=8, axis="X")
+    b.frustum((x + 1.52 * d * s, y, z + 0.98 * s), 0.12 * s, 0.07 * s, 0.30 * s, slot,
+              segments=6, axis="X")
+    for sy in (-1, 1):
+        b.frustum((x + 1.02 * d * s, y + sy * 0.15 * s, z + 1.50 * s), 0.07 * s, 0.0,
+                  0.46 * s, slot, segments=5)
+    for k in range(3):
+        px = 0.05 + 0.26 * k
+        pz = 0.95 + 0.42 * k
+        b.frustum((x + px * d * s, y, z + pz * s + 0.25 * s), 0.10 * s, 0.0, 0.5 * s,
+                  slot, segments=5)
+
+
+# ---------------------------------------------------------------------------
+# zidul gusuku: sectiune trasa pe un traseu
+# ---------------------------------------------------------------------------
+
+GUSUKU = dict(h=8.0, t_base=2.5, t_top=1.6, b_out=0.75, b_in=0.15,
+              courses=(2.3, 2.0, 1.75, 1.4), groove=0.09)
+
+
+def gusuku_n(z, sign, spec=GUSUKU):
+    """Cota laterala (fata fara rosturi) a fetei `sign` (+1 = exterioara,
+    convexa, cu talus; -1 = interioara) la inaltimea z."""
+    half = spec["t_base"] * 0.5
+    bb = spec["b_out"] if sign > 0 else spec["b_in"]
+    return sign * (half - bb * z / spec["h"])
+
+
+def _gusuku_rows(spec=GUSUKU):
+    """Randurile unei fete, de jos in sus: (z, retragere_spre_centru, asiza|None).
+    `asiza` != None = randul poarta rosturile verticale ale asizei respective."""
+    g = spec["groove"]
+    zs = [0.0]
+    for c in spec["courses"]:
+        zs.append(zs[-1] + c)
+    rows = []
+    for k in range(len(spec["courses"])):
+        z0, z1 = zs[k], zs[k + 1]
+        rows.append((z0, 0.0 if k == 0 else g, None))
+        rows.append((z0 + 0.16, 0.0, k))
+        rows.append(((z0 + z1) * 0.5, -0.03, k))
+        rows.append((z1 - 0.16, 0.0, k))
+        rows.append((z1, g, None))
+    # randurile de rost comun (sfarsit asiza k = inceput asiza k+1) se dubleaza: le unim
+    out = []
+    for r in rows:
+        if out and abs(out[-1][0] - r[0]) < 1e-6:
+            continue
+        out.append(r)
+    return out, zs[-1]
+
+
+def _lcg_f(seed):
+    s = [seed & 0x7FFFFFFF]
+
+    def r():
+        s[0] = (s[0] * 1103515245 + 12345) & 0x7FFFFFFF
+        return s[0] / float(0x7FFFFFFF)
+    return r
+
+
+def gusuku_wall(b, kind, length=12.0, R=None, chord=16.0, slot=OK_LIMESTONE,
+                seed=7, seam_dip=0.07, seams=True, spec=GUSUKU, ds=1.0,
+                crest_wave=0.12):
+    """Zid de calcar gusuku pe un traseu: 'straight' (pe Y, `length`, axa la x=0)
+    sau 'arc' (raza `R`, coarda `chord` pe Y, burta spre +X, capetele la
+    (0, +-chord/2)). Sectiunea e IDENTICA pe tot traseul si la cele doua capete:
+    capete plane, perpendiculare pe tangenta, deci modulele se inlantuie.
+
+    Sectiunea (de jos in sus): fata exterioara (+X) cu talus, asize cu rost
+    orizontal si bombare, creasta semi-eliptica rotunjita, fata interioara.
+    Rosturile verticale (alternate pe asize) nu ajung langa capete. Creasta
+    ondulata lin pe lungime (zero la capete). Return: dict cu cadrele capetelor."""
+    h = spec["h"]
+    rows, z_body = _gusuku_rows(spec)
+    crest_z0 = z_body + 0.10
+    bc = h - crest_z0 - crest_wave
+
+    if kind == "arc":
+        phi0 = math.asin(chord * 0.5 / R)
+        A = R * phi0
+        cxr = -math.sqrt(R * R - (chord * 0.5) ** 2)
+
+        def frame(a):
+            ph = a / R
+            return ((cxr + R * math.cos(ph), R * math.sin(ph)),
+                    (math.cos(ph), math.sin(ph)))
+    else:
+        phi0 = 0.0
+        A = length * 0.5
+
+        def frame(a):
+            return ((0.0, a), (1.0, 0.0))
+
+    rnd = _lcg_f(seed)
+    seam_pos = {k: [] for k in range(len(spec["courses"]))}
+    if seams:
+        for k in seam_pos:
+            a = -A + 0.9 + rnd() * 2.0
+            while a < A - 1.0:
+                seam_pos[k].append(a)
+                a += 2.6 + rnd() * 1.6
+    samples = set()
+    n_u = max(2, int(math.ceil(2 * A / ds)))
+    for i in range(n_u + 1):
+        samples.add(round(-A + 2 * A * i / n_u, 4))
+    for k, lst in seam_pos.items():
+        for a in lst:
+            for da in (-0.11, 0.0, 0.11):
+                samples.add(round(a + da, 4))
+    merged = []
+    for a in sorted(samples):
+        if merged and a - merged[-1] < 0.03:
+            continue
+        merged.append(a)
+    samples = merged
+    samples[0], samples[-1] = -A, A
+
+    def dip(course, a):
+        t = 0.0
+        for s0 in seam_pos.get(course, ()):
+            q = abs(a - s0) / 0.11
+            if q < 1.0:
+                t = max(t, 1.0 - q)
+        return t * seam_dip
+
+    def section(a):
+        und = crest_wave * math.sin(math.pi * (a + A) / (2 * A)) ** 2
+        loop = []
+        for (z, d, cs) in rows:                       # fata exterioara, in sus
+            n = gusuku_n(z, +1, spec) - d
+            if cs is not None:
+                n -= dip(cs, a)
+            loop.append((n, z))
+        n_o = gusuku_n(crest_z0, +1, spec) + 0.04
+        n_i = gusuku_n(crest_z0, -1, spec) - 0.04
+        loop.append((n_o, crest_z0 + und))            # buza proeminenta
+        n_c = (n_o + n_i) * 0.5
+        a_w = (n_o - n_i) * 0.5
+        for k in range(1, 6):                         # creasta rotunjita
+            th_ = math.pi * k / 6.0
+            loop.append((n_c + a_w * math.cos(th_),
+                         crest_z0 + und + bc * math.sin(th_)))
+        loop.append((n_i, crest_z0 + und))
+        for (z, d, cs) in reversed(rows):             # fata interioara, in jos
+            n = gusuku_n(z, -1, spec) + d
+            if cs is not None:
+                n += dip(cs, a)
+            loop.append((n, z))
+        return loop
+
+    made = []
+    rings = []
+    for a in samples:
+        (px, py), (nx, ny) = frame(a)
+        rings.append([b.bm.verts.new((px + nx * n, py + ny * n, z))
+                      for (n, z) in section(a)])
+    m = len(rings[0])
+    for r in range(len(rings) - 1):
+        for i in range(m):
+            j = (i + 1) % m
+            f = b.bm.faces.new([rings[r][i], rings[r][j], rings[r + 1][j], rings[r + 1][i]])
+            f[b.slot] = slot
+            made.append(f)
+    for ring in (list(reversed(rings[0])), list(rings[-1])):
+        f = b.bm.faces.new(ring)
+        f[b.slot] = slot
+        made.append(f)
+    bmesh.ops.recalc_face_normals(b.bm, faces=made)
+    return dict(A=A, loop_points=m, rings=len(rings),
+                end_tangent_deg=math.degrees(phi0))
+
+
+def arch_blocks(b, cy, zs, r_in, r_out, n, slot=OK_LIMESTONE, key_extra=0.22,
+                gap=0.018, proud=0.14, spec=GUSUKU, jamb_z=(0.0, 0.85, 1.7)):
+    """Bolta de piatra: `n` bolțari in semicerc (centru la y=cy, z=zs), cu cheia
+    de bolta (cea din mijloc) mai inalta, plus samburele (blocuri sub linia de
+    nastere, pe fiecare parte). Adancimea urmeaza talusul zidului la cota
+    fiecarui colt, cu `proud` iesit pe fiecare fata. Cutii inchise."""
+    def xs(z):
+        return (gusuku_n(z, -1, spec) - proud, gusuku_n(z, +1, spec) + proud)
+
+    made = []
+
+    def block(corners):
+        back, front = [], []
+        for (y, z) in corners:
+            xb, xf = xs(z)
+            back.append(b.bm.verts.new((xb, y, z)))
+            front.append(b.bm.verts.new((xf, y, z)))
+        for ring in (back, front):
+            f = b.bm.faces.new(ring)
+            f[b.slot] = slot
+            made.append(f)
+        for i in range(4):
+            j = (i + 1) % 4
+            f = b.bm.faces.new([back[i], back[j], front[j], front[i]])
+            f[b.slot] = slot
+            made.append(f)
+
+    for i in range(n):
+        ta = math.pi * i / n + gap
+        tb = math.pi * (i + 1) / n - gap
+        ro = r_out + (key_extra if i == n // 2 else 0.0)
+        block([(cy + r_in * math.cos(ta), zs + r_in * math.sin(ta)),
+               (cy + r_in * math.cos(tb), zs + r_in * math.sin(tb)),
+               (cy + ro * math.cos(tb), zs + ro * math.sin(tb)),
+               (cy + ro * math.cos(ta), zs + ro * math.sin(ta))])
+    zl = list(jamb_z) + [zs]
+    for sg in (-1, 1):
+        for k in range(len(zl) - 1):
+            za, zb = zl[k] + 0.02, zl[k + 1] - 0.02
+            ya, yb = cy + sg * r_in, cy + sg * r_out
+            block([(ya, za), (ya, zb), (yb, zb), (yb, za)])
+    bmesh.ops.recalc_face_normals(b.bm, faces=made)
+
+
+def prism_yz(b, poly, x0, x1, slot):
+    """Prisma inchisa: conturul `poly` (y, z) extrudat pe X intre x0 si x1
+    (omoloaga lui `prism_xz`); orientarea fetelor se decide din normala laturii."""
+    n = len(poly)
+    area = sum(poly[i][0] * poly[(i + 1) % n][1] - poly[(i + 1) % n][0] * poly[i][1]
+               for i in range(n)) * 0.5
+    sg = 1.0 if area > 0 else -1.0
+    for i in range(n):
+        j = (i + 1) % n
+        dy, dz = poly[j][0] - poly[i][0], poly[j][1] - poly[i][1]
+        if abs(dy) + abs(dz) < 1e-7:
+            continue
+        f = _face(b, [(x0, poly[i][0], poly[i][1]), (x0, poly[j][0], poly[j][1]),
+                      (x1, poly[j][0], poly[j][1]), (x1, poly[i][0], poly[i][1])], slot)
+        want = Vector((0.0, dz * sg, -dy * sg))
+        if f.normal.dot(want) < 0:
+            bmesh.ops.reverse_faces(b.bm, faces=[f])
+    for xx, nx in ((x1, 1.0), (x0, -1.0)):
+        f = _face(b, [(xx, p[0], p[1]) for p in poly], slot)
+        res = bmesh.ops.triangulate(b.bm, faces=[f], quad_method="BEAUTY", ngon_method="EAR_CLIP")
+        for t in res["faces"]:
+            t.normal_update()
+            if t.normal.x * nx < 0:
+                bmesh.ops.reverse_faces(b.bm, faces=[t])
+
+
+def wall_to_roof(b, roof, axis, c, a0, a1, z0, thick, slot=OK_LACQUER, step=0.8,
+                 clearance=0.08):
+    """Perete plin sub un acoperis in patru ape: marginea de sus urmeaza fata de
+    JOS a placii de olane (`roof.z - roof.th`), deci nu ramane gol sub streasina
+    si nu iese perete prin olane. `axis` = 'x': peretele merge pe X la y=c, intre
+    a0 si a1; 'y': merge pe Y la x=c. `z0` = baza, `thick` = grosimea."""
+    n = max(2, int(math.ceil(abs(a1 - a0) / step)))
+    top = []
+    for i in range(n + 1):
+        a = a0 + (a1 - a0) * i / n
+        x, y = (a, c) if axis == "x" else (c, a)
+        top.append((a, roof.z(x, y) - roof.th + clearance))
+    poly = [(a1, z0), (a0, z0)] + top
+    if axis == "x":
+        prism_xz(b, poly, c - thick * 0.5, c + thick * 0.5, OK_LACQUER if slot is None else slot)
+    else:
+        prism_yz(b, poly, c - thick * 0.5, c + thick * 0.5, OK_LACQUER if slot is None else slot)

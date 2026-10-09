@@ -82,5 +82,14 @@ check "structures/ryukyu_gate.glb" 40000 --origin=assembly --allow-car-slots=Gat
 gap_check "structures/ryukyu_gate.glb" 14.0 6.0
 
 echo
+echo "== val 1, ok-a: castelul =="
+# palatul: 6 noduri, aurul e CAR_YELLOW (--allow-car-slots), ansamblu pe sol
+check "buildings/ryukyu_palace.glb" 80000 --origin=assembly --allow-car-slots=Palace_Gold
+# zidurile: origine = mijlocul corzii (keep_xy), baza pe sol; doua radacini la curb
+check "structures/gusuku_wall_curve.glb" 20000 --origin=assembly
+check "structures/gusuku_wall_straight.glb" 12000 --origin=assembly
+check "structures/gusuku_arch_gate.glb" 12000 --origin=assembly
+
+echo
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi
 exit "$fail"

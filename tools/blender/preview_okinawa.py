@@ -59,6 +59,12 @@ CLASS_BY_SUFFIX = {"_Limestone": "#CFC6B0", "_Lacquer": "#B3261E", "_Roof": "#B8
 # din fata). 3/4 din fata = azimut ~60 (camera spre +X), ca pe decupari.
 SPECS = {
     "ryukyu_gate": {"camera": {"azimuth": 68.0, "elevation": 22.0, "lens": 60.0, "margin": 1.08}},
+    # val 1, ok-a: palatul se citeste din fata (scara pe +Y); zidurile gusuku au
+    # fata exterioara pe +X, deci camera vine dinspre +X, putin spre +Y
+    "ryukyu_palace": {"camera": {"azimuth": 76.0, "elevation": 24.0, "lens": 60.0, "margin": 1.08}},
+    "gusuku_wall_curve": {"camera": {"azimuth": 48.0, "elevation": 24.0, "lens": 60.0, "margin": 1.08}},
+    "gusuku_wall_straight": {"camera": {"azimuth": 48.0, "elevation": 22.0, "lens": 60.0, "margin": 1.08}},
+    "gusuku_arch_gate": {"camera": {"azimuth": 50.0, "elevation": 20.0, "lens": 60.0, "margin": 1.08}},
 }
 
 

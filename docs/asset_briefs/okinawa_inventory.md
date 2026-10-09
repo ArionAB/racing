@@ -73,3 +73,64 @@ simple; stalpii exteriori sunt lungi (~6 m sub streasina laterala).
 - Nu e facut: palatul, zidurile gusuku (valul 1); `limestone_wall` nu a fost
   exersat pe o piesa. Clasele (`ok_limestone`, `ok_lacquer`, `roof_tiles`) si
   coliziunea sunt ale coordonatorului.
+
+
+## val 1, ok-a: castelul (palat + ziduri gusuku)
+
+Build: `build_okinawa_castle.py` (`OK_ONLY=<piesa>` reface una). Vocabular nou in
+`okinawa_shapes.py` (la final): `inset_convex`, `banded_prism`, `slab_grid`, `karahafu`,
+`gold_dragon`, `gusuku_wall`, `gusuku_n`, `arch_blocks`, `prism_yz`, `wall_to_roof`.
+Singura schimbare la o functie existenta: `stone_plinth(..., z0=0.0)` (parametru nou la
+sfarsit, compatibil). Comparatii: `img/okinawa_fidelity/{ryukyu_palace,gusuku_wall_curve,
+gusuku_wall_straight,gusuku_arch_gate}.png`.
+
+### buildings/ryukyu_palace.glb — 41.084 tri, 32,01 x 18,31 x 16,75 m (h/l 0,52)
+
+| nod | slot | tri |
+|---|---|---:|
+| `Palace_Lacquer` | KERB_RED 7 | 3908 |
+| `Palace_Roof` | TILE_TERRACOTTA 23 | 28188 |
+| `Palace_Mortar` | FOAM_WHITE 22 | 4992 |
+| `Palace_Limestone` | MARBLE_GREY 29 | 1742 |
+| `Palace_Gold` | CAR_YELLOW 16 (`--allow-car-slots=Palace_Gold`) | 598 |
+| `Palace_Wood` | WOOD 9 + LOG_DARK 28 | 1656 |
+
+Platforma 2,5 m, scara pe +Y (9 trepte), 12 coloane pe fata, doua acoperisuri in patru ape
+(streasini 6,3 / 11,0 m, coama ~14,4 m), karahafu peste intrare, 2 dragoni de coama.
+
+| element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| platformă | zid înalt de piatră (~35% din h) cu scară și cheeks | 2,5 m (15% din h, contract), 3 asize, parapet, scară 6 m cu obraji | abatere: mult mai joasă (cota de contract) |
+| etaj jos | sală roșie cu uși/ferestre, coloane | pereți roșii, ușă dublă, 4 ferestre/parte, 12 coloane | OK |
+| acoperiș jos | larg, streașină ridicată, olane | 31,2 x 12,8 m, ridicare colțuri 0,8 m, coame albe | OK; curbura colțurilor mai teatrală decât pe planșă |
+| fronton karahafu | curbat, ornament auriu | 7,6 m, margine în S, panou roșu, bordură albă, ornament | OK (ornament simplificat) |
+| etaj sus + acoperiș | acoperiș înalt, coamă scurtă | pereți roșii 5 ferestre, coamă R 4,2, rise 3,4 | OK, mai turtit decât desenul |
+| dragoni | 2 aurii pe capetele coamei, voluminoși | 2, ~1,7 m, S în sus, cap spre exterior | OK ca poziție; mai subțiri decât pe planșă |
+| pavilioane laterale mici | 2 | nu sunt | abatere (nelistate în contract) |
+| tufe, copaci | pe decupare | nu intră | OK |
+
+### structures/gusuku_wall_curve.glb — 10.242 tri (A 5490, B 4752), 4,15 x 17,0 x 8,0 m
+
+Două rădăcini: `Wall_A_Limestone` (R 20 m) și `Wall_B_Limestone` (R 40 m, mutat +10 m pe X); numele
+nu sunt `Wall_Limestone` simplu (nume unice în Blender), dar se termină în `_Limestone`:
+clasa se mapează pe sufix. Origine fiecare = mijlocul corzii, baza la 0 (`keep_xy`).
+Capetele: la (0, ±8), plane, perpendiculare pe tangentă; tangenta e rotită ±23,58° (A) / ±11,54° (B)
+față de Y; secțiune identică cu a modulului drept (loop de 41 puncte, același cod).
+Extinderea pe Y (17,0) vine din planul de capăt înclinat.
+
+### structures/gusuku_wall_straight.glb — 3850 tri, 2,51 x 12,0 x 8,0 m (h/l 0,67)
+Nod `Wall_Limestone`; capete la y = ±6, secțiune identică.
+
+### structures/gusuku_arch_gate.glb — 4126 tri (Arch_Limestone 3934, Arch_Wood 192), 2,85 x 14,0 x 8,0 m
+Deschidere tăiată boolean (r 2,05, linia de naștere 2,5 m), 11 bolțari (r 2,0–2,85 + cheie),
+3+3 blocuri de sâmbure, canat din două aripi (una închisă, una deschisă ~40° spre −X). Deschidere
+efectivă 4,0 m lățime x 4,5 m înălțime (proiectată, nemăsurată cu measure_gap).
+
+| element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| secțiune zid | talus, creastă rotunjită | 2,5→1,6 m, talus ~5,4° pe fața +X (nu 8°), creastă semielipsă ondulată 12 cm | abatere minoră de unghi (grosimile de contract câștigă) |
+| asize | zidărie poligonală fină | 4 asize cu rost adânc, rosturi verticale ~3–4 m | formă mai grosolană; porii vin din clasa `ok_limestone` |
+| colțuri | rotunjite | creasta rotunjită; muchiile de capăt sunt drepte (cerința de înlănțuire) | OK |
+| bolta | arc cu bolțari mari | 11 bolțari + cheie, deschidere 4 m (mai îngustă decât pe desen, contract) | abatere de proporție |
+| canat | — | întredeschis | OK |
+| vegetație, dalaj | pe decupare | nu intră | OK |

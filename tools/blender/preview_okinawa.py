@@ -53,12 +53,12 @@ PALETTE_HEX = [
 SLOTS_N = 32
 
 # tintele claselor (tinta in joc), doar pentru preview, pe sufixul nodului
-CLASS_BY_SUFFIX = {"_Limestone": "#CFC6B0", "_Lacquer": "#B3261E"}
+CLASS_BY_SUFFIX = {"_Limestone": "#CFC6B0", "_Lacquer": "#B3261E", "_Roof": "#B8452E"}
 
 # camera: azimutul: camera la (cos a, sin a); fata piesei e +Y (azimut 90 =
 # din fata). 3/4 din fata = azimut ~60 (camera spre +X), ca pe decupari.
 SPECS = {
-    "ryukyu_gate": {"camera": {"azimuth": 72.0, "elevation": 24.0, "lens": 60.0, "margin": 1.08}},
+    "ryukyu_gate": {"camera": {"azimuth": 68.0, "elevation": 22.0, "lens": 60.0, "margin": 1.08}},
 }
 
 

@@ -95,7 +95,7 @@ class HipRoof:
         return self.z0 + self.rise
 
     def build(self, rb, mb, slot_tile=OK_TILE, slot_mortar=OK_MORTAR,
-              seams=True):
+              seams=True, border=True):
         """Adauga olanele in `rb` si mortarul in `mb` (doua Builder)."""
         nu = max(4, 2 * int(round(self.hu / self.tile_step)))
         nv = max(4, 2 * int(round(self.hv / self.tile_step)))
@@ -152,6 +152,16 @@ class HipRoof:
                     pts.append(on_surface(su * (self.hu + (R - self.hu) * f),
                                           sv * self.hv * (1 - f), 0.08))
                 lay(pts, 0.34, 0.26)
+        if border:
+            # bordura alba a streasinii (singurul alb de pe panta, cu coama si muchiile)
+            nb = max(6, int(2 * self.hu / 0.5))
+            mb_ = max(4, int(2 * self.hv / 0.5))
+            for sv in (-1, 1):
+                lay([on_surface(-self.hu + 2 * self.hu * k / nb, sv * self.hv, 0.02)
+                     for k in range(nb + 1)], 0.2, 0.16)
+            for su in (-1, 1):
+                lay([on_surface(su * self.hu, -self.hv + 2 * self.hv * k / mb_, 0.02)
+                     for k in range(mb_ + 1)], 0.2, 0.16)
         if seams:
             # rosturi albe (olane de rand): benzi inguste de la streasina la coama
             step = 2.1

@@ -78,7 +78,7 @@ gap_check() {  # gap_check <cale> <lat_min> <inalt_min>
 }
 
 echo "== pilotul (kit §3, val 0): poarta =="
-check "structures/ryukyu_gate.glb" 20000 --origin=assembly --allow-car-slots=Gate_Gold
+check "structures/ryukyu_gate.glb" 40000 --origin=assembly --allow-car-slots=Gate_Gold
 gap_check "structures/ryukyu_gate.glb" 14.0 6.0
 
 echo

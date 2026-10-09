@@ -73,3 +73,50 @@ simple; stalpii exteriori sunt lungi (~6 m sub streasina laterala).
 - Nu e facut: palatul, zidurile gusuku (valul 1); `limestone_wall` nu a fost
   exersat pe o piesa. Clasele (`ok_limestone`, `ok_lacquer`, `roof_tiles`) si
   coliziunea sunt ale coordonatorului.
+
+## Val 1, ok-b: coasta (`tools/blender/build_okinawa_coast.py`)
+
+Toate sunt `VERDICT: OK` in `verify_okinawa_v2.sh` (sectiunea „val 1, ok-b”),
+`--origin=assembly`, scala/rotatia aplicate pe radacini. Comparatii:
+`docs/asset_briefs/img/okinawa_fidelity/<nume>.png` (+ `<nume>_views.png` pentru
+notch_a, heart_rock, cliff, far); plansa: `okinawa_fidelity_val1-ok-b.png`.
+Sloturi: calcar MARBLE_GREY 29, nise SAND_SHADOW 2 (benzi), iarba TROPICAL_GREEN 21.
+Atentie la integrare: clasa `ok_limestone` pe `*_Limestone` suprascrie culoarea
+slotului, deci banda SAND_SHADOW a nisei se pierde in joc; nisa ramane citibila
+doar prin geometrie (gat ingust, buza) + AO copt. Preview-ul o arata la fel (clasa).
+
+| piesa | cote masurate (X x Y x Z) | tri | noduri | origine / linie apei |
+|---|---|---:|---|---|
+| `rocks/notch_rock_a.glb` | 7,12 x 6,57 x 8,97 m (cap ~7, picior Ø3, nisa z 0,4..1,9) | 624 | Notch_Limestone 454, Notch_Grass 170 | axa piciorului pe XY, baza la Z=0; apa presupusa la z ~0,4 |
+| `rocks/notch_rock_b.glb` | 8,85 x 8,45 x 5,56 m (cap ~8,8, nisa z 0,3..1,3) | 666 | idem (496 / 170) | idem, apa la z ~0,3 |
+| `rocks/notch_rock_c.glb` | 8,35 x 5,74 x 6,88 m (cap deplasat 2,0 m pe +X, nisa z 0,4..1,7) | 624 | idem (454 / 170) | idem, apa la z ~0,4; aplecata spre +X |
+| `rocks/heart_rock.glb` | 8,86 x 6,77 x 7,41 m (inima ~6,9 lat in X, 7,0 inalta) | 696 | Heart_Limestone | varful la Z=0, XY pe axa; apa presupusa la z ~0,9 (banda SAND_SHADOW z 0,25..1,25) |
+| `rocks/limestone_cliff_module.glb` | 5,90 x 12,00 x 14,77 m | 496 | Cliff_Limestone 234, Cliff_Grass 262 | baza la Z=0 (apa la z ~0,5, pe linia nisei); spre mare = +X, capete plane la y=+-6,0 identice |
+| `buildings/cape_lighthouse.glb` | 12,53 x 7,22 x 20,20 m (turn Ø3,6->2,6; casa 6x5x3,5 la +X/+Y) | 1082 | Plaster 332, Limestone 160, Metal 546, Lamp 44 | axa turnului pe XY=0, baza la Z=0 (stanca/apa nu intra) |
+| `structures/coral_stone_wall.glb` | 0,90 x 4,00 x 1,31 m | 696 | Coral_Wall_Coral | centrat pe XY, baza la Z=0, capete la y=+-2,0 |
+
+### Fidelitate (ok-b)
+
+| piesa | element | pe planșă | în GLB | verdict |
+|---|---|---|---|---|
+| notch a/b/c | siluete | aproape identice (corectura: distincte) | a inalta/zvelta (h/l 1,26), b lata/joasa (0,63), c aplecata cu cap deplasat 2 m (0,82) | OK, distincte |
+| notch | nisa | gat roas sub cap | gat mai ingust decat piciorul, banda SAND_SHADOW + AO | OK ca forma; culoarea nisei se pierde sub clasa |
+| notch | iarba | pernă + 3 tufe pe crestet | invelis `Notch_Grass` + 3 tufe joase | abatere: tufe de forma blocuri rotunjite, nu frunziș |
+| notch | facete | facete mari ca bolovani | triunghiuri low-poly (jag 0,10) | abatere: fatete mai mici si mai uniforme decat planșa |
+| notch | h/l | a ~1,2 / b ~0,55 / c ~1,0 | a 1,26 / b 0,63 / c 0,82 | a OK; b +15%; c -18% (limita) |
+| heart_rock | doi lobi + varf in apa | doi lobi inalti, cleft adanc | 2 lobi rotunjiti (7,0 / 6,6 m), varf r 0,45 la z 0; se citeste ca inima din cele 4 azimuturi (35/125/215/305) | OK; abatere: lobii mai netezi si mai simetrici decat planșa, 4 bolovani mici in loc de 6 |
+| faleza | fateta + nisa + creastet | ~5 fete, trepte de bolovani, nisa la apa | 6 fete late 1,3..2,8 m, 6 bombari, nisa ~2 m; iarba + 4 tufe | OK; abatere: planșa e mai lata (h/l 1,1 din contract = 14/12, nu din desen), tufele nu sunt frunziș; mic artefact de triunghiulare la capatul +Y al |
+| far | turn, galerie, felinar, casa | turn alb conic, galerie, felinar+cupola, casa cu acoperis rosu | toate; acoperis plat de calcar (contractul spune plat; roșul nu are slot) | OK; abatere: cupola si felinarul simplificate, fara stancile/tufele din jur |
+| zid corali | pietre rotunjite | blocuri dreptunghiulare (corectura: rotunjite) | 3 randuri 6/5/8 pietre, rand de sus 8 | OK; abatere: pietrele sunt „perne” moi, rosturile (miez SAND_SHADOW) abia se vad |
+
+Runde de comparatie: notch a/b/c 3 (impreuna), heart 3, faleza 2, far 3, zid 3.
+
+### Stare la oprire (ok-b)
+
+- Livrate: cele 7 piese, `VERDICT KIT: OK`. Adaugat in `okinawa_shapes.py`:
+  `ring_points`, `faceted_shell`, `notch_profile`, `notch_rock`, `foot_boulders`,
+  `lobe_profile`, `_ok_rand` (stanca roasa de val; reutilizabil pentru
+  stancile-ciuperca si faleza). Semnaturile existente neatinse.
+- Capcana: un `frustum` cu doar doua inele da AO intunecat pe tot turnul (normalele
+  netezite ale capacelor); farul foloseste `revolve` cu inele intermediare.
+- Neverificat: cum arata cu clasele `ok_limestone`/`coral_rock` in Godot.

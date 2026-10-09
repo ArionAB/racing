@@ -321,3 +321,191 @@ def report_ok():
         print("%-38s tris=%6d  %.2f x %.2f x %.2f m  %.0f kB" %
               (path, tris, dims.x, dims.y, dims.z, kb))
         print("    noduri:", per_node)
+
+
+# ---------------------------------------------------------------------------
+# calcar roas de val: corp fatetat din inele (ok-b, coasta)
+# ---------------------------------------------------------------------------
+# Vocabular comun pentru stancile-ciuperca, stanca-inima si faleza: un corp din
+# INELE cu profil (z, raza), centru deplasabil (aplecare) si zgomot determinist.
+# Inelele alterneaza decalate cu jumatate de pas unghiular, iar fetele sunt
+# TRIUNGHIURI: iese suprafata fatetata (low-poly), nu cilindru neted.
+
+def _ok_rand(seed):
+    state = [(seed * 1103515245 + 12345) & 0x7FFFFFFF]
+
+    def rand():
+        state[0] = (state[0] * 1103515245 + 12345) & 0x7FFFFFFF
+        return state[0] / 0x7FFFFFFF
+    return rand
+
+
+def ring_points(rings, seg, seed=0, jag=0.06, bite=None):
+    """Punctele inelelor. `rings` = lista de (z, rx, ry, cx, cy). Returneaza
+    (puncte[k][i] ca Vector, centre[k]). Zgomotul: o deviatie per coloana
+    (continua pe verticala, ca fetele sa fie late) x una per inel. `bite` =
+    (z0, z1, adancime, unghi_rad): in intervalul de z, raza scade pana la
+    `adancime` (fractie) pe directia `unghi` (nisa roasa dintr-o parte)."""
+    rnd = _ok_rand(seed)
+    col = [1.0 + (rnd() * 2 - 1) * jag for _ in range(seg)]
+    pts, cents = [], []
+    for k, (z, rx, ry, cx, cy) in enumerate(rings):
+        rd = 1.0 + (rnd() * 2 - 1) * jag * 0.7
+        off = 0.5 if k % 2 else 0.0
+        ring = []
+        for i in range(seg):
+            a = 2.0 * math.pi * (i + off) / seg
+            s = col[i] * rd
+            if bite is not None and bite[0] <= z <= bite[1]:
+                w = 0.5 * (1.0 + math.cos(a - bite[3]))
+                tz = (z - bite[0]) / max(bite[1] - bite[0], 1e-6)
+                s *= 1.0 - bite[2] * w * math.sin(math.pi * tz)
+            ring.append(Vector((cx + math.cos(a) * rx * s,
+                                cy + math.sin(a) * ry * s, z)))
+        pts.append(ring)
+        cents.append(Vector((cx, cy, z)))
+    return pts, cents
+
+
+def faceted_shell(b, pts, slot, slot_of=None, cap_top=True, cap_bottom=True,
+                  top_pt=None):
+    """Triunghiuri intre inelele `pts` (decalate cu jumatate de pas pe randuri
+    alternante) + capace. Vertecsii sunt SUDATI (un vertex per punct). `slot_of
+    (k, z)` -> slot pentru banda k (intre inelele k si k+1); implicit `slot`.
+    Normalele se recalculeaza la `to_object`."""
+    def sl(k, z):
+        return slot_of(k, z) if slot_of else slot
+
+    V = [[b.bm.verts.new(p) for p in ring] for ring in pts]
+
+    def tri(a, c, d, s):
+        f = b.bm.faces.new([a, c, d])
+        f[b.slot] = s
+
+    for k in range(len(pts) - 1):
+        lo, hi = V[k], V[k + 1]
+        n = len(lo)
+        s = sl(k, (pts[k][0].z + pts[k + 1][0].z) * 0.5)
+        for i in range(n):
+            j = (i + 1) % n
+            if k % 2 == 0:   # hi decalat cu +0.5: hi[i] intre lo[i], lo[i+1]
+                tri(lo[i], lo[j], hi[i], s)
+                tri(hi[i], lo[j], hi[j], s)
+            else:            # lo decalat: lo[i] intre hi[i], hi[i+1]
+                tri(lo[i], lo[j], hi[j], s)
+                tri(lo[i], hi[j], hi[i], s)
+    if cap_top:
+        top = V[-1]
+        c = b.bm.verts.new(top_pt if top_pt is not None
+                           else sum(pts[-1], Vector()) / len(pts[-1]))
+        s = sl(len(pts) - 2, pts[-1][0].z)
+        for i in range(len(top)):
+            tri(top[i], top[(i + 1) % len(top)], c, s)
+    if cap_bottom:
+        bot = V[0]
+        c = b.bm.verts.new(sum(pts[0], Vector()) / len(pts[0]))
+        s = sl(0, pts[0][0].z)
+        for i in range(len(bot)):
+            tri(bot[(i + 1) % len(bot)], bot[i], c, s)
+
+
+def notch_profile(h, stem_r, neck_r, cap_r, notch, cap_under, cap_mid, flat=0.55):
+    """Profilul (z, raza) al unei stanci-ciuperca: poala evazata -> NISA roasa
+    de val (`notch` = (z0, z1), gatul `neck_r`) -> picior -> burta capului ->
+    umarul `cap_r` la `cap_mid` -> cupola turtita (`flat` = cat de lata ramane
+    fata superioara)."""
+    n0, n1 = notch
+    nm = 0.5 * (n0 + n1)
+    return [
+        (0.0, stem_r * 1.40),
+        (n0 * 0.55, stem_r * 1.22),
+        (n0, stem_r * 1.0),
+        (nm, neck_r),
+        (n1, neck_r * 1.12),
+        (n1 + (cap_under - n1) * 0.55, stem_r * 0.98),
+        (cap_under, stem_r * 1.22),
+        (cap_under + (cap_mid - cap_under) * 0.30, cap_r * 0.62),
+        (cap_under + (cap_mid - cap_under) * 0.65, cap_r * 0.88),
+        (cap_mid, cap_r),
+        (cap_mid + (h - cap_mid) * 0.42, cap_r * 0.96),
+        (h - (h - cap_mid) * 0.12, cap_r * (0.50 + 0.12 * flat)),
+        (h, cap_r * 0.20 * flat + 0.05),
+    ]
+
+
+def notch_rock(lime, grass, prof, seg=10, seed=1, ratio=0.86, lean=0.0,
+               lean_from=None, lean_to=None, notch=None, bite=None, jag=0.10,
+               tufts=3, tuft_seed=3, shoulder_z=None, rock_slot=OK_LIMESTONE,
+               niche_slot=OK_NICHE, grass_slot=21, grass_lift=0.2):
+    """Stanca-ciuperca fatetata: corp de calcar in `lime` (banda nisei pe
+    `niche_slot`), invelis de iarba pe creastet in `grass` (+ `tufts` tufe
+    joase). `prof` = notch_profile; `lean` = deplasarea capului pe +X intre
+    `lean_from` si `lean_to` (smoothstep). Returneaza (z_varf, inaltimea
+    umarului)."""
+    rings = []
+    for (z, r) in prof:
+        c = 0.0
+        if lean and lean_from is not None:
+            t = max(0.0, min(1.0, (z - lean_from) / max(lean_to - lean_from, 1e-6)))
+            c = lean * t * t * t
+        rings.append((z, r, r * ratio, c, 0.0))
+    pts, cents = ring_points(rings, seg, seed, jag, bite)
+
+    def slot_of(k, z):
+        if notch and notch[0] - 0.05 <= z <= notch[1] + 0.15:
+            return niche_slot
+        return rock_slot
+    faceted_shell(lime, pts, rock_slot, slot_of)
+
+    # invelisul de iarba: inelele de la umar in sus, impinse spre exterior si in sus
+    k0 = 0
+    for k, (z, _) in enumerate(prof):
+        if shoulder_z is not None and z >= shoulder_z - 1e-6:
+            k0 = k
+            break
+    gp = []
+    for k in range(k0, len(pts)):
+        ring = []
+        for p in pts[k]:
+            d = Vector((p.x - cents[k].x, p.y - cents[k].y, 0.0))
+            ring.append(Vector((p.x + d.x * 0.0, p.y + d.y * 0.0,
+                                p.z + grass_lift + (0.16 if k == len(pts) - 1 else 0.0))))
+        gp.append(ring)
+    faceted_shell(grass, gp, grass_slot, cap_bottom=True)
+    top_z = pts[-1][0].z + grass_lift + 0.16
+    rnd = _ok_rand(tuft_seed)
+    cx_top = cents[-1].x
+    cap_r = max(r for _, r in prof)
+    for i in range(tufts):
+        a = 2.0 * math.pi * (i + rnd() * 0.6) / max(tufts, 1) + 0.4
+        rr = cap_r * (0.28 + 0.22 * rnd())
+        sx = 1.5 + rnd() * 0.9
+        sh = 0.85 + rnd() * 0.45
+        grass.boulder((cx_top + math.cos(a) * rr, math.sin(a) * rr * ratio,
+                       top_z - 0.08 + sh * 0.18), (sx, sx * 0.85, sh), grass_slot,
+                      seed=tuft_seed * 7 + i, segments=7, rings=3, deviation=0.14)
+    return top_z, pts[k0][0].z
+
+
+def foot_boulders(lime, specs, slot=OK_LIMESTONE):
+    """Bolovani la picior: `specs` = [(x, y, marime, seed)], marime = (sx, sy, sz).
+    Se infig 30% in sol (baza ingropata nu se vede)."""
+    for (x, y, size, seed) in specs:
+        lime.boulder((x, y, size[2] * 0.2), size, slot, seed=seed, segments=7,
+                     rings=3, deviation=0.16)
+
+
+def lobe_profile(h, R, r0=0.45, shoulder=0.62):
+    """Profil de lob rotunjit (stanca-inima): varf subtire jos, burta larga
+    la `shoulder`, cupola sus. Lista (z, raza)."""
+    out = []
+    n = 11
+    for k in range(n + 1):
+        t = k / n
+        if t <= shoulder:
+            r = r0 + (R - r0) * (t / shoulder) ** 1.15
+        else:
+            u = (t - shoulder) / (1.0 - shoulder)
+            r = R * math.sqrt(max(0.0, 1.0 - u * u)) + 0.05
+        out.append((h * t, r))
+    return out

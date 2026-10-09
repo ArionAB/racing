@@ -82,5 +82,16 @@ check "structures/ryukyu_gate.glb" 40000 --origin=assembly --allow-car-slots=Gat
 gap_check "structures/ryukyu_gate.glb" 14.0 6.0
 
 echo
+echo "== val 1, ok-b: coasta =="
+# --origin=assembly: piesele au mai multe noduri (calcar / iarba / tencuiala / metal);
+# offsetul de origine e calculat o data pe ansamblu, ansamblul atinge solul.
+check "rocks/notch_rock_a.glb" 2000 --origin=assembly
+check "rocks/notch_rock_b.glb" 2000 --origin=assembly
+check "rocks/notch_rock_c.glb" 2000 --origin=assembly
+check "rocks/heart_rock.glb" 2500 --origin=assembly
+check "rocks/limestone_cliff_module.glb" 3500 --origin=assembly
+check "buildings/cape_lighthouse.glb" 6000 --origin=assembly
+check "structures/coral_stone_wall.glb" 1500 --origin=assembly
+
 if [ "$fail" -eq 0 ]; then echo "VERDICT KIT: OK"; else echo "VERDICT KIT: PROBLEME"; fi
 exit "$fail"

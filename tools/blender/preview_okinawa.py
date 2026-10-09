@@ -12,6 +12,8 @@ Moduri (rulate prin run_build.py, argumentele dupa al doilea `--`):
                      *_Limestone pe #CFC6B0, *_Lacquer pe #B3261E (tintele
                      claselor). -> docs/asset_briefs/img/okinawa_fidelity/<nume>.png
   --views <nume>     4 azimuturi ale piesei -> <nume>_views.png
+  --tunnel           (ok-c) 6 fukugi la 3,5 m pe doua siruri, vedere din axa
+                     (1,5 m inaltime) | 3/4 de sus -> fukugi_tunnel.png
   --sheet <val> a,b  aduna comparatiile intr-o plansa
                      -> docs/asset_briefs/img/okinawa_fidelity_val<val>.png
 
@@ -330,6 +332,124 @@ def views(name, res_height=700):
             pass
 
 
+# --- ok-c: plantele (specs de camera + captura de tunel) ---------------------
+SPECS.update({
+    "fukugi_tree_a": {"camera": {"azimuth": 58.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
+    "fukugi_tree_b": {"camera": {"azimuth": 58.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
+    "fukugi_tree_c": {"camera": {"azimuth": 58.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
+    "ryukyu_pine": {"camera": {"azimuth": 80.0, "elevation": 12.0, "lens": 60.0, "margin": 1.08}},
+    "cycad": {"camera": {"azimuth": 60.0, "elevation": 18.0, "lens": 60.0, "margin": 1.08}},
+    "fan_palm": {"camera": {"azimuth": 60.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
+    "bougainvillea": {"camera": {"azimuth": 75.0, "elevation": 20.0, "lens": 60.0, "margin": 1.08}},
+})
+
+
+def _scene_lights(azimuth=58.0):
+    scene = bpy.context.scene
+    for o in list(bpy.data.objects):
+        if o.type == "LIGHT":
+            bpy.data.objects.remove(o, do_unlink=True)
+    sdata = bpy.data.lights.new("KSun", type="SUN")
+    sun = bpy.data.objects.new("KSun", sdata)
+    scene.collection.objects.link(sun)
+    sdata.energy = 2.6
+    sdata.angle = math.radians(4.0)
+    sdata.specular_factor = 0.0
+    sun.rotation_euler = (math.radians(58.0), 0.0, math.radians(azimuth + 25.0 + 90.0))
+    fdata = bpy.data.lights.new("KFill", type="SUN")
+    fill = bpy.data.objects.new("KFill", fdata)
+    scene.collection.objects.link(fill)
+    fdata.energy = 0.9
+    fdata.specular_factor = 0.0
+    fill.rotation_euler = (math.radians(70.0), 0.0, math.radians(azimuth - 70.0 + 90.0 + 180.0))
+    world = scene.world or bpy.data.worlds.new("KWorld")
+    scene.world = world
+    world.use_nodes = True
+    bg = world.node_tree.nodes.get("Background")
+    if bg:
+        bg.inputs[0].default_value = (0.8, 0.8, 0.8, 1.0)
+        bg.inputs[1].default_value = 0.55
+    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.look = "None"
+    scene.render.engine = "BLENDER_EEVEE" if "BLENDER_EEVEE" in [
+        x.identifier for x in bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items
+    ] else "BLENDER_EEVEE_NEXT"
+    scene.render.resolution_percentage = 100
+    scene.render.film_transparent = True
+    scene.render.image_settings.color_mode = "RGBA"
+    scene.render.image_settings.file_format = "PNG"
+
+
+def _render_cam(path, loc, target, lens, res):
+    scene = bpy.context.scene
+    cam = bpy.data.objects.get("TunnelCam")
+    if cam is None:
+        cam = bpy.data.objects.new("TunnelCam", bpy.data.cameras.new("TunnelCam"))
+        scene.collection.objects.link(cam)
+    scene.camera = cam
+    cam.data.lens = lens
+    cam.data.clip_start = 0.1
+    cam.data.clip_end = 500.0
+    cam.location = Vector(loc)
+    look = (Vector(target) - cam.location).normalized()
+    cam.rotation_euler = look.to_track_quat("-Z", "Y").to_euler()
+    scene.render.resolution_x, scene.render.resolution_y = res
+    scene.render.filepath = path
+    bpy.ops.render.render(write_still=True)
+
+
+def tunnel(res_height=760, spacing=3.5, row_x=4.0):
+    """Captura de tunel (POI B): 6 fukugi (amestec a/b/c) la `spacing` m pe doua
+    siruri la +-`row_x` m de axa, pe nisip alb. Doua vederi lipite: din axa, de
+    la 1,5 m inaltime, spre interiorul aleii | 3/4 de sus. Trebuie sa citeasca
+    PERETE continuu, nu sir de bile.
+    -> docs/asset_briefs/img/okinawa_fidelity/fukugi_tunnel.png"""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    protos = {v: _import("fukugi_tree_" + v) for v in "abc"}
+    for ms in protos.values():
+        for o in ms:
+            o.hide_render = True
+    rows = [(-row_x, "abc"), (row_x, "cab")]
+    ys = [-spacing, 0.0, spacing]
+    rnd = [0.3, 2.1, 4.0, 5.2, 1.1, 3.3]
+    k = 0
+    for x, order in rows:
+        for y, v in zip(ys, order):
+            for o in protos[v]:
+                c = o.copy()
+                bpy.context.collection.objects.link(c)
+                c.hide_render = False
+                c.location = (x, y, 0.0)
+                c.rotation_euler = (0.0, 0.0, rnd[k])
+            k += 1
+    # nisipul alb al aleii
+    bpy.ops.mesh.primitive_plane_add(size=1.0, location=(0.0, 0.0, 0.0))
+    ground = bpy.context.active_object
+    ground.scale = (22.0, 40.0, 1.0)
+    gm = bpy.data.materials.new("KSand")
+    gm.diffuse_color = (0.80, 0.72, 0.55, 1.0)
+    gm.use_nodes = True
+    gb = gm.node_tree.nodes.get("Principled BSDF")
+    gb.inputs["Base Color"].default_value = (0.80, 0.72, 0.55, 1.0)
+    gb.inputs["Roughness"].default_value = 1.0
+    ground.data.materials.append(gm)
+    _scene_lights(58.0)
+    res_a = (int(res_height * 1.35), res_height)
+    res_b = (int(res_height * 0.9), res_height)
+    a = os.path.join(FID_DIR, "_tunnel_axis.png")
+    b = os.path.join(FID_DIR, "_tunnel_top.png")
+    L = spacing * 1.0
+    _render_cam(a, (0.0, -L * 2.6, 1.5), (0.0, L * 2.0, 3.2), 22.0, res_a)
+    _render_cam(b, (9.5, -11.5, 8.5), (0.0, 0.0, 3.2), 34.0, res_b)
+    _compose(["--montage", a + "," + b, "--out", os.path.join(FID_DIR, "fukugi_tunnel.png")])
+    for p in (a, b):
+        try:
+            os.remove(p)
+        except OSError:
+            pass
+
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
 if "--compare" in args:
@@ -342,5 +462,7 @@ elif "--sheet" in args:
     _compose(["--sheet", val, "--fid-dir", FID_DIR, "--names", ",".join(names),
               "--out", os.path.join(PROJ, "docs", "asset_briefs", "img",
                                     "okinawa_fidelity_val%s.png" % val)])
+elif "--tunnel" in args:
+    tunnel()
 else:
     print(__doc__)

@@ -321,3 +321,191 @@ def report_ok():
         print("%-38s tris=%6d  %.2f x %.2f x %.2f m  %.0f kB" %
               (path, tris, dims.x, dims.y, dims.z, kb))
         print("    noduri:", per_node)
+
+
+# ---------------------------------------------------------------------------
+# vegetatie Ryukyu (kit v2 §1.3, ok-c): coloana de frunzis, perne, evantai,
+# frunza dintata, trunchi cu inele
+# ---------------------------------------------------------------------------
+
+def foliage_column(b, H, W, slot, n, z0=0.8, tip="round", seed=1, sat=3,
+                   sat_scale=0.34, wobble=0.04, seg=10, rings=5):
+    """Fukugi: STALP dens de frunzis (corectura de coordonator, nu coroana
+    rotunda de pe planse). `n` mase elipsoidale suprapuse pe verticala intre
+    cotele `z0` (unde incepe frunzisul, ~0,8 m: sub el se vede doar ciotul) si
+    `H`; fiecare masa poarta `sat` ciorchini mici pe margine, care umplu
+    conturul pana la raza W/2 -- laturile ies aproape drepte, cu valuri usoare
+    (`wobble`: masele pare/impare alterneaza +-). `tip`: "round" = varf
+    rotunjit, "sharp" = ultimele mase se ingusteaza si cea de sus e inalta.
+    Masele sunt `boulder` (elipsoid inchis), NU `rock` (con: lectia banyanului).
+    Returneaza lista (cz, rz, raza_orizontala) a maselor, pentru piese care
+    adauga mase laterale."""
+    half = W * 0.5
+    S = H - z0
+    rz = 1.38 * S / (n + 1)
+    rnd = _lcg(seed)
+    prof = [1.0] * n
+    rzs = [rz] * n
+    prof[0] = 0.9
+    if tip == "round":
+        prof[-1] = 0.78
+        if n > 2:
+            prof[-2] = 0.97
+    else:  # sharp
+        prof[-1] = 0.40
+        rzs[-1] = rz * 1.45
+        if n > 2:
+            prof[-2] = 0.66
+        if n > 3:
+            prof[-3] = 0.88
+    cs = []
+    for i in range(n):
+        if i == 0:
+            cs.append(z0 + rzs[0])
+        elif i == n - 1:
+            cs.append(H - rzs[i])
+        else:
+            lo, hi = cs[0], H - rzs[-1]
+            cs.append(lo + (hi - lo) * i / (n - 1))
+    out = []
+    for i in range(n):
+        wob = 1.0 + wobble * (1.0 if i % 2 else -1.0)
+        rx = half * 0.90 * prof[i] * wob
+        cz = cs[i]
+        b.boulder((0.0, 0.0, cz), (2 * rx, 2 * rx * 0.95, 2 * rzs[i]), slot,
+                  seed=seed * 31 + i * 7, segments=seg, rings=rings,
+                  deviation=0.13)
+        s = sat_scale * W
+        base = rnd() * 6.28
+        for k in range(sat):
+            a = base + k * 2 * math.pi / sat + (rnd() - 0.5) * 0.8
+            dz = rzs[i] * (rnd() * 1.5 - 0.75)
+            surf = rx * math.sqrt(max(0.0, 1.0 - (dz / rzs[i]) ** 2))
+            r = max(0.0, surf - s * 0.12) * prof[i] ** 0.0
+            sz = s * (0.85 + 0.35 * rnd())
+            b.boulder((math.cos(a) * r, math.sin(a) * r, cz + dz),
+                      (sz, sz * 0.92, sz * 0.78), slot,
+                      seed=seed * 53 + i * 11 + k, segments=7, rings=2,
+                      deviation=0.15)
+        out.append((cz, rzs[i], rx))
+    return out
+
+
+def foliage_pillow(b, center, w, d, h, slot, seed=0, bumps=2, seg=9, rings=4,
+                   tilt_deg=0.0, tilt_azim_deg=0.0):
+    """Perna de frunzis turtita (pin Ryukyu, bonsai): elipsoid lat si plat, cu
+    `bumps` umflaturi pe fata de sus ca sa nu iasa lentila. Inclinata cu
+    `tilt_deg` spre azimutul dat. Aceeasi familie ca `boulder`."""
+    rnd = _lcg(seed * 17 + 5)
+    faces = b.boulder((0, 0, 0), (w, d, h), slot, seed=seed, segments=seg,
+                      rings=rings, deviation=0.15)
+    verts = {v for f in faces for v in f.verts}
+    for k in range(bumps):
+        a = rnd() * 6.28
+        r = rnd() * 0.28 * w
+        bf = b.boulder((math.cos(a) * r, math.sin(a) * r * d / w, h * 0.22),
+                       (w * 0.42, d * 0.42, h * 0.8), slot, seed=seed + 3 + k,
+                       segments=7, rings=3, deviation=0.14)
+        verts |= {v for f in bf for v in f.verts}
+    a = math.radians(tilt_azim_deg)
+    axis = Vector((-math.sin(a), math.cos(a), 0.0))
+    rot = Matrix.Rotation(math.radians(tilt_deg), 3, axis)
+    for v in verts:
+        v.co = rot @ v.co + Vector(center)
+
+
+def ring_trunk(b, path, radii, slot, slot_ring, ring_every=0.35, seg=7,
+               ring_grow=1.25, ring_h=0.14):
+    """Trunchi cu INELE in geometrie (palmier-evantai, cicada): `taper_sweep`
+    plus, la fiecare `ring_every` metri pe traseu, un inel (frustum scurt, mai
+    gros cu `ring_grow`) in `slot_ring`. Traseul se interpoleaza liniar pe
+    segmente pentru raza si pozitie."""
+    b.taper_sweep(path, radii, slot, segments=seg)
+    pts = [Vector(p) for p in path]
+    lens = [(pts[i + 1] - pts[i]).length for i in range(len(pts) - 1)]
+    total = sum(lens)
+    s = ring_every * 0.5
+    while s < total - 0.1:
+        acc = 0.0
+        for i, L in enumerate(lens):
+            if acc + L >= s:
+                t = (s - acc) / L
+                p = pts[i].lerp(pts[i + 1], t)
+                r = radii[i] + (radii[i + 1] - radii[i]) * t
+                b.frustum((p.x, p.y, p.z), r * ring_grow, r * ring_grow * 0.97,
+                          ring_h, slot_ring, segments=seg)
+                break
+            acc += L
+        s += ring_every
+
+
+def pleated_fan(b, c, u, n, R, slot, pleats=7, span_deg=250.0, depth=0.07,
+                th=0.035, valley=0.80):
+    """Frunza de palmier-evantai: disc plisat (nu frunza penata). Pornind din
+    `c` (capatul petiolului) se desface in evantai cu centrul pe directia `u`,
+    in planul normal la `n`; `pleats` pliuri (creasta/vale alternante, cu
+    marginea dintata: valea e la `valley`*R). Corp INCHIS cu grosime `th`
+    (backface culling: o frunza dintr-un singur strat dispare de dedesubt).
+    Cost: ~100 tri la 7 pliuri."""
+    c = Vector(c)
+    u = Vector(u).normalized()
+    n = Vector(n)
+    n = (n - u * n.dot(u)).normalized()
+    v = n.cross(u)
+    M = pleats * 2
+    span = math.radians(span_deg)
+
+    def pt(i, rf, off):
+        a = -span * 0.5 + span * i / M
+        ridge = (i % 2 == 0)
+        r = R * rf * (1.0 if ridge else valley)
+        o = depth * R * (1.0 if ridge else -1.0) * min(1.0, rf * 1.6)
+        return c + (u * math.cos(a) + v * math.sin(a)) * r + n * (o + off)
+
+    layers = []
+    for off in (th * 0.5, -th * 0.5):
+        cen = b.bm.verts.new(c + n * off)
+        mid = [b.bm.verts.new(pt(i, 0.5, off)) for i in range(M + 1)]
+        out = [b.bm.verts.new(pt(i, 1.0, off)) for i in range(M + 1)]
+        layers.append((cen, mid, out))
+    (ct, mt, ot), (cb, mb, ob) = layers
+    for i in range(M):
+        b.bm.faces.new((ct, mt[i], mt[i + 1]))
+        b.bm.faces.new((mt[i], ot[i], ot[i + 1], mt[i + 1]))
+        b.bm.faces.new((cb, mb[i + 1], mb[i]))
+        b.bm.faces.new((mb[i], mb[i + 1], ob[i + 1], ob[i]))
+        b.bm.faces.new((ot[i], ob[i], ob[i + 1], ot[i + 1]))
+    for i in (0, M):
+        poly = [ct, mt[i], ot[i], ob[i], mb[i], cb]
+        if i == 0:
+            poly = list(reversed(poly))
+        b.bm.faces.new(poly)
+    b._tag([ct, cb] + mt + ot + mb + ob, slot)
+
+
+def serrated_frond(b, base, azim_deg, length, width, elev_deg, slot,
+                   stations=9, droop=0.45, fold_deg=18.0, thick=0.025,
+                   tooth=0.35):
+    """Frunza rigida penata (cicada): doua jumatati de lama V-pliate (ca
+    `leaf_vfold`), dar cu latimea ALTERNAND mare/mica pe statii -- marginea
+    dintata citeste ca foliole fara sa platim 12 lame per frunza. Pleaca din
+    `base` sub `elev_deg` fata de orizontala spre `azim_deg` si cade sub
+    greutate (`droop` * L * t^2). Cost: 2 * (4*(stations-1) + 2) tri."""
+    a = math.radians(azim_deg)
+    e = math.radians(elev_deg)
+    dh = Vector((math.cos(a), math.sin(a), 0.0))
+    path, widths = [], []
+    for i in range(stations):
+        t = i / float(stations - 1)
+        path.append(Vector(base) + dh * (length * t * math.cos(e)) + Vector(
+            (0, 0, length * t * math.sin(e) - droop * length * t * t)))
+        if i == stations - 1:
+            widths.append(0.0)
+        elif i == 0:
+            widths.append(width * 0.10)
+        else:
+            env = width * (0.30 + 0.70 * math.sin(math.pi * min(1.0, 0.12 + t * 0.88)) ** 0.7)
+            widths.append(env * (1.0 if i % 2 else tooth))
+    for sign in (1.0, -1.0):
+        up = Matrix.Rotation(math.radians(fold_deg) * sign, 4, dh) @ Vector((0.0, 0.0, 1.0))
+        b.blade(path, widths, thick, slot, up=up, side_bias=sign)

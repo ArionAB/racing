@@ -73,3 +73,28 @@ simple; stalpii exteriori sunt lungi (~6 m sub streasina laterala).
 - Nu e facut: palatul, zidurile gusuku (valul 1); `limestone_wall` nu a fost
   exersat pe o piesa. Clasele (`ok_limestone`, `ok_lacquer`, `roof_tiles`) si
   coliziunea sunt ale coordonatorului.
+
+## ok-c: plantele (`build_okinawa_plants.py`, kit §1.3)
+
+Toate cu origine la baza trunchiului (bougainvillea: la baza peretelui, spatele plat pe y = 0), scala aplicata pe radacini, un nod per material. Comparatii: `docs/asset_briefs/img/okinawa_fidelity/<nume>.png`; **captura de tunel**: `.../fukugi_tunnel.png` (6 fukugi a/b/c la 3,5 m pe doua siruri la +-4 m; stanga: din axa, la 1,5 m inaltime | dreapta: 3/4 de sus; `preview_okinawa.py --tunnel`). `*_Leaves` se randeaza in preview pe culoarea slotului 21 (#3F7A3C), mai deschis decat tinta #2E5A2C; tenta de clasa il intuneca la integrare.
+
+| piesa | cote masurate (X x Y x Z, m) | h/l | tri | noduri |
+|---|---|---:|---:|---|
+| fukugi_tree_a | 2,83 x 2,76 x 7,07 | 2,50 | 1852 | Fukugi_Leaves 1776, Fukugi_Bark 76 |
+| fukugi_tree_b | 2,94 x 2,98 x 8,59 | 2,88 | 2148 | idem |
+| fukugi_tree_c | 2,58 x 2,08 x 5,58 | 2,16 | 1754 | idem |
+| ryukyu_pine | 8,99 x 6,43 x 9,26 | 1,03 | 1516 | Pine_Leaves 1092, Pine_Bark 424 |
+| cycad | 2,52 x 2,48 x 2,00 | 0,79 | 3276 | Cycad_Leaves 2352, Cycad_Bark 924 |
+| fan_palm | 4,15 x 4,26 x 5,97 | 1,40 | 2252 | Palm_Leaves 1584, Palm_Bark 668 |
+| bougainvillea | 2,45 x 0,92 x 1,61 | 0,66 | 2656 | Bougainvillea_Leaves 640, Bougainvillea_Bloom 2016 (slot 31, `--allow-slots=31`) |
+
+### Fidelitate / abateri (cinstit)
+
+- **fukugi (corectura de coordonator, nu planșa):** stalp de frunzis, nu coroana rotunda; ciot de ~0,8 m; 6/7/5 mase suprapuse + 7 ciorchini pe masa (aceeasi textura vizuala de mase fatetate cu ciorchini ca pe planșa, fara silueta ei). a varf rotunjit, b varf ascutit (ultimele 3 mase 88/66/40%), c plin cu masa laterala spre +X (bbox 2,58 m). Abateri: (1) verde uniform de slot (planșa are lumini galben-verzui pe ciorchini; aici doar AO), (2) ciorchinii sunt lumpi fatetati simpli, nu frunze; (3) in tunel, la 3,5 m, ramane un gol de ~0,5-0,7 m la sol intre trunchiuri: din axa citeste perete continuu (masele se suprapun in perspectiva), din 3/4 lateral citeste inca sir de coloane dese, nu bile. Pentru perete mai ferm: plantare la 3,0-3,2 m. (4) b are h/l 2,88 (tinta 2,8, in +-15%).
+- **ryukyu_pine:** trunchi rasucit (S), 4 brate + lider, 7 perne turtite cu goluri intre ele, h/l 1,03 (tinta 1,0). Abateri: pernele sunt lise (fara ciorchini ca pe planșa), trunchiul mai neted si mai subtire decat in desen; fara stanci/tufe/nisip (regula „fara vegetatie lipita”).
+- **cycad:** 14 frunze (5+5+4) in 3 etaje, solzi in romburi (3 randuri x 8). Abateri: frunzele sunt lame dintate (zimti alternanti), nu foliole individuale; mai putin dense si mai rigide decat pe planșa; inaltimea 2,0 (tinta 2,2), h/l 0,79 (tinta 0,85); 3276 tri, cel mai scump per piesa.
+- **fan_palm:** trunchi cu inele (WOOD/LOG_DARK), 11 evantaie plisate in 2 etaje + 3 uscate (DRY 13) la baza coroanei. Abateri: trunchiul e mult mai lung si mai subtire decat in desen (contractul cere 6 m, planșa e un palmier scurt); evantaiele au muchii mai dure; frunzele uscate atarna prea sus/mici; coroana ~4,2 m.
+- **bougainvillea:** spate plat, 10 mase de frunzis + 48 ciorchini. Abateri: **floarea e roz pal** (`FLAMINGO_PINK` 31 = #D2A0BE), nu magenta saturat de pe planșa — slotul e contractul; magentul trebuie adus de integrare (tenta/clasa) sau de o decizie de slot; ciorchinii sunt lumpi, nu inflorescente; 2,45 x 1,61 (tinta 2,4 x 1,6).
+
+### Adaugiri la harnas
+`okinawa_shapes.py` (la final): `foliage_column`, `foliage_pillow`, `ring_trunk`, `pleated_fan`, `serrated_frond`. `preview_okinawa.py`: `SPECS` pentru cele 7 piese, `_scene_lights`, `_render_cam`, `tunnel()` si modul `--tunnel`. `verify_okinawa_v2.sh`: sectiunea `== val 1, ok-c: plantele ==`.

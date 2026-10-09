@@ -2079,8 +2079,13 @@ const _OK_ROOF: String = Palette.TRI_PREFIX + "ok_roof"
 const _OK_LEAVES: String = Palette.ATINT_PREFIX + "ok_leaves"
 const _OK_BLOOM: String = Palette.ATINT_PREFIX + "ok_bloom"
 const _OK_LACQUER: String = Palette.ATINT_PREFIX + "ok_lacquer"
-const _OK_PLASTER: String = Palette.TRI_PREFIX + "plaster"
-const _OK_CORAL: String = Palette.TRI_PREFIX + "coral_rock"
+# Tencuiala si zidul de corali (decizia coordonatorului dupa POI A r1, 10 oct 2026):
+# `plaster` (152,141,126) facea casele de beton bej, iar `coral_rock` are ancora
+# VOLCANIC_BLACK (kitul vechi) si scotea zidurile de corali aproape negre. Tencuiala
+# ramane pe atlas (FOAM_WHITE / FLAMINGO_PINK, alb si pastel ca in bara), iar
+# coralul ia calcarul gri-crem `ok_limestone`. Doua materiale mai putin pe pista.
+const _OK_PLASTER: String = Palette.ATLAS_PREFIX
+const _OK_CORAL: String = _OK_LIME
 const _OK_CONCRETE: String = Palette.TRI_PREFIX + "concrete"
 const _OK_HOUSE := {"House_Roof": _OK_ROOF, "House_Plaster": _OK_PLASTER,
 	"House_Coral": _OK_CORAL}

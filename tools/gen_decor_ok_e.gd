@@ -176,18 +176,26 @@ const PATHS := {
 	"hibiscus": "res://assets/models/plants/hibiscus_bush.glb",
 	"house": "res://assets/models/okinawa/buildings/concrete_house_b.glb",
 	"shelter": "res://assets/models/okinawa/structures/bus_stop_shelter.glb",
+	"cliff_a": "res://assets/models/okinawa/rocks/limestone_cliff_module.glb",
+	"cliff_b": "res://assets/models/okinawa/rocks/limestone_cliff_module_b.glb",
+	"bnotch_a": "res://assets/models/okinawa/rocks/notch_rock_a.glb",
+	"bnotch_b": "res://assets/models/okinawa/rocks/notch_rock_b.glb",
+	"bnotch_c": "res://assets/models/okinawa/rocks/notch_rock_c.glb",
+	"lippine": "res://assets/models/okinawa/plants/ryukyu_pine.glb",
 }
 const RADIUS := {
 	"notch_a": 3.0, "notch_b": 3.5, "notch_c": 3.0, "pine": 3.0, "cycad": 0.9, "bougain": 1.0,
 	"wall": 2.0, "pandanus": 1.5, "hibiscus": 0.8, "house": 4.2, "shelter": 2.0,
+	"cliff_a": 2.0, "cliff_b": 2.0, "bnotch_a": 1.2, "bnotch_b": 1.2, "bnotch_c": 1.2, "lippine": 2.5,
 }
 const NAMES := {
 	"notch_a": "Notch", "notch_b": "Notch", "notch_c": "Notch", "pine": "Pin", "cycad": "Cicas",
 	"bougain": "Bougainvillea", "wall": "ZidCoral", "pandanus": "Pandanus", "hibiscus": "Hibiscus",
 	"house": "CasaPaznic", "shelter": "Observator",
+	"cliff_a": "Faleza", "cliff_b": "Faleza", "bnotch_a": "StancaMal", "bnotch_b": "StancaMal", "bnotch_c": "StancaMal", "lippine": "PinBuza",
 }
 ## Fara coliziune: tot ce e vegetatie joasa (banda de langa drum).
-const NOCOL := ["bougain", "cycad", "hibiscus", "pandanus"]
+const NOCOL := ["bougain", "cycad", "hibiscus", "pandanus", "cliff_a", "cliff_b", "bnotch_a", "bnotch_b", "bnotch_c", "lippine"]
 
 var _seq := {}
 var _lh_pos := Vector3.ZERO
@@ -246,6 +254,9 @@ func _flat(x: float, z: float, r: float, maxd: float) -> bool:
 func _land_xz(kind: String, q: Vector3, sc: float, yaw: float, min_edge: float, sy: float = 1.0, min_h: float = 2.5, flat: float = 99.0) -> bool:
 	var y := _sol(q.x, q.z)
 	if y < _sea + min_h or _edge_dist(q.x, q.z) < min_edge or not _free(q.x, q.z, float(RADIUS[kind]) * sc * 0.8):
+		_skipped += 1
+		return false
+	if flat < 90.0 and absf(y - float(_sampler.ground_y(q.x, q.z))) > 0.7:
 		_skipped += 1
 		return false
 	if flat < 90.0 and not _flat(q.x, q.z, float(RADIUS[kind]) * sc, flat):
@@ -325,6 +336,80 @@ func _band(side: float, f0: float, f1: float, step: float, lat0: float, lat1: fl
 		f += step
 
 
+## Palc dens de vegetatie joasa (5-15 piese) in jurul unui centru; intre palcuri ramane iarba.
+func _clump(frac: float, side: float, lat: float, rad: float, n: int) -> void:
+	var c := _pos_at(frac, side, lat)
+	var placed := 0
+	var tries := 0
+	while placed < n and tries < n * 6:
+		tries += 1
+		var a := _rng.randf() * TAU
+		var d := rad * sqrt(_rng.randf())
+		var q := c + Vector3(cos(a), 0.0, sin(a)) * d
+		var roll := _rng.randf()
+		var kind := "hibiscus"
+		var sc := 1.0
+		var sy := 1.0
+		if roll < 0.35:
+			kind = "pandanus"
+			sc = _rng.randf_range(1.0, 1.6)
+			sy = _rng.randf_range(0.6, 0.9)
+		elif roll < 0.7:
+			kind = "cycad"
+			sc = _rng.randf_range(0.9, 1.5)
+			sy = _rng.randf_range(0.6, 0.95)
+		else:
+			kind = "hibiscus"
+			sc = _rng.randf_range(1.2, 1.9)
+			sy = _rng.randf_range(0.5, 0.85)
+		if _land_xz(kind, q, sc, _rng.randf() * TAU, 2.6, sy, 1.2, 1.0):
+			placed += 1
+
+
+## Muchia de calcar pe taluzul din stanga (sub cota drumului, fara coliziune).
+func _cliff() -> void:
+	var f := 0.518
+	var k := 0
+	var nh := {"bnotch_a": 9.0, "bnotch_b": 5.1, "bnotch_c": 6.7}
+	while f <= 0.612:
+		var i := _idx(f)
+		var p: Vector3 = _track.baked[i]
+		var l := _left(i)
+		var t := _tangent(i)
+		var w: float = _track.width_at_index(i)
+		var q0 := p + l * (w + 6.0)
+		var g0 := _sol(q0.x, q0.z)
+		if p.y - g0 >= 2.0 and g0 > _sea - 30.0:
+			# modul agatat sub buza: varful la cota drumului - 0.3, atarna pe fata taluzului
+			var sc := _rng.randf_range(0.45, 0.6)
+			var q := p + l * (w + 4.0)
+			var yaw := atan2(t.x, t.z) + (PI if _rng.randf() < 0.5 else 0.0) + _rng.randf_range(-0.25, 0.25)
+			_emit("cliff_a" if k % 2 == 0 else "cliff_b", q.x, p.y - 0.3 - 15.0 * sc, q.z, yaw, sc)
+			k += 1
+			for m in 3:
+				var d2 := _rng.randf_range(2.6, 6.5)
+				var q2 := p + l * (w + d2) + t * _rng.randf_range(-2.0, 2.0)
+				var g2 := _sol(q2.x, q2.z)
+				if p.y - g2 < 1.0:
+					continue
+				var bk: String = ["bnotch_a", "bnotch_b", "bnotch_c"][_rng.randi() % 3]
+				var bsc := _rng.randf_range(0.3, 0.5)
+				_emit(bk, q2.x, p.y - 0.3 - float(nh[bk]) * bsc, q2.z, _rng.randf() * TAU, bsc)
+		f += 0.0024
+	# pini turtiti si tufe agatati pe buza
+	for lf2 in [0.529, 0.548, 0.566, 0.585, 0.600]:
+		var j := _idx(lf2)
+		for dd in [4.0, 6.0, 8.0, 11.0]:
+			var qq := _pos_at(lf2, 1.0, dd)
+			if _land_xz("lippine", qq, _rng.randf_range(0.8, 1.1), _rng.randf() * TAU, 3.5, _rng.randf_range(0.65, 0.8), 1.5, 2.0):
+				break
+	for lf3 in [0.526, 0.536, 0.546, 0.556, 0.567, 0.578, 0.589, 0.600, 0.608]:
+		for dd in [3.5, 5.0, 7.0]:
+			var qq := _pos_at(lf3, 1.0, dd)
+			if _land_xz("hibiscus", qq, _rng.randf_range(1.0, 1.5), _rng.randf() * TAU, 3.0, _rng.randf_range(0.5, 0.8), 1.5, 1.2):
+				break
+
+
 ## Petic de flori (accent viu): bougainvillea + hibiscus, in jurul unui centru.
 func _patch(frac: float, side: float, lat: float, rad: float, n: int) -> void:
 	var c := _pos_at(frac, side, lat)
@@ -388,12 +473,16 @@ func _build() -> void:
 	_emit("shelter", ep.x, _sol(ep.x, ep.z) - 0.05, ep.z, atan2(-lf.x, -lf.z) + PI, 1.0)
 	var ep2 := lh - tfi * 14.0 + lf * float(maxi(step - 9, 6))
 	_emit("shelter", ep2.x, _sol(ep2.x, ep2.z) - 0.05, ep2.z, atan2(-lf.x, -lf.z) + PI, 0.9)
+	_cliff()
 	# --- banda de langa drum: dreapta (platoul) si stanga (pe culme, pana la cornisa) ---
-	_band(-1.0, 0.476, 0.612, 0.0014, 2.8, 15.0, 6)
-	_band(1.0, 0.476, 0.612, 0.0016, 2.8, 15.0, 6)
-	_band(-1.0, 0.476, 0.612, 0.0020, 15.0, 36.0, 5)
-	_band(1.0, 0.476, 0.5235, 0.0020, 15.0, 55.0, 5)
-	_band(1.0, 0.5235, 0.612, 0.0024, 15.0, 70.0, 4)
+	_band(1.0, 0.476, 0.5235, 0.0020, 2.8, 15.0, 4)
+	var cf := 0.476
+	while cf < 0.612:
+		_clump(cf, -1.0, _rng.randf_range(3.5, 13.0), _rng.randf_range(2.4, 3.6), _rng.randi_range(6, 14))
+		if _rng.randf() < 0.55:
+			_clump(cf + 0.002, -1.0, _rng.randf_range(15.0, 38.0), _rng.randf_range(3.0, 4.5), _rng.randi_range(8, 15))
+		cf += _rng.randf_range(0.0035, 0.0065)
+	_band(1.0, 0.476, 0.5235, 0.0030, 15.0, 55.0, 2)
 	# petice de flori (accent), nealiniate
 	var pf := 0.480
 	while pf < 0.608:

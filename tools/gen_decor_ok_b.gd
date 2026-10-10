@@ -31,6 +31,7 @@ const RES := {
 	"ryukyu_c": M_OK + "buildings/ryukyu_house_c.glb",
 	"wall": M_OK + "structures/coral_stone_wall.glb",
 	"mirror": M_OK + "props/convex_mirror.glb",
+	"fan_palm": M_OK + "plants/fan_palm.glb",
 }
 
 const U0 := 0.1032
@@ -41,10 +42,12 @@ const PITCH := 3.1
 const ROWS := [[4.0, 0.0, 1, true], [6.9, 0.5, 1, false], [9.8, 0.0, 2, false]]
 ## goluri in randurile de fukugi pentru curti: [u, parte (+1 dreapta/-1 stanga), tip casa, v centru]
 const GAPS := [
-	[0.1200, 1.0, "ryukyu_c", 15.5], [0.1420, -1.0, "ryukyu_a", 17.0],
-	[0.1650, 1.0, "ryukyu_b", 18.0], [0.1900, -1.0, "ryukyu_c", 15.5],
+	[0.1130, 1.0, "ryukyu_c", 12.0], [0.1330, 1.0, "ryukyu_a", 12.5],
+	[0.1560, 1.0, "ryukyu_b", 13.0], [0.1750, 1.0, "ryukyu_c", 12.0],
+	[0.1220, -1.0, "ryukyu_a", 12.5], [0.1450, -1.0, "ryukyu_b", 13.0],
+	[0.1660, -1.0, "ryukyu_c", 12.0], [0.1930, -1.0, "ryukyu_a", 12.5],
 ]
-const GAP_HALF := 9.5   # m, jumatate din golul din randuri
+const GAP_HALF := 8.2   # m, jumatate din golul din randuri
 
 var tr: Track
 var n: int
@@ -183,9 +186,12 @@ func _fukugi_row(ri: int, side: float, fn: int) -> int:
 			var uv := _uv(pp)
 			var ok := absf(absf(uv.y) - (v + jv)) <= 1.6 and absf(uv.x - u) <= 0.005
 			if ok and not _in_gap(pp, side) and not _occupied(pp, 0.0):
-				var variant: String = ["a", "b", "c"][rng.randi() % 3]
+				var variant: String = ["a", "b", "c", "c"][rng.randi() % 4]
 				var h := rng.randf_range(1.0, 1.15)
 				var w := rng.randf_range(1.12, 1.28)
+				if variant == "c":
+					h = rng.randf_range(0.95, 1.08)
+					w = rng.randf_range(1.35, 1.55)
 				_prop(grp, "bFukugi%03d" % (fn + made), "fukugi_" + variant, pp,
 					rng.randf() * TAU, Vector3(w, h, w), 0.15,
 					"" if coll else 'metadata/coliziune = "none"')
@@ -230,7 +236,7 @@ func _wall_seg(wn: int, a: Vector3, b: Vector3) -> int:
 func _generate(path: String) -> void:
 	rng.seed = 20261012
 	for g in GAPS:
-		var gp := _pos(float(g[0]), float(g[1]) * float(g[3]))
+		var gp := _pos(float(g[0]), float(g[1]) * 6.0)
 		gap_pts.append([Vector3(gp.x, 0.0, gp.z), float(g[1])])
 
 	_group("Ziduri")
@@ -266,6 +272,13 @@ func _generate(path: String) -> void:
 			var hpz := _pos(gu + rng.randf_range(-8.0, 8.0) / LEN, gs * rng.randf_range(4.0, 6.0))
 			var s2 := rng.randf_range(1.2, 1.6)
 			_prop("Flori", "bHibiscus_g%d_%d" % [hn, k], "hibiscus", hpz, rng.randf() * TAU, Vector3(s2, s2, s2), 0.05)
+		# 1-2 palmieri-evantai langa casa, spre drum
+		for k in rng.randi_range(1, 2):
+			var pp := _pos(gu + (rng.randf_range(-6.5, 6.5)) / LEN, gs * rng.randf_range(5.0, 6.5))
+			if _edge_dist(pp) < 4.0:
+				continue
+			var ps := rng.randf_range(1.1, 1.4)
+			_prop("Flori", "bPalmier_g%d_%d" % [hn, k], "fan_palm", pp, rng.randf() * TAU, Vector3(ps, ps, ps), 0.1, 'metadata/coliziune = "none"')
 		hn += 1
 
 	# --- fukugi: 3 randuri pe fiecare parte
@@ -317,8 +330,8 @@ func _generate(path: String) -> void:
 			var cnt := rng.randi_range(1, 2)
 			for k in cnt:
 				var bu := uu + float(k) * rng.randf_range(2.2, 3.2) / LEN
-				var bp := _pos(bu, side * rng.randf_range(2.9, 3.4))
-				if _edge_dist(bp) < 2.6:
+				var bp := _pos(bu, side * rng.randf_range(3.1, 3.5))
+				if _edge_dist(bp) < 2.9:
 					continue
 				var bd := _pos(bu, 0.0) - bp
 				bd.y = 0.0
@@ -327,6 +340,40 @@ func _generate(path: String) -> void:
 				_prop("Flori", "bBougainvillea%02d" % bn, "bougainvillea", bp, atan2(-bd.x, -bd.z), Vector3(bs, bs, bs), 0.05, 'metadata/coliziune = "none"')
 				bn += 1
 			uu += rng.randf_range(11.0, 19.0) / LEN
+	# --- banda inflorita intre bordura si zid (v 0.9-2.4): palcuri dese de
+	# 5-10 piese pe ~50 % din lungime, coliziune none
+	var fb := 0
+	for side: float in [1.0, -1.0]:
+		var uu := U0 + rng.randf_range(0.0, 0.003)
+		while uu < U1:
+			var len_m := rng.randf_range(7.0, 11.0)
+			var npc := rng.randi_range(5, 10)
+			for k in npc:
+				var fu := uu + rng.randf_range(0.0, len_m) / LEN
+				var kk := rng.randi() % 5
+				var fv := side * rng.randf_range(1.5, 2.3)
+				if kk == 2:
+					fv = side * rng.randf_range(2.3, 2.6)
+				elif kk >= 3:
+					fv = side * rng.randf_range(2.0, 2.4)
+				var p := _pos(fu, fv)
+				if absf(absf(_uv(p).y) - absf(fv)) > 1.0 or _edge_dist(p) < 1.4:
+					continue
+				var key := "hibiscus"
+				if kk >= 3:
+					key = "bougainvillea"
+				elif kk == 2:
+					key = "cycad"
+				var sc := rng.randf_range(0.9, 1.15)
+				var yaw := rng.randf() * TAU
+				if key == "bougainvillea":
+					var bd := _pos(fu, 0.0) - p
+					bd.y = 0.0
+					bd = bd.normalized()
+					yaw = atan2(-bd.x, -bd.z)
+				_prop("Flori", "bBanda%03d" % fb, key, p, yaw, Vector3(sc, sc, sc), 0.05, 'metadata/coliziune = "none"')
+				fb += 1
+			uu += (len_m + rng.randf_range(6.0, 12.0)) / LEN
 	# --- hibiscus in petice la baza zidului, spre asfalt (v 1.7-2.3), coliziune none
 	var hb := 0
 	for side: float in [1.0, -1.0]:

@@ -147,6 +147,14 @@ enum Kind {
 ## Fiordland cere "evenimentul rar" (~60-90s); acum se poate declara pe nod.
 @export_range(0.0, 120.0, 1.0) var avalanche_period: float = 0.0
 
+## Doar pentru AVALANCHE: limba coboara de pe STANGA soselei, nu de pe dreapta.
+## `_build_avalanche` asaza masa pe +X local (dreapta in sensul de mers), deci
+## functioneaza doar unde versantul urca pe dreapta. Pe ramura intai a serpentinelor
+## Transfagarasan (spre V) versantul care urca spre creasta e pe STANGA, iar pe
+## dreapta terenul coboara spre ramura a doua: fara asta masa pluteste 14 m in aer
+## (ProbeAvalancheTerrain: "startul nu e pe teren"). Implicit fals = bit-identic.
+@export var avalanche_from_left: bool = false
+
 ## Clasa de material triplanar (ex. "rock", "snow"). Gol = ce da tema.
 ##
 ## O CLASA, nu o textura proprie: garda de materiale din `tools/probe_decor.gd`
@@ -239,6 +247,8 @@ func model_spec() -> Dictionary:
 		spec["sweep_speed"] = sweep_speed
 	if avalanche_period > 0.0:
 		spec["avalanche_period"] = avalanche_period
+	if avalanche_from_left:
+		spec["avalanche_from_left"] = true
 	if kind == Kind.ROCKFALL:
 		spec["rock_speed"] = rock_speed
 		spec["rock_pause"] = rock_pause

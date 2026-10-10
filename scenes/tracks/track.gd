@@ -12369,7 +12369,12 @@ func _build_avalanche(frac: float, spec: Dictionary = {}) -> void:
 	# `looking_at(dir)` da -Z pe sensul cursei si +X pe marginea din dreapta,
 	# conventia din tot proiectul. Avalansa coboara pe X local (vezi
 	# `_start_point` / `_end_point`), deci traverseaza perpendicular pe drum.
-	av.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
+	# Pe versantul din STANGA (avalanche_from_left): baza se roteste 180 de grade pe Y,
+	# deci +X local (de unde porneste masa) cade pe stanga soselei.
+	var av_basis := Basis.looking_at(dir, Vector3.UP)
+	if bool(spec.get("avalanche_from_left", false)):
+		av_basis = av_basis.rotated(Vector3.UP, PI)
+	av.transform = Transform3D(av_basis, p)
 	add_child(av)
 
 

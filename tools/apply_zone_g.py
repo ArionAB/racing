@@ -19,7 +19,7 @@ while i < len(lines):
     if l.startswith("[ext_resource") and 'id="g_' in l:
         i += 1
         continue
-    if l.startswith("[node ") and 'parent="DecorManual/ZonaG"' in l:
+    if l.startswith("[node ") and 'parent="DecorManual/ZonaG' in l:
         i += 1
         while i < len(lines) and lines[i] != "" and not lines[i].startswith("["):
             i += 1

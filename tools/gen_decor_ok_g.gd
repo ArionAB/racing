@@ -32,6 +32,8 @@ var _placed: Array[Vector4] = []  # x, z, raza, tip
 var _counts := {}
 var _nocol_all := false
 var _seq := {}
+var _variant := 1
+var _heart_pos := Vector3.INF
 
 
 func _ready() -> void:
@@ -131,6 +133,17 @@ func _in_typhoon(x: float, z: float) -> bool:
 	return f >= TY_F0 and f <= TY_F1 and nr.y < TY_LAT
 
 
+## Cu coliziune: nimic la < 30 m de drum pe 0.775-0.79 (zona trombei, evenimente de hazard).
+func _hot(x: float, z: float) -> bool:
+	var i0 := _idx(0.775)
+	var i1 := _idx(0.79)
+	for j in range(i0, i1 + 1):
+		var b: Vector3 = _track.baked[j]
+		if Vector2(x - b.x, z - b.z).length() < 30.0:
+			return true
+	return false
+
+
 const PATHS := {
 	"notch_a": "res://assets/models/okinawa/rocks/notch_rock_a.glb",
 	"notch_b": "res://assets/models/okinawa/rocks/notch_rock_b.glb",
@@ -146,21 +159,22 @@ const PATHS := {
 	"netrack": "res://assets/models/okinawa/props/fishing_net_rack.glb",
 	"egret": "res://assets/models/okinawa/animals/egret.glb",
 	"turtle": "res://assets/models/props/sea_turtle.glb",
+	"coral": "res://assets/models/rocks/coral_rock.glb",
 }
 ## Raza (m) de ocupare per tip, la scara 1, pentru evitarea suprapunerilor.
 const RADIUS := {
 	"notch_a": 3.0, "notch_b": 3.5, "notch_c": 3.0, "heart": 4.6, "cycad": 1.0,
 	"fanpalm": 1.8, "bougain": 1.2, "pandanus": 1.8, "hibiscus": 0.9, "sabani": 2.6,
-	"clutter": 0.9, "netrack": 1.5, "egret": 0.5, "turtle": 1.9,
+	"clutter": 0.9, "netrack": 1.5, "egret": 0.5, "turtle": 1.9, "coral": 1.0,
 }
 const NAMES := {
 	"notch_a": "Notch", "notch_b": "Notch", "notch_c": "Notch", "heart": "Inima",
 	"cycad": "Cicas", "fanpalm": "Palmier", "bougain": "Bougainvillea",
 	"pandanus": "Pandanus", "hibiscus": "Hibiscus", "sabani": "Sabani",
-	"clutter": "Flotor", "netrack": "Plasa", "egret": "Egreta", "turtle": "Broasca",
+	"clutter": "Flotor", "netrack": "Plasa", "egret": "Egreta", "turtle": "Broasca", "coral": "Bolovan",
 }
 ## Tipurile joase (<~3 m): singurele permise (fara coliziune) in culoarul trombei.
-const LOW := ["hibiscus", "cycad", "bougain", "pandanus", "clutter", "sabani", "egret", "netrack"]
+const LOW := ["coral", "hibiscus", "cycad", "bougain", "pandanus", "clutter", "sabani", "egret", "netrack"]
 
 
 func _pos_at(frac: float, side: float, lat: float) -> Vector3:
@@ -197,9 +211,16 @@ func _emit(kind: String, x: float, y: float, z: float, yaw: float, sc: float) ->
 		NAMES[kind], int(_seq[NAMES[kind]]), ZONE, ref])
 	_out.append("transform = Transform3D(%s, %s, %s, %.2f, %.3f, %.2f)" % [
 		rows[0], rows[1], rows[2], x, y, z])
-	if kind in ["bougain", "cycad", "hibiscus", "clutter", "egret"] or _nocol_all:
+	if kind in ["bougain", "cycad", "hibiscus", "clutter", "egret", "coral"] or _nocol_all:
 		_out.append('metadata/coliziune = "none"')
 	_out.append("")
+	if kind == "coral":
+		for v in 8:
+			if v + 1 != _variant:
+				_out.append('[node name="Coral_Rock_%02d" parent="%s/%s_G%02d" index="%d"]' % [
+					v + 1, ZONE, NAMES[kind], int(_seq[NAMES[kind]]), v])
+				_out.append("visible = false")
+				_out.append("")
 	_placed.append(Vector4(x, z, float(RADIUS[kind]) * sc, 0.0))
 	_counts[kind] = int(_counts.get(kind, 0)) + 1
 	_n += 1
@@ -215,6 +236,9 @@ func _land_xz(kind: String, q: Vector3, sc: float, yaw: float, min_edge: float) 
 		if not _nocol_all or not (kind in LOW):
 			_skipped += 1
 			return false
+	if not _nocol_all and _hot(q.x, q.z):
+		_skipped += 1
+		return false
 	_emit(kind, q.x, y - 0.05, q.z, yaw, sc)
 	return true
 
@@ -315,6 +339,7 @@ func _heart() -> void:
 	to = to.normalized()
 	var yaw := atan2(to.x, to.z)
 	print("; inima la (%.1f, %.1f) adancime %.2f yaw %.2f" % [best.x, best.z, _sea - _sol(best.x, best.z), yaw])
+	_heart_pos = best
 	_emit("heart", best.x, _sol(best.x, best.z) - 0.1, best.z, yaw, 1.45)
 
 
@@ -349,9 +374,75 @@ func _turtle(frac: float, side: float, lat: float) -> void:
 	_n += 1
 
 
+## Bolovan de calcar (coral_rock, o varianta vizibila 1..8), pe linia apei, partial ingropat.
+func _stone(x: float, z: float, variant: int, sc: float, sink: float = 0.25) -> bool:
+	if not _free(x, z, 0.35 * sc * float(variant)):
+		return false
+	var y := _sol(x, z)
+	if y < _sea - 1.3:
+		return false
+	_variant = variant
+	var prev := _nocol_all
+	_nocol_all = true
+	_emit("coral", x, maxf(y, _sea - 0.15) - sink * sc, z, _rng.randf() * TAU, sc)
+	_nocol_all = prev
+	return true
+
+
+## Grup de bolovani in jurul unui punct: n-3..n mici/mijlocii + eventual unul mare.
+func _stones(c: Vector3, n: int, rad: float, big: bool) -> void:
+	for k in n:
+		var a := _rng.randf() * TAU
+		var d := rad * sqrt(_rng.randf())
+		var q := c + Vector3(cos(a), 0.0, sin(a)) * d
+		if _edge_dist(q.x, q.z) < 3.0:
+			continue
+		var v := _rng.randi_range(1, 4)
+		var sc := _rng.randf_range(0.9, 1.8)
+		if big and k == 0:
+			v = _rng.randi_range(5, 7)
+			sc = _rng.randf_range(0.7, 1.0)
+		if _in_typhoon(q.x, q.z) and v * sc > 4.0:
+			v = 3
+		_stone(q.x, q.z, v, sc)
+
+
+## Linia apei pe o latura la o fractie: lat (de la axa, in m) la care solul coboara sub mare.
+func _shore(frac: float, side: float) -> Vector3:
+	var i := _idx(frac)
+	var p: Vector3 = _track.baked[i]
+	var l := _left(i) * side
+	var lat := _track.width_at_index(i) + 3.0
+	while lat < 80.0:
+		var q := p + l * lat
+		if _sol(q.x, q.z) < _sea + 0.05:
+			return q
+		lat += 0.7
+	return Vector3.INF
+
+
+## Palc-vedeta de pandanus (3-4) cu bolovani la picior; solid daca are voie, altfel fara coliziune.
+func _star(frac: float, side: float, lat: float) -> void:
+	var c := _pos_at(frac, side, lat)
+	var prev := _nocol_all
+	var got := 0
+	var tries := 0
+	var cc := c
+	while got < 4 and tries < 40:
+		tries += 1
+		var q := c + Vector3(_rng.randf_range(-3.2, 3.2), 0.0, _rng.randf_range(-3.2, 3.2))
+		_nocol_all = _in_typhoon(q.x, q.z) or _hot(q.x, q.z)
+		if _land_xz("pandanus", q, _rng.randf_range(1.6, 2.0), _rng.randf() * TAU, 6.5 if not _nocol_all else 4.5):
+			got += 1
+			cc = q
+	_nocol_all = prev
+	if got > 0:
+		_stones(cc, 5, 4.2, false)
+
+
 func _build() -> void:
-	var low := ["hibiscus", "cycad", "pandanus", "hibiscus", "bougain", "cycad", "pandanus", "hibiscus"]
-	var mid := ["pandanus", "pandanus", "hibiscus", "pandanus", "cycad", "hibiscus", "pandanus", "bougain"]
+	var low := ["hibiscus", "hibiscus", "pandanus", "hibiscus", "bougain", "cycad", "pandanus", "hibiscus"]
+	var mid := ["pandanus", "pandanus", "hibiscus", "pandanus", "hibiscus", "pandanus", "hibiscus", "cycad", "pandanus", "bougain"]
 	# --- 1. inima (O SINGURA) ---
 	_heart()
 	# --- 2. stancile-ciuperca in apa mica, ambele laturi (dincolo de culoarul trombei) ---
@@ -363,11 +454,31 @@ func _build() -> void:
 	]
 	for sp in specs:
 		_rock(sp[0], sp[1], sp[2], sp[3], sp[4], sp[5])
+	# --- 3b. palcuri-vedeta de pandanus + bolovani, 3 pe fiecare latura ---
+	for st in [[0.7415, -1.0, 8.0], [0.7585, -1.0, 9.0], [0.8065, -1.0, 10.0], [0.8185, -1.0, 14.0],
+			[0.7435, 1.0, 9.0], [0.8035, 1.0, 9.0], [0.8125, 1.0, 12.0], [0.8225, 1.0, 10.0], [0.7585, 1.0, 8.0]]:
+		_star(st[0], st[1], st[2])
+	# --- 3c. bolovani pe linia apei, ambele maluri, toata lungimea ---
+	var sf := 0.738
+	var gi := 0
+	while sf < 0.8235:
+		for sd in [-1.0, 1.0]:
+			var sp := _shore(sf + _rng.randf_range(-0.0008, 0.0008), sd)
+			if sp != Vector3.INF:
+				_stones(sp, _rng.randi_range(4, 8), 4.5, gi % 3 == 0)
+		gi += 1
+		sf += 0.0032
 	# --- 4. palmieri-evantai (cel mult 2, spre pod) ---
 	var fp := 0
 	for fa in [[0.742, 1.0, 11.0], [0.7405, -1.0, 12.0], [0.745, 1.0, 13.0], [0.739, -1.0, 14.0]]:
 		if fp < 2 and _land("fanpalm", fa[0], fa[1], fa[2], 1.2, 0.5, 8.0):
 			fp += 1
+	# bolovani la baza inimii (3-5)
+	if _heart_pos != Vector3.INF:
+		for k in 5:
+			var a := TAU * float(k) / 5.0 + _rng.randf() * 0.6
+			var q := _heart_pos + Vector3(cos(a), 0.0, sin(a)) * _rng.randf_range(3.4, 5.6)
+			_stone(q.x, q.z, _rng.randi_range(3, 6), _rng.randf_range(0.7, 1.1), 0.35)
 	# --- 3. pandanus-hero cu coliziune (trunchi), grupuri de 3, in afara culoarului ---
 	var groups := [
 		[0.745, -1.0, 12.0], [0.744, 1.0, 9.0], [0.808, -1.0, 12.0],
@@ -406,10 +517,15 @@ func _build() -> void:
 			# banda din spate (10-17 m): amestec dens cu pandanus
 			_patch(f + _rng.randf_range(-0.001, 0.001), side, _rng.randf_range(9.0, 16.0), 4.5, _rng.randi_range(6, 10), mid, 3.0)
 		f += 0.0028
-	# petice de hibiscus rosu (accentul viu), aproape de drum
-	for hf in [0.742, 0.756, 0.769, 0.783, 0.797, 0.811, 0.7455, 0.8035]:
-		var sd := 1.0 if (int(hf * 1000.0) % 2 == 0) else -1.0
-		_patch(hf, sd, _rng.randf_range(3.6, 6.0), 2.2, 5, ["hibiscus", "hibiscus", "hibiscus", "bougain"], 3.0)
+	# petice de hibiscus rosu (accentul viu), grupate, pe ambele laturi
+	var hf := 0.740
+	var hn := 0
+	while hf < 0.823:
+		var sd := 1.0 if (hn % 2 == 0) else -1.0
+		_patch(hf, sd, _rng.randf_range(3.6, 7.0), 2.6, 7, ["hibiscus", "hibiscus", "hibiscus", "hibiscus", "bougain"], 3.0)
+		_patch(hf + 0.004, -sd, _rng.randf_range(3.6, 7.0), 2.4, 6, ["hibiscus", "hibiscus", "hibiscus", "bougain"], 3.0)
+		hf += 0.0075
+		hn += 1
 	_nocol_all = false
 
 func _write() -> void:

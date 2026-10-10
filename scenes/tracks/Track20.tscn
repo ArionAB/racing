@@ -75,7 +75,17 @@
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/harbour_quay.glb" id="f_quay"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/vehicles/fishing_boat.glb" id="f_boat"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/vehicles/coastal_freighter.glb" id="f_freighter"]
-
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/coral_stone_wall.glb" id="b_wall"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/buildings/ryukyu_house_c.glb" id="b_ryukyu_c"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/cycad.glb" id="b_cycad"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/hibiscus_bush.glb" id="b_hibiscus"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/buildings/ryukyu_house_a.glb" id="b_ryukyu_a"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/buildings/ryukyu_house_b.glb" id="b_ryukyu_b"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fukugi_tree_b.glb" id="b_fukugi_b"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fukugi_tree_c.glb" id="b_fukugi_c"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fukugi_tree_a.glb" id="b_fukugi_a"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/bougainvillea.glb" id="b_bougainvillea"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/props/convex_mirror.glb" id="b_mirror"]
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
 _data = {
@@ -2972,6 +2982,2311 @@ metadata/coliziune = "none"
 
 [node name="ZonaB" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.100-0.205 (dirt 0.103-0.203, semi 5.5); x -228..-170, z -55..146; sea left at 72-86 m, land right (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="Ziduri" type="Node3D" parent="DecorManual/ZonaB"]
+
+[node name="Fukugi1" type="Node3D" parent="DecorManual/ZonaB"]
+
+[node name="Fukugi2" type="Node3D" parent="DecorManual/ZonaB"]
+
+[node name="Fukugi3" type="Node3D" parent="DecorManual/ZonaB"]
+
+[node name="Case" type="Node3D" parent="DecorManual/ZonaB"]
+
+[node name="Flori" type="Node3D" parent="DecorManual/ZonaB"]
+
+[node name="bZid000" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.74178994, 0, -0.5204262, 0, 1, 0, 0.6706323, 0, -0.5756462, -170.32205, 2.2512553, 136.54095)
+
+[node name="bZid001" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.81376994, 0, -0.41805252, 0, 1, 0, 0.5811871, 0, -0.58535117, -172.14433, 2.3050015, 134.28659)
+
+[node name="bZid002" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.8791029, 0, -0.4295687, 0, 1, 0, 0.4766321, 0, -0.7922989, -173.79019, 2.363632, 131.61154)
+
+[node name="bZid003" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.88590175, 0, -0.41607994, 0, 1, 0, 0.4638729, 0, -0.794627, -175.43224, 2.4238822, 128.53014)
+
+[node name="bZid004" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9053161, 0, -0.34828663, 0, 1, 0, 0.42473844, 0, -0.7423616, -176.91644, 2.4737995, 125.5457)
+
+[node name="bZid005" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.924163, 0, -0.4323978, 0, 1, 0, 0.38199836, 0, -1.0460936, -178.43234, 2.528187, 122.07297)
+
+[node name="bZid006" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91774684, 0, -0.3697947, 0, 1, 0, 0.3971659, 0, -0.85449916, -179.98999, 2.586065, 118.38249)
+
+[node name="bZid007" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9137911, 0, -0.3780735, 0, 1, 0, 0.40618438, 0, -0.85055023, -181.44217, 2.63836, 115.07172)
+
+[node name="bZid008" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91386515, 0, -0.49255273, 0, 1, 0, 0.4060179, 0, -1.1086378, -183.13269, 2.7022834, 111.26747)
+
+[node name="bZid009" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.913917, 0, -0.3510645, 0, 1, 0, 0.4059011, 0, -0.7904483, -184.77078, 2.762963, 107.579926)
+
+[node name="bZid010" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9140136, 0, -0.36316624, 0, 1, 0, 0.40568343, 0, -0.81822145, -186.15765, 2.8142989, 104.4563)
+
+[node name="bZid011" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9140518, 0, -0.51242244, 0, 1, 0, 0.40559757, 0, -1.1547915, -187.85782, 2.8776786, 100.6252)
+
+[node name="bZid012" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91383183, 0, -0.34718257, 0, 1, 0, 0.40609285, 0, -0.78126585, -189.52695, 2.9388075, 96.86587)
+
+[node name="bZid013" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91361326, 0, -0.35030615, 0, 1, 0, 0.40658432, 0, -0.7871537, -190.8813, 2.988173, 93.82039)
+
+[node name="bZid014" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9134115, 0, -0.5323981, 0, 1, 0, 0.40703735, 0, -1.1947271, -192.59529, 3.0482464, 89.97208)
+
+[node name="bZid015" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9136362, 0, -0.34200785, 0, 1, 0, 0.4065327, 0, -0.7686239, -194.29317, 3.1075387, 86.159744)
+
+[node name="bZid016" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.913866, 0, -0.34209037, 0, 1, 0, 0.40601593, 0, -0.76998144, -195.62152, 3.1579113, 83.172165)
+
+[node name="bZid017" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9140849, 0, -0.52786404, 0, 1, 0, 0.40552282, 0, -1.189853, -197.31075, 3.219128, 79.36666)
+
+[node name="bZid018" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91395223, 0, -0.35180327, 0, 1, 0, 0.4058218, 0, -0.792297, -199.01883, 3.2798488, 75.51782)
+
+[node name="bZid019" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9044172, 0, -0.405719, 0, 1, 0, 0.4266492, 0, -0.86004907, -200.48975, 3.3304696, 72.30939)
+
+[node name="bZid020" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.89714426, 0, -0.5338128, 0, 1, 0, 0.4417377, 0, -1.0841435, -202.31409, 3.3977635, 68.534256)
+
+[node name="bZid021" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.93720895, 0, -0.22226743, 0, 1, 0, 0.34876838, 0, -0.59727615, -203.7822, 3.4613764, 65.26936)
+
+[node name="bZid022" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9582879, 0, -0.21809469, 0, 1, 0, 0.28580475, 0, -0.73125976, -204.63727, 3.5047462, 62.689682)
+
+[node name="bZid023" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98037475, 0, -0.15918505, 0, 1, 0, 0.19714297, 0, -0.79161334, -205.36986, 3.5680788, 59.732647)
+
+[node name="bZid024" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9986188, 0, -0.035240464, 0, 1, 0, 0.052540805, 0, -0.6697992, -205.74738, 3.6255157, 56.89495)
+
+[node name="bZid025" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9995029, 0, 0.020286124, 0, 1, 0, -0.031527214, 0, -0.6431282, -205.77643, 3.6768272, 54.34558)
+
+[node name="bZid026" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98404884, 0, 0.15342113, 0, 1, 0, -0.17789835, 0, -0.8486526, -205.43912, 3.7348464, 51.448917)
+
+[node name="bZid027" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.976282, 0, 0.23830226, 0, 1, 0, -0.2165028, 0, -1.0745829, -204.6785, 3.8076859, 47.714478)
+
+[node name="bZid028" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98532456, 0, 0.15887862, 0, 1, 0, -0.17069143, 0, -0.9171345, -203.90727, 3.8766763, 43.84707)
+
+[node name="bZid029" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9864375, 0, 0.18248498, 0, 1, 0, -0.16413744, 0, -1.096703, -203.24443, 3.9382572, 39.936703)
+
+[node name="bZid030" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9864013, 0, 0.16547556, 0, 1, 0, -0.16435474, 0, -0.99312806, -202.56879, 4.004032, 35.878777)
+
+[node name="bZid031" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98635375, 0, 0.14838004, 0, 1, 0, -0.16463977, 0, -0.888942, -201.95935, 4.0641894, 32.224274)
+
+[node name="bZid032" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98628, 0, 0.1758957, 0, 1, 0, -0.16508092, 0, -1.0508933, -201.32968, 4.126791, 28.457603)
+
+[node name="bZid033" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98628783, 0, 0.17267773, 0, 1, 0, -0.16503437, 0, -1.0319666, -200.65285, 4.1955547, 24.413216)
+
+[node name="bZid034" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98526734, 0, 0.15049781, 0, 1, 0, -0.17102124, 0, -0.86703014, -200.02533, 4.257218, 20.725843)
+
+[node name="bZid035" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9774545, 0, 0.20032308, 0, 1, 0, -0.21114624, 0, -0.92735106, -199.34412, 4.3150496, 17.241608)
+
+[node name="bZid036" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9870776, 0, 0.21178438, 0, 1, 0, -0.16024292, 0, -1.304567, -198.54391, 4.3858123, 12.907787)
+
+[node name="bZid037" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9979312, 0, 0.06592699, 0, 1, 0, -0.064291365, 0, -1.0233194, -198.00467, 4.457526, 8.387619)
+
+[node name="bZid038" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.99990517, 0, 0.015237149, 0, 1, 0, -0.013771488, 0, -1.1063223, -197.84706, 4.523772, 4.252393)
+
+[node name="bZid039" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.99426043, 0, -0.1600221, 0, 1, 0, 0.1069868, 0, -1.4871334, -198.1282, 4.6067486, -0.7834431)
+
+[node name="bZid040" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9758165, 0, -0.22190997, 0, 1, 0, 0.21859136, 0, -0.9906311, -198.86981, 4.695896, -5.594636)
+
+[node name="bZid041" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9474795, 0, -0.3963321, 0, 1, 0, 0.31981662, 0, -1.174162, -200.07028, 4.7852983, -9.798118)
+
+[node name="bZid042" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9095908, 0, -0.53776926, 0, 1, 0, 0.41550523, 0, -1.1772413, -201.88406, 4.911226, -14.363949)
+
+[node name="bZid043" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9181748, 0, -0.30940792, 0, 1, 0, 0.39617556, 0, -0.7170825, -203.52908, 5.025696, -18.042248)
+
+[node name="bZid044" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.92391986, 0, -0.35697398, 0, 1, 0, 0.38258615, 0, -0.8620682, -204.82303, 5.1220474, -21.108559)
+
+[node name="bZid045" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.92150086, 0, -0.48121738, 0, 1, 0, 0.38837633, 0, -1.1417849, -206.45058, 5.229802, -24.999537)
+
+[node name="bZid046" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.921729, 0, -0.33540308, 0, 1, 0, 0.38783446, 0, -0.7971204, -208.03625, 5.3438425, -28.7644)
+
+[node name="bZid047" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9182151, 0, -0.36118603, 0, 1, 0, 0.3960821, 0, -0.83731747, -209.38885, 5.4411745, -31.938068)
+
+[node name="bZid048" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9186728, 0, -0.47475773, 0, 1, 0, 0.3950194, 0, -1.1041154, -211.01204, 5.5772953, -35.70784)
+
+[node name="bZid049" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9328568, 0, -0.3003747, 0, 1, 0, 0.36024737, 0, -0.77781713, -212.51715, 5.6838217, -39.362076)
+
+[node name="bZid050" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.927283, 0, -0.34093514, 0, 1, 0, 0.3743611, 0, -0.8444877, -213.76242, 5.7990603, -42.512184)
+
+[node name="bZid051" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9373654, 0, -0.40221015, 0, 1, 0, 0.34834757, 0, -1.0823036, -215.20541, 5.8847227, -46.253525)
+
+[node name="bZid052" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9897663, 0, -0.06704285, 0, 1, 0, 0.14269795, 0, -0.46501547, -216.11658, 5.998751, -49.25803)
+
+[node name="bZid053" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.74362767, 0, -0.6716507, 0, 1, 0, 0.66859394, 0, -0.74702746, -182.54681, 2.2468863, 147.77557)
+
+[node name="bZid054" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.8058705, 0, -0.7572471, 0, 1, 0, 0.59209186, 0, -1.0306561, -185.32137, 2.305026, 144.32376)
+
+[node name="bZid055" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.8734823, 0, -0.66446054, 0, 1, 0, 0.48685592, 0, -1.1921278, -188.08197, 2.365185, 140.00766)
+
+[node name="bZid056" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.8858728, 0, -0.40947115, 0, 1, 0, 0.46392825, 0, -0.78188676, -190.16727, 2.4222612, 136.17462)
+
+[node name="bZid057" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.90449387, 0, -0.47454554, 0, 1, 0, 0.4264866, 0, -1.0064174, -191.8838, 2.4734259, 132.7022)
+
+[node name="bZid058" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9239008, 0, -0.4630136, 0, 1, 0, 0.38263217, 0, -1.1179892, -193.70432, 2.5368693, 128.57713)
+
+[node name="bZid059" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9176183, 0, -0.32783952, 0, 1, 0, 0.39746282, 0, -0.7568797, -195.23994, 2.590998, 124.936615)
+
+[node name="bZid060" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9137919, 0, -0.37832487, 0, 1, 0, 0.40618262, 0, -0.8511201, -196.61115, 2.6419091, 121.814285)
+
+[node name="bZid061" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91386485, 0, -0.49292207, 0, 1, 0, 0.40601856, 0, -1.1094669, -198.30289, 2.7028244, 118.00732)
+
+[node name="bZid062" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9139181, 0, -0.35124528, 0, 1, 0, 0.40589872, 0, -0.7908609, -199.94205, 2.7638655, 114.31736)
+
+[node name="bZid063" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91401327, 0, -0.36377925, 0, 1, 0, 0.4056843, 0, -0.8196005, -201.33044, 2.8155785, 111.19025)
+
+[node name="bZid064" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9140521, 0, -0.51158947, 0, 1, 0, 0.4055967, 0, -1.1529173, -203.03018, 2.8781078, 107.36012)
+
+[node name="bZid065" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9138292, 0, -0.34631032, 0, 1, 0, 0.40609872, 0, -0.77928954, -204.69601, 2.9390612, 103.60826)
+
+[node name="bZid066" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91361403, 0, -0.34908038, 0, 1, 0, 0.4065826, 0, -0.7844033, -206.04628, 2.9874644, 100.57196)
+
+[node name="bZid067" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9134125, 0, -0.53305835, 0, 1, 0, 0.40703517, 0, -1.1962165, -207.75917, 3.046988, 96.726105)
+
+[node name="bZid068" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9136342, 0, -0.34257367, 0, 1, 0, 0.40653726, 0, -0.7698852, -209.45943, 3.1070075, 92.90843)
+
+[node name="bZid069" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9138685, 0, -0.3431041, 0, 1, 0, 0.40601027, 0, -0.7722761, -210.79083, 3.1547186, 89.91394)
+
+[node name="bZid070" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9140843, 0, -0.52857906, 0, 1, 0, 0.40552413, 0, -1.19146, -212.48343, 3.2165856, 86.10086)
+
+[node name="bZid071" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91395223, 0, -0.3508681, 0, 1, 0, 0.4058218, 0, -0.7901909, -214.1911, 3.2811174, 82.25299)
+
+[node name="bZid072" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9042259, 0, -0.33012226, 0, 1, 0, 0.42705455, 0, -0.6989859, -215.5134, 3.3299737, 79.36139)
+
+[node name="bZid073" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.89766943, 0, -0.58801126, 0, 1, 0, 0.44066942, 0, -1.1978134, -217.29619, 3.3846843, 75.67828)
+
+[node name="bZid074" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.93482614, 0, -0.40399015, 0, 1, 0, 0.35510582, 0, -1.0635155, -219.22241, 3.4437973, 71.28735)
+
+[node name="bZid075" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.958051, 0, -0.26375124, 0, 1, 0, 0.28659767, 0, -0.88167894, -220.51898, 3.4980135, 67.51028)
+
+[node name="bZid076" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98078084, 0, -0.29467764, 0, 1, 0, 0.19511253, 0, -1.4812692, -221.60332, 3.5605037, 62.922028)
+
+[node name="bZid077" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.99849576, 0, -0.061832804, 0, 1, 0, 0.054828703, 0, -1.1260488, -222.29556, 3.6299226, 57.859276)
+
+[node name="bZid078" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9993318, 0, 0.038823802, 0, 1, 0, -0.036551826, 0, -1.0614479, -222.34024, 3.6866057, 53.61171)
+
+[node name="bZid079" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98512053, 0, 0.25200328, 0, 1, 0, -0.17186473, 0, -1.444471, -221.77554, 3.7514176, 48.745846)
+
+[node name="bZid080" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.97576976, 0, 0.19251993, 0, 1, 0, -0.21879981, 0, -0.85857075, -220.91238, 3.8191504, 44.27392)
+
+[node name="bZid081" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9853606, 0, 0.1454645, 0, 1, 0, -0.17048305, 0, -0.84075797, -220.2561, 3.8771539, 40.97425)
+
+[node name="bZid082" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9864376, 0, 0.18257928, 0, 1, 0, -0.16413674, 0, -1.0972745, -219.61913, 3.9410872, 37.211082)
+
+[node name="bZid083" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9864014, 0, 0.16567999, 0, 1, 0, -0.16435428, 0, -0.9943579, -218.9429, 4.0066166, 33.14966)
+
+[node name="bZid084" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.986354, 0, 0.14864713, 0, 1, 0, -0.16463836, 0, -0.89055, -218.33255, 4.066886, 29.489645)
+
+[node name="bZid085" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9862802, 0, 0.17604502, 0, 1, 0, -0.16507974, 0, -1.051793, -217.70209, 4.129572, 25.718105)
+
+[node name="bZid086" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9862877, 0, 0.17248914, 0, 1, 0, -0.16503507, 0, -1.030835, -217.02531, 4.198337, 21.674168)
+
+[node name="bZid087" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98526317, 0, 0.16028908, 0, 1, 0, -0.1710452, 0, -0.9233053, -216.37915, 4.2584653, 17.87972)
+
+[node name="bZid088" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9778983, 0, 0.23370504, 0, 1, 0, -0.20908123, 0, -1.0930668, -215.6141, 4.3256817, 13.964436)
+
+[node name="bZid089" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.98740214, 0, 0.13640785, 0, 1, 0, -0.15823092, 0, -0.85122055, -214.89545, 4.3996043, 10.189119)
+
+[node name="bZid090" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.99825335, 0, 0.044081036, 0, 1, 0, -0.05907852, 0, -0.74483997, -214.54498, 4.461714, 7.0899734)
+
+[node name="bZid091" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.99991715, 0, 0.011087977, 0, 1, 0, -0.012873922, 0, -0.86120296, -214.43785, 4.539051, 3.9714432)
+
+[node name="bZid092" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9932066, 0, -0.089038216, 0, 1, 0, 0.1163641, 0, -0.7599711, -214.5892, 4.6241636, 0.8235325)
+
+[node name="bZid093" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.97551125, 0, -0.1593187, 0, 1, 0, 0.2199496, 0, -0.7066036, -215.07146, 4.705834, -2.0241854)
+
+[node name="bZid094" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9458898, 0, -0.2103504, 0, 1, 0, 0.32448807, 0, -0.613176, -215.78926, 4.788725, -4.5868645)
+
+[node name="bZid095" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.90837336, 0, -0.4623142, 0, 1, 0, 0.41816002, 0, -1.0042899, -217.0954, 4.894229, -7.727575)
+
+[node name="bZid096" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91787213, 0, -0.38521662, 0, 1, 0, 0.3968762, 0, -0.8909066, -218.74109, 5.0079484, -11.407568)
+
+[node name="bZid097" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.92392486, 0, -0.34414923, 0, 1, 0, 0.38257402, 0, -0.8311281, -220.15735, 5.1081004, -14.751325)
+
+[node name="bZid098" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.921498, 0, -0.47776753, 0, 1, 0, 0.38838315, 0, -1.133576, -221.7533, 5.224178, -18.566284)
+
+[node name="bZid099" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.92173743, 0, -0.3320789, 0, 1, 0, 0.38781446, 0, -0.7892681, -223.3258, 5.3356776, -22.299961)
+
+[node name="bZid100" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9182375, 0, -0.33710837, 0, 1, 0, 0.39603022, 0, -0.78162104, -224.62521, 5.4278417, -25.350231)
+
+[node name="bZid101" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.91913277, 0, -0.5371917, 0, 1, 0, 0.39394787, 0, -1.2533396, -226.32288, 5.5456743, -29.301613)
+
+[node name="bZid102" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9327927, 0, -0.31044126, 0, 1, 0, 0.36041328, 0, -0.8034591, -227.96877, 5.660103, -33.295395)
+
+[node name="bZid103" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.92731386, 0, -0.29796615, 0, 1, 0, 0.3742846, 0, -0.73823005, -229.15015, 5.7387156, -36.288967)
+
+[node name="bZid104" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.93740416, 0, -0.52818626, 0, 1, 0, 0.34824345, 0, -1.4217755, -230.75432, 5.838026, -40.483154)
+
+[node name="bZid105" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.9810098, 0, -0.22932419, 0, 1, 0, 0.19395818, 0, -1.1598855, -232.22522, 5.984105, -45.496086)
+
+[node name="bZid106" parent="DecorManual/ZonaB/Ziduri" instance=ExtResource("b_wall")]
+transform = Transform3D(-0.99176884, 0, -0.03347623, 0, 1, 0, 0.12804133, 0, -0.2592966, -232.7355, 6.061362, -48.251778)
+
+[node name="bCasa0" parent="DecorManual/ZonaB/Case" instance=ExtResource("b_ryukyu_c")]
+transform = Transform3D(-0.3914499, 0, 0.9201994, 0, 1, 0, -0.9201994, 0, -0.3914499, -172.31981, 2.5855548, 104.325806)
+
+[node name="bCicada_g0_0" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-0.3286586, 0, -0.9662898, 0, 1.020653, 0, 0.9662898, 0, -0.3286586, -180.35645, 2.7476358, 107.9466)
+metadata/coliziune = "none"
+
+[node name="bCicada_g0_1" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-1.113606, 0, -0.45167845, 0, 1.2017202, 0, 0.45167845, 0, -1.113606, -180.3804, 2.7671232, 106.529396)
+metadata/coliziune = "none"
+
+[node name="bCicada_g0_2" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(1.0917166, 0, -0.5122764, 0, 1.2059321, 0, 0.5122764, 0, 1.0917166, -182.27617, 2.8144193, 104.07348)
+metadata/coliziune = "none"
+
+[node name="bHibiscus_g0_0" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.57092863, 0, -1.4057773, 0, 1.5172901, 0, 1.4057773, 0, 0.57092863, -179.23651, 2.7052226, 114.171555)
+
+[node name="bHibiscus_g0_1" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.9271755, 0, 1.148712, 0, 1.4762093, 0, -1.148712, 0, -0.9271755, -182.54404, 2.8529336, 105.05452)
+
+[node name="bCasa1" parent="DecorManual/ZonaB/Case" instance=ExtResource("b_ryukyu_a")]
+transform = Transform3D(0.44116828, 0, -0.8974244, 0, 1, 0, 0.8974244, 0, 0.44116828, -229.73999, 3.2150388, 82.62653)
+
+[node name="bCicada_g1_0" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(1.035882, 0, 0.08930617, 0, 1.0397246, 0, -0.08930617, 0, 1.035882, -220.30031, 3.329358, 82.516464)
+metadata/coliziune = "none"
+
+[node name="bCicada_g1_1" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-0.18618847, 0, 0.9965806, 0, 1.013824, 0, -0.9965806, 0, -0.18618847, -221.83084, 3.427527, 75.4256)
+metadata/coliziune = "none"
+
+[node name="bCicada_g1_2" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.5999179, 0, -1.0932074, 0, 1.2469978, 0, 1.0932074, 0, 0.5999179, -219.27759, 3.309109, 83.60847)
+metadata/coliziune = "none"
+
+[node name="bHibiscus_g1_0" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.2386543, 0, 0.4457148, 0, 1.3164065, 0, -0.4457148, 0, 1.2386543, -217.29655, 3.3705041, 82.088196)
+
+[node name="bHibiscus_g1_1" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.0669595, 0, -1.0356408, 0, 1.4869279, 0, 1.0356408, 0, -1.0669595, -219.0052, 3.443793, 77.250435)
+
+[node name="bCasa2" parent="DecorManual/ZonaB/Case" instance=ExtResource("b_ryukyu_b")]
+transform = Transform3D(0.22972341, 0, 0.97325593, 0, 1, 0, -0.97325593, 0, 0.22972341, -186.32245, 3.9768696, 30.871584)
+
+[node name="bCicada_g2_0" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-1.0010093, 0, -0.19548436, 0, 1.0199186, 0, 0.19548436, 0, -1.0010093, -196.36107, 4.1271954, 30.265177)
+metadata/coliziune = "none"
+
+[node name="bCicada_g2_1" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.5814742, 0, -0.93347913, 0, 1.0997707, 0, 0.93347913, 0, 0.5814742, -196.83644, 4.1181917, 30.758232)
+metadata/coliziune = "none"
+
+[node name="bCicada_g2_2" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.76171577, 0, 0.90017813, 0, 1.179208, 0, -0.90017813, 0, 0.76171577, -195.7262, 4.1907606, 26.586773)
+metadata/coliziune = "none"
+
+[node name="bHibiscus_g2_0" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.1135967, 0, 0.9246494, 0, 1.447437, 0, -0.9246494, 0, 1.1135967, -200.2115, 4.161522, 30.78304)
+
+[node name="bHibiscus_g2_1" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.36345154, 0, -1.4626496, 0, 1.5071299, 0, 1.4626496, 0, 0.36345154, -199.54973, 4.127939, 32.95869)
+
+[node name="bCasa3" parent="DecorManual/ZonaB/Case" instance=ExtResource("b_ryukyu_c")]
+transform = Transform3D(0.36489496, 0, -0.9310487, 0, 1, 0, 0.9310487, 0, 0.36489496, -234.12758, 5.110603, -15.2271805)
+
+[node name="bCicada_g3_0" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-0.36483124, 0, -1.1678543, 0, 1.2235136, 0, 1.1678543, 0, -0.36483124, -225.99034, 5.3309813, -20.38412)
+metadata/coliziune = "none"
+
+[node name="bCicada_g3_1" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.08077081, 0, -1.2711338, 0, 1.2736974, 0, 1.2711338, 0, 0.08077081, -226.21613, 5.3060107, -19.32442)
+metadata/coliziune = "none"
+
+[node name="bCicada_g3_2" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(1.3584152, 0, -0.2728966, 0, 1.3855556, 0, 0.2728966, 0, 1.3584152, -224.8474, 5.2363696, -17.079386)
+metadata/coliziune = "none"
+
+[node name="bHibiscus_g3_0" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.282984, 0, -0.26781774, 0, 1.3106389, 0, 0.26781774, 0, 1.282984, -224.59717, 5.3435984, -19.413069)
+
+[node name="bHibiscus_g3_1" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.0628052, 0, -0.8253225, 0, 1.3456271, 0, 0.8253225, 0, -1.0628052, -223.41748, 5.212281, -14.799219)
+
+[node name="bFukugi000" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.7061052, 0, -1.0451424, 0, 1.0527772, 0, 1.0451424, 0, 0.7061052, -168.72975, 2.1950753, 136.84767)
+
+[node name="bFukugi001" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.83690166, 0, 0.7772867, 0, 1.0963861, 0, -0.7772867, 0, -0.83690166, -170.31102, 2.2467713, 134.71225)
+
+[node name="bFukugi002" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.67692924, 0, 1.0457737, 0, 1.0717851, 0, -1.0457737, 0, -0.67692924, -172.39186, 2.3187473, 131.50597)
+
+[node name="bFukugi003" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1437887, 0, -0.2504426, 0, 1.1029713, 0, 0.2504426, 0, -1.1437887, -173.88496, 2.3768833, 128.53365)
+
+[node name="bFukugi004" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.1214015, 0, -0.36332405, 0, 1.0152154, 0, 0.36332405, 0, -1.1214015, -175.49075, 2.426735, 126.16412)
+
+[node name="bFukugi005" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.21339469, 0, 1.1710929, 0, 1.0288314, 0, -1.1710929, 0, -0.21339469, -176.85576, 2.4714088, 123.38636)
+
+[node name="bFukugi006" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1513594, 0, -0.45591256, 0, 1.0725864, 0, 0.45591256, 0, 1.1513594, -177.9709, 2.5186288, 120.27633)
+
+[node name="bFukugi007" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.7045017, 0, -1.060514, 0, 1.0802191, 0, 1.060514, 0, 0.7045017, -179.43753, 2.5693839, 117.07934)
+
+[node name="bFukugi008" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.125298, 0, -0.43007937, 0, 1.1067895, 0, 0.43007937, 0, 1.125298, -180.29128, 2.6126678, 114.15117)
+
+[node name="bFukugi009" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.81442165, 0, -0.8961332, 0, 1.1164885, 0, 0.8961332, 0, -0.81442165, -182.02255, 2.6644986, 111.255936)
+
+[node name="bFukugi010" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.83487344, 0, -0.8473502, 0, 1.0026681, 0, 0.8473502, 0, -0.83487344, -183.35143, 2.7199686, 107.88941)
+
+[node name="bFukugi011" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.29563424, 0, -1.2334853, 0, 1.1054696, 0, 1.2334853, 0, -0.29563424, -184.50313, 2.7617629, 105.35395)
+
+[node name="bFukugi012" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.228744, 0, 0.29897228, 0, 1.1319306, 0, -0.29897228, 0, 1.228744, -185.85608, 2.817218, 101.934906)
+
+[node name="bFukugi013" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.93796426, 0, 0.644646, 0, 1.0750048, 0, -0.644646, 0, 0.93796426, -187.28293, 2.8605092, 99.41722)
+
+[node name="bFukugi014" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.13434213, 0, -1.1917111, 0, 1.1168216, 0, 1.1917111, 0, 0.13434213, -188.57217, 2.913026, 96.11701)
+
+[node name="bFukugi015" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.0050834, 0, -0.4999352, 0, 1.149709, 0, 0.4999352, 0, -1.0050834, -189.74232, 2.9538143, 93.6344)
+
+[node name="bFukugi016" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.213817, 0, -0.3880342, 0, 1.1133925, 0, 0.3880342, 0, -1.213817, -190.73697, 2.9970322, 90.80523)
+
+[node name="bFukugi017" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1775941, 0, 0.17945032, 0, 1.0429236, 0, -0.17945032, 0, 1.1775941, -192.49968, 3.0442848, 87.938675)
+
+[node name="bFukugi018" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.807679, 0, -0.915239, 0, 1.1266154, 0, 0.915239, 0, 0.807679, -193.63266, 3.0971067, 84.53472)
+
+[node name="bFukugi019" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.6440114, 0, -0.961563, 0, 1.1262084, 0, 0.961563, 0, -0.6440114, -194.93779, 3.1504734, 81.313446)
+
+[node name="bFukugi020" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.24636964, 0, -1.1585876, 0, 1.1076442, 0, 1.1585876, 0, 0.24636964, -196.29741, 3.1919699, 78.79147)
+
+[node name="bFukugi021" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.50279087, 0, -1.0263085, 0, 1.036481, 0, 1.0263085, 0, -0.50279087, -197.707, 3.2445037, 75.74127)
+
+[node name="bFukugi022" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.340501, 0, 1.2159224, 0, 1.033926, 0, -1.2159224, 0, -0.340501, -198.74576, 3.2876585, 72.625015)
+
+[node name="bFukugi023" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.9970394, 0, 0.54282373, 0, 1.0146668, 0, -0.54282373, 0, 0.9970394, -200.43526, 3.3339725, 69.8353)
+
+[node name="bFukugi024" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1182625, 0, -0.22789751, 0, 1.1036844, 0, 0.22789751, 0, 1.1182625, -201.54042, 3.394117, 66.86762)
+
+[node name="bFukugi025" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.1592277, 0, -0.28388402, 0, 1.0977051, 0, 0.28388402, 0, 1.1592277, -202.80496, 3.449117, 63.97197)
+
+[node name="bFukugi026" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.34532025, 0, 1.0968101, 0, 1.1255257, 0, -1.0968101, 0, 0.34532025, -204.09117, 3.5072503, 61.03276)
+
+[node name="bFukugi027" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.74514526, 0, -0.92789733, 0, 1.1245081, 0, 0.92789733, 0, 0.74514526, -204.49315, 3.5792406, 57.644398)
+
+[node name="bFukugi028" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.4532462, 0, -1.0914421, 0, 1.025041, 0, 1.0914421, 0, -0.4532462, -204.85132, 3.6582482, 53.749027)
+
+[node name="bFukugi029" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1137722, 0, -0.17386068, 0, 1.1271534, 0, 0.17386068, 0, -1.1137722, -204.15103, 3.7142096, 50.981773)
+
+[node name="bFukugi030" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.04303337, 0, -1.1486738, 0, 1.0855207, 0, 1.1486738, 0, -0.04303337, -203.34088, 3.7706177, 48.09216)
+
+[node name="bFukugi031" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.6894927, 0, 1.0474261, 0, 1.1056259, 0, -1.0474261, 0, 0.6894927, -202.5666, 3.8295503, 44.87321)
+
+[node name="bFukugi032" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1926104, 0, -0.23796277, 0, 1.1394598, 0, 0.23796277, 0, -1.1926104, -202.09415, 3.8941393, 41.033054)
+
+[node name="bFukugi033" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.90131164, 0, -0.7579149, 0, 1.0637754, 0, 0.7579149, 0, -0.90131164, -201.86905, 3.9409537, 37.999275)
+
+[node name="bFukugi034" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.3631844, 0, 1.2171067, 0, 1.0166624, 0, -1.2171067, 0, -0.3631844, -201.151, 3.9915166, 34.988144)
+
+[node name="bFukugi035" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.66483, 0, 1.006233, 0, 1.1270875, 0, -1.006233, 0, 0.66483, -200.71591, 4.0536675, 31.19683)
+
+[node name="bFukugi036" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.9467171, 0, -0.77712613, 0, 1.0487317, 0, 0.77712613, 0, -0.9467171, -199.80588, 4.101664, 28.41206)
+
+[node name="bFukugi037" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.008382156, 0, 1.166241, 0, 1.0052245, 0, -1.166241, 0, 0.008382156, -199.82394, 4.154907, 25.191948)
+
+[node name="bFukugi038" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.1271224, 0, -0.15749866, 0, 1.0001603, 0, 0.15749866, 0, 1.1271224, -199.26619, 4.2087755, 22.008924)
+
+[node name="bFukugi039" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.19190744, 0, 1.1255032, 0, 1.0384438, 0, -1.1255032, 0, -0.19190744, -198.40611, 4.267468, 18.479233)
+
+[node name="bFukugi040" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.2588401, 0, 0.19306448, 0, 1.0066495, 0, -0.19306448, 0, 1.2588401, -197.76218, 4.3303866, 14.651902)
+
+[node name="bFukugi041" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.9471716, 0, -0.8186858, 0, 1.1191356, 0, 0.8186858, 0, 0.9471716, -197.24855, 4.377832, 11.706434)
+
+[node name="bFukugi042" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.8978041, 0, -0.77815676, 0, 1.05021, 0, 0.77815676, 0, -0.8978041, -197.02673, 4.4329057, 8.203358)
+
+[node name="bFukugi043" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.0069857, 0, 0.73150873, 0, 1.060763, 0, -0.73150873, 0, 1.0069857, -196.65724, 4.4814477, 5.1695185)
+
+[node name="bFukugi044" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.90952116, 0, -0.8988452, 0, 1.0349982, 0, 0.8988452, 0, 0.90952116, -196.73552, 4.5337186, 1.9631625)
+
+[node name="bFukugi045" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.0367566, 0, 0.4579068, 0, 1.0046705, 0, -0.4579068, 0, 1.0367566, -196.88924, 4.58643, -1.2238791)
+
+[node name="bFukugi046" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.5792674, 0, -1.1154643, 0, 1.1124767, 0, 1.1154643, 0, 0.5792674, -197.69753, 4.658012, -5.0035543)
+
+[node name="bFukugi047" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.11648423, 0, -1.1886599, 0, 1.0076147, 0, 1.1886599, 0, -0.11648423, -198.24344, 4.7061133, -7.6261163)
+
+[node name="bFukugi048" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.0722351, 0, 0.34153077, 0, 1.102228, 0, -0.34153077, 0, 1.0722351, -198.8074, 4.7640977, -10.417833)
+
+[node name="bFukugi049" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.0884566, 0, 0.41911504, 0, 1.1261998, 0, -0.41911504, 0, -1.0884566, -199.88065, 4.846025, -13.588887)
+
+[node name="bFukugi050" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.4820319, 0, 1.0714983, 0, 1.1359098, 0, -1.0714983, 0, -0.4820319, -201.87141, 4.9461265, -16.891747)
+
+[node name="bFukugi051" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.2353641, 0, -0.25563183, 0, 1.0153309, 0, 0.25563183, 0, 1.2353641, -202.9044, 5.054005, -20.191042)
+
+[node name="bFukugi052" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.96888113, 0, 0.64697, 0, 1.112705, 0, -0.64697, 0, -0.96888113, -204.3409, 5.140213, -23.094027)
+
+[node name="bFukugi053" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.016659694, 0, 1.2559587, 0, 1.1399994, 0, -1.2559587, 0, -0.016659694, -205.87074, 5.2412305, -26.333216)
+
+[node name="bFukugi054" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.0864295, 0, 0.5132705, 0, 1.0833743, 0, -0.5132705, 0, 1.0864295, -207.06506, 5.3112106, -29.013592)
+
+[node name="bFukugi055" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.1788895, 0, 0.019340876, 0, 1.0357914, 0, -0.019340876, 0, -1.1788895, -207.9526, 5.40986, -32.388107)
+
+[node name="bFukugi056" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.06993954, 0, -1.1968275, 0, 1.0015125, 0, 1.1968275, 0, -0.06993954, -209.0437, 5.495087, -34.705902)
+
+[node name="bFukugi057" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.29783583, 0, -1.1730584, 0, 1.1351645, 0, 1.1730584, 0, -0.29783583, -210.65343, 5.625824, -38.2942)
+
+[node name="bFukugi058" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.6273587, 0, -0.98391676, 0, 1.1463014, 0, 0.98391676, 0, -0.6273587, -211.95323, 5.707955, -41.154392)
+
+[node name="bFukugi059" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.08070648, 0, 1.2173727, 0, 1.0147524, 0, -1.2173727, 0, -0.08070648, -213.32028, 5.828105, -44.192944)
+
+[node name="bFukugi060" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.35241696, 0, -1.1954256, 0, 1.1268885, 0, 1.1954256, 0, 0.35241696, -214.10657, 5.896329, -47.02666)
+
+[node name="bFukugi061" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.10762873, 0, -1.1471039, 0, 1.1386621, 0, 1.1471039, 0, 0.10762873, -214.92616, 6.025473, -50.14264)
+
+[node name="bFukugi062" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.0705197, 0, -0.51096976, 0, 1.0741421, 0, 0.51096976, 0, 1.0705197, -182.15225, 2.1925206, 149.9785)
+
+[node name="bFukugi063" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.04292522, 0, 1.1890906, 0, 1.0076497, 0, -1.1890906, 0, 0.04292522, -184.45053, 2.2364485, 147.52533)
+
+[node name="bFukugi064" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.6032175, 0, -0.9605117, 0, 1.1342062, 0, 0.9605117, 0, -0.6032175, -186.2678, 2.2732205, 145.40186)
+
+[node name="bFukugi065" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1129602, 0, 0.4465508, 0, 1.0054158, 0, -0.4465508, 0, -1.1129602, -187.9181, 2.3082616, 142.47055)
+
+[node name="bFukugi066" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.8903929, 0, 0.7323241, 0, 1.1275594, 0, -0.7323241, 0, -0.8903929, -190.10461, 2.3607922, 138.93886)
+
+[node name="bFukugi067" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.2327888, 0, 0.14411266, 0, 1.1144462, 0, -0.14411266, 0, -1.2327888, -191.461, 2.404675, 135.81857)
+
+[node name="bFukugi068" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.16566896, 0, 1.2356243, 0, 1.0492768, 0, -1.2356243, 0, 0.16566896, -193.57231, 2.457338, 132.54807)
+
+[node name="bFukugi069" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.0420417, 0, 0.6362117, 0, 1.0699534, 0, -0.6362117, 0, 1.0420417, -194.42497, 2.489405, 130.42381)
+
+[node name="bFukugi070" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.09869892, 0, -1.2396306, 0, 1.0404993, 0, 1.2396306, 0, -0.09869892, -195.52249, 2.5391326, 126.83572)
+
+[node name="bFukugi071" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.23543814, 0, 1.1207478, 0, 1.1123751, 0, -1.1207478, 0, 0.23543814, -196.90355, 2.588937, 123.67675)
+
+[node name="bFukugi072" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.9293039, 0, 0.6530647, 0, 1.1316683, 0, -0.6530647, 0, -0.9293039, -198.24066, 2.6387727, 120.54573)
+
+[node name="bFukugi073" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.9397105, 0, 0.63073164, 0, 1.0606596, 0, -0.63073164, 0, -0.9397105, -199.83255, 2.6859813, 117.744675)
+
+[node name="bFukugi074" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.12979901, 0, 1.146485, 0, 1.1191308, 0, -1.146485, 0, -0.12979901, -201.14188, 2.7313766, 115.06372)
+
+[node name="bFukugi075" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.9013232, 0, -0.74301296, 0, 1.1010259, 0, 0.74301296, 0, -0.9013232, -202.3521, 2.7808006, 112.01311)
+
+[node name="bFukugi076" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.2360533, 0, -0.16309147, 0, 1.0698476, 0, 0.16309147, 0, -1.2360533, -203.59157, 2.8325684, 108.7377)
+
+[node name="bFukugi077" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.59760547, 0, 0.95807815, 0, 1.069964, 0, -0.95807815, 0, 0.59760547, -205.07158, 2.8771503, 106.126144)
+
+[node name="bFukugi078" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.53924954, 0, -1.1349585, 0, 1.1144807, 0, 1.1349585, 0, 0.53924954, -205.99539, 2.9208524, 103.30144)
+
+[node name="bFukugi079" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.0125703, 0, 0.74530816, 0, 1.1015056, 0, -0.74530816, 0, -1.0125703, -207.5877, 2.9718585, 100.137955)
+
+[node name="bFukugi080" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.57434654, 0, 1.1148828, 0, 1.0067954, 0, -1.1148828, 0, 0.57434654, -209.06757, 3.0217085, 96.93132)
+
+[node name="bFukugi081" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.7328381, 0, 0.99535614, 0, 1.0073587, 0, -0.99535614, 0, -0.7328381, -210.26599, 3.0694635, 93.83272)
+
+[node name="bFukugi082" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.1332775, 0, 0.26045102, 0, 1.0468943, 0, -0.26045102, 0, -1.1332775, -211.48431, 3.1141198, 91.01762)
+
+[node name="bFukugi083" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.9573714, 0, 0.6106132, 0, 1.0221977, 0, -0.6106132, 0, 0.9573714, -213.42833, 3.1713743, 87.65287)
+
+[node name="bFukugi084" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.7913172, 0, -0.8716338, 0, 1.0704277, 0, 0.8716338, 0, -0.7913172, -213.96498, 3.2107098, 85.0068)
+
+[node name="bFukugi085" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.91825116, 0, 0.65780514, 0, 1.1050409, 0, -0.65780514, 0, 0.91825116, -215.26018, 3.2597747, 82.11224)
+
+[node name="bFukugi086" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1849954, 0, -0.21755117, 0, 1.0521826, 0, 0.21755117, 0, -1.1849954, -216.90253, 3.3134933, 78.86899)
+
+[node name="bFukugi087" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.14679454, 0, 1.1349165, 0, 1.123688, 0, -1.1349165, 0, 0.14679454, -218.92282, 3.3628747, 75.623024)
+
+[node name="bFukugi088" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.11148803, 0, -1.1444902, 0, 1.0973785, 0, 1.1444902, 0, -0.11148803, -220.21758, 3.403663, 72.53578)
+
+[node name="bFukugi089" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.70981765, 0, 0.9642418, 0, 1.1048675, 0, -0.9642418, 0, -0.70981765, -221.46548, 3.4443002, 69.50908)
+
+[node name="bFukugi090" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1287926, 0, 0.067171924, 0, 1.1257479, 0, -0.067171924, 0, -1.1287926, -222.2863, 3.490616, 66.16898)
+
+[node name="bFukugi091" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.500712, 0, 1.0219474, 0, 1.0140989, 0, -1.0219474, 0, -0.500712, -222.9146, 3.5267146, 63.51895)
+
+[node name="bFukugi092" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.2621963, 0, 0.20977083, 0, 1.1008619, 0, -0.20977083, 0, 1.2621963, -223.30428, 3.573875, 59.9221)
+
+[node name="bFukugi093" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.159773, 0, 0.28536773, 0, 1.0293583, 0, -0.28536773, 0, -1.159773, -223.49507, 3.6137056, 56.852444)
+
+[node name="bFukugi094" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.31479764, 0, 1.173968, 0, 1.0273407, 0, -1.173968, 0, 0.31479764, -223.71326, 3.6566525, 53.518757)
+
+[node name="bFukugi095" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.93750024, 0, -0.6576956, 0, 1.1233364, 0, 0.6576956, 0, 0.93750024, -223.00099, 3.7084727, 49.444397)
+
+[node name="bFukugi096" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.0077853, 0, -0.6474872, 0, 1.1293821, 0, 0.6474872, 0, 1.0077853, -222.58443, 3.7362132, 47.404705)
+
+[node name="bFukugi097" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.11097041, 0, -1.2434944, 0, 1.1367021, 0, 1.2434944, 0, 0.11097041, -221.6537, 3.803803, 43.320454)
+
+[node name="bFukugi098" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.47648692, 0, 1.0933404, 0, 1.1302593, 0, -1.0933404, 0, 0.47648692, -221.51727, 3.8603024, 40.039886)
+
+[node name="bFukugi099" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.6390056, 0, -1.0063511, 0, 1.0352336, 0, 1.0063511, 0, -0.6390056, -220.67941, 3.9129438, 36.938087)
+
+[node name="bFukugi100" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.72921467, 0, -0.8941033, 0, 1.0178446, 0, 0.8941033, 0, 0.72921467, -220.3434, 3.9689798, 33.471855)
+
+[node name="bFukugi101" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.6933992, 0, -0.90734047, 0, 1.0338017, 0, 0.90734047, 0, 0.6933992, -219.77902, 4.021873, 30.254362)
+
+[node name="bFukugi102" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.154713, 0, 0.37584037, 0, 1.0512664, 0, -0.37584037, 0, 1.154713, -219.25662, 4.069495, 27.39379)
+
+[node name="bFukugi103" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.18577641, 0, -1.1467316, 0, 1.1239978, 0, 1.1467316, 0, 0.18577641, -218.4583, 4.1274023, 24.062141)
+
+[node name="bFukugi104" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.6284, 0, 0.95070297, 0, 1.1344216, 0, -0.95070297, 0, 0.6284, -218.25925, 4.181318, 20.797155)
+
+[node name="bFukugi105" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.49144462, 0, 1.0225523, 0, 1.1067976, 0, -1.0225523, 0, -0.49144462, -217.39809, 4.227693, 17.885883)
+
+[node name="bFukugi106" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.0873111, 0, -0.27732366, 0, 1.0322708, 0, 0.27732366, 0, -1.0873111, -217.2227, 4.2854013, 14.72429)
+
+[node name="bFukugi107" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.5176657, 0, -1.0948732, 0, 1.1384376, 0, 1.0948732, 0, -0.5176657, -216.1415, 4.340821, 11.787973)
+
+[node name="bFukugi108" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.2781173, 0, 1.168879, 0, 1.0229799, 0, -1.168879, 0, -0.2781173, -215.97153, 4.409266, 8.340143)
+
+[node name="bFukugi109" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.2120827, 0, -1.2346065, 0, 1.0233241, 0, 1.2346065, 0, 0.2120827, -215.43584, 4.4841423, 5.137902)
+
+[node name="bFukugi110" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.1236515, 0, 0.45966515, 0, 1.0184926, 0, -0.45966515, 0, 1.1236515, -215.43726, 4.559711, 2.3142653)
+
+[node name="bFukugi111" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1265281, 0, -0.40984267, 0, 1.1365788, 0, 0.40984267, 0, -1.1265281, -216.22726, 4.679883, -1.8252056)
+
+[node name="bFukugi112" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.70958763, 0, -0.98457485, 0, 1.0285721, 0, 0.98457485, 0, -0.70958763, -217.0952, 4.7749066, -4.7500005)
+
+[node name="bFukugi113" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.0440828, 0, -0.5749695, 0, 1.0720137, 0, 0.5749695, 0, -1.0440828, -218.17752, 4.8670835, -7.499861)
+
+[node name="bFukugi114" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.70058644, 0, -0.95920163, 0, 1.0141923, 0, 0.95920163, 0, 0.70058644, -219.91588, 4.9747596, -10.852645)
+
+[node name="bFukugi115" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.08653135, 0, 1.1704515, 0, 1.1347572, 0, -1.1704515, 0, 0.08653135, -220.72514, 5.0557103, -13.675387)
+
+[node name="bFukugi116" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.86763126, 0, 0.88917893, 0, 1.0166652, 0, -0.88917893, 0, 0.86763126, -222.21588, 5.1624317, -17.123465)
+
+[node name="bFukugi117" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.65728164, 0, 1.017231, 0, 1.0610416, 0, -1.017231, 0, -0.65728164, -223.5299, 5.245479, -19.866215)
+
+[node name="bFukugi118" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.40331882, 0, 1.0873445, 0, 1.0031133, 0, -1.0873445, 0, -0.40331882, -225.07246, 5.3375874, -22.929651)
+
+[node name="bFukugi119" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.9588702, 0, 0.8005255, 0, 1.1023899, 0, -0.8005255, 0, -0.9588702, -226.07024, 5.426183, -25.858513)
+
+[node name="bFukugi120" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.37747478, 0, 1.143086, 0, 1.0198299, 0, -1.143086, 0, -0.37747478, -227.05081, 5.4991136, -28.334068)
+
+[node name="bFukugi121" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.74117327, 0, 0.9938776, 0, 1.128725, 0, -0.9938776, 0, 0.74117327, -228.46323, 5.6027603, -31.96636)
+
+[node name="bFukugi122" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.5774764, 0, 1.0937362, 0, 1.0792172, 0, -1.0937362, 0, -0.5774764, -229.8493, 5.6833572, -34.837543)
+
+[node name="bFukugi123" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.9849922, 0, -0.6421128, 0, 1.0551106, 0, 0.6421128, 0, -0.9849922, -231.16864, 5.7640266, -38.21704)
+
+[node name="bFukugi124" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.5997619, 0, -1.0658325, 0, 1.1173387, 0, 1.0658325, 0, 0.5997619, -232.6028, 5.8457375, -41.162033)
+
+[node name="bFukugi125" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.81655496, 0, -0.8597417, 0, 1.1145132, 0, 0.8597417, 0, -0.81655496, -233.46571, 5.932217, -44.06893)
+
+[node name="bFukugi126" parent="DecorManual/ZonaB/Fukugi1" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.210786, 0, -0.08138839, 0, 1.1283336, 0, 0.08138839, 0, -1.210786, -233.95143, 6.01491, -47.04496)
+
+[node name="bFukugi127" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.6056523, 0, 0.97458816, 0, 1.0377513, 0, -0.97458816, 0, -0.6056523, -167.42259, 2.2288752, 133.49829)
+metadata/coliziune = "none"
+
+[node name="bFukugi128" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1338456, 0, 0.591665, 0, 1.0156305, 0, -0.591665, 0, 1.1338456, -169.39775, 2.2923732, 130.83252)
+metadata/coliziune = "none"
+
+[node name="bFukugi129" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.95248455, 0, -0.65020144, 0, 1.1445484, 0, 0.65020144, 0, 0.95248455, -171.05327, 2.3549137, 127.85684)
+metadata/coliziune = "none"
+
+[node name="bFukugi130" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.04754452, 0, -1.1441488, 0, 1.0239947, 0, 1.1441488, 0, -0.04754452, -172.24556, 2.4032876, 125.27116)
+metadata/coliziune = "none"
+
+[node name="bFukugi131" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.1029078, 0, -0.5574608, 0, 1.1442734, 0, 0.5574608, 0, -1.1029078, -173.50935, 2.4527335, 122.56095)
+metadata/coliziune = "none"
+
+[node name="bFukugi132" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.8660025, 0, -0.80584484, 0, 1.0339799, 0, 0.80584484, 0, 0.8660025, -174.88908, 2.5093453, 119.33912)
+metadata/coliziune = "none"
+
+[node name="bFukugi133" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.9006695, 0, 0.8520425, 0, 1.0315583, 0, -0.8520425, 0, 0.9006695, -176.63863, 2.5597272, 116.45648)
+metadata/coliziune = "none"
+
+[node name="bFukugi134" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.18346487, 0, 1.2437059, 0, 1.0918016, 0, -1.2437059, 0, -0.18346487, -177.89148, 2.6050508, 113.522)
+metadata/coliziune = "none"
+
+[node name="bFukugi135" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.62191755, 0, 1.1031073, 0, 1.034046, 0, -1.1031073, 0, 0.62191755, -182.98425, 2.8007524, 101.79762)
+metadata/coliziune = "none"
+
+[node name="bFukugi136" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.5820576, 0, -1.0127757, 0, 1.0808005, 0, 1.0127757, 0, -0.5820576, -184.13298, 2.8505116, 98.69336)
+metadata/coliziune = "none"
+
+[node name="bFukugi137" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.5614413, 0, 1.1159679, 0, 1.0590962, 0, -1.1159679, 0, -0.5614413, -185.38338, 2.9030225, 95.408325)
+metadata/coliziune = "none"
+
+[node name="bFukugi138" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.07299993, 0, -1.2368022, 0, 1.0017774, 0, 1.2368022, 0, 0.07299993, -186.68884, 2.9483385, 92.69453)
+metadata/coliziune = "none"
+
+[node name="bFukugi139" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.61037904, 0, 1.0790337, 0, 1.1388823, 0, -1.0790337, 0, -0.61037904, -188.35884, 2.9987543, 89.740875)
+metadata/coliziune = "none"
+
+[node name="bFukugi140" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.5436395, 0, 1.0267284, 0, 1.0032054, 0, -1.0267284, 0, 0.5436395, -189.43903, 3.0405507, 86.96775)
+metadata/coliziune = "none"
+
+[node name="bFukugi141" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.060978375, 0, -1.1263195, 0, 1.138337, 0, 1.1263195, 0, 0.060978375, -190.85458, 3.0900846, 83.97628)
+metadata/coliziune = "none"
+
+[node name="bFukugi142" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.1499883, 0, -0.049100436, 0, 1.0881463, 0, 0.049100436, 0, 1.1499883, -191.80133, 3.1348546, 81.19369)
+metadata/coliziune = "none"
+
+[node name="bFukugi143" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1670703, 0, -0.032259554, 0, 1.0609362, 0, 0.032259554, 0, 1.1670703, -193.28146, 3.1899612, 77.89288)
+metadata/coliziune = "none"
+
+[node name="bFukugi144" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.5332155, 0, -1.1089112, 0, 1.1210072, 0, 1.1089112, 0, -0.5332155, -195.02075, 3.2438443, 75.14248)
+metadata/coliziune = "none"
+
+[node name="bFukugi145" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.2169896, 0, 0.26559192, 0, 1.0925827, 0, -0.26559192, 0, 1.2169896, -195.9434, 3.285907, 72.372375)
+metadata/coliziune = "none"
+
+[node name="bFukugi146" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.96952224, 0, 0.6045997, 0, 1.0368435, 0, -0.6045997, 0, -0.96952224, -197.11441, 3.3366284, 69.17424)
+metadata/coliziune = "none"
+
+[node name="bFukugi147" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.5216361, 0, 1.0108514, 0, 1.1369035, 0, -1.0108514, 0, 0.5216361, -198.90947, 3.387787, 66.51829)
+metadata/coliziune = "none"
+
+[node name="bFukugi148" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.2156281, 0, 0.2934844, 0, 1.0721965, 0, -0.2934844, 0, 1.2156281, -200.36508, 3.4499319, 63.472748)
+metadata/coliziune = "none"
+
+[node name="bFukugi149" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.49615163, 0, 1.1297451, 0, 1.0603539, 0, -1.1297451, 0, 0.49615163, -201.35345, 3.520137, 60.089085)
+metadata/coliziune = "none"
+
+[node name="bFukugi150" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.6569021, 0, -0.9616084, 0, 1.0675431, 0, 0.9616084, 0, -0.6569021, -201.81102, 3.594561, 56.75497)
+metadata/coliziune = "none"
+
+[node name="bFukugi151" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.9861747, 0, 0.8035595, 0, 1.0538146, 0, -0.8035595, 0, -0.9861747, -201.3973, 3.6582456, 53.588825)
+metadata/coliziune = "none"
+
+[node name="bFukugi152" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.0682182, 0, 0.45939055, 0, 1.0963554, 0, -0.45939055, 0, -1.0682182, -201.02165, 3.7196338, 50.59579)
+metadata/coliziune = "none"
+
+[node name="bFukugi153" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.0535812, 0, 0.53882784, 0, 1.0604944, 0, -0.53882784, 0, -1.0535812, -200.35335, 3.7984166, 46.696167)
+metadata/coliziune = "none"
+
+[node name="bFukugi154" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.232231, 0, 0.084278114, 0, 1.1138371, 0, -0.084278114, 0, 1.232231, -199.66356, 3.8521876, 43.574993)
+metadata/coliziune = "none"
+
+[node name="bFukugi155" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.35864186, 0, 1.1035174, 0, 1.0595887, 0, -1.1035174, 0, -0.35864186, -199.10565, 3.917951, 39.704075)
+metadata/coliziune = "none"
+
+[node name="bFukugi156" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.099148296, 0, -1.2638122, 0, 1.1113031, 0, 1.2638122, 0, -0.099148296, -198.43922, 3.9734378, 36.421535)
+metadata/coliziune = "none"
+
+[node name="bFukugi157" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1148123, 0, 0.5756396, 0, 1.0621305, 0, -0.5756396, 0, 1.1148123, -198.01399, 4.0180473, 33.723873)
+metadata/coliziune = "none"
+
+[node name="bFukugi158" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.2205869, 0, 0.06857178, 0, 1.0504277, 0, -0.06857178, 0, 1.2205869, -197.46109, 4.073106, 30.404516)
+metadata/coliziune = "none"
+
+[node name="bFukugi159" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.4367498, 0, -1.0684237, 0, 1.0747569, 0, 1.0684237, 0, -0.4367498, -196.78003, 4.1352677, 26.785713)
+metadata/coliziune = "none"
+
+[node name="bFukugi160" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.163616, 0, 0.22752169, 0, 1.1012454, 0, -0.22752169, 0, -1.163616, -196.15645, 4.1834216, 23.954763)
+metadata/coliziune = "none"
+
+[node name="bFukugi161" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.2257491, 0, 0.25671488, 0, 1.1474118, 0, -0.25671488, 0, -1.2257491, -195.81514, 4.2339206, 20.922337)
+metadata/coliziune = "none"
+
+[node name="bFukugi162" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.35953695, 0, -1.1375958, 0, 1.1322125, 0, 1.1375958, 0, -0.35953695, -195.04123, 4.298476, 17.04106)
+metadata/coliziune = "none"
+
+[node name="bFukugi163" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.0654277, 0, 0.51002145, 0, 1.0671756, 0, -0.51002145, 0, 1.0654277, -194.2905, 4.351001, 13.863716)
+metadata/coliziune = "none"
+
+[node name="bFukugi164" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.1380209, 0, 0.23312251, 0, 1.1338369, 0, -0.23312251, 0, 1.1380209, -194.36179, 4.39734, 10.914808)
+metadata/coliziune = "none"
+
+[node name="bFukugi165" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.2824355, 0, -1.1177235, 0, 1.1051503, 0, 1.1177235, 0, 0.2824355, -193.88582, 4.4468036, 7.828784)
+metadata/coliziune = "none"
+
+[node name="bFukugi166" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.83996135, 0, -0.9022263, 0, 1.0663514, 0, 0.9022263, 0, 0.83996135, -193.81094, 4.498983, 4.5227323)
+metadata/coliziune = "none"
+
+[node name="bFukugi167" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.47371954, 0, -1.0868657, 0, 1.1320366, 0, 1.0868657, 0, -0.47371954, -193.74326, 4.578199, -0.39575458)
+metadata/coliziune = "none"
+
+[node name="bFukugi168" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.4547807, 0, 1.0242715, 0, 1.0692517, 0, -1.0242715, 0, 0.4547807, -194.39398, 4.643819, -3.875814)
+metadata/coliziune = "none"
+
+[node name="bFukugi169" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.0552878, 0, -0.47053114, 0, 1.1177126, 0, 0.47053114, 0, -1.0552878, -194.89148, 4.7051015, -7.0735245)
+metadata/coliziune = "none"
+
+[node name="bFukugi170" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.035098366, 0, 1.1281245, 0, 1.1129758, 0, -1.1281245, 0, -0.035098366, -195.22775, 4.747567, -9.3175955)
+metadata/coliziune = "none"
+
+[node name="bFukugi171" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.37282848, 0, 1.0947425, 0, 1.0588622, 0, -1.0947425, 0, -0.37282848, -196.75949, 4.833266, -13.093617)
+metadata/coliziune = "none"
+
+[node name="bFukugi172" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.32920143, 0, -1.1649927, 0, 1.0354768, 0, 1.1649927, 0, -0.32920143, -198.26483, 4.9099817, -16.36714)
+metadata/coliziune = "none"
+
+[node name="bFukugi173" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.254476, 0, 1.1142994, 0, 1.0068334, 0, -1.1142994, 0, 0.254476, -199.56801, 4.9966836, -19.338179)
+metadata/coliziune = "none"
+
+[node name="bFukugi174" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.48278227, 0, 1.1073399, 0, 1.13802, 0, -1.1073399, 0, -0.48278227, -200.99463, 5.0965495, -22.222446)
+metadata/coliziune = "none"
+
+[node name="bFukugi175" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.9264415, 0, 0.8524932, 0, 1.0384123, 0, -0.8524932, 0, -0.9264415, -201.963, 5.184471, -25.227905)
+metadata/coliziune = "none"
+
+[node name="bFukugi176" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.036322743, 0, 1.2460278, 0, 1.1281065, 0, -1.2460278, 0, 0.036322743, -203.67677, 5.2968464, -28.29808)
+metadata/coliziune = "none"
+
+[node name="bFukugi177" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.21212716, 0, 1.1600721, 0, 1.0173991, 0, -1.1600721, 0, -0.21212716, -204.55151, 5.380906, -31.445232)
+metadata/coliziune = "none"
+
+[node name="bFukugi178" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.44874117, 0, 1.0317502, 0, 1.0078284, 0, -1.0317502, 0, -0.44874117, -205.88399, 5.477423, -34.321095)
+metadata/coliziune = "none"
+
+[node name="bFukugi179" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.46211258, 0, -1.0328082, 0, 1.0580155, 0, 1.0328082, 0, 0.46211258, -207.014, 5.5669174, -37.214355)
+metadata/coliziune = "none"
+
+[node name="bFukugi180" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.198039, 0, 0.03336695, 0, 1.1487111, 0, -0.03336695, 0, -1.198039, -208.12637, 5.673641, -40.132927)
+metadata/coliziune = "none"
+
+[node name="bFukugi181" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1921957, 0, 0.25276637, 0, 1.1481936, 0, -0.25276637, 0, -1.1921957, -209.47916, 5.818808, -43.36298)
+metadata/coliziune = "none"
+
+[node name="bFukugi182" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.1390531, 0, -0.019482633, 0, 1.1009376, 0, 0.019482633, 0, -1.1390531, -210.96909, 5.950954, -46.706116)
+metadata/coliziune = "none"
+
+[node name="bFukugi183" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.0835663, 0, 0.49367586, 0, 1.1152302, 0, -0.49367586, 0, 1.0835663, -212.05446, 6.040579, -49.513992)
+metadata/coliziune = "none"
+
+[node name="bFukugi184" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1547295, 0, 0.1932917, 0, 1.0714159, 0, -0.1932917, 0, -1.1547295, -185.48239, 2.221345, 150.44147)
+metadata/coliziune = "none"
+
+[node name="bFukugi185" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.29185134, 0, 1.1837023, 0, 1.1011137, 0, -1.1837023, 0, -0.29185134, -187.60129, 2.2574134, 148.30312)
+metadata/coliziune = "none"
+
+[node name="bFukugi186" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1116674, 0, 0.3298943, 0, 1.0172521, 0, -0.3298943, 0, -1.1116674, -189.56995, 2.2963593, 145.58969)
+metadata/coliziune = "none"
+
+[node name="bFukugi187" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.46730217, 0, 1.0553268, 0, 1.0502847, 0, -1.0553268, 0, 0.46730217, -191.1582, 2.3296, 142.60439)
+metadata/coliziune = "none"
+
+[node name="bFukugi188" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.086983, 0, 0.62428015, 0, 1.0498359, 0, -0.62428015, 0, 1.086983, -193.10864, 2.3771822, 139.5334)
+metadata/coliziune = "none"
+
+[node name="bFukugi189" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.0962923, 0, -0.55824745, 0, 1.0792803, 0, 0.55824745, 0, -1.0962923, -194.21616, 2.416967, 136.84927)
+metadata/coliziune = "none"
+
+[node name="bFukugi190" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.0630001, 0, -0.37796736, 0, 1.086977, 0, 0.37796736, 0, -1.0630001, -196.12251, 2.4629693, 133.57225)
+metadata/coliziune = "none"
+
+[node name="bFukugi191" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1409652, 0, 0.052929174, 0, 1.0294139, 0, -0.052929174, 0, -1.1409652, -197.21512, 2.5070164, 130.54901)
+metadata/coliziune = "none"
+
+[node name="bFukugi192" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.47416613, 0, -1.0575107, 0, 1.0810895, 0, 1.0575107, 0, 0.47416613, -198.37874, 2.5464623, 127.80248)
+metadata/coliziune = "none"
+
+[node name="bFukugi193" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1714475, 0, -0.3960045, 0, 1.0851655, 0, 0.3960045, 0, -1.1714475, -199.71999, 2.5948372, 124.58653)
+metadata/coliziune = "none"
+
+[node name="bFukugi194" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.267514, 0, 0.0130457, 0, 1.0362192, 0, -0.0130457, 0, 1.267514, -200.7136, 2.6368432, 121.96027)
+metadata/coliziune = "none"
+
+[node name="bFukugi195" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.1781051, 0, 1.2069153, 0, 1.0531659, 0, -1.2069153, 0, 0.1781051, -202.28714, 2.684517, 119.12353)
+metadata/coliziune = "none"
+
+[node name="bFukugi196" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.56159735, 0, 1.1128929, 0, 1.1349944, 0, -1.1128929, 0, -0.56159735, -203.38107, 2.7329285, 116.006454)
+metadata/coliziune = "none"
+
+[node name="bFukugi197" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1945801, 0, 0.01630885, 0, 1.0497005, 0, -0.01630885, 0, -1.1945801, -205.0218, 2.7835953, 113.01976)
+metadata/coliziune = "none"
+
+[node name="bFukugi198" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.3578631, 0, 1.1721357, 0, 1.0654022, 0, -1.1721357, 0, 0.3578631, -206.27402, 2.8232117, 110.62498)
+metadata/coliziune = "none"
+
+[node name="bFukugi199" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.3803003, 0, 1.19286, 0, 1.1164801, 0, -1.19286, 0, 0.3803003, -207.45042, 2.8794298, 106.99049)
+metadata/coliziune = "none"
+
+[node name="bFukugi200" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.60494643, 0, -1.0254608, 0, 1.0509169, 0, 1.0254608, 0, 0.60494643, -208.58217, 2.922794, 104.285034)
+metadata/coliziune = "none"
+
+[node name="bFukugi201" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1823353, 0, -0.058751557, 0, 1.0316031, 0, 0.058751557, 0, -1.1823353, -209.96063, 2.9688494, 101.40405)
+metadata/coliziune = "none"
+
+[node name="bFukugi202" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.64670885, 0, 1.0613167, 0, 1.0548447, 0, -1.0613167, 0, -0.64670885, -211.58708, 3.0191257, 98.23331)
+metadata/coliziune = "none"
+
+[node name="bFukugi203" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.31859106, 0, 1.1712807, 0, 1.0331665, 0, -1.1712807, 0, 0.31859106, -212.83105, 3.0708683, 94.87072)
+metadata/coliziune = "none"
+
+[node name="bFukugi204" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.194542, 0, 0.0015321259, 0, 1.0211232, 0, -0.0015321259, 0, -1.194542, -214.24208, 3.1213274, 91.721954)
+metadata/coliziune = "none"
+
+[node name="bFukugi205" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.15268913, 0, 1.1653016, 0, 1.1034395, 0, -1.1653016, 0, -0.15268913, -215.27608, 3.1609442, 89.249466)
+metadata/coliziune = "none"
+
+[node name="bFukugi206" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.1234926, 0, -0.5498853, 0, 1.1061457, 0, 0.5498853, 0, 1.1234926, -217.10252, 3.2105799, 86.26682)
+metadata/coliziune = "none"
+
+[node name="bFukugi207" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.04251084, 0, -1.1372186, 0, 1.0464661, 0, 1.1372186, 0, 0.04251084, -217.89778, 3.256863, 83.26953)
+metadata/coliziune = "none"
+
+[node name="bFukugi208" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.118644, 0, -0.18258753, 0, 1.1274166, 0, 0.18258753, 0, 1.118644, -219.39325, 3.307032, 80.185005)
+metadata/coliziune = "none"
+
+[node name="bFukugi209" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.61129546, 0, 0.9515945, 0, 1.1111472, 0, -0.9515945, 0, -0.61129546, -220.8347, 3.3491194, 77.5132)
+metadata/coliziune = "none"
+
+[node name="bFukugi210" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.143202, 0, -0.037068486, 0, 1.0531399, 0, 0.037068486, 0, 1.143202, -222.73837, 3.4041824, 73.361855)
+metadata/coliziune = "none"
+
+[node name="bFukugi211" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.8461116, 0, 0.80570614, 0, 1.0854955, 0, -0.80570614, 0, 0.8461116, -224.01276, 3.4425206, 70.33069)
+metadata/coliziune = "none"
+
+[node name="bFukugi212" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1672645, 0, 0.3183999, 0, 1.1327788, 0, -0.3183999, 0, 1.1672645, -224.71532, 3.481833, 67.461296)
+metadata/coliziune = "none"
+
+[node name="bFukugi213" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.39420864, 0, 1.0758315, 0, 1.0862046, 0, -1.0758315, 0, -0.39420864, -225.5363, 3.5227625, 64.46607)
+metadata/coliziune = "none"
+
+[node name="bFukugi214" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1081432, 0, 0.5808951, 0, 1.1276803, 0, -0.5808951, 0, -1.1081432, -226.33241, 3.5652237, 61.0519)
+metadata/coliziune = "none"
+
+[node name="bFukugi215" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1538837, 0, 0.2116979, 0, 1.049391, 0, -0.2116979, 0, 1.1538837, -226.249, 3.6075182, 57.74919)
+metadata/coliziune = "none"
+
+[node name="bFukugi216" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.94617105, 0, 0.8189593, 0, 1.0987841, 0, -0.8189593, 0, -0.94617105, -226.3552, 3.650081, 54.303192)
+metadata/coliziune = "none"
+
+[node name="bFukugi217" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1275377, 0, -0.323601, 0, 1.1020706, 0, 0.323601, 0, -1.1275377, -226.3904, 3.6956685, 50.786774)
+metadata/coliziune = "none"
+
+[node name="bFukugi218" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.20687334, 0, 1.1490915, 0, 1.075707, 0, -1.1490915, 0, 0.20687334, -225.58734, 3.7353005, 47.693584)
+metadata/coliziune = "none"
+
+[node name="bFukugi219" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.1955823, 0, 0.04901407, 0, 1.0817286, 0, -0.04901407, 0, 1.1955823, -224.93098, 3.790576, 44.123325)
+metadata/coliziune = "none"
+
+[node name="bFukugi220" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.1991099, 0, 0.24453093, 0, 1.1346697, 0, -0.24453093, 0, -1.1991099, -224.40898, 3.8421333, 41.056477)
+metadata/coliziune = "none"
+
+[node name="bFukugi221" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.1471448, 0, 0.10801682, 0, 1.1335355, 0, -0.10801682, 0, 1.1471448, -223.96027, 3.8985286, 37.559364)
+metadata/coliziune = "none"
+
+[node name="bFukugi222" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.1367103, 0, 0.045566622, 0, 1.0167696, 0, -0.045566622, 0, 1.1367103, -223.38564, 3.952589, 34.202053)
+metadata/coliziune = "none"
+
+[node name="bFukugi223" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1897796, 0, -0.2688923, 0, 1.0322275, 0, 0.2688923, 0, -1.1897796, -222.93623, 3.9981465, 31.38073)
+metadata/coliziune = "none"
+
+[node name="bFukugi224" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.141706, 0, 0.4441067, 0, 1.0440807, 0, -0.4441067, 0, 1.141706, -222.33092, 4.0551844, 28.062307)
+metadata/coliziune = "none"
+
+[node name="bFukugi225" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.78727186, 0, 0.99498206, 0, 1.1102346, 0, -0.99498206, 0, -0.78727186, -221.5197, 4.1174684, 24.516136)
+metadata/coliziune = "none"
+
+[node name="bFukugi226" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.44501, 0, 1.1975566, 0, 1.1258379, 0, -1.1975566, 0, -0.44501, -221.30984, 4.167582, 21.541697)
+metadata/coliziune = "none"
+
+[node name="bFukugi227" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.9036822, 0, 0.8449085, 0, 1.0304137, 0, -0.8449085, 0, -0.9036822, -220.73605, 4.2245083, 18.406742)
+metadata/coliziune = "none"
+
+[node name="bFukugi228" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.8266443, 0, -0.779087, 0, 1.1417811, 0, 0.779087, 0, -0.8266443, -220.23135, 4.2946873, 14.717957)
+metadata/coliziune = "none"
+
+[node name="bFukugi229" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.079068, 0, 0.4790648, 0, 1.1431767, 0, -0.4790648, 0, -1.079068, -219.17679, 4.353389, 11.6217785)
+metadata/coliziune = "none"
+
+[node name="bFukugi230" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.8194792, 0, 0.84744674, 0, 1.1317962, 0, -0.84744674, 0, -0.8194792, -218.50351, 4.4306526, 8.094363)
+metadata/coliziune = "none"
+
+[node name="bFukugi231" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.1931467, 0, 0.03432345, 0, 1.0734832, 0, -0.03432345, 0, 1.1931467, -218.45872, 4.519678, 4.6266503)
+metadata/coliziune = "none"
+
+[node name="bFukugi232" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.6255461, 0, 1.0986131, 0, 1.0571027, 0, -1.0986131, 0, -0.6255461, -218.67792, 4.5963593, 1.8509787)
+metadata/coliziune = "none"
+
+[node name="bFukugi233" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.206533, 0, 0.20359392, 0, 1.0824431, 0, -0.20359392, 0, 1.206533, -219.2167, 4.70353, -1.7509372)
+metadata/coliziune = "none"
+
+[node name="bFukugi234" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.91859376, 0, 0.67103475, 0, 1.0652025, 0, -0.67103475, 0, -0.91859376, -220.19403, 4.7865515, -4.2399826)
+metadata/coliziune = "none"
+
+[node name="bFukugi235" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.0036801, 0, -0.7501991, 0, 1.0488132, 0, 0.7501991, 0, -1.0036801, -221.51378, 4.9074526, -7.8403883)
+metadata/coliziune = "none"
+
+[node name="bFukugi236" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.2666341, 0, 0.0012740665, 0, 1.0784097, 0, -0.0012740665, 0, 1.2666341, -223.04443, 4.9952497, -10.460413)
+metadata/coliziune = "none"
+
+[node name="bFukugi237" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.44080257, 0, -1.0419089, 0, 1.1062453, 0, 1.0419089, 0, -0.44080257, -224.40887, 5.0911922, -13.74848)
+metadata/coliziune = "none"
+
+[node name="bFukugi238" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.83951813, 0, 0.8219191, 0, 1.1385362, 0, -0.8219191, 0, -0.83951813, -227.7711, 5.361233, -22.73243)
+metadata/coliziune = "none"
+
+[node name="bFukugi239" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1546142, 0, -0.3128468, 0, 1.113955, 0, 0.3128468, 0, -1.1546142, -229.36232, 5.463307, -25.927488)
+metadata/coliziune = "none"
+
+[node name="bFukugi240" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.67372936, 0, -0.99543583, 0, 1.015058, 0, 0.99543583, 0, 0.67372936, -230.67876, 5.5697217, -29.709423)
+metadata/coliziune = "none"
+
+[node name="bFukugi241" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.93481493, 0, 0.6424766, 0, 1.1237737, 0, -0.6424766, 0, -0.93481493, -231.73181, 5.6376023, -32.129276)
+metadata/coliziune = "none"
+
+[node name="bFukugi242" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.0694706, 0, -0.54476386, 0, 1.0870991, 0, 0.54476386, 0, 1.0694706, -233.36119, 5.717916, -35.052372)
+metadata/coliziune = "none"
+
+[node name="bFukugi243" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.5351753, 0, 1.0233891, 0, 1.1218728, 0, -1.0233891, 0, 0.5351753, -234.39737, 5.786607, -37.81521)
+metadata/coliziune = "none"
+
+[node name="bFukugi244" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.0779723, 0, -0.65336734, 0, 1.1242362, 0, 0.65336734, 0, -1.0779723, -235.71254, 5.8877735, -41.299995)
+metadata/coliziune = "none"
+
+[node name="bFukugi245" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.94706625, 0, 0.7636476, 0, 1.0548973, 0, -0.7636476, 0, 0.94706625, -236.46863, 5.9768963, -44.390575)
+metadata/coliziune = "none"
+
+[node name="bFukugi246" parent="DecorManual/ZonaB/Fukugi2" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.15271758, 0, 1.1523632, 0, 1.1181105, 0, -1.1523632, 0, -0.15271758, -236.8188, 6.073413, -48.036827)
+metadata/coliziune = "none"
+
+[node name="bFukugi247" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.70790243, 0, 0.9505061, 0, 1.072767, 0, -0.9505061, 0, -0.70790243, -164.16086, 2.2002327, 132.89462)
+metadata/coliziune = "none"
+
+[node name="bFukugi248" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.093412, 0, -0.60843337, 0, 1.0893334, 0, 0.60843337, 0, 1.093412, -168.05806, 2.316562, 128.10245)
+metadata/coliziune = "none"
+
+[node name="bFukugi249" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.18561302, 0, -1.1958542, 0, 1.0572673, 0, 1.1958542, 0, 0.18561302, -170.47382, 2.423779, 122.24399)
+metadata/coliziune = "none"
+
+[node name="bFukugi250" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.4835077, 0, 1.0813962, 0, 1.1035274, 0, -1.0813962, 0, -0.4835077, -173.158, 2.533903, 116.16704)
+metadata/coliziune = "none"
+
+[node name="bFukugi251" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.1774598, 0, -0.13830543, 0, 1.0064311, 0, 0.13830543, 0, 1.1774598, -181.06195, 2.8334708, 98.46157)
+metadata/coliziune = "none"
+
+[node name="bFukugi252" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.0171237, 0, -0.55797267, 0, 1.0840106, 0, 0.55797267, 0, -1.0171237, -183.44247, 2.9263296, 92.84563)
+metadata/coliziune = "none"
+
+[node name="bFukugi253" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.47775653, 0, 1.0189959, 0, 1.0342746, 0, -1.0189959, 0, -0.47775653, -186.2762, 3.0298874, 86.54293)
+metadata/coliziune = "none"
+
+[node name="bFukugi254" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.852097, 0, -0.75251544, 0, 1.052641, 0, 0.75251544, 0, -0.852097, -188.94646, 3.127326, 80.82979)
+metadata/coliziune = "none"
+
+[node name="bFukugi255" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.0084506, 0, -0.7783148, 0, 1.0704876, 0, 0.7783148, 0, 1.0084506, -191.32913, 3.2214644, 75.38042)
+metadata/coliziune = "none"
+
+[node name="bFukugi256" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.19182092, 0, -1.1139339, 0, 1.0132551, 0, 1.1139339, 0, 0.19182092, -193.8886, 3.3232763, 69.564865)
+metadata/coliziune = "none"
+
+[node name="bFukugi257" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.9072513, 0, -0.66600955, 0, 1.1027025, 0, 0.66600955, 0, -0.9072513, -196.86307, 3.4459777, 63.23044)
+metadata/coliziune = "none"
+
+[node name="bFukugi258" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1922808, 0, -0.1695508, 0, 1.0106891, 0, 0.1695508, 0, 1.1922808, -198.55759, 3.5795498, 57.043606)
+metadata/coliziune = "none"
+
+[node name="bFukugi259" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.0285513, 0, -0.566735, 0, 1.0610769, 0, 0.566735, 0, -1.0285513, -198.49773, 3.7102437, 50.886898)
+metadata/coliziune = "none"
+
+[node name="bFukugi260" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.2271823, 0, 0.09838563, 0, 1.1141254, 0, -0.09838563, 0, 1.2271823, -196.98741, 3.8351548, 44.534706)
+metadata/coliziune = "none"
+
+[node name="bFukugi261" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.33005938, 0, 1.1042825, 0, 1.0301149, 0, -1.1042825, 0, -0.33005938, -195.86188, 3.939365, 38.43561)
+metadata/coliziune = "none"
+
+[node name="bFukugi262" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.0953962, 0, 0.60937506, 0, 1.0480683, 0, -0.60937506, 0, -1.0953962, -192.57742, 4.2557454, 19.998947)
+metadata/coliziune = "none"
+
+[node name="bFukugi263" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.832884, 0, -0.7529543, 0, 1.1086915, 0, 0.7529543, 0, 0.832884, -191.69026, 4.356364, 13.912307)
+metadata/coliziune = "none"
+
+[node name="bFukugi264" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.46529657, 0, 1.0542562, 0, 1.1280863, 0, -1.0542562, 0, 0.46529657, -191.1804, 4.466364, 7.006736)
+metadata/coliziune = "none"
+
+[node name="bFukugi265" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.9269305, 0, 0.8164673, 0, 1.13819, 0, -0.8164673, 0, -0.9269305, -190.8284, 4.5923095, -0.91242135)
+metadata/coliziune = "none"
+
+[node name="bFukugi266" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.03815348, 0, -1.2324258, 0, 1.037681, 0, 1.2324258, 0, -0.03815348, -192.21138, 4.703987, -6.6952376)
+metadata/coliziune = "none"
+
+[node name="bFukugi267" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1098194, 0, -0.25616288, 0, 1.0846553, 0, 0.25616288, 0, -1.1098194, -193.7054, 4.851076, -13.540815)
+metadata/coliziune = "none"
+
+[node name="bFukugi268" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.0312821, 0, -0.6430505, 0, 1.0884355, 0, 0.6430505, 0, -1.0312821, -196.52214, 4.9969616, -19.47134)
+metadata/coliziune = "none"
+
+[node name="bFukugi269" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.9342718, 0, -0.84960514, 0, 1.065749, 0, 0.84960514, 0, 0.9342718, -198.95383, 5.16698, -25.127028)
+metadata/coliziune = "none"
+
+[node name="bFukugi270" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.1456611, 0, 0.18074481, 0, 1.0932052, 0, -0.18074481, 0, 1.1456611, -201.12694, 5.3723187, -30.923141)
+metadata/coliziune = "none"
+
+[node name="bFukugi271" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.32216433, 0, -1.2221427, 0, 1.0509334, 0, 1.2221427, 0, -0.32216433, -203.9644, 5.5943656, -37.12921)
+metadata/coliziune = "none"
+
+[node name="bFukugi272" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.78396976, 0, 0.96233237, 0, 1.1174421, 0, -0.96233237, 0, 0.78396976, -206.45526, 5.784692, -42.478188)
+metadata/coliziune = "none"
+
+[node name="bFukugi273" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.445973, 0, -1.0420027, 0, 1.1072497, 0, 1.0420027, 0, -0.445973, -208.55322, 6.046703, -48.26391)
+metadata/coliziune = "none"
+
+[node name="bFukugi274" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1740096, 0, 0.18901722, 0, 1.0011078, 0, -0.18901722, 0, 1.1740096, -186.33662, 2.2102818, 153.96144)
+metadata/coliziune = "none"
+
+[node name="bFukugi275" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.40839896, 0, -1.0612593, 0, 1.1330663, 0, 1.0612593, 0, 0.40839896, -190.47906, 2.2713518, 149.55649)
+metadata/coliziune = "none"
+
+[node name="bFukugi276" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.149174, 0, -0.306532, 0, 1.011066, 0, 0.306532, 0, -1.149174, -194.39058, 2.346946, 143.77019)
+metadata/coliziune = "none"
+
+[node name="bFukugi277" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.2764164, 0, 0.06928673, 0, 1.1110743, 0, -0.06928673, 0, 1.2764164, -196.76752, 2.4231513, 138.1173)
+metadata/coliziune = "none"
+
+[node name="bFukugi278" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.009484089, 0, -1.1575578, 0, 1.0333171, 0, 1.1575578, 0, -0.009484089, -199.28896, 2.4938843, 132.84647)
+metadata/coliziune = "none"
+
+[node name="bFukugi279" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.2578906, 0, 1.155628, 0, 1.0913444, 0, -1.155628, 0, 0.2578906, -202.14032, 2.592848, 126.0974)
+metadata/coliziune = "none"
+
+[node name="bFukugi280" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.61611927, 0, 1.105147, 0, 1.0903645, 0, -1.105147, 0, 0.61611927, -204.66246, 2.6820726, 120.54821)
+metadata/coliziune = "none"
+
+[node name="bFukugi281" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.7078665, 0, -1.0196217, 0, 1.1468343, 0, 1.0196217, 0, 0.7078665, -207.39153, 2.7798278, 114.38522)
+metadata/coliziune = "none"
+
+[node name="bFukugi282" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1274503, 0, -0.43178362, 0, 1.1145111, 0, 0.43178362, 0, -1.1274503, -210.29181, 2.8696918, 108.95159)
+metadata/coliziune = "none"
+
+[node name="bFukugi283" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.29706952, 0, -1.1462381, 0, 1.1149734, 0, 1.1462381, 0, -0.29706952, -212.58267, 2.9589813, 103.27619)
+metadata/coliziune = "none"
+
+[node name="bFukugi284" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.1110992, 0, 0.6003243, 0, 1.1401601, 0, -0.6003243, 0, 1.1110992, -215.02602, 3.049322, 97.48301)
+metadata/coliziune = "none"
+
+[node name="bFukugi285" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.5397378, 0, 1.1417346, 0, 1.008492, 0, -1.1417346, 0, 0.5397378, -217.67369, 3.1397192, 91.78693)
+metadata/coliziune = "none"
+
+[node name="bFukugi286" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.040679, 0, -0.48042014, 0, 1.0455713, 0, 0.48042014, 0, -1.040679, -220.16904, 3.2320368, 85.84411)
+metadata/coliziune = "none"
+
+[node name="bFukugi287" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.8979238, 0, 0.8461458, 0, 1.0392079, 0, -0.8461458, 0, -0.8979238, -227.51637, 3.4804235, 68.30058)
+metadata/coliziune = "none"
+
+[node name="bFukugi288" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.0519353, 0, -0.6846547, 0, 1.0669303, 0, 0.6846547, 0, 1.0519353, -229.27359, 3.5621176, 61.7372)
+metadata/coliziune = "none"
+
+[node name="bFukugi289" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.0984826, 0, 0.3018101, 0, 1.0624821, 0, -0.3018101, 0, -1.0984826, -229.34183, 3.638141, 55.60327)
+metadata/coliziune = "none"
+
+[node name="bFukugi290" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.8815922, 0, 0.69489694, 0, 1.0147353, 0, -0.69489694, 0, 0.8815922, -229.37773, 3.7081501, 50.236107)
+metadata/coliziune = "none"
+
+[node name="bFukugi291" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.2319925, 0, -0.0446222, 0, 1.1176548, 0, 0.0446222, 0, -1.2319925, -227.4244, 3.8233023, 42.433624)
+metadata/coliziune = "none"
+
+[node name="bFukugi292" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.43717316, 0, 1.036983, 0, 1.1308386, 0, -1.036983, 0, -0.43717316, -226.40161, 3.9222918, 36.09363)
+metadata/coliziune = "none"
+
+[node name="bFukugi293" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.5056145, 0, 1.1222854, 0, 1.0897071, 0, -1.1222854, 0, 0.5056145, -225.56961, 4.0203876, 30.141285)
+metadata/coliziune = "none"
+
+[node name="bFukugi294" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.91525644, 0, -0.6978183, 0, 1.0040448, 0, 0.6978183, 0, 0.91525644, -224.63017, 4.1319118, 23.738369)
+metadata/coliziune = "none"
+
+[node name="bFukugi295" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.73123443, 0, 0.97064364, 0, 1.0165708, 0, -0.97064364, 0, -0.73123443, -223.3243, 4.2443423, 17.776825)
+metadata/coliziune = "none"
+
+[node name="bFukugi296" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1539383, 0, -0.09977295, 0, 1.0587857, 0, 0.09977295, 0, -1.1539383, -222.0524, 4.3814955, 11.187662)
+metadata/coliziune = "none"
+
+[node name="bFukugi297" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.4259062, 0, 1.0499324, 0, 1.1378781, 0, -1.0499324, 0, -0.4259062, -221.2593, 4.5309505, 4.964472)
+metadata/coliziune = "none"
+
+[node name="bFukugi298" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.65242785, 0, -1.0094745, 0, 1.1304836, 0, 1.0094745, 0, 0.65242785, -222.1664, 4.696489, -0.6307266)
+metadata/coliziune = "none"
+
+[node name="bFukugi299" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.90790117, 0, 0.82475924, 0, 1.0105811, 0, -0.82475924, 0, -0.90790117, -224.61378, 4.89696, -6.668665)
+metadata/coliziune = "none"
+
+[node name="bFukugi300" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.6905666, 0, 1.062341, 0, 1.098675, 0, -1.062341, 0, -0.6905666, -231.62433, 5.445371, -24.392242)
+metadata/coliziune = "none"
+
+[node name="bFukugi301" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1089787, 0, -0.20510855, 0, 1.1323807, 0, 0.20510855, 0, -1.1089787, -234.37611, 5.62404, -30.687462)
+metadata/coliziune = "none"
+
+[node name="bFukugi302" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.87939316, 0, -0.92577463, 0, 1.0656227, 0, 0.92577463, 0, -0.87939316, -236.75998, 5.787476, -36.640053)
+metadata/coliziune = "none"
+
+[node name="bFukugi303" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.2038425, 0, -0.0762838, 0, 1.0697404, 0, 0.0762838, 0, 1.2038425, -238.84995, 5.968645, -42.972492)
+metadata/coliziune = "none"
+
+[node name="bFukugiG000" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.2851991, 0, 1.1715696, 0, 1.0112122, 0, -1.1715696, 0, 0.2851991, -154.2204, 2.1814818, 125.748024)
+metadata/coliziune = "none"
+
+[node name="bFukugiG001" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.45614418, 0, -1.1372576, 0, 1.0253142, 0, 1.1372576, 0, 0.45614418, -157.83432, 2.2108393, 126.78822)
+metadata/coliziune = "none"
+
+[node name="bFukugiG002" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1033262, 0, 0.23077951, 0, 1.1492035, 0, -0.23077951, 0, -1.1033262, -160.32576, 2.2683225, 124.80328)
+metadata/coliziune = "none"
+
+[node name="bTufa000" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.7316136, 0, -1.1508185, 0, 1.3636868, 0, 1.1508185, 0, 0.7316136, -160.12526, 2.3803985, 121.56811)
+metadata/coliziune = "none"
+
+[node name="bTufa001" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.0826633, 0, 0.6445829, 0, 1.2600187, 0, -0.6445829, 0, 1.0826633, -156.80275, 2.3036284, 124.061295)
+metadata/coliziune = "none"
+
+[node name="bTufa002" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-1.0292742, 0, -0.055594023, 0, 1.0307745, 0, 0.055594023, 0, -1.0292742, -158.90814, 2.4470463, 115.72592)
+metadata/coliziune = "none"
+
+[node name="bTufa003" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.2334952, 0, -0.3273811, 0, 1.276201, 0, 0.3273811, 0, -1.2334952, -164.40501, 2.5056324, 116.26331)
+metadata/coliziune = "none"
+
+[node name="bTufa004" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.9913906, 0, -0.6077396, 0, 1.1628425, 0, 0.6077396, 0, 0.9913906, -160.73204, 2.417986, 119.38853)
+metadata/coliziune = "none"
+
+[node name="bFukugiG003" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.0614418, 0, -0.49443993, 0, 1.148989, 0, 0.49443993, 0, 1.0614418, -176.76614, 3.0000324, 84.96152)
+metadata/coliziune = "none"
+
+[node name="bFukugiG004" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.1171291, 0, 0.05221606, 0, 1.0154741, 0, -0.05221606, 0, -1.1171291, -177.31277, 3.0274825, 83.451965)
+metadata/coliziune = "none"
+
+[node name="bFukugiG005" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.16214284, 0, 1.2799282, 0, 1.079535, 0, -1.2799282, 0, -0.16214284, -178.95016, 3.0059414, 85.3977)
+metadata/coliziune = "none"
+
+[node name="bTufa005" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.67016363, 0, 1.2567002, 0, 1.4242241, 0, -1.2567002, 0, 0.67016363, -175.70523, 3.116089, 81.70014)
+metadata/coliziune = "none"
+
+[node name="bTufa006" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.1807239, 0, -0.4487925, 0, 1.2631404, 0, 0.4487925, 0, 1.1807239, -177.78879, 3.0453608, 86.985176)
+metadata/coliziune = "none"
+
+[node name="bTufa007" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.75510013, 0, 0.74820346, 0, 1.0630074, 0, -0.74820346, 0, -0.75510013, -180.96175, 3.2737775, 73.96486)
+metadata/coliziune = "none"
+
+[node name="bTufa008" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.0008333, 0, -0.58505154, 0, 1.1592897, 0, 0.58505154, 0, 1.0008333, -183.05135, 3.3220234, 71.6723)
+metadata/coliziune = "none"
+
+[node name="bTufa009" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.2329572, 0, -0.28055933, 0, 1.264475, 0, 0.28055933, 0, -1.2329572, -183.30013, 3.3871787, 68.218956)
+metadata/coliziune = "none"
+
+[node name="bFukugiG006" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.0545442, 0, 0.42102057, 0, 1.0876241, 0, -0.42102057, 0, 1.0545442, -189.97177, 3.4401772, 63.005997)
+metadata/coliziune = "none"
+
+[node name="bFukugiG007" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.17189156, 0, -1.2256913, 0, 1.0267909, 0, 1.2256913, 0, -0.17189156, -187.7669, 3.4213254, 63.63343)
+metadata/coliziune = "none"
+
+[node name="bFukugiG008" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.56814706, 0, 0.97016656, 0, 1.1172403, 0, -0.97016656, 0, -0.56814706, -187.61722, 3.5017164, 59.722153)
+metadata/coliziune = "none"
+
+[node name="bFukugiG009" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.065423414, 0, 1.1238717, 0, 1.104748, 0, -1.1238717, 0, 0.065423414, -186.75117, 3.4868495, 60.289997)
+metadata/coliziune = "none"
+
+[node name="bTufa010" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.8089777, 0, 0.8354529, 0, 1.1629387, 0, -0.8354529, 0, -0.8089777, -185.66139, 3.4642565, 64.70397)
+metadata/coliziune = "none"
+
+[node name="bTufa011" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.6063651, 0, 0.8531823, 0, 1.0467085, 0, -0.8531823, 0, -0.6063651, -191.84312, 3.6002705, 58.81129)
+metadata/coliziune = "none"
+
+[node name="bTufa012" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.1667373, 0, -1.3512723, 0, 1.3615205, 0, 1.3512723, 0, 0.1667373, -192.04012, 3.5386834, 61.80383)
+metadata/coliziune = "none"
+
+[node name="bTufa013" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.9663977, 0, 0.78021836, 0, 1.2420408, 0, -0.78021836, 0, -0.9663977, -187.82063, 3.5142624, 62.44515)
+metadata/coliziune = "none"
+
+[node name="bTufa014" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.0301385, 0, -0.56840134, 0, 1.1765481, 0, 0.56840134, 0, -1.0301385, -189.70956, 3.7013757, 53.744076)
+metadata/coliziune = "none"
+
+[node name="bTufa015" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-1.2394444, 0, 0.77308935, 0, 1.4607838, 0, -0.77308935, 0, -1.2394444, -183.20145, 3.59287, 58.101418)
+metadata/coliziune = "none"
+
+[node name="bFukugiG010" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.1807003, 0, 0.21655698, 0, 1.079054, 0, -0.21655698, 0, 1.1807003, -194.61867, 3.5897093, 56.163567)
+metadata/coliziune = "none"
+
+[node name="bFukugiG011" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.1920661, 0, -0.28797698, 0, 1.011245, 0, 0.28797698, 0, 1.1920661, -193.38068, 3.609623, 55.128624)
+metadata/coliziune = "none"
+
+[node name="bFukugiG012" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.2044516, 0, 0.19759643, 0, 1.06846, 0, -0.19759643, 0, -1.2044516, -193.57239, 3.6817963, 51.707317)
+metadata/coliziune = "none"
+
+[node name="bFukugiG013" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.5044688, 0, 1.090573, 0, 1.0382024, 0, -1.090573, 0, 0.5044688, -189.55232, 3.6105626, 54.705654)
+metadata/coliziune = "none"
+
+[node name="bTufa016" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.5308386, 0, -0.92440474, 0, 1.0659802, 0, 0.92440474, 0, -0.5308386, -190.28923, 3.7188215, 52.980442)
+metadata/coliziune = "none"
+
+[node name="bTufa017" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.81398183, 0, 0.85892534, 0, 1.1833508, 0, -0.85892534, 0, 0.81398183, -187.56897, 3.6162152, 57.60379)
+metadata/coliziune = "none"
+
+[node name="bTufa018" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.9298585, 0, -0.45120767, 0, 1.0335498, 0, 0.45120767, 0, -0.9298585, -191.97787, 3.6678681, 55.54268)
+metadata/coliziune = "none"
+
+[node name="bTufa019" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.0067262016, 0, 1.1737798, 0, 1.173799, 0, -1.1737798, 0, -0.0067262016, -188.43584, 3.915512, 43.267876)
+metadata/coliziune = "none"
+
+[node name="bTufa020" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.40316048, 0, 1.0507481, 0, 1.1254376, 0, -1.0507481, 0, 0.40316048, -186.28043, 3.8598702, 45.887096)
+metadata/coliziune = "none"
+
+[node name="bTufa021" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.1230785, 0, -0.46306357, 0, 1.2147976, 0, 0.46306357, 0, -1.1230785, -186.755, 3.9251595, 42.701305)
+metadata/coliziune = "none"
+
+[node name="bFukugiG014" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1641294, 0, -0.33811086, 0, 0.9623683, 0, 0.33811086, 0, 1.1641294, -181.99199, 4.4693713, 7.3625193)
+metadata/coliziune = "none"
+
+[node name="bFukugiG015" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.2320919, 0, 0.30518854, 0, 1.1271298, 0, -0.30518854, 0, -1.2320919, -183.0356, 4.5128937, 4.7346873)
+metadata/coliziune = "none"
+
+[node name="bFukugiG016" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.0859125, 0, 0.34262046, 0, 1.0780821, 0, -0.34262046, 0, 1.0859125, -181.34215, 4.479416, 6.7370768)
+metadata/coliziune = "none"
+
+[node name="bTufa022" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-0.7959932, 0, -1.2442455, 0, 1.4770756, 0, 1.2442455, 0, -0.7959932, -179.7785, 4.617461, 2.610144)
+metadata/coliziune = "none"
+
+[node name="bTufa023" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.48791116, 0, 0.93899775, 0, 1.0581938, 0, -0.93899775, 0, -0.48791116, -183.56203, 4.620182, 2.4918032)
+metadata/coliziune = "none"
+
+[node name="bTufa024" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-0.4517786, 0, -1.3698779, 0, 1.4424525, 0, 1.3698779, 0, -0.4517786, -181.45004, 4.5930552, 4.0995793)
+metadata/coliziune = "none"
+
+[node name="bTufa025" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.9431288, 0, 0.44139686, 0, 1.0413084, 0, -0.44139686, 0, 0.9431288, -190.86737, 4.9945188, -16.38929)
+metadata/coliziune = "none"
+
+[node name="bTufa026" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.0124290995, 0, -1.3571961, 0, 1.357253, 0, 1.3571961, 0, 0.0124290995, -188.57713, 4.9289255, -13.680693)
+metadata/coliziune = "none"
+
+[node name="bTufa027" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.407796, 0, 0.2956349, 0, 1.4385026, 0, -0.2956349, 0, 1.407796, -191.56631, 4.962443, -15.044935)
+metadata/coliziune = "none"
+
+[node name="bFukugiG017" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.2072195, 0, -0.020525888, 0, 1.0001711, 0, 0.020525888, 0, 1.2072195, -192.11192, 5.3348103, -30.012665)
+metadata/coliziune = "none"
+
+[node name="bFukugiG018" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(1.1431354, 0, 0.5748561, 0, 0.97025836, 0, -0.5748561, 0, 1.1431354, -195.07413, 5.27497, -28.266123)
+metadata/coliziune = "none"
+
+[node name="bFukugiG019" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.7437188, 0, 0.8823481, 0, 0.99379176, 0, -0.8823481, 0, 0.7437188, -193.59421, 5.309275, -29.265472)
+metadata/coliziune = "none"
+
+[node name="bTufa028" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-0.53910995, 0, -0.8639142, 0, 1.0183257, 0, 0.8639142, 0, -0.53910995, -196.53685, 5.4523644, -31.455345)
+metadata/coliziune = "none"
+
+[node name="bTufa029" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.2836201, 0, 0.13601308, 0, 1.2908059, 0, -0.13601308, 0, 1.2836201, -197.59303, 5.280316, -26.385025)
+metadata/coliziune = "none"
+
+[node name="bTufa030" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.3729974, 0, 1.0715696, 0, 1.1346314, 0, -1.0715696, 0, -0.3729974, -199.63388, 5.9323893, -42.559204)
+metadata/coliziune = "none"
+
+[node name="bTufa031" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.59183204, 0, 1.2484212, 0, 1.3816007, 0, -1.2484212, 0, 0.59183204, -197.65373, 5.828587, -40.40194)
+metadata/coliziune = "none"
+
+[node name="bFukugiG020" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.2036917, 0, 0.31789625, 0, 0.9629257, 0, -0.31789625, 0, 1.2036917, -197.3476, 6.3645725, -50.652508)
+metadata/coliziune = "none"
+
+[node name="bFukugiG021" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.25984812, 0, -1.195743, 0, 1.0613183, 0, 1.195743, 0, 0.25984812, -200.59734, 6.4889226, -53.230553)
+metadata/coliziune = "none"
+
+[node name="bFukugiG022" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.2899791, 0, -0.06824245, 0, 1.1379658, 0, 0.06824245, 0, -1.2899791, -202.29985, 6.2077637, -49.413136)
+metadata/coliziune = "none"
+
+[node name="bFukugiG023" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.44938385, 0, 1.0672234, 0, 1.1200105, 0, -1.0672234, 0, -0.44938385, -201.9179, 6.3260846, -51.09685)
+metadata/coliziune = "none"
+
+[node name="bTufa032" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(1.1064969, 0, 0.3412663, 0, 1.1579283, 0, -0.3412663, 0, 1.1064969, -201.97899, 6.661195, -55.053677)
+metadata/coliziune = "none"
+
+[node name="bTufa033" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.3170809, 0, 0.39305416, 0, 1.3744794, 0, -0.39305416, 0, 1.3170809, -199.83232, 6.6840835, -54.928272)
+metadata/coliziune = "none"
+
+[node name="bTufa034" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.5769492, 0, -1.2821894, 0, 1.4060156, 0, 1.2821894, 0, -0.5769492, -202.02298, 6.5213017, -52.996265)
+metadata/coliziune = "none"
+
+[node name="bFukugiG024" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.41647202, 0, 1.2188381, 0, 1.1127472, 0, -1.2188381, 0, 0.41647202, -198.98676, 2.312358, 153.49419)
+metadata/coliziune = "none"
+
+[node name="bFukugiG025" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.8490765, 0, -0.73611265, 0, 1.0395343, 0, 0.73611265, 0, -0.8490765, -194.90024, 2.2624636, 156.80537)
+metadata/coliziune = "none"
+
+[node name="bFukugiG026" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.92355275, 0, -0.8453756, 0, 1.0902473, 0, 0.8453756, 0, 0.92355275, -194.7725, 2.2849522, 152.66037)
+metadata/coliziune = "none"
+
+[node name="bFukugiG027" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.7958219, 0, 0.8232624, 0, 1.1434233, 0, -0.8232624, 0, -0.7958219, -198.43633, 2.2892365, 156.27985)
+metadata/coliziune = "none"
+
+[node name="bTufa035" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.80040455, 0, -1.1555113, 0, 1.4056506, 0, 1.1555113, 0, 0.80040455, -200.7756, 2.365912, 157.6398)
+metadata/coliziune = "none"
+
+[node name="bTufa036" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.51877046, 0, -1.280791, 0, 1.3818642, 0, 1.280791, 0, -0.51877046, -194.62993, 2.360304, 151.70207)
+metadata/coliziune = "none"
+
+[node name="bTufa037" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.1561574, 0, 0.6868464, 0, 1.3447891, 0, -0.6868464, 0, 1.1561574, -207.33612, 2.5747404, 137.44897)
+metadata/coliziune = "none"
+
+[node name="bTufa038" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-1.2867804, 0, 0.34810525, 0, 1.3330345, 0, -0.34810525, 0, -1.2867804, -210.509, 2.552249, 141.71332)
+metadata/coliziune = "none"
+
+[node name="bFukugiG028" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.70580643, 0, 1.0329822, 0, 1.0308381, 0, -1.0329822, 0, 0.70580643, -208.59761, 2.697995, 121.31121)
+metadata/coliziune = "none"
+
+[node name="bFukugiG029" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.09381264, 0, -1.1800096, 0, 1.0545937, 0, 1.1800096, 0, -0.09381264, -205.2072, 2.6778202, 121.169525)
+metadata/coliziune = "none"
+
+[node name="bFukugiG030" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(0.30176416, 0, 1.1514393, 0, 1.0626116, 0, -1.1514393, 0, 0.30176416, -203.9729, 2.6204562, 124.969666)
+metadata/coliziune = "none"
+
+[node name="bTufa039" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-0.53390324, 0, 1.2225326, 0, 1.334031, 0, -1.2225326, 0, -0.53390324, -209.52917, 2.7750342, 121.229454)
+metadata/coliziune = "none"
+
+[node name="bTufa040" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-0.34675458, 0, 1.1538954, 0, 1.2048707, 0, -1.1538954, 0, -0.34675458, -208.33684, 2.76554, 121.37277)
+metadata/coliziune = "none"
+
+[node name="bTufa041" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.93087643, 0, 1.0138754, 0, 1.376399, 0, -1.0138754, 0, 0.93087643, -205.92387, 2.7534919, 121.08799)
+metadata/coliziune = "none"
+
+[node name="bTufa042" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.47408184, 0, 1.0911527, 0, 1.1896923, 0, -1.0911527, 0, -0.47408184, -214.39941, 2.9209936, 112.22614)
+metadata/coliziune = "none"
+
+[node name="bTufa043" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-0.93534505, 0, -0.62558174, 0, 1.1252657, 0, 0.62558174, 0, -0.93534505, -214.86157, 2.8505116, 117.86389)
+metadata/coliziune = "none"
+
+[node name="bTufa044" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-1.4624413, 0, 0.12480892, 0, 1.4677575, 0, -0.12480892, 0, -1.4624413, -215.80971, 2.850375, 118.3494)
+metadata/coliziune = "none"
+
+[node name="bTufa045" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.90956414, 0, -0.856073, 0, 1.2490668, 0, 0.856073, 0, -0.90956414, -214.32256, 2.8290336, 119.32339)
+metadata/coliziune = "none"
+
+[node name="bFukugiG031" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.36709988, 0, -1.1743157, 0, 0.9934862, 0, 1.1743157, 0, -0.36709988, -223.26436, 2.9514718, 108.45845)
+metadata/coliziune = "none"
+
+[node name="bFukugiG032" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.66949624, 0, 1.0613705, 0, 1.0087488, 0, -1.0613705, 0, 0.66949624, -220.4046, 2.9302294, 108.83942)
+metadata/coliziune = "none"
+
+[node name="bFukugiG033" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(1.1385565, 0, 0.6037043, 0, 1.1334012, 0, -0.6037043, 0, 1.1385565, -223.63583, 2.9282146, 110.42442)
+metadata/coliziune = "none"
+
+[node name="bFukugiG034" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.0646428, 0, -0.3647769, 0, 1.001354, 0, 0.3647769, 0, 1.0646428, -222.94821, 2.9667969, 107.1466)
+metadata/coliziune = "none"
+
+[node name="bTufa046" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.6755337, 0, 1.2187542, 0, 1.3934517, 0, -1.2187542, 0, -0.6755337, -222.8876, 3.0322952, 107.46661)
+metadata/coliziune = "none"
+
+[node name="bTufa047" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.75452507, 0, 1.274466, 0, 1.4810711, 0, -1.274466, 0, -0.75452507, -221.6088, 2.9690852, 111.78881)
+metadata/coliziune = "none"
+
+[node name="bTufa048" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.95129126, 0, -0.39346072, 0, 1.0294496, 0, 0.39346072, 0, 0.95129126, -223.98772, 3.030799, 108.04856)
+metadata/coliziune = "none"
+
+[node name="bTufa049" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.0309078, 0, 0.41376624, 0, 1.1108435, 0, -0.41376624, 0, 1.0309078, -220.90672, 3.1257515, 99.47196)
+metadata/coliziune = "none"
+
+[node name="bTufa050" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.73260295, 0, 1.1946177, 0, 1.4013631, 0, -1.1946177, 0, -0.73260295, -226.87369, 3.137792, 100.96076)
+metadata/coliziune = "none"
+
+[node name="bTufa051" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-1.0888897, 0, 0.6591342, 0, 1.2728467, 0, -0.6591342, 0, -1.0888897, -223.14738, 3.1775417, 96.448814)
+metadata/coliziune = "none"
+
+[node name="bTufa052" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.27418536, 0, 1.4423604, 0, 1.4681898, 0, -1.4423604, 0, 0.27418536, -234.78734, 3.5610666, 68.90411)
+metadata/coliziune = "none"
+
+[node name="bTufa053" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.23456702, 0, -1.4133271, 0, 1.4326602, 0, 1.4133271, 0, 0.23456702, -231.42683, 3.5315652, 70.80988)
+metadata/coliziune = "none"
+
+[node name="bFukugiG035" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-1.0463983, 0, 0.7442812, 0, 0.9785619, 0, -0.7442812, 0, -1.0463983, -230.2335, 3.6375344, 55.75132)
+metadata/coliziune = "none"
+
+[node name="bFukugiG036" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.1884505, 0, -0.22915372, 0, 1.0880103, 0, 0.22915372, 0, -1.1884505, -235.68748, 3.7112038, 50.770035)
+metadata/coliziune = "none"
+
+[node name="bFukugiG037" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.6140744, 0, -1.0053796, 0, 1.0143073, 0, 1.0053796, 0, 0.6140744, -235.01566, 3.6422, 56.039696)
+metadata/coliziune = "none"
+
+[node name="bTufa054" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.9502748, 0, 0.35593227, 0, 1.0147463, 0, -0.35593227, 0, 0.9502748, -233.09856, 3.7187974, 55.223476)
+metadata/coliziune = "none"
+
+[node name="bTufa055" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.898904, 0, 0.6924141, 0, 1.1346655, 0, -0.6924141, 0, -0.898904, -236.71219, 3.758724, 52.575195)
+metadata/coliziune = "none"
+
+[node name="bTufa056" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.66025466, 0, 1.0470041, 0, 1.237802, 0, -1.0470041, 0, 0.66025466, -231.39629, 3.7722902, 50.94159)
+metadata/coliziune = "none"
+
+[node name="bTufa057" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.9559625, 0, -1.1405351, 0, 1.4881816, 0, 1.1405351, 0, -0.9559625, -233.94518, 3.7920737, 49.77118)
+metadata/coliziune = "none"
+
+[node name="bTufa058" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.0152941, 0, 0.22079954, 0, 1.0390258, 0, -0.22079954, 0, 1.0152941, -232.43138, 3.939498, 39.523968)
+metadata/coliziune = "none"
+
+[node name="bTufa059" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.0128233, 0, -0.61090034, 0, 1.1827977, 0, 0.61090034, 0, 1.0128233, -228.80276, 3.8733552, 43.74061)
+metadata/coliziune = "none"
+
+[node name="bFukugiG038" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.50166106, 0, -1.1170434, 0, 1.0373819, 0, 1.1170434, 0, -0.50166106, -236.37749, 4.092527, 26.79964)
+metadata/coliziune = "none"
+
+[node name="bFukugiG039" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-0.70213324, 0, -0.8811283, 0, 1.117638, 0, 0.8811283, 0, -0.70213324, -235.81367, 4.1131296, 25.711025)
+metadata/coliziune = "none"
+
+[node name="bFukugiG040" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.2161746, 0, 0.24907719, 0, 1.1241624, 0, -0.24907719, 0, -1.2161746, -235.66617, 4.0168896, 30.750957)
+metadata/coliziune = "none"
+
+[node name="bTufa060" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.34207785, 0, -1.2974342, 0, 1.3417723, 0, 1.2974342, 0, 0.34207785, -240.97554, 4.079957, 31.432592)
+metadata/coliziune = "none"
+
+[node name="bTufa061" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-1.3360487, 0, 0.281736, 0, 1.3654308, 0, -0.281736, 0, -1.3360487, -239.1554, 4.0565743, 32.68531)
+metadata/coliziune = "none"
+
+[node name="bTufa062" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.2403653, 0, 0.58758265, 0, 1.3725011, 0, -0.58758265, 0, 1.2403653, -230.57669, 4.292542, 19.979853)
+metadata/coliziune = "none"
+
+[node name="bTufa063" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.3117967, 0, -0.52910846, 0, 1.4144845, 0, 0.52910846, 0, 1.3117967, -229.18091, 4.3094573, 18.915346)
+metadata/coliziune = "none"
+
+[node name="bTufa064" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.2446618, 0, 0.53097564, 0, 1.3531882, 0, -0.53097564, 0, 1.2446618, -227.77774, 4.4247584, 13.485802)
+metadata/coliziune = "none"
+
+[node name="bFukugiG041" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(-0.77949804, 0, -0.8504891, 0, 1.0863628, 0, 0.8504891, 0, -0.77949804, -225.39842, 4.4598203, 8.7193)
+metadata/coliziune = "none"
+
+[node name="bFukugiG042" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_b")]
+transform = Transform3D(0.031347338, 0, -1.2819277, 0, 1.0226717, 0, 1.2819277, 0, 0.031347338, -228.8174, 4.4695683, 9.173406)
+metadata/coliziune = "none"
+
+[node name="bFukugiG043" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(1.1979048, 0, 0.30187905, 0, 1.0564457, 0, -0.30187905, 0, 1.1979048, -223.26839, 4.458746, 8.32863)
+metadata/coliziune = "none"
+
+[node name="bTufa065" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-1.0498348, 0, 1.0201416, 0, 1.463845, 0, -1.0201416, 0, -1.0498348, -225.2961, 4.627922, 5.0546894)
+metadata/coliziune = "none"
+
+[node name="bTufa066" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.0514792, 0, 0.41652477, 0, 1.1309737, 0, -0.41652477, 0, -1.0514792, -227.74821, 4.476608, 11.346987)
+metadata/coliziune = "none"
+
+[node name="bTufa067" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(1.1217839, 0, -0.35773203, 0, 1.1774427, 0, 0.35773203, 0, 1.1217839, -228.83849, 4.611665, 6.421847)
+metadata/coliziune = "none"
+
+[node name="bTufa068" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.7956405, 0, -0.70867723, 0, 1.0654892, 0, 0.70867723, 0, 0.7956405, -234.98221, 4.724764, 3.6534507)
+metadata/coliziune = "none"
+
+[node name="bTufa069" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.2665044, 0, -1.0954746, 0, 1.1274259, 0, 1.0954746, 0, -0.2665044, -232.96654, 4.663271, 5.4409266)
+metadata/coliziune = "none"
+
+[node name="bTufa070" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.9200035, 0, 1.0881459, 0, 1.4249449, 0, -1.0881459, 0, 0.9200035, -232.88013, 4.724546, 3.3192122)
+metadata/coliziune = "none"
+
+[node name="bTufa071" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(-1.3473711, 0, 0.6409337, 0, 1.4920472, 0, -0.6409337, 0, -1.3473711, -228.89548, 4.7927647, 0.15257812)
+metadata/coliziune = "none"
+
+[node name="bFukugiG044" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.3832707, 0, 1.1238126, 0, 0.9781924, 0, -1.1238126, 0, 0.3832707, -230.63414, 4.838835, -3.3509173)
+metadata/coliziune = "none"
+
+[node name="bFukugiG045" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-0.70479065, 0, 0.8832036, 0, 0.95859396, 0, -0.8832036, 0, -0.70479065, -231.04866, 4.74798, -0.19235468)
+metadata/coliziune = "none"
+
+[node name="bFukugiG046" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(0.9153696, 0, -0.87012494, 0, 1.0741416, 0, 0.87012494, 0, 0.9153696, -230.50186, 4.729382, 0.32153273)
+metadata/coliziune = "none"
+
+[node name="bTufa072" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-1.0621079, 0, 0.9112275, 0, 1.3994316, 0, -0.9112275, 0, -1.0621079, -230.7055, 4.760233, 1.7184238)
+metadata/coliziune = "none"
+
+[node name="bTufa073" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.1966493, 0, 0.3047467, 0, 1.2348442, 0, -0.3047467, 0, -1.1966493, -233.11386, 4.94099, -3.930255)
+metadata/coliziune = "none"
+
+[node name="bTufa074" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.66925097, 0, -0.7810309, 0, 1.0285456, 0, 0.7810309, 0, 0.66925097, -232.99995, 4.9355907, -3.7716599)
+metadata/coliziune = "none"
+
+[node name="bFukugiG047" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_a")]
+transform = Transform3D(-1.0275393, 0, -0.71144825, 0, 1.0225178, 0, 0.71144825, 0, -1.0275393, -241.53725, 5.6042466, -27.735754)
+metadata/coliziune = "none"
+
+[node name="bFukugiG048" parent="DecorManual/ZonaB/Fukugi3" instance=ExtResource("b_fukugi_c")]
+transform = Transform3D(-1.1735222, 0, 0.37276644, 0, 1.1342702, 0, -0.37276644, 0, -1.1735222, -238.22745, 5.494457, -24.386614)
+metadata/coliziune = "none"
+
+[node name="bTufa075" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.45288205, 0, -1.1223837, 0, 1.2103088, 0, 1.1223837, 0, 0.45288205, -235.99385, 5.5884123, -25.97267)
+metadata/coliziune = "none"
+
+[node name="bTufa076" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-1.4526482, 0, 0.17101388, 0, 1.4626799, 0, -0.17101388, 0, -1.4526482, -234.93265, 5.6326294, -28.09869)
+metadata/coliziune = "none"
+
+[node name="bTufa077" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_cycad")]
+transform = Transform3D(0.21552064, 0, 1.2031265, 0, 1.2222776, 0, -1.2031265, 0, 0.21552064, -242.20135, 5.937025, -38.03645)
+metadata/coliziune = "none"
+
+[node name="bTufa078" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-1.0071514, 0, -0.047157317, 0, 1.0082548, 0, 0.047157317, 0, -1.0071514, -242.9432, 6.0523777, -42.393425)
+metadata/coliziune = "none"
+
+[node name="bTufa079" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.12001673, 0, 1.4750156, 0, 1.4798902, 0, -1.4750156, 0, 0.12001673, -236.80516, 5.818675, -35.0076)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea00" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.79394096, 0, 0.9116671, 0, 1.2089165, 0, -0.9116671, 0, -0.79394096, -171.34375, 2.35218, 135.22061)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea01" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.6564629, 0, 0.99020374, 0, 1.1880434, 0, -0.99020374, 0, -0.6564629, -171.79463, 2.3662238, 134.60968)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea02" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.5281809, 0, 1.2723277, 0, 1.377604, 0, -1.2723277, 0, -0.5281809, -178.48006, 2.6178577, 120.58054)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea03" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.5209494, 0, 1.1738036, 0, 1.2842131, 0, -1.1738036, 0, -0.5209494, -185.59097, 2.8776588, 104.68279)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea04" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.4737336, 0, 1.0641725, 0, 1.1648548, 0, -1.0641725, 0, -0.4737336, -190.71838, 3.0579967, 93.762)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea05" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.5578411, 0, 1.256616, 0, 1.3748711, 0, -1.256616, 0, -0.5578411, -198.4329, 3.3430302, 75.95226)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea06" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.530403, 0, 1.1939669, 0, 1.3064778, 0, -1.1939669, 0, -0.530403, -199.3961, 3.3766558, 73.60694)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea07" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.41610152, 0, 1.2853427, 0, 1.3510168, 0, -1.2853427, 0, -0.41610152, -203.84283, 3.547666, 64.252884)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea08" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.35633248, 0, 1.1966305, 0, 1.2485582, 0, -1.1966305, 0, -0.35633248, -204.33221, 3.5772731, 62.474613)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea09" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.22218321, 0, 1.2275443, 0, 1.2474896, 0, -1.2275443, 0, 0.22218321, -205.35745, 3.7999456, 51.701614)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea10" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.3197838, 0, 1.3375466, 0, 1.3752427, 0, -1.3375466, 0, 0.3197838, -204.87701, 3.8472948, 49.27389)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea11" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.2160125, 0, 1.2948668, 0, 1.3127611, 0, -1.2948668, 0, 0.2160125, -201.82513, 4.1111298, 33.69745)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea12" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.22216865, 0, 1.3309894, 0, 1.3494041, 0, -1.3309894, 0, 0.22216865, -199.98987, 4.306011, 22.05374)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea13" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.08478443, 0, 1.2668484, 0, 1.2696824, 0, -1.2668484, 0, 0.08478443, -197.44579, 4.52122, 8.8851795)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea14" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.06554825, 0, 1.4360701, 0, 1.4375652, 0, -1.4360701, 0, 0.06554825, -197.4015, 4.5596247, 6.4293027)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea15" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.5441024, 0, 1.3262689, 0, 1.4335399, 0, -1.3262689, 0, -0.5441024, -200.38745, 4.9230113, -12.473694)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea16" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.5405733, 0, 1.1261511, 0, 1.249174, 0, -1.1261511, 0, -0.5405733, -201.83882, 5.0161815, -15.73973)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea17" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.48185995, 0, 1.1394286, 0, 1.2371284, 0, -1.1394286, 0, -0.48185995, -206.54205, 5.3276863, -25.872412)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea18" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.4508951, 0, 1.0750239, 0, 1.1657542, 0, -1.0750239, 0, -0.4508951, -207.64688, 5.4050817, -28.590889)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea19" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.4668058, 0, 1.1042283, 0, 1.1988443, 0, -1.1042283, 0, -0.4668058, -211.32399, 5.7083826, -37.624184)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea20" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.4084362, 0, 1.0784315, 0, 1.1531845, 0, -1.0784315, 0, -0.4084362, -212.23427, 5.762978, -39.713654)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea21" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.1336003, 0, 1.2526965, 0, 1.2598007, 0, -1.2526965, 0, -0.1336003, -215.75647, 6.1353817, -50.26056)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea22" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.76150626, 0, -1.1486462, 0, 1.3781437, 0, 1.1486462, 0, 0.76150626, -186.64717, 2.3911157, 143.59338)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea23" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.50744784, 0, -1.222377, 0, 1.3235214, 0, 1.222377, 0, 0.50744784, -195.01721, 2.6357236, 126.84666)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea24" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.5531982, 0, -1.2455094, 0, 1.362836, 0, 1.2455094, 0, 0.5531982, -200.06944, 2.8239155, 115.1003)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea25" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.4805174, 0, -1.0821763, 0, 1.1840619, 0, 1.0821763, 0, 0.4805174, -200.93141, 2.8546238, 113.27555)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea26" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.47747722, 0, -1.0734975, 0, 1.1748964, 0, 1.0734975, 0, 0.47747722, -206.35527, 3.0517056, 101.153336)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea27" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.48717678, 0, -1.0980731, 0, 1.2012933, 0, 1.0980731, 0, 0.48717678, -213.09694, 3.2894552, 86.1659)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea28" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.5309033, 0, -1.1959378, 0, 1.308482, 0, 1.1959378, 0, 0.5309033, -214.39099, 3.3382347, 83.25541)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea29" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.4603559, 0, -1.2186534, 0, 1.3027062, 0, 1.2186534, 0, 0.4603559, -219.59277, 3.5100179, 71.75268)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea30" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.4227843, 0, -1.3059814, 0, 1.3727105, 0, 1.3059814, 0, 0.4227843, -220.13043, 3.5418055, 69.3146)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea31" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.04240041, 0, -1.2738839, 0, 1.2745894, 0, 1.2738839, 0, -0.04240041, -222.86555, 3.7444034, 54.392323)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea32" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.23072965, 0, -1.3868451, 0, 1.4059074, 0, 1.3868451, 0, -0.23072965, -220.03839, 4.0156236, 36.859303)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea33" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.20540437, 0, -1.2265836, 0, 1.2436632, 0, 1.2265836, 0, -0.20540437, -218.15364, 4.198304, 25.747437)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea34" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.20633312, 0, -1.2323261, 0, 1.2494804, 0, 1.2323261, 0, -0.20633312, -217.35487, 4.25978, 22.20415)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea35" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.28515077, 0, -1.2839631, 0, 1.3152461, 0, 1.2839631, 0, -0.28515077, -215.85995, 4.4141574, 13.07814)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea36" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(-0.20510668, 0, -1.1566037, 0, 1.1746492, 0, 1.1566037, 0, -0.20510668, -215.45813, 4.4643116, 10.50948)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea37" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.015348943, 0, -1.306465, 0, 1.3065552, 0, 1.306465, 0, 0.015348943, -214.71635, 4.622394, 3.533103)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea38" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.5450605, 0, -1.1355014, 0, 1.2595453, 0, 1.1355014, 0, 0.5450605, -217.0696, 4.9460826, -7.135935)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea39" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.5105839, 0, -1.1032156, 0, 1.21564, 0, 1.1032156, 0, 0.5105839, -218.40994, 5.0388274, -9.951562)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea40" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.54680896, 0, -1.3037065, 0, 1.4137365, 0, 1.3037065, 0, 0.54680896, -223.61758, 5.3985114, -21.915176)
+metadata/coliziune = "none"
+
+[node name="bBougainvillea41" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_bougainvillea")]
+transform = Transform3D(0.48496592, 0, -1.1543688, 0, 1.2521019, 0, 1.1543688, 0, 0.48496592, -230.06367, 5.853703, -38.12482)
+metadata/coliziune = "none"
+
+[node name="bHibiscus00" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.1051881, 0, 0.71907574, 0, 1.318526, 0, -0.71907574, 0, 1.1051881, -172.47449, 2.3590598, 135.70892)
+metadata/coliziune = "none"
+
+[node name="bHibiscus01" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.2261977, 0, -0.6888798, 0, 1.4064552, 0, 0.6888798, 0, 1.2261977, -172.54291, 2.3659067, 135.28001)
+metadata/coliziune = "none"
+
+[node name="bHibiscus02" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.96985143, 0, -0.56366616, 0, 1.1217537, 0, 0.56366616, 0, 0.96985143, -186.93484, 2.8957572, 103.98144)
+metadata/coliziune = "none"
+
+[node name="bHibiscus03" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.7337631, 0, -1.2102175, 0, 1.4152861, 0, 1.2102175, 0, -0.7337631, -186.9953, 2.8978617, 103.856674)
+metadata/coliziune = "none"
+
+[node name="bHibiscus04" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.4270452, 0, 0.32754812, 0, 1.4641536, 0, -0.32754812, 0, -1.4270452, -199.8682, 3.3521047, 75.677155)
+metadata/coliziune = "none"
+
+[node name="bHibiscus05" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.1494257, 0, -0.62467974, 0, 1.3082066, 0, 0.62467974, 0, 1.1494257, -200.08366, 3.3529415, 75.71264)
+metadata/coliziune = "none"
+
+[node name="bHibiscus06" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.9835499, 0, 0.6600833, 0, 1.1845169, 0, -0.6600833, 0, 0.9835499, -199.67645, 3.3406997, 76.45064)
+metadata/coliziune = "none"
+
+[node name="bHibiscus07" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.0841014, 0, 0.3529998, 0, 1.1401249, 0, -0.3529998, 0, 1.0841014, -206.52666, 3.757737, 53.85159)
+metadata/coliziune = "none"
+
+[node name="bHibiscus08" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.32808805, 0, 1.3623521, 0, 1.4013013, 0, -1.3623521, 0, 0.32808805, -206.48233, 3.7656271, 53.452785)
+metadata/coliziune = "none"
+
+[node name="bHibiscus09" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.66903424, 0, 1.0710374, 0, 1.2628254, 0, -1.0710374, 0, 0.66903424, -206.44374, 3.7260077, 55.412086)
+metadata/coliziune = "none"
+
+[node name="bHibiscus10" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.3332442, 0, -0.098826095, 0, 1.3369019, 0, 0.098826095, 0, 1.3332442, -201.12746, 4.2677712, 24.19914)
+metadata/coliziune = "none"
+
+[node name="bHibiscus11" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.2057263, 0, -0.8887347, 0, 1.4978735, 0, 0.8887347, 0, -1.2057263, -201.22034, 4.2930803, 22.642466)
+metadata/coliziune = "none"
+
+[node name="bHibiscus12" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.4478829, 0, -0.32769683, 0, 1.4845033, 0, 0.32769683, 0, 1.4478829, -205.2051, 5.15215, -19.46742)
+metadata/coliziune = "none"
+
+[node name="bHibiscus13" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.93188816, 0, 0.6411423, 0, 1.1311406, 0, -0.6411423, 0, -0.93188816, -205.44032, 5.174205, -20.28479)
+metadata/coliziune = "none"
+
+[node name="bHibiscus14" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.32368863, 0, -1.2506785, 0, 1.2918866, 0, 1.2506785, 0, 0.32368863, -189.34816, 2.4836485, 136.49443)
+metadata/coliziune = "none"
+
+[node name="bHibiscus15" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.8522036, 0, 0.78559935, 0, 1.1590588, 0, -0.78559935, 0, -0.8522036, -189.83632, 2.4998257, 135.32173)
+metadata/coliziune = "none"
+
+[node name="bHibiscus16" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.4099164, 0, 0.3686661, 0, 1.4573191, 0, -0.3686661, 0, -1.4099164, -189.26036, 2.484776, 136.34637)
+metadata/coliziune = "none"
+
+[node name="bHibiscus17" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.2252543, 0, -1.1848476, 0, 1.2060694, 0, 1.1848476, 0, -0.2252543, -200.17023, 2.8624275, 112.34981)
+metadata/coliziune = "none"
+
+[node name="bHibiscus18" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.9430724, 0, -1.0672184, 0, 1.4241983, 0, 1.0672184, 0, -0.9430724, -199.68735, 2.858666, 112.39548)
+metadata/coliziune = "none"
+
+[node name="bHibiscus19" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.28316244, 0, -1.2621781, 0, 1.2935511, 0, 1.2621781, 0, -0.28316244, -214.39026, 3.380255, 80.28409)
+metadata/coliziune = "none"
+
+[node name="bHibiscus20" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.2456034, 0, -0.7588597, 0, 1.4585595, 0, 0.7588597, 0, 1.2456034, -213.46764, 3.3493702, 82.04511)
+metadata/coliziune = "none"
+
+[node name="bHibiscus21" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.9584775, 0, 0.6252304, 0, 1.1443741, 0, -0.6252304, 0, 0.9584775, -219.01488, 3.983689, 39.00529)
+metadata/coliziune = "none"
+
+[node name="bHibiscus22" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(1.1335183, 0, -0.6039619, 0, 1.2843807, 0, 0.6039619, 0, 1.1335183, -219.68002, 3.950703, 40.843197)
+metadata/coliziune = "none"
+
+[node name="bHibiscus23" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.0982327, 0, -0.110041395, 0, 1.103732, 0, 0.110041395, 0, -1.0982327, -214.04108, 4.448812, 11.243412)
+metadata/coliziune = "none"
+
+[node name="bHibiscus24" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.463455, 0, 0.27635553, 0, 1.4893196, 0, -0.27635553, 0, -1.463455, -214.05164, 4.4599357, 10.6870775)
+metadata/coliziune = "none"
+
+[node name="bHibiscus25" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-0.5827186, 0, 1.2953162, 0, 1.4203539, 0, -1.2953162, 0, -0.5827186, -220.97227, 5.273767, -18.089052)
+metadata/coliziune = "none"
+
+[node name="bHibiscus26" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(-1.2648541, 0, -0.78147244, 0, 1.4867935, 0, 0.78147244, 0, -1.2648541, -219.87622, 5.197553, -15.601031)
+metadata/coliziune = "none"
+
+[node name="bHibiscus27" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_hibiscus")]
+transform = Transform3D(0.9779127, 0, -0.5356409, 0, 1.1149998, 0, 0.5356409, 0, 0.9779127, -219.88408, 5.2021894, -15.7735195)
+metadata/coliziune = "none"
+
+[node name="bOglinda" parent="DecorManual/ZonaB/Flori" instance=ExtResource("b_mirror")]
+transform = Transform3D(-0.21323825, 0, 0.97700024, 0, 1, 0, -0.97700024, 0, -0.21323825, -198.57545, 4.7995825, -6.2738905)
 
 [node name="ZonaC" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.205-0.333 (urcare +6.4 -> +24); x -225..-60, z -190..-50; sea left at 86-100 m, interior right (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"

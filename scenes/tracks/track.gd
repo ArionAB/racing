@@ -3946,6 +3946,10 @@ static func themes() -> Dictionary:
 		"horizon_model": "res://assets/models/okinawa/effects/okinawa_horizon.glb",
 		"horizon_picks": [],
 		"horizon_class": "",
+		# Scatterul: vocabularul kitului Okinawa (fukugi, pin, cicade, pandanus...),
+		# NU al insulei generice (cocotieri). Vezi `TrackDecor._build_oki_carpet`.
+		# "island" ramane neatins: Track08 bit-identic.
+		"props": "okinawa",
 		"horizon_rings": [
 			# POZITII FIXE (`"at"`, x/z de lume), alese din harta in MARE, nu pe
 			# raza din centroid (vezi `_build_horizon`). Insula Ie la NV, ~250 m
@@ -14290,9 +14294,44 @@ const VEG_SOFT_STEMS: Array[String] = ["sagebrush", "juniper", "rabbitbrush",
 	"yucca", "tumbleweed", "talus", "horse", "raven", "sheep", "fence",
 	"telegraph", "pole", "boulder", "rock", "hoodoo"]
 
+const OKI_VEG_SOFT_STEMS: Array[String] = ["fukugi", "cycad", "bougainvillea",
+	"hibiscus", "pandanus", "fan_palm", "ryukyu_pine", "banyan", "egret",
+	"water_buffalo", "cane", "turtle", "coral_stone_wall", "sabani", "clutter",
+	"fishing_net", "convex_mirror", "vending", "tetrapod"]
+
 func _set_decor_veg_exclusions() -> void:
 	var circles := PackedVector3Array()
 	var windows: Array[Vector2] = []
+	if String(theme_flag("props", "desert")) == "okinawa" and _sampler != null:
+		# Covorul Okinawa (vezi `TrackDecor._build_oki_carpet`): marea, grila de
+		# start si piesele mari din DecorManual (casele, zidurile, turnurile,
+		# stancile — plantele, animalele si zidurile joase de corali se amesteca).
+		TrackDecor.set_oki_sea(_sampler.mean_road_y() + sea_level_offset)
+		var otot := _sampler.total_length()
+		windows.append(Vector2(otot - 20.0, otot))
+		windows.append(Vector2(0.0, 35.0))
+		var oman := get_node_or_null("DecorManual")
+		if oman != null:
+			var ostack: Array[Node] = [oman]
+			while not ostack.is_empty():
+				var on: Node = ostack.pop_back()
+				var on3 := on as Node3D
+				if on3 != null and on3 != oman and on3.visible and not on3.scene_file_path.is_empty():
+					var ostem := on3.scene_file_path.get_file().get_basename().to_lower()
+					var osoft := false
+					for sub in OKI_VEG_SOFT_STEMS:
+						if ostem.contains(sub):
+							osoft = true
+							break
+					if not osoft:
+						var oaabb := _visual_aabb(on3)
+						if oaabb.size != Vector3.ZERO:
+							var ohalf := Vector2(oaabb.size.x, oaabb.size.z).length() * 0.5
+							var ogp := on3.global_position
+							circles.append(Vector3(ogp.x, ogp.z, ohalf * 0.8 + 1.0))
+					continue
+				for oc in on.get_children():
+					ostack.append(oc)
 	if String(theme_flag("props", "desert")) == "monumentvalley" and _sampler != null:
 		var total := _sampler.total_length()
 		windows.append(Vector2(total - 15.0, total))

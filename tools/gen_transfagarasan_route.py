@@ -567,7 +567,7 @@ sweep_speed = 1.8
 [node name="SemaforTunel" type="Node3D" parent="Hazarduri"]
 transform = {sig_xf}
 script = ExtResource("5_signal")
-period = 38.0
+period = 34.0
 clear_hold = 6.0
 tunnel_length = {TUNNEL_LEN}
 bus_speed = 11.0
@@ -579,6 +579,7 @@ bus_side_accel = 4.0
 bus_nose_angle_deg = 40.0
 tunnel_half_width = 6.0
 camera_tail_m = 18.0
+first_green_bonus_s = 28.0
 bus_lane_offset = -2.6
 
 [node name="Avalansa" type="Marker3D" parent="Hazarduri"]
@@ -601,6 +602,8 @@ animal_mass = 45.0
 speed = 2.5
 spacing = 1.4
 zebra_ratio = 0.0
+no_body_radius = 9.0
+body_reach = 18.0
 
 [node name="Tren" type="Node3D" parent="Hazarduri"]
 transform = Transform3D({rot_y(rail_deg)}, {tr_g[0]:.3f}, {tr_g[1]:.3f}, {tr_g[2]:.3f})
@@ -614,8 +617,8 @@ road_half_width = 7.0
 transform = {xf_ident(F_JUMP)}
 gizmo_extents = 90.0
 script = ExtResource("3_channel")
-gap = 16.0
-water_half = 8.0
+gap = 12.0
+water_half = 6.0
 bank = 16.0
 depth = 18.0
 water_y_drop = 15.0

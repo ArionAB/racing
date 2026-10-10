@@ -106,6 +106,11 @@ const ZEBRA_GLB := "res://assets/models/serengeti/animals/zebra.glb"
 @export_range(4.0, 30.0, 0.5) var body_reach: float = 12.0
 
 @export_group("Aspect")
+## Modelele turmei. Implicit gnu + zebra (Serengeti, bit-identic); o alta pista
+## (Transfagarasan: oaie + caine ciobanesc) le inlocuieste cu alt GLB, iar
+## `zebra_ratio` devine proportia modelului `alt_model`.
+@export_file("*.glb") var animal_model: String = WILDEBEEST_GLB
+@export_file("*.glb") var alt_model: String = ZEBRA_GLB
 @export_range(0.0, 1.0, 0.05) var zebra_ratio: float = 0.2
 
 ## Plafonul de valoare pe blana (vezi shader-ul): 1.0 = neatins, deci celelalte
@@ -404,11 +409,11 @@ func _ground(p: Vector3) -> float:
 
 
 func _build_visual() -> void:
-	var gnu_mesh := _animal_mesh_from(WILDEBEEST_GLB)
-	var zebra_mesh := _animal_mesh_from(ZEBRA_GLB)
+	var gnu_mesh := _animal_mesh_from(animal_model)
+	var zebra_mesh := _animal_mesh_from(alt_model)
 	var from_kit := gnu_mesh != null
 	if gnu_mesh == null:
-		push_warning("HerdHazard: %s nu se incarca; turma ramane pe cutii" % WILDEBEEST_GLB)
+		push_warning("HerdHazard: %s nu se incarca; turma ramane pe cutii" % animal_model)
 		gnu_mesh = _animal_mesh()
 	if zebra_mesh == null:
 		zebra_mesh = gnu_mesh

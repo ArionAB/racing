@@ -262,8 +262,8 @@ pe diagonală exact când grip-ul lateral e la limită.
    N ↑         [G] Bâlea Cascadă              F jos ◄────────────────┐ ac4
         ┌────── molizi, CASCADA ◄──────────────────────────────────┐ │
         │ [H]   (stânga, pe perete)            ┌──────────────────┘ ac3
-        │ defileul                             └────────────────────┐ ac2  [F] SERPENTINELE
-        │ Oltului                              ┌────── OILE ───────┘       telecabina deasupra
+        │ defileul                             └────── OILE ────────┐ ac2  [F] SERPENTINELE
+        │ Oltului                              ┌───────────────────┘       telecabina deasupra
         │ râul pe dreapta                      └──── AVALANȘA ──────┐ ac1
         │                                                F sus ◄──┘
         ● TRECEREA LA NIVEL (tren)                          ▲ [E] lacul Bâlea, cabana

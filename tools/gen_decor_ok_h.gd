@@ -141,7 +141,7 @@ const PATHS := {
 	"coral": "res://assets/models/rocks/coral_rock.glb",
 }
 const RADIUS := {
-	"tetra": 1.6, "wall": 2.0, "notch_a": 3.0, "notch_b": 3.5, "notch_c": 3.0,
+	"tetra": 2.6, "wall": 2.0, "notch_a": 3.0, "notch_b": 3.5, "notch_c": 3.0,
 	"cycad": 1.0, "bougain": 1.2, "pandanus": 1.8, "hibiscus": 0.9, "clutter": 0.9, "coral": 1.0,
 }
 const NAMES := {
@@ -190,10 +190,9 @@ func _print_profile() -> void:
 			print(s)
 
 
-func _emit(kind: String, x: float, y: float, z: float, yaw: float, sc: float, variant: int = 0) -> void:
+func _emit(kind: String, x: float, y: float, z: float, yaw: float, sc: float, variant: int = 0, scl3: Vector3 = Vector3.ONE) -> void:
 	var ref := _ref(kind)
-	var b := Basis(Vector3.UP, yaw)
-	b = b.scaled(Vector3(sc, sc, sc))
+	var b := Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(sc, sc, sc) * scl3)
 	_seq[NAMES[kind]] = int(_seq.get(NAMES[kind], 0)) + 1
 	var nm := "%s_H%02d" % [NAMES[kind], int(_seq[NAMES[kind]])]
 	var rows := []
@@ -265,41 +264,38 @@ func _tilt_emit(kind: String, x: float, y: float, z: float, yaw: float, sc: floa
 	_n += 1
 
 
-## Tetrapozi: pe STANGA, 2-3 straturi neregulate pe 0.84-0.96, la >= 12.8 m de axa (>= 6,3 m de
-## margine), asezati pe terenul real: stratul 1 la linia apei, 2 si 3 mai adanc in apa mica.
+## Tetrapozi (runda 2): pe STANGA, 2 randuri continue suprapuse pe 0.84-0.96, scara 2,2-2,6x
+## (lat ~5 m, inalt ~4 m, cat o masina). Centrul la >= 14,2 m de axa (>= 7,7 m de margine, deci
+## hull-ul de ~2,6 m jumatate ramane la >= 5 m de asfalt). Randul 1 lipit de dig, randul 2 mai jos,
+## decalat spre apa. Pasul e mai mic decat latimea piesei, ca sa se suprapuna (fara goluri).
 func _tetrapods() -> void:
-	var targets := [-0.05, 0.6, 1.2]
 	var f := 0.840
+	var row_i := 0
 	while f < 0.960:
-		for layer in 3:
-			if layer == 2 and (f < 0.852 or f > 0.948):
-				continue
-			var ff := f + _rng.randf_range(-0.0012, 0.0012) + float(layer) * 0.0007
-			var base := _lat_at_depth(ff, 1.0, float(targets[layer]), 12.8, 24.0)
-			if layer > 0 and base <= 12.81:
-				base = 12.8 + 2.4 * float(layer)
-			var lat := maxf(base + _rng.randf_range(-0.7, 0.9), 12.8)
-			var q := _pos_ax(ff, 1.0, lat)
-			var var_i := 0
-			var sc := _rng.randf_range(1.5, 1.8)
-			if layer == 2 and _rng.randf() < 0.3:
-				var_i = 2
-				sc = _rng.randf_range(0.95, 1.2)
-			var y := _sol(q.x, q.z)
-			var rr := float(RADIUS["tetra"]) * sc * 0.5
-			if _edge_dist(q.x, q.z) < 6.0 or not _free(q.x, q.z, rr):
-				_skipped += 1
-				continue
-			_tilt_emit("tetra", q.x, y - _rng.randf_range(0.15, 0.45), q.z, _rng.randf() * TAU, sc, var_i,
-				_rng.randf_range(-0.14, 0.14), _rng.randf_range(-0.14, 0.14))
-		f += 0.0014
+		var ff := f + _rng.randf_range(-0.0004, 0.0004)
+		var sc := _rng.randf_range(2.2, 2.6)
+		var lat := 14.5 + _rng.randf_range(-0.3, 0.6)
+		var q := _pos_ax(ff, 1.0, lat)
+		if _edge_dist(q.x, q.z) >= 6.0:
+			_tilt_emit("tetra", q.x, _sol(q.x, q.z) - _rng.randf_range(0.3, 0.6), q.z, _rng.randf() * TAU, sc, 0,
+				_rng.randf_range(-0.08, 0.08), _rng.randf_range(-0.08, 0.08))
+		# randul 2: decalat pe lungime (jumatate de pas), mai spre apa si mai jos
+		if f > 0.842 and f < 0.958:
+			var f2 := ff + 0.0009
+			var l2 := maxf(_lat_at_depth(f2, 1.0, 0.8, 17.0, 24.0), 17.0) + _rng.randf_range(-0.3, 0.7)
+			var q2 := _pos_ax(f2, 1.0, l2)
+			var sc2 := _rng.randf_range(2.2, 2.6)
+			_tilt_emit("tetra", q2.x, _sol(q2.x, q2.z) - _rng.randf_range(0.4, 0.8), q2.z, _rng.randf() * TAU, sc2, 0,
+				_rng.randf_range(-0.08, 0.08), _rng.randf_range(-0.08, 0.08))
+		row_i += 1
+		f += 0.0017
 
 
-## Zid de corali jos pe dreapta (golful), la 3,1 m de margine, module de 4 m, cu goluri rare.
+## Zid de corali pe dreapta (golful), CONTINUU pe uscat 0.838-0.950, la 3,1 m de margine,
+## module de 4 m, ingrosat (x1,6) si inaltat (x1,0) ca sa se citeasca.
 func _wall_run() -> void:
 	var i1 := _idx(0.950)
 	var i := _idx(0.838)
-	var cnt := 0
 	while i < i1:
 		var ia := i
 		var ib := i + 2
@@ -310,29 +306,27 @@ func _wall_run() -> void:
 		var m := (a + b) * 0.5
 		var d := Vector2(b.x - a.x, b.z - a.z).normalized()
 		var lo := minf(minf(_sol(a.x, a.z), _sol(b.x, b.z)), _sol(m.x, m.z))
-		cnt += 1
 		i += 2
-		if cnt % 9 == 0:
-			continue  # gol (acces la mal)
-		if lo < _sea + 0.2:
+		if lo < _sea + 0.2 or _edge_dist(m.x, m.z) < 2.5:
 			continue
-		if _edge_dist(m.x, m.z) < 2.5:
-			continue
-		_emit("wall", m.x, lo - 0.08, m.z, atan2(d.x, d.y), 1.0)
+		_emit("wall", m.x, lo - 0.08, m.z, atan2(d.x, d.y), 1.0, 0, Vector3(1.6, 1.0, 1.05))
 
 
-## Notch rocks in larg (stanga), >= 27 m de axa, in afara ferestrei valului 0.86-0.90.
+## Notch rocks in larg (stanga), >= 27 m de axa, in afara ferestrei valului. Doar pe fund real:
+## baza la teren, iar daca apa e mai adanca de 2,2 m piesa se scoate (nimic nu pluteste).
 func _notches() -> void:
 	var specs := [
-		["notch_a", 0.843, 30.0, 1.7, 0.4], ["notch_c", 0.853, 36.0, 1.5, 2.2],
-		["notch_b", 0.912, 29.0, 1.6, 4.1], ["notch_a", 0.926, 34.0, 1.5, 1.0],
-		["notch_c", 0.939, 31.0, 1.7, 3.0], ["notch_b", 0.949, 38.0, 1.4, 5.2],
+		["notch_a", 0.842, 30.0, 1.7, 0.4], ["notch_c", 0.848, 36.0, 1.5, 2.2],
+		["notch_b", 0.938, 30.0, 1.6, 4.1], ["notch_a", 0.946, 34.0, 1.5, 1.0],
+		["notch_c", 0.953, 31.0, 1.7, 3.0], ["notch_b", 0.959, 38.0, 1.4, 5.2],
 	]
 	for sp in specs:
 		var q := _pos_ax(sp[1], 1.0, sp[2])
 		var g := _sol(q.x, q.z)
-		var y := maxf(g, _sea - 2.2) - 0.1
-		_emit(sp[0], q.x, y, q.z, sp[4], sp[3])
+		if _sea - g > 2.2:
+			print("; notch scos (adancime %.1f) la %.3f" % [_sea - g, sp[1]])
+			continue
+		_emit(sp[0], q.x, g - 0.1, q.z, sp[4], sp[3])
 
 
 func _shore(frac: float, side: float) -> Vector3:

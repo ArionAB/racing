@@ -2115,6 +2115,9 @@ const CLASSES_OKINAWA := {
 	"concrete_house_a": _OK_CONCRETE_HOUSE, "concrete_house_b": _OK_CONCRETE_HOUSE,
 	"harbour_quay": {"Quay_Concrete": _OK_CONCRETE},
 	"bus_stop_shelter": {"Shelter_Roof": _OK_ROOF, "Shelter_Coral": _OK_CORAL},
+	# `concrete` (ISLAND_CLASSES) iesea bej-maro pe nisip; calcarul gri-crem e deja pe pista,
+	# deci nu aduce material nou. Prefixul `Tetrapod` prinde si _01, _04, _Stack_01.
+	"tetrapod": {"Tetrapod": _OK_LIME},
 	"coral_stone_wall": {"Coral_Wall_Coral": _OK_CORAL},
 	"vending_machine": {"Vending_Plaster": _OK_PLASTER},
 	"fukugi_tree_a": {"Fukugi_Leaves": _OK_LEAVES},

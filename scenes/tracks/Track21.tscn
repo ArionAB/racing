@@ -101,6 +101,7 @@ bus_shove = 1.5
 bus_side_accel = 4.0
 bus_nose_angle_deg = 40.0
 tunnel_half_width = 6.0
+camera_tail_m = 18.0
 bus_lane_offset = -2.6
 
 [node name="Avalansa" type="Marker3D" parent="Hazarduri"]

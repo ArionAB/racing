@@ -11744,6 +11744,11 @@ func _tunnel_specs() -> Array[Vector4]:
 	return []
 
 
+## Coada zonei de camera dupa gura de iesire, per tunel (cheie = fractia liniei de
+## oprire). Plina doar pentru tunelurile cu `camera_tail_m` > 0.
+var _tunnel_camera_tail: Dictionary = {}
+
+
 ## Tunelurile declarate ca noduri [TunnelSignalHazard], in aceleasi patru
 ## numere. Cautare recursiva si manuala, ca la varfuri.
 func _node_tunnels() -> Array[Vector4]:
@@ -11762,6 +11767,8 @@ func _collect_tunnels(node: Node, out: Array[Vector4]) -> void:
 			var i := _closest_baked_index(p)
 			out.append(Vector4(frac_at(i), sig.tunnel_length,
 				sig.tunnel_half_width, sig.tunnel_ceiling))
+			if sig.camera_tail_m > 0.0:
+				_tunnel_camera_tail[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.camera_tail_m # cheia trece prin float32, ca spec.x
 		_collect_tunnels(child, out)
 
 
@@ -11881,6 +11888,9 @@ func _build_tunnel(spec: Vector4) -> void:
 	cz.size = Vector3(2.0, 2.0, 2.0)
 	cz.frac_from = r.frac_at(line_idx)
 	cz.frac_to = r.frac_at(r.wrap_index(idx_west))
+	var tail_m := float(_tunnel_camera_tail.get(spec.x, 0.0))
+	if tail_m > 0.0:
+		cz.frac_to = fposmod(cz.frac_to + tail_m / maxf(r.length(), 1.0), 1.0)
 	cz.height = 5.5
 	cz.ceiling = ceil_h
 	cz.darkness = 0.5

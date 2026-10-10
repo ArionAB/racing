@@ -304,12 +304,12 @@ const BASELINE := {
 	# (`--sabotaj`) verificat la armare.
 	"Okinawa (Track20)": 4,
 	# Transfagarasan (Track21), fundatia (traseu + hazarde + apa + decor provizoriu, 10 oct
-	# 2026): 3 raportari, masurate de 3 ori, identic — toate la frac 0.670-0.675 pe INAINTE,
+	# 2026): 2 raportari (cu gol de 12 m; 3 la gol 16 m), masurate de 3 ori, identic — toate la frac 0.675 pe INAINTE,
 	# toate `ChannelKicker`, trambulina sariturii peste paraul Balea (G): obstacolul
-	# intentionat al pistei (h=0.4 la 5,6 m si h=0.4/1.0 la 1,55 m). Portalurile provizorii
+	# intentionat al pistei (h=0.4 la 4,2 m si h=1.0 la 1,6 m). Portalurile provizorii
 	# (`coliziune = none`), peretii de zapada si blocurile de langa ace NU intra in banda.
 	# Baza = cifra masurata, FARA marja. Sabotaj (`--sabotaj`) verificat la armare.
-	"Transfagarasan (Track21)": 3,
+	"Transfagarasan (Track21)": 2,
 }
 
 

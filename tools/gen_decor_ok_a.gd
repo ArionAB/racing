@@ -1,5 +1,5 @@
 extends Node
-## Generator de decor MANUAL pentru POI A — PORTUL SI SATUL (Track20, Okinawa,
+## Generator de decor MANUAL pentru POI A â€” PORTUL SI SATUL (Track20, Okinawa,
 ## frac 0.974-1.000 + 0.000-0.1023). Tiparul gen_decor_mv_a.gd.
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/GenDecorOkA.tscn -- --scan
@@ -34,6 +34,11 @@ const PATHS := {
 	"shisa_statue_closed": "res://assets/models/props/shisa_statue_closed.glb",
 	"hibiscus_bush": "res://assets/models/plants/hibiscus_bush.glb",
 	"coconut_palm": "res://assets/models/trees/coconut_palm.glb",
+	"fukugi_tree_a": "res://assets/models/okinawa/plants/fukugi_tree_a.glb",
+	"fukugi_tree_b": "res://assets/models/okinawa/plants/fukugi_tree_b.glb",
+	"fukugi_tree_c": "res://assets/models/okinawa/plants/fukugi_tree_c.glb",
+	"cycad": "res://assets/models/okinawa/plants/cycad.glb",
+	"ryukyu_pine": "res://assets/models/okinawa/plants/ryukyu_pine.glb",
 }
 
 var _track: Track
@@ -177,6 +182,7 @@ func _off(q: Dictionary, lat: float) -> Vector3:
 # ------------------------------------------------------------------ piese
 
 var _circles: Array[Vector3] = []   # (x, z, r) piese cu corp, pentru respingere
+var _houses: Array = []
 var _hib := 0
 var _bou := 0
 
@@ -238,6 +244,7 @@ func _house(model: String, s: float, front: float, side: float, w: float, dep: f
 	if y < 0.3:
 		return false              # tarmul apei
 	_claim(o.x, o.z, r)
+	_houses.append({"o": Vector2(o.x, o.z), "f": f, "w": w, "dep": dep})
 	_raw(model, tag, Vector3(o.x, y, o.z), _yaw_face(f), 1.0)
 	return true
 
@@ -328,6 +335,8 @@ func _build() -> void:
 	_wall_run(-52.0, 196.0, -10.2, true)
 	_wall_run(-52.0, 196.0, 10.2, true)
 	_port()
+	_port2()
+	_nests()
 	_flora()
 
 
@@ -353,7 +362,7 @@ func _street() -> void:
 			_yaw_face(-d), 1.0)
 		_claim(om.x, om.z, 0.6)
 	# perechea shisa la intrarea in sat (s = 42), una pe fiecare parte, 1,5x
-	for sd in [-1.0, 1.0]:
+	for sd: float in [-1.0, 1.0]:
 		var qs := _at(42.0)
 		var os := _off(qs, sd * (SEMI + 3.6))
 		var mdl := "shisa_statue" if sd < 0.0 else "shisa_statue_closed"
@@ -457,6 +466,131 @@ func _port() -> void:
 	if _road_dist(vp.x, vp.y) > 14.0:
 		_raw("vending_machine", "aAutomatP", Vector3(vp.x, _sol(vp.x, vp.y) - 0.03, vp.y),
 			yaw_q, 1.0)
+
+
+func _tree(model: String, tag: String, x: float, z: float, scl: float, r: float) -> bool:
+	if not _free(x, z, r):
+		return false
+	var q := _closest_axis(x, z)
+	# banda libera + gabaritul de start
+	if q["dist"] < 13.0:
+		return false
+	if q["s"] > -8.0 and q["s"] < 34.0 and q["dist"] < 17.0:
+		return false
+	var y := _sol(x, z) - 0.04
+	if y < 0.3:
+		return false
+	_claim(x, z, r)
+	var mode := "none" if model == "cycad" else ""
+	_raw(model, tag, Vector3(x, y, z), _rng.randf() * TAU, scl, mode)
+	return true
+
+
+## Cel mai apropiat punct de axa (arclength s si distanta), pe tronsonul A.
+var _axis_cache: Array = []
+
+
+func _closest_axis(x: float, z: float) -> Dictionary:
+	if _axis_cache.is_empty():
+		var s0 := -60.0
+		while s0 < 215.0:
+			var p3: Vector3 = _at(s0)["p"]
+			_axis_cache.append(Vector3(p3.x, p3.z, s0))
+			s0 += 2.0
+	var best := 1e9
+	var bs := 0.0
+	for v: Vector3 in _axis_cache:
+		var d := Vector2(v.x - x, v.y - z).length()
+		if d < best:
+			best = d
+			bs = v.z
+	return {"dist": best, "s": bs}
+
+
+func _fukugi(tag: String, x: float, z: float, scl: float) -> bool:
+	var m: String = ["fukugi_tree_a", "fukugi_tree_b", "fukugi_tree_c"][_rng.randi() % 3]
+	return _tree(m, tag, x, z, scl, 2.0 * scl)
+
+
+## Cuiburi de verde: pe fiecare casa 2-4 copaci pe flancuri/spate (siruri de
+## vant), cicade la colturile din fata; apoi palcuri in golurile dintre randuri.
+func _nests() -> void:
+	for h in _houses:
+		var o: Vector2 = h["o"]
+		var f: Vector2 = h["f"]
+		var w: float = h["w"]
+		var dep: float = h["dep"]
+		var tt := Vector2(-f.y, f.x)
+		for sd: float in [-1.0, 1.0]:
+			for k in 2:
+				var p := o + tt * sd * (w * 0.5 + 2.2 + _rng.randf_range(0.0, 1.6)) \
+					- f * _rng.randf_range(-3.0, dep * 0.4 + 1.0 + 3.0 * k)
+				if _rng.randf() < 0.8:
+					_fukugi("aFukugi", p.x, p.y, _rng.randf_range(1.0, 1.35))
+				else:
+					_tree("ryukyu_pine", "aPin", p.x, p.y, _rng.randf_range(0.9, 1.1), 2.2)
+		for k in 2:
+			var pb := o - f * (dep * 0.5 + 2.4) + tt * _rng.randf_range(-w * 0.4, w * 0.4)
+			_fukugi("aFukugiS", pb.x, pb.y, _rng.randf_range(1.1, 1.4))
+		for sd: float in [-1.0, 1.0]:
+			var pc := o + f * (dep * 0.5 + 1.0) + tt * sd * (w * 0.5 - 0.5)
+			if _free(pc.x, pc.y, 0.8):
+				_tree("cycad", "aCicada", pc.x, pc.y, _rng.randf_range(1.0, 1.4), 0.8)
+	# palcuri in goluri: ambele parti, de la 13 la 56 m de axa
+	var made := 0
+	var tries := 0
+	while made < 330 and tries < 9000:
+		tries += 1
+		var s := _rng.randf_range(-44.0, 196.0)
+		var side := -1.0 if _rng.randf() < 0.6 else 1.0
+		var lat := side * _rng.randf_range(13.5, 46.0 if side < 0.0 else 42.0)
+		var q := _at(s)
+		var c := _off(q, lat)
+		if not _free(c.x, c.z, 2.0):
+			continue
+		var n := 2 + int(_rng.randi() % 3)
+		for i in n:
+			var p := Vector2(c.x, c.z) + Vector2(_rng.randf_range(-3.0, 3.0), _rng.randf_range(-3.0, 3.0))
+			var r := _rng.randf()
+			var ok := false
+			if r < 0.5:
+				ok = _fukugi("aFukugiP", p.x, p.y, _rng.randf_range(0.95, 1.3))
+			elif r < 0.9:
+				ok = _tree("cycad", "aCicadaP", p.x, p.y, _rng.randf_range(1.0, 1.5), 1.0)
+			else:
+				ok = _tree("ryukyu_pine", "aPinP", p.x, p.y, _rng.randf_range(0.9, 1.15), 2.2)
+			if ok:
+				made += 1
+
+
+## Al doilea cheu, mai aproape de drum (vizibil la 0.960-0.985): doua module,
+## barci, lazi/butoaie/flotoare pe chei, plase.
+func _port2() -> void:
+	var qa := _at(-98.0)
+	var d: Vector2 = qa["d"]
+	var w: Vector2 = -Vector2(qa["n"])           # dreapta = spre apa
+	var yaw_q := atan2(w.y, -w.x)
+	var p := Vector2(_off(qa, -12.0).x, _off(qa, -12.0).z)
+	var sp := _shore_point(p, w)
+	var shores: Array[Vector2] = []
+	for k in [-0.5, 0.5]:
+		var base := sp + d * float(k) * 12.0
+		base = _shore_point(base - w * 10.0, w)
+		shores.append(base)
+		var org := base - w * 1.6
+		_raw("harbour_quay", "aCheu2", Vector3(org.x, 0.05, org.y), yaw_q, 1.0)
+		_claim(org.x, org.y, 7.0)
+		for i in 5:
+			var cp := org - w * _rng.randf_range(0.2, 2.6) + d * _rng.randf_range(-4.5, 4.5)
+			_raw("beach_clutter", "aLadaCheu", Vector3(cp.x, 2.2, cp.y), _rng.randf() * TAU, 1.0, "none")
+	var yb := atan2(d.x, d.y)
+	for i in 3:
+		var base2: Vector2 = shores[i % 2]
+		var bp := base2 + w * (5.5 + 4.2 * float(i / 2)) + d * _rng.randf_range(-2.5, 2.5)
+		_raw("fishing_boat" if i != 1 else "sabani_boat", "aBarca2", Vector3(bp.x, 0.05, bp.y),
+			yb + _rng.randf_range(-0.1, 0.1) + (PI if i == 2 else 0.0), 1.0)
+	var rp := shores[0] - w * 6.0 + d * 3.0
+	_raw("fishing_net_rack", "aPlase2", Vector3(rp.x, _sol(rp.x, rp.y), rp.y), yaw_q + PI * 0.5, 1.0)
 
 
 ## Flori in petice: hibiscus (40) si bougainvillea (20), pe lungul zidurilor.

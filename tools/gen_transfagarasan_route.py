@@ -301,7 +301,7 @@ if SABOTAJ:
     sys.exit(0)
 
 # ---------------------------------------------------------------------------------
-# De aici in jos: doar scrierea .tscn-ului.
+# De aici in jos: doar scrierea .tscn-ului (brief §7 pasul 2, §3, §3.1).
 if OUT_PATH is None:
     print("(fara cale de iesire: nu scriu nimic)")
     sys.exit(0)
@@ -314,10 +314,11 @@ def r3(x):
     return round(x, 3)
 
 _cum = cum_lengths(rs)
+L_TOTAL = _cum[-1]
 
 def road_at(f):
     """Pozitie (x, y_harta, cota) + directie unitara pe harta, INTERPOLAT pe arc."""
-    sd = (f % 1.0) * _cum[-1]
+    sd = (f % 1.0) * L_TOTAL
     j = 0
     while j < n - 1 and _cum[j + 1] < sd:
         j += 1
@@ -332,145 +333,172 @@ def pva(seq):
         f"0, 0, 0, 0, 0, 0, {round(a, 2)}, {round(b, 2)}, {round(c, 2)}" for a, b, c in seq) + ")"
 
 F = frac
-mean_elev = sum(p[2] for p in rs) / n
-SEA_ABS = 0.0     # marea absoluta: cota 0 (digul sta la +1.6, podul la +8.5)
-sea_offset = round(SEA_ABS - mean_elev, 2)
-# Fundul golfului la -4 m sub mare (laguna turcoaz de mic adanc, sub SEA_REEF_DEPTH 5):
-# bed = mean_y - lagoon_depth  =>  lagoon_depth = mean_y + 4.
-LAGOON_WATER_DEPTH = 4.0
-lagoon_depth = round(mean_elev + LAGOON_WATER_DEPTH, 1)
-print(f"\ncota medie sosea {mean_elev:.2f}; sea_level_offset {sea_offset} (marea absoluta {SEA_ABS}); "
-      f"lagoon_depth {lagoon_depth} (apa {LAGOON_WATER_DEPTH} m)")
+main_pts = [godot(p, p[2]) for p in rs]
 
-SUN_ROT = (-25.0, -70.0, 0.0)   # busola 180 - y = 250 = VSV, elevatie 25 (ca in tema okinawa)
-
-# --- latimi (semilatimi, brief §2): B 5.5, D 6, pod 6.5, dig H 6.5; restul 7 -------
-fB0, fB1 = r3(F["A colt N"] + 0.004), r3(F["B iesire"])
-fD0, fD1 = r3(F["D ziduri"] - 0.004), r3(F["D poarta"] + 0.012)
-fP0, fP1 = r3(F["F pod start"] - 0.02), r3(F["F pod capat"] + 0.02)
-fH0, fH1 = r3(F["G3"]), r3(F["H colt port"])
-WS = [(fB0, fB1, 5.5), (fD0, fD1, 6.0), (fP0, fP1, 6.5), (fH0, fH1, 6.5)]
-w_txt = ", ".join(f"Vector3({a}, {b}, {c})" for a, b, c in WS)
-
-# --- aleea de nisip coraligen: B ---------------------------------------------------
-DIRT = [(fB0, fB1)]
-dirt_txt = ", ".join(f"Vector2({a}, {b})" for a, b in DIRT)
-
-# --- rape: 0 = cornisa E (stanga = est = marea), 1 = podul (viaduct, ambele laturi),
-#           2 = digul H (ambele laturi) -------------------------------------------------
-fE0, fE1 = r3(F["E cornisa far"]), r3(F["F cap pod"])
-# Fereastra viaductului = doar partea PLANA a podului (+8.5). Dincolo de capat soseaua coboara
-# spre insula mica (+5), iar plasa de repunere a viaductului (`ViaductNet`) se pune sub cota
-# cea mai joasa din fereastra, ca o cutie cu margine: cu 45 m (implicit) si fereastra prelungita
-# peste capat, cutia prindea SOSEAUA de la coltul G (ProbeRace seed 1: 22 de repuneri la 0.723,
-# "ViaductNet1"). Marja se coboara la 12 m, ca la Kyoto (Track18).
-fV0, fV1 = r3(F["F pod start"] - 0.01), r3(F["F pod capat"] + 0.002)
-VIADUCT_NET_MARGIN_M = 12.0
-fG0, fG1 = r3(F["G3"] + 0.015), r3(F["H colt port"] - 0.025)
-RAVINES = [
-    (fE0, fE1, 30.0, -1),     # cornisa E: buza la 0.5 m de asfalt, marea la picior
-    (fV0, fV1, 12.5, 0),      # podul: terenul coboara si SUB tablier (viaduct), fund la -4
-    (0.735, 0.805, 5.0, -1),  # plaja G: marea (stanga = larg) la ~8 m de asfalt, ca tromba sa porneasca DIN APA
-    (fG0, fG1, 6.0, 0),       # digul H: marea pana la asfalt pe ambele parti, putin adanc (turcoaz)
-]
-rav_txt = ", ".join(f"Vector4({a}, {b}, {c}, {d})" for a, b, c, d in RAVINES)
-# Fara `custom_ravine_widths`: cu latime (60 m) cornisa a iesit un iaz dreptunghiular cu mal
-# de uscat dincolo de el; fara, marginea exterioara a insulei (shore) e cea care inchide apa.
-
-# --- golful (custom_lagoon): interiorul buclei din coltul SE, intre pod, insula mica,
-#     dig si coasta insulei mari. Harta (x, y) -> lume Vector2(gx, gz) = (x, -y). ---------
-BAY_MAP = [
-    (225, -58), (292, -105), (330, -150), (372, -195), (405, -250), (392, -322),
-    (320, -360), (232, -326), (150, -252), (108, -178), (112, -128), (160, -88),
-]
-lag_txt = ", ".join(f"Vector2({x}, {-y})" for x, y in BAY_MAP)
-
-# --- hazarduri -------------------------------------------------------------------------
-def marker_xf(f, along_m=0.0):
-    pos, d = road_at(f + along_m / tot)
-    g = godot(pos, pos[2])
-    return f"Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {g[0]:.3f}, {g[1]:.3f}, {g[2]:.3f})"
-
-F_BRIDGE = r3((F["F traveea"]))
-F_TYPHOON = float(os.environ.get("OK_TYPHOON", "0.77"))
-F_WAVE = float(os.environ.get("OK_WAVE", "0.88"))
-BR_POS, _bd = road_at(F_BRIDGE)
-br_g = godot(BR_POS, BR_POS[2])
-print(f"pod: frac {F_BRIDGE}, pozitie harta ({BR_POS[0]:.0f}, {BR_POS[1]:.0f}) cota {BR_POS[2]:.1f}; "
-      f"tromba {F_TYPHOON}; val {F_WAVE}")
-for nm, ff in (("pod", F_BRIDGE), ("tromba", F_TYPHOON), ("val", F_WAVE)):
-    pp, dd = road_at(ff)
-    print(f"  {nm}: frac {ff:.3f} -> harta ({pp[0]:.0f}, {pp[1]:.0f}) cota {pp[2]:.1f} "
-          f"directie {math.degrees(math.atan2(dd[0], dd[1])) % 360:.0f} deg")
-
-# --- decor provizoriu (kitul vechi, ca sa se vada scara) ---------------------------------
+# Basis ca in .tscn (nouă numere pe randuri, memoria tscn-transform-e-pe-randuri):
+# X local -> (cos t, sin t), Z local -> (-sin t, cos t) in planul (x, z) al lumii.
 def rot_y(deg, sc=1.0):
     c, s_ = math.cos(math.radians(deg)), math.sin(math.radians(deg))
     return f"{c*sc:.5f}, 0, {-s_*sc:.5f}, 0, {sc}, 0, {s_*sc:.5f}, 0, {c*sc:.5f}"
 
 def rot_y_s(deg, sx, sy, sz):
-    """ca rot_y, dar cu scara pe fiecare axa locala (coloane scalate, randuri in .tscn)."""
     c, s_ = math.cos(math.radians(deg)), math.sin(math.radians(deg))
     return f"{sx*c:.5f}, 0, {-sz*s_:.5f}, 0, {sy}, 0, {sx*s_:.5f}, 0, {sz*c:.5f}"
 
-def offset_from_road(f, lateral, yaw_extra=0.0):
-    """Punct la `lateral` m de axa (+ = dreapta, - = stanga), + cota drumului + yaw 'along'."""
+def yaw_z_to(zx, zz):
+    """yaw (grade) care aseaza Z local pe (zx, zz) in plan."""
+    return math.degrees(math.atan2(-zx, zz))
+
+def travel_g(f):
+    """Directia de mers la fractia f, in coordonate Godot (x, z)."""
+    _p, d = road_at(f)
+    return (d[0], -d[1])
+
+def at_road(f, lateral=0.0):
+    """Punct Godot (x, cota, z) la `lateral` m de axa (+ = dreapta in sensul de mers)."""
     pos, d = road_at(f)
-    rx, ry = d[1], -d[0]            # dreapta pe harta pentru directia (dx, dy)
-    x, y = pos[0] + rx * lateral, pos[1] + ry * lateral
-    heading = math.degrees(math.atan2(d[0], d[1]))   # 0 = N, 90 = E (harta)
-    # Godot: yaw 0 = obiect cu axa lunga pe +X; harta -> lume (gx = x, gz = -y).
-    # directia de mers in Godot = (dx, 0, -dy); yaw = atan2(-dz, dx) pentru +X local.
-    # `rot_y(t)` (formatul pe randuri din .tscn) aseaza axa locala +X pe (cos t, 0, sin t)
-    # in lume, iar directia de mers in lume e (dx, 0, -dy): deci t = -atan2(dy, dx).
-    yaw = -math.degrees(math.atan2(d[1], d[0]))
-    return (x, pos[2], -y), yaw + yaw_extra
+    rx, ry = d[1], -d[0]
+    return (pos[0] + rx * lateral, pos[2], -(pos[1] + ry * lateral))
 
-# tetrapozi pe latura dinspre larg (stanga) a digului H
-tetra = []
-f_a, f_b = fG0 + 0.01, fG1 - 0.01
+def xf_ident(f, lateral=0.0, dy=0.0):
+    g = at_road(f, lateral)
+    return f"Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {g[0]:.3f}, {g[1] + dy:.3f}, {g[2]:.3f})"
+
+# --- fractii (brief §3: urs 0.20, semafor la gura tunelului, avalansa 0.40, oi 0.49, tren 0.80,
+#     sarituri 0.67). Avalansa isi muta singura fractia (`_build_avalanche`): se citeste din scena.
+F_BEAR = 0.20
+F_TUNNEL = F["D portal S"] + 14.0 / L_TOTAL   # linia de oprire: 14 m dupa coltul portalului (nu pe coltul de 318->349)
+TUNNEL_LEN = 60.0
+F_TUNNEL_END = F_TUNNEL + TUNNEL_LEN / L_TOTAL
+F_AVAL = 0.40
+F_SHEEP = 0.49
+F_JUMP = 0.678
+F_TRAIN = 0.80
+
+# --- latimi: coronamentul si tunelul la 6 (rampa Track.WIDTH_RAMP_M de fiecare parte) ---
+fCr0, fCr1 = F["B baraj V"], F["B baraj E"]
+fTu0, fTu1 = F_TUNNEL - 0.002, F_TUNNEL_END + 0.002
+WS = [(r3(fCr0), r3(fCr1), 6.0), (r3(fTu0), r3(fTu1), 6.0)]
+w_txt = ", ".join(f"Vector3({a}, {b}, {c})" for a, b, c in WS)
+
+# --- rape (lac Vidraru stanga, haul dreapta, cuveta Balea, Olt dreapta) ---------------------
+# Latura: -1 stanga, +1 dreapta in sensul de mers (side_at = dir x UP).
+RAVINES = [
+    (0.080, 0.135, 30.0, -1),   # 0 lacul Vidraru la coronament (cornisa, 4,5 m sub drum)
+    (0.135, 0.245, 20.0, -1),   # 1 lacul Vidraru, malul C (mal lin)
+    (0.074, 0.128, 40.0, 1),    # 2 haul de sub baraj (dreapta), cornisa
+    (0.347, 0.382, 5.0, 1),     # 3 cuveta lacului Balea (apa = disc, vezi mai jos)
+    (0.705, 0.775, 10.0, 1),    # 4 Oltul amonte
+    (0.845, 0.975, 10.0, 1),    # 5 Oltul aval (nimic intre 0.775 si 0.845: trecerea la nivel)
+]
+rav_txt = ", ".join(f"Vector4({a}, {b}, {c}, {d})" for a, b, c, d in RAVINES)
+RAV_FLOORS = [(0, 3.0), (1, 3.0), (2, -28.0), (3, 37.0), (4, -4.0), (5, -5.0)]
+floors_txt = ", ".join(f"Vector2({i}, {y})" for i, y in RAV_FLOORS)
+RAV_WIDTHS = [(0, 120.0), (1, 150.0), (2, 60.0), (3, 55.0), (4, 45.0), (5, 45.0)]
+widths_txt = ", ".join(f"Vector2({i}, {w})" for i, w in RAV_WIDTHS)
+# Apa: (rapa, cota ABSOLUTA, elan la repunere). Nivelurile sunt SUB sosea pe tot coridorul de
+# care se poate lega cuveta (altfel umplerea ar curge pe sosea: vezi _build_ravine_water).
+RAV_WATER = [(0, 7.5, 16.0), (2, -24.0, 20.0), (4, 3.4, 16.0), (5, -2.5, 16.0)]
+rwater_txt = ", ".join(f"Vector3({i}, {y}, {b})" for i, y, b in RAV_WATER)
+
+# --- lacul Balea: disc provizoriu (cuveta sapata pe ravena 3, fara umplere automata) -----------
+BAL_POS = at_road(F["E Balea Lac"], 44.0)
+BAL_Y = 40.3
+BAL_R = 34.0
+
+# --- varfuri (muntele din mijloc + masivul peste tunel, tiparul Track09/Track16) -------------
+tun_c = at_road((F_TUNNEL + F_TUNNEL_END) * 0.5, 0.0)
+PEAKS = [
+    ("MasivTunel", (tun_c[0], 85.0, tun_c[2]), 160.0),
+    ("CreastaVest", (-30.0, 105.0, -100.0), 200.0),
+    ("CreastaCentru", (100.0, 92.0, -115.0), 140.0),
+]
+
+# --- decor provizoriu din kitul alpin --------------------------------------------------------
+dec = []   # (nume, resursa, transform_str, extra_proprietati)
+def add(nm, res, xform, extra=""):
+    dec.append((nm, res, xform, extra))
+
+# Portalurile: mountain_tunnel.glb (18,7 x 12,8 x 15,3; gol 8 x 5,5), X scalat 1,5 -> gol 12 m = tunelul;
+# Z local pe sensul de mers; centrat la 7,6 m in AFARA gurii. Coliziune "none" (tubul are propriile ziduri).
+d_in = travel_g(F_TUNNEL)
+d_out = travel_g(F_TUNNEL_END)
+g_in = at_road(F_TUNNEL - 7.6 / L_TOTAL)
+g_out = at_road(F_TUNNEL_END + 7.6 / L_TOTAL)
+add("Portal_S", "tunnel",
+    f"Transform3D({rot_y_s(yaw_z_to(*d_in), 1.5, 1.25, 1.0)}, {g_in[0]:.2f}, {g_in[1]:.2f}, {g_in[2]:.2f})",
+    'metadata/coliziune = "none"')
+add("Portal_N", "tunnel",
+    f"Transform3D({rot_y_s(yaw_z_to(*d_out), 1.5, 1.25, 1.0)}, {g_out[0]:.2f}, {g_out[1]:.2f}, {g_out[2]:.2f})",
+    'metadata/coliziune = "none"')
+# utilajul parcat la portalul de sud, pe acostament
+gp = at_road(F_TUNNEL - 22.0 / L_TOTAL, 9.0)
+add("Utilaj_parcat", "snowplow",
+    f"Transform3D({rot_y(yaw_z_to(*d_in), 1.0)}, {gp[0]:.2f}, {gp[1]:.2f}, {gp[2]:.2f})")
+# pereti de zapada provizorii: petice ridicate pe verticala, de-o parte si de alta a ultimilor 80 m
 k = 0
-ft = f_a
-while ft < f_b:
-    for row, lat in enumerate((-11.5, -16.0)):
-        g, yaw = offset_from_road(ft + (0.5 * 4.5 / tot if row else 0.0), lat)
-        tetra.append((f"Tetra{k:02d}", g, yaw * 3.7 + k * 41.0))
+for j in range(8):
+    ff = F_TUNNEL - (80.0 - j * 9.0) / L_TOTAL
+    for lat in (-9.8, 9.8):
+        g = at_road(ff, lat)
+        add(f"Zapada{k:02d}", "snow",
+            f"Transform3D({rot_y_s(yaw_z_to(*d_in), 1.6, 11.0, 1.1)}, {g[0]:.2f}, {g[1] - 0.2:.2f}, {g[2]:.2f})",
+            'metadata/coliziune = "none"')
         k += 1
-    ft += 4.5 / tot * 2.0
-# ziduri gusuku langa D (provizorii, kitul vechi, 2.8-4.5 m)
-gusuku = []
-for i, ff in enumerate([F["D ziduri"] + 0.006 * j for j in range(1, 12)]):
-    side = -1.0 if i % 2 == 0 else 1.0
-    g, yaw = offset_from_road(ff, side * 9.5)
-    gusuku.append((f"Gusuku{i:02d}", g, yaw))
-# farul alb (kitul vechi, lighthouse.glb 9 m), pe capul E
-# poarta provizorie peste drum la ~0.43
-F_GATE = 0.43
-# Golul dintre picioarele din kit are ~1.9 m inauntru (x in +-0.95..1.89): ca sa treaca un
-# drum de 12 m (D, semilatime 6) cu marja, X se scaleaza 6.8x (gol ~12.9 m), iar Y/Z doar 2.6x
-# (poarta de ~9.6 m, nu de 25). Provizoriu: o inlocuieste `ryukyu_gate` (brief par. 5.1).
-GATE_SX = 6.8
-gate_pos, gate_yaw = offset_from_road(F_GATE, 0.0)
+# ziduri de sprijin provizorii: blocuri de stanca pe exteriorul acelor de par (F)
+k = 0
+for fl in ("F ac1b", "F ac2a", "F ac2b", "F ac3a", "F ac3b", "F ac4a", "F ac4b"):
+    for dj in range(-2, 3):
+        ff = F[fl] + dj * 0.0065
+        _p0, d0 = road_at(ff - 0.01)
+        _p1, d1 = road_at(ff + 0.01)
+        cross = d0[0] * d1[1] - d0[1] * d1[0]     # >0 vireaza spre stanga -> exteriorul e la dreapta
+        lat = 10.5 if cross > 0 else -10.5
+        g = at_road(ff, lat)
+        add(f"ZidAc{k:02d}", "rock",
+            f"Transform3D({rot_y(yaw_z_to(*travel_g(ff)) + 90.0, 0.7)}, {g[0]:.2f}, {g[1] - 0.3:.2f}, {g[2]:.2f})")
+        k += 1
 
-main_pts = [godot(p, p[2]) for p in rs]
+SUN_ROT = (-25.0, -110.0, 0.0)
+SHEEP = "res://assets/models/monumentvalley/animals/sheep.glb"
 
-# Feribot PROVIZORIU: cruise_boat.glb din kitul Fiordland (14 x 4,8 x 6,2 m, originea la linia de
-# plutire, prova pe +Z, MASURAT pe geometrie: capatul +Z se ingusteaza la 1,8 m si e jos (0,9 m), capatul -Z e bont
-# cu cos (4,6 m) -- contrar brief-ului Fiordland care o da pe -Z). Scalat 2x (28 m, varf +9,4 m peste mare) ca sa depaseasca asfaltul de la
-# +8,5 m: la 1x (varf +4,7 m) podul nu mai avea de ce sa se ridice (probe_bridge: "catargele chiar
-# depasesc asfaltul" = FAIL). Il inlocuieste `island_ferry` / `coastal_freighter` (brief par. 5.2).
-SHIP_MODEL = "res://assets/models/fiordland/vehicles/cruise_boat.glb"
+# --- hazarde: transformari -----------------------------------------------------------------
+sig_g = at_road(F_TUNNEL, 7.6)
+sig_xf = f"Transform3D({rot_y(yaw_z_to(-d_in[0], -d_in[1]))}, {sig_g[0]:.3f}, {sig_g[1]:.3f}, {sig_g[2]:.3f})"
+
+# oile: curg in jos pe panta (nord = -Z in Godot) peste ramura a treia, road_dir de-a lungul ramurii
+_pos_s, d_s = road_at(F_SHEEP)
+road_dir_g = (d_s[0], -d_s[1])
+flow_g = (0.0, -1.0)
+
+# trenul: sina perpendiculara pe drum, rotita 30 de grade (diagonala)
+dg = travel_g(F_TRAIN)
+perp_g = (-dg[1], dg[0])
+rail_deg = math.degrees(math.atan2(perp_g[1], perp_g[0])) + 30.0
+tr_g = at_road(F_TRAIN)
+
+print()
+for nm, ff in (("urs", F_BEAR), ("semafor", F_TUNNEL), ("avalansa", F_AVAL), ("oi", F_SHEEP),
+               ("sarituri", F_JUMP), ("tren", F_TRAIN)):
+    pp, dd = road_at(ff)
+    print(f"  {nm}: frac {ff:.3f} -> harta ({pp[0]:.0f}, {pp[1]:.0f}) cota {pp[2]:.1f} "
+          f"directie {math.degrees(math.atan2(dd[0], dd[1])) % 360:.0f} deg")
 
 tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
-[ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="5_channel"]
-[ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="6_hzm"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+[ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="3_channel"]
+[ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="4_hzm"]
+[ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
+[ext_resource type="Script" path="res://scenes/hazards/herd_hazard.gd" id="6_herd"]
+[ext_resource type="Script" path="res://scenes/hazards/train_hazard.gd" id="7_train"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
-[ext_resource type="PackedScene" path="res://assets/models/structures/tetrapod.glb" id="10_tetra"]
-[ext_resource type="PackedScene" path="res://assets/models/structures/gusuku_wall.glb" id="11_gusuku"]
-[ext_resource type="PackedScene" path="res://assets/models/buildings/lighthouse.glb" id="12_light"]
-[ext_resource type="PackedScene" path="res://assets/models/structures/stone_gate_torii.glb" id="13_gate"]
+[ext_resource type="PackedScene" path="res://assets/models/props/cow.glb" id="10_cow"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/snowplow.glb" id="11_plow"]
+[ext_resource type="PackedScene" path="res://assets/models/structures/mountain_tunnel.glb" id="12_tunnel"]
+[ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
+[ext_resource type="PackedScene" path="res://assets/models/scatter/snow_patch.glb" id="14_snow"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -480,97 +508,137 @@ _data = {{
 }}
 point_count = {len(main_pts)}
 
-[node name="Track20" type="Node3D"]
+[sub_resource type="CylinderMesh" id="Cyl_balea"]
+top_radius = {BAL_R}
+bottom_radius = {BAL_R}
+height = 0.1
+radial_segments = 28
+rings = 1
+cap_bottom = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_balea"]
+albedo_color = Color(0.25, 0.45, 0.47, 0.88)
+transparency = 1
+roughness = 0.25
+
+[node name="Track21" type="Node3D"]
 script = ExtResource("1_track")
-custom_name = "Okinawa"
-custom_theme = "okinawa"
-custom_world_seed_name = "okinawa20"
+custom_name = "Transfagarasan"
+custom_theme = "transfagarasan"
+custom_world_seed_name = "transfagarasan21"
 custom_half_width = 7.0
 custom_road_surface = "asphalt"
 custom_sun_rotation_deg = Vector3({SUN_ROT[0]:.0f}, {SUN_ROT[1]:.0f}, {SUN_ROT[2]:.0f})
-custom_sea_level_offset = {sea_offset}
 custom_width_segments = Array[Vector3]([{w_txt}])
-custom_dirt_ranges = Array[Vector2]([{dirt_txt}])
 custom_ravines = Array[Vector4]([{rav_txt}])
-custom_cornice_ravines = Array[int]([0])
-custom_viaduct_ravines = Array[int]([1])
-custom_viaduct_net_margin = {VIADUCT_NET_MARGIN_M}
-custom_lagoon = Array[Vector2]([{lag_txt}])
+custom_cornice_ravines = Array[int]([0, 2])
+custom_ravine_floors = Array[Vector2]([{floors_txt}])
+custom_ravine_widths = Array[Vector2]([{widths_txt}])
+custom_ravine_water = Array[Vector3]([{rwater_txt}])
 traffic_count = 0
-lagoon_depth = {lagoon_depth}
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_main")
 
+[node name="Peaks" type="Node3D" parent="."]
+"""
+for nm, (px, py, pz), rad in PEAKS:
+    tscn += f"""
+[node name="{nm}" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {px:.2f}, {py:.2f}, {pz:.2f})
+gizmo_extents = {rad}
+script = ExtResource("2_peak")
+radius_m = {rad}
+"""
+tscn += f"""
 [node name="Hazarduri" type="Node3D" parent="."]
 
-[node name="PodMobil" type="Marker3D" parent="Hazarduri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {br_g[0]:.3f}, {br_g[1]:.3f}, {br_g[2]:.3f})
-gizmo_extents = 100.0
-script = ExtResource("5_channel")
-gap = 12.0
-water_half = 26.0
-bank = 20.0
-depth = 13.0
-reach = 100.0
-fade = 40.0
-jump = false
-water_y_drop = -1.0
-label = "Podul de la Kouri"
-ship_model = "{SHIP_MODEL}"
-ship_node = "Boat"
-ship_scale = 2.0
-ship_draft = 0.0
-ship_bow_neg_z = false
-
-[node name="Tromba" type="Marker3D" parent="Hazarduri"]
-transform = {marker_xf(F_TYPHOON)}
+[node name="Urs" type="Marker3D" parent="Hazarduri"]
+transform = {xf_ident(F_BEAR)}
 gizmo_extents = 3.0
-script = ExtResource("6_hzm")
-kind = 4
+script = ExtResource("4_hzm")
+kind = 0
+model = ExtResource("10_cow")
+model_scale = 0.9
+face_travel = true
+motion = 1
+sweep_speed = 1.8
 
-[node name="Val" type="Marker3D" parent="Hazarduri"]
-transform = {marker_xf(F_WAVE)}
+[node name="SemaforTunel" type="Node3D" parent="Hazarduri"]
+transform = {sig_xf}
+script = ExtResource("5_signal")
+period = 38.0
+clear_hold = 6.0
+tunnel_length = {TUNNEL_LEN}
+bus_speed = 11.0
+bus_width = 2.4
+bus_length = 4.0
+bus_model = ExtResource("11_plow")
+bus_shove = 1.5
+bus_side_accel = 4.0
+bus_nose_angle_deg = 40.0
+tunnel_half_width = 6.0
+bus_lane_offset = -2.6
+
+[node name="Avalansa" type="Marker3D" parent="Hazarduri"]
+transform = {xf_ident(F_AVAL)}
 gizmo_extents = 3.0
-script = ExtResource("6_hzm")
-kind = 9
+script = ExtResource("4_hzm")
+kind = 8
+avalanche_period = 75.0
+
+[node name="OileAcPaior" type="Node3D" parent="Hazarduri"]
+transform = {xf_ident(F_SHEEP)}
+script = ExtResource("6_herd")
+animal_model = "{SHEEP}"
+alt_model = "{SHEEP}"
+flow_dir = Vector3({flow_g[0]}, 0, {flow_g[1]})
+road_dir = Vector3({road_dir_g[0]:.4f}, 0, {road_dir_g[1]:.4f})
+corridor_m = 14.0
+animal_mass = 45.0
+speed = 2.5
+spacing = 1.4
+zebra_ratio = 0.0
+
+[node name="Tren" type="Node3D" parent="Hazarduri"]
+transform = Transform3D({rot_y(rail_deg)}, {tr_g[0]:.3f}, {tr_g[1]:.3f}, {tr_g[2]:.3f})
+script = ExtResource("7_train")
+model_path = "res://assets/models/vehicles/train.glb"
+period = 40.0
+half_rail = 65.0
+road_half_width = 7.0
+
+[node name="ParaulBalea" type="Marker3D" parent="Hazarduri"]
+transform = {xf_ident(F_JUMP)}
+gizmo_extents = 90.0
+script = ExtResource("3_channel")
+gap = 16.0
+water_half = 8.0
+bank = 16.0
+depth = 18.0
+water_y_drop = 15.0
+reach = 90.0
+fade = 30.0
+jump = true
+label = "Paraul Balea"
+
+[node name="LacBalea" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {BAL_POS[0]:.2f}, {BAL_Y}, {BAL_POS[2]:.2f})
+cast_shadow = 0
+mesh = SubResource("Cyl_balea")
+surface_material_override/0 = SubResource("Mat_balea")
 
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("9_prop")
-
-[node name="Dig_tetrapozi" type="Node3D" parent="DecorManual"]
 """
-for nm, g, yaw in tetra:
+RES = {"tunnel": "12_tunnel", "snowplow": "11_plow", "rock": "13_rock", "snow": "14_snow"}
+for nm, res, xform, extra in dec:
     tscn += f"""
-[node name="{nm}" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D({rot_y(yaw, 1.6)}, {g[0]:.2f}, {g[1] + 0.25:.2f}, {g[2]:.2f})
+[node name="{nm}" parent="DecorManual" instance=ExtResource("{RES[res]}")]
+transform = {xform}
 """
-    for kk, vn in ((1, "Tetrapod_04"), (2, "Tetrapod_Stack_01")):
-        tscn += f"""
-[node name="{vn}" parent="DecorManual/Dig_tetrapozi/{nm}" index="{kk}"]
-visible = false
-"""
-tscn += """
-[node name="Ziduri_D" type="Node3D" parent="DecorManual"]
-"""
-for nm, g, yaw in gusuku:
-    tscn += f"""
-[node name="{nm}" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D({rot_y(yaw, 1.3)}, {g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})
-"""
-    for kk, vn in ((1, "Gusuku_Wall_B"), (2, "Gusuku_Wall_C")):
-        tscn += f"""
-[node name="{vn}" parent="DecorManual/Ziduri_D/{nm}" index="{kk}"]
-visible = false
-"""
-lh = (LIGHTHOUSE[0], float(os.environ.get("OK_LIGHT_Y", "22.0")), -LIGHTHOUSE[1])
-tscn += f"""
-[node name="Far_capul_E" parent="DecorManual" instance=ExtResource("12_light")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, {lh[0]:.2f}, {lh[1]:.2f}, {lh[2]:.2f})
-
-[node name="Poarta_D" parent="DecorManual" instance=ExtResource("13_gate")]
-transform = Transform3D({rot_y_s(gate_yaw + 90.0, GATE_SX, 2.6, 2.6)}, {gate_pos[0]:.2f}, {gate_pos[1]:.2f}, {gate_pos[2]:.2f})
-"""
+    if extra:
+        tscn += extra + "\n"
 
 with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:
     f.write(tscn)

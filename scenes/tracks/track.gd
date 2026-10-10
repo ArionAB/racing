@@ -3950,6 +3950,12 @@ static func themes() -> Dictionary:
 		# NU al insulei generice (cocotieri). Vezi `TrackDecor._build_oki_carpet`.
 		# "island" ramane neatins: Track08 bit-identic.
 		"props": "okinawa",
+		# Raza amprentei la baza e calculata o data per (mesh, transformare relativa):
+		# 1000 de tufe din acelasi .glb au aceeasi cheie. Fara cache, Okinawa citea
+		# varfurile de pe GPU pentru fiecare nod ramas WorldProp (~3,7 s din incarcare).
+		"prop_foot_cache": true,
+		"prop_contact_flat": ["hibiscus_bush", "cycad", "bougainvillea", "pandanus", "fan_palm",
+			"fukugi_tree_a", "fukugi_tree_b", "fukugi_tree_c", "ryukyu_pine", "banyan"],
 		"horizon_rings": [
 			# POZITII FIXE (`"at"`, x/z de lume), alese din harta in MARE, nu pe
 			# raza din centroid (vezi `_build_horizon`). Insula Ie la NV, ~250 m
@@ -8639,73 +8645,94 @@ func _prop_contact_discs() -> PackedVector4Array:
 		var n3 := n as Node3D
 		if n3 == null or n3 == root or not n3.visible:
 			continue
-		# PIESE INLANTUITE: fara disc de contact. Steag OPT-IN pe nod
-		# (`metadata/contact = "none"`), deci implicit nu se schimba NIMIC
-		# pe nicio pista — se aplica doar unde generatorul il scrie explicit.
-		#
-		# De ce a fost nevoie, masurat pe POI A (Machu Picchu, frac 0.035):
-		# 99,3% din pixelii complet NEGRI ai cadrului (luminanta sub 5) cadeau
-		# pe `PropContact`, si 38,2% din obiectul asta se randa la zero.
-		# Terenul, prin contrast, nu cobora niciodata sub 122 — deci nu era
-		# umbra, era discul.
-		#
-		# Mecanismul e cel pe care nota de la PROP_AO_FOOT_BAND il descrie deja
-		# pentru padure, dar reparatia de acolo nu-l acopera. Raza luata din
-		# amprenta BAZEI rezolva copacul (trunchi subtire sub coroana lata);
-		# pentru un ZID amprenta bazei E toata lungimea piesei, deci discul
-		# iese cu raza ~4,4 m la `inca_wall_b`, iar zidurile inlantuite stau la
-		# 3,7 m unul de altul PRIN CONSTRUCTIE (capete la ±2,0/±3,0/±1,0, rost
-		# 0,0000). Suprapunerea e atunci garantata, nu accidentala.
-		#
-		# Numarata pe cele 802 ziduri ale zonei A, pe 4000 de puncte: 86% din
-		# solul acoperit sta sub 2+ discuri, maximul e 10, iar BLEND_MODE_MUL
-		# inmulteste: 0,74^10 = 0,049. Inmultit apoi cu umbra dinamica
-		# (`shadow_opacity` 0,70) ajunge la zero pe intreg.
-		#
-		# Contactul zidului nu se pierde vizual: un zid sta pe o linie, nu pe
-		# un punct, iar umbra lui o face lumina directionala — care are forma
-		# si directie. Discul era menit sa lipeasca de sol o piesa IZOLATA.
-		if n3.has_meta("contact") and str(n3.get_meta("contact")) == "none":
+		if n3 is FlockProp:
+			# Stol copt din WorldProp: discurile calculate la coacere.
+			var fp := n3 as FlockProp
+			for k in fp.contact_discs.size():
+				out.append(fp.contact_discs[k])
+				if not _contact_flat.is_empty():
+					_disc_flat.append(fp.contact_flat[k] if k < fp.contact_flat.size() else 0)
 			continue
-		if PROP_AO_SKIP_MODELS.has(n3.scene_file_path.get_file().get_basename()):
+		var d := _contact_disc_for(n3, root)
+		if is_nan(d.x):
 			continue
-		if not _contact_skip.is_empty() and _contact_skip.has(_instance_stem(n3, root)):
-			continue
-		var flat_disc := not _contact_flat.is_empty() and _in_flat_model(n3, root)
-		var aabb := _visual_aabb(n3)
-		if aabb.size == Vector3.ZERO:
-			continue
-		var gp := n3.global_position
-		# Raza din AMPRENTA DE LA BAZA, nu din diagonala gabaritului intreg
-		# (vezi nota de la PROP_AO_FOOT_BAND). Cand piesa n-are vertecsi in
-		# banda de jos — panouri, pasari, orice fara picior — se cade inapoi
-		# pe vechea socoteala, ca sa nu ramana piese fara contact.
-		var r: float
-		var stem := n3.scene_file_path.get_file().get_basename()
-		if WorldProp.TRUNK_RADIUS.has(stem):
-			# Piesa cu trunchi MASURAT (WorldProp.TRUNK_RADIUS, azi doar Kyoto):
-			# discul sta la piciorul TRUNCHIULUI, nu sub coroana. Amprenta bazei
-			# a unui artar cu coroana de 10-12 m iesea un octogon negru de 6 m
-			# (banda de 18% din inaltime prinde ramurile joase). Pistele fara
-			# intrari in tabel trec pe calea de mai jos, neschimbate.
-			var gs := n3.global_transform.basis.get_scale()
-			var sc := maxf(gs.x, gs.z)
-			r = clampf(float(WorldProp.TRUNK_RADIUS[stem]) * sc * PROP_AO_TRUNK_MULT,
-					PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
-		else:
-			var half := _prop_foot_radius(n3, aabb)
-			if half <= 0.0:
-				half = Vector2(aabb.size.x, aabb.size.z).length() * 0.5
-			r = clampf(half * PROP_AO_RADIUS_SCALE,
-					PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
-		# Cota BAZEI, nu a originii: originile kitului stau pe pivot (vezi
-		# memoria "Kit assets Cappadocia"), deci originea unui horn poate fi la
-		# mijlocul lui. Ce trebuie sa atinga solul e fundul gabaritului.
-		var base_y := gp.y + aabb.position.y
-		out.append(Vector4(gp.x, gp.z, r, base_y))
+		out.append(d)
 		if not _contact_flat.is_empty():
-			_disc_flat.append(1 if flat_disc else 0)
+			_disc_flat.append(1 if _in_flat_model(n3, root) else 0)
 	return out
+
+
+## Valoare-santinela: piesa nu primeste disc de contact.
+const NO_DISC := Vector4(NAN, NAN, NAN, NAN)
+
+## Discul de contact al unei piese: (x, z, raza, cota bazei), sau [constant NO_DISC].
+## Corpul bucatii de mai sus, scos intr-o functie ca sa-l poata chema si coacerea
+## decorului (tools/bake_okinawa_manifest.gd): un stol FlockProp nu are mesh-uri de
+## masurat, deci poarta discurile calculate aici (`FlockProp.contact_discs`).
+func _contact_disc_for(n3: Node3D, root: Node) -> Vector4:
+	# PIESE INLANTUITE: fara disc de contact. Steag OPT-IN pe nod
+	# (`metadata/contact = "none"`), deci implicit nu se schimba NIMIC
+	# pe nicio pista — se aplica doar unde generatorul il scrie explicit.
+	#
+	# De ce a fost nevoie, masurat pe POI A (Machu Picchu, frac 0.035):
+	# 99,3% din pixelii complet NEGRI ai cadrului (luminanta sub 5) cadeau
+	# pe `PropContact`, si 38,2% din obiectul asta se randa la zero.
+	# Terenul, prin contrast, nu cobora niciodata sub 122 — deci nu era
+	# umbra, era discul.
+	#
+	# Mecanismul e cel pe care nota de la PROP_AO_FOOT_BAND il descrie deja
+	# pentru padure, dar reparatia de acolo nu-l acopera. Raza luata din
+	# amprenta BAZEI rezolva copacul (trunchi subtire sub coroana lata);
+	# pentru un ZID amprenta bazei E toata lungimea piesei, deci discul
+	# iese cu raza ~4,4 m la `inca_wall_b`, iar zidurile inlantuite stau la
+	# 3,7 m unul de altul PRIN CONSTRUCTIE (capete la ±2,0/±3,0/±1,0, rost
+	# 0,0000). Suprapunerea e atunci garantata, nu accidentala.
+	#
+	# Numarata pe cele 802 ziduri ale zonei A, pe 4000 de puncte: 86% din
+	# solul acoperit sta sub 2+ discuri, maximul e 10, iar BLEND_MODE_MUL
+	# inmulteste: 0,74^10 = 0,049. Inmultit apoi cu umbra dinamica
+	# (`shadow_opacity` 0,70) ajunge la zero pe intreg.
+	#
+	# Contactul zidului nu se pierde vizual: un zid sta pe o linie, nu pe
+	# un punct, iar umbra lui o face lumina directionala — care are forma
+	# si directie. Discul era menit sa lipeasca de sol o piesa IZOLATA.
+	if n3.has_meta("contact") and str(n3.get_meta("contact")) == "none":
+		return NO_DISC
+	if PROP_AO_SKIP_MODELS.has(n3.scene_file_path.get_file().get_basename()):
+		return NO_DISC
+	if not _contact_skip.is_empty() and _contact_skip.has(_instance_stem(n3, root)):
+		return NO_DISC
+	var aabb := _visual_aabb(n3)
+	if aabb.size == Vector3.ZERO:
+		return NO_DISC
+	var gp := n3.global_position
+	# Raza din AMPRENTA DE LA BAZA, nu din diagonala gabaritului intreg
+	# (vezi nota de la PROP_AO_FOOT_BAND). Cand piesa n-are vertecsi in
+	# banda de jos — panouri, pasari, orice fara picior — se cade inapoi
+	# pe vechea socoteala, ca sa nu ramana piese fara contact.
+	var r: float
+	var stem := n3.scene_file_path.get_file().get_basename()
+	if WorldProp.TRUNK_RADIUS.has(stem):
+		# Piesa cu trunchi MASURAT (WorldProp.TRUNK_RADIUS, azi doar Kyoto):
+		# discul sta la piciorul TRUNCHIULUI, nu sub coroana. Amprenta bazei
+		# a unui artar cu coroana de 10-12 m iesea un octogon negru de 6 m
+		# (banda de 18% din inaltime prinde ramurile joase). Pistele fara
+		# intrari in tabel trec pe calea de mai jos, neschimbate.
+		var gs := n3.global_transform.basis.get_scale()
+		var sc := maxf(gs.x, gs.z)
+		r = clampf(float(WorldProp.TRUNK_RADIUS[stem]) * sc * PROP_AO_TRUNK_MULT,
+				PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
+	else:
+		var half := _prop_foot_radius(n3, aabb)
+		if half <= 0.0:
+			half = Vector2(aabb.size.x, aabb.size.z).length() * 0.5
+		r = clampf(half * PROP_AO_RADIUS_SCALE,
+				PROP_AO_RADIUS_MIN, PROP_AO_RADIUS_MAX)
+	# Cota BAZEI, nu a originii: originile kitului stau pe pivot (vezi
+	# memoria "Kit assets Cappadocia"), deci originea unui horn poate fi la
+	# mijlocul lui. Ce trebuie sa atinga solul e fundul gabaritului.
+	var base_y := gp.y + aabb.position.y
+	return Vector4(gp.x, gp.z, r, base_y)
 
 
 ## Stem-ul modelului instantiat din care face parte nodul (primul stramos cu
@@ -14299,6 +14326,23 @@ const OKI_VEG_SOFT_STEMS: Array[String] = ["fukugi", "cycad", "bougainvillea",
 	"water_buffalo", "cane", "turtle", "coral_stone_wall", "sabani", "clutter",
 	"fishing_net", "convex_mirror", "vending", "tetrapod"]
 
+## Cercul de excludere a vegetatiei procedurale pentru o piesa din DecorManual pe
+## Okinawa: (x, z, raza) sau Vector3(NAN, ...) pentru plante/animale/ziduri joase
+## (`OKI_VEG_SOFT_STEMS`), care se amesteca cu covorul. Scos din bucla de mai jos
+## ca sa-l poata chema si coacerea decorului (tools/bake_okinawa_manifest.gd).
+func _oki_veg_circle_for(on3: Node3D) -> Vector3:
+	var ostem := on3.scene_file_path.get_file().get_basename().to_lower()
+	for sub in OKI_VEG_SOFT_STEMS:
+		if ostem.contains(sub):
+			return Vector3(NAN, NAN, NAN)
+	var oaabb := _visual_aabb(on3)
+	if oaabb.size == Vector3.ZERO:
+		return Vector3(NAN, NAN, NAN)
+	var ohalf := Vector2(oaabb.size.x, oaabb.size.z).length() * 0.5
+	var ogp := on3.global_position
+	return Vector3(ogp.x, ogp.z, ohalf * 0.8 + 1.0)
+
+
 func _set_decor_veg_exclusions() -> void:
 	var circles := PackedVector3Array()
 	var windows: Array[Vector2] = []
@@ -14317,19 +14361,15 @@ func _set_decor_veg_exclusions() -> void:
 				var on: Node = ostack.pop_back()
 				var on3 := on as Node3D
 				if on3 != null and on3 != oman and on3.visible and not on3.scene_file_path.is_empty():
-					var ostem := on3.scene_file_path.get_file().get_basename().to_lower()
-					var osoft := false
-					for sub in OKI_VEG_SOFT_STEMS:
-						if ostem.contains(sub):
-							osoft = true
-							break
-					if not osoft:
-						var oaabb := _visual_aabb(on3)
-						if oaabb.size != Vector3.ZERO:
-							var ohalf := Vector2(oaabb.size.x, oaabb.size.z).length() * 0.5
-							var ogp := on3.global_position
-							circles.append(Vector3(ogp.x, ogp.z, ohalf * 0.8 + 1.0))
+					var ocirc := _oki_veg_circle_for(on3)
+					if not is_nan(ocirc.x):
+						circles.append(ocirc)
 					continue
+				# Stoluri FlockProp coapte din WorldProp (tools/bake_okinawa_decor.py):
+				# poarta cercurile pe care nodurile originale le-ar fi dat.
+				if on is FlockProp:
+					for fc in (on as FlockProp).veg_circles:
+						circles.append(fc)
 				for oc in on.get_children():
 					ostack.append(oc)
 	if String(theme_flag("props", "desert")) == "monumentvalley" and _sampler != null:

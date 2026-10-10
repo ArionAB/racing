@@ -24,6 +24,15 @@ class_name FlockProp
 ## Distanta peste care stolul nu se mai randeaza (visibility_range_end, m).
 ## 0 = nelimitat (comportamentul vechi).
 @export var view_m: float = 0.0
+## Date de amprenta pastrate de la nodurile WorldProp coapte in stol
+## (tools/bake_okinawa_decor.py): un MultiMesh nu are mesh-uri de masurat, deci
+## discurile de contact (x, z, raza, cota bazei) si cercurile de excludere a
+## vegetatiei se calculeaza LA COACERE cu aceleasi functii ale pistei si se citesc
+## de acolo (`Track._prop_contact_discs`, `_set_decor_veg_exclusions`). Goale =
+## comportamentul vechi: niciun alt stol nu produce disc.
+@export var contact_discs: PackedVector4Array = PackedVector4Array()
+@export var contact_flat: PackedByteArray = PackedByteArray()
+@export var veg_circles: PackedVector3Array = PackedVector3Array()
 @export var positions: PackedVector3Array = PackedVector3Array()
 @export var yaws: PackedFloat32Array = PackedFloat32Array()
 ## Variatie de scara per instanta, ca stolul sa nu fie o stampila repetata.
@@ -232,8 +241,11 @@ func _build() -> void:
 	if tri_class.begins_with(Palette.ATINT_PREFIX):
 		# tenta de atlas partajata (ex. "atint:ok_bloom"): culoarea slotului ramane, inmultita cu tenta
 		material_override = Palette.atlas_tint_material(tri_class.trim_prefix(Palette.ATINT_PREFIX))
+	elif tri_class.begins_with("class:"):
+		# clasa cu UV-uri reale (ex. "class:bark"), pentru stolurile copte din WorldProp
+		material_override = Palette.class_material(tri_class.trim_prefix("class:"))
 	else:
-		material_override = Palette.triplanar_class_material(tri_class) if tri_class != "" else Palette.world_material()
+		material_override = Palette.triplanar_class_material(tri_class.trim_prefix(Palette.TRI_PREFIX)) if tri_class != "" else Palette.world_material()
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	if not split_keep.is_empty():
 		_split_flock(mm)
@@ -293,7 +305,23 @@ func _find_sampler() -> Object:
 	return null
 
 
+## Cache pe (GLB, nume de nod): sute de stoluri copte din acelasi GLB (tools/
+## bake_okinawa_decor.py) ar instantia modelul de sute de ori. Rezultatul e
+## imutabil (ao_keep lucreaza pe o copie).
+static var _mesh_cache: Dictionary = {}
+
+
 static func _mesh_of(ps: PackedScene, want: String = "") -> Mesh:
+	var key := ps.resource_path + "|" + want
+	if ps.resource_path != "" and _mesh_cache.has(key):
+		return _mesh_cache[key]
+	var m := _mesh_of_uncached(ps, want)
+	if ps.resource_path != "" and m != null:
+		_mesh_cache[key] = m
+	return m
+
+
+static func _mesh_of_uncached(ps: PackedScene, want: String = "") -> Mesh:
 	var root := ps.instantiate()
 	var found: MeshInstance3D = null
 	var stack: Array[Node] = [root]

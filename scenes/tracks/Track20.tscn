@@ -120,6 +120,16 @@
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/cycad.glb" id="g_cycad"]
 [ext_resource type="PackedScene" path="res://assets/models/plants/hibiscus_bush.glb" id="g_hibiscus"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/bougainvillea.glb" id="g_bougain"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/coral_stone_wall.glb" id="h_wall"]
+[ext_resource type="PackedScene" path="res://assets/models/structures/tetrapod.glb" id="h_tetra"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/rocks/notch_rock_a.glb" id="h_notch_a"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/rocks/notch_rock_c.glb" id="h_notch_c"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/rocks/notch_rock_b.glb" id="h_notch_b"]
+[ext_resource type="PackedScene" path="res://assets/models/rocks/coral_rock.glb" id="h_coral"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/cycad.glb" id="h_cycad"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/hibiscus_bush.glb" id="h_hibiscus"]
+[ext_resource type="PackedScene" path="res://assets/models/trees/pandanus.glb" id="h_pandanus"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/bougainvillea.glb" id="h_bougain"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -186,386 +196,6 @@ kind = 9
 
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("9_prop")
-
-[node name="Dig_tetrapozi" type="Node3D" parent="DecorManual"]
-
-[node name="Tetra00" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.24406, 0, -1.00613, 0, 1.6, 0, 1.00613, 0, -1.24406, 263.01, 2.04, 367.09)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra00" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra00" index="2"]
-visible = false
-
-[node name="Tetra01" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.59899, 0, 0.05684, 0, 1.6, 0, -0.05684, 0, -1.59899, 259.16, 2.03, 370.32)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra01" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra01" index="2"]
-visible = false
-
-[node name="Tetra02" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.16948, 0, 1.09193, 0, 1.6, 0, -1.09193, 0, -1.16948, 254.79, 2.01, 363.51)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra02" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra02" index="2"]
-visible = false
-
-[node name="Tetra03" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.16625, 0, 1.59134, 0, 1.6, 0, -1.59134, 0, -0.16625, 250.95, 2.00, 366.74)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra03" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra03" index="2"]
-visible = false
-
-[node name="Tetra04" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.91854, 0, 1.31007, 0, 1.6, 0, -1.31007, 0, 0.91854, 246.58, 1.97, 359.94)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra04" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra04" index="2"]
-visible = false
-
-[node name="Tetra05" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.55272, 0, 0.38610, 0, 1.6, 0, -0.38610, 0, 1.55272, 242.73, 1.96, 363.17)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra05" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra05" index="2"]
-visible = false
-
-[node name="Tetra06" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.42516, 0, -0.72728, 0, 1.6, 0, 0.72728, 0, 1.42516, 238.37, 1.93, 356.36)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra06" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra06" index="2"]
-visible = false
-
-[node name="Tetra07" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.59844, 0, -1.48387, 0, 1.6, 0, 1.48387, 0, 0.59844, 234.52, 1.92, 359.59)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra07" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra07" index="2"]
-visible = false
-
-[node name="Tetra08" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.52186, 0, -1.51250, 0, 1.6, 0, 1.51250, 0, -0.52186, 230.15, 1.89, 352.79)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra08" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra08" index="2"]
-visible = false
-
-[node name="Tetra09" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.55669, 0, -0.36974, 0, 1.6, 0, 0.36974, 0, -1.55669, 225.21, 1.89, 355.39)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra09" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra09" index="2"]
-visible = false
-
-[node name="Tetra10" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.41742, 0, 0.74224, 0, 1.6, 0, -0.74224, 0, -1.41742, 221.40, 1.86, 348.27)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra10" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra10" index="2"]
-visible = false
-
-[node name="Tetra11" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.58279, 0, 1.49008, 0, 1.6, 0, -1.49008, 0, -0.58279, 217.31, 1.86, 351.19)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra11" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra11" index="2"]
-visible = false
-
-[node name="Tetra12" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.59046, 0, 0.17447, 0, 1.6, 0, -0.17447, 0, 1.59046, 211.60, 1.85, 340.80)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra12" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra12" index="2"]
-visible = false
-
-[node name="Tetra13" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.31480, 0, -0.91176, 0, 1.6, 0, 0.91176, 0, 1.31480, 206.82, 1.85, 342.37)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra13" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra13" index="2"]
-visible = false
-
-[node name="Tetra14" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.39412, 0, -1.55070, 0, 1.6, 0, 1.55070, 0, 0.39412, 205.30, 1.85, 334.43)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra14" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra14" index="2"]
-visible = false
-
-[node name="Tetra15" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.71990, 0, -1.42890, 0, 1.6, 0, 1.42890, 0, -0.71990, 200.52, 1.85, 336.00)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra15" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra15" index="2"]
-visible = false
-
-[node name="Tetra16" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.48076, 0, -0.60610, 0, 1.6, 0, 0.60610, 0, -1.48076, 199.00, 1.85, 328.06)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra16" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra16" index="2"]
-visible = false
-
-[node name="Tetra17" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.51518, 0, 0.51403, 0, 1.6, 0, -0.51403, 0, -1.51518, 194.23, 1.85, 329.63)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra17" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra17" index="2"]
-visible = false
-
-[node name="Tetra18" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.80629, 0, 1.38199, 0, 1.6, 0, -1.38199, 0, -0.80629, 192.71, 1.85, 321.68)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra18" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra18" index="2"]
-visible = false
-
-[node name="Tetra19" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.29816, 0, 1.57197, 0, 1.6, 0, -1.57197, 0, 0.29816, 187.93, 1.85, 323.26)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra19" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra19" index="2"]
-visible = false
-
-[node name="Tetra20" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.25633, 0, 0.99078, 0, 1.6, 0, -0.99078, 0, 1.25633, 186.41, 1.85, 315.31)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra20" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra20" index="2"]
-visible = false
-
-[node name="Tetra21" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.59817, 0, -0.07648, 0, 1.6, 0, 0.07648, 0, 1.59817, 181.63, 1.85, 316.88)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra21" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra21" index="2"]
-visible = false
-
-[node name="Tetra22" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.15598, 0, -1.10621, 0, 1.6, 0, 1.10621, 0, 1.15598, 180.11, 1.85, 308.94)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra22" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra22" index="2"]
-visible = false
-
-[node name="Tetra23" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.14669, 0, -1.59326, 0, 1.6, 0, 1.59326, 0, 0.14669, 175.34, 1.85, 310.51)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra23" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra23" index="2"]
-visible = false
-
-[node name="Tetra24" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.93457, 0, -1.29869, 0, 1.6, 0, 1.29869, 0, -0.93457, 173.81, 1.85, 302.57)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra24" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra24" index="2"]
-visible = false
-
-[node name="Tetra25" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.55734, 0, -0.36700, 0, 1.6, 0, 0.36700, 0, -1.55734, 169.04, 1.85, 304.14)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra25" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra25" index="2"]
-visible = false
-
-[node name="Tetra26" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.41611, 0, 0.74473, 0, 1.6, 0, -0.74473, 0, -1.41611, 167.52, 1.85, 296.20)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra26" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra26" index="2"]
-visible = false
-
-[node name="Tetra27" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.58017, 0, 1.49111, 0, 1.6, 0, -1.49111, 0, -0.58017, 162.74, 1.85, 297.77)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra27" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra27" index="2"]
-visible = false
-
-[node name="Tetra28" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.54040, 0, 1.50598, 0, 1.6, 0, -1.50598, 0, 0.54040, 161.22, 1.85, 289.83)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra28" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra28" index="2"]
-visible = false
-
-[node name="Tetra29" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.39585, 0, 0.78204, 0, 1.6, 0, -0.78204, 0, 1.39585, 156.45, 1.85, 291.40)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra29" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra29" index="2"]
-visible = false
-
-[node name="Tetra30" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.56653, 0, -0.32555, 0, 1.6, 0, 0.32555, 0, 1.56653, 154.92, 1.85, 283.46)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra30" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra30" index="2"]
-visible = false
-
-[node name="Tetra31" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.96870, 0, -1.27343, 0, 1.6, 0, 1.27343, 0, 0.96870, 150.15, 1.85, 285.03)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra31" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra31" index="2"]
-visible = false
-
-[node name="Tetra32" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.10436, 0, -1.59659, 0, 1.6, 0, 1.59659, 0, -0.10436, 148.63, 1.85, 277.09)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra32" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra32" index="2"]
-visible = false
-
-[node name="Tetra33" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.12622, 0, -1.13650, 0, 1.6, 0, 1.13650, 0, -1.12622, 143.85, 1.85, 278.66)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra33" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra33" index="2"]
-visible = false
-
-[node name="Tetra34" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.59558, 0, -0.11886, 0, 1.6, 0, 0.11886, 0, -1.59558, 142.33, 1.85, 270.72)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra34" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra34" index="2"]
-visible = false
-
-[node name="Tetra35" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.28218, 0, 0.95709, 0, 1.6, 0, -0.95709, 0, -1.28218, 137.55, 1.85, 272.29)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra35" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra35" index="2"]
-visible = false
-
-[node name="Tetra36" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.03425, 0, 1.59963, 0, 1.6, 0, -1.59963, 0, 0.03425, 135.74, 1.85, 263.62)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra36" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra36" index="2"]
-visible = false
-
-[node name="Tetra37" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.07531, 0, 1.18479, 0, 1.6, 0, -1.18479, 0, 1.07531, 130.88, 1.85, 264.88)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra37" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra37" index="2"]
-visible = false
-
-[node name="Tetra38" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(1.30263, 0, -0.92907, 0, 1.6, 0, 0.92907, 0, 1.30263, 128.77, 1.86, 254.83)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra38" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra38" index="2"]
-visible = false
-
-[node name="Tetra39" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(0.37358, 0, -1.55578, 0, 1.6, 0, 1.55578, 0, 0.37358, 123.75, 1.86, 255.10)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra39" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra39" index="2"]
-visible = false
-
-[node name="Tetra40" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-0.73874, 0, -1.41925, 0, 1.6, 0, 1.41925, 0, -0.73874, 124.34, 1.88, 247.04)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra40" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra40" index="2"]
-visible = false
-
-[node name="Tetra41" parent="DecorManual/Dig_tetrapozi" instance=ExtResource("10_tetra")]
-transform = Transform3D(-1.53600, 0, -0.44802, 0, 1.6, 0, 0.44802, 0, -1.53600, 119.15, 1.88, 246.96)
-
-[node name="Tetrapod_04" parent="DecorManual/Dig_tetrapozi/Tetra41" index="1"]
-visible = false
-
-[node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra41" index="2"]
-visible = false
 
 [node name="ZonaA" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.974-1.000 + 0.000-0.100 (corner H->A 0.9747, start 0.000, corner into B 0.0994); x -175..95, z 145..170; sea left at 66-72 m, flat land right; harbour = W end of bay at (95-125,150-170) just before the start (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
@@ -15817,3 +15447,3080 @@ metadata/coliziune = "none"
 
 [node name="ZonaH" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.824-0.974 (dig, val 0.8811, width 6.5 0.82-0.971); x 95..310, z 170..372; sea 10-14 m left, bay right 10-24 m (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="Zid_H01" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.40569, 0.00000, -0.91401, 0.00000, 1.00000, 0.00000, 0.91401, 0.00000, -0.40569, 285.16, 0.679, 353.74)
+
+[node name="Zid_H02" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.40006, 0.00000, -0.91649, 0.00000, 1.00000, 0.00000, 0.91649, 0.00000, -0.40006, 281.57, 0.660, 352.16)
+
+[node name="Zid_H03" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.39922, 0.00000, -0.91685, 0.00000, 1.00000, 0.00000, 0.91685, 0.00000, -0.39922, 277.97, 0.660, 350.59)
+
+[node name="Zid_H04" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.39931, 0.00000, -0.91682, 0.00000, 1.00000, 0.00000, 0.91682, 0.00000, -0.39931, 274.13, 0.661, 348.92)
+
+[node name="Zid_H05" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.39925, 0.00000, -0.91684, 0.00000, 1.00000, 0.00000, 0.91684, 0.00000, -0.39925, 270.55, 0.553, 347.36)
+
+[node name="Zid_H06" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.39925, 0.00000, -0.91684, 0.00000, 1.00000, 0.00000, 0.91684, 0.00000, -0.39925, 266.97, 0.407, 345.80)
+
+[node name="Zid_H07" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.39925, 0.00000, -0.91684, 0.00000, 1.00000, 0.00000, 0.91684, 0.00000, -0.39925, 263.13, 0.407, 344.13)
+
+[node name="Zid_H08" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.39926, 0.00000, -0.91684, 0.00000, 1.00000, 0.00000, 0.91684, 0.00000, -0.39926, 259.55, 0.531, 342.57)
+
+[node name="Zid_H09" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.39922, 0.00000, -0.91685, 0.00000, 1.00000, 0.00000, 0.91685, 0.00000, -0.39922, 252.13, 0.320, 339.34)
+
+[node name="Zid_H10" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.39691, 0.00000, -0.91786, 0.00000, 1.00000, 0.00000, 0.91786, 0.00000, -0.39691, 248.50, 0.189, 337.76)
+
+[node name="Zid_H11" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.38391, 0.00000, -0.92337, 0.00000, 1.00000, 0.00000, 0.92337, 0.00000, -0.38391, 244.87, 0.221, 336.22)
+
+[node name="Zid_H12" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.40276, 0.00000, -0.91530, 0.00000, 1.00000, 0.00000, 0.91530, 0.00000, -0.40276, 241.13, 0.354, 334.62)
+
+[node name="Zid_H13" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.42651, 0.00000, -0.90448, 0.00000, 1.00000, 0.00000, 0.90448, 0.00000, -0.42651, 237.70, 0.433, 333.06)
+
+[node name="Zid_H14" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.40650, 0.00000, -0.91365, 0.00000, 1.00000, 0.00000, 0.91365, 0.00000, -0.40650, 234.35, 0.199, 331.53)
+
+[node name="Zid_H15" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.59847, 0.00000, -0.80114, 0.00000, 1.00000, 0.00000, 0.80114, 0.00000, -0.59847, 229.03, 0.257, 328.54)
+
+[node name="Zid_H16" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.71128, 0.00000, -0.70291, 0.00000, 1.00000, 0.00000, 0.70291, 0.00000, -0.71128, 218.90, 0.344, 318.18)
+
+[node name="Zid_H17" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.71136, 0.00000, -0.70283, 0.00000, 1.00000, 0.00000, 0.70283, 0.00000, -0.71136, 210.45, 0.368, 309.62)
+
+[node name="Zid_H18" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.71103, 0.00000, -0.70316, 0.00000, 1.00000, 0.00000, 0.70316, 0.00000, -0.71103, 204.77, 0.261, 303.87)
+
+[node name="Zid_H19" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.71127, 0.00000, -0.70291, 0.00000, 1.00000, 0.00000, 0.70291, 0.00000, -0.71127, 196.33, 0.375, 295.34)
+
+[node name="Zid_H20" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.71127, 0.00000, -0.70292, 0.00000, 1.00000, 0.00000, 0.70292, 0.00000, -0.71127, 187.90, 0.375, 286.80)
+
+[node name="Zid_H21" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.71126, 0.00000, -0.70293, 0.00000, 1.00000, 0.00000, 0.70293, 0.00000, -0.71126, 179.46, 0.375, 278.27)
+
+[node name="Zid_H22" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.71126, 0.00000, -0.70293, 0.00000, 1.00000, 0.00000, 0.70293, 0.00000, -0.71126, 171.03, 0.380, 269.73)
+
+[node name="Zid_H23" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.71071, 0.00000, -0.70348, 0.00000, 1.00000, 0.00000, 0.70348, 0.00000, -0.71071, 165.33, 0.187, 263.97)
+
+[node name="Zid_H24" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.70990, 0.00000, -0.70431, 0.00000, 1.00000, 0.00000, 0.70431, 0.00000, -0.70990, 162.56, 0.243, 261.17)
+
+[node name="Zid_H25" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.71425, 0.00000, -0.69989, 0.00000, 1.00000, 0.00000, 0.69989, 0.00000, -0.71425, 156.90, 0.313, 255.51)
+
+[node name="Zid_H26" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.76993, 0.00000, -0.63813, 0.00000, 1.00000, 0.00000, 0.63813, 0.00000, -0.76993, 149.25, 0.338, 247.33)
+
+[node name="Zid_H27" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.81630, 0.00000, -0.57763, 0.00000, 1.00000, 0.00000, 0.57763, 0.00000, -0.81630, 147.33, 0.346, 244.84)
+
+[node name="Zid_H28" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.86149, 0.00000, -0.50777, 0.00000, 1.00000, 0.00000, 0.50777, 0.00000, -0.86149, 145.63, 0.206, 242.18)
+
+[node name="Zid_H29" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.89008, 0.00000, -0.45580, 0.00000, 1.00000, 0.00000, 0.45580, 0.00000, -0.89008, 143.81, 0.206, 238.87)
+
+[node name="Zid_H30" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.87855, 0.00000, -0.47765, 0.00000, 1.00000, 0.00000, 0.47765, 0.00000, -0.87855, 142.00, 0.402, 235.43)
+
+[node name="Zid_H31" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.88119, 0.00000, -0.47277, 0.00000, 1.00000, 0.00000, 0.47277, 0.00000, -0.88119, 140.14, 0.463, 231.98)
+
+[node name="Zid_H32" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.88427, 0.00000, -0.46697, 0.00000, 1.00000, 0.00000, 0.46697, 0.00000, -0.88427, 138.19, 0.413, 228.31)
+
+[node name="Zid_H33" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.88184, 0.00000, -0.47155, 0.00000, 1.00000, 0.00000, 0.47155, 0.00000, -0.88184, 136.35, 0.413, 224.85)
+
+[node name="Zid_H34" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.88114, 0.00000, -0.47286, 0.00000, 1.00000, 0.00000, 0.47286, 0.00000, -0.88114, 132.52, 0.539, 217.70)
+
+[node name="Zid_H35" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.88148, 0.00000, -0.47222, 0.00000, 1.00000, 0.00000, 0.47222, 0.00000, -0.88148, 130.67, 0.539, 214.27)
+
+[node name="Zid_H36" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.88180, 0.00000, -0.47163, 0.00000, 1.00000, 0.00000, 0.47163, 0.00000, -0.88180, 128.83, 0.583, 210.83)
+
+[node name="Zid_H37" parent="DecorManual/ZonaH" instance=ExtResource("h_wall")]
+transform = Transform3D(-0.88185, 0.00000, -0.47154, 0.00000, 1.00000, 0.00000, 0.47154, 0.00000, -0.88185, 126.86, 0.933, 207.14)
+
+[node name="Tetra_H01" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.36313, 0.22616, -0.71219, -0.14569, 1.53360, 0.20814, 0.73290, -0.11576, 1.36600, 269.38, -0.048, 380.01)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H01" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H01" index="2"]
+visible = false
+
+[node name="Tetra_H02" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.47117, 0.10791, 0.84163, 0.16473, 1.68881, 0.07142, -0.83238, 0.14350, -1.47339, 273.45, 0.087, 375.15)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H02" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H02" index="2"]
+visible = false
+
+[node name="Tetra_H03" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.25350, -0.04086, 1.56776, 0.19586, 1.57485, 0.07271, -1.55601, 0.20489, -0.24626, 269.93, 0.134, 374.29)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H03" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H03" index="2"]
+visible = false
+
+[node name="Tetra_H04" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.11983, 0.20211, -1.06497, 0.14283, 1.54537, 0.14308, 1.07453, 0.00521, -1.12889, 265.16, -0.075, 374.75)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H04" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H04" index="2"]
+visible = false
+
+[node name="Tetra_H05" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.93378, 0.03871, 1.21226, 0.00230, 1.52996, -0.04709, -1.21287, -0.02690, -0.93340, 262.96, -0.115, 373.20)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H05" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H05" index="2"]
+visible = false
+
+[node name="Tetra_H06" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.60684, -0.05565, 0.21520, 0.06951, 1.61752, -0.10069, -0.21113, 0.10896, 1.60465, 259.70, -0.914, 376.83)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H06" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H06" index="2"]
+visible = false
+
+[node name="Tetra_H07" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.64956, 0.17624, -0.45159, 0.16960, 1.71026, 0.04791, 0.45412, 0.00142, -1.65826, 257.36, -0.846, 373.11)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H07" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H07" index="2"]
+visible = false
+
+[node name="Tetra_H08" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.50598, -0.28129, 0.72901, 0.22730, 1.67214, 0.17565, -0.74760, -0.05824, 1.52193, 258.46, -0.233, 366.71)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H08" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H08" index="2"]
+visible = false
+
+[node name="Tetra_H09" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.14672, 0.02501, 1.15496, 0.09225, 1.62018, -0.12667, -1.15155, 0.15470, 1.13997, 252.91, -0.328, 366.23)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H09" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H09" index="2"]
+visible = false
+
+[node name="Tetra_H10" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.10384, 0.17494, 1.09126, -0.13848, 1.55207, -0.10874, -1.09648, -0.01990, 1.11232, 254.33, -0.951, 369.59)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H10" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H10" index="2"]
+visible = false
+
+[node name="Tetra_H11" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.20821, -0.05092, 1.52126, 0.01821, 1.53524, 0.05389, -1.52201, 0.02534, -0.20746, 248.40, -0.158, 363.64)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H11" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H11" index="2"]
+visible = false
+
+[node name="Tetra_H12" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.11573, 0.04005, -1.16402, 0.15542, 1.59240, 0.20375, 1.15429, -0.25311, 1.09770, 249.34, -0.766, 366.03)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H12" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H12" index="2"]
+visible = false
+
+[node name="Tetra_H13" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.69927, 0.02127, -1.53654, 0.00439, 1.68811, 0.02537, 1.53668, -0.01450, 0.69913, 246.62, -1.815, 367.72)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H13" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H13" index="2"]
+visible = false
+
+[node name="Tetra_H14" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.05449, 0.18436, 1.29363, 0.19438, 1.66595, -0.07896, -1.29216, 0.10017, -1.06757, 242.87, -1.716, 365.86)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H14" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H14" index="2"]
+visible = false
+
+[node name="Tetra_H15" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.14561, 0.26328, 1.06168, 0.15674, 1.56103, -0.21798, -1.08255, -0.05259, -1.15508, 242.50, -0.507, 360.08)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H15" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H15" index="2"]
+visible = false
+
+[node name="Tetra_H16" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.72903, 0.03536, -1.43911, -0.16999, 1.60396, -0.04671, 1.42947, 0.17271, 0.72839, 240.55, -1.691, 364.56)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H16" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H16" index="2"]
+visible = false
+
+[node name="Tetra_H17" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.75811, 0.12119, -0.24289, 0.09325, 1.76458, 0.20542, 0.25492, 0.19028, -1.75027, 239.66, -0.456, 358.34)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H17" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H17" index="2"]
+visible = false
+
+[node name="Tetra_H18" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.65191, -0.16615, 0.15486, -0.15422, 1.65514, 0.13082, -0.16675, 0.11527, -1.65508, 237.91, -1.549, 362.42)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H18" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H18" index="2"]
+visible = false
+
+[node name="Tetra_H19" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.05793, -0.13743, -1.14695, 0.03120, 1.55130, -0.21466, 1.15473, -0.16783, -1.04500, 235.93, -0.848, 358.71)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H19" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H19" index="2"]
+visible = false
+
+[node name="Tetra_H20" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.09545, -0.13820, -1.13037, -0.02586, 1.13430, -0.13649, 1.13849, 0.01418, -0.09787, 229.92, -1.374, 358.74)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H20" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H20" index="1"]
+visible = false
+
+[node name="Tetra_H21" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.95992, 0.03573, -1.47709, -0.03810, 1.76146, 0.01785, 1.47703, 0.02221, 0.96042, 233.41, -0.794, 357.71)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H21" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H21" index="2"]
+visible = false
+
+[node name="Tetra_H22" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.87173, -0.27133, 1.38684, 0.14293, 1.63806, 0.23063, -1.40589, -0.00170, 0.88337, 226.13, -1.615, 358.18)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H22" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H22" index="2"]
+visible = false
+
+[node name="Tetra_H23" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.36924, -0.02415, 0.75995, -0.13913, 1.54693, -0.20151, -0.74750, -0.24368, -1.35455, 228.34, -0.364, 353.41)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H23" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H23" index="2"]
+visible = false
+
+[node name="Tetra_H24" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.54480, 0.16572, -1.43079, -0.08347, 1.53078, 0.14552, 1.43793, 0.02607, 0.55054, 224.71, -0.747, 352.81)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H24" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H24" index="2"]
+visible = false
+
+[node name="Tetra_H25" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.39702, 0.14564, -0.88540, -0.08049, 0.97007, 0.12348, 0.89368, 0.02266, 0.40446, 222.84, -1.647, 356.72)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H25" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H25" index="1"]
+visible = false
+
+[node name="Tetra_H26" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.08731, 0.11181, 1.78474, 0.18619, 1.77772, -0.10226, -1.77852, 0.18061, -0.09832, 221.44, -0.863, 352.68)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H26" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H26" index="2"]
+visible = false
+
+[node name="Tetra_H27" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.07396, -0.00831, -1.14521, 0.09083, 1.56565, 0.07381, 1.14163, -0.11674, 1.07145, 219.54, -0.610, 349.51)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H27" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H27" index="2"]
+visible = false
+
+[node name="Tetra_H28" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.67652, -0.02678, 1.37603, -0.12320, 1.52596, 0.09027, -1.37077, -0.15036, 0.67101, 216.56, -1.079, 349.71)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H28" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H28" index="2"]
+visible = false
+
+[node name="Tetra_H29" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.23156, -0.04710, -1.70381, 0.05893, 1.71821, -0.05551, 1.70344, -0.06584, -0.22969, 213.48, -1.066, 349.18)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H29" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H29" index="2"]
+visible = false
+
+[node name="Tetra_H30" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.73894, -0.04356, -1.42652, 0.11197, 1.59967, -0.10684, 1.42279, -0.14851, -0.73247, 211.70, -0.484, 343.22)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H30" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H30" index="2"]
+visible = false
+
+[node name="Tetra_H31" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.33920, -0.02315, -1.74865, 0.18012, 1.77131, -0.05839, 1.73951, -0.18792, -0.33494, 212.26, -0.746, 346.16)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H31" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H31" index="2"]
+visible = false
+
+[node name="Tetra_H32" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.18365, -0.00824, 0.97899, 0.09532, 0.99118, 0.02623, -0.97438, 0.09852, -0.18195, 210.46, -1.683, 348.24)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H32" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H32" index="1"]
+visible = false
+
+[node name="Tetra_H33" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.83118, 0.08135, -1.50270, -0.21141, 1.70595, -0.02458, 1.48997, 0.19667, 0.83479, 208.10, -0.966, 342.36)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H33" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H33" index="2"]
+visible = false
+
+[node name="Tetra_H34" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.46771, -0.07305, 0.52839, 0.07156, 1.55991, 0.01688, -0.52859, 0.00835, 1.46943, 205.14, -0.909, 341.14)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H34" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H34" index="2"]
+visible = false
+
+[node name="Tetra_H35" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.55789, 0.09391, 0.15367, -0.08344, 1.56226, -0.10876, -0.15959, 0.09987, 1.55692, 207.62, -0.186, 338.87)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H35" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H35" index="2"]
+visible = false
+
+[node name="Tetra_H36" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.36929, -0.02472, -1.65871, -0.14883, 1.69196, -0.05835, 1.65220, 0.15794, 0.36549, 203.42, -0.970, 338.59)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H36" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H36" index="2"]
+visible = false
+
+[node name="Tetra_H37" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.71318, 0.09741, 0.39424, -0.14146, 1.74534, 0.18350, -0.38065, -0.21023, 1.70611, 205.49, -0.208, 336.61)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H37" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H37" index="2"]
+visible = false
+
+[node name="Tetra_H38" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.52438, -0.13798, 0.03872, -0.13187, 1.51247, 0.19831, -0.05612, 0.19410, -1.51771, 203.12, -0.894, 334.52)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H38" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H38" index="2"]
+visible = false
+
+[node name="Tetra_H39" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.29747, 0.07106, 0.85239, 0.05346, 1.55238, -0.04804, -0.85368, -0.01078, -1.29853, 198.52, -1.623, 335.35)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H39" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H39" index="2"]
+visible = false
+
+[node name="Tetra_H40" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.23116, -0.05811, -0.98548, 0.20099, 1.55709, 0.15928, 0.96652, -0.24978, 1.22219, 201.49, -0.302, 332.42)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H40" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H40" index="2"]
+visible = false
+
+[node name="Tetra_H41" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.02782, 0.20175, 1.20292, 0.18940, 1.58038, -0.10322, -1.20492, 0.07633, -1.04233, 193.97, -1.645, 331.40)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H41" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H41" index="2"]
+visible = false
+
+[node name="Tetra_H42" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.54577, -0.16568, -0.21606, 0.17033, 1.56014, 0.02225, 0.21241, -0.04536, 1.55447, 199.42, -0.454, 330.74)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H42" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H42" index="2"]
+visible = false
+
+[node name="Tetra_H43" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.92425, -0.14334, 0.33711, 0.12096, 0.98303, 0.08635, -0.34577, -0.03926, 0.93131, 194.30, -1.470, 328.53)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H43" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H43" index="1"]
+visible = false
+
+[node name="Tetra_H44" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.41988, -0.00504, -1.61426, -0.07866, 1.66606, 0.01526, 1.61235, 0.07996, -0.41963, 197.00, -0.526, 328.41)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H44" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H44" index="2"]
+visible = false
+
+[node name="Tetra_H45" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.82604, 0.23962, -1.37847, 0.13052, 1.60700, 0.20113, 1.39304, -0.00848, -0.83624, 187.32, -1.846, 325.84)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H45" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H45" index="2"]
+visible = false
+
+[node name="Tetra_H46" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.53464, 0.08812, -0.61264, 0.03249, 1.64711, 0.15552, 0.61809, 0.13221, -1.52928, 192.73, -0.385, 324.20)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H46" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H46" index="2"]
+visible = false
+
+[node name="Tetra_H47" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.88515, -0.01724, 1.34364, 0.03366, 1.60816, 0.04281, -1.34333, 0.05166, -0.88428, 189.74, -0.249, 321.28)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H47" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H47" index="2"]
+visible = false
+
+[node name="Tetra_H48" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.35582, -0.00713, 1.50854, 0.15720, 1.54132, 0.04437, -1.50035, 0.16318, -0.35311, 185.90, -1.880, 322.53)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H48" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H48" index="2"]
+visible = false
+
+[node name="Tetra_H49" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.84882, -0.14186, -0.49054, 0.10995, 0.98005, -0.09318, 0.49867, 0.02540, 0.85554, 183.97, -1.623, 319.72)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H49" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H49" index="1"]
+visible = false
+
+[node name="Tetra_H50" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.66913, 0.17395, 1.36132, 0.04402, 1.51645, -0.17213, -1.37168, -0.03618, -0.66959, 186.48, -0.595, 317.24)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H50" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H50" index="2"]
+visible = false
+
+[node name="Tetra_H51" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.50855, 0.08544, -1.02314, 0.00342, 1.14163, 0.09703, 1.02670, -0.04612, 0.50647, 181.40, -1.530, 318.55)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H51" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H51" index="1"]
+visible = false
+
+[node name="Tetra_H52" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.49936, 0.12295, 1.66449, 0.21052, 1.72816, -0.06449, -1.65570, 0.18265, -0.51021, 184.39, -0.243, 315.59)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H52" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H52" index="2"]
+visible = false
+
+[node name="Tetra_H53" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.94263, 0.04185, -0.73171, -0.02719, 1.18926, 0.10305, 0.73240, 0.09801, -0.93791, 179.19, -1.354, 314.84)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H53" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H53" index="1"]
+visible = false
+
+[node name="Tetra_H54" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.47865, -0.23108, -0.99412, 0.18582, 1.78173, -0.13777, 1.00356, 0.01057, 1.49024, 179.82, -0.624, 311.66)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H54" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H54" index="2"]
+visible = false
+
+[node name="Tetra_H55" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.20680, -0.12347, 1.51746, 0.07735, 1.52857, 0.13491, -1.52051, 0.09455, -0.19952, 175.76, -0.394, 307.22)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H55" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H55" index="2"]
+visible = false
+
+[node name="Tetra_H56" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.50040, 0.20864, -0.81550, 0.21056, 1.70675, 0.04925, 0.81501, -0.05685, -1.51404, 173.57, -1.141, 309.38)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H56" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H56" index="2"]
+visible = false
+
+[node name="Tetra_H57" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.89639, -0.09822, -1.35646, 0.03304, 1.62254, -0.13932, 1.35961, -0.10419, -0.89093, 170.78, -1.832, 308.43)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H57" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H57" index="2"]
+visible = false
+
+[node name="Tetra_H58" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.41288, 0.23524, -0.85239, -0.15965, 1.64817, 0.19024, 0.86973, -0.07961, 1.41964, 172.99, -0.402, 304.08)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H58" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H58" index="2"]
+visible = false
+
+[node name="Tetra_H59" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.35536, -0.17448, 0.99161, 0.16313, 1.67896, 0.07245, -0.99354, 0.03765, 1.36463, 170.09, -1.604, 304.40)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H59" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H59" index="2"]
+visible = false
+
+[node name="Tetra_H60" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.94869, -0.07909, 1.18286, 0.18990, 1.50556, -0.05163, -1.17019, 0.18020, 0.95058, 170.69, -0.391, 301.26)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H60" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H60" index="2"]
+visible = false
+
+[node name="Tetra_H61" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.04172, -0.15983, -1.09050, -0.08296, 1.50763, -0.14171, 1.09902, -0.03769, -1.04434, 165.51, -0.841, 300.51)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H61" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H61" index="2"]
+visible = false
+
+[node name="Tetra_H62" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.46577, 0.00704, 1.50117, 0.08474, 1.56938, 0.01893, -1.49879, 0.08655, -0.46544, 165.87, -0.129, 296.44)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H62" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H62" index="2"]
+visible = false
+
+[node name="Tetra_H63" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.28818, -0.00599, 0.80765, 0.02159, 1.51960, 0.04571, -0.80738, 0.05019, -1.28738, 163.93, -1.244, 298.36)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H63" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H63" index="2"]
+visible = false
+
+[node name="Tetra_H64" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.10403, -0.20241, 1.63387, 0.08395, 1.63565, 0.19729, -1.64422, 0.07070, 0.11344, 161.02, -1.761, 296.49)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H64" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H64" index="2"]
+visible = false
+
+[node name="Tetra_H65" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.32879, 0.11888, 0.74101, 0.08476, 1.52094, -0.09202, -0.74569, -0.03896, -1.33092, 163.53, -0.561, 294.02)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H65" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H65" index="2"]
+visible = false
+
+[node name="Tetra_H66" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.31394, -0.01945, 1.10169, -0.06439, 1.71025, 0.10699, -1.09998, -0.12335, 1.30972, 159.85, -0.711, 292.91)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H66" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H66" index="2"]
+visible = false
+
+[node name="Tetra_H67" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.17360, 0.20335, 1.49620, -0.02000, 1.50624, -0.20239, -1.50983, 0.00343, 0.17471, 159.30, -0.244, 289.74)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H67" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H67" index="2"]
+visible = false
+
+[node name="Tetra_H68" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.57656, 0.09271, -1.03039, -0.13921, 1.17582, 0.02790, 1.02514, 0.10753, 0.58330, 157.82, -1.615, 294.92)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H68" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H68" index="1"]
+visible = false
+
+[node name="Tetra_H69" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.62271, 0.07330, -0.76820, 0.06231, 1.79533, 0.03969, 0.76917, 0.00920, -1.62388, 156.97, -1.090, 292.04)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H69" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H69" index="2"]
+visible = false
+
+[node name="Tetra_H70" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.53562, 0.02648, 1.69419, 0.18301, 1.76553, -0.08546, -1.68449, 0.20024, 0.52943, 154.37, -1.427, 288.73)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H70" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H70" index="2"]
+visible = false
+
+[node name="Tetra_H71" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.08880, 0.09853, 1.52886, 0.05656, 1.53060, -0.09536, -1.53099, 0.05083, -0.09220, 156.35, -0.450, 286.78)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H71" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H71" index="2"]
+visible = false
+
+[node name="Tetra_H72" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.50454, 0.04609, -0.91535, 0.15355, 1.74729, -0.16440, 0.90355, -0.22018, -1.49624, 151.00, -1.637, 286.98)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H72" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H72" index="2"]
+visible = false
+
+[node name="Tetra_H73" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.51466, -0.00897, 0.01081, -0.00784, 1.50710, 0.15158, -0.01165, 0.15152, -1.50708, 147.38, -1.628, 284.68)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H73" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H73" index="2"]
+visible = false
+
+[node name="Tetra_H74" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.53470, 0.02870, -0.59754, -0.07761, 1.64092, -0.12052, 0.59317, 0.14045, 1.53023, 152.38, -0.401, 283.45)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H74" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H74" index="2"]
+visible = false
+
+[node name="Tetra_H75" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.25605, -0.01433, -0.85010, -0.09743, 1.50412, -0.16930, 0.84462, 0.19481, 1.24467, 147.65, -0.839, 278.54)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H75" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H75" index="2"]
+visible = false
+
+[node name="Tetra_H76" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.49418, -0.18130, 1.58056, -0.01280, 1.65455, 0.19379, -1.59087, -0.06963, 0.48942, 143.72, -1.609, 279.94)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H76" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H76" index="2"]
+visible = false
+
+[node name="Tetra_H77" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.14504, 0.06961, 0.98609, 0.13588, 0.98859, -0.04980, -0.97916, 0.12687, -0.15298, 141.02, -1.580, 277.98)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H77" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H77" index="1"]
+visible = false
+
+[node name="Tetra_H78" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.53736, 0.16992, -0.01439, 0.17033, 1.52374, -0.20429, -0.00827, -0.20463, -1.53317, 144.27, -0.471, 274.72)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H78" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H78" index="2"]
+visible = false
+
+[node name="Tetra_H79" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.72048, 0.13547, -0.47245, 0.13033, 1.78417, 0.03699, 0.47390, 0.00115, -1.72541, 139.99, -0.706, 271.31)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H79" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H79" index="2"]
+visible = false
+
+[node name="Tetra_H80" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.28861, 0.15141, 1.46489, -0.02815, 1.49192, -0.15974, -1.47243, -0.05820, -0.28408, 139.74, -1.411, 275.44)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H80" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H80" index="2"]
+visible = false
+
+[node name="Tetra_H81" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.41204, -0.03230, 0.50862, 0.06182, 1.49798, -0.07650, -0.50588, 0.09290, 1.41034, 136.68, -1.755, 272.15)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H81" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H81" index="2"]
+visible = false
+
+[node name="Tetra_H82" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.97685, -0.29995, 1.19074, 0.21335, 1.53988, 0.21287, -1.20926, 0.02938, 0.99945, 138.04, -0.282, 268.21)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H82" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H82" index="2"]
+visible = false
+
+[node name="Tetra_H83" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.59754, -0.07303, 1.63274, 0.12192, 1.73161, 0.12207, -1.62982, 0.15630, -0.58948, 132.94, -1.703, 270.52)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H83" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H83" index="2"]
+visible = false
+
+[node name="Tetra_H84" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.54827, -0.09801, 0.53028, -0.13153, 1.63213, -0.08236, -0.52297, -0.12032, -1.54918, 130.64, -1.606, 266.21)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H84" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H84" index="2"]
+visible = false
+
+[node name="Tetra_H85" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.60782, 0.02068, 1.65036, 0.13138, 1.75374, 0.02641, -1.64526, 0.13240, -0.60760, 133.54, -0.284, 263.63)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H85" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H85" index="2"]
+visible = false
+
+[node name="Tetra_H86" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.12793, 0.03569, -1.26295, 0.18832, 1.67884, -0.12075, 1.24934, -0.22084, -1.12202, 127.26, -0.869, 259.00)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H86" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H86" index="2"]
+visible = false
+
+[node name="Tetra_H87" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.31477, 0.07546, 1.03531, -0.07613, 1.08063, -0.05562, -1.03526, -0.05652, 0.31888, 124.52, -1.780, 260.93)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H87" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H87" index="1"]
+visible = false
+
+[node name="Tetra_H88" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.52866, -0.08445, -1.60986, 0.05085, 1.69424, -0.07218, 1.61127, -0.02576, 0.53047, 122.81, -1.446, 256.25)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H88" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H88" index="2"]
+visible = false
+
+[node name="Tetra_H89" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.99444, 0.18643, 1.37216, 0.04003, 1.69248, -0.20094, -1.38419, -0.08499, -0.99161, 125.98, -0.097, 254.40)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H89" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H89" index="2"]
+visible = false
+
+[node name="Tetra_H90" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.49231, -0.06981, 0.42460, 0.12216, 1.53821, -0.17643, -0.41260, 0.20292, 1.48349, 121.51, -1.063, 250.19)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H90" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H90" index="2"]
+visible = false
+
+[node name="Tetra_H91" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.16212, -0.07545, 1.13132, -0.04226, 1.14243, 0.07014, -1.13304, -0.03181, -0.16449, 119.20, -1.642, 251.43)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H91" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H91" index="1"]
+visible = false
+
+[node name="Tetra_H92" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.69837, -0.05230, -0.32751, 0.02093, 1.72230, -0.16649, 0.33099, 0.15944, 1.69100, 116.49, -1.340, 249.12)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H92" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H92" index="2"]
+visible = false
+
+[node name="Tetra_H93" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.96444, -0.03802, 1.35829, 0.20068, 1.64339, 0.18849, -1.34392, 0.27269, -0.94661, 122.13, -0.401, 246.08)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H93" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H93" index="2"]
+visible = false
+
+[node name="Tetra_H94" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.83169, 0.21159, -1.24420, 0.20055, 1.49329, 0.11989, 1.24603, -0.09912, -0.84976, 117.58, -0.707, 246.51)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H94" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H94" index="2"]
+visible = false
+
+[node name="Tetra_H95" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.38074, -0.05879, -0.62415, 0.03337, 1.51447, -0.06883, 0.62602, 0.04894, 1.38028, 110.51, -1.712, 245.41)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H95" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H95" index="2"]
+visible = false
+
+[node name="Tetra_H96" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.19715, -0.02637, -0.92519, 0.17027, 1.49306, 0.17777, 0.90977, -0.24474, 1.18417, 118.47, -0.326, 244.22)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H96" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H96" index="2"]
+visible = false
+
+[node name="Tetra_H97" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.63443, 0.20344, 0.14434, -0.21844, 1.62926, 0.17715, -0.12044, -0.19419, 1.63749, 114.45, -0.804, 243.31)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H97" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H97" index="2"]
+visible = false
+
+[node name="Tetra_H98" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.45095, 0.04590, -0.62035, -0.06538, 1.57689, -0.03623, 0.61860, 0.05899, 1.45122, 112.65, -1.729, 247.34)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H98" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H98" index="2"]
+visible = false
+
+[node name="Tetra_H99" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.48399, 0.13141, -0.41723, 0.16575, 1.53454, -0.10622, 0.40481, -0.14659, -1.48600, 115.37, -0.391, 239.81)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H99" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H99" index="2"]
+visible = false
+
+[node name="Tetra_H100" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.90624, -0.02455, 1.44349, -0.12011, 1.69713, 0.10427, -1.43870, -0.15715, 0.90055, 111.63, -1.032, 241.80)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H100" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H100" index="2"]
+visible = false
+
+[node name="Tetra_H101" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.22082, 0.19305, 1.19507, 0.16292, 1.70802, -0.10948, -1.19955, 0.03551, -1.23113, 112.94, -0.279, 237.35)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H101" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H101" index="2"]
+visible = false
+
+[node name="Tetra_H102" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.49173, -0.18626, -0.32453, -0.20478, 1.52276, 0.06732, 0.31318, 0.10851, -1.50180, 113.87, -0.060, 234.82)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H102" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H102" index="2"]
+visible = false
+
+[node name="Tetra_H103" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.06367, 0.21629, -1.53613, 0.11205, 1.53405, 0.21135, 1.54723, -0.10220, -0.07851, 109.04, -0.118, 232.68)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H103" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H103" index="2"]
+visible = false
+
+[node name="Tetra_H104" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.09211, -0.16566, -1.56036, 0.03231, 1.56252, -0.16780, 1.56880, -0.04191, -0.08816, 106.10, -0.314, 234.25)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H104" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H104" index="2"]
+visible = false
+
+[node name="Tetra_H105" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.56655, -0.07114, -0.42615, -0.05996, 1.62314, -0.05054, 0.42786, -0.03300, -1.56735, 110.53, 0.124, 228.88)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H105" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H105" index="2"]
+visible = false
+
+[node name="Tetra_H106" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.18287, -0.01392, 0.06438, 0.01656, 1.18361, -0.04820, -0.06376, 0.04903, 1.18197, 107.49, 0.121, 228.75)
+
+[node name="Tetrapod_01" parent="DecorManual/ZonaH/Tetra_H106" index="0"]
+visible = false
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H106" index="1"]
+visible = false
+
+[node name="Tetra_H107" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.12121, -0.08814, 1.15782, -0.04647, 1.61159, 0.07768, -1.16024, 0.02063, -1.12198, 111.67, 0.226, 226.51)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H107" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H107" index="2"]
+visible = false
+
+[node name="Tetra_H108" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.82733, -0.01467, -1.30337, -0.20576, 1.52292, -0.14775, 1.28711, 0.25288, 0.81417, 107.67, 0.230, 224.52)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H108" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H108" index="2"]
+visible = false
+
+[node name="Tetra_H109" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.57330, 0.11406, 0.84144, -0.09216, 1.78409, -0.06951, -0.84412, 0.01779, 1.57590, 109.06, 0.329, 222.03)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H109" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H109" index="2"]
+visible = false
+
+[node name="Tetra_H110" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.45135, -0.24703, 0.74434, 0.16768, 1.62726, 0.21311, -0.76613, -0.11183, 1.45672, 102.30, 1.202, 219.65)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H110" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H110" index="2"]
+visible = false
+
+[node name="Tetra_H111" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.80459, -0.01664, -1.60952, 0.01557, 1.79940, -0.01083, 1.60953, -0.00908, 0.80468, 106.85, 0.951, 217.22)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H111" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H111" index="2"]
+visible = false
+
+[node name="Tetra_H112" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-0.31319, 0.08388, -1.50346, 0.14009, 1.53060, 0.05621, 1.49927, -0.12549, -0.31932, 103.69, 0.974, 215.10)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H112" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H112" index="2"]
+visible = false
+
+[node name="Tetra_H113" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.33970, 0.04638, 0.83733, -0.09838, 1.57590, 0.07012, -0.83282, -0.11155, 1.33867, 101.19, 1.141, 206.65)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H113" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H113" index="2"]
+visible = false
+
+[node name="Tetra_H114" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(-1.63234, -0.07784, -0.28987, -0.06517, 1.65659, -0.07784, 0.29298, -0.06517, -1.63234, 98.72, 1.125, 207.97)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H114" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H114" index="2"]
+visible = false
+
+[node name="Tetra_H115" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(0.45700, 0.13074, -1.57547, -0.07578, 1.63990, 0.11411, 1.57906, 0.04086, 0.46143, 97.60, 1.102, 204.61)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H115" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H115" index="2"]
+visible = false
+
+[node name="Tetra_H116" parent="DecorManual/ZonaH" instance=ExtResource("h_tetra")]
+transform = Transform3D(1.58397, 0.20397, -0.34863, -0.18010, 1.61955, 0.12928, 0.36154, -0.08686, 1.59180, 95.25, 1.061, 201.85)
+
+[node name="Tetrapod_04" parent="DecorManual/ZonaH/Tetra_H116" index="1"]
+visible = false
+
+[node name="Tetrapod_Stack_01" parent="DecorManual/ZonaH/Tetra_H116" index="2"]
+visible = false
+
+[node name="Notch_H01" parent="DecorManual/ZonaH" instance=ExtResource("h_notch_a")]
+transform = Transform3D(1.56580, 0.00000, 0.66201, 0.00000, 1.70000, 0.00000, -0.66201, 0.00000, 1.56580, 262.66, -0.736, 387.11)
+
+[node name="Notch_H02" parent="DecorManual/ZonaH" instance=ExtResource("h_notch_c")]
+transform = Transform3D(-0.88275, 0.00000, 1.21274, 0.00000, 1.50000, 0.00000, -1.21274, 0.00000, -0.88275, 241.35, -2.255, 384.38)
+
+[node name="Notch_H03" parent="DecorManual/ZonaH" instance=ExtResource("h_notch_b")]
+transform = Transform3D(-0.91972, 0.00000, -1.30924, 0.00000, 1.60000, 0.00000, 1.30924, 0.00000, -0.91972, 142.31, -2.255, 295.58)
+
+[node name="Notch_H04" parent="DecorManual/ZonaH" instance=ExtResource("h_notch_a")]
+transform = Transform3D(0.81045, 0.00000, 1.26221, 0.00000, 1.50000, 0.00000, -1.26221, 0.00000, 0.81045, 117.78, -2.255, 277.64)
+
+[node name="Notch_H05" parent="DecorManual/ZonaH" instance=ExtResource("h_notch_c")]
+transform = Transform3D(-1.68299, 0.00000, 0.23990, 0.00000, 1.70000, 0.00000, -0.23990, 0.00000, -1.68299, 102.08, -1.482, 246.87)
+
+[node name="Notch_H06" parent="DecorManual/ZonaH" instance=ExtResource("h_notch_b")]
+transform = Transform3D(0.65592, 0.00000, -1.23684, 0.00000, 1.40000, 0.00000, 1.23684, 0.00000, 0.65592, 85.87, 1.105, 231.43)
+
+[node name="Bolovan_H01" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.54565, 0.00000, -0.91693, 0.00000, 1.06701, 0.00000, 0.91693, 0.00000, 0.54565, 304.58, -0.371, 344.05)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H01" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H01" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H01" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H01" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H01" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H01" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H01" index="7"]
+visible = false
+
+[node name="Bolovan_H02" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.90483, 0.00000, -0.37957, 0.00000, 0.98121, 0.00000, 0.37957, 0.00000, 0.90483, 301.79, -0.350, 343.37)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H02" index="0"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H02" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H02" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H02" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H02" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H02" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H02" index="7"]
+visible = false
+
+[node name="Bolovan_H03" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-1.61619, 0.00000, 0.17979, 0.00000, 1.62616, 0.00000, -0.17979, 0.00000, -1.61619, 292.04, -0.402, 341.67)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H03" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H03" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H03" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H03" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H03" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H03" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H03" index="7"]
+visible = false
+
+[node name="Bolovan_H04" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.10138, 0.00000, -1.11680, 0.00000, 1.12139, 0.00000, 1.11680, 0.00000, -0.10138, 295.10, -0.385, 340.16)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H04" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H04" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H04" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H04" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H04" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H04" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H04" index="7"]
+visible = false
+
+[node name="Bolovan_H05" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(1.06847, 0.00000, -0.03326, 0.00000, 1.06899, 0.00000, 0.03326, 0.00000, 1.06847, 293.05, -0.372, 339.63)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H05" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H05" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H05" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H05" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H05" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H05" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H05" index="7"]
+visible = false
+
+[node name="Bolovan_H06" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.13988, 0.00000, 1.14133, 0.00000, 1.14987, 0.00000, -1.14133, 0.00000, 0.13988, 278.79, -0.111, 343.63)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H06" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H06" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H06" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H06" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H06" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H06" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H06" index="7"]
+visible = false
+
+[node name="Bolovan_H07" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.71458, 0.00000, 1.16221, 0.00000, 1.36431, 0.00000, -1.16221, 0.00000, -0.71458, 284.18, -0.318, 342.63)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H07" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H07" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H07" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H07" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H07" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H07" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H07" index="7"]
+visible = false
+
+[node name="Bolovan_H08" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-1.16227, 0.00000, -0.21895, 0.00000, 1.18271, 0.00000, 0.21895, 0.00000, -1.16227, 266.36, -0.400, 335.95)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H08" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H08" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H08" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H08" index="3"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H08" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H08" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H08" index="7"]
+visible = false
+
+[node name="Bolovan_H09" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-1.25942, 0.00000, 0.15321, 0.00000, 1.26871, 0.00000, -0.15321, 0.00000, -1.25942, 255.38, -0.184, 338.32)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H09" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H09" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H09" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H09" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H09" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H09" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H09" index="7"]
+visible = false
+
+[node name="Bolovan_H10" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.73935, 0.00000, 1.48627, 0.00000, 1.66001, 0.00000, -1.48627, 0.00000, -0.73935, 244.56, -0.520, 329.88)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H10" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H10" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H10" index="2"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H10" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H10" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H10" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H10" index="7"]
+visible = false
+
+[node name="Bolovan_H11" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.95065, 0.00000, 1.34221, 0.00000, 1.64476, 0.00000, -1.34221, 0.00000, 0.95065, 234.56, -0.516, 326.86)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H11" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H11" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H11" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H11" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H11" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H11" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H11" index="7"]
+visible = false
+
+[node name="Bolovan_H12" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.03618, 0.00000, 1.52217, 0.00000, 1.52260, 0.00000, -1.52217, 0.00000, -0.03618, 227.82, -0.485, 320.03)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H12" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H12" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H12" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H12" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H12" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H12" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H12" index="7"]
+visible = false
+
+[node name="Bolovan_H13" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.42176, 0.00000, -0.93419, 0.00000, 1.02499, 0.00000, 0.93419, 0.00000, 0.42176, 226.22, 0.150, 324.17)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H13" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H13" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H13" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H13" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H13" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H13" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H13" index="7"]
+visible = false
+
+[node name="Bolovan_H14" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(1.43275, 0.00000, 0.56529, 0.00000, 1.54024, 0.00000, -0.56529, 0.00000, 1.43275, 217.10, -0.490, 312.71)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H14" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H14" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H14" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H14" index="3"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H14" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H14" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H14" index="7"]
+visible = false
+
+[node name="Bolovan_H15" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.93996, 0.00000, 0.85402, 0.00000, 1.26999, 0.00000, -0.85402, 0.00000, -0.93996, 221.48, -0.422, 313.99)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H15" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H15" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H15" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H15" index="3"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H15" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H15" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H15" index="7"]
+visible = false
+
+[node name="Bolovan_H16" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.76991, 0.00000, -1.22457, 0.00000, 1.44650, 0.00000, 1.22457, 0.00000, 0.76991, 208.77, -0.466, 305.39)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H16" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H16" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H16" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H16" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H16" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H16" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H16" index="7"]
+visible = false
+
+[node name="Bolovan_H17" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.31038, 0.00000, -0.87236, 0.00000, 0.92593, 0.00000, 0.87236, 0.00000, -0.31038, 201.15, -0.336, 294.51)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H17" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H17" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H17" index="2"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H17" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H17" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H17" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H17" index="7"]
+visible = false
+
+[node name="Bolovan_H18" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-1.29047, 0.00000, -0.31987, 0.00000, 1.32953, 0.00000, 0.31987, 0.00000, -1.29047, 201.38, -0.376, 298.21)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H18" index="0"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H18" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H18" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H18" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H18" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H18" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H18" index="7"]
+visible = false
+
+[node name="Bolovan_H19" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(1.03129, 0.00000, 0.09251, 0.00000, 1.03543, 0.00000, -0.09251, 0.00000, 1.03129, 191.75, -0.303, 288.40)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H19" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H19" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H19" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H19" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H19" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H19" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H19" index="7"]
+visible = false
+
+[node name="Bolovan_H20" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.32535, 0.00000, 1.15544, 0.00000, 1.20038, 0.00000, -1.15544, 0.00000, -0.32535, 183.99, -0.392, 279.25)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H20" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H20" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H20" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H20" index="3"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H20" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H20" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H20" index="7"]
+visible = false
+
+[node name="Bolovan_H21" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.76524, 0.00000, -1.00992, 0.00000, 1.26709, 0.00000, 1.00992, 0.00000, 0.76524, 174.24, -0.173, 268.10)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H21" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H21" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H21" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H21" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H21" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H21" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H21" index="7"]
+visible = false
+
+[node name="Bolovan_H22" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.96760, 0.00000, 1.33286, 0.00000, 1.64705, 0.00000, -1.33286, 0.00000, 0.96760, 165.97, -0.516, 256.77)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H22" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H22" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H22" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H22" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H22" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H22" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H22" index="7"]
+visible = false
+
+[node name="Bolovan_H23" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-1.41479, 0.00000, 0.10930, 0.00000, 1.41901, 0.00000, -0.10930, 0.00000, -1.41479, 158.53, -0.359, 251.79)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H23" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H23" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H23" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H23" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H23" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H23" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H23" index="7"]
+visible = false
+
+[node name="Bolovan_H24" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.82306, 0.00000, -0.54090, 0.00000, 0.98489, 0.00000, 0.54090, 0.00000, -0.82306, 155.97, -0.351, 248.77)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H24" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H24" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H24" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H24" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H24" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H24" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H24" index="7"]
+visible = false
+
+[node name="Bolovan_H25" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(1.44538, 0.00000, -0.54707, 0.00000, 1.54545, 0.00000, 0.54707, 0.00000, 1.44538, 152.77, -0.491, 246.67)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H25" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H25" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H25" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H25" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H25" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H25" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H25" index="7"]
+visible = false
+
+[node name="Bolovan_H26" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(1.54497, 0.00000, 0.12800, 0.00000, 1.55027, 0.00000, -0.12800, 0.00000, 1.54497, 154.53, -0.492, 244.06)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H26" index="0"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H26" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H26" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H26" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H26" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H26" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H26" index="7"]
+visible = false
+
+[node name="Bolovan_H27" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.54646, 0.00000, -1.32982, 0.00000, 1.43772, 0.00000, 1.32982, 0.00000, -0.54646, 144.53, -0.177, 235.44)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H27" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H27" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H27" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H27" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H27" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H27" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H27" index="7"]
+visible = false
+
+[node name="Bolovan_H28" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.29228, 0.00000, 0.88165, 0.00000, 0.92884, 0.00000, -0.88165, 0.00000, 0.29228, 146.29, -0.337, 220.87)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H28" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H28" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H28" index="2"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H28" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H28" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H28" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H28" index="7"]
+visible = false
+
+[node name="Bolovan_H29" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(1.21522, 0.00000, 1.14253, 0.00000, 1.66797, 0.00000, -1.14253, 0.00000, 1.21522, 142.02, -0.006, 225.79)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H29" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H29" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H29" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H29" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H29" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H29" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H29" index="7"]
+visible = false
+
+[node name="Bolovan_H30" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.50768, 0.00000, 0.97535, 0.00000, 1.09957, 0.00000, -0.97535, 0.00000, -0.50768, 142.95, -0.201, 219.67)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H30" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H30" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H30" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H30" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H30" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H30" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H30" index="7"]
+visible = false
+
+[node name="Bolovan_H31" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.94391, 0.00000, 0.18249, 0.00000, 0.96139, 0.00000, -0.18249, 0.00000, 0.94391, 144.82, -0.345, 224.08)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H31" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H31" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H31" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H31" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H31" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H31" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H31" index="7"]
+visible = false
+
+[node name="Bolovan_H32" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.38649, 0.00000, -1.02495, 0.00000, 1.09540, 0.00000, 1.02495, 0.00000, 0.38649, 143.06, -0.378, 209.25)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H32" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H32" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H32" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H32" index="3"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H32" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H32" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H32" index="7"]
+visible = false
+
+[node name="Bolovan_H33" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.92605, 0.00000, 0.55394, 0.00000, 1.07908, 0.00000, -0.55394, 0.00000, 0.92605, 138.29, -0.013, 213.79)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H33" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H33" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H33" index="2"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H33" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H33" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H33" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H33" index="7"]
+visible = false
+
+[node name="Bolovan_H34" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.24539, 0.00000, -1.10455, 0.00000, 1.13148, 0.00000, 1.10455, 0.00000, -0.24539, 140.35, -0.275, 208.95)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H34" index="0"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H34" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H34" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H34" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H34" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H34" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H34" index="7"]
+visible = false
+
+[node name="Bolovan_H35" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.73130, 0.00000, 0.73856, 0.00000, 1.03936, 0.00000, -0.73856, 0.00000, -0.73130, 138.79, -0.364, 195.37)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H35" index="0"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H35" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H35" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H35" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H35" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H35" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H35" index="7"]
+visible = false
+
+[node name="Bolovan_H36" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-1.15515, 0.00000, 0.51276, 0.00000, 1.26384, 0.00000, -0.51276, 0.00000, -1.15515, 136.19, -0.345, 194.53)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H36" index="0"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H36" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H36" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H36" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H36" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H36" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H36" index="7"]
+visible = false
+
+[node name="Bolovan_H37" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(1.46254, 0.00000, -0.49790, 0.00000, 1.54496, 0.00000, 0.49790, 0.00000, 1.46254, 135.70, 0.185, 199.24)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H37" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H37" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H37" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H37" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H37" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H37" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H37" index="7"]
+visible = false
+
+[node name="Bolovan_H38" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.68538, 0.00000, -0.88803, 0.00000, 1.12177, 0.00000, 0.88803, 0.00000, -0.68538, 133.28, -0.382, 187.85)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H38" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H38" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H38" index="2"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H38" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H38" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H38" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H38" index="7"]
+visible = false
+
+[node name="Bolovan_H39" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-1.18063, 0.00000, 1.18031, 0.00000, 1.66944, 0.00000, -1.18031, 0.00000, -1.18063, 129.25, -0.141, 185.04)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H39" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H39" index="1"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H39" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H39" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H39" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H39" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H39" index="7"]
+visible = false
+
+[node name="Bolovan_H40" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.74049, 0.00000, -0.76548, 0.00000, 1.06503, 0.00000, 0.76548, 0.00000, 0.74049, 123.68, -0.162, 172.34)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H40" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H40" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H40" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H40" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H40" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H40" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H40" index="7"]
+visible = false
+
+[node name="Bolovan_H41" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.80360, 0.00000, -0.98583, 0.00000, 1.27186, 0.00000, 0.98583, 0.00000, -0.80360, 125.83, 0.059, 177.76)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H41" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H41" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H41" index="3"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H41" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H41" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H41" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H41" index="7"]
+visible = false
+
+[node name="Bolovan_H42" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.95372, 0.00000, 0.43871, 0.00000, 1.04978, 0.00000, -0.43871, 0.00000, -0.95372, 122.00, 0.342, 175.11)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H42" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H42" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H42" index="2"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H42" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H42" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H42" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H42" index="7"]
+visible = false
+
+[node name="Bolovan_H43" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(0.04305, 0.00000, -1.26210, 0.00000, 1.26283, 0.00000, 1.26210, 0.00000, 0.04305, 120.34, -0.420, 162.61)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H43" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H43" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H43" index="2"]
+visible = false
+
+[node name="Coral_Rock_04" parent="DecorManual/ZonaH/Bolovan_H43" index="3"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H43" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H43" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H43" index="7"]
+visible = false
+
+[node name="Bolovan_H44" parent="DecorManual/ZonaH" instance=ExtResource("h_coral")]
+transform = Transform3D(-0.25614, 0.00000, 1.32415, 0.00000, 1.34870, 0.00000, -1.32415, 0.00000, -0.25614, 117.85, -0.442, 160.32)
+metadata/coliziune = "none"
+
+[node name="Coral_Rock_01" parent="DecorManual/ZonaH/Bolovan_H44" index="0"]
+visible = false
+
+[node name="Coral_Rock_02" parent="DecorManual/ZonaH/Bolovan_H44" index="1"]
+visible = false
+
+[node name="Coral_Rock_03" parent="DecorManual/ZonaH/Bolovan_H44" index="2"]
+visible = false
+
+[node name="Coral_Rock_05" parent="DecorManual/ZonaH/Bolovan_H44" index="4"]
+visible = false
+
+[node name="Coral_Rock_06" parent="DecorManual/ZonaH/Bolovan_H44" index="5"]
+visible = false
+
+[node name="Coral_Rock_07" parent="DecorManual/ZonaH/Bolovan_H44" index="6"]
+visible = false
+
+[node name="Coral_Rock_08" parent="DecorManual/ZonaH/Bolovan_H44" index="7"]
+visible = false
+
+[node name="Cicas_H01" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.89500, 0.00000, -0.18548, 0.00000, 0.91402, 0.00000, 0.18548, 0.00000, -0.89500, 306.54, 1.609, 360.49)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H01" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.58018, 0.00000, 0.92409, 0.00000, 1.09112, 0.00000, -0.92409, 0.00000, -0.58018, 304.72, 1.602, 362.28)
+metadata/coliziune = "none"
+
+[node name="Cicas_H02" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.83957, 0.00000, 0.44009, 0.00000, 0.94792, 0.00000, -0.44009, 0.00000, 0.83957, 308.44, 1.618, 361.13)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H02" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.57484, 0.00000, 0.86467, 0.00000, 1.03832, 0.00000, -0.86467, 0.00000, -0.57484, 307.26, 1.614, 362.83)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H01" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(0.07153, 0.00000, -1.32726, 0.00000, 1.32919, 0.00000, 1.32726, 0.00000, 0.07153, 306.68, 1.455, 354.80)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H03" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.45634, 0.00000, 0.27013, 0.00000, 1.48118, 0.00000, -0.27013, 0.00000, 1.45634, 310.55, 1.638, 356.47)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H04" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.28536, 0.00000, -0.10026, 0.00000, 1.28926, 0.00000, 0.10026, 0.00000, -1.28536, 310.99, 1.321, 353.30)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H05" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.45133, 0.00000, -0.15724, 0.00000, 1.45983, 0.00000, 0.15724, 0.00000, 1.45133, 308.90, 0.994, 351.44)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H06" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.10134, 0.00000, 0.17693, 0.00000, 1.11546, 0.00000, -0.17693, 0.00000, 1.10134, 304.09, 1.612, 380.01)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H07" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.53176, 0.00000, -0.91091, 0.00000, 1.05477, 0.00000, 0.91091, 0.00000, -0.53176, 303.72, 1.612, 382.33)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H08" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.46701, 0.00000, -1.12021, 0.00000, 1.21366, 0.00000, 1.12021, 0.00000, -0.46701, 300.17, 1.602, 386.07)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H09" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.32550, 0.00000, -0.07094, 0.00000, 1.32739, 0.00000, 0.07094, 0.00000, 1.32550, 306.74, 1.630, 389.46)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H02" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(-0.67238, 0.00000, -1.10732, 0.00000, 1.29547, 0.00000, 1.10732, 0.00000, -0.67238, 301.09, 1.604, 391.79)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H10" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.15637, 0.00000, -0.41186, 0.00000, 1.22752, 0.00000, 0.41186, 0.00000, -1.15637, 304.85, 1.621, 391.14)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H01" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-1.00796, 0.00000, -0.29098, 0.00000, 1.04912, 0.00000, 0.29098, 0.00000, -1.00796, 305.43, 1.623, 386.17)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H02" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-1.16874, 0.00000, -0.69127, 0.00000, 1.35787, 0.00000, 0.69127, 0.00000, -1.16874, 302.69, 1.613, 387.94)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H03" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(1.05206, 0.00000, -0.48863, 0.00000, 1.16000, 0.00000, 0.48863, 0.00000, 1.05206, 303.45, 1.594, 357.71)
+metadata/coliziune = "none"
+
+[node name="Cicas_H03" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.65017, 0.00000, -0.81129, 0.00000, 1.03967, 0.00000, 0.81129, 0.00000, 0.65017, 303.14, 1.594, 360.32)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H11" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.78588, 0.00000, -0.68710, 0.00000, 1.04389, 0.00000, 0.68710, 0.00000, 0.78588, 301.06, 1.586, 360.93)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H04" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(0.60561, 0.00000, 0.80096, 0.00000, 1.00414, 0.00000, -0.80096, 0.00000, 0.60561, 300.66, 1.583, 358.56)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H12" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.52193, 0.00000, 1.33439, 0.00000, 1.43284, 0.00000, -1.33439, 0.00000, -0.52193, 303.33, 1.198, 353.01)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H13" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.86316, 0.00000, -1.09384, 0.00000, 1.39339, 0.00000, 1.09384, 0.00000, 0.86316, 302.90, 0.943, 349.29)
+metadata/coliziune = "none"
+
+[node name="Cicas_H04" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.14495, 0.00000, -0.92593, 0.00000, 0.93721, 0.00000, 0.92593, 0.00000, 0.14495, 309.03, 0.655, 349.02)
+metadata/coliziune = "none"
+
+[node name="Cicas_H05" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.99721, 0.00000, -0.33530, 0.00000, 1.05207, 0.00000, 0.33530, 0.00000, -0.99721, 306.21, 0.542, 347.61)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H03" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(0.21593, 0.00000, 1.19714, 0.00000, 1.21645, 0.00000, -1.19714, 0.00000, 0.21593, 295.36, 1.583, 381.30)
+metadata/coliziune = "none"
+
+[node name="Cicas_H06" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.96320, 0.00000, -0.00103, 0.00000, 0.96320, 0.00000, 0.00103, 0.00000, 0.96320, 295.33, 1.583, 378.12)
+metadata/coliziune = "none"
+
+[node name="Cicas_H07" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.06075, 0.00000, 1.30280, 0.00000, 1.30421, 0.00000, -1.30280, 0.00000, -0.06075, 298.83, 1.595, 378.64)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H14" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.27544, 0.00000, -0.04251, 0.00000, 1.27615, 0.00000, 0.04251, 0.00000, 1.27544, 298.77, 1.594, 381.47)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H04" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(1.39914, 0.00000, -0.51155, 0.00000, 1.48973, 0.00000, 0.51155, 0.00000, 1.39914, 294.66, 1.577, 386.85)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H15" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.17749, 0.00000, -0.22996, 0.00000, 1.19973, 0.00000, 0.22996, 0.00000, -1.17749, 298.31, 1.593, 384.79)
+metadata/coliziune = "none"
+
+[node name="Cicas_H08" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.75246, 0.00000, -0.63167, 0.00000, 0.98245, 0.00000, 0.63167, 0.00000, -0.75246, 298.60, 1.575, 359.75)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H16" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.73990, 0.00000, 0.68889, 0.00000, 1.01095, 0.00000, -0.68889, 0.00000, 0.73990, 300.73, 1.243, 351.45)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H17" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.00388, 0.00000, 1.31622, 0.00000, 1.31623, 0.00000, -1.31622, 0.00000, -0.00388, 306.67, 0.757, 349.89)
+metadata/coliziune = "none"
+
+[node name="Cicas_H09" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.64061, 0.00000, 0.81713, 0.00000, 1.03831, 0.00000, -0.81713, 0.00000, -0.64061, 292.54, 1.572, 377.04)
+metadata/coliziune = "none"
+
+[node name="Cicas_H10" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.37465, 0.00000, 1.22386, 0.00000, 1.27992, 0.00000, -1.22386, 0.00000, 0.37465, 289.99, 1.558, 387.09)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H18" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.33397, 0.00000, 0.06492, 0.00000, 1.33555, 0.00000, -0.06492, 0.00000, -1.33397, 291.93, 1.570, 382.12)
+metadata/coliziune = "none"
+
+[node name="Cicas_H11" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.50342, 0.00000, -1.03142, 0.00000, 1.14772, 0.00000, 1.03142, 0.00000, -0.50342, 288.83, 1.558, 382.62)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H05" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(1.08693, 0.00000, -0.80213, 0.00000, 1.35086, 0.00000, 0.80213, 0.00000, 1.08693, 287.64, 1.549, 385.38)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H19" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.64004, 0.00000, -0.97036, 0.00000, 1.16243, 0.00000, 0.97036, 0.00000, 0.64004, 291.26, 1.570, 379.94)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H20" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.24636, 0.00000, 0.70998, 0.00000, 1.43439, 0.00000, -0.70998, 0.00000, 1.24636, 293.94, 1.550, 357.69)
+metadata/coliziune = "none"
+
+[node name="Cicas_H12" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.98866, 0.00000, -0.74836, 0.00000, 1.23996, 0.00000, 0.74836, 0.00000, 0.98866, 291.03, 1.378, 356.99)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H06" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-1.01202, 0.00000, -0.63996, 0.00000, 1.19739, 0.00000, 0.63996, 0.00000, -1.01202, 298.25, 1.193, 350.89)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H05" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(0.87680, 0.00000, 0.82478, 0.00000, 1.20376, 0.00000, -0.82478, 0.00000, 0.87680, 296.27, 0.621, 345.49)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H07" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-0.88219, 0.00000, -0.57288, 0.00000, 1.05187, 0.00000, 0.57288, 0.00000, -0.88219, 293.09, 1.330, 347.84)
+metadata/coliziune = "none"
+
+[node name="Cicas_H13" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.90990, 0.00000, -0.50753, 0.00000, 1.04187, 0.00000, 0.50753, 0.00000, 0.90990, 299.78, 0.976, 347.72)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H21" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.11422, 0.00000, -0.85695, 0.00000, 1.40565, 0.00000, 0.85695, 0.00000, -1.11422, 295.10, 1.289, 349.67)
+metadata/coliziune = "none"
+
+[node name="Cicas_H14" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-1.04390, 0.00000, 0.18849, 0.00000, 1.06078, 0.00000, -0.18849, 0.00000, -1.04390, 285.34, 1.547, 378.06)
+metadata/coliziune = "none"
+
+[node name="Cicas_H15" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.99011, 0.00000, 0.09309, 0.00000, 0.99448, 0.00000, -0.09309, 0.00000, -0.99011, 285.29, 1.542, 375.11)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H22" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.05611, 0.00000, -0.97237, 0.00000, 1.43558, 0.00000, 0.97237, 0.00000, -1.05611, 281.98, 1.225, 376.65)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H06" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(0.54106, 0.00000, 1.51800, 0.00000, 1.61155, 0.00000, -1.51800, 0.00000, 0.54106, 279.78, 1.526, 384.80)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H23" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.17158, 0.00000, -0.62754, 0.00000, 1.32906, 0.00000, 0.62754, 0.00000, -1.17158, 283.62, 1.539, 383.33)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H24" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.06154, 0.00000, 1.35162, 0.00000, 1.35302, 0.00000, -1.35162, 0.00000, 0.06154, 280.56, 1.148, 380.39)
+metadata/coliziune = "none"
+
+[node name="Cicas_H16" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.87905, 0.00000, -0.62080, 0.00000, 1.07616, 0.00000, 0.62080, 0.00000, 0.87905, 289.51, 1.209, 355.12)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H25" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.64267, 0.00000, -0.80602, 0.00000, 1.03087, 0.00000, 0.80602, 0.00000, 0.64267, 287.73, 1.051, 356.12)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H26" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.34873, 0.00000, -1.12956, 0.00000, 1.18217, 0.00000, 1.12956, 0.00000, -0.34873, 282.09, 1.259, 372.56)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H27" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.31492, 0.00000, 0.01763, 0.00000, 1.31504, 0.00000, -0.01763, 0.00000, -1.31492, 279.41, 0.970, 374.37)
+metadata/coliziune = "none"
+
+[node name="Cicas_H17" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.72308, 0.00000, 0.58289, 0.00000, 0.92876, 0.00000, -0.58289, 0.00000, -0.72308, 284.14, 1.465, 373.36)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H07" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(1.21807, 0.00000, -0.08684, 0.00000, 1.22116, 0.00000, 0.08684, 0.00000, 1.21807, 274.38, 0.670, 384.05)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H08" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(0.92900, 0.00000, 1.15602, 0.00000, 1.48305, 0.00000, -1.15602, 0.00000, 0.92900, 276.54, 0.635, 378.59)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H28" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.90762, 0.00000, 1.10008, 0.00000, 1.42617, 0.00000, -1.10008, 0.00000, -0.90762, 288.59, 0.307, 344.76)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H29" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.08412, 0.00000, 0.98753, 0.00000, 1.46647, 0.00000, -0.98753, 0.00000, 1.08412, 285.18, 0.322, 345.40)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H30" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.89761, 0.00000, -0.98198, 0.00000, 1.33041, 0.00000, 0.98198, 0.00000, -0.89761, 274.72, 0.655, 372.60)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H31" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.05906, 0.00000, -1.16896, 0.00000, 1.17045, 0.00000, 1.16896, 0.00000, -0.05906, 272.22, 0.606, 372.77)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H32" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.17734, 0.00000, -1.26513, 0.00000, 1.27749, 0.00000, 1.26513, 0.00000, 0.17734, 273.79, 0.706, 368.80)
+metadata/coliziune = "none"
+
+[node name="Cicas_H18" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.69158, 0.00000, 0.68500, 0.00000, 0.97340, 0.00000, -0.68500, 0.00000, -0.69158, 271.27, 0.672, 369.83)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H33" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.01952, 0.00000, -0.38749, 0.00000, 1.09067, 0.00000, 0.38749, 0.00000, 1.01952, 272.04, 0.289, 377.82)
+metadata/coliziune = "none"
+
+[node name="Cicas_H19" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(1.31831, 0.00000, 0.33177, 0.00000, 1.35941, 0.00000, -0.33177, 0.00000, 1.31831, 282.64, 0.452, 346.31)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H08" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(0.12230, 0.00000, 1.08861, 0.00000, 1.09546, 0.00000, -1.08861, 0.00000, 0.12230, 270.04, 0.688, 366.92)
+metadata/coliziune = "none"
+
+[node name="Cicas_H20" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.28415, 0.00000, -0.95516, 0.00000, 0.99653, 0.00000, 0.95516, 0.00000, -0.28415, 273.77, 0.276, 344.77)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H34" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.67809, 0.00000, -0.77871, 0.00000, 1.03256, 0.00000, 0.77871, 0.00000, 0.67809, 262.61, 0.393, 368.13)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H35" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.05451, 0.00000, 0.47191, 0.00000, 1.15529, 0.00000, -0.47191, 0.00000, -1.05451, 264.87, 0.547, 365.98)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H36" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.64975, 0.00000, 1.05217, 0.00000, 1.23663, 0.00000, -1.05217, 0.00000, -0.64975, 260.77, 0.622, 364.18)
+metadata/coliziune = "none"
+
+[node name="Cicas_H21" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.84590, 0.00000, 0.36141, 0.00000, 0.91987, 0.00000, -0.36141, 0.00000, -0.84590, 262.94, 0.594, 365.19)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H37" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.19500, 0.00000, -1.25767, 0.00000, 1.27269, 0.00000, 1.25767, 0.00000, 0.19500, 264.41, 0.327, 340.25)
+metadata/coliziune = "none"
+
+[node name="Cicas_H22" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(1.03966, 0.00000, 0.08043, 0.00000, 1.04277, 0.00000, -0.08043, 0.00000, 1.03966, 252.91, 0.556, 361.98)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H38" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.86862, 0.00000, 0.66015, 0.00000, 1.09101, 0.00000, -0.66015, 0.00000, -0.86862, 256.45, 0.605, 363.37)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H39" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.32648, 0.00000, 0.37757, 0.00000, 1.37917, 0.00000, -0.37757, 0.00000, -1.32648, 255.58, 0.587, 361.30)
+metadata/coliziune = "none"
+
+[node name="Cicas_H23" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.90404, 0.00000, -0.01661, 0.00000, 0.90419, 0.00000, 0.01661, 0.00000, -0.90404, 257.66, 0.561, 340.18)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H40" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.21146, 0.00000, -1.18519, 0.00000, 1.20391, 0.00000, 1.18519, 0.00000, 0.21146, 256.27, 0.579, 341.92)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H09" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-1.17953, 0.00000, -0.15914, 0.00000, 1.19021, 0.00000, 0.15914, 0.00000, -1.17953, 248.46, 0.369, 358.14)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H41" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.15353, 0.00000, 1.06167, 0.00000, 1.07271, 0.00000, -1.06167, 0.00000, -0.15353, 251.43, 0.425, 360.09)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H42" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.28553, 0.00000, -1.12754, 0.00000, 1.16313, 0.00000, 1.12754, 0.00000, -0.28553, 226.10, 0.359, 326.87)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H43" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.86986, 0.00000, 1.16699, 0.00000, 1.45551, 0.00000, -1.16699, 0.00000, 0.86986, 221.71, 0.319, 320.66)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H44" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.45019, 0.00000, -0.96843, 0.00000, 1.06796, 0.00000, 0.96843, 0.00000, 0.45019, 215.57, 0.426, 316.09)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H45" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.79415, 0.00000, 1.13598, 0.00000, 1.38604, 0.00000, -1.13598, 0.00000, -0.79415, 214.20, 0.249, 314.08)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H46" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.09428, 0.00000, -0.52544, 0.00000, 1.21390, 0.00000, 0.52544, 0.00000, 1.09428, 212.08, 0.425, 312.44)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H47" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.07751, 0.00000, 1.17307, 0.00000, 1.17563, 0.00000, -1.17307, 0.00000, -0.07751, 207.15, 0.351, 307.79)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H48" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.14137, 0.00000, 1.48341, 0.00000, 1.49013, 0.00000, -1.48341, 0.00000, 0.14137, 198.06, 0.331, 298.63)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H49" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.96878, 0.00000, 0.59953, 0.00000, 1.13929, 0.00000, -0.59953, 0.00000, -0.96878, 196.36, 0.342, 292.21)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H10" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-1.28399, 0.00000, 0.14645, 0.00000, 1.29232, 0.00000, -0.14645, 0.00000, -1.28399, 190.19, 0.319, 290.51)
+metadata/coliziune = "none"
+
+[node name="Cicas_H24" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.46686, 0.00000, -1.26578, 0.00000, 1.34914, 0.00000, 1.26578, 0.00000, 0.46686, 185.63, 0.344, 284.08)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H50" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.12807, 0.00000, 1.03292, 0.00000, 1.04083, 0.00000, -1.03292, 0.00000, -0.12807, 181.83, 0.390, 280.64)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H51" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.72968, 0.00000, -0.89270, 0.00000, 1.15297, 0.00000, 0.89270, 0.00000, -0.72968, 177.17, 0.273, 275.78)
+metadata/coliziune = "none"
+
+[node name="Cicas_H25" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.80947, 0.00000, -0.96245, 0.00000, 1.25760, 0.00000, 0.96245, 0.00000, -0.80947, 174.35, 0.271, 271.18)
+metadata/coliziune = "none"
+
+[node name="Cicas_H26" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.87203, 0.00000, 0.42960, 0.00000, 0.97211, 0.00000, -0.42960, 0.00000, -0.87203, 152.53, 0.343, 252.16)
+metadata/coliziune = "none"
+
+[node name="Cicas_H27" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.13742, 0.00000, 1.05377, 0.00000, 1.06269, 0.00000, -1.05377, 0.00000, -0.13742, 150.88, 0.263, 250.70)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H52" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.27521, 0.00000, 0.61447, 0.00000, 1.41553, 0.00000, -0.61447, 0.00000, 1.27521, 123.53, 0.360, 241.86)
+metadata/coliziune = "none"
+
+[node name="Cicas_H28" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.75266, 0.00000, 0.72002, 0.00000, 1.04159, 0.00000, -0.72002, 0.00000, 0.75266, 121.98, 0.351, 239.56)
+metadata/coliziune = "none"
+
+[node name="Cicas_H29" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.83336, 0.00000, -0.36123, 0.00000, 0.90828, 0.00000, 0.36123, 0.00000, 0.83336, 125.20, 0.470, 243.29)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H53" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.43667, 0.00000, -1.32977, 0.00000, 1.39963, 0.00000, 1.32977, 0.00000, 0.43667, 139.55, 0.342, 224.03)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H11" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-0.67799, 0.00000, 1.21148, 0.00000, 1.38829, 0.00000, -1.21148, 0.00000, -0.67799, 120.65, 0.531, 235.76)
+metadata/coliziune = "none"
+
+[node name="Cicas_H30" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.19389, 0.00000, -0.89760, 0.00000, 0.91830, 0.00000, 0.89760, 0.00000, 0.19389, 134.42, 0.538, 220.23)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H54" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.55424, 0.00000, -1.37716, 0.00000, 1.48451, 0.00000, 1.37716, 0.00000, 0.55424, 117.14, 0.488, 230.37)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H12" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(0.85825, 0.00000, 1.01730, 0.00000, 1.33097, 0.00000, -1.01730, 0.00000, 0.85825, 116.62, 0.565, 226.57)
+metadata/coliziune = "none"
+
+[node name="Cicas_H31" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.86697, 0.00000, -0.88115, 0.00000, 1.23615, 0.00000, 0.88115, 0.00000, 0.86697, 133.19, 0.657, 212.01)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H55" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.59317, 0.00000, 1.36968, 0.00000, 1.49261, 0.00000, -1.36968, 0.00000, -0.59317, 137.99, 0.385, 206.50)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H56" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.15669, 0.00000, 0.58733, 0.00000, 1.29726, 0.00000, -0.58733, 0.00000, -1.15669, 136.77, 0.328, 209.78)
+metadata/coliziune = "none"
+
+[node name="Cicas_H32" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.87182, 0.00000, -0.56043, 0.00000, 1.03641, 0.00000, 0.56043, 0.00000, -0.87182, 114.01, 0.564, 223.47)
+metadata/coliziune = "none"
+
+[node name="Cicas_H33" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.48301, 0.00000, -1.03469, 0.00000, 1.14188, 0.00000, 1.03469, 0.00000, 0.48301, 110.78, 0.557, 224.23)
+metadata/coliziune = "none"
+
+[node name="Cicas_H34" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.18788, 0.00000, -0.93592, 0.00000, 0.95459, 0.00000, 0.93592, 0.00000, -0.18788, 130.52, 1.134, 206.86)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H57" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.34313, 0.00000, -1.35530, 0.00000, 1.39806, 0.00000, 1.35530, 0.00000, -0.34313, 135.86, 0.820, 204.19)
+metadata/coliziune = "none"
+
+[node name="Cicas_H35" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.74888, 0.00000, 0.65182, 0.00000, 0.99282, 0.00000, -0.65182, 0.00000, 0.74888, 133.61, 1.177, 206.06)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H58" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.70895, 0.00000, -1.01879, 0.00000, 1.24119, 0.00000, 1.01879, 0.00000, 0.70895, 133.03, 1.106, 202.42)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H13" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-0.35067, 0.00000, 1.29386, 0.00000, 1.34054, 0.00000, -1.29386, 0.00000, -0.35067, 110.53, 0.914, 217.66)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H59" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.13588, 0.00000, 0.23014, 0.00000, 1.15896, 0.00000, -0.23014, 0.00000, 1.13588, 108.40, 0.922, 219.26)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H60" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.58800, 0.00000, 0.84809, 0.00000, 1.03199, 0.00000, -0.84809, 0.00000, -0.58800, 111.54, 0.661, 220.28)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H61" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.92383, 0.00000, -0.88550, 0.00000, 1.27968, 0.00000, 0.88550, 0.00000, -0.92383, 125.25, 1.359, 204.29)
+metadata/coliziune = "none"
+
+[node name="Cicas_H36" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.94678, 0.00000, 0.35893, 0.00000, 1.01254, 0.00000, -0.35893, 0.00000, 0.94678, 123.12, 1.366, 201.84)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H62" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.06432, 0.00000, -0.23700, 0.00000, 1.09038, 0.00000, 0.23700, 0.00000, 1.06432, 125.30, 1.364, 202.11)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H09" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(0.53435, 0.00000, 1.16572, 0.00000, 1.28236, 0.00000, -1.16572, 0.00000, 0.53435, 131.98, 0.761, 195.65)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H63" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.53846, 0.00000, -0.97479, 0.00000, 1.11363, 0.00000, 0.97479, 0.00000, 0.53846, 131.62, 0.979, 200.06)
+metadata/coliziune = "none"
+
+[node name="Cicas_H37" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.17665, 0.00000, -0.92098, 0.00000, 0.93777, 0.00000, 0.92098, 0.00000, -0.17665, 136.26, 0.548, 201.77)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H64" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.21698, 0.00000, -1.21409, 0.00000, 1.23332, 0.00000, 1.21409, 0.00000, -0.21698, 108.02, 1.362, 212.32)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H65" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.24236, 0.00000, 0.31070, 0.00000, 1.28062, 0.00000, -0.31070, 0.00000, -1.24236, 105.97, 1.361, 213.36)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H66" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.28278, 0.00000, -1.01897, 0.00000, 1.05749, 0.00000, 1.01897, 0.00000, 0.28278, 107.99, 1.348, 214.55)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H67" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.04331, 0.00000, -0.42450, 0.00000, 1.12636, 0.00000, 0.42450, 0.00000, 1.04331, 125.40, 1.368, 196.79)
+metadata/coliziune = "none"
+
+[node name="Cicas_H38" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.37900, 0.00000, 0.93869, 0.00000, 1.01232, 0.00000, -0.93869, 0.00000, 0.37900, 122.23, 1.372, 199.81)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H68" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.43154, 0.00000, 0.38813, 0.00000, 1.48323, 0.00000, -0.38813, 0.00000, -1.43154, 122.56, 1.354, 195.67)
+metadata/coliziune = "none"
+
+[node name="Cicas_H39" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.86280, 0.00000, 0.28841, 0.00000, 0.90973, 0.00000, -0.28841, 0.00000, -0.86280, 124.78, 1.371, 198.76)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H14" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-0.91275, 0.00000, 0.98616, 0.00000, 1.34374, 0.00000, -0.98616, 0.00000, -0.91275, 128.24, 0.946, 193.05)
+metadata/coliziune = "none"
+
+[node name="Cicas_H40" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-1.09908, 0.00000, 0.12497, 0.00000, 1.10617, 0.00000, -0.12497, 0.00000, -1.09908, 128.52, 1.046, 195.86)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H69" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.92338, 0.00000, -0.43959, 0.00000, 1.02267, 0.00000, 0.43959, 0.00000, 0.92338, 132.56, 0.366, 192.43)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H70" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.75389, 0.00000, 0.98669, 0.00000, 1.24173, 0.00000, -0.98669, 0.00000, 0.75389, 105.06, 1.377, 206.93)
+metadata/coliziune = "none"
+
+[node name="Cicas_H41" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(1.02943, 0.00000, 0.54483, 0.00000, 1.16472, 0.00000, -0.54483, 0.00000, 1.02943, 104.38, 1.372, 209.60)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H15" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-0.41006, 0.00000, 0.95845, 0.00000, 1.04248, 0.00000, -0.95845, 0.00000, -0.41006, 107.25, 1.370, 208.98)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H71" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.36581, 0.00000, -1.07032, 0.00000, 1.13111, 0.00000, 1.07032, 0.00000, 0.36581, 120.08, 1.358, 191.63)
+metadata/coliziune = "none"
+
+[node name="Cicas_H42" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.21048, 0.00000, -1.02627, 0.00000, 1.04763, 0.00000, 1.02627, 0.00000, -0.21048, 120.29, 1.347, 194.76)
+metadata/coliziune = "none"
+
+[node name="Cicas_H43" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.22298, 0.00000, -0.89944, 0.00000, 0.92666, 0.00000, 0.89944, 0.00000, -0.22298, 117.68, 1.397, 191.18)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H72" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.06765, 0.00000, 0.43286, 0.00000, 1.15206, 0.00000, -0.43286, 0.00000, -1.06765, 125.19, 1.266, 189.34)
+metadata/coliziune = "none"
+
+[node name="Cicas_H44" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.91481, 0.00000, -0.89214, 0.00000, 1.27781, 0.00000, 0.89214, 0.00000, 0.91481, 127.98, 0.937, 189.68)
+metadata/coliziune = "none"
+
+[node name="Cicas_H45" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-1.30997, 0.00000, -0.30587, 0.00000, 1.34521, 0.00000, 0.30587, 0.00000, -1.30997, 126.28, 0.968, 185.63)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H16" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-1.18116, 0.00000, -0.17506, 0.00000, 1.19406, 0.00000, 0.17506, 0.00000, -1.18116, 131.11, 0.410, 189.83)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H73" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.12652, 0.00000, 0.14914, 0.00000, 1.13635, 0.00000, -0.14914, 0.00000, 1.12652, 103.50, 1.386, 203.55)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H74" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.40755, 0.00000, 0.30076, 0.00000, 1.43932, 0.00000, -0.30076, 0.00000, -1.40755, 100.14, 1.383, 201.67)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H75" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.79026, 0.00000, 0.71674, 0.00000, 1.06687, 0.00000, -0.71674, 0.00000, 0.79026, 101.95, 1.393, 200.11)
+metadata/coliziune = "none"
+
+[node name="Cicas_H46" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.39914, 0.00000, 0.84469, 0.00000, 0.93425, 0.00000, -0.84469, 0.00000, -0.39914, 101.25, 1.382, 204.16)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H76" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.25319, 0.00000, 1.05071, 0.00000, 1.08078, 0.00000, -1.05071, 0.00000, 0.25319, 119.97, 1.288, 188.05)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H77" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.62580, 0.00000, -0.93481, 0.00000, 1.12494, 0.00000, 0.93481, 0.00000, 0.62580, 117.98, 1.404, 187.47)
+metadata/coliziune = "none"
+
+[node name="Cicas_H47" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.86042, 0.00000, -1.07802, 0.00000, 1.37929, 0.00000, 1.07802, 0.00000, 0.86042, 121.89, 1.328, 189.80)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H78" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.11651, 0.00000, -1.14892, 0.00000, 1.15481, 0.00000, 1.14892, 0.00000, -0.11651, 123.24, 0.996, 184.55)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H79" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.38806, 0.00000, 1.04068, 0.00000, 1.11067, 0.00000, -1.04068, 0.00000, 0.38806, 126.47, 0.758, 183.13)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H80" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.04824, 0.00000, -0.15498, 0.00000, 1.05963, 0.00000, 0.15498, 0.00000, -1.04824, 124.41, 1.148, 187.21)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H81" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.10193, 0.00000, -1.14635, 0.00000, 1.15087, 0.00000, 1.14635, 0.00000, 0.10193, 122.39, 1.178, 187.08)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H82" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.99534, 0.00000, -0.33658, 0.00000, 1.05070, 0.00000, 0.33658, 0.00000, 0.99534, 99.59, 1.399, 198.05)
+metadata/coliziune = "none"
+
+[node name="Cicas_H48" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.21632, 0.00000, -0.94886, 0.00000, 0.97321, 0.00000, 0.94886, 0.00000, 0.21632, 97.92, 1.391, 199.44)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H17" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(0.87967, 0.00000, -1.08186, 0.00000, 1.39436, 0.00000, 1.08186, 0.00000, 0.87967, 112.12, 1.422, 181.91)
+metadata/coliziune = "none"
+
+[node name="Cicas_H49" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.99651, 0.00000, -0.06859, 0.00000, 0.99886, 0.00000, 0.06859, 0.00000, -0.99651, 110.60, 1.417, 179.52)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H83" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.17360, 0.00000, 0.42439, 0.00000, 1.24798, 0.00000, -0.42439, 0.00000, 1.17360, 113.53, 1.368, 179.44)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H84" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.98876, 0.00000, -0.75685, 0.00000, 1.24518, 0.00000, 0.75685, 0.00000, 0.98876, 115.88, 1.339, 178.52)
+metadata/coliziune = "none"
+
+[node name="Cicas_H50" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-1.24421, 0.00000, 0.41961, 0.00000, 1.31306, 0.00000, -0.41961, 0.00000, -1.24421, 119.67, 1.061, 178.31)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H85" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.52363, 0.00000, -1.03787, 0.00000, 1.16248, 0.00000, 1.03787, 0.00000, 0.52363, 118.60, 1.169, 175.39)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H86" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.70066, 0.00000, -0.75125, 0.00000, 1.02728, 0.00000, 0.75125, 0.00000, -0.70066, 120.07, 0.850, 173.37)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H18" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-0.51984, 0.00000, -0.89058, 0.00000, 1.03120, 0.00000, 0.89058, 0.00000, -0.51984, 94.70, 1.424, 192.34)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H19" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-0.87177, 0.00000, 0.56128, 0.00000, 1.03683, 0.00000, -0.56128, 0.00000, -0.87177, 93.00, 1.426, 189.66)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H87" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.31606, 0.00000, 0.23160, 0.00000, 1.33628, 0.00000, -0.23160, 0.00000, 1.31606, 96.89, 1.423, 191.22)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H10" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(0.51736, 0.00000, 1.16106, 0.00000, 1.27111, 0.00000, -1.16106, 0.00000, 0.51736, 86.12, 1.350, 195.51)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H88" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.23841, 0.00000, -1.24826, 0.00000, 1.27083, 0.00000, 1.24826, 0.00000, 0.23841, 91.19, 1.402, 191.48)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H11" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(-1.09997, 0.00000, -0.51809, 0.00000, 1.21588, 0.00000, 0.51809, 0.00000, -1.09997, 92.30, 1.395, 195.61)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H89" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.21884, 0.00000, 1.30578, 0.00000, 1.32399, 0.00000, -1.30578, 0.00000, -0.21884, 89.21, 1.345, 198.79)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H90" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.79707, 0.00000, 1.19244, 0.00000, 1.43430, 0.00000, -1.19244, 0.00000, 0.79707, 112.26, 1.369, 177.12)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H20" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(0.89729, 0.00000, 0.50731, 0.00000, 1.03077, 0.00000, -0.50731, 0.00000, 0.89729, 114.54, 1.300, 175.25)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H91" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.58833, 0.00000, -0.98606, 0.00000, 1.14823, 0.00000, 0.98606, 0.00000, -0.58833, 117.78, 1.108, 172.44)
+metadata/coliziune = "none"
+
+[node name="Cicas_H51" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(1.27835, 0.00000, 0.50292, 0.00000, 1.37372, 0.00000, -0.50292, 0.00000, 1.27835, 119.24, 0.551, 169.45)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H92" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.12106, 0.00000, -0.69649, 0.00000, 1.31980, 0.00000, 0.69649, 0.00000, -1.12106, 96.08, 1.429, 188.74)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H21" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-0.86699, 0.00000, -0.50689, 0.00000, 1.00429, 0.00000, 0.50689, 0.00000, -0.86699, 82.22, 1.341, 196.35)
+metadata/coliziune = "none"
+
+[node name="Cicas_H52" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-1.06194, 0.00000, -0.14372, 0.00000, 1.07162, 0.00000, 0.14372, 0.00000, -1.06194, 85.17, 1.330, 198.80)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H22" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(-0.65435, 0.00000, 0.76198, 0.00000, 1.00439, 0.00000, -0.76198, 0.00000, -0.65435, 83.44, 1.386, 193.09)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H93" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.04085, 0.00000, 0.12479, 0.00000, 1.04830, 0.00000, -0.12479, 0.00000, -1.04085, 85.37, 1.398, 192.13)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H94" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.75957, 0.00000, 0.68286, 0.00000, 1.02140, 0.00000, -0.68286, 0.00000, 0.75957, 106.02, 1.403, 167.66)
+metadata/coliziune = "none"
+
+[node name="Cicas_H53" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(0.08393, 0.00000, -1.02617, 0.00000, 1.02959, 0.00000, 1.02617, 0.00000, 0.08393, 104.04, 1.429, 170.01)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H95" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.81452, 0.00000, -0.75083, 0.00000, 1.10779, 0.00000, 0.75083, 0.00000, 0.81452, 107.45, 1.398, 169.56)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H12" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(-1.32225, 0.00000, -0.67935, 0.00000, 1.48656, 0.00000, 0.67935, 0.00000, -1.32225, 111.53, 0.517, 159.25)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_H23" parent="DecorManual/ZonaH" instance=ExtResource("h_bougain")]
+transform = Transform3D(0.60397, 0.00000, 1.12619, 0.00000, 1.27793, 0.00000, -1.12619, 0.00000, 0.60397, 113.85, 0.620, 163.61)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H96" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.19538, 0.00000, -0.60345, 0.00000, 1.33906, 0.00000, 0.60345, 0.00000, 1.19538, 109.50, 1.093, 162.68)
+metadata/coliziune = "none"
+
+[node name="Cicas_H54" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(1.17751, 0.00000, 0.09194, 0.00000, 1.18109, 0.00000, -0.09194, 0.00000, 1.17751, 110.92, 1.263, 165.46)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H97" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.66149, 0.00000, 1.23816, 0.00000, 1.40378, 0.00000, -1.23816, 0.00000, -0.66149, 91.41, 1.446, 184.24)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H98" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.40125, 0.00000, 0.38705, 0.00000, 1.45373, 0.00000, -0.38705, 0.00000, -1.40125, 89.12, 1.446, 185.62)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H99" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.81149, 0.00000, 1.16310, 0.00000, 1.41821, 0.00000, -1.16310, 0.00000, -0.81149, 91.27, 1.438, 187.23)
+metadata/coliziune = "none"
+
+[node name="Pandanus_H13" parent="DecorManual/ZonaH" instance=ExtResource("h_pandanus")]
+transform = Transform3D(0.04832, 0.00000, 1.20758, 0.00000, 1.20855, 0.00000, -1.20758, 0.00000, 0.04832, 84.47, 1.435, 188.90)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H100" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.54474, 0.00000, -1.14193, 0.00000, 1.26521, 0.00000, 1.14193, 0.00000, -0.54474, 81.19, 1.400, 191.50)
+metadata/coliziune = "none"
+
+[node name="Cicas_H55" parent="DecorManual/ZonaH" instance=ExtResource("h_cycad")]
+transform = Transform3D(-0.44719, 0.00000, 0.82229, 0.00000, 0.93602, 0.00000, -0.82229, 0.00000, -0.44719, 80.94, 1.424, 189.24)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H101" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.50307, 0.00000, 1.13234, 0.00000, 1.23906, 0.00000, -1.13234, 0.00000, 0.50307, 287.97, 0.981, 351.15)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H102" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.02555, 0.00000, -0.38505, 0.00000, 1.09545, 0.00000, 0.38505, 0.00000, -1.02555, 290.09, 1.217, 352.83)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H103" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.39067, 0.00000, -0.15964, 0.00000, 1.39980, 0.00000, 0.15964, 0.00000, 1.39067, 260.45, 0.273, 368.60)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H104" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.68808, 0.00000, 0.74649, 0.00000, 1.01524, 0.00000, -0.74649, 0.00000, -0.68808, 261.05, 0.503, 366.43)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H105" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.18655, 0.00000, 0.11930, 0.00000, 1.19253, 0.00000, -0.11930, 0.00000, 1.18655, 228.49, 0.307, 325.43)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H106" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-0.73832, 0.00000, -0.78095, 0.00000, 1.07471, 0.00000, 0.78095, 0.00000, -0.73832, 200.69, 0.442, 300.40)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H107" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.28316, 0.00000, -0.10472, 0.00000, 1.28743, 0.00000, 0.10472, 0.00000, 1.28316, 201.85, 0.421, 302.22)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H108" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(1.37082, 0.00000, -0.43974, 0.00000, 1.43962, 0.00000, 0.43974, 0.00000, 1.37082, 166.10, 0.318, 260.68)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H109" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(-1.28538, 0.00000, -0.22738, 0.00000, 1.30534, 0.00000, 0.22738, 0.00000, -1.28538, 154.81, 0.373, 252.42)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_H110" parent="DecorManual/ZonaH" instance=ExtResource("h_hibiscus")]
+transform = Transform3D(0.66799, 0.00000, 0.97558, 0.00000, 1.18236, 0.00000, -0.97558, 0.00000, 0.66799, 122.26, 1.315, 192.25)
+metadata/coliziune = "none"

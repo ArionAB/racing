@@ -62,11 +62,15 @@ const TRACK_SCENES: Array[String] = [
 	# adreseaza cu --track=20 (resolve_track_index o gaseste dupa numarul scenei;
 	# probe_decor/probe_manual vor 20, snapshot/probe_race/probe_layout vor 13 SAU 20).
 	"res://scenes/tracks/Track20.tscn", # Okinawa = INDEXUL 13
+	# Track21 = INDEXUL 14 (Transfagarasan, brief transfagarasan.md §7): la COADA
+	# listei; Alpii (Track09) raman pe indexul 2 pana la swap. Uneltele o adreseaza
+	# cu --track=21 (resolve_track_index o gaseste dupa numarul scenei).
+	"res://scenes/tracks/Track21.tscn", # Transfagarasan = INDEXUL 14
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Alpii", "Baikal", "Stromboli", "Chongqing",
 	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland", "Jodhpur", "Kyoto",
-	"Monument Valley", "Okinawa",
+	"Monument Valley", "Okinawa", "Transfagarasan",
 ]
 const CHAMP_ROUNDS: int = 3
 

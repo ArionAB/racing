@@ -3934,6 +3934,40 @@ static func themes() -> Dictionary:
 		"fog_end": 350.0,
 	}, true)
 	_themes_cache["okinawa"] = oki
+	# TRANSFAGARASAN (Track21, docs/track_briefs/transfagarasan.md §4, pasul 2 din
+	# §7): pleaca din COPIA lui "alpine" (cer de altitudine, ceata albastruie,
+	# decor "bands" cu props alpine, fara ziduri/borduri), cu override-uri minime.
+	# "alpine" NU se editeaza: Track09 il foloseste pana la swap si trebuie sa ramana
+	# bit-identic. Apa NU intra in tema (`water` ramane false): lacurile Vidraru si
+	# Balea si Oltul sunt `custom_ravine_water` pe scena, deci doar culoarea apei
+	# se spune aici (verde-inchis rece, nu albastru de mare).
+	var tf: Dictionary = (_themes_cache["alpine"] as Dictionary).duplicate()
+	tf.merge({
+		# Pajiste alpina rece, scurta (#7D9A4E), nu verdele cald al Alpilor.
+		"ground_tint": Color(0.49, 0.60, 0.31),
+		# Soare de dupa-amiaza tarzie din VNV (~290 grade, 25 de grade elevatie),
+		# cald-auriu (#FFD9A8). Busola 180 - y = 290 => y = -110. Azimutul se
+		# remasoara pe traseul real (memoria azimutul-soarelui-fata-de-drum).
+		"sun_rotation_deg": Vector3(-25, -110, 0),
+		"sun_color": Color(1.0, 0.85, 0.66),
+		"sun_energy": 1.1,
+		# Ambient de altitudine, rece (#B8CCE0 la 0.3): umbrele de pe zapada albastre.
+		"ambient_color": Color.html("B8CCE0"),
+		"ambient_energy": 0.30,
+		# Aer de 2000 m: zenit mai saturat decat pe Alpi (#2F6FD0), orizont alb-cald.
+		"sky_top": Color(0.18, 0.44, 0.82),
+		"sky_horizon": Color(0.86, 0.88, 0.90),
+		"fog_begin": 140.0,
+		"fog_end": 370.0,
+		# Apa de lac de munte: transparenta la mal (turcoaz rece), verde-inchis
+		# in adanc (Vidraru). Spuma si luciul coborate: lac, nu mare.
+		"water_shallow_slot": Palette.ICE_TURQUOISE,
+		"water_deep_slot": Palette.SEA_DEEP,
+		"water_shore_slot": Palette.ROCK_LIGHT,
+		"water_foam": 0.15,
+		"water_glint": 0.5,
+	}, true)
+	_themes_cache["transfagarasan"] = tf
 	return _themes_cache
 
 

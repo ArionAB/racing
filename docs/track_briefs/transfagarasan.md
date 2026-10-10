@@ -1,4 +1,4 @@
-# Track brief — Transfăgărășan (`Track21`, temă `transfagarasan`) — v0.1 (concept)
+# Track brief — Transfăgărășan (`Track21`, temă `transfagarasan`) — v0.1.1 (concept + decizii)
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `okinawa.md` și `monument_valley.md`. Secțiunile de assets (§5) sunt un
@@ -49,7 +49,8 @@ ajungi între **pereții de zăpadă** de la portalul **tunelului Capra–Bâlea
 unde **semaforul** hotărăște dacă intri acum sau aștepți. Ieși pe partea
 cealaltă la **lacul Bâlea**, în căldarea glaciară, și de acolo **vezi sub tine
 stiva de serpentine**: le cobori una câte una, cu **telecabina** trecând pe
-deasupra și **o turmă de oi** care traversează un ac de păr mai jos. Intri în
+deasupra, **o limbă de zăpadă** care se desprinde de sub creastă peste prima
+ramură și **o turmă de oi** care traversează un ac de păr mai jos. Intri în
 **pădurea de molid de la Bâlea Cascadă**, cu cascada în trepte pe peretele
 din stânga, și închizi bucla prin **defileul Oltului**, pe lângă râu și
 **calea ferată**, unde **trenul** taie drumul la trecerea la nivel, înapoi
@@ -224,7 +225,7 @@ crestei și închide bucla.
 | **C** lacul Vidraru | 0,15 → 0,24 | +13 → +20 | 7 | malul, **tunelurile scurte** prin pinteni (~0,17), **ursul** spre coada lacului (~0,20) |
 | **D** valea Caprei | 0,24 → 0,32 | +20 → +42 | 7 | zigzag larg peste linia pădurii, jnepeni, **stâna**, pereții de zăpadă, **portalul cu semafor** (~0,315) |
 | **E** tunelul și lacul Bâlea | 0,32 → 0,37 | +42 → +43 | **6** în tunel | tunelul (~60 m), ieșirea la lac, cabana, tarabele, **dezvăluirea serpentinelor** |
-| **F** serpentinele | 0,37 → 0,62 | +43 → +14 | 7 | **patru ace de păr** (rază 16 m), ziduri de sprijin, viaduct scurt, telecabina pe deasupra, **oile pe ramura a treia** (~0,49) |
+| **F** serpentinele | 0,37 → 0,62 | +43 → +14 | 7 | **patru ace de păr** (rază 16 m), ziduri de sprijin, viaduct scurt, telecabina pe deasupra, **avalanșa pe ramura întâi** (~0,40), **oile pe ramura a treia** (~0,49), **tăietura ciobanilor** peste acul 3 |
 | **G** Bâlea Cascadă | 0,62 → 0,70 | +14 → +9 | 7 | pădure de molid, **cascada** în stânga, stația de jos a telecabinei, **săritura peste pârâu** (§3.1.3) |
 | **H** defileul Oltului | 0,70 → 0,97 | +9 → 0 | 7 | râul pe dreapta, calea ferată pe malul celălalt, **trecerea la nivel** (~0,80), Poenari în stânga-față la final |
 
@@ -263,7 +264,7 @@ pe diagonală exact când grip-ul lateral e la limită.
         │ [H]   (stânga, pe perete)            ┌──────────────────┘ ac3
         │ defileul                             └────────────────────┐ ac2  [F] SERPENTINELE
         │ Oltului                              ┌────── OILE ───────┘       telecabina deasupra
-        │ râul pe dreapta                      └────────────────────┐ ac1
+        │ râul pe dreapta                      └──── AVALANȘA ──────┐ ac1
         │                                                F sus ◄──┘
         ● TRECEREA LA NIVEL (tren)                          ▲ [E] lacul Bâlea, cabana
         │                       CREASTA                     ║ TUNELUL Capra–Bâlea
@@ -337,10 +338,10 @@ trecerea la nivel (−200, 130), Poenari (−125, −215).
 
 ## 3. Hazarduri și mecanici
 
-Cererea a fost „hazarduri refolosite și/sau unice”. Răspunsul: **trei
-refolosite, fiecare cu un rost real pe Transfăgărășan, și unul unic**.
-Mecanicile vin toate din cod existent. Ce e nou e mic: un export de model,
-un clip de telegraf și un GLB animat.
+Cererea a fost „hazarduri refolosite și/sau unice”. Răspunsul: **patru
+refolosite, fiecare cu un rost pe Transfăgărășan, și unul unic**. Mecanicile
+vin toate din cod existent. Ce e nou e mic: un export de model, un clip de
+telegraf și un GLB animat.
 
 Acoperirea celor cinci clase din `ref_notes/sisteme.md` §3:
 
@@ -348,7 +349,7 @@ Acoperirea celor cinci clase din `ref_notes/sisteme.md` §3:
 |---|---|
 | **teatru** | telecabina peste serpentine, cascada, mașini și motociclete parcate la Bâlea Lac, câinii ciobănești, corbii peste creastă, marea de nori din văile depărtate, trenul care trece prin defileu și când nu taie drumul |
 | frecare | **pământul** de pe tăietura ciobanilor (§3.1.4), **pietrișul** de pe acostamentul serpentinelor, iarba de pe pajiști (45%) |
-| **oprire** | **semaforul de la tunel** (stai sau riști pe contrasens), **trenul** la trecerea la nivel |
+| **oprire** | **semaforul de la tunel** (stai sau riști pe contrasens), **trenul** la trecerea la nivel, **avalanșa** (te ia cu ea, repunere) |
 | sabotaj de control | **oile** (te încetinesc și te împing, în funcție de masă), **ursul** (obstacol greu care traversează) |
 | **aruncare** | **săritura peste pârâul Bâlea** (§3.1.3), crestele din defileu, oile împinse de mașina grea |
 
@@ -356,66 +357,64 @@ Acoperirea celor cinci clase din `ref_notes/sisteme.md` §3:
 |---|---|---|
 | **Ursul** (C, ~0,20) — **unic** | un urs brun stă pe acostament, la marginea pădurii de pe malul lacului. **Telegraful e ursul însuși**: se ridică în două labe (1,2 s), apoi traversează drumul cu pas greu și se oprește pe partea cealaltă. E obstacol **greu**: dacă dai în el, te oprești tu, nu el. Nu se rănește și nu cade, doar te împinge (§8) | **reuse** — `SlidingHazard` în modul `TRAVERSARE`, prin `HazardMarker kind = SLIDING` (0) cu `motion = 1` și `face_travel = true`, ca vaca din Track09 și caii din Track19. **Nou:** GLB-ul animat `brown_bear` (Idle / Walk / **Stand**), pe pipeline-ul vacii și al elefantului (memoria `asset-animat-pipeline`). **Mic, nou:** dacă modelul are clipul `Stand`, `SlidingHazard` îl joacă pe durata telegrafului (azi telegraful e doar o întârziere). Fără clip, comportamentul rămâne bit-identic pe celelalte piste |
 | **Semaforul de la tunel** (D→E, ~0,315) | tunelul are o bandă închisă de **lucrări** (șantierul de pe drumul de munte: conuri, barieră, semafor de șantier). Pe roșu vine din față **utilajul de drumuri**, pe banda liberă. AI-ul așteaptă pe dreapta; jucătorul poate forța pe stânga, cu risc. Decizia: **aștepți sau ghicești dacă iese utilajul** | **reuse** — `TunnelSignalHazard`, ca **nod separat** sub `Hazarduri`, cu lampa copil (`HazardLamp`), ca `Track16.tscn:273`. **Nu** prin `HazardMarker`: `kind = SIGNAL` (13) n-are constructor (`track.gd:12012-12042` tratează doar 0–12). `bus_model` e deja export, deci utilajul nu cere cod (§3.1.2). `tunnel_length` se măsoară pe tunelul din schiță (~60 m, nu 150), iar `period` se reglează pe el (Fiordland are 47,5 s pe 150 m). Pereții tunelului vin din relief (`TerrainPeak`) + GLB de portal, nu din script |
+| **Avalanșa pe prima serpentină** (F, ~0,40) | de pe versantul nordic, care ține zăpada până târziu, o limbă de zăpadă coboară de sub creastă peste **ramura întâi**. **O vezi de la lacul Bâlea**, de sus, cu telegraful lung (bulgări care se desprind, praf de zăpadă). Te prinde și te ia cu ea (repunere ~22 m înapoi). Versantul de deasupra ramurii întâi e liber până la creastă, deci limba nu trece peste altă serpentină | **reuse** — `AvalancheHazard` prin `HazardMarker kind = AVALANCHE` (8), ca în Track09 și Track16. **Perioada se setează explicit** prin `avalanche_period` (60–90 s, ca Fiordland, 90 s): implicitul clasei e 8 s, adică „des”, nu „eveniment rar” (memoria `avalansa-alpii-ciclu-implicit`). `_build_avalanche` o mută de pe viraje pe o porțiune calmă (`track.gd:12303`), deci fracția finală se citește din scenă, nu din schiță. Bulgării: `effects/avalanche_boulders.glb` (implicitul) |
 | **Oile pe serpentine** (F, ~0,49) | o turmă coboară versantul **peste ramura a treia**, în pulsuri (`pulse_on` / `pulse_off`), cu un câine ciobănesc la câteva oi. **O vezi de pe ramura de deasupra**, de sus, cu ~6 s înainte. Oile sunt **ușoare**: mașina grea trece prin turmă și o împrăștie, cea ușoară e frânată și deviată. E principiul 1 (masa contează) aplicat pe un hazard | **reuse** — `HerdHazard`, ca **nod separat** cu `flow_dir` (în jos pe pantă, spre N) și `road_dir` (de-a lungul ramurii, V–E), ca „RaulDeGnu” din `Track14.tscn:104`. **Mic, nou:** modelele sunt azi constante (`WILDEBEEST_GLB` / `ZEBRA_GLB`, `herd_hazard.gd:63-64`) și devin exporturi (`animal_model`, `alt_model`) cu implicitul neschimbat, deci **Track14 rămâne bit-identic**. Pe Track21, `zebra_ratio` devine proporția de câini. Reglaje de pornire: `animal_mass` ~45 (gnu 200), `speed` ~2,5 (gnu 6,5), `spacing` ~1,4, `corridor_m` ~14 (un ac de păr, nu o câmpie) |
 | **Trenul** (H, ~0,80) | trecere la nivel în defileul Oltului, cu bariere și lumini. Trenul vine de pe malul celălalt și **taie drumul în diagonală**, ca linia reală, care trece dintr-o parte în alta a râului | **reuse** — `TrainHazard`, ca **nod separat** cu `model_path` (ca PeruRail în `Track15.tscn:288`). **Nu** prin `HazardMarker kind = TRAIN`: acolo `_build_train(frac)` (`track.gd:12354`) ignoră modelul din marker. La fundație rămâne `vehicles/train.glb`; trenul românesc e piesă opțională de kit (§5) |
 | **Săritura peste pârâu** (G, ~0,67) | podețul de lemn al pârâului Bâlea e luat de viitură, iar golul se sare la ieșirea din pădure. E săritura din Track09, mutată | **reuse** — `TrackChannel` cu `jump = true`, ca „ParaulVaii” din `Track09.tscn:139` (gap 22, depth 18; se reglează pe viteza de la ieșirea din serpentine, nu se copiază) |
 | **Tăietura ciobanilor** (F) | scurtătură de pământ (§3.1.4) | **reuse** — `TrackBranch` cu `surface = DIRT_ROAD`, ca „scurtatura” din `Track09.tscn:186` |
 
-**Ce NU e nou:** ursul ca mecanică, semaforul, turma, trenul, săritura,
-scurtătura. **Nou în cod, mic:** exporturile de model din `HerdHazard` și
+**Ce NU e nou:** ursul ca mecanică, semaforul, avalanșa, turma, trenul,
+săritura, scurtătura. **Nou în cod, mic:** exporturile de model din `HerdHazard` și
 clipul de telegraf din `SlidingHazard`. **Nou ca asset:** ursul animat și
-oaia. Identitatea vine din **loc + drum + patru hazarde care chiar se întâmplă
-acolo**: urși la marginea drumului, șantiere cu semafor, turme pe serpentine
-și trenul din defileu.
+oaia. Identitatea vine din **loc + drum + hazarde legate de el**: urși la
+marginea drumului, șantiere cu semafor, zăpada de pe versantul nordic, turme
+pe serpentine și trenul din defileu.
 
 **Distanțe între hazardele cu ceas** (lecția din `track08.gd:267`: „două
 hazarde cu ceas lipite nu produc două decizii, produc o loterie”):
-urs 0,20 → semafor 0,315 = **~245 m**; semafor → oi 0,49 = **~375 m**;
-oi → tren 0,80 = **~665 m** (săritura e la mijloc, fără ceas); tren → urs
-(peste start) = **~860 m**. Respiro-ul e A–B (valea, barajul) și G–H
-(pădurea, defileul): condus pur, săritura, dreptele Oltului.
+urs 0,20 → semafor 0,315 = **~245 m**; semafor → avalanșă 0,40 = **~185 m**;
+avalanșă → oi 0,49 = **~195 m**; oi → tren 0,80 = **~665 m** (săritura e la
+mijloc, fără ceas); tren → urs (peste start) = **~860 m**.
 
-### 3.1 Decizii pentru dezvoltator
+**Două distanțe sunt sub ținta de 200 m, asumat.** Între semafor și avalanșă
+stau tunelul și lacul Bâlea, deci decizia de la semafor e încheiată înainte
+să vezi limba de zăpadă. Între avalanșă și oi sunt două ace de păr, iar
+oile se văd de pe ramura a doua. Serpentinele F devin secțiunea-erou a
+hazardelor, cu ceva de citit pe fiecare ramură. Dacă ProbeRace sau volanul
+arată loterie (aceeași mașină prinsă de amândouă), se mută oile pe ramura a
+patra (~0,53), nu se scoate avalanșa.
 
-1. **Numele de afișare.** „Transfăgărășan” e numele drumului (DN7C) și nu e
-   marcă. **Recomandare: „Transfăgărășan”, cu diacritice.** UI-ul folosește
-   fontul implicit din Godot, care ar trebui să aibă diacriticele românești;
-   se verifică pe captura meniului la fundație. Recordurile sunt pe cheie
+Respiro-ul e A–B (valea, barajul) și G–H (pădurea, defileul): condus pur,
+săritura, dreptele Oltului.
+
+### 3.1 Decizii (luate de dezvoltator, 10 oct 2026)
+
+1. **Numele de afișare: „Transfagarasan”, fără diacritice**, în
+   `TRACK_NAMES` și în `info/Track21.tres`. Recordurile sunt pe cheie
    `TRACK_NAMES`, deci cele ale Alpilor rămân orfane la swap. E corect,
    fiindcă e altă pistă.
-2. **Ce vine din tunel pe roșu.** (a) **utilajul de drumuri**, care
-   refolosește `vehicles/snowplow.glb` (5 × 2,2 × 2,3 m): e real în prima
-   săptămână după deschidere și nu cere GLB nou; (b) un autocar de turiști,
-   mai lung și mai amenințător, dar GLB nou și apropiat de identitatea
-   Fiordland (autocarul din tunelul Homer). **Recomandare: (a)**, cu girofar
-   portocaliu.
-3. **Săritura.** Drumul real nu are săritură. Track09 are, iar principiile
-   (CLAUDE.md, „definiția fun”) o cer. **Recomandare: da**, la podețul luat de
-   viitură de la ieșirea din pădurea G (viiturile și alunecările chiar închid porțiuni din
-   Transfăgărășan).
-4. **Scurtătura: tăietura ciobanilor.** O potecă de pământ care taie **acul
-   de păr 3**, coborând direct pe pajiște de pe ramura a treia pe a patra.
-   Scurtează drumul cu ~50 m, dar e pământ (grip mai mic), e abruptă și
-   **trece prin culoarul oilor**, deci nu e o scăpare gratuită. **De măsurat
-   întâi**: între ramuri sunt 32 m pe orizontală și 6 m pe verticală, adică
-   ~19% pantă pe linie dreaptă. Peste 15%, poteca devine **diagonală** (mai
-   lungă, mai blândă) sau o **săritură controlată** de pe buza ramurii.
-   **Recomandare: da**, după ProbeRace pe bucla fără ea, cu ținta de la
-   Monument Valley (−25…35% lungime, +0,5…1,5 s).
-5. **Un al cincilea hazard?** Candidați: **căderile de pietre din defileul
-   Oltului** (`RockfallHazard` pe Path3D, real: drumul din defileu se închide
-   des din cauza lor) sau **avalanșa** din Track09 (`AvalancheHazard`).
-   **Recomandare: nu la v0.1.** Avalanșa în iulie nu e credibilă (zăpada e
-   doar pe margini), iar patru hazarde cu ceas pe 2,1 km e densitatea lui
-   Track09. Căderile de pietre revin în discuție după ProbeRace, dacă
-   defileul se simte gol.
-6. **Turma: `HerdHazard` sau `SlidingHazard`?** La Monument Valley caii au
-   rămas pe `SlidingHazard`, ca `HerdHazard` să rămână identitatea
-   Serengeti. Aici diferența e de scară: oi mici, albe și lente, pe un culoar
-   de 14 m, nu un fluviu de gnu pe 24 m. Comportamentul de turmă
-   (împrăștierea, masa) e chiar ce face oile credibile. **Recomandare:
-   `HerdHazard`**, cu exporturile de model. Se verifică pe captură că nu
-   citește „Serengeti”.
+2. **Din tunel vine utilajul de drumuri** pe roșu: `vehicles/snowplow.glb`
+   (5 × 2,2 × 2,3 m) pe `bus_model`, cu girofar portocaliu. E real în prima
+   săptămână după deschidere și nu cere GLB nou.
+3. **Săritura rămâne**, la podețul luat de viitură de la ieșirea din pădurea
+   G (viiturile și alunecările chiar închid porțiuni din Transfăgărășan).
+4. **Scurtătura prin pajiște: da.** O potecă de pământ care taie **acul de
+   păr 3**, coborând de pe ramura a treia pe a patra. Scurtează drumul cu
+   ~50 m, dar e pământ (grip mai mic), e abruptă și **trece prin culoarul
+   oilor**, deci nu e o scăpare gratuită. **De măsurat la construcție**:
+   între ramuri sunt 32 m pe orizontală și 6 m pe verticală, adică ~19% pantă
+   pe linie dreaptă. Peste 15%, poteca devine **diagonală** (mai lungă, mai
+   blândă) sau o **săritură controlată** de pe buza ramurii. Ținta e cea de
+   la Monument Valley (−25…35% lungime, +0,5…1,5 s), măsurată după ProbeRace
+   pe bucla fără ea.
+5. **Avalanșa: da**, chiar dacă e iulie (versantul nordic ține zăpada; e
+   joc). Pe **ramura întâi a serpentinelor** (~0,40), cu perioadă lungă,
+   setată explicit (§3). Căderile de pietre din defileu nu intră.
+6. **Oile pe `HerdHazard`**, cu exporturile de model. Oi mici, albe și
+   lente, pe un culoar de 14 m, nu un fluviu de gnu pe 24 m. Se verifică pe
+   captură că nu citește „Serengeti”.
+7. **Apa:** dacă tema `transfagarasan` (copiată din `alpine`, care n-are apă)
+   are nevoie de apă pentru lacuri și Olt, **se adaugă** (§7).
 
 ## 4. Paleta și lumina (fără slot nou)
 
@@ -512,7 +511,7 @@ trebuie **văzut de departe** cere ≥ 15 m.
 | `buildings/alpine_church.glb` | 14 m | **scos** | biserică tiroleză (§0.1); nicio biserică nouă (§8) |
 | `buildings/mountain_chalet_large/small.glb` | 6,5–9 m | **scos** | chalet elvețian; vin `cabana_balea_lac`, `cabana_balea_cascada`, `stana`, `arges_house` |
 | `vehicles/timber_sled.glb` | 5 m | **scos** | hazardul fără loc al Alpilor |
-| `effects/avalanche_boulders.glb` | — | **nefolosit** | §3.1.5 |
+| `effects/avalanche_boulders.glb` | — | **păstrat** | bulgării avalanșei de pe ramura întâi (§3.1.5) |
 
 ### 5.2 Piese noi (schiță)
 
@@ -597,14 +596,15 @@ verifică ce face deja codul.
      `custom_ravines` (hăul barajului pe dreapta, viaductele de pe
      serpentine), `TrackChannel` cu `jump = true` (G), `TerrainPeak` pentru
      creastă (Track09 are tiparul: „MasivCentral”, „UmarulDeSud”), noduri
-     `TunnelSignalHazard`, `HerdHazard` și `TrainHazard`, plus un
-     `HazardMarker` SLIDING pentru urs, cu vaca drept model provizoriu.
+     `TunnelSignalHazard`, `HerdHazard` și `TrainHazard`, plus
+     `HazardMarker` SLIDING pentru urs (cu vaca drept model provizoriu) și
+     AVALANCHE pe ramura întâi (`avalanche_period` explicit).
      Portaluri și ziduri **provizorii** din kitul alpin în `DecorManual`, ca
      să se vadă scara;
-   - **de lămurit la fundație: apa fără mare.** Tema `alpine` are
-     `water = false`. Lacurile (Vidraru, Bâlea) și Oltul cer apă de lac sau de
-     râpă. Tiparul e Fiordland (Track16) sau Baikal (Track10), nu marea de
-     insulă;
+   - **apa fără mare** (decizia 7: se adaugă). Tema `alpine` are
+     `water = false`. Lacurile (Vidraru, Bâlea) și Oltul cer apă de lac sau
+     de râpă. Tiparul e Fiordland (Track16) sau Baikal (Track10), nu marea
+     de insulă;
    - **exporturile din `HerdHazard`** (`animal_model`, `alt_model`), cu
      implicitul neschimbat (Track14 bit-identic), și **clipul `Stand`** din
      `SlidingHazard`, opțional pe model;
@@ -617,8 +617,10 @@ verifică ce face deja codul.
      care pică;
    - `ProbeCameraSolid` pe tunel, portaluri și pereții de zăpadă (memoria
      `camera-zone-tavan-per-sala`);
-   - pe Track21: `probe_fiord_semafor` / `probe_tunel`, `probe_herd_coverage`
-     și sonda de traversare pentru urs (`probe_crossing`).
+   - pe Track21: `probe_fiord_semafor` / `probe_tunel`, `probe_herd_coverage`,
+     `probe_avalanche` / `probe_avalanche_terrain` (limba coboară pe teren
+     real și nu trece peste ramura a doua) și sonda de traversare pentru urs
+     (`probe_crossing`).
 4. **ProbeRace la început**: 8 mașini, 16 seed-uri. Se citesc `[blocaj]` /
    lent / invers / carusel, nu doar repunerile. Locul de urmărit sunt acele
    de păr: raza de 16 m e aproape de pragul de ~14 m al AI-ului.
@@ -667,8 +669,8 @@ verifică ce face deja codul.
   `hazard-dezaliniat-contamineaza-verdictul`: autocarul din Fiordland mergea
   la 8 m de drum).
 - **Ceasurile pornesc în prima fază** (memoria
-  `ceasul-porneste-in-prima-faza`): semaforul, turma și trenul se verifică
-  și la `t = 0`, nu doar în regim.
+  `ceasul-porneste-in-prima-faza`): semaforul, avalanșa, turma și trenul
+  se verifică și la `t = 0`, nu doar în regim.
 - **Unealta de captură înainte de captură** (memoria
   `unealta-de-captura-e-parte-din-masuratoare`): `Snapshot` are nevoie de
   faze forțate pentru ursul ridicat, turma pe drum, trenul pe trecere și roșul
@@ -691,15 +693,15 @@ verifică ce face deja codul.
 - **Legal și nume:**
   - fără mărci: fără Dacia, CFR, Top Gear, branduri de bere sau de caș pe
     tarabe; mașinile parcate sunt generice;
-  - în UI apare doar „Transfăgărășan” (numele drumului); „Bâlea”, „Vidraru”
-    și „Poenari” **nu** apar;
+  - în UI apare doar „Transfagarasan” (numele drumului, fără diacritice,
+    §3.1.1); „Bâlea”, „Vidraru” și „Poenari” **nu** apar;
   - semnele de drum și indicatoarele sunt **fără text lizibil**.
 - **Respins, cu motiv:**
   - **Zermatt / Matterhorn** și **Stelvio + Dolomiții**: candidații care n-au
     fost aleși (decizia dezvoltatorului, 10 oct 2026);
   - **urcarea pe nord** (sensul „natural” Sibiu → Bâlea): serpentinele ar fi
     deasupra ta, adică în afara cadrului (§2.0);
-  - **avalanșa și sania** din Track09 (§3.1.5, §0.1);
+  - **sania** din Track09 (§0.1);
   - **hotelul de gheață** de la Bâlea Lac: există doar iarna, iar pista e în
     iulie;
   - **calea ferată de culme** din Track09: pe creasta Făgărașului nu e tren;
@@ -720,6 +722,13 @@ pasul 7), nu pe schița de aici. Tiparul e `okinawa.md` §9 / §9.1:
 - lista FORBIDDEN din §8.
 
 ## Istoric
+
+- **v0.1.1 (10 oct 2026):** deciziile dezvoltatorului pe §3.1: numele
+  „Transfagarasan” fără diacritice, utilajul de drumuri în tunel, săritura și
+  scurtătura prin pajiște rămân, **avalanșa intră** (ramura întâi a
+  serpentinelor, ~0,40, perioadă explicită), oile pe `HerdHazard`, apa se
+  adaugă temei dacă e nevoie. Cinci hazarde cu ceas; două distanțe sub
+  200 m, asumate (§3).
 
 - **v0.1 (10 oct 2026):** concept. Alpii refăcuți ca Monument Valley și
   Okinawa: `Track21` nou, temă `transfagarasan`, traseu redesenat de la zero

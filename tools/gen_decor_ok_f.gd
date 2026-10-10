@@ -198,19 +198,24 @@ const PATHS := {
 	"bougain": "res://assets/models/okinawa/plants/bougainvillea.glb",
 	"wall": "res://assets/models/okinawa/structures/coral_stone_wall.glb",
 	"pandanus": "res://assets/models/trees/pandanus.glb",
+	"hibiscus": "res://assets/models/plants/hibiscus_bush.glb",
+	"quay": "res://assets/models/okinawa/structures/harbour_quay.glb",
 }
 ## Raza (m) de ocupare per tip, la scara 1, pentru evitarea suprapunerilor.
 const RADIUS := {
 	"notch_a": 3.0, "notch_b": 3.5, "notch_c": 3.0, "freighter": 17.0, "boat": 2.5,
 	"pine": 3.0, "cycad": 1.0, "fanpalm": 1.8, "bougain": 1.2, "wall": 2.0, "pandanus": 1.8,
+	"hibiscus": 0.9, "quay": 5.0,
 }
 const NAMES := {
 	"notch_a": "Notch", "notch_b": "Notch", "notch_c": "Notch", "freighter": "Cargou",
 	"boat": "Barca", "pine": "Pin", "cycad": "Cicas", "fanpalm": "Palmier",
 	"bougain": "Bougainvillea", "wall": "ZidCoral", "pandanus": "Pandanus",
+	"hibiscus": "Hibiscus", "quay": "Chei",
 }
 
 var _seq := {}
+var _nocol_all := false
 var _skip_kinds: PackedStringArray = PackedStringArray()
 
 
@@ -245,6 +250,8 @@ func _emit(kind: String, x: float, y: float, z: float, yaw: float, sc: float) ->
 		NAMES[kind], int(_seq[NAMES[kind]]), ZONE, _res[kind]])
 	_out.append("transform = Transform3D(%s, %s, %s, %.2f, %.3f, %.2f)" % [
 		rows[0], rows[1], rows[2], x, y, z])
+	if kind in ["bougain", "cycad", "hibiscus"] or _nocol_all:
+		_out.append('metadata/coliziune = "none"')
 	_out.append("")
 	_placed.append(Vector4(x, z, float(RADIUS[kind]) * sc, 0.0))
 	_counts[kind] = int(_counts.get(kind, 0)) + 1
@@ -253,7 +260,10 @@ func _emit(kind: String, x: float, y: float, z: float, yaw: float, sc: float) ->
 
 ## Piesa pe uscat (cota solului real), cu conditii de distanta fata de asfalt.
 func _land(kind: String, frac: float, side: float, lat: float, sc: float, yaw: float, min_edge: float = 8.0) -> bool:
-	var q := _pos_at(frac, side, lat)
+	return _land_xz(kind, _pos_at(frac, side, lat), sc, yaw, min_edge)
+
+
+func _land_xz(kind: String, q: Vector3, sc: float, yaw: float, min_edge: float = 8.0) -> bool:
 	var y := _sol(q.x, q.z)
 	if y < _sea + 0.9 or _edge_dist(q.x, q.z) < min_edge or not _free(q.x, q.z, float(RADIUS[kind]) * sc):
 		_skipped += 1
@@ -295,6 +305,64 @@ func _rock_xz(kind: String, base: Vector3, sc: float, yaw: float, lo: float = 0.
 	return false
 
 
+## Palc dens: `n` piese in jurul unui centru, amestec pandanus/palmier/cicada/hibiscus/bougainvillea.
+func _cluster(frac: float, side: float, lat: float, rad: float, n: int, _jit: float) -> void:
+	var c := _pos_at(frac, side, lat)
+	var mix := ["pandanus", "cycad", "cycad", "hibiscus", "fanpalm", "cycad", "bougain", "pandanus", "hibiscus", "cycad"]
+	var placed := 0
+	var tries := 0
+	while placed < n and tries < n * 6:
+		tries += 1
+		var a := _rng.randf() * TAU
+		var d := rad * sqrt(_rng.randf())
+		var q := c + Vector3(cos(a), 0.0, sin(a)) * d
+		var kind: String = mix[_rng.randi() % mix.size()]
+		var sc := 1.0
+		match kind:
+			"pandanus": sc = _rng.randf_range(1.5, 1.9)
+			"fanpalm": sc = _rng.randf_range(1.0, 1.3)
+			"cycad": sc = _rng.randf_range(0.9, 1.4)
+			"hibiscus": sc = _rng.randf_range(1.0, 1.5)
+			"bougain": sc = _rng.randf_range(1.0, 1.4)
+		if _land_xz(kind, q, sc, _rng.randf() * TAU, 8.0):
+			placed += 1
+
+
+## Cheiul: cauta pe tarmul golfului, dincolo de culoar, un punct cu apa la ~0,3 m si uscat la 4 m spre mal.
+func _quay() -> void:
+	var lf := Vector3(_chan_t.z, 0.0, -_chan_t.x)
+	var best := Vector3.INF
+	var yawb := 0.0
+	for ap in [56.0, 66.0, 76.0, 88.0, -56.0, -70.0]:
+		for pp in [-24.0, -30.0, -36.0, -44.0, -52.0]:
+			var q: Vector3 = _chan_p + _chan_t * ap + lf * pp
+			var dep := _sea - _sol(q.x, q.z)
+			if dep < 0.0 or dep > 1.2 or _in_channel(q.x, q.z, 16.0) or _edge_dist(q.x, q.z) < 14.0:
+				continue
+			# directia spre uscat: -lf (spre dreapta->centru) sau +lf; alege cea cu uscat
+			for sgn in [1.0, -1.0]:
+				var dirn: Vector3 = lf * sgn
+				var land: Vector3 = q + dirn * 5.0
+				if _sol(land.x, land.z) > _sea + 0.8 and _free(q.x, q.z, 6.0):
+					best = q
+					yawb = atan2(dirn.x, dirn.z)
+					break
+			if best != Vector3.INF:
+				break
+		if best != Vector3.INF:
+			break
+	if best == Vector3.INF:
+		print("; cheiul sarit (nu am gasit tarm)")
+		return
+	print("; chei la (%.1f, %.1f) yaw %.2f" % [best.x, best.z, yawb])
+	_emit("quay", best.x, _sea, best.z, yawb, 1.0)
+	var side := Vector3(cos(yawb), 0.0, -sin(yawb))
+	for k in 2:
+		var bq: Vector3 = best - Vector3(sin(yawb), 0.0, cos(yawb)) * (7.0 + 3.0 * k) + side * (5.0 if k == 0 else -6.0)
+		if _sea - _sol(bq.x, bq.z) > 1.4 and _free(bq.x, bq.z, 3.0):
+			_emit("boat", bq.x, _sea, bq.z, yawb + 1.5 + k, 1.0)
+
+
 func _build() -> void:
 	var ch := _chan_p
 	var lf := Vector3(_chan_t.z, 0.0, -_chan_t.x)
@@ -321,18 +389,7 @@ func _build() -> void:
 	for fr in frame:
 		var fq: Vector3 = _chan_p + _chan_t * float(fr[1]) + Vector3(_chan_t.z, 0.0, -_chan_t.x) * float(fr[2])
 		_rock_xz(fr[0], fq, fr[3], fr[4])
-	# --- coborarea: zid de corali la >= 8 m de margine, pini, cicade, flori ---
-	for side: float in [1.0, -1.0]:
-		var f := 0.616
-		var run := 0
-		while f < 0.633:
-			var i := _idx(f)
-			var t := _tangent(i)
-			var yaw := atan2(t.x, t.z)
-			if run % 9 != 8:
-				_land("wall", f, side, 8.0 + (0.8 if side < 0.0 else 0.0), 1.0, yaw, 7.0)
-			run += 1
-			f += 0.0021
+	# --- coborarea (fara zid de corali: runda 2) ---
 	_land("pine", 0.620, 1.0, 17.0, 1.1, 0.6, 12.0)
 	_land("pine", 0.629, 1.0, 24.0, 0.9, 2.2, 12.0)
 	_land("pine", 0.624, -1.0, 16.0, 1.0, 4.4, 12.0)
@@ -340,25 +397,34 @@ func _build() -> void:
 		_land("cycad", c[0], c[1], c[2], _rng.randf_range(0.9, 1.25), _rng.randf() * TAU, 8.0)
 	for fl in [[0.619, 1.0, 10.0], [0.6195, 1.0, 11.2], [0.6205, 1.0, 10.6], [0.631, -1.0, 10.0], [0.6318, -1.0, 11.0]]:
 		_land("bougain", fl[0], fl[1], fl[2], _rng.randf_range(1.0, 1.3), PI + _rng.randf_range(-0.4, 0.4), 8.0)
-	# --- malul de la capatul podului: pandanus, cicade, pini, palmier, flori ---
-	for side: float in [1.0, -1.0]:
-		var f := 0.703
-		var k := 0
-		while f < 0.737:
-			var lat := 9.0 + _rng.randf_range(0.0, 16.0) * (1.0 + float(k % 3) * 0.4)
-			if _rng.randf() < 0.8:
-				_land("pandanus", f, side, lat, _rng.randf_range(1.5, 1.9), _rng.randf() * TAU, 8.0)
-			if _rng.randf() < 0.7:
-				for g in 2 + (k % 2):
-					_land("cycad", f + _rng.randf_range(-0.002, 0.002), side, lat + _rng.randf_range(-3.5, 3.5) - 2.0, _rng.randf_range(0.9, 1.3), _rng.randf() * TAU, 8.0)
-			f += _rng.randf_range(0.0042, 0.0075)
-			k += 1
-	_land("pine", 0.712, 1.0, 22.0, 1.2, 1.3, 12.0)
-	_land("pine", 0.724, -1.0, 28.0, 1.0, 3.9, 12.0)
-	_land("fanpalm", 0.707, -1.0, 12.0, 1.1, 0.5, 9.0)
-	_land("fanpalm", 0.729, 1.0, 13.0, 1.0, 2.2, 9.0)
-	for fl in [[0.708, 1.0, 10.0], [0.7088, 1.0, 11.4], [0.727, -1.0, 10.5], [0.7278, -1.0, 11.6], [0.7285, -1.0, 9.8]]:
-		_land("bougain", fl[0], fl[1], fl[2], _rng.randf_range(1.0, 1.3), PI + _rng.randf_range(-0.4, 0.4), 8.0)
+	# --- pâlcuri dese (coliziune none): capatul podului dreapta + stanga, rampa stanga ---
+	_nocol_all = true
+	_cluster(0.712, 1.0, 14.0, 9.0, 30, 0.15)
+	_cluster(0.724, -1.0, 15.0, 9.0, 28, 0.15)
+	_cluster(0.7335, 1.0, 14.0, 7.0, 16, 0.1)
+	_cluster(0.623, 1.0, 15.0, 8.0, 22, 0.2)
+	_cluster(0.628, -1.0, 13.0, 7.0, 14, 0.2)
+	_nocol_all = false
+	# --- stanci in grupuri, in apa mica, la ambele maluri ---
+	var groups := [
+		[-52.0, 34.0], [-66.0, 62.0], [52.0, -34.0], [66.0, -52.0], [60.0, 56.0],
+	]
+	var kinds := ["notch_a", "notch_b", "notch_c"]
+	var gi := 0
+	for g in groups:
+		var cp: Vector3 = _chan_p + _chan_t * float(g[0]) + lf * float(g[1])
+		for m in 3:
+			var off := Vector3(_rng.randf_range(-9.0, 9.0), 0.0, _rng.randf_range(-9.0, 9.0))
+			var sc: float = float([1.9, 1.4, 1.0][m]) * _rng.randf_range(0.9, 1.1)
+			_rock_xz(kinds[(gi + m) % 3], cp + off, sc, _rng.randf() * TAU)
+		gi += 1
+	for fr in [[0.692, -1.0, 26.0], [0.698, -1.0, 36.0], [0.7055, -1.0, 30.0]]:
+		for m in 2:
+			var bp := _pos_at(fr[0], fr[1], fr[2]) + Vector3(_rng.randf_range(-6.0, 6.0), 0.0, _rng.randf_range(-6.0, 6.0))
+			_rock_xz(kinds[(gi + m) % 3], bp, [1.7, 1.1][m], _rng.randf() * TAU)
+		gi += 1
+	# --- cheiul de piatra pe malul golfului (dincolo de culoar), cu barci ---
+	_quay()
 	# --- vasul de coasta, STATIC, asteptand in larg (stanga, dincolo de gura canalului) ---
 	var fp := ch + _chan_t * 84.0 + lf * 116.0
 	var dir := (ch + _chan_t * 28.0 + lf * 70.0) - fp

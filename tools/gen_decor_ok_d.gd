@@ -27,6 +27,7 @@ const RES := {
 	"fukugi_c": M_OK + "plants/fukugi_tree_c.glb",
 	"cycad": M_OK + "plants/cycad.glb",
 	"bougainvillea": M_OK + "plants/bougainvillea.glb",
+	"banyan": "res://assets/models/trees/banyan.glb",
 	"hibiscus": "res://assets/models/plants/hibiscus_bush.glb",
 	"shisa": "res://assets/models/props/shisa_statue.glb",
 	"shisa_c": "res://assets/models/props/shisa_statue_closed.glb",
@@ -52,6 +53,11 @@ var mods: Array = []
 var road_p := PackedVector2Array()   # (x, z) Godot, indici i0..i1
 var road_hw := PackedFloat32Array()
 var wall_pts: Array[Vector2] = []    # Godot (x,z): puncte de zid (pentru copaci)
+var module_pts: Array = []           # {pts: Array[Vector2] godot, arch: bool, side}
+var trunk_pts: Array[Vector2] = []
+var noise := FastNoiseLite.new()
+var pal_pos := Vector3.ZERO
+var pal_yaw_v := 0.0
 var module_mid: Array = []           # [Vector2 godot, side, clearance]
 var min_clear_seen := 99.0
 var tgt_p := PackedVector2Array()    # tinta curenta, cadru Blender
@@ -305,6 +311,7 @@ func _emit_module(cname: String, idx: int, m: Dictionary, st: Dictionary, side: 
 	for lp in _local_samples(m):
 		var g := _b2g(_rot(lp, r) + t)
 		miny = minf(miny, _gy(g))
+	var cpts: Array[Vector2] = []
 	for k in 6:
 		var f := float(k) / 5.0
 		var lp: Vector2
@@ -315,6 +322,8 @@ func _emit_module(cname: String, idx: int, m: Dictionary, st: Dictionary, side: 
 		else:
 			lp = Vector2(0, lerpf(-float(m.half), float(m.half), f))
 		wall_pts.append(_b2g(_rot(lp, r) + t))
+		cpts.append(_b2g(_rot(lp, r) + t))
+	module_pts.append({"pts": cpts, "arch": m.res == "arch", "side": side})
 	var cl := _clear_of(m, st)
 	min_clear_seen = minf(min_clear_seen, cl)
 	if cl < MIN_CLEAR:
@@ -446,52 +455,12 @@ func _generate(path: String) -> void:
 		wall_pts.append(Vector2(p.x, p.z))
 		pn += 1
 
-	# fukugi in grupuri la baza zidului, flori, cicade
-	var fn := 0
-	var cyn := 0
-	var hn := 0
-	var bn := 0
-	var variants := ["fukugi_a", "fukugi_b", "fukugi_c"]
-	var gi := 0
-	for mm in module_mid:
-		gi += 1
-		var mid: Vector2 = mm[0]
-		var uvm := _uv(Vector3(mid.x, 0.0, mid.y))
-		var um: float = uvm.x
-		if absf(um - GATE_U) < 0.0085 or absf(um - PAL_U) < 0.005:
-			continue
-		var rp := _pos(um, 0.0)
-		var toward := Vector2(rp.x - mid.x, rp.z - mid.y).normalized()
-		if gi % 2 == 0:
-			var nf := rng.randi_range(1, 2)
-			for k in nf:
-				var q := mid + toward * rng.randf_range(4.2, 6.0) + Vector2(-toward.y, toward.x) * rng.randf_range(-6.0, 6.0)
-				if _edge2(q) < 3.4 or _near_wall(q, 2.6):
-					continue
-				var p3 := _on_ground(Vector3(q.x, 0, q.y))
-				_prop("Arbori", "Fukugi%02d" % fn, variants[rng.randi() % 3], p3, rng.randf() * TAU, rng.randf_range(0.9, 1.15), 0.2)
-				wall_pts.append(q)
-				fn += 1
-		if gi % 3 == 0:
-			var hq := mid + toward * rng.randf_range(2.4, 3.2)
-			for k in 3:
-				var q2 := hq + Vector2(rng.randf_range(-3.0, 3.0), rng.randf_range(-3.0, 3.0))
-				if _edge2(q2) < 2.8 or _near_wall(q2, 1.9):
-					continue
-				_prop("Flori", "Hibiscus%02d" % hn, "hibiscus", _on_ground(Vector3(q2.x, 0, q2.y)), rng.randf() * TAU, rng.randf_range(1.2, 1.7), 0.05)
-				hn += 1
-		if gi % 5 == 1 and cyn < 10:
-			var cq := mid + toward * rng.randf_range(3.6, 5.0)
-			if _edge2(cq) >= 3.0 and not _near_wall(cq, 2.2):
-				_prop("Flori", "Cicada%02d" % cyn, "cycad", _on_ground(Vector3(cq.x, 0, cq.y)), rng.randf() * TAU, rng.randf_range(1.0, 1.35), 0.1)
-				cyn += 1
-		if gi % 9 == 4 and bn < 3:
-			var bq := mid + toward * 2.2
-			if _edge2(bq) >= 3.0:
-				var bp := _on_ground(Vector3(bq.x, 0, bq.y))
-				var d3 := Vector3(toward.x, 0, toward.y)
-				_prop("Flori", "Bougainvillea%d" % bn, "bougainvillea", bp, atan2(-d3.x, -d3.z), 1.1, 0.05, 'metadata/coliziune = "none"')
-				bn += 1
+	pal_pos = pp
+	pal_yaw_v = pal_yaw
+	noise.seed = 20261013
+	noise.frequency = 0.045
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	_vegetation()
 
 	var head := PackedStringArray()
 	for k in used_res:
@@ -503,3 +472,149 @@ func _generate(path: String) -> void:
 	for r in report:
 		print("  ", r)
 	print("  piese: ", counts)
+
+
+# ---------------------------------------------------------------- vegetatie
+
+func _pal_local(q: Vector2) -> Vector2:
+	var d := Vector3(q.x - pal_pos.x, 0.0, q.y - pal_pos.z)
+	var l := Basis(Vector3.UP, pal_yaw_v).inverse() * d
+	return Vector2(l.x, l.z)   # fata palatului = -z local
+
+
+func _in_palace_view(q: Vector2) -> bool:
+	var l := _pal_local(q)
+	return absf(l.x) < 23.0 and l.y < 12.0
+
+
+func _stream(step: float) -> Array:
+	var res: Array = []
+	for md in module_pts:
+		var pts: Array = md["pts"]
+		for k in pts.size() - 1:
+			var a: Vector2 = pts[k]
+			var b: Vector2 = pts[k + 1]
+			var cnt := maxi(int(a.distance_to(b) / step), 1)
+			var td := (b - a).normalized()
+			for j in cnt:
+				var p := a.lerp(b, float(j) / float(cnt))
+				var nrm := Vector2(-td.y, td.x)
+				var uv := _uv(Vector3(p.x, tr._terrain_mesh_y(p.x, p.y), p.y))
+				var rp := _pos(uv.x, 0.0)
+				if nrm.dot(p - Vector2(rp.x, rp.z)) < 0.0:
+					nrm = -nrm
+				res.append({"p": p, "away": nrm, "u": uv.x, "arch": md["arch"]})
+	return res
+
+
+func _trunk_free(q: Vector2, d: float) -> bool:
+	for t in trunk_pts:
+		if t.distance_to(q) < d:
+			return false
+	return true
+
+
+var _ids := {}
+func _nid(k: String) -> String:
+	_ids[k] = int(_ids.get(k, 0)) + 1
+	return "%s%03d" % [k, _ids[k]]
+
+
+func _tree(group: String, key: String, q: Vector2, sc: float, sink := 0.2) -> void:
+	var p := _on_ground(Vector3(q.x, 0, q.y))
+	_prop(group, _nid(key), key, p, rng.randf() * TAU, sc, sink)
+	trunk_pts.append(q)
+	wall_pts.append(q)
+
+
+func _vegetation() -> void:
+	var variants := ["fukugi_a", "fukugi_b", "fukugi_c"]
+	# --- 1+3: banda la baza zidurilor (partea dinspre drum) + paturi de fukugi
+	var st := _stream(2.2)
+	var active := 0
+	var cool := 0.0
+	var cov_n := 0
+	for e in st:
+		var p: Vector2 = e["p"]
+		var away: Vector2 = e["away"]
+		var u: float = e["u"]
+		if noise.get_noise_2d(p.x, p.y) < -0.12:
+			continue
+		active += 1
+		var tang := Vector2(-away.y, away.x)
+		# tufe joase, fara coliziune pana la ~2.2 m de bordura
+		if rng.randf() < 0.75:
+			var q := p - away * rng.randf_range(1.8, 3.2) + tang * rng.randf_range(-1.0, 1.0)
+			if _edge2(q) >= 2.2 and not _near_wall(q, 1.5):
+				_prop("Flori", _nid("Hibiscus"), "hibiscus", _on_ground(Vector3(q.x, 0, q.y)), rng.randf() * TAU, rng.randf_range(1.3, 2.0), 0.05)
+		if rng.randf() < 0.35:
+			var q2 := p - away * rng.randf_range(2.0, 3.6) + tang * rng.randf_range(-1.0, 1.0)
+			if _edge2(q2) >= 2.4 and not _near_wall(q2, 1.6):
+				_prop("Flori", _nid("Cicada"), "cycad", _on_ground(Vector3(q2.x, 0, q2.y)), rng.randf() * TAU, rng.randf_range(1.1, 1.5), 0.1)
+		if rng.randf() < 0.07:
+			var q3 := p - away * 1.9
+			if _edge2(q3) >= 2.4:
+				var d3 := Vector3(-away.x, 0, -away.y)
+				_prop("Flori", _nid("Bougainvillea"), "bougainvillea", _on_ground(Vector3(q3.x, 0, q3.y)), atan2(-d3.x, -d3.z), 1.2, 0.05, 'metadata/coliziune = "none"')
+		# pat de fukugi suprapuse (3-5), nu in dreptul portii / arcului
+		cool -= 2.2
+		if cool <= 0.0 and not bool(e["arch"]) and absf(u - GATE_U) > 0.0085 and absf(u - PAL_U) > 0.005:
+			cool = rng.randf_range(12.0, 26.0)
+			var c := p - away * rng.randf_range(2.9, 4.4)
+			var nn := rng.randi_range(3, 5)
+			for k in nn:
+				var q4 := c + Vector2(rng.randf_range(-2.8, 2.8), rng.randf_range(-2.8, 2.8))
+				if _edge2(q4) < 3.3 or _near_wall(q4, 2.3) or not _trunk_free(q4, 1.1):
+					continue
+				_tree("Arbori", variants[rng.randi() % 3], q4, rng.randf_range(0.85, 1.25))
+	report.append("fluxul de baza: %d puncte active din %d" % [active, st.size()])
+
+	# --- 2: masa de coroane in spatele zidurilor (peste zid se vede o linie de coroane)
+	var st2 := _stream(4.0)
+	var pine_new := 0
+	for e in st2:
+		var p: Vector2 = e["p"]
+		var away: Vector2 = e["away"]
+		if bool(e["arch"]):
+			continue
+		var base := p + away * rng.randf_range(3.2, 7.5)
+		if _in_palace_view(base) or base.distance_to(Vector2(pal_pos.x, pal_pos.z)) < 22.0:
+			continue
+		if rng.randf() < 0.28:
+			if _near_wall(base, 3.4) or not _trunk_free(base, 3.0):
+				continue
+			_tree("Arbori", "pine", base, rng.randf_range(1.15, 1.5))
+			pine_new += 1
+		else:
+			var nn := rng.randi_range(2, 3)
+			for k in nn:
+				var q := base + Vector2(rng.randf_range(-2.2, 2.2), rng.randf_range(-2.2, 2.2))
+				if _near_wall(q, 2.4) or not _trunk_free(q, 1.3) or _in_palace_view(q):
+					continue
+				_tree("Arbori", variants[rng.randi() % 3], q, rng.randf_range(1.35, 1.8))
+	report.append("pini noi pe coama: %d" % pine_new)
+
+	# --- palatul: banian pe laturi + masa de tufe si pini pe terasa
+	for sgn in [-1.0, 1.0]:
+		var lq: Vector3 = Basis(Vector3.UP, pal_yaw_v) * Vector3(sgn * 27.5, 0.0, 3.0)
+		var q := Vector2(pal_pos.x + lq.x, pal_pos.z + lq.z)
+		_tree("Arbori", "banyan", q, 1.6, 0.25)
+		for k in 3:
+			var lq2: Vector3 = Basis(Vector3.UP, pal_yaw_v) * Vector3(sgn * rng.randf_range(20.0, 32.0), 0.0, rng.randf_range(-4.0, 14.0))
+			var q2 := Vector2(pal_pos.x + lq2.x, pal_pos.z + lq2.z)
+			if _near_wall(q2, 3.0) or not _trunk_free(q2, 2.2):
+				continue
+			if k == 0:
+				_tree("Arbori", "pine", q2, rng.randf_range(1.2, 1.5))
+			else:
+				_tree("Arbori", variants[rng.randi() % 3], q2, rng.randf_range(1.3, 1.7))
+		for k in 6:
+			var lq3: Vector3 = Basis(Vector3.UP, pal_yaw_v) * Vector3(sgn * rng.randf_range(17.5, 24.0), 0.0, rng.randf_range(-8.0, 8.0))
+			var q3 := Vector2(pal_pos.x + lq3.x, pal_pos.z + lq3.z)
+			_prop("Flori", _nid("Hibiscus"), "hibiscus", _on_ground(Vector3(q3.x, 0, q3.y)), rng.randf() * TAU, rng.randf_range(1.3, 1.9), 0.05)
+	# coroane in spatele palatului (nu se vad din fata; umplu cerul de pe laturi)
+	for k in 5:
+		var lq4: Vector3 = Basis(Vector3.UP, pal_yaw_v) * Vector3(rng.randf_range(-36.0, 36.0), 0.0, rng.randf_range(16.0, 24.0))
+		var q4 := Vector2(pal_pos.x + lq4.x, pal_pos.z + lq4.z)
+		if _trunk_free(q4, 3.0):
+			_tree("Arbori", "pine" if k % 2 == 0 else variants[k % 3], q4, rng.randf_range(1.2, 1.6))

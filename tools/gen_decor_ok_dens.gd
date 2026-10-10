@@ -30,6 +30,9 @@ const ZONES := [
 	{"id": "A", "f0": 0.976, "f1": 0.1023, "pandanus": true},
 	{"id": "C", "f0": 0.215, "f1": 0.333, "pandanus": false},
 	{"id": "D", "f0": 0.335, "f1": 0.474, "pandanus": false},
+	# F: doar malurile, fara pasajul 0.630-0.685 (rampe, travee, repuneri)
+	{"id": "F1", "f0": 0.612, "f1": 0.630, "pandanus": true},
+	{"id": "F2", "f0": 0.685, "f1": 0.737, "pandanus": true},
 ]
 
 var _track: Track
@@ -155,6 +158,8 @@ func _collect_footprints() -> void:
 	var pts := 0
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
+		if n.name == "Densitate":
+			continue  # rularile repetate nu se blocheaza pe propriul rezultat
 		for c in n.get_children():
 			stack.append(c)
 		if n is MeshInstance3D and (n as MeshInstance3D).mesh != null and (n as MeshInstance3D).is_visible_in_tree():

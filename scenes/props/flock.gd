@@ -229,7 +229,11 @@ func _build() -> void:
 				halo_radius_m * 0.7, halo_reflect_stretch, halo_flicker, seed_value)
 	if view_m > 0.0:
 		visibility_range_end = view_m
-	material_override = Palette.triplanar_class_material(tri_class) if tri_class != "" else Palette.world_material()
+	if tri_class.begins_with(Palette.ATINT_PREFIX):
+		# tenta de atlas partajata (ex. "atint:ok_bloom"): culoarea slotului ramane, inmultita cu tenta
+		material_override = Palette.atlas_tint_material(tri_class.trim_prefix(Palette.ATINT_PREFIX))
+	else:
+		material_override = Palette.triplanar_class_material(tri_class) if tri_class != "" else Palette.world_material()
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	if not split_keep.is_empty():
 		_split_flock(mm)

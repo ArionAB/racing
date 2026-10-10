@@ -22,6 +22,19 @@
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/animals/egret.glb" id="c_egret"]
 [ext_resource type="Script" path="res://scenes/props/flock.gd" id="c_flock"]
 [ext_resource type="PackedScene" path="res://assets/models/plants/sugar_cane_clump.glb" id="c_cane"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/buildings/ryukyu_palace.glb" id="d_palace"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/gusuku_wall_curve.glb" id="d_curve"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/gusuku_wall_straight.glb" id="d_straight"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/gusuku_arch_gate.glb" id="d_arch"]
+[ext_resource type="PackedScene" path="res://assets/models/props/shisa_statue.glb" id="d_shisa"]
+[ext_resource type="PackedScene" path="res://assets/models/props/shisa_statue_closed.glb" id="d_shisa_c"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/ryukyu_pine.glb" id="d_pine"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/cycad.glb" id="d_cycad"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fukugi_tree_b.glb" id="d_fukugi_b"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/hibiscus_bush.glb" id="d_hibiscus"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/bougainvillea.glb" id="d_bougainvillea"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fukugi_tree_a.glb" id="d_fukugi_a"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fukugi_tree_c.glb" id="d_fukugi_c"]
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
 _data = {
@@ -468,47 +481,8 @@ visible = false
 [node name="Tetrapod_Stack_01" parent="DecorManual/Dig_tetrapozi/Tetra41" index="2"]
 visible = false
 
-[node name="Ziduri_D" type="Node3D" parent="DecorManual"]
-
-[node name="Gusuku00" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(-0.20673, 0, 0.97840, 0, 1, 0, -0.97840, 0, -0.20673, -29.80, 25.05, -250.62)
-
-[node name="Gusuku01" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(0.12315, 0, 0.99238, 0, 1, 0, -0.99238, 0, 0.12315, -16.80, 25.74, -230.87)
-
-[node name="Gusuku02" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(0.23002, 0, 0.97318, 0, 1, 0, -0.97318, 0, 0.23002, -1.43, 26.35, -246.83)
-
-[node name="Gusuku03" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(0.23002, 0, 0.97318, 0, 1, 0, -0.97318, 0, 0.23002, 6.20, 26.92, -225.50)
-
-[node name="Gusuku04" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(0.05706, 0, 0.99837, 0, 1, 0, -0.99837, 0, 0.05706, 21.22, 27.63, -243.45)
-
-[node name="Gusuku05" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(-0.45269, 0, 0.89167, 0, 1, 0, -0.89167, 0, -0.45269, 36.54, 27.93, -229.74)
-
-[node name="Gusuku06" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(-0.45269, 0, 0.89167, 0, 1, 0, -0.89167, 0, -0.45269, 38.93, 28.26, -252.27)
-
-[node name="Gusuku07" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(-0.45269, 0, 0.89167, 0, 1, 0, -0.89167, 0, -0.45269, 58.52, 28.61, -240.90)
-
-[node name="Gusuku08" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(-0.32184, 0, 0.94679, 0, 1, 0, -0.94679, 0, -0.32184, 62.23, 28.97, -263.78)
-
-[node name="Gusuku09" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(-0.23982, 0, 0.97082, 0, 1, 0, -0.97082, 0, -0.23982, 79.27, 29.28, -249.39)
-
-[node name="Gusuku10" parent="DecorManual/Ziduri_D" instance=ExtResource("11_gusuku")]
-transform = Transform3D(0.07434, 0, 0.99723, 0, 1, 0, -0.99723, 0, 0.07434, 89.72, 29.54, -270.40)
-
 [node name="Far_capul_E" parent="DecorManual" instance=ExtResource("12_light")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 318.00, 21.40, -170.00)
-
-[node name="Poarta_D" parent="DecorManual" instance=ExtResource("13_gate")]
-transform = Transform3D(0.2534, 0, 0.9676, 0, 1, 0, -0.9676, 0, 0.2534, 142.79, 30.00, -249.88)
-metadata/camera_blocker = true
 
 [node name="ZonaA" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.974-1.000 + 0.000-0.100 (corner H->A 0.9747, start 0.000, corner into B 0.0994); x -175..95, z 145..170; sea left at 66-72 m, flat land right; harbour = W end of bay at (95-125,150-170) just before the start (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
@@ -1396,6 +1370,385 @@ scale3_list = Array[Vector3]([Vector3(1.2294312, 1.0525194, 1.2402645), Vector3(
 
 [node name="ZonaD" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.333-0.474 (walls from 0.339, Poarta_D 0.4298, culmea +30 la 0.4045); x -40..230, z -270..-220; flat +-50 m at road level, interior falls 10-13 m at +100 m (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="Poarta_D" parent="DecorManual/ZonaD" instance=ExtResource("13_gate")]
+transform = Transform3D(0.2534, 0, 0.9676, 0, 1, 0, -0.9676, 0, 0.2534, 142.79, 30.00, -249.88)
+metadata/camera_blocker = true
+
+[node name="Ziduri" type="Node3D" parent="DecorManual/ZonaD"]
+
+[node name="Palat" type="Node3D" parent="DecorManual/ZonaD"]
+
+[node name="Arbori" type="Node3D" parent="DecorManual/ZonaD"]
+
+[node name="Flori" type="Node3D" parent="DecorManual/ZonaD"]
+
+[node name="Shisa" type="Node3D" parent="DecorManual/ZonaD"]
+
+[node name="Palat" parent="DecorManual/ZonaD/Palat" instance=ExtResource("d_palace")]
+transform = Transform3D(-0.98049945, 0, 0.1965219, 0, 1, 0, -0.1965219, 0, -0.98049945, 114.85315, 29.50114, -294.17233)
+
+[node name="L00" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.34230906, 0, 0.9395874, 0, 0.85, 0, -0.9395874, 0, -0.34230906, -37.20718, 24.082512, -246.72821)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L00" index="0"]
+visible = false
+
+[node name="L01" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.14747559, 0, -0.9890657, 0, 0.85, 0, 0.9890657, 0, 0.14747559, -27.179176, 24.746655, -259.7474)
+
+[node name="L02" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.053317063, 0, 0.99857765, 0, 0.85, 0, -0.99857765, 0, 0.053317063, -13.789333, 25.222305, -250.21994)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L02" index="0"]
+visible = false
+
+[node name="L03" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.25195554, 0, -0.9677388, 0, 0.85, 0, 0.9677388, 0, -0.25195554, 0.5388932, 25.937325, -258.26746)
+
+[node name="L04" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.25195554, 0, -0.9677388, 0, 0.85, 0, 0.9677388, 0, -0.25195554, 12.151758, 26.552277, -255.244)
+
+[node name="L05" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.15617451, 0, -0.9877295, 0, 0.85, 0, 0.9877295, 0, 0.15617451, 25.860027, 27.195969, -254.98166)
+
+[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L05" index="1"]
+visible = false
+
+[node name="L06" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.53822803, 0, -0.84279925, 0, 0.85, 0, 0.84279925, 0, 0.53822803, 38.81866, 27.92764, -259.46042)
+
+[node name="L07" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.53822803, 0, -0.84279925, 0, 0.85, 0, 0.84279925, 0, 0.53822803, 48.932255, 28.28155, -265.91916)
+
+[node name="L08" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.53822803, 0, -0.84279925, 0, 0.85, 0, 0.84279925, 0, 0.53822803, 59.04585, 28.594622, -272.3779)
+
+[node name="L09" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.35879377, 0, 0.93341684, 0, 0.85, 0, -0.93341684, 0, -0.35879377, 75.15791, 28.854551, -269.14346)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L09" index="0"]
+visible = false
+
+[node name="L10" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.24342859, 0, 0.96991885, 0, 0.85, 0, -0.96991885, 0, 0.24342859, 86.79666, 29.12391, -279.40057)
+
+[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L10" index="1"]
+visible = false
+
+[node name="L11" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.24342874, 0, -0.9699188, 0, 0.85, 0, 0.9699188, 0, -0.24342874, 102.31537, 29.297514, -275.50574)
+
+[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L11" index="1"]
+visible = false
+
+[node name="L12" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.03573278, 0, 0.9993614, 0, 0.85, 0, -0.9993614, 0, 0.03573278, 117.71228, 29.326742, -263.27884)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L12" index="0"]
+visible = false
+
+[node name="L13" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_arch")]
+transform = Transform3D(-0.23488317, 0, -0.9720236, 0, 0.85, 0, 0.9720236, 0, -0.23488317, 132.86867, 29.277077, -271.3424)
+
+[node name="L14" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.42454252, 0, 0.905408, 0, 0.85, 0, -0.905408, 0, 0.42454252, 142.67068, 29.151108, -257.2478)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L14" index="0"]
+visible = false
+
+[node name="L15" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.22631943, 0, -0.97405314, 0, 0.85, 0, 0.97405314, 0, -0.22631943, 161.9518, 28.728998, -261.095)
+
+[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L15" index="1"]
+visible = false
+
+[node name="L16" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.018137425, 0, 0.9998355, 0, 0.85, 0, -0.9998355, 0, 0.018137425, 177.56152, 28.183039, -249.14099)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L16" index="0"]
+visible = false
+
+[node name="L17" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.4085402, 0, 0.91274035, 0, 0.85, 0, -0.91274035, 0, 0.4085402, 188.95811, 27.610003, -246.59851)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L17" index="0"]
+visible = false
+
+[node name="L18" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.40854043, 0, -0.91274023, 0, 0.85, 0, 0.91274023, 0, -0.40854043, 211.73277, 27.03323, -258.31665)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L18" index="0"]
+visible = false
+
+[node name="L19" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.4085402, 0, 0.91274035, 0, 0.85, 0, -0.91274035, 0, 0.4085402, 218.16582, 26.500837, -233.5252)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L19" index="0"]
+visible = false
+
+[node name="L20" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.5828343, 0, -0.812591, 0, 0.85, 0, 0.812591, 0, -0.5828343, 234.4287, 26.107143, -235.88727)
+
+[node name="R00" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.24519028, 0, 0.969475, 0, 0.85, 0, -0.969475, 0, 0.24519028, -21.9477, 24.671179, -213.94164)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R00" index="0"]
+visible = false
+
+[node name="R01" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.4341317, 0, -0.9008494, 0, 0.85, 0, 0.9008494, 0, -0.4341317, -6.3349004, 25.733585, -219.07007)
+
+[node name="R02" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.24519055, 0, -0.9694749, 0, 0.85, 0, 0.9694749, 0, -0.24519055, 9.277901, 26.311901, -224.1985)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R02" index="0"]
+visible = false
+
+[node name="R03" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.15437979, 0, -0.9880116, 0, 0.85, 0, 0.9880116, 0, 0.15437979, 20.94209, 26.950098, -223.65738)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R03" index="0"]
+visible = false
+
+[node name="R04" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.52924925, 0, -0.8484664, 0, 0.85, 0, 0.8484664, 0, 0.52924925, 31.88522, 27.43105, -227.73096)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R04" index="0"]
+visible = false
+
+[node name="R05" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.5292492, 0, 0.84846646, 0, 0.85, 0, -0.84846646, 0, -0.5292492, 56.045666, 27.845592, -219.22961)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R05" index="0"]
+visible = false
+
+[node name="R06" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.34886292, 0, -0.9371738, 0, 0.85, 0, 0.9371738, 0, 0.34886292, 63.163948, 28.284853, -234.04144)
+
+[node name="R07" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.34886292, 0, -0.9371738, 0, 0.85, 0, 0.9371738, 0, 0.34886292, 74.41003, 28.634436, -238.22778)
+
+[node name="R08" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.15437983, 0, 0.9880116, 0, 0.85, 0, -0.9880116, 0, -0.15437983, 89.48096, 28.971457, -231.67587)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R08" index="0"]
+visible = false
+
+[node name="R09" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.04634167, 0, -0.9989256, 0, 0.85, 0, 0.9989256, 0, -0.04634167, 101.8348, 29.25892, -242.51297)
+
+[node name="R10" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.24519028, 0, 0.969475, 0, 0.85, 0, -0.969475, 0, 0.24519028, 113.13225, 29.314127, -230.57866)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R10" index="0"]
+visible = false
+
+[node name="S00" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.28253534, 0, -0.9592569, 0, 0.85, 0, 0.9592569, 0, -0.28253534, 149.93263, 28.880283, -231.64842)
+
+[node name="S01" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.46867827, 0, 0.88336897, 0, 0.85, 0, -0.88336897, 0, 0.46867827, 158.06834, 28.324001, -217.3701)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/S01" index="0"]
+visible = false
+
+[node name="S02" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.46867839, 0, -0.88336885, 0, 0.85, 0, 0.88336885, 0, -0.46867839, 181.57582, 27.716732, -227.53865)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/S02" index="0"]
+visible = false
+
+[node name="S03" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.28253534, 0, -0.9592569, 0, 0.85, 0, 0.9592569, 0, -0.28253534, 189.71153, 27.214308, -213.26033)
+
+[node name="S04" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_arch")]
+transform = Transform3D(-0.28253534, 0, -0.9592569, 0, 0.85, 0, 0.9592569, 0, -0.28253534, 202.18187, 26.51928, -209.58737)
+
+[node name="S05" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.46867827, 0, 0.88336897, 0, 0.85, 0, -0.88336897, 0, 0.46867827, 211.27684, 25.497107, -195.0265)
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/S05" index="0"]
+visible = false
+
+[node name="Shisa_S" parent="DecorManual/ZonaD/Shisa" instance=ExtResource("d_shisa")]
+transform = Transform3D(-0.56662136, 0, 1.388863, 0, 1.5, 0, -1.388863, 0, -0.56662136, 136.6534, 29.67006, -262.65363)
+
+[node name="Shisa_D" parent="DecorManual/ZonaD/Shisa" instance=ExtResource("d_shisa_c")]
+transform = Transform3D(1.1746525, 0, 0.93284065, 0, 1.5, 0, -0.93284065, 0, 1.1746525, 131.1811, 29.664658, -241.7583)
+
+[node name="Pin00" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(0.5235168, 0, -0.8336578, 0, 0.984406, 0, 0.8336578, 0, 0.5235168, 163.02184, 29.084364, -276.371)
+
+[node name="Pin01" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(0.6162194, 0, 0.7282339, 0, 0.9539659, 0, -0.7282339, 0, 0.6162194, 55.322834, 28.843376, -282.87396)
+
+[node name="Pin02" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(0.64309096, 0, 0.8116991, 0, 1.0355778, 0, -0.8116991, 0, 0.64309096, 215.10829, 27.303389, -254.99442)
+
+[node name="Pin03" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(0.70111465, 0, 0.58215445, 0, 0.9112989, 0, -0.58215445, 0, 0.70111465, 190.10625, 28.289343, -270.26736)
+
+[node name="Pin04" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(-0.6410781, 0, -0.86958, 0, 1.0803474, 0, 0.86958, 0, -0.6410781, 216.96, 27.332823, -261.43967)
+
+[node name="Pin05" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(0.22914188, 0, -0.92214286, 0, 0.950186, 0, 0.92214286, 0, 0.22914188, 64.68167, 29.035618, -284.28256)
+
+[node name="Pin06" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(-0.5765721, 0, -0.6908389, 0, 0.89982986, 0, 0.6908389, 0, -0.5765721, 13.103154, 27.12662, -268.9085)
+
+[node name="Pin07" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(-0.98902196, 0, -0.38286665, 0, 1.060543, 0, 0.38286665, 0, -0.98902196, 141.98438, 29.391436, -279.46265)
+
+[node name="Pin08" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(-0.9010169, 0, -0.33650598, 0, 0.9618044, 0, 0.33650598, 0, -0.9010169, 4.269085, 26.598972, -263.07645)
+
+[node name="Pin09" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(-0.43283564, 0, -0.9873204, 0, 1.0780299, 0, 0.9873204, 0, -0.43283564, 3.4117432, 26.577614, -270.69687)
+
+[node name="Pin10" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(-0.7343999, 0, 0.5593034, 0, 0.923127, 0, -0.5593034, 0, -0.7343999, 121.21425, 29.383245, -220.6051)
+
+[node name="Pin11" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(1.1113027, 0, -0.25656217, 0, 1.140534, 0, 0.25656217, 0, 1.1113027, 20.553928, 27.19523, -200.55957)
+
+[node name="Pin12" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(-1.0128498, 0, -0.04331191, 0, 1.0137755, 0, 0.04331191, 0, -1.0128498, 65.54608, 28.615166, -228.54561)
+
+[node name="Pin13" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_pine")]
+transform = Transform3D(-0.1896535, 0, 1.1242902, 0, 1.1401742, 0, -1.1242902, 0, -0.1896535, 97.09914, 29.333107, -230.73024)
+
+[node name="Cicada00" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_cycad")]
+transform = Transform3D(0.90318537, 0, -0.6747891, 0, 1.1274236, 0, 0.6747891, 0, 0.90318537, -39.47659, 24.728226, -252.30028)
+
+[node name="Fukugi00" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_b")]
+transform = Transform3D(0.7967067, 0, -0.5332381, 0, 0.9586889, 0, 0.5332381, 0, 0.7967067, -33.29463, 24.874643, -255.5719)
+
+[node name="Hibiscus00" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(1.3222729, 0, 0.752269, 0, 1.5212871, 0, -0.752269, 0, 1.3222729, -14.849192, 25.765532, -256.0995)
+
+[node name="Hibiscus01" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(-0.7764881, 0, -1.3594716, 0, 1.5655979, 0, 1.3594716, 0, -0.7764881, -16.02768, 25.72123, -258.28436)
+
+[node name="Hibiscus02" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(-1.2910377, 0, 0.015735162, 0, 1.2911335, 0, -0.015735162, 0, -1.2910377, -16.20259, 25.70008, -255.5278)
+
+[node name="Fukugi01" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_b")]
+transform = Transform3D(-0.42851293, 0, 0.94056237, 0, 1.0335767, 0, -0.94056237, 0, -0.42851293, 0.43625486, 26.380865, -252.23572)
+
+[node name="Bougainvillea0" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_bougainvillea")]
+transform = Transform3D(-1.0488807, 0, 0.33143523, 0, 1.1, 0, -0.33143523, 0, -1.0488807, -0.1239773, 26.49345, -256.1697)
+metadata/coliziune = "none"
+
+[node name="Fukugi02" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_b")]
+transform = Transform3D(0.9440717, 0, -0.08678389, 0, 0.94805217, 0, 0.08678389, 0, 0.9440717, 32.14496, 28.00437, -251.82579)
+
+[node name="Cicada01" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_cycad")]
+transform = Transform3D(1.0162673, 0, -0.2438934, 0, 1.0451236, 0, 0.2438934, 0, 1.0162673, 27.30496, 27.948914, -251.19646)
+
+[node name="Fukugi03" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(0.68692106, 0, -0.67726064, 0, 0.96464634, 0, 0.67726064, 0, 0.68692106, 52.428986, 28.672266, -262.87048)
+
+[node name="Hibiscus03" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(-0.55759376, 0, 1.2246101, 0, 1.3455782, 0, -1.2246101, 0, -0.55759376, 58.059322, 28.9904, -268.17926)
+
+[node name="Hibiscus04" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(-1.3789, 0, -0.6307108, 0, 1.5162985, 0, 0.6307108, 0, -1.3789, 62.628838, 29.098969, -268.17014)
+
+[node name="Hibiscus05" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(-1.2390292, 0, -0.15530673, 0, 1.2487248, 0, 0.15530673, 0, -1.2390292, 59.7623, 29.034029, -268.6705)
+
+[node name="Fukugi04" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(0.8146011, 0, 0.70266163, 0, 1.0757827, 0, -0.70266163, 0, 0.8146011, 74.0559, 29.214478, -273.65323)
+
+[node name="Fukugi05" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(0.2194201, 0, -1.00529, 0, 1.0289574, 0, 1.00529, 0, 0.2194201, 70.76252, 29.15479, -272.1288)
+
+[node name="Cicada02" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_cycad")]
+transform = Transform3D(0.83342826, 0, -0.57633734, 0, 1.0132953, 0, 0.57633734, 0, 0.83342826, 86.90344, 29.53805, -274.5704)
+
+[node name="Fukugi06" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_c")]
+transform = Transform3D(1.0408955, 0, 0.00024849465, 0, 1.0408955, 0, -0.00024849465, 0, 1.0408955, 165.1591, 29.027315, -255.30058)
+
+[node name="Cicada03" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_cycad")]
+transform = Transform3D(-1.1530546, 0, 0.018920604, 0, 1.1532098, 0, -0.018920604, 0, -1.1530546, 160.9045, 29.264229, -256.50766)
+
+[node name="Fukugi07" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_c")]
+transform = Transform3D(-0.5799326, 0, 0.7020706, 0, 0.9106178, 0, -0.7020706, 0, -0.5799326, 193.52324, 27.969595, -249.79907)
+
+[node name="Hibiscus06" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(1.4382461, 0, -0.3255136, 0, 1.4746224, 0, 0.3255136, 0, 1.4382461, 190.67877, 28.239609, -251.80634)
+
+[node name="Fukugi08" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_c")]
+transform = Transform3D(0.74766904, 0, 0.6122962, 0, 0.9663931, 0, -0.6122962, 0, 0.74766904, 221.06137, 26.876799, -238.02768)
+
+[node name="Fukugi09" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_b")]
+transform = Transform3D(-0.3571311, 0, 0.9447196, 0, 1.0099692, 0, -0.9447196, 0, -0.3571311, 215.29086, 27.08488, -239.39203)
+
+[node name="Hibiscus07" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(0.16143385, 0, 1.5194869, 0, 1.5280384, 0, -1.5194869, 0, 0.16143385, 232.28336, 26.623312, -231.66417)
+
+[node name="Cicada04" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_cycad")]
+transform = Transform3D(0.28011873, 0, -1.2199386, 0, 1.2516855, 0, 1.2199386, 0, 0.28011873, 232.10991, 26.584131, -231.95448)
+
+[node name="Fukugi10" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(0.03992673, 0, 0.9348521, 0, 0.93570435, 0, -0.9348521, 0, 0.03992673, -22.311693, 25.284391, -228.57822)
+
+[node name="Fukugi11" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(0.95650977, 0, -0.008018704, 0, 0.9565434, 0, 0.008018704, 0, 0.95650977, -14.674116, 25.779749, -228.8657)
+
+[node name="Bougainvillea1" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_bougainvillea")]
+transform = Transform3D(1.0991055, 0, -0.044353276, 0, 1.1, 0, 0.044353276, 0, 1.0991055, -19.40709, 25.5685, -225.8346)
+metadata/coliziune = "none"
+
+[node name="Fukugi12" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(-0.8710424, 0, -0.43521658, 0, 0.97371876, 0, 0.43521658, 0, -0.8710424, 11.3735485, 27.060368, -219.9247)
+
+[node name="Fukugi13" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_b")]
+transform = Transform3D(0.87988544, 0, -0.3659562, 0, 0.95295453, 0, 0.3659562, 0, 0.87988544, 4.677489, 26.766037, -219.90338)
+
+[node name="Hibiscus08" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(0.23379889, 0, 1.5076634, 0, 1.5256836, 0, -1.5076634, 0, 0.23379889, 5.583011, 26.928474, -217.04443)
+
+[node name="Fukugi14" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(-0.5583054, 0, -0.920715, 0, 1.0767641, 0, 0.920715, 0, -0.5583054, 39.449265, 27.90035, -225.23276)
+
+[node name="Cicada05" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_cycad")]
+transform = Transform3D(1.0711306, 0, 0.60680383, 0, 1.2310693, 0, -0.60680383, 0, 1.0711306, 35.405502, 27.886581, -222.96208)
+
+[node name="Hibiscus09" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(0.68994963, 0, 1.4701464, 0, 1.6239954, 0, -1.4701464, 0, 0.68994963, 46.659218, 28.256466, -227.90393)
+
+[node name="Fukugi15" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(0.9895317, 0, 0.29003564, 0, 1.0311613, 0, -0.29003564, 0, 0.9895317, 63.061295, 28.659067, -239.46646)
+
+[node name="Fukugi16" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_c")]
+transform = Transform3D(0.8198471, 0, 0.4520755, 0, 0.9362273, 0, -0.4520755, 0, 0.8198471, 90.38567, 29.416473, -247.33784)
+
+[node name="Hibiscus10" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(-0.45968756, 0, -1.5520897, 0, 1.6187326, 0, 1.5520897, 0, -0.45968756, 86.196045, 29.509214, -246.68329)
+
+[node name="Fukugi17" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_b")]
+transform = Transform3D(-1.0604867, 0, 0.40157026, 0, 1.1339712, 0, -0.40157026, 0, -1.0604867, 117.71451, 29.491425, -245.12064)
+
+[node name="Fukugi18" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_b")]
+transform = Transform3D(-0.8062197, 0, -0.49082485, 0, 0.9438746, 0, 0.49082485, 0, -0.8062197, 167.74777, 28.649658, -229.58818)
+
+[node name="Fukugi19" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(0.8840167, 0, -0.6284547, 0, 1.0846386, 0, 0.6284547, 0, 0.8840167, 196.23174, 27.431011, -215.38596)
+
+[node name="Hibiscus11" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(0.9350822, 0, 1.4152648, 0, 1.6962763, 0, -1.4152648, 0, 0.9350822, 192.95589, 27.708712, -215.92874)
+
+[node name="Hibiscus12" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_hibiscus")]
+transform = Transform3D(-1.4201139, 0, -0.7761285, 0, 1.618363, 0, 0.7761285, 0, -1.4201139, 188.84592, 27.892855, -218.0197)
+
+[node name="Cicada06" parent="DecorManual/ZonaD/Flori" instance=ExtResource("d_cycad")]
+transform = Transform3D(1.0749536, 0, 0.2390729, 0, 1.101218, 0, -0.2390729, 0, 1.0749536, 191.47389, 27.742958, -217.65453)
+
+[node name="Fukugi20" parent="DecorManual/ZonaD/Arbori" instance=ExtResource("d_fukugi_a")]
+transform = Transform3D(-1.0885046, 0, -0.07879904, 0, 1.091353, 0, 0.07879904, 0, -1.0885046, 217.19633, 26.509872, -211.87402)
 
 [node name="ZonaE" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.474-0.612 (cornisa 0.5175-0.6109, Far_capul_E 0.5166 la 54 m stanga); x 230..280, z -222..46; sea at 12 m left from 0.56 (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"

@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/gusuku_wall_straight.glb" id="11_gusuku"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/buildings/cape_lighthouse.glb" id="12_light"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/ryukyu_gate.glb" id="13_gate"]
+
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/buildings/ryukyu_house_c.glb" id="c_ryukyu_c"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/buildings/concrete_house_a.glb" id="c_house_a"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/coral_stone_wall.glb" id="c_wall"]
@@ -62,6 +63,18 @@
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fukugi_tree_a.glb" id="d_fukugi_a"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/bougainvillea.glb" id="d_bougainvillea"]
 [ext_resource type="PackedScene" path="res://assets/models/trees/banyan.glb" id="d_banyan"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/rocks/notch_rock_a.glb" id="f_notch_a"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/rocks/notch_rock_c.glb" id="f_notch_c"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/rocks/notch_rock_b.glb" id="f_notch_b"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/ryukyu_pine.glb" id="f_pine"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/cycad.glb" id="f_cycad"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/bougainvillea.glb" id="f_bougain"]
+[ext_resource type="PackedScene" path="res://assets/models/plants/hibiscus_bush.glb" id="f_hibiscus"]
+[ext_resource type="PackedScene" path="res://assets/models/trees/pandanus.glb" id="f_pandanus"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/fan_palm.glb" id="f_fanpalm"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/harbour_quay.glb" id="f_quay"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/vehicles/fishing_boat.glb" id="f_boat"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/vehicles/coastal_freighter.glb" id="f_freighter"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -5104,6 +5117,381 @@ metadata/fractii = "REAL 0.474-0.612 (cornisa 0.5175-0.6109, Far_capul_E 0.5166 
 
 [node name="ZonaF" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.612-0.737 (pod 0.6365-0.7018, travee 0.6696); x 255..410, z 46..252; water both sides on the bridge (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"
+
+[node name="Notch_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_a")]
+transform = Transform3D(1.10902, 0.00000, 0.93412, 0.00000, 1.45000, 0.00000, -0.93412, 0.00000, 1.10902, 293.38, -0.628, 37.84)
+
+[node name="Notch_F02" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_c")]
+transform = Transform3D(-0.88487, 0.00000, 0.81056, 0.00000, 1.20000, 0.00000, -0.81056, 0.00000, -0.88487, 355.58, -1.421, 41.09)
+
+[node name="Notch_F03" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_b")]
+transform = Transform3D(-0.65364, 0.00000, -0.75680, 0.00000, 1.00000, 0.00000, 0.75680, 0.00000, -0.65364, 284.73, -0.524, 35.08)
+
+[node name="Notch_F04" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_b")]
+transform = Transform3D(0.58967, 0.00000, 1.15857, 0.00000, 1.30000, 0.00000, -1.15857, 0.00000, 0.58967, 268.26, -1.242, 136.92)
+
+[node name="Notch_F05" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_c")]
+transform = Transform3D(-1.33310, 0.00000, -0.21296, 0.00000, 1.35000, 0.00000, 0.21296, 0.00000, -1.33310, 329.37, -0.950, 205.80)
+
+[node name="Notch_F06" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_a")]
+transform = Transform3D(0.98007, 0.00000, 0.19867, 0.00000, 1.00000, 0.00000, -0.19867, 0.00000, 0.98007, 337.57, -1.547, 216.91)
+
+[node name="Notch_F07" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_c")]
+transform = Transform3D(-0.05256, 0.00000, 1.79923, 0.00000, 1.80000, 0.00000, -1.79923, 0.00000, -0.05256, 344.26, -1.542, 224.79)
+
+[node name="Notch_F08" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_b")]
+transform = Transform3D(1.13387, 0.00000, -1.12886, 0.00000, 1.60000, 0.00000, 1.12886, 0.00000, 1.13387, 422.43, -0.493, 127.96)
+
+[node name="Notch_F09" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_c")]
+transform = Transform3D(-1.38247, 0.00000, -0.22084, 0.00000, 1.40000, 0.00000, 0.22084, 0.00000, -1.38247, 257.31, -1.768, 129.23)
+
+[node name="Pin_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_pine")]
+transform = Transform3D(0.90787, 0.00000, 0.62111, 0.00000, 1.10000, 0.00000, -0.62111, 0.00000, 0.90787, 284.81, 8.734, 51.72)
+
+[node name="Pin_F02" parent="DecorManual/ZonaF" instance=ExtResource("f_pine")]
+transform = Transform3D(-0.52965, 0.00000, 0.72765, 0.00000, 0.90000, 0.00000, -0.72765, 0.00000, -0.52965, 299.25, 8.308, 64.78)
+
+[node name="Pin_F03" parent="DecorManual/ZonaF" instance=ExtResource("f_pine")]
+transform = Transform3D(-0.30733, 0.00000, -0.95160, 0.00000, 1.00000, 0.00000, 0.95160, 0.00000, -0.30733, 247.40, 6.286, 79.78)
+
+[node name="Cicas_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.35391, 0.00000, -0.85369, 0.00000, 0.92414, 0.00000, 0.85369, 0.00000, -0.35391, 278.66, 8.735, 51.17)
+metadata/coliziune = "none"
+
+[node name="Cicas_F02" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.58428, 0.00000, 0.80318, 0.00000, 0.99322, 0.00000, -0.80318, 0.00000, 0.58428, 282.66, 8.588, 56.54)
+metadata/coliziune = "none"
+
+[node name="Cicas_F03" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.49415, 0.00000, -0.92131, 0.00000, 1.04547, 0.00000, 0.92131, 0.00000, 0.49415, 285.44, 8.436, 64.10)
+metadata/coliziune = "none"
+
+[node name="Cicas_F04" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.19609, 0.00000, 0.89047, 0.00000, 0.91181, 0.00000, -0.89047, 0.00000, 0.19609, 256.70, 7.370, 88.11)
+metadata/coliziune = "none"
+
+[node name="Cicas_F05" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(1.12498, 0.00000, -0.43339, 0.00000, 1.20557, 0.00000, 0.43339, 0.00000, 1.12498, 258.15, 7.246, 93.17)
+metadata/coliziune = "none"
+
+[node name="Cicas_F06" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.85656, 0.00000, -0.90380, 0.00000, 1.24522, 0.00000, 0.90380, 0.00000, 0.85656, 293.29, 8.357, 61.88)
+metadata/coliziune = "none"
+
+[node name="Cicas_F07" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-1.15300, 0.00000, -0.26161, 0.00000, 1.18231, 0.00000, 0.26161, 0.00000, -1.15300, 247.47, 7.724, 71.57)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-0.97676, 0.00000, -0.30893, 0.00000, 1.02445, 0.00000, 0.30893, 0.00000, -0.97676, 277.91, 8.662, 53.31)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F02" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-1.14062, 0.00000, 0.17150, 0.00000, 1.15344, 0.00000, -0.17150, 0.00000, -1.14062, 279.47, 8.601, 55.51)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F03" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-1.14114, 0.00000, 0.11677, 0.00000, 1.14710, 0.00000, -0.11677, 0.00000, -1.14114, 258.86, 7.604, 89.05)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(1.30883, 0.00000, 0.58499, 0.00000, 1.43361, 0.00000, -0.58499, 0.00000, 1.30883, 401.66, 5.915, 200.70)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F02" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(-0.28353, 0.00000, -1.19395, 0.00000, 1.22716, 0.00000, 1.19395, 0.00000, -0.28353, 395.77, 6.136, 192.64)
+metadata/coliziune = "none"
+
+[node name="Cicas_F08" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(1.23107, 0.00000, -0.27871, 0.00000, 1.26223, 0.00000, 0.27871, 0.00000, 1.23107, 395.69, 6.340, 201.31)
+metadata/coliziune = "none"
+
+[node name="Pandanus_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_pandanus")]
+transform = Transform3D(-1.69100, 0.00000, 0.08900, 0.00000, 1.69335, 0.00000, -0.08900, 0.00000, -1.69100, 394.81, 6.324, 197.01)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F03" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(0.28143, 0.00000, 1.13940, 0.00000, 1.17364, 0.00000, -1.13940, 0.00000, 0.28143, 400.86, 6.051, 191.95)
+metadata/coliziune = "none"
+
+[node name="Cicas_F09" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.87703, 0.00000, 1.05761, 0.00000, 1.37394, 0.00000, -1.05761, 0.00000, -0.87703, 393.11, 6.471, 202.45)
+metadata/coliziune = "none"
+
+[node name="Cicas_F10" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.90922, 0.00000, -0.70668, 0.00000, 1.15155, 0.00000, 0.70668, 0.00000, -0.90922, 397.39, 6.294, 204.78)
+metadata/coliziune = "none"
+
+[node name="Pandanus_F02" parent="DecorManual/ZonaF" instance=ExtResource("f_pandanus")]
+transform = Transform3D(-1.20741, 0.00000, -1.15826, 0.00000, 1.67314, 0.00000, 1.15826, 0.00000, -1.20741, 388.60, 6.818, 194.09)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F04" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(0.64424, 0.00000, -0.81268, 0.00000, 1.03706, 0.00000, 0.81268, 0.00000, 0.64424, 399.15, 6.135, 202.38)
+metadata/coliziune = "none"
+
+[node name="Cicas_F11" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.88076, 0.00000, -0.35996, 0.00000, 0.95148, 0.00000, 0.35996, 0.00000, 0.88076, 400.60, 6.016, 194.10)
+metadata/coliziune = "none"
+
+[node name="Cicas_F12" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.79642, 0.00000, -0.79404, 0.00000, 1.12463, 0.00000, 0.79404, 0.00000, 0.79642, 394.19, 6.477, 205.55)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F05" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-0.03070, 0.00000, 1.09842, 0.00000, 1.09885, 0.00000, -1.09842, 0.00000, -0.03070, 400.65, 5.925, 197.26)
+metadata/coliziune = "none"
+
+[node name="Cicas_F13" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.39276, 0.00000, 0.93944, 0.00000, 1.01824, 0.00000, -0.93944, 0.00000, 0.39276, 397.26, 6.071, 190.89)
+metadata/coliziune = "none"
+
+[node name="Cicas_F14" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.54682, 0.00000, 0.81335, 0.00000, 0.98007, 0.00000, -0.81335, 0.00000, -0.54682, 387.91, 6.930, 198.56)
+metadata/coliziune = "none"
+
+[node name="Cicas_F15" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.85937, 0.00000, 1.06855, 0.00000, 1.37125, 0.00000, -1.06855, 0.00000, -0.85937, 394.31, 6.212, 190.21)
+metadata/coliziune = "none"
+
+[node name="Cicas_F16" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.85529, 0.00000, 0.65550, 0.00000, 1.07760, 0.00000, -0.65550, 0.00000, -0.85529, 390.72, 6.528, 190.49)
+metadata/coliziune = "none"
+
+[node name="Cicas_F17" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(1.29012, 0.00000, -0.35618, 0.00000, 1.33838, 0.00000, 0.35618, 0.00000, 1.29012, 399.17, 6.076, 199.53)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F04" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(-0.50143, 0.00000, 1.05092, 0.00000, 1.16442, 0.00000, -1.05092, 0.00000, -0.50143, 403.22, 5.772, 197.98)
+metadata/coliziune = "none"
+
+[node name="Pandanus_F03" parent="DecorManual/ZonaF" instance=ExtResource("f_pandanus")]
+transform = Transform3D(-1.54427, 0.00000, -0.17178, 0.00000, 1.55379, 0.00000, 0.17178, 0.00000, -1.54427, 379.17, 5.266, 238.80)
+metadata/coliziune = "none"
+
+[node name="Pandanus_F04" parent="DecorManual/ZonaF" instance=ExtResource("f_pandanus")]
+transform = Transform3D(-1.17206, 0.00000, 1.15945, 0.00000, 1.64865, 0.00000, -1.15945, 0.00000, -1.17206, 371.63, 1.889, 245.16)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F05" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(1.28329, 0.00000, -0.41517, 0.00000, 1.34878, 0.00000, 0.41517, 0.00000, 1.28329, 374.72, 3.513, 241.71)
+metadata/coliziune = "none"
+
+[node name="Pandanus_F05" parent="DecorManual/ZonaF" instance=ExtResource("f_pandanus")]
+transform = Transform3D(-0.12719, 0.00000, 1.88126, 0.00000, 1.88555, 0.00000, -1.88126, 0.00000, -0.12719, 383.61, 4.252, 247.19)
+metadata/coliziune = "none"
+
+[node name="Palmier_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_fanpalm")]
+transform = Transform3D(-0.99615, 0.00000, 0.26824, 0.00000, 1.03164, 0.00000, -0.26824, 0.00000, -0.99615, 380.01, 2.798, 251.24)
+metadata/coliziune = "none"
+
+[node name="Palmier_F02" parent="DecorManual/ZonaF" instance=ExtResource("f_fanpalm")]
+transform = Transform3D(-0.39272, 0.00000, 1.13289, 0.00000, 1.19903, 0.00000, -1.13289, 0.00000, -0.39272, 377.07, 2.527, 248.35)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F06" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-0.50733, 0.00000, 1.13872, 0.00000, 1.24662, 0.00000, -1.13872, 0.00000, -0.50733, 382.43, 4.921, 242.28)
+metadata/coliziune = "none"
+
+[node name="Palmier_F03" parent="DecorManual/ZonaF" instance=ExtResource("f_fanpalm")]
+transform = Transform3D(0.72396, 0.00000, 0.83618, 0.00000, 1.10604, 0.00000, -0.83618, 0.00000, 0.72396, 372.94, 4.652, 237.04)
+metadata/coliziune = "none"
+
+[node name="Cicas_F18" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.76056, 0.00000, 0.59994, 0.00000, 0.96870, 0.00000, -0.59994, 0.00000, -0.76056, 378.52, 4.299, 243.78)
+metadata/coliziune = "none"
+
+[node name="Cicas_F19" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.93233, 0.00000, 0.82135, 0.00000, 1.24252, 0.00000, -0.82135, 0.00000, 0.93233, 369.28, 2.317, 240.70)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F06" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(0.26561, 0.00000, 0.98310, 0.00000, 1.01835, 0.00000, -0.98310, 0.00000, 0.26561, 375.73, 3.033, 245.53)
+metadata/coliziune = "none"
+
+[node name="Cicas_F20" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.97843, 0.00000, 0.10399, 0.00000, 0.98394, 0.00000, -0.10399, 0.00000, -0.97843, 375.40, 5.169, 235.02)
+metadata/coliziune = "none"
+
+[node name="Cicas_F21" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(1.08221, 0.00000, 0.14044, 0.00000, 1.09128, 0.00000, -0.14044, 0.00000, 1.08221, 419.97, 4.920, 233.26)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F07" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(-0.29556, 0.00000, 1.10936, 0.00000, 1.14806, 0.00000, -1.10936, 0.00000, -0.29556, 430.97, 4.447, 237.56)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F07" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(0.92597, 0.00000, 0.99300, 0.00000, 1.35774, 0.00000, -0.99300, 0.00000, 0.92597, 429.37, 4.666, 231.59)
+metadata/coliziune = "none"
+
+[node name="Pandanus_F06" parent="DecorManual/ZonaF" instance=ExtResource("f_pandanus")]
+transform = Transform3D(1.43808, 0.00000, 0.44087, 0.00000, 1.50414, 0.00000, -0.44087, 0.00000, 1.43808, 424.83, 4.765, 231.38)
+metadata/coliziune = "none"
+
+[node name="Palmier_F04" parent="DecorManual/ZonaF" instance=ExtResource("f_fanpalm")]
+transform = Transform3D(0.81023, 0.00000, 0.60926, 0.00000, 1.01374, 0.00000, -0.60926, 0.00000, 0.81023, 423.44, 4.622, 240.76)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F08" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(0.98480, 0.00000, -0.62340, 0.00000, 1.16553, 0.00000, 0.62340, 0.00000, 0.98480, 427.36, 4.485, 237.92)
+metadata/coliziune = "none"
+
+[node name="Palmier_F05" parent="DecorManual/ZonaF" instance=ExtResource("f_fanpalm")]
+transform = Transform3D(-0.14449, 0.00000, 1.04848, 0.00000, 1.05839, 0.00000, -1.04848, 0.00000, -0.14449, 424.70, 4.699, 236.09)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F08" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-1.02591, 0.00000, 0.25411, 0.00000, 1.05691, 0.00000, -0.25411, 0.00000, -1.02591, 420.94, 4.913, 230.34)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F09" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(-0.60847, 0.00000, 1.01361, 0.00000, 1.18222, 0.00000, -1.01361, 0.00000, -0.60847, 429.72, 4.625, 234.48)
+metadata/coliziune = "none"
+
+[node name="Cicas_F22" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.83077, 0.00000, -0.42218, 0.00000, 0.93188, 0.00000, 0.42218, 0.00000, 0.83077, 429.78, 4.232, 239.92)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F10" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(-1.18877, 0.00000, 0.89913, 0.00000, 1.49051, 0.00000, -0.89913, 0.00000, -1.18877, 419.02, 4.894, 237.13)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F11" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(0.28648, 0.00000, 1.00468, 0.00000, 1.04473, 0.00000, -1.00468, 0.00000, 0.28648, 426.87, 4.064, 242.73)
+metadata/coliziune = "none"
+
+[node name="Cicas_F23" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.43820, 0.00000, -0.89651, 0.00000, 0.99787, 0.00000, 0.89651, 0.00000, -0.43820, 281.48, 8.467, 62.58)
+metadata/coliziune = "none"
+
+[node name="Cicas_F24" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(1.08379, 0.00000, -0.05051, 0.00000, 1.08497, 0.00000, 0.05051, 0.00000, 1.08379, 280.45, 8.512, 60.52)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F12" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(1.18613, 0.00000, -0.84513, 0.00000, 1.45642, 0.00000, 0.84513, 0.00000, 1.18613, 289.91, 8.733, 52.48)
+metadata/coliziune = "none"
+
+[node name="Palmier_F06" parent="DecorManual/ZonaF" instance=ExtResource("f_fanpalm")]
+transform = Transform3D(-1.21756, 0.00000, -0.22169, 0.00000, 1.23758, 0.00000, 0.22169, 0.00000, -1.21756, 292.18, 8.553, 57.44)
+metadata/coliziune = "none"
+
+[node name="Cicas_F25" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.89519, 0.00000, -0.60982, 0.00000, 1.08317, 0.00000, 0.60982, 0.00000, 0.89519, 289.41, 8.638, 55.18)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F09" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-1.02788, 0.00000, -0.11438, 0.00000, 1.03422, 0.00000, 0.11438, 0.00000, -1.02788, 289.27, 8.377, 64.66)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F13" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(1.05987, 0.00000, 0.55941, 0.00000, 1.19844, 0.00000, -0.55941, 0.00000, 1.05987, 284.67, 8.491, 60.63)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F14" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(1.09367, 0.00000, -0.10050, 0.00000, 1.09828, 0.00000, 0.10050, 0.00000, 1.09367, 288.13, 8.409, 62.17)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F10" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(0.59126, 0.00000, -0.88065, 0.00000, 1.06072, 0.00000, 0.88065, 0.00000, 0.59126, 287.94, 8.539, 59.23)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F11" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-0.35404, 0.00000, -0.96793, 0.00000, 1.03065, 0.00000, 0.96793, 0.00000, -0.35404, 278.09, 8.556, 58.29)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F15" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(-0.91613, 0.00000, -0.43257, 0.00000, 1.01312, 0.00000, 0.43257, 0.00000, -0.91613, 282.94, 8.450, 63.86)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F16" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(-1.20261, 0.00000, 0.36106, 0.00000, 1.25565, 0.00000, -0.36106, 0.00000, -1.20261, 286.84, 8.585, 56.87)
+metadata/coliziune = "none"
+
+[node name="Cicas_F26" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.75131, 0.00000, -0.80354, 0.00000, 1.10006, 0.00000, 0.80354, 0.00000, -0.75131, 284.29, 8.547, 58.11)
+metadata/coliziune = "none"
+
+[node name="Cicas_F27" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.44047, 0.00000, 1.11676, 0.00000, 1.20049, 0.00000, -1.11676, 0.00000, 0.44047, 246.71, 4.371, 86.45)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F12" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-0.54459, 0.00000, 0.88981, 0.00000, 1.04323, 0.00000, -0.88981, 0.00000, -0.54459, 255.12, 7.823, 82.41)
+metadata/coliziune = "none"
+
+[node name="Cicas_F28" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.60056, 0.00000, 0.88676, 0.00000, 1.07099, 0.00000, -0.88676, 0.00000, -0.60056, 250.77, 6.441, 85.08)
+metadata/coliziune = "none"
+
+[node name="Cicas_F29" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.94084, 0.00000, 0.31837, 0.00000, 0.99325, 0.00000, -0.31837, 0.00000, 0.94084, 254.96, 6.671, 90.19)
+metadata/coliziune = "none"
+
+[node name="Hibiscus_F17" parent="DecorManual/ZonaF" instance=ExtResource("f_hibiscus")]
+transform = Transform3D(-0.44617, 0.00000, -1.03110, 0.00000, 1.12349, 0.00000, 1.03110, 0.00000, -0.44617, 256.25, 8.198, 79.49)
+metadata/coliziune = "none"
+
+[node name="Cicas_F30" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.64962, 0.00000, 1.18495, 0.00000, 1.35134, 0.00000, -1.18495, 0.00000, 0.64962, 251.28, 5.706, 89.00)
+metadata/coliziune = "none"
+
+[node name="Cicas_F31" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(0.32700, 0.00000, 1.28345, 0.00000, 1.32445, 0.00000, -1.28345, 0.00000, 0.32700, 258.21, 8.034, 83.68)
+metadata/coliziune = "none"
+
+[node name="Palmier_F07" parent="DecorManual/ZonaF" instance=ExtResource("f_fanpalm")]
+transform = Transform3D(1.09461, 0.00000, 0.38771, 0.00000, 1.16124, 0.00000, -0.38771, 0.00000, 1.09461, 252.96, 8.151, 79.20)
+metadata/coliziune = "none"
+
+[node name="Cicas_F32" parent="DecorManual/ZonaF" instance=ExtResource("f_cycad")]
+transform = Transform3D(-0.27210, 0.00000, 1.28614, 0.00000, 1.31461, 0.00000, -1.28614, 0.00000, -0.27210, 254.52, 7.540, 85.35)
+metadata/coliziune = "none"
+
+[node name="Bougainvillea_F13" parent="DecorManual/ZonaF" instance=ExtResource("f_bougain")]
+transform = Transform3D(-0.25487, 0.00000, -1.01752, 0.00000, 1.04896, 0.00000, 1.01752, 0.00000, -0.25487, 252.24, 7.365, 82.96)
+metadata/coliziune = "none"
+
+[node name="Notch_F10" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_b")]
+transform = Transform3D(-0.68697, 0.00000, -0.67260, 0.00000, 0.96141, 0.00000, 0.67260, 0.00000, -0.68697, 324.80, -0.704, 199.33)
+
+[node name="Notch_F11" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_c")]
+transform = Transform3D(0.82662, 0.00000, -1.12080, 0.00000, 1.39265, 0.00000, 1.12080, 0.00000, 0.82662, 433.18, -0.527, 141.71)
+
+[node name="Notch_F12" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_a")]
+transform = Transform3D(0.81561, 0.00000, -0.40532, 0.00000, 0.91077, 0.00000, 0.40532, 0.00000, 0.81561, 415.68, -0.439, 121.35)
+
+[node name="Notch_F13" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_b")]
+transform = Transform3D(-1.08807, 0.00000, 0.16160, 0.00000, 1.10000, 0.00000, -0.16160, 0.00000, -1.08807, 351.97, -0.568, 230.00)
+
+[node name="Notch_F14" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_b")]
+transform = Transform3D(1.24853, 0.00000, 1.15376, 0.00000, 1.70000, 0.00000, -1.15376, 0.00000, 1.24853, 357.11, -1.507, 238.60)
+
+[node name="Notch_F15" parent="DecorManual/ZonaF" instance=ExtResource("f_notch_c")]
+transform = Transform3D(1.09822, 0.00000, -0.06250, 0.00000, 1.10000, 0.00000, 0.06250, 0.00000, 1.09822, 333.43, -1.754, 211.97)
+
+[node name="Chei_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_quay")]
+transform = Transform3D(-0.67021, 0.00000, 0.74217, 0.00000, 1.00000, 0.00000, -0.74217, 0.00000, -0.67021, 251.46, 0.045, 114.59)
+
+[node name="Barca_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_boat")]
+transform = Transform3D(-0.78772, 0.00000, -0.61603, 0.00000, 1.00000, 0.00000, 0.61603, 0.00000, -0.78772, 242.91, 0.045, 115.58)
+
+[node name="Barca_F02" parent="DecorManual/ZonaF" instance=ExtResource("f_boat")]
+transform = Transform3D(0.09276, 0.00000, -0.99569, 0.00000, 1.00000, 0.00000, 0.99569, 0.00000, 0.09276, 248.06, 0.045, 125.75)
+
+[node name="Cargou_F01" parent="DecorManual/ZonaF" instance=ExtResource("f_freighter")]
+transform = Transform3D(0.14809, 0.00000, 0.98897, 0.00000, 1.00000, 0.00000, -0.98897, 0.00000, 0.14809, 463.03, 0.045, 131.04)
+
+[node name="Barca_F03" parent="DecorManual/ZonaF" instance=ExtResource("f_boat")]
+transform = Transform3D(0.92106, 0.00000, 0.38942, 0.00000, 1.00000, 0.00000, -0.38942, 0.00000, 0.92106, 304.11, 0.045, 220.65)
+
+[node name="Barca_F04" parent="DecorManual/ZonaF" instance=ExtResource("f_boat")]
+transform = Transform3D(-0.85689, 0.00000, 0.51550, 0.00000, 1.00000, 0.00000, -0.51550, 0.00000, -0.85689, 323.89, 0.045, 221.66)
+
+[node name="Barca_F05" parent="DecorManual/ZonaF" instance=ExtResource("f_boat")]
+transform = Transform3D(0.08750, 0.00000, -0.99616, 0.00000, 1.00000, 0.00000, 0.99616, 0.00000, 0.08750, 230.87, 0.045, 157.44)
 
 [node name="ZonaG" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.737-0.824 (tromba 0.7758, viraje 0.7368/0.7778/0.8236); x 310..412, z 250..375; sea left 20-22 m, bay right 30 m (masurat cu tools/sv_ok_fractii.gd; vezi docs/track_briefs/okinawa_poi_gauntlet.md)"

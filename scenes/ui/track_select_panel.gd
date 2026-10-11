@@ -36,11 +36,10 @@ func _ready() -> void:
 
 	root.add_child(_build_header())
 
-	var scroll := ScrollContainer.new()
+	# Se trage cu degetul oriunde pe grila, inclusiv peste cartonase; o tragere
+	# nu apasa cartonasul de sub deget.
+	var scroll := TouchScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	# Pe touch, o tragere scurta peste un cartonas nu trebuie sa-l apese.
-	scroll.scroll_deadzone = 12
 	root.add_child(scroll)
 	# Marginea interioara lasa loc conturului de focus (3 px) sa nu fie taiat.
 	var pad := MarginContainer.new()

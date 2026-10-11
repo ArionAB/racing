@@ -161,10 +161,13 @@ var real_headlight: bool = true
 
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
 var touch_steer: float = 0.0
-# Pedale explicite (sageata sus/jos): +1 gaz, -1 frana/marsarier, 0 nimic.
-# Nu mai exista auto-accelerate — decizia dezvoltatorului dupa primul test pe
-# iPhone (oct 2026): butoane separate de viraj si de pedale, fara DRIFT pe touch.
+# Gaz explicit (sageata sus / TURBO): +1 gaz, 0 nimic. Nu mai exista
+# auto-accelerate — decizia dezvoltatorului dupa primul test pe iPhone (oct
+# 2026): butoane separate de viraj si de pedale.
 var touch_throttle: float = 0.0
+# Butonul de frana de mana (fosta sageata jos). Drift / frana / marsarier,
+# dupa viteza — decide `PlayerController`.
+var touch_handbrake: bool = false
 var touch_turbo: bool = false
 
 # Best lap per pista (nume pista -> milisecunde), persistat. Cheia e numele,
@@ -259,6 +262,7 @@ func go_to_menu() -> void:
 func reset_touch() -> void:
 	touch_steer = 0.0
 	touch_throttle = 0.0
+	touch_handbrake = false
 	touch_turbo = false
 
 # ---------------------------------------------------------------- setari

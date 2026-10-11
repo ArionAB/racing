@@ -3,16 +3,19 @@ extends Control
 ## Controale touch: butoane explicite, fara zone de jumatate de ecran.
 ##
 ##   stanga-jos:  [ < ] [ > ]                           viraj
-##   dreapta-jos:            [ ^ ]                       gaz
-##                           [ v ]   [ TURBO ]           frana/marsarier, turbo
+##   dreapta-jos:            [ TURBO ] [ ^ ]             turbo, gaz
+##                                     [(P)]             frana de mana
 ##
 ## Aranjamentul e decizia dezvoltatorului dupa primul test pe iPhone (oct
-## 2026): fara auto-accelerate si fara DRIFT pe touch. TURBO da si gaz — nu
-## trebuie tinut si ^ in acelasi timp. < si > stau apropiate (STEER_GAP).
+## 2026): fara auto-accelerate. TURBO da si gaz — nu trebuie tinut si ^ in
+## acelasi timp. < si > stau apropiate (STEER_GAP). A doua runda (oct 2026):
+## ^ si frana de mana lipite de marginea din dreapta, TURBO in stanga lui ^,
+## iar fosta sageata jos e acum frana de mana — drift in viraj, frana in
+## linie dreapta, marsarier de pe loc (vezi `PlayerController`).
 ##
 ## Evenimente touch brute pentru multitouch corect; fiecare deget isi
 ## re-evalueaza butonul la glisare (degetul mare aluneca de pe < pe > sau de
-## pe ^ pe v fara sa se ridice). Starea se scrie in GameState.
+## pe ^ pe (P) fara sa se ridice). Starea se scrie in GameState.
 
 const BUTTON_RADIUS: float = 66.0
 const TURBO_SCALE: float = 1.15
@@ -24,7 +27,7 @@ const PEDAL_GAP: float = 18.0
 ## dezvoltatorul le-a vrut apropiate.
 const STEER_GAP: float = 22.0
 
-var _touches: Dictionary = {} # index deget -> buton ("left"/"right"/"up"/"down"/"turbo"/"")
+var _touches: Dictionary = {} # index deget -> buton ("left"/"right"/"up"/"handbrake"/"turbo"/"")
 
 func _ready() -> void:
 	# _AND_OFFSETS: in arbore, set_anchors_preset singur pastreaza dreptunghiul
@@ -64,11 +67,11 @@ func _refresh() -> void:
 	if held.has("right"):
 		steer += 1.0
 	GameState.touch_steer = steer
-	# Sus + jos deodata = frana castiga, ca pe tastatura (S bate W).
 	# TURBO tinut singur da si gaz: turbo fara acceleratie n-are sens.
-	if held.has("down"):
-		GameState.touch_throttle = -1.0
-	elif held.has("up") or held.has("turbo"):
+	# Frana de mana nu e pedala: ce face din ea decide controllerul, care
+	# stie viteza masinii.
+	GameState.touch_handbrake = held.has("handbrake")
+	if held.has("up") or held.has("turbo"):
 		GameState.touch_throttle = 1.0
 	else:
 		GameState.touch_throttle = 0.0
@@ -100,15 +103,14 @@ func _layout() -> Dictionary:
 	var left_x := maxf(EDGE_MARGIN, inset.x) + r
 	var right_edge := size.x - maxf(EDGE_MARGIN, inset.z)
 	var left_c := Vector2(left_x, bottom - r)
-	var turbo_c := Vector2(right_edge - rt, bottom - rt)
-	var pedal_x := turbo_c.x - rt - PEDAL_GAP - r
-	var down_c := Vector2(pedal_x, bottom - r)
+	var hand_c := Vector2(right_edge - r, bottom - r)
+	var up_c := hand_c - Vector2(0.0, 2.0 * r + PEDAL_GAP)
 	return {
 		"left": [left_c, r],
 		"right": [left_c + Vector2(2.0 * r + STEER_GAP, 0.0), r],
-		"down": [down_c, r],
-		"up": [down_c - Vector2(0.0, 2.0 * r + PEDAL_GAP), r],
-		"turbo": [turbo_c, rt],
+		"handbrake": [hand_c, r],
+		"up": [up_c, r],
+		"turbo": [up_c - Vector2(r + PEDAL_GAP + rt, 0.0), rt],
 	}
 
 ## Zona sigura a ecranului (notch, colturi rotunjite, bara home), in unitatile
@@ -146,8 +148,8 @@ func _draw() -> void:
 				_draw_arrow(c, Vector2.RIGHT, r, ink)
 			"up":
 				_draw_arrow(c, Vector2.UP, r, ink)
-			"down":
-				_draw_arrow(c, Vector2.DOWN, r, ink)
+			"handbrake":
+				_draw_handbrake(c, r, font, ink)
 			"turbo":
 				draw_string(font, c + Vector2(-40, 8), "TURBO",
 					HORIZONTAL_ALIGNMENT_CENTER, 80, 22, ink)
@@ -161,3 +163,14 @@ func _draw_arrow(c: Vector2, dir: Vector2, r: float, col: Color) -> void:
 	var base := c - dir * s * 0.7
 	draw_colored_polygon(PackedVector2Array([
 		tip, base + side * s, base - side * s]), col)
+
+## Simbolul de frana de mana din bord: P intr-un cerc, intre doua paranteze.
+func _draw_handbrake(c: Vector2, r: float, font: Font, col: Color) -> void:
+	var w := maxf(r * 0.07, 3.0)
+	draw_arc(c, r * 0.36, 0.0, TAU, 40, col, w, true)
+	var side := deg_to_rad(42.0)
+	draw_arc(c, r * 0.56, PI - side, PI + side, 16, col, w, true)
+	draw_arc(c, r * 0.56, -side, side, 16, col, w, true)
+	var fs := int(r * 0.42)
+	draw_string(font, c + Vector2(-r, fs * 0.36), "P",
+		HORIZONTAL_ALIGNMENT_CENTER, 2.0 * r, fs, col)

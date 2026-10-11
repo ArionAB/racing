@@ -1,4 +1,4 @@
-# Track brief — Okinawa (`Track20`, temă `okinawa`) — v0.1 (concept)
+# Track brief — Okinawa (`Track20`, temă `okinawa`) — v0.3 (diorama + inventar acceptate)
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `monument_valley.md`. Secțiunile de assets (§5) sunt un **audit al kitului
@@ -363,7 +363,7 @@ claselor partajate, iar tenta doar întunecă, deci luminosul cere
 | olanele | `TILE_TERRACOTTA` 23 |
 | roșul lăcuit al porții și al palatului | `CAR_RED` 14 (de măsurat: dacă iese „plastic”, clasă `ok_lacquer` pe dala de lemn, fără să atingă clasa `wood`) |
 | ornamentele aurii | `CAR_YELLOW` 16, în puncte mici |
-| calcarul Ryukyu (ziduri, faleze, stânci-ciupercă) | `ROCK_LIGHT` 3 + clasă nouă **`ok_limestone`** pe o dală poroasă existentă (candidata e `coral_rock`, care e deja triplanar la scara 0,85; de comparat cu `mv_cap`) |
+| calcarul Ryukyu (ziduri, faleze, stânci-ciupercă) | **`MARBLE_GREY` 29** (`#B8B4AC`) + clasă nouă **`ok_limestone`** pe o dală poroasă existentă (candidata e `coral_rock`, care e deja triplanar la scara 0,85; de comparat cu `mv_cap`). **Corectat în v0.3:** v0.1 punea `ROCK_LIGHT` 3, dar hexul lui e `#C18446` (gresie portocalie), iar tenta doar întunecă, deci de acolo nu se ajunge la crem (memoria `slot-ales-dupa-nume`) |
 | crăpăturile, nișele (notch) | `ROCK_DARK` 4, **nu** pe calcar alb în suprafețe mari (memoria `rock-dark-nu-pe-bazalt`: iese rugină) |
 | fukugi, banian, pin | `TROPICAL_GREEN` 21 (dominant), `CACTUS_GREEN` 12 (cicade, pandanus) |
 | trestia | `DRY_VEGETATION` 13 + `TROPICAL_GREEN` 21 |
@@ -520,7 +520,8 @@ verifică ce face deja codul.
    fereastră**, apoi `tools/annotate_okinawa_plan.py`, tiparul
    `annotate_monument_plan.py`) → **prompturile ChatGPT v0.2 (§9)** →
    dioramă + planșă de inventar → kit Blender
-   (`docs/asset_briefs/okinawa_kit_v2.md`, `tools/blender/verify_okinawa.sh`)
+   (`docs/asset_briefs/okinawa_kit_v2.md`, `tools/blender/verify_okinawa_v2.sh`;
+   `verify_okinawa.sh` rămâne al kitului vechi)
    → integrare → POI A–H (gauntlet, valuri de 3).
 8. **Commit-ul de swap**, după decor și după al doilea verdict la volan:
    - Track20 pe indexul 1, Track08 scos din `TRACK_SCENES` / `TRACK_NAMES`;
@@ -775,7 +776,63 @@ fișier sunt contractul (categoria `assets/models/okinawa/`). Cotele vin din
 > distant island with one cone-shaped peak), `kerama_islands` (a strip of
 > low distant islands).
 
+### 9.2 Rezultatul: diorama și planșa acceptate
+
+Fișierele sunt în `img/okinawa_plan/`: `diorama_v02_iter1.jpg` (prima
+generare), `diorama_v02.jpg` (acceptată) și `inventar_v02.jpg` (planșa).
+Decupările per piesă sunt în `img/okinawa_assets_v1/`
+(`tools/blender/crop_okinawa_sheet.py`).
+
+**Prima generare, respinsă pe 11 puncte.** Cele care contau:
+- **POI B lipsea**: asfalt cu chiparoși în loc de aleea de nisip alb cu
+  tunelul de fukugi;
+- **podul era basculant** (două aripi înclinate), nu ridicător vertical;
+- **tromba stătea în larg**, ca o panglică subțire, nu traversa drumul;
+- **poarta stătea lângă drum**;
+- erau **trei faruri**, iar insula mică era plină de cocotieri;
+- **tetrapozii erau bolovani**, iar valul nu trecea peste șosea;
+- **o mașină avea livrea de poliție**.
+
+S-a cerut o corecție în aceeași conversație, nu o regenerare.
+
+**A doua generare, acceptată.** Nouă din unsprezece puncte sunt rezolvate.
+Au rămas două:
+- **poarta stă pe un drum lateral**, într-o intersecție în T, nu peste buclă;
+- **stânca-inimă e dublă**, iar shisa nu se văd pe acoperișuri.
+
+Nu s-a mai făcut o a treia rundă. Diorama e referință de compoziție, iar
+poziția porții vine din geometria Track20 (§2, ~0,43). O rundă în plus risca
+să strice ce ieșise bine.
+
+**Planșa, acceptată cu corecturi.** Are toate cele 48 de nume. Fraza adăugată
+la prompt („`ryukyu_gate` spans a 12 m road; heart_rock only once”) a
+funcționat. Abaterile intră ca **corecturi de coordonator** în
+`okinawa_kit_v2.md`, nu ca regenerare:
+- fukugi erau foioase rotunde, identice și prea deschise; trebuie coloane
+  dense, verde închis;
+- casele n-aveau shisa, mortar în relief și *hinpun*, iar cele trei erau
+  identice;
+- ambii shisa aveau gura deschisă. Se rezolvă singur, fiindcă se refolosește
+  perechea din kitul vechi;
+- stâncile-ciupercă erau identice;
+- zidul de corali era din blocuri dreptunghiulare;
+- vegetația era lipită pe clădiri;
+- vasul de coastă ieșise portcontainer;
+- scara nu e respectată (era de așteptat; cotele vin din §2.0 și §5).
+
 ## Istoric
+
+- **v0.3 (9 oct 2026):** diorama v0.2 acceptată la a doua generare, planșa de
+  inventar acceptată cu corecturi (§9.2). Contractul kitului e
+  `docs/asset_briefs/okinawa_kit_v2.md`:
+  - **35 de fișiere noi** în 7 grupe, pentru 36 de desene (Ie și Kerama
+    stau în același GLB de fundal);
+  - **11 desene acoperite de piese refolosite sau de cod**: tetrapod,
+    pandanus, banian, hibiscus, trestie, sabani, flotoare, shisa, broasca,
+    tromba, valul;
+  - `storm_wall` rămâne condiționat de cer.
+
+  Calcarul trece de pe `ROCK_LIGHT` pe `MARBLE_GREY` (§4).
 
 - **v0.2 (7 oct 2026):** §9 scris pe planul REAL al fundației Track20
   (`img/okinawa_plan/okinawa_plan.png`, `tools/annotate_okinawa_plan.py`).

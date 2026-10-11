@@ -613,6 +613,17 @@ const CLASS_TEXTURES := {
 	# `olkhon_marble` a gresiei (imparte imaginea ridicata, CLASS_LIFT_SHARED): fara modelul de
 	# zid de piatra al lui alpine_granite, care pe calota iesea mozaic gri-verzui. +1 material.
 	"mv_cap": "res://assets/textures/classes/olkhon_marble.png",
+	# CALCARUL RYUKYU (Track20, brief okinawa.md §4: gri-crem #CFC6B0). Dala
+	# `coral_rock` (poroasa, cu cratere si pete albe — singura din biblioteca care
+	# citeste ca roca de recif) RIDICATA, nu `olkhon_marble`: aceea are striuri
+	# verticale de lemn/sist, iar zidurile gusuku de 8 m ar fi iesit cu scoarta pe
+	# ele. Clasa e NOUA, `coral_rock` ramane neatinsa (stancile Track08).
+	"ok_limestone": "res://assets/textures/classes/coral_rock.png",
+	# OLANELE RYUKYU (#B8452E, rosu-caramiziu). Dala lui `roof_tiles` ridicata si
+	# tentata: slotul 23 (TILE_TERRACOTTA) iese portocaliu-pal, iar `roof_tiles`
+	# plin e brun-portocaliu (154,113,82), deci nici una nu da rosul din brief.
+	# Clasa separata, ca `roof_tiles` (case Dunele, Fiordland) sa ramana neatinsa.
+	"ok_roof": "res://assets/textures/classes/roof_tiles.png",
 	# TUFUL CREM al Cappadociei: hornurile, poarta geamana, gura de pestera si
 	# fatada bisericii rupestre. ACEEASI dala ca `red_valley_tuff` — nu se
 	# dubleaza in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica
@@ -1013,6 +1024,16 @@ const CLASS_TINT := {
 	"mv_sage": Color(1.130, 0.920, 0.880),
 	# Calota: tinta liniara (0.49, 0.35, 0.26) / dala ridicata la 0.70 => (0.955, 0.872, 0.861).
 	"mv_cap": Color(0.900, 0.830, 0.800),
+	# Calcarul Ryukyu (#CFC6B0 = 207,198,176). Dala `coral_rock` ridicata la 0.85
+	# (CLASS_LIFT) are media liniara (0.676, 0.651, 0.670); tinta liniara e
+	# (0.624, 0.565, 0.434) => multiplicator liniar (0.92, 0.87, 0.65) = in sRGB
+	# (0.965, 0.94, 0.825). INCEPUT DE CALIBRARE, de masurat pe captura de joc.
+	"ok_limestone": Color(0.988, 0.988, 0.945),
+	# Olanele (#B8452E = 184,69,46). Dala `roof_tiles` ridicata la 0.60 are media
+	# liniara (0.599, 0.303, 0.153); tinta liniara (0.479, 0.060, 0.027) =>
+	# multiplicator liniar (0.80, 0.20, 0.18) = in sRGB (0.906, 0.48, 0.46).
+	# TOATE canalele sub 1. INCEPUT DE CALIBRARE.
+	"ok_roof": Color(0.630, 0.370, 0.480),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
@@ -1234,6 +1255,12 @@ const CLASS_LIFT := {
 	"mv_sandstone": 0.820,
 	# Salvia: vezi CLASS_TINT (R tinta 142 > media dalei 86.7, deci ridicare).
 	"mv_sage": 0.950,
+	# Calcarul Ryukyu: dala `coral_rock` are luminanta 0.35 si trebuie sa ajunga
+	# pe un crem deschis (#CFC6B0, 0.78). Vezi CLASS_TINT.
+	"ok_limestone": 0.850,
+	# Olanele Ryukyu: R tinta (0.479 liniar) e peste media dalei `roof_tiles`
+	# (0.357), deci tenta singura nu ajunge. Vezi CLASS_TINT.
+	"ok_roof": 0.600,
 	"village_plaster": 0.88,
 	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
 	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:
@@ -1368,6 +1395,13 @@ const CLASS_TRIPLANAR_SCALE := {
 	"mv_sage": 1.4,
 	# Calota: aceeasi scara ca gresia (aceeasi dala).
 	"mv_cap": 0.065,
+	# Calcarul Ryukyu: dala de 1.1 m ca `coral_rock` (0.85), dar zidurile gusuku au
+	# 8 m: la 0.85 o fata prinde 7 repetitii pe inaltime si se citeste tapet.
+	# Mai rar (o repetitie la 1.7 m) cratere mai late, tot la scara de bolovan.
+	"ok_limestone": 0.6,
+	# Olanele: ~26 coloane de tigla pe repetitie. La 0.2 (5 m) coloana are ~0.19 m,
+	# aproape de nervurile de 0.2 m modelate in geometrie (`Gate_Roof`).
+	"ok_roof": 0.2,
 	# ACEEASI scara ca faleza rosie, si nu din lene: hornurile masoara 11-18 m
 	# pe verticala (masurat pe cele 12 .glb-uri — chimney_a 11.3, chimney_c 17.3,
 	# triple 18.5, twin_gate 21.6), adica exact plaja modulului de faleza de
@@ -1946,6 +1980,49 @@ static func plain_material() -> StandardMaterial3D:
 	return _plain_mat
 
 
+## Al saptelea prefix acceptat: "atint:<nume>". ATLASUL modelului, cu o TENTA pe
+## material: culoarea slotului ramane (nicio textura noua, nicio clasa
+## triplanara), dar se inmulteste cu `ATLAS_TINTS[nume]`.
+##
+## Exista fiindca un slot nu se poate muta pe alta culoare fara sa fie stricate
+## toate piesele care il folosesc, iar o clasa triplanara ar STERGE culoarea
+## slotului (textura inlocuieste atlasul). Cazul Okinawa (Track20): floarea de
+## bougainvillea sta pe FLAMINGO_PINK 31 (#D2A0BE, roz pal), iar tinta e magenta
+## #C2378F; frunzisul fukugi sta pe TROPICAL_GREEN 21 (#3F7A3C), iar tinta e
+## #2E5A2C. Tenta doar INTUNECA, deci tinta se alege sub slot pe fiecare canal.
+##
+## Un material per nume, partajat de toate piesele care il cer (garda numara
+## materiale, nu instante). Pastreaza stratul de detaliu al atlasului, ca
+## `world_material()`: copie cu `duplicate()`, texturile raman aceleasi obiecte.
+const ATINT_PREFIX := "atint:"
+
+const ATLAS_TINTS := {
+	# Magenta #C2378F pe slotul 31 (#D2A0BE): (0.92, 0.34, 0.75), valoarea din
+	# inventarul kitului (okinawa_inventory.md, bougainvillea). CALIBRATA in joc.
+	"ok_bloom": Color(0.890, 0.420, 0.830),
+	# Frunzisul fukugi/pin: #3F7A3C -> #2E5A2C, liniar (0.55, 0.52, 0.56) = in
+	# sRGB (0.76, 0.745, 0.77). INCEPUT DE CALIBRARE, de masurat in joc.
+	"ok_leaves": Color(0.760, 0.720, 1.000),
+	# Lacul (#B3261E = 179,38,30) pe slotul KERB_RED 7. Pe captura de joc, fata
+	# luminata a peretelui palatului iesea (222, 48, 19) = #DE3013: portocaliu-aprins,
+	# mult peste tinta (nu „plastic" prin luciu, ci prin valoare si saturatie).
+	# Tenta liniara R 0.62, G 0.66; B nu poate creste (19 vs 30), ramane 1.0 => in
+	# sRGB (0.81, 0.84, 1.0). Doar pe `*_Lacquer`; aurul si mortarul raman pe atlas.
+	"ok_lacquer": Color(0.810, 0.840, 1.000),
+}
+
+static var _atint_mats: Dictionary = {}
+
+static func atlas_tint_material(name: String) -> StandardMaterial3D:
+	if _atint_mats.has(name):
+		return _atint_mats[name]
+	assert(ATLAS_TINTS.has(name), "tenta de atlas necunoscuta: " + name)
+	var mat := world_material().duplicate() as StandardMaterial3D
+	mat.albedo_color = ATLAS_TINTS[name]
+	_atint_mats[name] = mat
+	return mat
+
+
 ## Materialul cerut de un "glow:<slot>|<energie>". Energia e optionala
 ## (implicit 1.2, ca la `glow_material`).
 static func _glow_from_spec(spec: String) -> StandardMaterial3D:
@@ -2239,6 +2316,9 @@ static func apply_class_materials(root: Node, mapping: Dictionary) -> void:
 		elif cls.begins_with(GLOW_PREFIX):
 			mi.material_override = _glow_from_spec(
 				cls.trim_prefix(GLOW_PREFIX))
+		elif cls.begins_with(ATINT_PREFIX):
+			mi.material_override = atlas_tint_material(
+				cls.trim_prefix(ATINT_PREFIX))
 		elif cls.begins_with(TRI_PREFIX):
 			mi.material_override = triplanar_class_material(
 				cls.trim_prefix(TRI_PREFIX))
@@ -2274,6 +2354,9 @@ static func apply_object_class_materials(root: Node, mapping: Dictionary,
 		elif cls.begins_with(GLOW_PREFIX):
 			mi.material_override = _glow_from_spec(
 				cls.trim_prefix(GLOW_PREFIX))
+		elif cls.begins_with(ATINT_PREFIX):
+			mi.material_override = atlas_tint_material(
+				cls.trim_prefix(ATINT_PREFIX))
 		elif cls.begins_with(TRI_PREFIX):
 			mi.material_override = object_triplanar_class_material(
 				cls.trim_prefix(TRI_PREFIX), world_scale)

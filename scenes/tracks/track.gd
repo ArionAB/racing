@@ -2465,7 +2465,7 @@ static func themes() -> Dictionary:
 		# 2. Soare JOS (~20°), cald, dinspre mare — ora la care emisivul lavei
 		#    (PR-ul hazardului) incepe sa se citeasca fara sa fie noapte.
 		# 3. `fog_end` 300, peste ce cer alte teme calde: de pe buza craterului
-		#    (70 m) diagonala pana la sat e ~280 m, iar dezvaluirea din brief
+		#    (70 m) diagonala pana la sat e ~250 m, iar dezvaluirea din brief
 		#    (§2.0) exista doar daca satul ramane sub ceata. Cotele raman legate:
 		#    inele orizont < fog_end < FAR_PLANE 380.
 		# 4. `walls: false`, ca pe Alpi, si din acelasi motiv: e drum de munte
@@ -3928,10 +3928,39 @@ static func themes() -> Dictionary:
 		# `custom_sun_rotation_deg` din Track20.tscn (conventia busolei din
 		# gen_okinawa_route.py: 180 - y = 250 = VSV).
 		"sun_rotation_deg": Vector3(-25, -70, 0),
-		# Ceata 140 -> 350 m: castelul trebuie sa se vada intreg de la ~280 m
+		# Ceata 140 -> 350 m: castelul trebuie sa se vada intreg de la ~250 m
 		# (brief §2.0), iar ceata implicita (90 -> 250) il inghite.
 		"fog_begin": 140.0,
 		"fog_end": 350.0,
+		# FUNDALUL (brief §2.0): insula Ie (conul Gusukuyama) pe inelul de NV si
+		# insulele Kerama pe inelul de V/S, din `okinawa_horizon.glb` (noduri copii
+		# directe ale radacinii: IeIsland_A, Kerama_A/B/C). Inelele stau intre 200 si
+		# 340 m, sub fog_end 350 < FAR_PLANE 380 (memoria efecte-de-fundal-cote-legate),
+		# iar `_build_horizon` stinge aruncarea de umbra (caster-departat-fura-umbra)
+		# si piesa nu are coliziune (PROP_COLLISION "none"). `horizon_picks` se
+		# GOLESTE: tema `island` de la care pornim il are setat pe insulele Track08,
+		# iar o lista de tema bate `picks` din inel.
+		#
+		# `horizon_class` gol = atlasul modelului: platoul, padurea si falezele palide
+		# (MARBLE_GREY) sunt pictate in sloturi; `coral_rock` din `island` le-ar sterge.
+		"horizon_model": "res://assets/models/okinawa/effects/okinawa_horizon.glb",
+		"horizon_picks": [],
+		"horizon_class": "",
+		"horizon_rings": [
+			# POZITII FIXE (`"at"`, x/z de lume), alese din harta in MARE, nu pe
+			# raza din centroid (vezi `_build_horizon`). Insula Ie la NV, ~250 m
+			# de aleea B si ~210 m de urcarea C (brief §2.0: cota varfului ramane in
+			# cadru, (45 - 4 - 15) / 300 = 0,087 < tan 5,25 = 0,092). Kerama la V
+			# si S, in fata drumului de pe latura de sud a portului (POI A).
+			{"near": 230.0, "far": 340.0, "count": 1, "scale": 1.0,
+				"clear": 80.0, "picks": ["IeIsland_A"], "at": Vector2(-360.0, -250.0)},
+			{"near": 230.0, "far": 340.0, "count": 1, "scale": 1.0,
+				"clear": 80.0, "picks": ["Kerama_A"], "at": Vector2(-100.0, 450.0)},
+			{"near": 230.0, "far": 340.0, "count": 1, "scale": 1.0,
+				"clear": 80.0, "picks": ["Kerama_B"], "at": Vector2(-300.0, 330.0)},
+			{"near": 230.0, "far": 340.0, "count": 1, "scale": 1.0,
+				"clear": 80.0, "picks": ["Kerama_C"], "at": Vector2(-430.0, 120.0)},
+		],
 	}, true)
 	_themes_cache["okinawa"] = oki
 	return _themes_cache
@@ -5857,7 +5886,18 @@ func _build_horizon(centroid: Vector3) -> void:
 			# asa e mai bine: cer gol pe un arc e mai putin rau decat un munte
 			# care se preface ca e in fata ta.
 			var relaxari: Array[float] = [1.0, 0.85, 0.7, 0.55]
-			for relax in relaxari:
+			# POZITIE FIXA (optional, oct 2026, Okinawa): `"at": Vector2(x, z)` in
+			# coordonate de lume sare peste cautarea pe raza. Cautarea porneste din
+			# CENTROID, iar pe o insula care ocupa ~640 m din cei ~700 ai lumii, o raza
+			# de 230-340 m din centroid cade mai ales PE insula (insula Ie ajungea in
+			# mijlocul dealului), nu in largul din care trebuie sa se vada. Pozitia se
+			# alege din harta, la 250-340 m de sosea, in mare. Fara cheia asta, nimic
+			# nu se schimba pe celelalte teme (aceeasi tragere rng, aceeasi cautare).
+			if ring.has("at"):
+				var at: Vector2 = ring["at"]
+				pos = Vector3(at.x, 0.0, at.y)
+				found = true
+			for relax in ([] if found else relaxari):
 				var dist: float = float(ring["near"])
 				while dist <= limit:
 					var cand := centroid 						+ Vector3(cos(angle), 0, sin(angle)) * dist

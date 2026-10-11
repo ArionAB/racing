@@ -49,6 +49,11 @@ const TRUNK_RADIUS := {
 	# Monument Valley: latimea AABB minte (coroana de 4,4 m, bratul de 2 m, rombul
 	# de 1,4 m); raza reala vine de pe nodul de trunchi/stalp din GLB.
 	"juniper": 0.45, "telegraph_pole": 0.16, "open_range_sign": 0.12,
+	# Okinawa: coroana fukugi (2,8 m) si evantaiele palmierului nu sunt trunchi.
+	# Raze masurate pe nodul `*_Bark` la y < 1 m (fukugi 0,21-0,23; palmier 0,35;
+	# pinul are baza evazata, r 1,35 la y < 1, dar trunchiul real e ~0,7).
+	"fukugi_tree_a": 0.25, "fukugi_tree_b": 0.25, "fukugi_tree_c": 0.25,
+	"ryukyu_pine": 0.7, "fan_palm": 0.35, "convex_mirror": 0.1,
 }
 
 ## Numele metadatei prin care o INSTANTA anume iese din regula generala.
@@ -418,6 +423,50 @@ const PROP_COLLISION := {
 	# `SlidingHazard`, cu corpul lui).
 	"tourist_group": "none", "raven": "none", "sheep": "none",
 	"horse_bay": "none", "horse_pinto": "none", "horse_black": "none",
+	# --- Okinawa (kitul din assets/models/okinawa/, 36 de piese) -------------------
+	# Inventarul COMPLET, scris explicit. Cheia e fisierul (stem).
+	#
+	# PORTA Ryukyu (peste drum, gol de 14,35 x 6,20 m): `mesh`, NU hull. Un hull
+	# convex peste cei 8 stalpi ar umple tot golul. Doar `Gate_Lacquer` (stalpii,
+	# grinzile de la 6,2 m in sus) si `Gate_Limestone` (soclurile) au corp; acoperisul,
+	# mortarul si aurul sunt la >= 6,8 m deasupra soselei (HULL_SKIP_PARTS).
+	"ryukyu_gate": "mesh",
+	# Arcul gusuku: zid cu bolta de 4 x 4,5 m, nu e pe drum; `mesh` ca bolta sa ramana
+	# libera (hull-ul ar sigila intrarea spre platforma palatului).
+	"gusuku_arch_gate": "mesh",
+	# Farul: turn + casa paznicului in aceeasi plasa (`Lighthouse_Plaster`), iar un
+	# hull ar umple un clin de aer intre varful turnului (20 m) si acoperisul casei
+	# (3,5 m). Plasa e mica (~1000 tri), deci trimesh-ul exact costa putin.
+	"cape_lighthouse": "mesh",
+	# Stancile-ciuperca: nisa de la baza (~1,5 m) si capul de 7-9 m fac din hull un
+	# con plin sub cap, adica un perete de aer in fata nisei. `mesh` (1.200-1.450 tri).
+	"notch_rock_a": "mesh", "notch_rock_b": "mesh", "notch_rock_c": "mesh",
+	# Stanca-inima: doi lobi care se unesc intr-un varf infipt in apa; hull = corect.
+	"heart_rock": "hull",
+	# Falezele-modul (provizorii, inca nefolosite): bloc compact cu nisa la baza.
+	"limestone_cliff_module": "hull", "limestone_cliff_module_b": "hull",
+	# Zidurile gusuku: hull per modul. Modulul curb (R 20 m, coarda 16 m) isi umple
+	# sageata de 1,7 m pe fata concava; de rezolvat la POI D, per instanta, cu
+	# `coliziune = "mesh"` daca un modul se aseaza cu fata concava spre drum.
+	"gusuku_wall_curve": "hull", "gusuku_wall_straight": "hull",
+	"coral_stone_wall": "hull",
+	# Palatul, casele, cheiul, refugiul, automatul: cladiri solide (hull per parte,
+	# acoperisurile si anexele de lemn sunt sarite — HULL_SKIP_PARTS).
+	"ryukyu_palace": "hull",
+	"ryukyu_house_a": "hull", "ryukyu_house_b": "hull", "ryukyu_house_c": "hull",
+	"concrete_house_a": "hull", "concrete_house_b": "hull",
+	"harbour_quay": "hull", "bus_stop_shelter": "hull", "vending_machine": "hull",
+	# Copaci: cilindru pe trunchi (TRUNK_RADIUS). Cicada, tufele si plasa de pescuit
+	# sunt moi sau joase: se trece prin ele. `bougainvillea` NU are intrare aici:
+	# cheia (stem) e impartita cu `stromboli/props/bougainvillea.glb`, care e `hull`
+	# pe Track11 — instantele Okinawa poarta `coliziune = "none"` in .tscn.
+	"fukugi_tree_a": "trunk", "fukugi_tree_b": "trunk", "fukugi_tree_c": "trunk",
+	"ryukyu_pine": "trunk", "fan_palm": "trunk", "convex_mirror": "trunk",
+	"cycad": "none", "fishing_net_rack": "none",
+	# Animale, vapoare (mutate de hazard, au corpul lor), fundalul: fara corp.
+	"water_buffalo": "none", "egret": "none",
+	"island_ferry": "none", "coastal_freighter": "none", "fishing_boat": "none",
+	"okinawa_horizon": "none",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -2008,6 +2057,73 @@ const MV_ROCK_FIN := {"Fin_Rock": _MV, "Fin_Scree": _MV}
 const MV_ROCK_HOODOO := {"Hoodoo_Rock": _MV, "Hoodoo_Scree": _MV, "Hoodoo_Cap": _MVC}
 const MV_ROCK_TALUS := {"Talus_Scree": _MV}
 
+## Clasele kitului Okinawa (Track20), pe FISIER si pe numele intreg al nodului.
+##
+## De ce tot kitul e aici si nu in `ISLAND_CLASSES` & co: acelea se contopesc in
+## `prop_classes()`, global, iar numele de noduri ale kitului (`House_Roof`,
+## `House_Plaster`, `Wall_*`, `Cliff_*`, `Palm_Bark`) COINCID cu chei ale altor
+## piste (`House_Roof` -> `roof_tiles`, `Wall_` -> `village_plaster`, `Cliff_` ->
+## `olkhon_marble`, `Palm_Bark` -> `bark`). Maparea pe TEMA ruleaza DUPA cea
+## globala si o suprascrie, deci fiecare nod de mai jos e numit explicit, inclusiv
+## cele care trebuie sa ramana pe atlas (`ATLAS_PREFIX`).
+##
+## Culorile se citesc din clasa, nu din slot (vezi `Palette.CLASS_TINT`):
+##   `ok_limestone`  calcarul gri-crem  #CFC6B0 (dala `coral_rock` ridicata)
+##   `ok_roof`       olanele            #B8452E (dala `roof_tiles` ridicata)
+##   `ok_leaves`     frunzisul          #2E5A2C (atlas tentat, fara textura)
+##   `ok_bloom`      bougainvillea      #C2378F (atlas tentat)
+##   `ok_lacquer`    lacul porti/palat  #B3261E (atlas tentat; KERB_RED iesea #DE3013)
+## Mortarul si aurul raman pe atlas.
+const _OK_LIME: String = Palette.TRI_PREFIX + "ok_limestone"
+const _OK_ROOF: String = Palette.TRI_PREFIX + "ok_roof"
+const _OK_LEAVES: String = Palette.ATINT_PREFIX + "ok_leaves"
+const _OK_BLOOM: String = Palette.ATINT_PREFIX + "ok_bloom"
+const _OK_LACQUER: String = Palette.ATINT_PREFIX + "ok_lacquer"
+const _OK_PLASTER: String = Palette.TRI_PREFIX + "plaster"
+const _OK_CORAL: String = Palette.TRI_PREFIX + "coral_rock"
+const _OK_CONCRETE: String = Palette.TRI_PREFIX + "concrete"
+const _OK_HOUSE := {"House_Roof": _OK_ROOF, "House_Plaster": _OK_PLASTER,
+	"House_Coral": _OK_CORAL}
+const _OK_CONCRETE_HOUSE := {"Concrete_Plaster": _OK_PLASTER,
+	"Concrete_Concrete": _OK_CONCRETE}
+const _OK_NOTCH := {"Notch_Limestone": _OK_LIME}
+const _OK_CLIFF := {"Cliff_Limestone": _OK_LIME,
+	"Cliff_Grass": Palette.ATLAS_PREFIX}
+const CLASSES_OKINAWA := {
+	"ryukyu_gate": {"Gate_Limestone": _OK_LIME, "Gate_Roof": _OK_ROOF,
+		"Gate_Lacquer": _OK_LACQUER},
+	"ryukyu_palace": {"Palace_Limestone": _OK_LIME, "Palace_Roof": _OK_ROOF,
+		"Palace_Lacquer": _OK_LACQUER},
+	"gusuku_wall_curve": {"Wall_A_Limestone": _OK_LIME, "Wall_B_Limestone": _OK_LIME},
+	"gusuku_wall_straight": {"Wall_Limestone": _OK_LIME},
+	"gusuku_arch_gate": {"Arch_Limestone": _OK_LIME},
+	"notch_rock_a": _OK_NOTCH, "notch_rock_b": _OK_NOTCH, "notch_rock_c": _OK_NOTCH,
+	"heart_rock": {"Heart_Limestone": _OK_LIME},
+	"limestone_cliff_module": _OK_CLIFF, "limestone_cliff_module_b": _OK_CLIFF,
+	# Turnul ramane pe atlas (FOAM_WHITE): clasa `plaster` (152,141,126) il facea
+	# bej pe captura, iar farul e ALB (kit §1.2). Numit explicit fiindca
+	# `Lighthouse_White` e cheie globala `plaster` pentru farul vechi.
+	"cape_lighthouse": {"Lighthouse_Limestone": _OK_LIME,
+		"Lighthouse_Plaster": Palette.ATLAS_PREFIX, "Lighthouse_Roof": _OK_ROOF},
+	"ryukyu_house_a": _OK_HOUSE, "ryukyu_house_b": _OK_HOUSE,
+	"ryukyu_house_c": _OK_HOUSE,
+	"concrete_house_a": _OK_CONCRETE_HOUSE, "concrete_house_b": _OK_CONCRETE_HOUSE,
+	"harbour_quay": {"Quay_Concrete": _OK_CONCRETE},
+	"bus_stop_shelter": {"Shelter_Roof": _OK_ROOF, "Shelter_Coral": _OK_CORAL},
+	"coral_stone_wall": {"Coral_Wall_Coral": _OK_CORAL},
+	"vending_machine": {"Vending_Plaster": _OK_PLASTER},
+	"fukugi_tree_a": {"Fukugi_Leaves": _OK_LEAVES},
+	"fukugi_tree_b": {"Fukugi_Leaves": _OK_LEAVES},
+	"fukugi_tree_c": {"Fukugi_Leaves": _OK_LEAVES},
+	"ryukyu_pine": {"Pine_Leaves": _OK_LEAVES},
+	"cycad": {"Cycad_Leaves": _OK_LEAVES},
+	# `Palm_Bark` e cheie GLOBALA (`bark`, non-triplanar, deci un singur texel pe
+	# UV-urile colapsate): trunchiul palmierului revine explicit pe atlas.
+	"fan_palm": {"Palm_Leaves": _OK_LEAVES, "Palm_Bark": Palette.ATLAS_PREFIX},
+	"bougainvillea": {"Bougainvillea_Leaves": _OK_LEAVES,
+		"Bougainvillea_Bloom": _OK_BLOOM},
+}
+
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),
 ## nu global — la fel cum [constant SLOT_REMAP_BY_THEME] exista langa
 ## [constant SLOT_REMAP_BY_MODEL].
@@ -2096,6 +2212,8 @@ const CLASSES_BY_THEME := {
 		# Postul de negot: piatra pe clasa calotei (#B9A08C), nu pe SAND_LIGHT (galben).
 		"trading_post": {"Post_Stone": _MVC},
 	},
+	# Okinawa (Track20): vezi `CLASSES_OKINAWA`.
+	"okinawa": CLASSES_OKINAWA,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -3236,6 +3354,8 @@ func _model_class_material(cls: String) -> Material:
 	# ar fi cazut tacut pe o clasa triplanara inexistenta, ca "glow:" inainte.
 	if cls.begins_with(Palette.SHADER_PREFIX):
 		return Palette.shader_material(cls.trim_prefix(Palette.SHADER_PREFIX))
+	if cls.begins_with(Palette.ATINT_PREFIX):
+		return Palette.atlas_tint_material(cls.trim_prefix(Palette.ATINT_PREFIX))
 	return Palette.triplanar_class_material(
 		cls.trim_prefix(Palette.TRI_PREFIX))
 
@@ -3414,6 +3534,24 @@ const HULL_SKIP_PARTS := {
 	"west_mitten": ["Mitten_Scree", "Mitten_Cap"],
 	"east_mitten": ["EastMitten_Scree", "EastMitten_Cap"],
 	"merrick_butte": ["Butte_Scree", "Butte_Cap"],
+	# Okinawa. Portile si arcurile sunt `mesh` (citit tot de `_add_trimesh`).
+	# Poarta: acoperisul/mortarul/aurul stau la >= 6,8 m peste drum, deasupra oricarei
+	# masini; stalpii si soclurile sunt corpul. Arcul: canatul de lemn e decor.
+	"ryukyu_gate": ["Gate_Roof", "Gate_Mortar", "Gate_Gold"],
+	"gusuku_arch_gate": ["Arch_Wood"],
+	"notch_rock_a": ["Notch_Grass"], "notch_rock_b": ["Notch_Grass"],
+	"notch_rock_c": ["Notch_Grass"],
+	"limestone_cliff_module": ["Cliff_Grass"], "limestone_cliff_module_b": ["Cliff_Grass"],
+	# Cladiri: hull doar pe corp (pereti, curte, platforma). Acoperisul (streasina
+	# iese 1-1,5 m), mortarul, aurul, shisa, lemnaria prispei si scarile nu sunt
+	# obstacole: hull pe ele ar umple prispa si ar lipi un perete in aer sub streasina.
+	"ryukyu_palace": ["Palace_Roof", "Palace_Mortar", "Palace_Gold"],
+	"ryukyu_house_a": ["House_Roof", "House_Mortar", "House_Shisa", "House_Wood"],
+	"ryukyu_house_b": ["House_Roof", "House_Mortar", "House_Shisa", "House_Wood"],
+	"ryukyu_house_c": ["House_Roof", "House_Mortar", "House_Shisa", "House_Wood"],
+	"concrete_house_a": ["Concrete_Wood"], "concrete_house_b": ["Concrete_Wood"],
+	"harbour_quay": ["Quay_Rubber"],
+	"bus_stop_shelter": ["Shelter_Concrete", "Shelter_Mortar"],
 	# Kyoto: casele de oras au hull doar pe miezul de lemn (peretii). Acoperisul
 	# (streasina iese 1,1 m dincolo de perete), zabrelele din fata (pana la 0,9 m
 	# in strada), norenul si jaluzelele nu sunt obstacole: un hull pe ele ar
@@ -3473,6 +3611,42 @@ func _build_collision() -> void:
 		# reparentarea ar muta nodul asezat de mana — adica exact ce n-are voie
 		# sa faca un pas automat peste munca din editor.
 		model.get_parent().add_child(body)
+		_add_camera_only_body(model)
+
+
+## Partile care blocheaza DOAR CAMERA, nu masina (stem -> nume de mesh).
+##
+## Poarta Ryukyu are acoperisul la 6,8-13,2 m peste drum, deasupra oricarei masini,
+## deci `ryukyu_gate` nu are corp fizic pe el (`HULL_SKIP_PARTS`). Camera de joc sta
+## insa la 10 m: cand masina e la 9-15 m dincolo de poarta, camera e INAUNTRUL
+## acoperisului si cadrul devine o culoare plata (vezi tools/probe_camera_solid.gd).
+## Corpul de aici are hull pe parti si sta DOAR pe `CAMERA_BLOCKER_LAYER`, fara
+## masca: `ChaseCamera._unclip` il vede si trage camera in fata lui, masina trece
+## prin el ca prin aer.
+const CAMERA_ONLY_PARTS := {
+	"ryukyu_gate": ["Gate_Roof", "Gate_Mortar"],
+}
+
+
+func _add_camera_only_body(model: Node3D) -> void:
+	var stem := model.scene_file_path.get_file().get_basename()
+	if not CAMERA_ONLY_PARTS.has(stem):
+		return
+	var keep: Array = CAMERA_ONLY_PARTS[stem]
+	var skip: Array = []
+	for entry in TrackDecor.visible_meshes(model, model.transform):
+		var nm := String((entry[0] as MeshInstance3D).name)
+		if not keep.has(nm):
+			skip.append(nm)
+	var body := StaticBody3D.new()
+	body.name = "%s_cam" % model.name
+	body.collision_layer = Track.CAMERA_BLOCKER_LAYER
+	body.collision_mask = 0
+	if not TrackDecor.add_hull_collision(body, model, true, skip):
+		body.free()
+		return
+	body.set_meta("mod_coliziune", "camera")
+	model.get_parent().add_child(body)
 
 
 ## Instantele de model din subarbore. Se opreste la prima gasita (un .glb nu

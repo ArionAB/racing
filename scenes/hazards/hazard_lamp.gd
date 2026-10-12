@@ -49,7 +49,71 @@ extends Node3D
 		housing_slot = value
 		_rebuild()
 
+## [b]Opt-in, Transfagarasan (oct 2026).[/b] Semaforul de la tunel era invizibil
+## pe telefon: lampa statea la nivelul soselei, cu becuri de 0,34 m fara emisie.
+## Cu `glow_energy > 0` becul APRINS foloseste `Palette.glow_material` (emisie pe
+## slotul lui, cate un material per culoare, partajat) iar becul STINS ramane
+## vizibil si INTUNECAT (slot ASPHALT, pe materialul lumii: zero materiale
+## noi). Implicit 0 = comportamentul vechi, bit-identic (Track16 si restul).
+@export_range(0.0, 8.0, 0.1) var glow_energy: float = 0.0:
+	set(value):
+		glow_energy = value
+		_rebuild()
+
+## Care becuri ard pe material emisiv (indici in `slots`). Gol = toate. Un bec
+## care nu se aprinde niciodata (galbenul semaforului de santier) n-are nevoie
+## de materialul lui emisiv, iar garda numara materialele per pista.
+@export var glow_bulbs: Array[int] = []:
+	set(value):
+		glow_bulbs = value
+		_rebuild()
+
+## Inaltimea capului lampii fata de nodul-radacina (m). Cu `pole_slot >= 0`
+## se construieste si un stalp de la nod pana la cap. Implicit 0 = ca inainte.
+@export_range(0.0, 10.0, 0.1) var head_height: float = 0.0:
+	set(value):
+		head_height = value
+		_rebuild()
+
+## Cat iese capul lampii spre -X local, pe o consola orizontala prinsa de stalp
+## (semaforul de santier sta pe acostament si priveste peste banda). 0 = capul
+## direct pe stalp.
+@export_range(0.0, 10.0, 0.1) var arm_length: float = 0.0:
+	set(value):
+		arm_length = value
+		_rebuild()
+
+## Inverseaza ordinea pe verticala: slotul 0 jos, ultimul slot SUS. Implicit
+## (fals) slotul 0 sta SUS, deci pe un semafor [verde, galben, rosu] rosul e
+## jos — invers decat zice comentariul din `_rebuild`. Raman neatinse pistele
+## existente; semaforul de santier din Transfagarasan cere rosul sus, ca in
+## viata reala.
+@export var invert_stack: bool = false:
+	set(value):
+		invert_stack = value
+		_rebuild()
+
+## Slotul stalpului (negativ = fara stalp).
+@export var pole_slot: int = -1:
+	set(value):
+		pole_slot = value
+		_rebuild()
+
+## Latimea unei linii de oprire pe sosea, trasata la nivelul nodului, spre
+## interior (-X local). 0 = fara. Doar un indiciu vizual, fara coliziune.
+@export_range(0.0, 20.0, 0.5) var stop_line_span: float = 0.0:
+	set(value):
+		stop_line_span = value
+		_rebuild()
+
+## Distanta de la stalp pana la mijlocul liniei de oprire (pe -X local).
+@export_range(0.0, 20.0, 0.1) var stop_line_offset: float = 0.0:
+	set(value):
+		stop_line_offset = value
+		_rebuild()
+
 var _bulbs: Array[MeshInstance3D] = []
+var _dark: Array[MeshInstance3D] = []
 var _lit: int = -1
 var _blink_on: bool = true
 
@@ -65,25 +129,52 @@ func _rebuild() -> void:
 		remove_child(child)
 		child.queue_free()
 	_bulbs.clear()
+	_dark.clear()
 	var n := slots.size()
 	if n == 0:
 		return
 	var span := float(n - 1) * spacing
+	var hs := Vector3(bulb_size * 1.5, span + bulb_size * 1.6, bulb_size * 0.5)
+	if not vertical:
+		hs = Vector3(span + bulb_size * 1.6, bulb_size * 1.5, bulb_size * 0.5)
+	var head_x := -arm_length
+	if pole_slot >= 0 and head_height > 0.0:
+		# Stalpul urca pana deasupra capului; consola il leaga de cap.
+		var top := head_height + hs.y * 0.5 + 0.1
+		add_child(PaletteBox.instance(Vector3(0.22, top + 0.5, 0.22),
+			pole_slot, Vector3(0.0, (top - 0.5) * 0.5, -bulb_size * 0.9)))
+		if arm_length > 0.0:
+			add_child(PaletteBox.instance(Vector3(arm_length + 0.22, 0.18, 0.18),
+				pole_slot, Vector3(head_x * 0.5, top, -bulb_size * 0.9)))
+	if stop_line_span > 0.0:
+		add_child(PaletteBox.instance(Vector3(stop_line_span, 0.1, 2.0),
+			Palette.FOAM_WHITE, Vector3(-stop_line_offset, 0.09, 0.0)))
 	if housing_slot >= 0:
-		var hs := Vector3(bulb_size * 1.5, span + bulb_size * 1.6, bulb_size * 0.5)
-		if not vertical:
-			hs = Vector3(span + bulb_size * 1.6, bulb_size * 1.5, bulb_size * 0.5)
 		add_child(PaletteBox.instance(hs, housing_slot,
-			Vector3(0.0, 0.0, -bulb_size * 0.4)))
+			Vector3(head_x, head_height, -bulb_size * 0.4)))
 	for i in n:
 		var t := float(i) * spacing - span * 0.5
+		if invert_stack:
+			t = -t
 		# Semaforul are ROSUL SUS, ca orice semafor: primul slot din lista e
 		# primul din drumul ciclului (verde), deci pe verticala se numara de
 		# jos in sus.
 		var at := Vector3(0.0, -t, 0.0) if vertical else Vector3(t, 0.0, 0.0)
+		at.y += head_height
+		at.x += head_x
 		var bulb := PaletteBox.instance(Vector3.ONE * bulb_size, slots[i], at)
 		bulb.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		bulb.visible = i == _lit
+		if glow_energy > 0.0 and (glow_bulbs.is_empty() or i in glow_bulbs):
+			bulb.material_override = Palette.glow_material(slots[i], glow_energy)
+		if glow_energy > 0.0:
+			# Becul stins: cutie INTUNECATA pe materialul lumii, ca sa se vada
+			# ca e o lampa stinsa, nu o gaura.
+			var dark := PaletteBox.instance(Vector3.ONE * bulb_size, Palette.ASPHALT, at)
+			dark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			dark.visible = i != _lit
+			add_child(dark)
+			_dark.append(dark)
 		add_child(bulb)
 		_bulbs.append(bulb)
 
@@ -105,7 +196,10 @@ func blink(idx: int, on: bool) -> void:
 
 func _apply() -> void:
 	for i in _bulbs.size():
-		_bulbs[i].visible = i == _lit and _blink_on
+		var on := i == _lit and _blink_on
+		_bulbs[i].visible = on
+		if i < _dark.size():
+			_dark[i].visible = not on
 
 
 ## Ce bec e aprins acum (pentru sonde). -1 = niciunul.

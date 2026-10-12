@@ -432,7 +432,7 @@ add("Portal_N", "tunnel",
     f"Transform3D({rot_y_s(yaw_z_to(*d_out), 1.5, 1.25, 1.0)}, {g_out[0]:.2f}, {g_out[1]:.2f}, {g_out[2]:.2f})",
     'metadata/coliziune = "none"')
 # utilajul parcat la portalul de sud, pe acostament
-gp = at_road(F_TUNNEL - 22.0 / L_TOTAL, 9.0)
+gp = at_road(F_TUNNEL - 50.0 / L_TOTAL, 9.0)   # dincolo de lampa (34 m), sa nu-i stea in fundal
 add("Utilaj_parcat", "snowplow",
     f"Transform3D({rot_y(yaw_z_to(*d_in), 1.0)}, {gp[0]:.2f}, {gp[1]:.2f}, {gp[2]:.2f})")
 # pereti de zapada provizorii: petice ridicate pe verticala, de-o parte si de alta a ultimilor 80 m
@@ -459,12 +459,73 @@ for fl in ("F ac1b", "F ac2a", "F ac2b", "F ac3a", "F ac3b", "F ac4a", "F ac4b")
             f"Transform3D({rot_y(yaw_z_to(*travel_g(ff)) + 90.0, 0.7)}, {g[0]:.2f}, {g[1] - 0.3:.2f}, {g[2]:.2f})")
         k += 1
 
+# --- semaforul de la tunel: lampa pe stalp (nu la nivelul soselei), becuri mari, emisie ------
+LAMP_BULB = 1.1
+LAMP_SPACING = 1.25
+LAMP_GLOW = 1.4
+LAMP_HEAD = 5.6
+LAMP_ARM = 3.4          # consola peste banda (capul sta la 7,6 - 3,4 = 4,2 m din axa)
+LAMP_BACK_M = 34.0      # stalpul sta cu atat INAINTEA gurii: portalul (15,3 m adancime, 28 m lat.) si coltul
+                        # lateral 6-14 m) ar fi acoperit stalpul si capul, masurat pe captura
+
+# --- parapete de beton cu coliziune pe serpentine (Track._build_parapets) --------------------
+# Un ac de par = doua arce de 90 grade (r 16) consecutive: arcul "a" e centrat pe F[acNa], arcul
+# "b" pe F[acNb], fiecare de ~25 m. Marja de 4 m in plus la capete. Ramurile (drepte) stau INTRE
+# aceste ace: ramura k merge de la sfarsitul acului k-1 la inceputul acului k.
+# Latura: +1 dreapta, -1 stanga in sensul de mers. Marginea din VALE a unei ramuri e cea dinspre
+# ramura urmatoare: ramura 1 (spre V) o are pe dreapta, ramura 2 (spre E) pe stanga, etc.
+# Acul are parapet pe AMBELE laturi: exteriorul (altfel iesi pe versant si cobori pe langa
+# stiva) si interiorul (altfel taiai coltul peste fasia dintre ramuri).
+# DESCHIDEREA pentru scurtatura ciobanilor (brief §3.1 decizia 4, ramura 3 -> ramura 4 peste
+# acul 3): PE DREAPTA ramurii 3, pe PARAP_GAP_M metri, imediat inaintea acului 3. Taierea
+# viitoare se leaga de aici: poteca coboara pe fasia dintre ramuri si intra pe ramura 4 prin
+# marginea ei dreapta (de pe ramura 4, spre sud/amonte, nu are parapet). Pune
+# PARAP_OPEN_AC3 = False ca sa inchizi complet.
+PARAP_OPEN_AC3 = True
+PARAP_GAP_M = (26.0, 6.0)      # golul: de la 26 m pana la 6 m inaintea inceputului acului 3
+_m = 1.0 / L_TOTAL
+def _ac_a(k):
+    return F[f"F ac{k}a"] - 17.0 * _m
+def _ac_b(k):
+    return F[f"F ac{k}b"] + 17.0 * _m
+PARAP = []   # (f0, f1, latura)
+PARAP.append((F["F sus"] + 6.0 * _m, _ac_a(1), 1))        # ramura 1, vale = dreapta
+PARAP.append((_ac_a(1), _ac_b(1), 0))                     # acul 1
+PARAP.append((_ac_b(1), _ac_a(2), -1))                    # ramura 2, vale = stanga
+PARAP.append((_ac_a(2), _ac_b(2), 0))                     # acul 2
+if PARAP_OPEN_AC3:
+    PARAP.append((_ac_b(2), _ac_a(3) - PARAP_GAP_M[0] * _m, 1))   # ramura 3 pana la gol
+    PARAP.append((_ac_a(3) - PARAP_GAP_M[1] * _m, _ac_a(3), 1))  # ... si dupa gol
+else:
+    PARAP.append((_ac_b(2), _ac_a(3), 1))
+PARAP.append((_ac_a(3), _ac_b(3), 0))                     # acul 3
+PARAP.append((_ac_b(3), _ac_a(4), -1))                    # ramura 4, vale = stanga
+PARAP.append((_ac_a(4), _ac_b(4), 0))                     # acul 4
+PARAP.append((_ac_b(4), F["F jos"], 1))                   # ramura 5, vale = dreapta
+parap_txt = ", ".join(f"Vector4({r3(a)}, {r3(b)}, {sd}, 0)" for a, b, sd in PARAP)
+print("\nparapete (frac0, frac1, latura):")
+for a, b, sd in PARAP:
+    print(f"  {a:.4f} -> {b:.4f}  latura {sd:+d}")
+
 SUN_ROT = (-25.0, -110.0, 0.0)
 SHEEP = "res://assets/models/monumentvalley/animals/sheep.glb"
 
 # --- hazarde: transformari -----------------------------------------------------------------
 sig_g = at_road(F_TUNNEL, 7.6)
 sig_xf = f"Transform3D({rot_y(yaw_z_to(-d_in[0], -d_in[1]))}, {sig_g[0]:.3f}, {sig_g[1]:.3f}, {sig_g[2]:.3f})"
+
+# Lampa: nod copil al lui SemaforTunel, mutat cu LAMP_BACK_M inapoi pe drum. Pozitie si
+# inaltime se iau de pe drum la fractia ei, apoi se scriu in coordonatele locale ale hazardului
+# (baza = rot_y: coloane X -> (c, s), Z -> (-s, c) in planul (x, z)).
+_f_lamp = F_TUNNEL - LAMP_BACK_M / L_TOTAL
+_gl = at_road(_f_lamp, 7.6)
+_t_sig = yaw_z_to(-d_in[0], -d_in[1])
+_d_l = travel_g(_f_lamp)
+_t_lamp = yaw_z_to(-_d_l[0], -_d_l[1])
+_dx, _dz = _gl[0] - sig_g[0], _gl[2] - sig_g[2]
+_c, _s = math.cos(math.radians(_t_sig)), math.sin(math.radians(_t_sig))
+lamp_local = (_c * _dx + _s * _dz, _gl[1] - sig_g[1], -_s * _dx + _c * _dz)
+lamp_xf = f"Transform3D({rot_y(_t_lamp - _t_sig)}, {lamp_local[0]:.3f}, {lamp_local[1]:.3f}, {lamp_local[2]:.3f})"
 
 # oile: curg in jos pe panta (nord = -Z in Godot) peste ramura a treia, road_dir de-a lungul ramurii
 _pos_s, d_s = road_at(F_SHEEP)
@@ -481,7 +542,7 @@ print()
 for nm, ff in (("urs", F_BEAR), ("semafor", F_TUNNEL), ("avalansa", F_AVAL), ("oi", F_SHEEP),
                ("sarituri", F_JUMP), ("tren", F_TRAIN)):
     pp, dd = road_at(ff)
-    print(f"  {nm}: frac {ff:.3f} -> harta ({pp[0]:.0f}, {pp[1]:.0f}) cota {pp[2]:.1f} "
+    print(f"  {nm}: frac {ff:.4f} (L_TOTAL {L_TOTAL:.1f}) -> harta ({pp[0]:.0f}, {pp[1]:.0f}) cota {pp[2]:.1f} "
           f"directie {math.degrees(math.atan2(dd[0], dd[1])) % 360:.0f} deg")
 
 tscn = f"""[gd_scene format=3]
@@ -493,6 +554,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
 [ext_resource type="Script" path="res://scenes/hazards/herd_hazard.gd" id="6_herd"]
 [ext_resource type="Script" path="res://scenes/hazards/train_hazard.gd" id="7_train"]
+[ext_resource type="Script" path="res://scenes/hazards/hazard_lamp.gd" id="15_lamp"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/props/cow.glb" id="10_cow"]
 [ext_resource type="PackedScene" path="res://assets/models/vehicles/snowplow.glb" id="11_plow"]
@@ -535,6 +597,7 @@ custom_cornice_ravines = Array[int]([0, 2])
 custom_ravine_floors = Array[Vector2]([{floors_txt}])
 custom_ravine_widths = Array[Vector2]([{widths_txt}])
 custom_ravine_water = Array[Vector3]([{rwater_txt}])
+custom_parapets = Array[Vector4]([{parap_txt}])
 traffic_count = 0
 
 [node name="Path" type="Path3D" parent="."]
@@ -564,7 +627,7 @@ face_travel = true
 motion = 1
 sweep_speed = 1.8
 
-[node name="SemaforTunel" type="Node3D" parent="Hazarduri"]
+[node name="SemaforTunel" type="Node3D" parent="Hazarduri" node_paths=PackedStringArray("lamp")]
 transform = {sig_xf}
 script = ExtResource("5_signal")
 period = 34.0
@@ -581,6 +644,22 @@ tunnel_half_width = 6.0
 camera_tail_m = 18.0
 first_green_bonus_s = 28.0
 bus_lane_offset = -2.6
+lamp = NodePath("Lampa")
+
+[node name="Lampa" type="Node3D" parent="Hazarduri/SemaforTunel"]
+transform = {lamp_xf}
+script = ExtResource("15_lamp")
+bulb_size = {LAMP_BULB}
+spacing = {LAMP_SPACING}
+slots = Array[int]([12, 16, 7])
+glow_energy = {LAMP_GLOW}
+invert_stack = true
+glow_bulbs = Array[int]([0, 2])
+head_height = {LAMP_HEAD}
+arm_length = {LAMP_ARM}
+pole_slot = 8
+stop_line_span = 12.0
+stop_line_offset = 7.6
 
 [node name="Avalansa" type="Marker3D" parent="Hazarduri"]
 transform = {xf_ident(F_AVAL)}
@@ -589,6 +668,7 @@ script = ExtResource("4_hzm")
 kind = 8
 avalanche_period = 75.0
 avalanche_from_left = true
+avalanche_keep_lane = true
 
 [node name="OileAcPaior" type="Node3D" parent="Hazarduri"]
 transform = {xf_ident(F_SHEEP)}

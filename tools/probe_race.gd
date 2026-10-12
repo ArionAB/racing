@@ -392,6 +392,8 @@ func _ready() -> void:
 			_slice = Vector2(float(ab[0]), float(ab[1]))
 		elif arg.begins_with("--rain="):
 			_force_rain = int(arg.trim_prefix("--rain="))
+		elif arg == "--no-parapet":
+			Track.probe_skip_parapets = true
 		elif arg.begins_with("--traffic="):
 			_traffic = int(arg.trim_prefix("--traffic="))
 		elif arg.begins_with("--dusk="):

@@ -155,6 +155,10 @@ enum Kind {
 ## (ProbeAvalancheTerrain: "startul nu e pe teren"). Implicit fals = bit-identic.
 @export var avalanche_from_left: bool = false
 
+## Doar pentru AVALANCHE: repunerea dupa inghitire ramane pe banda de pe care a
+## plecat masina (vezi `AvalancheHazard.keep_origin_checkpoint`). Implicit fals.
+@export var avalanche_keep_lane: bool = false
+
 ## Clasa de material triplanar (ex. "rock", "snow"). Gol = ce da tema.
 ##
 ## O CLASA, nu o textura proprie: garda de materiale din `tools/probe_decor.gd`
@@ -249,6 +253,8 @@ func model_spec() -> Dictionary:
 		spec["avalanche_period"] = avalanche_period
 	if avalanche_from_left:
 		spec["avalanche_from_left"] = true
+	if avalanche_keep_lane:
+		spec["avalanche_keep_lane"] = true
 	if kind == Kind.ROCKFALL:
 		spec["rock_speed"] = rock_speed
 		spec["rock_pause"] = rock_pause

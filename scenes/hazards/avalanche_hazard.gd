@@ -118,6 +118,15 @@ const STUN_SECONDS: float = 1.35
 ## Cat de departe in spate se repune. Mai mult decat cei 14 m impliciti si decat
 ## trenul: masa te-a carat la vale, deci repunerea in fata ar fi un cadou.
 const RESPAWN_BACKOFF: float = 22.0
+## Opt-in (Transfagarasan, ramura intai a serpentinelor): repunerea foloseste
+## checkpoint-ul masinii din clipa INGHITIRII, nu cel de la finalul caratului.
+## Masa duce masina ~23 m intr-o parte, iar pe o serpentina asta e peste jumatatea
+## distantei pana la ramura urmatoare: cat e carata, roatele ating asfaltul ei,
+## checkpoint-ul se muta acolo, iar repunerea o punea pe ramura a doua (castig
+## de ~64 m, 5 cazuri pe 16 seed-uri la ProbeRace). Implicit fals = comportamentul
+## vechi, bit-identic (Alpii, Fiordland).
+@export var keep_origin_checkpoint: bool = false
+
 ## Cat sta o masina imuna dupa ce a fost lovita.
 const HIT_COOLDOWN: float = 1.0
 ## Cat de repede se invarte caroseria cat esti dus de masa (rad/s). DOAR VIZUAL,
@@ -911,12 +920,18 @@ func _swallow(car: Car) -> void:
 	_carried[car] = STUN_SECONDS
 	_play_hit()
 	var hit_car := car
+	var origin_index := car.last_safe_index
+	var origin_route := car.last_safe_route
+	var keep_origin := keep_origin_checkpoint
 	get_tree().create_timer(STUN_SECONDS, false).timeout.connect(
 		func() -> void:
 			if not is_instance_valid(hit_car):
 				return
 			_carried.erase(hit_car)
 			hit_car.race_active = true
+			if keep_origin:
+				hit_car.last_safe_index = origin_index
+				hit_car.last_safe_route = origin_route
 			hit_car.respawn(RESPAWN_BACKOFF))
 
 

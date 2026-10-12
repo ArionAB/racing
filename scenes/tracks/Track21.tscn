@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
 [ext_resource type="Script" path="res://scenes/hazards/herd_hazard.gd" id="6_herd"]
 [ext_resource type="Script" path="res://scenes/hazards/train_hazard.gd" id="7_train"]
+[ext_resource type="Script" path="res://scenes/hazards/hazard_lamp.gd" id="15_lamp"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/props/cow.glb" id="10_cow"]
 [ext_resource type="PackedScene" path="res://assets/models/vehicles/snowplow.glb" id="11_plow"]
@@ -49,6 +50,7 @@ custom_cornice_ravines = Array[int]([0, 2])
 custom_ravine_floors = Array[Vector2]([Vector2(0, 3.0), Vector2(1, 3.0), Vector2(2, -28.0), Vector2(3, 37.0), Vector2(4, -4.0), Vector2(5, -5.0)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 120.0), Vector2(1, 150.0), Vector2(2, 60.0), Vector2(3, 55.0), Vector2(4, 45.0), Vector2(5, 45.0)])
 custom_ravine_water = Array[Vector3]([Vector3(0, 7.5, 16.0), Vector3(2, -24.0, 20.0), Vector3(4, 3.4, 16.0), Vector3(5, -2.5, 16.0)])
+custom_parapets = Array[Vector4]([Vector4(0.377, 0.405, 1, 0), Vector4(0.405, 0.433, 0, 0), Vector4(0.433, 0.45, -1, 0), Vector4(0.45, 0.477, 0, 0), Vector4(0.477, 0.488, 1, 0), Vector4(0.498, 0.5, 1, 0), Vector4(0.5, 0.528, 0, 0), Vector4(0.528, 0.545, -1, 0), Vector4(0.545, 0.572, 0, 0), Vector4(0.572, 0.626, 1, 0)])
 traffic_count = 0
 
 [node name="Path" type="Path3D" parent="."]
@@ -87,7 +89,7 @@ face_travel = true
 motion = 1
 sweep_speed = 1.8
 
-[node name="SemaforTunel" type="Node3D" parent="Hazarduri"]
+[node name="SemaforTunel" type="Node3D" parent="Hazarduri" node_paths=PackedStringArray("lamp")]
 transform = Transform3D(0.98387, 0, 0.17889, 0, 1.0, 0, -0.17889, 0, 0.98387, 220.624, 42.185, -96.551)
 script = ExtResource("5_signal")
 period = 34.0
@@ -104,6 +106,22 @@ tunnel_half_width = 6.0
 camera_tail_m = 18.0
 first_green_bonus_s = 28.0
 bus_lane_offset = -2.6
+lamp = NodePath("Lampa")
+
+[node name="Lampa" type="Node3D" parent="Hazarduri/SemaforTunel"]
+transform = Transform3D(0.85420, 0, 0.51995, 0, 1.0, 0, -0.51995, 0, 0.85420, 11.305, -2.355, 26.800)
+script = ExtResource("15_lamp")
+bulb_size = 1.1
+spacing = 1.25
+slots = Array[int]([12, 16, 7])
+glow_energy = 1.4
+invert_stack = true
+glow_bulbs = Array[int]([0, 2])
+head_height = 5.6
+arm_length = 3.4
+pole_slot = 8
+stop_line_span = 12.0
+stop_line_offset = 7.6
 
 [node name="Avalansa" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 110.271, 38.537, -195.000)
@@ -168,7 +186,7 @@ transform = Transform3D(-1.44229, 0, -0.27472, 0, 1.25, 0, 0.41208, 0, -0.96152,
 metadata/coliziune = "none"
 
 [node name="Utilaj_parcat" parent="DecorManual" instance=ExtResource("11_plow")]
-transform = Transform3D(-0.98387, 0, -0.17889, 0, 1.0, 0, 0.17889, 0, -0.98387, 229.62, 40.92, -82.10)
+transform = Transform3D(-0.98387, 0, -0.17889, 0, 1.0, 0, 0.17889, 0, -0.98387, 248.14, 38.37, -54.58)
 
 [node name="Zapada00" parent="DecorManual" instance=ExtResource("14_snow")]
 transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 222.62, 35.01, -36.23)

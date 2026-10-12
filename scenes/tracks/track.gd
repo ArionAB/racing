@@ -5325,6 +5325,7 @@ func rebuild() -> void:
 	_build_road()
 	_build_branch_surfaces()
 	_build_walls()
+	_build_parapets()
 	_build_viaduct_nets()
 	build_step.emit(&"drum")
 	# Tuburile de tunel DUPA sosea si ziduri (le foloseste ca reper de cota) si
@@ -11411,6 +11412,115 @@ func _build_walls() -> void:
 				null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
 				null, null, true, null, "WallDeck")
 	_build_rail_posts(post_spots)
+
+
+## PARAPET DE BETON CU COLIZIUNE REALA (opt-in; Transfagarasan, oct 2026).
+##
+## Intervale (frac_start, frac_end, latura +-1 sau 0 = ambele, rezervat).
+## Gol = nimic, deci orice pista care nu le declara ramane bit-identica.
+##
+## De ce nu `_rail_segments`: acolo singurul regim cu efect pe o pista fara
+## ziduri e RAIL_POSTS, FARA coliziune (stalpi de 11 cm pe buza). Aici se
+## cere opusul: o bariera care chiar opreste masina, ca pe serpentinele
+## reale (parapet jos de beton alb-rosu), ca sa nu poti taia o serpentina
+## coborand pe iarba de pe o ramura pe urmatoarea. De aici inaltimea: 1.1 m
+## deasupra soselei, mai mult decat poate sari o masina fara rampa.
+const PARAPET_HEIGHT: float = 1.1
+const PARAPET_THICK: float = 0.6
+## Distanta dintre marginea asfaltului si fata parapetului: fara ea, parapetul
+## intra in banda (ProbeLaneClear).
+const PARAPET_GAP: float = 0.25
+## Cat coboara sub nivelul soselei, ca pe taluz sa nu ramana jos o crapatura.
+const PARAPET_SKIRT: float = 0.9
+## Lungimea unui bloc alb sau rosu (dungile de pe parapetul real).
+const PARAPET_BLOCK_M: float = 4.0
+
+
+func _parapet_segments() -> Array[Vector4]:
+	return []
+
+
+## Doar pentru sonde A/B (`ProbeRace --no-parapet`): construieste pista fara
+## parapete, ca "inainte" sa fie aceeasi scena, nu alta ramura.
+static var probe_skip_parapets: bool = false
+
+
+func _build_parapets() -> void:
+	var segs := _parapet_segments()
+	if segs.is_empty() or probe_skip_parapets:
+		return
+	var n := baked.size()
+	var total_len: float = _dists[n] if _dists.size() > n else 0.0
+	if n < 3 or total_len <= 0.0:
+		return
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var emitted := false
+	for seg in segs:
+		for side_sign: float in [-1.0, 1.0]:
+			if not is_zero_approx(seg.z) and signf(seg.z) != side_sign:
+				continue
+			# Sectiunea transversala la fiecare punct copt din interval.
+			var secs: Array = [] # [inner_top, outer_top, inner_bot, outer_bot, dist]
+			for i in n:
+				var f := _dists[i] / total_len
+				if f < seg.x or f > seg.y:
+					continue
+				var c := baked[i]
+				var side := _side_at(i)
+				var e := c + side * (width_at_index(i) + PARAPET_GAP) * side_sign
+				var out := side * side_sign
+				secs.append([
+					e + Vector3.UP * PARAPET_HEIGHT,
+					e + out * PARAPET_THICK + Vector3.UP * PARAPET_HEIGHT,
+					e - Vector3.UP * PARAPET_SKIRT,
+					e + out * PARAPET_THICK - Vector3.UP * PARAPET_SKIRT,
+					_dists[i], side * side_sign])
+			if secs.size() < 2:
+				continue
+			emitted = true
+			for k in secs.size() - 1:
+				var a: Array = secs[k]
+				var b: Array = secs[k + 1]
+				var block := int(floor(float(a[4]) / PARAPET_BLOCK_M)) % 2
+				var slot := Palette.FOAM_WHITE if block == 0 else Palette.KERB_RED
+				var outv: Vector3 = a[5]
+				# top, fata dinspre sosea, fata dinspre vale
+				_parapet_quad(st, a[0], b[0], b[1], a[1], slot, Vector3.UP)
+				_parapet_quad(st, a[2], b[2], b[0], a[0], slot, -outv)
+				_parapet_quad(st, a[1], b[1], b[3], a[3], slot, outv)
+			# Capetele, ca sa nu ramana gol vizibil la intreruperi.
+			var first: Array = secs[0]
+			var last: Array = secs[secs.size() - 1]
+			var d0: Vector3 = (secs[1] as Array)[0] - first[0]
+			var d1: Vector3 = last[0] - (secs[secs.size() - 2] as Array)[0]
+			_parapet_quad(st, first[0], first[1], first[3], first[2],
+				Palette.KERB_RED, -d0.normalized())
+			_parapet_quad(st, last[0], last[1], last[3], last[2],
+				Palette.KERB_RED, d1.normalized())
+	if not emitted:
+		return
+	st.generate_normals()
+	var mesh := st.commit()
+	_add_mesh_with_collision(mesh, Color.WHITE, null, 1.0, 0.5,
+		BaseMaterial3D.CULL_DISABLED, null, null, true,
+		Palette.world_material(), "Parapet")
+
+
+## Un cvadrilater pe atlasul de paleta, cu fata spre `hint` (infasurarea se
+## alege singura, ca sa nu depinda de ordinea colturilor).
+func _parapet_quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3,
+		d: Vector3, slot: int, hint: Vector3) -> void:
+	var n := (b - a).cross(c - a)
+	var quad: Array[Vector3] = [a, b, c, d]
+	if n.dot(hint) < 0.0:
+		quad = [d, c, b, a]
+	var uv := Palette.uv(slot)
+	for tri: Array in [[0, 1, 2], [0, 2, 3]]:
+		for k: int in tri:
+			st.set_uv(uv)
+			st.set_color(Color.WHITE)
+			st.add_vertex(quad[k])
 
 
 ## Stalpii rari de pe portiunile RAIL_POSTS.

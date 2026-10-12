@@ -274,7 +274,9 @@ func _collect(node: Node, out: Array[Dictionary]) -> void:
 
 func _gather(node: Node, out: Array[Dictionary]) -> void:
 	var mi := node as MeshInstance3D
-	if mi != null and mi.mesh != null:
+	# Doar ce se VEDE: radacina ascunsa a unui GLB multi-varianta (ex. Wall_B pe un
+	# modul curb A, deplasat +10 m in fisier) nu se randeaza si nu are corp.
+	if mi != null and mi.mesh != null and mi.is_visible_in_tree():
 		var xf := mi.global_transform
 		var tris := PackedVector3Array()
 		for v in mi.mesh.get_faces():

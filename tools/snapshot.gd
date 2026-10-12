@@ -1746,14 +1746,16 @@ func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
 func _vitrina_path(stem: String) -> String:
 	if _VITRINA_MODEL_PATHS.has(stem):
 		return String(_VITRINA_MODEL_PATHS[stem])
-	var root := "res://assets/models/kyoto"
-	var d := DirAccess.open(root)
-	if d == null:
-		return ""
-	for sub in d.get_directories():
-		var cand := "%s/%s/%s.glb" % [root, sub, stem]
-		if ResourceLoader.exists(cand):
-			return cand
+	# Kitul Kyoto si kitul Okinawa (assets/models/<kit>/<categorie>/<stem>.glb).
+	for kit: String in ["kyoto", "okinawa"]:
+		var root: String = "res://assets/models/" + kit
+		var d := DirAccess.open(root)
+		if d == null:
+			continue
+		for sub in d.get_directories():
+			var cand := "%s/%s/%s.glb" % [root, sub, stem]
+			if ResourceLoader.exists(cand):
+				return cand
 	return ""
 
 

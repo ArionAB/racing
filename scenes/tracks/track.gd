@@ -3924,6 +3924,16 @@ static func themes() -> Dictionary:
 		# Nisip coraligen alb-crem pe aleea B (`custom_dirt_ranges`), nu ocrul
 		# prafuit al insulei de Track08.
 		"dirt_road_tint": Color(0.86, 0.82, 0.72),
+		# Decizia dezvoltatorului (11 oct 2026): fara margine rosie pe drum si
+		# nisip peste tot. Bordura rosu-alb e mobilier de circuit (ca pe Alpi);
+		# gardul exterior ramane COLIZIUNE (digul si golful au apa langa drum,
+		# fara el masinile ies in mare) dar fara panglica rosie (`wall_visible`,
+		# ca la tema care isi face bariera din scenografie). Parapetul podului
+		# nu asculta de cheie. `inland_tint` (verdele 0.85 al insulei) se
+		# stinge, deci solul ramane `ground_tint` CORAL_SAND pe toata pista.
+		"kerbs": false,
+		"wall_visible": false,
+		"inland_tint": null,
 		# Soare de dupa-amiaza tarzie din VSV, ~25 grade. Aceeasi cifra ca
 		# `custom_sun_rotation_deg` din Track20.tscn (conventia busolei din
 		# gen_okinawa_route.py: 180 - y = 250 = VSV).

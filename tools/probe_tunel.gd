@@ -254,8 +254,15 @@ func _check(idx: int) -> bool:
 			continue
 		var f0 := r.frac_at(line_idx)
 		var f1 := r.frac_at(r.wrap_index(idx_west))
+		# `camera_tail_m` (opt-in pe SemaforTunel): zona continua dupa gura de iesire, ca
+		# camera sa iasa din movila tubului; capatul de iesire poate fi mai departe cu atat.
+		var tail_frac := 0.0
+		for tsig in track.find_children("*", "TunnelSignalHazard", true, false):
+			tail_frac = maxf(tail_frac,
+				(tsig as TunnelSignalHazard).camera_tail_m / maxf(r.length(), 1.0))
 		var covers: bool = cz.frac_to > cz.frac_from \
-			and absf(cz.frac_from - f0) < 0.002 and absf(cz.frac_to - f1) < 0.002
+			and absf(cz.frac_from - f0) < 0.002 \
+			and cz.frac_to - f1 > -0.002 and cz.frac_to - f1 < tail_frac + 0.002
 		print("  CameraZone %s: frac %.3f-%.3f (tub %.3f-%.3f) ceiling %.1f height %.1f darkness %.2f -> %s"
 			% [cz.name, cz.frac_from, cz.frac_to, f0, f1, cz.ceiling, cz.height,
 				cz.darkness, "acopera tubul" if covers else "NU acopera tubul"])

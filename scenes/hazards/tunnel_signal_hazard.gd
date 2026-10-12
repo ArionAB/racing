@@ -364,6 +364,13 @@ func _build_bus() -> void:
 ## `custom_width_segments`), suprascrisa pe nod.
 @export_range(1.0, 10.0, 0.1) var tunnel_half_width: float = 4.0
 
+## Cat de mult (m) continua zona de camera a tunelului DUPA gura de iesire.
+## Camera sta 12,5 m in spatele masinii: cand masina iese, camera e inca in
+## movila tubului (ProbeCameraSolid: TunnelBore/TunnelPortal intre masina si camera,
+## ~9 m de drum pe Transfagarasan). Zona ramane pornita, deci camera sta jos (in cavitatea
+## tubului) pana trece de capat. 0 (implicit) = zona se opreste la capat, bit-identic.
+@export_range(0.0, 60.0, 1.0) var camera_tail_m: float = 0.0
+
 ## Inaltimea tavanului tubului peste asfalt (m), brief §2 E: 6,5.
 ##
 ## Nodul e DECLARATIA tunelului (linia de oprire = originea lui, lungimea si

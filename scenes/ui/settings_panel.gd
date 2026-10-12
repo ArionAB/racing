@@ -41,8 +41,9 @@ func _build() -> void:
 	# Sapte slidere nu mai incap pe un ecran de telefon in landscape. Deruleaza
 	# doar LISTA: titlul si butoanele raman in afara ei, altfel INAPOI ajunge sub
 	# marginea de jos si panoul se inchide doar cu scroll — pe touch, o capcana.
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	# Tragerea cu degetul peste slidere/comutatoare deruleaza si ea (doar
+	# vertical — orizontal ramane reglajul sliderului).
+	var scroll := TouchScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(440,
 		minf(520.0, get_viewport_rect().size.y * 0.58))
 	root.add_child(scroll)

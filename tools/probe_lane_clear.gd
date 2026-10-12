@@ -293,6 +293,23 @@ const BASELINE := {
 	# cifra masurata, FARA marja: prima piesa de decor pusa in banda trebuie sa
 	# pice garda. Sabotaj (`--sabotaj`) verificat la armare.
 	"Monument Valley (Track19)": 3,
+	# Okinawa (Track20), fundatia (traseu + pod + hazarde + decor provizoriu, 7 oct
+	# 2026): 4 raportari, masurate de 3 ori, identic — toate la frac 0.665-0.670 pe
+	# INAINTE si toate PODUL RIDICATOR, obstacolul intentionat al pistei: `RampNear`
+	# (h=1.0, la 1.75 m), `LiftSpan` (h=1.6, la 3.67 m, traveea la ceasul de repaus) si
+	# `RampFar` (h=0.4 si h=1.0, la 5.5-5.8 m, cealalta buza). Poarta provizorie de la 0.43
+	# (torii scalat ca sa-i incapa 12 m de drum) a dat 18 raportari cat a fost la scara
+	# uniforma 3.2 (golul dintre picioare ~6 m): corectata, zero. Baza = cifra masurata,
+	# FARA marja: prima piesa de decor pusa in banda trebuie sa pice garda. Sabotaj
+	# (`--sabotaj`) verificat la armare.
+	"Okinawa (Track20)": 4,
+	# Transfagarasan (Track21), fundatia (traseu + hazarde + apa + decor provizoriu, 10 oct
+	# 2026): 2 raportari (cu gol de 12 m; 3 la gol 16 m), masurate de 3 ori, identic — toate la frac 0.675 pe INAINTE,
+	# toate `ChannelKicker`, trambulina sariturii peste paraul Balea (G): obstacolul
+	# intentionat al pistei (h=0.4 la 4,2 m si h=1.0 la 1,6 m). Portalurile provizorii
+	# (`coliziune = none`), peretii de zapada si blocurile de langa ace NU intra in banda.
+	# Baza = cifra masurata, FARA marja. Sabotaj (`--sabotaj`) verificat la armare.
+	"Transfagarasan (Track21)": 2,
 }
 
 

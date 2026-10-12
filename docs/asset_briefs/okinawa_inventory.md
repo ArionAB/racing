@@ -1,0 +1,512 @@
+# Inventar — kitul Okinawa v2 (Track20)
+
+Contract: `docs/asset_briefs/okinawa_kit_v2.md`. Cotele sunt MASURATE din GLB
+(`verify_glb.py`, `measure_gap.py`; Godot Y-up, Blender +Y = Godot -Z).
+Build: `tools/blender/build_okinawa_castle.py` (vocabular: `okinawa_shapes.py`).
+Verdict: `bash tools/blender/verify_okinawa_v2.sh` -> `VERDICT KIT: OK`.
+
+## Stare la oprire (kitul intreg, 9 oct 2026, coordonator)
+
+**36 de GLB-uri**, toate `VERDICT: OK` in `verify_okinawa_v2.sh`, plus trei
+contracte de cod verificate de harnas: golul portii (14,35 x 6,20 m), varful
+feribotului (11,00 m peste apa) si fata caselor (+Y, masurata pe goluri).
+
+| verdict | piese |
+|---|---|
+| **acceptate** | ryukyu_gate, ryukyu_palace, gusuku_wall_curve/straight, gusuku_arch_gate (gol 5,45 x 5,5 m, abatere decisa de coordonator), notch_rock_a/b/c, heart_rock, cape_lighthouse, coral_stone_wall, fukugi_tree_a/b/c, ryukyu_pine, cycad, fan_palm, bougainvillea, ryukyu_house_a/b/c, concrete_house_a/b, harbour_quay, bus_stop_shelter, vending_machine, convex_mirror, fishing_net_rack (slab, prop mic), island_ferry, coastal_freighter, fishing_boat, water_buffalo, egret, okinawa_horizon |
+| **provizorii** | limestone_cliff_module, limestone_cliff_module_b: dupa 5 runde citesc bazalt columnar, nu calcar. Cornisa E o face terenul din cod; se decide la POI E daca modulul e nevoie |
+| **nefacute, cu motiv** | storm_wall (conditionat de cer, kit §1.8); cele 11 desene acoperite de kitul vechi sau de cod (kit §1.9) |
+
+**Ce trebuie stiut la integrare:**
+- **Culorile finale vin din clase/tente**, nu din sloturi: `roof_tiles` pe
+  `*_Roof` (olanele ies portocaliu-pal pe slotul 23), `ok_limestone` pe
+  `*_Limestone`, `ok_lacquer` pe `*_Lacquer` daca KERB_RED iese plastic, tenta
+  (0,92; 0,34; 0,75) pe `*_Bloom` pentru magenta, intunecare pe `*_Leaves`
+  (fukugi #2E5A2C), `plaster` pe casa de beton b (iese violet).
+- **Build-ul complet NU reproduce piesele revizuite** pentru casele Ryukyu,
+  refugiu, suportul de plase, notch_rock_b/c si faleza b: RNG-ul de modul e
+  consumat altfel decat in rularile `OK_ONLY` in care au fost revizuite.
+  GLB-urile comise sunt cele revizuite; o piesa se reface DOAR cu
+  `OK_ONLY=<piesa>`, iar dupa orice build complet se verifica `git status`.
+- Feribotul inlocuieste pe Track20 `cruise_boat` x2: `ship_model` =
+  `okinawa/vehicles/island_ferry.glb`, `ship_node` = `Island_Ferry`,
+  `ship_scale` = 1, `ship_draft` = 0, `ship_bow_neg_z` = true.
+- Poarta (14,7 m) e mai inalta decat camera de joc (10 m): la montare,
+  `ProbeCameraSolid` / zona de camera sub poarta.
+- Fukugi in tunelul B: pas 3,0-3,2 m (la 3,5 m ramane un gol de ~0,5 m la sol).
+
+## structures/ryukyu_gate.glb (PILOT, revizia 4 — ierarhia de acoperisuri, ceruta de coordonator)
+
+| nod | slot | tri |
+|---|---|---:|
+| `Gate_Lacquer` | KERB_RED 7 | 1128 |
+| `Gate_Roof` | TILE_TERRACOTTA 23 (un singur material, nervuri de olane in relief) | 17736 |
+| `Gate_Mortar` | FOAM_WHITE 22 (DOAR coama, muchiile de colt si bordura streasinii) | 3432 |
+| `Gate_Limestone` | MARBLE_GREY 29 (cele 4 socluri) | 352 |
+| `Gate_Gold` | CAR_YELLOW 16 (panouri, console, ornamente; `--allow-car-slots=Gate_Gold`) | 928 |
+| total | `VERDICT KIT: OK`, `--origin=assembly`, scala/rotatia aplicate pe radacini | 23576 |
+
+Cote masurate: **23,76 m** lat (X) x **5,97 m** adanc (Y) x **14,70 m** inalt
+(varful ornamentelor; coama centralului la ~13,1 m); h/l = 0,62. Streasina centrala
+~9,7 m, cele laterale ~7,0 m. Origine: ansamblu centrat pe XY, baza la 0. Poarta e
+simetrica fata/spate. Triunghiurile cresc fata de runda 3 (11.236) din nervurile de
+olane (pas 0,2 m) — raportat, fara plafon; verify are bugetul 40.000.
+
+### CONTRACT INGHETAT: golul portii (`measure_gap.py`, proiectie pe plan, grila 5 cm)
+
+Masurat pe GLB-ul exportat, TOATE nodurile, pe fereastra caroseriei (identic cu
+rundele anterioare, nu s-a schimbat din rev. 3):
+
+- **gol lateral, banda y 0,15-2,0 m: 14,35 m** (x -7,18..+7,17; contract >= 14,0)
+- **inaltime libera pe tot golul: 6,20 m** (contract >= 6,0) — grinda de jos (z 6,2-6,9)
+  e minimul; peste ea: grinda de sus (8,1), panoul, acoperisul central (streasina
+  ~9,7) si streasinile laterale (>= 6,85 m, intra peste |x| 5,5..7,2)
+- **gol util (inaltime >= 6 m): 14,35 m**
+- drumul are +-6,0 m: marja laterala ~1,2 m pe parte.
+Orice modificare a portii se re-masoara (`verify_okinawa_v2.sh` pica sub contract).
+
+### Fidelitate
+
+Comparatia: `docs/asset_briefs/img/okinawa_fidelity/ryukyu_gate.png` (decupare |
+randare din GLB, 3/4 din fata, culoare reala; `Gate_Roof` randat pe tinta
+`#B8452E` din brief — **rosul olanelor vine din clasa `roof_tiles` la integrare**,
+slotul 23 e portocaliu-pal), 4 azimuturi: `ryukyu_gate_views.png`.
+Runde: 1-3 (constructor), **4 = ceruta de coordonator** (ierarhie, panta, olane,
+grinzi duble, console aurii).
+
+| element | pe planșă | în GLB (rev. 4) | verdict |
+|---|---|---|---|
+| stâlpi | 2+2 vizibili, pe socluri | 8 (4/parte: interior+exterior x fata/spate), r 0,5, pe 4 socluri de calcar | OK; interiorii la +-7,85 (golul de contract), nu +-4,5 ca in desen |
+| acoperis central | bloc inalt si scurt, ~55% din latime | 17,2 m lat (~72% din 23,8: trebuie sa acopere stalpii interiori la 7,85), 5,5 m adanc, streasina 9,7, coama ~13,1, panta abrupta (rise 3,4 / hv 2,75), coama scurta (R 3,5), colturi +1,0 | mai apropiat; abatere: ~72% nu 55%, stalpii interiori sunt sub el |
+| acoperisuri laterale | mari (~35% fiecare), mai jos, sub streasina centralului | 6,2 x 5,6 m fiecare (~26%), x 5,5..11,7, streasina 7,0, piramida +2,0, colturi +0,8, se suprapun sub streasina centrala | OK ca ierarhie (etaj 2 clar); abatere: ~26%, nu 35% |
+| streasini | curbe vizibile in sus la colturi | colturi ridicate (+1,0 / +0,8), profil concav | OK |
+| olane | randuri dese de nervuri in culoarea olanelor | nervuri in relief 9 cm, pas ~0,4 m, in `Gate_Roof`; fara dungi albe pe panta | OK |
+| alb | doar coama, muchii de colt, bordura streasinii | exact acestea (`Gate_Mortar`) | OK |
+| grinzi + panou | doua grinzi orizontale cu panou gol intre ele | grinda jos 6,2-6,9, sus 8,1-8,8, panou intre ele pe fiecare fata: rama rosie, fond auriu, GOL, fara text | OK; panoul se citeste ca banda aurie lata (planșa il are decorat si mai mic) |
+| console | aurii | aurii (`Gate_Gold`), 3 trepte sub fiecare streasina; al doilea nivel pe stalpii interiori sub streasina laterala | OK |
+| ornamente aurii | 2 sus + cate unul pe fiecare coama laterala | 2 pe coama de sus (1,4x) + 2 pe varful piramidelor laterale (0,9x); bila+flacara, nu floare | OK ca numar/pozitie, forma simplificata |
+| socluri | 4, calcar, evazate | 4, 2,7 x 1,7 x 1,3 m, MARBLE_GREY | OK |
+| text, asfalt, tufe | — / pe decupare / pe decupare | fara text; nu intra in GLB | OK |
+| h/l | ~0,55 | 14,7/23,8 = 0,62 | la limita (+12%) |
+
+Abateri ramase: central ~72% (nu 55%) si laterale ~26% (nu 35%) din latime — stalpii
+interiori trebuie sa stea la +-7,85 sub centralul care ii acopera; ornamentele sunt
+simple; stalpii exteriori sunt lungi (~6 m sub streasina laterala).
+
+### Stare la oprire
+
+- Pilot livrat: harnas (`okinawa_shapes.py`, `preview_okinawa.py`,
+  `verify_okinawa_v2.sh`) + `ryukyu_gate`. `VERDICT KIT: OK`, gol 14,35 m / 6,20 m (rev. 4).
+- `okinawa_shapes.py` are `HipRoof` (reutilizabil: palat, case, refugiu),
+  `lacquer_pillar`, `bracket`, `stone_plinth`, `gold_finial`, `limestone_wall`
+  (talus; NETESTAT in GLB, doar API), `emit_ok`.
+- Nu e facut: palatul, zidurile gusuku (valul 1); `limestone_wall` nu a fost
+  exersat pe o piesa. Clasele (`ok_limestone`, `ok_lacquer`, `roof_tiles`) si
+  coliziunea sunt ale coordonatorului.
+
+## ok-c: plantele (`build_okinawa_plants.py`, kit §1.3)
+
+Toate cu origine la baza trunchiului (bougainvillea: la baza peretelui, spatele plat pe y = 0), scala aplicata pe radacini, un nod per material. Comparatii: `docs/asset_briefs/img/okinawa_fidelity/<nume>.png`; **captura de tunel**: `.../fukugi_tunnel.png` (6 fukugi a/b/c la 3,5 m pe doua siruri la +-4 m; stanga: din axa, la 1,5 m inaltime | dreapta: 3/4 de sus; `preview_okinawa.py --tunnel`). `*_Leaves` se randeaza in preview pe culoarea slotului 21 (#3F7A3C), mai deschis decat tinta #2E5A2C; tenta de clasa il intuneca la integrare.
+
+| piesa | cote masurate (X x Y x Z, m) | h/l | tri | noduri |
+|---|---|---:|---:|---|
+| fukugi_tree_a | 2,83 x 2,76 x 7,07 | 2,50 | 1852 | Fukugi_Leaves 1776, Fukugi_Bark 76 |
+| fukugi_tree_b | 2,94 x 2,98 x 8,59 | 2,88 | 2148 | idem |
+| fukugi_tree_c | 2,58 x 2,08 x 5,58 | 2,16 | 1754 | idem |
+| ryukyu_pine | 8,99 x 6,43 x 9,26 | 1,03 | 1516 | Pine_Leaves 1092, Pine_Bark 424 |
+| cycad | 2,52 x 2,48 x 2,00 | 0,79 | 3276 | Cycad_Leaves 2352, Cycad_Bark 924 |
+| fan_palm | 4,15 x 4,26 x 5,97 | 1,40 | 2252 | Palm_Leaves 1584, Palm_Bark 668 |
+| bougainvillea | 2,45 x 0,92 x 1,61 | 0,66 | 2656 | Bougainvillea_Leaves 640, Bougainvillea_Bloom 2016 (slot 31, `--allow-slots=31`) |
+
+### Fidelitate / abateri (cinstit)
+
+- **fukugi (corectura de coordonator, nu planșa):** stalp de frunzis, nu coroana rotunda; ciot de ~0,8 m; 6/7/5 mase suprapuse + 7 ciorchini pe masa (aceeasi textura vizuala de mase fatetate cu ciorchini ca pe planșa, fara silueta ei). a varf rotunjit, b varf ascutit (ultimele 3 mase 88/66/40%), c plin cu masa laterala spre +X (bbox 2,58 m). Abateri: (1) verde uniform de slot (planșa are lumini galben-verzui pe ciorchini; aici doar AO), (2) ciorchinii sunt lumpi fatetati simpli, nu frunze; (3) in tunel, la 3,5 m, ramane un gol de ~0,5-0,7 m la sol intre trunchiuri: din axa citeste perete continuu (masele se suprapun in perspectiva), din 3/4 lateral citeste inca sir de coloane dese, nu bile. Pentru perete mai ferm: plantare la 3,0-3,2 m. (4) b are h/l 2,88 (tinta 2,8, in +-15%).
+- **ryukyu_pine:** trunchi rasucit (S), 4 brate + lider, 7 perne turtite cu goluri intre ele, h/l 1,03 (tinta 1,0). Abateri: pernele sunt lise (fara ciorchini ca pe planșa), trunchiul mai neted si mai subtire decat in desen; fara stanci/tufe/nisip (regula „fara vegetatie lipita”).
+- **cycad:** 14 frunze (5+5+4) in 3 etaje, solzi in romburi (3 randuri x 8). Abateri: frunzele sunt lame dintate (zimti alternanti), nu foliole individuale; mai putin dense si mai rigide decat pe planșa; inaltimea 2,0 (tinta 2,2), h/l 0,79 (tinta 0,85); 3276 tri, cel mai scump per piesa.
+- **fan_palm:** trunchi cu inele (WOOD/LOG_DARK), 11 evantaie plisate in 2 etaje + 3 uscate (DRY 13) la baza coroanei. Abateri: trunchiul e mult mai lung si mai subtire decat in desen (contractul cere 6 m, planșa e un palmier scurt); evantaiele au muchii mai dure; frunzele uscate atarna prea sus/mici; coroana ~4,2 m.
+- **bougainvillea:** spate plat, 10 mase de frunzis + 48 ciorchini. Abateri: **floarea e roz pal** (`FLAMINGO_PINK` 31 = #D2A0BE), nu magenta saturat de pe planșa — slotul e contractul; magentul trebuie adus de integrare (tenta/clasa) sau de o decizie de slot; ciorchinii sunt lumpi, nu inflorescente; 2,45 x 1,61 (tinta 2,4 x 1,6).
+
+### Adaugiri la harnas
+`okinawa_shapes.py` (la final): `foliage_column`, `foliage_pillow`, `ring_trunk`, `pleated_fan`, `serrated_frond`. `preview_okinawa.py`: `SPECS` pentru cele 7 piese, `_scene_lights`, `_render_cam`, `tunnel()` si modul `--tunnel`. `verify_okinawa_v2.sh`: sectiunea `== val 1, ok-c: plantele ==`.
+
+### ok-c, runda 4 (ceruta de coordonator): ciorchini fatetati, pinnate, evantaie mari
+
+Vocabular nou in `okinawa_shapes.py`: `column_ellipsoids`, `ellipsoid_anchors`, `foliage_clumps` (anvelopa de ciorchini turtiti, doua tonuri dupa normala), `pinnate_frond`. Frunzisul fukugi/pin = miez nevazut + ciorchini; ~28% din ciorchini (normala in sus) in nodul `*_Leaves_Tip` pe CACTUS_GREEN 12. Capturi: `fukugi_tunnel.png` refacut; comparatii refacute pentru toate cele 7 (maxim 2 runde pe piesa).
+
+| piesa | cote (X x Y x Z, m) | h/l | tri | noduri |
+|---|---|---:|---:|---|
+| fukugi_tree_a | 2,77 x 2,67 x 7,07 | 2,55 | 2308 | Leaves 1692, Leaves_Tip 540, Bark 76 (54 ciorchini) |
+| fukugi_tree_b | 2,98 x 2,84 x 8,51 | 2,86 | 2248 | Leaves 1668, Leaves_Tip 504, Bark 76 (51) |
+| fukugi_tree_c | 2,59 x 2,04 x 5,42 | 2,09 | 2308 | Leaves 1656, Leaves_Tip 540, Bark 76 (53) |
+| ryukyu_pine | 9,07 x 6,86 x 9,28 | 1,02 | 3532 | Leaves 2352, Leaves_Tip 756, Bark 424 (7 perne x 11 ciorchini) |
+| cycad | 2,54 x 2,37 x 2,23 | 0,88 | 5420 | Leaves ~4500 (20 frunze x 31 statii), Bark ~900 |
+| fan_palm | 4,46 x 4,23 x 6,43 | 1,44 | 3438 | Leaves 1584, Bark 1854 |
+| bougainvillea | 2,45 x 1,02 x 1,62 | 0,66 | 3024 | Leaves ~1200, Bloom ~1800 (96 ciorchini + 10 revarsati) |
+
+Note si abateri:
+- **Fukugi:** contur zimtat de ciorchini, doua tonuri, fara cubulete. Tip-ul apare mai ales sus (normala in sus); pe laturi domina tonul 21. In tunel ramane un gol de ~0,5 m la sol intre trunchiuri, dar din axa citeste perete. Ciorchinii sunt poligoane netede, fara lumina galbena pe fiecare (planșa).
+- **Pin:** silueta pastrata, pernele sunt acum 11 ciorchini; pernele de sus par putin incarcate. 3532 tri.
+- **Cicada:** frunze penate (comb din 31 de statii alternante = ~15 perechi, sub cele 25-40 cerute, ca sa ramana sub 5500 tri), 20 de frunze; mai subtiri si mai putin pline decat pe planșa, trunchiul domina vizual. Verify: buget 6500.
+- **Palmier:** coroana ~4,5 m, 11 evantaie pe petioli de ~1,7 m, trunchi Ø ~0,5 m cu solzi in romb pe treimea de sus, 3 frunze uscate mari sub coroana. **Abatere:** coroana iese asimetrica (evantaiele se aduna in dreapta/sus, pare ciorchine si nu radiaza uniform), evantaiele (R ~1,0) se citesc mai mici decat Ø 1,6-2 m cerut; solzii sunt bulgari, nu romburi cu muchii. Nerezolvat in 2 runde.
+- **Bougainvillea:** frunzis verde ~40% vizibil, 96 + 10 ciorchini de flori de 0,25-0,36 m, revarsati peste marginea de jos. Preview randeaza `*_Bloom` pe **#C2378F**. **Tenta de clasa necesara la integrare:** slotul 31 e #D2A0BE (pal); tinta magenta #C2378F cere inmultire pe canale (0,92, 0,34, 0,75).
+
+## Val 1, ok-b: coasta (`tools/blender/build_okinawa_coast.py`)
+
+Toate sunt `VERDICT: OK` in `verify_okinawa_v2.sh` (sectiunea „val 1, ok-b”),
+`--origin=assembly`, scala/rotatia aplicate pe radacini. Comparatii:
+`docs/asset_briefs/img/okinawa_fidelity/<nume>.png` (+ `<nume>_views.png` pentru
+notch_a, heart_rock, cliff, far); plansa: `okinawa_fidelity_val1-ok-b.png`.
+Sloturi: calcar MARBLE_GREY 29, nise SAND_SHADOW 2 (benzi), iarba TROPICAL_GREEN 21.
+Atentie la integrare: clasa `ok_limestone` pe `*_Limestone` suprascrie culoarea
+slotului, deci banda SAND_SHADOW a nisei se pierde in joc; nisa ramane citibila
+doar prin geometrie (gat ingust, buza) + AO copt. Preview-ul o arata la fel (clasa).
+
+| piesa | cote masurate (X x Y x Z) | tri | noduri | origine / linie apei |
+|---|---|---:|---|---|
+| `rocks/notch_rock_a.glb` | 7,12 x 6,57 x 8,97 m (cap ~7, picior Ø3, nisa z 0,4..1,9) | 624 | Notch_Limestone 454, Notch_Grass 170 | axa piciorului pe XY, baza la Z=0; apa presupusa la z ~0,4 |
+| `rocks/notch_rock_b.glb` | 8,85 x 8,45 x 5,56 m (cap ~8,8, nisa z 0,3..1,3) | 666 | idem (496 / 170) | idem, apa la z ~0,3 |
+| `rocks/notch_rock_c.glb` | 8,35 x 5,74 x 6,88 m (cap deplasat 2,0 m pe +X, nisa z 0,4..1,7) | 624 | idem (454 / 170) | idem, apa la z ~0,4; aplecata spre +X |
+| `rocks/heart_rock.glb` | 8,86 x 6,77 x 7,41 m (inima ~6,9 lat in X, 7,0 inalta) | 696 | Heart_Limestone | varful la Z=0, XY pe axa; apa presupusa la z ~0,9 (banda SAND_SHADOW z 0,25..1,25) |
+| `rocks/limestone_cliff_module.glb` | 5,90 x 12,00 x 14,77 m | 496 | Cliff_Limestone 234, Cliff_Grass 262 | baza la Z=0 (apa la z ~0,5, pe linia nisei); spre mare = +X, capete plane la y=+-6,0 identice |
+| `buildings/cape_lighthouse.glb` | 12,53 x 7,22 x 20,20 m (turn Ø3,6->2,6; casa 6x5x3,5 la +X/+Y) | 1082 | Plaster 332, Limestone 160, Metal 546, Lamp 44 | axa turnului pe XY=0, baza la Z=0 (stanca/apa nu intra) |
+| `structures/coral_stone_wall.glb` | 0,90 x 4,00 x 1,31 m | 696 | Coral_Wall_Coral | centrat pe XY, baza la Z=0, capete la y=+-2,0 |
+
+### Fidelitate (ok-b)
+
+| piesa | element | pe planșă | în GLB | verdict |
+|---|---|---|---|---|
+| notch a/b/c | siluete | aproape identice (corectura: distincte) | a inalta/zvelta (h/l 1,26), b lata/joasa (0,63), c aplecata cu cap deplasat 2 m (0,82) | OK, distincte |
+| notch | nisa | gat roas sub cap | gat mai ingust decat piciorul, banda SAND_SHADOW + AO | OK ca forma; culoarea nisei se pierde sub clasa |
+| notch | iarba | pernă + 3 tufe pe crestet | invelis `Notch_Grass` + 3 tufe joase | abatere: tufe de forma blocuri rotunjite, nu frunziș |
+| notch | facete | facete mari ca bolovani | triunghiuri low-poly (jag 0,10) | abatere: fatete mai mici si mai uniforme decat planșa |
+| notch | h/l | a ~1,2 / b ~0,55 / c ~1,0 | a 1,26 / b 0,63 / c 0,82 | a OK; b +15%; c -18% (limita) |
+| heart_rock | doi lobi + varf in apa | doi lobi inalti, cleft adanc | 2 lobi rotunjiti (7,0 / 6,6 m), varf r 0,45 la z 0; se citeste ca inima din cele 4 azimuturi (35/125/215/305) | OK; abatere: lobii mai netezi si mai simetrici decat planșa, 4 bolovani mici in loc de 6 |
+| faleza | fateta + nisa + creastet | ~5 fete, trepte de bolovani, nisa la apa | 6 fete late 1,3..2,8 m, 6 bombari, nisa ~2 m; iarba + 4 tufe | OK; abatere: planșa e mai lata (h/l 1,1 din contract = 14/12, nu din desen), tufele nu sunt frunziș; mic artefact de triunghiulare la capatul +Y al |
+| far | turn, galerie, felinar, casa | turn alb conic, galerie, felinar+cupola, casa cu acoperis rosu | toate; acoperis plat de calcar (contractul spune plat; roșul nu are slot) | OK; abatere: cupola si felinarul simplificate, fara stancile/tufele din jur |
+| zid corali | pietre rotunjite | blocuri dreptunghiulare (corectura: rotunjite) | 3 randuri 6/5/8 pietre, rand de sus 8 | OK; abatere: pietrele sunt „perne” moi, rosturile (miez SAND_SHADOW) abia se vad |
+
+Runde de comparatie: notch a/b/c 3 (impreuna), heart 3, faleza 2, far 3, zid 3.
+
+### Stare la oprire (ok-b)
+
+- Livrate: cele 7 piese, `VERDICT KIT: OK`. Adaugat in `okinawa_shapes.py`:
+  `ring_points`, `faceted_shell`, `notch_profile`, `notch_rock`, `foot_boulders`,
+  `lobe_profile`, `_ok_rand` (stanca roasa de val; reutilizabil pentru
+  stancile-ciuperca si faleza). Semnaturile existente neatinse.
+- Capcana: un `frustum` cu doar doua inele da AO intunecat pe tot turnul (normalele
+  netezite ale capacelor); farul foloseste `revolve` cu inele intermediare.
+- Neverificat: cum arata cu clasele `ok_limestone`/`coral_rock` in Godot.
+
+### Runda 4, ceruta de coordonator (ok-b): aglomerari de blocuri + umbrire plata
+
+Cauza comuna a respingerii: profil rotit + AO coapt pe vertex = gradient moale
+(pahar / perna). Reparat: (1) `emit_ok(..., flat_ao=True)` (kwarg nou, optional):
+muchiile se sparg inainte de coacere, iar AO-ul fiecarei fete = media ei, deci
+fiecare fateta e un plan de o singura valoare; (2) forma din `chunk()` =
+bolovani fatetati rotiti (`okinawa_shapes.py`), nu din inele rotite. Piatra,
+iarba si zidul sunt umbrire plata; farul ramane neted (turn rotund). Max. 2
+comparatii pe piesa in aceasta runda.
+
+| piesa | cote (X x Y x Z) | tri | ce s-a schimbat |
+|---|---|---:|---|
+| notch_rock_a | 8,70 x 7,18 x 8,26 | 1502 | cap din 12 bolovani (7+4+1), picior neregulat 7 laturi, gat ~3,6 m, fusta 7+2 bolovani, 11 ciorchini de iarba pe 2 tonuri (21 / 12) |
+| notch_rock_b | 8,90 x 8,05 x 5,53 | 1524 | cap din 13 bolovani (8+4+1), picior scurt gros care se largeste in cap, fusta 7+2 |
+| notch_rock_c | 7,88 x 6,85 x 6,69 | 1344 | cap din 11 bolovani deplasat 2,0 m pe +X, picior aplecat (t^2), fusta 6+2 |
+| heart_rock | 8,86 x 8,39 x 7,41 | 780 | umbrire plata + 6 bolovani (2 noi) |
+| limestone_cliff_module | 5,72 x 12,04 x 15,03 | 1286 | masa din spate cu sectiune constanta + nisa ~2,5 m scobita 1 m; 6 coloane-bolovan jos si 5 sus care ies 0,6..1,5 m, crapaturi adanci; iarba cu 9 ciorchini |
+| coral_stone_wall | 0,82 x 4,00 x 1,32 | 948 | 5 asize (8/8/8/8/7 pietre, ~0,5 x 0,25 m), pebble 6 laturi x 2 inele, umbrire plata; putin peste ~900 tri |
+| cape_lighthouse | 12,55 x 7,25 x 20,20 | 1034 | nod nou `Lighthouse_Roof` (TILE_TERRACOTTA 23, placa 6,5 x 5,5 x 0,3), restul neschimbat |
+
+Captura inlantuita: `docs/asset_briefs/img/okinawa_fidelity/limestone_cliff_module_chain.png`
+(`preview_okinawa.py --chain limestone_cliff_module 3`). **Tiparul se repeta vizibil**
+(acelasi modul de 3 ori); capetele sunt simetrice, deci la integrare modulele se pot
+oglindi pe Y (scale.y = -1) si alterna; o a doua varianta de faleza ar rezolva de fapt.
+
+Abateri ramase (cinstit): la notch_rock_a/b capul se citeste ca un morman de bolovani
+rotunjiti (fatetele sunt mai mici si mai netede decat pe planșă), iar nisa e mai
+putin accentuata decat pe decupare (a are picior gros, 3,6 m, cum s-a cerut, deci
+surplomba capului e ~1,8 m pe fiecare parte). Ciorchinii de iarba sunt blocuri
+fatetate, nu frunzis. Pietrele zidului sunt mai netede decat blocurile planșei.
+
+
+## val 1, ok-a: castelul (palat + ziduri gusuku)
+
+Build: `build_okinawa_castle.py` (`OK_ONLY=<piesa>` reface una). Vocabular nou in
+`okinawa_shapes.py` (la final): `inset_convex`, `banded_prism`, `slab_grid`, `karahafu`,
+`gold_dragon`, `gusuku_wall`, `gusuku_n`, `arch_blocks`, `prism_yz`, `wall_to_roof`.
+Singura schimbare la o functie existenta: `stone_plinth(..., z0=0.0)` (parametru nou la
+sfarsit, compatibil). Comparatii: `img/okinawa_fidelity/{ryukyu_palace,gusuku_wall_curve,
+gusuku_wall_straight,gusuku_arch_gate}.png`.
+
+### buildings/ryukyu_palace.glb — 41.084 tri, 32,01 x 18,31 x 16,75 m (h/l 0,52)
+
+| nod | slot | tri |
+|---|---|---:|
+| `Palace_Lacquer` | KERB_RED 7 | 3908 |
+| `Palace_Roof` | TILE_TERRACOTTA 23 | 28188 |
+| `Palace_Mortar` | FOAM_WHITE 22 | 4992 |
+| `Palace_Limestone` | MARBLE_GREY 29 | 1742 |
+| `Palace_Gold` | CAR_YELLOW 16 (`--allow-car-slots=Palace_Gold`) | 598 |
+| `Palace_Wood` | WOOD 9 + LOG_DARK 28 | 1656 |
+
+Platforma 2,5 m, scara pe +Y (9 trepte), 12 coloane pe fata, doua acoperisuri in patru ape
+(streasini 6,3 / 11,0 m, coama ~14,4 m), karahafu peste intrare, 2 dragoni de coama.
+
+| element | pe planșă | în GLB | verdict |
+|---|---|---|---|
+| platformă | zid înalt de piatră (~35% din h) cu scară și cheeks | 2,5 m (15% din h, contract), 3 asize, parapet, scară 6 m cu obraji | abatere: mult mai joasă (cota de contract) |
+| etaj jos | sală roșie cu uși/ferestre, coloane | pereți roșii, ușă dublă, 4 ferestre/parte, 12 coloane | OK |
+| acoperiș jos | larg, streașină ridicată, olane | 31,2 x 12,8 m, ridicare colțuri 0,8 m, coame albe | OK; curbura colțurilor mai teatrală decât pe planșă |
+| fronton karahafu | curbat, ornament auriu | 7,6 m, margine în S, panou roșu, bordură albă, ornament | OK (ornament simplificat) |
+| etaj sus + acoperiș | acoperiș înalt, coamă scurtă | pereți roșii 5 ferestre, coamă R 4,2, rise 3,4 | OK, mai turtit decât desenul |
+| dragoni | 2 aurii pe capetele coamei, voluminoși | 2, ~1,7 m, S în sus, cap spre exterior | OK ca poziție; mai subțiri decât pe planșă |
+| pavilioane laterale mici | 2 | nu sunt | abatere (nelistate în contract) |
+| tufe, copaci | pe decupare | nu intră | OK |
+
+### Runda 4, ceruta de coordonator: zidariile refacute (zidurile si poarta boltita)
+
+Coordonatorul a respins prima varianta (4 asize de ~2 m, umbrire moale, bulb rotunjit, bolta mica).
+Acum, pe `gusuku_wall`: **miez** cu sectiune identica (talus pe +X, creasta PLATA cu capac iesit 10 cm,
+colturi rotunjite doar in plan) + **blocuri fasonate pe ambele fete**: 11 asize de 0,6-0,8 m, blocuri de
+0,8-1,5 m decalate pe randuri, perne cu fete plate, rost 5 cm si relief 4-7 cm, usor neregulate (jitter
+de 1,5 cm). **Umbrire plata** (`smooth_angle=None`, fete plate, ca la Monument Valley). Pe randurile pare
+blocurile de la capete nu au rost spre capat (doua module vecine fac un bloc continuu), pe cele impare au:
+imbinarea e decalata ca restul zidariei. Nu am implementat blocul inalt cat doua asize (deviatie).
+
+### structures/gusuku_wall_curve.glb — 6.872 tri (A 3436, B 3436), 4,25 x 17,04 x 8,0 m
+
+Doua radacini: `Wall_A_Limestone` (R 20 m) si `Wall_B_Limestone` (R 40 m, mutat +10 m pe X); numele nu pot
+fi ambele `Wall_Limestone` (nume unice in Blender), se termina in `_Limestone` (clasa pe sufix). Origine =
+mijlocul corzii, baza la 0. Capete la (0, +-8), plane, perpendiculare pe tangenta (rotita +-23,58 deg la A,
++-11,54 deg la B).
+
+### structures/gusuku_wall_straight.glb — 2.556 tri, 2,64 x 12,0 x 8,0 m
+Nod `Wall_Limestone`; capete la y = +-6.
+
+### Capete identice, MASURATE pe GLB (`tools/blender/measure_okinawa_castle.py`)
+Vertecsii din planul fiecarui capat (perpendicular pe tangenta) au fost comparati cu cele 8 puncte ale
+sectiunii de miez (baza 2,5 m, creasta ~1,65 m + capac 0,1 m pe parte, 8 m): drept (+/-), curb A (+/-),
+curb B (+/-): **abatere maxima 0,00000 m** pe toate cele 6 capete (136 vertecsi in plan fiecare).
+Captura de lant (drept + A + B + drept, 3/4): `img/okinawa_fidelity/gusuku_wall_chain.png`, imbinarile
+nu se vad, zidul se citeste ca unul singur.
+
+### structures/gusuku_arch_gate.glb — 2.788 tri (Arch_Limestone 2548, Arch_Wood 240), 3,31 x 14,0 x 8,0 m
+Deschidere **~5,5 x 5,5 m** (decizia coordonatorului, runda 4; contractul initial: 4 x 4,5 m): semicerc
+r 2,8 pe linia de nastere de 2,75 m, tunel taiat boolean pe axa X; 11 bolțari (r 2,75-3,55 + cheie),
+4+4 blocuri de sambure, canat din doua aripi (una inchisa, una ~40 deg spre -X). Canatul e decor, nu
+intra in gol. **`measure_gap.py`** pe copia rotita (doar piatra, tunel pe Y), banda 0,15-2,0 m:
+**gol lateral 5,45 m** (x -2,70..+2,75; grila de 5 cm), inaltime libera la axa **5,5 m** (la margini
+2,75 m = linia de nastere, e semicerc), mediana 5,05 m.
+
+| element | pe planșă | în GLB (runda 4) | verdict |
+|---|---|---|---|
+| asize | 10-12, blocuri ~0,6-0,8 m x 0,8-1,5 m, decalate | 11 asize 0,6-0,8 m, blocuri 0,8-1,5 m decalate, jitter | OK; lipsesc blocurile inalte pe doua asize |
+| rosturi | in relief, prind umbra | 5 cm rost, 4-7 cm relief, perne cu fete plate | OK |
+| umbrire | plata | fete plate, fara smooth | OK |
+| creasta | plata, margine usor iesita | plata + capac iesit 10 cm | OK |
+| colțuri | rotunjite in plan | rotunjite in plan (arc) ; capetele drepte, cerinta de inlantuire | OK |
+| talus | ~8 deg | ~5,4 deg pe fata exterioara (grosimile de contract) | abatere minora |
+| bolta | ~40% din lungime, ~60% din inaltime | 5,5/14 = 39%, 5,5/8 = 69% (cu cheia 6,5 m) | OK |
+| bolțari | perne in relief, scara zidariei | 11, aceeasi perna | OK |
+| vegetatie, dalaj, bolovani | pe decupare | nu intra | OK |
+
+## Runda 5, constructor nou (ok-g): stancile-ciuperca, faleza (A+B), palmierul-evantai
+
+Pornit de la ce NU mersese (verdictul coordonatorului: nicio stanca nu citea ciuperca, faleza era placa cu oua, palmierul avea coroana mica si asimetrica). Metoda: **silueta intai** (un singur profil de ciuperca cu nisa concava), abia apoi fatetarea. Vocabular nou la finalul `okinawa_shapes.py`: `mushroom_rock`, `column_prism`, `cliff_section`, `_loft_stations`, `cliff_columns_module`, `rhomb_scales` (semnaturile vechi neatinse). `preview_okinawa.py --chain a,b N` alterneaza piesele (a-b-a-b). Piesele acceptate (heart_rock, far, zid, fukugi, pin, cicada, bougainvillea) nu s-au regenerat (`OK_ONLY`), GLB-urile lor sunt neschimbate (`git status`).
+
+| piesa | cote totale (X x Y x Z, m) | cap (Ø) | gat (Ø) | cap/gat | tri | noduri |
+|---|---|---:|---:|---:|---:|---|
+| notch_rock_a | 10,00 x 8,56 x 8,97 (cu fusta) | 8,6 x 8,1 | 2,9 x 2,6 | 2,95 | 2244 | Notch_Limestone 1428, Notch_Grass 816 |
+| notch_rock_b | 10,13 x 9,00 x 5,09 | 10,1 x 9,0 | 3,8 x 3,9 | 2,65 | 2064 | idem |
+| notch_rock_c | 9,09 x 7,18 x 6,66 | 7,9 x 7,2 (centrul deplasat 2,0 m pe +X fata de baza) | 2,7 x 2,3 | 2,9 | 1812 | idem |
+| limestone_cliff_module (A) | 6,56 x 12,00 x 15,54 | | | | 1702 | Cliff_Limestone, Cliff_Grass |
+| limestone_cliff_module_b | 6,42 x 12,00 x 15,01 | | | | 1930 | idem |
+| fan_palm | 4,21 x 4,11 x 5,49 | coroana ~4,2 | trunchi Ø ~0,5 | | 2910 | Palm_Leaves, Palm_Bark |
+
+Cap si gat masurate pe varfurile din GLB (banda de la buza capului +-0,9 m, respectiv cea mai ingusta banda a gatului); raportul cap/gat e pe diametrul pe X. Inaltimile totale (cu iarba) au intrat in cote prin compresie pe Z (`zscale` 0,88 / 0,86 / 0,93 in `_mushroom`), orizontalele neatinse.
+
+**Stancile-ciuperca (rotunde 3 comparatii: a 3, b 3, c 3, plus o rerandare dupa compresia pe Z).** Un corp dintr-un profil de ciuperca (poala evazata -> gat zvelt -> trompeta concava sub buza -> burta capului -> cupola), banda SAND_SHADOW pe nisa de sub buza, apoi bolovani pe buza (2 straturi) si pe cupola, fusta de 5-7 bolovani, piele de iarba pe cupola sub 82% din raza buzei, 8-10 ciorchini de 2 bolovani pe 2 tonuri (21 / 12) care revarsa peste buza. Abateri: (1) cap/gat 2,65-2,95 (spre 2,3-3x cerut), dar **capul iese mai mult de 7 m** la a (8,6, cu bolovanii de pe buza) fiindca surplomba ceruta de >= 2,5 m cu gat de 2,9 m nu se potriveste cu un cap de 7 m; am urmat surplomba; (2) c: surplomba pe latura opusa deplasarii e doar ~1,4 m (capul e mutat 2,0 m pe +X, gatul se apleaca cu ~1,4 m); (3) ciorchinii de iarba sunt bolovani verzi fatetati, mai mari si mai uniformi decat frunzisul planșei si prea saturati (21 fara varianta galbuie); (4) b: gatul (3,8 m) e gros si scurt, silueta citeste ciuperca lata dar mai putin „masa” decat planșa; (5) fusta e mai sarac decat pe planșa (nisip/pietre mici lipsesc, corect dupa brief).
+
+**Faleza A + B (3 comparatii + lantul a-b-a-b, `limestone_cliff_module_chain.png`).** Masa din spate = loft pe 9 statii (pas 1,5 m) cu **nisa neregulata** (adancime 0,75-1,35 m, tavan z 2,4-3,6, variaza pe lungime), capetele ±6 m IDENTICE (sectiune si doua stive de coloane de capat, aceleasi seed-uri). Suprafata o fac **coloanele prismatice pe doua trepte** (jos 4 coloane de 1,6-2,6 m iesite peste nisa, sus 3-4 de ~2-2,7 m retrase, crapaturi care nu se aliniaza, cotitura la mijloc = prag, coloane in crapaturi). A: 4+3 coloane, B: 4+4 cu alt ritm si alte inaltimi. Lantul a-b-a-b nu mai repeta tiparul si nu mai citeste placa cu oua / jgheab drept. Abateri: **inca arata ca tuburi de orga / bazalt columnar**, nu masa de bolovani fatetati ca pe decupare (fatete verticale lungi, nu 1-2 m pe orizontala); iarba de pe coloane e placa turtita, nu frunzis; capetele plane arata la unirea a doua module o crapatura de ~0,2 m intre coloanele de capat (intentionat, citeste crapatura); in lant se vad usor liniile de triunghiulare pe capacul masei din spate (invizibil in joc); inaltimea 15,0-15,5 m cu iarba (contract 14 m + iarba).
+
+**Palmierul-evantai (3 comparatii + evantai izolat `fan_palm_leaf.png`, 4 azimuturi).** Evantaiul izolat construit si randat primul (disc plisat Ø ~1,9 m, 9 pliuri, pe petiol; planul discului are normala spre exterior ca sa se citeasca din fata). Coroana: 11 evantaie la pas egal de 32,7 grade, 3 inele alternate (3 sus 70, 5 oblice 40, 3 cazute -65), petioli 1,2-1,6 m, vazuta de la toate cele 4 azimuturi simetrica (`fan_palm_views.png`). Trunchi 3,5 m, Ø ~0,5 m, inele pana la 1,5 m, apoi 7 randuri x 8 **solzi in romb cu muchii** (rombul ridicat cu varf spre exterior). 3 frunze uscate (R 0,8) atarnate lipite de trunchi, plan tangent la trunchi (nu fusta). Abateri: coroana Ø ~4,2 m (cerut 4,5-5) si inaltime 5,5 m (cerut 6); evantaiele au marginea dintata mare si pliurile abia se disting la distanta (un singur verde pe fata, fara galbenul planșei); trunchiul e mai drept si mai subtire decat in desen; solzii se vad doar de aproape (frunzele uscate si coroana acopera partea de sus); evantaiele de pe inelul oblic se vad pe cant de la camera joasa din preview.
+
+## Val 2, ok-e: vapoare, animale, fundal
+
+Build: `build_okinawa_vessels.py`, `build_okinawa_animals.py`, `build_okinawa_horizon.py`
+(+ `emit_ok_placed` la finalul `okinawa_shapes.py`, `measure_okinawa_vessels.py`,
+moduri noi in `preview_okinawa.py`: `--poses <animal>`, `--horizon-compare <decupare> <glb> <noduri>`).
+Verify: sectiunea `val 2, ok-e` din `verify_okinawa_v2.sh`.
+
+### vehicles/island_ferry.glb — 1.559 tri — CONTRACT DE COD INGHETAT (masurat pe GLB)
+
+`python tools/blender/measure_okinawa_vessels.py island_ferry` (coordonate Godot):
+
+| cota | contract | masurat |
+|---|---|---|
+| lungime (Z) | 28 m | **28,00 m** (Z -14,00..+14,00) |
+| latime (X) | 8 m | **8,01 m** |
+| **varf (catarg) peste linia apei** | 11,0 +- 0,5 | **11,00 m** (Y max, apa = Y 0) |
+| pescaj | 2 m | **2,00 m** (Y min -2,00) |
+| **prova** | −Z Godot (`ship_bow_neg_z = true`) | **−Z**: coca are 0,00 m latime in primii 2 m pe −Z (varf ascutit) vs 7,44 m pe +Z |
+| origine | linia apei | `--origin=waterline` OK (geometria incaleca Y=0) |
+| scala/rotatie radacina | 1 / 0 | aplicate |
+
+Ierarhie: radacina `Island_Ferry` (Empty/Node3D) cu copiii reali `Ferry_Glass`, `Ferry_Hull`
+(CAR_BLUE 15, 112 tri), `Ferry_Plaster` (FOAM_WHITE 22, 919), `Ferry_Stripe` (KERB_RED 7, 50),
+`Ferry_Glass` (VOLCANIC_BLACK 20, 456). Coca 4 niveluri (z -2..+2,5), bord alb, doua punti
+(cabina lunga z 2,95..5,35 + salon z 5,5..7,6), timoneria in fata, cos albastru cu banda rosie,
+catarg de 3,2 m cu verga si radar; balustrade pe puntea deschisa. `measure` iese cu cod 1 si
+`verify_okinawa_v2.sh` pica daca oricare cota iese din contract.
+
+### vehicles/coastal_freighter.glb — 835 tri
+
+Masurat: 34,00 x 8,00 m, varf (radar) 12,05 m, pescaj 2,30 m, prova −Z (ascutita). Noduri
+radacina (fara parinte): `Freighter_Hull` (rosu sub z 0,5 / albastru deasupra, + cos), `Freighter_Deck`
+(RUST, pereti de magazie, 3 lazi + 2 paleti), `Freighter_Plaster` (parapet alb, cabina pe 2 nivele,
+catarg-radar, catarg de prova, macara), `Freighter_Glass`.
+
+### vehicles/fishing_boat.glb — 388 tri
+
+Masurat: 9,00 x 2,81 m, pescaj 0,90 m, acoperisul cabinei 3,2 m (catarg 4,45 m), prova −Z.
+Noduri: `Boat_Hull`, `Boat_Stripe` (CAR_BLUE), `Boat_Glass`.
+
+### animals/water_buffalo.glb — 1.934 tri; animals/egret.glb — 866 tri
+
+Bivol: `Pose_Stand`, `Pose_Walk` (967 tri fiecare), 2,8 m bot→crupa (2,94 cu coada), greaban ~1,5 m,
+coarne MARBLE_GREY pe spate, corp LOG_DARK. Starc: `Pose_Stand` (0,93 m inalt), `Pose_Fly`
+(anvergura 1,43 m, ridicat 0,9 m); ciocul CAR_YELLOW e in mesh-ul pozei, deci
+`--allow-car-slots=Pose_` (nu exista nod `Egret_Beak` separat; deviatie de la brief).
+Origine: picioarele pe z=0, XY pe corp, fara offset pe ansamblu.
+
+### effects/okinawa_horizon.glb — 1.028 tri
+
+Patru noduri copii directe ale radacinii, origine la baza, XY centrat pe bbox, umbrire plata:
+`IeIsland_A` 119,3 x 60,8 x 45,0 m (platou 8 m + UN con, varf la 45 m, excentric −20 m),
+`Kerama_A` 85,6 x 36,8 x 25 m, `Kerama_B` 66,2 x 38,4 x 18 m, `Kerama_C` 47,9 x 22,0 x 12 m.
+
+### Fidelitate (cinstit; comparatii in `docs/asset_briefs/img/okinawa_fidelity/<nume>.png`)
+
+Runde: feribot 2, restul 2 (bivol 2, starc 1, freighter 1, barca 1, Ie 1, Kerama 2).
+
+| piesa | element | pe decupare | in GLB | verdict |
+|---|---|---|---|---|
+| feribot | coca albastra + dunga rosie, 2 punti, comanda in fata, cos, catarg | da | da (dupa runda 2 coca mai inalta) | OK; abateri: mult mai lung si subtire (28 x 8 din contract, desenul e scurt si lat), pupa fara deschiderea de catamaran, barca fara valuri |
+| freighter | punte deschisa, cabina pe pupa, 2 catarge, macara | da | da | OK; desenul are containere colorate, aici 3 lazi + 2 paleti (corectura); coca mai joasa |
+| barca de pescuit | cabina in fata, catarg, dunga albastra | da | da | abatere: lipsesc cosul negru, plasa/lazile colorate, macaraua curba; dunga a fost largita dupa randare (comparatie nerefacuta) |
+| bivol | trunchi greu, cap jos, coarne | da | da | abateri: picioare prea lungi/subtiri, coarne mai subtiri si mai drepte decat semiluna din desen, culoarea LOG_DARK e maro (tenta se da la integrare) |
+| starc | gat S, cioc galben, picioare negre | da | da | abateri: picioare mai lungi si subtiri, corp mai mic decat in desen, fara creasta pe cap |
+| Ie | masiv ascutit cu coaste, falezele ruginii la mal | con mare | platou + con | contractul de cote castiga: conul domina mai putin, falezele de baza subtiri si gri-crem, nu portocalii |
+| Kerama | insule cu doua varfuri, faleze rosiatice | da | 3 insule (1–2 lobi) | OK ca siluete; falezele gri-crem in loc de rosiatice, creste mai rotunjite |
+
+Nota de proces: la o randare lacatul `D:/GameDev/.render_lock` era luat de alt constructor
+si am rulat o comparatie fara lacat, apoi am dat `rmdir` pe lacatul altuia; reluata corect ulterior.
+
+### Stare la oprire (ok-e)
+
+Toate cele 7 GLB livrate, `VERDICT KIT: OK`. Nerefacut: comparatia barcii dupa largirea dungii.
+
+### Runda 2, cerută de coordonator (ok-e): bivol și insula Ie
+
+| piesă | ce s-a cerut | ce s-a făcut | rezultat |
+|---|---|---|---|
+| `water_buffalo.glb` (2.108 tri, 1,80 x 2,97 x 1,89 m; 2 comparații) | cap orizontal la nivelul greabănului, bot scurt și lat, coarne în semilună groase, picioare scurte și groase, culoare ardezie | cap la z ~1,2 (greabăn 1,5), bot bont, coarne r 0,14→0 care pleacă lateral și se curbează în sus/înapoi, burta la ~0,72 m, picioare r 0,19–0,09; corp `VOLCANIC_BLACK` 20 (LOG_DARK ieșea maro), jos pe picioare și bot `LOG_DARK` 28, coarne `MARBLE_GREY` 29 | citește ca bivol (nu mai e tapir); abateri: vârfurile coarnelor sunt mai drepte decât semiluna din desen, fără cută pe frunte |
+| `okinawa_horizon.glb` / `IeIsland_A` (1.174 tri total; `IeIsland_A` 119,3 x 60,8 x 45,0 m; 2 comparații) | con masiv (~55–60% din lungime), flancuri concave, 2–3 creste, platou care urcă, bandă de faleză palidă 2–4 m | con 70 x 42 m la bază (~58%), vârf la 45 m, flancuri concave (r = R(1-t)^1,2), 3 creste (modulare pe unghi), platou care urcă spre con (11 m la inelul de sus), bandă de faleză `MARBLE_GREY` 3,5 m pe tot țărmul | conul e mai masiv ca în runda 1, dar tot **mai îngust în partea de sus decât desenul**: doar ~37 m din el depășesc platoul și latura de 45 m din contract nu lasă mai mult; abatere raportată, nu rezolvată |
+
+Verify neschimbat în structură: `VERDICT KIT: OK`.
+
+## Val 2, ok-d: satul si portul (`tools/blender/build_okinawa_village.py`, kit §1.4)
+
+Vocabular adaugat la FINALUL `okinawa_shapes.py` (semnaturile existente neatinse):
+`hip_seams` (rosturi albe in relief pe `HipRoof`), `ellipsoid`, `shisa_lion`,
+`coral_wall_segment` (zidul de corali la lungime/directie variabila; aceeasi retea de
+asize mici ca `coral_stone_wall`, care ramane NESCHIMBAT), `wall_under_roof`,
+`stair_wedge`, `emit_ok_nodes` (umbrire plata doar pe nodurile `_Coral`; `keep_z` pentru
+originea la linia apei). `tools/blender/measure_front.py` masoara fata (raza spre
+exterior din fiecare fata LOG_DARK a nodului `*_Wood`; spatele placilor ingropate nu
+conteaza). Verify: sectiune `== val 2, ok-d ==`.
+
+**Fata (masurata pe GLB, aria golurilor expuse): +Y la toate cele 5 case** —
+ryukyu a 3,03 m2 pe +Y (urmeaza -Y 2,27 = ferestrele din spate), b 5,94, c 3,26,
+concrete a 11,28, b 6,55.
+
+| piesa | cote masurate (X x Y x Z) | tri | noduri (tri) |
+|---|---|---:|---|
+| `buildings/ryukyu_house_a.glb` | 14,01 x 12,00 x 5,17 m (curtea 14x12; varf 5,17 cu shisa) | 11.724 | Roof 2696, Mortar 1968, Plaster 416, Wood 600, Coral 5712, Shisa 332 |
+| `buildings/ryukyu_house_b.glb` | 16,01 x 12,02 x 5,52 m | 17.852 | Roof 4952, Mortar 4968, Plaster 748, Wood 756, Coral 6096, Shisa 332 |
+| `buildings/ryukyu_house_c.glb` | 11,08 x 10,00 x 4,67 m | 10.004 | Roof 1760, Mortar 2400, Plaster 304, Wood 444, Coral 4764, Shisa 332 |
+| `buildings/concrete_house_a.glb` | 10,31 (cu scara) x 8,18 x 9,11 m (cladire 6,5 + rezervor) | 2.216 | Plaster 72, Concrete 548, Wood 1596 |
+| `buildings/concrete_house_b.glb` | 8,21 x 7,16 x 6,36 m (cladire 4,0 + rezervoare) | 1.296 | Plaster 60, Concrete 684, Wood 552 |
+| `structures/harbour_quay.glb` | 6,26 x 12,00 x 4,43 m; Z de la -1,5 la +2,2 (+babale); origine la linia apei | 884 | Concrete 384, Rubber 500 |
+| `structures/bus_stop_shelter.glb` | 4,31 x 2,31 x 3,11 m | 3.248 | Roof 608, Mortar 1344, Wood 120, Coral 1164, Concrete 12 |
+| `props/vending_machine.glb` | 1,00 x 0,91 x 1,85 m | 476 | Plaster 96, Glass 380 |
+| `props/convex_mirror.glb` | 0,86 x 0,74 x 3,15 m | 156 | Frame 112, Glass 44 |
+| `props/fishing_net_rack.glb` | 4,00 x 1,19 x 1,97 m | 576 | Wood 84, Net 492 |
+
+Casele Ryukyu depasesc bugetul orientativ de ~12k (b: 17,9k) din zidul de corali al curtii
+(~5-6k, cel mai mare consumator, 52 m de perimetru) — raportat, fara plafon.
+`verify`: bugete 20.000 (ryukyu) / contract (restul).
+
+### ryukyu_house_a (piesa-erou), 2 runde de `--compare`
+
+Comparatie: `docs/asset_briefs/img/okinawa_fidelity/ryukyu_house_a.png`; cele trei pe o
+planșa: `docs/asset_briefs/img/okinawa_fidelity_val2.png`.
+
+| element | pe planșă / corectură | în GLB | verdict |
+|---|---|---|---|
+| varf | manerul rosu (corectura: SHISA) | leu shisa de teracota 0,6 m pe coama, cu fata spre +Y (`House_Shisa`, 332 tri) | OK ca numar/loc; la vedere de ansamblu e mic (0,6 m din 14) |
+| olane | nervuri dese, rosu | nervuri in relief (pas 0,3 m, 0,1 m) pe `House_Roof`; rosul vine din clasa | OK; la 3/4 din sus nervurile se citesc slab (clasa le aduce) |
+| mortar alb | coame + rosturi in relief | `House_Mortar`: coama, 4 muchii, bordura si ~14 rosturi de la streasina la coama, in relief | OK (rosturile rare si subtiri: la pas 0,9 m erau prea dese, "umbrela") |
+| acoperis | 4 ape, streasina ridicata | 4 ape, coama scurta, colturi +0,15 | OK; coama mai scurta decat pe planșă |
+| hinpun | lipsea pe planșă | zid liber 3 x 1,6 x 0,45 la y = 4,0 (2 m in spatele intrarii) | OK, contract |
+| intrare | poarta de lemn | FARA poarta, flancata de 2 stalpi de corali 1,75 m | OK (corectura) |
+| prispa | — | podea de lemn, 5 stalpi sub streasina lata, usi glisante inchise | OK |
+| zid de corali | zid dreptunghiular alb | pietre rotunjite in 4 asize, 1,4 m, umbrire plata | OK; pietrele sunt mai mari/colturoase ca in desen |
+| vegetatie lipita | palmieri, flori, tufe | NU modelata (corectura) | OK |
+| zid vs casa | zid strans in jurul casei | curte 14 x 12 din contract: casa pare mica in ea | abatere de contract, nu de forma |
+
+b = doua corpuri in L (casa 10 m + anexa perpendiculara mai joasa, doua shisa... doar una pe
+corpul principal), intrarea decalata la x = -3,2; c = casa mica, acoperis mai abrupt
+(curbura 1,15), curte 11 x 10 cu coltul (-X,+Y) taiat, intrarea pe +X. Se disting net pe planșa
+`okinawa_fidelity_val2.png`. Abateri: b si c au o singura shisa; la c prispa e pe +Y
+(intrarea curtii e pe +X, contract).
+
+### Casele de beton, cheiul, refugiul, props (1-2 runde)
+
+Comparatii: `okinawa_fidelity/{concrete_house_a,concrete_house_b,harbour_quay,bus_stop_shelter,vending_machine,convex_mirror,fishing_net_rack}.png`,
+planșe `okinawa_fidelity_val3.png`, `okinawa_fidelity_val4.png`.
+
+| piesa | abateri cinstite |
+|---|---|
+| concrete_house_a | tencuiala `FOAM_WHITE` (cu clasa `plaster` iese ca pe planșă); 2 niveluri, rezervor 10 segmente pe picioare, scara exterioara pe +X, sarma cu 4 rufe, 3+1 ferestre cu jaluzele pe +Y. Parapetul e in `Concrete_Plaster` (alb ca pe planșă), coronamentul in `Concrete_Concrete` (contractul punea parapetul in Concrete). Planșa arata un singur nivel + curte cu trepte si zid: nu se modeleaza (contract: 2 niveluri) |
+| concrete_house_b | `FLAMINGO_PINK` 31 e mai violaceu (#D2A0BE) decat roz-somon-ul din desen: slot existent, culoarea finala o poate da clasa `plaster`. Doua rezervoare + iesire pe acoperis |
+| harbour_quay | bloc 6 x 12, scara in nisa de 7 trepte pe -X, 3 babale, 5 anvelope, rosturi de placi pe fata -X (benzi). Planșa are blocuri de piatra cu accente portocalii pe babale/scara: slotul e CONCRETE (contract); bordura/babalele nu au portocaliu. Capetele y=±6 plane |
+| bus_stop_shelter | acoperis HipRoof 4 x 2, 4 stalpi de lemn, perete de corali in spate + 2 jardiniere joase (fara plante), banca; acoperisul pare mult alb (mortar pe o suprafata mica) fata de planșă. Stalpi de lemn, nu de piatra ca in desen (contract) |
+| vending_machine | decuparea e un panou alb gol; contractul cere vitrina cu 8 sticle: urmeaza contractul (abatere declarata). Fara text/logo |
+| convex_mirror | stalp 3 m, rama portocalie 12 segmente, oglinda ICE_TURQUOISE; calota fara peisaj pictat (desenul are cer/drum) |
+| fishing_net_rack | 2 capre in A + bara (desenul: 2 bare, capete rotunde), 3 plase ca saci fatetati cu flotoare; **plasele nu au ochiuri** (saci plini, nu retea): abatere mare, retelele se citesc din clasa/textura la integrare |
+
+### Stare la oprire (ok-d)
+
+Toate cele 10 GLB exportate, `verify_okinawa_v2.sh` -> `VERDICT KIT: OK`. Comparatiile sunt de
+vazut de coordonator; cea mai slaba fidelitate: `fishing_net_rack` (fara ochiuri) si `harbour_quay`
+(fara accente, tonuri uniforme).
+
+### ok-d, runda 2, ceruta de coordonator (casele Ryukyu, cheiul, refugiul)
+
+Comparatii refacute (cate 1-2 pe piesa): `okinawa_fidelity/{ryukyu_house_a,ryukyu_house_b,ryukyu_house_c,harbour_quay,bus_stop_shelter}.png`,
+`ryukyu_house_a_views.png` (4 azimuturi: hinpun-ul apare in spatele intrarii), planșe `okinawa_fidelity_val2.png`, `val3.png`.
+Casele de beton, automatul, oglinda si suportul de plase au fost acceptate si NU au fost atinse.
+
+| piesa | schimbare | cote / tri |
+|---|---|---|
+| ryukyu_house_a/b/c | acoperis jos, ~drept: `HipRoof` cu `tile_step` 0,2 (perioada nervurilor 0,4 m, 0,1 m relief, ca la poarta), curbura 1,0, colturi ridicate cel mult 0,2 m; alb DOAR pe coama, cele 4 muchii de colt si bordura streasinii; `hip_seams` scos de pe case (ramane in vocabular) | a 14,00 x 12,00 x 5,17 m, 21.764 tri; b 16,00 x 12,00 x 5,52, 29.036; c 11,14 x 10,03 x 4,67, 16.476 |
+| zidul curtii | acelasi tipar ca `coral_stone_wall.glb`: 5 asize, pietre de ~0,5 m, proportii originale (nucleu SAND_SHADOW 0,4 din grosime), 1,35 m, creasta plata; stalpii de la intrare 1,8 m din 7 asize; fara goluri pe randarea de aproape | coralii = 13,2k (a) / 14,2k (b) / 10,5k (c) din total; peste ~14k, acceptat de coordonator |
+| hinpun | piatra de corali ca zidul, 3 x 1,6 m, grosime 0,6 | vizibil pe `ryukyu_house_a_views.png` |
+| harbour_quay | UN bloc continuu 6 x 12 m; scara sapata in fata -X (nisa 1,8 m, y -2,5..3,5, 8 trepte pe lungimea fetei, primele 3 sub apa); 3 babale pe muchie (y -4,8 / -3,0 / 4,5); 4 anvelope atarnate pe fata verticala la z = 1,2 (~1 m sub muchie), in afara scarii; fata -X din blocuri mari in relief (rand de 1,4-2,6 m, umbrire plata); capete plane la ±6, origine la linia apei | 6,29 x 12,00 x 4,43 m, 828 tri |
+| bus_stop_shelter | acoperis in doua ape (`gable_roof`, nou in shapes): streasina dreapta, olane dese in relief, alb DOAR pe coama si pe cele doua capete ale ei (`Shelter_Mortar` 36 tri); stalpi de lemn, perete de corali cu asizele zidului | 4,10 x 2,10 x 3,29 m (3,20 cu coama), 2.660 tri |
+
+Abateri ramase: olanele se citesc ca benzi la randarea neutra (rosul si textura vin din clasa `roof_tiles`);
+nucleul brun al zidului de corali se vede intre pietre, ca la modulul acceptat; scara cheiului e in
+umbra proprie a nisei (se citeste, dar mai greu decat pe decupare); fara accentele portocalii ale desenului
+(slot CONCRETE).

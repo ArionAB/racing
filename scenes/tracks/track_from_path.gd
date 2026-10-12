@@ -25,7 +25,7 @@ extends Track
 @export var custom_name: String = "Pista noua"
 @export_enum("forest", "desert", "island", "baikal", "stromboli", "chongqing",
 	"cappadocia", "serengeti", "machupicchu", "fiordland", "jodhpur", "kyoto",
-	"monumentvalley") var custom_theme: String = "forest"
+	"monumentvalley", "okinawa", "transfagarasan") var custom_theme: String = "forest"
 @export var custom_half_width: float = 7.0
 ## Samanta lumii procedurale, separata de numele de afisare. Gol = samanta vine
 ## din `custom_name` (comportamentul vechi, bit-identic). Se pune cand numele de

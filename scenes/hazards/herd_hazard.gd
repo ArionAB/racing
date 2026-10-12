@@ -104,8 +104,19 @@ const ZEBRA_GLB := "res://assets/models/serengeti/animals/zebra.glb"
 @export_range(4, 40) var body_pool: int = 16
 ## Raza in jurul unei masini in care animalele primesc corp.
 @export_range(4.0, 30.0, 0.5) var body_reach: float = 12.0
+## Sub distanta asta de o masina un animal NU primeste corp (implicit [constant NO_BODY_RADIUS]).
+## La viteze mari corpul trebuie sa dispara INAINTE ca botul masinii sa-l ajunga intr-un pas
+## fizic: la 30 m/s masina face 0,5 m pe cadru, iar un corp cinematic atins asa e un zid (pe
+## Transfagarasan, cu turma deasa si masini de 30 m/s: ~100 de ejectari "perete" la 0.49).
+## Turmele pe drum cu viteza mare cer 8-10 m; implicitul ramane cel de la Serengeti.
+@export_range(1.0, 20.0, 0.1) var no_body_radius: float = NO_BODY_RADIUS
 
 @export_group("Aspect")
+## Modelele turmei. Implicit gnu + zebra (Serengeti, bit-identic); o alta pista
+## (Transfagarasan: oaie + caine ciobanesc) le inlocuieste cu alt GLB, iar
+## `zebra_ratio` devine proportia modelului `alt_model`.
+@export_file("*.glb") var animal_model: String = WILDEBEEST_GLB
+@export_file("*.glb") var alt_model: String = ZEBRA_GLB
 @export_range(0.0, 1.0, 0.05) var zebra_ratio: float = 0.2
 
 ## Plafonul de valoare pe blana (vezi shader-ul): 1.0 = neatins, deci celelalte
@@ -404,11 +415,11 @@ func _ground(p: Vector3) -> float:
 
 
 func _build_visual() -> void:
-	var gnu_mesh := _animal_mesh_from(WILDEBEEST_GLB)
-	var zebra_mesh := _animal_mesh_from(ZEBRA_GLB)
+	var gnu_mesh := _animal_mesh_from(animal_model)
+	var zebra_mesh := _animal_mesh_from(alt_model)
 	var from_kit := gnu_mesh != null
 	if gnu_mesh == null:
-		push_warning("HerdHazard: %s nu se incarca; turma ramane pe cutii" % WILDEBEEST_GLB)
+		push_warning("HerdHazard: %s nu se incarca; turma ramane pe cutii" % animal_model)
 		gnu_mesh = _animal_mesh()
 	if zebra_mesh == null:
 		zebra_mesh = gnu_mesh
@@ -724,7 +735,7 @@ func _assign_bodies() -> void:
 			var d := car.global_position.distance_to(_pos[i])
 			if d < best:
 				best = d
-		if best < body_reach and best > NO_BODY_RADIUS:
+		if best < body_reach and best > no_body_radius:
 			want.append([best, i])
 	want.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	var keep: Dictionary = {}
@@ -739,7 +750,7 @@ func _assign_bodies() -> void:
 				var car := c as Node3D
 				if car != null:
 					best = minf(best, car.global_position.distance_to(_pos[a]))
-			still = best < body_reach * 1.3 and best > NO_BODY_RADIUS
+			still = best < body_reach * 1.3 and best > no_body_radius
 		if still:
 			keep[a] = b
 		else:

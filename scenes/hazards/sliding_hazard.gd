@@ -103,6 +103,9 @@ const SWEEP_PUSH: float = 5.5
 const ANIM_REST := [&"Eating", &"Idle"] # prima gasita castiga
 const ANIM_WALK := &"Walk"
 const ANIM_RUN := &"Gallop"
+## Clip OPTIONAL jucat pe durata telegrafului unei traversari (ursul se ridica
+## in doua labe). Un model fara el ramane exact ca inainte.
+const ANIM_STAND := &"Stand"
 ## Peste viteza asta pasul devine galop (vaca la trap real ~3 m/s).
 const RUN_SPEED: float = 3.0
 ## Vitezele "naturale" ale ciclurilor, ca ritmul pasilor sa urmeze nodul:
@@ -172,6 +175,7 @@ var _pivot: Node3D
 ## AnimationPlayer-ul modelului, daca GLB-ul are schelet. Vezi ANIM_* sus.
 var _anim: AnimationPlayer
 var _anim_rest: StringName = &""
+var _stand_started: bool = false
 var _walk_cycle_speed: float = WALK_CYCLE_SPEED
 var _run_cycle_speed: float = RUN_CYCLE_SPEED
 var _last_pos: Vector3
@@ -415,6 +419,14 @@ func _hook_animation(model: Node3D) -> void:
 
 ## Pasul urmeaza nodul: ce animatie si in ce ritm, din viteza reala (m/s).
 func _animate(speed: float) -> void:
+	if motion == Motion.TRAVERSARE and _anim.has_animation(ANIM_STAND):
+		if _in_telegraph(_time):
+			if not _stand_started:
+				_stand_started = true
+				_anim.speed_scale = 1.0
+				_anim.play(ANIM_STAND, ANIM_BLEND)
+			return
+		_stand_started = false
 	var target := _anim_rest
 	var rate := 1.0
 	if speed > RUN_SPEED and _anim.has_animation(ANIM_RUN):
@@ -497,6 +509,16 @@ func _physics_process(delta: float) -> void:
 	_last_pos = next_pos
 	if not Engine.is_editor_hint():
 		_shove_cars(delta)
+
+## Suntem in fereastra de telegraf a unei traversari? Oglindeste calendarul din
+## [method _offset_at] (aceleasi constante), fara sa-l modifice.
+func _in_telegraph(time: float) -> bool:
+	var cross := period * 0.5
+	var leg := CROSS_WAIT + CROSS_TELEGRAPH + cross
+	var t := fposmod(time + phase * leg * 2.0, leg * 2.0)
+	if t >= leg:
+		t -= leg
+	return t >= CROSS_WAIT and t < CROSS_WAIT + CROSS_TELEGRAPH
 
 ## Unde se afla obstacolul pe axa `travel`, ca fractie -1..+1 (−1 si +1 fiind
 ## cele doua margini ale cursei).

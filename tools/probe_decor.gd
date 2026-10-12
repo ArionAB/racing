@@ -158,7 +158,9 @@ func _initialize() -> void:
 			only = int(arg.trim_prefix("--track="))
 		elif arg == "--no-leaves":
 			_no_leaves = true
-	for i in range(1, 20):
+	# 1..21: Track21 (Transfagarasan) exista de la fundatia din 10 oct 2026; Track20 (Okinawa) din 7 oct; cu `range(1, 20)`
+	# `--track=20` nu gasea nicio pista (si iesea cu 1, nu cu un verdict fals).
+	for i in range(1, 22):
 		var path := "res://scenes/tracks/Track%02d.tscn" % i
 		if not ResourceLoader.exists(path):
 			continue
@@ -612,7 +614,10 @@ func _source_of(mi: Node, track: Node) -> String:
 		return "GLB: " + String(mi.name).trim_prefix("CityFill_").get_slice("__", 0) + " (CityFill)"
 	var up: Node = mi
 	while up != null and up != track:
-		if up is Node3D and (up as Node3D).scene_file_path.contains("/models/jodhpur/"):
+		# Kitul Okinawa (assets/models/okinawa/) are aceeasi capcana: casele
+		# poarta `House_Roof` (= village_house), pinii ryukyu cad pe
+		# alpine_pines, barcile pe cruise_boat, zidurile pe stirling_ledge.
+		if up is Node3D and ((up as Node3D).scene_file_path.contains("/models/jodhpur/") 				or (up as Node3D).scene_file_path.contains("/models/okinawa/")):
 			return "GLB: " + (up as Node3D).scene_file_path.get_file().get_basename()
 		up = up.get_parent()
 	# Intai numele PROPRIU al mesh-ului: variantele sunt cheia stabila.

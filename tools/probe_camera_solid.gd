@@ -221,6 +221,14 @@ const BASELINE := {
 	# Baza = cifra masurata, FARA marja (memoria garda-fara-linie-de-baza). Sabotaj
 	# (`--sabotaj`) verificat la armare.
 	"Monument Valley (Track19)": 1,
+	# Transfagarasan (Track21), fundatia (10 oct 2026): UN incident, identic la 3 rulari —
+	# `ChannelKicker` la frac 0.676 (trambulina sariturii peste paraul Balea taie linia
+	# masina-camera cat masina e pe ea; aceeasi clasa ca Track19). Tunelul (0.319-0.347) si
+	# portalurile trec curate DOAR cu `camera_tail_m = 18` pe SemaforTunel: fara el, la iesire
+	# camera (12,5 m in spate, 10 m sus) ramanea in movila tubului pe 0.350-0.354 (TunnelBore +
+	# TunnelPortal intre masina si camera) — zona de camera se oprea chiar la capat. Baza =
+	# cifra masurata, FARA marja. Sabotaj (`--sabotaj`) verificat la armare.
+	"Transfagarasan (Track21)": 1,
 }
 
 

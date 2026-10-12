@@ -5224,6 +5224,37 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	rebuild()
 	MeshCpu.end()
+	if not Engine.is_editor_hint():
+		_bake_manual_decor()
+
+## Coace vizualul static din DecorManual in MultiMesh-uri pe celule (vezi
+## `TrackDecorBatch.bake_manual`: de ce, ce ramane nod). Doar in joc: in editor
+## nodurile sunt sursa de adevar si trebuie sa ramana editabile.
+##
+## Asteapta doua cadre fiindca WorldProp isi pune clasele de material, ruptura
+## de accente si alegerea variantelor prin `call_deferred` din `_ready`, iar
+## unele dintre ele amana mai departe; coacerea trebuie sa vada starea finala.
+## `--no-batch` / `--no-manual-batch` o sar, pentru A/B in sonde;
+## `--decal-cell=N` schimba latura celulelor de langa decaluri (masuratori).
+func _bake_manual_decor() -> void:
+	var args := OS.get_cmdline_user_args()
+	if args.has("--no-batch") or args.has("--no-manual-batch"):
+		return
+	var dm := get_node_or_null(^"DecorManual") as Node3D
+	if dm == null:
+		return
+	for _i in 2:
+		await get_tree().process_frame
+	if not is_instance_valid(dm) or not dm.is_inside_tree():
+		return
+	var cell := TrackDecorBatch.DECAL_CELL_M
+	for arg in args:
+		if arg.begins_with("--decal-cell="):
+			cell = maxf(10.0, float(arg.trim_prefix("--decal-cell=")))
+	var t0 := Time.get_ticks_msec()
+	var r := TrackDecorBatch.bake_manual(dm, cell)
+	print("DecorManual coacere: %d noduri de mesh -> %d buffere (%d instante), %d ms"
+		% [r["hidden"], r["batches"], r["instances"], Time.get_ticks_msec() - t0])
 
 ## Reconstruieste toata pista (folosit si de editor, la Regenerate).
 ##

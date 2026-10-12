@@ -3983,6 +3983,40 @@ static func themes() -> Dictionary:
 		],
 	}, true)
 	_themes_cache["okinawa"] = oki
+	# TRANSFAGARASAN (Track21, docs/track_briefs/transfagarasan.md §4, pasul 2 din
+	# §7): pleaca din COPIA lui "alpine" (cer de altitudine, ceata albastruie,
+	# decor "bands" cu props alpine, fara ziduri/borduri), cu override-uri minime.
+	# "alpine" NU se editeaza: Track09 il foloseste pana la swap si trebuie sa ramana
+	# bit-identic. Apa NU intra in tema (`water` ramane false): lacurile Vidraru si
+	# Balea si Oltul sunt `custom_ravine_water` pe scena, deci doar culoarea apei
+	# se spune aici (verde-inchis rece, nu albastru de mare).
+	var tf: Dictionary = (_themes_cache["alpine"] as Dictionary).duplicate()
+	tf.merge({
+		# Pajiste alpina rece, scurta (#7D9A4E), nu verdele cald al Alpilor.
+		"ground_tint": Color(0.49, 0.60, 0.31),
+		# Soare de dupa-amiaza tarzie din VNV (~290 grade, 25 de grade elevatie),
+		# cald-auriu (#FFD9A8). Busola 180 - y = 290 => y = -110. Azimutul se
+		# remasoara pe traseul real (memoria azimutul-soarelui-fata-de-drum).
+		"sun_rotation_deg": Vector3(-25, -110, 0),
+		"sun_color": Color(1.0, 0.85, 0.66),
+		"sun_energy": 1.1,
+		# Ambient de altitudine, rece (#B8CCE0 la 0.3): umbrele de pe zapada albastre.
+		"ambient_color": Color.html("B8CCE0"),
+		"ambient_energy": 0.30,
+		# Aer de 2000 m: zenit mai saturat decat pe Alpi (#2F6FD0), orizont alb-cald.
+		"sky_top": Color(0.18, 0.44, 0.82),
+		"sky_horizon": Color(0.86, 0.88, 0.90),
+		"fog_begin": 140.0,
+		"fog_end": 370.0,
+		# Apa de lac de munte: transparenta la mal (turcoaz rece), verde-inchis
+		# in adanc (Vidraru). Spuma si luciul coborate: lac, nu mare.
+		"water_shallow_slot": Palette.ICE_TURQUOISE,
+		"water_deep_slot": Palette.SEA_DEEP,
+		"water_shore_slot": Palette.ROCK_LIGHT,
+		"water_foam": 0.15,
+		"water_glint": 0.5,
+	}, true)
+	_themes_cache["transfagarasan"] = tf
 	return _themes_cache
 
 
@@ -11791,6 +11825,11 @@ func _tunnel_specs() -> Array[Vector4]:
 	return []
 
 
+## Coada zonei de camera dupa gura de iesire, per tunel (cheie = fractia liniei de
+## oprire). Plina doar pentru tunelurile cu `camera_tail_m` > 0.
+var _tunnel_camera_tail: Dictionary = {}
+
+
 ## Tunelurile declarate ca noduri [TunnelSignalHazard], in aceleasi patru
 ## numere. Cautare recursiva si manuala, ca la varfuri.
 func _node_tunnels() -> Array[Vector4]:
@@ -11809,6 +11848,8 @@ func _collect_tunnels(node: Node, out: Array[Vector4]) -> void:
 			var i := _closest_baked_index(p)
 			out.append(Vector4(frac_at(i), sig.tunnel_length,
 				sig.tunnel_half_width, sig.tunnel_ceiling))
+			if sig.camera_tail_m > 0.0:
+				_tunnel_camera_tail[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.camera_tail_m # cheia trece prin float32, ca spec.x
 		_collect_tunnels(child, out)
 
 
@@ -11928,6 +11969,9 @@ func _build_tunnel(spec: Vector4) -> void:
 	cz.size = Vector3(2.0, 2.0, 2.0)
 	cz.frac_from = r.frac_at(line_idx)
 	cz.frac_to = r.frac_at(r.wrap_index(idx_west))
+	var tail_m := float(_tunnel_camera_tail.get(spec.x, 0.0))
+	if tail_m > 0.0:
+		cz.frac_to = fposmod(cz.frac_to + tail_m / maxf(r.length(), 1.0), 1.0)
 	cz.height = 5.5
 	cz.ceiling = ceil_h
 	cz.darkness = 0.5
@@ -12416,7 +12460,12 @@ func _build_avalanche(frac: float, spec: Dictionary = {}) -> void:
 	# `looking_at(dir)` da -Z pe sensul cursei si +X pe marginea din dreapta,
 	# conventia din tot proiectul. Avalansa coboara pe X local (vezi
 	# `_start_point` / `_end_point`), deci traverseaza perpendicular pe drum.
-	av.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), p)
+	# Pe versantul din STANGA (avalanche_from_left): baza se roteste 180 de grade pe Y,
+	# deci +X local (de unde porneste masa) cade pe stanga soselei.
+	var av_basis := Basis.looking_at(dir, Vector3.UP)
+	if bool(spec.get("avalanche_from_left", false)):
+		av_basis = av_basis.rotated(Vector3.UP, PI)
+	av.transform = Transform3D(av_basis, p)
 	add_child(av)
 
 

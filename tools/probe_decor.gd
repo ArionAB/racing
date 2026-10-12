@@ -158,9 +158,9 @@ func _initialize() -> void:
 			only = int(arg.trim_prefix("--track="))
 		elif arg == "--no-leaves":
 			_no_leaves = true
-	# 1..20: Track20 (Okinawa) exista de la fundatia din 7 oct 2026; cu `range(1, 20)`
+	# 1..21: Track21 (Transfagarasan) exista de la fundatia din 10 oct 2026; Track20 (Okinawa) din 7 oct; cu `range(1, 20)`
 	# `--track=20` nu gasea nicio pista (si iesea cu 1, nu cu un verdict fals).
-	for i in range(1, 21):
+	for i in range(1, 22):
 		var path := "res://scenes/tracks/Track%02d.tscn" % i
 		if not ResourceLoader.exists(path):
 			continue

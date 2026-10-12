@@ -1,0 +1,340 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+[ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="3_channel"]
+[ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="4_hzm"]
+[ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
+[ext_resource type="Script" path="res://scenes/hazards/herd_hazard.gd" id="6_herd"]
+[ext_resource type="Script" path="res://scenes/hazards/train_hazard.gd" id="7_train"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/props/cow.glb" id="10_cow"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/snowplow.glb" id="11_plow"]
+[ext_resource type="PackedScene" path="res://assets/models/structures/mountain_tunnel.glb" id="12_tunnel"]
+[ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
+[ext_resource type="PackedScene" path="res://assets/models/scatter/snow_patch.glb" id="14_snow"]
+
+[sub_resource type="Curve3D" id="Curve3D_main"]
+closed = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -115.0, 0.0, 262.0, 0, 0, 0, 0, 0, 0, -103.03, 0.44, 262.87, 0, 0, 0, 0, 0, 0, -91.06, 0.87, 263.74, 0, 0, 0, 0, 0, 0, -79.09, 1.31, 264.61, 0, 0, 0, 0, 0, 0, -67.13, 1.74, 265.48, 0, 0, 0, 0, 0, 0, -55.16, 2.44, 265.65, 0, 0, 0, 0, 0, 0, -43.19, 3.53, 264.78, 0, 0, 0, 0, 0, 0, -31.22, 4.62, 263.91, 0, 0, 0, 0, 0, 0, -19.25, 5.7, 263.04, 0, 0, 0, 0, 0, 0, -7.28, 6.79, 262.17, 0, 0, 0, 0, 0, 0, 4.49, 7.86, 259.93, 0, 0, 0, 0, 0, 0, 16.22, 8.93, 257.37, 0, 0, 0, 0, 0, 0, 27.94, 9.99, 254.81, 0, 0, 0, 0, 0, 0, 39.67, 11.06, 252.25, 0, 0, 0, 0, 0, 0, 51.38, 12.0, 249.63, 0, 0, 0, 0, 0, 0, 62.97, 12.0, 246.54, 0, 0, 0, 0, 0, 0, 74.57, 12.0, 243.45, 0, 0, 0, 0, 0, 0, 86.16, 12.0, 240.36, 0, 0, 0, 0, 0, 0, 97.85, 12.0, 238.13, 0, 0, 0, 0, 0, 0, 109.84, 12.0, 238.66, 0, 0, 0, 0, 0, 0, 121.82, 12.0, 239.19, 0, 0, 0, 0, 0, 0, 133.81, 12.0, 239.73, 0, 0, 0, 0, 0, 0, 144.9, 12.09, 236.88, 0, 0, 0, 0, 0, 0, 155.02, 12.28, 230.44, 0, 0, 0, 0, 0, 0, 165.15, 12.46, 224.0, 0, 0, 0, 0, 0, 0, 175.27, 12.65, 217.55, 0, 0, 0, 0, 0, 0, 185.36, 12.83, 211.07, 0, 0, 0, 0, 0, 0, 193.75, 13.05, 202.6, 0, 0, 0, 0, 0, 0, 198.56, 13.52, 191.64, 0, 0, 0, 0, 0, 0, 201.66, 13.98, 180.04, 0, 0, 0, 0, 0, 0, 204.75, 14.45, 168.45, 0, 0, 0, 0, 0, 0, 207.84, 14.92, 156.85, 0, 0, 0, 0, 0, 0, 210.93, 15.38, 145.26, 0, 0, 0, 0, 0, 0, 214.02, 15.85, 133.66, 0, 0, 0, 0, 0, 0, 212.4, 16.56, 122.21, 0, 0, 0, 0, 0, 0, 208.61, 17.37, 110.83, 0, 0, 0, 0, 0, 0, 204.81, 18.18, 99.44, 0, 0, 0, 0, 0, 0, 201.95, 18.99, 87.84, 0, 0, 0, 0, 0, 0, 202.65, 19.8, 76.03, 0, 0, 0, 0, 0, 0, 207.84, 20.86, 65.35, 0, 0, 0, 0, 0, 0, 216.84, 21.99, 57.52, 0, 0, 0, 0, 0, 0, 227.26, 23.13, 51.57, 0, 0, 0, 0, 0, 0, 236.29, 24.27, 43.91, 0, 0, 0, 0, 0, 0, 239.77, 25.4, 32.64, 0, 0, 0, 0, 0, 0, 235.95, 26.71, 21.57, 0, 0, 0, 0, 0, 0, 226.72, 28.02, 14.24, 0, 0, 0, 0, 0, 0, 215.83, 29.34, 9.25, 0, 0, 0, 0, 0, 0, 208.4, 30.66, 0.24, 0, 0, 0, 0, 0, 0, 208.09, 32.03, -11.43, 0, 0, 0, 0, 0, 0, 215.04, 33.42, -20.81, 0, 0, 0, 0, 0, 0, 225.67, 34.81, -26.31, 0, 0, 0, 0, 0, 0, 235.24, 36.2, -33.31, 0, 0, 0, 0, 0, 0, 240.02, 37.47, -44.1, 0, 0, 0, 0, 0, 0, 239.0, 38.56, -55.84, 0, 0, 0, 0, 0, 0, 232.19, 39.65, -65.67, 0, 0, 0, 0, 0, 0, 224.21, 40.74, -74.63, 0, 0, 0, 0, 0, 0, 216.24, 41.83, -83.6, 0, 0, 0, 0, 0, 0, 213.19, 42.18, -94.97, 0, 0, 0, 0, 0, 0, 211.04, 42.4, -106.77, 0, 0, 0, 0, 0, 0, 208.89, 42.61, -118.58, 0, 0, 0, 0, 0, 0, 206.75, 42.83, -130.39, 0, 0, 0, 0, 0, 0, 204.39, 43.0, -142.14, 0, 0, 0, 0, 0, 0, 201.09, 43.0, -153.68, 0, 0, 0, 0, 0, 0, 197.79, 43.0, -165.22, 0, 0, 0, 0, 0, 0, 192.38, 42.94, -175.73, 0, 0, 0, 0, 0, 0, 182.92, 42.6, -183.05, 0, 0, 0, 0, 0, 0, 172.94, 42.27, -189.71, 0, 0, 0, 0, 0, 0, 162.54, 41.84, -195.0, 0, 0, 0, 0, 0, 0, 150.54, 41.09, -195.0, 0, 0, 0, 0, 0, 0, 138.54, 40.33, -195.0, 0, 0, 0, 0, 0, 0, 126.54, 39.57, -195.0, 0, 0, 0, 0, 0, 0, 114.54, 38.81, -195.0, 0, 0, 0, 0, 0, 0, 102.54, 38.05, -195.0, 0, 0, 0, 0, 0, 0, 90.65, 37.29, -195.99, 0, 0, 0, 0, 0, 0, 81.95, 37.0, -203.77, 0, 0, 0, 0, 0, 0, 80.69, 37.0, -215.37, 0, 0, 0, 0, 0, 0, 87.85, 36.51, -224.59, 0, 0, 0, 0, 0, 0, 99.4, 35.58, -227.0, 0, 0, 0, 0, 0, 0, 111.4, 34.66, -227.0, 0, 0, 0, 0, 0, 0, 123.4, 33.74, -227.0, 0, 0, 0, 0, 0, 0, 135.4, 32.82, -227.0, 0, 0, 0, 0, 0, 0, 147.4, 31.89, -227.0, 0, 0, 0, 0, 0, 0, 158.68, 31.0, -230.33, 0, 0, 0, 0, 0, 0, 164.59, 31.0, -240.4, 0, 0, 0, 0, 0, 0, 162.24, 31.0, -251.83, 0, 0, 0, 0, 0, 0, 152.61, 30.13, -258.43, 0, 0, 0, 0, 0, 0, 140.66, 29.2, -259.0, 0, 0, 0, 0, 0, 0, 128.66, 28.28, -259.0, 0, 0, 0, 0, 0, 0, 116.66, 27.36, -259.0, 0, 0, 0, 0, 0, 0, 104.66, 26.44, -259.0, 0, 0, 0, 0, 0, 0, 92.7, 25.51, -259.52, 0, 0, 0, 0, 0, 0, 82.91, 25.0, -265.88, 0, 0, 0, 0, 0, 0, 80.36, 25.0, -277.28, 0, 0, 0, 0, 0, 0, 86.1, 24.67, -287.44, 0, 0, 0, 0, 0, 0, 97.28, 23.75, -291.0, 0, 0, 0, 0, 0, 0, 109.28, 22.82, -291.0, 0, 0, 0, 0, 0, 0, 121.28, 21.9, -291.0, 0, 0, 0, 0, 0, 0, 133.28, 20.98, -291.0, 0, 0, 0, 0, 0, 0, 145.28, 20.06, -291.0, 0, 0, 0, 0, 0, 0, 156.86, 19.13, -293.27, 0, 0, 0, 0, 0, 0, 164.26, 19.0, -302.31, 0, 0, 0, 0, 0, 0, 163.54, 19.0, -314.06, 0, 0, 0, 0, 0, 0, 155.2, 18.73, -322.31, 0, 0, 0, 0, 0, 0, 143.35, 18.24, -323.87, 0, 0, 0, 0, 0, 0, 131.36, 17.75, -324.35, 0, 0, 0, 0, 0, 0, 119.37, 17.26, -324.83, 0, 0, 0, 0, 0, 0, 107.38, 16.77, -325.3, 0, 0, 0, 0, 0, 0, 95.39, 16.27, -325.78, 0, 0, 0, 0, 0, 0, 83.4, 15.78, -326.26, 0, 0, 0, 0, 0, 0, 71.41, 15.29, -326.74, 0, 0, 0, 0, 0, 0, 59.42, 14.8, -327.22, 0, 0, 0, 0, 0, 0, 47.43, 14.3, -327.7, 0, 0, 0, 0, 0, 0, 35.45, 13.89, -328.4, 0, 0, 0, 0, 0, 0, 23.5, 13.59, -329.44, 0, 0, 0, 0, 0, 0, 11.54, 13.29, -330.49, 0, 0, 0, 0, 0, 0, -0.41, 12.99, -331.54, 0, 0, 0, 0, 0, 0, -12.36, 12.69, -332.58, 0, 0, 0, 0, 0, 0, -24.32, 12.39, -333.63, 0, 0, 0, 0, 0, 0, -36.28, 12.09, -334.62, 0, 0, 0, 0, 0, 0, -48.15, 11.69, -333.27, 0, 0, 0, 0, 0, 0, -59.89, 11.25, -330.77, 0, 0, 0, 0, 0, 0, -71.63, 10.81, -328.28, 0, 0, 0, 0, 0, 0, -83.36, 10.37, -325.79, 0, 0, 0, 0, 0, 0, -95.1, 9.92, -323.29, 0, 0, 0, 0, 0, 0, -106.84, 9.48, -320.8, 0, 0, 0, 0, 0, 0, -118.12, 9.04, -316.74, 0, 0, 0, 0, 0, 0, -127.76, 8.76, -309.67, 0, 0, 0, 0, 0, 0, -136.15, 8.51, -301.1, 0, 0, 0, 0, 0, 0, -144.45, 8.25, -292.43, 0, 0, 0, 0, 0, 0, -152.74, 7.99, -283.75, 0, 0, 0, 0, 0, 0, -161.03, 7.73, -275.08, 0, 0, 0, 0, 0, 0, -169.32, 7.48, -266.4, 0, 0, 0, 0, 0, 0, -177.3, 7.22, -257.47, 0, 0, 0, 0, 0, 0, -183.59, 6.97, -247.34, 0, 0, 0, 0, 0, 0, -186.78, 6.77, -235.79, 0, 0, 0, 0, 0, 0, -188.26, 6.57, -223.88, 0, 0, 0, 0, 0, 0, -189.75, 6.37, -211.97, 0, 0, 0, 0, 0, 0, -191.24, 6.17, -200.07, 0, 0, 0, 0, 0, 0, -192.73, 5.97, -188.16, 0, 0, 0, 0, 0, 0, -194.22, 5.77, -176.25, 0, 0, 0, 0, 0, 0, -195.71, 5.57, -164.35, 0, 0, 0, 0, 0, 0, -197.2, 5.38, -152.44, 0, 0, 0, 0, 0, 0, -198.68, 5.18, -140.53, 0, 0, 0, 0, 0, 0, -200.05, 4.98, -128.61, 0, 0, 0, 0, 0, 0, -200.51, 4.79, -116.62, 0, 0, 0, 0, 0, 0, -200.98, 4.61, -104.63, 0, 0, 0, 0, 0, 0, -201.44, 4.43, -92.64, 0, 0, 0, 0, 0, 0, -201.9, 4.24, -80.65, 0, 0, 0, 0, 0, 0, -202.36, 4.06, -68.66, 0, 0, 0, 0, 0, 0, -202.82, 3.87, -56.67, 0, 0, 0, 0, 0, 0, -203.28, 3.69, -44.68, 0, 0, 0, 0, 0, 0, -203.74, 3.5, -32.68, 0, 0, 0, 0, 0, 0, -204.2, 3.32, -20.69, 0, 0, 0, 0, 0, 0, -204.67, 3.13, -8.7, 0, 0, 0, 0, 0, 0, -204.77, 2.96, 3.28, 0, 0, 0, 0, 0, 0, -203.91, 2.84, 15.25, 0, 0, 0, 0, 0, 0, -203.06, 2.71, 27.22, 0, 0, 0, 0, 0, 0, -202.2, 2.58, 39.19, 0, 0, 0, 0, 0, 0, -201.35, 2.45, 51.16, 0, 0, 0, 0, 0, 0, -200.49, 2.32, 63.13, 0, 0, 0, 0, 0, 0, -199.64, 2.2, 75.1, 0, 0, 0, 0, 0, 0, -198.78, 2.07, 87.07, 0, 0, 0, 0, 0, 0, -197.93, 1.94, 99.04, 0, 0, 0, 0, 0, 0, -197.07, 1.81, 111.01, 0, 0, 0, 0, 0, 0, -196.22, 1.68, 122.98, 0, 0, 0, 0, 0, 0, -195.33, 1.55, 134.94, 0, 0, 0, 0, 0, 0, -192.64, 1.43, 146.6, 0, 0, 0, 0, 0, 0, -188.61, 1.32, 157.9, 0, 0, 0, 0, 0, 0, -184.57, 1.2, 169.2, 0, 0, 0, 0, 0, 0, -180.53, 1.08, 180.5, 0, 0, 0, 0, 0, 0, -176.5, 0.97, 191.81, 0, 0, 0, 0, 0, 0, -172.46, 0.85, 203.11, 0, 0, 0, 0, 0, 0, -168.43, 0.74, 214.41, 0, 0, 0, 0, 0, 0, -163.99, 0.62, 225.52, 0, 0, 0, 0, 0, 0, -157.95, 0.5, 235.89, 0, 0, 0, 0, 0, 0, -148.65, 0.38, 243.45, 0, 0, 0, 0, 0, 0, -138.36, 0.26, 249.54, 0, 0, 0, 0, 0, 0, -127.77, 0.14, 255.19, 0, 0, 0, 0, 0, 0, -117.18, 0.02, 260.84),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 179
+
+[sub_resource type="CylinderMesh" id="Cyl_balea"]
+top_radius = 34.0
+bottom_radius = 34.0
+height = 0.1
+radial_segments = 28
+rings = 1
+cap_bottom = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_balea"]
+albedo_color = Color(0.25, 0.45, 0.47, 0.88)
+transparency = 1
+roughness = 0.25
+
+[node name="Track21" type="Node3D"]
+script = ExtResource("1_track")
+custom_name = "Transfagarasan"
+custom_theme = "transfagarasan"
+custom_world_seed_name = "transfagarasan21"
+custom_half_width = 7.0
+custom_road_surface = "asphalt"
+custom_sun_rotation_deg = Vector3(-25, -110, 0)
+custom_width_segments = Array[Vector3]([Vector3(0.078, 0.123, 6.0), Vector3(0.317, 0.35, 6.0)])
+custom_ravines = Array[Vector4]([Vector4(0.08, 0.135, 30.0, -1), Vector4(0.135, 0.245, 20.0, -1), Vector4(0.074, 0.128, 40.0, 1), Vector4(0.347, 0.382, 5.0, 1), Vector4(0.705, 0.775, 10.0, 1), Vector4(0.845, 0.975, 10.0, 1)])
+custom_cornice_ravines = Array[int]([0, 2])
+custom_ravine_floors = Array[Vector2]([Vector2(0, 3.0), Vector2(1, 3.0), Vector2(2, -28.0), Vector2(3, 37.0), Vector2(4, -4.0), Vector2(5, -5.0)])
+custom_ravine_widths = Array[Vector2]([Vector2(0, 120.0), Vector2(1, 150.0), Vector2(2, 60.0), Vector2(3, 55.0), Vector2(4, 45.0), Vector2(5, 45.0)])
+custom_ravine_water = Array[Vector3]([Vector3(0, 7.5, 16.0), Vector3(2, -24.0, 20.0), Vector3(4, 3.4, 16.0), Vector3(5, -2.5, 16.0)])
+traffic_count = 0
+
+[node name="Path" type="Path3D" parent="."]
+curve = SubResource("Curve3D_main")
+
+[node name="Peaks" type="Node3D" parent="."]
+
+[node name="MasivTunel" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 207.78, 85.00, -124.71)
+gizmo_extents = 160.0
+script = ExtResource("2_peak")
+radius_m = 160.0
+
+[node name="CreastaVest" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.00, 105.00, -100.00)
+gizmo_extents = 200.0
+script = ExtResource("2_peak")
+radius_m = 200.0
+
+[node name="CreastaCentru" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100.00, 92.00, -115.00)
+gizmo_extents = 140.0
+script = ExtResource("2_peak")
+radius_m = 140.0
+
+[node name="Hazarduri" type="Node3D" parent="."]
+
+[node name="Urs" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 206.427, 17.833, 104.281)
+gizmo_extents = 3.0
+script = ExtResource("4_hzm")
+kind = 0
+model = ExtResource("10_cow")
+model_scale = 0.9
+face_travel = true
+motion = 1
+sweep_speed = 1.8
+
+[node name="SemaforTunel" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(0.98387, 0, 0.17889, 0, 1.0, 0, -0.17889, 0, 0.98387, 220.624, 42.185, -96.551)
+script = ExtResource("5_signal")
+period = 34.0
+clear_hold = 6.0
+tunnel_length = 60.0
+bus_speed = 11.0
+bus_width = 2.4
+bus_length = 4.0
+bus_model = ExtResource("11_plow")
+bus_shove = 1.5
+bus_side_accel = 4.0
+bus_nose_angle_deg = 40.0
+tunnel_half_width = 6.0
+camera_tail_m = 18.0
+first_green_bonus_s = 28.0
+bus_lane_offset = -2.6
+
+[node name="Avalansa" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 110.271, 38.537, -195.000)
+gizmo_extents = 3.0
+script = ExtResource("4_hzm")
+kind = 8
+avalanche_period = 75.0
+avalanche_from_left = true
+
+[node name="OileAcPaior" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 122.326, 27.794, -259.000)
+script = ExtResource("6_herd")
+animal_model = "res://assets/models/monumentvalley/animals/sheep.glb"
+alt_model = "res://assets/models/monumentvalley/animals/sheep.glb"
+flow_dir = Vector3(0.0, 0, -1.0)
+road_dir = Vector3(-1.0000, 0, -0.0000)
+corridor_m = 14.0
+animal_mass = 45.0
+speed = 2.5
+spacing = 1.4
+zebra_ratio = 0.0
+no_body_radius = 9.0
+body_reach = 18.0
+
+[node name="Tren" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(-0.80327, 0, 0.59562, 0, 1.0, 0, -0.59562, 0, -0.80327, -199.674, 5.033, -131.918)
+script = ExtResource("7_train")
+model_path = "res://assets/models/vehicles/train.glb"
+period = 40.0
+half_rail = 65.0
+road_half_width = 7.0
+
+[node name="ParaulBalea" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72.448, 10.778, -328.105)
+gizmo_extents = 90.0
+script = ExtResource("3_channel")
+gap = 12.0
+water_half = 6.0
+bank = 16.0
+depth = 18.0
+water_y_drop = 15.0
+reach = 90.0
+fade = 30.0
+jump = true
+label = "Paraul Balea"
+
+[node name="LacBalea" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 232.62, 40.3, -193.70)
+cast_shadow = 0
+mesh = SubResource("Cyl_balea")
+surface_material_override/0 = SubResource("Mat_balea")
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("9_prop")
+
+[node name="Portal_S" parent="DecorManual" instance=ExtResource("12_tunnel")]
+transform = Transform3D(-1.47580, 0, -0.17889, 0, 1.25, 0, 0.26833, 0, -0.98387, 215.10, 41.96, -87.85)
+metadata/coliziune = "none"
+
+[node name="Portal_N" parent="DecorManual" instance=ExtResource("12_tunnel")]
+transform = Transform3D(-1.44229, 0, -0.27472, 0, 1.25, 0, 0.41208, 0, -0.96152, 198.94, 43.00, -161.22)
+metadata/coliziune = "none"
+
+[node name="Utilaj_parcat" parent="DecorManual" instance=ExtResource("11_plow")]
+transform = Transform3D(-0.98387, 0, -0.17889, 0, 1.0, 0, 0.17889, 0, -0.98387, 229.62, 40.92, -82.10)
+
+[node name="Zapada00" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 222.62, 35.01, -36.23)
+metadata/coliziune = "none"
+
+[node name="Zapada01" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 234.19, 35.01, -20.40)
+metadata/coliziune = "none"
+
+[node name="Zapada02" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 226.50, 36.06, -37.77)
+metadata/coliziune = "none"
+
+[node name="Zapada03" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 244.42, 36.06, -29.83)
+metadata/coliziune = "none"
+
+[node name="Zapada04" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 230.14, 37.02, -46.00)
+metadata/coliziune = "none"
+
+[node name="Zapada05" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 248.06, 37.02, -38.06)
+metadata/coliziune = "none"
+
+[node name="Zapada06" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 229.67, 37.89, -49.96)
+metadata/coliziune = "none"
+
+[node name="Zapada07" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 249.20, 37.89, -51.66)
+metadata/coliziune = "none"
+
+[node name="Zapada08" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 228.69, 38.72, -53.50)
+metadata/coliziune = "none"
+
+[node name="Zapada09" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 244.80, 38.72, -64.67)
+metadata/coliziune = "none"
+
+[node name="Zapada10" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 224.20, 39.54, -59.90)
+metadata/coliziune = "none"
+
+[node name="Zapada11" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 238.85, 39.54, -72.92)
+metadata/coliziune = "none"
+
+[node name="Zapada12" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 218.22, 40.36, -66.62)
+metadata/coliziune = "none"
+
+[node name="Zapada13" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 232.87, 40.36, -79.65)
+metadata/coliziune = "none"
+
+[node name="Zapada14" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 212.24, 41.18, -73.35)
+metadata/coliziune = "none"
+
+[node name="Zapada15" parent="DecorManual" instance=ExtResource("14_snow")]
+transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 226.89, 41.18, -86.37)
+metadata/coliziune = "none"
+
+[node name="ZidAc00" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.52186, 0, 0.46654, 0, 0.7, 0, -0.46654, 0, -0.52186, 79.94, 36.87, -191.49)
+
+[node name="ZidAc01" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.07523, 0, 0.69595, 0, 0.7, 0, -0.69595, 0, -0.07523, 70.74, 36.70, -209.75)
+
+[node name="ZidAc02" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.42964, 0, 0.55264, 0, 0.7, 0, -0.55264, 0, 0.42964, 78.12, 36.31, -229.17)
+
+[node name="ZidAc03" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.68518, 0, 0.14329, 0, 0.7, 0, -0.14329, 0, 0.68518, 96.94, 35.31, -237.21)
+
+[node name="ZidAc04" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 112.91, 34.24, -237.50)
+
+[node name="ZidAc05" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 128.92, 33.01, -216.50)
+
+[node name="ZidAc06" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 142.75, 31.95, -216.50)
+
+[node name="ZidAc07" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.67135, 0, 0.19822, 0, 0.7, 0, -0.19822, 0, 0.67135, 159.18, 30.90, -219.53)
+
+[node name="ZidAc08" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.35423, 0, 0.60376, 0, 0.7, 0, -0.60376, 0, 0.35423, 173.43, 30.70, -234.73)
+
+[node name="ZidAc09" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.57740, 0, 0.39574, 0, 0.7, 0, -0.39574, 0, -0.57740, 166.73, 30.57, -261.48)
+
+[node name="ZidAc10" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.67135, 0, 0.19822, 0, 0.7, 0, -0.19822, 0, 0.67135, 155.45, 31.19, -218.43)
+
+[node name="ZidAc11" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.35423, 0, 0.60376, 0, 0.7, 0, -0.60376, 0, 0.35423, 171.46, 30.70, -231.37)
+
+[node name="ZidAc12" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.14115, 0, 0.68562, 0, 0.7, 0, -0.68562, 0, -0.14115, 172.95, 30.70, -251.85)
+
+[node name="ZidAc13" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.69920, 0, 0.03348, 0, 0.7, 0, -0.03348, 0, -0.69920, 153.09, 29.82, -268.92)
+
+[node name="ZidAc14" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, -0.70000, 138.77, 28.76, -269.50)
+
+[node name="ZidAc15" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, -0.70000, 110.88, 26.61, -248.50)
+
+[node name="ZidAc16" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.69933, 0, 0.03056, 0, 0.7, 0, -0.03056, 0, -0.69933, 96.59, 25.55, -248.84)
+
+[node name="ZidAc17" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.58701, 0, 0.38135, 0, 0.7, 0, -0.38135, 0, -0.58701, 79.03, 24.80, -255.88)
+
+[node name="ZidAc18" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.15266, 0, 0.68315, 0, 0.7, 0, -0.68315, 0, -0.15266, 70.12, 24.70, -274.95)
+
+[node name="ZidAc19" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.66712, 0, 0.21203, 0, 0.7, 0, -0.21203, 0, 0.66712, 84.94, 24.20, -298.09)
+
+[node name="ZidAc20" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.58701, 0, 0.38135, 0, 0.7, 0, -0.38135, 0, -0.58701, 82.29, 24.97, -253.76)
+
+[node name="ZidAc21" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.15266, 0, 0.68315, 0, 0.7, 0, -0.68315, 0, -0.15266, 70.97, 24.70, -271.16)
+
+[node name="ZidAc22" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.34402, 0, 0.60963, 0, 0.7, 0, -0.60963, 0, 0.34402, 76.08, 24.42, -291.07)
+
+[node name="ZidAc23" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 97.61, 23.42, -301.50)
+
+[node name="ZidAc24" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 111.45, 22.36, -301.50)
+
+[node name="ZidAc25" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 127.45, 21.13, -280.50)
+
+[node name="ZidAc26" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 141.29, 20.06, -280.50)
+
+[node name="ZidAc27" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.68692, 0, 0.13466, 0, 0.7, 0, -0.13466, 0, 0.68692, 156.96, 18.99, -282.59)
+
+[node name="ZidAc28" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.04240, 0, 0.69871, 0, 0.7, 0, -0.69871, 0, -0.04240, 174.73, 18.70, -303.14)
+
+[node name="ZidAc29" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.49814, 0, 0.49179, 0, 0.7, 0, -0.49179, 0, -0.49814, 169.32, 18.65, -323.12)
+
+[node name="ZidAc30" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.68692, 0, 0.13466, 0, 0.7, 0, -0.13466, 0, 0.68692, 153.14, 19.29, -281.84)
+
+[node name="ZidAc31" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.44317, 0, 0.54185, 0, 0.7, 0, -0.54185, 0, 0.44317, 170.04, 18.74, -292.80)
+
+[node name="ZidAc32" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.04240, 0, 0.69871, 0, 0.7, 0, -0.69871, 0, -0.04240, 174.12, 18.70, -313.06)
+
+[node name="ZidAc33" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.69400, 0, 0.09143, 0, 0.7, 0, -0.09143, 0, -0.69400, 156.11, 18.42, -332.78)
+
+[node name="ZidAc34" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.69944, 0, 0.02798, 0, 0.7, 0, -0.02798, 0, -0.69944, 141.42, 17.85, -334.45)

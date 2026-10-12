@@ -214,7 +214,12 @@ func apply_gfx_tier() -> void:
 	var mobile := OS.has_feature("mobile")
 	if mobile:
 		var target_h: float = [720.0, 864.0, 100000.0][gfx_tier]
-		var h := float(vp.get_visible_rect().size.y)
+		# Inaltimea in PIXELI FIZICI, nu `get_visible_rect()`: cu
+		# `stretch/mode = canvas_items` rect-ul vizibil e in coordonatele de
+		# baza (720 de inaltime pe orice ecran), deci 864/720 iesea peste 1 si
+		# scala ramanea mereu nativa — pe iPhone 12 Pro (1170 px) nici
+		# Economic, nici Normal nu coborau rezolutia.
+		var h := float(DisplayServer.window_get_size().y)
 		vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 		vp.scaling_3d_scale = clampf(target_h / maxf(h, 1.0), 0.5, 1.0)
 		vp.msaa_3d = Viewport.MSAA_2X if gfx_tier == 0 else Viewport.MSAA_4X

@@ -12572,6 +12572,8 @@ func _build_avalanche(frac: float, spec: Dictionary = {}) -> void:
 	# `_start_point` / `_end_point`), deci traverseaza perpendicular pe drum.
 	# Pe versantul din STANGA (avalanche_from_left): baza se roteste 180 de grade pe Y,
 	# deci +X local (de unde porneste masa) cade pe stanga soselei.
+	if bool(spec.get("avalanche_keep_lane", false)):
+		av.keep_origin_checkpoint = true
 	var av_basis := Basis.looking_at(dir, Vector3.UP)
 	if bool(spec.get("avalanche_from_left", false)):
 		av_basis = av_basis.rotated(Vector3.UP, PI)

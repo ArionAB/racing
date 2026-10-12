@@ -668,6 +668,7 @@ script = ExtResource("4_hzm")
 kind = 8
 avalanche_period = 75.0
 avalanche_from_left = true
+avalanche_keep_lane = true
 
 [node name="OileAcPaior" type="Node3D" parent="Hazarduri"]
 transform = {xf_ident(F_SHEEP)}

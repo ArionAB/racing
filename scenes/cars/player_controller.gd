@@ -16,13 +16,33 @@ func get_throttle() -> float:
 		return -1.0
 	if Input.is_action_pressed("accelerate"):
 		return 1.0
-	# Touch: sageata sus = gaz, sageata jos = frana/marsarier (aceeasi
-	# conventie ca S/Jos pe tastatura).
+	if GameState.touch_handbrake:
+		return _handbrake_throttle()
+	# Touch: sageata sus (sau TURBO) = gaz.
 	return GameState.touch_throttle
 
+## Sub viteza asta (m/s, inainte) masina e "pe loc": frana de mana da marsarier.
+const HANDBRAKE_REVERSE_SPEED: float = 1.0
+
+## Frana de mana pe touch, dupa viteza:
+## - pe loc sau deja inapoi: marsarier (inlocuieste fosta sageata jos);
+## - in drift: gazul ramane al lui ^ — frana de mana doar tine spatele liber;
+## - inainte, fara drift (linie dreapta sau prea incet): franeaza.
+## Din viteza, tinuta, franeaza pana la oprire si apoi trece in marsarier,
+## exact ca fosta sageata jos.
+func _handbrake_throttle() -> float:
+	if car == null:
+		return -1.0
+	var fwd := -car.global_transform.basis.z
+	if car.linear_velocity.dot(fwd) < HANDBRAKE_REVERSE_SPEED:
+		return -1.0
+	if car.is_drifting:
+		return GameState.touch_throttle
+	return -1.0
+
 func is_drift_pressed() -> bool:
-	# Pe touch nu exista DRIFT (scos la cererea dezvoltatorului); ramane tasta.
-	return Input.is_action_pressed("drift")
+	# Frana de mana de pe touch e drift-ul (handbrake pur, ca tasta).
+	return Input.is_action_pressed("drift") or GameState.touch_handbrake
 
 func is_turbo_pressed() -> bool:
 	return Input.is_action_pressed("turbo") or GameState.touch_turbo

@@ -63,6 +63,8 @@ func _ready() -> void:
 		_print_aabb()
 	elif "--nodes" in _args:
 		_print_nodes()
+	elif "--ray" in _args:
+		_debug_ray()
 	elif "--at" in _args:
 		for a in _args:
 			if a.begins_with("--f="):
@@ -205,6 +207,48 @@ func _print_nodes() -> void:
 			float(bi) / _pts.size(), lat, g.y, qp.y])
 
 
+## Depanare camera: raza de la masina la camera pe stratul de blocare, plus
+## punctul-in-solid, la fractia data (--f=) si cu camera data (--cam=x,y,z).
+func _debug_ray() -> void:
+	var f := 0.142
+	var cam := Vector3(167.7, 21.7, 222.0)
+	for a in _args:
+		if a.begins_with("--f="):
+			f = float(a.trim_prefix("--f="))
+		if a.begins_with("--cam="):
+			var v := a.trim_prefix("--cam=").split(",")
+			cam = Vector3(float(v[0]), float(v[1]), float(v[2]))
+	var p: Vector3 = _at(_s_of(f))["p"]
+	var from := p + Vector3.UP * 0.5 + Vector3.UP * 1.5
+	for a in _args:
+		if a.begins_with("--from="):
+			var v := a.trim_prefix("--from=").split(",")
+			from = Vector3(float(v[0]), float(v[1]), float(v[2]))
+	print("car p=%s from=%s cam=%s" % [p, from, cam])
+	var q := PhysicsRayQueryParameters3D.create(from, cam, Track.CAMERA_BLOCKER_LAYER)
+	var hit := _space.intersect_ray(q)
+	print("ray blocker: %s" % [hit.get("position", "nimic")])
+	var q2 := PhysicsRayQueryParameters3D.create(from, cam, 0xFFFFFFFF)
+	var ex: Array[RID] = []
+	for k in 6:
+		q2.exclude = ex
+		var h2 := _space.intersect_ray(q2)
+		if h2.is_empty():
+			break
+		var col := h2["collider"] as Node
+		print("ray toate #%d: %s la %s layer=%d" % [k, col.name, h2["position"],
+			(col as CollisionObject3D).collision_layer])
+		ex.append(h2["rid"])
+	var pq := PhysicsPointQueryParameters3D.new()
+	pq.collision_mask = 0xFFFFFFFF
+	for pt in [cam, from, p + Vector3.UP * 0.2, p + Vector3.UP * 5.0, p + Vector3.UP * 9.0]:
+		pq.position = pt
+		var names: Array[String] = []
+		for res in _space.intersect_point(pq, 8):
+			names.append(String((res["collider"] as Node).name))
+		print("inside %s: %s" % [pt, names])
+
+
 func _print_at(f: float) -> void:
 	var s := _s_of(f)
 	var q := _at(s)
@@ -234,7 +278,8 @@ func _zone(zname: String) -> void:
 ## `visible = false` ca plasa de siguranta pana aterizeaza
 ## WorldProp._prune_variants (commit 25538d2a, inca nemerged).
 func _put(zone: String, model: String, nm: String, pos: Vector3, yaw: float,
-		scl: float = 1.0, keep: Array = [], variants: Array = []) -> void:
+		scl: float = 1.0, keep: Array = [], variants: Array = [],
+		cam_blocker: bool = false) -> void:
 	var lines := '[node name="%s" parent="DecorManual/%s" instance=%s]\ntransform = %s\n' % [
 		nm, zone, _res(model), _xf(pos, yaw, scl)]
 	if not keep.is_empty():
@@ -242,6 +287,11 @@ func _put(zone: String, model: String, nm: String, pos: Vector3, yaw: float,
 		for k in keep:
 			qs.append('"%s"' % k)
 		lines += 'metadata/keep_variants = PackedStringArray(%s)\n' % ", ".join(qs)
+	if cam_blocker:
+		# camera de urmarire (10 m sus, 12,5 m in spate) intra in masa portalului:
+		# corpul trece pe CAMERA_BLOCKER_LAYER, iar ChaseCamera o scoate afara
+		lines += 'metadata/camera_blocker = true
+'
 	_out.append(lines)
 	for v in variants:
 		if not keep.has(v):
@@ -289,8 +339,10 @@ func _portals() -> void:
 	var pa: Vector3 = qa["p"]
 	var pb: Vector3 = qb["p"]
 	# S: masinile intra mergand pe d; fata (-Z local) priveste inapoi spre ele.
-	_put("ZonaTunel", "portal_balea", "Portal_S", pa, float(qa["yaw"]) + PI)
-	_put("ZonaTunel", "portal_balea", "Portal_N", pb, float(qb["yaw"]))
+	_put("ZonaTunel", "portal_balea", "Portal_S", pa, float(qa["yaw"]) + PI,
+		1.0, [], [], true)
+	_put("ZonaTunel", "portal_balea", "Portal_N", pb, float(qb["yaw"]),
+		1.0, [], [], true)
 	# Recuzita santierului: in tunel, pe dreapta, la ~14 m de gura de sud.
 	var qw := _at(s_a + 14.0)
 	var dw: Vector2 = qw["d"]
@@ -399,7 +451,9 @@ func _walls() -> void:
 
 
 ## Pereti de zapada pe urcarea D (fata taiata spre sosea) + jaloane pe portiunea
-## inalta.
+## inalta. Fata taiata sta la ~9,75 m de axa (nu la 7,45 si nici la 8,65): cu fata la 7,45 o masina
+## de pe marginea soselei (centrul la 7,3-8,8 m) se intepenea in hull (ProbeRace seed 2,
+## [blocaj] la 0,272 pe Zapada_S01).
 func _snow() -> void:
 	var s0 := _s_of(0.268)
 	var s1 := _s_of(0.313)
@@ -416,7 +470,7 @@ func _snow() -> void:
 			# stanga (versantul) continuu; dreapta cu goluri (fiecare al 3-lea)
 			if side > 0.0 and (k % 3 == 2 or absf(s + 4.0 - s_util) < 8.0):
 				continue
-			var pos := _lat(s + 4.0, (w + 1.7) * side)
+			var pos := _lat(s + 4.0, (w + 4.0) * side)
 			var g := _sol(pos.x, pos.z)
 			if p.y - g > 3.0:
 				continue  # deasupra unei prapastii: fara banca plutitoare
@@ -462,7 +516,8 @@ func _landmarks() -> void:
 	var qr := _at(sr)
 	var pr: Vector3 = qr["p"]
 	pr.y -= 1.0  # coborat 1 m: flancul din stanga atarna peste panta spre lac
-	_put("ZonaRepere", "rock_portal", "Portal_Stanca", pr, float(qr["yaw"]) + PI)
+	_put("ZonaRepere", "rock_portal", "Portal_Stanca", pr, float(qr["yaw"]) + PI,
+		1.0, [], [], true)
 
 	_res("bear")  # modelul de pe Hazarduri/Urs (ext_resource m_bear)
 	# --- ursul: semnul "nu hraniti ursii" cu ~45 m inaintea lui, pe dreapta ---

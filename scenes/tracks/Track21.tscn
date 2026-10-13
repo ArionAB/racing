@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/train_hazard.gd" id="7_train"]
 [ext_resource type="Script" path="res://scenes/hazards/hazard_lamp.gd" id="15_lamp"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
+[ext_resource type="Script" uid="uid://b6qhqlgfsk8ou" path="res://scenes/hazards/camera_zone.gd" id="16_camzone"]
 [ext_resource type="PackedScene" path="res://assets/models/vehicles/snowplow.glb" id="11_plow"]
 [ext_resource type="PackedScene" path="res://assets/models/transfagarasan/structures/tunnel_portal_balea.glb" id="m_portal_balea"]
 [ext_resource type="PackedScene" path="res://assets/models/transfagarasan/props/road_works.glb" id="m_road_works"]
@@ -183,6 +184,18 @@ cast_shadow = 0
 mesh = SubResource("Cyl_balea")
 surface_material_override/0 = SubResource("Mat_balea")
 
+[node name="ZoneCamera" type="Node3D" parent="."]
+
+[node name="TunelStanca" type="Area3D" parent="ZoneCamera"]
+monitorable = false
+script = ExtResource("16_camzone")
+size = Vector3(2, 2, 2)
+frac_from = 0.1315
+frac_to = 0.148
+height = 5.0
+ceiling = 7.5
+ceiling_dist = 20.0
+
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("9_prop")
 
@@ -193,9 +206,11 @@ transform = Transform3D(-0.98387, 0, -0.17889, 0, 1.0, 0, 0.17889, 0, -0.98387, 
 
 [node name="Portal_S" parent="DecorManual/ZonaTunel" instance=ExtResource("m_portal_balea")]
 transform = Transform3D(-0.96633476, 0, -0.25728798, 0, 1, 0, 0.25728798, 0, -0.96633476, 214.3195, 42.067112, -88.73352)
+metadata/camera_blocker = true
 
 [node name="Portal_N" parent="DecorManual/ZonaTunel" instance=ExtResource("m_portal_balea")]
 transform = Transform3D(0.9728008, 0, 0.23164324, 0, 1, 0, -0.23164324, 0, 0.9728008, 200.13869, 43.00232, -157.33185)
+metadata/camera_blocker = true
 
 [node name="Santier_tunel" parent="DecorManual/ZonaTunel" instance=ExtResource("m_road_works")]
 transform = Transform3D(-0.16083124, 0, 0.9869819, 0, 1, 0, -0.9869819, 0, -0.16083124, 216.01434, 42.32805, -103.18486)
@@ -389,126 +404,126 @@ transform = Transform3D(0.3838708, 0, 0.9233868, 0, 1, 0, -0.9233868, 0, 0.38387
 [node name="ZonaZapada" type="Node3D" parent="DecorManual"]
 
 [node name="Zapada_S00" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.9438641, 0, 0.330334, 0, 1, 0, -0.330334, 0, -0.9438641, 200.36794, 31.705744, -15.702719)
+transform = Transform3D(-0.9438641, 0, 0.330334, 0, 1, 0, -0.330334, 0, -0.9438641, 198.19705, 31.72848, -16.462488)
 metadata/keep_variants = PackedStringArray("SnowWall_A")
 
 [node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S00"]
 visible = false
 
 [node name="Zapada_D00" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(0.9438641, 0, -0.33033398, 0, 1, 0, 0.33033398, 0, 0.9438641, 216.79118, 31.953318, -9.954908)
+transform = Transform3D(0.9438641, 0, -0.33033398, 0, 1, 0, 0.33033398, 0, 0.9438641, 218.96207, 31.972239, -9.19514)
 metadata/keep_variants = PackedStringArray("SnowWall_B")
 
 [node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_D00"]
 visible = false
 
 [node name="Zapada_S01" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.66745335, 0, 0.7446516, 0, 1, 0, -0.7446516, 0, -0.66745335, 207.37306, 32.75036, -25.677502)
+transform = Transform3D(-0.66745335, 0, 0.7446516, 0, 1, 0, -0.7446516, 0, -0.66745335, 205.83792, 32.788857, -27.3902)
 metadata/keep_variants = PackedStringArray("SnowWall_B")
 
 [node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S01"]
 visible = false
 
 [node name="Zapada_D01" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(0.66745335, 0, -0.7446516, 0, 1, 0, 0.7446516, 0, 0.66745335, 218.98674, 32.49285, -12.720563)
+transform = Transform3D(0.66745335, 0, -0.7446516, 0, 1, 0, 0.7446516, 0, 0.66745335, 220.52188, 32.415, -11.007864)
 metadata/keep_variants = PackedStringArray("SnowWall_A")
 
 [node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_D01"]
 visible = false
 
 [node name="Zapada_S02" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.40992594, 0, 0.9121188, 0, 1, 0, -0.9121188, 0, -0.40992594, 216.1768, 33.73301, -31.513958)
+transform = Transform3D(-0.40992594, 0, 0.9121188, 0, 1, 0, -0.9121188, 0, -0.40992594, 215.23398, 33.794426, -33.61183)
 metadata/keep_variants = PackedStringArray("SnowWall_A")
 
 [node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S02"]
 visible = false
 
 [node name="Zapada_S03" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.5125557, 0, 0.85865396, 0, 1, 0, -0.85865396, 0, -0.5125557, 222.42245, 34.552452, -34.503574)
+transform = Transform3D(-0.5125557, 0, 0.85865396, 0, 1, 0, -0.85865396, 0, -0.5125557, 221.24358, 34.751503, -36.478477)
 metadata/keep_variants = PackedStringArray("SnowWall_B")
 
 [node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S03"]
 visible = false
 
 [node name="Zapada_D03" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(0.51255584, 0, -0.8586539, 0, 1, 0, 0.8586539, 0, 0.51255584, 231.34091, 34.466545, -19.562996)
+transform = Transform3D(0.51255584, 0, -0.8586539, 0, 1, 0, 0.8586539, 0, 0.51255584, 232.51979, 34.307976, -17.58809)
 metadata/keep_variants = PackedStringArray("SnowWall_A")
 
 [node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_D03"]
 visible = false
 
 [node name="Zapada_S04" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.7002514, 0, 0.71389633, 0, 1, 0, -0.71389633, 0, -0.7002514, 227.40018, 35.570488, -37.60863)
+transform = Transform3D(-0.7002514, 0, 0.71389633, 0, 1, 0, -0.71389633, 0, -0.7002514, 225.78961, 35.649162, -39.25059)
 metadata/keep_variants = PackedStringArray("SnowWall_A")
 
 [node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S04"]
 visible = false
 
 [node name="Zapada_D04" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(0.70025146, 0, -0.7138963, 0, 1, 0, 0.7138963, 0, 0.70025146, 239.58456, 35.41079, -25.186834)
+transform = Transform3D(0.70025146, 0, -0.7138963, 0, 1, 0, 0.7138963, 0, 0.70025146, 241.19513, 35.324867, -23.544872)
 metadata/keep_variants = PackedStringArray("SnowWall_B")
 
 [node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_D04"]
 visible = false
 
 [node name="Zapada_S05" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.8760371, 0, 0.48224363, 0, 1, 0, -0.48224363, 0, -0.8760371, 230.57755, 36.40583, -41.95608)
+transform = Transform3D(-0.8760371, 0, 0.48224363, 0, 1, 0, -0.48224363, 0, -0.8760371, 228.56265, 36.46546, -43.06524)
 metadata/keep_variants = PackedStringArray("SnowWall_B")
 
 [node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S05"]
 visible = false
 
 [node name="Zapada_S06" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.98856705, 0, 0.15078196, 0, 1, 0, -0.15078196, 0, -0.98856705, 231.62045, 37.07395, -46.729527)
+transform = Transform3D(-0.98856705, 0, 0.15078196, 0, 1, 0, -0.15078196, 0, -0.98856705, 229.34676, 37.128014, -47.076324)
 metadata/keep_variants = PackedStringArray("SnowWall_A")
 
 [node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S06"]
 visible = false
 
 [node name="Zapada_S07" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.9600552, 0, -0.27981085, 0, 1, 0, 0.27981085, 0, -0.9600552, 231.4734, 37.698723, -50.87209)
+transform = Transform3D(-0.9600552, 0, -0.27981085, 0, 1, 0, 0.27981085, 0, -0.9600552, 229.26527, 37.625984, -50.228527)
 metadata/keep_variants = PackedStringArray("SnowWall_B")
 
 [node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S07"]
 visible = false
 
 [node name="Zapada_S08" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.8251813, 0, -0.564868, 0, 1, 0, 0.564868, 0, -0.8251813, 229.32716, 38.450035, -55.57762)
+transform = Transform3D(-0.8251813, 0, -0.564868, 0, 1, 0, 0.564868, 0, -0.8251813, 227.42924, 38.36982, -54.278427)
 metadata/keep_variants = PackedStringArray("SnowWall_A")
 
 [node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S08"]
 visible = false
 
 [node name="Zapada_S09" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.77949256, 0, -0.6264115, 0, 1, 0, 0.6264115, 0, -0.77949256, 224.64186, 39.238792, -61.17439)
+transform = Transform3D(-0.77949256, 0, -0.6264115, 0, 1, 0, 0.6264115, 0, -0.77949256, 222.84903, 39.194008, -59.733643)
 metadata/keep_variants = PackedStringArray("SnowWall_B")
 
 [node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S09"]
 visible = false
 
 [node name="Zapada_D09" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(0.7794926, 0, 0.62641144, 0, 1, 0, -0.62641144, 0, 0.7794926, 238.20476, 39.306206, -72.07374)
+transform = Transform3D(0.7794926, 0, 0.62641144, 0, 1, 0, -0.62641144, 0, 0.7794926, 239.99759, 39.32177, -73.51448)
 metadata/keep_variants = PackedStringArray("SnowWall_A")
 
 [node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_D09"]
 visible = false
 
 [node name="Zapada_S10" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.7331164, 0, -0.68010324, 0, 1, 0, 0.68010324, 0, -0.7331164, 219.86127, 40.017693, -66.760765)
+transform = Transform3D(-0.7331164, 0, -0.68010324, 0, 1, 0, 0.68010324, 0, -0.7331164, 218.17511, 40.128532, -65.19653)
 metadata/keep_variants = PackedStringArray("SnowWall_A")
 
 [node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S10"]
 visible = false
 
 [node name="Zapada_D10" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(0.73311645, 0, 0.6801032, 0, 1, 0, -0.6801032, 0, 0.73311645, 232.3468, 40.045982, -78.34344)
+transform = Transform3D(0.73311645, 0, 0.6801032, 0, 1, 0, -0.6801032, 0, 0.73311645, 234.03296, 40.04972, -79.90767)
 metadata/keep_variants = PackedStringArray("SnowWall_B")
 
 [node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_D10"]
 visible = false
 
 [node name="Zapada_S11" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
-transform = Transform3D(-0.6777146, 0, -0.7353251, 0, 1, 0, 0.7353251, 0, -0.6777146, 215.02913, 40.74563, -72.26277)
+transform = Transform3D(-0.6777146, 0, -0.7353251, 0, 1, 0, 0.7353251, 0, -0.6777146, 213.47038, 40.756004, -70.57152)
 metadata/keep_variants = PackedStringArray("SnowWall_B")
 
 [node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S11"]
@@ -557,6 +572,7 @@ transform = Transform3D(-0.5514392, 0, 0.8342151, 0, 1, 0, -0.8342151, 0, -0.551
 
 [node name="Portal_Stanca" parent="DecorManual/ZonaRepere" instance=ExtResource("m_rock_portal")]
 transform = Transform3D(-0.53756005, 0, 0.8432255, 0, 1, 0, -0.8432255, 0, -0.53756005, 171.37538, 11.577143, 220.03749)
+metadata/camera_blocker = true
 
 [node name="Semn_urs" parent="DecorManual/ZonaRepere" instance=ExtResource("m_bear_sign")]
 transform = Transform3D(-0.966254, 0, 0.25759122, 0, 1, 0, -0.25759122, 0, -0.966254, 218.9876, 14.907672, 150.7509)

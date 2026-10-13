@@ -3611,9 +3611,11 @@ const HULL_SKIP_PARTS := {
 	"machiya_d": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster",
 		"Machiya_Bamboo"],
 	"machiya_e": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster"],
-	# Transfagarasan (kitul din assets/models/transfagarasan/): captuseala neagra a
-	# gurii e vizuala. Portalul e `mesh` (se trece prin gol), iar `Portal_Void` e
-	# un tub de 10 m cu pereti lipiti de gol: fara corp propriu, golul ramane gol.
+	# Transfagarasan (kitul din assets/models/transfagarasan/): captuselile negre ale
+	# gurilor sunt vizuale. Portalurile sunt `mesh` (se trece prin gol), iar `*_Void`
+	# e un tub cu pereti lipiti de gol: ca trimesh ar da camerei din tunel un fals
+	# "in solid" (parity pe un tub inchis, vezi tools/probe_camera_solid.gd), iar golul
+	# trebuie sa ramana gol.
 	"tunnel_portal_balea": ["Portal_Void"],
 	"rock_tunnel_portal": ["Rock_Void"],
 }

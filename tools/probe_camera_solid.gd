@@ -228,7 +228,15 @@ const BASELINE := {
 	# camera (12,5 m in spate, 10 m sus) ramanea in movila tubului pe 0.350-0.354 (TunnelBore +
 	# TunnelPortal intre masina si camera) — zona de camera se oprea chiar la capat. Baza =
 	# cifra masurata, FARA marja. Sabotaj (`--sabotaj`) verificat la armare.
-	"Transfagarasan (Track21)": 1,
+	# 1 -> 2 (13 oct 2026, montarea kitului): portalul de stanca (`Portal_Stanca`, tunel
+	# de 16 m pe 0.134-0.142, zona de camera `ZoneCamera/TunelStanca`) da UN esantion,
+	# frac 0.146, cu camera la (175.6, ~18, 218.9), adica 5 m peste asfalt, in AERUL
+	# tunelului. Nu e geometrie: raza masina-camera nu taie nicio fata (verificat cu
+	# `tools/gen_mont_scena.gd --ray --f=0.146`), iar `intersect_point` raporteaza
+	# "inauntru" fiindca un trimesh cu gaura trecatoare nu are paritate curata in
+	# interior. Aceeasi pozitie xz da acelasi raspuns la orice inaltime de camera
+	# (4,5 / 5,0 / 7,5). Camera de joc coboara in tunel (zona), deci nu orbeste.
+	"Transfagarasan (Track21)": 2,
 }
 
 

@@ -28,7 +28,8 @@ AO_PORTAL = dict(samples=16, dist=2.6, gradient="vertical", low=0.62, high=1.0,
 
 
 def build_tunnel_portal_balea():
-    """Portalul tunelului de la Balea (`tunnel_portal_balea`), PILOT, REV. 2
+    """Portalul tunelului de la Balea (`tunnel_portal_balea`), PILOT, REV. 4
+    (zapada refacuta in valul 1; placa, gura si golul sunt cele din rev. 2)
     (contract nou al coordonatorului: placa masiva, gura teșita, zapada care
     INVELUIE portalul; planșa bate corectura `snow_wall` pentru piesa asta).
 
@@ -45,18 +46,21 @@ def build_tunnel_portal_balea():
       c) `Portal_Void`: captuseala pe pereti si tavan, pe toata grosimea placii
          si 4 m in spate (10 m, y -10..0), fara podea, fara capace; in preview
          (NU in GLB) un plan negru la y = -12
-      d) MOVILA DE ZAPADA pe laturi: 8 blocuri mari, fatetate, unghiulare pe
-         fiecare parte (planșa: 5-6 vizibile), 9-10 m langa placa, coborand la
-         ~4 m la 11 m spre exterior; incep de la |x| >= 13 (nimic in banda
-         drumului), fata blocurilor ~0,5 m in spatele fetei placii (placa iese
-         ~1 m in fata zapezii la baza)
-      e) CALOTA de zapada peste placa si in spatele ei, 4 randuri x 4-5 blocuri neregulate:
-         urca spre -Y pana la ~13 m, la 10 m in spate; pe deasupra tubului
-         sta de la 8,55 m in sus (peste captuseala), deci golul ramane liber
-      f) 2 blocuri interioare in spatele placii (|x| 7,6..13) care inchid
-         peretii tubului
-      g) PRAFUL `Portal_Dust`: 3 bucati scurte, inclinate, NEregulate, pe
-         blocurile de jos din fata, pe fiecare parte
+      d) MOVILA DE ZAPADA (rev. 4, val 1 tf-a; decizia coordonatorului: vocabularul
+         `snow_wall`, bulgari izotropi, masa continua, potcoava). Pe decupare:
+         bulgari fatetati de ~2-2,5 m (cam 1/5 din inaltimea placii), ~25 pe un
+         brat, lipiti unul de altul fara goluri, in potcoava; bratele vin in
+         fata pana la linia fetei placii, inalte cat placa langa ea si mai joase
+         spre capete. Aici: brate de la |x| 13 la 24, 10,8 m langa placa ->
+         ~4,6 m la 11 m spre exterior, fata movilei la y = -1 langa placa
+         (placa iese ~1 m) si inainte pana la y ~ +0,8 la capete
+      e) CALOTA peste placa (de la y = -2,5, partea din fata a crestei placii
+         ramane libera) si peste tub, urca la ~13 m la 8 m in spate; peste tub
+         nimic sub 8,6 m (golul ramane liber pe ORICE y)
+      f) spatele placii (|x| 7,75..13) umplut din sol, ca peretii tubului sa
+         fie inchisi
+      g) PRAFUL `Portal_Dust`: PETE, nu volume: 10 fete pe parte ale bulgarilor
+         de jos din fata bratelor, mutate pe nodul de praf (vocabularul `snow_wall`)
       h) NU intra: asfaltul, marcajele, vegetatia
 
     Contract (golul, MASURAT pe GLB): >= 13,0 m lateral pe 0-2 m, >= 7,0 m
@@ -76,46 +80,106 @@ def build_tunnel_portal_balea():
 
     tube_lining(void, mouth, -DEP - 4.0, 0.0, TAN)
 
-    # --- movila pe laturi: (cx, cy, h, sx, sy) pe partea +X; oglindita pe -X cu
-    # alt seed ca sa nu fie copie
-    side = [
-        (15.8, -3.2, 9.6, 5.6, 5.4), (15.8, -8.6, 9.2, 5.6, 5.4),
-        (16.0, -13.8, 7.0, 5.8, 5.0),
-        (20.4, -3.0, 6.8, 5.0, 5.0), (20.6, -8.2, 6.6, 5.2, 5.6),
-        (20.8, -13.6, 5.0, 4.8, 5.0),
-        (22.4, -3.4, 4.2, 3.4, 4.2), (22.4, -9.0, 4.0, 3.4, 5.0),
-        (10.4, -9.0, 9.6, 5.6, 6.0),     # interior, in spatele placii (|x| 7,6..13)
-        (10.6, -14.0, 7.0, 5.6, 5.0),
-    ]
-    for sx in (1, -1):
-        for k, (cx, cy, h, bx, by) in enumerate(side):
-            faceted_block(snow, (sx * cx, cy, 0.0), (bx, by, h), TF_SNOW,
-                          seed=100 + k * 7 + (0 if sx > 0 else 53))
-
-    # --- calota: 4 randuri x 4-5 blocuri neregulate deasupra placii si a tubului
+    # --- ZAPADA (rev. 4, val 1 tf-a): masa continua din bulgari aproape izotropi,
+    # in potcoava pe laturi + calota in spate. Campul de inaltime decide unde e
+    # zapada; bulgarii il umplu pe o grila jitterata (pas 2,8 m, raza ~2,0 m ->
+    # suprapunere 30% pe orizontala, 2,6 m pe verticala -> 35%). Se pastreaza
+    # doar coaja (bulgarii acoperiti din toate partile nu se vad).
     import random
-    rr = random.Random(77)
-    rows = [(-3.6, 10.3, 1.9, 5.0, 12.2), (-6.6, 8.55, 3.8, 5.6, 12.7),
-            (-10.6, 8.55, 4.4, 5.6, 13.1), (-14.2, 8.55, 4.2, 5.0, 12.4)]
-    for r, (cy, zb, hh, by, top) in enumerate(rows):
-        n = 5 if r else 4
-        for i in range(n):
-            cx = -12.0 + 24.0 * (i + 0.5) / n + (rr.random() - 0.5) * 2.2
-            wx = 5.8 + rr.random() * 3.2
-            ht = top - zb + (rr.random() - 0.5) * 1.2
-            faceted_block(snow, (cx, cy + (rr.random() - 0.5) * 0.8, zb - (0.0 if r else 0.0)),
-                          (wx, by + rr.random() * 1.2, ht), TF_SNOW,
-                          seed=300 + r * 11 + i, jag=0.42)
-    # --- praf: bucati scurte, inclinate, neregulate, pe blocurile de jos din fata
-    patches = [(14.4, -0.5, 1.3, 2.1, 14.0), (18.2, -0.4, 3.0, 1.6, -19.0),
-               (21.0, -0.6, 2.2, 2.4, 9.0)]
+    rr = random.Random(2026)
+    S, R0, DZ = 2.8, 2.0, 2.6
+
+    def smooth(t):
+        t = max(0.0, min(1.0, t))
+        return t * t * (3.0 - 2.0 * t)
+
+    def h_side(x, y):
+        """Bratele potcoavei: |x| 13 -> 24, fata se trage inainte spre capete."""
+        u = abs(x) - 13.0
+        if u < -1.5 or u > 11.5:
+            return 0.0
+        vf = -1.0 + 0.16 * max(u, 0.0)          # fata movilei (placa iese ~1 m)
+        if y > vf or y < -17.5:
+            return 0.0
+        h = 10.8 - 0.56 * max(u, 0.0)           # 10,8 langa placa -> ~4,6 la 11 m
+        h *= math.sqrt(smooth((vf - y) / 1.8))  # fata abrupta, rotunjita sus
+        h *= math.sqrt(smooth((11.5 - u) / 2.5))
+        h *= math.sqrt(smooth((y + 17.5) / 3.0))
+        return h
+
+    def h_cal(x, y):
+        """Calota: peste placa (de la y = -2,5) si peste tub, urca la ~13 m."""
+        if abs(x) > 14.5 or y > -2.5 or y < -17.5:
+            return 0.0
+        h = 11.5 + 1.7 * smooth((-2.5 - y) / 6.0) - 0.006 * x * x
+        h -= 2.0 * (1.0 - smooth((y + 17.5) / 3.5))
+        return h
+
+    def floor_at(x, y):
+        return 11.0 if (abs(x) < 13.0 and y > -6.0) else 0.0
+
+    cols = {}
+    nx = int(26.0 / S) + 1
+    ny = int(19.5 / S) + 1
+    for i in range(-nx, nx + 1):
+        for j in range(ny + 1):
+            x = i * S + (rr.random() - 0.5) * 0.7 * S
+            y = 1.6 - j * S + (rr.random() - 0.5) * 0.7 * S
+            H = max(h_side(x, y), h_cal(x, y))
+            if H < 1.2:
+                continue
+            f = floor_at(x, y)
+            if H - f < 0.8:
+                continue
+            zs = []
+            z = f + 0.55 * R0 + rr.random() * 0.6
+            while z < H - 0.55 * R0:
+                zs.append(z)
+                z += DZ
+            zs.append(H - 0.55 * R0)
+            cols[(i, j)] = (x, y, f, H, zs)
+
+    placed = kept = 0
+    for (i, j), (x, y, f, H, zs) in cols.items():
+        nbr = [cols.get((i + di, j + dj)) for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1))]
+        for li, z in enumerate(zs):
+            r = R0 * (0.92 + 0.18 * rr.random())
+            ext = 1.1 * r
+            # golul: nimic sub 8,6 m in |x| <= 7,75, la ORICE y (masuratoarea e pe proiectie)
+            if abs(x) - ext < 7.8 and z - ext < 8.6:
+                continue
+            # nimic IN FATA fetei placii in banda ei (|x| < 13); in volumul placii
+            # (y -6..0) zapada e ascunsa, deci calota poate sta lipita de creasta
+            if y + ext > -0.9 and abs(x) - ext < 13.0:
+                continue
+            placed += 1
+            top = li == len(zs) - 1
+            interior = (not top and all(n is not None and n[3] >= z + 1.0 for n in nbr)
+                        and z - f > 1.0)
+            if interior:
+                continue
+            bulgar(snow, (x, y, z), r, TF_SNOW, seed=10000 + i * 131 + j * 17 + li,
+                   base=f if (li == 0 and f == 0.0) else None)
+            kept += 1
+    print("portal Balea: %d bulgari in camp, %d in coaja" % (placed, kept))
+
+    # --- praful: PETE pe fete (fete mutate pe Portal_Dust), pe bulgarii de jos
+    # din fata bratelor, 6 pe parte
+    bmesh.ops.recalc_face_normals(snow.bm, faces=snow.bm.faces[:])
+    snow.bm.faces.ensure_lookup_table()
     for sx in (1, -1):
-        for (x, y, z, ln, ang) in patches:
-            dust_patch(dust, (sx * (x + (0.7 if sx < 0 else 0.0)), y - 0.38, z), ln * 1.3, sx * ang, height=0.3)
+        pool = []
+        for fc in snow.bm.faces:
+            c = fc.calc_center_median()
+            if (c.x * sx > 13.5 and c.z < 4.5 and fc.calc_area() > 0.8
+                    and fc.normal.y * 0.8 + fc.normal.x * sx * 0.4 > 0.35 and fc.normal.z < 0.6):
+                pool.append(fc)
+        random.Random(7 + sx).shuffle(pool)
+        faces_to_dust(snow, dust, pool[:10])
 
     return [Builder.to_object(conc, "Portal_Concrete"),
-            Builder.to_object(snow, "Portal_Snow"),
-            Builder.to_object(dust, "Portal_Dust"),
+            to_obj(snow, "Portal_Snow"),
+            to_obj(dust, "Portal_Dust"),
             to_obj(void, "Portal_Void")]
 
 
@@ -809,7 +873,16 @@ ONLY = os.environ.get("TF_ONLY", "")
 
 
 def _want(name):
-    return not ONLY or ONLY == name
+    """Si curata scena inainte de fiecare piesa: altfel doua piese cu acelasi nume
+    de nod (`Wall_Stone` la zidul drept si la cel curb) ies `Wall_Stone.001` in
+    al doilea GLB, iar Godot cauta nodurile dupa nume."""
+    if ONLY and ONLY != name:
+        return False
+    clear_built()
+    for o in list(bpy.data.objects):
+        if o.type == "EMPTY":
+            bpy.data.objects.remove(o, do_unlink=True)
+    return True
 
 
 if _want("tunnel_portal_balea"):

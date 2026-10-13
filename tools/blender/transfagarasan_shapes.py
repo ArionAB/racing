@@ -6,25 +6,28 @@ Pe pilot (tunnel_portal_balea) s-au scris DOAR formele folosite de portal; cele
 care vin in valul 1 sunt stub-uri cu contractul in docstring (NU au corp: ridica
 NotImplementedError, ca sa nu le foloseasca nimeni pe nevazute).
 
-FOLOSITE (pilot):
-  (ring_stack / snow_layers: pentru `snow_wall` din valul 1; portalul nu le mai
-   foloseste dupa contractul nou -- movila lui e din `faceted_block`)
+FOLOSITE (pilot + val 1 tf-a):
   ring_stack       masa inchisa din inele de puncte 3D (acelasi numar de puncte
-                   pe inel). Doua inele consecutive la ACEEASI cota = un prag
-                   orizontal (treapta). Baza pentru `snow_layers`.
-  snow_layers      peretele de zapada veche: 4 straturi cu trepte de 0,3 m pe
-                   fetele taiate de plug (+-Y), dungi de praf (nod separat),
-                   muchia de sus rotunjita si ondulata, baza murdara. Va fi
-                   refolosit de `snow_wall` (valul 1) cu alti parametri.
+                   pe inel). Doua inele consecutive la ACEEASI cota = un prag.
+  snow_wall_section / snow_wall_module   (tf-a) peretele de zapada veche: 3-4
+                   straturi cu trepte pe fata taiata de plug, scobituri de freza,
+                   praful ca PETE pe fete (nod *_Dust), creasta topita; totul
+                   periodic pe lungimea modulului -> capete identice.
+  bulgar           (tf-a) bulgare de zapada aproape izotrop (portalul Balea rev. 4).
+  faces_to_dust    (tf-a) muta fete din zapada pe nodul de praf (pata, nu volum).
   extrude_xz       prisma dintr-un contur in planul XZ (poate fi concav), pe Y.
   tilt_front       inclina fata din fata a unei prisme (placa lasata inapoi).
   tube_lining      captuseala de umbra a gurii: banda fara capace, normale spre gol.
-  faceted_block    bloc de zapada unghiular (convex hull), baza plata.
-  dust_patch       bucata scurta de praf, inclinata.
+  faceted_block    bloc unghiular (convex hull), baza plata (bolovanii semnelor).
+  dust_patch       bucata scurta de praf, inclinata (pilot rev. 2; nefolosit acum).
+  schist_blade     (tf-a, MINIMA) lama de sist pe foliatie; la integrare se
+                   unifica cu `tf_shapes_nature.schist_blade` (tf-b).
+  dry_stone_wall   (tf-a) zid de sprijin: corp cu fete mari + randul de sus din
+                   pietre individuale, periodic, cu varianta curba (`bend_R`).
   emit_tf          finish pe fiecare nod + export in assets/models/transfagarasan/.
 
 STUB-URI (valul 1, vezi docstring-urile):
-  schist_blade, dry_stone_wall, tin_roof
+  tin_roof
 
 Se incarca cu exec, dupa dio_lib (vezi build_tf_*.py). Axe: X latime, Y adancime
 (fata spre +Y in Blender = -Z in Godot), Z sus. Reutilizeaza `_face`, `to_obj`
@@ -240,6 +243,45 @@ def snow_wall_module(snow, dust, H, L=8.0, seed=0.0, rings_per_cell=4, cells=7,
         f = dust.bm.faces.new([dust.bm.verts.new(p) for p in q])
         f[dust.slot] = TF_DUST
     return len(dust_faces)
+
+
+def bulgar(b, center, r, slot, seed=0, base=None, ratio=(1.0, 0.92, 0.86), jitter=0.06,
+           npts=(14, 18)):
+    """Bulgare de zapada APROAPE IZOTROP (portalul Balea, rev. 4): invelitoarea
+    convexa a 14-18 puncte (10-13 dau cioburi neregulate, verificat in runda 3)
+    pe un elipsoid cu semiaxele `r * ratio` (aproape
+    sfera: 1 : 0,92 : 0,86), raza jitterata doar +-`jitter`, rotit aleator.
+    Iese un bulgare fatetat, gros, nu un ciob (rev. 3 avea 1 : 0,8 : 0,7 si
+    jitter 0,95-1,25 -> placi subtiri, "hartie mototolita"). Cu `base`
+    punctele de sub cota se ridica la ea (baza se turteste pe sol).
+    Pornit din generatorul rev. 3 (`70abe521`)."""
+    import random
+    rnd = random.Random(seed)
+    cx, cy, cz = center
+    n = rnd.randint(*npts)
+    rot = (Matrix.Rotation(rnd.random() * math.tau, 3, "Z")
+           @ Matrix.Rotation(math.radians((rnd.random() - 0.5) * 60.0), 3, "X")
+           @ Matrix.Rotation(math.radians((rnd.random() - 0.5) * 60.0), 3, "Y"))
+    pts = []
+    for _ in range(n):
+        d = Vector((rnd.gauss(0, 1), rnd.gauss(0, 1), rnd.gauss(0, 1))).normalized()
+        k = 1.0 + jitter * (2.0 * rnd.random() - 1.0)
+        p = rot @ (Vector((d.x * ratio[0], d.y * ratio[1], d.z * ratio[2])) * (r * k))
+        z = cz + p.z
+        if base is not None:
+            z = max(z, base)
+        pts.append((cx + p.x, cy + p.y, z))
+    _hull(b, pts, slot)
+
+
+def faces_to_dust(snow, dust, pick, slot=None):
+    """Praful ca PATA pe fete, nu ca volum: fetele alese (`pick` = BMFace din
+    `snow`) se copiaza in `dust` cu ACEEASI infasurare si se sterg din `snow`."""
+    slot = TF_DUST if slot is None else slot
+    for f in pick:
+        nf = dust.bm.faces.new([dust.bm.verts.new(v.co.copy()) for v in f.verts])
+        nf[dust.slot] = slot
+    bmesh.ops.delete(snow.bm, geom=list(pick), context="FACES_ONLY")
 
 
 # ---------------------------------------------------------------------------

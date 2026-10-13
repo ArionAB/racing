@@ -134,7 +134,7 @@ echo "== val 2, tf-f: vehicule de decor si ciobanescul (kit §1.6, §1.7) =="
 #                       la sol), geamurile si caroseria nu ating solul.
 #   --allow-car-slots   caroseria pe CAR_BLUE 15 / CAR_RED 14 (kit §0, tabelul de
 #                       sloturi): DOAR nodurile Car_Body si Moto_Body.
-#   sheepdog            FARA exceptii: contractul HerdHazard cere UN singur mesh
+#   sheepdog            FARA exceptii (rev. 2): contractul HerdHazard cere UN singur mesh
 #                       (toate sloturile in el), origine la sol; un singur nod.
 check "vehicles/parked_car_a.glb" --origin=assembly --allow-car-slots=Car_Body
 check "vehicles/parked_car_b.glb" --origin=assembly --allow-car-slots=Car_Body

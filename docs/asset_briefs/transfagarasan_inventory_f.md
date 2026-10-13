@@ -48,7 +48,7 @@ mașinilor parcate rămâne a coordonatorului.
 | `vehicles/parked_car_a.glb` | **2,200** | 1,625 | **3,808** | 2,20 × 3,80 | 3 768 |
 | `vehicles/parked_car_b.glb` | **2,200** | 2,239 (1,91 la plafon, restul e cutia) | **4,364** | 2,20 × 4,37 (+15 %) | 5 364 |
 | `vehicles/motorbike.glb` | 0,970 | **1,345** | **2,194** | 2,2 × 1,3, ~10° | 3 952 |
-| `animals/sheepdog.glb` | 0,571 | 1,341 (greabăn ~1,02) | 1,965 (trunchi 1,30) | 1,0 greabăn, 1,3 lung | 1 168 |
+| `animals/sheepdog.glb` **rev. 2** | 0,674 | 1,318 (greabăn ~1,02) | 2,132 (trunchi 1,15) | 1,0 greabăn, trunchi 1,15 (contract revizuit) | 1 852 |
 
 Nodurile au fiecare un singur slot, cu excepția câinelui, care e un singur nod
 cu trei sloturi (contractul `HerdHazard`):
@@ -69,8 +69,8 @@ cu trei sloturi (contractul `HerdHazard`):
   - `Moto_Dark` VOLCANIC_BLACK 20 (1 988);
   - `Moto_Lamp` FOAM_WHITE 22 (12);
   - `Moto_Tail` KERB_RED 7 (12).
-- `sheepdog`: un singur nod `Sheepdog` (1 168), cu CORAL_SAND 19, MARBLE_GREY 29
-  și VOLCANIC_BLACK 20.
+- `sheepdog` (rev. 2): un singur nod `Sheepdog` (1 852), cu CORAL_SAND 19,
+  ASPHALT_EDGE 6 (pata, masca, urechile) și VOLCANIC_BLACK 20 (nasul, ochii).
 
 Origini:
 - vehiculele au originea în centrul amprentei, la sol, cu fața pe +Y Blender
@@ -87,16 +87,18 @@ Origini:
 
 | model | nodul luat de turmă | vârfuri | sub 0,45 m | sub 0,55 m |
 |---|---|---:|---:|---:|
-| `sheepdog.glb` | `Sheepdog` (singurul) | 1 538 | **24,4 %** | 32,1 % |
+| `sheepdog.glb` rev. 2 | `Sheepdog` (singurul) | 2 680 | **21,9 %** | 34,0 % |
+| `sheepdog.glb` rev. 1 (istoric) | `Sheepdog` | 1 538 | 24,4 % | 32,1 % |
 | `monumentvalley/.../sheep.glb` | `Pose_Walk` | 1 187 | **37,4 %** | 46,0 % |
 | `serengeti/.../wildebeest.glb` (referință) | `Wildebeest` | 550 | — | 36,7 % |
 
-- La câine, burta e la ≥ 0,46 m, iar coada are capătul la ~0,49 m. Cu
-  `leg_top = 0,45`, se leagănă doar picioarele, labele și partea de jos a
+- La câine (rev. 2), burta e la 0,465 m și franjurii ei coboară la ~0,46 m,
+  deci peste `leg_top` 0,45. Coada pornește de la ~0,80 m. Cu
+  `leg_top = 0,45` se leagănă doar picioarele, labele și partea de jos a
   „pantalonilor”.
 - Câinele are procentul mai mic decât oaia fiindcă trunchiul (loft-ul cu
-  12 puncte pe inel) și capul au mai multe vârfuri decât picioarele (tuburi
-  cu 6 laturi). Shader-ul deplasează liniar pe y, deci un picior cu 3 inele
+  12 puncte pe inel), coama, capul și coada (bulgări `clump`) au mai multe
+  vârfuri decât picioarele (tuburi cu 6 laturi). Shader-ul deplasează liniar pe y, deci un picior cu 3 inele
   se leagănă corect și cu puține vârfuri.
 - `leg_top` e un singur uniform pe material, comun oii și câinelui, deci se
   alege la integrare pentru amândoi:
@@ -199,41 +201,57 @@ Rundele:
 - zona motorului e aglomerată de tuburi negre;
 - aripa față și ciocul ies destul de mult în față.
 
-### sheepdog — 3 runde
+### sheepdog — REV. 2, pe contractul revizuit (2 runde din 2)
 
-| element | pe planșă | în GLB | verdict |
+Rev. 1 (3 runde, istoric): din camera de joc citea „oaie palidă” sau „capră pe
+picioroange”, adică o cutie lungă pe patru bețe. Coordonatorul a revizuit
+contractul (kit §1.6 și rândul „ciobănescul” din tabelul de sloturi,
+actualizate în același commit).
+
+| element | contractul rev. 2 / planșa | în GLB | verdict |
 |---|---|---|---|
-| trunchi | masiv, lung, pieptul adânc | loft continuu, de 1,30 m de la umăr la crupă, cu burta la 0,46–0,49 m | OK |
-| blană lungă | smocuri pe contur | coamă la gât, jabou, jitter pe conturul burții, „pantaloni” pe coapse | **abatere**: conturul trunchiului e prea neted, nu se citește lățos |
-| pata gri (șaua) | una mare, gri-închis, de la umăr spre crupă | pe spate, de la umăr la crupă, până la jumătatea flancului | **abatere**: MARBLE_GREY (`#B8B4AC`) e mult mai deschis decât griul de pe planșă, iar marginea are trepte (pata e pe fețele loft-ului) |
-| capul | craniu lat, bot alb, nas negru | idem, cu mască gri, dungă albă pe frunte, 2 ochi negri | OK |
-| urechi | căzute, gri | căzute, triunghiulare, gri | OK |
-| picioare | 4, groase, labe mari | 4 tuburi conice, cu jaret în spate și labe | **abatere**: încă puțin lungi și subțiri față de decupare |
-| coada | panaș mare, atârnă și se curbează | 4 bulgări pe arc | OK; puțin mai mică |
+| trunchi | masiv, adânc, 1,15 m umăr–crupă, pieptul ≥ 0,55 din greabăn, burta peste 0,45 | loft continuu, de la +0,56 la −0,59 (1,15 m); spinarea la 1,01–1,05; burta la 0,465 (adâncime 0,55–0,58) | OK |
+| coama | masă lățoasă pe gât și piept, fața mai lată decât crupa | `clump`-uri: gâtul (0,56 lat), jaboul, 2 pe laturile pieptului; fața are ~0,67 m lățime, crupa ~0,50 | OK |
+| picioare | scurte, groase (≥ 0,18 m sus), labe late | tuburi de 0,23–0,25 m sus și 0,18 jos, de la 0,62 m la sol; labe de 0,19 × 0,23 | OK; din profil încă se văd drepte, ca stâlpi |
+| pantaloni | conturul se lărgește la coapsă | 2 `clump`-uri pe fiecare coapsă din spate (0,24 × 0,34 × 0,40) + franjuri după picioarele din față | OK |
+| cap | mare (~0,40 m), bot scurt și lat, urechi atârnate | craniu de 0,40 × 0,34 × 0,34, închis; bot alb de 0,25 lat; urechi atârnate, închise | OK |
+| masca / dunga | cap gri-închis, dungă albă pe frunte, bot alb | craniu ASPHALT_EDGE, dungă albă mică pe frunte, bot alb, nas și ochi negri | OK; dunga e un smoc mic, pe planșă e mai lată |
+| pata | gri-închis, pe umăr, coborând pe flanc | `clump` plat pe spate + câte unul pe fiecare flanc, ASPHALT_EDGE, margini pe fațete | **abatere**: pe flanc pata iese ca o placă cu muchie dreaptă de jos, nu ca pata organică de pe planșă |
+| coada | smoc mare, stufos, curbat în sus, ca masă aproape cât capul | 5 `clump`-uri pe arc: iese înapoi din crupă și se ridică până la ~1,24 m | OK; e mai mult „pompon pe arc” decât panașul continuu de pe planșă |
+| contur lățos | zimțat | `clump` pe spinare, piept, gât, pantaloni, coadă și franjurii burții | OK ca formă; fațetele sunt mari, nu fir |
 
 Rundele:
-1. Trunchi scurt din 3 bulgări, cu picioare lungi: citea „cerb”.
-2. Trunchiul alungit la 1,30 m din 5 bulgări: a ieșit o „omidă” cu inele.
-3. Un singur loft continuu, picioare mai groase, fără franjurii-„mameloane” de
-   sub burtă.
+1. Contractul nou aplicat. Coada a ieșit coloană verticală de bulgări,
+   smocurile de pe flanc păreau umflături, iar dunga de pe frunte ieșea ca un
+   corn.
+2. Coada pusă pe arc, cu bulgări mari suprapuși; smocurile de flanc mutate jos
+   ca franjuri ai burții (peste 0,46 m); dunga aplatizată; pata de pe flanc
+   apropiată de suprafață.
 
-**Captura cu turma** (`sheepdog_herd.png`):
-- câinele se deosebește de oi prin siluetă (capul sus, picioarele lungi, fără
-  capul maro al oii);
-- e mai înalt decât oile (greabăn 1,0 față de 0,92 m cât are oaia în total),
-  cum cere tabelul;
-- pe culoare se distinge greu: cremul e același, iar griul pâlcului e
-  deschis.
+Am păstrat runda 2: coada și burta, care sunt puncte de contract, sunt mai
+bune. Pata de flanc a ieșit mai plată (placă) decât în runda 1, iar asta e
+abaterea rămasă.
+
+**Captura cu turma** (`sheepdog_herd.png`, camera de joc: 12,5 m în spate, 10 m
+sus, fov vertical 68; turma la ~9–11 m în fața mașinii, adică ~23 m de cameră).
+Întrebarea „de la 30 m se vede un câine mare printre oi?”:
+- **în cadrul de joc întreg (stânga): se vede un animal DIFERIT**, mai înalt
+  decât oile, alb cu cap închis, cu pete închise pe spate și coada ridicată.
+  Animalul are însă ~25 px în 1280 × 720, iar „câine” ca specie se citește
+  la limită: din pete și coada sus, nu din formă;
+- **în vederea apropiată (dreapta), da**: câine mare, alb cu cap închis,
+  printre oi, mai înalt cu o treime decât ele;
+- pe culoare se deosebește acum de oi prin capul închis și pete (ASPHALT_EDGE),
+  nu doar prin siluetă, cum era la rev. 1.
 
 ## Decizii luate singur
 
 1. **Gabaritul** e carcasa din Car.tscn (2,20 × 3,80), nu carcasa efectivă a
    mașinii Muscle (1,80 × 3,71). Motivul e mai sus.
-2. **„1,3 m lung” la câine** e lungimea trunchiului (de la vârful umărului la
-   vârful crupei), adică măsura chinologică. Cu 1,3 m de la nas la coadă și
-   greabănul la 1,0 m (runda 1), câinele ieșea pătrat, cu h/l ~1, iar pe
-   decupare lungimea totală e de ~1,8 ori greabănul. Așa, de la nas la coadă
-   are 1,96 m. În turmă, `ANIMAL_LEN` e 1,7.
+2. **Lungimea câinelui** e lungimea trunchiului (de la vârful umărului la
+   vârful crupei). La rev. 1 am interpretat „1,3 m” ca trunchi; contractul
+   rev. 2 fixează explicit trunchiul, la 1,15 m. De la nas la vârful
+   cozii are 2,13 m. În turmă, `ANIMAL_LEN` e 1,7.
 3. **Un nod pe slot la vehicule:** am pus 7 noduri pe mașină în loc de cele 3
    numite în contract:
    - farurile, stopurile, jantele și plasticul au primit fiecare nodul lor;
@@ -270,11 +288,14 @@ inventarul.
 | `parked_car_a` | 3 / 3 |
 | `parked_car_b` | 1 / 3 |
 | `motorbike` | 3 / 3 |
-| `sheepdog` | 3 / 3 |
+| `sheepdog` | rev. 1: 3 / 3; rev. 2 (contract revizuit): 2 / 2 |
 
-Acceptarea rămâne a coordonatorului.
+Coordonatorul a acceptat `parked_car_a`, `parked_car_b` și `motorbike` (13 oct
+2026). Rundele rămase pe B nu se mai folosesc. `sheepdog` rev. 2 așteaptă
+verdictul.
 
 **Abaterile cu cel mai mare risc:**
-- **câinele:** blana nu citește lățoasă, iar pata gri e prea deschisă și are
-  margine în trepte;
+- **câinele (rev. 2):** pata de pe flanc e o placă cu muchie dreaptă; coada
+  e din bulgări (pompon), nu un panaș continuu; în cadrul de joc întreg
+  animalul are ~25 px, iar „câine” se citește la limită;
 - **motocicleta:** carenajul e din blocuri unghiulare.

@@ -206,6 +206,37 @@ PY
 fi
 
 echo
+echo "== val 3, tf-h: garnitura si cabina mare (kit §1.7) =="
+# Exceptii tf-h, cu motiv:
+#   ro_train   --origin=assembly   trei noduri pe rol (Train_Loco / _Tender /
+#              _Wagon), cautate dupa nume EXACT de TrainHazard; offsetul de
+#              origine e calculat O DATA pe ansamblu (baza rotilor la y = 0,
+#              ecartamentul centrat pe z = 0), nu pe bbox-ul fiecarui nod.
+#              --allow-car-slots=Train_Loco,Train_Tender,Train_Wagon: caroseria
+#              pe CAR_RED 14 (kit §0, tabelul de sloturi, randul „trenul”).
+#   cable_cabin_large   --origin=rim: originea e pe LINIA CABLULUI (varful
+#              rotilor caruciorului), cabina atarna 7,5 m sub ea. Fara
+#              --rim-above: nimic nu trece peste cablu.
+#              --allow-car-slots=Cabin_Body: caroseria pe CAR_RED 14 (kit §0,
+#              randul „cabina telecabinei”).
+check "vehicles/ro_train.glb" --origin=assembly --allow-car-slots=Train_Loco,Train_Tender,Train_Wagon
+if [ -f "$ROOT/vehicles/ro_train.glb" ]; then
+  python - "$ROOT/vehicles/ro_train.glb" <<'PY2' || fail=1
+import sys, os
+sys.path.insert(0, os.path.join("tools", "blender"))
+from verify_glb import load_glb
+g = load_glb(sys.argv[1])[0]
+root = g["scenes"][g.get("scene", 0)]["nodes"]
+names = [g["nodes"][i].get("name") for i in root]
+miss = [n for n in ("Train_Loco", "Train_Tender", "Train_Wagon") if n not in names]
+if miss:
+    print("   !! TrainHazard cere copii DIRECTI ai radacinii %s; lipsesc: %s" % (names, miss))
+    sys.exit(1)
+PY2
+fi
+check "vehicles/cable_cabin_large.glb" --origin=rim --allow-car-slots=Cabin_Body
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

@@ -55,11 +55,11 @@ const TEXT_DIM := Color(0.62, 0.68, 0.78)
 const BAR_HEIGHT := 10.0
 
 const TIPS: Array[String] = [
-	"Tine TURBO apasat in ultima secunda a numaratorii pentru rocket start.",
-	"Driftul umple bara de turbo mult mai repede decat mersul drept.",
-	"Turbo-ul e al tau: pastreaza-l pentru o dreapta lunga sau inaintea unei sarituri.",
-	"Masinile grele imping, cele usoare zboara. Alege-ti bine cu cine te freci.",
-	"Iarba te incetineste, dar unele scurtaturi tot merita riscul.",
+	"Hold TURBO in the last second of the countdown for a rocket start.",
+	"Drifting fills the turbo bar much faster than driving straight.",
+	"Turbo is yours to spend: save it for a long straight or right before a jump.",
+	"Heavy cars push, light cars fly. Pick your fights wisely.",
+	"Grass slows you down, but some shortcuts are still worth the risk.",
 ]
 
 ## Pozitia pistei in GameState.TRACK_SCENES; se seteaza inainte de add_child.
@@ -260,7 +260,7 @@ func _build_ui() -> void:
 	margin.add_child(column)
 
 	var region := _label(22, info.accent.lightened(0.45))
-	region.text = info.region.to_upper() if info.region != "" else "PISTA"
+	region.text = info.region.to_upper() if info.region != "" else "TRACK"
 	column.add_child(region)
 	var title := _label(60, Color.WHITE)
 	title.text = info.display_name if info.display_name != "" \

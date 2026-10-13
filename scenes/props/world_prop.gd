@@ -2132,6 +2132,73 @@ const CLASSES_OKINAWA := {
 		"Bougainvillea_Bloom": _OK_BLOOM},
 }
 
+## Clasele kitului Transfagarasan (Track21), pe FISIER si pe numele intreg al nodului.
+##
+## Acelasi motiv ca la `CLASSES_OKINAWA`: numele de noduri ale kitului (`House_Roof`,
+## `House_Stone`, `House_Plaster`, `Wall_Stone`) coincid cu chei GLOBALE din
+## `prop_classes()` (`roof_tiles`, `stone_wall`, `plaster`, `village_plaster`), iar
+## maparea pe TEMA ruleaza dupa cea globala si o suprascrie. Deci fiecare nod care
+## trebuie sa ramana pe atlas e numit explicit cu `ATLAS_PREFIX`. Nicio alta pista nu
+## e atinsa: tema "transfagarasan" exista doar pe Track21.
+##
+## Culorile (tinta din brief §4) se citesc din clasa, vezi `Palette.CLASS_TINT`:
+##   `tf_schist`   sistul        #7E8478  (dala `alpine_granite`)
+##   `tf_stone`    zidaria       ~#9B978B (dala `stone_wall`, fara tenta)
+##   `tf_jneapan`  jneapanul     #34503A  (dala `pine_needles`)
+##   `tf_beech`    coroana fagului #5E8A3A (dala `acacia_canopy`, ridicata)
+##   `snow`        zapada        (clasa existenta, netentata)
+##   `concrete`    betonul       (clasa existenta, netentata)
+##   `plaster`     tencuiala     (ATLAS: clasa iesea bej-maro, vezi `_TF_PLASTER`)
+##   `tf_bloom`    bujorul       #B63A7A  (atlas tentat, slotul 31)
+## Tabla acoperisurilor NU e clasa: tenta doar INTUNECA, deci ASPHALT_EDGE (#696765) nu
+## poate urca spre argintiu. Se rezolva prin remapare de slot (`SLOT_REMAP_BY_THEME`),
+## fara material nou: tabla argintie pe MARBLE_GREY, cea ruginie pe LARCH_RUST (mai putin
+## saturat decat RUST_METAL). Tabla rosie (`arges_house_b`) ramane pe KERB_RED.
+const _TF_SCHIST: String = Palette.TRI_PREFIX + "tf_schist"
+const _TF_STONE: String = Palette.TRI_PREFIX + "tf_stone"
+const _TF_SNOW: String = Palette.TRI_PREFIX + "snow"
+const _TF_CONCRETE: String = Palette.TRI_PREFIX + "concrete"
+# Tencuiala: briefului ii cere ALBA (FOAM_WHITE), iar clasa `plaster` (#978D7D) a dat in joc
+# (154,121,84), bej-maro, pe cand atlasul da (192,176,149), crem. Ca la Okinawa
+# (`_OK_PLASTER`), ramane pe atlas: mai aproape de alb si zero material.
+const _TF_PLASTER: String = Palette.ATLAS_PREFIX
+const _TF_JNEAPAN: String = Palette.TRI_PREFIX + "tf_jneapan"
+const _TF_BEECH: String = Palette.TRI_PREFIX + "tf_beech"
+const _TF_BLOOM: String = Palette.ATINT_PREFIX + "tf_bloom"
+const _TF_OUTCROP := {"Schist_Schist": _TF_SCHIST}
+const _TF_HOUSE := {"House_Stone": _TF_STONE, "House_Plaster": _TF_PLASTER,
+	"House_Roof": Palette.ATLAS_PREFIX}
+const _TF_WALL := {"Wall_Stone": _TF_STONE}
+const _TF_BEECH_TREE := {"Beech_Leaves": _TF_BEECH}
+const _TF_JNEAPAN_BUSH := {"Jneapan_Needles": _TF_JNEAPAN}
+const CLASSES_TRANSFAGARASAN := {
+	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
+	"schist_outcrop_c": _TF_OUTCROP,
+	"scree_cone": {"Scree_Schist": _TF_SCHIST},
+	"rock_tunnel_portal": {"Rock_Schist": _TF_SCHIST},
+	"poenari_ruin": {"Poenari_Schist": _TF_SCHIST, "Poenari_Stone": _TF_STONE},
+	"prometheus_statue": {"Statue_Schist": _TF_SCHIST},
+	# Kitul refolosit (kit §1.9): sistul doar pe Track21 (tema), nu global. `PeakSnow`
+	# ramane pe atlas (calota alba).
+	"canyon_rocks": {"Canyon_": _TF_SCHIST},
+	"rock_large": {"Rock_Large": _TF_SCHIST},
+	"mountain_peak": {"MountainPeak": _TF_SCHIST},
+	"snow_wall": {"SnowWall_A_Snow": _TF_SNOW, "SnowWall_B_Snow": _TF_SNOW},
+	"tunnel_portal_balea": {"Portal_Snow": _TF_SNOW, "Portal_Concrete": _TF_CONCRETE},
+	# Numele intregi: prefixul `Dam_` ar prinde si `Dam_Rail` (dungile rosii, pe atlas).
+	"vidraru_dam": {"Dam_Module_Concrete": _TF_CONCRETE,
+		"Dam_PowerHouse_Concrete": _TF_CONCRETE, "Dam_Tower_Concrete": _TF_CONCRETE},
+	"retaining_wall_straight": _TF_WALL, "retaining_wall_curve": _TF_WALL,
+	"arges_house_a": _TF_HOUSE, "arges_house_b": _TF_HOUSE,
+	"cabana_balea_lac": {"Cabana_Stone": _TF_STONE, "Cabana_Roof": Palette.ATLAS_PREFIX},
+	"cabana_balea_cascada": {"Cascada_Stone": _TF_STONE,
+		"Cascada_Roof": Palette.ATLAS_PREFIX},
+	"stana": {"Stana_Roof": Palette.ATLAS_PREFIX},
+	"jneapan_a": _TF_JNEAPAN_BUSH, "jneapan_b": _TF_JNEAPAN_BUSH,
+	"beech_tree_a": _TF_BEECH_TREE, "beech_tree_b": _TF_BEECH_TREE,
+	"bujor_de_munte": {"Bujor_Bloom": _TF_BLOOM},
+}
+
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),
 ## nu global — la fel cum [constant SLOT_REMAP_BY_THEME] exista langa
 ## [constant SLOT_REMAP_BY_MODEL].
@@ -2222,6 +2289,8 @@ const CLASSES_BY_THEME := {
 	},
 	# Okinawa (Track20): vezi `CLASSES_OKINAWA`.
 	"okinawa": CLASSES_OKINAWA,
+	# Transfagarasan (Track21): vezi `CLASSES_TRANSFAGARASAN`.
+	"transfagarasan": CLASSES_TRANSFAGARASAN,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -2416,6 +2485,27 @@ const SLOT_REMAP_BY_GROUP := {
 ## piesele plasate individual (WorldProp, ex. `--vitrina`) tot citesc atlasul,
 ## si o remapare globala pe model le-ar fi schimbat si pe Track15.
 const SLOT_REMAP_BY_THEME := {
+	# Transfagarasan (Track21), tabla acoperisurilor. Brief: tabla argintie, dar slotul
+	# ASPHALT_EDGE 6 (#696765) e gri de asfalt, iar o clasa o poate doar INTUNECA. Deci slotul
+	# se muta pe MARBLE_GREY 29 (#B8B4AC), fara material nou. `cascada` are tabla pe
+	# RUST_METAL 10 (#91461E, saturatie 0.79, "foarte saturata"): trece pe LARCH_RUST 27
+	# (#A8683A, 0.65). `stana` are ambele (78% argintie, 22% ruginita). Slotul 6 nu e folosit
+	# de alt nod din aceste modele (masurat pe UV-uri), deci mutarea atinge doar tabla.
+	"transfagarasan": {
+		"arges_house_a": {6: Palette.MARBLE_GREY},
+		"cabana_balea_lac": {6: Palette.MARBLE_GREY},
+		"cabana_balea_cascada": {10: Palette.LARCH_RUST},
+		"stana": {6: Palette.MARBLE_GREY, 10: Palette.LARCH_RUST},
+		# Trunchiul fagului: scoarta neteda dar INCHISA, nu cremul slotului 29 (#B8B4AC).
+		# Mutata pe VOLCANIC_BLACK 20 (#55535A), fara material nou (tenta doar intuneca,
+		# dar un ATINT ar fi costat un material pentru un trunchi).
+		"beech_tree_a": {29: Palette.VOLCANIC_BLACK},
+		"beech_tree_b": {29: Palette.VOLCANIC_BLACK},
+		# Ursul: blana pe LARCH_RUST 27 (#A8683A) iesea portocalie sub soarele temei,
+		# (161,88,40) pe captura, adica vaca ruginie; pe WOOD_WEATHERED 9 tot (138,84,40).
+		# Blana intreaga pe LOG_DARK 28 (#4A3526).
+		"brown_bear": {27: Palette.LOG_DARK},
+	},
 	"fiordland": {
 		# `moss_boulder_a/b/c`: masurat pe .glb (probe ad-hoc), un SINGUR
 		# material/mesh cu trei sloturi — corpul pe 3 ROCK_LIGHT (bej-tan

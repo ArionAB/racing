@@ -20,22 +20,38 @@ Comparațiile sunt în `docs/asset_briefs/img/transfagarasan_fidelity/<nume>.png
 
 ## Rezumat
 
-| piesă | cote măsurate (m) | contract | h/l măsurat / cerut | tri | noduri (slot) |
+| piesă | cote măsurate (m) | contract | h/l măsurat / cerut | tri (înainte → acum) | noduri (slot) |
 |---|---|---|---|---:|---|
-| `rocks/schist_outcrop_a` | 5,79 × 6,22 × **5,88** | 6 × 5 | **1,11** / 1,2 | 638 | `Schist_Schist` (29), `Schist_Crack` (20) |
-| `rocks/schist_outcrop_b` | 6,30 × 8,84 × **3,40** | 3,5 × 8 | **0,48** / 0,45 | 494 | idem |
-| `rocks/schist_outcrop_c` | 3,58 × 4,40 × **7,73** | 8 × 4 | **1,97** / 2,0 | 380 | idem |
+| `rocks/schist_outcrop_a` | 6,43 × 6,81 × **5,97** | 6 × 5 | **0,99** cu moloz (1,11 fără) / 1,2 | 638 → **936** | `Schist_Schist` (29), `Schist_Crack` (20) |
+| `rocks/schist_outcrop_b` | 6,86 × 8,85 × **3,49** | 3,5 × 8 | **0,56** cu moloz (0,48 fără) / 0,45 | 494 → **806** | idem |
+| `rocks/schist_outcrop_c` | 3,96 × 5,02 × **7,86** | 8 × 4 | **1,78** cu moloz (1,97 fără) / 2,0 | 380 → **624** | idem |
 | `rocks/scree_cone` | **13,49** × 6,81 × **4,13** | Ø 12 × 4 | 0,31 din față* / 0,35 | 1 534 | `Scree_Schist` (29) |
-| `plants/jneapan_a` | **4,15** × 3,98 × **1,23** | 1,2 × 4 | 0,30* / 0,3 | 3 792 | `Jneapan_Bark` (9), `Jneapan_Needles` (28) |
-| `plants/jneapan_b` | **3,38** × 2,61 × **1,44** | 1,5 × 3 | 0,43* / 0,5 | 3 112 | idem |
-| `plants/beech_tree_a` | **11,03** × 9,26 × **12,60** | 13, coroana 10 | **1,15** / 1,3 | 2 846 | `Beech_Bark` (29), `Beech_Leaves` (21) |
-| `plants/beech_tree_b` | **10,04** × 6,92 × **10,29** | 10, coroana 9 | **1,07** / 1,1 | 2 532 | idem |
+| `plants/jneapan_a` | **4,12** × 3,87 × **1,15** | 1,2 × 4 | 0,28* / 0,3 | 3 792 → **1 392** | `Jneapan_Bark` (9), `Jneapan_Needles` (28) |
+| `plants/jneapan_b` | **3,32** × 2,73 × **1,35** | 1,5 × 3 | 0,41* / 0,5 | 3 112 → **1 322** | idem |
+| `plants/beech_tree_a` | **10,27** × 10,70 × **11,55** | ~12,5, coroana ~10 | **0,99** / ~1,3 (decuparea: 0,97) | 2 846 → **3 054** | `Beech_Bark` (29), `Beech_Leaves` (21) |
+| `plants/beech_tree_b` | **10,04** × 6,92 × **10,32** | 10, coroana 9 | **1,07** / 1,1 | 2 532 → **2 590** | idem |
 | `plants/bujor_de_munte` | **1,39** × 1,33 × **0,64** | 0,6 × 1,2 | 0,46* / 0,5 | 2 224 | `Bujor_Leaves` (21), `Bujor_Bloom` (31) |
-| `plants/afin` | **0,76** × 0,73 × **0,47** | 0,5 × 0,9 | 0,62* / 0,55 | 1 736 | `Afin_Leaves` (21), `Afin_Berry` (25) |
+| `plants/afin` | **0,85** × 0,93 × **0,50** | 0,5 × 0,9 | 0,54* / 0,55 | 1 736 → **1 764** | `Afin_Leaves` (21), `Afin_Berry` (25) |
 
 \* Din cotele GLB (înălțime / lățimea cea mai mare). La piesele joase, vederea 3/4
 (camera la 24–28°) adaugă adâncimea în înălțimea siluetei; randarea dă 0,51
-(grohotiș), 0,62 (bujor) și 0,74 (afin).
+(grohotiș), 0,48 / 0,50 (jneapăn a / b), 0,62 (bujor) și 0,64 (afin).
+
+## Verdictele coordonatorului (13 oct) și ce s-a făcut
+
+| piesă | verdict | ce s-a făcut | commit |
+|---|---|---|---|
+| `schist_outcrop_a/b/c` | acceptate cu reglaj mic | vârfuri **teșite**: fața ruptă are cel puțin **0,4 m** (`tip_w` în `slab_profile`/`foliation_stack`, cota cerută e a feței rupte); **moloz la picior**: 12/12/10 blocuri de 0,3–1,2 m (mare/mediu/mic, sprijinite de stâncă, `foot_rubble`) | `c67ba308`, `1da01f73`, `8e1aecd4` |
+| `scree_cone` | acceptat | — | `a6fa6958` |
+| `bujor_de_munte` | acceptat | — | `dfdeb6dd` |
+| `afin` | acceptat cu reglaj mic | **29 de bobițe** vizibile (pe suprafața ciorchinilor, spre exterior), frunziș aerisit (miez mai mic, 8 crenguțe exterioare cu goluri), lățimea 0,93 m | `a5ac4e80` |
+| `jneapan_a/b` | de refăcut (max 2 runde) | plăci plate de ace, ≤ 1 500 tri: 1 392 / 1 322 (erau 3 792 / 3 112). 2 runde. Pâlcul de 8 regenerat | `15568069`, `02159da3` |
+| `beech_tree_a` | de refăcut (max 2 runde) | trunchi scurt și gros, 4 brațe în evantai, coroană joasă și lată, cu goluri. 2 runde | `f742f432` |
+| `beech_tree_b` | rămâne, cu trunchiul îngroșat | trunchi Ø 0,76 m, conducători Ø 0,52 m, pinteni scurți | `a9fa799f` |
+
+Notă: `build_tf_plants.py` e un singur fișier, așa că modificările de parametri de
+la afin au intrat în același diff cu commit-ul lui `beech_tree_a` (`f742f432`).
+Commit-ul `a5ac4e80` aduce GLB-ul și capturile afinului.
 
 Stâncile au originea pe centrul bbox-ului ansamblului, cu baza la 0. Copacii au
 originea **la baza trunchiului**, nu pe centrul bbox-ului; fagul b e aplecat și
@@ -51,7 +67,17 @@ Contrastul de valoare din randare e **mai mic** decât pe planșă: diferența d
 fețe o fac doar lumina și AO-ul. **Mușchiul verde-galben de pe planșă NU e pus**
 (corectura „fără vegetație lipită pe stânci”).
 
-### schist_outcrop_a — commit `628fc359`
+**Reglaj (13 oct), comun a/b/c.** Toate vârfurile sunt acum fețe rupte plane
+de cel puțin 0,4 m. Teșitura mare (~1,35 m pe fiecare față, la vârfurile de 17°)
+e compensată în cotă: `height` e cota feței rupte. Molozul de la picior are
+blocuri de 0,3–1,2 m, cu grosimea 45–70% din latură, pe tot perimetrul
+amprentei. Molozul lărgește silueta, așa că h/l scade la a (0,99) și c (1,78).
+La b crește la 0,56, fiindcă blocurile din față coboară baza siluetei în
+vederea 3/4. **Abatere rămasă:** pe planșă molozul e mai dens (10–15 blocuri
+plus pietriș mărunt); la noi cam jumătate din blocuri stau în spatele stâncii în
+vederea 3/4.
+
+### schist_outcrop_a — commit `628fc359` (+ reglaj `c67ba308`)
 
 | element | pe planșă | în GLB | verdict |
 |---|---|---|---|
@@ -68,7 +94,7 @@ Runde: 3. (1) lamele erau foi cu fața spre cameră: citire greșită a structur
 diagonală vizibilă. (3) stivă de 4 plăci subțiri, fisuri vizibile, spate subțiat
 (din lateral pană, nu cutie).
 
-### schist_outcrop_b — commit `3136ca4c`
+### schist_outcrop_b — commit `3136ca4c` (+ reglaj `1da01f73`)
 
 | element | pe planșă | în GLB | verdict |
 |---|---|---|---|
@@ -82,7 +108,7 @@ Runde: 2. (1) avea și un al 4-lea dinte, o placă subțire care citea ca o cuti
 așezată deasupra; blocurile groase citeau ca „picioare”. (2) dintele scos,
 lespezile turtite.
 
-### schist_outcrop_c — commit `3136ca4c`
+### schist_outcrop_c — commit `3136ca4c` (+ reglaj `8e1aecd4`)
 
 | element | pe planșă | în GLB | verdict |
 |---|---|---|---|
@@ -115,40 +141,61 @@ mari și mai groase, plus lespezile mari.
 
 ## Plantele — fidelitate
 
-### jneapan_a, jneapan_b — commit `6067a513`
+### jneapan_a, jneapan_b — REFĂCUT: `15568069`, `02159da3` (prima versiune `6067a513`)
 
 Preview: `*_Needles` e randat pe #34503A (ținta jneapănului din brief §4). Slotul
 LOG_DARK 28 e maro și există doar ca rezervă: culoarea o dă clasa `pine_needles`.
 
-| element | pe planșă | în GLB | verdict |
-|---|---|---|---|
-| culcat, nu brad mic | ramuri groase radiale pe sol, ridicate la capete | a: 6 ramuri de 1,55–1,9 m, culcate la 0,05–0,2 m, vârfurile la 0,5–0,85 m; b: 5 culcate + 3 scurte care urcă din centru | OK |
-| perne de ace | crengi plate ca de ferigă, margine zimțată | 24 de perne plate (a), fiecare un miez plus 3 lobi alternanți pe parte | OK ca formă; **abatere**: lobii au contur poligonal (5 laturi), deci citesc ca bulgări fațetați, nu ca ace pufoase. Netezirea umbririi (runda 3) nu schimbă conturul |
-| ramurile maro vizibile | în centru, între perne | da, în centru și la capete | OK |
-| b: asimetric, pernă ieșită într-o parte | (planșa b ≈ a) | ramura lungă spre +X cu 4 perne | OK |
-| b: mai înalt și compact | — | 1,44 m (contract 1,5), lățime 3,38 m (+13%) | OK în toleranță |
-| pâlcul de 8 | — | `jneapan_group.png`: covor jos și continuu pe versant, nu brăduți | OK |
+Contractul clarificat de coordonator cere perne = **plăci plate de ace**:
+- alungite de-a lungul ramurii, ca frunzele de ferigă;
+- 0,8–1,2 × 0,4–0,6 × 0,15–0,25 m;
+- marginea zimțată pe lung;
+- suprapuse ca solzii, aproape orizontale, ridicate la capete;
+- ≤ 1 500 tri pe variantă.
 
-Runde: 3. (1) perne din bile înșirate (mărgele); b avea o bilă mare în centru.
-(2) perne plate și zimțate, ramuri care urcă în b. (3) umbrire netedă. Pragul de
-75° n-a netezit nimic, fiindcă fețele ciorchinilor cu 5 laturi se întâlnesc la
-72–90°. L-am corectat la 100° ca să se aplice ce cerea runda 3; nu l-am numărat
-ca rundă nouă.
-
-### beech_tree_a, beech_tree_b — commit `5309e6bf`
+`needle_pad` e rescris ca placă: contur stelat zimțat, cu evantai sus și jos și
+o bandă laterală, 4·(4·teeth+2) = 56 tri la 3 dinți.
 
 | element | pe planșă | în GLB | verdict |
 |---|---|---|---|
-| trunchiul | maro, gros, cu rădăcini | **gri, neted** (MARBLE_GREY 29, după contract), Ø 0,84 m (a) / 0,72 m (b), 4 pinteni de rădăcină | OK (urmez contractul) |
-| coroana a | ovală, lată, ~15–20 de lobi zimțați | 7 mase (contractul cere 5–7), fiecare cu miez și 7 ciorchini turtiți | OK ca masă și siluetă |
-| baza coroanei | ~1/3 din înălțime, brațe vizibile între lobi | ~4,2 m pe laturi; brațele se văd puțin | **abatere**: a citește încă parțial ca „acadea” (coroana pe un trunchi gol). Pe planșă brațele în evantai se văd mult mai clar |
-| culoarea coroanei | verde-lime cald | TROPICAL_GREEN #3F7A3C, mai rece și mai închis | de integrare: clasa `beech_canopy` cu tenta recalculată (contract) |
-| b: altă siluetă | (planșa b ≈ a) | furcă la 2,7 m, cu doi conducători divergenți vizibili din toate azimuturile, aplecat 5° spre +X, coroană asimetrică și mai joasă, cu o masă joasă ieșită spre +X | OK |
-| h/l | — | a 1,15 (cerut 1,3, −12%), b 1,07 (cerut 1,1) | OK în toleranță |
+| culcat, nu brad mic | ramuri groase radiale pe sol, ridicate la capete | a: 6 ramuri de 1,55–1,9 m, culcate, vârfurile la 0,5–0,85 m; b: 5 culcate + 3 care urcă din centru | OK |
+| perne de ace | crengi plate ca de ferigă, zimțate, suprapuse | a: 21 de plăci (3 pe ramură + 3 în centru); b: 19. Toate de 0,85–1,15 × 0,64–0,80 × 0,16 m, cu 3 zimți adânci pe parte și ridicate spre capăt cu 3–34° | OK. Lățimea plăcilor (0,64–0,80 m) e peste intervalul cerut de 0,4–0,6: în runda 1, la 0,5–0,6 m, citeau ca bare înguste de cărămidă, iar planșa le arată late |
+| suprapuse ca solzii | da | fiecare placă următoare puțin mai sus, alternând stânga/dreapta ±0,07 m și ±6–12° | OK |
+| ramurile maro vizibile | în centru | da, printre plăci | OK |
+| b: asimetric și compact | — | ramura lungă spre +X; 1,35 m înălțime (contract 1,5, −10%); h/l 0,41 din cote (cerut 0,5, −18%) | abatere mică |
+| buget | ≤ 1 500 | **1 392 / 1 322** (erau 3 792 / 3 112) | OK |
+| pâlcul de 8 | covor jos | `jneapan_group.png`: covor continuu de ferigi joase, nu brăduți | OK |
 
-Runde: 3. (1) bule rotunde pe un băț lung, ca o acadea. (2) mase mai joase,
-ciorchini mai mari și turtiți. (3) miezul maselor mai mic (core_scale 0,70),
-furca lui b coborâtă, conducătorii mai divergenți.
+Runde, după clarificarea contractului: 2.
+1. Plăci de 0,5–0,6 m, zimți puțin adânci: citeau ca bare cu margine vălurită,
+   iar tufa era rară, ca o stea de mare.
+2. Plăci mai late, mai subțiri și cu zimți mai adânci; b cu 3 plăci pe ramură.
+
+`JNEAPAN_SMOOTH` = 50°: evantaiul de sus se netezește, iar muchiile laterale
+rămân vii.
+
+### beech_tree_a — REFĂCUT: `f742f432` (prima versiune `5309e6bf`)
+
+| element | pe planșă / contract clarificat | în GLB | verdict |
+|---|---|---|---|
+| trunchiul | scurt și gros, Ø 0,7 m, rădăcini evazate, 3 m până la ramificare | Ø 0,70 m, 5 pinteni scurți și groși, ramificat la 2,9 m; gri (29), închis la bază prin AO (low 0,42) | OK. Pe planșă trunchiul pare mai gros (~0,9 m raportat la coroană): am urmat cota |
+| brațele | 3–4 brațe groase în evantai | 4 brațe de Ø 0,44 → 0,24 m, de la 2,9 m la 4,9 m, la 2,6 m de axă; se văd sub coroană din toate azimuturile | OK |
+| coroana | joasă și lată, ~10 m, aproape rotundă (h/l coroană ≈ 0,85) | lată de 10,3–10,7 m, baza la ~3,8 m, vârful la 11,55 m: h/l coroană ≈ 0,74 | **abatere**: mai turtită decât cere contractul |
+| golurile de jos | brațele se văd prin coroană | inel de 4 mase cu ciorchini doar de la ecuator în sus, cu goluri pe azimuturile dintre brațe | OK. În vederea 3/4, golul de pe axă citește ca o „gaură” la mijlocul coroanei: abatere mică |
+| h/l total | ~1,3 | **0,99** (decuparea măsoară 0,97) | **abatere** față de contract (−24%), aproape de planșă |
+| culoarea coroanei | verde-lime cald | TROPICAL_GREEN #3F7A3C, mai rece | de integrare (clasa `beech_canopy`) |
+
+Runde, după clarificare: 2.
+1. Coroana corectă ca structură, dar o coloană îngustă de 9 m, etajată; pinteni
+   ca „picioare de păianjen”.
+2. Masele mutate spre exterior, vârful lat și turtit, pinteni scurți și groși.
+   S-a pierdut h/l-ul: 1,32 în runda 1, 0,99 acum.
+
+### beech_tree_b — commit `5309e6bf` (+ reglaj `a9fa799f`)
+
+Silueta e neschimbată: furcă la 2,7 m, aplecat 5° spre +X, coroană asimetrică și
+joasă din 6 mase. Reglajul îngroașă trunchiul (Ø 0,76 m), conducătorii (Ø 0,52 m)
+și pintenii. h/l 1,07 (cerut 1,1).
 
 ### bujor_de_munte — commit `dfdeb6dd`
 
@@ -161,16 +208,15 @@ furca lui b coborâtă, conducătorii mai divergenți.
 
 Runde: 2. (1) 7 capete mici, ~15% din vederea de sus. (2) 8 capete mari.
 
-### afin — commit `dfdeb6dd`
+### afin — commit `dfdeb6dd` (+ reglaj `a5ac4e80`)
 
 | element | pe planșă | în GLB | verdict |
 |---|---|---|---|
-| tufă măruntă, verde | dreaptă, din crenguțe cu frunze, ca de ferigă | calotă din miez plus 14 crenguțe pe două inele (5 drepte în centru, 9 culcate pe margine) | **abatere**: silueta e corectă, dar citește mai compactă și mai „bulgăroasă” decât crenguțele aerisite de pe planșă |
-| bobițele | ~20 de puncte albastre | 20 de bobițe ICE_DEEP de 7 cm, 5,8% din vederea de sus | OK |
-| cote | 0,5 × 0,9 | 0,47 × 0,76 (−16% lățime) | abatere mică de lățime |
+| tufă măruntă, verde | dreaptă, din crenguțe cu frunze, ca de ferigă | calotă: miez mic plus 13 crenguțe pe două inele (5 drepte în centru, 8 culcate pe margine, cu goluri între ele) | OK. Rămâne puțin mai „bulgăroasă” decât planșa |
+| bobițele | ~20 de puncte albastre, la vedere | **29** de bobițe ICE_DEEP de 7 cm, pe suprafața ciorchinilor, spre exterior și sus. În vederea 3/4 se văd ~20 | OK (reglaj: 20–30) |
+| cote | 0,5 × 0,9 | 0,50 × 0,93 | OK |
 
-Runde: 3. (1) movilă de bulgări cu frunze ca foaia, 0,37 m. (2) un singur inel
-de crenguțe evazate, deci o vază goală la mijloc. (3) două inele, calotă.
+Runde: 3, plus reglajul de parametri al coordonatorului.
 
 ## Decizii luate singur
 
@@ -198,21 +244,29 @@ de crenguțe evazate, deci o vază goală la mijloc. (3) două inele, calotă.
    ridicat la puterea fracționară din `bake_ao`, dă număr complex și build-ul
    crapă (s-a întâmplat la grohotiș).
 
-## Stare la oprire (13 oct 2026)
+## Stare la oprire (13 oct 2026, după verdictele coordonatorului)
 
-Făcut: toate cele 10 piese din §1.4 și §1.5, comparațiile, vederile din 4
-azimuturi, planșa a | b | c, planșa plantelor și pâlcul de 8 jnepeni. `VERDICT
-KIT: OK`. Acceptarea rămâne a coordonatorului.
+Făcut: toate cele 10 piese din §1.4 și §1.5, plus reglajele și refacerile cerute
+pe 13 oct:
+- vârfuri teșite și moloz pe a/b/c;
+- afin cu 29 de bobițe, aerisit, la cotă;
+- jneapăn din plăci plate, sub 1 500 tri, cu pâlcul de 8 regenerat;
+- fagul a refăcut, fagul b cu trunchiul îngroșat.
+
+Comparațiile, vederile din 4 azimuturi și planșele `val1b_stanci` / `val1b_plante`
+sunt regenerate. `VERDICT KIT: OK`.
 
 Abaterile deschise, de la cea mai mare la cea mai mică:
-1. `beech_tree_a` citește încă parțial ca „acadea”: brațele se văd puțin.
-2. `afin` iese mai compact și mai bulgăros decât crenguțele aerisite; lățimea
-   e −16%.
-3. Lobii jneapănului au contur poligonal, deci citesc ca bulgări, nu ca ace.
-   Clasa `pine_needles` de la integrare poate ajuta, dar nu schimbă conturul.
-4. La stânci, contrastul luminat/umbră e mai mic decât pe planșă: preview-ul
-   pune toată clasa pe un singur ton. Se judecă în joc.
-5. `schist_outcrop_a` e la 68° în loc de ~40°: decizie de cote, nu defect.
-6. Bujorul e roz pal pe slot; magenta vine din tenta de la integrare.
+1. `beech_tree_a`: h/l 0,99 față de ~1,3 cerut (decuparea măsoară 0,97).
+   Coroana e mai turtită (0,74 față de 0,85). Pe axă, în vederea 3/4, apare
+   un gol ca o gaură.
+2. Molozul de la picioarele stâncilor e mai rar decât pe planșă (10–15 blocuri
+   plus pietriș). Cu el, h/l iese 0,99 (a) și 0,56 (b), în afara toleranței.
+   Fără moloz, h/l era 1,11 și 0,48.
+3. `jneapan_b` e mai scund decât cota (1,35 m față de 1,5); plăcile de ace sunt
+   mai late decât intervalul cerut, deliberat (vezi tabelul).
+4. La stânci, contrastul luminat/umbră din preview e mai mic decât pe planșă,
+   fiindcă clasa pune un singur ton. Se judecă în joc.
+5. Bujorul e roz pal pe slot; magenta vine din tenta de la integrare.
 
 Nimic nu e neînceput.

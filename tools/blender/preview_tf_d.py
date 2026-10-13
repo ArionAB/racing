@@ -35,7 +35,7 @@ from mathutils import Vector, Euler  # noqa: E402
 # din aval (+X) cu capatul +Y in dreapta-departe -> camera pe +X, putin spre -Y.
 SPECS.update({
     "vidraru_dam": {"camera": {"azimuth": -38.0, "elevation": 20.0, "lens": 60.0, "margin": 1.06}},
-    "poenari_ruin": {"camera": {"azimuth": -60.0, "elevation": 20.0, "lens": 60.0, "margin": 1.06}},
+    "poenari_ruin": {"camera": {"azimuth": 62.0, "elevation": 20.0, "lens": 60.0, "margin": 1.06}},
     "prometheus_statue": {"camera": {"azimuth": 75.0, "elevation": 12.0, "lens": 70.0, "margin": 1.08}},
 })
 

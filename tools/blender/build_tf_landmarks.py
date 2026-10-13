@@ -226,6 +226,489 @@ def build_vidraru_dam():
             ("Dam_PowerHouse", power, AO_DAM)]
 
 
+# ---------------------------------------------------------------------------
+# stanca de sist: trepte + blocuri pe foliatie (vocabularul tf_shapes_nature)
+# ---------------------------------------------------------------------------
+
+def _rr(seed):
+    return _rnd(seed)          # LCG din tf_shapes_nature (nu consuma random-ul global)
+
+
+def se_point(a, b, t, p=3.0):
+    """Punct pe superelipsa |x/a|^p + |y/b|^p = 1 (dreptunghi rotunjit, convex)."""
+    c, s = math.cos(t), math.sin(t)
+    x = a * math.copysign(abs(c) ** (2.0 / p), c)
+    y = b * math.copysign(abs(s) ** (2.0 / p), s)
+    return Vector((x, y))
+
+
+def se_normal(a, b, t, p=3.0):
+    q = se_point(a, b, t, p)
+    gx = math.copysign(abs(q.x / a) ** (p - 1), q.x) / a
+    gy = math.copysign(abs(q.y / b) ** (p - 1), q.y) / b
+    return Vector((gx, gy)).normalized()
+
+
+def se_ring(a, b, z, n=24, p=3.0, jit=0.0, seed=0, c=(0.0, 0.0)):
+    r = _rr(seed)
+    out = []
+    for i in range(n):
+        q = se_point(a, b, 2.0 * math.pi * i / n, p) * (1.0 + jit * (2.0 * r() - 1.0))
+        out.append(Vector((q.x + c[0], q.y + c[1], z)))
+    return out
+
+
+def rock_tier(b, bot, top, seed, n=24, p=3.0, jit=0.03, c=(0.0, 0.0), tilt=0.0, tilt_az=0.0,
+              p_top=None):
+    """O treapta a stancii: invelitoarea convexa intre inelul de jos si cel de
+    sus (a, b, z); peretii abrupti, fata de sus PLATA (aici se aseaza iarba /
+    zidurile)."""
+    pts = se_ring(*bot, n=n, p=p, jit=jit, seed=seed, c=c)
+    tp = se_ring(top[0], top[1], top[2], n=n, p=p_top or p, jit=jit * 0.6, seed=seed + 1, c=c)
+    for q in tp:              # varful treptei inclinat (fara inele orizontale "de tort")
+        q.z += tilt * math.cos(math.atan2(q.y - c[1], q.x - c[0]) - tilt_az)
+    return hull(b, pts + tp, TF_SCHIST)
+
+
+def tier_blocks(b, fr, a, bb, z0, z1, n, seed, dip=35.0, sink=1.2, out=(0.45, 1.1),
+                top_clamp=None, top_drop=(0.2, 1.6), p=3.0, thin=None, c=(0.0, 0.0),
+                fill=0.86):
+    """Blocurile de sist de pe peretele unei trepte: `n` mase pe perimetrul
+    superelipsei (a, bb), intre z0 si z1, cu ROSTURI verticale intre ele (umbra,
+    ca pe planșa). Fata de sus a fiecarui bloc e PLANUL DE FOLIATIE: coboara cu
+    `dip` grade pe directia `fr.d` a cadrului -- aceeasi pe toata piesa (kit,
+    regula 7), deci pe o latura vezi lamele de sus, pe cealalta capetele lor.
+    Fata din afara e usor inclinata (iese mai mult jos), cu o coama la mijloc
+    (2-3 fatete mari). `thin(normala)` -> True: blocul iese doar 0,15 m."""
+    r = _rr(seed)
+    k = math.tan(math.radians(dip))
+    per = 0.0
+    prev = se_point(a, bb, 0.0, p)
+    for i in range(1, 97):
+        q = se_point(a, bb, 2.0 * math.pi * i / 96, p)
+        per += (q - prev).length
+        prev = q
+    faces = []
+    for i in range(n):
+        t = 2.0 * math.pi * (i + 0.5 + 0.25 * (r() - 0.5)) / n
+        P2 = se_point(a, bb, t, p) + Vector(c)
+        N2 = se_normal(a, bb, t, p)
+        T2 = Vector((-N2.y, N2.x))
+        w = per / n * fill * (0.8 + 0.3 * r())
+        d_out = out[0] + (out[1] - out[0]) * r()
+        if thin and thin(N2):
+            d_out = 0.15
+        ztop = z1 - (top_drop[0] + (top_drop[1] - top_drop[0]) * r())
+        pts = []
+        for sw in (-0.5, 0.5):
+            for dd, zz in ((-sink, None), (d_out, None)):
+                Q = P2 + T2 * (sw * w * (0.92 + 0.08 * r())) + N2 * dd
+                zb = max(0.0, z0 - 0.15)
+                zt = ztop + k * ((Q - P2).dot(fr.d.to_2d()))
+                if top_clamp is not None:
+                    zt = min(zt, top_clamp)
+                zt = max(zt, z0 + 0.8)
+                ins = 0.4 * d_out if dd > 0 else 0.0      # fata din afara: mai retrasa sus
+                Qt = Q - N2 * ins
+                pts.append((Q.x, Q.y, zb))
+                pts.append((Qt.x, Qt.y, zt))
+        # coama: fata din afara are o muchie verticala la mijloc
+        R = P2 + T2 * ((r() - 0.5) * w * 0.3) + N2 * (d_out + 0.18)
+        zm = z0 + (ztop - z0) * (0.35 + 0.3 * r())
+        pts.append((R.x, R.y, zm))
+        faces += hull(b, pts, TF_SCHIST)
+    return faces
+
+
+def grass_ledge(g, a_in, b_in, a_out, b_out, z, n, seed, frac=0.6, p=3.0, c=(0.0, 0.0),
+                slot=TROPICAL_GREEN, th=0.14):
+    """Petice de iarba / muschi pe o treapta: `n` bucati scurte de inel (fiecare
+    convexa) intre superelipsa interioara si cea exterioara, groase `th`, cu
+    fata de sus la z + th (3 cm peste stanca: fara fete coplanare)."""
+    r = _rr(seed)
+    for i in range(n):
+        t0 = 2.0 * math.pi * (i + 0.5 * r()) / n
+        t1 = t0 + 2.0 * math.pi / n * frac * (0.6 + 0.6 * r())
+        pts = []
+        for t in (t0, (t0 + t1) * 0.5, t1):
+            for (aa, bb_, kk) in ((a_in, b_in, 0.0), (a_out, b_out, 1.0)):
+                q = se_point(aa, bb_, t, p) * (1.0 - 0.04 * kk * r()) + Vector(c)
+                pts.append((q.x, q.y, z - 0.25))
+                pts.append((q.x, q.y, z + 0.03 + th * (0.6 + 0.4 * r())))
+        hull(g, pts, slot)
+
+
+# ---------------------------------------------------------------------------
+# poenari_ruin
+# ---------------------------------------------------------------------------
+
+PZ = 18.0            # platoul stancii (baza zidurilor)
+AO_POENARI = dict(samples=20, dist=2.6, gradient="vertical", low=0.58, high=1.0,
+                  power=0.8, floor=0.30, z_range=(0.0, 28.0))
+
+
+def _wall_piece(br, st, p0, p1, thick, z_base, h, stone_h, seed, crenel=False,
+                window=None, jag=0.35):
+    """Bucata de zid intre p0 si p1 (centrul zidului, 2D), de la z_base pana la
+    PZ + h: talpa de PIATRA (pana la PZ + stone_h, iese 0,12 m pe fiecare parte)
+    si CARAMIDA deasupra, cu fata de sus rupta (colturile la cote diferite, +-
+    `jag`). `window` = (u0, u1, sill, lintel) -> gol real in caramida.
+    `crenel` -> creneluri (merloni de 0,8 m cu goluri de 0,6) pe creasta."""
+    r = _rr(seed)
+    p0, p1 = Vector(p0), Vector(p1)
+    d = (p1 - p0)
+    L = d.length
+    d.normalize()
+    nrm = Vector((-d.y, d.x))
+    hs = min(h, stone_h)
+    ht = PZ + h
+
+    def slab(u0, u1, za, zb, b_, slot, widen=0.0, tops=None):
+        pts = []
+        for u in (u0, u1):
+            for s in (-1.0, 1.0):
+                q = p0 + d * u + nrm * (s * (thick * 0.5 + widen))
+                pts.append((q.x, q.y, za))
+                zt = zb if tops is None else tops[(0 if u == u0 else 1) * 2 + (0 if s < 0 else 1)]
+                pts.append((q.x, q.y, zt))
+        return hull(b_, pts, slot)
+
+    slab(0.0, L, z_base, PZ + hs, st, MARBLE_GREY, widen=0.06)
+    if h <= stone_h + 0.05:
+        return
+    zb = PZ + hs - 0.02
+    tops = [ht - jag * r() for _ in range(4)]
+    if window:
+        u0, u1, sill, lintel = window
+        u0, u1 = u0 * L, u1 * L
+        slab(0.0, u0, zb, ht, br, TILE_TERRACOTTA, tops=[tops[0], tops[1], ht, ht])
+        slab(u1, L, zb, ht, br, TILE_TERRACOTTA, tops=[ht, ht, tops[2], tops[3]])
+        slab(u0, u1, zb, PZ + sill, br, TILE_TERRACOTTA)
+        if PZ + lintel < ht - 0.3:
+            slab(u0, u1, PZ + lintel, ht, br, TILE_TERRACOTTA)
+    else:
+        slab(0.0, L, zb, ht, br, TILE_TERRACOTTA, tops=tops)
+    if crenel:
+        u = 0.25
+        while u + 0.8 <= L - 0.2:
+            slab(u, u + 0.8, ht - 0.1, ht + 0.9, br, TILE_TERRACOTTA, widen=-0.05)
+            u += 1.4
+
+
+def build_poenari_ruin():
+    """Cetatea Poenari, RUINA (`poenari_ruin`), kit §1.2; brief §8: fara Dracula.
+
+    LISTA DE ELEMENTE (decuparea `transfagarasan_assets_v1/poenari_ruin.png`,
+    scrisa INAINTE de geometrie; fasia de zapada din piesa vecina, la dreapta,
+    se ignora):
+      1) STANCA: movila masiva gri, mai lata decat inalta, ~2/3 din inaltimea
+         totala, pereti abrupti din ~12-16 BLOCURI MARI unghiulare, cu fete
+         plane si fisuri verticale inchise intre ele; 2 praguri (trepte)
+         vizibile pe flanc
+      2) MUSCHI si IARBA verde pe umerii stancii, pe trepte si pe creștet (pete
+         mari, nu fire)
+      3) creștetul plat, pe care sta ruina
+      4) RUINA de CARAMIDA (terracotta): incinta dreptunghiulara alungita,
+         ziduri RUPTE la inaltimi diferite, cu muchii in trepte
+      5) un TURN inalt (~1,5 x zidurile) in spate-stanga, gol pe dinauntru, cu
+         2-3 ferestre, varful rupt
+      6) al doilea turn in dreapta (pe planșa tot rectangular, mai scund)
+      7) ~6 FERESTRE (goluri inchise la culoare) in ziduri si turnuri
+      8) o banda de PIATRA gri la baza zidurilor, pe alocuri
+      9) moloz de caramida in curte; verde pe creasta zidurilor
+     10) FARA acoperisuri, turle, steaguri
+    CORECTURI (kit, suprascriu decuparea):
+      * al doilea turn e SEMICIRCULAR (ca ruina reala), pe latura scurta -X,
+        iesit in afara peste marginea stancii; turnul rectangular in coltul
+        +X/-Y (spate-stanga in 3/4 din fata);
+      * creneluri DOAR pe 2 bucati de zid; brese pana la talpa de piatra;
+      * fara verde pe ziduri (corectura "fara vegetatie lipita"); iarba si
+        muschiul DOAR pe stanca (treptele si creștetul), ca parte din silueta;
+      * pe flancul nevazut (-Y): SCARA in zig-zag, 4 rampe, doar ca forma.
+    Cote (tabel): stanca 18 m, amprenta 32 x 24 m (mai lata la baza, 3 trepte
+    abrupte), zidurile 10 m peste creștet (turnul), incinta 22 x 12 m.
+    Foliatia: cadrul `SchistFrame` la 25 grade, toate blocurile au fata de sus
+    pe planul de foliatie (35 grade) -- aceeasi directie pe toata stanca.
+    Noduri: Poenari_Schist (MARBLE_GREY 29), Poenari_Brick (TILE_TERRACOTTA 23),
+    Poenari_Stone (MARBLE_GREY 29: talpa zidurilor, scara, moloz de piatra),
+    Poenari_Grass (TROPICAL_GREEN 21)."""
+    sch, br, st, gr = Builder(), Builder(), Builder(), Builder()
+    fr = SchistFrame((0.0, 0.0, 0.0), 25.0)
+    # --- stanca: 2 trepte abrupte (a, b, z), cea de jos cu varful INCLINAT
+    # (8,6..11,4 m), platoul de sus PLAT si mai patrat (p = 4: incape incinta)
+    rock_tier(sch, (16.0, 12.0, 0.0), (14.4, 10.2, 10.0), seed=11, tilt=1.4, tilt_az=0.9)
+    rock_tier(sch, (13.6, 9.2, 8.6), (13.0, 8.4, PZ), seed=18, p=4.0)
+    thin = lambda N: N.y < -0.6           # flancul scarii: blocuri lipite de perete
+    tier_blocks(sch, fr, 15.3, 11.2, 0.0, 10.0, 18, seed=31, top_clamp=11.4, thin=thin,
+                out=(0.5, 1.6), top_drop=(0.3, 1.8))
+    tier_blocks(sch, fr, 14.6, 10.6, 0.0, 5.5, 13, seed=37, top_clamp=6.0, thin=thin,
+                out=(0.6, 1.4), top_drop=(0.2, 2.2), fill=0.7)
+    # soclul de blocuri mari de la picior: stanca se lateste jos (silueta de
+    # movila, nu de tambur)
+    tier_blocks(sch, fr, 16.3, 12.3, 0.0, 4.5, 16, seed=43, top_clamp=5.0, thin=thin,
+                out=(0.8, 2.2), top_drop=(0.0, 2.5), sink=1.5, fill=0.8)
+    tier_blocks(sch, fr, 13.3, 8.8, 8.8, PZ, 16, seed=59, top_clamp=PZ + 0.12, thin=thin,
+                out=(0.4, 1.2), top_drop=(0.1, 1.4), p=4.0)
+    foot = [(p.x, p.y) for p in se_ring(16.4, 12.4, 0.0, n=20)]
+    foot_rubble(sch, fr, [((Vector((x, y)) - fr.o.to_2d()).dot(fr.d.to_2d()),
+                           (Vector((x, y)) - fr.o.to_2d()).dot(fr.n.to_2d())) for x, y in foot],
+                16, seed=83, size=(0.7, 2.6))
+    # --- iarba si muschi: pe trepte (intre fata treptei de sus si muchia celei
+    # de jos) si pe creștet
+    # treapta de jos e inclinata: iarba pe bucati scurte, fiecare la cota ei
+    rg = _rr(23)
+    for i in range(14):
+        t0 = 2.0 * math.pi * (i + 0.3 * rg()) / 14
+        t1 = t0 + 2.0 * math.pi / 14 * (0.3 + 0.55 * rg())
+        pts = []
+        for t in (t0, (t0 + t1) * 0.5, t1):
+            for (aa, bb_) in ((13.35, 8.95), (14.6, 10.45)):
+                qq = se_point(aa, bb_, t)
+                z = 10.0 + 1.4 * math.cos(math.atan2(qq.y, qq.x) - 0.9)
+                pts += [(qq.x, qq.y, z - 0.35), (qq.x, qq.y, z + 0.12)]
+        hull(gr, pts, TROPICAL_GREEN)
+    # platoul: covor de iarba pana la muchie + petice care atarna peste ea
+    hull(gr, [(q.x, q.y, PZ - 0.2) for q in se_ring(12.9, 8.3, 0.0, n=24, p=4.0)]
+         + [(q.x, q.y, PZ + 0.05) for q in se_ring(12.9, 8.3, 0.0, n=24, p=4.0)]
+         + [(q.x, q.y, PZ + 0.10) for q in se_ring(10.5, 6.2, 0.0, n=12, p=4.0)], TROPICAL_GREEN)
+    r = _rr(61)
+    for i in range(11):
+        t0 = 2.0 * math.pi * (i + 0.5 * r()) / 11
+        t1 = t0 + 2.0 * math.pi / 11 * (0.35 + 0.3 * r())
+        drop = 1.2 + 2.2 * r()
+        pts = []
+        for t in (t0, (t0 + t1) * 0.5, t1):
+            qi = se_point(12.6, 8.0, t, 4.0)
+            qo = se_point(13.15, 8.55, t, 4.0)
+            qb = se_point(13.35 + 0.15 * r(), 8.75 + 0.15 * r(), t, 4.0)
+            pts += [(qi.x, qi.y, PZ + 0.08), (qo.x, qo.y, PZ + 0.06),
+                    (qb.x, qb.y, PZ - drop * (0.7 + 0.3 * r())), (qi.x, qi.y, PZ - drop)]
+        hull(gr, pts, TROPICAL_GREEN)
+    # --- incinta 22 x 12 (centrul zidurilor la x = +-10,4, y = +-5,4; groase 1,2)
+    X, Y, TH = 10.4, 5.4, 1.2
+    zb = PZ - 0.4
+    walls = [
+        # (p0, p1, [(u0, u1, h, crenel, window(u0,u1,sill,lintel) in fractii din bucata)])
+        ((-X, Y), (X, Y), [(0.00, 0.16, 6.5, False, None), (0.16, 0.32, 5.2, False, (0.3, 0.7, 2.6, 4.4)),
+                           (0.32, 0.43, 1.6, False, None), (0.43, 0.62, 4.6, True, None),
+                           (0.62, 0.80, 6.2, False, (0.35, 0.65, 3.0, 5.0)), (0.80, 1.00, 7.6, False, None)]),
+        ((5.0, -Y), (-X, -Y), [(0.00, 0.28, 8.0, False, (0.35, 0.6, 4.0, 6.2)), (0.28, 0.52, 6.6, False, None),
+                               (0.52, 0.72, 2.8, False, None), (0.72, 1.00, 7.2, True, None)]),
+        ((X, -0.4), (X, Y), [(0.0, 0.5, 7.0, False, None), (0.5, 1.0, 5.6, False, (0.25, 0.75, 2.8, 4.6))]),
+        ((-X, -Y), (-X, Y), [(0.0, 0.25, 6.0, False, None), (0.25, 0.75, 2.4, False, None),
+                             (0.75, 1.0, 5.0, False, None)]),
+    ]
+    s_i = 0
+    for p0, p1, pieces in walls:
+        p0, p1 = Vector(p0), Vector(p1)
+        for (u0, u1, h, cren, win) in pieces:
+            a = p0.lerp(p1, u0)
+            b_ = p0.lerp(p1, u1)
+            s_i += 1
+            _wall_piece(br, st, a, b_, TH, zb, h, 0.4 + 1.2 * ((s_i * 37) % 7) / 6.0, seed=100 + s_i,
+                        crenel=cren, window=win)
+    # --- turnul rectangular (6 x 6, gol, 10 m), coltul +X/-Y, varful rupt in trepte
+    tx0, tx1, ty0, ty1, tt = 5.0, 11.0, -6.4, -0.4, 1.0
+    tw = [((tx0, ty0 + tt * 0.5), (tx1, ty0 + tt * 0.5), [(0.0, 0.55, 10.0, None), (0.55, 1.0, 8.8, (0.2, 0.7, 4.5, 6.6))]),
+          ((tx1 - tt * 0.5, ty0), (tx1 - tt * 0.5, ty1), [(0.0, 1.0, 9.4, (0.35, 0.65, 5.0, 7.0))]),
+          ((tx1, ty1 - tt * 0.5), (tx0, ty1 - tt * 0.5), [(0.0, 0.5, 8.2, (0.4, 0.8, 3.6, 5.6)), (0.5, 1.0, 9.6, None)]),
+          ((tx0 + tt * 0.5, ty1), (tx0 + tt * 0.5, ty0), [(0.0, 1.0, 7.4, None)])]
+    for p0, p1, pieces in tw:
+        p0, p1 = Vector(p0), Vector(p1)
+        for (u0, u1, h, win) in pieces:
+            s_i += 1
+            _wall_piece(br, st, p0.lerp(p1, u0), p0.lerp(p1, u1), tt, zb, h, 0.6 + 0.5 * (s_i % 3),
+                        seed=200 + s_i,
+                        window=win, jag=0.5)
+    # --- turnul semicircular pe latura -X, iesit peste marginea stancii; talpa
+    # coboara pe treapta a doua (12,8), ca la cetatile pe stanca
+    cx, R = -X - 0.2, 3.0
+    hs = [5.2, 7.0, 6.4, 4.2, 3.0, 5.6]
+    for i in range(6):
+        a0 = math.pi * 0.5 + math.pi * i / 6.0
+        a1 = math.pi * 0.5 + math.pi * (i + 1) / 6.0
+        p0 = Vector((cx + R * math.cos(a0), R * math.sin(a0)))
+        p1 = Vector((cx + R * math.cos(a1), R * math.sin(a1)))
+        win = (0.3, 0.75, 3.0, 4.6) if i == 2 else None
+        _wall_piece(br, st, p0, p1, 1.0, 11.0, hs[i], 1.0 + 0.4 * (i % 3), seed=300 + i, window=win,
+                    jag=0.4)
+    # --- moloz in curte: caramizi si pietre cazute
+    r = _rr(77)
+    for k in range(9):
+        x = -7.0 + 14.0 * r()
+        y = -3.6 + 7.2 * r()
+        s = 0.5 + 0.7 * r()
+        sb = br if k % 3 else st
+        faceted_block(sb, (x, y, PZ - 0.05), (s * 1.4, s, s * 0.6), TILE_TERRACOTTA if k % 3 else MARBLE_GREY,
+                      seed=400 + k, jag=0.4)
+    # --- scara in zig-zag pe flancul -Y: 4 rampe de trepte (forma, nu detaliu)
+    def face_y(z):
+        """Fata -Y a stancii la cota z (pe axa x ~ 0), fara blocuri."""
+        if z <= 9.0:
+            return -(12.0 + (10.2 - 12.0) * z / 10.0)
+        return -(9.2 + (8.4 - 9.2) * (z - 8.6) / (PZ - 8.6))
+    flights = [((-9.0, 0.2), (7.0, 4.4)), ((7.0, 4.4), (-7.0, 8.8)),
+               ((-7.0, 8.8), (7.0, 13.6)), ((7.0, 13.6), (-5.0, PZ))]
+    for (xa, za), (xb, zb_) in flights:
+        n = max(4, int(round((zb_ - za) / 0.32)))
+        for i in range(n):
+            x0 = xa + (xb - xa) * i / n
+            x1 = xa + (xb - xa) * (i + 1) / n
+            ztop = za + (zb_ - za) * (i + 1) / n
+            yi = face_y(ztop) + 0.35
+            st.box(((x0 + x1) * 0.5, yi - 0.75, ztop - 0.55),
+                   (abs(x1 - x0) + 0.02, 1.5, 1.1), MARBLE_GREY)
+        # parapetul scund de pe marginea din afara
+        st.beam((xa, face_y(za) - 1.3, za + 0.5), (xb, face_y(zb_) - 1.3, zb_ + 0.5), (0.25, 0.5),
+                MARBLE_GREY, up=(0, 1, 0))
+    return [sch.to_object("Poenari_Schist"), br.to_object("Poenari_Brick"),
+            st.to_object("Poenari_Stone"), gr.to_object("Poenari_Grass")]
+
+
+# ---------------------------------------------------------------------------
+# prometheus_statue
+# ---------------------------------------------------------------------------
+
+AO_STATUE = dict(samples=20, dist=0.9, gradient="vertical", low=0.62, high=1.0,
+                 power=0.8, floor=0.34, z_range=(0.0, 9.0))
+
+
+def _ell_hull(b, c, r3, slot, n=7, rings=3, seed=0, jit=0.06):
+    """Masa fatetata: invelitoarea convexa a unor puncte pe un elipsoid."""
+    rr = _rr(seed)
+    pts = [(c[0], c[1], c[2] - r3[2]), (c[0], c[1], c[2] + r3[2])]
+    for k in range(1, rings + 1):
+        el = -math.pi * 0.5 + math.pi * k / (rings + 1)
+        for i in range(n):
+            a = 2 * math.pi * (i + 0.5 * (k % 2)) / n
+            j = 1.0 + jit * (2 * rr() - 1)
+            pts.append((c[0] + r3[0] * math.cos(el) * math.cos(a) * j,
+                        c[1] + r3[1] * math.cos(el) * math.sin(a) * j,
+                        c[2] + r3[2] * math.sin(el) * j))
+    return hull(b, pts, slot)
+
+
+def _limb(b, pts, radii, slot, seg=6):
+    return b.taper_sweep([Vector(p) for p in pts], list(radii), slot, segments=seg)
+
+
+def _bolt(b, base, axis_deg, length, width, seed=0, plane="XZ"):
+    """Fulgerul in zig-zag: 3 segmente plate, groase 0,12 m, ultimul ascutit.
+    Linia de mijloc Q0..Q3 in (u lungul axei, w lateral), rotita cu `axis_deg`
+    in planul XZ, cu centrul (punctul de prindere) in `base`."""
+    Q = [(0.0, 0.0), (0.40, 0.30), (0.50, -0.10), (1.0, 0.22)]
+    a = math.radians(axis_deg)
+    U = Vector((math.cos(a), 0.0, math.sin(a)))
+    W = Vector((-math.sin(a), 0.0, math.cos(a)))
+    Y = Vector((0.0, 0.06, 0.0))
+    c = Vector(base) - U * (length * 0.5)
+    for i in range(3):
+        u0, w0 = Q[i]
+        u1, w1 = Q[i + 1]
+        p0 = c + U * (u0 * length) + W * (w0 * length)
+        p1 = c + U * (u1 * length) + W * (w1 * length)
+        d = (p1 - p0).normalized()
+        nn = Vector((-d.z, 0.0, d.x))       # perpendicular in planul XZ
+        hw0 = width * (0.5 if i < 2 else 0.45)
+        hw1 = 0.0 if i == 2 else width * 0.45
+        e0 = p0 - d * width * 0.25
+        e1 = p1 + d * (width * 0.25 if i < 2 else 0.0)
+        pts = []
+        for (p, hw) in ((e0, hw0), (e1, hw1)):
+            for s in (-1.0, 1.0):
+                for sy in (-1.0, 1.0):
+                    pts.append(p + nn * (s * hw) + Y * sy)
+        hull(b, pts, CAR_YELLOW)
+
+
+def build_prometheus_statue():
+    """Statuia lui Prometeu (`prometheus_statue`), kit §1.2.
+
+    LISTA DE ELEMENTE (decuparea `transfagarasan_assets_v1/prometheus_statue.png`,
+    scrisa INAINTE de geometrie; fasia de stanca din piesa vecina, la dreapta,
+    se ignora):
+      1) SOCLUL de stanca: tambur scund si lat (~1/3 din total), fete plane mari
+         aproape verticale, 5-6 blocuri, cu CRESTETUL PLAT acoperit de iarba
+         galben-verzuie; 4 bolovani separati la picior, putin muschi
+      2) FIGURA masculina de BRONZ (maro-arama), musculoasa, cu fatete mari,
+         in picioare, cu picioarele DEPARTATE (pas larg), trunchiul usor rasucit
+      3) un BRAT ridicat drept in sus, cu FULGERUL mare galben in zig-zag tinut
+         deasupra capului, in diagonala, spre exterior
+      4) celalalt brat coborat langa corp, cu un FULGER MIC galben spre jos
+      5) capul cu par strans (o creasta)
+      6) fara inscriptie, fara text
+    CORECTURI / cote (tabel): 9 m total = soclu 3 m (diametru ~4 m) + figura 6 m
+    cu bratul ridicat; bratul ridicat e DREPTUL figurii (pe decupare e stangul:
+    urmez tabelul); fulgerul mare are 3 segmente si 1,5 m (pe decupare e
+    ramificat: urmez tabelul); fulgerul mic din mana coborata (0,7 m) e pe
+    decupare si nu-l contrazice nimic, deci il pastrez. Figura e privita si din
+    spate (drumul trece pe langa pinten): bratul si fulgerul ies din silueta
+    pe orice azimut. Fata spre +Y (dreapta figurii = +X).
+    Noduri: Statue_Bronze (LARCH_RUST 27, parul si panza de pe solduri LOG_DARK
+    28), Statue_Bolt (CAR_YELLOW 16, --allow-car-slots=Statue_Bolt),
+    Statue_Schist (soclul, MARBLE_GREY 29 -> tf_schist), Statue_Grass (iarba de pe
+    creștet, DRY_VEGETATION 13: nod separat, fiindca clasa de pe *_Schist sterge
+    sloturile -- abatere de la lista de noduri din tabel, cu motiv)."""
+    bz, bo, sc, gr = Builder(), Builder(), Builder(), Builder()
+    fr = SchistFrame((0.0, 0.0, 0.0), 40.0)
+    Z0 = 3.0
+    # --- soclul: tambur care se largeste la baza + blocuri pe foliatie + moloz
+    rock_tier(sc, (2.3, 2.2, 0.0), (1.62, 1.52, Z0), seed=3, n=10, p=2.4, jit=0.05)
+    tier_blocks(sc, fr, 2.0, 1.9, 0.0, Z0, 7, seed=17, dip=38.0, sink=0.6, out=(0.2, 0.5),
+                top_clamp=Z0 + 0.1, top_drop=(0.1, 1.1), p=2.4, fill=0.9)
+    foot = [(q.x, q.y) for q in se_ring(2.45, 2.35, 0.0, n=12, p=2.4)]
+    foot_rubble(sc, fr, [((Vector(f) - fr.o.to_2d()).dot(fr.d.to_2d()),
+                          (Vector(f) - fr.o.to_2d()).dot(fr.n.to_2d())) for f in foot],
+                5, seed=29, size=(0.4, 1.0))
+    # iarba: in INTERIORUL crestetului (nu iese peste muchie ca un capac)
+    hull(gr, [(q.x, q.y, Z0 - 0.2) for q in se_ring(1.5, 1.4, 0.0, n=12, p=2.4, jit=0.06, seed=4)]
+         + [(q.x, q.y, Z0 + 0.04) for q in se_ring(1.42, 1.32, 0.0, n=12, p=2.4, jit=0.06, seed=5)]
+         + [(q.x, q.y, Z0 + 0.09) for q in se_ring(0.9, 0.8, 0.0, n=8, p=2.4)], DRY_VEGETATION)
+
+    # --- figura: cotele peste crestet (z = Z0 + h). MASIVA: umeri de 1,7 m,
+    # coapse groase, pas larg cu genunchii indoiti, ca pe decupare
+    def P(x, y, h):
+        return (x, y, Z0 + h)
+    B, D = LARCH_RUST, LOG_DARK
+    # picioarele: scurte si groase, genunchii indoiti in fata si spre afara
+    _limb(bz, [P(0.3, 0.02, 2.05), P(0.66, 0.30, 1.05), P(0.86, 0.20, 0.22)], (0.42, 0.30, 0.17), B)
+    _limb(bz, [P(-0.3, -0.02, 2.05), P(-0.62, 0.12, 1.05), P(-0.84, -0.25, 0.22)], (0.42, 0.30, 0.17), B)
+    for (x, y, yaw) in ((0.88, 0.34, 0.25), (-0.86, -0.18, -0.2)):
+        bz.box((x, y, Z0 + 0.11), (0.36, 0.7, 0.22), B, rotation=Matrix.Rotation(yaw, 3, "Z"))
+    # bazinul cu panza (LOG_DARK)
+    _ell_hull(bz, P(0.0, 0.02, 2.08), (0.54, 0.38, 0.3), D, n=8, rings=2, seed=1)
+    # trunchiul in V, APLECAT in fata (pieptul +0,15 pe Y): talie, piept adanc,
+    # umeri lati, trapezul gros
+    hull(bz, [P(sx * 0.44, sy * 0.27, 2.28) for sx in (-1, 1) for sy in (-1, 1)]
+         + [P(sx * 0.76, 0.52 if sy > 0 else -0.22, 3.12) for sx in (-1, 1) for sy in (-1, 1)]
+         + [P(sx * 0.98, 0.12, 3.55) for sx in (-1, 1)]
+         + [P(sx * 0.56, 0.12 + sy * 0.26, 3.76) for sx in (-1, 1) for sy in (-1, 1)]
+         + [P(0.0, 0.6, 3.1), P(0.0, -0.3, 3.25)], B)
+    # pieptul: o placa lata, iesita, si abdomenul
+    hull(bz, [P(sx * 0.66, 0.48, 2.95) for sx in (-1, 1)] + [P(sx * 0.62, 0.48, 3.42) for sx in (-1, 1)]
+         + [P(sx * 0.3, 0.64, 3.08) for sx in (-1, 1)] + [P(0.0, 0.66, 3.25), P(0.0, 0.3, 3.2)], B)
+    hull(bz, [P(sx * 0.3, 0.32, 2.35) for sx in (-1, 1)] + [P(sx * 0.36, 0.48, 2.85) for sx in (-1, 1)]
+         + [P(0.0, 0.52, 2.6), P(0.0, 0.1, 2.6)], B)
+    for sx in (-1, 1):            # deltoizii
+        _ell_hull(bz, P(sx * 0.95, 0.12, 3.55), (0.3, 0.29, 0.3), B, n=6, rings=2, seed=12 + sx)
+    # gat scurt si gros, capul intre umeri, parul (creasta) inchis
+    _limb(bz, [P(0.0, 0.15, 3.66), P(0.0, 0.2, 3.86)], (0.23, 0.2), B)
+    _ell_hull(bz, P(0.0, 0.26, 4.0), (0.21, 0.24, 0.26), B, n=7, rings=3, seed=21)
+    hull(bz, [P(sx * 0.2, y, 4.08) for sx in (-1, 1) for y in (0.06, 0.36)]
+         + [P(0.0, 0.16, 4.33), P(0.0, 0.36, 4.28), P(0.1, 0.03, 4.22), P(-0.1, 0.03, 4.22)], D)
+    # bratul DREPT (+X) ridicat, cotul in afara; fulgerul mare in diagonala
+    # spre exterior, varful la ~9,0 m
+    _limb(bz, [P(0.98, 0.12, 3.6), P(1.45, 0.18, 4.25), P(1.32, 0.2, 4.98)], (0.28, 0.22, 0.16), B)
+    _ell_hull(bz, P(1.32, 0.2, 5.04), (0.19, 0.19, 0.2), B, n=6, rings=2, seed=31)
+    _bolt(bo, P(1.58, 0.2, 5.3), 55.0, 1.5, 0.17)
+    # bratul STANG (-X) coborat, cu fulgerul mic spre jos-afara
+    _limb(bz, [P(-0.98, 0.12, 3.6), P(-1.28, 0.0, 2.85), P(-1.32, 0.25, 2.25)], (0.28, 0.22, 0.16), B)
+    _ell_hull(bz, P(-1.33, 0.26, 2.15), (0.19, 0.19, 0.2), B, n=6, rings=2, seed=33)
+    _bolt(bo, P(-1.55, 0.27, 1.82), -122.0, 0.8, 0.12)
+    return [bz.to_object("Statue_Bronze"), bo.to_object("Statue_Bolt"),
+            sc.to_object("Statue_Schist"), gr.to_object("Statue_Grass")]
+
+
 ONLY = os.environ.get("TF_ONLY", "")
 
 
@@ -242,5 +725,13 @@ def _want(name):
 
 if _want("vidraru_dam"):
     emit_roots(build_vidraru_dam(), "structures/vidraru_dam.glb", smooth_angle=None)
+
+if _want("poenari_ruin"):
+    emit_tf(build_poenari_ruin(), "buildings/poenari_ruin.glb", AO_POENARI, keep_xy=True,
+            bevel=0.0, bevels={"_Brick": 0.03, "_Stone": 0.03}, smooth_angle=None)
+
+if _want("prometheus_statue"):
+    emit_tf(build_prometheus_statue(), "props/prometheus_statue.glb", AO_STATUE, keep_xy=True,
+            bevel=0.0, smooth_angle=None)
 
 report_tf()

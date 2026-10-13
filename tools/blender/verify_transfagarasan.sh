@@ -149,6 +149,15 @@ deck_check() {  # deck_check <cale>
 }
 check "structures/vidraru_dam.glb" --origin=rim --rim-above=8.1
 deck_check "structures/vidraru_dam.glb"
+# poenari_ruin       --origin=assembly: noduri pe rol (Poenari_Schist / _Brick /
+#                    _Stone / _Grass), offsetul calculat O DATA pe ansamblu;
+#                    iarba si zidurile nu ating solul.
+# prometheus_statue  --origin=assembly (Statue_Bronze / _Bolt / _Schist / _Grass,
+#                    figura sta pe soclu la 3 m); --allow-car-slots=Statue_Bolt:
+#                    fulgerul pe CAR_YELLOW 16 (kit §0, tabelul de sloturi). Potrivirea
+#                    e pe PREFIX, deci se scrie numele nodului, nu `*_Bolt`.
+check "buildings/poenari_ruin.glb" --origin=assembly
+check "props/prometheus_statue.glb" --origin=assembly --allow-car-slots=Statue_Bolt
 
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="

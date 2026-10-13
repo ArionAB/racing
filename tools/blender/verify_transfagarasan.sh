@@ -126,6 +126,34 @@ done
 check "plants/bujor_de_munte.glb" --origin=assembly --allow-slots=31
 
 echo
+echo "== val 2, tf-f: vehicule de decor si ciobanescul (kit §1.6, §1.7) =="
+# Exceptii tf-f, cu motiv:
+#   --origin=assembly   vehiculele: un nod pe slot (Car_Body/Glass/Tyre/Trim/Hub/
+#                       Lamp/Tail, Moto_Body/Metal/Dark/Lamp/Tail); offsetul de
+#                       origine e calculat O DATA pe ansamblu (centrul amprentei,
+#                       la sol), geamurile si caroseria nu ating solul.
+#   --allow-car-slots   caroseria pe CAR_BLUE 15 / CAR_RED 14 (kit §0, tabelul de
+#                       sloturi): DOAR nodurile Car_Body si Moto_Body.
+#   sheepdog            FARA exceptii: contractul HerdHazard cere UN singur mesh
+#                       (toate sloturile in el), origine la sol; un singur nod.
+check "vehicles/parked_car_a.glb" --origin=assembly --allow-car-slots=Car_Body
+check "vehicles/parked_car_b.glb" --origin=assembly --allow-car-slots=Car_Body
+check "vehicles/motorbike.glb" --origin=assembly --allow-car-slots=Moto_Body
+check "animals/sheepdog.glb"
+if [ -f "$ROOT/animals/sheepdog.glb" ]; then
+  python - "$ROOT/animals/sheepdog.glb" <<'PY' || fail=1
+import sys, os
+sys.path.insert(0, os.path.join("tools", "blender"))
+from verify_glb import load_glb
+g = load_glb(sys.argv[1])[0]
+n = sum(1 for nd in g["nodes"] if "mesh" in nd)
+if n != 1:
+    print("   !! sheepdog: %d noduri cu mesh, HerdHazard ia doar primul (cerut 1)" % n)
+    sys.exit(1)
+PY
+fi
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

@@ -306,8 +306,8 @@ inutile. Coliziunea (`trunk` la arbori, `none` la tufe) e a coordonatorului.
 | `vehicles/parked_car_a.glb` | **la gabaritul mașinii de joc**, adică lățimea și lungimea carcasei din `scenes/cars/Car.tscn`, **măsurate, nu presupuse** | — | **hatchback mic generic** (corectura de sus: **nu Dacia**), proporții de jucărie (roți mari, cabină scurtă), `CAR_BLUE`. Grila e o fantă simplă, farurile sunt dreptunghiuri, plăcuța e goală. Decor static, cu coliziunea a coordonatorului. `Car_Body`, `Car_Glass`, `Car_Tyre` |
 | `vehicles/parked_car_b.glb` | ca `a`, cu +15% lungime | — | **break mic / SUV mic generic**, `CAR_RED`, bare de acoperiș și un bagaj pe portbagajul de sus (o cutie de 1,2 m) |
 | `vehicles/motorbike.glb` | **2,2 m** lung, 1,3 m înalt | ~0,6 | motocicletă de turism-aventură, generică, pe cric lateral (înclinată ~10°), cu 2 genți laterale. **Fără siglă.** `Moto_Body`, `Moto_Metal` |
-| `vehicles/ro_train.glb` *(ultimul val)* | locomotivă **3,0 × 4,2 × 17 m**, vagon **3,0 × 4,0 × 20 m** (scara de joc a lui `train.glb`, de măsurat) | ~0,25 | locomotivă **electrică** cu pantograf și cabine la ambele capete, roșie cu bandă gri, plus un vagon de călători roșu-gri. **Fără sigle, fără numere.** `TrainHazard` extrage nodurile **după nume**: `Train_Loco`, `Train_Tender` (aici un vagon de bagaje scurt, ca nodul să existe, tiparul PeruRail), `Train_Wagon`. Botul, ecartamentul și baza roților se copiază din `machupicchu/vehicles/perurail_train.glb`: **botul pe +X**, roțile la y = 0 (`machu_picchu_inventory.md:82`). Altfel garnitura plutește sau se înfige în șina procedurală |
-| `vehicles/cable_cabin_large.glb` *(ultimul val)* | cabina **5,5 × 3,2 × 3,0 m** + brațul de suspensie 2,5 m + căruciorul 2,0 m lung; total **~7,5 m** | ~1,5 | cabină **mare** (corectura de sus): o cutie roșie cu colțuri teșite, **geamuri pe toate laturile** în bandă continuă și podea plată. Brațul e un stâlp în L, iar căruciorul are 4 roți pe cablu. **Originea pe linia cablului** (vârful căruciorului), cu geometria atârnând sub ea (`--origin=rim`). Decor static: Track09 folosea gondola la fel (`DecorManual`) |
+| `vehicles/ro_train.glb` *(ultimul val)* | **la scara de joc** (rev. val 3: cifrele vechi de 17 m / 20 m s-au anulat, fiindcă o garnitură de ~87 m dubla timpul de blocaj al drumului): locomotiva **~11 m**, tenderul ~5 m, vagonul **~8,5 m**, înălțimea ~3,6 m fără pantograf, lățimea ~2,9 m; ~45 m cu 3 vagoane (PeruRail ~43) | ~0,25 | locomotivă **electrică** cu pantograf și cabine la ambele capete, roșie cu bandă gri, plus un vagon de călători roșu-gri. **Fără sigle, fără numere.** `TrainHazard` extrage nodurile **după nume**: `Train_Loco`, `Train_Tender` (aici un vagon de bagaje scurt, ca nodul să existe, tiparul PeruRail), `Train_Wagon`. Botul, ecartamentul și baza roților se copiază din `machupicchu/vehicles/perurail_train.glb`: **botul pe +X**, roțile la y = 0 (`machu_picchu_inventory.md:82`). Altfel garnitura plutește sau se înfige în șina procedurală |
+| `vehicles/cable_cabin_large.glb` *(ultimul val)* | cabina **~4,2 × 3,4 × 3,3 m**, aproape cub, ca pe planșă (rev. val 3: 5,5 × 3,2 × 3,0 citea butoi) + brațul în A + căruciorul de ~3 m pe cablu; total **~7,3 m** | ~1,5 | cabină **mare** (corectura de sus): o cutie roșie cu colțuri rotunjite pe verticală, **geamuri pe toate laturile** în jumătatea de sus, ca panouri înalte între montanți roșii, cu un brâu roșu plin jos și podea plată. Brațul e un stâlp în A, iar căruciorul e o grindă joasă pe cablu, cu 4 roți. **Originea pe linia cablului** (vârful căruciorului), cu geometria atârnând sub ea (`--origin=rim`). Decor static: Track09 folosea gondola la fel (`DecorManual`) |
 
 ### 1.8 Fundal — `build_tf_horizon.py`
 
@@ -416,10 +416,12 @@ sus, sunt sursa de **cote și de contracte de cod**.
      celorlalte;
    - **tf-f**: vehiculele de decor și ciobănescul (§1.6, §1.7, fără tren și
      cabină).
-3. **Valul 3:**
-   - **tf-g**: fundalul (§1.8);
-   - **tf-h**: `ro_train` și `cable_cabin_large`. Sunt opționale: dacă
-     bugetul se termină, rămân `train.glb` și gondola alpină.
+3. **Valul 3** (gata, 13 oct 2026, integrat pe `transfagarasan/kit-val3`):
+   - **tf-g**: fundalul (§1.8), **provizoriu**: creasta din runda tf-g,
+     norii din reluarea tf-g2, câmpia neschimbată. Verdictul se dă pe
+     pista reală;
+   - **tf-h**: `ro_train` și `cable_cabin_large`, acceptate după reluarea
+     tf-h2.
 
 Lucrează în worktree-ul indicat în prompt (ramura
 `transfagarasan/kit-<grupa>`). Nu comite pe `main`, nu folosi `git stash`

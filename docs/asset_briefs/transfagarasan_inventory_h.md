@@ -4,6 +4,15 @@ Ramura `transfagarasan/kit-h`. Build: `tools/blender/build_tf_vehicles.py` (`TF_
 Previews: `tools/blender/preview_tf_h.py` (`--compare`, `--views`, `--consist`, `--align`, `--scale`).
 Verdict: `bash tools/blender/verify_transfagarasan.sh` -> `VERDICT KIT: OK`.
 
+## Decizia coordonatorului (13 oct 2026): ACCEPTAT pe reluarea tf-h2
+
+Ambele piese sunt acceptate pe comparații. Trenul are scara de joc, iar botul, roțile și
+ecartamentul se aliniază cu PeruRail. Cabina citește cabină mare, nu butoi. Abaterile
+asumate sunt cele din „Stare la oprire”: raportul locomotivă/vagon de 1,3× (pe planșă 1,7×),
+pantograful turtit, linia albă în loc de galbenă, brațul cabinei fără zăbrele. Runda
+inițială (17 m / 20 m și cabina 5,5 m) a fost respinsă din vina contractului, nu a
+constructorului.
+
 ## Reluare (tf-h2)
 
 Constructorul din tf-h a fost respins de coordonator pe ambele piese; tf-h2 le-a refacut de la decupare + verdict.

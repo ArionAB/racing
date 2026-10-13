@@ -38,7 +38,10 @@ SPECS.update({
     "retaining_wall_curve": {"camera": {"azimuth": 20.0, "elevation": 18.0, "lens": 60.0, "margin": 1.08}},
     "snow_pole": {"camera": {"azimuth": 60.0, "elevation": 10.0, "lens": 80.0, "margin": 1.1}},
     "road_works": {"camera": {"azimuth": 70.0, "elevation": 14.0, "lens": 60.0, "margin": 1.08}},
-    "level_crossing": {"camera": {"azimuth": 75.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08}},
+    # DOAR in comparatie: ansamblul _R se muta langa _L (decuparea le arata
+    # strans); in GLB stau la +-9 m, pe marginile drumului
+    "level_crossing": {"camera": {"azimuth": 75.0, "elevation": 10.0, "lens": 60.0, "margin": 1.08},
+                       "compare_shift": {"_R": (-13.4, 0.0, 0.0)}},
     "bear_warning_sign": {"camera": {"azimuth": 88.0, "elevation": 6.0, "lens": 80.0, "margin": 1.1}},
 })
 
@@ -57,6 +60,12 @@ def _import_a(name, mode):
     """Importa GLB-ul; filtreaza/decaleaza variantele dupa SPECS."""
     meshes = _import(name)
     spec = SPECS.get(name, {})
+    if mode == "compare":
+        for o in meshes:
+            for suf, off in spec.get("compare_shift", {}).items():
+                if _base(o.name).endswith(suf):
+                    o.location = o.location + Vector(off)
+        bpy.context.view_layer.update()
     var = spec.get("variant")
     if not var:
         return meshes

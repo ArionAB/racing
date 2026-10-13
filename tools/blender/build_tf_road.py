@@ -468,6 +468,343 @@ def emit_rim(objs, path, ao):
                        per_node, sz / 1024.0))
 
 
+AO_PROP = dict(samples=12, dist=0.6, gradient="vertical", low=0.78, high=1.0,
+               power=0.8, floor=0.5)
+POST_GREY = ASPHALT_EDGE          # 6, #696765: stalpi, capre, carcase
+
+
+# --- 2D pe planul XZ (fata spre +Y) -----------------------------------------
+
+def _ccw(pts):
+    a = sum(pts[i][0] * pts[(i + 1) % len(pts)][1] - pts[(i + 1) % len(pts)][0] * pts[i][1]
+            for i in range(len(pts)))
+    return pts if a > 0 else list(reversed(pts))
+
+
+def plate(b, pts, y0, y1, slot, ox=0.0, oz=0.0):
+    """Placa din conturul 2D (u, t) -> (ox + u, z = oz + t), intre y0 si y1."""
+    extrude_xz(b, _ccw([(ox + u, oz + t) for u, t in pts]), y0, y1, slot)
+
+
+def seg2(p, q, w):
+    p, q = Vector(p), Vector(q)
+    d = (q - p).normalized()
+    n = Vector((-d.y, d.x)) * (w * 0.5)
+    return [tuple(p - n), tuple(q - n), tuple(q + n), tuple(p + n)]
+
+
+def disk2(c, r, n=10):
+    return [(c[0] + r * math.cos(2 * math.pi * i / n), c[1] + r * math.sin(2 * math.pi * i / n))
+            for i in range(n)]
+
+
+def clip_x(poly, lo, hi):
+    """Sutherland-Hodgman pe benzi verticale lo <= u <= hi."""
+    def cut(pts, keep, edge):
+        out = []
+        for i in range(len(pts)):
+            a, b2 = pts[i - 1], pts[i]
+            ia, ib = keep(a), keep(b2)
+            if ib:
+                if not ia:
+                    out.append(edge(a, b2))
+                out.append(b2)
+            elif ia:
+                out.append(edge(a, b2))
+        return out
+
+    def at(x):
+        return lambda a, b2: (x, a[1] + (b2[1] - a[1]) * (x - a[0]) / (b2[0] - a[0]))
+    poly = cut(poly, lambda p: p[0] >= lo, at(lo))
+    return cut(poly, lambda p: p[0] <= hi, at(hi)) if poly else []
+
+
+def warning_triangle(b, side, border, z_base, y_face, x0=0.0):
+    """Semn triunghiular cu varful in sus, fata spre +Y: chenar KERB_RED (placa de
+    3 cm), camp FOAM_WHITE iesit 5 mm, spatele de tabla gri. Intoarce (z_baza_campului, latura_campului,
+    y_fata_campului) pentru pictograma, care se pune in relief peste camp."""
+    h = side * math.sqrt(3) * 0.5
+    plate(b, [(-side / 2, 0.0), (side / 2, 0.0), (0.0, h)], y_face - 0.03, y_face, KERB_RED, x0, z_base)
+    # spatele: tabla gri (rost de 2 mm fata de placa rosie, vezi mai jos)
+    plate(b, [(-side / 2, 0.0), (side / 2, 0.0), (0.0, h)], y_face - 0.037, y_face - 0.032,
+          POST_GREY, x0, z_base)
+    si = side - 2.0 * math.sqrt(3) * border
+    # straturile NU sunt coplanare (rost de 2 mm): `assign_uvs` ia slotul fetei
+    # celei mai apropiate, iar o fata lipita de alta ii fura culoarea
+    plate(b, [(-si / 2, border), (si / 2, border), (0.0, border + si * math.sqrt(3) * 0.5)],
+          y_face + 0.002, y_face + 0.007, FOAM_WHITE, x0, z_base)
+    return z_base + border, si, y_face + 0.009
+
+
+def emit_nodes(nodes, path, ao=AO_PROP, smooth_angle=None):
+    """Noduri cu pivot propriu: fiecare obiect e construit cu baza lui la origine
+    si se muta in pozitie prin `location` (translatia nodului in GLB), ca
+    integrarea sa-l poata muta separat. Scala/rotatia raman 1/0."""
+    total, per_node, out = 0, {}, []
+    for obj, loc in nodes:
+        st = finish(obj, bevel=0.0, ao=ao, origin=None, smooth_angle=smooth_angle)
+        total += st["tris"]
+        per_node[obj.name] = st["tris"]
+        obj.location = Vector(loc)
+        out.append(obj)
+    bpy.context.view_layer.update()
+    lo = Vector((1e9,) * 3); hi = Vector((-1e9,) * 3)
+    for o in out:
+        for v in o.data.vertices:
+            p = o.matrix_world @ v.co
+            lo = Vector((min(lo[i], p[i]) for i in range(3)))
+            hi = Vector((max(hi[i], p[i]) for i in range(3)))
+    _, sz = export_glb(out, "transfagarasan/" + path)
+    TF_RESULTS.append((path, total, hi - lo, per_node, sz / 1024.0))
+
+
+def stones_at_base(b, r, seed, n=4, h=0.4):
+    """Bolovanul de la piciorul unui stalp: unul mare (inalt `h`) + n-1 mici."""
+    import random
+    rr = random.Random(seed)
+    faceted_block(b, (0.0, 0.0, 0.0), (r * 2.0, r * 1.7, h), MARBLE_GREY, seed=seed, jag=0.35)
+    for i in range(n - 1):
+        a = rr.random() * math.tau
+        d = r * (0.9 + 0.4 * rr.random())
+        s = r * (0.45 + 0.35 * rr.random())
+        faceted_block(b, (d * math.cos(a), d * math.sin(a), 0.0), (s * 1.5, s * 1.3, s * 0.9),
+                      MARBLE_GREY, seed=seed + 11 * (i + 1), jag=0.4)
+
+
+# --- snow_pole -----------------------------------------------------------------
+
+def build_snow_pole():
+    """Stalpul de zapada (`snow_pole`), kit §1.1.
+
+    LISTA DE ELEMENTE (decuparea `snow_pole.png`, INAINTE de geometrie):
+      1) un stalp subtire, drept, cu DUNGI alternante rosu-alb: de sus rosu,
+         alb, rosu, alb, rosu (5 dungi egale pe partea vizibila)
+      2) la baza un MORMAN de 3-4 pietre gri (unul mare + mici), cu putin verde
+      3) h/l foarte mare (stalp)
+    Corecturi: fara verde pe pietre (fara vegetatie lipita). Cote din tabel:
+    2,5 m, diametru 0,08 m (`segments` 8), bolovan de 0,4 m.
+    Noduri: `Pole_Paint_Red` (KERB_RED, 3 dungi), `Pole_Paint_White` (FOAM_WHITE,
+    2 dungi), `Pole_Stone` (MARBLE_GREY). Origine la baza stalpului."""
+    red, white, stone = Builder(), Builder(), Builder()
+    z_vis, z_top, r = 0.35, 2.5, 0.04
+    seg = (z_top - z_vis) / 5.0
+    for i in range(5):
+        za = z_top - (i + 1) * seg
+        zb = z_top - i * seg
+        if i == 4:
+            za = 0.05           # ultima dunga coboara in bolovan
+        bb = red if i % 2 == 0 else white
+        bb.cylinder((0.0, 0.0, (za + zb) * 0.5), r, zb - za, KERB_RED if i % 2 == 0 else FOAM_WHITE,
+                    segments=8)
+    stones_at_base(stone, 0.30, seed=41, n=4, h=0.40)
+    return [(Builder.to_object(red, "Pole_Paint_Red"), (0, 0, 0)),
+            (Builder.to_object(white, "Pole_Paint_White"), (0, 0, 0)),
+            (Builder.to_object(stone, "Pole_Stone"), (0, 0, 0))]
+
+
+# --- road_works ----------------------------------------------------------------
+
+def _cone(b):
+    b.box((0.0, 0.0, 0.02), (0.38, 0.38, 0.04), LAVA_ORANGE)
+    b.frustum((0.0, 0.0, 0.04 + 0.355), 0.15, 0.025, 0.71, LAVA_ORANGE, segments=10)
+    # doua benzi albe (frustum putin mai lat peste con)
+    for t0, t1 in ((0.30, 0.42), (0.58, 0.68)):
+        ra = 0.15 + (0.025 - 0.15) * t0 + 0.006
+        rb = 0.15 + (0.025 - 0.15) * t1 + 0.006
+        b.frustum((0.0, 0.0, 0.04 + 0.71 * (t0 + t1) * 0.5), ra, rb, 0.71 * (t1 - t0), FOAM_WHITE, segments=10)
+
+
+def _worker_pictogram(b, t0, si, yf, oz):
+    """Omul cu lopata, in relief de 1,5 cm, negru, pe campul alb; (u, t) de la
+    baza campului, in coordonatele PRIVITORULUI (din fata, dreapta privitorului
+    e -X, deci u se oglindeste): aplecat spre dreapta, lopata infipta in
+    gramada din dreapta, ca pe decupare."""
+    y0, y1 = yf, yf + 0.015
+    k = si / 0.623
+    P = lambda u, t: (-u * k, t * k)
+    BK = VOLCANIC_BLACK
+    plate(b, disk2(P(0.045, 0.30), 0.04 * k, 10), y0, y1, BK, 0.0, oz)          # capul
+    plate(b, seg2(P(-0.07, 0.13), P(0.0, 0.235), 0.075 * k), y0, y1, BK, 0.0, oz)  # trunchiul aplecat
+    plate(b, seg2(P(-0.07, 0.14), P(-0.13, 0.03), 0.05 * k), y0, y1, BK, 0.0, oz)  # piciorul din spate
+    plate(b, seg2(P(-0.07, 0.14), P(-0.01, 0.03), 0.05 * k), y0, y1, BK, 0.0, oz)  # piciorul din fata
+    plate(b, seg2(P(0.0, 0.225), P(0.075, 0.15), 0.04 * k), y0, y1, BK, 0.0, oz)   # bratul
+    plate(b, seg2(P(-0.03, 0.245), P(0.125, 0.075), 0.022 * k), y0, y1, BK, 0.0, oz)  # coada lopetii
+    plate(b, [P(0.105, 0.045), P(0.165, 0.03), P(0.17, 0.085), P(0.125, 0.10)], y0, y1, BK, 0.0, oz)
+    pile = [P(0.15 + 0.095 * math.cos(math.pi * i / 8), 0.012 + 0.07 * math.sin(math.pi * i / 8))
+            for i in range(9)]
+    plate(b, pile, y0, y1, BK, 0.0, oz)                                           # gramada
+
+
+def build_road_works():
+    """Recuzita santierului din tunel (`road_works`), kit §1.1.
+
+    LISTA DE ELEMENTE (decuparea `road_works.png`, INAINTE de geometrie):
+      1) 3 conuri portocaliu-rosii, fiecare cu 2 BENZI albe (cea de sus mai
+         ingusta) si talpa patrata
+      2) o BARIERA: scandura lata cu DUNGI DIAGONALE rosu-alb (capetele albe),
+         pe 2 CAPRE in A, gri inchis
+      3) un SEMN triunghiular cu chenar rosu, camp alb, pictograma OMULUI CU
+         LOPATA (aplecat, gramada in dreapta), pe 2 stalpi gri cu talpi
+      4) fara text, fara semafor
+    Tabelul cere 4 conuri (decuparea are 3): urmez tabelul. Cote: grup pe 6 x 2 m,
+    conuri 0,75 m, bariera 3 m x 1,1 m, semnul (latura 1,2 m, ca semnul cu ursul;
+    tabelul nu o da) cu varful la 2,4 m, pe doi stalpi ca pe decupare. Fiecare element e NOD SEPARAT cu pivotul la baza lui:
+    `Works_Cone_1..4`, `Works_Barrier`, `Works_Sign`. Fata spre +Y."""
+    nodes = []
+    # vazut din fata (+Y), +X e in STANGA: semnul la -X iese in dreapta, ca pe decupare
+    for i, (x, y) in enumerate(((2.55, 0.65), (1.0, 0.75), (-0.55, 0.6), (-1.75, 0.8))):
+        c = Builder()
+        _cone(c)
+        nodes.append((Builder.to_object(c, "Works_Cone_%d" % (i + 1)), (x, y, 0.0)))
+
+    bar = Builder()
+    zb, zt, hl = 0.82, 1.10, 1.5
+    k = 0
+    u = -hl - 0.3
+    while u < hl:
+        poly = clip_x([(u, zb), (u + 0.3, zb), (u + 0.58, zt), (u + 0.28, zt)], -hl + 0.12, hl - 0.12)
+        if len(poly) >= 3:
+            plate(bar, poly, -0.025, 0.025, KERB_RED if k % 2 == 0 else FOAM_WHITE)
+        u += 0.3
+        k += 1
+    for sx in (-1, 1):   # capetele albe
+        plate(bar, [(sx * (hl - 0.12), zb), (sx * hl, zb), (sx * hl, zt), (sx * (hl - 0.12), zt)],
+              -0.025, 0.025, FOAM_WHITE)
+    for x in (-1.05, 1.05):        # caprele in A (picioarele desfacute pe Y)
+        for sy in (-1, 1):
+            bar.beam((x, sy * 0.32, 0.0), (x, sy * 0.04, zb), 0.06, POST_GREY)
+        bar.beam((x, -0.22, 0.30), (x, 0.22, 0.30), 0.04, POST_GREY)
+        bar.box((x, 0.0, zb - 0.03), (0.08, 0.12, 0.06), POST_GREY)
+    nodes.append((Builder.to_object(bar, "Works_Barrier"), (1.0, -0.45, 0.0)))
+
+    sg = Builder()
+    side, border = 1.2, 0.10
+    zs = 2.4 - side * math.sqrt(3) * 0.5     # varful triunghiului la 2,4 m
+    post_top = zs + 0.45          # stalpii se opresc la jumatatea triunghiului
+    for x in (-0.22, 0.22):
+        sg.box((x, -0.04, post_top * 0.5), (0.06, 0.06, post_top), POST_GREY)
+        sg.box((x, -0.04, 0.03), (0.22, 0.34, 0.06), POST_GREY)
+    t0, si, yf = warning_triangle(sg, side, border, zs, 0.0)
+    _worker_pictogram(sg, t0, si, yf, t0)
+    nodes.append((Builder.to_object(sg, "Works_Sign"), (-2.3, -0.5, 0.0)))
+    return nodes
+
+
+# --- level_crossing ------------------------------------------------------------
+
+def _crossing_post(b, lamp):
+    """Stalpul cu crucea Sf. Andrei (2,8 m) si placa lampilor; lentilele in `lamp`."""
+    b.box((0.0, 0.0, 0.04), (0.5, 0.5, 0.08), CONCRETE)
+    b.box((0.0, 0.0, 1.4), (0.12, 0.12, 2.8 - 0.25), POST_GREY)
+    zc = 2.8 - 0.36
+    for ang in (45.0, -45.0):
+        rot = Matrix.Rotation(math.radians(ang), 3, "Y")
+        b.box((0.0, 0.10, zc), (1.0, 0.03, 0.17), KERB_RED, rotation=rot)
+        b.box((0.0, 0.118, zc), (0.84, 0.01, 0.10), FOAM_WHITE, rotation=rot)
+    # placa neagra a lampilor sub cruce, doua viziere
+    zl = 1.85
+    b.box((0.0, 0.08, zl), (0.82, 0.04, 0.38), VOLCANIC_BLACK)
+    for x in (-0.22, 0.22):
+        b.cylinder((x, 0.13, zl), 0.16, 0.06, VOLCANIC_BLACK, segments=10, axis="Y")
+        b.box((x, 0.20, zl + 0.15), (0.32, 0.12, 0.02), VOLCANIC_BLACK)
+        lamp.cylinder((x, 0.168, zl), 0.12, 0.02, KERB_RED, segments=10, axis="Y")
+
+
+def _crossing_gate(b):
+    b.box((0.0, 0.0, 0.04), (0.55, 0.5, 0.08), CONCRETE)
+    b.box((0.0, 0.0, 0.55), (0.34, 0.30, 0.95), POST_GREY)
+    b.box((0.0, 0.0, 1.05), (0.38, 0.34, 0.05), POST_GREY)
+
+
+def _crossing_boom(b):
+    """Bratul in poza RIDICATA: de la balama (originea nodului) in sus pe +Z,
+    10 dungi de 0,75 m; contragreutatea scurta sub balama."""
+    for i in range(10):
+        b.box((0.0, 0.0, 0.10 + 0.75 * (i + 0.5)), (0.16, 0.10, 0.75),
+              KERB_RED if i % 2 == 0 else FOAM_WHITE)
+    b.box((0.0, 0.0, -0.18), (0.16, 0.12, 0.42), POST_GREY)
+    b.cylinder((0.0, -0.07, 0.0), 0.07, 0.06, POST_GREY, segments=8, axis="Y")
+
+
+def build_level_crossing():
+    """Trecerea la nivel (`level_crossing`), kit §1.1.
+
+    LISTA DE ELEMENTE (decuparea `level_crossing.png`, INAINTE de geometrie):
+      1) doua ansambluri oglindite, cate unul pe fiecare parte a drumului
+      2) fiecare: un STALP gri pe soclu, cu CRUCEA SF. ANDREI alb-rosie sus si
+         sub ea o placa neagra cu DOUA LAMPI rotunde rosii (aprinse pe desen)
+      3) fiecare: o CARCASA gri pe soclu, cu BRATUL BARIEREI dungat rosu-alb
+         (~9-10 dungi), ridicat aproape vertical
+      4) bratele intre stalpi (stalpii la exterior)
+      5) fara text
+    Cote din tabel: crucea la 2,8 m, bratul de 7,5 m peste o banda (drumul de
+    14 m: bratul coborat ajunge de la balama, |x| 7,6, pana la axa).
+    Noduri: `Crossing_Post_L/_R` (stalp + cruce + placa), `Crossing_Lamp_L/_R`
+    (doar lentilele, KERB_RED, `segments` 10, ca integrarea sa le aprinda),
+    `Crossing_Gate_L/_R` (carcasa), `Crossing_Boom_L/_R` (bratul, ORIGINEA
+    NODULUI PE BALAMA, poza ridicata vertical). Coborare: _L se roteste +90
+    grade in jurul +Y Blender (= -90 grade in jurul +Z Godot) si cade spre +X;
+    _R invers. Origine pe axa drumului, baza la 0, fata spre +Y."""
+    nodes = []
+    for side, sx in (("L", -1), ("R", 1)):
+        post, lamp = Builder(), Builder()
+        _crossing_post(post, lamp)
+        nodes.append((Builder.to_object(post, "Crossing_Post_" + side), (sx * 9.0, 0.0, 0.0)))
+        nodes.append((Builder.to_object(lamp, "Crossing_Lamp_" + side), (sx * 9.0, 0.0, 0.0)))
+        gate = Builder()
+        _crossing_gate(gate)
+        nodes.append((Builder.to_object(gate, "Crossing_Gate_" + side), (sx * 7.85, 0.0, 0.0)))
+        boom = Builder()
+        _crossing_boom(boom)
+        nodes.append((Builder.to_object(boom, "Crossing_Boom_" + side), (sx * 7.6, 0.24, 0.92)))
+    return nodes
+
+
+# --- bear_warning_sign ---------------------------------------------------------
+
+BEAR_2D = [(-0.17, 0.0), (-0.11, 0.0), (-0.10, 0.065), (0.06, 0.065), (0.07, 0.0), (0.125, 0.0),
+           (0.135, 0.09), (0.17, 0.115), (0.225, 0.12), (0.235, 0.145), (0.195, 0.17),
+           (0.18, 0.195), (0.16, 0.182), (0.12, 0.178), (0.02, 0.21), (-0.12, 0.188),
+           (-0.19, 0.15), (-0.205, 0.08)]
+
+
+def build_bear_warning_sign():
+    """Semnul „nu hraniti ursii” (`bear_warning_sign`), kit §1.1.
+
+    LISTA DE ELEMENTE (decuparea `bear_warning_sign.png`, INAINTE de geometrie;
+    fasiile din piesele vecine de la margini se ignora):
+      1) TRIUNGHI cu varful in sus, chenar ROSU lat, colturi usor rotunjite, camp alb
+      2) pictograma: URSUL negru din profil, mergand spre stanga, cocoasa pe umeri
+      3) STALP gri subtire sub triunghi
+      4) la baza un MORMAN de pietre gri (unul mare + 4-5 mici), cu putin verde
+    CORECTURA coordonatorului: pictograma e „NU HRANITI URSII”: ursul + o MANA
+    cu mancare, taiate de BARA ROSIE (2 se completeaza); fara text; fara verde
+    pe pietre (fara vegetatie lipita). Lista urmeaza corectura:
+      a) triunghi cu latura 1,2 m, chenar KERB_RED de 0,1 m (placa de 3 cm),
+         camp FOAM_WHITE iesit 5 mm
+      b) ursul (VOLCANIC_BLACK, relief 1,5 cm), intors spre DREAPTA, spre mana
+      c) mana cu un mar (antebrat, palma, degetul mare, marul rotund), dreapta-jos
+      d) BARA ROSIE diagonala, stanga-sus -> dreapta-jos, peste pictograma (2 cm)
+      e) stalp de 2,4 m (ASPHALT_EDGE), bolovan de ~0,35 m la baza
+    Noduri: `BearSign_Plate` (rosu / alb / negru), `BearSign_Post`,
+    `BearSign_Stone` (MARBLE_GREY). Origine la baza stalpului, fata spre +Y."""
+    pl, post, stone = Builder(), Builder(), Builder()
+    side, border, zs = 1.2, 0.10, 1.45
+    post.box((0.0, -0.04, 1.25), (0.07, 0.07, 2.4), POST_GREY)
+    t0, si, yf = warning_triangle(pl, side, border, zs, 0.0)
+    y0, y1 = yf, yf + 0.015
+    plate(pl, [(u - 0.06, t + 0.07) for u, t in BEAR_2D], y0, y1, VOLCANIC_BLACK, 0.0, t0)
+    plate(pl, seg2((0.36, 0.02), (0.265, 0.085), 0.055), y0, y1, VOLCANIC_BLACK, 0.0, t0)   # antebratul
+    plate(pl, [(0.215, 0.085), (0.29, 0.07), (0.30, 0.105), (0.225, 0.118)], y0, y1, VOLCANIC_BLACK, 0.0, t0)
+    plate(pl, seg2((0.22, 0.10), (0.205, 0.135), 0.02), y0, y1, VOLCANIC_BLACK, 0.0, t0)    # degetul mare
+    plate(pl, disk2((0.245, 0.158), 0.034, 10), y0, y1, VOLCANIC_BLACK, 0.0, t0)           # marul
+    plate(pl, seg2((-0.21, 0.335), (0.30, 0.005), 0.055), yf + 0.017, yf + 0.025, KERB_RED, 0.0, t0)
+    stones_at_base(stone, 0.26, seed=73, n=5, h=0.35)
+    return [(Builder.to_object(pl, "BearSign_Plate"), (0, 0, 0)),
+            (Builder.to_object(post, "BearSign_Post"), (0, 0, 0)),
+            (Builder.to_object(stone, "BearSign_Stone"), (0, 0, 0))]
+
+
 ONLY = os.environ.get("TF_ONLY", "")
 
 
@@ -489,6 +826,12 @@ if _want("retaining_wall_straight"):
 
 if _want("retaining_wall_curve"):
     emit_rim(build_retaining_wall(True), "structures/retaining_wall_curve.glb", AO_WALL)
+
+for _n, _f in (("snow_pole", build_snow_pole), ("road_works", build_road_works),
+               ("level_crossing", build_level_crossing),
+               ("bear_warning_sign", build_bear_warning_sign)):
+    if _want(_n):
+        emit_nodes(_f(), "props/%s.glb" % _n)
 
 if _want("snow_wall"):
     emit_tf_variants(build_snow_wall(), "structures/snow_wall.glb")

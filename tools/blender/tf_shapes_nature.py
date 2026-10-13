@@ -1,0 +1,451 @@
+"""Vocabular de NATURA pentru kitul Transfagarasan (Track21) -- grupa tf-b
+(stanci si plante). Contract: docs/asset_briefs/transfagarasan_kit.md §0 (regulile
+7 si 8), §1.4, §1.5.
+
+Se incarca DUPA `transfagarasan_shapes.py` (care aduce dio_lib, monument_shapes si
+sloturile TF_*):
+
+    exec(open(os.path.join(_here, "transfagarasan_shapes.py")).read())
+    exec(open(os.path.join(_here, "tf_shapes_nature.py")).read())
+
+Fisier NOU, separat de `transfagarasan_shapes.py`, ca sa nu se calce cu tf-a (care
+are in shapes stub-ul `schist_blade` si o lama minima pentru portalul de stanca).
+La integrare, `schist_blade` din shapes se unifica pe `schist_slab` de aici:
+numele sunt DIFERITE intentionat, ca un build care incarca ambele fisiere sa nu
+primeasca in tacere alta semnatura.
+
+=== SIST (regulile 7 si 8) ===================================================
+
+Sistul se citeste pe LAME (foliatia, toate in aceeasi directie pe o piesa) si pe
+DOUA TONURI: suprafata (nodul *_Schist, MARBLE_GREY 29 -> clasa tf_schist) si
+FISURILE dintre lame (nod separat *_Crack, VOLCANIC_BLACK 20, benzi inguste).
+Fisura NU poate sta in nodul *_Schist: clasa e material_override si sterge
+sloturile (memoria clase-pe-piese-de-kit). ROCK_DARK e interzis (rugina).
+
+  SchistFrame(origin, axis_deg)
+        cadrul unei piese: s = directia ORIZONTALA in care coboara fata lunga a
+        lamelor (sensul foliatiei), v = grosimea lamei (normala orizontala,
+        v = +90 grade fata de s), z sus. `.w(s, v, z)` -> Vector in lume.
+        Toate lamele unei piese folosesc ACELASI cadru => aceeasi directie.
+
+  slab_profile(foot_s, height, back_lean=6, dip=52, tip_cut=0.25, belly=0.0)
+        conturul (s, z) al unei lame, convex: piciorul fetei abrupte (spatele) la
+        foot_s, fata abrupta aplecata `back_lean` grade fata de verticala pana la
+        varf, varful TESIT (`tip_cut` m pe ambele fete), fata lunga (planul de
+        foliatie vazut din lateral) coborand la `dip` grade FATA DE ORIZONTALA
+        pana la sol; `belly` umfla mijlocul fetei lungi (ramane convex).
+        Latimea pe s = height*tan(back_lean) + height/tan(dip).
+
+  schist_slab(b, fr, prof, v0, thick, slot=TF_SCHIST, ridge=0.10, taper=0.35,
+              seed=0, jit=0.05)
+        LAMA: invelitoare convexa (fete plane, mari) a conturului extrudat pe v
+        intre v0 (fata din fata) si v0+thick (spatele). Spatele e PLAN = planul de
+        foliatie pe care se sprijina lama urmatoare si fisura. Fata din fata se
+        subtiaza spre varf (`taper` x thick) si are o COAMA pe axa lamei (iese
+        `ridge` m) -> 2-3 fatete mari, ca pe plansa. Jitter-ul merge doar spre +v
+        (nu inchide fisura). Intoarce fetele.
+
+  crack_between(bc, fr, prof_front, prof_back, v_plane, gap, grow=0.16,
+                slot=TF_CRACK)
+        FISURA dintre doua lame stivuite pe v (lama din fata se termina la
+        v_plane, cea din spate incepe la v_plane+gap): placa subtire in golul
+        dintre ele, pe INTERSECTIA contururilor, cu conturul lamei din fata
+        CRESCUT cu `grow` -> pe fata lamei din spate apare o banda inchisa de
+        `grow` m de-a lungul muchiei lamei din fata (umbra de rost), iar in gol se
+        vede negru. Placa sta intre v_plane-0,04 si v_plane+0,6*gap (nu atinge
+        coama lamei din spate). Benzi INGUSTE, nu suprafata mare (regula 8).
+
+  crack_hull(bc, fr, pts_svz, slot=TF_CRACK)
+        fisura cu forma data explicit (puncte (s, v, z)), pentru crapaturi care nu
+        sunt intre lame stivuite (acul `schist_outcrop_c`, crapat pe lung).
+
+  schist_chip(b, fr, s, v, size, dip=40, yaw=0, seed=0, slot=TF_SCHIST, sink=0.25)
+        bloc de picior / piatra de grohotis: lespede PLATA (L x W x T) cu fata
+        mare inclinata pe foliatie (`dip` pe s, plus `yaw` in plan), colturi
+        jitter-ate, ingropata `sink` x T si taiata plat la z = 0.
+
+  hull(b, pts, slot)
+        invelitoarea convexa a unor puncte, pe un slot (baza tuturor de mai sus).
+
+=== PLANTE ==================================================================
+
+  clump(b, c, size, slot, seed=0, seg=6, rings=3, dev=0.18, yaw=None, tilt=0.3)
+        ciorchine fatetat (elipsoid inchis, perturbat, rotit aleator): unitatea
+        de frunzis. 2*seg*rings triunghiuri (36 la 6x3).
+  branch(b, pts, r0, r1, slot, seg=6)
+        ramura / trunchi conic pe traseu (taper_sweep cu raze interpolate).
+  needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, n=4,
+             rise=0.0)
+        PERNA DE ACE de jneapan: n ciorchini alungiti pe directia ramurii,
+        turtiti, cu marginea zimtata; `rise` ridica capatul pernei (varful
+        ramurii se ridica).
+  crown_mass(b, center, radii, slot, seed=0, n=9, clump=1.4, el_lo=-0.25,
+             core=True)
+        MASA DE COROANA de foios: miez elipsoidal (88%) + n ciorchini mari pe
+        suprafata lui (doar deasupra elevatiei `el_lo`), conturul zimtat de
+        ciorchini fatetati, ca pe plansa fagului.
+
+Axe ca in tot kitul: X latime, Y adancime (fata spre +Y in Blender = -Z in
+Godot), Z sus.
+"""
+
+import math
+from mathutils import Vector, Matrix
+
+TF_CRACK = VOLCANIC_BLACK      # 20: fisurile dintre lame (regula 8), nod *_Crack
+TF_BARK_GREY = MARBLE_GREY     # 29: scoarta neteda, gri, a fagului
+TF_LEAF = TROPICAL_GREEN       # 21: coroana fagului, frunzisul bujorului / afinului
+TF_NEEDLES = LOG_DARK          # 28: acele jneapanului (clasa pine_needles, *_Needles)
+TF_WOOD = WOOD                 # 9:  ramurile jneapanului
+TF_BLOOM = FLAMINGO_PINK       # 31: florile bujorului (--allow-slots=31)
+TF_BERRY = ICE_DEEP            # 25: bobitele de afin
+
+
+def _rnd(seed):
+    """LCG determinist (nu consuma random-ul global)."""
+    state = [(int(seed) * 1103515245 + 12345) & 0x7FFFFFFF]
+
+    def r():
+        state[0] = (state[0] * 1103515245 + 12345) & 0x7FFFFFFF
+        return state[0] / float(0x7FFFFFFF)
+    return r
+
+
+def hull(b, pts, slot):
+    """Invelitoarea convexa a punctelor `pts`, toate fetele pe `slot`."""
+    vs = [b.bm.verts.new(Vector(p)) for p in pts]
+    res = bmesh.ops.convex_hull(b.bm, input=vs)
+    junk = {g for g in list(res["geom_interior"]) + list(res["geom_unused"])
+            if isinstance(g, bmesh.types.BMVert) and g.is_valid}
+    if junk:
+        bmesh.ops.delete(b.bm, geom=list(junk), context="VERTS")
+    out = []
+    for f in res["geom"]:
+        if isinstance(f, bmesh.types.BMFace) and f.is_valid:
+            f[b.slot] = slot
+            out.append(f)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# sist
+# ---------------------------------------------------------------------------
+
+class SchistFrame:
+    """Cadrul (s, v, z) al unei piese de sist; vezi docstring-ul modulului."""
+
+    def __init__(self, origin=(0.0, 0.0, 0.0), axis_deg=0.0):
+        a = math.radians(axis_deg)
+        self.o = Vector(origin)
+        self.d = Vector((math.cos(a), math.sin(a), 0.0))
+        self.n = Vector((-math.sin(a), math.cos(a), 0.0))
+
+    def w(self, s, v, z):
+        return self.o + self.d * s + self.n * v + Vector((0.0, 0.0, z))
+
+
+def slab_profile(foot_s, height, back_lean=6.0, dip=52.0, tip_cut=0.25, belly=0.0):
+    tip = Vector((foot_s + height * math.tan(math.radians(back_lean)), height))
+    end = Vector((tip.x + height / math.tan(math.radians(dip)), 0.0))
+    foot = Vector((foot_s, 0.0))
+    up = (tip - foot).normalized()
+    down = (end - tip).normalized()
+    t1 = tip - up * tip_cut
+    t2 = tip + down * tip_cut
+    pts = [foot, t1, t2]
+    if belly:
+        mid = (t2 + end) * 0.5
+        nrm = Vector((-down.y, down.x))          # normala exterioara (sus-dreapta)
+        if nrm.y < 0:
+            nrm = -nrm
+        pts.append(mid + nrm * belly)
+    pts.append(end)
+    return [(p.x, p.y) for p in pts]
+
+
+def foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2):
+    """STIVA DE LAME pe foliatie ("carti aplecate"): lame-placi PARALELE cu
+    planul de foliatie (inclinat `dip` grade fata de orizontala, coborand spre
+    +s), asezate una PESTE alta pe normala planului, fiecare taiata de o fata
+    abrupta in spate, varfurile coborand in trepte spre +s. Fisurile ies
+    DIAGONALE, paralele cu fetele lungi (ca pe plansa).
+
+    `specs` = [(h, t, back_lean), ...]: lama 0 e PANA DE BAZA (de la s0, varf la
+    h0, t ignorat), lamele 1.. stau pe ea, fiecare groasa de `t` m (pe normala
+    planului), cu varful la `h`. Intre lame: `gap` m.
+    Intoarce (profiles, cracks): conturul (s, z) al fiecarei lame si conturul
+    fiecarei fisuri (fasia de gol de sub lama k, de la fata ei abrupta la sol,
+    ingropata 0,04 m in ambele lame). Pentru extrudare pe v: `schist_slab` si
+    `crack_hull`/`crack_strip`."""
+    dl = math.radians(dip)
+    sd, cd = math.sin(dl), math.cos(dl)
+    h0, _t0, bl0 = specs[0]
+    prof0 = slab_profile(s0, h0, back_lean=bl0, dip=dip, tip_cut=tip_cut)
+    s_tip0 = s0 + h0 * math.tan(math.radians(bl0))
+    U = s_tip0 * sd + h0 * cd                   # planul de sus al lamei 0
+    profiles, cracks = [prof0], []
+    for (h, t, bl) in specs[1:]:
+        c = U + gap
+        U2 = c + t
+        bb = math.radians(bl)
+        B = Vector(((U2 - h * cd) / sd, h))
+        down = Vector((-math.sin(bb), -math.cos(bb)))
+        cosdb = math.cos(dl - bb)
+
+        def on_back(plane):
+            lam = (U2 - plane) / cosdb
+            p = B + down * lam
+            if p.y < 0.0:                       # fata abrupta atinge solul inainte
+                lam = B.y / math.cos(bb)
+                p = B + down * lam
+            return p
+        E = on_back(c)
+        up = -down
+        dn = Vector((math.cos(dl), -math.sin(dl)))
+        t1 = B - up * tip_cut
+        t2 = B + dn * tip_cut
+        C = Vector((U2 / sd, 0.0))
+        D = Vector((c / sd, 0.0))
+        prof = [E, t1, t2, C]
+        if E.y > 1e-4:
+            prof.append(D)
+        else:
+            prof = [Vector((E.x, 0.0)), t1, t2, C]
+        profiles.append([(p.x, p.y) for p in prof])
+        # fisura: fasia dintre planul U (lama de dedesubt) si c, sub lama curenta
+        lo, hi = U - 0.04, c + 0.04
+        F_lo, F_hi = on_back(lo), on_back(hi)
+        poly = [F_lo, F_hi, Vector((hi / sd, 0.0)), Vector((lo / sd, 0.0))]
+        cracks.append([(p.x, max(p.y, 0.0)) for p in poly])
+        U = U2
+    return profiles, cracks
+
+
+def crack_strip(bc, fr, poly, v_a, v_b, slot=TF_CRACK):
+    """Extrudeaza pe v (intre v_a si v_b) conturul (s, z) al unei fisuri din
+    `foliation_stack`. v_a/v_b se aleg putin IN INTERIORUL fetelor lamelor
+    (0,06 m), ca fisura sa se vada ca rost adancit, nu ca dunga pictata."""
+    pts = []
+    for (s, z) in poly:
+        pts.append(fr.w(s, v_a, z))
+        pts.append(fr.w(s, v_b, z))
+    return hull(bc, pts, slot)
+
+
+def schist_slab(b, fr, prof, v0, thick, slot=TF_SCHIST, ridge=0.10, taper=0.35,
+                seed=0, jit=0.05, back_taper=0.0, v_drop=0.0):
+    """Vezi docstring-ul modulului. `back_taper` (implicit 0 = spate PLAN, cerut
+    cand o lama sta lipita in spatele ei) subtiaza si spatele spre varf;
+    `v_drop` coboara conturul de pe spate cu acea fractie (varful e mai inalt
+    in fata decat in spate) -> din lateral lama e o pana, nu o cutie."""
+    r = _rnd(seed)
+    zs = [p[1] for p in prof]
+    zlo, zhi = min(zs), max(zs)
+    span = max(zhi - zlo, 1e-6)
+    # ATENTIE: coama iese spre -v; daca in fata lamei sta alta lama la distanta
+    # `gap`, tine ridge < gap (altfel coama strapunge lama din fata).
+    pts = []
+    for (s, z) in prof:
+        t = (z - zlo) / span
+        pts.append(fr.w(s, v0 + thick * taper * t + jit * r(), z))
+        zb = zlo + (z - zlo) * (1.0 - v_drop)
+        tb = (zb - zlo) / span
+        pts.append(fr.w(s, v0 + thick - thick * back_taper * tb, zb))
+    # axa lamei: de la mijlocul bazei la varf
+    base_pts = [p for p in prof if p[1] <= zlo + 1e-6]
+    bs = sum(p[0] for p in base_pts) / len(base_pts)
+    top = max(prof, key=lambda p: p[1])
+    for f in (0.30, 0.66):
+        s = bs + (top[0] - bs) * f
+        z = zlo + span * f
+        pts.append(fr.w(s, v0 + thick * taper * f - ridge, z))
+    return hull(b, pts, slot)
+
+
+def _clip_half(poly, a, b_, c):
+    """Sutherland-Hodgman: pastreaza a*s + b*z + c >= 0."""
+    out = []
+    n = len(poly)
+    for i in range(n):
+        p, q = poly[i], poly[(i + 1) % n]
+        fp = a * p[0] + b_ * p[1] + c
+        fq = a * q[0] + b_ * q[1] + c
+        if fp >= 0:
+            out.append(p)
+        if (fp >= 0) != (fq >= 0):
+            t = fp / (fp - fq)
+            out.append((p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t))
+    return out
+
+
+def _ccw(poly):
+    area = 0.0
+    for i in range(len(poly)):
+        x0, y0 = poly[i]
+        x1, y1 = poly[(i + 1) % len(poly)]
+        area += x0 * y1 - x1 * y0
+    return poly if area > 0 else list(reversed(poly))
+
+
+def _clip_convex(subject, clip):
+    """Intersectia a doua poligoane convexe (s, z)."""
+    clip = _ccw(clip)
+    out = list(subject)
+    for i in range(len(clip)):
+        p, q = clip[i], clip[(i + 1) % len(clip)]
+        # stanga muchiei p->q (CCW) = interior
+        a = -(q[1] - p[1])
+        b_ = q[0] - p[0]
+        c = -(a * p[0] + b_ * p[1])
+        out = _clip_half(out, a, b_, c)
+        if len(out) < 3:
+            return []
+    return out
+
+
+def _offset_convex(poly, d):
+    """Deplaseaza fiecare muchie a unui poligon convex cu `d` spre exterior
+    (d < 0: spre interior); colturile prin intersectia muchiilor vecine."""
+    poly = _ccw(poly)
+    n = len(poly)
+    lines = []
+    for i in range(n):
+        p, q = Vector(poly[i]), Vector(poly[(i + 1) % n])
+        e = (q - p).normalized()
+        nrm = Vector((e.y, -e.x))               # exterior pentru CCW
+        lines.append((p + nrm * d, e))
+    out = []
+    for i in range(n):
+        (p0, e0), (p1, e1) = lines[i - 1], lines[i]
+        den = e0.x * e1.y - e0.y * e1.x
+        if abs(den) < 1e-9:
+            out.append((p1.x, p1.y))
+            continue
+        t = ((p1.x - p0.x) * e1.y - (p1.y - p0.y) * e1.x) / den
+        x = p0 + e0 * t
+        out.append((x.x, x.y))
+    return out
+
+
+def crack_between(bc, fr, prof_front, prof_back, v_plane, gap, grow=0.16,
+                  slot=TF_CRACK):
+    poly = _clip_convex(_offset_convex(prof_front, grow), _offset_convex(prof_back, -0.05))
+    if len(poly) < 3:
+        return []
+    poly = _clip_half(poly, 0.0, 1.0, -0.02)    # z >= 0,02
+    if len(poly) < 3:
+        return []
+    pts = []
+    for (s, z) in poly:
+        pts.append(fr.w(s, v_plane - 0.04, z))
+        pts.append(fr.w(s, v_plane + gap * 0.6, z))
+    return hull(bc, pts, slot)
+
+
+def crack_hull(bc, fr, pts_svz, slot=TF_CRACK):
+    return hull(bc, [fr.w(s, v, z) for (s, v, z) in pts_svz], slot)
+
+
+def schist_chip(b, fr, s, v, size, dip=40.0, yaw=0.0, seed=0, slot=TF_SCHIST,
+                sink=0.25):
+    r = _rnd(seed)
+    L, W, T = size
+    rot = (Matrix.Rotation(math.radians(yaw), 3, "Z")
+           @ Matrix.Rotation(math.radians(dip), 3, "Y"))
+    # cadrul piesei: s pe d, v pe n
+    to_world = Matrix(((fr.d.x, fr.n.x, 0.0), (fr.d.y, fr.n.y, 0.0), (0.0, 0.0, 1.0)))
+    loc = []
+    for ix in (-1, 1):
+        for iy in (-1, 1):
+            for iz in (-1, 1):
+                k = 0.78 + 0.22 * r()
+                loc.append(Vector((ix * L * 0.5 * k, iy * W * 0.5 * (0.8 + 0.2 * r()),
+                                   iz * T * 0.5 * (0.85 + 0.15 * r()))))
+    # doua puncte de mijloc pe fata de sus: fatete
+    loc.append(Vector(((r() - 0.5) * L * 0.4, (r() - 0.5) * W * 0.4, T * 0.62)))
+    loc.append(Vector(((r() - 0.5) * L * 0.5, W * 0.52, (r() - 0.5) * T * 0.3)))
+    pts = [to_world @ (rot @ p) for p in loc]
+    zmin = min(p.z for p in pts)
+    lift = -zmin - T * sink
+    base = fr.w(s, v, 0.0)
+    out = []
+    for p in pts:
+        q = p + base + Vector((0.0, 0.0, lift))
+        q.z = max(q.z, 0.0)
+        out.append(q)
+    return hull(b, out, slot)
+
+
+# ---------------------------------------------------------------------------
+# plante
+# ---------------------------------------------------------------------------
+
+def clump(b, c, size, slot, seed=0, seg=6, rings=3, dev=0.18, yaw=None, tilt=0.3):
+    r = _rnd(seed + 7)
+    faces = b.boulder(tuple(c), tuple(size), slot, seed=seed, segments=seg, rings=rings,
+                      deviation=dev)
+    verts = set()
+    for f in faces:
+        verts.update(f.verts)
+    a = r() * 2.0 * math.pi if yaw is None else math.radians(yaw)
+    rot = (Matrix.Rotation(a, 3, "Z")
+           @ Matrix.Rotation((r() - 0.5) * tilt, 3, "X")
+           @ Matrix.Rotation((r() - 0.5) * tilt, 3, "Y"))
+    cv = Vector(c)
+    for v in verts:
+        v.co = cv + rot @ (v.co - cv)
+    return faces
+
+
+def branch(b, pts, r0, r1, slot, seg=6):
+    n = len(pts)
+    radii = [r0 + (r1 - r0) * (i / float(n - 1)) for i in range(n)]
+    return b.taper_sweep(pts, radii, slot, segments=seg)
+
+
+def needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, n=4, rise=0.0):
+    r = _rnd(seed)
+    a = math.radians(azim_deg)
+    d = Vector((math.cos(a), math.sin(a), 0.0))
+    side = Vector((-d.y, d.x, 0.0))
+    base = Vector(base)
+    faces = []
+    for i in range(n):
+        t = (i + 0.5) / n
+        p = (base + d * (length * (t - 0.5)) + side * ((r() - 0.5) * width * 0.35)
+             + Vector((0.0, 0.0, rise * t * t + (r() - 0.5) * height * 0.15)))
+        lc = length / n * (1.7 + 0.3 * r())
+        wc = width * (0.62 + 0.28 * r()) * (1.0 - 0.25 * t)
+        hc = height * (0.70 + 0.30 * r())
+        faces += clump(b, p, (lc, wc, hc), slot, seed=seed * 13 + i,
+                       seg=6, rings=3, dev=0.22,
+                       yaw=azim_deg + (r() - 0.5) * 25.0, tilt=0.25)
+    return faces
+
+
+def crown_mass(b, center, radii, slot, seed=0, n=9, clump_size=1.4, el_lo=-0.25,
+               core=True):
+    r = _rnd(seed)
+    c = Vector(center)
+    rx, ry, rz = radii
+    faces = []
+    if core:
+        faces += clump(b, c, (2 * rx * 0.88, 2 * ry * 0.88, 2 * rz * 0.88), slot,
+                       seed=seed, seg=8, rings=4, dev=0.08, tilt=0.15)
+    ga = math.pi * (3.0 - math.sqrt(5.0))
+    k = 0
+    i = 0
+    while k < n and i < n * 4:
+        zz = 1.0 - (i + 0.5) / (n * 1.6)
+        i += 1
+        if zz < el_lo:
+            continue
+        rr = math.sqrt(max(0.0, 1.0 - zz * zz))
+        ang = ga * i + seed
+        dirv = Vector((rr * math.cos(ang), rr * math.sin(ang), zz))
+        p = c + Vector((dirv.x * rx, dirv.y * ry, dirv.z * rz)) * (0.86 + 0.08 * r())
+        s = clump_size * (0.8 + 0.4 * r())
+        faces += clump(b, p, (s, s, s * (0.78 + 0.2 * r())), slot, seed=seed * 31 + k,
+                       seg=6, rings=3, dev=0.2, tilt=0.5)
+        k += 1
+    return faces

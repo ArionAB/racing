@@ -320,7 +320,7 @@ se taie sus, iar asta e voit.
 
 | nod | cote | contract |
 |---|---|---|
-| `FagarasRidge_A`, `_B`, `_C` | 160–240 m lungime, **45–70 m** înălțime | creasta-perete continuă: **12–15 dinți** triunghiulari pe o linie care coboară doar 15–25% în șei (reluarea tf-g2 a înlocuit „5–8 vârfuri”, care ieșeau ace izolate), coaste oblice, **căldări glaciare** ca scobituri cu zăpadă (`FOAM_WHITE`) și flancuri `MARBLE_GREY`. Una dintre ele are un vârf dominant (Negoiu). Nu un pisc izolat (brief §0.1) |
+| `FagarasRidge_A`, `_B`, `_C` | 160–240 m lungime, **45–70 m** înălțime | creasta zimțată: 5–8 vârfuri pe o bucată, **căldări glaciare** ca scobituri cu zăpadă (`FOAM_WHITE`) și flancuri `MARBLE_GREY`. Una dintre ele are un vârf dominant (Negoiu). Nu un pisc izolat (brief §0.1) |
 | `CloudSea_A`, `_B` | 200–300 m lungime, 8–15 m grosime | **marea de nori** din văile depărtate: un strat plat, fațetat, cu bulgări rotunzi pe muchia de sus. `FOAM_WHITE`. Se așază **sub** cota drumului, în văi (brief §1) |
 | `FagarasPlain_A` | 300 × 120 m, 2–4 m relief | câmpia Țării Făgărașului: fâșii de câmp (3 verzi, una galben-uscat `DRY_VEGETATION`) și 4–6 pâlcuri de copaci ca mase joase |
 

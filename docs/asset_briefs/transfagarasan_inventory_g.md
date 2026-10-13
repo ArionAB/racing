@@ -4,17 +4,36 @@ Contract: `docs/asset_briefs/transfagarasan_kit.md` §1.8. Build: `tools/blender
 Preview: `tools/blender/preview_tf_g.py` (`--compare ridge|cloud|plain`, `--views ...`, `--game`).
 Axe: Blender X lateral, Y adâncime, Z sus. Cote MĂSURATE pe GLB (`verify_glb.py`).
 
+## Decizia coordonatorului (13 oct 2026): PROVIZORIU, creasta rev. tf-g + norii tf-g2
+
+Bucla se oprește aici: 3 runde la tf-g și 2 la reluarea tf-g2, fără convergență față de
+decupare (memoria `gauntlet-iesirea-din-bucla`). GLB-ul livrat combină cea mai bine judecată
+stare a fiecărei piese, judecată pe **captura de joc** (`horizon_game_300m.png`), nu pe 3/4:
+- **creasta = rev. tf-g** (`efea5de7`): vârfuri de înălțimi diferite, care din camera de joc se
+  citesc ca lanț muntos. Defectul ei e cunoscut: prea „Dolomiți” (ace izolate, Negoiu-obelisc).
+  Peretele cu 12–13 dinți egali al reluării (`8fdbcf7e`) a corectat silueta în 3/4, dar din
+  joc citea **pieptene / gard**, adică mai rău. Codul reluării rămâne în istoric, iar §1.8 din
+  kit păstrează contractul inițial;
+- **norii = tf-g2**: cocoașe de cumulus care se citesc din joc ca un șir de grămezi sub drum,
+  față de fâșia albastră plată din rev. tf-g. Rămâne placa vizibilă din 3/4;
+- **câmpia = rev. tf-g**, neschimbată (`PLAIN_HASH e15697de…`). La 300 m ocupă ~10 px.
+
+Verdictul final se dă pe pista reală, la montare: cu ceața temei (140–370 m), la 300 m
+rămâne doar silueta. Tabelele de fidelitate ale crestei de mai jos descriu reluarea tf-g2
+(respinsă); pentru rev. tf-g, vezi abaterile din raportul ei: 8 vârfuri și 3 dinți pe bucată,
+zăpadă puțină, rocă deschisă, Negoiu subțire.
+
 ## assets/models/transfagarasan/effects/transfagarasan_horizon.glb
 
 Șase noduri, copii direcți ai rădăcinii, fiecare un corp închis (elipsă / dreptunghi + evantai de bază la z=0),
 originea la bază (XY centrat pe bbox, Z min = 0), scala aplicată (garda din `verify_transfagarasan.sh`),
-un singur material (atlas). Fără excepții de verificare. Total **26 634 tri** (era 18 382; `FagarasPlain_A` neschimbată: 4 008).
+un singur material (atlas). Fără excepții de verificare. Total **16 942 tri** (creasta rev. tf-g, norii tf-g2, câmpia neschimbată: 4 008).
 
 | nod | L × l × h (m) | tri | sloturi | contract |
 |---|---|---:|---|---|
-| `FagarasRidge_A` (Negoiu) | 230,0 × 66,0 × 64,5 | 6 726 | MARBLE_GREY, FOAM_WHITE, TROPICAL_GREEN, CACTUS_GREEN | 160–240 × 45–70: OK |
-| `FagarasRidge_B` | 190,0 × 60,0 × 50,0 | 4 990 | idem | OK |
-| `FagarasRidge_C` | 165,0 × 56,0 × 53,1 | 3 982 | idem | OK |
+| `FagarasRidge_A` (Negoiu) | 230,0 × 66,0 × 67,5 | 2 468 | MARBLE_GREY, FOAM_WHITE, TROPICAL_GREEN, CACTUS_GREEN | 160–240 × 45–70: OK |
+| `FagarasRidge_B` | 189,9 × 60,0 × 50,4 | 1 942 | idem | OK |
+| `FagarasRidge_C` | 165,0 × 56,0 × 52,1 | 1 596 | idem | OK |
 | `CloudSea_A` | 270,8 × 57,7 × 17,1 | 3 744 | FOAM_WHITE 22 | 200–300 × 8–15: grosime 17,1 (voit, verdictul tf-g2 permite ~18 m; stau sub drum) |
 | `CloudSea_B` | 210,4 × 50,5 × 15,7 | 3 184 | FOAM_WHITE 22 | idem, 15,7 |
 | `FagarasPlain_A` | 300,0 × 120,0 × 10,7 | 4 008 | TROPICAL_GREEN 21, CACTUS_GREEN 12, DRY_VEGETATION 13 | 300 × 120: OK; relief teren 1,6–4,2 m, 10,7 cu palcurile |
@@ -111,7 +130,7 @@ s-a comparat vizual, în `fagaras_ridge.png`, și pe numere de mai sus.
 | nori | 240–320 m | `CloudSea_A` 1×, `CloudSea_B` 1× | 1,0 | între creastă și drum, est/sud-est; **cere offset vertical −20…−30 m**: `_build_horizon` pune nodul la `ground_y − 4` fără parametru de cotă |
 | câmpia | 280–340 m | `FagarasPlain_A` 1× | 1,0 | nord, pe inel; la fel, ideal −30 m |
 
-Totalul e 6 noduri (26,6 k tri, 1 material). Dacă nu se adaugă un `dy` per inel, norii și câmpia se văd doar dacă
+Totalul e 6 noduri (16,9 k tri, 1 material). Dacă nu se adaugă un `dy` per inel, norii și câmpia se văd doar dacă
 terenul de acolo e deja sub cota drumului.
 
 ## Stare la oprire

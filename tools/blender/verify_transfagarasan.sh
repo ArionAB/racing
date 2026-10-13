@@ -206,6 +206,14 @@ PY
 fi
 
 echo
+echo "== val 3, tf-g: fundalul (kit §1.8) =="
+# Fara exceptii: 6 noduri-copil directe ale radacinii, fiecare un corp inchis cu originea
+# la baza (XY centrat pe bbox, Z min = 0), scala aplicata (garda din check), un singur
+# material (atlasul). Sloturi: MARBLE_GREY / FOAM_WHITE / TROPICAL_GREEN / CACTUS_GREEN /
+# DRY_VEGETATION, toate legale.
+check "effects/transfagarasan_horizon.glb"
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

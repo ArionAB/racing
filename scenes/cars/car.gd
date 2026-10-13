@@ -451,6 +451,11 @@ var _wheel_orig_pos: Array[Vector3] = []
 var _wheel_corner: Array[int] = []
 var _skid_accum: float = 0.0
 var _respawn_cooldown: float = 0.0
+## Ceasul recautarii globale de index (vezi Track.reacquire_index): o scanare
+## completa la cel mult REACQUIRE_PERIOD_S, doar cat masina pare in afara
+## drumului. Scanarea e O(n) pe ~1000 de puncte — nu pe fiecare tick, x6 masini.
+const REACQUIRE_PERIOD_S: float = 0.25
+var _reacquire_left: float = 0.0
 
 # Resurse partajate intre toate urmele de cauciuc (ieftin la instantiere).
 static var _skid_mesh: PlaneMesh
@@ -603,6 +608,14 @@ func _physics_process(delta: float) -> void:
 			road_index = resolved.y
 		else:
 			road_index = track.closest_index(road_index, global_position, route)
+		# Fereastra locala poate ramane agatata in urma dupa o taietura prin
+		# iarba (#496): pe asfalt, `is_on_road` ar raspunde „iarba" si plafonul
+		# ar ramane la 45%. Cat parem in afara drumului, verificam rar, global.
+		_reacquire_left -= delta
+		if _reacquire_left <= 0.0 \
+				and not track.is_on_road(road_index, global_position, route):
+			_reacquire_left = REACQUIRE_PERIOD_S
+			road_index = track.reacquire_index(road_index, global_position, route)
 		# Banda uda: se reinnoieste in fiecare cadru, deci efectul tine exact cat
 		# stai pe ea. Refoloseste acelasi slip_time ca WaterHazard — un al doilea
 		# mecanism de aquaplanare ar fi insemnat doua feluri de a pierde grip-ul,

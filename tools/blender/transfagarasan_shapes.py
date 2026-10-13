@@ -8,7 +8,7 @@ NotImplementedError, ca sa nu le foloseasca nimeni pe nevazute).
 
 FOLOSITE (pilot):
   (ring_stack / snow_layers: pentru `snow_wall` din valul 1; portalul nu le mai
-   foloseste dupa contractul nou -- movila lui e din `bulgar`)
+   foloseste dupa contractul nou -- movila lui e din `faceted_block`)
   ring_stack       masa inchisa din inele de puncte 3D (acelasi numar de puncte
                    pe inel). Doua inele consecutive la ACEEASI cota = un prag
                    orizontal (treapta). Baza pentru `snow_layers`.
@@ -19,8 +19,8 @@ FOLOSITE (pilot):
   extrude_xz       prisma dintr-un contur in planul XZ (poate fi concav), pe Y.
   tilt_front       inclina fata din fata a unei prisme (placa lasata inapoi).
   tube_lining      captuseala de umbra a gurii: banda fara capace, normale spre gol.
-  bulgar           bulgare de zapada: convex hull pe un elipsoid jitterat, rotit.
-  faces_to_dust    praful ca pata: muta fete alese din zapada pe nodul de praf.
+  faceted_block    bloc de zapada unghiular (convex hull), baza plata.
+  dust_patch       bucata scurta de praf, inclinata.
   emit_tf          finish pe fiecare nod + export in assets/models/transfagarasan/.
 
 STUB-URI (valul 1, vezi docstring-urile):
@@ -228,48 +228,43 @@ def tube_lining(b, path_xz, y_back, y_front, tan_back, inset=0.03, slot=TF_VOID)
         f[b.slot] = slot
 
 
-def bulgar(b, center, r, slot, seed=0, base=None, zk=1.0, ratio=(1.0, 0.8, 0.7)):
-    """Bulgare unghiular de zapada: invelitoarea convexa (convex hull) a 10-14
-    puncte jitterate pe un ELIPSOID cu semiaxele `r * ratio` (raport ~1:0,8:0,7),
-    rotit aleator (yaw complet, inclinari +-30 grade); `zk` scaleaza pe verticala.
-    Fete plane in toate directiile, fara laturi verticale paralele lungi. Cu
-    `base` (cota solului) punctele sub cota sunt ridicate la ea: baza se turteste
-    doar cat sa stea pe sol; fara `base` bulgarele sta pe alte bulgari."""
+def faceted_block(b, center, size, slot, seed=0, jag=0.22, base_flat=True):
+    """Bloc de zapada: invelitoare convexa (convex hull) a unor puncte din jurul
+    unei cutii `size` (sx, sy, sz) cu centrul pe (cx, cy) si BAZA la z = center[2]:
+    fete plane, unghiulare, 2-4 m, nu trepte regulate. Colturile de sus sunt
+    trase spre interior (`jag`), 4 puncte de mijloc ies usor din fete. Baza e
+    plata (se aseaza pe teren)."""
     import random
     rnd = random.Random(seed)
-    cx, cy, cz = center
-    n = rnd.randint(10, 14)
-    rot = (Matrix.Rotation(rnd.random() * math.tau, 3, "Z")
-           @ Matrix.Rotation(math.radians((rnd.random() - 0.5) * 60.0), 3, "X")
-           @ Matrix.Rotation(math.radians((rnd.random() - 0.5) * 60.0), 3, "Y"))
-    vs = []
-    for _ in range(n):
-        d = Vector((rnd.gauss(0, 1), rnd.gauss(0, 1), rnd.gauss(0, 1)))
-        d.normalize()
-        k = 0.95 + 0.3 * rnd.random()
-        p = Vector((d.x * ratio[0], d.y * ratio[1], d.z * ratio[2])) * (r * k)
-        p = rot @ p
-        z = cz + p.z * zk
-        if base is not None:
-            z = max(z, base)
-        vs.append(b.bm.verts.new((cx + p.x, cy + p.y, z)))
-    bmesh.ops.remove_doubles(b.bm, verts=vs, dist=1e-4)
-    vs = [v for v in vs if v.is_valid]
+    cx, cy, z0 = center
+    sx, sy, sz = size
+    hx, hy = sx * 0.5, sy * 0.5
+    pts = []
+    for ix in (-1, 1):
+        for iy in (-1, 1):
+            j = lambda: 1.0 - jag * rnd.random()
+            pts.append((cx + ix * hx * (0.9 + 0.1 * rnd.random()), cy + iy * hy * (0.9 + 0.1 * rnd.random()), z0))
+            pts.append((cx + ix * hx * j() * 0.8, cy + iy * hy * j() * 0.8,
+                        z0 + sz * (1.0 - 0.25 * jag * rnd.random())))
+    zm = z0 + sz * (0.45 + 0.2 * rnd.random())
+    for ax, ay in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        pts.append((cx + ax * hx * (1.0 + 0.06 * rnd.random()) + (rnd.random() - 0.5) * hx * 0.4 * ay,
+                    cy + ay * hy * (1.0 + 0.06 * rnd.random()) + (rnd.random() - 0.5) * hy * 0.4 * ax,
+                    zm + (rnd.random() - 0.5) * sz * 0.2))
+    vs = [b.bm.verts.new(p) for p in pts]
     res = bmesh.ops.convex_hull(b.bm, input=vs)
-    junk = [g for g in set(res["geom_interior"]) | set(res["geom_unused"]) if g.is_valid]
-    bmesh.ops.delete(b.bm, geom=junk, context="VERTS")
+    bmesh.ops.delete(b.bm, geom=list(res["geom_interior"]) + list(res["geom_unused"]),
+                     context="VERTS")
     for f in res["geom"]:
         if isinstance(f, bmesh.types.BMFace) and f.is_valid:
             f[b.slot] = slot
 
 
-def faces_to_dust(snow, dust, pick, slot=TF_DUST):
-    """Praful ca PATA pe fete, nu ca volum: fetele alese (`pick` = lista de BMFace
-    din `snow`) se muta in `dust` (acelasi mesh, alt material), la aceleasi coordonate."""
-    for f in pick:
-        nf = dust.bm.faces.new([dust.bm.verts.new(v.co.copy()) for v in f.verts])
-        nf[dust.slot] = slot
-    bmesh.ops.delete(snow.bm, geom=list(pick), context="FACES_ONLY")
+def dust_patch(b, center, length, tilt_deg, height=0.2, depth=0.7, slot=TF_DUST):
+    """Bucata scurta de praf, INCLINATA in planul fetei (rotatie pe Y), pe fata
+    din fata a unui bloc; adanca (`depth`) ca sa nu pluteasca pe o fata retrasa."""
+    rot = Matrix.Rotation(math.radians(tilt_deg), 3, "Y")
+    b.box(center, (length, depth, height), slot, rotation=rot)
 
 
 # ---------------------------------------------------------------------------

@@ -44,6 +44,17 @@ func _ready() -> void:
 		_dam_void()
 	if _arg("--far") != "":
 		_far_ring()
+	if _arg("--horizon") != "":
+		for c in _all(tr):
+			var nm := String(c.name)
+			if c is Node3D and (nm.begins_with("CloudSea") or nm.begins_with("Fagaras")):
+				var q := (c as Node3D).global_position
+				var bb := AABB()
+				for m in c.find_children("*", "MeshInstance3D", true, false):
+					var mi := m as MeshInstance3D
+					bb = bb.merge(mi.global_transform * mi.get_aabb()) if bb.size != Vector3.ZERO else mi.global_transform * mi.get_aabb()
+				print("  %s pos (%.1f, %.1f, %.1f) aabb y %.1f..%.1f x %.0f..%.0f z %.0f..%.0f" % [nm, q.x, q.y, q.z,
+					bb.position.y, bb.end.y, bb.position.x, bb.end.x, bb.position.z, bb.end.z])
 	var pts := _arg("--pts")
 	if pts != "":
 		for s in pts.split(";"):
@@ -54,6 +65,38 @@ func _ready() -> void:
 			var gy: float = samp.call("ground_y", x, z)
 			print("  pt (%.0f, %.0f): mesh %+.1f  sampler %+.1f  (fata de drum mediu %+.1f)" % [
 				x, z, ty, gy, ty - road_y_mean])
+	var grid := _arg("--grid")
+	if grid != "":
+		# --grid=x0,z0,x1,z1,pas : tabel de cote absolute (rand = z in rand, x in antet);
+		# `w` = apa, `R` = pe sosea (la <= 8 m de un punct copt)
+		var g := grid.split(",")
+		var gx0 := float(g[0])
+		var gz0 := float(g[1])
+		var gx1 := float(g[2])
+		var gz1 := float(g[3])
+		var gst := float(g[4])
+		var hdr := "        z\x "
+		var xx := gx0
+		while xx <= gx1 + 0.01:
+			hdr += "%6.0f" % xx
+			xx += gst
+		print(hdr)
+		var zz := gz0
+		while zz <= gz1 + 0.01:
+			var out := "  %7.0f " % zz
+			xx = gx0
+			while xx <= gx1 + 0.01:
+				var ty: float = tr.call("_terrain_mesh_y", xx, zz)
+				var tag := " "
+				if _wl(xx, zz, ty) > ty + 0.05:
+					tag = "w"
+				var ci := _closest(Vector3(xx, 0, zz))
+				if Vector2(tr.baked[ci].x - xx, tr.baked[ci].z - zz).length() <= 8.0:
+					tag = "R"
+				out += "%5.0f%s" % [ty, tag]
+				xx += gst
+			print(out)
+			zz += gst
 	var line := _arg("--line")
 	if line != "":
 		var v := line.split(",")

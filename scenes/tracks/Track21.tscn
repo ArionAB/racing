@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="17_hollow"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="3_channel"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="4_hzm"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
@@ -136,6 +137,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.00, 28.00, 324.00)
 gizmo_extents = 62.0
 script = ExtResource("2_peak")
 radius_m = 62.0
+
+[node name="Goluri" type="Node3D" parent="."]
+
+[node name="GolNoriA" type="Marker3D" parent="Goluri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 375.00, -12.00, 15.00)
+gizmo_extents = 130.0
+script = ExtResource("17_hollow")
+radius_m = 45.0
+wall_m = 85.0
+
+[node name="GolNoriB" type="Marker3D" parent="Goluri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300.00, -12.00, 320.00)
+gizmo_extents = 140.0
+script = ExtResource("17_hollow")
+radius_m = 70.0
+wall_m = 70.0
+
+[node name="GolCampie" type="Marker3D" parent="Goluri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.00, -20.00, -455.00)
+gizmo_extents = 105.0
+script = ExtResource("17_hollow")
+radius_m = 25.0
+wall_m = 80.0
 
 [node name="Hazarduri" type="Node3D" parent="."]
 

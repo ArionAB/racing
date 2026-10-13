@@ -132,8 +132,17 @@ Rundele:
 - `check_glb_anims.py ... Idle Walk Stand`: `OK`, `skins=1`.
 - `verify_transfagarasan.sh`: am adăugat secțiunea „valul 1, tf-c”, cu `check` pe
   urs plus `check_glb_anims`. → **`VERDICT KIT: OK`**.
-- Sonda Godot (temporară, `tools/_probe_bear_tmp.gd`, necomisă): vezi „Stare la
-  oprire”.
+- **Sonda Godot** (temporară, ștearsă după rulare), după `--import` în worktree:
+  - un singur `AnimationPlayer`, cu clipurile `Idle` 2,000 s, `Stand` 1,167 s și
+    `Walk` 1,167 s, fiecare cu 18 piste. Importul le lasă one-shot (`loop_mode` 0);
+  - după bucla pusă ca în `_hook_animation`, `Walk` e `LOOP_LINEAR`;
+  - scheletul chiar deformează: între începutul și capătul lui `Stand`, `Hips` se
+    rotește cu 60,0°, iar `Chest` se mută cu 0,27 m. Prima variantă a sondei citea
+    `get_bone_global_pose` imediat după `seek` și dădea delta 0. Poza globală nu
+    se reîmprospătează în același tick, așa că sonda citește acum poza locală
+    (memoria `sonda-masura-alt-obiect`);
+  - AABB-ul mesh-ului e 1,00 × 1,39 × 2,58 m, iar rădăcina are scala 1, deci
+    colizorul din `SlidingHazard` iese la mărimea reală.
 
 ## Stare la oprire
 

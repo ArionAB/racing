@@ -1,9 +1,9 @@
 """Transfagarasan -- FUNDALUL (kit docs/asset_briefs/transfagarasan_kit.md §1.8, val 3, tf-g).
 
   transfagarasan/effects/transfagarasan_horizon.glb   6 noduri, copii directi ai radacinii:
-    FagarasRidge_A  creasta zimtata, 230 m, VARFUL DOMINANT (Negoiu, 70 m)
-    FagarasRidge_B  creasta zimtata, 190 m
-    FagarasRidge_C  creasta zimtata, 165 m
+    FagarasRidge_A  creasta-perete cu 13 dinti, 230 m, dintele dominant Negoiu (+17%)
+    FagarasRidge_B  creasta-perete cu 12 dinti, 190 m
+    FagarasRidge_C  creasta-perete cu 12 dinti, 165 m
     CloudSea_A      marea de nori, 280 m
     CloudSea_B      marea de nori, 220 m
     FagarasPlain_A  Tara Fagarasului: 300 x 120 m de campuri si palcuri
@@ -17,9 +17,9 @@ CE VEDE JUCATORUL (memoriile `verifica-cu-parametrii-lui`, `munte-flanc-nu-funda
 joc sta la 10 m, priveste in jos ~29 grade (tinta la 5 m in fata, 0,4 m sus) cu fov vertical
 68, deci marginea de SUS a cadrului e la doar +5,3 grade peste orizont: la 300 m, ~38 m peste
 cota drumului. Creasta se citeste din banda de jos si de la mijloc: poalele verzi, flancurile
-de sist, SAUA dintre varfuri, caldarile cu zapada. De aceea fiecare creasta are saile adanci
-(40-55% din inaltimea varfurilor) si dinti secundari de 20-28 m: la 25-35 m deasupra bazei
-silueta trebuie sa fie deja zimtata, nu doar varfurile de 60-70 m, pe care cadrul le taie.
+de sist, SAUA dintre varfuri, caldarile cu zapada. Reluare tf-g2: creasta e un PERETE CONTINUU cu 12-13 dinti (sei de doar 16-24%), coaste oblice,
+caldari cu zapada si limbi verzi (nu ace izolate); norii sunt GRAMEZI de cumulus inalte (nu
+pietricele pe o placa). Dintii de 25-35 m deasupra bazei se citesc in banda pe care o vede camera.
 
 Sloturi (kit §0, tabelul "fundalul"): MARBLE_GREY 29 (sistul) + FOAM_WHITE 22 (zapada) +
 TROPICAL_GREEN 21 / CACTUS_GREEN 12 (poalele) pe creasta; FOAM_WHITE pe nori; TROPICAL_GREEN,
@@ -141,169 +141,312 @@ def _heightfield_solid(b, nu, nv, L, W, height_fn, jitter, seed, tone_of=None):
 
 
 # ---------------------------------------------------------------------------
-# CREASTA
+# CREASTA (reluare tf-g2: perete continuu cu dinti, nu ace izolate)
 # ---------------------------------------------------------------------------
 
-def _ridge(name, seed, L, W, summits, teeth, cirques, base_h=7.0):
-    """`fagaras_ridge` (decuparea `fagaras_ridge.png`) -- LISTA DE ELEMENTE pe o bucata:
+# Anvelopa crestei, EXTRASA din decuparea `fagaras_ridge.png` (silueta de sus pe 200 de
+# coloane, 0-100, max = 100; coloanele 11..588 din 602). E o CURBA LENTA (clopot: ~55% la
+# capete, 100% la mijloc); dintii o modeaza in `_crest_knots`. Silueta bruta a decuparii are
+# doar ~7 crestaturi (dintii din spate se suprapun peste cei din fata, vedere de sus ~25
+# grade): numarul de dinti (12-15) vine din verdictul coordonatorului, nu din aceasta curba.
+ENV = [12, 44, 49, 53, 53, 55, 56, 57, 57, 58, 60, 63, 64, 66, 69, 69, 70, 70, 70, 68, 67, 69,
+       71, 72, 73, 75, 76, 78, 80, 80, 80, 79, 79, 76, 74, 74, 73, 74, 76, 78, 79, 80, 79, 79,
+       79, 80, 82, 83, 86, 88, 89, 89, 89, 88, 88, 88, 86, 84, 84, 88, 88, 90, 91, 91, 91, 89,
+       89, 88, 87, 85, 83, 82, 81, 81, 82, 83, 84, 84, 84, 82, 80, 78, 77, 77, 76, 74, 75, 76,
+       78, 78, 76, 76, 77, 78, 79, 80, 84, 86, 86, 84, 84, 84, 84, 86, 87, 90, 91, 93, 95, 96,
+       97, 95, 94, 94, 94, 93, 93, 93, 91, 91, 91, 90, 92, 93, 93, 92, 94, 94, 96, 97, 98, 99,
+       100, 99, 98, 96, 95, 94, 92, 91, 91, 91, 89, 88, 87, 85, 84, 83, 83, 79, 77, 79, 80, 80,
+       81, 79, 78, 76, 74, 74, 74, 74, 73, 71, 73, 74, 75, 77, 77, 78, 76, 74, 73, 71, 70, 68,
+       66, 67, 68, 68, 67, 64, 64, 64, 64, 61, 60, 57, 57, 58, 58, 60, 60, 61, 60, 58, 57, 54,
+       54, 54]
+ENV_FLAT = 0.40      # env' = 0,40 + 0,60 * env: pe decupare clopotul e umflat de perspectiva
+                     # (vedere de sus); verdictul cere perete aproape la aceeasi cota
 
-    - `summits` = varfurile: fiecare (x, y, inaltime, raza) -> con concav (profil
-      (1 - r/R(theta))^p, p ~1,3-1,6) cu 2 ARETE lungi pe directia crestei (cos 2theta) si
-      1-3 contraforturi laterale (cos 3theta, faza proprie). Sailor dintre varfuri
-      cad la 40-55% din inaltimea varfurilor.
-    - `teeth` = dintii secundari (gendarmi) de 20-28 m pe arete, intre varfuri: silueta
-      ramane zimtata si in banda de 25-35 m pe care o vede camera.
-    - `cirques` = CALDARILE GLACIARE: scobituri (centru x, y, raza, adancime) in flancuri,
-      pe sub varfuri; podeaua lor si jgheaburile inalte, line, iau FOAM_WHITE.
-    - poalele: un brau de contrafort verde (TROPICAL_GREEN, 28% CACTUS_GREEN) pana la
-      ~15 m, cu ramasite de sist unde panta e abrupta.
-    - zapada si pe fetele line de sub creasta (praguri de panta crescatoare cu cota).
-    Plan: elipsa L x W (corp INCHIS), baza plata, 3 bucati: A cu varful dominant (Negoiu).
-    Facetele: grila de ~3,5 m cu jitter, diagonala pe creasta, AO plat pe fateta.
-    """
-    b = Builder()
-    nu = int(round(L / 3.6))
-    nv = int(round(W / 3.6))
-    hmax = max(s[2] for s in summits)
+RIDGE_SIL = {}
+
+
+def _env_fn(lo, hi, mirror):
+    n = len(ENV) - 1
+
+    def f(xn):
+        if mirror:
+            xn = 1.0 - xn
+        p = max(0.0, min(1.0, lo + (hi - lo) * xn)) * n
+        i = max(0, min(n - 1, int(p)))
+        fr = p - i
+        return ENV_FLAT + (1.0 - ENV_FLAT) * (ENV[i] * (1.0 - fr) + ENV[i + 1] * fr) / 100.0
+    return f
+
+
+def _crest_knots(L, n, seed, nego_frac=None):
+    """Profilul DINTILOR ca linie franta: noduri (x, K, w). `K` = factorul de inaltime (dinte
+    ~1,0; sa dintre doi dinti = 0,76-0,84 din cel mai mic), `w` = 0 pe dinte, 1 pe sa (da mai
+    tarziu coastele si jgheaburile). `n` dinti triunghiulari pe `L * 0,90`."""
     rnd = _lcg(seed)
-    S = []
-    for (sx, sy, H, R) in summits:
-        S.append((sx, sy, H, R, rnd() * 6.28, 0.22 + rnd() * 0.22, 1.30 + rnd() * 0.22))
-    T = []
-    for (sx, sy, H, R) in teeth:
-        T.append((sx, sy, H, R, rnd() * 6.28, 0.30, 1.15))
+    half = L * 0.5
+    span = L * 0.90
+    pitch = span / n
+    cs = [-span * 0.5 + (i + 0.5) * pitch + (rnd() - 0.5) * 0.34 * pitch for i in range(n)]
+    hts = [0.97 + rnd() * 0.03 for _ in range(n)]
+    if nego_frac is not None:
+        # Negoiu: dinte cu ~17% mai inalt decat vecinii (masa, nu ac), la anvelopa maxima
+        xm = -half + L * nego_frac
+        j = min(range(n), key=lambda q: abs(cs[q] - xm))
+        hts[j] = 1.17
+    knots = [(-half, hts[0] * 0.80, 1.0)]
+    for i in range(n):
+        knots.append((cs[i], hts[i], 0.0))
+        if i + 1 < n:
+            depth = 0.16 + 0.08 * rnd()
+            m = cs[i] + (cs[i + 1] - cs[i]) * (0.5 + (rnd() - 0.5) * 0.24)
+            lo_h, hi_h = min(hts[i], hts[i + 1]), max(hts[i], hts[i + 1])
+            knots.append((m, (lo_h + 0.40 * (hi_h - lo_h)) * (1.0 - depth), 1.0))
+    knots.append((half, hts[-1] * 0.80, 1.0))
+    return knots
+
+
+def _knot_eval(knots, u):
+    if u <= knots[0][0]:
+        return knots[0][1], knots[0][2]
+    for k in range(len(knots) - 1):
+        a, c = knots[k], knots[k + 1]
+        if u <= c[0]:
+            fr = (u - a[0]) / max(c[0] - a[0], 1e-6)
+            return a[1] + (c[1] - a[1]) * fr, a[2] + (c[2] - a[2]) * fr
+    return knots[-1][1], knots[-1][2]
+
+
+def _peaks(col, step, off, minprom):
+    """Maxime locale cu proeminenta >= minprom pe profilul de coloane `col`."""
+    nb = len(col)
+    pk = []
+    for i in range(1, nb - 1):
+        if col[i] >= col[i - 1] and col[i] > col[i + 1]:
+            l = i
+            while l > 0 and col[l - 1] <= col[i]:
+                l -= 1
+            r = i
+            while r < nb - 1 and col[r + 1] <= col[i]:
+                r += 1
+            drops = []
+            if l > 0:
+                drops.append(col[i] - min(col[l:i + 1]))
+            if r < nb - 1:
+                drops.append(col[i] - min(col[i:r + 1]))
+            if not drops:
+                drops = [col[i] - min(col)]
+            pr = min(drops)
+            if pr >= minprom:
+                pk.append((round((i + 0.5) * step - off), round(col[i], 1), round(pr, 1)))
+    return pk
+
+
+def _ridge(name, seed, L, W, n_teeth, h_target, win, mirror, nego_frac=None, base_h=6.0):
+    """`fagaras_ridge` (decuparea `fagaras_ridge.png`), reluare tf-g2 -- LISTA DE ELEMENTE pe o
+    bucata (SILUETA INTAI, apoi fatetarea):
+
+    1. LINIA CRESTEI = un PERETE CONTINUU: anvelopa extrasa din decupare (`ENV`, comprimata la
+       0,40 + 0,60 env) x un profil de `n_teeth` (12-13) DINTI TRIUNGHIULARI, de 14-18 m
+       latime; sailor dintre ei coboara DOAR 16-24% din inaltimea dintelui (nu pana la poale).
+       Un singur dinte (Negoiu, doar pe A) e cu ~17% mai inalt decat vecinii: masa, nu ac.
+       In plan creasta ondulata +-2,5 m, culmea plata de ~2,4 m.
+    2. COASTE de stanca: de la fiecare dinte pleaca oblic spre poale (evantai: 0,85 x x/(L/2)
+       + 0,30 pe fata) o muchie ingusta (w < 0,25 din semi-latimea dintelui); flancul spre +X
+       in umbra (ton ~0,5), cel spre -X luminat.
+    3. CALDARI / CULOARE: intre coaste, scobituri largi (w 0,25-0,9), tot mai adanci spre poale
+       (pana la 55% din inaltimea locala): `FOAM_WHITE` pe ~35-45% din fata de sus (masurat).
+    4. Verdele (TROPICAL_GREEN, 30% CACTUS_GREEN) in LIMBI sub coaste, in treimea de jos
+       (pana la 4 + 17 m, mai sus sub coaste, mai jos in culoar) + brau de poala de 6 m.
+    Plan: elipsa L x W (corp INCHIS), baza plata; grila ~2,0 x 2,4 m, diagonala pe creasta,
+    AO plat pe fateta. Sloturi: MARBLE_GREY, FOAM_WHITE, TROPICAL_GREEN, CACTUS_GREEN."""
+    b = Builder()
+    half = L * 0.5
+    nu = int(round(L / 2.0))
+    nv = int(round(W / 2.4))
+    env = _env_fn(win[0], win[1], mirror)
+    knots = _crest_knots(L, n_teeth, seed, nego_frac)
+    peak = max(env(q / 2000.0) * _knot_eval(knots, -half + L * q / 2000.0)[0]
+               for q in range(2001))
+    Hs = h_target / peak
+    rw = W * 0.5 * 0.93
+
+    def field(x, y):
+        yc = 2.5 * _vn(x * 0.04, 0.0, seed)
+        d = abs(y - yc)
+        side = 1.0 if y >= yc else -1.0
+        xn = max(-1.0, min(1.0, x / half))
+        u = max(-half, min(half, x - (0.85 * xn + 0.30 * side) * d))
+        K, w = _knot_eval(knots, u)
+        e = env((u + half) / L)
+        t = min(1.0, max(0.0, d - 1.2) / rw)
+        return Hs * e * K, w, t
 
     def height(x, y, rho):
-        sk = base_h * _sm(1.0, 0.78, rho) * (0.85 + 0.30 * _vn(x * 0.05, y * 0.05, seed))
-        m = 0.0
-        for (sx, sy, H, R, ph, spur, p) in S + T:
-            dx, dy = x - sx, y - sy
-            r = math.hypot(dx, dy)
-            th = math.atan2(dy, dx)
-            Rt = R * (1.0 + 0.50 * math.cos(2.0 * th) + spur * math.cos(3.0 * th + ph))
-            if r < Rt:
-                m = max(m, H * (1.0 - r / Rt) ** p)
-        m *= _sm(1.04, 0.80, rho)
-        h = max(sk, m)
-        for (cx, cy, Rc, dep) in cirques:
-            d = math.hypot(x - cx, y - cy) / Rc
-            if d < 1.0:
-                h = max(sk * 0.92, h - dep * _sm(1.0, 0.40, d))
-        return h * (1.0 + 0.045 * _vn(x * 0.23, y * 0.31, seed + 3))
+        hc, w, t = field(x, y)
+        gl = _sm(0.25, 0.90, w)
+        gd = 0.55 * _sm(0.04, 0.75, t)
+        h = hc * (1.0 - t) ** 1.2 * (1.0 - gd * gl)
+        h *= 1.0 + 0.03 * _vn(x * 0.31, y * 0.27, seed + 3)
+        h *= 0.22 + 0.78 * _sm(1.0, 0.86, rho)
+        sk = base_h * _sm(1.0, 0.72, rho) * (0.85 + 0.30 * _vn(x * 0.05, y * 0.05, seed))
+        return max(h, sk)
 
-    faces = _heightfield_solid(b, nu, nv, L, W, height, 0.30, seed)
+    faces = _heightfield_solid(b, nu, nv, L, W, height, 0.18, seed)
+    hmax = max(v.co.z for v in b.bm.verts)
+
+    def glt(c):
+        _, w, t = field(c.x, c.y)
+        return _sm(0.25, 0.90, w), t
 
     def snow(c, n):
-        zf = c.z / hmax
-        if c.z > 10.0 and n.z > 0.28:
-            for (cx, cy, Rc, dep) in cirques:
-                if math.hypot(c.x - cx, c.y - cy) < 0.82 * Rc:
-                    return True
+        gl, t = glt(c)
         hs = _h01(c.x * 0.31, c.y * 0.27, seed)
-        if c.z > 0.16 * hmax and n.z > 0.52 - 0.40 * zf:
-            return hs < 0.88
-        return c.z > 0.26 * hmax and n.z > 0.25 and hs < 0.30
+        zf = c.z / hmax
+        if gl > 0.30 and zf > 0.20 and n.z > 0.18:
+            return hs < 0.93
+        return zf > 0.55 and n.z > 0.55 and hs < 0.22
 
     def green(c, n):
-        return (c.z < 10.0 and n.z > 0.62) or c.z < 3.5
+        gl, t = glt(c)
+        hs = _h01(c.x * 0.19, c.y * 0.23, seed + 9)
+        gz = 4.0 + 17.0 * (1.0 - gl) * (0.70 + 0.60 * hs)
+        return (c.z < gz and n.z > 0.30) or c.z < 3.0
 
     b.retag(faces, ROCK)
     b.retag(faces, SNOW, where=snow)
     b.retag(faces, GRASS, where=lambda c, n: green(c, n) and not snow(c, n))
     b.retag(faces, GRASS2, where=lambda c, n: (green(c, n) and not snow(c, n)
-                                               and (_h01(c.x, c.y, seed + 5) < 0.30
-                                                    or c.z > 7.5)))
+                                               and _h01(c.x, c.y, seed + 5) < 0.30))
     tone = b.bm.faces.layers.float.new("tone")
     b.bm.normal_update()
+    cov = {1: [0.0, 0.0], -1: [0.0, 0.0]}
     for f in b.bm.faces:
         n = f.normal
-        f[tone] = 0.50 + 0.50 * max(0.0, min(1.0, (n.z - 0.15) / 0.75)) ** 0.8 if f[b.slot] != SNOW else 0.92
+        lit = 1.0 - _sm(-0.35, 0.35, n.x)            # flancul spre +X in umbra
+        if f[b.slot] == SNOW:
+            f[tone] = 0.78 + 0.18 * lit
+        else:
+            slope = max(0.0, min(1.0, (n.z - 0.15) / 0.75)) ** 0.8
+            f[tone] = (0.48 + 0.20 * slope) * (0.45 + 0.55 * lit)
+        c = f.calc_center_median()
+        if c.z > 0.30 * hmax and abs(n.y) > 0.05:
+            s = 1 if n.y > 0 else -1
+            ar = f.calc_area() * abs(n.y)
+            cov[s][0] += ar
+            if f[b.slot] == SNOW:
+                cov[s][1] += ar
+    # silueta masurata pe FUNCTIA de inaltime: maximul pe y, la pas de 1,15 m in x
+    nb = int(L / 1.15)
+    col = []
+    for k in range(nb):
+        x = -half + (k + 0.5) * L / nb
+        col.append(max(height(x, yy, math.hypot(x / half, yy / (W * 0.5)))
+                       for yy in [-9.0 + 0.75 * q for q in range(25)]))
+    pk = _peaks(col, L / nb, half, 0.025 * hmax)
+    sad = col[int(nb * 0.1):int(nb * 0.9)]
+    print("RIDGE %s: hmax %.1f; zapada pe fata de sus (z>30%% hmax) +Y %.0f%%, -Y %.0f%%; "
+          "dinti %d; sa minima 10-90%% din lungime %.1f m = %.0f%% din hmax"
+          % (name, hmax, 100.0 * cov[1][1] / max(cov[1][0], 1e-6),
+             100.0 * cov[-1][1] / max(cov[-1][0], 1e-6), len(pk), min(sad),
+             100.0 * min(sad) / hmax))
+    print("  dinti (x, cota, proeminenta): %s" % pk)
+    RIDGE_SIL[name] = (nb, col, hmax, L)
     return settle(b, name)
 
 
 def build_ridge_a():
-    """FagarasRidge_A (Negoiu) -- LISTA: elipsa 230 x 66 m; 8 VARFURI (36, 44, 52, **70 =
-    varful dominant, ingust, la x -8**, 50, 46, 40, 30 m); 3 DINTI secundari (24, 27, 22 m);
-    3 CALDARI (R 18-22 m, adancimi 10-14 m) pe flancuri, sub varfurile 3, 4 si 6."""
-    summits = [(-100, 3, 36, 24), (-72, -5, 44, 27), (-44, 5, 52, 29), (-8, -1, 70, 33),
-               (24, -5, 50, 28), (52, 6, 46, 27), (78, -3, 40, 25), (100, 2, 30, 21)]
-    teeth = [(-58, 8, 24, 11), (8, 8, 27, 12), (66, -9, 22, 10)]
-    cirques = [(-46, 19, 20, 12), (12, -19, 22, 14), (54, 19, 18, 10)]
-    return _ridge("FagarasRidge_A", 9101, 230.0, 66.0, summits, teeth, cirques)
+    """FagarasRidge_A (Negoiu) -- LISTA: 230 x 66 m, creasta 67 m max; 13 dinti pe perete
+    continuu, sa 16-24%; Negoiu = dintele din anvelopa maxima (la ~65% din lungime), +17%."""
+    return _ridge("FagarasRidge_A", 9101, 230.0, 66.0, 13, 66.0, (0.012, 1.0), False, 0.65)
 
 
 def build_ridge_b():
-    """FagarasRidge_B -- LISTA: elipsa 190 x 60 m; 6 VARFURI (42, 54, 46, 58, 44, 34 m);
-    3 DINTI secundari (24, 26, 21 m); 2 CALDARI (R 19 si 17 m, adancimi 12 si 10 m)."""
-    summits = [(-66, 3, 42, 26), (-36, -4, 54, 29), (-4, 4, 46, 27), (28, -3, 58, 31),
-               (58, 5, 44, 26), (78, -2, 34, 22)]
-    teeth = [(-50, -9, 24, 11), (12, 9, 26, 11), (44, -8, 21, 10)]
-    cirques = [(-22, -19, 19, 12), (44, 18, 17, 10)]
-    return _ridge("FagarasRidge_B", 9202, 190.0, 60.0, summits, teeth, cirques)
+    """FagarasRidge_B -- LISTA: 190 x 60 m, creasta ~52 m; 12 dinti, aceeasi lege; anvelopa
+    decuparii oglindita, ferestruita 1-86% (alta ordine a dintilor decat A); fara dinte
+    dominant."""
+    return _ridge("FagarasRidge_B", 9202, 190.0, 60.0, 12, 51.0, (0.012, 0.86), True)
 
 
 def build_ridge_c():
-    """FagarasRidge_C -- LISTA: elipsa 165 x 56 m; 7 VARFURI (34, 42, 52, 44, 56, 40, 32 m);
-    2 DINTI secundari (22, 25 m); 2 CALDARI (R 17 si 16 m, adancimi 10 si 9 m)."""
-    summits = [(-64, 2, 34, 22), (-42, -4, 42, 24), (-18, 4, 52, 27), (6, -3, 44, 25),
-               (30, 4, 56, 28), (54, -2, 40, 24), (70, 2, 32, 20)]
-    teeth = [(-30, -9, 22, 10), (42, 9, 25, 11)]
-    cirques = [(-8, 17, 17, 10), (44, -17, 16, 9)]
-    return _ridge("FagarasRidge_C", 9303, 165.0, 56.0, summits, teeth, cirques)
+    """FagarasRidge_C -- LISTA: 165 x 56 m, creasta ~54 m; 12 dinti; anvelopa 14-100%."""
+    return _ridge("FagarasRidge_C", 9303, 165.0, 56.0, 12, 54.0, (0.14, 1.0), False)
 
 
 # ---------------------------------------------------------------------------
-# MAREA DE NORI
+# MAREA DE NORI (reluare tf-g2: gramezi de cumulus, nu pietricele pe o placa)
 # ---------------------------------------------------------------------------
 
-def _cloud(name, seed, L, W, n_lumps, slab_h, top_hi):
-    """`cloud_sea` (decuparea `cloud_sea.png`) -- LISTA DE ELEMENTE pe o bucata:
-    - UN STRAT PLAT (placa fatetata, elipsa L x W, `slab_h` m grosime, 28 laturi, 4 inele);
-    - `n_lumps` BULGARI rotunzi (fatete late: 9 laturi x 4 inele), raze 15-29 m pe X, 70-100%
-      pe Y, varfurile intre slab_h si `top_hi` (cele din centru mai inalte); ~40% sunt asezati
-      pe MUCHIA placii, ca bulgarii sa iasa in contur;
-    - toti pe FOAM_WHITE, corpuri inchise, baza la z=0 (fundul plat, in vale)."""
+def _cloud(name, seed, L, W, n_heaps, slab_h, top_hi):
+    """`cloud_sea` (decuparea `cloud_sea.png`), reluare tf-g2 -- LISTA DE ELEMENTE pe o bucata:
+
+    1. BAZA: o placa joasa (`slab_h` = 3 m, elipsa 0,90 L x 0,80 W, fatetata, ton 0,55: fundul
+       mai intunecat care se vede prin goluri).
+    2. `n_heaps` (8 pe A, 7 pe B) GRAMEZI de cumulus, in ZIGZAG de-a lungul lungimii (y = +-0,20
+       W, jitter +-0,10 W), diametrul gramezii D = 1,15 x pasul L/n: vecinele se ating in
+       proiectie, dar in plan raman VAI intre randuri si goluri neregulate.
+    3. Fiecare gramada: un BULGARE PRINCIPAL (raza 0,26 D, varful `top_hi` x 0,75-1,00, aspect
+       inaltime/diametru ~0,7-0,9) si 4-5 SATELITI la 0,28-0,36 D de centru (raza 0,16-0,20 D,
+       varful 50-75% din principal, aspect ~0,55-0,9): se suprapun in COCOASE cu SEI de 4-9 m.
+    4. Toti bulgarii: dom inchis (10 laturi x 4 inele + varf), fundul la z=0, FOAM_WHITE;
+       tonul copt: fete de sus 1,0, flancuri spre +X mai intunecate, poala intunecata."""
     b = Builder()
     rnd = _lcg(seed)
     rx0, ry0 = L * 0.5, W * 0.5
     prof = [(0.0, 1.0), (0.38, 1.0), (0.82, 0.90), (1.0, 0.72)]
-    rings = [(slab_h * t, rx0 * f, ry0 * f, 0.0, 0.0) for t, f in prof]
+    rings = [(slab_h * t, rx0 * 0.90 * f, ry0 * 0.80 * f, 0.0, 0.0) for t, f in prof]
     pts, _ = ring_points(rings, 28, seed + 1, 0.06)
     faceted_shell(b, pts, SNOW)
-    placed = 0
-    guard = 0
-    while placed < n_lumps and guard < 2000:
-        guard += 1
-        if placed < int(n_lumps * 0.4):
-            a = rnd() * 2.0 * math.pi
-            k = 0.82 + rnd() * 0.20            # pe muchie sau chiar peste ea
-        else:
-            a = rnd() * 2.0 * math.pi
-            k = math.sqrt(rnd()) * 0.80
-        cx, cy = math.cos(a) * rx0 * k, math.sin(a) * ry0 * k
-        rho = math.hypot(cx / rx0, cy / ry0)
-        rx = 15.0 + rnd() * 14.0
-        ry = rx * (0.70 + rnd() * 0.30)
-        top = slab_h + (top_hi - slab_h) * (0.15 + 0.85 * rnd()) * (1.0 - 0.30 * rho)
-        hl = 9.0 + rnd() * 5.0
-        z0 = max(0.0, top - hl)
-        hl = top - z0
-        lring = [(z0 + hl * t, rx * f, ry * f, cx, cy)
-                 for t, f in ((0.0, 0.94), (0.25, 1.0), (0.60, 0.80), (0.88, 0.44))]
-        lp, _ = ring_points(lring, 9, seed * 7 + placed, 0.10)
+    pitch = L / n_heaps
+    D = pitch * 1.15
+    lumps = []
+    for hi in range(n_heaps):
+        cx = -L * 0.5 + (hi + 0.5) * pitch + (rnd() - 0.5) * 0.16 * pitch
+        cy = (0.20 if hi % 2 == 0 else -0.20) * W + (rnd() - 0.5) * 0.20 * W
+        top = top_hi * (0.75 + 0.25 * rnd())
+        lumps.append((cx, cy, D * (0.25 + 0.02 * rnd()), top))
+        ns = 4 + int(rnd() * 1.99)
+        a0 = rnd() * 6.283
+        for q in range(ns):
+            ang = a0 + 6.283 * (q + 0.35 * (rnd() - 0.5)) / ns
+            dist = D * (0.28 + 0.08 * rnd())
+            sx = cx + math.cos(ang) * dist
+            sy = max(-0.33 * W, min(0.33 * W, cy + math.sin(ang) * dist * 0.85))
+            lumps.append((sx, sy, D * (0.16 + 0.04 * rnd()), top * (0.50 + 0.25 * rnd())))
+    for li, (cx, cy, rx, top) in enumerate(lumps):
+        ry = rx * (0.86 + 0.14 * rnd())
+        lring = [(top * t, rx * f, ry * f, cx, cy)
+                 for t, f in ((0.0, 0.94), (0.28, 1.0), (0.62, 0.82), (0.88, 0.46))]
+        lp, _ = ring_points(lring, 10, seed * 7 + li, 0.10)
         faceted_shell(b, lp, SNOW, top_pt=Vector((cx, cy, top)))
-        placed += 1
+    tone = b.bm.faces.layers.float.new("tone")
+    b.bm.normal_update()
+    for f in b.bm.faces:
+        n = f.normal
+        c = f.calc_center_median()
+        up = max(0.0, min(1.0, (n.z + 0.1) / 0.9))
+        base = 0.50 + 0.50 * up
+        lit = 1.0 - 0.22 * _sm(-0.2, 0.6, n.x)
+        foot = 0.62 + 0.38 * _sm(0.0, 9.0, c.z)
+        f[tone] = base * lit * foot if c.z > slab_h else 0.55
+    nb = int(L / 2.0)
+    col = [0.0] * nb
+    for v in b.bm.verts:
+        k = min(nb - 1, max(0, int((v.co.x + rx0) / L * nb)))
+        col[k] = max(col[k], v.co.z)
+    pk = _peaks(col, L / nb, rx0, 3.0)
+    print("CLOUD %s: %d bulgari in %d gramezi; cocoase (prom >= 3 m) %d: %s; sa min %.1f m, max %.1f m"
+          % (name, len(lumps), n_heaps, len(pk), pk, min(col[2:-2]), max(col)))
     return settle(b, name)
 
 
 def build_cloud_a():
-    """CloudSea_A -- 280 x 70 m, placa de 6 m, 62 bulgari (raze 15-29 m), varfuri pana la 15 m."""
-    return _cloud("CloudSea_A", 9411, 270.0, 66.0, 62, 4.0, 15.0)
+    """CloudSea_A -- 270 x ~66-80 m, baza 3 m, 8 gramezi, varfuri pana la ~18 m."""
+    return _cloud("CloudSea_A", 9411, 270.0, 66.0, 8, 3.0, 18.0)
 
 
 def build_cloud_b():
-    """CloudSea_B -- 220 x 60 m, placa de 5 m, 48 bulgari, varfuri pana la 13 m."""
-    return _cloud("CloudSea_B", 9512, 210.0, 58.0, 48, 4.0, 13.0)
+    """CloudSea_B -- 210 x ~58-72 m, baza 3 m, 7 gramezi, varfuri pana la ~16 m."""
+    return _cloud("CloudSea_B", 9512, 210.0, 58.0, 7, 3.0, 16.0)
 
 
 # ---------------------------------------------------------------------------
@@ -456,6 +599,15 @@ def emit(obj, ao):
     _apply_tone(obj)
     d = obj.dimensions
     results.append((obj.name, st["tris"], d.x, d.y, d.z))
+    if obj.name == "FagarasPlain_A":      # amprenta: garda "campia ramane identica" (tf-g2)
+        import hashlib
+        me = obj.data
+        hh = hashlib.sha1()
+        for v in me.vertices:
+            hh.update(("%.3f,%.3f,%.3f;" % (v.co.x, v.co.y, v.co.z)).encode())
+        for ca in me.color_attributes["AO"].data:
+            hh.update(("%.3f;" % ca.color[0]).encode())
+        print("PLAIN_HASH", hh.hexdigest(), len(me.vertices), len(me.polygons))
     return obj
 
 

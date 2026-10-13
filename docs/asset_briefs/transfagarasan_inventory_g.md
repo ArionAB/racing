@@ -8,15 +8,15 @@ Axe: Blender X lateral, Y adâncime, Z sus. Cote MĂSURATE pe GLB (`verify_glb.p
 
 Șase noduri, copii direcți ai rădăcinii, fiecare un corp închis (elipsă / dreptunghi + evantai de bază la z=0),
 originea la bază (XY centrat pe bbox, Z min = 0), scala aplicată (garda din `verify_transfagarasan.sh`),
-un singur material (atlas). Fără excepții de verificare. Total **18 382 tri**.
+un singur material (atlas). Fără excepții de verificare. Total **26 634 tri** (era 18 382; `FagarasPlain_A` neschimbată: 4 008).
 
 | nod | L × l × h (m) | tri | sloturi | contract |
 |---|---|---:|---|---|
-| `FagarasRidge_A` (Negoiu) | 230,0 × 66,0 × 67,5 | 2 468 | MARBLE_GREY 29, FOAM_WHITE 22, TROPICAL_GREEN 21, CACTUS_GREEN 12 | 160–240 × 45–70: OK |
-| `FagarasRidge_B` | 189,9 × 60,0 × 50,4 | 1 942 | idem | OK |
-| `FagarasRidge_C` | 165,0 × 56,0 × 52,1 | 1 596 | idem | OK |
-| `CloudSea_A` | 302,3 × 101,1 × 13,9 | 4 688 | FOAM_WHITE 22 | 200–300 × 8–15: lungime +2%, lățime 101 m (bulgării de pe margine ies din placa de 66 m) |
-| `CloudSea_B` | 240,5 × 101,3 × 11,0 | 3 680 | FOAM_WHITE 22 | OK (aceeași notă de lățime) |
+| `FagarasRidge_A` (Negoiu) | 230,0 × 66,0 × 64,5 | 6 726 | MARBLE_GREY, FOAM_WHITE, TROPICAL_GREEN, CACTUS_GREEN | 160–240 × 45–70: OK |
+| `FagarasRidge_B` | 190,0 × 60,0 × 50,0 | 4 990 | idem | OK |
+| `FagarasRidge_C` | 165,0 × 56,0 × 53,1 | 3 982 | idem | OK |
+| `CloudSea_A` | 270,8 × 57,7 × 17,1 | 3 744 | FOAM_WHITE 22 | 200–300 × 8–15: grosime 17,1 (voit, verdictul tf-g2 permite ~18 m; stau sub drum) |
+| `CloudSea_B` | 210,4 × 50,5 × 15,7 | 3 184 | FOAM_WHITE 22 | idem, 15,7 |
 | `FagarasPlain_A` | 300,0 × 120,0 × 10,7 | 4 008 | TROPICAL_GREEN 21, CACTUS_GREEN 12, DRY_VEGETATION 13 | 300 × 120: OK; relief teren 1,6–4,2 m, 10,7 cu palcurile |
 
 Umbrire plată (`flat_ao`), plus ton per fațetă (pantă la creastă; petice și palcuri la câmpie), copt în AO.
@@ -29,22 +29,26 @@ Materiale per pistă: GLB-ul adaugă 1 (atlasul). Clasa de integrare: **`horizon
 Comparații: `docs/asset_briefs/img/transfagarasan_fidelity/fagaras_ridge.png`, `cloud_sea.png`,
 `fagaras_plain.png`, plus `*_views.png`.
 
-### Creasta (`fagaras_ridge`, randat FagarasRidge_A)
-| element | pe planșă | în GLB | verdict |
+### Creasta (`fagaras_ridge`, randat FagarasRidge_A) — reluare tf-g2
+| element | pe planșă / în verdict | în GLB | verdict |
 |---|---|---|---|
-| vârfuri | ~15 pe aceeași lungime | 8 (+3 dinți) pe bucată, 5–8 prin contract | abatere asumată (contract) |
-| vârf dominant | 2 vârfuri mai înalte, mai late | un singur corn de 70 m, mai subțire și mai ascuțit | abatere: prea spiral |
-| căldări cu zăpadă | câmpuri mari de zăpadă între vârfuri | 3 căldări + zăpadă pe fețe line; acoperire vizibil mai mică | abatere: mai puțină zăpadă |
-| poale verzi | brâu verde îngust, neregulat | brâu verde până la ~10 m, fără ținte; poalele par o farfurie la capete | OK cu rezerve |
-| contrast rock | piatră întunecată verzui, umbre adânci | gri deschis, tonul din pantă; mai plat | abatere |
-| contur / silueta | zimțată, densă | zimțată, mai rară, saua adâncă | OK |
+| linie continuă | perete, șeile coboară ~15–25% | un singur perete; șeile au 16–24% din dinte (măsurat pe funcția de înălțime, §„Măsurători”) | OK |
+| dinți | ~12–15 mărunți, triunghiulari | A 13, B 12, C 12 (maxime locale cu proeminență ≥ 2,5% din hmax) | OK |
+| Negoiu | un dinte cu ~15–20% mai înalt, nu obelisc | 65,8 m față de 57,2 și 54,5 la vecini (+15% / +21%), flancul îl face masă | OK; încă cel mai ascuțit dinte pe randare |
+| coaste | muchii oblice din dinți spre poale, fețe în umbră | evantai (0,85·x/(L/2) + 0,30 pe față), flanc +X în ton 0,45–0,60 | OK ca structură; coastele sunt mai drepte și mai regulate decât pe planșă |
+| căldări / culoare | scobituri largi cu zăpadă, între coaste | jgheaburi tot mai adânci spre poale, FOAM_WHITE; acoperire 42% (+Y și −Y) pe fața de sus (z > 30% hmax) | OK pe cifră; pe randare zăpada citește ca **dungi verticale**, nu câmpuri largi |
+| verde | limbi sub coaste, treimea de jos | limbi până la 4 + 17 m sub coaste + brâu de 6 m | OK; verdele e mai închis decât pe planșă |
+| rocă | verzui închis, umbre adânci | gri cald, ton 0,45–0,65 în umbră; mai deschis decât planșa | abatere |
+| conturul din față | zimțat | dinți pe un perete, clopot lent (capete ~70% din max) | OK |
 
-### Marea de nori (`cloud_sea`, CloudSea_A)
-| element | pe planșă | în GLB | verdict |
+### Marea de nori (`cloud_sea`, CloudSea_A) — reluare tf-g2
+| element | pe planșă / în verdict | în GLB | verdict |
 |---|---|---|---|
-| strat plat + bulgări | bulgări înalți, suprapuși, cu goluri albastre | placă de 4 m + 62 bulgări (raze 15–29 m, până la 14 m) | OK ca structură |
-| relief | turnuri înalte, văi între ele | bulgări aplatizați, relief mai jos | abatere: prea plat |
-| culoare | alb cald sus, albastru în umbră | alb-gri uniform (doar FOAM_WHITE + AO) | abatere: fără albastru |
+| grămezi | cumulus în cocoașe, 6–10 pe bucată | 8 grămezi în zigzag (y ±0,20 W) pe A, 7 pe B; 44 + 37 bulgări | OK ca număr |
+| bulgări înalți | aspect 0,6–0,9 | principal ~0,7–0,9, sateliți ~0,55–0,9, vârfuri 12–17 m | OK |
+| goluri / văi | se vede adânc, mai închis | baza de 3 m, ton 0,55, iese prin golurile dintre grămezi | abatere: golurile sunt gri, nu albastre (un singur slot FOAM_WHITE) |
+| contur de sus | cocoașe de 6–15 m cu șei | A: 12 cocoașe (proeminență ≥ 3 m), șa minimă 5,6 m; B: 9 | OK pe cifră |
+| aspect în plan | nori care umplu suprafața | bulgării acoperă ~55–60% din placă; placa e vizibil mai goală decât planșa | abatere: din 3/4 încă se citește „grămezi pe placă” |
 
 ### Câmpia (`fagaras_plain`, FagarasPlain_A)
 | element | pe planșă | în GLB | verdict |
@@ -64,13 +68,38 @@ inelul apropiat (200–230 m) pentru creastă, norii și câmpia coborâți mult
 orizontului (câmpia la 300 m și la nivelul drumului ar ocupa ~1° = 10 px).
 Presupuneri: culoarea ceții = `sky_horizon`; soarele din față-stânga (fețele spre cameră luminate).
 
-## Runde
+## Reluare (tf-g2)
 
-- Creasta: 3 (1: insulă cu fustă verde prea mare, vârfuri rare -> 2: contur dreptunghiular, poale mici, ton de
-  pantă -> 3: zăpadă mai multă). Nu a convergit la densitate/zăpadă/contrast; raportat.
-- Norii: 3 (placă + bulgari mici -> bulgari mari și mulți -> relief mai mare). Rămâne plat.
-- Câmpia: 3 (culori -> petice -> două fâșii galbene). Rămâne mai întunecată decât planșa.
-Harnasul de captură a avut un bug de materiale (`materials.clear()` reseta indicii) și de direcție a soarelui; corectate.
+Constructor nou, plecat de la verdictul coordonatorului și de la decupări, nu de la forma tf-g. Anulat: „5–8 vârfuri pe
+o bucată” (acum 12–15 dinți pe perete continuu; kit §1.8 corectat). Metodă: SILUETA ÎNTÂI.
+- Creasta: anvelopa crestei s-a EXTRAS din `fagaras_ridge.png` (200 de coloane, `ENV` în `build_tf_horizon.py`) și s-a
+  comprimat (0,40 + 0,60·env, fiindcă clopotul decupării e umflat de perspectiva de sus); dinții (`_crest_knots`) sunt
+  profilul liniar-frânt peste ea. Silueta brută a decupării are doar ~7 crestături (dinții din spate se suprapun peste cei din
+  față), deci numărul de dinți e din verdict, nu din imagine. Coastele, căldările și culorile s-au adăugat DUPĂ ce
+  silueta a stat (liste de elemente în docstring-urile `_ridge` și `_cloud`, scrise înaintea codului).
+- Norii: grămezi în zigzag, bulgări de aspect 0,55–0,9, bază joasă întunecată.
+- `FagarasPlain_A`: neatinsă. Amprentă SHA-1 pe vârfuri + AO + număr de fețe, identică înainte și după
+  (`e15697de…`, 12 024 vârfuri, 4 008 tri; se afișează la fiecare build ca `PLAIN_HASH`), dimensiuni 300,0 × 120,0 × 10,7.
+- Harnasul (`preview_tf_g.py`, `compose_tf_g.py`) nemodificat.
+
+### Măsurători (din build)
+| nod | hmax | dinți / cocoașe | șa minimă (10–90% lungime) | zăpadă pe fața de sus |
+|---|---|---|---|---|
+| A | 64,5 | 13 | 58% din hmax (e și clopotul de capăt; șeile locale 16–24%) | 42% / 42% |
+| B | 50,0 | 12 | 67% | 41% / 43% |
+| C | 53,1 | 12 | 67% | 45% / 41% |
+| CloudSea_A | 17,1 | 12 cocoașe | 5,6 m | – |
+| CloudSea_B | 15,7 | 9 cocoașe | 0 (capetele) | – |
+
+Siluetă: comparația numerică pe mască binară NU s-a făcut (silueta decupării e netedă, deci n-ar fi spus nimic despre dinți);
+s-a comparat vizual, în `fagaras_ridge.png`, și pe numere de mai sus.
+
+## Runde (tf-g2)
+
+- Creasta: 2. R1: perete cu dinți + coaste verticale, Negoiu ac îngust, rocă prea deschisă. R2: șa lângă Negoiu ridicată
+  (masă, nu ac), evantai de coaste mai înclinat (0,85 în loc de 0,5), rocă mai închisă în umbră.
+- Norii: 2. R1: 8 bulgări mici pe placă mare (pietricele). R2: grămezi de 5–6 bulgări în zigzag, placă mai mică și mai deschisă.
+- Câmpia: neatinsă (3 runde tf-g, acceptată provizoriu).
 
 ## Recomandare `horizon_rings` (tema `transfagarasan`, coordonatorul integrează)
 
@@ -82,12 +111,16 @@ Harnasul de captură a avut un bug de materiale (`materials.clear()` reseta indi
 | nori | 240–320 m | `CloudSea_A` 1×, `CloudSea_B` 1× | 1,0 | între creastă și drum, est/sud-est; **cere offset vertical −20…−30 m**: `_build_horizon` pune nodul la `ground_y − 4` fără parametru de cotă |
 | câmpia | 280–340 m | `FagarasPlain_A` 1× | 1,0 | nord, pe inel; la fel, ideal −30 m |
 
-Totalul e 6 noduri (18 k tri, 1 material). Dacă nu se adaugă un `dy` per inel, norii și câmpia se văd doar dacă
+Totalul e 6 noduri (26,6 k tri, 1 material). Dacă nu se adaugă un `dy` per inel, norii și câmpia se văd doar dacă
 terenul de acolo e deja sub cota drumului.
 
 ## Stare la oprire
 
-Livrate: GLB, build, preview, verify (`VERDICT KIT: OK`), comparații. **Neacceptat de coordonator.** Abateri
-deschise: zăpadă și contrast pe creastă; relief și culoare pe nori; culoare (galben-oliv) și dealuri de fundal pe
-câmpie; piesa de integrat cere un `dy` per inel în `_build_horizon`. Runda următoare: zăpadă pe faze mai
-abrupte în jgheaburi, a doua tentă de rocă în umbră, bulgări mai înalți cu goluri, câmpie cu petice mai deschise.
+Livrate (tf-g2): GLB reexportat, `verify_glb` OK, `verify_transfagarasan.sh` -> `VERDICT KIT: OK`, comparațiile
+(`fagaras_ridge`, `cloud_sea`, `*_views`, `horizon_game_300m`). Câmpia neschimbată.
+**Creasta**: perete continuu cu 12–13 dinți, coaste, căldări, limbi verzi: structura din verdict e acolo. **Rămân
+deschise (PROVIZORIU, 2 runde consumate):** zăpada citește ca dungi verticale, nu ca câmpuri largi între coaste;
+dinții sunt mai înalți și mai ascuțiți decât pe planșă (Negoiu cel mai mult); coastele sunt prea regulate; rocă prea deschisă;
+poalele verzi prea închise. **Norii**: grămezi, dar din 3/4 încă se citește „grămezi pe o placă”; golurile sunt gri, nu albastre;
+placa vizibilă. În joc (`horizon_game_300m.png`) norii stau sub cota drumului și se citesc ca un șir de cocoașe; creasta ca perete
+dințat. Integrarea cere tot un `dy` per inel în `_build_horizon` (v. tabelul de mai sus); cu grosimea de 17 m norii au nevoie de ~−28 m.

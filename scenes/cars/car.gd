@@ -1471,6 +1471,97 @@ func _branch_flank_trap() -> Vector2i:
 	return Vector2i.ZERO
 
 
+## Cat se mai retrage repunerea, pas cu pas, cand locul de pe axa nu e liber.
+const RESPAWN_RETRY_M: float = 4.0
+const RESPAWN_RETRY_STEPS: int = 15
+
+## Punctul de repunere de pe axa drumului, retras pana gaseste un loc LIBER.
+##
+## Axa e mereu pe carosabil si cu botul pe sensul de mers (ProbeRespawnRoad,
+## #494: 0 din 1971 de puncte in afara drumului sau deviate). Ce lipsea era
+## intrebarea „ce e ACOLO": 28 din 1971 de puncte cadeau in rampa unui kicker,
+## peste golul unei sarituri sau al podului mobil, ori intr-un hazard. Repusa
+## acolo, masina era aruncata de solver sau cadea din nou. Se cauta inapoi pe
+## traseu (mai mult elan, aceeasi ruta) din RESPAWN_RETRY_M in RESPAWN_RETRY_M
+## metri; daca nimic nu e liber, ramane primul punct — comportamentul vechi.
+##
+## Pe o BANDA (ruta deschisa), retragerea se oprea la capatul ei: indexul se
+## taie la 0, deci orice retragere mai lunga decat drumul parcurs pe banda
+## dadea acelasi punct — furca, cu roata pe muchia terenului (pe Stromboli,
+## (-226, 23, 437), unde ProbeRace arata repuneri repetate). Restul retragerii
+## continua pe bucla principala, inaintea furcii; atunci si `last_safe_*`
+## trec pe bucla, ca `respawn` sa puna masina pe ruta pe care chiar sta.
+func _clear_recovery_transform(backoff_m: float) -> Transform3D:
+	var first := Transform3D()
+	for k in RESPAWN_RETRY_STEPS:
+		var back := backoff_m + RESPAWN_RETRY_M * float(k)
+		var route_i := last_safe_route
+		var index := last_safe_index
+		if route_i != 0:
+			var br := track.route_at(route_i)
+			var along := 0.0
+			if br != null and not br.dists.is_empty():
+				along = br.dists[clampi(index, 0, br.dists.size() - 1)]
+			if br != null and not br.baked.is_empty() and back > along:
+				index = track.closest_index_global(br.baked[0], 0)
+				route_i = 0
+				back -= along
+		var t := track.recovery_transform(index, back, route_i)
+		if k == 0:
+			first = t
+		if _respawn_spot_clear(t):
+			if route_i != last_safe_route:
+				last_safe_route = route_i
+				last_safe_index = index
+			return t
+	return first
+
+
+## Locul e bun daca toate cele patru roti au sol sub ele, la cel mult 3 m (nu
+## golul unei sarituri), si daca nimic nu intra in gabaritul caroseriei — cu
+## 0,4 m de joc lateral si 0,5 m in fata/spate — de la 0,4 m peste sol in sus.
+## Sub 0,4 m e treaba rotilor (borduri, dale); peste, e rampa sau perete.
+func _respawn_spot_clear(t: Transform3D) -> bool:
+	var space := get_world_3d().direct_space_state
+	var box := _collision_shape.shape as BoxShape3D if _collision_shape != null \
+		else null
+	var size := box.size if box != null else Vector3(2.0, 1.0, 3.8)
+	var exclude: Array[RID] = [get_rid()]
+	var ground_y := INF
+	# Patru roti + centrul: podul basculant are golul CHIAR la mijloc, intre
+	# cele doua jumatati, cu rotile pe buzele lor.
+	var spots: Array[Vector2] = [Vector2(-0.45, -0.45), Vector2(0.45, -0.45),
+		Vector2(-0.45, 0.45), Vector2(0.45, 0.45), Vector2.ZERO]
+	for s in spots:
+		var top: Vector3 = t * Vector3(size.x * s.x, 1.0, size.z * s.y)
+		var q := PhysicsRayQueryParameters3D.create(top, top + Vector3.DOWN * 4.2)
+		q.exclude = exclude
+		var hit := space.intersect_ray(q)
+		if hit.is_empty():
+			return false
+		# Solul trebuie sa fie la cota DRUMULUI (axa e cu 1,2 m sub origine):
+		# tablierul ridicat al podului mobil e „sol" pentru raza, dar e
+		# deasupra drumului, iar golul de sub el e tot gol.
+		var hy := (hit.position as Vector3).y
+		var road_y := t.origin.y - 1.2
+		if hy > road_y + 0.6 or hy < road_y - 2.0:
+			return false
+		ground_y = minf(ground_y, hy)
+	var top_y := t.origin.y + 1.25
+	var bottom_y := ground_y + 0.4
+	if top_y <= bottom_y:
+		return true
+	var probe := BoxShape3D.new()
+	probe.size = Vector3(size.x + 0.8, top_y - bottom_y, size.z + 1.0)
+	var sq := PhysicsShapeQueryParameters3D.new()
+	sq.shape = probe
+	sq.exclude = exclude
+	var center := t.origin
+	center.y = (top_y + bottom_y) * 0.5
+	sq.transform = Transform3D(t.basis, center)
+	return space.intersect_shape(sq, 1).is_empty()
+
+
 func respawn(backoff_m: float = 14.0) -> void:
 	if track == null or _respawn_cooldown > 0.0:
 		return
@@ -1507,8 +1598,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	if trap.x != 0:
 		last_safe_route = trap.x
 		last_safe_index = trap.y
-	global_transform = track.recovery_transform(last_safe_index, backoff_m,
-		last_safe_route)
+	global_transform = _clear_recovery_transform(backoff_m)
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei
 	# curse e mai frustranta decat saritura ratata.
 	velocity = -global_transform.basis.z * 9.0

@@ -80,7 +80,7 @@ față de pistă; brief §9.2 și măsurătorile de mai jos le confirmă):
 | **al doilea portal** înaintea serpentinelor, citit ca ieșire | e `Portal_N` (0.3499): ieșirea reală; în dioramă pare un al treilea tunel | abatere asumată, brief §9.2 |
 | **lacul Bâlea** ca un lac larg, cu plajă, în căldare, cu cabana pe mal | disc de **Ø 68 m** (`LacBalea`, +40,3) la **43,5 m dreapta** (0.3573): începe la **9,5 m de axă**, deci la ~3 m de asfalt; terenul din jurul lui coboară spre exterior; **nu există căldare și nu e loc plat** pentru cabană (N5) | relief/cod |
 | **satul pe un deal**, cu pajiști pe pante | A e **plat**: ±0,3 m pe 40 m pe ambele laturi, perete > 3 m abia la **68–86 m** | relief (N6) |
-| **Poenari** lipită de sat, pe stâncă înaltă și vizibilă tot drumul | `Poenari` la **(−125, 215)**, **36,7 m STÂNGA** de axă la 0.985; ruina întreagă (28 m) intră în cadru doar de la **~190 m**: fereastra **0.775–0.900** (nu pe ultima dreaptă 0.90–0.98) | `sv_tf_fractii --windows` |
+| **Poenari** lipită de sat, pe stâncă înaltă și vizibilă tot drumul | `Poenari` la **(−125, 215)**, **36,7 m STÂNGA** de axă la 0.985; ruina întreagă (28 m) intră în cadru doar de la **~190 m**: fereastra **0.775–0.900** (nu pe ultima dreaptă 0.90–0.98) | `sv_tf_fractii` (secțiunea „ferestre de vizibilitate”) |
 | **ziduri mari de sprijin** pe toate fețele treptelor | **34 module** `retaining_wall_curve` la **6,8–7,2 m de axă** (lipite de asfalt), alternând laturile, pe 0.373–0.5725; **nu există module drepte** (terenul nu coboară destul lângă drepte); 20 dintre ele intră 0,11–0,18 m peste asfalt (baza gărzii) | montarea |
 | **trenul** pe trecere, cu râul alături | `Trecere_nivel_A/B` la 0.798/0.8045 și `Tren` la 0.8007, **dar fără râu pe 0.775–0.845**: Oltul se întrerupe exact aici (N9) | rapele 4 și 5 nu se ating |
 | **cascada** în trepte pe peretele din stânga | **nu există nod de cascadă** în `Track21.tscn`, iar **peretele din stânga e la 40–84 m** (nu la 15–30 m) (N7) | relief + cod |
@@ -151,7 +151,7 @@ decor de POI. Rezultatele brute sunt rotunjite aici; unealta e cea din coloana 2
 |---|---|---|
 | ProbeLaneClear | `res://tools/ProbeLaneClear.tscn -- --track=21` | **3 probe blocate** (garda are baza 2 în cod și raportează „REGRESIE”): **0.200 `AnimatableBody3D`** (ursul, hit-box real 1,07 × 1,38 × 2,58 m, la +2,3 m lateral; **decizia (a) a dezvoltatorului: rămâne obstacol greu**) și **0.675 `ChannelKicker`** (h 0,4 la 4,19 m și h 1,0 la 1,62 m, săritura din G). **Baza reală a pistei = 3.** Orice raportare nouă e coliziune pe bandă; atribuie-o sau scoate piesa. Linia de bază din probă se ridică la 3 la integrare, nu o face constructorul |
 | probe_decor | `--headless --path . --script res://tools/probe_decor.gd -- --track=21` | **32 materiale** (31 002 prop-uri, 585 desene, **1 244 628 triunghiuri**, 153 unice; procedural 79 prop-uri / 24 materiale / 125 778 tri; `MultiMesh neatribuit` 29 570 prop-uri / 3 materiale / 776 905 tri; `alpine_pines` 586, `canyon_rocks` 256, `megakit_plants` 155, `megakit_rocks` 148, `alpine_shrub` 109, `stirling_ledge` 34, `boulder_roller` 9, `mine_portal` 8, `torrent_chute` 3). **Ținta brief-ului era ≤ 30 (inventarul de montare raportase 30); azi 32, garda pică la 38.** Triunghiurile se raportează, nu pică. Un material nou se cere explicit în raport, cu ce cumpără vizual. **Recomandare**: ținta se mută pe ≤ 34 cu motivul scris în brief, sau coordonatorul scoate la integrare scatterul moștenit din Track09/Fiordland care nu are ce căuta aici (`stirling_ledge` 34 prop-uri, `mine_portal` 8 prop-uri cu 3 materiale, `boulder_roller` 3 materiale, `torrent_chute` 2) |
-| probe_decor_overlap | `--script res://tools/probe_decor_overlap.gd -- --track=21 --manual` | **22 piese peste asfalt**: 2 × `Dam_Module_Concrete` (**0,59 m** la (104, 242) și **0,48 m** la (137, 244)) și 20 × `Wall_Stone` (0,11–0,18 m, zidurile `ZidC*` la ~7,0 m de axă pe o pistă cu semi 7,0). Verdictul tipărit e „PROBLEMĂ — 2 piese” (cele două de la baraj). **E linia de bază și datoria montării, nu a POI-urilor** (B pentru baraj, F pentru ziduri); 0 îngropate în altă piesă. Pe restul: 0 piese noi peste asfalt |
+| probe_decor_overlap | `--script res://tools/probe_decor_overlap.gd -- --track=21 --manual` | **22 piese peste asfalt**: 2 × `Dam_Module_Concrete` (**0,59 m** la (104, 242) și **0,48 m** la (137, 244)) și 20 de piese a căror listă sonda o taie la 12 rânduri (cele 10 afișate sunt `Wall_Stone`, 0,11–0,18 m: zidurile `ZidC*` la ~7,0 m de axă pe o pistă cu semi 7,0). Verdictul tipărit e „PROBLEMĂ — 2 piese” (cele două de la baraj). **E linia de bază și datoria montării, nu a POI-urilor** (B pentru baraj, F pentru ziduri); 0 îngropate în altă piesă. Pe restul: 0 piese noi peste asfalt |
 | probe_manual | `--script res://tools/probe_manual.gd -- --track=21` | 82 obiecte, **1 „de reparat” = `Utilaj_parcat`** („ok / IN DRUM”, 8,4 m de axă, +0,41 m peste teren). Restul „ok”: `Prometeu` −1,72 m și `Poenari` −1,50 m față de teren (bază de stâncă îngropată, **intenționat**). Notă: sonda tipărește `Identifier not found: GameState/AudioManager` în `--script` (autoload-uri) și rulează totuși tabelul |
 | probe_solid | `--script res://tools/probe_solid.gd -- --track=21` | **OK**: 70 corpuri, 126 forme (hull 57, mesh 12, trunk 1); „gabaritul mașinii trece liber pe toată linia șoselei”. Obligatoriu pentru orice piesă `hull`/`mesh` lângă drum (plimbă CHIAR corpul mașinii) |
 | ProbeBuried | `res://tools/ProbeBuried.tscn -- --track=21` | **0 îngropate, 31 tavane** (tunelul, portalurile, stânca), cel mai adânc +0,00 m la 0.000. „Tavane 31” e baza (nu „0 tavane” ca la Okinawa) |
@@ -224,7 +224,7 @@ din tabel). Ce arată:
   avalanșei albi;
 - **G** (0.640, 0.665, 0.690): terenul drept pe dreapta e acoperit de **poligoane
   muștar/verde închis cu margini drepte** (canalul), triunghiul portocaliu al kickerului,
-  un apă îngustă în depărtare, **nicio pădure densă și nicio cascadă**;
+  o apă îngustă în depărtare, **nicio pădure densă și nicio cascadă**;
 - **H** (0.730, 0.790 `--train-at=0.20`, 0.880, 0.955): **Oltul turcoaz cu spumă ca marea**
   pe dreapta (0.73, 0.88), **absent** la trecerea la nivel (0.79), trenul roșu peste iarbă
   fără râu, pe stânga versant de iarbă; la 0.955 `Poenari` pe stânga, un iaz pe dreapta;
@@ -238,16 +238,16 @@ Sunt punctul de plecare al fiecărei perechi.
 
 | POI | frac de captură (index) | poziție (x, z) | flaguri | bară |
 |---|---|---|---|---|
-| A valea Argeșului | **0.985**, **0.000**, **0.020**, **0.045**, **0.060** | (−140, 244), (−115, 262), (−90, 264), (−55, 265), (−3, 262) | — | `A`, `A_poenari`, `ORIZONT` la 0.985 |
-| B baraj | **0.060**, **0.085**, **0.100**, **0.120**, **0.140** | (−3, 262), (68, 247), (104, 238), (133, 239), (180, 215) | — | `B`, `C` (lacul) |
-| C malul lacului + urs | **0.160**, **0.180**, **0.195**, **0.215**, **0.240** | (195, 190), (213, 140), (207, 112), (204, 74), (236, 28) | `--cross-at=5.4` pe 0.185–0.195 | `C`, `C_urs` |
-| D valea Caprei + portal | **0.255**, **0.280**, **0.300** (`--signal=red`), **0.312**, **0.3171** | (230, 26), (212, −8), (236, −66), (220, −82), (214, −89) | `--signal=red` pe 0.295–0.312 | `D` |
-| E tunel + Bâlea Lac | **0.322**, **0.340**, **0.358**, **0.366**, **0.370** | (212, −100), (205, −130), (193, −175), (178, −187), (172, −194) | — (nu pune camera pe 0.349–0.353: e în placa lui `Portal_N`) | `E`, `CREASTA`, `ORIZONT` la 0.366 |
-| F serpentine | **0.376**, **0.395**, **0.440**, **0.485**, **0.530**, **0.585** | (160, −196), (125, −196), (104, −222), (148, −258), (84, −268), (148, −313) | `--avalanche-at=3.5` pe 0.385–0.395; `--herd-at=4.0` pe 0.485 | `F`, `F_oi` |
-| G Bâlea Cascadă | **0.630**, **0.650**, **0.665**, **0.690**, **0.700** | (38, −329), (3, −336), (−28, −334), (−89, −323), (−117, −316) | — | `G` |
-| H defileul Oltului | **0.720**, **0.760**, **0.790**, **0.880**, **0.955** | (−170, −290), (−190, −225), (−200, −150), (−197, −24), (−188, 175) | `--train-at=0.20` pe 0.775–0.805 | `H`, `A_poenari` la 0.955 |
+| A valea Argeșului | **0.985**, **0.000**, **0.020**, **0.045**, **0.060** | (−146, 245), (−115, 262), (−73, 265), (−19, 263), (13, 258) | — | `A`, `A_poenari`, `ORIZONT` la 0.985 |
+| B baraj | **0.060**, **0.085**, **0.100**, **0.120**, **0.140** | (13, 258), (63, 247), (95, 238), (137, 239), (174, 219) | — | `B`, `C` (lacul) |
+| C malul lacului + urs | **0.160**, **0.180**, **0.195**, **0.215**, **0.240** | (200, 186), (211, 145), (210, 114), (203, 74), (240, 36) | `--cross-at=5.4` pe 0.185–0.195 | `C`, `C_urs` |
+| D valea Caprei + portal | **0.255**, **0.280**, **0.300** (`--signal=red`), **0.312**, **0.3171** | (224, 13), (224, −25), (238, −59), (220, −79), (215, −87) | `--signal=red` pe 0.295–0.312 | `D` |
+| E tunel + Bâlea Lac | **0.322**, **0.340**, **0.358**, **0.366**, **0.370** | (213, −98), (206, −136), (194, −173), (181, −184), (174, −189) | — (nu pune camera pe 0.349–0.353: e în placa lui `Portal_N`) | `E`, `CREASTA`, `ORIZONT` la 0.366 |
+| F serpentine | **0.376**, **0.395**, **0.440**, **0.485**, **0.530**, **0.585** | (164, −195), (123, −195), (115, −227), (137, −259), (101, −291), (130, −324) | `--avalanche-at=3.5` pe 0.385–0.395; `--herd-at=4.0` pe 0.485 | `F`, `F_oi` |
+| G Bâlea Cascadă | **0.630**, **0.650**, **0.665**, **0.690**, **0.700** | (34, −329), (−9, −332), (−40, −334), (−93, −324), (−115, −318) | — | `G` |
+| H defileul Oltului | **0.720**, **0.760**, **0.790**, **0.880**, **0.955** | (−146, −291), (−189, −221), (−197, −156), (−202, 36), (−177, 192) | `--train-at=0.20` pe 0.775–0.805 | `H`, `A_poenari` la 0.955 |
 
-(pozițiile sunt interpolate din tabelul de repere; verifică pe captură, nu pe tabel.)
+(pozițiile sunt citite din punctele coapte la fracția dată; verifică pe captură.)
 
 ## Fracțiile reale ale traseului (NU cele din brief §2)
 
@@ -855,7 +855,7 @@ Tot ce un constructor de POI **nu poate repara din decor**: relief, teren, apă,
 (fundalul plat, `mountain_peak` pe `tf_schist`) și adaug ce arată capturile „înainte” și măsurătoarea. Pentru fiecare: **ce, unde, dovadă,
 reparație propusă, cine, înainte sau după valuri.** Ordinea e a impactului pe bucla oarbă (câte POI-uri pică pe (c) dacă nu se repară).
 
-**N1. Culoarea terenului și lipsa stâncii/zăpezii pe versant (toate POI-urile).** Dovadă: pe toate cele 27 de capturi iarba iese **oliv-galbenă**
+**N1. Culoarea terenului și lipsa stâncii/zăpezii pe versant (toate POI-urile).** Dovadă: pe toate capturile „înainte” iarba iese **oliv-galbenă**
 (H 51–66°, S 0,33–0,46, V 0,47–0,58, `#88894C`, `#82884A`, `#8E8551`) față de ținta `#7D9A4E` (H 83°, S 0,49, V 0,60), deși `ground_tint` din temă
 **e deja** `(0.49, 0.60, 0.31)` = țintă; deci devierea e de **lumină + shader de teren** (soare `#FFD9A8` energie 1,1 + `terrain_splat`), nu de
 tentă. În plus **versanții sunt iarbă 100 %** (D, F, G, H): niciun taluz de șist gol, nicio zăpadă pe versantul nordic (doar `snow_wall` și
@@ -923,6 +923,18 @@ tema `alpine`/Fiordland. **Reparație**: scoate scatterul care n-are ce căuta (
 `probe_manual`/`probe_solid` în `--script` tipăresc erori de autoload (rulează, dar zgomotos). **Cine**: coordonatorul. **Înainte de valuri: (a) DA, restul opțional.**
 
 **Rezumat**: N1, N2, N3 se repară **înainte de orice val** (toate POI-urile); N4 înainte de B, N5 înainte de E, N6 înainte de A (recomandat), N7+N8 înainte de G, N9 înainte de H; N10, N12 se judecă la volan.
+
+## Ce n-a fost măsurat (și de ce)
+
+- **Cauza poligoanelor muștar/verde de la G (N8)**: nu am izolat dacă vin din `terrain_splat` sau din banca `TrackChannel`; `Snapshot --hide=` n-a fost încercat. Decide coordonatorul cu o captură A/B pe
+  noduri ascunse.
+- **Ursul în `Stand`**: `--cross-at` 5.4/6.0 îl prinde mergând; ridicat n-am prins (de încercat 4.5–5.2 și apropiat la `--frac=0.19`).
+- **Baza ProbeRace per felie**: n-am rulat `--slice` separat; baza pe felii e **derivată** din cele 16 curse întregi (poziția fiecărui eveniment), deci „0 în afara celor patru locuri” e măsurat pe pistă
+  întreagă, nu pe felie.
+- **Culorile pe instanțe apropiate** (bujor, jneapăn, zăpadă și beton pe fețe luminate): n-au piese montate încă; se măsoară după fiecare POI (`monocromia-se-masoara-dupa-remap`).
+- **Tavanul tunelului** (E): doar din captură și din `ProbeBuried` (31 tavane); nu am măsurat dacă camera vede tavan în tunel.
+- **Telecabina**: nu există în scenă, deci traseul cablului, înălțimea pilonilor și gabaritul față de camera de joc sunt neverificate.
+- **Device fizic**: nimic măsurat pe telefon (M4 amânat); toate cifrele de timp sunt pe RTX 3070.
 
 ## Bucla oarbă
 

@@ -42,93 +42,117 @@ def _ao(h, dist=0.8, low=0.55):
 # jneapanul (Pinus mugo)
 # ---------------------------------------------------------------------------
 
-def _jneapan(branches, seed, upright=()):
-    """branches = [(azimut, lungime, cota_varf, [(t, lung, lat, inalt, rise), ...])]
-    Ramura: porneste din centru culcata pe sol (0,05-0,2 m), se ridica la capat.
-    Pe ea: perne de ace (needle_pad) la fractiile t. `upright` = ramuri scurte
-    care urca din centru (azimut, lungime, cota_varf, lat_perna)."""
+# runda 2 a refacerii: placi mai LATE (0,7-0,8 m), mai subtiri (0,16 m) si cu
+# zimti mai adanci -- in runda 1 citeau ca bare de caramida cu margine valurita
+JN_T = 0.16
+JN_NOTCH = 0.40
+
+
+def _jneapan(branches, seed, upright=(), center=()):
+    """branches = [(azimut, lungime, cota_varf, [(t, lung, lat, gros, pitch), ...])]
+    Ramura: porneste din centru culcata pe sol, se ridica la capat. Pe ea:
+    PLACI de ace (needle_pad) la fractiile t, suprapuse ca solzii -- fiecare
+    placa urmatoare putin mai sus si mai ridicata, alternand stanga/dreapta.
+    upright = [(azimut, lungime, cota_varf, lung, lat, pitch)] ramuri care urca
+    din centru; center = [(azimut, raza, z, lung, lat, pitch)] placi joase in
+    centru (acopera golul dintre ramuri)."""
     bark, nd = Builder(), Builder()
     r = _rnd(seed)
     for k, (az, L, ztip, pads) in enumerate(branches):
         a = math.radians(az)
         d = Vector((math.cos(a), math.sin(a), 0.0))
-        side = Vector((-d.y, d.x, 0.0)) * ((r() - 0.5) * 0.25)
-        path = [Vector((0.0, 0.0, 0.04)), d * (0.30 * L) + Vector((0, 0, 0.14)),
-                d * (0.60 * L) + side + Vector((0, 0, 0.18)),
-                d * (0.85 * L) + side * 1.5 + Vector((0, 0, 0.18 + (ztip - 0.18) * 0.45)),
-                d * L + side * 1.8 + Vector((0, 0, ztip))]
-        branch(bark, path, 0.11, 0.035, TF_WOOD, seg=6)
+        side = Vector((-d.y, d.x, 0.0))
+        bend = side * ((r() - 0.5) * 0.3)
+        path = [Vector((0.0, 0.0, 0.05)), d * (0.40 * L) + Vector((0, 0, 0.16)) + bend * 0.5,
+                d * (0.78 * L) + bend + Vector((0, 0, 0.18 + (ztip - 0.18) * 0.35)),
+                d * L + bend * 1.3 + Vector((0, 0, ztip))]
+        branch(bark, path, 0.10, 0.035, TF_WOOD, seg=5)
 
         def at(t):
             f = t * (len(path) - 1)
             i = min(int(f), len(path) - 2)
             return path[i].lerp(path[i + 1], f - i)
-        for j, (t, pl, pw, ph, rise) in enumerate(pads):
-            p = at(t) + Vector((0.0, 0.0, ph * 0.25))
-            needle_pad(nd, p, az + (r() - 0.5) * 30.0, pl, pw, ph, TF_NEEDLES,
-                       seed=seed * 100 + k * 10 + j, n=3, rise=rise)
-    for k, (az, L, ztip, pw) in enumerate(upright):
+        for j, (t, pl, pw, ph, pitch) in enumerate(pads):
+            sgn = 1.0 if (j + k) % 2 else -1.0
+            p = (at(t) + side * (sgn * 0.07) + Vector((0.0, 0.0, ph * 0.45 + 0.03 * j)))
+            needle_pad(nd, p, az + sgn * (6.0 + 6.0 * r()), pl, pw, ph, TF_NEEDLES,
+                       seed=seed * 100 + k * 10 + j, teeth=3, pitch=pitch,
+                       roll=sgn * 6.0, notch=JN_NOTCH)
+    for k, (az, L, ztip, pl, pw, pitch) in enumerate(upright):
         a = math.radians(az)
         d = Vector((math.cos(a), math.sin(a), 0.0))
         tip = d * L + Vector((0.0, 0.0, ztip))
-        branch(bark, [Vector((0.0, 0.0, 0.05)), d * (0.3 * L) + Vector((0, 0, ztip * 0.45)), tip],
-               0.09, 0.04, TF_WOOD, seg=6)
-        needle_pad(nd, d * (0.55 * L) + Vector((0, 0, ztip * 0.62)), az, 0.75, pw, 0.5,
-                   TF_NEEDLES, seed=seed * 100 + 70 + k, n=3, rise=0.3)
+        branch(bark, [Vector((0.0, 0.0, 0.05)), d * (0.35 * L) + Vector((0, 0, ztip * 0.5)), tip],
+               0.08, 0.035, TF_WOOD, seg=5)
+        needle_pad(nd, d * (0.55 * L + pl * 0.3) + Vector((0, 0, ztip * 0.80)), az, pl, pw,
+                   JN_T, TF_NEEDLES, seed=seed * 100 + 70 + k, teeth=3, pitch=pitch,
+                   notch=JN_NOTCH)
+    for k, (az, rad, z, pl, pw, pitch) in enumerate(center):
+        a = math.radians(az)
+        d = Vector((math.cos(a), math.sin(a), 0.0))
+        needle_pad(nd, d * rad + Vector((0, 0, z)), az, pl, pw, JN_T, TF_NEEDLES,
+                   seed=seed * 100 + 90 + k, teeth=3, pitch=pitch, notch=JN_NOTCH)
     return [bark.to_object("Jneapan_Bark"), nd.to_object("Jneapan_Needles")]
 
 
 def build_jneapan_a():
     """Jneapanul A (`jneapan_a`): 1,2 m inalt, 4 m lat, h/l ~0,3 -- tufa CULCATA.
+    REFACUT pe contractul clarificat de coordonator (13 oct): perne = PLACI PLATE.
 
-    LISTA DE ELEMENTE (decuparea `jneapan_a.png` + contractul; scrisa INAINTE
-    de geometrie):
-      a) 6 RAMURI groase (plansa: 6-7 vizibile; contractul 4-6) care pornesc
-         din CENTRU, culcate pe sol (0,05-0,2 m), si se RIDICA la capete
-         (varfurile la 0,5-0,85 m); lungi de 1,55-1,9 m, maro (WOOD 9), vizibile
-         intre perne in centrul tufei.
-      b) PERNE DENSE de ace: 4 pe fiecare ramura (24), fiecare o "creanga cu
-         ace" PLATA, cu marginea zimtata (miez + 3 lobi alternanti pe fiecare
-         parte), suprapuse -> perna continua; perna de la varf urca cu ramura.
-         (Runda 1: perne din bile in sir -- citeau ca margele, nu ca ace.)
-      c) centrul tufei JOS si rar (pe plansa se vad ramurile maro): fara masa
-         centrala inalta -- NU e un brad mic.
-      d) NU intra: pietrele de la baza de pe plansa (decor de integrare).
+    LISTA DE ELEMENTE (decuparea `jneapan_a.png` + contractul clarificat; scrisa
+    INAINTE de geometrie):
+      a) 6 RAMURI groase (plansa: 6-7 vizibile) care pornesc din CENTRU,
+         culcate pe sol (0,05-0,2 m), si se RIDICA la capete (varfurile la
+         0,5-0,85 m); lungi de 1,55-1,9 m, maro (WOOD 9), vizibile intre placi.
+      b) PLACI DE ACE: 3 pe fiecare ramura (18), fiecare o placa PLATA alungita
+         pe ramura, ca o frunza de feriga: 0,95-1,15 m lunga, 0,7-0,8 m lata,
+         0,16 m groasa, marginea ZIMTATA adanc pe lung (3 dinti pe parte), capete
+         ascutite; suprapuse ca SOLZII (fiecare urmatoare mai sus, alternand
+         stanga/dreapta), aproape orizontale, ridicate spre capat (4/9/16 grade).
+      c) 3 placi joase in centru, intre ramuri (centrul ramane JOS; ramurile maro
+         se vad) -- NU e un brad mic.
+      d) NU intra: pietrele de la baza de pe plansa.
+    Buget: <= 1 500 tri (MultiMesh, sute de exemplare). Runda 1-3 (inainte de
+    clarificare): ciorchini pentagonali in sir, 3 792 tri -- "margele pe ata".
     Noduri: Jneapan_Bark (WOOD 9), Jneapan_Needles (LOG_DARK 28 -> clasa
     pine_needles; in preview tinta #34503A).
     """
-    pads = lambda s: [(0.30, 0.80 * s, 0.95, 0.36, 0.0), (0.52, 0.85 * s, 0.95, 0.38, 0.04),
-                      (0.74, 0.85 * s, 0.90, 0.40, 0.10), (0.95, 0.80 * s, 0.85, 0.42, 0.22)]
-    branches = [(8.0, 1.85, 0.62, pads(1.0)), (68.0, 1.60, 0.80, pads(0.9)),
-                (128.0, 1.90, 0.55, pads(1.05)), (188.0, 1.55, 0.85, pads(0.9)),
+    pads = lambda s: [(0.36, 1.05 * s, 0.80, JN_T, 4.0), (0.64, 1.15 * s, 0.76, JN_T, 9.0),
+                      (0.93, 1.05 * s, 0.68, JN_T, 16.0)]
+    branches = [(8.0, 1.85, 0.62, pads(1.0)), (68.0, 1.60, 0.80, pads(0.92)),
+                (128.0, 1.90, 0.55, pads(1.05)), (188.0, 1.55, 0.85, pads(0.92)),
                 (245.0, 1.80, 0.50, pads(1.0)), (305.0, 1.65, 0.70, pads(0.95))]
-    return _jneapan(branches, 31)
+    center = [(38.0, 0.40, 0.30, 0.95, 0.75, 10.0), (158.0, 0.40, 0.32, 0.95, 0.75, 10.0),
+              (275.0, 0.40, 0.28, 0.95, 0.75, 10.0)]
+    return _jneapan(branches, 31, center=center)
 
 
 def build_jneapan_b():
     """Jneapanul B (`jneapan_b`): 1,5 m inalt, 3 m lat, h/l ~0,5 -- compact,
-    mai inalt, ASIMETRIC, cu o perna iesita intr-o parte.
+    mai inalt, ASIMETRIC, cu o perna iesita intr-o parte. REFACUT pe contractul
+    clarificat (placi plate).
 
     LISTA DE ELEMENTE (decuparea `jneapan_b.png` + contractul; plansa b e aproape
     identica cu a, deci urmez contractul pentru silueta):
-      a) 5 RAMURI culcate: 4 scurte (0,95-1,15 m) care urca mai abrupt (varfuri
-         la 0,8-1,05 m) + 1 LUNGA spre +X (1,6 m), joasa, cu 4 perne -> perna
-         iesita intr-o parte (asimetria ceruta).
-      b) 3 RAMURI SCURTE care URCA din centru (varfuri la 1,2-1,3 m), fiecare cu
-         o perna inclinata: dau inaltimea de 1,5 m. (Runda 1: o bila mare in
-         centru -- citea ca un bulgare, nu ca ace.)
-      c) PERNE plate, zimtate, ca la a: 3 pe ramurile scurte, 4 pe cea lunga.
+      a) 5 RAMURI culcate: 4 scurte (0,95-1,15 m), cu varfurile la 0,8-1,05 m, +
+         1 LUNGA spre +X (1,6 m), joasa, cu 3 placi -> perna iesita intr-o parte.
+      b) 3 RAMURI care URCA din centru (varfuri la 1,1-1,2 m), fiecare cu o placa
+         ridicata 28-34 grade: dau inaltimea de 1,5 m.
+      c) PLACI plate, zimtate, ca la a: 3 pe fiecare ramura, 1 in centru, 3 pe
+         ramurile care urca (19 placi; runda 2: tufa mai deasa).
       d) NU intra: pietrele, pamantul de la baza.
-    Noduri: Jneapan_Bark (WOOD 9), Jneapan_Needles (LOG_DARK 28).
+    Buget <= 1 500 tri. Noduri: Jneapan_Bark (WOOD 9), Jneapan_Needles (LOG_DARK 28).
     """
-    sh = lambda: [(0.40, 0.65, 0.85, 0.42, 0.0), (0.72, 0.65, 0.80, 0.44, 0.05),
-                  (0.96, 0.60, 0.75, 0.46, 0.2)]
-    branches = [(0.0, 1.60, 0.40, [(0.30, 0.80, 0.95, 0.42, 0.0), (0.55, 0.85, 0.95, 0.44, 0.0),
-                                   (0.78, 0.85, 0.90, 0.46, 0.05), (0.98, 0.80, 0.85, 0.50, 0.15)]),
+    sh = lambda: [(0.30, 0.85, 0.70, JN_T, 5.0), (0.62, 0.90, 0.70, JN_T, 10.0),
+                  (0.95, 0.85, 0.64, JN_T, 18.0)]
+    branches = [(0.0, 1.60, 0.40, [(0.36, 1.05, 0.80, JN_T, 3.0), (0.64, 1.10, 0.78, JN_T, 5.0),
+                                   (0.93, 1.00, 0.72, JN_T, 10.0)]),
                 (90.0, 1.05, 0.95, sh()), (160.0, 1.15, 1.05, sh()),
                 (230.0, 0.95, 0.90, sh()), (300.0, 1.10, 0.80, sh())]
-    upright = [(40.0, 0.45, 1.30, 0.80), (150.0, 0.40, 1.20, 0.75), (260.0, 0.45, 1.25, 0.80)]
-    return _jneapan(branches, 47, upright=upright)
+    upright = [(40.0, 0.45, 1.20, 0.90, 0.68, 30.0), (150.0, 0.40, 1.15, 0.85, 0.66, 34.0),
+               (260.0, 0.45, 1.25, 0.90, 0.68, 28.0)]
+    center = [(200.0, 0.20, 0.55, 0.85, 0.72, 12.0)]
+    return _jneapan(branches, 47, upright=upright, center=center)
 
 
 # ---------------------------------------------------------------------------
@@ -372,9 +396,9 @@ def build_afin():
     return [lv.to_object("Afin_Leaves"), be.to_object("Afin_Berry")]
 
 
-# runda 3: umbrire neteda pe ciorchinii de 5 x 2 (cu fatete plate citeau ca
-# niste cubulete; lobii de pe plansa sunt rotunjiti)
-JNEAPAN_SMOOTH = 100.0   # 75 nu netezea nimic: fetele ciorchinilor de 5 laturi se intalnesc la 72-90+ grade
+# placile de ace: fetele evantaiului de sus (unghiuri mici) se netezesc, muchiile
+# laterale (~90 grade) raman vii -> placa se citeste plata, cu margine taiata
+JNEAPAN_SMOOTH = 50.0
 
 ONLY = os.environ.get("TF_ONLY", "")
 

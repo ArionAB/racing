@@ -111,7 +111,7 @@ sloturile (memoria clase-pe-piese-de-kit). ROCK_DARK e interzis (rugina).
   branch(b, pts, r0, r1, slot, seg=6)
         ramura / trunchi conic pe traseu (taper_sweep cu raze interpolate).
   needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, teeth=3,
-             pitch=6, ridge=0.05, roll=0)
+             pitch=6, ridge=0.05, roll=0, notch=0.62)
         PERNA DE ACE de jneapan: PLACA PLATA alungita pe ramura (ca o frunza de
         feriga), margine zimtata pe lung, capete ascutite, fata de sus bombata,
         capatul ridicat cu `pitch` grade. 4*(4*teeth+2) tri (56 la teeth=3).
@@ -569,12 +569,14 @@ def branch(b, pts, r0, r1, slot, seg=6):
 
 
 def needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, teeth=3,
-               pitch=6.0, ridge=0.05, roll=0.0):
+               pitch=6.0, ridge=0.05, roll=0.0, notch=0.62):
     """PERNA DE ACE de jneapan: PLACA PLATA alungita pe directia ramurii, ca o
     frunza de feriga (decuparea), cu marginea ZIMTATA pe lung (`teeth` dinti pe
     fiecare parte), capetele ascutite, groasa `height` (0,15-0,25 m), fata de
     sus usor bombata (`ridge`). Culcata aproape orizontal, capatul ridicat cu
-    `pitch` grade; `roll` o inclina in jurul axei ei. Centrul in `base`.
+    `pitch` grade; `roll` o inclina in jurul axei ei; `notch` = adancimea
+    scobiturilor dintre dinti (fractie din semilatime; mai mic = zimti mai
+    adanci). Centrul in `base`.
 
     Topologie: contur stelat de N = 4*teeth + 2 puncte, evantai sus si jos din
     centru + banda laterala -> 4N triunghiuri (56 la teeth=3). Asa ies multe
@@ -591,7 +593,7 @@ def needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, teeth=3,
             env0 = math.sin(math.pi * (u0 + 0.5)) ** 0.6
             env1 = math.sin(math.pi * (u1 + 0.5)) ** 0.6
             pts.append((L * u0, side * W * 0.5 * env0 * (0.95 + 0.1 * r())))   # dinte
-            pts.append((L * u1, side * W * 0.5 * env1 * 0.62))                  # scobitura
+            pts.append((L * u1, side * W * 0.5 * env1 * notch))                 # scobitura
         if side < 0:
             pts = list(reversed(pts))
         outline += pts

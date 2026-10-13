@@ -622,7 +622,7 @@ def _slab(b, top, n, thick, slot):
 
 def tin_roof(b, cx, cy, hx, hy, z_eave, pitch_deg, slot, kind="gable", axis="X",
              thick=0.12, rib_h=0.035, rib_w=0.045, step=0.5, cap=(0.26, 0.10),
-             ribs=True):
+             ribs=True, extend=(0.0, 0.0)):
     """Acoperis de TABLA CU FALTURI (tf-e: cabane, case, stana): ape plane cu
     nervuri in relief de-a lungul pantei, coama si (la `hip`) muchiile acoperite.
 
@@ -633,6 +633,10 @@ def tin_roof(b, cx, cy, hx, hy, z_eave, pitch_deg, slot, kind="gable", axis="X",
       kind="gable"  doua ape, fronton la capete (coama pe toata lungimea 2*hx)
       kind="hip"    patru ape: coama 2*(hx - hy), ape triunghiulare la capete,
                     muchii (hip) la 45 de grade in plan, aceeasi panta peste tot
+      kind="shed"   o singura apa: muchia de sus la -v (cy - hy), streasina la
+                    +v (cy + hy) la `z_eave`; fara capac (tarabe, sopoare)
+    `extend` = (pe +v, pe -v): doar la `gable`, apa respectiva se prelungeste
+    cu atat dincolo de streasina, pe aceeasi panta (prispa sub streasina).
     Streasina e la `z_eave` (fata de SUS a tablei, pe muchia streasinii), panta
     `pitch_deg`. Fiecare apa e o placa groasa `thick` (cantul se vede ca
     streasina). Falturile: nervuri `rib_w` x `rib_h` (3-4 cm, contract) la pasul
@@ -677,10 +681,32 @@ def tin_roof(b, cx, cy, hx, hy, z_eave, pitch_deg, slot, kind="gable", axis="X",
         off = n * (rib_h * 0.5)
         b.beam(p1 + off, p2 + off, (rib_w, rib_h), slot, up=n)
 
+    if kind == "shed":
+        n = WN(0.0, t, 1.0)
+        z_hi = z_eave + 2.0 * hy * t
+        _slab(b, [W(-hx, hy, z_eave), W(hx, hy, z_eave), W(hx, -hy, z_hi), W(-hx, -hy, z_hi)],
+              n, thick, slot)
+        k = 0
+        while ribs:
+            u = -hx + step * 0.5 + k * step
+            k += 1
+            if u > hx - 1e-6:
+                break
+            rib(W(u, hy, z_eave), W(u, -hy, z_hi), n)
+
+        def top_s(x, y):
+            u, v = loc(x, y)
+            return z_eave + (hy - v) * t
+        return {"ridge_z": z_hi, "tan": t, "top": top_s,
+                "under": lambda x, y: top_s(x, y) - thick * sec}
+    if hip and any(extend):
+        raise ValueError("tin_roof: extend doar la gable")
     # --- apele lungi (+v / -v)
     for s in (1.0, -1.0):
         n = WN(0.0, s * t, 1.0)
-        _slab(b, [W(-hx, s * hy, z_eave), W(hx, s * hy, z_eave), W(r, 0.0, z_r),
+        es = extend[0] if s > 0 else extend[1]
+        ve, ze = hy + es, z_eave - es * t
+        _slab(b, [W(-hx, s * ve, ze), W(hx, s * ve, ze), W(r, 0.0, z_r),
                   W(-r, 0.0, z_r)], n, thick, slot)
         if not ribs:
             continue
@@ -693,7 +719,7 @@ def tin_roof(b, cx, cy, hx, hy, z_eave, pitch_deg, slot, kind="gable", axis="X",
             v_end = max(0.0, abs(u) - r)
             if v_end > hy - 0.15:
                 continue
-            rib(W(u, s * hy, z_eave), W(u, s * v_end, z_eave + (hy - v_end) * t), n)
+            rib(W(u, s * ve, ze), W(u, s * v_end, z_eave + (hy - v_end) * t), n)
     # --- apele de capat (hip)
     if hip:
         for s in (1.0, -1.0):

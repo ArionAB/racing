@@ -5,7 +5,8 @@ culoarea pe slot, camera si compunerea harnasului).
   --compare <nume>   decupare | randare (camera din SPECS de mai jos)
   --views <nume>     4 azimuturi
   --facade <nume>    MASOARA pe GLB fata bogata: aria golurilor (nodul *_Void,
-                     fetele din fata ale placilor negre) pe fiecare directie
+                     fata din fata a placilor negre = cea care vede aer, prin
+                     raycast) pe fiecare directie
                      +X/-X/+Y/-Y, plus cat iese geometria peste corpul cladirii
                      pe fiecare parte (terasa, scara, prispa). Nu randeaza.
 
@@ -34,6 +35,16 @@ from mathutils import Vector  # noqa: E402
 # grade fata de normala lui), latura lunga cu terasa (+Y) intra in dreapta.
 SPECS.update({
     "cabana_balea_lac": {"camera": {"azimuth": 32.0, "elevation": 22.0, "lens": 60.0, "margin": 1.06}},
+    # cascada: fronton +X in stanga, prispa (+Y) in dreapta, ca pe decupare
+    "cabana_balea_cascada": {"camera": {"azimuth": 38.0, "elevation": 22.0, "lens": 60.0, "margin": 1.06}},
+    # stana: frontonul colibei (+Y, cu usa) si tarcul vazute din fata-stanga
+    "stana": {"camera": {"azimuth": 112.0, "elevation": 26.0, "lens": 60.0, "margin": 1.06}},
+    # casa A: latura scurta (+X) in stanga, prispa (+Y) in dreapta
+    "arges_house_a": {"camera": {"azimuth": 40.0, "elevation": 22.0, "lens": 60.0, "margin": 1.06}},
+    # casa B: frontonul spre drum (+Y) in stanga, latura cu usa (-X) in dreapta
+    "arges_house_b": {"camera": {"azimuth": 125.0, "elevation": 22.0, "lens": 60.0, "margin": 1.06}},
+    # taraba: fata (+Y) cu capatul -X vazut, ca pe decupare
+    "souvenir_stall": {"camera": {"azimuth": 108.0, "elevation": 16.0, "lens": 60.0, "margin": 1.08}},
 })
 
 
@@ -67,12 +78,26 @@ def facade(name):
                 continue
             if abs(n.x) > 0.7:
                 k = "+X" if n.x > 0 else "-X"
-                outward = (c.x - cen.x) * n.x > 0
             elif abs(n.y) > 0.7:
                 k = "+Y" if n.y > 0 else "-Y"
-                outward = (c.y - cen.y) * n.y > 0
             else:
                 continue
+            # fata din FATA a placii negre sta in aer (in golul taiat); cea din
+            # spate e INGROPATA in corpul plin. Paritate: din punctul de langa
+            # fata, pe normala, se numara trecerile prin suprafete; impar =
+            # punctul e in interiorul unui solid inchis. Proba e intr-un sfert
+            # al placii, pe langa montantii din mijloc.
+            v0 = mw @ o.data.vertices[p.vertices[0]].co
+            q = c * 0.6 + v0 * 0.4 + n * 0.01
+            dg = bpy.context.evaluated_depsgraph_get()
+            hits = 0
+            for _ in range(60):
+                hit, loc = bpy.context.scene.ray_cast(dg, q, n, distance=200.0)[:2]
+                if not hit:
+                    break
+                hits += 1
+                q = loc + n * 0.0005
+            outward = hits % 2 == 0
             if outward and p.area > 0.05:
                 area[k] += p.area
                 count[k] += 1
@@ -85,7 +110,10 @@ def facade(name):
     print("  iese peste corp: +Y %.2f m, -Y %.2f m, +X %.2f m, -X %.2f m"
           % (hi.y - bhi.y, blo.y - lo.y, hi.x - bhi.x, blo.x - lo.x))
     best = max(("+X", "-X", "+Y", "-Y"), key=lambda k: area[k])
-    print("  fata cu cele mai multe goluri: %s" % best)
+    print("  fata cu cele mai multe goluri: %s" % (best if area[best] > 0 else "- (fara goluri)"))
+    for o in meshes:
+        c = sum((o.matrix_world @ v.co for v in o.data.vertices), Vector()) / max(1, len(o.data.vertices))
+        print("  centroid %-16s x %+.2f  y %+.2f  z %.2f" % (_base(o.name), c.x, c.y, c.z))
 
 
 args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []

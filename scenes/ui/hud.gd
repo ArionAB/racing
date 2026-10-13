@@ -309,14 +309,55 @@ func _process(delta: float) -> void:
 		RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
 	var sh_prims := RenderingServer.viewport_get_render_info(vp, ts,
 		RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
-	# Inaltimea 3D efectiva (pixeli fizici x scala): confirma pe device ca
-	# nivelul grafic chiar a coborat rezolutia.
-	var h3d := int(DisplayServer.window_get_size().y * get_viewport().scaling_3d_scale)
-	_perf.text = "%d fps  |  %d+%d desene  |  %dk+%dk tri  |  3D %dp  |  cpu %.1f ms  gpu %.1f ms" % [
+	# A doua linie: optiunile grafice active, inclusiv inaltimea 3D efectiva.
+	_perf.text = "%d fps  |  %d+%d desene  |  %dk+%dk tri  |  cpu %.1f ms  gpu %.1f ms\n%s" % [
 		Engine.get_frames_per_second(), draws, sh_draws, prims / 1000,
-		sh_prims / 1000, h3d,
+		sh_prims / 1000,
 		RenderingServer.viewport_get_measured_render_time_cpu(vp),
-		RenderingServer.viewport_get_measured_render_time_gpu(vp)]
+		RenderingServer.viewport_get_measured_render_time_gpu(vp),
+		_gfx_line()]
+
+
+## Soarele si mediul pistei, cautate o data pe cursa (nu la fiecare
+## reimprospatare: un find_children pe tot arborele de 4 ori pe secunda ar
+## costa chiar timpul de CPU pe care contorul il masoara).
+var _perf_sun: DirectionalLight3D
+var _perf_env: WorldEnvironment
+
+## A doua linie a contorului: optiunile grafice EFECTIV active (citite de pe
+## viewport, soare si mediu, nu din setari), cu „*" pe cele fortate de un
+## comutator de test. Asa o captura de ecran spune singura in ce conditii s-a
+## masurat fps-ul.
+func _gfx_line() -> String:
+	if not is_instance_valid(_perf_sun):
+		var suns := get_tree().root.find_children("*", "DirectionalLight3D", true, false)
+		_perf_sun = suns[0] as DirectionalLight3D if not suns.is_empty() else null
+	if not is_instance_valid(_perf_env):
+		var envs := get_tree().root.find_children("*", "WorldEnvironment", true, false)
+		_perf_env = envs[0] as WorldEnvironment if not envs.is_empty() else null
+	var vpn := get_viewport()
+	var msaa := "off"
+	match vpn.msaa_3d:
+		Viewport.MSAA_2X: msaa = "2x"
+		Viewport.MSAA_4X: msaa = "4x"
+		Viewport.MSAA_8X: msaa = "8x"
+	var h3d := int(DisplayServer.window_get_size().y * vpn.scaling_3d_scale)
+	var shadows := "off"
+	if _perf_sun != null and _perf_sun.shadow_enabled:
+		var two := _perf_sun.directional_shadow_mode \
+			== DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+		shadows = "2 felii" if two else "1 felie"
+	var glow := "off"
+	if _perf_env != null and _perf_env.environment != null \
+			and _perf_env.environment.glow_enabled:
+		glow = "on"
+	var star := func(forced: bool) -> String: return "*" if forced else ""
+	return "%s  |  MSAA %s%s  |  3D %dp%s  |  umbre %s%s  |  glow %s%s" % [
+		GameState.GFX_TIER_NAMES[GameState.gfx_tier],
+		msaa, star.call(GameState.dbg_msaa > 0),
+		h3d, star.call(GameState.dbg_scale > 0),
+		shadows, star.call(GameState.dbg_shadows > 0),
+		glow, star.call(GameState.dbg_glow > 0)]
 
 
 func _make_label(font_size: int) -> Label:

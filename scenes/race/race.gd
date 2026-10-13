@@ -120,6 +120,9 @@ func _mount_track(t: Track) -> void:
 
 ## Tot ce sta pe pista: masini, camera, HUD, legaturile de feedback.
 func _setup_race() -> void:
+	# Comutatoarele de test (GameState.dbg_*) ating soarele si mediul pistei,
+	# care exista abia de acum.
+	GameState.apply_debug_gfx()
 	_skid_parent = Node3D.new()
 	_skid_parent.name = "SkidMarks"
 	add_child(_skid_parent)

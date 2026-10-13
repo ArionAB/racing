@@ -97,7 +97,11 @@ func _build() -> void:
 	_add_toggle(box, "Contor de performanta", GameState.show_perf,
 		func(on: bool) -> void:
 			GameState.show_perf = on
-			GameState.save_settings())
+			GameState.save_settings()
+			# Sectiunea de test apare/dispare odata cu contorul.
+			_rebuild.call_deferred())
+	if GameState.show_perf:
+		_add_perf_tests(box)
 	_add_toggle(box, "Far real pe noapte (test)", GameState.real_headlight,
 		func(on: bool) -> void:
 			GameState.real_headlight = on
@@ -121,6 +125,36 @@ func _build() -> void:
 	back.add_theme_font_size_override("font_size", 24)
 	back.pressed.connect(func() -> void: back_pressed.emit())
 	root.add_child(back)
+
+## COMUTATOARELE DE TEST pe device (vezi GameState.apply_debug_gfx): vizibile
+## doar cu contorul de performanta pornit, aplicate pe loc, nesalvate. Din pauza
+## scena ramane pe ecran si HUD-ul masoara mai departe, deci fiecare schimbare
+## se citeste in fps pe acelasi cadru.
+func _add_perf_tests(box: VBoxContainer) -> void:
+	var head := Label.new()
+	head.text = "TEST PERFORMANTA (doar sesiunea asta)"
+	head.add_theme_font_size_override("font_size", 20)
+	head.modulate = Color(1.0, 0.85, 0.4)
+	box.add_child(head)
+	_add_choice(box, "Test: MSAA", GameState.DBG_MSAA_NAMES, GameState.dbg_msaa,
+		func(i: int) -> void:
+			GameState.dbg_msaa = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: rezolutie 3D", GameState.DBG_SCALE_NAMES,
+		GameState.dbg_scale,
+		func(i: int) -> void:
+			GameState.dbg_scale = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: umbre", GameState.DBG_SHADOW_NAMES,
+		GameState.dbg_shadows,
+		func(i: int) -> void:
+			GameState.dbg_shadows = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: glow", GameState.DBG_GLOW_NAMES, GameState.dbg_glow,
+		func(i: int) -> void:
+			GameState.dbg_glow = i
+			GameState.apply_gfx_tier())
+
 
 ## Camera vie afla imediat, prin grup. Salvarea merge in acelasi apel: sliderele
 ## astea se misca de cateva ori pe reglaj, nu de zeci de ori pe secunda ca tastele

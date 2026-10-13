@@ -60,7 +60,8 @@ hash-ul transformurilor de orizont e identic pe 6 teme.
 - **Poenari:** de aproape e trunchi de con, dar de la 190 m și de la 50 m se citește stâncă cu ruină.
 
 **Decizii pentru dezvoltator (la volan):**
-- **ursul are acum un hit-box real**, 1,07 × 1,38 × 2,58 m. Vaca avea ~0,24 × 0,48 × 0,85 m,
+- **DECIS (dezvoltatorul, 14 oct 2026): (a), ursul rămâne obstacol greu.** Contextul:
+  **ursul are acum un hit-box real**, 1,07 × 1,38 × 2,58 m. Vaca avea ~0,24 × 0,48 × 0,85 m,
   deci practic nu se lovea. AI-ul nu ocolește hazardele care traversează, așa că
   repunerile la urs cresc de la 1 la 9 pe 6 seed-uri. `sweep_speed` nu schimbă cifra.
   Variante:

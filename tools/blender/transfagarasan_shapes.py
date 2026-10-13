@@ -25,8 +25,10 @@ FOLOSITE (pilot + val 1 tf-a):
                    fata, coronament din pietre lipite, varianta curba (`bend_R`).
   emit_tf          finish pe fiecare nod + export in assets/models/transfagarasan/.
 
-STUB-URI (valul 1, vezi docstring-urile):
-  tin_roof
+  tin_roof         (tf-e, val 2) acoperis de tabla cu falturi: ape plane groase,
+                   nervuri de 3-4 cm la 0,5 m pe panta, coama + muchii de hip
+                   acoperite; `gable` (doua ape) sau `hip` (patru ape), coama
+                   pe X sau pe Y; intoarce cotele fetei de sus / de jos.
 
 Se incarca cu exec, dupa dio_lib (vezi build_tf_*.py). Axe: X latime, Y adancime
 (fata spre +Y in Blender = -Z in Godot), Z sus. Reutilizeaza `_face`, `to_obj`
@@ -602,11 +604,127 @@ def dry_stone_wall(b, L=8.0, H=5.0, top_w=1.2, base_w=2.0, seed=0.0, slot=None,
     return stones
 
 
-def tin_roof(b, *args, **kw):
-    """STUB (tf-e, cabane si case): acoperis de tabla cu falturi (nervuri in
-    relief), in doua sau patru ape, nod `*_Roof` pe PAINTED_METAL / KERB_RED /
-    RUST_METAL dupa piesa."""
-    raise NotImplementedError("tin_roof: valul 1 (tf-e)")
+def _slab(b, top, n, thick, slot):
+    """Placa plana: poligonul `top` (3D, coplanar, convex) si copia lui coborata
+    cu `thick` pe -n, inchisa pe laturi. Infasurarea o repara `Builder.to_object`
+    (recalc pe carcasa inchisa)."""
+    vt = [b.bm.verts.new(Vector(p)) for p in top]
+    vb = [b.bm.verts.new(Vector(p) - n * thick) for p in top]
+    m = len(vt)
+    for face in (vt, list(reversed(vb))):
+        f = b.bm.faces.new(face)
+        f[b.slot] = slot
+    for i in range(m):
+        j = (i + 1) % m
+        f = b.bm.faces.new((vt[i], vb[i], vb[j], vt[j]))
+        f[b.slot] = slot
+
+
+def tin_roof(b, cx, cy, hx, hy, z_eave, pitch_deg, slot, kind="gable", axis="X",
+             thick=0.12, rib_h=0.035, rib_w=0.045, step=0.5, cap=(0.26, 0.10),
+             ribs=True):
+    """Acoperis de TABLA CU FALTURI (tf-e: cabane, case, stana): ape plane cu
+    nervuri in relief de-a lungul pantei, coama si (la `hip`) muchiile acoperite.
+
+    Plan: dreptunghiul acoperisului cu streasina INCLUSA, centrul (cx, cy),
+    semi-laturile `hx` (de-a lungul coamei) si `hy` (de la coama la streasina).
+    `axis="X"`: coama paralela cu X (streasinile la cy +- hy); `axis="Y"`: coama
+    paralela cu Y (planul rotit 90 de grade; hx tot de-a lungul coamei).
+      kind="gable"  doua ape, fronton la capete (coama pe toata lungimea 2*hx)
+      kind="hip"    patru ape: coama 2*(hx - hy), ape triunghiulare la capete,
+                    muchii (hip) la 45 de grade in plan, aceeasi panta peste tot
+    Streasina e la `z_eave` (fata de SUS a tablei, pe muchia streasinii), panta
+    `pitch_deg`. Fiecare apa e o placa groasa `thick` (cantul se vede ca
+    streasina). Falturile: nervuri `rib_w` x `rib_h` (3-4 cm, contract) la pasul
+    `step` (0,5 m), de la streasina pana la coama sau pana la muchia de hip;
+    capetele lor de la hip sunt acoperite de capacul muchiei (`cap` = latime,
+    inaltime). Totul pe UN slot (nodul `*_Roof`: PAINTED_METAL / KERB_RED /
+    RUST_METAL dupa piesa).
+
+    Intoarce dict: `ridge_z` (fata de sus la coama), `tan`, `top(x, y)` (cota
+    fetei de sus a tablei), `under(x, y)` (cota fetei de jos: pe ea se opresc
+    peretii si frontoanele)."""
+    t = math.tan(math.radians(pitch_deg))
+    hip = kind == "hip"
+    r = (hx - hy) if hip else hx
+    if r < 0:
+        raise ValueError("tin_roof hip: hx < hy")
+    z_r = z_eave + hy * t
+    sec = math.sqrt(1.0 + t * t)
+
+    def W(u, v, z):
+        return Vector((cx + u, cy + v, z)) if axis == "X" else Vector((cx - v, cy + u, z))
+
+    def WN(nu, nv, nz):
+        n = Vector((nu, nv, nz)) if axis == "X" else Vector((-nv, nu, nz))
+        return n.normalized()
+
+    def loc(x, y):
+        return (x - cx, y - cy) if axis == "X" else (y - cy, -(x - cx))
+
+    def top(x, y):
+        u, v = loc(x, y)
+        d = hy - abs(v)
+        if hip:
+            d = min(d, hx - abs(u))
+        return z_eave + d * t
+
+    def under(x, y):
+        return top(x, y) - thick * sec
+
+    def rib(p1, p2, n):
+        off = n * (rib_h * 0.5)
+        b.beam(p1 + off, p2 + off, (rib_w, rib_h), slot, up=n)
+
+    # --- apele lungi (+v / -v)
+    for s in (1.0, -1.0):
+        n = WN(0.0, s * t, 1.0)
+        _slab(b, [W(-hx, s * hy, z_eave), W(hx, s * hy, z_eave), W(r, 0.0, z_r),
+                  W(-r, 0.0, z_r)], n, thick, slot)
+        if not ribs:
+            continue
+        k = 0
+        while True:
+            u = -hx + step * 0.5 + k * step
+            k += 1
+            if u > hx - 1e-6:
+                break
+            v_end = max(0.0, abs(u) - r)
+            if v_end > hy - 0.15:
+                continue
+            rib(W(u, s * hy, z_eave), W(u, s * v_end, z_eave + (hy - v_end) * t), n)
+    # --- apele de capat (hip)
+    if hip:
+        for s in (1.0, -1.0):
+            n = WN(s * t, 0.0, 1.0)
+            _slab(b, [W(s * hx, -hy, z_eave), W(s * hx, hy, z_eave), W(s * r, 0.0, z_r)]
+                  if s > 0 else [W(s * hx, hy, z_eave), W(s * hx, -hy, z_eave), W(s * r, 0.0, z_r)],
+                  n, thick, slot)
+            if not ribs:
+                continue
+            k = 0
+            while True:
+                v = -hy + step * 0.5 + k * step
+                k += 1
+                if v > hy - 1e-6:
+                    break
+                u_end = r + abs(v)
+                if hx - u_end < 0.15:
+                    continue
+                rib(W(s * hx, v, z_eave), W(s * u_end, v, z_eave + (hx - u_end) * t), n)
+    # --- capacele: coama si muchiile de hip
+    cw, ch = cap
+    lift = Vector((0.0, 0.0, ch * 0.5 - 0.02))
+    if r > 1e-3:
+        b.beam(W(-r, 0.0, z_r) + lift, W(r, 0.0, z_r) + lift,
+               (cw, ch), slot, up=(0.0, 0.0, 1.0))
+    if hip:
+        for su in (1.0, -1.0):
+            for sv in (1.0, -1.0):
+                a = W(su * hx, sv * hy, z_eave) + lift
+                c = W(su * r, 0.0, z_r) + lift
+                b.beam(a, c, (cw, ch), slot, up=(0.0, 0.0, 1.0))
+    return {"ridge_z": z_r, "tan": t, "top": top, "under": under}
 
 
 # ---------------------------------------------------------------------------

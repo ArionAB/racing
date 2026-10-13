@@ -126,6 +126,16 @@ done
 check "plants/bujor_de_munte.glb" --origin=assembly --allow-slots=31
 
 echo
+echo "== val 2, tf-e: cladirile (kit §1.3) =="
+# Exceptii tf-e, cu motiv:
+#   --origin=assembly  cladirile sunt sparte pe roluri (*_Stone, *_Wood, *_Roof,
+#                      *_Void); acoperisul, golurile si cosul nu ating solul,
+#                      deci offsetul de origine e calculat O DATA pe ansamblu.
+#                      Originea e pe CENTRUL CORPULUI (piatra), nu pe bbox:
+#                      terasa si scara ies 5,85 m pe +Y (fata bogata).
+check "buildings/cabana_balea_lac.glb" --origin=assembly
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

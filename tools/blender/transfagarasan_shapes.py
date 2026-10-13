@@ -402,11 +402,135 @@ def schist_blade(b, center, size, slot=None, dip_deg=40.0, strike_deg=0.0, seed=
             f[b.slot] = slot
 
 
-def dry_stone_wall(b, *args, **kw):
-    """STUB (tf-a, `retaining_wall_*`): zid de piatra uscata cu talus ~10 grade pe
-    fata spre vale, 7-9 pietre individuale DOAR pe randul de sus, masa cu fete mari
-    in rest, creasta plana la cota 0, capete plane la +-L/2 (inlantuibil)."""
-    raise NotImplementedError("dry_stone_wall: valul 1 (tf-a)")
+def _clip_hull_pts(pts, y_lo, y_hi):
+    """Punctele politopului convex conv(pts) taiat la y_lo <= y <= y_hi: varfurile
+    din interior + intersectiile muchiilor hull-ului cu cele doua plane. Asa o
+    piatra care incalca capatul modulului se taie PLAN, fara boolean."""
+    tmp = bmesh.new()
+    vs = [tmp.verts.new(p) for p in pts]
+    res = bmesh.ops.convex_hull(tmp, input=vs)
+    edges = [e for e in res["geom"] if isinstance(e, bmesh.types.BMEdge) and e.is_valid]
+    out = [Vector(v.co) for v in tmp.verts if v.is_valid and v.link_edges
+           and y_lo - 1e-6 <= v.co.y <= y_hi + 1e-6]
+    for e in edges:
+        a, b = e.verts[0].co, e.verts[1].co
+        for yp in (y_lo, y_hi):
+            if (a.y - yp) * (b.y - yp) < 0:
+                t = (yp - a.y) / (b.y - a.y)
+                out.append(Vector(a.lerp(b, t)))
+    tmp.free()
+    return out
+
+
+def _hull(b, pts, slot):
+    vs = [b.bm.verts.new(p) for p in pts]
+    bmesh.ops.remove_doubles(b.bm, verts=vs, dist=1e-4)
+    vs = [v for v in vs if v.is_valid]
+    res = bmesh.ops.convex_hull(b.bm, input=vs)
+    junk = [g for g in set(res["geom_interior"]) | set(res["geom_unused"]) if g.is_valid]
+    bmesh.ops.delete(b.bm, geom=junk, context="VERTS")
+    for f in res["geom"]:
+        if isinstance(f, bmesh.types.BMFace) and f.is_valid:
+            f[b.slot] = slot
+
+
+def dry_stone_wall(b, L=8.0, H=5.0, top_w=1.2, base_w=2.0, stones=8, seed=0.0,
+                   slot=None, bend_R=None, cap_h=(0.62, 0.86)):
+    """Zid de sprijin din piatra uscata (kit §1.1 `retaining_wall_*`).
+
+    Axe: Y lungul zidului (capete plane la +-L/2), X spre VALE, Z sus. Originea
+    pe muchia dinspre drum a crestei (x = 0, z = 0): creasta e PLANA la cota 0
+    (acolo sta marginea drumului), zidul atarna pana la z = -H. Spatele (x = 0)
+    e vertical, ingropat in umplutura; fata spre vale coboara de la x = top_w la
+    x = base_w (talus ~10 grade pentru 1,2 -> 2,0 pe 5 m).
+
+    * CORPUL: masa cu FETE MARI (inele la 0,5 m pe Y, 4 randuri pe fata de
+      vale, jitter periodic pe L pe X, +-0,2 m) -- piatra se citeste din clasa
+      `stone_wall`, nu din geometrie;
+    * RANDUL DE SUS: `stones` pietre INDIVIDUALE pe perioada L (hull-uri cu
+      colturi jitterate, fata de sus plana la z = 0, buza spre vale tesita, iesite
+      0,06-0,14 m din fata, rosturi de ~5 cm). Rosturile sunt periodice pe L, iar
+      piatra care incalca un capat se construieste o data si se taie PLAN la
+      ambele capete (copia ei decalata cu L), deci modulele se leaga piatra-n
+      piatra;
+    * `bend_R`: modulul curb. Fiecare punct (x, y) trece pe arcul cu centrul la
+      (-bend_R, 0); coarda la x = 0 ramane L (unghiul pe capat = asin(L/2R)),
+      capetele raman plane (radiale) si cu ACEEASI sectiune ca modulul drept."""
+    import random
+    slot = TF_SCHIST if slot is None else slot
+    rnd = random.Random(int(seed * 1000) + 7)
+    h = L * 0.5
+    z_top_body = -0.60
+
+    def face_x(z):          # fata spre vale (fara jitter), z in [-H, 0]
+        return top_w + (base_w - top_w) * (-z / H)
+
+    # --- corpul: inele pe Y
+    n = int(round(L / 0.5))
+    ys = [-h + L * i / n for i in range(n + 1)]
+    zr = [-H, -0.80 * H, -0.61 * H, -0.42 * H, -0.24 * H, z_top_body]
+    rings = []
+    for y in ys:
+        sec = [(0.0, z_top_body), (0.0, -H)]
+        for j, z in enumerate(zr):
+            jit = 0.0 if j in (0, len(zr) - 1) else 0.11 * _per(y, L, [(2, 0.8, seed + j * 1.9), (3, 0.7, seed * 2 + j * 2.3), (4, 0.5, j * 0.7)])
+            sec.append((face_x(z) + jit, z))
+        rings.append([(x, y, z) for x, z in sec])
+    # orientarea fetelor o reface `Builder.to_object` (corp inchis + hull-uri)
+    vr = [[b.bm.verts.new(p) for p in r] for r in rings]
+    m = len(vr[0])
+    for k in range(len(vr) - 1):
+        for i in range(m):
+            j = (i + 1) % m
+            f = b.bm.faces.new((vr[k][i], vr[k][j], vr[k + 1][j], vr[k + 1][i]))
+            f[b.slot] = slot
+    f = b.bm.faces.new(list(reversed(vr[0])))
+    f[b.slot] = slot
+    f = b.bm.faces.new(vr[-1])
+    f[b.slot] = slot
+
+    # --- randul de sus: rosturi periodice
+    widths = [0.8 + 0.5 * rnd.random() for _ in range(stones)]
+    sc = L / sum(widths)
+    widths = [w * sc for w in widths]
+    j0 = -h + 0.35 + 0.3 * rnd.random()
+    joints = [j0]
+    for w in widths:
+        joints.append(joints[-1] + w)          # ultimul = j0 + L
+    gap = 0.05
+    for si in range(stones):
+        y0, y1 = joints[si] + gap * 0.5, joints[si + 1] - gap * 0.5
+        srnd = random.Random(int(seed * 1000) + 101 * si)
+        zb = -(cap_h[0] + (cap_h[1] - cap_h[0]) * srnd.random())
+        xf = top_w + 0.10 + 0.10 * srnd.random()
+        pts = []
+        for yy in (y0, y1):
+            dj = lambda: (srnd.random() - 0.5) * 0.10
+            pts.append(Vector((0.0 + 0.03 * srnd.random(), yy + dj(), 0.0)))
+            pts.append(Vector((xf - 0.05, yy + dj() * 0.5, 0.0)))
+            pts.append(Vector((xf, yy + dj() * 0.5, -0.05)))
+            pts.append(Vector((xf + 0.03 * srnd.random(), yy + dj(), zb + 0.12 + srnd.random() * 0.1)))
+            pts.append(Vector((xf - 0.10 * srnd.random(), yy + dj() + (0.08 if yy == y0 else -0.08), zb + (srnd.random() - 0.5) * 0.10)))
+            pts.append(Vector((0.02, yy + dj(), zb)))
+        ym = (y0 + y1) * 0.5
+        pts.append(Vector((xf + 0.05, ym + (srnd.random() - 0.5) * 0.3, zb * (0.45 + 0.2 * srnd.random()))))
+        for shift in (0.0, -L, L):
+            q = [p + Vector((0.0, shift, 0.0)) for p in pts]
+            ylo = min(p.y for p in q)
+            yhi = max(p.y for p in q)
+            if yhi <= -h or ylo >= h:
+                continue
+            if ylo < -h or yhi > h:
+                q = _clip_hull_pts(q, -h, h)
+            _hull(b, q, slot)
+
+    if bend_R:
+        alpha = math.asin(h / bend_R)
+        for v in b.bm.verts:
+            x, y, z = v.co
+            th = y / h * alpha
+            r = bend_R + x
+            v.co = Vector((-bend_R + r * math.cos(th), r * math.sin(th), z))
 
 
 def tin_roof(b, *args, **kw):

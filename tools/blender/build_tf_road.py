@@ -411,6 +411,63 @@ def build_rock_tunnel_portal():
     return [rock, grass, to_obj(void, "Rock_Void")]
 
 
+AO_WALL = dict(samples=16, dist=1.6, gradient="vertical", low=0.66, high=1.0,
+               power=0.8, floor=0.38, z_range=(-5.0, 0.0))
+
+
+def build_retaining_wall(curve=False):
+    """Zidul de sprijin din piatra uscata de la acele de par
+    (`retaining_wall_straight` / `retaining_wall_curve`), kit §1.1.
+
+    LISTA DE ELEMENTE (decuparile `transfagarasan_assets_v1/retaining_wall_straight.png`
+    si `retaining_wall_curve.png`, scrisa INAINTE de geometrie; fasia din piesa
+    vecina din dreapta decuparii curbe se ignora):
+      1) zid lung, h/l ~0,4 pe decupare (dreapta), ~0,45 (curba)
+      2) RANDUL DE SUS: ~11 pietre de coronament dreptunghiulare, mai deschise,
+         usor iesite din fata, cu rosturi vizibile
+      3) CORPUL: ~40 de pietre rotunjite, neregulate, in 4-5 asize, cu rosturi
+         inchise si putin verde in rosturi
+      4) fata usor inclinata, capatul din dreapta vizibil (gros ~1/4 din inaltime)
+      5) curba: aceeasi zidarie pe un arc, fata CONVEXA spre privitor
+    CONTRACTUL kitului (suprascrie decuparea, regula 7 + tabelul §1.1): pietre
+    individuale DOAR pe randul de sus, 7-9 pe modul (decuparea are ~11: urmez
+    contractul, 8); corpul (3) e masa cu FETE MARI, piatra lui vine din clasa
+    `stone_wall` la integrare; fara verde in rosturi (fara vegetatie lipita).
+    Lista urmeaza contractul:
+      a) corpul: 8 m (Y) x 5 m, spate vertical (x = 0, ingropat), fata spre vale
+         (+X) de la 1,2 m sus la 2,0 m jos (talus ~9 grade), 4 randuri de fete
+         mari cu jitter periodic
+      b) randul de sus: 8 pietre/modul (7 intregi + 2 jumatati la capete care
+         fac o piatra peste rost), fata de sus PLANA la z = 0, buza tesita,
+         iesite 0,10-0,20 m din fata, inalte 0,62-0,86 m, rosturi de 5 cm
+      c) capete plane la +-4 m, aceeasi sectiune la ambele capete si la ambele
+         module (drept / curb)
+      d) curba: acelasi zid pe arcul R = 23 m la marginea drumului (x = 0),
+         coarda 8 m, fata convexa spre vale (+X)
+    Nod: `Wall_Stone` (MARBLE_GREY 29). Origine pe marginea drumului (x = 0) la
+    cota crestei (z = 0); geometria atarna sub 0 (`--origin=rim`)."""
+    b = Builder()
+    dry_stone_wall(b, L=8.0, H=5.0, top_w=1.2, base_w=2.0, stones=8, seed=3.0,
+                   slot=MARBLE_GREY, bend_R=23.0 if curve else None)
+    return [Builder.to_object(b, "Wall_Stone")]
+
+
+def emit_rim(objs, path, ao):
+    """Ca `emit_tf`, dar originea e pe COAMA: nu se muta nimic (geometria e
+    construita cu creasta la z = 0 si atarna dedesubt)."""
+    total, per_node = 0, {}
+    for o in objs:
+        st = finish(o, bevel=0.0, ao=ao, origin=None, smooth_angle=None)
+        total += st["tris"]
+        per_node[o.name] = st["tris"]
+    xs = [v.co.x for o in objs for v in o.data.vertices]
+    ys = [v.co.y for o in objs for v in o.data.vertices]
+    zs = [v.co.z for o in objs for v in o.data.vertices]
+    _, sz = export_glb(objs, "transfagarasan/" + path)
+    TF_RESULTS.append((path, total, Vector((max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs))),
+                       per_node, sz / 1024.0))
+
+
 ONLY = os.environ.get("TF_ONLY", "")
 
 
@@ -426,6 +483,12 @@ if _want("tunnel_portal_balea"):
 if _want("rock_tunnel_portal"):
     emit_tf(build_rock_tunnel_portal(), "structures/rock_tunnel_portal.glb", AO_ROCK,
             keep_xy=True, bevel=0.0, smooth_angle=None)
+
+if _want("retaining_wall_straight"):
+    emit_rim(build_retaining_wall(False), "structures/retaining_wall_straight.glb", AO_WALL)
+
+if _want("retaining_wall_curve"):
+    emit_rim(build_retaining_wall(True), "structures/retaining_wall_curve.glb", AO_WALL)
 
 if _want("snow_wall"):
     emit_tf_variants(build_snow_wall(), "structures/snow_wall.glb")

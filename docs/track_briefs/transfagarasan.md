@@ -1066,8 +1066,12 @@ nu ca regenerare:
 - **mașinile parcate seamănă cu Dacia** (Logan și Sandero/Duster: grila,
   silueta). Legal (§8): în Blender ies **generice**, cu grilă simplă și
   fără siluetă recognoscibilă;
-- **`vidraru_dam` e un zid drept**. Barajul e **arc**: modulul se curbează
-  în plan, iar coronamentul urmează drumul;
+- **`vidraru_dam` e un zid drept, și în plan e corect.** Prima versiune a
+  acestei liste cerea un arc în plan. Remăsurat pe Track21, coronamentul
+  (0,078–0,123) are 96 m și o rază de ~3,2 km, deci e drept, iar drumul e
+  sursa de adevăr. Arcul se citește din **profilul concav pe verticală**
+  al feței din aval, din culoarul de stâncă și din turnul de priză (kit
+  §1.2);
 - **`snow_wall` e din cuburi albe curate**. Trebuie zăpadă veche, cu straturi
   și dungi de praf (`#B9B2A4`), și cu muchia de sus rotunjită;
 - **cabanele au balcoane sculptate**, deci risc de chalet tirolez (§0.1).
@@ -1094,9 +1098,13 @@ nu ca regenerare:
 - **v0.3 (13 oct 2026):** diorama acceptată la a doua corecție (iter2, nu
   iter3: ordinea la tunel, ursul și tunelurile scurte cântăresc mai mult
   decât avalanșa, care e deja cod). Planșa e acceptată cu corecturi (§9.2):
-  mașinile generice (nu Dacia), barajul în arc, zăpada cu straturi, cabanele
-  fără balcoane sculptate, cabina mare, pictograma „nu hrăniți”. Contractul
-  kitului urmează în `docs/asset_briefs/transfagarasan_kit.md`.
+  mașinile generice (nu Dacia), barajul cu profil concav (coronamentul e
+  drept pe Track21), zăpada cu straturi, cabanele fără balcoane sculptate,
+  cabina mare, pictograma „nu hrăniți”. Contractul kitului e
+  `docs/asset_briefs/transfagarasan_kit.md`: 36 de fișiere noi în 8 grupe,
+  plus oaia, molizii, telecabina, utilajul și decorul de sat refolosite.
+  Decupările pe piese sunt în `img/transfagarasan_assets_v1/`
+  (`tools/blender/crop_transfagarasan_sheet.py`).
 
 - **v0.2 (13 oct 2026):** §9 scris pe planul REAL al fundației Track21
   (`img/transfagarasan_plan/transfagarasan_plan.png`,

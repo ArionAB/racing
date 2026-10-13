@@ -83,11 +83,11 @@ sloturile (memoria clase-pe-piese-de-kit). ROCK_DARK e interzis (rugina).
         de frunzis. 2*seg*rings triunghiuri (36 la 6x3).
   branch(b, pts, r0, r1, slot, seg=6)
         ramura / trunchi conic pe traseu (taper_sweep cu raze interpolate).
-  needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, n=4,
-             rise=0.0)
-        PERNA DE ACE de jneapan: n ciorchini alungiti pe directia ramurii,
-        turtiti, cu marginea zimtata; `rise` ridica capatul pernei (varful
-        ramurii se ridica).
+  needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, n=3,
+             rise=0.0, seg=5, rings=2)
+        PERNA DE ACE de jneapan: "creanga cu ace" PLATA (ca o feriga de sus):
+        miez turtit pe directia ramurii + n lobi alternanti pe fiecare parte
+        (marginea zimtata); `rise` ridica capatul pernei.
   crown_mass(b, center, radii, slot, seed=0, n=9, clump=1.4, el_lo=-0.25,
              core=True)
         MASA DE COROANA de foios: miez elipsoidal (88%) + n ciorchini mari pe
@@ -452,23 +452,33 @@ def branch(b, pts, r0, r1, slot, seg=6):
     return b.taper_sweep(pts, radii, slot, segments=seg)
 
 
-def needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, n=4, rise=0.0):
+def needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, n=3, rise=0.0,
+               seg=5, rings=2):
+    """PERNA DE ACE de jneapan = o "creanga cu ace" PLATA, ca o frunza de feriga
+    vazuta de sus (plansa): un miez turtit pe directia ramurii + `n` lobi pe
+    FIECARE parte, alternanti, turtiti, care dau marginea ZIMTATA. Capatul urca
+    cu `rise`. Ciorchini de seg x rings (20 tri la 5x2): perna ~ (1 + 2n) x 20."""
     r = _rnd(seed)
     a = math.radians(azim_deg)
     d = Vector((math.cos(a), math.sin(a), 0.0))
     side = Vector((-d.y, d.x, 0.0))
     base = Vector(base)
     faces = []
+    # miezul (rahisul acoperit de ace)
+    faces += clump(b, base + Vector((0.0, 0.0, rise * 0.5)), (length, width * 0.5, height * 0.62),
+                   slot, seed=seed * 13, seg=seg + 1, rings=rings, dev=0.15,
+                   yaw=azim_deg, tilt=0.12)
     for i in range(n):
-        t = (i + 0.5) / n
-        p = (base + d * (length * (t - 0.5)) + side * ((r() - 0.5) * width * 0.35)
-             + Vector((0.0, 0.0, rise * t * t + (r() - 0.5) * height * 0.15)))
-        lc = length / n * (1.7 + 0.3 * r())
-        wc = width * (0.62 + 0.28 * r()) * (1.0 - 0.25 * t)
-        hc = height * (0.70 + 0.30 * r())
-        faces += clump(b, p, (lc, wc, hc), slot, seed=seed * 13 + i,
-                       seg=6, rings=3, dev=0.22,
-                       yaw=azim_deg + (r() - 0.5) * 25.0, tilt=0.25)
+        for sgn in (-1.0, 1.0):
+            t = (i + (0.25 if sgn > 0 else 0.75)) / n
+            along = length * (t - 0.5) * 0.9
+            p = (base + d * along + side * (sgn * width * (0.30 + 0.06 * r()))
+                 + Vector((0.0, 0.0, rise * t + (r() - 0.6) * height * 0.15)))
+            lc = length / n * (0.95 + 0.25 * r())
+            wc = width * (0.40 + 0.12 * r()) * (1.0 - 0.3 * t)
+            faces += clump(b, p, (lc, wc, height * (0.42 + 0.15 * r())), slot,
+                           seed=seed * 13 + 1 + i * 2 + (sgn > 0), seg=seg, rings=rings,
+                           dev=0.2, yaw=azim_deg + sgn * (35.0 + 15.0 * r()), tilt=0.2)
     return faces
 
 

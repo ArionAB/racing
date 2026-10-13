@@ -585,3 +585,27 @@ transform = Transform3D(0.9954582, 0, -0.0951995, 0, 1, 0, 0.0951995, 0, 0.99545
 
 [node name="Trecere_nivel_B" parent="DecorManual/ZonaRepere" instance=ExtResource("m_level_crossing")]
 transform = Transform3D(-0.99545825, 0, 0.095199354, 0, 1, 0, -0.095199354, 0, -0.99545825, -200.27275, 4.921023, -124.97557)
+
+[node name="ZonaA" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.9786-1.000 + 0.000-0.064 (grila 0.000 la (-115, 262), colt H->A -40 grade 0.9766, urcare 4-9 % de la 0.02); x -156..20, z 238..266; stanga si dreapta plat la cota drumului (-0.3 m) pe 40 m, perete >3 m abia la 68-86 m, fara apa; Poenari la (-125, 215), 37 m STANGA (0.985) (masurat cu tools/sv_tf_fractii.gd; vezi docs/track_briefs/transfagarasan_poi_gauntlet.md)"
+
+[node name="ZonaB" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.064-0.1535 (coronament semi 6.0 la 0.078-0.123, rapa 2 = hau 0.074-0.128, lac rapa 0 0.080-0.135, colt -45 grade 0.1515); x 20..195, z 200..257; STANGA lacul Vidraru apa la +7.5 (4.5 m sub drum, de la 2 m de margine), DREAPTA hau -33..-40 m (rau la -24), Prometeu 13 m dreapta (0.129), Portal_Stanca 0.1384 (masurat cu tools/sv_tf_fractii.gd)"
+
+[node name="ZonaC" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.1535-0.2520 (ursul 0.1993 pe axa, Semn_urs 0.1777 la 9 m dreapta, ac -110 grade r21 la 0.2423); x 195..240, z 15..200; STANGA apa la 10-16 m de margine (cadere >3 m la 6-8 m, lac sub drum -7..-15 m), DREAPTA plat 0 m pe 40 m, perete 50-98 m (masurat cu tools/sv_tf_fractii.gd)"
+
+[node name="ZonaD" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.2520-0.3171 (acele +119/-96 grade la 0.2666/0.2919, pante 10-12 %, Utilaj_parcat 0.2956, Lampa semafor 0.3040, Portal_S 0.3171); x 207..240, z -87..15; teren lateral variabil: perete +11..+23 m la 20-40 m pe una din parti, cadere -7..-10 pe cealalta; zapada Zapada_*/Jalon* la 8-11 m de axa (masurat cu tools/sv_tf_fractii.gd)"
+
+[node name="ZonaE" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.3171-0.3720 (tunel semi 6.0 0.317-0.350, Santier_tunel 0.3237, Portal_N 0.3499, LacBalea disc R34 la 43.5 m DREAPTA 0.3573, colt -49 grade 0.3686); x 171..215, z -191..-87; STANGA perete +17..+43 m la 20-80 m, DREAPTA lac (disc +40.3) apoi cadere -13..-20 m la 80 m (masurat cu tools/sv_tf_fractii.gd)"
+
+[node name="ZonaF" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.3720-0.6268 (patru ace +144/-144 grade r16 la 0.4191/0.4668/0.5154/0.5631, parapete 0.377-0.626, Avalansa 0.4004, OileAcPaior 0.4911, rapa 3 0.347-0.382); x 39..171, z -328..-191; terenul alterneaza intre ramuri (perete +12..+50 m pe o parte, cadere -10..-21 m pe cealalta) pe 80 m; zidurile ZidC01..34 la 7 m de axa (masurat cu tools/sv_tf_fractii.gd)"
+
+[node name="ZonaG" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.6268-0.7036 (dreapta spre cascada 275 grade, ParaulBalea TrackChannel jump 0.6791, rapa 4 de la 0.705, colt -36 grade 0.7016); x -121..39, z -335..-315; plat 0 m pe 40-80 m pe dreapta, STANGA perete +15..+21 m abia la 80 m (nu exista perete de cascada la <40 m), apa doar in canal la 0.67-0.69 (masurat cu tools/sv_tf_fractii.gd)"
+
+[node name="ZonaH" type="Node3D" parent="DecorManual"]
+metadata/fractii = "REAL 0.7036-0.9786 (rapa 4 0.705-0.775 si rapa 5 0.845-0.975 = Oltul DREAPTA, Tren 0.8007 + Trecere_nivel 0.798/0.8045, fara apa pe 0.775-0.845, colt -37 0.7465, colt -40 0.9766); x -205..-121, z -315..238; STANGA perete +20..+72 m la 40-80 m (pereti de defileu), DREAPTA rau la 10-14 m de margine in rape, plat in rest (masurat cu tools/sv_tf_fractii.gd)"

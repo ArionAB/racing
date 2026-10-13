@@ -88,11 +88,13 @@ sloturile (memoria clase-pe-piese-de-kit). ROCK_DARK e interzis (rugina).
         PERNA DE ACE de jneapan: "creanga cu ace" PLATA (ca o feriga de sus):
         miez turtit pe directia ramurii + n lobi alternanti pe fiecare parte
         (marginea zimtata); `rise` ridica capatul pernei.
-  crown_mass(b, center, radii, slot, seed=0, n=9, clump=1.4, el_lo=-0.25,
-             core=True)
+  crown_mass(b, center, radii, slot, seed=0, n=9, clump_size=1.4, el_lo=-0.25,
+             core=True, squash=1.0, core_scale=0.88)
         MASA DE COROANA de foios: miez elipsoidal (88%) + n ciorchini mari pe
         suprafata lui (doar deasupra elevatiei `el_lo`), conturul zimtat de
-        ciorchini fatetati, ca pe plansa fagului.
+        ciorchini fatetati, ca pe plansa fagului; `squash` < 1 turteste
+        ciorchinii (lobi mai lati decat inalti, nu bule); `core_scale` mai mic
+        (si ridicat) lasa goluri pe dedesubt prin care se vad bratele.
 
 Axe ca in tot kitul: X latime, Y adancime (fata spre +Y in Blender = -Z in
 Godot), Z sus.
@@ -483,13 +485,15 @@ def needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, n=3, rise
 
 
 def crown_mass(b, center, radii, slot, seed=0, n=9, clump_size=1.4, el_lo=-0.25,
-               core=True):
+               core=True, squash=1.0, core_scale=0.88):
     r = _rnd(seed)
     c = Vector(center)
     rx, ry, rz = radii
     faces = []
     if core:
-        faces += clump(b, c, (2 * rx * 0.88, 2 * ry * 0.88, 2 * rz * 0.88), slot,
+        k0 = core_scale
+        faces += clump(b, c + Vector((0.0, 0.0, rz * (0.88 - k0) * 0.8)),
+                       (2 * rx * k0, 2 * ry * k0, 2 * rz * k0), slot,
                        seed=seed, seg=8, rings=4, dev=0.08, tilt=0.15)
     ga = math.pi * (3.0 - math.sqrt(5.0))
     k = 0
@@ -504,7 +508,7 @@ def crown_mass(b, center, radii, slot, seed=0, n=9, clump_size=1.4, el_lo=-0.25,
         dirv = Vector((rr * math.cos(ang), rr * math.sin(ang), zz))
         p = c + Vector((dirv.x * rx, dirv.y * ry, dirv.z * rz)) * (0.86 + 0.08 * r())
         s = clump_size * (0.8 + 0.4 * r())
-        faces += clump(b, p, (s, s, s * (0.78 + 0.2 * r())), slot, seed=seed * 31 + k,
-                       seg=6, rings=3, dev=0.2, tilt=0.5)
+        faces += clump(b, p, (s, s, s * (0.78 + 0.2 * r()) * squash), slot,
+                       seed=seed * 31 + k, seg=7, rings=3, dev=0.22, tilt=0.35)
         k += 1
     return faces

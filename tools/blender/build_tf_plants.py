@@ -131,6 +131,120 @@ def build_jneapan_b():
     return _jneapan(branches, 47, upright=upright)
 
 
+# ---------------------------------------------------------------------------
+# fagul european (Fagus sylvatica)
+# ---------------------------------------------------------------------------
+
+def _shear(builders, lean_deg, axis=(1.0, 0.0)):
+    """Aplecarea arborelui: fiecare vertex se muta pe `axis` cu z*tan(lean).
+    Baza trunchiului (z = 0) ramane pe origine."""
+    k = math.tan(math.radians(lean_deg))
+    for b in builders:
+        for v in b.bm.verts:
+            v.co.x += v.co.z * k * axis[0]
+            v.co.y += v.co.z * k * axis[1]
+
+
+def _root_flare(bark, r0, seed, n=4):
+    r = _rnd(seed)
+    for i in range(n):
+        a = 2.0 * math.pi * (i + 0.2 * r()) / n
+        d = Vector((math.cos(a), math.sin(a), 0.0))
+        bark.taper_sweep([d * (r0 * 0.4) + Vector((0, 0, 0.9)), d * (r0 * 1.1) + Vector((0, 0, 0.25)),
+                          d * (r0 * 2.0) + Vector((0, 0, 0.0))],
+                         [r0 * 0.45, r0 * 0.35, 0.0], TF_BARK_GREY, segments=5)
+
+
+def _limbs_to(bark, start, masses, frac=0.72, r0=0.17, r1=0.07, seed=0):
+    """Cate un brat din `start` spre centrul fiecarei mase (pana la `frac` din
+    drum, ca sa intre in miez): se vad pe sub coroana, ca pe plansa."""
+    r = _rnd(seed)
+    s = Vector(start)
+    for (c, _rad) in masses:
+        c = Vector(c)
+        mid = s.lerp(c, 0.45) + Vector(((r() - 0.5) * 0.4, (r() - 0.5) * 0.4, -0.3))
+        branch(bark, [s, mid, s.lerp(c, frac)], r0, r1, TF_BARK_GREY, seg=6)
+
+
+def build_beech_tree_a():
+    """Fagul A (`beech_tree_a`): 13 m inalt, coroana 10 m, h/l ~1,3.
+
+    LISTA DE ELEMENTE (decuparea `beech_tree_a.png` + contractul; scrisa INAINTE
+    de geometrie):
+      a) TRUNCHI drept, vizibil de la sol pana la ~4,5 m, Ø ~0,8 m la baza, cu
+         4 pinteni de radacina (runda 2: ramificat de la ~4,6 m); GRI si NETED (contractul; pe plansa e maro -- urmez
+         contractul: scoarta fagului e gri, MARBLE_GREY 29).
+      b) RAMIFICAT SUS: la ~5,2 m trunchiul se desface in 7 brate (unul spre
+         fiecare masa), vizibile in golurile de sub coroana (plansa: 3-4 brate
+         vizibile intre mase).
+      c) COROANA ovala, LATA (10 m), din 7 MASE (contractul 5-7): varful, doua sus
+         pe laturi, una in fata, una in spate, doua jos pe laturi; fiecare masa =
+         miez + 9 ciorchini fatetati pe suprafata -> conturul zimtat de ciorchini
+         din plansa (~18-20 vizibili din fata).
+      d) baza coroanei la ~4,8 m; coroana coboara mai jos pe laturi (masele de jos).
+      e) NU intra: umbra de sol, iarba.
+    Noduri: Beech_Bark (MARBLE_GREY 29), Beech_Leaves (TROPICAL_GREEN 21 -> clasa
+    beech_canopy, tenta recalculata la integrare).
+    """
+    bark, lv = Builder(), Builder()
+    bark.taper_sweep([(0, 0, 0.0), (0.04, 0.0, 2.5), (0.08, 0.04, 4.8)], [0.42, 0.33, 0.27],
+                     TF_BARK_GREY, segments=8)
+    _root_flare(bark, 0.40, 3)
+    # runda 2: coroana coboara pe laturi pana la ~4 m (pe plansa baza coroanei e
+    # la ~1/3 din inaltime), mase mai mari si mai joase, ciorchini mai mari si
+    # turtiti (runda 1: bule rotunde pe un bat lung -- "acadea")
+    masses = [((0.0, 0.0, 10.3), (2.8, 2.8, 2.0)), ((-2.6, 0.5, 8.6), (2.5, 2.5, 2.0)),
+              ((2.7, -0.4, 8.4), (2.5, 2.5, 2.0)), ((0.3, 2.3, 7.4), (2.5, 2.2, 2.0)),
+              ((-0.4, -2.4, 7.6), (2.4, 2.2, 2.0)), ((-2.8, -0.8, 5.9), (2.3, 2.2, 1.7)),
+              ((2.9, 1.0, 5.7), (2.3, 2.2, 1.7))]
+    _limbs_to(bark, (0.08, 0.04, 4.6), masses, seed=5)
+    for i, (c, rad) in enumerate(masses):
+        crown_mass(lv, c, rad, TF_LEAF, seed=200 + i * 7, n=7, clump_size=2.2, el_lo=-0.45,
+                   squash=0.72, core_scale=0.70)
+    return [bark.to_object("Beech_Bark"), lv.to_object("Beech_Leaves")]
+
+
+def build_beech_tree_b():
+    """Fagul B (`beech_tree_b`): 10 m inalt, coroana 9 m, usor aplecat, h/l ~1,1.
+
+    LISTA DE ELEMENTE (decuparea `beech_tree_b.png` + CORECTURA kitului: pe
+    plansa b e aproape identic cu a -- trunchi drept, coroana rotunda; urmez
+    corectura: "alta silueta", fag de margine de padure):
+      a) TRUNCHI gri, neted, scurt, care se DESFACE IN DOUA la 3 m (doi conducatori
+         divergenti, cel din dreapta mai lung si mai culcat).
+      b) tot arborele APLECAT ~5 grade spre +X (spre lumina, marginea padurii).
+      c) COROANA ASIMETRICA si mai JOASA (baza la ~4 m): 6 MASE -- doua pe
+         conducatori, una sus intre ei, o masa JOASA iesita spre +X (partea
+         luminata), una mica spre -X, una in fata; mai multa masa pe +X.
+      d) bratele vizibile sub coroana, ca la a (runda 3: miezul maselor mai mic
+         si ridicat, ca bratele sa se vada prin goluri).
+      e) NU intra: umbra, iarba.
+    Noduri: Beech_Bark (MARBLE_GREY 29), Beech_Leaves (TROPICAL_GREEN 21).
+    """
+    bark, lv = Builder(), Builder()
+    # runda 3: furca la 2,7 m, conducatorii diverg mai larg (in runda 2 furca
+    # intra aproape imediat in coroana si trunchiul citea simplu)
+    bark.taper_sweep([(0, 0, 0.0), (0.03, 0.0, 1.5), (0.06, 0.0, 2.8)], [0.36, 0.30, 0.27],
+                     TF_BARK_GREY, segments=8)
+    _root_flare(bark, 0.36, 9)
+    fork = Vector((0.06, 0.0, 2.7))
+    lead1 = [fork, Vector((-0.75, 0.15, 4.3)), Vector((-1.3, 0.25, 6.4))]
+    lead2 = [fork, Vector((1.2, -0.1, 3.9)), Vector((2.2, -0.2, 5.6))]
+    branch(bark, lead1, 0.22, 0.12, TF_BARK_GREY, seg=7)
+    branch(bark, lead2, 0.22, 0.12, TF_BARK_GREY, seg=7)
+    m1 = [((-1.2, 0.3, 7.5), (2.3, 2.2, 1.8)), ((0.5, 0.2, 8.2), (2.3, 2.2, 1.6)),
+          ((-2.3, -0.5, 5.6), (1.8, 1.7, 1.4))]
+    m2 = [((2.2, -0.2, 6.8), (2.5, 2.3, 1.8)), ((3.4, 0.4, 5.0), (2.0, 1.9, 1.4)),
+          ((1.2, 2.0, 5.6), (2.0, 1.7, 1.5))]
+    _limbs_to(bark, lead1[-1], m1, r0=0.12, r1=0.06, seed=11)
+    _limbs_to(bark, lead2[-1], m2, r0=0.12, r1=0.06, seed=12)
+    for i, (c, rad) in enumerate(m1 + m2):
+        crown_mass(lv, c, rad, TF_LEAF, seed=400 + i * 7, n=7, clump_size=2.0, el_lo=-0.45,
+                   squash=0.72, core_scale=0.70)
+    _shear([bark, lv], 5.0)
+    return [bark.to_object("Beech_Bark"), lv.to_object("Beech_Leaves")]
+
+
 # runda 3: umbrire neteda pe ciorchinii de 5 x 2 (cu fatete plate citeau ca
 # niste cubulete; lobii de pe plansa sunt rotunjiti)
 JNEAPAN_SMOOTH = 100.0   # 75 nu netezea nimic: fetele ciorchinilor de 5 laturi se intalnesc la 72-90+ grade
@@ -148,5 +262,12 @@ if _want("jneapan_a"):
 if _want("jneapan_b"):
     emit_tf(build_jneapan_b(), "plants/jneapan_b.glb", _ao(1.5, 0.6), keep_xy=True,
             bevel=0.0, smooth_angle=JNEAPAN_SMOOTH)
+
+if _want("beech_tree_a"):
+    emit_tf(build_beech_tree_a(), "plants/beech_tree_a.glb", _ao(13.0, 1.6, 0.5),
+            keep_xy=True, bevel=0.0, smooth_angle=None)
+if _want("beech_tree_b"):
+    emit_tf(build_beech_tree_b(), "plants/beech_tree_b.glb", _ao(10.0, 1.6, 0.5),
+            keep_xy=True, bevel=0.0, smooth_angle=None)
 
 report_tf()

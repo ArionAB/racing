@@ -64,6 +64,15 @@ sloturile (memoria clase-pe-piese-de-kit). ROCK_DARK e interzis (rugina).
         mare inclinata pe foliatie (`dip` pe s, plus `yaw` in plan), colturi
         jitter-ate, ingropata `sink` x T si taiata plat la z = 0.
 
+  slab_stone(b, center, size, normal=(0,0,1), spin=0, seed=0, slot=TF_SCHIST,
+             zmin=0.0, ymin=None)
+        piatra PLATA de grohotis culcata pe panta (axa subtire pe `normal`),
+        taiata la sol (z >= zmin) si la perete (y >= ymin).
+
+  cut_profile(poly, s_max, lean_deg=20)
+        taie un contur (s, z) cu o fractura abrupta la capatul din aval
+        (creste lungi pe foliatie culcata, `schist_outcrop_b`).
+
   hull(b, pts, slot)
         invelitoarea convexa a unor puncte, pe un slot (baza tuturor de mai sus).
 
@@ -384,6 +393,36 @@ def schist_chip(b, fr, s, v, size, dip=40.0, yaw=0.0, seed=0, slot=TF_SCHIST,
         q.z = max(q.z, 0.0)
         out.append(q)
     return hull(b, out, slot)
+
+
+def slab_stone(b, center, size, normal=(0.0, 0.0, 1.0), spin=0.0, seed=0,
+               slot=TF_SCHIST, zmin=0.0, ymin=None):
+    """Piatra PLATA de sist (grohotis): lespede L x W x T cu colturi jitter-ate,
+    culcata pe o panta -- axa ei subtire pe `normal`, rotita `spin` grade in
+    jurul normalei -- cu centrul in `center`. Taiata plat la z >= zmin si, daca
+    `ymin` e dat, la y >= ymin (latura lipita de peretele de stanca)."""
+    r = _rnd(seed)
+    L, W, T = size
+    loc = []
+    for ix in (-1, 1):
+        for iy in (-1, 1):
+            for iz in (-1, 1):
+                k = 0.72 + 0.28 * r()
+                loc.append(Vector((ix * L * 0.5 * k, iy * W * 0.5 * (0.75 + 0.25 * r()),
+                                   iz * T * 0.5 * (0.8 + 0.2 * r()))))
+    loc.append(Vector(((r() - 0.5) * L * 0.5, (r() - 0.5) * W * 0.5, T * 0.6)))
+    nz = Vector(normal).normalized()
+    q = Vector((0.0, 0.0, 1.0)).rotation_difference(nz)
+    rot = q.to_matrix() @ Matrix.Rotation(math.radians(spin), 3, "Z")
+    c = Vector(center)
+    pts = []
+    for p in loc:
+        w = c + rot @ p
+        w.z = max(w.z, zmin)
+        if ymin is not None:
+            w.y = max(w.y, ymin)
+        pts.append(w)
+    return hull(b, pts, slot)
 
 
 # ---------------------------------------------------------------------------

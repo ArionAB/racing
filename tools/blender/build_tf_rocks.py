@@ -34,7 +34,7 @@ clear_built()
 
 def _ao(h):
     return dict(samples=24, dist=2.2, gradient="vertical", low=0.62, high=1.0,
-                power=0.8, floor=0.30, z_range=(0.0, h))
+                power=0.8, floor=0.30, z_range=(-0.01, h))
 
 
 def _stack(sch, crk, fr, blades, gap):
@@ -219,6 +219,92 @@ def build_schist_outcrop_c():
     return [sch.to_object("Schist_Schist"), crk.to_object("Schist_Crack")]
 
 
+def build_scree_cone():
+    """Conul de grohotis (`scree_cone`): diametru 12 m, 4 m inalt, h/l ~0,35.
+
+    LISTA DE ELEMENTE (decuparea `scree_cone.png`, scrisa INAINTE de geometrie;
+    cotele si latura lipita de perete din tabel):
+      a) CON pe jumatate (contractul: "o latura e plana, -Y, se lipeste de
+         stanca"; plansa arata un con intreg, liber): varful lipit de perete la
+         4 m, baza un semicerc cu raza 6 m in fata peretelui, panta ~34 grade.
+      b) PIETRE PLATE de sist, culcate pe panta (nu bulgari rotunzi): ~100, mai
+         mici sus (0,6-0,9 m), mai mari jos (1,1-1,6 m) -- sortarea naturala;
+         plus 5 LESPEZI MARI (1,5-2,1 m) iesite din panta. (Runda 1: 244 de
+         pietre de 0,35-1 m citeau ca dale marunte, 12,9k tri.)
+      c) 6 BLOCURI mari (1,2-1,7 m) la piciorul conului (plansa: 5-7 blocuri
+         unghiulare mari in fata si pe laturi).
+      d) pietris marunt imprastiat pe sol in jurul piciorului, pana la ~7 m.
+      e) miezul conului (nevazut printre pietre), ca sa nu se vada prin goluri.
+      f) NU intra: muschiul de pe pietre; latura dinspre perete e TAIATA PLAN
+         la y = 0 (pietrele de pe margine se taie la perete).
+    Nod: Scree_Schist (MARBLE_GREY 29 -> tf_schist). Fara nod de fisuri: golurile
+    dintre pietre sunt fisurile, iar umbra lor o da AO-ul (regula 8: nu un slot
+    inchis intins pe suprafata). Coliziune `none` (contract).
+    """
+    sch = Builder()
+    R, H = 6.0, 4.0
+    r = _rnd(404)
+    # miezul: jumatate de con (hull), putin sub suprafata pietrelor
+    core = [(0.0, 0.02, H * 0.94)]
+    for i in range(13):
+        a = math.pi * i / 12.0
+        rr = R * 0.92 * (0.95 + 0.05 * r())
+        core.append((rr * math.cos(a), max(rr * math.sin(a), 0.0), 0.0))
+    hull(sch, core, TF_SCHIST)
+
+    def surf(rr):
+        return H * max(0.0, 1.0 - rr / R)
+
+    slope = math.atan2(H, R)
+    k = 0
+    rr = 0.35
+    while rr < R * 0.98:
+        L = 0.6 + 0.75 * (rr / R)
+        n = max(2, int(math.pi * rr / (L * 0.85)))
+        for i in range(n):
+            a = math.pi * (i + 0.15 + 0.7 * r()) / n
+            ri = rr + (r() - 0.5) * L * 0.4
+            x, y = ri * math.cos(a), ri * math.sin(a)
+            nrm = Vector((math.cos(a) * math.sin(slope), math.sin(a) * math.sin(slope),
+                          math.cos(slope)))
+            nrm = (nrm + Vector(((r() - 0.5) * 0.5, (r() - 0.5) * 0.5, 0.0))).normalized()
+            Ls = L * (0.8 + 0.45 * r())
+            size = (Ls, Ls * (0.55 + 0.3 * r()), Ls * (0.28 + 0.14 * r()))
+            c = Vector((x, y, surf(ri) - size[2] * 0.1))
+            slab_stone(sch, c, size, nrm, spin=r() * 180.0, seed=1000 + k, ymin=0.0)
+            k += 1
+        rr += L * 0.70
+    print("scree_cone: pietre pe con", k)
+    # 5 lespezi MARI pe panta (plansa: lespezi de 1,5-2 m ies din con, mai ales
+    # pe jumatatea de jos)
+    for i, (a_deg, ri, Ls) in enumerate([(30, 3.6, 1.9), (70, 4.4, 2.1), (100, 2.6, 1.6),
+                                         (135, 4.0, 1.8), (160, 3.0, 1.5)]):
+        a = math.radians(a_deg)
+        nrm = Vector((math.cos(a) * math.sin(slope), math.sin(a) * math.sin(slope),
+                      math.cos(slope))) + Vector(((r() - 0.5) * 0.3, (r() - 0.5) * 0.3, 0.0))
+        size = (Ls, Ls * 0.6, Ls * 0.4)
+        c = Vector((ri * math.cos(a), ri * math.sin(a), surf(ri) + size[2] * 0.15))
+        slab_stone(sch, c, size, nrm, spin=r() * 180.0, seed=1500 + i, ymin=0.0)
+    # blocurile mari de la picior
+    for i, (a_deg, rad, Ls) in enumerate([(12, 6.1, 1.5), (48, 6.3, 1.2), (78, 6.2, 1.7),
+                                          (112, 6.0, 1.3), (145, 6.4, 1.6), (170, 6.1, 1.2)]):
+        a = math.radians(a_deg)
+        size = (Ls, Ls * 0.7, Ls * 0.45)
+        c = Vector((rad * math.cos(a), rad * math.sin(a), size[2] * 0.3))
+        nrm = Vector(((r() - 0.5) * 0.6, (r() - 0.5) * 0.6, 1.0))
+        slab_stone(sch, c, size, nrm, spin=r() * 180.0, seed=2000 + i, ymin=0.0)
+    # pietris pe sol
+    for i in range(16):
+        a = math.pi * r()
+        rad = R * (1.02 + 0.18 * r())
+        Ls = 0.25 + 0.3 * r()
+        size = (Ls, Ls * 0.7, Ls * 0.35)
+        c = Vector((rad * math.cos(a), rad * math.sin(a), 0.0))
+        slab_stone(sch, c, size, (0.0, 0.0, 1.0), spin=r() * 180.0, seed=3000 + i,
+                   ymin=0.0)
+    return [sch.to_object("Scree_Schist")]
+
+
 ONLY = os.environ.get("TF_ONLY", "")
 
 
@@ -237,5 +323,11 @@ if _want("schist_outcrop_b"):
 if _want("schist_outcrop_c"):
     emit_tf(build_schist_outcrop_c(), "rocks/schist_outcrop_c.glb", _ao(8.0),
             keep_xy=False, bevel=0.05, bevels={"_Crack": 0.0}, smooth_angle=None)
+
+if _want("scree_cone"):
+    emit_tf(build_scree_cone(), "rocks/scree_cone.glb",
+            dict(samples=24, dist=1.2, gradient="vertical", low=0.66, high=1.0,
+                 power=0.8, floor=0.30, z_range=(-0.01, 4.0)),
+            keep_xy=False, bevel=0.0, smooth_angle=None)
 
 report_tf()

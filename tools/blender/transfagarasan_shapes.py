@@ -6,25 +6,26 @@ Pe pilot (tunnel_portal_balea) s-au scris DOAR formele folosite de portal; cele
 care vin in valul 1 sunt stub-uri cu contractul in docstring (NU au corp: ridica
 NotImplementedError, ca sa nu le foloseasca nimeni pe nevazute).
 
-FOLOSITE (pilot):
-  (ring_stack / snow_layers: pentru `snow_wall` din valul 1; portalul nu le mai
-   foloseste dupa contractul nou -- movila lui e din `faceted_block`)
+FOLOSITE (pilot + val 1 tf-a):
   ring_stack       masa inchisa din inele de puncte 3D (acelasi numar de puncte
-                   pe inel). Doua inele consecutive la ACEEASI cota = un prag
-                   orizontal (treapta). Baza pentru `snow_layers`.
-  snow_layers      peretele de zapada veche: 4 straturi cu trepte de 0,3 m pe
-                   fetele taiate de plug (+-Y), dungi de praf (nod separat),
-                   muchia de sus rotunjita si ondulata, baza murdara. Va fi
-                   refolosit de `snow_wall` (valul 1) cu alti parametri.
+                   pe inel). Doua inele consecutive la ACEEASI cota = un prag.
+  snow_wall_section / snow_wall_module   (tf-a) peretele de zapada veche: 3-4
+                   straturi cu trepte pe fata taiata de plug, scobituri de freza,
+                   praful ca PETE pe fete (nod *_Dust), creasta topita; totul
+                   periodic pe lungimea modulului -> capete identice.
   extrude_xz       prisma dintr-un contur in planul XZ (poate fi concav), pe Y.
   tilt_front       inclina fata din fata a unei prisme (placa lasata inapoi).
   tube_lining      captuseala de umbra a gurii: banda fara capace, normale spre gol.
-  faceted_block    bloc de zapada unghiular (convex hull), baza plata.
-  dust_patch       bucata scurta de praf, inclinata.
+  faceted_block    bloc de zapada unghiular (convex hull), baza plata (portalul
+                   Balea rev. 2, bolovanii semnelor).
+  dust_patch       bucata scurta de praf, inclinata (portalul Balea rev. 2).
+  schist_blade     (tf-a, MINIMA) lama de sist pe foliatie; la integrare se
+                   unifica cu `tf_shapes_nature.schist_blade` (tf-b).
+  dry_stone_wall   (tf-a) zid de sprijin, cu varianta curba (`bend_R`).
   emit_tf          finish pe fiecare nod + export in assets/models/transfagarasan/.
 
 STUB-URI (valul 1, vezi docstring-urile):
-  schist_blade, dry_stone_wall, tin_roof
+  tin_roof
 
 Se incarca cu exec, dupa dio_lib (vezi build_tf_*.py). Axe: X latime, Y adancime
 (fata spre +Y in Blender = -Z in Godot), Z sus. Reutilizeaza `_face`, `to_obj`

@@ -809,7 +809,16 @@ ONLY = os.environ.get("TF_ONLY", "")
 
 
 def _want(name):
-    return not ONLY or ONLY == name
+    """Si curata scena inainte de fiecare piesa: altfel doua piese cu acelasi nume
+    de nod (`Wall_Stone` la zidul drept si la cel curb) ies `Wall_Stone.001` in
+    al doilea GLB, iar Godot cauta nodurile dupa nume."""
+    if ONLY and ONLY != name:
+        return False
+    clear_built()
+    for o in list(bpy.data.objects):
+        if o.type == "EMPTY":
+            bpy.data.objects.remove(o, do_unlink=True)
+    return True
 
 
 if _want("tunnel_portal_balea"):

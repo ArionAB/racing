@@ -11,12 +11,14 @@
 # Exceptii, fiecare cu motivul:
 #   --origin=assembly   piesele au mai multe noduri pe rol (beton / zapada / praf /
 #                       umbra); offsetul de origine e calculat o data pe ansamblu.
+#   --origin=rim        zidurile de sprijin: creasta la 0, zidul atarna dedesubt.
 # Fara plafon de triunghiuri (CLAUDE.md): bugetul dat lui verify_glb e doar o
 # plasa de siguranta (1.000.000). Garzi suplimentare:
 #   - scala/rotatia aplicate pe nodurile radacina (memoria scala-glb-neaplicata-
 #     la-radacina)
 #   - golul portalului, MASURAT CA GOL (measure_tf_gap.py): >= 13,0 m lateral pe
 #     banda caroseriei 0-2 m, >= 7,0 m inaltime libera in |x| <= 6,5 (kit §1.1, contract nou)
+#   - golul portalului de stanca (tf-a): >= 15,0 m pe 0-2 m, >= 7,0 m in |x| <= 6,5
 #   - orice GLB din assets/models/transfagarasan/ care NU e declarat mai jos e
 #     verificat cu verify_glb.py fara exceptii (si pica daca nu trece).
 
@@ -79,6 +81,23 @@ gap_check() {  # gap_check <cale> <lat_min> <inalt_min>
 echo "== pilotul (kit §3, val 0): portalul =="
 check "structures/tunnel_portal_balea.glb" --origin=assembly
 gap_check "structures/tunnel_portal_balea.glb" 13.0 7.0
+
+echo
+echo "== val 1, tf-a (drumul, kit §1.1) =="
+# --origin=assembly: snow_wall are variantele ca radacini goale (SnowWall_A/_B)
+#   cu copiii *_Snow/*_Dust; portalul de stanca are 3 noduri pe rol; recuzita are
+#   noduri cu pivot propriu (conuri, bratele barierei pe balama).
+# --origin=rim: zidurile de sprijin au creasta la cota 0 (marginea drumului) si
+#   atarna sub ea, ca si craterul.
+check "structures/snow_wall.glb" --origin=assembly
+check "structures/rock_tunnel_portal.glb" --origin=assembly
+gap_check "structures/rock_tunnel_portal.glb" 15.0 7.0
+check "structures/retaining_wall_straight.glb" --origin=rim
+check "structures/retaining_wall_curve.glb" --origin=rim
+check "props/snow_pole.glb" --origin=assembly
+check "props/road_works.glb" --origin=assembly
+check "props/level_crossing.glb" --origin=assembly
+check "props/bear_warning_sign.glb" --origin=assembly
 
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="

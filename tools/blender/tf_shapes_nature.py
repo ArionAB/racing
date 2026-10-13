@@ -221,6 +221,16 @@ def foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2):
     return profiles, cracks
 
 
+def cut_profile(poly, s_max, lean_deg=20.0):
+    """Taie un contur (s, z) cu o fata abrupta la capatul din aval: pastreaza
+    s <= s_max - z*tan(lean) (fractura de capat, aplecata spre corpul piesei).
+    Pentru creste lungi pe foliatie culcata, unde fata lunga a ultimei lame ar
+    cobori prea departe."""
+    k = math.tan(math.radians(lean_deg))
+    out = _clip_half(poly, -1.0, -k, s_max)
+    return out if len(out) >= 3 else []
+
+
 def crack_strip(bc, fr, poly, v_a, v_b, slot=TF_CRACK):
     """Extrudeaza pe v (intre v_a si v_b) conturul (s, z) al unei fisuri din
     `foliation_stack`. v_a/v_b se aleg putin IN INTERIORUL fetelor lamelor

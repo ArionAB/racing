@@ -119,6 +119,24 @@ gizmo_extents = 140.0
 script = ExtResource("2_peak")
 radius_m = 140.0
 
+[node name="ValeA_N" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55.00, 27.00, 207.00)
+gizmo_extents = 60.0
+script = ExtResource("2_peak")
+radius_m = 60.0
+
+[node name="ValeA_S1" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -110.00, 22.00, 322.00)
+gizmo_extents = 62.0
+script = ExtResource("2_peak")
+radius_m = 62.0
+
+[node name="ValeA_S2" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.00, 28.00, 324.00)
+gizmo_extents = 62.0
+script = ExtResource("2_peak")
+radius_m = 62.0
+
 [node name="Hazarduri" type="Node3D" parent="."]
 
 [node name="Urs" type="Marker3D" parent="Hazarduri"]

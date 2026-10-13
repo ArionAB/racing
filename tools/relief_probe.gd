@@ -75,7 +75,7 @@ func _ready() -> void:
 		var gx1 := float(g[2])
 		var gz1 := float(g[3])
 		var gst := float(g[4])
-		var hdr := "        z\x "
+		var hdr := "        z per x "
 		var xx := gx0
 		while xx <= gx1 + 0.01:
 			hdr += "%6.0f" % xx

@@ -272,7 +272,7 @@ def rock_tier(b, bot, top, seed, n=24, p=3.0, jit=0.03, c=(0.0, 0.0), tilt=0.0, 
 
 def tier_blocks(b, fr, a, bb, z0, z1, n, seed, dip=35.0, sink=1.2, out=(0.45, 1.1),
                 top_clamp=None, top_drop=(0.2, 1.6), p=3.0, thin=None, c=(0.0, 0.0),
-                fill=0.86):
+                fill=0.86, skip=None):
     """Blocurile de sist de pe peretele unei trepte: `n` mase pe perimetrul
     superelipsei (a, bb), intre z0 si z1, cu ROSTURI verticale intre ele (umbra,
     ca pe planșa). Fata de sus a fiecarui bloc e PLANUL DE FOLIATIE: coboara cu
@@ -291,6 +291,10 @@ def tier_blocks(b, fr, a, bb, z0, z1, n, seed, dip=35.0, sink=1.2, out=(0.45, 1.
     faces = []
     for i in range(n):
         t = 2.0 * math.pi * (i + 0.5 + 0.25 * (r() - 0.5)) / n
+        if skip and skip(t):
+            for _ in range(14):
+                r()
+            continue
         P2 = se_point(a, bb, t, p) + Vector(c)
         N2 = se_normal(a, bb, t, p)
         T2 = Vector((-N2.y, N2.x))
@@ -373,10 +377,13 @@ def _wall_piece(br, st, p0, p1, thick, z_base, h, stone_h, seed, crenel=False,
                 pts.append((q.x, q.y, zt))
         return hull(b_, pts, slot)
 
-    slab(0.0, L, z_base, PZ + hs, st, MARBLE_GREY, widen=0.06)
-    if h <= stone_h + 0.05:
-        return
-    zb = PZ + hs - 0.02
+    if stone_h > 0.0:
+        slab(0.0, L, z_base, PZ + hs, st, MARBLE_GREY, widen=0.02)
+        if h <= stone_h + 0.05:
+            return
+        zb = PZ + hs - 0.02
+    else:
+        zb = z_base               # caramida porneste direct din stanca (ingropata)
     tops = [ht - jag * r() for _ in range(4)]
     if window:
         u0, u1, sill, lintel = window
@@ -425,68 +432,170 @@ def build_poenari_ruin():
       * fara verde pe ziduri (corectura "fara vegetatie lipita"); iarba si
         muschiul DOAR pe stanca (treptele si creștetul), ca parte din silueta;
       * pe flancul nevazut (-Y): SCARA in zig-zag, 4 rampe, doar ca forma.
-    Cote (tabel): stanca 18 m, amprenta 32 x 24 m (mai lata la baza, 3 trepte
-    abrupte), zidurile 10 m peste creștet (turnul), incinta 22 x 12 m.
+    CONTRACT REVIZUIT (coordonatorul, dupa val 2: stanca citea "tort cu doua
+    etaje"; ruina ramane), lista pentru STANCA:
+      a) MIEZ CONIC in 3 straturi neregulate: baza 33 x 25 (rotunda, p 2,6),
+         creștetul 25 x 15 (dreptunghi rotunjit, p 5: tine incinta), 18 m
+      b) 6 MASE (contraforturi) de 6,5-10 m pe flancuri, pana la 7 / 8,5 / 11 /
+         13 / 15,5 / 17,4 m; fiecare e o pana in trepte: jos lata, fata din
+         afara la ~60 grade, sus o masa mai ingusta la ~72 grade; amprenta
+         ajunge la ~36 x 28 m (39,6 x 30,7 cu molozul)
+      c) 4 RAVENE intre mase (85 / 35 / 350 / 145 grade), unde se vede miezul
+         2-4 m mai in spate; fara blocuri mici in ele
+      d) MUCHIA creștetului rupta de 13 blocuri care ies 0,3-1,1 m peste ea;
+         iarba: covor RETRAS 0,6 m de la muchie (fara inel), LIMBI care coboara
+         8-12 m pe ravene, petice pe varful a 3 mase
+      e) talpa zidurilor SUBTIRE si DISCONTINUA (0,3-0,7 m, doar pe jumatate
+         din bucati); restul zidurilor porneste direct din stanca, ingropat 0,3 m;
+         turnul semicircular sta pe masa de la -X, fara talpa
+      f) molozul de la picior ramane (16 lespezi)
+    Cote: stanca 18 m, zidurile 10 m peste creștet (turnul), incinta 22 x 12 m.
     Foliatia: cadrul `SchistFrame` la 25 grade, toate blocurile au fata de sus
-    pe planul de foliatie (35 grade) -- aceeasi directie pe toata stanca.
+    pe planul de foliatie -- aceeasi directie pe toata stanca.
     Noduri: Poenari_Schist (MARBLE_GREY 29), Poenari_Brick (TILE_TERRACOTTA 23),
     Poenari_Stone (MARBLE_GREY 29: talpa zidurilor, scara, moloz de piatra),
     Poenari_Grass (TROPICAL_GREEN 21)."""
     sch, br, st, gr = Builder(), Builder(), Builder(), Builder()
     fr = SchistFrame((0.0, 0.0, 0.0), 25.0)
-    # --- stanca: 2 trepte abrupte (a, b, z), cea de jos cu varful INCLINAT
-    # (8,6..11,4 m), platoul de sus PLAT si mai patrat (p = 4: incape incinta)
-    rock_tier(sch, (16.0, 12.0, 0.0), (14.4, 10.2, 10.0), seed=11, tilt=1.4, tilt_az=0.9)
-    rock_tier(sch, (13.6, 9.2, 8.6), (13.0, 8.4, PZ), seed=18, p=4.0)
+    # --- STANCA (contract revizuit, runda 4): MOVILA conica, nu tambur.
+    # miezul: 3 straturi neregulate care se strang spre creștet (25 x 15)
+    CORE = [((16.5, 12.5, 0.0), (15.0, 10.7, 6.5), 2.6, 0.6),
+            ((15.0, 10.6, 6.0), (13.8, 9.1, 12.5), 3.4, 0.0),
+            ((13.8, 9.0, 12.0), (12.5, 7.5, PZ), 5.0, 0.0)]
+    for k, (bot, top, pp, tl) in enumerate(CORE):
+        rock_tier(sch, bot, top, seed=11 + 7 * k, n=16, p=pp, jit=0.04, tilt=tl, tilt_az=2.2)
+
+    def core_pt(t, z):
+        """Punct pe fata miezului (fara jitter) la unghiul t si cota z."""
+        for (bot, top, pp, _tl) in reversed(CORE):
+            if z >= bot[2] or bot[2] == 0.0:
+                f = max(0.0, min(1.0, (z - bot[2]) / (top[2] - bot[2])))
+                aa = bot[0] + (top[0] - bot[0]) * f
+                bb_ = bot[1] + (top[1] - bot[1]) * f
+                return se_point(aa, bb_, t, pp)
+        return se_point(15.0, 11.0, t, 3.0)
+
+    # contraforturile: 6 mase de 6,5-10 m, pana la cote diferite; intre ele
+    # raman 4 RAVENE (unde se vede miezul, 2-4 m mai in spate)
+    BUTT = [  # (unghi grade, latime, cota varfului, iesire la baza, iesire sus)
+        (110.0, 9.0, 13.0, 0.6, 1.6),
+        (62.0, 7.0, 8.5, 0.4, 1.8),
+        (8.0, 8.0, 15.5, 0.8, 1.4),
+        (180.0, 10.0, 17.4, 1.2, 2.0),
+        (215.0, 7.0, 7.0, 0.3, 1.6),
+        (330.0, 6.5, 11.0, 0.5, 1.5),
+    ]
+    RAVINES = (85.0, 35.0, 350.0, 145.0)
+    kf = math.tan(math.radians(32.0))      # foliatia pe varful maselor
+    rb = _rr(91)
+    tops_g = []
+    for bi, (ang, w, ht, ob, ot) in enumerate(BUTT):
+        t = math.radians(ang)
+        N2 = se_normal(18.0, 14.0, t, 3.0)
+        T2 = Vector((-N2.y, N2.x))
+        base_out = core_pt(t, 0.0) + N2 * (1.6 + ob)
+        zk = ht * 0.5                       # cota "genunchiului" (schimbarea de panta)
+
+        def outer_at(zz):
+            """Fata din afara: ~60 grade sub genunchi, ~72 peste; niciodata in miez."""
+            if zz <= zk:
+                o = base_out - N2 * (zz / math.tan(math.radians(60.0)))
+            else:
+                o = (base_out - N2 * (zk / math.tan(math.radians(60.0)))
+                     - N2 * ((zz - zk) / math.tan(math.radians(72.0))))
+            cp_ = core_pt(t, zz)
+            if (o - cp_).dot(N2) < ot * 0.6:
+                o = cp_ + N2 * (ot * 0.6)
+            return o
+        for part, (z0, z1, wf, sh) in enumerate(((0.0, zk + 0.6, 1.0, 0.0),
+                                                 (zk - 0.6, ht, 0.62, 0.2 * (1 if bi % 2 else -1)))):
+            pts = []
+            for zz, outer_w in ((z0, wf), (z1, wf * 0.8)):
+                cp = core_pt(t, zz)
+                outer = outer_at(zz)
+                inner = cp - N2 * 1.4
+                for sw in (-0.5, 0.5):
+                    off = T2 * ((sw + sh) * w * outer_w * (0.9 + 0.15 * rb()))
+                    for q in (inner + off, outer + off * 0.92):
+                        z = zz
+                        if zz == z1:
+                            z = ht + kf * (off.dot(fr.d.to_2d())) * 0.5 - 0.6 * rb()
+                            z = min(z, PZ + 1.3 if bi == 3 else ht + 0.8)
+                            z = max(z, z0 + 1.0)
+                        pts.append((q.x, q.y, z))
+            # coama pe fata din afara (2-3 fatete mari)
+            zm = z0 + (z1 - z0) * (0.4 + 0.2 * rb())
+            cm = core_pt(t, zm)
+            om = outer_at(zm) + N2 * 0.6 + T2 * ((rb() - 0.5) * w * 0.3)
+            pts.append((om.x, om.y, zm))
+            hull(sch, pts, TF_SCHIST)
+            if part == 1:
+                tops_g.append((t, w * 0.66, ht, N2, T2, sh, ot))
+    # blocuri mai mici pe fata miezului (textura), NU in ravene
+    in_rav = lambda t: any(abs(((math.degrees(t) - r_) + 180.0) % 360.0 - 180.0) < 12.0 for r_ in RAVINES)
     thin = lambda N: N.y < -0.6           # flancul scarii: blocuri lipite de perete
-    tier_blocks(sch, fr, 15.3, 11.2, 0.0, 10.0, 18, seed=31, top_clamp=11.4, thin=thin,
-                out=(0.5, 1.6), top_drop=(0.3, 1.8))
-    tier_blocks(sch, fr, 14.6, 10.6, 0.0, 5.5, 13, seed=37, top_clamp=6.0, thin=thin,
-                out=(0.6, 1.4), top_drop=(0.2, 2.2), fill=0.7)
-    # soclul de blocuri mari de la picior: stanca se lateste jos (silueta de
-    # movila, nu de tambur)
-    tier_blocks(sch, fr, 16.3, 12.3, 0.0, 4.5, 16, seed=43, top_clamp=5.0, thin=thin,
-                out=(0.8, 2.2), top_drop=(0.0, 2.5), sink=1.5, fill=0.8)
-    tier_blocks(sch, fr, 13.3, 8.8, 8.8, PZ, 16, seed=59, top_clamp=PZ + 0.12, thin=thin,
-                out=(0.4, 1.2), top_drop=(0.1, 1.4), p=4.0)
-    foot = [(p.x, p.y) for p in se_ring(16.4, 12.4, 0.0, n=20)]
+    tier_blocks(sch, fr, 15.9, 11.8, 0.0, 6.5, 14, seed=31, top_clamp=7.0, thin=thin,
+                out=(0.4, 1.0), top_drop=(0.2, 2.5), skip=in_rav)
+    tier_blocks(sch, fr, 14.4, 9.9, 6.0, 12.5, 12, seed=47, top_clamp=13.0, thin=thin,
+                out=(0.3, 0.8), top_drop=(0.2, 2.0), p=3.5, skip=in_rav)
+    # muchia creștetului RUPTA: blocuri care ies 0,4-1,6 m peste ea, intre
+    # ziduri si margine (ruina e ingropata in ele pe alocuri)
+    re_ = _rr(29)
+    for i in range(13):
+        t = 2.0 * math.pi * (i + 0.2 + 0.6 * re_()) / 13
+        e = core_pt(t, PZ)
+        N2 = se_normal(12.5, 7.5, t, 5.0)
+        T2 = Vector((-N2.y, N2.x))
+        wb = 2.6 + 1.8 * re_()
+        up = 0.3 + 0.8 * re_()
+        pts = []
+        for sw in (-0.5, 0.5):
+            for dd in (-1.1, 0.5 + 0.4 * re_()):
+                q = e + T2 * (sw * wb) + N2 * dd
+                pts.append((q.x, q.y, PZ - 2.5))
+                pts.append((q.x, q.y, PZ + up * (0.6 + 0.4 * re_()) + kf * 0.5 * (T2 * sw * wb).dot(fr.d.to_2d())
+                            - (0.5 if dd > 0 else 0.0)))
+        hull(sch, pts, TF_SCHIST)
+    foot = [(q.x, q.y) for q in se_ring(18.4, 14.4, 0.0, n=20)]
     foot_rubble(sch, fr, [((Vector((x, y)) - fr.o.to_2d()).dot(fr.d.to_2d()),
                            (Vector((x, y)) - fr.o.to_2d()).dot(fr.n.to_2d())) for x, y in foot],
                 16, seed=83, size=(0.7, 2.6))
-    # --- iarba si muschi: pe trepte (intre fata treptei de sus si muchia celei
-    # de jos) si pe creștet
-    # treapta de jos e inclinata: iarba pe bucati scurte, fiecare la cota ei
-    rg = _rr(23)
-    for i in range(14):
-        t0 = 2.0 * math.pi * (i + 0.3 * rg()) / 14
-        t1 = t0 + 2.0 * math.pi / 14 * (0.3 + 0.55 * rg())
+    # --- iarba: covorul creștetului (retras 0,6 m de la muchie: nu face inel),
+    # LIMBI care coboara pe ravene, petice pe varful a 4 contraforturi
+    hull(gr, [(q.x, q.y, PZ - 0.2) for q in se_ring(11.9, 6.9, 0.0, n=20, p=5.0)]
+         + [(q.x, q.y, PZ + 0.05) for q in se_ring(11.9, 6.9, 0.0, n=20, p=5.0)]
+         + [(q.x, q.y, PZ + 0.10) for q in se_ring(10.0, 5.5, 0.0, n=12, p=5.0)], TROPICAL_GREEN)
+    rt = _rr(37)
+    for ang in RAVINES:
+        t = math.radians(ang)
+        drop = 8.0 + 4.0 * rt()
+        steps = 5
+        for j in range(steps):               # limba pe bucati (urmareste fata)
+            za = PZ + 0.1 - drop * j / steps
+            zb2 = PZ + 0.1 - drop * (j + 1) / steps
+            pts = []
+            for zz, hw in ((za, 2.4 - 1.4 * j / steps), (zb2, 2.4 - 1.4 * (j + 1) / steps)):
+                c0 = core_pt(t, min(zz, PZ))
+                N2 = se_normal(13.0, 8.5, t, 4.0)
+                T2 = Vector((-N2.y, N2.x))
+                for sw in (-1.0, 1.0):
+                    q = c0 + T2 * (sw * hw * (0.8 + 0.3 * rt()))
+                    pts.append((q.x - N2.x * 0.4, q.y - N2.y * 0.4, zz))
+                    pts.append((q.x + N2.x * 0.12, q.y + N2.y * 0.12, zz))
+            hull(gr, pts, TROPICAL_GREEN)
+    for (t, wg, ht, N2, T2, sh, ot) in tops_g:
+        if ht > PZ - 1.0 or ht < 8.0:
+            continue                          # sub turn / prea jos: fara petic
+        c0 = core_pt(t, ht) + N2 * (ot * 0.5) + T2 * (sh * wg)
         pts = []
-        for t in (t0, (t0 + t1) * 0.5, t1):
-            for (aa, bb_) in ((13.35, 8.95), (14.6, 10.45)):
-                qq = se_point(aa, bb_, t)
-                z = 10.0 + 1.4 * math.cos(math.atan2(qq.y, qq.x) - 0.9)
-                pts += [(qq.x, qq.y, z - 0.35), (qq.x, qq.y, z + 0.12)]
-        hull(gr, pts, TROPICAL_GREEN)
-    # platoul: covor de iarba pana la muchie + petice care atarna peste ea
-    hull(gr, [(q.x, q.y, PZ - 0.2) for q in se_ring(12.9, 8.3, 0.0, n=24, p=4.0)]
-         + [(q.x, q.y, PZ + 0.05) for q in se_ring(12.9, 8.3, 0.0, n=24, p=4.0)]
-         + [(q.x, q.y, PZ + 0.10) for q in se_ring(10.5, 6.2, 0.0, n=12, p=4.0)], TROPICAL_GREEN)
-    r = _rr(61)
-    for i in range(11):
-        t0 = 2.0 * math.pi * (i + 0.5 * r()) / 11
-        t1 = t0 + 2.0 * math.pi / 11 * (0.35 + 0.3 * r())
-        drop = 1.2 + 2.2 * r()
-        pts = []
-        for t in (t0, (t0 + t1) * 0.5, t1):
-            qi = se_point(12.6, 8.0, t, 4.0)
-            qo = se_point(13.15, 8.55, t, 4.0)
-            qb = se_point(13.35 + 0.15 * r(), 8.75 + 0.15 * r(), t, 4.0)
-            pts += [(qi.x, qi.y, PZ + 0.08), (qo.x, qo.y, PZ + 0.06),
-                    (qb.x, qb.y, PZ - drop * (0.7 + 0.3 * r())), (qi.x, qi.y, PZ - drop)]
+        for k in range(6):
+            a_ = 2 * math.pi * k / 6
+            q = c0 + T2 * (math.cos(a_) * wg * 0.35) + N2 * (math.sin(a_) * 1.0)
+            pts += [(q.x, q.y, ht - 0.9), (q.x, q.y, ht + 0.45)]
         hull(gr, pts, TROPICAL_GREEN)
     # --- incinta 22 x 12 (centrul zidurilor la x = +-10,4, y = +-5,4; groase 1,2)
     X, Y, TH = 10.4, 5.4, 1.2
-    zb = PZ - 0.4
+    zb = PZ - 0.3
     walls = [
         # (p0, p1, [(u0, u1, h, crenel, window(u0,u1,sill,lintel) in fractii din bucata)])
         ((-X, Y), (X, Y), [(0.00, 0.16, 6.5, False, None), (0.16, 0.32, 5.2, False, (0.3, 0.7, 2.6, 4.4)),
@@ -505,7 +614,8 @@ def build_poenari_ruin():
             a = p0.lerp(p1, u0)
             b_ = p0.lerp(p1, u1)
             s_i += 1
-            _wall_piece(br, st, a, b_, TH, zb, h, 0.4 + 1.2 * ((s_i * 37) % 7) / 6.0, seed=100 + s_i,
+            _wall_piece(br, st, a, b_, TH, zb, h, (0.3 + 0.4 * ((s_i * 37) % 5) / 4.0) if s_i % 2 else 0.0,
+                        seed=100 + s_i,
                         crenel=cren, window=win)
     # --- turnul rectangular (6 x 6, gol, 10 m), coltul +X/-Y, varful rupt in trepte
     tx0, tx1, ty0, ty1, tt = 5.0, 11.0, -6.4, -0.4, 1.0
@@ -517,11 +627,11 @@ def build_poenari_ruin():
         p0, p1 = Vector(p0), Vector(p1)
         for (u0, u1, h, win) in pieces:
             s_i += 1
-            _wall_piece(br, st, p0.lerp(p1, u0), p0.lerp(p1, u1), tt, zb, h, 0.6 + 0.5 * (s_i % 3),
+            _wall_piece(br, st, p0.lerp(p1, u0), p0.lerp(p1, u1), tt, zb, h, 0.5 if s_i % 3 == 0 else 0.0,
                         seed=200 + s_i,
                         window=win, jag=0.5)
-    # --- turnul semicircular pe latura -X, iesit peste marginea stancii; talpa
-    # coboara pe treapta a doua (12,8), ca la cetatile pe stanca
+    # --- turnul semicircular pe latura -X, iesit peste marginea stancii; sta pe
+    # contrafortul de la -X (varful la ~17,4), ingropat 0,3 m in el, fara talpa
     cx, R = -X - 0.2, 3.0
     hs = [5.2, 7.0, 6.4, 4.2, 3.0, 5.6]
     for i in range(6):
@@ -530,7 +640,7 @@ def build_poenari_ruin():
         p0 = Vector((cx + R * math.cos(a0), R * math.sin(a0)))
         p1 = Vector((cx + R * math.cos(a1), R * math.sin(a1)))
         win = (0.3, 0.75, 3.0, 4.6) if i == 2 else None
-        _wall_piece(br, st, p0, p1, 1.0, 11.0, hs[i], 1.0 + 0.4 * (i % 3), seed=300 + i, window=win,
+        _wall_piece(br, st, p0, p1, 1.0, 16.6, hs[i], 0.0, seed=300 + i, window=win,
                     jag=0.4)
     # --- moloz in curte: caramizi si pietre cazute
     r = _rr(77)
@@ -543,10 +653,8 @@ def build_poenari_ruin():
                       seed=400 + k, jag=0.4)
     # --- scara in zig-zag pe flancul -Y: 4 rampe de trepte (forma, nu detaliu)
     def face_y(z):
-        """Fata -Y a stancii la cota z (pe axa x ~ 0), fara blocuri."""
-        if z <= 9.0:
-            return -(12.0 + (10.2 - 12.0) * z / 10.0)
-        return -(9.2 + (8.4 - 9.2) * (z - 8.6) / (PZ - 8.6))
+        """Fata -Y a miezului la cota z (pe axa x ~ 0)."""
+        return core_pt(-math.pi * 0.5, z).y
     flights = [((-9.0, 0.2), (7.0, 4.4)), ((7.0, 4.4), (-7.0, 8.8)),
                ((-7.0, 8.8), (7.0, 13.6)), ((7.0, 13.6), (-5.0, PZ))]
     for (xa, za), (xb, zb_) in flights:

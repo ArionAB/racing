@@ -4,6 +4,9 @@
   --compare <nume>   decupare | randare din GLB-ul EXPORTAT (culoare reala pe slot /
                      clasa), camera din SPECS de mai jos
   --views <nume>     4 azimuturi -> <nume>_views.png
+  --far <nume> [--dist 190] [--az 70]
+                     piesa de la 190 m, ochiul la 10 m, FOV vertical 68: camera de joc
+                     (aplecata 28,75) | privire orizontala -> <nume>_far190.png
   --chain vidraru_dam [--count 6]
                      `count` module `Dam_Module` inlantuite pe Y (pas 16 m, coronament
                      de 96 m), `Dam_Tower` langa al doilea modul (partea lacului, -X),
@@ -136,11 +139,61 @@ def chain_dam(count=6, res_height=900):
     print("chain:", out)
 
 
+def far_view(name, dist=190.0, az=70.0, eye=10.0, res=(1600, 900)):
+    """Piesa vazuta de la `dist` m, cu ochiul la `eye` m peste baza ei, ca din
+    masina (memoria verifica-cu-parametrii-lui): FOV VERTICAL 68 grade (Godot).
+    Doua panouri, alaturate:
+      A) camera de JOC: aplecata 28,75 grade in jos (ChaseCamera), privind spre
+         piesa -- marginea de sus a cadrului e la +5,25 grade peste orizontala;
+      B) aceeasi pozitie, privire aproape orizontala (-3 grade), ca sa se vada
+         toata silueta. Un plan de sol la z = 0 (doar preview)."""
+    os.makedirs(FID_DIR, exist_ok=True)
+    _clear()
+    meshes = _import(name)
+    if not meshes:
+        return
+    ground = _plane("PreviewGround", -600.0, 600.0, -600.0, 600.0, -0.02, "#6E7F5A")
+    tmp = os.path.join(FID_DIR, "_far_tmp.png")
+    _render(meshes, tmp, azimuth=az, elevation=10.0, res_height=200, aspect=1.0)   # lumini, lume
+    ground.hide_render = False
+    scene = bpy.context.scene
+    cam = scene.camera
+    cam.data.sensor_fit = "VERTICAL"
+    cam.data.angle_y = math.radians(68.0)
+    cam.data.clip_end = 3000.0
+    scene.render.resolution_x, scene.render.resolution_y = res
+    scene.render.film_transparent = False
+    a = math.radians(az)
+    cam.location = Vector((dist * math.cos(a), dist * math.sin(a), eye))
+    yaw = math.atan2(-cam.location.y, -cam.location.x)
+    outs = []
+    for tag, pitch in (("A_joc", -28.75), ("B_orizont", -3.0)):
+        pr = math.radians(pitch)
+        d = Vector((math.cos(yaw) * math.cos(pr), math.sin(yaw) * math.cos(pr), math.sin(pr)))
+        cam.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
+        p = os.path.join(FID_DIR, "_far_%s.png" % tag)
+        scene.render.filepath = p
+        bpy.ops.render.render(write_still=True)
+        outs.append(p)
+    out = os.path.join(FID_DIR, name + "_far190.png")
+    _compose(["--montage", ",".join(outs), "--out", out])
+    for p in outs + [tmp]:
+        try:
+            os.remove(p)
+        except OSError:
+            pass
+    print("far:", out)
+
+
 args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 if "--compare" in args:
     compare_d(args[args.index("--compare") + 1])
 elif "--views" in args:
     views_d(args[args.index("--views") + 1])
+elif "--far" in args:
+    far_view(args[args.index("--far") + 1],
+             dist=float(args[args.index("--dist") + 1]) if "--dist" in args else 190.0,
+             az=float(args[args.index("--az") + 1]) if "--az" in args else 70.0)
 elif "--chain" in args:
     cnt = int(args[args.index("--count") + 1]) if "--count" in args else 6
     chain_dam(count=cnt)

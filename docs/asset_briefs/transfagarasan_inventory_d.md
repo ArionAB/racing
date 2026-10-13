@@ -87,75 +87,119 @@ Runde: 1 (cornișă slabă; planurile de preview ieșeau negre, fiindcă
 materialul de preview înmulțește cu AO, iar ele nu aveau strat AO), apoi 2
 (cornișă 2,1 m / 0,6 m, planurile reparate).
 
-## buildings/poenari_ruin.glb
+## buildings/poenari_ruin.glb — stânca refăcută (contract revizuit după val 2)
+
+**Verdictul coordonatorului pe runda 3:** stânca citea „tort cu două etaje”
+(un tambur: pereți verticali, margine de platou dreaptă, plată și continuă).
+Ruina e acceptată și rămâne. Talpa de piatră ieșea ca o bandă albă continuă.
+Contractul nou (kit §1.2, actualizat în același commit):
+- profil conic;
+- 4–6 mase mari și 3–4 ravene;
+- muchia creștetului ruptă;
+- talpa subțire și discontinuă.
+
+S-au făcut 2 runde noi (4 și 5); a fost **aleasă runda 5**.
 
 | nod | slot | tri |
 |---|---|---:|
-| `Poenari_Schist` | MARBLE_GREY 29 (→ `tf_schist`) | 1 274 |
-| `Poenari_Brick` | TILE_TERRACOTTA 23 | 2 890 |
-| `Poenari_Stone` | MARBLE_GREY 29 (talpa zidurilor, scara, molozul de piatră; → `stone_wall` la integrare) | 4 070 |
-| `Poenari_Grass` | TROPICAL_GREEN 21 | 588 |
-| total | `--origin=assembly`, scala aplicată | **8 822** |
+| `Poenari_Schist` | MARBLE_GREY 29 (→ `tf_schist`) | 978 |
+| `Poenari_Brick` | TILE_TERRACOTTA 23 | 2 934 |
+| `Poenari_Stone` | MARBLE_GREY 29 (talpa, numai pe alocuri, plus scara și molozul de piatră; → `stone_wall`) | 3 322 |
+| `Poenari_Grass` | TROPICAL_GREEN 21 | 420 |
+| total | `--origin=assembly`, scala aplicată | **7 654** |
 
-Cote măsurate (Godot Y sus):
+### Ruina (acceptată din runda 3, neschimbată în afară de talpă)
+- **Incinta:** X −11,0..+11,0 × Y(Blender) −6,0..+6,0, adică **22,0 × 12,0 m**.
+  Cărămida urcă la Y 28,52. Pornește de la 17,18, fiindcă zidurile sunt
+  îngropate 0,3 m, iar turnul semicircular pleacă de la 16,6 de pe masa lui.
+- **Zidurile** sunt 4, rupte la 1,6–8,0 m peste creștet, cu 3 breșe și
+  creneluri pe 2 bucăți.
+- **8 goluri reale** de fereastră.
+- **Turnul rectangular** are 6 × 6 m, e gol și are 10 m.
+- **Turnul semicircular** are R 3 m și iese pe −X.
+- **Moloz:** 9 bucăți în curte.
+- **Scara** are 4 rampe pe −Y, 56 de trepte.
+- Fără acoperiș, turle, steaguri sau verde pe ziduri.
+- **Totalul** e 28,52 m; h/l e 28,5 / 36 = 0,79 pe amprenta stâncii, față de
+  ținta ~0,85.
 
-| cotă | contract | GLB |
-|---|---|---|
-| stânca | 18 m | `Poenari_Schist` Y 0,58..18,70 (platoul plat la 18,0; blocurile ies ≤ 0,12 peste el) |
-| amprenta | ~32 × 24 m, mai lată la bază | corpul are 32 × 24 la bază; cu soclul de blocuri și molozul ajunge la 36,6 × 28,0 |
-| zidurile | 10 m peste creștet | `Poenari_Brick` Y 18,53..28,52 (turnul rectangular: 10,0 m + zimții) |
-| incinta | ~22 × 12 m | X −11,0..+11,0, Y(Blender) −6,0..+6,0 = **22,0 × 12,0** |
-| total / h/l | 28 m / ~0,85 | 28,52 m; 28,5 / 32 = 0,89 pe corp (0,78 cu molozul) |
+### Stânca nouă (`build_poenari_ruin`, lista din docstring)
+- **Miezul conic** are 3 straturi neregulate (`rock_tier`, 16 puncte, jitter
+  4%): baza 33 × 25 (rotundă), creștetul **25 × 15** (dreptunghi rotunjit care
+  ține incinta), înalt de 18 m.
+- **6 mase** de 6,5–10 m urcă la 7 / 8,5 / 11 / 13 / 15,5 / 17,4 m. Fiecare e o
+  pană în două trepte: fața de jos e la ~60°, cea de sus la ~72°, cu o coamă la
+  mijloc. Vârful fiecărei mase urmează foliația.
+- **4 ravene** (85° / 35° / 350° / 145°) arată miezul 2–4 m mai în spate. În ele
+  nu sunt blocuri mici; câte o limbă de iarbă coboară 8–12 m pe fiecare.
+- **Muchia creștetului** e ruptă de 13 blocuri care ies 0,3–1,1 m peste ea.
+  Covorul de iarbă e retras 0,6 m de la muchie, deci nu face inel. Mai sunt 3
+  petice pe vârfurile maselor.
+- **Talpa zidurilor** are 0,3–0,7 m și e doar pe jumătate din bucăți. Restul
+  zidurilor pornește direct din stâncă, îngropat 0,3 m. Turnul semicircular
+  stă pe masa de la −X, fără talpă.
+- Molozul (16 lespezi) și scara de pe −Y au rămas.
 
-Elemente: 2 trepte abrupte, cea de jos cu vârful înclinat (8,6..11,4 m) și
-platoul plat. Pe ele stau 63 de blocuri de șist în 4 inele, iar fața de sus a
-fiecăruia e planul de foliație: 35°, aceeași direcție pe toată stânca
-(`SchistFrame` la 25°). La picior sunt 16 lespezi (`foot_rubble`). Iarba e în
-14 petice pe treapta de jos, un covor pe creștet și 11 limbi care atârnă peste
-muchia platoului.
+### Măsurat pe GLB
 
-Ruina:
-- 4 ziduri rupte la 1,6–8,0 m, cu talpa de piatră de 0,4–1,6 m;
-- 3 breșe coboară aproape de talpă (1,6 / 2,4 / 2,8 m);
-- creneluri pe **2 bucăți**;
-- **8 goluri reale** de fereastră;
-- turnul rectangular de 6 × 6 m, gol, de 10 m, în colțul +X/−Y;
-- turnul **semicircular** (R 3 m) iese pe −X peste muchia stâncii, iar talpa
-  lui coboară la cota 11;
-- 9 bucăți de moloz în curte.
+Sonda temporară face profilul pe benzi de cotă (percentila 99,5 a ocupării) și
+conturul văzut de sus (raza maximă pe 180 de direcții).
 
-Scara e pe −Y, în **4 rampe în zig-zag**, cu 56 de trepte și parapet. Nu se vede
-din față. Nu are acoperișuri, turle, steaguri sau verde pe ziduri.
+| măsură | runda 3 (respinsă) | runda 4 | **runda 5** | contract |
+|---|---|---|---|---|
+| amprenta la 0–1 m (cu molozul) | 36,1 × 27,2 | — | **39,2 × 30,5** (bbox 39,6 × 30,7) | ~36 × 28 |
+| la 17–18 m | 27,8 × 18,3 | — | 31,2 × 16,3 | creștetul ~25 × 15 |
+| panta flancului pe Y | 75° | 67° | **67°** | 60–70° |
+| panta flancului pe X | 76° | 82° | **77°** | 60–70° — **ABATERE** |
+| cea mai lungă muchie dreaptă văzută de sus (toleranța 0,3 m) | 7,0 m | 7,5 m | **4,6 m** | ≤ ~6 |
+| adâncimea medie a scobiturilor conturului | 0,16 m | 0,57 m | 0,43 m | — |
+| înălțimea stâncii | 18 | 18 | 18,0 (platoul); blocurile de pe muchie ating 20,1 | 18 |
 
-Coliziunea `mesh` pe stâncă o pune coordonatorul. `Poenari_Schist` e nod
-separat, deci poate primi corp propriu.
+**Abaterea pe X, cu cauza măsurată:** la 17–18 m silueta pe X are 31,2 m, nu
+25. Cele două mase de la capete urcă prea sus:
+- cea de la −X, la 17,4 m, poartă turnul semicircular, care iese peste muchie;
+- cea de la +X urcă la 15,5 m.
+
+Reparația (n-am mai făcut-o, fiindcă s-au epuizat cele 2 runde): masa de la +X
+coboară la ~9 m, iar cea de la −X se îngustează doar sub turn (~6 m lățime).
+Altfel turnul ar atârna în gol.
 
 ### Fidelitate
 
-Comparațiile sunt `img/transfagarasan_fidelity/poenari_ruin.png` și
-`poenari_ruin_views.png`.
+Comparațiile sunt în `img/transfagarasan_fidelity/`:
+- `poenari_ruin.png` și `poenari_ruin_views.png`;
+- **de la 190 m:** `poenari_ruin_far190.png`, cu ochiul la 10 m deasupra bazei
+  și FOV vertical 68°. Panoul A e camera de joc (aplecată 28,75°), panoul B e
+  privirea aproape orizontală (−3°). Zoom pe B (4×, nearest):
+  `poenari_ruin_far190_zoom.png`.
 
-| element | pe planșă | în GLB | verdict |
+**„Se citește ruină pe un colț de stâncă?” Da, de la 190 m:** o movilă
+trapezoidală de stâncă gri, cu mase și ravene verzi, și ruina portocalie
+deasupra. De aproape, stânca citește mai degrabă **trunchi de con cu
+contraforturi** decât grămadă neregulată de blocuri. Linia creștetului e încă
+aproape orizontală, iar blocurile de pe muchie sunt mici față de masa ei.
+
+**În camera de joc la 190 m, ruina stă la marginea de sus a cadrului:** plafonul
+cadrului la 190 m e ~27,5 m, iar turnul are 28,5. Asta e o chestiune de
+amplasare, nu de piesă.
+
+| element | pe planșă | runda 5 | verdict |
 |---|---|---|---|
-| stânca, masa | movilă lată, ~2/3 din total, pereți abrupți | 18 / 28,5 = 0,63, soclu lățit la bază | OK ca proporție |
-| stânca, blocurile | ~12–16 blocuri mari, fețe plane, fisuri verticale adânci | 63 de blocuri cu rosturi, dar fețele mari ale treptelor se văd între ele | **abatere:** citește mai mult „perete cu plăci” decât „grămadă de blocuri”; fisurile sunt mai puțin adânci decât pe planșă |
-| mușchi / iarbă | pete mari pe umeri, trepte, creștet | covor pe creștet, limbi peste muchie, petice pe treapta de jos | **abatere:** sunt mai puține pete pe fețele stâncii decât pe planșă. Corectura kitului permite verde doar pe trepte și pe creștet |
-| incinta de cărămidă | ziduri rupte la înălțimi diferite, muchii în trepte | 4 ziduri pe bucăți de 1,6–8 m, colțurile de sus rupte ±0,35 m | OK |
-| turnul înalt | spate-stânga, ~1,5× zidurile, gol, ferestre | rectangular, 10 m, gol, 3 ferestre, spate-stânga în 3/4 | OK |
-| al doilea turn | dreapta, rectangular | semicircular pe −X | corectura kitului |
-| ferestre | ~6 goluri închise | 8 goluri reale (se vede prin ele) | OK |
-| piatra la bază | bandă gri pe alocuri | talpă de 0,4–1,6 m sub toată cărămida | **abatere:** în preview iese mai deschisă decât stânca: e `MARBLE_GREY` brut, iar stânca e pe ținta clasei. Talpa turnului semicircular (7 m sub platou) citește ca o coloană palidă. Se reglează cu clasa `stone_wall` |
-| culoarea cărămizii | roșu-cărămiziu, umbrit | `TILE_TERRACOTTA` plat, portocaliu | abatere de slot, nu de formă |
-| verde pe ziduri, moloz roșu | da | fără verde (corectura kitului); 9 bucăți de moloz | OK |
+| silueta stâncii | movilă lată jos, îngustă sus, contur rupt | trapez cu 6 mase și 4 ravene; Y 67°, X 77° | **parțial:** conic pe Y; pe X masele de la capete țin flancul abrupt |
+| blocurile | 12–16 blocuri mari, fisuri adânci | 6 mase în trepte, 26 de blocuri mici, 13 pe muchie | mai puțin fragmentat decât planșa: masele au fețe mari, netede |
+| muchia creștetului | neregulată, cu mușchi | ruptă de blocuri, covorul retras, fără inel | OK |
+| iarba / mușchiul | pete mari pe umeri și în ravene | limbi late pe 4 ravene, petice pe vârfurile maselor | OK ca așezare; mai puțin verde pe fețe decât pe planșă |
+| talpa de piatră | bandă pe alocuri | 0,3–0,7 m, doar pe jumătate din bucăți; nu se mai vede ca bandă | OK |
+| ruina | — | neschimbată (acceptată), cu excepția tălpii | OK |
 
 Runde:
-1. Camera era pe −Y, unde se vedea scara, din cauza unei erori de semn la
-   azimut. Stânca era un „tort” cu 3 trepte și inele orizontale, iar banda de
-   piatră era palidă și continuă.
-2. Camera corectată, 2 trepte, cea de jos înclinată, iarbă care atârnă,
-   turnul mutat înăuntru, talpa de piatră variată.
-3. Soclu de blocuri mari la picior, deci silueta de movilă. Mai multe blocuri,
-   talpa de piatră mai subțire. **Aleasă**, fiind mai bună decât 2.
+1. **(4)** Miezul conic, 6 contraforturi, ravene cu limbi, blocuri pe muchie,
+   talpa discontinuă. Contraforturile aveau fețele aproape verticale, deci
+   silueta citea „piedestal cu umflături” (X 82°).
+2. **(5)** Miezul cu baza lărgită și rotundă, masele în pană (~60° jos, ~72°
+   sus), blocurile de pe muchie mai joase și mai late, limbile de iarbă mai
+   late. **Aleasă:** conturul de sus a scăzut de la 7,5 la 4,6 m, iar flancul
+   pe X de la 82° la 77°.
 
 ## props/prometheus_statue.glb
 
@@ -217,13 +261,26 @@ Runde:
   `preview_transfagarasan.py`: **neatinse**. Helperele noi (`se_ring`,
   `rock_tier`, `tier_blocks`, `grass_ledge`, `emit_roots`) stau în
   `build_tf_landmarks.py`.
-- Noi: `tools/blender/measure_tf_deck.py`, `tools/blender/preview_tf_d.py`.
+- Noi: `tools/blender/measure_tf_deck.py`, `tools/blender/preview_tf_d.py`
+  (`--compare`, `--views`, `--chain vidraru_dam`, `--far <nume>`: vederea de
+  la 190 m cu ochiul la 10 m).
+- `docs/asset_briefs/transfagarasan_kit.md` §1.2: rândul `poenari_ruin`
+  rescris pe contractul revizuit al stâncii (în commitul refacerii).
+
+## Verdictele coordonatorului (13 oct 2026)
+
+- **`vidraru_dam`: ACCEPTAT.** Turnul mic rămâne abatere scrisă și se
+  reverifică în joc.
+- **`prometheus_statue`: ACCEPTAT.** Poza frontală și simetrică rămâne
+  abatere scrisă.
+- **`poenari_ruin`:** stânca e refăcută pe contractul revizuit (rundele 4–5,
+  mai sus), iar ruina e acceptată. Pentru stâncă se așteaptă verdictul.
 
 ## Stare la oprire (tf-d, 13 oct 2026)
 
 Gata, pe ramura `transfagarasan/kit-d`, un commit pe piesă:
 - `vidraru_dam` (2 runde);
-- `poenari_ruin` (3 runde);
+- `poenari_ruin` (3 runde, plus stânca refăcută în 2 runde, runda 5 aleasă);
 - `prometheus_statue` (3 runde).
 
 `bash tools/blender/verify_transfagarasan.sh` → **VERDICT KIT: OK**. Contractul

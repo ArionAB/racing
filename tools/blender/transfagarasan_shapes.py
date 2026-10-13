@@ -351,11 +351,55 @@ def dust_patch(b, center, length, tilt_deg, height=0.2, depth=0.7, slot=TF_DUST)
 # STUB-URI (valul 1) -- contractul din kit; fara corp pana le foloseste cineva
 # ---------------------------------------------------------------------------
 
-def schist_blade(b, *args, **kw):
-    """STUB (tf-b, `schist_outcrop_*`, `scree_cone`): lama de sist inclinata la
-    30-50 grade, toate in ACEEASI directie pe o piesa; fisura inchisa dintre lame
-    din geometrie + AO (slot VOLCANIC_BLACK in benzi inguste, NU ROCK_DARK)."""
-    raise NotImplementedError("schist_blade: valul 1 (tf-b)")
+def schist_blade(b, center, size, slot=None, dip_deg=40.0, strike_deg=0.0, seed=0,
+                 jag=0.12, lip=0.45):
+    """Lama de sist (varianta MINIMA tf-a, pentru `rock_tunnel_portal`; la
+    integrare se unifica cu `tf_shapes_nature.schist_blade` din grupa tf-b).
+
+    Invelitoarea convexa a unei cutii orientate pe foliatie, cu colturile
+    jitterate: `size` = (lungime pe DIRECTIE, latime pe INCLINARE, grosime).
+    Directia (strike) e orizontala, la `strike_deg` de +Y (0 = lama curge pe Y);
+    inclinarea (dip) urca spre +X local cu `dip_deg` (30-50, ACEEASI pe toata
+    piesa: kit regula 7). Muchia de sus a lamei (capatul +dip) e ascutita: fata
+    ei de sus se retrage cu `lip` din grosime, deci lama se termina in buza, nu
+    in cant drept. Fisura dintre lame vine din geometrie (lamele se suprapun cu
+    rost) + AO, nu dintr-un slot inchis."""
+    import random
+    slot = TF_SCHIST if slot is None else slot
+    rnd = random.Random(seed)
+    a = math.radians(strike_deg)
+    dp = math.radians(dip_deg)
+    sv = Vector((math.sin(a), math.cos(a), 0.0))
+    hv = Vector((math.cos(a), -math.sin(a), 0.0))
+    dv = hv * math.cos(dp) + Vector((0.0, 0.0, math.sin(dp)))
+    nv = sv.cross(dv).normalized()
+    if nv.z < 0:
+        nv = -nv
+    c = Vector(center)
+    L, W, T = size
+    pts = []
+    for iu in (-1, 1):
+        for iw in (-1, 1):
+            for it in (-1, 1):
+                ju = 1.0 - jag * rnd.random()
+                jw = 1.0 - jag * rnd.random()
+                tt = T * 0.5
+                if iw > 0 and it > 0:
+                    tt *= (1.0 - lip)                      # buza: capatul de sus ascutit
+                p = (c + sv * (iu * L * 0.5 * ju) + dv * (iw * W * 0.5 * jw)
+                     + nv * (it * tt * (1.0 - 0.5 * jag * rnd.random())))
+                pts.append(p)
+    # doua puncte pe mijlocul lungimii, ca muchia lunga sa nu fie perfect dreapta
+    for iw in (-1, 1):
+        pts.append(c + sv * ((rnd.random() - 0.5) * L * 0.4) + dv * (iw * W * 0.5 * (1.0 + 0.05 * rnd.random()))
+                   + nv * (T * 0.5 * (0.2 if iw > 0 else 0.7)))
+    vs = [b.bm.verts.new(p) for p in pts]
+    res = bmesh.ops.convex_hull(b.bm, input=vs)
+    junk = [g for g in set(res["geom_interior"]) | set(res["geom_unused"]) if g.is_valid]
+    bmesh.ops.delete(b.bm, geom=junk, context="VERTS")
+    for f in res["geom"]:
+        if isinstance(f, bmesh.types.BMFace) and f.is_valid:
+            f[b.slot] = slot
 
 
 def dry_stone_wall(b, *args, **kw):

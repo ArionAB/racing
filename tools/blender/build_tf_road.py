@@ -195,6 +195,222 @@ def build_snow_wall():
     return variants
 
 
+AO_ROCK = dict(samples=16, dist=2.4, gradient="vertical", low=0.62, high=1.0,
+               power=0.8, floor=0.32, z_range=(0.0, 13.0))
+
+
+def bool_apply(obj, cutter, op):
+    """Boolean EXACT aplicat (op = DIFFERENCE / INTERSECT / UNION); `use_self`:
+    piesele sunt hull-uri care se intrepatrund."""
+    mod = obj.modifiers.new("Bool", "BOOLEAN")
+    mod.operation = op
+    mod.object = cutter
+    mod.solver = "EXACT"
+    mod.use_self = True
+    mod.use_hole_tolerant = True
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+
+
+def retag_all(obj, slot):
+    """Dupa boolean, fetele noi n-au slot (ar cadea pe 0, SAND_LIGHT): totul pe `slot`."""
+    me = obj.data
+    a = me.attributes.get("slot")
+    if a is None or a.domain != "FACE":
+        if a is not None:
+            me.attributes.remove(a)
+        a = me.attributes.new("slot", "INT", "FACE")
+    for i in range(len(me.polygons)):
+        a.data[i].value = slot
+
+
+def split_faces(obj, pred, name, slot):
+    """Muta fetele care satisfac `pred(BMFace)` intr-un nod nou (acelasi contur,
+    alt material); infasurarea se pastreaza, deci nodul se face fara recalc."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    nb = Builder()
+    sel = [f for f in bm.faces if pred(f)]
+    for f in sel:
+        nf = nb.bm.faces.new([nb.bm.verts.new(v.co.copy()) for v in f.verts])
+        nf[nb.slot] = slot
+    bmesh.ops.delete(bm, geom=sel, context="FACES")
+    bm.to_mesh(obj.data)
+    bm.free()
+    return to_obj(nb, name), len(sel)
+
+
+def join(objs, name):
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in objs:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = objs[0]
+    bpy.ops.object.join()
+    objs[0].name = name
+    objs[0].data.name = name
+    return objs[0]
+
+
+def drop(o):
+    bpy.data.objects.remove(o, do_unlink=True)
+
+
+def rock_bore_path():
+    """Conturul golului (stanga jos -> sus -> dreapta jos), in (x, z). Pereti la
+    |x| >= 7,75 pe banda 0-2 m, bolta neregulata: elipsa (a 7,95, b 5,5, centru
+    la 4,3) + jitter DOAR spre exterior, asimetric stanga-dreapta (roca taiata,
+    nu arc zidit). La |x| = 6,5 bolta e la >= 7,4 m."""
+    import random
+    rr = random.Random(21)
+    left = [(-7.75, 0.0), (-7.85, 1.4), (-7.80, 2.9), (-7.98, 4.3)]
+    right = [(7.98, 4.3), (7.85, 2.8), (7.92, 1.5), (7.75, 0.0)]
+    arch = []
+    n = 13
+    for i in range(1, n):
+        t = math.pi * (1.0 - i / n)
+        out = 0.10 + 0.45 * rr.random()
+        ax, bz = 7.95 + out, 5.5 + out
+        arch.append((ax * math.cos(t), 4.3 + bz * math.sin(t)))
+    return left + arch + right
+
+
+ROCK_MOUND = [(13.0, 0.0), (13.2, 3.0), (12.6, 5.6), (11.6, 7.8), (10.2, 9.8), (8.4, 11.2),
+              (5.8, 12.1), (2.5, 12.6), (0.0, 12.7), (-2.8, 12.5), (-6.0, 11.9), (-8.6, 10.9),
+              (-10.4, 9.4), (-11.8, 7.4), (-12.7, 5.0), (-13.2, 2.6), (-13.0, 0.0)]
+
+
+def build_rock_tunnel_portal():
+    """Tunelul scurt prin pintenul de sist de pe malul Vidraru (`rock_tunnel_portal`).
+
+    LISTA DE ELEMENTE (decuparea `transfagarasan_assets_v1/rock_tunnel_portal.png`,
+    scrisa INAINTE de geometrie; asfaltul si marcajele din decupare se ignora):
+      1) o movila de stanca in forma de dom, h/l ~0,6 pe decupare, mai joasa la
+         capete (~1/4 din inaltime la margini), din ~12-14 BLOCURI unghiulare mari
+         vizibile pe fata, cu fete plane, gri-cald
+      2) gura: arc semicircular pe pereti verticali, ~45% din latime, interior
+         intunecat care se pierde in adanc
+      3) INELUL DE ZIDARIE: ~13 bolțari in jurul gurii + 2 stalpi zidiți
+      4) muschi galben-verde pe fetele de sus ale blocurilor, peste tot
+      5) bolovani mici la picior, pe ambele parti
+    CORECTURA coordonatorului (suprascrie decuparea): stanca BRUTA, FARA inelul
+    de zidarie (3 cade); pinten INTREG strapuns, deschis la ambele capete; lame
+    de sist inclinate in ACEEASI directie pe toata piesa; iarba DOAR pe crestet
+    (strat subtire, pentru 2-3 fagi la integrare), deci muschiul de pe toate
+    blocurile (4) se reduce la crestet. Lista urmeaza corectura:
+      a) MASA: profil de dom ascutit, umeri inalti, 26 m (X) x ~12,7 m (Z) extrudat pe 13 m (y +-6,5),
+         cu gura taiata; capetele acoperite de lamele de la b)
+      b) FETELE DE CAPAT (+-Y): ~13 benzi de sist inclinate la 40 grade (urca
+         spre +X), fiecare rupta in blocuri de 5-9 m, iesite inegal din fata
+         (y 6,2..8,0) -> blocurile unghiulare din 1), dar asezate pe foliatie
+      c) FLANCURILE si CRESTETUL: ~25 de lame pe aceeasi foliatie, iesite din
+         masa, ca silueta sa fie zimtata (dinti de sist), pana la ~13 m
+      d) GURA NEREGULATA: bolta din 12 fatete pe o elipsa cu jitter spre exterior,
+         asimetrica; pereti la |x| >= 7,75; fara inel, fara stalpi
+      e) `Rock_Void`: captuseala VOLCANIC_BLACK doar in primii 2 m la fiecare capat
+      f) `Rock_Grass`: fetele de sus ale crestetului (normala > 0,8, z > 11,4),
+         TROPICAL_GREEN; pe crestet (|x| < 4) doar lame joase, iarba ramane in
+         petice intre ele (loc pentru 2-3 fagi)
+      g) bolovanii de la picior (5): NU, ii pune integrarea (`canyon_rocks`),
+         ca sa nu intre in banda drumului
+    Contract (golul, MASURAT CA GOL pe tot pintenul): >= 15,0 m pe banda 0-2 m,
+    >= 7,0 m inaltime libera in |x| <= 6,5. Noduri: `Rock_Schist` (MARBLE_GREY 29,
+    clasa tf_schist), `Rock_Grass` (TROPICAL_GREEN 21), `Rock_Void` (VOLCANIC_BLACK
+    20; nod separat, altfel clasa de sist ar sterge negrul -- memoria
+    clase-pe-piese-de-kit). Origine pe axa drumului, la mijlocul pintenului, baza 0."""
+    import random
+    rr = random.Random(1997)
+    DIP = 40.0
+    HL = 8.0
+    mound = ROCK_MOUND
+    bore = rock_bore_path()
+
+    # a) masa: dom extrudat, cu gura (contur concav, antiorar in XZ)
+    core = Builder()
+    extrude_xz(core, [(-13.0, 0.0)] + bore + [(13.0, 0.0)] + mound[1:-1], -6.5, 6.5, TF_SCHIST)
+    core_o = Builder.to_object(core, "RockCore")
+
+    # b) fetele de capat: benzi la 40 grade, rupte in blocuri
+    ends = Builder()
+    dp = math.radians(DIP)
+    dvec = Vector((math.cos(dp), math.sin(dp)))
+    nvec = Vector((-math.sin(dp), math.cos(dp)))
+    k = 0
+    for sy in (-1, 1):
+        off = -9.2
+        while off < 13.5:
+            t = 1.8 + 1.2 * rr.random()
+            mid = off + t * 0.5
+            u = -24.0 + rr.random() * 3.0
+            while u < 24.0:
+                w = 3.5 + 3.5 * rr.random()
+                c2 = nvec * mid + dvec * (u + w * 0.5)
+                out = HL - 1.8 * rr.random() ** 0.7
+                depth = 3.4
+                schist_blade(ends, (c2.x, sy * (out - depth * 0.5), c2.y), (depth, w + 0.3, t + 0.15),
+                             dip_deg=DIP, seed=5000 + k, jag=0.10, lip=0.35)
+                u += w
+                k += 1
+            off += t
+    ends_o = Builder.to_object(ends, "RockEnds")
+    clip = Builder()
+    extrude_xz(clip, [(-13.0, -0.5), (13.0, -0.5)] + mound[1:-1], -HL - 0.01, HL + 0.01, TF_SCHIST)
+    clip_o = Builder.to_object(clip, "RockClip")
+    bool_apply(ends_o, clip_o, "INTERSECT")
+    drop(clip_o)
+
+    # c) flancurile si crestetul: lame pe aceeasi foliatie, iesite din masa
+    blades = Builder()
+    pts = mound[1:-1]
+    k = 0
+    for i in range(len(pts) - 1):
+        (x0, z0), (x1, z1) = pts[i], pts[i + 1]
+        for f in (0.25, 0.75):
+            x, z = x0 + (x1 - x0) * f, z0 + (z1 - z0) * f
+            low = abs(x) < 4.0 and z > 11.5     # crestet: lame joase, iarba intre ele (fagii)
+            nrm = Vector((z1 - z0, -(x1 - x0))).normalized()
+            if nrm.dot(Vector((x, z - 4.0))) < 0:
+                nrm = -nrm
+            push = (0.1 + 0.3 * rr.random()) if low else (0.6 + 0.8 * rr.random())
+            px, pz = x + nrm.x * (push - 1.0), z + nrm.y * (push - 1.0)
+            ln = 4.0 + 3.5 * rr.random()
+            cy = (rr.random() - 0.5) * (2 * HL - ln) * 0.9
+            schist_blade(blades, (px, cy, pz), (ln, 3.2 + 1.8 * rr.random(), 1.6 + 0.9 * rr.random()),
+                         dip_deg=DIP + (rr.random() - 0.5) * 6.0, seed=7000 + k, jag=0.14)
+            k += 1
+    blades_o = Builder.to_object(blades, "RockBlades")
+    box = Builder()
+    box.box((0.0, 0.0, 6.5), (26.6, 2 * HL, 13.0), TF_SCHIST)   # latimea de contract 26 m (+-0,3)
+    box_o = Builder.to_object(box, "RockBox")
+    bool_apply(blades_o, box_o, "INTERSECT")
+    drop(box_o)
+
+    rock = join([core_o, ends_o, blades_o], "Rock_Schist")
+
+    # d) gura: taie golul prin tot pintenul; apoi nimic sub cota 0
+    cut = Builder()
+    extrude_xz(cut, [(bore[0][0], -1.0)] + bore + [(bore[-1][0], -1.0)], -HL - 3.0, HL + 3.0, TF_SCHIST)
+    cut_o = Builder.to_object(cut, "RockCut")
+    bool_apply(rock, cut_o, "DIFFERENCE")
+    drop(cut_o)
+    floor = Builder()
+    floor.box((0.0, 0.0, -5.0), (60.0, 40.0, 10.0), TF_SCHIST)
+    floor_o = Builder.to_object(floor, "RockFloor")
+    bool_apply(rock, floor_o, "DIFFERENCE")
+    drop(floor_o)
+    retag_all(rock, TF_SCHIST)
+
+    # f) iarba pe crestet
+    grass, ng = split_faces(rock, lambda f: f.normal.z > 0.80 and f.calc_center_median().z > 11.4,
+                            "Rock_Grass", TROPICAL_GREEN)
+    print("rock_tunnel_portal: %d fete de iarba" % ng)
+
+    # e) captuseala neagra, doar primii 2 m la fiecare capat
+    void = Builder()
+    tube_lining(void, bore, HL - 2.0, HL, 0.0)
+    tube_lining(void, bore, -HL, -HL + 2.0, 0.0)
+    return [rock, grass, to_obj(void, "Rock_Void")]
+
+
 ONLY = os.environ.get("TF_ONLY", "")
 
 
@@ -206,6 +422,10 @@ if _want("tunnel_portal_balea"):
     objs = build_tunnel_portal_balea()
     emit_tf(objs, "structures/tunnel_portal_balea.glb", AO_PORTAL, keep_xy=True,
             bevel=0.0, smooth_angle=None)
+
+if _want("rock_tunnel_portal"):
+    emit_tf(build_rock_tunnel_portal(), "structures/rock_tunnel_portal.glb", AO_ROCK,
+            keep_xy=True, bevel=0.0, smooth_angle=None)
 
 if _want("snow_wall"):
     emit_tf_variants(build_snow_wall(), "structures/snow_wall.glb")

@@ -33,7 +33,7 @@ from mathutils import Vector, Euler  # noqa: E402
 SPECS.update({
     "snow_wall": {"camera": {"azimuth": 205.0, "elevation": 16.0, "lens": 60.0, "margin": 1.08},
                   "variant": "SnowWall_A", "side": {"SnowWall_B": (0.0, -10.0, 0.0)}},
-    "rock_tunnel_portal": {"camera": {"azimuth": 62.0, "elevation": 14.0, "lens": 60.0, "margin": 1.08}},
+    "rock_tunnel_portal": {"camera": {"azimuth": 78.0, "elevation": 12.0, "lens": 60.0, "margin": 1.08}},
     "retaining_wall_straight": {"camera": {"azimuth": 30.0, "elevation": 16.0, "lens": 60.0, "margin": 1.08}},
     "retaining_wall_curve": {"camera": {"azimuth": 20.0, "elevation": 18.0, "lens": 60.0, "margin": 1.08}},
     "snow_pole": {"camera": {"azimuth": 60.0, "elevation": 10.0, "lens": 80.0, "margin": 1.1}},

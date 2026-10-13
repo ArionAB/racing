@@ -121,6 +121,8 @@ const RUN_CYCLE_SPEED: float = 8.0
 const WALK_CYCLE_SPEED_BY_MODEL := {
 	&"horse_bay": 1.55, &"horse_pinto": 1.55, &"horse_black": 1.55,
 	&"elephant": 1.72, &"cow": 0.94,
+	# urs brun (Transfagarasan): 0,97 masurat pe clipul Walk al kitului
+	&"brown_bear": 0.97,
 	# lama: 2,34 m/s masurat la model_scale 3,135 (Track15) -> 0,746 la 1,0
 	&"llama": 0.746, &"llama_b": 0.746, &"llama_c": 0.746,
 	# ursul brun (Transfagarasan, Track21): pasul greu; cheia e numele fisierului

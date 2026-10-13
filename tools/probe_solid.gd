@@ -43,7 +43,7 @@ func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			only = int(arg.trim_prefix("--track="))
-	for i in range(1, 21):
+	for i in range(1, 22):
 		var path := "res://scenes/tracks/Track%02d.tscn" % i
 		if not ResourceLoader.exists(path):
 			continue

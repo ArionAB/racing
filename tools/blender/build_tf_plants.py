@@ -245,6 +245,133 @@ def build_beech_tree_b():
     return [bark.to_object("Beech_Bark"), lv.to_object("Beech_Leaves")]
 
 
+# ---------------------------------------------------------------------------
+# tufele mici: bujorul de munte (Rhododendron myrtifolium) si afinul
+# ---------------------------------------------------------------------------
+
+def _dome_points(n, rx, ry, rz, z0, seed, el_lo=0.0):
+    """n puncte pe o calota de elipsoid (spirala Fibonacci, doar deasupra lui
+    el_lo), centrul la z0."""
+    r = _rnd(seed)
+    ga = math.pi * (3.0 - math.sqrt(5.0))
+    out = []
+    i = 0
+    while len(out) < n and i < n * 6:
+        zz = 1.0 - (i + 0.5) / (n * 1.4)
+        i += 1
+        if zz < el_lo:
+            continue
+        rr = math.sqrt(max(0.0, 1.0 - zz * zz))
+        a = ga * i + seed
+        out.append(Vector((rx * rr * math.cos(a) * (0.92 + 0.12 * r()),
+                           ry * rr * math.sin(a) * (0.92 + 0.12 * r()),
+                           z0 + rz * zz)))
+    return out
+
+
+def build_bujor_de_munte():
+    """Bujorul de munte (`bujor_de_munte`): 0,6 m inalt, 1,2 m lat, h/l ~0,5.
+
+    LISTA DE ELEMENTE (decuparea `bujor_de_munte.png` + contractul; scrisa
+    INAINTE de geometrie):
+      a) TUFA joasa si DEASA: o calota de frunzis 1,2 x 1,0 x 0,5 m din 12
+         ciorchini verzi.
+      b) ROZETE DE FRUNZE alungite pe margine, jos (plansa: ~12 frunze verzi
+         care ies de sub flori, mai ales in fata si pe laturi): 12 frunze cu
+         pliu in V (leaf_vfold), radiale, usor aplecate.
+      c) 8 CAPETE DE FLORI magenta la varful ramurilor, pe calota de sus
+         (plansa: 6-7 capete mari), fiecare din 7 bulgarasi (~0,4 m diametru)
+         -> ~40-50% din suprafata vazuta de sus (contract: ~40%).
+      d) NU intra: umbra, solul.
+    Noduri: Bujor_Leaves (TROPICAL_GREEN 21), Bujor_Bloom (FLAMINGO_PINK 31,
+    --allow-slots=31). FLAMINGO_PINK e #D2A0BE (roz pal): magenta #B63A7A vine din
+    tenta la integrare (kit §0, tabelul de sloturi).
+    """
+    lv, bl = Builder(), Builder()
+    r = _rnd(61)
+    for i, p in enumerate(_dome_points(12, 0.48, 0.40, 0.30, 0.12, 61, el_lo=-0.2)):
+        clump(lv, p, (0.40, 0.36, 0.30), TF_LEAF, seed=610 + i, seg=6, rings=3, dev=0.2)
+    for i in range(12):
+        az = i * 30.0 + (r() - 0.5) * 14.0
+        a = math.radians(az)
+        base = Vector((0.36 * math.cos(a), 0.30 * math.sin(a), 0.10 + 0.08 * r()))
+        leaf_vfold(lv, base, az, 0.32 + 0.06 * r(), 0.10, 0.06, TF_LEAF, fold_deg=22.0,
+                   stations=4, thick=0.015, droop=0.30)
+    # runda 2: 8 capete MARI (~0,4 m), mai sus -- runda 1 avea 7 capete de
+    # ~0,28 m, ~15% din suprafata de sus, fata de ~40% cerut (plansa: ~60%)
+    heads = _dome_points(8, 0.42, 0.34, 0.30, 0.24, 67, el_lo=0.05)
+    for i, h in enumerate(heads):
+        for j in range(6):
+            a = j * 60.0 + 25.0 * r()
+            off = Vector((math.cos(math.radians(a)), math.sin(math.radians(a)), 0.0)) * 0.12
+            p = h + off + Vector((0.0, 0.0, 0.03 + 0.04 * r()))
+            clump(bl, p, (0.19, 0.19, 0.14), TF_BLOOM, seed=700 + i * 9 + j, seg=5, rings=2,
+                  dev=0.2)
+        clump(bl, h + Vector((0.0, 0.0, 0.10)), (0.20, 0.20, 0.14), TF_BLOOM, seed=790 + i,
+              seg=5, rings=2, dev=0.2)
+    return [lv.to_object("Bujor_Leaves"), bl.to_object("Bujor_Bloom")]
+
+
+def build_afin():
+    """Afinul (`afin`): 0,5 m inalt, 0,9 m lat, h/l ~0,55.
+
+    LISTA DE ELEMENTE (decuparea `afin.png` + contractul; scrisa INAINTE de
+    geometrie):
+      a) TUFA MARUNTA, DREAPTA: un miez de 6 ciorchini de frunze.
+      b) 14 CRENGUTE cu frunze (plansa: ~10-12 "crengute" ca de feriga), fiecare
+         din 4 ciorchini care se subtiaza spre varf, pe DOUA inele: 5 in centru,
+         aproape verticale, varfurile la 0,44-0,5 m; 9 pe margine, culcate spre
+         afara, varfurile la 0,24-0,32 m, raza 0,30-0,38 m -> calota.
+      c) BOBITE albastru-inchis in puncte mici: ~20 de ~7 cm, pe crengute, spre
+         exterior si sus (plansa: ~20).
+      d) NU intra: umbra, solul.
+    Noduri: Afin_Leaves (TROPICAL_GREEN 21), Afin_Berry (ICE_DEEP 25).
+    """
+    lv, be = Builder(), Builder()
+    r = _rnd(81)
+    # runda 2: tufa DREAPTA din 13 crengute cu frunze (plansa), nu o movila de
+    # bulgari cu frunze-foaie (runda 1: 0,37 m in loc de 0,5, citea a varza)
+    # runda 3: DOUA inele de crengute -- 5 interioare, aproape verticale, inalte
+    # (0,45-0,5 m), 9 exterioare, joase si culcate spre afara (0,24-0,32 m) ->
+    # calota cu centrul cel mai inalt; runda 2 avea un singur inel evazat si
+    # citea ca o vaza goala la mijloc
+    for i, p in enumerate(_dome_points(6, 0.18, 0.16, 0.16, 0.14, 81, el_lo=-0.2)):
+        clump(lv, p, (0.30, 0.27, 0.26), TF_LEAF, seed=810 + i, seg=6, rings=3, dev=0.2)
+    tips = []
+    rings_spec = [(5, 0.07, 0.06, 0.44, 0.06), (9, 0.30, 0.08, 0.24, 0.08)]
+    i = -1
+    for (cnt, r_lo, r_var, z_lo, z_var) in rings_spec:
+      for _j in range(cnt):
+        i += 1
+        az = _j * (360.0 / cnt) + (r() - 0.5) * 18.0 + (20.0 if cnt == 5 else 0.0)
+        a = math.radians(az)
+        d = Vector((math.cos(a), math.sin(a), 0.0))
+        rr = r_lo + r_var * r()
+        zt = z_lo + z_var * r()
+        p0 = d * 0.05 + Vector((0, 0, 0.06))
+        p1 = d * (rr * 0.55) + Vector((0, 0, zt * 0.55))
+        p2 = d * rr + Vector((0, 0, zt))
+        for k, t in enumerate((0.35, 0.62, 0.86, 1.0)):
+            q = p0.lerp(p1, t * 2) if t < 0.5 else p1.lerp(p2, (t - 0.5) * 2)
+            sz = 0.19 - 0.025 * k
+            clump(lv, q, (sz * 1.1, sz * 0.8, sz * 0.75), TF_LEAF, seed=900 + i * 5 + k,
+                  seg=5, rings=2, dev=0.22, yaw=az + 90.0, tilt=0.4)
+        tips.append((d, rr, zt))
+    # bobitele: pe crengute, spre exterior si sus
+    k = 0
+    for (d, rr, zt) in tips:
+        for f in ((0.55, 0.0), (0.8, 0.06)):
+            if r() < 0.25:
+                continue
+            side = Vector((-d.y, d.x, 0.0)) * (0.06 if k % 2 else -0.06)
+            q = d * (rr * f[0] + 0.04) + side + Vector((0, 0, zt * f[0] + f[1] + 0.02))
+            be.boulder(tuple(q), (0.07, 0.07, 0.07), TF_BERRY, seed=880 + k, segments=5,
+                       rings=2, deviation=0.05)
+            k += 1
+    print("afin: bobite", k)
+    return [lv.to_object("Afin_Leaves"), be.to_object("Afin_Berry")]
+
+
 # runda 3: umbrire neteda pe ciorchinii de 5 x 2 (cu fatete plate citeau ca
 # niste cubulete; lobii de pe plansa sunt rotunjiti)
 JNEAPAN_SMOOTH = 100.0   # 75 nu netezea nimic: fetele ciorchinilor de 5 laturi se intalnesc la 72-90+ grade
@@ -269,5 +396,12 @@ if _want("beech_tree_a"):
 if _want("beech_tree_b"):
     emit_tf(build_beech_tree_b(), "plants/beech_tree_b.glb", _ao(10.0, 1.6, 0.5),
             keep_xy=True, bevel=0.0, smooth_angle=None)
+
+if _want("bujor_de_munte"):
+    emit_tf(build_bujor_de_munte(), "plants/bujor_de_munte.glb", _ao(0.6, 0.3, 0.6),
+            keep_xy=False, bevel=0.0, smooth_angle=None)
+if _want("afin"):
+    emit_tf(build_afin(), "plants/afin.glb", _ao(0.5, 0.25, 0.6),
+            keep_xy=False, bevel=0.0, smooth_angle=None)
 
 report_tf()

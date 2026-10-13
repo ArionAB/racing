@@ -4,7 +4,8 @@
   transfagarasan/vehicles/parked_car_b.glb   break / SUV mic generic, CAR_RED, bare + cutie
   transfagarasan/vehicles/motorbike.glb      turism-aventura generica, pe cric, 2 genti
 
-Trenul (`ro_train`) si cabina (`cable_cabin_large`) NU sunt aici: valul 3 (tf-h).
+  transfagarasan/vehicles/ro_train.glb      locomotiva electrica + vagon de bagaje + vagon (TrainHazard), val 3
+  transfagarasan/vehicles/cable_cabin_large.glb  cabina mare a telecabinei, pe linia cablului, val 3
 
 Rulare:
     D:/Blender/blender.exe --background --factory-startup \\
@@ -556,9 +557,470 @@ def build_motorbike():
 
 
 # ---------------------------------------------------------------------------
+# ro_train (valul 3, tf-h): Train_Loco + Train_Tender + Train_Wagon
+# ---------------------------------------------------------------------------
+#
+# CONTRACT DE COD (scenes/hazards/train_hazard.gd, MASURAT, nu presupus):
+#   - noduri cautate dupa nume EXACT, doar printre copiii DIRECTI ai radacinii:
+#     Train_Loco, Train_Tender, Train_Wagon (lipseste unul => toata garnitura
+#     cade pe cutii, in tacere)
+#   - lungimea fiecarei piese pe X, BOTUL PE +X (hazardul pune locomotiva
+#     ultima, la x maxim), roti la y = 0 (hazardul ridica piesa la RAIL_TOP 0,28)
+#   - ecartament |z| = 0,45 (GAUGE_HALF); piesele centrate pe axa, fiecare cu
+#     capatul din coada luat din AABB (originea nu conteaza pe X)
+#   - cotele (lungime, coliziune, zona de lovire) ies din AABB-ul piesei
+# SCARA (tf-h2, verdictul coordonatorului): cifrele 17 / 20 m din kit §1.7 sunt
+# ANULATE; scara de joc a garniturilor (train.glb, perurail_train.glb) e 8-9 m
+# pe piesa. Loco ~11 m, tender ~5 m, vagon ~8,5 m, latime ~2,9, h ~3,6 m.
+# In Blender: X lungime (bot +X), Y latime (sina la |y| = 0,45), Z sus.
 
-def _emit(objs, path, ao, bevels=None, smooth=50.0):
-    emit_tf(objs, path, ao, keep_xy=True, bevel=0.0, bevels=bevels, smooth_angle=smooth)
+TR_GREY = ASPHALT_EDGE      # 6: banda, acoperisul (decizie: nu PAINTED_METAL 11, iese albastru)
+TR_W = 2.80                 # latimea caroseriei (cu ferestre/banda ~2,9)
+TR_HW = TR_W * 0.5
+TR_GAUGE = 0.45             # GAUGE_HALF din train_hazard.gd
+TR_WR = 0.45                # raza rotii; baza la z = 0
+TR_SILL = 0.95              # talpa caroseriei (peste rotile de 0,45 -> varf 0,90)
+TR_BAND = 1.50              # varful benzii gri (~27% din flancul 0,95..3,0, +talpa); sus: rosu
+TR_BUF = 0.40               # cat ies tampoanele dincolo de caroserie
+AO_TRAIN = dict(samples=20, dist=1.6, gradient="vertical", low=0.64, high=1.0,
+                power=0.9, floor=0.30, z_range=(0.0, 4.4))
+
+
+def _tr_wheelset(b, x, motor=False):
+    """O osie: 2 roti (r 0,45, 12 segmente) la |y| = 0,45, butuc, axul intre ele."""
+    for sy in (-1.0, 1.0):
+        b.cylinder((x, sy * TR_GAUGE, TR_WR), TR_WR, 0.16, VOLCANIC_BLACK,
+                   segments=12, axis="Y")
+        b.cylinder((x, sy * (TR_GAUGE + 0.09), TR_WR), 0.20, 0.06, TR_GREY,
+                   segments=8, axis="Y")
+    b.cylinder((x, 0.0, TR_WR), 0.07, 2 * TR_GAUGE, VOLCANIC_BLACK, segments=6, axis="Y")
+    if motor:   # carcasa motorului de tractiune, pe axa
+        b.cylinder((x + 0.05, 0.0, TR_WR + 0.06), 0.24, 0.62, VOLCANIC_BLACK,
+                   segments=8, axis="Y")
+
+
+def _tr_bogie(b, cx, wb, motor=True):
+    """Boghiu cu 2 osii (la cx +- wb/2): 4 roti, 2 lonjeroane laterale, travers."""
+    for dx in (-wb * 0.5, wb * 0.5):
+        _tr_wheelset(b, cx + dx, motor=motor)
+    for sy in (-1.0, 1.0):
+        b.box((cx, sy * 0.68, 0.62), (wb - 0.50, 0.14, 0.34), VOLCANIC_BLACK)
+        b.box((cx, sy * 0.68, 0.80), (wb + 0.70, 0.12, 0.10), VOLCANIC_BLACK)
+    b.box((cx, 0.0, 0.84), (0.90, 1.50, 0.20), VOLCANIC_BLACK)    # travers / pivot
+
+
+def _tr_body(b, hl, eave, peak):
+    """Banda gri LATA jos (talpa..TR_BAND, iese 2 cm din flanc), linie
+    FOAM_WHITE subtire la limita, corp rosu deasupra, acoperis gri bombat (hull).
+    `hl` = jumatate din lungimea caroseriei, `eave` = streasina, `peak` = coama."""
+    b.box((0.0, 0.0, (TR_SILL + TR_BAND) * 0.5), (2 * hl, TR_W + 0.04, TR_BAND - TR_SILL),
+          TR_GREY)
+    b.box((0.0, 0.0, TR_BAND + 0.03), (2 * hl, TR_W + 0.07, 0.06), FOAM_WHITE)
+    b.box((0.0, 0.0, (TR_BAND + eave) * 0.5), (2 * hl, TR_W, eave - TR_BAND), CAR_RED)
+    h = peak - eave
+    yz = [(1.0, eave - 0.02), (1.0, eave + 0.06), (0.88, eave + 0.46 * h),
+          (0.62, eave + 0.76 * h), (0.30, eave + 0.94 * h), (0.0, peak)]
+    pts = []
+    for x in (-hl, hl):
+        for (f, z) in yz:
+            pts.append((x, f * TR_HW, z))
+            if f > 0:
+                pts.append((x, -f * TR_HW, z))
+    hull(b, pts, TR_GREY)
+
+
+def _tr_window(b, x, side, zc, w, h):
+    """Fereastra pe flanc: rama rosie iesita 3 cm + geam negru iesit 6 cm."""
+    b.box((x, side * TR_HW, zc), (w + 0.14, 0.06, h + 0.14), CAR_RED)
+    b.box((x, side * (TR_HW + 0.03), zc), (w, 0.06, h), VOLCANIC_BLACK)
+
+
+def _tr_door(b, x, side, z0, z1, win=True):
+    """Usa pe flanc: 2 rosturi verticale negre (1,0 m intre ele) + geam mic."""
+    zc = (z0 + z1) * 0.5
+    for dx in (-0.5, 0.5):
+        b.box((x + dx, side * (TR_HW + 0.012), zc), (0.05, 0.05, z1 - z0), VOLCANIC_BLACK)
+    if win:
+        _tr_window(b, x, side, z1 - 0.62, 0.50, 0.62)
+
+
+def _tr_louvre(b, x, side, z0, z1, w=1.3, slats=5):
+    """Grila de aerisire: `slats` lamele negre orizontale."""
+    for i in range(slats):
+        z = z0 + (z1 - z0) * i / (slats - 1)
+        b.box((x, side * (TR_HW + 0.02), z), (w, 0.04, 0.07), VOLCANIC_BLACK)
+
+
+def _tr_buffers(b, hl):
+    """Grinda de capat + 2 tampoane (ax r 0,11, taler r 0,20) pe fiecare capat;
+    capatul total al piesei = hl + TR_BUF."""
+    for sx in (-1.0, 1.0):
+        b.box((sx * (hl + 0.05), 0.0, 1.05), (0.10, 2.60, 0.30), VOLCANIC_BLACK)
+        for sy in (-1.0, 1.0):
+            b.cylinder((sx * (hl + 0.20), sy * 1.00, 1.05), 0.11, 0.30, VOLCANIC_BLACK,
+                       segments=8, axis="X")
+            b.cylinder((sx * (hl + TR_BUF - 0.03), sy * 1.00, 1.05), 0.20, 0.06,
+                       TR_GREY, segments=8, axis="X")
+
+
+def _tr_underframe(b, hl, xs, box_l=1.2):
+    """Sasiu continuu sub talpa + cutii/rezervoare la x din `xs` (cate 2, pe parte)."""
+    b.box((0.0, 0.0, 0.87), (2 * hl - 0.3, 2.40, 0.16), VOLCANIC_BLACK)
+    for x in xs:
+        for sy in (-1.0, 1.0):
+            b.box((x, sy * 0.95, 0.60), (box_l, 0.46, 0.40), VOLCANIC_BLACK)
+
+
+def _tr_pantograph(b, x, raised, top=4.40, half=1.75):
+    """Pantograf MARE, ROMB in plan laterala (~3,5 m = ~1/3 din loco): postament
+    pe 4 izolatori rosii, 2 romburi de brate rosii (y = +-0,5) groase de 14 cm,
+    bara de captare neagra pe Y (2,0 m) cu cornite, tije negre de ax.
+    `raised`: varful rombului la `top`; altfel pliat (romb turtit, ~3,95 m)."""
+    for sx in (-0.9, 0.9):
+        for sy in (-0.55, 0.55):
+            b.cylinder((x + sx, sy, 3.52), 0.08, 0.22, CAR_RED, segments=6)
+    b.box((x, 0.0, 3.65), (2.20, 1.40, 0.10), VOLCANIC_BLACK)       # postament
+    zb = 3.72
+    zt = top - 0.07 if raised else 3.98
+    zk = zb + (zt - zb) * 0.38
+    for sy in (-0.5, 0.5):
+        pl = (x - half, sy, zk)
+        pr = (x + half, sy, zk)
+        pb = (x, sy, zb)
+        pt = (x, sy, zt)
+        for p, q in ((pb, pl), (pl, pt), (pt, pr), (pr, pb)):
+            b.beam(p, q, 0.19, CAR_RED)
+        b.box((x, sy, zb + 0.06), (0.30, 0.20, 0.12), CAR_RED)       # articulatie jos
+    b.beam((x, 0.0, zb), (x, 0.0, zt), (0.06, 0.06), VOLCANIC_BLACK)
+    b.beam((x - half, 0.0, zk), (x + half, 0.0, zk), (0.06, 0.06), VOLCANIC_BLACK)
+    b.beam((x, -1.00, zt + 0.07), (x, 1.00, zt + 0.07), 0.09, VOLCANIC_BLACK)   # bara de captare
+    for sy in (-1.0, 1.0):
+        b.beam((x, sy * 1.00, zt + 0.07), (x, sy * 1.15, zt - 0.03), 0.07, VOLCANIC_BLACK)
+
+
+def _tr_gangway(b, sx, hl, z0=1.70, z1=3.05):
+    """Capat de vagon cu tambuchi de trecere: rama rosie + panou negru de 1,6 m
+    iesit 18 cm."""
+    b.box((sx * (hl + 0.005), 0.0, (z0 + z1) * 0.5), (0.04, 1.80, z1 - z0 + 0.20), CAR_RED)
+    b.box((sx * (hl + 0.09), 0.0, (z0 + z1) * 0.5), (0.18, 1.60, z1 - z0), VOLCANIC_BLACK)
+
+
+def build_train_loco():
+    """`Train_Loco`: LOCOMOTIVA ELECTRICA romaneasca, CAR_RED cu banda gri lata, ~10,8 m.
+
+    LISTA DE ELEMENTE (decuparea `ro_train.png`, scrisa INAINTE de geometrie;
+    scara de joc, nu cifrele din kit):
+      1) caroserie 10,0 m (hl 5,0) x 2,8 m, streasina 3,0, coama 3,40; acoperis
+         gri bombat; inaltime fara pantograf ~3,6 m
+      2) BANDA GRI LATA jos, z 0,95..1,50 (~27% din flanc, iese 2 cm) +
+         LINIE FOAM_WHITE de 6 cm la limita rosu/gri (nu galben: slot de masini)
+      3) per parte (de la coada): usa cu geam, fereastra 1,05x0,8, grila 5
+         lamele, fereastra, grila, fereastra, usa cu geam = 2 usi + 3 ferestre
+         + 2 grile pe parte
+      4) cabine la ambele capete: 2 parbrize (0,84 x 0,80), 3 faruri albe,
+         grinda de capat, 2 tampoane
+      5) 2 PANTOGRAFE ROMB de ~3,5 m (aprox 1/3 din loco) pe postament si 4
+         izolatori: unul RIDICAT (varf 4,4 m), unul PLIAT (varf ~4,0 m)
+      6) cutie de rezistente cu 4 lamele pe acoperis (x = 0) + 2 cabluri laterale
+      7) 2 BOGHIURI x 2 osii = 8 ROTI (r 0,45), motoare, lonjeroane, travers
+      8) sasiu negru + 4 cutii intre boghiuri
+    Cote tinta: ~10,8 x 2,9 x 3,6 (4,4 cu pantograf). Sloturi: CAR_RED 14,
+    ASPHALT_EDGE 6, VOLCANIC_BLACK 20, FOAM_WHITE 22.
+    """
+    b = Builder()
+    hl = 5.0
+    eave, peak = 3.00, 3.40
+    _tr_body(b, hl, eave, peak)
+    for cx in (-3.4, 3.4):                                  # 7) boghiuri
+        _tr_bogie(b, cx, 2.4, motor=True)
+    _tr_underframe(b, hl, (-1.44, 1.44))                    # 8)
+    for side in (-1.0, 1.0):                                # 3) flancurile
+        _tr_door(b, -4.2, side, 1.55, 3.0)
+        _tr_door(b, 4.2, side, 1.55, 3.0)
+        for x in (-2.8, 0.2, 3.0):
+            _tr_window(b, x, side, 2.40, 1.05, 0.80)
+        for x in (-1.3, 1.6):
+            _tr_louvre(b, x, side, 1.90, 2.75, w=1.1)
+    for sx in (-1.0, 1.0):                                  # 4) capetele
+        for sy in (-1.0, 1.0):
+            b.box((sx * (hl + 0.03), sy * 0.62, 2.40), (0.06, 0.98, 0.94), CAR_RED)
+            b.box((sx * (hl + 0.06), sy * 0.62, 2.40), (0.06, 0.84, 0.80), VOLCANIC_BLACK)
+            b.box((sx * (hl + 0.025), sy * 1.10, 1.25), (0.05, 0.26, 0.16), FOAM_WHITE)
+        b.box((sx * (hl + 0.025), 0.0, 3.30), (0.05, 0.26, 0.16), FOAM_WHITE)
+    _tr_buffers(b, hl)
+    _tr_pantograph(b, -2.15, True)                          # 5)
+    _tr_pantograph(b, 2.15, False)
+    b.box((0.0, 0.0, 3.46), (0.90, 1.00, 0.16), VOLCANIC_BLACK)   # 6)
+    for k in range(4):
+        b.box((-0.30 + k * 0.20, 0.0, 3.56), (0.05, 0.90, 0.05), TR_GREY)
+    for sy in (-1.0, 1.0):
+        b.beam((-4.4, sy * 1.00, 3.15), (4.4, sy * 1.00, 3.15), (0.05, 0.05), VOLCANIC_BLACK)
+    return [b.to_object("Train_Loco")]
+
+
+def build_train_wagon():
+    """`Train_Wagon`: VAGON DE CALATORI rosu cu banda gri lata, ~8,3 m.
+
+    LISTA DE ELEMENTE (decuparea `ro_train.png`, scrisa INAINTE de geometrie):
+      1) acelasi corp ca locomotiva: banda gri 0,95..1,50 + linie FOAM_WHITE,
+         corp rosu, acoperis gri bombat, caroserie 7,5 m x 2,8 m, coama 3,45
+      2) per parte: 4 ferestre mari 1,0 x 0,9 (pas 1,3 m) intre 2 usi cu geam
+         (decuparea: 3 ferestre + usa); fara ovalul cu text
+      3) 3 guri de aerisire negre pe acoperis (z pana la 3,55)
+      4) tambuchi de trecere la ambele capete (panou negru + rama rosie),
+         grinda de capat, 2 tampoane
+      5) 2 BOGHIURI x 2 osii = 8 ROTI (r 0,45)
+      6) sasiu negru + 2 cutii
+    Cote tinta: 8,3 x 2,9 x 3,6 m. Sloturi: CAR_RED 14, ASPHALT_EDGE 6,
+    VOLCANIC_BLACK 20, FOAM_WHITE 22.
+    """
+    b = Builder()
+    hl = 3.75
+    eave, peak = 3.00, 3.45
+    _tr_body(b, hl, eave, peak)
+    for cx in (-2.5, 2.5):
+        _tr_bogie(b, cx, 2.2, motor=False)
+    _tr_underframe(b, hl, (0.0,), box_l=1.0)
+    for side in (-1.0, 1.0):
+        _tr_door(b, -3.2, side, 1.55, 3.0)
+        _tr_door(b, 3.2, side, 1.55, 3.0)
+        for x in (-2.0, -0.7, 0.7, 2.0):
+            _tr_window(b, x, side, 2.40, 1.0, 0.90)
+    for x in (-2.0, 0.0, 2.0):
+        b.box((x, 0.0, 3.52), (0.70, 0.40, 0.12), VOLCANIC_BLACK)
+    for sx in (-1.0, 1.0):
+        _tr_gangway(b, sx, hl)
+    _tr_buffers(b, hl)
+    return [b.to_object("Train_Wagon")]
+
+
+def build_train_tender():
+    """`Train_Tender`: VAGON DE BAGAJE scurt, 5,0 m (nodul trebuie sa existe:
+    TrainHazard arunca toata garnitura daca lipseste; tiparul PeruRail).
+
+    LISTA DE ELEMENTE (nu e pe decupare; acelasi limbaj ca vagonul):
+      1) acelasi corp (banda gri + linie alba, corp rosu, acoperis gri, coama
+         3,45), caroseria 4,2 m + 2 x 0,4 m tampoane
+      2) per parte: 1 usa mare de bagaje (2 rosturi la 1,6 m) si 2 ferestre mici
+      3) o gura de aerisire pe acoperis
+      4) tambuchi de trecere la ambele capete, grinda de capat, 2 tampoane
+      5) 2 osii separate = 4 roti (r 0,45), la x = +-1,25, cu lonjeroane
+      6) sasiu negru
+    Sloturi: CAR_RED 14, ASPHALT_EDGE 6, VOLCANIC_BLACK 20, FOAM_WHITE 22.
+    """
+    b = Builder()
+    hl = 2.1
+    eave, peak = 3.00, 3.45
+    _tr_body(b, hl, eave, peak)
+    for dx in (-1.25, 1.25):
+        _tr_wheelset(b, dx)
+    for sy in (-1.0, 1.0):
+        b.box((0.0, sy * 0.68, 0.62), (2.1, 0.14, 0.30), VOLCANIC_BLACK)
+        b.box((0.0, sy * 0.68, 0.80), (3.2, 0.12, 0.10), VOLCANIC_BLACK)
+    b.box((0.0, 0.0, 0.87), (2 * hl - 0.3, 2.40, 0.16), VOLCANIC_BLACK)
+    for side in (-1.0, 1.0):
+        for dx in (-0.8, 0.8):                     # usa de bagaje: 2 rosturi
+            b.box((dx, side * (TR_HW + 0.012), 2.30), (0.05, 0.05, 1.50), VOLCANIC_BLACK)
+        for x in (-1.5, 1.5):
+            _tr_window(b, x, side, 2.50, 0.50, 0.50)
+    b.box((0.0, 0.0, 3.52), (0.70, 0.40, 0.12), VOLCANIC_BLACK)
+    for sx in (-1.0, 1.0):
+        _tr_gangway(b, sx, hl)
+    _tr_buffers(b, hl)
+    return [b.to_object("Train_Tender")]
+
+
+def _emit_train():
+    """Cele trei noduri pleaca intr-un GLB, cu offsetul de origine calculat O
+    DATA pe ansamblu (talpa rotilor la z = 0, XY pastrat: fiecare piesa e deja
+    centrata pe axa ei, ecartamentul pe y = 0). `finish` per nod ar desface
+    piesele (memoria finish-recentreaza-fiecare-nod-separat)."""
+    objs = build_train_loco() + build_train_tender() + build_train_wagon()
+    _emit(objs, "vehicles/ro_train.glb", AO_TRAIN, bevel=0.02, smooth=40.0)
+
+
+# ---------------------------------------------------------------------------
+# cable_cabin_large (valul 3, tf-h)
+# ---------------------------------------------------------------------------
+
+AO_CABIN = dict(samples=20, dist=1.4, gradient="vertical", low=0.70, high=1.0,
+                power=0.8, floor=0.35, z_range=(0.0, 7.5))
+
+# sectiunile cabinei de jos in sus: (z, semi-lungime X, semi-latime Y, raza coltului)
+# ~4,1 x 3,3 x 3,3 m; podea plata, burta la z 1,3, acoperis usor bombat
+CAB_SECT = [(0.00, 1.70, 1.35, 0.45), (0.12, 1.88, 1.52, 0.46), (0.55, 2.00, 1.62, 0.46),
+            (1.30, 2.05, 1.65, 0.46), (2.40, 2.02, 1.62, 0.46), (3.00, 1.88, 1.48, 0.46),
+            (3.15, 1.65, 1.28, 0.45), (3.25, 1.40, 1.05, 0.42), (3.30, 1.20, 0.85, 0.40)]
+CAB_ARC = 4   # segmente pe arcul fiecarui colt
+
+
+def _cab_dims(z):
+    """(hx, hy, r) interpolat liniar pe CAB_SECT la cota z (punctele inelului
+    sunt liniare in aceste valori, deci inelul interpolat e exact)."""
+    for a, c in zip(CAB_SECT, CAB_SECT[1:]):
+        if a[0] <= z <= c[0]:
+            t = (z - a[0]) / (c[0] - a[0])
+            return tuple(a[i] + (c[i] - a[i]) * t for i in (1, 2, 3))
+    return CAB_SECT[-1][1:]
+
+
+def _cab_corner_centers(hx, hy, r):
+    return [(hx - r, hy - r, 0.0), (-(hx - r), hy - r, 90.0),
+            (-(hx - r), -(hy - r), 180.0), (hx - r, -(hy - r), 270.0)]
+
+
+def _cab_ring(z, grow=0.0):
+    """Inel dreptunghi cu colturi ROTUNJITE (4 arce x (CAB_ARC+1) puncte = 20),
+    antiorar vazut de sus; `grow` il dilata."""
+    hx, hy, r = _cab_dims(z)
+    hx += grow
+    hy += grow
+    r += grow
+    pts = []
+    for cx, cy, a0 in _cab_corner_centers(hx, hy, r):
+        for k in range(CAB_ARC + 1):
+            a = math.radians(a0 + 90.0 * k / CAB_ARC)
+            pts.append((cx + r * math.cos(a), cy + r * math.sin(a), z))
+    return pts
+
+
+def _cab_surface(z, kind, f):
+    """Punct (x, y) + normala exterioara pe suprafata la cota z.
+    'corner': f = indexul coltului 0..3 (la 45 grade pe arc);
+    'long': f = (fata +-1 pe Y, t) cu t = 0 la x = +(hx-r) .. 1 la -(hx-r);
+    'short': f = (fata +-1 pe X, t) cu t = 0 la y = +(hy-r) .. 1 la -(hy-r)."""
+    hx, hy, r = _cab_dims(z)
+    if kind == "corner":
+        cx, cy, a0 = _cab_corner_centers(hx, hy, r)[f]
+        a = math.radians(a0 + 45.0)
+        n = (math.cos(a), math.sin(a))
+        return (cx + r * n[0], cy + r * n[1]), n
+    face, t = f
+    if kind == "long":
+        x = (hx - r) * (1.0 - 2.0 * t)
+        return (x, face * hy), (0.0, float(face))
+    y = (hy - r) * (1.0 - 2.0 * t)
+    return (face * hx, y), (float(face), 0.0)
+
+
+def _cab_post(b, kind, f, z_levels, w, off=0.055):
+    """Montant rosu LAT (w) pe suprafata, urmareste profilul pe toate cotele:
+    sectiune de 4 puncte extrudata pe z_levels (ring_stack)."""
+    rings = []
+    for z in z_levels:
+        (px, py), (nx, ny) = _cab_surface(z, kind, f)
+        tx, ty = -ny, nx          # tangenta antiorara
+        h = w * 0.5
+        sec = [(-0.01, -h), (off, -h), (off, h), (-0.01, h)]     # (n, t)
+        rings.append([(px + nx * a + tx * c, py + ny * a + ty * c, z) for a, c in sec])
+    ring_stack(b, rings, CAR_RED)
+
+
+def build_cable_cabin_large():
+    """`cable_cabin_large`: cabina MARE a telecabinei de la Balea (~30 de oameni),
+    CAR_RED, ~4,2 x 3,4 x 3,3 m (aproape un CUB), cu brat in A si cărucior orizontal.
+
+    LISTA DE ELEMENTE (decuparea `cable_cabin_large.png`, scrisa INAINTE de
+    geometrie; cota 5,5 x 3,2 x 3,0 din kit e ANULATA de coordonator):
+      1) corp rosu loftat din 9 sectiuni, colturi ROTUNJITE PE VERTICALA (raza
+         0,46 m, 4 arce x 5 puncte), podea plata, burta la z 1,3, acoperis
+         usor BOMBAT (z 3,0 -> 3,3)
+      2) BRAU ROSU PLIN jos, z 0..1,35 (~40% din 3,3)
+      3) GEAMURI = ~50% din inaltime (z 1,38..3,0), panouri inalte intre
+         montanti, din fete VOLCANIC_BLACK; sunt ADANCITE ~4 cm fata de montanti
+         (geamul 1,5 cm peste corp, montantul 5,5 cm); 4 panouri pe fata lunga
+         (3 montanti), 3 pe cea scurta (2 montanti)
+      4) MONTANTI rosii LATI (0,22 m) pe fete + 4 montanti de colt CURBATI (0,30),
+         de la burta pana la umar; rame orizontale rosii sus si jos de geam
+      5) ramă de prindere pe acoperis (patrat 1,9 x 1,2, 4 picioare)
+      6) BRAT = stalp in A (4 picioare care se strang in sus, 2 randuri de
+         traverse pe X si Y) + coloana ingusta + 2 diagonale spre carucior
+      7) CARUCIOR = GRINDA JOASA de 3,0 m pe X (paralela cu cablul), 2 obraji,
+         4 ROTI vizibile (r 0,28) pe linia cablului
+    Cote tinta: ~4,3 x 3,4 x 7,2 m in total, originea pe LINIA CABLULUI (varful
+    rotilor, y = 0 in glTF), cablul pe X. Noduri: Cabin_Body CAR_RED 14 (corp +
+    montanti), Cabin_Glass VOLCANIC_BLACK 20, Cabin_Cart ASPHALT_EDGE 6
+    (+ VOLCANIC_BLACK la roti).
+    """
+    body, glass, cart = Builder(), Builder(), Builder()
+    zs = [s[0] for s in CAB_SECT]
+    ring_stack(body, [_cab_ring(z) for z in zs], CAR_RED)                       # 1), 2)
+    gz = [1.38, 1.65, 2.0, 2.4, 2.75, 3.0]
+    ring_stack(glass, [_cab_ring(z, 0.015) for z in gz], VOLCANIC_BLACK,
+               cap_top=False, cap_bottom=False)                                 # 3)
+    for z in (1.34, 3.04):                                                       # rame orizontale
+        ring_stack(body, [_cab_ring(z - 0.05, 0.055), _cab_ring(z + 0.05, 0.055)],
+                   CAR_RED, cap_top=False, cap_bottom=False)
+    pz = [1.20, 1.38, 1.65, 2.0, 2.4, 2.75, 3.0, 3.12]
+    for c in range(4):                                                           # 4) colt
+        _cab_post(body, "corner", c, pz, 0.30, off=0.06)
+    for face in (1, -1):
+        for t in (0.2, 0.5, 0.8):
+            _cab_post(body, "long", (face, t), pz, 0.22)
+        for t in (0.29, 0.71):
+            _cab_post(body, "short", (face, t), pz, 0.22)
+    # 5) rama de pe acoperis
+    fx, fy, zr = 0.95, 0.60, 3.38
+    for sy in (-1.0, 1.0):
+        cart.beam((-fx, sy * fy, zr), (fx, sy * fy, zr), 0.11, TR_GREY)
+    for sx in (-1.0, 1.0):
+        cart.beam((sx * fx, -fy, zr), (sx * fx, fy, zr), 0.11, TR_GREY)
+        for sy in (-1.0, 1.0):
+            cart.box((sx * fx, sy * fy, zr - 0.05), (0.12, 0.12, 0.16), TR_GREY)
+    # 6) bratul in A: 4 picioare, traverse, coloana, diagonale
+    z_b, z_c = zr, 5.35
+    for sx in (-1.0, 1.0):
+        for sy in (-1.0, 1.0):
+            cart.beam((sx * fx, sy * fy, z_b), (sx * 0.17, sy * 0.13, z_c), 0.20, TR_GREY)
+    for zb in (4.0, 4.65):
+        t = (zb - z_b) / (z_c - z_b)
+        hx_ = fx + (0.17 - fx) * t
+        hy_ = fy + (0.13 - fy) * t
+        cart.beam((-hx_, 0.0, zb), (hx_, 0.0, zb), (0.10, 0.12), TR_GREY)
+        cart.beam((0.0, -hy_, zb), (0.0, hy_, zb), (0.10, 0.12), TR_GREY)
+    cart.beam((0.0, 0.0, z_c - 0.05), (0.0, 0.0, 6.55), (0.40, 0.30), TR_GREY)
+    for sx in (-1.0, 1.0):
+        cart.beam((sx * 0.10, 0.0, 6.0), (sx * 1.15, 0.0, 6.52), (0.12, 0.14), TR_GREY)
+    # 7) caruciorul: grinda joasa de-a lungul cablului, obraji, 4 roti
+    cart.box((0.0, 0.0, 6.60), (3.00, 0.50, 0.24), TR_GREY)
+    for sy in (-1.0, 1.0):
+        cart.box((0.0, sy * 0.19, 6.88), (2.80, 0.05, 0.36), TR_GREY)
+    for x in (-1.2, -0.4, 0.4, 1.2):
+        cart.cylinder((x, 0.0, 6.97), 0.28, 0.46, VOLCANIC_BLACK, segments=12, axis="Y")
+        cart.cylinder((x, 0.0, 6.97), 0.06, 0.52, TR_GREY, segments=6, axis="Y")
+    return [body.to_object("Cabin_Body"), glass.to_object("Cabin_Glass"),
+            cart.to_object("Cabin_Cart")]
+
+
+def _emit_cabin():
+    """Ca emit_tf, dar OFFSETUL de origine pune VARFUL rotilor (linia cablului)
+    la y = 0, iar geometria atarna sub el (`verify_glb --origin=rim`). Baza se
+    construieste la z = 0 ca gradientul de AO sa porneasca de la podea; dupa
+    finish se coboara tot ansamblul cu inaltimea maxima."""
+    objs = build_cable_cabin_large()
+    total, per_node = 0, {}
+    for o in objs:
+        bw = 0.015 if o.name.endswith("_Cart") else (0.0 if o.name.endswith("_Glass") else 0.02)
+        st = finish(o, bevel=bw, bevel_angle=30.0, ao=AO_CABIN, origin=None, smooth_angle=50.0)
+        total += st["tris"]
+        per_node[o.name] = st["tris"]
+    top = max(v.co.z for o in objs for v in o.data.vertices)
+    for o in objs:
+        for v in o.data.vertices:
+            v.co.z -= top
+    xs = [v.co.x for o in objs for v in o.data.vertices]
+    ys = [v.co.y for o in objs for v in o.data.vertices]
+    zs = [v.co.z for o in objs for v in o.data.vertices]
+    dims = Vector((max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs)))
+    _, sz = export_glb(objs, "transfagarasan/vehicles/cable_cabin_large.glb")
+    TF_RESULTS.append(("vehicles/cable_cabin_large.glb", total, dims, per_node, sz / 1024.0))
+    clear_built()
+
+
+# ---------------------------------------------------------------------------
+
+def _emit(objs, path, ao, bevels=None, smooth=50.0, bevel=0.0):
+    emit_tf(objs, path, ao, keep_xy=True, bevel=bevel, bevels=bevels, smooth_angle=smooth)
     clear_built()
 
 
@@ -572,4 +1034,8 @@ if not ONLY or ONLY == "parked_car_b":
 if not ONLY or ONLY == "motorbike":
     _emit(build_motorbike(), "vehicles/motorbike.glb", AO_MOTO,
           bevels={"_Body": 0.0, "_Metal": 0.006, "_Dark": 0.006}, smooth=40.0)
+if not ONLY or ONLY == "ro_train":
+    _emit_train()
+if not ONLY or ONLY == "cable_cabin_large":
+    _emit_cabin()
 report_tf()

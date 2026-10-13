@@ -256,7 +256,7 @@ func _talus() -> void:
 	for s in [1750.0, 1764.0]:
 		var lp := _lip(s, -1.0)
 		if lp > 0.0:
-			_raw("tumbleweed", "g2Tumble", _on(s, -(lp + 0.8)), r.randf() * TAU, 1.2, "none")
+			_raw("tumbleweed", "g2Tumble", _on(s, -(lp + 0.8)), r.randf() * TAU, 1.2, "bump")
 	for sd in [[1745.0, 1.0], [1762.0, 1.0], [1757.0, -1.0], [1771.0, -1.0]]:
 		var lp := _lip(sd[0], sd[1])
 		if lp > 0.0:

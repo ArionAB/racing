@@ -119,6 +119,82 @@ def build_tunnel_portal_balea():
             to_obj(void, "Portal_Void")]
 
 
+AO_SNOW_WALL = dict(samples=16, dist=1.2, gradient="vertical", low=0.70, high=1.0,
+                    power=0.7, floor=0.45)
+
+
+def emit_tf_variants(variants, path, smooth_angle=35.0):
+    """GLB cu VARIANTE: fiecare varianta e o radacina goala (Empty, scala 1, la
+    origine) cu nodurile ei de un singur material ca copii (`SnowWall_A` ->
+    `SnowWall_A_Snow`, `SnowWall_A_Dust`). Godot alege varianta dupa numele
+    copilului DIRECT al radacinii GLB (docs/blender_export.md), iar clasa se
+    pune pe sufixul nodului copil. Toate variantele stau la origine (regula 1
+    din blender_export.md); baza fiecareia e deja la z = 0, XY pe axa.
+    `variants` = lista (nume_radacina, [obiecte], ao)."""
+    out, total, per_node = [], 0, {}
+    lo = Vector((1e9,) * 3); hi = Vector((-1e9,) * 3)
+    for root, objs, ao in variants:
+        objs = [o for o in objs if o is not None and len(o.data.vertices) > 0]
+        emp = bpy.data.objects.new(root, None)
+        bpy.context.collection.objects.link(emp)
+        for o in objs:
+            st = finish(o, bevel=0.0, ao=ao, origin=None, smooth_angle=smooth_angle)
+            total += st["tris"]
+            per_node[o.name] = st["tris"]
+            o.parent = emp
+            for v in o.data.vertices:
+                lo = Vector((min(lo[i], v.co[i]) for i in range(3)))
+                hi = Vector((max(hi[i], v.co[i]) for i in range(3)))
+        out += [emp] + objs
+    _, sz = export_glb(out, "transfagarasan/" + path)
+    TF_RESULTS.append((path, total, hi - lo, per_node, sz / 1024.0))
+    return total
+
+
+def build_snow_wall():
+    """Peretele de zapada veche de langa asfalt (`snow_wall`), kit §1.1.
+
+    LISTA DE ELEMENTE (decuparea `transfagarasan_assets_v1/snow_wall.png`,
+    scrisa INAINTE de geometrie):
+      1) un perete lung si drept, h/l ~0,5 pe fata lunga, grosimea ~1/3 din
+         inaltime la capat
+      2) fata lunga din ~7 COLOANE x 3 RANDURI de blocuri fatetate (~21), fiecare
+         bloc cu fata impartita in 4 fatete ca o piramida joasa
+      3) muchia de sus neregulata: blocurile de sus au inaltimi diferite, unul la
+         mijloc e retezat oblic
+      4) capatul din dreapta vizibil, fatetat ca fata lunga
+      5) culoare: alb cu umbre albastrui pe fatetele intoarse
+    CORECTURA coordonatorului (suprascrie decuparea, kit "Corecturi"): NU cuburi
+    albe curate, ci zapada veche de iulie. Lista urmeaza corectura:
+      a) fata spre drum (-X) taiata VERTICAL de plug, cu 4 STRATURI (A) / 3 (B)
+         in loc de cele 3 randuri de blocuri; intre straturi TREPTE de 0,22-0,30 m
+         (fata se retrage la fiecare prag), buza fiecarui strat rotunjita
+      b) cele ~7 coloane ale decuparii devin 7 SCOBITURI de freza pe fata taiata
+         (celule concave de 1,14 m, adanci 0,11 m, cu muchii verticale intre ele):
+         pastreaza ritmul vertical al desenului fara rosturi de cuburi
+      c) dungile de praf: PETE (fete mutate pe `*_Dust`, CONCRETE 8) in banda de
+         la baza fiecarui strat si pe praguri, neregulate pe lungime; baza murdara
+         (banda de 0,3 m, cea mai acoperita), si o banda rara la baza fetei din spate
+      d) fata dinspre versant (+X) rotunjita: umar convex, 2,5 m gros la baza,
+         1,2 m sus
+      e) muchia de sus topita: rotunjita si ondulata (+-0,1 m pe lungime)
+      f) capete plane, IDENTICE la +-4 m pe Y: toata variatia (cote de strat,
+         trepte, ondulare, praf) e periodica pe 8 m, scobiturile au cuspida la capete
+    Cote: modul 8 m (Y), A 4 m / B 3 m inaltime, 2,5 m la baza, 1,2 m sus.
+    Noduri: radacinile `SnowWall_A`, `SnowWall_B` (Empty), copiii
+    `SnowWall_<v>_Snow` (FOAM_WHITE 22) si `SnowWall_<v>_Dust` (CONCRETE 8)."""
+    variants = []
+    for v, H, seed in (("A", 4.0, 0.0), ("B", 3.0, 2.4)):
+        snow, dust = Builder(), Builder()
+        nd = snow_wall_module(snow, dust, H, L=8.0, seed=seed)
+        print("snow_wall %s: %d fete de praf" % (v, nd))
+        ao = dict(AO_SNOW_WALL, z_range=(0.0, H))
+        variants.append(("SnowWall_" + v,
+                         [to_obj(snow, "SnowWall_%s_Snow" % v), to_obj(dust, "SnowWall_%s_Dust" % v)],
+                         ao))
+    return variants
+
+
 ONLY = os.environ.get("TF_ONLY", "")
 
 
@@ -130,5 +206,8 @@ if _want("tunnel_portal_balea"):
     objs = build_tunnel_portal_balea()
     emit_tf(objs, "structures/tunnel_portal_balea.glb", AO_PORTAL, keep_xy=True,
             bevel=0.0, smooth_angle=None)
+
+if _want("snow_wall"):
+    emit_tf_variants(build_snow_wall(), "structures/snow_wall.glb")
 
 report_tf()

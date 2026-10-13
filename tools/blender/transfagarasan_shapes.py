@@ -108,10 +108,11 @@ def snow_wall_section(y, H, L=8.0, seed=0.0, base_w=2.5, top_w=1.2, cells=7):
     dinspre versant pe +X (rotunjita), baza intre x = -base_w/2 si +base_w/2.
     Intoarce lista de (x, z, eticheta_segment) cu ACELASI numar de puncte la
     orice `y`; segmentul i -> i+1 poarta eticheta punctului i:
-      'face'   fata verticala a unui strat     'band<l>' banda de praf a stratului l
-      'ledge<l>' pragul de deasupra stratului l 'top'   creasta topita
-      'slope'  fata dinspre versant            'sbase'  baza murdara dinspre versant
-      'base'   baza murdara spre drum           'bottom' talpa
+      'face'   fata verticala a unui strat     'band<l>' baza stratului l (fara praf)
+      'step<l>' MUCHIA treptei de deasupra stratului l: buza rotunjita + pragul
+      'top'    creasta topita                  'slope'  fata dinspre versant
+      'sbase'  baza fetei din spate             'base'   baza murdara spre drum
+      'bottom' talpa
     Totul periodic pe L (vezi `_per`)."""
     s = seed
     nl = 4 if H >= 3.5 else 3
@@ -140,8 +141,8 @@ def snow_wall_section(y, H, L=8.0, seed=0.0, base_w=2.5, top_w=1.2, cells=7):
         pts.append((xf[l], zb + band_h, "face"))
         if l < nl - 1:
             zt = bounds[l + 1]
-            pts.append((xf[l], zt - 0.09, "face"))         # buza rotunjita a stratului
-            pts.append((xf[l] + 0.09, zt, "ledge%d" % l))  # pragul spre stratul de sus
+            pts.append((xf[l], zt - 0.09, "step%d" % l))   # buza rotunjita a stratului
+            pts.append((xf[l] + 0.09, zt, "step%d" % l))   # pragul spre stratul de sus
     # --- creasta topita si ondulata (stratul de sus)
     Ht = H - 0.14 - 0.07 * _per(y, L, [(2, 1.0, s + 0.7), (3, 0.6, s + 2.0), (5, 0.3, s)])
     xl = xf[-1]
@@ -167,32 +168,46 @@ def snow_wall_section(y, H, L=8.0, seed=0.0, base_w=2.5, top_w=1.2, cells=7):
 
 
 def snow_wall_module(snow, dust, H, L=8.0, seed=0.0, rings_per_cell=4, cells=7,
-                     dust_thr=None):
+                     dust_frac=None):
     """Modulul de perete de zapada veche (kit §1.1 `snow_wall`, corectura
     coordonatorului): sectiunea `snow_wall_section` trasa pe Y intre -L/2 si
     +L/2, cu inele pe cuspidele scobiturilor (capetele cad pe cuspida). Capete
     plane, identice (toata variatia e periodica pe L).
 
-    Praful e PATA pe fete, nu volum: fetele din benzile de la baza straturilor
-    (`band<l>`), de pe praguri (`ledge<l>`) si de la baza ('base', 'sbase') trec
-    in `dust` (acelasi contur, alt nod) doar unde un zgomot periodic depaseste
-    pragul stratului -> petice neregulate, nu dungi continue. Fetele se scriu cu
-    infasurarea spre exterior (verificata pe volum), deci nodurile se fac cu
-    `to_obj`, fara recalc de normale."""
+    Praful e PATA pe fete, nu volum, si sta DOAR unde se aduna praful real
+    (verdictul coordonatorului, val 1): pe banda de la baza primului strat
+    ('base') si pe MUCHIILE treptelor ('step<l>': buza + prag). Se alege pe
+    QUAD, pe coloane intregi (fara sah de triunghiuri), cu un zgomot periodic de
+    frecventa joasa -> petice lungi de-a lungul muchiei. Acoperirea pe eticheta
+    e EXACTA (cuantila pe coloane, `dust_frac`); randul de sus al benzii de baza
+    primeste mai putin, deci peticul are margine in trepte. Fetele se scriu cu
+    infasurarea spre exterior, nodurile se fac cu `to_obj`."""
     n = cells * rings_per_cell
     ys = [-L * 0.5 + L * i / n for i in range(n + 1)]
     secs = [snow_wall_section(y, H, L, seed, cells=cells) for y in ys]
     m = len(secs[0])
-    # praguri de praf (mai mic = mai mult praf)
-    thr = {"base": -0.05, "sbase": 0.25, "band1": 0.35, "band2": 0.25, "band3": 0.45,
-           "ledge0": 0.70, "ledge1": 0.55, "ledge2": 0.80}
-    thr.update(dust_thr or {})
-    harm = {}
-    for i, tag in enumerate(sorted(thr)):
-        harm[tag] = [(1, 0.55, seed + i * 1.7), (2, 0.6, seed * 0.5 + i), (3, 0.5, i * 2.3),
-                     (5, 0.35, seed + i * 0.9), (7, 0.25, i)]
+    frac = {"base": 0.38, "step0": 0.15, "step1": 0.13, "step2": 0.13}
+    frac.update(dust_frac or {})
+    ymids = [(ys[k] + ys[k + 1]) * 0.5 for k in range(n)]
+    noise, cut = {}, {}
+    for t_i, tag in enumerate(sorted(frac)):
+        hm = [(1, 0.7, seed + t_i * 1.7), (2, 0.9, seed * 0.5 + t_i * 2.9),
+              (3, 0.5, t_i * 2.3), (4, 0.3, seed + t_i)]
+        vals = [_per(y, L, hm) for y in ymids]
+        noise[tag] = vals
+        srt = sorted(vals)
 
-    # orientarea: sectiunea e parcursa in sens orar in (x, z) -> verificam aria
+        def q(f, srt=srt):
+            return srt[max(0, min(len(srt) - 1, int(round((1.0 - f) * len(srt)))))]
+        cut[tag] = (q(frac[tag]), q(frac[tag] * 0.55))   # (rand de jos, rand de sus)
+    # al catelea segment din eticheta e (randul) -- pe sectiunea 0
+    row_of = {}
+    seen = {}
+    for i in range(m):
+        tag = secs[0][i][2]
+        row_of[i] = seen.get(tag, 0)
+        seen[tag] = row_of[i] + 1
+
     a2 = 0.0
     sec = secs[0]
     for i in range(m):
@@ -204,30 +219,20 @@ def snow_wall_module(snow, dust, H, L=8.0, seed=0.0, rings_per_cell=4, cells=7,
     rings = [[snow.bm.verts.new((x, y, z)) for (x, z, _) in sec] for y, sec in zip(ys, secs)]
     dust_faces = []
     for k in range(n):
-        ymid = (ys[k] + ys[k + 1]) * 0.5
         for i in range(m):
             j = (i + 1) % m
             quad = [rings[k][i], rings[k][j], rings[k + 1][j], rings[k + 1][i]]
-            # (x,z) antiorar vazut din +Y; extrudat spre +Y -> normala spre exterior
-            # cere ordinea inversa
             if ccw:
                 quad.reverse()
             tag = secs[k][i][2]
-            if tag not in thr:
-                f = snow.bm.faces.new(quad)
-                f[snow.slot] = TF_SNOW
-                continue
-            # fetele etichetate se aleg pe TRIUNGHI (margini zdrentuite, nu
-            # dreptunghiuri); zgomotul se decaleaza cu cota -> petele se
-            # inclina usor, ca scurgerile, si randurile nu se aliniaza
-            zmid = (secs[k][i][1] + secs[k][j][1]) * 0.5
-            for ti, tri in enumerate(((quad[0], quad[1], quad[2]), (quad[0], quad[2], quad[3]))):
-                if _per(ymid + (ti - 0.5) * 0.14 + 0.9 * zmid, L, harm[tag]) > thr[tag]:
-                    dust_faces.append([v.co.copy() for v in tri])
-                else:
-                    f = snow.bm.faces.new(tri)
-                    f[snow.slot] = TF_SNOW
-    # capetele plane (n-gon concav, triangulat la export)
+            if tag in frac:
+                lo_cut, hi_cut = cut[tag]
+                thr = hi_cut if (tag == "base" and row_of[i] > 0) else lo_cut
+                if noise[tag][k] >= thr:
+                    dust_faces.append([v.co.copy() for v in quad])
+                    continue
+            f = snow.bm.faces.new(quad)
+            f[snow.slot] = TF_SNOW
     cap0 = list(rings[0])
     cap1 = list(rings[-1])
     if ccw:
@@ -237,8 +242,8 @@ def snow_wall_module(snow, dust, H, L=8.0, seed=0.0, rings_per_cell=4, cells=7,
     for cap in (cap0, cap1):
         f = snow.bm.faces.new(cap)
         f[snow.slot] = TF_SNOW
-    for q in dust_faces:
-        f = dust.bm.faces.new([dust.bm.verts.new(p) for p in q])
+    for q4 in dust_faces:
+        f = dust.bm.faces.new([dust.bm.verts.new(p) for p in q4])
         f[dust.slot] = TF_DUST
     return len(dust_faces)
 

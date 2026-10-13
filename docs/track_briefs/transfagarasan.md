@@ -1,4 +1,4 @@
-# Track brief — Transfăgărășan (`Track21`, temă `transfagarasan`) — v0.2 (concept + decizii + prompturile ChatGPT)
+# Track brief — Transfăgărășan (`Track21`, temă `transfagarasan`) — v0.3 (concept + decizii + dioramă acceptată)
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `okinawa.md` și `monument_valley.md`. Secțiunile de assets (§5) sunt un
@@ -1016,7 +1016,87 @@ acolo):
   corectură de coordonator în `docs/asset_briefs/transfagarasan_kit.md`, nu
   ca regenerare.
 
+### 9.2 Rezultatul: diorama și planșa acceptate
+
+Fișierele sunt în `img/transfagarasan_plan/`:
+- `diorama_v02_iter1.jpg` (prima generare);
+- `diorama_v02_iter2.jpg` (**acceptată**);
+- `diorama_v02_iter3.jpg` (variantă respinsă);
+- `inventar_v02.jpg` (planșa).
+
+**Prima generare, respinsă.** Camera era din sud, nu din NE. Cu versantul
+nordic ascuns, ChatGPT a mutat serpentinele pe fața vizibilă: **urcau spre
+lacul glaciar**, iar tunelul era o fundătură lângă ele. Celelalte erori:
+- **barajul ținea satul și pajiștea**, iar lacul stătea alături;
+- **Poenari lipsea**;
+- **podețul era întreg** și nicio mașină nu era în aer;
+- **Oltul era torent** cu cascade;
+- **telecabina trecea peste lac**;
+- portalul n-avea pereți de zăpadă, iar semaforul era în tunel;
+- creasta era un câmp de vârfuri mici;
+- stilul era aproape de miniatură foto.
+
+S-a cerut o corecție în 12 puncte, în aceeași conversație.
+
+**A doua corecție a dat două variante; s-a ales iter2.** Pe amândouă s-au
+rezolvat aceleași puncte: lacul lipit de baraj, Poenari, Oltul lat, trenul
+pe trecere, golul cu mașina în aer, serpentinele în prim-plan cu oile,
+camera dinspre serpentine. Diferențele:
+- **iter2 are ordinea corectă la tunel**: ursul ridicat → tunelurile scurte
+  în stâncă → portalul cu semafor și pereți de zăpadă → lacul cu cabana →
+  serpentinele;
+- **iter3 pune semaforul chiar deasupra serpentinelor**, cu lacul în spatele
+  portalului. Pe sensul jocului, asta înseamnă că urci serpentinele spre
+  semafor (eroarea din iter1). În plus, **pierde ursul și tunelurile
+  scurte**.
+
+Singurul câștig al lui iter3 e avalanșa. Dar avalanșa e deja cod
+(`AvalancheHazard`) plus `effects/avalanche_boulders.glb`, iar ursul și
+portalul de stâncă sunt piese noi de kit. Abaterile rămase în iter2 sunt
+asumate, fără o a patra rundă:
+- **avalanșa lipsește**;
+- **al doilea portal** dinaintea serpentinelor se citește ca ieșire din
+  tunel. Poziția reală vine din `Track21`, nu din dioramă.
+
+**Planșa, acceptată cu corecturi.** Are toate cele **39 de nume**. Fraza
+adăugată la prompt (ursul ridicat ca urs, jneapănul ca tufă culcată) a
+funcționat: ursul ridicat e urs, iar jneapănul e tufă joasă. Abaterile intră
+ca **corecturi de coordonator** în `docs/asset_briefs/transfagarasan_kit.md`,
+nu ca regenerare:
+- **mașinile parcate seamănă cu Dacia** (Logan și Sandero/Duster: grila,
+  silueta). Legal (§8): în Blender ies **generice**, cu grilă simplă și
+  fără siluetă recognoscibilă;
+- **`vidraru_dam` e un zid drept**. Barajul e **arc**: modulul se curbează
+  în plan, iar coronamentul urmează drumul;
+- **`snow_wall` e din cuburi albe curate**. Trebuie zăpadă veche, cu straturi
+  și dungi de praf (`#B9B2A4`), și cu muchia de sus rotunjită;
+- **cabanele au balcoane sculptate**, deci risc de chalet tirolez (§0.1).
+  Se păstrează piatra jos, lemnul sus și acoperișul abrupt de tablă, fără
+  balustrade decorate. `cabana_balea_cascada` trebuie să difere de
+  `arges_house_a`;
+- **`cable_cabin_large` e o gondolă mică**. Cabina de la Bâlea e mare,
+  pentru ~30 de oameni, cutie cu geamuri pe toate laturile, ~2–3× gondola
+  alpină (§5.1);
+- **`bear_warning_sign` arată „atenție urși”**, iar §8 cere pictograma „nu
+  hrăniți urșii” (ursul și mâncarea tăiată). Rămâne triunghiul, cu
+  pictograma schimbată;
+- `beech_tree_a` și `b` sunt aproape identice, iar `schist_outcrop_b` și `c`
+  la fel. Variantele trebuie să difere în siluetă, nu doar în scară;
+- `sheepdog` iese ciobănesc de munte generic, ceea ce e acceptabil.
+  Ciobănescul românesc (carpatin / mioritic) e mai lățos și deschis;
+- etichete greșite: „viiraru_dam”, „retaning_wall_straight”. Numele de
+  fișier rămân cele din §9.1;
+- scara nu e respectată (era de așteptat). Cotele vin din §5 și din
+  `Track21`.
+
 ## Istoric
+
+- **v0.3 (13 oct 2026):** diorama acceptată la a doua corecție (iter2, nu
+  iter3: ordinea la tunel, ursul și tunelurile scurte cântăresc mai mult
+  decât avalanșa, care e deja cod). Planșa e acceptată cu corecturi (§9.2):
+  mașinile generice (nu Dacia), barajul în arc, zăpada cu straturi, cabanele
+  fără balcoane sculptate, cabina mare, pictograma „nu hrăniți”. Contractul
+  kitului urmează în `docs/asset_briefs/transfagarasan_kit.md`.
 
 - **v0.2 (13 oct 2026):** §9 scris pe planul REAL al fundației Track21
   (`img/transfagarasan_plan/transfagarasan_plan.png`,

@@ -160,6 +160,24 @@ check "buildings/poenari_ruin.glb" --origin=assembly
 check "props/prometheus_statue.glb" --origin=assembly --allow-car-slots=Statue_Bolt
 
 echo
+echo "== val 2, tf-e: cladirile (kit §1.3) =="
+# Exceptii tf-e, cu motiv:
+#   --origin=assembly  cladirile sunt sparte pe roluri (*_Stone, *_Wood, *_Roof,
+#                      *_Void); acoperisul, golurile si cosul nu ating solul,
+#                      deci offsetul de origine e calculat O DATA pe ansamblu.
+#                      Originea e pe CENTRUL CORPULUI (piatra / tencuiala), nu
+#                      pe bbox: terasa, prispa, gardul si anexele ies pe o parte
+#                      (cabana Lac: +5,85 m pe +Y). La stana originea e pe
+#                      centrul tarcului (coliba e in coltul din spate).
+check "buildings/cabana_balea_lac.glb" --origin=assembly
+check "buildings/cabana_balea_cascada.glb" --origin=assembly
+check "buildings/stana.glb" --origin=assembly
+check "buildings/arges_house_a.glb" --origin=assembly
+check "buildings/arges_house_b.glb" --origin=assembly
+# taraba: originea pe centrul tarabei; marfa si acoperisul nu ating solul
+check "props/souvenir_stall.glb" --origin=assembly
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

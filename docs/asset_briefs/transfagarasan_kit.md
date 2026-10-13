@@ -165,7 +165,7 @@ atinge cu clasa, la integrare.
 | conurile de șantier | `LAVA_ORANGE` 30 (doar albedo, **fără** clasa de lavă), benzile `FOAM_WHITE` 22 | — |
 | cărămida de la Poenari | `TILE_TERRACOTTA` 23 | — |
 | piatra zidurilor de la Poenari, zidurile de sprijin, parterul cabanelor | `MARBLE_GREY` 29 | `stone_wall` pe `*_Stone` (decizie la integrare) |
-| tabla acoperișurilor (argintie) | `PAINTED_METAL` 11 (`#7692A8`) | `*_Roof` |
+| tabla acoperișurilor (argintie) | **`ASPHALT_EDGE` 6** (`#696765`, gri neutru). **Revizuit în valul 2** (decizia coordonatorului, pentru toate clădirile): `PAINTED_METAL` 11 (`#7692A8`) ieșea albastru în comparație, iar tenta clasei doar întunecă, deci din albastru nu se ajunge la gri | `*_Roof` (clasa o luminează la integrare) |
 | tabla roșie (`arges_house_b`) | `KERB_RED` 7 | `*_Roof` |
 | tabla ruginită (stâna, anexe) | `RUST_METAL` 10 | — |
 | tencuiala albă a caselor din vale | `FOAM_WHITE` 22 | `plaster` pe `*_Plaster` |
@@ -257,7 +257,7 @@ nu îl acoperă. Orientarea: drumul pe +Y, **lacul pe −X (stânga)**, **hăul 
 
 | fișier | cote | h/l | contract |
 |---|---|---:|---|
-| `buildings/cabana_balea_lac.glb` | **16 × 10 m**, **11 m** la coamă | ~0,7 | cabană de munte: **parter de piatră** de 3 m, **două niveluri de lemn**, **acoperiș abrupt** (~50°) de tablă argintie, cu 2 lucarne și un coș de piatră. Pe +Y: o **terasă simplă** cu balustradă din scânduri drepte (corectura de sus) și o scară. Ferestrele sunt în rânduri regulate. `Cabana_Stone`, `Cabana_Wood`, `Cabana_Roof`, `Cabana_Void` |
+| `buildings/cabana_balea_lac.glb` **(contract revizuit după etapa 1 a valului 2)** | **13 × 10 m**, parter de piatră **3 m** + **două niveluri de lemn de câte 2,7 m** (peretele lung ~8,4 m până la streașină), pantă ~45–48°, coama la **~13 m** | ~0,7 | cabană de munte: **parter de piatră**, **două niveluri întregi de lemn**, **acoperiș abrupt** de tablă argintie (`ASPHALT_EDGE`), cu 2 lucarne și un coș de piatră. Pe frontonul +X: trei rânduri de ferestre plus aerisirea. Pe +Y: o **terasă simplă** la +3 m, cu balustradă din scânduri drepte (corectura de sus) și o scară. Ferestrele sunt în rânduri regulate. Rev. 1 (16 × 10 m, coama la 11 m) citea „șură lungă și joasă”. `Cabana_Stone`, `Cabana_Wood`, `Cabana_Roof`, `Cabana_Void` |
 | `buildings/cabana_balea_cascada.glb` | **12 × 9 m** + anexă **6 × 5 m**; **8 m** la coamă | ~0,6 | **altă formă** (corectura de sus): **un singur nivel** de lemn pe soclu de piatră, cu podul mansardat și o **anexă joasă în L**. Acoperiș de tablă **ruginie** (`RUST_METAL`), prispă de-a lungul fațadei lungi. Stă lângă stația de jos a telecabinei (`cable_car_station.glb`, refolosită) |
 | `buildings/stana.glb` | coliba **5 × 4 m**, **3,2 m** la coamă; țarcul **14 × 10 m**, gard de **1,2 m** | ~0,5 (coliba) | stâna: colibă joasă de **scânduri verticale**, acoperiș în două ape de șindrilă, coș de tablă, **țarcul** din pari și 3 rânduri de bârne, cu **o poartă deschisă**. Un butuc de despicat lemne lângă colibă. Fără oi (vin din turmă și din decor). `Stana_Wood`, `Stana_Roof`, `Stana_Fence` |
 | `buildings/arges_house_a.glb` | **9 × 7 m**, **6,5 m** la coamă; gard de 1,2 m pe +Y | ~0,7 | casă din vale: **pereți albi tencuiți**, **prispă de lemn** pe stâlpi pe +Y, **acoperiș în patru ape de tablă argintie**, streașină largă, ferestre cu ramă de lemn. **Gard de scânduri** în față, cu poartă. `House_Plaster`, `House_Wood`, `House_Roof` |

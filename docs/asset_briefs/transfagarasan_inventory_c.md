@@ -53,8 +53,8 @@ coordonatorului, vezi „Fidelitate”).
 
 | slot | arie | unde |
 |---|---|---|
-| `LARCH_RUST` 27 | **74,8%** | blana dominantă |
-| `LOG_DARK` 28 | **24,6%** | gambele și labele din spate, jumătatea de jos a antebrațelor, tălpile labelor din față, partea de jos a coapselor și brațelor, fâșia de sub burtă, sub bărbie |
+| `LARCH_RUST` 27 | **77,3%** | blana dominantă, inclusiv burta |
+| `LOG_DARK` 28 | **22,1%** | gambele și labele din spate, jumătatea de jos a antebrațelor, tălpile labelor din față, partea de jos a coapselor și brațelor, sub bărbie |
 | `SAND_MID` 1 | 0,2% | vârful botului |
 | `VOLCANIC_BLACK` 20 | 0,4% | nasul, ochii, 4 gheare pe labă |
 
@@ -149,7 +149,7 @@ ruginie pe creastă. Tehnica a fost acceptată.
 | brațe groase, depărtate, antebrațele atârnă în față | da | 15° depărtare, antebrațul 46° înainte, laba moale | OK |
 | picioare scurte, groase, genunchi ușor îndoiți | da | 12° la genunchi, talpa plată | OK |
 | capul coborât între umeri, întors | da | scufundat 5 cm, întors 12° spre dreapta imaginii | OK |
-| fâșia închisă de sub burtă se vede ridicat | burta e ușor mai închisă | o diagonală `LOG_DARK` pe flancul burții | **abatere mică**: e burta cerută de contract, dar ridicat se citește ca o pată |
+| fâșia închisă de sub burtă | burta e ușor mai închisă | **scoasă** (`BELLY_BELOW = 0`, decizia coordonatorului): ridicat citea ca o eșarfă în diagonală pe flanc | burta e roșcată ca restul corpului |
 | ochii / nasul | închiși | `VOLCANIC_BLACK` (`#55535A`), la soare gri | rămâne de la prima serie |
 
 „De la 30 m, din spate-sus, se citește URS BRUN?” În patru labe (planșa de cadre)
@@ -178,18 +178,23 @@ cu picioarele închise. Nu se confundă cu vaca.
   Sonda a rulat pe geometria din prima serie. Revizia n-a schimbat clipurile,
   scheletul sau rădăcina (recitite din GLB): AABB-ul nou e 1,07 × 1,38 × 2,58 m.
 
+## Decizia coordonatorului
+
+**Acceptat.** Trunchiul ridicat rămâne cilindru, cu h/l 1,96, adică +17% față de
+ținta de 1,68. E o abatere scrisă: poza e ținută 1,2 s și se vede din spate-sus.
+Verdictul final pe ea se dă pe captura din joc, la integrare. Fâșia închisă de
+sub burtă a fost scoasă (`BELLY_BELOW = 0`); burta e acum `LARCH_RUST`.
+
 ## Stare la oprire
 
-- Revizia de formă și culoare e comisă pe `transfagarasan/kit-c`: GLB, build,
-  comparații, planșe și acest inventar. Seria a doua s-a oprit după 3 runde.
-- Deschis pentru coordonator:
-  1. h/l ridicat e **1,96**: +17% față de ținta de 1,68, dar +9,5% față de 1,79,
-     cât am măsurat eu decuparea. Trunchiul citește încă cilindru, nu pară. Pasul
-     următor ar fi o bombă de burtă: `dn` mai mare pe inelele din mijlocul crupei
-     și pieptului, adică în fața ursului când e ridicat;
-  2. fâșia `LOG_DARK` de sub burtă se vede ridicat ca o diagonală. Dacă deranjează,
-     `BELLY_BELOW = 0` o scoate (burta rămâne roșcată);
-  3. intrarea `&"brown_bear": 0.97` în `WALK_CYCLE_SPEED_BY_MODEL` și
-     `sweep_speed` pe marker (`scripts/` și `scenes/` nu sunt ale mele);
-  4. montarea pe `Hazarduri/Urs` în `Track21.tscn`, în locul vacii, cu
+- Piesa e acceptată și comisă pe `transfagarasan/kit-c`: GLB, build, comparații,
+  planșe și acest inventar.
+- Tălpile stau pe sol: baza e 0,000 ±0,002 m pe toate cadrele cheie ale celor
+  trei clipuri, după ultimul rebuild.
+- De făcut la integrare (`scripts/` și `scenes/` nu sunt ale mele):
+  1. de reverificat în joc, pe captură, poza `Stand` (trunchiul e cilindru,
+     h/l 1,96);
+  2. intrarea `&"brown_bear": 0.97` în `WALK_CYCLE_SPEED_BY_MODEL` și
+     `sweep_speed` pe marker;
+  3. montarea pe `Hazarduri/Urs` în `Track21.tscn`, în locul vacii, cu
      `model_scale` 1,0.

@@ -89,7 +89,7 @@ OUT = "transfagarasan/animals/brown_bear.glb"
 # barbie), varful botului SAND_MID, nasul si ghearele VOLCANIC_BLACK.
 FUR, TIP, SHADE, MUZZLE, DARK = LARCH_RUST, LARCH_RUST, LOG_DARK, SAND_MID, VOLCANIC_BLACK
 DARK_BELOW = 0.58        # sub scorul asta (inaltime + 0,22 x normala.z) blana e LOG_DARK (picioare)
-BELLY_BELOW = 0.22       # pe trunchi doar fasia de sub burta
+BELLY_BELOW = 0.0        # fara fasie inchisa pe burta: ridicat citea ca o esarfa (decizia coordonatorului)
 FPS = 24
 AO_FLOOR = 0.60          # talpile; 1,0 pe spinare
 

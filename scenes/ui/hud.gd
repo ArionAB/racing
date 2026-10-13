@@ -301,8 +301,20 @@ func _process(delta: float) -> void:
 		RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
 	var prims := RenderingServer.viewport_get_render_info(vp, t,
 		RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
-	_perf.text = "%d fps  |  %d desene  |  %dk tri  |  cpu %.1f ms  gpu %.1f ms" % [
-		Engine.get_frames_per_second(), draws, prims / 1000,
+	# Pasa de UMBRA se numara separat (TYPE_SHADOW): pe Jodhpur adauga 260-1700
+	# desene si pana la 1,3M tri peste cele vizibile, iar fara ea contorul
+	# arata doar o parte din cadru.
+	var ts := RenderingServer.VIEWPORT_RENDER_INFO_TYPE_SHADOW
+	var sh_draws := RenderingServer.viewport_get_render_info(vp, ts,
+		RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
+	var sh_prims := RenderingServer.viewport_get_render_info(vp, ts,
+		RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
+	# Inaltimea 3D efectiva (pixeli fizici x scala): confirma pe device ca
+	# nivelul grafic chiar a coborat rezolutia.
+	var h3d := int(DisplayServer.window_get_size().y * get_viewport().scaling_3d_scale)
+	_perf.text = "%d fps  |  %d+%d desene  |  %dk+%dk tri  |  3D %dp  |  cpu %.1f ms  gpu %.1f ms" % [
+		Engine.get_frames_per_second(), draws, sh_draws, prims / 1000,
+		sh_prims / 1000, h3d,
 		RenderingServer.viewport_get_measured_render_time_cpu(vp),
 		RenderingServer.viewport_get_measured_render_time_gpu(vp)]
 

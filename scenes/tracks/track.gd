@@ -256,6 +256,11 @@ var theme_exposure: float = 1.0
 ## e o abatere asumata de la CLAUDE.md, cu un singur loc de unde se stinge daca
 ## primul test pe device nu tine 60fps.
 var theme_shadows: bool = true
+## Nivelul grafic al jucatorului (GameState.gfx_tier), scris de GameState la
+## pornire si la schimbarea setarii. Static si nu citit din autoload fiindca
+## scriptul e @tool: in editor autoload-ul nu exista, iar 1 (normal) e exact
+## ce trebuie sa vada editorul. 0 = economic: fara umbre dinamice, fara glow.
+static var gfx_tier: int = 1
 
 ## Bloom subtil (style_bible §8). Singurul efect fullscreen din joc — un lant de
 ## downsample pe cadru, deci cel mai scump item de fill rate pe care il rulam.
@@ -276,8 +281,9 @@ var theme_headlights: float = 0.0
 ## ~110 m — exact banda in care chase cam-ul le vede cel mai des — nu aruncau
 ## nimic si pareau lipite pe fundal, iar ceata abia incepe acolo (~20% la
 ## 110 m). Rezolutia pe metru scade cu ~18%; shadow_blur-ul de mai jos o
-## acopera. NU se adauga a doua cascada: ar dubla draw call-urile de umbra
-## ale intregii scene.
+## acopera. (Pana in sep 2026 scria aici ca a doua cascada "ar dubla draw
+## call-urile de umbra ale intregii scene" — masurat, nu: vezi
+## `shadow_splits` in _build_environment.)
 const SHADOW_DISTANCE: float = 110.0
 
 ## Rotatia soarelui (elevatie 42°, azimut 315° — style_bible §5). Constanta,
@@ -377,6 +383,7 @@ static func themes() -> Dictionary:
 			"sky_top": Color(0.25, 0.52, 0.92), # albastru adanc, contrast cu nisipul
 			"sky_horizon": Color(1.0, 0.86, 0.6),
 			"fog": Color(0.98, 0.87, 0.68),
+			"fog_aerial": 0.35,
 			"hill_color": Color(0.88, 0.62, 0.36),
 			"sun_color": Color(1.0, 0.92, 0.78),
 			# Calibrate prin masurare (vezi theme_exposure): la valorile vechi
@@ -546,6 +553,7 @@ static func themes() -> Dictionary:
 			# saturatie cu adancimea urca 29% -> 70%, cu referinta la 58% si
 			# cu saturatia de prim-plan neschimbata (0.527 in ambele stari).
 			"fog": Color(0.58, 0.51, 0.38),
+			"fog_aerial": 0.20,
 			# Malul opus al craterului. Nu e "dealul de fundal" al altor teme:
 			# de pe buza, movilele de orizont (`_build_horizon_fallback`, 240-480 m)
 			# sunt EXACT banda de deasupra lacului, 30% din cadrul hero
@@ -1024,6 +1032,7 @@ static func themes() -> Dictionary:
 			# Serengeti — la 1.0 banda de cer iesea culoarea cetii).
 			"fog_sky_affect": 0.15,
 			"fog": Color(0.86, 0.87, 0.89),
+			"fog_aerial": 0.35,
 			# Peretele opus al defileului: padure de nori, verde inchis-albastrui.
 			"hill_color": Color(0.20, 0.30, 0.22),
 			# FATA DE STANCA: granit andin cenusiu-cald, pe orice teren mai
@@ -1215,6 +1224,7 @@ static func themes() -> Dictionary:
 			# pur, altfel fiordul stramt (~200 m) s-ar inneca prea devreme.
 			"fog_sky_affect": 0.20,
 			"fog": Color(0.62, 0.68, 0.70),
+			"fog_aerial": 0.35,
 			# Peretele opus (fjord_far_wall, la 200-250 m): gneis + paduri
 			# negre in benzi — mai inchis decat cerul, ca sa se citeasca sub
 			# linia de orizont.
@@ -1971,6 +1981,7 @@ static func themes() -> Dictionary:
 			"sky_top": Color(0.22, 0.48, 0.9),
 			"sky_horizon": Color(0.72, 0.87, 1.0),
 			"fog": Color(0.78, 0.88, 0.98),
+			"fog_aerial": 0.35,
 			"hill_color": Color(0.3, 0.56, 0.27),
 			"sun_color": Color(1.0, 0.97, 0.88),
 			"sun_energy": 1.25,
@@ -2024,6 +2035,7 @@ static func themes() -> Dictionary:
 			"sky_horizon": Color(0.74, 0.86, 0.97),
 			# Ceata albastruie — vezi punctul 1 de mai sus.
 			"fog": Color(0.72, 0.83, 0.94),
+			"fog_aerial": 0.35,
 			"hill_color": Color(0.36, 0.56, 0.38),
 			"sun_color": Color(1.0, 0.97, 0.90),
 			"sun_energy": 1.15,
@@ -2297,6 +2309,7 @@ static func themes() -> Dictionary:
 			"sky_top": Color(0.20, 0.50, 0.88),
 			"sky_horizon": Color(0.80, 0.92, 0.95), # palid marin, nu auriu ca desertul
 			"fog": Color(0.82, 0.91, 0.93),
+			"fog_aerial": 0.35,
 			"hill_color": Palette.color(Palette.TROPICAL_GREEN),
 			"sun_color": Color(1.0, 0.97, 0.92),
 			"sun_energy": 1.50,
@@ -2404,6 +2417,7 @@ static func themes() -> Dictionary:
 			"sky_top": Color(0.52, 0.66, 0.84),
 			"sky_horizon": Color(0.95, 0.88, 0.86),
 			"fog": Color(0.90, 0.90, 0.92),
+			"fog_aerial": 0.35,
 			"hill_color": Color(0.84, 0.87, 0.90),
 			"sun_color": Color(1.0, 0.90, 0.78),
 			"sun_energy": 1.0,
@@ -2483,6 +2497,7 @@ static func themes() -> Dictionary:
 			"sky_top": Color(0.28, 0.50, 0.82),
 			"sky_horizon": Color(0.86, 0.89, 0.88),
 			"fog": Color(0.80, 0.85, 0.88),
+			"fog_aerial": 0.35,
 			"hill_color": Color(0.40, 0.44, 0.42),
 			# LUMINA E CE FACEA VULCANUL SA ARATE A PLAJA.
 			#
@@ -3458,6 +3473,7 @@ static func themes() -> Dictionary:
 			# Nu e gri: pastreaza o urma de roz de zori (rosul putin peste
 			# verde), ca sa nu contrazica cerul de rasarit de deasupra.
 			"fog": Color(0.72, 0.74, 0.80),
+			"fog_aerial": 0.35,
 			"hill_color": Color(0.82, 0.70, 0.56),
 			# ZORI: soare CALD, si mai TARE decat pana acum — 0.95, urcat de la
 			# 0.85 impreuna cu coborarea ambientului la 0.26 (runda 13).
@@ -4088,6 +4104,9 @@ func apply_theme(theme: String) -> void:
 	# iar o umbra dura ar contrazice lumina. "shadows": false le stinge pe tema.
 	theme_shadows = bool(_theme.get("shadows", true))
 	theme_headlights = float(_theme.get("headlights", 0.0))
+	# Glow-ul e "a doua setare de stins dupa umbre" (style_bible §8), dar cheia
+	# de tema nu ajungea niciodata aici: `theme_glow` ramanea mereu true.
+	theme_glow = bool(_theme.get("glow", true))
 	# Stratul de detaliu triplanar al lumii: implicit strate orizontale, dar
 	# Cappadocia cere caneluri verticale (vezi cheia `detail_texture`). Se
 	# aseaza AICI, inainte ca decorul sa ceara primul material — `_shared` din
@@ -5569,6 +5588,11 @@ func _build_environment() -> void:
 	# 285 de randuri clasificate drept cer si aceeasi saturatie pe benzi.
 	# Ceata pe inaltime cere FOG_MODE_EXPONENTIAL, adica renuntarea la
 	# inceputul/sfarsitul explicit pe care se bazeaza ChaseCamera.far.
+	# Din sep 2026 temele de zi o declara la 0.35 (Serengeti 0.20, cerul de
+	# furtuna e deja in ceata; Chongqing 0, noaptea n-are cer de amestecat):
+	# obiectele departate se trag spre culoarea cerului DE DEASUPRA lor, nu
+	# spre o singura culoare de ceata — muntele intra in cer, nu se lipeste
+	# de o panza plata. E aceeasi formula de ceata, deci nu costa nimic.
 	env.fog_aerial_perspective = float(theme_flag("fog_aerial", 0.0))
 	# Cat din cer acopera ceata (1.0 = tot, implicitul Godot si al temelor
 	# vechi). Ceata de ADANCIME vede cerul la infinit, deci cu 1.0 sky_top si
@@ -5609,7 +5633,7 @@ func _build_environment() -> void:
 	# Indicii 2 si 3 de mai jos sunt cei EFECTIV activi de atunci — adica
 	# etichetele 3-4 din inspector, nu 2-3. Se pastreaza asa: ei sunt in
 	# snapshot-urile pe care s-a calibrat restul tonemap-ului.
-	if theme_glow:
+	if theme_glow and gfx_tier >= 1:
 		env.glow_enabled = true
 		env.glow_intensity = 0.25
 		env.glow_bloom = 0.04
@@ -5653,10 +5677,30 @@ func _build_environment() -> void:
 	#
 	# COMUTATORUL E theme_shadows. Daca primul test pe device nu tine 60fps, se
 	# stinge de acolo si AO-ul copt ramane singura sursa de volum.
-	sun.shadow_enabled = theme_shadows
-	if theme_shadows:
-		sun.directional_shadow_mode = \
-			DirectionalLight3D.SHADOW_ORTHOGONAL
+	# ...si al doilea comutator, al jucatorului: nivelul grafic ECONOMIC
+	# (GameState.gfx_tier = 0) le stinge pe orice tema.
+	var shadows := theme_shadows and gfx_tier >= 1
+	sun.shadow_enabled = shadows
+	if shadows:
+		# DOUA CASCADE (sep 2026, planul de grafica pe mobil). Comentariul de
+		# la SHADOW_DISTANCE spunea ca a doua cascada "ar dubla draw call-urile
+		# de umbra ale intregii scene"; masurat cu ProbePerf, nu e asa: felia
+		# apropiata (primii ~15% din 110 m) contine doar casterii de langa
+		# masina, deci cateva zeci de desene, nu inca o scena. In schimb harta
+		# de umbra din jurul masinii — unde se uita ochiul, si unde vine
+		# contactul rotilor cu solul — capata de ~6 ori mai multi texeli pe
+		# metru. `blend_splits` topeste granita dintre felii, altfel s-ar
+		# vedea o linie unde rezolutia se schimba. Cheia `shadow_splits` a
+		# temei poate cere 1 (vechea purtare) daca o pista anume o cere.
+		if int(theme_flag("shadow_splits", 2)) >= 2:
+			sun.directional_shadow_mode = \
+				DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+			sun.directional_shadow_split_1 = float(
+				theme_flag("shadow_split_1", 0.15))
+			sun.directional_shadow_blend_splits = true
+		else:
+			sun.directional_shadow_mode = \
+				DirectionalLight3D.SHADOW_ORTHOGONAL
 		# Cheia de tema `shadow_distance` era SCRISA in trei teme si nu se
 		# citea niciodata (POI B, runda 6): valoarea folosita era constanta
 		# SHADOW_DISTANCE. Pe Serengeti casterii care conteaza — acaciile de pe

@@ -2158,7 +2158,14 @@ func _puff_mesh(size: float) -> Mesh:
 		# LUMINAT, nu unshaded — asta e alegerea de directie: guide-ul cere
 		# puf-uri cu volum, cu o latura in lumina si una in umbra. Un billboard
 		# unshaded n-are cum sa aiba fete, deci n-are cum sa aiba volum.
-		m.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
+		#
+		# PER VERTEX, nu per pixel (sep 2026, planul de grafica pe mobil): pe
+		# o sfera cu 8x4 segmente lumina per-vertex da aceleasi fete, cu
+		# aceeasi latura in lumina si in umbra — fatetarea e chiar din
+		# vertecsi. Diferenta e ca pixelul de fum nu mai evalueaza lumina, si
+		# fumul jucatorului e exact stratul transparent care sta cel mai
+		# aproape de camera, pe cel mai mult ecran, pe un GPU cu placi.
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_PER_VERTEX
 		# Difuz plat si fara specular: praful nu straluceste, doar prinde
 		# directia soarelui. Fara asta, sferele ies ca niste bile de plastic.
 		m.roughness = 1.0
@@ -2573,7 +2580,15 @@ func _update_shadow() -> void:
 	_shadow.global_position = (hit.position as Vector3) + Vector3.UP * 0.06
 	_shadow.rotation = Vector3(0.0, rotation.y, 0.0)
 	var height := global_position.y - (hit.position as Vector3).y
-	_shadow_mat.albedo_color.a = clampf(0.38 - height * 0.03, 0.08, 0.38)
+	# Cu umbre dinamice pornite caroseria arunca deja o umbra reala, iar
+	# blob-ul peste ea dubla intunecarea sub masina. Ramane doar ca AO de
+	# contact (0.16) — si ca semn de aterizare in aer, unde umbra reala cade
+	# oriunde o duce soarele, dar blob-ul sta mereu sub roti. Fara umbre
+	# (theme_shadows stins pe device), blob-ul e singura umbra, deci 0.38.
+	var full := 0.38
+	if track != null and track.theme_shadows:
+		full = 0.16
+	_shadow_mat.albedo_color.a = clampf(full - height * 0.03, 0.06, full)
 
 func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	# Pe fizica intreaga, CORPUL insusi se inclina: panta, ruliul, squat-ul si

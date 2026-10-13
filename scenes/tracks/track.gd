@@ -16447,6 +16447,40 @@ func closest_index_global(pos: Vector3, route: int = 0) -> int:
 	var r := route_at(route)
 	return r.closest_index_global(pos) if r != null else 0
 
+## Cat de departe INAINTE poate sari indexul la o recautare (fractie de tur).
+## Peste atat, „inapoi pe drum" la sute de metri in fata nu mai e o scurtatura
+## prin iarba, ci altceva (o cadere, o teleportare) — ramane pe mana plasei de
+## siguranta din Race, nu a trackerului.
+const REACQUIRE_MAX_AHEAD_FRAC: float = 0.25
+
+## Indexul tinut de masina, recautat GLOBAL cand fereastra locala l-a pierdut.
+##
+## `closest_index` cauta doar -8..+24 puncte in jurul celui vechi, si asta e
+## voit (indexul nu teleporteaza). Dar dupa o taietura prin iarba — mai ales
+## peste o serpentina, unde drumul se intoarce langa el insusi — fereastra
+## ramane agatata intr-un minim local in urma masinii. Masurat cu
+## ProbeOffroadIndex (#496): 134 din 10800 de taieturi, pe 10 piste, lasau
+## indexul cu 225-430 m in urma; `is_on_road` raspundea „iarba" pe asfalt, iar
+## plafonul ramanea la `offroad_speed_factor` (45%) pana la turul urmator.
+##
+## Se accepta doar un index la care pozitia e CHIAR pe drum (lateral si la
+## etaj, `is_on_road`), deci iarba in sine nu muta nimic; si doar inapoi sau
+## inainte cu cel mult `REACQUIRE_MAX_AHEAD_FRAC` din tur. Altfel intoarce
+## indexul primit, neschimbat. Scanare completa (O(n)) — apelantul o rareste.
+func reacquire_index(index: int, pos: Vector3, route: int = 0) -> int:
+	var r := route_at(route)
+	if r == null or r.baked.is_empty():
+		return index
+	var g := r.closest_index_global(pos)
+	if g == index or not is_on_road(g, pos, route):
+		return index
+	if r.closed:
+		var n := r.baked.size()
+		var ahead := ((g - index) % n + n) % n
+		if ahead <= n / 2 and ahead > int(float(n) * REACQUIRE_MAX_AHEAD_FRAC):
+			return index
+	return g
+
 func frac_at(index: int, route: int = 0) -> float:
 	var r := route_at(route)
 	return r.frac_at(index) if r != null else 0.0

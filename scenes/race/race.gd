@@ -53,6 +53,14 @@ var _last_beep: int = -1
 var _skid_parent: Node3D
 var _drift_hold: Dictionary = {}
 var _lap_start_ms: int = -1
+## Ceasul cursei (s), din tick-urile de fizica ale cursei: nu curge in pauza
+## (Race sta pe pauza odata cu arborele) si nici in countdown. Pana la #498
+## tururile se cronometrau cu Time.get_ticks_msec(), deci o pauza in mijlocul
+## turului intra in timpul turului — si in record.
+var _race_clock: float = 0.0
+## Timpul total al jucatorului la sosire (ms); -1 pana trece linia.
+var _player_race_ms: int = -1
+var _race_record_new: bool = false
 var _best_lap_ms: int = -1
 var _final_order: Array = [] # sloturi in ordinea sosirii
 var _champion_shown: bool = false
@@ -338,7 +346,8 @@ func _go() -> void:
 	AudioManager.play_sfx(&"go_beep")
 	get_tree().create_timer(0.7, false).timeout.connect(
 		func() -> void: hud.show_countdown(""))
-	_lap_start_ms = Time.get_ticks_msec()
+	_race_clock = 0.0
+	_lap_start_ms = 0
 	for car in cars:
 		car.race_active = true
 		car.on_start_grid = false # se dezgheata fizica; de aici incolo e cursa
@@ -354,7 +363,11 @@ func _go() -> void:
 
 # ------------------------------------------------------------------ cursa
 
+func _clock_ms() -> int:
+	return int(_race_clock * 1000.0)
+
 func _tick_race(delta: float) -> void:
+	_race_clock += delta
 	for i in cars.size():
 		var car := cars[i]
 		_watch_recovery(car, delta)
@@ -514,7 +527,7 @@ func _on_player_lap(laps: int) -> void:
 	for child in track.get_children():
 		if child is LavaFlowHazard:
 			(child as LavaFlowHazard).on_lap_completed()
-	var now := Time.get_ticks_msec()
+	var now := _clock_ms()
 	if _lap_start_ms >= 0:
 		var lap_ms := now - _lap_start_ms
 		if _best_lap_ms < 0 or lap_ms < _best_lap_ms:
@@ -528,6 +541,9 @@ func _on_player_lap(laps: int) -> void:
 
 func _finish_race() -> void:
 	state = State.FINISHED
+	_player_race_ms = _clock_ms()
+	_race_record_new = GameState.try_race_record(GameState.selected_track,
+		_player_race_ms)
 	_update_positions()
 	# Ordinea finala = pozitiile din clipa sosirii jucatorului (AI-ul din
 	# spate isi pastreaza locul relativ; cursa e a jucatorului).
@@ -537,7 +553,12 @@ func _finish_race() -> void:
 	_final_order = order
 	if GameState.champ_active:
 		GameState.record_results(_final_order)
-	hud.flash_message("FINISH — locul %d!" % player.race_position)
+	if _race_record_new:
+		hud.flash_message("FINISH — locul %d!\nRECORD CURSA %s" % [
+			player.race_position, _fmt_ms(_player_race_ms)])
+		AudioManager.play_sfx(&"drift_level", 1.5)
+	else:
+		hud.flash_message("FINISH — locul %d!" % player.race_position)
 	get_tree().create_timer(1.5, false).timeout.connect(_show_results)
 
 func _show_results() -> void:
@@ -551,6 +572,11 @@ func _show_results() -> void:
 			var gained: int = GameState.CHAMP_POINTS[rank] \
 				if rank < GameState.CHAMP_POINTS.size() else 0
 			right = "+%d p  (total %d)" % [gained, GameState.champ_points[slot]]
+		# Timpul tau pe toata cursa, si daca e record pe pista (#498).
+		if car.is_player and _player_race_ms >= 0:
+			var time_text := _fmt_ms(_player_race_ms) \
+				+ ("  RECORD!" if _race_record_new else "")
+			right = time_text if right == "" else right + "   " + time_text
 		rows.append({
 			"name": "%d. %s (%s)" % [rank + 1, car.pilot_name, car.car_name],
 			"color": car.body_color,
@@ -697,7 +723,7 @@ func _update_hud() -> void:
 	hud.set_respawn_enabled(state == State.RUNNING and player.can_respawn())
 	var lap_text := "--:--.-"
 	if _lap_start_ms >= 0 and state != State.COUNTDOWN:
-		lap_text = _fmt_ms(Time.get_ticks_msec() - _lap_start_ms)
+		lap_text = _fmt_ms(_clock_ms() - _lap_start_ms)
 	var best_text := _fmt_ms(_best_lap_ms) if _best_lap_ms >= 0 else "--:--.-"
 	var lap_no := clampi(int(_progress[0].laps) + 1, 1, GameState.total_laps)
 	var champ_line := ""
@@ -709,10 +735,16 @@ func _update_hud() -> void:
 	# Indiciul de camera apare doar unde exista si reglajul (build de debug),
 	# altfel ar promite jucatorului o tasta care nu face nimic.
 	var cam_hint := "  [F2] camera" if OS.is_debug_build() else ""
-	var info := "%3.0f km/h   loc %d/%d   tur %d/%d%s\ntur:  %s\nbest: %s   rec: %s\n%s pe %s   [SPACE] turbo  [SHIFT] drift%s" % [
+	# Timpul total al cursei langa recordul pe cursa (#498): pe ultimul tur
+	# vezi direct daca il mai bati.
+	var race_ms := _player_race_ms if _player_race_ms >= 0 else _clock_ms()
+	var race_text := _fmt_ms(race_ms) if state != State.COUNTDOWN else "--:--.-"
+	var race_rec_ms := GameState.best_race(GameState.selected_track)
+	var race_rec_text := _fmt_ms(race_rec_ms) if race_rec_ms > 0 else "--:--.-"
+	var info := "%3.0f km/h   loc %d/%d   tur %d/%d%s\ntur:  %s   cursa: %s\nbest: %s   rec: %s   rec cursa: %s\n%s pe %s   [SPACE] turbo  [SHIFT] drift%s" % [
 		player.horizontal_speed() * 3.6, player.race_position, cars.size(),
-		lap_no, GameState.total_laps, champ_line, lap_text, best_text,
-		record_text, player.car_name, track.track_name, cam_hint]
+		lap_no, GameState.total_laps, champ_line, lap_text, race_text, best_text,
+		record_text, race_rec_text, player.car_name, track.track_name, cam_hint]
 	hud.set_info(info)
 	hud.set_turbo(player.turbo_charge, player.is_boosting)
 

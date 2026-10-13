@@ -5,6 +5,57 @@ Contract: `docs/asset_briefs/transfagarasan_kit.md`. Cote MASURATE din GLB
 Build: `tools/blender/build_tf_road.py` (vocabular: `transfagarasan_shapes.py`).
 Verdict: `bash tools/blender/verify_transfagarasan.sh` -> `VERDICT KIT: OK`.
 
+## Valul 2 — integrat (13 oct 2026)
+
+Inventarele pe grupe:
+- `transfagarasan_inventory_d.md`, tf-d: `vidraru_dam` (`Dam_Module`,
+  `Dam_Tower`, `Dam_PowerHouse`), `poenari_ruin`, `prometheus_statue`;
+- `transfagarasan_inventory_e.md`, tf-e: `cabana_balea_lac`,
+  `cabana_balea_cascada`, `stana`, `arges_house_a`, `arges_house_b`,
+  `souvenir_stall`;
+- `transfagarasan_inventory_f.md`, tf-f: `parked_car_a`, `parked_car_b`,
+  `motorbike`, `sheepdog`.
+
+`verify_transfagarasan.sh`: **VERDICT KIT: OK**, cu verificare nouă pe baraj
+(`measure_tf_deck.py`): nimic peste −0,05 m pe banda drumului (maximul măsurat
+−0,080 m), iar parapetele au 1,100 m. Coordonatorul a acceptat toate piesele pe
+comparații.
+
+**Abateri asumate:**
+- **turnul de priză al barajului** citește mic;
+- **Prometeu** are poza frontală și simetrică;
+- **Poenari:** flancurile X stau la 77° (contract 60–70°), deci de aproape se
+  citește trunchi de con cu contraforturi. De la 190 m se citește ruină pe
+  stâncă;
+- **ciobănescul:** pata de pe flanc e geometrică, iar picioarele par stâlpi;
+- **cabana Bâlea Lac:** coama e la 13,67 m (contract ~13), fiindcă două
+  niveluri de lemn la 45° nu încap sub 13 m;
+- **tabla ruginie** e foarte saturată, iar tenta o corectează la integrare.
+
+**Decizii de contract luate în val:**
+- **tabla argintie e pe `ASPHALT_EDGE` 6, nu pe `PAINTED_METAL` 11.** Hexul
+  #7692A8 e albastru, iar tenta doar întunecă;
+- **cabana Bâlea Lac** are 13 × 10 m, cu două niveluri de lemn;
+- **petele ciobănescului** sunt pe `ASPHALT_EDGE`;
+- **`verify_glb.py --rim-above`**: `--origin=rim` cu geometrie admisă peste 0,
+  necesară pentru parapet și turn.
+
+**De făcut la montarea în Track21:**
+- **barajul:** 6 × `Dam_Module` pe fracțiile 0,078–0,123; turnul și centrala
+  primesc transformul modulului lângă care stau;
+- **Poenari:** amplasat ca vârful turnului să intre sub plafonul cadrului de la
+  190 m, care lipsește cu ~1 m;
+- **turma:** `HerdHazard.alt_model` = `sheepdog.glb`, `zebra_ratio` ~0,1, iar
+  `leg_top` comun cu oaia, ales pe captura din joc;
+- **coliziunea:** mașinile parcate, motocicleta, gardurile și țarcul cer
+  colizori simpli;
+- **tentele:**
+  - `concrete` pe `*_Concrete`;
+  - `stone_wall` pe `*_Stone`;
+  - `plaster` pe `*_Plaster`;
+  - tabla `*_Roof` luminată;
+  - `tf_schist` pe `Poenari_Schist` și pe `Statue_Schist`.
+
 ## Valul 1 — integrat (13 oct 2026)
 
 Inventarele pe grupe, fiecare cu cote, triunghiuri, noduri, tabele de

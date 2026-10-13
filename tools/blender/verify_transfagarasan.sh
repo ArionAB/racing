@@ -126,6 +126,86 @@ done
 check "plants/bujor_de_munte.glb" --origin=assembly --allow-slots=31
 
 echo
+echo "== val 2, tf-d: barajul si reperele (kit §1.2) =="
+# Exceptii tf-d, cu motiv:
+#   vidraru_dam  --origin=rim --rim-above=8.1: originea FIECARUI nod (Dam_Module,
+#                Dam_Tower, Dam_PowerHouse) e la cota drumului, pe axa; corpul
+#                atarna 40 m sub ea. Peste ea stau doar parapetul (+1,1, pe
+#                6,25 <= |x| <= 7,0) si turnul de priza (+8, la x ~ -16). Banda
+#                drumului se verifica separat, PE GLB: measure_tf_deck.py ->
+#                nimic peste Y = -0,05 in |x| <= 6,0, coronament sub tot drumul.
+deck_check() {  # deck_check <cale>
+  local f="$ROOT/$1"
+  [ -f "$f" ] || { printf "%-34s DRUM: LIPSESTE\n" "$(basename "$f")"; fail=1; return; }
+  local out; out=$(python tools/blender/measure_tf_deck.py "$f" --contract=-0.05 2>&1); local rc=$?
+  local dmax; dmax=$(printf '%s' "$out" | awk '$1=="deck_max"{print $2}')
+  local par; par=$(printf '%s' "$out" | grep -o "parapet_lac.*")
+  if [ "$rc" -eq 0 ]; then
+    printf "%-34s DRUM: OK   max %s m in |x| <= 6,0 (<= -0,05), %s\n" "$(basename "$f")" "$dmax" "$par"
+  else
+    printf "%-34s DRUM: INCALCAT   max %s m in |x| <= 6,0 (<= -0,05)\n" "$(basename "$f")" "${dmax:-?}"
+    fail=1
+  fi
+}
+check "structures/vidraru_dam.glb" --origin=rim --rim-above=8.1
+deck_check "structures/vidraru_dam.glb"
+# poenari_ruin       --origin=assembly: noduri pe rol (Poenari_Schist / _Brick /
+#                    _Stone / _Grass), offsetul calculat O DATA pe ansamblu;
+#                    iarba si zidurile nu ating solul.
+# prometheus_statue  --origin=assembly (Statue_Bronze / _Bolt / _Schist / _Grass,
+#                    figura sta pe soclu la 3 m); --allow-car-slots=Statue_Bolt:
+#                    fulgerul pe CAR_YELLOW 16 (kit §0, tabelul de sloturi). Potrivirea
+#                    e pe PREFIX, deci se scrie numele nodului, nu `*_Bolt`.
+check "buildings/poenari_ruin.glb" --origin=assembly
+check "props/prometheus_statue.glb" --origin=assembly --allow-car-slots=Statue_Bolt
+
+echo
+echo "== val 2, tf-e: cladirile (kit §1.3) =="
+# Exceptii tf-e, cu motiv:
+#   --origin=assembly  cladirile sunt sparte pe roluri (*_Stone, *_Wood, *_Roof,
+#                      *_Void); acoperisul, golurile si cosul nu ating solul,
+#                      deci offsetul de origine e calculat O DATA pe ansamblu.
+#                      Originea e pe CENTRUL CORPULUI (piatra / tencuiala), nu
+#                      pe bbox: terasa, prispa, gardul si anexele ies pe o parte
+#                      (cabana Lac: +5,85 m pe +Y). La stana originea e pe
+#                      centrul tarcului (coliba e in coltul din spate).
+check "buildings/cabana_balea_lac.glb" --origin=assembly
+check "buildings/cabana_balea_cascada.glb" --origin=assembly
+check "buildings/stana.glb" --origin=assembly
+check "buildings/arges_house_a.glb" --origin=assembly
+check "buildings/arges_house_b.glb" --origin=assembly
+# taraba: originea pe centrul tarabei; marfa si acoperisul nu ating solul
+check "props/souvenir_stall.glb" --origin=assembly
+
+echo
+echo "== val 2, tf-f: vehicule de decor si ciobanescul (kit §1.6, §1.7) =="
+# Exceptii tf-f, cu motiv:
+#   --origin=assembly   vehiculele: un nod pe slot (Car_Body/Glass/Tyre/Trim/Hub/
+#                       Lamp/Tail, Moto_Body/Metal/Dark/Lamp/Tail); offsetul de
+#                       origine e calculat O DATA pe ansamblu (centrul amprentei,
+#                       la sol), geamurile si caroseria nu ating solul.
+#   --allow-car-slots   caroseria pe CAR_BLUE 15 / CAR_RED 14 (kit §0, tabelul de
+#                       sloturi): DOAR nodurile Car_Body si Moto_Body.
+#   sheepdog            FARA exceptii (rev. 2): contractul HerdHazard cere UN singur mesh
+#                       (toate sloturile in el), origine la sol; un singur nod.
+check "vehicles/parked_car_a.glb" --origin=assembly --allow-car-slots=Car_Body
+check "vehicles/parked_car_b.glb" --origin=assembly --allow-car-slots=Car_Body
+check "vehicles/motorbike.glb" --origin=assembly --allow-car-slots=Moto_Body
+check "animals/sheepdog.glb"
+if [ -f "$ROOT/animals/sheepdog.glb" ]; then
+  python - "$ROOT/animals/sheepdog.glb" <<'PY' || fail=1
+import sys, os
+sys.path.insert(0, os.path.join("tools", "blender"))
+from verify_glb import load_glb
+g = load_glb(sys.argv[1])[0]
+n = sum(1 for nd in g["nodes"] if "mesh" in nd)
+if n != 1:
+    print("   !! sheepdog: %d noduri cu mesh, HerdHazard ia doar primul (cerut 1)" % n)
+    sys.exit(1)
+PY
+fi
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

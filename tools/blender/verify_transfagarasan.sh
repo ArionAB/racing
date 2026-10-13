@@ -126,6 +126,31 @@ done
 check "plants/bujor_de_munte.glb" --origin=assembly --allow-slots=31
 
 echo
+echo "== val 2, tf-d: barajul si reperele (kit §1.2) =="
+# Exceptii tf-d, cu motiv:
+#   vidraru_dam  --origin=rim --rim-above=8.1: originea FIECARUI nod (Dam_Module,
+#                Dam_Tower, Dam_PowerHouse) e la cota drumului, pe axa; corpul
+#                atarna 40 m sub ea. Peste ea stau doar parapetul (+1,1, pe
+#                6,25 <= |x| <= 7,0) si turnul de priza (+8, la x ~ -16). Banda
+#                drumului se verifica separat, PE GLB: measure_tf_deck.py ->
+#                nimic peste Y = -0,05 in |x| <= 6,0, coronament sub tot drumul.
+deck_check() {  # deck_check <cale>
+  local f="$ROOT/$1"
+  [ -f "$f" ] || { printf "%-34s DRUM: LIPSESTE\n" "$(basename "$f")"; fail=1; return; }
+  local out; out=$(python tools/blender/measure_tf_deck.py "$f" --contract=-0.05 2>&1); local rc=$?
+  local dmax; dmax=$(printf '%s' "$out" | awk '$1=="deck_max"{print $2}')
+  local par; par=$(printf '%s' "$out" | grep -o "parapet_lac.*")
+  if [ "$rc" -eq 0 ]; then
+    printf "%-34s DRUM: OK   max %s m in |x| <= 6,0 (<= -0,05), %s\n" "$(basename "$f")" "$dmax" "$par"
+  else
+    printf "%-34s DRUM: INCALCAT   max %s m in |x| <= 6,0 (<= -0,05)\n" "$(basename "$f")" "${dmax:-?}"
+    fail=1
+  fi
+}
+check "structures/vidraru_dam.glb" --origin=rim --rim-above=8.1
+deck_check "structures/vidraru_dam.glb"
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

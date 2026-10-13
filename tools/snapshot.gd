@@ -417,6 +417,7 @@ func _ready() -> void:
 	var rim_at := -1.0
 	var rim_hit := false
 	var bus_at := -1.0
+	var signal_state := ""
 	var tuk_at := ""
 	var cow_mode := ""
 	var cross_at := -1.0
@@ -565,6 +566,8 @@ func _ready() -> void:
 			rim_at = float(arg.trim_prefix("--rim-at="))
 		elif arg == "--rim-hit":
 			rim_hit = true
+		elif arg.begins_with("--signal="):
+			signal_state = arg.trim_prefix("--signal=")
 		elif arg.begins_with("--bus-at="):
 			bus_at = float(arg.trim_prefix("--bus-at="))
 		elif arg.begins_with("--tuk-at="):
@@ -711,6 +714,8 @@ func _ready() -> void:
 		await _set_rim_time(track, rim_at)
 	if bus_at >= 0.0:
 		await _set_bus_time(track, bus_at)
+	if signal_state != "":
+		await _set_signal(track, signal_state)
 	if tuk_at != "":
 		_place_tuktuks(track, tuk_at)
 	if cow_mode != "":
@@ -1573,6 +1578,28 @@ func _remove_haboob(root: Node) -> void:
 		node.free()
 		n += 1
 	print("--no-haboob: %d haboob-uri scoase din scena" % n)
+
+
+## `--signal=red|green`: semaforul de la tunel (TunnelSignalHazard) INGHETAT pe
+## culoarea ceruta, ca sa se poata masura lampa aprinsa pe ambele culori.
+func _set_signal(root: Node, state: String) -> void:
+	await get_tree().process_frame
+	await get_tree().physics_frame
+	var found := 0
+	for node in root.find_children("*", "TunnelSignalHazard", true, false):
+		var h := node as TunnelSignalHazard
+		h.set("_startup_grace_left", 0.0)
+		var red := state == "red"
+		# Ceasul in mijlocul fazei cerute, apoi hazardul nu mai misca nimic.
+		h.set("_clock", h.green_hold() + 1.0 if red else 1.0)
+		h.lamp.set_lit(TunnelSignalHazard.RED_SLOT if red else TunnelSignalHazard.GREEN_SLOT)
+		h.set_physics_process(false)
+		found += 1
+		print("--signal=%s: %s la (%.1f, %.1f, %.1f), bec aprins %d"
+			% [state, h.name, h.global_position.x, h.global_position.y,
+				h.global_position.z, h.lamp.lit()])
+	if found == 0:
+		print("--signal: NICIUN TunnelSignalHazard pe pista asta")
 
 
 ## Autobuzul: la N secunde de coborare pe curba lui, cu botul pe directia de

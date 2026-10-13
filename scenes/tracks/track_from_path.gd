@@ -245,6 +245,9 @@ extends Track
 ## Vezi Track._rail_segments — pe o pista fara gard (`walls: false`) singurul
 ## regim cu efect e RAIL_POSTS: stalpi rari pe buza, fara coliziune.
 @export var custom_rail_segments: Array[Vector4] = []
+## PARAPET DE BETON CU COLIZIUNE: (frac_start, frac_end, latura +-1 sau 0 =
+## ambele, rezervat). Vezi Track._build_parapets. Gol = fara.
+@export var custom_parapets: Array[Vector4] = []
 ## APA declarata, ca poligon in plan XZ (coordonate de lume): se sapa la
 ## `lagoon_depth` sub media soselei, cu mal lin (TrackSideSampler.LAGOON_*).
 ## E singurul fel de a pune apa DOAR pe o parte a lumii: `seabed_drop` inunda
@@ -388,6 +391,9 @@ func _ravines() -> Array[Vector4]:
 
 func _rail_segments() -> Array[Vector4]:
 	return custom_rail_segments
+
+func _parapet_segments() -> Array[Vector4]:
+	return custom_parapets
 
 func _cornice_ravines() -> Array[int]:
 	return custom_cornice_ravines

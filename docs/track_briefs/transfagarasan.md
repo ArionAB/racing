@@ -416,6 +416,37 @@ săritura, dreptele Oltului.
 7. **Apa:** dacă tema `transfagarasan` (copiată din `alpine`, care n-are apă)
    are nevoie de apă pentru lacuri și Olt, **se adaugă** (§7).
 
+### 3.2 Parapete pe serpentine, semaforul pe stâlp, avalanșa care nu mai sare o ramură (12 oct 2026)
+
+Reparații după primul test pe iPhone („nu se citește niciun semafor”;
+„serpentinele se pot evita”). Tot ce schimbă scena trăiește în
+`tools/gen_transfagarasan_route.py` (regenerarea nu strică nimic).
+
+- **Semaforul.** Cauza: `SemaforTunel` n-avea nod `Lampa`, deci `TunnelSignalHazard`
+  construia un `HazardLamp` în originea nodului: la nivelul șoselei, cu becuri de 0,34 m
+  fără emisie, la 7,6 m dreapta, adică *în interiorul* blocului lateral al portalului.
+  Track16 are același tipar (lampa pe axa șoselei, la cota ei) și NU a fost atinsă.
+  Acum `HazardLamp` are opțiuni opt-in (`glow_energy`, `glow_bulbs`, `head_height`,
+  `pole_slot`, `arm_length`, `invert_stack`, `stop_line_span/offset`): stâlp cu consolă la
+  34 m *înaintea* gurii (în afara portalului și a cotului), cap peste banda dreaptă, becuri
+  de 1,1 m, rosu sus, becul aprins pe `Palette.glow_material` (+2 materiale), cel stins
+  rămâne o cutie întunecată. Linie de oprire albă, 2 m adâncime, în dreptul stâlpului.
+- **Parapetele** (`Track._build_parapets`, `TrackFromPath.custom_parapets`, opt-in):
+  beton alb-roșu de 1,1 m cu coliziune reală (corp `Parapet`, trimesh), la 0,25 m de
+  marginea asfaltului, pe materialul lumii. Fracțiile sunt calculate în generator (`PARAP`):
+  marginea din vale a ramurilor 1–5 (ramura 1 și 3 și 5 pe dreapta, 2 și 4 pe stânga) și
+  ambele laturi la fiecare ac.
+- **Deschiderea pentru scurtătura ciobanilor** (decizia 4): pe DREAPTA ramurii 3, frac
+  **0.4882 → 0.4976** (~20 m, imediat înaintea acului 3, la ~0.4900 sunt și oile).
+  Poteca viitoare coboară pe fâșia dintre ramurile 3 și 4 și intră pe ramura 4 prin
+  marginea ei dreaptă (acolo, în sus spre amonte, nu e parapet). `PARAP_OPEN_AC3 = False`
+  în generator o închide complet.
+- **Avalanșa.** Masa mută `global_position` direct (fără coliziune), deci parapetul n-o
+  oprește, iar un car cu decalaj +3…+5 m spre vale ajungea la <7 m de ramura a doua și
+  repunerea (checkpointul se ia cu roțile pe asfalt) îl punea acolo: +68…+76 m. Remediu:
+  `AvalancheHazard.keep_origin_checkpoint` (opt-in prin `HazardMarker.avalanche_keep_lane`),
+  repunerea folosește checkpointul din clipa înghițirii.
+
 ## 4. Paleta și lumina (fără slot nou)
 
 **Nu există slot liber** (32 din 32; `docs/style_bible.md:48` e învechit și

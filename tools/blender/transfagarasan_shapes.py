@@ -7,6 +7,8 @@ care vin in valul 1 sunt stub-uri cu contractul in docstring (NU au corp: ridica
 NotImplementedError, ca sa nu le foloseasca nimeni pe nevazute).
 
 FOLOSITE (pilot):
+  (ring_stack / snow_layers: pentru `snow_wall` din valul 1; portalul nu le mai
+   foloseste dupa contractul nou -- movila lui e din `faceted_block`)
   ring_stack       masa inchisa din inele de puncte 3D (acelasi numar de puncte
                    pe inel). Doua inele consecutive la ACEEASI cota = un prag
                    orizontal (treapta). Baza pentru `snow_layers`.
@@ -14,14 +16,11 @@ FOLOSITE (pilot):
                    fetele taiate de plug (+-Y), dungi de praf (nod separat),
                    muchia de sus rotunjita si ondulata, baza murdara. Va fi
                    refolosit de `snow_wall` (valul 1) cu alti parametri.
-  segmental_arch   punctele unui arc turtit (segmental) prin doua capete si o
-                   sageata, stanga -> dreapta.
   extrude_xz       prisma dintr-un contur in planul XZ (poate fi concav), pe Y.
-  prism_yz         prisma dintr-un profil in planul YZ, extrudata pe X (contrafort).
-  arch_band        rama plata a unei guri cu arc (latime constanta pe arc).
-  mouth_lining     captuseala de umbra pe peretii/tavanul gurii: banda fara capace,
-                   cu normalele spre interiorul golului.
-  concrete_cornice cornisa in doua trepte (filet + placa), iesita pe fata si spate.
+  tilt_front       inclina fata din fata a unei prisme (placa lasata inapoi).
+  tube_lining      captuseala de umbra a gurii: banda fara capace, normale spre gol.
+  faceted_block    bloc de zapada unghiular (convex hull), baza plata.
+  dust_patch       bucata scurta de praf, inclinata.
   emit_tf          finish pe fiecare nod + export in assets/models/transfagarasan/.
 
 STUB-URI (valul 1, vezi docstring-urile):
@@ -167,20 +166,6 @@ def snow_layers(snow, dust, sx, x_in, height=4.0, profile=None, cut=0.9,
 # beton: arc, prisme, rama, cornisa, contrafort, captuseala
 # ---------------------------------------------------------------------------
 
-def segmental_arch(half_span, spring_z, rise, n=10):
-    """Puncte (x, z) ale unui arc turtit (segmental): de la (-half_span, spring_z)
-    la (+half_span, spring_z), cu sageata `rise` la mijloc, in n segmente.
-    Intoarce (puncte, raza, z_centru)."""
-    R = (half_span * half_span + rise * rise) / (2.0 * rise)
-    zc = spring_z + rise - R
-    th0 = math.asin(half_span / R)
-    pts = []
-    for i in range(n + 1):
-        th = -th0 + 2.0 * th0 * i / n
-        pts.append((R * math.sin(th), zc + R * math.cos(th)))
-    return pts, R, zc
-
-
 def extrude_xz(b, outline, y0, y1, slot):
     """Prisma dintr-un contur (x, z) ANTIORAR (axa X spre dreapta, Z in sus),
     extrudata intre y0 si y1. Conturul poate fi CONCAV (ex. fatada cu gura);
@@ -198,85 +183,88 @@ def extrude_xz(b, outline, y0, y1, slot):
         f[b.slot] = slot
 
 
-def prism_yz(b, poly_yz, x0, x1, slot):
-    """Prisma dintr-un profil (y, z) CONVEX, extrudata intre x0 si x1 (contrafort
-    cu capat in panta)."""
-    n = len(poly_yz)
-    lo = [b.bm.verts.new((x0, y, z)) for y, z in poly_yz]
-    hi = [b.bm.verts.new((x1, y, z)) for y, z in poly_yz]
-    for ring in (lo, list(reversed(hi))):
-        f = b.bm.faces.new(ring)
-        f[b.slot] = slot
-    for i in range(n):
-        j = (i + 1) % n
-        f = b.bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
-        f[b.slot] = slot
+def tilt_front(b, y_front, tan_back, z_ref=0.0):
+    """Inclina FATA din fata a unei prisme extrudate: vertecsii cu y ~ y_front se
+    retrag cu `tan_back` * (z - z_ref) spre -Y (placa se inclina inapoi)."""
+    for v in b.bm.verts:
+        if abs(v.co.y - y_front) < 1e-6:
+            v.co.y = y_front - tan_back * (v.co.z - z_ref)
 
 
-def concrete_cornice(b, hx, y_body, z0, z1, slot=TF_CONCRETE):
-    """Cornisa in doua trepte: filet (z0 -> z0+35%) iesit 0,18 si placa
-    (restul) iesita 0,38, pe toata latimea 2*hx, FARA sa iasa in X (fetele laterale
-    raman in planul zidului, ca zapada sa se lipeasca curat)."""
-    zm = z0 + (z1 - z0) * 0.38
-    b.box((0.0, 0.0, (z0 + zm) * 0.5), (2 * hx, 2 * (y_body + 0.18), zm - z0), slot)
-    b.box((0.0, 0.0, (zm + z1) * 0.5), (2 * hx, 2 * (y_body + 0.38), z1 - zm), slot)
-
-
-def arch_band(b, jamb_x, spring_z, rise, width, y_face, depth, n=10, slot=TF_CONCRETE):
-    """Rama plata (iesita `depth` m) in jurul unei guri cu arc turtit, cu
-    latimea `width` pe tot conturul (jamburi + arc), pe fata y_face (>0: fata,
-    <0: spate; grosimea creste spre exterior). Conturul = bucla jos-stanga ->
-    sus pe jamb -> arc -> jos pe jamb dreapta, apoi inapoi pe exterior."""
-    inner, R, zc = segmental_arch(jamb_x, spring_z, rise, n)
-    outer = []
-    for (x, z) in inner:
-        dx, dz = x, z - zc
-        L = math.hypot(dx, dz)
-        outer.append((x + dx / L * width, z + dz / L * width))
-    jx = jamb_x + width
-    # inner: (-jx0,0) sus (arc...) (jx0,0); outer in sens invers
-    pts = [(-jamb_x, 0.0)] + inner + [(jamb_x, 0.0), (jx, 0.0), (jx, spring_z)] \
-        + list(reversed(outer)) + [(-jx, spring_z), (-jx, 0.0)]
-    # conturul nu e antiorar in aceasta ordine: il intoarcem
-    area = sum(pts[i][0] * pts[(i + 1) % len(pts)][1] - pts[(i + 1) % len(pts)][0] * pts[i][1]
-               for i in range(len(pts)))
-    if area < 0:
-        pts = list(reversed(pts))
-    if y_face > 0:
-        extrude_xz(b, pts, y_face, y_face + depth, slot)
-    else:
-        extrude_xz(b, pts, y_face - depth, y_face, slot)
-
-
-def mouth_lining(b, jamb_x, spring_z, rise, y_half, inset=0.03, n=10, slot=TF_VOID):
-    """Captuseala de umbra pe peretii si tavanul gurii: o banda FARA capace,
-    de-a lungul jamb stang -> arc -> jamb drept, pe y in [-y_half, y_half], retrasa
-    `inset` spre interior fata de reveniri (ca sa nu faca z-fighting cu betonul).
-    Normalele spre INTERIORUL golului. NU inchide golul: stransa doar cu `inset`
-    pe parte, la masurarea golului intra in cifra."""
-    arc, R, zc = segmental_arch(jamb_x, spring_z, rise, n)
-    path = [(-jamb_x, 0.0)] + arc + [(jamb_x, 0.0)]
-    # retragere spre interior: jamburile pe x, arcul pe raza
+def tube_lining(b, path_xz, y_back, y_front, tan_back, inset=0.03, slot=TF_VOID):
+    """Captuseala de umbra a unei guri: banda FARA capace de-a lungul conturului
+    deschis `path_xz` (stanga jos -> sus -> dreapta jos), intre y_back si fata
+    inclinata (capatul din fata urmareste inclinarea `tan_back`), retrasa `inset`
+    spre interior pe colturi (miter). Normalele spre INTERIORUL golului. Nu are
+    podea si nu inchide golul; la masurare intra in cifra (strange cu `inset`)."""
+    pts = [Vector(p) for p in path_xz]
+    n = len(pts)
+    cen = Vector((0.0, 6.0))
     shifted = []
-    for i, (x, z) in enumerate(path):
-        if i == 0:
-            shifted.append((x + inset, z))
-        elif i == len(path) - 1:
-            shifted.append((x - inset, z))
-        else:
-            dx, dz = x, z - zc
-            L = math.hypot(dx, dz)
-            shifted.append((x - dx / L * inset, z - dz / L * inset))
-    centre = Vector((0.0, 0.0, spring_z * 0.5))
-    for i in range(len(shifted) - 1):
+    for i, p in enumerate(pts):
+        segs = []
+        if i > 0:
+            segs.append((p - pts[i - 1]).normalized())
+        if i < n - 1:
+            segs.append((pts[i + 1] - p).normalized())
+        nrm = []
+        for d in segs:
+            nn = Vector((-d.y, d.x))          # normala stanga a directiei
+            if nn.dot(cen - p) < 0:
+                nn = -nn
+            nrm.append(nn)
+        off = nrm[0] if len(nrm) == 1 else (nrm[0] + nrm[1]) / (1.0 + nrm[0].dot(nrm[1]))
+        shifted.append(p + off * inset)
+    for i in range(n - 1):
         (x0, z0), (x1, z1) = shifted[i], shifted[i + 1]
-        vs = [(x0, -y_half, z0), (x1, -y_half, z1), (x1, y_half, z1), (x0, y_half, z0)]
-        f = b.bm.faces.new([b.bm.verts.new(p) for p in vs])
+        yf0 = y_front - tan_back * z0 - 0.02
+        yf1 = y_front - tan_back * z1 - 0.02
+        vs = [(x0, y_back, z0), (x1, y_back, z1), (x1, yf1, z1), (x0, yf0, z0)]
+        f = b.bm.faces.new([b.bm.verts.new(q) for q in vs])
         f.normal_update()
-        mid = Vector(((x0 + x1) * 0.5, 0.0, (z0 + z1) * 0.5))
-        if f.normal.dot(centre - mid) < 0:
+        mid = Vector(((x0 + x1) * 0.5, f.calc_center_median().y, (z0 + z1) * 0.5))
+        if f.normal.dot(Vector((0.0, mid.y, 4.0)) - mid) < 0:
             f.normal_flip()
         f[b.slot] = slot
+
+
+def faceted_block(b, center, size, slot, seed=0, jag=0.22, base_flat=True):
+    """Bloc de zapada: invelitoare convexa (convex hull) a unor puncte din jurul
+    unei cutii `size` (sx, sy, sz) cu centrul pe (cx, cy) si BAZA la z = center[2]:
+    fete plane, unghiulare, 2-4 m, nu trepte regulate. Colturile de sus sunt
+    trase spre interior (`jag`), 4 puncte de mijloc ies usor din fete. Baza e
+    plata (se aseaza pe teren)."""
+    import random
+    rnd = random.Random(seed)
+    cx, cy, z0 = center
+    sx, sy, sz = size
+    hx, hy = sx * 0.5, sy * 0.5
+    pts = []
+    for ix in (-1, 1):
+        for iy in (-1, 1):
+            j = lambda: 1.0 - jag * rnd.random()
+            pts.append((cx + ix * hx * (0.9 + 0.1 * rnd.random()), cy + iy * hy * (0.9 + 0.1 * rnd.random()), z0))
+            pts.append((cx + ix * hx * j() * 0.8, cy + iy * hy * j() * 0.8,
+                        z0 + sz * (1.0 - 0.25 * jag * rnd.random())))
+    zm = z0 + sz * (0.45 + 0.2 * rnd.random())
+    for ax, ay in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        pts.append((cx + ax * hx * (1.0 + 0.06 * rnd.random()) + (rnd.random() - 0.5) * hx * 0.4 * ay,
+                    cy + ay * hy * (1.0 + 0.06 * rnd.random()) + (rnd.random() - 0.5) * hy * 0.4 * ax,
+                    zm + (rnd.random() - 0.5) * sz * 0.2))
+    vs = [b.bm.verts.new(p) for p in pts]
+    res = bmesh.ops.convex_hull(b.bm, input=vs)
+    bmesh.ops.delete(b.bm, geom=list(res["geom_interior"]) + list(res["geom_unused"]),
+                     context="VERTS")
+    for f in res["geom"]:
+        if isinstance(f, bmesh.types.BMFace) and f.is_valid:
+            f[b.slot] = slot
+
+
+def dust_patch(b, center, length, tilt_deg, height=0.2, depth=0.7, slot=TF_DUST):
+    """Bucata scurta de praf, INCLINATA in planul fetei (rotatie pe Y), pe fata
+    din fata a unui bloc; adanca (`depth`) ca sa nu pluteasca pe o fata retrasa."""
+    rot = Matrix.Rotation(math.radians(tilt_deg), 3, "Y")
+    b.box(center, (length, depth, height), slot, rotation=rot)
 
 
 # ---------------------------------------------------------------------------

@@ -60,7 +60,7 @@ CLASS_BY_SUFFIX = {"_Schist": "#7E8478", "_Snow": "#E8ECEE", "_Concrete": "#B8B4
 SPECS = {
     # pilot: portalul se citeste din fata, putin dinspre +X (decuparea il arata
     # cu fata si flancul stang in imagine = camera spre +X)
-    "tunnel_portal_balea": {"camera": {"azimuth": 62.0, "elevation": 16.0, "lens": 60.0, "margin": 1.08}},
+    "tunnel_portal_balea": {"camera": {"azimuth": 62.0, "elevation": 14.0, "lens": 60.0, "margin": 1.08}},
 }
 
 
@@ -285,6 +285,21 @@ def _camera_for(name):
     return c
 
 
+def _backdrop(name):
+    """Doar in preview: plan negru in spatele gurii (in joc tunelul continua in
+    teren). Portalul: y = -12 (Blender), sub gura, ca fundalul gri sa nu se vada."""
+    if name != "tunnel_portal_balea":
+        return []
+    me = bpy.data.meshes.new("PreviewBackdrop")
+    vs = [(-9, -12, 0), (9, -12, 0), (9, -12, 10), (-9, -12, 10)]
+    me.from_pydata(vs, [], [(0, 1, 2, 3)])
+    me.update()
+    o = bpy.data.objects.new("PreviewBackdrop", me)
+    bpy.context.collection.objects.link(o)
+    me.materials.append(_flat_material("#050505"))
+    return [o]
+
+
 def compare(name, res_height=900):
     os.makedirs(FID_DIR, exist_ok=True)
     crop = os.path.join(CROPS, SPECS.get(name, {}).get("crop", name) + ".png")
@@ -295,6 +310,7 @@ def compare(name, res_height=900):
     meshes = _import(name)
     if not meshes:
         return
+    meshes += _backdrop(name)
     tmp = os.path.join(FID_DIR, "_render_" + name + ".png")
     img = bpy.data.images.load(crop)
     cw, ch = img.size
@@ -316,6 +332,7 @@ def views(name, res_height=700):
     meshes = _import(name)
     if not meshes:
         return
+    meshes += _backdrop(name)
     outs = []
     for az in (35.0, 125.0, 215.0, 305.0):
         cam = _camera_for(name)

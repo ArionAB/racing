@@ -16,7 +16,7 @@
 #   - scala/rotatia aplicate pe nodurile radacina (memoria scala-glb-neaplicata-
 #     la-radacina)
 #   - golul portalului, MASURAT CA GOL (measure_tf_gap.py): >= 13,0 m lateral pe
-#     banda caroseriei 0-2 m, >= 7,0 m inaltime libera (kit §1.1)
+#     banda caroseriei 0-2 m, >= 7,0 m inaltime libera in |x| <= 6,5 (kit §1.1, contract nou)
 #   - orice GLB din assets/models/transfagarasan/ care NU e declarat mai jos e
 #     verificat cu verify_glb.py fara exceptii (si pica daca nu trece).
 
@@ -63,7 +63,7 @@ gap_check() {  # gap_check <cale> <lat_min> <inalt_min>
   local f="$ROOT/$1"
   [ -f "$f" ] || { printf "%-34s GOL: LIPSESTE\n" "$(basename "$f")"; fail=1; return; }
   local out gap clear
-  out=$(python tools/blender/measure_tf_gap.py "$f" --contract="$2,$3" 2>&1); local rc=$?
+  out=$(python tools/blender/measure_tf_gap.py "$f" --contract="$2,$3" --window=6.5 2>&1); local rc=$?
   gap=$(printf '%s' "$out" | awk '$1=="gap"{print $2}')
   clear=$(printf '%s' "$out" | awk '$1=="clear_min"{print $2}')
   if [ "$rc" -eq 0 ]; then

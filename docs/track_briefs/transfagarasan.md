@@ -1,4 +1,4 @@
-# Track brief — Transfăgărășan (`Track21`, temă `transfagarasan`) — v0.1.1 (concept + decizii)
+# Track brief — Transfăgărășan (`Track21`, temă `transfagarasan`) — v0.2 (concept + decizii + prompturile ChatGPT)
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `okinawa.md` și `monument_valley.md`. Secțiunile de assets (§5) sunt un
@@ -740,19 +740,292 @@ verifică ce face deja codul.
     inventată ar fi mai puțin adevărată decât cea pe care chiar o fac
     oamenii.
 
-## 9. Prompturile ChatGPT (dioramă + planșă de inventar)
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.2, paste-ready
 
-Se scriu în **v0.2**, pe **planul real adnotat** al fundației Track21 (§7,
-pasul 7), nu pe schița de aici. Tiparul e `okinawa.md` §9 / §9.1:
-- „ONE CLOSED LOOP” ca prim paragraf;
-- densitatea pe cifre;
-- hazardele surprinse în cadru: ursul ridicat, turma pe ramura a treia,
-  utilajul ieșind din tunel, trenul pe trecere;
-- camera din colțul de **SE**, fiindcă serpentinele și barajul sunt pe latura
-  de est;
-- lista FORBIDDEN din §8.
+**Se atașează doar `docs/track_briefs/img/transfagarasan_plan/transfagarasan_plan.png`**,
+într-o **conversație nouă**. Planul e captura REALĂ de sus din Godot a
+fundației (`Snapshot.tscn -- --track=21 --no-fog`, cu fereastră; captura
+brută e `plan_de_sus_nofog.png`), cu legenda desenată de
+`python tools/annotate_transfagarasan_plan.py`. Scriptul potrivește singur
+scara pe pixelii de asfalt și tipărește cât din traseu cade pe asfalt (la
+captura din 13 oct: **95%**, scară 1,015 din formula din `snapshot.gd`).
+Hazardele, tunelul, coronamentul, parapetele și lacul Bâlea se citesc din
+nodurile lui `Track21.tscn`. Ce n-are încă nod (barajul, Prometeu, Poenari,
+cascada, stâna, satul) e marcat ca „poziție planificată”, din reperele fixe
+din §2.1. Pista e sursa de adevăr (memoria `diorama-din-geometria-reala`).
+
+Ce se ia din Okinawa v0.2: **„ONE CLOSED LOOP”** ca prim paragraf,
+**densitatea pe cifre**, **hazardele surprinse în cadru** (ursul ridicat,
+turma pe ramura a treia, utilajul ieșind din tunel pe roșu, trenul pe
+trecere, plus limba de zăpadă) și lista **FORBIDDEN** din §8.
+
+**Camera: din colțul de NE, nu de SE** (schimbare față de v0.1, măsurată pe
+planul real). Creasta are trei vârfuri în mijlocul buclei, iar masivul
+tunelului (`MasivTunel`, +85 m, rază 160 m) stă pe linia de vedere:
+- **din SE**, linia spre stiva de serpentine (+19…+43) trece la **34 m** de
+  centrul masivului, deci serpentinele ar fi ascunse;
+- **din NE**, linia spre baraj trece la **26 m** de el, deci barajul ar fi
+  ascuns.
+
+Nu se pot avea amândouă din același colț. Serpentinele sunt reperul principal
+al pistei (§0.1: „ce sunt Mittens-urile pentru Monument Valley”), așa că
+merg în prim-plan. Barajul și lacul Vidraru rămân în fund, iar promptul cere
+o cameră **înaltă** (~50°), ca să se vadă peste capătul de est al crestei.
+Soarele (VNV, ~25°) vine din dreapta-față a camerei: serpentinele de pe
+versantul nordic primesc lumină razantă, zăpada are muchia aprinsă, iar
+umbrele sunt albastre. E exact lumina din §1.
+
+> Create a stylized low-poly **tabletop diorama** of a toy-car racing track
+> on the **Transfăgărășan high mountain road in the Făgăraș Mountains,
+> Romania**, on a **late afternoon in early July**, in the first week after
+> the road opens: summer in the valleys, still winter at the top. **Use the
+> attached top-down plan as the exact layout: same loop shape, same lakes,
+> same river, same position of every landmark.** The letters A–H, the
+> circles, red arrows, text boxes and the legend strip under the plan are a
+> legend: do not draw them. On the plan:
+> - the thin white line on the dark grey band is the **asphalt road**;
+> - the light-grey band at the bottom (B) is the road **on top of a dam**;
+> - the white band on the right (D) is the road between **walls of snow**;
+> - the brown block (E) is a **tunnel**;
+> - the thin red lines along the zigzags at the top right (F) are
+>   **white-and-red concrete barriers**;
+> - the dark diagonal line on the left (H) is a **railway**.
+>
+> The round white-capped mountains around the edge, the uniform grass, the
+> scattered bushes and the parked snowplough are placeholders: dress
+> everything as described below.
+>
+> **THE ROAD IS ONE CLOSED LOOP. READ THIS FIRST [!]**
+> - There is **exactly one closed loop of road**: no other roads, no car
+>   parks off the loop, no second tunnel through the ridge.
+> - The loop runs **anticlockwise on the plan**: right (east) along the
+>   BOTTOM, up the RIGHT side, through the tunnel, down the zigzags at the
+>   TOP RIGHT, left (west) along the TOP, down the LEFT side, back to the
+>   start.
+> - **Start/finish: bottom-left (A)**, in the **Argeș valley**. The road runs
+>   east through a **small village** of Romanian mountain houses with
+>   **metal roofs** (silver, red, green), wooden fences, orchards and
+>   haystacks.
+> - **BOTTOM (B)**: the road climbs a little and runs **along the top of a
+>   huge curved concrete arch dam** (light-grey band). On its **left
+>   (north)** is the dark-green **reservoir lake**. On its **right (south)**
+>   there is a **sheer 40 m drop** down the curved concrete face to a narrow
+>   gorge with a river and a small power house at the bottom. A **bronze
+>   statue of Prometheus holding a lightning bolt** stands on a rock spur at
+>   the east end of the dam.
+> - **RIGHT side, lower (C)**: the road turns north along the **east shore of
+>   the reservoir** (lake on the left), through **two short raw-rock
+>   tunnels** cut through rocky spurs, between beech forest. A **brown bear**
+>   is at the roadside here (see below).
+> - **RIGHT side, upper (D)**: the road climbs in **wide S-bends above the
+>   tree line**, past a **shepherd's hut with a wooden sheep pen**, into the
+>   snow: the last stretch runs between **walls of old snow 3–5 m high**,
+>   with red-and-white snow poles, up to a **plain concrete tunnel portal**.
+> - **The tunnel (E)** goes north through the **east end of the rocky
+>   ridge**. It comes out at a small **glacial lake in a rocky cirque** (on
+>   the right of the road), with a **stone-and-wood mountain chalet** on the
+>   shore, a row of parked cars and motorbikes, and wooden stalls.
+> - **TOP RIGHT (F), THE HERO OF THE DIORAMA**: from the glacial lake the
+>   road drops down the **north face of the ridge** in a **stack of four
+>   hairpin bends**: five parallel east–west ribbons of asphalt stacked one
+>   below the other, each one lower than the last, folding back and forth
+>   across a bare green-grey slope with **stone retaining walls** and
+>   **white-and-red concrete barriers** on the valley side and around every
+>   hairpin. Only one short gap in the barriers, just before the third
+>   hairpin, where a **narrow dirt shepherds' path** cuts straight down to
+>   the branch below. A **cable car** line with two large cabins passes
+>   **over** the zigzags, from the glacial lake down to the forest.
+> - **TOP (G)**: from the bottom of the zigzags the road runs west along the
+>   top edge into **dense dark spruce forest**. On its **left (south)** a
+>   **tall stepped waterfall** falls down a rock wall, with the lower cable
+>   car station and a second chalet. Where the stream crosses the road (the
+>   orange dot), **the small wooden bridge has been washed away** by a flood:
+>   the road jumps over a gap above the rushing stream.
+> - **LEFT side (H)**: the road turns south down a **wooded river gorge**,
+>   with the **wide grey-green Olt river on its right (west)**, outside the
+>   loop. Draw the river as one continuous river. A **railway** runs along
+>   the far bank and crosses the road **diagonally at a level crossing**
+>   with barriers and red lights (upper left).
+> - **Bottom-left**: just before the start, a **small ruined fortress** of
+>   brick and stone walls stands on top of a **steep rock spur** beside the
+>   road.
+> - **The middle of the loop is the Făgăraș ridge**: a **long, jagged ridge
+>   of grey-green crystalline schist** running west–east, with snow in its
+>   cirques and on its north face, scree cones and dwarf pine at its feet.
+>   It is a wall of rock, not a single round peak.
+>
+> **THE HAZARDS, CAUGHT IN THE ACT [!]:**
+> - **the bear**: a big brown bear on the roadside at C, **standing up on
+>   its hind legs** at the edge of the forest, about to cross;
+> - **the tunnel traffic light**: at the south portal, a **traffic light on
+>   a pole with an arm over the right lane** shows **red**, with a white stop
+>   line and roadworks cones. A **yellow road-maintenance truck with an
+>   orange beacon** is coming **out of the tunnel** on the free lane;
+> - **the snow slide**: from under the ridge, a **tongue of snow and
+>   tumbling snow boulders** is pouring onto the **first (highest) branch**
+>   of the zigzags, with a cloud of snow dust;
+> - **the sheep**: a **flock of 30–40 white sheep** with **two shepherd
+>   dogs** is crossing the **third branch** of the zigzags, coming down the
+>   slope;
+> - **the train**: a **red-and-grey electric train** (locomotive + 3
+>   carriages, no logos) is **on the level crossing**, with the barriers
+>   down.
+>
+> **DENSITY: THIS MUST LOOK ALIVE, NOT EMPTY [!]** (counts are mandatory):
+> - **Vegetation in altitude bands, in clusters, never spread evenly**:
+>   **150+ beech trees** (warm green, round crowns) in the valley around A,
+>   B and C; **250+ spruce trees** (dark, narrow, pointed) in the forest at G
+>   and on the walls of the Olt gorge; **80+ clumps of dwarf mountain pine**
+>   (low, dark blue-green, creeping) above the tree line at D and around the
+>   zigzags; **30+ patches of magenta mountain rhododendron** on the alpine
+>   meadows (the brightest accent); bilberry bushes.
+> - **Rock and snow**: **15–20 jagged schist outcrops** (tilted blades, not
+>   round boulders), **8 scree cones** at the foot of the ridge, **20+ snow
+>   patches** on the north slopes, the snow walls along D, snow in every
+>   cirque of the ridge.
+> - **The road and its works**: stone retaining walls under every hairpin,
+>   **red-and-white snow poles** every ~20 m on the high part, **white-and-red
+>   concrete barriers** on the zigzags and the dam, small road signs
+>   **without text**, a **bear pictogram sign** (no text) by the lake shore.
+> - **Signs of people**: the village at A (**12–15 houses**, a hay cart,
+>   haystacks, **4–5 cows** in the meadow, never on the road), **8–10 parked
+>   cars and 4 motorbikes** at the glacial lake, **4 wooden stalls** with
+>   cheese and berries, the shepherd's hut with the sheep pen, a parked
+>   snowplough by the tunnel portal, utility poles in the valley.
+> - **Sky and distance**: a few ravens over the ridge; behind the base, softly
+>   in haze, a **sea of clouds** filling the far valleys and the flat green
+>   **Făgăraș plain** to the north.
+> - **Race elements**: **4 toy racing cars** on the track: one on the dam,
+>   one **waiting at the red light**, one **sliding through a hairpin** of
+>   the zigzags, one **in the air over the washed-out bridge**.
+>
+> **CAMERA AND BASE:** high raised 3/4 view, **about 50° down, from the
+> TOP-RIGHT corner of the plan looking toward the bottom-left**, so the
+> **stack of hairpins** with the sheep, the snow slide and the cable car is
+> nearest, the glacial lake and the tunnel are on the left-front, the jagged
+> ridge fills the middle, and **over its low east end you see the dam and
+> the reservoir** at the back-left. The spruce forest with the waterfall and
+> the jump is on the right-front, and the Olt gorge with the train and the
+> ruined fortress is at the right-back. The camera is high enough that **the
+> ridge does not hide the far side of the loop**. The diorama sits on a thin
+> dark rounded base with a matte edge, cut through the mountain so the rock
+> strata show on the sides.
+>
+> **STYLE (strict) [!]:** **flat-shaded low-poly, like a game-asset render
+> in a Blender viewport. Every face is one flat colour.** Big facets, 1–3 m
+> wide at model scale. No painted texture, no photorealism, no tilt-shift
+> look. Water is faceted too: flat dark green on the reservoir, cold
+> blue-green on the glacial lake, cloudy grey-green on the Olt, white foam
+> as flat shapes. Soft baked ambient occlusion under every object. Toy
+> proportions: cars are stubby and about 1.3× wider than real cars.
+>
+> **PALETTE (strict) [!]:**
+> - schist rock grey-green `#7E8478`, lighter on sunlit faces `#A3A796`,
+>   dark in the cracks `#4A4E47`;
+> - July snow off-white `#E8ECEE`, **blue in shadow** `#B5C3D3`, dusty
+>   streaks `#B9B2A4`;
+> - alpine meadow cool green `#7D9A4E`, rhododendron magenta `#B63A7A`;
+> - dwarf pine blue-green `#34503A`, spruce green-black `#23392B`, beech
+>   warm green `#5E8A3A`;
+> - glacial lake `#3F6F7A`, reservoir `#2F5446`, Olt river `#6E7F69`;
+> - dam and portal concrete warm grey `#B8B4AA`;
+> - barriers white `#EEEEEA` with red stripes `#C2312B`;
+> - asphalt blue-grey with a **white** centre line, never yellow.
+>
+> **LIGHT [!]:** low late-afternoon sun, **about 25°, from the LEFT of the
+> plan, slightly toward the top (west-north-west)**, warm gold. The hairpin
+> ribbons on the north face catch **grazing light and shine**, the snow
+> edges are lit warm, and **every shadow on the snow is blue**, not grey.
+> The shadows in the spruce forest are dark green, not black. The dam face
+> at the back is lit from the side.
+>
+> **FORBIDDEN:** no text or numbers anywhere, no logos, no brand names (no
+> car brands, no railway company marks), no Dracula, no bats, no Gothic
+> castles with pointed towers, no stakes, no blood, no full moon, no purple
+> fog; no churches, monasteries or wayside crosses; no flags or political
+> symbols; no military vehicles; no Swiss or Tyrolean chalets with carved
+> balconies, no onion domes, no Matterhorn; no cows or carts on the road;
+> no people feeding the bear; no ice hotel; no train on the ridge; no
+> yellow road lines; no sledges.
+
+### 9.1 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.2, paste-ready
+
+Se dă **în aceeași conversație**, după ce diorama e acceptată. Numele de
+fișier sunt contractul (categoria `assets/models/transfagarasan/`, §5) și
+vin din §5.2, plus indicatorul cu ursul din §8. Cotele vin din §2, §5 și din
+`Track21.tscn` și se remăsoară pe drum la integrare: șoseaua are **14 m**,
+iar pe coronament și în tunel are **12 m** (`custom_width_segments`). Ce face
+codul **nu** intră în planșă (§5.3): parapetele de beton, cascada, lacurile,
+Oltul, trestle-ul trenului, lampa semaforului. Piesele păstrate din kitul
+alpin (§5.1: molizii, telecabina, utilajul, căruța, vaca, gardul, podețul,
+bulgării avalanșei) nu se redesenează.
+
+> Now make an **asset inventory sheet** for this diorama, in the same
+> flat-shaded low-poly style and palette: every distinct object drawn
+> **once, isolated, on a plain light-grey background**, in a neat grid, in a
+> 3/4 view, all at the **same scale** (a toy car shown for scale in one
+> corner), with **small simple text labels under each object using exactly
+> these file names** (labels are the only text allowed):
+>
+> **Hero:** `vidraru_dam` (a section of the curved concrete arch dam, 40 m
+> from the crest to the foot, with the parapet and a small tower on the
+> crest; modular along its length), `prometheus_statue` (bronze, 9 m,
+> holding a lightning bolt, on a rock plinth, no text), `poenari_ruin`
+> (ruined brick-and-stone fortress walls, 10 m, on top of an 18 m rock
+> spur), `tunnel_portal_balea` (plain concrete portal over a 12 m road, with
+> snow walls attached on both sides), `cabana_balea_lac` (mountain chalet:
+> stone ground floor, wooden upper floor, steep metal roof),
+> `cabana_balea_cascada` (smaller chalet of the same family), `brown_bear`
+> (drawn twice: on all fours 2.2 m long, and **standing up on its hind
+> legs**, 3 m tall), `sheep` (small, white-cream wool, dark face),
+> `sheepdog` (large white-grey shepherd dog).
+> **Road kit:** `snow_wall` (a 3–5 m wall of old snow with dusty layers,
+> straight module), `retaining_wall_straight` and `retaining_wall_curve`
+> (dry-stone retaining walls for the hairpins), `rock_tunnel_portal` (raw
+> rock tunnel mouth over a 14 m road), `snow_pole` (red-and-white pole,
+> 2 m), `road_works` (cones, a striped barrier, a roadworks sign without
+> text), `level_crossing` (two barriers,
+> flashing lights, a St Andrew's cross without text), `bear_warning_sign`
+> (a sign with only a bear pictogram, no text).
+> **Buildings:** `stana` (low wooden shepherd's hut with a wooden sheep
+> pen), `arges_house_a`, `arges_house_b` (village houses with a metal roof,
+> a porch and a wooden fence, different from each other),
+> `souvenir_stall` (wooden market stall, no text).
+> **Vehicles:** `parked_car_a`, `parked_car_b` (generic, no brands),
+> `motorbike`, `ro_train` (electric locomotive and one carriage, red and
+> grey, no logos), `cable_cabin_large` (a large cable-car cabin for 30
+> people, hanging from its carriage).
+> **Rocks:** `schist_outcrop_a`, `schist_outcrop_b`, `schist_outcrop_c`
+> (tilted blade-like schist outcrops, 3–8 m, all different), `scree_cone`
+> (a cone of loose grey-green scree at the foot of a cliff).
+> **Plants:** `jneapan_a`, `jneapan_b` (dwarf mountain pine: low, creeping,
+> dense, dark blue-green, 1–1.5 m), `beech_tree_a`, `beech_tree_b` (warm
+> green round crowns, 10–14 m), `bujor_de_munte` (low clump of magenta
+> rhododendron), `afin` (low bilberry bush).
+> **Background:** `fagaras_ridge` (a long jagged schist ridge with snow in
+> the cirques, as a background strip), `cloud_sea` (a strip of low clouds
+> filling far valleys), `fagaras_plain` (a strip of flat green farmland,
+> far away).
+
+Trei lucruri de urmărit la planșă, din ce a ieșit prost la Okinawa (§9.2
+acolo):
+- **ursul ridicat** trebuie să fie urs, nu om în blană: capul jos între umeri,
+  labele din față atârnând;
+- **casele din vale** n-au voie să iasă chalet elvețian (§0.1);
+- **jneapănul** e tufă culcată, nu brad mic. Dacă iese brad, intră ca
+  corectură de coordonator în `docs/asset_briefs/transfagarasan_kit.md`, nu
+  ca regenerare.
 
 ## Istoric
+
+- **v0.2 (13 oct 2026):** §9 scris pe planul REAL al fundației Track21
+  (`img/transfagarasan_plan/transfagarasan_plan.png`,
+  `tools/annotate_transfagarasan_plan.py`). Diorama cere densitatea pe cifre
+  și cinci hazarde surprinse în cadru (ursul ridicat, roșul cu utilajul
+  ieșind din tunel, limba de zăpadă pe ramura întâi, turma pe ramura a
+  treia, trenul pe trecere). **Camera trece din SE în NE**: pe planul real,
+  masivul tunelului ascunde stiva de serpentine din SE (§9). Planșa de
+  inventar are 39 de nume de fișier, din §5.2 plus indicatorul cu ursul.
 
 - **v0.1.1 (10 oct 2026):** deciziile dezvoltatorului pe §3.1: numele
   „Transfagarasan” fără diacritice, utilajul de drumuri în tunel, săritura și

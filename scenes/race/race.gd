@@ -349,6 +349,7 @@ func _go() -> void:
 				hud.flash_message("ROCKET START!")
 			elif hold > 1.05:
 				hud.flash_message("Prea devreme...")
+				car.hold_turbo_until_release()
 		elif _rng.randf() < 0.45:
 			car.force_boost(0.8)
 

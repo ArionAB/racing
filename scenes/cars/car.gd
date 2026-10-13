@@ -296,6 +296,9 @@ var steer_invert_left: float = 0.0
 ## Mereu true in joc; exista ca garda `ProbeCrushTurbo --sabotaj` sa poata scoate
 ## fix-ul la runtime si sa dovedeasca ca masoara ceva.
 var crush_blocks_turbo: bool = true
+## TURBO tinut de prea devreme la GO (#491): nu se aprinde pana nu ridici
+## degetul. Vezi `hold_turbo_until_release`.
+var _turbo_needs_release: bool = false
 signal steer_inverted(seconds: float)
 ## Ars de o coloana de foc (gheizerele din craterul Stromboli, vezi
 ## `ignite`). Se tine SEPARAT de `crush_time` desi amandoua taie plafonul:
@@ -1104,6 +1107,11 @@ func _update_turbo(turbo_pressed: bool, delta: float) -> void:
 	# `crush_time` > 0 turbo-ul nu porneste; bara NU se goleste (nu ai ars nimic) si
 	# continua sa se incarce, ca sa-l ai gata cand expira strivirea.
 	var crush_blocked := crush_blocks_turbo and crush_time > 0.0
+	if _turbo_needs_release:
+		if turbo_pressed:
+			turbo_pressed = false
+		else:
+			_turbo_needs_release = false
 	if turbo_pressed and can_fire and not crush_blocked:
 		if not is_boosting:
 			_start_boost()
@@ -1127,6 +1135,13 @@ func _start_boost() -> void:
 
 func grant_turbo(amount: float) -> void:
 	turbo_charge = clampf(turbo_charge + amount, 0.0, 1.0)
+
+## TURBO apasat de dinainte de GO, prea devreme pentru rocket start (#491):
+## butonul trebuie ridicat si apasat din nou. Altfel, tinut de pe ecranul de
+## incarcare, aprindea la GO bara plina — masina tasnea singura, fara gaz, iar
+## „Prea devreme..." de pe ecran contrazicea ce vedeai.
+func hold_turbo_until_release() -> void:
+	_turbo_needs_release = true
 
 ## Ardere gratuita (rocket start): boost fara sa goleasca bara.
 func force_boost(seconds: float) -> void:

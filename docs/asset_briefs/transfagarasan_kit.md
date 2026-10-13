@@ -409,7 +409,7 @@ sus, sunt sursa de **cote și de contracte de cod**.
    - **tf-c**: **ursul** (§1.6), fiindcă e piesa cea mai lungă. Se
      livrează cu capturi din cele trei clipuri: un cadru din `Idle`, două
      din `Walk`, iar `Stand` la început, la jumătate și la capăt.
-2. **Valul 2:**
+2. **Valul 2** (gata, 13 oct 2026, integrat pe `transfagarasan/kit-val2`):
    - **tf-d**: barajul și reperele (§1.2), cu **originea barajului
      verificată** (`--origin=rim`, nimic peste −0,05 m pe drum);
    - **tf-e**: clădirile (§1.3). `cabana_balea_lac` se judecă înaintea

@@ -174,9 +174,11 @@ def _root_flare(bark, r0, seed, n=4):
     for i in range(n):
         a = 2.0 * math.pi * (i + 0.2 * r()) / n
         d = Vector((math.cos(a), math.sin(a), 0.0))
-        bark.taper_sweep([d * (r0 * 0.4) + Vector((0, 0, 0.9)), d * (r0 * 1.1) + Vector((0, 0, 0.25)),
-                          d * (r0 * 2.0) + Vector((0, 0, 0.0))],
-                         [r0 * 0.45, r0 * 0.35, 0.0], TF_BARK_GREY, segments=5)
+        # pinteni scurti si grosi (runda 2 a fagului: cei lungi si ascutiti
+        # citeau ca picioare de paianjen)
+        bark.taper_sweep([d * (r0 * 0.35) + Vector((0, 0, 0.75)), d * (r0 * 0.95) + Vector((0, 0, 0.22)),
+                          d * (r0 * 1.55) + Vector((0, 0, 0.0))],
+                         [r0 * 0.55, r0 * 0.42, r0 * 0.12], TF_BARK_GREY, segments=5)
 
 
 def _limbs_to(bark, start, masses, frac=0.72, r0=0.17, r1=0.07, seed=0):
@@ -191,40 +193,53 @@ def _limbs_to(bark, start, masses, frac=0.72, r0=0.17, r1=0.07, seed=0):
 
 
 def build_beech_tree_a():
-    """Fagul A (`beech_tree_a`): 13 m inalt, coroana 10 m, h/l ~1,3.
+    """Fagul A (`beech_tree_a`): ~12,5 m inalt, coroana ~10 m, h/l ~1,25.
+    REFACUT pe contractul clarificat de coordonator (13 oct; runda 1-3 citea
+    "acadea": coroana sus pe un trunchi gol, bratele nevazute).
 
-    LISTA DE ELEMENTE (decuparea `beech_tree_a.png` + contractul; scrisa INAINTE
-    de geometrie):
-      a) TRUNCHI drept, vizibil de la sol pana la ~4,5 m, Ø ~0,8 m la baza, cu
-         4 pinteni de radacina (runda 2: ramificat de la ~4,6 m); GRI si NETED (contractul; pe plansa e maro -- urmez
-         contractul: scoarta fagului e gri, MARBLE_GREY 29).
-      b) RAMIFICAT SUS: la ~5,2 m trunchiul se desface in 7 brate (unul spre
-         fiecare masa), vizibile in golurile de sub coroana (plansa: 3-4 brate
-         vizibile intre mase).
-      c) COROANA ovala, LATA (10 m), din 7 MASE (contractul 5-7): varful, doua sus
-         pe laturi, una in fata, una in spate, doua jos pe laturi; fiecare masa =
-         miez + 9 ciorchini fatetati pe suprafata -> conturul zimtat de ciorchini
-         din plansa (~18-20 vizibili din fata).
-      d) baza coroanei la ~4,8 m; coroana coboara mai jos pe laturi (masele de jos).
-      e) NU intra: umbra de sol, iarba.
+    LISTA DE ELEMENTE (decuparea `beech_tree_a.png` + contractul clarificat;
+    scrisa INAINTE de geometrie):
+      a) TRUNCHI SCURT si GROS: O 0,7 m la baza, 5 pinteni de radacina evazati,
+         3 m pana la ramificare; GRI (MARBLE_GREY 29), inchis la baza prin AO.
+      b) 4 BRATE GROASE (O 0,44 -> 0,24 m) care pornesc in EVANTAI de la 2,9 m si
+         intra in coroana la ~4,9 m, la 2,6 m de axa -- se vad intre sol si
+         coroana, ca pe plansa (3-4 brate vizibile).
+      c) COROANA JOASA si LATA, aproape rotunda (h coroana / l ~0,85): baza la
+         ~3,8 m, latimea ~10-11 m, varful la ~12 m; din 7 MASE: 4 jos, pe
+         capetele bratelor (inel), 2 la mijloc departate de axa, 1 sus lata si
+         turtita; ciorchini mari, turtiti.
+      d) GOLURI in partea de jos a coroanei: masele de jos au ciorchini doar de la
+         ecuator in sus si miezul mic, iar intre ele (pe azimuturi alternate cu
+         bratele) ramane gol -> bratele se vad prin el.
+      e) NU intra: umbra, iarba.
     Noduri: Beech_Bark (MARBLE_GREY 29), Beech_Leaves (TROPICAL_GREEN 21 -> clasa
     beech_canopy, tenta recalculata la integrare).
     """
     bark, lv = Builder(), Builder()
-    bark.taper_sweep([(0, 0, 0.0), (0.04, 0.0, 2.5), (0.08, 0.04, 4.8)], [0.42, 0.33, 0.27],
+    bark.taper_sweep([(0, 0, 0.0), (0.02, 0.0, 1.5), (0.04, 0.02, 3.1)], [0.35, 0.31, 0.29],
                      TF_BARK_GREY, segments=8)
-    _root_flare(bark, 0.40, 3)
-    # runda 2: coroana coboara pe laturi pana la ~4 m (pe plansa baza coroanei e
-    # la ~1/3 din inaltime), mase mai mari si mai joase, ciorchini mai mari si
-    # turtiti (runda 1: bule rotunde pe un bat lung -- "acadea")
-    masses = [((0.0, 0.0, 10.3), (2.8, 2.8, 2.0)), ((-2.6, 0.5, 8.6), (2.5, 2.5, 2.0)),
-              ((2.7, -0.4, 8.4), (2.5, 2.5, 2.0)), ((0.3, 2.3, 7.4), (2.5, 2.2, 2.0)),
-              ((-0.4, -2.4, 7.6), (2.4, 2.2, 2.0)), ((-2.8, -0.8, 5.9), (2.3, 2.2, 1.7)),
-              ((2.9, 1.0, 5.7), (2.3, 2.2, 1.7))]
-    _limbs_to(bark, (0.08, 0.04, 4.6), masses, seed=5)
-    for i, (c, rad) in enumerate(masses):
-        crown_mass(lv, c, rad, TF_LEAF, seed=200 + i * 7, n=7, clump_size=2.2, el_lo=-0.45,
-                   squash=0.72, core_scale=0.70)
+    _root_flare(bark, 0.42, 3, n=5)
+    fork = Vector((0.04, 0.02, 2.9))
+    ring = []
+    for k, az in enumerate((15.0, 105.0, 195.0, 285.0)):
+        a = math.radians(az)
+        d = Vector((math.cos(a), math.sin(a), 0.0))
+        end = d * 2.6 + Vector((0.0, 0.0, 4.9))
+        mid = fork.lerp(end, 0.5) + Vector((0.0, 0.0, -0.15))
+        branch(bark, [fork, mid, end + d * 0.3 + Vector((0, 0, 0.4))], 0.22, 0.12,
+               TF_BARK_GREY, seg=7)
+        ring.append(((end.x + d.x * 0.2, end.y + d.y * 0.2, 5.0), (2.3, 2.3, 1.7)))
+    # runda 2: masele de mijloc mai departe de axa si varful mai lat si mai
+    # turtit -> dom rotund si lat (runda 1: coloana ingusta de 9 m, etajata)
+    upper = [((0.0, 0.0, 9.2), (3.3, 3.3, 1.9)), ((2.2, -2.0, 7.4), (2.4, 2.4, 1.9)),
+             ((-2.2, 2.0, 7.5), (2.4, 2.4, 1.9))]
+    _limbs_to(bark, (0.04, 0.02, 3.4), upper, frac=0.6, r0=0.15, r1=0.07, seed=5)
+    for i, (c, rad) in enumerate(ring):
+        crown_mass(lv, c, rad, TF_LEAF, seed=200 + i * 7, n=7, clump_size=2.0, el_lo=-0.12,
+                   squash=0.72, core_scale=0.62)
+    for i, (c, rad) in enumerate(upper):
+        crown_mass(lv, c, rad, TF_LEAF, seed=260 + i * 7, n=8, clump_size=2.1, el_lo=-0.35,
+                   squash=0.72, core_scale=0.72)
     return [bark.to_object("Beech_Bark"), lv.to_object("Beech_Leaves")]
 
 
@@ -248,14 +263,15 @@ def build_beech_tree_b():
     bark, lv = Builder(), Builder()
     # runda 3: furca la 2,7 m, conducatorii diverg mai larg (in runda 2 furca
     # intra aproape imediat in coroana si trunchiul citea simplu)
-    bark.taper_sweep([(0, 0, 0.0), (0.03, 0.0, 1.5), (0.06, 0.0, 2.8)], [0.36, 0.30, 0.27],
+    # reglaj (coordonator, 13 oct): trunchi ingrosat la fel ca a
+    bark.taper_sweep([(0, 0, 0.0), (0.03, 0.0, 1.5), (0.06, 0.0, 2.8)], [0.38, 0.33, 0.31],
                      TF_BARK_GREY, segments=8)
-    _root_flare(bark, 0.36, 9)
+    _root_flare(bark, 0.42, 9, n=5)
     fork = Vector((0.06, 0.0, 2.7))
     lead1 = [fork, Vector((-0.75, 0.15, 4.3)), Vector((-1.3, 0.25, 6.4))]
     lead2 = [fork, Vector((1.2, -0.1, 3.9)), Vector((2.2, -0.2, 5.6))]
-    branch(bark, lead1, 0.22, 0.12, TF_BARK_GREY, seg=7)
-    branch(bark, lead2, 0.22, 0.12, TF_BARK_GREY, seg=7)
+    branch(bark, lead1, 0.26, 0.15, TF_BARK_GREY, seg=7)
+    branch(bark, lead2, 0.26, 0.15, TF_BARK_GREY, seg=7)
     m1 = [((-1.2, 0.3, 7.5), (2.3, 2.2, 1.8)), ((0.5, 0.2, 8.2), (2.3, 2.2, 1.6)),
           ((-2.3, -0.5, 5.6), (1.8, 1.7, 1.4))]
     m2 = [((2.2, -0.2, 6.8), (2.5, 2.3, 1.8)), ((3.4, 0.4, 5.0), (2.0, 1.9, 1.4)),
@@ -342,12 +358,14 @@ def build_afin():
     LISTA DE ELEMENTE (decuparea `afin.png` + contractul; scrisa INAINTE de
     geometrie):
       a) TUFA MARUNTA, DREAPTA: un miez de 6 ciorchini de frunze.
-      b) 14 CRENGUTE cu frunze (plansa: ~10-12 "crengute" ca de feriga), fiecare
+      b) 13 CRENGUTE cu frunze (plansa: ~10-12 "crengute" ca de feriga), fiecare
          din 4 ciorchini care se subtiaza spre varf, pe DOUA inele: 5 in centru,
-         aproape verticale, varfurile la 0,44-0,5 m; 9 pe margine, culcate spre
-         afara, varfurile la 0,24-0,32 m, raza 0,30-0,38 m -> calota.
-      c) BOBITE albastru-inchis in puncte mici: ~20 de ~7 cm, pe crengute, spre
-         exterior si sus (plansa: ~20).
+         aproape verticale, varfurile la 0,44-0,5 m; 8 pe margine, culcate spre
+         afara, varfurile la 0,24-0,32 m, raza 0,36-0,42 m, cu goluri intre ele
+         -> calota aerisita, lata de ~0,9 m.
+      c) BOBITE albastru-inchis in puncte mici: 25-30 de ~7 cm, pe suprafata
+         ciorchinilor de pe crengute, spre exterior si sus, vizibile (plansa ~20;
+         reglajul coordonatorului: 20-30).
       d) NU intra: umbra, solul.
     Noduri: Afin_Leaves (TROPICAL_GREEN 21), Afin_Berry (ICE_DEEP 25).
     """
@@ -359,10 +377,14 @@ def build_afin():
     # (0,45-0,5 m), 9 exterioare, joase si culcate spre afara (0,24-0,32 m) ->
     # calota cu centrul cel mai inalt; runda 2 avea un singur inel evazat si
     # citea ca o vaza goala la mijloc
-    for i, p in enumerate(_dome_points(6, 0.18, 0.16, 0.16, 0.14, 81, el_lo=-0.2)):
-        clump(lv, p, (0.30, 0.27, 0.26), TF_LEAF, seed=810 + i, seg=6, rings=3, dev=0.2)
+    # reglaj (coordonator, 13 oct): mai AERISIT (miez mai mic, 8 crengute
+    # exterioare cu goluri intre ele), latimea la cota (0,9 m), 25-30 de bobite
+    # VIZIBILE (iesite din ciorchini, nu ascunse in ei)
+    for i, p in enumerate(_dome_points(4, 0.14, 0.12, 0.14, 0.14, 81, el_lo=-0.2)):
+        clump(lv, p, (0.22, 0.20, 0.20), TF_LEAF, seed=810 + i, seg=6, rings=3, dev=0.2)
     tips = []
-    rings_spec = [(5, 0.07, 0.06, 0.44, 0.06), (9, 0.30, 0.08, 0.24, 0.08)]
+    leaves_at = []
+    rings_spec = [(5, 0.07, 0.06, 0.44, 0.06), (8, 0.36, 0.06, 0.24, 0.08)]
     i = -1
     for (cnt, r_lo, r_var, z_lo, z_var) in rings_spec:
       for _j in range(cnt):
@@ -380,18 +402,19 @@ def build_afin():
             sz = 0.19 - 0.025 * k
             clump(lv, q, (sz * 1.1, sz * 0.8, sz * 0.75), TF_LEAF, seed=900 + i * 5 + k,
                   seg=5, rings=2, dev=0.22, yaw=az + 90.0, tilt=0.4)
+            leaves_at.append((q, d, sz, k))
         tips.append((d, rr, zt))
-    # bobitele: pe crengute, spre exterior si sus
+    # bobitele: pe suprafata ciorchinilor de pe crengute (k = 1..3), spre
+    # exterior si in sus, ca sa se vada (runda 3: ~20, dar 2/3 ascunse in frunze)
     k = 0
-    for (d, rr, zt) in tips:
-        for f in ((0.55, 0.0), (0.8, 0.06)):
-            if r() < 0.25:
-                continue
-            side = Vector((-d.y, d.x, 0.0)) * (0.06 if k % 2 else -0.06)
-            q = d * (rr * f[0] + 0.04) + side + Vector((0, 0, zt * f[0] + f[1] + 0.02))
-            be.boulder(tuple(q), (0.07, 0.07, 0.07), TF_BERRY, seed=880 + k, segments=5,
-                       rings=2, deviation=0.05)
-            k += 1
+    for (q, d, sz, kk) in leaves_at:
+        if kk == 0 or r() < 0.30:
+            continue
+        side = Vector((-d.y, d.x, 0.0)) * ((r() - 0.5) * sz * 0.8)
+        pos = q + d * (sz * 0.42) + side + Vector((0.0, 0.0, sz * 0.28))
+        be.boulder(tuple(pos), (0.07, 0.07, 0.07), TF_BERRY, seed=880 + k, segments=5,
+                   rings=2, deviation=0.05)
+        k += 1
     print("afin: bobite", k)
     return [lv.to_object("Afin_Leaves"), be.to_object("Afin_Berry")]
 
@@ -415,10 +438,10 @@ if _want("jneapan_b"):
             bevel=0.0, smooth_angle=JNEAPAN_SMOOTH)
 
 if _want("beech_tree_a"):
-    emit_tf(build_beech_tree_a(), "plants/beech_tree_a.glb", _ao(13.0, 1.6, 0.5),
+    emit_tf(build_beech_tree_a(), "plants/beech_tree_a.glb", _ao(12.5, 1.6, 0.42),
             keep_xy=True, bevel=0.0, smooth_angle=None)
 if _want("beech_tree_b"):
-    emit_tf(build_beech_tree_b(), "plants/beech_tree_b.glb", _ao(10.0, 1.6, 0.5),
+    emit_tf(build_beech_tree_b(), "plants/beech_tree_b.glb", _ao(10.0, 1.6, 0.42),
             keep_xy=True, bevel=0.0, smooth_angle=None)
 
 if _want("bujor_de_munte"):

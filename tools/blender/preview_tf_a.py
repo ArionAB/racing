@@ -33,7 +33,10 @@ from mathutils import Vector, Euler  # noqa: E402
 SPECS.update({
     "snow_wall": {"camera": {"azimuth": 205.0, "elevation": 16.0, "lens": 60.0, "margin": 1.08},
                   "variant": "SnowWall_A", "side": {"SnowWall_B": (0.0, -10.0, 0.0)}},
-    "rock_tunnel_portal": {"camera": {"azimuth": 78.0, "elevation": 12.0, "lens": 60.0, "margin": 1.08}},
+    # plan negru la y = -14 (DOAR in comparatie, nu si in cele 4 vederi, unde ar
+    # pluti ca un panou): in joc tunelul iese in peisaj
+    "rock_tunnel_portal": {"camera": {"azimuth": 78.0, "elevation": 12.0, "lens": 60.0, "margin": 1.08},
+                           "backdrop": (-14.0, 9.0, 11.0)},
     "retaining_wall_straight": {"camera": {"azimuth": 30.0, "elevation": 16.0, "lens": 60.0, "margin": 1.08}},
     "retaining_wall_curve": {"camera": {"azimuth": 20.0, "elevation": 18.0, "lens": 60.0, "margin": 1.08}},
     "snow_pole": {"camera": {"azimuth": 60.0, "elevation": 10.0, "lens": 80.0, "margin": 1.1}},
@@ -87,6 +90,21 @@ def _import_a(name, mode):
     return keep
 
 
+def _backdrop_a(name):
+    """Plan negru in spatele gurii, doar in preview (SPECS["backdrop"] = (y, |x|, z_sus))."""
+    bd = SPECS.get(name, {}).get("backdrop")
+    if not bd:
+        return []
+    y, hx, zt = bd
+    me = bpy.data.meshes.new("PreviewBackdrop")
+    me.from_pydata([(-hx, y, 0), (hx, y, 0), (hx, y, zt), (-hx, y, zt)], [], [(0, 1, 2, 3)])
+    me.update()
+    o = bpy.data.objects.new("PreviewBackdrop", me)
+    bpy.context.collection.objects.link(o)
+    me.materials.append(_flat_material("#050505"))
+    return [o]
+
+
 def compare_a(name, res_height=900):
     os.makedirs(FID_DIR, exist_ok=True)
     crop = os.path.join(CROPS, SPECS.get(name, {}).get("crop", name) + ".png")
@@ -94,6 +112,7 @@ def compare_a(name, res_height=900):
     meshes = _import_a(name, "compare")
     if not meshes:
         return
+    meshes += _backdrop_a(name)
     tmp = os.path.join(FID_DIR, "_render_" + name + ".png")
     img = bpy.data.images.load(crop)
     cw, ch = img.size

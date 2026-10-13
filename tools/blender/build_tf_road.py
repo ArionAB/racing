@@ -196,7 +196,7 @@ def build_snow_wall():
 
 
 AO_ROCK = dict(samples=16, dist=2.4, gradient="vertical", low=0.62, high=1.0,
-               power=0.8, floor=0.32, z_range=(0.0, 13.0))
+               power=0.8, floor=0.32, z_range=(0.0, 20.0))
 
 
 def bool_apply(obj, cutter, op):
@@ -274,44 +274,60 @@ def rock_bore_path():
     return left + arch + right
 
 
-ROCK_MOUND = [(13.0, 0.0), (13.2, 3.0), (12.6, 5.6), (11.6, 7.8), (10.2, 9.8), (8.4, 11.2),
-              (5.8, 12.1), (2.5, 12.6), (0.0, 12.7), (-2.8, 12.5), (-6.0, 11.9), (-8.6, 10.9),
-              (-10.4, 9.4), (-11.8, 7.4), (-12.7, 5.0), (-13.2, 2.6), (-13.0, 0.0)]
+ROCK_MOUND = [(17.0, 0.0), (16.4, 2.2), (15.0, 4.6), (13.4, 7.0), (11.6, 9.6), (9.8, 12.0),
+              (7.8, 14.4), (5.6, 16.6), (3.4, 18.4), (1.4, 19.7), (-0.6, 19.2), (-2.8, 17.9),
+              (-5.2, 16.0), (-7.6, 13.8), (-9.8, 11.4), (-11.8, 8.9), (-13.6, 6.4),
+              (-15.2, 3.8), (-16.5, 1.4), (-17.0, 0.0)]
+
+# contraforturile de pe fata (x0, x1, z0, z1, iesire_y, latime_sus): masa de
+# stanca in relief langa gura; NIMIC in |x| < 8,3 sub bolta
+ROCK_BUTTRESSES = [(-12.2, -8.3, 0.0, 11.2, 8.0, 0.55),
+                   (8.3, 12.6, 0.0, 9.6, 7.9, 0.5),
+                   (-16.2, -12.4, 0.0, 5.6, 7.6, 0.6),
+                   (-1.8, 4.6, 11.6, 16.6, 7.8, 0.6)]
 
 
 def build_rock_tunnel_portal():
-    """Tunelul scurt prin pintenul de sist de pe malul Vidraru (`rock_tunnel_portal`).
+    """Tunelul scurt prin pintenul de sist de pe malul Vidraru (`rock_tunnel_portal`),
+    CONTRACT REVIZUIT (coordonatorul, dupa val 1: proportiile vechi, 26 x 13 m,
+    il faceau arcada).
 
     LISTA DE ELEMENTE (decuparea `transfagarasan_assets_v1/rock_tunnel_portal.png`,
     scrisa INAINTE de geometrie; asfaltul si marcajele din decupare se ignora):
-      1) o movila de stanca in forma de dom, h/l ~0,6 pe decupare, mai joasa la
-         capete (~1/4 din inaltime la margini), din ~12-14 BLOCURI unghiulare mari
-         vizibile pe fata, cu fete plane, gri-cald
-      2) gura: arc semicircular pe pereti verticali, ~45% din latime, interior
-         intunecat care se pierde in adanc
+      1) o movila de stanca in DOM / TRIUNGHI, h/l ~0,6: masa urca spre un varf
+         deasupra gurii, flancurile coboara pana la sol pe ambele parti
+      2) gura: arc pe pereti verticali, ~45% din latime, interior intunecat
       3) INELUL DE ZIDARIE: ~13 bolțari in jurul gurii + 2 stalpi zidiți
-      4) muschi galben-verde pe fetele de sus ale blocurilor, peste tot
-      5) bolovani mici la picior, pe ambele parti
+      4) langa gura, BLOCURI MARI DISTINCTE care ies in relief: 2 inalte de o
+         parte si de alta a gurii, unul jos la stanga, unul deasupra gurii
+      5) muschi galben-verde pe fetele de sus ale blocurilor
+      6) bolovani mici la picior, pe ambele parti
     CORECTURA coordonatorului (suprascrie decuparea): stanca BRUTA, FARA inelul
     de zidarie (3 cade); pinten INTREG strapuns, deschis la ambele capete; lame
-    de sist inclinate in ACEEASI directie pe toata piesa; iarba DOAR pe crestet
-    (strat subtire, pentru 2-3 fagi la integrare), deci muschiul de pe toate
-    blocurile (4) se reduce la crestet. Lista urmeaza corectura:
-      a) MASA: profil de dom ascutit, umeri inalti, 26 m (X) x ~12,7 m (Z) extrudat pe 13 m (y +-6,5),
-         cu gura taiata; capetele acoperite de lamele de la b)
-      b) FETELE DE CAPAT (+-Y): ~13 benzi de sist inclinate la 40 grade (urca
-         spre +X), fiecare rupta in blocuri de 5-9 m, iesite inegal din fata
-         (y 6,2..8,0) -> blocurile unghiulare din 1), dar asezate pe foliatie
-      c) FLANCURILE si CRESTETUL: ~25 de lame pe aceeasi foliatie, iesite din
-         masa, ca silueta sa fie zimtata (dinti de sist), pana la ~13 m
-      d) GURA NEREGULATA: bolta din 12 fatete pe o elipsa cu jitter spre exterior,
+    de sist inclinate in ACEEASI directie; iarba DOAR pe trepte si pe crestet.
+    Lista urmeaza corectura si contractul revizuit:
+      a) MASA: triunghi cu flancuri drepte, 34 m (X) la baza, varful la ~19,7 m
+         (Z) putin la dreapta gurii, extrudat pe 12 m (y +-6), cu gura taiata;
+         capetele acoperite de b)
+      b) FETELE DE CAPAT (+-Y): benzi de sist GROASE (2,6-4 m) la 40 grade (urca
+         spre +X), rupte in blocuri de 3-5 m (mase distincte, nu sindrila),
+         iesite inegal (y 6,0..7,3) -> trepte
+      a2) FATA SE LASA INAPOI cu inaltimea (y' = y (1 - 0,025 z)): baza la +-8 m,
+         varful la ~+-4 m, ca nasul de munte de pe decupare (nu prisma extrudata)
+      c) 4 CONTRAFORTURI (elementul 4): mase de stanca in relief de pana la 2 m
+         in fata fetei: langa gura stanga (x -12,2..-8,3, pana la 11,2 m) si
+         dreapta (8,3..12,6, pana la 9,6 m), jos la stanga (-16,2..-12,4, 5,6 m)
+         si deasupra gurii (-1,8..4,6, z 11,6..16,6); fata lor de sus urca spre
+         +X (foliatia)
+      d) FLANCURILE si CRESTETUL: lame pe aceeasi foliatie, iesite din masa (dinti
+         de sist), pana la 20 m; pe crestet (|x| < 4,5, z > 17) doar lame joase
+      e) GURA NEREGULATA: bolta din 12 fatete pe o elipsa cu jitter spre exterior,
          asimetrica; pereti la |x| >= 7,75; fara inel, fara stalpi
-      e) `Rock_Void`: captuseala VOLCANIC_BLACK doar in primii 2 m la fiecare capat
-      f) `Rock_Grass`: fetele de sus ale crestetului (normala > 0,8, z > 11,4),
-         TROPICAL_GREEN; pe crestet (|x| < 4) doar lame joase, iarba ramane in
-         petice intre ele (loc pentru 2-3 fagi)
-      g) bolovanii de la picior (5): NU, ii pune integrarea (`canyon_rocks`),
-         ca sa nu intre in banda drumului
+      f) `Rock_Void`: captuseala VOLCANIC_BLACK in primii 2 m ai stancii la
+         fiecare capat (y 4,6..6,6), ca sa nu iasa in fata blocurilor
+      g) `Rock_Grass`: fetele orientate in sus (normala > 0,86) de pe trepte si
+         de pe crestet, de la 3 m in sus, TROPICAL_GREEN
+      h) bolovanii de la picior (6): NU, ii pune integrarea (`canyon_rocks`)
     Contract (golul, MASURAT CA GOL pe tot pintenul): >= 15,0 m pe banda 0-2 m,
     >= 7,0 m inaltime libera in |x| <= 6,5. Noduri: `Rock_Schist` (MARBLE_GREY 29,
     clasa tf_schist), `Rock_Grass` (TROPICAL_GREEN 21), `Rock_Void` (VOLCANIC_BLACK
@@ -321,12 +337,13 @@ def build_rock_tunnel_portal():
     rr = random.Random(1997)
     DIP = 40.0
     HL = 8.0
+    HX, HZ = 17.0, 20.0
     mound = ROCK_MOUND
     bore = rock_bore_path()
 
     # a) masa: dom extrudat, cu gura (contur concav, antiorar in XZ)
     core = Builder()
-    extrude_xz(core, [(-13.0, 0.0)] + bore + [(13.0, 0.0)] + mound[1:-1], -6.5, 6.5, TF_SCHIST)
+    extrude_xz(core, [(-HX, 0.0)] + bore + [(HX, 0.0)] + mound[1:-1], -6.0, 6.0, TF_SCHIST)
     core_o = Builder.to_object(core, "RockCore")
 
     # b) fetele de capat: benzi la 40 grade, rupte in blocuri
@@ -336,16 +353,16 @@ def build_rock_tunnel_portal():
     nvec = Vector((-math.sin(dp), math.cos(dp)))
     k = 0
     for sy in (-1, 1):
-        off = -9.2
-        while off < 13.5:
-            t = 1.8 + 1.2 * rr.random()
+        off = -12.0
+        while off < 22.0:
+            t = 2.6 + 1.4 * rr.random()
             mid = off + t * 0.5
-            u = -24.0 + rr.random() * 3.0
-            while u < 24.0:
-                w = 3.5 + 3.5 * rr.random()
+            u = -30.0 + rr.random() * 3.0
+            while u < 30.0:
+                w = 3.0 + 2.2 * rr.random()
                 c2 = nvec * mid + dvec * (u + w * 0.5)
-                out = HL - 1.8 * rr.random() ** 0.7
-                depth = 3.4
+                out = 7.3 - 1.3 * rr.random() ** 0.8    # blocurile raman in urma contraforturilor
+                depth = 3.0
                 schist_blade(ends, (c2.x, sy * (out - depth * 0.5), c2.y), (depth, w + 0.3, t + 0.15),
                              dip_deg=DIP, seed=5000 + k, jag=0.10, lip=0.35)
                 u += w
@@ -353,12 +370,33 @@ def build_rock_tunnel_portal():
             off += t
     ends_o = Builder.to_object(ends, "RockEnds")
     clip = Builder()
-    extrude_xz(clip, [(-13.0, -0.5), (13.0, -0.5)] + mound[1:-1], -HL - 0.01, HL + 0.01, TF_SCHIST)
+    extrude_xz(clip, [(-HX, -0.5), (HX, -0.5)] + mound[1:-1], -HL - 0.01, HL + 0.01, TF_SCHIST)
     clip_o = Builder.to_object(clip, "RockClip")
     bool_apply(ends_o, clip_o, "INTERSECT")
     drop(clip_o)
 
-    # c) flancurile si crestetul: lame pe aceeasi foliatie, iesite din masa
+    # c) contraforturile, pe ambele capete (al doilea capat = oglinda pe Y)
+    butt = Builder()
+    tanf = math.tan(dp) * 0.35          # fata de sus urca spre +X (foliatia, mai lina)
+    for sy in (-1, 1):
+        for bi, (x0, x1, z0, z1, yo, topw) in enumerate(ROCK_BUTTRESSES):
+            br = random.Random(900 + bi * 13 + (0 if sy > 0 else 7))
+            wx = x1 - x0
+            xa = x0 + wx * (1.0 - topw) * 0.5
+            xb = x1 - wx * (1.0 - topw) * 0.5
+            pts = []
+            for (xx, zz, yy) in ((x0, z0, yo), (x1, z0, yo - 0.2 * br.random()),
+                                 (x0, z0, 5.0), (x1, z0, 5.0),
+                                 (xa, z1 - tanf * (xb - xa), yo - 0.6 - 0.3 * br.random()),
+                                 (xb, z1, yo - 0.5 - 0.3 * br.random()),
+                                 (xa, z1 - tanf * (xb - xa), 5.0), (xb, z1, 5.0),
+                                 (x0 + wx * 0.1, (z0 + z1) * 0.5, yo + 0.05),
+                                 (x1 - wx * 0.15, (z0 + z1) * 0.55, yo - 0.15)):
+                pts.append((xx + (br.random() - 0.5) * 0.3, sy * yy, zz))
+            _hull(butt, pts, TF_SCHIST)
+    butt_o = Builder.to_object(butt, "RockButtress")
+
+    # d) flancurile si crestetul: lame pe aceeasi foliatie, iesite din masa
     blades = Builder()
     pts = mound[1:-1]
     k = 0
@@ -366,48 +404,60 @@ def build_rock_tunnel_portal():
         (x0, z0), (x1, z1) = pts[i], pts[i + 1]
         for f in (0.25, 0.75):
             x, z = x0 + (x1 - x0) * f, z0 + (z1 - z0) * f
-            low = abs(x) < 4.0 and z > 11.5     # crestet: lame joase, iarba intre ele (fagii)
+            low = abs(x) < 4.5 and z > 17.0     # crestet: lame joase, iarba intre ele
             nrm = Vector((z1 - z0, -(x1 - x0))).normalized()
-            if nrm.dot(Vector((x, z - 4.0))) < 0:
+            if nrm.dot(Vector((x, z - 6.0))) < 0:
                 nrm = -nrm
             push = (0.1 + 0.3 * rr.random()) if low else (0.6 + 0.8 * rr.random())
             px, pz = x + nrm.x * (push - 1.0), z + nrm.y * (push - 1.0)
             ln = 4.0 + 3.5 * rr.random()
             cy = (rr.random() - 0.5) * (2 * HL - ln) * 0.9
-            schist_blade(blades, (px, cy, pz), (ln, 3.2 + 1.8 * rr.random(), 1.6 + 0.9 * rr.random()),
+            schist_blade(blades, (px, cy, pz), (ln, 3.4 + 2.0 * rr.random(), 1.7 + 1.0 * rr.random()),
                          dip_deg=DIP + (rr.random() - 0.5) * 6.0, seed=7000 + k, jag=0.14)
             k += 1
     blades_o = Builder.to_object(blades, "RockBlades")
     box = Builder()
-    box.box((0.0, 0.0, 6.5), (26.6, 2 * HL, 13.0), TF_SCHIST)   # latimea de contract 26 m (+-0,3)
+    box.box((0.0, 0.0, HZ * 0.5), (2 * HX, 2 * HL, HZ), TF_SCHIST)   # 34 x 16 x 20 m (contract)
     box_o = Builder.to_object(box, "RockBox")
     bool_apply(blades_o, box_o, "INTERSECT")
     drop(box_o)
 
-    rock = join([core_o, ends_o, blades_o], "Rock_Schist")
+    # fata se lasa INAPOI pe masura ce urca (ca pe decupare): baza ramane la
+    # +-8 m, varful se retrage la ~+-4 m; pintenul citeste nas de munte, nu paine
+    BATTER = 0.025
 
-    # d) gura: taie golul prin tot pintenul; apoi nimic sub cota 0
+    def batter(o):
+        for v in o.data.vertices:
+            v.co.y *= (1.0 - BATTER * max(v.co.z, 0.0))
+        o.data.update()
+    for o in (core_o, ends_o, butt_o, blades_o):
+        batter(o)
+    rock = join([core_o, ends_o, butt_o, blades_o], "Rock_Schist")
+
+    # e) gura: taie golul prin tot pintenul; apoi nimic sub cota 0
     cut = Builder()
     extrude_xz(cut, [(bore[0][0], -1.0)] + bore + [(bore[-1][0], -1.0)], -HL - 3.0, HL + 3.0, TF_SCHIST)
     cut_o = Builder.to_object(cut, "RockCut")
     bool_apply(rock, cut_o, "DIFFERENCE")
     drop(cut_o)
     floor = Builder()
-    floor.box((0.0, 0.0, -5.0), (60.0, 40.0, 10.0), TF_SCHIST)
+    floor.box((0.0, 0.0, -5.0), (80.0, 40.0, 10.0), TF_SCHIST)
     floor_o = Builder.to_object(floor, "RockFloor")
     bool_apply(rock, floor_o, "DIFFERENCE")
     drop(floor_o)
     retag_all(rock, TF_SCHIST)
 
-    # f) iarba pe crestet
-    grass, ng = split_faces(rock, lambda f: f.normal.z > 0.80 and f.calc_center_median().z > 11.4,
-                            "Rock_Grass", TROPICAL_GREEN)
+    # g) iarba pe trepte si pe crestet
+    grass, ng = split_faces(rock, lambda f: f.normal.z > 0.86 and f.calc_center_median().z > 3.0
+                            and f.calc_area() > 0.15, "Rock_Grass", TROPICAL_GREEN)
     print("rock_tunnel_portal: %d fete de iarba" % ng)
 
-    # e) captuseala neagra, doar primii 2 m la fiecare capat
+    # f) captuseala neagra in primii 2 m ai stancii, la fiecare capat
     void = Builder()
-    tube_lining(void, bore, HL - 2.0, HL, 0.0)
-    tube_lining(void, bore, -HL, -HL + 2.0, 0.0)
+    tube_lining(void, bore, 4.6, 6.6, 0.0)
+    tube_lining(void, bore, -6.6, -4.6, 0.0)
+    for v in void.bm.verts:                       # aceeasi lasare ca stanca
+        v.co.y *= (1.0 - BATTER * max(v.co.z, 0.0))
     return [rock, grass, to_obj(void, "Rock_Void")]
 
 

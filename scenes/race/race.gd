@@ -172,8 +172,13 @@ func _setup_race() -> void:
 		hud.blind_flash(seconds))
 	# Imbranceala se SIMTE proportional cu cat ai incasat: un autobuz care te ia
 	# din spate zguduie ecranul, o atingere lateral aproape deloc.
+	#
+	# Shake-ul e trauma^2, deci sub ~0.4 practic nu se vede (vezi nota de la
+	# `splashed`). Plafonul vechi era chiar 0.35 — izbiturile se simteau doar
+	# pe hartie (#500). Acum o atingere la prag (2.5 m/s) da ~0.23 (abia), o
+	# izbitura plina (15 m/s, plafonul de violenta) da 0.6.
 	player.bumped.connect(func(_c: Car, _other: Car, delta_v: float) -> void:
-		camera.add_trauma(clampf(delta_v / 40.0, 0.05, 0.35)))
+		camera.add_trauma(clampf(0.12 + delta_v / 22.0, 0.12, 0.6)))
 	# Repunerea teleporteaza masina: camera trebuie sa sara cu ea, altfel
 	# urmareste cateva cadre un punct de la 100m.
 	player.respawned.connect(func(_c: Car) -> void:

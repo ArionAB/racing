@@ -87,6 +87,27 @@ const SLIP_GRIP_ICE: float = 1.5
 @export var drift_steer_bonus: float = 1.5
 @export var drift_bias: float = 0.4
 @export var drift_min_speed: float = 9.0
+## Secunde in care driftul intra deplin dupa ce tragi frana de mana. Inainte
+## era un singur tick: rotatia sarea cu 60% si aderenta spatelui scadea de 4
+## ori dintr-un cadru intr-altul — smucitura, nu alunecare.
+@export var drift_ramp_in: float = 0.2
+## Secunde in care spatele se reaseaza dupa ce eliberezi frana de mana.
+@export var drift_ramp_out: float = 0.25
+## Driftul se dozeaza pe viteza: la drift_min_speed e pivotul strans de pana
+## acum, spre viteza maxima devine o alunecare larga care pastreaza viteza.
+## Inainte era acelasi pivot la orice viteza — la 29 m/s: 3.3 rad/s (190°/s),
+## 42° de derapaj si 11 m/s pierduti in jumatate de secunda.
+##
+## Cat din rotatia COMANDATA in plus (drift_steer_bonus + drift_bias) ramane
+## la viteza maxima; 1 = toata, ca la viteza mica.
+@export var drift_yaw_at_top: float = 0.0
+## Aderenta spatelui in drift la viteza maxima (`drift_grip` e cea de la
+## drift_min_speed; intre ele, liniar). MAI MARE decat drift_grip, nu mai mica:
+## rotatia driftului vine mai ales din dezechilibrul fata-spate (fata tine,
+## spatele cedeaza, forta de pe fata suceste caroseria) — un spate mai moale
+## inseamna mai multa rotatie, nu un arc mai larg. Masurat in ProbeDriftEntry:
+## cu yaw_at_top 0, spatele la 1.2 dadea tot 2.8 rad/s la 29 m/s.
+@export var drift_grip_at_top: float = 4.0
 
 @export_group("Turbo (model Ignition)")
 ## Secunde pana la umplerea barii doar din mers.
@@ -233,6 +254,10 @@ var last_safe_route: int = 0
 # --- Drift/turbo ---
 var is_drifting: bool = false
 var drift_dir: float = 0.0
+## Cat de „intrat" e driftul, 0..1: urca in drift_ramp_in cu frana de mana
+## trasa, coboara in drift_ramp_out dupa. `is_drifting` spune daca e TRASA
+## (turbo, stopuri, fum); fizica si ruliul citesc dozajul de aici.
+var drift_blend: float = 0.0
 ## Stopurile aprinse: frana de serviciu (inapoi cu viteza inainte) sau
 ## handbrake-ul de drift. Citit de [CarLights]; scris o data pe tick.
 var brake_lamp: bool = false
@@ -661,7 +686,7 @@ func _physics_process(delta: float) -> void:
 	var rel_vel := velocity - _ground_velocity
 	var fwd_speed := Vector3(rel_vel.x, 0.0, rel_vel.z).dot(fwd_h)
 
-	_update_drift(drift_pressed, steer, fwd_speed)
+	_update_drift(drift_pressed, steer, fwd_speed, delta)
 	_update_turbo(turbo_pressed, delta)
 	brake_lamp = (throttle < 0.0 and fwd_speed > 1.0) or is_drifting
 
@@ -848,12 +873,17 @@ func _apply_driving(steer: float, throttle: float,
 	apply_force(-hvel * drag * mass * ground_frac, _contact_offset)
 
 	# --- Grip lateral, per axa: fata tine, spatele aluneca in drift ---
+	# Dozat cu rampa (drift_blend) si cu viteza: cu cat mai repede, cu atat
+	# spatele cedeaza mai putin, deci se roteste mai putin — arc larg.
+	var drift_amt := _drift_amount()
+	var drift_t := _drift_speed_t(fwd_speed)
 	for axle in 2:
 		if _axle_grounded[axle] == 0:
 			continue
 		var grip_axle := grip
-		if axle == 1 and is_drifting:
-			grip_axle = drift_grip
+		if axle == 1 and drift_amt > 0.0:
+			grip_axle = lerpf(grip,
+				lerpf(drift_grip, drift_grip_at_top, drift_t), drift_amt)
 		if slip_time > 0.0:
 			grip_axle = slip_grip
 		# Viteza laterala A AXEI (cu componenta din rotatie): spatele care se
@@ -869,9 +899,11 @@ func _apply_driving(steer: float, throttle: float,
 	# --- Directia (amplificata si "impinsa" in directia drift-ului) ---
 	var speed_frac := clampf(absf(fwd_speed) / (max_speed * 0.5), 0.0, 1.0)
 	var effective_steer := steer
-	if is_drifting:
-		effective_steer = clampf(
+	if drift_amt > 0.0:
+		var drift_steer := clampf(
 			steer * drift_steer_bonus + drift_dir * drift_bias, -1.6, 1.6)
+		effective_steer += (drift_steer - steer) \
+			* lerpf(1.0, drift_yaw_at_top, drift_t) * drift_amt
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
 	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign
 	# Comanda + rotatia ramasa din lovituri (se stinge singura, plafonata).
@@ -1021,7 +1053,8 @@ func _current_max_speed() -> float:
 # ------------------------------------------------------------------- drift
 
 ## Handbrake pur: alunecare controlata pentru viraje, fara boost la iesire.
-func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float) -> void:
+func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float,
+		delta: float) -> void:
 	if not is_drifting:
 		if drift_pressed and fwd_speed > drift_min_speed and absf(steer) > 0.25:
 			is_drifting = true
@@ -1030,6 +1063,24 @@ func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float) -> void:
 				AudioManager.play_sfx(&"drift_start")
 	elif not drift_pressed or fwd_speed < drift_min_speed * 0.55:
 		is_drifting = false
+	if is_drifting:
+		drift_blend = move_toward(drift_blend, 1.0,
+			delta / maxf(drift_ramp_in, 0.001))
+	else:
+		drift_blend = move_toward(drift_blend, 0.0,
+			delta / maxf(drift_ramp_out, 0.001))
+
+
+## Dozajul driftului aplicat fizicii: rampa netezita (smoothstep), ca intrarea
+## sa nu porneasca nici ea cu o treapta de panta.
+func _drift_amount() -> float:
+	return smoothstep(0.0, 1.0, drift_blend)
+
+
+## 0 la drift_min_speed, 1 la viteza maxima a masinii — driftul se dozeaza pe
+## viteza PROPRIE, ca tuk-tuk-ul (18 m/s) sa-si aiba si el driftul rapid.
+func _drift_speed_t(fwd_speed: float) -> float:
+	return clampf(inverse_lerp(drift_min_speed, max_speed, fwd_speed), 0.0, 1.0)
 
 # ------------------------------------------------------------------- turbo
 
@@ -1332,6 +1383,7 @@ func _eject(fling: Vector3, cause: String = "", value: float = 0.0) -> void:
 	is_ejected = true
 	_eject_left = eject_hold
 	is_drifting = false
+	drift_blend = 0.0
 	is_boosting = false
 	_forced_boost = 0.0
 	ejected.emit(self, ragdoll)
@@ -1467,6 +1519,7 @@ func respawn(backoff_m: float = 14.0) -> void:
 	_prev_velocity = velocity
 	_commanded_yaw = 0.0
 	is_drifting = false
+	drift_blend = 0.0
 	is_boosting = false
 	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
 	_douse_left = 0.0 # repus = uscat, nu mai picura
@@ -2600,7 +2653,7 @@ func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	# care vinde alunecarea, calibrat mic ca sa nu se bata cu ruliul fizic —
 	# si invartirea de tromba (_update_spin), care e doar vizuala prin design.
 	var speed_frac := clampf(fwd_speed / max_speed, 0.0, 1.0)
-	var target_roll := -steer * 0.05 * speed_frac * (1.6 if is_drifting else 0.0)
+	var target_roll := -steer * 0.05 * speed_frac * 1.6 * drift_blend
 	_visual.rotation.z = lerpf(_visual.rotation.z, target_roll, 8.0 * delta)
 	_update_spin(delta)
 

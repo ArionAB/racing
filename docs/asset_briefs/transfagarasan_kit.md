@@ -396,7 +396,7 @@ sus, sunt sursa de **cote și de contracte de cod**.
    altceva** și se compară cu `mountain_tunnel.glb` scalat, cel care trece
    azi ProbeRace. Coordonatorul judecă comparația înainte de valul 1:
    portalul e locul semaforului.
-1. **Valul 1:**
+1. **Valul 1** (gata, 13 oct 2026, integrat pe `transfagarasan/kit-val1`; stare în `transfagarasan_inventory.md`):
    - **tf-a**: restul drumului (§1.1), cu **`snow_wall` primul** (pe lângă
      captura izolată, una cu 4 module înlănțuite pe o curbă) și
      `rock_tunnel_portal` cu golul măsurat;

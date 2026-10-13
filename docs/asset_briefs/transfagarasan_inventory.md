@@ -5,6 +5,58 @@ Contract: `docs/asset_briefs/transfagarasan_kit.md`. Cote MASURATE din GLB
 Build: `tools/blender/build_tf_road.py` (vocabular: `transfagarasan_shapes.py`).
 Verdict: `bash tools/blender/verify_transfagarasan.sh` -> `VERDICT KIT: OK`.
 
+## Valul 1 — integrat (13 oct 2026)
+
+Inventarele pe grupe, fiecare cu cote, triunghiuri, noduri, tabele de
+fidelitate și „Stare la oprire”:
+- `transfagarasan_inventory_a.md`, tf-a, drumul: `snow_wall`,
+  `rock_tunnel_portal`, `retaining_wall_straight/curve`, `snow_pole`,
+  `road_works`, `level_crossing`, `bear_warning_sign`;
+- `transfagarasan_inventory_b.md`, tf-b, stânci și plante:
+  `schist_outcrop_a/b/c`, `scree_cone`, `jneapan_a/b`, `beech_tree_a/b`,
+  `bujor_de_munte`, `afin`;
+- `transfagarasan_inventory_c.md`, tf-c: `brown_bear`, animat (`Idle`,
+  `Walk`, `Stand`).
+
+`bash tools/blender/verify_transfagarasan.sh` dă **VERDICT KIT: OK** pe ramura
+integrată. Golurile: Bâlea 14,85 × 7,40 m, stânca 15,40 × 7,60 m.
+
+**Toate piesele au fost acceptate de coordonator pe comparații.** Abaterile
+asumate (detaliile sunt în inventarele pe grupe):
+- **zăpada portalului Bâlea** rămâne rev. 2, cu blocuri prea cubice. Rev. 3 și
+  rev. 4 au fost respinse: au ieșit cioburi, apoi grindină. Verdictul final se
+  dă pe captura din joc;
+- **pe fața portalului de stâncă** blocurile ies ca plăci înclinate, nu ca
+  poliedrele groase de pe planșă (3 runde din 3);
+- **ursul ridicat** are trunchiul cilindric (h/l 1,96 față de ținta de 1,68).
+  Se reverifică pe captura din joc;
+- **`beech_tree_a`:** trunchiul gri-deschis citește subțire, iar coroana are
+  un gol central. La integrare, trunchiul se întunecă din tentă;
+- **zidurile de sprijin** au pietre mai regulate decât pe planșă.
+
+**Lama de șist rămâne în două implementări, decizie de integrare.** E vorba de
+`tf_shapes_nature.py` (tf-b: `foliation_stack`, `schist_slab`, folosite la
+aflorimente) și de `transfagarasan_shapes.schist_blade` (tf-a, varianta
+minimă din portalul de stâncă). Unificarea ar fi schimbat un GLB deja
+acceptat, deci nu s-a făcut. Piesele noi de șist folosesc
+`tf_shapes_nature.py`.
+
+**De făcut la montarea în Track21** (coordonatorul, în `scripts/` / `scenes/`):
+- **ursul:**
+  - în `WALK_CYCLE_SPEED_BY_MODEL` din `sliding_hazard.gd` se adaugă
+    `&"brown_bear": 0.97`, altfel labele patinează;
+  - `sweep_speed` de pe `Hazarduri/Urs` coboară de la 1,8 spre ~1,2, pentru
+    pasul greu;
+  - `model_scale` 1,0 în locul vacii.
+- **trecerea la nivel:** brațele se coboară rotind `Crossing_Boom_L/_R` cu
+  −90° în jurul +Z (Godot).
+- **tentele de clasă:**
+  - `tf_schist` pe `*_Schist`, cu ținta `#7E8478`;
+  - `*_Crack` rămâne pe atlas;
+  - bujorul trece spre magenta `#B63A7A`;
+  - coroana fagului pe `beech_canopy`, recalculată;
+  - trunchiul fagului întunecat.
+
 ## Decizia coordonatorului (13 oct 2026): ACCEPTAT pe rev. 2
 
 Piesa e **acceptată în starea rev. 2**: placa, gura teșită și golul

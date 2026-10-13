@@ -81,6 +81,16 @@ check "structures/tunnel_portal_balea.glb" --origin=assembly
 gap_check "structures/tunnel_portal_balea.glb" 13.0 7.0
 
 echo
+echo "== valul 1, tf-c: ursul animat (kit §1.6) =="
+# Fara exceptii de origine: un singur mesh skinnuit, baza la 0, centrat; armatura
+# la identitate pe nodul radacina (nimic de aplicat). Garda in plus: clipurile
+# exact Idle/Walk/Stand (contractul cu SlidingHazard.ANIM_*), citite din GLB.
+check "animals/brown_bear.glb"
+if [ -f "$ROOT/animals/brown_bear.glb" ]; then
+  python tools/blender/check_glb_anims.py "$ROOT/animals/brown_bear.glb" Idle Walk Stand || fail=1
+fi
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

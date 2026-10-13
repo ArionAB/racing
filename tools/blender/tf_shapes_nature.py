@@ -28,15 +28,19 @@ sloturile (memoria clase-pe-piese-de-kit). ROCK_DARK e interzis (rugina).
         v = +90 grade fata de s), z sus. `.w(s, v, z)` -> Vector in lume.
         Toate lamele unei piese folosesc ACELASI cadru => aceeasi directie.
 
-  slab_profile(foot_s, height, back_lean=6, dip=52, tip_cut=0.25, belly=0.0)
+  slab_profile(foot_s, height, back_lean=6, dip=52, tip_cut=0.25, belly=0.0,
+               tip_w=0.0)
         conturul (s, z) al unei lame, convex: piciorul fetei abrupte (spatele) la
         foot_s, fata abrupta aplecata `back_lean` grade fata de verticala pana la
         varf, varful TESIT (`tip_cut` m pe ambele fete), fata lunga (planul de
         foliatie vazut din lateral) coborand la `dip` grade FATA DE ORIZONTALA
         pana la sol; `belly` umfla mijlocul fetei lungi (ramane convex).
         Latimea pe s = height*tan(back_lean) + height/tan(dip).
+        `tip_w` > 0: varful e o FATA RUPTA plana de cel putin tip_w m (decuparea
+        are capete tesite, nu varf de cutit), iar `height` e cota fetei rupte.
 
-  foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2) -> (profiles, cracks)
+  foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2, tip_w=0.0)
+                  -> (profiles, cracks)
         STIVA "CARTI APLECATE" (folosita de toate trei aflorimentele): placi
         paralele cu foliatia (`dip` fata de orizontala), asezate una PESTE alta
         pe normala planului; specs = [(h, t, back_lean), ...], placa 0 e pana de
@@ -90,6 +94,12 @@ sloturile (memoria clase-pe-piese-de-kit). ROCK_DARK e interzis (rugina).
         taie un contur (s, z) cu o fractura abrupta la capatul din aval
         (creste lungi pe foliatie culcata, `schist_outcrop_b`).
 
+  foot_rubble(b, fr, foot_sv, n, seed=0, size=(0.3, 1.2), slot=TF_SCHIST,
+              out=(-0.15, 0.25))
+        MOLOZ la piciorul stancii: n lespezi de marimi diferite pe perimetrul
+        amprentei (puncte (s, v)), iesite in afara, aplecate spre afara, pe
+        jumatate ingropate -- stanca nu mai pare infipta in sol.
+
   hull(b, pts, slot)
         invelitoarea convexa a unor puncte, pe un slot (baza tuturor de mai sus).
 
@@ -100,11 +110,11 @@ sloturile (memoria clase-pe-piese-de-kit). ROCK_DARK e interzis (rugina).
         de frunzis. 2*seg*rings triunghiuri (36 la 6x3).
   branch(b, pts, r0, r1, slot, seg=6)
         ramura / trunchi conic pe traseu (taper_sweep cu raze interpolate).
-  needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, n=3,
-             rise=0.0, seg=5, rings=2)
-        PERNA DE ACE de jneapan: "creanga cu ace" PLATA (ca o feriga de sus):
-        miez turtit pe directia ramurii + n lobi alternanti pe fiecare parte
-        (marginea zimtata); `rise` ridica capatul pernei.
+  needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, teeth=3,
+             pitch=6, ridge=0.05, roll=0)
+        PERNA DE ACE de jneapan: PLACA PLATA alungita pe ramura (ca o frunza de
+        feriga), margine zimtata pe lung, capete ascutite, fata de sus bombata,
+        capatul ridicat cu `pitch` grade. 4*(4*teeth+2) tri (56 la teeth=3).
   crown_mass(b, center, radii, slot, seed=0, n=9, clump_size=1.4, el_lo=-0.25,
              core=True, squash=1.0, core_scale=0.88)
         MASA DE COROANA de foios: miez elipsoidal (88%) + n ciorchini mari pe
@@ -172,7 +182,23 @@ class SchistFrame:
         return self.o + self.d * s + self.n * v + Vector((0.0, 0.0, z))
 
 
-def slab_profile(foot_s, height, back_lean=6.0, dip=52.0, tip_cut=0.25, belly=0.0):
+def _tip_len(u_back, u_long, tip_cut, tip_w):
+    """Cat se taie din varf pe fiecare fata ca fata rupta (coarda t1-t2) sa aiba
+    cel putin `tip_w` m. u_back / u_long = directiile din varf in jos pe cele
+    doua fete (unitare)."""
+    ch = (u_long - u_back).length
+    return max(tip_cut, tip_w / ch) if ch > 1e-6 else tip_cut
+
+
+def slab_profile(foot_s, height, back_lean=6.0, dip=52.0, tip_cut=0.25, belly=0.0,
+                 tip_w=0.0):
+    bl, dl = math.radians(back_lean), math.radians(dip)
+    u_back = Vector((-math.sin(bl), -math.cos(bl)))
+    u_long = Vector((math.cos(dl), -math.sin(dl)))
+    d = _tip_len(u_back, u_long, tip_cut, tip_w)
+    # cota ceruta (`height`) e a FETEI RUPTE, nu a varfului teoretic
+    height = height + d * min(math.cos(bl), math.sin(dl)) if tip_w > 0 else height
+    tip_cut = d
     tip = Vector((foot_s + height * math.tan(math.radians(back_lean)), height))
     end = Vector((tip.x + height / math.tan(math.radians(dip)), 0.0))
     foot = Vector((foot_s, 0.0))
@@ -191,7 +217,7 @@ def slab_profile(foot_s, height, back_lean=6.0, dip=52.0, tip_cut=0.25, belly=0.
     return [(p.x, p.y) for p in pts]
 
 
-def foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2):
+def foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2, tip_w=0.0):
     """STIVA DE LAME pe foliatie ("carti aplecate"): lame-placi PARALELE cu
     planul de foliatie (inclinat `dip` grade fata de orizontala, coborand spre
     +s), asezate una PESTE alta pe normala planului, fiecare taiata de o fata
@@ -204,11 +230,17 @@ def foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2):
     Intoarce (profiles, cracks): conturul (s, z) al fiecarei lame si conturul
     fiecarei fisuri (fasia de gol de sub lama k, de la fata ei abrupta la sol,
     ingropata 0,04 m in ambele lame). Pentru extrudare pe v: `schist_slab` si
-    `crack_hull`/`crack_strip`."""
+    `crack_hull`/`crack_strip`.
+    `tip_w` > 0: fiecare varf e TESIT (fata rupta, plana) de cel putin tip_w m,
+    iar `h` din specs e cota fetei rupte (varful teoretic se ridica)."""
     dl = math.radians(dip)
     sd, cd = math.sin(dl), math.cos(dl)
     h0, _t0, bl0 = specs[0]
-    prof0 = slab_profile(s0, h0, back_lean=bl0, dip=dip, tip_cut=tip_cut)
+    prof0 = slab_profile(s0, h0, back_lean=bl0, dip=dip, tip_cut=tip_cut, tip_w=tip_w)
+    b0 = math.radians(bl0)
+    d0 = _tip_len(Vector((-math.sin(b0), -math.cos(b0))), Vector((cd, -sd)), tip_cut, tip_w)
+    if tip_w > 0:
+        h0 = h0 + d0 * min(math.cos(b0), sd)
     s_tip0 = s0 + h0 * math.tan(math.radians(bl0))
     U = s_tip0 * sd + h0 * cd                   # planul de sus al lamei 0
     profiles, cracks = [prof0], []
@@ -216,8 +248,11 @@ def foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2):
         c = U + gap
         U2 = c + t
         bb = math.radians(bl)
-        B = Vector(((U2 - h * cd) / sd, h))
         down = Vector((-math.sin(bb), -math.cos(bb)))
+        dk = _tip_len(down, Vector((cd, -sd)), tip_cut, tip_w)
+        if tip_w > 0:
+            h = h + dk * min(math.cos(bb), sd)
+        B = Vector(((U2 - h * cd) / sd, h))
         cosdb = math.cos(dl - bb)
 
         def on_back(plane):
@@ -230,8 +265,8 @@ def foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2):
         E = on_back(c)
         up = -down
         dn = Vector((math.cos(dl), -math.sin(dl)))
-        t1 = B - up * tip_cut
-        t2 = B + dn * tip_cut
+        t1 = B - up * dk
+        t2 = B + dn * dk
         C = Vector((U2 / sd, 0.0))
         D = Vector((c / sd, 0.0))
         prof = [E, t1, t2, C]
@@ -444,6 +479,68 @@ def slab_stone(b, center, size, normal=(0.0, 0.0, 1.0), spin=0.0, seed=0,
     return hull(b, pts, slot)
 
 
+def _hull2d(pts):
+    pts = sorted(set((round(x, 4), round(y, 4)) for x, y in pts))
+    if len(pts) < 3:
+        return pts
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lo, hi = [], []
+    for p in pts:
+        while len(lo) >= 2 and cross(lo[-2], lo[-1], p) <= 0:
+            lo.pop()
+        lo.append(p)
+    for p in reversed(pts):
+        while len(hi) >= 2 and cross(hi[-2], hi[-1], p) <= 0:
+            hi.pop()
+        hi.append(p)
+    return lo[:-1] + hi[:-1]
+
+
+def foot_rubble(b, fr, foot_sv, n, seed=0, size=(0.3, 1.2), slot=TF_SCHIST, out=(-0.15, 0.25)):
+    """MOLOZ la piciorul unei stanci (memoria patru-defecte-de-diorama: obiectul
+    nu are voie sa para infipt in sol): `n` lespezi de marimi DIFERITE (size =
+    (min, max) pe latura lunga), asezate de jur imprejurul amprentei (`foot_sv`
+    = puncte (s, v) ale bazei), cate una pe un arc egal al perimetrului, la
+    `out` m de muchie (negativ = sprijinite pe stanca), aplecate spre afara
+    15-40 grade, BLOCURI (grosimea 45-70% din latura) ingropate ~20%. Marimile
+    alterneaza mare / mediu / mic ca sa nu iasa un sirag."""
+    r = _rnd(seed)
+    poly = _hull2d(foot_sv)
+    m = len(poly)
+    segs = []
+    tot = 0.0
+    for i in range(m):
+        a, c = Vector(poly[i]), Vector(poly[(i + 1) % m])
+        segs.append((a, c, tot))
+        tot += (c - a).length
+    cs = sum((Vector(p) for p in poly), Vector((0.0, 0.0))) / m
+    faces = []
+    for k in range(n):
+        t = (k + 0.2 + 0.6 * r()) / n * tot
+        for (a, c, t0) in segs:
+            L = (c - a).length
+            if t0 <= t <= t0 + L:
+                p = a.lerp(c, (t - t0) / max(L, 1e-6))
+                break
+        outv = (p - cs).normalized()
+        # marimi alternate: mare / mediu / mic (nu un sirag de pietre egale)
+        tier = (0.65 + 0.35 * r(), 0.3 + 0.25 * r(), 0.05 + 0.2 * r())[k % 3]
+        Ls = size[0] + (size[1] - size[0]) * tier
+        q = p + outv * (out[0] + (out[1] - out[0]) * r() + Ls * 0.15)
+        w = fr.w(q.x, q.y, 0.0)
+        o3 = fr.d * outv.x + fr.n * outv.y
+        # sprijinite de stanca: fata de sus privind in afara 15-40 grade
+        tilt = math.radians(15.0 + 25.0 * r())
+        nrm = Vector((0.0, 0.0, math.cos(tilt))) + o3 * math.sin(tilt)
+        # BLOCURI, nu dale: grosimea 45-70% din latura lunga
+        sz = (Ls, Ls * (0.6 + 0.25 * r()), Ls * (0.45 + 0.25 * r()))
+        faces += slab_stone(b, w + Vector((0.0, 0.0, sz[2] * 0.32)), sz, nrm,
+                            spin=r() * 180.0, seed=seed * 50 + k, slot=slot)
+    return faces
+
+
 # ---------------------------------------------------------------------------
 # plante
 # ---------------------------------------------------------------------------
@@ -471,33 +568,56 @@ def branch(b, pts, r0, r1, slot, seg=6):
     return b.taper_sweep(pts, radii, slot, segments=seg)
 
 
-def needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, n=3, rise=0.0,
-               seg=5, rings=2):
-    """PERNA DE ACE de jneapan = o "creanga cu ace" PLATA, ca o frunza de feriga
-    vazuta de sus (plansa): un miez turtit pe directia ramurii + `n` lobi pe
-    FIECARE parte, alternanti, turtiti, care dau marginea ZIMTATA. Capatul urca
-    cu `rise`. Ciorchini de seg x rings (20 tri la 5x2): perna ~ (1 + 2n) x 20."""
+def needle_pad(b, base, azim_deg, length, width, height, slot, seed=0, teeth=3,
+               pitch=6.0, ridge=0.05, roll=0.0):
+    """PERNA DE ACE de jneapan: PLACA PLATA alungita pe directia ramurii, ca o
+    frunza de feriga (decuparea), cu marginea ZIMTATA pe lung (`teeth` dinti pe
+    fiecare parte), capetele ascutite, groasa `height` (0,15-0,25 m), fata de
+    sus usor bombata (`ridge`). Culcata aproape orizontal, capatul ridicat cu
+    `pitch` grade; `roll` o inclina in jurul axei ei. Centrul in `base`.
+
+    Topologie: contur stelat de N = 4*teeth + 2 puncte, evantai sus si jos din
+    centru + banda laterala -> 4N triunghiuri (56 la teeth=3). Asa ies multe
+    perne mari si putine triunghiuri (jneapanul merge pe MultiMesh)."""
     r = _rnd(seed)
+    L, W, T = length, width, height
+    outline = [(L * 0.5, 0.0)]
+    # partea +w, de la varf spre coada, apoi partea -w inapoi
+    for side in (1.0, -1.0):
+        pts = []
+        for i in range(teeth):
+            u0 = 0.5 - (i + 0.25) / (teeth + 0.5)
+            u1 = 0.5 - (i + 0.75) / (teeth + 0.5)
+            env0 = math.sin(math.pi * (u0 + 0.5)) ** 0.6
+            env1 = math.sin(math.pi * (u1 + 0.5)) ** 0.6
+            pts.append((L * u0, side * W * 0.5 * env0 * (0.95 + 0.1 * r())))   # dinte
+            pts.append((L * u1, side * W * 0.5 * env1 * 0.62))                  # scobitura
+        if side < 0:
+            pts = list(reversed(pts))
+        outline += pts
+        if side > 0:
+            outline.append((-L * 0.5, 0.0))
+    # outline: varf(+u) -> latura +w -> coada -> latura -w -> inapoi la varf
     a = math.radians(azim_deg)
-    d = Vector((math.cos(a), math.sin(a), 0.0))
-    side = Vector((-d.y, d.x, 0.0))
-    base = Vector(base)
+    rot = (Matrix.Rotation(a, 3, "Z") @ Matrix.Rotation(-math.radians(pitch), 3, "Y")
+           @ Matrix.Rotation(math.radians(roll), 3, "X"))
+    c = Vector(base)
+
+    def P(u, w, z):
+        return b.bm.verts.new(c + rot @ Vector((u, w, z)))
+    top = [P(u, w, T * 0.5) for (u, w) in outline]
+    bot = [P(u * 0.92, w * 0.85, -T * 0.5) for (u, w) in outline]
+    ct = P(0.0, 0.0, T * 0.5 + ridge)
+    cb = P(0.0, 0.0, -T * 0.5)
+    n = len(outline)
     faces = []
-    # miezul (rahisul acoperit de ace)
-    faces += clump(b, base + Vector((0.0, 0.0, rise * 0.5)), (length, width * 0.5, height * 0.62),
-                   slot, seed=seed * 13, seg=seg + 1, rings=rings, dev=0.15,
-                   yaw=azim_deg, tilt=0.12)
     for i in range(n):
-        for sgn in (-1.0, 1.0):
-            t = (i + (0.25 if sgn > 0 else 0.75)) / n
-            along = length * (t - 0.5) * 0.9
-            p = (base + d * along + side * (sgn * width * (0.30 + 0.06 * r()))
-                 + Vector((0.0, 0.0, rise * t + (r() - 0.6) * height * 0.15)))
-            lc = length / n * (0.95 + 0.25 * r())
-            wc = width * (0.40 + 0.12 * r()) * (1.0 - 0.3 * t)
-            faces += clump(b, p, (lc, wc, height * (0.42 + 0.15 * r())), slot,
-                           seed=seed * 13 + 1 + i * 2 + (sgn > 0), seg=seg, rings=rings,
-                           dev=0.2, yaw=azim_deg + sgn * (35.0 + 15.0 * r()), tilt=0.2)
+        j = (i + 1) % n
+        faces.append(b.bm.faces.new((ct, top[i], top[j])))
+        faces.append(b.bm.faces.new((cb, bot[j], bot[i])))
+        faces.append(b.bm.faces.new((top[i], bot[i], bot[j], top[j])))
+    for f in faces:
+        f[b.slot] = slot
     return faces
 
 

@@ -123,6 +123,9 @@ const WALK_CYCLE_SPEED_BY_MODEL := {
 	&"elephant": 1.72, &"cow": 0.94,
 	# lama: 2,34 m/s masurat la model_scale 3,135 (Track15) -> 0,746 la 1,0
 	&"llama": 0.746, &"llama_b": 0.746, &"llama_c": 0.746,
+	# ursul brun (Transfagarasan, Track21): pasul greu; cheia e numele fisierului
+	# (`model_scene.resource_path.get_file().get_basename()`), deci `brown_bear.glb`.
+	&"brown_bear": 0.97,
 }
 ## Galop: vaca din cireada Serengeti (12 m/s) are S* = 4,06 (patinare minima
 ## 3,3 m/s la ritm 2,87; cu constanta globala 8,0 ritmul ar fi 1,46).

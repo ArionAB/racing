@@ -125,7 +125,10 @@ func _report() -> bool:
 		# peste drum (asa cere brief-ul), dar n-are corp fizic care sa loveasca
 		# masina. Verificarea e pe MODUL REZOLVAT (metadata proprie, apoi
 		# `PROP_COLLISION` dupa numele fisierului), nu pe nume de prefix.
-		if (near < hw_here + ROAD_MARGIN and not _spans_road(entry["path"])
+		var road_limit := hw_here + ROAD_MARGIN
+		if _is_edge_piece(entry["path"]):
+			road_limit = hw_here - EDGE_TOLERANCE
+		if (near < road_limit and not _spans_road(entry["path"])
 				and _effective_collision_mode(n3) != "none"):
 			verdict += " / IN DRUM"
 		if not verdict.begins_with("ok") or verdict.contains("IN DRUM"):
@@ -184,7 +187,22 @@ const SPANS_ROAD_PREFIXES: Array[String] = [
 
 	# Kyoto POI E: poarta-turn Romon (coliziune `mesh`, golul de 14,1 m peste sosea).
 	"PoartaRomon",
+	# Transfagarasan (montarea kitului, tools/gen_mont_scena.gd): portalurile
+	# (coliziune `mesh`, goluri de 14,85 / 15,40 m), coronamentul barajului (sta
+	# SUB asfalt, parapetul e la 6,25-7 m), trecerea la nivel (stalpii la 9 m),
+	# santierul din tunel. Garda adevarata e probe_solid (gabaritul pe axa).
+	"Portal_", "Dam_", "Trecere_nivel", "Santier_",
 ]
+
+## Piese de MARGINE: originea sta pe marginea asfaltului prin proiect (zid de
+## sprijin cu originea pe rim, banca de zapada, jalon). Pe ele "IN DRUM" inseamna
+## ca centrul lor e INAUNTRUL asfaltului, nu la mai putin de ROAD_MARGIN de el.
+const EDGE_PREFIXES: Array[String] = [
+	"ZidC", "ZidD", "Zapada_", "Jalon", "Semn_urs",
+]
+## Cat de mult poate intra originea unei piese de margine sub marginea asfaltului
+## (curba zidului: sageata de 0,35 m + rotunjirea cotelor coapte).
+const EDGE_TOLERANCE: float = 0.8
 
 ## Modul de coliziune REZOLVAT pentru un prop asezat de mana: metadata proprie
 ## `coliziune` daca exista, altfel implicitul din `WorldProp.PROP_COLLISION`
@@ -225,6 +243,14 @@ static func _top_y(n3: Node3D) -> float:
 		for k in 8:
 			top = maxf(top, (xf * bb.get_endpoint(k)).y)
 	return top if top > -INF else n3.global_position.y
+
+
+static func _is_edge_piece(path: String) -> bool:
+	var leaf := path.get_file() if path.contains("/") else path
+	for prefix in EDGE_PREFIXES:
+		if leaf.begins_with(prefix):
+			return true
+	return false
 
 
 static func _spans_road(path: String) -> bool:

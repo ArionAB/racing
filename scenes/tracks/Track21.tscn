@@ -9,11 +9,19 @@
 [ext_resource type="Script" path="res://scenes/hazards/train_hazard.gd" id="7_train"]
 [ext_resource type="Script" path="res://scenes/hazards/hazard_lamp.gd" id="15_lamp"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
-[ext_resource type="PackedScene" path="res://assets/models/props/cow.glb" id="10_cow"]
 [ext_resource type="PackedScene" path="res://assets/models/vehicles/snowplow.glb" id="11_plow"]
-[ext_resource type="PackedScene" path="res://assets/models/structures/mountain_tunnel.glb" id="12_tunnel"]
-[ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
-[ext_resource type="PackedScene" path="res://assets/models/scatter/snow_patch.glb" id="14_snow"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/structures/tunnel_portal_balea.glb" id="m_portal_balea"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/props/road_works.glb" id="m_road_works"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/structures/vidraru_dam.glb" id="m_dam"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/structures/retaining_wall_curve.glb" id="m_wall_curve"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/structures/snow_wall.glb" id="m_snow_wall"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/props/snow_pole.glb" id="m_snow_pole"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/props/prometheus_statue.glb" id="m_prometheus"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/structures/rock_tunnel_portal.glb" id="m_rock_portal"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/animals/brown_bear.glb" id="m_bear"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/props/bear_warning_sign.glb" id="m_bear_sign"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/buildings/poenari_ruin.glb" id="m_poenari"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/props/level_crossing.glb" id="m_level_crossing"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -83,11 +91,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 206.427, 17.833, 104.281)
 gizmo_extents = 3.0
 script = ExtResource("4_hzm")
 kind = 0
-model = ExtResource("10_cow")
-model_scale = 0.9
+model = ExtResource("m_bear")
+model_scale = 1.0
 face_travel = true
 motion = 1
-sweep_speed = 1.8
+sweep_speed = 1.2
 
 [node name="SemaforTunel" type="Node3D" parent="Hazarduri" node_paths=PackedStringArray("lamp")]
 transform = Transform3D(0.98387, 0, 0.17889, 0, 1.0, 0, -0.17889, 0, 0.98387, 220.624, 42.185, -96.551)
@@ -136,21 +144,21 @@ avalanche_keep_lane = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 122.326, 27.794, -259.000)
 script = ExtResource("6_herd")
 animal_model = "res://assets/models/monumentvalley/animals/sheep.glb"
-alt_model = "res://assets/models/monumentvalley/animals/sheep.glb"
+alt_model = "res://assets/models/transfagarasan/animals/sheepdog.glb"
 flow_dir = Vector3(0.0, 0, -1.0)
 road_dir = Vector3(-1.0000, 0, -0.0000)
 corridor_m = 14.0
 animal_mass = 45.0
 speed = 2.5
 spacing = 1.4
-zebra_ratio = 0.0
+zebra_ratio = 0.1
 no_body_radius = 9.0
 body_reach = 18.0
 
 [node name="Tren" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(-0.80327, 0, 0.59562, 0, 1.0, 0, -0.59562, 0, -0.80327, -199.674, 5.033, -131.918)
 script = ExtResource("7_train")
-model_path = "res://assets/models/vehicles/train.glb"
+model_path = "res://assets/models/transfagarasan/vehicles/ro_train.glb"
 period = 40.0
 half_rail = 65.0
 road_half_width = 7.0
@@ -178,182 +186,386 @@ surface_material_override/0 = SubResource("Mat_balea")
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("9_prop")
 
-[node name="Portal_S" parent="DecorManual" instance=ExtResource("12_tunnel")]
-transform = Transform3D(-1.47580, 0, -0.17889, 0, 1.25, 0, 0.26833, 0, -0.98387, 215.10, 41.96, -87.85)
-metadata/coliziune = "none"
-
-[node name="Portal_N" parent="DecorManual" instance=ExtResource("12_tunnel")]
-transform = Transform3D(-1.44229, 0, -0.27472, 0, 1.25, 0, 0.41208, 0, -0.96152, 198.94, 43.00, -161.22)
-metadata/coliziune = "none"
-
 [node name="Utilaj_parcat" parent="DecorManual" instance=ExtResource("11_plow")]
 transform = Transform3D(-0.98387, 0, -0.17889, 0, 1.0, 0, 0.17889, 0, -0.98387, 248.14, 38.37, -54.58)
 
-[node name="Zapada00" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 222.62, 35.01, -36.23)
-metadata/coliziune = "none"
+[node name="ZonaTunel" type="Node3D" parent="DecorManual"]
 
-[node name="Zapada01" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 234.19, 35.01, -20.40)
-metadata/coliziune = "none"
+[node name="Portal_S" parent="DecorManual/ZonaTunel" instance=ExtResource("m_portal_balea")]
+transform = Transform3D(-0.96633476, 0, -0.25728798, 0, 1, 0, 0.25728798, 0, -0.96633476, 214.3195, 42.067112, -88.73352)
 
-[node name="Zapada02" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 226.50, 36.06, -37.77)
-metadata/coliziune = "none"
+[node name="Portal_N" parent="DecorManual/ZonaTunel" instance=ExtResource("m_portal_balea")]
+transform = Transform3D(0.9728008, 0, 0.23164324, 0, 1, 0, -0.23164324, 0, 0.9728008, 200.13869, 43.00232, -157.33185)
 
-[node name="Zapada03" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 244.42, 36.06, -29.83)
-metadata/coliziune = "none"
+[node name="Santier_tunel" parent="DecorManual/ZonaTunel" instance=ExtResource("m_road_works")]
+transform = Transform3D(-0.16083124, 0, 0.9869819, 0, 1, 0, -0.9869819, 0, -0.16083124, 216.01434, 42.32805, -103.18486)
 
-[node name="Zapada04" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 230.14, 37.02, -46.00)
-metadata/coliziune = "none"
+[node name="ZonaBaraj" type="Node3D" parent="DecorManual"]
 
-[node name="Zapada05" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 248.06, 37.02, -38.06)
-metadata/coliziune = "none"
+[node name="Dam_01" parent="DecorManual/ZonaBaraj" instance=ExtResource("m_dam")]
+transform = Transform3D(0.26676813, 0, -0.96376073, 0, 1, 0, 0.96376073, 0, 0.26676813, 57.88798, 12.0641365, 247.92894)
+metadata/keep_variants = PackedStringArray("Dam_Module")
 
-[node name="Zapada06" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 229.67, 37.89, -49.96)
-metadata/coliziune = "none"
+[node name="Dam_Tower" parent="DecorManual/ZonaBaraj/Dam_01"]
+visible = false
 
-[node name="Zapada07" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 249.20, 37.89, -51.66)
-metadata/coliziune = "none"
+[node name="Dam_PowerHouse" parent="DecorManual/ZonaBaraj/Dam_01"]
+visible = false
 
-[node name="Zapada08" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 228.69, 38.72, -53.50)
-metadata/coliziune = "none"
+[node name="Dam_02" parent="DecorManual/ZonaBaraj" instance=ExtResource("m_dam")]
+transform = Transform3D(0.2574769, 0, -0.96628445, 0, 1, 0, 0.96628445, 0, 0.2574769, 73.339516, 12, 243.77788)
+metadata/keep_variants = PackedStringArray("Dam_Module")
 
-[node name="Zapada09" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 244.80, 38.72, -64.67)
-metadata/coliziune = "none"
+[node name="Dam_Tower" parent="DecorManual/ZonaBaraj/Dam_02"]
+visible = false
 
-[node name="Zapada10" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 224.20, 39.54, -59.90)
-metadata/coliziune = "none"
+[node name="Dam_PowerHouse" parent="DecorManual/ZonaBaraj/Dam_02"]
+visible = false
 
-[node name="Zapada11" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 238.85, 39.54, -72.92)
-metadata/coliziune = "none"
+[node name="Dam_03" parent="DecorManual/ZonaBaraj" instance=ExtResource("m_dam")]
+transform = Transform3D(0.24204995, 0, -0.9702638, 0, 1, 0, 0.9702638, 0, 0.24204995, 88.814156, 12, 239.7202)
+metadata/keep_variants = PackedStringArray("Dam_Module")
 
-[node name="Zapada12" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 218.22, 40.36, -66.62)
-metadata/coliziune = "none"
+[node name="Dam_Tower" parent="DecorManual/ZonaBaraj/Dam_03"]
+visible = false
 
-[node name="Zapada13" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 232.87, 40.36, -79.65)
-metadata/coliziune = "none"
+[node name="Dam_PowerHouse" parent="DecorManual/ZonaBaraj/Dam_03"]
+visible = false
 
-[node name="Zapada14" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 212.24, 41.18, -73.35)
-metadata/coliziune = "none"
+[node name="Dam_Turn" parent="DecorManual/ZonaBaraj" instance=ExtResource("m_dam")]
+transform = Transform3D(0.24204995, 0, -0.9702638, 0, 1, 0, 0.9702638, 0, 0.24204995, 88.814156, 12, 239.7202)
+metadata/keep_variants = PackedStringArray("Dam_Tower")
 
-[node name="Zapada15" parent="DecorManual" instance=ExtResource("14_snow")]
-transform = Transform3D(-1.57419, 0, -0.19677, 0, 11.0, 0, 0.28622, 0, -1.08226, 226.89, 41.18, -86.37)
-metadata/coliziune = "none"
+[node name="Dam_Module" parent="DecorManual/ZonaBaraj/Dam_Turn"]
+visible = false
 
-[node name="ZidAc00" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.52186, 0, 0.46654, 0, 0.7, 0, -0.46654, 0, -0.52186, 79.94, 36.87, -191.49)
+[node name="Dam_PowerHouse" parent="DecorManual/ZonaBaraj/Dam_Turn"]
+visible = false
 
-[node name="ZidAc01" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.07523, 0, 0.69595, 0, 0.7, 0, -0.69595, 0, -0.07523, 70.74, 36.70, -209.75)
+[node name="Dam_04" parent="DecorManual/ZonaBaraj" instance=ExtResource("m_dam")]
+transform = Transform3D(-0.097117096, 0, -0.99527293, 0, 1, 0, 0.99527293, 0, -0.097117096, 104.64871, 12, 238.24808)
+metadata/keep_variants = PackedStringArray("Dam_Module")
 
-[node name="ZidAc02" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.42964, 0, 0.55264, 0, 0.7, 0, -0.55264, 0, 0.42964, 78.12, 36.31, -229.17)
+[node name="Dam_Tower" parent="DecorManual/ZonaBaraj/Dam_04"]
+visible = false
 
-[node name="ZidAc03" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.68518, 0, 0.14329, 0, 0.7, 0, -0.14329, 0, 0.68518, 96.94, 35.31, -237.21)
+[node name="Dam_PowerHouse" parent="DecorManual/ZonaBaraj/Dam_04"]
+visible = false
 
-[node name="ZidAc04" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 112.91, 34.24, -237.50)
+[node name="Dam_Centrala" parent="DecorManual/ZonaBaraj" instance=ExtResource("m_dam")]
+transform = Transform3D(-0.097117096, 0, -0.99527293, 0, 1, 0, 0.99527293, 0, -0.097117096, 104.64871, 12, 238.24808)
+metadata/keep_variants = PackedStringArray("Dam_PowerHouse")
 
-[node name="ZidAc05" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 128.92, 33.01, -216.50)
+[node name="Dam_Module" parent="DecorManual/ZonaBaraj/Dam_Centrala"]
+visible = false
 
-[node name="ZidAc06" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 142.75, 31.95, -216.50)
+[node name="Dam_Tower" parent="DecorManual/ZonaBaraj/Dam_Centrala"]
+visible = false
 
-[node name="ZidAc07" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.67135, 0, 0.19822, 0, 0.7, 0, -0.19822, 0, 0.67135, 159.18, 30.90, -219.53)
+[node name="Dam_05" parent="DecorManual/ZonaBaraj" instance=ExtResource("m_dam")]
+transform = Transform3D(-0.044523697, 0, -0.99900836, 0, 1, 0, 0.99900836, 0, -0.044523697, 120.62114, 12, 239.13657)
+metadata/keep_variants = PackedStringArray("Dam_Module")
 
-[node name="ZidAc08" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.35423, 0, 0.60376, 0, 0.7, 0, -0.60376, 0, 0.35423, 173.43, 30.70, -234.73)
+[node name="Dam_Tower" parent="DecorManual/ZonaBaraj/Dam_05"]
+visible = false
 
-[node name="ZidAc09" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.57740, 0, 0.39574, 0, 0.7, 0, -0.39574, 0, -0.57740, 166.73, 30.57, -261.48)
+[node name="Dam_PowerHouse" parent="DecorManual/ZonaBaraj/Dam_05"]
+visible = false
 
-[node name="ZidAc10" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.67135, 0, 0.19822, 0, 0.7, 0, -0.19822, 0, 0.67135, 155.45, 31.19, -218.43)
+[node name="Dam_06" parent="DecorManual/ZonaBaraj" instance=ExtResource("m_dam")]
+transform = Transform3D(0.12622838, 0, -0.99200124, 0, 1, 0, 0.99200124, 0, 0.12622838, 136.5662, 12.011644, 239.41653)
+metadata/keep_variants = PackedStringArray("Dam_Module")
 
-[node name="ZidAc11" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.35423, 0, 0.60376, 0, 0.7, 0, -0.60376, 0, 0.35423, 171.46, 30.70, -231.37)
+[node name="Dam_Tower" parent="DecorManual/ZonaBaraj/Dam_06"]
+visible = false
 
-[node name="ZidAc12" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.14115, 0, 0.68562, 0, 0.7, 0, -0.68562, 0, -0.14115, 172.95, 30.70, -251.85)
+[node name="Dam_PowerHouse" parent="DecorManual/ZonaBaraj/Dam_06"]
+visible = false
 
-[node name="ZidAc13" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.69920, 0, 0.03348, 0, 0.7, 0, -0.03348, 0, -0.69920, 153.09, 29.82, -268.92)
+[node name="ZonaZiduri" type="Node3D" parent="DecorManual"]
 
-[node name="ZidAc14" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, -0.70000, 138.77, 28.76, -269.50)
+[node name="ZidC01" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.47458816, 0, 0.88020796, 0, 1, 0, -0.88020796, 0, 0.47458816, 170.99191, 42.072845, -199.28741)
 
-[node name="ZidAc15" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, -0.70000, 110.88, 26.61, -248.50)
+[node name="ZidC02" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.19403389, 0, 0.9809948, 0, 1, 0, -0.9809948, 0, 0.19403389, 163.30194, 41.81048, -202.02887)
 
-[node name="ZidAc16" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.69933, 0, 0.03056, 0, 0.7, 0, -0.03056, 0, -0.69933, 96.59, 25.55, -248.84)
+[node name="ZidC03" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.26010242, 0, -0.96558106, 0, 1, 0, 0.96558106, 0, -0.26010242, 90.56254, 37.3955, -188.67816)
 
-[node name="ZidAc17" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.58701, 0, 0.38135, 0, 0.7, 0, -0.38135, 0, -0.58701, 79.03, 24.80, -255.88)
+[node name="ZidC04" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.55217475, 0, -0.8337284, 0, 1, 0, 0.8337284, 0, -0.55217475, 83.21294, 37.15966, -191.99365)
 
-[node name="ZidAc18" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.15266, 0, 0.68315, 0, 0.7, 0, -0.68315, 0, -0.15266, 70.12, 24.70, -274.95)
+[node name="ZidC05" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.8213094, 0, -0.5704831, 0, 1, 0, 0.5704831, 0, -0.8213094, 77.46573, 37.03736, -197.61847)
 
-[node name="ZidAc19" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.66712, 0, 0.21203, 0, 0.7, 0, -0.21203, 0, 0.66712, 84.94, 24.20, -298.09)
+[node name="ZidC06" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.96003646, 0, -0.27987495, 0, 1, 0, 0.27987495, 0, -0.96003646, 73.89595, 37.006493, -205.21857)
 
-[node name="ZidAc20" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.58701, 0, 0.38135, 0, 0.7, 0, -0.38135, 0, -0.58701, 82.29, 24.97, -253.76)
+[node name="ZidC07" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.99210227, 0, 0.12543184, 0, 1, 0, -0.12543184, 0, -0.99210227, 73.17039, 37.00812, -213.5475)
 
-[node name="ZidAc21" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.15266, 0, 0.68315, 0, 0.7, 0, -0.68315, 0, -0.15266, 70.97, 24.70, -271.16)
+[node name="ZidC08" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.8875356, 0, 0.4607392, 0, 1, 0, -0.4607392, 0, -0.8875356, 75.84127, 36.914692, -221.7662)
 
-[node name="ZidAc22" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.34402, 0, 0.60963, 0, 0.7, 0, -0.60963, 0, 0.34402, 76.08, 24.42, -291.07)
+[node name="ZidC09" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.6286477, 0, 0.77769023, 0, 1, 0, -0.77769023, 0, -0.6286477, 81.178154, 36.66703, -228.49747)
 
-[node name="ZidAc23" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 97.61, 23.42, -301.50)
+[node name="ZidC10" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.3196995, 0, 0.947519, 0, 1, 0, -0.947519, 0, -0.3196995, 88.55104, 36.288353, -232.47644)
 
-[node name="ZidAc24" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 111.45, 22.36, -301.50)
+[node name="ZidC11" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.050930467, 0, -0.9987022, 0, 1, 0, 0.9987022, 0, 0.050930467, 145.0172, 32.093388, -219.595)
 
-[node name="ZidAc25" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 127.45, 21.13, -280.50)
+[node name="ZidC12" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.17748757, 0, -0.98412305, 0, 1, 0, 0.98412305, 0, 0.17748757, 153.00533, 31.555046, -220.5152)
 
-[node name="ZidAc26" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.70000, 0, -0.00000, 0, 0.7, 0, 0.00000, 0, 0.70000, 141.29, 20.06, -280.50)
+[node name="ZidC13" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.4938628, 0, -0.86953986, 0, 1, 0, 0.86953986, 0, 0.4938628, 160.54486, 31.12321, -223.24641)
 
-[node name="ZidAc27" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.68692, 0, 0.13466, 0, 0.7, 0, -0.13466, 0, 0.68692, 156.96, 18.99, -282.59)
+[node name="ZidC14" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.768001, 0, -0.64044863, 0, 1, 0, 0.64044863, 0, 0.768001, 166.78992, 30.94817, -228.49979)
 
-[node name="ZidAc28" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.04240, 0, 0.69871, 0, 0.7, 0, -0.69871, 0, -0.04240, 174.73, 18.70, -303.14)
+[node name="ZidC15" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.9560812, 0, -0.29310185, 0, 1, 0, 0.29310185, 0, 0.9560812, 170.70221, 30.963844, -235.67558)
 
-[node name="ZidAc29" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.49814, 0, 0.49179, 0, 0.7, 0, -0.49179, 0, -0.49814, 169.32, 18.65, -323.12)
+[node name="ZidC16" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.999686, 0, 0.025056714, 0, 1, 0, -0.025056714, 0, 0.999686, 171.7882, 31.036442, -244.15486)
 
-[node name="ZidAc30" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.68692, 0, 0.13466, 0, 0.7, 0, -0.13466, 0, 0.68692, 153.14, 19.29, -281.84)
+[node name="ZidC17" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.90490717, 0, 0.42560893, 0, 1, 0, -0.42560893, 0, 0.90490717, 169.92032, 31.034336, -252.46252)
 
-[node name="ZidAc31" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.44317, 0, 0.54185, 0, 0.7, 0, -0.54185, 0, 0.44317, 170.04, 18.74, -292.80)
+[node name="ZidC18" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.6961243, 0, 0.71792126, 0, 1, 0, -0.71792126, 0, 0.6961243, 164.88338, 30.818705, -259.36923)
 
-[node name="ZidAc32" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.04240, 0, 0.69871, 0, 0.7, 0, -0.69871, 0, -0.04240, 174.12, 18.70, -313.06)
+[node name="ZidC19" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.024773285, 0, 0.9996931, 0, 1, 0, -0.9996931, 0, 0.024773285, 147.73473, 29.712337, -266.31973)
 
-[node name="ZidAc33" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.69400, 0, 0.09143, 0, 0.7, 0, -0.09143, 0, -0.69400, 156.11, 18.42, -332.78)
+[node name="ZidC20" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.23729941, 0, -0.97143656, 0, 1, 0, 0.97143656, 0, -0.23729941, 91.79507, 25.552715, -252.43185)
 
-[node name="ZidAc34" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.69944, 0, 0.02798, 0, 0.7, 0, -0.02798, 0, -0.69944, 141.42, 17.85, -334.45)
+[node name="ZidC21" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.48971978, 0, -0.8718799, 0, 1, 0, 0.8718799, 0, -0.48971978, 84.2785, 25.229042, -255.395)
+
+[node name="ZidC22" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.77745163, 0, -0.6289427, 0, 1, 0, 0.6289427, 0, -0.77745163, 78.103294, 25.033978, -260.62228)
+
+[node name="ZidC23" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.9490109, 0, -0.31524318, 0, 1, 0, 0.31524318, 0, -0.9490109, 74.21591, 24.983345, -267.702)
+
+[node name="ZidC24" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.99884665, 0, 0.048014205, 0, 1, 0, -0.048014205, 0, -0.99884665, 73.13037, 24.989742, -275.65756)
+
+[node name="ZidC25" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.93659574, 0, 0.35041174, 0, 1, 0, -0.35041174, 0, -0.93659574, 74.753876, 24.945927, -283.55667)
+
+[node name="ZidC26" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.73169476, 0, 0.6816324, 0, 1, 0, -0.6816324, 0, -0.73169476, 78.99109, 24.787071, -290.396)
+
+[node name="ZidC27" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(-0.43404946, 0, 0.90088904, 0, 1, 0, -0.90088904, 0, -0.43404946, 85.83349, 24.46244, -295.35065)
+
+[node name="ZidC28" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.54104465, 0, -0.8409939, 0, 1, 0, 0.8409939, 0, 0.54104465, 161.51826, 19.1168, -287.8495)
+
+[node name="ZidC29" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.7963701, 0, -0.6048096, 0, 1, 0, 0.6048096, 0, 0.7963701, 167.42651, 19.00587, -293.3153)
+
+[node name="ZidC30" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.9595144, 0, -0.28165975, 0, 1, 0, 0.28165975, 0, 0.9595144, 171.1465, 18.998432, -300.81787)
+
+[node name="ZidC31" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.9962122, 0, 0.0869559, 0, 1, 0, -0.0869559, 0, 0.9962122, 172.0308, 19.00869, -309.21533)
+
+[node name="ZidC32" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.90061635, 0, 0.43461493, 0, 1, 0, -0.43461493, 0, 0.90061635, 169.69162, 18.988363, -317.46115)
+
+[node name="ZidC33" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.6810584, 0, 0.7322291, 0, 1, 0, -0.7322291, 0, 0.6810584, 164.72089, 18.893394, -324.34332)
+
+[node name="ZidC34" parent="DecorManual/ZonaZiduri" instance=ExtResource("m_wall_curve")]
+transform = Transform3D(0.3838708, 0, 0.9233868, 0, 1, 0, -0.9233868, 0, 0.3838708, 157.43452, 18.721737, -328.91083)
+
+[node name="ZonaZapada" type="Node3D" parent="DecorManual"]
+
+[node name="Zapada_S00" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.9438641, 0, 0.330334, 0, 1, 0, -0.330334, 0, -0.9438641, 200.36794, 31.705744, -15.702719)
+metadata/keep_variants = PackedStringArray("SnowWall_A")
+
+[node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S00"]
+visible = false
+
+[node name="Zapada_D00" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(0.9438641, 0, -0.33033398, 0, 1, 0, 0.33033398, 0, 0.9438641, 216.79118, 31.953318, -9.954908)
+metadata/keep_variants = PackedStringArray("SnowWall_B")
+
+[node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_D00"]
+visible = false
+
+[node name="Zapada_S01" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.66745335, 0, 0.7446516, 0, 1, 0, -0.7446516, 0, -0.66745335, 207.37306, 32.75036, -25.677502)
+metadata/keep_variants = PackedStringArray("SnowWall_B")
+
+[node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S01"]
+visible = false
+
+[node name="Zapada_D01" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(0.66745335, 0, -0.7446516, 0, 1, 0, 0.7446516, 0, 0.66745335, 218.98674, 32.49285, -12.720563)
+metadata/keep_variants = PackedStringArray("SnowWall_A")
+
+[node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_D01"]
+visible = false
+
+[node name="Zapada_S02" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.40992594, 0, 0.9121188, 0, 1, 0, -0.9121188, 0, -0.40992594, 216.1768, 33.73301, -31.513958)
+metadata/keep_variants = PackedStringArray("SnowWall_A")
+
+[node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S02"]
+visible = false
+
+[node name="Zapada_S03" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.5125557, 0, 0.85865396, 0, 1, 0, -0.85865396, 0, -0.5125557, 222.42245, 34.552452, -34.503574)
+metadata/keep_variants = PackedStringArray("SnowWall_B")
+
+[node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S03"]
+visible = false
+
+[node name="Zapada_D03" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(0.51255584, 0, -0.8586539, 0, 1, 0, 0.8586539, 0, 0.51255584, 231.34091, 34.466545, -19.562996)
+metadata/keep_variants = PackedStringArray("SnowWall_A")
+
+[node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_D03"]
+visible = false
+
+[node name="Zapada_S04" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.7002514, 0, 0.71389633, 0, 1, 0, -0.71389633, 0, -0.7002514, 227.40018, 35.570488, -37.60863)
+metadata/keep_variants = PackedStringArray("SnowWall_A")
+
+[node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S04"]
+visible = false
+
+[node name="Zapada_D04" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(0.70025146, 0, -0.7138963, 0, 1, 0, 0.7138963, 0, 0.70025146, 239.58456, 35.41079, -25.186834)
+metadata/keep_variants = PackedStringArray("SnowWall_B")
+
+[node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_D04"]
+visible = false
+
+[node name="Zapada_S05" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.8760371, 0, 0.48224363, 0, 1, 0, -0.48224363, 0, -0.8760371, 230.57755, 36.40583, -41.95608)
+metadata/keep_variants = PackedStringArray("SnowWall_B")
+
+[node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S05"]
+visible = false
+
+[node name="Zapada_S06" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.98856705, 0, 0.15078196, 0, 1, 0, -0.15078196, 0, -0.98856705, 231.62045, 37.07395, -46.729527)
+metadata/keep_variants = PackedStringArray("SnowWall_A")
+
+[node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S06"]
+visible = false
+
+[node name="Zapada_S07" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.9600552, 0, -0.27981085, 0, 1, 0, 0.27981085, 0, -0.9600552, 231.4734, 37.698723, -50.87209)
+metadata/keep_variants = PackedStringArray("SnowWall_B")
+
+[node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S07"]
+visible = false
+
+[node name="Zapada_S08" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.8251813, 0, -0.564868, 0, 1, 0, 0.564868, 0, -0.8251813, 229.32716, 38.450035, -55.57762)
+metadata/keep_variants = PackedStringArray("SnowWall_A")
+
+[node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S08"]
+visible = false
+
+[node name="Zapada_S09" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.77949256, 0, -0.6264115, 0, 1, 0, 0.6264115, 0, -0.77949256, 224.64186, 39.238792, -61.17439)
+metadata/keep_variants = PackedStringArray("SnowWall_B")
+
+[node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S09"]
+visible = false
+
+[node name="Zapada_D09" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(0.7794926, 0, 0.62641144, 0, 1, 0, -0.62641144, 0, 0.7794926, 238.20476, 39.306206, -72.07374)
+metadata/keep_variants = PackedStringArray("SnowWall_A")
+
+[node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_D09"]
+visible = false
+
+[node name="Zapada_S10" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.7331164, 0, -0.68010324, 0, 1, 0, 0.68010324, 0, -0.7331164, 219.86127, 40.017693, -66.760765)
+metadata/keep_variants = PackedStringArray("SnowWall_A")
+
+[node name="SnowWall_B" parent="DecorManual/ZonaZapada/Zapada_S10"]
+visible = false
+
+[node name="Zapada_D10" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(0.73311645, 0, 0.6801032, 0, 1, 0, -0.6801032, 0, 0.73311645, 232.3468, 40.045982, -78.34344)
+metadata/keep_variants = PackedStringArray("SnowWall_B")
+
+[node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_D10"]
+visible = false
+
+[node name="Zapada_S11" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_wall")]
+transform = Transform3D(-0.6777146, 0, -0.7353251, 0, 1, 0, 0.7353251, 0, -0.6777146, 215.02913, 40.74563, -72.26277)
+metadata/keep_variants = PackedStringArray("SnowWall_B")
+
+[node name="SnowWall_A" parent="DecorManual/ZonaZapada/Zapada_S11"]
+visible = false
+
+[node name="Jalon00" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 235.55547, 27.177814, 10.357864)
+
+[node name="Jalon01" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(-0.12884454, 0, 0.9916648, 0, 1, 0, -0.9916648, 0, -0.12884454, 208.94171, 29.139866, 13.892195)
+
+[node name="Jalon07" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(0.78607005, 0, -0.6181374, 0, 1, 0, 0.6181374, 0, 0.78607005, 208.91872, 41.533176, -82.82026)
+
+[node name="Jalon08" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(0.51170367, 0, 0.85916203, 0, 1, 0, -0.85916203, 0, 0.51170367, 218.16216, 42.013767, -106.12117)
+
+[node name="Jalon09" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(-0.91793084, 0, 0.3967404, 0, 1, 0, -0.3967404, 0, -0.91793084, 201.01665, 42.371906, -123.433205)
+
+[node name="Jalon10" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(-0.27516335, 0, -0.96139747, 0, 1, 0, 0.96139747, 0, -0.27516335, 210.52374, 42.651554, -146.02814)
+
+[node name="Jalon11" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(0.9888375, 0, -0.14899828, 0, 1, 0, 0.14899828, 0, 0.9888375, 191.8534, 42.639896, -161.29448)
+
+[node name="Jalon12" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(0.020351226, 0, 0.9997929, 0, 1, 0, -0.9997929, 0, 0.020351226, 191.94646, 41.511265, -186.51189)
+
+[node name="Jalon13" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(-0.9940815, 0, -0.108636975, 0, 1, 0, 0.108636975, 0, -0.9940815, 166.74733, 41.822468, -184.25108)
+
+[node name="Jalon14" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(0.23581228, 0, -0.9717986, 0, 1, 0, 0.9717986, 0, 0.23581228, 151.93927, 40.183506, -202.9392)
+
+[node name="Jalon15" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(0.9333151, 0, 0.35905835, 0, 1, 0, -0.35905835, 0, 0.9333151, 132.18593, 39.544544, -187.1)
+
+[node name="Jalon16" parent="DecorManual/ZonaZapada" instance=ExtResource("m_snow_pole")]
+transform = Transform3D(-0.47631872, 0, 0.8792727, 0, 1, 0, -0.8792727, 0, -0.47631872, 112.11522, 38.07613, -202.88332)
+
+[node name="ZonaRepere" type="Node3D" parent="DecorManual"]
+
+[node name="Prometeu" parent="DecorManual/ZonaRepere" instance=ExtResource("m_prometheus")]
+transform = Transform3D(-0.5514392, 0, 0.8342151, 0, 1, 0, -0.8342151, 0, -0.5514392, 162.038, 10.261972, 241.38445)
+
+[node name="Portal_Stanca" parent="DecorManual/ZonaRepere" instance=ExtResource("m_rock_portal")]
+transform = Transform3D(-0.53756005, 0, 0.8432255, 0, 1, 0, -0.8432255, 0, -0.53756005, 171.37538, 11.577143, 220.03749)
+
+[node name="Semn_urs" parent="DecorManual/ZonaRepere" instance=ExtResource("m_bear_sign")]
+transform = Transform3D(-0.966254, 0, 0.25759122, 0, 1, 0, -0.25759122, 0, -0.966254, 218.9876, 14.907672, 150.7509)
+
+[node name="Poenari" parent="DecorManual/ZonaRepere" instance=ExtResource("m_poenari")]
+transform = Transform3D(0.87777764, 0, 0.47906825, 0, 1, 0, -0.47906825, 0, 0.87777764, -125, -1.3326111, 215)
+
+[node name="Trecere_nivel_A" parent="DecorManual/ZonaRepere" instance=ExtResource("m_level_crossing")]
+transform = Transform3D(0.9954582, 0, -0.0951995, 0, 1, 0, 0.0951995, 0, 0.9954582, -198.88132, 5.152528, -138.89868)
+
+[node name="Trecere_nivel_B" parent="DecorManual/ZonaRepere" instance=ExtResource("m_level_crossing")]
+transform = Transform3D(-0.99545825, 0, 0.095199354, 0, 1, 0, -0.095199354, 0, -0.99545825, -200.27275, 4.921023, -124.97557)

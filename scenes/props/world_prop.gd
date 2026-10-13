@@ -467,6 +467,44 @@ const PROP_COLLISION := {
 	"water_buffalo": "none", "egret": "none",
 	"island_ferry": "none", "coastal_freighter": "none", "fishing_boat": "none",
 	"okinawa_horizon": "none",
+	# --- Transfagarasan (kitul din assets/models/transfagarasan/) ------------
+	# Prin ele se TRECE: golul portalului Balea e 14,85 x 7,40 m, al portalului de
+	# stanca 15,40 x 7,60 m (masurate ca GOL); un hull ar fi un bloc plin peste
+	# sosea. Coliziunea exacta, nu cutia. Lipsesc captuselile `*_Void`
+	# (HULL_SKIP_PARTS).
+	"tunnel_portal_balea": "mesh", "rock_tunnel_portal": "mesh",
+	# Barajul: coronamentul sta SUB asfaltul procedural (nimic peste -0,05 m pe banda
+	# de 12 m, `measure_tf_deck.py`), deci trimesh-ul da doar parapetul (1,1 m) si
+	# peretele din aval; un hull ar fi o cutie pana la varful parapetului, adica un
+	# zid peste toata latimea drumului. Acelasi tipar pentru turn si centrala.
+	"vidraru_dam": "mesh",
+	# Stanca Poenari: coliziune exacta pe sisturi (kit §1.2), sta lipita de drum.
+	"poenari_ruin": "mesh",
+	# Ziduri de sprijin, bancile de zapada, statuia, recuzita: poliedre convexe
+	# per mesh, corecte (stau pe marginea drumului, nu peste el).
+	"retaining_wall_straight": "hull", "retaining_wall_curve": "hull",
+	"snow_wall": "hull", "prometheus_statue": "hull", "road_works": "hull",
+	# Ansamblul de la trecerea la nivel are 18,8 m latime (stalpi pe ambele margini):
+	# hull PER MESH (stalp, brat, felinar), nu o cutie peste drum.
+	"level_crossing": "hull",
+	# Semnul: stalp subtire + bolovan mic; cilindru in ax, ca stalpii.
+	"bear_warning_sign": "trunk",
+	# Copaci: fagul are trunchi gri neted si coroana larga (trunk, ca fagii Fiordland).
+	"beech_tree_a": "trunk", "beech_tree_b": "trunk",
+	# Fantome: tufe/flori (MultiMesh, sute), grohotis (con de 12 m cu o latura plana
+	# lipita de perete), figuranti animati de hazarduri, trenul (TrainHazard isi
+	# face garnitura), cabina telecabinei (trece pe deasupra), fundalul.
+	# `snow_pole` e deja "none" mai sus (Fiordland).
+	"jneapan_a": "none", "jneapan_b": "none", "bujor_de_munte": "none", "afin": "none",
+	"scree_cone": "none", "brown_bear": "none", "sheepdog": "none",
+	"ro_train": "none", "cable_cabin_large": "none", "transfagarasan_horizon": "none",
+	# Pregatite pentru etapa de POI (hull simplu, corect): masini parcate,
+	# motocicleta, stana cu tarcul, taraba, cabanele, casele din vale, aflorimentele.
+	"parked_car_a": "hull", "parked_car_b": "hull", "motorbike": "hull",
+	"stana": "hull", "souvenir_stall": "hull",
+	"cabana_balea_lac": "hull", "cabana_balea_cascada": "hull",
+	"arges_house_a": "hull", "arges_house_b": "hull",
+	"schist_outcrop_a": "hull", "schist_outcrop_b": "hull", "schist_outcrop_c": "hull",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -3573,6 +3611,11 @@ const HULL_SKIP_PARTS := {
 	"machiya_d": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster",
 		"Machiya_Bamboo"],
 	"machiya_e": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster"],
+	# Transfagarasan (kitul din assets/models/transfagarasan/): captuseala neagra a
+	# gurii e vizuala. Portalul e `mesh` (se trece prin gol), iar `Portal_Void` e
+	# un tub de 10 m cu pereti lipiti de gol: fara corp propriu, golul ramane gol.
+	"tunnel_portal_balea": ["Portal_Void"],
+	"rock_tunnel_portal": ["Rock_Void"],
 }
 
 

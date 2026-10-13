@@ -38,8 +38,14 @@ triunghiuri si umbrite plat. Licenta: geometria e a proiectului.
   5. 4 picioare groase, cu coapsa lata la picioarele din spate; labele mari,
      plate (plantigrad), cu 4 gheare inchise la varf fiecare;
   6. coada: practic invizibila (nu se modeleaza);
-  7. culoare: blana maro, fetele de sus (umeri, spate) mai deschise si
-     ruginii, botul si ghearele aproape negre.
+  7. culoare: blana maro-roscata UNIFORMA (contract revizuit: LARCH_RUST
+     dominant, ~75%), mai inchisa jos (LOG_DARK pe gambe, labe, burta, sub
+     barbie, in trepte pe fatete), varful botului mai deschis (SAND_MID),
+     nasul si ghearele aproape negre.
+ Contract revizuit (coordonator, dupa prima serie): cocoasa 0,15-0,20 m peste
+ crupa, corp rotund si adanc (~0,8 din greaban), picioare groase, cap mare;
+ ridicat: para lata jos, brate departate 12-15 grade, genunchi usor indoiti,
+ capul intors 10-15 grade.
 `brown_bear_stand.png` (ridicat, aproape din fata):
   8. trunchiul aproape vertical, picioarele din spate drepte sub el, talpile
      intregi pe sol;
@@ -78,11 +84,14 @@ from mathutils import Matrix, Vector
 
 OUT = "transfagarasan/animals/brown_bear.glb"
 
-FUR, TIP, DARK = LOG_DARK, LARCH_RUST, VOLCANIC_BLACK
+# Contract revizuit (verdictul coordonatorului): blana DOMINANTA e LARCH_RUST
+# (maro-roscat, ~65-75% din arie), LOG_DARK doar jos (gambe, labe, burta, sub
+# barbie), varful botului SAND_MID, nasul si ghearele VOLCANIC_BLACK.
+FUR, TIP, SHADE, MUZZLE, DARK = LARCH_RUST, LARCH_RUST, LOG_DARK, SAND_MID, VOLCANIC_BLACK
+DARK_BELOW = 0.58        # sub scorul asta (inaltime + 0,22 x normala.z) blana e LOG_DARK (picioare)
+BELLY_BELOW = 0.22       # pe trunchi doar fasia de sub burta
 FPS = 24
 AO_FLOOR = 0.60          # talpile; 1,0 pe spinare
-TIP_NORMAL_Z = 0.22      # fetele cu normala mai sus de atat, pe spate/umeri -> TIP
-TIP_MIN_Z = 1.00         # ... si peste inaltimea asta (nu burta, nu labele)
 
 # Articulatiile (spatiul armaturii = spatiul lumii; armatura la identitate).
 HIP_Z = 0.94
@@ -102,7 +111,10 @@ ST_HEAD_TOTAL = -8.0     # capul ramane aproape orizontal, botul usor in jos
 ST_HEAD_SINK = 0.05      # capul intra intre umeri (pe axa spatelui)
 ST_STRETCH = 0.27        # spatele se intinde (suprapunerea crupa/piept e 0,38 m)
 ST_ARM = 6.0            # bratul atarna usor in fata pieptului
-ST_FOREARM = 28.0        # antebratul spre inainte-jos
+ST_FOREARM = 46.0        # antebratul spre inainte-jos, din cot
+ST_ABDUCT = 15.0         # bratele departate de corp (contract revizuit: 12-15 grade)
+ST_KNEE = 12.0           # genunchii usor indoiti, talpa plata
+ST_HEAD_YAW = 12.0       # capul intors spre stanga ursului, ca pe decupare
 ST_PAW = -62.0           # laba moale, in jos (unghiul ei total fata de orizontala)
 
 
@@ -210,83 +222,87 @@ def ring_z(z, cx, cy, hw, fwd, back, n=8, power=0.85):
 
 def build_mesh():
     b = Bear()
-    # 1. Crupa (Hips): de la coada pana in mijlocul spatelui, rotunda si ADANCA
-    #    (burta la ~0,48 m: pe decupare corpul ocupa peste jumatate din inaltime).
+    # 1. Crupa (Hips): rotunda (sectiuni aproape circulare, nu cutie), spinarea
+    #    COBOARA spre coada: 1,22 m, cu 0,18 m sub cocoasa (contract revizuit).
+    #    Lata ~1,06 m: ridicat, crupa e baza „perei".
     b.loft("Rump", "Hips", FUR, [
-        ring_y(-1.26, 0, 0.86, 0.14, 0.12, 0.14),
-        ring_y(-1.18, 0, 0.87, 0.32, 0.27, 0.32),
-        ring_y(-1.00, 0, 0.88, 0.46, 0.34, 0.40),
-        ring_y(-0.70, 0, 0.88, 0.50, 0.33, 0.41),
-        ring_y(-0.35, 0, 0.88, 0.49, 0.31, 0.40),
-        ring_y(-0.02, 0, 0.90, 0.46, 0.29, 0.40),
+        ring_y(-1.26, 0, 0.86, 0.16, 0.14, 0.16, power=1.0),
+        ring_y(-1.16, 0, 0.86, 0.37, 0.30, 0.36, power=1.0),
+        ring_y(-0.98, 0, 0.86, 0.50, 0.33, 0.42, power=1.0),
+        ring_y(-0.70, 0, 0.86, 0.56, 0.35, 0.44, power=1.0),
+        ring_y(-0.40, 0, 0.86, 0.56, 0.37, 0.47, power=1.0),
+        ring_y(-0.05, 0, 0.87, 0.54, 0.40, 0.49, power=1.0),
     ], seed=11, caps=(0.03, 0.05))
-    # 1. Pieptul (Chest) cu COCOASA de umeri peste labele din fata.
+    # 1. Pieptul (Chest) cu COCOASA de umeri: cel mai inalt punct (1,40 m), chiar
+    #    deasupra labelor din fata; adanc (burta la ~0,34 m, ~0,75 din greaban) si
+    #    lat (~1,1 m la umeri).
     b.loft("Chest", "Chest", FUR, [
-        ring_y(-0.40, 0, 0.90, 0.46, 0.30, 0.41),
-        ring_y(-0.10, 0, 0.93, 0.48, 0.36, 0.45),
-        ring_y(0.20, 0, 0.96, 0.48, 0.44, 0.48),
-        ring_y(0.46, 0, 0.98, 0.44, 0.40, 0.46),
-        ring_y(0.66, 0, 1.00, 0.36, 0.31, 0.38),
-        ring_y(0.80, 0, 1.01, 0.24, 0.20, 0.25),
+        ring_y(-0.40, 0, 0.86, 0.50, 0.37, 0.46, power=1.0),
+        ring_y(-0.10, 0, 0.88, 0.56, 0.44, 0.52, power=1.0),
+        ring_y(0.22, 0, 0.91, 0.55, 0.49, 0.57, power=1.0),
+        ring_y(0.48, 0, 0.94, 0.50, 0.43, 0.54, power=1.0),
+        ring_y(0.66, 0, 0.98, 0.41, 0.33, 0.45, power=1.0),
+        ring_y(0.80, 0, 1.00, 0.29, 0.22, 0.31, power=1.0),
     ], seed=23, caps=(0.03, 0.03))
-    # 2. Capul (Head): ceafa ascunsa in piept, craniu MARE si rotund, obraji
-    #    lati, bot scurt (decuparea: capul e ~1/5 din lungime, botul ~1/3 din cap).
+    # 2. Capul (Head): MARE (~0,56 m lat, ~0,60 m de la ceafa la nas), fruntea
+    #    lata si bombata, botul se ingusteaza treptat; gatul gros si scurt
+    #    (ceafa ascunsa in piept); crestetul ~1,29 m, sub linia cocoasei.
     b.loft("Head", "Head", FUR, [
-        ring_y(0.62, 0, 1.02, 0.30, 0.24, 0.26),
-        ring_y(0.80, 0, 1.05, 0.33, 0.27, 0.25),
-        ring_y(0.96, 0, 1.04, 0.31, 0.24, 0.21),
-        ring_y(1.07, 0, 0.99, 0.21, 0.15, 0.16),
-        ring_y(1.17, 0, 0.95, 0.14, 0.10, 0.11),
-        ring_y(1.26, 0, 0.93, 0.09, 0.065, 0.065),
+        ring_y(0.60, 0, 1.02, 0.31, 0.25, 0.31, power=1.0),
+        ring_y(0.78, 0, 1.04, 0.29, 0.25, 0.27, power=1.0),
+        ring_y(0.92, 0, 1.04, 0.28, 0.24, 0.22, power=1.0),
+        ring_y(1.04, 0, 1.00, 0.21, 0.17, 0.17, power=1.0),
+        ring_y(1.16, 0, 0.95, 0.14, 0.11, 0.11, power=1.0),
+        ring_y(1.26, 0, 0.93, 0.09, 0.07, 0.07, power=1.0),
     ], seed=37, jitter=0.014, caps=(0.03, 0.03))
-    # 3. Urechile: discuri mici, rotunde, sus-lateral pe crestet.
+    # 3. Urechile: discuri scurte si rotunde, sus-lateral pe crestet.
     for sx in (-1, 1):
         b.loft("Ear", "Head", FUR, [
-            ring_z(1.22, sx * 0.20, 0.83, 0.095, 0.06, 0.05, n=6, power=1.0),
-            ring_z(1.30, sx * 0.205, 0.825, 0.095, 0.055, 0.045, n=6, power=1.0),
-            ring_z(1.35, sx * 0.21, 0.82, 0.06, 0.035, 0.03, n=6, power=1.0),
+            ring_z(1.20, sx * 0.21, 0.82, 0.095, 0.06, 0.05, n=6, power=1.0),
+            ring_z(1.29, sx * 0.215, 0.815, 0.095, 0.055, 0.045, n=6, power=1.0),
+            ring_z(1.34, sx * 0.22, 0.81, 0.06, 0.035, 0.03, n=6, power=1.0),
         ], seed=41 + sx, jitter=0.006, caps=(0.0, 0.015))
-    # 4. Ochii (inchisi), pe fata, la radacina botului; aproape la nivelul fetei.
+    # 4. Ochii (inchisi), pe fata, la radacina botului.
     for sx in (-1, 1):
-        b.blob("Eye", "Head", DARK, (sx * 0.15, 1.055, 1.12), (0.028, 0.016, 0.024))
+        b.blob("Eye", "Head", DARK, (sx * 0.15, 1.02, 1.12), (0.028, 0.016, 0.024))
     # 5. Picioarele GROASE (decuparea: ~0,4 m latime la umar): sus / jos / laba.
     for side, sx in (("L", -1), ("R", 1)):
         fx, hx = sx * FRONT_X, sx * HIND_X
         # fata: bratul (in piept) -> antebratul -> laba lata
         b.loft("ArmF", "LegFU_" + side, FUR, [
-            ring_z(1.04, fx, 0.36, 0.21, 0.24, 0.26),
-            ring_z(0.78, fx, 0.40, 0.20, 0.21, 0.22),
-            ring_z(0.55, fx, 0.42, 0.17, 0.17, 0.17),
-            ring_z(0.42, fx, 0.42, 0.16, 0.15, 0.15),
+            ring_z(1.04, fx, 0.36, 0.22, 0.25, 0.27, power=1.0),
+            ring_z(0.78, fx, 0.40, 0.21, 0.22, 0.23, power=1.0),
+            ring_z(0.55, fx, 0.42, 0.19, 0.18, 0.18, power=1.0),
+            ring_z(0.42, fx, 0.42, 0.18, 0.16, 0.16, power=1.0),
         ], seed=51 + sx, caps=(0.02, 0.03))
         b.loft("ForeF", "LegFL_" + side, FUR, [
-            ring_z(0.54, fx, 0.42, 0.16, 0.15, 0.15),
-            ring_z(0.32, fx, 0.43, 0.15, 0.14, 0.14),
-            ring_z(0.15, fx, 0.44, 0.15, 0.135, 0.13),
+            ring_z(0.54, fx, 0.42, 0.18, 0.16, 0.16, power=1.0),
+            ring_z(0.32, fx, 0.43, 0.17, 0.15, 0.15, power=1.0),
+            ring_z(0.15, fx, 0.44, 0.165, 0.14, 0.135, power=1.0),
         ], seed=61 + sx, caps=(0.02, 0.02))
         b.loft("PawF", "PawF_" + side, FUR, [
-            ring_y(0.28, fx, 0.10, 0.16, 0.08, 0.10),
-            ring_y(0.44, fx, 0.085, 0.17, 0.09, 0.085),
-            ring_y(0.58, fx, 0.06, 0.16, 0.06, 0.06),
+            ring_y(0.28, fx, 0.10, 0.17, 0.08, 0.10),
+            ring_y(0.44, fx, 0.085, 0.175, 0.09, 0.085),
+            ring_y(0.58, fx, 0.06, 0.165, 0.06, 0.06),
         ], seed=71 + sx, jitter=0.012, caps=(0.02, 0.04))
         for gx in (-0.09, -0.03, 0.03, 0.09):
             b.blob("ClawF", "PawF_" + side, DARK, (fx + gx, 0.625, 0.022), (0.016, 0.03, 0.018))
         # spate: coapsa lata (in crupa) -> gamba -> talpa lunga
         b.loft("ThighH", "LegHU_" + side, FUR, [
-            ring_z(1.10, hx, HIP_Y, 0.23, 0.32, 0.30),
-            ring_z(0.84, hx, HIP_Y + 0.02, 0.22, 0.28, 0.26),
-            ring_z(0.58, hx, HIP_Y + 0.04, 0.17, 0.18, 0.17),
-            ring_z(0.45, hx, HIP_Y + 0.02, 0.16, 0.15, 0.15),
+            ring_z(1.10, hx, HIP_Y, 0.25, 0.34, 0.32, power=1.0),
+            ring_z(0.84, hx, HIP_Y + 0.02, 0.24, 0.30, 0.28, power=1.0),
+            ring_z(0.58, hx, HIP_Y + 0.04, 0.19, 0.19, 0.18, power=1.0),
+            ring_z(0.45, hx, HIP_Y + 0.02, 0.18, 0.16, 0.16, power=1.0),
         ], seed=81 + sx, caps=(0.02, 0.03))
         b.loft("ShinH", "LegHL_" + side, FUR, [
-            ring_z(0.53, hx, HIP_Y + 0.02, 0.16, 0.15, 0.15),
-            ring_z(0.31, hx, HIP_Y - 0.02, 0.15, 0.14, 0.14),
-            ring_z(0.15, hx, HIP_Y - 0.04, 0.15, 0.13, 0.13),
+            ring_z(0.53, hx, HIP_Y + 0.02, 0.18, 0.16, 0.16, power=1.0),
+            ring_z(0.31, hx, HIP_Y - 0.02, 0.17, 0.15, 0.15, power=1.0),
+            ring_z(0.15, hx, HIP_Y - 0.04, 0.165, 0.14, 0.14, power=1.0),
         ], seed=91 + sx, caps=(0.02, 0.02))
         b.loft("PawH", "PawH_" + side, FUR, [
-            ring_y(HIP_Y - 0.19, hx, 0.085, 0.15, 0.07, 0.085),
-            ring_y(HIP_Y - 0.02, hx, 0.08, 0.16, 0.08, 0.08),
-            ring_y(HIP_Y + 0.15, hx, 0.06, 0.16, 0.055, 0.06),
+            ring_y(HIP_Y - 0.19, hx, 0.085, 0.16, 0.07, 0.085),
+            ring_y(HIP_Y - 0.02, hx, 0.08, 0.17, 0.08, 0.08),
+            ring_y(HIP_Y + 0.15, hx, 0.06, 0.165, 0.055, 0.06),
         ], seed=101 + sx, jitter=0.012, caps=(0.02, 0.04))
         for gx in (-0.09, -0.03, 0.03, 0.09):
             b.blob("ClawH", "PawH_" + side, DARK, (hx + gx, HIP_Y + 0.195, 0.022), (0.016, 0.03, 0.018))
@@ -325,14 +341,41 @@ def paint(obj, b):
     """Sloturi pe fete (UV colapsat pe centrul slotului) + AO gradient vertical."""
     me = obj.data
     slots = []
-    for p, slot, piece in zip(me.polygons, b.face_slot, b.face_piece):
+    zoff, yoff = OFFSET[2], OFFSET[1]
+    for i, (p, slot, piece) in enumerate(zip(me.polygons, b.face_slot, b.face_piece)):
         c, n = p.center, p.normal
-        s = slot
-        if piece in ("Rump", "Chest") and n.z > TIP_NORMAL_Z and c.z > TIP_MIN_Z:
-            s = TIP  # varfurile blanii pe spate si umeri
+        if slot != FUR:
+            slots.append(slot)  # ochi, gheare: raman VOLCANIC_BLACK
+            continue
+        # Blana: LARCH_RUST dominant; LOG_DARK jos (gambe, labe, burta, sub
+        # barbie). Granita e un prag pe INALTIME + NORMALA, cu un zgomot
+        # determinist per fata: urmeaza fatetele in trepte, nu o linie dreapta.
+        jit = ((i * 2654435761) % 1000) / 1000.0 - 0.5
+        score = (c.z - zoff) + 0.22 * n.z + 0.08 * jit
+        s = TIP
+        if piece in ("Rump", "Chest"):
+            # doar fasia de sub burta: ridicat, burta e fata ursului spre
+            # camera, iar pe decupare ea are aceeasi blana ca restul
+            s = SHADE if score < BELLY_BELOW else TIP
+        elif piece in ("ArmF", "ThighH"):
+            s = SHADE if score < DARK_BELOW else TIP
+        elif piece in ("PawH", "ShinH"):
+            s = SHADE  # gamba si laba din spate: stau pe sol si ridicat
+        elif piece == "PawF":
+            # talpa inchisa; dosul labei din fata are blana corpului: ridicat,
+            # labele atarna in fata pieptului (pe decupare nu sunt „manusi")
+            s = SHADE if n.z < 0.2 else TIP
+        elif piece == "ForeF":
+            s = SHADE if score < 0.36 else TIP
         if piece == "Head":
-            if c.y > 1.27:
-                s = DARK  # nasul
+            if c.y - yoff > 1.265:
+                s = DARK            # nasul
+            elif c.y - yoff > 1.17 and n.z > -0.05:
+                s = MUZZLE          # varful botului, mai deschis (suprafata mica)
+            elif n.z < -0.70:
+                s = SHADE           # sub barbie
+            else:
+                s = TIP
         slots.append(s)
     uv = me.uv_layers.new(name="UVMap")
     for p, s in zip(me.polygons, slots):
@@ -586,16 +629,19 @@ def stand_pose(s, crouch=0.0):
         # spatele se intinde cand se ridica (coloana iese din arcuirea de patruped)
         "Chest": (_rot(x=chest), Vector((0, ST_STRETCH * s, 0))),
         # scufundat pe axa spatelui (in cadrul de repaus al pieptului = -Y)
-        "Head": (_rot(x=head), Vector((0, -ST_HEAD_SINK * s, -0.02 * s))),
+        # rotatia pe Y-ul pieptului = in jurul verticalei cand ursul e ridicat
+        "Head": (_rot(x=head, y=ST_HEAD_YAW * s), Vector((0, -ST_HEAD_SINK * s, -0.02 * s))),
     }
-    for side in ("L", "R"):
-        pose["LegFU_" + side] = (_rot(x=arm), None)
+    for side, sgn in (("L", -1.0), ("R", 1.0)):
+        # Z-ul local al bratului ~ -Y in lume cand pieptul e ridicat: +z duce
+        # bratul spre +X, deci stangul primeste -ST_ABDUCT
+        pose["LegFU_" + side] = (_rot(x=arm, z=sgn * ST_ABDUCT * s), None)
         pose["LegFL_" + side] = (_rot(x=fore), None)
         pose["PawF_" + side] = (_rot(x=paw), None)
-        # picioarele din spate raman verticale, talpa plata pe sol
-        pose["LegHU_" + side] = (_rot(x=-hips), None)
-        pose["LegHL_" + side] = (_rot(), None)
-        pose["PawH_" + side] = (_rot(), None)
+        # picioarele din spate: aproape verticale, genunchiul usor indoit, talpa plata
+        pose["LegHU_" + side] = (_rot(x=-hips + ST_KNEE * s), None)
+        pose["LegHL_" + side] = (_rot(x=-2 * ST_KNEE * s), None)
+        pose["PawH_" + side] = (_rot(x=ST_KNEE * s), None)
     return pose
 
 

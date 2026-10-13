@@ -25,28 +25,43 @@ a proiectului, deci nu există o licență terță.
 | `Farm Animal Pack-glb`, `Godot_4.7_Animals...` (ithappy) | fermă, cerb, tigru, câine... | niciun urs |
 
 Decuparea e un urs cu **fațete mari**, triunghiuri plate. Forma asta iese direct din
-puține secțiuni transversale, unite în fâșii cu diagonale alternante, cu jitter
-determinist și umbrite plat.
+puține secțiuni transversale (elipse), unite în fâșii cu diagonale alternante, cu
+jitter determinist și umbrite plat.
 
 ## Cote măsurate (pe mesh-ul evaluat cu scheletul aplicat)
 
-| cotă | contract (kit §1.6) | măsurat | |
+Cotele sunt după revizia de formă și culoare (contractul revizuit al
+coordonatorului, vezi „Fidelitate”).
+
+| cotă | contract | măsurat | |
 |---|---|---|---|
 | lungimea în patru labe (bot–crupă, `Idle` cadrul 0) | 2,6 m | **2,58 m** | −0,8% |
-| greabănul (cocoașa, `Idle` cadrul 0) | 1,4 m | **1,39 m** | −0,7% |
-| lățimea | — | 1,00 m | |
-| înălțimea ridicat (`Stand`, cadrul final, ținut) | 3,0 m | **2,95 m** (2,97 la depășirea din cadrul 23) | −1,7% |
-| baza, pe toate cadrele cheie ale celor 3 clipuri | 0 | 0,000 ±0,002 m | |
+| greabănul (cocoașa, `Idle` cadrul 0) | 1,4 m | **1,38 m**, la Y = +0,23 (deasupra labelor din față) | −1,4% |
+| cocoașa peste crupă | 0,15–0,20 m | **0,19 m** (crupa 1,19 m) | OK |
+| adâncimea burtă–spinare | ~0,80 din greabăn | burta la 0,32 m, adâncimea 1,06 m = **0,77** | OK |
+| lățimea la umeri | ~1,1 m | **1,07 m** | OK |
+| capul | ~0,50 lat, ~0,60 lung | ~0,58 lat (0,60 cu urechile), ~0,65 de la ceafă la nas | OK, puțin mai mare |
+| înălțimea ridicat (`Stand`, cadrul final, ținut) | 3,0 m | **2,91 m** (2,93 la depășirea din cadrul 23) | −3% |
+| baza, pe toate cadrele cheie ale celor 3 clipuri | 0 | 0,000 ±0,002 m | nicio labă în sol |
 | originea | la bază, centrată | centru XY (0,000; 0,000), Y glTF de la 0,000 | OK |
 | fața | +Y Blender = −Z Godot | osul `Head` la z = −0,70 în glTF, `Hips` la +0,88 | OK |
 
 ## Geometria, scheletul, clipurile
 
 - **Triunghiuri:** 1.144. Un singur mesh, un material (atlasul).
-- **Sloturi** (aria fețelor): `LOG_DARK` 28 = 85,3%, `LARCH_RUST` 27 = 14,3%
-  (fețele cu normala în sus pe crupă și piept, peste 1,0 m: spatele și umerii),
-  `VOLCANIC_BLACK` 20 = 0,4% (nasul, ochii, 4 gheare pe fiecare labă). AO e
-  gradient vertical 0,60 → 1,00 (`COLOR_0`), nu raycast.
+- **Sloturi** (aria fețelor), după contractul revizuit:
+
+| slot | arie | unde |
+|---|---|---|
+| `LARCH_RUST` 27 | **74,8%** | blana dominantă |
+| `LOG_DARK` 28 | **24,6%** | gambele și labele din spate, jumătatea de jos a antebrațelor, tălpile labelor din față, partea de jos a coapselor și brațelor, fâșia de sub burtă, sub bărbie |
+| `SAND_MID` 1 | 0,2% | vârful botului |
+| `VOLCANIC_BLACK` 20 | 0,4% | nasul, ochii, 4 gheare pe labă |
+
+  Granița rust/dark e un prag pe înălțime + 0,22 × normala.z (în poza de repaus),
+  cu un zgomot determinist pe fiecare fațetă. Urmează deci fațetele în trepte,
+  nu o linie dreaptă, și nu există placă pe creastă. AO e gradient vertical
+  0,60 → 1,00 (`COLOR_0`), nu raycast.
 - **Oase (15):**
   - `Hips` e rădăcina, cu pivotul la articulația șoldului;
   - `Chest` are pivotul în mijlocul spatelui;
@@ -60,13 +75,17 @@ determinist și umbrite plat.
 
 | clip | durata | buclă | ce face |
 |---|---|---|---|
-| `Idle` | **2,000 s** (48 de cadre la 24 fps) | se închide (primul cadru = ultimul, diferența 0,0000). Bucla o pune `SlidingHazard._hook_animation` | respiră (pieptul se umflă 1°, umerii rămân pe loc), adulmecă: capul coboară 9° și se întoarce ±7° |
-| `Walk` | **1,167 s** (28 de cadre) | se închide (diferența 0,0000). Bucla o pune `_hook_animation` | **secvență laterală în patru timpi** (HL, FL, HR, FR), ca la ursul real. Fiecare labă stă 65% din ciclu pe sol, deci sunt mereu cel puțin două jos. Laba din sprijin merge înapoi **liniar** (IK în două segmente), așa că nu patinează. Corpul coboară până la 10 cm când laba e departe de verticală: ăsta e „pasul greu”. Umerii se leagănă, iar capul dă din cap la fiecare pas din față |
-| `Stand` | **1,167 s** (28 de cadre, sub telegraful de 1,2 s) | **nu** (se joacă o dată și ține ultimul cadru) | ține capul jos și adulmecă (cadrul 5), se ridică din șold (60°) și din mijlocul spatelui (18°), cu spatele întins cu 0,27 m. Depășește puțin (cadrul 23), apoi se așază (cadrul 28). **Poza finală:** trunchiul la ~78° (aplecat ușor înainte, ca pe decupare), picioarele din spate verticale, cu tălpile întregi pe sol. **Labele din față atârnă**: brațul în jos, antebrațul spre înainte-jos, laba moale în jos. Capul e aproape orizontal, cu botul cu 8° în jos, scufundat 5 cm între umeri. Fără gesturi umane |
+| `Idle` | **2,000 s** (48 de cadre la 24 fps) | se închide (primul cadru = ultimul). Bucla o pune `SlidingHazard._hook_animation` | respiră (pieptul se umflă 1°, umerii rămân pe loc), adulmecă: capul coboară 9° și se întoarce ±7° |
+| `Walk` | **1,167 s** (28 de cadre) | se închide. Bucla o pune `_hook_animation` | **secvență laterală în patru timpi** (HL, FL, HR, FR), ca la ursul real. Fiecare labă stă 65% din ciclu pe sol, deci sunt mereu cel puțin două jos. Laba din sprijin merge înapoi **liniar** (IK în două segmente), așa că nu patinează. Corpul coboară până la 10 cm: „pasul greu”. Umerii se leagănă, iar capul dă din cap la fiecare pas din față |
+| `Stand` | **1,167 s** (28 de cadre, sub telegraful de 1,2 s) | **nu** (se joacă o dată și ține ultimul cadru) | ține capul jos și adulmecă (cadrul 5), se ridică din șold (60°) și din mijlocul spatelui (18°), cu spatele întins cu 0,27 m. Depășește puțin (cadrul 23), apoi se așază (cadrul 28). **Poza finală:** trunchiul la ~78° (aplecat ușor înainte), genunchii îndoiți 12° cu tălpile plate. **Brațele depărtate 15°**, antebrațele atârnă din cot 46° înainte, laba moale în jos. Capul e scufundat 5 cm între umeri, cu botul 8° în jos, **întors 12°** ca pe decupare. Fără gesturi umane |
 
 - **Fără root motion.** Toate cheile sunt pe oase, nodul nu se mișcă. Pe fiecare
   cheie, o „corecție de sol” pune punctul cel mai de jos pe y = 0. Corecția e
-  ≤ 1,0 cm la `Walk` și 0 la `Idle`/`Stand`.
+  ≤ 1,0 cm la `Walk` și 0 la `Idle`. La `Stand` e −3,6 cm: genunchii îndoiți
+  coboară șoldul, iar tălpile rămân plate pe sol.
+- **Revizia de formă n-a atins tehnica:** scheletul, IK-ul, clipurile și duratele
+  sunt aceleași (recitite din GLB). În `Stand` s-au adăugat doar câteva rotații:
+  brațele depărtate, antebrațul, genunchii și capul întors.
 - **Viteza naturală a lui `Walk`:** laba din sprijin se duce înapoi cu **0,97 m/s**
   la ritm 1 (măsurat atât pe față, cât și pe spate), iar laba se ridică maximum
   0,13 m. Ursul **nu** e în `WALK_CYCLE_SPEED_BY_MODEL`, deci azi ar lua 1,5 m/s
@@ -78,57 +97,70 @@ determinist și umbrite plat.
   Cu cheile de la cadrul 1, clipurile ieșeau 1,208 s (`Stand` depășea
   telegraful), iar bucla ar fi stat un cadru pe loc.
 
-## Fidelitate (3 runde, maximul)
+## Fidelitate
 
 Comparațiile, cu decuparea în stânga și randarea din GLB în dreapta, la aceeași
 înălțime:
 - `docs/asset_briefs/img/transfagarasan_fidelity/brown_bear_walk.png`
-  (`Walk`, cadrul 4);
+  (`Walk`, cadrul 4, camera la azimut 45°, ca decuparea);
 - `docs/asset_briefs/img/transfagarasan_fidelity/brown_bear_stand.png`
-  (`Stand`, cadrul final).
+  (`Stand`, cadrul final, azimut 50°: brațul drept al ursului e în stânga
+  imaginii și capul spre dreapta, ca pe decupare).
 
 Planșa de cadre e `brown_bear_frames.png`: `Idle` 1, `Walk` 2, `Stand` la început,
 la mijloc și la capăt. Etichetele numără cadrele de la 1. `brown_bear_stand_views.png`
 arată poza `Stand` din 4 azimuturi.
 
-Rundele:
-1. Picioare subțiri, corp ca un tub (citea hienă), bot lung de câine, urechi ca
-   niște coarne, cap cu căciulă ruginie, picioare din față ridicate ca de
-   cerșetor în `Stand`.
-2. Picioarele îngroșate la ~0,4 m, burta coborâtă la 0,48 m, cap mare cu bot
-   scurt, urechi rotunde, crupa rotunjită la spate. Rugina a plecat de pe
-   creștet. Brațele în `Stand` erau tot la piept.
-3. Brațele atârnă (paw la ~1,4 m), capul iese mai sus dintre umeri, șoldul e mai
-   lat decât pieptul, nasul e doar vârful botului, spatele mai întins
-   (2,95 m ridicat).
+h/l se măsoară pe bounding box-ul pixelilor ursului: saturație > 28 sau
+luminanță < 120, aceeași mască pe decupare și pe randare.
+
+### Prima serie (3 runde): respinsă de coordonator pe formă și culoare
+
+În patru labe se citea jder sau câine: spinare dreaptă, fără cocoașă, cutie
+lungă, cap mic. Ridicat era un stâlp (h/l 2,48). Blana era `LOG_DARK`, cu o „șa”
+ruginie pe creastă. Tehnica a fost acceptată.
+
+### A doua serie (contract revizuit, 3 runde)
+
+1. Corp rotund (elipse) și adânc, cu cocoașa la 1,40 m și crupa la 1,22 m, plus
+   picioare mai groase și cap mare. Am trecut culoarea pe `LARCH_RUST` dominant și
+   am pus brațele depărtate, genunchii îndoiți și capul întors în `Stand`.
+   Rezultat: în patru labe citea urs. Ridicat însă burta (închisă în repaus)
+   devenea toată fața ursului, deci un piept negru; botul `SAND_MID` era prea mare
+   și citea cioc.
+2. Crupa și pieptul mai late (1,12 m la șold), antebrațul mai înainte. Pe
+   trunchi rămâne închisă doar fâșia de sub burtă. Am micșorat botul deschis la
+   vârf și am mutat camera de mers la azimutul decupării.
+3. Am echilibrat culoarea: rugina ~75%, închisul ~25%. Labele din față nu mai
+   sunt „mănuși” închise: doar talpa e închisă, iar antebrațul are rugina
+   corpului până la jumătate.
 
 | element | pe planșă | în GLB | verdict |
 |---|---|---|---|
-| silueta în patru labe, h/l | 0,67 | 0,59 | OK (−12%, în ±15%) |
-| cocoașa de umeri, cel mai înalt punct | da | da, 1,39 m peste labele din față | OK |
-| șaua după cocoașă, crupa mai joasă | da, ~0,87 | da, crupa 1,21 m = 0,87 | OK |
-| capul mai jos decât cocoașa, lat, bot scurt | da | da, creștetul ~1,29 (fără urechi) | OK, dar botul e mai „cutie” decât pe decupare |
-| urechi mici, rotunde | 2 | 2 discuri cu 6 laturi | OK |
-| ochi / nas închiși | da | da (`VOLCANIC_BLACK`) | OK. Slotul e gri închis `#55535A`, deci la soare iese mai deschis decât negrul de pe decupare |
-| 4 picioare groase, labe plate mari | da | da, ~0,40 m la umăr, labe 0,34 × 0,40 m | OK. Pe decupare umărul curge în picior, la noi se vede îmbinarea crupă/piept/picior |
-| gheare închise | 4 pe labă | 4 pe labă | OK |
-| culoarea | maro mediu-deschis uniform, fețele luminate portocalii | `LOG_DARK` închis + `LARCH_RUST` pe spate/umeri | **abatere asumată**: sloturile sunt cele din tabelul de roluri (kit §0). Ursul iese mai închis decât decuparea, iar spatele ruginiu se citește ca o „șa”. Nu seamănă cu vaca (`WOOD` maro mediu + pete crem): e mai închis, n-are pete, are cocoașă |
-| silueta ridicată, h/l | 1,68 | **2,48** | **ABATERE, în afara ±15%.** Ursul ridicat e mult mai zvelt decât cel de pe decupare: trunchiul are 1,0 m lățime pe 2,95 m, iar decuparea e un urs-jucărie „îndesat”, cu umerii lați și brațele depărtate de corp |
-| trunchi aproape vertical, ușor aplecat înainte | da | ~78° | OK |
-| labele din față atârnă în fața pieptului, fără gest uman | da | da: brațul jos, antebrațul înainte, laba moale | OK |
-| capul pe umeri, botul înainte | da | da, scufundat 5 cm, botul −8° | OK. Pe decupare capul e întors ușor spre dreapta, la noi e drept |
-| tălpile întregi pe sol, picioarele drepte | da | da | OK |
+| silueta în patru labe, h/l | 0,69 | **0,65** | OK (−6%) |
+| cocoașa de umeri, cel mai înalt punct, peste labele din față | da | 1,38 m la Y = +0,23, cu 0,19 m peste crupă | OK |
+| spinarea coboară spre crupă | da | da | OK |
+| corp rotund și adânc, nu cutie | da | secțiuni eliptice, adâncimea 0,77 din greabăn | OK |
+| picioare groase, labe late | da | brațul și coapsa 0,44–0,50 m sus, labele 0,34 m | OK |
+| cap mare, frunte lată, bot îngustat, urechi rotunde scurte | da | ~0,58 × 0,65 m, urechi-disc | OK. Botul rămâne ceva mai lung și mai drept decât pe decupare |
+| culoarea | maro-roșcat uniform | `LARCH_RUST` 75%, picioarele de jos `LOG_DARK` | OK. În patru labe citește urs roșcat cu „șosete” închise, fără pete. Vaca (`WOOD` + pete crem) nu are cocoașă, iar ursul nu are pete |
+| silueta ridicată, h/l | 1,68 (coordonator); **1,79** măsurat de mine pe decupare cu masca de mai sus | **1,96** | +9,5% față de 1,79, deci în ±15%. Față de 1,68 e **+17%, peste toleranță**. Diferența dintre cele două citiri ale decupării vine probabil din mască (umbra de pe sol, marginea gri) |
+| trunchi în formă de pară | lat jos | șoldul 1,12 m, umerii ~1,0 m | **parțial**: lățimea e acolo, dar trunchiul tot citește cilindru, nu pară cu burtă bombată |
+| brațe groase, depărtate, antebrațele atârnă în față | da | 15° depărtare, antebrațul 46° înainte, laba moale | OK |
+| picioare scurte, groase, genunchi ușor îndoiți | da | 12° la genunchi, talpa plată | OK |
+| capul coborât între umeri, întors | da | scufundat 5 cm, întors 12° spre dreapta imaginii | OK |
+| fâșia închisă de sub burtă se vede ridicat | burta e ușor mai închisă | o diagonală `LOG_DARK` pe flancul burții | **abatere mică**: e burta cerută de contract, dar ridicat se citește ca o pată |
+| ochii / nasul | închiși | `VOLCANIC_BLACK` (`#55535A`), la soare gri | rămâne de la prima serie |
 
-**Ce ar repara a 4-a rundă, dacă o cere coordonatorul:**
-- pieptul mai lat în `Stand`: piesele pieptului și crupei cu ~+0,12 m pe X;
-- brațele depărtate lateral, cu o rotație de ~12° în jurul lui Y pe `LegFU` în poza
-  ridicată;
-- antebrațul mai lung, ca labele să coboare spre șold.
+„De la 30 m, din spate-sus, se citește URS BRUN?” În patru labe (planșa de cadre)
+**da**: masă roșcată rotundă, cocoașă, cap mare cu urechi rotunde, picioare
+scurte închise. Din spate (vederile ridicat 215°/305°) e o masă roșcată uniformă
+cu picioarele închise. Nu se confundă cu vaca.
 
 ## Verificări
 
-- `verify_glb.py`: `VERDICT: OK`, fără excepții. Origine `base`, sloturile 20, 27 și
-  28 sunt legale, AO 0,60–1,00.
+- `verify_glb.py`: `VERDICT: OK`, fără excepții. Origine `base`, sloturile 1, 20,
+  27 și 28 sunt legale, AO 0,60–1,00.
 - `check_glb_anims.py ... Idle Walk Stand`: `OK`, `skins=1`.
 - `verify_transfagarasan.sh`: am adăugat secțiunea „valul 1, tf-c”, cu `check` pe
   urs plus `check_glb_anims`. → **`VERDICT KIT: OK`**.
@@ -141,17 +173,23 @@ Rundele:
     `get_bone_global_pose` imediat după `seek` și dădea delta 0. Poza globală nu
     se reîmprospătează în același tick, așa că sonda citește acum poza locală
     (memoria `sonda-masura-alt-obiect`);
-  - AABB-ul mesh-ului e 1,00 × 1,39 × 2,58 m, iar rădăcina are scala 1, deci
-    colizorul din `SlidingHazard` iese la mărimea reală.
+  - rădăcina are scala 1, deci colizorul din `SlidingHazard` iese la mărimea reală.
+
+  Sonda a rulat pe geometria din prima serie. Revizia n-a schimbat clipurile,
+  scheletul sau rădăcina (recitite din GLB): AABB-ul nou e 1,07 × 1,38 × 2,58 m.
 
 ## Stare la oprire
 
-- GLB, build, preview, comparațiile și planșele sunt livrate și comise pe
-  `transfagarasan/kit-c`.
+- Revizia de formă și culoare e comisă pe `transfagarasan/kit-c`: GLB, build,
+  comparații, planșe și acest inventar. Seria a doua s-a oprit după 3 runde.
 - Deschis pentru coordonator:
-  1. silueta ridicată e prea zveltă (h/l 2,48 față de 1,68). Am făcut 3 runde,
-     iar reparația e scrisă mai sus;
-  2. intrarea `&"brown_bear": 0.97` în `WALK_CYCLE_SPEED_BY_MODEL` și
+  1. h/l ridicat e **1,96**: +17% față de ținta de 1,68, dar +9,5% față de 1,79,
+     cât am măsurat eu decuparea. Trunchiul citește încă cilindru, nu pară. Pasul
+     următor ar fi o bombă de burtă: `dn` mai mare pe inelele din mijlocul crupei
+     și pieptului, adică în fața ursului când e ridicat;
+  2. fâșia `LOG_DARK` de sub burtă se vede ridicat ca o diagonală. Dacă deranjează,
+     `BELLY_BELOW = 0` o scoate (burta rămâne roșcată);
+  3. intrarea `&"brown_bear": 0.97` în `WALK_CYCLE_SPEED_BY_MODEL` și
      `sweep_speed` pe marker (`scripts/` și `scenes/` nu sunt ale mele);
-  3. montarea pe `Hazarduri/Urs` în `Track21.tscn`, în locul vacii cu
-     `model_scale` 0,9, cu `model_scale` 1,0 (ursul e construit la scară reală).
+  4. montarea pe `Hazarduri/Urs` în `Track21.tscn`, în locul vacii, cu
+     `model_scale` 1,0.

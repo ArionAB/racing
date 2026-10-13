@@ -38,8 +38,8 @@ GLB = os.path.join(MODELS_DIR, "animals", "brown_bear.glb")
 # Camera pe decupari: `walk` e aproape din profil, dinspre dreapta ursului si
 # putin din fata (capul in dreapta imaginii) -> camera spre +X, azimut mic.
 # `stand` e aproape din fata, usor dinspre dreapta ursului.
-CAM_WALK = dict(azimuth=35.0, elevation=11.0, lens=60.0, margin=1.06)
-CAM_STAND = dict(azimuth=68.0, elevation=6.0, lens=60.0, margin=1.04)
+CAM_WALK = dict(azimuth=45.0, elevation=11.0, lens=60.0, margin=1.06)
+CAM_STAND = dict(azimuth=50.0, elevation=6.0, lens=60.0, margin=1.04)
 CAM_SHEET = dict(azimuth=25.0, elevation=10.0, lens=60.0, margin=1.08)
 
 

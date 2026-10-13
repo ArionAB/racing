@@ -33,6 +33,9 @@ var _minimap: Minimap
 ## care nu-si mai vede pozitia sau bara de turbo ar citi asta ca bug, nu ca
 ## hazard.
 var _blind_veil: ColorRect
+## Voalul tranzitiei de repunere (#495): se intuneca cat clipeste masina.
+var _recover_veil: ColorRect
+var _recover_tween: Tween
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -104,6 +107,12 @@ func _ready() -> void:
 	_blind_veil.color = Color(0.94, 0.96, 0.98, 1.0)
 	_blind_veil.modulate.a = 0.0
 	root.add_child(_blind_veil)
+	_recover_veil = ColorRect.new()
+	_recover_veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_recover_veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_recover_veil.color = Color(0.02, 0.02, 0.04, 1.0)
+	_recover_veil.modulate.a = 0.0
+	root.add_child(_recover_veil)
 
 	_countdown = _make_label(110)
 	_countdown.set_anchors_and_offsets_preset(
@@ -402,6 +411,26 @@ func blind_flash(seconds: float) -> void:
 	tw.tween_property(_blind_veil, "modulate:a", BLIND_PEAK, 0.12)
 	tw.tween_interval(hold * 0.45)
 	tw.tween_property(_blind_veil, "modulate:a", 0.0, hold * 0.75)
+
+
+## Tranzitia de repunere (#495). Nu pana la negru: in ultima clipa inca vezi
+## masina clipind acolo unde a ramas, ca sa stii DE CE esti mutat.
+const RECOVER_VEIL_PEAK: float = 0.7
+
+func recovery_fade_in(seconds: float) -> void:
+	if _recover_tween != null and _recover_tween.is_valid():
+		_recover_tween.kill()
+	_recover_tween = create_tween()
+	_recover_tween.tween_property(_recover_veil, "modulate:a", RECOVER_VEIL_PEAK,
+		maxf(seconds, 0.1)).set_ease(Tween.EASE_IN)
+
+
+## Dupa teleport: ecranul se limpezeste repede, pe masina deja asezata.
+func recovery_fade_out() -> void:
+	if _recover_tween != null and _recover_tween.is_valid():
+		_recover_tween.kill()
+	_recover_tween = create_tween()
+	_recover_tween.tween_property(_recover_veil, "modulate:a", 0.0, 0.3)
 
 
 func flash_message(text: String) -> void:

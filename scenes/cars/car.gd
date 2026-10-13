@@ -27,6 +27,9 @@ signal boost_started(car: Car)
 signal wall_hit(car: Car, impact: float)
 signal landed(car: Car, fall_speed: float)
 signal respawned(car: Car)
+## Repunerea cu tranzitie a inceput (#495): masina clipeste `RECOVER_S`
+## secunde, fara comenzi, apoi vine `respawned`. Race intuneca ecranul.
+signal recovery_started(car: Car, seconds: float)
 ## Izbitura cu o alta masina, cu delta-v-ul incasat de NOI — cu cat mai mare,
 ## cu atat mai violent contactul (shake, sunet).
 signal bumped(car: Car, other: Car, delta_v: float)
@@ -461,6 +464,13 @@ var _collision_shape: CollisionShape3D
 var _driver: Driver
 var is_ejected: bool = false
 var _eject_left: float = 0.0
+## Repunerea cu tranzitie (#495): cat mai clipeste pana la teleport, si cu ce
+## retragere se va face repunerea.
+const RECOVER_S: float = 1.0
+## De cate ori pe secunda clipeste caroseria in tranzitie.
+const RECOVER_BLINK_HZ: float = 7.0
+var _recover_left: float = 0.0
+var _recover_backoff: float = 14.0
 ## Ultima ejectare, pentru sonde: ce a declansat-o ("perete" / "aterizare")
 ## si cu ce marime (delta-v orizontal, respectiv viteza de cadere, m/s).
 var last_eject_cause: String = ""
@@ -676,6 +686,14 @@ func _physics_process(delta: float) -> void:
 		drift_pressed = false
 		turbo_pressed = false
 		_tick_eject(delta)
+	# La fel in tranzitia de repunere: nu mai conduci o masina care urmeaza sa
+	# dispara de aici.
+	if _recover_left > 0.0:
+		steer = 0.0
+		throttle = 0.0
+		drift_pressed = false
+		turbo_pressed = false
+		_tick_recover(delta)
 
 	_apply_suspension()
 
@@ -1410,6 +1428,40 @@ func _reseat_driver() -> void:
 		_driver.reseat()
 
 
+## Repunere CU TRANZITIE (#495): in loc de teleport instant, masina clipeste
+## `RECOVER_S` secunde fara comenzi (fizica curge — rasturnata ramane
+## rasturnata, cazand continua sa cada), apoi `respawn(backoff_m)`.
+## Pentru repunerile pe care le vede jucatorul ca urmare a unei greseli:
+## butonul, masina rasturnata sau impotmolita. Hazardele care au propria
+## punere in scena (tren, avalansa, plasa de sub faleza) raman pe `respawn`.
+func recover(backoff_m: float = 14.0) -> void:
+	if not can_respawn() or _eject_left > 0.0:
+		return
+	_recover_left = RECOVER_S
+	_recover_backoff = backoff_m
+	is_drifting = false
+	is_boosting = false
+	recovery_started.emit(self, RECOVER_S)
+
+
+## In tranzitie (pentru Race: nu porni a doua oara aceeasi repunere).
+func is_recovering() -> bool:
+	return _recover_left > 0.0
+
+
+func _tick_recover(delta: float) -> void:
+	_recover_left -= delta
+	if _visual != null:
+		_visual.visible = fmod(_recover_left * RECOVER_BLINK_HZ, 1.0) > 0.35
+	if _recover_left > 0.0:
+		return
+	_recover_left = 0.0
+	if _visual != null:
+		_visual.visible = true
+	_respawn_cooldown = 0.0 # tranzitia a fost asteptarea; repunerea nu mai asteapta
+	respawn(_recover_backoff)
+
+
 func driver_seated() -> bool:
 	return _driver != null and _driver.is_seated()
 
@@ -1442,7 +1494,8 @@ func _relocate_level() -> void:
 ## respawn() iese in tacere cand nu poate (fara pista, in cooldown, dupa
 ## terminare). Butonul trebuie sa arate asta, nu sa para stricat.
 func can_respawn() -> bool:
-	return track != null and _respawn_cooldown <= 0.0 and not finished
+	return track != null and _respawn_cooldown <= 0.0 and not finished \
+		and _recover_left <= 0.0
 
 
 ## Daca masina sta in afara unei benzi deschise (fara poarta) si in afara soselei,
@@ -1537,6 +1590,8 @@ func respawn(backoff_m: float = 14.0) -> void:
 		_squash_tween.kill()
 	if _visual != null:
 		_visual.scale = Vector3.ONE
+		_visual.visible = true # o tranzitie intrerupta de alta repunere nu lasa masina stinsa
+	_recover_left = 0.0
 	_bump_pairs.clear() # am fost teleportati; vechile contacte nu mai exista
 	_impact_yaw = 0.0 # nici rotatia din ultima izbitura nu ne urmareste
 	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere

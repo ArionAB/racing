@@ -2539,10 +2539,6 @@ const SLOT_REMAP_BY_THEME := {
 		# dar un ATINT ar fi costat un material pentru un trunchi).
 		"beech_tree_a": {29: Palette.VOLCANIC_BLACK},
 		"beech_tree_b": {29: Palette.VOLCANIC_BLACK},
-		# Ursul: blana pe LARCH_RUST 27 (#A8683A) iesea portocalie sub soarele temei,
-		# (161,88,40) pe captura, adica vaca ruginie; pe WOOD_WEATHERED 9 tot (138,84,40).
-		# Blana intreaga pe LOG_DARK 28 (#4A3526).
-		"brown_bear": {27: Palette.LOG_DARK},
 	},
 	"fiordland": {
 		# `moss_boulder_a/b/c`: masurat pe .glb (probe ad-hoc), un SINGUR
@@ -2662,6 +2658,13 @@ const ACCENT_SPLIT_BY_THEME := {
 }
 
 const SLOT_REMAP_BY_MODEL := {
+	# Ursul brun (Transfagarasan, Track21): blana pe LARCH_RUST 27 (#A8683A) iesea
+	# portocalie sub soarele temei, (161,88,40) pe captura, adica vaca ruginie; pe
+	# WOOD_WEATHERED 9 tot (138,84,40). Blana intreaga pe LOG_DARK 28 (#4A3526).
+	# Sta AICI, nu in SLOT_REMAP_BY_THEME: ursul e modelul unui HazardMarker, iar
+	# `SlidingHazard._remap_model_slots` citeste doar tabelul pe model. Pe tema,
+	# remaparea nu ajungea niciodata la urs (captura de joc: tot roscat).
+	"brown_bear": {27: Palette.LOG_DARK},
 	# `wharf.glb` (Fiordland POI A): toata fata de SUS a peretelui de piatra
 	# (17 triunghiuri, y in [1.98, 2.12] — masurat direct pe mesh, acopera
 	# intreaga lungime de 20 m si latime de 4,2 m, deci CHIAR platforma de

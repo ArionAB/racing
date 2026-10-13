@@ -134,6 +134,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/bougainvillea.glb" id="o_bougain"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/plants/cycad.glb" id="o_cycad"]
 [ext_resource type="PackedScene" path="res://assets/models/trees/pandanus.glb" id="o_pandanus"]
+[ext_resource type="Script" path="res://scenes/props/wall_chain.gd" id="d_wallchain"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -149,7 +150,7 @@ custom_name = "Okinawa"
 custom_theme = "okinawa"
 custom_world_seed_name = "okinawa20"
 custom_half_width = 7.0
-custom_road_surface = "asphalt"
+custom_road_surface = "dirt"
 custom_sun_rotation_deg = Vector3(-25, -70, 0)
 custom_sea_level_offset = -10.57
 custom_width_segments = Array[Vector3]([Vector3(0.103, 0.203, 5.5), Vector3(0.333, 0.442, 6.0), Vector3(0.625, 0.718, 6.5), Vector3(0.82, 0.971, 6.5)])
@@ -2586,6 +2587,213 @@ transform = Transform3D(0.2534, 0, 0.9676, 0, 1, 0, -0.9676, 0, 0.2534, 142.79, 
 metadata/camera_blocker = true
 
 [node name="Ziduri" type="Node3D" parent="DecorManual/ZonaD"]
+script = ExtResource("d_wallchain")
+
+[node name="L00" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.34230906, -0.033122536, 0.938779, 0, 0.8492687, 0.04147319, -0.9395874, 0.012067152, -0.34201455, -37.20718, 24.314583, -246.72821)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L00" index="0"]
+visible = false
+
+[node name="L01" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.14747559, -0.033297442, -0.98828965, 0, 0.8493331, -0.03960653, 0.9890657, 0.004964847, 0.14735988, -27.179176, 24.88448, -259.7474)
+
+[node name="L02" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.053317063, -0.037893515, 0.997582, 0, 0.8491525, 0.044644102, -0.99857765, -0.0020232487, 0.053263903, -13.789333, 25.479815, -250.21994)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L02" index="0"]
+visible = false
+
+[node name="L03" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.25195554, -0.042098615, -0.9664706, 0, 0.84888613, -0.051178876, 0.9677388, -0.010960582, -0.25162536, 0.5388932, 26.1448, -258.26746)
+
+[node name="L04" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.25195554, -0.0440606, -0.96634954, 0, 0.8487798, -0.053564038, 0.9677388, -0.0114713935, -0.25159383, 12.151758, 26.774122, -255.244)
+
+[node name="L05" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.15617451, -0.038352996, -0.9866983, 0, 0.84911263, -0.045681708, 0.9877295, 0.006064171, 0.15601146, 25.860027, 27.461805, -254.98166)
+metadata/drop_variants = "Wall_B_Limestone"
+
+[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L05" index="1"]
+visible = false
+
+[node name="L06" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.53822803, -0.021118626, -0.8424329, 0, 0.8496306, -0.029479668, 0.84279925, 0.013486767, 0.5379941, 38.81866, 28.004595, -259.46042)
+
+[node name="L07" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.53822803, -0.018683424, -0.84251255, 0, 0.8497109, -0.026080348, 0.84279925, 0.011931598, 0.5380449, 48.932255, 28.338085, -265.91916)
+
+[node name="L08" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.53822803, -0.015513735, -0.8426016, 0, 0.8498007, -0.021655753, 0.84279925, 0.009907374, 0.53810185, 59.04585, 28.624586, -272.3779)
+
+[node name="L09" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.35879377, -0.013355112, 0.9332846, 0, 0.8498796, 0.016832668, -0.93341684, 0.005133538, -0.35874292, 75.15791, 28.88923, -269.14346)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L09" index="0"]
+visible = false
+
+[node name="L10" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.24342859, -0.008944637, 0.9698618, 0, 0.84995, 0.010849467, -0.96991885, -0.00224491, 0.24341427, 86.79666, 29.110712, -279.40057)
+metadata/drop_variants = "Wall_B_Limestone"
+
+[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L10" index="1"]
+visible = false
+
+[node name="L11" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.24342874, -0.0019247188, -0.9699161, 0, 0.8499977, -0.0023346029, 0.9699188, -0.00048306305, -0.24342807, 102.31537, 29.21619, -275.50574)
+metadata/drop_variants = "Wall_B_Limestone"
+
+[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L11" index="1"]
+visible = false
+
+[node name="L12" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.03573278, 0.0004313397, 0.9993613, 0, 0.8499999, -0.00050778274, -0.9993614, 1.5422816e-05, 0.035732776, 117.71228, 29.230804, -263.27884)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L12" index="0"]
+visible = false
+
+[node name="L13" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_arch")]
+transform = Transform3D(-0.23488317, 0.002931013, -0.97201747, 0, 0.84999466, 0.0035474966, 0.9720236, 0.00070826017, -0.23488168, 132.86867, 29.20191, -271.3424)
+
+[node name="L14" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.42454252, 0.0060589407, 0.90537995, 0, 0.8499737, -0.007872876, -0.905408, 0.002841015, 0.42452934, 142.67068, 29.114092, -257.2478)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L14" index="0"]
+visible = false
+
+[node name="L15" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.22631943, 0.021835117, -0.97371435, 0, 0.8497044, 0.02637266, 0.97405314, 0.0050733485, -0.22624072, 161.9518, 28.840054, -261.095)
+metadata/drop_variants = "Wall_B_Limestone"
+
+[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L15" index="1"]
+visible = false
+
+[node name="L16" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.018137425, 0.028982451, 0.9992539, 0, 0.8495056, -0.03410261, -0.9998355, 0.00052575354, 0.018126875, 177.56152, 28.356018, -249.14099)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L16" index="0"]
+visible = false
+
+[node name="L17" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.4085402, 0.027768303, 0.9121555, 0, 0.84945536, -0.035791766, -0.91274035, 0.0124290185, 0.4082784, 188.95811, 27.79652, -246.59851)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L17" index="0"]
+visible = false
+
+[node name="L18" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.40854043, 0.027949218, -0.91214776, 0, 0.84944826, 0.03602496, 0.91274023, 0.012510005, -0.40827525, 211.73277, 27.221617, -258.31665)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L18" index="0"]
+visible = false
+
+[node name="L19" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.4085402, 0.025801098, 0.9122355, 0, 0.84952986, -0.03325615, -0.91274035, 0.011548503, 0.4083142, 218.16582, 26.667032, -233.5252)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L19" index="0"]
+visible = false
+
+[node name="L20" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.5828343, 0.022648182, -0.81215405, 0, 0.8495429, 0.032790072, 0.812591, 0.016244503, -0.5825209, 234.4287, 26.20399, -235.88727)
+
+[node name="R00" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.24519028, -0.054597303, 0.96734476, 0, 0.8481324, 0.06625454, -0.969475, -0.013808225, 0.24465153, -21.9477, 25.102383, -213.94164)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R00" index="0"]
+visible = false
+
+[node name="R01" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.4341317, -0.03685961, -0.89980507, 0, 0.84901464, -0.048137065, 0.9008494, -0.017763153, -0.43362844, -6.3349004, 25.922743, -219.07007)
+
+[node name="R02" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.24519055, -0.032843146, -0.96870464, 0, 0.84932464, -0.03985559, 0.9694749, -0.008306381, -0.24499573, 9.277901, 26.531, -224.1985)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R02" index="0"]
+visible = false
+
+[node name="R03" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.15437979, -0.025232824, -0.9875655, 0, 0.8496162, -0.030045876, 0.9880116, 0.0039427048, 0.15431008, 20.94209, 27.090572, -223.65738)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R03" index="0"]
+visible = false
+
+[node name="R04" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.52924925, -0.018679174, -0.8481818, 0, 0.8497149, -0.025900256, 0.8484664, 0.011651537, 0.5290717, 31.88522, 27.53832, -227.73096)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R04" index="0"]
+visible = false
+
+[node name="R05" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.5292492, -0.019792123, 0.8481469, 0, 0.8496799, 0.027443456, -0.84846646, 0.012345763, -0.5290499, 56.045666, 27.965223, -219.22961)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R05" index="0"]
+visible = false
+
+[node name="R06" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.34886292, -0.023196619, -0.93677634, 0, 0.84963953, -0.029119615, 0.9371738, 0.008634941, 0.34871498, 63.163948, 28.359644, -234.04144)
+
+[node name="R07" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(0.34886292, -0.022363583, -0.93680435, 0, 0.849665, -0.028073873, 0.9371738, 0.008324844, 0.3487254, 74.41003, 28.702946, -238.22778)
+
+[node name="R08" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.15437983, -0.015086106, 0.98785216, 0, 0.8498629, 0.017963715, -0.9880116, 0.00235725, -0.15435492, 89.48096, 29.015188, -231.67587)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R08" index="0"]
+visible = false
+
+[node name="R09" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.04634167, -0.0039061022, -0.998915, 0, 0.849991, -0.004600357, 0.9989256, -0.00018120998, -0.046341177, 101.8348, 29.186523, -242.51297)
+
+[node name="R10" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.24519028, -0.0003149448, 0.9694749, 0, 0.84999996, 0.00038218964, -0.969475, -7.965281e-05, 0.24519026, 113.13225, 29.217184, -230.57866)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R10" index="0"]
+visible = false
+
+[node name="S00" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.28253534, 0.019633593, -0.9589787, 0, 0.84975356, 0.024079414, 0.9592569, 0.005782793, -0.28245342, 149.93263, 28.9248, -231.64842)
+
+[node name="S01" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.46867827, 0.026089966, 0.88283557, 0, 0.84948677, -0.03474661, -0.88336897, 0.013842233, 0.46839526, 158.06834, 28.502142, -217.3701)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/S01" index="0"]
+visible = false
+
+[node name="S02" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(-0.46867839, 0.028477991, -0.8827333, 0, 0.8493885, 0.037926987, 0.88336885, 0.015109226, -0.46834117, 181.57582, 27.920366, -227.53865)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/S02" index="0"]
+visible = false
+
+[node name="S03" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
+transform = Transform3D(-0.28253534, 0.03410859, -0.9584172, 0, 0.849256, 0.041832123, 0.9592569, 0.010046196, -0.282288, 189.71153, 27.36552, -213.26033)
+
+[node name="S04" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_arch")]
+transform = Transform3D(-0.28253534, 0.040429067, -0.95807695, 0, 0.8489545, 0.049583808, 0.9592569, 0.011907802, -0.28218782, 202.18187, 26.766792, -209.58737)
+
+[node name="S05" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
+transform = Transform3D(0.46867827, 0.047871932, 0.88157177, 0, 0.8482707, -0.063755825, -0.88336897, 0.025398824, 0.46772474, 211.27684, 25.908192, -195.0265)
+metadata/drop_variants = "Wall_A_Limestone"
+
+[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/S05" index="0"]
+visible = false
 
 [node name="Palat" type="Node3D" parent="DecorManual/ZonaD"]
 
@@ -2597,189 +2805,6 @@ metadata/camera_blocker = true
 
 [node name="Palat" parent="DecorManual/ZonaD/Palat" instance=ExtResource("d_palace")]
 transform = Transform3D(-0.98049945, 0, 0.1965219, 0, 1, 0, -0.1965219, 0, -0.98049945, 114.85315, 29.50114, -294.17233)
-
-[node name="L00" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(-0.34230906, 0, 0.9395874, 0, 0.85, 0, -0.9395874, 0, -0.34230906, -37.20718, 24.082512, -246.72821)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L00" index="0"]
-visible = false
-
-[node name="L01" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(0.14747559, 0, -0.9890657, 0, 0.85, 0, 0.9890657, 0, 0.14747559, -27.179176, 24.746655, -259.7474)
-
-[node name="L02" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.053317063, 0, 0.99857765, 0, 0.85, 0, -0.99857765, 0, 0.053317063, -13.789333, 25.222305, -250.21994)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L02" index="0"]
-visible = false
-
-[node name="L03" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(-0.25195554, 0, -0.9677388, 0, 0.85, 0, 0.9677388, 0, -0.25195554, 0.5388932, 25.937325, -258.26746)
-
-[node name="L04" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(-0.25195554, 0, -0.9677388, 0, 0.85, 0, 0.9677388, 0, -0.25195554, 12.151758, 26.552277, -255.244)
-
-[node name="L05" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.15617451, 0, -0.9877295, 0, 0.85, 0, 0.9877295, 0, 0.15617451, 25.860027, 27.195969, -254.98166)
-
-[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L05" index="1"]
-visible = false
-
-[node name="L06" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(0.53822803, 0, -0.84279925, 0, 0.85, 0, 0.84279925, 0, 0.53822803, 38.81866, 27.92764, -259.46042)
-
-[node name="L07" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(0.53822803, 0, -0.84279925, 0, 0.85, 0, 0.84279925, 0, 0.53822803, 48.932255, 28.28155, -265.91916)
-
-[node name="L08" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(0.53822803, 0, -0.84279925, 0, 0.85, 0, 0.84279925, 0, 0.53822803, 59.04585, 28.594622, -272.3779)
-
-[node name="L09" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(-0.35879377, 0, 0.93341684, 0, 0.85, 0, -0.93341684, 0, -0.35879377, 75.15791, 28.854551, -269.14346)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L09" index="0"]
-visible = false
-
-[node name="L10" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.24342859, 0, 0.96991885, 0, 0.85, 0, -0.96991885, 0, 0.24342859, 86.79666, 29.12391, -279.40057)
-
-[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L10" index="1"]
-visible = false
-
-[node name="L11" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(-0.24342874, 0, -0.9699188, 0, 0.85, 0, 0.9699188, 0, -0.24342874, 102.31537, 29.297514, -275.50574)
-
-[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L11" index="1"]
-visible = false
-
-[node name="L12" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.03573278, 0, 0.9993614, 0, 0.85, 0, -0.9993614, 0, 0.03573278, 117.71228, 29.326742, -263.27884)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L12" index="0"]
-visible = false
-
-[node name="L13" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_arch")]
-transform = Transform3D(-0.23488317, 0, -0.9720236, 0, 0.85, 0, 0.9720236, 0, -0.23488317, 132.86867, 29.277077, -271.3424)
-
-[node name="L14" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.42454252, 0, 0.905408, 0, 0.85, 0, -0.905408, 0, 0.42454252, 142.67068, 29.151108, -257.2478)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L14" index="0"]
-visible = false
-
-[node name="L15" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(-0.22631943, 0, -0.97405314, 0, 0.85, 0, 0.97405314, 0, -0.22631943, 161.9518, 28.728998, -261.095)
-
-[node name="Wall_B_Limestone" parent="DecorManual/ZonaD/Ziduri/L15" index="1"]
-visible = false
-
-[node name="L16" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.018137425, 0, 0.9998355, 0, 0.85, 0, -0.9998355, 0, 0.018137425, 177.56152, 28.183039, -249.14099)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L16" index="0"]
-visible = false
-
-[node name="L17" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.4085402, 0, 0.91274035, 0, 0.85, 0, -0.91274035, 0, 0.4085402, 188.95811, 27.610003, -246.59851)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L17" index="0"]
-visible = false
-
-[node name="L18" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(-0.40854043, 0, -0.91274023, 0, 0.85, 0, 0.91274023, 0, -0.40854043, 211.73277, 27.03323, -258.31665)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L18" index="0"]
-visible = false
-
-[node name="L19" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.4085402, 0, 0.91274035, 0, 0.85, 0, -0.91274035, 0, 0.4085402, 218.16582, 26.500837, -233.5252)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/L19" index="0"]
-visible = false
-
-[node name="L20" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(-0.5828343, 0, -0.812591, 0, 0.85, 0, 0.812591, 0, -0.5828343, 234.4287, 26.107143, -235.88727)
-
-[node name="R00" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.24519028, 0, 0.969475, 0, 0.85, 0, -0.969475, 0, 0.24519028, -21.9477, 24.671179, -213.94164)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R00" index="0"]
-visible = false
-
-[node name="R01" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(-0.4341317, 0, -0.9008494, 0, 0.85, 0, 0.9008494, 0, -0.4341317, -6.3349004, 25.733585, -219.07007)
-
-[node name="R02" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(-0.24519055, 0, -0.9694749, 0, 0.85, 0, 0.9694749, 0, -0.24519055, 9.277901, 26.311901, -224.1985)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R02" index="0"]
-visible = false
-
-[node name="R03" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.15437979, 0, -0.9880116, 0, 0.85, 0, 0.9880116, 0, 0.15437979, 20.94209, 26.950098, -223.65738)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R03" index="0"]
-visible = false
-
-[node name="R04" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.52924925, 0, -0.8484664, 0, 0.85, 0, 0.8484664, 0, 0.52924925, 31.88522, 27.43105, -227.73096)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R04" index="0"]
-visible = false
-
-[node name="R05" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(-0.5292492, 0, 0.84846646, 0, 0.85, 0, -0.84846646, 0, -0.5292492, 56.045666, 27.845592, -219.22961)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R05" index="0"]
-visible = false
-
-[node name="R06" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(0.34886292, 0, -0.9371738, 0, 0.85, 0, 0.9371738, 0, 0.34886292, 63.163948, 28.284853, -234.04144)
-
-[node name="R07" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(0.34886292, 0, -0.9371738, 0, 0.85, 0, 0.9371738, 0, 0.34886292, 74.41003, 28.634436, -238.22778)
-
-[node name="R08" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(-0.15437983, 0, 0.9880116, 0, 0.85, 0, -0.9880116, 0, -0.15437983, 89.48096, 28.971457, -231.67587)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R08" index="0"]
-visible = false
-
-[node name="R09" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(-0.04634167, 0, -0.9989256, 0, 0.85, 0, 0.9989256, 0, -0.04634167, 101.8348, 29.25892, -242.51297)
-
-[node name="R10" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.24519028, 0, 0.969475, 0, 0.85, 0, -0.969475, 0, 0.24519028, 113.13225, 29.314127, -230.57866)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/R10" index="0"]
-visible = false
-
-[node name="S00" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(-0.28253534, 0, -0.9592569, 0, 0.85, 0, 0.9592569, 0, -0.28253534, 149.93263, 28.880283, -231.64842)
-
-[node name="S01" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.46867827, 0, 0.88336897, 0, 0.85, 0, -0.88336897, 0, 0.46867827, 158.06834, 28.324001, -217.3701)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/S01" index="0"]
-visible = false
-
-[node name="S02" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(-0.46867839, 0, -0.88336885, 0, 0.85, 0, 0.88336885, 0, -0.46867839, 181.57582, 27.716732, -227.53865)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/S02" index="0"]
-visible = false
-
-[node name="S03" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_straight")]
-transform = Transform3D(-0.28253534, 0, -0.9592569, 0, 0.85, 0, 0.9592569, 0, -0.28253534, 189.71153, 27.214308, -213.26033)
-
-[node name="S04" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_arch")]
-transform = Transform3D(-0.28253534, 0, -0.9592569, 0, 0.85, 0, 0.9592569, 0, -0.28253534, 202.18187, 26.51928, -209.58737)
-
-[node name="S05" parent="DecorManual/ZonaD/Ziduri" instance=ExtResource("d_curve")]
-transform = Transform3D(0.46867827, 0, 0.88336897, 0, 0.85, 0, -0.88336897, 0, 0.46867827, 211.27684, 25.497107, -195.0265)
-
-[node name="Wall_A_Limestone" parent="DecorManual/ZonaD/Ziduri/S05" index="0"]
-visible = false
 
 [node name="Shisa_S" parent="DecorManual/ZonaD/Shisa" instance=ExtResource("d_shisa")]
 transform = Transform3D(-0.56662136, 0, 1.388863, 0, 1.5, 0, -1.388863, 0, -0.56662136, 136.6534, 29.67006, -262.65363)

@@ -116,7 +116,19 @@ static func bake(root: Node3D, sway: SwayDriver = null) -> Dictionary:
 	var holder := Node3D.new()
 	holder.name = "Batched"
 	root.add_child(holder)
+	var instances := _emit(groups, holder, sway)
 
+	var freed := _prune_empty(root)
+	return {
+		"instances": instances,
+		"batches": groups.size(),
+		"freed": freed,
+	}
+
+
+## Scrie cate un [MultiMeshInstance3D] per grup sub `holder`. Comun pentru
+## `bake` si `bake_manual`; intoarce numarul de instante scrise.
+static func _emit(groups: Dictionary, holder: Node3D, sway: SwayDriver) -> int:
 	var instances := 0
 	for key: String in groups:
 		var g: Dictionary = groups[key]
@@ -125,9 +137,13 @@ static func bake(root: Node3D, sway: SwayDriver = null) -> Dictionary:
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.mesh = g["mesh"]
 		mm.instance_count = xforms.size()
+		var nu := bool(g.get("nu", false))
+		var undo := Transform3D(Basis.from_scale(NU_SCALE).inverse(), Vector3.ZERO)
 		for i in xforms.size():
-			mm.set_instance_transform(i, xforms[i])
+			mm.set_instance_transform(i, undo * xforms[i] if nu else xforms[i])
 		var mmi := MultiMeshInstance3D.new()
+		if nu:
+			mmi.scale = NU_SCALE
 		# Numele PASTREAZA numele variantei sursa, si nu din cochetarie:
 		# `probe_decor._source_of` atribuie fiecare vizual unui GLB dupa
 		# prefixul numelui. Botezat "Batch_17", tot decorul pistei ar fi
@@ -142,13 +158,7 @@ static func bake(root: Node3D, sway: SwayDriver = null) -> Dictionary:
 		if sway != null:
 			for idx: int in g["sway"]:
 				sway.add_instance(mmi, idx, xforms[idx])
-
-	var freed := _prune_empty(root)
-	return {
-		"instances": instances,
-		"batches": groups.size(),
-		"freed": freed,
-	}
+	return instances
 
 
 ## Parcurge subarborele adunand vizualele, cu transformarea acumulata de la
@@ -179,9 +189,10 @@ static func _collect(node: Node3D, xf: Transform3D, swaying: bool,
 
 
 static func _add(mi: MeshInstance3D, xf: Transform3D, swaying: bool,
-		groups: Dictionary, flipped: Dictionary) -> void:
+		groups: Dictionary, flipped: Dictionary,
+		extra_key: String = "", cell_m: float = CELL_M) -> String:
 	var cell := Vector2i(
-		int(floor(xf.origin.x / CELL_M)), int(floor(xf.origin.z / CELL_M)))
+		int(floor(xf.origin.x / cell_m)), int(floor(xf.origin.z / cell_m)))
 	# Instanta oglindita primeste mesh-ul cu triunghiurile intoarse (vezi nota
 	# de la inceputul fisierului). Se separa de la sine in alt grup, fiindca
 	# cheia contine mesh-ul.
@@ -193,6 +204,8 @@ static func _add(mi: MeshInstance3D, xf: Transform3D, swaying: bool,
 	# sunt doua desenari oricum, iar un multimesh are un singur material.
 	var key := "%d|%d|%d|%d" % [mesh.get_instance_id(),
 		mi.material_override.get_instance_id(), cell.x, cell.y]
+	# `bake_manual` adauga umbra si latura celulei (vezi acolo).
+	key += extra_key
 	if not groups.has(key):
 		groups[key] = {
 			"mesh": mesh,
@@ -211,6 +224,7 @@ static func _add(mi: MeshInstance3D, xf: Transform3D, swaying: bool,
 	if swaying:
 		(g["sway"] as Array).append(xforms.size())
 	xforms.append(xf)
+	return key
 
 
 ## Acelasi mesh cu triunghiurile parcurse invers.
@@ -284,3 +298,172 @@ static func _walk(node: Node) -> Array[Node]:
 		out.append(c)
 		out.append_array(_walk(c))
 	return out
+
+
+## ############################################################################
+## DECORUL MANUAL (DecorManual) — aceeasi coacere, la incarcarea cursei.
+##
+## Masurat pe iPhone 12 Pro (video din 12 oct 2026, Jodhpur): 22-38 fps pe
+## dreptele deschise, la 1700-2300 de desene; 60 fps in fort, la 150-350. Iar
+## defalcarea pe grupuri (stinge grupul, masoara) la frac 0,917: casele puse de
+## mana dau 1264 de desene si tarabele/sacii/coviltirele/ghirlandele inca 672,
+## adica ~85% din cadru. Cele 571 de case din OrasFill, deja MultiMesh pe
+## celule, costa 80. Fiecare GLB pus de mana e 3-5 noduri de mesh, iar fiecare
+## nod e propriul apel de desenare.
+##
+## DecorManual ramane SURSA DE ADEVAR in .tscn (memoria
+## `decor-manual-sursa-de-adevar`): coacerea se face doar in joc, niciodata in
+## editor, si nu scrie nimic in scena.
+##
+## Fata de `bake` sunt cinci diferente, toate din cauza ca aici nodurile sunt
+## asezate de mana si unele traiesc:
+##   - sursele se ASCUND (visible = false), nu se elibereaza: un script care tine
+##     o referinta la un nod de mesh nu ramane cu un obiect mort.
+##   - variantele stinse (`visible = false`) ale GLB-urilor multi-varianta nu se
+##     coc: n-au fost niciodata pe ecran si nu trebuie sa apara acum.
+##   - orice subarbore cu script propriu (felinare, stoluri, lumini, kituri,
+##     hazarde, CameraZone) ramane nod, fiindca scriptul poate misca sau schimba
+##     ce e sub el. La fel orice GLB cu [AnimationPlayer] sau [Skeleton3D].
+##   - umbra intra in cheie: WorldProp stinge umbra pe unele modele
+##     (NO_SHADOW_MODELS), iar un grup are o singura setare.
+##   - mesh-urile atinse de un [Decal] primesc celule mici, iar cele din raza
+##     unei lumini omni/spot raman noduri (vezi mai jos).
+## Coliziunea nu se atinge: corpurile [StaticBody3D] raman unde sunt.
+##
+## DECALURILE: rendererul Mobile plafoneaza la 8 decalurile pe instanta de
+## mesh, iar un MultiMesh e O instanta. Pe Jodhpur, decalurile calde de pe
+## fatade (`StreetLights.facade_wash`, 83 pe pista) disparusera de pe jumatate
+## din case cu celule de 250 m — masurat prin diff de pixeli cu/fara coacere,
+## singura diferenta din cadru. Celule de 60 m pe tot decorul le aduceau
+## inapoi, dar varful de desene urca de la 695 la 1203. Deci doar mesh-urile
+## al caror AABB atinge un decal merg pe celule de `DECAL_CELL_M`; restul pe
+## cei 250 m ai lui `bake`.
+##
+## LUMINILE LOCALE au acelasi plafon (8 omni + 8 spot pe instanta, Mobile): in
+## caverna Cappadocia (Track13) peretele isi pierdea lumina calda a
+## felinarelor la celule de 250 m, si panourile luminate tot se stingeau la
+## 40 m (sala are mai mult de 8 lumini pe o celula). Deci mesh-urile din raza
+## unei [OmniLight3D]/[SpotLight3D] a pistei raman noduri — fiecare cu cele
+## mai apropiate 8 lumini ale lui, ca inainte.
+const DECAL_CELL_M: float = 40.0
+
+## SCALAREA NEUNIFORMA: shaderul Godot alege matricea normalelor dupa steagul
+## de scalare neuniforma al NODULUI. Un [MultiMeshInstance3D] cu scala 1 nu-l
+## are, deci normalele unei instante turtite pe o axa (225 de piese pe Jodhpur,
+## 482 pe Okinawa) se transformau cu matricea modelului, nu cu inversa ei
+## transpusa: fetele de sus ale stancilor ieseau mai intunecate (diff de pixeli
+## pe Track08). Grupurile cu astfel de instante primesc pe nod o scala
+## neuniforma infima, compensata exact in transformarile instantelor, ca
+## shaderul sa calculeze normalele corect. Geometria nu se misca.
+const NU_SCALE := Vector3(1.0, 1.0, 1.001)
+
+## PROIECTIA TRIPLANARA DE LUME nu supravietuieste coacerii pe rendererul
+## Mobile: in MultiMesh textura iese proiectata ca si cum instanta n-ar avea
+## rotatia ei (benzi verticale in loc de orizontale pe stancile rock_slab de pe
+## Jodhpur; diff de pixeli 0,63% -> 0,06% cand le scoti din coacere). Piesele
+## pe astfel de materiale (clasele `tri:` — roca, tuf, riolit) raman noduri.
+## Pe Jodhpur sunt ~770 din 3554; restul se coace.
+##
+## La fel, o instanta cu bazei degenerata (determinant ~0, de ex. `zidValea52`
+## pe Cappadocia, scara pe Y = 0 in .tscn) nu deseneaza nimic ca nod, dar in
+## MultiMesh iesea intinsa pe cer. Ramane nod, adica tot nimic.
+static func _world_triplanar(m: Material) -> bool:
+	var sm := m as StandardMaterial3D
+	return sm != null and (sm.uv1_world_triplanar or sm.uv2_world_triplanar)
+
+static func _non_uniform(b: Basis) -> bool:
+	var s := b.get_scale().abs()
+	return maxf(s.x, maxf(s.y, s.z)) > minf(s.x, minf(s.y, s.z)) * 1.001
+
+static func bake_manual(dm: Node3D, decal_cell_m: float = DECAL_CELL_M) -> Dictionary:
+	var groups := {}
+	var sources: Array[MeshInstance3D] = []
+	var flipped := {}
+	var to_local := dm.global_transform.affine_inverse()
+	# Decalurile si luminile locale din toata pista (StreetLights sta in
+	# DecorManual, dar un decal sau o lumina poate fi si in afara lui), ca AABB
+	# de lume. O lumina omni/spot se aproximeaza cu cutia sferei ei de raza.
+	var decals: Array[AABB] = []
+	var lights: Array[AABB] = []
+	var scope: Node = dm.get_parent() if dm.get_parent() != null else dm
+	for d in scope.find_children("*", "Decal", true, false):
+		var dec := d as Decal
+		decals.append(dec.global_transform * AABB(-dec.size * 0.5, dec.size))
+	for l in scope.find_children("*", "Light3D", true, false):
+		var r := 0.0
+		if l is OmniLight3D:
+			r = (l as OmniLight3D).omni_range
+		elif l is SpotLight3D:
+			r = (l as SpotLight3D).spot_range
+		if r > 0.0:
+			var c := (l as Node3D).global_position
+			lights.append(AABB(c - Vector3.ONE * r, Vector3.ONE * r * 2.0))
+	var ctx := {"to_local": to_local, "decals": decals, "lights": lights,
+		"cell": decal_cell_m,
+		"groups": groups, "sources": sources, "flipped": flipped}
+	for c in dm.get_children():
+		if c is Node3D:
+			_collect_manual(c as Node3D, ctx)
+	if groups.is_empty():
+		return {"instances": 0, "batches": 0, "hidden": 0}
+	for mi in sources:
+		mi.visible = false
+	var holder := Node3D.new()
+	holder.name = "Batched"
+	dm.add_child(holder)
+	var instances := _emit(groups, holder, null)
+	return {
+		"instances": instances,
+		"batches": groups.size(),
+		"hidden": sources.size(),
+	}
+
+
+static func _collect_manual(node: Node3D, ctx: Dictionary) -> void:
+	if not node.visible or node.is_queued_for_deletion():
+		return
+	if node.get_script() != null:
+		return
+	# Radacina unui GLB instantiat: daca are animatie sau schelet, tot modelul
+	# ramane nod (oasele misca mesh-urile, iar bufferul ar ingheta poza).
+	if node.scene_file_path != "":
+		if not node.find_children("*", "AnimationPlayer", true, false).is_empty() \
+				or not node.find_children("*", "Skeleton3D", true, false).is_empty():
+			return
+	if node is MeshInstance3D and _bakeable(node as MeshInstance3D, ctx["lights"]):
+		var mi := node as MeshInstance3D
+		var world := mi.global_transform * mi.get_aabb()
+		var cell_m := CELL_M
+		for box: AABB in ctx["decals"]:
+			if box.intersects(world):
+				cell_m = float(ctx["cell"])
+				break
+		var xf := (ctx["to_local"] as Transform3D) * mi.global_transform
+		var nu := _non_uniform(xf.basis)
+		var key := _add(mi, xf, false, ctx["groups"], ctx["flipped"],
+			"|s%d|c%d|n%d" % [mi.cast_shadow, int(cell_m), int(nu)], cell_m)
+		if nu:
+			(ctx["groups"][key] as Dictionary)["nu"] = true
+		(ctx["sources"] as Array).append(mi)
+	# Coborarea continua si sub un mesh necopt: copiii lui (trunchiul de sub
+	# coroana) se judeca separat.
+	for c in node.get_children():
+		if c is Node3D:
+			_collect_manual(c as Node3D, ctx)
+
+
+## Un nod de mesh se coace doar daca nimic din el nu depinde de instanta: un
+## singur material pe tot mesh-ul, fara schelet, fara proiectie de lume, cu
+## baza nedegenerata si in afara razei oricarei lumini locale.
+static func _bakeable(mi: MeshInstance3D, lights: Array) -> bool:
+	if mi.mesh == null or mi.material_override == null or mi.skin != null:
+		return false
+	if _world_triplanar(mi.material_override):
+		return false
+	if absf(mi.global_transform.basis.determinant()) <= 1e-6:
+		return false
+	var world := mi.global_transform * mi.get_aabb()
+	for box: AABB in lights:
+		if box.intersects(world):
+			return false
+	return true

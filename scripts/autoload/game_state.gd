@@ -167,6 +167,17 @@ var show_perf: bool = false
 ## Setare ca sa se poata compara la volan, din pauza; prima de stins daca
 ## device-ul nu tine 60 fps (vezi CarLights).
 var real_headlight: bool = true
+## NIVELUL GRAFIC — comutatorul de device din planul de grafica pe mobil.
+##   0 = ECONOMIC: fara umbre dinamice, fara glow, randare 3D la ~720 px
+##       inaltime pe telefon. Ce ramane e AO-ul copt + blob-ul masinii.
+##   1 = NORMAL (implicit): umbre + glow; pe telefon randarea 3D la ~864 px
+##       inaltime si MSAA 4x (pe un GPU cu placi 4x la 0.75 e mai ieftin si
+##       mai curat decat 2x la nativ); pe desktop rezolutie nativa.
+##   2 = MAXIM: totul, la rezolutie nativa, MSAA 4x.
+## Umbrele si glow-ul se citesc la construirea pistei (Track.gfx_tier), deci
+## schimbarea lor se vede la urmatoarea cursa; scala si MSAA se aplica pe loc.
+const GFX_TIER_NAMES: Array[String] = ["Economic", "Normal", "Maxim"]
+var gfx_tier: int = 1
 
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
 var touch_steer: float = 0.0
@@ -187,6 +198,38 @@ var records: Dictionary = {}
 func _ready() -> void:
 	load_settings()
 	load_records()
+	apply_gfx_tier()
+
+
+## Aplica nivelul grafic pe ce se poate schimba PE LOC: scala de randare 3D
+## si MSAA pe viewport-ul radacina, plus steagul static pe care il citeste
+## Track la construirea pistei (umbre, glow). Track e @tool si nu poate
+## atinge un autoload din editor, de aceea nu citeste GameState direct.
+##
+## Scala se da ca INALTIME-TINTA, nu ca factor: un iPhone are 1170-1290 px
+## pe inaltime in landscape, un iPad 1640+, un desktop 720-1440 — acelasi
+## 0.75 ar insemna altceva pe fiecare. Pe desktop ramane nativ la orice
+## nivel: dezvoltatorul trebuie sa vada cadrul intreg, iar bugetul de acolo
+## nu e cel de pe telefon.
+func apply_gfx_tier() -> void:
+	Track.gfx_tier = gfx_tier
+	var vp := get_viewport()
+	if vp == null:
+		return
+	var mobile := OS.has_feature("mobile")
+	if mobile:
+		var target_h: float = [720.0, 864.0, 100000.0][gfx_tier]
+		# Inaltimea in PIXELI FIZICI, nu `get_visible_rect()`: cu
+		# `stretch/mode = canvas_items` rect-ul vizibil e in coordonatele de
+		# baza (720 de inaltime pe orice ecran), deci 864/720 iesea peste 1 si
+		# scala ramanea mereu nativa — pe iPhone 12 Pro (1170 px) nici
+		# Economic, nici Normal nu coborau rezolutia.
+		var h := float(DisplayServer.window_get_size().y)
+		vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+		vp.scaling_3d_scale = clampf(target_h / maxf(h, 1.0), 0.5, 1.0)
+		vp.msaa_3d = Viewport.MSAA_2X if gfx_tier == 0 else Viewport.MSAA_4X
+	elif gfx_tier == 2:
+		vp.msaa_3d = Viewport.MSAA_4X
 
 ## Returneaza true daca timpul e record nou pe pista respectiva.
 func try_record(track_index: int, lap_ms: int) -> bool:
@@ -297,6 +340,7 @@ func load_settings() -> void:
 		float(cfg.get_value("camera", "follow_scale", 1.0)), 0.4, 2.5)
 	show_perf = bool(cfg.get_value("debug", "show_perf", false))
 	real_headlight = bool(cfg.get_value("debug", "real_headlight", true))
+	gfx_tier = clampi(int(cfg.get_value("video", "gfx_tier", 1)), 0, 2)
 
 func save_settings() -> void:
 	var cfg := ConfigFile.new()
@@ -310,6 +354,7 @@ func save_settings() -> void:
 	cfg.set_value("camera", "follow_scale", cam_follow_scale)
 	cfg.set_value("debug", "show_perf", show_perf)
 	cfg.set_value("debug", "real_headlight", real_headlight)
+	cfg.set_value("video", "gfx_tier", gfx_tier)
 	cfg.save(SETTINGS_PATH)
 
 

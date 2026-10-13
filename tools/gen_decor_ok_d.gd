@@ -39,7 +39,7 @@ const PAL_U := 0.4125
 const PAL_V := -30.0
 const MIN_CLEAR := 6.0      # fata zidului la >= 6 m de asfalt
 const HALF_T := 1.45        # jumatate de grosime + marja
-const SINK := 0.35
+const SINK := 0.45
 const SY := 0.85            # inaltime zid 6,8 m (contract 6-10)
 
 var tr: Track
@@ -60,6 +60,7 @@ var pal_pos := Vector3.ZERO
 var pal_yaw_v := 0.0
 var module_mid: Array = []           # [Vector2 godot, side, clearance]
 var min_clear_seen := 99.0
+var max_gap_seen := -99.0
 var tgt_p := PackedVector2Array()    # tinta curenta, cadru Blender
 var tgt_h := PackedFloat32Array()
 var tgt_u := PackedFloat32Array()
@@ -307,10 +308,7 @@ func _emit_module(cname: String, idx: int, m: Dictionary, st: Dictionary, side: 
 	if m.root == "B":
 		inst = t - _rot(Vector2(10.0, 0.0), r)
 	var gp := _b2g(inst)
-	var miny := 1e9
-	for lp in _local_samples(m):
-		var g := _b2g(_rot(lp, r) + t)
-		miny = minf(miny, _gy(g))
+	var half: float = m.half
 	var cpts: Array[Vector2] = []
 	for k in 6:
 		var f := float(k) / 5.0
@@ -320,7 +318,7 @@ func _emit_module(cname: String, idx: int, m: Dictionary, st: Dictionary, side: 
 			var R: float = m.R
 			lp = Vector2(-R * cos(float(m.phi)) + R * cos(th), R * sin(th))
 		else:
-			lp = Vector2(0, lerpf(-float(m.half), float(m.half), f))
+			lp = Vector2(0, lerpf(-half, half, f))
 		wall_pts.append(_b2g(_rot(lp, r) + t))
 		cpts.append(_b2g(_rot(lp, r) + t))
 	module_pts.append({"pts": cpts, "arch": m.res == "arch", "side": side})
@@ -328,17 +326,40 @@ func _emit_module(cname: String, idx: int, m: Dictionary, st: Dictionary, side: 
 	min_clear_seen = minf(min_clear_seen, cl)
 	if cl < MIN_CLEAR:
 		report.append("ATENTIE modul %s%d clearance %.2f la (%.0f, %.0f)" % [cname, idx, cl, gp.x, gp.y])
-	var b := Basis(Vector3.UP, r) * Basis.from_scale(Vector3(1.0, SY, 1.0))
+
+	# INALTIMEA: modulul urmareste panta, nu stă orizontal. Capetele lui sunt
+	# punctele de imbinare cu vecinii (aceleasi in XZ la doua module consecutive),
+	# deci cota lor de pe teren e aceeasi pentru amandoi: creasta zidului e
+	# continua, fara trepte la imbinari (inainte: o cota per modul = cel mai jos
+	# punct, adica o treapta de ~0,6 m la fiecare imbinare, cu fata capatului
+	# la vedere — „zid dublat”). Capatul Blender (0,-half) cade pe Godot +Z local.
+	var pa := _b2g(_rot(Vector2(0, -half), r) + t)
+	var pb := _b2g(_rot(Vector2(0, half), r) + t)
+	var ga := _gy(pa)
+	var gb := _gy(pb)
+	var tilt := -atan2(ga - gb, 2.0 * half)
+	var y_mid := 0.5 * (ga + gb) - SINK
+	# golul de sub zid pe punctele curbei: rampa liniara ga->gb fata de teren
+	var ab := pb - pa
+	for q in cpts:
+		var u := clampf((q - pa).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		max_gap_seen = maxf(max_gap_seen, lerpf(ga, gb, u) - _gy(q) - SINK)
+	var b := Basis(Vector3.UP, r) * Basis(Vector3.RIGHT, tilt) * Basis.from_scale(Vector3(1.0, SY, 1.0))
 	var nname := "%s%02d" % [cname, idx]
 	out.append('[node name="%s" parent="%s/Ziduri" instance=ExtResource("%s")]' % [nname, ZONE, _rid(m.res)])
-	out.append("transform = " + var_to_str(Transform3D(b, Vector3(gp.x, miny - SINK, gp.y))))
-	out.append("")
+	out.append("transform = " + var_to_str(Transform3D(b, Vector3(gp.x, y_mid, gp.y))))
 	if m.res == "curve":
 		var hide := "Wall_B_Limestone" if m.root == "A" else "Wall_A_Limestone"
+		# varianta nefolosita se STERGE din arbore la pornire (wall_chain.gd), nu
+		# doar se ascunde: pe telefon `visible = false` din suprascrierea de nod
+		# nu s-a aplicat si cele doua variante s-au randat una peste alta, cu
+		# cealalta decalata 10 m in lateral (captura dezvoltatorului, 12 oct).
+		out.append('metadata/drop_variants = "%s"' % hide)
+		out.append("")
 		var hidx := 1 if m.root == "A" else 0
 		out.append('[node name="%s" parent="%s/Ziduri/%s" index="%d"]' % [hide, ZONE, nname, hidx])
 		out.append("visible = false")
-		out.append("")
+	out.append("")
 	_cnt("modul_" + String(m.k))
 	module_mid.append([_b2g(t), side, cl])
 
@@ -354,8 +375,10 @@ func _cnt(k: String, c := 1) -> void:
 	counts[k] = int(counts.get(k, 0)) + c
 
 
-func _group(g: String) -> void:
+func _group(g: String, script_id := "") -> void:
 	out.append('[node name="%s" type="Node3D" parent="%s"]' % [g, ZONE])
+	if script_id != "":
+		out.append('script = ExtResource("%s")' % script_id)
 	out.append("")
 
 
@@ -398,7 +421,7 @@ func _generate(path: String) -> void:
 		road_p.append(Vector2(q.x, q.z))
 		road_hw.append(tr.width_at_index(i))
 
-	_group("Ziduri")
+	_group("Ziduri", "d_wallchain")
 	_group("Palat")
 	_group("Arbori")
 	_group("Flori")
@@ -418,6 +441,7 @@ func _generate(path: String) -> void:
 	var nr1 := _build_chain("R", 1.0, 0.347, 0.418, 0.352, 0.0)
 	var nr2 := _build_chain("S", 1.0, 0.4375, 0.470, 0.352, 0.4555)
 	report.append("lant stanga %d module, dreapta %d + %d" % [nl, nr1, nr2])
+	report.append("gol maxim sub zid (cota rampei - teren - sink): %.2f m" % max_gap_seen)
 	report.append("clearance minim fata zid (centru - 1.45 m - asfalt): %.2f m" % min_clear_seen)
 
 	# pereche shisa la poarta (kit vechi, ~1.5x), inainte de cadrul portii
@@ -465,6 +489,7 @@ func _generate(path: String) -> void:
 	var head := PackedStringArray()
 	for k in used_res:
 		head.append('[ext_resource type="PackedScene" path="%s" id="d_%s"]' % [RES[k], k])
+	head.append('[ext_resource type="Script" path="res://scenes/props/wall_chain.gd" id="d_wallchain"]')
 	var fo := FileAccess.open(path, FileAccess.WRITE)
 	fo.store_string("\n".join(head) + "\n###NODES###\n" + "\n".join(out))
 	fo.close()

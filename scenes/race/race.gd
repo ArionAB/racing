@@ -136,6 +136,7 @@ func _setup_race() -> void:
 		var tuner := CameraTuner.new()
 		tuner.camera = camera
 		add_child(tuner)
+	add_child(Vignette.new())
 	hud = RaceHUD.new()
 	add_child(hud)
 	hud.restart_requested.connect(GameState.start_race)

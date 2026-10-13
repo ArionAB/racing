@@ -28,6 +28,8 @@ extends Node
 ##   --no-glow        stinge glow-ul — cat costa post-procesarea
 ##   --scale=0.75     factorul de rezolutie 3D (1.0 = nativ)
 ##   --msaa=4         MSAA 3D: 0, 2, 4, 8
+##   --splits=1|2     cascadele umbrei directionale fortate pe lumina
+##                    (1 = ortogonal, 2 = PSSM cu felia apropiata la 15%)
 ##
 ## De ce si timp GPU, nu doar desene: pe un GPU cu placi (Apple, Mali) numarul
 ## de desene e cost de CPU, iar ce doare cu adevarat — overdraw transparent,
@@ -47,6 +49,7 @@ func _ready() -> void:
 	var no_glow := false
 	var scale := 1.0
 	var msaa := -1
+	var splits := 0
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			track_arg = int(arg.trim_prefix("--track="))
@@ -66,6 +69,8 @@ func _ready() -> void:
 			scale = clampf(float(arg.trim_prefix("--scale=")), 0.25, 2.0)
 		elif arg.begins_with("--msaa="):
 			msaa = int(arg.trim_prefix("--msaa="))
+		elif arg.begins_with("--splits="):
+			splits = int(arg.trim_prefix("--splits="))
 	if DisplayServer.get_name() == "headless":
 		push_error("ProbePerf: ruleaza CU FEREASTRA — in --headless nu se deseneaza nimic, deci n-ar fi nimic de masurat.")
 		get_tree().quit(2)
@@ -83,6 +88,12 @@ func _ready() -> void:
 		if msaa < 0:
 			msaa = 4
 
+	# FARA VSYNC: cu vsync, cadrul de ~1 ms lasa GPU-ul 94% din timp in gol,
+	# frecventa lui cade in starea de economie si ACEEASI configuratie iese
+	# cand 0,7, cand 1,4 ms de la o rulare la alta (Chongqing, doua rulari
+	# identice: 1,45 si 0,68). Cu GPU-ul incarcat continuu, frecventa sta sus
+	# si cifrele se compara.
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	var vp := get_viewport()
 	var vp_rid := vp.get_viewport_rid()
 	if shadow_size > 0:
@@ -108,6 +119,18 @@ func _ready() -> void:
 	if no_glow:
 		for e in track.find_children("*", "WorldEnvironment", true, false):
 			(e as WorldEnvironment).environment.glow_enabled = false
+	# Cascadele, fortate pe lumina (A/B fara editarea temei): 1 = ortogonal
+	# pe toata distanta, 2 = PSSM cu felia apropiata la 15%.
+	if splits > 0:
+		for l in track.find_children("*", "DirectionalLight3D", true, false):
+			var sun := l as DirectionalLight3D
+			if splits >= 2:
+				sun.directional_shadow_mode = \
+					DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+				sun.directional_shadow_split_1 = 0.15
+				sun.directional_shadow_blend_splits = true
+			else:
+				sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	# Decorul care se construieste singur (`_build.call_deferred`, stoluri,
 	# turme) are nevoie de cadre de proces SI de fizica — aceeasi asteptare ca
 	# in snapshot.gd, altfel masuram o pista pe jumatate goala.
@@ -143,27 +166,40 @@ func _ready() -> void:
 		for _k in WARMUP_FRAMES:
 			await RenderingServer.frame_post_draw
 		var draw_sum := 0
+		var shadow_sum := 0
 		var prim_sum := 0
 		var obj_sum := 0
 		var cpu_sum := 0.0
-		var gpu_sum := 0.0
+		# Timpul GPU se ia ca MEDIANA a cadrelor, nu media: un singur cadru cu
+		# sughit de sistem (3-4 ms intr-o rulare de 0,5) tragea media punctului
+		# in sus si facea doua rulari identice sa difere cu 60%.
+		var gpu_frames: Array[float] = []
 		for _k in frames:
 			await RenderingServer.frame_post_draw
 			draw_sum += RenderingServer.viewport_get_render_info(vp_rid, t,
+				RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
+			# Desenele din PASA DE UMBRA sunt un tip separat de informatie:
+			# coloana "desene" nu le contine, deci o cascada in plus nu s-ar
+			# vedea acolo deloc.
+			shadow_sum += RenderingServer.viewport_get_render_info(vp_rid,
+				RenderingServer.VIEWPORT_RENDER_INFO_TYPE_SHADOW,
 				RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
 			prim_sum += RenderingServer.viewport_get_render_info(vp_rid, t,
 				RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
 			obj_sum += RenderingServer.viewport_get_render_info(vp_rid, t,
 				RenderingServer.VIEWPORT_RENDER_INFO_OBJECTS_IN_FRAME)
 			cpu_sum += RenderingServer.viewport_get_measured_render_time_cpu(vp_rid)
-			gpu_sum += RenderingServer.viewport_get_measured_render_time_gpu(vp_rid)
+			gpu_frames.append(
+				RenderingServer.viewport_get_measured_render_time_gpu(vp_rid))
+		gpu_frames.sort()
 		rows.append({
 			"frac": frac,
 			"draw": draw_sum / frames,
+			"shadow": shadow_sum / frames,
 			"prim": prim_sum / frames,
 			"obj": obj_sum / frames,
 			"cpu": cpu_sum / float(frames),
-			"gpu": gpu_sum / float(frames),
+			"gpu": gpu_frames[gpu_frames.size() / 2],
 		})
 
 	# Garda de "n-am masurat nimic": zero desene pe TOATE punctele nu e o pista
@@ -186,27 +222,36 @@ func _ready() -> void:
 			"NU" if no_shadows else "da",
 			str(shadow_size) if shadow_size > 0 else "proiect",
 			"NU" if no_glow else "da", samples, frames])
-	print("  frac   desene   obiecte    tri(k)   cpu ms   gpu ms")
+	print("  frac   desene   umbra   obiecte    tri(k)   cpu ms   gpu ms")
 	var max_d := 0
 	var max_g := 0.0
 	var sum_d := 0
+	var sum_s := 0
 	var sum_p := 0
 	var sum_c := 0.0
 	var sum_g := 0.0
 	for r in rows:
-		print("  %.2f   %6d   %7d   %7d   %6.2f   %6.2f" % [r["frac"], r["draw"],
-			r["obj"], int(r["prim"]) / 1000, r["cpu"], r["gpu"]])
+		print("  %.2f   %6d   %5d   %7d   %7d   %6.2f   %6.2f" % [r["frac"],
+			r["draw"], r["shadow"], r["obj"], int(r["prim"]) / 1000, r["cpu"],
+			r["gpu"]])
 		max_d = maxi(max_d, int(r["draw"]))
 		max_g = maxf(max_g, float(r["gpu"]))
 		sum_d += int(r["draw"])
+		sum_s += int(r["shadow"])
 		sum_p += int(r["prim"])
 		sum_c += float(r["cpu"])
 		sum_g += float(r["gpu"])
 	var cnt := float(rows.size())
-	print("  --- desene:  medie %d, varf %d" % [sum_d / rows.size(), max_d])
+	print("  --- desene:  medie %d, varf %d (umbra: medie %d)"
+		% [sum_d / rows.size(), max_d, sum_s / rows.size()])
 	print("  --- tri:     medie %dk" % [(sum_p / rows.size()) / 1000])
 	print("  --- cpu ms:  medie %.2f" % [sum_c / cnt])
-	print("  --- gpu ms:  medie %.2f, varf %.2f" % [sum_g / cnt, max_g])
+	var gpus: Array[float] = []
+	for r in rows:
+		gpus.append(float(r["gpu"]))
+	gpus.sort()
+	print("  --- gpu ms:  medie %.2f, mediana %.2f, varf %.2f"
+		% [sum_g / cnt, gpus[gpus.size() / 2], max_g])
 	get_tree().quit()
 
 

@@ -12,6 +12,9 @@ extends Node
 ##   --track=0 --frac=0.2 --driver
 ##                             POZA DE MASURARE (perspectiva). Vezi mai jos.
 ##   --track=0 --frac=0.2 --gamecam
+##   --fog-aerial=0.35         forteaza `fog_aerial_perspective` pe toate
+##                             WorldEnvironment-urile (A/B fara editarea temei)
+##   --vignette                adauga vigneta din joc (Vignette) peste captura
 ##   --track=3 --eye=250,6,-118 --look=232,8,-165
 ##                             CAMERA LIBERA: ochi si punct privit, in metri
 ##                             de lume (x,y,z). Pentru ce nu se vede de pe
@@ -378,6 +381,8 @@ func _ready() -> void:
 	var cine := false
 	var hide_terrain := false
 	var no_fog := false
+	var fog_aerial := -1.0
+	var vignette := false
 	var game_cam := false
 	## --cave: aplica presetul si intunericul celei mai apropiate [CameraZone].
 	##
@@ -601,6 +606,10 @@ func _ready() -> void:
 		elif arg == "--gamecam":
 			driver_view = true
 			game_cam = true
+		elif arg.begins_with("--fog-aerial="):
+			fog_aerial = float(arg.trim_prefix("--fog-aerial="))
+		elif arg == "--vignette":
+			vignette = true
 		elif arg == "--no-fog":
 			# Diagnostic: stinge ceata de adancime. Raspunde la intrebarea
 			# „geometria departata lipseste, sau doar e inghitita de ceata?" —
@@ -661,6 +670,15 @@ func _ready() -> void:
 		else:
 			push_error("snapshot: --dirt cere o pista TrackFromPath (custom_dirt_ranges)")
 	add_child(track)
+	# Perspectiva aeriana fortata (A/B pe aceeasi pista fara sa editezi tema).
+	if fog_aerial >= 0.0:
+		for we in track.find_children("*", "WorldEnvironment", true, false):
+			(we as WorldEnvironment).environment.fog_aerial_perspective = fog_aerial
+		print("--fog-aerial=%.2f" % fog_aerial)
+	# Vigneta din joc (Race o adauga; captura o pune doar la cerere, ca
+	# masuratorile de culoare pe margini sa nu se schimbe pe nesimtite).
+	if vignette:
+		add_child(Vignette.new())
 	if no_fog:
 		var envs := track.find_children("*", "WorldEnvironment", true, false)
 		for e in envs:

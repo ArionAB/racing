@@ -61,6 +61,8 @@ pur plus haosul fizic, nu proiectilele.
 ## Post-MVP (nu implementa fără să fie cerut)
 
 Multiplayer, campionat lung, unlockables, tuning vizual de mașini, monetizare.
+Analiza de monetizare, cu argumente pro/contra și deciziile deschise:
+`docs/monetizare/model_de_monetizare.md`.
 
 ## Arhitectură (ținta restructurării — M1)
 

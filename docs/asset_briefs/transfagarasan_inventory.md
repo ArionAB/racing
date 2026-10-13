@@ -5,6 +5,27 @@ Contract: `docs/asset_briefs/transfagarasan_kit.md`. Cote MASURATE din GLB
 Build: `tools/blender/build_tf_road.py` (vocabular: `transfagarasan_shapes.py`).
 Verdict: `bash tools/blender/verify_transfagarasan.sh` -> `VERDICT KIT: OK`.
 
+## Decizia coordonatorului (13 oct 2026): ACCEPTAT pe rev. 2
+
+Piesa e **acceptată în starea rev. 2**: placa, gura teșită și golul
+(14,85 × 7,40 m) sunt contractul înghețat. Zăpada are abateri cunoscute
+(blocuri prea cutioare, movila pe două coloane, dungi ca bețișoare).
+Runda 3 (`70abe521`) a făcut bulgări unghiulari pe potcoavă, dar a pierdut
+masa: cioburi rare și subțiri, citite ca hârtie mototolită, nu ca munte de
+zăpadă. S-a revenit la rev. 2 (`87dfc307`), adică la starea cel mai bine
+judecată.
+
+**Zăpada portalului se reface în valul 1**, de constructorul lui `snow_wall`,
+după ce vocabularul de zăpadă al kitului e stabilit și acceptat. Punctul de
+plecare e generatorul de bulgări din `70abe521`
+(`git show 70abe521:tools/blender/transfagarasan_shapes.py`), cu două reguli:
+- bulgări aproape izotropi (jitter mic, fără cioburi);
+- densitate de masă continuă, cu suprapunere ≥ 30%.
+
+În joc, laturile movilei stau oricum lipite de versantul din `TerrainPeak` și
+de modulele `snow_wall` de pe urcarea D. Deci placa și gura, care sunt bune,
+duc citirea.
+
 ## Stare la oprire (pilot, rev. 2, 13 oct 2026)
 
 Facut: harnasul (shapes, preview `--compare/--views/--sheet`, compose, verify,

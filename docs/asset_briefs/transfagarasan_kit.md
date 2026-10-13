@@ -400,6 +400,9 @@ sus, sunt sursa de **cote și de contracte de cod**.
    - **tf-a**: restul drumului (§1.1), cu **`snow_wall` primul** (pe lângă
      captura izolată, una cu 4 module înlănțuite pe o curbă) și
      `rock_tunnel_portal` cu golul măsurat;
+     după ce `snow_wall` e acceptat, **reface zăpada portalului Bâlea** cu
+     același vocabular. Placa, gura și golul nu se ating (inventar,
+     „Decizia coordonatorului”);
    - **tf-b**: stâncile și plantele (§1.4, §1.5). **`schist_outcrop_a`
      primul**, apoi **jneapănul**, cu o captură de 8 tufe la 3 m una de alta
      (pâlcul de pe versant) alături de cea izolată;

@@ -36,14 +36,31 @@ sloturile (memoria clase-pe-piese-de-kit). ROCK_DARK e interzis (rugina).
         pana la sol; `belly` umfla mijlocul fetei lungi (ramane convex).
         Latimea pe s = height*tan(back_lean) + height/tan(dip).
 
+  foliation_stack(s0, dip, specs, gap=0.15, tip_cut=0.2) -> (profiles, cracks)
+        STIVA "CARTI APLECATE" (folosita de toate trei aflorimentele): placi
+        paralele cu foliatia (`dip` fata de orizontala), asezate una PESTE alta
+        pe normala planului; specs = [(h, t, back_lean), ...], placa 0 e pana de
+        baza (slab_profile), urmatoarele au grosimea t si varful la h. Varfurile
+        coboara in trepte; fiecare iese ~t/cos(dip) peste fata celei de dinainte.
+        Intoarce conturul (s, z) al fiecarei placi si conturul fisurii DIAGONALE
+        de sub fiecare placa (de la fata ei abrupta pana la sol). Latimea pe s
+        creste cu (t + gap)/sin(dip) per placa -- de aici dip-ul abrupt la a.
+
+  crack_strip(bc, fr, poly, v_a, v_b, slot=TF_CRACK)
+        extrudeaza pe v o fisura din `foliation_stack` (intre v_a si v_b, putin
+        in interiorul fetelor -> rost adancit, nu dunga pictata).
+
   schist_slab(b, fr, prof, v0, thick, slot=TF_SCHIST, ridge=0.10, taper=0.35,
-              seed=0, jit=0.05)
+              seed=0, jit=0.05, back_taper=0.0, v_drop=0.0)
         LAMA: invelitoare convexa (fete plane, mari) a conturului extrudat pe v
         intre v0 (fata din fata) si v0+thick (spatele). Spatele e PLAN = planul de
         foliatie pe care se sprijina lama urmatoare si fisura. Fata din fata se
         subtiaza spre varf (`taper` x thick) si are o COAMA pe axa lamei (iese
         `ridge` m) -> 2-3 fatete mari, ca pe plansa. Jitter-ul merge doar spre +v
-        (nu inchide fisura). Intoarce fetele.
+        (nu inchide fisura). `back_taper` > 0 subtiaza si spatele spre varf, iar
+        `v_drop` coboara conturul de pe spate (lama e pana din lateral, nu
+        cutie); ramai la 0 cand alta lama sta lipita in spatele ei.
+        Intoarce fetele.
 
   crack_between(bc, fr, prof_front, prof_back, v_plane, gap, grow=0.16,
                 slot=TF_CRACK)

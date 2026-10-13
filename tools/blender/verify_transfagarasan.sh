@@ -92,9 +92,9 @@ echo "== val 1, tf-b: stanci si plante (kit §1.4, §1.5) =="
 #   --allow-slots=31   bujor_de_munte: florile pe FLAMINGO_PINK 31 (kit §0,
 #                      tabelul de sloturi), ca bougainvillea din Okinawa.
 for f in rocks/schist_outcrop_a rocks/schist_outcrop_b rocks/schist_outcrop_c          rocks/scree_cone plants/jneapan_a plants/jneapan_b plants/beech_tree_a          plants/beech_tree_b plants/afin; do
-  [ -f "$ROOT/$f.glb" ] && check "$f.glb" --origin=assembly
+  check "$f.glb" --origin=assembly
 done
-[ -f "$ROOT/plants/bujor_de_munte.glb" ] && check "plants/bujor_de_munte.glb" --origin=assembly --allow-slots=31
+check "plants/bujor_de_munte.glb" --origin=assembly --allow-slots=31
 
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="

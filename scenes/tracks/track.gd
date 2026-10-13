@@ -4031,6 +4031,43 @@ static func themes() -> Dictionary:
 		"water_shore_slot": Palette.ROCK_LIGHT,
 		"water_foam": 0.15,
 		"water_glint": 0.5,
+		# FUNDALUL (brief §1/§4, inventory_g.md): creasta Fagarasului la est, marea de
+		# nori in vaile din E/SE si campia la nord, din `transfagarasan_horizon.glb`
+		# (6 noduri, copii directe ale radacinii). Tema "alpine" de la care pornim are
+		# `horizon_picks`/`horizon_classes` pentru MountainPeak: aici se GOLESC/se
+		# inlocuiesc, altfel o lista de tema bate `picks` din inel. Clasa goala =
+		# atlasul modelului (zapada, poalele verzi si campia sunt pictate in sloturi;
+		# o clasa de roca le-ar sterge).
+		#
+		# Unghiul e in conventia `_build_horizon` (cos pe X, sin pe Z fata de
+		# centroid): Godot x = est, z = -nord, deci E = 0, SE = +45, N = -90. Bucla
+		# are ~445 x 600 m, centroidul (26, -62), iar latura de est (drumul propriu-
+		# zis) trece la x = 200..240: cautarea pe raza impinge creasta pana la
+		# `clear` (80 m) de sosea, adica ~300 m, sub fog_end 370 < FAR_PLANE 380
+		# (memoria efecte-de-fundal-cote-legate). `_build_horizon` stinge singur
+		# aruncarea de umbra pe siluete (memoria caster-departat-fura-umbra).
+		#
+		# `"dy"` (cheie noua, doar aici): coboara piesa SUB `ground_y - 4`. Norii (17 m
+		# grosime) si campia trebuie sa stea in vai, sub cota drumului.
+		"horizon_model": "res://assets/models/transfagarasan/effects/transfagarasan_horizon.glb",
+		"horizon_class": "",
+		"horizon_classes": {},
+		"horizon_picks": [["FagarasRidge_A"], ["FagarasRidge_B"], ["FagarasRidge_C"],
+			["CloudSea_A"], ["CloudSea_B"], ["FagarasPlain_A"]],
+		"horizon_rings": [
+			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
+				"picks": ["FagarasRidge_A"], "angle_deg": 0.0, "yaw_deg": -90.0},
+			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
+				"picks": ["FagarasRidge_B"], "angle_deg": -35.0, "yaw_deg": -55.0},
+			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
+				"picks": ["FagarasRidge_C"], "angle_deg": 35.0, "yaw_deg": -125.0},
+			{"near": 240.0, "far": 320.0, "count": 1, "scale": 1.0, "clear": 90.0,
+				"picks": ["CloudSea_A"], "angle_deg": 15.0, "yaw_deg": -105.0, "dy": -8.0},
+			{"near": 240.0, "far": 320.0, "count": 1, "scale": 1.0, "clear": 90.0,
+				"picks": ["CloudSea_B"], "angle_deg": 55.0, "yaw_deg": -145.0, "dy": -8.0},
+			{"near": 280.0, "far": 340.0, "count": 1, "scale": 1.0, "clear": 60.0,
+				"picks": ["FagarasPlain_A"], "angle_deg": -90.0, "yaw_deg": 0.0, "dy": 0.0},
+		],
 	}, true)
 	_themes_cache["transfagarasan"] = tf
 	return _themes_cache
@@ -6068,9 +6105,20 @@ func _build_horizon(centroid: Vector3) -> void:
 			# Ingropate 4m: taie muchia de la baza si le aseaza in peisaj.
 			# Ingropate 4 m SUB nisipul de acolo, nu sub cota zero: la 150-320 m
 			# terenul e deja dune in jurul mediei pistei, nu o podea plata.
+			# COBORARE PER INEL (optional, oct 2026, Transfagarasan): `"dy": -24.0` se
+			# ADAUGA la cei 4 m de ingropare. Norii (17 m grosime) si campia trebuie sa
+			# stea in vai, SUB drum, nu pe cota terenului de la 300 m: acolo ar fi o
+			# placa pe cer. Fara cheie, `dy` = 0 si pozitia ramane bit-identica.
+			var dy: float = float(ring.get("dy", 0.0))
 			model.position = Vector3(pos.x,
-				_sampler.ground_y(pos.x, pos.z) - 4.0, pos.z)
+				_sampler.ground_y(pos.x, pos.z) - 4.0 + dy, pos.z)
 			model.rotation.y = rng.randf_range(0.0, TAU)
+			# ORIENTARE FIXA (optional, oct 2026, Transfagarasan): `"yaw_deg"` suprascrie
+			# rotatia trasa la sorti (tragerea ramane, ca sirul rng al celorlalte inele
+			# sa fie identic). Creasta (230 x 66 m) vazuta din capat citeste doua
+			# varfuri, nu un perete: lungimea trebuie asezata paralel cu soseaua.
+			if ring.has("yaw_deg"):
+				model.rotation.y = deg_to_rad(float(ring["yaw_deg"]))
 			# Scara creste cu inelul. La marimea nominala (25-60m) siluetele se
 			# pierdeau sub linia cetii in loc sa se ridice pe cer — verificat in
 			# vederea soferului. Sunt fundal pur, deci exagerarea nu costa nimic:

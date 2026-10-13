@@ -417,38 +417,44 @@ AO_WALL = dict(samples=16, dist=1.6, gradient="vertical", low=0.66, high=1.0,
 
 def build_retaining_wall(curve=False):
     """Zidul de sprijin din piatra uscata de la acele de par
-    (`retaining_wall_straight` / `retaining_wall_curve`), kit §1.1.
+    (`retaining_wall_straight` / `retaining_wall_curve`), kit §1.1, CONTRACT
+    REVIZUIT (coordonatorul, dupa val 1: corpul gol citea tencuiala, iar
+    dintii de pe creasta nu citeau zid de piatra uscata).
 
-    LISTA DE ELEMENTE (decuparile `transfagarasan_assets_v1/retaining_wall_straight.png`
-    si `retaining_wall_curve.png`, scrisa INAINTE de geometrie; fasia din piesa
+    LISTA DE ELEMENTE (decuparile `retaining_wall_straight.png` si
+    `retaining_wall_curve.png`, scrisa INAINTE de geometrie; fasia din piesa
     vecina din dreapta decuparii curbe se ignora):
       1) zid lung, h/l ~0,4 pe decupare (dreapta), ~0,45 (curba)
-      2) RANDUL DE SUS: ~11 pietre de coronament dreptunghiulare, mai deschise,
-         usor iesite din fata, cu rosturi vizibile
-      3) CORPUL: ~40 de pietre rotunjite, neregulate, in 4-5 asize, cu rosturi
-         inchise si putin verde in rosturi
-      4) fata usor inclinata, capatul din dreapta vizibil (gros ~1/4 din inaltime)
-      5) curba: aceeasi zidarie pe un arc, fata CONVEXA spre privitor
-    CONTRACTUL kitului (suprascrie decuparea, regula 7 + tabelul §1.1): pietre
-    individuale DOAR pe randul de sus, 7-9 pe modul (decuparea are ~11: urmez
-    contractul, 8); corpul (3) e masa cu FETE MARI, piatra lui vine din clasa
-    `stone_wall` la integrare; fara verde in rosturi (fara vegetatie lipita).
-    Lista urmeaza contractul:
+      2) CORONAMENTUL: un rand continuu de pietre plate, mai deschise, LIPITE,
+         usor iesite in afara fetei
+      3) CORPUL: pietre MARI rotunjite-colturoase in 4-5 asize neregulate, cu
+         rosturi inchise intre ele (umbra), ~40 pe decupare
+      4) fata usor inclinata; capatul din dreapta vizibil (gros ~1/4 din inaltime)
+      5) curba: aceeasi zidarie pe arc
+    CONTRACTUL REVIZUIT (suprascrie decuparea unde difera): 12-18 pietre pe fata
+    unui modul (decuparea are ~40, mai mici: urmez contractul, 17), fara verde in
+    rosturi, h/l din cote (5 / 8). Lista urmeaza contractul:
       a) corpul: 8 m (Y) x 5 m, spate vertical (x = 0, ingropat), fata spre vale
-         (+X) de la 1,2 m sus la 2,0 m jos (talus ~9 grade), 4 randuri de fete
-         mari cu jitter periodic
-      b) randul de sus: 8 pietre/modul (7 intregi + 2 jumatati la capete care
-         fac o piatra peste rost), fata de sus PLANA la z = 0, buza tesita,
-         iesite 0,10-0,20 m din fata, inalte 0,62-0,86 m, rosturi de 5 cm
-      c) capete plane la +-4 m, aceeasi sectiune la ambele capete si la ambele
-         module (drept / curb)
-      d) curba: acelasi zid pe arcul R = 23 m la marginea drumului (x = 0),
+         (+X) cu talus ~10 grade, de la 1,15 m sub coronament la 2,0 m jos
+      b) fata: 17 pietre MARI (1,3-2,2 m lungime, ~1,1 m inaltime) in 4 randuri
+         neregulate (4-5-4-4), cu rosturi decalate intre randuri. Conturul are
+         8 laturi (colturi tesite aleator 0,12-0,32 m, piatra de camp, nu bloc
+         taiat). Fiecare piatra are fata retrasa 5 cm pe contur (muchie tesita),
+         rosturile au 5 cm latime si 6 cm adancime (plus colturi stranse aleator
+         0-8 cm), iar fata e bombata 6 cm la mijloc
+      c) coronamentul: 8 pietre LIPITE, fata de sus in acelasi plan (z = 0),
+         0,55 m inalte, x 0..1,2, iesite 5 cm peste fata; intre ele doar
+         tesitura de 3 cm (rost in V)
+      d) capete plane la +-4 m, aceeasi sectiune la ambele capete si la ambele
+         module; rosturile periodice, piatra de peste capat taiata plan
+      e) curba: acelasi zid pe arcul R = 23 m la marginea drumului (x = 0),
          coarda 8 m, fata convexa spre vale (+X)
     Nod: `Wall_Stone` (MARBLE_GREY 29). Origine pe marginea drumului (x = 0) la
     cota crestei (z = 0); geometria atarna sub 0 (`--origin=rim`)."""
     b = Builder()
-    dry_stone_wall(b, L=8.0, H=5.0, top_w=1.2, base_w=2.0, stones=8, seed=3.0,
-                   slot=MARBLE_GREY, bend_R=23.0 if curve else None)
+    n = dry_stone_wall(b, L=8.0, H=5.0, top_w=1.2, base_w=2.0, seed=3.0,
+                       slot=MARBLE_GREY, bend_R=23.0 if curve else None)
+    print("retaining_wall %s: %d pietre pe fata" % ("curve" if curve else "straight", n))
     return [Builder.to_object(b, "Wall_Stone")]
 
 

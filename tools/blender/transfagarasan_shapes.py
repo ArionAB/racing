@@ -21,7 +21,8 @@ FOLOSITE (pilot + val 1 tf-a):
   dust_patch       bucata scurta de praf, inclinata (portalul Balea rev. 2).
   schist_blade     (tf-a, MINIMA) lama de sist pe foliatie; la integrare se
                    unifica cu `tf_shapes_nature.schist_blade` (tf-b).
-  dry_stone_wall   (tf-a) zid de sprijin, cu varianta curba (`bend_R`).
+  dry_stone_wall   (tf-a) zid de sprijin: 17 pietre mari cu muchii tesite pe
+                   fata, coronament din pietre lipite, varianta curba (`bend_R`).
   emit_tf          finish pe fiecare nod + export in assets/models/transfagarasan/.
 
 STUB-URI (valul 1, vezi docstring-urile):
@@ -440,95 +441,156 @@ def _hull(b, pts, slot):
             f[b.slot] = slot
 
 
-def dry_stone_wall(b, L=8.0, H=5.0, top_w=1.2, base_w=2.0, stones=8, seed=0.0,
-                   slot=None, bend_R=None, cap_h=(0.62, 0.86)):
-    """Zid de sprijin din piatra uscata (kit §1.1 `retaining_wall_*`).
+def _periodic_joints(rnd, L, n, wmin, wmax):
+    """`n` latimi aleatoare in [wmin, wmax] scalate la suma L, cu un decalaj
+    aleator: rosturile sunt periodice pe L (capetele modulului se potrivesc)."""
+    ws = [wmin + (wmax - wmin) * rnd.random() for _ in range(n)]
+    sc = L / sum(ws)
+    ws = [w * sc for w in ws]
+    j = -L * 0.5 + rnd.random() * ws[0]
+    out = [j]
+    for w in ws:
+        out.append(out[-1] + w)
+    return out
+
+
+def _emit_periodic_hull(b, pts, L, slot):
+    """Hull-ul punctelor, plus copiile decalate cu +-L, taiate plan la +-L/2:
+    o piatra care incalca un capat apare jumatate la fiecare capat, identic."""
+    h = L * 0.5
+    for shift in (0.0, -L, L):
+        q = [Vector(p) + Vector((0.0, shift, 0.0)) for p in pts]
+        ylo = min(p.y for p in q)
+        yhi = max(p.y for p in q)
+        if yhi <= -h or ylo >= h:
+            continue
+        if ylo < -h or yhi > h:
+            q = _clip_hull_pts(q, -h, h)
+        if len(q) >= 4:
+            _hull(b, q, slot)
+
+
+def dry_stone_wall(b, L=8.0, H=5.0, top_w=1.2, base_w=2.0, seed=0.0, slot=None,
+                   bend_R=None, cope_h=0.55, cope_over=0.05, rows=(4, 5, 4, 4),
+                   joint=0.05, depth=0.06, inset=0.05):
+    """Zid de sprijin din piatra uscata (kit §1.1 `retaining_wall_*`, contract
+    revizuit de coordonator dupa val 1).
 
     Axe: Y lungul zidului (capete plane la +-L/2), X spre VALE, Z sus. Originea
-    pe muchia dinspre drum a crestei (x = 0, z = 0): creasta e PLANA la cota 0
-    (acolo sta marginea drumului), zidul atarna pana la z = -H. Spatele (x = 0)
-    e vertical, ingropat in umplutura; fata spre vale coboara de la x = top_w la
-    x = base_w (talus ~10 grade pentru 1,2 -> 2,0 pe 5 m).
+    e pe muchia dinspre drum a crestei (x = 0, z = 0): creasta e PLANA la cota 0,
+    iar zidul atarna pana la z = -H. Spatele (x = 0) e vertical, ingropat in
+    umplutura.
 
-    * CORPUL: masa cu FETE MARI (inele la 0,5 m pe Y, 4 randuri pe fata de
-      vale, jitter periodic pe L pe X, +-0,2 m) -- piatra se citeste din clasa
-      `stone_wall`, nu din geometrie;
-    * RANDUL DE SUS: `stones` pietre INDIVIDUALE pe perioada L (hull-uri cu
-      colturi jitterate, fata de sus plana la z = 0, buza spre vale tesita, iesite
-      0,06-0,14 m din fata, rosturi de ~5 cm). Rosturile sunt periodice pe L, iar
-      piatra care incalca un capat se construieste o data si se taie PLAN la
-      ambele capete (copia ei decalata cu L), deci modulele se leaga piatra-n
-      piatra;
+    * CORONAMENTUL (coping): un rand de pietre LIPITE, cu fata de sus in ACELASI
+      plan (z = 0), de la x = 0 la x = top_w, inalte `cope_h`; ies `cope_over`
+      peste fata zidului de dedesubt. Intre ele se vede doar o tesitura de 3 cm
+      (rost in V), nu goluri.
+    * FATA SPRE VALE (talus ~10 grade, de la top_w - cope_over sub coronament la
+      base_w la baza): pietre MARI ca forma, in randuri neregulate (`rows` =
+      pietre pe rand, 17 pe modul), cu colturile tesite aleator (contur de 8
+      laturi, piatra de camp). Fiecare piatra e un hull: conturul pe
+      planul retras al corpului (`depth` in spate), fata din fata retrasa cu
+      `inset` pe contur, deci muchia e tesita si rosturile (`joint`, plus
+      colturi stranse aleator 0-8 cm) fac umbra. Granulatia ramane a clasei
+      `stone_wall`.
+    * CORPUL: masa din spatele pietrelor (fata retrasa cu `depth`), inchisa.
+    * Rosturile tuturor randurilor sunt periodice pe L, iar piatra care incalca
+      un capat se taie plan la ambele capete -> capete identice, modulele se
+      leaga piatra-n piatra.
     * `bend_R`: modulul curb. Fiecare punct (x, y) trece pe arcul cu centrul la
-      (-bend_R, 0); coarda la x = 0 ramane L (unghiul pe capat = asin(L/2R)),
-      capetele raman plane (radiale) si cu ACEEASI sectiune ca modulul drept."""
+      (-bend_R, 0); coarda la x = 0 ramane L, capetele raman plane (radiale) si
+      cu ACEEASI sectiune ca modulul drept."""
     import random
     slot = TF_SCHIST if slot is None else slot
     rnd = random.Random(int(seed * 1000) + 7)
     h = L * 0.5
-    z_top_body = -0.60
+    x_top = top_w - cope_over                     # fata zidului sub coronament
+    span = H - cope_h
+    nrm = Vector((span, 0.0, base_w - x_top)).normalized()   # normala fetei spre vale
 
-    def face_x(z):          # fata spre vale (fara jitter), z in [-H, 0]
-        return top_w + (base_w - top_w) * (-z / H)
+    def face(y, z):                                # punct pe planul fetei
+        t = (-cope_h - z) / span
+        return Vector((x_top + (base_w - x_top) * t, y, z))
 
-    # --- corpul: inele pe Y
+    # --- corpul: inele pe Y (pentru indoire), fata retrasa cu `depth`
     n = int(round(L / 0.5))
-    ys = [-h + L * i / n for i in range(n + 1)]
-    zr = [-H, -0.80 * H, -0.61 * H, -0.42 * H, -0.24 * H, z_top_body]
     rings = []
-    for y in ys:
-        sec = [(0.0, z_top_body), (0.0, -H)]
-        for j, z in enumerate(zr):
-            jit = 0.0 if j in (0, len(zr) - 1) else 0.11 * _per(y, L, [(2, 0.8, seed + j * 1.9), (3, 0.7, seed * 2 + j * 2.3), (4, 0.5, j * 0.7)])
-            sec.append((face_x(z) + jit, z))
-        rings.append([(x, y, z) for x, z in sec])
-    # orientarea fetelor o reface `Builder.to_object` (corp inchis + hull-uri)
+    for i in range(n + 1):
+        y = -h + L * i / n
+        ft = face(y, -cope_h) - nrm * depth
+        fb = face(y, -H) - nrm * depth
+        rings.append([(0.0, y, -cope_h), (0.0, y, -H), (fb.x, y, -H), (ft.x, y, ft.z)])
     vr = [[b.bm.verts.new(p) for p in r] for r in rings]
-    m = len(vr[0])
-    for k in range(len(vr) - 1):
-        for i in range(m):
-            j = (i + 1) % m
+    for k in range(n):
+        for i in range(4):
+            j = (i + 1) % 4
             f = b.bm.faces.new((vr[k][i], vr[k][j], vr[k + 1][j], vr[k + 1][i]))
             f[b.slot] = slot
-    f = b.bm.faces.new(list(reversed(vr[0])))
-    f[b.slot] = slot
-    f = b.bm.faces.new(vr[-1])
-    f[b.slot] = slot
+    for cap in (list(reversed(vr[0])), vr[-1]):
+        f = b.bm.faces.new(cap)
+        f[b.slot] = slot
 
-    # --- randul de sus: rosturi periodice
-    widths = [0.8 + 0.5 * rnd.random() for _ in range(stones)]
-    sc = L / sum(widths)
-    widths = [w * sc for w in widths]
-    j0 = -h + 0.35 + 0.3 * rnd.random()
-    joints = [j0]
-    for w in widths:
-        joints.append(joints[-1] + w)          # ultimul = j0 + L
-    gap = 0.05
-    for si in range(stones):
-        y0, y1 = joints[si] + gap * 0.5, joints[si + 1] - gap * 0.5
-        srnd = random.Random(int(seed * 1000) + 101 * si)
-        zb = -(cap_h[0] + (cap_h[1] - cap_h[0]) * srnd.random())
-        xf = top_w + 0.10 + 0.10 * srnd.random()
+    # --- pietrele fetei: randuri neregulate
+    hs = [0.9 + 0.35 * rnd.random() for _ in rows]
+    sc = span / sum(hs)
+    zb = [-cope_h]
+    for hh in hs:
+        zb.append(zb[-1] - hh * sc)
+    zb[-1] = -H
+    stones = 0
+    for r, cnt in enumerate(rows):
+        z_top, z_bot = zb[r], zb[r + 1]
+        joints = _periodic_joints(rnd, L, cnt, 1.3, 2.2)
+        for si in range(cnt):
+            y0, y1 = joints[si] + joint * 0.5, joints[si + 1] - joint * 0.5
+            zt = z_top - (joint * 0.5 if r > 0 else 0.02)
+            zbt = z_bot + (joint * 0.5 if r < len(rows) - 1 else 0.0)
+            sr = random.Random(int(seed * 1000) + 977 * r + 31 * si)
+            k = lambda: 0.08 * sr.random()
+            quad = [(y0 + k(), zt - k()), (y1 - k(), zt - k()),
+                    (y1 - k(), zbt + (k() if r < len(rows) - 1 else 0.0)),
+                    (y0 + k(), zbt + (k() if r < len(rows) - 1 else 0.0))]
+            # piatra de camp, nu bloc taiat: fiecare colt tesit aleator
+            # 0,12-0,32 m -> contur neregulat de 8 laturi; in colturi raman
+            # goluri triunghiulare (umbra), ca pe decupare
+            corners = []
+            for qi in range(4):
+                P = Vector(quad[qi])
+                A = Vector(quad[qi - 1]) - P
+                B = Vector(quad[(qi + 1) % 4]) - P
+                ca = min(0.12 + 0.20 * sr.random(), A.length * 0.35)
+                cb = min(0.12 + 0.20 * sr.random(), B.length * 0.35)
+                pa, pb = P + A.normalized() * ca, P + B.normalized() * cb
+                corners += [(pa.x, pa.y), (pb.x, pb.y)]
+            cy = sum(c[0] for c in corners) / len(corners)
+            cz = sum(c[1] for c in corners) / len(corners)
+            pts = []
+            for (yy, zz) in corners:
+                pts.append(face(yy, zz) - nrm * depth)                      # pe corp
+                dy, dz = cy - yy, cz - zz
+                ln = math.hypot(dy, dz) or 1.0
+                fi = inset * (1.0 + 0.2 * sr.random())
+                pts.append(face(yy + dy / ln * fi, zz + dz / ln * fi)
+                           + nrm * 0.01 * sr.random())                     # fata, retrasa
+            pts.append(face(cy + (sr.random() - 0.5) * 0.3, cz) + nrm * 0.06)   # bombata
+            for p in pts:              # normala are si z: nimic sub baza zidului
+                p.z = max(p.z, -H)
+            _emit_periodic_hull(b, pts, L, slot)
+            stones += 1
+
+    # --- coronamentul: pietre lipite, aceeasi fata de sus
+    c = 0.03
+    joints = _periodic_joints(rnd, L, 8, 0.85, 1.2)
+    for si in range(8):
+        y0, y1 = joints[si], joints[si + 1]
         pts = []
-        for yy in (y0, y1):
-            dj = lambda: (srnd.random() - 0.5) * 0.10
-            pts.append(Vector((0.0 + 0.03 * srnd.random(), yy + dj(), 0.0)))
-            pts.append(Vector((xf - 0.05, yy + dj() * 0.5, 0.0)))
-            pts.append(Vector((xf, yy + dj() * 0.5, -0.05)))
-            pts.append(Vector((xf + 0.03 * srnd.random(), yy + dj(), zb + 0.12 + srnd.random() * 0.1)))
-            pts.append(Vector((xf - 0.10 * srnd.random(), yy + dj() + (0.08 if yy == y0 else -0.08), zb + (srnd.random() - 0.5) * 0.10)))
-            pts.append(Vector((0.02, yy + dj(), zb)))
-        ym = (y0 + y1) * 0.5
-        pts.append(Vector((xf + 0.05, ym + (srnd.random() - 0.5) * 0.3, zb * (0.45 + 0.2 * srnd.random()))))
-        for shift in (0.0, -L, L):
-            q = [p + Vector((0.0, shift, 0.0)) for p in pts]
-            ylo = min(p.y for p in q)
-            yhi = max(p.y for p in q)
-            if yhi <= -h or ylo >= h:
-                continue
-            if ylo < -h or yhi > h:
-                q = _clip_hull_pts(q, -h, h)
-            _hull(b, q, slot)
+        for ya, sgn in ((y0, 1.0), (y1, -1.0)):
+            yi = ya + sgn * c
+            pts += [Vector((0.0, yi, 0.0)), Vector((top_w - c, yi, 0.0)),
+                    Vector((top_w, yi, -c)), Vector((top_w, yi, -cope_h)),
+                    Vector((0.0, ya, -c)), Vector((top_w - c, ya, -c)),
+                    Vector((top_w - c, ya, -cope_h)), Vector((0.0, ya, -cope_h))]
+        _emit_periodic_hull(b, pts, L, slot)
 
     if bend_R:
         alpha = math.asin(h / bend_R)
@@ -537,6 +599,7 @@ def dry_stone_wall(b, L=8.0, H=5.0, top_w=1.2, base_w=2.0, stones=8, seed=0.0,
             th = y / h * alpha
             r = bend_R + x
             v.co = Vector((-bend_R + r * math.cos(th), r * math.sin(th), z))
+    return stones
 
 
 def tin_roof(b, *args, **kw):

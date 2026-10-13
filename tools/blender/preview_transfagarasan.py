@@ -53,7 +53,10 @@ PALETTE_HEX = [
 SLOTS_N = 32
 
 # tintele claselor (tinta in joc), doar pentru preview, pe sufixul nodului
-CLASS_BY_SUFFIX = {"_Schist": "#7E8478", "_Snow": "#E8ECEE", "_Concrete": "#B8B4AA"}
+CLASS_BY_SUFFIX = {"_Schist": "#7E8478", "_Snow": "#E8ECEE", "_Concrete": "#B8B4AA",
+                   # tf-b: jneapanul e pe LOG_DARK 28 (maro) doar ca slot de
+                   # rezerva; culoarea o da clasa pine_needles -> tinta brief §4
+                   "_Needles": "#34503A"}
 
 # camera: azimutul: camera la (cos a, sin a); fata piesei e +Y (azimut 90 =
 # din fata). 3/4 din fata = azimut ~60 (camera spre +X), ca pe decupari.
@@ -61,6 +64,11 @@ SPECS = {
     # pilot: portalul se citeste din fata, putin dinspre +X (decuparea il arata
     # cu fata si flancul stang in imagine = camera spre +X)
     "tunnel_portal_balea": {"camera": {"azimuth": 62.0, "elevation": 14.0, "lens": 60.0, "margin": 1.08}},
+    # tf-b: plantele joase sunt desenate de SUS pe plansa (~25-30 grade), nu la 18
+    "jneapan_a": {"camera": {"elevation": 28.0}},
+    "jneapan_b": {"camera": {"elevation": 28.0}},
+    "bujor_de_munte": {"camera": {"elevation": 26.0}},
+    "afin": {"camera": {"elevation": 24.0}},
 }
 
 

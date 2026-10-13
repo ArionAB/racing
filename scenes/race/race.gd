@@ -355,6 +355,7 @@ func _go() -> void:
 # ------------------------------------------------------------------ cursa
 
 func _tick_race(delta: float) -> void:
+	_tick_wrong_way(delta)
 	for i in cars.size():
 		var car := cars[i]
 		_watch_recovery(car, delta)
@@ -376,6 +377,47 @@ func _tick_race(delta: float) -> void:
 			if laps >= GameState.total_laps and not car.finished:
 				car.finished = true
 	_update_positions()
+
+## „WRONG WAY" (#499): jucatorul merge pe contrasens fata de sensul pistei.
+##
+## Se judeca dupa directia de MERS (viteza), nu dupa bot: un spin te lasa cu
+## botul invers o clipa, dar tot inainte aluneci; si marsarierul pe sensul
+## cursei nu e contrasens, desi botul priveste inapoi. Histerezis pe timp si
+## pe unghi, ca mesajul sa nu clipeasca: apare dupa WRONG_WAY_ON_S de mers
+## clar invers (cos < WRONG_WAY_COS, adica peste ~107°), dispare dupa
+## WRONG_WAY_OFF_S de mers pe sens (cos > 0).
+const WRONG_WAY_COS: float = -0.3
+const WRONG_WAY_MIN_SPEED: float = 3.0
+const WRONG_WAY_ON_S: float = 1.5
+const WRONG_WAY_OFF_S: float = 0.4
+var _wrong_way: bool = false
+var _wrong_way_clock: float = 0.0
+
+func _tick_wrong_way(delta: float) -> void:
+	var cos_dir := 1.0
+	var v := player.velocity
+	v.y = 0.0
+	if not player.finished and v.length() > WRONG_WAY_MIN_SPEED:
+		var r: TrackRoute = track.route_at(player.route)
+		if r != null and r.baked.size() > 2:
+			var i := player.road_index
+			var tan := r.baked[r.wrap_index(i + 1)] - r.baked[r.wrap_index(i - 1)]
+			tan.y = 0.0
+			if tan.length_squared() > 0.0001:
+				cos_dir = v.normalized().dot(tan.normalized())
+	# Pragul de intrare e mai strict decat cel de iesire (histerezis pe unghi).
+	# Oprit sau aproape oprit, cos_dir ramane 1: nu mergi pe niciun sens.
+	var wrong_now := cos_dir < WRONG_WAY_COS if not _wrong_way else cos_dir <= 0.0
+	if wrong_now == _wrong_way:
+		_wrong_way_clock = 0.0
+		return
+	# Starea s-ar schimba: abia dupa ce noua stare tine destul.
+	_wrong_way_clock += delta
+	if _wrong_way_clock >= (WRONG_WAY_ON_S if not _wrong_way else WRONG_WAY_OFF_S):
+		_wrong_way = wrong_now
+		_wrong_way_clock = 0.0
+		hud.set_wrong_way(_wrong_way)
+
 
 ## Progresul jucatorului ca fractie din cursa intreaga (0 pe grila/countdown,
 ## 1 la ultima trecere) — sursa lui `DuskCycle.dusk` (Jodhpur, brief §3

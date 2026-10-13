@@ -33,6 +33,9 @@ var _minimap: Minimap
 ## care nu-si mai vede pozitia sau bara de turbo ar citi asta ca bug, nu ca
 ## hazard.
 var _blind_veil: ColorRect
+## „WRONG WAY" (#499): mare, rosu, pulsand cat timp mergi pe contrasens.
+var _wrong_way_label: Label
+var _wrong_way_tween: Tween
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -111,6 +114,17 @@ func _ready() -> void:
 	_countdown.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_countdown.grow_vertical = Control.GROW_DIRECTION_BOTH
 	root.add_child(_countdown)
+
+	_wrong_way_label = _make_label(72)
+	_wrong_way_label.text = "WRONG WAY"
+	_wrong_way_label.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	_wrong_way_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_wrong_way_label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_wrong_way_label.position += Vector2(0, -60)
+	_wrong_way_label.add_theme_color_override("font_color", Color(1.0, 0.22, 0.18))
+	_wrong_way_label.visible = false
+	root.add_child(_wrong_way_label)
 
 	_message = _make_label(38)
 	_message.set_anchors_and_offsets_preset(
@@ -402,6 +416,17 @@ func blind_flash(seconds: float) -> void:
 	tw.tween_property(_blind_veil, "modulate:a", BLIND_PEAK, 0.12)
 	tw.tween_interval(hold * 0.45)
 	tw.tween_property(_blind_veil, "modulate:a", 0.0, hold * 0.75)
+
+
+func set_wrong_way(on: bool) -> void:
+	if _wrong_way_tween != null and _wrong_way_tween.is_valid():
+		_wrong_way_tween.kill()
+	_wrong_way_label.visible = on
+	_wrong_way_label.modulate.a = 1.0
+	if on:
+		_wrong_way_tween = create_tween().set_loops()
+		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 0.35, 0.35)
+		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 1.0, 0.35)
 
 
 func flash_message(text: String) -> void:

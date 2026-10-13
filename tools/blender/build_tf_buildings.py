@@ -35,13 +35,17 @@ FRAME = 0.08           # latimea ramei
 FRAME_OUT = 0.05       # cat iese rama din perete
 GAP = 0.002            # distanta dintre straturi (anti-furt de slot)
 
-# WOOD (dio_lib) = 9, WOOD_WEATHERED #835C34; RUST = 10 RUST_METAL; PAINTED = 11 PAINTED_METAL
+# WOOD (dio_lib) = 9 WOOD_WEATHERED #835C34; RUST = 10 RUST_METAL
 TRIM = LOG_DARK        # 28 #4A3526: brauri, stalpi de colt, rame
 STONE = MARBLE_GREY    # 29 #B8B4AC: parterul, cosul
 VOID = VOLCANIC_BLACK  # 20
+ROOF_SILVER = ASPHALT_EDGE   # 6 #696765: tabla argintie (decizia coordonatorului:
+                             # PAINTED_METAL #7692A8 iesea albastru; clasa o lumineaza)
+ROOF_RED = KERB_RED          # 7: tabla rosie (arges_house_b)
+ROOF_RUST = RUST             # 10 RUST_METAL: tabla ruginie (cascada, stana)
 
 AO_BUILDING = dict(samples=16, dist=1.6, gradient="vertical", low=0.66, high=1.0,
-                   power=0.8, floor=0.38, z_range=(0.0, 12.0))
+                   power=0.8, floor=0.38, z_range=(0.0, 14.0))
 
 
 # ---------------------------------------------------------------------------
@@ -199,11 +203,129 @@ def railing_boards(b, p0, p1, h, slot, board_w=0.13, gap=0.09, t=0.03, rail=(0.1
 
 
 # ---------------------------------------------------------------------------
+# piese de cladire comune (cabane, case)
+# ---------------------------------------------------------------------------
+
+def stone_base(b, SX, SY, Z1, quoins=True, slot=None):
+    """Parter / soclu de piatra plin (+-SX, +-SY, 0..Z1) cu pietre de colt
+    alternante (relief 3 cm pe ambele fete)."""
+    slot = STONE if slot is None else slot
+    b.box((0.0, 0.0, Z1 * 0.5), (2 * SX, 2 * SY, Z1), slot)
+    if not quoins:
+        return
+    n = max(1, int((Z1 - 0.2) / 0.72))
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            for k in range(n):
+                z = 0.2 + k * 0.72 + 0.17
+                lx, ly = (0.62, 0.34) if k % 2 == 0 else (0.34, 0.62)
+                b.box((sx * (SX - lx * 0.5 + 0.03), sy * (SY - ly * 0.5 + 0.03), z),
+                      (lx, ly, 0.34), slot)
+
+
+def wood_bands(trim, HX, HY, levels, z_top, posts=True):
+    """Braurile LOG_DARK (ies 6 cm) la baza fiecarui nivel de lemn si stalpii
+    de colt pana sub tabla."""
+    for zl in levels:
+        zb0, zb1 = zl - 0.06, zl + 0.2
+        for sy in (-1, 1):
+            trim.box((0.0, sy * (HY - 0.04), (zb0 + zb1) * 0.5), (2 * HX + 0.2, 0.2, zb1 - zb0), TRIM)
+        for sx in (-1, 1):
+            trim.box((sx * (HX - 0.04), 0.0, (zb0 + zb1) * 0.5), (0.2, 2 * HY + 0.2, zb1 - zb0), TRIM)
+    if posts:
+        z0 = levels[0] + 0.2
+        for sx in (-1, 1):
+            for sy in (-1, 1):
+                trim.box((sx * (HX - 0.07), sy * (HY - 0.07), (z0 + z_top) * 0.5),
+                         (0.24, 0.24, z_top - z0), TRIM)
+
+
+def barge_boards(trim, R, ex, ey, slot=None, axis="X"):
+    """Scanduri de bordura sub marginea frontoanelor (sub placa de tabla), la
+    capetele coamei (+-ex de-a lungul ei; streasina la +-ey)."""
+    slot = WOOD if slot is None else slot
+    for s in (-1, 1):
+        for sy in (-1, 1):
+            if axis == "X":
+                xb = s * (ex - 0.06)
+                pa, pb = (xb, sy * ey), (xb, 0.0)
+                up = (s, 0.0, 0.0)
+            else:
+                yb = s * (ex - 0.06)
+                pa, pb = (sy * ey, yb), (0.0, yb)
+                up = (0.0, s, 0.0)
+            za = R["under"](*pa) - 0.15
+            zb = R["under"](*pb) - 0.15
+            trim.beam((pa[0], pa[1], za), (pb[0], pb[1], zb), (0.3, 0.07), slot, up=up)
+
+
+def dormer(wood_b, roof_b, op, R, xc, y_front, w, roof_slot, y_back=0.4, win=(1.0, 0.8)):
+    """Lucarna in doua ape pe apa +Y a unui acoperis cu coama pe X: corp de lemn
+    (pentagon extrudat pe Y, ingropat in acoperis), tabla proprie cu coama pe Y,
+    o fereastra (gol) in fata."""
+    zt = R["top"](xc, y_front)
+    z_de = zt + 1.3
+    prism_xz(wood_b, [(xc - w * 0.5, zt - 0.6), (xc + w * 0.5, zt - 0.6),
+                      (xc + w * 0.5, z_de), (xc, z_de + w * 0.5 - 0.1),
+                      (xc - w * 0.5, z_de)], y_back, y_front, WOOD)
+    tin_roof(roof_b, xc, (y_back + y_front + 0.3) * 0.5, (y_front + 0.3 - y_back) * 0.5,
+             w * 0.5 + 0.25, z_de - 0.06, 45.0, roof_slot, axis="Y", rib_w=0.04)
+    op.add("wood", "+Y", y_front, xc, win[0], zt + 0.25, zt + 0.25 + win[1])
+
+
+def chimney(stone_b, void_b, x, y, z0, z_top, size=0.9, slot=None):
+    """Cos de piatra (sau tabla, cu `slot`) cu coronament si gura neagra."""
+    slot = STONE if slot is None else slot
+    stone_b.box((x, y, (z0 + z_top) * 0.5), (size, size, z_top - z0), slot)
+    stone_b.box((x, y, z_top + 0.08), (size + 0.2, size + 0.2, 0.16), slot)
+    void_b.box((x, y, z_top + 0.16 + GAP + 0.01), (size * 0.47, size * 0.47, 0.02), VOID)
+
+
+def terrace(terr, tx0, tx1, ty0, ty1, deck_top, stair=None, rh=1.0):
+    """Terasa simpla pe +Y (podea, stalpi, grinda) cu balustrada din scanduri
+    drepte pe 3 laturi; `stair` = (x0, x1): scara dreapta care coboara
+    perpendicular pe perete, spre +Y, din muchia din fata."""
+    terr.box(((tx0 + tx1) * 0.5, (ty0 + ty1) * 0.5 + 0.05, deck_top - 0.1),
+             (tx1 - tx0, ty1 - ty0 + 0.1, 0.2), WOOD)
+    for x in (tx0 + 0.15, (tx0 + tx1) * 0.5, tx1 - 0.15):
+        terr.box((x, ty1 - 0.15, (deck_top - 0.2) * 0.5), (0.22, 0.22, deck_top - 0.2), TRIM)
+    terr.box(((tx0 + tx1) * 0.5, ty1 - 0.15, deck_top - 0.32), (tx1 - tx0, 0.2, 0.24), TRIM)
+    front = [(tx0 + 0.05, tx1 - 0.05)]
+    if stair:
+        sx0, sx1 = stair
+        nst = max(2, int(round(deck_top / 0.26)) - 1)
+        rise = deck_top / (nst + 1)
+        run = 0.29
+        foot = ty1 + nst * run
+        for i in range(nst):
+            z = deck_top - rise * (i + 1)
+            y = ty1 + run * (i + 0.5)
+            terr.box(((sx0 + sx1) * 0.5, y, z - 0.03), (sx1 - sx0 - 0.1, run + 0.04, 0.06), WOOD)
+        for x in (sx0 + 0.05, sx1 - 0.05):
+            terr.beam((x, ty1 - 0.1, deck_top - 0.12), (x, foot + 0.05, 0.20), (0.28, 0.08), TRIM,
+                      up=(1.0, 0.0, 0.0))
+            terr.beam((x, ty1, deck_top + rh - 0.05), (x, foot - 0.2, 1.0), (0.07, 0.08), WOOD,
+                      up=(0.0, 0.0, 1.0))
+            terr.box((x, foot - 0.2, 0.5), (0.1, 0.1, 1.0), TRIM)
+        front = [(tx0 + 0.05, sx0), (sx1, tx1 - 0.05)]
+    for a, c in front:
+        railing_boards(terr, (a, ty1 - 0.05, deck_top), (c, ty1 - 0.05, deck_top), rh, WOOD)
+    railing_boards(terr, (tx0 + 0.05, ty0 + 0.08, deck_top), (tx0 + 0.05, ty1 - 0.05, deck_top), rh, WOOD)
+    railing_boards(terr, (tx1 - 0.05, ty0 + 0.08, deck_top), (tx1 - 0.05, ty1 - 0.05, deck_top), rh, WOOD)
+    posts = [tx0 + 0.05, tx1 - 0.05] + (list(stair) if stair else [])
+    for x in posts:
+        terr.box((x, ty1 - 0.05, deck_top + rh * 0.5), (0.12, 0.12, rh + 0.08), TRIM)
+
+
+# ---------------------------------------------------------------------------
 # cabana_balea_lac
 # ---------------------------------------------------------------------------
 
 def build_cabana_balea_lac():
-    """Cabana Balea Lac (`cabana_balea_lac`), kit §1.3: 16 x 10 m, 11 m la coama.
+    """Cabana Balea Lac (`cabana_balea_lac`), kit §1.3, CONTRACT REVIZUIT de
+    coordonator dupa etapa 1: 13 x 10 m, parter de piatra 3 m, DOUA niveluri
+    intregi de lemn de 2,7 m (peretele lung ~8,4 m pana la streasina), panta
+    ~45-48, coama ~13 m. Rev. 1 (16 x 10, coama 11) citea sura lunga si joasa.
 
     LISTA DE ELEMENTE (decuparea `transfagarasan_assets_v1/cabana_balea_lac.png`,
     scrisa INAINTE de primul vertex; fasia alba din piesa vecina, la marginea
@@ -211,186 +333,120 @@ def build_cabana_balea_lac():
     latura lunga cu terasa in dreapta (aici +Y, fata bogata):
       1) PARTER DE PIATRA, 3 m, gri, pe tot conturul; colturile din pietre mai
          mari (aici 4 pietre de colt alternante pe fiecare muchie, relief 3 cm)
-      2) ETAJUL 1 DE LEMN (scanduri maro-portocalii), iese putin peste piatra
-         (aici 0,15 m); brau inchis la baza lui (linia piatra/lemn); stalpi de
-         colt inchisi
-      3) AL DOILEA NIVEL DE LEMN = mansarda din fronton, desparțita de etajul 1
-         printr-un brau orizontal pe fronton (decuparea: o streasina mica)
-      4) ACOPERIS ABRUPT de tabla argintie-gri in doua ape, coama paralela cu
-         latura lunga, streasina larga, falturi pe panta; scanduri de bordura
-         (deschise la culoare) sub marginea frontoanelor
+      2) DOUA NIVELURI DE LEMN de 2,7 m (contractul revizuit), lemnul iese
+         putin peste piatra (aici 0,15 m); brau inchis la baza lemnului si
+         intre niveluri; stalpi de colt inchisi
+      3) FRONTONUL de deasupra nivelului 2, despartit printr-un brau orizontal
+         (decuparea: o streasina mica), cu aerisirea sub varf
+      4) ACOPERIS ABRUPT de tabla argintie in doua ape (ASPHALT_EDGE 6,
+         decizia coordonatorului: PAINTED_METAL iesea albastru), coama paralela
+         cu latura lunga, streasina larga, falturi pe panta; scanduri de bordura
+         sub marginea frontoanelor
       5) LUCARNE: decuparea arata 1 pe apa din fata; contractul cere 2 -> 2
          lucarne in doua ape pe apa +Y, cu cate o fereastra
       6) COS: 1, langa varful frontonului din stanga, iese ~1,2 m peste coama.
          Pe decupare e caramiziu; contractul cere "cos de piatra" -> piatra
-         (MARBLE_GREY, nodul de piatra)
       7) un tub mic de aerisire pe coama (decuparea: punct negru pe coama)
       FERESTRE, in randuri regulate, cu rama de lemn si cruce (4 ochiuri):
-      8) fronton (+X): parter 3 ferestre mici; etaj 4 ferestre (doua perechi);
-         mansarda 3 ferestre grupate + 1 aerisire mica sub varf
-      9) latura +Y: parter 1 fereastra + 1 usa sub terasa; etaj 4 ferestre +
-         1 usa spre terasa
+      8) fronton (+X): TREI randuri, ca pe decupare: parter 3 mici; nivelul 1
+         4 (doua perechi); nivelul 2 3 grupate; + 1 aerisire sub varf
+      9) latura +Y: parter 1 fereastra + 1 usa sub terasa; nivelul 1 3 ferestre
+         + usa spre terasa + 1 fereastra peste terasa; nivelul 2 5 ferestre
      10) latura -Y si frontonul -X (nevazute pe decupare): ferestre in aceleasi
-         randuri, mai putine (spatele nu e gol: cabana se vede si din urcare)
-     11) TERASA pe +Y la capatul -X (decuparea: dreapta), la nivelul etajului,
-         pe 4 stalpi, cu BALUSTRADA DIN SCANDURI DREPTE pe 3 laturi
+         randuri, mai putine
+     11) TERASA pe +Y la capatul -X (decuparea: dreapta), la nivelul 1 (+3 m),
+         pe 3 stalpi, cu BALUSTRADA DIN SCANDURI DREPTE pe 3 laturi
          (corectura: fara balcon sculptat) si o SCARA dreapta care coboara
          perpendicular pe perete, spre +Y
      12) NU intra: veranda de jos cu acoperis propriu din dreapta decuparii
          (corectura: "cel mult o terasa simpla"), bolovanii si iarba de la
          baza, tufa lipita in stanga (vegetatia vine la integrare)
 
-    Cote: corpul de lemn 16 x 10 m, piatra 15,7 x 9,7 x 3 m; panta 45 de grade
-    (contract ~50: cu 50 si coama la 11 m, peretele de lemn al laturii lungi
-    iese 1,6 m sub tabla, sub inaltimea unei usi; runda 2 la 47 de grade a
-    aratat inca o fasie scunda sub streasina, decuparea are etaj intreg);
-    streasina 0,6 m; coama (capacul) ~11,0 m.
+    Cote: corpul de lemn 13 x 10 m, piatra 12,7 x 9,7 x 3 m, lemnul 3,0 -> 8,4 m
+    (2 x 2,7); panta 45 de grade, streasina 0,6 m. Coama iese ~13,6 m: cu
+    peretele la 8,4 si semideschiderea de 5 m, 45 de grade dau +5 m (contractul
+    "~13 m" si "45-48" nu incap amandoua; s-a pastrat peretele de 2 x 2,7).
     Noduri: Cabana_Stone, Cabana_Wood, Cabana_Roof, Cabana_Void."""
     stone, wood_body, trim, roof, void = Builder(), Builder(), Builder(), Builder(), Builder()
     op = Openings(void, trim)
 
-    HX, HY = 8.0, 5.0            # corpul de lemn (semi)
-    SX, SY = 7.85, 4.85          # parterul de piatra (semi)
-    Z1 = 3.0                     # piatra / lemn
+    HX, HY = 6.5, 5.0            # corpul de lemn (semi)
+    SX, SY = 6.35, 4.85          # parterul de piatra (semi)
+    Z1, Z2, ZW = 3.0, 5.7, 8.4   # piatra / nivelul 1 / nivelul 2 / sub tabla
     PITCH = 45.0
     OVER = 0.6
     t = math.tan(math.radians(PITCH))
-    RIDGE_TOP = 10.90            # fata de sus a tablei la coama (capacul +0,1)
+    roof_top_wall = ZW + 0.02 + 0.12 * math.sqrt(1 + t * t)   # tabla deasupra peretelui
+    RIDGE_TOP = roof_top_wall + HY * t
     z_eave = RIDGE_TOP - (HY + OVER) * t
-    R = tin_roof(roof, 0.0, 0.0, HX + OVER, HY + OVER, z_eave, PITCH, PAINTED)
-    zu_wall = R["under"](0.0, HY) - 0.02          # cota de sus a peretelui lung
+    R = tin_roof(roof, 0.0, 0.0, HX + OVER, HY + OVER, z_eave, PITCH, ROOF_SILVER)
+    zu_wall = R["under"](0.0, HY) - 0.02          # = ZW
     zu_ridge = R["under"](0.0, 0.0) - 0.02
 
-    # --- 1) parterul de piatra (corp plin, taiat de goluri)
-    stone.box((0.0, 0.0, Z1 * 0.5), (2 * SX, 2 * SY, Z1), STONE)
-    # pietre de colt alternante, 3 cm relief pe ambele fete
-    for sx in (-1, 1):
-        for sy in (-1, 1):
-            for k in range(4):
-                z = 0.2 + k * 0.72 + 0.17
-                lx, ly = (0.62, 0.34) if k % 2 == 0 else (0.34, 0.62)
-                stone.box((sx * (SX - lx * 0.5 + 0.03), sy * (SY - ly * 0.5 + 0.03), z),
-                          (lx, ly, 0.34), STONE)
+    # --- 1) parterul de piatra
+    stone_base(stone, SX, SY, Z1)
 
-    # --- 2/3) corpul de lemn: etajul + frontoanele, pana sub tabla
+    # --- 2/3) corpul de lemn: doua niveluri + frontoanele, pana sub tabla
     prism_yz(wood_body, [(-HY, Z1), (HY, Z1), (HY, zu_wall), (0.0, zu_ridge), (-HY, zu_wall)],
              -HX, HX, WOOD)
-    # brau la baza lemnului (iese 6 cm), stalpi de colt
-    zb0, zb1 = Z1 - 0.06, Z1 + 0.22
-    for sy in (-1, 1):
-        trim.box((0.0, sy * (HY - 0.04), (zb0 + zb1) * 0.5), (2 * HX + 0.2, 0.2, zb1 - zb0), TRIM)
-    for sx in (-1, 1):
-        trim.box((sx * (HX - 0.04), 0.0, (zb0 + zb1) * 0.5), (0.2, 2 * HY + 0.2, zb1 - zb0), TRIM)
-        for sy in (-1, 1):
-            trim.box((sx * (HX - 0.07), sy * (HY - 0.07), (zb1 + zu_wall) * 0.5),
-                     (0.24, 0.24, zu_wall - zb1), TRIM)
-    # 3) braul de pe fronton, intre etaj si mansarda (o streasina mica)
+    wood_bands(trim, HX, HY, (Z1, Z2), zu_wall)
     zg = zu_wall - 0.05
     for sx in (-1, 1):
         trim.box((sx * (HX + 0.06), 0.0, zg), (0.22, 2 * HY + 0.1, 0.22), TRIM)
         trim.beam((sx * (HX + 0.16), -HY - 0.05, zg + 0.17), (sx * (HX + 0.16), HY + 0.05, zg + 0.17),
                   (0.14, 0.32), TRIM, up=(sx * 0.6, 0.0, 1.0))
-    # 4) scanduri de bordura sub marginea frontonului (sub placa de tabla)
-    for sx in (-1, 1):
-        xb = sx * (HX + OVER - 0.06)
-        for sy in (-1, 1):
-            ya, yb = sy * (HY + OVER), 0.0
-            za = R["under"](0.0, ya) - 0.15
-            zb = R["under"](0.0, yb) - 0.15
-            wood_trim_beam = ((xb, ya, za), (xb, yb, zb))
-            trim.beam(wood_trim_beam[0], wood_trim_beam[1], (0.3, 0.07), WOOD, up=(sx, 0.0, 0.0))
+    barge_boards(trim, R, HX + OVER, HY + OVER)
 
     # --- 5) lucarnele (doua, pe apa +Y)
-    dorm_w, dorm_y = 2.4, 3.2
-    for xc in (3.2, -2.4):
-        zt = R["top"](xc, dorm_y)            # tabla in fata lucarnei
-        z_de = zt + 1.3                      # streasina lucarnei
-        prism_xz(wood_body, [(xc - dorm_w * 0.5, zt - 0.6), (xc + dorm_w * 0.5, zt - 0.6),
-                             (xc + dorm_w * 0.5, z_de), (xc, z_de + dorm_w * 0.5 - 0.1),
-                             (xc - dorm_w * 0.5, z_de)], 0.4, dorm_y, WOOD)
-        tin_roof(roof, xc, (0.4 + dorm_y + 0.3) * 0.5, (dorm_y + 0.3 - 0.4) * 0.5,
-                 dorm_w * 0.5 + 0.25, z_de - 0.06, 45.0, PAINTED, axis="Y",
-                 rib_w=0.04)
-        op.add("wood", "+Y", dorm_y, xc, 1.0, zt + 0.25, zt + 1.05)
+    for xc in (2.6, -2.4):
+        dormer(wood_body, roof, op, R, xc, 3.2, 2.4, ROOF_SILVER)
 
     # --- 6) cosul de piatra, langa varful frontonului +X, peste coama
-    chx, chy = HX - 1.5, -0.2
-    ch_top = RIDGE_TOP + 1.25
-    stone.box((chx, chy, (zu_ridge - 1.5 + ch_top) * 0.5), (0.9, 0.9, ch_top - zu_ridge + 1.5), STONE)
-    stone.box((chx, chy, ch_top + 0.08), (1.1, 1.1, 0.16), STONE)
-    void.box((chx, chy, ch_top + 0.16 + GAP + 0.01), (0.42, 0.42, 0.02), VOID)
+    chimney(stone, void, HX - 1.5, -0.2, zu_ridge - 1.5, RIDGE_TOP + 1.25)
     # 7) tubul de aerisire pe apa din spate, langa coama
-    void.cylinder((-4.2, -0.9, R["top"](-4.2, -0.9) + 0.35), 0.08, 0.9, VOID, segments=8)
+    void.cylinder((-3.4, -0.9, R["top"](-3.4, -0.9) + 0.35), 0.08, 0.9, VOID, segments=8)
 
-    # --- 8) frontonul +X
+    # --- 8) frontonul +X: trei randuri + aerisirea
     zs0, zs1 = 1.1, 1.85                       # parter
-    zw0, zw1 = Z1 + 0.62, Z1 + 1.62            # etaj
-    za0, za1 = zu_wall + 0.55, zu_wall + 1.45  # mansarda
+    zw0, zw1 = Z1 + 0.62, Z1 + 1.62            # nivelul 1
+    zv0, zv1 = Z2 + 0.62, Z2 + 1.62            # nivelul 2
     for y in (-3.0, 0.0, 3.0):
         op.add("stone", "+X", SX, y, 0.7, zs0, zs1)
     for y in (-3.5, -2.1, 2.1, 3.5):
         op.add("wood", "+X", HX, y, 0.8, zw0, zw1)
-    for y in (-1.05, 0.0, 1.05):
-        op.add("wood", "+X", HX, y, 0.62, za0, za1)
-    op.add("wood", "+X", HX, 0.0, 0.32, za1 + 1.25, za1 + 1.75, cross=False, sill=False)
+    for y in (-1.1, 0.0, 1.1):
+        op.add("wood", "+X", HX, y, 0.72, zv0, zv1)
+    op.add("wood", "+X", HX, 0.0, 0.4, zu_wall + 1.2, zu_wall + 1.9, cross=False)
     # --- 9) latura +Y (fata bogata)
-    op.add("stone", "+Y", SY, 4.6, 0.7, zs0, zs1)
-    op.add("stone", "+Y", SY, -4.7, 1.0, 0.04, 2.05, kind="door")
-    for x in (6.2, 3.6, 1.6, -0.6):
+    op.add("stone", "+Y", SY, 3.6, 0.7, zs0, zs1)
+    op.add("stone", "+Y", SY, -3.7, 1.0, 0.04, 2.05, kind="door")
+    for x in (5.0, 2.6, 0.2):
         op.add("wood", "+Y", HY, x, 0.8, zw0, zw1)
-    op.add("wood", "+Y", HY, -5.8, 1.0, Z1 + 0.26, Z1 + 2.2, kind="door")
-    op.add("wood", "+Y", HY, -3.6, 0.8, zw0, zw1)
+    op.add("wood", "+Y", HY, -4.4, 1.0, Z1 + 0.26, Z1 + 2.2, kind="door")
+    op.add("wood", "+Y", HY, -2.3, 0.8, zw0, zw1)
+    for x in (5.0, 2.6, 0.2, -2.2, -4.6):
+        op.add("wood", "+Y", HY, x, 0.8, zv0, zv1)
     # --- 10) spatele (-Y) si frontonul -X
-    for x in (-4.5, 0.0, 4.5):
+    for x in (-4.0, 0.0, 4.0):
         op.add("stone", "-Y", SY, x, 0.7, zs0, zs1)
-    for x in (-5.5, -2.0, 2.0, 5.5):
+    for x in (-4.5, -1.5, 1.5, 4.5):
         op.add("wood", "-Y", HY, x, 0.8, zw0, zw1)
+        op.add("wood", "-Y", HY, x, 0.8, zv0, zv1)
     for y in (-2.5, 2.5):
         op.add("stone", "-X", SX, y, 0.7, zs0, zs1)
         op.add("wood", "-X", HX, y, 0.8, zw0, zw1)
-    op.add("wood", "-X", HX, 0.0, 0.62, za0, za1)
+        op.add("wood", "-X", HX, y, 0.8, zv0, zv1)
+    op.add("wood", "-X", HX, 0.0, 0.4, zu_wall + 1.2, zu_wall + 1.9, cross=False)
 
-    # --- 11) terasa pe +Y, capatul -X, la nivelul etajului, si scara
-    tx0, tx1 = -7.6, -1.6
-    ty0, ty1 = HY, HY + 2.4
-    deck_top = Z1
+    # --- 11) terasa pe +Y, capatul -X, la nivelul 1, si scara
     terr = Builder()
-    terr.box(((tx0 + tx1) * 0.5, (ty0 + ty1) * 0.5 + 0.05, deck_top - 0.1),
-             (tx1 - tx0, ty1 - ty0 + 0.1, 0.2), WOOD)
-    for x in (tx0 + 0.15, (tx0 + tx1) * 0.5, tx1 - 0.15):
-        terr.box((x, ty1 - 0.15, (deck_top - 0.2) * 0.5), (0.22, 0.22, deck_top - 0.2), TRIM)
-    terr.box(((tx0 + tx1) * 0.5, ty1 - 0.15, deck_top - 0.32), (tx1 - tx0, 0.2, 0.24), TRIM)
-    # scara: 1,1 m lata, coboara spre +Y de pe muchia terasei, intre x -3,0 si -1,9
-    sx0, sx1 = -3.05, -1.9
-    nst = 11
-    rise = deck_top / (nst + 1)
-    run = 0.29
-    foot = ty1 + nst * run
-    for i in range(nst):
-        z = deck_top - rise * (i + 1)
-        y = ty1 + run * (i + 0.5)
-        terr.box(((sx0 + sx1) * 0.5, y, z - 0.03), (sx1 - sx0 - 0.1, run + 0.04, 0.06), WOOD)
-    for x in (sx0 + 0.05, sx1 - 0.05):
-        terr.beam((x, ty1 - 0.1, deck_top - 0.12), (x, foot + 0.05, 0.20), (0.28, 0.08), TRIM,
-                  up=(1.0, 0.0, 0.0))
-        terr.beam((x, ty1, deck_top + 0.95), (x, foot - 0.2, 1.0), (0.07, 0.08), WOOD,
-                  up=(0.0, 0.0, 1.0))
-        terr.box((x, foot - 0.2, 0.5), (0.1, 0.1, 1.0), TRIM)
-    # balustrada din scanduri drepte: fata (lasand gura scarii), capatul -X, capatul +X
-    rh = 1.0
-    railing_boards(terr, (tx0 + 0.05, ty1 - 0.05, deck_top), (sx0, ty1 - 0.05, deck_top), rh, WOOD)
-    railing_boards(terr, (sx1, ty1 - 0.05, deck_top), (tx1 - 0.05, ty1 - 0.05, deck_top), rh, WOOD)
-    railing_boards(terr, (tx0 + 0.05, ty0 + 0.08, deck_top), (tx0 + 0.05, ty1 - 0.05, deck_top), rh, WOOD)
-    railing_boards(terr, (tx1 - 0.05, ty0 + 0.08, deck_top), (tx1 - 0.05, ty1 - 0.05, deck_top), rh, WOOD)
-    for x in (tx0 + 0.05, sx0, sx1, tx1 - 0.05):
-        terr.box((x, ty1 - 0.05, deck_top + rh * 0.5), (0.12, 0.12, rh + 0.08), TRIM)
+    terrace(terr, -6.2, -1.0, HY, HY + 2.4, Z1, stair=(-2.55, -1.4))
 
     # --- obiectele: taiere, lipire, noduri
     st_o = op.apply("stone", Builder.to_object(stone, "Cabana_Stone"), STONE)
     wb_o = op.apply("wood", Builder.to_object(wood_body, "WoodBody"), WOOD)
-    tr_o = Builder.to_object(trim, "WoodTrim")
-    te_o = Builder.to_object(terr, "WoodTerrace")
-    wood_o = join([wb_o, tr_o, te_o], "Cabana_Wood")
+    wood_o = join([wb_o, Builder.to_object(trim, "WoodTrim"), Builder.to_object(terr, "WoodTerrace")],
+                  "Cabana_Wood")
     print("cabana_balea_lac: goluri", len(op.log), "| coama la %.2f, streasina la %.2f, perete lung %.2f"
           % (RIDGE_TOP, z_eave, zu_wall))
     return [st_o, wood_o, Builder.to_object(roof, "Cabana_Roof"), to_obj(void, "Cabana_Void")]

@@ -638,8 +638,9 @@ def tin_roof(b, cx, cy, hx, hy, z_eave, pitch_deg, slot, kind="gable", axis="X",
     streasina). Falturile: nervuri `rib_w` x `rib_h` (3-4 cm, contract) la pasul
     `step` (0,5 m), de la streasina pana la coama sau pana la muchia de hip;
     capetele lor de la hip sunt acoperite de capacul muchiei (`cap` = latime,
-    inaltime). Totul pe UN slot (nodul `*_Roof`: PAINTED_METAL / KERB_RED /
-    RUST_METAL dupa piesa).
+    inaltime). Totul pe UN slot (nodul `*_Roof`: ASPHALT_EDGE / KERB_RED /
+    RUST_METAL dupa piesa; tabla argintie pe ASPHALT_EDGE 6, decizia
+    coordonatorului din val 2: PAINTED_METAL iesea albastru).
 
     Intoarce dict: `ridge_z` (fata de sus la coama), `tan`, `top(x, y)` (cota
     fetei de sus a tablei), `under(x, y)` (cota fetei de jos: pe ea se opresc

@@ -6,25 +6,27 @@ Pe pilot (tunnel_portal_balea) s-au scris DOAR formele folosite de portal; cele
 care vin in valul 1 sunt stub-uri cu contractul in docstring (NU au corp: ridica
 NotImplementedError, ca sa nu le foloseasca nimeni pe nevazute).
 
-FOLOSITE (pilot):
-  (ring_stack / snow_layers: pentru `snow_wall` din valul 1; portalul nu le mai
-   foloseste dupa contractul nou -- movila lui e din `faceted_block`)
+FOLOSITE (pilot + val 1 tf-a):
   ring_stack       masa inchisa din inele de puncte 3D (acelasi numar de puncte
-                   pe inel). Doua inele consecutive la ACEEASI cota = un prag
-                   orizontal (treapta). Baza pentru `snow_layers`.
-  snow_layers      peretele de zapada veche: 4 straturi cu trepte de 0,3 m pe
-                   fetele taiate de plug (+-Y), dungi de praf (nod separat),
-                   muchia de sus rotunjita si ondulata, baza murdara. Va fi
-                   refolosit de `snow_wall` (valul 1) cu alti parametri.
+                   pe inel). Doua inele consecutive la ACEEASI cota = un prag.
+  snow_wall_section / snow_wall_module   (tf-a) peretele de zapada veche: 3-4
+                   straturi cu trepte pe fata taiata de plug, scobituri de freza,
+                   praful ca PETE pe fete (nod *_Dust), creasta topita; totul
+                   periodic pe lungimea modulului -> capete identice.
   extrude_xz       prisma dintr-un contur in planul XZ (poate fi concav), pe Y.
   tilt_front       inclina fata din fata a unei prisme (placa lasata inapoi).
   tube_lining      captuseala de umbra a gurii: banda fara capace, normale spre gol.
-  faceted_block    bloc de zapada unghiular (convex hull), baza plata.
-  dust_patch       bucata scurta de praf, inclinata.
+  faceted_block    bloc de zapada unghiular (convex hull), baza plata (portalul
+                   Balea rev. 2, bolovanii semnelor).
+  dust_patch       bucata scurta de praf, inclinata (portalul Balea rev. 2).
+  schist_blade     (tf-a, MINIMA) lama de sist pe foliatie; la integrare se
+                   unifica cu `tf_shapes_nature.schist_blade` (tf-b).
+  dry_stone_wall   (tf-a) zid de sprijin: 17 pietre mari cu muchii tesite pe
+                   fata, coronament din pietre lipite, varianta curba (`bend_R`).
   emit_tf          finish pe fiecare nod + export in assets/models/transfagarasan/.
 
 STUB-URI (valul 1, vezi docstring-urile):
-  schist_blade, dry_stone_wall, tin_roof
+  tin_roof
 
 Se incarca cu exec, dupa dio_lib (vezi build_tf_*.py). Axe: X latime, Y adancime
 (fata spre +Y in Blender = -Z in Godot), Z sus. Reutilizeaza `_face`, `to_obj`
@@ -79,87 +81,172 @@ def ring_stack(b, rings, slot, cap_bottom=True, cap_top=True):
     return vr
 
 
-def _snow_poly(sx, x_in, x_out, half_len, cut):
-    """Conturul in plan al unui strat de zapada, ANTIORAR. Pe partea sx=+1 peretele
-    portalului e la x_in, spre exterior pana la x_out; pe sx=-1 oglindit.
-    Colturile exterioare sunt tesite cu `cut` (rotunjire topita)."""
-    pts = [(x_in, -half_len), (x_out - cut, -half_len), (x_out, -half_len + cut),
-           (x_out, half_len - cut), (x_out - cut, half_len), (x_in, half_len)]
-    if sx < 0:
-        pts = [(-x, y) for x, y in reversed(pts)]
+# ---------------------------------------------------------------------------
+# zapada veche: snow_wall (valul 1, tf-a)
+# ---------------------------------------------------------------------------
+
+def _per(y, L, harmonics):
+    """Zgomot PERIODIC pe lungimea modulului: suma de sinusuri cu un numar INTREG
+    de perioade pe L, deci valoarea si panta sunt identice la -L/2 si +L/2
+    (modulele se leaga fara rost). `harmonics` = lista (k, amplitudine, faza)."""
+    u = 2.0 * math.pi * (y + L * 0.5) / L
+    return sum(a * math.sin(k * u + ph) for k, a, ph in harmonics)
+
+
+def _scoop(y, L, cells, depth):
+    """Scobitura frezei de zapada pe fata taiata: `cells` celule concave pe
+    lungimea modulului, cu muchii (cuspide) la capetele fiecarei celule. Capetele
+    modulului cad pe cuspide (adancime 0), deci se leaga."""
+    c = L / cells
+    u = ((y + L * 0.5) / c) % 1.0
+    return depth * (1.0 - (2.0 * u - 1.0) ** 2)
+
+
+def snow_wall_section(y, H, L=8.0, seed=0.0, base_w=2.5, top_w=1.2, cells=7):
+    """Sectiunea (x, z) a peretelui de zapada veche la pozitia `y` pe modul.
+
+    Fata spre drum pe -X (taiata vertical de plug, cu trepte de strat), fata
+    dinspre versant pe +X (rotunjita), baza intre x = -base_w/2 si +base_w/2.
+    Intoarce lista de (x, z, eticheta_segment) cu ACELASI numar de puncte la
+    orice `y`; segmentul i -> i+1 poarta eticheta punctului i:
+      'face'   fata verticala a unui strat     'band<l>' baza stratului l (fara praf)
+      'step<l>' MUCHIA treptei de deasupra stratului l: buza rotunjita + pragul
+      'top'    creasta topita                  'slope'  fata dinspre versant
+      'sbase'  baza fetei din spate             'base'   baza murdara spre drum
+      'bottom' talpa
+    Totul periodic pe L (vezi `_per`)."""
+    s = seed
+    nl = 4 if H >= 3.5 else 3
+    # cotele straturilor (fara ultimul, care merge pana la creasta)
+    span = (H - 0.95) / (nl - 1)
+    bounds = [0.0] + [l * span + 0.07 * _per(y, L, [(1, 1.0, s + l * 1.3), (3, 0.5, s * 2 + l)])
+                      for l in range(1, nl)]
+    # treptele: cat se retrage fata la fiecare prag (0,2-0,4 m, contract)
+    base_steps = [0.30, 0.24, 0.28, 0.22]
+    x0 = -base_w * 0.5
+    sc = _scoop(y, L, cells, 0.11)
+    xf = []
+    acc = 0.0
+    for l in range(nl):
+        if l > 0:
+            acc += base_steps[l - 1] + 0.05 * _per(y, L, [(2, 1.0, s + l * 2.1), (5, 0.4, l)])
+        xf.append(x0 + acc + sc)
+    pts = []
+    # --- fata spre drum, strat cu strat (de jos in sus)
+    for l in range(nl):
+        zb = bounds[l]
+        band_h = 0.30 if l == 0 else 0.16
+        tag = "base" if l == 0 else "band%d" % l
+        pts.append((xf[l], zb, tag))
+        pts.append((xf[l], zb + band_h * 0.5, tag))      # doua randuri: margine zdrentuita
+        pts.append((xf[l], zb + band_h, "face"))
+        if l < nl - 1:
+            zt = bounds[l + 1]
+            pts.append((xf[l], zt - 0.09, "step%d" % l))   # buza rotunjita a stratului
+            pts.append((xf[l] + 0.09, zt, "step%d" % l))   # pragul spre stratul de sus
+    # --- creasta topita si ondulata (stratul de sus)
+    Ht = H - 0.14 - 0.07 * _per(y, L, [(2, 1.0, s + 0.7), (3, 0.6, s + 2.0), (5, 0.3, s)])
+    xl = xf[-1]
+    xb = xl - sc + top_w                        # muchia din spate: 1,2 m la varf
+    pts.append((xl, Ht - 0.48, "face"))
+    pts.append((xl + 0.07, Ht - 0.20, "top"))
+    pts.append((xl + 0.26, Ht - 0.04, "top"))
+    pts.append((xl + 0.62, Ht + 0.04 * _per(y, L, [(4, 1.0, s + 1.1)]), "top"))
+    pts.append((xb - 0.18, Ht - 0.10, "top"))
+    pts.append((xb + 0.02, Ht - 0.38, "slope"))
+    # --- fata dinspre versant: umar rotunjit, coboara la x = +base_w/2
+    zs0 = Ht - 0.38
+    xs0 = xb + 0.02
+    xe = base_w * 0.5
+    for f in (0.78, 0.55, 0.34, 0.14):
+        z = zs0 * f
+        x = min(xe, xe - (xe - xs0) * f ** 2.2 + 0.05 * _per(y, L, [(3, 1.0, s + f * 4.0)]))
+        pts.append((x, z, "slope"))
+    pts.append((xe, 0.28, "sbase"))
+    pts.append((xe, 0.14, "sbase"))
+    pts.append((xe, 0.0, "bottom"))
     return pts
 
 
-# profilul unui perete de zapada: (cota, avans_exterior_m, semilungime_m) pe
-# inelele din cate DOUA per strat (jos / sus), cu PRAG intre straturi (treapta
-# 0,3 m, si pe exterior, si pe fetele taiate +-Y); apoi doua inele de topire.
-SNOW_PROFILE = [
-    # strat 0 (baza murdara), 0 -> 1,0
-    (0.00, 6.00, 4.00), (1.00, 5.85, 3.95),
-    # strat 1, 1,0 -> 2,0 (treapta de 0,3 m)
-    (1.00, 5.55, 3.65), (2.00, 5.25, 3.60),
-    # strat 2, 2,0 -> 3,0
-    (2.00, 4.95, 3.30), (3.00, 4.40, 3.25),
-    # strat 3, 3,0 -> 3,7
-    (3.00, 4.10, 2.95), (3.70, 3.60, 2.90),
-    # topirea: muchia de sus rotunjita (doua inele)
-    (3.90, 3.00, 2.65), (4.00, 2.20, 2.30),
-]
-SNOW_LAYER_STARTS = (0, 2, 4, 6)   # indicii inelelor "jos" ale celor 4 straturi
+def snow_wall_module(snow, dust, H, L=8.0, seed=0.0, rings_per_cell=4, cells=7,
+                     dust_frac=None):
+    """Modulul de perete de zapada veche (kit §1.1 `snow_wall`, corectura
+    coordonatorului): sectiunea `snow_wall_section` trasa pe Y intre -L/2 si
+    +L/2, cu inele pe cuspidele scobiturilor (capetele cad pe cuspida). Capete
+    plane, identice (toata variatia e periodica pe L).
 
+    Praful e PATA pe fete, nu volum, si sta DOAR unde se aduna praful real
+    (verdictul coordonatorului, val 1): pe banda de la baza primului strat
+    ('base') si pe MUCHIILE treptelor ('step<l>': buza + prag). Se alege pe
+    QUAD, pe coloane intregi (fara sah de triunghiuri), cu un zgomot periodic de
+    frecventa joasa -> petice lungi de-a lungul muchiei. Acoperirea pe eticheta
+    e EXACTA (cuantila pe coloane, `dust_frac`); randul de sus al benzii de baza
+    primeste mai putin, deci peticul are margine in trepte. Fetele se scriu cu
+    infasurarea spre exterior, nodurile se fac cu `to_obj`."""
+    n = cells * rings_per_cell
+    ys = [-L * 0.5 + L * i / n for i in range(n + 1)]
+    secs = [snow_wall_section(y, H, L, seed, cells=cells) for y in ys]
+    m = len(secs[0])
+    frac = {"base": 0.38, "step0": 0.15, "step1": 0.13, "step2": 0.13}
+    frac.update(dust_frac or {})
+    ymids = [(ys[k] + ys[k + 1]) * 0.5 for k in range(n)]
+    noise, cut = {}, {}
+    for t_i, tag in enumerate(sorted(frac)):
+        hm = [(1, 0.7, seed + t_i * 1.7), (2, 0.9, seed * 0.5 + t_i * 2.9),
+              (3, 0.5, t_i * 2.3), (4, 0.3, seed + t_i)]
+        vals = [_per(y, L, hm) for y in ymids]
+        noise[tag] = vals
+        srt = sorted(vals)
 
-def snow_layers(snow, dust, sx, x_in, height=4.0, profile=None, cut=0.9,
-                seed=0.0, melt=0.12):
-    """Peretele de zapada veche lipit de un zid vertical (portal), pe partea `sx`.
+        def q(f, srt=srt):
+            return srt[max(0, min(len(srt) - 1, int(round((1.0 - f) * len(srt)))))]
+        cut[tag] = (q(frac[tag]), q(frac[tag] * 0.55))   # (rand de jos, rand de sus)
+    # al catelea segment din eticheta e (randul) -- pe sectiunea 0
+    row_of = {}
+    seen = {}
+    for i in range(m):
+        tag = secs[0][i][2]
+        row_of[i] = seen.get(tag, 0)
+        seen[tag] = row_of[i] + 1
 
-    Contractul (kit corectura `snow_wall`): 3-4 straturi orizontale vizibile ca
-    FORMA (trepte de 0,2-0,4 m pe fata taiata de plug, +-Y), dungi de praf pe
-    fetele spre drum (`dust`, nod separat, slot CONCRETE), muchia de sus
-    rotunjita si ondulata (topita), baza murdara (banda de praf mai groasa).
-    Simetric fata-spate: ondularea e functie de |y|.
+    a2 = 0.0
+    sec = secs[0]
+    for i in range(m):
+        x1, z1, _ = sec[i]
+        x2, z2, _ = sec[(i + 1) % m]
+        a2 += x1 * z2 - x2 * z1
+    ccw = a2 > 0   # antiorar in (x, z)
 
-    `snow`, `dust` = Builder-e. `x_in` = fata zidului (|x|); masa intra 0,1 m
-    in zid ca sa nu apara rost. `profile` = lista (z, avans_exterior, semilungime).
-    Returneaza (x_out_la_baza, z_sus)."""
-    profile = profile or SNOW_PROFILE
-    inner = x_in - 0.10
-    rings = []
-    for k, (z, adv, hl) in enumerate(profile):
-        x_out = x_in + adv
-        poly = _snow_poly(sx, inner, x_out, hl, cut * max(0.45, min(1.0, adv / 5.0)))
-        ring = []
-        for (x, y) in poly:
-            zz = z
-            top = k >= len(profile) - 2
-            if top and abs(x) > x_in + 0.2:
-                # creasta topita: ondulare simetrica fata-spate (functie de |y|)
-                zz = z + melt * _wob(x, abs(y), seed) * (1.0 if k == len(profile) - 1 else 0.5)
-            ring.append((x, y, zz))
-        rings.append(ring)
-    ring_stack(snow, rings, TF_SNOW)
-
-    # --- dungile de praf pe fetele taiate (+-Y), la baza fiecarui strat --------
-    def x_range(z):
-        for (z0, a0, l0), (z1, a1, l1) in zip(profile, profile[1:]):
-            if z0 <= z <= z1 and z1 > z0:
-                t = (z - z0) / (z1 - z0)
-                return x_in + a0 + (a1 - a0) * t - cut, l0 + (l1 - l0) * t
-        return x_in + profile[-1][1] - cut, profile[-1][2]
-
-    for li, ri in enumerate(SNOW_LAYER_STARTS):
-        z0 = profile[ri][0]
-        stripes = [(z0 + 0.02, 0.45 if li == 0 else 0.16, 1.0)]
-        if li in (1, 3):
-            stripes.append((z0 + 0.52, 0.08, 0.6))
-        for (zb, hh, frac) in stripes:
-            xe, hl = x_range(zb + hh * 0.5)
-            x0 = inner + 0.15
-            w = (xe - x0) * frac
-            for sy in (-1, 1):
-                yc = sy * (hl - 0.01)
-                xc = (x0 + x0 + w) * 0.5 * sx
-                dust.box((xc, yc, zb + hh * 0.5), (w, 0.10, hh), TF_DUST)
-    return x_in + profile[0][1], profile[-1][0]
+    rings = [[snow.bm.verts.new((x, y, z)) for (x, z, _) in sec] for y, sec in zip(ys, secs)]
+    dust_faces = []
+    for k in range(n):
+        for i in range(m):
+            j = (i + 1) % m
+            quad = [rings[k][i], rings[k][j], rings[k + 1][j], rings[k + 1][i]]
+            if ccw:
+                quad.reverse()
+            tag = secs[k][i][2]
+            if tag in frac:
+                lo_cut, hi_cut = cut[tag]
+                thr = hi_cut if (tag == "base" and row_of[i] > 0) else lo_cut
+                if noise[tag][k] >= thr:
+                    dust_faces.append([v.co.copy() for v in quad])
+                    continue
+            f = snow.bm.faces.new(quad)
+            f[snow.slot] = TF_SNOW
+    cap0 = list(rings[0])
+    cap1 = list(rings[-1])
+    if ccw:
+        cap1.reverse()
+    else:
+        cap0.reverse()
+    for cap in (cap0, cap1):
+        f = snow.bm.faces.new(cap)
+        f[snow.slot] = TF_SNOW
+    for q4 in dust_faces:
+        f = dust.bm.faces.new([dust.bm.verts.new(p) for p in q4])
+        f[dust.slot] = TF_DUST
+    return len(dust_faces)
 
 
 # ---------------------------------------------------------------------------
@@ -271,18 +358,248 @@ def dust_patch(b, center, length, tilt_deg, height=0.2, depth=0.7, slot=TF_DUST)
 # STUB-URI (valul 1) -- contractul din kit; fara corp pana le foloseste cineva
 # ---------------------------------------------------------------------------
 
-def schist_blade(b, *args, **kw):
-    """STUB (tf-b, `schist_outcrop_*`, `scree_cone`): lama de sist inclinata la
-    30-50 grade, toate in ACEEASI directie pe o piesa; fisura inchisa dintre lame
-    din geometrie + AO (slot VOLCANIC_BLACK in benzi inguste, NU ROCK_DARK)."""
-    raise NotImplementedError("schist_blade: valul 1 (tf-b)")
+def schist_blade(b, center, size, slot=None, dip_deg=40.0, strike_deg=0.0, seed=0,
+                 jag=0.12, lip=0.45):
+    """Lama de sist (varianta MINIMA tf-a, pentru `rock_tunnel_portal`; la
+    integrare se unifica cu `tf_shapes_nature.schist_blade` din grupa tf-b).
+
+    Invelitoarea convexa a unei cutii orientate pe foliatie, cu colturile
+    jitterate: `size` = (lungime pe DIRECTIE, latime pe INCLINARE, grosime).
+    Directia (strike) e orizontala, la `strike_deg` de +Y (0 = lama curge pe Y);
+    inclinarea (dip) urca spre +X local cu `dip_deg` (30-50, ACEEASI pe toata
+    piesa: kit regula 7). Muchia de sus a lamei (capatul +dip) e ascutita: fata
+    ei de sus se retrage cu `lip` din grosime, deci lama se termina in buza, nu
+    in cant drept. Fisura dintre lame vine din geometrie (lamele se suprapun cu
+    rost) + AO, nu dintr-un slot inchis."""
+    import random
+    slot = TF_SCHIST if slot is None else slot
+    rnd = random.Random(seed)
+    a = math.radians(strike_deg)
+    dp = math.radians(dip_deg)
+    sv = Vector((math.sin(a), math.cos(a), 0.0))
+    hv = Vector((math.cos(a), -math.sin(a), 0.0))
+    dv = hv * math.cos(dp) + Vector((0.0, 0.0, math.sin(dp)))
+    nv = sv.cross(dv).normalized()
+    if nv.z < 0:
+        nv = -nv
+    c = Vector(center)
+    L, W, T = size
+    pts = []
+    for iu in (-1, 1):
+        for iw in (-1, 1):
+            for it in (-1, 1):
+                ju = 1.0 - jag * rnd.random()
+                jw = 1.0 - jag * rnd.random()
+                tt = T * 0.5
+                if iw > 0 and it > 0:
+                    tt *= (1.0 - lip)                      # buza: capatul de sus ascutit
+                p = (c + sv * (iu * L * 0.5 * ju) + dv * (iw * W * 0.5 * jw)
+                     + nv * (it * tt * (1.0 - 0.5 * jag * rnd.random())))
+                pts.append(p)
+    # doua puncte pe mijlocul lungimii, ca muchia lunga sa nu fie perfect dreapta
+    for iw in (-1, 1):
+        pts.append(c + sv * ((rnd.random() - 0.5) * L * 0.4) + dv * (iw * W * 0.5 * (1.0 + 0.05 * rnd.random()))
+                   + nv * (T * 0.5 * (0.2 if iw > 0 else 0.7)))
+    vs = [b.bm.verts.new(p) for p in pts]
+    res = bmesh.ops.convex_hull(b.bm, input=vs)
+    junk = [g for g in set(res["geom_interior"]) | set(res["geom_unused"]) if g.is_valid]
+    bmesh.ops.delete(b.bm, geom=junk, context="VERTS")
+    for f in res["geom"]:
+        if isinstance(f, bmesh.types.BMFace) and f.is_valid:
+            f[b.slot] = slot
 
 
-def dry_stone_wall(b, *args, **kw):
-    """STUB (tf-a, `retaining_wall_*`): zid de piatra uscata cu talus ~10 grade pe
-    fata spre vale, 7-9 pietre individuale DOAR pe randul de sus, masa cu fete mari
-    in rest, creasta plana la cota 0, capete plane la +-L/2 (inlantuibil)."""
-    raise NotImplementedError("dry_stone_wall: valul 1 (tf-a)")
+def _clip_hull_pts(pts, y_lo, y_hi):
+    """Punctele politopului convex conv(pts) taiat la y_lo <= y <= y_hi: varfurile
+    din interior + intersectiile muchiilor hull-ului cu cele doua plane. Asa o
+    piatra care incalca capatul modulului se taie PLAN, fara boolean."""
+    tmp = bmesh.new()
+    vs = [tmp.verts.new(p) for p in pts]
+    res = bmesh.ops.convex_hull(tmp, input=vs)
+    edges = [e for e in res["geom"] if isinstance(e, bmesh.types.BMEdge) and e.is_valid]
+    out = [Vector(v.co) for v in tmp.verts if v.is_valid and v.link_edges
+           and y_lo - 1e-6 <= v.co.y <= y_hi + 1e-6]
+    for e in edges:
+        a, b = e.verts[0].co, e.verts[1].co
+        for yp in (y_lo, y_hi):
+            if (a.y - yp) * (b.y - yp) < 0:
+                t = (yp - a.y) / (b.y - a.y)
+                out.append(Vector(a.lerp(b, t)))
+    tmp.free()
+    return out
+
+
+def _hull(b, pts, slot):
+    vs = [b.bm.verts.new(p) for p in pts]
+    bmesh.ops.remove_doubles(b.bm, verts=vs, dist=1e-4)
+    vs = [v for v in vs if v.is_valid]
+    res = bmesh.ops.convex_hull(b.bm, input=vs)
+    junk = [g for g in set(res["geom_interior"]) | set(res["geom_unused"]) if g.is_valid]
+    bmesh.ops.delete(b.bm, geom=junk, context="VERTS")
+    for f in res["geom"]:
+        if isinstance(f, bmesh.types.BMFace) and f.is_valid:
+            f[b.slot] = slot
+
+
+def _periodic_joints(rnd, L, n, wmin, wmax):
+    """`n` latimi aleatoare in [wmin, wmax] scalate la suma L, cu un decalaj
+    aleator: rosturile sunt periodice pe L (capetele modulului se potrivesc)."""
+    ws = [wmin + (wmax - wmin) * rnd.random() for _ in range(n)]
+    sc = L / sum(ws)
+    ws = [w * sc for w in ws]
+    j = -L * 0.5 + rnd.random() * ws[0]
+    out = [j]
+    for w in ws:
+        out.append(out[-1] + w)
+    return out
+
+
+def _emit_periodic_hull(b, pts, L, slot):
+    """Hull-ul punctelor, plus copiile decalate cu +-L, taiate plan la +-L/2:
+    o piatra care incalca un capat apare jumatate la fiecare capat, identic."""
+    h = L * 0.5
+    for shift in (0.0, -L, L):
+        q = [Vector(p) + Vector((0.0, shift, 0.0)) for p in pts]
+        ylo = min(p.y for p in q)
+        yhi = max(p.y for p in q)
+        if yhi <= -h or ylo >= h:
+            continue
+        if ylo < -h or yhi > h:
+            q = _clip_hull_pts(q, -h, h)
+        if len(q) >= 4:
+            _hull(b, q, slot)
+
+
+def dry_stone_wall(b, L=8.0, H=5.0, top_w=1.2, base_w=2.0, seed=0.0, slot=None,
+                   bend_R=None, cope_h=0.55, cope_over=0.05, rows=(4, 5, 4, 4),
+                   joint=0.05, depth=0.06, inset=0.05):
+    """Zid de sprijin din piatra uscata (kit §1.1 `retaining_wall_*`, contract
+    revizuit de coordonator dupa val 1).
+
+    Axe: Y lungul zidului (capete plane la +-L/2), X spre VALE, Z sus. Originea
+    e pe muchia dinspre drum a crestei (x = 0, z = 0): creasta e PLANA la cota 0,
+    iar zidul atarna pana la z = -H. Spatele (x = 0) e vertical, ingropat in
+    umplutura.
+
+    * CORONAMENTUL (coping): un rand de pietre LIPITE, cu fata de sus in ACELASI
+      plan (z = 0), de la x = 0 la x = top_w, inalte `cope_h`; ies `cope_over`
+      peste fata zidului de dedesubt. Intre ele se vede doar o tesitura de 3 cm
+      (rost in V), nu goluri.
+    * FATA SPRE VALE (talus ~10 grade, de la top_w - cope_over sub coronament la
+      base_w la baza): pietre MARI ca forma, in randuri neregulate (`rows` =
+      pietre pe rand, 17 pe modul), cu colturile tesite aleator (contur de 8
+      laturi, piatra de camp). Fiecare piatra e un hull: conturul pe
+      planul retras al corpului (`depth` in spate), fata din fata retrasa cu
+      `inset` pe contur, deci muchia e tesita si rosturile (`joint`, plus
+      colturi stranse aleator 0-8 cm) fac umbra. Granulatia ramane a clasei
+      `stone_wall`.
+    * CORPUL: masa din spatele pietrelor (fata retrasa cu `depth`), inchisa.
+    * Rosturile tuturor randurilor sunt periodice pe L, iar piatra care incalca
+      un capat se taie plan la ambele capete -> capete identice, modulele se
+      leaga piatra-n piatra.
+    * `bend_R`: modulul curb. Fiecare punct (x, y) trece pe arcul cu centrul la
+      (-bend_R, 0); coarda la x = 0 ramane L, capetele raman plane (radiale) si
+      cu ACEEASI sectiune ca modulul drept."""
+    import random
+    slot = TF_SCHIST if slot is None else slot
+    rnd = random.Random(int(seed * 1000) + 7)
+    h = L * 0.5
+    x_top = top_w - cope_over                     # fata zidului sub coronament
+    span = H - cope_h
+    nrm = Vector((span, 0.0, base_w - x_top)).normalized()   # normala fetei spre vale
+
+    def face(y, z):                                # punct pe planul fetei
+        t = (-cope_h - z) / span
+        return Vector((x_top + (base_w - x_top) * t, y, z))
+
+    # --- corpul: inele pe Y (pentru indoire), fata retrasa cu `depth`
+    n = int(round(L / 0.5))
+    rings = []
+    for i in range(n + 1):
+        y = -h + L * i / n
+        ft = face(y, -cope_h) - nrm * depth
+        fb = face(y, -H) - nrm * depth
+        rings.append([(0.0, y, -cope_h), (0.0, y, -H), (fb.x, y, -H), (ft.x, y, ft.z)])
+    vr = [[b.bm.verts.new(p) for p in r] for r in rings]
+    for k in range(n):
+        for i in range(4):
+            j = (i + 1) % 4
+            f = b.bm.faces.new((vr[k][i], vr[k][j], vr[k + 1][j], vr[k + 1][i]))
+            f[b.slot] = slot
+    for cap in (list(reversed(vr[0])), vr[-1]):
+        f = b.bm.faces.new(cap)
+        f[b.slot] = slot
+
+    # --- pietrele fetei: randuri neregulate
+    hs = [0.9 + 0.35 * rnd.random() for _ in rows]
+    sc = span / sum(hs)
+    zb = [-cope_h]
+    for hh in hs:
+        zb.append(zb[-1] - hh * sc)
+    zb[-1] = -H
+    stones = 0
+    for r, cnt in enumerate(rows):
+        z_top, z_bot = zb[r], zb[r + 1]
+        joints = _periodic_joints(rnd, L, cnt, 1.3, 2.2)
+        for si in range(cnt):
+            y0, y1 = joints[si] + joint * 0.5, joints[si + 1] - joint * 0.5
+            zt = z_top - (joint * 0.5 if r > 0 else 0.02)
+            zbt = z_bot + (joint * 0.5 if r < len(rows) - 1 else 0.0)
+            sr = random.Random(int(seed * 1000) + 977 * r + 31 * si)
+            k = lambda: 0.08 * sr.random()
+            quad = [(y0 + k(), zt - k()), (y1 - k(), zt - k()),
+                    (y1 - k(), zbt + (k() if r < len(rows) - 1 else 0.0)),
+                    (y0 + k(), zbt + (k() if r < len(rows) - 1 else 0.0))]
+            # piatra de camp, nu bloc taiat: fiecare colt tesit aleator
+            # 0,12-0,32 m -> contur neregulat de 8 laturi; in colturi raman
+            # goluri triunghiulare (umbra), ca pe decupare
+            corners = []
+            for qi in range(4):
+                P = Vector(quad[qi])
+                A = Vector(quad[qi - 1]) - P
+                B = Vector(quad[(qi + 1) % 4]) - P
+                ca = min(0.12 + 0.20 * sr.random(), A.length * 0.35)
+                cb = min(0.12 + 0.20 * sr.random(), B.length * 0.35)
+                pa, pb = P + A.normalized() * ca, P + B.normalized() * cb
+                corners += [(pa.x, pa.y), (pb.x, pb.y)]
+            cy = sum(c[0] for c in corners) / len(corners)
+            cz = sum(c[1] for c in corners) / len(corners)
+            pts = []
+            for (yy, zz) in corners:
+                pts.append(face(yy, zz) - nrm * depth)                      # pe corp
+                dy, dz = cy - yy, cz - zz
+                ln = math.hypot(dy, dz) or 1.0
+                fi = inset * (1.0 + 0.2 * sr.random())
+                pts.append(face(yy + dy / ln * fi, zz + dz / ln * fi)
+                           + nrm * 0.01 * sr.random())                     # fata, retrasa
+            pts.append(face(cy + (sr.random() - 0.5) * 0.3, cz) + nrm * 0.06)   # bombata
+            for p in pts:              # normala are si z: nimic sub baza zidului
+                p.z = max(p.z, -H)
+            _emit_periodic_hull(b, pts, L, slot)
+            stones += 1
+
+    # --- coronamentul: pietre lipite, aceeasi fata de sus
+    c = 0.03
+    joints = _periodic_joints(rnd, L, 8, 0.85, 1.2)
+    for si in range(8):
+        y0, y1 = joints[si], joints[si + 1]
+        pts = []
+        for ya, sgn in ((y0, 1.0), (y1, -1.0)):
+            yi = ya + sgn * c
+            pts += [Vector((0.0, yi, 0.0)), Vector((top_w - c, yi, 0.0)),
+                    Vector((top_w, yi, -c)), Vector((top_w, yi, -cope_h)),
+                    Vector((0.0, ya, -c)), Vector((top_w - c, ya, -c)),
+                    Vector((top_w - c, ya, -cope_h)), Vector((0.0, ya, -cope_h))]
+        _emit_periodic_hull(b, pts, L, slot)
+
+    if bend_R:
+        alpha = math.asin(h / bend_R)
+        for v in b.bm.verts:
+            x, y, z = v.co
+            th = y / h * alpha
+            r = bend_R + x
+            v.co = Vector((-bend_R + r * math.cos(th), r * math.sin(th), z))
+    return stones
 
 
 def tin_roof(b, *args, **kw):

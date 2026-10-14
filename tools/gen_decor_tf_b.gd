@@ -131,7 +131,8 @@ func _build() -> void:
 	_molizi_pajiste()
 	_molizi_mal_stang()
 	_pinten_prometeu()
-	_sist_perete_opus()
+	_roci_perete()
+	_molizi_pante()
 	_zapada_creasta()
 	_grohotis_mal()
 	_fagi()
@@ -240,7 +241,9 @@ func _flock_add(key: String, pos: Vector3, yaw: float, scl: Vector3) -> void:
 	d["scl"] = sa
 
 
-## Un molid in stolul potrivit (coroana + trunchi, aceleasi instante).
+## Un molid in stolul potrivit (coroana + trunchi, aceleasi instante). Runda 2: trei
+## tonuri, ca sa nu citeasca perete negru: ~55% coroana pe `tf_jneapan`, ~30% pe
+## atlas (oliv mediu), ~15% fag (`tf_beech`, verde-lime) in locul molidului.
 func _pine(pos: Vector3, sc: float) -> void:
 	var r := _rng.randf()
 	var v := "b" if r < 0.34 else ("c" if r < 0.68 else ("d" if r < 0.86 else "a"))
@@ -248,9 +251,27 @@ func _pine(pos: Vector3, sc: float) -> void:
 	var s := _slice_of(pos)
 	var p3 := pos
 	p3.y -= 0.12
+	var tone := _rng.randf()
+	if tone >= 0.85:
+		var fs := sc * _rng.randf_range(0.75, 1.0)
+		_flock_add("fag_a_s%d" % s, p3, yaw, Vector3(fs, fs, fs))
+		_flock_add("fagb_a_s%d" % s, p3, yaw, Vector3(fs, fs, fs))
+		return
 	var sv := Vector3(sc, sc * _rng.randf_range(0.95, 1.12), sc)
-	_flock_add("pine_%s_s%d" % [v, s], p3, yaw, sv)
+	var pre := "pine" if tone < 0.55 else "pinea"
+	_flock_add("%s_%s_s%d" % [pre, v, s], p3, yaw, sv)
 	_flock_add("trunk_%s_s%d" % [v, s], p3, yaw, sv)
+
+
+## Tufa rotunda verde-galben (fag mic), pentru pantele de sub roci.
+func _tufa(pos: Vector3) -> void:
+	var sc := _rng.randf_range(0.3, 0.5)
+	var p3 := pos
+	p3.y -= 0.05
+	var s := _slice_of(pos)
+	var yaw := _rng.randf_range(-PI, PI)
+	_flock_add("fag_a_s%d" % s, p3, yaw, Vector3(sc, sc * 0.85, sc))
+	_flock_add("fagb_a_s%d" % s, p3, yaw, Vector3(sc, sc * 0.85, sc))
 
 
 # 4 ------------------------------------------------------------------ fasia joasa
@@ -330,7 +351,7 @@ func _strip() -> void:
 func _molizi_perete_opus() -> void:
 	var clumps := 0
 	var guard := 0
-	while clumps < 80 and guard < 24000:
+	while clumps < 44 and guard < 14000:
 		guard += 1
 		var f := _rng.randf_range(0.0725, 0.1275)
 		var off := 36.0 + pow(_rng.randf(), 1.7) * 60.0
@@ -474,39 +495,112 @@ func _pinten_prometeu() -> void:
 		_put("aflorimente_mal", c2)
 
 
-# 6 ------------------------------------------------------------------ sist in peretele opus
+# 6 ------------------------------------------------------------------ roci in peretele opus
 
-## Lame inalte de sist (scara neuniforma, foliatie) care ies prin padure pe
-## peretele opus; stol `tf_schist`, fara coliziune (sunt la 40+ m de drum).
-func _sist_perete_opus() -> void:
+## Runda 2: peretele hauului ca masa continua de stanca in trepte. ~50 de aflorimente
+## (a/b, scara mare si mixta) + conuri de grohotis, SUPRAPUSE si inclinate dupa
+## panta, pe jitter de grila (5 m pe lungime, 6 m pe latime), ca sa acopere ~60-70%
+## din panta vizibila 0.080-0.120. Noduri fara coliziune (sunt in hau, sub drum).
+func _roci_perete() -> void:
 	var n := 0
+	var sc_n := 0
+	var f := 0.0795
+	var cols := 0
+	while f < 0.1215 and n < 120:
+		cols += 1
+		var off := 17.0 + _rng.randf_range(0.0, 3.0)
+		while off < 68.0 and n < 120:
+			var c := _cand(f + _rng.randf_range(-0.0010, 0.0010), 1.0, off + _rng.randf_range(-2.0, 2.0))
+			off += _rng.randf_range(5.0, 8.0)
+			if is_nan((c["pos"] as Vector3).y) or float(c["dy"]) < -45.0 or float(c["dy"]) > 14.0:
+				continue
+			if off < 34.0 and _rng.randf() < 0.45:
+				continue
+			if not _ok(c, 3.0, 9.0) or _near_dam(c["pos"]):
+				continue
+			var p3: Vector3 = c["pos"]
+			var nrm := _normal_at(p3)
+			var sc := _rng.randf_range(1.8, 3.6)
+			if _rng.randf() < 0.18:
+				sc = _rng.randf_range(0.8, 1.3)
+			var yaw := _rng.randf_range(-PI, PI)
+			var cone := _rng.randf() < 0.18
+			var nm := "b_scree" if cone else ("b_outcrop_a" if _rng.randf() < 0.5 else "b_outcrop_b")
+			if not cone and _rng.randf() < 0.1:
+				nm = "b_outcrop_c"
+			if cone:
+				sc_n += 1
+				_node_tilt("B_Grohotis%02d" % (100 + sc_n), nm, Vector3(p3.x, p3.y - 0.3, p3.z), yaw,
+					_rng.randf_range(1.0, 1.9), "none", nrm, 0.8)
+			else:
+				n += 1
+				_node_tilt("B_Stanca%02d" % n, nm, Vector3(p3.x, p3.y - 0.3 * sc, p3.z), yaw, sc, "none", nrm,
+					_rng.randf_range(0.25, 0.6))
+			_put("roci_perete", c)
+			# bucati mici peste lespezi mari, ca treptele sa se suprapuna
+			if not cone and sc > 2.0 and _rng.randf() < 0.55:
+				var q2 := p3 + Vector3(_rng.randf_range(-3.0, 3.0), 0.0, _rng.randf_range(-3.0, 3.0))
+				var c2 := _cand_at(q2, f, float(c["road_y"]))
+				if not is_nan((c2["pos"] as Vector3).y) and _ok(c2, 2.0, 9.0):
+					var p4: Vector3 = c2["pos"]
+					n += 1
+					_node_tilt("B_Stanca%02d" % n, "b_outcrop_a" if _rng.randf() < 0.5 else "b_outcrop_b",
+						Vector3(p4.x, p4.y - 0.2, p4.z), _rng.randf_range(-PI, PI), _rng.randf_range(0.7, 1.2), "none",
+						_normal_at(p4), 0.45)
+					_put("roci_perete", c2)
+		f += 0.0023
+	_count["roci_perete_noduri"] = n + sc_n
+
+
+## Modulele barajului (turn, centrala) stau la marginea coronamentului: rocile raman la >= 12 m de ele.
+func _near_dam(q: Vector3) -> bool:
+	for dm in [Vector3(104.6, 0, 238.2)]:
+		if Vector2(q.x - dm.x, q.z - dm.z).length() < 12.0:
+			return true
+	return false
+
+
+func _normal_at(p: Vector3) -> Vector3:
+	var y1 := _sol_real(p.x + 2.0, p.z)
+	var y2 := _sol_real(p.x - 2.0, p.z)
+	var y3 := _sol_real(p.x, p.z + 2.0)
+	var y4 := _sol_real(p.x, p.z - 2.0)
+	if is_nan(y1) or is_nan(y2) or is_nan(y3) or is_nan(y4):
+		return Vector3.UP
+	return Vector3(y2 - y1, 4.0, y4 - y3).normalized()
+
+
+## Molizi la baza stancilor (palcuri) + tufe rotunde, pe panta, nu pe margine.
+func _molizi_pante() -> void:
+	var clumps := 0
 	var guard := 0
-	while n < 46 and guard < 9000:
+	while clumps < 12 and guard < 12000:
 		guard += 1
-		var f := _rng.randf_range(0.0715, 0.1275)
-		var c := _cand(f, 1.0, 36.0 + pow(_rng.randf(), 1.5) * 46.0)
-		if is_nan((c["pos"] as Vector3).y) or float(c["dy"]) < -20.0:
+		var f := _rng.randf_range(0.0795, 0.1215)
+		var c := _cand(f, 1.0, _rng.randf_range(36.0, 62.0))
+		if is_nan((c["pos"] as Vector3).y) or float(c["dy"]) < -22.0 or float(c["dy"]) > 12.0:
 			continue
-		if not _ok(c, 3.0, 20.0):
+		if not _ok(c, 2.4, 24.0):
 			continue
-		# gruparea: 2-3 lame vecine
-		var k := _rng.randi_range(1, 3)
-		for m in k:
+		var got := 0
+		for m in _rng.randi_range(3, 5):
 			var pc := c
 			if m > 0:
 				var ang := _rng.randf() * TAU
-				var rad := _rng.randf_range(2.5, 6.0)
+				var rad := _rng.randf_range(2.0, 6.0)
 				pc = _cand_at((c["pos"] as Vector3) + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), f, float(c["road_y"]))
-				if not _ok(pc, 2.0, 20.0) or float(pc["dy"]) < -22.0:
+				if not _ok(pc, 1.8, 24.0) or float(pc["dy"]) < -24.0:
 					continue
-			var sx := _rng.randf_range(1.6, 3.2)
-			var sy := _rng.randf_range(1.8, 3.8)
-			var sz := _rng.randf_range(0.9, 1.6)
-			var p3: Vector3 = pc["pos"]
-			p3.y -= 0.45 * sy
-			_flock_add("rock_s%d" % _slice_of(p3), p3, _rng.randf_range(-PI, PI), Vector3(sx, sy, sz))
-			_put("sist_perete", pc)
-			n += 1
+			_pine(pc["pos"], _rng.randf_range(0.55, 1.5))
+			_put("molizi_pante", pc)
+			got += 1
+		if got > 0:
+			clumps += 1
+			for t in _rng.randi_range(1, 2):
+				var tc := _cand_at((c["pos"] as Vector3) + Vector3(_rng.randf_range(-5.0, 5.0), 0.0, _rng.randf_range(-5.0, 5.0)), f, float(c["road_y"]))
+				if not is_nan((tc["pos"] as Vector3).y) and _ok(tc, 0.8, 24.0):
+					_tufa(tc["pos"])
+					_put("tufe", tc)
 
 
 # 7 ------------------------------------------------------------------ zapada pe creasta opusa
@@ -514,7 +608,7 @@ func _sist_perete_opus() -> void:
 func _zapada_creasta() -> void:
 	var n := 0
 	var guard := 0
-	while n < 10 and guard < 5000:
+	while n < 5 and guard < 5000:
 		guard += 1
 		var f := _rng.randf_range(0.0725, 0.1235)
 		var c := _cand(f, 1.0, _rng.randf_range(44.0, 78.0))
@@ -621,6 +715,24 @@ func _node(nm: String, res_id: String, pos: Vector3, yaw: float, sc: float, mode
 	_node_n += 1
 
 
+## Nod instantiat, inclinat dupa panta (`tilt` 0 = vertical, 1 = normala terenului).
+func _node_tilt(nm: String, res_id: String, pos: Vector3, yaw: float, sc: float, mode: String,
+		nrm: Vector3, tilt: float) -> void:
+	var b := Basis(Vector3.UP, yaw)
+	if nrm.y < 0.999:
+		var axis := Vector3.UP.cross(nrm)
+		if axis.length() > 0.001:
+			b = Basis(axis.normalized(), Vector3.UP.angle_to(nrm) * tilt) * b
+	b = b.scaled(Vector3(sc, sc, sc))
+	_nodes.append('[node name="%s" parent="%s" instance=ExtResource("%s")]' % [nm, ZONE, res_id])
+	_nodes.append("transform = Transform3D(%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.3f, %.3f, %.3f)"
+		% [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z, pos.x, pos.y, pos.z])
+	if mode != "":
+		_nodes.append('metadata/coliziune = "%s"' % mode)
+	_nodes.append("")
+	_node_n += 1
+
+
 ## Lotul -> (id model, mesh_name, clasa). Cheia lotului: prefix_variant_sN.
 func _lot_spec(key: String) -> Dictionary:
 	var parts := key.split("_")
@@ -631,12 +743,18 @@ func _lot_spec(key: String) -> Dictionary:
 			return {"model": "b_afin", "mesh": "Afin_Leaves", "cls": "", "nm": "B_Afin_" + parts[1]}
 		"pine":
 			return {"model": "b_pines", "mesh": "Pine_" + parts[1].to_upper(), "cls": "tf_jneapan", "nm": "B_Molid_" + parts[1] + "_" + parts[2]}
+		"pinea":
+			return {"model": "b_pines", "mesh": "Pine_" + parts[1].to_upper(), "cls": "", "nm": "B_MolidA_" + parts[1] + "_" + parts[2]}
+		"fag":
+			return {"model": "b_beech_a", "mesh": "Beech_Leaves", "cls": "tf_beech", "nm": "B_FagFrunze_" + parts[2]}
+		"fagb":
+			return {"model": "b_beech_a", "mesh": "Beech_Bark", "cls": "", "nm": "B_FagScoarta_" + parts[2]}
 		"trunk":
 			return {"model": "b_pines", "mesh": "Trunk_" + parts[1].to_upper(), "cls": "", "nm": "B_Trunchi_" + parts[1] + "_" + parts[2]}
 		"rock":
 			return {"model": "b_outcrop_b", "mesh": "Schist_Schist", "cls": "tf_schist", "nm": "B_Sist_" + parts[1]}
 		"snow":
-			return {"model": "b_snow_wall", "mesh": "SnowWall_B_Snow", "cls": "snow", "nm": "B_Banc_" + parts[1]}
+			return {"model": "b_snow_wall", "mesh": "SnowWall_B_Snow", "cls": "", "nm": "B_Banc_" + parts[1]}
 		"flori":
 			return {"model": "b_flower", "mesh": "", "cls": "", "nm": "B_Flori_" + parts[1]}
 		"bujor":

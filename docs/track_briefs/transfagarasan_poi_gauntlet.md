@@ -968,6 +968,29 @@ ProbeRace pe 16 seed-uri: 49 de repuneri (urs 36, portal 9, avalanșă 2, plus 2
 
 Mai sunt 2 `[blocaj]` noi la 0.320 (`Portal_S`, seed 6).
 
+## Starea valului 2 (B, D, G) — integrat pe `transfagarasan/poi-integrare`, 14 oct 2026
+
+| POI | runde | ieșire | ce s-a făcut | ce a rămas |
+|---|---|---|---|---|
+| B | 2 | (c): vegetația pe pereții hăului, numită de 2 ori | ~120 de aflorimente înclinate în trepte pe peretele hăului, pădure în 3 tonuri, fâșie joasă, pintenul lui Prometeu | pereții se citesc pe jumătate goi; fața din aval a barajului nu se vede din cameră (N4) |
+| D | 2 | (c): zăpada „stâncă stratificată gri-albăstruie”, numită de 2 ori | molizi pe 3 rânduri, jneapăn, afin, stâna, coame de zăpadă pe atlas la portal | **zăpada cere piesă (troian neted, fără trepte) sau lumină (ambient mai cald în umbră)**: decizia dezvoltatorului; A/B-ul de ambient e în scratchpad |
+| G | 2 + pas final | (c): criticul a oscilat (r1 „perete uniform”, r2 „pădure continuă”) | 3 tonuri de molid, fagi, treptele de șist ale cascadei, cabana | kickerul săriturii e o placă portocalie plată (`ChannelKicker`, fundație); cascada e subțire |
+
+**Reparații centrale în timpul valului 2**, fără material nou:
+- **zăpada pe atlas**, nu pe clasa `snow`: dala cu pistrui citea parapet de piatră. Materialele scad la 34;
+- **parapetul de la capătul barajului** (0.115–0.135, dreapta): elimină repunerea de la 0.120;
+- **Prometeu** pe `DRY_VEGETATION`: bronz mat;
+- **amestecul de tonuri al pădurii:** ~35% din molizii lui A pe atlas și ~25% din ai lui C; benzile pe `tf_jneapan` doar 65%;
+- **rărirea** molizilor de peste 40 m de drum (−1 396 de instanțe);
+- `prop_foot_cache` și `prop_contact_flat` pe temă;
+- `probe_manual`: reevaluare pe raycast, opt-in pe `ZonaB` (pereții râpelor).
+
+**Scena integrată:**
+- gărzile sunt la linia de bază;
+- ProbeRace pe 16 seed-uri: 52 de repuneri, toate la hazarde (urs 37, portal 9, avalanșă 6); **0 evenimente în zonele de decor**, 0 la baraj, 0 la săritură;
+- materiale 34; triunghiuri 7,22 M; desene 1 282;
+- **încărcare la cald 3,86–3,92 s** (limita 4,32). Costul rămas e iarba densă (~1,5 s), umerii (~0,6 s) și nodurile `DecorManual`, nu stolurile.
+
 ## Bucla oarbă
 
 1. Constructorul (Sonnet, memoria `coordonator-fable-constructori-sonnet`) lucrează în `D:/GameDev/wt-tf-poi-<x>` pe `transfagarasan/poi-<x>`, plecat din vârful ramurii după merge-ul

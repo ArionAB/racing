@@ -20,8 +20,13 @@
 > insuliță 0,042 m (contract < 0,3), tangaj și val propriu. Podul de pe Machu
 > Picchu e **neatins** și toate contractele lui trec.
 >
-> **Următorii pași:** `TideHazard`, `CameraZone` pe grotă, gărzile de layout,
-> apoi verdictul dezvoltatorului la volan.
+> **`TideHazard` există și trece toate contractele** (§7.3), dar **banda de jos
+> nu e pusă pe pistă**: măsurătoarea arată că pe traseul actual nu există
+> nicio coardă care să scurteze la nivelul mării (singura e pe insulă, la
+> +20 m). Sunt trei opțiuni în §7.3 și **cer o decizie a dezvoltatorului**.
+>
+> **Următorii pași:** decizia de la §7.3, apoi `CameraZone` pe grotă, gărzile
+> de layout, apoi verdictul la volan.
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `transfagarasan.md`, `okinawa.md` și `monument_valley.md`. Secțiunile de
@@ -486,11 +491,25 @@ Nu le iau singur, fiindcă schimbă scopul. Propunerea mea e prima la fiecare.
    libere. Pontonul rămâne o mecanică nouă și fără el.
 3. **Mareea: cine comută scurtătura?** Partea de apă e lămurită (§3:
    `TideHazard` ca variantă de `WaterHazard`, care e scris exact pentru asta).
-   Rămas de decis: închiderea benzii de jos o face hazardul (dezactivează
-   `TrackBranch`-ul) sau rămâne deschisă și apa doar taie grip-ul până la
-   impracticabil? Propunere: **apa taie grip-ul, banda rămâne deschisă** —
-   e mai puțin cod și lasă decizia riscantă posibilă („o iau oricum”), în
-   spiritul principiului 2 (skill de decizie).
+   **ÎNCHIS (14 oct 2026), pe cod citit: hazardul închide banda.** Propusesem
+   „apa taie grip-ul, banda rămâne deschisă”, ca variantă mai ieftină. Dar
+   `Track.branch_is_open` + `BRANCH_GATE_GROUP` **există deja** și cer două
+   metode (`branch_index` + `shortcut_open()`), cu precedent dublu — lava de pe
+   Stromboli și vaca de la Jodhpur. Deci închiderea nu e mai scumpă, și e mai
+   onestă: la 1,5 m de apă peste terasă, o bandă „deschisă cu grip tăiat” ar fi
+   o capcană, nu o decizie. Bonus neprevăzut: `shortcut_open()` e întrebat
+   **per tur** în `AIController`, deci un AI care a decis „o iau pe scurtă” la
+   turul 1 nu intră în apă la turul 3.
+
+   **Compromisul păstrat:** banda se închide **doar** la apă plină. Fazele de
+   urcare și de retragere o lasă deschisă **cu apă pe ea** — acolo stă riscul
+   asumat, măsurat la **22,8 s per ciclu** de fereastră în care poți încerca.
+
+   **DAR banda de jos nu e pusă pe pistă** (§7.3): măsurătoarea arată că pe
+   traseul actual nu există nicio coardă care să scurteze la nivelul mării.
+   Poarta de bandă rămâne implementată și testată, nefolosită până se ia una
+   dintre cele trei opțiuni din §7.3. Decizia asta e **deschisă din nou**, la
+   alt nivel: nu „cine comută banda”, ci **unde poate exista banda**.
 4. **Grota: una lungă (70 m) sau două scurte?** Propunere: **una lungă**, ca
    să fie eveniment, nu detaliu. Depinde de ce arată `ProbeCameraSolid` pe
    tavanul de 11 m.
@@ -1130,6 +1149,101 @@ defectul era la **granița dintre clasă și pistă** — o limită nescrisă, o
 încărcare pe care sonda izolată nu o produce, o unitate de măsură diferită.
 De aceea `ProbeRace` pe pista reală nu e opțional după `ProbePonton`: măsoară
 altceva (memoria `harnas-sintetic-comportament-emergent`).
+
+### 7.3 `TideHazard` și banda de jos (14 oct 2026)
+
+`scenes/hazards/tide_hazard.gd` + `tools/ProbeMaree.tscn`. Variantă de
+`WaterHazard` (cele trei metode virtuale) **plus** poartă de bandă în
+`Track.BRANCH_GATE_GROUP` — vezi decizia 3.1.3, închisă acum pe cod citit.
+
+Ciclu de **80 s** în patru faze: JOS (terasa descoperită, scurtătură uscată) →
+URCA (apa vine, banda **încă deschisă**) → SUS (apa peste terasă, banda
+**închisă**) → COBOARA (se retrage, banda redeschisă udă).
+
+**Contractele, măsurate** (`ProbeMaree`, izolat):
+
+| contract | măsurat |
+|---|---|
+| ceasul la `t = 0` e **telegraf** (URCA), nu apă sus | ✔ URCA |
+| banda deschisă majoritar | **49,6 s din 80** (62%) |
+| fereastră de risc (apă pe bandă deschisă) | **22,8 s** per ciclu |
+| toate patru fazele apar, în ordine | URCA → SUS → COBOARA → JOS |
+| nivelul e continuu (fără salturi) | **0,0015** / tick |
+| apa și poarta acordate | **0 / 400** contradicții |
+
+`--sabotaj` pornește ceasul cu apa sus — exact greșeala din Fiordland — și
+garda 1 **pică**, cum trebuie.
+
+#### Scurtătura de maree e geometric IMPOSIBILĂ pe traseul ăsta — clasa rămâne, plasarea nu
+
+**Clasa e gata și testată. Banda de jos NU e pusă pe pistă**, iar motivul e
+măsurat, nu de gust. Trei încercări, fiecare infirmată de cifre:
+
+**1. Banda paralelă (cum o descrie §3): −1,9% câștig.** §3 o descria ca „bandă
+la +0,4 m, mai scurtă și mai directă”, pe terasa de la baza peretelui, paralelă
+cu drumul de sus. Construită literal, garda a dat −1,9%. Baleind toată bucla
+(patru ferestre × laterale de −12 la +12 m): **niciodată peste −2,3%**.
+
+Motivul e geometric și evident în retrospectivă: **o bandă paralelă are aceeași
+lungime ca drumul pe care merge.** Offsetul lateral scurtează doar pe interiorul
+curbelor, iar latura de coastă e prea dreaptă. Ținta Monument Valley (−25…−35%)
+nu e atingibilă așa — o scurtătură trebuie să **taie coarda**.
+
+**2. Coarda de la închiderea buclei (0,962–1,040): −32%, dar rupe cursa.**
+Măsurând câștigul de coardă pe tot traseul, candidata arăta perfectă: −32,0%,
+plată (0,3 m pe 158 m), pe lângă satul plutitor. ProbeRace a arătat altceva:
+**tur minim 2,88 s** pe o pistă de 2 km. Fracțiile 0,962 → 1,040 trec **peste
+linia de start**, deci mașina care ia scurtătura închide turul pe ea și reintră
+dincolo de start. Nu e scurtătură, e o eroare de topologie.
+
+Pe drum a apărut și o a doua ipoteză greșită: cele 14 repuneri noi din zona
+benzii le-am pus pe seama unei trepte de 1,2 m la joncțiune (banda era coborâtă
+**uniform**, iar `TrackBranch` citește capetele de pe bucla principală — vezi
+memoria `banda-coborata-uniform-lasa-treapta`). Racordarea cotei cu profil
+`4u(1−u)` a fost **corectă ca principiu** și a rămas în lecții, dar **n-a
+schimbat cifra**: tot 14 repuneri. Cauza era topologia, nu cota.
+
+**3. Nicio altă coardă nu există la nivelul mării.** Baleind tot traseul cu
+filtru „nu atinge startul”, **singura** scurtătură cu câștig ≥ 20% e la **acele
+de păr** (0,58–0,68, −40%), la cotă **+12…+22 m**. Zero candidați sub +6 m.
+
+**Concluzia, care e o decizie de design, nu un reglaj:** pe traseul actual o
+scurtătură de **maree** nu are loc. Mareea cere o terasă *plată și la nivelul
+apei*, iar singurul loc care scurtează ceva e pe insulă, la 20 m deasupra mării,
+unde o terasă de abraziune n-ar avea nicio logică.
+
+**Opțiunile, pentru dezvoltator** (nu le aleg singur, schimbă scopul):
+- **(a) scurtătura rămâne pe insulă, fără maree** — taie acul de păr 2 (−40%),
+  ca poteca ciobanilor de pe Transfăgărășan. Mareea devine atunci doar
+  *atmosferă* pe drumul de coastă: apa urcă și coboară, taie gripul pe banda de
+  jos, dar nu închide nimic. Ieftin, și gimmickul vizual rămâne;
+- **(b) traseul se redesenează** pe latura de coastă (POI G) ca să conțină o
+  curbă pe care o coardă joasă să o taie — de exemplu un golf care intră în
+  uscat. Scump: mută reperele și cere remăsurarea azimutului;
+- **(c) mareea se mută pe altceva** — de exemplu acoperă o porțiune a
+  **digului** (POI C), unde nu e scurtătură ci un pasaj obligatoriu care devine
+  udă și lentă pe ciclu. Pierde decizia, păstrează ceasul.
+
+**Ce rămâne livrat acum:** `TideHazard` + `ProbeMaree`, cu toate contractele
+verificate izolat. Clasa e bună pentru oricare dintre cele trei variante — în
+(a) și (c) se folosește fără `branch_index`, iar poarta de bandă rămâne o
+capacitate nefolosită, nu cod mort (precedentul există: lava și vaca o
+folosesc).
+
+**Lecția de metodă:** o afirmație de geometrie dintr-un brief („mai scurtă și
+mai directă”) e o **ipoteză**, nu un fapt. Garda de scurtătură a expus-o, n-a
+prins-o: fusese scrisă pentru contract, iar contractul a arătat că premisa nu-l
+putea atinge. Și a doua lecție, mai scumpă: **o coardă bună pe hartă poate fi
+invalidă în cursă** — fracțiile se verifică și față de linia de start, nu doar
+față de lungime și cotă.
+
+#### O capcană de format `.tscn`
+
+`[sub_resource]` trebuie să fie **înaintea primului `[node]`**, altfel parserul
+dă „Unknown tag 'sub_resource' in file" și scena nu se încarcă deloc. Curba
+benzii se calculează deci *înainte* de header-ul scenei, nu lângă nodul care o
+folosește. (Prima încercare de a muta blocul prin manipulare de string a rupt
+generatorul — restaurat din git și refăcut cu editări țintite.)
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 

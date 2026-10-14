@@ -5549,8 +5549,33 @@ func rebuild() -> void:
 	build_step.emit(&"umbre")
 	# Apa DUPA teren: are nevoie de aceleasi cote ca sa stie unde e tarmul.
 	_build_water()
+	_wire_scene_water_hazards()
 	_build_world_bounds()
 	build_step.emit(&"apa")
+
+## Cablează hazardele de apa DECLARATE CA NODURI in scena (azi: [TideHazard]).
+##
+## Cele construite de pista prin fractii (`WaterHose`, `WaveSurge`) isi primesc
+## materialul in `_build_wave` / `_build_hose`, INAINTE de `add_child`. Un nod
+## pus de mana in .tscn nu trece pe acolo, deci ar rămâne cu `film_material`
+## null si ar desena un albastru propriu — adica un material in plus la
+## numaratoarea garzii, exact felul in care bugetul creste pe nesimtite
+## (vezi `WaterHazard.film_material`).
+##
+## Se apeleaza DUPA `_build_water`: materialul marii exista abia atunci.
+## Hazardul isi reface foaia de apa cu materialul primit; daca nu e inca
+## construita (nod adaugat intre timp), apelul e inofensiv.
+func _wire_scene_water_hazards() -> void:
+	if not theme_flag("water", false):
+		return
+	var mat := _water_material()
+	for node in find_children("*", "TideHazard", true, false):
+		var tide := node as TideHazard
+		if tide == null:
+			continue
+		tide.film_material = mat
+		tide.apply_film_material(mat)
+
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
 ## la fiecare 6.5m de-a lungul curbei.

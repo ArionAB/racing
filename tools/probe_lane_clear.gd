@@ -218,6 +218,11 @@ func _ready() -> void:
 const BASELINE := {
 	"Dunele (Track01)": 30,
 	"Okinawa manual (Track08)": 18,
+	# Alpii: SCOASA din lista de joc la swap-ul din 14 oct 2026 (Track21 i-a luat
+	# indexul 2). Cheia RAMANE: `track_label` o compune din TRACK_NAMES +
+	# numele scenei, deci nu se mai poate ajunge la ea prin index — dar Track09
+	# e in continuare in repo ca banc de test si sondele il incarca PE CALE.
+	# Stearsa, un `--only` pe Track09 ar primi baza -1 si ar trece cu orice cifra.
 	"Alpii (Track09)": 21,
 	"Baikal (Track10)": 70,
 	"Stromboli (Track11)": 190,

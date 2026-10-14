@@ -209,7 +209,7 @@ func _slice_of(f: float) -> int:
 func _jneapan() -> void:
 	var clusters := 0
 	var guard := 0
-	while clusters < 44 and guard < 5000:
+	while clusters < 72 and guard < 9000:
 		guard += 1
 		var f := _rng.randf_range(F0 + 0.004, F1 - 0.004)
 		var sg := 1.0 if _rng.randf() < 0.5 else -1.0
@@ -222,7 +222,7 @@ func _jneapan() -> void:
 		if not _ok(c, 2.0, 3.0):
 			_rejected += 1
 			continue
-		var k := _rng.randi_range(4, 6)
+		var k := _rng.randi_range(3, 5)
 		var placed := 0
 		for m in k:
 			var ang := _rng.randf() * TAU
@@ -292,7 +292,7 @@ func _bujor() -> void:
 	var patches := 0
 	var guard := 0
 	# 10 petice, cate unul pe fiecare a zecea parte a intervalului, nu aliniate
-	var slots := 10
+	var slots := 24
 	for s in slots:
 		var placed := false
 		guard = 0
@@ -337,33 +337,44 @@ func _uphill_cand(f: float, off_lo: float, off_hi: float, min_dy: float = 3.5) -
 
 
 func _aflorimente() -> void:
-	var names := ["outcrop_a", "outcrop_b", "outcrop_a", "outcrop_c"]
-	var placed: Array[Vector3] = []
+	# Runda 2: gramezi de 2-3 lame, nu piese singure. `outcrop_c` (lama inalta,
+	# subtire) doar o data: izolata citea ca un ciob.
+	var centers: Array[Vector3] = []
 	var guard := 0
-	while placed.size() < 4 and guard < 6000:
+	var total := 0
+	var groups := 0
+	while groups < 7 and guard < 9000:
 		guard += 1
 		var f := _rng.randf_range(F0 + 0.004, F1 - 0.004)
-		var c := _uphill_cand(f, 12.0, 34.0)
-		if c.is_empty():
-			continue
-		var nm: String = names[placed.size()]
-		if not _ok(c, float(BASE_R[nm]) * 1.3, 5.0):
-			_rejected += 1
+		var c := _uphill_cand(f, 10.0, 34.0)
+		if c.is_empty() or not _ok(c, 4.5, 5.0):
 			continue
 		var pp: Vector3 = c["pos"]
 		var near := false
-		for q in placed:
-			if q.distance_to(pp) < 45.0:
+		for q in centers:
+			if q.distance_to(pp) < 38.0:
 				near = true
 				break
 		if near:
 			continue
-		var sc := _rng.randf_range(1.15, 1.6)
-		var p3: Vector3 = pp
-		p3.y -= 0.35 * sc
-		_node("F_Aflor%02d" % (placed.size() + 1), "f_" + nm, p3, _rng.randf_range(-PI, PI), sc, c["nrm"], 0.25)
-		_put("aflorimente", c)
-		placed.append(pp)
+		centers.append(pp)
+		groups += 1
+		var k := _rng.randi_range(2, 3)
+		for m in k:
+			var ang := _rng.randf() * TAU
+			var rad := _rng.randf_range(0.0, 4.5) if m > 0 else 0.0
+			var pc := _cand_at(pp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
+			if not _ok(pc, 4.0, 4.5):
+				continue
+			var nm := "outcrop_a" if _rng.randf() < 0.5 else "outcrop_b"
+			if total == 3:
+				nm = "outcrop_c"
+			var sc := _rng.randf_range(1.0, 1.55)
+			var p3: Vector3 = pc["pos"]
+			p3.y -= 0.35 * sc
+			total += 1
+			_node("F_Aflor%02d" % total, "f_" + nm, p3, _rng.randf_range(-PI, PI), sc, c["nrm"], 0.25)
+			_put("aflorimente", pc)
 
 
 # 5 ------------------------------------------------------------------ grohotis
@@ -404,32 +415,32 @@ func _zapada() -> void:
 	var centers: Array[Vector3] = []
 	var guard := 0
 	var total := 0
-	while total < 14 and guard < 8000:
+	while total < 40 and guard < 20000:
 		guard += 1
 		var f := _rng.randf_range(F0 + 0.004, F1 - 0.004)
-		var c := _uphill_cand(f, 12.0, 50.0, 1.5)
-		if c.is_empty() or float(c["slope"]) < 0.45:
+		var c := _uphill_cand(f, 12.0, 28.0, 1.5)
+		if c.is_empty() or float(c["slope"]) < 0.3:
 			continue
-		if not _ok(c, 2.4, 4.0):
+		if not _ok(c, 3.0, 3.5):
 			_rejected += 1
 			continue
 		var pp: Vector3 = c["pos"]
 		var near := false
 		for q in centers:
-			if q.distance_to(pp) < 30.0:
+			if q.distance_to(pp) < 16.0:
 				near = true
 				break
 		if near:
 			continue
 		centers.append(pp)
-		var k := mini(_rng.randi_range(2, 3), 14 - total)
+		var k := mini(_rng.randi_range(2, 4), 40 - total)
 		for m in k:
 			var ang := _rng.randf() * TAU
 			var rad := _rng.randf_range(0.0, 2.8) if m > 0 else 0.0
 			var pc := _cand_at(pp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
 			if not _ok(pc, 1.6, 4.0):
 				continue
-			var sc := _rng.randf_range(0.7, 1.25)
+			var sc := _rng.randf_range(1.4, 2.3)
 			var p3: Vector3 = pc["pos"]
 			p3.y += 0.05
 			total += 1
@@ -440,29 +451,32 @@ func _zapada() -> void:
 # 7 ------------------------------------------------------------------ molizi
 
 func _molizi() -> void:
-	var trees := 0
+	# Runda 2: palcuri de 4-6 molizi de inaltimi diferite, cam la fiecare 15-20 m,
+	# pe ambele parti: fasii si versant.
+	var clumps := 0
 	var guard := 0
-	while trees < 36 and guard < 4000:
+	var trees := 0
+	while clumps < 64 and guard < 12000:
 		guard += 1
 		var f := _rng.randf_range(F0 + 0.004, F1 - 0.004)
 		var sg := 1.0 if _rng.randf() < 0.5 else -1.0
-		var off := 8.0 + pow(_rng.randf(), 1.3) * 46.0
+		var off := 6.0 + pow(_rng.randf(), 1.3) * 38.0
 		var c := _cand(f, sg, off)
-		if not _ok(c, 2.2, 5.0):
+		if not _ok(c, 2.6, 4.0):
 			_rejected += 1
 			continue
-		# 12 izolati (un singur molid), restul in palcuri de 2-3
-		var k := 1 if trees < 12 else _rng.randi_range(2, 3)
+		var k := 1 if clumps < 6 else _rng.randi_range(4, 6)
+		var got := 0
 		for m in k:
 			var pc := c
 			if m > 0:
 				var ang := _rng.randf() * TAU
-				var rad := _rng.randf_range(2.8, 5.2)
+				var rad := _rng.randf_range(1.8, 5.5)
 				pc = _cand_at((c["pos"] as Vector3) + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
-				if not _ok(pc, 2.2, 5.0):
+				if not _ok(pc, 2.0, 4.0):
 					continue
 			var variant := "b" if _rng.randf() < 0.55 else "c"
-			var sc := _rng.randf_range(0.85, 1.3)
+			var sc := _rng.randf_range(0.55, 1.35)
 			var yaw := _rng.randf_range(-PI, PI)
 			var sl := _slice_of(f)
 			var p3: Vector3 = pc["pos"]
@@ -471,6 +485,9 @@ func _molizi() -> void:
 			_flock_add("trunk_%s_s%d" % [variant, sl], p3, yaw, Vector3(sc, sc, sc))
 			_put("molizi", pc)
 			trees += 1
+			got += 1
+		if got > 0:
+			clumps += 1
 
 
 # 8 ------------------------------------------------------------------ flori

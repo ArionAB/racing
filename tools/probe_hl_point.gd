@@ -1,0 +1,97 @@
+extends Node
+## MASOARA CE E INTR-UN PUNCT de pe Track22, in loc sa ghiceşti.
+##
+##   godot --headless --fixed-fps 60 --path . res://tools/ProbeHlPoint.tscn \
+##       -- --at=61,-196 [--span=12] [--track=22]
+##
+## De ce exista (brief §7.1, defectul 4): ProbeRace dadea 2-5 repuneri pe
+## fiecare seed, toate la frac 0.801, toate in ACELASI punct. Am diagnosticat
+## greşit de DOUA ori pe baza formei traseului (am ingustat rapa canalului, am
+## largit podetul) si cifra n-a miscat de niciuna. Sonda asta a dat raspunsul
+## din prima: un `@AnimatableBody3D@64` pe carosabil — colizorul placeholder al
+## joncii fara model (vezi memoria `hazard-fara-model-e-zid-invizibil`).
+##
+## Regula de metoda: cand repunerile cad mereu in acelasi punct, defectul NU e
+## de forma. Masoara ce e acolo: raycast vertical pe mai multe laterale (gaseste
+## gauri si praguri) plus inventarul nodurilor din jur (gaseste corpuri fizice
+## care n-ar trebui sa fie acolo).
+
+const DEFAULT_SPAN := 12.0
+const RAY_TOP := 60.0
+const RAY_LEN := 140.0
+
+
+func _ready() -> void:
+	var at := Vector2(61.0, -196.0)
+	var span := DEFAULT_SPAN
+	var track_no := 22
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--at="):
+			var parts := a.substr(5).split(",")
+			if parts.size() == 2:
+				at = Vector2(float(parts[0]), float(parts[1]))
+		elif a.begins_with("--span="):
+			span = float(a.substr(7))
+		elif a.begins_with("--track="):
+			track_no = int(a.substr(8))
+
+	var path := "res://scenes/tracks/Track%02d.tscn" % track_no
+	var packed := load(path) as PackedScene
+	if packed == null:
+		print("nu pot incarca ", path)
+		get_tree().quit(1)
+		return
+	var track := packed.instantiate()
+	add_child(track)
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	var center := Vector3(at.x, 0.0, at.y)
+	print("=== ProbeHlPoint: %s la (%.0f, ?, %.0f), span +/-%.0f m ==="
+		% [path.get_file(), at.x, at.y, span])
+
+	# 1. RAYCAST VERTICAL pe o cruce de puncte: gaseste gauri, praguri, cote.
+	var space := get_viewport().world_3d.direct_space_state
+	print("\n--- raycast vertical (cota si ce s-a lovit) ---")
+	var hits: Array[float] = []
+	for off in [-span, -span * 0.66, -span * 0.33, 0.0, span * 0.33, span * 0.66, span]:
+		for axis in [Vector3(1, 0, 0), Vector3(0, 0, 1)]:
+			var p := center + axis * off + Vector3.UP * RAY_TOP
+			var q := PhysicsRayQueryParameters3D.create(p, p + Vector3.DOWN * RAY_LEN)
+			var hit := space.intersect_ray(q)
+			var tag := "x" if axis.x != 0.0 else "z"
+			if hit.is_empty():
+				print("  %s %+6.1f m: NIMIC (gol pe %.0f m in jos)" % [tag, off, RAY_LEN])
+			else:
+				var col := hit.get("collider") as Node
+				var y := float(hit["position"].y)
+				hits.append(y)
+				print("  %s %+6.1f m: y=%6.2f   %s" % [tag, off, y,
+					col.name if col != null else "?"])
+	if hits.size() >= 2:
+		hits.sort()
+		var spread := hits[hits.size() - 1] - hits[0]
+		print("  -> imprastiere de cote: %.2f m %s" % [spread,
+			"(PRAG/GAURA: peste 0.3 m e zid)" if spread > 0.3 else "(plan)"])
+
+	# 2. CORPURI FIZICE in jur: gaseste ce n-ar trebui sa fie pe drum.
+	print("\n--- corpuri fizice la < %.0f m (cauta ce n-are ce cauta pe drum) ---"
+		% (span * 4.0))
+	var found := 0
+	for n in track.find_children("*", "PhysicsBody3D", true, false):
+		var b := n as Node3D
+		if b == null:
+			continue
+		var d := Vector2(b.global_position.x - at.x, b.global_position.z - at.y).length()
+		if d > span * 4.0:
+			continue
+		found += 1
+		print("  %-28s la (%.1f, %.2f, %.1f)  d=%.1f m  [%s]"
+			% [b.name, b.global_position.x, b.global_position.y, b.global_position.z,
+				d, b.get_class()])
+	if found == 0:
+		print("  (niciunul)")
+	else:
+		print("  -> un AnimatableBody3D fara mesh pe carosabil e un ZID INVIZIBIL")
+
+	get_tree().quit(0)

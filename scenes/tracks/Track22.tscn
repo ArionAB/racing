@@ -1,0 +1,191 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+[ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="4_hzm"]
+[ext_resource type="Script" path="res://scenes/hazards/herd_hazard.gd" id="6_herd"]
+[ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/harbour_quay.glb" id="14_quay"]
+[ext_resource type="PackedScene" path="res://assets/models/okinawa/vehicles/fishing_boat.glb" id="15_boat"]
+
+[sub_resource type="Curve3D" id="Curve3D_main"]
+closed = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -322.0, 1.07, -311.0, 0, 0, 0, 0, 0, 0, -333.82, 1.02, -312.0, 0, 0, 0, 0, 0, 0, -344.85, 1.0, -307.79, 0, 0, 0, 0, 0, 0, -352.99, 1.0, -299.19, 0, 0, 0, 0, 0, 0, -356.19, 1.0, -287.68, 0, 0, 0, 0, 0, 0, -357.64, 1.0, -275.77, 0, 0, 0, 0, 0, 0, -359.09, 1.0, -263.85, 0, 0, 0, 0, 0, 0, -360.54, 1.0, -251.94, 0, 0, 0, 0, 0, 0, -362.0, 1.0, -240.03, 0, 0, 0, 0, 0, 0, -360.68, 0.93, -228.1, 0, 0, 0, 0, 0, 0, -359.35, 0.87, -216.18, 0, 0, 0, 0, 0, 0, -358.03, 0.8, -204.25, 0, 0, 0, 0, 0, 0, -356.7, 0.74, -192.32, 0, 0, 0, 0, 0, 0, -355.38, 0.67, -180.4, 0, 0, 0, 0, 0, 0, -354.05, 0.6, -168.47, 0, 0, 0, 0, 0, 0, -352.73, 0.6, -156.54, 0, 0, 0, 0, 0, 0, -351.4, 0.6, -144.62, 0, 0, 0, 0, 0, 0, -350.08, 0.6, -132.69, 0, 0, 0, 0, 0, 0, -348.75, 0.6, -120.76, 0, 0, 0, 0, 0, 0, -347.43, 0.6, -108.84, 0, 0, 0, 0, 0, 0, -346.1, 0.6, -96.91, 0, 0, 0, 0, 0, 0, -344.78, 0.6, -84.98, 0, 0, 0, 0, 0, 0, -343.45, 0.6, -73.06, 0, 0, 0, 0, 0, 0, -342.13, 0.6, -61.13, 0, 0, 0, 0, 0, 0, -340.8, 0.6, -49.2, 0, 0, 0, 0, 0, 0, -339.48, 0.6, -37.28, 0, 0, 0, 0, 0, 0, -338.15, 0.6, -25.35, 0, 0, 0, 0, 0, 0, -336.82, 0.6, -13.42, 0, 0, 0, 0, 0, 0, -335.5, 0.6, -1.5, 0, 0, 0, 0, 0, 0, -334.17, 0.6, 10.43, 0, 0, 0, 0, 0, 0, -332.85, 0.6, 22.35, 0, 0, 0, 0, 0, 0, -331.52, 0.6, 34.28, 0, 0, 0, 0, 0, 0, -330.2, 0.6, 46.21, 0, 0, 0, 0, 0, 0, -328.6, 0.6, 58.1, 0, 0, 0, 0, 0, 0, -326.95, 0.6, 69.99, 0, 0, 0, 0, 0, 0, -325.3, 0.6, 81.87, 0, 0, 0, 0, 0, 0, -323.64, 0.6, 93.76, 0, 0, 0, 0, 0, 0, -321.99, 0.6, 105.64, 0, 0, 0, 0, 0, 0, -320.34, 0.6, 117.53, 0, 0, 0, 0, 0, 0, -316.84, 0.72, 128.96, 0, 0, 0, 0, 0, 0, -312.84, 0.87, 140.28, 0, 0, 0, 0, 0, 0, -308.85, 1.02, 151.6, 0, 0, 0, 0, 0, 0, -304.85, 1.17, 162.91, 0, 0, 0, 0, 0, 0, -300.85, 1.32, 174.22, 0, 0, 0, 0, 0, 0, -295.1, 1.47, 184.75, 0, 0, 0, 0, 0, 0, -286.82, 1.6, 193.32, 0, 0, 0, 0, 0, 0, -277.25, 1.71, 200.5, 0, 0, 0, 0, 0, 0, -267.26, 1.83, 207.16, 0, 0, 0, 0, 0, 0, -257.28, 1.94, 213.81, 0, 0, 0, 0, 0, 0, -247.29, 2.06, 220.47, 0, 0, 0, 0, 0, 0, -237.31, 2.18, 227.13, 0, 0, 0, 0, 0, 0, -227.33, 2.29, 233.78, 0, 0, 0, 0, 0, 0, -217.24, 2.41, 240.22, 0, 0, 0, 0, 0, 0, -205.73, 2.48, 243.62, 0, 0, 0, 0, 0, 0, -194.22, 2.56, 247.02, 0, 0, 0, 0, 0, 0, -182.72, 2.64, 250.42, 0, 0, 0, 0, 0, 0, -171.21, 2.72, 253.82, 0, 0, 0, 0, 0, 0, -159.7, 2.8, 257.23, 0, 0, 0, 0, 0, 0, -148.19, 2.88, 260.63, 0, 0, 0, 0, 0, 0, -136.68, 2.95, 264.03, 0, 0, 0, 0, 0, 0, -125.06, 3.21, 266.95, 0, 0, 0, 0, 0, 0, -113.27, 3.71, 269.2, 0, 0, 0, 0, 0, 0, -101.49, 4.21, 271.46, 0, 0, 0, 0, 0, 0, -89.7, 4.72, 273.72, 0, 0, 0, 0, 0, 0, -77.92, 5.22, 275.97, 0, 0, 0, 0, 0, 0, -66.13, 5.72, 278.23, 0, 0, 0, 0, 0, 0, -54.34, 6.22, 280.49, 0, 0, 0, 0, 0, 0, -42.55, 6.72, 282.67, 0, 0, 0, 0, 0, 0, -30.59, 7.39, 283.16, 0, 0, 0, 0, 0, 0, -18.67, 8.26, 281.83, 0, 0, 0, 0, 0, 0, -6.76, 9.13, 280.35, 0, 0, 0, 0, 0, 0, 5.14, 10.0, 278.86, 0, 0, 0, 0, 0, 0, 17.05, 10.87, 277.37, 0, 0, 0, 0, 0, 0, 28.96, 11.74, 275.88, 0, 0, 0, 0, 0, 0, 40.87, 12.61, 274.39, 0, 0, 0, 0, 0, 0, 52.76, 13.48, 272.85, 0, 0, 0, 0, 0, 0, 64.24, 14.33, 269.49, 0, 0, 0, 0, 0, 0, 74.99, 15.14, 264.18, 0, 0, 0, 0, 0, 0, 85.63, 15.95, 258.63, 0, 0, 0, 0, 0, 0, 96.27, 16.76, 253.08, 0, 0, 0, 0, 0, 0, 106.91, 17.57, 247.53, 0, 0, 0, 0, 0, 0, 117.54, 18.38, 241.98, 0, 0, 0, 0, 0, 0, 128.18, 19.2, 236.43, 0, 0, 0, 0, 0, 0, 138.82, 20.01, 230.88, 0, 0, 0, 0, 0, 0, 149.07, 20.82, 224.67, 0, 0, 0, 0, 0, 0, 157.57, 21.53, 216.28, 0, 0, 0, 0, 0, 0, 164.6, 22.2, 206.55, 0, 0, 0, 0, 0, 0, 171.63, 22.88, 196.83, 0, 0, 0, 0, 0, 0, 178.65, 23.56, 187.1, 0, 0, 0, 0, 0, 0, 185.68, 24.23, 177.37, 0, 0, 0, 0, 0, 0, 192.7, 24.91, 167.64, 0, 0, 0, 0, 0, 0, 199.73, 25.59, 157.91, 0, 0, 0, 0, 0, 0, 203.62, 25.76, 147.31, 0, 0, 0, 0, 0, 0, 202.67, 25.15, 135.35, 0, 0, 0, 0, 0, 0, 201.71, 24.53, 123.39, 0, 0, 0, 0, 0, 0, 200.75, 23.92, 111.42, 0, 0, 0, 0, 0, 0, 199.8, 23.31, 99.46, 0, 0, 0, 0, 0, 0, 198.84, 22.7, 87.5, 0, 0, 0, 0, 0, 0, 197.88, 22.09, 75.54, 0, 0, 0, 0, 0, 0, 196.06, 21.47, 63.72, 0, 0, 0, 0, 0, 0, 189.69, 20.78, 53.8, 0, 0, 0, 0, 0, 0, 179.42, 19.84, 47.88, 0, 0, 0, 0, 0, 0, 167.78, 18.89, 44.95, 0, 0, 0, 0, 0, 0, 156.43, 17.95, 41.18, 0, 0, 0, 0, 0, 0, 147.21, 17.0, 33.76, 0, 0, 0, 0, 0, 0, 143.36, 15.86, 22.56, 0, 0, 0, 0, 0, 0, 144.91, 14.72, 10.85, 0, 0, 0, 0, 0, 0, 149.99, 13.58, 0.01, 0, 0, 0, 0, 0, 0, 155.36, 12.44, -10.72, 0, 0, 0, 0, 0, 0, 161.19, 11.3, -21.18, 0, 0, 0, 0, 0, 0, 170.17, 10.41, -28.82, 0, 0, 0, 0, 0, 0, 181.6, 9.61, -32.4, 0, 0, 0, 0, 0, 0, 193.24, 8.81, -35.31, 0, 0, 0, 0, 0, 0, 204.88, 8.0, -38.22, 0, 0, 0, 0, 0, 0, 215.22, 7.2, -44.03, 0, 0, 0, 0, 0, 0, 221.75, 6.48, -53.85, 0, 0, 0, 0, 0, 0, 222.68, 5.78, -65.67, 0, 0, 0, 0, 0, 0, 220.15, 5.08, -77.38, 0, 0, 0, 0, 0, 0, 217.4, 4.38, -89.06, 0, 0, 0, 0, 0, 0, 214.65, 3.68, -100.74, 0, 0, 0, 0, 0, 0, 211.68, 2.99, -112.3, 0, 0, 0, 0, 0, 0, 202.89, 2.77, -120.46, 0, 0, 0, 0, 0, 0, 194.09, 2.55, -128.63, 0, 0, 0, 0, 0, 0, 185.3, 2.33, -136.79, 0, 0, 0, 0, 0, 0, 176.51, 2.11, -144.96, 0, 0, 0, 0, 0, 0, 167.71, 1.89, -153.12, 0, 0, 0, 0, 0, 0, 158.65, 1.67, -160.97, 0, 0, 0, 0, 0, 0, 148.31, 1.58, -166.97, 0, 0, 0, 0, 0, 0, 137.14, 1.55, -171.34, 0, 0, 0, 0, 0, 0, 125.95, 1.52, -175.69, 0, 0, 0, 0, 0, 0, 114.77, 1.49, -180.03, 0, 0, 0, 0, 0, 0, 103.58, 1.45, -184.38, 0, 0, 0, 0, 0, 0, 92.4, 1.42, -188.73, 0, 0, 0, 0, 0, 0, 81.05, 1.4, -192.45, 0, 0, 0, 0, 0, 0, 69.18, 1.4, -194.25, 0, 0, 0, 0, 0, 0, 57.32, 1.4, -196.06, 0, 0, 0, 0, 0, 0, 45.46, 1.4, -197.87, 0, 0, 0, 0, 0, 0, 33.59, 1.4, -199.67, 0, 0, 0, 0, 0, 0, 21.73, 1.4, -201.48, 0, 0, 0, 0, 0, 0, 9.87, 1.4, -203.28, 0, 0, 0, 0, 0, 0, -2.0, 1.4, -205.09, 0, 0, 0, 0, 0, 0, -13.8, 1.41, -207.21, 0, 0, 0, 0, 0, 0, -25.55, 1.44, -209.66, 0, 0, 0, 0, 0, 0, -37.3, 1.46, -212.1, 0, 0, 0, 0, 0, 0, -49.05, 1.49, -214.55, 0, 0, 0, 0, 0, 0, -60.79, 1.51, -217.0, 0, 0, 0, 0, 0, 0, -72.54, 1.53, -219.45, 0, 0, 0, 0, 0, 0, -84.29, 1.56, -221.89, 0, 0, 0, 0, 0, 0, -96.04, 1.58, -224.34, 0, 0, 0, 0, 0, 0, -107.65, 1.59, -227.29, 0, 0, 0, 0, 0, 0, -118.96, 1.57, -231.28, 0, 0, 0, 0, 0, 0, -130.28, 1.55, -235.27, 0, 0, 0, 0, 0, 0, -141.59, 1.53, -239.27, 0, 0, 0, 0, 0, 0, -152.91, 1.5, -243.26, 0, 0, 0, 0, 0, 0, -164.23, 1.48, -247.26, 0, 0, 0, 0, 0, 0, -175.54, 1.46, -251.25, 0, 0, 0, 0, 0, 0, -186.86, 1.44, -255.24, 0, 0, 0, 0, 0, 0, -198.17, 1.42, -259.24, 0, 0, 0, 0, 0, 0, -209.38, 1.39, -263.5, 0, 0, 0, 0, 0, 0, -220.36, 1.37, -268.35, 0, 0, 0, 0, 0, 0, -231.34, 1.34, -273.2, 0, 0, 0, 0, 0, 0, -242.31, 1.32, -278.05, 0, 0, 0, 0, 0, 0, -253.29, 1.29, -282.9, 0, 0, 0, 0, 0, 0, -264.27, 1.26, -287.75, 0, 0, 0, 0, 0, 0, -275.24, 1.24, -292.6, 0, 0, 0, 0, 0, 0, -286.22, 1.21, -297.45, 0, 0, 0, 0, 0, 0, -297.33, 1.18, -301.95, 0, 0, 0, 0, 0, 0, -308.6, 1.13, -306.09, 0, 0, 0, 0, 0, 0, -319.86, 1.08, -310.22),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 169
+
+[node name="Track22" type="Node3D"]
+script = ExtResource("1_track")
+custom_name = "Ha Long"
+custom_theme = "halong"
+custom_world_seed_name = "halong22"
+custom_half_width = 7.0
+custom_road_surface = "asphalt"
+custom_sea_level_offset = -5.99
+custom_sun_rotation_deg = Vector3(-30, 70, 0)
+custom_width_segments = Array[Vector3]([Vector3(0.306, 0.344, 6.0), Vector3(0.785, 0.836, 6.0), Vector3(0.083, 0.118, 6.0), Vector3(0.154, 0.189, 6.0), Vector3(0.225, 0.26, 6.0)])
+custom_ravines = Array[Vector4]([Vector4(0.055, 0.235, 26.0, 1), Vector4(0.245, 0.3, 22.0, 1), Vector4(0.7, 0.76, 18.0, 1), Vector4(0.8, 0.822, 30.0, 1), Vector4(0.85, 0.98, 20.0, 1)])
+custom_ravine_floors = Array[Vector2]([Vector2(0, -15.0), Vector2(1, -14.0), Vector2(2, -5.0), Vector2(3, -6.0), Vector2(4, -14.0)])
+custom_ravine_widths = Array[Vector2]([Vector2(0, 150.0), Vector2(1, 120.0), Vector2(2, 70.0), Vector2(3, 55.0), Vector2(4, 130.0)])
+custom_ravine_water = Array[Vector3]([Vector3(0, 0.0, 18.0)])
+traffic_count = 0
+
+[node name="Path" type="Path3D" parent="."]
+curve = SubResource("Curve3D_main")
+
+[node name="Peaks" type="Node3D" parent="."]
+
+[node name="Insula" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104.15, 44.00, 187.65)
+gizmo_extents = 190.0
+script = ExtResource("2_peak")
+radius_m = 190.0
+
+[node name="TurnGrota" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -174.00, 52.00, 253.00)
+gizmo_extents = 70.0
+script = ExtResource("2_peak")
+radius_m = 70.0
+
+[node name="TurnVest" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -430.00, 46.00, -40.00)
+gizmo_extents = 80.0
+script = ExtResource("2_peak")
+radius_m = 80.0
+
+[node name="TurnSud" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150.00, 50.00, 330.00)
+gizmo_extents = 85.0
+script = ExtResource("2_peak")
+radius_m = 85.0
+
+[node name="TurnNord" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.00, 44.00, -300.00)
+gizmo_extents = 75.0
+script = ExtResource("2_peak")
+radius_m = 75.0
+
+[node name="Hazarduri" type="Node3D" parent="."]
+
+[node name="JoncaCanal" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.754, 1.400, -198.581)
+gizmo_extents = 3.0
+script = ExtResource("4_hzm")
+kind = 0
+model = ExtResource("15_boat")
+model_scale = 1.0
+face_travel = true
+motion = 1
+sweep_speed = 2.2
+
+[node name="MaimutePerete" type="Node3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -201.098, 1.409, -260.348)
+script = ExtResource("6_herd")
+flow_dir = Vector3(0.3550, 0, -0.9349)
+road_dir = Vector3(-0.9349, 0, -0.3550)
+corridor_m = 10.0
+animal_mass = 12.0
+speed = 4.0
+spacing = 1.1
+zebra_ratio = 0.0
+no_body_radius = 7.0
+body_reach = 14.0
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("9_prop")
+
+[node name="TurnCalcar00" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(2.58410, 0, 0.28712, 0, 4.9399999999999995, 0, -0.28712, 0, 2.58410, -386.31, -0.40, -150.93)
+
+[node name="TurnCalcar01" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(2.96987, 0, -0.88873, 0, 5.89, 0, 0.88873, 0, 2.96987, -379.16, -0.40, -50.38)
+
+[node name="TurnCalcar02" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(1.84763, 0, -1.53175, 0, 4.56, 0, 1.53175, 0, 1.84763, -363.07, -0.40, 49.19)
+
+[node name="TurnCalcar03" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(2.13413, 0, -1.81259, 0, 5.319999999999999, 0, 1.81259, 0, 2.13413, -328.41, 0.43, 198.86)
+
+[node name="TurnCalcar04" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(2.08680, 0, -0.69661, 0, 4.18, 0, 0.69661, 0, 2.08680, -207.50, 1.41, 211.82)
+
+[node name="TurnCalcar05" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(2.25040, 0, -1.82912, 0, 5.51, 0, 1.82912, 0, 2.25040, -120.69, 2.12, 232.99)
+
+[node name="TurnCalcar06" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.81207, 0, 2.15187, 0, 4.369999999999999, 0, -2.15187, 0, -0.81207, 150.02, 0.55, -200.66)
+
+[node name="TurnCalcar07" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(-0.48497, 0, 2.65609, 0, 5.13, 0, -2.65609, 0, -0.48497, 67.38, 0.40, -230.94)
+
+[node name="TurnCalcar08" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(0.67937, 0, 2.40592, 0, 4.75, 0, -2.40592, 0, 0.67937, -50.12, 0.50, -249.51)
+
+[node name="TurnCalcar09" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(2.17396, 0, 2.06734, 0, 5.699999999999999, 0, -2.06734, 0, 2.17396, -160.15, 0.47, -286.11)
+
+[node name="TurnCalcar10" parent="DecorManual" instance=ExtResource("13_rock")]
+transform = Transform3D(2.11306, 0, 0.61235, 0, 4.18, 0, -0.61235, 0, 2.11306, -234.58, 0.30, -309.61)
+
+[node name="Ponton00" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -353.32, 0.15, -161.92)
+metadata/coliziune = "none"
+
+[node name="Ponton01" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -351.74, 0.15, -147.70)
+metadata/coliziune = "none"
+
+[node name="Ponton02" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -350.16, 0.15, -133.48)
+metadata/coliziune = "none"
+
+[node name="Ponton03" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -348.58, 0.15, -119.26)
+metadata/coliziune = "none"
+
+[node name="Ponton04" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -347.01, 0.15, -105.05)
+metadata/coliziune = "none"
+
+[node name="Ponton05" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -337.53, 0.15, -19.74)
+metadata/coliziune = "none"
+
+[node name="Ponton06" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -335.95, 0.15, -5.52)
+metadata/coliziune = "none"
+
+[node name="Ponton07" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -334.37, 0.15, 8.70)
+metadata/coliziune = "none"
+
+[node name="Ponton08" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -332.79, 0.15, 22.92)
+metadata/coliziune = "none"
+
+[node name="Ponton09" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.39144, 0, 0.13252, 0, 0.3, 0, -0.15460, 0, 1.19266, -331.21, 0.15, 37.13)
+metadata/coliziune = "none"
+
+[node name="Ponton10" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.33846, 0, 0.35186, 0, 0.3, 0, -0.41050, 0, 1.14726, -318.96, 0.20, 122.02)
+metadata/coliziune = "none"
+
+[node name="Ponton11" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.32019, 0, 0.39938, 0, 0.3, 0, -0.46595, 0, 1.13159, -314.49, 0.36, 135.61)
+metadata/coliziune = "none"
+
+[node name="Ponton12" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.32019, 0, 0.39938, 0, 0.3, 0, -0.46595, 0, 1.13159, -309.73, 0.54, 149.10)
+metadata/coliziune = "none"
+
+[node name="Ponton13" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.32019, 0, 0.39938, 0, 0.3, 0, -0.46595, 0, 1.13159, -304.97, 0.72, 162.59)
+metadata/coliziune = "none"
+
+[node name="Ponton14" parent="DecorManual" instance=ExtResource("14_quay")]
+transform = Transform3D(1.22850, 0, 0.57549, 0, 0.3, 0, -0.67140, 0, 1.05300, -299.91, 0.90, 175.95)
+metadata/coliziune = "none"

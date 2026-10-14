@@ -1,4 +1,15 @@
-# Track brief — Ha Long Bay (`Track22`, temă `halong`) — v0.3 (concept + contracte verificate + schiță măsurată)
+# Track brief — Ha Long Bay (`Track22`, temă `halong`) — v0.4 (fundație construită și condusă)
+
+> **v0.4 (14 oct 2026):** fundația `Track22.tscn` există, se încarcă fără erori
+> și **se conduce** (ProbeRace, patru seed-uri: tur minim 59,5 s, mediu 70–72 s,
+> **0% offroad**, **zero ieșiri din lume**). Trei defecte de construcție găsite
+> și închise, plus unul care s-a dovedit a **nu** fi defect: repunerile de la
+> frac 0,80 sunt jonca, un hazard care funcționează dar e nereglat (model de
+> 9 m pe drum de 6 m). **§7.1** e partea de citit dacă reiei lucrul — conține
+> trei ipoteze greșite măsurate, și de ce fiecare a fost greșită.
+>
+> **Următorul pas concret:** reglajul joncii (`model_scale`, `travel`,
+> `sweep_speed`, `phase`) cu ProbeRace ca măsură.
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `transfagarasan.md`, `okinawa.md` și `monument_valley.md`. Secțiunile de
@@ -703,30 +714,39 @@ carosabil fix, ca să se măsoare traseul și plasa lumii întâi (§7 pasul 4).
    pontoanele, deci ori se extrage un strat comun, ori se strâng căutările.
    **Rămas de făcut din pasul ăsta:** auditul kiturilor Okinawa / Fiordland
    (§5.1), care nu blochează fundația.
-3. **Fundația `Track22.tscn`** din `tools/gen_halong_route.py` (copie de
-   `gen_transfagarasan_route.py`):
-   - garda de **sens** (bucla e ORARĂ) și garda de **azimut** scrise
-     **înaintea** traseului, pe reperele fixe din §2.1, plus `--sabotaj`, care
-     trebuie să pice;
-   - tema **`halong`** în `Track.themes()`, pornind de la `okinawa`, **fără**
-     să o editeze (decizia 3.1.5), cheia în enum-ul din `track_from_path.gd`
-     și `info/Track22.tres` (regiunea „ASIA”; accentul propus e verde-jad,
-     `(0.29, 0.48, 0.42)`);
-   - `custom_name` și `custom_world_seed_name` **înghețate** de la prima
-     generare;
-   - pe traseu: `custom_width_segments` (grota și pontoanele la 6),
-     `TerrainPeak` pentru turnuri și pentru insulă, `CameraZone` pe grotă,
-     `TrackBranch` pentru banda de jos, noduri `PontoonRoadHazard` și
-     `HerdHazard`, `HazardMarker` SLIDING pentru joncă. Turnuri **provizorii**
-     din kitul Okinawa în `DecorManual`, ca să se vadă scara;
-   - `GameState`: Track22 **la coada listei** (indexul 15). Uneltele o
-     adresează cu `--track=22` (`resolve_track_index` o găsește după numărul
-     scenei); atenție la cele două convenții —
+3. **Fundația `Track22.tscn` ✔ FĂCUT** (14 oct 2026),
+   `tools/gen_halong_route.py` + `tools/ProbeHalongLoad.tscn`. Vezi §7.1 pentru
+   ce a găsit. Ce e în scenă:
+   - gărzile de **formă**, **apă**, **azimut**, **departare** și **hazarde cu
+     ceas**, toate scrise **înaintea** traseului, pe reperele fixe din §2.1,
+     plus `--sabotaj`, **care pică** (cod 1);
+   - tema **`halong`** în `Track.themes()`, pornind din **copia** lui `okinawa`
+     (singura temă cu mare cu adâncimi), fără să o editeze — Track20 rămâne
+     bit-identică. Cheia în enum-ul din `track_from_path.gd` și
+     `info/Track22.tres` (regiunea „ASIA”, accent verde-jad);
+   - `custom_name` („Ha Long”) și `custom_world_seed_name` („halong22”)
+     **înghețate** de la prima generare;
+   - `custom_sea_level_offset = -5,99`, **nu** implicitul −7 (§2);
+   - pe traseu: `custom_width_segments` (grota, podețul și cele trei tronsoane
+     de ponton la 6 m), cinci `TerrainPeak` (insula + patru turnuri de calcar
+     ca flanc), cinci râpe cu apă de golf, `HazardMarker` SLIDING pentru joncă
+     și `HerdHazard` pentru maimuțe. Turnuri și pontoane **provizorii** din
+     kitul Okinawa în `DecorManual` (41 de noduri), ca să se vadă scara;
+   - `GameState`: Track22 la coada listei (**indexul 15**). Uneltele o
+     adresează cu `--track=22`; atenție la cele două convenții —
      `probe_decor`/`probe_manual` vor **22**, `snapshot`/`probe_race`/
      `probe_layout` vor **15 SAU 22** (memoria `probe-decor-numar-de-scena`,
      care a costat 528 de piese plutind).
-4. **ProbeRace la început** (§6), pe traseul gol, înaintea oricărui decor —
-   fiindcă plasa lumii pe o pistă jumătate-apă e riscul numărul unu (§2).
+
+   **Ce NU e încă în scenă, deliberat:** `PontoonRoadHazard` (clasa nu există
+   — §5.3), `TideHazard` și `TrackBranch`-ul benzii de jos, `CameraZone` pe
+   grotă. Fundația pornește cu pontoanele ca **carosabil fix**, ca să se
+   măsoare traseul, apa și repunerile înainte să existe un tablier care se
+   leagănă. Fracțiile tronsoanelor sunt deja tipărite de generator, pentru
+   `road_hole_span()`.
+4. **ProbeRace la început ✔ FĂCUT** (§6, §7.1), pe traseul gol, înaintea
+   oricărui decor — fiindcă apa pe o pistă jumătate-apă e riscul numărul unu
+   (§2). A găsit un defect real și l-a închis.
 5. **Gărzi:** `ProbeLayout --track=22`, `ProbeBuried`, `ProbeLaneClear` cu
    **linie de bază proprie, fără marjă** (memoria
    `garda-fara-linie-de-baza-iese-zero`: fără ea pare verde dar nu e armată) +
@@ -742,6 +762,117 @@ carosabil fix, ca să se măsoare traseul și plasa lumii întâi (§7 pasul 4).
    `tools/annotate_halong_plan.py` → prompt de dioramă → planșă de inventar →
    kit Blender → integrare → POI A–G (gauntlet, **valuri de 3**, memoria
    `valuri-de-trei-nu-opt-agenti`).
+
+### 7.1 Ce a găsit pasul 3 (14 oct 2026)
+
+Patru defecte, fiecare prins de o altă gardă. Niciunul n-ar fi fost găsit de
+cel care l-a prins pe celălalt — de aceea sunt patru gărzi, nu una.
+
+**1. `decor: false` oprea construcția pistei.** `TrackDecor.build` primește
+modul ca `String` (al doilea argument), iar un bool arunca „Cannot convert
+argument 2 from bool to String” și scena nu se mai construia. Celelalte teme
+care sting decorul statistic folosesc **string gol**. Prins de
+`ProbeHalongLoad` la prima rulare; nicio gardă geometrică nu l-ar fi văzut,
+fiindcă traseul era corect.
+
+**2. Patru râpe cereau apă pe care nu o puteau primi.** Prima versiune declara
+`custom_ravine_water` pe **toate cinci** râpele, la aceeași cotă (0,0).
+`_build_ravine_water` umple prin inundare de la buză în jos și ține minte
+celulele ude în `_ravine_wet`, deci a doua râpă cu aceeași cotă **nu mai
+găsește nicio celulă liberă**: patru `push_warning` („rapa N n-are nicio celula
+sub 0.0”) și patru zone de repunere eliberate degeaba. Pe Ha Long apa e **un
+singur golf**, deci se declară **o singură dată**. Cazul e simetric cu
+Transfăgărășanul, unde cele patru râpe cu apă au **cote diferite** (Vidraru
++7,5, hăul −24, Oltul +3,4 și −2,5) și de aceea funcționează acolo.
+
+**3. `sea_level_offset` în temă e citit de nimeni.** L-am pus prima dată ca
+cheie de temă, iar sonda a raportat marea la **−0,99**, adică implicitul −7, nu
+valoarea scrisă. Cauza: `sea_level_offset` e `@export` pe `Track`, iar
+`TrackFromPath._ready` îl scrie din **`custom_sea_level_offset`**, *după* ce
+tema s-a aplicat. Deci cota mării se pune **pe scenă**, nu pe temă. Sonda
+`ProbeHalongLoad` verifică acum perechea (media cotelor × offset = marea la
+0,00 ± 0,20), deci dacă cineva mută o cotă și uită offsetul, iese imediat.
+
+**4. Repunerile de la frac 0,80 sunt JONCA, și nu sunt un defect — e un
+hazard nereglat.** ProbeRace dă **2–8 repuneri pe fiecare seed**, toate la frac
+0,80, toate în **același punct** `(61, 3, −196)`. Reproductibil, deci nu zgomot.
+
+Cauza, după trei ipoteze greșite: la `Motion.TRAVERSARE`, `Track` îi dă joncii
+`travel = side · half_width · 0,9` — pleacă de pe acostament și **traversează
+carosabilul**, parcându-se dincolo. Jonca e, **prin design**, un obstacol solid
+pe drum. `SlidingHazard` *extends* `AnimatableBody3D`, deci corpul chiar e
+fizic. Repunerile sunt mașini care se izbesc de un hazard care **funcționează**.
+
+**Ce a dovedit măsurătoarea A/B** (patru seed-uri, 260 s, același traseu):
+
+| starea scenei | repuneri (seed 1/2/3/4) |
+|---|---|
+| canal lat pe tot podețul, joncă fără model | 2 / 5 / 5 / 2 |
+| canal îngustat (ipoteza 1: cad lateral în apă) | 2 / 5 / — / — |
+| canal îngustat + podeț lărgit la 7 m (ipoteza 2: nu încap) | 2 / 1 / 3 / 7 |
+| podeț repus la 6 m + **joncă CU model** (ipoteza 3: zid invizibil) | **6 / 8 / 6 / 7** |
+
+Primele două ipoteze au ieșit cu cifra **neschimbată**. A treia a făcut-o
+**mai mare**, și asta a fost dovada decisivă: fără model `SlidingHazard` își
+construiește `_build_placeholder_box()` de 4,5 × 2,2 × 2,6 m, iar
+`fishing_boat.glb` are **9 m lungime** — obstacol mai lat pe un drum de 6–7 m,
+deci mai multe coliziuni. Nu era un zid invizibil; era un obstacol real, pe
+care l-am făcut mai mare.
+
+**Deci nu e nimic de reparat în geometrie.** Ce rămâne de reglat, la pasul
+următor, e **hazardul**: cursa (`travel`), viteza (`sweep_speed`), faza
+(`phase`) și **scara modelului** — o joncă de 9 m care traversează un drum de
+6 m blochează banda cu totul. Reglajul se face cu jonca pe poziție și cu
+`ProbeRace` ca măsură, exact ca distanțele dintre hazardele cu ceas. Opțiuni,
+în ordinea pe care aș încerca-o: `model_scale` sub 1,0 (barca e de 9 m, jonca
+reală din §5.2 e cerută la ~12 m — deci modelul final trebuie **scalat**, nu
+doar înlocuit), apoi o cursă mai scurtă care lasă o bandă liberă, apoi fereastra
+de telegrafare.
+
+**Lecția de metodă, mai valoroasă decât defectul.** Trei ipoteze, trei
+măsurători, zero ghiceli validate:
+- când repunerile cad mereu în **același punct**, defectul nu e de formă —
+  **măsoară ce e acolo** (raycast + inventar de corpuri fizice), nu ajusta ce
+  crezi că e de vină;
+- o „reparație” care **nu schimbă cifra** nu e o reparație. Dacă o păstrezi
+  oricum, e o modificare de design strecurată sub numele unui fix. De aceea
+  lățimea podețului **s-a repus la 6 m** (intenția din brief), iar îngustarea
+  râpei a rămas doar pentru că are motiv de design propriu;
+- o reparație care **înrăutățește** cifra e cel mai informativ rezultat: aici a
+  arătat că obstacolul era real și că mărimea lui e variabila care contează.
+
+**Cifrele fundației** (ProbeRace, 8 mașini, 260 s, patru seed-uri): tur minim
+**59,5–59,9 s**, mediu **70,0–71,8 s** — în fereastra Ignition 65–80 s ✔ —,
+**0% offroad** și **zero ieșiri din lume** pe toate seed-urile. Viteza medie e
+**28–31 m/s** uniform pe tot turul, cu o singură felie mai lentă la
+**0,95–1,00** (22 m/s, 23,9% „lent”): e intrarea în cheiul de start, unde
+drumul se strânge. De urmărit la volan, nu neapărat un defect.
+
+Repunerile (6–8 per seed) sunt **toate** pe joncă, la frac 0,80, și sunt
+chestiune de **reglaj de hazard**, nu de traseu — vezi defectul 4. Verdictul
+„se conduce cap-coadă” se dă după reglajul ei, nu acum.
+
+Variația între seed-uri (de exemplu 2/1/3/7 pe o stare intermediară) e
+nedeterminismul lui Jolt (memoria `proberace-nedeterminism`: se compară
+**distribuții**, nu o rulare) — de aceea fiecare ipoteză s-a măsurat pe toate
+cele patru seed-uri, nu pe unul.
+
+**Ce rămâne de confirmat la pasul 4–5:** marja plasei de mare (0,85 m sub
+pontonul complet afundat) se verifică abia când pontonul **chiar se leagănă**,
+fiindcă valul joncilor o mai mănâncă. Până atunci garda din generator o
+calculează din `rest_sag + sag_bus`, nu o măsoară.
+
+**Două capcane de unelte, de evitat la reluare** (nu sunt despre pistă, dar au
+costat timp aici):
+- **`| head -N` pe ProbeRace blochează procesul.** Când `head` închide
+  pipe-ul, Godot nu primește SIGPIPE dacă ieșirea e tăcută, iar procesul
+  rămâne agățat cu CPU 0 — fără să termine și fără să scrie nimic. Rulează
+  ProbeRace **cu redirectare în fișier** (`> seed1.txt 2>&1`) și filtrează
+  fișierul după;
+- **editorul Godot deschis rescrie `.tscn`-uri** (memoria
+  `editor-godot-deschis-rescrie-tscn`). Înainte de orice regenerare a lui
+  `Track22.tscn`, verifică `tasklist` / `git diff --stat` — aici am prins un
+  proces de editor deschis din dimineață, și deși n-a atins scena, ar fi putut.
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 

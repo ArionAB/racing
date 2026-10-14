@@ -368,6 +368,7 @@ func _go() -> void:
 # ------------------------------------------------------------------ cursa
 
 func _tick_race(delta: float) -> void:
+	_tick_offroad_clock(delta)
 	for i in cars.size():
 		var car := cars[i]
 		_watch_recovery(car, delta)
@@ -389,6 +390,49 @@ func _tick_race(delta: float) -> void:
 			if laps >= GameState.total_laps and not car.finished:
 				car.finished = true
 	_update_positions()
+
+## Ceasul de offroad al jucatorului (#497): iesit de pe carosabil, ai atatea
+## secunde sa revii; la zero esti repus de unde ai iesit. Doar jucatorul — AI-ul
+## nu taie prin iarba, iar plasa lui ramane `_watch_recovery`.
+##
+## Benzile si scurtaturile declarate (`TrackBranch`, inclusiv drumurile de
+## tara prin off-road) NU pornesc ceasul: pe ele `route` e banda, iar
+## `is_on_road` raspunde dupa latimea ei. Iarba de langa o banda il porneste.
+const OFFROAD_LIMIT_S: float = 3.0
+## Retragerea la repunerea data de ceas: aproape de punctul de iesire (care e
+## ultimul checkpoint pe asfalt), cu cativa metri de elan.
+const OFFROAD_RESPAWN_BACKOFF_M: float = 4.0
+## Secundele ramase; negativ = ceasul nu ruleaza.
+var _offroad_left: float = -1.0
+
+func _tick_offroad_clock(delta: float) -> void:
+	# Doar la volan uman: ProbeRace pune un AIController pe masina jucatorului,
+	# iar cifrele ei trebuie sa ramana comparabile cu ale celorlalte masini.
+	if not (player.controller is PlayerController) or player.finished \
+			or player.is_recovering() or player.is_ejected:
+		_set_offroad_left(-1.0)
+		return
+	var off := not track.is_on_road(player.road_index, player.global_position,
+		player.route)
+	if not off:
+		_set_offroad_left(-1.0)
+		return
+	if _offroad_left < 0.0:
+		_set_offroad_left(OFFROAD_LIMIT_S)
+		return
+	# In aer ceasul sta: o saritura peste iarba nu e timp pierdut pe iarba, iar
+	# aterizarea pe asfalt il opreste oricum.
+	if player.is_on_floor():
+		_set_offroad_left(_offroad_left - delta)
+	if _offroad_left <= 0.0:
+		_set_offroad_left(-1.0)
+		player.recover(OFFROAD_RESPAWN_BACKOFF_M)
+
+
+func _set_offroad_left(seconds: float) -> void:
+	_offroad_left = seconds
+	hud.set_offroad_clock(seconds)
+
 
 ## Progresul jucatorului ca fractie din cursa intreaga (0 pe grila/countdown,
 ## 1 la ultima trecere) — sursa lui `DuskCycle.dusk` (Jodhpur, brief §3

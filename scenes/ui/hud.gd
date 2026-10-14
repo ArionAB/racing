@@ -36,6 +36,8 @@ var _blind_veil: ColorRect
 ## Voalul tranzitiei de repunere (#495): se intuneca cat clipeste masina.
 var _recover_veil: ColorRect
 var _recover_tween: Tween
+## Ceasul de offroad (#497): cifra mare deasupra centrului.
+var _offroad_label: Label
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -120,6 +122,17 @@ func _ready() -> void:
 	_countdown.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_countdown.grow_vertical = Control.GROW_DIRECTION_BOTH
 	root.add_child(_countdown)
+
+	_offroad_label = _make_label(64)
+	_offroad_label.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	_offroad_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_offroad_label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_offroad_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_offroad_label.position += Vector2(0, -150)
+	_offroad_label.add_theme_color_override("font_color", Color(1.0, 0.82, 0.25))
+	_offroad_label.visible = false
+	root.add_child(_offroad_label)
 
 	_message = _make_label(38)
 	_message.set_anchors_and_offsets_preset(
@@ -431,6 +444,18 @@ func recovery_fade_out() -> void:
 		_recover_tween.kill()
 	_recover_tween = create_tween()
 	_recover_tween.tween_property(_recover_veil, "modulate:a", 0.0, 0.3)
+
+
+## Negativ = ascuns. Zecimi, nu secunde intregi: la 3 s, „3, 2, 1" sare prea
+## rar ca sa simti ca timpul curge; ultima secunda se inroseste.
+func set_offroad_clock(seconds: float) -> void:
+	if seconds < 0.0:
+		_offroad_label.visible = false
+		return
+	_offroad_label.visible = true
+	_offroad_label.text = "OFF ROAD\n%.1f" % maxf(seconds, 0.0)
+	_offroad_label.add_theme_color_override("font_color",
+		Color(1.0, 0.3, 0.2) if seconds < 1.0 else Color(1.0, 0.82, 0.25))
 
 
 func flash_message(text: String) -> void:

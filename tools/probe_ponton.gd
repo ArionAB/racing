@@ -23,7 +23,15 @@ extends Node3D
 ##  5. VALUL: pontonul se misca si cand nu e nimeni pe el (altfel nu pluteste,
 ##     e doar moale);
 ##  6. TANGAJUL: o masina spre un capat inclina tronsonul, si capatul ei
-##     COBOARA (nu urca).
+##     COBOARA (nu urca);
+##  7. SEMNAL/ZGOMOT SOLO: afundarea masinii jucatorului trebuie sa fie de cel
+##     putin `SOLO_SNR_MIN` ori valul de fond. Garda asta exista pentru ca
+##     verdictul la volan („cu mai multe masini se simte, singur nu") a trecut
+##     prin toate celelalte sase: fiecare cifra era in contract, dar contractul
+##     nu spunea nimic despre RAPORTUL dintre afundare si val, iar `_drop` le
+##     aduna pe acelasi canal vertical. O amplitudine corecta sub un val la fel
+##     de mare nu se poate percepe — e aceeasi familie cu memoria
+##     `efecte-invizibile-nu-se-numara`: cifra exista, efectul nu se vede.
 ##
 ## SABOTAJ (`--sabotaj`): stinge capetele libere (free_ends = 0, adica podul).
 ## Garda 2 trebuie sa TREACA oricum (pragul devine zero), dar garda 5-6 de
@@ -40,13 +48,24 @@ const MASS_SPORT := 0.9
 const LENGTH := 43.1
 const WIDTH := 6.0
 ## Contractele din brief §3.
-const SAG_BUS_TARGET := 0.45
-const SAG_SPORT_TARGET := 0.18
+const SAG_BUS_TARGET := 0.70
+const SAG_SPORT_TARGET := 0.30
 const SAG_TOL := 0.08
+## Masa masinii jucatorului, pentru garda de semnal/zgomot (garda 7).
+const MASS_PLAYER := 1.3
+## [b]RAPORTUL SEMNAL/ZGOMOT MINIM[/b], solo. Afundarea unei singure masini
+## impartita la amplitudinea valului de fond. Sub ~2 verdictul la volan a fost
+## „singur nu prea se simte", desi TOATE celelalte garzi treceau: cifrele de
+## calibrare erau respectate, dar fata de un val care le acoperea. Vezi garda 7.
+const SOLO_SNR_MIN := 2.5
 const EDGE_STEP_MAX := 0.30
 const PLATE_JUMP_MAX := 0.12
 
 var _fails: Array[String] = []
+## Amplitudinea varf-la-varf a pontonului GOL, masurata de garda 5 si folosita
+## ca numitor de garda 7. O tin aici ca sa nu masor valul de doua ori, cu doua
+## definitii care pot aluneca una de alta.
+var _wave_swing: float = 0.0
 var pont: PontoonRoadHazard
 
 
@@ -87,6 +106,7 @@ func _ready() -> void:
 	await _check_continuity()
 	_check_twin_invariants()
 	var wave_ok := _check_wave()
+	_check_solo_snr(_wave_swing)
 	var pitch_ok := _check_pitch()
 	_check_grid_load()
 	_check_entry_slope()
@@ -186,25 +206,58 @@ func _check_edge_step() -> void:
 
 
 ## 3. Continuitatea: nicio placa nu sare sub masina.
+##
+## [b]Masoara o masina care TRAVERSEAZA, nu una aparuta din senin.[/b] Prima
+## versiune punea sarcina brusc la mijloc si masura de acolo, iar cifra ei era
+## dominata de PROPRIUL artefact de pornire: placile se teleportau din poziţia
+## de repaus in forma incarcata. Tick-urile o arata fara dubiu — 0.3012,
+## 0.1406, apoi 0.0064, 0.0092, 0.0117... — doua tick-uri de salt si pe urma o
+## mişcare de zeci de ori mai mica. Nu e nimic ce poate lovi o masina: la tick
+## 0 masina nici n-a ajuns pe ponton.
+##
+## Diagnosticul a fost pus prin eliminare: cu balansul stins, cu tangajul stins,
+## cu valul stins si cu sarcina centrata, cifra rămânea 0.1403-0.1410, identica
+## la a treia zecimala. Un numar care nu se schimba cand stingi pe rand toate
+## mecanismele nu-i masoara pe ei (memoria `sonda-masura-alt-obiect`).
+##
+## Cazul REAL e o masina care intra pe un capat si iese pe celalalt: la 90 km/h
+## traverseaza 43 m in 1.72 s, deci ~103 tick-uri. Asa masurat, saltul maxim e
+## 0.023 m/tick — de sase ori sub prag. Pragul nu s-a mutat; sonda a inceput sa
+## masoare ce pretindea ca masoara.
 func _check_continuity() -> void:
-	print("\n--- 3. continuitate (saltul unei placi intre tick-uri) ---")
-	pont.preview_loads = [Vector3(0.5, 1.5, MASS_BUS)]
+	print("
+--- 3. continuitate (masina care traverseaza la 90 km/h) ---")
+	# Pornesc de la pontonul AŞEZAT si gol, apoi plimb sarcina de la un capat la
+	# altul. Fara `settle_now` aici, primul tick ar reintroduce exact artefactul
+	# pe care garda asta l-a avut.
+	pont.preview_loads = []
+	pont.settle_now()
+	await get_tree().physics_frame
 	var prev: Array[float] = []
 	for p in pont.plates():
 		prev.append(p.global_position.y)
 	var worst := 0.0
-	for i in 90:
+	var worst_at := 0.0
+	# 103 tick-uri de traversare la 90 km/h, plus marja ca sarcina sa iasa.
+	const CROSSING_TICKS := 103
+	for i in 110:
+		var u := clampf(float(i) / float(CROSSING_TICKS), 0.0, 1.0)
+		pont.preview_loads = [Vector3(u, 1.5, MASS_BUS)]
 		await get_tree().physics_frame
 		var plates := pont.plates()
 		for k in plates.size():
 			var y := plates[k].global_position.y
-			worst = maxf(worst, absf(y - prev[k]))
+			var d := absf(y - prev[k])
+			if d > worst:
+				worst = d
+				worst_at = u
 			prev[k] = y
 	pont.preview_loads = []
-	print("  %d tick-uri x %d placi masurate" % [90, pont.plates().size()])
+	print("  110 tick-uri x %d placi, sarcina plimbata u=0->1" % pont.plates().size())
+	print("  cel mai rau salt la u=%.2f" % worst_at)
 	print("  saltul maxim pe tick: %.4f m (prag %.2f)" % [worst, PLATE_JUMP_MAX])
 	if worst <= 0.0:
-		_fails.append("saltul maxim e 0.0000 m pe 90 de tick-uri: placile nu s-au "
+		_fails.append("saltul maxim e 0.0000 m pe 110 de tick-uri: placile nu s-au "
 			+ "mişcat DELOC, deci garda n-a masurat nimic (ponton inert?)")
 	elif worst > PLATE_JUMP_MAX:
 		_fails.append("o placa sare cu %.3f m pe tick (prag %.2f): masina ar fi "
@@ -259,6 +312,7 @@ func _check_wave() -> bool:
 		lo = minf(lo, d)
 		hi = maxf(hi, d)
 	var swing := hi - lo
+	_wave_swing = swing
 	print("  cota mijlocului oscileaza pe %.4f m (gol, doar din val)" % swing)
 	if swing < 0.02:
 		_fails.append("valul nu mişca pontonul gol (%.4f m): nu pluteste, e doar moale"
@@ -266,6 +320,47 @@ func _check_wave() -> bool:
 		return false
 	print("  [OK] pontonul se mişca si cand pista e goala")
 	return true
+
+
+## 7. SEMNAL/ZGOMOT SOLO: se simte pontonul cand ESTI SINGUR pe el?
+##
+## Garzile 1-6 masoara fiecare efect IZOLAT, si de-aia garda 1 stinge deliberat
+## valul inainte de-a masura afundarea. Izolarea e corecta pentru calibrare, dar
+## jucatorul nu primeste efectele izolate: `_drop` le aduna pe acelasi canal
+## vertical. Deci o afundare care respecta contractul poate fi invizibila sub un
+## val care respecta si el contractul — ce s-a si intamplat (verdict la volan:
+## „cu mai multe masini pe el am simtit, singur nu prea").
+##
+## Masor amandoua pe acelasi tronson, in aceleasi unitati: cat coboara tablierul
+## sub masina jucatorului, fata de cat se mişca singur din val. Pragul e un
+## raport, nu o cota, fiindca perceptia e a contrastului.
+func _check_solo_snr(wave_swing: float) -> void:
+	print("
+--- 7. semnal/zgomot solo (contract >= %.1f) ---" % SOLO_SNR_MIN)
+	if wave_swing <= 0.0:
+		print("  [skip] valul e stins (sabotaj): raportul nu are numitor")
+		return
+	var wave_keep := pont.wave_amp
+	pont.wave_amp = 0.0
+	pont.preview_loads = [Vector3(0.5, 0.0, MASS_PLAYER)]
+	pont.settle_now()
+	var solo := pont.sag_at(0.5)
+	pont.preview_loads = []
+	pont.wave_amp = wave_keep
+	pont.settle_now()
+	# `wave_swing` e amplitudinea VARF-LA-VARF a pontonului gol (garda 5), deci
+	# il compar cu afundarea proprie masurata la fel, de la repaus.
+	var snr := solo / maxf(wave_swing, 0.0001)
+	print("  masina jucatorului (%.1f) lasa %.3f m; valul mişca %.3f m"
+		% [MASS_PLAYER, solo, wave_swing])
+	print("  raport semnal/zgomot = %.2f" % snr)
+	if snr < SOLO_SNR_MIN:
+		_fails.append(("solo semnal/zgomot %.2f < %.1f: afundarea proprie (%.3f m) "
+			+ "e acoperita de valul de fond (%.3f m), deci pontonul se simte doar "
+			+ "cand sunt mai multe masini pe el")
+			% [snr, SOLO_SNR_MIN, solo, wave_swing])
+	else:
+		print("  [OK] pontonul cedeaza vizibil si sub o singura masina")
 
 
 ## 8. PANTA DE INTRARE pe ponton, cu plutonul pe el.

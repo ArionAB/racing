@@ -113,9 +113,24 @@ const SHADER_PATH: String = "res://assets/shaders/pontoon_road.gdshader"
 ## cu propria greutate sta deja putin in apa.
 @export_range(0.0, 1.0, 0.05) var rest_sag: float = 0.12
 ## Cat coboara mijlocul sub autobuz (2.6) si sub sport (0.9), fata de repaus.
-## Brief §3: ~0.45 m autobuz, ~0.18 m sport. Din ele ies gain-ul si exponentul.
-@export_range(0.1, 2.0, 0.05) var sag_bus: float = 0.45
-@export_range(0.05, 1.0, 0.05) var sag_sport: float = 0.18
+##
+## [b]RECALIBRAT dupa verdictul la volan[/b] (brief §3 cerea 0.45 / 0.18).
+## Verdictul a fost: pontonul se simte cu mai multe masini pe el, dar SINGUR
+## aproape deloc. Cauza e masurabila si nu e amplitudinea in sine, ci RAPORTUL
+## ei fata de valul de fond, pentru ca `_drop` le aduna pe acelasi canal
+## vertical: afundarea proprie a masinii jucatorului (mass_factor ~1.3) era
+## 0.160 m, iar valul joncilor 0.10 m, deci semnal/zgomot = 1.6. Sub ~2 nu se
+## poate deosebi „pontonul cedeaza sub MINE" de „pontonul se mişca oricum".
+## In grup raportul era 5.1 (patru masini saturate la 0.505 m) — de-aia acolo
+## se simtea. Un singur set de cifre explica AMANDOUA jumatatile verdictului.
+##
+## 0.70 / 0.30 duce solo la 0.260 m, iar cu `wave_amp` 0.10 -> 0.06 raportul
+## ajunge la 4.3 solo si 10.5 in grup. Cazul de GRUP nu creste proportional,
+## fiindca `sag_max` il satureaza deja — adica reglajul mută exact cazul care
+## lipsea, fara sa strice cel care functiona (panta de intrare cu plutonul pe
+## tronson rămâne 2.6%, mult sub pragul pistei de 13%; vezi `edge_clamp`).
+@export_range(0.1, 2.0, 0.05) var sag_bus: float = 0.70
+@export_range(0.05, 1.0, 0.05) var sag_sport: float = 0.30
 ## Cat din amplitudine e afundarea LOCALA de sub masina (restul e mod global).
 ## Mai mare decat la pod: un ponton cedeaza mai ales sub roti, nu pe toata
 ## lungimea — e o plută, nu o coarda intinsa.
@@ -198,7 +213,13 @@ const SHADER_PATH: String = "res://assets/shaders/pontoon_road.gdshader"
 @export_group("Valul joncilor")
 ## [b]SCHIMBAREA 3 fata de pod.[/b] Amplitudinea valului care trece pe sub
 ## ponton (m). 0 = pontonul e viu doar sub masini, ca podul.
-@export_range(0.0, 0.6, 0.01) var wave_amp: float = 0.10
+##
+## [b]0.10 -> 0.06 la recalibrare[/b] (vezi `sag_bus`): valul e ZGOMOTUL fata de
+## care se citeste afundarea proprie, nu un efect independent. Nu poate fi 0 —
+## atunci pontonul nu mai pluteste, e doar moale, si garda 5 din
+## `probe_ponton.gd` pica — dar trebuie sa rămâna sub afundarea unei singure
+## masini, altfel o acopera.
+@export_range(0.0, 0.6, 0.01) var wave_amp: float = 0.06
 ## Perioada valului (s).
 @export_range(1.0, 20.0, 0.1) var wave_period: float = 6.5
 ## Defazaj 0..1: trei tronsoane cu aceeasi faza s-ar mişca la unison si ar citi

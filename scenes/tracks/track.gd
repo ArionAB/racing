@@ -4085,6 +4085,9 @@ static func themes() -> Dictionary:
 		"horizon_slot_remap": {29: 11},
 		"horizon_picks": [["FagarasRidge_A"], ["FagarasRidge_B"], ["FagarasRidge_C"],
 			["CloudSea_A"], ["CloudSea_B"], ["FagarasPlain_A"]],
+		# Cotele de fundal pe relieful din nivel-relief (TerrainHollow GolNoriA/B si GolCampie):
+		# norii la dy +10 (la -8 erau ingropati sub podeaua golului); campia la clear 105 si
+		# dy +12, altfel marginea ei de sud cadea peste drum la G (poligoanele mustar, N8).
 		"horizon_rings": [
 			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
 				"picks": ["FagarasRidge_A"], "angle_deg": 0.0, "yaw_deg": -90.0},
@@ -4093,11 +4096,11 @@ static func themes() -> Dictionary:
 			{"near": 200.0, "far": 330.0, "count": 1, "scale": 1.0, "clear": 140.0,
 				"picks": ["FagarasRidge_C"], "angle_deg": 35.0, "yaw_deg": -125.0},
 			{"near": 240.0, "far": 320.0, "count": 1, "scale": 1.0, "clear": 90.0,
-				"picks": ["CloudSea_A"], "angle_deg": 15.0, "yaw_deg": -105.0, "dy": -8.0},
+				"picks": ["CloudSea_A"], "angle_deg": 15.0, "yaw_deg": -105.0, "dy": 10.0},
 			{"near": 240.0, "far": 320.0, "count": 1, "scale": 1.0, "clear": 90.0,
-				"picks": ["CloudSea_B"], "angle_deg": 55.0, "yaw_deg": -145.0, "dy": -8.0},
-			{"near": 280.0, "far": 340.0, "count": 1, "scale": 1.0, "clear": 60.0,
-				"picks": ["FagarasPlain_A"], "angle_deg": -90.0, "yaw_deg": 0.0, "dy": 0.0},
+				"picks": ["CloudSea_B"], "angle_deg": 55.0, "yaw_deg": -145.0, "dy": 10.0},
+			{"near": 280.0, "far": 340.0, "count": 1, "scale": 1.0, "clear": 105.0,
+				"picks": ["FagarasPlain_A"], "angle_deg": -90.0, "yaw_deg": 0.0, "dy": 12.0},
 		],
 	}, true)
 	_themes_cache["transfagarasan"] = tf

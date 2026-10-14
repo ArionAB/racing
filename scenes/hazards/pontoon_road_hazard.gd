@@ -126,10 +126,23 @@ const SHADER_PATH: String = "res://assets/shaders/pontoon_road.gdshader"
 ## rămâne la buze. 0 = capete ancorate, adica exact podul. 0.35 = la capat
 ## cedeaza 35% din cat cedeaza la mijloc.
 @export_range(0.0, 0.8, 0.05) var free_ends: float = 0.35
-## Pe cati metri de la fiecare buza se stinge cedarea, ca pragul spre insulita
-## fixa sa rămâna sub 0.3 m. 0 = fara stingere (si atunci pragul = toata
-## cedarea de la capat).
-@export_range(0.0, 12.0, 0.5) var edge_clamp: float = 5.0
+## Pe cati metri de la fiecare buza se stinge cedarea.
+##
+## Are DOUA roluri, si al doilea l-am descoperit tarziu:
+##  1. tine PRAGUL spre insulita fixa sub 0.3 m (masurat 0.042 m);
+##  2. tine PANTA DE INTRARE pe ponton sub pragul pistei (13%).
+##
+## Al doilea e cel care conteaza cu plutonul pe el. La `edge_clamp = 5` (prima
+## valoare), tablierul cobora de la 0.042 la 0.458 m sub drum pe primii 4 m —
+## adica o rampa de **13.4%**, care apare BRUSC cand plutonul urca pe tronson.
+## Pragul izolat era in regula; panta nu. Masurat, cu sag_max 0.70:
+##    edge_clamp  5 m -> 13.4%   (peste pragul pistei)
+##    edge_clamp 10 m ->  7.9%
+##    edge_clamp 14 m ->  5.0%   <- ales
+##    edge_clamp 18 m ->  3.5%
+## 14 m pe un tronson de 43 m lasa 15 m de tablier "plin" la mijloc, deci
+## legănarea se simte in continuare.
+@export_range(0.0, 24.0, 0.5) var edge_clamp: float = 14.0
 ## Frecventa (Hz) si amortizarea modului global.
 @export_range(0.2, 4.0, 0.05) var sag_freq: float = 0.9
 @export_range(0.05, 1.5, 0.05) var sag_damping: float = 0.45

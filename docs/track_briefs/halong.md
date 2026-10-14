@@ -1297,20 +1297,48 @@ tururi, iar pe seed 1 și 3 aproape nimic.
 5. **grila de start** — toate cele opt sloturi sunt pe `RoadTop`, cote
    1,09–1,16, măsurat cu `spawn_transforms(8)` plus raycast. Sănătoasă.
 
-**Ce rămâne de investigat** (ordinea pe care aș urma-o):
-- **profilul lateral al primului ponton**: la −8 m de ax terenul e la **−1,44**,
-  iar la +8 m la **+0,23** — asimetric, cu o cădere de ~1,9 m pe stânga. Nu e
-  pe carosabil (tablierul ține ±5,3 m), dar e o buză aproape de bandă. De
-  verificat dacă mașina împinsă lateral în primul tur ajunge acolo;
-- **de ce doar seed 2 și 4**: sugerează dependență de ordinea pe grilă sau de
-  o coliziune în primele secunde, nu de geometrie statică;
-- **ProbeRace cu `--ai=3`** (pluton mic): dacă regresia dispare, e problemă de
-  înghesuială, nu de pistă.
+**Ipotezele 6–7, tot infirmate:**
+6. **profilul lateral asimetric** (−1,44 m pe o parte, +0,23 pe alta) e
+   **corect prin design**: râpa golfului e pe **exteriorul** buclei, iar sonda
+   măsura *dreapta drumului* la −8 m pe axa x — fiindcă la frac 0,09 drumul
+   merge spre sud, deci lateralul-dreapta are x negativ. Nu e un defect;
+7. **plutonul** (`--ai=3` vs `--ai=7`): zero repuneri pe ponton în **toate**
+   cele patru rulări. Nu e înghesuială.
 
-**Decizia de acum:** golful **rămâne** — și-a atins scopul (scurtătura există,
-e folosită, nu rupe turul), iar regresia e pe un punct care avea deja istoric
-de probleme (primul ponton, vezi defectul 3 din §7.2). Nu o ascund și nu o
-declar rezolvată.
+#### Ce a fost de fapt: o cauză reală, plus o concluzie prematură
+
+**Cauza reală, găsită la a opta încercare: `edge_clamp` prea scurt.** Toate
+contractele pontonului verificau **pragul** la buză (0,042 m) și **afundarea**
+la mijloc (1,080 m), amândouă bune. Niciunul nu se uita la cât de *repede*
+coboară tablierul între ele. Cu `edge_clamp = 5` pe un tronson de 43 m și
+plutonul pe el, tablierul cădea **0,42 m pe primii 4 m** — o rampă de
+**13,4%**, peste pragul de pantă al pistei (13%), apărută brusc exact când
+mașinile urcă pe tronson.
+
+Reparat: `edge_clamp = 14` → **8,7%** măsurat pe lungimea reală, cu
+**garda 8** în `ProbePonton` care măsoară panta pe primii 20% cu plutonul pe el.
+
+**Și concluzia prematură, care e lecția mai importantă.** Rulând aceeași scenă,
+același seed, aceeași configurație, am obținut **15 / 12 / 4** repuneri. Deci
+diferența „0/3/0/4 → 1/13/2/9" pe care am numit-o *regresie* era **în mare parte
+nedeterminismul lui Jolt** (memoria `proberace-nedeterminism`: se compară
+distribuții, nu rulări). Am tratat o fluctuație ca pe un defect și am ars șase
+ipoteze pe ea.
+
+Ce rămâne valid din investigație: `edge_clamp` **era** într-adevăr prea scurt
+(13,4% e peste prag, independent de orice rulare), iar fracțiile râpelor **erau**
+hardcodate și alunecaseră. Ambele reparate pe motive proprii, verificabile fără
+ProbeRace.
+
+**Două defecte în propria sondă**, găsite pe drum, amândouă din familia
+„testezi alt obiect decât jocul" (memoria `verifica-cu-parametrii-lui`):
+- rula pe tronsoane de **60 m**, jocul are **43,1 m** — iar panta depinde de
+  raportul `edge_clamp / lungime`, deci raporta 7,1% în loc de 7,6%;
+- folosea **12 plăci**, jocul **7** — rezoluție mai fină, deci garda de
+  continuitate raporta salturi mai mici decât cele reale.
+
+**Decizia:** golful **rămâne** — și-a atins scopul (scurtătura există, e
+folosită, nu rupe turul).
 
 **Lecția de metodă:** o afirmație de geometrie dintr-un brief („mai scurtă și
 mai directă”) e o **ipoteză**, nu un fapt. Garda de scurtătură a expus-o, n-a

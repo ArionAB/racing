@@ -33,7 +33,11 @@ extends Node3D
 const PontoonScript := preload("res://scenes/hazards/pontoon_road_hazard.gd")
 const MASS_BUS := 2.6
 const MASS_SPORT := 0.9
-const LENGTH := 60.0
+## Lungimea tronsonului de TEST. E cea REALA din Track22 (7 tronsoane pe zona
+## plutitoare dau 43.1 m), nu o cifra rotunda: panta de intrare depinde de
+## raportul `edge_clamp / lungime`, deci o sonda care testeaza pe 60 m raporteaza
+## o panta mai blanda decat cea din joc (7.1% vs 7.6% masurat).
+const LENGTH := 43.1
 const WIDTH := 6.0
 ## Contractele din brief §3.
 const SAG_BUS_TARGET := 0.45
@@ -53,6 +57,13 @@ func _ready() -> void:
 	pont.near_end = Vector3.ZERO
 	pont.far_end = Vector3(0.0, 0.0, -LENGTH)
 	pont.deck_width = WIDTH
+	# `plate_count` CA IN JOC. Generatorul foloseste `max(6, int(span / 6.0))`,
+	# deci 7 placi pe 43.1 m (6.2 m per placa). Implicitul clasei e 12, adica
+	# 3.6 m per placa — o rezolutie mai FINA decat cea din joc, pe care garda de
+	# continuitate (3) ar fi raportat salturi mai mici decat cele reale. O sonda
+	# care testeaza alti parametri decat jocul masoara alt obiect
+	# (memoria `verifica-cu-parametrii-lui`).
+	pont.plate_count = maxi(6, int(LENGTH / 6.0))
 	if sabotaj:
 		# „Pontonul" devine pod: capete ancorate, fara tangaj, fara val.
 		pont.free_ends = 0.0
@@ -78,6 +89,7 @@ func _ready() -> void:
 	var wave_ok := _check_wave()
 	var pitch_ok := _check_pitch()
 	_check_grid_load()
+	_check_entry_slope()
 
 	print()
 	if sabotaj:
@@ -254,6 +266,51 @@ func _check_wave() -> bool:
 		return false
 	print("  [OK] pontonul se mişca si cand pista e goala")
 	return true
+
+
+## 8. PANTA DE INTRARE pe ponton, cu plutonul pe el.
+##
+## Contractele 1-7 verificau PRAGUL la buza (0.042 m, in regula) si afundarea la
+## MIJLOC (1.080 m, in regula). Niciunul nu se uita la cat de REPEDE coboara
+## tablierul intre cele doua — si acolo era defectul: cu `edge_clamp = 5` pe un
+## tronson de 43 m, tablierul cadea 0.42 m pe primii 4 m, adica **13.4%**, peste
+## pragul de panta al pistei (13%). Pe pista asta a dat repuneri in valuri pe
+## primul ponton (0/3/0/4 -> 1/13/2/9), fiindcă plutonul urca pe el strans.
+##
+## Garda masoara panta MAXIMA a tablierului pe primii 20% din tronson, in starea
+## cea mai defavorabila (plutonul la mijloc, deci afundare maxima).
+func _check_entry_slope() -> void:
+	print("\n--- 8. panta de intrare pe ponton (cu plutonul pe el) ---")
+	var loads: Array[Vector3] = []
+	for i in 8:
+		loads.append(Vector3(0.35 + 0.30 * (float(i) / 7.0),
+			-2.0 if i % 2 == 0 else 2.0, MASS_BUS))
+	pont.preview_loads = loads
+	pont.settle_now()
+	var L: float = pont.deck_length()
+	var worst := 0.0
+	var worst_u := 0.0
+	var prev := pont.drop_at(0.0)
+	var steps := 80
+	for k in range(1, steps + 1):
+		var u := 0.20 * float(k) / float(steps)
+		var d := pont.drop_at(u)
+		var dx := 0.20 * L / float(steps)
+		var slope := absf(d - prev) / maxf(dx, 0.0001)
+		if slope > worst:
+			worst = slope
+			worst_u = u
+		prev = d
+	pont.preview_loads = []
+	pont.settle_now()
+	print("  panta maxima pe primii 20%%: %.1f%% (la u=%.3f)" % [worst * 100.0, worst_u])
+	print("  edge_clamp = %.1f m pe un tronson de %.1f m" % [pont.edge_clamp, L])
+	if worst > 0.13:
+		_fails.append("panta de intrare %.1f%% depaseste pragul pistei de 13%%: "
+			% (worst * 100.0) + "creste `edge_clamp` (la 43 m tronson, 14 m dau ~5%%)")
+	else:
+		print("  [OK] panta de intrare %.1f%% sub pragul pistei (13%%)"
+			% (worst * 100.0))
 
 
 ## 7. GRILA DE START pe un singur tronson — cazul care a rupt pista.

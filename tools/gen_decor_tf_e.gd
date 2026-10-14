@@ -9,6 +9,12 @@ extends Node
 ##   godot --headless --path . res://tools/GenDecorTfE.tscn -- --write   (rescrie ZonaE)
 ##
 ## ---------------------------------------------------------------------------
+## STARE LA OPRIRE (runda 1, ultima pentru E): iesit din bucla pe (c) dupa r1 — criticul a numit zapada pe
+##  versanti, aceeasi diferenta ca la D si F; cauza e de nivel de pista (piesa de zapada + terenul), rezolvata
+##  central cu zapada in shaderul de terenului. Nu se mai adauga banci de zapada. Facut: cabana, 6 masini, 3 moto,
+##  3 tarabe, aflorimente, molizi in 3 tonuri, fasie joasa, bujor, 0 materiale noi, garzile la baza.
+##  Ramas: lacul nu se vede din camera (sub buza terasei; relief/N5); terasa e iarba, nu pamant batut.
+##
 ## LISTA DE ELEMENTE (runda 1) — din decupajul `E.png` (+ CREASTA/ORIZONT pentru dezvaluire),
 ## cu cifrele fisei (`### E` din transfagarasan_poi_gauntlet.md), fiecare legat de o piesa.
 ##

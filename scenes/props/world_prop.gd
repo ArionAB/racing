@@ -472,6 +472,44 @@ const PROP_COLLISION := {
 	"water_buffalo": "none", "egret": "none",
 	"island_ferry": "none", "coastal_freighter": "none", "fishing_boat": "none",
 	"okinawa_horizon": "none",
+	# --- Transfagarasan (kitul din assets/models/transfagarasan/) ------------
+	# Prin ele se TRECE: golul portalului Balea e 14,85 x 7,40 m, al portalului de
+	# stanca 15,40 x 7,60 m (masurate ca GOL); un hull ar fi un bloc plin peste
+	# sosea. Coliziunea exacta, nu cutia. Lipsesc captuselile `*_Void`
+	# (HULL_SKIP_PARTS).
+	"tunnel_portal_balea": "mesh", "rock_tunnel_portal": "mesh",
+	# Barajul: coronamentul sta SUB asfaltul procedural (nimic peste -0,05 m pe banda
+	# de 12 m, `measure_tf_deck.py`), deci trimesh-ul da doar parapetul (1,1 m) si
+	# peretele din aval; un hull ar fi o cutie pana la varful parapetului, adica un
+	# zid peste toata latimea drumului. Acelasi tipar pentru turn si centrala.
+	"vidraru_dam": "mesh",
+	# Stanca Poenari: coliziune exacta pe sisturi (kit §1.2), sta lipita de drum.
+	"poenari_ruin": "mesh",
+	# Ziduri de sprijin, bancile de zapada, statuia, recuzita: poliedre convexe
+	# per mesh, corecte (stau pe marginea drumului, nu peste el).
+	"retaining_wall_straight": "hull", "retaining_wall_curve": "hull",
+	"snow_wall": "hull", "prometheus_statue": "hull", "road_works": "hull",
+	# Ansamblul de la trecerea la nivel are 18,8 m latime (stalpi pe ambele margini):
+	# hull PER MESH (stalp, brat, felinar), nu o cutie peste drum.
+	"level_crossing": "hull",
+	# Semnul: stalp subtire + bolovan mic; cilindru in ax, ca stalpii.
+	"bear_warning_sign": "trunk",
+	# Copaci: fagul are trunchi gri neted si coroana larga (trunk, ca fagii Fiordland).
+	"beech_tree_a": "trunk", "beech_tree_b": "trunk",
+	# Fantome: tufe/flori (MultiMesh, sute), grohotis (con de 12 m cu o latura plana
+	# lipita de perete), figuranti animati de hazarduri, trenul (TrainHazard isi
+	# face garnitura), cabina telecabinei (trece pe deasupra), fundalul.
+	# `snow_pole` e deja "none" mai sus (Fiordland).
+	"jneapan_a": "none", "jneapan_b": "none", "bujor_de_munte": "none", "afin": "none",
+	"scree_cone": "none", "brown_bear": "none", "sheepdog": "none",
+	"ro_train": "none", "cable_cabin_large": "none", "transfagarasan_horizon": "none",
+	# Pregatite pentru etapa de POI (hull simplu, corect): masini parcate,
+	# motocicleta, stana cu tarcul, taraba, cabanele, casele din vale, aflorimentele.
+	"parked_car_a": "hull", "parked_car_b": "hull", "motorbike": "hull",
+	"stana": "hull", "souvenir_stall": "hull",
+	"cabana_balea_lac": "hull", "cabana_balea_cascada": "hull",
+	"arges_house_a": "hull", "arges_house_b": "hull",
+	"schist_outcrop_a": "hull", "schist_outcrop_b": "hull", "schist_outcrop_c": "hull",
 }
 
 ## Corpuri fizice automate pentru tot ce e asezat de mana dedesubt.
@@ -2137,6 +2175,73 @@ const CLASSES_OKINAWA := {
 		"Bougainvillea_Bloom": _OK_BLOOM},
 }
 
+## Clasele kitului Transfagarasan (Track21), pe FISIER si pe numele intreg al nodului.
+##
+## Acelasi motiv ca la `CLASSES_OKINAWA`: numele de noduri ale kitului (`House_Roof`,
+## `House_Stone`, `House_Plaster`, `Wall_Stone`) coincid cu chei GLOBALE din
+## `prop_classes()` (`roof_tiles`, `stone_wall`, `plaster`, `village_plaster`), iar
+## maparea pe TEMA ruleaza dupa cea globala si o suprascrie. Deci fiecare nod care
+## trebuie sa ramana pe atlas e numit explicit cu `ATLAS_PREFIX`. Nicio alta pista nu
+## e atinsa: tema "transfagarasan" exista doar pe Track21.
+##
+## Culorile (tinta din brief §4) se citesc din clasa, vezi `Palette.CLASS_TINT`:
+##   `tf_schist`   sistul        #7E8478  (dala `alpine_granite`)
+##   `tf_stone`    zidaria       ~#9B978B (dala `stone_wall`, fara tenta)
+##   `tf_jneapan`  jneapanul     #34503A  (dala `pine_needles`)
+##   `tf_beech`    coroana fagului #5E8A3A (dala `acacia_canopy`, ridicata)
+##   `snow`        zapada        (clasa existenta, netentata)
+##   `concrete`    betonul       (clasa existenta, netentata)
+##   `plaster`     tencuiala     (ATLAS: clasa iesea bej-maro, vezi `_TF_PLASTER`)
+##   `tf_bloom`    bujorul       #B63A7A  (atlas tentat, slotul 31)
+## Tabla acoperisurilor NU e clasa: tenta doar INTUNECA, deci ASPHALT_EDGE (#696765) nu
+## poate urca spre argintiu. Se rezolva prin remapare de slot (`SLOT_REMAP_BY_THEME`),
+## fara material nou: tabla argintie pe MARBLE_GREY, cea ruginie pe LARCH_RUST (mai putin
+## saturat decat RUST_METAL). Tabla rosie (`arges_house_b`) ramane pe KERB_RED.
+const _TF_SCHIST: String = Palette.TRI_PREFIX + "tf_schist"
+const _TF_STONE: String = Palette.TRI_PREFIX + "tf_stone"
+const _TF_SNOW: String = Palette.TRI_PREFIX + "snow"
+const _TF_CONCRETE: String = Palette.TRI_PREFIX + "concrete"
+# Tencuiala: briefului ii cere ALBA (FOAM_WHITE), iar clasa `plaster` (#978D7D) a dat in joc
+# (154,121,84), bej-maro, pe cand atlasul da (192,176,149), crem. Ca la Okinawa
+# (`_OK_PLASTER`), ramane pe atlas: mai aproape de alb si zero material.
+const _TF_PLASTER: String = Palette.ATLAS_PREFIX
+const _TF_JNEAPAN: String = Palette.TRI_PREFIX + "tf_jneapan"
+const _TF_BEECH: String = Palette.TRI_PREFIX + "tf_beech"
+const _TF_BLOOM: String = Palette.ATINT_PREFIX + "tf_bloom"
+const _TF_OUTCROP := {"Schist_Schist": _TF_SCHIST}
+const _TF_HOUSE := {"House_Stone": _TF_STONE, "House_Plaster": _TF_PLASTER,
+	"House_Roof": Palette.ATLAS_PREFIX}
+const _TF_WALL := {"Wall_Stone": _TF_STONE}
+const _TF_BEECH_TREE := {"Beech_Leaves": _TF_BEECH}
+const _TF_JNEAPAN_BUSH := {"Jneapan_Needles": _TF_JNEAPAN}
+const CLASSES_TRANSFAGARASAN := {
+	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
+	"schist_outcrop_c": _TF_OUTCROP,
+	"scree_cone": {"Scree_Schist": _TF_SCHIST},
+	"rock_tunnel_portal": {"Rock_Schist": _TF_SCHIST},
+	"poenari_ruin": {"Poenari_Schist": _TF_SCHIST, "Poenari_Stone": _TF_STONE},
+	"prometheus_statue": {"Statue_Schist": _TF_SCHIST},
+	# Kitul refolosit (kit §1.9): sistul doar pe Track21 (tema), nu global. `PeakSnow`
+	# ramane pe atlas (calota alba).
+	"canyon_rocks": {"Canyon_": _TF_SCHIST},
+	"rock_large": {"Rock_Large": _TF_SCHIST},
+	"mountain_peak": {"MountainPeak": _TF_SCHIST},
+	"snow_wall": {"SnowWall_A_Snow": _TF_SNOW, "SnowWall_B_Snow": _TF_SNOW},
+	"tunnel_portal_balea": {"Portal_Snow": _TF_SNOW, "Portal_Concrete": _TF_CONCRETE},
+	# Numele intregi: prefixul `Dam_` ar prinde si `Dam_Rail` (dungile rosii, pe atlas).
+	"vidraru_dam": {"Dam_Module_Concrete": _TF_CONCRETE,
+		"Dam_PowerHouse_Concrete": _TF_CONCRETE, "Dam_Tower_Concrete": _TF_CONCRETE},
+	"retaining_wall_straight": _TF_WALL, "retaining_wall_curve": _TF_WALL,
+	"arges_house_a": _TF_HOUSE, "arges_house_b": _TF_HOUSE,
+	"cabana_balea_lac": {"Cabana_Stone": _TF_STONE, "Cabana_Roof": Palette.ATLAS_PREFIX},
+	"cabana_balea_cascada": {"Cascada_Stone": _TF_STONE,
+		"Cascada_Roof": Palette.ATLAS_PREFIX},
+	"stana": {"Stana_Roof": Palette.ATLAS_PREFIX},
+	"jneapan_a": _TF_JNEAPAN_BUSH, "jneapan_b": _TF_JNEAPAN_BUSH,
+	"beech_tree_a": _TF_BEECH_TREE, "beech_tree_b": _TF_BEECH_TREE,
+	"bujor_de_munte": {"Bujor_Bloom": _TF_BLOOM},
+}
+
 ## Ca [constant CLASSES_BY_MODEL], dar scopat pe TEMA pistei (`_ancestor_theme`),
 ## nu global — la fel cum [constant SLOT_REMAP_BY_THEME] exista langa
 ## [constant SLOT_REMAP_BY_MODEL].
@@ -2227,6 +2332,8 @@ const CLASSES_BY_THEME := {
 	},
 	# Okinawa (Track20): vezi `CLASSES_OKINAWA`.
 	"okinawa": CLASSES_OKINAWA,
+	# Transfagarasan (Track21): vezi `CLASSES_TRANSFAGARASAN`.
+	"transfagarasan": CLASSES_TRANSFAGARASAN,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -2421,6 +2528,23 @@ const SLOT_REMAP_BY_GROUP := {
 ## piesele plasate individual (WorldProp, ex. `--vitrina`) tot citesc atlasul,
 ## si o remapare globala pe model le-ar fi schimbat si pe Track15.
 const SLOT_REMAP_BY_THEME := {
+	# Transfagarasan (Track21), tabla acoperisurilor. Brief: tabla argintie, dar slotul
+	# ASPHALT_EDGE 6 (#696765) e gri de asfalt, iar o clasa o poate doar INTUNECA. Deci slotul
+	# se muta pe MARBLE_GREY 29 (#B8B4AC), fara material nou. `cascada` are tabla pe
+	# RUST_METAL 10 (#91461E, saturatie 0.79, "foarte saturata"): trece pe LARCH_RUST 27
+	# (#A8683A, 0.65). `stana` are ambele (78% argintie, 22% ruginita). Slotul 6 nu e folosit
+	# de alt nod din aceste modele (masurat pe UV-uri), deci mutarea atinge doar tabla.
+	"transfagarasan": {
+		"arges_house_a": {6: Palette.MARBLE_GREY},
+		"cabana_balea_lac": {6: Palette.MARBLE_GREY},
+		"cabana_balea_cascada": {10: Palette.LARCH_RUST},
+		"stana": {6: Palette.MARBLE_GREY, 10: Palette.LARCH_RUST},
+		# Trunchiul fagului: scoarta neteda dar INCHISA, nu cremul slotului 29 (#B8B4AC).
+		# Mutata pe VOLCANIC_BLACK 20 (#55535A), fara material nou (tenta doar intuneca,
+		# dar un ATINT ar fi costat un material pentru un trunchi).
+		"beech_tree_a": {29: Palette.VOLCANIC_BLACK},
+		"beech_tree_b": {29: Palette.VOLCANIC_BLACK},
+	},
 	"fiordland": {
 		# `moss_boulder_a/b/c`: masurat pe .glb (probe ad-hoc), un SINGUR
 		# material/mesh cu trei sloturi — corpul pe 3 ROCK_LIGHT (bej-tan
@@ -2539,6 +2663,13 @@ const ACCENT_SPLIT_BY_THEME := {
 }
 
 const SLOT_REMAP_BY_MODEL := {
+	# Ursul brun (Transfagarasan, Track21): blana pe LARCH_RUST 27 (#A8683A) iesea
+	# portocalie sub soarele temei, (161,88,40) pe captura, adica vaca ruginie; pe
+	# WOOD_WEATHERED 9 tot (138,84,40). Blana intreaga pe LOG_DARK 28 (#4A3526).
+	# Sta AICI, nu in SLOT_REMAP_BY_THEME: ursul e modelul unui HazardMarker, iar
+	# `SlidingHazard._remap_model_slots` citeste doar tabelul pe model. Pe tema,
+	# remaparea nu ajungea niciodata la urs (captura de joc: tot roscat).
+	"brown_bear": {27: Palette.LOG_DARK},
 	# `wharf.glb` (Fiordland POI A): toata fata de SUS a peretelui de piatra
 	# (17 triunghiuri, y in [1.98, 2.12] — masurat direct pe mesh, acopera
 	# intreaga lungime de 20 m si latime de 4,2 m, deci CHIAR platforma de
@@ -3578,6 +3709,13 @@ const HULL_SKIP_PARTS := {
 	"machiya_d": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster",
 		"Machiya_Bamboo"],
 	"machiya_e": ["Machiya_Roof", "Machiya_Trim", "Machiya_Plaster"],
+	# Transfagarasan (kitul din assets/models/transfagarasan/): captuselile negre ale
+	# gurilor sunt vizuale. Portalurile sunt `mesh` (se trece prin gol), iar `*_Void`
+	# e un tub cu pereti lipiti de gol: ca trimesh ar da camerei din tunel un fals
+	# "in solid" (parity pe un tub inchis, vezi tools/probe_camera_solid.gd), iar golul
+	# trebuie sa ramana gol.
+	"tunnel_portal_balea": ["Portal_Void"],
+	"rock_tunnel_portal": ["Rock_Void"],
 }
 
 

@@ -287,6 +287,10 @@ const _VITRINA_MODEL_PATHS := {
 	"bush_plane": "res://assets/models/fiordland/vehicles/bush_plane.glb",
 	"coach_fiordland": "res://assets/models/fiordland/vehicles/coach_fiordland.glb",
 	"cruise_boat": "res://assets/models/fiordland/vehicles/cruise_boat.glb",
+	# --- reuse pe Transfagarasan (Track21): sistul pe `tf_schist` doar pe tema lui ---
+	"canyon_rocks": "res://assets/models/rocks/canyon_rocks.glb",
+	"rock_large": "res://assets/models/rocks/rock_large.glb",
+	"mountain_peak": "res://assets/models/rocks/mountain_peak.glb",
 	# --- reuse, inregistrate in Track16.tscn ---
 	"fern_cluster": "res://assets/models/plants/fern_cluster.glb",
 	"nerpa_seal": "res://assets/models/baikal/props/nerpa_seal.glb",
@@ -1791,8 +1795,8 @@ func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
 func _vitrina_path(stem: String) -> String:
 	if _VITRINA_MODEL_PATHS.has(stem):
 		return String(_VITRINA_MODEL_PATHS[stem])
-	# Kitul Kyoto si kitul Okinawa (assets/models/<kit>/<categorie>/<stem>.glb).
-	for kit: String in ["kyoto", "okinawa"]:
+	# Kitul Kyoto, Okinawa si Transfagarasan (assets/models/<kit>/<categorie>/<stem>.glb).
+	for kit: String in ["kyoto", "okinawa", "transfagarasan"]:
 		var root: String = "res://assets/models/" + kit
 		var d := DirAccess.open(root)
 		if d == null:

@@ -1,15 +1,23 @@
 # Track brief — Ha Long Bay (`Track22`, temă `halong`) — v0.4 (fundație construită și condusă)
 
-> **v0.4 (14 oct 2026):** fundația `Track22.tscn` există, se încarcă fără erori
-> și **se conduce** (ProbeRace, patru seed-uri: tur minim 59,5 s, mediu 70–72 s,
-> **0% offroad**, **zero ieșiri din lume**). Trei defecte de construcție găsite
-> și închise, plus unul care s-a dovedit a **nu** fi defect: repunerile de la
-> frac 0,80 sunt jonca, un hazard care funcționează dar e nereglat (model de
-> 9 m pe drum de 6 m). **§7.1** e partea de citit dacă reiei lucrul — conține
-> trei ipoteze greșite măsurate, și de ce fiecare a fost greșită.
+> **v0.5 (14 oct 2026):** fundația `Track22.tscn` există, se încarcă fără erori
+> și **se conduce curat** — ProbeRace pe patru seed-uri: tur minim **59,8 s**,
+> mediu **68,6–70,1 s**, **0% offroad**, **zero blocaje**, **zero ieșiri din
+> lume**, și doar **1–3 repuneri** per cursă, toate pe joncă (adică pe hazard,
+> unde le e locul).
 >
-> **Următorul pas concret:** reglajul joncii (`model_scale`, `travel`,
-> `sweep_speed`, `phase`) cu ProbeRace ca măsură.
+> Jonca e **reglată din măsurători**: gabarit 6,49 m pe carosabil de 11,5 m →
+> bandă liberă **5,01 m**, `sweep_speed` la implicitul clasei (12,0). Reglajul
+> a tăiat repunerile cu **75%** (de la 6/8/6/7 la 1/3/2/1) și a *scăzut* turul
+> mediu. Contractul e acum **gardă în generator**, nu doar o cifră în scenă.
+>
+> **§7.1** e partea de citit dacă reiei lucrul: conține trei ipoteze greșite
+> măsurate, două unelte stricate de mine și prinse tot măsurând, și de ce
+> fiecare a fost greșită.
+>
+> **Următorii pași:** `PontoonRoadHazard` (§5.3 — subclasă mică),
+> `TideHazard`, `CameraZone` pe grotă, gărzile de layout, apoi verdictul
+> dezvoltatorului la volan.
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `transfagarasan.md`, `okinawa.md` și `monument_valley.md`. Secțiunile de
@@ -819,15 +827,58 @@ construiește `_build_placeholder_box()` de 4,5 × 2,2 × 2,6 m, iar
 deci mai multe coliziuni. Nu era un zid invizibil; era un obstacol real, pe
 care l-am făcut mai mare.
 
-**Deci nu e nimic de reparat în geometrie.** Ce rămâne de reglat, la pasul
-următor, e **hazardul**: cursa (`travel`), viteza (`sweep_speed`), faza
-(`phase`) și **scara modelului** — o joncă de 9 m care traversează un drum de
-6 m blochează banda cu totul. Reglajul se face cu jonca pe poziție și cu
-`ProbeRace` ca măsură, exact ca distanțele dintre hazardele cu ceas. Opțiuni,
-în ordinea pe care aș încerca-o: `model_scale` sub 1,0 (barca e de 9 m, jonca
-reală din §5.2 e cerută la ~12 m — deci modelul final trebuie **scalat**, nu
-doar înlocuit), apoi o cursă mai scurtă care lasă o bandă liberă, apoi fereastra
-de telegrafare.
+**Deci nu e nimic de reparat în geometrie** — ce era de reglat e **hazardul**.
+
+### Reglajul joncii, din două măsurători (14 oct 2026)
+
+**1. Gabaritul**, măsurat cu `ProbeHlPoint` pe scena construită: corpul joncii
+e **4,12 × 5,35 × 9,32 m**, iar carosabilul podețului măsoară **11,5 m**. La
+`model_scale = 1,0` rămâneau **2,18 m** de bandă liberă când barca e pe axă —
+mai puțin decât lățimea unei mașini (2,6 m). Traversarea nu era o decizie, era
+un zid.
+
+Scara iese din ținta de bandă liberă, nu din gust:
+`model_scale = (11,5 − 5,0) / 9,32 = `**`0,697`**, pentru o bandă de **5,0 m**
+(o mașină trece confortabil, dar trebuie să vrea).
+
+**2. Viteza: implicitul clasei (12,0), nu 2,2.** Antetul lui `SlidingHazard`
+are măsurătoarea, și e contraintuitivă: *„încetinirea măturării «ca să fie mai
+citibil» ÎNRĂUTĂȚEȘTE lucrurile. Cu perioada dublă, obstacolul devine un blocaj
+semi-static și toată lumea intră în el (cadre de contact per mașină: ~10 la
+perioada originală, ~110 la dublu). Un obstacol rapid traversează și eliberează
+drumul; unul lent stă în el.”*
+
+Pusesem **2,2** din reflexul „o barcă e lentă” — exact greșeala pe care clasa o
+avertizează în antet. Lamele de pe Track15 merg la 2,0 fiindcă *sunt* animale
+lente și au `model_scale` 3,135 pe un GLB mic; o joncă de 9 m nu e o lamă.
+
+**Gardă nouă în generator**, ca cifrele să nu poată fi schimbate fără
+consecințe — contractul gimmickului scris ca cifră (memoria
+`garda-cu-numele-gimmickului`):
+- banda liberă **≥ 1,6 × lățimea mașinii** (4,16 m), altfel nu e decizie;
+- banda liberă **≤ 60% din carosabil** (6,90 m), altfel jonca nu mai e obstacol;
+- `sweep_speed` **≥ 8,0**, cu măsurătoarea din antetul clasei citată în mesaj.
+
+**Verdictul, măsurat pe patru seed-uri** (ProbeRace, 8 mașini, 260 s):
+
+| starea joncii | repuneri (seed 1/2/3/4) | tur mediu |
+|---|---|---|
+| fără model (box 4,5 m), `sweep` 2,2 | 2 / 5 / 5 / 2 | 69,0 s |
+| model 9,32 m, `sweep` 2,2 | 6 / 8 / 6 / 7 | 70,8–71,8 s |
+| **model 6,49 m (scale 0,697), `sweep` 12,0** | **1 / 3 / 2 / 1** | **68,6–70,1 s** |
+
+**−75% repuneri**, iar turul mediu a *scăzut* — semn direct că mașinile nu mai
+stau blocate în obstacol, ci îl trec. Toate cele 7 repuneri rămase sunt pe
+joncă (frac 0,80), **0% offroad** și **zero blocaje** pe toate seed-urile.
+
+Asta e comportamentul corect, nu un rest de defect: jonca **trebuie** să fie un
+obstacol. Una până la trei atingeri per cursă de 260 s cu 8 mașini înseamnă că
+cine n-o citește plătește, iar cine o citește trece prin banda de 5 m — exact
+contractul din §3 („decizie, nu taxă”).
+
+**Rămas de reglat, dacă verdictul la volan o cere:** `phase` (fereastra de
+telegrafare — acum e cea derivată din fracție) și eventual `travel`. Nu le
+ating fără un motiv măsurat: cifrele de mai sus sunt deja în contract.
 
 **Confirmarea finală, cu sonda de punct** (`ProbeHlPoint` pe (61, −196)):
 corpul mobil al joncii stă la **(37,8; 1,40; −187,4)**, adică la ~11 m pe cursa
@@ -835,12 +886,18 @@ de traversare din nodul declarat la (40,75; −198,58) — chiar prin punctul de
 repunere. Drumul e la cota 1,40 pe toată lățimea pe axa x, deci **nu există
 nicio gaură**: ipotezele 1 și 2 n-aveau pe ce să se sprijine.
 
-Sonda a scos însă și un lucru de ținut minte: pe axa **z**, la ±8–12 m de ax,
-terenul coboară la **0,27–1,10** față de drumul la 1,40 — o împrăștiere de
-**1,13 m**, adică prag lateral peste limita de 0,3 m de la care un prag e zid
-(memoria `suprafete-cu-goluri-si-praguri`). Nu e cauza repunerilor, dar e
-umărul îngust al podețului, și **se remăsoară la reglajul joncii**: dacă
-mașina împinsă de barcă iese lateral acolo, pragul devine a doua problemă.
+Sonda a scos și **buza laterală a podețului**, măsurată: pe axa z, la ±8 m de
+ax, terenul coboară la **0,27–1,10** față de drumul la 1,40 — o treaptă de
+**0,30–1,13 m**, peste limita de 0,3 m de la care un prag e zid (memoria
+`suprafete-cu-goluri-si-praguri`). Cifra e **dincolo de marginea carosabilului**
+(podețul are semi-6, deci marginea e la 6 m), așa că nu e un prag *pe* drum și
+nu explică repunerile — dar e o buză de care te agăți dacă ieși lateral.
+
+**Verdict: se lasă așa, deliberat.** Podețul de plute *trebuie* să aibă o
+margine: e o punte peste un canal, nu un drum cu acostament. După reglajul
+joncii (banda liberă de 5 m, §mai jos) mașina împinsă are pe unde să treacă
+fără să ajungă la buză. Se redeschide doar dacă ProbeRace arată repuneri
+**laterale** acolo, nu frontale pe joncă.
 
 **Lecția de metodă, mai valoroasă decât defectul.** Trei ipoteze, trei
 măsurători, zero ghiceli validate:
@@ -861,7 +918,14 @@ măsurători, zero ghiceli validate:
   amândouă în unealtă acum: **buclele sunt tipizate** (`for axis: Vector3 in
   axes`), și sonda **iese cu cod 1 dacă n-a măsurat nimic**, în loc să tacă
   (memoria `garda-verde-pe-zero-masuratori`). Regula generală: rulează sonda
-  *înainte* de a o cita, și pune-i o linie care pică pe zero măsurători.
+  *înainte* de a o cita, și pune-i o linie care pică pe zero măsurători;
+- **o lățime de drum măsurată pe axele lumii e greșită**, și a doua versiune a
+  aceleiași sonde a dat **48 m** pe un drum de 11,5: pe o axă aliniată cu sensul
+  de mers, `RoadTop` continuă pe sute de metri. Lățimea se măsoară
+  **perpendicular pe ax** — practic, baleind unghiul și luând **minimul**, care
+  e normala la drum. Tiparul e cel din memoria `masoara-inainte-nu-langa`, pe
+  altă axă: nu presupune că axele lumii sunt axele drumului. A treia cifră
+  (11,5 m pe un podeț declarat la semi-6) a fost prima credibilă.
 
 **Cifrele fundației** (ProbeRace, 8 mașini, 260 s, patru seed-uri): tur minim
 **59,5–59,9 s**, mediu **70,0–71,8 s** — în fereastra Ignition 65–80 s ✔ —,

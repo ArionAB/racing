@@ -97,6 +97,41 @@ func _ready() -> void:
 		print("  %-28s la (%.1f, %.2f, %.1f)  d=%.1f m  [%s]"
 			% [b.name, b.global_position.x, b.global_position.y, b.global_position.z,
 				d, b.get_class()])
+	# GABARITUL corpurilor mobile: cat ocupa efectiv din drum. La un hazard de
+	# traversare asta e cifra care decide daca mai rămâne banda libera.
+	print("\n--- gabaritul corpurilor mobile (cat din drum ocupa) ---")
+	# Latimea drumului in punctul masurat: din raycast-urile de mai sus, nu
+	# presupusa. Cea mai larga intindere pe care s-a lovit `RoadTop`.
+	var road_total := _road_width_at(space, center, span)
+	print("  latimea drumului masurata aici: %.1f m" % road_total)
+	var any_mobile := false
+	for n in track.find_children("*", "AnimatableBody3D", true, false):
+		var b := n as Node3D
+		if b == null:
+			continue
+		var d := Vector2(b.global_position.x - at.x, b.global_position.z - at.y).length()
+		if d > span * 4.0:
+			continue
+		any_mobile = true
+		var aabb := Track.model_aabb(b)
+		print("  %s: %.2f x %.2f x %.2f m (lung x inalt x lat)"
+			% [b.name, aabb.size.x, aabb.size.y, aabb.size.z])
+		var footprint := maxf(aabb.size.x, aabb.size.z)
+		# LATIMEA TOTALA a drumului, nu semi-latimea: un corp de 9 m pe un drum
+		# de 2 x 6 m are 12 m de traversat, nu 6. (Prima versiune compara cu
+		# semi-latimea si raporta "-2.32 m, acopera tot drumul", ceea ce era
+		# fals cu un factor de doi.)
+		print("    -> amprenta max %.2f m pe drum de %.0f m total (2 x %.0f)"
+			% [footprint, road_total, road_total * 0.5])
+		var free := road_total - footprint
+		print("       banda libera cand corpul e pe axa: %.2f m" % free)
+		if free < 1.0:
+			print("       !! ACOPERA TOT DRUMUL: nicio banda libera")
+		elif free < 3.0:
+			print("       !  banda strimta (< 3 m): trecerea e la limita")
+	if not any_mobile:
+		print("  (niciun corp mobil in zona)")
+
 	if found == 0:
 		print("  (niciunul)")
 	else:
@@ -114,3 +149,41 @@ func _ready() -> void:
 		return
 	print("\n(%d raycast-uri au lovit; sonda a masurat ceva)" % hits.size())
 	get_tree().quit(0)
+
+
+## Latimea carosabilului in punctul dat, MASURATA.
+##
+## Baleiajul trebuie facut PERPENDICULAR pe direcţia drumului, nu pe axele
+## lumii: pe o axa aliniata cu sensul de mers, `RoadTop` continua pe sute de
+## metri si masuratoarea iese absurd (prima versiune a raportat 48 m pe un drum
+## de 12). Direcţia o dau cele doua laturi ale drumului: caut unghiul pe care
+## latimea e MINIMA — aia e normala la ax.
+func _road_width_at(space: PhysicsDirectSpaceState3D, center: Vector3,
+		span: float) -> float:
+	var best := INF
+	for deg in range(0, 180, 10):
+		var a := deg_to_rad(float(deg))
+		var axis := Vector3(cos(a), 0.0, sin(a))
+		var reach_pos := 0.0
+		var reach_neg := 0.0
+		var step := 0.5
+		var d := step
+		while d <= span * 2.5:
+			for sign_: float in [1.0, -1.0]:
+				var p: Vector3 = center + axis * (d * sign_) + Vector3.UP * RAY_TOP
+				var q := PhysicsRayQueryParameters3D.create(p, p + Vector3.DOWN * RAY_LEN)
+				var hit := space.intersect_ray(q)
+				if hit.is_empty():
+					continue
+				var col := hit.get("collider") as Node
+				if col == null or not String(col.name).begins_with("RoadTop"):
+					continue
+				if sign_ > 0.0:
+					reach_pos = maxf(reach_pos, d)
+				else:
+					reach_neg = maxf(reach_neg, d)
+			d += step
+		var w := reach_pos + reach_neg
+		if w > 1.0:
+			best = minf(best, w)
+	return 0.0 if is_inf(best) else best

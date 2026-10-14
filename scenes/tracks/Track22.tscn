@@ -76,10 +76,10 @@ gizmo_extents = 3.0
 script = ExtResource("4_hzm")
 kind = 0
 model = ExtResource("15_boat")
-model_scale = 1.0
+model_scale = 0.697
 face_travel = true
 motion = 1
-sweep_speed = 2.2
+sweep_speed = 12.0
 
 [node name="MaimutePerete" type="Node3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -201.098, 1.409, -260.348)

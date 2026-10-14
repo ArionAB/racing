@@ -93,6 +93,31 @@ PONTON_Y = 0.6
 # doar pentru garda: tablierul viitor nu are voie sa treaca sub plasa de mare.
 PONTON_SAG = 0.5 + 0.45
 
+# --- JONCA: scara si viteza, DERIVATE din masuratori (nu alese) --------------
+# Gabaritul corpului, masurat cu tools/ProbeHlPoint.tscn pe scena construita:
+# `fishing_boat.glb` da un corp de 4.12 x 5.35 x 9.32 m, iar podetul masoara
+# 11.5 m de carosabil. La scara 1.0 ramaneau 2.18 m de banda libera cand barca
+# e pe axa — mai putin decat latimea unei masini, deci traversarea era un zid,
+# nu un obstacol de ocolit. De aici 6-8 repuneri pe seed.
+JONCA_BEAM_M = 9.32      # masurat, nu din brief
+ROAD_AT_RAFT_M = 11.5    # masurat pe scena
+# Tinta: o banda libera de ~5 m (o masina trece confortabil, dar trebuie sa
+# vrea). Scara iese din ea, nu din gust.
+JONCA_FREE_TARGET_M = 5.0
+JONCA_SCALE = round((ROAD_AT_RAFT_M - JONCA_FREE_TARGET_M) / JONCA_BEAM_M, 3)
+#
+# VITEZA: implicitul clasei (12.0), nu 2.2. Antetul lui SlidingHazard are
+# masuratoarea, si e contraintuitiva: "incetinirea maturarii «ca sa fie mai
+# citibil» INRAUTATESTE lucrurile. Cu perioada dubla, obstacolul devine un
+# blocaj semi-static si toata lumea intra in el (cadre de contact per masina:
+# ~10 la perioada originala, ~110 la dublu). Un obstacol rapid traverseaza si
+# elibereaza drumul; unul lent sta in el." Pusesem 2.2 din reflexul "o barca e
+# lenta" — exact greşeala pe care clasa o avertizeaza. Lamele de pe Track15
+# merg la 2.0 fiindca SUNT animale lente si au `model_scale` 3.135 pe un GLB
+# mic; o joncă de 9 m nu e o lama.
+JONCA_SWEEP = 12.0   # = SlidingHazard.MAX_SWEEP_SPEED_DEFAULT
+
+
 
 def v(a, b):
     return (b[0] - a[0], b[1] - a[1])
@@ -390,6 +415,24 @@ for lbl, g in (("pontoane -> jonca", gap_m(F_PONTON2, F_JONCA)),
                ("maimute -> pontoane", gap_m(F_MAIMUTE, F_PONTON2))):
     report(g >= 200.0, f"{lbl}: {g:.0f} m")
 
+# --- GARDA DE BANDA LIBERA la jonca ------------------------------------------
+# Contractul gimmickului (brief §3): jonca e o DECIZIE ("trec sau aştept"), nu
+# o taxa. Daca banda libera scade sub latimea unei masini, nu mai e decizie.
+# Cifra se masoara pe scena construita cu tools/ProbeHlPoint.tscn; aici se
+# verifica perechea (scara x gabarit) inainte sa se scrie .tscn-ul.
+CAR_WIDTH_M = 2.6     # gabaritul caroseriei (bus_width din Track21 e 2.4)
+print("\n=== GARDA DE BANDA LIBERA (jonca e decizie, nu taxa) ===")
+_beam = JONCA_BEAM_M * JONCA_SCALE
+_free = ROAD_AT_RAFT_M - _beam
+print(f"  jonca la scara {JONCA_SCALE}: {_beam:.2f} m pe {ROAD_AT_RAFT_M:.1f} m de carosabil")
+report(_free >= CAR_WIDTH_M * 1.6,
+       f"banda libera {_free:.2f} m >= {CAR_WIDTH_M * 1.6:.2f} m (1.6 x latimea masinii)")
+report(_free <= ROAD_AT_RAFT_M * 0.6,
+       f"banda libera {_free:.2f} m <= {ROAD_AT_RAFT_M * 0.6:.2f} m (altfel jonca nu mai e obstacol)")
+report(JONCA_SWEEP >= 8.0,
+       f"sweep_speed {JONCA_SWEEP} >= 8.0 (antetul SlidingHazard: lent = blocaj semi-static, "
+       f"~110 cadre de contact la perioada dubla vs ~10)")
+
 if not all(guard_results):
     print("\nGARDA: CEL PUTIN O LINIE A PICAT -- nu scriu .tscn, ies cu cod 1")
     sys.exit(1)
@@ -680,10 +723,10 @@ gizmo_extents = 3.0
 script = ExtResource("4_hzm")
 kind = 0
 model = ExtResource("15_boat")
-model_scale = 1.0
+model_scale = {JONCA_SCALE}
 face_travel = true
 motion = 1
-sweep_speed = 2.2
+sweep_speed = {JONCA_SWEEP}
 
 [node name="MaimutePerete" type="Node3D" parent="Hazarduri"]
 transform = {xf_ident(F_MAIMUTE)}

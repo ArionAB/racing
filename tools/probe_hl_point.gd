@@ -54,9 +54,17 @@ func _ready() -> void:
 	var space := get_viewport().world_3d.direct_space_state
 	print("\n--- raycast vertical (cota si ce s-a lovit) ---")
 	var hits: Array[float] = []
-	for off in [-span, -span * 0.66, -span * 0.33, 0.0, span * 0.33, span * 0.66, span]:
-		for axis in [Vector3(1, 0, 0), Vector3(0, 0, 1)]:
-			var p := center + axis * off + Vector3.UP * RAY_TOP
+	# Buclele sunt TIPIZATE anume: iterand peste un array literal netipizat,
+	# `var p := center + axis * off` nu-si poate infera tipul si scriptul NU
+	# COMPILEAZA ("Cannot infer the type of p"). Prima versiune a fost comisa
+	# asa si n-a rulat niciodata — iar o sonda care nu ruleaza arata exact ca
+	# una care nu gaseste nimic (memoria `garda-verde-pe-zero-masuratori`).
+	var offs: Array[float] = [-span, -span * 0.66, -span * 0.33, 0.0,
+		span * 0.33, span * 0.66, span]
+	var axes: Array[Vector3] = [Vector3(1, 0, 0), Vector3(0, 0, 1)]
+	for off: float in offs:
+		for axis: Vector3 in axes:
+			var p: Vector3 = center + axis * off + Vector3.UP * RAY_TOP
 			var q := PhysicsRayQueryParameters3D.create(p, p + Vector3.DOWN * RAY_LEN)
 			var hit := space.intersect_ray(q)
 			var tag := "x" if axis.x != 0.0 else "z"
@@ -92,6 +100,17 @@ func _ready() -> void:
 	if found == 0:
 		print("  (niciunul)")
 	else:
-		print("  -> un AnimatableBody3D fara mesh pe carosabil e un ZID INVIZIBIL")
+		print("  -> un corp care traverseaza carosabilul e obstacol SOLID: la")
+		print("     SlidingHazard/TRAVERSARE e prin design, deci repunerile pe el")
+		print("     sunt reglaj de hazard, nu defect de traseu")
 
+	# O sonda care n-a masurat NIMIC nu are voie sa iasa cu cod 0: ar arata
+	# identic cu una care n-a gasit nimic de raportat (memoria
+	# `garda-verde-pe-zero-masuratori`).
+	if hits.is_empty():
+		print("\nPICAT: niciun raycast n-a lovit nimic — punctul e in afara lumii,")
+		print("       sau pista nu s-a construit. Nu e un rezultat, e o sonda goala.")
+		get_tree().quit(1)
+		return
+	print("\n(%d raycast-uri au lovit; sonda a masurat ceva)" % hits.size())
 	get_tree().quit(0)

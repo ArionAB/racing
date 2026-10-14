@@ -829,6 +829,19 @@ reală din §5.2 e cerută la ~12 m — deci modelul final trebuie **scalat**, n
 doar înlocuit), apoi o cursă mai scurtă care lasă o bandă liberă, apoi fereastra
 de telegrafare.
 
+**Confirmarea finală, cu sonda de punct** (`ProbeHlPoint` pe (61, −196)):
+corpul mobil al joncii stă la **(37,8; 1,40; −187,4)**, adică la ~11 m pe cursa
+de traversare din nodul declarat la (40,75; −198,58) — chiar prin punctul de
+repunere. Drumul e la cota 1,40 pe toată lățimea pe axa x, deci **nu există
+nicio gaură**: ipotezele 1 și 2 n-aveau pe ce să se sprijine.
+
+Sonda a scos însă și un lucru de ținut minte: pe axa **z**, la ±8–12 m de ax,
+terenul coboară la **0,27–1,10** față de drumul la 1,40 — o împrăștiere de
+**1,13 m**, adică prag lateral peste limita de 0,3 m de la care un prag e zid
+(memoria `suprafete-cu-goluri-si-praguri`). Nu e cauza repunerilor, dar e
+umărul îngust al podețului, și **se remăsoară la reglajul joncii**: dacă
+mașina împinsă de barcă iese lateral acolo, pragul devine a doua problemă.
+
 **Lecția de metodă, mai valoroasă decât defectul.** Trei ipoteze, trei
 măsurători, zero ghiceli validate:
 - când repunerile cad mereu în **același punct**, defectul nu e de formă —
@@ -839,7 +852,16 @@ măsurători, zero ghiceli validate:
   lățimea podețului **s-a repus la 6 m** (intenția din brief), iar îngustarea
   râpei a rămas doar pentru că are motiv de design propriu;
 - o reparație care **înrăutățește** cifra e cel mai informativ rezultat: aici a
-  arătat că obstacolul era real și că mărimea lui e variabila care contează.
+  arătat că obstacolul era real și că mărimea lui e variabila care contează;
+- **o sondă nerulată arată identic cu una care nu găsește nimic.** Prima
+  versiune a lui `ProbeHlPoint` a fost scrisă, comisă *și citată ca dovadă*
+  fără să compileze: `var p := center + axis * off`, cu `axis` venind dintr-un
+  array literal netipizat, dă „Cannot infer the type of p” și scriptul nu se
+  încarcă. Ieșirea era goală, și am pus-o pe seama unui timeout. Două apărări,
+  amândouă în unealtă acum: **buclele sunt tipizate** (`for axis: Vector3 in
+  axes`), și sonda **iese cu cod 1 dacă n-a măsurat nimic**, în loc să tacă
+  (memoria `garda-verde-pe-zero-masuratori`). Regula generală: rulează sonda
+  *înainte* de a o cita, și pune-i o linie care pică pe zero măsurători.
 
 **Cifrele fundației** (ProbeRace, 8 mașini, 260 s, patru seed-uri): tur minim
 **59,5–59,9 s**, mediu **70,0–71,8 s** — în fereastra Ignition 65–80 s ✔ —,

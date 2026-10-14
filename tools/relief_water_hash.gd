@@ -26,6 +26,9 @@ func _ready() -> void:
 	var ctx := HashingContext.new()
 	ctx.start(HashingContext.HASH_MD5)
 	for n in names:
-		ctx.update(("%s=%s;" % [n, str(mat.get_shader_parameter(n))]).to_utf8_buffer())
+		var v: Variant = mat.get_shader_parameter(n)
+		# Texturile s-ar tipari cu id-ul de instanta (diferit la fiecare rulare).
+		var txt := (v as Resource).resource_path if v is Resource else str(v)
+		ctx.update(("%s=%s;" % [n, txt]).to_utf8_buffer())
 	print("WATERHASH %s %d uniformi %s" % [path.get_file(), names.size(), ctx.finish().hex_encode()])
 	get_tree().quit(0)

@@ -4034,6 +4034,8 @@ static func themes() -> Dictionary:
 		"rock_line": 34.0,
 		"rock_fade": 14.0,
 		"rock_band_tint": Color(0.33, 0.43, 0.44),
+		# Molizii din benzi pe clasa acelor inchise (vezi _build_decor).
+		"pine_crown_class": "tf_jneapan",
 		"snow_line": 44.0,
 		"snow_fade": 14.0,
 		"snow_tint": Color(0.80, 0.90, 1.0),
@@ -14748,6 +14750,17 @@ func _build_world_decor() -> void:
 		cliffs.get_meta(TrackCliffs.FOOTPRINT_META, []) as Array)
 	add_child(decor)
 	_decor_roots.append(decor)
+	# Coroana molizilor din benzi (`TrackDecor._add_pine`, clasa `pine_needles`) pe
+	# clasa ceruta de tema, daca o cere. Transfagarasan: `tf_jneapan`, ca molizii
+	# pusi pe POI-uri; pe `pine_needles` iesau oliv sub soarele cald. Doar nodurile
+	# `Pine*` (trunchiurile sunt `Trunk_*`), deci restul decorului ramane neatins;
+	# fara cheie, nimic nu se schimba.
+	var pine_cls := String(theme_flag("pine_crown_class", ""))
+	if not pine_cls.is_empty():
+		var pine_mat := Palette.triplanar_class_material(pine_cls)
+		for node in Palette._walk(decor):
+			if node is MeshInstance3D and String(node.name).begins_with("Pine"):
+				(node as MeshInstance3D).material_override = pine_mat
 	# Scenografia DUPA benzile statistice, si tot in `_decor_roots`: semnele
 	# chevron si gardurile isi cauta loc liber printre obstacolele de acolo, iar
 	# un tetrapod sau un zid de cetate e cel putin la fel de solid ca o stanca.

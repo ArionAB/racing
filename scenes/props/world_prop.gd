@@ -2214,7 +2214,10 @@ const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_c": _TF_OUTCROP,
 	"scree_cone": {"Scree_Schist": _TF_SCHIST},
 	"rock_tunnel_portal": {"Rock_Schist": _TF_SCHIST},
-	"poenari_ruin": {"Poenari_Schist": _TF_SCHIST, "Poenari_Stone": _TF_STONE},
+	# Caramida (TILE_TERRACOTTA) iesea portocaliu-viu in joc; diorama arata ruina bej-gri.
+	# Pe `tf_stone` (deja pe pista): zero material nou.
+	"poenari_ruin": {"Poenari_Schist": _TF_SCHIST, "Poenari_Stone": _TF_STONE,
+		"Poenari_Brick": _TF_STONE},
 	"prometheus_statue": {"Statue_Schist": _TF_SCHIST},
 	# Kitul refolosit (kit §1.9): sistul doar pe Track21 (tema), nu global. `PeakSnow`
 	# ramane pe atlas (calota alba).
@@ -2530,8 +2533,12 @@ const SLOT_REMAP_BY_THEME := {
 	# (#A8683A, 0.65). `stana` are ambele (78% argintie, 22% ruginita). Slotul 6 nu e folosit
 	# de alt nod din aceste modele (masurat pe UV-uri), deci mutarea atinge doar tabla.
 	"transfagarasan": {
-		"arges_house_a": {6: Palette.MARBLE_GREY},
-		"cabana_balea_lac": {6: Palette.MARBLE_GREY},
+		# Tabla argintie pe PAINTED_METAL (#7692A8), nu pe MARBLE_GREY: sub soarele cald
+		# al temei (1, .85, .66) MARBLE_GREY iesea bej, ca stuful (POI A, runda 1), pe
+		# cand albastrul lui PAINTED_METAL se neutralizeaza spre gri (~118,124,111) si
+		# citeste tabla albastru-gri din diorama. Zero material nou (remap de slot).
+		"arges_house_a": {6: Palette.PAINTED_METAL},
+		"cabana_balea_lac": {6: Palette.PAINTED_METAL},
 		"cabana_balea_cascada": {10: Palette.LARCH_RUST},
 		"stana": {6: Palette.MARBLE_GREY, 10: Palette.LARCH_RUST},
 		# Trunchiul fagului: scoarta neteda dar INCHISA, nu cremul slotului 29 (#B8B4AC).

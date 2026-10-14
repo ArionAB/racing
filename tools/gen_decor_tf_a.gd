@@ -241,8 +241,8 @@ var _houses: Array[Dictionary] = []
 var _a_idx: Array[int] = []        # indicii baked din zona A
 var _near_idx: Array[int] = []     # toata soseaua din caseta zonei (A + capetele H si B)
 const PATH_SLOT := 8               # DRY_VEGETATION: pamantul batut al drumului dintre case
-const WANT_BEECH := 130
-const WANT_PINE := 640
+const WANT_BEECH := 55
+const WANT_PINE := 1500
 var _sun_dir := Vector3.ZERO
 
 
@@ -358,13 +358,14 @@ func _plan_houses() -> void:
 		var fr := float(ii) / float(n)
 		if fr > 0.0640 and fr < 0.9700:
 			break
-		anchors.append({"i": ii, "row": 1, "side": 1.0})
-		anchors.append({"i": ii + 3, "row": 2, "side": 1.0})
-		if k % 2 == 0:
-			anchors.append({"i": ii + 5, "row": 1, "side": -1.0})
-		idx += 8 + (k % 3)
+		var px := _track.baked[ii].x
+		if px < -125.0 or px > -22.0:
+			anchors.append({"i": ii, "row": 1, "side": 1.0})
+			anchors.append({"i": ii + 2, "row": 2, "side": 1.0})
+			anchors.append({"i": ii + 3, "row": 1, "side": -1.0})
+		idx += 4
 		k += 1
-	var want := 15
+	var want := 14
 	for pass_i in 2:
 		var hsc := 1.0 if pass_i == 0 else 0.84
 		for a in anchors:
@@ -409,7 +410,7 @@ func _try_house(a: Dictionary, hsc: float) -> Dictionary:
 			var tgt := Vector2(p.x, p.z) + fwd * float(dl)
 			var yaw := _yaw_to(c2, tgt) + _rng.randf_range(-0.25, 0.25)
 			var circ := _house_circle(model, c2, yaw, hsc)
-			if not _free(Vector2(circ.x, circ.y), circ.z, 1.2):
+			if not _free(Vector2(circ.x, circ.y), circ.z, -2.0):
 				continue
 			if POENARI.distance_to(Vector2(circ.x, circ.y)) < 40.0:
 				continue
@@ -543,10 +544,11 @@ func _road_anchor(i: int, side: float, gap: float) -> Vector2:
 
 
 func _village_indices() -> Array[int]:
+	# Doua clustere pe fasia plata: capatul vestic (x < -125) si cel estic (x > -22).
 	var r: Array[int] = []
 	for i in _a_idx:
 		var p := _track.baked[i]
-		if p.x > -165.0 and p.x < 12.0:
+		if p.x > -172.0 and (p.x < -125.0 or (p.x > -22.0 and p.x < 14.0)):
 			r.append(i)
 	return r
 
@@ -702,7 +704,7 @@ func _forest() -> void:
 	nz.seed = 4242
 	nz.frequency = 0.05
 	# Felii pe x (culling): 4 felii
-	var cuts := [-200.0, -130.0, -75.0, -20.0, 40.0]
+	var cuts := [-200.0, -130.0, -75.0, -20.0, 70.0]
 	var slices := cuts.size() - 1
 	var pos := {}
 	var yw := {}
@@ -732,15 +734,15 @@ func _forest() -> void:
 	var all_idx: Array[int] = []
 	for i in _near_idx:
 		var pp := _track.baked[i]
-		if pp.x > -190.0 and pp.x < 30.0 and pp.z > 215.0:
+		if pp.x > -190.0 and pp.x < 50.0 and pp.z > 215.0:
 			all_idx.append(i)
 	var cand: Array[Dictionary] = forced.duplicate()
-	for t in 60000:
+	for t in 160000:
 		var i: int = all_idx[_rng.randi() % all_idx.size()]
 		var side := 1.0 if _rng.randf() < 0.5 else -1.0
 		# distanta de la margine: mai multe aproape (sqrt inversat), pana la ~100 m
 		var u := _rng.randf()
-		var gap := 9.0 + pow(u, 1.35) * 112.0
+		var gap := 8.0 + pow(u, 1.2) * 110.0
 		var along := _rng.randf_range(-4.0, 4.0)
 		var q3 := _road_anchor(i, side, gap)
 		var nn := _track.baked.size()
@@ -755,12 +757,12 @@ func _forest() -> void:
 		tries += 1
 		var q4: Vector2 = cd["p"]
 		var forced_t: bool = String(cd["kind"]) != ""
-		if q4.x < -215.0 or q4.x > 32.0:
+		if q4.x < -215.0 or q4.x > 62.0:
 			continue
 		if POENARI.distance_to(q4) < 21.0:
 			continue
 		var g := _edge_gap(q4)
-		if g < 9.0:
+		if g < 8.0:
 			continue
 		if not _free(q4, 2.2, 0.0):
 			continue
@@ -784,7 +786,7 @@ func _forest() -> void:
 			var nv := _noise_at(nz, q4)
 			var dens := 0.97
 			if rel < 1.5:
-				dens = 0.10 if g < 26.0 else (0.60 if nv > 0.45 else 0.08)
+				dens = 0.55 if g < 30.0 else (0.80 if nv > 0.35 else 0.35)
 			elif rel < 4.0:
 				dens = 0.85
 			if _rng.randf() > dens:
@@ -794,7 +796,7 @@ func _forest() -> void:
 			# fagul (coroana 10 m) nu sta in marginea soselei: umbra si ocluzia; molidul mai aproape
 			if kind == "beech" and g < 19.0:
 				kind = "pine"
-			if kind == "pine" and g < 11.5:
+			if kind == "pine" and g < 8.0:
 				continue
 			if kind == "beech" and nb >= want_beech:
 				continue
@@ -830,7 +832,7 @@ func _forest() -> void:
 		else:
 			var r := _rng.randf()
 			var v2 := "B" if r < 0.5 else ("C" if r < 0.85 else "A")
-			var s1 := _rng.randf_range(0.8, 1.4)
+			var s1 := _rng.randf_range(0.8, 1.4) if g >= 16.0 else _rng.randf_range(0.6, 0.85)
 			var u2 := _rng.randf_range(0.9, 1.1)
 			for part2 in ["P", "T"]:
 				var key2 := "pine_%s_%s_%d" % [v2, part2, sl]
@@ -898,7 +900,7 @@ func _fences() -> void:
 ## Un rand sub 4 segmente se arunca (sine singuratice pe iarba citesc ca resturi, nu ca gard).
 func _fence_line(pos: PackedVector3Array, yws: PackedFloat32Array, sc: Array, gap: float,
 		side: float, maxn: int, rmin: int, rmax: int) -> int:
-	var vi := _village_indices()
+	var vi: Array[int] = _a_idx
 	var run_left := 0
 	var gap_left := 0
 	var count := 0
@@ -909,12 +911,25 @@ func _fence_line(pos: PackedVector3Array, yws: PackedFloat32Array, sc: Array, ga
 	for i in vi:
 		if count + buf_p.size() >= maxn:
 			break
+		var px := _track.baked[i].x
+		if px < -176.0 or (px > -120.0 and px < -32.0) or px > 16.0:
+			count += _flush_run(buf_p, buf_y, pos, yws, sc)
+			buf_p = PackedVector3Array()
+			buf_y = PackedFloat32Array()
+			have_prev = false
+			continue
 		var o := _road_anchor(i, side, gap)
 		if not have_prev:
 			prev = o
 			have_prev = true
 			continue
 		if o.distance_to(prev) < 2.04:
+			continue
+		if o.distance_to(prev) > 4.5:
+			count += _flush_run(buf_p, buf_y, pos, yws, sc)
+			buf_p = PackedVector3Array()
+			buf_y = PackedFloat32Array()
+			prev = o
 			continue
 		var mid := (o + prev) * 0.5
 		var t := (o - prev).normalized()
@@ -1023,6 +1038,31 @@ func _paths() -> void:
 			var s := _rng.randf_range(0.95, 1.25)
 			sc.append(Vector3(s, 1.0, s))
 			t += 1.3
+	# poteci intre case: de la poarta unei case la poarta vecinei (<= 32 m), curbate usor
+	for ia in _houses.size():
+		for ib in range(ia + 1, _houses.size()):
+			var ha: Dictionary = _houses[ia]
+			var hb: Dictionary = _houses[ib]
+			var ga: Vector3 = Basis(Vector3.UP, float(ha["yaw"])) * Vector3(0, 0, -6.2 * float(ha["sc"]))
+			var gb: Vector3 = Basis(Vector3.UP, float(hb["yaw"])) * Vector3(0, 0, -6.2 * float(hb["sc"]))
+			var pa := Vector2(ha["c"].x + ga.x, ha["c"].y + ga.z)
+			var pb := Vector2(hb["c"].x + gb.x, hb["c"].y + gb.z)
+			var dd := pa.distance_to(pb)
+			if dd > 24.0:
+				continue
+			var tt := 0.0
+			while tt < dd:
+				var qq := pa.lerp(pb, tt / dd)
+				if _free(qq, 0.1, -1.0) or true:
+					var inside := false
+					for o in _solid:
+						if o.z > 5.0 and Vector2(o.x, o.y).distance_to(qq) < o.z * 0.55:
+							inside = true
+					if not inside and _edge_gap(qq) > 2.5:
+						pos.append(Vector3(qq.x, _sol_real(qq.x, qq.y) + 0.07, qq.y))
+						yws.append(0.0)
+						sc.append(Vector3(1.0, 1.0, 1.0))
+				tt += 1.3
 	_n += 1
 	var sid := _use("flock", "res://scenes/props/flock.gd", "Script")
 	_out.append('[node name="Poteca%d" type="MultiMeshInstance3D" parent="%s"]' % [_n, PARENT])

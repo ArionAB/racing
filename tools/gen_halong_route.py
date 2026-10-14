@@ -797,17 +797,29 @@ print(f"  maimute: {F_MAIMUTE:.4f}")
 # `[sub_resource]` vin INAINTEA primului `[node]`, altfel parserul da
 # "Unknown tag 'sub_resource' in file" si scena nu se incarca deloc.
 BR_F0, BR_F1 = 0.8555, 0.9653
-_BR_DROP = 0.7          # m sub drumul de sus, la MIJLOC (terasa de abraziune).
-# PRAG MASURAT, nu ales: ProbeCameraSolid baleiat pe cota benzii da
-#   0.0 / 0.3 / 0.5 / 0.7 -> 0 incidente
-#   0.85 / 1.0            -> 1 incident (camera INTRA IN MASINA pe mijlocul benzii)
-# Camera urmeaza terenul; pe o banda prea coborata ajunge sub tablier, iar sonda
-# raporteaza collider "Car" — nu un perete (memoria
-# banda-coborata-ingroapa-camera). 0.7 e cea mai ADANCA terasa care tine camera
-# afara, deci se alege MAXIMUL, nu prima valoare care merge: abaterea de cota e
-# exact ce face banda sa arate ca o terasa.
-# Nota: sonda de camera E determinista (1.0 a dat acelasi verdict la doua
-# rulari separate), deci pragul nu e zgomot — altfel decat ProbeRace.
+_BR_DROP = 0.0          # banda e PE COTA DRUMULUI, nu sub ea. Vezi mai jos.
+# BANDA NU POATE AVEA COTA PROPRIE, si asta e un contract intre doua sisteme,
+# masurat pe doua garzi diferite:
+#
+#  1. `ProbeLaneClear` — DECISIVA. `TrackSideSampler._carve_branches` sapa
+#     terenul la cota benzii minus `BRANCH_DROP` (0.25 m), dar la CAPETE
+#     `TrackBranch` racordeaza la cota buclei principale, deci terenul rămâne
+#     sus si blocheaza intrarea. Baleiat:
+#       _BR_DROP 0.00 ->  1 blocaj (jonca, pe ruta principala — nu banda)
+#       _BR_DROP 0.25 -> 17 blocaje (TerrainBody in fata, la 0.09-5.3 m)
+#       _BR_DROP 0.45 -> 13 blocaje
+#     Adica ORICE coborare blocheaza capetele benzii. Terasa de abraziune
+#     "scufundata" nu se poate face asa; daca o vrem, cere sapatura proprie
+#     (`custom_hollows`) sau o rapa, nu o cota de banda.
+#
+#  2. `ProbeCameraSolid` — a doua constrangere, mai permisiva (0.7 m era inca
+#     bine): pe o banda prea coborata camera INTRA IN MASINA, si sonda
+#     raporteaza collider "Car", nu un perete (memoria
+#     banda-coborata-ingroapa-camera). Baleiat: 0.0-0.7 -> 0 incidente,
+#     0.85/1.0 -> 1. Sonda aia E determinista, altfel decat ProbeRace.
+#
+# Cu 0.0 banda rămâne o scurtatura de -32.8% pe acelasi plan ca drumul, iar
+# mareea o uda si o inchide la fel de bine: gimmickul nu depinde de cota.
 _BR_BOW = 10.0         # bombare spre apa la mijloc (m), ca sa nu fie o rigla
 _br_a = at_road(BR_F0)
 _br_b = at_road(BR_F1)

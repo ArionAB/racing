@@ -1415,7 +1415,39 @@ l-am verificat anume, după ce nedeterminismul lui ProbeRace mă păcălise cu
 **Garda e armată** cu linie de bază proprie, **fără marjă** (memoria
 `garda-fara-linie-de-baza-iese-zero`): până la armare sonda tipărea „pistă fără
 linie de bază", adică trecea verde orice. `Ha Long (Track22): 0`, plus
-`--sabotaj` verificat.
+`--sabotaj` verificat (găsește zidul plantat la frac 0,300).
+
+#### Și constrângerea decisivă, găsită de `ProbeLaneClear`: banda nu poate avea cotă proprie
+
+Garda pragului de cameră spunea că 0,7 m e în regulă. **`ProbeLaneClear` a
+spus altceva, și e mai tare:** cu banda la 0,7 m, **20 de probe blocate**, cu
+`TerrainBody` în față la 0,09–5,3 m, grupate exact la **capetele** benzii.
+
+Cauza e un contract între două sisteme: `TrackSideSampler._carve_branches` sapă
+terenul la cota benzii **minus `BRANCH_DROP` (0,25 m)**, dar `TrackBranch`
+**racordează capetele la cota buclei** — iar acolo terenul rămâne sus și
+blochează intrarea.
+
+| coborâre | probe blocate |
+|---|---|
+| **0,0** | **1** (jonca, pe ruta principală — intenționat) |
+| 0,25 | 17 |
+| 0,45 | 13 |
+
+Deci **orice** cotă proprie de bandă blochează capetele, nu doar una mare.
+Banda stă acum **pe cota drumului**, iar gimmickul nu pierde nimic: scurtătura
+rămâne −32,8% și mareea o udă și o închide la fel. O terasă *scufundată*, dacă
+o vrem vizual, cere **săpătură proprie** (`custom_hollows`) sau o râpă, nu o
+cotă de bandă.
+
+**Toate gărzile de layout trec acum:**
+
+| gardă | rezultat |
+|---|---|
+| `ProbeLayout` | OK (rază min 17,8 m, pantă 9,8%) |
+| `ProbeBuried` | OK — niciun carosabil îngropat |
+| `ProbeCameraSolid` | **0 incidente, exact linia de bază**; sabotaj pică |
+| `ProbeLaneClear` | **1 blocaj (jonca), exact linia de bază**; sabotaj pică |
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 

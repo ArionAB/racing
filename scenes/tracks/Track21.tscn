@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="17_hollow"]
+[ext_resource type="Script" path="res://scenes/hazards/waterfall_decor.gd" id="18_wfdecor"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="3_channel"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="4_hzm"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
@@ -149,6 +150,12 @@ gizmo_extents = 190.0
 script = ExtResource("2_peak")
 radius_m = 190.0
 
+[node name="CascadaMal" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72.00, 62.00, -291.00)
+gizmo_extents = 27.0
+script = ExtResource("2_peak")
+radius_m = 27.0
+
 [node name="Goluri" type="Node3D" parent="."]
 
 [node name="GolNoriA" type="Marker3D" parent="Goluri"]
@@ -268,10 +275,16 @@ water_half = 6.0
 bank = 16.0
 depth = 18.0
 water_y_drop = 15.0
-reach = 90.0
-fade = 30.0
+reach = 28.0
+fade = 14.0
 jump = true
 label = "Paraul Balea"
+
+[node name="Cascada" type="Node3D" parent="."]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -72.00, 8.00, -302.50)
+script = ExtResource("18_wfdecor")
+curtain_size = Vector3(3, 26, 6)
+spray_count = 16
 
 [node name="ZoneCamera" type="Node3D" parent="."]
 

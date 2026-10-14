@@ -36,7 +36,7 @@ extends Node
 ##     (jneapan ~10 palcuri, afin,          schist_outcrop_b mic, scree mic
 ##      sist mic)
 ##  9  petice de bujor magenta      6       plants/bujor_de_munte (x6-8/petic) MultiMesh, atint:tf_bloom
-## 10  zapada veche pe versant      6 pet.  structures/snow_wall (SnowWall_B)  MultiMesh, pe ATLAS (tri_class ""),
+## 10  zapada veche pe versant      12 pet. structures/snow_wall (SnowWall_B)  MultiMesh, pe ATLAS (tri_class ""),
 ##                                                                              ingropata 35-50%
 ## 11  telecabina, lac, apa, tunel, portaluri: NU sunt ale mele (fundatie/integrare)
 ## 12  corbi (raven), cable_car_station: nu — material nou / piesa de integrare
@@ -280,7 +280,7 @@ func _cabana_si_terasa() -> void:
 		var y := base_yaw + (0.38 if j % 2 == 0 else -0.30) + _rng.randf_range(-0.1, 0.1)
 		var p3 := q
 		p3.y = _y_garda(q.x, q.z, q.y - 0.02)
-		_node("E_Masina%d" % k, "e_car_" + ("a" if j % 2 == 0 else "b"), p3, y, 1.0)
+		_node("E_Masina%d" % k, "e_car_" + ("a" if j % 2 == 0 else "b"), p3, y, 1.0, c["nrm"], 0.9)
 		_solid.append(Vector3(q.x, 2.4, 0.0))
 		_put("masini")
 		print(";   masina %d la (%.1f, %.1f) margine %.1f dy %.2f sl %.2f" % [k, q.x, q.z, float(c["d"]) - float(c["half_j"]), float(c["dy_road"]), float(c["slope"])])
@@ -299,7 +299,7 @@ func _cabana_si_terasa() -> void:
 		p3.y = _y_garda(q.x, q.z, q.y - 0.02)
 		var i2 := int(c["j"])
 		var tg2 := (_track.baked[mini(i2 + 1, _track.baked.size() - 1)] - _track.baked[maxi(i2 - 1, 0)])
-		_node("E_Moto%d" % k, "e_moto", p3, atan2(-tg2.x, -tg2.z) + float(mt[2]), 1.0)
+		_node("E_Moto%d" % k, "e_moto", p3, atan2(-tg2.x, -tg2.z) + float(mt[2]), 1.0, c["nrm"], 0.9)
 		_solid.append(Vector3(q.x, 1.4, 0.0))
 		_put("motociclete")
 	# tarabe: 4, in sir pe flancul cabanei dinspre amonte, fata spre drum
@@ -316,7 +316,7 @@ func _cabana_si_terasa() -> void:
 		k += 1
 		var p3 := q
 		p3.y = _y_garda(q.x, q.z, q.y - 0.02)
-		_node("E_Taraba%d" % k, "e_stall", p3, _face(q, road_pt) + _rng.randf_range(-0.12, 0.12), 1.0)
+		_node("E_Taraba%d" % k, "e_stall", p3, _face(q, road_pt) + _rng.randf_range(-0.12, 0.12), 1.0, c["nrm"], 0.9)
 		_solid.append(Vector3(q.x, 2.4, 0.0))
 		_put("tarabe")
 		print(";   taraba %d la (%.1f, %.1f) d axa %.1f" % [k, q.x, q.z, float(c["d"])])
@@ -571,7 +571,7 @@ func _bujor() -> void:
 # 10 ----------------------------------------------------------------- zapada
 
 ## Zapada veche pe versant: SnowWall_B_Snow pe ATLAS, ingropata 35-50% (calota cu trepte), lungimea pe
-## curba de nivel. 6 petice de 3 banci pe versantul stang (sus) + pe buza de nord a caldarii (dreapta).
+## curba de nivel. 12 petice de 3 banci: 8 pe versantul stang (sus) + 4 pe buza de nord a caldarii (dreapta).
 func _snow_lump(pc: Dictionary, big: bool) -> void:
 	var nrm: Vector3 = pc["nrm"]
 	var cx := -nrm.z
@@ -591,10 +591,10 @@ func _snow_lump(pc: Dictionary, big: bool) -> void:
 func _zapada() -> void:
 	var groups := 0
 	var guard := 0
-	while groups < 6 and guard < 9000:
+	while groups < 12 and guard < 12000:
 		guard += 1
 		var f := _rng.randf_range(F_TUNEL_END, F1 - 0.004)
-		var sg := -1.0 if groups < 4 else 1.0
+		var sg := -1.0 if groups < 8 else 1.0
 		# sus pe versant: la 14-40 m de margine, panta mai mare
 		var c := _cand(f, sg, _rng.randf_range(14.0, 40.0) if sg < 0.0 else _rng.randf_range(24.0, 44.0))
 		if not _ok(c, 3.0, 8.0) or float(c["slope"]) < 0.25 or float(c["slope"]) > 1.4:

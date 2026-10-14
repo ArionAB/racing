@@ -624,6 +624,22 @@ const CLASS_TEXTURES := {
 	# plin e brun-portocaliu (154,113,82), deci nici una nu da rosul din brief.
 	# Clasa separata, ca `roof_tiles` (case Dunele, Fiordland) sa ramana neatinsa.
 	"ok_roof": "res://assets/textures/classes/roof_tiles.png",
+	# CLASELE TRANSFAGARASAN (Track21, brief transfagarasan.md §4). Toate sunt clase NOI
+	# pe dale EXISTENTE (zero VRAM nou, nicio clasa partajata retentata — memoria
+	# `tenta-pe-clasa-partajata`); se aplica doar prin `CLASSES_BY_THEME["transfagarasan"]`.
+	# SISTUL: tinta #7E8478 (gri-verzui). Dala `alpine_granite` e crem-calda (#ADA38F),
+	# dar toate canalele tintei stau SUB ea (0.50 / 0.63 / 0.68 liniar), deci tenta ajunge.
+	"tf_schist": "res://assets/textures/classes/alpine_granite.png",
+	# ZIDARIA (Poenari, cabane, case, ziduri de sprijin, parterul): `stone_wall` n-are
+	# scara triplanara (azi doar prin UV-uri colapsate, adica un singur texel), deci clasa
+	# proprie pe aceeasi dala, ridicata si tentata spre gri neutru (vezi CLASS_TINT).
+	"tf_stone": "res://assets/textures/classes/stone_wall.png",
+	# JNEAPANUL: tinta #34503A (verde inchis albastrui). `pine_needles` ramane #6C8946
+	# (molizii Alpilor), prea luminoasa si prea galbena pentru tufa culcata.
+	"tf_jneapan": "res://assets/textures/classes/pine_needles.png",
+	# FAGUL european (#5E8A3A, verde cald): `beech_canopy` (Fiordland) iese #486335, mai
+	# inchis si mai rece. Aceeasi dala `acacia_canopy`, ridicata si tentata altfel.
+	"tf_beech": "res://assets/textures/classes/acacia_canopy.png",
 	# TUFUL CREM al Cappadociei: hornurile, poarta geamana, gura de pestera si
 	# fatada bisericii rupestre. ACEEASI dala ca `red_valley_tuff` — nu se
 	# dubleaza in memorie, se schimba doar ridicarea si tenta (aceeasi mecanica
@@ -1034,6 +1050,24 @@ const CLASS_TINT := {
 	# multiplicator liniar (0.80, 0.20, 0.18) = in sRGB (0.906, 0.48, 0.46).
 	# TOATE canalele sub 1. INCEPUT DE CALIBRARE.
 	"ok_roof": Color(0.630, 0.370, 0.480),
+	# Transfagarasan: tentele se calculeaza ca (tinta liniara / media liniara a dalei), pe
+	# canal, apoi in sRGB (`tools` de calibrare din commit-ul clasei). TOATE canalele sub 1.
+	# Sist #7E8478 IN JOC (nu pe dala): soarele temei (#FFD9A8) taie albastrul. Masurat pe
+	# vitrina, cu tenta (0.737, 0.817, 0.843) pe dala neridicata, sistul iesea (127,117,84)
+	# = olive-cald, ratia fata de albedo (1.02, 0.77, 0.47) liniar. Albedoul cerut e deci
+	# tinta / ratia = #7D95AA, iar B (0.40 liniar) e peste media dalei (0.276): dala ridicata
+	# la 0.80 (CLASS_LIFT), apoi tenta (0.31, 0.50, 0.84) liniar. A doua trecere: (123,132,129)
+	# pe captura, deci B -15% si R +5% liniar: (0.32, 0.50, 0.71).
+	"tf_schist": Color(0.6030, 0.7327, 0.8597),
+	# Jneapan #34503A: dala (0.150, 0.251, 0.061) -> (0.229, 0.320, 0.691).
+	# Zidaria: tinta in joc #8E8C82 (gri neutru; cu dala neatinsa piatra iesea (150,127,91),
+	# bej-maro sub soarele temei). Albedo #8D9EB7, dala ridicata la 0.80, tenta (0.41, 0.55, 0.91).
+	"tf_stone": Color(0.6703, 0.7683, 0.9603),
+	"tf_jneapan": Color(0.5160, 0.6011, 0.8495),
+	# Fag #5E8A3A: dala ridicata la 0.50 (mai jos). Prima tenta (0.773, 0.923, 0.788) a dat in
+	# joc (104,139,53) pe coroana, deci R prea mare si B prea mic: corectie liniara
+	# (0.81, 0.98, 1.19) peste (0.559, 0.833, 0.584).
+	"tf_beech": Color(0.7030, 0.9165, 0.8510),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
@@ -1261,6 +1295,11 @@ const CLASS_LIFT := {
 	# Olanele Ryukyu: R tinta (0.479 liniar) e peste media dalei `roof_tiles`
 	# (0.357), deci tenta singura nu ajunge. Vezi CLASS_TINT.
 	"ok_roof": 0.600,
+	# Sistul Transfagarasan: vezi CLASS_TINT.
+	"tf_schist": 0.800,
+	"tf_stone": 0.800,
+	# Fagul Transfagarasan: G tinta (0.254 liniar) e peste media dalei (0.182), deci ridicare.
+	"tf_beech": 0.500,
 	"village_plaster": 0.88,
 	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
 	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:
@@ -1402,6 +1441,13 @@ const CLASS_TRIPLANAR_SCALE := {
 	# Olanele: ~26 coloane de tigla pe repetitie. La 0.2 (5 m) coloana are ~0.19 m,
 	# aproape de nervurile de 0.2 m modelate in geometrie (`Gate_Roof`).
 	"ok_roof": 0.2,
+	# Transfagarasan. Sistul: ca `alpine_granite`/`wet_gneiss` (o repetitie la ~6 m).
+	"tf_schist": 0.16,
+	# Zidaria: o repetitie la ~2.5 m — pietre cat o piatra de zid, nu cat un bloc.
+	"tf_stone": 0.4,
+	"tf_jneapan": 0.6,
+	# Ca `beech_canopy` (aceeasi dala pictata, lobi la ~20 m/repetitie).
+	"tf_beech": 0.05,
 	# ACEEASI scara ca faleza rosie, si nu din lene: hornurile masoara 11-18 m
 	# pe verticala (masurat pe cele 12 .glb-uri — chimney_a 11.3, chimney_c 17.3,
 	# triple 18.5, twin_gate 21.6), adica exact plaja modulului de faleza de
@@ -2009,6 +2055,11 @@ const ATLAS_TINTS := {
 	# Tenta liniara R 0.62, G 0.66; B nu poate creste (19 vs 30), ramane 1.0 => in
 	# sRGB (0.81, 0.84, 1.0). Doar pe `*_Lacquer`; aurul si mortarul raman pe atlas.
 	"ok_lacquer": Color(0.810, 0.840, 1.000),
+	# Transfagarasan. Bujorul de munte: FLAMINGO_PINK 31 (#D2A0BE) -> #B63A7A, liniar
+	# (0.727, 0.119, 0.379) = in sRGB (0.868, 0.382, 0.648) a dat in joc (202,33,94), rosu-aprins;
+	# tinta (182,58,122) cere R mai jos, G si B mai sus. Corectie liniara (0.79, 3.5, 1.78),
+	# aplicata pe jumatate (floarea are ~300 px, masuratoarea e zgomotoasa): (0.824, 0.510, 0.739).
+	"tf_bloom": Color(0.824, 0.510, 0.739),
 }
 
 static var _atint_mats: Dictionary = {}

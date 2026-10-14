@@ -24,17 +24,30 @@ const CAR_DATA_TUKTUK: CarData = preload("res://scenes/cars/data/tuktuk.tres")
 
 ## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in cursa rapida.
 ##
-## ATENTIE, nota de mai jos e VECHE si nu mai e adevarata: zicea „momentan toate
-## trei, deci campionatul le acopera pe toate", scrisa cand chiar erau trei.
-## Acum sunt SAPTE, iar `CHAMP_ROUNDS` a ramas 3 — deci Baikal, Stromboli,
-## Chongqing si Cappadocia sunt doar cursa rapida, nu intra in campionat.
-## Nu e o scapare de reparat in graba: lungimea campionatului e decizie de
-## design (3 curse = burst play, 7 = alt ritm), si se schimba deliberat, cu
-## `CHAMP_ROUNDS`, nu din reflex.
+## `CHAMP_ROUNDS` a ramas 3 de cand erau trei piste, iar lista a crescut la
+## PAISPREZECE — deci campionatul e Dunele + Okinawa manual + Transfagarasan
+## (indicii 0-2), si restul sunt doar cursa rapida. Nu e o scapare de reparat
+## in graba: lungimea campionatului e decizie de design (3 curse = burst play,
+## 14 = alt ritm), si se schimba deliberat, cu `CHAMP_ROUNDS`, nu din reflex.
+##
+## Pe indexul 2 a stat Alpii (Track09) pana la swap-ul din 14 oct 2026. Deci
+## un swap pe primele CHAMP_ROUNDS pozitii schimba si campionatul: aici a fost
+## vrut explicit (Transfagarasanul ia runda 3), nu incasat din greseala.
 const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track01.tscn",
 	"res://scenes/tracks/Track08.tscn",
-	"res://scenes/tracks/Track09.tscn",
+	# Track21 = INDEXUL 2 (Transfagarasan). PRIMUL SWAP din proiect: pana acum
+	# Monument Valley, Okinawa si Transfagarasanul doar se ADAUGASERA la coada,
+	# cu nota "pana la swap". Aici Alpii (Track09) IES din lista de joc si
+	# Transfagarasanul le ia locul, inclusiv runda 3 de campionat
+	# (indexul 2 < CHAMP_ROUNDS): decizia dezvoltatorului, 14 oct 2026, nu
+	# un efect secundar — brief transfagarasan.md §8.
+	# Track09 RAMANE IN REPO ca banc de test: probe_track09_fracs,
+	# probe_alpine_terrain si verify_all_tracks_load il incarca PE CALE
+	# ("res://scenes/tracks/Track09.tscn"), nu prin index, deci swap-ul nu le
+	# atinge. Uneltele cer Transfagarasanul cu --track=2 SAU --track=21
+	# (resolve_track_index il gaseste si dupa numarul scenei).
+	"res://scenes/tracks/Track21.tscn", # Transfagarasan = INDEXUL 2
 	"res://scenes/tracks/Track10.tscn",
 	"res://scenes/tracks/Track11.tscn",
 	"res://scenes/tracks/Track12.tscn",
@@ -54,30 +67,40 @@ const TRACK_SCENES: Array[String] = [
 	# vor 18 (memoria `probe-decor-numar-de-scena`).
 	"res://scenes/tracks/Track18.tscn", # Kyoto = INDEXUL 11
 	# Track19 = INDEXUL 12 (Monument Valley, brief monument_valley.md §7): la
-	# COADA listei; Dunele (Track01) ramane pe indexul 0 pana la swap. Uneltele
-	# o adreseaza cu --track=19 (resolve_track_index o gaseste dupa numarul scenei).
+	# COADA listei; Dunele (Track01) ramane pe indexul 0 pana la swap — care
+	# N-A FOST FACUT inca, desi nota e aici de la inceputul lui oct 2026.
+	# Tiparul e swap-ul Transfagarasanului de mai sus: se scrie PE POZITIE,
+	# peste Track01, nu se sterge intrarea veche (lista nu are voie sa se
+	# taseze — vezi comentariul de pe indexul 2). Indexul 0 e in campionat.
+	# Uneltele o adreseaza cu --track=19 (resolve_track_index o gaseste dupa
+	# numarul scenei).
 	"res://scenes/tracks/Track19.tscn", # Monument Valley = INDEXUL 12
 	# Track20 = INDEXUL 13 (Okinawa, brief okinawa.md §7): la COADA listei;
-	# Okinawa manual (Track08) ramane pe indexul 1 pana la swap. Uneltele o
+	# Okinawa manual (Track08) ramane pe indexul 1 pana la swap — care, ca la
+	# Monument Valley, N-A FOST FACUT inca. Acelasi tipar: PE POZITIE, peste
+	# Track08. Indexul 1 e in campionat. Uneltele o
 	# adreseaza cu --track=20 (resolve_track_index o gaseste dupa numarul scenei;
 	# probe_decor/probe_manual vor 20, snapshot/probe_race/probe_layout vor 13 SAU 20).
 	"res://scenes/tracks/Track20.tscn", # Okinawa = INDEXUL 13
-	# Track21 = INDEXUL 14 (Transfagarasan, brief transfagarasan.md §7): la COADA
-	# listei; Alpii (Track09) raman pe indexul 2 pana la swap. Uneltele o adreseaza
-	# cu --track=21 (resolve_track_index o gaseste dupa numarul scenei).
-	"res://scenes/tracks/Track21.tscn", # Transfagarasan = INDEXUL 14
-	# Track22 = INDEXUL 15 (Ha Long, brief halong.md §7). Prima pista care se
-	# ADAUGA, nu inlocuieste: Monument Valley, Okinawa si Transfagarasan luaseră
-	# locul Dunelor, Okinawei manuale si Alpilor. Deci aici NU urmeaza un swap.
+	# Track22 = INDEXUL 14 (Ha Long, brief halong.md §7). Prima pista care se
+	# ADAUGA fara sa inlocuiasca nimic: Monument Valley, Okinawa si
+	# Transfagarasanul luaseră locul Dunelor, Okinawei manuale si Alpilor, deci
+	# aici NU urmeaza un swap.
+	#
+	# INDEXUL 14, nu 15: la integrarea cu main, swap-ul Transfagarasanului (care
+	# l-a mutat pe INDEXUL 2, peste Alpii) a scos intrarea lui de la coada, deci
+	# Ha Long urca cu o poziţie. Pe ramura de fundatie era 15, cand Track21 era
+	# inca la coada.
+	#
 	# Uneltele o adreseaza cu --track=22 (resolve_track_index o gaseste dupa
 	# numarul scenei); probe_decor/probe_manual vor 22, snapshot/probe_race/
-	# probe_layout vor 15 SAU 22 (memoria probe-decor-numar-de-scena).
-	"res://scenes/tracks/Track22.tscn", # Ha Long = INDEXUL 15
+	# probe_layout vor 14 SAU 22 (memoria probe-decor-numar-de-scena).
+	"res://scenes/tracks/Track22.tscn", # Ha Long = INDEXUL 14
 ]
 const TRACK_NAMES: Array[String] = [
-	"Dunele", "Okinawa manual", "Alpii", "Baikal", "Stromboli", "Chongqing",
-	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland", "Jodhpur", "Kyoto",
-	"Monument Valley", "Okinawa", "Transfagarasan", "Ha Long",
+	"Dunele", "Okinawa manual", "Transfagarasan", "Baikal", "Stromboli",
+	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
+	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long",
 ]
 const CHAMP_ROUNDS: int = 3
 
@@ -183,7 +206,7 @@ var real_headlight: bool = true
 ##   2 = MAXIM: totul, la rezolutie nativa, MSAA 4x.
 ## Umbrele si glow-ul se citesc la construirea pistei (Track.gfx_tier), deci
 ## schimbarea lor se vede la urmatoarea cursa; scala si MSAA se aplica pe loc.
-const GFX_TIER_NAMES: Array[String] = ["Economic", "Normal", "Maxim"]
+const GFX_TIER_NAMES: Array[String] = ["Low", "Normal", "High"]
 var gfx_tier: int = 1
 
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
@@ -196,6 +219,10 @@ var touch_active: bool = false # cel putin un deget pe ecran (auto-accelerate)
 # nu indexul: la stergerea sau reordonarea unei piste, indexul ramas liber era
 # mostenit de alta pista si-i afisa recordul altcuiva.
 var records: Dictionary = {}
+## Recordul pe toata cursa (#498), separat de cel pe tur: cheie
+## `race_record_key` (pista + numarul de ture — un record pe 3 ture nu se
+## compara cu unul pe 5), valoare in ms.
+var race_records: Dictionary = {}
 
 func _ready() -> void:
 	load_settings()
@@ -250,11 +277,11 @@ func apply_gfx_tier() -> void:
 ## Testele pornesc de pe Normal si STING lucruri; aprinderea unei umbre sau a
 ## unui glow pe care nivelul nu l-a construit foloseste reglajele implicite
 ## ale Godot, nu pe cele ale temei.
-const DBG_MSAA_NAMES: Array[String] = ["Nivel", "Off", "2x", "4x"]
-const DBG_SCALE_NAMES: Array[String] = ["Nivel", "540p", "648p", "720p", "864p", "Nativ"]
+const DBG_MSAA_NAMES: Array[String] = ["Tier", "Off", "2x", "4x"]
+const DBG_SCALE_NAMES: Array[String] = ["Tier", "540p", "648p", "720p", "864p", "Native"]
 const DBG_SCALE_H: Array[float] = [0.0, 540.0, 648.0, 720.0, 864.0, 100000.0]
-const DBG_SHADOW_NAMES: Array[String] = ["Nivel", "Off", "1 felie", "2 felii"]
-const DBG_GLOW_NAMES: Array[String] = ["Nivel", "Off", "On"]
+const DBG_SHADOW_NAMES: Array[String] = ["Tier", "Off", "1 split", "2 splits"]
+const DBG_GLOW_NAMES: Array[String] = ["Tier", "Off", "On"]
 var dbg_msaa: int = 0
 var dbg_scale: int = 0
 var dbg_shadows: int = 0
@@ -317,6 +344,24 @@ func try_record(track_index: int, lap_ms: int) -> bool:
 func best_lap(track_index: int) -> int:
 	return int(records.get(TRACK_NAMES[track_index], 0)) # 0 = niciun record inca
 
+## Cheia recordului de cursa: aceeasi pista pe alt numar de ture e alta proba.
+static func race_record_key(track_index: int, laps: int) -> String:
+	return "%s@%d" % [TRACK_NAMES[track_index], laps]
+
+## Ca `try_record`, pentru timpul TOTAL al cursei, pe numarul curent de ture.
+func try_race_record(track_index: int, race_ms: int) -> bool:
+	var key := race_record_key(track_index, total_laps)
+	var best := int(race_records.get(key, 0))
+	if best > 0 and race_ms >= best:
+		return false
+	race_records[key] = race_ms
+	save_records()
+	return true
+
+## 0 = niciun record de cursa inca (pe numarul curent de ture).
+func best_race(track_index: int) -> int:
+	return int(race_records.get(race_record_key(track_index, total_laps), 0))
+
 func load_records() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(RECORDS_PATH) != OK:
@@ -325,11 +370,18 @@ func load_records() -> void:
 		var ms := int(cfg.get_value("records", track_name, 0))
 		if ms > 0:
 			records[track_name] = ms
+	if cfg.has_section("race_records"):
+		for key in cfg.get_section_keys("race_records"):
+			var ms := int(cfg.get_value("race_records", key, 0))
+			if ms > 0:
+				race_records[key] = ms
 
 func save_records() -> void:
 	var cfg := ConfigFile.new()
 	for track_name in records:
 		cfg.set_value("records", track_name, records[track_name])
+	for key in race_records:
+		cfg.set_value("race_records", key, race_records[key])
 	cfg.save(RECORDS_PATH)
 
 # ------------------------------------------------------------------ flux

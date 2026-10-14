@@ -232,6 +232,12 @@ extends Track
 ## de elan la repunere). Pe o tema fara mare rapa ramane altfel uscata. Vezi
 ## Track._build_ravine_water.
 @export var custom_ravine_water: Array[Vector3] = []
+## STILURI de apa (optional). Fiecare Dictionary: "ravines": Array[int] (indicii
+## din `custom_ravines`) si/sau "channels": true, plus chei de tema `water_*`
+## care se suprascriu pentru acele ape (ex. `water_shallow_rgb`, `water_foam`,
+## `water_crest`, `water_wave_amp_k`). Gol = toate apele iau tema. Vezi
+## Track._water_styles.
+@export var custom_water_styles: Array[Dictionary] = []
 ## DEBLEE: (frac_start, frac_end pe LUNGIME, cota ABSOLUTA a buzei, latura
 ## +-1). Soseaua taiata in teren: pe latura data peretele urca de la umar pana
 ## la buza. Perechea pe plus a rapei-cornisa. Vezi
@@ -431,6 +437,10 @@ func _ravine_floor_slopes() -> Array[Vector2]:
 
 func _ravine_water() -> Array[Vector3]:
 	return custom_ravine_water
+
+
+func _water_styles() -> Array[Dictionary]:
+	return custom_water_styles
 
 
 func _cuttings() -> Array[Vector4]:

@@ -23,22 +23,22 @@ func _ready() -> void:
 	_main_box.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "curse cu masinute, drift si imbranceli"
+	subtitle.text = "toy cars, drifting and bumping"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_size_override("font_size", 24)
 	subtitle.modulate = Color(1, 1, 1, 0.6)
 	_main_box.add_child(subtitle)
 
-	var quick := _make_button("CURSA RAPIDA")
+	var quick := _make_button("QUICK RACE")
 	_main_box.add_child(quick)
-	var champ := _make_button("CAMPIONAT")
+	var champ := _make_button("CHAMPIONSHIP")
 	champ.pressed.connect(GameState.start_championship)
 	_main_box.add_child(champ)
-	var garage_btn := _make_button("GARAJ")
+	var garage_btn := _make_button("GARAGE")
 	_main_box.add_child(garage_btn)
-	var settings_btn := _make_button("SETARI")
+	var settings_btn := _make_button("SETTINGS")
 	_main_box.add_child(settings_btn)
-	var quit := _make_button("IESIRE")
+	var quit := _make_button("QUIT")
 	quit.pressed.connect(func() -> void: get_tree().quit())
 	_main_box.add_child(quit)
 
@@ -79,7 +79,7 @@ func _build_garage_panel() -> Control:
 	var panel := _make_panel()
 	var box := panel.get_child(0).get_child(0) as VBoxContainer
 	var title := Label.new()
-	title.text = "GARAJ"
+	title.text = "GARAGE"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 34)
 	box.add_child(title)
@@ -104,7 +104,7 @@ func _refresh_garage(buttons: Array[Button]) -> void:
 	for i in buttons.size():
 		var data := GameState.CAR_DATA[i] as CarData
 		var marker := "> " if i == GameState.selected_car else "   "
-		buttons[i].text = "%s%s   vit %d  accel %d  grip %d  masa %.1f" % [
+		buttons[i].text = "%s%s   speed %d  accel %d  grip %d  mass %.1f" % [
 			marker, data.display_name, int(data.max_speed),
 			int(data.acceleration), int(data.grip), data.mass_factor]
 
@@ -138,7 +138,7 @@ func _make_panel() -> PanelContainer:
 
 func _add_back(box: VBoxContainer) -> void:
 	var back := Button.new()
-	back.text = "INAPOI"
+	back.text = "BACK"
 	back.custom_minimum_size = Vector2(200, 60)
 	back.add_theme_font_size_override("font_size", 24)
 	back.pressed.connect(_show_main)

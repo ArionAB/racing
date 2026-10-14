@@ -75,8 +75,41 @@ func _init() -> void:
 	# scartaitul rotilor de lemn la traversare.
 	_save("gion_bayashi", _gion_bayashi())
 	_save("gion_wheels", _gion_wheels())
+	# Tabla pe tabla la ciocnirea intre masini (#500). TOT LA SFARSIT: `rng` e
+	# un singur sir, orice sunet inserat mai sus rescrie fisiere neatinse.
+	_save("metal_hit", _metal_hit())
 	print("SFX generate in res://assets/audio/")
 	quit()
+
+## Tabla pe tabla (#500): clinchet metalic, nu bufnitura. Patru moduri
+## NEARMONICE (ca o placa de tabla, nu ca o coarda: 1 : 2,3 : 3,6 : 5,2), cele
+## inalte stinse mai repede; peste ele un hartait de zgomot de ~40 ms (zgarietura
+## la contact) si un pic de corp jos, ca sa nu sune a clopotel. ~0,35 s.
+## Jocul il reda cu volum si pitch dupa impuls (Car._process_contacts).
+func _metal_hit() -> PackedFloat32Array:
+	var n := int(RATE * 0.35)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var freqs := [520.0, 1196.0, 1872.0, 2704.0]
+	var decays := [11.0, 16.0, 24.0, 34.0]
+	var gains := [0.45, 0.35, 0.25, 0.18]
+	var hp := 0.0
+	var prev := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var ring := 0.0
+		for k in freqs.size():
+			ring += sin(TAU * float(freqs[k]) * t) * exp(-t * float(decays[k])) \
+				* float(gains[k])
+		# Zgarietura: zgomot trecut-sus (diferenta de esantioane), doar la atac.
+		var nz := rng.randf() * 2.0 - 1.0
+		hp = nz - prev
+		prev = nz
+		var scrape := hp * 0.5 * exp(-t * 55.0)
+		var body := sin(TAU * 140.0 * t) * exp(-t * 30.0) * 0.35
+		var attack := minf(float(i) / (RATE * 0.0015), 1.0)
+		out[i] = clampf((ring + scrape + body) * attack, -1.0, 1.0)
+	return _peak_norm(out, 0.9)
 
 ## „TOC" de lemn pe lemn: un bloc de lemn, nu o bubuitura. Trei moduri
 ## NEARMONICE (raport ~1 : 1,9 : 3,1), care se sting repede (mai repede cele

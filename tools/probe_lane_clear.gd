@@ -218,6 +218,11 @@ func _ready() -> void:
 const BASELINE := {
 	"Dunele (Track01)": 30,
 	"Okinawa manual (Track08)": 18,
+	# Alpii: SCOASA din lista de joc la swap-ul din 14 oct 2026 (Track21 i-a luat
+	# indexul 2). Cheia RAMANE: `track_label` o compune din TRACK_NAMES +
+	# numele scenei, deci nu se mai poate ajunge la ea prin index — dar Track09
+	# e in continuare in repo ca banc de test si sondele il incarca PE CALE.
+	# Stearsa, un `--only` pe Track09 ar primi baza -1 si ar trece cu orice cifra.
 	"Alpii (Track09)": 21,
 	"Baikal (Track10)": 70,
 	"Stromboli (Track11)": 190,
@@ -309,7 +314,15 @@ const BASELINE := {
 	# intentionat al pistei (h=0.4 la 4,2 m si h=1.0 la 1,6 m). Portalurile provizorii
 	# (`coliziune = none`), peretii de zapada si blocurile de langa ace NU intra in banda.
 	# Baza = cifra masurata, FARA marja. Sabotaj (`--sabotaj`) verificat la armare.
-	"Transfagarasan (Track21)": 2,
+	#
+	# 2 -> 3 (14 oct 2026, nivel-tema, N12a): a treia raportare e URSUL (`Urs`, hazardul
+	# de la 0.200: `AnimatableBody3D` la lat=+2.3, adica pe banda). Ursul are acum un
+	# hit-box REAL (1,07 x 1,38 x 2,58 m; vaca avea ~0,24 x 0,48 x 0,85 m si practic
+	# nu se lovea), iar sonda il vede corect ca obstacol pe banda principala. Decizia
+	# dezvoltatorului (14 oct 2026) e (a): ursul ramane obstacol greu, deci cifra 3
+	# e INTENTIONATA, nu o regresie. Baza = cifra masurata, FARA marja: un al patrulea
+	# obstacol pe banda trebuie sa pice garda. Sabotaj (`--sabotaj`) verificat la armare.
+	"Transfagarasan (Track21)": 3,
 	# Ha Long (Track22), fundatia + pontoane + banda de maree (14 oct 2026):
 	# O raportare, la frac 0.790 lat=+2.0, collider `@AnimatableBody3D@134` —
 	# adica JONCA (SlidingHazard in TRAVERSARE). E obstacolul INTENTIONAT al

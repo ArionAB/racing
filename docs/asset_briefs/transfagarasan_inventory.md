@@ -5,6 +5,124 @@ Contract: `docs/asset_briefs/transfagarasan_kit.md`. Cote MASURATE din GLB
 Build: `tools/blender/build_tf_road.py` (vocabular: `transfagarasan_shapes.py`).
 Verdict: `bash tools/blender/verify_transfagarasan.sh` -> `VERDICT KIT: OK`.
 
+## Montarea în Track21 (14 oct 2026)
+
+Ramura `transfagarasan/montare` integrează doi constructori:
+- **M-cod** (`transfagarasan/montare-cod`): clasele, tentele, remapările și fundalul;
+- **M-scena** (`transfagarasan/montare-scena`): piesele în `Track21.tscn`, `PROP_COLLISION` și hazardele.
+
+Capturile sunt în `docs/track_briefs/img/transfagarasan_plan/montare/`. Cele de pe scena
+integrată sunt `integrare_*.png`.
+
+**În scenă:**
+- portalurile Bâlea, la scara 1, pe 0,317 / 0,350, cu coliziune `mesh` și `camera_blocker`;
+- `road_works` în tunel;
+- barajul, 6 module pe 0,078–0,123, cu turnul și centrala;
+- Prometeu, pe pintenul de est;
+- portalul de stâncă, la 0,138, cu `ZoneCamera/TunelStanca`;
+- Poenari, la final;
+- 34 de module `retaining_wall_curve` la acele de păr. Nu există module drepte: terenul nu coboară destul lângă drepte;
+- 18 module `snow_wall` pe urcarea D, cu fața la 9,75 m de axă;
+- 12 jaloane `snow_pole`;
+- semnul pentru urși;
+- trecerea la nivel, cu brațele ridicate;
+- pe hazarde: ursul (`sweep_speed` 1,2), câinii în turmă (`zebra_ratio` 0,1) și `ro_train`.
+
+**Clase noi, toate cheiate pe tema `transfagarasan`:** `tf_schist`, `tf_stone`, `tf_jneapan`,
+`tf_beech` și `tf_bloom`. Alte decizii de culoare:
+- `snow` și `concrete` rămân clasele existente;
+- tencuiala rămâne pe atlas, fiindcă clasa `plaster` ieșea bej-maronie;
+- tabla argintie, tabla ruginie, trunchiul fagului și blana ursului sunt rezolvate prin
+  remapare de slot. **Ursul e în `SLOT_REMAP_BY_MODEL`**: hazardul nu citește tabelul pe temă.
+
+Celelalte piste sunt bit-identice: `probe_decor` dă rânduri identice pe Track01–20, iar
+hash-ul transformurilor de orizont e identic pe 6 teme.
+
+**Sonde (6 seed-uri ProbeRace):**
+
+| sondă | înainte | după |
+|---|---|---|
+| repuneri | 4 | 13 (9 la urs) |
+| `[blocaj]` | 0 | 0 |
+| carusel | 0 | 0 |
+| tur | 77–80 s | 78–80 s |
+| materiale | 29 | 30 (max 38) |
+
+- `probe_solid` și `probe_manual`: OK. Garda `probe_solid` acoperă acum Track21.
+- `ProbeCameraSolid`: linia de bază crește de la 1 la 2. Eșantionul nou e un fals pozitiv de
+  paritate în tunelul de stâncă, iar sabotajul trece.
+- `verify_local.sh`: OK (10 pași).
+
+**Abateri deschise, judecate pe capturile din joc:**
+- **zăpada portalului Bâlea:** din camera de joc se citește ca lespezi stratificate, nu ca
+  cuburi. E acceptabilă pentru joc;
+- **ursul ridicat:** trunchiul e cilindric (confirmat), dar se citește clar „ridicat”;
+- **Poenari:** de aproape e trunchi de con, dar de la 190 m și de la 50 m se citește stâncă cu ruină.
+
+**Decizii pentru dezvoltator (la volan):**
+- **DECIS (dezvoltatorul, 14 oct 2026): (a), ursul rămâne obstacol greu.** Contextul:
+  **ursul are acum un hit-box real**, 1,07 × 1,38 × 2,58 m. Vaca avea ~0,24 × 0,48 × 0,85 m,
+  deci practic nu se lovea. AI-ul nu ocolește hazardele care traversează, așa că
+  repunerile la urs cresc de la 1 la 9 pe 6 seed-uri. `sweep_speed` nu schimbă cifra.
+  Variante:
+  - (a) rămâne așa, ca obstacol greu;
+  - (b) AI-ul frânează la telegraful hazardelor care traversează, ca la ușa din Cappadocia.
+    Asta e cod nou în `ai_controller.gd`;
+  - (c) un hit-box mai mic doar pentru AI.
+- **norii și câmpia din fundal nu se citesc încă.** Terenul de la 300–400 m e plat, aproape
+  la cota drumului, deci nu există vale în care să coboare (`dy` −8 / 0). Relieful se
+  rezolvă la POI;
+- **`mountain_peak` pe `tf_schist`** citește deal verde, fiindcă clasa înmulțește
+  vertex color-ul pictat. Se decide la POI.
+
+**Rămâne pentru etapa de POI:**
+- clădirile (cabanele, stâna, casele din Argeș, taraba), mașinile parcate, motocicleta,
+  cabina telecabinei, plantele și stâncile de decor;
+- relieful pentru marea de nori;
+- remăsurarea culorilor pe instanțe apropiate (bujorul, jneapănul, zăpada și betonul pe
+  fețele luminate).
+
+**Înainte de primul build pe telefon:** `keep_variants` nu există în `world_prop.gd` pe
+main. Commit-ul `25538d2a` nu a ajuns pe nicio ramură. Barajul și pereții de zăpadă
+folosesc `visible = false` pe variante (plus metadata `keep_variants`, inertă), iar pe
+Android ascunderea s-a dovedit nesigură. Recuperarea e un PR separat.
+
+## Valul 3 — integrat (13 oct 2026)
+
+Kitul e complet: **36 de modele**. Inventarele pe grupe:
+- `transfagarasan_inventory_g.md`, tf-g: `effects/transfagarasan_horizon.glb`
+  (`FagarasRidge_A/_B/_C`, `CloudSea_A/_B`, `FagarasPlain_A`), **provizoriu**;
+- `transfagarasan_inventory_h.md`, tf-h: `vehicles/ro_train.glb` și
+  `vehicles/cable_cabin_large.glb`, acceptate.
+
+`verify_transfagarasan.sh`: **VERDICT KIT: OK**. `ro_train` are în plus o
+verificare: nodurile `Train_Loco/_Tender/_Wagon` sunt copii direcți ai rădăcinii.
+
+**Abateri asumate:**
+- **fundalul nu a convers** (3 runde tf-g, 2 la reluarea tf-g2). GLB-ul combină
+  creasta tf-g, care din camera de joc citește lanț muntos, deși e prea
+  „Dolomiți”, cu norii tf-g2. Peretele cu dinți egali al reluării citea
+  pieptene. Verdictul final se dă pe pista reală;
+- **contractul trenului și al cabinei avea cifre greșite** (17 m / 20 m,
+  cabina 5,5 m). S-au corectat în kit §1.7 la scara de joc.
+
+**De făcut la montarea în Track21:**
+- **fundalul:**
+  - tema `transfagarasan`: `horizon_model` = GLB-ul, `horizon_class` = `""`,
+    plus inelele din `transfagarasan_inventory_g.md`;
+  - creasta la est, la 200–260 m;
+  - norii la est/sud-est, la 240–320 m;
+  - câmpia la nord, la 280–340 m;
+  - **cod nou:** `_build_horizon` pune azi fiecare piesă la `ground_y − 4`.
+    Norii (17 m grosime) și câmpia cer o coborâre per inel (~−28 m), altfel
+    se văd doar unde terenul e deja sub drum;
+- **trenul:** `TrainHazard.model_path` =
+  `res://assets/models/transfagarasan/vehicles/ro_train.glb`. Garnitura cu
+  3 vagoane are ~45,5 m; se verifică pe ProbeRace că blocajul de la trecere
+  nu crește;
+- **cabina:** originea pe linia cablului, cablul pe X local, fără offset.
+  Înlocuiește gondola alpină în `DecorManual`.
+
 ## Valul 2 — integrat (13 oct 2026)
 
 Inventarele pe grupe:

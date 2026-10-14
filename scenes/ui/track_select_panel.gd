@@ -105,7 +105,7 @@ func _build_header() -> Control:
 	titles.add_theme_constant_override("separation", 2)
 	header.add_child(titles)
 	var title := Label.new()
-	title.text = "CURSA RAPIDA"
+	title.text = "QUICK RACE"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 52)
 	title.add_theme_color_override("font_color", TITLE_COLOR)
@@ -118,14 +118,14 @@ func _build_header() -> Control:
 	titles.add_child(sub_row)
 	sub_row.add_child(_rule())
 	var subtitle := Label.new()
-	subtitle.text = "ALEGE PISTA"
+	subtitle.text = "CHOOSE A TRACK"
 	subtitle.add_theme_font_size_override("font_size", 20)
 	subtitle.add_theme_color_override("font_color", SUBTITLE_COLOR)
 	sub_row.add_child(subtitle)
 	sub_row.add_child(_rule())
 
 	var back := Button.new()
-	back.text = "<  INAPOI"
+	back.text = "<  BACK"
 	back.custom_minimum_size = Vector2(160, 56)
 	back.position = Vector2(0, 8)
 	back.focus_mode = Control.FOCUS_NONE

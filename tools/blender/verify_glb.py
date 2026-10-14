@@ -173,7 +173,7 @@ def uv_kind(uv_count, exact_count):
 
 
 def verify(path, budget=None, front=None, origin="base", class_parts=(),
-           allow_car=(), allow_slots=()):
+           allow_car=(), allow_slots=(), rim_above=0.01):
     gltf, blob, total, version = load_glb(path)
     print("=" * 74)
     print("%s  —  %d B, glTF v%d" % (os.path.basename(path), total, version))
@@ -456,9 +456,10 @@ def verify(path, budget=None, front=None, origin="base", class_parts=(),
                   "(Y %.3f .. %.3f) — exportat cu originea la baza?"
                   % (assembly_lo, assembly_hi))
             ok = False
-        elif assembly_hi > 0.01:
+        elif assembly_hi > rim_above:
             print("\n!! origin=rim: geometria trece PESTE coronament cu %.3f m "
-                  "(Y %.3f .. %.3f)" % (assembly_hi, assembly_lo, assembly_hi))
+                  "(Y %.3f .. %.3f; tolerat %.2f)" % (assembly_hi, assembly_lo,
+                                                     assembly_hi, rim_above))
             ok = False
         else:
             print("\ncoronament: confirmat (Y %.3f .. %.3f, atarna sub origine)"
@@ -478,6 +479,7 @@ if __name__ == "__main__":
     class_parts = ()
     allow_car = ()
     allow_slots = ()
+    rim_above = 0.01
     for f in flags:
         if f.startswith("--allow-slots="):
             # Exceptie DECLARATA pentru sloturile din rezerva (24-31) pe care
@@ -501,6 +503,14 @@ if __name__ == "__main__":
             allow_car = tuple(x.strip()
                               for x in f.split("=", 1)[1].split(",")
                               if x.strip())
+        elif f.startswith("--rim-above="):
+            # Exceptie DECLARATA pentru --origin=rim: cat are voie sa urce
+            # geometria PESTE coronament (implicit 0,01 = nimic). Prima folosire:
+            # barajul Vidraru (Transfagarasan) -- originea e la cota drumului,
+            # corpul atarna 40 m sub ea, dar parapetul (+1,1) si turnul de priza
+            # (+8) stau deasupra. Banda drumului (|x| <= 6) se verifica separat,
+            # pe GLB, cu measure_tf_deck.py.
+            rim_above = float(f.split("=", 1)[1])
         elif f.startswith("--origin="):
             origin = f.split("=", 1)[1].strip().lower()
             if origin not in ("base", "center", "assembly", "waterline", "rim"):
@@ -512,4 +522,4 @@ if __name__ == "__main__":
     target = args[0]
     budget = int(args[1]) if len(args) > 1 else None
     sys.exit(0 if verify(target, budget, front, origin, class_parts,
-                         allow_car, allow_slots) else 1)
+                         allow_car, allow_slots, rim_above) else 1)

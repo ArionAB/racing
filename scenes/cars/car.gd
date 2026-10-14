@@ -27,6 +27,9 @@ signal boost_started(car: Car)
 signal wall_hit(car: Car, impact: float)
 signal landed(car: Car, fall_speed: float)
 signal respawned(car: Car)
+## Repunerea cu tranzitie a inceput (#495): masina clipeste `RECOVER_S`
+## secunde, fara comenzi, apoi vine `respawned`. Race intuneca ecranul.
+signal recovery_started(car: Car, seconds: float)
 ## Izbitura cu o alta masina, cu delta-v-ul incasat de NOI — cu cat mai mare,
 ## cu atat mai violent contactul (shake, sunet).
 signal bumped(car: Car, other: Car, delta_v: float)
@@ -87,6 +90,27 @@ const SLIP_GRIP_ICE: float = 1.5
 @export var drift_steer_bonus: float = 1.5
 @export var drift_bias: float = 0.4
 @export var drift_min_speed: float = 9.0
+## Secunde in care driftul intra deplin dupa ce tragi frana de mana. Inainte
+## era un singur tick: rotatia sarea cu 60% si aderenta spatelui scadea de 4
+## ori dintr-un cadru intr-altul — smucitura, nu alunecare.
+@export var drift_ramp_in: float = 0.2
+## Secunde in care spatele se reaseaza dupa ce eliberezi frana de mana.
+@export var drift_ramp_out: float = 0.25
+## Driftul se dozeaza pe viteza: la drift_min_speed e pivotul strans de pana
+## acum, spre viteza maxima devine o alunecare larga care pastreaza viteza.
+## Inainte era acelasi pivot la orice viteza — la 29 m/s: 3.3 rad/s (190°/s),
+## 42° de derapaj si 11 m/s pierduti in jumatate de secunda.
+##
+## Cat din rotatia COMANDATA in plus (drift_steer_bonus + drift_bias) ramane
+## la viteza maxima; 1 = toata, ca la viteza mica.
+@export var drift_yaw_at_top: float = 0.0
+## Aderenta spatelui in drift la viteza maxima (`drift_grip` e cea de la
+## drift_min_speed; intre ele, liniar). MAI MARE decat drift_grip, nu mai mica:
+## rotatia driftului vine mai ales din dezechilibrul fata-spate (fata tine,
+## spatele cedeaza, forta de pe fata suceste caroseria) — un spate mai moale
+## inseamna mai multa rotatie, nu un arc mai larg. Masurat in ProbeDriftEntry:
+## cu yaw_at_top 0, spatele la 1.2 dadea tot 2.8 rad/s la 29 m/s.
+@export var drift_grip_at_top: float = 4.0
 
 @export_group("Turbo (model Ignition)")
 ## Secunde pana la umplerea barii doar din mers.
@@ -233,6 +257,10 @@ var last_safe_route: int = 0
 # --- Drift/turbo ---
 var is_drifting: bool = false
 var drift_dir: float = 0.0
+## Cat de „intrat" e driftul, 0..1: urca in drift_ramp_in cu frana de mana
+## trasa, coboara in drift_ramp_out dupa. `is_drifting` spune daca e TRASA
+## (turbo, stopuri, fum); fizica si ruliul citesc dozajul de aici.
+var drift_blend: float = 0.0
 ## Stopurile aprinse: frana de serviciu (inapoi cu viteza inainte) sau
 ## handbrake-ul de drift. Citit de [CarLights]; scris o data pe tick.
 var brake_lamp: bool = false
@@ -271,6 +299,9 @@ var steer_invert_left: float = 0.0
 ## Mereu true in joc; exista ca garda `ProbeCrushTurbo --sabotaj` sa poata scoate
 ## fix-ul la runtime si sa dovedeasca ca masoara ceva.
 var crush_blocks_turbo: bool = true
+## TURBO tinut de prea devreme la GO (#491): nu se aprinde pana nu ridici
+## degetul. Vezi `hold_turbo_until_release`.
+var _turbo_needs_release: bool = false
 signal steer_inverted(seconds: float)
 ## Ars de o coloana de foc (gheizerele din craterul Stromboli, vezi
 ## `ignite`). Se tine SEPARAT de `crush_time` desi amandoua taie plafonul:
@@ -305,6 +336,9 @@ var _dust_particles: CPUParticles3D
 var in_water: bool = false
 ## Spray continuu de la rotile din FATA cat timp treci prin apa cu viteza.
 var _water_spray: CPUParticles3D
+## Scantei la ciocnirea cu alta masina (#500): un emitator one-shot per masina,
+## mutat la punctul de contact si repornit la fiecare izbitura.
+var _sparks: CPUParticles3D
 ## Stropul de la intrare: o rafala (one_shot) repornita la fiecare intrare.
 var _water_burst: CPUParticles3D
 ## Materialul inelului de unde — al masinii, nu static: culoarea e a apei din
@@ -433,6 +467,11 @@ var _respawn_cooldown: float = 0.0
 var _respawn_check: float = 0.0
 var _respawn_retry: bool = false
 const RESPAWN_CHECK_S: float = 0.75
+## Ceasul recautarii globale de index (vezi Track.reacquire_index): o scanare
+## completa la cel mult REACQUIRE_PERIOD_S, doar cat masina pare in afara
+## drumului. Scanarea e O(n) pe ~1000 de puncte — nu pe fiecare tick, x6 masini.
+const REACQUIRE_PERIOD_S: float = 0.25
+var _reacquire_left: float = 0.0
 
 # Resurse partajate intre toate urmele de cauciuc (ieftin la instantiere).
 static var _skid_mesh: PlaneMesh
@@ -443,6 +482,14 @@ var _collision_shape: CollisionShape3D
 var _driver: Driver
 var is_ejected: bool = false
 var _eject_left: float = 0.0
+## Repunerea cu tranzitie (#495): cat mai clipeste pana la teleport, si cu ce
+## retragere se va face repunerea.
+const RECOVER_S: float = 1.0
+## De cate ori pe secunda clipeste caroseria in tranzitie.
+const RECOVER_BLINK_HZ: float = 7.0
+var _recover_left: float = 0.0
+var _recover_backoff: float = 14.0
+var _recover_main_road: bool = false
 ## Ultima ejectare, pentru sonde: ce a declansat-o ("perete" / "aterizare")
 ## si cu ce marime (delta-v orizontal, respectiv viteza de cadere, m/s).
 var last_eject_cause: String = ""
@@ -471,6 +518,9 @@ func _ready() -> void:
 	# arcade vine din material.
 	contact_monitor = true
 	max_contacts_reported = 8
+	# Decorul bump-abil (#489) sta pe stratul lui: masina il loveste, dar
+	# razele suspensiei (masca implicita) nu-l vad — roata nu urca pe un taburet.
+	collision_mask |= BumpProp.LAYER
 	var pmat := PhysicsMaterial.new()
 	pmat.bounce = bump_restitution
 	pmat.friction = 0.4
@@ -585,6 +635,14 @@ func _physics_process(delta: float) -> void:
 			road_index = resolved.y
 		else:
 			road_index = track.closest_index(road_index, global_position, route)
+		# Fereastra locala poate ramane agatata in urma dupa o taietura prin
+		# iarba (#496): pe asfalt, `is_on_road` ar raspunde „iarba" si plafonul
+		# ar ramane la 45%. Cat parem in afara drumului, verificam rar, global.
+		_reacquire_left -= delta
+		if _reacquire_left <= 0.0 \
+				and not track.is_on_road(road_index, global_position, route):
+			_reacquire_left = REACQUIRE_PERIOD_S
+			road_index = track.reacquire_index(road_index, global_position, route)
 		# Banda uda: se reinnoieste in fiecare cadru, deci efectul tine exact cat
 		# stai pe ea. Refoloseste acelasi slip_time ca WaterHazard — un al doilea
 		# mecanism de aquaplanare ar fi insemnat doua feluri de a pierde grip-ul,
@@ -658,6 +716,14 @@ func _physics_process(delta: float) -> void:
 		drift_pressed = false
 		turbo_pressed = false
 		_tick_eject(delta)
+	# La fel in tranzitia de repunere: nu mai conduci o masina care urmeaza sa
+	# dispara de aici.
+	if _recover_left > 0.0:
+		steer = 0.0
+		throttle = 0.0
+		drift_pressed = false
+		turbo_pressed = false
+		_tick_recover(delta)
 
 	_apply_suspension()
 
@@ -668,7 +734,7 @@ func _physics_process(delta: float) -> void:
 	var rel_vel := velocity - _ground_velocity
 	var fwd_speed := Vector3(rel_vel.x, 0.0, rel_vel.z).dot(fwd_h)
 
-	_update_drift(drift_pressed, steer, fwd_speed)
+	_update_drift(drift_pressed, steer, fwd_speed, delta)
 	_update_turbo(turbo_pressed, delta)
 	brake_lamp = (throttle < 0.0 and fwd_speed > 1.0) or is_drifting
 
@@ -856,12 +922,17 @@ func _apply_driving(steer: float, throttle: float,
 	apply_force(-hvel * drag * mass * ground_frac, _contact_offset)
 
 	# --- Grip lateral, per axa: fata tine, spatele aluneca in drift ---
+	# Dozat cu rampa (drift_blend) si cu viteza: cu cat mai repede, cu atat
+	# spatele cedeaza mai putin, deci se roteste mai putin — arc larg.
+	var drift_amt := _drift_amount()
+	var drift_t := _drift_speed_t(fwd_speed)
 	for axle in 2:
 		if _axle_grounded[axle] == 0:
 			continue
 		var grip_axle := grip
-		if axle == 1 and is_drifting:
-			grip_axle = drift_grip
+		if axle == 1 and drift_amt > 0.0:
+			grip_axle = lerpf(grip,
+				lerpf(drift_grip, drift_grip_at_top, drift_t), drift_amt)
 		if slip_time > 0.0:
 			grip_axle = slip_grip
 		# Viteza laterala A AXEI (cu componenta din rotatie): spatele care se
@@ -877,9 +948,11 @@ func _apply_driving(steer: float, throttle: float,
 	# --- Directia (amplificata si "impinsa" in directia drift-ului) ---
 	var speed_frac := clampf(absf(fwd_speed) / (max_speed * 0.5), 0.0, 1.0)
 	var effective_steer := steer
-	if is_drifting:
-		effective_steer = clampf(
+	if drift_amt > 0.0:
+		var drift_steer := clampf(
 			steer * drift_steer_bonus + drift_dir * drift_bias, -1.6, 1.6)
+		effective_steer += (drift_steer - steer) \
+			* lerpf(1.0, drift_yaw_at_top, drift_t) * drift_amt
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
 	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign
 	# Comanda + rotatia ramasa din lovituri (se stinge singura, plafonata).
@@ -950,9 +1023,16 @@ func _process_contacts(delta: float) -> void:
 					continue
 				_bump_pairs[key] = bump_pair_cooldown
 				bumped.emit(self, other, dv)
+				_emit_sparks(other, dv)
 				if _bump_cooldown <= 0.0 and (is_player or other.is_player):
 					_bump_cooldown = 0.25
 					AudioManager.play_sfx(&"bump")
+					# Tabla pe tabla, dozata dupa impuls (#500): o atingere abia
+					# se aude si suna mai subtire, o izbitura plina e tare si
+					# grava. Inainte era doar bufnitura `bump`, la volum fix.
+					var k := _bump_strength(dv)
+					AudioManager.play_sfx(&"metal_hit", lerpf(1.18, 0.86, k),
+						lerpf(-20.0, -1.0, k))
 		# Impulsul de separare (reteta SuperTuxKart): contactul sustinut nu
 		# are voie sa lipeasca masinile. O acceleratie LATERALA le impinge una
 		# de langa alta -- centrala (fara rotatie: directia ramane a soferului),
@@ -1029,7 +1109,8 @@ func _current_max_speed() -> float:
 # ------------------------------------------------------------------- drift
 
 ## Handbrake pur: alunecare controlata pentru viraje, fara boost la iesire.
-func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float) -> void:
+func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float,
+		delta: float) -> void:
 	if not is_drifting:
 		if drift_pressed and fwd_speed > drift_min_speed and absf(steer) > 0.25:
 			is_drifting = true
@@ -1038,6 +1119,24 @@ func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float) -> void:
 				AudioManager.play_sfx(&"drift_start")
 	elif not drift_pressed or fwd_speed < drift_min_speed * 0.55:
 		is_drifting = false
+	if is_drifting:
+		drift_blend = move_toward(drift_blend, 1.0,
+			delta / maxf(drift_ramp_in, 0.001))
+	else:
+		drift_blend = move_toward(drift_blend, 0.0,
+			delta / maxf(drift_ramp_out, 0.001))
+
+
+## Dozajul driftului aplicat fizicii: rampa netezita (smoothstep), ca intrarea
+## sa nu porneasca nici ea cu o treapta de panta.
+func _drift_amount() -> float:
+	return smoothstep(0.0, 1.0, drift_blend)
+
+
+## 0 la drift_min_speed, 1 la viteza maxima a masinii — driftul se dozeaza pe
+## viteza PROPRIE, ca tuk-tuk-ul (18 m/s) sa-si aiba si el driftul rapid.
+func _drift_speed_t(fwd_speed: float) -> float:
+	return clampf(inverse_lerp(drift_min_speed, max_speed, fwd_speed), 0.0, 1.0)
 
 # ------------------------------------------------------------------- turbo
 
@@ -1061,6 +1160,11 @@ func _update_turbo(turbo_pressed: bool, delta: float) -> void:
 	# `crush_time` > 0 turbo-ul nu porneste; bara NU se goleste (nu ai ars nimic) si
 	# continua sa se incarce, ca sa-l ai gata cand expira strivirea.
 	var crush_blocked := crush_blocks_turbo and crush_time > 0.0
+	if _turbo_needs_release:
+		if turbo_pressed:
+			turbo_pressed = false
+		else:
+			_turbo_needs_release = false
 	if turbo_pressed and can_fire and not crush_blocked:
 		if not is_boosting:
 			_start_boost()
@@ -1084,6 +1188,13 @@ func _start_boost() -> void:
 
 func grant_turbo(amount: float) -> void:
 	turbo_charge = clampf(turbo_charge + amount, 0.0, 1.0)
+
+## TURBO apasat de dinainte de GO, prea devreme pentru rocket start (#491):
+## butonul trebuie ridicat si apasat din nou. Altfel, tinut de pe ecranul de
+## incarcare, aprindea la GO bara plina — masina tasnea singura, fara gaz, iar
+## „Prea devreme..." de pe ecran contrazicea ce vedeai.
+func hold_turbo_until_release() -> void:
+	_turbo_needs_release = true
 
 ## Ardere gratuita (rocket start): boost fara sa goleasca bara.
 func force_boost(seconds: float) -> void:
@@ -1340,6 +1451,7 @@ func _eject(fling: Vector3, cause: String = "", value: float = 0.0) -> void:
 	is_ejected = true
 	_eject_left = eject_hold
 	is_drifting = false
+	drift_blend = 0.0
 	is_boosting = false
 	_forced_boost = 0.0
 	ejected.emit(self, ragdoll)
@@ -1364,6 +1476,42 @@ func _reseat_driver() -> void:
 	_eject_left = 0.0
 	if _driver != null:
 		_driver.reseat()
+
+
+## Repunere CU TRANZITIE (#495): in loc de teleport instant, masina clipeste
+## `RECOVER_S` secunde fara comenzi (fizica curge — rasturnata ramane
+## rasturnata, cazand continua sa cada), apoi `respawn(backoff_m)`.
+## Pentru repunerile pe care le vede jucatorul ca urmare a unei greseli:
+## butonul, masina rasturnata sau impotmolita. Hazardele care au propria
+## punere in scena (tren, avalansa, plasa de sub faleza) raman pe `respawn`.
+## `main_road` trece la `respawn` (butonul jucatorului: mereu pe bucla principala).
+func recover(backoff_m: float = 14.0, main_road: bool = false) -> void:
+	if not can_respawn() or _eject_left > 0.0:
+		return
+	_recover_left = RECOVER_S
+	_recover_backoff = backoff_m
+	_recover_main_road = main_road
+	is_drifting = false
+	is_boosting = false
+	recovery_started.emit(self, RECOVER_S)
+
+
+## In tranzitie (pentru Race: nu porni a doua oara aceeasi repunere).
+func is_recovering() -> bool:
+	return _recover_left > 0.0
+
+
+func _tick_recover(delta: float) -> void:
+	_recover_left -= delta
+	if _visual != null:
+		_visual.visible = fmod(_recover_left * RECOVER_BLINK_HZ, 1.0) > 0.35
+	if _recover_left > 0.0:
+		return
+	_recover_left = 0.0
+	if _visual != null:
+		_visual.visible = true
+	_respawn_cooldown = 0.0 # tranzitia a fost asteptarea; repunerea nu mai asteapta
+	respawn(_recover_backoff, _recover_main_road)
 
 
 func driver_seated() -> bool:
@@ -1398,7 +1546,8 @@ func _relocate_level() -> void:
 ## respawn() iese in tacere cand nu poate (fara pista, in cooldown, dupa
 ## terminare). Butonul trebuie sa arate asta, nu sa para stricat.
 func can_respawn() -> bool:
-	return track != null and _respawn_cooldown <= 0.0 and not finished
+	return track != null and _respawn_cooldown <= 0.0 and not finished \
+		and _recover_left <= 0.0
 
 
 ## Daca masina sta in afara unei benzi deschise (fara poarta) si in afara soselei,
@@ -1425,6 +1574,97 @@ func _branch_flank_trap() -> Vector2i:
 		if lat > br.half_width and lat < BRANCH_FLANK_M:
 			return Vector2i(bi, bidx)
 	return Vector2i.ZERO
+
+
+## Cat se mai retrage repunerea, pas cu pas, cand locul de pe axa nu e liber.
+const RESPAWN_RETRY_M: float = 4.0
+const RESPAWN_RETRY_STEPS: int = 15
+
+## Punctul de repunere de pe axa drumului, retras pana gaseste un loc LIBER.
+##
+## Axa e mereu pe carosabil si cu botul pe sensul de mers (ProbeRespawnRoad,
+## #494: 0 din 1971 de puncte in afara drumului sau deviate). Ce lipsea era
+## intrebarea „ce e ACOLO": 28 din 1971 de puncte cadeau in rampa unui kicker,
+## peste golul unei sarituri sau al podului mobil, ori intr-un hazard. Repusa
+## acolo, masina era aruncata de solver sau cadea din nou. Se cauta inapoi pe
+## traseu (mai mult elan, aceeasi ruta) din RESPAWN_RETRY_M in RESPAWN_RETRY_M
+## metri; daca nimic nu e liber, ramane primul punct — comportamentul vechi.
+##
+## Pe o BANDA (ruta deschisa), retragerea se oprea la capatul ei: indexul se
+## taie la 0, deci orice retragere mai lunga decat drumul parcurs pe banda
+## dadea acelasi punct — furca, cu roata pe muchia terenului (pe Stromboli,
+## (-226, 23, 437), unde ProbeRace arata repuneri repetate). Restul retragerii
+## continua pe bucla principala, inaintea furcii; atunci si `last_safe_*`
+## trec pe bucla, ca `respawn` sa puna masina pe ruta pe care chiar sta.
+func _clear_recovery_transform(backoff_m: float) -> Transform3D:
+	var first := Transform3D()
+	for k in RESPAWN_RETRY_STEPS:
+		var back := backoff_m + RESPAWN_RETRY_M * float(k)
+		var route_i := last_safe_route
+		var index := last_safe_index
+		if route_i != 0:
+			var br := track.route_at(route_i)
+			var along := 0.0
+			if br != null and not br.dists.is_empty():
+				along = br.dists[clampi(index, 0, br.dists.size() - 1)]
+			if br != null and not br.baked.is_empty() and back > along:
+				index = track.closest_index_global(br.baked[0], 0)
+				route_i = 0
+				back -= along
+		var t := track.recovery_transform(index, back, route_i)
+		if k == 0:
+			first = t
+		if _respawn_spot_clear(t):
+			if route_i != last_safe_route:
+				last_safe_route = route_i
+				last_safe_index = index
+			return t
+	return first
+
+
+## Locul e bun daca toate cele patru roti au sol sub ele, la cel mult 3 m (nu
+## golul unei sarituri), si daca nimic nu intra in gabaritul caroseriei — cu
+## 0,4 m de joc lateral si 0,5 m in fata/spate — de la 0,4 m peste sol in sus.
+## Sub 0,4 m e treaba rotilor (borduri, dale); peste, e rampa sau perete.
+func _respawn_spot_clear(t: Transform3D) -> bool:
+	var space := get_world_3d().direct_space_state
+	var box := _collision_shape.shape as BoxShape3D if _collision_shape != null \
+		else null
+	var size := box.size if box != null else Vector3(2.0, 1.0, 3.8)
+	var exclude: Array[RID] = [get_rid()]
+	var ground_y := INF
+	# Patru roti + centrul: podul basculant are golul CHIAR la mijloc, intre
+	# cele doua jumatati, cu rotile pe buzele lor.
+	var spots: Array[Vector2] = [Vector2(-0.45, -0.45), Vector2(0.45, -0.45),
+		Vector2(-0.45, 0.45), Vector2(0.45, 0.45), Vector2.ZERO]
+	for s in spots:
+		var top: Vector3 = t * Vector3(size.x * s.x, 1.0, size.z * s.y)
+		var q := PhysicsRayQueryParameters3D.create(top, top + Vector3.DOWN * 4.2)
+		q.exclude = exclude
+		var hit := space.intersect_ray(q)
+		if hit.is_empty():
+			return false
+		# Solul trebuie sa fie la cota DRUMULUI (axa e cu 1,2 m sub origine):
+		# tablierul ridicat al podului mobil e „sol" pentru raza, dar e
+		# deasupra drumului, iar golul de sub el e tot gol.
+		var hy := (hit.position as Vector3).y
+		var road_y := t.origin.y - 1.2
+		if hy > road_y + 0.6 or hy < road_y - 2.0:
+			return false
+		ground_y = minf(ground_y, hy)
+	var top_y := t.origin.y + 1.25
+	var bottom_y := ground_y + 0.4
+	if top_y <= bottom_y:
+		return true
+	var probe := BoxShape3D.new()
+	probe.size = Vector3(size.x + 0.8, top_y - bottom_y, size.z + 1.0)
+	var sq := PhysicsShapeQueryParameters3D.new()
+	sq.shape = probe
+	sq.exclude = exclude
+	var center := t.origin
+	center.y = (top_y + bottom_y) * 0.5
+	sq.transform = Transform3D(t.basis, center)
+	return space.intersect_shape(sq, 1).is_empty()
 
 
 ## `main_road`: repunerea ceruta de jucator merge mereu pe bucla principala.
@@ -1472,8 +1712,7 @@ func respawn(backoff_m: float = 14.0, main_road: bool = false) -> void:
 	if trap.x != 0:
 		last_safe_route = trap.x
 		last_safe_index = trap.y
-	global_transform = track.recovery_transform(last_safe_index, backoff_m,
-		last_safe_route)
+	global_transform = _clear_recovery_transform(backoff_m)
 	if is_player and not _respawn_retry:
 		_respawn_check = RESPAWN_CHECK_S
 	# Un pic de viteza, nu oprire pe loc: pornirea din zero in mijlocul unei
@@ -1486,6 +1725,7 @@ func respawn(backoff_m: float = 14.0, main_road: bool = false) -> void:
 	_prev_velocity = velocity
 	_commanded_yaw = 0.0
 	is_drifting = false
+	drift_blend = 0.0
 	is_boosting = false
 	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
 	_douse_left = 0.0 # repus = uscat, nu mai picura
@@ -1503,6 +1743,8 @@ func respawn(backoff_m: float = 14.0, main_road: bool = false) -> void:
 		_squash_tween.kill()
 	if _visual != null:
 		_visual.scale = Vector3.ONE
+		_visual.visible = true # o tranzitie intrerupta de alta repunere nu lasa masina stinsa
+	_recover_left = 0.0
 	_bump_pairs.clear() # am fost teleportati; vechile contacte nu mai exista
 	_impact_yaw = 0.0 # nici rotatia din ultima izbitura nu ne urmareste
 	_was_on_floor = true # fara "aterizare" falsa (shake + bufnet) la repunere
@@ -2223,7 +2465,117 @@ func _puff_mesh(size: float) -> Mesh:
 ## vezi _update_dust.
 const DRIFT_SMOKE_COLOR: Color = Color(0.78, 0.78, 0.8)
 
+## 0 la pragul de ciocnire, 1 la plafonul de violenta — dozajul comun pentru
+## sunet si scantei.
+func _bump_strength(dv: float) -> float:
+	return clampf(inverse_lerp(bump_min_closing, bump_max_dv, dv), 0.0, 1.0)
+
+
+## Sub atat (m/s de delta-v) contactul e frecare, nu izbitura: fara scantei.
+const SPARK_MIN_DV: float = 4.0
+
+## Scantei la contactul cu `other` (#500): la jumatatea distantei dintre
+## caroserii, la inaltimea barelor, aruncate in afara contactului si in sus.
+## Mai multe si mai rapide cu cat izbitura e mai mare: `amount` (CPUParticles3D
+## n-are `amount_ratio`; schimbarea realoca, dar oricum repornim). Emitatorul e in coordonate de LUME, deci scanteile raman unde
+## s-au nascut, nu fug cu masina.
+func _emit_sparks(other: Car, dv: float) -> void:
+	if _sparks == null or dv < SPARK_MIN_DV:
+		return
+	var to_other := other.global_position - global_position
+	to_other.y = 0.0
+	if to_other.length_squared() < 0.0001:
+		return
+	var k := _bump_strength(dv)
+	_sparks.global_position = _contact_point_with(other,
+		global_position + to_other * 0.5 + Vector3.UP * 0.55)
+	# Directia: perpendiculara pe linia dintre masini (de-a lungul fetelor care
+	# se freaca), cu o componenta in sus; spread-ul larg face restul.
+	var along := to_other.normalized().cross(Vector3.UP)
+	_sparks.direction = (along * (1.0 if randf() < 0.5 else -1.0) + Vector3.UP * 0.6)
+	_sparks.amount = int(lerpf(float(SPARKS_MIN), float(SPARKS_MAX), k))
+	_sparks.initial_velocity_max = lerpf(7.0, 13.0, k)
+	_sparks.restart()
+
+
+## Punctul de contact cu `other`, cum il raporteaza solverul (media punctelor
+## din tick-ul asta); `fallback` daca nu exista niciunul. Mijlocul dintre
+## centre nu ajunge: cand o masina e mult mai mare (autobuzul), el cade in
+## caroseria ei, iar scanteile ies ascunse inauntru (vazut pe captura).
+func _contact_point_with(other: Car, fallback: Vector3) -> Vector3:
+	var state := PhysicsServer3D.body_get_direct_state(get_rid())
+	if state == null:
+		return fallback
+	var sum := Vector3.ZERO
+	var count := 0
+	for i in state.get_contact_count():
+		if state.get_contact_collider_object(i) == other:
+			sum += state.get_contact_collider_position(i)
+			count += 1
+	return sum / float(count) if count > 0 else fallback
+
+
+static var _spark_material: StandardMaterial3D = null
+const SPARKS_MIN: int = 10
+const SPARKS_MAX: int = 24
+
+func _build_sparks() -> void:
+	_sparks = CPUParticles3D.new()
+	_sparks.name = "Sparks"
+	_sparks.emitting = false
+	_sparks.one_shot = true
+	_sparks.explosiveness = 1.0
+	# Plafonul pe mobil: 24 pe masina, 144 pe o cursa de 6, si doar o clipa.
+	_sparks.amount = SPARKS_MAX
+	_sparks.lifetime = 0.45
+	_sparks.local_coords = false
+	_sparks.spread = 70.0
+	_sparks.initial_velocity_min = 4.0
+	_sparks.initial_velocity_max = 8.0
+	_sparks.gravity = Vector3(0, -14.0, 0)
+	_sparks.damping_min = 2.0
+	_sparks.damping_max = 4.0
+	_sparks.scale_amount_min = 0.6
+	_sparks.scale_amount_max = 1.2
+	var shrink := Curve.new()
+	shrink.add_point(Vector2(0.0, 1.0))
+	shrink.add_point(Vector2(1.0, 0.2))
+	_sparks.scale_amount_curve = shrink
+	# Alb-galben la nastere, portocaliu, apoi se stinge: metal incins.
+	var heat := Gradient.new()
+	heat.set_offsets(PackedFloat32Array([0.0, 0.35, 1.0]))
+	heat.set_colors(PackedColorArray([
+		Color(1.0, 0.97, 0.75, 1.0), Color(1.0, 0.62, 0.15, 1.0),
+		Color(0.9, 0.25, 0.05, 0.0)]))
+	_sparks.color_ramp = heat
+	if _spark_material == null:
+		# Un material de CLASA pentru toate scanteile din cursa (vezi nota de la
+		# _puff_material): neluminat — scanteia e sursa de lumina, nu o
+		# suprafata. OPAC, nu aditiv: pe nisipul luminos de zi aditivul n-avea
+		# ce adauga (pixelul era deja aproape alb) si darele ieseau translucide,
+		# abia ghicite pe captura. Se sting prin rampa de culoare.
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.vertex_color_use_as_albedo = true
+		m.vertex_color_is_srgb = true
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_spark_material = m
+	# Dara, nu punct: o bara subtire de 60 cm aliniata cu viteza
+	# (`particle_flag_align_y`). Un patrat de 9 cm cu fata la camera iesea de
+	# 3-4 pixeli la distanta camerei de urmarire — numarat de sonda, nevazut pe
+	# captura. Cutia se vede din orice unghi, unde un quad aliniat ar fi putut
+	# ajunge cu muchia spre camera. 12 triunghiuri.
+	var streak := BoxMesh.new()
+	streak.size = Vector3(0.07, 0.6, 0.07)
+	streak.material = _spark_material
+	_sparks.mesh = streak
+	_sparks.particle_flag_align_y = true
+	_sparks.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_sparks)
+
+
 func _build_effects() -> void:
+	_build_sparks()
 	# Fum de drift, colorat dupa nivelul de boost incarcat.
 	_drift_particles = CPUParticles3D.new()
 	# Nume propriu, ca la "Dust"/"Debris": pana acum singurul mod de a deosebi
@@ -2634,7 +2986,7 @@ func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	# care vinde alunecarea, calibrat mic ca sa nu se bata cu ruliul fizic —
 	# si invartirea de tromba (_update_spin), care e doar vizuala prin design.
 	var speed_frac := clampf(fwd_speed / max_speed, 0.0, 1.0)
-	var target_roll := -steer * 0.05 * speed_frac * (1.6 if is_drifting else 0.0)
+	var target_roll := -steer * 0.05 * speed_frac * 1.6 * drift_blend
 	_visual.rotation.z = lerpf(_visual.rotation.z, target_roll, 8.0 * delta)
 	_update_spin(delta)
 

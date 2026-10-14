@@ -61,6 +61,8 @@ pur plus haosul fizic, nu proiectilele.
 ## Post-MVP (nu implementa fără să fie cerut)
 
 Multiplayer, campionat lung, unlockables, tuning vizual de mașini, monetizare.
+Analiza de monetizare, cu argumente pro/contra și deciziile deschise:
+`docs/monetizare/model_de_monetizare.md`.
 
 ## Arhitectură (ținta restructurării — M1)
 
@@ -146,7 +148,12 @@ res://
 - Texturi comprimate ETC2/ASTC, materiale simple (albedo, fără PBR complex)
 - Particule cu limită de count; test pe device fizic de la primul build (M4,
   dar mai devreme dacă apar dubii de feel pe touch)
-- Build size țintă: sub 100MB
+- **Build size: fără țintă proprie** (decizia dezvoltatorului, 13 oct 2026;
+  ținta veche de 100 MB încurca). Limitele reale sunt ale magazinelor: Google
+  Play cere modulul de bază al AAB-ului sub 200 MB comprimat (peste, Play
+  Asset Delivery); pe App Store nu există plafon practic, iar pe celular
+  descărcările peste 200 MB cer confirmarea utilizatorului, după setarea lui.
+  Mărimea se măsoară la fiecare build de store, nu se optimizează preventiv.
 
 ## Nume și legal
 

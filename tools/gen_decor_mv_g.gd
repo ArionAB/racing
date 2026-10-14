@@ -404,7 +404,7 @@ func _tumble() -> void:
 		var side := 1.0 if r.randf() < 0.5 else -1.0
 		var p := _off(q, side * (7.0 + r.randf_range(8.0, 30.0)))
 		p.y = _sol(p.x, p.z)
-		if _put("tumbleweed", "gTumble", p, r.randf() * TAU, r.randf_range(1.0, 1.3), "none", "none"):
+		if _put("tumbleweed", "gTumble", p, r.randf() * TAU, r.randf_range(1.0, 1.3), "bump", "none"):
 			k += 1
 	print("; tumbleweed: %d" % k)
 

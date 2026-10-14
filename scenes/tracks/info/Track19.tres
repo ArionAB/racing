@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_info")
 display_name = "Monument Valley"
-region = "SUA"
+region = "USA"
 accent = Color(0.72, 0.33, 0.18, 1)

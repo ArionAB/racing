@@ -33,6 +33,14 @@ var _minimap: Minimap
 ## care nu-si mai vede pozitia sau bara de turbo ar citi asta ca bug, nu ca
 ## hazard.
 var _blind_veil: ColorRect
+## Voalul tranzitiei de repunere (#495): se intuneca cat clipeste masina.
+var _recover_veil: ColorRect
+var _recover_tween: Tween
+## Ceasul de offroad (#497): cifra mare deasupra centrului.
+var _offroad_label: Label
+## „WRONG WAY" (#499): mare, rosu, pulsand cat timp mergi pe contrasens.
+var _wrong_way_label: Label
+var _wrong_way_tween: Tween
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -85,7 +93,7 @@ func _ready() -> void:
 	# Un Button real cu mouse_filter STOP consuma evenimentul inaintea lui
 	# TouchControls, deci nu mai vireaza in acelasi timp. Butonul de pauza
 	# demonstreaza deja ca merge.
-	_respawn_button = _make_button("REPUNE")
+	_respawn_button = _make_button("RESET")
 	_respawn_button.custom_minimum_size = Vector2(Minimap.MAP_SIZE, 52)
 	_respawn_button.add_theme_font_size_override("font_size", 20)
 	_respawn_button.set_anchors_and_offsets_preset(
@@ -104,6 +112,12 @@ func _ready() -> void:
 	_blind_veil.color = Color(0.94, 0.96, 0.98, 1.0)
 	_blind_veil.modulate.a = 0.0
 	root.add_child(_blind_veil)
+	_recover_veil = ColorRect.new()
+	_recover_veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_recover_veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_recover_veil.color = Color(0.02, 0.02, 0.04, 1.0)
+	_recover_veil.modulate.a = 0.0
+	root.add_child(_recover_veil)
 
 	_countdown = _make_label(110)
 	_countdown.set_anchors_and_offsets_preset(
@@ -111,6 +125,27 @@ func _ready() -> void:
 	_countdown.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_countdown.grow_vertical = Control.GROW_DIRECTION_BOTH
 	root.add_child(_countdown)
+
+	_offroad_label = _make_label(64)
+	_offroad_label.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	_offroad_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_offroad_label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_offroad_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_offroad_label.position += Vector2(0, -150)
+	_offroad_label.add_theme_color_override("font_color", Color(1.0, 0.82, 0.25))
+	_offroad_label.visible = false
+	root.add_child(_offroad_label)
+	_wrong_way_label = _make_label(72)
+	_wrong_way_label.text = "WRONG WAY"
+	_wrong_way_label.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	_wrong_way_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_wrong_way_label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_wrong_way_label.position += Vector2(0, -60)
+	_wrong_way_label.add_theme_color_override("font_color", Color(1.0, 0.22, 0.18))
+	_wrong_way_label.visible = false
+	root.add_child(_wrong_way_label)
 
 	_message = _make_label(38)
 	_message.set_anchors_and_offsets_preset(
@@ -162,14 +197,14 @@ func _build_pause_panel(root: Control) -> void:
 	margin.add_child(box)
 
 	var title := _make_label(38)
-	title.text = "PAUZA"
+	title.text = "PAUSED"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 
-	var resume := _make_button("CONTINUA")
+	var resume := _make_button("RESUME")
 	resume.pressed.connect(_close_pause)
 	box.add_child(resume)
-	var settings := _make_button("SETARI")
+	var settings := _make_button("SETTINGS")
 	settings.pressed.connect(func() -> void:
 		_pause_panel.visible = false
 		_settings.visible = true)
@@ -179,7 +214,7 @@ func _build_pause_panel(root: Control) -> void:
 		get_tree().paused = false
 		restart_requested.emit())
 	box.add_child(restart)
-	var menu := _make_button("MENIU")
+	var menu := _make_button("MENU")
 	menu.pressed.connect(func() -> void:
 		get_tree().paused = false
 		menu_requested.emit())
@@ -242,7 +277,7 @@ func show_results(title: String, rows: Array[Dictionary], primary_label: String)
 		_results_panel.visible = false
 		results_primary.emit())
 	buttons.add_child(primary)
-	var menu := _make_button("MENIU")
+	var menu := _make_button("MENU")
 	menu.pressed.connect(func() -> void: menu_requested.emit())
 	buttons.add_child(menu)
 	_results_panel.visible = true
@@ -309,14 +344,55 @@ func _process(delta: float) -> void:
 		RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
 	var sh_prims := RenderingServer.viewport_get_render_info(vp, ts,
 		RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
-	# Inaltimea 3D efectiva (pixeli fizici x scala): confirma pe device ca
-	# nivelul grafic chiar a coborat rezolutia.
-	var h3d := int(DisplayServer.window_get_size().y * get_viewport().scaling_3d_scale)
-	_perf.text = "%d fps  |  %d+%d desene  |  %dk+%dk tri  |  3D %dp  |  cpu %.1f ms  gpu %.1f ms" % [
+	# A doua linie: optiunile grafice active, inclusiv inaltimea 3D efectiva.
+	_perf.text = "%d fps  |  %d+%d draws  |  %dk+%dk tri  |  cpu %.1f ms  gpu %.1f ms\n%s" % [
 		Engine.get_frames_per_second(), draws, sh_draws, prims / 1000,
-		sh_prims / 1000, h3d,
+		sh_prims / 1000,
 		RenderingServer.viewport_get_measured_render_time_cpu(vp),
-		RenderingServer.viewport_get_measured_render_time_gpu(vp)]
+		RenderingServer.viewport_get_measured_render_time_gpu(vp),
+		_gfx_line()]
+
+
+## Soarele si mediul pistei, cautate o data pe cursa (nu la fiecare
+## reimprospatare: un find_children pe tot arborele de 4 ori pe secunda ar
+## costa chiar timpul de CPU pe care contorul il masoara).
+var _perf_sun: DirectionalLight3D
+var _perf_env: WorldEnvironment
+
+## A doua linie a contorului: optiunile grafice EFECTIV active (citite de pe
+## viewport, soare si mediu, nu din setari), cu „*" pe cele fortate de un
+## comutator de test. Asa o captura de ecran spune singura in ce conditii s-a
+## masurat fps-ul.
+func _gfx_line() -> String:
+	if not is_instance_valid(_perf_sun):
+		var suns := get_tree().root.find_children("*", "DirectionalLight3D", true, false)
+		_perf_sun = suns[0] as DirectionalLight3D if not suns.is_empty() else null
+	if not is_instance_valid(_perf_env):
+		var envs := get_tree().root.find_children("*", "WorldEnvironment", true, false)
+		_perf_env = envs[0] as WorldEnvironment if not envs.is_empty() else null
+	var vpn := get_viewport()
+	var msaa := "off"
+	match vpn.msaa_3d:
+		Viewport.MSAA_2X: msaa = "2x"
+		Viewport.MSAA_4X: msaa = "4x"
+		Viewport.MSAA_8X: msaa = "8x"
+	var h3d := int(DisplayServer.window_get_size().y * vpn.scaling_3d_scale)
+	var shadows := "off"
+	if _perf_sun != null and _perf_sun.shadow_enabled:
+		var two := _perf_sun.directional_shadow_mode \
+			== DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+		shadows = "2 splits" if two else "1 split"
+	var glow := "off"
+	if _perf_env != null and _perf_env.environment != null \
+			and _perf_env.environment.glow_enabled:
+		glow = "on"
+	var star := func(forced: bool) -> String: return "*" if forced else ""
+	return "%s  |  MSAA %s%s  |  3D %dp%s  |  shadows %s%s  |  glow %s%s" % [
+		GameState.GFX_TIER_NAMES[GameState.gfx_tier],
+		msaa, star.call(GameState.dbg_msaa > 0),
+		h3d, star.call(GameState.dbg_scale > 0),
+		shadows, star.call(GameState.dbg_shadows > 0),
+		glow, star.call(GameState.dbg_glow > 0)]
 
 
 func _make_label(font_size: int) -> Label:
@@ -361,6 +437,49 @@ func blind_flash(seconds: float) -> void:
 	tw.tween_property(_blind_veil, "modulate:a", BLIND_PEAK, 0.12)
 	tw.tween_interval(hold * 0.45)
 	tw.tween_property(_blind_veil, "modulate:a", 0.0, hold * 0.75)
+
+
+## Tranzitia de repunere (#495). Nu pana la negru: in ultima clipa inca vezi
+## masina clipind acolo unde a ramas, ca sa stii DE CE esti mutat.
+const RECOVER_VEIL_PEAK: float = 0.7
+
+func recovery_fade_in(seconds: float) -> void:
+	if _recover_tween != null and _recover_tween.is_valid():
+		_recover_tween.kill()
+	_recover_tween = create_tween()
+	_recover_tween.tween_property(_recover_veil, "modulate:a", RECOVER_VEIL_PEAK,
+		maxf(seconds, 0.1)).set_ease(Tween.EASE_IN)
+
+
+## Dupa teleport: ecranul se limpezeste repede, pe masina deja asezata.
+func recovery_fade_out() -> void:
+	if _recover_tween != null and _recover_tween.is_valid():
+		_recover_tween.kill()
+	_recover_tween = create_tween()
+	_recover_tween.tween_property(_recover_veil, "modulate:a", 0.0, 0.3)
+
+
+## Negativ = ascuns. Zecimi, nu secunde intregi: la 3 s, „3, 2, 1" sare prea
+## rar ca sa simti ca timpul curge; ultima secunda se inroseste.
+func set_offroad_clock(seconds: float) -> void:
+	if seconds < 0.0:
+		_offroad_label.visible = false
+		return
+	_offroad_label.visible = true
+	_offroad_label.text = "OFF ROAD\n%.1f" % maxf(seconds, 0.0)
+	_offroad_label.add_theme_color_override("font_color",
+		Color(1.0, 0.3, 0.2) if seconds < 1.0 else Color(1.0, 0.82, 0.25))
+
+
+func set_wrong_way(on: bool) -> void:
+	if _wrong_way_tween != null and _wrong_way_tween.is_valid():
+		_wrong_way_tween.kill()
+	_wrong_way_label.visible = on
+	_wrong_way_label.modulate.a = 1.0
+	if on:
+		_wrong_way_tween = create_tween().set_loops()
+		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 0.35, 0.35)
+		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 1.0, 0.35)
 
 
 func flash_message(text: String) -> void:

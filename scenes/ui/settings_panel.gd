@@ -33,7 +33,7 @@ func _build() -> void:
 	margin.add_child(root)
 
 	var title := Label.new()
-	title.text = "SETARI"
+	title.text = "SETTINGS"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 36)
 	root.add_child(title)
@@ -52,16 +52,16 @@ func _build() -> void:
 	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(box)
 
-	_add_slider(box, "Sensibilitate virare", 0.6, 1.4, GameState.steer_sensitivity,
+	_add_slider(box, "Steering sensitivity", 0.6, 1.4, GameState.steer_sensitivity,
 		func(v: float) -> void:
 			GameState.steer_sensitivity = v
 			GameState.save_settings())
-	_add_slider(box, "Volum efecte", 0.0, 1.0, GameState.sfx_volume,
+	_add_slider(box, "Effects volume", 0.0, 1.0, GameState.sfx_volume,
 		func(v: float) -> void:
 			GameState.sfx_volume = v
 			AudioManager.apply_volumes()
 			GameState.save_settings())
-	_add_slider(box, "Volum motor", 0.0, 1.0, GameState.engine_volume,
+	_add_slider(box, "Engine volume", 0.0, 1.0, GameState.engine_volume,
 		func(v: float) -> void:
 			GameState.engine_volume = v
 			AudioManager.apply_volumes()
@@ -71,40 +71,44 @@ func _build() -> void:
 	# Sliderele lucreaza pe FACTORI, nu pe metri: valorile din ChaseCamera raman
 	# implicitul, iar setarea le scaleaza. Din pauza, camera se muta sub deget —
 	# de aia fiecare schimbare striga si prin grup, nu doar in GameState.
-	_add_slider(box, "Camera: distanta", 0.5, 2.0, GameState.cam_distance_scale,
+	_add_slider(box, "Camera: distance", 0.5, 2.0, GameState.cam_distance_scale,
 		func(v: float) -> void:
 			GameState.cam_distance_scale = v
 			_push_camera())
-	_add_slider(box, "Camera: inaltime", 0.4, 2.0, GameState.cam_height_scale,
+	_add_slider(box, "Camera: height", 0.4, 2.0, GameState.cam_height_scale,
 		func(v: float) -> void:
 			GameState.cam_height_scale = v
 			_push_camera())
-	_add_slider(box, "Camera: unghi de vedere", 0.7, 1.3, GameState.cam_fov_scale,
+	_add_slider(box, "Camera: field of view", 0.7, 1.3, GameState.cam_fov_scale,
 		func(v: float) -> void:
 			GameState.cam_fov_scale = v
 			_push_camera())
-	_add_slider(box, "Camera: viteza de urmarire", 0.4, 2.5,
+	_add_slider(box, "Camera: follow speed", 0.4, 2.5,
 		GameState.cam_follow_scale,
 		func(v: float) -> void:
 			GameState.cam_follow_scale = v
 			_push_camera())
 
-	_add_choice(box, "Grafica", GameState.GFX_TIER_NAMES, GameState.gfx_tier,
+	_add_choice(box, "Graphics", GameState.GFX_TIER_NAMES, GameState.gfx_tier,
 		func(i: int) -> void:
 			GameState.gfx_tier = i
 			GameState.apply_gfx_tier()
 			GameState.save_settings())
-	_add_toggle(box, "Contor de performanta", GameState.show_perf,
+	_add_toggle(box, "Performance counter", GameState.show_perf,
 		func(on: bool) -> void:
 			GameState.show_perf = on
-			GameState.save_settings())
-	_add_toggle(box, "Far real pe noapte (test)", GameState.real_headlight,
+			GameState.save_settings()
+			# Sectiunea de test apare/dispare odata cu contorul.
+			_rebuild.call_deferred())
+	if GameState.show_perf:
+		_add_perf_tests(box)
+	_add_toggle(box, "Real headlight at night (test)", GameState.real_headlight,
 		func(on: bool) -> void:
 			GameState.real_headlight = on
 			GameState.save_settings())
 
 	var reset_cam := Button.new()
-	reset_cam.text = "RESETEAZA CAMERA"
+	reset_cam.text = "RESET CAMERA"
 	reset_cam.custom_minimum_size = Vector2(200, 48)
 	reset_cam.add_theme_font_size_override("font_size", 20)
 	reset_cam.pressed.connect(func() -> void:
@@ -116,11 +120,41 @@ func _build() -> void:
 	root.add_child(reset_cam)
 
 	var back := Button.new()
-	back.text = "INAPOI"
+	back.text = "BACK"
 	back.custom_minimum_size = Vector2(200, 60)
 	back.add_theme_font_size_override("font_size", 24)
 	back.pressed.connect(func() -> void: back_pressed.emit())
 	root.add_child(back)
+
+## COMUTATOARELE DE TEST pe device (vezi GameState.apply_debug_gfx): vizibile
+## doar cu contorul de performanta pornit, aplicate pe loc, nesalvate. Din pauza
+## scena ramane pe ecran si HUD-ul masoara mai departe, deci fiecare schimbare
+## se citeste in fps pe acelasi cadru.
+func _add_perf_tests(box: VBoxContainer) -> void:
+	var head := Label.new()
+	head.text = "PERFORMANCE TEST (this session only)"
+	head.add_theme_font_size_override("font_size", 20)
+	head.modulate = Color(1.0, 0.85, 0.4)
+	box.add_child(head)
+	_add_choice(box, "Test: MSAA", GameState.DBG_MSAA_NAMES, GameState.dbg_msaa,
+		func(i: int) -> void:
+			GameState.dbg_msaa = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: 3D resolution", GameState.DBG_SCALE_NAMES,
+		GameState.dbg_scale,
+		func(i: int) -> void:
+			GameState.dbg_scale = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: shadows", GameState.DBG_SHADOW_NAMES,
+		GameState.dbg_shadows,
+		func(i: int) -> void:
+			GameState.dbg_shadows = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: glow", GameState.DBG_GLOW_NAMES, GameState.dbg_glow,
+		func(i: int) -> void:
+			GameState.dbg_glow = i
+			GameState.apply_gfx_tier())
+
 
 ## Camera vie afla imediat, prin grup. Salvarea merge in acelasi apel: sliderele
 ## astea se misca de cateva ori pe reglaj, nu de zeci de ori pe secunda ca tastele

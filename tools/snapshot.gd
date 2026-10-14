@@ -219,6 +219,11 @@ extends Node
 ##                             = 2 x (5 s parcat + 1,2 s telegraf + traversare);
 ##                             sonda tipareste pentru fiecare unde e si daca e
 ##                             pe carosabil.
+##   --cross-stand             in loc de --cross-at: pune FIECARE obstacol in mijlocul
+##                             telegrafului lui, deci modelele cu clipul `Stand`
+##                             (ursul Transfagarasan) apar in doua labe. Faza
+##                             ciclului (`phase`) muta fereastra: 4,5-5,2 s dau
+##                             `Walk`, nu `Stand`; flag-ul o cauta singur.
 ##   --cross-phase=0.25        (cu --cross-at) faza ciclului de mers, 0..1, pentru
 ##                             modelele CU SCHELET (caii din Monument Valley:
 ##                             Walk/Idle): animatia aleasa dupa viteza reala,
@@ -287,6 +292,10 @@ const _VITRINA_MODEL_PATHS := {
 	"bush_plane": "res://assets/models/fiordland/vehicles/bush_plane.glb",
 	"coach_fiordland": "res://assets/models/fiordland/vehicles/coach_fiordland.glb",
 	"cruise_boat": "res://assets/models/fiordland/vehicles/cruise_boat.glb",
+	# --- reuse pe Transfagarasan (Track21): sistul pe `tf_schist` doar pe tema lui ---
+	"canyon_rocks": "res://assets/models/rocks/canyon_rocks.glb",
+	"rock_large": "res://assets/models/rocks/rock_large.glb",
+	"mountain_peak": "res://assets/models/rocks/mountain_peak.glb",
 	# --- reuse, inregistrate in Track16.tscn ---
 	"fern_cluster": "res://assets/models/plants/fern_cluster.glb",
 	"nerpa_seal": "res://assets/models/baikal/props/nerpa_seal.glb",
@@ -422,6 +431,7 @@ func _ready() -> void:
 	var cow_mode := ""
 	var cross_at := -1.0
 	var cross_phase := 0.0
+	var cross_stand := false
 	var burner_at := -1.0
 	# Teatrul bastionului (Jodhpur, POI F): ceasurile BastionTheatre, inghetate.
 	var salute_at := -1.0
@@ -583,6 +593,8 @@ func _ready() -> void:
 			cross_at = float(arg.trim_prefix("--cross-at="))
 		elif arg.begins_with("--cross-phase="):
 			cross_phase = float(arg.trim_prefix("--cross-phase="))
+		elif arg == "--cross-stand":
+			cross_stand = true
 		elif arg.begins_with("--burner-at="):
 			burner_at = float(arg.trim_prefix("--burner-at="))
 		elif arg.begins_with("--balloon-at="):
@@ -720,8 +732,8 @@ func _ready() -> void:
 		_place_tuktuks(track, tuk_at)
 	if cow_mode != "":
 		await _set_cow(track, cow_mode)
-	if cross_at >= 0.0:
-		await _set_cross_time(track, cross_at, cross_phase)
+	if cross_at >= 0.0 or cross_stand:
+		await _set_cross_time(track, cross_at, cross_phase, cross_stand)
 	if burner_at >= 0.0:
 		await _set_burner_phase(track, burner_at)
 	if balloon_at >= 0.0:
@@ -1467,7 +1479,8 @@ func _set_herd_time(root: Node, seconds: float) -> void:
 ## (vezi `--cross-at`). Cursa si perioada se configureaza la primul tick
 ## (`_configure`, dupa ce pista a pus `travel`), deci se cere un cadru de
 ## fizica inainte; apoi se INGHEATA, ca la turma.
-func _set_cross_time(root: Node, seconds: float, anim_phase: float = 0.0) -> void:
+func _set_cross_time(root: Node, seconds_arg: float, anim_phase: float = 0.0,
+		stand: bool = false) -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var found := 0
@@ -1475,6 +1488,17 @@ func _set_cross_time(root: Node, seconds: float, anim_phase: float = 0.0) -> voi
 		var hz := node as SlidingHazard
 		if hz == null or hz.motion != SlidingHazard.Motion.TRAVERSARE:
 			continue
+		var seconds := seconds_arg
+		if stand:
+			# `--cross-stand`: mijlocul primului telegraf al acestui obstacol, adica
+			# fereastra in care modelele cu clipul `Stand` (ursul) stau in doua
+			# labe. Faza ciclului (`phase`) muta fereastra, deci ea nu e la o
+			# secunda fixa: se CAUTA, nu se ghiceste (4,5-5,2 s dadea `Walk`).
+			var st := 0.0
+			while st < 2.0 * (SlidingHazard.CROSS_WAIT + SlidingHazard.CROSS_TELEGRAPH
+					+ hz.period * 0.5) and not hz._in_telegraph(st):
+				st += 0.05
+			seconds = st + SlidingHazard.CROSS_TELEGRAPH * 0.5
 		hz.set("_time", seconds)
 		hz._physics_process(0.0)
 		hz.set_physics_process(false)
@@ -1505,7 +1529,7 @@ func _set_cross_time(root: Node, seconds: float, anim_phase: float = 0.0) -> voi
 			2.0 * (SlidingHazard.CROSS_WAIT + SlidingHazard.CROSS_TELEGRAPH
 				+ hz.period * 0.5)])
 	if found == 0:
-		print("--cross-at=%.2f: NICIUN obstacol care traverseaza pe pista asta" % seconds)
+		print("--cross-at=%.2f: NICIUN obstacol care traverseaza pe pista asta" % seconds_arg)
 
 
 ## Muta hipopotamii la o fractie din ciclul lor (vezi `--hippo-at`). Toti la
@@ -1791,8 +1815,8 @@ func _seat_car_on_rope_bridge(root: Node, car: Car) -> void:
 func _vitrina_path(stem: String) -> String:
 	if _VITRINA_MODEL_PATHS.has(stem):
 		return String(_VITRINA_MODEL_PATHS[stem])
-	# Kitul Kyoto si kitul Okinawa (assets/models/<kit>/<categorie>/<stem>.glb).
-	for kit: String in ["kyoto", "okinawa"]:
+	# Kitul Kyoto, Okinawa si Transfagarasan (assets/models/<kit>/<categorie>/<stem>.glb).
+	for kit: String in ["kyoto", "okinawa", "transfagarasan"]:
 		var root: String = "res://assets/models/" + kit
 		var d := DirAccess.open(root)
 		if d == null:

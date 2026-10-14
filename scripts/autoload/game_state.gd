@@ -176,7 +176,7 @@ var real_headlight: bool = true
 ##   2 = MAXIM: totul, la rezolutie nativa, MSAA 4x.
 ## Umbrele si glow-ul se citesc la construirea pistei (Track.gfx_tier), deci
 ## schimbarea lor se vede la urmatoarea cursa; scala si MSAA se aplica pe loc.
-const GFX_TIER_NAMES: Array[String] = ["Economic", "Normal", "Maxim"]
+const GFX_TIER_NAMES: Array[String] = ["Low", "Normal", "High"]
 var gfx_tier: int = 1
 
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
@@ -194,6 +194,10 @@ var touch_turbo: bool = false
 # nu indexul: la stergerea sau reordonarea unei piste, indexul ramas liber era
 # mostenit de alta pista si-i afisa recordul altcuiva.
 var records: Dictionary = {}
+## Recordul pe toata cursa (#498), separat de cel pe tur: cheie
+## `race_record_key` (pista + numarul de ture — un record pe 3 ture nu se
+## compara cu unul pe 5), valoare in ms.
+var race_records: Dictionary = {}
 
 func _ready() -> void:
 	load_settings()
@@ -228,8 +232,79 @@ func apply_gfx_tier() -> void:
 		vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 		vp.scaling_3d_scale = clampf(target_h / maxf(h, 1.0), 0.5, 1.0)
 		vp.msaa_3d = Viewport.MSAA_2X if gfx_tier == 0 else Viewport.MSAA_4X
-	elif gfx_tier == 2:
-		vp.msaa_3d = Viewport.MSAA_4X
+	else:
+		# Pe desktop valorile se scriu explicit (nu doar la Maxim), ca un
+		# comutator de test intors pe „Nivel" sa revina la ele.
+		vp.msaa_3d = Viewport.MSAA_4X if gfx_tier == 2 else Viewport.MSAA_2X
+		vp.scaling_3d_scale = 1.0
+	apply_debug_gfx()
+
+
+## COMUTATOARELE DE TEST PE DEVICE (oct 2026). Primele teste pe iPhone 12 Pro
+## au aratat ca limita e costul per PIXEL: pe Jodhpur, Economic tine 58 fps
+## in medie, iar Normal 44 fps la acelasi continut. Economic schimba insa patru
+## lucruri deodata (rezolutie, MSAA, umbre, glow). Comutatoarele astea le despart:
+## se schimba din SETARI, in pauza, si se aplica pe loc. HUD-ul (care ruleaza si
+## in pauza) arata fps-ul si optiunile efectiv active.
+##
+## Doar pe sesiune, NU se salveaza: un test uitat pe „Off" nu trebuie sa ramana
+## in jocul normal. Indexul 0 = „Nivel", adica ce da nivelul grafic ales.
+## Testele pornesc de pe Normal si STING lucruri; aprinderea unei umbre sau a
+## unui glow pe care nivelul nu l-a construit foloseste reglajele implicite
+## ale Godot, nu pe cele ale temei.
+const DBG_MSAA_NAMES: Array[String] = ["Tier", "Off", "2x", "4x"]
+const DBG_SCALE_NAMES: Array[String] = ["Tier", "540p", "648p", "720p", "864p", "Native"]
+const DBG_SCALE_H: Array[float] = [0.0, 540.0, 648.0, 720.0, 864.0, 100000.0]
+const DBG_SHADOW_NAMES: Array[String] = ["Tier", "Off", "1 split", "2 splits"]
+const DBG_GLOW_NAMES: Array[String] = ["Tier", "Off", "On"]
+var dbg_msaa: int = 0
+var dbg_scale: int = 0
+var dbg_shadows: int = 0
+var dbg_glow: int = 0
+
+## Aplica comutatoarele de test peste nivelul grafic. Se cheama la sfarsitul
+## lui `apply_gfx_tier`, la pornirea cursei (pista abia si-a construit soarele)
+## si la fiecare schimbare din SETARI.
+func apply_debug_gfx() -> void:
+	var vp := get_viewport()
+	if vp == null:
+		return
+	if dbg_msaa > 0:
+		vp.msaa_3d = [Viewport.MSAA_DISABLED, Viewport.MSAA_2X,
+			Viewport.MSAA_4X][dbg_msaa - 1]
+	if dbg_scale > 0:
+		var h := float(DisplayServer.window_get_size().y)
+		vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+		vp.scaling_3d_scale = clampf(DBG_SCALE_H[dbg_scale] / maxf(h, 1.0), 0.25, 1.0)
+	# Soarele si mediul pistei: valorile date de nivel se tin in metadata la
+	# prima atingere, ca „Nivel" sa le poata pune inapoi exact.
+	for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
+		var sun := n as DirectionalLight3D
+		if not sun.has_meta(&"dbg_orig"):
+			sun.set_meta(&"dbg_orig", [sun.shadow_enabled, sun.directional_shadow_mode])
+		var orig: Array = sun.get_meta(&"dbg_orig")
+		match dbg_shadows:
+			0:
+				sun.shadow_enabled = orig[0]
+				sun.directional_shadow_mode = orig[1]
+			1:
+				sun.shadow_enabled = false
+			2:
+				sun.shadow_enabled = true
+				sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
+			3:
+				sun.shadow_enabled = true
+				sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	for n in get_tree().root.find_children("*", "WorldEnvironment", true, false):
+		var we := n as WorldEnvironment
+		if we.environment == null:
+			continue
+		if not we.has_meta(&"dbg_orig"):
+			we.set_meta(&"dbg_orig", we.environment.glow_enabled)
+		if dbg_glow == 0:
+			we.environment.glow_enabled = bool(we.get_meta(&"dbg_orig"))
+		else:
+			we.environment.glow_enabled = dbg_glow == 2
 
 ## Returneaza true daca timpul e record nou pe pista respectiva.
 func try_record(track_index: int, lap_ms: int) -> bool:
@@ -244,6 +319,24 @@ func try_record(track_index: int, lap_ms: int) -> bool:
 func best_lap(track_index: int) -> int:
 	return int(records.get(TRACK_NAMES[track_index], 0)) # 0 = niciun record inca
 
+## Cheia recordului de cursa: aceeasi pista pe alt numar de ture e alta proba.
+static func race_record_key(track_index: int, laps: int) -> String:
+	return "%s@%d" % [TRACK_NAMES[track_index], laps]
+
+## Ca `try_record`, pentru timpul TOTAL al cursei, pe numarul curent de ture.
+func try_race_record(track_index: int, race_ms: int) -> bool:
+	var key := race_record_key(track_index, total_laps)
+	var best := int(race_records.get(key, 0))
+	if best > 0 and race_ms >= best:
+		return false
+	race_records[key] = race_ms
+	save_records()
+	return true
+
+## 0 = niciun record de cursa inca (pe numarul curent de ture).
+func best_race(track_index: int) -> int:
+	return int(race_records.get(race_record_key(track_index, total_laps), 0))
+
 func load_records() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(RECORDS_PATH) != OK:
@@ -252,11 +345,18 @@ func load_records() -> void:
 		var ms := int(cfg.get_value("records", track_name, 0))
 		if ms > 0:
 			records[track_name] = ms
+	if cfg.has_section("race_records"):
+		for key in cfg.get_section_keys("race_records"):
+			var ms := int(cfg.get_value("race_records", key, 0))
+			if ms > 0:
+				race_records[key] = ms
 
 func save_records() -> void:
 	var cfg := ConfigFile.new()
 	for track_name in records:
 		cfg.set_value("records", track_name, records[track_name])
+	for key in race_records:
+		cfg.set_value("race_records", key, race_records[key])
 	cfg.save(RECORDS_PATH)
 
 # ------------------------------------------------------------------ flux

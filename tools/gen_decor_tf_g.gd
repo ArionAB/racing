@@ -9,7 +9,7 @@ extends Node
 ##   godot --headless --path . res://tools/GenDecorTfG.tscn -- --write   (rescrie ZonaG)
 ##
 ## ---------------------------------------------------------------------------
-## LISTA DE ELEMENTE (runda 1) — din decupajul `G.png`, cu cifrele fisei
+## LISTA DE ELEMENTE (runda 1; runda 2: 3 tonuri de molid 65 inchis/35 atlas + palcuri de fag 17%, molizi mici 0,4-0,7 in primii 25 m, gramezi de 3-4 aflorimente x3 pe felie, umplere dreapta 0.688-0.7036) — din decupajul `G.png`, cu cifrele fisei
 ## (`### G` din transfagarasan_poi_gauntlet.md), fiecare legat de o piesa.
 ##
 ## Ce arata decupajul (MATERIA, nu layoutul): MASA de molid verde-negru, in
@@ -53,6 +53,8 @@ const CASCADA := Vector2(-72.0, -302.5)
 const MODELS := {
 	"g_flock": ["Script", "res://scenes/props/flock.gd"],
 	"g_pines": ["PackedScene", "res://assets/models/trees/alpine_pines.glb"],
+	"g_beech_a": ["PackedScene", "res://assets/models/transfagarasan/plants/beech_tree_a.glb"],
+	"g_beech_b": ["PackedScene", "res://assets/models/transfagarasan/plants/beech_tree_b.glb"],
 	"g_jneapan_a": ["PackedScene", "res://assets/models/transfagarasan/plants/jneapan_a.glb"],
 	"g_jneapan_b": ["PackedScene", "res://assets/models/transfagarasan/plants/jneapan_b.glb"],
 	"g_afin": ["PackedScene", "res://assets/models/transfagarasan/plants/afin.glb"],
@@ -255,46 +257,49 @@ func _roci_cascada() -> void:
 		_count["aflorimente"] = int(_count.get("aflorimente", 0)) + 1
 
 
-## Grupuri de 2-3 aflorimente in padure (stanga pe platou, dreapta pe panta).
+## Gramezi de 3-4 aflorimente fatetate (a/b, scara mixta) care ies din padure:
+## 3 pe fiecare din cele 4 felii, la 14-45 m de margine, ambele parti.
 func _roci_padure() -> void:
 	var centers: Array[Vector3] = []
-	var groups := 0
-	var guard := 0
 	var total := 0
-	while groups < 7 and guard < 4000:
-		guard += 1
-		var f := _rng.randf_range(F0 + 0.006, F1 - 0.004)
-		var sg := 1.0 if _rng.randf() < 0.45 else -1.0
-		var c := _cand(f, sg, _rng.randf_range(24.0, 50.0))
-		if not _ok(c, 3.5, 12.0) or float(c["slope"]) > 0.9:
-			continue
-		var pp: Vector3 = c["pos"]
-		var near := false
-		for q in centers:
-			if q.distance_to(pp) < 35.0:
-				near = true
-				break
-		if near:
-			continue
-		centers.append(pp)
-		groups += 1
-		var k := _rng.randi_range(2, 3)
-		for m in k:
-			var ang := _rng.randf() * TAU
-			var rad := _rng.randf_range(0.0, 4.0) if m > 0 else 0.0
-			var pc := _cand_at(pp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
-			var sc := _rng.randf_range(0.8, 1.4) if m == 0 else _rng.randf_range(0.5, 0.9)
-			if not _ok(pc, 3.0 * sc, 12.0):
+	var groups := 0
+	for sl in 4:
+		var got := 0
+		var guard := 0
+		while got < 3 and guard < 3000:
+			guard += 1
+			var f := F0 + (F1 - F0) * (float(sl) + _rng.randf()) / 4.0
+			var sg := 1.0 if _rng.randf() < 0.5 else -1.0
+			var c := _cand(f, sg, _rng.randf_range(14.0, 45.0))
+			if not _ok(c, 4.0, 12.0) or float(c["slope"]) > 0.9:
 				continue
-			var nm := "outcrop_a" if _rng.randf() < 0.5 else "outcrop_b"
-			if _rng.randf() < 0.2:
-				nm = "outcrop_c"
-			var p3: Vector3 = pc["pos"]
-			p3.y = _y_garda(p3.x, p3.z, p3.y - 0.35 * sc)
-			total += 1
-			_node("G_Aflor%02d" % total, "g_" + nm, p3, _rng.randf_range(-PI, PI), sc, pc["nrm"], 0.3)
-			_rocks.append(pc["pos"])
-			_count["aflorimente"] = int(_count.get("aflorimente", 0)) + 1
+			var pp: Vector3 = c["pos"]
+			var near := false
+			for q in centers:
+				if q.distance_to(pp) < 22.0:
+					near = true
+					break
+			if near:
+				continue
+			centers.append(pp)
+			got += 1
+			groups += 1
+			var k := _rng.randi_range(3, 4)
+			for m in k:
+				var ang := _rng.randf() * TAU
+				var rad := _rng.randf_range(0.0, 3.2) if m > 0 else 0.0
+				var pc := _cand_at(pp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
+				var sc := _rng.randf_range(1.0, 1.6) if m == 0 else _rng.randf_range(0.55, 1.2)
+				if not _ok(pc, 3.0 * sc, 12.0):
+					continue
+				var nm := "outcrop_a" if _rng.randf() < 0.55 else "outcrop_b"
+				var p3: Vector3 = pc["pos"]
+				p3.y = _y_garda(p3.x, p3.z, p3.y - 0.35 * sc)
+				total += 1
+				_node("G_Aflor%02d" % total, "g_" + nm, p3, _rng.randf_range(-PI, PI), sc, pc["nrm"], 0.3)
+				_rocks.append(pc["pos"])
+				_count["aflorimente"] = int(_count.get("aflorimente", 0)) + 1
+	_count["gramezi_roci"] = groups
 
 
 func _grohotis() -> void:
@@ -322,7 +327,7 @@ func _grohotis() -> void:
 func _molizi() -> void:
 	# [offset centru de la margine, prob. palc, decalaj frac, clasa marime]
 	var rows := [
-		[9.5, 0.6, 0.0, 0], [15.0, 0.92, 0.0012, 1], [22.0, 0.92, 0.0024, 1],
+		[9.5, 0.6, 0.0, 0], [15.0, 0.92, 0.0012, 0], [22.0, 0.92, 0.0024, 0],
 		[31.0, 0.92, 0.0006, 1], [42.0, 0.92, 0.0018, 2], [55.0, 0.9, 0.0030, 2],
 		[70.0, 0.88, 0.0010, 2], [88.0, 0.85, 0.0022, 2],
 	]
@@ -340,7 +345,11 @@ func _molizi() -> void:
 				if float(c["slope"]) > 1.0:
 					_rejected += 1
 					continue
-				var k := _rng.randi_range(2, 4) if int(r[3]) == 0 else _rng.randi_range(3, 7)
+				var k := _rng.randi_range(3, 6) if int(r[3]) == 0 else _rng.randi_range(3, 7)
+				# ~14% dintre palcuri sunt fagi (verde-lime), 3-5 la rand, doar in primele 45 m
+				var beech := float(r[0]) <= 45.0 and _rng.randf() < 0.17
+				if beech:
+					k = _rng.randi_range(3, 5)
 				var got := 0
 				for m in k:
 					var pc := c
@@ -358,33 +367,59 @@ func _molizi() -> void:
 						continue
 					got += 1
 					trees += 1
-					_pine(pc, int(r[3]))
+					_pine(pc, int(r[3]), beech)
 				if got > 0:
 					clumps += 1
+	# pajistea dreapta 0.688-0.7036: randuri suplimentare (cerinta r2)
+	for r2: Array in [[12.0, 0], [20.0, 0], [32.0, 1], [46.0, 2], [62.0, 2], [80.0, 2]]:
+		var f2 := 0.686
+		while f2 < F1 + 0.004:
+			f2 += _rng.randf_range(0.0018, 0.0030)
+			var c2 := _cand(f2, 1.0, float(r2[0]) + _rng.randf_range(-3.0, 3.0))
+			var k2 := _rng.randi_range(3, 6)
+			for m in k2:
+				var pc2 := c2
+				if m > 0:
+					var ang2 := _rng.randf() * TAU
+					var rad2 := _rng.randf_range(1.8, 5.0)
+					pc2 = _cand_at((c2["pos"] as Vector3) + Vector3(cos(ang2) * rad2, 0.0, sin(ang2) * rad2), c2)
+				if not _ok(pc2, 2.0, 5.5) or float(pc2["slope"]) > 1.1:
+					continue
+				trees += 1
+				_pine(pc2, int(r2[1]), false)
 	_count["molizi"] = trees
 	_count["palcuri_molizi"] = clumps
 
 
-func _pine(pc: Dictionary, size_class: int) -> void:
-	var rr := _rng.randf()
-	var v := "A" if rr < 0.25 else ("B" if rr < 0.6 else ("C" if rr < 0.85 else "D"))
-	var sc := 1.0
-	# 3 marimi: mici (puiet) in fata, medii, mari in spate
-	var pick := _rng.randf()
-	match size_class:
-		0:
-			sc = _rng.randf_range(0.5, 0.85)
-		1:
-			sc = _rng.randf_range(0.85, 1.3) if pick < 0.75 else _rng.randf_range(0.55, 0.8)
-		_:
-			sc = _rng.randf_range(1.2, 1.75) if pick < 0.7 else _rng.randf_range(0.9, 1.2)
+func _pine(pc: Dictionary, size_class: int, beech: bool = false) -> void:
 	var f: float = pc["f"]
+	var sl := _slice_of(f)
 	var yaw := _rng.randf_range(-PI, PI)
 	var p3: Vector3 = pc["pos"]
 	p3.y -= 0.15
-	var sl := _slice_of(f)
-	var s3 := Vector3(sc, sc * _rng.randf_range(0.95, 1.12), sc)
-	_flock_add("pine_%s_s%d" % [v, sl], p3, yaw, s3)
+	if beech:
+		var bv := "a" if _rng.randf() < 0.5 else "b"
+		var bs := _rng.randf_range(0.55, 1.0)
+		var b3 := Vector3(bs * _rng.randf_range(0.9, 1.1), bs * _rng.randf_range(0.9, 1.1), bs * _rng.randf_range(0.9, 1.1))
+		_flock_add("fag_%s_s%d" % [bv, sl], p3, yaw, b3)
+		return
+	var rr := _rng.randf()
+	var v := "A" if rr < 0.25 else ("B" if rr < 0.6 else ("C" if rr < 0.85 else "D"))
+	var sc := 1.0
+	var pick := _rng.randf()
+	match size_class:
+		0:
+			# primii ~25 m: molizi mici (0,4-0,7), rar unul mai mare
+			sc = _rng.randf_range(0.4, 0.7) if pick < 0.88 else _rng.randf_range(0.7, 0.9)
+		1:
+			sc = _rng.randf_range(0.75, 1.15) if pick < 0.75 else _rng.randf_range(0.5, 0.75)
+		_:
+			sc = _rng.randf_range(1.2, 1.75) if pick < 0.7 else _rng.randf_range(0.9, 1.2)
+	# ton: ~65% inchis (tf_jneapan), ~35% atlas (oliv-verde); amestecat in palcuri
+	var tone := "pine" if _rng.randf() < 0.65 else "pinem"
+	# inclinare simulata prin scara neuniforma (FlockProp nu are inclinare per instanta)
+	var s3 := Vector3(sc * _rng.randf_range(0.85, 1.15), sc * _rng.randf_range(0.9, 1.15), sc * _rng.randf_range(0.85, 1.15))
+	_flock_add("%s_%s_s%d" % [tone, v, sl], p3, yaw, s3)
 	_flock_add("trunk_%s_s%d" % [v, sl], p3, yaw, s3)
 
 
@@ -497,6 +532,13 @@ func _lot_specs(key: String) -> Array:
 	match parts[0]:
 		"pine":
 			return [{"model": "g_pines", "mesh": "Pine_" + parts[1], "cls": "tf_jneapan", "nm": "G_Molid_%s_%s" % [parts[1], parts[2]]}]
+		"pinem":
+			return [{"model": "g_pines", "mesh": "Pine_" + parts[1], "cls": "", "nm": "G_MolidM_%s_%s" % [parts[1], parts[2]]}]
+		"fag":
+			return [
+				{"model": "g_beech_" + parts[1], "mesh": "Beech_Bark", "cls": "", "nm": "G_FagScoarta_%s_%s" % [parts[1], parts[2]]},
+				{"model": "g_beech_" + parts[1], "mesh": "Beech_Leaves", "cls": "tf_beech", "nm": "G_FagCoroana_%s_%s" % [parts[1], parts[2]]},
+			]
 		"trunk":
 			return [{"model": "g_pines", "mesh": "Trunk_" + parts[1], "cls": "", "nm": "G_Trunchi_%s_%s" % [parts[1], parts[2]]}]
 		"jn":

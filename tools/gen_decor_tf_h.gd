@@ -9,6 +9,12 @@ extends Node
 ##   godot --headless --path . res://tools/GenDecorTfH.tscn -- --write   (rescrie ZonaH)
 ##
 ## ---------------------------------------------------------------------------
+## STARE LA OPRIRE (runda 2, ultima pentru H): iesit din bucla pe (c) dupa r2. R1: padure in 3 tonuri,
+##  lespezi in perete, pietre de mal, eroi cu hull; r2: umplutura de 1.537 molizi mici (4-25 m), trepte de
+##  sist pe taluz, afin -70%, fagi doar accente; pista 9,99 M triunghiuri, 0 materiale noi, felia H 0 repuneri.
+##  Ramane: densitatea si amestecul de specii (criticul cere foioase ~30-40%); fagul costa ~2.600 tri/copac,
+##  deci ar trebui un fag low-poly (decizie de kit). Oltul plat si malurile de iarba sunt de fundatie.
+##
 ## LISTA DE ELEMENTE (runda 1) — din decupajele `H.png` si `A_poenari.png`, cu
 ## cifrele fisei (`### H` din transfagarasan_poi_gauntlet.md), fiecare legat de o
 ## piesa. Cifrele sunt TINTE; cele reale se tipasesc la `--emit` si merg in raport.

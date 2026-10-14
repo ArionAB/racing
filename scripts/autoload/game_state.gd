@@ -67,11 +67,18 @@ const TRACK_SCENES: Array[String] = [
 	# vor 18 (memoria `probe-decor-numar-de-scena`).
 	"res://scenes/tracks/Track18.tscn", # Kyoto = INDEXUL 11
 	# Track19 = INDEXUL 12 (Monument Valley, brief monument_valley.md §7): la
-	# COADA listei; Dunele (Track01) ramane pe indexul 0 pana la swap. Uneltele
-	# o adreseaza cu --track=19 (resolve_track_index o gaseste dupa numarul scenei).
+	# COADA listei; Dunele (Track01) ramane pe indexul 0 pana la swap — care
+	# N-A FOST FACUT inca, desi nota e aici de la inceputul lui oct 2026.
+	# Tiparul e swap-ul Transfagarasanului de mai sus: se scrie PE POZITIE,
+	# peste Track01, nu se sterge intrarea veche (lista nu are voie sa se
+	# taseze — vezi comentariul de pe indexul 2). Indexul 0 e in campionat.
+	# Uneltele o adreseaza cu --track=19 (resolve_track_index o gaseste dupa
+	# numarul scenei).
 	"res://scenes/tracks/Track19.tscn", # Monument Valley = INDEXUL 12
 	# Track20 = INDEXUL 13 (Okinawa, brief okinawa.md §7): la COADA listei;
-	# Okinawa manual (Track08) ramane pe indexul 1 pana la swap. Uneltele o
+	# Okinawa manual (Track08) ramane pe indexul 1 pana la swap — care, ca la
+	# Monument Valley, N-A FOST FACUT inca. Acelasi tipar: PE POZITIE, peste
+	# Track08. Indexul 1 e in campionat. Uneltele o
 	# adreseaza cu --track=20 (resolve_track_index o gaseste dupa numarul scenei;
 	# probe_decor/probe_manual vor 20, snapshot/probe_race/probe_layout vor 13 SAU 20).
 	"res://scenes/tracks/Track20.tscn", # Okinawa = INDEXUL 13

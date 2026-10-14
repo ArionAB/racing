@@ -4036,6 +4036,11 @@ static func themes() -> Dictionary:
 		"rock_band_tint": Color(0.33, 0.43, 0.44),
 		# Molizii din benzi pe clasa acelor inchise (vezi _build_decor).
 		"pine_crown_class": "tf_jneapan",
+		# Amprenta de la baza pieselor se memoreaza per (mesh, transformare relativa):
+		# DecorManual are sute de piese din aceleasi GLB-uri (casa, zid, aflorimente)
+		# si fara cache fiecare isi aducea varfurile de pe GPU.
+		"prop_foot_cache": true,
+		"prop_contact_flat": ["bujor_de_munte", "wood_stack", "hay_bale", "snow_pole", "schist_outcrop_a", "schist_outcrop_b", "schist_outcrop_c", "scree_cone"],
 		"snow_line": 44.0,
 		"snow_fade": 14.0,
 		"snow_tint": Color(0.80, 0.90, 1.0),
@@ -14758,9 +14763,16 @@ func _build_world_decor() -> void:
 	var pine_cls := String(theme_flag("pine_crown_class", ""))
 	if not pine_cls.is_empty():
 		var pine_mat := Palette.triplanar_class_material(pine_cls)
+		# Doar ~65 % dintre molizi, alesi deterministic dupa pozitie: tot padurea pe
+		# aceeasi clasa citea ca un singur ton verde-inchis de la un capat la altul.
+		# Restul isi pastreaza materialul de acum, deci tonurile se amesteca in
+		# spatiu, fara material nou.
+		var pine_share: int = int(theme_flag("pine_crown_class_pct", 65))
 		for node in Palette._walk(decor):
 			if node is MeshInstance3D and String(node.name).begins_with("Pine"):
-				(node as MeshInstance3D).material_override = pine_mat
+				var pp := (node as MeshInstance3D).global_position
+				if posmod(hash(Vector2i(roundi(pp.x * 10.0), roundi(pp.z * 10.0))), 100) < pine_share:
+					(node as MeshInstance3D).material_override = pine_mat
 	# Scenografia DUPA benzile statistice, si tot in `_decor_roots`: semnele
 	# chevron si gardurile isi cauta loc liber printre obstacolele de acolo, iar
 	# un tetrapod sau un zid de cetate e cel putin la fel de solid ca o stanca.

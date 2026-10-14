@@ -1525,6 +1525,150 @@ murit cu `UnicodeEncodeError` **înainte de a scrie scena** — deci corecția
 părea că n-are niciun efect, iar captura ieșea identică. A treia oară în
 sesiune. Toate diacriticele din `gen_halong_route.py` sunt acum scoase (27).
 
+### 7.6 Verdictul la volan pe fundație, și ce a produs (14 oct 2026)
+
+Primul verdict al dezvoltatorului pe fundația condusă efectiv. Patru răspunsuri,
+patru diagnostice diferite — și trei dintre ele au arătat un defect pe care
+gărzile existente nu-l puteau vedea, fiindcă fiecare măsura altceva decât ce
+decide senzația.
+
+#### „La ponton am simțit o fizică aparte când am fost mai multe mașini pe el; când am fost singur, nu prea"
+
+**Cel mai util dintre cele patru**, fiindcă e o jumătate de verdict pozitivă și
+o jumătate negativă pe *același* mecanism — deci cauza nu putea fi „pontonul nu
+merge", trebuia să fie o mărime care se schimbă cu numărul de mașini.
+
+Măsurat: afundarea proprie a mașinii jucătorului (`mass_factor` ~1,3) era
+**0,160 m**, iar valul de fond al pontonului **0,10 m**. Raport semnal/zgomot
+**1,6**. Cu patru mașini afundarea sare la 0,505 m (raport **5,1**) — și acolo
+se simțea. `_drop` adună valul și afundarea pe **același canal vertical**, deci
+un efect care respectă contractul poate fi invizibil sub un alt efect care și
+el respectă contractul.
+
+Reglat: `sag_bus` 0,45 → **0,70**, `sag_sport` 0,18 → **0,30**, `wave_amp`
+0,10 → **0,06**. Solo ajunge la 0,260 m și raport **4,3**; în grup la 10,5.
+Cazul de grup *nu* crește proporțional, fiindcă `sag_max` îl saturează deja —
+adică reglajul mută exact cazul care lipsea. Panta de intrare cu plutonul pe
+tronson rămâne **2,6%**, mult sub pragul pistei de 13%, deci `edge_clamp = 14`
+nu trebuie atins.
+
+**Gardă nouă (7) în `probe_ponton.gd`:** raportul semnal/zgomot solo ≥ 2,5.
+Armată prin sabotaj țintit: pe valorile vechi iese **2,02 → PICĂ**, pe cele noi
+**5,39 → trece**.
+
+**Și o gardă reparată.** Reglajul a făcut garda 3 (continuitate) să pice cu
+0,141 m/tick, peste pragul de 0,12. Diagnosticul prin eliminare: cu balansul
+stins, cu tangajul stins, cu valul stins și cu sarcina centrată, cifra rămânea
+**0,1403–0,1410** — identică la a treia zecimală. Un număr care nu se schimbă
+când stingi pe rând toate mecanismele nu-i măsoară pe ei (memoria
+`sonda-masura-alt-obiect`). Cauza: garda aplica sarcina **brusc** la mijloc și
+măsura de acolo, deci cifra ei era propriul artefact de pornire — plăcile se
+teleportau din repaus în forma încărcată. Tick-urile o arată fără dubiu:
+`0,3012 · 0,1406 · 0,0064 · 0,0092 · 0,0117 …`. La tick 0 mașina nici n-a ajuns
+pe ponton. Rescrisă pe cazul real (o mașină care **traversează** la 90 km/h,
+~103 tick-uri): **0,023 m/tick**, de șase ori sub prag. Pragul nu s-a mutat;
+sonda a început să măsoare ce pretindea că măsoară.
+
+#### „Belvedere nu am știut unde este"
+
+Gărzile spuneau că turnurile de fundal sunt „în cadru pe 7/10 puncte". Ambele
+afirmații sunt adevărate, și de aici a ieșit o unealtă care lipsea.
+
+`tools/halong_frustum_table.py` — tabelul de frustum cerut de §2.1 „înainte de
+decor", care **nu se făcuse niciodată**. Garda veche din `gen_halong_route.py`
+măsura **două** axe (azimut, distanță) pe repere date ca puncte **2D** — fără
+cotă, deci fără verticală, și fără nicio noțiune de ocluzie. Memoria
+`reperul-se-vede-pe-patru-axe` cere patru.
+
+Ce a arătat, pe parametrii camerei de joc (memoria `verifica-cu-parametrii-lui`):
+turnurile se văd **14/14, întregi**, la 182–324 m; apa se vede în jos pe
+**17/17** puncte, cu o cădere de până la −15,0°. Satul plutitor 12/12. Adică
+**vizibilitatea nu e problema** — tot ce trebuie văzut, se vede.
+
+Diagnosticul real e în **profilul de cotă**: urcarea e continuă de la frac 0,35
+la 0,53 (+6 m pe fiecare felie de 5%), vârful la 0,533 (25,7 m), coborârea
+310 m. Vârful durează **3,8 s** la viteză de joc, și nu are nicio **margine**:
+urci 371 m, treci un platou nemarcat, cobori. Nimic nu spune „aici e punctul".
+Belvederea nu lipsea din câmpul vizual, lipsea ca **loc**.
+
+Ce s-a făcut acum: `CameraZone` „CameraBelvedere" pe 0,47–0,55, cu
+`fov_bonus = +8` (68 → 76). Aleasă **măsurat**, nu din gust: turnurile stau la
+numai **+1,8…+2,8°** iar marginea de sus a cadrului e la +5,25°, deci marja e
+~2,5°. Un preset care ridică camera (varianta evidentă pentru „privește în jos")
+duce marginea de sus la **−4,66°** și **taie exact reperul** — ar fi reparat o
+axă stricând alta (memoria `tinta-pe-o-axa-se-atinge-pe-axa-aia`). `fov_bonus`
+lărgește cadrul în ambele direcții fără să atingă camera: turnurile capătă marjă
+(+9,25°) și se vede mai mult golf în jos.
+
+**Ce rămâne deschis, și de ce nu s-a făcut aici:** un *reper construit* la vârf
+(belvedere cu parapet, pavilion, platformă) e singurul lucru care transformă
+platoul într-un loc recunoscut. Kitul Ha Long nu există încă (nu există nici
+`docs/asset_briefs/halong*`), iar assets-urile generice disponibile nu au nimic
+care să citească „punct de belvedere" fără să inventeze. E muncă de kit, nu de
+reglaj — intră în brieful de assets, la POI D.
+
+Garda `halong_frustum_table.py` e armată prin `--sabotaj` (drumul coborât la
+cota 0): turnurile cad de la 14/14 la **4/14**, ascunse de Insula, și garda iese
+cu cod 1. Deci cota belvederii e chiar mecanismul care le descoperă.
+
+#### „Mareea apare ca o bandă albastră peste scurtătură"
+
+Defect real, găsit exact unde verdictul îl arăta — și prezis, cuvânt cu cuvânt,
+de propriul comentariu al codului.
+
+`_update_film` avea deasupra lui regula corectă scrisă explicit: *„se scalează
+pe Y în loc să fie mutată, ca marginea să rămână lipită de terasă: o foaie de
+apă care PLUTEȘTE la 1,5 m ar citi ca o placă de sticlă"*. Codul de sub acel
+comentariu făcea `position.y = _level * rise_m` — **tocmai mutarea pe care
+comentariul o interzicea**. Nicăieri în fișier nu exista vreo scalare. Nodul
+`Maree` stă la 1,493 (pe terasă), deci la maree plină apa plutea la ~3 m peste
+mare. Memoria `justificarea-din-comentariu-se-verifica`: o justificare scrisă
+nu dovedește că e și implementată.
+
+Reparat: mesh-ul devine o **cutie** (un plan are grosime zero, deci nu poate
+avea o margine de jos care să stea pe loc), înaltă `rise_m`, scalată pe Y cu
+nivelul și coborâtă cu exact cât s-a scurtat — centrul unei cutii scalate la `k`
+stă la `k · rise_m / 2` peste bază. Cota mării se citește din transformul
+propriu (`_sea_offset_y`), nu dintr-o constantă.
+
+Măsurat după fix: marginea de jos se abate de la cota mării cu **0,000 m**,
+marginea de sus urcă între 0,051 și 1,500 m. Apa urcă acum, nu plutește.
+
+**Gardă nouă (7) în `probe_maree.gd`:** contractul e pe **margini**, nu pe
+nivel — baza pe cota mării la orice nivel, vârful care urcă cu mareea. Gărzile
+1–6 măsurau toate **ceasul** (faze, durate, continuitate) și poarta de bandă;
+niciuna nu se uita unde se află foaia în spațiu, și pe acolo a trecut defectul.
+Armată prin reintroducerea defectului vechi: baza iese la **2,24 m peste mare →
+PICĂ**, cu mesajul care numește simptomul („bandă albastră peste scurtătură").
+Sonda ridică deliberat nodul la 1,493 ca în pistă: cu nodul la 0, baza și marea
+ar coincide din întâmplare și defectul ar fi invizibil.
+
+Întrebarea de fond — *mareea e decizie sau taxă?* — rămâne **deschisă**, și
+dezvoltatorul a spus de ce: „e prea incipientă ca să-mi dau seama". Corect:
+telegraful de pe belvedere e ce face din ea o decizie, iar belvederea încă nu e
+un loc (vezi mai sus). Cele două întrebări sunt legate, și se închid împreună.
+
+#### „Grota — momentan, cum nu există asset, nu pot să-mi dau seama"
+
+Confirmat: nu există `assets/models/halong/`, nici brief de assets. `CameraZone`
+pe grotă există și e reglat (§7.4), dar o grotă fără geometrie nu se poate
+judeca. Rămâne deschisă până la kit.
+
+#### Ce spune ProbeRace
+
+Distribuții, nu rulări (memoria `proberace-nedeterminism`). Pe ponton
+recalibrat, fără zona de cameră, pe 3 seed-uri: **0/5/3** repuneri. Cu zona de
+belvedere, pe 7 seed-uri: **4/5/4/2/0/3/7** — aceeași plajă lărgită (0–7),
+mediană 4 vs 3. Primele trei seed-uri singure (4/5/4) ar fi arătat ca o regresie; a doua
+serie a așezat distribuția în același interval. Zgomot, nimic de reparat
+(memoria `proberace-nedeterminism`: se compară distribuții, nu rulări).
+`CameraZone` nu are mască de coliziune și `monitorable = false`
+(„cost zero" e scris în clasă și verificat aici), deci nu poate împinge pe
+nimeni. Repunerile cad la **frac 0,78–0,87** — zona maimuțelor și fundul
+golfului G, adică un hazard mobil cu masă — nu pe belvedere (0,47–0,55) și nu pe
+banda de maree. Zona 0,95–1,00 la 15 m/s pe toate seed-urile e fundul golfului G
+cu raze de fillet 34–40 m: viraj strâns legitim, 0 pereți.
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Patru axe, scrise înaintea traseului** (§2.0). Consecința derivată din

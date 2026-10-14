@@ -48,6 +48,17 @@ extends Node
 ##     `tri_class tf_jneapan`, trunchiuri pe atlas.
 ##   - FAGII scad la 3 palcuri-accent; AFLORIMENTELE devin 3 grupuri de 2-3 lame
 ##     mari (peretele de sist) + 2 pe capul din stanga; BUJORUL 4 petice mici.
+## RUNDA 3 (ultima): FASIA APROPIATA 3,5-9 m de margine, 0.160-0.240 pe dreapta
+##   si pe taluzul din viraj (stanga, de la 0.2395): jneapan culcat, afin, lame
+##   mici de sist si grohotis mic, toate FlockProp fara coliziune (0 material nou).
+##   Molizii pe 3 randuri in adancime (13 / 26 / 42 m), cu goluri.
+##
+## STARE LA OPRIRE (runda 3): decorul acopera fasia apropiata, trei randuri de
+## molizi (~160), 8 fagi, 11 aflorimente si petice mici de bujor. Ramane diferit
+## de bara: iarba rasa intre grupuri, molizii vechi din scatter (oliv-galbui)
+## amestecati cu ai nostri, acele cu mediana B~20 fata de 43 tinta, lacul-mare si
+## groapa din stanga de la 0.24 (relief/apa, nu decor). Material de ignorat la
+## integrare: tf_jneapan, tf_beech, tf_bloom sunt cele 3 clase aduse de zona.
 ## Densitate pe benzi (de la marginea asfaltului): 0-10 m iarba si tufe (nimic
 ## solid), 10-30 m fagi + molizi + aflorimente, 30-60 m padurea si pintenii.
 ## STANGA: nimic la < 3 m de malul lacului; nimic care sa acopere lacul.
@@ -65,6 +76,8 @@ const RES := {
 	"scree": ["c_scree", "res://assets/models/transfagarasan/rocks/scree_cone.glb"],
 	"pines": ["c_pines", "res://assets/models/trees/alpine_pines.glb"],
 	"bujor": ["c_bujor", "res://assets/models/transfagarasan/plants/bujor_de_munte.glb"],
+	"jneapan_a": ["c_jneapan_a", "res://assets/models/transfagarasan/plants/jneapan_a.glb"],
+	"jneapan_b": ["c_jneapan_b", "res://assets/models/transfagarasan/plants/jneapan_b.glb"],
 	"afin": ["c_afin", "res://assets/models/transfagarasan/plants/afin.glb"],
 }
 
@@ -89,6 +102,9 @@ var _afin_pos: Array = []
 var _afin_yaw: Array = []
 var _patch_slice: Array = []
 var _afin_slice: Array = []
+var _rock_pos: Array = []   # aflorimente (noduri), ca spruces sa nu intre in ele
+# Fasia apropiata (runda 3): cheie -> {pos, yaw, sl}
+var _strip: Dictionary = {}
 
 
 func _ready() -> void:
@@ -106,6 +122,7 @@ func _ready() -> void:
 	_beeches()
 	_outcrops_and_scree()
 	_spruces()
+	_near_strip()
 	_flowers()
 	_write()
 	get_tree().quit(0)
@@ -208,6 +225,7 @@ func _outcrops_and_scree() -> void:
 		if is_nan(q.y):
 			continue
 		_node(String(s[0]), "Aflorimentul", q, float(s[3]), float(s[4]), 0.3)
+		_rock_pos.append(q)
 	# Grohotis la piciorul aflorimentelor b si c: latura plata (+Z local) spre
 	# stanca; yaw = atan2(d.x, d.z) cu d = directia grohotis -> stanca.
 	for sc: Array in [[0.1960, 28.0, 7.5], [0.2115, 25.0, 6.5]]:
@@ -224,29 +242,39 @@ func _outcrops_and_scree() -> void:
 
 ## D. MOLIZII. Grupuri neregulate de 5-12 pe dreapta; densitate spre drum.
 func _spruces() -> void:
-	# [frac centru, offset centru de la margine, nr.]
-	var clusters := [
-		[0.1580, 13.0, 9], [0.1665, 17.0, 11], [0.1740, 12.0, 8],
-		[0.1815, 24.0, 7], [0.1890, 13.0, 10], [0.1960, 18.0, 6],
-		[0.2040, 12.0, 10], [0.2105, 20.0, 8], [0.2185, 14.0, 9],
-		[0.2265, 12.0, 8], [0.2345, 16.0, 7], [0.2405, 20.0, 6],
-		[0.1700, 40.0, 7], [0.2000, 42.0, 7], [0.2150, 40.0, 6],
-		[0.2290, -32.0, 5],
-	]
+	# Runda 3: 3 randuri in adancime (aproape / mijloc / fund), centre la ~0.0072,
+	# decalate intre randuri, cu goluri ca acoperirea sa nu fie uniforma.
+	# [offset centru, nr. pe grup, decalaj frac, prob. grup]
+	var rows := [[13.0, 5, 0.0, 0.85], [26.0, 7, 0.0036, 0.8], [42.0, 7, 0.0018, 0.7]]
+	var clusters: Array = []
+	for r: Array in rows:
+		var f: float = 0.1560 + float(r[2])
+		while f < 0.2420:
+			if _rng.randf() < float(r[3]):
+				clusters.append([f, float(r[0]) + _rng.randf_range(-3.0, 3.0), int(r[1]) + _rng.randi_range(-1, 2)])
+			f += 0.0072
+	clusters.append([0.2290, -32.0, 5])
 	var total := 0
 	for c: Array in clusters:
 		for k in int(c[2]):
 			var sgn := signf(float(c[1]))
-			var off: float = float(c[1]) + sgn * _rng.randf_range(-7.0, 7.0)
+			var off: float = float(c[1]) + sgn * _rng.randf_range(-5.0, 5.0)
 			if absf(off) < 9.0:
 				off = 9.0 * sgn
-			var fr: float = float(c[0]) + _rng.randf_range(-0.0045, 0.0045)
+			var fr: float = float(c[0]) + _rng.randf_range(-0.0035, 0.0035)
 			var q := _pt(fr, off, 0.0)
 			if is_nan(q.y) or _axis_dist(q, 0.185, 0.205) < 10.0:
 				continue
 			var si := _idx(0.1777)
 			var sg: Vector3 = _track.baked[si] + _track._side_at(si) * 9.2
 			if Vector2(sg.x - q.x, sg.z - q.z).length() < 6.0:
+				continue
+			var blocked := false
+			for rp: Vector3 in _rock_pos:
+				if Vector2(rp.x - q.x, rp.z - q.z).length() < 5.5:
+					blocked = true
+					break
+			if blocked:
 				continue
 			var r := _rng.randf()
 			var nm := "Pine_A" if r < 0.25 else ("Pine_B" if r < 0.6 else ("Pine_C" if r < 0.85 else "Pine_D"))
@@ -255,6 +283,61 @@ func _spruces() -> void:
 			(_pine_sl[nm] as Array).append(0 if fr < 0.2 else 1)
 			total += 1
 	_log.append("; molizi: %d" % total)
+
+
+func _acc(key: String, q: Vector3, fr: float) -> void:
+	if not _strip.has(key):
+		_strip[key] = {"pos": [], "yaw": [], "sl": []}
+	(_strip[key].pos as Array).append(q)
+	(_strip[key].yaw as Array).append(_rng.randf_range(0.0, TAU))
+	(_strip[key].sl as Array).append(0 if fr < 0.2 else 1)
+
+
+## FASIA APROPIATA (runda 3): de la 3,5 m la ~9 m de margine, pe toata lungimea
+## 0.160-0.240 pe dreapta si pe taluzul din viraj (stanga, 0.2395-0.252). Doar
+## piese joase si fara coliziune (MultiMesh): jneapan culcat, afin, lame mici de
+## sist, grohotis mic. Camera nu are ce taia, banda libera ramane libera.
+func _near_strip() -> void:
+	var si := _idx(0.1777)
+	var sg: Vector3 = _track.baked[si] + _track._side_at(si) * 9.2
+	var n := 0
+	var f := 0.1600
+	while f < 0.2520:
+		var left := f >= 0.2395
+		var sgn := -1.0 if left else 1.0
+		# 1-2 piese de jneapan pe statie, la 3,5-9 m; la stanga doar pe taluz.
+		for k in _rng.randi_range(1, 2):
+			var off := _rng.randf_range(3.5, 9.0)
+			var q := _pt(f + _rng.randf_range(-0.002, 0.002), off * sgn, _rng.randf_range(-3.0, 3.0))
+			if is_nan(q.y) or Vector2(sg.x - q.x, sg.z - q.z).length() < 3.0:
+				continue
+			if left and absf(_sol(q.x, q.z) - _track.baked[_idx(f)].y) > 6.0:
+				continue
+			_acc("jneapan_a" if _rng.randf() < 0.5 else "jneapan_b", q, f)
+			n += 1
+		# afin: pâlc de 2-3 la baza lor
+		if _rng.randf() < 0.75:
+			var c := _pt(f, _rng.randf_range(4.0, 9.0) * sgn, 0.0)
+			if not is_nan(c.y) and Vector2(sg.x - c.x, sg.z - c.z).length() > 3.0:
+				for j in _rng.randi_range(2, 3):
+					var q2 := c + Vector3(_rng.randf_range(-1.6, 1.6), 0.0, _rng.randf_range(-1.6, 1.6))
+					q2.y = _sol(q2.x, q2.z)
+					if not is_nan(q2.y):
+						_acc("afin", q2, f)
+						n += 1
+		# roca mica: lama de sist (b) la scara mica si, rar, grohotis mic
+		if _rng.randf() < 0.45:
+			var q3 := _pt(f, _rng.randf_range(4.5, 9.0) * sgn, _rng.randf_range(-3.0, 3.0))
+			if not is_nan(q3.y):
+				_acc("rock", Vector3(q3.x, q3.y - 0.12, q3.z), f)
+				n += 1
+		if _rng.randf() < 0.12:
+			var q4 := _pt(f, _rng.randf_range(6.0, 9.0) * sgn, 0.0)
+			if not is_nan(q4.y):
+				_acc("scree", Vector3(q4.x, q4.y - 0.1, q4.z), f)
+				n += 1
+		f += 0.0014
+	_log.append("; fasie apropiata: %d piese" % n)
 
 
 ## E. FLORILE. Petice neregulate de bujor cu afin pe margine.
@@ -339,6 +422,30 @@ func _write() -> void:
 		var a := _slice(_afin_pos, _afin_yaw, _afin_slice, sl)
 		_flock("C_AfinFrunze_S%d" % sl, "afin", "Afin_Leaves", a[0], a[1], 1.4, 1.9, "", 6301 + sl)
 		_flock("C_AfinBoabe_S%d" % sl, "afin", "Afin_Berry", a[0], a[1], 1.4, 1.9, "", 6301 + sl)
+	# fasia apropiata: stoluri pe felii
+	var spec := {
+		"jneapan_a": [["jneapan_a", "Jneapan_Needles", "tf_jneapan"], ["jneapan_a", "Jneapan_Bark", ""]],
+		"jneapan_b": [["jneapan_b", "Jneapan_Needles", "tf_jneapan"], ["jneapan_b", "Jneapan_Bark", ""]],
+		"afin": [["afin", "Afin_Leaves", ""], ["afin", "Afin_Berry", ""]],
+	}
+	var scl := {"jneapan_a": [0.7, 1.0], "jneapan_b": [0.8, 1.1], "afin": [1.3, 1.8]}
+	for key: String in spec:
+		if not _strip.has(key):
+			continue
+		for sl in 2:
+			var pp := _slice(_strip[key].pos, _strip[key].yaw, _strip[key].sl, sl)
+			for e: Array in spec[key]:
+				var nm := "C_F_%s_%s_S%d" % [key, String(e[1]).get_slice("_", 1), sl]
+				_flock(nm, String(e[0]), String(e[1]), pp[0], pp[1], scl[key][0], scl[key][1], String(e[2]), 7000 + sl)
+	for key2: String in ["rock", "scree"]:
+		if not _strip.has(key2):
+			continue
+		for sl in 2:
+			var pp2 := _slice(_strip[key2].pos, _strip[key2].yaw, _strip[key2].sl, sl)
+			if key2 == "rock":
+				_flock("C_F_Roca_S%d" % sl, "outcrop_b", "Schist_Schist", pp2[0], pp2[1], 0.28, 0.5, "tf_schist", 7100 + sl)
+			else:
+				_flock("C_F_Grohotis_S%d" % sl, "scree", "Scree_Schist", pp2[0], pp2[1], 0.28, 0.4, "tf_schist", 7200 + sl)
 	print("; noduri %d, bujor %d, afin %d" % [_n,
 		_bujor_pos.size(), _afin_pos.size()])
 	for l in _log:

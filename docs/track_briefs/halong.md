@@ -1498,6 +1498,26 @@ captură se văd trei golfuri cu țărmuri, iar uscatul s-a rupt în bucăți.
 vede în `ProbeLayout` sau `ProbeRace` — se vede pe captura de sus, și de aceea
 pasul 7 e un pas în sine, nu un export de la final.
 
+#### Regula de zgomot, aplicată corect de data asta
+
+După scobituri, `ProbeRace` a urcat de la 4/1/5 la **11/13/4** repuneri, toate
+la intrarea în golf. Am verificat metodic trei suspecți — stânca provizorie
+(măsurată: 6,14 m, la 34 m lateral, nu ajunge pe drum), raza virajului (38,8 m,
+confortabilă) și scobiturile în sine — și **apoi m-am oprit**, ca să aplic
+regula scrisă după cele șase ipoteze arse (§7.3): *rerulează aceeași stare
+înainte de prima ipoteză.*
+
+| | rulare 1 | rulare 2 | rulare 3 | mediană |
+|---|---|---|---|---|
+| seed 1 | 11 | 7 | 2 | **7** |
+| seed 2 | 13 | 4 | 5 | **5** |
+
+**Amplitudinea pe aceeași stare e 2–13**, adică un interval de 11. Diferența de
+mediane față de starea anterioară (7 vs 4) e **3** — bine sub zgomot.
+
+**Verdict: scobiturile n-au stricat nimic măsurabil.** De data asta regula a
+prins zgomotul *înainte* de a ataca o ipoteză, nu după șase.
+
 #### O rundă pierdută pe diacritice
 
 Mesajul unei gărzi conținea „ă", consola Windows e cp1252, iar generatorul a
@@ -1583,17 +1603,117 @@ sesiune. Toate diacriticele din `gen_halong_route.py` sunt acum scoase (27).
 
 ## 9. Prompt pentru ChatGPT (dioramă de referință)
 
-Se scrie la pasul 7 din §7, **pe captura reală de sus** a lui `Track22`
-(`Snapshot.tscn -- --track=22 --no-fog`, cu fereastră), adnotată cu
-`tools/annotate_halong_plan.py`. Nu se scrie acum: memoria
-`diorama-din-geometria-reala` — referința e o captură ortografică adnotată a
-pistei reale, nu un plan schematic desenat din brief.
+**Se atașează doar
+`docs/track_briefs/img/halong_plan/halong_plan.png`**, într-o **conversație
+nouă**. Planul e captura **REALĂ** de sus din Godot
+(`Snapshot.tscn -- --track=22 --no-fog`, cu fereastră; bruta e
+`plan_de_sus_nofog.png`), cu legenda desenată de
+`python tools/annotate_halong_plan.py`. Scriptul potrivește singur scara pe
+pixelii de asfalt și tipărește cât din traseu cade pe el (**85%**, scară 1,015).
+Traseul, pontoanele, grota, banda, jonca, maimuțele și turnurile se citesc din
+nodurile lui `Track22.tscn`; ce n-are încă nod (satul plutitor, belvederea,
+plaja, șirul de fundal) e marcat „poziție planificată" (memoria
+`diorama-din-geometria-reala`).
 
-Ce se ia din Okinawa v0.2 și Transfăgărășan v0.2 când se scrie:
-**„ONE CLOSED LOOP”** ca prim paragraf, **densitatea pe cifre**, **hazardele
-surprinse în cadru** (jonca tăind canalul, maimuțele sărind pe parapet,
-pontonul afundat sub o mașină grea, banda de jos pe jumătate sub apă) și lista
-**FORBIDDEN** din §8.
+**Camera: din colțul de NV, înaltă (~50°).** Măsurat pe reperele reale
+(centroid la (−83, 20)): satul plutitor e la **NV** (384 m), belvederea la
+**SE** (339 m), șirul de turnuri de fundal tot la **SE** (482 m), grota la
+**S** (288 m). Din NV, satul plutitor intră în prim-plan, iar insula cu
+belvederea și turnurile de fundal cad în adâncime — exact stratificarea care
+face pista să se citească. Insula (rază 120 m) nu ascunde nimic esențial din
+acest unghi: belvederea stă **pe vârful ei**, deci o cameră înaltă o arată.
+Soarele de ESE (~30°) vine din **dreapta-față** a camerei, deci turnurile sunt
+în contralumină parțială și umbrele cad **pe apă** — identitatea luminii din §1.
+
+> Create a stylized low-poly **tabletop diorama** of a toy-car racing track in
+> **Ha Long Bay, Vietnam**, on a **late spring morning**, with low mist still
+> caught between the limestone towers. **Use the attached top-down plan as the
+> exact layout: same loop shape, same islands, same water, same position of
+> every landmark.** The letters A–G, the circles, red arrows, text boxes and the
+> legend strip under the plan are a legend: do not draw them. On the plan:
+> - the thin white line on the dark band is the **asphalt road**;
+> - the brown-and-blue striped segments on the left (B) are the road **floating
+>   on pontoons**;
+> - the dark brown block (C) is the road passing **through a sea cave**;
+> - the pale yellow line at the top (G) is a **lower tidal shelf**;
+> - the light grey patches are **limestone**, the teal is **water**.
+>
+> **THE ROAD IS ONE CLOSED LOOP. READ THIS FIRST [!]**
+> - There is **exactly one closed loop of road**: no other roads, no car parks
+>   off the loop, no second cave.
+> - The loop runs **anticlockwise on the plan**: south down the LEFT side,
+>   east along the BOTTOM, up the RIGHT side over the island, then west along
+>   the TOP back to the start.
+> - **Start/finish: top-left (A)**, on a **stone quay** at the edge of a
+>   **floating fishing village**: wooden houses on rafts with corrugated metal
+>   roofs, square fish-farm pens of netting and blue plastic drums, round
+>   basket boats, drying nets.
+> - **LEFT side (B)**: the road **floats**. Seven linked pontoon sections of
+>   bamboo decking on **blue plastic drums**, separated by small fixed rock
+>   islets. The decking visibly **sags** under weight and sits only just above
+>   the water.
+> - **BOTTOM (C)**: a **stone causeway** between limestone towers, then the road
+>   goes **straight through a sea cave** bored into the base of one tower, with
+>   water on both sides of the roadway.
+> - **RIGHT side (D–E)**: the road climbs the spine of a **forested limestone
+>   island** among fig trees with aerial roots, reaches a **viewpoint** looking
+>   out over the whole bay, then drops in **two tight hairpins** to a small
+>   **crescent beach** of grey-cream sand in a cove.
+> - **TOP RIGHT (F)**: a **raft bridge** of lashed bamboo pontoons crosses a
+>   channel; a wooden **fishing junk with a rust-red sail** is crossing it.
+> - **TOP (G)**: the road is **cut into a limestone cliff face**, with a lower
+>   **tidal shelf** running beside it — a flat abrasion terrace that the sea
+>   covers at high tide. **Macaque monkeys** sit on the parapet.
+> - **THE HERO OF THE DIORAMA**: **limestone karst towers rising straight out
+>   of the water** — vertical grey-white cliffs, undercut and darker at the
+>   waterline where waves have eaten the base, streaked with vertical dark
+>   runnels, rounded green scrub on top. Towers stand **in the water inside and
+>   outside the loop**, not just around the edge.
+>
+> **COLOUR — this is what makes it Ha Long and not a tropical resort [!]**
+> The water is **opaque jade green** (#4A7A6B), not transparent turquoise. It
+> is a silty bay, not a coral reef: you cannot see the bottom. Shallows near
+> rock go lighter green-grey (#6E9B86), shadowed water under the towers goes
+> almost black-green (#2A4A42). Limestone is **cool grey** (#A8A49A in sun,
+> #6E7276 in shade, near-black wet undercut at the base). The single strongest
+> accent is the **blue plastic drums** (#2E6FA8) under the pontoons, in small
+> patches only. Sails are **rust red** (#A8503A), weathered wood is grey-brown.
+>
+> **MIST.** Low mist lies **on the water between the towers**, cutting them at
+> mid-height and separating them into **three depth layers**. The tops stay
+> clear. This is what gives the bay its scale — without it the towers read as a
+> flat wall of rock.
+>
+> **LIGHT.** Morning sun from the **right-front of the camera**, low (~30°),
+> warm white. Towers are in **partial backlight**, their long shadows falling
+> **across the opaque water** — the shadows read because the water is not
+> transparent.
+>
+> **CAMERA.** From the **north-west corner, high (~50°)**, so the floating
+> village is in the foreground, the cave and causeway in the middle distance,
+> and the island with its viewpoint plus the receding rows of towers in the
+> far distance.
+>
+> **DENSITY.** About **12** floating houses, **6** fish-farm pens, **4–5**
+> fishing junks and sampans on the water, **3** rows of background towers,
+> **7** pontoon sections, **1** sea cave, **1** raft bridge, **1** beach.
+>
+> **FORBIDDEN — do not draw any of these [!]**
+> - no temples, pagodas, shrines, altars, red lanterns, dragons or curved
+>   tiled roofs (this is not Kyoto and not generic South-East Asia);
+> - no palm trees, white sand beaches, parasols or resort buildings (this is
+>   not Okinawa);
+> - no pirate ships, cannons, black flags or treasure chests;
+> - no large white cruise ships;
+> - no transparent turquoise water and no visible coral or fish;
+> - no poverty as scenery: the village is lived-in and maintained, not ragged;
+> - no brands, logos, flags, political symbols or readable text anywhere;
+> - no snow, no autumn colours, no night.
+
+**Ce rămâne după dioramă** (pașii 7b–7d, nefăcuți): planșa de inventar, briful
+de kit (`docs/asset_briefs/halong_kit.md` + `tools/blender/verify_halong.sh`),
+apoi POI-urile A–G în gauntlet, cu **valuri de 3** (memoria
+`valuri-de-trei-nu-opt-agenti`).
 
 **Camera, de decis pe planul real** (lecția din Transfăgărășan §9: din SE
 masivul tunelului ascundea serpentinele, din NE ascundea barajul — nu se pot

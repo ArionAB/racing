@@ -123,6 +123,7 @@ func _build() -> void:
 	_poenari_picior()
 	_pietre_mal()
 	_molizi()
+	_umplutura()
 	_fasie()
 	var tot := 0
 	for k in _count:
@@ -276,7 +277,7 @@ func _pietre_perete() -> void:
 			off += _rng.randf_range(5.5, 9.0)
 			# ritm: spatii intre grupuri de lespezi (vegetatia ia restul peretelui)
 			var rhythm := 0.5 + 0.5 * sin((f - 0.7655) * 160.0 + off * 0.045)
-			if _rng.randf() > 0.38 + 0.4 * rhythm:
+			if _rng.randf() > 0.28 + 0.36 * rhythm:
 				continue
 			var c := _cand(f + _rng.randf_range(-0.0009, 0.0009), -1.0, o)
 			var dy: float = c["dy"]
@@ -395,29 +396,26 @@ func _pietre_mal() -> void:
 		var rhythm := 0.5 + 0.5 * sin(f * 210.0)
 		if _rng.randf() > 0.55 + 0.4 * rhythm:
 			continue
-		var k := _rng.randi_range(2, 4)
-		var base := _cand(f, 1.0, so + _rng.randf_range(-1.2, 0.8))
-		if is_nan((base["pos"] as Vector3).y):
-			continue
+		# trepte: 3-4 lespezi stivuite pe taluz, de la apa spre drum (fiecare pe cota terenului)
+		var along_i := mini(int(_track.baked.size()) - 2, int(f * float(_track.baked.size())))
+		var tan := _track.baked[along_i + 1] - _track.baked[along_i]
+		var yaw_t := atan2(-tan.z, tan.x)
+		var k := _rng.randi_range(3, 4)
 		for m in k:
-			var pc := base
-			if m > 0:
-				var along := _track.baked[mini(int(base["i"]) + 1, _track.baked.size() - 1)] - _track.baked[int(base["i"])]
-				var ang := atan2(along.z, along.x) + _rng.randf_range(-0.6, 0.6)
-				var rad := _rng.randf_range(1.0, 3.5) * (1.0 if m % 2 == 0 else -1.0)
-				pc = _cand_at((base["pos"] as Vector3) + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), base)
+			var oo := so + float(m) * _rng.randf_range(1.1, 1.8) - 1.0
+			var pc := _cand(f + _rng.randf_range(-0.0004, 0.0004), 1.0, oo)
 			var q: Vector3 = pc["pos"]
 			if is_nan(q.y) or not _ok(pc, 1.4, 3.0):
 				_rejected += 1
 				continue
-			var sx := _rng.randf_range(0.35, 0.95)
-			var sc3 := Vector3(sx, sx * _rng.randf_range(0.5, 0.85), sx * _rng.randf_range(0.8, 1.3))
+			var sx := _rng.randf_range(0.55, 1.0) * (1.0 - 0.12 * float(m))
+			var sc3 := Vector3(sx * _rng.randf_range(1.0, 1.5), sx * _rng.randf_range(0.45, 0.75), sx)
 			var p3 := q
-			p3.y -= 0.25 * sc3.y
-			_flock_add("mal_s%d" % _slice_of(f), p3, _rng.randf_range(-PI, PI), sc3)
+			p3.y -= 0.2 * sc3.y
+			_flock_add("mal_s%d" % _slice_of(f), p3, yaw_t + _rng.randf_range(-0.35, 0.35), sc3)
 			n_rock += 1
 		# tufa de salcie / fag mic la apa
-		if _rng.randf() < 0.42:
+		if _rng.randf() < 0.08:
 			var tc := _cand(f + _rng.randf_range(-0.001, 0.001), 1.0, so + _rng.randf_range(-3.5, -0.6))
 			if _ok(tc, 1.0, 2.5) and float(tc["slope"]) < 1.3 and float(tc["dy"]) > -9.0:
 				var ts := _rng.randf_range(0.17, 0.3)
@@ -460,7 +458,7 @@ func _molizi() -> void:
 			var f: float = F0 + float(r[2]) - 0.004
 			while f < F1 + 0.004:
 				f += _rng.randf_range(float(r[4]), float(r[5]))
-				if _rng.randf() > float(r[1]) * _densitate(f, sg, float(r[0])):
+				if _rng.randf() > float(r[1]) * _densitate(f, sg, float(r[0])) * (0.45 if float(r[0]) > 55.0 else (0.7 if float(r[0]) > 38.0 else 1.0)):
 					continue
 				var off: float = float(r[0]) + _rng.randf_range(-3.5, 3.5)
 				var c := _cand(f, sg, maxf(off, 8.0))
@@ -479,7 +477,7 @@ func _molizi() -> void:
 						continue
 					sc_cls = 0
 				var pb := 0.04 + 0.23 * _smooth(0.74, 0.975, f)
-				var is_beech := _rng.randf() < pb
+				var is_beech := float(r[0]) >= 28.0 and _rng.randf() < pb * 0.55
 				var tone_dark := _rng.randf() < 0.65
 				var k := _rng.randi_range(5, 8) if float(r[0]) <= 31.0 else _rng.randi_range(4, 7)
 				if is_beech:
@@ -556,7 +554,7 @@ func _pine(pc: Dictionary, size_class: int, beech: bool, tone_dark: bool) -> voi
 		_flock_add("fagb_%s_s%d" % [bv, sl], p3, yaw, b3)
 		return
 	var rr := _rng.randf()
-	var v := "A" if rr < 0.25 else ("B" if rr < 0.6 else ("C" if rr < 0.85 else "D"))
+	var v := "A" if rr < 0.3 else ("B" if rr < 0.5 else ("C" if rr < 0.7 else "D"))
 	var sc := 1.0
 	var pick := _rng.randf()
 	match size_class:
@@ -576,6 +574,56 @@ func _pine(pc: Dictionary, size_class: int, beech: bool, tone_dark: bool) -> voi
 	_flock_add("trunk_%s_s%d" % [v, sl], p3, yaw, s3)
 
 
+# 1b ------------------------------------------------------------------ umplutura
+
+## Stratul de umplutura (verdictul r1): molizi mici (0,3-0,6) la fiecare ~2,6 m, de la
+## 4 m de margine pana la ~25 m pe stanga (si pe fasia de langa apa pe dreapta), cu
+## cele 3 tonuri amestecate pe palcuri si cate o lespede mica la baza. ~230 tri/molid.
+func _umplutura() -> void:
+	var n := 0
+	for sg: float in [-1.0, 1.0]:
+		var f := F0
+		while f < F1:
+			f += 0.0012
+			var off := 4.0
+			var cl_dark := _rng.randf() < 0.62
+			while off < (25.0 if sg < 0.0 else 12.0):
+				var o := off + _rng.randf_range(-0.9, 0.9)
+				off += _rng.randf_range(2.2, 3.2)
+				if _rng.randf() < 0.24:
+					continue
+				var c := _cand(f + _rng.randf_range(-0.0005, 0.0005), sg, maxf(o, 3.6))
+				if not _ok(c, 1.0, 3.0) or float(c["slope"]) > 1.35:
+					continue
+				if sg > 0.0 and not _right_ok(c):
+					continue
+				var dens := _densitate(f, sg, 22.0)
+				if _rng.randf() > 0.35 + 0.65 * dens:
+					continue
+				var sc := _rng.randf_range(0.3, 0.6)
+				if sg > 0.0:
+					sc *= 0.85
+				var p3: Vector3 = c["pos"]
+				p3.y -= 0.1
+				var dark := cl_dark
+				if _rng.randf() < 0.3:
+					dark = not dark
+				var rr := _rng.randf()
+				var v := "A" if rr < 0.25 else ("B" if rr < 0.6 else ("C" if rr < 0.85 else "D"))
+				var sl := _slice_of(f)
+				var s3 := Vector3(sc * _rng.randf_range(0.85, 1.15), sc * _rng.randf_range(0.9, 1.2), sc * _rng.randf_range(0.85, 1.15))
+				var yaw := _rng.randf_range(-PI, PI)
+				_flock_add("%s_%s_s%d" % ["pine" if dark else "pinem", v, sl], p3, yaw, s3)
+				_flock_add("trunk_%s_s%d" % [v, sl], p3, yaw, s3)
+				n += 1
+				if _rng.randf() < 0.1:
+					var rp := p3 + Vector3(_rng.randf_range(-1.2, 1.2), 0.0, _rng.randf_range(-1.2, 1.2))
+					rp.y = _sol_real(rp.x, rp.z) - 0.1
+					var rs := _rng.randf_range(0.3, 0.55)
+					_flock_add("roca_s%d" % sl, rp, _rng.randf_range(-PI, PI), Vector3(rs, rs * 0.7, rs))
+	_bump("umplutura_molizi_mici", n)
+
+
 # 7 ------------------------------------------------------------------ fasie
 
 ## Fasia joasa de la 3,5 la ~9 m de margine, pe ambele parti: afin in pete, tufe
@@ -586,10 +634,10 @@ func _fasie() -> void:
 	while f < F1:
 		for sg: float in [1.0, -1.0]:
 			# rhythm: pete, nu covor
-			if _rng.randf() < 0.4:
+			if _rng.randf() < 0.78:
 				continue
 			for k in _rng.randi_range(1, 2):
-				var c := _cand(f + _rng.randf_range(-0.0012, 0.0012), sg, _rng.randf_range(3.6, 9.0))
+				var c := _cand(f + _rng.randf_range(-0.0012, 0.0012), sg, _rng.randf_range(3.6, 6.0))
 				if not _ok(c, 0.9, 3.2) or float(c["slope"]) > 1.0:
 					continue
 				if sg > 0.0 and not _right_ok(c):
@@ -610,7 +658,7 @@ func _fasie() -> void:
 					var sc4 := _rng.randf_range(0.28, 0.55)
 					_flock_add("roca_s%d" % _slice_of(f), p4, _rng.randf_range(-PI, PI), Vector3(sc4, sc4, sc4))
 					n += 1
-			if _rng.randf() < 0.12:
+			if _rng.randf() < 0.0:
 				var c5 := _cand(f, sg, _rng.randf_range(5.0, 9.0))
 				if _ok(c5, 0.8, 3.2) and not (sg > 0.0 and not _right_ok(c5)):
 					var p5: Vector3 = c5["pos"]

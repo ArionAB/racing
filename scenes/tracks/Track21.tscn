@@ -123,7 +123,7 @@ custom_water_styles = Array[Dictionary]([{
 "water_wave_amp_k": 0.0,
 "water_glint": 0.2
 }])
-custom_parapets = Array[Vector4]([Vector4(0.377, 0.405, 1, 0), Vector4(0.405, 0.433, 0, 0), Vector4(0.433, 0.45, -1, 0), Vector4(0.45, 0.477, 0, 0), Vector4(0.477, 0.488, 1, 0), Vector4(0.498, 0.5, 1, 0), Vector4(0.5, 0.528, 0, 0), Vector4(0.528, 0.545, -1, 0), Vector4(0.545, 0.572, 0, 0), Vector4(0.572, 0.626, 1, 0)])
+custom_parapets = Array[Vector4]([Vector4(0.115, 0.135, 1, 0), Vector4(0.377, 0.405, 1, 0), Vector4(0.405, 0.433, 0, 0), Vector4(0.433, 0.45, -1, 0), Vector4(0.45, 0.477, 0, 0), Vector4(0.477, 0.488, 1, 0), Vector4(0.498, 0.5, 1, 0), Vector4(0.5, 0.528, 0, 0), Vector4(0.528, 0.545, -1, 0), Vector4(0.545, 0.572, 0, 0), Vector4(0.572, 0.626, 1, 0)])
 traffic_count = 0
 
 [node name="Path" type="Path3D" parent="."]

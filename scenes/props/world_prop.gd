@@ -2543,6 +2543,10 @@ const SLOT_REMAP_BY_THEME := {
 		# citeste tabla albastru-gri din diorama. Zero material nou (remap de slot).
 		"arges_house_a": {6: Palette.PAINTED_METAL},
 		"cabana_balea_lac": {6: Palette.PAINTED_METAL},
+		# Prometeu: bronzul pe LARCH_RUST iesea „jucarie portocalie” (162,85,36) sub soarele
+		# temei (critic/constructor POI B r1). DRY_VEGETATION da auriu mat (180,139,52),
+		# bronzul din diorama; umbrele raman pe LOG_DARK.
+		"prometheus_statue": {27: Palette.DRY_VEGETATION},
 		"cabana_balea_cascada": {10: Palette.LARCH_RUST},
 		"stana": {6: Palette.MARBLE_GREY, 10: Palette.LARCH_RUST},
 		# Trunchiul fagului: scoarta neteda dar INCHISA, nu cremul slotului 29 (#B8B4AC).

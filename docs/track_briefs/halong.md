@@ -20,13 +20,19 @@
 > insuliță 0,042 m (contract < 0,3), tangaj și val propriu. Podul de pe Machu
 > Picchu e **neatins** și toate contractele lui trec.
 >
-> **`TideHazard` există și trece toate contractele** (§7.3), dar **banda de jos
-> nu e pusă pe pistă**: măsurătoarea arată că pe traseul actual nu există
-> nicio coardă care să scurteze la nivelul mării (singura e pe insulă, la
-> +20 m). Sunt trei opțiuni în §7.3 și **cer o decizie a dezvoltatorului**.
+> **`TideHazard` + banda de jos sunt pe pistă** (§7.3). Scurtătura de maree
+> cerea o coardă joasă care nu exista pe traseul inițial, deci **latura de
+> coastă s-a redesenat** (decizia dezvoltatorului): drumul ocolește acum un
+> golf de 100 m, iar banda taie peste gura lui — **−32,8%**, în ținta Monument
+> Valley, pe teren plat. Bucla a crescut la **2 076 m**, toate gărzile trec.
 >
-> **Următorii pași:** decizia de la §7.3, apoi `CameraZone` pe grotă, gărzile
-> de layout, apoi verdictul la volan.
+> **O problemă deschisă:** redesenarea a adus o regresie pe primul ponton
+> (repuneri 0/3/0/4 → 1/13/2/9 pe aceleași seed-uri). Cinci ipoteze eliminate
+> prin măsurare, scrise în §7.3 ca să nu fie reluate.
+>
+> **Următorii pași:** regresia de pe primul ponton, `CameraZone` pe grotă,
+> gărzile de layout (`ProbeLayout`, `ProbeBuried`, `ProbeLaneClear` cu linie
+> de bază proprie), apoi verdictul dezvoltatorului la volan.
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `transfagarasan.md`, `okinawa.md` și `monument_valley.md`. Secțiunile de
@@ -1207,28 +1213,104 @@ schimbat cifra**: tot 14 repuneri. Cauza era topologia, nu cota.
 filtru „nu atinge startul”, **singura** scurtătură cu câștig ≥ 20% e la **acele
 de păr** (0,58–0,68, −40%), la cotă **+12…+22 m**. Zero candidați sub +6 m.
 
-**Concluzia, care e o decizie de design, nu un reglaj:** pe traseul actual o
-scurtătură de **maree** nu are loc. Mareea cere o terasă *plată și la nivelul
-apei*, iar singurul loc care scurtează ceva e pe insulă, la 20 m deasupra mării,
-unde o terasă de abraziune n-ar avea nicio logică.
+**Concluzia intermediară a fost:** pe traseul de atunci o scurtătură de maree
+nu avea loc. Mareea cere o terasă *plată și la nivelul apei*, iar singurul loc
+care scurta ceva era pe insulă, la 20 m deasupra mării.
 
-**Opțiunile, pentru dezvoltator** (nu le aleg singur, schimbă scopul):
-- **(a) scurtătura rămâne pe insulă, fără maree** — taie acul de păr 2 (−40%),
-  ca poteca ciobanilor de pe Transfăgărășan. Mareea devine atunci doar
-  *atmosferă* pe drumul de coastă: apa urcă și coboară, taie gripul pe banda de
-  jos, dar nu închide nimic. Ieftin, și gimmickul vizual rămâne;
-- **(b) traseul se redesenează** pe latura de coastă (POI G) ca să conțină o
-  curbă pe care o coardă joasă să o taie — de exemplu un golf care intră în
-  uscat. Scump: mută reperele și cere remăsurarea azimutului;
-- **(c) mareea se mută pe altceva** — de exemplu acoperă o porțiune a
-  **digului** (POI C), unde nu e scurtătură ci un pasaj obligatoriu care devine
-  udă și lentă pe ciclu. Pierde decizia, păstrează ceasul.
+**Decizia dezvoltatorului (14 oct 2026): se redesenează latura de coastă** —
+opțiunea (b) din cele trei puse pe masă. Celelalte două, respinse: (a)
+scurtătura pe insulă cu mareea doar ca atmosferă, (c) mareea pe dig ca pasaj
+obligatoriu fără decizie.
 
-**Ce rămâne livrat acum:** `TideHazard` + `ProbeMaree`, cu toate contractele
-verificate izolat. Clasa e bună pentru oricare dintre cele trei variante — în
-(a) și (c) se folosește fără `branch_index`, iar poarta de bandă rămâne o
-capacitate nefolosită, nu cod mort (precedentul există: lava și vaca o
-folosesc).
+#### Redesenarea laturii G: golful care intră în uscat
+
+Latura G era o linie aproape dreaptă de la (84, 192) la (−352, 322) — și pe o
+dreaptă nu există scurtătură, fiindcă nu e nimic de tăiat. Acum drumul
+**ocolește un golf care intră ~100 m spre uscat (nord)**, iar banda de jos taie
+peste **gura golfului**, la nivelul apei.
+
+**Adâncimea golfului e aleasă pe măsurătoare, nu din ochi:**
+
+| adâncime | câștigul cordei | verdict |
+|---|---|---|
+| 60 m | −12,4% | prea puțin |
+| 80 m | −22,0% | la limită |
+| **100 m** | **−28,4%** | **în țintă** |
+| 120 m | −36,2% | peste țintă |
+
+La 100 m bucla crește de la 2 028 la **2 076 m**, deci rămâne în fereastra
+2 000–2 200. Toate gărzile existente trec după redesenare: rază 22,1 m, pantă
+9,7%, separare 88,9 m, Cebîșev 305 m, sens antiorar, iar cele trei gărzi de
+azimut văd reperele (93%, 100%, 85%).
+
+**Măsurat pe scurtătura finală:** ocol 227,9 m, coardă **153,3 m**, câștig
+**−32,8%** — în ținta Monument Valley. Ocolul e plat (0,2 m abatere), deci
+terasa de maree stă acolo credibil, iar banda **nu atinge linia de start**.
+
+Două efecte secundare, amândouă corecte:
+- **`sea_level_offset` s-a recalculat singur** la −5,91 (era −5,99), fiindcă
+  media cotelor s-a schimbat odată cu traseul. Exact motivul pentru care e
+  derivat în generator și nu scris de mână (memoria
+  `cota-marii-e-relativa-la-media-drumului`);
+- **maimuțele s-au mutat** pe ramura de intrare în golf (punctul „G maimute" a
+  dispărut), iar distanțele dintre hazardele cu ceas rămân peste prag:
+  1 326 / 246 / 504 m.
+
+**Patru gărzi noi** pe contractul scurtăturii, fiecare pentru un defect care a
+costat deja o rundă: câștig în intervalul [−45%, −20%]; **nu trece peste linia
+de start**; ocolul plat; **treapta la joncțiune zero** (profilul de coborâre e
+`4u(1−u)`, nu o constantă).
+
+**Scurtătura funcționează în joc:** 9–13 treceri per cursă, timpi 6–19 s, zero
+repuneri pe bandă, **niciun tur scurtcircuitat** (minim 60,3 s). Obiectivul
+redesenării e atins.
+
+#### PROBLEMĂ DESCHISĂ: regresie pe primul ponton după redesenare
+
+Redesenarea a adus o **regresie măsurată** pe care nu am reușit să o
+diagnostichez, și o las scrisă cu tot ce am eliminat, ca următoarea sesiune să
+nu reia aceleași piste.
+
+**Cifrele** (aceleași patru seed-uri, repuneri în zona pontoanelor /
+repuneri totale):
+
+| starea pistei | seed 1 | seed 2 | seed 3 | seed 4 |
+|---|---|---|---|---|
+| înainte de golf | 0 | 3 | 0 | 4 |
+| **cu golf** | 1 | **13** | 2 | **9** |
+| cu golf, fără nodul de maree | — | 10 | — | 7 |
+
+Turul mediu a urcat de la 70,6–72,4 s la 72,6–80,5 s. Tiparul e în **valuri**
+(t ≈ 23–25 s, 31–36 s, 45 s): tot plutonul cade la trecerile din primele
+tururi, iar pe seed 1 și 3 aproape nimic.
+
+**Cinci ipoteze, toate infirmate prin măsurare:**
+1. **mareea** — scoasă din scenă, cifra rămâne 10/7 (vs 13/9). În limita
+   nedeterminismului Jolt, deci **nu e mareea**;
+2. **treaptă de cotă la joncțiunea benzii** — racordarea cu profil `4u(1−u)`
+   e corectă ca principiu și a rămas, dar **n-a schimbat cifra**;
+3. **fracțiile râpelor nealiniate** după lungirea buclei (2 028 → 2 076 m).
+   Erau într-adevăr hardcodate și alunecaseră cu ~2%; **le-am legat la
+   reperele reale**, ceea ce rămâne o îmbunătățire reală. Dar profilul măsurat
+   la punctul de cădere e **identic** înainte și după;
+4. **distanța start → primul ponton** — măsurată: **168 m în ambele stări**;
+5. **grila de start** — toate cele opt sloturi sunt pe `RoadTop`, cote
+   1,09–1,16, măsurat cu `spawn_transforms(8)` plus raycast. Sănătoasă.
+
+**Ce rămâne de investigat** (ordinea pe care aș urma-o):
+- **profilul lateral al primului ponton**: la −8 m de ax terenul e la **−1,44**,
+  iar la +8 m la **+0,23** — asimetric, cu o cădere de ~1,9 m pe stânga. Nu e
+  pe carosabil (tablierul ține ±5,3 m), dar e o buză aproape de bandă. De
+  verificat dacă mașina împinsă lateral în primul tur ajunge acolo;
+- **de ce doar seed 2 și 4**: sugerează dependență de ordinea pe grilă sau de
+  o coliziune în primele secunde, nu de geometrie statică;
+- **ProbeRace cu `--ai=3`** (pluton mic): dacă regresia dispare, e problemă de
+  înghesuială, nu de pistă.
+
+**Decizia de acum:** golful **rămâne** — și-a atins scopul (scurtătura există,
+e folosită, nu rupe turul), iar regresia e pe un punct care avea deja istoric
+de probleme (primul ponton, vezi defectul 3 din §7.2). Nu o ascund și nu o
+declar rezolvată.
 
 **Lecția de metodă:** o afirmație de geometrie dintr-un brief („mai scurtă și
 mai directă”) e o **ipoteză**, nu un fapt. Garda de scurtătură a expus-o, n-a

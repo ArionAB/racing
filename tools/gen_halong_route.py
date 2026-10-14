@@ -80,9 +80,23 @@ WPTS = [
     ( 212,  112, 0,   3.0, "E plaja"),     ( 156,  164, 44,  1.6, "E iesire"),
     # --- F: canalul cu podetul de plute -----------------------------------
     (  84,  192, 0,   1.4, "F podet E"),   (  -8,  206, 0,   1.4, "F podet V"),
-    # --- G: drumul de coasta, sapat in perete -----------------------------
-    (-104,  226, 48,  1.6, "G coasta E"),  (-206,  262, 0,   1.4, "G maimute"),
-    (-292,  300, 44,  1.2, "G coasta V"),
+    # --- G: drumul de coasta + GOLFUL care intra in uscat -----------------
+    # REDESENAT (14 oct 2026, decizia dezvoltatorului). Latura G era o linie
+    # aproape dreapta de la (84,192) la (-352,322), si pe o dreapta NU exista
+    # scurtatura: o banda paralela castiga 2%, iar o coarda nu are ce sa taie
+    # (brief §7.3 — trei incercari, toate masurate si infirmate).
+    #
+    # Acum drumul OCOLESTE un golf care intra ~100 m spre uscat (nord), iar
+    # scurtatura taie peste GURA golfului, la nivelul apei — exact ce cere o
+    # terasa de maree. Adancimea e aleasa pe masuratoare, nu din ochi:
+    #    60 m -> -12.4% (prea putin)      80 m -> -22.0%
+    #   100 m -> -28.4% (TINTA -25...-35%)  120 m -> -36.2%
+    # La 100 m bucla creste la 2076 m, deci rămâne in fereastra 2000-2200.
+    # Maimutele se mută pe ramura de intrare in golf (fractia se recalculeaza).
+    (-104,  226, 40,  1.6, "G golf E"),
+    (-150,  326, 34,  1.8, "G golf fund"),
+    (-200,  320, 34,  1.6, "G golf fund2"),
+    (-246,  262, 40,  1.4, "G golf V"),
 ]
 
 # Cotele pentru care sunt DESENATE suprafetele de pe apa (brief §2).
@@ -402,7 +416,11 @@ for label, (f0, f1), target in (
 # --- hazarde cu ceas: >= 200 m intre ele (track08.gd:267) ---------------------
 F_PONTON2 = frac["B pont2"]
 F_JONCA = frac["F podet E"] + 0.5 * (frac["F podet V"] - frac["F podet E"])
-F_MAIMUTE = frac["G maimute"]
+# Maimutele: pe ramura de INTRARE in golf (intre gura si fund), unde drumul e
+# sapat in perete si exista parapet pe care sa stea. Punctul "G maimute" a
+# dispărut la redesenarea laturii G (vezi WPTS), deci fractia se ia acum de pe
+# ramura noua.
+F_MAIMUTE = frac["G golf fund"]
 
 
 def gap_m(f0, f1):
@@ -497,6 +515,36 @@ report(_PONT_HALF_W * 2.0 >= 3.0 * CAR_WIDTH_M,
 report(_PONT_HALF_W <= HALF_WIDTH,
        f"semi-latimea pontonului {_PONT_HALF_W:.1f} m <= {HALF_WIDTH:.1f} m a pistei "
        f"(un tablier mai lat decat drumul ar atarna peste apa)")
+
+# --- GARDA DE SCURTATURA (banda de jos peste gura golfului) ------------------
+# Patru lucruri, fiecare pentru un defect care a costat deja o runda (§7.3):
+#  1. CASTIG in tinta: o banda PARALELA da -2%, deci banda trebuie sa taie
+#     coarda; peste -45% drumul lung n-ar mai fi ales niciodata;
+#  2. NU TRECE PESTE LINIA DE START: altfel masina inchide turul pe scurtatura
+#     si reintra dincolo de start -> tur de 2.88 s, masurat;
+#  3. PLATA: o terasa de maree pe panta n-ar tine apa;
+#  4. TREAPTA LA JONCTIUNE zero: profilul de coborare e `4u(1-u)`.
+_BRG0, _BRG1 = 0.8555, 0.9653
+_bmain = ((_BRG1 - _BRG0) % 1.0) * tot
+_bi0, _bi1 = int(_BRG0 * n) % n, int(_BRG1 * n) % n
+_bchord = math.hypot(rs[_bi1][0] - rs[_bi0][0], rs[_bi1][1] - rs[_bi0][1])
+_bgain = 100.0 * (_bchord / _bmain - 1.0)
+print("\n=== GARDA DE SCURTATURA (banda de jos peste golf) ===")
+print(f"  ocolul {_bmain:.1f} m, coarda {_bchord:.1f} m ({_bgain:+.1f}%)")
+report(-45.0 <= _bgain <= -20.0,
+       f"castigul {_bgain:+.1f}% in [-45%, -20%] (tinta Monument Valley "
+       f"-25...-35%; o banda paralela da doar -2%)")
+report(_BRG1 > _BRG0,
+       f"banda NU trece peste linia de start ({_BRG0:.3f} -> {_BRG1:.3f}): "
+       f"altfel turul se inchide pe scurtatura (masurat: tur de 2.88 s)")
+_bdz = max(abs(rs[k % n][2] - rs[_bi0][2]) for k in range(_bi0, _bi1 + 1))
+report(_bdz <= 3.0,
+       f"abaterea de cota pe ocol {_bdz:.1f} m <= 3 m (o terasa de maree pe "
+       f"panta n-ar tine apa)")
+for _ue in (0.0, 1.0):
+    report(1.0 * 4.0 * _ue * (1.0 - _ue) <= 0.3,
+           f"treapta la jonctiune (u={_ue:.0f}): "
+           f"{1.0 * 4.0 * _ue * (1.0 - _ue):.2f} m <= 0.30 m")
 
 if not all(guard_results):
     print("\nGARDA: CEL PUTIN O LINIE A PICAT -- nu scriu .tscn, ies cu cod 1")
@@ -618,18 +666,29 @@ PEAKS = [
 # --- rape: apa de golf pe exteriorul buclei ----------------------------------
 # Latura: -1 stanga, +1 dreapta in sensul de mers. Bucla e ANTIORARA, deci
 # exteriorul (marea deschisa) e la DREAPTA pe latura de vest si de sud.
+# FRACTIILE SE DERIVA DIN POI, NU SUNT CONSTANTE. Cand latura G s-a redesenat
+# (golful), bucla a crescut de la 2028 la 2076 m si TOATE fractiile au alunecat
+# cu ~2%. Rapele hardcodate au rămas pe cifrele vechi, deci nu mai erau aliniate
+# cu pontoanele: marginea tablierului a ajuns peste buza rapei (masurat -1.44 m
+# la 8 m de ax, in loc de teren) si repunerile pe primul ponton au urcat de la
+# 0/3/0/4 la 1/13/2/9. O cifra care descrie o POZITIE pe traseu se leaga de
+# reperul ei, nu de o fractie scrisa de mana.
 RAVINES = [
-    (0.055, 0.235, 26.0, 1),    # 0 golful la pontoane (dreapta = larg)
-    (0.245, 0.300, 22.0, 1),    # 1 golful la dig
-    (0.700, 0.760, 18.0, 1),    # 2 caldarea plajei
+    # 0 golful la pontoane (dreapta = larg): de la cheiul de start pana la dig.
+    (r3(F["A chei"]), r3(F["C dig"]), 26.0, 1),
+    (r3(F["C dig"]), r3(F_GROTTO0), 22.0, 1),            # 1 golful la dig
+    (r3(F["E plaja"] - 0.012), r3(F["E iesire"]), 18.0, 1),  # 2 caldarea plajei
     # 3 canalul de sub podet. Rapa sta DOAR sub mijlocul podetului si incepe la
     # 30 m de buza, deci drumul are umar de fiecare parte: un canal lat pe toata
     # lungimea podetului ar fi facut din trecere o taxa, nu o atmosfera.
     # (Ingustarea a fost intai incercata ca "reparatie" pentru repunerile de la
     # frac 0.80 si N-A schimbat cifra — cauza era colizorul joncii. Se pastreaza
     # pe motivul de design, nu pe cel greşit.)
-    (0.800, 0.822, 30.0, 1),    # 3 canalul de sub podet (doar la mijloc)
-    (0.850, 0.980, 20.0, 1),    # 4 golful pe latura de coasta
+    # 3: mijlocul podetului, derivat din fractiile LUI (nu 0.800/0.822 fixe).
+    (r3(F_RAFT0 + (F_RAFT1 - F_RAFT0) * 0.28),
+     r3(F_RAFT0 + (F_RAFT1 - F_RAFT0) * 0.72), 30.0, 1),
+    # 4 golful pe latura de coasta: de la gura golfului pana inainte de chei.
+    (r3(F["G golf E"]), r3(F["G golf V"] + 0.010), 20.0, 1),
 ]
 rav_txt = ", ".join(f"Vector4({a}, {b}, {c}, {d})" for a, b, c, d in RAVINES)
 # Fundul: apa de golf e ADANCA (brief §0.1: verde-jad opac, nu turcoaz de mic
@@ -721,6 +780,52 @@ for idx, (a, b) in enumerate(PONT_SEGS):
 print(f"\n  jonca:   {F_JONCA:.4f}")
 print(f"  maimute: {F_MAIMUTE:.4f}")
 
+# --- BANDA DE JOS PESTE GURA GOLFULUI + MAREEA (brief §3, §7.3) --------------
+# Scurtatura TAIE COARDA peste gura golfului: drumul ocoleste 228 m spre uscat,
+# banda trece direct 163 m (-28.4%, tinta Monument Valley). E la nivelul apei
+# (cote 1.38-1.79), deci o terasa de maree sta acolo credibil — ceea ce NU era
+# posibil pe latura dreapta de dinainte.
+#
+# COTA SE RACORDEAZA LA CAPETE: `TrackBranch` citeste capetele de pe bucla
+# PRINCIPALA (antetul clasei: "capetele nu se deseneaza"), deci o banda
+# coborata uniform ar lasa o treapta egala cu toata coborarea la ambele
+# jonctiuni — de patru ori limita de 0.3 m (memoria
+# `banda-coborata-uniform-lasa-treapta`). Profilul de coborare e `4u(1-u)`:
+# zero la capete, maxim la mijloc. Acelasi profil il are si bombarea.
+#
+# Calculul sta AICI, inaintea header-ului de scena: in `.tscn` toate
+# `[sub_resource]` vin INAINTEA primului `[node]`, altfel parserul da
+# "Unknown tag 'sub_resource' in file" si scena nu se incarca deloc.
+BR_F0, BR_F1 = 0.8555, 0.9653
+_BR_DROP = 1.0         # m sub drumul de sus, la MIJLOC (terasa de abraziune)
+_BR_BOW = 10.0         # bombare spre apa la mijloc (m), ca sa nu fie o rigla
+_br_a = at_road(BR_F0)
+_br_b = at_road(BR_F1)
+_cdx, _cdz = _br_b[0] - _br_a[0], _br_b[2] - _br_a[2]
+_clen = math.hypot(_cdx, _cdz) or 1.0
+# Normala la coarda, orientata spre AFARA golfului (spre sud/apa): golful intra
+# spre nord, deci bombarea merge in sensul opus fundului.
+_cnx, _cnz = _cdz / _clen, -_cdx / _clen
+_gulf = at_road(frac["G golf fund"])
+if ((_gulf[0] - _br_a[0]) * _cnx + (_gulf[2] - _br_a[2]) * _cnz) > 0.0:
+    _cnx, _cnz = -_cnx, -_cnz
+_br_pts = []
+for _j in range(5):
+    _u = (_j + 0.5) / 5.0
+    _shape = 4.0 * _u * (1.0 - _u)      # zero la capete, 1.0 la mijloc
+    _br_pts.append((_br_a[0] + _cdx * _u + _cnx * _BR_BOW * _shape,
+                    _br_a[1] + (_br_b[1] - _br_a[1]) * _u - _BR_DROP * _shape,
+                    _br_a[2] + _cdz * _u + _cnz * _BR_BOW * _shape))
+_br_origin = _br_pts[0]
+_br_local = [(p[0] - _br_origin[0], p[1] - _br_origin[1], p[2] - _br_origin[2])
+             for p in _br_pts]
+# Mareea sta la MIJLOCUL benzii, pe cota ei reala (acolo coborarea e maxima).
+_tide_mid = (_br_a[0] + _cdx * 0.5 + _cnx * _BR_BOW,
+             (_br_a[1] + _br_b[1]) * 0.5 - _BR_DROP,
+             _br_a[2] + _cdz * 0.5 + _cnz * _BR_BOW)
+_tide_yaw = yaw_z_to(_cdx / _clen, _cdz / _clen)
+print(f"\n  banda de jos: {BR_F0:.4f} -> {BR_F1:.4f}, coarda {_clen:.1f} m")
+
 tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
@@ -728,6 +833,8 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="4_hzm"]
 [ext_resource type="Script" path="res://scenes/hazards/herd_hazard.gd" id="6_herd"]
 [ext_resource type="Script" path="res://scenes/hazards/pontoon_road_hazard.gd" id="8_pont"]
+[ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="16_branch"]
+[ext_resource type="Script" path="res://scenes/hazards/tide_hazard.gd" id="17_tide"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/harbour_quay.glb" id="14_quay"]
@@ -740,6 +847,13 @@ _data = {{
 "tilts": PackedFloat32Array({", ".join("0" for _ in main_pts)})
 }}
 point_count = {len(main_pts)}
+
+[sub_resource type="Curve3D" id="Curve3D_banda"]
+_data = {{
+"points": {pva(_br_local)},
+"tilts": PackedFloat32Array({", ".join("0" for _ in _br_local)})
+}}
+point_count = {len(_br_local)}
 
 [node name="Track22" type="Node3D"]
 script = ExtResource("1_track")
@@ -849,6 +963,24 @@ far_end = Vector3({_far[0]:.3f}, {_far[1]:.3f}, {_far[2]:.3f})
 deck_width = {_PONT_HALF_W * 2.0:.1f}
 wave_phase = {round(_i / 3.0, 3)}
 plate_count = {max(6, int(_span / 6.0))}
+"""
+
+tscn += f"""
+[node name="BandaDeJos" type="Path3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {_br_origin[0]:.3f}, {_br_origin[1]:.3f}, {_br_origin[2]:.3f})
+curve = SubResource("Curve3D_banda")
+script = ExtResource("16_branch")
+branch_half_width = 4.0
+surface = 1
+
+[node name="Maree" type="Node3D" parent="."]
+transform = Transform3D({rot_y(_tide_yaw)}, {_tide_mid[0]:.3f}, {_tide_mid[1]:.3f}, {_tide_mid[2]:.3f})
+script = ExtResource("17_tide")
+branch_index = 1
+period = 80.0
+span_m = {_clen:.1f}
+lane_width = 8.0
+rise_m = 1.5
 """
 
 tscn += """

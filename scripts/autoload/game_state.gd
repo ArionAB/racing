@@ -176,7 +176,7 @@ var real_headlight: bool = true
 ##   2 = MAXIM: totul, la rezolutie nativa, MSAA 4x.
 ## Umbrele si glow-ul se citesc la construirea pistei (Track.gfx_tier), deci
 ## schimbarea lor se vede la urmatoarea cursa; scala si MSAA se aplica pe loc.
-const GFX_TIER_NAMES: Array[String] = ["Economic", "Normal", "Maxim"]
+const GFX_TIER_NAMES: Array[String] = ["Low", "Normal", "High"]
 var gfx_tier: int = 1
 
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
@@ -247,11 +247,11 @@ func apply_gfx_tier() -> void:
 ## Testele pornesc de pe Normal si STING lucruri; aprinderea unei umbre sau a
 ## unui glow pe care nivelul nu l-a construit foloseste reglajele implicite
 ## ale Godot, nu pe cele ale temei.
-const DBG_MSAA_NAMES: Array[String] = ["Nivel", "Off", "2x", "4x"]
-const DBG_SCALE_NAMES: Array[String] = ["Nivel", "540p", "648p", "720p", "864p", "Nativ"]
+const DBG_MSAA_NAMES: Array[String] = ["Tier", "Off", "2x", "4x"]
+const DBG_SCALE_NAMES: Array[String] = ["Tier", "540p", "648p", "720p", "864p", "Native"]
 const DBG_SCALE_H: Array[float] = [0.0, 540.0, 648.0, 720.0, 864.0, 100000.0]
-const DBG_SHADOW_NAMES: Array[String] = ["Nivel", "Off", "1 felie", "2 felii"]
-const DBG_GLOW_NAMES: Array[String] = ["Nivel", "Off", "On"]
+const DBG_SHADOW_NAMES: Array[String] = ["Tier", "Off", "1 split", "2 splits"]
+const DBG_GLOW_NAMES: Array[String] = ["Tier", "Off", "On"]
 var dbg_msaa: int = 0
 var dbg_scale: int = 0
 var dbg_shadows: int = 0

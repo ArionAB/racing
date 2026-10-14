@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_info")
 display_name = "Fiordland"
-region = "NOUA ZEELANDA"
+region = "NEW ZEALAND"
 accent = Color(0.24, 0.46, 0.46, 1)

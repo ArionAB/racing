@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_info")
 display_name = "Stromboli"
-region = "ITALIA"
+region = "ITALY"
 accent = Color(0.78, 0.33, 0.20, 1)

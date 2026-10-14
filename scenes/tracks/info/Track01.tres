@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_info")
-display_name = "Dunele"
+display_name = "The Dunes"
 region = "DESERT"
 accent = Color(0.78, 0.58, 0.32, 1)

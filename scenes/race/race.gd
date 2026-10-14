@@ -200,7 +200,7 @@ func _setup_race() -> void:
 		camera.snap_behind()
 		camera.add_trauma(0.22)
 		hud.recovery_fade_out()
-		hud.flash_message("RATAT — repus pe pista"))
+		hud.flash_message("MISSED — back on track"))
 	# Tranzitia de dinaintea repunerii (#495): ecranul se intuneca cat clipeste
 	# masina; `respawned` de mai sus il limpezeste dupa teleport.
 	player.recovery_started.connect(func(_c: Car, seconds: float) -> void:
@@ -213,7 +213,7 @@ func _setup_race() -> void:
 		camera.focus_on(rag.focus_node() if rag != null else ragdoll,
 			c.eject_hold + 0.6)
 		camera.add_trauma(0.45)
-		hud.flash_message("EJECTAT!"))
+		hud.flash_message("EJECTED!"))
 	# Strivit / ars: shake proportional cu severitatea. Semnalul exista de la
 	# bolovani (#242), dar nu fusese legat la camera; lava il refoloseste.
 	player.crushed.connect(func(_c: Car, severity: float) -> void:
@@ -222,12 +222,12 @@ func _setup_race() -> void:
 	# inversarea (1.2 s + 0.5 s fade vs 1.75 s), deci jucatorul stie DE CE vireaza
 	# invers. Pe masina apare si "<=>" (vezi Car._update_invert_marker).
 	player.steer_inverted.connect(func(_s: float) -> void:
-		hud.flash_message("DIRECTIE INVERSATA  <=>"))
+		hud.flash_message("STEERING REVERSED  <=>"))
 	# Aprins de o coloana de foc: mesajul spune de ce vezi prost, ca sa nu se
 	# citeasca drept bug grafic. Shake-ul il da deja `crushed`, emis din
 	# `Car.ignite` — nu-l dublam aici.
 	player.ignited.connect(func(_c: Car, _s: float) -> void:
-		hud.flash_message("IN FLACARI!"))
+		hud.flash_message("ON FIRE!"))
 	# Eruptia (Stromboli): bubuitul e al lumii (il reda EruptionCycle), dar
 	# tremurul de ecran e feedback de jucator, deci se leaga aici — pentru
 	# TOATE ciclurile de pe pista, oriunde ai fi (telegraph-ul din brief).
@@ -374,7 +374,7 @@ func _go() -> void:
 				car.force_boost(1.2)
 				hud.flash_message("ROCKET START!")
 			elif hold > 1.05:
-				hud.flash_message("Prea devreme...")
+				hud.flash_message("Too early...")
 				car.hold_turbo_until_release()
 		elif _rng.randf() < 0.45:
 			car.force_boost(0.8)
@@ -649,7 +649,7 @@ func _on_player_lap(laps: int) -> void:
 		if _best_lap_ms < 0 or lap_ms < _best_lap_ms:
 			_best_lap_ms = lap_ms
 		if GameState.try_record(GameState.selected_track, lap_ms):
-			hud.flash_message("RECORD NOU! " + _fmt_ms(lap_ms))
+			hud.flash_message("NEW LAP RECORD! " + _fmt_ms(lap_ms))
 			AudioManager.play_sfx(&"drift_level", 1.5)
 	_lap_start_ms = now
 	if laps >= GameState.total_laps and state != State.FINISHED:
@@ -670,11 +670,11 @@ func _finish_race() -> void:
 	if GameState.champ_active:
 		GameState.record_results(_final_order)
 	if _race_record_new:
-		hud.flash_message("FINISH — locul %d!\nRECORD CURSA %s" % [
-			player.race_position, _fmt_ms(_player_race_ms)])
+		hud.flash_message("FINISH — %s place!\nRACE RECORD %s" % [
+			_ordinal(player.race_position), _fmt_ms(_player_race_ms)])
 		AudioManager.play_sfx(&"drift_level", 1.5)
 	else:
-		hud.flash_message("FINISH — locul %d!" % player.race_position)
+		hud.flash_message("FINISH — %s place!" % _ordinal(player.race_position))
 	get_tree().create_timer(1.5, false).timeout.connect(_show_results)
 
 func _show_results() -> void:
@@ -687,7 +687,7 @@ func _show_results() -> void:
 			# Sub baremul de puncte nu se mai da nimic — vezi record_results.
 			var gained: int = GameState.CHAMP_POINTS[rank] \
 				if rank < GameState.CHAMP_POINTS.size() else 0
-			right = "+%d p  (total %d)" % [gained, GameState.champ_points[slot]]
+			right = "+%d pts  (total %d)" % [gained, GameState.champ_points[slot]]
 		# Timpul tau pe toata cursa, si daca e record pe pista (#498).
 		if car.is_player and _player_race_ms >= 0:
 			var time_text := _fmt_ms(_player_race_ms) \
@@ -699,13 +699,13 @@ func _show_results() -> void:
 			"right": right,
 			"is_player": car.is_player,
 		})
-	var title := "REZULTATE — " + track.track_name
+	var title := "RESULTS — " + _track_title()
 	var primary := "RESTART"
 	if GameState.champ_active:
-		title = "CURSA %d/%d — %s" % [GameState.champ_round + 1,
-			GameState.CHAMP_ROUNDS, track.track_name]
-		primary = "CLASAMENT FINAL" if GameState.champ_is_last_round() \
-			else "URMATOAREA CURSA"
+		title = "RACE %d/%d — %s" % [GameState.champ_round + 1,
+			GameState.CHAMP_ROUNDS, _track_title()]
+		primary = "FINAL STANDINGS" if GameState.champ_is_last_round() \
+			else "NEXT RACE"
 	hud.show_results(title, rows, primary)
 
 func _on_results_primary() -> void:
@@ -733,13 +733,13 @@ func _show_champion() -> void:
 		rows.append({
 			"name": "%d. %s (%s)" % [rank + 1, car.pilot_name, car.car_name],
 			"color": car.body_color,
-			"right": "%d puncte" % GameState.champ_points[slot],
+			"right": "%d points" % GameState.champ_points[slot],
 			"is_player": car.is_player,
 		})
 	var champion := cars[slots[0]]
-	var title := "CAMPION: %s!" % champion.pilot_name
+	var title := "CHAMPION: %s!" % champion.pilot_name
 	AudioManager.play_sfx(&"go_beep", 1.3)
-	hud.show_results(title, rows, "CAMPIONAT NOU")
+	hud.show_results(title, rows, "NEW CHAMPIONSHIP")
 
 # -------------------------------------------------------------------- HUD
 
@@ -844,7 +844,7 @@ func _update_hud() -> void:
 	var lap_no := clampi(int(_progress[0].laps) + 1, 1, GameState.total_laps)
 	var champ_line := ""
 	if GameState.champ_active:
-		champ_line = "   cursa %d/%d" % [
+		champ_line = "   race %d/%d" % [
 			GameState.champ_round + 1, GameState.CHAMP_ROUNDS]
 	var record_ms := GameState.best_lap(GameState.selected_track)
 	var record_text := _fmt_ms(record_ms) if record_ms > 0 else "--:--.-"
@@ -857,12 +857,37 @@ func _update_hud() -> void:
 	var race_text := _fmt_ms(race_ms) if state != State.COUNTDOWN else "--:--.-"
 	var race_rec_ms := GameState.best_race(GameState.selected_track)
 	var race_rec_text := _fmt_ms(race_rec_ms) if race_rec_ms > 0 else "--:--.-"
-	var info := "%3.0f km/h   loc %d/%d   tur %d/%d%s\ntur:  %s   cursa: %s\nbest: %s   rec: %s   rec cursa: %s\n%s pe %s   [SPACE] turbo  [SHIFT] drift%s" % [
+	var info := "%3.0f km/h   pos %d/%d   lap %d/%d%s\nlap:  %s   race: %s\nbest: %s   rec: %s   race rec: %s\n%s on %s   [SPACE] turbo  [SHIFT] drift%s" % [
 		player.horizontal_speed() * 3.6, player.race_position, cars.size(),
 		lap_no, GameState.total_laps, champ_line, lap_text, race_text, best_text,
-		record_text, race_rec_text, player.car_name, track.track_name, cam_hint]
+		record_text, race_rec_text, player.car_name, _track_title(), cam_hint]
 	hud.set_info(info)
 	hud.set_turbo(player.turbo_charge, player.is_boosting)
+
+
+## Numele pistei pentru jucator: cel din TrackInfo (tradus), nu
+## `GameState.TRACK_NAMES` — acelea sunt si chei in fisierul de recorduri, deci
+## raman cum sunt.
+## Cache: HUD-ul il cere in fiecare cadru.
+var _track_title_cache: String = ""
+
+func _track_title() -> String:
+	if _track_title_cache == "":
+		var info := TrackInfo.for_track(GameState.selected_track)
+		_track_title_cache = info.display_name \
+			if info != null and info.display_name != "" else track.track_name
+	return _track_title_cache
+
+
+## 1st, 2nd, 3rd, 4th... (11-13 sunt „th").
+static func _ordinal(n: int) -> String:
+	var suffix := "th"
+	if n % 100 < 11 or n % 100 > 13:
+		match n % 10:
+			1: suffix = "st"
+			2: suffix = "nd"
+			3: suffix = "rd"
+	return "%d%s" % [n, suffix]
 
 func _fmt_ms(ms: int) -> String:
 	@warning_ignore("integer_division")

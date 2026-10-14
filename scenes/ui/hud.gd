@@ -93,7 +93,7 @@ func _ready() -> void:
 	# Un Button real cu mouse_filter STOP consuma evenimentul inaintea lui
 	# TouchControls, deci nu mai vireaza in acelasi timp. Butonul de pauza
 	# demonstreaza deja ca merge.
-	_respawn_button = _make_button("REPUNE")
+	_respawn_button = _make_button("RESET")
 	_respawn_button.custom_minimum_size = Vector2(Minimap.MAP_SIZE, 52)
 	_respawn_button.add_theme_font_size_override("font_size", 20)
 	_respawn_button.set_anchors_and_offsets_preset(
@@ -197,14 +197,14 @@ func _build_pause_panel(root: Control) -> void:
 	margin.add_child(box)
 
 	var title := _make_label(38)
-	title.text = "PAUZA"
+	title.text = "PAUSED"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 
-	var resume := _make_button("CONTINUA")
+	var resume := _make_button("RESUME")
 	resume.pressed.connect(_close_pause)
 	box.add_child(resume)
-	var settings := _make_button("SETARI")
+	var settings := _make_button("SETTINGS")
 	settings.pressed.connect(func() -> void:
 		_pause_panel.visible = false
 		_settings.visible = true)
@@ -214,7 +214,7 @@ func _build_pause_panel(root: Control) -> void:
 		get_tree().paused = false
 		restart_requested.emit())
 	box.add_child(restart)
-	var menu := _make_button("MENIU")
+	var menu := _make_button("MENU")
 	menu.pressed.connect(func() -> void:
 		get_tree().paused = false
 		menu_requested.emit())
@@ -277,7 +277,7 @@ func show_results(title: String, rows: Array[Dictionary], primary_label: String)
 		_results_panel.visible = false
 		results_primary.emit())
 	buttons.add_child(primary)
-	var menu := _make_button("MENIU")
+	var menu := _make_button("MENU")
 	menu.pressed.connect(func() -> void: menu_requested.emit())
 	buttons.add_child(menu)
 	_results_panel.visible = true
@@ -345,7 +345,7 @@ func _process(delta: float) -> void:
 	var sh_prims := RenderingServer.viewport_get_render_info(vp, ts,
 		RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
 	# A doua linie: optiunile grafice active, inclusiv inaltimea 3D efectiva.
-	_perf.text = "%d fps  |  %d+%d desene  |  %dk+%dk tri  |  cpu %.1f ms  gpu %.1f ms\n%s" % [
+	_perf.text = "%d fps  |  %d+%d draws  |  %dk+%dk tri  |  cpu %.1f ms  gpu %.1f ms\n%s" % [
 		Engine.get_frames_per_second(), draws, sh_draws, prims / 1000,
 		sh_prims / 1000,
 		RenderingServer.viewport_get_measured_render_time_cpu(vp),
@@ -381,13 +381,13 @@ func _gfx_line() -> String:
 	if _perf_sun != null and _perf_sun.shadow_enabled:
 		var two := _perf_sun.directional_shadow_mode \
 			== DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-		shadows = "2 felii" if two else "1 felie"
+		shadows = "2 splits" if two else "1 split"
 	var glow := "off"
 	if _perf_env != null and _perf_env.environment != null \
 			and _perf_env.environment.glow_enabled:
 		glow = "on"
 	var star := func(forced: bool) -> String: return "*" if forced else ""
-	return "%s  |  MSAA %s%s  |  3D %dp%s  |  umbre %s%s  |  glow %s%s" % [
+	return "%s  |  MSAA %s%s  |  3D %dp%s  |  shadows %s%s  |  glow %s%s" % [
 		GameState.GFX_TIER_NAMES[GameState.gfx_tier],
 		msaa, star.call(GameState.dbg_msaa > 0),
 		h3d, star.call(GameState.dbg_scale > 0),

@@ -165,11 +165,11 @@ radius_m = 70.0
 wall_m = 70.0
 
 [node name="GolCampie" type="Marker3D" parent="Goluri"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.00, -20.00, -455.00)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.00, -20.00, -440.00)
 gizmo_extents = 105.0
 script = ExtResource("17_hollow")
-radius_m = 25.0
-wall_m = 80.0
+radius_m = 35.0
+wall_m = 70.0
 
 [node name="GolBalea" type="Marker3D" parent="Goluri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 262.00, 31.00, -212.00)

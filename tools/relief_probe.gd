@@ -55,6 +55,15 @@ func _ready() -> void:
 					bb = bb.merge(mi.global_transform * mi.get_aabb()) if bb.size != Vector3.ZERO else mi.global_transform * mi.get_aabb()
 				print("  %s pos (%.1f, %.1f, %.1f) aabb y %.1f..%.1f x %.0f..%.0f z %.0f..%.0f" % [nm, q.x, q.y, q.z,
 					bb.position.y, bb.end.y, bb.position.x, bb.end.x, bb.position.z, bb.end.z])
+	if _arg("--nodes") != "":
+		for c in tr.get_children():
+			var extra := ""
+			if c is MeshInstance3D:
+				var mi := c as MeshInstance3D
+				var bb: AABB = mi.global_transform * mi.get_aabb()
+				extra = " aabb x %.0f..%.0f y %.1f..%.1f z %.0f..%.0f" % [bb.position.x, bb.end.x,
+					bb.position.y, bb.end.y, bb.position.z, bb.end.z]
+			print("  %s [%s]%s" % [c.name, c.get_class(), extra])
 	var pts := _arg("--pts")
 	if pts != "":
 		for s in pts.split(";"):

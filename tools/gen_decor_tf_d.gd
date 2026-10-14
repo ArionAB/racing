@@ -43,7 +43,7 @@ extends Node
 ## molizi mari, stana, grohotis, zapada pe versant. Culoarele: nimic la < 3 m de
 ## marginea ORICAREI ramuri; nimic la < 13 m de axa in lungimea peretilor de zapada
 ## (0.266-0.316: peretii stau la 10,4-11 m, Utilaj_parcat la 8,3 m, Lampa la 7,5 m,
-## Jalon la 7,9 m); nimic la < 18 m de axa pe 0.309-0.322 (aripile portalului);
+## Jalon la 7,9 m); nimic la < 16 m de axa pe 0.309-0.322 (aripile portalului);
 ## culoarul utilajului (offset -2,6) e pe banda, deci liber.
 
 const TRACK := "res://scenes/tracks/Track21.tscn"
@@ -119,6 +119,7 @@ func _build() -> void:
 	_roci_si_zapada()
 	_grohotis()
 	_molizi()
+	_flancuri_portal()
 	_flori()
 	var tot := 0
 	for k in _count:
@@ -165,7 +166,7 @@ func _ok(c: Dictionary, r: float, margin: float) -> bool:
 			return false
 	# aripile portalului
 	if (fj > 0.309 and fj < 0.322) or (fi > 0.309 and fi < 0.322):
-		if d < 18.0 + r:
+		if d < 16.0 + r:
 			return false
 	return true
 
@@ -439,7 +440,7 @@ func _roci_si_zapada() -> void:
 	# panouri mari de zapada pe versant (sus) + zapada intre si dincolo de pereti
 	var big := 0
 	guard = 0
-	while big < 30 and guard < 5000:
+	while big < 50 and guard < 8000:
 		guard += 1
 		var f := _rng.randf_range(F0 + 0.004, F1 - 0.004)
 		var c := _uphill_cand(f, 16.0, 50.0, 2.5)
@@ -449,11 +450,11 @@ func _roci_si_zapada() -> void:
 		big += 1
 	var lo := 0
 	guard = 0
-	while lo < 26 and guard < 5000:
+	while lo < 50 and guard < 8000:
 		guard += 1
 		var f := _rng.randf_range(0.272, F1 - 0.003)
 		var sg := 1.0 if _rng.randf() < 0.5 else -1.0
-		var c := _cand(f, sg, _rng.randf_range(7.0, 22.0))
+		var c := _cand(f, sg, _rng.randf_range(7.0, 30.0))
 		if not _ok(c, 2.2, 3.0):
 			continue
 		_snow_lump(c, false)
@@ -535,6 +536,48 @@ func _molizi() -> void:
 				got += 1
 			if got > 0:
 				clumps += 1
+
+
+# 10 ----------------------------------------------------------------- flancurile portalului
+
+## Dincolo de aripile portalului (>= 20 m de axa) versantul era gol: zapada, molizi
+## si jneapan pe ambele laturi, fara conditia de panta (decupajul are zapada pana la gura).
+func _flancuri_portal() -> void:
+	var n := 0
+	var guard := 0
+	while n < 60 and guard < 9000:
+		guard += 1
+		var f := _rng.randf_range(0.294, F1 - 0.002)
+		var sg := 1.0 if _rng.randf() < 0.5 else -1.0
+		var c := _cand(f, sg, _rng.randf_range(9.0, 44.0))
+		if not _ok(c, 2.6, 3.0):
+			continue
+		var roll := _rng.randf()
+		if roll < 0.5:
+			_snow_lump(c, float(c["d"]) > 26.0)
+		elif roll < 0.8:
+			var got := 0
+			for m in _rng.randi_range(2, 4):
+				var pc := c
+				if m > 0:
+					var ang := _rng.randf() * TAU
+					var rad := _rng.randf_range(1.6, 4.5)
+					pc = _cand_at((c["pos"] as Vector3) + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
+					if not _ok(pc, 1.8, 3.5):
+						continue
+				_pine_put(pc, "b" if _rng.randf() < 0.55 else "c", _rng.randf_range(0.5, 1.1), f)
+				got += 1
+			if got == 0:
+				continue
+		else:
+			var variant := "a" if _rng.randf() < 0.55 else "b"
+			var sc := _rng.randf_range(0.9, 1.4)
+			var p3: Vector3 = c["pos"]
+			p3.y -= 0.05
+			_flock_add("jn_%s_s%d" % [variant, _slice_of(f)], p3, _rng.randf_range(-PI, PI), Vector3(sc, sc, sc))
+			_put("jneapan_" + variant, c)
+		n += 1
+	_count["flancuri_portal"] = n
 
 
 # 9 ------------------------------------------------------------------ flori

@@ -120,6 +120,8 @@ func _build() -> void:
 	_grohotis()
 	_molizi()
 	_flancuri_portal()
+	_creste()
+	_petice_pajiste()
 	_flori()
 	var tot := 0
 	for k in _count:
@@ -440,7 +442,7 @@ func _roci_si_zapada() -> void:
 	# panouri mari de zapada pe versant (sus) + zapada intre si dincolo de pereti
 	var big := 0
 	guard = 0
-	while big < 50 and guard < 8000:
+	while big < 24 and guard < 8000:
 		guard += 1
 		var f := _rng.randf_range(F0 + 0.004, F1 - 0.004)
 		var c := _uphill_cand(f, 16.0, 50.0, 2.5)
@@ -450,7 +452,7 @@ func _roci_si_zapada() -> void:
 		big += 1
 	var lo := 0
 	guard = 0
-	while lo < 50 and guard < 8000:
+	while lo < 16 and guard < 8000:
 		guard += 1
 		var f := _rng.randf_range(0.272, F1 - 0.003)
 		var sg := 1.0 if _rng.randf() < 0.5 else -1.0
@@ -531,6 +533,8 @@ func _molizi() -> void:
 					pc = _cand_at((c["pos"] as Vector3) + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
 					if not _ok(pc, 1.8, 4.0):
 						continue
+				if f < 0.275 and _rng.randf() < 0.25:
+					continue
 				var variant := "b" if _rng.randf() < 0.55 else "c"
 				_pine_put(pc, variant, _rng.randf_range(float(r["s0"]), float(r["s1"])), f)
 				got += 1
@@ -553,9 +557,9 @@ func _flancuri_portal() -> void:
 		if not _ok(c, 2.6, 3.0):
 			continue
 		var roll := _rng.randf()
-		if roll < 0.5:
+		if roll < 0.2:
 			_snow_lump(c, float(c["d"]) > 26.0)
-		elif roll < 0.8:
+		elif roll < 0.65:
 			var got := 0
 			for m in _rng.randi_range(2, 4):
 				var pc := c
@@ -578,6 +582,75 @@ func _flancuri_portal() -> void:
 			_put("jneapan_" + variant, c)
 		n += 1
 	_count["flancuri_portal"] = n
+
+
+# 11 ----------------------------------------------------------------- creste de zapada (runda 2)
+
+## Coame MARI si PUTINE de zapada veche (SnowWall_A pe atlas, scalat 1,3-2,0, ingropat
+## ~30%), lungimea pe curba de nivel, lipite de peretii montati si de flancurile portalului.
+func _crest(pc: Dictionary) -> void:
+	var nrm: Vector3 = pc["nrm"]
+	var cx := -nrm.z
+	var cz := nrm.x
+	var yaw := _rng.randf_range(-PI, PI)
+	if Vector2(cx, cz).length() > 0.05:
+		yaw = atan2(cx, cz) + _rng.randf_range(-0.3, 0.3)
+	var sy := _rng.randf_range(1.3, 2.0)
+	var sx := _rng.randf_range(1.2, 1.9)
+	var sz := _rng.randf_range(1.3, 2.0)
+	var p3: Vector3 = pc["pos"]
+	p3.y -= 4.01 * sy * 0.3
+	_flock_add("snowa_s%d" % _slice_of(float(pc["f"])), p3, yaw, Vector3(sx, sy, sz))
+	_put("creasta", pc)
+
+
+func _creste() -> void:
+	var placed: Array[Vector3] = []
+	var guard := 0
+	while placed.size() < 26 and guard < 12000:
+		guard += 1
+		var f := _rng.randf_range(0.298, F1 - 0.002)
+		var sg := 1.0 if _rng.randf() < 0.5 else -1.0
+		var upper := placed.size() >= 16
+		var c := _cand(f, sg, _rng.randf_range(16.0, 34.0) if upper else _rng.randf_range(6.0, 22.0))
+		if not _ok(c, 0.5, 2.0):
+			continue
+		var pp: Vector3 = c["pos"]
+		var near := false
+		for q in placed:
+			if q.distance_to(pp) < 6.5:
+				near = true
+				break
+		if near:
+			continue
+		_crest(c)
+		placed.append(pp)
+
+
+## Petice care coboara pe pajiste si pe stanci, 0.255-0.285: grupuri de 3 bance joase.
+func _petice_pajiste() -> void:
+	var groups := 0
+	var guard := 0
+	while groups < 5 and guard < 6000:
+		guard += 1
+		var f := _rng.randf_range(0.255, 0.285)
+		var sg := 1.0 if _rng.randf() < 0.5 else -1.0
+		var c := _cand(f, sg, _rng.randf_range(10.0, 28.0))
+		if not _ok(c, 3.0, 3.0):
+			continue
+		var cp: Vector3 = c["pos"]
+		var got := 0
+		for m in 3:
+			var ang := _rng.randf() * TAU
+			var rad := _rng.randf_range(0.0, 3.5) if m > 0 else 0.0
+			var pc := _cand_at(cp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
+			if not _ok(pc, 1.8, 3.0):
+				continue
+			_snow_lump(pc, m == 0)
+			got += 1
+		if got > 0:
+			groups += 1
+	_count["petice_pajiste"] = groups
 
 
 # 9 ------------------------------------------------------------------ flori
@@ -632,7 +705,9 @@ func _lot_spec(key: String) -> Dictionary:
 		"trunk":
 			return {"model": "d_pines", "mesh": "Trunk_" + parts[1].to_upper(), "cls": "", "nm": "D_Trunchi_" + parts[1] + "_" + parts[2]}
 		"snow":
-			return {"model": "d_snow_wall", "mesh": "SnowWall_B_Snow", "cls": "snow", "nm": "D_Banc_" + parts[1]}
+			return {"model": "d_snow_wall", "mesh": "SnowWall_B_Snow", "cls": "", "nm": "D_Banc_" + parts[1]}
+		"snowa":
+			return {"model": "d_snow_wall", "mesh": "SnowWall_A_Snow", "cls": "", "nm": "D_Creasta_" + parts[1]}
 		"flori":
 			return {"model": "d_flower", "mesh": "", "cls": "", "nm": "D_Flori_" + parts[1]}
 	return {}

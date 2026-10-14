@@ -64,6 +64,13 @@ var _stalled: Dictionary = {}
 ## scutirea expira (QUEUE_EXEMPT_MAX_S) inainte ca masina sa mai progreseze,
 ## plasa de siguranta trebuie sa apuce imediat, nu sa mai astepte alte 5s.
 var _queue_exempt_time: Dictionary = {}
+## Cat sta fiecare masina rasturnata si aproape oprita (secunde), vezi
+## `_watch_recovery`. Sub FLIPPED_COS (cos fata de verticala) caroseria e pe o
+## parte sau pe acoperis; un viraj inclinat pe doua roti ramane mult peste.
+var _flipped: Dictionary = {}
+const FLIPPED_COS: float = 0.3
+const FLIPPED_SPEED: float = 4.0
+const FLIPPED_S: float = 1.5
 var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
@@ -179,7 +186,12 @@ func _setup_race() -> void:
 	player.respawned.connect(func(_c: Car) -> void:
 		camera.snap_behind()
 		camera.add_trauma(0.22)
+		hud.recovery_fade_out()
 		hud.flash_message("RATAT — repus pe pista"))
+	# Tranzitia de dinaintea repunerii (#495): ecranul se intuneca cat clipeste
+	# masina; `respawned` de mai sus il limpezeste dupa teleport.
+	player.recovery_started.connect(func(_c: Car, seconds: float) -> void:
+		hud.recovery_fade_in(seconds))
 	# Soferul aruncat din masina (buggy, prototip): camera ramane pe loc si
 	# urmareste figurina cat tine aruncarea; repunerea de dupa trage camera
 	# inapoi prin `respawned` (snap_behind sterge focalizarea).
@@ -396,7 +408,7 @@ func player_progress_fraction() -> float:
 ## lume si sa te impotmolesti in nisip fara sa mai poti iesi. Amandoua se
 ## termina cu repunerea pe ultimul checkpoint valid.
 func _watch_recovery(car: Car, delta: float) -> void:
-	if car.finished:
+	if car.finished or car.is_recovering():
 		return
 	# Prag RELATIV la sosea, nu absolut. De cand terenul urmareste drumul, cota
 	# zero nu mai inseamna nimic: fundul unei rape sapate pe o portiune joasa e
@@ -410,6 +422,18 @@ func _watch_recovery(car: Car, delta: float) -> void:
 				car.global_position.x, car.global_position.y, car.global_position.z])
 		car.respawn()
 		return
+	# Rasturnata (#495): pe acoperis sau pe o parte, aproape oprita. Pe asfalt
+	# n-o prindea nimic — plasa de mai jos cere „in afara soselei" — si
+	# jucatorul ramanea cu rotile in sus pana apasa singur butonul.
+	if car.global_transform.basis.y.dot(Vector3.UP) < FLIPPED_COS \
+			and car.horizontal_speed() < FLIPPED_SPEED:
+		_flipped[car] = float(_flipped.get(car, 0.0)) + delta
+		if float(_flipped[car]) > FLIPPED_S:
+			_flipped[car] = 0.0
+			car.recover()
+			return
+	else:
+		_flipped[car] = 0.0
 	var off_road := not track.is_on_road(car.road_index, car.global_position,
 		car.route)
 	if off_road and car.horizontal_speed() < 2.5:
@@ -450,7 +474,7 @@ func _watch_recovery(car: Car, delta: float) -> void:
 				print("[race-respawn] %s cauza=stall_offroad frac=%.3f pos=(%.0f,%.0f,%.0f)"
 					% [car.pilot_name, track.frac_at(car.road_index, car.route),
 						car.global_position.x, car.global_position.y, car.global_position.z])
-			car.respawn()
+			car.recover()
 	else:
 		_stalled[car] = 0.0
 		_queue_exempt_time[car] = 0.0
@@ -647,7 +671,7 @@ func _swap_player_car(index: int) -> void:
 func _on_respawn_requested() -> void:
 	if state != State.RUNNING or player.finished:
 		return
-	player.respawn()
+	player.recover()
 
 
 func _fit_camera_to_player() -> void:

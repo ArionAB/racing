@@ -322,8 +322,9 @@ func _grohotis() -> void:
 func _molizi() -> void:
 	# [offset centru de la margine, prob. palc, decalaj frac, clasa marime]
 	var rows := [
-		[9.5, 0.55, 0.0, 0], [16.0, 0.85, 0.0012, 1], [27.0, 0.9, 0.0024, 1],
-		[40.0, 0.9, 0.0008, 2], [56.0, 0.85, 0.0030, 2],
+		[9.5, 0.6, 0.0, 0], [15.0, 0.92, 0.0012, 1], [22.0, 0.92, 0.0024, 1],
+		[31.0, 0.92, 0.0006, 1], [42.0, 0.92, 0.0018, 2], [55.0, 0.9, 0.0030, 2],
+		[70.0, 0.88, 0.0010, 2], [88.0, 0.85, 0.0022, 2],
 	]
 	var trees := 0
 	var clumps := 0
@@ -331,7 +332,7 @@ func _molizi() -> void:
 		for r: Array in rows:
 			var f: float = F0 + float(r[2]) - 0.006
 			while f < F1 + 0.006:
-				f += _rng.randf_range(0.0030, 0.0046)
+				f += _rng.randf_range(0.0024, 0.0038)
 				if _rng.randf() > float(r[1]):
 					continue
 				var off: float = float(r[0]) + _rng.randf_range(-3.5, 3.5)
@@ -339,7 +340,7 @@ func _molizi() -> void:
 				if float(c["slope"]) > 1.0:
 					_rejected += 1
 					continue
-				var k := _rng.randi_range(2, 4) if int(r[3]) == 0 else _rng.randi_range(3, 6)
+				var k := _rng.randi_range(2, 4) if int(r[3]) == 0 else _rng.randi_range(3, 7)
 				var got := 0
 				for m in k:
 					var pc := c
@@ -348,6 +349,11 @@ func _molizi() -> void:
 						var rad := _rng.randf_range(1.8, 5.2)
 						pc = _cand_at((c["pos"] as Vector3) + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
 					if not _ok(pc, 2.0, 5.5) or float(pc["slope"]) > 1.1:
+						_rejected += 1
+						continue
+					# poiana cabanei: molizii mari nu o ascund de pe drum
+					var qp: Vector3 = pc["pos"]
+					if _cabana_pos != Vector3.ZERO and int(r[3]) > 0 							and Vector2(qp.x - _cabana_pos.x, qp.z - _cabana_pos.z).length() < 19.0:
 						_rejected += 1
 						continue
 					got += 1

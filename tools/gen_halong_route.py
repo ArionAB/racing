@@ -797,7 +797,17 @@ print(f"  maimute: {F_MAIMUTE:.4f}")
 # `[sub_resource]` vin INAINTEA primului `[node]`, altfel parserul da
 # "Unknown tag 'sub_resource' in file" si scena nu se incarca deloc.
 BR_F0, BR_F1 = 0.8555, 0.9653
-_BR_DROP = 1.0         # m sub drumul de sus, la MIJLOC (terasa de abraziune)
+_BR_DROP = 0.7          # m sub drumul de sus, la MIJLOC (terasa de abraziune).
+# PRAG MASURAT, nu ales: ProbeCameraSolid baleiat pe cota benzii da
+#   0.0 / 0.3 / 0.5 / 0.7 -> 0 incidente
+#   0.85 / 1.0            -> 1 incident (camera INTRA IN MASINA pe mijlocul benzii)
+# Camera urmeaza terenul; pe o banda prea coborata ajunge sub tablier, iar sonda
+# raporteaza collider "Car" — nu un perete (memoria
+# banda-coborata-ingroapa-camera). 0.7 e cea mai ADANCA terasa care tine camera
+# afara, deci se alege MAXIMUL, nu prima valoare care merge: abaterea de cota e
+# exact ce face banda sa arate ca o terasa.
+# Nota: sonda de camera E determinista (1.0 a dat acelasi verdict la doua
+# rulari separate), deci pragul nu e zgomot — altfel decat ProbeRace.
 _BR_BOW = 10.0         # bombare spre apa la mijloc (m), ca sa nu fie o rigla
 _br_a = at_road(BR_F0)
 _br_b = at_road(BR_F1)
@@ -834,6 +844,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/hazards/herd_hazard.gd" id="6_herd"]
 [ext_resource type="Script" path="res://scenes/hazards/pontoon_road_hazard.gd" id="8_pont"]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="16_branch"]
+[ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="18_camzone"]
 [ext_resource type="Script" path="res://scenes/hazards/tide_hazard.gd" id="17_tide"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
@@ -972,6 +983,18 @@ curve = SubResource("Curve3D_banda")
 script = ExtResource("16_branch")
 branch_half_width = 4.0
 surface = 1
+
+[node name="CameraGrota" type="Area3D" parent="."]
+transform = {xf_ident((F_GROTTO0 + F_GROTTO1) * 0.5)}
+script = ExtResource("18_camzone")
+frac_from = {r3(F_GROTTO0 - 0.004)}
+frac_to = {r3(F_GROTTO1 + 0.004)}
+size = Vector3(16.0, 13.0, 40.0)
+ceiling = 11.0
+ceiling_dist = 20.0
+darkness = 0.55
+cave_fog_end = 70.0
+blend_time = 0.45
 
 [node name="Maree" type="Node3D" parent="."]
 transform = Transform3D({rot_y(_tide_yaw)}, {_tide_mid[0]:.3f}, {_tide_mid[1]:.3f}, {_tide_mid[2]:.3f})

@@ -1373,6 +1373,50 @@ benzii se calculează deci *înainte* de header-ul scenei, nu lângă nodul care
 folosește. (Prima încercare de a muta blocul prin manipulare de string a rupt
 generatorul — restaurat din git și refăcut cu editări țintite.)
 
+### 7.4 `CameraZone` pe grotă și pragul de cotă al benzii (14 oct 2026)
+
+**Grota are `CameraZone`** (frac 0,297–0,338), declarată prin **cerința
+geometrică** — `ceiling = 11`, `ceiling_dist = 20` — nu prin cote de cameră.
+Clasa rezolvă singură înălțimea și FOV-ul pentru sliderele reale ale
+jucătorului (`ChaseCamera.solve_preset`); antetul ei documentează de ce cotele
+fixe nu ajung: cu `cam_fov_scale` la minimul legal, tavanul ar intra abia de la
+45,6 m în loc de 22,4, deci pe o bună parte din reglajele permise POI-ul
+subteran ar fi fost un tavan negru.
+
+Tavanul e **11 m**, nu implicitul de 15 — exact lecția din memoria
+`camera-zone-tavan-per-sala` (implicitul ratează săli de altă înălțime).
+
+#### Pragul de cotă al benzii, măsurat
+
+`ProbeCameraSolid` a prins un incident pe banda de maree: **camera intra în
+mașină** pe mijlocul benzii. Două lucruri de citit corect în raport:
+- colliderul era **`Car`**, nu un perete — deci nu e un defect de geometrie, e
+  camera prea jos (ea urmează terenul, iar pe o bandă coborâtă ajunge sub
+  tablier);
+- fracțiile raportate (0,352–0,596) sunt **ale rutei**, nu ale buclei: banda are
+  77 de puncte coapte, deci era mijlocul ei — unde coborârea `4u(1−u)` e maximă.
+
+**Baleierea pe cotă a dat pragul:**
+
+| coborâre la mijloc | incidente |
+|---|---|
+| 0,0 / 0,3 / 0,5 / **0,7** | **0** |
+| 0,85 / 1,0 | 1 |
+
+Banda stă acum la **0,7 m** — **maximul** care ține camera afară, nu prima
+valoare care merge: abaterea de cotă e exact ce face banda să arate ca o terasă
+de abraziune, deci o vrei cât mai mare.
+
+**Sonda de cameră e deterministă**, altfel decât ProbeRace: 1,0 a dat același
+verdict la două rulări separate. Deci pragul e real, nu zgomot — lucru pe care
+l-am verificat anume, după ce nedeterminismul lui ProbeRace mă păcălise cu
+șase ipoteze (§7.3).
+
+**Garda e armată** cu linie de bază proprie, **fără marjă** (memoria
+`garda-fara-linie-de-baza-iese-zero`): până la armare sonda tipărea „pistă fără
+linie de bază", adică trecea verde orice. `Ha Long (Track22): 0`, plus
+`--sabotaj` verificat.
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Patru axe, scrise înaintea traseului** (§2.0). Consecința derivată din

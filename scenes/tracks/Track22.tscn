@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/herd_hazard.gd" id="6_herd"]
 [ext_resource type="Script" path="res://scenes/hazards/pontoon_road_hazard.gd" id="8_pont"]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="16_branch"]
+[ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="18_camzone"]
 [ext_resource type="Script" path="res://scenes/hazards/tide_hazard.gd" id="17_tide"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
@@ -22,7 +23,7 @@ point_count = 173
 
 [sub_resource type="Curve3D" id="Curve3D_banda"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, -32.66, -0.52, -5.15, 0, 0, 0, 0, 0, 0, -64.37, -0.72, -13.36, 0, 0, 0, 0, 0, 0, -95.13, -0.61, -24.62, 0, 0, 0, 0, 0, 0, -124.94, -0.17, -38.94),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, -32.66, -0.38, -5.15, 0, 0, 0, 0, 0, 0, -64.37, -0.53, -13.36, 0, 0, 0, 0, 0, 0, -95.13, -0.46, -24.62, 0, 0, 0, 0, 0, 0, -124.94, -0.17, -38.94),
 "tilts": PackedFloat32Array(0, 0, 0, 0, 0)
 }
 point_count = 5
@@ -169,14 +170,26 @@ wave_phase = 2.0
 plate_count = 7
 
 [node name="BandaDeJos" type="Path3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -111.496, 1.217, -227.431)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -111.496, 1.325, -227.431)
 curve = SubResource("Curve3D_banda")
 script = ExtResource("16_branch")
 branch_half_width = 4.0
 surface = 1
 
+[node name="CameraGrota" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.951, 2.632, 250.060)
+script = ExtResource("18_camzone")
+frac_from = 0.297
+frac_to = 0.338
+size = Vector3(16.0, 13.0, 40.0)
+ceiling = 11.0
+ceiling_dist = 20.0
+darkness = 0.55
+cave_fog_end = 70.0
+blend_time = 0.45
+
 [node name="Maree" type="Node3D" parent="."]
-transform = Transform3D(-0.29756, 0, -0.95470, 0, 1.0, 0, 0.95470, 0, -0.29756, -175.870, 0.493, -240.792)
+transform = Transform3D(-0.29756, 0, -0.95470, 0, 1.0, 0, 0.95470, 0, -0.29756, -175.870, 0.793, -240.792)
 script = ExtResource("17_tide")
 branch_index = 1
 period = 80.0

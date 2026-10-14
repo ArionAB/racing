@@ -5,6 +5,42 @@ Contract: `docs/asset_briefs/transfagarasan_kit.md`. Cote MASURATE din GLB
 Build: `tools/blender/build_tf_road.py` (vocabular: `transfagarasan_shapes.py`).
 Verdict: `bash tools/blender/verify_transfagarasan.sh` -> `VERDICT KIT: OK`.
 
+## Valul 3 — integrat (13 oct 2026)
+
+Kitul e complet: **36 de modele**. Inventarele pe grupe:
+- `transfagarasan_inventory_g.md`, tf-g: `effects/transfagarasan_horizon.glb`
+  (`FagarasRidge_A/_B/_C`, `CloudSea_A/_B`, `FagarasPlain_A`), **provizoriu**;
+- `transfagarasan_inventory_h.md`, tf-h: `vehicles/ro_train.glb` și
+  `vehicles/cable_cabin_large.glb`, acceptate.
+
+`verify_transfagarasan.sh`: **VERDICT KIT: OK**. `ro_train` are în plus o
+verificare: nodurile `Train_Loco/_Tender/_Wagon` sunt copii direcți ai rădăcinii.
+
+**Abateri asumate:**
+- **fundalul nu a convers** (3 runde tf-g, 2 la reluarea tf-g2). GLB-ul combină
+  creasta tf-g, care din camera de joc citește lanț muntos, deși e prea
+  „Dolomiți”, cu norii tf-g2. Peretele cu dinți egali al reluării citea
+  pieptene. Verdictul final se dă pe pista reală;
+- **contractul trenului și al cabinei avea cifre greșite** (17 m / 20 m,
+  cabina 5,5 m). S-au corectat în kit §1.7 la scara de joc.
+
+**De făcut la montarea în Track21:**
+- **fundalul:**
+  - tema `transfagarasan`: `horizon_model` = GLB-ul, `horizon_class` = `""`,
+    plus inelele din `transfagarasan_inventory_g.md`;
+  - creasta la est, la 200–260 m;
+  - norii la est/sud-est, la 240–320 m;
+  - câmpia la nord, la 280–340 m;
+  - **cod nou:** `_build_horizon` pune azi fiecare piesă la `ground_y − 4`.
+    Norii (17 m grosime) și câmpia cer o coborâre per inel (~−28 m), altfel
+    se văd doar unde terenul e deja sub drum;
+- **trenul:** `TrainHazard.model_path` =
+  `res://assets/models/transfagarasan/vehicles/ro_train.glb`. Garnitura cu
+  3 vagoane are ~45,5 m; se verifică pe ProbeRace că blocajul de la trecere
+  nu crește;
+- **cabina:** originea pe linia cablului, cablul pe X local, fără offset.
+  Înlocuiește gondola alpină în `DecorManual`.
+
 ## Valul 2 — integrat (13 oct 2026)
 
 Inventarele pe grupe:

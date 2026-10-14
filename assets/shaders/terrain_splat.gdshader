@@ -101,6 +101,36 @@ varying flat float v_tri_w;
 varying vec2 v_uv_side;
 varying vec2 v_uv_side_macro;
 
+// PETICE DE ZAPADA VECHE (track.gd, cheia de tema `snow_patches`). Zgomotul si
+// marginea taiata se fac AICI, per pixel: vertex color nu poate (se taie la [0,1],
+// deci doar intuneca, iar grila de 7.9 m nu poarta o margine de 1 m). Vertexul da
+// doar permisiunea (CUSTOM0.r: 0 langa drum, 1 de la ~8 m). `snow_on` = 0 pe orice
+// tema fara cheie: ramura nu se executa, randarea ramane bit-identica.
+uniform float snow_on = 0.0;
+uniform vec3 snow_color : source_color = vec3(1.0);
+uniform float snow_y0 = 24.0;
+uniform float snow_y_ramp = 14.0;
+uniform float snow_cover = 0.35;
+uniform float snow_scale = 0.045;
+uniform float snow_slope_gain = 0.6;
+uniform float snow_edge_noise = 0.10;
+varying float v_snow_elig;
+varying vec3 v_wpos;
+varying float v_ny;
+
+float snow_hash(vec2 p) {
+	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+	p3 += dot(p3, p3.yzx + 33.33);
+	return fract((p3.x + p3.y) * p3.z);
+}
+float snow_vnoise(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	return mix(mix(snow_hash(i), snow_hash(i + vec2(1.0, 0.0)), f.x),
+			mix(snow_hash(i + vec2(0.0, 1.0)), snow_hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+
 void vertex() {
 	// VERTEX si NORMAL sunt aici in spatiul OBIECTULUI (inainte de proiectia
 	// in `vertex()`). Pentru Terrain asta e identic cu spatiul lumii: nodul
@@ -124,6 +154,11 @@ void vertex() {
 	vec2 side = mix(VERTEX.zy, VERTEX.xy, step(n.x, n.z));
 	v_uv_side = side * tiling_micro;
 	v_uv_side_macro = side * tiling_macro;
+	if (snow_on > 0.5) {
+		v_snow_elig = CUSTOM0.r;
+		v_wpos = VERTEX;
+		v_ny = NORMAL.y;
+	}
 }
 
 void fragment() {
@@ -156,6 +191,24 @@ void fragment() {
 	micro = mix(vec3(detail_mean), micro, k);
 	macro = mix(vec3(detail_mean), macro, k);
 	ALBEDO = COLOR.rgb * micro * macro;
+	if (snow_on > 0.5) {
+		vec2 q = v_wpos.xz * snow_scale;
+		float n = 0.55 * snow_vnoise(q) + 0.30 * snow_vnoise(q * 2.3 + 17.0)
+				+ 0.15 * snow_vnoise(q * 5.1 + 41.0);
+		// Margine rupta de un zgomot fin (~0.7 m), ca conturul sa nu iasa blob neted.
+		n += (snow_vnoise(v_wpos.xz * 1.4) - 0.5) * snow_edge_noise;
+		float e = clamp((v_wpos.y - snow_y0) / snow_y_ramp, 0.0, 1.0);
+		float steep = clamp(1.0 - v_ny, 0.0, 1.0);
+		float score = n + (e - 1.0) * 0.6 + steep * snow_slope_gain;
+		float thr = 1.0 - snow_cover;
+		float aa = fwidth(score) * 1.0 + 0.004;
+		float m = smoothstep(thr - aa, thr + aa, score);
+		float ae = fwidth(v_snow_elig) + 0.01;
+		m *= smoothstep(0.5 - ae, 0.5 + ae, v_snow_elig);
+		float lum = (micro.g * macro.g) / (detail_mean * detail_mean);
+		vec3 snow_albedo = snow_color * mix(1.0, lum, 0.5);
+		ALBEDO = mix(ALBEDO, snow_albedo, m);
+	}
 	// style_bible §4: nisip/iarba 0.95, fara specular — singurul sheen din
 	// lume ramane al asfaltului.
 	ROUGHNESS = 0.95;

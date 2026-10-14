@@ -4044,6 +4044,14 @@ static func themes() -> Dictionary:
 		"snow_line": 44.0,
 		"snow_fade": 14.0,
 		"snow_tint": Color(0.80, 0.90, 1.0),
+		# PETICE DE ZAPADA VECHE pe versantii inalti (vezi _build_terrain): petice cu
+		# margine taiata, nu tenta. Culoarea e precompensata spre albastru ca sa iasa
+		# alb-neutru sub soarele cald (1; 0.85; 0.66).
+		"snow_patches": {
+			"snow_color": Color(0.80, 0.92, 1.0),
+			"snow_y0": 14.0, "snow_y_ramp": 14.0, "snow_cover": 0.55,
+			"road_clear": 8.0, "road_ramp": 6.0,
+		},
 		# Soare de dupa-amiaza tarzie din VNV (~290 grade, 25 de grade elevatie),
 		# cald-auriu (#FFD9A8). Busola 180 - y = 290 => y = -110. Azimutul se
 		# remasoara pe traseul real (memoria azimutul-soarelui-fata-de-drum).
@@ -6815,8 +6823,44 @@ func _build_terrain() -> void:
 	# Greutatea zonei intra si in COLOR.a (perechea a doua de texturi a
 	# shader-ului) DOAR daca tema a dat perechii a doua o dala de roca.
 	var zone_alt: bool = theme_flag("terrain_alt_class", null) != null
+	# PETICE DE ZAPADA VECHE PE VERSANT (cheia `snow_patches`, Dictionary).
+	# Trei critici orbi au numit aceeasi lipsa: in referinta zapada de iulie sta
+	# in PETICE albe cu margini taiate, nu intr-o tenta. Tenta pe vertex nu poate:
+	# vertex color se taie la [0,1] (doar INTUNECA, deci iese gri) si grila de
+	# 7.9 m nu poarta o margine de 1 m. Aici vertexul poarta doar PERMISIUNEA
+	# (CUSTOM0.r: 0 la marginea drumului, 1 de la `road_clear` m in sus); zgomotul
+	# si marginea taiata se fac in shader, per pixel. Null pe orice tema fara
+	# cheie: nici CUSTOM0, nici uniform setat, deci restul pistelor identic.
+	var snow_cfg: Variant = theme_flag("snow_patches", null)
+	var snow_elig := PackedFloat32Array()
+	if snow_cfg != null:
+		var road_clear: float = float((snow_cfg as Dictionary).get("road_clear", 8.0))
+		var road_ramp: float = float((snow_cfg as Dictionary).get("road_ramp", 6.0))
+		snow_elig.resize((cells + 1) * (cells + 1))
+		# Distanta pana la axa, prin STAMPILARE: fiecare punct copt actualizeaza doar
+		# varfurile din raza lui (O(puncte x 49)), nu toate varfurile x toate
+		# punctele (clearance_at pe fiecare varf adaugase ~1 s la incarcare).
+		var reach := half_width + road_clear + road_ramp
+		var rc := int(ceil(reach / step)) + 1
+		var dist_sq := PackedFloat32Array()
+		dist_sq.resize((cells + 1) * (cells + 1))
+		dist_sq.fill(INF)
+		for bp: Vector3 in baked:
+			var cx := int(round((bp.x - origin.x) / step))
+			var cz := int(round((bp.z - origin.z) / step))
+			for ez in range(maxi(cz - rc, 0), mini(cz + rc, cells) + 1):
+				for ex in range(maxi(cx - rc, 0), mini(cx + rc, cells) + 1):
+					var dx := origin.x + float(ex) * step - bp.x
+					var dz := origin.z + float(ez) * step - bp.z
+					var ei := ez * (cells + 1) + ex
+					dist_sq[ei] = minf(dist_sq[ei], dx * dx + dz * dz)
+		for ei in dist_sq.size():
+			var edge_d: float = sqrt(dist_sq[ei]) - half_width
+			snow_elig[ei] = clampf((edge_d - road_clear) / road_ramp + 1.0, 0.0, 1.0)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	if snow_cfg != null:
+		st.set_custom_format(0, SurfaceTool.CUSTOM_R_FLOAT)
 	for gz in cells:
 		for gx in cells:
 			var idx00 := gz * (cells + 1) + gx
@@ -7081,6 +7125,8 @@ func _build_terrain() -> void:
 					# de 15 ori mai lenta. Suprapuse, cele doua rup tiparul de
 					# repetitie pe care ochiul il prinde imediat pe suprafete mari.
 					st.set_uv2(Vector2(v.x, v.z) * SURFACE_TILING_MACRO)
+					if snow_cfg != null:
+						st.set_custom(0, Color(snow_elig[idx00 + [0, 1, cells + 1, cells + 2][corner_idx]], 0.0, 0.0, 0.0))
 					st.add_vertex(v)
 	# Indexarea uneste colturile de celula partajate (pozitie+culoare+UV
 	# identice), deci normalele se mediaza REAL intre celule vecine: dunele
@@ -7123,6 +7169,13 @@ func _build_terrain() -> void:
 				Palette._class_texture(String(alt_cls)))
 			mat.set_shader_parameter("grass_macro",
 				_tex("res://assets/textures/surface_sand_macro.png"))
+		if snow_cfg != null:
+			var sc: Dictionary = snow_cfg
+			mat.set_shader_parameter("snow_on", 1.0)
+			for k: String in ["snow_color", "snow_y0", "snow_y_ramp", "snow_cover",
+					"snow_scale", "snow_slope_gain", "snow_edge_noise"]:
+				if sc.has(k):
+					mat.set_shader_parameter(k, sc[k])
 		inst.material_override = mat
 	else:
 		# Checkout fara texturi: macar culoarea din vertex colors.

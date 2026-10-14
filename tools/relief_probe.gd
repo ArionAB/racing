@@ -64,6 +64,27 @@ func _ready() -> void:
 				extra = " aabb x %.0f..%.0f y %.1f..%.1f z %.0f..%.0f" % [bb.position.x, bb.end.x,
 					bb.position.y, bb.end.y, bb.position.z, bb.end.z]
 			print("  %s [%s]%s" % [c.name, c.get_class(), extra])
+	if _arg("--train") != "":
+		var samp2: Object = tr.get("_sampler")
+		for c in _all(tr):
+			if c is TrainHazard:
+				var th := c as TrainHazard
+				var gt := th.global_transform
+				var oy := gt.origin.y
+				var lit := ""
+				var d := -th.half_rail
+				var cnt := 0
+				var out := "  Tren half_rail %.0f, trepte %.1f m: " % [th.half_rail, TrainHazard.TRESTLE_BENT_STEP]
+				while d <= th.half_rail + 0.001:
+					var q: Vector3 = gt * Vector3(d, 0.0, 0.0)
+					var gy: float = samp2.call("ground_y", q.x, q.z)
+					var drop := oy - gy
+					lit += ("" if cnt == 0 else ", ") + "%.2f" % drop
+					out += "%.1f " % drop
+					cnt += 1
+					d += TrainHazard.TRESTLE_BENT_STEP
+				print(out)
+				print("  ground_drop = PackedFloat32Array(%s)" % lit)
 	var pts := _arg("--pts")
 	if pts != "":
 		for s in pts.split(";"):

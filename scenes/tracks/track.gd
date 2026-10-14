@@ -7754,9 +7754,17 @@ func _build_ravine_water() -> void:
 		# alta rapa sapata (Vidraru pe stanga, hau-ul pe dreapta) se varsa prin
 		# celulele de la marginea coronamentului si acoperea hau-ul la +7,5.
 		var side_lock := false
+		# `fill_window` (optional): apa doar pe celulele al caror punct de sosea
+		# cel mai apropiat e in intervalul rapei - o rapa de legatura (Oltul la
+		# trecerea la nivel) nu are voie sa inunde bazinele vecinilor, care au
+		# alta cota a apei.
+		var window_lock := false
 		var st_i := _water_style_of_ravine(ri)
-		if st_i >= 0 and not is_zero_approx(r.w):
-			side_lock = bool(_water_styles()[st_i].get("side_lock", false))
+		if st_i >= 0:
+			var stw: Dictionary = _water_styles()[st_i]
+			window_lock = bool(stw.get("fill_window", false))
+			if not is_zero_approx(r.w):
+				side_lock = bool(stw.get("side_lock", false))
 		while not queue.is_empty():
 			var cur: Vector2i = queue.pop_back()
 			for dv: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
@@ -7770,11 +7778,14 @@ func _build_ravine_water() -> void:
 					var cz2 := _terr_origin.z + (float(nb.y) + 0.5) * step
 					if Vector2(cx2 - circ.x, cz2 - circ.y).length() > circ.z:
 						continue
-				if side_lock:
+				if side_lock or window_lock:
 					var nx := _terr_origin.x + (float(nb.x) + 0.5) * step
 					var nz := _terr_origin.z + (float(nb.y) + 0.5) * step
 					var nci := _closest_baked_index(Vector3(nx, water_y, nz))
-					if signf(r.w) != _sampler._side_sign_at(nci, nx, nz):
+					if side_lock and signf(r.w) != _sampler._side_sign_at(nci, nx, nz):
+						continue
+					if window_lock and TrackSideSampler._ring_window(
+							_dists[nci] / total, r.x, r.y, 0.0001) <= 0.0:
 						continue
 				filled[nb] = true
 				queue.append(nb)

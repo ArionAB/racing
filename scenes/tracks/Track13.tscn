@@ -116,6 +116,7 @@ custom_ravine_floors = Array[Vector2]([Vector2(0, 10), Vector2(1, 8), Vector2(3,
 custom_ravine_widths = Array[Vector2]([Vector2(0, 110), Vector2(1, 70)])
 custom_ravine_floor_slopes = Array[Vector2]([Vector2(0, 8)])
 custom_overpass_ranges = Array[Vector2]([Vector2(0.788, 0.962)])
+custom_parapets = Array[Vector4]([Vector4(0.783, 0.965, 1, 1)])
 custom_width_segments = Array[Vector3]([Vector3(0.962, 0.04, 9), Vector3(0.04, 0.16, 6.5), Vector3(0.175, 0.394, 7), Vector3(0.41, 0.557, 5.5), Vector3(0.58, 0.69, 8), Vector3(0.7185, 0.727, 2), Vector3(0.7555, 0.772, 7), Vector3(0.772, 0.962, 6)])
 terrain_pad_m = 200.0
 

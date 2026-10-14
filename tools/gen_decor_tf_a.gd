@@ -27,6 +27,13 @@ extends Node
 ##  Densitate: 0-10 m de margine pajiste scurta + garduri, 10-30 m case/fagi in paclauri, 30-60 m
 ##  al doilea rand, livada, vaci, molizii in departare.
 
+## STARE LA OPRIRE (r3, iesire din bucla pe (c) dupa runda 2): facut = 14 case in doua clustere
+## (vest/est, pe fasia plata), centura de ~1500 molizi (tf_jneapan) + ~55 fagi, vaci, capite, lemne,
+## poteci intre case, aflorimente, padure in jurul lui Poenari (pana la x ~62, pe terenul lui B).
+## Ramas: tabla argintie si Poenari (reparate central, la integrare), culoarea/pantele terenului,
+## densitatea de foioase, gardurile inchise de curte (stinse). Criticul orb a repetat acelasi verdict
+## (densitate/aranjare) dupa r2 => cauza e sub decor; decizia ramane a dezvoltatorului la volan.
+
 const TRACK := "res://scenes/tracks/Track21.tscn"
 
 var _track: Track
@@ -240,6 +247,9 @@ var _stat: Dictionary = {}
 var _houses: Array[Dictionary] = []
 var _a_idx: Array[int] = []        # indicii baked din zona A
 var _near_idx: Array[int] = []     # toata soseaua din caseta zonei (A + capetele H si B)
+## Gardurile MultiMesh sunt STINSE (r3): rutele de 4+ segmente tot citeau ca bucati razlete pe iarba.
+## Raman gardurile proprii ale caselor (in GLB).
+const NO_FENCE := true
 const PATH_SLOT := 8               # DRY_VEGETATION: pamantul batut al drumului dintre case
 const WANT_BEECH := 55
 const WANT_PINE := 1500
@@ -890,7 +900,8 @@ func _fences() -> void:
 	var c1 := _fence_line(pos, yws, sc, 3.4, 1.0, 50, 10, 18)
 	var c2 := _fence_line(pos, yws, sc, 13.5, 1.0, 36, 6, 12)
 	var c3 := _fence_line(pos, yws, sc, 5.0, -1.0, 22, 6, 12)
-	_flock("Garduri", "wooden_fence", "Fence_A", pos, yws, sc, "", 150.0)
+	if not NO_FENCE:
+		_flock("Garduri", "wooden_fence", "Fence_A", pos, yws, sc, "", 150.0)
 	var count := c1 + c2 + c3
 	print("; garduri: %d segmente de 2,04 m = %.0f m (margine %d, pasune %d, stanga %d)" % [count, count * 2.04, c1, c2, c3])
 	_count("garduri_m", int(count * 2.04))

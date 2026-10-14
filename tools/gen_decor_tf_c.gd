@@ -45,7 +45,7 @@ extends Node
 ##   - MOLIZII devin masa dominanta pe dreapta: ~12 grupuri neregulate de 5-12
 ##     (peste 100 de arbori), 4 marimi (Pine_A/B/C/D), pe ~60% din lungime,
 ##     densitate crescand spre drum; FlockProp pe 2 felii, ace pe
-##     `class:tf_jneapan`, trunchiuri pe atlas.
+##     `tri_class tf_jneapan`, trunchiuri pe atlas.
 ##   - FAGII scad la 3 palcuri-accent; AFLORIMENTELE devin 3 grupuri de 2-3 lame
 ##     mari (peretele de sist) + 2 pe capul din stanga; BUJORUL 4 petice mici.
 ## Densitate pe benzi (de la marginea asfaltului): 0-10 m iarba si tufe (nimic
@@ -330,7 +330,7 @@ func _write() -> void:
 		for sl in 2:
 			var pp := _slice(_pine_pos[nm], _pine_yaw[nm], _pine_sl[nm], sl)
 			var sd := 5100 + PINES.find(nm) * 10 + sl
-			_flock("C_%s_S%d" % [nm, sl], "pines", nm, pp[0], pp[1], sc[0], sc[1], "class:tf_jneapan", sd)
+			_flock("C_%s_S%d" % [nm, sl], "pines", nm, pp[0], pp[1], sc[0], sc[1], "tf_jneapan", sd)
 			_flock("C_%s_S%d" % [tr, sl], "pines", tr, pp[0], pp[1], sc[0], sc[1], "", sd)
 	for sl in 2:
 		var b := _slice(_bujor_pos, _bujor_yaw, _patch_slice, sl)

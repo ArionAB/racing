@@ -885,8 +885,8 @@ func _fences() -> void:
 	var pos := PackedVector3Array()
 	var yws := PackedFloat32Array()
 	var sc: Array = []
-	var c1 := _fence_line(pos, yws, sc, 3.4, 1.0, 44, 8, 16)
-	var c2 := _fence_line(pos, yws, sc, 17.0, 1.0, 34, 5, 11)
+	var c1 := _fence_line(pos, yws, sc, 3.4, 1.0, 50, 10, 18)
+	var c2 := _fence_line(pos, yws, sc, 13.5, 1.0, 36, 6, 12)
 	var c3 := _fence_line(pos, yws, sc, 5.0, -1.0, 22, 6, 12)
 	_flock("Garduri", "wooden_fence", "Fence_A", pos, yws, sc, "", 150.0)
 	var count := c1 + c2 + c3
@@ -895,6 +895,7 @@ func _fences() -> void:
 
 
 ## O linie de gard la `gap` m de marginea soselei, pe `side`, in randuri de `rmin`..`rmax` segmente cu goluri.
+## Un rand sub 4 segmente se arunca (sine singuratice pe iarba citesc ca resturi, nu ca gard).
 func _fence_line(pos: PackedVector3Array, yws: PackedFloat32Array, sc: Array, gap: float,
 		side: float, maxn: int, rmin: int, rmax: int) -> int:
 	var vi := _village_indices()
@@ -903,8 +904,10 @@ func _fence_line(pos: PackedVector3Array, yws: PackedFloat32Array, sc: Array, ga
 	var count := 0
 	var prev := Vector2.ZERO
 	var have_prev := false
+	var buf_p := PackedVector3Array()
+	var buf_y := PackedFloat32Array()
 	for i in vi:
-		if count >= maxn:
+		if count + buf_p.size() >= maxn:
 			break
 		var o := _road_anchor(i, side, gap)
 		if not have_prev:
@@ -916,32 +919,50 @@ func _fence_line(pos: PackedVector3Array, yws: PackedFloat32Array, sc: Array, ga
 		var mid := (o + prev) * 0.5
 		var t := (o - prev).normalized()
 		prev = o
+		var good := true
 		if gap_left > 0:
 			gap_left -= 1
-			continue
-		if run_left <= 0:
-			run_left = rmin + (_rng.randi() % (rmax - rmin + 1))
-		run_left -= 1
-		if run_left == 0:
-			gap_left = 3 + (_rng.randi() % 3)
-		if not _free(mid, 0.3, 0.0):
-			continue
-		var ok := true
-		for h in _houses:
-			var circ := _house_circle(h["model"], h["c"], h["yaw"], float(h["sc"]))
-			if Vector2(circ.x, circ.y).distance_to(mid) < circ.z + 1.5:
-				ok = false
-				break
-		if not ok or _edge_gap(mid) < 2.8:
-			continue
-		var y0 := _sol_real(mid.x, mid.y)
-		if absf(_sol_real(mid.x + t.x * 1.0, mid.y + t.y * 1.0) - y0) > 0.7:
-			continue
-		pos.append(Vector3(mid.x, y0, mid.y))
-		yws.append(atan2(-t.y, t.x))
-		sc.append(Vector3.ONE)
-		count += 1
+			good = false
+		else:
+			if run_left <= 0:
+				run_left = rmin + (_rng.randi() % (rmax - rmin + 1))
+			run_left -= 1
+			if run_left == 0:
+				gap_left = 3 + (_rng.randi() % 3)
+		if good:
+			if not _free(mid, 0.3, 0.0) or _edge_gap(mid) < 2.8:
+				good = false
+		if good:
+			for h in _houses:
+				var circ := _house_circle(h["model"], h["c"], h["yaw"], float(h["sc"]))
+				if Vector2(circ.x, circ.y).distance_to(mid) < circ.z + 1.5:
+					good = false
+					break
+		var y0 := 0.0
+		if good:
+			y0 = _sol_real(mid.x, mid.y)
+			if absf(_sol_real(mid.x + t.x * 1.0, mid.y + t.y * 1.0) - y0) > 0.9:
+				good = false
+		if good:
+			buf_p.append(Vector3(mid.x, y0, mid.y))
+			buf_y.append(atan2(-t.y, t.x))
+		if (not good) or run_left == 0:
+			count += _flush_run(buf_p, buf_y, pos, yws, sc)
+			buf_p = PackedVector3Array()
+			buf_y = PackedFloat32Array()
+	count += _flush_run(buf_p, buf_y, pos, yws, sc)
 	return count
+
+
+func _flush_run(bp: PackedVector3Array, by: PackedFloat32Array, pos: PackedVector3Array,
+		yws: PackedFloat32Array, sc: Array) -> int:
+	if bp.size() < 4:
+		return 0
+	for k in bp.size():
+		pos.append(bp[k])
+		yws.append(by[k])
+		sc.append(Vector3.ONE)
+	return bp.size()
 
 
 func _flowers() -> void:

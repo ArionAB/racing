@@ -991,6 +991,51 @@ Mai sunt 2 `[blocaj]` noi la 0.320 (`Portal_S`, seed 6).
 - materiale 34; triunghiuri 7,22 M; desene 1 282;
 - **încărcare la cald 3,86–3,92 s** (limita 4,32). Costul rămas e iarba densă (~1,5 s), umerii (~0,6 s) și nodurile `DecorManual`, nu stolurile.
 
+## Starea valului 3 (E, H) și închiderea etapei POI, 14 oct 2026
+
+| POI | runde | ieșire | ce s-a făcut | ce a rămas |
+|---|---|---|---|---|
+| E | 1 | (c): zăpada pe versanți, a treia oară pe pistă (după D și F) | cabana Bâlea Lac pe platou, 6 mașini, 3 motociclete, tarabe, molizi în 3 tonuri; dezvăluirea serpentinelor e liberă | lacul nu se vede din camera de joc (relief); platoul e iarbă, nu pământ bătut |
+| H | 2 | (c): densitate și foioase, de 2 ori; bugetul de triunghiuri e la limită | ~3 300 de copaci în 3 tonuri, umplutură de molizi mici, trepte de șist pe taluzul Oltului, afinul tăiat cu 70 % | foioasele cerute au nevoie de un fag low-poly (decizie de kit) |
+
+**Reparația centrală de la finalul etapei: zăpada pe teren.** E cheia de temă `snow_patches`, cu shaderul `terrain_splat` cheiat pe temă și bit-identic pe celelalte piste:
+- petice albe cu **margini tăiate** (zgomot pe 3 octave, `fwidth`), mai dese pe pante;
+- niciodată la sub 8 + 6 m de drum.
+
+Rezolvă verdictul comun al lui D, E și F. Aria de zăpadă din cadru a crescut astfel:
+
+| cadru | înainte | după |
+|---|---|---|
+| E | ~1 % | 15–16 % |
+| F 0.395 | ~1 % | 9 % |
+| D | ~1 % | 2–3 % |
+
+**Scena finală (toate cele 8 POI-uri):**
+- gărzile sunt la linia de bază;
+- 34 de materiale; 10,78 M triunghiuri; 1 526 de desene (Okinawa: 14,9 M / 1 835; Machu Picchu: 2 544 de desene);
+- încărcare la cald 4,07–4,11 s (limita 4,32 s);
+- `verify_local.sh`: OK.
+
+ProbeRace pe 16 seed-uri: 55 de repuneri (urs 41, portal 9, avalanșă 4) plus două evenimente noi:
+- **0.992, seed 2, determinist.** Autobuzul lovește la 30 m/s, la 0.998, ceva fără nod de decor în rază de 14 m. Cel mai probabil e un stâlp al porții de start (fundație), după ce a fost împins lateral. **De urmărit la volan;**
+- **0.272, seed 8**: nu se reproduce în 2 rulări (nedeterminism Jolt).
+
+**Ieșirile pe toată etapa:** 0 din 8 POI-uri câștigate orb (ca pe Okinawa, Fiordland, Serengeti, Machu Picchu); toate au ieșit pe (c). Criticii au fost util ca instrument: au găsit
+- clasa `snow`, care citea piatră;
+- molizii oliv, apoi molizii negri uniformi;
+- Prometeu portocaliu;
+- tabla bej;
+- lipsa zăpezii pe versanți.
+
+**Decizii deschise pentru dezvoltator (la volan):**
+1. **Lumina din umbră:** ambientul rece face iarba teal și zăpada gri-albăstruie la portalul D. Un A/B cu ambientul `#D8D2C4` × 0,42 ajută clar în umbră, iar în soare nu schimbă practic nimic. Brief-ul cere însă umbre reci.
+2. **Piesa de zăpadă:** `snow_wall` are trepte și se citește ca stâncă stratificată. Varianta e un troian neted și rotunjit (kit).
+3. **Afinul** (1 764 de triunghiuri pe tufă de 50 cm) și **fagul** (~2 600) sunt scumpe. O versiune decimată a lor ar elibera ~2 M de triunghiuri și ar permite foioasele cerute la H (kit).
+4. **Rocile mari înclinate de pe peretele hăului (B)** se citesc ca „cioburi de sticlă” din camera de joc: plăci fațetate fără umbrire.
+5. **Kickerul săriturii (G)** e o placă portocalie plată (fundație).
+6. **`Utilaj_parcat`** e încă la 8,4 m de axă („IN DRUM” în `probe_manual`).
+7. **Fixul `keep_variants`** pentru variantele GLB dublate pe Android nu e în main (commit-ul `25538d2a`): de recuperat înainte de primul build pe telefon.
+
 ## Bucla oarbă
 
 1. Constructorul (Sonnet, memoria `coordonator-fable-constructori-sonnet`) lucrează în `D:/GameDev/wt-tf-poi-<x>` pe `transfagarasan/poi-<x>`, plecat din vârful ramurii după merge-ul

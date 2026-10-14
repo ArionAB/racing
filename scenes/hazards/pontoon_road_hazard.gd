@@ -248,6 +248,9 @@ func _ready() -> void:
 	_build_visual()
 	_place_plates(0.0)
 	_push_shader_params()
+	# Atlasul DUPA `_ready` (vezi `deck_material`): cerut aici, randarea nu e
+	# gata si `Palette.world_material()` pica la crearea texturii.
+	_attach_atlas.call_deferred()
 
 
 ## Capetele: copilul „Route" (primul si ultimul punct) sau exporturile.
@@ -387,14 +390,32 @@ func _build_deck_area() -> void:
 	_deck_area.transform = _frame
 
 
+## Materialul tablierului. Shaderul se leagă acum, dar ATLASUL se cere AMANAT:
+## `Palette.world_material()` construieste un `StandardMaterial3D` cu texturi, si
+## chemat din `_ready` (adica inainte ca randarea sa fie pregatita) pica cu
+## „CreateResource failed" / „Attempting to use an uninitialized RID" — masurat
+## la prima captura cu `Snapshot`, care randeaza imediat dupa construirea pistei.
+## Podul de franghie nu da eroarea fiindca `Track` il construieste mai tarziu;
+## pontonul e declarat ca nod in .tscn, deci `_ready` ii vine primul.
+## Acelasi tipar ca memoria `decor-ready-inaintea-temei`.
 static func deck_material() -> ShaderMaterial:
 	if _deck_material == null:
 		_deck_material = ShaderMaterial.new()
 		_deck_material.shader = load(SHADER_PATH)
-		# ACEEASI textura ca materialul lumii: niciun asset nou.
-		_deck_material.set_shader_parameter(&"atlas",
-			Palette.world_material().albedo_texture)
 	return _deck_material
+
+
+## Pune atlasul pe materialul tablierului. Se cheama AMANAT (vezi
+## `deck_material`), deci o singura data pe material, nu per ponton.
+static func _attach_atlas() -> void:
+	if _deck_material == null:
+		return
+	if _deck_material.get_shader_parameter(&"atlas") != null:
+		return
+	# ACEEASI textura ca materialul lumii: niciun asset nou, niciun material in
+	# plus la numaratoarea garzii.
+	_deck_material.set_shader_parameter(&"atlas",
+		Palette.world_material().albedo_texture)
 
 
 ## Un singur mesh in cadrul coardei: scanduri de bambus + butoaie de flotor

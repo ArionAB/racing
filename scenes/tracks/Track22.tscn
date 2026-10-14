@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/pontoon_road_hazard.gd" id="8_pont"]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="16_branch"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="18_camzone"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="19_hollow"]
 [ext_resource type="Script" path="res://scenes/hazards/tide_hazard.gd" id="17_tide"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
@@ -49,35 +50,76 @@ curve = SubResource("Curve3D_main")
 
 [node name="Peaks" type="Node3D" parent="."]
 
+[node name="Hollows" type="Node3D" parent="."]
+
+[node name="GolfNord" type="Marker3D" parent="Hollows"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150.00, -12.00, 40.00)
+gizmo_extents = 95.0
+script = ExtResource("19_hollow")
+radius_m = 95.0
+wall_m = 45.0
+
+[node name="GolfCentru" type="Marker3D" parent="Hollows"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.00, -10.00, -140.00)
+gizmo_extents = 85.0
+script = ExtResource("19_hollow")
+radius_m = 85.0
+wall_m = 40.0
+
+[node name="GolfSud" type="Marker3D" parent="Hollows"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.00, -11.00, 170.00)
+gizmo_extents = 80.0
+script = ExtResource("19_hollow")
+radius_m = 80.0
+wall_m = 40.0
+
 [node name="Insula" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107.94, 44.00, 185.32)
-gizmo_extents = 190.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 107.94, 30.00, 185.32)
+gizmo_extents = 120.0
 script = ExtResource("2_peak")
-radius_m = 190.0
+radius_m = 120.0
 
 [node name="TurnGrota" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -174.00, 52.00, 253.00)
-gizmo_extents = 70.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -174.00, 58.00, 253.00)
+gizmo_extents = 32.0
 script = ExtResource("2_peak")
-radius_m = 70.0
+radius_m = 32.0
 
 [node name="TurnVest" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -430.00, 46.00, -40.00)
-gizmo_extents = 80.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -430.00, 52.00, -40.00)
+gizmo_extents = 30.0
 script = ExtResource("2_peak")
-radius_m = 80.0
+radius_m = 30.0
 
 [node name="TurnSud" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150.00, 50.00, 330.00)
-gizmo_extents = 85.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150.00, 60.00, 330.00)
+gizmo_extents = 33.0
 script = ExtResource("2_peak")
-radius_m = 85.0
+radius_m = 33.0
 
 [node name="TurnNord" type="Marker3D" parent="Peaks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.00, 44.00, -300.00)
-gizmo_extents = 75.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.00, 48.00, -300.00)
+gizmo_extents = 28.0
 script = ExtResource("2_peak")
-radius_m = 75.0
+radius_m = 28.0
+
+[node name="TurnGolf1" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -250.00, 54.00, 60.00)
+gizmo_extents = 30.0
+script = ExtResource("2_peak")
+radius_m = 30.0
+
+[node name="TurnGolf2" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180.00, 46.00, -120.00)
+gizmo_extents = 26.0
+script = ExtResource("2_peak")
+radius_m = 26.0
+
+[node name="TurnGolf3" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.00, 50.00, 150.00)
+gizmo_extents = 28.0
+script = ExtResource("2_peak")
+radius_m = 28.0
 
 [node name="Hazarduri" type="Node3D" parent="."]
 

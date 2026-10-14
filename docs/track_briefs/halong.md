@@ -1449,6 +1449,62 @@ cotă de bandă.
 | `ProbeCameraSolid` | **0 incidente, exact linia de bază**; sabotaj pică |
 | `ProbeLaneClear` | **1 blocaj (jonca), exact linia de bază**; sabotaj pică |
 
+### 7.5 Planul real adnotat, și ce a dezvăluit (14 oct 2026)
+
+`docs/track_briefs/img/halong_plan/halong_plan.png`, generat cu
+`tools/annotate_halong_plan.py` din captura **reală** de sus
+(`Snapshot.tscn -- --track=22 --no-fog`, **cu fereastră** — memoria
+`snapshot-nu-merge-headless`). Potrivire automată pe pixelii de asfalt:
+**85%**, scară 1,015, lungime 2 073 m.
+
+Traseul, cele 7 tronsoane de ponton, grota, banda de maree, jonca, maimuțele și
+turnurile se citesc **direct din `Track22.tscn`** (memoria
+`diorama-din-geometria-reala`); doar reperele fără nod (satul plutitor,
+belvederea, plaja, șirul de fundal) sunt marcate ca „poziție planificată".
+
+#### Captura a arătat un defect pe care nicio gardă numerică nu-l vedea
+
+Prima imagine arăta **interiorul buclei ca o masă continuă de uscat**, cu
+drumul în jurul ei — adică exact pe dos față de §0.1 („turnuri de calcar
+cenușii ieșind **drept din apă**"). Toate gărzile treceau: traseul era corect,
+hazardele la locul lor, apa la 0,00. Defectul era de **compoziție**, și se vede
+doar privind.
+
+**Două cauze, amândouă măsurabile:**
+
+**1. Proporția.** Turnurile aveau raze de 70–85 m la înălțimi de 44–52 m, adică
+raport **h/r = 0,57–0,74**. Un turn de carst are pereți aproape verticali
+(**h/r ≥ 1,5**); la 0,6 e un *deal*. Corectate la raze de 26–33 m, plus **trei
+turnuri noi în golf**, între drum și centru, care lipseau cu totul.
+
+**Gardă nouă:** măsoară **raportul**, nu înălțimea — plus un plafon pe insulă
+(rază ≤ 45% din Cebîșev, altfel umple interiorul). Măsurat acum: h/r = 1,71–1,82
+pe toate șapte turnurile, insula 120 m ≤ 137 m.
+
+**2. Lipsa săpăturii.** `TerrainPeak` **ridică local, dar nu sapă nimic între
+vârfuri**, iar terenul de bază urmează șoseaua (`TrackSideSampler.ground_y`) —
+deci interiorul stătea la ~+5 m, bine peste apa de la 0,00. Oricâte vârfuri aș
+fi pus, apa n-avea pe unde să intre.
+
+Remediul e `TerrainHollow`, perechea pe minus: trei scobituri de 80–95 m rază
+la **−10…−12 m**, între turnuri. Acum apa intră în interiorul buclei — pe
+captură se văd trei golfuri cu țărmuri, iar uscatul s-a rupt în bucăți.
+
+**Toate gărzile trec neschimbate după schimbarea de relief:** `ProbeLaneClear`
+1 blocaj (exact linia de bază), `ProbeCameraSolid` 0 incidente,
+`ProbeBuried` curat, `ProbeHalongLoad` toate contractele.
+
+**Lecția:** compoziția nu are gardă numerică. „Cât uscat și câtă apă" nu se
+vede în `ProbeLayout` sau `ProbeRace` — se vede pe captura de sus, și de aceea
+pasul 7 e un pas în sine, nu un export de la final.
+
+#### O rundă pierdută pe diacritice
+
+Mesajul unei gărzi conținea „ă", consola Windows e cp1252, iar generatorul a
+murit cu `UnicodeEncodeError` **înainte de a scrie scena** — deci corecția
+părea că n-are niciun efect, iar captura ieșea identică. A treia oară în
+sesiune. Toate diacriticele din `gen_halong_route.py` sunt acum scoase (27).
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Patru axe, scrise înaintea traseului** (§2.0). Consecința derivată din

@@ -52,7 +52,7 @@ PODET = (38.0, 199.0)          # mijlocul podetului de plute
 # Sirul de turnuri de fundal (EST). Pozitia e limitata de DOUA capete, nu doar
 # de azimut (memoria efecte-de-fundal-cote-legate: inel < fog_end < FAR_PLANE):
 # la 430 m distanta maxima din fereastra de belvedere ieşea 409 m, adica PESTE
-# FAR_PLANE 380 -- turnurile ar fi fost tăiate de planul de departare exact in
+# FAR_PLANE 380 -- turnurile ar fi fost taiate de planul de departare exact in
 # cadrul in care sunt subiectul. Mutate la 360 m de belvedere.
 TURNURI_REAL = (360.0, -170.0)
 TURNURI = TURNURI_REAL
@@ -91,8 +91,8 @@ WPTS = [
     # terasa de maree. Adancimea e aleasa pe masuratoare, nu din ochi:
     #    60 m -> -12.4% (prea putin)      80 m -> -22.0%
     #   100 m -> -28.4% (TINTA -25...-35%)  120 m -> -36.2%
-    # La 100 m bucla creste la 2076 m, deci rămâne in fereastra 2000-2200.
-    # Maimutele se mută pe ramura de intrare in golf (fractia se recalculeaza).
+    # La 100 m bucla creste la 2076 m, deci ramane in fereastra 2000-2200.
+    # Maimutele se muta pe ramura de intrare in golf (fractia se recalculeaza).
     (-104,  226, 40,  1.6, "G golf E"),
     (-150,  326, 34,  1.8, "G golf fund"),
     (-200,  320, 34,  1.6, "G golf fund2"),
@@ -128,7 +128,7 @@ JONCA_SCALE = round((ROAD_AT_RAFT_M - JONCA_FREE_TARGET_M) / JONCA_BEAM_M, 3)
 # elibereaza drumul; unul lent sta in el." Pusesem 2.2 din reflexul "o barca e
 # lenta" — exact greşeala pe care clasa o avertizeaza. Lamele de pe Track15
 # merg la 2.0 fiindca SUNT animale lente si au `model_scale` 3.135 pe un GLB
-# mic; o joncă de 9 m nu e o lama.
+# mic; o jonca de 9 m nu e o lama.
 JONCA_SWEEP = 12.0   # = SlidingHazard.MAX_SWEEP_SPEED_DEFAULT
 
 
@@ -397,7 +397,7 @@ for label, (f0, f1), target, limit, thr in (
            f"distanta {dmin:.0f}-{dmax:.0f} m")
 
 # Reperele NU au voie sa stea peste planul de departare: un reper la > FAR_PLANE
-# e tăiat exact in cadrul in care e subiectul (memoria
+# e taiat exact in cadrul in care e subiectul (memoria
 # efecte-de-fundal-cote-legate: inel < fog_end < FAR_PLANE).
 FAR_PLANE = 380.0
 FOG_END = 340.0     # brief §4
@@ -418,7 +418,7 @@ F_PONTON2 = frac["B pont2"]
 F_JONCA = frac["F podet E"] + 0.5 * (frac["F podet V"] - frac["F podet E"])
 # Maimutele: pe ramura de INTRARE in golf (intre gura si fund), unde drumul e
 # sapat in perete si exista parapet pe care sa stea. Punctul "G maimute" a
-# dispărut la redesenarea laturii G (vezi WPTS), deci fractia se ia acum de pe
+# disparut la redesenarea laturii G (vezi WPTS), deci fractia se ia acum de pe
 # ramura noua.
 F_MAIMUTE = frac["G golf fund"]
 
@@ -452,13 +452,13 @@ report(JONCA_SWEEP >= 8.0,
        f"~110 cadre de contact la perioada dubla vs ~10)")
 
 # TRONSOANELE DE PONTON. Lungimea e constransa de `Track._resolve_span_holes`:
-# gaura din carosabil se taie pe `2*steps` puncte coapte, iar bucla care caută
+# gaura din carosabil se taie pe `2*steps` puncte coapte, iar bucla care cauta
 # pasul merge doar pana la **k = 15**. Pasul mediu masurat pe Track22 e
 # **2.001 m** (1009 puncte pe 2019 m), deci gaura maxima pe care mecanismul o
-# poate tăia e **60 m**.
+# poate taia e **60 m**.
 #
 # Prima versiune avea 3 tronsoane de 71.5 m, adica peste limita: gaura s-a
-# tăiat la 60 m, iar ultimii ~11 m au rămas ASFALT peste placile care se mişca.
+# taiat la 60 m, iar ultimii ~11 m au ramas ASFALT peste placile care se mişca.
 # ProbeRace a dat 148-156 repuneri pe cursa (de la 1-3), toate grupate la
 # fractiile capetelor de tronson (0.11 / 0.14 / 0.21). Nu e un defect al
 # pontonului: e un contract depasit, in silentiu.
@@ -470,7 +470,7 @@ _PONT_START = frac["B pont1"]
 _PONT_END = frac["C dig"]
 _PONT_N = 7
 _PONT_SPAN_FRAC = (_PONT_END - _PONT_START) / float(_PONT_N)
-# Fiecare tronson lasa o fanta de insulita la capat: tablierul acoperă
+# Fiecare tronson lasa o fanta de insulita la capat: tablierul acopera
 # `_PONT_GAP` mai putin, iar pe bucata aia sta piatra fixa.
 _PONT_GAP = 0.004
 # SEMI-latimea carosabilului pe pontoane. `custom_width_segments` ia HALF_WIDTH
@@ -479,7 +479,7 @@ _PONT_GAP = 0.004
 # tablierului. Prima versiune punea 6.0 in amandoua: carosabilul ieşea de 12 m
 # si tablierul de 6, deci 3 m de fiecare parte pe care masina calca pe NIMIC.
 # ProbeRace: 7-24 repuneri, grupate pe primul tronson. Cifra se scrie O DATA si
-# se derivă in ambele locuri.
+# se deriva in ambele locuri.
 _PONT_HALF_W = 6.0
 PONT_SEGS = [
     (_PONT_START + i * _PONT_SPAN_FRAC,
@@ -490,7 +490,7 @@ PONT_SEGS = [
 # --- GARDA DE GAURA DE CAROSABIL (pontoane) ----------------------------------
 # `Track._resolve_span_holes` taie gaura pe `2*steps` puncte coapte, cu bucla
 # limitata la k = 15. Pasul mediu masurat pe Track22 e 2.001 m, deci gaura
-# maxima e 60 m. Un tronson mai lung primeste o gaura PREA MICA si rămâne
+# maxima e 60 m. Un tronson mai lung primeste o gaura PREA MICA si ramane
 # asfalt peste placi — defect silentios care a costat 148-156 repuneri/cursa.
 SPAN_HOLE_MAX_M = 2.0 * 15 * 2.001   # k_max * 2 * pas_mediu_masurat
 print("\n=== GARDA DE GAURA DE CAROSABIL (tronsoane de ponton) ===")
@@ -505,7 +505,7 @@ report(min(_pont_lens) >= 24.0,
 # LATIMEA: `custom_width_segments` ia SEMI-latime, `deck_width` ia latimea
 # TOTALA. Nepotrivirea e MUTA — masina calca pe nimic la 3 m de ax si cade,
 # fara niciun avertisment — deci cifra se scrie o data (`_PONT_HALF_W`) si se
-# derivă in ambele locuri. Garda nu compara constanta cu ea insasi (ar fi
+# deriva in ambele locuri. Garda nu compara constanta cu ea insasi (ar fi
 # tautologie): verifica plafonul pe care il impune camera si `half_width`-ul
 # pistei, adica faptul ca pontonul nu e nici mai ingust decat o masina care
 # depaseste, nici mai lat decat carosabilul din jur.
@@ -640,9 +640,9 @@ RAFT_LEN = ((F_RAFT1 - F_RAFT0) % 1.0) * L_TOTAL
 # --- latimi: pontoanele, grota si podetul la 6 m ------------------------------
 # Tronsoanele de ponton (brief §2): trei bucati despartite de doua insulite fixe.
 # Grota si podetul la 6 m (brief §2: ingustarea e parte din atmosfera lor).
-# NOTA DE METODA: lărgisem podetul la 7 m crezand ca de asta cad masinile la
+# NOTA DE METODA: largisem podetul la 7 m crezand ca de asta cad masinile la
 # frac 0.80 — n-a schimbat nimic, fiindca adevarata cauza era colizorul
-# placeholder al joncii (vezi mai jos). Lăţimea e repusa la intentia din brief:
+# placeholder al joncii (vezi mai jos). Laţimea e repusa la intentia din brief:
 # o "reparatie" care nu schimba cifra nu e o reparatie, e o modificare de
 # design strecurata.
 WS = [(r3(F_GROTTO0 - 0.002), r3(F_GROTTO1 + 0.002), 6.0),
@@ -655,20 +655,61 @@ w_txt = ", ".join(f"Vector3({a}, {b}, {c})" for a, b, c in WS)
 # Brief §2.0: turnurile apropiate sunt FLANC (< 40 m lateral), nu reper. Insula
 # e relieful care duce drumul la +26 (D-E).
 isl_c = at_road(F["D belvedere"], 0.0)
+# PROPORTIA FACE TURNUL, nu inaltimea. Prima versiune avea raze de 70-85 m la
+# inaltimi de 44-52 m, adica raport h/r = 0.57-0.74 — aia e un DEAL, nu un turn
+# de carst. Pe planul de sus se vedea exact asta: insula umplea tot interiorul
+# buclei ca o masa cenusie plata, iar „turnurile" erau movile late.
+# Un turn de carst are pereti aproape verticali: **h/r >= 1.5**.
+#
+# Insula ramane larga (e o insula, nu un turn), dar coboara de la 190 la 120 m
+# raza: la 190 m, cu Cebisev 305, umplea practic tot interiorul buclei si nu mai
+# ramanea apa intre drum si centru — exact pe dos fata de brief §0.1 („turnuri
+# verticale din apa, nu o platforma cu drum in jur").
 PEAKS = [
-    ("Insula", (isl_c[0] - 40.0, 44.0, isl_c[2] - 40.0), 190.0),
-    ("TurnGrota", (-174.0, 52.0, 253.0), 70.0),
-    ("TurnVest", (-430.0, 46.0, -40.0), 80.0),
-    ("TurnSud", (-150.0, 50.0, 330.0), 85.0),
-    ("TurnNord", (-60.0, 44.0, -300.0), 75.0),
+    ("Insula", (isl_c[0] - 40.0, 30.0, isl_c[2] - 40.0), 120.0),
+    ("TurnGrota", (-174.0, 58.0, 253.0), 32.0),
+    ("TurnVest", (-430.0, 52.0, -40.0), 30.0),
+    ("TurnSud", (-150.0, 60.0, 330.0), 33.0),
+    ("TurnNord", (-60.0, 48.0, -300.0), 28.0),
+    # Turnuri IN GOLF, intre drum si centru: ele sunt subiectul pistei si pana
+    # acum lipseau cu totul — interiorul buclei era o singura masa de teren.
+    ("TurnGolf1", (-250.0, 54.0, 60.0), 30.0),
+    ("TurnGolf2", (-180.0, 46.0, -120.0), 26.0),
+    ("TurnGolf3", (-30.0, 50.0, 150.0), 28.0),
 ]
+
+# --- GARDA DE PROPORTIE A TURNURILOR ----------------------------------------
+# Brief §0.1: ce trebuie recunoscut in 3 secunde sunt „turnuri de calcar
+# cenusii iesind DREPT din apa". Un turn de carst are pereti aproape verticali;
+# o movila lata citeste „deal", iar pe planul de sus arata ca o platforma cu
+# drum in jur — exact ce s-a intamplat la prima generare. Garda masoara
+# RAPORTUL h/r, nu inaltimea.
+print("\n=== GARDA DE PROPORTIE (turn de carst, nu deal) ===")
+_prop_ok = True
+for _nm, _pos, _rad in PEAKS:
+    if not _nm.startswith("Turn"):
+        continue
+    _ratio = _pos[1] / max(_rad, 0.1)
+    _ok = _ratio >= 1.5
+    _prop_ok = _prop_ok and _ok
+    print(f"  [{'OK' if _ok else 'PROBLEMA'}] {_nm}: h={_pos[1]:.0f} / r={_rad:.0f} "
+          f"-> h/r = {_ratio:.2f} (prag 1.50; sub atat e deal)")
+_isl = [p for p in PEAKS if p[0] == "Insula"][0]
+_isl_ok = _isl[2] <= cheb * 0.45
+_prop_ok = _prop_ok and _isl_ok
+print(f"  [{'OK' if _isl_ok else 'PROBLEMA'}] insula: raza {_isl[2]:.0f} m <= "
+      f"{cheb * 0.45:.0f} m (45% din Cebisev {cheb:.0f}); peste atat umple "
+      f"interiorul si nu mai ramane golf")
+if not _prop_ok:
+    print("\nGARDA DE PROPORTIE A PICAT -- nu scriu .tscn, ies cu cod 1")
+    sys.exit(1)
 
 # --- rape: apa de golf pe exteriorul buclei ----------------------------------
 # Latura: -1 stanga, +1 dreapta in sensul de mers. Bucla e ANTIORARA, deci
 # exteriorul (marea deschisa) e la DREAPTA pe latura de vest si de sud.
 # FRACTIILE SE DERIVA DIN POI, NU SUNT CONSTANTE. Cand latura G s-a redesenat
 # (golful), bucla a crescut de la 2028 la 2076 m si TOATE fractiile au alunecat
-# cu ~2%. Rapele hardcodate au rămas pe cifrele vechi, deci nu mai erau aliniate
+# cu ~2%. Rapele hardcodate au ramas pe cifrele vechi, deci nu mai erau aliniate
 # cu pontoanele: marginea tablierului a ajuns peste buza rapei (masurat -1.44 m
 # la 8 m de ax, in loc de teren) si repunerile pe primul ponton au urcat de la
 # 0/3/0/4 la 1/13/2/9. O cifra care descrie o POZITIE pe traseu se leaga de
@@ -803,7 +844,7 @@ _BR_DROP = 0.0          # banda e PE COTA DRUMULUI, nu sub ea. Vezi mai jos.
 #
 #  1. `ProbeLaneClear` — DECISIVA. `TrackSideSampler._carve_branches` sapa
 #     terenul la cota benzii minus `BRANCH_DROP` (0.25 m), dar la CAPETE
-#     `TrackBranch` racordeaza la cota buclei principale, deci terenul rămâne
+#     `TrackBranch` racordeaza la cota buclei principale, deci terenul ramane
 #     sus si blocheaza intrarea. Baleiat:
 #       _BR_DROP 0.00 ->  1 blocaj (jonca, pe ruta principala — nu banda)
 #       _BR_DROP 0.25 -> 17 blocaje (TerrainBody in fata, la 0.09-5.3 m)
@@ -818,7 +859,7 @@ _BR_DROP = 0.0          # banda e PE COTA DRUMULUI, nu sub ea. Vezi mai jos.
 #     banda-coborata-ingroapa-camera). Baleiat: 0.0-0.7 -> 0 incidente,
 #     0.85/1.0 -> 1. Sonda aia E determinista, altfel decat ProbeRace.
 #
-# Cu 0.0 banda rămâne o scurtatura de -32.8% pe acelasi plan ca drumul, iar
+# Cu 0.0 banda ramane o scurtatura de -32.8% pe acelasi plan ca drumul, iar
 # mareea o uda si o inchide la fel de bine: gimmickul nu depinde de cota.
 _BR_BOW = 10.0         # bombare spre apa la mijloc (m), ca sa nu fie o rigla
 _br_a = at_road(BR_F0)
@@ -857,6 +898,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/hazards/pontoon_road_hazard.gd" id="8_pont"]
 [ext_resource type="Script" path="res://scenes/tracks/track_branch.gd" id="16_branch"]
 [ext_resource type="Script" path="res://scenes/hazards/camera_zone.gd" id="18_camzone"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="19_hollow"]
 [ext_resource type="Script" path="res://scenes/hazards/tide_hazard.gd" id="17_tide"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
@@ -899,6 +941,34 @@ curve = SubResource("Curve3D_main")
 
 [node name="Peaks" type="Node3D" parent="."]
 """
+# --- SCOBITURILE care fac GOLFUL din interiorul buclei ----------------------
+# Fara ele, interiorul e o masa continua de teren si pista citeste „drum in
+# jurul unei platforme", nu „golf cu turnuri" (brief §0.1). Cauza e in
+# `TrackSideSampler.ground_y`: terenul URMEAZA soseaua, deci interiorul sta la
+# cota drumului minus putin — adica ~+5 m, bine peste apa de la 0.00.
+# `TerrainPeak` ridica local, dar nu sapa nimic intre varfuri.
+#
+# `TerrainHollow` e perechea pe MINUS: coboara terenul la cota NODULUI pe raza
+# ceruta, cu o palnie de `wall_m` dincolo de ea. Puse sub 0, lasa apa sa intre.
+HOLLOWS = [
+    # (nume, (x, y, z), raza, perete) — y NEGATIV: fundul golfului.
+    ("GolfNord", (-150.0, -12.0, 40.0), 95.0, 45.0),
+    ("GolfCentru", (-60.0, -10.0, -140.0), 85.0, 40.0),
+    ("GolfSud", (10.0, -11.0, 170.0), 80.0, 40.0),
+]
+tscn += """
+[node name="Hollows" type="Node3D" parent="."]
+"""
+for nm, (hx, hy, hz), hrad, hwall in HOLLOWS:
+    tscn += f"""
+[node name="{nm}" type="Marker3D" parent="Hollows"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {hx:.2f}, {hy:.2f}, {hz:.2f})
+gizmo_extents = {hrad}
+script = ExtResource("19_hollow")
+radius_m = {hrad}
+wall_m = {hwall}
+"""
+
 for nm, (px, py, pz), rad in PEAKS:
     tscn += f"""
 [node name="{nm}" type="Marker3D" parent="Peaks"]

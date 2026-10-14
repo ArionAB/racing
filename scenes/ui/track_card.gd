@@ -150,14 +150,20 @@ func _build_footer(info: TrackInfo) -> Control:
 	var clock := _Clock.new()
 	clock.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(clock)
-	var best := VBoxContainer.new()
-	best.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	best.alignment = BoxContainer.ALIGNMENT_CENTER
-	best.add_theme_constant_override("separation", 0)
-	row.add_child(best)
-	best.add_child(_label("BEST", 12, TEXT_DIM))
-	best.add_child(_label(_format_ms(GameState.best_lap(track_index)), 18, Color.WHITE))
+	# Doua recorduri: cel mai bun tur si cea mai buna cursa intreaga (#498).
+	_add_record(row, "LAP", GameState.best_lap(track_index))
+	_add_record(row, "RACE", GameState.best_race(track_index))
 	return margin
+
+
+func _add_record(row: HBoxContainer, caption: String, ms: int) -> void:
+	var box := VBoxContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 0)
+	row.add_child(box)
+	box.add_child(_label(caption, 12, TEXT_DIM))
+	box.add_child(_label(_format_ms(ms), 18, Color.WHITE))
 
 
 static func _format_ms(ms: int) -> String:

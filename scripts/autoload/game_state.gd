@@ -189,6 +189,10 @@ var touch_active: bool = false # cel putin un deget pe ecran (auto-accelerate)
 # nu indexul: la stergerea sau reordonarea unei piste, indexul ramas liber era
 # mostenit de alta pista si-i afisa recordul altcuiva.
 var records: Dictionary = {}
+## Recordul pe toata cursa (#498), separat de cel pe tur: cheie
+## `race_record_key` (pista + numarul de ture — un record pe 3 ture nu se
+## compara cu unul pe 5), valoare in ms.
+var race_records: Dictionary = {}
 
 func _ready() -> void:
 	load_settings()
@@ -310,6 +314,24 @@ func try_record(track_index: int, lap_ms: int) -> bool:
 func best_lap(track_index: int) -> int:
 	return int(records.get(TRACK_NAMES[track_index], 0)) # 0 = niciun record inca
 
+## Cheia recordului de cursa: aceeasi pista pe alt numar de ture e alta proba.
+static func race_record_key(track_index: int, laps: int) -> String:
+	return "%s@%d" % [TRACK_NAMES[track_index], laps]
+
+## Ca `try_record`, pentru timpul TOTAL al cursei, pe numarul curent de ture.
+func try_race_record(track_index: int, race_ms: int) -> bool:
+	var key := race_record_key(track_index, total_laps)
+	var best := int(race_records.get(key, 0))
+	if best > 0 and race_ms >= best:
+		return false
+	race_records[key] = race_ms
+	save_records()
+	return true
+
+## 0 = niciun record de cursa inca (pe numarul curent de ture).
+func best_race(track_index: int) -> int:
+	return int(race_records.get(race_record_key(track_index, total_laps), 0))
+
 func load_records() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(RECORDS_PATH) != OK:
@@ -318,11 +340,18 @@ func load_records() -> void:
 		var ms := int(cfg.get_value("records", track_name, 0))
 		if ms > 0:
 			records[track_name] = ms
+	if cfg.has_section("race_records"):
+		for key in cfg.get_section_keys("race_records"):
+			var ms := int(cfg.get_value("race_records", key, 0))
+			if ms > 0:
+				race_records[key] = ms
 
 func save_records() -> void:
 	var cfg := ConfigFile.new()
 	for track_name in records:
 		cfg.set_value("records", track_name, records[track_name])
+	for key in race_records:
+		cfg.set_value("race_records", key, race_records[key])
 	cfg.save(RECORDS_PATH)
 
 # ------------------------------------------------------------------ flux

@@ -53,6 +53,14 @@ var _last_beep: int = -1
 var _skid_parent: Node3D
 var _drift_hold: Dictionary = {}
 var _lap_start_ms: int = -1
+## Ceasul cursei (s), din tick-urile de fizica ale cursei: nu curge in pauza
+## (Race sta pe pauza odata cu arborele) si nici in countdown. Pana la #498
+## tururile se cronometrau cu Time.get_ticks_msec(), deci o pauza in mijlocul
+## turului intra in timpul turului — si in record.
+var _race_clock: float = 0.0
+## Timpul total al jucatorului la sosire (ms); -1 pana trece linia.
+var _player_race_ms: int = -1
+var _race_record_new: bool = false
 var _best_lap_ms: int = -1
 var _final_order: Array = [] # sloturi in ordinea sosirii
 var _champion_shown: bool = false
@@ -64,6 +72,13 @@ var _stalled: Dictionary = {}
 ## scutirea expira (QUEUE_EXEMPT_MAX_S) inainte ca masina sa mai progreseze,
 ## plasa de siguranta trebuie sa apuce imediat, nu sa mai astepte alte 5s.
 var _queue_exempt_time: Dictionary = {}
+## Cat sta fiecare masina rasturnata si aproape oprita (secunde), vezi
+## `_watch_recovery`. Sub FLIPPED_COS (cos fata de verticala) caroseria e pe o
+## parte sau pe acoperis; un viraj inclinat pe doua roti ramane mult peste.
+var _flipped: Dictionary = {}
+const FLIPPED_COS: float = 0.3
+const FLIPPED_SPEED: float = 4.0
+const FLIPPED_S: float = 1.5
 var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
@@ -172,14 +187,24 @@ func _setup_race() -> void:
 		hud.blind_flash(seconds))
 	# Imbranceala se SIMTE proportional cu cat ai incasat: un autobuz care te ia
 	# din spate zguduie ecranul, o atingere lateral aproape deloc.
+	#
+	# Shake-ul e trauma^2, deci sub ~0.4 practic nu se vede (vezi nota de la
+	# `splashed`). Plafonul vechi era chiar 0.35 — izbiturile se simteau doar
+	# pe hartie (#500). Acum o atingere la prag (2.5 m/s) da ~0.23 (abia), o
+	# izbitura plina (15 m/s, plafonul de violenta) da 0.6.
 	player.bumped.connect(func(_c: Car, _other: Car, delta_v: float) -> void:
-		camera.add_trauma(clampf(delta_v / 40.0, 0.05, 0.35)))
+		camera.add_trauma(clampf(0.12 + delta_v / 22.0, 0.12, 0.6)))
 	# Repunerea teleporteaza masina: camera trebuie sa sara cu ea, altfel
 	# urmareste cateva cadre un punct de la 100m.
 	player.respawned.connect(func(_c: Car) -> void:
 		camera.snap_behind()
 		camera.add_trauma(0.22)
+		hud.recovery_fade_out()
 		hud.flash_message("MISSED — back on track"))
+	# Tranzitia de dinaintea repunerii (#495): ecranul se intuneca cat clipeste
+	# masina; `respawned` de mai sus il limpezeste dupa teleport.
+	player.recovery_started.connect(func(_c: Car, seconds: float) -> void:
+		hud.recovery_fade_in(seconds))
 	# Soferul aruncat din masina (buggy, prototip): camera ramane pe loc si
 	# urmareste figurina cat tine aruncarea; repunerea de dupa trage camera
 	# inapoi prin `respawned` (snap_behind sterge focalizarea).
@@ -338,7 +363,8 @@ func _go() -> void:
 	AudioManager.play_sfx(&"go_beep")
 	get_tree().create_timer(0.7, false).timeout.connect(
 		func() -> void: hud.show_countdown(""))
-	_lap_start_ms = Time.get_ticks_msec()
+	_race_clock = 0.0
+	_lap_start_ms = 0
 	for car in cars:
 		car.race_active = true
 		car.on_start_grid = false # se dezgheata fizica; de aici incolo e cursa
@@ -349,12 +375,19 @@ func _go() -> void:
 				hud.flash_message("ROCKET START!")
 			elif hold > 1.05:
 				hud.flash_message("Too early...")
+				car.hold_turbo_until_release()
 		elif _rng.randf() < 0.45:
 			car.force_boost(0.8)
 
 # ------------------------------------------------------------------ cursa
 
+func _clock_ms() -> int:
+	return int(_race_clock * 1000.0)
+
 func _tick_race(delta: float) -> void:
+	_race_clock += delta
+	_tick_offroad_clock(delta)
+	_tick_wrong_way(delta)
 	for i in cars.size():
 		var car := cars[i]
 		_watch_recovery(car, delta)
@@ -377,6 +410,90 @@ func _tick_race(delta: float) -> void:
 				car.finished = true
 	_update_positions()
 
+## Ceasul de offroad al jucatorului (#497): iesit de pe carosabil, ai atatea
+## secunde sa revii; la zero esti repus de unde ai iesit. Doar jucatorul — AI-ul
+## nu taie prin iarba, iar plasa lui ramane `_watch_recovery`.
+##
+## Benzile si scurtaturile declarate (`TrackBranch`, inclusiv drumurile de
+## tara prin off-road) NU pornesc ceasul: pe ele `route` e banda, iar
+## `is_on_road` raspunde dupa latimea ei. Iarba de langa o banda il porneste.
+const OFFROAD_LIMIT_S: float = 3.0
+## Retragerea la repunerea data de ceas: aproape de punctul de iesire (care e
+## ultimul checkpoint pe asfalt), cu cativa metri de elan.
+const OFFROAD_RESPAWN_BACKOFF_M: float = 4.0
+## Secundele ramase; negativ = ceasul nu ruleaza.
+var _offroad_left: float = -1.0
+
+func _tick_offroad_clock(delta: float) -> void:
+	# Doar la volan uman: ProbeRace pune un AIController pe masina jucatorului,
+	# iar cifrele ei trebuie sa ramana comparabile cu ale celorlalte masini.
+	if not (player.controller is PlayerController) or player.finished \
+			or player.is_recovering() or player.is_ejected:
+		_set_offroad_left(-1.0)
+		return
+	var off := not track.is_on_road(player.road_index, player.global_position,
+		player.route)
+	if not off:
+		_set_offroad_left(-1.0)
+		return
+	if _offroad_left < 0.0:
+		_set_offroad_left(OFFROAD_LIMIT_S)
+		return
+	# In aer ceasul sta: o saritura peste iarba nu e timp pierdut pe iarba, iar
+	# aterizarea pe asfalt il opreste oricum.
+	if player.is_on_floor():
+		_set_offroad_left(_offroad_left - delta)
+	if _offroad_left <= 0.0:
+		_set_offroad_left(-1.0)
+		player.recover(OFFROAD_RESPAWN_BACKOFF_M)
+
+
+func _set_offroad_left(seconds: float) -> void:
+	_offroad_left = seconds
+	hud.set_offroad_clock(seconds)
+
+
+## „WRONG WAY" (#499): jucatorul merge pe contrasens fata de sensul pistei.
+##
+## Se judeca dupa directia de MERS (viteza), nu dupa bot: un spin te lasa cu
+## botul invers o clipa, dar tot inainte aluneci; si marsarierul pe sensul
+## cursei nu e contrasens, desi botul priveste inapoi. Histerezis pe timp si
+## pe unghi, ca mesajul sa nu clipeasca: apare dupa WRONG_WAY_ON_S de mers
+## clar invers (cos < WRONG_WAY_COS, adica peste ~107°), dispare dupa
+## WRONG_WAY_OFF_S de mers pe sens (cos > 0).
+const WRONG_WAY_COS: float = -0.3
+const WRONG_WAY_MIN_SPEED: float = 3.0
+const WRONG_WAY_ON_S: float = 1.5
+const WRONG_WAY_OFF_S: float = 0.4
+var _wrong_way: bool = false
+var _wrong_way_clock: float = 0.0
+
+func _tick_wrong_way(delta: float) -> void:
+	var cos_dir := 1.0
+	var v := player.velocity
+	v.y = 0.0
+	if not player.finished and v.length() > WRONG_WAY_MIN_SPEED:
+		var r: TrackRoute = track.route_at(player.route)
+		if r != null and r.baked.size() > 2:
+			var i := player.road_index
+			var tan := r.baked[r.wrap_index(i + 1)] - r.baked[r.wrap_index(i - 1)]
+			tan.y = 0.0
+			if tan.length_squared() > 0.0001:
+				cos_dir = v.normalized().dot(tan.normalized())
+	# Pragul de intrare e mai strict decat cel de iesire (histerezis pe unghi).
+	# Oprit sau aproape oprit, cos_dir ramane 1: nu mergi pe niciun sens.
+	var wrong_now := cos_dir < WRONG_WAY_COS if not _wrong_way else cos_dir <= 0.0
+	if wrong_now == _wrong_way:
+		_wrong_way_clock = 0.0
+		return
+	# Starea s-ar schimba: abia dupa ce noua stare tine destul.
+	_wrong_way_clock += delta
+	if _wrong_way_clock >= (WRONG_WAY_ON_S if not _wrong_way else WRONG_WAY_OFF_S):
+		_wrong_way = wrong_now
+		_wrong_way_clock = 0.0
+		hud.set_wrong_way(_wrong_way)
+
+
 ## Progresul jucatorului ca fractie din cursa intreaga (0 pe grila/countdown,
 ## 1 la ultima trecere) — sursa lui `DuskCycle.dusk` (Jodhpur, brief §3
 ## „Ceasul de lumina”: iluminarea trebuie sa fie identica pentru acelasi PUNCT
@@ -395,7 +512,7 @@ func player_progress_fraction() -> float:
 ## lume si sa te impotmolesti in nisip fara sa mai poti iesi. Amandoua se
 ## termina cu repunerea pe ultimul checkpoint valid.
 func _watch_recovery(car: Car, delta: float) -> void:
-	if car.finished:
+	if car.finished or car.is_recovering():
 		return
 	# Prag RELATIV la sosea, nu absolut. De cand terenul urmareste drumul, cota
 	# zero nu mai inseamna nimic: fundul unei rape sapate pe o portiune joasa e
@@ -409,6 +526,18 @@ func _watch_recovery(car: Car, delta: float) -> void:
 				car.global_position.x, car.global_position.y, car.global_position.z])
 		car.respawn()
 		return
+	# Rasturnata (#495): pe acoperis sau pe o parte, aproape oprita. Pe asfalt
+	# n-o prindea nimic — plasa de mai jos cere „in afara soselei" — si
+	# jucatorul ramanea cu rotile in sus pana apasa singur butonul.
+	if car.global_transform.basis.y.dot(Vector3.UP) < FLIPPED_COS \
+			and car.horizontal_speed() < FLIPPED_SPEED:
+		_flipped[car] = float(_flipped.get(car, 0.0)) + delta
+		if float(_flipped[car]) > FLIPPED_S:
+			_flipped[car] = 0.0
+			car.recover()
+			return
+	else:
+		_flipped[car] = 0.0
 	var off_road := not track.is_on_road(car.road_index, car.global_position,
 		car.route)
 	if off_road and car.horizontal_speed() < 2.5:
@@ -449,7 +578,7 @@ func _watch_recovery(car: Car, delta: float) -> void:
 				print("[race-respawn] %s cauza=stall_offroad frac=%.3f pos=(%.0f,%.0f,%.0f)"
 					% [car.pilot_name, track.frac_at(car.road_index, car.route),
 						car.global_position.x, car.global_position.y, car.global_position.z])
-			car.respawn()
+			car.recover()
 	else:
 		_stalled[car] = 0.0
 		_queue_exempt_time[car] = 0.0
@@ -514,7 +643,7 @@ func _on_player_lap(laps: int) -> void:
 	for child in track.get_children():
 		if child is LavaFlowHazard:
 			(child as LavaFlowHazard).on_lap_completed()
-	var now := Time.get_ticks_msec()
+	var now := _clock_ms()
 	if _lap_start_ms >= 0:
 		var lap_ms := now - _lap_start_ms
 		if _best_lap_ms < 0 or lap_ms < _best_lap_ms:
@@ -528,6 +657,9 @@ func _on_player_lap(laps: int) -> void:
 
 func _finish_race() -> void:
 	state = State.FINISHED
+	_player_race_ms = _clock_ms()
+	_race_record_new = GameState.try_race_record(GameState.selected_track,
+		_player_race_ms)
 	_update_positions()
 	# Ordinea finala = pozitiile din clipa sosirii jucatorului (AI-ul din
 	# spate isi pastreaza locul relativ; cursa e a jucatorului).
@@ -537,7 +669,12 @@ func _finish_race() -> void:
 	_final_order = order
 	if GameState.champ_active:
 		GameState.record_results(_final_order)
-	hud.flash_message("FINISH — %s place!" % _ordinal(player.race_position))
+	if _race_record_new:
+		hud.flash_message("FINISH — %s place!\nRACE RECORD %s" % [
+			_ordinal(player.race_position), _fmt_ms(_player_race_ms)])
+		AudioManager.play_sfx(&"drift_level", 1.5)
+	else:
+		hud.flash_message("FINISH — %s place!" % _ordinal(player.race_position))
 	get_tree().create_timer(1.5, false).timeout.connect(_show_results)
 
 func _show_results() -> void:
@@ -551,6 +688,11 @@ func _show_results() -> void:
 			var gained: int = GameState.CHAMP_POINTS[rank] \
 				if rank < GameState.CHAMP_POINTS.size() else 0
 			right = "+%d pts  (total %d)" % [gained, GameState.champ_points[slot]]
+		# Timpul tau pe toata cursa, si daca e record pe pista (#498).
+		if car.is_player and _player_race_ms >= 0:
+			var time_text := _fmt_ms(_player_race_ms) \
+				+ ("  RECORD!" if _race_record_new else "")
+			right = time_text if right == "" else right + "   " + time_text
 		rows.append({
 			"name": "%d. %s (%s)" % [rank + 1, car.pilot_name, car.car_name],
 			"color": car.body_color,
@@ -646,7 +788,7 @@ func _swap_player_car(index: int) -> void:
 func _on_respawn_requested() -> void:
 	if state != State.RUNNING or player.finished:
 		return
-	player.respawn()
+	player.recover()
 
 
 func _fit_camera_to_player() -> void:
@@ -697,7 +839,7 @@ func _update_hud() -> void:
 	hud.set_respawn_enabled(state == State.RUNNING and player.can_respawn())
 	var lap_text := "--:--.-"
 	if _lap_start_ms >= 0 and state != State.COUNTDOWN:
-		lap_text = _fmt_ms(Time.get_ticks_msec() - _lap_start_ms)
+		lap_text = _fmt_ms(_clock_ms() - _lap_start_ms)
 	var best_text := _fmt_ms(_best_lap_ms) if _best_lap_ms >= 0 else "--:--.-"
 	var lap_no := clampi(int(_progress[0].laps) + 1, 1, GameState.total_laps)
 	var champ_line := ""
@@ -709,10 +851,16 @@ func _update_hud() -> void:
 	# Indiciul de camera apare doar unde exista si reglajul (build de debug),
 	# altfel ar promite jucatorului o tasta care nu face nimic.
 	var cam_hint := "  [F2] camera" if OS.is_debug_build() else ""
-	var info := "%3.0f km/h   pos %d/%d   lap %d/%d%s\nlap:  %s\nbest: %s   rec: %s\n%s on %s   [SPACE] turbo  [SHIFT] drift%s" % [
+	# Timpul total al cursei langa recordul pe cursa (#498): pe ultimul tur
+	# vezi direct daca il mai bati.
+	var race_ms := _player_race_ms if _player_race_ms >= 0 else _clock_ms()
+	var race_text := _fmt_ms(race_ms) if state != State.COUNTDOWN else "--:--.-"
+	var race_rec_ms := GameState.best_race(GameState.selected_track)
+	var race_rec_text := _fmt_ms(race_rec_ms) if race_rec_ms > 0 else "--:--.-"
+	var info := "%3.0f km/h   pos %d/%d   lap %d/%d%s\nlap:  %s   race: %s\nbest: %s   rec: %s   race rec: %s\n%s on %s   [SPACE] turbo  [SHIFT] drift%s" % [
 		player.horizontal_speed() * 3.6, player.race_position, cars.size(),
-		lap_no, GameState.total_laps, champ_line, lap_text, best_text,
-		record_text, player.car_name, _track_title(), cam_hint]
+		lap_no, GameState.total_laps, champ_line, lap_text, race_text, best_text,
+		record_text, race_rec_text, player.car_name, _track_title(), cam_hint]
 	hud.set_info(info)
 	hud.set_turbo(player.turbo_charge, player.is_boosting)
 

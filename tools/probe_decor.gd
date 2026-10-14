@@ -614,10 +614,17 @@ func _source_of(mi: Node, track: Node) -> String:
 		return "GLB: " + String(mi.name).trim_prefix("CityFill_").get_slice("__", 0) + " (CityFill)"
 	var up: Node = mi
 	while up != null and up != track:
+		# Kitul Transfagarasan (assets/models/transfagarasan/): aceeasi capcana,
+		# a treia oara. Nodurile lui se numesc `Wall_Stone` (= stirling_ledge),
+		# `Portal_Concrete`/`Portal_Snow` (= mine_portal), `Rock_Schist` (=
+		# torrent_chute), asa ca linia pe surse arata "scatter mostenit din
+		# Fiordland" acolo unde de fapt sunt zidurile de sprijin si portalul
+		# Balea (N11 din gauntlet). Decide fisierul instantei-stramos.
 		# Kitul Okinawa (assets/models/okinawa/) are aceeasi capcana: casele
 		# poarta `House_Roof` (= village_house), pinii ryukyu cad pe
 		# alpine_pines, barcile pe cruise_boat, zidurile pe stirling_ledge.
-		if up is Node3D and ((up as Node3D).scene_file_path.contains("/models/jodhpur/") 				or (up as Node3D).scene_file_path.contains("/models/okinawa/")):
+		if up is Node3D and ((up as Node3D).scene_file_path.contains("/models/jodhpur/") 				or (up as Node3D).scene_file_path.contains("/models/okinawa/")
+				or (up as Node3D).scene_file_path.contains("/models/transfagarasan/")):
 			return "GLB: " + (up as Node3D).scene_file_path.get_file().get_basename()
 		up = up.get_parent()
 	# Intai numele PROPRIU al mesh-ului: variantele sunt cheia stabila.

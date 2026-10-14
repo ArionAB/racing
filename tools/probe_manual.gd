@@ -26,6 +26,9 @@ const SUNK_MIN_VISIBLE: float = 0.8
 ## Marja peste jumatatea de sosea sub care obiectul e practic pe carosabil.
 const ROAD_MARGIN: float = 2.0
 
+## Diferenta (m) intre sampler si raycast peste care se reevalueaza pe raycast.
+const RAY_DIFF_MAX: float = 1.5
+
 var _frames := 0
 var _track: Node = null
 
@@ -50,6 +53,67 @@ func _process(_delta: float) -> bool:
 		return false
 	quit(0 if _report() else 1)
 	return true
+
+
+## Verdictul plutit/ingropat al unei piese fata de cota `ground`.
+func _height_verdict(n3: Node3D, p: Vector3, ground: float, sea_y: float) -> String:
+	var verdict := "ok"
+	if ground < sea_y and absf(p.y - sea_y) <= 1.0:
+		verdict = "ok (pe apa)"
+	elif p.y - ground > FLOAT_MAX and _on_static_face(n3):
+		verdict = "ok (pe stanca)"
+	elif p.y - ground > FLOAT_MAX and _under_airborne_mover(n3):
+		verdict = "ok (in zbor)"
+	elif p.y - ground > FLOAT_MAX:
+		verdict = "PLUTESTE"
+	elif ground - p.y > SINK_MAX and n3.has_meta(SUNK_META):
+		# Scufundat PRIN PROIECT (zidurile-parapet ale portilor Jodhpur: un
+		# zid de 14 m ingropat pana ii raman crenelurile peste drum). Nu se
+		# iarta pe declaratie: se masoara VARFUL real al mesh-ului, care
+		# trebuie sa iasa din teren cu cel putin SUNK_MIN_VISIBLE — altfel
+		# terenul l-a inghitit si e tot INGROPAT.
+		var top := _top_y(n3)
+		if top - ground >= SUNK_MIN_VISIBLE:
+			verdict = "ok (scufundat, varf %+.1f m)" % (top - ground)
+		else:
+			verdict = "INGROPAT (varf %+.1f m)" % (top - ground)
+	elif ground - p.y > SINK_MAX:
+		verdict = "INGROPAT"
+	return verdict
+
+
+func _ray_ref_opt_in(n3: Node) -> bool:
+	var cur: Node = n3
+	while cur != null and cur != _track:
+		if cur.has_meta("ref_teren_raycast"):
+			return true
+		cur = cur.get_parent()
+	return false
+
+
+## Cota terenului randat sub `p`: raycast de sus, ignorand tot ce nu e `TerrainBody`
+## (corpurile decorului). NAN daca nu exista TerrainBody sau raza nu-l loveste.
+func _terrain_ray_y(t: Node3D, p: Vector3) -> float:
+	var tb: StaticBody3D = null
+	for c in t.get_children():
+		if str(c.name) == "TerrainBody":
+			tb = c as StaticBody3D
+			break
+	if tb == null:
+		return NAN
+	var space := t.get_world_3d().direct_space_state
+	var top := maxf(p.y, 0.0) + 400.0
+	var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, top, p.z), Vector3(p.x, top - 1200.0, p.z))
+	q.collide_with_areas = false
+	var hit: Dictionary = space.intersect_ray(q)
+	var guard := 0
+	while not hit.is_empty() and hit["rid"] != tb.get_rid() and guard < 60:
+		q.exclude = q.exclude + [hit["rid"]]
+		hit = space.intersect_ray(q)
+		guard += 1
+	if hit.is_empty() or hit["rid"] != tb.get_rid():
+		return NAN
+	return float((hit["position"] as Vector3).y)
 
 
 func _report() -> bool:
@@ -91,28 +155,22 @@ func _report() -> bool:
 			if d < near:
 				near = d
 				near_i = i
-		var verdict := "ok"
-		if ground < sea_y and absf(p.y - sea_y) <= 1.0:
-			verdict = "ok (pe apa)"
-		elif p.y - ground > FLOAT_MAX and _on_static_face(n3):
-			verdict = "ok (pe stanca)"
-		elif p.y - ground > FLOAT_MAX and _under_airborne_mover(n3):
-			verdict = "ok (in zbor)"
-		elif p.y - ground > FLOAT_MAX:
-			verdict = "PLUTESTE"
-		elif ground - p.y > SINK_MAX and n3.has_meta(SUNK_META):
-			# Scufundat PRIN PROIECT (zidurile-parapet ale portilor Jodhpur: un
-			# zid de 14 m ingropat pana ii raman crenelurile peste drum). Nu se
-			# iarta pe declaratie: se masoara VARFUL real al mesh-ului, care
-			# trebuie sa iasa din teren cu cel putin SUNK_MIN_VISIBLE — altfel
-			# terenul l-a inghitit si e tot INGROPAT.
-			var top := _top_y(n3)
-			if top - ground >= SUNK_MIN_VISIBLE:
-				verdict = "ok (scufundat, varf %+.1f m)" % (top - ground)
-			else:
-				verdict = "INGROPAT (varf %+.1f m)" % (top - ground)
-		elif ground - p.y > SINK_MAX:
-			verdict = "INGROPAT"
+		var verdict := _height_verdict(n3, p, ground, sea_y)
+		# Cota de referinta a doua: terenul RANDAT (raycast pe `TerrainBody`). Doar
+		# cand cota din sampler da PLUTESTE/INGROPAT si cele doua difera cu >
+		# RAY_DIFF_MAX (peretii rapelor, `custom_scarp_ravines`, pe care sampler-ul
+		# nu-i modeleaza si da fundul): daca fata de teren piesa e in regula, e ok.
+		# Un verdict deja "ok" nu se atinge, deci rezultatele ok raman cele de dinainte.
+		# OPT-IN: doar sub un nod cu metadata `ref_teren_raycast` (ex. `ZonaB` de pe
+		# Transfagarasan). Pe celelalte piste sonda ramane exact cum era, ca sa nu
+		# ascunda semnale reale pe pistele deja verificate.
+		if not verdict.begins_with("ok") and _ray_ref_opt_in(n3):
+			var ray_y := _terrain_ray_y(t, p)
+			if not is_nan(ray_y) and absf(ray_y - ground) > RAY_DIFF_MAX:
+				var v2 := _height_verdict(n3, p, ray_y, sea_y)
+				if v2.begins_with("ok"):
+					verdict = v2
+					ground = ray_y
 		# Latimea LOCALA, nu `half_width`. Pe o pista cu profil de latime
 		# (Baikal: 6 m in grota, 11 m pe gheata) marginea masurata fata de
 		# latimea implicita raporteaza "IN DRUM" obiecte asezate cuminte langa

@@ -2199,7 +2199,11 @@ const CLASSES_OKINAWA := {
 ## saturat decat RUST_METAL). Tabla rosie (`arges_house_b`) ramane pe KERB_RED.
 const _TF_SCHIST: String = Palette.TRI_PREFIX + "tf_schist"
 const _TF_STONE: String = Palette.TRI_PREFIX + "tf_stone"
-const _TF_SNOW: String = Palette.TRI_PREFIX + "snow"
+# Zapada pe ATLAS (FOAM_WHITE), nu pe clasa `snow`: dala clasei are pistrui granulati
+# si in joc peretii de zapada se citeau ca parapet de piatra (criticul orb POI D r1:
+# "zidurile albe-gri sunt parapet de piatra, nu zapada"). Pe atlas se vad treptele
+# modelate ale zapezii vechi, alb-albastrui in umbra. Si un material mai putin.
+const _TF_SNOW: String = Palette.ATLAS_PREFIX
 const _TF_CONCRETE: String = Palette.TRI_PREFIX + "concrete"
 # Tencuiala: briefului ii cere ALBA (FOAM_WHITE), iar clasa `plaster` (#978D7D) a dat in joc
 # (154,121,84), bej-maro, pe cand atlasul da (192,176,149), crem. Ca la Okinawa
@@ -2219,7 +2223,10 @@ const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_c": _TF_OUTCROP,
 	"scree_cone": {"Scree_Schist": _TF_SCHIST},
 	"rock_tunnel_portal": {"Rock_Schist": _TF_SCHIST},
-	"poenari_ruin": {"Poenari_Schist": _TF_SCHIST, "Poenari_Stone": _TF_STONE},
+	# Caramida (TILE_TERRACOTTA) iesea portocaliu-viu in joc; diorama arata ruina bej-gri.
+	# Pe `tf_stone` (deja pe pista): zero material nou.
+	"poenari_ruin": {"Poenari_Schist": _TF_SCHIST, "Poenari_Stone": _TF_STONE,
+		"Poenari_Brick": _TF_STONE},
 	"prometheus_statue": {"Statue_Schist": _TF_SCHIST},
 	# Kitul refolosit (kit §1.9): sistul doar pe Track21 (tema), nu global. `PeakSnow`
 	# ramane pe atlas (calota alba).
@@ -2535,8 +2542,16 @@ const SLOT_REMAP_BY_THEME := {
 	# (#A8683A, 0.65). `stana` are ambele (78% argintie, 22% ruginita). Slotul 6 nu e folosit
 	# de alt nod din aceste modele (masurat pe UV-uri), deci mutarea atinge doar tabla.
 	"transfagarasan": {
-		"arges_house_a": {6: Palette.MARBLE_GREY},
-		"cabana_balea_lac": {6: Palette.MARBLE_GREY},
+		# Tabla argintie pe PAINTED_METAL (#7692A8), nu pe MARBLE_GREY: sub soarele cald
+		# al temei (1, .85, .66) MARBLE_GREY iesea bej, ca stuful (POI A, runda 1), pe
+		# cand albastrul lui PAINTED_METAL se neutralizeaza spre gri (~118,124,111) si
+		# citeste tabla albastru-gri din diorama. Zero material nou (remap de slot).
+		"arges_house_a": {6: Palette.PAINTED_METAL},
+		"cabana_balea_lac": {6: Palette.PAINTED_METAL},
+		# Prometeu: bronzul pe LARCH_RUST iesea „jucarie portocalie” (162,85,36) sub soarele
+		# temei (critic/constructor POI B r1). DRY_VEGETATION da auriu mat (180,139,52),
+		# bronzul din diorama; umbrele raman pe LOG_DARK.
+		"prometheus_statue": {27: Palette.DRY_VEGETATION},
 		"cabana_balea_cascada": {10: Palette.LARCH_RUST},
 		"stana": {6: Palette.MARBLE_GREY, 10: Palette.LARCH_RUST},
 		# Trunchiul fagului: scoarta neteda dar INCHISA, nu cremul slotului 29 (#B8B4AC).

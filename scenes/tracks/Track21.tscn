@@ -60,6 +60,20 @@
 [ext_resource type="PackedScene" path="res://assets/models/transfagarasan/structures/snow_wall.glb" id="f_snow_wall"]
 [ext_resource type="PackedScene" path="res://assets/models/trees/alpine_pines.glb" id="f_pines"]
 [ext_resource type="PackedScene" path="res://assets/models/flowers/flower_cluster.glb" id="f_flower"]
+[ext_resource type="Script" path="res://scenes/props/flock.gd" id="b_flock"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/jneapan_a.glb" id="b_jneapan_a"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/jneapan_b.glb" id="b_jneapan_b"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/afin.glb" id="b_afin"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/bujor_de_munte.glb" id="b_bujor"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/rocks/schist_outcrop_a.glb" id="b_outcrop_a"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/rocks/schist_outcrop_b.glb" id="b_outcrop_b"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/rocks/schist_outcrop_c.glb" id="b_outcrop_c"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/rocks/scree_cone.glb" id="b_scree"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/structures/snow_wall.glb" id="b_snow_wall"]
+[ext_resource type="PackedScene" path="res://assets/models/trees/alpine_pines.glb" id="b_pines"]
+[ext_resource type="PackedScene" path="res://assets/models/flowers/flower_cluster.glb" id="b_flower"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/beech_tree_a.glb" id="b_beech_a"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/beech_tree_b.glb" id="b_beech_b"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -1198,7 +1212,1144 @@ yaws = PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 scale3_list = Array[Vector3]([Vector3(1.1697443, 1, 1.1697443), Vector3(1.1904346, 1, 1.1904346), Vector3(1.1884505, 1, 1.1884505), Vector3(1.2133319, 1, 1.2133319), Vector3(0.97069657, 1, 0.97069657), Vector3(1.2430927, 1, 1.2430927), Vector3(0.96455723, 1, 0.96455723), Vector3(1.148238, 1, 1.148238), Vector3(1.0961561, 1, 1.0961561), Vector3(1.1703684, 1, 1.1703684), Vector3(0.96800476, 1, 0.96800476), Vector3(1.1016966, 1, 1.1016966), Vector3(1.2423148, 1, 1.2423148), Vector3(1.081855, 1, 1.081855), Vector3(0.96535796, 1, 0.96535796), Vector3(1.1441008, 1, 1.1441008), Vector3(0.9723043, 1, 0.9723043), Vector3(1.0225112, 1, 1.0225112), Vector3(0.99963635, 1, 0.99963635), Vector3(1.0710603, 1, 1.0710603), Vector3(1.0115114, 1, 1.0115114), Vector3(1.172051, 1, 1.172051), Vector3(1.2198672, 1, 1.2198672), Vector3(1.165027, 1, 1.165027), Vector3(0.98191434, 1, 0.98191434), Vector3(1.0051646, 1, 1.0051646), Vector3(1.1038294, 1, 1.1038294), Vector3(1.1940045, 1, 1.1940045), Vector3(1.1045842, 1, 1.1045842), Vector3(1.2225245, 1, 1.2225245), Vector3(1.249407, 1, 1.249407), Vector3(1.0401405, 1, 1.0401405), Vector3(1.1634233, 1, 1.1634233), Vector3(1.2444832, 1, 1.2444832), Vector3(1.0793843, 1, 1.0793843), Vector3(1.1117312, 1, 1.1117312), Vector3(1.0518441, 1, 1.0518441), Vector3(1.2145494, 1, 1.2145494), Vector3(0.9837773, 1, 0.9837773), Vector3(1.0138375, 1, 1.0138375), Vector3(1.1298108, 1, 1.1298108), Vector3(1.0482128, 1, 1.0482128), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 1)])
 
 [node name="ZonaB" type="Node3D" parent="DecorManual"]
+metadata/ref_teren_raycast = true
 metadata/fractii = "REAL 0.064-0.1535 (coronament semi 6.0 la 0.078-0.123, rapa 2 = hau 0.074-0.128, lac rapa 0 0.080-0.135, colt -45 grade 0.1515); x 20..195, z 200..257; STANGA lacul Vidraru apa la +7.5 (4.5 m sub drum, de la 2 m de margine), DREAPTA hau -33..-40 m (rau la -24), Prometeu 13 m dreapta (0.129), Portal_Stanca 0.1384 (masurat cu tools/sv_tf_fractii.gd)"
+
+[node name="B_Pinten01" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(1.3164, 0.0000, -0.7191, 0.0000, 1.5000, 0.0000, 0.7191, 0.0000, 1.3164, 172.944, 11.442, 258.626)
+
+[node name="B_Pinten02" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(-0.6323, 0.0000, 0.9001, 0.0000, 1.1000, 0.0000, -0.9001, 0.0000, -0.6323, 175.477, 11.705, 251.441)
+
+[node name="B_Pinten03" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.1700, 0.0000, -0.9854, 0.0000, 1.0000, 0.0000, 0.9854, 0.0000, 0.1700, 171.585, 11.585, 250.246)
+
+[node name="B_Pinten04" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(-0.8394, 0.0000, 0.1341, 0.0000, 0.8500, 0.0000, -0.1341, 0.0000, -0.8394, 162.676, 4.994, 258.048)
+
+[node name="B_Pinten05" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.9307, 0.0000, 0.7575, 0.0000, 1.2000, 0.0000, -0.7575, 0.0000, 0.9307, 183.947, 10.809, 256.919)
+
+[node name="B_Pinten06" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.5897, 0.0000, -1.1586, 0.0000, 1.3000, 0.0000, 1.1586, 0.0000, 0.5897, 169.658, 9.379, 255.894)
+
+[node name="B_Stanca01" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.2038, 0.0722, -0.8503, 0.2647, 0.8365, 0.0076, 0.8113, -0.2548, -0.2161, 57.435, -10.379, 273.987)
+metadata/coliziune = "none"
+
+[node name="B_Stanca02" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(2.6552, -0.7825, -1.3011, 0.8749, 2.9307, 0.0228, 1.2408, -0.3920, 2.7680, 58.380, -11.833, 277.788)
+metadata/coliziune = "none"
+
+[node name="B_Stanca03" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.1288, 0.0306, 0.9527, 0.2767, 0.9211, 0.0078, -0.9121, 0.2751, -0.1321, 59.673, -12.033, 274.897)
+metadata/coliziune = "none"
+
+[node name="B_Stanca04" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.5728, 0.3326, 3.3926, 0.9020, 3.3028, -0.4761, -3.2874, 0.9642, 0.4605, 62.397, -13.826, 285.251)
+metadata/coliziune = "none"
+
+[node name="B_Stanca05" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-2.2876, -0.8174, -1.4611, 0.1423, 2.3701, -1.5487, 1.6681, -1.3231, -1.8716, 61.851, -4.956, 291.749)
+metadata/coliziune = "none"
+
+[node name="B_Stanca06" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.6493, -0.0002, -0.7691, 0.3059, 0.9235, -0.2584, 0.7057, -0.4004, -0.5956, 59.352, -8.834, 289.019)
+metadata/coliziune = "none"
+
+[node name="B_Stanca07" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-1.4350, 0.6574, 1.2254, -0.1599, 1.6712, -1.0838, -1.3814, -0.8764, -1.1475, 63.532, 23.149, 298.511)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis101" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.9354, 0.6463, 0.7374, 0.6036, 1.1827, -0.2710, -0.7728, 0.1414, -1.1042, 65.831, -17.384, 279.363)
+metadata/coliziune = "none"
+
+[node name="B_Stanca08" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-1.8735, 0.6617, 0.4366, 0.6201, 1.9212, -0.2507, -0.4939, -0.0978, -1.9710, 67.073, -16.716, 283.850)
+metadata/coliziune = "none"
+
+[node name="B_Stanca09" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(1.8868, -1.4703, -1.4830, 0.4775, 2.2495, -1.6226, 2.0330, 0.8362, 1.7575, 66.077, -10.649, 291.388)
+metadata/coliziune = "none"
+
+[node name="B_Stanca10" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.8094, -0.3989, -0.7680, 0.1450, 0.9742, -0.6588, 0.8532, -0.5439, -0.6166, 65.191, -3.305, 292.768)
+metadata/coliziune = "none"
+
+[node name="B_Stanca11" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-2.2561, 1.2475, 2.0229, 0.0195, 2.7988, -1.7042, -2.3765, -1.1613, -1.9343, 70.917, 22.336, 297.737)
+metadata/coliziune = "none"
+
+[node name="B_Stanca12" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.0395, -0.5146, -0.9247, -0.0220, 0.9255, -0.5142, 1.0580, -0.0000, -0.0452, 70.382, 26.052, 299.024)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis102" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.0985, -0.0885, 1.6559, 0.9754, 1.3446, 0.0138, -1.3410, 0.9715, 0.1317, 67.435, -19.321, 270.118)
+metadata/coliziune = "none"
+
+[node name="B_Stanca13" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.6305, -0.1431, -2.4074, 0.5569, 2.4124, -0.2892, 2.3465, -0.6109, -0.5782, 69.559, -20.570, 278.010)
+metadata/coliziune = "none"
+
+[node name="B_Stanca14" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.2637, 0.2318, 0.9129, 0.2909, 0.9217, -0.1500, -0.8958, 0.2311, -0.3175, 71.835, -21.358, 279.776)
+metadata/coliziune = "none"
+
+[node name="B_Stanca15" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-1.6947, 0.5037, 2.3978, 0.8641, 2.8510, 0.0118, -2.2927, 0.7022, -1.7679, 72.145, -21.132, 287.621)
+metadata/coliziune = "none"
+
+[node name="B_Stanca16" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(2.3942, 0.5298, 1.1981, 0.2683, 2.2448, -1.5287, -1.2823, 1.4589, 1.9172, 73.151, -15.412, 291.357)
+metadata/coliziune = "none"
+
+[node name="B_Stanca17" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-2.4164, -0.6394, -1.8306, 0.0181, 2.9173, -1.0429, 1.9390, -0.8241, -2.2716, 73.755, 24.913, 298.625)
+metadata/coliziune = "none"
+
+[node name="B_Stanca18" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.5533, 0.1890, 0.6918, 0.0171, 0.8770, -0.2259, -0.7170, -0.1249, -0.5393, 72.975, 26.618, 300.121)
+metadata/coliziune = "none"
+
+[node name="B_Stanca19" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-1.5682, 0.3801, -2.8743, 0.7632, 3.2067, 0.0077, 2.7971, -0.6619, -1.6136, 71.969, -24.276, 267.273)
+metadata/coliziune = "none"
+
+[node name="B_Stanca20" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-1.9809, 0.1985, -2.5637, 1.1239, 2.9776, -0.6378, 2.3128, -1.2769, -1.8859, 73.968, -23.319, 280.772)
+metadata/coliziune = "none"
+
+[node name="B_Stanca21" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.8833, 0.2718, 0.0652, 0.2589, 0.8770, -0.1486, -0.1053, -0.1235, -0.9121, 74.748, -23.170, 280.732)
+metadata/coliziune = "none"
+
+[node name="B_Stanca22" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.5963, -0.2876, -1.0510, -0.4022, 1.0554, -0.5170, 1.0127, 0.5885, 0.4136, 80.030, -26.010, 287.279)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis103" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.9621, 1.0262, -0.0449, -0.6678, 0.5781, -1.0957, -0.7805, 0.7703, 0.8821, 78.501, -9.651, 291.798)
+metadata/coliziune = "none"
+
+[node name="B_Stanca23" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-2.8130, 0.1998, -0.7679, 0.3230, 2.8719, -0.4360, 0.7247, -0.5045, -2.7861, 80.739, 24.291, 300.203)
+metadata/coliziune = "none"
+
+[node name="B_Stanca24" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-1.0593, 0.1932, 0.0332, 0.1809, 1.0336, -0.2441, -0.0756, -0.2345, -1.0487, 81.161, 24.807, 300.244)
+metadata/coliziune = "none"
+
+[node name="B_Stanca25" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(1.9712, -0.9022, -1.1965, 0.7285, 2.3047, -0.5377, 1.3096, 0.0760, 2.1001, 84.687, 24.840, 304.765)
+metadata/coliziune = "none"
+
+[node name="B_Stanca26" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.7250, 0.1916, 0.0560, 0.1787, 0.7169, -0.1396, -0.0889, -0.1213, -0.7368, 85.864, 23.602, 302.601)
+metadata/coliziune = "none"
+
+[node name="B_Stanca27" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(2.2133, -0.1574, -0.3556, 0.1067, 2.2218, -0.3195, 0.3740, 0.2978, 2.1958, 80.405, -26.957, 278.409)
+metadata/coliziune = "none"
+
+[node name="B_Stanca28" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.7061, 0.0592, -0.0313, 0.0642, 0.6926, -0.1384, 0.0190, -0.1406, -0.6949, 78.522, -25.934, 279.504)
+metadata/coliziune = "none"
+
+[node name="B_Stanca29" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.5498, -0.9544, -1.9926, -0.9045, 1.7762, -1.1003, 2.0157, 1.0574, 0.0498, 82.275, -27.429, 285.427)
+metadata/coliziune = "none"
+
+[node name="B_Stanca30" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.2568, -0.0524, -0.8975, 0.1941, 0.9147, 0.0022, 0.8779, -0.1869, 0.2621, 81.282, -26.427, 282.874)
+metadata/coliziune = "none"
+
+[node name="B_Stanca31" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(-0.1375, -1.4456, -2.5998, -0.8932, 2.5026, -1.3442, 2.8374, 0.7178, -0.5492, 85.286, 15.534, 290.715)
+metadata/coliziune = "none"
+
+[node name="B_Stanca32" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.9624, -0.3359, -0.4602, 0.1388, 1.0144, -0.4501, 0.5526, 0.3302, 0.9146, 87.318, 16.036, 291.623)
+metadata/coliziune = "none"
+
+[node name="B_Stanca33" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(-1.8318, 0.5250, 1.1644, 0.2975, 2.1552, -0.5036, -1.2421, -0.2580, -1.8378, 85.188, 20.003, 296.361)
+metadata/coliziune = "none"
+
+[node name="B_Stanca34" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.7571, 0.2261, 0.5021, 0.0390, 0.8735, -0.3346, -0.5493, -0.2497, -0.7158, 82.766, 20.252, 294.635)
+metadata/coliziune = "none"
+
+[node name="B_Stanca35" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.5886, -0.2278, -2.2195, 0.5500, 2.2098, -0.3727, 2.1624, -0.6240, -0.5094, 87.000, 22.588, 303.162)
+metadata/coliziune = "none"
+
+[node name="B_Stanca36" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.6540, -0.3224, -0.7672, 0.2835, 1.0038, -0.1802, 0.7824, -0.0941, 0.7066, 87.832, 22.277, 302.730)
+metadata/coliziune = "none"
+
+[node name="B_Stanca37" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(2.3596, -0.7918, -1.1452, 0.8394, 2.6070, -0.0730, 1.1108, -0.2880, 2.4879, 89.378, 22.447, 312.090)
+metadata/coliziune = "none"
+
+[node name="B_Stanca38" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.8560, -0.2282, -0.2960, 0.2296, 0.9047, -0.0334, 0.2949, -0.0421, 0.8852, 92.191, 20.440, 309.407)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis104" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.1142, -0.0865, -1.7984, 0.0000, 1.8020, -0.0867, 1.8005, 0.0055, 0.1140, 84.949, -28.600, 273.827)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis105" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.4332, 0.0000, 1.2162, 0.0000, 1.2910, 0.0000, -1.2162, 0.0000, 0.4332, 88.471, -28.600, 280.009)
+metadata/coliziune = "none"
+
+[node name="B_Stanca39" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.6607, 1.4696, 2.8623, 0.0845, 2.9289, -1.4843, -3.2164, -0.2249, -0.6270, 88.814, 0.360, 287.649)
+metadata/coliziune = "none"
+
+[node name="B_Stanca40" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.7643, -0.1407, -0.2630, 0.0372, 0.6729, -0.4680, 0.2960, -0.4479, -0.6204, 88.153, 7.631, 288.849)
+metadata/coliziune = "none"
+
+[node name="B_Stanca41" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(0.9195, 0.1091, 2.0182, 0.5244, 2.1285, -0.3540, -1.9520, 0.6232, 0.8557, 90.774, 15.827, 294.659)
+metadata/coliziune = "none"
+
+[node name="B_Stanca42" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-1.6109, 0.4455, 2.0192, 0.2829, 2.5831, -0.3442, -2.0483, 0.0064, -1.6356, 92.988, 17.523, 302.578)
+metadata/coliziune = "none"
+
+[node name="B_Stanca43" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(1.0234, -0.3155, 0.0157, 0.3147, 1.0136, -0.1439, 0.0275, 0.1421, 1.0612, 90.599, 20.712, 304.260)
+metadata/coliziune = "none"
+
+[node name="B_Stanca44" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(-2.5910, 0.0090, -0.5257, 0.0281, 2.6420, -0.0936, 0.5250, -0.0973, -2.5893, 94.351, 18.935, 307.453)
+metadata/coliziune = "none"
+
+[node name="B_Stanca45" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(1.0552, 0.1684, -1.5255, -0.0399, 1.8537, 0.1771, 1.5343, -0.0676, 1.0538, 96.105, 19.639, 313.726)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis106" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(1.1684, 0.0000, -0.6286, 0.0000, 1.3268, 0.0000, 0.6286, 0.0000, 1.1684, 91.759, -28.600, 276.690)
+metadata/coliziune = "none"
+
+[node name="B_Stanca46" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.1080, -0.4449, -0.7888, 0.0144, 0.7934, -0.4495, 0.9055, -0.0657, -0.0869, 91.659, -20.958, 283.652)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis107" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.9961, 0.9445, 0.5864, 0.0222, 0.8041, -1.2574, -1.1115, -0.8303, -0.5507, 93.380, 11.387, 290.021)
+metadata/coliziune = "none"
+
+[node name="B_Stanca47" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.5669, 0.3969, 3.3002, -0.3893, 3.3168, -0.4658, -3.3011, -0.4593, -0.5118, 97.032, 16.570, 297.862)
+metadata/coliziune = "none"
+
+[node name="B_Stanca48" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.8702, -0.0036, -0.4182, -0.0724, 0.9496, -0.1589, 0.4119, 0.1746, 0.8556, 94.644, 17.584, 300.667)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis108" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.4144, 0.2322, 1.4341, -0.3220, 1.4395, -0.3261, -1.4166, -0.3951, -0.3454, 96.912, 19.203, 303.090)
+metadata/coliziune = "none"
+
+[node name="B_Stanca49" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.8070, 0.0219, -1.6364, -0.0881, 1.8225, -0.0190, 1.6342, 0.0874, 0.8070, 98.249, 20.144, 308.039)
+metadata/coliziune = "none"
+
+[node name="B_Stanca50" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-2.5718, 0.0000, 2.1234, 0.0000, 3.3351, 0.0000, -2.1234, 0.0000, -2.5718, 94.320, -29.301, 274.822)
+metadata/coliziune = "none"
+
+[node name="B_Stanca51" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.3471, -1.3421, -1.5186, 0.0000, 1.5407, -1.3617, 2.0267, -0.2298, -0.2601, 96.132, -27.963, 282.476)
+metadata/coliziune = "none"
+
+[node name="B_Stanca52" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.3331, 0.4624, 0.7188, 0.0000, 0.7714, -0.4963, -0.8547, 0.1802, 0.2802, 97.940, -25.933, 282.788)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis109" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.7668, -0.9616, -0.5153, -0.1149, 0.6975, -1.1307, 1.0849, -0.6058, -0.4839, 97.907, 12.586, 289.974)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis110" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.9334, 0.5719, 0.7523, -0.3505, 1.1915, -0.4709, -0.8776, 0.1324, 0.9882, 97.369, 16.450, 296.005)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis111" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.6704, -0.2751, -0.8430, -0.2464, 1.0730, -0.1542, 0.8518, 0.0939, -0.7081, 99.600, 20.405, 305.511)
+metadata/coliziune = "none"
+
+[node name="B_Stanca53" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(1.1297, 0.4595, -0.0398, -0.4573, 1.1296, 0.0613, 0.0600, -0.0418, 1.2180, 102.551, 21.707, 309.585)
+metadata/coliziune = "none"
+
+[node name="B_Stanca54" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-2.5128, 0.0000, -0.1298, 0.0000, 2.5162, 0.0000, 0.1298, 0.0000, -2.5128, 98.105, -29.055, 275.184)
+metadata/coliziune = "none"
+
+[node name="B_Stanca55" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.6526, 0.0000, -0.4669, 0.0000, 0.8025, 0.0000, 0.4669, 0.0000, -0.6526, 100.939, -28.500, 274.597)
+metadata/coliziune = "none"
+
+[node name="B_Stanca56" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-2.6133, -0.3699, -0.6035, -0.0308, 2.3657, -1.3166, 0.7072, -1.2639, -2.2876, 100.193, -22.714, 283.517)
+metadata/coliziune = "none"
+
+[node name="B_Stanca57" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.0940, -0.4779, -0.6648, -0.0179, 0.6678, -0.4826, 0.8186, 0.0695, 0.0658, 100.784, -13.084, 285.119)
+metadata/coliziune = "none"
+
+[node name="B_Stanca58" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-1.1668, -0.7286, -1.4958, -0.0454, 1.8403, -0.8609, 1.6632, -0.4608, -1.0729, 101.390, 6.063, 288.644)
+metadata/coliziune = "none"
+
+[node name="B_Stanca59" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-2.1131, -1.0199, -2.5476, -0.3350, 3.2872, -1.0381, 2.7237, -0.3869, -2.1042, 101.612, 14.996, 291.212)
+metadata/coliziune = "none"
+
+[node name="B_Stanca60" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(0.9004, 0.3111, 1.9732, -0.4645, 2.1376, -0.1250, -1.9428, -0.3669, 0.9444, 103.350, 21.129, 300.633)
+metadata/coliziune = "none"
+
+[node name="B_Stanca61" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-1.7446, -0.5132, 2.5907, -0.9304, 3.0253, -0.0273, -2.4717, -0.7766, -1.8183, 105.801, 24.525, 306.721)
+metadata/coliziune = "none"
+
+[node name="B_Stanca62" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.6337, 0.0000, -1.0822, 0.0000, 1.2541, 0.0000, 1.0822, 0.0000, -0.6337, 98.007, -28.676, 266.620)
+metadata/coliziune = "none"
+
+[node name="B_Stanca63" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-2.4156, 0.0000, 0.9517, 0.0000, 2.5963, 0.0000, -0.9517, 0.0000, -2.4156, 98.908, -29.079, 273.951)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis112" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.5980, -0.9006, -0.7251, 0.0000, 0.8164, -1.0139, 1.1562, -0.4658, -0.3750, 99.845, -28.600, 281.862)
+metadata/coliziune = "none"
+
+[node name="B_Stanca64" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(2.5681, 0.6625, 0.7673, -0.0689, 2.1990, -1.6681, -1.0114, 1.5324, 2.0619, 100.269, -14.427, 285.021)
+metadata/coliziune = "none"
+
+[node name="B_Stanca65" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.1977, 0.4536, 0.6340, -0.0153, 0.6517, -0.4710, -0.7794, -0.1278, -0.1516, 101.097, -9.249, 285.797)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis113" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.7544, 1.1927, 0.7576, -0.1357, 0.7937, -1.3846, -1.4064, -0.7163, -0.2728, 100.826, 11.241, 289.553)
+metadata/coliziune = "none"
+
+[node name="B_Stanca66" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-1.5083, 0.0091, 2.5666, -0.6091, 2.8907, -0.3683, -2.4933, -0.7117, -1.4627, 101.839, 18.756, 297.792)
+metadata/coliziune = "none"
+
+[node name="B_Stanca67" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(2.7564, 1.0287, 0.9389, -0.9751, 2.9120, -0.3279, -0.9945, -0.0038, 2.9238, 102.160, 19.756, 300.398)
+metadata/coliziune = "none"
+
+[node name="B_Stanca68" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.4668, 0.2455, 0.8751, -0.3279, 0.9630, -0.0952, -0.8477, -0.2373, 0.5187, 103.831, 22.550, 302.905)
+metadata/coliziune = "none"
+
+[node name="B_Stanca69" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.3750, -0.0428, -2.1922, -0.6951, 2.1117, 0.0776, 2.0795, 0.6981, -0.3693, 103.248, 22.106, 309.247)
+metadata/coliziune = "none"
+
+[node name="B_Stanca70" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.1352, 0.0000, -2.0130, 0.0000, 2.0176, 0.0000, 2.0130, 0.0000, -0.1352, 99.976, -28.905, 275.538)
+metadata/coliziune = "none"
+
+[node name="B_Stanca71" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.1191, 0.0000, -1.0393, 0.0000, 1.0461, 0.0000, 1.0393, 0.0000, 0.1191, 99.468, -28.500, 277.396)
+metadata/coliziune = "none"
+
+[node name="B_Stanca72" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-1.2081, -0.6383, -1.7046, -0.0306, 2.0527, -0.7470, 1.8199, -0.3892, -1.1441, 100.060, -14.513, 284.986)
+metadata/coliziune = "none"
+
+[node name="B_Stanca73" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.4286, -0.5215, -0.6979, -0.0328, 0.7869, -0.5679, 0.8707, -0.2271, -0.3650, 98.838, -6.041, 286.516)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis114" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.7342, 1.1682, 0.7011, -0.0892, 0.7535, -1.3489, -1.3595, -0.6803, -0.2901, 100.099, 10.012, 289.374)
+metadata/coliziune = "none"
+
+[node name="B_Stanca74" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-2.0794, -0.4475, -0.8691, -0.3353, 2.2454, -0.3539, 0.9183, -0.1934, -2.0973, 97.800, 17.880, 299.557)
+metadata/coliziune = "none"
+
+[node name="B_Stanca75" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(-0.2006, 0.0547, 1.2380, -0.2125, 1.2340, -0.0889, -1.2208, -0.2238, -0.1879, 101.305, 20.399, 303.966)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis115" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.9054, 0.1012, -0.8055, -0.1066, 1.2109, 0.0324, 0.8048, 0.0465, 0.9105, 97.195, 20.273, 310.580)
+metadata/coliziune = "none"
+
+[node name="B_Stanca76" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-3.3822, 0.0000, -0.0389, 0.0000, 3.3824, 0.0000, 0.0389, 0.0000, -3.3822, 101.572, -29.315, 261.220)
+metadata/coliziune = "none"
+
+[node name="B_Stanca77" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.1731, 0.0000, 0.9697, 0.0000, 0.9850, 0.0000, -0.9697, 0.0000, 0.1731, 104.271, -28.499, 261.379)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis116" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-1.0667, 0.0000, 1.3952, 0.0000, 1.7562, 0.0000, -1.3952, 0.0000, -1.0667, 100.408, -28.600, 273.148)
+metadata/coliziune = "none"
+
+[node name="B_Stanca78" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-1.6966, 0.0000, -0.7072, 0.0000, 1.8381, 0.0000, 0.7072, 0.0000, -1.6966, 103.158, -28.851, 278.367)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis117" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.2909, -1.0201, -0.5060, -0.0116, 0.5195, -1.0541, 1.1386, 0.2659, 0.1185, 102.515, -7.555, 286.114)
+metadata/coliziune = "none"
+
+[node name="B_Stanca79" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-1.3738, -0.6568, -1.7652, -0.5091, 2.2331, -0.4347, 1.8133, 0.1293, -1.4594, 101.741, 17.612, 295.425)
+metadata/coliziune = "none"
+
+[node name="B_Stanca80" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.9392, -0.1571, 0.2926, -0.2197, 0.9521, -0.1940, -0.2491, -0.2475, -0.9323, 101.513, 16.873, 293.359)
+metadata/coliziune = "none"
+
+[node name="B_Stanca81" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.0682, -0.1736, -2.0046, -0.1772, 1.9975, -0.1790, 2.0043, 0.1825, 0.0524, 97.735, 18.322, 300.537)
+metadata/coliziune = "none"
+
+[node name="B_Stanca82" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.0414, 0.1230, 0.7192, -0.1111, 0.7131, -0.1155, -0.7212, -0.1028, 0.0590, 97.980, 18.518, 299.760)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis118" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(1.3640, 0.1821, 0.2428, -0.1810, 1.3854, -0.0222, -0.2437, -0.0097, 1.3759, 97.258, 20.285, 309.424)
+metadata/coliziune = "none"
+
+[node name="B_Stanca83" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.4512, 0.0000, 0.8617, 0.0000, 0.9727, 0.0000, -0.8617, 0.0000, -0.4512, 106.643, -28.590, 262.430)
+metadata/coliziune = "none"
+
+[node name="B_Stanca84" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-1.7542, -0.3712, -2.3783, -0.6167, 2.9139, 0.0000, 2.3268, 0.4924, -1.7930, 109.988, -28.609, 276.488)
+metadata/coliziune = "none"
+
+[node name="B_Stanca85" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.8321, 0.2108, -0.5483, -0.2502, 0.9874, 0.0000, 0.5315, 0.1347, 0.8584, 110.666, -27.441, 276.388)
+metadata/coliziune = "none"
+
+[node name="B_Stanca86" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.6902, 0.9849, 1.3722, -0.1263, 1.4481, -1.1029, -1.6844, -0.5122, -0.4796, 109.623, -13.085, 284.763)
+metadata/coliziune = "none"
+
+[node name="B_Stanca87" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.0440, 1.5182, 3.2072, -0.6043, 3.1574, -1.5029, -3.4966, -0.5648, 0.2194, 107.515, 19.375, 291.292)
+metadata/coliziune = "none"
+
+[node name="B_Stanca88" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(-2.3250, -0.3468, 0.4340, -0.4051, 2.3363, -0.3034, -0.3802, -0.3686, -2.3311, 109.058, 25.143, 297.565)
+metadata/coliziune = "none"
+
+[node name="B_Stanca89" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.2462, -0.1270, -0.9748, -0.2825, 0.9534, -0.1956, 0.9416, 0.3192, 0.1962, 107.950, 24.404, 297.142)
+metadata/coliziune = "none"
+
+[node name="B_Stanca90" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-1.7358, -0.7491, -0.0822, -0.7528, 1.7330, 0.1034, 0.0344, 0.1275, -1.8877, 103.788, 22.440, 311.756)
+metadata/coliziune = "none"
+
+[node name="B_Stanca91" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.6647, -0.1714, -2.4375, -0.6317, 2.4523, -0.0002, 2.3605, 0.6080, -0.6864, 114.831, -25.085, 261.522)
+metadata/coliziune = "none"
+
+[node name="B_Stanca92" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(1.9660, 0.4669, 2.1600, -0.6835, 2.8778, 0.0001, -2.1015, -0.4992, 2.0207, 114.089, -25.731, 278.312)
+metadata/coliziune = "none"
+
+[node name="B_Stanca93" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.6965, -0.0932, -0.6547, -0.2015, 0.8757, -0.3391, 0.6299, 0.3833, 0.6155, 114.912, -24.468, 281.046)
+metadata/coliziune = "none"
+
+[node name="B_Stanca94" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.8477, 0.3246, 0.8934, -0.0610, 1.1760, -0.4852, -0.9486, -0.3658, -0.7671, 111.211, -17.463, 283.857)
+metadata/coliziune = "none"
+
+[node name="B_Stanca95" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.1950, -0.9714, -1.8234, -0.0916, 1.8337, -0.9671, 2.0639, -0.0104, -0.2152, 113.610, 16.142, 289.145)
+metadata/coliziune = "none"
+
+[node name="B_Stanca96" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.7535, -0.2414, -0.7377, -0.1339, 0.9722, -0.4549, 0.7645, 0.4082, 0.6473, 111.540, 22.848, 291.553)
+metadata/coliziune = "none"
+
+[node name="B_Stanca97" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-3.0509, -0.8827, 0.4214, -0.8905, 3.0776, -0.0006, -0.4046, -0.1177, -3.1761, 118.883, -22.267, 264.336)
+metadata/coliziune = "none"
+
+[node name="B_Stanca98" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.8357, -0.2424, -0.0294, -0.2425, 0.8362, -0.0001, 0.0283, 0.0081, -0.8701, 116.062, -23.662, 265.787)
+metadata/coliziune = "none"
+
+[node name="B_Stanca99" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(-0.8056, -0.4066, -2.2333, -0.7126, 2.2953, -0.1609, 2.1553, 0.6069, -0.8880, 119.867, -21.240, 271.052)
+metadata/coliziune = "none"
+
+[node name="B_Stanca100" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.6275, -0.3184, -0.4098, -0.3081, 0.7460, -0.1078, 0.4176, 0.0720, -0.6953, 120.018, -20.140, 272.149)
+metadata/coliziune = "none"
+
+[node name="B_Stanca101" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.3589, 0.1236, -0.8787, -0.3116, 0.9050, 0.0000, 0.8308, 0.2861, 0.3796, 118.216, -21.394, 279.296)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis119" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(1.4913, -0.1869, -0.3799, -0.2667, 0.6660, -1.3742, 0.3289, 1.3873, 0.6085, 117.964, -5.813, 284.954)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis120" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.3565, -0.2128, 1.3702, -0.7358, 1.2281, -0.0007, -1.1752, -0.7044, -0.4152, 121.300, -19.672, 264.794)
+metadata/coliziune = "none"
+
+[node name="B_Stanca102" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.9534, -0.2885, 2.0123, -0.9044, 2.0507, -0.1345, -1.8206, -0.8677, -0.9870, 121.310, -17.348, 275.036)
+metadata/coliziune = "none"
+
+[node name="B_Stanca103" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-0.0484, -0.0661, -0.8584, -0.3604, 0.7824, -0.0399, 0.7819, 0.3565, -0.0715, 121.614, -16.438, 275.380)
+metadata/coliziune = "none"
+
+[node name="B_Stanca104" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(-0.8118, -1.8777, -1.8988, -0.8097, 2.0642, -1.6951, 2.5447, 0.0578, -1.1451, 119.693, -19.813, 282.294)
+metadata/coliziune = "none"
+
+[node name="B_Stanca105" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_c")]
+transform = Transform3D(0.7916, 0.2040, 0.2724, -0.0542, 0.7564, -0.4091, -0.3360, 0.3587, 0.7078, 119.147, 15.472, 288.247)
+metadata/coliziune = "none"
+
+[node name="B_Stanca106" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-0.0042, -0.0002, -1.0155, -0.0286, 1.0151, -0.0000, 1.0151, 0.0286, -0.0042, 131.255, -11.718, 275.371)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis121" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.1377, -0.9049, -0.8874, -0.3924, 0.8183, -0.8954, 1.2052, 0.3698, -0.1902, 135.225, -9.892, 281.961)
+metadata/coliziune = "none"
+
+[node name="B_Stanca107" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-1.7759, 0.6704, 0.9851, -0.2027, 1.5724, -1.4354, -1.1743, -1.2853, -1.2421, 135.538, 6.164, 286.110)
+metadata/coliziune = "none"
+
+[node name="B_Stanca108" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(2.9491, -0.9144, -1.4610, 0.8458, 3.2907, -0.3522, 1.5018, -0.0577, 3.0675, 136.601, 24.131, 300.214)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis122" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.1387, 0.0800, -1.6065, -0.8122, 1.3953, -0.0006, 1.3884, 0.8082, 0.1601, 136.500, -8.907, 265.143)
+metadata/coliziune = "none"
+
+[node name="B_Stanca109" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(0.1560, 0.0319, 0.8470, -0.1724, 0.8444, -0.0000, -0.8299, -0.1694, 0.1592, 137.081, -8.414, 270.629)
+metadata/coliziune = "none"
+
+[node name="B_Stanca110" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-1.8150, -0.3069, 0.3656, -0.3129, 1.8505, -0.0000, -0.3605, -0.0610, -1.8408, 134.771, -10.506, 275.936)
+metadata/coliziune = "none"
+
+[node name="B_Stanca111" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(0.6397, -0.9677, -3.0076, -0.2348, 3.0456, -1.0299, 3.1507, 0.4234, 0.5339, 135.341, -5.354, 283.501)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis123" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-1.5802, 0.4036, -0.2082, 0.4270, 1.0637, -1.1787, -0.1547, -1.1869, -1.1272, 139.143, 17.326, 290.107)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis124" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(0.0308, -0.4034, -0.9630, 0.4736, 0.8640, -0.3468, 0.9305, -0.4265, 0.2084, 139.735, 20.330, 295.691)
+metadata/coliziune = "none"
+
+[node name="B_Stanca112" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-2.0613, 0.5683, 1.0369, 0.5754, 2.3026, -0.1180, -1.0329, 0.1487, -2.1349, 143.695, 19.140, 303.530)
+metadata/coliziune = "none"
+
+[node name="B_Stanca113" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(3.3950, -0.9742, -0.2383, 0.9799, 3.4013, 0.0554, 0.2137, -0.1191, 3.5316, 144.195, 18.543, 307.464)
+metadata/coliziune = "none"
+
+[node name="B_Stanca114" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(1.4883, 0.3390, -2.2422, -0.6017, 2.6449, 0.0006, 2.1864, 0.4971, 1.5264, 148.565, -1.421, 267.339)
+metadata/coliziune = "none"
+
+[node name="B_Stanca115" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(-2.6985, -0.2434, -2.2096, -0.4414, 3.4647, 0.1573, 2.1787, 0.4004, -2.7049, 150.091, -1.038, 272.136)
+metadata/coliziune = "none"
+
+[node name="B_Stanca116" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(1.0748, 0.1195, -0.2764, -0.0999, 1.1080, 0.0904, 0.2840, -0.0623, 1.0776, 152.996, 0.941, 270.006)
+metadata/coliziune = "none"
+
+[node name="B_Stanca117" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(-1.1839, 0.7634, 1.2036, 0.0178, 1.5724, -0.9798, -1.4252, -0.6145, -1.0121, 145.561, -1.780, 283.740)
+metadata/coliziune = "none"
+
+[node name="B_Stanca118" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_a")]
+transform = Transform3D(2.9792, -0.5278, -1.6501, -0.0498, 3.2551, -1.1310, 1.7318, 1.0015, 2.8062, 154.877, 6.275, 287.176)
+metadata/coliziune = "none"
+
+[node name="B_Stanca119" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(1.5533, -0.0520, 1.8180, 0.1433, 2.3868, -0.0541, -1.8130, 0.1441, 1.5532, 156.466, 11.298, 292.168)
+metadata/coliziune = "none"
+
+[node name="B_Stanca120" parent="DecorManual/ZonaB" instance=ExtResource("b_outcrop_b")]
+transform = Transform3D(1.5138, 0.0000, -3.0785, 0.0000, 3.4306, 0.0000, 3.0785, 0.0000, 1.5138, 158.587, 11.114, 298.834)
+metadata/coliziune = "none"
+
+[node name="B_Grohotis01" parent="DecorManual/ZonaB" instance=ExtResource("b_scree")]
+transform = Transform3D(-0.8427, 0.0000, 0.5383, 0.0000, 1.0000, 0.0000, -0.5383, 0.0000, -0.8427, 162.750, 10.174, 204.190)
+metadata/coliziune = "none"
+
+[node name="B_Fag01" parent="DecorManual/ZonaB" instance=ExtResource("b_beech_a")]
+transform = Transform3D(0.4158, 0.0000, 0.7345, 0.0000, 0.8440, 0.0000, -0.7345, 0.0000, 0.4158, 213.251, 11.498, 221.912)
+
+[node name="B_Fag02" parent="DecorManual/ZonaB" instance=ExtResource("b_beech_b")]
+transform = Transform3D(-0.2488, 0.0000, -0.7739, 0.0000, 0.8129, 0.0000, 0.7739, 0.0000, -0.2488, 216.784, 11.189, 221.033)
+
+[node name="B_Fag03" parent="DecorManual/ZonaB" instance=ExtResource("b_beech_a")]
+transform = Transform3D(-0.9941, 0.0000, -0.3292, 0.0000, 1.0472, 0.0000, 0.3292, 0.0000, -0.9941, 218.729, 10.472, 222.406)
+
+[node name="B_Fag04" parent="DecorManual/ZonaB" instance=ExtResource("b_beech_a")]
+transform = Transform3D(-0.7353, 0.0000, 0.5178, 0.0000, 0.8993, 0.0000, -0.5178, 0.0000, -0.7353, 209.686, 12.779, 212.933)
+
+[node name="B_Fag05" parent="DecorManual/ZonaB" instance=ExtResource("b_beech_a")]
+transform = Transform3D(-1.0720, 0.0000, 0.2144, 0.0000, 1.0932, 0.0000, -0.2144, 0.0000, -1.0720, 215.444, 12.589, 213.054)
+
+[node name="B_Fag06" parent="DecorManual/ZonaB" instance=ExtResource("b_beech_a")]
+transform = Transform3D(0.6582, 0.0000, 0.9134, 0.0000, 1.1258, 0.0000, -0.9134, 0.0000, 0.6582, 215.409, 12.592, 213.033)
+
+[node name="B_JnAce_b_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_jneapan_b")
+mesh_name = "Jneapan_Needles"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(22.205898, 8.868182, 269.02798, 24.871239, 9.090426, 269.2174, 29.603474, 9.511859, 268.0514, 30.057608, 9.510501, 269.49374, 16.522333, 8.824328, 244.98645, 19.411798, 9.130862, 240.29573, 18.59859, 9.052707, 241.19385, 23.35659, 9.454028, 242.59843, 22.847868, 9.446795, 237.6868, 28.370975, 9.895236, 239.84747, 29.289257, 9.974261, 240.46368, 27.37642, 9.808063, 240.17194, 28.657928, 9.916446, 242.26697, 29.488285, 9.990436, 241.21065, 28.795746, 9.928836, 242.0265, 27.691916, 9.835361, 240.29128, 30.621, 10.082828, 242.35957, 31.621758, 10.164691, 241.83868, 30.483768, 10.077136, 238.29204, 29.552671, 9.997912, 240.02675, 34.77553, 10.4285, 240.83553, 33.57046, 10.330661, 241.54414, 38.05654, 10.667483, 236.03218, 40.618725, 10.882266, 239.65047, 39.39925, 10.803958, 240.55089)
+yaws = PackedFloat32Array(-0.33036566, 2.5340407, -2.0091467, -0.7460172, 2.9042103, 3.1295364, 0.49069834, 3.0337107, 0.7367618, -0.3081746, 1.2327425, 1.2673652, -0.20249605, -0.9439447, -2.172723, 1.275707, -0.6598706, -1.7646847, -2.9774094, 2.506334, 1.0649045, 1.5246184, -0.70154166, -2.9992466, 0.38711667)
+scale3_list = Array[Vector3]([Vector3(0.97587025, 1.1138573, 0.97587025), Vector3(1.1872649, 1.3612689, 1.1872649), Vector3(1.2324907, 1.2561189, 1.2324907), Vector3(1.119109, 1.250266, 1.119109), Vector3(1.0861814, 1.191633, 1.0861814), Vector3(1.1080276, 1.0595415, 1.1080276), Vector3(0.83122575, 0.7503025, 0.83122575), Vector3(0.88325906, 0.9102565, 0.88325906), Vector3(0.8495102, 0.95995736, 0.8495102), Vector3(1.0185174, 1.052791, 1.0185174), Vector3(1.1397909, 1.15084, 1.1397909), Vector3(1.0312049, 1.0625908, 1.0312049), Vector3(0.96417063, 1.0961604, 0.96417063), Vector3(1.1566514, 1.2655753, 1.1566514), Vector3(0.94027036, 0.9319899, 0.94027036), Vector3(1.1531973, 1.1277132, 1.1531973), Vector3(1.1932299, 1.2037463, 1.1932299), Vector3(1.1583776, 1.2143757, 1.1583776), Vector3(1.0063779, 0.9749975, 1.0063779), Vector3(0.9149711, 0.84243315, 0.9149711), Vector3(1.2403514, 1.2934039, 1.2403514), Vector3(0.86690134, 0.81133723, 0.86690134), Vector3(1.042101, 1.1452152, 1.042101), Vector3(1.2629532, 1.2438228, 1.2629532), Vector3(1.1850696, 1.2029063, 1.1850696)])
+
+[node name="B_JnScoarta_b_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_jneapan_b")
+mesh_name = "Jneapan_Bark"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(22.205898, 8.868182, 269.02798, 24.871239, 9.090426, 269.2174, 29.603474, 9.511859, 268.0514, 30.057608, 9.510501, 269.49374, 16.522333, 8.824328, 244.98645, 19.411798, 9.130862, 240.29573, 18.59859, 9.052707, 241.19385, 23.35659, 9.454028, 242.59843, 22.847868, 9.446795, 237.6868, 28.370975, 9.895236, 239.84747, 29.289257, 9.974261, 240.46368, 27.37642, 9.808063, 240.17194, 28.657928, 9.916446, 242.26697, 29.488285, 9.990436, 241.21065, 28.795746, 9.928836, 242.0265, 27.691916, 9.835361, 240.29128, 30.621, 10.082828, 242.35957, 31.621758, 10.164691, 241.83868, 30.483768, 10.077136, 238.29204, 29.552671, 9.997912, 240.02675, 34.77553, 10.4285, 240.83553, 33.57046, 10.330661, 241.54414, 38.05654, 10.667483, 236.03218, 40.618725, 10.882266, 239.65047, 39.39925, 10.803958, 240.55089)
+yaws = PackedFloat32Array(-0.33036566, 2.5340407, -2.0091467, -0.7460172, 2.9042103, 3.1295364, 0.49069834, 3.0337107, 0.7367618, -0.3081746, 1.2327425, 1.2673652, -0.20249605, -0.9439447, -2.172723, 1.275707, -0.6598706, -1.7646847, -2.9774094, 2.506334, 1.0649045, 1.5246184, -0.70154166, -2.9992466, 0.38711667)
+scale3_list = Array[Vector3]([Vector3(0.97587025, 1.1138573, 0.97587025), Vector3(1.1872649, 1.3612689, 1.1872649), Vector3(1.2324907, 1.2561189, 1.2324907), Vector3(1.119109, 1.250266, 1.119109), Vector3(1.0861814, 1.191633, 1.0861814), Vector3(1.1080276, 1.0595415, 1.1080276), Vector3(0.83122575, 0.7503025, 0.83122575), Vector3(0.88325906, 0.9102565, 0.88325906), Vector3(0.8495102, 0.95995736, 0.8495102), Vector3(1.0185174, 1.052791, 1.0185174), Vector3(1.1397909, 1.15084, 1.1397909), Vector3(1.0312049, 1.0625908, 1.0312049), Vector3(0.96417063, 1.0961604, 0.96417063), Vector3(1.1566514, 1.2655753, 1.1566514), Vector3(0.94027036, 0.9319899, 0.94027036), Vector3(1.1531973, 1.1277132, 1.1531973), Vector3(1.1932299, 1.2037463, 1.1932299), Vector3(1.1583776, 1.2143757, 1.1583776), Vector3(1.0063779, 0.9749975, 1.0063779), Vector3(0.9149711, 0.84243315, 0.9149711), Vector3(1.2403514, 1.2934039, 1.2403514), Vector3(0.86690134, 0.81133723, 0.86690134), Vector3(1.042101, 1.1452152, 1.042101), Vector3(1.2629532, 1.2438228, 1.2629532), Vector3(1.1850696, 1.2029063, 1.1850696)])
+
+[node name="B_JnAce_a_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_jneapan_a")
+mesh_name = "Jneapan_Needles"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(22.246525, 8.841266, 270.4483, 22.897272, 8.912707, 269.6913, 21.69426, 8.802844, 270.07773, 24.97298, 9.0966215, 269.33154, 24.98793, 9.086459, 269.86642, 26.200142, 9.2394285, 267.52484, 27.775688, 9.319629, 269.80148, 27.77859, 9.319522, 269.8143, 25.9171, 9.184314, 268.97958, 30.66149, 9.094333, 267.29376, 29.71275, 9.518664, 268.1259, 30.400423, 9.252551, 269.3046, 16.872705, 8.860553, 244.61787, 18.433092, 9.008136, 243.85774, 18.909721, 9.076602, 241.5792, 18.936811, 9.0822935, 241.17331, 19.028605, 9.103961, 239.52176, 23.363697, 9.455005, 242.36052, 24.410305, 9.564731, 238.61891, 23.718637, 9.511386, 238.34575, 24.361168, 9.558383, 238.90816, 23.288445, 9.485644, 237.27496, 28.26839, 9.885303, 240.47148, 31.196377, 10.126071, 241.56177, 30.58646, 10.086841, 237.06795, 35.404327, 10.487521, 241.33769, 36.49975, 10.567416, 239.70369, 38.081406, 10.671191, 236.24419, 39.05783, 10.716876, 234.37148, 40.497402, 10.877383, 240.05936, 40.117714, 10.855029, 240.56224)
+yaws = PackedFloat32Array(1.8333108, -0.9450712, 2.0371525, 1.9014122, -2.9275699, 1.8820374, -0.10209584, -0.38093162, -0.47843742, -1.4608945, 0.75623274, 1.5248363, 1.9242861, -0.3990941, -1.51503, 1.2925689, -1.3009734, 0.98989606, 0.025940657, 2.0327814, 0.7256646, -2.8556976, -1.2380667, -0.26565194, 0.7182636, 2.1138508, 1.607363, -1.0455782, -0.1630733, 0.5936153, 0.3144877)
+scale3_list = Array[Vector3]([Vector3(0.92220914, 0.8673036, 0.92220914), Vector3(1.2890328, 1.2214143, 1.2890328), Vector3(1.104375, 1.0869108, 1.104375), Vector3(1.1518667, 1.2861865, 1.1518667), Vector3(0.9725704, 1.0884743, 0.9725704), Vector3(1.0639944, 1.0331637, 1.0639944), Vector3(1.0440701, 1.1004267, 1.0440701), Vector3(0.98532677, 0.91753435, 0.98532677), Vector3(0.98589003, 1.0826138, 0.98589003), Vector3(1.2321649, 1.2817724, 1.2321649), Vector3(1.0354552, 0.94401217, 1.0354552), Vector3(1.1805582, 1.2382334, 1.1805582), Vector3(0.80945575, 0.7664556, 0.80945575), Vector3(0.9222745, 0.8552022, 0.9222745), Vector3(0.90427315, 1.0305756, 0.90427315), Vector3(1.0109193, 0.9112114, 1.0109193), Vector3(0.8447525, 0.85009706, 0.8447525), Vector3(1.2177056, 1.1854647, 1.2177056), Vector3(1.0764356, 1.1700737, 1.0764356), Vector3(1.153132, 1.0886829, 1.153132), Vector3(1.1032249, 1.0269649, 1.1032249), Vector3(1.2099977, 1.170822, 1.2099977), Vector3(1.2127323, 1.191646, 1.2127323), Vector3(1.0366678, 0.9666587, 1.0366678), Vector3(1.1370692, 1.262809, 1.1370692), Vector3(1.0603114, 0.9554931, 1.0603114), Vector3(0.8863071, 0.8738914, 0.8863071), Vector3(1.2181824, 1.2810047, 1.2181824), Vector3(1.2516801, 1.3693309, 1.2516801), Vector3(1.0949606, 1.0584793, 1.0949606), Vector3(0.8510373, 0.8980228, 0.8510373)])
+
+[node name="B_JnScoarta_a_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_jneapan_a")
+mesh_name = "Jneapan_Bark"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(22.246525, 8.841266, 270.4483, 22.897272, 8.912707, 269.6913, 21.69426, 8.802844, 270.07773, 24.97298, 9.0966215, 269.33154, 24.98793, 9.086459, 269.86642, 26.200142, 9.2394285, 267.52484, 27.775688, 9.319629, 269.80148, 27.77859, 9.319522, 269.8143, 25.9171, 9.184314, 268.97958, 30.66149, 9.094333, 267.29376, 29.71275, 9.518664, 268.1259, 30.400423, 9.252551, 269.3046, 16.872705, 8.860553, 244.61787, 18.433092, 9.008136, 243.85774, 18.909721, 9.076602, 241.5792, 18.936811, 9.0822935, 241.17331, 19.028605, 9.103961, 239.52176, 23.363697, 9.455005, 242.36052, 24.410305, 9.564731, 238.61891, 23.718637, 9.511386, 238.34575, 24.361168, 9.558383, 238.90816, 23.288445, 9.485644, 237.27496, 28.26839, 9.885303, 240.47148, 31.196377, 10.126071, 241.56177, 30.58646, 10.086841, 237.06795, 35.404327, 10.487521, 241.33769, 36.49975, 10.567416, 239.70369, 38.081406, 10.671191, 236.24419, 39.05783, 10.716876, 234.37148, 40.497402, 10.877383, 240.05936, 40.117714, 10.855029, 240.56224)
+yaws = PackedFloat32Array(1.8333108, -0.9450712, 2.0371525, 1.9014122, -2.9275699, 1.8820374, -0.10209584, -0.38093162, -0.47843742, -1.4608945, 0.75623274, 1.5248363, 1.9242861, -0.3990941, -1.51503, 1.2925689, -1.3009734, 0.98989606, 0.025940657, 2.0327814, 0.7256646, -2.8556976, -1.2380667, -0.26565194, 0.7182636, 2.1138508, 1.607363, -1.0455782, -0.1630733, 0.5936153, 0.3144877)
+scale3_list = Array[Vector3]([Vector3(0.92220914, 0.8673036, 0.92220914), Vector3(1.2890328, 1.2214143, 1.2890328), Vector3(1.104375, 1.0869108, 1.104375), Vector3(1.1518667, 1.2861865, 1.1518667), Vector3(0.9725704, 1.0884743, 0.9725704), Vector3(1.0639944, 1.0331637, 1.0639944), Vector3(1.0440701, 1.1004267, 1.0440701), Vector3(0.98532677, 0.91753435, 0.98532677), Vector3(0.98589003, 1.0826138, 0.98589003), Vector3(1.2321649, 1.2817724, 1.2321649), Vector3(1.0354552, 0.94401217, 1.0354552), Vector3(1.1805582, 1.2382334, 1.1805582), Vector3(0.80945575, 0.7664556, 0.80945575), Vector3(0.9222745, 0.8552022, 0.9222745), Vector3(0.90427315, 1.0305756, 0.90427315), Vector3(1.0109193, 0.9112114, 1.0109193), Vector3(0.8447525, 0.85009706, 0.8447525), Vector3(1.2177056, 1.1854647, 1.2177056), Vector3(1.0764356, 1.1700737, 1.0764356), Vector3(1.153132, 1.0886829, 1.153132), Vector3(1.1032249, 1.0269649, 1.1032249), Vector3(1.2099977, 1.170822, 1.2099977), Vector3(1.2127323, 1.191646, 1.2127323), Vector3(1.0366678, 0.9666587, 1.0366678), Vector3(1.1370692, 1.262809, 1.1370692), Vector3(1.0603114, 0.9554931, 1.0603114), Vector3(0.8863071, 0.8738914, 0.8863071), Vector3(1.2181824, 1.2810047, 1.2181824), Vector3(1.2516801, 1.3693309, 1.2516801), Vector3(1.0949606, 1.0584793, 1.0949606), Vector3(0.8510373, 0.8980228, 0.8510373)])
+
+[node name="B_Afin_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_afin")
+mesh_name = "Afin_Leaves"
+positions = PackedVector3Array(22.808296, 8.917052, 270.07056, 23.544283, 8.987716, 269.68762, 20.924122, 8.740935, 270.889, 20.95835, 8.76715, 269.7975, 22.342028, 8.887572, 269.5962, 26.315586, 9.28807, 266.64526, 27.434889, 9.392547, 266.19702, 26.57627, 9.274062, 268.33536, 26.454784, 9.288344, 267.1844, 27.353954, 9.385009, 266.22897, 17.187145, 8.960387, 239.9348, 14.476113, 8.739211, 239.26643, 16.039595, 8.857223, 240.50157, 22.277351, 9.38977, 241.4531, 22.40911, 9.415755, 239.58937, 20.839077, 9.282897, 239.3415, 22.462618, 9.415816, 240.10359, 20.255527, 9.226851, 239.98048, 30.209383, 10.073455, 240.12102, 30.671906, 10.110305, 238.99327, 31.018478, 10.135924, 239.42288, 29.770178, 10.036056, 240.54416, 38.02723, 10.706222, 238.31354, 39.013496, 10.789443, 239.76633, 37.345066, 10.660903, 239.73767, 41.40536, 10.936553, 237.29317, 39.475597, 10.815902, 239.07205, 40.06914, 10.849563, 238.1505, 30.381933, 9.366898, 274.78986, 27.41422, 9.326218, 270.354, 31.638395, 8.309753, 269.04016)
+yaws = PackedFloat32Array(2.7220104, -3.0101554, 3.0984123, -1.4469911, -2.3316488, 3.044615, 0.85343933, 2.1959784, 2.8195236, 2.347243, -1.8231714, -1.6827176, -1.1415768, 3.035806, 1.0599926, -2.8426356, 0.93101144, 1.9798114, -1.2892706, 0.115189314, -2.0866783, 1.9461777, -2.2318873, -0.3998878, 1.2556703, 2.3637898, -2.3593392, -0.5453565, 1.4468205, -1.8350511, -1.8074844)
+scale3_list = Array[Vector3]([Vector3(1.4990598, 1.4990598, 1.4990598), Vector3(1.6789379, 1.6789379, 1.6789379), Vector3(1.5957303, 1.5957303, 1.5957303), Vector3(1.6957747, 1.6957747, 1.6957747), Vector3(1.6346786, 1.6346786, 1.6346786), Vector3(1.3138493, 1.3138493, 1.3138493), Vector3(1.6385312, 1.6385312, 1.6385312), Vector3(1.8153769, 1.8153769, 1.8153769), Vector3(1.3785725, 1.3785725, 1.3785725), Vector3(1.5993034, 1.5993034, 1.5993034), Vector3(1.5559769, 1.5559769, 1.5559769), Vector3(1.3734052, 1.3734052, 1.3734052), Vector3(1.8853507, 1.8853507, 1.8853507), Vector3(1.464365, 1.464365, 1.464365), Vector3(1.4773983, 1.4773983, 1.4773983), Vector3(1.6902077, 1.6902077, 1.6902077), Vector3(1.514786, 1.514786, 1.514786), Vector3(1.518268, 1.518268, 1.518268), Vector3(1.8082179, 1.8082179, 1.8082179), Vector3(1.8735914, 1.8735914, 1.8735914), Vector3(1.3627133, 1.3627133, 1.3627133), Vector3(1.7147299, 1.7147299, 1.7147299), Vector3(1.647157, 1.647157, 1.647157), Vector3(1.5930812, 1.5930812, 1.5930812), Vector3(1.7196593, 1.7196593, 1.7196593), Vector3(1.7649314, 1.7649314, 1.7649314), Vector3(1.418803, 1.418803, 1.418803), Vector3(1.7009393, 1.7009393, 1.7009393), Vector3(1.7284076, 1.7284076, 1.7284076), Vector3(1.672866, 1.672866, 1.672866), Vector3(1.6413672, 1.6413672, 1.6413672)])
+
+[node name="B_AfinBoabe_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_afin")
+mesh_name = "Afin_Berry"
+positions = PackedVector3Array(22.808296, 8.917052, 270.07056, 23.544283, 8.987716, 269.68762, 20.924122, 8.740935, 270.889, 20.95835, 8.76715, 269.7975, 22.342028, 8.887572, 269.5962, 26.315586, 9.28807, 266.64526, 27.434889, 9.392547, 266.19702, 26.57627, 9.274062, 268.33536, 26.454784, 9.288344, 267.1844, 27.353954, 9.385009, 266.22897, 17.187145, 8.960387, 239.9348, 14.476113, 8.739211, 239.26643, 16.039595, 8.857223, 240.50157, 22.277351, 9.38977, 241.4531, 22.40911, 9.415755, 239.58937, 20.839077, 9.282897, 239.3415, 22.462618, 9.415816, 240.10359, 20.255527, 9.226851, 239.98048, 30.209383, 10.073455, 240.12102, 30.671906, 10.110305, 238.99327, 31.018478, 10.135924, 239.42288, 29.770178, 10.036056, 240.54416, 38.02723, 10.706222, 238.31354, 39.013496, 10.789443, 239.76633, 37.345066, 10.660903, 239.73767, 41.40536, 10.936553, 237.29317, 39.475597, 10.815902, 239.07205, 40.06914, 10.849563, 238.1505, 30.381933, 9.366898, 274.78986, 27.41422, 9.326218, 270.354, 31.638395, 8.309753, 269.04016)
+yaws = PackedFloat32Array(2.7220104, -3.0101554, 3.0984123, -1.4469911, -2.3316488, 3.044615, 0.85343933, 2.1959784, 2.8195236, 2.347243, -1.8231714, -1.6827176, -1.1415768, 3.035806, 1.0599926, -2.8426356, 0.93101144, 1.9798114, -1.2892706, 0.115189314, -2.0866783, 1.9461777, -2.2318873, -0.3998878, 1.2556703, 2.3637898, -2.3593392, -0.5453565, 1.4468205, -1.8350511, -1.8074844)
+scale3_list = Array[Vector3]([Vector3(1.4990598, 1.4990598, 1.4990598), Vector3(1.6789379, 1.6789379, 1.6789379), Vector3(1.5957303, 1.5957303, 1.5957303), Vector3(1.6957747, 1.6957747, 1.6957747), Vector3(1.6346786, 1.6346786, 1.6346786), Vector3(1.3138493, 1.3138493, 1.3138493), Vector3(1.6385312, 1.6385312, 1.6385312), Vector3(1.8153769, 1.8153769, 1.8153769), Vector3(1.3785725, 1.3785725, 1.3785725), Vector3(1.5993034, 1.5993034, 1.5993034), Vector3(1.5559769, 1.5559769, 1.5559769), Vector3(1.3734052, 1.3734052, 1.3734052), Vector3(1.8853507, 1.8853507, 1.8853507), Vector3(1.464365, 1.464365, 1.464365), Vector3(1.4773983, 1.4773983, 1.4773983), Vector3(1.6902077, 1.6902077, 1.6902077), Vector3(1.514786, 1.514786, 1.514786), Vector3(1.518268, 1.518268, 1.518268), Vector3(1.8082179, 1.8082179, 1.8082179), Vector3(1.8735914, 1.8735914, 1.8735914), Vector3(1.3627133, 1.3627133, 1.3627133), Vector3(1.7147299, 1.7147299, 1.7147299), Vector3(1.647157, 1.647157, 1.647157), Vector3(1.5930812, 1.5930812, 1.5930812), Vector3(1.7196593, 1.7196593, 1.7196593), Vector3(1.7649314, 1.7649314, 1.7649314), Vector3(1.418803, 1.418803, 1.418803), Vector3(1.7009393, 1.7009393, 1.7009393), Vector3(1.7284076, 1.7284076, 1.7284076), Vector3(1.672866, 1.672866, 1.672866), Vector3(1.6413672, 1.6413672, 1.6413672)])
+
+[node name="B_Flori_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_flower")
+positions = PackedVector3Array(22.175133, 8.888579, 268.88718, 24.662079, 9.120666, 267.9085, 27.627977, 9.345504, 269.1252, 30.816864, 8.970244, 268.00647, 30.724958, 9.055465, 267.5849, 35.579514, 8.238219, 274.17032, 18.380596, 9.070601, 239.15733, 21.279013, 9.315215, 240.05783, 19.860378, 9.119094, 245.9305, 23.630743, 9.483947, 243.58344, 22.930998, 9.52452, 231.83318, 23.216623, 9.463347, 241.68701, 28.886374, 9.946212, 243.31993, 25.581232, 9.705459, 235.40923, 30.652803, 10.108748, 239.06764, 35.220627, 10.484023, 240.50465, 34.87399, 10.414199, 230.34201, 33.6256, 10.333419, 233.27187, 34.801582, 10.408172, 230.01126, 39.722065, 10.809325, 236.43756)
+yaws = PackedFloat32Array(0.54710317, 2.8634365, 0.33986664, -0.518944, -0.3595879, 0.43375635, -1.7112665, 1.2796171, -0.83459115, 1.9685333, 2.5199049, 2.1511638, -2.360851, -1.1642824, 3.1022818, -2.5030193, 0.60069203, -2.1196926, 2.0576003, 1.5702302)
+scale3_list = Array[Vector3]([Vector3(1.2969396, 1.2969396, 1.2969396), Vector3(1.6599616, 1.6599616, 1.6599616), Vector3(1.1260535, 1.1260535, 1.1260535), Vector3(1.3957517, 1.3957517, 1.3957517), Vector3(1.187175, 1.187175, 1.187175), Vector3(1.3056462, 1.3056462, 1.3056462), Vector3(1.3921391, 1.3921391, 1.3921391), Vector3(1.1775975, 1.1775975, 1.1775975), Vector3(1.7184535, 1.7184535, 1.7184535), Vector3(1.7787337, 1.7787337, 1.7787337), Vector3(1.3995014, 1.3995014, 1.3995014), Vector3(1.0176152, 1.0176152, 1.0176152), Vector3(1.3760537, 1.3760537, 1.3760537), Vector3(1.2725477, 1.2725477, 1.2725477), Vector3(1.0592624, 1.0592624, 1.0592624), Vector3(1.4531051, 1.4531051, 1.4531051), Vector3(1.2918696, 1.2918696, 1.2918696), Vector3(1.1072665, 1.1072665, 1.1072665), Vector3(1.3910849, 1.3910849, 1.3910849), Vector3(1.085535, 1.085535, 1.085535)])
+
+[node name="B_Flori_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_flower")
+positions = PackedVector3Array(164.61859, 11.081252, 248.27045, 164.9887, 11.439879, 246.11653, 167.8194, 11.772414, 244.31984, 168.35838, 11.640258, 245.16818, 173.04892, 12.099181, 242.68288, 173.72562, 12.12036, 240.85715, 179.36479, 12.176009, 242.96259, 177.32713, 12.229033, 231.93718, 182.99, 12.320891, 229.95775, 184.37021, 12.32141, 232.17604, 185.58217, 12.364821, 228.75662, 187.82831, 12.361373, 232.67265, 193.6434, 12.466292, 228.35701, 200.28563, 12.085311, 229.62885, 200.07114, 12.115615, 229.36212, 197.95586, 12.580672, 220.40102, 201.044, 12.6843405, 212.44452, 202.78938, 12.700469, 213.79813, 201.76746, 12.65277, 218.09978, 210.45776, 12.551604, 216.56963, 207.50388, 12.7890005, 214.48549, 202.94229, 12.754043, 208.56003, 214.98897, 12.692763, 212.79126, 207.92421, 12.906127, 205.52458, 155.98062, 10.391112, 215.84547, 155.46944, 10.202361, 208.78815, 161.50392, 11.309417, 212.00926, 164.08481, 10.682723, 206.27942, 169.23169, 10.994765, 203.75269, 167.19946, 11.424346, 208.29758, 170.12444, 11.367507, 205.26428, 171.70074, 11.401198, 204.555, 174.22377, 11.500899, 204.5679, 179.09119, 11.153243, 200.43593, 179.01993, 11.132064, 200.34775, 179.30045, 10.878722, 199.01074, 179.58609, 10.606734, 197.57904, 180.42451, 10.443053, 196.45323, 184.69801, 11.552749, 196.73096, 184.31773, 11.181685, 195.10883, 184.77051, 11.3046255, 194.83844, 182.33719, 10.740706, 193.96701)
+yaws = PackedFloat32Array(0.14131379, 0.576545, -2.2204993, 0.9658797, -0.53464866, 1.2935908, 2.4130437, 2.7686703, 1.4211986, -1.1931976, -0.42402124, 0.016724825, -1.2323416, -2.8095968, -2.3404927, -2.6737323, -0.49405694, -2.9043062, -2.784132, 0.9369056, 1.9087131, -2.0852003, 1.7331841, -1.7568324, -0.7034755, -2.8559182, 1.6938479, -0.06710172, 0.9947865, 0.42811847, 1.4496944, 1.158066, 3.0962517, -2.5898485, 0.94911647, 1.9177301, 2.369593, 2.9504116, -2.4908133, 1.4746864, -0.9378078, -0.08632755)
+scale3_list = Array[Vector3]([Vector3(1.4643399, 1.4643399, 1.4643399), Vector3(1.7503562, 1.7503562, 1.7503562), Vector3(1.7560277, 1.7560277, 1.7560277), Vector3(1.2670425, 1.2670425, 1.2670425), Vector3(1.5970937, 1.5970937, 1.5970937), Vector3(1.5729783, 1.5729783, 1.5729783), Vector3(1.1087909, 1.1087909, 1.1087909), Vector3(1.126246, 1.126246, 1.126246), Vector3(1.6504661, 1.6504661, 1.6504661), Vector3(1.1242896, 1.1242896, 1.1242896), Vector3(1.5003717, 1.5003717, 1.5003717), Vector3(1.3238935, 1.3238935, 1.3238935), Vector3(1.1159127, 1.1159127, 1.1159127), Vector3(1.6065495, 1.6065495, 1.6065495), Vector3(1.5758624, 1.5758624, 1.5758624), Vector3(1.0118841, 1.0118841, 1.0118841), Vector3(1.0388188, 1.0388188, 1.0388188), Vector3(1.5325319, 1.5325319, 1.5325319), Vector3(1.6297708, 1.6297708, 1.6297708), Vector3(1.6922255, 1.6922255, 1.6922255), Vector3(1.7842436, 1.7842436, 1.7842436), Vector3(1.2496761, 1.2496761, 1.2496761), Vector3(1.664083, 1.664083, 1.664083), Vector3(1.7924246, 1.7924246, 1.7924246), Vector3(1.6573719, 1.6573719, 1.6573719), Vector3(1.3898985, 1.3898985, 1.3898985), Vector3(1.3928865, 1.3928865, 1.3928865), Vector3(1.0549748, 1.0549748, 1.0549748), Vector3(1.6737882, 1.6737882, 1.6737882), Vector3(1.7992451, 1.7992451, 1.7992451), Vector3(1.2153109, 1.2153109, 1.2153109), Vector3(1.6408377, 1.6408377, 1.6408377), Vector3(1.6424344, 1.6424344, 1.6424344), Vector3(1.4270637, 1.4270637, 1.4270637), Vector3(1.6478646, 1.6478646, 1.6478646), Vector3(1.2996465, 1.2996465, 1.2996465), Vector3(1.0443397, 1.0443397, 1.0443397), Vector3(1.30473, 1.30473, 1.30473), Vector3(1.7363693, 1.7363693, 1.7363693), Vector3(1.6369493, 1.6369493, 1.6369493), Vector3(1.7936405, 1.7936405, 1.7936405), Vector3(1.0100492, 1.0100492, 1.0100492)])
+
+[node name="B_Afin_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_afin")
+mesh_name = "Afin_Leaves"
+positions = PackedVector3Array(169.33113, 12.062942, 240.63863, 169.01933, 12.05815, 240.7468, 168.76414, 12.058455, 240.14865, 168.98303, 12.061355, 240.14795, 167.298, 12.041396, 239.7684, 183.3187, 12.337401, 228.38718, 181.15839, 12.303374, 229.05907, 182.06935, 12.31491, 229.13828, 181.33038, 12.300124, 229.77705, 180.63544, 12.288451, 230.08615, 203.7904, 12.710998, 214.31516, 201.60416, 12.688109, 213.13043, 203.61035, 12.72026, 212.7645, 203.2495, 12.7116995, 213.19919, 204.4892, 12.764007, 210.01167, 205.28499, 12.785003, 209.92465, 204.10092, 12.762404, 209.35043, 164.06386, 10.943023, 207.91353, 165.79466, 11.161559, 207.94177, 165.3204, 11.037276, 207.59953, 177.15466, 11.393996, 202.12366, 176.96474, 11.378356, 202.09276, 177.41534, 11.112288, 200.64957, 176.00485, 11.4391775, 202.63669, 176.139, 11.116683, 200.99023, 194.07846, 12.513336, 226.92288, 197.15422, 12.156128, 231.7909, 196.63997, 12.4223175, 228.23198, 206.73032, 12.840927, 210.2859, 211.0093, 12.772949, 213.83147, 206.70015, 12.844162, 210.03758)
+yaws = PackedFloat32Array(-2.4514346, 1.2881353, 2.4572356, 1.3294437, 1.6880581, 0.06631279, -1.4234382, 2.7692468, 1.1687272, -1.289892, 1.7420881, 1.0000851, 2.908406, 1.0479395, 2.844991, 2.8392856, -0.12849426, 2.5542195, 2.5544097, 1.9470451, -0.7557566, -0.3928058, 0.4551928, -0.8892441, 0.35225677, 0.035367727, 1.7732751, 3.0079148, -1.3192735, -1.1368232, 0.2096045)
+scale3_list = Array[Vector3]([Vector3(1.4528184, 1.4528184, 1.4528184), Vector3(1.5823176, 1.5823176, 1.5823176), Vector3(1.7413254, 1.7413254, 1.7413254), Vector3(1.4181172, 1.4181172, 1.4181172), Vector3(1.678462, 1.678462, 1.678462), Vector3(1.5296211, 1.5296211, 1.5296211), Vector3(1.3907748, 1.3907748, 1.3907748), Vector3(1.5411897, 1.5411897, 1.5411897), Vector3(1.6914155, 1.6914155, 1.6914155), Vector3(1.6224695, 1.6224695, 1.6224695), Vector3(1.64813, 1.64813, 1.64813), Vector3(1.7315806, 1.7315806, 1.7315806), Vector3(1.4875892, 1.4875892, 1.4875892), Vector3(1.5682424, 1.5682424, 1.5682424), Vector3(1.8217711, 1.8217711, 1.8217711), Vector3(1.8073244, 1.8073244, 1.8073244), Vector3(1.572371, 1.572371, 1.572371), Vector3(1.6281835, 1.6281835, 1.6281835), Vector3(1.3255737, 1.3255737, 1.3255737), Vector3(1.3172697, 1.3172697, 1.3172697), Vector3(1.6904409, 1.6904409, 1.6904409), Vector3(1.7933052, 1.7933052, 1.7933052), Vector3(1.7910738, 1.7910738, 1.7910738), Vector3(1.6060705, 1.6060705, 1.6060705), Vector3(1.4069855, 1.4069855, 1.4069855), Vector3(1.5806426, 1.5806426, 1.5806426), Vector3(1.8402674, 1.8402674, 1.8402674), Vector3(1.5287132, 1.5287132, 1.5287132), Vector3(1.7632574, 1.7632574, 1.7632574), Vector3(1.5769997, 1.5769997, 1.5769997), Vector3(1.8168814, 1.8168814, 1.8168814)])
+
+[node name="B_AfinBoabe_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_afin")
+mesh_name = "Afin_Berry"
+positions = PackedVector3Array(169.33113, 12.062942, 240.63863, 169.01933, 12.05815, 240.7468, 168.76414, 12.058455, 240.14865, 168.98303, 12.061355, 240.14795, 167.298, 12.041396, 239.7684, 183.3187, 12.337401, 228.38718, 181.15839, 12.303374, 229.05907, 182.06935, 12.31491, 229.13828, 181.33038, 12.300124, 229.77705, 180.63544, 12.288451, 230.08615, 203.7904, 12.710998, 214.31516, 201.60416, 12.688109, 213.13043, 203.61035, 12.72026, 212.7645, 203.2495, 12.7116995, 213.19919, 204.4892, 12.764007, 210.01167, 205.28499, 12.785003, 209.92465, 204.10092, 12.762404, 209.35043, 164.06386, 10.943023, 207.91353, 165.79466, 11.161559, 207.94177, 165.3204, 11.037276, 207.59953, 177.15466, 11.393996, 202.12366, 176.96474, 11.378356, 202.09276, 177.41534, 11.112288, 200.64957, 176.00485, 11.4391775, 202.63669, 176.139, 11.116683, 200.99023, 194.07846, 12.513336, 226.92288, 197.15422, 12.156128, 231.7909, 196.63997, 12.4223175, 228.23198, 206.73032, 12.840927, 210.2859, 211.0093, 12.772949, 213.83147, 206.70015, 12.844162, 210.03758)
+yaws = PackedFloat32Array(-2.4514346, 1.2881353, 2.4572356, 1.3294437, 1.6880581, 0.06631279, -1.4234382, 2.7692468, 1.1687272, -1.289892, 1.7420881, 1.0000851, 2.908406, 1.0479395, 2.844991, 2.8392856, -0.12849426, 2.5542195, 2.5544097, 1.9470451, -0.7557566, -0.3928058, 0.4551928, -0.8892441, 0.35225677, 0.035367727, 1.7732751, 3.0079148, -1.3192735, -1.1368232, 0.2096045)
+scale3_list = Array[Vector3]([Vector3(1.4528184, 1.4528184, 1.4528184), Vector3(1.5823176, 1.5823176, 1.5823176), Vector3(1.7413254, 1.7413254, 1.7413254), Vector3(1.4181172, 1.4181172, 1.4181172), Vector3(1.678462, 1.678462, 1.678462), Vector3(1.5296211, 1.5296211, 1.5296211), Vector3(1.3907748, 1.3907748, 1.3907748), Vector3(1.5411897, 1.5411897, 1.5411897), Vector3(1.6914155, 1.6914155, 1.6914155), Vector3(1.6224695, 1.6224695, 1.6224695), Vector3(1.64813, 1.64813, 1.64813), Vector3(1.7315806, 1.7315806, 1.7315806), Vector3(1.4875892, 1.4875892, 1.4875892), Vector3(1.5682424, 1.5682424, 1.5682424), Vector3(1.8217711, 1.8217711, 1.8217711), Vector3(1.8073244, 1.8073244, 1.8073244), Vector3(1.572371, 1.572371, 1.572371), Vector3(1.6281835, 1.6281835, 1.6281835), Vector3(1.3255737, 1.3255737, 1.3255737), Vector3(1.3172697, 1.3172697, 1.3172697), Vector3(1.6904409, 1.6904409, 1.6904409), Vector3(1.7933052, 1.7933052, 1.7933052), Vector3(1.7910738, 1.7910738, 1.7910738), Vector3(1.6060705, 1.6060705, 1.6060705), Vector3(1.4069855, 1.4069855, 1.4069855), Vector3(1.5806426, 1.5806426, 1.5806426), Vector3(1.8402674, 1.8402674, 1.8402674), Vector3(1.5287132, 1.5287132, 1.5287132), Vector3(1.7632574, 1.7632574, 1.7632574), Vector3(1.5769997, 1.5769997, 1.5769997), Vector3(1.8168814, 1.8168814, 1.8168814)])
+
+[node name="B_JnAce_b_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_jneapan_b")
+mesh_name = "Jneapan_Needles"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(170.19365, 12.069385, 238.19339, 170.32742, 12.071612, 238.12093, 170.10738, 12.066913, 238.41014, 170.09735, 12.068866, 238.07281, 181.01338, 12.253207, 232.71591, 188.41533, 12.394839, 227.12515, 191.58595, 12.43941, 226.15692, 195.28978, 12.501132, 223.64554, 195.85036, 12.504611, 224.08398, 196.5138, 12.534213, 221.18237, 203.7566, 12.70943, 211.84157, 204.08446, 12.715777, 211.66641, 204.62238, 12.751834, 209.64935, 204.26349, 12.737353, 210.088, 209.0636, 12.856265, 209.3752, 157.01532, 10.963168, 210.4281, 156.45679, 10.858172, 211.78859, 157.2122, 10.941958, 209.9543, 158.5245, 11.031894, 210.5861, 159.97588, 11.112231, 210.56602, 159.76582, 10.6821165, 207.90884, 160.68459, 10.70473, 207.76479, 158.12395, 10.844806, 208.00557, 163.76563, 11.053302, 208.8347, 169.9818, 11.287951, 205.02277, 170.28882, 11.257861, 204.5537, 171.54855, 11.372226, 204.28966, 171.95525, 11.368686, 203.9562, 171.26765, 11.101474, 203.08914)
+yaws = PackedFloat32Array(0.3277955, -0.58401704, -0.8520646, -2.9525282, -1.8848088, 3.04868, 1.7893207, 2.9957016, 1.6551607, -3.054163, -0.24538207, 0.95663905, -0.3623333, 0.0392375, 2.363642, -0.10999012, -3.128472, 0.72726154, -3.053074, 1.8044269, -1.155561, -1.3038954, -3.0561843, -1.891751, -1.3046647, 2.0364878, 2.8281324, -0.22407651, -1.2848996)
+scale3_list = Array[Vector3]([Vector3(1.0959332, 1.1177726, 1.0959332), Vector3(0.86973214, 0.9887826, 0.86973214), Vector3(1.2403977, 1.2554169, 1.2403977), Vector3(0.85447264, 0.8369729, 0.85447264), Vector3(1.2957802, 1.2128836, 1.2957802), Vector3(0.8703539, 0.83180285, 0.8703539), Vector3(0.9265952, 1.0059105, 0.9265952), Vector3(0.98982894, 1.1234049, 0.98982894), Vector3(1.2480469, 1.2707862, 1.2480469), Vector3(1.1753478, 1.1323144, 1.1753478), Vector3(1.1342908, 1.0758249, 1.1342908), Vector3(0.8154927, 0.8230822, 0.8154927), Vector3(1.1178318, 1.2373651, 1.1178318), Vector3(1.052416, 1.0249552, 1.052416), Vector3(1.1518598, 1.0736481, 1.1518598), Vector3(1.0415345, 1.1932588, 1.0415345), Vector3(1.2219186, 1.2695696, 1.2219186), Vector3(0.89529055, 0.9955168, 0.89529055), Vector3(1.0045502, 1.0432085, 1.0045502), Vector3(1.1222342, 1.2771332, 1.1222342), Vector3(1.014217, 1.1350735, 1.014217), Vector3(0.83628774, 0.8131129, 0.83628774), Vector3(1.2071657, 1.1048502, 1.2071657), Vector3(1.0458013, 1.0768723, 1.0458013), Vector3(1.2708584, 1.2670323, 1.2708584), Vector3(0.98860055, 1.0101244, 0.98860055), Vector3(1.0758967, 1.0850967, 1.0758967), Vector3(1.05235, 0.9657673, 1.05235), Vector3(1.2944416, 1.4359633, 1.2944416)])
+
+[node name="B_JnScoarta_b_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_jneapan_b")
+mesh_name = "Jneapan_Bark"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(170.19365, 12.069385, 238.19339, 170.32742, 12.071612, 238.12093, 170.10738, 12.066913, 238.41014, 170.09735, 12.068866, 238.07281, 181.01338, 12.253207, 232.71591, 188.41533, 12.394839, 227.12515, 191.58595, 12.43941, 226.15692, 195.28978, 12.501132, 223.64554, 195.85036, 12.504611, 224.08398, 196.5138, 12.534213, 221.18237, 203.7566, 12.70943, 211.84157, 204.08446, 12.715777, 211.66641, 204.62238, 12.751834, 209.64935, 204.26349, 12.737353, 210.088, 209.0636, 12.856265, 209.3752, 157.01532, 10.963168, 210.4281, 156.45679, 10.858172, 211.78859, 157.2122, 10.941958, 209.9543, 158.5245, 11.031894, 210.5861, 159.97588, 11.112231, 210.56602, 159.76582, 10.6821165, 207.90884, 160.68459, 10.70473, 207.76479, 158.12395, 10.844806, 208.00557, 163.76563, 11.053302, 208.8347, 169.9818, 11.287951, 205.02277, 170.28882, 11.257861, 204.5537, 171.54855, 11.372226, 204.28966, 171.95525, 11.368686, 203.9562, 171.26765, 11.101474, 203.08914)
+yaws = PackedFloat32Array(0.3277955, -0.58401704, -0.8520646, -2.9525282, -1.8848088, 3.04868, 1.7893207, 2.9957016, 1.6551607, -3.054163, -0.24538207, 0.95663905, -0.3623333, 0.0392375, 2.363642, -0.10999012, -3.128472, 0.72726154, -3.053074, 1.8044269, -1.155561, -1.3038954, -3.0561843, -1.891751, -1.3046647, 2.0364878, 2.8281324, -0.22407651, -1.2848996)
+scale3_list = Array[Vector3]([Vector3(1.0959332, 1.1177726, 1.0959332), Vector3(0.86973214, 0.9887826, 0.86973214), Vector3(1.2403977, 1.2554169, 1.2403977), Vector3(0.85447264, 0.8369729, 0.85447264), Vector3(1.2957802, 1.2128836, 1.2957802), Vector3(0.8703539, 0.83180285, 0.8703539), Vector3(0.9265952, 1.0059105, 0.9265952), Vector3(0.98982894, 1.1234049, 0.98982894), Vector3(1.2480469, 1.2707862, 1.2480469), Vector3(1.1753478, 1.1323144, 1.1753478), Vector3(1.1342908, 1.0758249, 1.1342908), Vector3(0.8154927, 0.8230822, 0.8154927), Vector3(1.1178318, 1.2373651, 1.1178318), Vector3(1.052416, 1.0249552, 1.052416), Vector3(1.1518598, 1.0736481, 1.1518598), Vector3(1.0415345, 1.1932588, 1.0415345), Vector3(1.2219186, 1.2695696, 1.2219186), Vector3(0.89529055, 0.9955168, 0.89529055), Vector3(1.0045502, 1.0432085, 1.0045502), Vector3(1.1222342, 1.2771332, 1.1222342), Vector3(1.014217, 1.1350735, 1.014217), Vector3(0.83628774, 0.8131129, 0.83628774), Vector3(1.2071657, 1.1048502, 1.2071657), Vector3(1.0458013, 1.0768723, 1.0458013), Vector3(1.2708584, 1.2670323, 1.2708584), Vector3(0.98860055, 1.0101244, 0.98860055), Vector3(1.0758967, 1.0850967, 1.0758967), Vector3(1.05235, 0.9657673, 1.05235), Vector3(1.2944416, 1.4359633, 1.2944416)])
+
+[node name="B_JnAce_a_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_jneapan_a")
+mesh_name = "Jneapan_Needles"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(180.41258, 12.251925, 231.84132, 180.75342, 12.257129, 231.75822, 179.79538, 12.234836, 232.96864, 181.34315, 12.263141, 232.00111, 187.62617, 12.398089, 224.89116, 187.89977, 12.394443, 226.14452, 192.22147, 12.445392, 226.37186, 191.44756, 12.435779, 226.43726, 195.76616, 12.504153, 224.00923, 197.19621, 12.555911, 219.53, 197.45317, 12.565677, 218.71034, 201.54794, 12.669299, 212.83534, 201.68242, 12.670367, 212.97691, 201.53871, 12.669238, 212.82326, 203.72195, 12.707232, 212.06242, 204.72504, 12.731952, 211.383, 204.88426, 12.747119, 210.5049, 210.81766, 12.890567, 209.63548, 208.75357, 12.830554, 210.58203, 209.81322, 12.895907, 207.89554, 210.80072, 12.90372, 208.77399, 157.12042, 11.036639, 211.38248, 157.01112, 11.030719, 211.88931, 155.91595, 10.509036, 210.13522, 156.64162, 11.000827, 210.6301, 155.28511, 10.05263, 209.6394, 160.21107, 11.031558, 209.97739, 161.98448, 11.2888365, 210.9472, 161.14009, 10.835742, 208.41965, 158.92833, 10.765094, 207.96138, 158.78645, 10.819247, 209.16316, 165.39738, 11.146152, 208.33432, 169.55875, 11.19086, 204.80344, 169.50647, 11.313983, 205.6207, 169.58293, 10.758151, 202.95038)
+yaws = PackedFloat32Array(-0.8012204, -0.2141726, -1.8276291, 1.1613848, 2.8404715, -1.4764673, -0.99148536, -0.12477183, -1.2629237, -2.6175659, -0.25857496, -2.6575146, -2.6119256, -0.60674024, 1.7076538, 1.8515747, -1.1554337, 0.77064896, 2.2309935, 0.8115673, -1.4838374, -0.77657986, 1.3090055, -0.15736532, -1.1292186, -0.33781576, 1.4139335, 0.51719975, -3.0175405, 2.8271153, 1.4843643, 1.1614316, 0.5176351, 2.2132404, 0.33002806)
+scale3_list = Array[Vector3]([Vector3(0.8682592, 0.93975484, 0.8682592), Vector3(1.2315049, 1.109985, 1.2315049), Vector3(0.8721729, 0.91900074, 0.8721729), Vector3(1.0850887, 1.2206713, 1.0850887), Vector3(1.1718147, 1.2292659, 1.1718147), Vector3(1.0795869, 1.1102185, 1.0795869), Vector3(1.0889786, 1.16848, 1.0889786), Vector3(0.9133578, 0.8939545, 0.9133578), Vector3(0.89777493, 0.968842, 0.89777493), Vector3(1.2016066, 1.3636578, 1.2016066), Vector3(1.1162306, 1.0178788, 1.1162306), Vector3(1.1902627, 1.3335376, 1.1902627), Vector3(0.81099534, 0.80437857, 0.81099534), Vector3(0.8663816, 0.9910594, 0.8663816), Vector3(1.0044822, 1.1352762, 1.0044822), Vector3(0.8510543, 0.7956433, 0.8510543), Vector3(0.9448826, 0.9876522, 0.9448826), Vector3(1.2820275, 1.1559858, 1.2820275), Vector3(1.2224452, 1.3038946, 1.2224452), Vector3(0.8000914, 0.7350136, 0.8000914), Vector3(0.83392805, 0.87024724, 0.83392805), Vector3(1.0305489, 1.131728, 1.0305489), Vector3(1.0408086, 0.98822594, 1.0408086), Vector3(1.0378466, 1.1164205, 1.0378466), Vector3(0.9295491, 1.0508044, 0.9295491), Vector3(0.997276, 1.01501, 0.997276), Vector3(0.9169774, 0.831688, 0.9169774), Vector3(0.8056752, 0.7581579, 0.8056752), Vector3(1.0327235, 1.1616787, 1.0327235), Vector3(1.0357972, 1.1535586, 1.0357972), Vector3(1.0670942, 1.1203682, 1.0670942), Vector3(1.2795925, 1.2705342, 1.2795925), Vector3(1.1918378, 1.2827282, 1.1918378), Vector3(0.90729463, 0.8281668, 0.90729463), Vector3(1.2771065, 1.2160863, 1.2771065)])
+
+[node name="B_JnScoarta_a_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_jneapan_a")
+mesh_name = "Jneapan_Bark"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(180.41258, 12.251925, 231.84132, 180.75342, 12.257129, 231.75822, 179.79538, 12.234836, 232.96864, 181.34315, 12.263141, 232.00111, 187.62617, 12.398089, 224.89116, 187.89977, 12.394443, 226.14452, 192.22147, 12.445392, 226.37186, 191.44756, 12.435779, 226.43726, 195.76616, 12.504153, 224.00923, 197.19621, 12.555911, 219.53, 197.45317, 12.565677, 218.71034, 201.54794, 12.669299, 212.83534, 201.68242, 12.670367, 212.97691, 201.53871, 12.669238, 212.82326, 203.72195, 12.707232, 212.06242, 204.72504, 12.731952, 211.383, 204.88426, 12.747119, 210.5049, 210.81766, 12.890567, 209.63548, 208.75357, 12.830554, 210.58203, 209.81322, 12.895907, 207.89554, 210.80072, 12.90372, 208.77399, 157.12042, 11.036639, 211.38248, 157.01112, 11.030719, 211.88931, 155.91595, 10.509036, 210.13522, 156.64162, 11.000827, 210.6301, 155.28511, 10.05263, 209.6394, 160.21107, 11.031558, 209.97739, 161.98448, 11.2888365, 210.9472, 161.14009, 10.835742, 208.41965, 158.92833, 10.765094, 207.96138, 158.78645, 10.819247, 209.16316, 165.39738, 11.146152, 208.33432, 169.55875, 11.19086, 204.80344, 169.50647, 11.313983, 205.6207, 169.58293, 10.758151, 202.95038)
+yaws = PackedFloat32Array(-0.8012204, -0.2141726, -1.8276291, 1.1613848, 2.8404715, -1.4764673, -0.99148536, -0.12477183, -1.2629237, -2.6175659, -0.25857496, -2.6575146, -2.6119256, -0.60674024, 1.7076538, 1.8515747, -1.1554337, 0.77064896, 2.2309935, 0.8115673, -1.4838374, -0.77657986, 1.3090055, -0.15736532, -1.1292186, -0.33781576, 1.4139335, 0.51719975, -3.0175405, 2.8271153, 1.4843643, 1.1614316, 0.5176351, 2.2132404, 0.33002806)
+scale3_list = Array[Vector3]([Vector3(0.8682592, 0.93975484, 0.8682592), Vector3(1.2315049, 1.109985, 1.2315049), Vector3(0.8721729, 0.91900074, 0.8721729), Vector3(1.0850887, 1.2206713, 1.0850887), Vector3(1.1718147, 1.2292659, 1.1718147), Vector3(1.0795869, 1.1102185, 1.0795869), Vector3(1.0889786, 1.16848, 1.0889786), Vector3(0.9133578, 0.8939545, 0.9133578), Vector3(0.89777493, 0.968842, 0.89777493), Vector3(1.2016066, 1.3636578, 1.2016066), Vector3(1.1162306, 1.0178788, 1.1162306), Vector3(1.1902627, 1.3335376, 1.1902627), Vector3(0.81099534, 0.80437857, 0.81099534), Vector3(0.8663816, 0.9910594, 0.8663816), Vector3(1.0044822, 1.1352762, 1.0044822), Vector3(0.8510543, 0.7956433, 0.8510543), Vector3(0.9448826, 0.9876522, 0.9448826), Vector3(1.2820275, 1.1559858, 1.2820275), Vector3(1.2224452, 1.3038946, 1.2224452), Vector3(0.8000914, 0.7350136, 0.8000914), Vector3(0.83392805, 0.87024724, 0.83392805), Vector3(1.0305489, 1.131728, 1.0305489), Vector3(1.0408086, 0.98822594, 1.0408086), Vector3(1.0378466, 1.1164205, 1.0378466), Vector3(0.9295491, 1.0508044, 0.9295491), Vector3(0.997276, 1.01501, 0.997276), Vector3(0.9169774, 0.831688, 0.9169774), Vector3(0.8056752, 0.7581579, 0.8056752), Vector3(1.0327235, 1.1616787, 1.0327235), Vector3(1.0357972, 1.1535586, 1.0357972), Vector3(1.0670942, 1.1203682, 1.0670942), Vector3(1.2795925, 1.2705342, 1.2795925), Vector3(1.1918378, 1.2827282, 1.1918378), Vector3(0.90729463, 0.8281668, 0.90729463), Vector3(1.2771065, 1.2160863, 1.2771065)])
+
+[node name="B_Molid_b_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_B"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(167.15907, 3.4452925, 274.2089, 153.0646, 14.09962, 333.27853, 165.48177, 11.818294, 298.27588, 176.78079, 10.094676, 284.08707, 179.90924, 8.717204, 291.2174, 180.66563, 8.706157, 287.9938, 175.70706, 10.354533, 284.0812, 154.6458, -1.477254, 275.81894, 168.34636, 11.403529, 246.06062, 179.79724, 12.125087, 238.35654, 186.2433, 11.1402235, 253.51859, 187.395, 10.909572, 253.57928, 183.31627, 11.283931, 256.53952, 186.78143, 11.70164, 246.76736, 193.04097, 10.598674, 247.61984, 203.39375, 8.870723, 243.2934, 204.09816, 10.682948, 234.36942, 215.77425, 9.363963, 228.86424, 219.27548, 7.707408, 231.20192, 182.01909, 10.226314, 268.60016, 196.25816, 6.927699, 261.6327, 195.40652, 6.3980207, 265.55444, 205.28123, 3.6657515, 260.34897, 202.768, 4.6032667, 260.78595, 208.5571, 3.5021315, 256.17896, 218.6568, -0.49936402, 255.78346, 233.75745, -1.1725208, 242.2408, 168.9425, 10.784022, 203.26306)
+yaws = PackedFloat32Array(0.7616615, 0.37787986, 2.4925635, -2.762815, -2.8060508, -0.27109647, -0.49747682, -0.93124413, -1.9466603, -2.992405, -0.8390384, -0.45698595, 1.2212579, 1.8228042, 2.5785325, 0.92972064, 1.0460565, -1.9287696, -2.4035535, 0.9012158, 2.9194987, -1.4458369, -2.378018, -2.8849502, 2.667816, -2.322272, -0.24813461, 0.5973227)
+scale3_list = Array[Vector3]([Vector3(1.2449706, 1.3599429, 1.2449706), Vector3(1.1968191, 1.1550552, 1.1968191), Vector3(1.2220856, 1.1619184, 1.2220856), Vector3(1.0454255, 1.138037, 1.0454255), Vector3(1.0134356, 1.0968155, 1.0134356), Vector3(0.96284044, 1.0388004, 0.96284044), Vector3(1.0675678, 1.1162071, 1.0675678), Vector3(0.87312174, 0.91736394, 0.87312174), Vector3(0.6147798, 0.608, 0.6147798), Vector3(0.88100314, 0.9059344, 0.88100314), Vector3(1.1751812, 1.2483428, 1.1751812), Vector3(1.2782519, 1.3053286, 1.2782519), Vector3(1.2215679, 1.3025765, 1.2215679), Vector3(1.0976526, 1.1820738, 1.0976526), Vector3(0.87220466, 0.8710668, 0.87220466), Vector3(1.0707879, 1.0624617, 1.0707879), Vector3(1.149348, 1.2418847, 1.149348), Vector3(1.2803503, 1.2963061, 1.2803503), Vector3(1.176853, 1.1412787, 1.176853), Vector3(1.3087362, 1.4329875, 1.3087362), Vector3(1.6911825, 1.6340187, 1.6911825), Vector3(1.410857, 1.5584978, 1.410857), Vector3(1.688496, 1.6745931, 1.688496), Vector3(1.6100321, 1.722401, 1.6100321), Vector3(1.3029008, 1.4002073, 1.3029008), Vector3(1.1913764, 1.1581868, 1.1913764), Vector3(1.4022354, 1.5423265, 1.4022354), Vector3(1.0028646, 1.0904511, 1.0028646)])
+
+[node name="B_Trunchi_b_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_B"
+positions = PackedVector3Array(167.15907, 3.4452925, 274.2089, 153.0646, 14.09962, 333.27853, 165.48177, 11.818294, 298.27588, 176.78079, 10.094676, 284.08707, 171.83432, 11.045497, 288.52963, 179.90924, 8.717204, 291.2174, 180.66563, 8.706157, 287.9938, 175.70706, 10.354533, 284.0812, 169.30167, 7.2775526, 276.96622, 166.58371, 5.5401564, 266.51367, 159.50389, 1.5078381, 271.84546, 163.27707, 2.0540113, 274.21115, 154.6458, -1.477254, 275.81894, 168.34636, 11.403529, 246.06062, 179.79724, 12.125087, 238.35654, 186.2433, 11.1402235, 253.51859, 187.395, 10.909572, 253.57928, 183.31627, 11.283931, 256.53952, 186.78143, 11.70164, 246.76736, 188.47221, 11.664485, 245.23544, 186.16226, 11.568889, 248.75034, 192.87885, 11.413157, 241.69568, 193.57785, 10.938823, 244.97498, 193.04097, 10.598674, 247.61984, 203.39375, 8.870723, 243.2934, 204.09816, 10.682948, 234.36942, 215.77425, 9.363963, 228.86424, 219.27548, 7.707408, 231.20192, 182.01909, 10.226314, 268.60016, 196.25816, 6.927699, 261.6327, 195.40652, 6.3980207, 265.55444, 205.28123, 3.6657515, 260.34897, 202.768, 4.6032667, 260.78595, 203.45134, 4.5527906, 259.86102, 206.55363, 4.3961287, 255.9557, 208.5571, 3.5021315, 256.17896, 218.6568, -0.49936402, 255.78346, 233.75745, -1.1725208, 242.2408, 168.9425, 10.784022, 203.26306, 165.23201, 8.851008, 200.7602, 150.04059, 10.255778, 196.86682, 154.40286, 9.405177, 199.68132)
+yaws = PackedFloat32Array(0.7616615, 0.37787986, 2.4925635, -2.762815, 2.3604596, -2.8060508, -0.27109647, -0.49747682, -1.1640463, 1.7366459, 2.914334, 2.6863105, -0.93124413, -1.9466603, -2.992405, -0.8390384, -0.45698595, 1.2212579, 1.8228042, 0.60789347, -2.2833834, -1.4750569, -2.9898925, 2.5785325, 0.92972064, 1.0460565, -1.9287696, -2.4035535, 0.9012158, 2.9194987, -1.4458369, -2.378018, -2.8849502, -0.050460815, 0.88557744, 2.667816, -2.322272, -0.24813461, 0.5973227, 2.4898956, 1.3481624, 1.6210845)
+scale3_list = Array[Vector3]([Vector3(1.2449706, 1.3599429, 1.2449706), Vector3(1.1968191, 1.1550552, 1.1968191), Vector3(1.2220856, 1.1619184, 1.2220856), Vector3(1.0454255, 1.138037, 1.0454255), Vector3(1.0677657, 1.1557512, 1.0677657), Vector3(1.0134356, 1.0968155, 1.0134356), Vector3(0.96284044, 1.0388004, 0.96284044), Vector3(1.0675678, 1.1162071, 1.0675678), Vector3(1.0142988, 1.0183917, 1.0142988), Vector3(0.97532773, 0.94425035, 0.97532773), Vector3(1.0749928, 1.0744954, 1.0749928), Vector3(0.9722288, 1.0037746, 0.9722288), Vector3(0.87312174, 0.91736394, 0.87312174), Vector3(0.6147798, 0.608, 0.6147798), Vector3(0.88100314, 0.9059344, 0.88100314), Vector3(1.1751812, 1.2483428, 1.1751812), Vector3(1.2782519, 1.3053286, 1.2782519), Vector3(1.2215679, 1.3025765, 1.2215679), Vector3(1.0976526, 1.1820738, 1.0976526), Vector3(1.2340064, 1.3229715, 1.2340064), Vector3(1.1328536, 1.1814369, 1.1328536), Vector3(0.88270867, 0.88486814, 0.88270867), Vector3(1.2096627, 1.3277113, 1.2096627), Vector3(0.87220466, 0.8710668, 0.87220466), Vector3(1.0707879, 1.0624617, 1.0707879), Vector3(1.149348, 1.2418847, 1.149348), Vector3(1.2803503, 1.2963061, 1.2803503), Vector3(1.176853, 1.1412787, 1.176853), Vector3(1.3087362, 1.4329875, 1.3087362), Vector3(1.6911825, 1.6340187, 1.6911825), Vector3(1.410857, 1.5584978, 1.410857), Vector3(1.688496, 1.6745931, 1.688496), Vector3(1.6100321, 1.722401, 1.6100321), Vector3(1.150326, 1.2453861, 1.150326), Vector3(1.3604065, 1.4395351, 1.3604065), Vector3(1.3029008, 1.4002073, 1.3029008), Vector3(1.1913764, 1.1581868, 1.1913764), Vector3(1.4022354, 1.5423265, 1.4022354), Vector3(1.0028646, 1.0904511, 1.0028646), Vector3(1.1690772, 1.2369125, 1.1690772), Vector3(0.65664995, 0.734062, 0.65664995), Vector3(0.7242554, 0.8037549, 0.7242554)])
+
+[node name="B_Molid_d_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_D"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(167.79372, 8.276149, 278.28195, 168.6477, 7.7735395, 277.59012, 164.51135, 2.5974379, 274.04626, 155.22527, 13.771815, 330.2512, 164.73737, 11.915614, 295.60583, 171.59607, 5.217906, 268.8906, 164.8137, 9.156108, 279.95584, 171.99767, 12.000346, 241.92622, 182.95807, 12.136439, 240.5225, 190.74428, 12.159602, 234.58612, 175.18488, 11.992717, 248.95366, 174.05968, 11.9926405, 247.6997, 183.89099, 11.470836, 253.44926, 191.16998, 11.212321, 245.78198, 202.77686, 11.475322, 230.96303, 202.05731, 10.924922, 234.90384, 217.18294, 8.948741, 229.25237, 203.97406, 3.351985, 263.68375, 199.52287, 5.109111, 264.14087, 219.6115, 1.3148602, 249.1954, 225.02011, -0.22787964, 247.90085)
+yaws = PackedFloat32Array(2.5782864, 1.1920717, -2.3044477, 2.3850286, 2.7155159, 1.1592586, 0.47457576, 1.8520238, -0.083963156, 0.688396, 1.151686, -2.974919, -1.583125, 2.1254532, -1.2151489, 0.46326113, -0.100100756, -1.7169734, 0.113465786, 1.7629755, -1.8185534)
+scale3_list = Array[Vector3]([Vector3(1.0842698, 1.1589849, 1.0842698), Vector3(1.3892072, 1.5185561, 1.3892072), Vector3(1.020068, 1.084504, 1.020068), Vector3(1.0756298, 1.152317, 1.0756298), Vector3(1.2873385, 1.422833, 1.2873385), Vector3(1.2645279, 1.2275914, 1.2645279), Vector3(1.0662521, 1.1513609, 1.0662521), Vector3(0.73642313, 0.8202829, 0.73642313), Vector3(0.69913816, 0.72438025, 0.69913816), Vector3(0.73487705, 0.7448736, 0.73487705), Vector3(1.1462557, 1.1241636, 1.1462557), Vector3(1.0801494, 1.1203991, 1.0801494), Vector3(0.96068215, 1.0509957, 0.96068215), Vector3(0.8863392, 0.8732164, 0.8863392), Vector3(1.3252375, 1.3633132, 1.3252375), Vector3(1.3205149, 1.2682775, 1.3205149), Vector3(1.2531685, 1.1915617, 1.2531685), Vector3(1.45702, 1.478081, 1.45702), Vector3(1.2452277, 1.2486672, 1.2452277), Vector3(1.6850865, 1.8360807, 1.6850865), Vector3(1.2031955, 1.2866033, 1.2031955)])
+
+[node name="B_Trunchi_d_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_D"
+positions = PackedVector3Array(167.79372, 8.276149, 278.28195, 168.6477, 7.7735395, 277.59012, 164.51135, 2.5974379, 274.04626, 154.13356, 13.696254, 328.33777, 155.22527, 13.771815, 330.2512, 164.73737, 11.915614, 295.60583, 173.86142, 10.702998, 286.55695, 171.59607, 5.217906, 268.8906, 164.8137, 9.156108, 279.95584, 171.99767, 12.000346, 241.92622, 182.95807, 12.136439, 240.5225, 190.74428, 12.159602, 234.58612, 175.18488, 11.992717, 248.95366, 174.05968, 11.9926405, 247.6997, 183.89099, 11.470836, 253.44926, 183.66296, 12.021907, 243.90776, 191.16998, 11.212321, 245.78198, 202.77686, 11.475322, 230.96303, 202.05731, 10.924922, 234.90384, 217.18294, 8.948741, 229.25237, 178.1634, 9.074885, 271.65723, 194.60973, 6.8890944, 264.6115, 203.97406, 3.351985, 263.68375, 199.52287, 5.109111, 264.14087, 219.6115, 1.3148602, 249.1954, 217.75844, 2.5425978, 247.7799, 225.02011, -0.22787964, 247.90085, 222.69965, 1.3240308, 246.01682, 218.5741, 3.97935, 242.68716, 216.35263, 3.4856672, 246.6732)
+yaws = PackedFloat32Array(2.5782864, 1.1920717, -2.3044477, 0.52464604, 2.3850286, 2.7155159, -2.2584927, 1.1592586, 0.47457576, 1.8520238, -0.083963156, 0.688396, 1.151686, -2.974919, -1.583125, 2.5888917, 2.1254532, -1.2151489, 0.46326113, -0.100100756, -0.9055748, 0.9423697, -1.7169734, 0.113465786, 1.7629755, -1.4888263, -1.8185534, -0.5663357, -1.4281541, 0.82468987)
+scale3_list = Array[Vector3]([Vector3(1.0842698, 1.1589849, 1.0842698), Vector3(1.3892072, 1.5185561, 1.3892072), Vector3(1.020068, 1.084504, 1.020068), Vector3(1.2094142, 1.1630919, 1.2094142), Vector3(1.0756298, 1.152317, 1.0756298), Vector3(1.2873385, 1.422833, 1.2873385), Vector3(1.2796435, 1.3806626, 1.2796435), Vector3(1.2645279, 1.2275914, 1.2645279), Vector3(1.0662521, 1.1513609, 1.0662521), Vector3(0.73642313, 0.8202829, 0.73642313), Vector3(0.69913816, 0.72438025, 0.69913816), Vector3(0.73487705, 0.7448736, 0.73487705), Vector3(1.1462557, 1.1241636, 1.1462557), Vector3(1.0801494, 1.1203991, 1.0801494), Vector3(0.96068215, 1.0509957, 0.96068215), Vector3(0.9766513, 1.0483729, 0.9766513), Vector3(0.8863392, 0.8732164, 0.8863392), Vector3(1.3252375, 1.3633132, 1.3252375), Vector3(1.3205149, 1.2682775, 1.3205149), Vector3(1.2531685, 1.1915617, 1.2531685), Vector3(1.4738785, 1.4996705, 1.4738785), Vector3(1.3143821, 1.4283919, 1.3143821), Vector3(1.45702, 1.478081, 1.45702), Vector3(1.2452277, 1.2486672, 1.2452277), Vector3(1.6850865, 1.8360807, 1.6850865), Vector3(1.2536426, 1.2921064, 1.2536426), Vector3(1.2031955, 1.2866033, 1.2031955), Vector3(1.6836451, 1.7451656, 1.6836451), Vector3(1.5154146, 1.6629075, 1.5154146), Vector3(1.3933451, 1.4310303, 1.3933451)])
+
+[node name="B_Molid_c_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_C"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(167.34897, 6.9336348, 277.2833, 169.54353, 7.3158827, 276.9233, 155.98111, 13.824534, 331.2924, 157.49258, 13.313991, 325.01596, 152.37906, 13.718699, 327.3776, 169.77571, 11.338038, 287.49487, 152.37778, -3.1435747, 279.3208, 151.62737, -0.47255433, 283.68433, 153.14066, -1.6425678, 276.08142, 171.46451, 11.823466, 245.12665, 175.18654, 12.02122, 245.17917, 177.67451, 12.0843, 240.30557, 187.8778, 12.271281, 232.75896, 211.98634, 12.2443495, 218.32637, 175.53128, 12.013194, 247.31274, 177.03052, 12.004924, 248.88234, 192.79585, 11.401942, 241.86282, 189.9365, 11.157359, 248.13683, 199.62547, 10.475932, 240.28508, 205.88885, 10.141246, 234.92293, 201.50777, 11.16772, 233.98822, 213.46712, 9.961909, 228.54628, 180.57707, 9.826762, 276.20425, 176.8145, 8.208262, 272.2774, 188.80023, 7.669978, 272.40466, 191.15756, 6.731059, 272.6152, 198.01141, 5.8140974, 263.72946, 196.54816, 7.7281294, 257.4794, 203.39262, 4.910884, 258.45856, 220.15773, 2.2936354, 245.85764, 235.20006, -0.28329957, 238.93396, 232.81137, -1.4767963, 243.85419, 158.27028, 9.048808, 198.50064, 175.20885, 9.228465, 198.06384, 170.57458, 10.584102, 202.59158, 168.20306, 10.888316, 204.59167, 172.90027, 9.655055, 200.48792)
+yaws = PackedFloat32Array(2.8932703, -1.5373149, 1.7304881, 2.5850117, -0.24779153, -0.3210361, -2.745965, -2.3572292, -0.55551386, 1.4133613, -1.9562538, 0.40856028, 1.9879258, 3.0298727, -0.7233703, -3.0074406, 1.527808, 1.9257929, 0.24308991, -1.6191897, -2.4060817, -0.01446414, -3.0074484, -0.97106886, -2.893065, -0.081718445, 0.6808729, 1.2798922, 2.941086, -2.2946515, 2.7056863, -1.3600727, -0.4235413, -0.2983129, 0.43446445, 0.03878069, 0.30801892)
+scale3_list = Array[Vector3]([Vector3(1.3166913, 1.356987, 1.3166913), Vector3(1.2677143, 1.2452445, 1.2677143), Vector3(1.2656949, 1.224577, 1.2656949), Vector3(1.3360411, 1.302469, 1.3360411), Vector3(1.4885695, 1.5077745, 1.4885695), Vector3(1.3846531, 1.3992809, 1.3846531), Vector3(1.1126993, 1.1282839, 1.1126993), Vector3(0.8718514, 0.95781386, 0.8718514), Vector3(1.1112108, 1.2386473, 1.1112108), Vector3(0.85018003, 0.9154991, 0.85018003), Vector3(0.6201391, 0.6750554, 0.6201391), Vector3(0.71960557, 0.7646721, 0.71960557), Vector3(0.8670077, 0.941028, 0.8670077), Vector3(0.6681202, 0.64247715, 0.6681202), Vector3(0.9991536, 1.0125016, 0.9991536), Vector3(1.0460253, 1.0431306, 1.0460253), Vector3(0.97357273, 1.0883049, 0.97357273), Vector3(1.2264701, 1.1808009, 1.2264701), Vector3(1.2278638, 1.1799432, 1.2278638), Vector3(1.06399, 1.074977, 1.06399), Vector3(0.9746563, 1.0446115, 0.9746563), Vector3(0.9337464, 1.0156957, 0.9337464), Vector3(1.4955299, 1.5796192, 1.4955299), Vector3(1.2551268, 1.3895992, 1.2551268), Vector3(1.6728497, 1.7595166, 1.6728497), Vector3(1.3700883, 1.5235412, 1.3700883), Vector3(1.4812322, 1.5716391, 1.4812322), Vector3(1.1463934, 1.2642183, 1.1463934), Vector3(1.449151, 1.5273354, 1.449151), Vector3(1.4830421, 1.4186819, 1.4830421), Vector3(1.4595101, 1.5525994, 1.4595101), Vector3(1.1073687, 1.1404923, 1.1073687), Vector3(0.6927504, 0.7253953, 0.6927504), Vector3(1.1361892, 1.1740389, 1.1361892), Vector3(0.6331317, 0.6796943, 0.6331317), Vector3(1.1919448, 1.2397354, 1.1919448), Vector3(0.6032838, 0.6130251, 0.6032838)])
+
+[node name="B_Trunchi_c_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_C"
+positions = PackedVector3Array(167.34897, 6.9336348, 277.2833, 169.54353, 7.3158827, 276.9233, 155.98111, 13.824534, 331.2924, 153.81596, 14.090022, 333.47308, 157.49258, 13.313991, 325.01596, 152.37906, 13.718699, 327.3776, 160.3638, 11.996791, 298.27014, 168.74133, 11.306102, 299.5432, 169.77571, 11.338038, 287.49487, 171.67667, 10.818065, 281.67334, 177.80484, 9.869472, 283.51913, 152.37778, -3.1435747, 279.3208, 156.03493, -0.84421265, 281.27454, 151.62737, -0.47255433, 283.68433, 151.27141, -1.4902698, 275.8087, 153.14066, -1.6425678, 276.08142, 171.19463, 5.013652, 271.0318, 174.49182, 6.6487837, 274.00775, 171.46451, 11.823466, 245.12665, 171.18756, 12.002009, 239.91261, 175.18654, 12.02122, 245.17917, 177.67451, 12.0843, 240.30557, 179.15242, 12.094752, 241.37523, 187.8778, 12.271281, 232.75896, 211.98634, 12.2443495, 218.32637, 207.78233, 12.251155, 220.87819, 176.05962, 11.991084, 249.53339, 175.53128, 12.013194, 247.31274, 177.03052, 12.004924, 248.88234, 191.43996, 10.925044, 247.8782, 192.79585, 11.401942, 241.86282, 189.9365, 11.157359, 248.13683, 199.62547, 10.475932, 240.28508, 205.88885, 10.141246, 234.92293, 201.50777, 11.16772, 233.98822, 213.46712, 9.961909, 228.54628, 220.35912, 7.5673475, 230.7038, 180.57707, 9.826762, 276.20425, 176.8145, 8.208262, 272.2774, 188.80023, 7.669978, 272.40466, 191.15756, 6.731059, 272.6152, 188.12233, 7.527278, 274.93802, 193.7304, 5.9746504, 271.16666, 198.01141, 5.8140974, 263.72946, 196.54816, 7.7281294, 257.4794, 204.55974, 2.1226454, 267.5842, 203.39262, 4.910884, 258.45856, 211.05585, 2.1955366, 257.06207, 214.00693, 3.4341993, 249.41052, 220.15773, 2.2936354, 245.85764, 235.20006, -0.28329957, 238.93396, 232.81137, -1.4767963, 243.85419, 236.01607, -2.2186937, 242.94061, 167.22363, 8.581401, 200.3871, 167.12428, 9.950694, 202.40771, 156.68835, 9.864924, 199.56287, 158.27028, 9.048808, 198.50064, 175.20885, 9.228465, 198.06384, 170.57458, 10.584102, 202.59158, 168.20306, 10.888316, 204.59167, 172.90027, 9.655055, 200.48792)
+yaws = PackedFloat32Array(2.8932703, -1.5373149, 1.7304881, -1.030503, 2.5850117, -0.24779153, 0.30366826, 0.527756, -0.3210361, 0.13684368, 1.8166449, -2.745965, -0.38842225, -2.3572292, -0.9904239, -0.55551386, -2.6509717, 0.41732597, 1.4133613, -2.7392442, -1.9562538, 0.40856028, 1.2247269, 1.9879258, 3.0298727, 1.5504191, -1.0753489, -0.7233703, -3.0074406, 1.410527, 1.527808, 1.9257929, 0.24308991, -1.6191897, -2.4060817, -0.01446414, -0.8794904, -3.0074484, -0.97106886, -2.893065, -0.081718445, 1.7140534, -2.7302995, 0.6808729, 1.2798922, 1.9652226, 2.941086, -1.6580489, -2.2555974, -2.2946515, 2.7056863, -1.3600727, -0.039816856, 2.9281566, 0.5616901, 1.2354414, -0.4235413, -0.2983129, 0.43446445, 0.03878069, 0.30801892)
+scale3_list = Array[Vector3]([Vector3(1.3166913, 1.356987, 1.3166913), Vector3(1.2677143, 1.2452445, 1.2677143), Vector3(1.2656949, 1.224577, 1.2656949), Vector3(1.0967764, 1.1738464, 1.0967764), Vector3(1.3360411, 1.302469, 1.3360411), Vector3(1.4885695, 1.5077745, 1.4885695), Vector3(1.1410121, 1.2366873, 1.1410121), Vector3(1.0806612, 1.192839, 1.0806612), Vector3(1.3846531, 1.3992809, 1.3846531), Vector3(1.2609422, 1.374871, 1.2609422), Vector3(1.1498035, 1.1018531, 1.1498035), Vector3(1.1126993, 1.1282839, 1.1126993), Vector3(1.2155286, 1.2233062, 1.2155286), Vector3(0.8718514, 0.95781386, 0.8718514), Vector3(1.0259258, 1.1160252, 1.0259258), Vector3(1.1112108, 1.2386473, 1.1112108), Vector3(1.2450203, 1.3374989, 1.2450203), Vector3(1.0090599, 1.0016139, 1.0090599), Vector3(0.85018003, 0.9154991, 0.85018003), Vector3(0.5810846, 0.6090502, 0.5810846), Vector3(0.6201391, 0.6750554, 0.6201391), Vector3(0.71960557, 0.7646721, 0.71960557), Vector3(0.63179374, 0.6445163, 0.63179374), Vector3(0.8670077, 0.941028, 0.8670077), Vector3(0.6681202, 0.64247715, 0.6681202), Vector3(0.985435, 1.0905293, 0.985435), Vector3(0.9609585, 0.95199233, 0.9609585), Vector3(0.9991536, 1.0125016, 0.9991536), Vector3(1.0460253, 1.0431306, 1.0460253), Vector3(1.3477567, 1.4476799, 1.3477567), Vector3(0.97357273, 1.0883049, 0.97357273), Vector3(1.2264701, 1.1808009, 1.2264701), Vector3(1.2278638, 1.1799432, 1.2278638), Vector3(1.06399, 1.074977, 1.06399), Vector3(0.9746563, 1.0446115, 0.9746563), Vector3(0.9337464, 1.0156957, 0.9337464), Vector3(0.933444, 0.9851739, 0.933444), Vector3(1.4955299, 1.5796192, 1.4955299), Vector3(1.2551268, 1.3895992, 1.2551268), Vector3(1.6728497, 1.7595166, 1.6728497), Vector3(1.3700883, 1.5235412, 1.3700883), Vector3(1.4543417, 1.4368443, 1.4543417), Vector3(1.3840837, 1.3272289, 1.3840837), Vector3(1.4812322, 1.5716391, 1.4812322), Vector3(1.1463934, 1.2642183, 1.1463934), Vector3(1.3447288, 1.4548658, 1.3447288), Vector3(1.449151, 1.5273354, 1.449151), Vector3(1.5819181, 1.7674907, 1.5819181), Vector3(1.6721146, 1.7933204, 1.6721146), Vector3(1.4830421, 1.4186819, 1.4830421), Vector3(1.4595101, 1.5525994, 1.4595101), Vector3(1.1073687, 1.1404923, 1.1073687), Vector3(1.5817348, 1.6200116, 1.5817348), Vector3(0.73358285, 0.78183323, 0.73358285), Vector3(0.71793437, 0.7612196, 0.71793437), Vector3(0.8592824, 0.9020759, 0.8592824), Vector3(0.6927504, 0.7253953, 0.6927504), Vector3(1.1361892, 1.1740389, 1.1361892), Vector3(0.6331317, 0.6796943, 0.6331317), Vector3(1.1919448, 1.2397354, 1.1919448), Vector3(0.6032838, 0.6130251, 0.6032838)])
+
+[node name="B_MolidA_c_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_C"
+positions = PackedVector3Array(100.090355, 4.9241133, 288.4175, 101.47596, 19.039225, 297.4416, 118.86564, 10.247844, 287.3885, 121.735054, 9.611964, 286.9206, 117.533035, 19.017023, 289.1704, 110.907585, 22.326487, 323.96753, 103.36896, 18.374704, 322.46533, 115.32693, 28.555841, 318.16785, 95.646194, 19.593317, 305.22183, 96.655876, 20.275629, 308.8879, 148.27037, 10.925578, 195.34624, 103.79116, 22.215876, 301.30807, 109.72208, 26.763239, 298.98782, 122.59747, 10.499446, 287.1062, 87.70282, 24.420801, 310.75558, 88.26893, 23.96647, 310.8153, 103.63433, 22.464426, 302.93848, 105.665436, 24.422464, 303.17206, 125.16149, 7.9659986, 286.535)
+yaws = PackedFloat32Array(0.3852632, 0.8980639, 0.98280406, -2.743358, -2.4966252, -2.5277743, -2.2950265, -2.728648, -2.0391755, -1.6655612, -1.7501143, 0.15973473, -1.1219311, 0.50819445, -2.4984844, 0.8495805, -1.5301659, 2.2363994, -0.80521584)
+scale3_list = Array[Vector3]([Vector3(1.082131, 1.0553999, 1.082131), Vector3(1.4319983, 1.368769, 1.4319983), Vector3(1.3107117, 1.274293, 1.3107117), Vector3(1.4291381, 1.5504382, 1.4291381), Vector3(1.5133678, 1.5465888, 1.5133678), Vector3(1.4937032, 1.4581928, 1.4937032), Vector3(1.5918666, 1.5897762, 1.5918666), Vector3(1.2210084, 1.3330586, 1.2210084), Vector3(1.5731758, 1.589427, 1.5731758), Vector3(1.628819, 1.7552942, 1.628819), Vector3(1.1810524, 1.2841824, 1.1810524), Vector3(1.0471859, 1.0110143, 1.0471859), Vector3(1.2226073, 1.254621, 1.2226073), Vector3(0.79390806, 0.8011903, 0.79390806), Vector3(1.2334039, 1.3753862, 1.2334039), Vector3(0.93312734, 1.0321509, 0.93312734), Vector3(1.200314, 1.2358185, 1.200314), Vector3(1.3586793, 1.391029, 1.3586793), Vector3(1.3429177, 1.3940153, 1.3429177)])
+
+[node name="B_Trunchi_c_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_C"
+positions = PackedVector3Array(100.090355, 4.9241133, 288.4175, 88.85449, 21.40777, 302.2747, 85.980515, 22.972666, 301.34415, 107.98411, 21.626383, 323.25345, 98.62682, 18.571924, 318.81924, 101.32836, 16.620768, 322.8632, 102.832985, 20.318247, 297.66162, 101.47596, 19.039225, 297.4416, 136.85059, 25.836374, 303.52936, 118.86564, 10.247844, 287.3885, 121.735054, 9.611964, 286.9206, 117.533035, 19.017023, 289.1704, 109.6958, 26.535791, 316.25897, 111.334694, 28.557352, 314.3145, 110.72814, 17.344599, 330.0664, 110.907585, 22.326487, 323.96753, 107.90522, 26.421106, 302.73352, 122.54095, 26.607767, 292.6892, 127.65884, 27.203562, 294.59595, 126.574, 22.794794, 326.35394, 103.36896, 18.374704, 322.46533, 98.07725, 16.925089, 322.8963, 105.516624, 14.685283, 339.90543, 108.76283, 15.168956, 335.96646, 100.813225, 14.587443, 342.2648, 107.22049, 17.541391, 289.88013, 116.97053, 32.392498, 311.94998, 115.32693, 28.555841, 318.16785, 122.26288, 33.04617, 310.3534, 86.50997, 22.462534, 301.0708, 89.50756, 21.791742, 304.54086, 95.646194, 19.593317, 305.22183, 99.94407, 20.521769, 304.90427, 97.921875, 20.608133, 309.3745, 96.655876, 20.275629, 308.8879, 90.629005, 21.677668, 307.85645, 101.002594, 20.6309, 304.32196, 101.01138, 19.864145, 301.08075, 95.99331, 19.51417, 304.54636, 102.98395, 21.642557, 301.8896, 121.90172, 23.685099, 289.9791, 108.860245, 14.838222, 337.22455, 107.01671, 14.963466, 342.10245, 148.27037, 10.925578, 195.34624, 101.24854, 19.987818, 301.36005, 103.79116, 22.215876, 301.30807, 97.64513, 17.641611, 297.7525, 100.126656, 15.890178, 292.52075, 101.3207, 10.07162, 289.28275, 104.66284, 21.257181, 296.64063, 109.72208, 26.763239, 298.98782, 103.05407, 21.0272, 299.0349, 122.59747, 10.499446, 287.1062, 103.929504, 18.867014, 293.60513, 104.42567, 18.299204, 291.79965, 90.330025, 14.4006605, 291.04193, 87.70282, 24.420801, 310.75558, 88.26893, 23.96647, 310.8153, 103.63433, 22.464426, 302.93848, 105.665436, 24.422464, 303.17206, 101.47041, 20.001352, 300.59293, 102.49351, 22.15211, 305.60626, 105.52708, 21.73533, 296.211, 125.16149, 7.9659986, 286.535)
+yaws = PackedFloat32Array(0.3852632, 0.9843118, -1.5532218, -2.368766, 2.4672086, -1.6345931, 2.9373472, 0.8980639, -1.8099246, 0.98280406, -2.743358, -2.4966252, 0.9978974, 1.7016895, -1.7941582, -2.5277743, 0.3747325, 0.62267566, -2.912345, -1.6241435, -2.2950265, -3.0239968, 2.2171557, -3.1216145, 1.1755693, 2.8953836, 1.575866, -2.728648, 0.4690926, 1.9420855, 0.024038076, -2.0391755, 0.73711896, -1.094588, -1.6655612, 1.7432911, 2.6190856, -1.5604823, 2.2208393, -1.3263004, 0.9404795, -2.365863, -1.388844, -1.7501143, 1.6381128, 0.15973473, 2.9021251, 1.0004408, 2.8791173, 2.096698, -1.1219311, 2.0335624, 0.50819445, 3.0884244, -0.09675646, 2.585055, -2.4984844, 0.8495805, -1.5301659, 2.2363994, -0.07604861, -2.796728, -1.0557725, -0.80521584)
+scale3_list = Array[Vector3]([Vector3(1.082131, 1.0553999, 1.082131), Vector3(1.299399, 1.3402033, 1.299399), Vector3(1.2864763, 1.293156, 1.2864763), Vector3(1.3330873, 1.4230223, 1.3330873), Vector3(1.2364321, 1.3096019, 1.2364321), Vector3(1.1122603, 1.2334248, 1.1122603), Vector3(1.2058216, 1.3329617, 1.2058216), Vector3(1.4319983, 1.368769, 1.4319983), Vector3(1.353676, 1.49818, 1.353676), Vector3(1.3107117, 1.274293, 1.3107117), Vector3(1.4291381, 1.5504382, 1.4291381), Vector3(1.5133678, 1.5465888, 1.5133678), Vector3(1.2849339, 1.3608564, 1.2849339), Vector3(1.4789143, 1.4933194, 1.4789143), Vector3(1.1583499, 1.1022904, 1.1583499), Vector3(1.4937032, 1.4581928, 1.4937032), Vector3(1.5162703, 1.6908381, 1.5162703), Vector3(1.382723, 1.3721465, 1.382723), Vector3(1.5142068, 1.4685848, 1.5142068), Vector3(1.3451596, 1.4787862, 1.3451596), Vector3(1.5918666, 1.5897762, 1.5918666), Vector3(1.2097883, 1.1646237, 1.2097883), Vector3(1.3257896, 1.2755419, 1.3257896), Vector3(1.233099, 1.1871696, 1.233099), Vector3(1.1983421, 1.2283115, 1.1983421), Vector3(1.4981617, 1.4803779, 1.4981617), Vector3(1.3104275, 1.4393449, 1.3104275), Vector3(1.2210084, 1.3330586, 1.2210084), Vector3(1.3237976, 1.2929684, 1.3237976), Vector3(1.4299864, 1.5023116, 1.4299864), Vector3(1.6075135, 1.5827844, 1.6075135), Vector3(1.5731758, 1.589427, 1.5731758), Vector3(1.3203228, 1.4505212, 1.3203228), Vector3(1.3400892, 1.4462837, 1.3400892), Vector3(1.628819, 1.7552942, 1.628819), Vector3(1.5018498, 1.5432426, 1.5018498), Vector3(1.3449463, 1.4455159, 1.3449463), Vector3(1.5766474, 1.7624016, 1.5766474), Vector3(1.2034322, 1.308627, 1.2034322), Vector3(1.3079981, 1.3472562, 1.3079981), Vector3(1.5105112, 1.667222, 1.5105112), Vector3(1.2206552, 1.3335534, 1.2206552), Vector3(1.139294, 1.1958276, 1.139294), Vector3(1.1810524, 1.2841824, 1.1810524), Vector3(0.8007174, 0.867341, 0.8007174), Vector3(1.0471859, 1.0110143, 1.0471859), Vector3(0.9768523, 1.006402, 0.9768523), Vector3(0.92388344, 0.9004746, 0.92388344), Vector3(0.7737138, 0.85254794, 0.7737138), Vector3(1.0719521, 1.0254455, 1.0719521), Vector3(1.2226073, 1.254621, 1.2226073), Vector3(0.91786754, 0.9858507, 0.91786754), Vector3(0.79390806, 0.8011903, 0.79390806), Vector3(0.91594005, 0.92213976, 0.91594005), Vector3(1.2011575, 1.271107, 1.2011575), Vector3(0.85533, 0.81898475, 0.85533), Vector3(1.2334039, 1.3753862, 1.2334039), Vector3(0.93312734, 1.0321509, 0.93312734), Vector3(1.200314, 1.2358185, 1.200314), Vector3(1.3586793, 1.391029, 1.3586793), Vector3(1.4553268, 1.4430257, 1.4553268), Vector3(1.2348775, 1.1850913, 1.2348775), Vector3(0.5549374, 0.5584372, 0.5549374), Vector3(1.3429177, 1.3940153, 1.3429177)])
+
+[node name="B_Molid_d_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_D"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(102.29884, -7.260564, 286.13474, 103.851456, 11.348475, 289.28726, 102.12054, 19.472666, 317.67636, 103.60715, 20.78654, 317.79236, 135.59007, 26.21667, 301.33282, 141.46379, 22.04745, 304.46783, 113.8325, -13.02892, 284.2315, 121.4367, 24.92045, 290.51593, 111.8421, 3.613841, 287.11966, 115.063805, 31.65693, 309.6713, 131.53027, 15.925639, 288.66403, 137.69318, 0.606593, 284.27902, 123.97064, 29.09321, 295.84427, 105.06402, 23.084131, 300.24026, 102.8758, 15.788951, 290.1138, 128.2677, 4.4352217, 285.76547)
+yaws = PackedFloat32Array(1.6245091, 2.598828, 2.4892719, -2.5748606, -1.9367027, 2.251592, -0.017073154, -0.8326559, 1.5635746, -0.39912653, -0.69846106, -2.8473449, 1.291045, 1.3674338, -1.0013862, 0.8681543)
+scale3_list = Array[Vector3]([Vector3(0.897297, 0.9039197, 0.897297), Vector3(1.4636539, 1.3988895, 1.4636539), Vector3(1.5573337, 1.7122494, 1.5573337), Vector3(1.247428, 1.286375, 1.247428), Vector3(1.201944, 1.2038549, 1.201944), Vector3(1.3538473, 1.3351403, 1.3538473), Vector3(0.7356965, 0.7935905, 0.7356965), Vector3(1.496118, 1.4920778, 1.496118), Vector3(1.3036234, 1.3148079, 1.3036234), Vector3(1.6095811, 1.5680757, 1.6095811), Vector3(1.1794919, 1.2985744, 1.1794919), Vector3(1.2436035, 1.2432563, 1.2436035), Vector3(1.6476759, 1.6168634, 1.6476759), Vector3(1.4351053, 1.5780635, 1.4351053), Vector3(0.7851402, 0.78568786, 0.7851402), Vector3(1.4110541, 1.448226, 1.4110541)])
+
+[node name="B_Trunchi_d_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_D"
+positions = PackedVector3Array(102.29884, -7.260564, 286.13474, 103.851456, 11.348475, 289.28726, 102.12054, 19.472666, 317.67636, 103.60715, 20.78654, 317.79236, 139.36195, 22.605967, 299.55026, 135.59007, 26.21667, 301.33282, 141.46379, 22.04745, 304.46783, 113.8325, -13.02892, 284.2315, 121.4367, 24.92045, 290.51593, 87.50217, 13.889827, 339.52496, 111.8421, 3.613841, 287.11966, 115.063805, 31.65693, 309.6713, 89.77075, 19.390146, 299.52634, 131.53027, 15.925639, 288.66403, 137.69318, 0.606593, 284.27902, 123.97064, 29.09321, 295.84427, 100.39399, 14.240153, 334.3342, 105.06402, 23.084131, 300.24026, 102.8758, 15.788951, 290.1138, 128.2677, 4.4352217, 285.76547)
+yaws = PackedFloat32Array(1.6245091, 2.598828, 2.4892719, -2.5748606, -0.005316496, -1.9367027, 2.251592, -0.017073154, -0.8326559, 0.57752776, 1.5635746, -0.39912653, -2.259771, -0.69846106, -2.8473449, 1.291045, -1.109206, 1.3674338, -1.0013862, 0.8681543)
+scale3_list = Array[Vector3]([Vector3(0.897297, 0.9039197, 0.897297), Vector3(1.4636539, 1.3988895, 1.4636539), Vector3(1.5573337, 1.7122494, 1.5573337), Vector3(1.247428, 1.286375, 1.247428), Vector3(1.3792732, 1.4424713, 1.3792732), Vector3(1.201944, 1.2038549, 1.201944), Vector3(1.3538473, 1.3351403, 1.3538473), Vector3(0.7356965, 0.7935905, 0.7356965), Vector3(1.496118, 1.4920778, 1.496118), Vector3(1.3336433, 1.3194504, 1.3336433), Vector3(1.3036234, 1.3148079, 1.3036234), Vector3(1.6095811, 1.5680757, 1.6095811), Vector3(1.3292774, 1.3983728, 1.3292774), Vector3(1.1794919, 1.2985744, 1.1794919), Vector3(1.2436035, 1.2432563, 1.2436035), Vector3(1.6476759, 1.6168634, 1.6476759), Vector3(1.4539152, 1.3888911, 1.4539152), Vector3(1.4351053, 1.5780635, 1.4351053), Vector3(0.7851402, 0.78568786, 0.7851402), Vector3(1.4110541, 1.448226, 1.4110541)])
+
+[node name="B_FagFrunze_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_beech_a")
+mesh_name = "Beech_Leaves"
+tri_class = "tf_beech"
+positions = PackedVector3Array(98.51616, 15.211284, 292.34903, 86.75104, 23.154367, 302.79913, 139.70969, 23.496927, 304.0846, 111.50068, 24.631296, 321.3589, 110.68083, 27.078623, 316.31888, 106.16677, 20.718561, 322.0903, 98.400734, 18.937159, 300.21555, 124.30601, 13.243754, 287.68832, 97.310104, 17.804895, 321.10065, 100.986244, 17.26951, 321.0992, 118.26352, 31.847757, 314.4782, 95.35058, 16.82281, 297.87976, 107.7815, -10.942601, 285.25262, 108.89419, 19.025446, 289.91965, 93.28379, 19.09086, 305.51416, 110.986755, 15.28654, 336.8196, 107.239296, 25.491144, 301.77695, 147.59651, 9.768657, 198.26147, 99.429794, 20.750996, 306.19, 101.62503, 18.222178, 295.65036, 96.347496, 15.006747, 293.3094, 107.78053, 23.590961, 295.9078, 105.15899, 23.564243, 301.61646, 93.08657, -11.335408, 285.57324, 95.883736, -28.350002, 282.17896, 103.37782, 0.6105682, 287.55164, 129.05821, -11.539586, 281.5361, 129.02821, -8.833341, 282.8648, 97.23511, 9.393085, 289.38876, 106.254364, 20.538532, 293.31866, 86.22229, -10.866765, 285.42642, 89.50504, 14.941295, 291.29623, 92.00996, 4.850192, 288.5996, 85.46543, 19.413395, 294.89868, 88.20738, 23.632746, 307.69495, 90.90926, 21.37244, 306.66452, 99.63966, 20.909534, 307.80164, 99.0983, 20.436695, 305.08316, 105.930954, 25.447926, 305.4463, 121.942406, 15.771312, 288.25806, 126.8293, -5.849759, 283.51483)
+yaws = PackedFloat32Array(-0.20404148, -2.2490072, -0.9739306, -2.4976509, -1.6585684, -1.0903373, -0.62259483, -0.14943862, 1.7730806, 1.7262905, 0.26503372, -0.6907284, 2.9190624, 2.8125527, 0.4159863, -0.2168746, -0.14556289, -2.4425354, -1.5035979, 1.3796146, 1.6657531, 0.1853354, 3.0407708, 0.13110209, -0.65625215, 1.1067255, -2.8419771, 0.4129727, 0.76101017, -2.2834816, -1.7808106, -0.99253726, 0.03895521, -0.32609725, 0.33538795, -0.69933414, -2.6291332, 2.6121042, -2.9202743, -1.3206408, -1.4138275)
+scale3_list = Array[Vector3]([Vector3(1.0828615, 1.0828615, 1.0828615), Vector3(1.3951458, 1.3951458, 1.3951458), Vector3(1.0731701, 1.0731701, 1.0731701), Vector3(1.3402759, 1.3402759, 1.3402759), Vector3(1.2116169, 1.2116169, 1.2116169), Vector3(1.1988558, 1.1988558, 1.1988558), Vector3(1.2306262, 1.2306262, 1.2306262), Vector3(1.2264345, 1.2264345, 1.2264345), Vector3(1.1710961, 1.1710961, 1.1710961), Vector3(1.1301304, 1.1301304, 1.1301304), Vector3(1.3659042, 1.3659042, 1.3659042), Vector3(1.1756076, 1.1756076, 1.1756076), Vector3(0.8030524, 0.8030524, 0.8030524), Vector3(1.064748, 1.064748, 1.064748), Vector3(1.1891482, 1.1891482, 1.1891482), Vector3(0.93184745, 0.93184745, 0.93184745), Vector3(1.3476553, 1.3476553, 1.3476553), Vector3(1.0211852, 1.0211852, 1.0211852), Vector3(0.35093343, 0.2982934, 0.35093343), Vector3(0.52246565, 0.52246565, 0.52246565), Vector3(0.3585343, 0.30475417, 0.3585343), Vector3(0.40775353, 0.3465905, 0.40775353), Vector3(0.31418613, 0.2670582, 0.31418613), Vector3(0.6305153, 0.6305153, 0.6305153), Vector3(0.43669358, 0.37118953, 0.43669358), Vector3(0.39210564, 0.3332898, 0.39210564), Vector3(1.2096795, 1.2096795, 1.2096795), Vector3(0.4116959, 0.34994152, 0.4116959), Vector3(0.30391952, 0.2583316, 0.30391952), Vector3(0.46703708, 0.3969815, 0.46703708), Vector3(0.80713326, 0.80713326, 0.80713326), Vector3(0.6067308, 0.6067308, 0.6067308), Vector3(0.44141245, 0.37520057, 0.44141245), Vector3(0.41095263, 0.34930974, 0.41095263), Vector3(0.64100003, 0.64100003, 0.64100003), Vector3(0.493216, 0.41923362, 0.493216), Vector3(0.430179, 0.36565214, 0.430179), Vector3(0.45909184, 0.39022806, 0.45909184), Vector3(0.40307444, 0.34261328, 0.40307444), Vector3(0.9995312, 0.9995312, 0.9995312), Vector3(0.3123752, 0.2655189, 0.3123752)])
+
+[node name="B_FagScoarta_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_beech_a")
+mesh_name = "Beech_Bark"
+positions = PackedVector3Array(98.51616, 15.211284, 292.34903, 86.75104, 23.154367, 302.79913, 139.70969, 23.496927, 304.0846, 111.50068, 24.631296, 321.3589, 110.68083, 27.078623, 316.31888, 106.16677, 20.718561, 322.0903, 98.400734, 18.937159, 300.21555, 124.30601, 13.243754, 287.68832, 97.310104, 17.804895, 321.10065, 100.986244, 17.26951, 321.0992, 118.26352, 31.847757, 314.4782, 95.35058, 16.82281, 297.87976, 107.7815, -10.942601, 285.25262, 108.89419, 19.025446, 289.91965, 93.28379, 19.09086, 305.51416, 110.986755, 15.28654, 336.8196, 107.239296, 25.491144, 301.77695, 147.59651, 9.768657, 198.26147, 99.429794, 20.750996, 306.19, 101.62503, 18.222178, 295.65036, 96.347496, 15.006747, 293.3094, 107.78053, 23.590961, 295.9078, 105.15899, 23.564243, 301.61646, 93.08657, -11.335408, 285.57324, 95.883736, -28.350002, 282.17896, 103.37782, 0.6105682, 287.55164, 129.05821, -11.539586, 281.5361, 129.02821, -8.833341, 282.8648, 97.23511, 9.393085, 289.38876, 106.254364, 20.538532, 293.31866, 86.22229, -10.866765, 285.42642, 89.50504, 14.941295, 291.29623, 92.00996, 4.850192, 288.5996, 85.46543, 19.413395, 294.89868, 88.20738, 23.632746, 307.69495, 90.90926, 21.37244, 306.66452, 99.63966, 20.909534, 307.80164, 99.0983, 20.436695, 305.08316, 105.930954, 25.447926, 305.4463, 121.942406, 15.771312, 288.25806, 126.8293, -5.849759, 283.51483)
+yaws = PackedFloat32Array(-0.20404148, -2.2490072, -0.9739306, -2.4976509, -1.6585684, -1.0903373, -0.62259483, -0.14943862, 1.7730806, 1.7262905, 0.26503372, -0.6907284, 2.9190624, 2.8125527, 0.4159863, -0.2168746, -0.14556289, -2.4425354, -1.5035979, 1.3796146, 1.6657531, 0.1853354, 3.0407708, 0.13110209, -0.65625215, 1.1067255, -2.8419771, 0.4129727, 0.76101017, -2.2834816, -1.7808106, -0.99253726, 0.03895521, -0.32609725, 0.33538795, -0.69933414, -2.6291332, 2.6121042, -2.9202743, -1.3206408, -1.4138275)
+scale3_list = Array[Vector3]([Vector3(1.0828615, 1.0828615, 1.0828615), Vector3(1.3951458, 1.3951458, 1.3951458), Vector3(1.0731701, 1.0731701, 1.0731701), Vector3(1.3402759, 1.3402759, 1.3402759), Vector3(1.2116169, 1.2116169, 1.2116169), Vector3(1.1988558, 1.1988558, 1.1988558), Vector3(1.2306262, 1.2306262, 1.2306262), Vector3(1.2264345, 1.2264345, 1.2264345), Vector3(1.1710961, 1.1710961, 1.1710961), Vector3(1.1301304, 1.1301304, 1.1301304), Vector3(1.3659042, 1.3659042, 1.3659042), Vector3(1.1756076, 1.1756076, 1.1756076), Vector3(0.8030524, 0.8030524, 0.8030524), Vector3(1.064748, 1.064748, 1.064748), Vector3(1.1891482, 1.1891482, 1.1891482), Vector3(0.93184745, 0.93184745, 0.93184745), Vector3(1.3476553, 1.3476553, 1.3476553), Vector3(1.0211852, 1.0211852, 1.0211852), Vector3(0.35093343, 0.2982934, 0.35093343), Vector3(0.52246565, 0.52246565, 0.52246565), Vector3(0.3585343, 0.30475417, 0.3585343), Vector3(0.40775353, 0.3465905, 0.40775353), Vector3(0.31418613, 0.2670582, 0.31418613), Vector3(0.6305153, 0.6305153, 0.6305153), Vector3(0.43669358, 0.37118953, 0.43669358), Vector3(0.39210564, 0.3332898, 0.39210564), Vector3(1.2096795, 1.2096795, 1.2096795), Vector3(0.4116959, 0.34994152, 0.4116959), Vector3(0.30391952, 0.2583316, 0.30391952), Vector3(0.46703708, 0.3969815, 0.46703708), Vector3(0.80713326, 0.80713326, 0.80713326), Vector3(0.6067308, 0.6067308, 0.6067308), Vector3(0.44141245, 0.37520057, 0.44141245), Vector3(0.41095263, 0.34930974, 0.41095263), Vector3(0.64100003, 0.64100003, 0.64100003), Vector3(0.493216, 0.41923362, 0.493216), Vector3(0.430179, 0.36565214, 0.430179), Vector3(0.45909184, 0.39022806, 0.45909184), Vector3(0.40307444, 0.34261328, 0.40307444), Vector3(0.9995312, 0.9995312, 0.9995312), Vector3(0.3123752, 0.2655189, 0.3123752)])
+
+[node name="B_MolidA_b_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_B"
+positions = PackedVector3Array(102.895805, 16.694239, 290.88388, 99.91975, 17.786737, 320.23865, 124.875435, 25.768137, 291.44403, 127.29567, 24.01475, 324.74185, 127.289764, 19.855753, 329.42194, 106.92706, 19.000391, 326.07547, 103.709694, 14.557246, 338.1362, 135.84271, 19.82963, 290.15335, 110.997894, 16.73121, 332.7583, 105.619514, 15.527995, 334.18784, 103.080696, 21.083735, 299.17438, 147.00435, 8.595073, 201.73161, 106.79013, 21.149744, 293.63574, 98.536964, -8.122197, 286.14166, 125.335754, -5.787389, 283.5445)
+yaws = PackedFloat32Array(1.0535133, -1.426713, -0.09328699, -2.6231039, -2.5160244, 2.0181377, 2.5106528, 3.0845664, -2.1294541, -0.99766946, -1.1189344, -0.1901803, 0.6670902, 1.4134829, 0.409384)
+scale3_list = Array[Vector3]([Vector3(1.1846818, 1.2256223, 1.1846818), Vector3(1.2617325, 1.3111708, 1.2617325), Vector3(1.4806277, 1.5672035, 1.4806277), Vector3(1.3759065, 1.4189478, 1.3759065), Vector3(1.3478571, 1.410094, 1.3478571), Vector3(1.3822384, 1.3480597, 1.3822384), Vector3(1.1954604, 1.1650915, 1.1954604), Vector3(1.2936692, 1.3384221, 1.2936692), Vector3(1.4920673, 1.6568091, 1.4920673), Vector3(1.4116503, 1.370158, 1.4116503), Vector3(1.2254143, 1.2218103, 1.2254143), Vector3(0.951771, 0.9410081, 0.951771), Vector3(0.5562207, 0.5496997, 0.5562207), Vector3(1.4086297, 1.4402674, 1.4086297), Vector3(1.4615993, 1.4398508, 1.4615993)])
+
+[node name="B_Trunchi_b_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_B"
+positions = PackedVector3Array(102.895805, 16.694239, 290.88388, 99.35292, 15.847316, 325.21753, 99.91975, 17.786737, 320.23865, 95.26086, 17.034754, 323.5919, 104.527374, 22.312708, 298.9815, 106.91769, 24.575327, 299.64102, 134.97144, 27.779154, 308.79672, 135.17226, 27.684168, 305.0066, 118.38981, 26.50152, 322.55624, 110.0921, 24.235132, 320.8873, 108.384766, 18.019053, 327.93146, 105.53571, 18.537806, 326.05136, 105.94074, 17.082666, 328.0437, 101.33101, 20.376108, 302.6907, 124.875435, 25.768137, 291.44403, 122.0133, 26.623163, 292.73773, 122.93916, 24.853998, 324.67184, 125.150955, 27.680918, 321.57797, 121.68313, 23.32757, 326.24075, 120.849205, 28.849009, 319.45874, 127.29567, 24.01475, 324.74185, 127.289764, 19.855753, 329.42194, 106.92706, 19.000391, 326.07547, 103.709694, 14.557246, 338.1362, 107.755455, -7.2796373, 285.84225, 114.63978, 30.190042, 314.86047, 110.706635, 28.613428, 312.66403, 92.16268, 15.7037, 295.32886, 86.3787, 19.314829, 295.38278, 98.65033, 19.59167, 302.25693, 135.84271, 19.82963, 290.15335, 134.70586, 2.4001722, 285.24927, 133.73643, 22.724085, 292.20483, 120.502365, 26.831705, 293.09192, 114.93328, 28.244501, 296.67194, 110.562454, 15.904735, 335.2508, 110.997894, 16.73121, 332.7583, 105.619514, 15.527995, 334.18784, 103.080696, 21.083735, 299.17438, 108.84857, 25.98002, 298.39032, 147.00435, 8.595073, 201.73161, 149.1668, 10.828166, 194.54657, 103.962, 21.649744, 298.2868, 103.89748, 18.59672, 293.12866, 106.79013, 21.149744, 293.63574, 106.07691, 21.045816, 294.431, 98.536964, -8.122197, 286.14166, 98.511345, 6.0387983, 288.71524, 125.335754, -5.787389, 283.5445, 105.79734, 22.799677, 297.46368, 96.964554, 15.484111, 294.04684, 87.34288, 15.321345, 290.56982, 90.99575, 21.341196, 307.55264, 99.716705, 19.67521, 301.5591, 99.25188, 19.422083, 300.9496, 127.83975, 17.620356, 288.74594, 129.33485, 5.443141, 285.99704)
+yaws = PackedFloat32Array(1.0535133, -2.410768, -1.426713, -1.4845824, 1.1286056, -1.7187139, 1.9137914, -1.7329258, -0.31398654, 2.3118713, -0.36004758, -2.4665248, 0.07799363, -1.7735485, -0.09328699, 0.78170776, -0.66383314, 0.367249, -2.4471216, -1.6969651, -2.6231039, -2.5160244, 2.0181377, 2.5106528, 1.1382086, 3.0446675, -1.4481566, -0.2628858, 1.6876075, -1.4237775, 3.0845664, -2.774743, 0.9845526, -0.15076971, 2.8904297, 1.4071343, -2.1294541, -0.99766946, -1.1189344, -3.0102255, -0.1901803, -1.121707, -0.7493491, 1.4277909, 0.6670902, 1.3172519, 1.4134829, -1.3306386, 0.409384, 0.8438232, -1.5807524, 0.14289999, -0.77872777, 0.30287814, -2.502937, 0.8982785, -2.6506028)
+scale3_list = Array[Vector3]([Vector3(1.1846818, 1.2256223, 1.1846818), Vector3(1.215761, 1.155034, 1.215761), Vector3(1.2617325, 1.3111708, 1.2617325), Vector3(1.4702849, 1.4743884, 1.4702849), Vector3(1.6317698, 1.6260909, 1.6317698), Vector3(1.6036333, 1.7934455, 1.6036333), Vector3(1.5951993, 1.6005745, 1.5951993), Vector3(1.5702809, 1.6684898, 1.5702809), Vector3(1.6494206, 1.6214556, 1.6494206), Vector3(1.4393396, 1.4203439, 1.4393396), Vector3(1.2911727, 1.2956175, 1.2911727), Vector3(1.3923777, 1.3663236, 1.3923777), Vector3(1.3238434, 1.2919396, 1.3238434), Vector3(1.2164948, 1.1593326, 1.2164948), Vector3(1.4806277, 1.5672035, 1.4806277), Vector3(1.6059804, 1.6646917, 1.6059804), Vector3(1.2070769, 1.3208591, 1.2070769), Vector3(1.3902781, 1.3692344, 1.3902781), Vector3(1.3588374, 1.3251214, 1.3588374), Vector3(1.5638976, 1.5008804, 1.5638976), Vector3(1.3759065, 1.4189478, 1.3759065), Vector3(1.3478571, 1.410094, 1.3478571), Vector3(1.3822384, 1.3480597, 1.3822384), Vector3(1.1954604, 1.1650915, 1.1954604), Vector3(0.9409473, 1.0524951, 0.9409473), Vector3(1.402727, 1.5289168, 1.402727), Vector3(1.4040785, 1.4756312, 1.4040785), Vector3(1.046294, 1.06866, 1.046294), Vector3(1.0506154, 1.0332565, 1.0506154), Vector3(1.2496322, 1.3081808, 1.2496322), Vector3(1.2936692, 1.3384221, 1.2936692), Vector3(1.2298417, 1.2737547, 1.2298417), Vector3(1.2290795, 1.3624372, 1.2290795), Vector3(1.5076739, 1.6820067, 1.5076739), Vector3(1.3005283, 1.2824856, 1.3005283), Vector3(1.3192632, 1.337783, 1.3192632), Vector3(1.4920673, 1.6568091, 1.4920673), Vector3(1.4116503, 1.370158, 1.4116503), Vector3(1.2254143, 1.2218103, 1.2254143), Vector3(1.1679429, 1.1587307, 1.1679429), Vector3(0.951771, 0.9410081, 0.951771), Vector3(0.7320213, 0.7181191, 0.7320213), Vector3(1.0575967, 1.0676131, 1.0575967), Vector3(0.7587498, 0.7852797, 0.7587498), Vector3(0.5562207, 0.5496997, 0.5562207), Vector3(0.85120475, 0.9517759, 0.85120475), Vector3(1.4086297, 1.4402674, 1.4086297), Vector3(1.3318968, 1.4700391, 1.3318968), Vector3(1.4615993, 1.4398508, 1.4615993), Vector3(1.0220573, 1.0762343, 1.0220573), Vector3(0.9164605, 1.0039287, 0.9164605), Vector3(1.2895244, 1.3783771, 1.2895244), Vector3(1.3467418, 1.4797306, 1.3467418), Vector3(1.2786875, 1.3602694, 1.2786875), Vector3(1.1388807, 1.1172181, 1.1388807), Vector3(0.99297667, 1.0698364, 0.99297667), Vector3(1.4361782, 1.5341728, 1.4361782)])
+
+[node name="B_Molid_b_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_B"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(83.813156, 24.292032, 301.48315, 80.55726, 26.923517, 303.28198, 58.905685, 20.912256, 326.04935, 62.16432, 26.215006, 321.03824, 47.47118, 1.7708386, 294.46664, 71.0193, 13.532786, 347.96918, 58.66986, 17.207209, 331.88184, 79.34981, 29.028421, 306.66736, 69.96193, -9.605947, 291.8329, 66.441536, 11.468455, 295.77628)
+yaws = PackedFloat32Array(-0.036781788, 1.2518666, -0.079642534, 2.422253, 2.073992, 0.038544655, -1.6069449, -1.9990366, -2.1128635, -1.6325395)
+scale3_list = Array[Vector3]([Vector3(1.4150633, 1.4624311, 1.4150633), Vector3(1.4928024, 1.4984343, 1.4928024), Vector3(1.3233658, 1.3783888, 1.3233658), Vector3(1.1562382, 1.1070646, 1.1562382), Vector3(1.0347372, 0.9942293, 1.0347372), Vector3(1.5215855, 1.5161078, 1.5215855), Vector3(1.2115315, 1.1896187, 1.2115315), Vector3(1.7004427, 1.722792, 1.7004427), Vector3(1.3087525, 1.4448622, 1.3087525), Vector3(1.4806113, 1.5703689, 1.4806113)])
+
+[node name="B_Trunchi_b_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_B"
+positions = PackedVector3Array(83.813156, 24.292032, 301.48315, 80.55726, 26.923517, 303.28198, 72.069176, -7.6750994, 292.47153, 58.905685, 20.912256, 326.04935, 62.16432, 26.215006, 321.03824, 47.47118, 1.7708386, 294.46664, 54.23338, 6.7904005, 294.12244, 70.27994, 13.272777, 344.94852, 71.0193, 13.532786, 347.96918, 60.358833, 20.01188, 328.51233, 58.66986, 17.207209, 331.88184, 84.17072, 14.664683, 336.64706, 63.151203, 28.87063, 314.54535, 50.17571, 18.280313, 311.2723, 79.34981, 29.028421, 306.66736, 76.916626, 18.717234, 297.0696, 73.45299, 11.075419, 295.8286, 70.756836, 19.568216, 297.15845, 69.96193, -9.605947, 291.8329, 66.441536, 11.468455, 295.77628)
+yaws = PackedFloat32Array(-0.036781788, 1.2518666, -2.0373647, -0.079642534, 2.422253, 2.073992, -2.3046129, -0.9347677, 0.038544655, -0.30389142, -1.6069449, -0.8506532, 2.7655542, 2.2115457, -1.9990366, 2.916577, -2.2512186, 0.15692711, -2.1128635, -1.6325395)
+scale3_list = Array[Vector3]([Vector3(1.4150633, 1.4624311, 1.4150633), Vector3(1.4928024, 1.4984343, 1.4928024), Vector3(0.7909855, 0.82435846, 0.7909855), Vector3(1.3233658, 1.3783888, 1.3233658), Vector3(1.1562382, 1.1070646, 1.1562382), Vector3(1.0347372, 0.9942293, 1.0347372), Vector3(1.1663508, 1.1695437, 1.1663508), Vector3(1.1599731, 1.2193626, 1.1599731), Vector3(1.5215855, 1.5161078, 1.5215855), Vector3(1.2265756, 1.3082894, 1.2265756), Vector3(1.2115315, 1.1896187, 1.2115315), Vector3(1.436215, 1.470735, 1.436215), Vector3(1.3837663, 1.5138756, 1.3837663), Vector3(1.3368031, 1.4835674, 1.3368031), Vector3(1.7004427, 1.722792, 1.7004427), Vector3(1.192275, 1.3154086, 1.192275), Vector3(0.9937094, 1.0041443, 0.9937094), Vector3(0.9299698, 0.886745, 0.9299698), Vector3(1.3087525, 1.4448622, 1.3087525), Vector3(1.4806113, 1.5703689, 1.4806113)])
+
+[node name="B_MolidA_d_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_D"
+positions = PackedVector3Array(81.60332, 23.89718, 298.90134, 54.154305, 14.002406, 332.86935, 66.716354, 30.042871, 315.5509, 73.31059, 27.228632, 300.99216)
+yaws = PackedFloat32Array(1.0795953, 3.1213877, -2.7234166, -0.27297235)
+scale3_list = Array[Vector3]([Vector3(1.2517524, 1.3122163, 1.2517524), Vector3(1.4557551, 1.5876575, 1.4557551), Vector3(1.575086, 1.701862, 1.575086), Vector3(0.9737642, 1.0567559, 0.9737642)])
+
+[node name="B_Trunchi_d_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_D"
+positions = PackedVector3Array(81.60332, 23.89718, 298.90134, 54.47448, 20.46348, 321.77448, 54.359833, 0.3510388, 291.66327, 60.68655, 16.318308, 333.8844, 54.154305, 14.002406, 332.86935, 66.716354, 30.042871, 315.5509, 74.37617, 30.742792, 309.62527, 80.036, 28.420603, 305.72693, 78.01036, 4.6372786, 294.4387, 73.31059, 27.228632, 300.99216)
+yaws = PackedFloat32Array(1.0795953, -1.510413, 2.121287, -1.5366899, 3.1213877, -2.7234166, -1.8989145, -1.5713384, -1.6454225, -0.27297235)
+scale3_list = Array[Vector3]([Vector3(1.2517524, 1.3122163, 1.2517524), Vector3(1.5803066, 1.6686045, 1.5803066), Vector3(1.2152113, 1.3033905, 1.2152113), Vector3(1.195873, 1.2047682, 1.195873), Vector3(1.4557551, 1.5876575, 1.4557551), Vector3(1.575086, 1.701862, 1.575086), Vector3(1.1726797, 1.1151159, 1.1726797), Vector3(1.2657647, 1.2680593, 1.2657647), Vector3(1.1586924, 1.118207, 1.1586924), Vector3(0.9737642, 1.0567559, 0.9737642)])
+
+[node name="B_Molid_c_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_C"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(88.85449, 21.40777, 302.2747, 85.980515, 22.972666, 301.34415, 107.98411, 21.626383, 323.25345, 98.62682, 18.571924, 318.81924, 101.32836, 16.620768, 322.8632, 102.832985, 20.318247, 297.66162, 136.85059, 25.836374, 303.52936, 109.6958, 26.535791, 316.25897, 111.334694, 28.557352, 314.3145, 110.72814, 17.344599, 330.0664, 107.90522, 26.421106, 302.73352, 122.54095, 26.607767, 292.6892, 127.65884, 27.203562, 294.59595, 126.574, 22.794794, 326.35394, 98.07725, 16.925089, 322.8963, 105.516624, 14.685283, 339.90543, 108.76283, 15.168956, 335.96646, 100.813225, 14.587443, 342.2648, 107.22049, 17.541391, 289.88013, 116.97053, 32.392498, 311.94998, 122.26288, 33.04617, 310.3534, 86.50997, 22.462534, 301.0708, 89.50756, 21.791742, 304.54086, 99.94407, 20.521769, 304.90427, 97.921875, 20.608133, 309.3745, 90.629005, 21.677668, 307.85645, 101.002594, 20.6309, 304.32196, 101.01138, 19.864145, 301.08075, 95.99331, 19.51417, 304.54636, 102.98395, 21.642557, 301.8896, 121.90172, 23.685099, 289.9791, 108.860245, 14.838222, 337.22455, 107.01671, 14.963466, 342.10245, 101.24854, 19.987818, 301.36005, 97.64513, 17.641611, 297.7525, 100.126656, 15.890178, 292.52075, 101.3207, 10.07162, 289.28275, 104.66284, 21.257181, 296.64063, 103.05407, 21.0272, 299.0349, 103.929504, 18.867014, 293.60513, 104.42567, 18.299204, 291.79965, 90.330025, 14.4006605, 291.04193, 101.47041, 20.001352, 300.59293, 102.49351, 22.15211, 305.60626, 105.52708, 21.73533, 296.211)
+yaws = PackedFloat32Array(0.9843118, -1.5532218, -2.368766, 2.4672086, -1.6345931, 2.9373472, -1.8099246, 0.9978974, 1.7016895, -1.7941582, 0.3747325, 0.62267566, -2.912345, -1.6241435, -3.0239968, 2.2171557, -3.1216145, 1.1755693, 2.8953836, 1.575866, 0.4690926, 1.9420855, 0.024038076, 0.73711896, -1.094588, 1.7432911, 2.6190856, -1.5604823, 2.2208393, -1.3263004, 0.9404795, -2.365863, -1.388844, 1.6381128, 2.9021251, 1.0004408, 2.8791173, 2.096698, 2.0335624, 3.0884244, -0.09675646, 2.585055, -0.07604861, -2.796728, -1.0557725)
+scale3_list = Array[Vector3]([Vector3(1.299399, 1.3402033, 1.299399), Vector3(1.2864763, 1.293156, 1.2864763), Vector3(1.3330873, 1.4230223, 1.3330873), Vector3(1.2364321, 1.3096019, 1.2364321), Vector3(1.1122603, 1.2334248, 1.1122603), Vector3(1.2058216, 1.3329617, 1.2058216), Vector3(1.353676, 1.49818, 1.353676), Vector3(1.2849339, 1.3608564, 1.2849339), Vector3(1.4789143, 1.4933194, 1.4789143), Vector3(1.1583499, 1.1022904, 1.1583499), Vector3(1.5162703, 1.6908381, 1.5162703), Vector3(1.382723, 1.3721465, 1.382723), Vector3(1.5142068, 1.4685848, 1.5142068), Vector3(1.3451596, 1.4787862, 1.3451596), Vector3(1.2097883, 1.1646237, 1.2097883), Vector3(1.3257896, 1.2755419, 1.3257896), Vector3(1.233099, 1.1871696, 1.233099), Vector3(1.1983421, 1.2283115, 1.1983421), Vector3(1.4981617, 1.4803779, 1.4981617), Vector3(1.3104275, 1.4393449, 1.3104275), Vector3(1.3237976, 1.2929684, 1.3237976), Vector3(1.4299864, 1.5023116, 1.4299864), Vector3(1.6075135, 1.5827844, 1.6075135), Vector3(1.3203228, 1.4505212, 1.3203228), Vector3(1.3400892, 1.4462837, 1.3400892), Vector3(1.5018498, 1.5432426, 1.5018498), Vector3(1.3449463, 1.4455159, 1.3449463), Vector3(1.5766474, 1.7624016, 1.5766474), Vector3(1.2034322, 1.308627, 1.2034322), Vector3(1.3079981, 1.3472562, 1.3079981), Vector3(1.5105112, 1.667222, 1.5105112), Vector3(1.2206552, 1.3335534, 1.2206552), Vector3(1.139294, 1.1958276, 1.139294), Vector3(0.8007174, 0.867341, 0.8007174), Vector3(0.9768523, 1.006402, 0.9768523), Vector3(0.92388344, 0.9004746, 0.92388344), Vector3(0.7737138, 0.85254794, 0.7737138), Vector3(1.0719521, 1.0254455, 1.0719521), Vector3(0.91786754, 0.9858507, 0.91786754), Vector3(0.91594005, 0.92213976, 0.91594005), Vector3(1.2011575, 1.271107, 1.2011575), Vector3(0.85533, 0.81898475, 0.85533), Vector3(1.4553268, 1.4430257, 1.4553268), Vector3(1.2348775, 1.1850913, 1.2348775), Vector3(0.5549374, 0.5584372, 0.5549374)])
+
+[node name="B_Molid_c_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_C"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(82.87548, 21.509058, 296.28143, 70.27474, 8.211543, 295.07687, 68.10146, -13.1531725, 291.09644, 59.603024, 23.375452, 323.1645, 68.18065, 13.155986, 345.4045, 54.38909, 14.815043, 331.19702, 55.060604, 14.208293, 333.7686, 60.586414, 17.07847, 332.94452, 58.700905, 19.609415, 327.65308, 78.91218, 16.321726, 335.48947, 75.791405, 3.5974073, 294.6574)
+yaws = PackedFloat32Array(0.2161262, -0.98735833, -3.025422, 1.9471362, 0.3043604, 1.2385375, 1.3144696, -1.769465, 2.4657624, -2.8148258, 0.6484418)
+scale3_list = Array[Vector3]([Vector3(1.3313197, 1.3132231, 1.3313197), Vector3(1.0773422, 1.1799031, 1.0773422), Vector3(1.0139537, 1.0231594, 1.0139537), Vector3(1.2812954, 1.4134699, 1.2812954), Vector3(1.2438492, 1.307574, 1.2438492), Vector3(1.3280424, 1.3807828, 1.3280424), Vector3(1.397713, 1.5134983, 1.397713), Vector3(1.1747397, 1.3016362, 1.1747397), Vector3(1.4337964, 1.5137588, 1.4337964), Vector3(1.1097999, 1.2074561, 1.1097999), Vector3(1.269761, 1.2665547, 1.269761)])
+
+[node name="B_Trunchi_c_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_C"
+positions = PackedVector3Array(82.87548, 21.509058, 296.28143, 70.27474, 8.211543, 295.07687, 68.10146, -13.1531725, 291.09644, 59.603024, 23.375452, 323.1645, 61.735527, 22.137568, 326.77148, 47.145943, 2.0376387, 293.1112, 68.18065, 13.155986, 345.4045, 54.38909, 14.815043, 331.19702, 55.060604, 14.208293, 333.7686, 56.998085, 17.774256, 328.71057, 60.586414, 17.07847, 332.94452, 58.700905, 19.609415, 327.65308, 78.91218, 16.321726, 335.48947, 52.248497, 20.14889, 309.70813, 77.47832, 30.998743, 314.20358, 82.57355, 27.627985, 308.76825, 75.791405, 3.5974073, 294.6574, 83.92376, 25.314142, 303.65063)
+yaws = PackedFloat32Array(0.2161262, -0.98735833, -3.025422, 1.9471362, -0.62268543, -2.2366629, 0.3043604, 1.2385375, 1.3144696, 1.4817502, -1.769465, 2.4657624, -2.8148258, -0.75127006, -0.28074765, 2.444442, 0.6484418, -1.4964473)
+scale3_list = Array[Vector3]([Vector3(1.3313197, 1.3132231, 1.3313197), Vector3(1.0773422, 1.1799031, 1.0773422), Vector3(1.0139537, 1.0231594, 1.0139537), Vector3(1.2812954, 1.4134699, 1.2812954), Vector3(1.4367892, 1.4792497, 1.4367892), Vector3(1.0533177, 1.0859619, 1.0533177), Vector3(1.2438492, 1.307574, 1.2438492), Vector3(1.3280424, 1.3807828, 1.3280424), Vector3(1.397713, 1.5134983, 1.397713), Vector3(1.3924242, 1.4889866, 1.3924242), Vector3(1.1747397, 1.3016362, 1.1747397), Vector3(1.4337964, 1.5137588, 1.4337964), Vector3(1.1097999, 1.2074561, 1.1097999), Vector3(1.3732374, 1.536584, 1.3732374), Vector3(1.2609919, 1.2283591, 1.2609919), Vector3(1.682379, 1.8484163, 1.682379), Vector3(1.269761, 1.2665547, 1.269761), Vector3(0.8494431, 0.84799296, 0.8494431)])
+
+[node name="B_MolidA_b_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_B"
+positions = PackedVector3Array(72.069176, -7.6750994, 292.47153, 54.23338, 6.7904005, 294.12244, 70.27994, 13.272777, 344.94852, 60.358833, 20.01188, 328.51233, 84.17072, 14.664683, 336.64706, 63.151203, 28.87063, 314.54535, 50.17571, 18.280313, 311.2723, 76.916626, 18.717234, 297.0696, 73.45299, 11.075419, 295.8286, 70.756836, 19.568216, 297.15845)
+yaws = PackedFloat32Array(-2.0373647, -2.3046129, -0.9347677, -0.30389142, -0.8506532, 2.7655542, 2.2115457, 2.916577, -2.2512186, 0.15692711)
+scale3_list = Array[Vector3]([Vector3(0.7909855, 0.82435846, 0.7909855), Vector3(1.1663508, 1.1695437, 1.1663508), Vector3(1.1599731, 1.2193626, 1.1599731), Vector3(1.2265756, 1.3082894, 1.2265756), Vector3(1.436215, 1.470735, 1.436215), Vector3(1.3837663, 1.5138756, 1.3837663), Vector3(1.3368031, 1.4835674, 1.3368031), Vector3(1.192275, 1.3154086, 1.192275), Vector3(0.9937094, 1.0041443, 0.9937094), Vector3(0.9299698, 0.886745, 0.9299698)])
+
+[node name="B_Molid_a_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_A"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(102.5095, 18.913935, 319.8537, 114.96154, 28.56782, 317.8657, 104.3996, 22.723825, 301.18936, 89.53954, 13.888652, 339.17627, 101.9946, 16.289469, 325.26324, 106.18719, 15.09257, 344.24786, 112.102005, -0.65216553, 286.4074, 149.9325, -4.50266, 280.83932, 131.48602, 4.6253004, 285.98947, 104.755104, 14.617946, 338.78317, 101.91361, 17.245173, 293.35083, 96.53811, 16.987787, 297.314, 120.921295, 14.121242, 287.908)
+yaws = PackedFloat32Array(-3.0059624, -2.8927183, 2.1363084, 0.8100662, -3.0476017, -1.1701422, -1.5115548, -0.23383045, 1.5031765, -3.0625641, 2.1473691, -2.2836053, -2.5482898)
+scale3_list = Array[Vector3]([Vector3(1.2052569, 1.230463, 1.2052569), Vector3(1.6315039, 1.619096, 1.6315039), Vector3(1.6092304, 1.6218402, 1.6092304), Vector3(1.1187297, 1.1350179, 1.1187297), Vector3(1.3980747, 1.4495081, 1.3980747), Vector3(1.489992, 1.6112928, 1.489992), Vector3(0.8719022, 0.85190505, 0.8719022), Vector3(0.8745843, 0.92833006, 0.8745843), Vector3(1.1073967, 1.1659838, 1.1073967), Vector3(1.1685302, 1.1220516, 1.1685302), Vector3(0.7551192, 0.7730462, 0.7551192), Vector3(0.6896306, 0.6659574, 0.6896306), Vector3(0.9360813, 1.0128601, 0.9360813)])
+
+[node name="B_Trunchi_a_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_A"
+positions = PackedVector3Array(102.5095, 18.913935, 319.8537, 101.87535, 19.631662, 297.9, 114.96154, 28.56782, 317.8657, 109.68059, 16.229471, 332.77625, 104.3996, 22.723825, 301.18936, 89.53954, 13.888652, 339.17627, 101.9946, 16.289469, 325.26324, 106.18719, 15.09257, 344.24786, 112.102005, -0.65216553, 286.4074, 108.147484, 2.5326033, 287.36707, 149.9325, -4.50266, 280.83932, 131.48602, 4.6253004, 285.98947, 118.56952, 27.84733, 294.53528, 105.63243, 14.676051, 339.5279, 104.755104, 14.617946, 338.78317, 148.98183, 8.625056, 204.20384, 149.75713, 9.628917, 199.647, 101.91361, 17.245173, 293.35083, 96.53811, 16.987787, 297.314, 120.921295, 14.121242, 287.908)
+yaws = PackedFloat32Array(-3.0059624, 2.075435, -2.8927183, -2.1771007, 2.1363084, 0.8100662, -3.0476017, -1.1701422, -1.5115548, -0.45815992, -0.23383045, 1.5031765, -0.22316146, -0.72402763, -3.0625641, 2.2462971, -1.6958528, 2.1473691, -2.2836053, -2.5482898)
+scale3_list = Array[Vector3]([Vector3(1.2052569, 1.230463, 1.2052569), Vector3(1.2521698, 1.3725004, 1.2521698), Vector3(1.6315039, 1.619096, 1.6315039), Vector3(1.4605064, 1.6192051, 1.4605064), Vector3(1.6092304, 1.6218402, 1.6092304), Vector3(1.1187297, 1.1350179, 1.1187297), Vector3(1.3980747, 1.4495081, 1.3980747), Vector3(1.489992, 1.6112928, 1.489992), Vector3(0.8719022, 0.85190505, 0.8719022), Vector3(1.2910714, 1.3844844, 1.2910714), Vector3(0.8745843, 0.92833006, 0.8745843), Vector3(1.1073967, 1.1659838, 1.1073967), Vector3(1.567792, 1.6270181, 1.567792), Vector3(1.293006, 1.4373934, 1.293006), Vector3(1.1685302, 1.1220516, 1.1685302), Vector3(0.7226746, 0.6911468, 0.7226746), Vector3(0.89897907, 0.88627785, 0.89897907), Vector3(0.7551192, 0.7730462, 0.7551192), Vector3(0.6896306, 0.6659574, 0.6896306), Vector3(0.9360813, 1.0128601, 0.9360813)])
+
+[node name="B_Molid_b_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_B"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(99.35292, 15.847316, 325.21753, 95.26086, 17.034754, 323.5919, 104.527374, 22.312708, 298.9815, 106.91769, 24.575327, 299.64102, 134.97144, 27.779154, 308.79672, 135.17226, 27.684168, 305.0066, 118.38981, 26.50152, 322.55624, 110.0921, 24.235132, 320.8873, 108.384766, 18.019053, 327.93146, 105.53571, 18.537806, 326.05136, 105.94074, 17.082666, 328.0437, 101.33101, 20.376108, 302.6907, 122.0133, 26.623163, 292.73773, 122.93916, 24.853998, 324.67184, 125.150955, 27.680918, 321.57797, 121.68313, 23.32757, 326.24075, 120.849205, 28.849009, 319.45874, 107.755455, -7.2796373, 285.84225, 114.63978, 30.190042, 314.86047, 110.706635, 28.613428, 312.66403, 92.16268, 15.7037, 295.32886, 86.3787, 19.314829, 295.38278, 98.65033, 19.59167, 302.25693, 134.70586, 2.4001722, 285.24927, 133.73643, 22.724085, 292.20483, 120.502365, 26.831705, 293.09192, 114.93328, 28.244501, 296.67194, 110.562454, 15.904735, 335.2508, 108.84857, 25.98002, 298.39032, 149.1668, 10.828166, 194.54657, 103.962, 21.649744, 298.2868, 103.89748, 18.59672, 293.12866, 106.07691, 21.045816, 294.431, 98.511345, 6.0387983, 288.71524, 105.79734, 22.799677, 297.46368, 96.964554, 15.484111, 294.04684, 87.34288, 15.321345, 290.56982, 90.99575, 21.341196, 307.55264, 99.716705, 19.67521, 301.5591, 99.25188, 19.422083, 300.9496, 127.83975, 17.620356, 288.74594, 129.33485, 5.443141, 285.99704)
+yaws = PackedFloat32Array(-2.410768, -1.4845824, 1.1286056, -1.7187139, 1.9137914, -1.7329258, -0.31398654, 2.3118713, -0.36004758, -2.4665248, 0.07799363, -1.7735485, 0.78170776, -0.66383314, 0.367249, -2.4471216, -1.6969651, 1.1382086, 3.0446675, -1.4481566, -0.2628858, 1.6876075, -1.4237775, -2.774743, 0.9845526, -0.15076971, 2.8904297, 1.4071343, -3.0102255, -1.121707, -0.7493491, 1.4277909, 1.3172519, -1.3306386, 0.8438232, -1.5807524, 0.14289999, -0.77872777, 0.30287814, -2.502937, 0.8982785, -2.6506028)
+scale3_list = Array[Vector3]([Vector3(1.215761, 1.155034, 1.215761), Vector3(1.4702849, 1.4743884, 1.4702849), Vector3(1.6317698, 1.6260909, 1.6317698), Vector3(1.6036333, 1.7934455, 1.6036333), Vector3(1.5951993, 1.6005745, 1.5951993), Vector3(1.5702809, 1.6684898, 1.5702809), Vector3(1.6494206, 1.6214556, 1.6494206), Vector3(1.4393396, 1.4203439, 1.4393396), Vector3(1.2911727, 1.2956175, 1.2911727), Vector3(1.3923777, 1.3663236, 1.3923777), Vector3(1.3238434, 1.2919396, 1.3238434), Vector3(1.2164948, 1.1593326, 1.2164948), Vector3(1.6059804, 1.6646917, 1.6059804), Vector3(1.2070769, 1.3208591, 1.2070769), Vector3(1.3902781, 1.3692344, 1.3902781), Vector3(1.3588374, 1.3251214, 1.3588374), Vector3(1.5638976, 1.5008804, 1.5638976), Vector3(0.9409473, 1.0524951, 0.9409473), Vector3(1.402727, 1.5289168, 1.402727), Vector3(1.4040785, 1.4756312, 1.4040785), Vector3(1.046294, 1.06866, 1.046294), Vector3(1.0506154, 1.0332565, 1.0506154), Vector3(1.2496322, 1.3081808, 1.2496322), Vector3(1.2298417, 1.2737547, 1.2298417), Vector3(1.2290795, 1.3624372, 1.2290795), Vector3(1.5076739, 1.6820067, 1.5076739), Vector3(1.3005283, 1.2824856, 1.3005283), Vector3(1.3192632, 1.337783, 1.3192632), Vector3(1.1679429, 1.1587307, 1.1679429), Vector3(0.7320213, 0.7181191, 0.7320213), Vector3(1.0575967, 1.0676131, 1.0575967), Vector3(0.7587498, 0.7852797, 0.7587498), Vector3(0.85120475, 0.9517759, 0.85120475), Vector3(1.3318968, 1.4700391, 1.3318968), Vector3(1.0220573, 1.0762343, 1.0220573), Vector3(0.9164605, 1.0039287, 0.9164605), Vector3(1.2895244, 1.3783771, 1.2895244), Vector3(1.3467418, 1.4797306, 1.3467418), Vector3(1.2786875, 1.3602694, 1.2786875), Vector3(1.1388807, 1.1172181, 1.1388807), Vector3(0.99297667, 1.0698364, 0.99297667), Vector3(1.4361782, 1.5341728, 1.4361782)])
+
+[node name="B_MolidA_d_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_D"
+positions = PackedVector3Array(154.13356, 13.696254, 328.33777, 173.86142, 10.702998, 286.55695, 183.66296, 12.021907, 243.90776, 178.1634, 9.074885, 271.65723, 194.60973, 6.8890944, 264.6115, 217.75844, 2.5425978, 247.7799, 222.69965, 1.3240308, 246.01682, 218.5741, 3.97935, 242.68716, 216.35263, 3.4856672, 246.6732)
+yaws = PackedFloat32Array(0.52464604, -2.2584927, 2.5888917, -0.9055748, 0.9423697, -1.4888263, -0.5663357, -1.4281541, 0.82468987)
+scale3_list = Array[Vector3]([Vector3(1.2094142, 1.1630919, 1.2094142), Vector3(1.2796435, 1.3806626, 1.2796435), Vector3(0.9766513, 1.0483729, 0.9766513), Vector3(1.4738785, 1.4996705, 1.4738785), Vector3(1.3143821, 1.4283919, 1.3143821), Vector3(1.2536426, 1.2921064, 1.2536426), Vector3(1.6836451, 1.7451656, 1.6836451), Vector3(1.5154146, 1.6629075, 1.5154146), Vector3(1.3933451, 1.4310303, 1.3933451)])
+
+[node name="B_MolidA_c_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_C"
+positions = PackedVector3Array(153.81596, 14.090022, 333.47308, 160.3638, 11.996791, 298.27014, 168.74133, 11.306102, 299.5432, 171.67667, 10.818065, 281.67334, 177.80484, 9.869472, 283.51913, 156.03493, -0.84421265, 281.27454, 151.27141, -1.4902698, 275.8087, 171.19463, 5.013652, 271.0318, 174.49182, 6.6487837, 274.00775, 171.18756, 12.002009, 239.91261, 179.15242, 12.094752, 241.37523, 207.78233, 12.251155, 220.87819, 176.05962, 11.991084, 249.53339, 191.43996, 10.925044, 247.8782, 220.35912, 7.5673475, 230.7038, 188.12233, 7.527278, 274.93802, 193.7304, 5.9746504, 271.16666, 204.55974, 2.1226454, 267.5842, 211.05585, 2.1955366, 257.06207, 214.00693, 3.4341993, 249.41052, 236.01607, -2.2186937, 242.94061, 167.22363, 8.581401, 200.3871, 167.12428, 9.950694, 202.40771, 156.68835, 9.864924, 199.56287)
+yaws = PackedFloat32Array(-1.030503, 0.30366826, 0.527756, 0.13684368, 1.8166449, -0.38842225, -0.9904239, -2.6509717, 0.41732597, -2.7392442, 1.2247269, 1.5504191, -1.0753489, 1.410527, -0.8794904, 1.7140534, -2.7302995, 1.9652226, -1.6580489, -2.2555974, -0.039816856, 2.9281566, 0.5616901, 1.2354414)
+scale3_list = Array[Vector3]([Vector3(1.0967764, 1.1738464, 1.0967764), Vector3(1.1410121, 1.2366873, 1.1410121), Vector3(1.0806612, 1.192839, 1.0806612), Vector3(1.2609422, 1.374871, 1.2609422), Vector3(1.1498035, 1.1018531, 1.1498035), Vector3(1.2155286, 1.2233062, 1.2155286), Vector3(1.0259258, 1.1160252, 1.0259258), Vector3(1.2450203, 1.3374989, 1.2450203), Vector3(1.0090599, 1.0016139, 1.0090599), Vector3(0.5810846, 0.6090502, 0.5810846), Vector3(0.63179374, 0.6445163, 0.63179374), Vector3(0.985435, 1.0905293, 0.985435), Vector3(0.9609585, 0.95199233, 0.9609585), Vector3(1.3477567, 1.4476799, 1.3477567), Vector3(0.933444, 0.9851739, 0.933444), Vector3(1.4543417, 1.4368443, 1.4543417), Vector3(1.3840837, 1.3272289, 1.3840837), Vector3(1.3447288, 1.4548658, 1.3447288), Vector3(1.5819181, 1.7674907, 1.5819181), Vector3(1.6721146, 1.7933204, 1.6721146), Vector3(1.5817348, 1.6200116, 1.5817348), Vector3(0.73358285, 0.78183323, 0.73358285), Vector3(0.71793437, 0.7612196, 0.71793437), Vector3(0.8592824, 0.9020759, 0.8592824)])
+
+[node name="B_MolidA_c_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_C"
+positions = PackedVector3Array(61.735527, 22.137568, 326.77148, 47.145943, 2.0376387, 293.1112, 56.998085, 17.774256, 328.71057, 52.248497, 20.14889, 309.70813, 77.47832, 30.998743, 314.20358, 82.57355, 27.627985, 308.76825, 83.92376, 25.314142, 303.65063)
+yaws = PackedFloat32Array(-0.62268543, -2.2366629, 1.4817502, -0.75127006, -0.28074765, 2.444442, -1.4964473)
+scale3_list = Array[Vector3]([Vector3(1.4367892, 1.4792497, 1.4367892), Vector3(1.0533177, 1.0859619, 1.0533177), Vector3(1.3924242, 1.4889866, 1.3924242), Vector3(1.3732374, 1.536584, 1.3732374), Vector3(1.2609919, 1.2283591, 1.2609919), Vector3(1.682379, 1.8484163, 1.682379), Vector3(0.8494431, 0.84799296, 0.8494431)])
+
+[node name="B_Molid_d_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_D"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(54.47448, 20.46348, 321.77448, 54.359833, 0.3510388, 291.66327, 60.68655, 16.318308, 333.8844, 74.37617, 30.742792, 309.62527, 80.036, 28.420603, 305.72693, 78.01036, 4.6372786, 294.4387)
+yaws = PackedFloat32Array(-1.510413, 2.121287, -1.5366899, -1.8989145, -1.5713384, -1.6454225)
+scale3_list = Array[Vector3]([Vector3(1.5803066, 1.6686045, 1.5803066), Vector3(1.2152113, 1.3033905, 1.2152113), Vector3(1.195873, 1.2047682, 1.195873), Vector3(1.1726797, 1.1151159, 1.1726797), Vector3(1.2657647, 1.2680593, 1.2657647), Vector3(1.1586924, 1.118207, 1.1586924)])
+
+[node name="B_MolidA_a_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_A"
+positions = PackedVector3Array(101.87535, 19.631662, 297.9, 109.68059, 16.229471, 332.77625, 108.147484, 2.5326033, 287.36707, 118.56952, 27.84733, 294.53528, 105.63243, 14.676051, 339.5279, 148.98183, 8.625056, 204.20384, 149.75713, 9.628917, 199.647)
+yaws = PackedFloat32Array(2.075435, -2.1771007, -0.45815992, -0.22316146, -0.72402763, 2.2462971, -1.6958528)
+scale3_list = Array[Vector3]([Vector3(1.2521698, 1.3725004, 1.2521698), Vector3(1.4605064, 1.6192051, 1.4605064), Vector3(1.2910714, 1.3844844, 1.2910714), Vector3(1.567792, 1.6270181, 1.567792), Vector3(1.293006, 1.4373934, 1.293006), Vector3(0.7226746, 0.6911468, 0.7226746), Vector3(0.89897907, 0.88627785, 0.89897907)])
+
+[node name="B_MolidA_d_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_D"
+positions = PackedVector3Array(139.36195, 22.605967, 299.55026, 87.50217, 13.889827, 339.52496, 89.77075, 19.390146, 299.52634, 100.39399, 14.240153, 334.3342)
+yaws = PackedFloat32Array(-0.005316496, 0.57752776, -2.259771, -1.109206)
+scale3_list = Array[Vector3]([Vector3(1.3792732, 1.4424713, 1.3792732), Vector3(1.3336433, 1.3194504, 1.3336433), Vector3(1.3292774, 1.3983728, 1.3292774), Vector3(1.4539152, 1.3888911, 1.4539152)])
+
+[node name="B_FagFrunze_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_beech_a")
+mesh_name = "Beech_Leaves"
+tri_class = "tf_beech"
+positions = PackedVector3Array(51.781685, 0.033503417, 292.77124, 74.28495, 13.760814, 343.50723, 57.650383, 15.321727, 334.38373, 58.51395, 25.63801, 314.97372, 65.28731, 29.730677, 314.6898, 60.86519, 27.706247, 313.27466, 47.514256, 15.505534, 309.024, 80.0505, 29.254358, 310.64136, 74.60182, 27.579264, 301.6852, 74.1328, 1.6598389, 294.32574, 68.4826, 27.532322, 301.82675, 84.538605, 26.854084, 310.83643)
+yaws = PackedFloat32Array(0.80862665, -0.55032086, 1.6854942, 2.5372326, 1.9185703, 2.4626377, 0.80760956, -0.79125476, -1.5537338, 1.5156591, 2.8844879, -2.8641105)
+scale3_list = Array[Vector3]([Vector3(1.0075135, 1.0075135, 1.0075135), Vector3(1.0208755, 1.0208755, 1.0208755), Vector3(1.2409786, 1.2409786, 1.2409786), Vector3(1.126764, 1.126764, 1.126764), Vector3(1.3575379, 1.3575379, 1.3575379), Vector3(1.3421744, 1.3421744, 1.3421744), Vector3(1.2924851, 1.2924851, 1.2924851), Vector3(1.3709853, 1.3709853, 1.3709853), Vector3(0.9821832, 0.9821832, 0.9821832), Vector3(0.37890738, 0.32207128, 0.37890738), Vector3(0.43332434, 0.36832568, 0.43332434), Vector3(0.3333614, 0.28335717, 0.3333614)])
+
+[node name="B_FagScoarta_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_beech_a")
+mesh_name = "Beech_Bark"
+positions = PackedVector3Array(51.781685, 0.033503417, 292.77124, 74.28495, 13.760814, 343.50723, 57.650383, 15.321727, 334.38373, 58.51395, 25.63801, 314.97372, 65.28731, 29.730677, 314.6898, 60.86519, 27.706247, 313.27466, 47.514256, 15.505534, 309.024, 80.0505, 29.254358, 310.64136, 74.60182, 27.579264, 301.6852, 74.1328, 1.6598389, 294.32574, 68.4826, 27.532322, 301.82675, 84.538605, 26.854084, 310.83643)
+yaws = PackedFloat32Array(0.80862665, -0.55032086, 1.6854942, 2.5372326, 1.9185703, 2.4626377, 0.80760956, -0.79125476, -1.5537338, 1.5156591, 2.8844879, -2.8641105)
+scale3_list = Array[Vector3]([Vector3(1.0075135, 1.0075135, 1.0075135), Vector3(1.0208755, 1.0208755, 1.0208755), Vector3(1.2409786, 1.2409786, 1.2409786), Vector3(1.126764, 1.126764, 1.126764), Vector3(1.3575379, 1.3575379, 1.3575379), Vector3(1.3421744, 1.3421744, 1.3421744), Vector3(1.2924851, 1.2924851, 1.2924851), Vector3(1.3709853, 1.3709853, 1.3709853), Vector3(0.9821832, 0.9821832, 0.9821832), Vector3(0.37890738, 0.32207128, 0.37890738), Vector3(0.43332434, 0.36832568, 0.43332434), Vector3(0.3333614, 0.28335717, 0.3333614)])
+
+[node name="B_MolidA_b_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_B"
+positions = PackedVector3Array(171.83432, 11.045497, 288.52963, 169.30167, 7.2775526, 276.96622, 166.58371, 5.5401564, 266.51367, 159.50389, 1.5078381, 271.84546, 163.27707, 2.0540113, 274.21115, 188.47221, 11.664485, 245.23544, 186.16226, 11.568889, 248.75034, 192.87885, 11.413157, 241.69568, 193.57785, 10.938823, 244.97498, 203.45134, 4.5527906, 259.86102, 206.55363, 4.3961287, 255.9557, 165.23201, 8.851008, 200.7602, 150.04059, 10.255778, 196.86682, 154.40286, 9.405177, 199.68132)
+yaws = PackedFloat32Array(2.3604596, -1.1640463, 1.7366459, 2.914334, 2.6863105, 0.60789347, -2.2833834, -1.4750569, -2.9898925, -0.050460815, 0.88557744, 2.4898956, 1.3481624, 1.6210845)
+scale3_list = Array[Vector3]([Vector3(1.0677657, 1.1557512, 1.0677657), Vector3(1.0142988, 1.0183917, 1.0142988), Vector3(0.97532773, 0.94425035, 0.97532773), Vector3(1.0749928, 1.0744954, 1.0749928), Vector3(0.9722288, 1.0037746, 0.9722288), Vector3(1.2340064, 1.3229715, 1.2340064), Vector3(1.1328536, 1.1814369, 1.1328536), Vector3(0.88270867, 0.88486814, 0.88270867), Vector3(1.2096627, 1.3277113, 1.2096627), Vector3(1.150326, 1.2453861, 1.150326), Vector3(1.3604065, 1.4395351, 1.3604065), Vector3(1.1690772, 1.2369125, 1.1690772), Vector3(0.65664995, 0.734062, 0.65664995), Vector3(0.7242554, 0.8037549, 0.7242554)])
+
+[node name="B_FagFrunze_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_beech_a")
+mesh_name = "Beech_Leaves"
+tri_class = "tf_beech"
+positions = PackedVector3Array(177.74397, 9.359462, 291.0076, 180.8513, 8.827037, 285.75015, 175.00732, 7.3086805, 266.95578, 159.83875, 0.6807507, 276.21753, 175.27765, 12.057429, 239.90349, 183.67828, 12.184794, 236.95392, 188.15125, 12.052653, 240.14651, 193.7038, 12.126155, 233.02931, 202.86603, 12.174815, 225.03746, 208.93509, 12.378856, 218.56438, 175.84743, 11.969569, 252.02324, 182.91835, 11.91447, 248.77695, 181.97002, 11.920726, 249.72806, 183.83156, 11.981013, 247.03304, 192.93309, 10.822032, 246.56218, 207.06155, 8.102366, 241.91597, 202.2037, 9.025645, 244.0542, 203.5007, 11.2009535, 231.88745, 217.09279, 7.9807234, 232.33153, 180.75616, 10.324809, 270.91208, 183.06555, 9.187816, 274.63818, 193.5429, 6.137538, 270.7347, 200.2463, 5.157939, 262.7631, 204.03616, 6.5051374, 251.6059, 218.60873, 0.6372937, 252.41217, 179.01878, 10.383449, 197.0542, 158.60133, 10.713359, 204.07674, 155.2276, 9.933421, 207.49902)
+yaws = PackedFloat32Array(-0.112811804, 0.28177238, -0.44201612, 1.6642492, -2.9390917, -0.7012422, 1.9108117, -0.676527, -1.5475402, 0.23416758, -0.68764997, 2.6133168, -0.3418224, 0.5409095, 1.5307453, 0.8129301, 1.4533961, 0.23111439, 2.017556, -1.2610098, -2.3391318, -3.098544, -2.749093, 2.7019875, -2.2476013, 0.50596905, -2.0464447, -0.9871335)
+scale3_list = Array[Vector3]([Vector3(0.9957242, 0.9957242, 0.9957242), Vector3(1.1251655, 1.1251655, 1.1251655), Vector3(1.2809299, 1.2809299, 1.2809299), Vector3(0.89623225, 0.89623225, 0.89623225), Vector3(0.52509457, 0.52509457, 0.52509457), Vector3(0.65267855, 0.65267855, 0.65267855), Vector3(0.55624163, 0.55624163, 0.55624163), Vector3(0.46775642, 0.46775642, 0.46775642), Vector3(0.7447574, 0.7447574, 0.7447574), Vector3(0.49771136, 0.49771136, 0.49771136), Vector3(0.71994126, 0.71994126, 0.71994126), Vector3(1.046894, 1.046894, 1.046894), Vector3(0.9445908, 0.9445908, 0.9445908), Vector3(0.90352345, 0.90352345, 0.90352345), Vector3(0.75837684, 0.75837684, 0.75837684), Vector3(1.320503, 1.320503, 1.320503), Vector3(1.1732966, 1.1732966, 1.1732966), Vector3(1.157093, 1.157093, 1.157093), Vector3(0.9085321, 0.9085321, 0.9085321), Vector3(0.9543953, 0.9543953, 0.9543953), Vector3(1.1787654, 1.1787654, 1.1787654), Vector3(1.4380325, 1.4380325, 1.4380325), Vector3(1.039181, 1.039181, 1.039181), Vector3(1.1783547, 1.1783547, 1.1783547), Vector3(1.0161812, 1.0161812, 1.0161812), Vector3(0.7930047, 0.7930047, 0.7930047), Vector3(0.59069353, 0.59069353, 0.59069353), Vector3(1.0192935, 1.0192935, 1.0192935)])
+
+[node name="B_FagScoarta_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_beech_a")
+mesh_name = "Beech_Bark"
+positions = PackedVector3Array(177.74397, 9.359462, 291.0076, 180.8513, 8.827037, 285.75015, 175.00732, 7.3086805, 266.95578, 159.83875, 0.6807507, 276.21753, 175.27765, 12.057429, 239.90349, 183.67828, 12.184794, 236.95392, 188.15125, 12.052653, 240.14651, 193.7038, 12.126155, 233.02931, 202.86603, 12.174815, 225.03746, 208.93509, 12.378856, 218.56438, 175.84743, 11.969569, 252.02324, 182.91835, 11.91447, 248.77695, 181.97002, 11.920726, 249.72806, 183.83156, 11.981013, 247.03304, 192.93309, 10.822032, 246.56218, 207.06155, 8.102366, 241.91597, 202.2037, 9.025645, 244.0542, 203.5007, 11.2009535, 231.88745, 217.09279, 7.9807234, 232.33153, 180.75616, 10.324809, 270.91208, 183.06555, 9.187816, 274.63818, 193.5429, 6.137538, 270.7347, 200.2463, 5.157939, 262.7631, 204.03616, 6.5051374, 251.6059, 218.60873, 0.6372937, 252.41217, 179.01878, 10.383449, 197.0542, 158.60133, 10.713359, 204.07674, 155.2276, 9.933421, 207.49902)
+yaws = PackedFloat32Array(-0.112811804, 0.28177238, -0.44201612, 1.6642492, -2.9390917, -0.7012422, 1.9108117, -0.676527, -1.5475402, 0.23416758, -0.68764997, 2.6133168, -0.3418224, 0.5409095, 1.5307453, 0.8129301, 1.4533961, 0.23111439, 2.017556, -1.2610098, -2.3391318, -3.098544, -2.749093, 2.7019875, -2.2476013, 0.50596905, -2.0464447, -0.9871335)
+scale3_list = Array[Vector3]([Vector3(0.9957242, 0.9957242, 0.9957242), Vector3(1.1251655, 1.1251655, 1.1251655), Vector3(1.2809299, 1.2809299, 1.2809299), Vector3(0.89623225, 0.89623225, 0.89623225), Vector3(0.52509457, 0.52509457, 0.52509457), Vector3(0.65267855, 0.65267855, 0.65267855), Vector3(0.55624163, 0.55624163, 0.55624163), Vector3(0.46775642, 0.46775642, 0.46775642), Vector3(0.7447574, 0.7447574, 0.7447574), Vector3(0.49771136, 0.49771136, 0.49771136), Vector3(0.71994126, 0.71994126, 0.71994126), Vector3(1.046894, 1.046894, 1.046894), Vector3(0.9445908, 0.9445908, 0.9445908), Vector3(0.90352345, 0.90352345, 0.90352345), Vector3(0.75837684, 0.75837684, 0.75837684), Vector3(1.320503, 1.320503, 1.320503), Vector3(1.1732966, 1.1732966, 1.1732966), Vector3(1.157093, 1.157093, 1.157093), Vector3(0.9085321, 0.9085321, 0.9085321), Vector3(0.9543953, 0.9543953, 0.9543953), Vector3(1.1787654, 1.1787654, 1.1787654), Vector3(1.4380325, 1.4380325, 1.4380325), Vector3(1.039181, 1.039181, 1.039181), Vector3(1.1783547, 1.1783547, 1.1783547), Vector3(1.0161812, 1.0161812, 1.0161812), Vector3(0.7930047, 0.7930047, 0.7930047), Vector3(0.59069353, 0.59069353, 0.59069353), Vector3(1.0192935, 1.0192935, 1.0192935)])
+
+[node name="B_MolidA_a_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_A"
+positions = PackedVector3Array(186.15845, 7.206889, 282.16418, 200.12378, 12.504237, 222.88675, 185.07541, 11.977611, 245.35873, 188.4318, 11.347911, 248.44562, 200.19888, 5.679591, 260.49, 220.30368, 0.5517682, 250.60068, 232.09093, -1.0062915, 243.2568)
+yaws = PackedFloat32Array(0.6359477, 2.0584404, -1.1809458, 0.16157961, 0.57276464, -2.3787215, -0.9098122)
+scale3_list = Array[Vector3]([Vector3(1.3145679, 1.2984548, 1.3145679), Vector3(0.91296095, 0.9172201, 0.91296095), Vector3(1.3269211, 1.311429, 1.3269211), Vector3(1.3392056, 1.4487286, 1.3392056), Vector3(1.398849, 1.4425948, 1.398849), Vector3(1.3635664, 1.4979806, 1.3635664), Vector3(1.2418327, 1.2330531, 1.2418327)])
+
+[node name="B_Trunchi_a_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_A"
+positions = PackedVector3Array(186.15845, 7.206889, 282.16418, 171.38039, 6.942729, 264.77267, 159.5304, 0.9388989, 279.63815, 175.38254, 12.03361, 243.46085, 179.25052, 12.096446, 241.31078, 200.12378, 12.504237, 222.88675, 173.68831, 11.973872, 249.75348, 181.02824, 11.823222, 252.61192, 184.81993, 11.974772, 245.99615, 185.07541, 11.977611, 245.35873, 183.69638, 11.821086, 248.8749, 188.4318, 11.347911, 248.44562, 188.16641, 11.760402, 244.7024, 202.77132, 9.503993, 241.10034, 215.75691, 8.80511, 231.0419, 181.13113, 9.770534, 274.98053, 200.19888, 5.679591, 260.49, 201.23962, 3.409068, 268.3621, 220.30368, 0.5517682, 250.60068, 232.09093, -1.0062915, 243.2568, 235.4593, 1.8215741, 233.70404, 175.0201, 10.91978, 200.73505, 158.36731, 10.747371, 207.07965)
+yaws = PackedFloat32Array(0.6359477, -1.5527697, 2.8425658, -0.8607259, 1.1412709, 2.0584404, 1.0474536, -1.2137144, 2.763911, -1.1809458, -1.1230669, 0.16157961, 1.454335, 1.6193502, -1.4771782, -2.2612963, 0.57276464, 2.5019944, -2.3787215, -0.9098122, -3.0903738, 0.3664751, 0.25520134)
+scale3_list = Array[Vector3]([Vector3(1.3145679, 1.2984548, 1.3145679), Vector3(1.0751774, 1.1955884, 1.0751774), Vector3(1.1069707, 1.2223326, 1.1069707), Vector3(0.7487446, 0.73715836, 0.7487446), Vector3(0.67897785, 0.6729611, 0.67897785), Vector3(0.91296095, 0.9172201, 0.91296095), Vector3(1.1123686, 1.1464531, 1.1123686), Vector3(1.3023843, 1.2670395, 1.3023843), Vector3(1.2242872, 1.2422779, 1.2242872), Vector3(1.3269211, 1.311429, 1.3269211), Vector3(1.0391958, 1.0650631, 1.0391958), Vector3(1.3392056, 1.4487286, 1.3392056), Vector3(0.8721978, 0.8640008, 0.8721978), Vector3(1.2021961, 1.2246115, 1.2021961), Vector3(0.94327605, 0.9304731, 0.94327605), Vector3(1.4724917, 1.6346278, 1.4724917), Vector3(1.398849, 1.4425948, 1.398849), Vector3(1.5587443, 1.502475, 1.5587443), Vector3(1.3635664, 1.4979806, 1.3635664), Vector3(1.2418327, 1.2330531, 1.2418327), Vector3(1.2101185, 1.2753735, 1.2101185), Vector3(0.6140203, 0.675437, 0.6140203), Vector3(0.8277257, 0.86304677, 0.8277257)])
+
+[node name="B_MolidA_a_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_A"
+positions = PackedVector3Array(57.712147, 18.230494, 328.69467)
+yaws = PackedFloat32Array(0.5328741)
+scale3_list = Array[Vector3]([Vector3(1.4875298, 1.5818137, 1.4875298)])
+
+[node name="B_Trunchi_a_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Trunk_A"
+positions = PackedVector3Array(57.712147, 18.230494, 328.69467, 50.998302, 17.888758, 304.5714)
+yaws = PackedFloat32Array(0.5328741, -1.2773263)
+scale3_list = Array[Vector3]([Vector3(1.4875298, 1.5818137, 1.4875298), Vector3(1.2406926, 1.2652684, 1.2406926)])
+
+[node name="B_Molid_a_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_A"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(50.998302, 17.888758, 304.5714)
+yaws = PackedFloat32Array(-1.2773263)
+scale3_list = Array[Vector3]([Vector3(1.2406926, 1.2652684, 1.2406926)])
+
+[node name="B_Molid_a_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_pines")
+mesh_name = "Pine_A"
+tri_class = "tf_jneapan"
+positions = PackedVector3Array(171.38039, 6.942729, 264.77267, 159.5304, 0.9388989, 279.63815, 175.38254, 12.03361, 243.46085, 179.25052, 12.096446, 241.31078, 173.68831, 11.973872, 249.75348, 181.02824, 11.823222, 252.61192, 184.81993, 11.974772, 245.99615, 183.69638, 11.821086, 248.8749, 188.16641, 11.760402, 244.7024, 202.77132, 9.503993, 241.10034, 215.75691, 8.80511, 231.0419, 181.13113, 9.770534, 274.98053, 201.23962, 3.409068, 268.3621, 235.4593, 1.8215741, 233.70404, 175.0201, 10.91978, 200.73505, 158.36731, 10.747371, 207.07965)
+yaws = PackedFloat32Array(-1.5527697, 2.8425658, -0.8607259, 1.1412709, 1.0474536, -1.2137144, 2.763911, -1.1230669, 1.454335, 1.6193502, -1.4771782, -2.2612963, 2.5019944, -3.0903738, 0.3664751, 0.25520134)
+scale3_list = Array[Vector3]([Vector3(1.0751774, 1.1955884, 1.0751774), Vector3(1.1069707, 1.2223326, 1.1069707), Vector3(0.7487446, 0.73715836, 0.7487446), Vector3(0.67897785, 0.6729611, 0.67897785), Vector3(1.1123686, 1.1464531, 1.1123686), Vector3(1.3023843, 1.2670395, 1.3023843), Vector3(1.2242872, 1.2422779, 1.2242872), Vector3(1.0391958, 1.0650631, 1.0391958), Vector3(0.8721978, 0.8640008, 0.8721978), Vector3(1.2021961, 1.2246115, 1.2021961), Vector3(0.94327605, 0.9304731, 0.94327605), Vector3(1.4724917, 1.6346278, 1.4724917), Vector3(1.5587443, 1.502475, 1.5587443), Vector3(1.2101185, 1.2753735, 1.2101185), Vector3(0.6140203, 0.675437, 0.6140203), Vector3(0.8277257, 0.86304677, 0.8277257)])
+
+[node name="B_Banc_s1" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_snow_wall")
+mesh_name = "SnowWall_B_Snow"
+positions = PackedVector3Array(105.130226, 23.228758, 310.28632, 102.38161, 20.250444, 311.09045, 131.80093, 27.747358, 302.28262, 100.26271, 19.376411, 307.8991)
+yaws = PackedFloat32Array(0.8334515, 0.84845424, -1.5247576, 1.9490392)
+scale3_list = Array[Vector3]([Vector3(2.2593458, 0.966435, 0.6037518), Vector3(2.1633053, 1.1667697, 0.86026406), Vector3(1.7652587, 1.1019058, 0.96422267), Vector3(1.5721797, 1.1274645, 0.7820668)])
+
+[node name="B_Banc_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_snow_wall")
+mesh_name = "SnowWall_B_Snow"
+positions = PackedVector3Array(73.26471, 22.425232, 327.59058)
+yaws = PackedFloat32Array(-2.130991)
+scale3_list = Array[Vector3]([Vector3(2.3459504, 1.3052354, 0.8398939)])
+
+[node name="B_BujorFloare_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_bujor")
+mesh_name = "Bujor_Bloom"
+tri_class = "atint:tf_bloom"
+positions = PackedVector3Array(29.782803, 9.520168, 270.95865, 29.177212, 9.460888, 271.36963, 28.747208, 9.462429, 269.99423, 30.536743, 9.136288, 272.21613, 29.594835, 9.527386, 270.10617, 29.309702, 9.48547, 270.83582)
+yaws = PackedFloat32Array(1.0476396, 2.738715, 2.9157193, -1.7830272, -0.54785156, 0.11452246)
+scale3_list = Array[Vector3]([Vector3(1.1332016, 1.1332016, 1.1332016), Vector3(1.2837607, 1.2837607, 1.2837607), Vector3(1.3139312, 1.3139312, 1.3139312), Vector3(1.3037131, 1.3037131, 1.3037131), Vector3(1.3113396, 1.3113396, 1.3113396), Vector3(1.0921811, 1.0921811, 1.0921811)])
+
+[node name="B_BujorFrunze_s0" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_bujor")
+mesh_name = "Bujor_Leaves"
+positions = PackedVector3Array(29.782803, 9.520168, 270.95865, 29.177212, 9.460888, 271.36963, 28.747208, 9.462429, 269.99423, 30.536743, 9.136288, 272.21613, 29.594835, 9.527386, 270.10617, 29.309702, 9.48547, 270.83582)
+yaws = PackedFloat32Array(1.0476396, 2.738715, 2.9157193, -1.7830272, -0.54785156, 0.11452246)
+scale3_list = Array[Vector3]([Vector3(1.1332016, 1.1332016, 1.1332016), Vector3(1.2837607, 1.2837607, 1.2837607), Vector3(1.3139312, 1.3139312, 1.3139312), Vector3(1.3037131, 1.3037131, 1.3037131), Vector3(1.3113396, 1.3113396, 1.3113396), Vector3(1.0921811, 1.0921811, 1.0921811)])
+
+[node name="B_BujorFloare_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_bujor")
+mesh_name = "Bujor_Bloom"
+tri_class = "atint:tf_bloom"
+positions = PackedVector3Array(195.42763, 12.456463, 228.95811, 195.73018, 12.276638, 231.45985, 195.20753, 12.340481, 230.86086, 196.47, 12.361385, 229.60358, 195.13408, 12.324551, 231.15245, 195.55577, 12.285091, 231.45392, 209.32642, 12.885845, 213.57396, 209.89584, 12.907757, 212.33875, 210.46841, 12.896526, 212.8792, 208.37321, 12.874233, 212.36594, 210.53888, 12.92474, 211.95674, 209.25288, 12.899853, 211.53502)
+yaws = PackedFloat32Array(-2.6518228, -2.2788546, -0.5531306, 2.7015874, -1.6138567, 2.4508479, 0.2976892, -1.898204, 2.4676144, -2.112313, 1.1235192, -1.3102114)
+scale3_list = Array[Vector3]([Vector3(1.074894, 1.074894, 1.074894), Vector3(1.3220198, 1.3220198, 1.3220198), Vector3(1.0742997, 1.0742997, 1.0742997), Vector3(1.0436256, 1.0436256, 1.0436256), Vector3(1.2993165, 1.2993165, 1.2993165), Vector3(1.0045624, 1.0045624, 1.0045624), Vector3(1.0099803, 1.0099803, 1.0099803), Vector3(1.012947, 1.012947, 1.012947), Vector3(1.3197861, 1.3197861, 1.3197861), Vector3(1.1854353, 1.1854353, 1.1854353), Vector3(1.2785599, 1.2785599, 1.2785599), Vector3(1.0461001, 1.0461001, 1.0461001)])
+
+[node name="B_BujorFrunze_s2" type="MultiMeshInstance3D" parent="DecorManual/ZonaB"]
+script = ExtResource("b_flock")
+model = ExtResource("b_bujor")
+mesh_name = "Bujor_Leaves"
+positions = PackedVector3Array(195.42763, 12.456463, 228.95811, 195.73018, 12.276638, 231.45985, 195.20753, 12.340481, 230.86086, 196.47, 12.361385, 229.60358, 195.13408, 12.324551, 231.15245, 195.55577, 12.285091, 231.45392, 209.32642, 12.885845, 213.57396, 209.89584, 12.907757, 212.33875, 210.46841, 12.896526, 212.8792, 208.37321, 12.874233, 212.36594, 210.53888, 12.92474, 211.95674, 209.25288, 12.899853, 211.53502)
+yaws = PackedFloat32Array(-2.6518228, -2.2788546, -0.5531306, 2.7015874, -1.6138567, 2.4508479, 0.2976892, -1.898204, 2.4676144, -2.112313, 1.1235192, -1.3102114)
+scale3_list = Array[Vector3]([Vector3(1.074894, 1.074894, 1.074894), Vector3(1.3220198, 1.3220198, 1.3220198), Vector3(1.0742997, 1.0742997, 1.0742997), Vector3(1.0436256, 1.0436256, 1.0436256), Vector3(1.2993165, 1.2993165, 1.2993165), Vector3(1.0045624, 1.0045624, 1.0045624), Vector3(1.0099803, 1.0099803, 1.0099803), Vector3(1.012947, 1.012947, 1.012947), Vector3(1.3197861, 1.3197861, 1.3197861), Vector3(1.1854353, 1.1854353, 1.1854353), Vector3(1.2785599, 1.2785599, 1.2785599), Vector3(1.0461001, 1.0461001, 1.0461001)])
+
 
 [node name="ZonaC" type="Node3D" parent="DecorManual"]
 metadata/fractii = "REAL 0.1535-0.2520 (ursul 0.1993 pe axa, Semn_urs 0.1777 la 9 m dreapta, ac -110 grade r21 la 0.2423); x 195..240, z 15..200; STANGA apa la 10-16 m de margine (cadere >3 m la 6-8 m, lac sub drum -7..-15 m), DREAPTA plat 0 m pe 40 m, perete 50-98 m (masurat cu tools/sv_tf_fractii.gd)"

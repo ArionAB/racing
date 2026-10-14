@@ -510,6 +510,9 @@ func _ready() -> void:
 	# arcade vine din material.
 	contact_monitor = true
 	max_contacts_reported = 8
+	# Decorul bump-abil (#489) sta pe stratul lui: masina il loveste, dar
+	# razele suspensiei (masca implicita) nu-l vad — roata nu urca pe un taburet.
+	collision_mask |= BumpProp.LAYER
 	var pmat := PhysicsMaterial.new()
 	pmat.bounce = bump_restitution
 	pmat.friction = 0.4

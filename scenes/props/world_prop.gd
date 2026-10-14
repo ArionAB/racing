@@ -155,8 +155,10 @@ const PROP_COLLISION := {
 	# --- figuranti si marunt: nimic care sa opreasca o masina de cursa -----
 	# Hamalii se plimba pe scara, sub linia camerei; mesele si scuterul stau pe
 	# trotuarul din aleea de 6 m, adica la o roata distanta de linia de curs.
-	"porter": "none", "table_stools": "none", "steam_vent": "none",
-	"scooter": "none", "bicycle": "none",
+	# Mesele cu taburete, scuterul si bicicletele de pe aleea cu pravalii: decor
+	# MIC care se imprastie la contact (#489, #507), nu zid si nici fantoma.
+	"porter": "none", "table_stools": "bump", "steam_vent": "none",
+	"scooter": "bump", "bicycle": "bump",
 	# --- Cappadocia (POI E: via si balonul aterizat) ----------------------
 	# Panza dezumflata ZACE PESTE drum, pe toata latimea lui (20,7 x 8,0 m,
 	# groasa de 50 cm). Implicitul "hull" ar fi exact ce descrie brief-ul ca
@@ -251,7 +253,10 @@ const PROP_COLLISION := {
 	# orchid_cluster 0,39 m, backpack_pile 0,69 m (bagaje, nu obstacol).
 	# Lamele se monteaza oricum pe SlidingHazard, care isi face colizorul lui.
 	"condor": "none", "llama": "none", "llama_b": "none", "llama_c": "none",
-	"bromeliad": "none", "orchid_cluster": "none", "backpack_pile": "none",
+	"bromeliad": "none", "orchid_cluster": "none",
+	# Nu "bump": generatorul ii scaleaza x1,3-1,9 (gramezi de 2,15 m, ca sa se
+	# citeasca de la 35 m) — peste pragul din BumpProp, ar cadea pe hull (#489).
+	"backpack_pile": "none",
 	# Orizontul. Acelasi tipar ca `lengai` / `crater_far_wall` la Serengeti: un
 	# hull pe ele ar fi un corp fizic cat o pista. gorge_far_wall e 196,00 x
 	# 75,39 x 92,06 m si e o PANZA (doua foi cusute), deci nici n-are volum de
@@ -406,7 +411,7 @@ const PROP_COLLISION := {
 	# masina (raza din TRUNK_RADIUS); restul sunt vegetatie moale, prin care se trece.
 	"juniper": "trunk",
 	"sagebrush": "none", "rabbitbrush": "none", "yucca": "none",
-	"tumbleweed": "none",
+	"tumbleweed": "bump", # se rostogoleste cand il lovesti (#489)
 	# Grila pentru vite: PLATA (<= 0,15 m), se trece peste ea; stalpii de capat
 	# sunt la 7,3 m de axa, adica pe margine. Sarma gardului: panou subtire, ca
 	# `shiba_fence` / `wooden_fence`. Semnul si stalpul de telegraf: cilindru pe
@@ -3583,6 +3588,10 @@ func _build_collision() -> void:
 		var mode := _collision_mode(model)
 		if mode == "none":
 			continue
+		if mode == "bump":
+			if BumpProp.wrap(model) != null:
+				continue
+			mode = "hull"
 		var body := StaticBody3D.new()
 		body.name = "%s_col" % model.name
 		var added := false
@@ -4158,7 +4167,11 @@ func _collect_models(node: Node, out: Array[Node3D]) -> void:
 ## de mana sau de un generator: `match` de mai jos are ramura implicita `_`, deci
 ## o valoare scrisa gresit nu cade in gol, ci face HULL — adica exact pe dos
 ## fata de intentie, si in tacere.
-const COLLISION_MODES := ["hull", "trunk", "mesh", "none"]
+##
+## "bump" (#489): piesa devine `BumpProp` — corp rigid usor, adormit, pe care
+## masina il imprastie. Doar pentru piese mici (pragul e in BumpProp); una prea
+## mare, sau peste plafonul pistei, cade pe "hull".
+const COLLISION_MODES := ["hull", "trunk", "mesh", "none", "bump"]
 
 func _collision_mode(model: Node3D) -> String:
 	if model.has_meta(COLLISION_META):

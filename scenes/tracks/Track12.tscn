@@ -1518,15 +1518,15 @@ metadata/coliziune = "none"
 
 [node name="hol221" parent="DecorManual/7) Liziba" unique_id=523991892 instance=ExtResource("36_bike")]
 transform = Transform3D(-0.302852, 0, 0.953038, 0, 1, 0, -0.953038, 0, -0.302852, 252.75012, 53.968796, 14.952752)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="hol222" parent="DecorManual/7) Liziba" unique_id=1225540722 instance=ExtResource("36_bike")]
 transform = Transform3D(-0.63776, 0, 0.770235, 0, 1, 0, -0.770235, 0, -0.63776, 251.79634, 54.26, 11.892771)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="hol223" parent="DecorManual/7) Liziba" unique_id=986027393 instance=ExtResource("36_bike")]
 transform = Transform3D(0.269588, 0, -0.962976, 0, 1, 0, 0.962976, 0, 0.269588, 228.58563, 55.594913, 2.624862)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="pasarela224" parent="DecorManual/7) Liziba" unique_id=657184219 instance=ExtResource("34_footbridge")]
 transform = Transform3D(-0.416164, 0, 0.909289, 0, 1, 0, -0.909289, 0, -0.416164, 195.4529, 63.47395, -101.20495)

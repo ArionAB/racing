@@ -6432,35 +6432,35 @@ metadata/coliziune = "none"
 
 [node name="gTumble139" parent="DecorManual/ZonaG" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(0.798514, 0.000000, -0.784864, 0.000000, 1.119659, 0.000000, 0.784864, 0.000000, 0.798514, -13.473517, -0.108154, 40.467644)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="gTumble140" parent="DecorManual/ZonaG" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(0.970737, 0.000000, -0.266246, 0.000000, 1.006587, 0.000000, 0.266246, 0.000000, 0.970737, -140.729111, 8.563202, 143.014465)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="gTumble141" parent="DecorManual/ZonaG" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(-0.356638, 0.000000, 1.111514, 0.000000, 1.167328, 0.000000, -1.111514, 0.000000, -0.356638, -45.738499, -0.016541, 97.024612)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="gTumble142" parent="DecorManual/ZonaG" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(-1.149605, 0.000000, 0.189842, 0.000000, 1.165174, 0.000000, -0.189842, 0.000000, -1.149605, -5.530521, 2.142761, 203.900223)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="gTumble143" parent="DecorManual/ZonaG" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(-1.231573, 0.000000, -0.205800, 0.000000, 1.248649, 0.000000, 0.205800, 0.000000, -1.231573, 10.075650, 1.440384, 145.721802)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="gTumble144" parent="DecorManual/ZonaG" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(-1.002536, 0.000000, -0.778850, 0.000000, 1.269522, 0.000000, 0.778850, 0.000000, -1.002536, -22.035292, 0.808197, 96.094955)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="gTumble145" parent="DecorManual/ZonaG" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(0.934521, 0.000000, -0.408810, 0.000000, 1.020027, 0.000000, 0.408810, 0.000000, 0.934521, 57.563766, 0.733597, 184.655350)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="gTumble146" parent="DecorManual/ZonaG" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(-0.496694, 0.000000, -1.009329, 0.000000, 1.124922, 0.000000, 1.009329, 0.000000, -0.496694, -48.526646, 3.653534, 198.743790)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="gCorb147" parent="DecorManual/ZonaG" instance=ExtResource("s_raven")]
 transform = Transform3D(1.228616, 0.000000, 0.671196, 0.000000, 1.400000, 0.000000, -0.671196, 0.000000, 1.228616, -28.000000, 2.540146, 112.000000)
@@ -6549,11 +6549,11 @@ metadata/coliziune = "none"
 
 [node name="g2Tumble19" parent="DecorManual/ZonaG2" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(-0.609599, 0.000000, 1.033629, 0.000000, 1.200000, 0.000000, -1.033629, 0.000000, -0.609599, -58.451042, -0.787262, 1.272280)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="g2Tumble20" parent="DecorManual/ZonaG2" instance=ExtResource("s_tumbleweed")]
 transform = Transform3D(-0.072490, 0.000000, -1.197809, 0.000000, 1.200000, 0.000000, 1.197809, 0.000000, -0.072490, -53.983261, -0.598862, 5.996722)
-metadata/coliziune = "none"
+metadata/coliziune = "bump"
 
 [node name="g2Salvie21" parent="DecorManual/ZonaG2" instance=ExtResource("s_sagebrush")]
 transform = Transform3D(-0.643615, 0.000000, -1.031792, 0.000000, 1.216074, 0.000000, 1.031792, 0.000000, -0.643615, -120.476814, -1.011276, 35.469505)

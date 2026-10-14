@@ -56,6 +56,7 @@ func _ready() -> void:
 	# ProbePonton garda 3 — fara `await`, verdictul se tipareste inaintea ei si
 	# secţiunea iese goala).
 	await _check_water_gate_agreement()
+	await _check_film_geometry()
 
 	print()
 	if sabotaj:
@@ -208,3 +209,63 @@ func _check_water_gate_agreement() -> void:
 	if not open0:
 		_fails.append("shortcut_open() e false in telegraf: banda se inchide "
 			+ "inainte sa vina apa")
+
+
+## 7. GEOMETRIA FOII: apa URCA de pe mare, nu pluteste peste terasa.
+##
+## Garzile 1-6 masoara toate CEASUL (faze, durate, continuitatea nivelului) si
+## poarta de banda. Niciuna nu se uita la unde se afla FOAIA in spatiu — si
+## exact pe acolo a trecut defectul: `_update_film` muta foaia cu
+## `position.y = _level * rise_m`, de pe cota nodului (1.49 pe terasa) in sus,
+## deci la maree plina apa plutea la ~3 m peste mare. Toate cele sase garzi
+## treceau. Verdictul la volan a fost "mareea apare ca o banda albastra peste
+## scurtatura" — adica fix placa plutitoare.
+##
+## Contractul e pe margini, nu pe nivel: marginea de JOS a foii trebuie sa stea
+## pe cota marii la ORICE nivel (altfel apa nu vine de nicaieri), iar marginea
+## de SUS trebuie sa urce cu nivelul (altfel nu e maree).
+func _check_film_geometry() -> void:
+	print("
+--- 7. geometria foii (apa urca de pe mare) ---")
+	# Nodul se ridica la o cota de terasa, ca in Track22 (1.493): daca foaia s-ar
+	# masura cu nodul la 0, defectul ar fi invizibil — baza si marea ar coincide
+	# din intamplare.
+	const NODE_Y := 1.493
+	tide.position.y = NODE_Y
+	await get_tree().physics_frame
+	var film := tide.get_node_or_null("TideFilm") as MeshInstance3D
+	if film == null:
+		_fails.append("nu gasesc TideFilm: nu pot verifica geometria apei")
+		return
+	var box := film.mesh as BoxMesh
+	if box == null:
+		_fails.append("TideFilm nu e o cutie: o foaie care se intinde pe Y cere "
+			+ "grosime, un plan nu are margine de jos")
+		return
+	var worst_base := 0.0
+	var top_lo := INF
+	var top_hi := -INF
+	for i in 400:
+		tide.set_clock(float(i) * tide.period / 400.0)
+		await get_tree().physics_frame
+		if not film.visible:
+			continue
+		var half := box.size.y * film.scale.y * 0.5
+		var base := film.global_position.y - half
+		var top := film.global_position.y + half
+		worst_base = maxf(worst_base, absf(base))
+		top_lo = minf(top_lo, top)
+		top_hi = maxf(top_hi, top)
+	print("  marginea de JOS se abate de la cota marii cu cel mult %.3f m" % worst_base)
+	print("  marginea de SUS urca intre %.3f si %.3f m" % [top_lo, top_hi])
+	if worst_base > 0.15:
+		_fails.append(("baza foii se ridica cu %.2f m peste mare: apa PLUTESTE in "
+			+ "loc sa urce (banda albastra peste scurtatura)") % worst_base)
+	else:
+		print("  [OK] baza rămâne pe mare: apa vine de jos")
+	if top_hi - top_lo < 0.5 * tide.rise_m:
+		_fails.append("marginea de sus se mişca doar %.2f m, din %.2f de maree: "
+			% [top_hi - top_lo, tide.rise_m] + "apa nu urca")
+	else:
+		print("  [OK] marginea de sus urca cu mareea (%.2f m)" % (top_hi - top_lo))
+	tide.position.y = 0.0

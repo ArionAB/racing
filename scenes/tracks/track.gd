@@ -14765,14 +14765,17 @@ func _build_world_decor() -> void:
 		var pine_mat := Palette.triplanar_class_material(pine_cls)
 		# Doar ~65 % dintre molizi, alesi deterministic dupa pozitie: tot padurea pe
 		# aceeasi clasa citea ca un singur ton verde-inchis de la un capat la altul.
-		# Restul isi pastreaza materialul de acum, deci tonurile se amesteca in
-		# spatiu, fara material nou.
+		# Restul trec pe ATLAS (`world_material`, ca stolurile cu tri_class ""), NU
+		# raman pe `pine_needles`: clasa aceea nu mai exista pe pista de cand toti
+		# molizii sunt pe tf_jneapan, deci lasata ar fi fost un material in plus.
 		var pine_share: int = int(theme_flag("pine_crown_class_pct", 65))
 		for node in Palette._walk(decor):
 			if node is MeshInstance3D and String(node.name).begins_with("Pine"):
 				var pp := (node as MeshInstance3D).global_position
 				if posmod(hash(Vector2i(roundi(pp.x * 10.0), roundi(pp.z * 10.0))), 100) < pine_share:
 					(node as MeshInstance3D).material_override = pine_mat
+				else:
+					(node as MeshInstance3D).material_override = Palette.world_material()
 	# Scenografia DUPA benzile statistice, si tot in `_decor_roots`: semnele
 	# chevron si gardurile isi cauta loc liber printre obstacolele de acolo, iar
 	# un tetrapod sau un zid de cetate e cel putin la fel de solid ca o stanca.

@@ -230,6 +230,17 @@ darkness = 0.55
 cave_fog_end = 70.0
 blend_time = 0.45
 
+[node name="CameraBelvedere" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180.000, 24.000, 185.000)
+script = ExtResource("18_camzone")
+frac_from = 0.47
+frac_to = 0.55
+size = Vector3(60.0, 30.0, 180.0)
+fov_bonus = 8.0
+ceiling = 0.0
+ceiling_dist = 0.0
+blend_time = 0.8
+
 [node name="Maree" type="Node3D" parent="."]
 transform = Transform3D(-0.29756, 0, -0.95470, 0, 1.0, 0, 0.95470, 0, -0.29756, -175.870, 1.493, -240.792)
 script = ExtResource("17_tide")

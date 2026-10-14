@@ -2572,7 +2572,7 @@ static func themes() -> Dictionary:
 			# Stromboli se opreste repede — insula e conul, nu are platou.
 			# `rock_fade` mare (16) ca trecerea sa fie o zona, nu o linie.
 			"rock_line": 18.0,
-			"rock_fade": 16.0,
+			"rock_fade": 14.0,
 			"rock_band_tint": Palette.color(Palette.VOLCANIC_BLACK).darkened(0.42),
 			# Capul de cenusa: mecanismul zapezii, cu gri in loc de alb.
 			"snow_line": 48.0,
@@ -4010,6 +4010,33 @@ static func themes() -> Dictionary:
 	tf.merge({
 		# Pajiste alpina rece, scurta (#7D9A4E), nu verdele cald al Alpilor.
 		"ground_tint": Color(0.49, 0.60, 0.31),
+		# Iarba randata iese H 59 (oliv-galben), nu H 83: cauza masurata prin A/B pe
+		# lume inghetata (sun_color alb => H 87, sun_color mild => H 74, curent =>
+		# H 59) e SOARELE, care taie albastrul si lasa rosul. Terenul primeste o
+		# tenta precompensata, ca iarba SA IASA #7D9A4E sub soarele ramas neschimbat.
+		"terrain_ground_tint": Color(0.33, 0.60, 0.27),
+		# Stancile risipite pe pista sunt sistul Transfagarasanului (clasa `tf_schist`,
+		# aceeasi cu Prometeu si portalul de stanca), nu granitul Alpilor mostenit:
+		# acelasi material partajat ca piesele din kit, deci o clasa in minus.
+		"rock_class": "tf_schist",
+		# VERSANTUL (brief §0.1, dioramei): sist cenusiu-verzui la vedere pe pantele
+		# abrupte, zapada veche sus, pajiste doar pe pantele line. Mecanismele
+		# (`scarp_tint` pe panta, `rock_band_tint`/`snow_tint` pe cota) exista deja
+		# in `_build_terrain`; tema "alpine" de la care pornim avea cotele ei
+		# (rock 46 / snow 72 m), prea sus pentru o sosea care culmineaza la 43 m si
+		# cu un granit cald. Aici cotele sunt ale Transfagarasanului (drumul urca
+		# de la 0 la 43 m, masivul la 85-105 m), iar tenta e precompensata pentru
+		# soarele cald, ca sistul sa iasa #7E8478.
+		"savanna_grass_w": 1.0,
+		"scarp_tint": Color(0.33, 0.43, 0.44),
+		"scarp_slope_deg": 16.0,
+		"scarp_fade_deg": 7.0,
+		"rock_line": 34.0,
+		"rock_fade": 14.0,
+		"rock_band_tint": Color(0.33, 0.43, 0.44),
+		"snow_line": 44.0,
+		"snow_fade": 14.0,
+		"snow_tint": Color(0.80, 0.90, 1.0),
 		# Soare de dupa-amiaza tarzie din VNV (~290 grade, 25 de grade elevatie),
 		# cald-auriu (#FFD9A8). Busola 180 - y = 290 => y = -110. Azimutul se
 		# remasoara pe traseul real (memoria azimutul-soarelui-fata-de-drum).
@@ -4052,6 +4079,10 @@ static func themes() -> Dictionary:
 		"horizon_model": "res://assets/models/transfagarasan/effects/transfagarasan_horizon.glb",
 		"horizon_class": "",
 		"horizon_classes": {},
+		# Creasta iesea bej: MARBLE_GREY 29 (#B8B4AC, gri CALD) sub soarele #FFD9A8.
+		# Pe PAINTED_METAL 11 (#7692A8, gri-albastrui) iese gri-verzui rece, tinta
+		# #7E8478; zapada (FOAM_WHITE) si poalele verzi raman pe atlas.
+		"horizon_slot_remap": {29: 11},
 		"horizon_picks": [["FagarasRidge_A"], ["FagarasRidge_B"], ["FagarasRidge_C"],
 			["CloudSea_A"], ["CloudSea_B"], ["FagarasPlain_A"]],
 		"horizon_rings": [
@@ -6162,6 +6193,13 @@ func _build_horizon(centroid: Vector3) -> void:
 			# inventat: un varf alpin isi are benzile (padure/granit/zapada)
 			# pictate in sloturi, iar o textura de roca intinsa peste ele le
 			# sterge — pe captura, crestele ieseau portocalii ca dunele.
+			# Remapare de slot pe siluetele de orizont (cheia `horizon_slot_remap`,
+			# {slot_sursa: slot_tinta}). Atlasul modelului ramane (zapada, poalele
+			# verzi), dar un slot care iese gresit sub soarele temei se muta pe altul,
+			# fara material nou. Lipsa cheii = nimic schimbat pe celelalte teme.
+			var horizon_remap: Dictionary = theme_flag("horizon_slot_remap", {})
+			if not horizon_remap.is_empty():
+				_remap_horizon_slots(model, horizon_remap)
 			var horizon_class := String(theme_flag("horizon_class", "rock"))
 			# `horizon_classes` (dictionar prefix -> clasa) are prioritate:
 			# un model spart pe noduri (corp de granit + calota de zapada) isi
@@ -6186,6 +6224,16 @@ func _build_horizon(centroid: Vector3) -> void:
 ## Stinge aruncarea de umbra pe tot subarborele. Vezi motivul la apelul din
 ## _build_horizon: un caster imens si departat fura precizia hartii de umbra de
 ## la tot ce e in prim-plan.
+## Muta vertecsii unei siluete de orizont de pe un slot de atlas pe altul. Mesh-ul
+## se duplica (resursa din .glb e partajata si tinuta in cache), ca in
+## `WorldProp._remap_model_slots`.
+func _remap_horizon_slots(root: Node, remap: Dictionary) -> void:
+	for n in Palette._walk(root):
+		var mi := n as MeshInstance3D
+		if mi != null and mi.mesh != null:
+			mi.mesh = WorldProp._mesh_with_slots_moved(mi.mesh, remap)
+
+
 func _fara_umbra_aruncata(n: Node) -> void:
 	var mi := n as MeshInstance3D
 	if mi != null:
@@ -6622,6 +6670,14 @@ func _build_terrain() -> void:
 	# continuu de pai pana la orizont, cu tufele verzi ca accente separate;
 	# firele de iarba sunt detaliul de aproape, nu covorul. Deci schimbam
 	# PODEAUA, nu tepii de pe ea. 0.0 pe orice alta tema = zero diferenta.
+	# TENTA DE BAZA A TERENULUI, separata de `ground_tint` doar cand tema o cere
+	# (cheia `terrain_ground_tint`). `ground_tint` mai coloreaza tufele de iarba,
+	# praful si alte piese; terenul, in schimb, e singurul care ia soarele plin
+	# peste o textura gri, deci singurul a carui nuanta DERIVEAZA cu culoarea
+	# soarelui (Transfagarasan: soare #FFD9A8 trage #7D9A4E de la H 83 la H 59).
+	# Tema compenseaza aici, fara sa atinga soarele (pe care sunt calibrate clasele
+	# de piese). Null pe orice alta tema = exact `theme_ground_tint`, bit-identic.
+	var terrain_base_tint: Color = theme_flag("terrain_ground_tint", theme_ground_tint)
 	var savanna_w := float(theme_flag("savanna_grass_w", 0.0))
 	var savanna_tint: Variant = theme_flag("savanna_grass_tint", null)
 	# Zapada de creasta: null pe orice tema fara munte, deci restul pistelor
@@ -6799,7 +6855,7 @@ func _build_terrain() -> void:
 					var rel := v.y - _sampler.mean_road_y()
 					var shade := clampf(1.0 + rel * 0.012, 0.86, 1.10)
 					shade *= _cliff_shadow(v, cliff_xz)
-					var tint := theme_ground_tint
+					var tint := terrain_base_tint
 					# Greutatea de iarba (0 = plaja/nisip, 1 = camp), plecata
 					# spre shader prin COLOR.a: acolo alege intre perechea de
 					# texturi de nisip si cea de iarba (#206).

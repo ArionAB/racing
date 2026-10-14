@@ -41,6 +41,13 @@ extends Node
 ##        (`afin`, 3/petic) — FlockProp, 2 felii de cate 4 petice. Bujorul e
 ##        accentul magenta, DOAR in petice.
 ##   F. Indicator urs: se foloseste cel montat; 0 in plus.
+## RUNDA 2 (verdict critic orb: lipsesc masele dense de molid intunecat):
+##   - MOLIZII devin masa dominanta pe dreapta: ~12 grupuri neregulate de 5-12
+##     (peste 100 de arbori), 4 marimi (Pine_A/B/C/D), pe ~60% din lungime,
+##     densitate crescand spre drum; FlockProp pe 2 felii, ace pe
+##     `class:tf_jneapan`, trunchiuri pe atlas.
+##   - FAGII scad la 3 palcuri-accent; AFLORIMENTELE devin 3 grupuri de 2-3 lame
+##     mari (peretele de sist) + 2 pe capul din stanga; BUJORUL 4 petice mici.
 ## Densitate pe benzi (de la marginea asfaltului): 0-10 m iarba si tufe (nimic
 ## solid), 10-30 m fagi + molizi + aflorimente, 30-60 m padurea si pintenii.
 ## STANGA: nimic la < 3 m de malul lacului; nimic care sa acopere lacul.
@@ -71,8 +78,11 @@ var _log: Array[String] = []
 var _out_path := ""
 
 # Pozitiile stolurilor (lume), emise la sfarsit.
-var _pine_pos: Dictionary = {"Pine_B": [], "Pine_C": []}
-var _pine_yaw: Dictionary = {"Pine_B": [], "Pine_C": []}
+const PINES := ["Pine_A", "Pine_B", "Pine_C", "Pine_D"]
+const PINE_SCALE := {"Pine_A": [1.0, 1.5], "Pine_B": [0.9, 1.3], "Pine_C": [0.8, 1.15], "Pine_D": [1.0, 1.6]}
+var _pine_pos: Dictionary = {"Pine_A": [], "Pine_B": [], "Pine_C": [], "Pine_D": []}
+var _pine_yaw: Dictionary = {"Pine_A": [], "Pine_B": [], "Pine_C": [], "Pine_D": []}
+var _pine_sl: Dictionary = {"Pine_A": [], "Pine_B": [], "Pine_C": [], "Pine_D": []}
 var _bujor_pos: Array = []
 var _bujor_yaw: Array = []
 var _afin_pos: Array = []
@@ -148,10 +158,7 @@ func _node(model: String, base: String, pos: Vector3, yaw: float, scl: float,
 func _beeches() -> void:
 	# [frac, offset de la margine, nr. in grup]
 	var groups := [
-		[0.1585, 11.0, 3], [0.1630, 19.0, 3], [0.1680, 14.0, 2],
-		[0.1725, 24.0, 3], [0.1850, 12.0, 3], [0.1895, 20.0, 3],
-		[0.2000, 16.0, 2], [0.2050, 10.0, 2], [0.2150, 14.0, 3],
-		[0.2260, 17.0, 3], [0.2340, 12.0, 2],
+		[0.1630, 15.0, 3], [0.1895, 20.0, 3], [0.2150, 14.0, 2],
 	]
 	var total := 0
 	for g: Array in groups:
@@ -167,16 +174,6 @@ func _beeches() -> void:
 			var m := "beech_a" if _rng.randf() < 0.5 else "beech_b"
 			_node(m, "Fag", q, _rng.randf_range(0.0, TAU), scl, 0.1)
 			total += 1
-	# al doilea rand: adancime
-	var f := 0.1600
-	while f < 0.2250:
-		if _rng.randf() < 0.55:
-			var q := _pt(f + _rng.randf_range(-0.003, 0.003), _rng.randf_range(28.0, 55.0), 0.0)
-			if _ok_tree(q):
-				var m2 := "beech_a" if _rng.randf() < 0.5 else "beech_b"
-				_node(m2, "FagFund", q, _rng.randf_range(0.0, TAU), _rng.randf_range(0.95, 1.3), 0.1)
-				total += 1
-		f += 0.0075
 	_log.append("; fagi: %d" % total)
 
 
@@ -197,9 +194,12 @@ func _ok_tree(q: Vector3) -> bool:
 func _outcrops_and_scree() -> void:
 	# [model, frac, off, yaw, scara]
 	var specs := [
-		["outcrop_a", 0.1665, 27.0, 0.6, 1.25],
-		["outcrop_b", 0.1975, 31.0, 2.4, 1.3],
-		["outcrop_c", 0.2125, 26.0, 1.1, 1.2],
+		["outcrop_a", 0.1650, 24.0, 0.6, 1.5], ["outcrop_c", 0.1685, 29.0, 1.9, 1.4],
+		["outcrop_b", 0.1660, 33.0, 2.8, 1.5],
+		["outcrop_b", 0.1960, 28.0, 2.4, 1.6], ["outcrop_c", 0.1995, 33.0, 0.8, 1.4],
+		["outcrop_a", 0.1975, 38.0, 4.1, 1.5],
+		["outcrop_c", 0.2115, 25.0, 1.1, 1.4], ["outcrop_a", 0.2145, 30.0, 5.0, 1.5],
+		["outcrop_b", 0.2130, 36.0, 0.3, 1.5],
 		["outcrop_a", 0.2250, -30.0, 3.7, 1.35],
 		["outcrop_c", 0.2335, -26.0, 5.2, 1.3],
 	]
@@ -210,7 +210,7 @@ func _outcrops_and_scree() -> void:
 		_node(String(s[0]), "Aflorimentul", q, float(s[3]), float(s[4]), 0.3)
 	# Grohotis la piciorul aflorimentelor b si c: latura plata (+Z local) spre
 	# stanca; yaw = atan2(d.x, d.z) cu d = directia grohotis -> stanca.
-	for sc: Array in [[0.1975, 31.0, 7.5], [0.2125, 26.0, 6.5]]:
+	for sc: Array in [[0.1960, 28.0, 7.5], [0.2115, 25.0, 6.5]]:
 		var rock := _pt(float(sc[0]), float(sc[1]), 0.0)
 		var road := _pt(float(sc[0]), float(sc[1]) - 10.0, 0.0)
 		var d := road - rock
@@ -222,26 +222,44 @@ func _outcrops_and_scree() -> void:
 		_node("scree", "Grohotis", center, atan2(to_rock.x, to_rock.z), 1.0, 0.25, "none")
 
 
-## D. MOLIZII. 4 palcuri x 3; stolurile se emit la sfarsit.
+## D. MOLIZII. Grupuri neregulate de 5-12 pe dreapta; densitate spre drum.
 func _spruces() -> void:
-	# [frac, off, nr]
+	# [frac centru, offset centru de la margine, nr.]
 	var clusters := [
-		[0.1700, 36.0, 3], [0.2055, 38.0, 3], [0.2290, -32.0, 3], [0.2385, 21.0, 3],
+		[0.1580, 13.0, 9], [0.1665, 17.0, 11], [0.1740, 12.0, 8],
+		[0.1815, 24.0, 7], [0.1890, 13.0, 10], [0.1960, 18.0, 6],
+		[0.2040, 12.0, 10], [0.2105, 20.0, 8], [0.2185, 14.0, 9],
+		[0.2265, 12.0, 8], [0.2345, 16.0, 7], [0.2405, 20.0, 6],
+		[0.1700, 40.0, 7], [0.2000, 42.0, 7], [0.2150, 40.0, 6],
+		[0.2290, -32.0, 5],
 	]
+	var total := 0
 	for c: Array in clusters:
 		for k in int(c[2]):
-			var off: float = float(c[1]) + _rng.randf_range(-3.5, 3.5)
-			var q := _pt(float(c[0]) + _rng.randf_range(-0.002, 0.002), off, _rng.randf_range(-3.0, 3.0))
+			var sgn := signf(float(c[1]))
+			var off: float = float(c[1]) + sgn * _rng.randf_range(-7.0, 7.0)
+			if absf(off) < 9.0:
+				off = 9.0 * sgn
+			var fr: float = float(c[0]) + _rng.randf_range(-0.0045, 0.0045)
+			var q := _pt(fr, off, 0.0)
 			if is_nan(q.y) or _axis_dist(q, 0.185, 0.205) < 10.0:
 				continue
-			var nm := "Pine_C" if k == 0 else "Pine_B"
+			var si := _idx(0.1777)
+			var sg: Vector3 = _track.baked[si] + _track._side_at(si) * 9.2
+			if Vector2(sg.x - q.x, sg.z - q.z).length() < 6.0:
+				continue
+			var r := _rng.randf()
+			var nm := "Pine_A" if r < 0.25 else ("Pine_B" if r < 0.6 else ("Pine_C" if r < 0.85 else "Pine_D"))
 			(_pine_pos[nm] as Array).append(Vector3(q.x, q.y - 0.15, q.z))
 			(_pine_yaw[nm] as Array).append(_rng.randf_range(0.0, TAU))
+			(_pine_sl[nm] as Array).append(0 if fr < 0.2 else 1)
+			total += 1
+	_log.append("; molizi: %d" % total)
 
 
 ## E. FLORILE. Petice neregulate de bujor cu afin pe margine.
 func _flowers() -> void:
-	var fr := [0.1600, 0.1660, 0.1830, 0.1900, 0.2040, 0.2130, 0.2300, 0.2370]
+	var fr := [0.1600, 0.1830, 0.2130, 0.2300]
 	var k := 0
 	for f: float in fr:
 		var off := _rng.randf_range(7.0, 15.0)
@@ -249,10 +267,10 @@ func _flowers() -> void:
 		if is_nan(center.y) or _axis_dist(center, 0.185, 0.205) < 8.0:
 			k += 1
 			continue
-		var sl := 0 if k < 4 else 1
-		for j in 6:
+		var sl := 0 if k < 2 else 1
+		for j in 5:
 			var a := _rng.randf_range(0.0, TAU)
-			var r := sqrt(_rng.randf()) * 2.4
+			var r := sqrt(_rng.randf()) * 1.8
 			var q := center + Vector3(cos(a) * r, 0.0, sin(a) * r)
 			q.y = _sol(q.x, q.z) + 0.02
 			_bujor_pos.append(q)
@@ -306,21 +324,22 @@ func _slice(pos: Array, yaw: Array, sl: Array, which: int) -> Array:
 
 
 func _write() -> void:
-	# molizi: foliajul + trunchiul fiecarei variante (acelasi seed => aceeasi scara)
-	for nm: String in ["Pine_B", "Pine_C"]:
+	for nm: String in PINES:
 		var tr := nm.replace("Pine_", "Trunk_")
-		var sd := 5101 + nm.length() + (7 if nm == "Pine_C" else 0)
-		_flock("C_%s" % nm, "pines", nm, _pine_pos[nm], _pine_yaw[nm], 0.9, 1.15, "", sd)
-		_flock("C_%s" % tr, "pines", tr, _pine_pos[nm], _pine_yaw[nm], 0.9, 1.15, "", sd)
+		var sc: Array = PINE_SCALE[nm]
+		for sl in 2:
+			var pp := _slice(_pine_pos[nm], _pine_yaw[nm], _pine_sl[nm], sl)
+			var sd := 5100 + PINES.find(nm) * 10 + sl
+			_flock("C_%s_S%d" % [nm, sl], "pines", nm, pp[0], pp[1], sc[0], sc[1], "class:tf_jneapan", sd)
+			_flock("C_%s_S%d" % [tr, sl], "pines", tr, pp[0], pp[1], sc[0], sc[1], "", sd)
 	for sl in 2:
 		var b := _slice(_bujor_pos, _bujor_yaw, _patch_slice, sl)
-		_flock("C_BujorFloare_S%d" % sl, "bujor", "Bujor_Bloom", b[0], b[1], 1.5, 2.1, "atint:tf_bloom", 6201 + sl)
-		_flock("C_BujorFrunze_S%d" % sl, "bujor", "Bujor_Leaves", b[0], b[1], 1.5, 2.1, "", 6201 + sl)
+		_flock("C_BujorFloare_S%d" % sl, "bujor", "Bujor_Bloom", b[0], b[1], 1.0, 1.4, "atint:tf_bloom", 6201 + sl)
+		_flock("C_BujorFrunze_S%d" % sl, "bujor", "Bujor_Leaves", b[0], b[1], 1.0, 1.4, "", 6201 + sl)
 		var a := _slice(_afin_pos, _afin_yaw, _afin_slice, sl)
 		_flock("C_AfinFrunze_S%d" % sl, "afin", "Afin_Leaves", a[0], a[1], 1.4, 1.9, "", 6301 + sl)
 		_flock("C_AfinBoabe_S%d" % sl, "afin", "Afin_Berry", a[0], a[1], 1.4, 1.9, "", 6301 + sl)
-	print("; noduri %d, molizi B=%d C=%d, bujor %d, afin %d" % [_n,
-		(_pine_pos["Pine_B"] as Array).size(), (_pine_pos["Pine_C"] as Array).size(),
+	print("; noduri %d, bujor %d, afin %d" % [_n,
 		_bujor_pos.size(), _afin_pos.size()])
 	for l in _log:
 		print(l)

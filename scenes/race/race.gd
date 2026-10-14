@@ -64,6 +64,13 @@ var _stalled: Dictionary = {}
 ## scutirea expira (QUEUE_EXEMPT_MAX_S) inainte ca masina sa mai progreseze,
 ## plasa de siguranta trebuie sa apuce imediat, nu sa mai astepte alte 5s.
 var _queue_exempt_time: Dictionary = {}
+## Cat sta fiecare masina rasturnata si aproape oprita (secunde), vezi
+## `_watch_recovery`. Sub FLIPPED_COS (cos fata de verticala) caroseria e pe o
+## parte sau pe acoperis; un viraj inclinat pe doua roti ramane mult peste.
+var _flipped: Dictionary = {}
+const FLIPPED_COS: float = 0.3
+const FLIPPED_SPEED: float = 4.0
+const FLIPPED_S: float = 1.5
 var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
@@ -179,7 +186,12 @@ func _setup_race() -> void:
 	player.respawned.connect(func(_c: Car) -> void:
 		camera.snap_behind()
 		camera.add_trauma(0.22)
+		hud.recovery_fade_out()
 		hud.flash_message("RATAT — repus pe pista"))
+	# Tranzitia de dinaintea repunerii (#495): ecranul se intuneca cat clipeste
+	# masina; `respawned` de mai sus il limpezeste dupa teleport.
+	player.recovery_started.connect(func(_c: Car, seconds: float) -> void:
+		hud.recovery_fade_in(seconds))
 	# Soferul aruncat din masina (buggy, prototip): camera ramane pe loc si
 	# urmareste figurina cat tine aruncarea; repunerea de dupa trage camera
 	# inapoi prin `respawned` (snap_behind sterge focalizarea).
@@ -349,12 +361,14 @@ func _go() -> void:
 				hud.flash_message("ROCKET START!")
 			elif hold > 1.05:
 				hud.flash_message("Prea devreme...")
+				car.hold_turbo_until_release()
 		elif _rng.randf() < 0.45:
 			car.force_boost(0.8)
 
 # ------------------------------------------------------------------ cursa
 
 func _tick_race(delta: float) -> void:
+	_tick_offroad_clock(delta)
 	_tick_wrong_way(delta)
 	for i in cars.size():
 		var car := cars[i]
@@ -377,6 +391,49 @@ func _tick_race(delta: float) -> void:
 			if laps >= GameState.total_laps and not car.finished:
 				car.finished = true
 	_update_positions()
+
+## Ceasul de offroad al jucatorului (#497): iesit de pe carosabil, ai atatea
+## secunde sa revii; la zero esti repus de unde ai iesit. Doar jucatorul — AI-ul
+## nu taie prin iarba, iar plasa lui ramane `_watch_recovery`.
+##
+## Benzile si scurtaturile declarate (`TrackBranch`, inclusiv drumurile de
+## tara prin off-road) NU pornesc ceasul: pe ele `route` e banda, iar
+## `is_on_road` raspunde dupa latimea ei. Iarba de langa o banda il porneste.
+const OFFROAD_LIMIT_S: float = 3.0
+## Retragerea la repunerea data de ceas: aproape de punctul de iesire (care e
+## ultimul checkpoint pe asfalt), cu cativa metri de elan.
+const OFFROAD_RESPAWN_BACKOFF_M: float = 4.0
+## Secundele ramase; negativ = ceasul nu ruleaza.
+var _offroad_left: float = -1.0
+
+func _tick_offroad_clock(delta: float) -> void:
+	# Doar la volan uman: ProbeRace pune un AIController pe masina jucatorului,
+	# iar cifrele ei trebuie sa ramana comparabile cu ale celorlalte masini.
+	if not (player.controller is PlayerController) or player.finished \
+			or player.is_recovering() or player.is_ejected:
+		_set_offroad_left(-1.0)
+		return
+	var off := not track.is_on_road(player.road_index, player.global_position,
+		player.route)
+	if not off:
+		_set_offroad_left(-1.0)
+		return
+	if _offroad_left < 0.0:
+		_set_offroad_left(OFFROAD_LIMIT_S)
+		return
+	# In aer ceasul sta: o saritura peste iarba nu e timp pierdut pe iarba, iar
+	# aterizarea pe asfalt il opreste oricum.
+	if player.is_on_floor():
+		_set_offroad_left(_offroad_left - delta)
+	if _offroad_left <= 0.0:
+		_set_offroad_left(-1.0)
+		player.recover(OFFROAD_RESPAWN_BACKOFF_M)
+
+
+func _set_offroad_left(seconds: float) -> void:
+	_offroad_left = seconds
+	hud.set_offroad_clock(seconds)
+
 
 ## „WRONG WAY" (#499): jucatorul merge pe contrasens fata de sensul pistei.
 ##
@@ -437,7 +494,7 @@ func player_progress_fraction() -> float:
 ## lume si sa te impotmolesti in nisip fara sa mai poti iesi. Amandoua se
 ## termina cu repunerea pe ultimul checkpoint valid.
 func _watch_recovery(car: Car, delta: float) -> void:
-	if car.finished:
+	if car.finished or car.is_recovering():
 		return
 	# Prag RELATIV la sosea, nu absolut. De cand terenul urmareste drumul, cota
 	# zero nu mai inseamna nimic: fundul unei rape sapate pe o portiune joasa e
@@ -451,6 +508,18 @@ func _watch_recovery(car: Car, delta: float) -> void:
 				car.global_position.x, car.global_position.y, car.global_position.z])
 		car.respawn()
 		return
+	# Rasturnata (#495): pe acoperis sau pe o parte, aproape oprita. Pe asfalt
+	# n-o prindea nimic — plasa de mai jos cere „in afara soselei" — si
+	# jucatorul ramanea cu rotile in sus pana apasa singur butonul.
+	if car.global_transform.basis.y.dot(Vector3.UP) < FLIPPED_COS \
+			and car.horizontal_speed() < FLIPPED_SPEED:
+		_flipped[car] = float(_flipped.get(car, 0.0)) + delta
+		if float(_flipped[car]) > FLIPPED_S:
+			_flipped[car] = 0.0
+			car.recover()
+			return
+	else:
+		_flipped[car] = 0.0
 	var off_road := not track.is_on_road(car.road_index, car.global_position,
 		car.route)
 	if off_road and car.horizontal_speed() < 2.5:
@@ -491,7 +560,7 @@ func _watch_recovery(car: Car, delta: float) -> void:
 				print("[race-respawn] %s cauza=stall_offroad frac=%.3f pos=(%.0f,%.0f,%.0f)"
 					% [car.pilot_name, track.frac_at(car.road_index, car.route),
 						car.global_position.x, car.global_position.y, car.global_position.z])
-			car.respawn()
+			car.recover()
 	else:
 		_stalled[car] = 0.0
 		_queue_exempt_time[car] = 0.0
@@ -688,7 +757,7 @@ func _swap_player_car(index: int) -> void:
 func _on_respawn_requested() -> void:
 	if state != State.RUNNING or player.finished:
 		return
-	player.respawn()
+	player.recover()
 
 
 func _fit_camera_to_player() -> void:

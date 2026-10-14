@@ -33,6 +33,11 @@ var _minimap: Minimap
 ## care nu-si mai vede pozitia sau bara de turbo ar citi asta ca bug, nu ca
 ## hazard.
 var _blind_veil: ColorRect
+## Voalul tranzitiei de repunere (#495): se intuneca cat clipeste masina.
+var _recover_veil: ColorRect
+var _recover_tween: Tween
+## Ceasul de offroad (#497): cifra mare deasupra centrului.
+var _offroad_label: Label
 ## „WRONG WAY" (#499): mare, rosu, pulsand cat timp mergi pe contrasens.
 var _wrong_way_label: Label
 var _wrong_way_tween: Tween
@@ -107,6 +112,12 @@ func _ready() -> void:
 	_blind_veil.color = Color(0.94, 0.96, 0.98, 1.0)
 	_blind_veil.modulate.a = 0.0
 	root.add_child(_blind_veil)
+	_recover_veil = ColorRect.new()
+	_recover_veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_recover_veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_recover_veil.color = Color(0.02, 0.02, 0.04, 1.0)
+	_recover_veil.modulate.a = 0.0
+	root.add_child(_recover_veil)
 
 	_countdown = _make_label(110)
 	_countdown.set_anchors_and_offsets_preset(
@@ -115,6 +126,16 @@ func _ready() -> void:
 	_countdown.grow_vertical = Control.GROW_DIRECTION_BOTH
 	root.add_child(_countdown)
 
+	_offroad_label = _make_label(64)
+	_offroad_label.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	_offroad_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_offroad_label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_offroad_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_offroad_label.position += Vector2(0, -150)
+	_offroad_label.add_theme_color_override("font_color", Color(1.0, 0.82, 0.25))
+	_offroad_label.visible = false
+	root.add_child(_offroad_label)
 	_wrong_way_label = _make_label(72)
 	_wrong_way_label.text = "WRONG WAY"
 	_wrong_way_label.set_anchors_and_offsets_preset(
@@ -416,6 +437,38 @@ func blind_flash(seconds: float) -> void:
 	tw.tween_property(_blind_veil, "modulate:a", BLIND_PEAK, 0.12)
 	tw.tween_interval(hold * 0.45)
 	tw.tween_property(_blind_veil, "modulate:a", 0.0, hold * 0.75)
+
+
+## Tranzitia de repunere (#495). Nu pana la negru: in ultima clipa inca vezi
+## masina clipind acolo unde a ramas, ca sa stii DE CE esti mutat.
+const RECOVER_VEIL_PEAK: float = 0.7
+
+func recovery_fade_in(seconds: float) -> void:
+	if _recover_tween != null and _recover_tween.is_valid():
+		_recover_tween.kill()
+	_recover_tween = create_tween()
+	_recover_tween.tween_property(_recover_veil, "modulate:a", RECOVER_VEIL_PEAK,
+		maxf(seconds, 0.1)).set_ease(Tween.EASE_IN)
+
+
+## Dupa teleport: ecranul se limpezeste repede, pe masina deja asezata.
+func recovery_fade_out() -> void:
+	if _recover_tween != null and _recover_tween.is_valid():
+		_recover_tween.kill()
+	_recover_tween = create_tween()
+	_recover_tween.tween_property(_recover_veil, "modulate:a", 0.0, 0.3)
+
+
+## Negativ = ascuns. Zecimi, nu secunde intregi: la 3 s, „3, 2, 1" sare prea
+## rar ca sa simti ca timpul curge; ultima secunda se inroseste.
+func set_offroad_clock(seconds: float) -> void:
+	if seconds < 0.0:
+		_offroad_label.visible = false
+		return
+	_offroad_label.visible = true
+	_offroad_label.text = "OFF ROAD\n%.1f" % maxf(seconds, 0.0)
+	_offroad_label.add_theme_color_override("font_color",
+		Color(1.0, 0.3, 0.2) if seconds < 1.0 else Color(1.0, 0.82, 0.25))
 
 
 func set_wrong_way(on: bool) -> void:

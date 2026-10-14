@@ -229,6 +229,21 @@ const BASELINE := {
 	# TunnelPortal intre masina si camera) — zona de camera se oprea chiar la capat. Baza =
 	# cifra masurata, FARA marja. Sabotaj (`--sabotaj`) verificat la armare.
 	"Transfagarasan (Track21)": 1,
+	# Ha Long (Track22), fundatia + pontoane + banda de maree (14 oct 2026):
+	# ZERO incidente. Cifra e MASURATA, fara marja (memoria
+	# `garda-fara-linie-de-baza-iese-zero`): pana la armare sonda tiparea
+	# "pista fara linie de baza", adica trecea verde orice.
+	#
+	# Armarea a venit dintr-un incident REAL, inchis: banda de maree cobora 1.0 m
+	# sub drum si camera intra IN MASINA pe mijlocul ei (collider `Car`, nu un
+	# perete). Baleierea pe cota a dat pragul: 0.0/0.3/0.5/0.7 -> 0 incidente,
+	# 0.85/1.0 -> 1. Banda sta acum la 0.7, adica MAXIMUL care tine camera afara.
+	# Sonda s-a dovedit DETERMINISTA aici (1.0 a dat acelasi verdict la doua
+	# rulari separate), altfel decat ProbeRace — deci pragul nu e zgomot.
+	#
+	# Grota (frac 0.297-0.338) trece curata, cu `CameraZone` pe cerinta
+	# geometrica (tavan 11 m vizibil de la 20 m), nu pe cote fixe.
+	"Ha Long (Track22)": 0,
 }
 
 

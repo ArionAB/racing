@@ -1,4 +1,38 @@
-# Track brief — Ha Long Bay (`Track22`, temă `halong`) — v0.3 (concept + contracte verificate + schiță măsurată)
+# Track brief — Ha Long Bay (`Track22`, temă `halong`) — v0.4 (fundație construită și condusă)
+
+> **v0.5 (14 oct 2026):** fundația `Track22.tscn` există, se încarcă fără erori
+> și **se conduce curat** — ProbeRace pe patru seed-uri: tur minim **59,8 s**,
+> mediu **68,6–70,1 s**, **0% offroad**, **zero blocaje**, **zero ieșiri din
+> lume**, și doar **1–3 repuneri** per cursă, toate pe joncă (adică pe hazard,
+> unde le e locul).
+>
+> Jonca e **reglată din măsurători**: gabarit 6,49 m pe carosabil de 11,5 m →
+> bandă liberă **5,01 m**, `sweep_speed` la implicitul clasei (12,0). Reglajul
+> a tăiat repunerile cu **75%** (de la 6/8/6/7 la 1/3/2/1) și a *scăzut* turul
+> mediu. Contractul e acum **gardă în generator**, nu doar o cifră în scenă.
+>
+> **§7.1** e partea de citit dacă reiei lucrul: conține trei ipoteze greșite
+> măsurate, două unelte stricate de mine și prinse tot măsurând, și de ce
+> fiecare a fost greșită.
+>
+> **`PontoonRoadHazard` EXISTĂ** (§7.2): trei tronsoane vii pe pistă, cu
+> afundare pe masă (autobuz 0,450 m, sport 0,180 m — exact țintele), prag la
+> insuliță 0,042 m (contract < 0,3), tangaj și val propriu. Podul de pe Machu
+> Picchu e **neatins** și toate contractele lui trec.
+>
+> **`TideHazard` + banda de jos sunt pe pistă** (§7.3). Scurtătura de maree
+> cerea o coardă joasă care nu exista pe traseul inițial, deci **latura de
+> coastă s-a redesenat** (decizia dezvoltatorului): drumul ocolește acum un
+> golf de 100 m, iar banda taie peste gura lui — **−32,8%**, în ținta Monument
+> Valley, pe teren plat. Bucla a crescut la **2 076 m**, toate gărzile trec.
+>
+> **O problemă deschisă:** redesenarea a adus o regresie pe primul ponton
+> (repuneri 0/3/0/4 → 1/13/2/9 pe aceleași seed-uri). Cinci ipoteze eliminate
+> prin măsurare, scrise în §7.3 ca să nu fie reluate.
+>
+> **Următorii pași:** regresia de pe primul ponton, `CameraZone` pe grotă,
+> gărzile de layout (`ProbeLayout`, `ProbeBuried`, `ProbeLaneClear` cu linie
+> de bază proprie), apoi verdictul dezvoltatorului la volan.
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `transfagarasan.md`, `okinawa.md` și `monument_valley.md`. Secțiunile de
@@ -463,11 +497,25 @@ Nu le iau singur, fiindcă schimbă scopul. Propunerea mea e prima la fiecare.
    libere. Pontonul rămâne o mecanică nouă și fără el.
 3. **Mareea: cine comută scurtătura?** Partea de apă e lămurită (§3:
    `TideHazard` ca variantă de `WaterHazard`, care e scris exact pentru asta).
-   Rămas de decis: închiderea benzii de jos o face hazardul (dezactivează
-   `TrackBranch`-ul) sau rămâne deschisă și apa doar taie grip-ul până la
-   impracticabil? Propunere: **apa taie grip-ul, banda rămâne deschisă** —
-   e mai puțin cod și lasă decizia riscantă posibilă („o iau oricum”), în
-   spiritul principiului 2 (skill de decizie).
+   **ÎNCHIS (14 oct 2026), pe cod citit: hazardul închide banda.** Propusesem
+   „apa taie grip-ul, banda rămâne deschisă”, ca variantă mai ieftină. Dar
+   `Track.branch_is_open` + `BRANCH_GATE_GROUP` **există deja** și cer două
+   metode (`branch_index` + `shortcut_open()`), cu precedent dublu — lava de pe
+   Stromboli și vaca de la Jodhpur. Deci închiderea nu e mai scumpă, și e mai
+   onestă: la 1,5 m de apă peste terasă, o bandă „deschisă cu grip tăiat” ar fi
+   o capcană, nu o decizie. Bonus neprevăzut: `shortcut_open()` e întrebat
+   **per tur** în `AIController`, deci un AI care a decis „o iau pe scurtă” la
+   turul 1 nu intră în apă la turul 3.
+
+   **Compromisul păstrat:** banda se închide **doar** la apă plină. Fazele de
+   urcare și de retragere o lasă deschisă **cu apă pe ea** — acolo stă riscul
+   asumat, măsurat la **22,8 s per ciclu** de fereastră în care poți încerca.
+
+   **DAR banda de jos nu e pusă pe pistă** (§7.3): măsurătoarea arată că pe
+   traseul actual nu există nicio coardă care să scurteze la nivelul mării.
+   Poarta de bandă rămâne implementată și testată, nefolosită până se ia una
+   dintre cele trei opțiuni din §7.3. Decizia asta e **deschisă din nou**, la
+   alt nivel: nu „cine comută banda”, ci **unde poate exista banda**.
 4. **Grota: una lungă (70 m) sau două scurte?** Propunere: **una lungă**, ca
    să fie eveniment, nu detaliu. Depinde de ce arată `ProbeCameraSolid` pe
    tavanul de 11 m.
@@ -703,30 +751,39 @@ carosabil fix, ca să se măsoare traseul și plasa lumii întâi (§7 pasul 4).
    pontoanele, deci ori se extrage un strat comun, ori se strâng căutările.
    **Rămas de făcut din pasul ăsta:** auditul kiturilor Okinawa / Fiordland
    (§5.1), care nu blochează fundația.
-3. **Fundația `Track22.tscn`** din `tools/gen_halong_route.py` (copie de
-   `gen_transfagarasan_route.py`):
-   - garda de **sens** (bucla e ORARĂ) și garda de **azimut** scrise
-     **înaintea** traseului, pe reperele fixe din §2.1, plus `--sabotaj`, care
-     trebuie să pice;
-   - tema **`halong`** în `Track.themes()`, pornind de la `okinawa`, **fără**
-     să o editeze (decizia 3.1.5), cheia în enum-ul din `track_from_path.gd`
-     și `info/Track22.tres` (regiunea „ASIA”; accentul propus e verde-jad,
-     `(0.29, 0.48, 0.42)`);
-   - `custom_name` și `custom_world_seed_name` **înghețate** de la prima
-     generare;
-   - pe traseu: `custom_width_segments` (grota și pontoanele la 6),
-     `TerrainPeak` pentru turnuri și pentru insulă, `CameraZone` pe grotă,
-     `TrackBranch` pentru banda de jos, noduri `PontoonRoadHazard` și
-     `HerdHazard`, `HazardMarker` SLIDING pentru joncă. Turnuri **provizorii**
-     din kitul Okinawa în `DecorManual`, ca să se vadă scara;
-   - `GameState`: Track22 **la coada listei** (indexul 15). Uneltele o
-     adresează cu `--track=22` (`resolve_track_index` o găsește după numărul
-     scenei); atenție la cele două convenții —
+3. **Fundația `Track22.tscn` ✔ FĂCUT** (14 oct 2026),
+   `tools/gen_halong_route.py` + `tools/ProbeHalongLoad.tscn`. Vezi §7.1 pentru
+   ce a găsit. Ce e în scenă:
+   - gărzile de **formă**, **apă**, **azimut**, **departare** și **hazarde cu
+     ceas**, toate scrise **înaintea** traseului, pe reperele fixe din §2.1,
+     plus `--sabotaj`, **care pică** (cod 1);
+   - tema **`halong`** în `Track.themes()`, pornind din **copia** lui `okinawa`
+     (singura temă cu mare cu adâncimi), fără să o editeze — Track20 rămâne
+     bit-identică. Cheia în enum-ul din `track_from_path.gd` și
+     `info/Track22.tres` (regiunea „ASIA”, accent verde-jad);
+   - `custom_name` („Ha Long”) și `custom_world_seed_name` („halong22”)
+     **înghețate** de la prima generare;
+   - `custom_sea_level_offset = -5,99`, **nu** implicitul −7 (§2);
+   - pe traseu: `custom_width_segments` (grota, podețul și cele trei tronsoane
+     de ponton la 6 m), cinci `TerrainPeak` (insula + patru turnuri de calcar
+     ca flanc), cinci râpe cu apă de golf, `HazardMarker` SLIDING pentru joncă
+     și `HerdHazard` pentru maimuțe. Turnuri și pontoane **provizorii** din
+     kitul Okinawa în `DecorManual` (41 de noduri), ca să se vadă scara;
+   - `GameState`: Track22 la coada listei (**indexul 15**). Uneltele o
+     adresează cu `--track=22`; atenție la cele două convenții —
      `probe_decor`/`probe_manual` vor **22**, `snapshot`/`probe_race`/
      `probe_layout` vor **15 SAU 22** (memoria `probe-decor-numar-de-scena`,
      care a costat 528 de piese plutind).
-4. **ProbeRace la început** (§6), pe traseul gol, înaintea oricărui decor —
-   fiindcă plasa lumii pe o pistă jumătate-apă e riscul numărul unu (§2).
+
+   **Ce NU e încă în scenă, deliberat:** `PontoonRoadHazard` (clasa nu există
+   — §5.3), `TideHazard` și `TrackBranch`-ul benzii de jos, `CameraZone` pe
+   grotă. Fundația pornește cu pontoanele ca **carosabil fix**, ca să se
+   măsoare traseul, apa și repunerile înainte să existe un tablier care se
+   leagănă. Fracțiile tronsoanelor sunt deja tipărite de generator, pentru
+   `road_hole_span()`.
+4. **ProbeRace la început ✔ FĂCUT** (§6, §7.1), pe traseul gol, înaintea
+   oricărui decor — fiindcă apa pe o pistă jumătate-apă e riscul numărul unu
+   (§2). A găsit un defect real și l-a închis.
 5. **Gărzi:** `ProbeLayout --track=22`, `ProbeBuried`, `ProbeLaneClear` cu
    **linie de bază proprie, fără marjă** (memoria
    `garda-fara-linie-de-baza-iese-zero`: fără ea pare verde dar nu e armată) +
@@ -742,6 +799,655 @@ carosabil fix, ca să se măsoare traseul și plasa lumii întâi (§7 pasul 4).
    `tools/annotate_halong_plan.py` → prompt de dioramă → planșă de inventar →
    kit Blender → integrare → POI A–G (gauntlet, **valuri de 3**, memoria
    `valuri-de-trei-nu-opt-agenti`).
+
+### 7.1 Ce a găsit pasul 3 (14 oct 2026)
+
+Patru defecte, fiecare prins de o altă gardă. Niciunul n-ar fi fost găsit de
+cel care l-a prins pe celălalt — de aceea sunt patru gărzi, nu una.
+
+**1. `decor: false` oprea construcția pistei.** `TrackDecor.build` primește
+modul ca `String` (al doilea argument), iar un bool arunca „Cannot convert
+argument 2 from bool to String” și scena nu se mai construia. Celelalte teme
+care sting decorul statistic folosesc **string gol**. Prins de
+`ProbeHalongLoad` la prima rulare; nicio gardă geometrică nu l-ar fi văzut,
+fiindcă traseul era corect.
+
+**2. Patru râpe cereau apă pe care nu o puteau primi.** Prima versiune declara
+`custom_ravine_water` pe **toate cinci** râpele, la aceeași cotă (0,0).
+`_build_ravine_water` umple prin inundare de la buză în jos și ține minte
+celulele ude în `_ravine_wet`, deci a doua râpă cu aceeași cotă **nu mai
+găsește nicio celulă liberă**: patru `push_warning` („rapa N n-are nicio celula
+sub 0.0”) și patru zone de repunere eliberate degeaba. Pe Ha Long apa e **un
+singur golf**, deci se declară **o singură dată**. Cazul e simetric cu
+Transfăgărășanul, unde cele patru râpe cu apă au **cote diferite** (Vidraru
++7,5, hăul −24, Oltul +3,4 și −2,5) și de aceea funcționează acolo.
+
+**3. `sea_level_offset` în temă e citit de nimeni.** L-am pus prima dată ca
+cheie de temă, iar sonda a raportat marea la **−0,99**, adică implicitul −7, nu
+valoarea scrisă. Cauza: `sea_level_offset` e `@export` pe `Track`, iar
+`TrackFromPath._ready` îl scrie din **`custom_sea_level_offset`**, *după* ce
+tema s-a aplicat. Deci cota mării se pune **pe scenă**, nu pe temă. Sonda
+`ProbeHalongLoad` verifică acum perechea (media cotelor × offset = marea la
+0,00 ± 0,20), deci dacă cineva mută o cotă și uită offsetul, iese imediat.
+
+**4. Repunerile de la frac 0,80 sunt JONCA, și nu sunt un defect — e un
+hazard nereglat.** ProbeRace dă **2–8 repuneri pe fiecare seed**, toate la frac
+0,80, toate în **același punct** `(61, 3, −196)`. Reproductibil, deci nu zgomot.
+
+Cauza, după trei ipoteze greșite: la `Motion.TRAVERSARE`, `Track` îi dă joncii
+`travel = side · half_width · 0,9` — pleacă de pe acostament și **traversează
+carosabilul**, parcându-se dincolo. Jonca e, **prin design**, un obstacol solid
+pe drum. `SlidingHazard` *extends* `AnimatableBody3D`, deci corpul chiar e
+fizic. Repunerile sunt mașini care se izbesc de un hazard care **funcționează**.
+
+**Ce a dovedit măsurătoarea A/B** (patru seed-uri, 260 s, același traseu):
+
+| starea scenei | repuneri (seed 1/2/3/4) |
+|---|---|
+| canal lat pe tot podețul, joncă fără model | 2 / 5 / 5 / 2 |
+| canal îngustat (ipoteza 1: cad lateral în apă) | 2 / 5 / — / — |
+| canal îngustat + podeț lărgit la 7 m (ipoteza 2: nu încap) | 2 / 1 / 3 / 7 |
+| podeț repus la 6 m + **joncă CU model** (ipoteza 3: zid invizibil) | **6 / 8 / 6 / 7** |
+
+Primele două ipoteze au ieșit cu cifra **neschimbată**. A treia a făcut-o
+**mai mare**, și asta a fost dovada decisivă: fără model `SlidingHazard` își
+construiește `_build_placeholder_box()` de 4,5 × 2,2 × 2,6 m, iar
+`fishing_boat.glb` are **9 m lungime** — obstacol mai lat pe un drum de 6–7 m,
+deci mai multe coliziuni. Nu era un zid invizibil; era un obstacol real, pe
+care l-am făcut mai mare.
+
+**Deci nu e nimic de reparat în geometrie** — ce era de reglat e **hazardul**.
+
+### Reglajul joncii, din două măsurători (14 oct 2026)
+
+**1. Gabaritul**, măsurat cu `ProbeHlPoint` pe scena construită: corpul joncii
+e **4,12 × 5,35 × 9,32 m**, iar carosabilul podețului măsoară **11,5 m**. La
+`model_scale = 1,0` rămâneau **2,18 m** de bandă liberă când barca e pe axă —
+mai puțin decât lățimea unei mașini (2,6 m). Traversarea nu era o decizie, era
+un zid.
+
+Scara iese din ținta de bandă liberă, nu din gust:
+`model_scale = (11,5 − 5,0) / 9,32 = `**`0,697`**, pentru o bandă de **5,0 m**
+(o mașină trece confortabil, dar trebuie să vrea).
+
+**2. Viteza: implicitul clasei (12,0), nu 2,2.** Antetul lui `SlidingHazard`
+are măsurătoarea, și e contraintuitivă: *„încetinirea măturării «ca să fie mai
+citibil» ÎNRĂUTĂȚEȘTE lucrurile. Cu perioada dublă, obstacolul devine un blocaj
+semi-static și toată lumea intră în el (cadre de contact per mașină: ~10 la
+perioada originală, ~110 la dublu). Un obstacol rapid traversează și eliberează
+drumul; unul lent stă în el.”*
+
+Pusesem **2,2** din reflexul „o barcă e lentă” — exact greșeala pe care clasa o
+avertizează în antet. Lamele de pe Track15 merg la 2,0 fiindcă *sunt* animale
+lente și au `model_scale` 3,135 pe un GLB mic; o joncă de 9 m nu e o lamă.
+
+**Gardă nouă în generator**, ca cifrele să nu poată fi schimbate fără
+consecințe — contractul gimmickului scris ca cifră (memoria
+`garda-cu-numele-gimmickului`):
+- banda liberă **≥ 1,6 × lățimea mașinii** (4,16 m), altfel nu e decizie;
+- banda liberă **≤ 60% din carosabil** (6,90 m), altfel jonca nu mai e obstacol;
+- `sweep_speed` **≥ 8,0**, cu măsurătoarea din antetul clasei citată în mesaj.
+
+**Verdictul, măsurat pe patru seed-uri** (ProbeRace, 8 mașini, 260 s):
+
+| starea joncii | repuneri (seed 1/2/3/4) | tur mediu |
+|---|---|---|
+| fără model (box 4,5 m), `sweep` 2,2 | 2 / 5 / 5 / 2 | 69,0 s |
+| model 9,32 m, `sweep` 2,2 | 6 / 8 / 6 / 7 | 70,8–71,8 s |
+| **model 6,49 m (scale 0,697), `sweep` 12,0** | **1 / 3 / 2 / 1** | **68,6–70,1 s** |
+
+**−75% repuneri**, iar turul mediu a *scăzut* — semn direct că mașinile nu mai
+stau blocate în obstacol, ci îl trec. Toate cele 7 repuneri rămase sunt pe
+joncă (frac 0,80), **0% offroad** și **zero blocaje** pe toate seed-urile.
+
+Asta e comportamentul corect, nu un rest de defect: jonca **trebuie** să fie un
+obstacol. Una până la trei atingeri per cursă de 260 s cu 8 mașini înseamnă că
+cine n-o citește plătește, iar cine o citește trece prin banda de 5 m — exact
+contractul din §3 („decizie, nu taxă”).
+
+**Rămas de reglat, dacă verdictul la volan o cere:** `phase` (fereastra de
+telegrafare — acum e cea derivată din fracție) și eventual `travel`. Nu le
+ating fără un motiv măsurat: cifrele de mai sus sunt deja în contract.
+
+**Confirmarea finală, cu sonda de punct** (`ProbeHlPoint` pe (61, −196)):
+corpul mobil al joncii stă la **(37,8; 1,40; −187,4)**, adică la ~11 m pe cursa
+de traversare din nodul declarat la (40,75; −198,58) — chiar prin punctul de
+repunere. Drumul e la cota 1,40 pe toată lățimea pe axa x, deci **nu există
+nicio gaură**: ipotezele 1 și 2 n-aveau pe ce să se sprijine.
+
+Sonda a scos și **buza laterală a podețului**, măsurată: pe axa z, la ±8 m de
+ax, terenul coboară la **0,27–1,10** față de drumul la 1,40 — o treaptă de
+**0,30–1,13 m**, peste limita de 0,3 m de la care un prag e zid (memoria
+`suprafete-cu-goluri-si-praguri`). Cifra e **dincolo de marginea carosabilului**
+(podețul are semi-6, deci marginea e la 6 m), așa că nu e un prag *pe* drum și
+nu explică repunerile — dar e o buză de care te agăți dacă ieși lateral.
+
+**Verdict: se lasă așa, deliberat.** Podețul de plute *trebuie* să aibă o
+margine: e o punte peste un canal, nu un drum cu acostament. După reglajul
+joncii (banda liberă de 5 m, §mai jos) mașina împinsă are pe unde să treacă
+fără să ajungă la buză. Se redeschide doar dacă ProbeRace arată repuneri
+**laterale** acolo, nu frontale pe joncă.
+
+**Lecția de metodă, mai valoroasă decât defectul.** Trei ipoteze, trei
+măsurători, zero ghiceli validate:
+- când repunerile cad mereu în **același punct**, defectul nu e de formă —
+  **măsoară ce e acolo** (raycast + inventar de corpuri fizice), nu ajusta ce
+  crezi că e de vină;
+- o „reparație” care **nu schimbă cifra** nu e o reparație. Dacă o păstrezi
+  oricum, e o modificare de design strecurată sub numele unui fix. De aceea
+  lățimea podețului **s-a repus la 6 m** (intenția din brief), iar îngustarea
+  râpei a rămas doar pentru că are motiv de design propriu;
+- o reparație care **înrăutățește** cifra e cel mai informativ rezultat: aici a
+  arătat că obstacolul era real și că mărimea lui e variabila care contează;
+- **o sondă nerulată arată identic cu una care nu găsește nimic.** Prima
+  versiune a lui `ProbeHlPoint` a fost scrisă, comisă *și citată ca dovadă*
+  fără să compileze: `var p := center + axis * off`, cu `axis` venind dintr-un
+  array literal netipizat, dă „Cannot infer the type of p” și scriptul nu se
+  încarcă. Ieșirea era goală, și am pus-o pe seama unui timeout. Două apărări,
+  amândouă în unealtă acum: **buclele sunt tipizate** (`for axis: Vector3 in
+  axes`), și sonda **iese cu cod 1 dacă n-a măsurat nimic**, în loc să tacă
+  (memoria `garda-verde-pe-zero-masuratori`). Regula generală: rulează sonda
+  *înainte* de a o cita, și pune-i o linie care pică pe zero măsurători;
+- **o lățime de drum măsurată pe axele lumii e greșită**, și a doua versiune a
+  aceleiași sonde a dat **48 m** pe un drum de 11,5: pe o axă aliniată cu sensul
+  de mers, `RoadTop` continuă pe sute de metri. Lățimea se măsoară
+  **perpendicular pe ax** — practic, baleind unghiul și luând **minimul**, care
+  e normala la drum. Tiparul e cel din memoria `masoara-inainte-nu-langa`, pe
+  altă axă: nu presupune că axele lumii sunt axele drumului. A treia cifră
+  (11,5 m pe un podeț declarat la semi-6) a fost prima credibilă.
+
+**Cifrele fundației** (ProbeRace, 8 mașini, 260 s, patru seed-uri): tur minim
+**59,5–59,9 s**, mediu **70,0–71,8 s** — în fereastra Ignition 65–80 s ✔ —,
+**0% offroad** și **zero ieșiri din lume** pe toate seed-urile. Viteza medie e
+**28–31 m/s** uniform pe tot turul, cu o singură felie mai lentă la
+**0,95–1,00** (22 m/s, 23,9% „lent”): e intrarea în cheiul de start, unde
+drumul se strânge. De urmărit la volan, nu neapărat un defect.
+
+Repunerile (6–8 per seed) sunt **toate** pe joncă, la frac 0,80, și sunt
+chestiune de **reglaj de hazard**, nu de traseu — vezi defectul 4. Verdictul
+„se conduce cap-coadă” se dă după reglajul ei, nu acum.
+
+Variația între seed-uri (de exemplu 2/1/3/7 pe o stare intermediară) e
+nedeterminismul lui Jolt (memoria `proberace-nedeterminism`: se compară
+**distribuții**, nu o rulare) — de aceea fiecare ipoteză s-a măsurat pe toate
+cele patru seed-uri, nu pe unul.
+
+**Ce rămâne de confirmat la pasul 4–5:** marja plasei de mare (0,85 m sub
+pontonul complet afundat) se verifică abia când pontonul **chiar se leagănă**,
+fiindcă valul joncilor o mai mănâncă. Până atunci garda din generator o
+calculează din `rest_sag + sag_bus`, nu o măsoară.
+
+**Două capcane de unelte, de evitat la reluare** (nu sunt despre pistă, dar au
+costat timp aici):
+- **`| head -N` pe ProbeRace blochează procesul.** Când `head` închide
+  pipe-ul, Godot nu primește SIGPIPE dacă ieșirea e tăcută, iar procesul
+  rămâne agățat cu CPU 0 — fără să termine și fără să scrie nimic. Rulează
+  ProbeRace **cu redirectare în fișier** (`> seed1.txt 2>&1`) și filtrează
+  fișierul după;
+- **editorul Godot deschis rescrie `.tscn`-uri** (memoria
+  `editor-godot-deschis-rescrie-tscn`). Înainte de orice regenerare a lui
+  `Track22.tscn`, verifică `tasklist` / `git diff --stat` — aici am prins un
+  proces de editor deschis din dimineață, și deși n-a atins scena, ar fi putut.
+
+### 7.2 `PontoonRoadHazard` — semnătura pistei (14 oct 2026)
+
+`scenes/hazards/pontoon_road_hazard.gd` + `assets/shaders/pontoon_road.gdshader`
++ `tools/ProbePonton.tscn`. Trei tronsoane vii pe `Track22`, cu faze de val
+diferite (0, 0,333, 0,667) ca să nu se legene la unison.
+
+**Decizia de arhitectură: clasă de sine stătătoare, nu subclasă.** §5.3
+identificase capcana (`find_children("*", "RopeBridgeHazard")` din
+`snapshot.gd` și `probe_machu_pod.gd` prinde și subclasele) și propunea ori un
+strat comun extras, ori căutări strânse pe tip exact. Am ales **a treia cale**,
+după ce am măsurat scopul: din cele 604 linii ale podului, ~36 de referințe sunt
+vizual de pod (scânduri, cabluri portante, balustrade de frânghie, turnuri de
+piatră), iar fizica comună e ~80 de linii. Un strat comun ar fi atins o clasă pe
+care Track15 o folosește, pentru un câștig mic.
+
+Deci: **cod propriu, model matematic împrumutat, podul neatins.** Contractul cu
+`Track` merge prin **duck-typing** (`has_method("road_hole_span")`), deci
+pontonul e recunoscut fără să fie rudă cu podul. Capcana e închisă **prin
+construcție**, nu prin fix. Verificat: `rope_bridge_hazard.gd`,
+`rope_bridge.gdshader`, `probe_machu_pod.gd`, `snapshot.gd` și `Track15.tscn`
+sunt **nemodificate**, iar `ProbeMachu` trece cu cifrele neschimbate (săgeată
+0,60 sport / 1,50 autobuz, balans 0,96 m, stingere 1,30 s).
+
+**Cele trei schimbări față de pod**, exact cele prezise în §5.3:
+
+| # | ce | de ce podul n-o are |
+|---|---|---|
+| 1 | **capete libere**: `P(u) = free_ends + (1−free_ends)·4u(1−u)` | la pod `4u(1−u)` e **zero** la capete — frânghia e ancorată în turnuri. Un ponton plutește pe toată lungimea |
+| 2 | **tangaj**: a treia ecuație, pendul amortizat pe axa longitudinală | un pod cu capete fixe nu se poate înclina pe lung. E ce separă „drum moale” de „drum care plutește” |
+| 3 | **valul joncilor**: termen sinusoidal cu fază proprie | pontonul e **viu când pista e goală**; podul, nu |
+
+Capetele libere aduc o constrângere pe care podul n-o avea: **pragul de la
+insuliță la ponton** nu are voie să treacă 0,3 m (memoria
+`suprafete-cu-goluri-si-praguri`). De aceea există `edge_clamp`, care stinge
+cedarea pe ultimii metri — măsurat **0,042 m**, cu marjă mare.
+
+**Contractele, măsurate** (`ProbePonton`, pe sol plat, înaintea pistei):
+
+| contract | țintă | măsurat |
+|---|---|---|
+| afundare autobuz (2,6) la mijloc | 0,45 m | **0,450 m** |
+| afundare sport (0,9) la mijloc | 0,18 m | **0,180 m** |
+| masa se vede (autobuz > sport) | — | **0,450 > 0,180** ✔ |
+| prag la insuliță, cea mai rea din 4 faze | < 0,30 m | **0,042 m** |
+| salt de placă pe tick | < 0,12 m | **0,099 m** |
+| val cu pistă goală | > 0,02 m | **0,121 m** |
+| tangaj: capătul încărcat **coboară** | semn negativ | **−0,125 m** ✔ |
+
+**Sabotajul prinde:** `--sabotaj` stinge `free_ends`, `pitch_gain` și
+`wave_amp` (adică face pontonul un pod), iar gărzile 5–6 trebuie să **pice** —
+și pică (oscilație 0,0000 în loc de 0,121). Fără proba asta, gărzile n-ar
+deosebi un ponton de un pod.
+
+**Trei defecte găsite de sondă, toate la prima rulare:**
+1. **semnul tangajului era invers** — masa la capătul departat îl *ridica*.
+   `_pitch_at(u)` se adună la cotă, deci un pitch pozitiv ridică; ținta trebuia
+   negată. Prins de garda 6, care verifică **semnul**, nu doar că răspunde;
+2. **sonda măsura afundarea cu valul pornit** și raporta 0,507 m în loc de
+   0,450. Diferența era *exact* `_wave(0,5)` la `t = 0` (−0,0571 m), la a patra
+   zecimală — deci clasa era corectă, sonda măsura două lucruri deodată.
+   Aceeași familie cu memoria `ceasul-porneste-in-prima-faza`. Acum garda 1
+   stinge valul, iar garda 2 (pragul) îl **baleiază pe 4 faze**, fiindcă mașina
+   intră pe ponton în orice fază a hulei;
+3. **garda 3 era `async` dar chemată fără `await`**, deci verdictul se tipărea
+   înaintea ei și secțiunea ieșea **goală** — o gardă care nu măsoară nimic și
+   nici nu se plânge. Are acum și o linie care pică dacă saltul maxim e exact
+   0,0000 (plăci care nu s-au mișcat deloc).
+
+Plus unul găsit de **sabotaj**: garda 4 restaura `wave_amp = 0.10` cu o
+constantă hardcodată, suprascriind sabotajul — deci garda 5 raporta oscilație
+chiar și cu valul stins. O sondă care își rescrie subiectul nu-l mai măsoară.
+
+#### Al cincilea defect, găsit de ProbeRace: tronsoane peste limita mecanismului
+
+Cu pontoanele puse pe pistă (3 tronsoane de 71,5 m), ProbeRace a dat
+**148–156 repuneri per cursă** — de la 1–3 — iar turul a urcat de la 69 s la
+**152–192 s**. Repunerile erau grupate exact la fracțiile capetelor de tronson
+(0,11 / 0,14 / 0,21).
+
+Cauza **nu era pontonul**, ci un contract depășit în silențiu.
+`Track._resolve_span_holes` taie gaura din carosabil pe `2·steps` puncte
+coapte, cu bucla limitată la **`k = 15`**. Pasul mediu **măsurat** pe Track22
+e **2,001 m** (1 009 puncte pe 2 019 m), deci gaura maximă pe care mecanismul
+o poate tăia e **~60 m**. Tronsoanele mele de 71,5 m cereau `k = 18`: gaura s-a
+tăiat la 60 m, iar ultimii ~11 m au rămas **asfalt peste plăcile care se
+mișcă**. Niciun avertisment.
+
+Diagnosticul a venit din raycast pe tablier, nu din ghicit: `RoadTop` era
+prezent la u=0 și u=1 (deci asfalt pe tronson), iar `Plate` doar la mijloc.
+
+**Remediul nu e creșterea limitei din `track.gd`** — ar atinge podul de pe
+Machu Picchu, care merge la 34 m cu `k ≈ 8`. Sunt **7 tronsoane de 43 m**, cu
+marjă față de 60, și o **gardă în generator** care verifică fiecare lungime
+față de `2 · 15 · pas_măsurat`, plus un minim de 24 m (sub atât legănarea nu se
+simte: e o treaptă, nu o plută).
+
+A ieșit și un defect secundar: insulițele fixe stăteau la **1,19–1,41** în timp
+ce tablierul e la 0,43–0,56, adică **prag de ~0,7 m** — de două ori limita de
+0,3. Cauza: `harbour_quay.glb` are originea **la linia apei**, nu la bază, și
+2,2 m peste ea (`docs/asset_briefs/okinawa_kit_v2.md:213`) — cote pe care le
+presupusesem, nu le citisem. Corectat cu cifrele reale plus corecția de
+afundare la buză: insulițele sunt acum la **0,59–0,60**, cu prag de
+**0,03–0,17 m**.
+
+#### Al șaselea defect: afundarea nu satura — grila de start scufunda tablierul
+
+După tronsoanele scurte, repunerile au scăzut de la 148–156 la **41–56**, dar
+**82 din 97** erau pe **primul tronson**, toate în primul tur (t = 22–25 s),
+toate în același punct, cu autobuzul de două ori mai des decât restul. Profilul
+longitudinal măsurat era curat (toate pragurile sub 0,17 m), deci nu geometria.
+
+Cauza era un defect de **proiectare al clasei mele**: `_sag_target` e suma
+`Σ a_i·P(u_i)`, deci afundarea e **liniară în încărcare**. Cu 8 mașini pe
+același tronson iese ~2,3 m (8 × 0,29), iar tablierul de la +0,60 ajunge la
+**−1,84 m** — sub plasa de repunere a mării (−1,20) și sub apă (0,00). Podul de
+pe Machu Picchu n-are problema: are 35 m și trece pe el o mașină sau două. Un
+ponton de pe grila de start primește **tot plutonul deodată**.
+
+**Remediul e fizic, nu un plafon arbitrar: flotabilitate.** Un ponton are
+butoaie care deplasează un volum **finit**, deci afundarea se **saturează** —
+exact ce o coardă nu face. Implementat ca plafon moale (`sag_max = 0,70`, prin
+`tanh`), ca să nu existe un punct în care tablierul se oprește brusc:
+- la o mașină răspunsul rămâne **liniar** — calibrarea a derivat cu 3,5%
+  (autobuz 0,434 în loc de 0,450), sub marja de 6% pe care o calculasem;
+- la 8 mașini dă **1,63×** afundarea uneia, nu 8×;
+- afundările **locale** trec și ele prin plafon (jumătate din `sag_max`),
+  altfel patru gaussiene lipite ar scufunda tablierul pe lângă saturație;
+- `net_ceiling_drop()` se socotește acum din `sag_max`, nu din `sag_bus`: cu
+  flotabilitate, cât de jos poate ajunge tablierul nu mai depinde de câte
+  mașini sunt pe el.
+
+**Gardă nouă (7) în `ProbePonton`**, care testează exact cazul care a rupt
+pista: 8 autobuze pe un tronson, strânse la mijloc. Verifică două lucruri —
+că tablierul rămâne **peste plasa pe care pontonul însuși o cere** (măsurat:
+1,080 m vs 1,320 m, marjă 0,240) și că raportul 8-mașini/1-mașină e **sub 3×**
+(măsurat 1,63). Fără garda asta, defectul s-ar fi întors la orice schimbare de
+calibrare.
+
+#### Al șaptelea defect: tablier de 6 m pe carosabil de 12 m
+
+Flotabilitatea a dus repunerile de la 41–56 la **7–24**, dar frac 0,10 rămânea
+punctul cald (22 din 45). Profilul **lateral** măsurat a dat răspunsul: la
+**+2,6 m** de ax se lovea `TerrainBody` la 0,28, nu tablierul la 0,43 — adică
+tablierul se termina la ±2,6 m, iar mai departe mașina călca pe nimic.
+
+Cauza e o **nepotrivire de unități între două contracte**, și e mută:
+- `custom_width_segments` ia **semi**-lățimea (`TrackFromPath`: „(frac_start,
+  frac_end, **half_width**)”), deci 6,0 → carosabil de **12 m**;
+- `PontoonRoadHazard.deck_width` ia lățimea **totală**, deci 6,0 → tablier de
+  **6 m**.
+
+Pusesem 6,0 în amândouă. Rezultatul: 3 m de fiecare parte de carosabil tăiat
+fără tablier dedesubt, și nicio eroare — mașina pur și simplu cade.
+
+Corectat prin **o singură constantă** (`_PONT_HALF_W = 6.0`) derivată în ambele
+locuri, plus gărzi care verifică sensul fizic în loc de tautologie: tablierul
+≥ 3 lățimi de mașină (ca să se poată depăși pe el) și semi-lățimea ≤ cea a
+pistei (ca tablierul să nu atârne peste apă). Verificat după: tablierul
+acoperă **±5,3 m** în loc de ±2,6.
+
+**Tiparul care se repetă în toate trei defectele de integrare** (gaura de 60 m,
+saturația, lățimea): contractele izolate ale clasei treceau impecabil, iar
+defectul era la **granița dintre clasă și pistă** — o limită nescrisă, o
+încărcare pe care sonda izolată nu o produce, o unitate de măsură diferită.
+De aceea `ProbeRace` pe pista reală nu e opțional după `ProbePonton`: măsoară
+altceva (memoria `harnas-sintetic-comportament-emergent`).
+
+### 7.3 `TideHazard` și banda de jos (14 oct 2026)
+
+`scenes/hazards/tide_hazard.gd` + `tools/ProbeMaree.tscn`. Variantă de
+`WaterHazard` (cele trei metode virtuale) **plus** poartă de bandă în
+`Track.BRANCH_GATE_GROUP` — vezi decizia 3.1.3, închisă acum pe cod citit.
+
+Ciclu de **80 s** în patru faze: JOS (terasa descoperită, scurtătură uscată) →
+URCA (apa vine, banda **încă deschisă**) → SUS (apa peste terasă, banda
+**închisă**) → COBOARA (se retrage, banda redeschisă udă).
+
+**Contractele, măsurate** (`ProbeMaree`, izolat):
+
+| contract | măsurat |
+|---|---|
+| ceasul la `t = 0` e **telegraf** (URCA), nu apă sus | ✔ URCA |
+| banda deschisă majoritar | **49,6 s din 80** (62%) |
+| fereastră de risc (apă pe bandă deschisă) | **22,8 s** per ciclu |
+| toate patru fazele apar, în ordine | URCA → SUS → COBOARA → JOS |
+| nivelul e continuu (fără salturi) | **0,0015** / tick |
+| apa și poarta acordate | **0 / 400** contradicții |
+
+`--sabotaj` pornește ceasul cu apa sus — exact greșeala din Fiordland — și
+garda 1 **pică**, cum trebuie.
+
+#### Scurtătura de maree e geometric IMPOSIBILĂ pe traseul ăsta — clasa rămâne, plasarea nu
+
+**Clasa e gata și testată. Banda de jos NU e pusă pe pistă**, iar motivul e
+măsurat, nu de gust. Trei încercări, fiecare infirmată de cifre:
+
+**1. Banda paralelă (cum o descrie §3): −1,9% câștig.** §3 o descria ca „bandă
+la +0,4 m, mai scurtă și mai directă”, pe terasa de la baza peretelui, paralelă
+cu drumul de sus. Construită literal, garda a dat −1,9%. Baleind toată bucla
+(patru ferestre × laterale de −12 la +12 m): **niciodată peste −2,3%**.
+
+Motivul e geometric și evident în retrospectivă: **o bandă paralelă are aceeași
+lungime ca drumul pe care merge.** Offsetul lateral scurtează doar pe interiorul
+curbelor, iar latura de coastă e prea dreaptă. Ținta Monument Valley (−25…−35%)
+nu e atingibilă așa — o scurtătură trebuie să **taie coarda**.
+
+**2. Coarda de la închiderea buclei (0,962–1,040): −32%, dar rupe cursa.**
+Măsurând câștigul de coardă pe tot traseul, candidata arăta perfectă: −32,0%,
+plată (0,3 m pe 158 m), pe lângă satul plutitor. ProbeRace a arătat altceva:
+**tur minim 2,88 s** pe o pistă de 2 km. Fracțiile 0,962 → 1,040 trec **peste
+linia de start**, deci mașina care ia scurtătura închide turul pe ea și reintră
+dincolo de start. Nu e scurtătură, e o eroare de topologie.
+
+Pe drum a apărut și o a doua ipoteză greșită: cele 14 repuneri noi din zona
+benzii le-am pus pe seama unei trepte de 1,2 m la joncțiune (banda era coborâtă
+**uniform**, iar `TrackBranch` citește capetele de pe bucla principală — vezi
+memoria `banda-coborata-uniform-lasa-treapta`). Racordarea cotei cu profil
+`4u(1−u)` a fost **corectă ca principiu** și a rămas în lecții, dar **n-a
+schimbat cifra**: tot 14 repuneri. Cauza era topologia, nu cota.
+
+**3. Nicio altă coardă nu există la nivelul mării.** Baleind tot traseul cu
+filtru „nu atinge startul”, **singura** scurtătură cu câștig ≥ 20% e la **acele
+de păr** (0,58–0,68, −40%), la cotă **+12…+22 m**. Zero candidați sub +6 m.
+
+**Concluzia intermediară a fost:** pe traseul de atunci o scurtătură de maree
+nu avea loc. Mareea cere o terasă *plată și la nivelul apei*, iar singurul loc
+care scurta ceva era pe insulă, la 20 m deasupra mării.
+
+**Decizia dezvoltatorului (14 oct 2026): se redesenează latura de coastă** —
+opțiunea (b) din cele trei puse pe masă. Celelalte două, respinse: (a)
+scurtătura pe insulă cu mareea doar ca atmosferă, (c) mareea pe dig ca pasaj
+obligatoriu fără decizie.
+
+#### Redesenarea laturii G: golful care intră în uscat
+
+Latura G era o linie aproape dreaptă de la (84, 192) la (−352, 322) — și pe o
+dreaptă nu există scurtătură, fiindcă nu e nimic de tăiat. Acum drumul
+**ocolește un golf care intră ~100 m spre uscat (nord)**, iar banda de jos taie
+peste **gura golfului**, la nivelul apei.
+
+**Adâncimea golfului e aleasă pe măsurătoare, nu din ochi:**
+
+| adâncime | câștigul cordei | verdict |
+|---|---|---|
+| 60 m | −12,4% | prea puțin |
+| 80 m | −22,0% | la limită |
+| **100 m** | **−28,4%** | **în țintă** |
+| 120 m | −36,2% | peste țintă |
+
+La 100 m bucla crește de la 2 028 la **2 076 m**, deci rămâne în fereastra
+2 000–2 200. Toate gărzile existente trec după redesenare: rază 22,1 m, pantă
+9,7%, separare 88,9 m, Cebîșev 305 m, sens antiorar, iar cele trei gărzi de
+azimut văd reperele (93%, 100%, 85%).
+
+**Măsurat pe scurtătura finală:** ocol 227,9 m, coardă **153,3 m**, câștig
+**−32,8%** — în ținta Monument Valley. Ocolul e plat (0,2 m abatere), deci
+terasa de maree stă acolo credibil, iar banda **nu atinge linia de start**.
+
+Două efecte secundare, amândouă corecte:
+- **`sea_level_offset` s-a recalculat singur** la −5,91 (era −5,99), fiindcă
+  media cotelor s-a schimbat odată cu traseul. Exact motivul pentru care e
+  derivat în generator și nu scris de mână (memoria
+  `cota-marii-e-relativa-la-media-drumului`);
+- **maimuțele s-au mutat** pe ramura de intrare în golf (punctul „G maimute" a
+  dispărut), iar distanțele dintre hazardele cu ceas rămân peste prag:
+  1 326 / 246 / 504 m.
+
+**Patru gărzi noi** pe contractul scurtăturii, fiecare pentru un defect care a
+costat deja o rundă: câștig în intervalul [−45%, −20%]; **nu trece peste linia
+de start**; ocolul plat; **treapta la joncțiune zero** (profilul de coborâre e
+`4u(1−u)`, nu o constantă).
+
+**Scurtătura funcționează în joc:** 9–13 treceri per cursă, timpi 6–19 s, zero
+repuneri pe bandă, **niciun tur scurtcircuitat** (minim 60,3 s). Obiectivul
+redesenării e atins.
+
+#### PROBLEMĂ DESCHISĂ: regresie pe primul ponton după redesenare
+
+Redesenarea a adus o **regresie măsurată** pe care nu am reușit să o
+diagnostichez, și o las scrisă cu tot ce am eliminat, ca următoarea sesiune să
+nu reia aceleași piste.
+
+**Cifrele** (aceleași patru seed-uri, repuneri în zona pontoanelor /
+repuneri totale):
+
+| starea pistei | seed 1 | seed 2 | seed 3 | seed 4 |
+|---|---|---|---|---|
+| înainte de golf | 0 | 3 | 0 | 4 |
+| **cu golf** | 1 | **13** | 2 | **9** |
+| cu golf, fără nodul de maree | — | 10 | — | 7 |
+
+Turul mediu a urcat de la 70,6–72,4 s la 72,6–80,5 s. Tiparul e în **valuri**
+(t ≈ 23–25 s, 31–36 s, 45 s): tot plutonul cade la trecerile din primele
+tururi, iar pe seed 1 și 3 aproape nimic.
+
+**Cinci ipoteze, toate infirmate prin măsurare:**
+1. **mareea** — scoasă din scenă, cifra rămâne 10/7 (vs 13/9). În limita
+   nedeterminismului Jolt, deci **nu e mareea**;
+2. **treaptă de cotă la joncțiunea benzii** — racordarea cu profil `4u(1−u)`
+   e corectă ca principiu și a rămas, dar **n-a schimbat cifra**;
+3. **fracțiile râpelor nealiniate** după lungirea buclei (2 028 → 2 076 m).
+   Erau într-adevăr hardcodate și alunecaseră cu ~2%; **le-am legat la
+   reperele reale**, ceea ce rămâne o îmbunătățire reală. Dar profilul măsurat
+   la punctul de cădere e **identic** înainte și după;
+4. **distanța start → primul ponton** — măsurată: **168 m în ambele stări**;
+5. **grila de start** — toate cele opt sloturi sunt pe `RoadTop`, cote
+   1,09–1,16, măsurat cu `spawn_transforms(8)` plus raycast. Sănătoasă.
+
+**Ipotezele 6–7, tot infirmate:**
+6. **profilul lateral asimetric** (−1,44 m pe o parte, +0,23 pe alta) e
+   **corect prin design**: râpa golfului e pe **exteriorul** buclei, iar sonda
+   măsura *dreapta drumului* la −8 m pe axa x — fiindcă la frac 0,09 drumul
+   merge spre sud, deci lateralul-dreapta are x negativ. Nu e un defect;
+7. **plutonul** (`--ai=3` vs `--ai=7`): zero repuneri pe ponton în **toate**
+   cele patru rulări. Nu e înghesuială.
+
+#### Ce a fost de fapt: o cauză reală, plus o concluzie prematură
+
+**Cauza reală, găsită la a opta încercare: `edge_clamp` prea scurt.** Toate
+contractele pontonului verificau **pragul** la buză (0,042 m) și **afundarea**
+la mijloc (1,080 m), amândouă bune. Niciunul nu se uita la cât de *repede*
+coboară tablierul între ele. Cu `edge_clamp = 5` pe un tronson de 43 m și
+plutonul pe el, tablierul cădea **0,42 m pe primii 4 m** — o rampă de
+**13,4%**, peste pragul de pantă al pistei (13%), apărută brusc exact când
+mașinile urcă pe tronson.
+
+Reparat: `edge_clamp = 14` → **8,7%** măsurat pe lungimea reală, cu
+**garda 8** în `ProbePonton` care măsoară panta pe primii 20% cu plutonul pe el.
+
+**Rezultatul în cursă** (patru seed-uri, 260 s):
+
+| | seed 1 | seed 2 | seed 3 | seed 4 |
+|---|---|---|---|---|
+| `edge_clamp` 5, total / pe ponton | 3 / 1 | 15 / **13** | 3 / 2 | 17 / **9** |
+| **`edge_clamp` 14, total / pe ponton** | 4 / **0** | 1 / **0** | 5 / **0** | 4 / **0** |
+
+**Zero repuneri pe pontoane** pe toate seed-urile, total 1–5 (de la 3–17), tur
+mediu 71,6–75,2 s.
+
+**Confirmat cu regula nouă** (rerulează aceeași stare înainte de a crede
+cifra): trei rulări per seed pe starea reparată dau **0 pe ponton de șase ori
+din șase**, cu totalul stabil (seed 2: 1/3/1, seed 4: 4/4/4). Amplitudinea
+zgomotului pe starea reparată e **±2 repuneri**, iar efectul măsurat era **13 și
+9** — cu un ordin de mărime peste. Spre deosebire de celelalte șase ipoteze,
+asta se sprijină pe două picioare independente: diferența depășește zgomotul,
+**și** cauza e demonstrabilă pe formulă fără nicio cursă.
+
+**Și concluzia prematură, care e lecția mai importantă.** Rulând aceeași scenă,
+același seed, aceeași configurație, am obținut **15 / 12 / 4** repuneri. Deci
+diferența „0/3/0/4 → 1/13/2/9" pe care am numit-o *regresie* era **în mare parte
+nedeterminismul lui Jolt** (memoria `proberace-nedeterminism`: se compară
+distribuții, nu rulări). Am tratat o fluctuație ca pe un defect și am ars șase
+ipoteze pe ea.
+
+Ce rămâne valid din investigație: `edge_clamp` **era** într-adevăr prea scurt
+(13,4% e peste prag, independent de orice rulare), iar fracțiile râpelor **erau**
+hardcodate și alunecaseră. Ambele reparate pe motive proprii, verificabile fără
+ProbeRace.
+
+**Două defecte în propria sondă**, găsite pe drum, amândouă din familia
+„testezi alt obiect decât jocul" (memoria `verifica-cu-parametrii-lui`):
+- rula pe tronsoane de **60 m**, jocul are **43,1 m** — iar panta depinde de
+  raportul `edge_clamp / lungime`, deci raporta 7,1% în loc de 7,6%;
+- folosea **12 plăci**, jocul **7** — rezoluție mai fină, deci garda de
+  continuitate raporta salturi mai mici decât cele reale.
+
+**Decizia:** golful **rămâne** — și-a atins scopul (scurtătura există, e
+folosită, nu rupe turul).
+
+**Lecția de metodă:** o afirmație de geometrie dintr-un brief („mai scurtă și
+mai directă”) e o **ipoteză**, nu un fapt. Garda de scurtătură a expus-o, n-a
+prins-o: fusese scrisă pentru contract, iar contractul a arătat că premisa nu-l
+putea atinge. Și a doua lecție, mai scumpă: **o coardă bună pe hartă poate fi
+invalidă în cursă** — fracțiile se verifică și față de linia de start, nu doar
+față de lungime și cotă.
+
+#### O capcană de format `.tscn`
+
+`[sub_resource]` trebuie să fie **înaintea primului `[node]`**, altfel parserul
+dă „Unknown tag 'sub_resource' in file" și scena nu se încarcă deloc. Curba
+benzii se calculează deci *înainte* de header-ul scenei, nu lângă nodul care o
+folosește. (Prima încercare de a muta blocul prin manipulare de string a rupt
+generatorul — restaurat din git și refăcut cu editări țintite.)
+
+### 7.4 `CameraZone` pe grotă și pragul de cotă al benzii (14 oct 2026)
+
+**Grota are `CameraZone`** (frac 0,297–0,338), declarată prin **cerința
+geometrică** — `ceiling = 11`, `ceiling_dist = 20` — nu prin cote de cameră.
+Clasa rezolvă singură înălțimea și FOV-ul pentru sliderele reale ale
+jucătorului (`ChaseCamera.solve_preset`); antetul ei documentează de ce cotele
+fixe nu ajung: cu `cam_fov_scale` la minimul legal, tavanul ar intra abia de la
+45,6 m în loc de 22,4, deci pe o bună parte din reglajele permise POI-ul
+subteran ar fi fost un tavan negru.
+
+Tavanul e **11 m**, nu implicitul de 15 — exact lecția din memoria
+`camera-zone-tavan-per-sala` (implicitul ratează săli de altă înălțime).
+
+#### Pragul de cotă al benzii, măsurat
+
+`ProbeCameraSolid` a prins un incident pe banda de maree: **camera intra în
+mașină** pe mijlocul benzii. Două lucruri de citit corect în raport:
+- colliderul era **`Car`**, nu un perete — deci nu e un defect de geometrie, e
+  camera prea jos (ea urmează terenul, iar pe o bandă coborâtă ajunge sub
+  tablier);
+- fracțiile raportate (0,352–0,596) sunt **ale rutei**, nu ale buclei: banda are
+  77 de puncte coapte, deci era mijlocul ei — unde coborârea `4u(1−u)` e maximă.
+
+**Baleierea pe cotă a dat pragul:**
+
+| coborâre la mijloc | incidente |
+|---|---|
+| 0,0 / 0,3 / 0,5 / **0,7** | **0** |
+| 0,85 / 1,0 | 1 |
+
+Banda stă acum la **0,7 m** — **maximul** care ține camera afară, nu prima
+valoare care merge: abaterea de cotă e exact ce face banda să arate ca o terasă
+de abraziune, deci o vrei cât mai mare.
+
+**Sonda de cameră e deterministă**, altfel decât ProbeRace: 1,0 a dat același
+verdict la două rulări separate. Deci pragul e real, nu zgomot — lucru pe care
+l-am verificat anume, după ce nedeterminismul lui ProbeRace mă păcălise cu
+șase ipoteze (§7.3).
+
+**Garda e armată** cu linie de bază proprie, **fără marjă** (memoria
+`garda-fara-linie-de-baza-iese-zero`): până la armare sonda tipărea „pistă fără
+linie de bază", adică trecea verde orice. `Ha Long (Track22): 0`, plus
+`--sabotaj` verificat (găsește zidul plantat la frac 0,300).
+
+#### Și constrângerea decisivă, găsită de `ProbeLaneClear`: banda nu poate avea cotă proprie
+
+Garda pragului de cameră spunea că 0,7 m e în regulă. **`ProbeLaneClear` a
+spus altceva, și e mai tare:** cu banda la 0,7 m, **20 de probe blocate**, cu
+`TerrainBody` în față la 0,09–5,3 m, grupate exact la **capetele** benzii.
+
+Cauza e un contract între două sisteme: `TrackSideSampler._carve_branches` sapă
+terenul la cota benzii **minus `BRANCH_DROP` (0,25 m)**, dar `TrackBranch`
+**racordează capetele la cota buclei** — iar acolo terenul rămâne sus și
+blochează intrarea.
+
+| coborâre | probe blocate |
+|---|---|
+| **0,0** | **1** (jonca, pe ruta principală — intenționat) |
+| 0,25 | 17 |
+| 0,45 | 13 |
+
+Deci **orice** cotă proprie de bandă blochează capetele, nu doar una mare.
+Banda stă acum **pe cota drumului**, iar gimmickul nu pierde nimic: scurtătura
+rămâne −32,8% și mareea o udă și o închide la fel. O terasă *scufundată*, dacă
+o vrem vizual, cere **săpătură proprie** (`custom_hollows`) sau o râpă, nu o
+cotă de bandă.
+
+**Toate gărzile de layout trec acum:**
+
+| gardă | rezultat |
+|---|---|
+| `ProbeLayout` | OK (rază min 17,8 m, pantă 9,8%) |
+| `ProbeBuried` | OK — niciun carosabil îngropat |
+| `ProbeCameraSolid` | **0 incidente, exact linia de bază**; sabotaj pică |
+| `ProbeLaneClear` | **1 blocaj (jonca), exact linia de bază**; sabotaj pică |
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 

@@ -1169,6 +1169,20 @@ func _build_far(sampler: TrackSideSampler, surface_y: Callable) -> Node3D:
 				_quad(st, cb[r], ca[r], ca[r + 1], cb[r + 1], cuv, s0, s0, s1, s1, true)
 	if built == 0:
 		return null
+	# CAPETELE (#529). Masa era o fasie de fata + coama, deschisa la capatul
+	# fiecarei portiuni continue: din drum, la iesirea din curba, vedeai prin
+	# capat partea din spate a fetei (emisa pe ambele parti), cu dungile ei, deci
+	# pintenul citea carcasa goala, „o placa", nu stanca. Profilul se inchide cu
+	# o fata plina: fata de sus in jos, apoi talpa coamei inapoi spre varf.
+	for j in cols.size():
+		var col: Array = cols[j]
+		var cap: Array = caps[j]
+		if col.is_empty() or cap.is_empty():
+			continue
+		var starts := j == 0 or (cols[j - 1] as Array).is_empty()
+		var ends := j == cols.size() - 1 or (cols[j + 1] as Array).is_empty()
+		if starts or ends:
+			_end_cap(st, col, cap)
 	st.generate_normals()
 	var mi := MeshInstance3D.new()
 	mi.name = "Faleza pinten " + name
@@ -1280,6 +1294,7 @@ func _far_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 		# privitor — compozitia referintei.
 		var eye_y := p.y + far_eye_rise_m
 		top_y = maxf(top_y, eye_y + far_over_eye_m)
+		top_y += _crest_wobble(sampler, f)
 		# TALPA se cauta INSPRE vale, ca fata sa aiba de unde urca din fund —
 		# dar pe TERENUL DE SUB MASA, nu dincolo de el.
 		#
@@ -1353,6 +1368,45 @@ func _far_column(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Ar
 	return out
 
 
+## Fata plina care inchide profilul pintenului la capat: conturul e fata (de
+## la coama in jos pana la talpa), apoi coama parcursa invers (de la capatul
+## infipt in teren inapoi spre buza). Evantai din centrul conturului — profilul
+## e aproape convex (fata e aproape verticala, coama coboara lin). Corpul rosu
+## (slotul 23, nu `cap_slots[0]` — acela e cremul buzei, si pe o fata plina
+## iesea o lespede palida), umbrit ca talpa; pe ambele parti, ca restul panzei.
+func _end_cap(st: SurfaceTool, col: Array, cap: Array) -> void:
+	var ring: Array[Vector3] = []
+	for v: Vector3 in col:
+		ring.append(v)
+	for k in range(cap.size() - 1, 0, -1):
+		ring.append(cap[k])
+	if ring.size() < 3:
+		return
+	var c := Vector3.ZERO
+	for v in ring:
+		c += v
+	c /= float(ring.size())
+	var uvv := Palette.uv(Palette.TILE_TERRACOTTA)
+	var shade := _shade(0.55)
+	for k in ring.size():
+		var a := ring[k]
+		var b := ring[(k + 1) % ring.size()]
+		_quad(st, c, a, b, b, uvv, shade, shade, shade, shade, true)
+
+
+## Cat urca/coboara coama malului de-a lungul lui (metri). Cu 0, coama e o
+## muchie perfect dreapta pe zeci de metri — cu fata plata dedesubt, malul
+## citea „scandura" (#529). Doua sinusuri pe rulaj, aceleasi pentru fata si
+## coama, ca sa ramana lipite.
+@export var far_crest_wobble_m: float = 0.0
+
+func _crest_wobble(sampler: TrackSideSampler, f: float) -> float:
+	if far_crest_wobble_m <= 0.0:
+		return 0.0
+	var d := f * sampler.total_length()
+	return far_crest_wobble_m * (0.65 * sin(d * 0.083) + 0.35 * sin(d * 0.231 + 0.7))
+
+
 ## Coama pintenului: capacul care il face masa, nu lama. Se construieste ca
 ## banda separata, de la buza fetei spre vale, cazand in teren la capat.
 func _far_cap(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array:
@@ -1377,6 +1431,7 @@ func _far_cap(sampler: TrackSideSampler, f: float, surface_y: Callable) -> Array
 		top_y = crest_y + far_rise_m
 		var eye_y := p.y + far_eye_rise_m
 		top_y = maxf(top_y, eye_y + far_over_eye_m)
+		top_y += _crest_wobble(sampler, f)
 		floor_y = surface_y.call(base.x, base.z)
 	if floor_y > top_y - 3.0:
 		return []

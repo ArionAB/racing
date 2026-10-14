@@ -2194,7 +2194,11 @@ const CLASSES_OKINAWA := {
 ## saturat decat RUST_METAL). Tabla rosie (`arges_house_b`) ramane pe KERB_RED.
 const _TF_SCHIST: String = Palette.TRI_PREFIX + "tf_schist"
 const _TF_STONE: String = Palette.TRI_PREFIX + "tf_stone"
-const _TF_SNOW: String = Palette.TRI_PREFIX + "snow"
+# Zapada pe ATLAS (FOAM_WHITE), nu pe clasa `snow`: dala clasei are pistrui granulati
+# si in joc peretii de zapada se citeau ca parapet de piatra (criticul orb POI D r1:
+# "zidurile albe-gri sunt parapet de piatra, nu zapada"). Pe atlas se vad treptele
+# modelate ale zapezii vechi, alb-albastrui in umbra. Si un material mai putin.
+const _TF_SNOW: String = Palette.ATLAS_PREFIX
 const _TF_CONCRETE: String = Palette.TRI_PREFIX + "concrete"
 # Tencuiala: briefului ii cere ALBA (FOAM_WHITE), iar clasa `plaster` (#978D7D) a dat in joc
 # (154,121,84), bej-maro, pe cand atlasul da (192,176,149), crem. Ca la Okinawa

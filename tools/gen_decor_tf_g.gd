@@ -9,6 +9,12 @@ extends Node
 ##   godot --headless --path . res://tools/GenDecorTfG.tscn -- --write   (rescrie ZonaG)
 ##
 ## ---------------------------------------------------------------------------
+## STARE LA OPRIRE (runda 3, ultima pentru G): iesit din bucla pe (c) dupa r2 (criticul a oscilat
+##  intre perete uniform si padure continua). Pas final fara critic: 10 trepte de sist pe firul apei
+##  (cele sub z -303 fara coliziune), 3 petice de bujor la baza cascadei, fagi scosi din poiana cabanei,
+##  mai putine aflorimente razlete. Ramane: relieful/peretele cascadei si canalul (fundatie), pajistea
+##  din dreapta la 0.700 (zona lui H), coroanele de fag lucioase.
+##
 ## LISTA DE ELEMENTE (runda 1; runda 2: 3 tonuri de molid 65 inchis/35 atlas + palcuri de fag 17%, molizi mici 0,4-0,7 in primii 25 m, gramezi de 3-4 aflorimente x3 pe felie, umplere dreapta 0.688-0.7036) — din decupajul `G.png`, cu cifrele fisei
 ## (`### G` din transfagarasan_poi_gauntlet.md), fiecare legat de o piesa.
 ##
@@ -117,6 +123,7 @@ func _build() -> void:
 	_cabana()
 	_roci_cascada()
 	_roci_padure()
+	_trepte_cascada()
 	_grohotis()
 	_molizi()
 	_fasie()
@@ -290,7 +297,7 @@ func _roci_padure() -> void:
 				var rad := _rng.randf_range(0.0, 3.2) if m > 0 else 0.0
 				var pc := _cand_at(pp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
 				var sc := _rng.randf_range(1.0, 1.6) if m == 0 else _rng.randf_range(0.55, 1.2)
-				if not _ok(pc, 3.0 * sc, 12.0):
+				if m >= 3 or not _ok(pc, 3.0 * sc, 12.0):
 					continue
 				var nm := "outcrop_a" if _rng.randf() < 0.55 else "outcrop_b"
 				var p3: Vector3 = pc["pos"]
@@ -318,6 +325,42 @@ func _grohotis() -> void:
 		p3.y = _y_garda(p3.x, p3.z, p3.y - 0.4)
 		_node("G_Grohotis%02d" % k, "g_scree", p3, atan2(to_rock.x, to_rock.y), _rng.randf_range(0.8, 1.0), c["nrm"], 0.7)
 		_count["grohotis"] = int(_count.get("grohotis", 0)) + 1
+
+
+## Treptele de sist ale cascadei: aflorimente mari, stivuite in scara pe firul apei
+## (x ~ -72, de la piciorul perdelei, z -303 -> -312), cate 5 pe fiecare parte. Sub
+## z -303 suntem la < 25 m de axa (culoarul sariturii): acolo FARA coliziune
+## (fantoma), ca sa nu schimbe ProbeRace. Plus 3 petice de bujor la baza stancii.
+func _trepte_cascada() -> void:
+	var r2 := RandomNumberGenerator.new()
+	r2.seed = 7203
+	var k := 0
+	for sd: float in [-1.0, 1.0]:
+		for i in 5:
+			var z := -303.2 - float(i) * 2.1
+			var x := CASCADA.x + sd * (6.0 + float(i) * 0.5 + r2.randf_range(-0.6, 0.6))
+			var c := _cand_at(Vector3(x, 0.0, z), {"f": 0.68, "sg": -1.0})
+			var q: Vector3 = c["pos"]
+			var sc := 1.7 - float(i) * 0.18 + r2.randf_range(-0.15, 0.15)
+			var hard := z >= -303.5
+			var p3 := q
+			p3.y -= 0.45 * sc
+			if hard:
+				p3.y = _y_garda(p3.x, p3.z, p3.y)
+			k += 1
+			var nm := "outcrop_a" if r2.randf() < 0.5 else "outcrop_b"
+			_node("G_Treapta%02d" % k, "g_" + nm, p3, r2.randf_range(-PI, PI), sc, c["nrm"], 0.35, "" if hard else "none")
+			_count["trepte_cascada"] = int(_count.get("trepte_cascada", 0)) + 1
+	for bp: Vector2 in [Vector2(-84.5, -303.6), Vector2(-59.5, -303.6), Vector2(-72.0, -305.5)]:
+		for m in 5:
+			var ang := r2.randf() * TAU
+			var rad := sqrt(r2.randf()) * 1.6
+			var cb := _cand_at(Vector3(bp.x + cos(ang) * rad, 0.0, bp.y + sin(ang) * rad), {"f": 0.68, "sg": -1.0})
+			var bq: Vector3 = cb["pos"]
+			bq.y -= 0.03
+			var bsc := r2.randf_range(1.5, 2.2)
+			_flock_add("bujor_s2", bq, r2.randf_range(-PI, PI), Vector3(bsc, bsc, bsc))
+	_count["petice_bujor_cascada"] = 3
 
 
 # 1 ------------------------------------------------------------------ molizi
@@ -512,7 +555,7 @@ func _bujor() -> void:
 # ------------------------------------------------------------------ emitere
 
 func _node(nm: String, res_id: String, pos: Vector3, yaw: float, sc: float,
-		nrm: Vector3 = Vector3.UP, tilt: float = 0.0) -> void:
+		nrm: Vector3 = Vector3.UP, tilt: float = 0.0, mode: String = "") -> void:
 	var b := Basis(Vector3.UP, yaw)
 	if tilt > 0.0 and nrm.y < 0.999:
 		var axis := Vector3.UP.cross(nrm)
@@ -523,6 +566,8 @@ func _node(nm: String, res_id: String, pos: Vector3, yaw: float, sc: float,
 	_nodes.append('[node name="%s" parent="%s" instance=ExtResource("%s")]' % [nm, ZONE, res_id])
 	_nodes.append("transform = Transform3D(%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.3f, %.3f, %.3f)"
 		% [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z, pos.x, pos.y, pos.z])
+	if mode != "":
+		_nodes.append('metadata/coliziune = "%s"' % mode)
 	_nodes.append("")
 
 

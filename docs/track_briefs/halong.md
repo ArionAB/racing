@@ -1318,6 +1318,24 @@ mașinile urcă pe tronson.
 Reparat: `edge_clamp = 14` → **8,7%** măsurat pe lungimea reală, cu
 **garda 8** în `ProbePonton` care măsoară panta pe primii 20% cu plutonul pe el.
 
+**Rezultatul în cursă** (patru seed-uri, 260 s):
+
+| | seed 1 | seed 2 | seed 3 | seed 4 |
+|---|---|---|---|---|
+| `edge_clamp` 5, total / pe ponton | 3 / 1 | 15 / **13** | 3 / 2 | 17 / **9** |
+| **`edge_clamp` 14, total / pe ponton** | 4 / **0** | 1 / **0** | 5 / **0** | 4 / **0** |
+
+**Zero repuneri pe pontoane** pe toate seed-urile, total 1–5 (de la 3–17), tur
+mediu 71,6–75,2 s.
+
+**Confirmat cu regula nouă** (rerulează aceeași stare înainte de a crede
+cifra): trei rulări per seed pe starea reparată dau **0 pe ponton de șase ori
+din șase**, cu totalul stabil (seed 2: 1/3/1, seed 4: 4/4/4). Amplitudinea
+zgomotului pe starea reparată e **±2 repuneri**, iar efectul măsurat era **13 și
+9** — cu un ordin de mărime peste. Spre deosebire de celelalte șase ipoteze,
+asta se sprijină pe două picioare independente: diferența depășește zgomotul,
+**și** cauza e demonstrabilă pe formulă fără nicio cursă.
+
 **Și concluzia prematură, care e lecția mai importantă.** Rulând aceeași scenă,
 același seed, aceeași configurație, am obținut **15 / 12 / 4** repuneri. Deci
 diferența „0/3/0/4 → 1/13/2/9" pe care am numit-o *regresie* era **în mare parte

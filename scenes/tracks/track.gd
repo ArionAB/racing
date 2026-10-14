@@ -7728,6 +7728,23 @@ func _build_ravine_water() -> void:
 				if not is_zero_approx(r.w) and signf(r.w) != _sampler._side_sign_at(ci, cx, cz):
 					continue
 				seeds.append(Vector2i(gx, gz))
+		# `fill_circle` (optional, din stilul apei): (x, z, raza) in lume. Apa nu
+		# iese din cerc: o umplere fara el scurge lacul de platou peste toata
+		# valea de dedesubt cand marginea bazinului are o singura bresa.
+		var circ := Vector3(0.0, 0.0, -1.0)
+		var st_c := _water_style_of_ravine(ri)
+		if st_c >= 0:
+			var cv: Variant = _water_styles()[st_c].get("fill_circle", null)
+			if cv is Vector3:
+				circ = cv as Vector3
+		if circ.z > 0.0:
+			var kept: Array[Vector2i] = []
+			for sd in seeds:
+				var sx := _terr_origin.x + (float(sd.x) + 0.5) * step
+				var sz := _terr_origin.z + (float(sd.y) + 0.5) * step
+				if Vector2(sx - circ.x, sz - circ.y).length() <= circ.z:
+					kept.append(sd)
+			seeds = kept
 		var filled := {}
 		var queue := seeds.duplicate()
 		for c0 in seeds:
@@ -7748,6 +7765,11 @@ func _build_ravine_water() -> void:
 					continue
 				if _cell_lowest(nb.x, nb.y) >= water_y:
 					continue
+				if circ.z > 0.0:
+					var cx2 := _terr_origin.x + (float(nb.x) + 0.5) * step
+					var cz2 := _terr_origin.z + (float(nb.y) + 0.5) * step
+					if Vector2(cx2 - circ.x, cz2 - circ.y).length() > circ.z:
+						continue
 				if side_lock:
 					var nx := _terr_origin.x + (float(nb.x) + 0.5) * step
 					var nz := _terr_origin.z + (float(nb.y) + 0.5) * step

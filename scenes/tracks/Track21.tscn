@@ -33,19 +33,6 @@ _data = {
 }
 point_count = 179
 
-[sub_resource type="CylinderMesh" id="Cyl_balea"]
-top_radius = 34.0
-bottom_radius = 34.0
-height = 0.1
-radial_segments = 28
-rings = 1
-cap_bottom = false
-
-[sub_resource type="StandardMaterial3D" id="Mat_balea"]
-albedo_color = Color(0.25, 0.45, 0.47, 0.88)
-transparency = 1
-roughness = 0.25
-
 [node name="Track21" type="Node3D"]
 script = ExtResource("1_track")
 custom_name = "Transfagarasan"
@@ -58,9 +45,10 @@ custom_width_segments = Array[Vector3]([Vector3(0.078, 0.123, 6.0), Vector3(0.31
 custom_ravines = Array[Vector4]([Vector4(0.08, 0.135, 30.0, -1), Vector4(0.135, 0.245, 20.0, -1), Vector4(0.058, 0.128, 40.0, 1), Vector4(0.347, 0.382, 5.0, 1), Vector4(0.705, 0.775, 10.0, 1), Vector4(0.845, 0.975, 10.0, 1)])
 custom_cornice_ravines = Array[int]([0, 2])
 custom_scarp_ravines = Array[int]([2])
+custom_ravine_capes = Array[Vector4]([Vector4(3, 0.3585, 17.5, 30.0)])
 custom_ravine_floors = Array[Vector2]([Vector2(0, 3.0), Vector2(1, 3.0), Vector2(2, -28.0), Vector2(3, 37.0), Vector2(4, -4.0), Vector2(5, -5.0)])
 custom_ravine_widths = Array[Vector2]([Vector2(0, 120.0), Vector2(1, 150.0), Vector2(2, 40.0), Vector2(3, 55.0), Vector2(4, 45.0), Vector2(5, 45.0)])
-custom_ravine_water = Array[Vector3]([Vector3(0, 7.5, 16.0), Vector3(2, -26.0, 20.0), Vector3(4, 3.4, 16.0), Vector3(5, -2.5, 16.0)])
+custom_ravine_water = Array[Vector3]([Vector3(0, 7.5, 16.0), Vector3(2, -26.0, 20.0), Vector3(4, 3.4, 16.0), Vector3(5, -2.5, 16.0), Vector3(3, 35.5, 16.0)])
 custom_water_styles = Array[Dictionary]([{
 "ravines": Array[int]([0]),
 "side_lock": true,
@@ -75,8 +63,10 @@ custom_water_styles = Array[Dictionary]([{
 "water_glint": 0.25
 }, {
 "ravines": Array[int]([3]),
-"water_shallow_rgb": Color(0.247, 0.435, 0.478, 1),
-"water_deep_rgb": Color(0.16, 0.31, 0.36, 1),
+"fill_circle": Vector3(262, -212, 58),
+"water_shallow_rgb": Color(0.36, 0.55, 0.58, 1),
+"water_deep_rgb": Color(0.25, 0.40, 0.44, 1),
+"water_lit_fresnel": 0.06,
 "water_shore_rgb": Color(0.40, 0.55, 0.58, 1),
 "water_foam": 0.0,
 "water_crest": 0.0,
@@ -152,6 +142,12 @@ gizmo_extents = 50.0
 script = ExtResource("2_peak")
 radius_m = 50.0
 
+[node name="BaleaMesa" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 262.00, 55.00, -212.00)
+gizmo_extents = 190.0
+script = ExtResource("2_peak")
+radius_m = 190.0
+
 [node name="Goluri" type="Node3D" parent="."]
 
 [node name="GolNoriA" type="Marker3D" parent="Goluri"]
@@ -174,6 +170,13 @@ gizmo_extents = 105.0
 script = ExtResource("17_hollow")
 radius_m = 25.0
 wall_m = 80.0
+
+[node name="GolBalea" type="Marker3D" parent="Goluri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 262.00, 31.00, -212.00)
+gizmo_extents = 56.0
+script = ExtResource("17_hollow")
+radius_m = 46.0
+wall_m = 10.0
 
 [node name="Hazarduri" type="Node3D" parent="."]
 
@@ -267,12 +270,6 @@ reach = 90.0
 fade = 30.0
 jump = true
 label = "Paraul Balea"
-
-[node name="LacBalea" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 232.62, 40.3, -193.70)
-cast_shadow = 0
-mesh = SubResource("Cyl_balea")
-surface_material_override/0 = SubResource("Mat_balea")
 
 [node name="ZoneCamera" type="Node3D" parent="."]
 

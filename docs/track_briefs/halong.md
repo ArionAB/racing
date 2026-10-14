@@ -1,10 +1,25 @@
-# Track brief — Ha Long Bay (`Track22`, temă `halong`) — v0.1 (concept)
+# Track brief — Ha Long Bay (`Track22`, temă `halong`) — v0.3 (concept + contracte verificate + schiță măsurată)
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `transfagarasan.md`, `okinawa.md` și `monument_valley.md`. Secțiunile de
 > assets (§5) sunt o schiță plus un **audit al kiturilor marine existente**
 > (Okinawa, Fiordland). Lista completă se scrie după ce traseul trece de
 > ProbeLayout, de ProbeRace și de captura `--gamecam`.
+>
+> **v0.3 (14 oct 2026):** trecerea de contracte făcută pe cod citit (§5.3) și
+> **schița de traseu măsurată** (§2.1), cu `tools/measure_halong_sketch.py`.
+> Ce s-a schimbat față de v0.1, tot din măsurători:
+> - **sensul buclei: ANTIORAR**, nu orar (afirmația din v0.1 era greșită,
+>   geometria e bună);
+> - **insula coborâtă la +26** (de la +38), fiindcă `sea_y = mean_road_y() +
+>   sea_level_offset`: insula înaltă **ridica marea** peste pontoane (§2);
+> - **acele de păr la rază 24 m**, nu 17 (prima schiță dădea 6,1 m măsurat);
+> - **turnurile de fundal mutate la est** (430, −150): de pe belvedere drumul
+>   merge spre NE, iar la SE se vedeau în **0/7 cadre**;
+> - **pontonul e subclasă mică**, nu clasă nouă: `RopeBridgeHazard` duce
+>   aproape tot, cu trei schimbări identificate (§5.3);
+> - patru iterații de schiță până au trecut toate gărzile; prima avea 1 140 m,
+>   rază 6,1 m, pantă 29,7% și apa peste pontoane.
 >
 > **Prima pistă nouă care NU înlocuiește una existentă** de la Fiordland
 > încoace: Monument Valley, Okinawa și Transfăgărășanul au luat locul Dunelor,
@@ -160,8 +175,9 @@ drumului. Un turn de 80 m la 100 m distanță intră în cadru doar pe
    trece pe lângă tine, și e corect — exact așa se simt din barcă. Nu se
    încearcă să fie „văzute întregi”;
 2. **Șirul de turnuri se citește de pe belvedere, privind în jos și în
-   depărtare** (POI D). De acolo turnurile sunt la 150–320 m, iar ce contează
-   nu e înălțimea lor în cadru, ci **ceața joasă care le separă în straturi**.
+   depărtare** (POI D). **Măsurat** (§2.1): de pe belvedere șirul de turnuri
+   cade în cadru pe **7 din 10 cadre**, la **238–291 m**. Ce contează nu e
+   înălțimea lor în cadru, ci **ceața joasă care le separă în straturi**.
    Dezvăluirea pistei nu e un obiect, e **adâncimea**.
 
 De aceea pista **urcă pe insulă la mijlocul turului**: belvederea e singurul
@@ -182,46 +198,58 @@ să le închidă:
 
 ## 2. Traseul și punctele de interes (POI)
 
-Lungime-țintă **~2 100 m** (tur ~70–75 s, 3 tururi ≈ 3:40), în fereastra
-Ignition 65–80 s din `ref_notes/sisteme.md`.
+Lungime **2 028 m, măsurată** (§2.1; tur ~70–75 s, 3 tururi ≈ 3:40), în
+fereastra Ignition 65–80 s din `ref_notes/sisteme.md`.
 
-**Sens orar pe plan.** Bucla are două jumătăți: jumătatea de **apă** (satul,
-pontoanele, digul, grota, canalul) și jumătatea de **uscat** (insula: urcarea,
-belvederea, plaja, drumul de coastă). Insula stă în **sud-estul** buclei, satul
-plutitor în **nord-vest**.
+**Sens ANTIORAR pe plan** (corectat în v0.3: v0.1 spunea „orar”, iar
+măsurătoarea pe schiță a arătat antiorar — geometria e bună, afirmația era
+greșită). Bucla are două jumătăți: jumătatea de **apă** (satul, pontoanele,
+digul, grota, canalul) și jumătatea de **uscat** (insula: urcarea, belvederea,
+plaja, drumul de coastă). Satul plutitor stă în **nord-vestul** buclei, iar
+insula în **est / sud-est**: A coboară spre sud pe latura de vest, C taie spre
+est pe latura de sud, D–E urcă și coboară insula în est, iar F–G se întorc
+spre vest pe latura de nord.
+
+Fracțiile și cotele de mai jos sunt **măsurate pe schița din §2.1**, nu
+estimate:
 
 | POI | fracții | cote | lățime (semi) | ce e |
 |---|---|---|---|---|
-| **A** cheiul satului | 0,96 → 0,05 | +1 → +1 | 7 | startul pe cheiul de piatră, casele plutitoare pe dreapta, plasele, bărcile-coș |
-| **B** pontoanele | 0,05 → 0,16 | +0,6 (plutitor) | **6** | **drumul de pontoane** prin satul plutitor: trei tronsoane care se leagănă, separate de două insulițe de piatră fixă (§3) |
-| **C** digul și grota | 0,16 → 0,27 | +1 → +3 | 7 / **6** în grotă | dig de piatră printre turnuri, apoi **grota marină** (~70 m) prin baza unui turn, cu apă pe ambele părți |
-| **D** urcarea și belvederea | 0,27 → 0,44 | +3 → +38 | 7 | urcare pe spinarea insulei printre ficuși, **belvederea cu golful** (~0,40), **mareea telegrafiată** de aici (§3) |
-| **E** plaja din căldare | 0,44 → 0,56 | +38 → +2 | 7 | coborâre în serpentină scurtă (două ace de păr, rază 17 m), **plaja** din căldare, nisip lent (§3) |
-| **F** canalul | 0,56 → 0,66 | +2 → +2 | **6** pe podeț | **podețul de plute** peste canalul dintre insule, cu **jonca** care îl taie (§3) |
-| **G** drumul de coastă | 0,66 → 0,96 | +2 → +1 | 7 (**banda de jos** separată) | drum săpat în peretele de calcar, cu **banda de jos la +0,4** care intră sub apă la maree înaltă (§3), **maimuțele** pe parapet (~0,80), satul plutitor vizibil peste golf |
+| **A** cheiul satului | 0,98 → 0,05 | +1,0 | 7 | startul pe cheiul de piatră, casele plutitoare pe dreapta, plasele, bărcile-coș |
+| **B** pontoanele | 0,05 → 0,24 | **+0,6** (plutitor) | **6** | **drumul de pontoane**: trei tronsoane care se leagănă (frac ~0,08 / ~0,15 / ~0,22), separate de două insulițe de piatră fixă (frac ~0,12 / ~0,18) |
+| **C** digul și grota | 0,24 → 0,36 | +1,5 → +3,0 | 7 / **6** în grotă | dig de piatră printre turnuri (0,25), apoi **grota marină** (~70 m, frac 0,30 → 0,35) prin baza unui turn |
+| **D** urcarea și belvederea | 0,36 → 0,53 | +3,0 → **+26** | 7 | urcare pe spinarea insulei printre ficuși, **belvederea** la frac **0,47**, de unde se telegrafiază mareea (§3) |
+| **E** coborârea și plaja | 0,53 → 0,74 | +26 → +1,6 | 7 | două ace de păr (**rază 24 m**, frac ~0,60 și ~0,68), **plaja** din căldare la 0,71, nisip lent (§3) |
+| **F** canalul | 0,74 → 0,84 | +1,4 | **6** pe podeț | **podețul de plute** peste canal (frac 0,78 → 0,83), cu **jonca** care îl taie la ~0,81 (§3) |
+| **G** drumul de coastă | 0,84 → 0,98 | +1,6 → +1,2 | 7 (**banda de jos** separată) | drum săpat în peretele de calcar, cu **banda de jos la +0,4** care intră sub apă la maree înaltă (§3), **maimuțele** la ~0,94, satul plutitor vizibil peste golf (8/8 cadre, §2.1) |
+
+Sens **ANTIORAR**. Nordul e sus; x creste spre est, y spre nord (§2.1).
 
 ```
    N ↑
-        ┌─────────── [A] CHEIUL ◄── START ──────────────┐
-        │  case plutitoare, plase, barci-cos            │
-        │                                               │
-        ▼ [B] PONTOANELE (se leagana)                   │ [G] DRUMUL DE COASTA
-        ● tronson 1 ─ insulita ─ tronson 2 ─ insulita ─ ● sapat in perete de calcar
-        │  ferme de pesti, case pe plute                │ MAIMUTELE pe parapet
-        │                                               │ BANDA DE JOS sub apa la maree
-        ▼ [C] DIGUL si GROTA                            │ (satul se vede peste golf)
-        ● dig de piatra printre turnuri                 ▲
-        ● GROTA MARINA (sub un turn intreg, ~70 m)      │
-        │                                               │
-        ╲ [D] URCAREA pe spinarea insulei               ● [F] CANALUL
-         ╲  ficusi, radacini pe stanca                  │ PODETUL DE PLUTE
-          ● BELVEDEREA (+38): GOLFUL INTREG, ceata      │ JONCA taie drumul
-          ╱  in straturi intre turnuri                  │
-         ╱ [E] COBORAREA: doua ace de par (17 m)        │
-        ● PLAJA din caldare (nisip lent) ───────────────┘
+     [A] CHEIUL ◄── START (-352, 322)
+      │  case plutitoare, plase, barci-cos
+      │                                     [G] DRUMUL DE COASTA
+      ▼ [B] PONTOANELE (se leagana)      ◄───── sapat in perete de calcar
+      ● tronson 1   (frac 0.08)                 MAIMUTELE pe parapet (0.94)
+      ○ insulita    (0.12)  fixa                BANDA DE JOS sub apa la maree
+      ● tronson 2   (0.15)                      (satul se vede: 8/8 cadre)
+      ○ insulita    (0.18)  fixa                      ▲
+      ● tronson 3   (0.22)                            │
+      │                                               ● [F] CANALUL (0.78-0.83)
+      ▼ [C] DIGUL (0.25) si GROTA (0.30-0.35)         │ PODETUL DE PLUTE
+      ●──► printre turnuri, apoi SUB un turn          │ JONCA taie drumul (0.81)
+          ╲                                           │
+           ╲ [D] URCAREA pe spinare (ficusi)          ● PLAJA (0.71, nisip lent)
+            ●  BELVEDEREA (0.47, +26 m):              ╱
+            │  turnurile de fundal 7/10 cadre,       ╱ [E] COBORAREA
+            │  la 238-291 m, in STRATURI de ceata   ╱  doua ace de par (raza 24)
+            ╰────────► varf (+26) ──────────────────╯   (frac 0.60, 0.68)
 
-   Turnurile de calcar: in jurul buclei si INTRE POI, ca FLANC (< 40 m lateral),
-   plus trei planuri de adancime spre SE, vazute de pe belvedere (150-320 m).
+   Turnurile de calcar: in jurul buclei si INTRE POI, ca FLANC (< 40 m lateral).
+   Sirul de fundal e la EST, centrat pe (430, -150): se vede de pe belvedere,
+   unde drumul merge spre NE. Trei planuri de adancime (240 / 270 / 290 m),
+   separate de ceata joasa — aia e dezvaluirea, nu un obiect.
 ```
 
 **Apa, relieful, mareea.**
@@ -232,7 +260,9 @@ plutitor în **nord-vest**.
   GLB-uri de turn pentru cele apropiate, unde silueta contează. Cele de fundal
   (150–320 m) sunt `horizon_model`, cu **`cast_shadow` OFF** (memoria
   `caster-departat-fura-umbra`);
-- **insula** (POI D–E) urcă la **+38** pe spinare, cu căldarea plajei la +2;
+- **insula** (POI D–E) urcă la **+26** pe spinare (coborâtă de la +38 în v0.3,
+  ca media cotelor să nu ridice marea — vezi caseta de mai jos), cu căldarea
+  plajei la +1,6;
 - **grota** (C) cere `CameraZone` cu **tavan propriu** (memoria
   `camera-zone-tavan-per-sala`: implicitul de 15 m ratează săli de 16/18 m);
   înălțimea grotei e ~11 m, deci tavanul se declară explicit;
@@ -246,30 +276,125 @@ plutitor în **nord-vest**.
 medie −7 taie piste noi — pe o pistă care e **jumătate pe apă**, asta se
 verifică **înaintea** traseului, nu după).
 
-> **Avertisment de verificat la fundație, cel mai mare risc tehnic al pistei.**
-> Plasa de repunere a lumii stă la **cota medie − 7**. Pe Ha Long, cota medie
-> e trasă jos de apă (0) și de pontoane (+0,6), iar belvederea e la +38. Dacă
-> plasa iese **peste** nivelul apei, mașina care cade de pe pontoane e repusă
-> instantaneu, iar dacă iese mult sub, cade prin apă. Amândouă sunt
-> vizibile doar în ProbeRace (memoria `ziduri-invizibile-ale-lumii`), deci
-> ProbeRace rulează **la început**, pe traseul gol (memoria
-> `proberace-la-inceput-nu-la-final`).
+> **Constrângerea tehnică centrală a pistei, găsită în cod (v0.3) și deja
+> rezolvată în schiță.** `track.gd:7055` o spune explicit, cu avertisment:
+> **cota mării e `_sampler.mean_road_y() + sea_level_offset`, relativă la
+> media cotelor șoselei, nu la `y = 0`** („asta e capcana: … «nivelul mării e
+> zero» e o presupunere pe care n-o pui la îndoială”).
+>
+> Pe o pistă **jumătate pe apă**, asta leagă cotele de pe apă (cheiul +1,0,
+> pontoanele +0,6) de media **întregului** traseu — deci **insula ridică
+> marea**. Cu insula la +38 din v0.1, media ieșea +8,2, iar marea la offsetul
+> implicit (−7) ar fi stat la **+1,2**: pontoanele scufundate, cheiul la buza
+> apei. Nu e un bug pe care l-ar fi prins o gardă geometrică; iese doar din
+> citit cota mării împreună cu media.
+>
+> **Rezolvarea, măsurată:** insula coborâtă la **+26** (de la +38) duce media
+> la **+6,0**, iar `sea_level_offset` se pune **explicit la −6,0**, nu pe
+> implicit — atunci apa iese la **0,0**, exact cota pentru care sunt desenate
+> cheiul și pontoanele. Offsetul **se recalculează la fiecare redesenare de
+> traseu**, ca azimutul soarelui: orice mutare de cotă mișcă media, deci mișcă
+> marea.
+>
+> **Plasa de repunere** nu e o cotă globală (cum spunea v0.1): `_build_sea_respawn`
+> o pune la **`sea_y − 1,2`**, cu 60 m de adâncime. La apă 0,0 plasa e la
+> **−1,2**, iar pontonul complet afundat (−0,3, adică `rest_sag + sag_bus` sub
+> +0,6) rămâne **deasupra** ei — deci mașina de pe ponton nu e repusă din
+> greșeală. Marja e 0,9 m și e **de verificat în ProbeRace**, fiindcă valul
+> joncilor o mai mănâncă.
+>
+> ProbeRace rămâne **la început**, pe traseul gol (memoriile
+> `proberace-la-inceput-nu-la-final`, `ziduri-invizibile-ale-lumii`): zidul
+> lumii la 420 m e respectat (Cebîșev 305 m, §2.1), dar restul se vede doar
+> conducând.
 
-### 2.1 Schița de waypoint-uri (sursa generatorului)
+### 2.1 Schița de waypoint-uri — **MĂSURATĂ** (v0.3, 14 oct 2026)
 
-Se scrie cu `tools/gen_halong_route.py` (copie de `gen_transfagarasan_route.py`),
-cu aceleași funcții geometrice (fillet-uri pe arc, pas 12 m). Coordonate de
-hartă: x est, y nord, metri; în Godot `gx = x`, `gz = −y`, **fără oglindire**.
+Coordonate de hartă: x est, y nord, metri; în Godot `gx = x`, `gz = −y`,
+**fără oglindire** (convenția din `gen_kyoto_route.py`). Coloanele sunt
+(x, y, rază de fillet, cotă, etichetă).
 
-Acele de păr de la coborârea E se scriu ca **două puncte cu fillet** fiecare
-(90° + 90°), nu ca un singur punct de 180° (memoria
-`viraje-stranse-puncte-pe-arc`). Benzile paralele stau la **≥ 2 × half_width**,
-adică ≥ 28 m între axe (memoria `dunele-hairpin-pileup`).
+Măsurată cu funcțiile geometrice din `gen_transfagarasan_route.py` (fillet pe
+arc, pas 12 m, statistici ca ProbeLayout). **Patru iterații** au fost necesare:
+prima schiță avea 1 140 m, rază 6,1 m, pantă 29,7% și apa peste pontoane.
+Cifrele de mai jos sunt ale schiței care trece toate gărzile.
 
-Repere fixe pentru garda de azimut, scrise **înaintea** traseului (memoria
-`garda-circulara-propria-functie`): centrul satului plutitor, gura grotei,
-punctul de belvedere, centrul plajei, mijlocul podețului de plute, centrul
-șirului de turnuri de fundal.
+```python
+WPTS = [
+    # --- A: cheiul satului plutitor (nord-vest) ----------------------------
+    (-352,  322, 44,  1.0, "A start"),     (-362,  240, 0,   1.0, "A chei"),
+    # --- B: pontoanele, trei tronsoane despartite de insulite fixe ---------
+    (-354,  168, 0,   0.6, "B pont1"),     (-346,   96, 0,   0.6, "B insulita1"),
+    (-338,   24, 0,   0.6, "B pont2"),     (-330,  -48, 0,   0.6, "B insulita2"),
+    (-320, -120, 0,   0.6, "B pont3"),
+    # --- C: digul de piatra, apoi grota marina ----------------------------
+    (-296, -188, 44,  1.5, "C dig"),       (-218, -240, 0,   2.4, "C grota V"),
+    (-130, -266, 0,   3.0, "C grota E"),
+    # --- D: urcarea pe spinarea insulei + belvederea -----------------------
+    ( -36, -284, 48,  7.0, "D urcare"),    (  60, -272, 44, 14.0, "D creasta"),
+    ( 152, -224, 40, 21.0, "D belvedere"), ( 204, -152, 0,  26.0, "D varf"),
+    # --- E: coborarea in doua ace de par + plaja ---------------------------
+    ( 196,  -52, 24, 21.0, "E ac1a"),      ( 132,  -36, 24, 17.0, "E ac1b"),
+    ( 164,   28, 24, 11.0, "E ac2a"),      ( 228,   44, 24,  7.0, "E ac2b"),
+    ( 212,  112, 0,   3.0, "E plaja"),     ( 156,  164, 44,  1.6, "E iesire"),
+    # --- F: canalul cu podetul de plute -----------------------------------
+    (  84,  192, 0,   1.4, "F podet E"),   (  -8,  206, 0,   1.4, "F podet V"),
+    # --- G: drumul de coasta, sapat in perete -----------------------------
+    (-104,  226, 48,  1.6, "G coasta E"),  (-206,  262, 0,   1.4, "G maimute"),
+    (-292,  300, 44,  1.2, "G coasta V"),
+]
+```
+
+**Cifrele măsurate:**
+
+| mărime | valoare | prag |
+|---|---|---|
+| lungime | **2 028 m** (169 de puncte, pas 12 m) | țintă 2 000–2 200 |
+| rază minimă | **21,2 m** (la frac 0,710, acul 2 de la E) | prag AI ~14 m, ProbeLayout ≥ 9 |
+| pantă maximă | **9,7%** (la frac 0,621, coborârea E) | prag 13% |
+| separare minimă | **42,7 m** (frac 0,024 ↔ 0,994, închiderea buclei) | ≥ 2 × half_width = 14 m |
+| centroid | **(−82, 12)** | — |
+| Cebîșev | **305 m** | zidul lumii la 420 |
+| cote | min **+0,6**, max **+25,8**, medie **+6,0** | — |
+| sens | **ANTIORAR** | §2 (corectat în v0.3) |
+
+**Acele de păr de la E** sunt scrise ca **două puncte cu fillet de 24 m**
+fiecare (90° + 90°), nu ca un singur punct de 180° (memoria
+`viraje-stranse-puncte-pe-arc`: Catmull-Rom strânge curba dacă virajul e un
+singur punct). Raza de 24 m e **deliberat mai largă** decât cea de 16 m de pe
+Transfăgărășan: acolo acele sunt subiectul pistei, aici sunt doar coborârea de
+pe insulă, iar o rază generoasă ține AI-ul departe de pragul de ~14 m.
+
+**Repere fixe pentru garda de azimut**, scrise **înaintea** traseului și
+**nederivate** din el (memoria `garda-circulara-propria-functie`):
+
+| reper | poziție |
+|---|---|
+| centrul satului plutitor | (−366, 280) |
+| gura grotei | (−174, −253) |
+| punctul de belvedere | (152, −224) |
+| centrul plajei | (212, 112) |
+| mijlocul podețului de plute | (38, 199) |
+| centrul șirului de turnuri de fundal | **(430, −150)** |
+
+**Garda de azimut, măsurată** (jumătate de cadru 50°, privind înainte pe
+traseu):
+
+| verificare | rezultat | distanță |
+|---|---|---|
+| turnurile de fundal, de pe belvedere | **7/10 cadre** | 238–291 m |
+| turnul cu grota, de pe pontoane | **8/8 cadre** | 249–323 m |
+| satul plutitor, de pe drumul de coastă | **8/8 cadre** | 82–157 m |
+
+**Sabotajul pică, deci garda măsoară ceva:** mutând șirul de turnuri 400 m spre
+vest, verificarea de pe belvedere trece de la 7/10 la **0/10** și garda iese cu
+cod ≠ 0. Fără proba asta, o gardă care nu poate da greș nu verifică nimic.
+
+> **Poziția turnurilor de fundal e derivată, nu aleasă.** La prima schiță le
+> pusesem la SE, din intuiția „golful se deschide spre mare”. Măsurătoarea a
+> arătat **0/7 cadre**: pe belvedere drumul merge spre **NE**, deci reperul
+> trebuie să fie spre est. Exact tiparul din memoria
+> `masoara-inainte-nu-langa` — camera privește în față, nu lateral.
 
 ## 3. Hazarduri și mecanici
 
@@ -309,11 +434,13 @@ scurtătură pe care ți-o dă și ți-o ia marea.
 **Distanțe între hazardele cu ceas** (lecția din `track08.gd:267`: „două
 hazarde cu ceas lipite nu produc două decizii, produc o loterie”):
 
+**Măsurate** pe schița din §2.1 (nu estimate):
+
 | de la | la | distanță |
 |---|---|---|
-| pontoane (B, centru ~0,10) | jonca (F, ~0,61) | **~1 070 m** |
-| jonca (F, ~0,61) | maimuțele (G, ~0,80) | **~400 m** |
-| maimuțele (G, ~0,80) | pontoane (B, peste start) | **~630 m** |
+| pontoane (B, tronson 2, frac 0,154) | jonca (F, frac 0,811) | **1 332 m** |
+| jonca (F, frac 0,811) | maimuțele (G, frac 0,935) | **252 m** |
+| maimuțele (G, frac 0,935) | pontoane (B, peste start) | **444 m** |
 
 Mareea (G) e **ciclu lung** peste toată latura, telegrafiat de pe belvedere,
 deci nu intră în socoteala de 200 m: e stare, nu eveniment. Toate distanțele
@@ -469,29 +596,89 @@ belvederea să funcționeze, împreună cu ceața în strat.
 ### 5.3 Trecerea de contracte — **de făcut înainte de primul build**
 
 Memoria `brief-cere-glb-cod-il-face-deja`: înainte de comanda de kit se
-verifică ce face deja codul. Pe pista asta sunt **șase** lucruri de verificat,
-și două dintre ele pot schimba scopul:
+verifică ce face deja codul. **Trecerea e făcută (14 oct 2026), pe cod citit
+integral.** Verdictul pe scurt: **pontonul e o subclasă mică, mareea e o
+variantă mică, și niciuna nu cere clasă de la zero.**
 
-1. **`RopeBridgeHazard` cât de departe duce pontonul?** E întrebarea
-   principală. Dacă modelul lui (săgeată + balans + plăci + shader) se poate
-   parametriza cu capete libere și cu o forțare externă, `PontoonRoadHazard`
-   e o **subclasă mică**, nu o clasă nouă. De citit integral înainte de orice
-   linie scrisă;
-2. **mareea: verificat ✔** — `water_hazard.gd` e bază comună pentru variante
-   de apă pe șosea, cu `_advance(delta)` ca ceas și `film_material` care
-   refolosește materialul mării. `TideHazard` e o variantă mică pe ea, nu o
-   clasă de la zero. Rămas de decis doar cine comută banda (§3.1.3);
-3. **apa de mare cu adâncimi** o face deja tema (`water_shallow_slot`,
-   `water_deep_slot`, `water_shore_slot`, `water_tint`) — din kit **nu** vine
-   nicio suprafață de apă;
-4. **`CameraZone`** pentru grotă: tavan declarat explicit, nu implicitul de
-   15 m;
-5. **`road_hole_span()`** taie carosabilul pentru ponton și pentru podețul de
-   plute, exact ca pentru podul de frânghie — deci nodurile se pun **pe
-   punctele copte**, iar capetele pe `±k` pași (tiparul Track15: nodul pe
-   baked[619], capetele pe baked[609] și baked[629]);
-6. **`prop_contact_skip`** pentru plase, năvoade și balustrade de bambus:
-   liniile subțiri n-au disc de contact (tiparul `rope_rail` din Machu Picchu).
+**1. `RopeBridgeHazard` — cât de departe duce pontonul? VERIFICAT ✔, duce
+aproape tot.** Clasa e deja parametrizată pe exporturi (`rest_sag`, `sag_bus`,
+`sag_sport`, `dip_ratio`, `dip_sigma`, `wave_gain`, `sag_freq`, `sag_damping`,
+`sway_gain`, `deck_mass`, `sway_freq`, `sway_damping`, `sway_max`, `roll_arm`,
+`plate_count`, `plate_overlap`), iar structura e exact cea de care are nevoie
+pontonul:
+
+| de ce are nevoie pontonul | ce există deja |
+|---|---|
+| afundare pe masă | `_calibrate()` + `amplitude_for(m)`: legea `a(m) = gain·m^exp`, calibrată din două puncte **în metri**, nu în coeficienți |
+| balans lateral | `_integrate()`: pendul amortizat spre `_sway_target`, cu limită moale peste `sway_max` |
+| „mașina ușoară ridicată de cea grea” | `wave_gain` — **deja măsurat** că sub 1.0 valul nu mai ridică mașina deloc |
+| plăci de coliziune | `_build_plates()`: `AnimatableBody3D` + `sync_to_physics`, **permanente**, cu `platform_velocity` scris pe tick |
+| o singură scriere de transform | `_place_plates()`: `body.global_transform = xf`, exact o dată |
+| golul din carosabil | `road_hole_span()` |
+| plasa de repunere coborâtă | `net_ceiling_drop()` |
+| stare pentru sonde | `sag_amplitude()`, `sway()`, `sag_at(u)`, `drop_at(u)`, `deck_coords()`, `deck_point_global()`, `plates()`, `cars_on_deck()`, `settle_now()` |
+
+**Ce trebuie schimbat, exact trei locuri** (și toate trei sunt mici):
+
+- **capetele libere.** `_p(u) = 4u(1-u)` e **zero la ambele capete** — chiar
+  definiția podului fix. Pontonul cere o formă de mod care nu moare la capete
+  (de exemplu `p_pontoon(u) = a + b·4u(1-u)`, cu `a > 0`). Se schimbă în
+  `_p()`, **și** în `e := smoothstep(0.0, 0.1, min(u, 1-u))` din `_drop()`,
+  care stinge anume afundarea locală la capete;
+- **tangajul.** A treia ecuație, pe același tipar ca `_sway` în `_integrate()`
+  (cinci linii) plus un termen în `_plate_basis()`;
+- **forțarea externă** din valul joncilor: un termen sinusoidal adăugat la
+  `_sag_target` în `_gather_loads()` (o linie).
+
+**Capcana de închis, găsită la citire — contaminarea Track15.** `snapshot.gd`
+(liniile 1748, 1763) și `probe_machu_pod.gd` caută podul cu
+`find_children("*", "RopeBridgeHazard", true, false)`. În Godot, **o subclasă
+se potrivește la numele clasei de bază**, deci dacă `PontoonRoadHazard extends
+RopeBridgeHazard`, uneltele de pe Machu Picchu vor „găsi” pontoanele de pe Ha
+Long, iar `--rope-load` va așeza mașina pe un ponton crezând că e podul. Două
+ieșiri, de decis la implementare: fie pontonul **nu** extinde clasa, ci se
+extrage un strat comun (`SuspendedDeck`) din care moștenesc amândouă, fie
+căutările din unelte se strâng pe tip exact. **Prima e mai curată**, a doua e
+mai ieftină; oricum se alege, uneltele Machu Picchu rulează după schimbare, ca
+să se vadă că podul n-a mișcat.
+
+**Al doilea contract de respectat:** `_drop()` din GDScript și `deck_drop()`
+din `assets/shaders/rope_bridge.gdshader` sunt **aceeași formulă scrisă de
+două ori** (antetul shaderului o spune explicit: „dacă schimbi formula aici,
+schimb-o și acolo, altfel mașina merge pe o suprafață pe care n-o vezi”).
+Pontonul are nevoie de shaderul lui, cu **aceleași** trei schimbări — deci
+sonda `probe_ponton` compară cota plăcii cu cota vizuală, nu doar cotele între
+ele.
+
+**2. mareea: VERIFICAT ✔** — `water_hazard.gd` e scris anume ca bază comună
+pentru variante de apă pe șosea („o variantă nouă = un fișier care răspunde la
+cele trei”: `_wet_patch_size()`, `_build_source()`, `_advance(delta)`), iar
+`film_material` **refolosește materialul mării**, deci apa de maree nu costă
+niciun material în plus. Petecul ud e **copil** al hazardului, deci dacă sursa
+se mișcă, apa merge cu ea fără nicio linie în plus. Rămas de decis doar cine
+comută banda (§3.1.3).
+
+**3. apa de mare cu adâncimi** o face deja tema (`water_shallow_slot`,
+`water_deep_slot`, `water_shore_slot`, `water_tint`) — din kit **nu** vine
+nicio suprafață de apă.
+
+**4. `CameraZone`** pentru grotă: tavan declarat explicit, nu implicitul de
+15 m.
+
+**5. `road_hole_span()`** taie carosabilul pentru ponton și pentru podețul de
+plute, exact ca pentru podul de frânghie — deci nodurile se pun **pe punctele
+copte**, iar capetele pe `±k` pași (tiparul Track15: nodul pe baked[619],
+capetele pe baked[609] și baked[629], 34,24 m). Pe Ha Long sunt **trei**
+tronsoane de ponton, deci trei noduri și trei găuri, fiecare cu insulițele
+fixe la capete.
+
+**6. `prop_contact_skip`** pentru plase, năvoade și balustrade de bambus:
+liniile subțiri n-au disc de contact (tiparul `rope_rail` din Machu Picchu).
+
+**Consecința pentru plan:** pasul 3 (fundația) nu mai e blocat de o clasă
+nescrisă. `PontoonRoadHazard` se poate construi **după** fundație, cu cotele
+luate din el, nu înaintea ei — iar fundația poate porni cu tronsoanele ca
+carosabil fix, ca să se măsoare traseul și plasa lumii întâi (§7 pasul 4).
 
 ## 6. Bugete
 
@@ -508,10 +695,14 @@ verifică ce face deja codul. Pe pista asta sunt **șase** lucruri de verificat,
 ## 7. Ordinea de construcție
 
 1. **Brief v0.1** (acest document). PR propriu.
-2. **Trecerea de contracte** (§5.3), **înaintea fundației**: citit integral
-   `rope_bridge_hazard.gd`, `water_hazard.gd`, `camera_zone`, plus auditul
-   kiturilor Okinawa / Fiordland (§5.1). Rezultatul se scrie în brief ca v0.2,
-   iar decizia 3.1.2 și 3.1.3 se închid acolo.
+2. **Trecerea de contracte ✔ FĂCUT** (§5.3, 14 oct 2026): `rope_bridge_hazard.gd`
+   și `rope_bridge.gdshader` citite integral, `water_hazard.gd` verificat.
+   Verdict: pontonul e subclasă mică (trei schimbări identificate), mareea e
+   variantă mică. O capcană găsită și scrisă: `find_children("*",
+   "RopeBridgeHazard")` din `snapshot.gd` / `probe_machu_pod.gd` ar prinde și
+   pontoanele, deci ori se extrage un strat comun, ori se strâng căutările.
+   **Rămas de făcut din pasul ăsta:** auditul kiturilor Okinawa / Fiordland
+   (§5.1), care nu blochează fundația.
 3. **Fundația `Track22.tscn`** din `tools/gen_halong_route.py` (copie de
    `gen_transfagarasan_route.py`):
    - garda de **sens** (bucla e ORARĂ) și garda de **azimut** scrise

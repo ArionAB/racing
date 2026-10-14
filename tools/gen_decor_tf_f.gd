@@ -44,6 +44,15 @@ extends Node
 ## in culoarul oilor (0.480-0.502, <24 m de axa) si nimic pe versantul de
 ## deasupra ramurii 1 in limba avalansei (0.396-0.435).
 
+## STARE LA OPRIRE (runda 3, ultima pentru F):
+##  - r1/r2: criticul a ales referinta pe toate planse; diferenta numita = densitatea
+##    (fasii/versant) si apoi grupurile de roci unghiulare cu zapada pe panta.
+##  - r3: 18 grupuri de 3-5 aflorimente + banci de zapada ingropate (snow_wall B, clasa
+##    `snow`, FlockProp), 24 panouri mari spre creasta, treapta de molizi mici (0.4-0.7),
+##    primul rand de molizi rarit ~25%, grup fortat la 0.585 dreapta (camp plat).
+##  - Ramane: versantul e panta neteda cu splat (relief/shader), zidurile ZidC se vad ca
+##    bordura; zapada e limitata de piesa. Nu se mai ating fara decizie.
+
 const TRACK := "res://scenes/tracks/Track21.tscn"
 const SCENE_PATH := "res://scenes/tracks/Track21.tscn"
 const ZONE := "DecorManual/ZonaF"
@@ -60,7 +69,7 @@ const MODELS := {
 	"f_outcrop_b": ["PackedScene", "res://assets/models/transfagarasan/rocks/schist_outcrop_b.glb"],
 	"f_outcrop_c": ["PackedScene", "res://assets/models/transfagarasan/rocks/schist_outcrop_c.glb"],
 	"f_scree": ["PackedScene", "res://assets/models/transfagarasan/rocks/scree_cone.glb"],
-	"f_snow_patch": ["PackedScene", "res://assets/models/scatter/snow_patch.glb"],
+	"f_snow_wall": ["PackedScene", "res://assets/models/transfagarasan/structures/snow_wall.glb"],
 	"f_pines": ["PackedScene", "res://assets/models/trees/alpine_pines.glb"],
 	"f_flower": ["PackedScene", "res://assets/models/flowers/flower_cluster.glb"],
 }
@@ -122,9 +131,8 @@ func _build() -> void:
 	_jneapan()
 	_afin()
 	_bujor()
-	_aflorimente()
+	_roci_si_zapada()
 	_grohotis()
-	_zapada()
 	_molizi()
 	_flori()
 	var tot := 0
@@ -324,7 +332,7 @@ func _bujor() -> void:
 	_count["petice_bujor"] = patches
 
 
-# 4 ------------------------------------------------------------------ aflorimente
+# 4 (runda 3: vezi _roci_si_zapada, mai jos)
 
 ## Un punct pe versantul de SUS: latura care urca fata de propria ramura SI
 ## cota peste drumul cel mai apropiat (fasiile dintre ramuri nu sunt versant).
@@ -334,47 +342,6 @@ func _uphill_cand(f: float, off_lo: float, off_hi: float, min_dy: float = 3.5) -
 	if not bool(c["uphill"]) or float(c["dy_road"]) < min_dy:
 		return {}
 	return c
-
-
-func _aflorimente() -> void:
-	# Runda 2: gramezi de 2-3 lame, nu piese singure. `outcrop_c` (lama inalta,
-	# subtire) doar o data: izolata citea ca un ciob.
-	var centers: Array[Vector3] = []
-	var guard := 0
-	var total := 0
-	var groups := 0
-	while groups < 7 and guard < 9000:
-		guard += 1
-		var f := _rng.randf_range(F0 + 0.004, F1 - 0.004)
-		var c := _uphill_cand(f, 10.0, 34.0)
-		if c.is_empty() or not _ok(c, 4.5, 5.0):
-			continue
-		var pp: Vector3 = c["pos"]
-		var near := false
-		for q in centers:
-			if q.distance_to(pp) < 38.0:
-				near = true
-				break
-		if near:
-			continue
-		centers.append(pp)
-		groups += 1
-		var k := _rng.randi_range(2, 3)
-		for m in k:
-			var ang := _rng.randf() * TAU
-			var rad := _rng.randf_range(0.0, 4.5) if m > 0 else 0.0
-			var pc := _cand_at(pp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
-			if not _ok(pc, 4.0, 4.5):
-				continue
-			var nm := "outcrop_a" if _rng.randf() < 0.5 else "outcrop_b"
-			if total == 3:
-				nm = "outcrop_c"
-			var sc := _rng.randf_range(1.0, 1.55)
-			var p3: Vector3 = pc["pos"]
-			p3.y -= 0.35 * sc
-			total += 1
-			_node("F_Aflor%02d" % total, "f_" + nm, p3, _rng.randf_range(-PI, PI), sc, c["nrm"], 0.25)
-			_put("aflorimente", pc)
 
 
 # 5 ------------------------------------------------------------------ grohotis
@@ -407,45 +374,127 @@ func _grohotis() -> void:
 		placed.append(pp)
 
 
-# 6 ------------------------------------------------------------------ zapada
+# 4+6 ----------------------------------------------------------------- roci + zapada
 
-func _zapada() -> void:
-	# Petice MICI, pe panta abrupta (>0.45), cate 2-3 suprapuse: o foaie plata de
-	# 11 m pe iarba usoara citea ca folie de plastic (captura t1_f0.530).
+## Un banc de zapada: mesh-ul `SnowWall_B_Snow` din snow_wall.glb (clasa `snow`
+## existenta, zero material nou), cu lungimea pe curba de nivel si ingropat
+## 50-70% in teren, ca sa iasa doar o calota alba cu trepte.
+func _snow_lump(pc: Dictionary, big: bool) -> void:
+	var nrm: Vector3 = pc["nrm"]
+	var cx := -nrm.z
+	var cz := nrm.x
+	var yaw := _rng.randf_range(-PI, PI)
+	if Vector2(cx, cz).length() > 0.05:
+		yaw = atan2(cx, cz) + _rng.randf_range(-0.4, 0.4)
+	var sy := _rng.randf_range(1.3, 2.1) if big else _rng.randf_range(0.8, 1.3)
+	var sx := _rng.randf_range(1.6, 2.6) if big else _rng.randf_range(1.0, 1.8)
+	var sz := _rng.randf_range(0.9, 1.5) if big else _rng.randf_range(0.5, 0.9)
+	var p3: Vector3 = pc["pos"]
+	p3.y -= 3.02 * sy * _rng.randf_range(0.35, 0.5)
+	_flock_add("snow_s%d" % _slice_of(float(pc["f"])), p3, yaw, Vector3(sx, sy, sz))
+	_put("zapada", pc)
+
+
+## Grupuri de 3-5 aflorimente (scara mixta, cele mici 0.5-0.8) + banci de zapada
+## lipite de ele, pe partea de deal, la 25-40 m; plus panouri mari de zapada mai
+## sus. Un grup e fortat pe dreapta la 0.585 (acolo nu exista deal).
+func _roci_si_zapada() -> void:
 	var centers: Array[Vector3] = []
 	var guard := 0
+	var groups := 0
 	var total := 0
-	while total < 40 and guard < 20000:
+	while groups < 18 and guard < 5000:
 		guard += 1
 		var f := _rng.randf_range(F0 + 0.004, F1 - 0.004)
-		var c := _uphill_cand(f, 12.0, 28.0, 1.5)
-		if c.is_empty() or float(c["slope"]) < 0.3:
-			continue
-		if not _ok(c, 3.0, 3.5):
-			_rejected += 1
+		var c := _uphill_cand(f, 9.0, 34.0)
+		if c.is_empty() or not _ok(c, 3.5, 5.0):
 			continue
 		var pp: Vector3 = c["pos"]
 		var near := false
 		for q in centers:
-			if q.distance_to(pp) < 16.0:
+			if q.distance_to(pp) < 25.0:
 				near = true
 				break
 		if near:
 			continue
 		centers.append(pp)
-		var k := mini(_rng.randi_range(2, 4), 40 - total)
-		for m in k:
-			var ang := _rng.randf() * TAU
-			var rad := _rng.randf_range(0.0, 2.8) if m > 0 else 0.0
-			var pc := _cand_at(pp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
-			if not _ok(pc, 1.6, 4.0):
+		groups += 1
+		total = _grup(c, total)
+	for k in 2:
+		var gd := 0
+		while gd < 400:
+			gd += 1
+			var f := 0.578 + _rng.randf() * 0.02 + k * 0.012
+			var c := _cand(f, 1.0, _rng.randf_range(10.0, 20.0))
+			if not _ok(c, 3.5, 5.0):
 				continue
-			var sc := _rng.randf_range(1.4, 2.3)
-			var p3: Vector3 = pc["pos"]
-			p3.y += 0.05
-			total += 1
-			_node("F_Zapada%02d" % total, "f_snow_patch", p3, _rng.randf_range(-PI, PI), sc, c["nrm"], 1.0)
-			_put("zapada", pc)
+			total = _grup(c, total)
+			var cp: Vector3 = c["pos"]
+			for m in 4:
+				var ang := _rng.randf() * TAU
+				var rr := _rng.randf_range(3.5, 7.0)
+				var pc := _cand_at(cp + Vector3(cos(ang) * rr, 0.0, sin(ang) * rr), c)
+				if not _ok(pc, 1.6, 4.0):
+					continue
+				var vv := "a" if _rng.randf() < 0.55 else "b"
+				var sc := _rng.randf_range(0.9, 1.4)
+				var p3: Vector3 = pc["pos"]
+				p3.y -= 0.05
+				_flock_add("jn_%s_s%d" % [vv, _slice_of(f)], p3, _rng.randf_range(-PI, PI), Vector3(sc, sc, sc))
+				_put("jneapan_" + vv, pc)
+			for m in 6:
+				var ang := _rng.randf() * TAU
+				var rr := _rng.randf_range(3.0, 8.0)
+				var pc := _cand_at(cp + Vector3(cos(ang) * rr, 0.0, sin(ang) * rr), c)
+				if not _ok(pc, 0.5, 3.5):
+					continue
+				var sc := _rng.randf_range(1.0, 1.8)
+				var p3: Vector3 = pc["pos"]
+				p3.y -= 0.03
+				_flock_add("flori_s%d" % _slice_of(f), p3, _rng.randf_range(-PI, PI), Vector3(sc, sc, sc))
+				_put("flori", pc)
+			break
+	var big := 0
+	guard = 0
+	while big < 40 and guard < 4000:
+		guard += 1
+		var f := _rng.randf_range(F0 + 0.004, F1 - 0.004)
+		var c := _uphill_cand(f, 24.0, 48.0, 5.0)
+		if c.is_empty() or float(c["slope"]) < 0.3 or not _ok(c, 3.5, 6.0):
+			continue
+		_snow_lump(c, true)
+		big += 1
+
+
+## Un grup in jurul centrului `c`: 3-5 aflorimente + 2-4 banci de zapada.
+func _grup(c: Dictionary, total: int) -> int:
+	var cp: Vector3 = c["pos"]
+	var k := _rng.randi_range(3, 5)
+	for m in k:
+		var ang := _rng.randf() * TAU
+		var rad := _rng.randf_range(0.0, 4.5) if m > 0 else 0.0
+		var pc := _cand_at(cp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
+		var small := m > 0 and _rng.randf() < 0.5
+		var sc := _rng.randf_range(0.5, 0.8) if small else _rng.randf_range(0.9, 1.35)
+		if not _ok(pc, 3.0 * sc, 4.5):
+			continue
+		var nm := "outcrop_a" if _rng.randf() < 0.5 else "outcrop_b"
+		if _rng.randf() < 0.06:
+			nm = "outcrop_c"
+		var p3: Vector3 = pc["pos"]
+		p3.y -= 0.35 * sc
+		total += 1
+		_node("F_Aflor%02d" % total, "f_" + nm, p3, _rng.randf_range(-PI, PI), sc, c["nrm"], 0.25)
+		_put("aflorimente", pc)
+	var z := _rng.randi_range(2, 4)
+	for m in z:
+		var ang := _rng.randf() * TAU
+		var rad := _rng.randf_range(2.0, 5.0)
+		var pc := _cand_at(cp + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
+		if not _ok(pc, 2.0, 4.0):
+			continue
+		_snow_lump(pc, false)
+	return total
 
 
 # 7 ------------------------------------------------------------------ molizi
@@ -475,6 +524,9 @@ func _molizi() -> void:
 				pc = _cand_at((c["pos"] as Vector3) + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c)
 				if not _ok(pc, 2.0, 4.0):
 					continue
+			# primul rand (< 14 m de margine) rarit cu ~25%: citea ca gard de brazi
+			if float(pc["d"]) - float(pc["half_j"]) < 14.0 and _rng.randf() < 0.25:
+				continue
 			var variant := "b" if _rng.randf() < 0.55 else "c"
 			var sc := _rng.randf_range(0.55, 1.35)
 			var yaw := _rng.randf_range(-PI, PI)
@@ -488,6 +540,35 @@ func _molizi() -> void:
 			got += 1
 		if got > 0:
 			clumps += 1
+	# treapta de molizi mici si medii pe panta (scara 0.4-0.7), in palcuri
+	var small := 0
+	guard = 0
+	while small < 44 and guard < 4000:
+		guard += 1
+		var f2 := _rng.randf_range(F0 + 0.004, F1 - 0.004)
+		var c2 := _uphill_cand(f2, 9.0, 40.0, 1.0)
+		if c2.is_empty() or not _ok(c2, 1.6, 4.0):
+			continue
+		var k2 := _rng.randi_range(3, 5)
+		var got2 := 0
+		for m in k2:
+			var ang := _rng.randf() * TAU
+			var rad := _rng.randf_range(0.0, 4.5)
+			var pc2 := _cand_at((c2["pos"] as Vector3) + Vector3(cos(ang) * rad, 0.0, sin(ang) * rad), c2)
+			if not _ok(pc2, 1.4, 4.0):
+				continue
+			var v2 := "b" if _rng.randf() < 0.6 else "c"
+			var sc2 := _rng.randf_range(0.4, 0.7)
+			var yaw2 := _rng.randf_range(-PI, PI)
+			var sl2 := _slice_of(f2)
+			var q3: Vector3 = pc2["pos"]
+			q3.y -= 0.1
+			_flock_add("pine_%s_s%d" % [v2, sl2], q3, yaw2, Vector3(sc2, sc2, sc2))
+			_flock_add("trunk_%s_s%d" % [v2, sl2], q3, yaw2, Vector3(sc2, sc2, sc2))
+			_put("molizi", pc2)
+			got2 += 1
+		if got2 > 0:
+			small += 1
 
 
 # 8 ------------------------------------------------------------------ flori
@@ -541,6 +622,8 @@ func _lot_spec(key: String) -> Dictionary:
 			return {"model": "f_pines", "mesh": "Pine_" + parts[1].to_upper(), "cls": "", "nm": "F_Molid_" + parts[1] + "_" + parts[2]}
 		"trunk":
 			return {"model": "f_pines", "mesh": "Trunk_" + parts[1].to_upper(), "cls": "", "nm": "F_Trunchi_" + parts[1] + "_" + parts[2]}
+		"snow":
+			return {"model": "f_snow_wall", "mesh": "SnowWall_B_Snow", "cls": "snow", "nm": "F_Banc_" + parts[1]}
 		"flori":
 			return {"model": "f_flower", "mesh": "", "cls": "", "nm": "F_Flori_" + parts[1]}
 	return {}

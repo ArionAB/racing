@@ -40,6 +40,8 @@ const MIN_MASS: float = 0.3
 const MAX_MASS: float = 4.0
 ## Sub cota de pornire cu atat (m): a cazut din lume, se sterge.
 const LOST_BELOW_M: float = 25.0
+## Cat se ridica talpa cutiei peste talpa modelului (vezi `_setup`).
+const SPAWN_LIFT_M: float = 0.03
 
 var _spawn_y: float = 0.0
 
@@ -87,19 +89,27 @@ func _setup(model: Node3D) -> void:
 	# Cutia se masoara in spatiul CORPULUI: modelul e copilul lui acum.
 	var aabb := Track.model_aabb(model)
 	var box := BoxShape3D.new()
-	# Putin sub vizual, ca sa nu se agate de colturi invizibile; pe sol ramane
-	# asezat pe talpa (centrul coboara cu jumatate din ce s-a taiat).
-	box.size = aabb.size * Vector3(0.9, 0.95, 0.9)
+	# Putin sub vizual, ca sa nu se agate de colturi invizibile, si cu talpa
+	# ridicata cu SPAWN_LIFT_M: piesele sunt asezate pe teren cu talpa la cota
+	# solului, iar pe o panta sau langa o vecina cutia intra cativa cm in ele.
+	# Solverul o scotea afara la nastere, o trezea, si teancul de oale de la
+	# capatul randului din Cappadocia aluneca 1,38 m singur (ProbeBumpProps).
+	var foot := Vector2(aabb.size.x, aabb.size.z) * 0.85
+	var height := maxf(aabb.size.y - SPAWN_LIFT_M, aabb.size.y * 0.5)
+	box.size = Vector3(foot.x, height, foot.y)
 	var shape := CollisionShape3D.new()
 	shape.shape = box
-	shape.position = aabb.get_center() - Vector3(0.0, aabb.size.y * 0.025, 0.0)
+	shape.position = aabb.get_center() + Vector3(0.0, (aabb.size.y - height) * 0.5, 0.0)
 	add_child(shape)
 	center_of_mass_mode = RigidBody3D.CENTER_OF_MASS_MODE_CUSTOM
 	center_of_mass = shape.position
 	mass = clampf(aabb.size.x * aabb.size.y * aabb.size.z * 0.5 * DENSITY,
 		MIN_MASS, MAX_MASS)
 	var mat := PhysicsMaterial.new()
-	mat.friction = 0.7
+	# 0,35, nu 0,7: un teanc inalt de 4 kg lovit jos se rastoarna peste capota
+	# si, cu frecare mare, se freca sub caroserie — masina cadea de la 13 la
+	# 5,8 m/s pe o oala (ProbeBumpProps, Cappadocia). La 0,35 pierde ~20%.
+	mat.friction = 0.35
 	mat.bounce = 0.2
 	physics_material_override = mat
 	linear_damp = 0.3
@@ -109,6 +119,12 @@ func _setup(model: Node3D) -> void:
 	set_physics_process(false)
 	sleeping_state_changed.connect(func() -> void:
 		set_physics_process(not sleeping))
+	# Adormirea ceruta inainte ca corpul sa ajunga in spatiul fizic nu tine:
+	# masurat, la primul pas piesele erau TREZE — pe teren plat stateau, pe
+	# panta din piata Goreme alunecau pana la 1,7 m fara sa le atinga nimeni.
+	# Se reaplica dupa primul pas de fizica, cand corpul exista in Jolt.
+	get_tree().physics_frame.connect(func() -> void:
+		sleeping = true, CONNECT_ONE_SHOT)
 
 
 ## Ruleaza doar cat corpul e treaz: piesa aruncata peste o faleza se sterge

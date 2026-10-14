@@ -38,6 +38,9 @@ var _recover_veil: ColorRect
 var _recover_tween: Tween
 ## Ceasul de offroad (#497): cifra mare deasupra centrului.
 var _offroad_label: Label
+## „WRONG WAY" (#499): mare, rosu, pulsand cat timp mergi pe contrasens.
+var _wrong_way_label: Label
+var _wrong_way_tween: Tween
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -133,6 +136,16 @@ func _ready() -> void:
 	_offroad_label.add_theme_color_override("font_color", Color(1.0, 0.82, 0.25))
 	_offroad_label.visible = false
 	root.add_child(_offroad_label)
+	_wrong_way_label = _make_label(72)
+	_wrong_way_label.text = "WRONG WAY"
+	_wrong_way_label.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
+	_wrong_way_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_wrong_way_label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_wrong_way_label.position += Vector2(0, -60)
+	_wrong_way_label.add_theme_color_override("font_color", Color(1.0, 0.22, 0.18))
+	_wrong_way_label.visible = false
+	root.add_child(_wrong_way_label)
 
 	_message = _make_label(38)
 	_message.set_anchors_and_offsets_preset(
@@ -456,6 +469,17 @@ func set_offroad_clock(seconds: float) -> void:
 	_offroad_label.text = "OFF ROAD\n%.1f" % maxf(seconds, 0.0)
 	_offroad_label.add_theme_color_override("font_color",
 		Color(1.0, 0.3, 0.2) if seconds < 1.0 else Color(1.0, 0.82, 0.25))
+
+
+func set_wrong_way(on: bool) -> void:
+	if _wrong_way_tween != null and _wrong_way_tween.is_valid():
+		_wrong_way_tween.kill()
+	_wrong_way_label.visible = on
+	_wrong_way_label.modulate.a = 1.0
+	if on:
+		_wrong_way_tween = create_tween().set_loops()
+		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 0.35, 0.35)
+		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 1.0, 0.35)
 
 
 func flash_message(text: String) -> void:

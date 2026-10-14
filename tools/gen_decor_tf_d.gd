@@ -46,6 +46,14 @@ extends Node
 ## Jalon la 7,9 m); nimic la < 16 m de axa pe 0.309-0.322 (aripile portalului);
 ## culoarul utilajului (offset -2,6) e pe banda, deci liber.
 
+## STARE LA OPRIRE (runda 2, ultima pentru D; iesire din bucla pe (c)):
+##  - r1: criticul a ales referinta; diferenta = zapada ca masa (bancile SnowWall_B pe clasa `snow` citeau piatra alba).
+##  - r2 (dupa zapada pe atlas, c1492c98): 26 de creste SnowWall_A in ultimii 40 m inaintea portalului, 5 petice pe pajiste,
+##    banci mici 154 -> 95, molizi rariti 25% pe 0.252-0.275. Gărzile verzi, 0 piese noi peste asfalt, 0 repuneri in felia D.
+##  - Ramane: criticul a numit a doua oara zapada ("placi gri-albastrui striate = stanca stratificata"). Cauza e sub decor:
+##    piesa snow_wall are treptele modelate ca straturi regulate, iar lumina rece din umbra portalului o face gri-albastra.
+##    Decizia apartine dezvoltatorului (piesa de zapada sau lumina), nu se mai ating aici.
+
 const TRACK := "res://scenes/tracks/Track21.tscn"
 const SCENE_PATH := "res://scenes/tracks/Track21.tscn"
 const ZONE := "DecorManual/ZonaD"

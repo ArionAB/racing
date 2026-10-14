@@ -936,6 +936,38 @@ tema `alpine`/Fiordland. **Reparație**: scoate scatterul care n-are ce căuta (
 - **Telecabina**: nu există în scenă, deci traseul cablului, înălțimea pilonilor și gabaritul față de camera de joc sunt neverificate.
 - **Device fizic**: nimic măsurat pe telefon (M4 amânat); toate cifrele de timp sunt pe RTX 3070.
 
+## Starea valului 1 (A, C, F) — integrat pe `transfagarasan/poi-integrare`, 14 oct 2026
+
+| POI | runde | ieșire | ce s-a făcut | ce a rămas |
+|---|---|---|---|---|
+| A | 2 + curățenie | (c): criticul a repetat verdictul de densitate după ce clusterele și pădurea erau acolo | 2 grupuri de 7 case, 1 500 de molizi, 55 de fagi, vaci, căpițe, poteci; gardurile MultiMesh scoase (rămâneau segmente răzlețe) | căpițele `hay_bale` citesc „franzelă”; pădurea intră pe terenul lui B până la x ≈ 62 (păstrată) |
+| C | 3 | (c) după ultima rundă | 162 de molizi pe 3 rânduri, fâșie de jneapăn, afin și șist la 3,5–9 m, fagi doar ca accent | molizii se citesc tot ca masă cu goluri; groapa de la 0.24 e relief |
+| F | 3 | (c): zăpada e sub 0,4 % din cadru | 416 molizi în 3 trepte, 302 tufe de jneapăn, 92 de bujori, 23 de aflorimente, 52 de bănci de zăpadă (`snow_wall` îngropat) | **zăpada cere relief**: versantul cel mai înalt e limba avalanșei (liberă prin contract), iar panta e netedă — decizia dezvoltatorului |
+
+Toți criticii au ales referința 5/5 în fiecare rundă (ca pe Okinawa, Fiordland și Serengeti).
+
+**Reparații centrale** făcute de coordonator în timpul valului, fără material nou:
+- cheia de temă `pine_crown_class`: molizii din benzi trec pe `tf_jneapan`;
+- `Poenari_Brick` trece pe `tf_stone`;
+- tabla argintie (`arges_house_a`, `cabana_balea_lac`) trece pe `PAINTED_METAL`, măsurată în joc la gri-albăstrui (95, 112, 114);
+- scoarța jneapănului trece pe `tf_jneapan`, fiindcă crenguțele ieșeau portocalii. **Rularea din nou a generatoarelor C și F pierde această cheie.**
+
+**Convenție pentru valurile următoare:** pe FlockProp, clasa se scrie `tri_class = "tf_*"` (triplanar), **niciodată `class:tf_*`**: cele două căi țin cache-uri separate, deci aceeași clasă s-ar număra ca 2 materiale. Procesele Godot se opresc doar după PID-ul propriu, niciodată cu `taskkill /IM`.
+
+**Scena integrată** (gărzile sunt toate la linia de bază):
+
+| măsură | valoare |
+|---|---|
+| materiale | 35 (plafon 38): **B, D, E, G și H nu mai au voie să adauge** |
+| triunghiuri | 3,76 M (bază 1,24 M) |
+| încărcare | 4,4 s la rece, 3,8–3,9 s la cald |
+
+ProbeRace pe 16 seed-uri: 49 de repuneri (urs 36, portal 9, avalanșă 2, plus 2 neașteptate în afara zonelor de decor):
+- **0.120, seed 2**: autobuzul Nyx, la baraj (B), determinist. Se verifică la B;
+- **0.266, seed 14**: nedeterminist.
+
+Mai sunt 2 `[blocaj]` noi la 0.320 (`Portal_S`, seed 6).
+
 ## Bucla oarbă
 
 1. Constructorul (Sonnet, memoria `coordonator-fable-constructori-sonnet`) lucrează în `D:/GameDev/wt-tf-poi-<x>` pe `transfagarasan/poi-<x>`, plecat din vârful ramurii după merge-ul

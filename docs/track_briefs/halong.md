@@ -15,9 +15,13 @@
 > măsurate, două unelte stricate de mine și prinse tot măsurând, și de ce
 > fiecare a fost greșită.
 >
-> **Următorii pași:** `PontoonRoadHazard` (§5.3 — subclasă mică),
-> `TideHazard`, `CameraZone` pe grotă, gărzile de layout, apoi verdictul
-> dezvoltatorului la volan.
+> **`PontoonRoadHazard` EXISTĂ** (§7.2): trei tronsoane vii pe pistă, cu
+> afundare pe masă (autobuz 0,450 m, sport 0,180 m — exact țintele), prag la
+> insuliță 0,042 m (contract < 0,3), tangaj și val propriu. Podul de pe Machu
+> Picchu e **neatins** și toate contractele lui trec.
+>
+> **Următorii pași:** `TideHazard`, `CameraZone` pe grotă, gărzile de layout,
+> apoi verdictul dezvoltatorului la volan.
 
 > Concept de pistă, înaintea listei definitive de assets. Scheletul e cel din
 > `transfagarasan.md`, `okinawa.md` și `monument_valley.md`. Secțiunile de
@@ -959,6 +963,173 @@ costat timp aici):
   `editor-godot-deschis-rescrie-tscn`). Înainte de orice regenerare a lui
   `Track22.tscn`, verifică `tasklist` / `git diff --stat` — aici am prins un
   proces de editor deschis din dimineață, și deși n-a atins scena, ar fi putut.
+
+### 7.2 `PontoonRoadHazard` — semnătura pistei (14 oct 2026)
+
+`scenes/hazards/pontoon_road_hazard.gd` + `assets/shaders/pontoon_road.gdshader`
++ `tools/ProbePonton.tscn`. Trei tronsoane vii pe `Track22`, cu faze de val
+diferite (0, 0,333, 0,667) ca să nu se legene la unison.
+
+**Decizia de arhitectură: clasă de sine stătătoare, nu subclasă.** §5.3
+identificase capcana (`find_children("*", "RopeBridgeHazard")` din
+`snapshot.gd` și `probe_machu_pod.gd` prinde și subclasele) și propunea ori un
+strat comun extras, ori căutări strânse pe tip exact. Am ales **a treia cale**,
+după ce am măsurat scopul: din cele 604 linii ale podului, ~36 de referințe sunt
+vizual de pod (scânduri, cabluri portante, balustrade de frânghie, turnuri de
+piatră), iar fizica comună e ~80 de linii. Un strat comun ar fi atins o clasă pe
+care Track15 o folosește, pentru un câștig mic.
+
+Deci: **cod propriu, model matematic împrumutat, podul neatins.** Contractul cu
+`Track` merge prin **duck-typing** (`has_method("road_hole_span")`), deci
+pontonul e recunoscut fără să fie rudă cu podul. Capcana e închisă **prin
+construcție**, nu prin fix. Verificat: `rope_bridge_hazard.gd`,
+`rope_bridge.gdshader`, `probe_machu_pod.gd`, `snapshot.gd` și `Track15.tscn`
+sunt **nemodificate**, iar `ProbeMachu` trece cu cifrele neschimbate (săgeată
+0,60 sport / 1,50 autobuz, balans 0,96 m, stingere 1,30 s).
+
+**Cele trei schimbări față de pod**, exact cele prezise în §5.3:
+
+| # | ce | de ce podul n-o are |
+|---|---|---|
+| 1 | **capete libere**: `P(u) = free_ends + (1−free_ends)·4u(1−u)` | la pod `4u(1−u)` e **zero** la capete — frânghia e ancorată în turnuri. Un ponton plutește pe toată lungimea |
+| 2 | **tangaj**: a treia ecuație, pendul amortizat pe axa longitudinală | un pod cu capete fixe nu se poate înclina pe lung. E ce separă „drum moale” de „drum care plutește” |
+| 3 | **valul joncilor**: termen sinusoidal cu fază proprie | pontonul e **viu când pista e goală**; podul, nu |
+
+Capetele libere aduc o constrângere pe care podul n-o avea: **pragul de la
+insuliță la ponton** nu are voie să treacă 0,3 m (memoria
+`suprafete-cu-goluri-si-praguri`). De aceea există `edge_clamp`, care stinge
+cedarea pe ultimii metri — măsurat **0,042 m**, cu marjă mare.
+
+**Contractele, măsurate** (`ProbePonton`, pe sol plat, înaintea pistei):
+
+| contract | țintă | măsurat |
+|---|---|---|
+| afundare autobuz (2,6) la mijloc | 0,45 m | **0,450 m** |
+| afundare sport (0,9) la mijloc | 0,18 m | **0,180 m** |
+| masa se vede (autobuz > sport) | — | **0,450 > 0,180** ✔ |
+| prag la insuliță, cea mai rea din 4 faze | < 0,30 m | **0,042 m** |
+| salt de placă pe tick | < 0,12 m | **0,099 m** |
+| val cu pistă goală | > 0,02 m | **0,121 m** |
+| tangaj: capătul încărcat **coboară** | semn negativ | **−0,125 m** ✔ |
+
+**Sabotajul prinde:** `--sabotaj` stinge `free_ends`, `pitch_gain` și
+`wave_amp` (adică face pontonul un pod), iar gărzile 5–6 trebuie să **pice** —
+și pică (oscilație 0,0000 în loc de 0,121). Fără proba asta, gărzile n-ar
+deosebi un ponton de un pod.
+
+**Trei defecte găsite de sondă, toate la prima rulare:**
+1. **semnul tangajului era invers** — masa la capătul departat îl *ridica*.
+   `_pitch_at(u)` se adună la cotă, deci un pitch pozitiv ridică; ținta trebuia
+   negată. Prins de garda 6, care verifică **semnul**, nu doar că răspunde;
+2. **sonda măsura afundarea cu valul pornit** și raporta 0,507 m în loc de
+   0,450. Diferența era *exact* `_wave(0,5)` la `t = 0` (−0,0571 m), la a patra
+   zecimală — deci clasa era corectă, sonda măsura două lucruri deodată.
+   Aceeași familie cu memoria `ceasul-porneste-in-prima-faza`. Acum garda 1
+   stinge valul, iar garda 2 (pragul) îl **baleiază pe 4 faze**, fiindcă mașina
+   intră pe ponton în orice fază a hulei;
+3. **garda 3 era `async` dar chemată fără `await`**, deci verdictul se tipărea
+   înaintea ei și secțiunea ieșea **goală** — o gardă care nu măsoară nimic și
+   nici nu se plânge. Are acum și o linie care pică dacă saltul maxim e exact
+   0,0000 (plăci care nu s-au mișcat deloc).
+
+Plus unul găsit de **sabotaj**: garda 4 restaura `wave_amp = 0.10` cu o
+constantă hardcodată, suprascriind sabotajul — deci garda 5 raporta oscilație
+chiar și cu valul stins. O sondă care își rescrie subiectul nu-l mai măsoară.
+
+#### Al cincilea defect, găsit de ProbeRace: tronsoane peste limita mecanismului
+
+Cu pontoanele puse pe pistă (3 tronsoane de 71,5 m), ProbeRace a dat
+**148–156 repuneri per cursă** — de la 1–3 — iar turul a urcat de la 69 s la
+**152–192 s**. Repunerile erau grupate exact la fracțiile capetelor de tronson
+(0,11 / 0,14 / 0,21).
+
+Cauza **nu era pontonul**, ci un contract depășit în silențiu.
+`Track._resolve_span_holes` taie gaura din carosabil pe `2·steps` puncte
+coapte, cu bucla limitată la **`k = 15`**. Pasul mediu **măsurat** pe Track22
+e **2,001 m** (1 009 puncte pe 2 019 m), deci gaura maximă pe care mecanismul
+o poate tăia e **~60 m**. Tronsoanele mele de 71,5 m cereau `k = 18`: gaura s-a
+tăiat la 60 m, iar ultimii ~11 m au rămas **asfalt peste plăcile care se
+mișcă**. Niciun avertisment.
+
+Diagnosticul a venit din raycast pe tablier, nu din ghicit: `RoadTop` era
+prezent la u=0 și u=1 (deci asfalt pe tronson), iar `Plate` doar la mijloc.
+
+**Remediul nu e creșterea limitei din `track.gd`** — ar atinge podul de pe
+Machu Picchu, care merge la 34 m cu `k ≈ 8`. Sunt **7 tronsoane de 43 m**, cu
+marjă față de 60, și o **gardă în generator** care verifică fiecare lungime
+față de `2 · 15 · pas_măsurat`, plus un minim de 24 m (sub atât legănarea nu se
+simte: e o treaptă, nu o plută).
+
+A ieșit și un defect secundar: insulițele fixe stăteau la **1,19–1,41** în timp
+ce tablierul e la 0,43–0,56, adică **prag de ~0,7 m** — de două ori limita de
+0,3. Cauza: `harbour_quay.glb` are originea **la linia apei**, nu la bază, și
+2,2 m peste ea (`docs/asset_briefs/okinawa_kit_v2.md:213`) — cote pe care le
+presupusesem, nu le citisem. Corectat cu cifrele reale plus corecția de
+afundare la buză: insulițele sunt acum la **0,59–0,60**, cu prag de
+**0,03–0,17 m**.
+
+#### Al șaselea defect: afundarea nu satura — grila de start scufunda tablierul
+
+După tronsoanele scurte, repunerile au scăzut de la 148–156 la **41–56**, dar
+**82 din 97** erau pe **primul tronson**, toate în primul tur (t = 22–25 s),
+toate în același punct, cu autobuzul de două ori mai des decât restul. Profilul
+longitudinal măsurat era curat (toate pragurile sub 0,17 m), deci nu geometria.
+
+Cauza era un defect de **proiectare al clasei mele**: `_sag_target` e suma
+`Σ a_i·P(u_i)`, deci afundarea e **liniară în încărcare**. Cu 8 mașini pe
+același tronson iese ~2,3 m (8 × 0,29), iar tablierul de la +0,60 ajunge la
+**−1,84 m** — sub plasa de repunere a mării (−1,20) și sub apă (0,00). Podul de
+pe Machu Picchu n-are problema: are 35 m și trece pe el o mașină sau două. Un
+ponton de pe grila de start primește **tot plutonul deodată**.
+
+**Remediul e fizic, nu un plafon arbitrar: flotabilitate.** Un ponton are
+butoaie care deplasează un volum **finit**, deci afundarea se **saturează** —
+exact ce o coardă nu face. Implementat ca plafon moale (`sag_max = 0,70`, prin
+`tanh`), ca să nu existe un punct în care tablierul se oprește brusc:
+- la o mașină răspunsul rămâne **liniar** — calibrarea a derivat cu 3,5%
+  (autobuz 0,434 în loc de 0,450), sub marja de 6% pe care o calculasem;
+- la 8 mașini dă **1,63×** afundarea uneia, nu 8×;
+- afundările **locale** trec și ele prin plafon (jumătate din `sag_max`),
+  altfel patru gaussiene lipite ar scufunda tablierul pe lângă saturație;
+- `net_ceiling_drop()` se socotește acum din `sag_max`, nu din `sag_bus`: cu
+  flotabilitate, cât de jos poate ajunge tablierul nu mai depinde de câte
+  mașini sunt pe el.
+
+**Gardă nouă (7) în `ProbePonton`**, care testează exact cazul care a rupt
+pista: 8 autobuze pe un tronson, strânse la mijloc. Verifică două lucruri —
+că tablierul rămâne **peste plasa pe care pontonul însuși o cere** (măsurat:
+1,080 m vs 1,320 m, marjă 0,240) și că raportul 8-mașini/1-mașină e **sub 3×**
+(măsurat 1,63). Fără garda asta, defectul s-ar fi întors la orice schimbare de
+calibrare.
+
+#### Al șaptelea defect: tablier de 6 m pe carosabil de 12 m
+
+Flotabilitatea a dus repunerile de la 41–56 la **7–24**, dar frac 0,10 rămânea
+punctul cald (22 din 45). Profilul **lateral** măsurat a dat răspunsul: la
+**+2,6 m** de ax se lovea `TerrainBody` la 0,28, nu tablierul la 0,43 — adică
+tablierul se termina la ±2,6 m, iar mai departe mașina călca pe nimic.
+
+Cauza e o **nepotrivire de unități între două contracte**, și e mută:
+- `custom_width_segments` ia **semi**-lățimea (`TrackFromPath`: „(frac_start,
+  frac_end, **half_width**)”), deci 6,0 → carosabil de **12 m**;
+- `PontoonRoadHazard.deck_width` ia lățimea **totală**, deci 6,0 → tablier de
+  **6 m**.
+
+Pusesem 6,0 în amândouă. Rezultatul: 3 m de fiecare parte de carosabil tăiat
+fără tablier dedesubt, și nicio eroare — mașina pur și simplu cade.
+
+Corectat prin **o singură constantă** (`_PONT_HALF_W = 6.0`) derivată în ambele
+locuri, plus gărzi care verifică sensul fizic în loc de tautologie: tablierul
+≥ 3 lățimi de mașină (ca să se poată depăși pe el) și semi-lățimea ≤ cea a
+pistei (ca tablierul să nu atârne peste apă). Verificat după: tablierul
+acoperă **±5,3 m** în loc de ±2,6.
+
+**Tiparul care se repetă în toate trei defectele de integrare** (gaura de 60 m,
+saturația, lățimea): contractele izolate ale clasei treceau impecabil, iar
+defectul era la **granița dintre clasă și pistă** — o limită nescrisă, o
+încărcare pe care sonda izolată nu o produce, o unitate de măsură diferită.
+De aceea `ProbeRace` pe pista reală nu e opțional după `ProbePonton`: măsoară
+altceva (memoria `harnas-sintetic-comportament-emergent`).
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 

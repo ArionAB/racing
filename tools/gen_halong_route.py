@@ -433,6 +433,71 @@ report(JONCA_SWEEP >= 8.0,
        f"sweep_speed {JONCA_SWEEP} >= 8.0 (antetul SlidingHazard: lent = blocaj semi-static, "
        f"~110 cadre de contact la perioada dubla vs ~10)")
 
+# TRONSOANELE DE PONTON. Lungimea e constransa de `Track._resolve_span_holes`:
+# gaura din carosabil se taie pe `2*steps` puncte coapte, iar bucla care caută
+# pasul merge doar pana la **k = 15**. Pasul mediu masurat pe Track22 e
+# **2.001 m** (1009 puncte pe 2019 m), deci gaura maxima pe care mecanismul o
+# poate tăia e **60 m**.
+#
+# Prima versiune avea 3 tronsoane de 71.5 m, adica peste limita: gaura s-a
+# tăiat la 60 m, iar ultimii ~11 m au rămas ASFALT peste placile care se mişca.
+# ProbeRace a dat 148-156 repuneri pe cursa (de la 1-3), toate grupate la
+# fractiile capetelor de tronson (0.11 / 0.14 / 0.21). Nu e un defect al
+# pontonului: e un contract depasit, in silentiu.
+#
+# Remediul NU e sa cresc limita din track.gd (ar atinge podul de pe Machu
+# Picchu, care merge la 34 m si k~8): tronsoane MAI SCURTE. Sapte bucati de
+# ~50 m pe cei ~353 m de zona plutitoare, cu marja fata de 60.
+_PONT_START = frac["B pont1"]
+_PONT_END = frac["C dig"]
+_PONT_N = 7
+_PONT_SPAN_FRAC = (_PONT_END - _PONT_START) / float(_PONT_N)
+# Fiecare tronson lasa o fanta de insulita la capat: tablierul acoperă
+# `_PONT_GAP` mai putin, iar pe bucata aia sta piatra fixa.
+_PONT_GAP = 0.004
+# SEMI-latimea carosabilului pe pontoane. `custom_width_segments` ia HALF_WIDTH
+# (vezi TrackFromPath.custom_width_segments: "(frac_start, frac_end,
+# half_width)"), iar `PontoonRoadHazard.deck_width` ia latimea TOTALA a
+# tablierului. Prima versiune punea 6.0 in amandoua: carosabilul ieşea de 12 m
+# si tablierul de 6, deci 3 m de fiecare parte pe care masina calca pe NIMIC.
+# ProbeRace: 7-24 repuneri, grupate pe primul tronson. Cifra se scrie O DATA si
+# se derivă in ambele locuri.
+_PONT_HALF_W = 6.0
+PONT_SEGS = [
+    (_PONT_START + i * _PONT_SPAN_FRAC,
+     _PONT_START + (i + 1) * _PONT_SPAN_FRAC - _PONT_GAP)
+    for i in range(_PONT_N)
+]
+
+# --- GARDA DE GAURA DE CAROSABIL (pontoane) ----------------------------------
+# `Track._resolve_span_holes` taie gaura pe `2*steps` puncte coapte, cu bucla
+# limitata la k = 15. Pasul mediu masurat pe Track22 e 2.001 m, deci gaura
+# maxima e 60 m. Un tronson mai lung primeste o gaura PREA MICA si rămâne
+# asfalt peste placi — defect silentios care a costat 148-156 repuneri/cursa.
+SPAN_HOLE_MAX_M = 2.0 * 15 * 2.001   # k_max * 2 * pas_mediu_masurat
+print("\n=== GARDA DE GAURA DE CAROSABIL (tronsoane de ponton) ===")
+_pont_lens = [((b - a) % 1.0) * tot for a, b in PONT_SEGS]
+for _i, _ln in enumerate(_pont_lens):
+    report(_ln <= SPAN_HOLE_MAX_M,
+           f"tronson {_i + 1}: {_ln:.1f} m <= {SPAN_HOLE_MAX_M:.0f} m "
+           f"(limita k=15 x pas 2.001 m din Track._resolve_span_holes)")
+report(min(_pont_lens) >= 24.0,
+       f"cel mai scurt tronson {min(_pont_lens):.1f} m >= 24 m "
+       f"(sub atat, leganarea nu se simte: e o treapta, nu o pluta)")
+# LATIMEA: `custom_width_segments` ia SEMI-latime, `deck_width` ia latimea
+# TOTALA. Nepotrivirea e MUTA — masina calca pe nimic la 3 m de ax si cade,
+# fara niciun avertisment — deci cifra se scrie o data (`_PONT_HALF_W`) si se
+# derivă in ambele locuri. Garda nu compara constanta cu ea insasi (ar fi
+# tautologie): verifica plafonul pe care il impune camera si `half_width`-ul
+# pistei, adica faptul ca pontonul nu e nici mai ingust decat o masina care
+# depaseste, nici mai lat decat carosabilul din jur.
+report(_PONT_HALF_W * 2.0 >= 3.0 * CAR_WIDTH_M,
+       f"tablierul {_PONT_HALF_W * 2.0:.1f} m >= 3 masini late ({3.0 * CAR_WIDTH_M:.1f} m): "
+       f"se poate depasi pe el")
+report(_PONT_HALF_W <= HALF_WIDTH,
+       f"semi-latimea pontonului {_PONT_HALF_W:.1f} m <= {HALF_WIDTH:.1f} m a pistei "
+       f"(un tablier mai lat decat drumul ar atarna peste apa)")
+
 if not all(guard_results):
     print("\nGARDA: CEL PUTIN O LINIE A PICAT -- nu scriu .tscn, ies cu cod 1")
     sys.exit(1)
@@ -526,11 +591,6 @@ RAFT_LEN = ((F_RAFT1 - F_RAFT0) % 1.0) * L_TOTAL
 
 # --- latimi: pontoanele, grota si podetul la 6 m ------------------------------
 # Tronsoanele de ponton (brief §2): trei bucati despartite de doua insulite fixe.
-PONT_SEGS = [
-    (F["B pont1"], F["B insulita1"]),
-    (F["B pont2"], F["B insulita2"]),
-    (F["B pont3"], F["C dig"]),
-]
 # Grota si podetul la 6 m (brief §2: ingustarea e parte din atmosfera lor).
 # NOTA DE METODA: lărgisem podetul la 7 m crezand ca de asta cad masinile la
 # frac 0.80 — n-a schimbat nimic, fiindca adevarata cauza era colizorul
@@ -540,7 +600,7 @@ PONT_SEGS = [
 WS = [(r3(F_GROTTO0 - 0.002), r3(F_GROTTO1 + 0.002), 6.0),
       (r3(F_RAFT0 - 0.002), r3(F_RAFT1 + 0.002), 6.0)]
 for a, b in PONT_SEGS:
-    WS.append((r3(a), r3(b), 6.0))
+    WS.append((r3(a), r3(b), _PONT_HALF_W))
 w_txt = ", ".join(f"Vector3({a}, {b}, {c})" for a, b, c in WS)
 
 # --- varfuri: turnurile de calcar apropiate (FLANC) + insula ------------------
@@ -614,19 +674,36 @@ for ff, lat, sc in ((0.09, 34.0, 2.6), (0.14, 38.0, 3.1), (0.19, 33.0, 2.4),
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + k * 23.0, sc, sc * 1.9, sc)}, "
         f"{g[0]:.2f}, {g[1] - 1.0:.2f}, {g[2]:.2f})")
     k += 1
-# Pontoanele: placi plate provizorii pe cele trei tronsoane (carosabil fix).
+# Insulitele FIXE dintre tronsoanele de ponton: piatra pe care se sprijina
+# capetele. Pontonul isi face tablierul singur (PontoonRoadHazard), deci aici
+# vine doar ce NU pluteste. Contractul lor: pragul de la piatra la ponton <
+# 0.3 m, verificat de probe_ponton (`edge_drop`, masurat 0.042 m).
 k = 0
-for a, b in PONT_SEGS:
-    span = ((b - a) % 1.0) * L_TOTAL
-    steps = max(2, int(span / 14.0))
-    for j in range(steps):
-        ff = a + (b - a) * (j + 0.5) / steps
-        g = at_road(ff, 0.0)
-        add(f"Ponton{k:02d}", "quay",
-            f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)), 1.4, 0.3, 1.2)}, "
-            f"{g[0]:.2f}, {g[1] - 0.45:.2f}, {g[2]:.2f})",
-            'metadata/coliziune = "none"')
-        k += 1
+for _idx, (_pa, _pb) in enumerate(PONT_SEGS):
+    if _idx == 0:
+        continue   # primul tronson incepe de pe chei, nu de pe insulita
+    g = at_road(_pa - _PONT_GAP * 0.5)
+    # COTA: suprafata insulitei trebuie sa cada la cota tablierului, nu peste.
+    # Prima versiune o lasa cu partea de sus la ~1.2-1.4 in timp ce tablierul
+    # sta la 0.43-0.56 -> prag de ~0.7 m, adica de doua ori limita de 0.3 la
+    # care un prag devine ZID (memoria `suprafete-cu-goluri-si-praguri`).
+    # Cotele vin din `docs/asset_briefs/okinawa_kit_v2.md:213`, nu presupuse:
+    # `harbour_quay.glb` are **2,2 m peste apa** (+1,5 m sub) si **originea la
+    # LINIA APEI** (`--origin=waterline`), nu la baza. Deci la scara `_QUAY_SY`
+    # varful sta la `2.2 * _QUAY_SY` DEASUPRA originii, si ca sa aduc varful la
+    # cota drumului cobor originea cu atat.
+    _QUAY_TOP_M = 2.2
+    _QUAY_SY = 0.5
+    # Plus corectia de afundare la buza: tablierul nu sta la cota drumului, ci cu
+    #  mai jos (masurat 0.042 m gol, pana la ~0.17 cu val+autobuz).
+    # Fara ea insulitele ieseau la 0.81 fata de tablier la 0.43-0.56, adica prag
+    # de 0.25-0.38 — pe muchia contractului de 0.3.
+    _EDGE_SAG_M = 0.22
+    _top_offset = _QUAY_TOP_M * _QUAY_SY + _EDGE_SAG_M
+    add(f"Insulita{k:02d}", "quay",
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(_pa)), 1.6, _QUAY_SY, 1.4)}, "
+        f"{g[0]:.2f}, {g[1] - _top_offset:.2f}, {g[2]:.2f})")
+    k += 1
 
 RES = {"rock": "13_rock", "quay": "14_quay"}
 
@@ -650,6 +727,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="4_hzm"]
 [ext_resource type="Script" path="res://scenes/hazards/herd_hazard.gd" id="6_herd"]
+[ext_resource type="Script" path="res://scenes/hazards/pontoon_road_hazard.gd" id="8_pont"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/harbour_quay.glb" id="14_quay"]
@@ -741,6 +819,39 @@ zebra_ratio = 0.0
 no_body_radius = 7.0
 body_reach = 14.0
 
+"""
+
+# --- PONTOANELE: semnatura pistei (brief §3) ---------------------------------
+# Un nod `PontoonRoadHazard` per tronson, pus PE mijlocul lui, cu capetele date
+# ca `near_end`/`far_end` LOCAL. `Track._resolve_span_holes` taie carosabilul
+# pe `road_hole_span()` metri centrati pe nod (contract prin duck-typing:
+# `has_method("road_hole_span")`, deci pontonul e recunoscut fara sa fie
+# subclasa podului — vezi antetul clasei).
+#
+# FAZA VALULUI e diferita pe fiecare tronson: trei pontoane cu aceeasi faza
+# s-ar legana la unison si ar citi „mecanism", nu „apa" (aceeasi regula ca
+# `phase` la SlidingHazard).
+for _i, (_a, _b) in enumerate(PONT_SEGS):
+    _mid = (_a + _b) * 0.5
+    _g_mid = at_road(_mid)
+    _g_a = at_road(_a)
+    _g_b = at_road(_b)
+    _span = ((_b - _a) % 1.0) * L_TOTAL
+    # near/far LOCAL fata de nod (nodul e la mijloc).
+    _near = (_g_a[0] - _g_mid[0], _g_a[1] - _g_mid[1], _g_a[2] - _g_mid[2])
+    _far = (_g_b[0] - _g_mid[0], _g_b[1] - _g_mid[1], _g_b[2] - _g_mid[2])
+    tscn += f"""
+[node name="Ponton{_i + 1}" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {_g_mid[0]:.3f}, {_g_mid[1]:.3f}, {_g_mid[2]:.3f})
+script = ExtResource("8_pont")
+near_end = Vector3({_near[0]:.3f}, {_near[1]:.3f}, {_near[2]:.3f})
+far_end = Vector3({_far[0]:.3f}, {_far[1]:.3f}, {_far[2]:.3f})
+deck_width = {_PONT_HALF_W * 2.0:.1f}
+wave_phase = {round(_i / 3.0, 3)}
+plate_count = {max(6, int(_span / 6.0))}
+"""
+
+tscn += """
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("9_prop")
 """

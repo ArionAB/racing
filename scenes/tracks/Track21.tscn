@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="17_hollow"]
+[ext_resource type="Script" path="res://scenes/hazards/waterfall_decor.gd" id="18_wfdecor"]
 [ext_resource type="Script" path="res://scenes/tracks/track_channel.gd" id="3_channel"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="4_hzm"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
@@ -32,19 +34,6 @@ _data = {
 }
 point_count = 179
 
-[sub_resource type="CylinderMesh" id="Cyl_balea"]
-top_radius = 34.0
-bottom_radius = 34.0
-height = 0.1
-radial_segments = 28
-rings = 1
-cap_bottom = false
-
-[sub_resource type="StandardMaterial3D" id="Mat_balea"]
-albedo_color = Color(0.25, 0.45, 0.47, 0.88)
-transparency = 1
-roughness = 0.25
-
 [node name="Track21" type="Node3D"]
 script = ExtResource("1_track")
 custom_name = "Transfagarasan"
@@ -54,11 +43,51 @@ custom_half_width = 7.0
 custom_road_surface = "asphalt"
 custom_sun_rotation_deg = Vector3(-25, -110, 0)
 custom_width_segments = Array[Vector3]([Vector3(0.078, 0.123, 6.0), Vector3(0.317, 0.35, 6.0)])
-custom_ravines = Array[Vector4]([Vector4(0.08, 0.135, 30.0, -1), Vector4(0.135, 0.245, 20.0, -1), Vector4(0.074, 0.128, 40.0, 1), Vector4(0.347, 0.382, 5.0, 1), Vector4(0.705, 0.775, 10.0, 1), Vector4(0.845, 0.975, 10.0, 1)])
+custom_ravines = Array[Vector4]([Vector4(0.08, 0.135, 30.0, -1), Vector4(0.135, 0.245, 20.0, -1), Vector4(0.068, 0.128, 40.0, 1), Vector4(0.347, 0.382, 5.0, 1), Vector4(0.705, 0.775, 10.0, 1), Vector4(0.845, 0.975, 10.0, 1), Vector4(0.766, 0.856, 10.0, 1)])
 custom_cornice_ravines = Array[int]([0, 2])
-custom_ravine_floors = Array[Vector2]([Vector2(0, 3.0), Vector2(1, 3.0), Vector2(2, -28.0), Vector2(3, 37.0), Vector2(4, -4.0), Vector2(5, -5.0)])
-custom_ravine_widths = Array[Vector2]([Vector2(0, 120.0), Vector2(1, 150.0), Vector2(2, 60.0), Vector2(3, 55.0), Vector2(4, 45.0), Vector2(5, 45.0)])
-custom_ravine_water = Array[Vector3]([Vector3(0, 7.5, 16.0), Vector3(2, -24.0, 20.0), Vector3(4, 3.4, 16.0), Vector3(5, -2.5, 16.0)])
+custom_scarp_ravines = Array[int]([2])
+custom_ravine_capes = Array[Vector4]([Vector4(3, 0.3585, 17.5, 30.0)])
+custom_ravine_floors = Array[Vector2]([Vector2(0, 3.0), Vector2(1, 3.0), Vector2(2, -28.0), Vector2(3, 37.0), Vector2(4, -4.0), Vector2(5, -5.0), Vector2(6, -4.5)])
+custom_ravine_widths = Array[Vector2]([Vector2(0, 120.0), Vector2(1, 150.0), Vector2(2, 40.0), Vector2(3, 55.0), Vector2(4, 45.0), Vector2(5, 45.0), Vector2(6, 45.0)])
+custom_ravine_water = Array[Vector3]([Vector3(0, 7.5, 16.0), Vector3(2, -26.0, 20.0), Vector3(4, 3.4, 16.0), Vector3(5, -2.5, 16.0), Vector3(3, 35.5, 16.0), Vector3(6, 0.4, 16.0)])
+custom_water_styles = Array[Dictionary]([{
+"ravines": Array[int]([0]),
+"side_lock": true,
+"water_shallow_rgb": Color(0.26, 0.46, 0.38, 1),
+"water_deep_rgb": Color(0.17, 0.30, 0.25, 1),
+"water_lit_fresnel": 0.06,
+"water_shore_rgb": Color(0.30, 0.42, 0.33, 1),
+"water_foam": 0.0,
+"water_crest": 0.0,
+"water_band": 0.0,
+"water_wave_amp_k": 0.12,
+"water_glint": 0.25
+}, {
+"ravines": Array[int]([3]),
+"fill_circle": Vector3(262, -212, 58),
+"water_shallow_rgb": Color(0.36, 0.55, 0.58, 1),
+"water_deep_rgb": Color(0.25, 0.40, 0.44, 1),
+"water_lit_fresnel": 0.06,
+"water_shore_rgb": Color(0.40, 0.55, 0.58, 1),
+"water_foam": 0.0,
+"water_crest": 0.0,
+"water_band": 0.0,
+"water_wave_amp_k": 0.12,
+"water_glint": 0.3
+}, {
+"ravines": Array[int]([2, 4, 5, 6]),
+"channels": true,
+"fill_window": true,
+"water_shallow_rgb": Color(0.53, 0.60, 0.52, 1),
+"water_lit_fresnel": 0.05,
+"water_deep_rgb": Color(0.40, 0.47, 0.40, 1),
+"water_shore_rgb": Color(0.50, 0.55, 0.46, 1),
+"water_foam": 0.0,
+"water_crest": 0.0,
+"water_band": 0.0,
+"water_wave_amp_k": 0.0,
+"water_glint": 0.2
+}])
 custom_parapets = Array[Vector4]([Vector4(0.377, 0.405, 1, 0), Vector4(0.405, 0.433, 0, 0), Vector4(0.433, 0.45, -1, 0), Vector4(0.45, 0.477, 0, 0), Vector4(0.477, 0.488, 1, 0), Vector4(0.498, 0.5, 1, 0), Vector4(0.5, 0.528, 0, 0), Vector4(0.528, 0.545, -1, 0), Vector4(0.545, 0.572, 0, 0), Vector4(0.572, 0.626, 1, 0)])
 traffic_count = 0
 
@@ -84,6 +113,78 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100.00, 92.00, -115.00)
 gizmo_extents = 140.0
 script = ExtResource("2_peak")
 radius_m = 140.0
+
+[node name="ValeA_N" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55.00, 27.00, 207.00)
+gizmo_extents = 60.0
+script = ExtResource("2_peak")
+radius_m = 60.0
+
+[node name="ValeA_S1" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -110.00, 22.00, 322.00)
+gizmo_extents = 62.0
+script = ExtResource("2_peak")
+radius_m = 62.0
+
+[node name="ValeA_S2" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.00, 28.00, 324.00)
+gizmo_extents = 62.0
+script = ExtResource("2_peak")
+radius_m = 62.0
+
+[node name="BarajHau_1" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72.00, 34.00, 312.00)
+gizmo_extents = 50.0
+script = ExtResource("2_peak")
+radius_m = 50.0
+
+[node name="BarajHau_2" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 122.00, 34.00, 308.00)
+gizmo_extents = 50.0
+script = ExtResource("2_peak")
+radius_m = 50.0
+
+[node name="BaleaMesa" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 262.00, 55.00, -212.00)
+gizmo_extents = 190.0
+script = ExtResource("2_peak")
+radius_m = 190.0
+
+[node name="CascadaMal" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72.00, 62.00, -291.00)
+gizmo_extents = 27.0
+script = ExtResource("2_peak")
+radius_m = 27.0
+
+[node name="Goluri" type="Node3D" parent="."]
+
+[node name="GolNoriA" type="Marker3D" parent="Goluri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 375.00, -12.00, 15.00)
+gizmo_extents = 130.0
+script = ExtResource("17_hollow")
+radius_m = 45.0
+wall_m = 85.0
+
+[node name="GolNoriB" type="Marker3D" parent="Goluri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300.00, -12.00, 320.00)
+gizmo_extents = 140.0
+script = ExtResource("17_hollow")
+radius_m = 70.0
+wall_m = 70.0
+
+[node name="GolCampie" type="Marker3D" parent="Goluri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.00, -20.00, -440.00)
+gizmo_extents = 105.0
+script = ExtResource("17_hollow")
+radius_m = 35.0
+wall_m = 70.0
+
+[node name="GolBalea" type="Marker3D" parent="Goluri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 262.00, 31.00, -212.00)
+gizmo_extents = 56.0
+script = ExtResource("17_hollow")
+radius_m = 46.0
+wall_m = 10.0
 
 [node name="Hazarduri" type="Node3D" parent="."]
 
@@ -163,6 +264,7 @@ model_path = "res://assets/models/transfagarasan/vehicles/ro_train.glb"
 period = 40.0
 half_rail = 65.0
 road_half_width = 7.0
+ground_drop = PackedFloat32Array(-33.80, -29.29, -25.00, -20.07, -12.05, -4.64, -0.48, 0.43, 0.36, 0.30, 0.99, 1.04, 4.75, 9.58, 9.83, 9.83, 9.83, 9.82, 9.63)
 
 [node name="ParaulBalea" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72.448, 10.778, -328.105)
@@ -173,16 +275,16 @@ water_half = 6.0
 bank = 16.0
 depth = 18.0
 water_y_drop = 15.0
-reach = 90.0
-fade = 30.0
+reach = 28.0
+fade = 14.0
 jump = true
 label = "Paraul Balea"
 
-[node name="LacBalea" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 232.62, 40.3, -193.70)
-cast_shadow = 0
-mesh = SubResource("Cyl_balea")
-surface_material_override/0 = SubResource("Mat_balea")
+[node name="Cascada" type="Node3D" parent="."]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -72.00, 8.00, -302.50)
+script = ExtResource("18_wfdecor")
+curtain_size = Vector3(3, 26, 6)
+spray_count = 16
 
 [node name="ZoneCamera" type="Node3D" parent="."]
 
@@ -568,7 +670,7 @@ transform = Transform3D(-0.47631872, 0, 0.8792727, 0, 1, 0, -0.8792727, 0, -0.47
 [node name="ZonaRepere" type="Node3D" parent="DecorManual"]
 
 [node name="Prometeu" parent="DecorManual/ZonaRepere" instance=ExtResource("m_prometheus")]
-transform = Transform3D(-0.5514392, 0, 0.8342151, 0, 1, 0, -0.8342151, 0, -0.5514392, 162.038, 10.261972, 241.38445)
+transform = Transform3D(-0.5514392, 0, 0.8342151, 0, 1, 0, -0.8342151, 0, -0.5514392, 162.038, 11.98, 241.38445)
 
 [node name="Portal_Stanca" parent="DecorManual/ZonaRepere" instance=ExtResource("m_rock_portal")]
 transform = Transform3D(-0.53756005, 0, 0.8432255, 0, 1, 0, -0.8432255, 0, -0.53756005, 171.37538, 11.577143, 220.03749)

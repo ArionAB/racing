@@ -7610,7 +7610,7 @@ func is_frozen() -> bool:
 func _build_channel_water() -> void:
 	if _channels.is_empty():
 		return
-	var mat := _water_material()
+	var mat := _water_material_for_style(_water_style_of_channels())
 	for ch in _channels:
 		# ALBIE USCATA (TrackChannel.dry): nu se randeaza apa, dar plasa de
 		# cadere ramane. Ramura sta INAINTEA testului de mai jos fiindca
@@ -7741,6 +7741,7 @@ func _build_ravine_water() -> void:
 		if ri < 0 or ri >= ravines.size():
 			push_warning("custom_ravine_water: rapa %d nu exista" % ri)
 			continue
+		mat = _water_material_for_style(_water_style_of_ravine(ri))
 		var r: Vector4 = ravines[ri]
 		var water_y := spec.y
 		# Caseta punctelor din interval, largita cat tine o rapa.
@@ -7783,10 +7784,43 @@ func _build_ravine_water() -> void:
 				if not is_zero_approx(r.w) and signf(r.w) != _sampler._side_sign_at(ci, cx, cz):
 					continue
 				seeds.append(Vector2i(gx, gz))
+		# `fill_circle` (optional, din stilul apei): (x, z, raza) in lume. Apa nu
+		# iese din cerc: o umplere fara el scurge lacul de platou peste toata
+		# valea de dedesubt cand marginea bazinului are o singura bresa.
+		var circ := Vector3(0.0, 0.0, -1.0)
+		var st_c := _water_style_of_ravine(ri)
+		if st_c >= 0:
+			var cv: Variant = _water_styles()[st_c].get("fill_circle", null)
+			if cv is Vector3:
+				circ = cv as Vector3
+		if circ.z > 0.0:
+			var kept: Array[Vector2i] = []
+			for sd in seeds:
+				var sx := _terr_origin.x + (float(sd.x) + 0.5) * step
+				var sz := _terr_origin.z + (float(sd.y) + 0.5) * step
+				if Vector2(sx - circ.x, sz - circ.y).length() <= circ.z:
+					kept.append(sd)
+			seeds = kept
 		var filled := {}
 		var queue := seeds.duplicate()
 		for c0 in seeds:
 			filled[c0] = true
+		# `side_lock` (optional, din stilul apei): umplerea NU trece pe cealalta
+		# parte a soselei fata de latura rapei. Fara el, un lac aflat langa o
+		# alta rapa sapata (Vidraru pe stanga, hau-ul pe dreapta) se varsa prin
+		# celulele de la marginea coronamentului si acoperea hau-ul la +7,5.
+		var side_lock := false
+		# `fill_window` (optional): apa doar pe celulele al caror punct de sosea
+		# cel mai apropiat e in intervalul rapei - o rapa de legatura (Oltul la
+		# trecerea la nivel) nu are voie sa inunde bazinele vecinilor, care au
+		# alta cota a apei.
+		var window_lock := false
+		var st_i := _water_style_of_ravine(ri)
+		if st_i >= 0:
+			var stw: Dictionary = _water_styles()[st_i]
+			window_lock = bool(stw.get("fill_window", false))
+			if not is_zero_approx(r.w):
+				side_lock = bool(stw.get("side_lock", false))
 		while not queue.is_empty():
 			var cur: Vector2i = queue.pop_back()
 			for dv: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
@@ -7795,6 +7829,20 @@ func _build_ravine_water() -> void:
 					continue
 				if _cell_lowest(nb.x, nb.y) >= water_y:
 					continue
+				if circ.z > 0.0:
+					var cx2 := _terr_origin.x + (float(nb.x) + 0.5) * step
+					var cz2 := _terr_origin.z + (float(nb.y) + 0.5) * step
+					if Vector2(cx2 - circ.x, cz2 - circ.y).length() > circ.z:
+						continue
+				if side_lock or window_lock:
+					var nx := _terr_origin.x + (float(nb.x) + 0.5) * step
+					var nz := _terr_origin.z + (float(nb.y) + 0.5) * step
+					var nci := _closest_baked_index(Vector3(nx, water_y, nz))
+					if side_lock and signf(r.w) != _sampler._side_sign_at(nci, nx, nz):
+						continue
+					if window_lock and TrackSideSampler._ring_window(
+							_dists[nci] / total, r.x, r.y, 0.0001) <= 0.0:
+						continue
 				filled[nb] = true
 				queue.append(nb)
 		var wet := 0
@@ -8239,8 +8287,11 @@ const WATER_GAIN: float = 0.87
 ## "water_mul", deci temele cu un singur rau nu se schimba.
 func water_tint(slot: int, gain: float = 1.0,
 		mul_key: String = "water_mul",
-		desat_key: String = "water_desat") -> Color:
-	var c := Palette.color(slot)
+		desat_key: String = "water_desat",
+		rgb: Color = Color(0.0, 0.0, 0.0, 0.0)) -> Color:
+	# `rgb` (alfa > 0) bate slotul: culoarea tinta data direct, tot prin
+	# calibrarea de mai jos (apele cu stil propriu, `custom_water_styles`).
+	var c := Palette.color(slot) if rgb.a <= 0.0 else rgb
 	var lum := c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
 	# Doua chei de tema aplicate O DATA, aici, pe toate culorile apei (rampa,
 	# spuma, glint — toate trec prin functia asta, deci raman in familie):
@@ -8384,11 +8435,77 @@ var _water_mat: ShaderMaterial
 func _water_material() -> ShaderMaterial:
 	if _water_mat != null:
 		return _water_mat
-	_water_mat = ShaderMaterial.new()
-	_water_mat.shader = load("res://assets/shaders/water.gdshader") as Shader
+	_water_mat = _build_water_material({})
+	return _water_mat
+
+
+## Materialul unei ape cu STIL propriu (`custom_water_styles`): cache pe indexul
+## stilului. Fara stil (-1) e materialul comun, exact ca inainte.
+var _water_style_mats: Dictionary = {}
+
+func _water_material_for_style(idx: int) -> ShaderMaterial:
+	if idx < 0:
+		return _water_material()
+	if _water_style_mats.has(idx):
+		return _water_style_mats[idx]
+	var styles := _water_styles()
+	var st: Dictionary = styles[idx] if idx < styles.size() else {}
+	var m := _build_water_material(st)
+	_water_style_mats[idx] = m
+	return m
+
+
+## STILURILE APELOR: fiecare e un Dictionary cu cheile de tema `water_*` pe care
+## le suprascrie pentru UNA sau mai multe ape, plus selectorul:
+##   "ravines": Array[int]  — indicii rapelor din [method _ravine_water]
+##   "channels": bool       — apa canalelor (TrackChannel) primeste stilul
+## Culorile se pot da direct (`water_shallow_rgb`, `water_deep_rgb`,
+## `water_shore_rgb`: Color) in loc de slot de paleta. `water_wave_amp_k`
+## inmulteste amplitudinea valurilor de vertecsi (0 = luciu fara hula).
+## Gol (implicit) = toate apele folosesc materialul temei, bit-identic.
+func _water_styles() -> Array[Dictionary]:
+	return []
+
+
+func _water_style_of_ravine(ri: int) -> int:
+	var styles := _water_styles()
+	for i in styles.size():
+		var rl: Variant = styles[i].get("ravines", [])
+		if rl is Array and (rl as Array).has(ri):
+			return i
+	return -1
+
+
+func _water_style_of_channels() -> int:
+	var styles := _water_styles()
+	for i in styles.size():
+		if bool(styles[i].get("channels", false)):
+			return i
+	return -1
+
+
+## Cheie de tema, cu stilul apei deasupra. Stil gol => exact theme_flag.
+func _wflag(style: Dictionary, key: String, fallback: Variant = null) -> Variant:
+	if style.has(key):
+		return style[key]
+	return theme_flag(key, fallback)
+
+
+## Culoarea unei trepte a apei: `rgb_key` (Color direct) bate slotul de paleta.
+func _wtint(style: Dictionary, slot_key: String, rgb_key: String,
+		fallback_slot: int, gain: float) -> Color:
+	var rgb: Variant = style.get(rgb_key, null)
+	if rgb is Color:
+		return water_tint(fallback_slot, gain, "water_mul", "water_desat", rgb)
+	return water_tint(_wflag(style, slot_key, fallback_slot), gain)
+
+
+func _build_water_material(style: Dictionary) -> ShaderMaterial:
+	var wm := ShaderMaterial.new()
+	wm.shader = load("res://assets/shaders/water.gdshader") as Shader
 	# Aceeasi textura pe care o foloseste deja stratul de detaliu al lumii —
 	# zero VRAM in plus.
-	_water_mat.set_shader_parameter("ripple_tex", load(Palette.DETAIL_PATH))
+	wm.set_shader_parameter("ripple_tex", load(Palette.DETAIL_PATH))
 	# v2 (issue #99): rampa de adancime per pixel, spuma animata, glint.
 	# Culorile trec toate prin water_tint() — calibrarea ramane pe CPU, intr-un
 	# singur loc. Intensitatile sunt kill-switch-uri: 0 = comportamentul v1,
@@ -8399,7 +8516,7 @@ func _water_material() -> ShaderMaterial:
 	# ambientul, deci pe o tema de noapte ramane apa de amiaza daca nu i se
 	# spune. `water_dim` e lumina pe care ar fi primit-o — se aplica pe toate
 	# culorile, o data, aici si in _sea_color.
-	var dim := clampf(float(theme_flag("water_dim", 1.0)), 0.0, 1.0)
+	var dim := clampf(float(_wflag(style, "water_dim", 1.0)), 0.0, 1.0)
 	# "Cata lumina primeste" fiecare treapta a rampei, ca FACTOR peste dim.
 	# Pana aici singurul mod de a face apa mai adanca sa arate mai adanca era
 	# sa-i dai alt SLOT — adica alta nuanta. Pe o laguna de recif e corect
@@ -8408,30 +8525,30 @@ func _water_material() -> ShaderMaterial:
 	# "adanc" trebuia autorat cu o a doua culoare, iar amestecul dintre doua
 	# familii de culoare pe acelasi luciu de apa iese OLIV (vezi runda 4).
 	# Implicit 1.0 => exact comportamentul de dinainte pe toate pistele vechi.
-	var deep_k := float(theme_flag("water_deep_gain", 1.0))
-	var shore_k := float(theme_flag("water_shore_gain", 1.0))
-	var shallow := water_tint(theme_flag("water_shallow_slot",
-		Palette.REEF_SHALLOW), dim)
-	var deep := water_tint(theme_flag("water_deep_slot",
-		Palette.SEA_DEEP), dim * deep_k)
+	var deep_k := float(_wflag(style, "water_deep_gain", 1.0))
+	var shore_k := float(_wflag(style, "water_shore_gain", 1.0))
+	var shallow := _wtint(style, "water_shallow_slot", "water_shallow_rgb",
+		Palette.REEF_SHALLOW, dim)
+	var deep := _wtint(style, "water_deep_slot", "water_deep_rgb",
+		Palette.SEA_DEEP, dim * deep_k)
 	# Nisipul ud de la linia apei: nisipul de coral, intunecat putin — apa
 	# uda nisipul inainte sa-l acopere. Slot de tema: un rau de noapte n-are
 	# plaja crem la mal.
-	var shore := water_tint(theme_flag("water_shore_slot",
-		Palette.CORAL_SAND), dim * shore_k).darkened(0.12)
+	var shore := _wtint(style, "water_shore_slot", "water_shore_rgb",
+		Palette.CORAL_SAND, dim * shore_k).darkened(0.12)
 	var foam := water_tint(Palette.FOAM_WHITE, dim).lerp(shallow, 0.35)
-	_water_mat.set_shader_parameter("ramp_strength", 1.0)
-	_water_mat.set_shader_parameter("shore_col", Vector3(shore.r, shore.g, shore.b))
-	_water_mat.set_shader_parameter("shallow_col",
+	wm.set_shader_parameter("ramp_strength", 1.0)
+	wm.set_shader_parameter("shore_col", Vector3(shore.r, shore.g, shore.b))
+	wm.set_shader_parameter("shallow_col",
 		Vector3(shallow.r, shallow.g, shallow.b))
-	_water_mat.set_shader_parameter("deep_col", Vector3(deep.r, deep.g, deep.b))
+	wm.set_shader_parameter("deep_col", Vector3(deep.r, deep.g, deep.b))
 	# Spuma, scanteierea si hula sunt chei de tema (implicitele = Okinawa):
 	# un rau noroios sub burnita n-are nici spuma alba, nici soare de reflectat.
-	_water_mat.set_shader_parameter("foam_strength",
-		float(theme_flag("water_foam", 0.75)))
-	_water_mat.set_shader_parameter("foam_col", Vector3(foam.r, foam.g, foam.b))
-	_water_mat.set_shader_parameter("glint_strength",
-		float(theme_flag("water_glint", 0.55)))
+	wm.set_shader_parameter("foam_strength",
+		float(_wflag(style, "water_foam", 0.75)))
+	wm.set_shader_parameter("foam_col", Vector3(foam.r, foam.g, foam.b))
+	wm.set_shader_parameter("glint_strength",
+		float(_wflag(style, "water_glint", 0.55)))
 	# SPRE soare: inversul directiei in care bat razele. Din aceeasi rotatie
 	# ca lumina reala (theme "sun_rotation_deg"), ca scanteierea sa cada corect
 	# si pe pistele care isi coboara soarele.
@@ -8439,7 +8556,7 @@ func _water_material() -> ShaderMaterial:
 	var to_sun := -(Basis.from_euler(Vector3(
 		deg_to_rad(sun_rot.x), deg_to_rad(sun_rot.y),
 		deg_to_rad(sun_rot.z))) * Vector3.FORWARD)
-	_water_mat.set_shader_parameter("sun_dir", to_sun)
+	wm.set_shader_parameter("sun_dir", to_sun)
 	# v3: creste de hula si trepte de adancime. Doua intrerupatoare, ambele in
 	# lista de stins la profilarea pe device — crestele costa 2 sin + 2 pow,
 	# treptele nu costa nimic (aceleasi esantioane).
@@ -8447,12 +8564,12 @@ func _water_material() -> ShaderMaterial:
 	# Directia hulei NU e aleatoare si nici legata de pista: bate dinspre soare,
 	# adica dinspre partea din care si scanteierea vine. Doua directii diferite
 	# ar fi dat o mare care sclipeste intr-o parte si curge in alta.
-	_water_mat.set_shader_parameter("crest_strength",
-		float(theme_flag("water_crest", 0.85)))
-	_water_mat.set_shader_parameter("crest_dir",
+	wm.set_shader_parameter("crest_strength",
+		float(_wflag(style, "water_crest", 0.85)))
+	wm.set_shader_parameter("crest_dir",
 		Vector2(to_sun.x, to_sun.z).normalized())
-	_water_mat.set_shader_parameter("band_strength",
-		float(theme_flag("water_band", 0.60)))
+	wm.set_shader_parameter("band_strength",
+		float(_wflag(style, "water_band", 0.60)))
 	# --- v5 (runda 6). Trei chei de SUPRAFATA, nu de culoare. Motivul e masurat
 	# si sta scris pe larg in water.gdshader: apa noastra avea 90% din pixeli
 	# intre luminanta 22 si 26 si exact aceeasi valoare de la orizont pana in
@@ -8461,71 +8578,71 @@ func _water_material() -> ShaderMaterial:
 	# suprafata, orice reglaj de nuanta iese linoleum luminat.
 	# Toate trei au implicitul = comportamentul de dinainte, deci Okinawa,
 	# Baikal, Alpii si Stromboli nu se misca.
-	_water_mat.set_shader_parameter("facet_strength",
-		float(theme_flag("water_facet", 0.0)))
-	_water_mat.set_shader_parameter("facet_count",
-		float(theme_flag("water_facet_count", 5.0)))
-	_water_mat.set_shader_parameter("facet_scale",
-		float(theme_flag("water_facet_scale", 0.10)))
-	_water_mat.set_shader_parameter("facet_wobble",
-		float(theme_flag("water_facet_wobble", 0.35)))
-	_water_mat.set_shader_parameter("facet_warp",
-		float(theme_flag("water_facet_warp", 0.22)))
-	_water_mat.set_shader_parameter("facet_ref",
-		float(theme_flag("water_facet_ref", 0.0)))
-	_water_mat.set_shader_parameter("facet_near_max",
-		float(theme_flag("water_facet_near", 2.5)))
+	wm.set_shader_parameter("facet_strength",
+		float(_wflag(style, "water_facet", 0.0)))
+	wm.set_shader_parameter("facet_count",
+		float(_wflag(style, "water_facet_count", 5.0)))
+	wm.set_shader_parameter("facet_scale",
+		float(_wflag(style, "water_facet_scale", 0.10)))
+	wm.set_shader_parameter("facet_wobble",
+		float(_wflag(style, "water_facet_wobble", 0.35)))
+	wm.set_shader_parameter("facet_warp",
+		float(_wflag(style, "water_facet_warp", 0.22)))
+	wm.set_shader_parameter("facet_ref",
+		float(_wflag(style, "water_facet_ref", 0.0)))
+	wm.set_shader_parameter("facet_near_max",
+		float(_wflag(style, "water_facet_near", 2.5)))
 	# RUNDA 11: marimea placii ceruta in PIXELI, nu printr-o distanta de
 	# referinta. Vezi `facet_px` in shader — o distanta de calibrare nu poate fi
 	# corecta si de pe cornisa (27 m peste apa) si de pe tablier (3.3 m).
-	_water_mat.set_shader_parameter("facet_px",
-		float(theme_flag("water_facet_px", 0.0)))
-	_water_mat.set_shader_parameter("facet_px_max",
-		float(theme_flag("water_facet_px_max", 32.0)))
-	_water_mat.set_shader_parameter("facet_gate",
-		float(theme_flag("water_facet_gate", 0.0)))
-	_water_mat.set_shader_parameter("facet_aniso",
-		float(theme_flag("water_facet_aniso", 1.0)))
-	_water_mat.set_shader_parameter("facet_aa",
-		float(theme_flag("water_facet_aa", 0.5)))
-	_water_mat.set_shader_parameter("glint_aa",
-		float(theme_flag("water_glint_aa", 0.0)))
-	_water_mat.set_shader_parameter("facet_b_gain",
-		float(theme_flag("water_facet_b_gain", 1.0)))
-	_water_mat.set_shader_parameter("facet_calm",
-		float(theme_flag("water_facet_calm", 1.0)))
-	_water_mat.set_shader_parameter("facet_lid",
-		float(theme_flag("water_facet_lid", 1.0)))
-	_water_mat.set_shader_parameter("glint_graze_cap",
-		float(theme_flag("water_glint_graze_cap", 1.0)))
+	wm.set_shader_parameter("facet_px",
+		float(_wflag(style, "water_facet_px", 0.0)))
+	wm.set_shader_parameter("facet_px_max",
+		float(_wflag(style, "water_facet_px_max", 32.0)))
+	wm.set_shader_parameter("facet_gate",
+		float(_wflag(style, "water_facet_gate", 0.0)))
+	wm.set_shader_parameter("facet_aniso",
+		float(_wflag(style, "water_facet_aniso", 1.0)))
+	wm.set_shader_parameter("facet_aa",
+		float(_wflag(style, "water_facet_aa", 0.5)))
+	wm.set_shader_parameter("glint_aa",
+		float(_wflag(style, "water_glint_aa", 0.0)))
+	wm.set_shader_parameter("facet_b_gain",
+		float(_wflag(style, "water_facet_b_gain", 1.0)))
+	wm.set_shader_parameter("facet_calm",
+		float(_wflag(style, "water_facet_calm", 1.0)))
+	wm.set_shader_parameter("facet_lid",
+		float(_wflag(style, "water_facet_lid", 1.0)))
+	wm.set_shader_parameter("glint_graze_cap",
+		float(_wflag(style, "water_glint_graze_cap", 1.0)))
 	# Gradientul de perspectiva: cat de mult se deschide apa cand privirea cade
 	# mai de sus pe ea. Implicit 1.0/1.0 = plat, ca pana acum.
-	_water_mat.set_shader_parameter("view_lo",
-		float(theme_flag("water_view_lo", 1.0)))
-	_water_mat.set_shader_parameter("view_hi",
-		float(theme_flag("water_view_hi", 1.0)))
-	_water_mat.set_shader_parameter("view_ref",
-		float(theme_flag("water_view_ref", 0.22)))
-	_water_mat.set_shader_parameter("crest_shade",
-		float(theme_flag("water_crest_shade", 0.12)))
+	wm.set_shader_parameter("view_lo",
+		float(_wflag(style, "water_view_lo", 1.0)))
+	wm.set_shader_parameter("view_hi",
+		float(_wflag(style, "water_view_hi", 1.0)))
+	wm.set_shader_parameter("view_ref",
+		float(_wflag(style, "water_view_ref", 0.22)))
+	wm.set_shader_parameter("crest_shade",
+		float(_wflag(style, "water_crest_shade", 0.12)))
 	# LUCIUL RAZANT. Culoarea nu e un slot de paleta ci MEDIUL REFLECTAT: pe o
 	# tema de noapte, ceata. Se ia de acolo tocmai ca sa nu se poata
 	# desincroniza — daca cerul se schimba, si ce se oglindeste in apa se
 	# schimba odata cu el.
-	var fres := float(theme_flag("water_fresnel", 0.0))
-	_water_mat.set_shader_parameter("fresnel_strength", fres)
+	var fres := float(_wflag(style, "water_fresnel", 0.0))
+	wm.set_shader_parameter("fresnel_strength", fres)
 	if fres > 0.0:
-		var fc: Color = theme_flag("water_fresnel_color",
-			theme_flag("fog", Color(0.5, 0.5, 0.5)))
+		var fc: Color = _wflag(style, "water_fresnel_color",
+			_wflag(style, "fog", Color(0.5, 0.5, 0.5)))
 		fc = fc.srgb_to_linear()
 		# NU se normalizeaza: aici e RADIANTA a ceea ce se oglindeste, adica
 		# exact culoarea cetii, in liniar. `water_fresnel` e cat de mult din ea
 		# se vede la incidenta razanta (0..1), nu cat de tare straluceste.
-		var fg := float(theme_flag("water_fresnel_gain", 1.0))
-		_water_mat.set_shader_parameter("fresnel_col",
+		var fg := float(_wflag(style, "water_fresnel_gain", 1.0))
+		wm.set_shader_parameter("fresnel_col",
 			Vector3(fc.r * fg, fc.g * fg, fc.b * fg))
-	_water_mat.set_shader_parameter("fresnel_sharp",
-		float(theme_flag("water_fresnel_sharp", 4.0)))
+	wm.set_shader_parameter("fresnel_sharp",
+		float(_wflag(style, "water_fresnel_sharp", 4.0)))
 	# --- AL DOILEA RAU (v4). Vezi nota lunga din water.gdshader: apa se imparte
 	# dupa LOC, nu dupa adancime, fiindca doua familii de culoare amestecate pe
 	# axa adancimii dau oliv — culoarea unei mirisiti, nu a unui rau.
@@ -8534,90 +8651,90 @@ func _water_material() -> ShaderMaterial:
 	# `water_b_gain` = cata lumina primeste raul B fata de A (Yangtze-ul e apa
 	# mai noroioasa decat Jialing-ul), `water_b_mul` = tenta lui. Implicit
 	# amandoua = ale raului A, deci o tema cu un singur rau nu se misca.
-	var b_k := float(theme_flag("water_b_gain", 1.0))
-	var b_shallow := water_tint(theme_flag("water_b_shallow_slot",
-		theme_flag("water_shallow_slot", Palette.REEF_SHALLOW)),
+	var b_k := float(_wflag(style, "water_b_gain", 1.0))
+	var b_shallow := water_tint(_wflag(style, "water_b_shallow_slot",
+		_wflag(style, "water_shallow_slot", Palette.REEF_SHALLOW)),
 		dim * b_k, "water_b_mul", "water_b_desat")
-	var b_deep := water_tint(theme_flag("water_b_deep_slot",
-		theme_flag("water_deep_slot", Palette.SEA_DEEP)),
+	var b_deep := water_tint(_wflag(style, "water_b_deep_slot",
+		_wflag(style, "water_deep_slot", Palette.SEA_DEEP)),
 		dim * b_k * deep_k, "water_b_mul", "water_b_desat")
-	var b_shore := water_tint(theme_flag("water_b_shore_slot",
-		theme_flag("water_shore_slot", Palette.CORAL_SAND)),
+	var b_shore := water_tint(_wflag(style, "water_b_shore_slot",
+		_wflag(style, "water_shore_slot", Palette.CORAL_SAND)),
 		dim * b_k * shore_k, "water_b_mul", "water_b_desat").darkened(0.12)
-	_water_mat.set_shader_parameter("shore_col_b",
+	wm.set_shader_parameter("shore_col_b",
 		Vector3(b_shore.r, b_shore.g, b_shore.b))
-	_water_mat.set_shader_parameter("shallow_col_b",
+	wm.set_shader_parameter("shallow_col_b",
 		Vector3(b_shallow.r, b_shallow.g, b_shallow.b))
-	_water_mat.set_shader_parameter("deep_col_b",
+	wm.set_shader_parameter("deep_col_b",
 		Vector3(b_deep.r, b_deep.g, b_deep.b))
-	_water_mat.set_shader_parameter("split_strength",
-		float(theme_flag("water_split", 0.0)))
-	var split_dir: Vector2 = theme_flag("water_split_dir", Vector2(1.0, 0.0))
-	_water_mat.set_shader_parameter("split_dir", split_dir.normalized())
-	_water_mat.set_shader_parameter("split_offset",
-		float(theme_flag("water_split_offset", 0.0)))
-	_water_mat.set_shader_parameter("split_soft",
-		float(theme_flag("water_split_soft", 24.0)))
-	_water_mat.set_shader_parameter("split_meander",
-		float(theme_flag("water_split_meander", 40.0)))
-	_water_mat.set_shader_parameter("split_wave",
-		float(theme_flag("water_split_wave", 260.0)))
-	_water_mat.set_shader_parameter("seam_strength",
-		float(theme_flag("water_seam", 0.0)))
+	wm.set_shader_parameter("split_strength",
+		float(_wflag(style, "water_split", 0.0)))
+	var split_dir: Vector2 = _wflag(style, "water_split_dir", Vector2(1.0, 0.0))
+	wm.set_shader_parameter("split_dir", split_dir.normalized())
+	wm.set_shader_parameter("split_offset",
+		float(_wflag(style, "water_split_offset", 0.0)))
+	wm.set_shader_parameter("split_soft",
+		float(_wflag(style, "water_split_soft", 24.0)))
+	wm.set_shader_parameter("split_meander",
+		float(_wflag(style, "water_split_meander", 40.0)))
+	wm.set_shader_parameter("split_wave",
+		float(_wflag(style, "water_split_wave", 260.0)))
+	wm.set_shader_parameter("seam_strength",
+		float(_wflag(style, "water_seam", 0.0)))
 	# Lumina care sclipeste si forma sclipirii. Pe temele vechi raman 0 =
 	# soarele si pete izotrope, adica v3 neatins.
-	_water_mat.set_shader_parameter("glint_horizon",
-		float(theme_flag("water_glint_horizon", 0.0)))
-	_water_mat.set_shader_parameter("glint_streak",
-		float(theme_flag("water_glint_streak", 0.0)))
-	_water_mat.set_shader_parameter("glint_sharp",
-		float(theme_flag("water_glint_sharp", 48.0)))
-	_water_mat.set_shader_parameter("glint_graze",
-		float(theme_flag("water_glint_graze", 1.0)))
-	_water_mat.set_shader_parameter("glint_graze_ref",
-		float(theme_flag("water_glint_graze_ref", 0.5)))
-	_water_mat.set_shader_parameter("glint_cut",
-		float(theme_flag("water_glint_cut", 0.0)))
-	_water_mat.set_shader_parameter("glint_grain",
-		float(theme_flag("water_glint_grain", 1.0)))
+	wm.set_shader_parameter("glint_horizon",
+		float(_wflag(style, "water_glint_horizon", 0.0)))
+	wm.set_shader_parameter("glint_streak",
+		float(_wflag(style, "water_glint_streak", 0.0)))
+	wm.set_shader_parameter("glint_sharp",
+		float(_wflag(style, "water_glint_sharp", 48.0)))
+	wm.set_shader_parameter("glint_graze",
+		float(_wflag(style, "water_glint_graze", 1.0)))
+	wm.set_shader_parameter("glint_graze_ref",
+		float(_wflag(style, "water_glint_graze_ref", 0.5)))
+	wm.set_shader_parameter("glint_cut",
+		float(_wflag(style, "water_glint_cut", 0.0)))
+	wm.set_shader_parameter("glint_grain",
+		float(_wflag(style, "water_glint_grain", 1.0)))
 	# CAT de aprins e raul B fata de A. Vezi nota v6 din shader: in diorama
 	# bratul auriu nu are alt albedo, are alt DRUM DE LUMINA — 2.0% din pixeli
 	# peste 150 si varf 201, fata de 0.4% si 160 pe cel verde. La noi era exact
 	# invers: brunul avea vopseaua cea mai deschisa si sclipirile cele mai
 	# putine. 1.0 / 0.0 = o singura apa, ca pe temele vechi.
-	_water_mat.set_shader_parameter("glint_b_gain",
-		float(theme_flag("water_b_glint", 1.0)))
-	_water_mat.set_shader_parameter("glint_b_cut",
-		float(theme_flag("water_b_glint_cut", 0.0)))
+	wm.set_shader_parameter("glint_b_gain",
+		float(_wflag(style, "water_b_glint", 1.0)))
+	wm.set_shader_parameter("glint_b_cut",
+		float(_wflag(style, "water_b_glint_cut", 0.0)))
 	# Din ce se face FORMA unei reflexii: fisurile texturii (0, temele vechi)
 	# sau fateta apei (1). Vezi nota din shader — pe apa de la 20-40 m fisurile
 	# de roca ies zigzaguri late de zeci de pixeli, adica flacari.
-	_water_mat.set_shader_parameter("glint_facet",
-		float(theme_flag("water_glint_facet", 0.0)))
-	_water_mat.set_shader_parameter("glint_b_facet",
-		float(theme_flag("water_b_glint_facet", 0.0)))
-	_water_mat.set_shader_parameter("glint_facet_far",
-		float(theme_flag("water_glint_facet_far", 130.0)))
+	wm.set_shader_parameter("glint_facet",
+		float(_wflag(style, "water_glint_facet", 0.0)))
+	wm.set_shader_parameter("glint_b_facet",
+		float(_wflag(style, "water_b_glint_facet", 0.0)))
+	wm.set_shader_parameter("glint_facet_far",
+		float(_wflag(style, "water_glint_facet_far", 130.0)))
 	# Marginea si interiorul unei reflexii. Masurat: petele dioramei stau la
 	# 1.8-2.8x fata de apa de sub ele, ale noastre la 6-7.4x, cu contur taiat cu
 	# cutitul si interior de o singura culoare — de aia se citeau frunze lipite
 	# pe suprafata, nu lumina in unda. Implicit: taietura de pana acum.
-	_water_mat.set_shader_parameter("glint_soft",
-		float(theme_flag("water_glint_soft", 0.17)))
-	_water_mat.set_shader_parameter("glint_body",
-		float(theme_flag("water_glint_body", 0.0)))
+	wm.set_shader_parameter("glint_soft",
+		float(_wflag(style, "water_glint_soft", 0.17)))
+	wm.set_shader_parameter("glint_body",
+		float(_wflag(style, "water_glint_body", 0.0)))
 	# Cat de MOTLATA e suprafata sub reflexii. Implicitul shaderului (0.35) e
 	# calibrat pe o laguna vazuta de aproape; pe un rau vazut de la 60 m in sus
 	# aceeasi valoare iese pasla — captura rundei 5 avea apa cu granulatie de
 	# muschi, adica jumatate din motivul pentru care citea camp. In diorama
 	# suprafata e NETEDA, cu fatete mari; detaliul il dau reflexiile.
-	_water_mat.set_shader_parameter("ripple_strength",
-		float(theme_flag("water_ripple", 0.35)))
+	wm.set_shader_parameter("ripple_strength",
+		float(_wflag(style, "water_ripple", 0.35)))
 	# Culoarea sclipirii se ADUNA in LINIAR, deci trece prin srgb_to_linear ca
 	# orice culoare a apei, dar NORMALIZATA la 1 pe canalul cel mai mare:
 	# intensitatea o da `glint_strength`, aici e doar nuanta. Fara normalizare,
 	# un slot inchis ar fi stins scanteierea in loc s-o coloreze.
-	var glint_slot: int = int(theme_flag("water_glint_slot", Palette.FOAM_WHITE))
+	var glint_slot: int = int(_wflag(style, "water_glint_slot", Palette.FOAM_WHITE))
 	var gc := Palette.color(glint_slot).srgb_to_linear()
 	var gmax := maxf(gc.r, maxf(gc.g, gc.b))
 	if gmax > 0.0:
@@ -8625,12 +8742,12 @@ func _water_material() -> ShaderMaterial:
 	# Spre alb cu `water_glint_white`: felinarele de sodiu sunt aurii, dar un
 	# reflex pur saturat pe apa neagra iese lampa de neon, nu lumina pe unda.
 	gc = Color.WHITE.lerp(gc, clampf(
-		float(theme_flag("water_glint_tint", 1.0)), 0.0, 1.0))
-	_water_mat.set_shader_parameter("glint_col", Vector3(gc.r, gc.g, gc.b))
+		float(_wflag(style, "water_glint_tint", 1.0)), 0.0, 1.0))
+	wm.set_shader_parameter("glint_col", Vector3(gc.r, gc.g, gc.b))
 	# Varful anvelopei de valuri, in adancime normalizata. Din constantele de
 	# aici, nu scris de mana in shader: reciful e o cota de gameplay, iar doua
 	# copii ale ei s-ar desincroniza tacut la prima retusare a lagunei.
-	_water_mat.set_shader_parameter("wave_reef",
+	wm.set_shader_parameter("wave_reef",
 		SEA_REEF_DEPTH / SEA_NEAR_DEPTH)
 	# Amplitudinea valurilor vine tot de pe CPU, din acelasi motiv ca wave_reef,
 	# doar ca aici consecinta desincronizarii nu e cosmetica: SEA_FAR_DROP se
@@ -8649,28 +8766,28 @@ func _water_material() -> ShaderMaterial:
 	# Implicit PORNIT pe toate temele (`water_lit` 1.0): e reparatia
 	# generala ceruta de dezvoltator, nu un efect de pista. O tema care nu-l
 	# vrea il coboara din cheie.
-	_water_mat.set_shader_parameter("lit_strength",
-		clampf(float(theme_flag("water_lit", 1.0)), 0.0, 1.0))
-	_water_mat.set_shader_parameter("lit_rough",
-		float(theme_flag("water_lit_rough", 0.22)))
-	_water_mat.set_shader_parameter("lit_rough_b",
-		float(theme_flag("water_lit_rough_b", 0.0)))
-	_water_mat.set_shader_parameter("lit_normal",
-		float(theme_flag("water_lit_normal", 1.0)))
-	_water_mat.set_shader_parameter("lit_wave_len",
-		float(theme_flag("water_lit_wave_len", 4.0)))
-	_water_mat.set_shader_parameter("lit_wave_speed",
-		float(theme_flag("water_lit_wave_speed", 1.0)))
+	wm.set_shader_parameter("lit_strength",
+		clampf(float(_wflag(style, "water_lit", 1.0)), 0.0, 1.0))
+	wm.set_shader_parameter("lit_rough",
+		float(_wflag(style, "water_lit_rough", 0.22)))
+	wm.set_shader_parameter("lit_rough_b",
+		float(_wflag(style, "water_lit_rough_b", 0.0)))
+	wm.set_shader_parameter("lit_normal",
+		float(_wflag(style, "water_lit_normal", 1.0)))
+	wm.set_shader_parameter("lit_wave_len",
+		float(_wflag(style, "water_lit_wave_len", 4.0)))
+	wm.set_shader_parameter("lit_wave_speed",
+		float(_wflag(style, "water_lit_wave_speed", 1.0)))
 	# 0.25, nu 1.0 fizic: din chase cam TOATA apa e razanta, iar la Fresnel
 	# plin marea Stromboli iesea cerul intreg (albastru pal, fara adancime);
 	# la 0.45 tot spala turcoazul Okinawei spre gri (A/B pe t8_0.95). Cerul
 	# se vede ca luciu pe departare, culoarea apei ramane a temei.
-	_water_mat.set_shader_parameter("lit_fresnel",
-		float(theme_flag("water_lit_fresnel", 0.25)))
-	_water_mat.set_shader_parameter("lit_spec",
-		float(theme_flag("water_lit_spec", 1.0)))
-	_water_mat.set_shader_parameter("lit_spec_cap",
-		float(theme_flag("water_lit_spec_cap", 3.0)))
+	wm.set_shader_parameter("lit_fresnel",
+		float(_wflag(style, "water_lit_fresnel", 0.25)))
+	wm.set_shader_parameter("lit_spec",
+		float(_wflag(style, "water_lit_spec", 1.0)))
+	wm.set_shader_parameter("lit_spec_cap",
+		float(_wflag(style, "water_lit_spec_cap", 3.0)))
 	# Cerul reflectat trece prin aceeasi „lumina" de tema ca albedo-ul apei
 	# (`water_dim`): pe o tema de noapte cerul e oricum intunecat, dar pe una
 	# de amiaza cu apa scazuta deliberat, o reflexie la putere plina ar fi
@@ -8680,37 +8797,38 @@ func _water_material() -> ShaderMaterial:
 	# ajung niciodata pe ecran (vezi _build_environment). Apa trebuie sa
 	# oglindeasca ce vede camera deasupra ei, nu gradientul teoretic — altfel
 	# pe Okinawa ar reflecta un albastru pe care nimeni nu-l vede in joc.
-	var sky_k := clampf(float(theme_flag("fog_sky_affect", 1.0)), 0.0, 1.0)
+	var sky_k := clampf(float(_wflag(style, "fog_sky_affect", 1.0)), 0.0, 1.0)
 	var fog_lin := theme_fog.srgb_to_linear()
 	var zen := theme_sky_top.srgb_to_linear().lerp(fog_lin, sky_k) * dim
 	var hor := theme_sky_horizon.srgb_to_linear().lerp(fog_lin, sky_k) * dim
-	_water_mat.set_shader_parameter("sky_zenith", Vector3(zen.r, zen.g, zen.b))
-	_water_mat.set_shader_parameter("sky_horizon", Vector3(hor.r, hor.g, hor.b))
+	wm.set_shader_parameter("sky_zenith", Vector3(zen.r, zen.g, zen.b))
+	wm.set_shader_parameter("sky_horizon", Vector3(hor.r, hor.g, hor.b))
 	var sc := theme_sun_color.srgb_to_linear() * theme_sun_energy
-	_water_mat.set_shader_parameter("sun_col", Vector3(sc.r, sc.g, sc.b))
+	wm.set_shader_parameter("sun_col", Vector3(sc.r, sc.g, sc.b))
 	# Curgerea marii (implicit statatoare); raurile isi iau directia din UV2.
-	var flow: Vector2 = theme_flag("water_flow", Vector2.ZERO)
-	_water_mat.set_shader_parameter("flow_default", flow)
-	_water_mat.set_shader_parameter("flow_speed",
-		float(theme_flag("water_flow_speed", 1.5)))
-	_water_mat.set_shader_parameter("flow_foam",
-		float(theme_flag("water_flow_foam", 0.0)))
-	_water_mat.set_shader_parameter("flow_foam_cut",
-		float(theme_flag("water_flow_foam_cut", 0.35)))
+	var flow: Vector2 = _wflag(style, "water_flow", Vector2.ZERO)
+	wm.set_shader_parameter("flow_default", flow)
+	wm.set_shader_parameter("flow_speed",
+		float(_wflag(style, "water_flow_speed", 1.5)))
+	wm.set_shader_parameter("flow_foam",
+		float(_wflag(style, "water_flow_foam", 0.0)))
+	wm.set_shader_parameter("flow_foam_cut",
+		float(_wflag(style, "water_flow_foam_cut", 0.35)))
 	# Spuma de curgere e spuma temei (FOAM_WHITE tras spre apa mica prin
 	# `water_foam_mix`), nu alb pur: pe namol e crem-maronie, pe recif alba.
 	# Pe raul B (unde curge apa, cand exista despartire) spuma e a lui B.
-	var foam_base := b_shallow if float(theme_flag("water_split", 0.0)) > 0.0 		else shallow
+	var foam_base := b_shallow if float(_wflag(style, "water_split", 0.0)) > 0.0 		else shallow
 	var ffoam := water_tint(Palette.FOAM_WHITE, dim).lerp(foam_base,
-		clampf(float(theme_flag("water_foam_mix", 0.35)) * 0.4, 0.0, 1.0))
-	_water_mat.set_shader_parameter("flow_foam_col",
+		clampf(float(_wflag(style, "water_foam_mix", 0.35)) * 0.4, 0.0, 1.0))
+	wm.set_shader_parameter("flow_foam_col",
 		Vector3(ffoam.r, ffoam.g, ffoam.b))
-	_water_mat.set_shader_parameter("wave_amp", SEA_WAVE_AMP)
+	wm.set_shader_parameter("wave_amp",
+		SEA_WAVE_AMP * float(style.get("water_wave_amp_k", 1.0)))
 	# Cata apa ramane noaptea (DuskCycle -> `dusk_lamps` = 1). Vezi `dusk_dim`
 	# in water.gdshader; 1.0 implicit = neatins.
-	_water_mat.set_shader_parameter("dusk_dim",
-		float(theme_flag("water_dusk_dim", 1.0)))
-	return _water_mat
+	wm.set_shader_parameter("dusk_dim",
+		float(_wflag(style, "water_dusk_dim", 1.0)))
+	return wm
 
 
 ## Iesitul in mare = repunere pe traseu.

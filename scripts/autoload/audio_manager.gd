@@ -11,6 +11,9 @@ const SFX: Dictionary = {
 	&"backfire": preload("res://assets/audio/backfire.wav"),
 	&"wall_hit": preload("res://assets/audio/wall_hit.wav"),
 	&"bump": preload("res://assets/audio/bump.wav"),
+	# Tabla pe tabla (#500): stratul de deasupra bufniturii `bump`, cu volum si
+	# pitch dupa impuls (vezi Car._process_contacts).
+	&"metal_hit": preload("res://assets/audio/metal_hit.wav"),
 	&"land": preload("res://assets/audio/land.wav"),
 	&"count_beep": preload("res://assets/audio/count_beep.wav"),
 	&"go_beep": preload("res://assets/audio/go_beep.wav"),
@@ -101,7 +104,10 @@ func apply_volumes() -> void:
 	AudioServer.set_bus_volume_db(
 		AudioServer.get_bus_index(&"Engine"), linear_to_db(GameState.engine_volume))
 
-func play_sfx(sfx_name: StringName, pitch: float = 1.0) -> void:
+## `volume_db`: -6 e nivelul comun; apelantii care dozeaza dupa intensitate
+## (ciocnirea intre masini) il dau explicit.
+func play_sfx(sfx_name: StringName, pitch: float = 1.0,
+		volume_db: float = -6.0) -> void:
 	var stream: AudioStream = SFX.get(sfx_name)
 	if stream == null:
 		return
@@ -115,5 +121,5 @@ func play_sfx(sfx_name: StringName, pitch: float = 1.0) -> void:
 	player.stream = stream
 	# Variatie mica de pitch: sunetul repetat nu suna "de robot".
 	player.pitch_scale = pitch * randf_range(0.96, 1.04)
-	player.volume_db = -6.0
+	player.volume_db = volume_db
 	player.play()

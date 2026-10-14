@@ -336,6 +336,9 @@ var _dust_particles: CPUParticles3D
 var in_water: bool = false
 ## Spray continuu de la rotile din FATA cat timp treci prin apa cu viteza.
 var _water_spray: CPUParticles3D
+## Scantei la ciocnirea cu alta masina (#500): un emitator one-shot per masina,
+## mutat la punctul de contact si repornit la fiecare izbitura.
+var _sparks: CPUParticles3D
 ## Stropul de la intrare: o rafala (one_shot) repornita la fiecare intrare.
 var _water_burst: CPUParticles3D
 ## Materialul inelului de unde — al masinii, nu static: culoarea e a apei din
@@ -1008,9 +1011,16 @@ func _process_contacts(delta: float) -> void:
 					continue
 				_bump_pairs[key] = bump_pair_cooldown
 				bumped.emit(self, other, dv)
+				_emit_sparks(other, dv)
 				if _bump_cooldown <= 0.0 and (is_player or other.is_player):
 					_bump_cooldown = 0.25
 					AudioManager.play_sfx(&"bump")
+					# Tabla pe tabla, dozata dupa impuls (#500): o atingere abia
+					# se aude si suna mai subtire, o izbitura plina e tare si
+					# grava. Inainte era doar bufnitura `bump`, la volum fix.
+					var k := _bump_strength(dv)
+					AudioManager.play_sfx(&"metal_hit", lerpf(1.18, 0.86, k),
+						lerpf(-20.0, -1.0, k))
 		# Impulsul de separare (reteta SuperTuxKart): contactul sustinut nu
 		# are voie sa lipeasca masinile. O acceleratie LATERALA le impinge una
 		# de langa alta -- centrala (fara rotatie: directia ramane a soferului),
@@ -2415,7 +2425,117 @@ func _puff_mesh(size: float) -> Mesh:
 ## vezi _update_dust.
 const DRIFT_SMOKE_COLOR: Color = Color(0.78, 0.78, 0.8)
 
+## 0 la pragul de ciocnire, 1 la plafonul de violenta — dozajul comun pentru
+## sunet si scantei.
+func _bump_strength(dv: float) -> float:
+	return clampf(inverse_lerp(bump_min_closing, bump_max_dv, dv), 0.0, 1.0)
+
+
+## Sub atat (m/s de delta-v) contactul e frecare, nu izbitura: fara scantei.
+const SPARK_MIN_DV: float = 4.0
+
+## Scantei la contactul cu `other` (#500): la jumatatea distantei dintre
+## caroserii, la inaltimea barelor, aruncate in afara contactului si in sus.
+## Mai multe si mai rapide cu cat izbitura e mai mare: `amount` (CPUParticles3D
+## n-are `amount_ratio`; schimbarea realoca, dar oricum repornim). Emitatorul e in coordonate de LUME, deci scanteile raman unde
+## s-au nascut, nu fug cu masina.
+func _emit_sparks(other: Car, dv: float) -> void:
+	if _sparks == null or dv < SPARK_MIN_DV:
+		return
+	var to_other := other.global_position - global_position
+	to_other.y = 0.0
+	if to_other.length_squared() < 0.0001:
+		return
+	var k := _bump_strength(dv)
+	_sparks.global_position = _contact_point_with(other,
+		global_position + to_other * 0.5 + Vector3.UP * 0.55)
+	# Directia: perpendiculara pe linia dintre masini (de-a lungul fetelor care
+	# se freaca), cu o componenta in sus; spread-ul larg face restul.
+	var along := to_other.normalized().cross(Vector3.UP)
+	_sparks.direction = (along * (1.0 if randf() < 0.5 else -1.0) + Vector3.UP * 0.6)
+	_sparks.amount = int(lerpf(float(SPARKS_MIN), float(SPARKS_MAX), k))
+	_sparks.initial_velocity_max = lerpf(7.0, 13.0, k)
+	_sparks.restart()
+
+
+## Punctul de contact cu `other`, cum il raporteaza solverul (media punctelor
+## din tick-ul asta); `fallback` daca nu exista niciunul. Mijlocul dintre
+## centre nu ajunge: cand o masina e mult mai mare (autobuzul), el cade in
+## caroseria ei, iar scanteile ies ascunse inauntru (vazut pe captura).
+func _contact_point_with(other: Car, fallback: Vector3) -> Vector3:
+	var state := PhysicsServer3D.body_get_direct_state(get_rid())
+	if state == null:
+		return fallback
+	var sum := Vector3.ZERO
+	var count := 0
+	for i in state.get_contact_count():
+		if state.get_contact_collider_object(i) == other:
+			sum += state.get_contact_collider_position(i)
+			count += 1
+	return sum / float(count) if count > 0 else fallback
+
+
+static var _spark_material: StandardMaterial3D = null
+const SPARKS_MIN: int = 10
+const SPARKS_MAX: int = 24
+
+func _build_sparks() -> void:
+	_sparks = CPUParticles3D.new()
+	_sparks.name = "Sparks"
+	_sparks.emitting = false
+	_sparks.one_shot = true
+	_sparks.explosiveness = 1.0
+	# Plafonul pe mobil: 24 pe masina, 144 pe o cursa de 6, si doar o clipa.
+	_sparks.amount = SPARKS_MAX
+	_sparks.lifetime = 0.45
+	_sparks.local_coords = false
+	_sparks.spread = 70.0
+	_sparks.initial_velocity_min = 4.0
+	_sparks.initial_velocity_max = 8.0
+	_sparks.gravity = Vector3(0, -14.0, 0)
+	_sparks.damping_min = 2.0
+	_sparks.damping_max = 4.0
+	_sparks.scale_amount_min = 0.6
+	_sparks.scale_amount_max = 1.2
+	var shrink := Curve.new()
+	shrink.add_point(Vector2(0.0, 1.0))
+	shrink.add_point(Vector2(1.0, 0.2))
+	_sparks.scale_amount_curve = shrink
+	# Alb-galben la nastere, portocaliu, apoi se stinge: metal incins.
+	var heat := Gradient.new()
+	heat.set_offsets(PackedFloat32Array([0.0, 0.35, 1.0]))
+	heat.set_colors(PackedColorArray([
+		Color(1.0, 0.97, 0.75, 1.0), Color(1.0, 0.62, 0.15, 1.0),
+		Color(0.9, 0.25, 0.05, 0.0)]))
+	_sparks.color_ramp = heat
+	if _spark_material == null:
+		# Un material de CLASA pentru toate scanteile din cursa (vezi nota de la
+		# _puff_material): neluminat — scanteia e sursa de lumina, nu o
+		# suprafata. OPAC, nu aditiv: pe nisipul luminos de zi aditivul n-avea
+		# ce adauga (pixelul era deja aproape alb) si darele ieseau translucide,
+		# abia ghicite pe captura. Se sting prin rampa de culoare.
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.vertex_color_use_as_albedo = true
+		m.vertex_color_is_srgb = true
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_spark_material = m
+	# Dara, nu punct: o bara subtire de 60 cm aliniata cu viteza
+	# (`particle_flag_align_y`). Un patrat de 9 cm cu fata la camera iesea de
+	# 3-4 pixeli la distanta camerei de urmarire — numarat de sonda, nevazut pe
+	# captura. Cutia se vede din orice unghi, unde un quad aliniat ar fi putut
+	# ajunge cu muchia spre camera. 12 triunghiuri.
+	var streak := BoxMesh.new()
+	streak.size = Vector3(0.07, 0.6, 0.07)
+	streak.material = _spark_material
+	_sparks.mesh = streak
+	_sparks.particle_flag_align_y = true
+	_sparks.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_sparks)
+
+
 func _build_effects() -> void:
+	_build_sparks()
 	# Fum de drift, colorat dupa nivelul de boost incarcat.
 	_drift_particles = CPUParticles3D.new()
 	# Nume propriu, ca la "Dust"/"Debris": pana acum singurul mod de a deosebi

@@ -247,14 +247,18 @@ def build_coast_parapet():
 
     Modular: capete plane la x = +/- 3, `keep_xy=True` ca modulele sa se
     insiruie fara sa alunece."""
-    L, T, H = 3.0, 0.21, 0.9
+    # 0,55 latime pe 0,75 inaltime. Prima versiune (0,42 pe 0,90) citea ca o
+    # ARIPIOARA subtire pe plansa — raport 1:2,1. Un parapet de coasta e un
+    # corp indesat, iar coama lui trebuie sa poata tine o maimuta asezata
+    # (POI G), deci latimea conteaza si functional.
+    L, T, H = 3.0, 0.275, 0.75
     b = Builder()
     # corpul, cu talus foarte usor
     loft(b, [(-L, -T), (L, -T), (L, T), (-L, T)], 0.0,
          [(-L, -T * 0.86), (L, -T * 0.86), (L, T * 0.86), (-L, T * 0.86)],
          H - 0.14, HL_ROCK)
     # coama: placa CONTINUA de 0,42 m lata (contractul cere >= 0,35)
-    b.box((0.0, 0.0, H - 0.07), (L * 2.0, 0.42, 0.14), HL_ROCK)
+    b.box((0.0, 0.0, H - 0.07), (L * 2.0, 0.55, 0.14), HL_ROCK)
     # rosturile verticale: trei caneluri, ca sa nu citeasca a bara de beton
     for x in (-1.5, 0.0, 1.5):
         b.box((x, 0.0, (H - 0.14) * 0.5), (0.06, T * 2.1, H - 0.2), HL_ROCK_DARK)
@@ -279,9 +283,14 @@ def build_stone_dike():
     # coama: placa continua peste tot
     b.box((0.0, 0.0, H - 0.05), (L * 2.0, D * 2.0, 0.1), HL_ROCK)
     # blocuri de anrocament pe fata dinspre mare (+Y)
+    # Blocurile se SUPRAPUN peste corp (y = D - 0,10, nu D + 0,30) si coboara
+    # pana in talpa. Prima versiune le punea langa dig, cu rost vizibil:
+    # masurat pe GLB, corpul se termina la Z 1,10 iar blocurile ajungeau la
+    # 1,85, deci pluteau pe langa el. Un anrocament e REZEMAT de dig, nu
+    # aliniat langa.
     for k in range(4):
         x = -L + (2.0 * L) * (k + 0.5) / 4.0
-        b.rock((x, D + 0.30, 0.42), (1.5, 1.0, 0.85), HL_ROCK,
+        b.rock((x, D - 0.10, 0.34), (1.6, 1.15, 0.78), HL_ROCK,
                seed=210 + k * 17, segments=6, rings=2)
     o = b.to_object("Dike")
     emit_hl([o], "structures/stone_dike.glb", _ao(dist=1.6), keep_xy=True,
@@ -585,16 +594,21 @@ def _macaque_pose(b, ox, crouch):
     b.boulder((ox, 0.0, body_z), (0.17, 0.2, 0.23 * s), HL_FUR, seed=11,
               segments=5, rings=2)
     # cap
-    b.boulder((ox, 0.055, body_z + 0.17 * s), (0.105, 0.11, 0.1), HL_FUR,
-              seed=12, segments=5, rings=2)
+    # cap mai rotund (6x3, nu 5x2): la 5x2 iesea un CUB pe plansa. Costa 8 tri
+    # in plus si e singura parte a siluetei care spune "maimuta".
+    b.boulder((ox, 0.045, body_z + 0.17 * s), (0.10, 0.105, 0.098), HL_FUR,
+              seed=12, segments=6, rings=3)
     # fata mai deschisa
-    b.box((ox, 0.125, body_z + 0.175 * s), (0.075, 0.03, 0.07), HL_LIME)
+    # botul: infundat in cap si mai mic (era o CUTIE proeminenta pe plansa).
+    b.box((ox, 0.105, body_z + 0.168 * s), (0.062, 0.028, 0.055), HL_LIME)
     # brate
     for sx in (-1.0, 1.0):
+        # bratele pe segments=3: la 0,04 m raza, a patra fata nu exista pe
+        # ecran. 352 -> 336 din bugetul de 350.
         b.taper_sweep([(ox + sx * 0.085, 0.03, body_z + 0.1 * s),
                        (ox + sx * 0.1, 0.075, body_z - 0.07 * s),
                        (ox + sx * 0.08, 0.1, body_z - 0.17 * s)],
-                      [0.042, 0.034, 0.028], HL_FUR, segments=4)
+                      [0.042, 0.034, 0.028], HL_FUR, segments=3)
     # picioare
     for sx in (-1.0, 1.0):
         if crouch:
@@ -608,11 +622,16 @@ def _macaque_pose(b, ox, crouch):
                            (ox + sx * 0.08, 0.075, 0.012)],
                           [0.05, 0.04, 0.03], HL_FUR, segments=4)
     # coada: lunga, curbata. `crab-eating macaque` o are cam cat corpul.
-    b.taper_sweep([(ox, -0.16, body_z + 0.02),
-                   (ox - 0.06, -0.3, body_z - 0.04),
-                   (ox - 0.12, -0.38, body_z - 0.2),
-                   (ox - 0.1, -0.34, body_z - 0.3)],
-                  [0.032, 0.026, 0.02, 0.014], HL_FUR, segments=4)
+    # Coada porneste din INTERIORUL corpului (y = -0,04, nu -0,16) si cu raza
+    # mai mare la radacina. Pe plansa coada PLUTEA detasata in spatele
+    # macacului: `boulder` aplica `deviation`, deci suprafata reala a corpului
+    # e mai stransa decat semiaxa nominala de 0,20, iar o radacina de 0,032
+    # pornita la -0,16 iesea din gol.
+    b.taper_sweep([(ox, -0.04, body_z + 0.04),
+                   (ox - 0.04, -0.22, body_z - 0.02),
+                   (ox - 0.11, -0.36, body_z - 0.18),
+                   (ox - 0.09, -0.33, body_z - 0.29)],
+                  [0.055, 0.034, 0.022, 0.014], HL_FUR, segments=4)
 
 
 def build_macaque():
@@ -658,19 +677,30 @@ def _karst_row(b, width, height, n, seed, slot_main, slot_pale=None,
         # turnul: baza strangsa, perete drept, varf retras — profilul de carst
         # redus la trei inele (la distanta asta nu se vede mai mult)
         if rings3:
-            b.frustum((x, y, h * 0.05), r * 0.82, r * 1.0, h * 0.1, slot,
+            # TREI inele, dar cu raze care VARIAZA pe inaltime.
+            #
+            # Prima versiune avea pereti drepti (1,0 -> 0,95) si capac plat la
+            # 0,5: sirul citea ca o LINIE DE BLOCURI, un mic skyline. Am
+            # incercat un al patrulea inel pentru varf rotunjit — 1720 tri din
+            # 1500 si castig vizual aproape nul, deci inelul nu era cauza.
+            # Cauza e peretele DREPT: un turn de carst se umfla la mijloc si se
+            # strange spre varf, iar diferenta se citeste si de la 150-320 m.
+            # `bulge` variaza per turn (determinist din rnd), deci sirul nu mai
+            # are doua siluete identice. Acelasi buget, alta forma.
+            bulge = 1.0 + 0.16 * (rnd() - 0.3)
+            b.frustum((x, y, h * 0.05), r * 0.80, r * bulge, h * 0.1, slot,
                       segments=6)
-            b.frustum((x, y, h * 0.52), r * 1.0, r * 0.95, h * 0.84, slot,
+            b.frustum((x, y, h * 0.5), r * bulge, r * 0.82, h * 0.8, slot,
                       segments=6)
-            b.frustum((x, y, h * 0.96), r * 0.95, r * 0.5, h * 0.08, slot,
+            b.frustum((x, y, h * 0.95), r * 0.82, r * 0.26, h * 0.1, slot,
                       segments=6)
         else:
             # Planul depArtat: DOUA inele. Brief 1.9 il cere "silueta aproape
             # plata", iar la 320 m strangerea de la baza nu se mai citeste;
             # ce rtamane e conturul de sus.
-            b.frustum((x, y, h * 0.5), r * 0.92, r * 0.95, h, slot,
+            b.frustum((x, y, h * 0.5), r * 0.88, r * 0.80, h, slot,
                       segments=6)
-            b.frustum((x, y, h * 0.96), r * 0.95, r * 0.5, h * 0.08, slot,
+            b.frustum((x, y, h * 0.96), r * 0.80, r * 0.24, h * 0.09, slot,
                       segments=6)
 
 

@@ -90,7 +90,12 @@ check "rocks/shore_boulder.glb"              150
 
 echo
 echo "== grota =="
-check "structures/grotto_portal.glb"         700
+# --origin=assembly: piesa e COMPUSA. `Portal_Rock` atinge solul (min Y = 0,000
+# pe GLB), dar `Portal_Dark` — fundul intunecat vizibil prin gol si stalactitele
+# scurte — incepe la 0,10 m si NU trebuie sa atinga pragul: ar astupa exact
+# golul pe care il incadreaza. Garda per-nod raporta corect "baza nu e la Y=0"
+# aratand spre interiorul grotei.
+check "structures/grotto_portal.glb"         700 --origin=assembly
 
 echo
 echo "== satul plutitor =="
@@ -136,9 +141,18 @@ check "structures/stone_dike.glb"            250
 
 echo
 echo "== vegetatie =="
-check "plants/karst_ficus_a.glb"             400
-check "plants/karst_ficus_b.glb"             400
-check "plants/bamboo_clump.glb"              300
+# --origin=assembly pe piesele cu FRUNZIS separat, din exact acelasi motiv ca
+# la turnuri (`Tower_Scrub`): o planta se sparge in lemn + frunze, fiindca la
+# integrare lemnul si frunzisul iau sloturi diferite (brief §0.6). Nodul de
+# frunze NU atinge niciodata pamantul — masurat pe GLB, `Ficus_Wood` merge de
+# la 0,000 la 5,486 iar `Ficus_Leaf` de la 4,072 la 5,777. O garda per-nod ar
+# cere ca frunzele sa stea pe sol, ceea ce ar fi o planta culcata.
+# `scrub_tuft` rtamane pe --origin=base: tufa e UN nod (miez + frunze impreuna,
+# la 0,8 m nu merita spart), deci regula per-nod i se aplica si trebuie sa stea
+# pe sol.
+check "plants/karst_ficus_a.glb"             400 --origin=assembly
+check "plants/karst_ficus_b.glb"             400 --origin=assembly
+check "plants/bamboo_clump.glb"              300 --origin=assembly
 check "plants/scrub_tuft.glb"                120
 
 echo

@@ -169,6 +169,10 @@ const PROP_COLLISION := {
 	# "iarba lenta cu geometrie"). Aracii au 4 cm: un hull per rand ar fi un
 	# gard de 10 m, si sunt zeci de randuri.
 	"vine_row": "none",
+	# Teancurile de oale de langa caruta din piata Goreme (#508): gimmick-ul nu
+	# mai e „nimereste fanta de 4 m", ci „le imprastii sau ocolesti". Caruta
+	# (pottery_cart) ramane zid: e jumatatea de blocaj care chiar opreste.
+	"pot_stack": "bump",
 	"shrub_dry": "none", "pigeon": "none",
 	# (Molozul hornurilor cazute — `cracked_chimney_*` — e declarat mai sus,
 	# la POI D. Motivul lui POI E e acelasi si se adauga: cele 72 de lespezi

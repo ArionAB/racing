@@ -13097,6 +13097,11 @@ var _lane_bias: Array[Vector3] = []
 ## -9.0 pana la +5.6, cu o SINGURA fanta, in dreapta. Un pilot trimis pe malul
 ## lui de personalitate intra in zid in jumatate din cazuri — masurat, exact
 ## asta se intampla: 25 de repuneri pe 3 seed-uri la frac 0.030.
+##
+## Din oct 2026 (#508) oalele se imprastie (BumpProp); zid ramane doar caruta,
+## pe stanga (-9.0 .. -4.0). Culoarul Track13 a coborat de la +0.71 (fanta) la
+## +0.25, adica PRIN oale: si AI-ul le imprastie (4 din 6 in primul tur), iar
+## caruta ramane ocolita. 0 repuneri in piata pe 3 seed-uri, ca inainte.
 var _lane_lane: Array[Vector3] = []
 
 

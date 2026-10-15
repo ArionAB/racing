@@ -24,6 +24,7 @@ var _v_before := 0.0
 var _v_after := -1.0
 var _hit_t := -1.0
 var _fails: PackedStringArray = []
+var _ai_mode := false
 const TRIES := 4
 var _tried := 0
 var _hits := 0
@@ -38,7 +39,10 @@ func _ready() -> void:
 	GameState.selected_track = idx
 	GameState.champ_active = false
 	GameState.total_laps = 99
-	GameState.ai_count = 0
+	# `--ai`: plutonul complet, fara lovitura sondei — cate piese imprastie AI-ul
+	# in primele 40 s (gimmick-ul de la Cappadocia, #508).
+	_ai_mode = OS.get_cmdline_user_args().has("--ai")
+	GameState.ai_count = 5 if _ai_mode else 0
 	_race = (load(RACE_SCENE) as PackedScene).instantiate() as Race
 	add_child(_race)
 
@@ -61,6 +65,15 @@ func _physics_process(delta: float) -> void:
 			_finish()
 		return
 	var p := _race.player
+	if _ai_mode:
+		if _t - _go_t > 40.0:
+			var moved := 0
+			for b in _props:
+				if not is_instance_valid(b) or b.global_position.distance_to(_start[b]) > 0.5:
+					moved += 1
+			print("[bump-props] plutonul AI, 40 s: %d din %d piese imprastiate" % [moved, _props.size()])
+			_finish()
+		return
 	match _phase:
 		"":
 			if _t - _go_t > 3.0:
@@ -73,6 +86,8 @@ func _physics_process(delta: float) -> void:
 						awake += 1
 					if b.global_position.distance_to(_start[b]) > 0.05:
 						moved += 1
+						print("[bump-props]   %s mutata %.2f m fara contact" % [b.name,
+							b.global_position.distance_to(_start[b])])
 				print("[bump-props] fara contact, la 3 s: %d treze, %d mutate > 5 cm" % [awake, moved])
 				if moved > 0:
 					_fails.append("%d piese s-au miscat fara contact" % moved)
@@ -145,6 +160,10 @@ func _aim(p: Car) -> void:
 	p.velocity = dir * RAM_SPEED
 	p.angular_velocity = Vector3.ZERO
 	print("[bump-props] tinta %s la %.1f m de axa drumului" % [_target.name, best_d])
+	# `--control`: aceeasi lansare, fara tinta — cat franeaza drumul singur.
+	if OS.get_cmdline_user_args().has("--control"):
+		_target.global_position += Vector3.DOWN * 500.0
+		_target.freeze = true
 	_phase = "ram"
 
 

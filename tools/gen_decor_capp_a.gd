@@ -488,6 +488,9 @@ func _rubble() -> void:
 
 ## CARUTA CU OALE la iesirea din piata, cu fanta de 4 m.
 ##
+## Din #508 teancurile de oale sunt bump-abile (`pot_stack` -> "bump" in
+## WorldProp.PROP_COLLISION): blocajul solid e doar caruta; oalele se imprastie.
+##
 ## Blocajul se construieste ca o linie CONTINUA perpendiculara pe banda, de la
 ## muchia din stanga (-half) pana la `half - GAP_TARGET`: caruta intai, apoi
 ## teancuri de oale cap la cap pana se umple lungimea. Golul ramas e exact

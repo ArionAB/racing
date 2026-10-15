@@ -10,7 +10,8 @@
 [ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="19_hollow"]
 [ext_resource type="Script" path="res://scenes/hazards/tide_hazard.gd" id="17_tide"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
-[ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_stack_a.glb" id="20_stack_a"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_stack_b.glb" id="21_stack_b"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/harbour_quay.glb" id="14_quay"]
 [ext_resource type="PackedScene" path="res://assets/models/okinawa/vehicles/fishing_boat.glb" id="15_boat"]
 
@@ -253,38 +254,38 @@ rise_m = 1.5
 [node name="DecorManual" type="Node3D" parent="."]
 script = ExtResource("9_prop")
 
-[node name="TurnCalcar00" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(2.58410, 0, 0.28712, 0, 4.9399999999999995, 0, -0.28712, 0, 2.58410, -385.67, -0.40, -145.16)
+[node name="TurnCalcar00" parent="DecorManual" instance=ExtResource("20_stack_a")]
+transform = Transform3D(1.10256, 0.00000, 0.00000, 0.00000, 1.10256, 0.00000, -0.00000, 0.00000, 1.10256, -385.67, -1.20, -145.16)
 
-[node name="TurnCalcar01" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(2.96987, 0, -0.88873, 0, 5.89, 0, 0.88873, 0, 2.96987, -378.22, -0.40, -41.86)
+[node name="TurnCalcar01" parent="DecorManual" instance=ExtResource("21_stack_b")]
+transform = Transform3D(0.63762, 0.00000, 2.08556, 0.00000, 2.18085, 0.00000, -2.08556, 0.00000, 0.63762, -378.22, -1.20, -41.86)
 
-[node name="TurnCalcar02" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(1.88548, 0, -1.48492, 0, 4.56, 0, 1.48492, 0, 1.88548, -361.47, -0.40, 61.23)
+[node name="TurnCalcar02" parent="DecorManual" instance=ExtResource("20_stack_a")]
+transform = Transform3D(-0.84498, 0.00000, 0.56995, 0.00000, 1.01923, 0.00000, -0.56995, 0.00000, -0.84498, -361.47, -1.20, 61.23)
 
-[node name="TurnCalcar03" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(2.56260, 0, -1.12831, 0, 5.319999999999999, 0, 1.12831, 0, 2.56260, -312.42, 0.59, 218.61)
+[node name="TurnCalcar03" parent="DecorManual" instance=ExtResource("21_stack_b")]
+transform = Transform3D(-1.52949, 0.00000, -1.23856, 0.00000, 1.96809, 0.00000, 1.23856, 0.00000, -1.52949, -312.42, -1.20, 218.61)
 
-[node name="TurnCalcar04" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(2.08680, 0, -0.69661, 0, 4.18, 0, 0.69661, 0, 2.08680, -190.31, 1.53, 216.90)
+[node name="TurnCalcar04" parent="DecorManual" instance=ExtResource("20_stack_a")]
+transform = Transform3D(0.35059, 0.00000, -0.86775, 0.00000, 0.93590, 0.00000, 0.86775, 0.00000, 0.35059, -190.31, -1.20, 216.90)
 
-[node name="TurnCalcar05" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(2.35089, 0, -1.69803, 0, 5.51, 0, 1.69803, 0, 2.35089, -102.59, 2.89, 236.63)
+[node name="TurnCalcar05" parent="DecorManual" instance=ExtResource("21_stack_b")]
+transform = Transform3D(2.03478, 0.00000, 0.17802, 0.00000, 2.04255, 0.00000, -0.17802, 0.00000, 2.03478, -102.59, -1.20, 236.63)
 
-[node name="TurnCalcar06" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.81485, 0, 2.15082, 0, 4.369999999999999, 0, -2.15082, 0, -0.81485, 110.01, 0.44, -216.22)
+[node name="TurnCalcar06" parent="DecorManual" instance=ExtResource("20_stack_a")]
+transform = Transform3D(0.20258, 0.00000, 0.95307, 0.00000, 0.97436, 0.00000, -0.95307, 0.00000, 0.20258, 110.01, -1.20, -216.22)
 
-[node name="TurnCalcar07" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(-0.48497, 0, 2.65609, 0, 5.13, 0, -2.65609, 0, -0.48497, 22.79, 0.40, -237.73)
+[node name="TurnCalcar07" parent="DecorManual" instance=ExtResource("21_stack_b")]
+transform = Transform3D(-1.66550, 0.00000, 0.92320, 0.00000, 1.90426, 0.00000, -0.92320, 0.00000, -1.66550, 22.79, -1.20, -237.73)
 
-[node name="TurnCalcar08" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(1.69188, 0, 1.84053, 0, 4.75, 0, -1.84053, 0, 1.69188, -81.10, 0.61, -258.00)
+[node name="TurnCalcar08" parent="DecorManual" instance=ExtResource("20_stack_a")]
+transform = Transform3D(-0.76084, 0.00000, -0.73473, 0.00000, 1.05769, 0.00000, 0.73473, 0.00000, -0.76084, -81.10, -1.20, -258.00)
 
-[node name="TurnCalcar09" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(1.03047, 0, 2.81747, 0, 5.699999999999999, 0, -2.81747, 0, 1.03047, -179.37, 0.70, -360.73)
+[node name="TurnCalcar09" parent="DecorManual" instance=ExtResource("21_stack_b")]
+transform = Transform3D(0.95628, 0.00000, -1.87680, 0.00000, 2.10638, 0.00000, 1.87680, 0.00000, 0.95628, -179.37, -1.20, -360.73)
 
-[node name="TurnCalcar10" parent="DecorManual" instance=ExtResource("13_rock")]
-transform = Transform3D(0.69882, 0, 2.08606, 0, 4.18, 0, -2.08606, 0, 0.69882, -257.13, 0.42, -304.88)
+[node name="TurnCalcar10" parent="DecorManual" instance=ExtResource("20_stack_a")]
+transform = Transform3D(0.92168, 0.00000, 0.16252, 0.00000, 0.93590, 0.00000, -0.16252, 0.00000, 0.92168, -257.13, -1.20, -304.88)
 
 [node name="Insulita00" parent="DecorManual" instance=ExtResource("14_quay")]
 transform = Transform3D(1.59021, 0, 0.15460, 0, 0.5, 0, -0.17669, 0, 1.39144, -348.75, -0.72, -120.74)

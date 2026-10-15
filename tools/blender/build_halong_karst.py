@@ -83,8 +83,15 @@ def _drop(objs):
 
 
 # --- sloturile pe roluri (halong_kit.md §0.4) --------------------------------
-HL_ROCK = ROCK_LIGHT        # 3: calcar in soare
-HL_ROCK_DARK = ROCK_DARK    # 4: nisa de val, umbra, roca uda
+# SLOTURILE SE VERIFICA IN ATLAS, NU DUPA NUME. Prima versiune folosea
+# ROCK_LIGHT (3) pentru calcar "in soare" — dar in atlas slotul 3 e #CE8D4A,
+# saturatie 0,64: stanca de DESERT, portocalie. In joc turnurile ieseau
+# portocaliu aprins (masurat pe captura de la volan: saturatie 0,82 fata de
+# 0,08 tinta). Calcarul cenusiu e MARBLE_GREY 29 (#B6B2AA, saturatie 0,07),
+# acelasi slot pe care il foloseste calcarul Ryukyu din Okinawa — aceeasi roca,
+# aceeasi dala (verificat pe notch_rock_*: sloturile lor sunt 2, 12, 21, 29).
+HL_ROCK = MARBLE_GREY       # 29: calcar cenusiu in soare
+HL_ROCK_DARK = ROCK_LIGHT   # 3: nisa de val, umbra — mai inchis si mai cald
 HL_SCRUB = TROPICAL_GREEN   # 21: tufe de creasta
 
 HL_RESULTS = []

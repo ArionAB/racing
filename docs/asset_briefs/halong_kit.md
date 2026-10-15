@@ -69,9 +69,19 @@ Referințe vizuale:
 
    | rol | slot |
    |---|---|
-   | calcar în soare (turnuri, faleze, portal, dig) | `ROCK_LIGHT` 3 |
-   | calcar în umbră, nișa de val, interiorul grotei | `ROCK_DARK` 4 |
+   | calcar în soare (turnuri, faleze, portal, dig) | `MARBLE_GREY` 29 |
+   | calcar în umbră, nișa de val, interiorul grotei | `ROCK_LIGHT` 3 |
    | piatră cioplită (chei, parapet, pavajul pavilionului) | `MARBLE_GREY` 29 |
+
+   > **De ce 29 și nu `ROCK_LIGHT` 3, cum scria prima versiune.** Numele
+   > înșală: în atlas slotul 3 e **#CE8D4A, saturație 0,64** — stâncă de
+   > deșert, portocalie. Calcarul cenușiu e **29** (#B6B2AA, saturație 0,07),
+   > exact slotul pe care îl folosește și calcarul Ryukyu din Okinawa
+   > (`notch_rock_*`, `limestone_cliff_module` — verificat pe GLB: sloturile
+   > lor sunt 2, 12, 21, 29). Fiind aceeași rocă, e și aceeași dală.
+   > Defectul s-a văzut abia în joc: turnurile ieșeau portocaliu aprins
+   > (măsurat în captura de la volan: saturație **0,82** față de 0,08 ținta).
+   > Sloturile se verifică în **atlas**, nu după nume.
    | vegetație de carst (ficuși, bambus, tufe de creastă) | `TROPICAL_GREEN` 21 |
    | umbră adâncă de frunziș, lemn închis | `LOG_DARK` 28 |
    | bârne, plute, punți, catarge, rame de țarc | `WOOD_WEATHERED` 9 |

@@ -5,6 +5,9 @@ Restul asset-urilor din `assets/models/` sunt CC0 (vezi `LICENSE_quaternius.txt`
 (`tools/blender/build_*.py`). Fisierul asta exista DOAR pentru sursele
 **CC-BY**, unde atribuirea e o conditie a licentei, nu o curtoazie.
 
+Pentru **audio** registrul e separat si listeaza *toate* fisierele, nu doar
+cele cu atribuire: `docs/audio_licente.md`.
+
 ---
 
 ## cruise_boat.glb (Fiordland, Track16)

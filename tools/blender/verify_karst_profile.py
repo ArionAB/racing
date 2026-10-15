@@ -144,11 +144,22 @@ def evaluate(path, notch_max, hr_min, verbose=True):
         print("PICA: piesa are inaltime zero")
         return False
     vals = [(zf, r) for zf, r in prof if r]
-    mid = [r for zf, r in vals if 0.45 <= zf <= 0.55]
+    # Raza de referinta: MEDIANA pe o fereastra LARGA (0,35-0,70), nu maximul
+    # pe una ingusta.
+    #
+    # Prima versiune lua max pe 0,45-0,55, adica pe ~3 felii din 80 — in
+    # practica O SINGURA felie (variatie masurata: 0%). Cu `jag` 0,13-0,15 raza
+    # oscileaza pe verticala, deci acel numar era de noroc: pe `karst_tower_b`
+    # iesea 13,82 fata de 16,16 mediana, umfland raportul de la 0,62 la 0,73 si
+    # picand o piesa CORECTA. Masurat atunci pe toate trei turnurile: fata de
+    # raza maxima, rapoartele erau 0,58 / 0,62 / 0,61 — adica exact tinta.
+    # Peretele unui turn de carst e drept pe toata inaltimea mijlocie, deci o
+    # mediana pe fereastra larga e si mai aproape de ce vede ochiul.
+    mid = sorted(r for zf, r in vals if 0.35 <= zf <= 0.70)
     if not mid:
         print("PICA: nu pot masura raza la mijloc")
         return False
-    r_mid = max(mid)
+    r_mid = mid[len(mid) // 2]
     notch = [(zf, r) for zf, r in vals if NOTCH_ZONE[0] <= zf <= NOTCH_ZONE[1]]
     if not notch:
         print("PICA: nu pot masura raza in zona nisei")
@@ -184,7 +195,12 @@ def evaluate(path, notch_max, hr_min, verbose=True):
     # raporta "nisa nu e punctul cel mai ingust" aratand spre COROANA — adica
     # cerea un turn care se LARGESTE spre varf, exact pe dos fata de contract.
     # Prins pe un GLB real inainte sa existe vreo piesa Ha Long.
-    wall = [r for zf, r in vals if 0.33 <= zf <= 0.90]
+    # Fereastra se opreste la 0,80, nu la 0,90: peste atat incepe CREASTA, iar
+    # pe un turn cu creasta dubla (`karst_tower_b`) o felie poate cadea in saua
+    # dintre varfuri si masoara aer. Masurat acolo: 14,48 -> 4,65 -> 13,59 pe
+    # trei felii consecutive, adica garda raporta "perete subtire de 4,65 m"
+    # aratand spre golul dintre creste.
+    wall = [r for zf, r in vals if 0.33 <= zf <= 0.80]
     if wall and r_notch > min(wall):
         print("    PICA: peretele e mai ingust (%.2f m) decat nisa (%.2f m) — "
               "nisa nu e stransura de la baza" % (min(wall), r_notch))

@@ -30,6 +30,12 @@ GROUPS = {
     # ce trebuie judecat aici — ar fi ilizibila.
     "karst": ("rocks", ["karst_tower_a", "karst_tower_b", "karst_tower_c"], 45.0),
     "stacks": ("rocks", ["karst_stack_a", "karst_stack_b", "shore_boulder"], 12.0),
+    # BAZELE, de aproape: contractul turnurilor e nisa de val, iar pe plansa
+    # `karst` (trei turnuri de 50-70 m incadrate impreuna) ea ocupa cativa
+    # pixeli si e in plus ingropata in podeaua de preview, asezata la cota
+    # minima a piesei. Grupul asta decupeaza doar treimea de jos, fara podea,
+    # ca surplomba sa poata fi JUDECATA, nu doar masurata.
+    "notch": ("rocks", ["karst_tower_a", "karst_tower_b", "karst_tower_c"], 45.0),
     "grotto": ("structures", ["grotto_portal"], 22.0),
     "village": ("", ["buildings/floating_house_a", "buildings/floating_house_b",
                      "structures/fish_farm", "props/net_drying_rack",
@@ -51,7 +57,9 @@ GROUPS = {
 # Turnurile si fundalul se vad din LATERAL, aproape de orizontala: contractul
 # lor e profilul (nisa de val, h/r), iar o camera de sus il turteste exact pe
 # axa care conteaza. Restul piesei se judeca in 3/4, ca la celelalte kituri.
-LOW_ANGLE = {"karst", "stacks", "grotto", "background"}
+LOW_ANGLE = {"karst", "stacks", "grotto", "background", "notch"}
+# Grupuri la care podeaua se stinge si cadrul se strange pe BAZA piesei.
+BASE_ONLY = {"notch"}
 
 
 def _clear():
@@ -107,7 +115,40 @@ def sheet(group, path, models_dir=None, res=(1600, 720)):
         bpy.context.scene.collection.objects.link(cam)
     cam.data.clip_end = 5000.0
     cam.data.clip_start = 0.5
-    shot(built, path, azimuth=azimuth, elevation=elevation, res=res)
+    if group in BASE_ONLY:
+        # Fara podea (ar ingropa exact nisa) si incadrat pe treimea de jos:
+        # `shot` incadreaza bbox-ul obiectelor primite, deci ii dau niste
+        # proxy-uri care acopera doar baza.
+        # Numele NU incepe cu "Preview": `shot` filtreaza exact prefixul ala
+        # (ca sa nu incadreze podeaua), deci niste proxy-uri numite PreviewBox
+        # ar fi fost aruncate din lista si camera ar fi incadrat NIMIC — prima
+        # versiune a dat o plansa complet goala, desi raportul tiparea sase
+        # obiecte (memoria `efecte-invizibile-nu-se-numara`).
+        import bmesh
+        proxies = []
+        for o in built:
+            zlo = min((o.matrix_world @ v.co).z for v in o.data.vertices)
+            zhi = max((o.matrix_world @ v.co).z for v in o.data.vertices)
+            xs = [(o.matrix_world @ v.co).x for v in o.data.vertices]
+            ys = [(o.matrix_world @ v.co).y for v in o.data.vertices]
+            me = bpy.data.meshes.new("BaseFrame")
+            bm = bmesh.new()
+            bmesh.ops.create_cube(bm, size=1.0)
+            bm.to_mesh(me)
+            bm.free()
+            px = bpy.data.objects.new("BaseFrame", me)
+            bpy.context.scene.collection.objects.link(px)
+            px.location = ((min(xs) + max(xs)) * 0.5, (min(ys) + max(ys)) * 0.5,
+                           zlo + (zhi - zlo) * 0.11)
+            px.scale = (max(xs) - min(xs), max(ys) - min(ys), (zhi - zlo) * 0.22)
+            px.hide_render = True
+            proxies.append(px)
+        bpy.context.view_layer.update()
+        shot(proxies, path, azimuth=azimuth, elevation=4.0, res=res, ground=False)
+        for px in proxies:
+            bpy.data.objects.remove(px, do_unlink=True)
+    else:
+        shot(built, path, azimuth=azimuth, elevation=elevation, res=res)
     return [(o.name, len(o.data.polygons)) for o in built]
 
 

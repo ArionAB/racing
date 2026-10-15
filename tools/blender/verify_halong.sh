@@ -75,12 +75,17 @@ check() {  # check <cale> <buget> [flag...]
   printf '%s' "$out" | grep -q "VERDICT: OK" || { fail=1; printf '%s\n' "$out" | grep "!!"; }
 }
 
+# --origin=assembly pe turnuri: nodul `Tower_Scrub` (tufele de pe creasta)
+# incepe prin constructie la cota varfului, nu la 0 — verificat pe GLB,
+# `Tower_Rock` merge de la 0,00 la 9,00 iar `Tower_Scrub` de la 9,01 la 9,44.
+# Garda per-nod ar raporta "baza nu e la Y=0" aratand spre vegetatie. E exact
+# cazul declarat la §0 pentru piesele compuse.
 echo "== hero: turnurile de carst =="
-check "rocks/karst_tower_a.glb"              900
-check "rocks/karst_tower_b.glb"              900
-check "rocks/karst_tower_c.glb"             1000
-check "rocks/karst_stack_a.glb"              400
-check "rocks/karst_stack_b.glb"              400
+check "rocks/karst_tower_a.glb"              900 --origin=assembly
+check "rocks/karst_tower_b.glb"              900 --origin=assembly
+check "rocks/karst_tower_c.glb"             1000 --origin=assembly
+check "rocks/karst_stack_a.glb"              400 --origin=assembly
+check "rocks/karst_stack_b.glb"              400 --origin=assembly
 check "rocks/shore_boulder.glb"              150
 
 echo

@@ -4119,6 +4119,87 @@ static func themes() -> Dictionary:
 		],
 	}, true)
 	_themes_cache["transfagarasan"] = tf
+	# HA LONG (Track22, docs/track_briefs/halong.md §4, pasul 3 din §7): pleaca
+	# din COPIA lui "okinawa", singura tema cu mare cu ADANCIMI (water_*_slot,
+	# water_tint, SEA_NEAR_DEPTH) — iar aici jumatate din pista e pe apa.
+	# "okinawa" NU se editeaza: Track20 trebuie sa ramana bit-identica.
+	#
+	# DIFERENTA CENTRALA fata de Okinawa, si principalul risc al temei (brief
+	# §0.1, decizia 3.1.5): Okinawa e TURCOAZ TRANSPARENT de recif, Ha Long e
+	# VERDE-JAD OPAC de golf cu sediment din delta. Daca pista citeste
+	# "Okinawa", e tocmai greseala pe care briful o numeste. Se masoara DUPA
+	# remap, in joc (memoria monocromia-se-masoara-dupa-remap), iar axa care
+	# decide e SATURATIA, nu luminanta (memoria apa-stilizata-de-noapte).
+	var hl: Dictionary = (_themes_cache["okinawa"] as Dictionary).duplicate()
+	hl.merge({
+		# COTA MARII NU SE PUNE AICI. `sea_level_offset` e @export pe Track, iar
+		# `TrackFromPath._ready` il scrie din `custom_sea_level_offset`, DUPA ce
+		# tema s-a aplicat — deci o cheie de tema cu numele asta e citita de
+		# nimeni (prima versiune o pusese aici si sonda a raportat marea la
+		# -0.99, adica implicitul -7, nu valoarea scrisa). Pe Ha Long offsetul
+		# trebuie sa fie -5.99, nu implicitul -7, fiindca e cota marii RELATIV
+		# la media cotelor soselei: vezi `custom_sea_level_offset` in Track22.tscn
+		# si garda de apa din tools/gen_halong_route.py.
+		# Apa de golf: verde-jad opac (#4A7A6B), mai deschisa la mal (#6E9B86),
+		# aproape negru-verde in umbra turnurilor. Sloturile sunt cele de mare
+		# (nu de lac, ca pe Transfagarasan): adancimea exista si conteaza.
+		"water_shallow_slot": Palette.TROPICAL_GREEN,
+		"water_deep_slot": Palette.SEA_DEEP,
+		"water_shore_slot": Palette.ROCK_LIGHT,
+		# Apa OPACA: spuma mica (golf adapostit, nu recif cu valuri sparte) si
+		# luciu redus — sedimentul mancă reflexia difuza, dar lasa Fresnel-ul
+		# razant, care e ce da luciul de pe chase cam (memoria apa-iluminata-v12).
+		"water_foam": 0.18,
+		"water_glint": 0.55,
+		# Calcarul de carst: cenusiu-deschis in soare (#A8A49A). Clasa e cea a
+		# calcarului Ryukyu (aceeasi roca), cu tenta proprie — brief §4.
+		"ground_tint": Color.html("8E8C84"),
+		# Soare de dimineata tarzie din ESE (~110 grade, 30 de grade elevatie),
+		# alb-cald (#FFF0D8). Busola 180 - y = 110 => y = 70. Azimutul se
+		# remasoara pe traseul real (memoria azimutul-soarelui-fata-de-drum).
+		"sun_rotation_deg": Vector3(-30, 70, 0),
+		"sun_color": Color(1.0, 0.94, 0.85),
+		"sun_energy": 1.1,
+		# Ambient de dimineata umeda (#C8D8DC la 0.32): umbrele din grota si de
+		# sub surplombe trebuie sa iasa VERZI-ALBASTRE de la lumina reflectata
+		# de apa, nu negre (memoria umbra-fara-culoare-e-negru-mort).
+		"ambient_color": Color.html("C8D8DC"),
+		"ambient_energy": 0.32,
+		# Aer umed de golf: albastru-pal spalacit sus (#6E9AC4), alb-cald laptos
+		# la orizont. NU albastrul adanc de altitudine (Alpi, Transfagarasan).
+		"sky_top": Color.html("6E9AC4"),
+		"sky_horizon": Color.html("E8E2D6"),
+		# Ceata 120 -> 340: aici e MECANICA DE COMPOZITIE, nu doar atmosfera —
+		# e ce separa turnurile in straturi de adancime pe belvedere (brief §2.0,
+		# memoria scara-de-adancime-are-gol). Reperele stau sub fog_end, iar
+		# fog_end sub FAR_PLANE 380 (memoria efecte-de-fundal-cote-legate);
+		# garda de departare din generator verifica si capatul celalalt.
+		"fog_begin": 120.0,
+		"fog_end": 340.0,
+		# Ceata se masoara HSV fata de APA, nu fata de ground_tint (memoria
+		# ceata-in-familia-solului, adaptata: pe o pista jumatate-apa, familia
+		# solului e apa). Alb-cald cu nuanta verzuie (#D8DCD4).
+		"fog": Color.html("D8DCD4"),
+		# Fundalul vine cu POI-urile (kit propriu, brief §5.2 `karst_horizon`):
+		# inelul si modelul lui Okinawa se GOLESC, altfel ar aparea insula Ie
+		# si Kerama in golful vietnamez.
+		"horizon_model": "",
+		"horizon_picks": [],
+		"horizon_rings": [],
+		# Scatterul si props-urile Okinawa se sting: vocabularul (fukugi, pin
+		# ryukyu, pandanus) e japonez. Decorul se pune de mana, pe POI, ca la
+		# Cappadocia / Serengeti / Machu Picchu (memoria
+		# decor-manual-sursa-de-adevar). `prop_contact_flat` se goleste odata cu
+		# props: lista numea piese care nu mai vin.
+		"props": "",
+		"prop_contact_flat": [],
+		# Decorul statistic stins: STRING GOL, nu `false`. `TrackDecor.build`
+		# primeste modul ca String (al doilea argument), deci un bool arunca
+		# "Cannot convert argument 2 from bool to String" si pista nu se mai
+		# construieste — prins de tools/ProbeHalongLoad.tscn la prima rulare.
+		"decor": "",
+	}, true)
+	_themes_cache["halong"] = hl
 	return _themes_cache
 
 
@@ -5554,8 +5635,33 @@ func rebuild() -> void:
 	build_step.emit(&"umbre")
 	# Apa DUPA teren: are nevoie de aceleasi cote ca sa stie unde e tarmul.
 	_build_water()
+	_wire_scene_water_hazards()
 	_build_world_bounds()
 	build_step.emit(&"apa")
+
+## Cablează hazardele de apa DECLARATE CA NODURI in scena (azi: [TideHazard]).
+##
+## Cele construite de pista prin fractii (`WaterHose`, `WaveSurge`) isi primesc
+## materialul in `_build_wave` / `_build_hose`, INAINTE de `add_child`. Un nod
+## pus de mana in .tscn nu trece pe acolo, deci ar rămâne cu `film_material`
+## null si ar desena un albastru propriu — adica un material in plus la
+## numaratoarea garzii, exact felul in care bugetul creste pe nesimtite
+## (vezi `WaterHazard.film_material`).
+##
+## Se apeleaza DUPA `_build_water`: materialul marii exista abia atunci.
+## Hazardul isi reface foaia de apa cu materialul primit; daca nu e inca
+## construita (nod adaugat intre timp), apelul e inofensiv.
+func _wire_scene_water_hazards() -> void:
+	if not theme_flag("water", false):
+		return
+	var mat := _water_material()
+	for node in find_children("*", "TideHazard", true, false):
+		var tide := node as TideHazard
+		if tide == null:
+			continue
+		tide.film_material = mat
+		tide.apply_film_material(mat)
+
 
 ## Linia discontinua de mijloc, din geometrie (fara texturi): placute albe
 ## la fiecare 6.5m de-a lungul curbei.
@@ -11776,7 +11882,11 @@ func _build_walls() -> void:
 
 ## PARAPET DE BETON CU COLIZIUNE REALA (opt-in; Transfagarasan, oct 2026).
 ##
-## Intervale (frac_start, frac_end, latura +-1 sau 0 = ambele, rezervat).
+## Intervale (frac_start, frac_end, latura +-1 sau 0 = ambele, stil).
+## Stil 0 = beton cu blocuri alb-rosii (Transfagarasan). Stil 1 = BUZA DE
+## STANCA (#509, Cappadocia): mai inalta, mai groasa, cu creasta neregulata si
+## o singura culoare de roca — peretele care lipseste intre asfalt si coaja
+## stancii goale, nu un parapet de sosea.
 ## Gol = nimic, deci orice pista care nu le declara ramane bit-identica.
 ##
 ## De ce nu `_rail_segments`: acolo singurul regim cu efect pe o pista fara
@@ -11794,6 +11904,10 @@ const PARAPET_GAP: float = 0.25
 const PARAPET_SKIRT: float = 0.9
 ## Lungimea unui bloc alb sau rosu (dungile de pe parapetul real).
 const PARAPET_BLOCK_M: float = 4.0
+## Stilul 1 (buza de stanca): inaltimea medie si cat urca/coboara creasta.
+const ROCK_LIP_HEIGHT: float = 1.6
+const ROCK_LIP_WAVE: float = 0.45
+const ROCK_LIP_THICK: float = 1.4
 
 
 func _parapet_segments() -> Array[Vector4]:
@@ -11820,6 +11934,8 @@ func _build_parapets() -> void:
 		for side_sign: float in [-1.0, 1.0]:
 			if not is_zero_approx(seg.z) and signf(seg.z) != side_sign:
 				continue
+			var rock := int(seg.w) == 1
+			var thick := ROCK_LIP_THICK if rock else PARAPET_THICK
 			# Sectiunea transversala la fiecare punct copt din interval.
 			var secs: Array = [] # [inner_top, outer_top, inner_bot, outer_bot, dist]
 			for i in n:
@@ -11830,11 +11946,18 @@ func _build_parapets() -> void:
 				var side := _side_at(i)
 				var e := c + side * (width_at_index(i) + PARAPET_GAP) * side_sign
 				var out := side * side_sign
+				var h := PARAPET_HEIGHT
+				if rock:
+					# Creasta neregulata din doua sinusuri cu perioade prime
+					# intre ele: nu se repeta vizibil pe o tura de elice.
+					var d: float = _dists[i]
+					h = ROCK_LIP_HEIGHT + ROCK_LIP_WAVE * (0.6 * sin(d * 0.41)
+						+ 0.4 * sin(d * 1.37 + 1.1))
 				secs.append([
-					e + Vector3.UP * PARAPET_HEIGHT,
-					e + out * PARAPET_THICK + Vector3.UP * PARAPET_HEIGHT,
+					e + Vector3.UP * h,
+					e + out * thick + Vector3.UP * h,
 					e - Vector3.UP * PARAPET_SKIRT,
-					e + out * PARAPET_THICK - Vector3.UP * PARAPET_SKIRT,
+					e + out * thick - Vector3.UP * PARAPET_SKIRT,
 					_dists[i], side * side_sign])
 			if secs.size() < 2:
 				continue
@@ -11844,6 +11967,8 @@ func _build_parapets() -> void:
 				var b: Array = secs[k + 1]
 				var block := int(floor(float(a[4]) / PARAPET_BLOCK_M)) % 2
 				var slot := Palette.FOAM_WHITE if block == 0 else Palette.KERB_RED
+				if rock:
+					slot = Palette.ROCK_DARK
 				var outv: Vector3 = a[5]
 				# top, fata dinspre sosea, fata dinspre vale
 				_parapet_quad(st, a[0], b[0], b[1], a[1], slot, Vector3.UP)
@@ -11854,10 +11979,11 @@ func _build_parapets() -> void:
 			var last: Array = secs[secs.size() - 1]
 			var d0: Vector3 = (secs[1] as Array)[0] - first[0]
 			var d1: Vector3 = last[0] - (secs[secs.size() - 2] as Array)[0]
+			var cap := Palette.ROCK_DARK if rock else Palette.KERB_RED
 			_parapet_quad(st, first[0], first[1], first[3], first[2],
-				Palette.KERB_RED, -d0.normalized())
+				cap, -d0.normalized())
 			_parapet_quad(st, last[0], last[1], last[3], last[2],
-				Palette.KERB_RED, d1.normalized())
+				cap, d1.normalized())
 	if not emitted:
 		return
 	st.generate_normals()
@@ -13097,6 +13223,11 @@ var _lane_bias: Array[Vector3] = []
 ## -9.0 pana la +5.6, cu o SINGURA fanta, in dreapta. Un pilot trimis pe malul
 ## lui de personalitate intra in zid in jumatate din cazuri — masurat, exact
 ## asta se intampla: 25 de repuneri pe 3 seed-uri la frac 0.030.
+##
+## Din oct 2026 (#508) oalele se imprastie (BumpProp); zid ramane doar caruta,
+## pe stanga (-9.0 .. -4.0). Culoarul Track13 a coborat de la +0.71 (fanta) la
+## +0.25, adica PRIN oale: si AI-ul le imprastie (4 din 6 in primul tur), iar
+## caruta ramane ocolita. 0 repuneri in piata pe 3 seed-uri, ca inainte.
 var _lane_lane: Array[Vector3] = []
 
 

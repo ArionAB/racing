@@ -24,17 +24,30 @@ const CAR_DATA_TUKTUK: CarData = preload("res://scenes/cars/data/tuktuk.tres")
 
 ## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in cursa rapida.
 ##
-## ATENTIE, nota de mai jos e VECHE si nu mai e adevarata: zicea „momentan toate
-## trei, deci campionatul le acopera pe toate", scrisa cand chiar erau trei.
-## Acum sunt SAPTE, iar `CHAMP_ROUNDS` a ramas 3 — deci Baikal, Stromboli,
-## Chongqing si Cappadocia sunt doar cursa rapida, nu intra in campionat.
-## Nu e o scapare de reparat in graba: lungimea campionatului e decizie de
-## design (3 curse = burst play, 7 = alt ritm), si se schimba deliberat, cu
-## `CHAMP_ROUNDS`, nu din reflex.
+## `CHAMP_ROUNDS` a ramas 3 de cand erau trei piste, iar lista a crescut la
+## PAISPREZECE — deci campionatul e Dunele + Okinawa manual + Transfagarasan
+## (indicii 0-2), si restul sunt doar cursa rapida. Nu e o scapare de reparat
+## in graba: lungimea campionatului e decizie de design (3 curse = burst play,
+## 14 = alt ritm), si se schimba deliberat, cu `CHAMP_ROUNDS`, nu din reflex.
+##
+## Pe indexul 2 a stat Alpii (Track09) pana la swap-ul din 14 oct 2026. Deci
+## un swap pe primele CHAMP_ROUNDS pozitii schimba si campionatul: aici a fost
+## vrut explicit (Transfagarasanul ia runda 3), nu incasat din greseala.
 const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track01.tscn",
 	"res://scenes/tracks/Track08.tscn",
-	"res://scenes/tracks/Track09.tscn",
+	# Track21 = INDEXUL 2 (Transfagarasan). PRIMUL SWAP din proiect: pana acum
+	# Monument Valley, Okinawa si Transfagarasanul doar se ADAUGASERA la coada,
+	# cu nota "pana la swap". Aici Alpii (Track09) IES din lista de joc si
+	# Transfagarasanul le ia locul, inclusiv runda 3 de campionat
+	# (indexul 2 < CHAMP_ROUNDS): decizia dezvoltatorului, 14 oct 2026, nu
+	# un efect secundar — brief transfagarasan.md §8.
+	# Track09 RAMANE IN REPO ca banc de test: probe_track09_fracs,
+	# probe_alpine_terrain si verify_all_tracks_load il incarca PE CALE
+	# ("res://scenes/tracks/Track09.tscn"), nu prin index, deci swap-ul nu le
+	# atinge. Uneltele cer Transfagarasanul cu --track=2 SAU --track=21
+	# (resolve_track_index il gaseste si dupa numarul scenei).
+	"res://scenes/tracks/Track21.tscn", # Transfagarasan = INDEXUL 2
 	"res://scenes/tracks/Track10.tscn",
 	"res://scenes/tracks/Track11.tscn",
 	"res://scenes/tracks/Track12.tscn",
@@ -54,23 +67,40 @@ const TRACK_SCENES: Array[String] = [
 	# vor 18 (memoria `probe-decor-numar-de-scena`).
 	"res://scenes/tracks/Track18.tscn", # Kyoto = INDEXUL 11
 	# Track19 = INDEXUL 12 (Monument Valley, brief monument_valley.md §7): la
-	# COADA listei; Dunele (Track01) ramane pe indexul 0 pana la swap. Uneltele
-	# o adreseaza cu --track=19 (resolve_track_index o gaseste dupa numarul scenei).
+	# COADA listei; Dunele (Track01) ramane pe indexul 0 pana la swap — care
+	# N-A FOST FACUT inca, desi nota e aici de la inceputul lui oct 2026.
+	# Tiparul e swap-ul Transfagarasanului de mai sus: se scrie PE POZITIE,
+	# peste Track01, nu se sterge intrarea veche (lista nu are voie sa se
+	# taseze — vezi comentariul de pe indexul 2). Indexul 0 e in campionat.
+	# Uneltele o adreseaza cu --track=19 (resolve_track_index o gaseste dupa
+	# numarul scenei).
 	"res://scenes/tracks/Track19.tscn", # Monument Valley = INDEXUL 12
 	# Track20 = INDEXUL 13 (Okinawa, brief okinawa.md §7): la COADA listei;
-	# Okinawa manual (Track08) ramane pe indexul 1 pana la swap. Uneltele o
+	# Okinawa manual (Track08) ramane pe indexul 1 pana la swap — care, ca la
+	# Monument Valley, N-A FOST FACUT inca. Acelasi tipar: PE POZITIE, peste
+	# Track08. Indexul 1 e in campionat. Uneltele o
 	# adreseaza cu --track=20 (resolve_track_index o gaseste dupa numarul scenei;
 	# probe_decor/probe_manual vor 20, snapshot/probe_race/probe_layout vor 13 SAU 20).
 	"res://scenes/tracks/Track20.tscn", # Okinawa = INDEXUL 13
-	# Track21 = INDEXUL 14 (Transfagarasan, brief transfagarasan.md §7): la COADA
-	# listei; Alpii (Track09) raman pe indexul 2 pana la swap. Uneltele o adreseaza
-	# cu --track=21 (resolve_track_index o gaseste dupa numarul scenei).
-	"res://scenes/tracks/Track21.tscn", # Transfagarasan = INDEXUL 14
+	# Track22 = INDEXUL 14 (Ha Long, brief halong.md §7). Prima pista care se
+	# ADAUGA fara sa inlocuiasca nimic: Monument Valley, Okinawa si
+	# Transfagarasanul luaseră locul Dunelor, Okinawei manuale si Alpilor, deci
+	# aici NU urmeaza un swap.
+	#
+	# INDEXUL 14, nu 15: la integrarea cu main, swap-ul Transfagarasanului (care
+	# l-a mutat pe INDEXUL 2, peste Alpii) a scos intrarea lui de la coada, deci
+	# Ha Long urca cu o poziţie. Pe ramura de fundatie era 15, cand Track21 era
+	# inca la coada.
+	#
+	# Uneltele o adreseaza cu --track=22 (resolve_track_index o gaseste dupa
+	# numarul scenei); probe_decor/probe_manual vor 22, snapshot/probe_race/
+	# probe_layout vor 14 SAU 22 (memoria probe-decor-numar-de-scena).
+	"res://scenes/tracks/Track22.tscn", # Ha Long = INDEXUL 14
 ]
 const TRACK_NAMES: Array[String] = [
-	"Dunele", "Okinawa manual", "Alpii", "Baikal", "Stromboli", "Chongqing",
-	"Cappadocia", "Serengeti", "Machu Picchu", "Fiordland", "Jodhpur", "Kyoto",
-	"Monument Valley", "Okinawa", "Transfagarasan",
+	"Dunele", "Okinawa manual", "Transfagarasan", "Baikal", "Stromboli",
+	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
+	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long",
 ]
 const CHAMP_ROUNDS: int = 3
 

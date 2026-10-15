@@ -642,6 +642,10 @@ verifică ce face deja codul.
    - `GameState`: Track21 **la coada listei** (indexul 14). Alpii rămân pe
      indexul 2 până la swap. Toate uneltele o adresează cu `--track=21`
      (`resolve_track_index`).
+     **Depășit la 14 oct 2026:** swap-ul (§8 pct. 8) s-a făcut, Track21 e pe
+     **indexul 2** și Track09 a ieșit din listă. `--track=21` merge în
+     continuare — `resolve_track_index` îl găsește după numărul scenei — iar
+     `--track=2` merge și el.
 3. **Gărzi:**
    - `ProbeLayout --track=21`, `ProbeBuried`;
    - `ProbeLaneClear`, cu linie de bază „… (Track21)” fără marjă + `--sabotaj`
@@ -671,14 +675,39 @@ verifică ce face deja codul.
    - kit Blender (`docs/asset_briefs/transfagarasan_kit.md`,
      `tools/blender/verify_transfagarasan.sh`) → integrare → POI A–H (gauntlet,
      valuri de 3).
-8. **Commit-ul de swap**, după decor și după al doilea verdict la volan:
-   - Track21 pe indexul 2, Track09 scos din `TRACK_SCENES` / `TRACK_NAMES`;
-   - **Track09 rămâne în repo**, ca banc de test. Sondele care îl încarcă
-     (`probe_track09_fracs`, `probe_alpine_terrain`, `probe_avalanche`,
-     `probe_avalanche_terrain`, `probe_decor`, `probe_lane_clear`,
-     `probe_manual`, `verify_all_tracks_load`) trec **pe cale** sau pe
-     `--track=21`;
-   - gărzile cu cheia „Alpii (Track09)” se mută.
+8. **Commit-ul de swap** — **FĂCUT, 14 oct 2026.** Track21 e pe indexul 2,
+   Track09 scos din `TRACK_SCENES` / `TRACK_NAMES`. Două lucruri de știut:
+   - **primul swap din proiect.** Monument Valley și Okinawa au nota „până la
+     swap" de luni, dar niciunul n-a fost făcut: stăteau amândouă la coada
+     listei, lângă pistele pe care trebuiau să le înlocuiască. Deci n-a existat
+     precedent de copiat, iar nota din `game_state.gd` e scrisă pentru
+     următorul care face unul;
+   - **indexul 2 e în campionat** (`CHAMP_ROUNDS = 3`), deci swap-ul a mutat și
+     runda 3 de campionat de la Alpii la Transfăgărășan. Cerut explicit de
+     dezvoltator, nu încasat ca efect secundar. Un swap pe indicii 0–2 atinge
+     mereu campionatul; unul de la 3 în sus, niciodată.
+
+   Ce **nu** a cerut lucru, verificat înainte de commit:
+   - **recordurile** sunt cheiate pe NUME (`records[TRACK_NAMES[i]]`), nu pe
+     index, deci „Alpii" rămâne dormant sub cheia lui și „Transfagarasan"
+     pornește curat. Zero migrare, zero record atribuit greșit;
+   - **`TrackInfo`** derivă calea din numele scenei (`scene_key`), deci indexul
+     2 ia singur `info/Track21.tres` („Transfagarasan", EUROPA);
+   - **`selected_track`** nu se persistă pe disc, deci niciun index vechi nu
+     supraviețuiește unui restart;
+   - **`ProbeLaneClear`** cheiază prin `track_label`, care acum dă
+     „Transfagarasan (Track21)" pe indexul 2 — cheie care exista deja în
+     `BASELINE` (3). Garda a continuat să funcționeze fără modificare.
+   - **Track09 a rămas în repo**, ca banc de test, și **n-a trebuit atinsă
+     nicio sondă**: `probe_track09_fracs`, `probe_alpine_terrain` și
+     `verify_all_tracks_load` îl încarcă deja **pe cale**
+     (`"res://scenes/tracks/Track09.tscn"`), nu prin index. Grija din v0.1 că
+     „sondele trec pe cale sau pe `--track=21`" era deja rezolvată din
+     construcție;
+   - cheia „Alpii (Track09)" din `ProbeLaneClear.BASELINE` **nu s-a mutat și nu
+     s-a șters**: nu se mai poate ajunge la ea prin index, dar un `--only` pe
+     Track09 ar primi baza −1 și ar trece cu orice cifră. Are acum un comentariu
+     care spune de ce rămâne.
 
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 

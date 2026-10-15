@@ -4,6 +4,16 @@ extends Node
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/GenCappCreasta.tscn
 ##
+## [b]SCOS DIN TRACK13 (#530, decizia dezvoltatorului, 14 oct 2026).[/b] Pe
+## 31 aug (commit 9df12e23, lucru pe hornurile POI B) cele 101 module au primit
+## transformuri permutate: originea mutata (y = vechiul x) si randul Y al bazei
+## numai zerouri, adica placi turtite. Pe desktop o baza cu determinant 0 nu se
+## deseneaza, deci zidul a lipsit din tot ce s-a aprobat de atunci; pe telefon
+## (rendererul Mobile) placile ieseau portocalii, cu textura intinsa in dungi,
+## langa drum la frac ~0.10. Restaurat, zidul reaparea masiv pe dreapta drumului
+## (0.04-0.16) si schimba compozitia aprobata — deci s-a scos, nu s-a reparat.
+## Nu rula generatorul fara o decizie noua.
+##
 ## De ce exista, si de ce e un PERETE si nu inca o sapatura.
 ##
 ## Amandoi criticii, runda 10, au cerut acelasi lucru cu aceleasi cuvinte:

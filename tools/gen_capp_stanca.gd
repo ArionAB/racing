@@ -291,8 +291,14 @@ func _ready() -> void:
 		for k in 14:
 			var az := float(k) * (360.0 / 14.0) + float(etaj) * 8.0
 			var a := deg_to_rad(az)
-			var p := Vector3(AXIS.x + INNER_WALL_R * cos(a), y,
-				AXIS.y + INNER_WALL_R * sin(a))
+			# Zid0_07 (az 180°) sta la GURA DE INTRARE: soseaua intra acolo in
+			# coaja si e mai lata (7 m), iar panoul intra cu un colt 1,3 m in
+			# carosabil, fara coliziune (#510, ProbeRoadRaypick la frac 0.770).
+			# Impins 1,6 m spre exterior, fata lui ajunge la 0,3 m dincolo de
+			# muchie.
+			var wall_r := INNER_WALL_R + (1.6 if etaj == 0 and k == 7 else 0.0)
+			var p := Vector3(AXIS.x + wall_r * cos(a), y,
+				AXIS.y + wall_r * sin(a))
 			# Fata inclinata a modulului e -Z; ca ea sa priveasca spre AXA
 			# (adica spre sosea), -Z local trebuie sa arate spre centru. Acelasi
 			# calcul ca la alcovuri, verificat cu dot in loc de ghicit
@@ -378,6 +384,14 @@ func _ready() -> void:
 	var widths: Array = [1.15, 0.85, 1.40, 1.00, 1.25, 0.75,
 		1.10, 1.50, 0.95, 1.30, 0.80, 1.20]
 	for k in 12:
+		# Colt01 (azimut 44°) cadea pe GURA DE IESIRE (#510): acolo soseaua iese
+		# din coaja radial, traverseaza inelul crestei la ~49,7 m, iar varful
+		# panoului (34 + 12,4 * 1,35 = 50,7 m) iesea cu 1 m peste asfalt — un
+		# „zid culcat" fara coliziune pe dreapta drumului, la frac 0.990.
+		# Premisa de mai sus („carosabilul se termina la r=34") e adevarata pe
+		# elice, nu si la gura. Gasit cu ProbeRoadRaypick.
+		if k == 1:
+			continue
 		var az := float(k) * 30.0 + 14.0
 		var a := deg_to_rad(az)
 		var rr := float(radii[k])

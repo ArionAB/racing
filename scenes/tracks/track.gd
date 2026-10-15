@@ -11776,7 +11776,11 @@ func _build_walls() -> void:
 
 ## PARAPET DE BETON CU COLIZIUNE REALA (opt-in; Transfagarasan, oct 2026).
 ##
-## Intervale (frac_start, frac_end, latura +-1 sau 0 = ambele, rezervat).
+## Intervale (frac_start, frac_end, latura +-1 sau 0 = ambele, stil).
+## Stil 0 = beton cu blocuri alb-rosii (Transfagarasan). Stil 1 = BUZA DE
+## STANCA (#509, Cappadocia): mai inalta, mai groasa, cu creasta neregulata si
+## o singura culoare de roca — peretele care lipseste intre asfalt si coaja
+## stancii goale, nu un parapet de sosea.
 ## Gol = nimic, deci orice pista care nu le declara ramane bit-identica.
 ##
 ## De ce nu `_rail_segments`: acolo singurul regim cu efect pe o pista fara
@@ -11794,6 +11798,10 @@ const PARAPET_GAP: float = 0.25
 const PARAPET_SKIRT: float = 0.9
 ## Lungimea unui bloc alb sau rosu (dungile de pe parapetul real).
 const PARAPET_BLOCK_M: float = 4.0
+## Stilul 1 (buza de stanca): inaltimea medie si cat urca/coboara creasta.
+const ROCK_LIP_HEIGHT: float = 1.6
+const ROCK_LIP_WAVE: float = 0.45
+const ROCK_LIP_THICK: float = 1.4
 
 
 func _parapet_segments() -> Array[Vector4]:
@@ -11820,6 +11828,8 @@ func _build_parapets() -> void:
 		for side_sign: float in [-1.0, 1.0]:
 			if not is_zero_approx(seg.z) and signf(seg.z) != side_sign:
 				continue
+			var rock := int(seg.w) == 1
+			var thick := ROCK_LIP_THICK if rock else PARAPET_THICK
 			# Sectiunea transversala la fiecare punct copt din interval.
 			var secs: Array = [] # [inner_top, outer_top, inner_bot, outer_bot, dist]
 			for i in n:
@@ -11830,11 +11840,18 @@ func _build_parapets() -> void:
 				var side := _side_at(i)
 				var e := c + side * (width_at_index(i) + PARAPET_GAP) * side_sign
 				var out := side * side_sign
+				var h := PARAPET_HEIGHT
+				if rock:
+					# Creasta neregulata din doua sinusuri cu perioade prime
+					# intre ele: nu se repeta vizibil pe o tura de elice.
+					var d: float = _dists[i]
+					h = ROCK_LIP_HEIGHT + ROCK_LIP_WAVE * (0.6 * sin(d * 0.41)
+						+ 0.4 * sin(d * 1.37 + 1.1))
 				secs.append([
-					e + Vector3.UP * PARAPET_HEIGHT,
-					e + out * PARAPET_THICK + Vector3.UP * PARAPET_HEIGHT,
+					e + Vector3.UP * h,
+					e + out * thick + Vector3.UP * h,
 					e - Vector3.UP * PARAPET_SKIRT,
-					e + out * PARAPET_THICK - Vector3.UP * PARAPET_SKIRT,
+					e + out * thick - Vector3.UP * PARAPET_SKIRT,
 					_dists[i], side * side_sign])
 			if secs.size() < 2:
 				continue
@@ -11844,6 +11861,8 @@ func _build_parapets() -> void:
 				var b: Array = secs[k + 1]
 				var block := int(floor(float(a[4]) / PARAPET_BLOCK_M)) % 2
 				var slot := Palette.FOAM_WHITE if block == 0 else Palette.KERB_RED
+				if rock:
+					slot = Palette.ROCK_DARK
 				var outv: Vector3 = a[5]
 				# top, fata dinspre sosea, fata dinspre vale
 				_parapet_quad(st, a[0], b[0], b[1], a[1], slot, Vector3.UP)
@@ -11854,10 +11873,11 @@ func _build_parapets() -> void:
 			var last: Array = secs[secs.size() - 1]
 			var d0: Vector3 = (secs[1] as Array)[0] - first[0]
 			var d1: Vector3 = last[0] - (secs[secs.size() - 2] as Array)[0]
+			var cap := Palette.ROCK_DARK if rock else Palette.KERB_RED
 			_parapet_quad(st, first[0], first[1], first[3], first[2],
-				Palette.KERB_RED, -d0.normalized())
+				cap, -d0.normalized())
 			_parapet_quad(st, last[0], last[1], last[3], last[2],
-				Palette.KERB_RED, d1.normalized())
+				cap, d1.normalized())
 	if not emitted:
 		return
 	st.generate_normals()

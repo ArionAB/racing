@@ -146,6 +146,8 @@ far_step_m = 6.0
 far_bands = 11
 far_foot_max_m = 58.0
 cap_slots = Array[int]([19, 23, 10, 27])
+far_relief_m = 0.35
+far_crest_wobble_m = 1.6
 
 [node name="TaieturaCornisei" type="Marker3D" parent="Faleze" unique_id=1813266854]
 script = ExtResource("15_cliffface")
@@ -161,6 +163,8 @@ far_step_m = 6.0
 far_bands = 12
 far_foot_max_m = 68.0
 cap_slots = Array[int]([19, 23, 10, 27])
+far_relief_m = 0.35
+far_crest_wobble_m = 1.6
 
 [node name="TaieturaInterioara" type="Marker3D" parent="Faleze" unique_id=370420576]
 script = ExtResource("15_cliffface")

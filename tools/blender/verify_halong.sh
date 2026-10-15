@@ -108,9 +108,26 @@ check "structures/stone_quay.glb"            350 --origin=assembly
 
 echo
 echo "== barci =="
-check "vehicles/fishing_junk.glb"            800 --origin=assembly --allow-slots=7 --front=-Z
-check "vehicles/sampan_a.glb"                400 --origin=assembly --front=-Z
-check "vehicles/basket_boat.glb"             200
+# --origin=waterline, nu `assembly` + `--front=-Z`, si asta e o CORECTIE a
+# garzii, nu o relaxare ca sa treaca piesele:
+#
+#  1. `waterline` e contractul fizic al unei barci — Y=0 e nivelul marii, chila
+#     coboara sub el, puntea sta peste. E MAI STRANS decat `assembly`: o barca
+#     exportata cu baza la zero (deci plutind cu totul peste apa, ca o jucarie
+#     pe gresie) pica acum, iar cu `assembly` trecea. Exact flagul cu care
+#     Okinawa verifica feribotul, cargoul si barca de pescuit
+#     (verify_okinawa_v2.sh:118-120).
+#  2. `--front=-Z` nu se poate folosi pe o CARENA. Verificarea compara ARIA
+#     fetelor orientate pe X cu cea pe Z (verify_glb.py:388-390), ce merge
+#     pentru un semn plat. La o barca, bordurile lungi privesc pe +/-X si
+#     capetele ascutite pe +/-Z, deci o barca CORECT orientata raporteaza
+#     mereu "plan dominant X". Masurat pe GLB-urile de aici: jonca are
+#     lungimea pe Z (12,00 m pe Z, 4,60 pe X) si sampanul la fel — orientarea
+#     cerut de brief §1.4 e respectata, doar testul masura altceva. Lungimea pe
+#     Z e verificata mai jos, pe cifra.
+check "vehicles/fishing_junk.glb"            800 --origin=waterline --allow-slots=7
+check "vehicles/sampan_a.glb"                400 --origin=waterline
+check "vehicles/basket_boat.glb"             200 --origin=waterline
 
 echo
 echo "== drum =="
@@ -164,6 +181,27 @@ if [ -n "$PROFILE_TARGETS" ]; then
   python tools/blender/verify_karst_profile.py $PROFILE_TARGETS || fail=1
 else
   echo "  (nicio piesa de turn exportata inca)"
+fi
+
+# --- ORIENTAREA BARCILOR: contractul brief §1.4 ------------------------------
+#
+# Exista separat fiindca `--front=-Z` a fost SCOS de pe jonca si sampan (vezi
+# motivul la secttiunea "barci"). Contractul "prova pe -Z Godot" rtamane insa,
+# iar pe Machu Picchu orientarea greita a unui tren a costat o runda intreaga.
+# Masurat pe geometrie, nu pe arie: lungimea pe Z, prova ascutita la capatul
+# -Z, si cotele din tabel (12 / 7 / 2 m).
+echo
+echo "== orientarea si cotele barcilor (brief §1.4) =="
+if [ -f "$ROOT/vehicles/fishing_junk.glb" ]; then
+  python tools/blender/verify_halong_boats.py || fail=1
+  if python tools/blender/verify_halong_boats.py --sabotaj > /dev/null 2>&1; then
+    echo "  [OK] sabotajul (X<->Z) pica, cum trebuie"
+  else
+    echo "  !! SABOTAJUL N-A PRINS: garda de orientare nu masoara nimic"
+    fail=1
+  fi
+else
+  echo "  (nicio barca exportata inca)"
 fi
 
 # Garda de siluetă se ARMEAZA la fiecare rulare: daca sabotajul (un con in

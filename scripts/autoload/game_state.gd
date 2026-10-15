@@ -82,11 +82,25 @@ const TRACK_SCENES: Array[String] = [
 	# adreseaza cu --track=20 (resolve_track_index o gaseste dupa numarul scenei;
 	# probe_decor/probe_manual vor 20, snapshot/probe_race/probe_layout vor 13 SAU 20).
 	"res://scenes/tracks/Track20.tscn", # Okinawa = INDEXUL 13
+	# Track22 = INDEXUL 14 (Ha Long, brief halong.md §7). Prima pista care se
+	# ADAUGA fara sa inlocuiasca nimic: Monument Valley, Okinawa si
+	# Transfagarasanul luaseră locul Dunelor, Okinawei manuale si Alpilor, deci
+	# aici NU urmeaza un swap.
+	#
+	# INDEXUL 14, nu 15: la integrarea cu main, swap-ul Transfagarasanului (care
+	# l-a mutat pe INDEXUL 2, peste Alpii) a scos intrarea lui de la coada, deci
+	# Ha Long urca cu o poziţie. Pe ramura de fundatie era 15, cand Track21 era
+	# inca la coada.
+	#
+	# Uneltele o adreseaza cu --track=22 (resolve_track_index o gaseste dupa
+	# numarul scenei); probe_decor/probe_manual vor 22, snapshot/probe_race/
+	# probe_layout vor 14 SAU 22 (memoria probe-decor-numar-de-scena).
+	"res://scenes/tracks/Track22.tscn", # Ha Long = INDEXUL 14
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Transfagarasan", "Baikal", "Stromboli",
 	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
-	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa",
+	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long",
 ]
 const CHAMP_ROUNDS: int = 3
 

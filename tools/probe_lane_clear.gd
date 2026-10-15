@@ -323,6 +323,25 @@ const BASELINE := {
 	# e INTENTIONATA, nu o regresie. Baza = cifra masurata, FARA marja: un al patrulea
 	# obstacol pe banda trebuie sa pice garda. Sabotaj (`--sabotaj`) verificat la armare.
 	"Transfagarasan (Track21)": 3,
+	# Ha Long (Track22), fundatia + pontoane + banda de maree (14 oct 2026):
+	# O raportare, la frac 0.790 lat=+2.0, collider `@AnimatableBody3D@134` —
+	# adica JONCA (SlidingHazard in TRAVERSARE). E obstacolul INTENTIONAT al
+	# pistei, pe mijlocul podetului de plute: un corp care traverseaza
+	# carosabilul prin design, exact ca `ChannelKicker` pe Track21.
+	# Pontoanele NU intra in banda (placile lor sunt carosabil, nu obstacol).
+	#
+	# ARMAREA A GASIT UN DEFECT REAL, inchis inainte de a fixa cifra: banda de
+	# maree era coborata 0.7 m sub drum si dadea **20 de blocaje** —
+	# `TrackSideSampler._carve_branches` sapa terenul la cota benzii minus
+	# `BRANCH_DROP` (0.25), dar la CAPETE `TrackBranch` racordeaza la cota
+	# buclei, deci terenul rămâne sus si blocheaza intrarea (TerrainBody in
+	# fata, la 0.09-5.3 m). Baleiat: 0.0 -> 1, 0.25 -> 17, 0.45 -> 13. Adica
+	# ORICE cota proprie de banda blocheaza capetele. Banda sta acum pe cota
+	# drumului, iar terasa "scufundata", daca o vrem, cere sapatura proprie
+	# (`custom_hollows`) sau o rapa — nu o cota de banda.
+	#
+	# Baza = cifra masurata, FARA marja. Sabotaj verificat la armare.
+	"Ha Long (Track22)": 1,
 }
 
 

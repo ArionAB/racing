@@ -1854,9 +1854,34 @@ Soarele de ESE (~30°) vine din **dreapta-față** a camerei, deci turnurile sun
 > - no brands, logos, flags, political symbols or readable text anywhere;
 > - no snow, no autumn colours, no night.
 
-**Ce rămâne după dioramă** (pașii 7b–7d, nefăcuți): planșa de inventar, briful
-de kit (`docs/asset_briefs/halong_kit.md` + `tools/blender/verify_halong.sh`),
-apoi POI-urile A–G în gauntlet, cu **valuri de 3** (memoria
+**Ce rămâne după dioramă** (15 oct 2026): dioramă ✔ **acceptată** (verificată pe
+pixeli: apă opacă — doar 6,3% pixeli luminoși, saturație 0,48 și luminanță 0,47,
+departe de turcoazul de recif 0,69/0,79; ceață în straturi — luminanța crește cu
++40 spre depărtare; accente mici — 1,18% butoaie, 0,77% vele; toate cele șapte
+POI prezente, o singură buclă închisă, niciun element interzis). Planșa de
+inventar ✔ **acceptată cu o excepție**: toate cele 25 de piese sunt prezente, cu
+paleta corectă (calcar 42%, umbră 12,2%, accente 1,07% / 1,63%), **dar rândul 1
+e greșit** — turnurile se lărgesc spre bază (84 px la mijloc, 148 px la bază,
++76%), adică dealuri conice, nu turnuri cu nișă de val. S-a cerut regenerarea
+rândului 1, iar forma corectă e fixată **în scris** în
+`docs/asset_briefs/halong_kit.md` §1.1 (profil pe șase cote, contract
+nișă/mijloc ≤ 0,70 și h/r ≥ 2,5), ca geometria să nu depindă de planșă.
+
+**Scara nu se ia de pe planșă** (a doua oară, după Fiordland §9.1): mașina de
+4 m e desenată identic — **58 px în toate cele 10 rânduri** — deci e un simbol
+de poziție. Luată de bună, ar da turnul la 12,3 m în loc de 55 și macacul la
+**4,6 m** în loc de 0,5. Cotele sunt cele din briful de kit.
+
+Briful de kit ✔ **scris**: `docs/asset_briefs/halong_kit.md` — 25 de piese în
+9 grupuri, sloturi de paletă fără niciunul nou, §1.10 „ce NU se generează"
+(tablierul de ponton, terasa, foaia de maree, masa turnurilor — toate făcute de
+cod, verificat în sursă, memoria `brief-cere-glb-cod-il-face-deja`), și
+`belvedere_pavilion` adăugat ca reper construit pentru POI D, care e răspunsul
+la verdictul „belvedere nu am știut unde este" (§7.6).
+
+**Mai rămâne** (pașii 7c–7d): `tools/blender/verify_halong.sh` +
+`preview_halong.py`, kitul propriu-zis în Blender (valuri de 3, §3 din briful de
+kit), apoi POI-urile A–G în gauntlet, cu **valuri de 3** (memoria
 `valuri-de-trei-nu-opt-agenti`).
 
 **Camera, de decis pe planul real** (lecția din Transfăgărășan §9: din SE

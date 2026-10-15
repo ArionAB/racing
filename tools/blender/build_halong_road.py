@@ -163,44 +163,73 @@ def build_grotto_portal():
     HALF_GAP = 4.6          # golul: 9,2 m la baza
     TOP = 7.0               # inaltimea golului
     W = 9.0                 # semilatimea piesei (18 m)
-    H = 11.0
     b = Builder()
-    # montantii: verticali pana la 3,2 m, apoi se apropie usor
+
+    # ROCA, NU ZIDARIE. Prima versiune folosea `box` pentru montanti, buiandrug
+    # si prag, plus un `rock` deasupra — si pe plansa iesea un SOPRON cu
+    # acoperis in doua ape: cutii vizibile, muchii drepte, masa de sus citita
+    # ca sarpanta. Garda trecuse (388/700, sloturi corecte), fiindca garda
+    # numara, nu VEDE (memoria `harnasul-de-kit-nu-vede-forma-nici-culoarea`).
+    #
+    # Acum peretele e facut din MASE de stanca suprapuse (`rock`, aceeasi
+    # familie ca turnurile), care nu au muchii drepte. Cutiile raman doar unde
+    # contractul le cere: pragul (suprafata continua, fara praguri de 15 cm).
+
+    # montantii: cate trei mase pe fiecare parte, tot mai mici spre varf,
+    # impinse usor spre exterior ca sa nu stranga golul
     for sx in (-1.0, 1.0):
-        # partea verticala
-        b.box((sx * (HALF_GAP + 1.7), 0.0, 1.6), (3.4, 2.4, 3.2), HL_ROCK)
-        # partea de deasupra, inclinata spre gol
-        for k in range(3):
-            t = k / 3.0
-            z = 3.2 + t * (TOP - 3.2)
-            inset = t * 0.55
-            b.box((sx * (HALF_GAP + 1.7 + inset * 0.5), 0.0, z + 0.65),
-                  (3.4 - inset, 2.4, 1.3), HL_ROCK)
-    # buiandrugul + masa de stanca de deasupra
-    b.box((0.0, 0.0, TOP + 1.1), ((HALF_GAP + 5.2) * 2.0, 2.4, 2.2), HL_ROCK)
-    # Masa de deasupra: `rock` deseneaza o forma CENTRATA pe cota data, deci
-    # jumatatea de sus urca peste ea. Cu (H-TOP)*1.6 piesa ieea de 15,4 m in
-    # loc de ~11 (masurat pe GLB). Inaltimea conteaza: plafonul camerei de joc
-    # se deriva din frustum (memoria `inaltimea-obiectelor-si-camera`), iar
-    # portalul sta pe un turn care are deja 45-65 m.
-    b.rock((0.0, 0.0, TOP + 1.4), (W * 2.0, 2.6, (H - TOP) * 0.78), HL_ROCK,
+        b.rock((sx * (HALF_GAP + 1.9), 0.1, 1.5), (4.6, 2.6, 3.6), HL_ROCK,
+               seed=120 + int(sx * 3), segments=7, rings=3)
+        b.rock((sx * (HALF_GAP + 2.1), -0.1, 4.2), (4.2, 2.5, 3.2), HL_ROCK,
+               seed=131 + int(sx * 3), segments=7, rings=3)
+        # masa de sus a montantului pe rezolutie mica: e acoperita in mare
+        # parte de arcada si de masele de deasupra, deci fatetele ei nu se vad.
+        # 764 -> sub 700, bugetul piesei.
+        b.rock((sx * (HALF_GAP + 2.4), 0.05, 6.4), (3.8, 2.4, 2.6), HL_ROCK,
+               seed=142 + int(sx * 3), segments=5, rings=2)
+
+    # arcada de deasupra golului: doua mase care se intalnesc la mijloc, deci
+    # muchia de sus a golului e NEREGULATA, nu un buiandrug drept
+    for sx in (-1.0, 1.0):
+        b.rock((sx * 2.6, 0.0, TOP + 0.9), (7.4, 2.5, 3.0), HL_ROCK,
+               seed=155 + int(sx * 3), segments=7, rings=3)
+    # Masa de deasupra: TREI bucati suprapuse, nu una lata.
+    # Cu un singur `rock` de 15 m latime piesa citea DOLMEN — un lintel plat
+    # cu muchii drepte peste doi stalpi (plansa rundei 2). `rock` turteste
+    # forma cand o axa e mult mai mare decat celelalte, deci masa iesea placa.
+    # Trei mase de latimi si cote diferite se citesc ca perete de stanca.
+    # Cotele sunt COBORATE fata de prima incercare cu trei mase: la TOP+2,2 /
+    # +2,7 / +4,3 masele pluteau DEASUPRA montantilor, cu o dunga de cer intre
+    # ele, iar piesa ajunsese la 14,3 m si 776 tri (peste bugetul de 700).
+    # Acum se suprapun cu arcada (care are varful pe la TOP+2,4), deci peretele
+    # e continuu, si a treia masa merge pe segments=6/rings=2 ca sa incapa.
+    b.rock((-3.1, 0.1, TOP + 1.5), (7.6, 2.5, 3.4), HL_ROCK,
            seed=71, segments=7, rings=3)
-    # aripile laterale, ca piesa sa aiba 18 m
+    b.rock((3.4, -0.05, TOP + 1.9), (7.0, 2.4, 3.6), HL_ROCK,
+           seed=83, segments=7, rings=3)
+    b.rock((0.4, 0.05, TOP + 3.0), (6.2, 2.3, 2.6), HL_ROCK,
+           seed=97, segments=6, rings=2)
+
+    # aripile laterale, ca piesa sa aiba 18 m si sa se piarda in turn
     for sx in (-1.0, 1.0):
-        b.rock((sx * (W - 1.6), 0.0, 2.6), (4.4, 2.5, 5.6), HL_ROCK,
+        b.rock((sx * (W - 1.2), 0.0, 2.4), (5.0, 2.5, 5.2), HL_ROCK,
                seed=90 + int(sx), segments=7, rings=3)
-    # pragul: o placa CONTINUA, nu dale (prag de 15 cm = zid pentru fizica)
+
+    # pragul: placa CONTINUA (prag de 15 cm = zid pentru fizica intreaga)
     b.box((0.0, 0.0, 0.07), (HALF_GAP * 2.0, 2.4, 0.14), HL_ROCK)
     o_rock = b.to_object("Portal_Rock")
 
     # interiorul intunecat vizibil prin gol + stalactite scurte
     d = Builder()
     d.box((0.0, -1.15, TOP * 0.5 + 0.1), (HALF_GAP * 2.0, 0.1, TOP), HL_DARK)
-    for k in range(5):
-        x = -HALF_GAP + (2.0 * HALF_GAP) * (k + 0.5) / 5.0
+    # 4 stalactite pe segments=4 (erau 5 pe 6): sunt siluete negre pe fundal
+    # intunecat, vazute prin gol de la 30+ m, deci conturul e tot ce conteaza.
+    # 728 -> 696 din bugetul de 700.
+    for k in range(4):
+        x = -HALF_GAP + (2.0 * HALF_GAP) * (k + 0.5) / 4.0
         ln = 0.5 + (k % 3) * 0.32
         d.frustum((x, -0.55, TOP - ln * 0.5), 0.22, 0.03, ln, HL_ROCK_DARK,
-                  segments=6)
+                  segments=4)
     o_dark = d.to_object("Portal_Dark")
 
     objs = [o_rock, o_dark]
@@ -292,20 +321,20 @@ def build_ficus(variant):
         b.taper_sweep([(lean * 0.7, 0.06, trunk_h * 0.72),
                        (rx * 0.8, ry * 0.8, trunk_h * 0.34),
                        (rx, ry, 0.0)],
-                      [0.075, 0.055, 0.045], HL_WOOD, segments=4)
+                      [0.075, 0.055, 0.045], HL_WOOD, segments=3)
     # ramurile principale
     tips = []
     nb = 4 if a else 5
     for k in range(nb):
         ang = 28.0 + k * (360.0 / nb)
-        ln = (1.5 if a else 1.25)
+        ln = (1.05 if a else 0.92)   # mai scurte: coroana sta PESTE trunchi
         tx = math.cos(math.radians(ang)) * ln
         ty = math.sin(math.radians(ang)) * ln
         tz = trunk_h + (H - trunk_h) * (0.52 + 0.16 * (k % 3))
         b.taper_sweep([(lean, 0.08, trunk_h),
                        (tx * 0.55, ty * 0.55, (trunk_h + tz) * 0.5),
                        (tx, ty, tz)],
-                      [0.15, 0.10, 0.06], HL_WOOD, segments=4)
+                      [0.15, 0.10, 0.06], HL_WOOD, segments=3)
         tips.append((tx, ty, tz, ang))
     o_wood = b.to_object("Ficus_Wood")
 
@@ -317,11 +346,43 @@ def build_ficus(variant):
     # 672-840 tri, de doua ori bugetul. Coroana RARA (brief 1.6) vine din
     # DISTANTA dintre frunze, nu din numarul lor: o frunza mai mare pe fiecare
     # varf citeste mai deschis decat trei mici inghesuite, si costa o treime.
-    for i, (tx, ty, tz, ang) in enumerate(tips):
-        slot = HL_SCRUB if i % 3 != 1 else HL_LEAF_DARK
-        leaf_vfold(f, (tx, ty, tz), ang, 1.75 if a else 1.5,
-                   0.62, 0.26, slot, fold_deg=26.0, stations=3,
-                   thick=0.02, droop=0.30)
+    # DOUA frunze per varf de ramura, la +/-38 grade fata de axa ramurii.
+    #
+    # Prima taiere (de la 3 frunze la 1) a adus bugetul de la 672 la 160 tri,
+    # dar pe plansa ficusul citea CRENGI GOALE DE IARNA, nu coroana rara:
+    # taiasem dincolo de ce cere brief §1.6 ("rare si deschise, nu brocoli" —
+    # deschise, nu moarte). Masurat pe plansa: 4-5 frunze pe o coroana de 5 m
+    # lasa ramura vizibila pe toata lungimea ei.
+    # `stations=3` tine frunza la 40 tri in loc de 56, deci doua frunze costa
+    # cat 1,4 din vechile de 4 statii.
+    # 4 frunze per varf de ramura, la stations=2 (12 tri bucata in loc de 40).
+    # Doua pe varf si doua mai jos pe ramura, ca masa sa nu fie doar la capat.
+    # Coroana = PERNE de frunzis pe varfurile ramurilor, nu frunze individuale.
+    # Una per ramura, turtita (h ~ 0,42 din latime) si usor inclinata spre
+    # exterior, ca sa urmeze directia ramurii.
+    # "Rar si deschis" vine din GOLURILE dintre perne: ele stau pe varfuri
+    # departate, deci se vede cerul intre ele si silueta ramane citibila.
+    # `seg`/`rings` explicit (regula primitivelor): 7x3 e minimul care nu
+    # citeste poligonal la 30-40 m.
+    # TREI perne (84 tri bucata, masurat: 144 lemn + 3 x 84 = 396 din 400),
+    # bombate si suprapuse, nu patru discuri departate.
+    #
+    # `h = 0,62 * w` in loc de 0,42: la 0,42 pernele citeau ca PALARII pe bete
+    # (plansa rundei 4). O coroana de ficus e bombata, iar pernele trebuie sa
+    # se ATINGA intre ele ca sa dea o masa unica, cu goluri doar pe margini —
+    # exact ce inseamna "rar si deschis" (brief §1.6) la 30-40 m.
+    npil = 3
+    for i in range(npil):
+        tx, ty, tz, ang = tips[i % len(tips)]
+        # pernele se trag spre centru, ca sa se intrepatrunda
+        k = 0.58
+        px, py = tx * k, ty * k
+        w = (1.62 if a else 1.42) * (0.88 + 0.12 * (i % 2))
+        slot = HL_SCRUB if i != 1 else HL_LEAF_DARK
+        foliage_pillow(f, (px, py, tz - 0.1 + 0.22 * (i % 2)),
+                       w, w * 0.92, w * 0.62, slot,
+                       seed=20 + i * 7, bumps=1, seg=7, rings=3,
+                       tilt_deg=12.0, tilt_azim_deg=ang)
     o_leaf = f.to_object("Ficus_Leaf")
 
     objs = [o_wood, o_leaf]
@@ -346,15 +407,15 @@ def build_bamboo():
     # 5 tulpini, nu 7: un palc se citeste ca o MASA verticala si tulpinile din
     # interior cad in spatele celor de pe margine. Bugetul de 300 e strict
     # fiindca bambusul merge pe MultiMesh peste ~1000 de piese (brief 1.6).
-    for k in range(5):
-        ang = k * (360.0 / 5.0) + 11.0
+    for k in range(4):
+        ang = k * (360.0 / 4.0) + 11.0
         r = 0.16 + (k % 3) * 0.13
         x, y = math.cos(math.radians(ang)) * r, math.sin(math.radians(ang)) * r
         h = H * (0.74 + 0.26 * ((k * 7 % 5) / 4.0))
         tipx, tipy = x + (k % 3 - 1) * 0.30, y + (k % 2 - 0.5) * 0.26
         b.taper_sweep([(x, y, 0.0), (x * 1.1, y * 1.1, h * 0.55),
                        (tipx, tipy, h)],
-                      [0.055, 0.044, 0.026], HL_WOOD, segments=4)
+                      [0.055, 0.044, 0.026], HL_WOOD, segments=3)
         culms.append((tipx, tipy, h))
     o_culm = b.to_object("Bamboo_Culm")
 
@@ -362,14 +423,47 @@ def build_bamboo():
     # O frunza per tulpina (7), nu trei (21 = 840 tri pe un buget de 300).
     # La bambus silueta e TULPINA; frunzisul e doar o pata in treimea de sus,
     # iar pe MultiMesh la peste 1000 de piese fiecare triunghi se inmulteste.
-    # Frunze doar pe 4 din 5 tulpini: una rtamane goala, ce e si mai adevarat
-    # (nu fiecare tulpina de bambus are frunzis la aceeasi cota).
-    for i, (tx, ty, h) in enumerate(culms):
-        if i == 2:
-            continue
-        leaf_vfold(f, (tx, ty, h - 0.6), i * 137.0, 1.0, 0.24, 0.1,
-                   HL_SCRUB if i % 3 else HL_LEAF_DARK, fold_deg=20.0,
-                   stations=3, thick=0.015, droop=0.5)
+    # DOUA frunze pe fiecare tulpina, la cote diferite. Cu una singura (si una
+    # dintre tulpini complet goala) plansa arata PRAJINI, nu bambus: frunzisul
+    # e tot ce deosebeste un palc de bambus de niste bete infipte in pamant.
+    # Tulpinile au trecut pe segments=3 ca sa incapa frunzele in bugetul de 300.
+    # 4 frunze pe fiecare tulpina, esalonate pe treimea de sus, la stations=2.
+    # Cu 1-2 frunze palcul citea PRAJINI; frunzisul e tot ce deosebeste
+    # bambusul de niste bete infipte in pamant.
+    # MASA de frunzis, nu frunze — acelasi diagnostic ca la ficus, aplicat cu
+    # alta forma. Ficusul primeste perne BOMBATE si rotunde; un palc de bambus
+    # are frunzisul ca o pana INGUSTA SI INALTA care imbraca treimea de sus a
+    # tulpinilor. Cu 9 lamele separate palcul citea PRAJINI pe plansa, oricat
+    # de dese erau.
+    #
+    # Doua perne inalte (84 tri bucata) peste grupul de tulpini, la cote
+    # diferite, plus 3 lamele lungi pe contur care rup silueta ca sa nu iasa
+    # un simplu ou. Buget: 70 + 168 + 72 = 310... deci lamelele merg pe
+    # stations=2 si raman 3: 70 + 168 + 3 x 24 = 310 -> 2 lamele = 286.
+    hmax = max(c[2] for c in culms)
+    # Trei perne LATE, esalonate pe treimea de sus (de la hmax-0,55 pana la
+    # hmax-2,45): cu doua perne de 0,74 m pe tulpini de 7 m palcul citea
+    # ACADELE — doua bile pe bete. Frunzisul unui palc de bambus imbraca
+    # treimea superioara si e cam la fel de lat cat grupul de tulpini
+    # (~1,2 m aici), nu un ciucure la varf.
+    # Pernele stau pe TULPINI DIFERITE, nu concentric pe ax: cu toate trei in
+    # jurul axei palcul citea MARGELE PE ATA (plansa rundei 6) — o coloana de
+    # bile, nu un palc. Frunzisul de bambus pleaca din fiecare tulpina in
+    # parte, deci masele se desfac lateral si se suprapun doar partial.
+    for j in range(3):
+        cx, cy, ch = culms[j % len(culms)]
+        foliage_pillow(f, (cx * 1.45, cy * 1.45, ch - 0.5 - j * 0.72),
+                       1.15 - j * 0.11, 1.05 - j * 0.1, 0.78 - j * 0.06,
+                       HL_SCRUB if j != 1 else HL_LEAF_DARK,
+                       seed=40 + j * 11, bumps=1, seg=7,
+                       # perna de jos pe rings=2: e cea mai acoperita de
+                       # celelalte doua, deci rezolutia ei nu se vede.
+                       # 308 -> 286 din bugetul de 300.
+                       rings=3 if j < 2 else 2)
+    # Fara lamele de contur: 3 perne (252) + 5 tulpini (70) = 322 depaseste
+    # bugetul de 300, iar pernele sunt ce face silueta. Tulpinile scad la 4,
+    # deci 56 + 252 = 308... inca peste, deci pernele merg pe rings=2:
+    # masurat mai jos.
     o_leaf = f.to_object("Bamboo_Leaf")
 
     objs = [o_culm, o_leaf]

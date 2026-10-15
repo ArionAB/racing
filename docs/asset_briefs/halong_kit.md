@@ -13,6 +13,7 @@ Referințe vizuale:
 | fișier | ce e |
 |---|---|
 | `docs/track_briefs/img/halong_assets_v1.jpg` | **planșa de inventar** (11 rânduri, numele scrise sub fiecare piesă) |
+| `docs/track_briefs/img/halong_assets_v2_row1.jpg` | **rândul 1 regenerat** — versiunea bună a turnurilor (v1 era greșit, vezi mai jos) |
 | `docs/track_briefs/img/halong_diorama_v1.jpg` | diorama de referință (stil, proporții, lumină) |
 | `docs/track_briefs/img/halong_plan/halong_plan.png` | planul real al pistei, adnotat (unde stă fiecare piesă) |
 | `docs/track_briefs/halong.md` | brief-ul pistei; §4 paleta, §5 assets, §2 POI-urile |
@@ -23,12 +24,29 @@ Referințe vizuale:
 > macacul la **4,6 m** în loc de 0,5. Cotele din acest fișier sunt singurele
 > valabile. (Aceeași lecție, scrisă deja la Fiordland §9.1.)
 
-> **Rândul 1 al planșei v1 e GREȘIT și se ignoră.** Turnurile desenate se
-> lărgesc spre bază (măsurat pe `karst_tower_a`: 84 px la mijloc, **148 px** la
-> bază, adică +76%), adică sunt dealuri conice cu poală de bolovani. Forma
-> corectă e exact invers și e scrisă la §1.1. Dacă primești o planșă v2 cu
-> rândul 1 refăcut, ea are prioritate pentru siluetă, dar **cifrele de aici
-> rămân**.
+> **Rândul 1: se folosește v2, nu v1.** Rândul 1 al planșei v1 era greșit —
+> turnurile se lărgeau spre bază (măsurat pe `karst_tower_a`: 84 px la mijloc,
+> **148 px** la bază, adică +76%), adică dealuri conice cu poală de bolovani, nu
+> turnuri cu nișă de val. A fost regenerat, iar `halong_assets_v2_row1.jpg` e
+> versiunea bună. Măsurat pe ea, cu umbra de contact exclusă:
+>
+> | piesă | nișă/mijloc (prag ≤ 0,70) | h/r (prag ≥ 2,50) |
+> |---|---|---|
+> | `karst_tower_a` | **0,48** ✔ | **4,94** ✔ |
+> | `karst_tower_b` | **0,64** ✔ | **2,26** ✘ |
+> | `karst_tower_c` | **0,42** ✔ | **3,75** ✔ |
+>
+> `karst_tower_a` a trecut de la **1,76** (v1) la **0,48**. Banda udă stă acum
+> **în nișă** (luminanța cade la 50–70 la z 0,08–0,18, apoi urcă înapoi la
+> bază), fără talus de bolovani.
+>
+> **`karst_tower_b` e desenat mai îndesat decât cota lui** (h/r 2,26 față de
+> 2,81 din tabelul de mai jos): ar trebui cu ~20% mai îngust la mijloc.
+> Verificat că nu e artefact de măsurare — e un bloc unitar care se desface în
+> creastă dublă doar la vârf. Planșa a fost acceptată așa, fiindcă scopul
+> regenerării era nișa și ea e rezolvată pe toate trei. **La construcție se ia
+> cifra din tabel (h 45 m, r 16 m), nu silueta desenată.** `verify_halong.sh`
+> testează h/r pe GLB, deci abaterea nu poate ajunge în kit.
 
 ## 0. Regulile care nu se negociază
 

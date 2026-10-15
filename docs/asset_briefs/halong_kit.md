@@ -316,6 +316,30 @@ constructori ard bugetul și niciun critic nu mai rulează).
    `karst_ficus_a/b`, `bamboo_clump`, `scrub_tuft`, `belvedere_pavilion`,
    `macaque`, `karst_horizon_a/b/c`.
 
+> **KITUL E COMPLET (16 oct 2026).** 25 de GLB-uri, `VERDICT KIT: OK`.
+> Valul 1 livrase 6 din 7 piese — `grotto_portal` lipsea și a intrat cu
+> valul 3.
+>
+> **Două corecții de contract**, ambele din citit codul consumatorului, nu
+> brieful (memoria `brief-cere-glb-cod-il-face-deja`):
+>
+> 1. **Fundalul e UN fișier cu trei noduri**, `rocks/halong_horizon.glb` cu
+>    `KarstRow_A/B/C` — nu `karst_horizon_a/b/c.glb`. `Track._build_horizon`
+>    încarcă un singur `horizon_model` per temă și scoate din el câte un nod
+>    pe nume, prin `_extract_glb_node` + `horizon_picks` (track.gd:6251-6256).
+>    Trei fișiere ar fi însemnat că două nu se încarcă niciodată. Același
+>    tipar la `fiordland_horizon.glb` (4 noduri), kyoto, jodhpur.
+> 2. **Bărcile se verifică cu `--origin=waterline`, nu `--front=-Z`.**
+>    `--front` compară *aria* fețelor pe X cu cea pe Z, deci o carenă corect
+>    orientată îl pică mereu (bordurile lungi privesc lateral). Contractul
+>    „prova pe −Z" rămâne, măsurat pe geometrie în `verify_halong_boats.py`.
+>
+> **Ce rămâne pentru instanța de gameplay** (§0.3 — kitul nu atinge `scenes/`):
+> schimbul celor trei provizorii (`rock_large`, `harbour_quay`,
+> `fishing_boat`), clasa `karst_limestone`, iar în temă `horizon_model` +
+> `horizon_picks` pe `KarstRow_A/B/C` și `cast_shadow` OFF pe fundal
+> (memoria `caster-departat-fura-umbra`).
+
 După fiecare val: `verify_halong.sh`, preview din GLB, commit. Verdictul final
 al kitului e la volan, pe pistă, nu pe planșă.
 

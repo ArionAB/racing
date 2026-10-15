@@ -2976,10 +2976,29 @@ func _ready() -> void:
 	_apply_tint()
 	_apply_glow()
 	_apply_no_shadow()
+	if not Engine.is_editor_hint():
+		_hide_degenerate()
 	if auto_collision and not Engine.is_editor_hint():
 		_build_collision()
 
 
+## Piesele cu baza DEGENERATA (determinant ~0, o scara pe o axa = 0) se ascund
+## si se numesc in log (#530).
+##
+## Pe desktop o asemenea piesa nu se deseneaza deloc, deci nimeni nu vede ca e
+## stricata; pe rendererul Mobile insa iese ca o placa turtita, cu textura
+## intinsa in dungi. Asa au stat 6 saptamani cele 101 module ale zidului Vaii
+## Rosii pe Cappadocia: invizibile la dezvoltare, placi portocalii pe telefon.
+## Ascunderea face desktopul si telefonul sa arate la fel; avertismentul face
+## ca urmatoarea scena stricata sa nu mai treaca in tacere.
+func _hide_degenerate() -> void:
+	var models: Array[Node3D] = []
+	_collect_models(self, models)
+	for model in models:
+		if absf(model.global_transform.basis.determinant()) < 1e-6:
+			model.visible = false
+			push_warning("world_prop: %s are baza degenerata (det ~0) — ascunsa"
+				% get_path_to(model))
 ## Stinge umbra pe modelele din `NO_SHADOW_MODELS` (orizontul asezat de mana).
 ## Ruleaza DUPA rupturi (`_split_shutters`), ca sa prinda si copiii `_Accente`.
 func _apply_no_shadow() -> void:

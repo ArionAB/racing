@@ -98,7 +98,13 @@ check "buildings/floating_house_a.glb"       600 --origin=assembly --allow-car-s
 check "buildings/floating_house_b.glb"       600 --origin=assembly --allow-car-slots=House_Drums
 check "structures/fish_farm.glb"             400 --origin=assembly --allow-car-slots=Farm_Drums
 check "props/net_drying_rack.glb"            250
-check "structures/stone_quay.glb"            350
+# --origin=assembly: cheiul e si el COMPUS. `Quay_Stone` atinge solul (min Y =
+# 0,00 pe GLB), dar `Quay_Fittings` — babalele de pe coronament si cauciucurile
+# de amortizare de pe fata dinspre apa — incepe la 0,53 m si NU trebuie sa
+# atinga pamantul. Garda per-nod raporta corect "baza nu e la Y=0" aratand spre
+# cauciucuri. Flagul verifica in continuare ca ANSAMBLUL atinge solul, deci nu
+# slabeste nimic: un chei care ar pluti tot ar pica si acum.
+check "structures/stone_quay.glb"            350 --origin=assembly
 
 echo
 echo "== barci =="
@@ -128,9 +134,18 @@ check "animals/macaque.glb"                  350 --origin=assembly
 
 echo
 echo "== fundal =="
-check "rocks/karst_horizon_a.glb"            600 --origin=assembly
-check "rocks/karst_horizon_b.glb"            500 --origin=assembly
-check "rocks/karst_horizon_c.glb"            400 --origin=assembly
+# UN fisier cu TREI noduri, nu trei fisiere — corectat fata de brief §1.9 dupa
+# ce s-a citit consumatorul, nu brief-ul (memoria `brief-cere-glb-cod-il-face-
+# deja`, care a costat 4 piese fara consumator pe Machu Picchu).
+#
+# `Track._build_horizon` incarca UN singur `horizon_model` per tema si scoate
+# din el cate un nod pe nume, prin `_extract_glb_node` + steagul `horizon_picks`
+# (track.gd:6251-6256). Trei fisiere separate ar insemna ca doua dintre ele nu
+# s-ar incarca NICIODATA: tema n-are decat o cheie. Acelasi tipar la toate
+# pistele cu fundal propriu — `fiordland_horizon.glb` are 4 noduri
+# (FarWall_A/B, SnowRidge_A/B), `kyoto_horizon.glb` si `jodhpur_horizon.glb` la
+# fel. Bugetul e suma celor trei planuri din brief (600+500+400).
+check "rocks/halong_horizon.glb"            1500 --origin=assembly
 
 # --- SILUETA: contractul propriu al pistei -----------------------------------
 #

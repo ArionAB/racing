@@ -318,3 +318,19 @@ constructori ard bugetul și niciun critic nu mai rulează).
 
 După fiecare val: `verify_halong.sh`, preview din GLB, commit. Verdictul final
 al kitului e la volan, pe pistă, nu pe planșă.
+
+> **Proporția turnurilor: VALIDATĂ la volan (16 oct 2026).** Valul 2 a fost
+> ținut deliberat pe loc până la verdictul ăsta, fiindcă satul și bărcile se
+> dimensionează *relativ la turnuri*: casa de 4 m și jonca de 12 m nu au scară
+> proprie, ele citesc ca mici sau mari doar lângă un turn de 45–65 m. Dacă
+> `r_mid` s-ar fi schimbat după playtest, cele 8 piese ale valului 2 ar fi fost
+> construite pe o premisă moartă.
+>
+> Verdictul dezvoltatorului, pe pistă: **„acele turnuri par ok ca și înălțime"**.
+> Deci `h` și `r_mid` din tabelul §1.1 rămân neatinse, iar `karst_tower_b` își
+> păstrează h/r măsurat (**2,78** pe GLB — peste pragul 2,50, deși planșa îl
+> desena la 2,26). Valurile 2 și 3 se construiesc pe cotele existente.
+>
+> Ce NU s-a validat: nișa văzută de la viteză și repetiția siluetei pe 11
+> rotații. Amândouă sunt întrebări de *integrare* (câte variante, ce rotații),
+> nu de kit — se reiau la montarea decorului, nu aici.

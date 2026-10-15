@@ -55,16 +55,35 @@ extends Node3D
 ## Indexul benzii secundare pe care o inchide (in ordinea din Track.routes).
 @export var branch_index: int = 1
 
+## Cat de sus porneste raza de asezare pe teren si cat de jos merge (m).
+const DRAPE_UP: float = 3.0
+const DRAPE_DOWN: float = 120.0
+
 signal stage_changed(stage: int)
 
 var _stage: int = 0
 var _laps: int = 0
 var _meshes: Array[Node3D] = []
+## Stadiile deja asezate pe teren (vezi `_drape_stage`).
+var _draped := {}
 
 
 func _ready() -> void:
 	_collect()
 	_apply()
+	# Asezarea pe teren cere colizorul lumii, care la `_ready` inca nu e in
+	# spatiul fizic: masurat, toate cele 217 raze ale stadiului 1 cadeau in gol
+	# si limba ramanea exact cum venea din .glb. Se reia dupa primul pas de
+	# fizica, cand terenul exista (acelasi tipar ca adormirea din BumpProp).
+	if not Engine.is_editor_hint():
+		get_tree().physics_frame.connect(func() -> void:
+			# TOATE stadiile, nu doar cel curent: 2 si 3 apar la turul 2 si 3,
+			# iar atunci terenul de sub ele e acelasi. Asezarea costa cateva
+			# sute de raze o singura data, la pornirea cursei, in loc de un
+			# hopa vizibil exact in cadrul in care limba creste.
+			for si in _meshes.size():
+				_drape_stage(si)
+			_rebuild_collision(), CONNECT_ONE_SHOT)
 	# Grupul comun de "porti de banda" (Track.branch_is_open, generalizat sep
 	# 2026 pentru vaca de la Jodhpur): orice nod cu `branch_index` +
 	# `shortcut_open()` intra aici, ca pista sa-l gaseasca fara sa-i cunoasca
@@ -125,6 +144,144 @@ func _apply() -> void:
 		if m != null:
 			m.visible = (i == _stage)
 	_rebuild_collision()
+
+
+## CURGE PE TEREN, nu pluteste peste el (#512).
+##
+## Limba din .glb e o placa de 1 m grosime si pana la 48 m lungime, asezata cu
+## un singur transform: o inclinare medie, buna la coada si gresita peste tot
+## in rest. Masurat cu `ProbeLavaFit` pe Track11 inainte de reparatie, talpa
+## statea in aer cu mediana 0,84–1,37 m si pana la 96% din puncte peste 0,5 m —
+## adica o limba intreaga plutind la inaltimea unei masini.
+##
+## Aici fiecare vertex e COBORAT pe relief: o raza in jos din vertex gaseste
+## terenul, iar vertexul se muta la cota aia plus inaltimea lui fata de talpa
+## limbii (deci crusta isi pastreaza grosimea si bombarea, doar urmeaza panta).
+## Raza merge pe colizorul real al lumii, nu pe `TrackSideSampler.ground_y`:
+## limbile stau departe de sosea, pe flancul conului, iar `ground_y` deriva
+## terenul din punctele DRUMULUI si extrapoleaza acolo (memoria
+## `terrain-mesh-y-extrapoleaza` — exact asa ajung prop-urile sa pluteasca).
+##
+## Se face o SINGURA data per stadiu, la pornirea cursei (vezi `_ready`), nu pe
+## cadru si nu la schimbarea stadiului: sunt cateva sute de raze per stadiu,
+## iar terenul de sub limba e acelasi in toate trei.
+func _drape_stage(stage: int) -> void:
+	if Engine.is_editor_hint() or stage < 0 or stage >= _meshes.size():
+		return
+	var m := _meshes[stage] as MeshInstance3D
+	if m == null or m.mesh == null or _draped.has(stage):
+		return
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		if OS.get_environment("LAVA_DRAPE_TRACE") == "1":
+			print("[drape] %s stadiu %d: FARA space" % [name, stage + 1])
+		return
+	var src := m.mesh
+	var arrays := src.surface_get_arrays(0)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	if verts.is_empty():
+		return
+	var xf := m.global_transform
+	var inv := xf.affine_inverse()
+	# Reperul de la care se masoara inaltimea fiecarui vertex.
+	#
+	# NU minimul global: masurat pe `lava_flow.glb`, limba nu are burta — e o
+	# fata de sus la y~0,7-0,9 plus o fusta subtire de ~44-63 vertecsi la y=0.
+	# Cu minimul (0,0) ca reper, fata de sus pastra un `rise` de ~0,8 m si
+	# limba ramanea exact atat in aer (masurat: mediana 0,81, toate valorile
+	# gramada la 0,86 — offset fix, nu eroare de panta).
+	#
+	# Reperul e deci MEDIANA lui y: coada de jos a distributiei e fusta, iar
+	# corpul limbii se aseaza pe teren cu grosimea lui reala deasupra.
+	var ys: PackedFloat32Array = PackedFloat32Array()
+	for v in verts:
+		ys.append(v.y)
+	ys.sort()
+	var base_y: float = ys[ys.size() / 2]
+	# Cache de teren pe o grila de 1 m: vertecsii vin in grupuri dese, iar o
+	# raza per vertex ar fi de cateva ori mai multe decat e nevoie.
+	var cache := {}
+	var moved := 0
+	for i in verts.size():
+		var local := verts[i]
+		var w := xf * local
+		var key := Vector2i(roundi(w.x), roundi(w.z))
+		var gy: float = cache.get(key, INF)
+		if is_inf(gy):
+			gy = _ground_under(space, w)
+			cache[key] = gy
+		if is_inf(gy):
+			continue
+		# Inaltimea vertexului peste talpa, PE VERTICALA LUMII.
+		var foot_w := xf * Vector3(local.x, base_y, local.z)
+		var rise := w.y - foot_w.y
+		var target := Vector3(w.x, gy + rise, w.z)
+		if absf(target.y - w.y) > 0.01:
+			moved += 1
+		verts[i] = inv * target
+	if OS.get_environment("LAVA_DRAPE_TRACE") == "1":
+		print("[drape] %s stadiu %d: %d/%d vertecsi mutati" % [
+			name, stage + 1, moved, verts.size()])
+	if moved == 0:
+		return
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	# Normalele vin din .glb pentru placa PLANA; dupa ce vertecsii urmeaza
+	# panta, ele mint, iar crusta se umbreste ca si cum ar fi tot orizontala.
+	# Se recalculeaza din triunghiurile noi, cu acelasi criteriu de netezire
+	# ca importul (medie pe vertex).
+	arrays[Mesh.ARRAY_NORMAL] = _recalc_normals(verts,
+		arrays[Mesh.ARRAY_INDEX] as PackedInt32Array)
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	for si in src.get_surface_count():
+		if si == 0:
+			am.surface_set_material(0, src.surface_get_material(0))
+	m.mesh = am
+	_draped[stage] = true
+
+
+## Normale per vertex din triunghiurile date: media normalelor fetelor care
+## ating vertexul. Fara ele, o limba asezata pe panta ramane umbrita ca o placa
+## orizontala.
+func _recalc_normals(verts: PackedVector3Array,
+		idx: PackedInt32Array) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	out.resize(verts.size())
+	for i in out.size():
+		out[i] = Vector3.ZERO
+	var tri := idx.size() / 3
+	for t in tri:
+		var a := idx[t * 3]
+		var b := idx[t * 3 + 1]
+		var c := idx[t * 3 + 2]
+		var n := (verts[b] - verts[a]).cross(verts[c] - verts[a])
+		out[a] += n
+		out[b] += n
+		out[c] += n
+	for i in out.size():
+		var v := out[i]
+		out[i] = v.normalized() if v.length_squared() > 1e-12 else Vector3.UP
+	return out
+
+
+## Cota terenului sub un punct din lume, sau INF daca nu e nimic.
+##
+## Ignora corpurile propriei limbi (si pe ale celorlalte stadii): altfel prima
+## raza ar gasi crusta de deasupra si limba s-ar ridica singura, tur dupa tur.
+func _ground_under(space: PhysicsDirectSpaceState3D, w: Vector3) -> float:
+	var from := w + Vector3.UP * DRAPE_UP
+	var to := w + Vector3.DOWN * DRAPE_DOWN
+	var q := PhysicsRayQueryParameters3D.create(from, to)
+	for _try in 4:
+		var hit := space.intersect_ray(q)
+		if hit.is_empty():
+			return INF
+		var node := hit.collider as Node
+		if node != null and not is_ancestor_of(node):
+			return (hit.position as Vector3).y
+		# A lovit propria crusta: continua de sub ea.
+		q.from = (hit.position as Vector3) + Vector3.DOWN * 0.05
+	return INF
 
 
 ## Colizorul urmeaza stadiul (vezi antetul: de ce nu e treaba lui world_prop).

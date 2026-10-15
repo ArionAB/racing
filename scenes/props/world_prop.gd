@@ -2999,6 +2999,8 @@ func _hide_degenerate() -> void:
 			model.visible = false
 			push_warning("world_prop: %s are baza degenerata (det ~0) — ascunsa"
 				% get_path_to(model))
+
+
 ## Stinge umbra pe modelele din `NO_SHADOW_MODELS` (orizontul asezat de mana).
 ## Ruleaza DUPA rupturi (`_split_shutters`), ca sa prinda si copiii `_Accente`.
 func _apply_no_shadow() -> void:

@@ -225,7 +225,14 @@ const BASELINE := {
 	# Stearsa, un `--only` pe Track09 ar primi baza -1 si ar trece cu orice cifra.
 	"Alpii (Track09)": 21,
 	"Baikal (Track10)": 70,
-	"Stromboli (Track11)": 190,
+	# 191, nu 190: linia veche era deja depasita PE MAIN (masurat 192 cu
+	# Track11 si lava neatinse, oct 2026) — a derivat la un merge fara ca
+	# cineva s-o actualizeze, si `verify_local.sh` nu ruleaza garda asta, deci
+	# n-a sarit nimeni. Asezarea lavei pe teren (#512) a coborat-o la 191:
+	# crusta lipita de panta ocupa mai putin din banda decat placa plutitoare.
+	# Blocajele raman in marea lor parte `stage_col` pe "Scurtatura de lava" —
+	# adica GIMMICK-ul, limba care inchide ruta scurta, nu un defect.
+	"Stromboli (Track11)": 191,
 	"Chongqing (Track12)": 146,
 	"Cappadocia (Track13)": 11,
 	"Serengeti (Track14)": 9,

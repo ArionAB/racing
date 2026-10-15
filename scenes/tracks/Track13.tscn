@@ -16182,7 +16182,7 @@ transform = Transform3D(0.434, 0, -0.901, 0, 1.05, 0, 0.901, 0, 0.434, -336.978,
 metadata/coliziune = "none"
 
 [node name="Zid0_07" parent="DecorManual/G) Stanca goala/PereteInterior" unique_id=1553174054 instance=ExtResource("23_cliff")]
-transform = Transform3D(0, 0, -1, 0, 1.05, 0, 1, 0, 0, -340.82, 12, 6)
+transform = Transform3D(0, 0, -1, 0, 1.05, 0, 1, 0, 0, -342.42, 12, 6)
 metadata/coliziune = "none"
 
 [node name="Zid0_08" parent="DecorManual/G) Stanca goala/PereteInterior" unique_id=611935982 instance=ExtResource("23_cliff")]
@@ -16325,10 +16325,6 @@ metadata/coliziune = "none"
 
 [node name="Colt00" parent="DecorManual/G) Stanca goala/Creasta" unique_id=2024528939 instance=ExtResource("23_cliff")]
 transform = Transform3D(0, 0, 1.15, 0, 0.5, 0, -1.15, 0, 0, -258.357, 34, 16.886)
-metadata/coliziune = "none"
-
-[node name="Colt01" parent="DecorManual/G) Stanca goala/Creasta" unique_id=1272233448 instance=ExtResource("23_cliff")]
-transform = Transform3D(0.679, 0, 0.512, 0, 1.35, 0, -0.512, 0, 0.679, -268.211, 34, 38.649)
 metadata/coliziune = "none"
 
 [node name="Colt02" parent="DecorManual/G) Stanca goala/Creasta" unique_id=790862312 instance=ExtResource("23_cliff")]

@@ -37,7 +37,7 @@
 > **v0.4 (17 oct 2026), decizii:** ce cumpără masa = **(a) hazardele scalate
 > cu masa + (b) trece prin turmă/trafic fără să piardă viteza**, bara de
 > turbo neatinsă; pragul de veto pe ecart **8%, provizoriu**, se fixează
-> după prima rundă de retuning. Pasul 0 pornește cu sonda (`ProbeCarBalance`),
+> după prima rundă de retuning. Pasul 0 pornește cu sonda (`tools/car_balance.sh`),
 > apoi retuning-ul A/B.
 >
 > **v0.5 (17 oct 2026), măsurat:** sonda există — `tools/car_balance.sh`
@@ -499,7 +499,7 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    - **gimmick-urile trebuie să treacă cu orice mașină**: autobuzul se
      înțepenește azi pe kicker-ul din Serengeti (§2.1).
 
-   *Gardă:* `ProbeCarBalance` — matricea din §2.1 ca sondă, pe toate cele
+   *Gardă:* `tools/car_balance.sh` (PR #553) — matricea din §2.1 ca sondă, pe toate cele
    12 piste din carieră, cel puțin 2 seed-uri (nedeterminism), raportată ca
    tabel în log. Trei praguri: (i) **veto**: ecartul de best lap pe o pistă
    între cea mai rapidă și cea mai lentă mașină ≤ 8%, provizoriu până după

@@ -11,15 +11,33 @@ signal respawn_requested
 signal menu_requested
 signal results_primary # butonul principal din panoul de rezultate
 
-var _info: Label
+## Panoul de telemetrie (stanga-sus). Fiecare cifra are Label-ul ei: textul
+## compus intr-un singur blob nu se poate stiliza pe bucati (pozitia mare si
+## aurie, „/6" mica si gri), iar panoul astepta oricum sa fie citit dintr-o
+## privire, nu citit.
+var _info_panel: PanelContainer
+var _pos_label: Label      # cifra mare a pozitiei
+var _pos_total: Label      # „/6"
+var _lap_label: Label      # „LAP 1/3"
+var _speed_label: Label    # cifra vitezei
+var _time_label: Label     # timpul turului curent
+var _best_label: Label     # cel mai bun tur
+## A doua linie de detalii (record, cursa, pista, taste): sta sub panou si
+## apare doar in build de debug, unde chiar ai nevoie de ea.
+var _detail_label: Label
 var _countdown: Label
 var _message: Label
 ## Contorul de performanta (setare `GameState.show_perf`). Sus, centrat, ca
 ## sa nu se bata cu pozitia/turul (stanga) si cu pauza/minimapa (dreapta).
 var _perf: Label
 var _perf_clock: float = 0.0
-var _charge_bg: ColorRect
-var _charge_fill: ColorRect
+## Bara de turbo: jgheabul, umplutura si fulgerul din capatul stang.
+## `Panel` in loc de `ColorRect` ca sa aiba colturi rotunjite — bara dreptunghiulara
+## era singura forma cu colt ascutit ramasa pe ecran.
+var _charge_bg: Panel
+var _charge_fill: Panel
+var _charge_fill_style: StyleBoxFlat
+var _charge_bolt: Label
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -47,7 +65,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 	var root := Control.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Si offset-urile, nu doar ancorele: vezi TouchControls._ready().
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 
@@ -61,6 +80,7 @@ func _ready() -> void:
 	_pause_button.set_anchors_and_offsets_preset(
 		Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
 	_pause_button.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_style_hud_button(_pause_button, 16)
 	_pause_button.pressed.connect(_open_pause)
 	root.add_child(_pause_button)
 
@@ -73,9 +93,7 @@ func _ready() -> void:
 		_pause_panel.visible = true)
 	root.add_child(_settings)
 
-	_info = _make_label(24)
-	_info.position = Vector2(20, 14)
-	root.add_child(_info)
+	_build_info_panel(root)
 
 	# Minimapa sub butonul de pauza (dreapta-sus); populata de Race.
 	_minimap = Minimap.new()
@@ -93,9 +111,10 @@ func _ready() -> void:
 	# Un Button real cu mouse_filter STOP consuma evenimentul inaintea lui
 	# TouchControls, deci nu mai vireaza in acelasi timp. Butonul de pauza
 	# demonstreaza deja ca merge.
-	_respawn_button = _make_button("RESET")
+	_respawn_button = _make_button("↺  RESET")
 	_respawn_button.custom_minimum_size = Vector2(Minimap.MAP_SIZE, 52)
 	_respawn_button.add_theme_font_size_override("font_size", 20)
+	_style_hud_button(_respawn_button, 16)
 	_respawn_button.set_anchors_and_offsets_preset(
 		Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
 	_respawn_button.grow_horizontal = Control.GROW_DIRECTION_BEGIN
@@ -166,18 +185,181 @@ func _ready() -> void:
 
 	# Bara de TURBO (model Ignition): mereu vizibila, se umple din mers
 	# (mai repede in drift); o arzi cand vrei tu cu butonul de turbo.
-	_charge_bg = ColorRect.new()
-	_charge_bg.custom_minimum_size = Vector2(260, 20)
-	_charge_bg.color = Color(0, 0, 0, 0.45)
-	_charge_bg.set_anchors_and_offsets_preset(
-		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 44)
-	_charge_bg.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_charge_bg.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	root.add_child(_charge_bg)
-	_charge_fill = ColorRect.new()
+	_build_turbo_bar(root)
+
+# ----------------------------------------------------------------- stil
+#
+# Paleta HUD-ului, intr-un singur loc. HUD-ul sta peste o lume care isi
+# schimba culoarea de la pista la pista (nisip pe Okinawa, zapada pe Baikal,
+# noapte pe Chongqing), deci fundalurile sunt aproape-negre translucide, nu
+# tente colorate: singurele care raman lizibile peste orice tema.
+
+const PANEL_BG := Color(0.04, 0.05, 0.08, 0.72)
+const PANEL_BORDER := Color(1, 1, 1, 0.10)
+## Auriu de accent: pozitia, jucatorul in rezultate, bara plina.
+const ACCENT := Color(1.0, 0.78, 0.22)
+## Textul secundar (etichete, „/6", unitati): gri-albastrui, vizibil dar
+## clar subordonat cifrelor.
+const DIM := Color(0.62, 0.68, 0.78)
+
+## Cutia translucida cu colturi rotunjite folosita de panoul de telemetrie si
+## de butoane. `radius` in px, `bg` implicit fundalul de panou.
+static func _panel_style(radius: int, bg: Color = PANEL_BG,
+		border: Color = PANEL_BORDER) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.set_corner_radius_all(radius)
+	sb.border_color = border
+	sb.set_border_width_all(1)
+	return sb
+
+
+## Butoanele care stau PESTE cursa (pauza, reset): aceeasi cutie translucida
+## ca panoul de telemetrie, ca sa se citeasca drept acelasi strat de HUD.
+## Butoanele din meniuri (pauza, rezultate) raman cu stilul temei — acolo
+## fundalul e un panou, nu lumea.
+func _style_hud_button(button: Button, radius: int) -> void:
+	button.add_theme_stylebox_override("normal", _panel_style(radius))
+	button.add_theme_stylebox_override("hover",
+		_panel_style(radius, Color(0.10, 0.12, 0.17, 0.80)))
+	button.add_theme_stylebox_override("pressed",
+		_panel_style(radius, Color(0.02, 0.03, 0.05, 0.88)))
+	button.add_theme_stylebox_override("disabled",
+		_panel_style(radius, Color(0.04, 0.05, 0.08, 0.45),
+			Color(1, 1, 1, 0.05)))
+	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	button.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.30))
+
+
+## Panoul de telemetrie din stanga-sus: pozitia mare, turul, viteza, timpii.
+## Ordinea e cea a nevoii in cursa — unde sunt, al catelea tur, cat de repede
+## merg, cat am facut — nu ordinea in care le calculeaza `Race`.
+func _build_info_panel(root: Control) -> void:
+	_info_panel = PanelContainer.new()
+	_info_panel.add_theme_stylebox_override("panel", _panel_style(14))
+	_info_panel.position = Vector2(16, 14)
+	_info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_info_panel)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 16)
+	margin.add_theme_constant_override("margin_right", 20)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	_info_panel.add_child(margin)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 2)
+	# Latime minima: altfel panoul se stramteaza pe randul cel mai scurt si
+	# taie „BEST". Fixa si pentru ca un panou care isi schimba latimea cand
+	# treci de la locul 9 la 10, sau viteza de la 99 la 100, palpaie in coltul
+	# ochiului tocmai cand te uiti in alta parte.
+	box.custom_minimum_size = Vector2(176, 0)
+	margin.add_child(box)
+
+	# Randul de sus: pozitia (mare) | separator | LAP x/y.
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 10)
+	box.add_child(top)
+	_pos_label = _make_label(54)
+	_pos_label.add_theme_color_override("font_color", ACCENT)
+	_pos_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	top.add_child(_pos_label)
+	_pos_total = _make_label(22, false)
+	_pos_total.add_theme_color_override("font_color", DIM)
+	# „/6" vrea sa stea pe linia de BAZA a cifrei mari. `SIZE_SHRINK_END` il
+	# lipeste de marginea de jos a randului, care e mai joasa decat baza
+	# cifrei (acolo incap si coada lui „g", si conturul) — si cade sub ea.
+	# Il centram si il coboram cu diferenta dintre cele doua marimi de font,
+	# care e exact cat tine descendentul cifrei mari.
+	# Coborarea se face cu un MarginContainer, nu cu `position`: intr-un HBox,
+	# pozitia copilului e rescrisa de asezare la fiecare redimensionare.
+	_pos_total.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var pos_total_pad := MarginContainer.new()
+	pos_total_pad.add_theme_constant_override("margin_top", 16)
+	pos_total_pad.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	pos_total_pad.add_child(_pos_total)
+	top.add_child(pos_total_pad)
+	var sep := ColorRect.new()
+	sep.color = Color(1, 1, 1, 0.18)
+	sep.custom_minimum_size = Vector2(1, 34)
+	sep.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(sep)
+	_lap_label = _make_label(24, false)
+	_lap_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	top.add_child(_lap_label)
+
+	# Randurile de dedesubt: viteza, timpul turului, cel mai bun tur.
+	_speed_label = _make_label(34)
+	box.add_child(_speed_label)
+	_time_label = _make_label(30)
+	box.add_child(_time_label)
+	_best_label = _make_label(17, false)
+	_best_label.add_theme_color_override("font_color", DIM)
+	box.add_child(_best_label)
+
+	# Detaliile de dezvoltare stau SUB panou, nu in el: recordurile si tastele
+	# nu se citesc in cursa, iar in panou ar ingrosa exact zona pe care ochiul
+	# o verifica cel mai des.
+	_detail_label = _make_label(15, false)
+	_detail_label.add_theme_color_override("font_color", DIM)
+	_detail_label.visible = OS.is_debug_build()
+	root.add_child(_detail_label)
+	# Pozitia se ia de la panou DUPA ce se aseaza, nu dintr-o cifra ghicita:
+	# inaltimea panoului depinde de font si de marimile de mai sus, iar un
+	# `y` fix a ajuns deja peste randul BEST.
+	_info_panel.resized.connect(_place_detail_label)
+	_place_detail_label()
+
+
+func _place_detail_label() -> void:
+	_detail_label.position = _info_panel.position \
+		+ Vector2(4, _info_panel.size.y + 8)
+
+
+## Bara de TURBO (model Ignition): mereu vizibila, se umple din mers (mai
+## repede in drift); o arzi cand vrei tu. Fulgerul din stanga e acolo ca bara
+## sa spuna CE se incarca fara eticheta — la 260 px latime nu incape un
+## cuvant, iar in cursa nimeni nu citeste cuvinte.
+const CHARGE_W: float = 300.0
+const CHARGE_H: float = 22.0
+
+func _build_turbo_bar(root: Control) -> void:
+	var holder := HBoxContainer.new()
+	holder.add_theme_constant_override("separation", 10)
+	holder.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 40)
+	holder.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	holder.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(holder)
+
+	_charge_bolt = _make_label(24)
+	_charge_bolt.text = "⚡"
+	_charge_bolt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	holder.add_child(_charge_bolt)
+
+	_charge_bg = Panel.new()
+	_charge_bg.custom_minimum_size = Vector2(CHARGE_W, CHARGE_H)
+	# Fara asta, HBox-ul intinde jgheabul pe inaltimea randului (data de
+	# fulger, care e mai inalt), iar umplutura — desenata la CHARGE_H — lasa o
+	# dunga goala dedesubt. Centrat vertical, jgheabul isi pastreaza inaltimea.
+	_charge_bg.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_charge_bg.add_theme_stylebox_override("panel",
+		_panel_style(int(CHARGE_H * 0.5), Color(0, 0, 0, 0.55)))
+	_charge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(_charge_bg)
+
+	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
+	# marginea intunecata sa ramana vizibila si cand bara e plina.
+	_charge_fill_style = _panel_style(int((CHARGE_H - 6.0) * 0.5),
+		Color(0.3, 0.8, 0.9), Color(0, 0, 0, 0))
+	_charge_fill = Panel.new()
+	_charge_fill.add_theme_stylebox_override("panel", _charge_fill_style)
 	_charge_fill.position = Vector2(3, 3)
-	_charge_fill.size = Vector2(0, 14)
+	_charge_fill.size = Vector2(0, CHARGE_H - 6.0)
+	_charge_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_charge_bg.add_child(_charge_fill)
+
 
 func _build_pause_panel(root: Control) -> void:
 	_pause_panel = PanelContainer.new()
@@ -224,6 +406,7 @@ func _make_button(text: String) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.custom_minimum_size = Vector2(220, 60)
+	button.add_theme_font_override("font", FONT_MEDIUM)
 	button.add_theme_font_size_override("font_size", 24)
 	return button
 
@@ -395,18 +578,61 @@ func _gfx_line() -> String:
 		glow, star.call(GameState.dbg_glow > 0)]
 
 
-func _make_label(font_size: int) -> Label:
+## Fontul HUD-ului: Barlow Condensed (SIL OFL, vezi
+## `assets/fonts/LICENSE_barlow_OFL.txt`). Condensat fiindca panoul de
+## telemetrie e ingust si cifrele se schimba des — „142 km/h" si „00:05.5"
+## trebuie sa incapa fara sa lateasca panoul la fiecare accelerare.
+##
+## `preload`, nu `load`: fonturile intra o data, la compilarea scriptului, nu
+## la fiecare cursa.
+const FONT_BOLD := preload("res://assets/fonts/BarlowCondensed-SemiBold.ttf")
+const FONT_MEDIUM := preload("res://assets/fonts/BarlowCondensed-Medium.ttf")
+
+## `bold` = cifrele care se citesc dintr-o privire (pozitie, viteza, timp).
+## Restul (etichete, butoane, mesaje) merg pe Medium: la aceeasi marime,
+## SemiBold peste tot ar face HUD-ul sa tipe uniform si n-ar mai exista
+## ierarhie.
+func _make_label(font_size: int, bold: bool = true) -> Label:
 	var label := Label.new()
+	label.add_theme_font_override("font", FONT_BOLD if bold else FONT_MEDIUM)
 	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-	label.add_theme_constant_override("outline_size", 7)
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	# Conturul se scaleaza cu textul, nu e fix: 7 px erau potriviti pe fontul
+	# implicit, gros, dar pe Barlow Condensed — litere subtiri si apropiate —
+	# umpleau golurile din „e"/„a" si randul mic iesea o pata. Aici conturul
+	# desparte textul de lume; cand devine mai gros decat linia literei, face
+	# exact pe dos.
+	label.add_theme_constant_override("outline_size",
+		maxi(3, roundi(font_size * 0.16)))
 	return label
 
 func setup_minimap(track: Track, cars: Array[Car]) -> void:
 	_minimap.setup(track, cars)
 
-func set_info(text: String) -> void:
-	_info.text = text
+## Telemetria cursei, pe campuri separate: HUD-ul decide cum arata fiecare
+## cifra, `Race` doar spune cat e. `speed_kmh` vine deja in km/h.
+func set_info(position: int, total_cars: int, lap: int, total_laps: int,
+		speed_kmh: float, lap_time: String, best_lap: String) -> void:
+	_pos_label.text = str(position)
+	_pos_total.text = "/%d" % total_cars
+	_lap_label.text = "LAP %d/%d" % [lap, total_laps]
+	_speed_label.text = "%.0f km/h" % speed_kmh
+	_time_label.text = lap_time
+	_best_label.text = "BEST  %s" % best_lap
+
+
+## Linia de dezvoltare de sub panou (recorduri, pista, taste). Ascunsa in
+## build-ul de release — vezi `_detail_label`.
+func set_detail(text: String) -> void:
+	if not _detail_label.visible:
+		return
+	_detail_label.text = text
+
+
+## Ca apelantul sa nu compuna degeaba un sir in fiecare cadru intr-un build
+## unde linia nici nu se afiseaza.
+func wants_detail() -> bool:
+	return _detail_label.visible
 
 func show_countdown(text: String) -> void:
 	_countdown.text = text
@@ -490,10 +716,18 @@ func flash_message(text: String) -> void:
 	tw.tween_property(_message, "modulate:a", 0.0, 0.5)
 
 func set_turbo(charge: float, boosting: bool) -> void:
-	_charge_fill.size.x = 254.0 * clampf(charge, 0.0, 1.0)
+	var filled := clampf(charge, 0.0, 1.0)
+	# Dimensiunile se iau de la jgheab, nu din constante: daca layout-ul il
+	# intinde vreodata altfel, umplutura il urmeaza in loc sa lase o dunga.
+	_charge_fill.size = Vector2(
+		(_charge_bg.size.x - 6.0) * filled, _charge_bg.size.y - 6.0)
+	var color := Color(0.3, 0.8, 0.9)             # se incarca
 	if boosting:
-		_charge_fill.color = Color(1.0, 0.55, 0.1) # arde
-	elif charge >= 1.0:
-		_charge_fill.color = Color(1.0, 0.9, 0.2)  # plina, gata de foc
-	else:
-		_charge_fill.color = Color(0.3, 0.8, 0.9)  # se incarca
+		color = Color(1.0, 0.55, 0.1)              # arde
+	elif filled >= 1.0:
+		color = Color(1.0, 0.9, 0.2)               # plina, gata de foc
+	_charge_fill_style.bg_color = color
+	# Fulgerul se aprinde in culoarea barii cand ai ce arde si sta stins cat
+	# timp se incarca: semnalul „apasa ACUM" fara inca un element pe ecran.
+	_charge_bolt.modulate = color if (boosting or filled >= 1.0) \
+		else Color(1, 1, 1, 0.45)

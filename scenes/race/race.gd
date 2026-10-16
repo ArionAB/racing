@@ -857,11 +857,14 @@ func _update_hud() -> void:
 	var race_text := _fmt_ms(race_ms) if state != State.COUNTDOWN else "--:--.-"
 	var race_rec_ms := GameState.best_race(GameState.selected_track)
 	var race_rec_text := _fmt_ms(race_rec_ms) if race_rec_ms > 0 else "--:--.-"
-	var info := "%3.0f km/h   pos %d/%d   lap %d/%d%s\nlap:  %s   race: %s\nbest: %s   rec: %s   race rec: %s\n%s on %s   [SPACE] turbo  [SHIFT] drift%s" % [
-		player.horizontal_speed() * 3.6, player.race_position, cars.size(),
-		lap_no, GameState.total_laps, champ_line, lap_text, race_text, best_text,
-		record_text, race_rec_text, player.car_name, _track_title(), cam_hint]
-	hud.set_info(info)
+	hud.set_info(player.race_position, cars.size(), lap_no, GameState.total_laps,
+		player.horizontal_speed() * 3.6, lap_text, best_text)
+	# Recordurile, pista si tastele: sub panou, doar in build de debug. In
+	# cursa nu le citeste nimeni, dar la reglat feel-ul sunt exact ce vrei.
+	if hud.wants_detail():
+		hud.set_detail("race: %s   rec: %s   race rec: %s%s\n%s on %s   [SPACE] turbo  [SHIFT] drift%s" % [
+			race_text, record_text, race_rec_text, champ_line,
+			player.car_name, _track_title(), cam_hint])
 	hud.set_turbo(player.turbo_charge, player.is_boosting)
 
 

@@ -90,7 +90,12 @@ check "rocks/shore_boulder.glb"              150
 
 echo
 echo "== grota =="
-check "structures/grotto_portal.glb"         700
+# --origin=assembly: piesa e COMPUSA. `Portal_Rock` atinge solul (min Y = 0,000
+# pe GLB), dar `Portal_Dark` — fundul intunecat vizibil prin gol si stalactitele
+# scurte — incepe la 0,10 m si NU trebuie sa atinga pragul: ar astupa exact
+# golul pe care il incadreaza. Garda per-nod raporta corect "baza nu e la Y=0"
+# aratand spre interiorul grotei.
+check "structures/grotto_portal.glb"         700 --origin=assembly
 
 echo
 echo "== satul plutitor =="
@@ -98,13 +103,36 @@ check "buildings/floating_house_a.glb"       600 --origin=assembly --allow-car-s
 check "buildings/floating_house_b.glb"       600 --origin=assembly --allow-car-slots=House_Drums
 check "structures/fish_farm.glb"             400 --origin=assembly --allow-car-slots=Farm_Drums
 check "props/net_drying_rack.glb"            250
-check "structures/stone_quay.glb"            350
+# --origin=assembly: cheiul e si el COMPUS. `Quay_Stone` atinge solul (min Y =
+# 0,00 pe GLB), dar `Quay_Fittings` — babalele de pe coronament si cauciucurile
+# de amortizare de pe fata dinspre apa — incepe la 0,53 m si NU trebuie sa
+# atinga pamantul. Garda per-nod raporta corect "baza nu e la Y=0" aratand spre
+# cauciucuri. Flagul verifica in continuare ca ANSAMBLUL atinge solul, deci nu
+# slabeste nimic: un chei care ar pluti tot ar pica si acum.
+check "structures/stone_quay.glb"            350 --origin=assembly
 
 echo
 echo "== barci =="
-check "vehicles/fishing_junk.glb"            800 --origin=assembly --allow-slots=7 --front=-Z
-check "vehicles/sampan_a.glb"                400 --origin=assembly --front=-Z
-check "vehicles/basket_boat.glb"             200
+# --origin=waterline, nu `assembly` + `--front=-Z`, si asta e o CORECTIE a
+# garzii, nu o relaxare ca sa treaca piesele:
+#
+#  1. `waterline` e contractul fizic al unei barci — Y=0 e nivelul marii, chila
+#     coboara sub el, puntea sta peste. E MAI STRANS decat `assembly`: o barca
+#     exportata cu baza la zero (deci plutind cu totul peste apa, ca o jucarie
+#     pe gresie) pica acum, iar cu `assembly` trecea. Exact flagul cu care
+#     Okinawa verifica feribotul, cargoul si barca de pescuit
+#     (verify_okinawa_v2.sh:118-120).
+#  2. `--front=-Z` nu se poate folosi pe o CARENA. Verificarea compara ARIA
+#     fetelor orientate pe X cu cea pe Z (verify_glb.py:388-390), ce merge
+#     pentru un semn plat. La o barca, bordurile lungi privesc pe +/-X si
+#     capetele ascutite pe +/-Z, deci o barca CORECT orientata raporteaza
+#     mereu "plan dominant X". Masurat pe GLB-urile de aici: jonca are
+#     lungimea pe Z (12,00 m pe Z, 4,60 pe X) si sampanul la fel — orientarea
+#     cerut de brief §1.4 e respectata, doar testul masura altceva. Lungimea pe
+#     Z e verificata mai jos, pe cifra.
+check "vehicles/fishing_junk.glb"            800 --origin=waterline --allow-slots=7
+check "vehicles/sampan_a.glb"                400 --origin=waterline
+check "vehicles/basket_boat.glb"             200 --origin=waterline
 
 echo
 echo "== drum =="
@@ -113,9 +141,18 @@ check "structures/stone_dike.glb"            250
 
 echo
 echo "== vegetatie =="
-check "plants/karst_ficus_a.glb"             400
-check "plants/karst_ficus_b.glb"             400
-check "plants/bamboo_clump.glb"              300
+# --origin=assembly pe piesele cu FRUNZIS separat, din exact acelasi motiv ca
+# la turnuri (`Tower_Scrub`): o planta se sparge in lemn + frunze, fiindca la
+# integrare lemnul si frunzisul iau sloturi diferite (brief §0.6). Nodul de
+# frunze NU atinge niciodata pamantul — masurat pe GLB, `Ficus_Wood` merge de
+# la 0,000 la 5,486 iar `Ficus_Leaf` de la 4,072 la 5,777. O garda per-nod ar
+# cere ca frunzele sa stea pe sol, ceea ce ar fi o planta culcata.
+# `scrub_tuft` rtamane pe --origin=base: tufa e UN nod (miez + frunze impreuna,
+# la 0,8 m nu merita spart), deci regula per-nod i se aplica si trebuie sa stea
+# pe sol.
+check "plants/karst_ficus_a.glb"             400 --origin=assembly
+check "plants/karst_ficus_b.glb"             400 --origin=assembly
+check "plants/bamboo_clump.glb"              300 --origin=assembly
 check "plants/scrub_tuft.glb"                120
 
 echo
@@ -128,9 +165,18 @@ check "animals/macaque.glb"                  350 --origin=assembly
 
 echo
 echo "== fundal =="
-check "rocks/karst_horizon_a.glb"            600 --origin=assembly
-check "rocks/karst_horizon_b.glb"            500 --origin=assembly
-check "rocks/karst_horizon_c.glb"            400 --origin=assembly
+# UN fisier cu TREI noduri, nu trei fisiere — corectat fata de brief §1.9 dupa
+# ce s-a citit consumatorul, nu brief-ul (memoria `brief-cere-glb-cod-il-face-
+# deja`, care a costat 4 piese fara consumator pe Machu Picchu).
+#
+# `Track._build_horizon` incarca UN singur `horizon_model` per tema si scoate
+# din el cate un nod pe nume, prin `_extract_glb_node` + steagul `horizon_picks`
+# (track.gd:6251-6256). Trei fisiere separate ar insemna ca doua dintre ele nu
+# s-ar incarca NICIODATA: tema n-are decat o cheie. Acelasi tipar la toate
+# pistele cu fundal propriu — `fiordland_horizon.glb` are 4 noduri
+# (FarWall_A/B, SnowRidge_A/B), `kyoto_horizon.glb` si `jodhpur_horizon.glb` la
+# fel. Bugetul e suma celor trei planuri din brief (600+500+400).
+check "rocks/halong_horizon.glb"            1500 --origin=assembly
 
 # --- SILUETA: contractul propriu al pistei -----------------------------------
 #
@@ -149,6 +195,27 @@ if [ -n "$PROFILE_TARGETS" ]; then
   python tools/blender/verify_karst_profile.py $PROFILE_TARGETS || fail=1
 else
   echo "  (nicio piesa de turn exportata inca)"
+fi
+
+# --- ORIENTAREA BARCILOR: contractul brief §1.4 ------------------------------
+#
+# Exista separat fiindca `--front=-Z` a fost SCOS de pe jonca si sampan (vezi
+# motivul la secttiunea "barci"). Contractul "prova pe -Z Godot" rtamane insa,
+# iar pe Machu Picchu orientarea greita a unui tren a costat o runda intreaga.
+# Masurat pe geometrie, nu pe arie: lungimea pe Z, prova ascutita la capatul
+# -Z, si cotele din tabel (12 / 7 / 2 m).
+echo
+echo "== orientarea si cotele barcilor (brief §1.4) =="
+if [ -f "$ROOT/vehicles/fishing_junk.glb" ]; then
+  python tools/blender/verify_halong_boats.py || fail=1
+  if python tools/blender/verify_halong_boats.py --sabotaj > /dev/null 2>&1; then
+    echo "  [OK] sabotajul (X<->Z) pica, cum trebuie"
+  else
+    echo "  !! SABOTAJUL N-A PRINS: garda de orientare nu masoara nimic"
+    fail=1
+  fi
+else
+  echo "  (nicio barca exportata inca)"
 fi
 
 # Garda de siluetă se ARMEAZA la fiecare rulare: daca sabotajul (un con in

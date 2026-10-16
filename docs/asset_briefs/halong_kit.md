@@ -316,5 +316,45 @@ constructori ard bugetul și niciun critic nu mai rulează).
    `karst_ficus_a/b`, `bamboo_clump`, `scrub_tuft`, `belvedere_pavilion`,
    `macaque`, `karst_horizon_a/b/c`.
 
+> **KITUL E COMPLET (16 oct 2026).** 25 de GLB-uri, `VERDICT KIT: OK`.
+> Valul 1 livrase 6 din 7 piese — `grotto_portal` lipsea și a intrat cu
+> valul 3.
+>
+> **Două corecții de contract**, ambele din citit codul consumatorului, nu
+> brieful (memoria `brief-cere-glb-cod-il-face-deja`):
+>
+> 1. **Fundalul e UN fișier cu trei noduri**, `rocks/halong_horizon.glb` cu
+>    `KarstRow_A/B/C` — nu `karst_horizon_a/b/c.glb`. `Track._build_horizon`
+>    încarcă un singur `horizon_model` per temă și scoate din el câte un nod
+>    pe nume, prin `_extract_glb_node` + `horizon_picks` (track.gd:6251-6256).
+>    Trei fișiere ar fi însemnat că două nu se încarcă niciodată. Același
+>    tipar la `fiordland_horizon.glb` (4 noduri), kyoto, jodhpur.
+> 2. **Bărcile se verifică cu `--origin=waterline`, nu `--front=-Z`.**
+>    `--front` compară *aria* fețelor pe X cu cea pe Z, deci o carenă corect
+>    orientată îl pică mereu (bordurile lungi privesc lateral). Contractul
+>    „prova pe −Z" rămâne, măsurat pe geometrie în `verify_halong_boats.py`.
+>
+> **Ce rămâne pentru instanța de gameplay** (§0.3 — kitul nu atinge `scenes/`):
+> schimbul celor trei provizorii (`rock_large`, `harbour_quay`,
+> `fishing_boat`), clasa `karst_limestone`, iar în temă `horizon_model` +
+> `horizon_picks` pe `KarstRow_A/B/C` și `cast_shadow` OFF pe fundal
+> (memoria `caster-departat-fura-umbra`).
+
 După fiecare val: `verify_halong.sh`, preview din GLB, commit. Verdictul final
 al kitului e la volan, pe pistă, nu pe planșă.
+
+> **Proporția turnurilor: VALIDATĂ la volan (16 oct 2026).** Valul 2 a fost
+> ținut deliberat pe loc până la verdictul ăsta, fiindcă satul și bărcile se
+> dimensionează *relativ la turnuri*: casa de 4 m și jonca de 12 m nu au scară
+> proprie, ele citesc ca mici sau mari doar lângă un turn de 45–65 m. Dacă
+> `r_mid` s-ar fi schimbat după playtest, cele 8 piese ale valului 2 ar fi fost
+> construite pe o premisă moartă.
+>
+> Verdictul dezvoltatorului, pe pistă: **„acele turnuri par ok ca și înălțime"**.
+> Deci `h` și `r_mid` din tabelul §1.1 rămân neatinse, iar `karst_tower_b` își
+> păstrează h/r măsurat (**2,78** pe GLB — peste pragul 2,50, deși planșa îl
+> desena la 2,26). Valurile 2 și 3 se construiesc pe cotele existente.
+>
+> Ce NU s-a validat: nișa văzută de la viteză și repetiția siluetei pe 11
+> rotații. Amândouă sunt întrebări de *integrare* (câte variante, ce rotații),
+> nu de kit — se reiau la montarea decorului, nu aici.

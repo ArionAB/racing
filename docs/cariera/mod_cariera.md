@@ -33,6 +33,12 @@
 > pushover și „câștigi mașina rivalului” e un premiu gol. Decizia: **pasul 0,
 > echilibrul garajului, înaintea carierei** (§11), cu matricea ca gardă.
 > Rivalii (§5) rămân, dar pista fiecăruia o aleg datele, după pasul 0.
+>
+> **v0.4 (17 oct 2026), decizii:** ce cumpără masa = **(a) hazardele scalate
+> cu masa + (b) trece prin turmă/trafic fără să piardă viteza**, bara de
+> turbo neatinsă; pragul de veto pe ecart **8%, provizoriu**, se fixează
+> după prima rundă de retuning. Pasul 0 pornește cu sonda (`ProbeCarBalance`),
+> apoi retuning-ul A/B.
 
 ## 0. Într-o propoziție
 
@@ -465,19 +471,20 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
      Buggy = agil + **off-road** (pierde mai puțin din cei 45% pe
      iarbă/nisip — e un buggy);
    - **masa plătește și fără contact**, altfel Pompierii și Autobuzul n-au
-     ce vinde. Trei candidați, se aleg **două** (§12): (a) hazardele scalate
-     cu masa — `car_thrown`, `spun`, `splashed`, `blinded` aplică efectul ×
+     ce vinde. **Decis (17 oct):** (a) hazardele scalate cu masa —
+     `car_thrown`, `spun`, `splashed`, `blinded` aplică efectul ×
      1/`mass_factor`, autobuzul nu e aruncat de carul de Gion; (b) trec prin
      turmă, tuk-tuk-uri și bolovani fără să piardă viteza (`animal_hit`
-     deja poartă `mass_ratio`); (c) rezervor de turbo mai mare sau
-     încărcare mai rapidă (motor mare);
+     deja poartă `mass_ratio`). Respins: rezervor de turbo mai mare — bara
+     de turbo e identitatea comună a jocului și nu se atinge per mașină;
    - **gimmick-urile trebuie să treacă cu orice mașină**: autobuzul se
      înțepenește azi pe kicker-ul din Serengeti (§2.1).
 
    *Gardă:* `ProbeCarBalance` — matricea din §2.1 ca sondă, pe toate cele
    12 piste din carieră, cel puțin 2 seed-uri (nedeterminism), raportată ca
    tabel în log. Trei praguri: (i) **veto**: ecartul de best lap pe o pistă
-   între cea mai rapidă și cea mai lentă mașină ≤ 8% (azi 26–27%); (ii)
+   între cea mai rapidă și cea mai lentă mașină ≤ 8%, provizoriu până după
+   prima rundă de retuning (azi 26–27%); (ii)
    **veto**: nicio mașină cu blocaje/repuneri pe gimmick peste linia de
    bază a pistei din `ProbeRace`; (iii) **raportat, nu veto**: fiecare
    mașină cea mai rapidă pe cel puțin o pistă — asta e ținta de design, dar
@@ -563,13 +570,12 @@ Rămase:
    fiecare pistă.
 7. **Ha Long** — când intră în carieră și în ce lume (a patra cutie, sau a
    cincea pistă a uneia existente; `CareerWorld.tracks` nu are limită).
-8. **Pasul 0, ce cumpără masa** (§11): două din (a) hazarde scalate cu masa,
-   (b) trec prin turmă/trafic/bolovani fără să piardă viteza, (c) rezervor
-   de turbo mai mare. Recomandarea: (a) + (b) — amândouă se văd pe pistă și
-   nu ating bara de turbo, care e identitatea comună a jocului.
-9. **Pasul 0, pragul de veto** pe ecartul best lap per pistă: 8% e
-   propunerea; sub 5% mașinile devin la fel, peste 10% cele lente rămân
-   lente. Se fixează după prima rundă de retuning, nu înainte.
-10. **Turul fals după repunere** (§2.1): issue separat, de verificat înainte
-    ca recordurile de carieră să conteze — o repunere peste linie nu are
-    voie să numere un tur.
+8. **Turul fals după repunere** (§2.1): issue separat, de verificat înainte
+   ca recordurile de carieră să conteze — o repunere peste linie nu are
+   voie să numere un tur.
+
+**Decise (17 oct 2026):** ce cumpără masa = (a) hazarde scalate cu masa +
+(b) trece prin turmă/trafic/bolovani fără să piardă viteza; bara de turbo
+nu se atinge. Pragul de veto pe ecartul best lap per pistă: **8%,
+provizoriu** — sub 5% mașinile devin la fel, peste 10% cele lente rămân
+lente; se fixează după prima rundă de retuning.

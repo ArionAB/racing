@@ -4180,12 +4180,35 @@ static func themes() -> Dictionary:
 		# ceata-in-familia-solului, adaptata: pe o pista jumatate-apa, familia
 		# solului e apa). Alb-cald cu nuanta verzuie (#D8DCD4).
 		"fog": Color.html("D8DCD4"),
-		# Fundalul vine cu POI-urile (kit propriu, brief §5.2 `karst_horizon`):
-		# inelul si modelul lui Okinawa se GOLESC, altfel ar aparea insula Ie
-		# si Kerama in golful vietnamez.
-		"horizon_model": "",
-		"horizon_picks": [],
-		"horizon_rings": [],
+		# Fundalul: `halong_horizon.glb`, kit propriu (brief §1.9). Inelul si
+		# modelul lui Okinawa raman GOLITE in sensul ca nu se mostenesc —
+		# altfel ar aparea insula Ie si Kerama in golful vietnamez.
+		#
+		# UN fisier cu TREI noduri, nu trei fisiere: `_build_horizon` incarca un
+		# singur `horizon_model` per tema si scoate din el cate un nod pe nume
+		# (vezi `_extract_glb_node` mai jos). Brief §1.9 ceruse
+		# `karst_horizon_a/b/c.glb` separate — doua dintre ele nu s-ar fi
+		# incarcat niciodata.
+		#
+		# Cele trei planuri au latimi DIFERITE prin constructie (150 / 230 /
+		# 320 m, inaltimi 50 / 45 / 40), deci fiecare isi ia propriul inel:
+		# planul apropiat sta mai aproape si mai mic la scara, cel depArtat mai
+		# departe. Impreuna cu ceata in strat, asta face adancimea de la
+		# belvedere (brief §5.2).
+		"horizon_model": "res://assets/models/halong/rocks/halong_horizon.glb",
+		"horizon_picks": [["KarstRow_A"], ["KarstRow_B"], ["KarstRow_C"]],
+		# Clasa ramane pe atlas: nodurile au deja sloturile pictate
+		# (MARBLE_GREY 29 calcar, FOAM_WHITE 22 pentru planul palid), iar o
+		# clasa triplanara le-ar sterge.
+		"horizon_class": "",
+		"horizon_rings": [
+			{"near": 260.0, "far": 340.0, "count": 4, "scale": 1.0,
+				"clear": 120.0, "picks": ["KarstRow_A"]},
+			{"near": 340.0, "far": 460.0, "count": 4, "scale": 1.15,
+				"clear": 150.0, "picks": ["KarstRow_B"]},
+			{"near": 460.0, "far": 620.0, "count": 4, "scale": 1.3,
+				"clear": 180.0, "picks": ["KarstRow_C"]},
+		],
 		# Scatterul si props-urile Okinawa se sting: vocabularul (fukugi, pin
 		# ryukyu, pandanus) e japonez. Decorul se pune de mana, pe POI, ca la
 		# Cappadocia / Serengeti / Machu Picchu (memoria

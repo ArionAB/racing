@@ -204,7 +204,16 @@ func _run_checks(panel: GaragePanel) -> void:
 	# captura bate cifra, dar o cifra pe geometria REALA prinde regresia).
 	_check_framing(panel)
 
-	# --- 6: vitrina chiar are un model, pe fiecare masina ---
+	# --- 6: masina primeste LUMINA DIRECTA ---
+	# Intr-o incapere inchisa asta nu e garantat si nu se vede dintr-o privire:
+	# atelierul avea soarele intrand pe usa, dar raza care trece pe sub
+	# buiandrug atingea podeaua abia la z=-4.08, iar masina sta la z=0. Toata
+	# vitrina parea doar "cam intunecata", cand de fapt subiectul era integral
+	# in umbra si n-avea umbra proprie — adica fix contactul cu solul pentru
+	# care s-au pornit umbrele lipsea.
+	_check_sunlight(panel)
+
+	# --- 7: vitrina chiar are un model, pe fiecare masina ---
 	for i in n:
 		var data := GameState.CAR_DATA[i] as CarData
 		panel._show(i)
@@ -257,7 +266,9 @@ func _check_framing(panel: GaragePanel) -> void:
 			for sx in [-1.0, 1.0]:
 				for sy in [0.0, 1.0]:
 					for sz in [-1.0, 1.0]:
-						var local := Vector3(sx * hw, sy * top, sz * hl)
+						# Masina sta pe fata de sus a podiumului, nu pe y=0.
+						var local := Vector3(sx * hw,
+							CarPreview.PODIUM_H + sy * top, sz * hl)
 						var world: Vector3 = basis * local
 						if cam.is_position_behind(world):
 							_fails.append("%s: colt in spatele camerei" % 								data.display_name)
@@ -273,6 +284,92 @@ func _check_framing(panel: GaragePanel) -> void:
 			_fails.append(("%s: gabaritul iese din cadru (x %.3f, y %.3f din "
 				+ "latura) — masina apare taiata in vitrina") % [
 				data.display_name, worst_x, worst_y])
+
+
+## Verifica, geometric, ca soarele ajunge la masina.
+##
+## NU prin raycast fizic: atelierul e decor pur, fara corpuri de coliziune, deci
+## `direct_space_state` n-are ce intersecta si garda ar fi trecut mereu — exact
+## tiparul "sonda masura alt obiect". Se intersecteaza raza cu TRIUNGHIURILE
+## mesh-urilor de atelier, care sunt singura geometrie reala de acolo.
+func _check_sunlight(panel: GaragePanel) -> void:
+	var preview := panel._preview
+	var world: Node3D = preview._viewport.get_child(0)
+	var sun: DirectionalLight3D = null
+	for n in world.get_children():
+		var l := n as DirectionalLight3D
+		if l != null and l.shadow_enabled:
+			sun = l
+			break
+	if sun == null:
+		_fails.append("vitrina n-are directionala cu umbre — fara ea masina "
+			+ "pluteste peste fundal (CLAUDE.md, contactul cu solul)")
+		return
+	var atelier := world.find_child("Atelier", false, false)
+	if atelier == null:
+		_notes.append("lumina: vitrina n-are atelier, nimic de ocluzat")
+		return
+	# Directia DINSPRE care vine lumina = +Z al basisului luminii.
+	var to_sun := sun.global_transform.basis.z.normalized()
+	var tris := _collect_triangles(atelier)
+	_notes.append("lumina: %d triunghiuri de atelier testate" % (tris.size() / 3))
+	var probes := [Vector3(0, 1.0, 0), Vector3(-0.9, 0.9, -1.2),
+		Vector3(0.9, 0.9, 1.2)]
+	var blocked := 0
+	for origin in probes:
+		if _ray_hits(tris, origin + to_sun * 0.05, to_sun):
+			blocked += 1
+	_notes.append("lumina: %d/%d puncte de pe masina in umbra" % [
+		blocked, probes.size()])
+	if blocked == probes.size():
+		_fails.append("masina e INTEGRAL in umbra: niciunul dintre cele %d "
+			% probes.size()
+			+ "puncte nu vede soarele. Fara lumina directa nu exista nici "
+			+ "umbra proprie, deci nici contact cu solul.")
+
+
+## Toate triunghiurile mesh-urilor din `root`, in spatiul lumii.
+func _collect_triangles(root: Node) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for node in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		var mesh := mi.mesh
+		if mesh == null:
+			continue
+		var xf := mi.global_transform
+		for si in mesh.get_surface_count():
+			var arr := mesh.surface_get_arrays(si)
+			var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+			if idx.is_empty():
+				for v in verts:
+					out.append(xf * v)
+			else:
+				for i in idx:
+					out.append(xf * verts[i])
+	return out
+
+
+## Möller–Trumbore: raza loveste vreun triunghi?
+func _ray_hits(tris: PackedVector3Array, origin: Vector3,
+		dir: Vector3) -> bool:
+	var i := 0
+	while i + 2 < tris.size():
+		var e1 := tris[i + 1] - tris[i]
+		var e2 := tris[i + 2] - tris[i]
+		var h := dir.cross(e2)
+		var a := e1.dot(h)
+		if absf(a) > 1e-7:
+			var f := 1.0 / a
+			var sv := origin - tris[i]
+			var u := f * sv.dot(h)
+			if u >= 0.0 and u <= 1.0:
+				var q := sv.cross(e1)
+				var v := f * dir.dot(q)
+				if v >= 0.0 and u + v <= 1.0 and f * e2.dot(q) > 1e-4:
+					return true
+		i += 3
+	return false
 
 
 func _report() -> void:

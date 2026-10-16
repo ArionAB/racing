@@ -211,24 +211,52 @@ def build_grotto_portal():
            seed=97, segments=6, rings=2)
 
     # aripile laterale, ca piesa sa aiba 18 m si sa se piarda in turn
+    # aripile pe rezolutie mica: sunt cele mai departe de gol si cel mai des
+    # acoperite de turnul de care se lipeste piesa. 724 -> sub 700.
     for sx in (-1.0, 1.0):
         b.rock((sx * (W - 1.2), 0.0, 2.4), (5.0, 2.5, 5.2), HL_ROCK,
-               seed=90 + int(sx), segments=7, rings=3)
+               seed=90 + int(sx), segments=6, rings=2)
 
     # pragul: placa CONTINUA (prag de 15 cm = zid pentru fizica intreaga)
     b.box((0.0, 0.0, 0.07), (HALF_GAP * 2.0, 2.4, 0.14), HL_ROCK)
     o_rock = b.to_object("Portal_Rock")
 
-    # interiorul intunecat vizibil prin gol + stalactite scurte
+    # INTERIORUL: o CAVITATE, nu o placa.
+    #
+    # Prima versiune punea o cutie plata la y = -1,15 (adica aproape in planul
+    # portalului) si in joc citea ca un PANOU NEGRU sprijinit langa drum —
+    # defectul cel mai vizibil din tot POI-ul, pe captura de la frac 0.295.
+    # O gura de pestera se citeste prin ADANCIME: peretii laterali si tavanul
+    # intra in stanca, iar fundul e departe si intunecat.
+    #
+    # Deci: fund impins la -4,2 m (nu -1,15), plus doi pereti laterali si un
+    # tavan care fac tunelul scurt. `CameraZone` se ocupa de camera; piesa nu
+    # modeleaza tunelul intreg (brief §1.2), doar primii metri care dau
+    # senzatia de gol.
     d = Builder()
-    d.box((0.0, -1.15, TOP * 0.5 + 0.1), (HALF_GAP * 2.0, 0.1, TOP), HL_DARK)
+    DEEP = -4.2
+    # fundul, departe
+    d.box((0.0, DEEP, TOP * 0.5 + 0.1), (HALF_GAP * 2.0, 0.12, TOP), HL_DARK)
+    # peretii laterali ai tunelului: inchid vederea pe lateral, deci golul nu
+    # mai arata ca o placa lipita pe fata piesei
+    for sx in (-1.0, 1.0):
+        d.box((sx * (HALF_GAP - 0.06), (DEEP + 0.2) * 0.5, TOP * 0.5 + 0.1),
+              (0.12, abs(DEEP) + 0.4, TOP), HL_DARK)
+    # tavanul tunelului
+    d.box((0.0, (DEEP + 0.2) * 0.5, TOP - 0.06),
+          (HALF_GAP * 2.0, abs(DEEP) + 0.4, 0.12), HL_DARK)
+    # podeaua tunelului, in continuarea pragului (suprafata continua)
+    d.box((0.0, (DEEP + 0.2) * 0.5, 0.06),
+          (HALF_GAP * 2.0, abs(DEEP) + 0.4, 0.12), HL_DARK)
     # 4 stalactite pe segments=4 (erau 5 pe 6): sunt siluete negre pe fundal
     # intunecat, vazute prin gol de la 30+ m, deci conturul e tot ce conteaza.
     # 728 -> 696 din bugetul de 700.
+    # stalactite in GURA tunelului (y = -0,7), nu pe fata piesei: asa se vad
+    # pe fondul intunecat si dau scara adancimii.
     for k in range(4):
         x = -HALF_GAP + (2.0 * HALF_GAP) * (k + 0.5) / 4.0
         ln = 0.5 + (k % 3) * 0.32
-        d.frustum((x, -0.55, TOP - ln * 0.5), 0.22, 0.03, ln, HL_ROCK_DARK,
+        d.frustum((x, -0.7, TOP - ln * 0.5), 0.22, 0.03, ln, HL_ROCK_DARK,
                   segments=4)
     o_dark = d.to_object("Portal_Dark")
 

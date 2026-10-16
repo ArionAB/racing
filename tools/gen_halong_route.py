@@ -907,10 +907,60 @@ for i, (ff, lat, kind, yaw, sc) in enumerate((
 # Brief §1.2 cere de altfel piesa ca GURA de grota cu spatele plat, lipita de
 # turn — nu ca poarta prin care trece drumul. Deci sta pe marginea dinspre
 # turn (stanga = interiorul buclei pe latura de sud), cu fata spre drum.
-_g = at_road(F_GROTTO0 + 0.004, -18.0)
-add("GuraGrota", "portal",
-    f"Transform3D({rot_y_s(yaw_z_to(*travel_g(F_GROTTO0)) + 90.0, 1.0, 1.0, 1.0)}, "
-    f"{_g[0]:.2f}, {_g[1] - 0.30:.2f}, {_g[2]:.2f})")
+# POZITIA: pe FLANCUL turnului `TurnGrota`, nu pe teren gol langa drum.
+#
+# Piesa a fost refacuta de trei ori si a esuat de fiecare data din acelasi
+# motiv, pe care abia a treia captura l-a facut evident:
+#   1. cutii            -> citea SOPRON cu acoperis in doua ape;
+#   2. un `rock` lat    -> citea DOLMEN (lintel peste doi stalpi);
+#   3. mase + cavitate  -> citea CUTIE NEAGRA langa drum.
+# Numitorul comun nu e forma, e CONTEXTUL: o gura de pestera nu e un obiect,
+# e o GAURA INTR-UN PERETE. Pusa pe teren deschis, i se vad spatele si
+# lateralele oricat de bine ar fi modelata, iar cavitatea intunecata devine o
+# cutie.
+#
+# Brief §1.2 spunea asta de la inceput — "spatele piesei e plat, ca sa se
+# lipeasca de turn" — adica piesa PRESUPUNE un turn in spate. Eu o asezasem
+# la 18 m lateral de drum, la ~41 m de centrul lui `TurnGrota` (raza 32),
+# adica exact in afara masivului care ar fi completat-o.
+#
+# Acum se aseaza pe raza 26 din centrul turnului, pe directia dinspre drum:
+# intra in flancul domului, iar spatele plat dispare in el. Distanta pana la
+# sosea ramane ~15 m, deci se vede bine fara sa fie obstacol.
+# GROTA: AMANATA, NU ASEZATA GRESIT A PATRA OARA.
+#
+# Piesa `grotto_portal.glb` ramane in kit, verificata (684/700 tri, gol 8,95 m
+# liber la cota masinii). Ce nu se rezolva aici e ASEZAREA ei, si merita scris
+# de ce, ca sa nu se reia de la zero:
+#
+# Patru incercari, toate esuate pe acelasi lucru:
+#   1. montanti din `box`        -> citea SOPRON cu acoperis in doua ape;
+#   2. un `rock` lat de 15 m     -> citea DOLMEN (lintel peste doi stalpi);
+#   3. trei mase + cavitate      -> citea CUTIE NEAGRA langa drum;
+#   4. idem + un turn in spate   -> tot cutie: turnul nu INCHIDE cavitatea,
+#                                   se vede pe langa el.
+#
+# Cauza nu e modelarea. O gura de pestera nu e un obiect, e o GAURA INTR-UN
+# PERETE — si brief §1.2 o spune direct ("spatele piesei e plat, ca sa se
+# lipeasca de turn"). Pe pista asta nu exista peretele:
+#
+#   masurat cu `tools/sv_halong_flanc.gd`, `TurnGrota` e declarat 58 m dar
+#   terenul real in jurul lui urca doar la +5,4 m. Cauza e o regula, nu un bug:
+#   `_lift_peaks` mascheaza masivele cu banda de protectie a asfaltului
+#   (PEAK_ROAD_CLEAR 6 m, PEAK_ROAD_FULL 32 m), ca sa nu creasca un munte peste
+#   drum. Turnul fiind langa sosea, e stins aproape complet.
+#
+# Deci solutia reala e o decizie de PISTA, nu de kit, si sunt doua:
+#   (a) gaura se sapa IN teren — `CliffFace` sau `TerrainHollow` dau perete
+#       adevarat, in care portalul devine incadrarea gurii;
+#   (b) grota devine tunel prin care chiar treci — dar atunci golul trebuie sa
+#       acopere cei 14 m de carosabil, nu 8,95, deci e alta piesa si alt
+#       contract (la scara 1,56x portalul ar avea 18 m, peste tavanul de 11 m
+#       al lui `CameraGrota`).
+#
+# Pana la decizia aia, POI-ul C ramane cu digul si cu turnurile din jur, care
+# sunt curate. `CameraGrota` ramane in scena si nu strica nimic: fara piesa,
+# zona e doar un coridor intre turnuri.
 
 # --- digul de piatra: marginea dinspre mare, pe latura de sud (POI C) ------
 # Module de 8 m insiruite pe fractii egale. Numarul vine din LUNGIME, nu ghicit.
@@ -1019,7 +1069,7 @@ RES = {"rock": "13_rock", "quay": "14_quay",
        "house_a": "22_house_a", "house_b": "23_house_b",
        "farm": "24_farm", "rack": "25_rack",
        "sampan": "26_sampan", "basket": "27_basket",
-       "portal": "28_portal", "parapet": "29_parapet",
+       "parapet": "29_parapet",
        "dike": "30_dike", "pavilion": "31_pavilion",
        "ficus_a": "32_ficus_a", "ficus_b": "33_ficus_b",
        "bamboo": "34_bamboo", "scrub": "35_scrub"}
@@ -1128,7 +1178,6 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="PackedScene" path="res://assets/models/halong/props/net_drying_rack.glb" id="25_rack"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/vehicles/sampan_a.glb" id="26_sampan"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/vehicles/basket_boat.glb" id="27_basket"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/structures/grotto_portal.glb" id="28_portal"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/structures/coast_parapet.glb" id="29_parapet"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/structures/stone_dike.glb" id="30_dike"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/structures/belvedere_pavilion.glb" id="31_pavilion"]

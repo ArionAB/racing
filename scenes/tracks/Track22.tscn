@@ -20,7 +20,6 @@
 [ext_resource type="PackedScene" path="res://assets/models/halong/props/net_drying_rack.glb" id="25_rack"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/vehicles/sampan_a.glb" id="26_sampan"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/vehicles/basket_boat.glb" id="27_basket"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/structures/grotto_portal.glb" id="28_portal"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/structures/coast_parapet.glb" id="29_parapet"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/structures/stone_dike.glb" id="30_dike"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/structures/belvedere_pavilion.glb" id="31_pavilion"]
@@ -357,9 +356,6 @@ transform = Transform3D(-0.09689, 0, -0.99530, 0, 1.0, 0, 0.99530, 0, -0.09689, 
 
 [node name="BarcaMica05" parent="DecorManual" instance=ExtResource("27_basket")]
 transform = Transform3D(0.94299, 0, 0.33282, 0, 1.0, 0, -0.33282, 0, 0.94299, -348.16, 0.00, 157.39)
-
-[node name="GuraGrota" parent="DecorManual" instance=ExtResource("28_portal")]
-transform = Transform3D(0.85345, 0, -0.52117, 0, 1.0, 0, 0.52117, 0, 0.85345, -204.48, 2.16, 225.23)
 
 [node name="Dig00" parent="DecorManual" instance=ExtResource("30_dike")]
 transform = Transform3D(0.33282, 0, -0.94299, 0, 1.0, 0, 0.94299, 0, 0.33282, -326.05, -0.35, 134.42)

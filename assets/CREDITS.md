@@ -51,3 +51,21 @@ Fisierele sursa nemodificate raman in
 intermediare din pipeline (`assets/blender/fiordland_boat_v2.blend`,
 `fiordland_kayak_a_v2.blend`, `fiordland_kayak_b_v2.blend`) sunt rezultatul
 procesarii descrise mai sus, nu sursa originala.
+
+---
+
+## Barlow Condensed (fontul HUD-ului)
+
+- **Titlu sursa:** Barlow Condensed (SemiBold + Medium)
+- **Autor:** Jeremy Tribby / The Barlow Project Authors
+  (https://github.com/jpt/barlow)
+- **Sursa:** Google Fonts (`google/fonts`, `ofl/barlowcondensed/`)
+- **Licenta:** SIL Open Font License 1.1 — textul integral in
+  `assets/fonts/LICENSE_barlow_OFL.txt`
+- **Modificari facute:** niciuna. Fisierele `.ttf` sunt cele originale.
+
+OFL **nu cere** atribuire in joc (spre deosebire de CC-BY), deci fontul nu
+trebuie trecut pe un ecran de credite. E notat aici fiindca fisierul asta e
+inventarul surselor externe. Cele doua conditii ale licentei pe care le
+respectam: fontul nu se vinde separat, iar numele rezervat („Barlow") nu se
+foloseste pentru o versiune modificata — si nu modificam nimic.

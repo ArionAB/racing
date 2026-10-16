@@ -4180,12 +4180,43 @@ static func themes() -> Dictionary:
 		# ceata-in-familia-solului, adaptata: pe o pista jumatate-apa, familia
 		# solului e apa). Alb-cald cu nuanta verzuie (#D8DCD4).
 		"fog": Color.html("D8DCD4"),
-		# Fundalul vine cu POI-urile (kit propriu, brief §5.2 `karst_horizon`):
-		# inelul si modelul lui Okinawa se GOLESC, altfel ar aparea insula Ie
-		# si Kerama in golful vietnamez.
-		"horizon_model": "",
-		"horizon_picks": [],
-		"horizon_rings": [],
+		# Fundalul: `halong_horizon.glb`, kit propriu (brief §1.9). Inelul si
+		# modelul lui Okinawa raman GOLITE in sensul ca nu se mostenesc —
+		# altfel ar aparea insula Ie si Kerama in golful vietnamez.
+		#
+		# UN fisier cu TREI noduri, nu trei fisiere: `_build_horizon` incarca un
+		# singur `horizon_model` per tema si scoate din el cate un nod pe nume
+		# (vezi `_extract_glb_node` mai jos). Brief §1.9 ceruse
+		# `karst_horizon_a/b/c.glb` separate — doua dintre ele nu s-ar fi
+		# incarcat niciodata.
+		#
+		# Cele trei planuri au latimi DIFERITE prin constructie (150 / 230 /
+		# 320 m, inaltimi 50 / 45 / 40), deci fiecare isi ia propriul inel:
+		# planul apropiat sta mai aproape si mai mic la scara, cel depArtat mai
+		# departe. Impreuna cu ceata in strat, asta face adancimea de la
+		# belvedere (brief §5.2).
+		"horizon_model": "res://assets/models/halong/rocks/halong_horizon.glb",
+		"horizon_picks": [["KarstRow_A"], ["KarstRow_B"], ["KarstRow_C"]],
+		# Clasa ramane pe atlas: nodurile au deja sloturile pictate
+		# (MARBLE_GREY 29 calcar, FOAM_WHITE 22 pentru planul palid), iar o
+		# clasa triplanara le-ar sterge.
+		"horizon_class": "",
+		"horizon_rings": [
+			# `dy` RIDICA siluetele, si pe pista asta e obligatoriu.
+			# `_build_horizon` le ingroapa 4 m in TEREN; pe uscat e corect, dar
+			# aici inelele cad pe GOLF, unde "terenul" e fundul marii. Masurat
+			# cu `tools/sv_halong_oriz.gd`: toate 12 stateau la -23..-25 m, pe
+			# un fund de ~-20, deci din piese de 40-50 m se vedeau ~20 — de aia
+			# citeau ca niste blocuri palide si scunde, nu ca turnuri de carst.
+			# Cu dy = +21 baza ajunge pe la -3 (intra in apa, cum trebuie) si
+			# varful la 37-47 m.
+			{"near": 260.0, "far": 340.0, "count": 4, "scale": 1.0,
+				"clear": 120.0, "dy": 21.0, "picks": ["KarstRow_A"]},
+			{"near": 340.0, "far": 460.0, "count": 4, "scale": 1.15,
+				"clear": 150.0, "dy": 21.0, "picks": ["KarstRow_B"]},
+			{"near": 460.0, "far": 620.0, "count": 4, "scale": 1.3,
+				"clear": 180.0, "dy": 21.0, "picks": ["KarstRow_C"]},
+		],
 		# Scatterul si props-urile Okinawa se sting: vocabularul (fukugi, pin
 		# ryukyu, pandanus) e japonez. Decorul se pune de mana, pe POI, ca la
 		# Cappadocia / Serengeti / Machu Picchu (memoria
@@ -4193,11 +4224,20 @@ static func themes() -> Dictionary:
 		# props: lista numea piese care nu mai vin.
 		"props": "",
 		"prop_contact_flat": [],
-		# Decorul statistic stins: STRING GOL, nu `false`. `TrackDecor.build`
-		# primeste modul ca String (al doilea argument), deci un bool arunca
-		# "Cannot convert argument 2 from bool to String" si pista nu se mai
-		# construieste — prins de tools/ProbeHalongLoad.tscn la prima rulare.
-		"decor": "",
+		# Decorul statistic stins: "none", nu string gol si nu `false`.
+		#
+		# Trei valori, trei comportamente diferite, si doua dintre ele gresesc:
+		#   false   -> "Cannot convert argument 2 from bool to String", pista
+		#              nu se mai construieste (prins la prima rulare);
+		#   ""      -> TREC E PRIN garda. `TrackDecor.build` testeaza
+		#              `mode == "none"` (track_decor.gd:164), iar "" nu e
+		#              "none", deci cade pe ramura `else` = `_build_scattered`.
+		#              Masurat pe Track22: 114 cilindri + 8 cutii generate in
+		#              cod sub `Decor/Batched`, adica exact molizii generici de
+		#              pe nisip care n-au ce cauta intr-un golf vietnamez;
+		#   "none"  -> iese imediat, cum cere brief §5.2.
+		# Decorul vine de mana, pe POI (memoria `decor-manual-sursa-de-adevar`).
+		"decor": "none",
 	}, true)
 	_themes_cache["halong"] = hl
 	return _themes_cache

@@ -770,9 +770,16 @@ for ff, lat, sc in ((0.09, 34.0, 2.6), (0.14, 38.0, 3.1), (0.19, 33.0, 2.4),
                     (0.76, 32.0, 2.3), (0.80, 36.0, 2.7), (0.86, 34.0, 2.5),
                     (0.92, 38.0, 3.0), (0.96, 32.0, 2.2)):
     g = at_road(ff, lat)
-    add(f"TurnCalcar{k:02d}", "rock",
-        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + k * 23.0, sc, sc * 1.9, sc)}, "
-        f"{g[0]:.2f}, {g[1] - 1.0:.2f}, {g[2]:.2f})")
+    # Piesele REALE de carst, alternate, cu scalare UNIFORMA. `rock_large`
+    # scalat 1.9x pe Y avea h/r 2,16 — sub pragul de 2,50 al pistei, deci
+    # citea ca bolovan, nu turn. `karst_stack_a/b` trec garda de silueta
+    # (nisa/mijloc 0,57-0,63, h/r 2,73-3,11) si NU se mai deformeaza pe Y:
+    # o scalare neuniforma ar strica exact raportul pe care il garanteaza.
+    _res = "stack_a" if k % 2 == 0 else "stack_b"
+    _su = sc * 0.72 if _res == "stack_a" else sc * 0.95
+    add(f"TurnCalcar{k:02d}", _res,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + k * 23.0, _su, _su, _su)}, "
+        f"{g[0]:.2f}, {g[1] - 1.20:.2f}, {g[2]:.2f})")
     k += 1
 # Insulitele FIXE dintre tronsoanele de ponton: piatra pe care se sprijina
 # capetele. Pontonul isi face tablierul singur (PontoonRoadHazard), deci aici
@@ -792,20 +799,316 @@ for _idx, (_pa, _pb) in enumerate(PONT_SEGS):
     # LINIA APEI** (`--origin=waterline`), nu la baza. Deci la scara `_QUAY_SY`
     # varful sta la `2.2 * _QUAY_SY` DEASUPRA originii, si ca sa aduc varful la
     # cota drumului cobor originea cu atat.
-    _QUAY_TOP_M = 2.2
-    _QUAY_SY = 0.5
+    # COTELE PIESEI PROPRII, nu ale celei de la Okinawa. `harbour_quay.glb`
+    # are 2,2 m peste apa si originea la LINIA APEI. `stone_quay.glb` e alta
+    # piesa: 1,5 m inaltime totala, originea la BAZA (verificat pe GLB,
+    # `--origin=assembly`, Quay_Stone min Y = 0,000). Deci varful sta la
+    # 1,5 * scara DEASUPRA originii, nu la 2,2.
+    _QUAY_TOP_M = 1.5
+    _QUAY_SY = 1.0
     # Plus corectia de afundare la buza: tablierul nu sta la cota drumului, ci cu
     #  mai jos (masurat 0.042 m gol, pana la ~0.17 cu val+autobuz).
     # Fara ea insulitele ieseau la 0.81 fata de tablier la 0.43-0.56, adica prag
     # de 0.25-0.38 — pe muchia contractului de 0.3.
     _EDGE_SAG_M = 0.22
     _top_offset = _QUAY_TOP_M * _QUAY_SY + _EDGE_SAG_M
+    # ROTIT 90°, si asta nu e cosmetic: cele doua chei au axele lungi pe
+    # DIRECTII OPUSE. `harbour_quay.glb` (Okinawa) e 6,3 pe X si 12,0 pe Z —
+    # lung pe Z. `stone_quay.glb` (al nostru) e 12,1 pe X si 3,3 pe Z — lung pe
+    # X, fiindca e un modul de chei care se insiruie lateral.
+    # Reutilizand rotatia veche, cheiul de 12 m statea DE-A CURMEZISUL
+    # drumului: ProbeRace a dat zeci de blocaje la frac 0.10 (masina oprita,
+    # "atinge: Plate6"), fata de 3 pe baseline. Garda de ponton nu-l prinsese
+    # fiindca ea masoara PRAGUL VERTICAL (0,042 m, trecut) — defectul era pe
+    # orizontala.
+    # Scara pe Z (adancime) compenseaza cei 3,3 m: insulita trebuie sa acopere
+    # latimea tablierului de 12 m.
     add(f"Insulita{k:02d}", "quay",
-        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(_pa)), 1.6, _QUAY_SY, 1.4)}, "
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(_pa)) + 90.0, 1.0, _QUAY_SY, 3.9)}, "
         f"{g[0]:.2f}, {g[1] - _top_offset:.2f}, {g[2]:.2f})")
     k += 1
 
-RES = {"rock": "13_rock", "quay": "14_quay"}
+# --- VALURILE 2 SI 3: satul, barcile, drumul, vegetatia, belvederea ---------
+#
+# Asezarea urmeaza POI-urile din brief §2, derivate din `F[...]`, NU fractii
+# scrise de mana: cand o latura se redeseneaza, bucla isi schimba lungimea si
+# toate fractiile aluneca (memoria `fractia-pe-index-vs-pe-lungime` — rapele
+# hardcodate au ramas odata pe cifrele vechi si au urcat repunerile de la
+# 0/3/0/4 la 1/13/2/9).
+#
+# LATERAL: pozitiv = dreapta in sensul de mers. Bucla e ANTIORARA, deci
+# dreapta = exteriorul (marea deschisa) pe laturile de vest si sud.
+
+# --- satul plutitor: pe apa, langa cheiul de start (POI A) ------------------
+# Casele stau pe APA (cota marii = 0), nu pe teren: `at_road` da cota DRUMULUI,
+# deci se foloseste 0.0 explicit. Plutele au originea la baza, deci corpul lor
+# intra in apa cu ~0,12 m — exact cat sa nu se vada fundul butoaielor.
+_SEA_Y = 0.0
+for i, (ff, lat, kind, yaw) in enumerate((
+        (F["A chei"] + 0.006, 42.0, "house_a", 18.0),
+        (F["A chei"] + 0.013, 55.0, "house_b", -24.0),
+        (F["A chei"] + 0.021, 44.0, "house_a", 52.0),
+        (F["A chei"] + 0.028, 61.0, "house_b", 8.0),
+        # mutata mai la larg: la -0.005/50 m terenul e la +0.58, adica USCAT
+        # (masurat cu tools/sv_halong_apa.gd). Restul satului e pe fund de -15.3.
+        (F["A chei"] - 0.010, 63.0, "house_b", 71.0),
+)):
+    g = at_road(ff, lat)
+    add(f"CasaPlutitoare{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {_SEA_Y - 0.12:.2f}, {g[2]:.2f})")
+
+# tarcurile de peste: modulare, insiruite pe acelasi aliniament
+for i, (ff, lat) in enumerate(((F["A chei"] + 0.009, 72.0),
+                               (F["A chei"] + 0.016, 72.0),
+                               (F["A chei"] + 0.023, 72.0))):
+    g = at_road(ff, lat)
+    add(f"TarcPeste{i:02d}", "farm",
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)), 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {_SEA_Y - 0.10:.2f}, {g[2]:.2f})")
+
+# rastelele de plase: pe CHEI (uscat), deci pe cota drumului
+for i, (ff, lat, yaw) in enumerate(((F["A chei"] - 0.004, 11.0, 90.0),
+                                    (F["A chei"] + 0.003, 12.5, 84.0))):
+    g = at_road(ff, lat)
+    add(f"RastelPlase{i:02d}", "rack",
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})")
+
+# --- barcile mici: imprastiate pe apa, langa sat si pe golf ----------------
+for i, (ff, lat, kind, yaw, sc) in enumerate((
+        (F["A chei"] + 0.011, 34.0, "sampan", 62.0, 1.0),
+        (F["A chei"] + 0.019, 66.0, "basket", 0.0, 1.0),
+        (F["A chei"] + 0.026, 38.0, "basket", 0.0, 1.0),
+        # idem: la -0.009/46 m terenul e la +0.68 (uscat)
+        (F["A chei"] - 0.018, 68.0, "sampan", -41.0, 1.0),
+        (F["C dig"] - 0.014, 48.0, "sampan", 115.0, 1.0),
+        (F["C dig"] - 0.021, 39.0, "basket", 0.0, 1.0),
+)):
+    g = at_road(ff, lat)
+    # Barcile au originea la LINIA APEI (--origin=waterline), deci se aseaza
+    # EXACT la cota marii: chila e deja sub zero in piesa.
+    add(f"BarcaMica{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, sc, sc, sc)}, "
+        f"{g[0]:.2f}, {_SEA_Y:.2f}, {g[2]:.2f})")
+
+# --- grota: gura pe turnul de la POI C -------------------------------------
+# Portalul se lipeste de turn, cu spatele plat spre el. Cota: originea la baza,
+# deci se aseaza pe cota drumului din dreptul grotei.
+# PORTALUL STA LANGA DRUM, NU PESTE EL — si asta e o limita masurata, nu o
+# preferinta. Pista are `custom_half_width = 7.0`, deci 14 m de carosabil;
+# golul portalului e 8,95 m liberi la cota masinii (contractul brief §1.2,
+# verificat pe GLB). 14 nu incap in 8,95. Ca sa incapa ar trebui scalat cu
+# 1,56x, adica 18 m inaltime — peste tavanul de 11 m al lui `CameraGrota`.
+#
+# Asezat initial pe ax (lateral 0.0), ProbeRace a dat 36 de blocaje la frac
+# 0.303, toate pe `GuraGrota_col`: montantii cadeau exact in linia de mers.
+#
+# Brief §1.2 cere de altfel piesa ca GURA de grota cu spatele plat, lipita de
+# turn — nu ca poarta prin care trece drumul. Deci sta pe marginea dinspre
+# turn (stanga = interiorul buclei pe latura de sud), cu fata spre drum.
+# POZITIA: pe FLANCUL turnului `TurnGrota`, nu pe teren gol langa drum.
+#
+# Piesa a fost refacuta de trei ori si a esuat de fiecare data din acelasi
+# motiv, pe care abia a treia captura l-a facut evident:
+#   1. cutii            -> citea SOPRON cu acoperis in doua ape;
+#   2. un `rock` lat    -> citea DOLMEN (lintel peste doi stalpi);
+#   3. mase + cavitate  -> citea CUTIE NEAGRA langa drum.
+# Numitorul comun nu e forma, e CONTEXTUL: o gura de pestera nu e un obiect,
+# e o GAURA INTR-UN PERETE. Pusa pe teren deschis, i se vad spatele si
+# lateralele oricat de bine ar fi modelata, iar cavitatea intunecata devine o
+# cutie.
+#
+# Brief §1.2 spunea asta de la inceput — "spatele piesei e plat, ca sa se
+# lipeasca de turn" — adica piesa PRESUPUNE un turn in spate. Eu o asezasem
+# la 18 m lateral de drum, la ~41 m de centrul lui `TurnGrota` (raza 32),
+# adica exact in afara masivului care ar fi completat-o.
+#
+# Acum se aseaza pe raza 26 din centrul turnului, pe directia dinspre drum:
+# intra in flancul domului, iar spatele plat dispare in el. Distanta pana la
+# sosea ramane ~15 m, deci se vede bine fara sa fie obstacol.
+# GROTA: AMANATA, NU ASEZATA GRESIT A PATRA OARA.
+#
+# Piesa `grotto_portal.glb` ramane in kit, verificata (684/700 tri, gol 8,95 m
+# liber la cota masinii). Ce nu se rezolva aici e ASEZAREA ei, si merita scris
+# de ce, ca sa nu se reia de la zero:
+#
+# Patru incercari, toate esuate pe acelasi lucru:
+#   1. montanti din `box`        -> citea SOPRON cu acoperis in doua ape;
+#   2. un `rock` lat de 15 m     -> citea DOLMEN (lintel peste doi stalpi);
+#   3. trei mase + cavitate      -> citea CUTIE NEAGRA langa drum;
+#   4. idem + un turn in spate   -> tot cutie: turnul nu INCHIDE cavitatea,
+#                                   se vede pe langa el.
+#
+# Cauza nu e modelarea. O gura de pestera nu e un obiect, e o GAURA INTR-UN
+# PERETE — si brief §1.2 o spune direct ("spatele piesei e plat, ca sa se
+# lipeasca de turn"). Pe pista asta nu exista peretele:
+#
+#   masurat cu `tools/sv_halong_flanc.gd`, `TurnGrota` e declarat 58 m dar
+#   terenul real in jurul lui urca doar la +5,4 m. Cauza e o regula, nu un bug:
+#   `_lift_peaks` mascheaza masivele cu banda de protectie a asfaltului
+#   (PEAK_ROAD_CLEAR 6 m, PEAK_ROAD_FULL 32 m), ca sa nu creasca un munte peste
+#   drum. Turnul fiind langa sosea, e stins aproape complet.
+#
+# Deci solutia reala e o decizie de PISTA, nu de kit, si sunt doua:
+#   (a) gaura se sapa IN teren — `CliffFace` sau `TerrainHollow` dau perete
+#       adevarat, in care portalul devine incadrarea gurii;
+#   (b) grota devine tunel prin care chiar treci — dar atunci golul trebuie sa
+#       acopere cei 14 m de carosabil, nu 8,95, deci e alta piesa si alt
+#       contract (la scara 1,56x portalul ar avea 18 m, peste tavanul de 11 m
+#       al lui `CameraGrota`).
+#
+# Pana la decizia aia, POI-ul C ramane cu digul si cu turnurile din jur, care
+# sunt curate. `CameraGrota` ramane in scena si nu strica nimic: fara piesa,
+# zona e doar un coridor intre turnuri.
+
+# --- digul de piatra: marginea dinspre mare, pe latura de sud (POI C) ------
+# Module de 8 m insiruite pe fractii egale. Numarul vine din LUNGIME, nu ghicit.
+_DIKE_FROM, _DIKE_TO = F["C dig"] - 0.030, F["C dig"] + 0.016
+_dike_len = ((_DIKE_TO - _DIKE_FROM) % 1.0) * L_TOTAL
+_n_dike = max(2, int(_dike_len / 8.0))
+for i in range(_n_dike):
+    ff = _DIKE_FROM + (_DIKE_TO - _DIKE_FROM) * (i + 0.5) / _n_dike
+    # 14,5 m lateral, nu 10,5: digul are 8 m modul si ~2,6 m adancime, deci
+    # la 10,5 marginea lui ajungea la 4,7 m de ax — SUB semi-latimea de 7 m,
+    # adica pe asfalt (masurat cu tools/sv_halong_gabarit.gd). Distanta se
+    # masoara pe GABARIT, nu pe origine.
+    g = at_road(ff, 14.5)
+    add(f"Dig{i:02d}", "dike",
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1] - 0.55:.2f}, {g[2]:.2f})")
+
+# --- parapetul de coasta: pe latura unde stau maimutele (POI G) ------------
+# Maimutele sar DIN perete, iar parapetul e cel pe care stau (brief §1.5), deci
+# se insiruie in jurul fractiei lor, pe partea dinspre perete (stanga = -lat).
+_PAR_FROM, _PAR_TO = F_MAIMUTE - 0.022, F_MAIMUTE + 0.022
+_par_len = ((_PAR_TO - _PAR_FROM) % 1.0) * L_TOTAL
+_n_par = max(2, int(_par_len / 6.0))
+for i in range(_n_par):
+    ff = _PAR_FROM + (_PAR_TO - _PAR_FROM) * (i + 0.5) / _n_par
+    # -11,5, nu -9,5: parapetul are 0,55 m coama plus talus, deci la -9,5
+    # marginea ajungea la 6,4-7,0 m de ax, adica PE asfalt (semi-latime 7,0).
+    # Un parapet MARGINESTE drumul, nu sta in el.
+    g = at_road(ff, -11.5)
+    add(f"Parapet{i:02d}", "parapet",
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1] - 0.10:.2f}, {g[2]:.2f})")
+
+# --- belvederea: reperul construit de pe varf (POI D) ----------------------
+# "Belvedere nu am stiut unde este" a fost verdictul la volan; pavilionul e
+# raspunsul (brief §1.7). Sta pe partea dinspre priveliste, langa CameraZone.
+_g = at_road(F["D belvedere"], -16.0)   # gabaritul lui ajungea la 7,7 m de ax
+add("PavilionBelvedere", "pavilion",
+    f"Transform3D({rot_y_s(yaw_z_to(*travel_g(F['D belvedere'])) + 90.0, 1.0, 1.0, 1.0)}, "
+    f"{_g[0]:.2f}, {_g[1] - 0.20:.2f}, {_g[2]:.2f})")
+
+# --- vegetatia: ficusi si bambus pe urcarea spre belvedere (POI D) --------
+# Pe malul dinspre interior (stanga), unde e versantul. Alternanta determinista.
+_veg = []
+# DENSITATEA vine din bugetul MASURAT, nu din prudenta.
+#
+# `tools/ProbePerf.tscn --track=14 --mobile` da pe Ha Long 41 de desene in
+# medie (varf 78) si 0,22 ms GPU. Pentru comparatie, pe aceeasi sonda:
+# Track08 1088 (varf 2194), Track09 760, Track10 553, Track02 506. Deci pista
+# desena de ~13-26 de ori mai putin decat cele deja livrate, pe acelasi buget
+# de 16,6 ms/cadru.
+#
+# Cifra aia nu e un merit, e un semnal ca versantul era GOL. 14 piese pe toata
+# urcarea insemna una la ~20 m, adica o planta razleata din cand in cand, nu un
+# versant de carst. Acum 34, pe trei randuri de departare, cu varietate pe
+# specie si pe latura — si tot ramane cu un ordin de marime sub celelalte piste.
+for i in range(34):
+    u = (i + 0.5) / 34.0
+    ff = F["D urcare"] + (F["D creasta"] - F["D urcare"]) * u
+    side = -1.0 if i % 3 != 1 else 1.0
+    # trei randuri: aproape de drum, mijloc, departe. Randul departat e mai
+    # rar, ca silueta sa nu devina un zid verde.
+    rand = i % 3
+    # 12,0 de baza, nu 10,0: ficusii au coroana de ~1,6 m raza, deci la 10
+    # marginea cadea la 6,9-8,0 m de ax.
+    lat = side * (12.0 + rand * 7.5 + 3.0 * ((i * 7) % 4) / 3.0)
+    kind = ("ficus_a", "bamboo", "ficus_b", "bamboo",
+            "ficus_a", "scrub")[i % 6]
+    _veg.append((ff, lat, kind, i * 47.0))
+# tufe pe creasta, in jurul belvederei
+for i in range(14):
+    u = (i + 0.5) / 14.0
+    ff = F["D creasta"] + (F["D varf"] - F["D creasta"]) * u
+    # 11,5 de baza, nu 9,0: la 9,0 fiecare al patrulea exemplar cadea exact
+    # pe pragul de gabarit si coroana ajungea la 6,9 m de ax.
+    _veg.append((ff, (-1.0 if i % 2 else 1.0) * (11.5 + 4.0 * (i % 4)),
+                 "scrub" if i % 3 else "ficus_b", i * 61.0))
+# vegetatie si pe coasta de nord, langa parapet (POI G): maimutele stau
+# intr-un loc cu copaci, nu pe un parapet intr-un desert.
+for i in range(12):
+    u = (i + 0.5) / 12.0
+    ff = F_MAIMUTE - 0.020 + 0.040 * u
+    # 15,5 de baza: la 13 coroanele ajungeau la 6,9-8,0 m de ax. Si aici
+    # distanta se da pe GABARIT, nu pe origine.
+    _veg.append((ff, -(15.5 + 6.0 * (i % 3)),
+                 ("ficus_b", "bamboo", "ficus_a")[i % 3], i * 83.0))
+for i, (ff, lat, kind, yaw) in enumerate(_veg):
+    g = at_road(ff, lat)
+    add(f"Veg{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
+
+# --- COTELE DE PE USCAT, MASURATE PE TERENUL REAL ---------------------------
+#
+# Generatorul stie doar DRUMUL: `at_road(f, lat)` da cota soselei. Pe apa e
+# exact ce trebuie (turnul intra in mare la -1,20 fata de drum). Pe uscat nu:
+# acolo unde un `TerrainPeak` ridica solul peste drum, aceeasi formula ingroapa
+# piesa, iar acolo unde terenul coboara (rapa de golf), o lasa in aer.
+#
+# Masurat pe Track22 cu `tools/sv_halong_cote.gd`: 4 turnuri ingropate cu
+# 0,88-0,97 m si 16 piese plutind, una la 12,55 m in aer.
+#
+# DE CE NU RECALCULEZ AICI: `TrackSideSampler._lift_peaks` combina domul
+# masivului prin `_smax` NETED, adauga zgomot de dune si mascheaza tot cu banda
+# de protectie a asfaltului. Reimplementata in Python, formula ar diverge tacut
+# de cea din joc la prima schimbare — exact tiparul din memoria
+# `justificarea-din-comentariu-se-verifica`. Asa, cifra vine din `ground_y()`,
+# adica din terenul pe care se conduce efectiv.
+#
+# FLUXUL, cand se muta ceva pe uscat:
+#   1. ruleaza generatorul (cotele vechi raman pentru nodurile nemutate);
+#   2. godot --headless --path . res://tools/SvHalongCote.tscn
+#      > tools/halong_cote_teren.txt   (doar liniile `COTA`);
+#   3. ruleaza generatorul din nou — citeste fisierul si corecteaza.
+# Sonda e si garda: `VERDICT: OK` doar cand nimic nu mai e ingropat sau plutind.
+COTE_TEREN = {}
+_cote_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "halong_cote_teren.txt")
+if os.path.isfile(_cote_path):
+    with open(_cote_path, encoding="utf-8") as _fh:
+        for _ln in _fh:
+            _parts = _ln.split()
+            if len(_parts) == 3 and _parts[0] == "COTA":
+                COTE_TEREN[_parts[1]] = float(_parts[2])
+
+if COTE_TEREN:
+    _fixed = 0
+    for _i, (_nm, _res, _xf, _extra) in enumerate(dec):
+        if _nm not in COTE_TEREN:
+            continue
+        # Transform3D(b0..b8, ox, oy, oz) -> se rescrie doar oy.
+        # Transform3D(b0..b8, ox, oy, oz): ultimele trei valori sunt pozitia,
+        # deci `oy` e penultima. Se rescrie DOAR ea.
+        _head, _oy, _oz = _xf.rsplit(",", 2)
+        dec[_i] = (_nm, _res,
+                   f"{_head}, {COTE_TEREN[_nm]:.2f},{_oz}", _extra)
+        _fixed += 1
+    print(f"\ncote de teren aplicate: {_fixed} din {len(COTE_TEREN)} masurate")
+
+RES = {"rock": "13_rock", "quay": "14_quay",
+       "stack_a": "20_stack_a", "stack_b": "21_stack_b",
+       "house_a": "22_house_a", "house_b": "23_house_b",
+       "farm": "24_farm", "rack": "25_rack",
+       "sampan": "26_sampan", "basket": "27_basket",
+       "parapet": "29_parapet",
+       "dike": "30_dike", "pavilion": "31_pavilion",
+       "ficus_a": "32_ficus_a", "ficus_b": "33_ficus_b",
+       "bamboo": "34_bamboo", "scrub": "35_scrub"}
 
 # --- consola: fractiile care conteaza la pasul urmator -----------------------
 print("\n=== FRACTII (pentru pasii urmatori) ===")
@@ -901,9 +1204,23 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_hollow.gd" id="19_hollow"]
 [ext_resource type="Script" path="res://scenes/hazards/tide_hazard.gd" id="17_tide"]
 [ext_resource type="Script" uid="uid://twspgftscxb4" path="res://scenes/props/world_prop.gd" id="9_prop"]
-[ext_resource type="PackedScene" path="res://assets/models/rocks/rock_large.glb" id="13_rock"]
-[ext_resource type="PackedScene" path="res://assets/models/okinawa/structures/harbour_quay.glb" id="14_quay"]
-[ext_resource type="PackedScene" path="res://assets/models/okinawa/vehicles/fishing_boat.glb" id="15_boat"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_stack_a.glb" id="20_stack_a"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_stack_b.glb" id="21_stack_b"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/structures/stone_quay.glb" id="14_quay"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/vehicles/fishing_junk.glb" id="15_boat"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/buildings/floating_house_a.glb" id="22_house_a"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/buildings/floating_house_b.glb" id="23_house_b"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/structures/fish_farm.glb" id="24_farm"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/props/net_drying_rack.glb" id="25_rack"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/vehicles/sampan_a.glb" id="26_sampan"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/vehicles/basket_boat.glb" id="27_basket"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/structures/coast_parapet.glb" id="29_parapet"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/structures/stone_dike.glb" id="30_dike"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/structures/belvedere_pavilion.glb" id="31_pavilion"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/plants/karst_ficus_a.glb" id="32_ficus_a"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/plants/karst_ficus_b.glb" id="33_ficus_b"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/plants/bamboo_clump.glb" id="34_bamboo"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/plants/scrub_tuft.glb" id="35_scrub"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -1023,6 +1340,8 @@ animal_mass = 12.0
 speed = 4.0
 spacing = 1.1
 zebra_ratio = 0.0
+animal_model = "res://assets/models/halong/animals/macaque.glb"
+alt_model = "res://assets/models/halong/animals/macaque.glb"
 no_body_radius = 7.0
 body_reach = 14.0
 

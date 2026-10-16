@@ -155,6 +155,14 @@ var ai_count: int = 5
 ## cheama proprul `_ready` sincron, in interiorul lui `add_child`, deci nu
 ## exista alt moment in care sonda sa apuce sa scrie pe `track` direct.
 var traffic_override: int = -1
+## Lineup-ul AI pentru sonde (`tools/car_balance.sh` prin `ProbeRace
+## --ai-cars=`): indecsi in `CAR_DATA`, unul per adversar, in ordinea
+## sloturilor. Gol (implicit) = `Race.AI_CARS`, lineup-ul jocului. Acelasi
+## tipar ca `traffic_override`: singurul punct din care o sonda poate schimba
+## grila INAINTE ca `Race._spawn_cars` sa ruleze. O lista mai scurta decat
+## `ai_count` se repeta ciclic, ca si `AI_CARS`. Matricea de echilibru pune
+## toate cele 6 masini din garaj pe aceeasi grila (docs/cariera §2.1, §11 pas 0).
+var ai_cars_override: Array[int] = []
 
 # Selectii (masina aleasa se persista).
 var selected_car: int = 0

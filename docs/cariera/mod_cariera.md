@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.2 (brief de design, gruparea lumilor decisă)
+# Modul Carieră — „Turul lumii” — v0.3 (brief de design, gruparea decisă, echilibrul garajului ca pas 0)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -24,6 +24,15 @@
 > sunt **date** (o resursă `CareerConfig`, §3), progresul se ține **pe
 > pistă**, nu pe lume (§10), iar o regrupare e o editare de `.tres`, zero
 > cod, zero progres pierdut. Rivalii refăcuți pe 3 lumi + un rival final (§5).
+>
+> **v0.3 (16 oct 2026), rezerva dezvoltatorului:** „sunt mașini ca autobuzul
+> sau pompierii care sunt încete; indiferent de hartă, mașina care câștigă
+> mereu e Poliția”. Verificată cu `ProbeRace` (§2.1): garajul are **două
+> clase**, nu șase stiluri — Pompierii și Autobuzul sunt cu 17–27% mai lenți
+> pe tur decât trio-ul ușor, pe orice pistă. Un rival în autobuz e un
+> pushover și „câștigi mașina rivalului” e un premiu gol. Decizia: **pasul 0,
+> echilibrul garajului, înaintea carierei** (§11), cu matricea ca gardă.
+> Rivalii (§5) rămân, dar pista fiecăruia o aleg datele, după pasul 0.
 
 ## 0. Într-o propoziție
 
@@ -123,6 +132,62 @@ pentru carieră.
   `TrackCard` arată regiunea și recordurile LAP / RACE; `GaragePanel` cu bare
   de statistici; `HUD.show_results(title, rows, primary)`.
 - **Fantomă (replay)**: nu există.
+
+## 2.1 Echilibrul garajului, măsurat (16 oct 2026)
+
+Observația dezvoltatorului, la volan: „indiferent de hartă, mașina care
+câștigă mereu e Poliția; autobuzul și pompierii sunt încete”. Verificată
+cu `ProbeRace --mode=race`: același `AIController` la volanul tuturor
+(al „jucătorului” prin `--car=`), 240 s, seed 1, pe trei piste ale lumii 1
+și una a lumii 2; două rulări per pistă (Muscle, apoi Buggy la volanul
+jucătorului; grila AI acoperă Poliția, Taxiul, Pompierii și două Autobuze).
+**Cel mai bun tur, în secunde**, cel mai bun din cele două rulări:
+
+| Mașină | Kyoto | Monument Valley | Serengeti | Transfăgărășan | față de cea mai rapidă |
+|---|---|---|---|---|---|
+| Muscle | **65,5** | **61,6** | 71,3 | **67,9** | 0 … +1% |
+| Buggy | 65,6 | 62,0 | 71,0 | 69,0 | 0 … +2% |
+| Poliția | 66,9 | 64,0 | **70,7** | 68,9 | 0 … +4% |
+| Taxi | 69,4 | 65,8 | 78,5 | 70,8 | +4 … +11% |
+| Pompierii | 76,5 | 73,3 | 86,8 | 80,6 | **+17 … +23%** |
+| Autobuzul | 82,9 | 77,9 | 89,3 | 86,2 | **+26 … +27%** |
+
+(Seed unic: `ProbeRace` e nedeterministă — memoria `proberace-nedeterminism`
+— dar zgomotul ei e de 1–8% între cele două autobuze din aceeași cursă;
+ecarturile de 17–27% sunt mult peste. Rapoartele brute, cu repunerile și
+blocajele fiecărei rulări, sunt în `echilibru_garaj_baseline_2026-10-16.md`
+— linia de bază „înainte” pentru A/B-ul de la pasul 0. 8 rulări, ~75 s
+fiecare, headless; matricea completă pe 12 piste costă ~30 min — e gardă,
+nu ceremonie.)
+
+Ce spun cifrele:
+
+- **Două clase, nu șase stiluri.** Trio-ul ușor (Muscle, Buggy, Poliția) e
+  în 1–4% pe orice pistă; Taxiul e la +6–11%; Pompierii și Autobuzul sunt
+  cu **un sfert** mai lenți pe tur, peste tot. Pe o cursă de 3 tururi
+  înseamnă 50–70 s în urmă. Nicio pistă nu echilibrează asta: viteza se
+  plătește pe fiecare metru, masa (singurul lor atu) doar la contact.
+- **AI-ul vs volanul.** Cu AI-ul, Muscle e la egalitate cu Poliția; la
+  volan uman Poliția câștigă. Nu e contradicție: AI-ul exploatează perfect
+  și grip-ul 7 al Muscle-ului, omul nu — grip 10 + accelerația cea mai mare
+  fac Poliția cea mai *accesibilă* la limită. Matricea măsoară potențialul
+  mașinii, volanul accesibilitatea; verdictele coincid pe ce contează: cele
+  grele nu pot câștiga nicăieri, iar principiul 4 („alegerea mașinii =
+  alegerea stilului”) e azi un slider de dificultate.
+- **Mașinile grele pică și gimmick-urile.** Pe Serengeti, un autobuz s-a
+  înțepenit pe kicker-ul `FlyoffRamp` (frac 0,87: 3 blocaje, 9 repuneri în
+  20 s) — nu are viteza să-l ia. Echilibrul nu e doar timp pe tur, e și
+  „poate mașina asta să treacă de fiecare gimmick”.
+- **Descoperire colaterală, de tratat separat**: același autobuz are un
+  „tur” de 17,8 s, imediat după o repunere la frac 0,06. Ipoteza:
+  repunerea peste linia de start numără un tur. Dacă e așa, `try_record`
+  poate salva un record fals și pentru jucător (recover după off-road lângă
+  linie). Issue separat, nu intră în PR-ul ăsta.
+
+Consecința pentru carieră: **rivalii (§5) și „câștigi mașina rivalului” cer
+ca fiecare mașină să fie cea mai bună undeva.** Cariera nu creează problema,
+dar o scoate la lumină la fiecare rival și la fiecare țintă de contratimp
+(care ar fi atinsă doar de Poliție). De aceea echilibrul e pasul 0 din §11.
 
 ## 3. Structura: raftul cu lumi și pașaportul
 
@@ -241,25 +306,35 @@ Boșii din CTR aruncă obiecte; noi avem masă și linie. Fiecare lume are un
 lumii. Când îl învingi, **mașina lui intră în garajul tău**. E recompensa
 centrală: ai văzut-o 3 minute cum conduce altfel decât tine, acum o ai.
 
+**Condiționat de pasul 0 (§2.1, §11).** Cu garajul de azi, un rival în
+Pompieri sau în Autobuz e cu un sfert mai lent pe tur: îl depășești pe
+prima dreaptă și proba s-a terminat. Rivalii se proiectează **după**
+echilibru, iar pista fiecăruia o alege **matricea**: rivalul rulează pe
+pista din lumea lui pe care mașina lui e cea mai rapidă (sau cel mai
+aproape de cea mai rapidă). Dacă după pasul 0 o mașină tot nu e prima
+nicăieri, nu e rival — se câștigă din cupa lumii (§7).
+
 Garajul de start: **Buggy + Taxi** (ușoară și agilă / echilibrată — cele două
 stiluri de bază). Trei lumi, deci trei rivali din ce în ce mai grei, plus un
 **rival final** care se deschide după ce i-ai învins pe toți trei — așa
-toate cele 6 mașini se câștigă prin joc:
+toate cele 6 mașini se câștigă prin joc. Perechile pilot–mașină sunt cele
+din grila de azi (`Race.AI_CARS` × `PILOTS`: Vex conduce Poliția, Luna
+Pompierii, Robo Autobuzul), ca jucătorul să-i recunoască:
 
-| Lume | Rival | Mașină | Pista rivalului | Caracterul la volan | Ce te învață |
-|---|---|---|---|---|---|
-| 1 | **Luna** | Poliția (0,9; grip 10) | Kyoto | driftează curat, ține turbo-ul pentru dreapta mare | drift ca unealtă de viraj, turbo pe decizie |
-| 2 | **Kai** | Pompierii (2,0) | Machu Picchu | te împinge la contact, nu cedează linia | cum te ferești de o masă dublă, când o folosești |
-| 3 | **Robo** | Autobuzul (2,6; viteză 30) | Fiordland | blochează; pe banda de autocar n-ai pe unde | **scurtătura**: autobuzul nu poate lua drumul vechi din pădure, tu da |
-| final | **Vex** | Muscle (1,35; viteză 37) | Monument Valley | cel mai rapid pe drepte, slab în viraj strâns | unde câștigi un viraj contra unei mașini mai rapide; închide bucla pe prima pistă |
+| Lume | Rival | Mașină | Caracterul la volan | Ce te învață |
+|---|---|---|---|---|
+| 1 | **Vex** | Poliția (0,9; grip 10) | driftează curat, ține turbo-ul pentru dreapta mare | drift ca unealtă de viraj, turbo pe decizie |
+| 2 | **Luna** | Pompierii (2,0) | te împinge la contact, nu cedează linia | cum te ferești de o masă dublă, când o folosești |
+| 3 | **Robo** | Autobuzul (2,6) | blochează; pe banda îngustă n-ai pe unde | răbdare, linie și scurtătura pe care el n-o poate lua |
+| final | **Nyx** | Muscle (1,35; viteză 37) | cel mai rapid pe drepte, slab în viraj strâns | unde câștigi un viraj contra unei mașini mai rapide |
 
-Pista rivalului e în lumea lui și e cea mai potrivită stilului: Luna pe
-virajele strânse din Kyoto, Kai pe serpentinele din Machu Picchu (unde
-autobuzul-hazard deja împinge — rivalul e ecoul lui), Robo pe Fiordland,
-unde blocajul e bătut de scurtătură, nu de contact. Rivalul final rulează pe
-Monument Valley, prima pistă a jocului, cu mașina pe care ai început — e
-propunere, nu decizie (§12). Pistele rivalilor sunt câmpuri pe `CareerWorld`
-(`rival`, `rival_track`), deci se mută odată cu gruparea.
+Pistele rivalilor nu se scriu aici: ies din matricea de după pasul 0 și
+stau în `CareerWorld` (`rival`, `rival_track`), deci se mută odată cu
+gruparea. Propunerile de stil (Vex pe virajele strânse din Kyoto, Luna pe
+serpentinele din Machu Picchu unde autobuzul-hazard deja împinge, Robo pe
+Fiordland unde blocajul e bătut de scurtătură, Nyx pe Monument Valley ca
+să închidă bucla pe prima pistă) sunt ipoteze de verificat cu cifra, nu
+decizii.
 
 Numele sunt cele din `Race.PILOTS`, ca piloții să fie aceiași în cursă și
 ca rivali (jucătorul îi „cunoaște” deja din grilă).
@@ -323,7 +398,7 @@ server.
 
 Cu modelul recomandat (gratuit de încercat, o plată pentru tot), **cutia cu
 `free = true` (Lumea 1: Monument Valley, Kyoto, Cappadocia, Serengeti) e
-gratis și conține toată bucla**: 4 piste × 3 probe, un rival (Luna), o
+gratis și conține toată bucla**: 4 piste × 3 probe, un rival (Vex), o
 mașină câștigată (Poliția), abțibilduri. Plata e a doua cutie sigilată, pe
 care o vezi de la început. Jucătorul plătește după ce a simțit
 tot, nu ca să afle ce e. Dacă modelul ales e premium pur, cutiile se deschid
@@ -356,7 +431,7 @@ o capcană. Cheile pe un **`id` stabil** nou în `TrackInfo` (`okinawa`,
 ```
 [meta]       version = 1
 [track:kyoto]     race_medal = 2   tt_medal = 1   tt_best_ms = 183420   challenge = true
-[rival:luna]      beaten = true
+[rival:vex]       beaten = true
 [cup:world_1]     won = false
 [garage]     unlocked = ["buggy", "taxi", "police_sports"]
 [stickers]   kyoto = true
@@ -377,6 +452,41 @@ recorduri); citește `CareerConfig` la pornire și expune `worlds()`,
 
 Fiecare pas are o gardă headless, ca restul proiectului; capturile de UI se
 fac cu fereastră (memoria `snapshot-nu-merge-headless`).
+
+0. **Echilibrul garajului** (înaintea carierei; §2.1, decizia
+   dezvoltatorului din 16 oct). Retuning în `CarData`, export vars, fără
+   sisteme noi — feel-ul se găsește prin iterare:
+   - **viteza maximă strânsă în ≤5%** (34–36): 30 față de 37 nu se
+     recuperează cu nimic;
+   - **trade-uri pe axe care se plătesc pe fiecare metru**: Poliția =
+     sprinter (accelerația cea mai mare, viteza maximă cea mai mică, cea mai
+     ușoară — pierde cel mai mult la contact și la hazarde); Muscle =
+     cruiser (viteză maximă, accelerație slabă, grip 7); Taxi = echilibrat;
+     Buggy = agil + **off-road** (pierde mai puțin din cei 45% pe
+     iarbă/nisip — e un buggy);
+   - **masa plătește și fără contact**, altfel Pompierii și Autobuzul n-au
+     ce vinde. Trei candidați, se aleg **două** (§12): (a) hazardele scalate
+     cu masa — `car_thrown`, `spun`, `splashed`, `blinded` aplică efectul ×
+     1/`mass_factor`, autobuzul nu e aruncat de carul de Gion; (b) trec prin
+     turmă, tuk-tuk-uri și bolovani fără să piardă viteza (`animal_hit`
+     deja poartă `mass_ratio`); (c) rezervor de turbo mai mare sau
+     încărcare mai rapidă (motor mare);
+   - **gimmick-urile trebuie să treacă cu orice mașină**: autobuzul se
+     înțepenește azi pe kicker-ul din Serengeti (§2.1).
+
+   *Gardă:* `ProbeCarBalance` — matricea din §2.1 ca sondă, pe toate cele
+   12 piste din carieră, cel puțin 2 seed-uri (nedeterminism), raportată ca
+   tabel în log. Trei praguri: (i) **veto**: ecartul de best lap pe o pistă
+   între cea mai rapidă și cea mai lentă mașină ≤ 8% (azi 26–27%); (ii)
+   **veto**: nicio mașină cu blocaje/repuneri pe gimmick peste linia de
+   bază a pistei din `ProbeRace`; (iii) **raportat, nu veto**: fiecare
+   mașină cea mai rapidă pe cel puțin o pistă — asta e ținta de design, dar
+   un prag de veto pe ea ar cere ceremonie la fiecare retuning (lecția
+   plafonului de triunghiuri din `CLAUDE.md`). Verdictul final rămâne **la
+   volan**: matricea măsoară potențialul mașinii, nu accesibilitatea ei —
+   dezvoltatorul conduce fiecare mașină pe 3 piste după retuning. Livrare:
+   un PR cu sonda + unul cu retuning-ul, A/B pe aceeași matrice (memoria
+   `proberace-nedeterminism`: distribuții, nu o rulare).
 
 1. **Date + raft + ștampile + gating** — resursele `CareerWorld` /
    `CareerConfig` cu gruparea din §3 (trei `.tres` de lume + unul de
@@ -417,8 +527,11 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
 6. **Polish** — cupa lumii pe campionatul existent, provocarea zilei,
    animația de ștampilă, pagina de 100%.
 
-Pașii 1 și 2 sunt fundația și se fac în serie. 3, 4 și 5 sunt independente
-între ele după 2 și pot merge în paralel pe worktree-uri frați
+Pasul 0 merge **primul și singur**: e fizică și feel, cere verdictul
+dezvoltatorului la volan, și toate țintele de mai jos (contratimp, rivali)
+depind de el. Pașii 1 și 2 sunt fundația și se fac în serie — pasul 1 (date
++ raft) nu depinde de 0 și poate merge în paralel cu el. 3, 4 și 5 sunt
+independente între ele după 2 și pot merge în paralel pe worktree-uri frați
 (`D:/GameDev/wt-cariera-<pas>`, memoria `orchestrare-agenti-worktree-frate`),
 cu constructori Sonnet și coordonare Fable (memoria
 `coordonator-fable-constructori-sonnet`). Integrarea, ca la piste: fiecare PR
@@ -439,10 +552,9 @@ Rămase:
    pe cutie, deci decide și iconografia raftului.
 2. **Garajul de start**: Buggy + Taxi, sau o singură mașină (progresie mai
    lungă, început mai sărac).
-3. **Rivalii și pistele lor** (§5): Luna/Poliția pe Kyoto, Kai/Pompierii pe
-   Machu Picchu, Robo/Autobuzul pe Fiordland, Vex/Muscle rival final pe
-   Monument Valley — propunere; Robo cere comportamentul de apărare, fără
-   el altă mașină în lumea 3.
+3. **Rivalii** (§5): perechile Vex/Poliția, Luna/Pompierii, Robo/Autobuzul,
+   Nyx/Muscle final — propunere; pistele lor le alege matricea **după pasul
+   0**. Robo cere comportamentul de apărare, fără el altă mașină în lumea 3.
 4. **Pragurile de ștampile** (6 / 14) și **țintele de contratimp** —
    amândouă se pun la volan, nu din calcul.
 5. **Vocabularul** în joc: „ștampile / pașaport / cutii” sau alt vocabular
@@ -451,3 +563,13 @@ Rămase:
    fiecare pistă.
 7. **Ha Long** — când intră în carieră și în ce lume (a patra cutie, sau a
    cincea pistă a uneia existente; `CareerWorld.tracks` nu are limită).
+8. **Pasul 0, ce cumpără masa** (§11): două din (a) hazarde scalate cu masa,
+   (b) trec prin turmă/trafic/bolovani fără să piardă viteza, (c) rezervor
+   de turbo mai mare. Recomandarea: (a) + (b) — amândouă se văd pe pistă și
+   nu ating bara de turbo, care e identitatea comună a jocului.
+9. **Pasul 0, pragul de veto** pe ecartul best lap per pistă: 8% e
+   propunerea; sub 5% mașinile devin la fel, peste 10% cele lente rămân
+   lente. Se fixează după prima rundă de retuning, nu înainte.
+10. **Turul fals după repunere** (§2.1): issue separat, de verificat înainte
+    ca recordurile de carieră să conteze — o repunere peste linie nu are
+    voie să numere un tur.

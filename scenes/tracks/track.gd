@@ -4202,12 +4202,20 @@ static func themes() -> Dictionary:
 		# clasa triplanara le-ar sterge.
 		"horizon_class": "",
 		"horizon_rings": [
+			# `dy` RIDICA siluetele, si pe pista asta e obligatoriu.
+			# `_build_horizon` le ingroapa 4 m in TEREN; pe uscat e corect, dar
+			# aici inelele cad pe GOLF, unde "terenul" e fundul marii. Masurat
+			# cu `tools/sv_halong_oriz.gd`: toate 12 stateau la -23..-25 m, pe
+			# un fund de ~-20, deci din piese de 40-50 m se vedeau ~20 — de aia
+			# citeau ca niste blocuri palide si scunde, nu ca turnuri de carst.
+			# Cu dy = +21 baza ajunge pe la -3 (intra in apa, cum trebuie) si
+			# varful la 37-47 m.
 			{"near": 260.0, "far": 340.0, "count": 4, "scale": 1.0,
-				"clear": 120.0, "picks": ["KarstRow_A"]},
+				"clear": 120.0, "dy": 21.0, "picks": ["KarstRow_A"]},
 			{"near": 340.0, "far": 460.0, "count": 4, "scale": 1.15,
-				"clear": 150.0, "picks": ["KarstRow_B"]},
+				"clear": 150.0, "dy": 21.0, "picks": ["KarstRow_B"]},
 			{"near": 460.0, "far": 620.0, "count": 4, "scale": 1.3,
-				"clear": 180.0, "picks": ["KarstRow_C"]},
+				"clear": 180.0, "dy": 21.0, "picks": ["KarstRow_C"]},
 		],
 		# Scatterul si props-urile Okinawa se sting: vocabularul (fukugi, pin
 		# ryukyu, pandanus) e japonez. Decorul se pune de mana, pe POI, ca la

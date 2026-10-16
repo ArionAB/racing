@@ -23,6 +23,7 @@
 #   bash tools/car_balance.sh --tracks="11 12" --seeds="1"   # rapid, 2 piste
 #   bash tools/car_balance.sh --out=docs/cariera/echilibru_garaj_2026-10-17.md
 #   bash tools/car_balance.sh --no-equal-speed         # cum vede jocul grila (zarul AI)
+#   bash tools/car_balance.sh --reparse                # doar raportul, din log-urile din $BALANCE_LOGS
 #
 # Pistele se dau ca POZITIE in GameState.TRACK_SCENES (ca la snapshot /
 # probe_race), nu ca numar de scena; numele pistei se citeste din log
@@ -35,7 +36,13 @@
 # Verdict (pragurile din brief §11 pasul 0):
 #   VETO    ecartul (cea mai lenta - cea mai rapida) / cea mai rapida > VETO_PCT
 #           pe orice pista (8%, provizoriu pana dupa prima runda de retuning);
-#   VETO    o masina cu blocaje pe o pista (se intepeneste pe un gimmick);
+#   VETO    o masina FARA niciun tur complet pe o pista (se intepeneste pe un
+#           gimmick si nu mai iese);
+#   RAPORT  blocajele si repunerile per masina si pista ("!" de la 3 blocaje).
+#           NU sunt veto: si cea mai rapida masina se blocheaza uneori (Politia
+#           are 4 pe Kyoto din linia AI, nu din masina), deci un prag absolut
+#           ar fi mereu rosu sau mereu orb — veto-ul pe blocaje se armeaza
+#           abia cu linie de baza per pista (memoria `garda-fara-linie-de-baza`);
 #   RAPORT  cate piste are fiecare masina pe locul 1 — tinta de design
 #           ("fiecare masina prima undeva"), fara veto (lectia plafonului de
 #           triunghiuri din CLAUDE.md: un prag atins mereu cere ceremonie).
@@ -54,6 +61,7 @@ EQUAL="--equal-speed"
 OUT=""
 PLAYER_CAR=0            # Muscle; adversarii = restul garajului, in ordinea CAR_DATA
 AI_CARS="1,2,3,4,5"     # Politia, Taxi, Autobuzul, Pompierii, Buggy
+REPARSE=0               # --reparse: doar raportul, din log-urile deja existente in $LOGS
 
 for a in "$@"; do
 	case "$a" in
@@ -63,6 +71,7 @@ for a in "$@"; do
 		--veto=*) VETO_PCT="${a#--veto=}" ;;
 		--out=*) OUT="${a#--out=}" ;;
 		--no-equal-speed) EQUAL="" ;;
+		--reparse) REPARSE=1 ;;
 		*) echo "argument necunoscut: $a"; exit 2 ;;
 	esac
 done
@@ -76,7 +85,11 @@ if [ ! -x "$GODOT" ] && [ ! -f "$GODOT" ]; then
 	exit 2
 fi
 mkdir -p "$LOGS"
-rm -f "$LOGS"/t*_s*.log "$LOGS"/rows.tsv
+if [ $REPARSE -eq 1 ]; then
+	rm -f "$LOGS"/rows.tsv
+else
+	rm -f "$LOGS"/t*_s*.log "$LOGS"/rows.tsv
+fi
 
 # ---------------------------------------------------------------- rulari
 # Un rand TSV per (pista, seed, masina): index, nume pista, seed, masina,
@@ -87,11 +100,19 @@ for t in $TRACKS; do
 		log="$LOGS/t${t}_s${s}.log"
 		printf '  pista %-3s seed %-2s ' "$t" "$s"
 		t0=$SECONDS
-		timeout "$STEP_TIMEOUT" "$GODOT" --headless --fixed-fps 60 --path . \
-			res://tools/ProbeRace.tscn -- --mode=race --track="$t" \
-			--seconds="$SECONDS_SIM" --seed="$s" --car="$PLAYER_CAR" \
-			--ai-cars="$AI_CARS" $EQUAL > "$log" 2>&1
-		status=$?
+		if [ $REPARSE -eq 1 ]; then
+			status=0
+			if [ ! -f "$log" ]; then
+				echo "fara log in $LOGS (ruleaza fara --reparse)"
+				continue
+			fi
+		else
+			timeout "$STEP_TIMEOUT" "$GODOT" --headless --fixed-fps 60 --path . \
+				res://tools/ProbeRace.tscn -- --mode=race --track="$t" \
+				--seconds="$SECONDS_SIM" --seed="$s" --car="$PLAYER_CAR" \
+				--ai-cars="$AI_CARS" $EQUAL > "$log" 2>&1
+			status=$?
+		fi
 		dt=$((SECONDS - t0))
 		if [ $status -eq 124 ]; then
 			echo "AGATAT (peste ${STEP_TIMEOUT}s) — vezi $log"
@@ -104,7 +125,7 @@ for t in $TRACKS; do
 		name=$(sed -n 's/^probe_race: pista \(.*\) (Track[0-9]*)$/\1/p' "$log" | head -1)
 		[ -z "$name" ] && name="pista $t"
 		# Blocul "--- ture (s)" are o linie per masina: "    Tu (Muscle)  3  min 65.52  med 68.27".
-		awk -v t="$t" -v name="$name" -v s="$s" -v log="$log" '
+		awk -v t="$t" -v name="$name" -v s="$s" '
 			/^--- ture \(s\)/ { inblock = 1; next }
 			/^--- / { inblock = 0 }
 			inblock && match($0, /\(([^)]*)\)[ \t]+([0-9]+)[ \t]+min[ \t]+([0-9.]+)/, m) {
@@ -188,7 +209,7 @@ REPORT=$(awk -F'\t' -v veto="$VETO_PCT" -v order="$TRACKS" -v equal="${EQUAL:-za
 		}
 		printf " |\n\n"
 
-		printf "## Blocaje / repuneri (suma pe seed-uri); fara tur complet = blocat\n\n"
+		printf "## Blocaje / repuneri (suma pe seed-uri; raportate, nu veto — \"!\" de la 3 blocaje); fara tur complet = VETO\n\n"
 		printf "| Masina |"; for (i = 1; i <= n; i++) if (ord[i] in seen) printf " %s |", name[ord[i]]; printf "\n"
 		printf "|---|"; for (i = 1; i <= n; i++) if (ord[i] in seen) printf "---|"; printf "\n"
 		for (r = 1; r <= m; r++) {
@@ -200,14 +221,14 @@ REPORT=$(awk -F'\t' -v veto="$VETO_PCT" -v order="$TRACKS" -v equal="${EQUAL:-za
 				bl = blocks[key] + 0; rp = resp[key] + 0
 				cell = sprintf("%d / %d", bl, rp)
 				if (!(key in bestlap)) { cell = cell " FARA TUR"; problems++ }
-				else if (bl > 0) { cell = cell " VETO"; problems++ }
+				else if (bl >= 3) cell = cell " !"
 				printf " %s |", cell
 			}
 			printf "\n"
 		}
 		printf "\n"
-		if (problems > 0) printf "VERDICT: PROBLEMA (%d veto-uri: ecart peste %s%% sau blocaje)\n", problems, veto
-		else printf "VERDICT: OK (ecart <= %s%% pe toate pistele, fara blocaje)\n", veto
+		if (problems > 0) printf "VERDICT: PROBLEMA (%d veto-uri: ecart peste %s%% sau masina fara tur complet)\n", problems, veto
+		else printf "VERDICT: OK (ecart <= %s%% pe toate pistele, toate masinile cu tur complet)\n", veto
 	}
 ' "$LOGS/rows.tsv")
 

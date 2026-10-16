@@ -23,4 +23,6 @@ project.godot text eol=lf
 *.fbx   binary
 *.blend binary
 *.ogg   binary
+*.ttf   binary
+*.otf   binary
 *.wav   binary

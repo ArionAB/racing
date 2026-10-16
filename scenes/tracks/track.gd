@@ -4224,11 +4224,20 @@ static func themes() -> Dictionary:
 		# props: lista numea piese care nu mai vin.
 		"props": "",
 		"prop_contact_flat": [],
-		# Decorul statistic stins: STRING GOL, nu `false`. `TrackDecor.build`
-		# primeste modul ca String (al doilea argument), deci un bool arunca
-		# "Cannot convert argument 2 from bool to String" si pista nu se mai
-		# construieste — prins de tools/ProbeHalongLoad.tscn la prima rulare.
-		"decor": "",
+		# Decorul statistic stins: "none", nu string gol si nu `false`.
+		#
+		# Trei valori, trei comportamente diferite, si doua dintre ele gresesc:
+		#   false   -> "Cannot convert argument 2 from bool to String", pista
+		#              nu se mai construieste (prins la prima rulare);
+		#   ""      -> TREC E PRIN garda. `TrackDecor.build` testeaza
+		#              `mode == "none"` (track_decor.gd:164), iar "" nu e
+		#              "none", deci cade pe ramura `else` = `_build_scattered`.
+		#              Masurat pe Track22: 114 cilindri + 8 cutii generate in
+		#              cod sub `Decor/Batched`, adica exact molizii generici de
+		#              pe nisip care n-au ce cauta intr-un golf vietnamez;
+		#   "none"  -> iese imediat, cum cere brief §5.2.
+		# Decorul vine de mana, pe POI (memoria `decor-manual-sursa-de-adevar`).
+		"decor": "none",
 	}, true)
 	_themes_cache["halong"] = hl
 	return _themes_cache

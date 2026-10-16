@@ -253,45 +253,54 @@ func _build_info_panel(root: Control) -> void:
 	# taie „BEST". Fixa si pentru ca un panou care isi schimba latimea cand
 	# treci de la locul 9 la 10, sau viteza de la 99 la 100, palpaie in coltul
 	# ochiului tocmai cand te uiti in alta parte.
-	box.custom_minimum_size = Vector2(212, 0)
+	box.custom_minimum_size = Vector2(176, 0)
 	margin.add_child(box)
 
 	# Randul de sus: pozitia (mare) | separator | LAP x/y.
 	var top := HBoxContainer.new()
 	top.add_theme_constant_override("separation", 10)
 	box.add_child(top)
-	_pos_label = _make_label(46)
+	_pos_label = _make_label(54)
 	_pos_label.add_theme_color_override("font_color", ACCENT)
 	_pos_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	top.add_child(_pos_label)
-	_pos_total = _make_label(22)
+	_pos_total = _make_label(22, false)
 	_pos_total.add_theme_color_override("font_color", DIM)
-	# Aliniat jos: „/6" sta pe linia de baza a cifrei mari, nu la mijlocul ei.
-	_pos_total.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	_pos_total.size_flags_vertical = Control.SIZE_SHRINK_END
-	top.add_child(_pos_total)
+	# „/6" vrea sa stea pe linia de BAZA a cifrei mari. `SIZE_SHRINK_END` il
+	# lipeste de marginea de jos a randului, care e mai joasa decat baza
+	# cifrei (acolo incap si coada lui „g", si conturul) — si cade sub ea.
+	# Il centram si il coboram cu diferenta dintre cele doua marimi de font,
+	# care e exact cat tine descendentul cifrei mari.
+	# Coborarea se face cu un MarginContainer, nu cu `position`: intr-un HBox,
+	# pozitia copilului e rescrisa de asezare la fiecare redimensionare.
+	_pos_total.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var pos_total_pad := MarginContainer.new()
+	pos_total_pad.add_theme_constant_override("margin_top", 16)
+	pos_total_pad.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	pos_total_pad.add_child(_pos_total)
+	top.add_child(pos_total_pad)
 	var sep := ColorRect.new()
 	sep.color = Color(1, 1, 1, 0.18)
 	sep.custom_minimum_size = Vector2(1, 34)
 	sep.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	top.add_child(sep)
-	_lap_label = _make_label(22)
+	_lap_label = _make_label(24, false)
 	_lap_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	top.add_child(_lap_label)
 
 	# Randurile de dedesubt: viteza, timpul turului, cel mai bun tur.
-	_speed_label = _make_label(30)
+	_speed_label = _make_label(34)
 	box.add_child(_speed_label)
-	_time_label = _make_label(26)
+	_time_label = _make_label(30)
 	box.add_child(_time_label)
-	_best_label = _make_label(17)
+	_best_label = _make_label(17, false)
 	_best_label.add_theme_color_override("font_color", DIM)
 	box.add_child(_best_label)
 
 	# Detaliile de dezvoltare stau SUB panou, nu in el: recordurile si tastele
 	# nu se citesc in cursa, iar in panou ar ingrosa exact zona pe care ochiul
 	# o verifica cel mai des.
-	_detail_label = _make_label(15)
+	_detail_label = _make_label(15, false)
 	_detail_label.add_theme_color_override("font_color", DIM)
 	_detail_label.visible = OS.is_debug_build()
 	root.add_child(_detail_label)
@@ -397,6 +406,7 @@ func _make_button(text: String) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.custom_minimum_size = Vector2(220, 60)
+	button.add_theme_font_override("font", FONT_MEDIUM)
 	button.add_theme_font_size_override("font_size", 24)
 	return button
 
@@ -568,11 +578,32 @@ func _gfx_line() -> String:
 		glow, star.call(GameState.dbg_glow > 0)]
 
 
-func _make_label(font_size: int) -> Label:
+## Fontul HUD-ului: Barlow Condensed (SIL OFL, vezi
+## `assets/fonts/LICENSE_barlow_OFL.txt`). Condensat fiindca panoul de
+## telemetrie e ingust si cifrele se schimba des — „142 km/h" si „00:05.5"
+## trebuie sa incapa fara sa lateasca panoul la fiecare accelerare.
+##
+## `preload`, nu `load`: fonturile intra o data, la compilarea scriptului, nu
+## la fiecare cursa.
+const FONT_BOLD := preload("res://assets/fonts/BarlowCondensed-SemiBold.ttf")
+const FONT_MEDIUM := preload("res://assets/fonts/BarlowCondensed-Medium.ttf")
+
+## `bold` = cifrele care se citesc dintr-o privire (pozitie, viteza, timp).
+## Restul (etichete, butoane, mesaje) merg pe Medium: la aceeasi marime,
+## SemiBold peste tot ar face HUD-ul sa tipe uniform si n-ar mai exista
+## ierarhie.
+func _make_label(font_size: int, bold: bool = true) -> Label:
 	var label := Label.new()
+	label.add_theme_font_override("font", FONT_BOLD if bold else FONT_MEDIUM)
 	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-	label.add_theme_constant_override("outline_size", 7)
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	# Conturul se scaleaza cu textul, nu e fix: 7 px erau potriviti pe fontul
+	# implicit, gros, dar pe Barlow Condensed — litere subtiri si apropiate —
+	# umpleau golurile din „e"/„a" si randul mic iesea o pata. Aici conturul
+	# desparte textul de lume; cand devine mai gros decat linia literei, face
+	# exact pe dos.
+	label.add_theme_constant_override("outline_size",
+		maxi(3, roundi(font_size * 0.16)))
 	return label
 
 func setup_minimap(track: Track, cars: Array[Car]) -> void:

@@ -55,8 +55,14 @@ pur plus haosul fizic, nu proiectilele.
 - Turbo Ignition: bară care se încarcă din mers (accelerat de drift), arsă
   la cerere cu butonul TURBO ✔
 - Countdown + rocket start (ține TURBO în ultima secundă), poziții live ✔
-- Touch controls: viraj pe jumătăți de ecran + auto-accelerate + butoane
-  DRIFT/TURBO ✔ — **de validat pe device fizic**
+- Touch controls: butoane ◀ ▶ de viraj (cu jumătățile de ecran ca zonă de
+  toleranță în jurul lor) + **accelerație explicită pe butonul ▲** din
+  dreapta-jos + butoane DRIFT/TURBO deasupra lui ✔ — validat pe iPhone
+  (oct 2026). Auto-accelerate (orice deget pe ecran = gaz) a fost **înlocuit**
+  de butonul ▲, decizia dezvoltatorului după primul test pe device: cu
+  auto-accelerate butonul din mockup n-ar fi făcut nimic, mergeai la fel și
+  fără să-l atingi. Garda `ProbeTouchZones` verifică maparea atingere→comandă
+  și că discurile apăsate împreună (gaz+drift, gaz+turbo) nu se ating.
 
 ## Post-MVP (nu implementa fără să fie cerut)
 

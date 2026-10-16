@@ -59,6 +59,11 @@ func _show_panel(panel: Control) -> void:
 	_main_box.visible = false
 	for p in _panels:
 		p.visible = p == panel
+	# Garajul se redeschide pe masina SALVATA, nu pe cea la care te uitai
+	# ultima data fara sa apesi SELECT.
+	var garage := panel as GaragePanel
+	if garage != null:
+		garage.reopen()
 
 func _show_main() -> void:
 	_main_box.visible = true
@@ -74,39 +79,16 @@ func _build_track_panel() -> Control:
 	panel.back_pressed.connect(_show_main)
 	return panel
 
-## Garajul: alegerea masinii, cu statistici; selectia se persista.
+## Garajul: vitrina 3D + statistici + banda de selectie, pe ecran intreg
+## (GaragePanel). A inlocuit lista de butoane-text, unde cifrele brute nu
+## spuneau nimic si nu vedeai masina pe care o alegi.
 func _build_garage_panel() -> Control:
-	var panel := _make_panel()
-	var box := panel.get_child(0).get_child(0) as VBoxContainer
-	var title := Label.new()
-	title.text = "GARAGE"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 34)
-	box.add_child(title)
-	var buttons: Array[Button] = []
-	for i in GameState.CAR_DATA.size():
-		var car_index := i
-		var data := GameState.CAR_DATA[i] as CarData
-		var button := Button.new()
-		button.custom_minimum_size = Vector2(430, 70)
-		button.add_theme_font_size_override("font_size", 22)
-		button.pressed.connect(func() -> void:
-			GameState.selected_car = car_index
-			GameState.save_settings()
-			_refresh_garage(buttons))
-		box.add_child(button)
-		buttons.append(button)
-	_refresh_garage(buttons)
-	_add_back(box)
+	var panel := GaragePanel.new()
+	panel.visible = false
+	add_child(panel)
+	_panels.append(panel)
+	panel.back_pressed.connect(_show_main)
 	return panel
-
-func _refresh_garage(buttons: Array[Button]) -> void:
-	for i in buttons.size():
-		var data := GameState.CAR_DATA[i] as CarData
-		var marker := "> " if i == GameState.selected_car else "   "
-		buttons[i].text = "%s%s   speed %d  accel %d  grip %d  mass %.1f" % [
-			marker, data.display_name, int(data.max_speed),
-			int(data.acceleration), int(data.grip), data.mass_factor]
 
 # ---------------------------------------------------------------- utilitare
 
@@ -117,32 +99,6 @@ func _make_center_box() -> VBoxContainer:
 	box.grow_vertical = Control.GROW_DIRECTION_BOTH
 	box.add_theme_constant_override("separation", 18)
 	return box
-
-func _make_panel() -> PanelContainer:
-	var panel := PanelContainer.new()
-	panel.set_anchors_and_offsets_preset(
-		Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
-	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	panel.visible = false
-	add_child(panel)
-	_panels.append(panel)
-	var margin := MarginContainer.new()
-	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-		margin.add_theme_constant_override(side, 24)
-	panel.add_child(margin)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 12)
-	margin.add_child(box)
-	return panel
-
-func _add_back(box: VBoxContainer) -> void:
-	var back := Button.new()
-	back.text = "BACK"
-	back.custom_minimum_size = Vector2(200, 60)
-	back.add_theme_font_size_override("font_size", 24)
-	back.pressed.connect(_show_main)
-	box.add_child(back)
 
 func _make_button(text: String) -> Button:
 	var button := Button.new()

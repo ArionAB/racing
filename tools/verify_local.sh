@@ -121,6 +121,21 @@ run_step "Strivit: turbo-ul nu scoate masina din strivire" crush_turbo.log 'VERD
 run_step "Bolovanul de pe buza + directie inversata" rim_boulder.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeRimBoulder.tscn
 run_step "Registrul MeshCpu (citiri GPU refolosite)" meshcpu.log 'MeshCpu:' -- \
 	--headless --path . res://tools/ProbeMeshCpu.tscn
+# Maparea atingere -> comanda. Pe iPhone, sageata DREAPTA vira la STANGA:
+# butoanele erau desenate amandoua in stanga ecranului, iar directia se decidea
+# din `pos.x < size.x/2`. Nicio captura nu putea prinde asta — o captura arata
+# unde e desenat butonul, nu ce face. Verifica si ca discurile apasate
+# simultan (gaz+drift, gaz+turbo) nu se ating.
+run_step "Controale touch: maparea si distantele" touch_zones.log 'VERDICT:' -- \
+	--headless --path . res://tools/ProbeTouchZones.tscn
+
+# Garajul: normalizarea barelor pe intervalul REAL al masinilor, masa ca axa
+# cu semn (nu bara care se umple), conturul-fantoma bidirectional si
+# incadrarea vitrinei 3D. Cifrele brute din vechiul garaj nu spuneau nimic,
+# iar o incadrare pe factor fix taia masina de indata ce panoul ii musca
+# din latime (prima captura).
+run_step "Garajul: bare, masa si incadrarea vitrinei" garage.log 'probe_garage:' -- \
+	--headless --path . res://tools/ProbeGarage.tscn -- --check
 
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then

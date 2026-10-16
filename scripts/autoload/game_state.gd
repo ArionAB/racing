@@ -213,6 +213,9 @@ var gfx_tier: int = 1
 var touch_steer: float = 0.0
 var touch_drift: bool = false
 var touch_turbo: bool = false
+## Gazul, de cand acceleratia e explicita (oct 2026): butonul ^ din
+## dreapta-jos. Inainte orice deget pe ecran insemna gaz (auto-accelerate).
+var touch_gas: bool = false
 var touch_active: bool = false # cel putin un deget pe ecran (auto-accelerate)
 
 # Best lap per pista (nume pista -> milisecunde), persistat. Cheia e numele,
@@ -440,6 +443,7 @@ func reset_touch() -> void:
 	touch_steer = 0.0
 	touch_drift = false
 	touch_turbo = false
+	touch_gas = false
 	touch_active = false
 
 # ---------------------------------------------------------------- setari

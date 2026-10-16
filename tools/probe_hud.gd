@@ -134,6 +134,6 @@ func _fake_touch(hud: RaceHUD) -> void:
 	# Un deget pe viraj-dreapta si unul pe turbo: starea obisnuita intr-un
 	# viraj luat cu bara plina, deci si cea in care butoanele se suprapun cel
 	# mai mult cu restul HUD-ului.
-	tc.set("_touches", {0: "right", 1: "turbo"})
+	tc.set("_touches", {0: "right", 1: "gas"})
 	tc.queue_redraw()
 	print("probe_hud: TouchControls size = %s" % tc.size)

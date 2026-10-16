@@ -849,7 +849,9 @@ for i, (ff, lat, kind, yaw) in enumerate((
         (F["A chei"] + 0.013, 55.0, "house_b", -24.0),
         (F["A chei"] + 0.021, 44.0, "house_a", 52.0),
         (F["A chei"] + 0.028, 61.0, "house_b", 8.0),
-        (F["A chei"] - 0.005, 50.0, "house_b", 71.0),
+        # mutata mai la larg: la -0.005/50 m terenul e la +0.58, adica USCAT
+        # (masurat cu tools/sv_halong_apa.gd). Restul satului e pe fund de -15.3.
+        (F["A chei"] - 0.010, 63.0, "house_b", 71.0),
 )):
     g = at_road(ff, lat)
     add(f"CasaPlutitoare{i:02d}", kind,
@@ -878,7 +880,8 @@ for i, (ff, lat, kind, yaw, sc) in enumerate((
         (F["A chei"] + 0.011, 34.0, "sampan", 62.0, 1.0),
         (F["A chei"] + 0.019, 66.0, "basket", 0.0, 1.0),
         (F["A chei"] + 0.026, 38.0, "basket", 0.0, 1.0),
-        (F["A chei"] - 0.009, 46.0, "sampan", -41.0, 1.0),
+        # idem: la -0.009/46 m terenul e la +0.68 (uscat)
+        (F["A chei"] - 0.018, 68.0, "sampan", -41.0, 1.0),
         (F["C dig"] - 0.014, 48.0, "sampan", 115.0, 1.0),
         (F["C dig"] - 0.021, 39.0, "basket", 0.0, 1.0),
 )):

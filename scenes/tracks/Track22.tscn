@@ -323,7 +323,7 @@ transform = Transform3D(0.69892, 0, -0.71520, 0, 1.0, 0, 0.71520, 0, 0.69892, -4
 transform = Transform3D(0.99958, 0, -0.02897, 0, 1.0, 0, 0.02897, 0, 0.99958, -416.11, -0.12, -174.59)
 
 [node name="CasaPlutitoare04" parent="DecorManual" instance=ExtResource("23_house_b")]
-transform = Transform3D(0.22334, 0, -0.97474, 0, 1.0, 0, 0.97474, 0, 0.22334, -410.56, -0.12, -254.53)
+transform = Transform3D(0.20871, 0, -0.97798, 0, 1.0, 0, 0.97798, 0, 0.20871, -422.16, -0.12, -267.12)
 
 [node name="TarcPeste00" parent="DecorManual" instance=ExtResource("24_farm")]
 transform = Transform3D(0.99388, 0, 0.11043, 0, 1.0, 0, -0.11043, 0, 0.99388, -431.38, -0.10, -212.46)
@@ -350,7 +350,7 @@ transform = Transform3D(0.99388, 0, 0.11043, 0, 1.0, 0, -0.11043, 0, 0.99388, -4
 transform = Transform3D(0.99388, 0, 0.11043, 0, 1.0, 0, -0.11043, 0, 0.99388, -393.71, 0.00, -181.25)
 
 [node name="BarcaMica03" parent="DecorManual" instance=ExtResource("26_sampan")]
-transform = Transform3D(0.82858, 0, 0.55987, 0, 1.0, 0, -0.55987, 0, 0.82858, -405.53, 0.00, -263.01)
+transform = Transform3D(0.87102, 0, 0.49125, 0, 1.0, 0, -0.49125, 0, 0.87102, -424.16, 0.00, -289.56)
 
 [node name="BarcaMica04" parent="DecorManual" instance=ExtResource("26_sampan")]
 transform = Transform3D(-0.09689, 0, -0.99530, 0, 1.0, 0, 0.99530, 0, -0.09689, -351.83, 0.00, 174.04)

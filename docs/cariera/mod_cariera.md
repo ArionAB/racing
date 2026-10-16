@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.1 (brief de design, pregătit de implementare)
+# Modul Carieră — „Turul lumii” — v0.2 (brief de design, gruparea lumilor decisă)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -15,15 +15,24 @@
 >
 > **v0.1 (16 oct 2026):** analiza din conversație, structura, inventarul
 > semnalelor din cod, planul în pași.
+>
+> **v0.2 (16 oct 2026), decizia dezvoltatorului:** trei lumi de câte 4
+> piste — 1 (gratis): Monument Valley, Kyoto, Cappadocia, Serengeti; 2:
+> Transfăgărășan, Chongqing, Machu Picchu, Okinawa; 3: Baikal, Stromboli,
+> Jodhpur, Fiordland. **Ha Long rămâne deocamdată în afara carierei** (doar
+> cursă rapidă). Cerința: „gruparea să poată fi refăcută ușor” — deci lumile
+> sunt **date** (o resursă `CareerConfig`, §3), progresul se ține **pe
+> pistă**, nu pe lume (§10), iar o regrupare e o editare de `.tres`, zero
+> cod, zero progres pierdut. Rivalii refăcuți pe 3 lumi + un rival final (§5).
 
 ## 0. Într-o propoziție
 
-Mașinuța face turul lumii: un raft cu diorame (lumi de 3–4 piste), fiecare
-pistă jucată de trei ori cu alt obiectiv (cursă, contratimp cu rezervor
-sigilat, provocarea gimmick-ului), fiecare lume cu un rival 1 contra 1 a cărui
-mașină o câștigi, iar progresul se numără în ștampile pe pașaport — orice
-medalie e o ștampilă, deci niciun obiectiv nu blochează singur drumul mai
-departe.
+Mașinuța face turul lumii: un raft cu diorame (trei lumi de câte 4 piste,
+gruparea e date, nu cod), fiecare pistă jucată de trei ori cu alt obiectiv
+(cursă, contratimp cu rezervor sigilat, provocarea gimmick-ului), fiecare
+lume cu un rival 1 contra 1 a cărui mașină o câștigi, iar progresul se numără
+în ștampile pe pașaport — orice medalie e o ștampilă, deci niciun obiectiv nu
+blochează singur drumul mai departe.
 
 ## 1. Ce ține un jucător într-o carieră (și ce luăm din CTR)
 
@@ -57,9 +66,11 @@ pentru carieră.
   nefăcute (Monument Valley peste Dunele, Okinawa nouă peste Okinawa manual)
   rămân **13**: Transfăgărășan, Baikal, Stromboli, Chongqing, Cappadocia,
   Serengeti, Machu Picchu, Fiordland, Jodhpur, Kyoto, Monument Valley,
-  Okinawa, Ha Long. `TrackInfo` are `display_name`, `region`, `accent` —
-  **fără `id` stabil**; recordurile au cheia pe nume, deci o redenumire
-  pierde recordul (Monument Valley e marcă înregistrată, vezi brief-ul §3.1).
+  Okinawa, Ha Long. **În carieră intră 12**: Ha Long rămâne deocamdată doar
+  în cursa rapidă (decizia dezvoltatorului, 16 oct). `TrackInfo` are
+  `display_name`, `region`, `accent` — **fără `id` stabil**; recordurile au
+  cheia pe nume, deci o redenumire pierde recordul (Monument Valley e marcă
+  înregistrată, vezi brief-ul §3.1).
 - **Campionatul** = primele `CHAMP_ROUNDS = 3` piste din listă, adică azi
   Dunele + Okinawa manual + Transfăgărășan — două din trei sunt piste de scos.
   Cariera îl absoarbe (§7, cupa lumii), butonul CHAMPIONSHIP dispare.
@@ -121,31 +132,49 @@ lume, în stilul dioramei din `docs/style_bible.md`. Cutia deschisă arată cele
 numele lumii, silueta și „mai ai N ștampile”. E un ecran 2D (Control), nu un
 hub 3D condus.
 
-**Lumile.** 13 piste, grupate pe caracter, nu pe continent, ca fiecare lume
-să aibă o identitate de raft (propunere, decizia e a dezvoltatorului — §12):
+**Lumile** (decizia dezvoltatorului, 16 oct 2026): 12 piste în trei cutii
+de câte 4, Ha Long în afara carierei deocamdată.
 
-| # | Lume | Piste | De ce împreună |
+| # | Lume | Piste | Gratis |
 |---|---|---|---|
-| 1 | **Coasta** (gratis) | Okinawa, Ha Long, Stromboli | mare, insule, apă pe drum; cele trei cele mai „vacanță” — intrarea în joc |
-| 2 | **Orașele** | Kyoto, Chongqing, Jodhpur | străzi înguste, trafic, sărbători; mașina învață să se strecoare |
-| 3 | **Sălbăticia** | Serengeti, Monument Valley, Cappadocia | spații deschise, animale, praf; viteză și linii largi |
-| 4 | **Înălțimile** | Transfăgărășan, Machu Picchu, Baikal, Fiordland | munte, gheață, serpentine; lumea finală e cea mai mare |
+| 1 | *(nume de ales — §12)* | Monument Valley, Kyoto, Cappadocia, Serengeti | **da** |
+| 2 | *(nume de ales)* | Transfăgărășan, Chongqing, Machu Picchu, Okinawa | nu |
+| 3 | *(nume de ales)* | Baikal, Stromboli, Jodhpur, Fiordland | nu |
 
-Prima lume e cea gratuită din modelul de monetizare recomandat („3 piste
-gratis”); de aceea trebuie să conțină **toată bucla**: cursă, contratimp,
-provocare, rival și o mașină câștigată (§8).
+Lumea gratuită e cea din modelul de monetizare recomandat; de aceea trebuie
+să conțină **toată bucla**: cursă, contratimp, provocare, rival și o mașină
+câștigată (§8).
+
+**Gruparea e date, nu cod** (cerința: „să poată fi refăcută ușor”). O
+resursă `CareerConfig` (`resources/career/career_config.tres`) ține lista de
+lumi; fiecare lume e o resursă `CareerWorld` cu `id`, `display_name`,
+`tracks: Array[StringName]` (id-uri de pistă, §10), `rival` (§5), `free:
+bool`, `stamps_to_unlock`. Regulile care decurg de aici:
+
+- **a regrupa = a edita un `.tres`**, zero cod; o pistă poate fi mutată, o
+  lume adăugată sau scoasă, Ha Long introdus mai târziu;
+- **progresul se ține pe pistă** (medalii, provocare, timp) și pe `id` de
+  rival, **niciodată pe lume** — deci o regrupare nu pierde nimic și nu
+  cere migrare; ștampilele se recalculează din ce e pe piste (§10);
+- lumea gratuită e cea cu `free = true`, nu „prima din listă”; garda
+  `ProbeCareer` verifică că exact una e gratuită și că lumile nu împart
+  piste;
+- o pistă din `TRACK_SCENES` care nu apare în nicio lume e doar cursă
+  rapidă (Ha Long azi) — nu e eroare, e starea normală a unei piste noi până
+  o pui într-o cutie.
 
 **Pașaportul.** Fiecare medalie, de orice culoare, pe orice probă, plus
 fiecare rival învins, e o **ștampilă**. Lumea următoare se deschide la un
-prag de ștampile cumulat (propunere de pornire, de tunat la volan: lumea 2 la
-5, lumea 3 la 12, lumea 4 la 20; maximul e 13 piste × 3 probe + 4 rivali =
-43). Pragurile sunt alese ca o lume să se poată deschide **fără niciun aur și
-fără rivalul** lumii curente — rivalul dă mașina, nu cheia. Pașaportul e și
-ecranul de progres: ștampile, medalii pe culori, mașini, abțibilduri, procent.
+prag de ștampile cumulat (`stamps_to_unlock` pe fiecare `CareerWorld`;
+propunere de pornire, de tunat la volan: lumea 2 la 6, lumea 3 la 14;
+maximul e 12 piste × 3 probe + 3 rivali + rivalul final = 40). Pragurile
+sunt alese ca o lume să se poată deschide **fără niciun aur și fără rivalul**
+lumii curente — rivalul dă mașina, nu cheia. Pașaportul e și ecranul de
+progres: ștampile, medalii pe culori, mașini, abțibilduri, procent.
 
 ## 4. Cele trei probe pe fiecare pistă
 
-Aceeași pistă, trei abilități diferite; 13 piste devin 39 de obiective fără
+Aceeași pistă, trei abilități diferite; 12 piste devin 36 de obiective fără
 conținut nou.
 
 ### 4.1 Cursa
@@ -187,7 +216,7 @@ existent se fac primele.
 | Pistă | Gimmick | Provocare (contract) | Semnal |
 |---|---|---|---|
 | Okinawa | taifunul + valul care spală șoseaua | termină cursa fără să te ia valul (0 × `splashed` peste prag) | **există** `Car.splashed` |
-| Ha Long | pontonul + mareea | traversează pontonul la maree înaltă în fiecare tur | `tide.phase_changed` există; lipsește „ești pe ponton” |
+| Ha Long *(în afara carierei deocamdată)* | pontonul + mareea | traversează pontonul la maree înaltă în fiecare tur | `tide.phase_changed` există; lipsește „ești pe ponton” |
 | Stromboli | gheizerele de foc + lava care crește pe tururi | 3 tururi fără nicio minge de foc | **există** `fireball_hit` |
 | Kyoto | carul de Gion + shishimai | nu te lasă aruncat niciodată | **există** `car_thrown` |
 | Chongqing | telecabina + pasajul rotativ | prinde telecabina în fiecare tur | de adăugat pe `CablewayHazard` |
@@ -213,14 +242,24 @@ lumii. Când îl învingi, **mașina lui intră în garajul tău**. E recompensa
 centrală: ai văzut-o 3 minute cum conduce altfel decât tine, acum o ai.
 
 Garajul de start: **Buggy + Taxi** (ușoară și agilă / echilibrată — cele două
-stiluri de bază). Cele 4 rivale, în ordinea lumilor, din ce în ce mai grele:
+stiluri de bază). Trei lumi, deci trei rivali din ce în ce mai grei, plus un
+**rival final** care se deschide după ce i-ai învins pe toți trei — așa
+toate cele 6 mașini se câștigă prin joc:
 
-| Lume | Rival | Mașină | Caracterul la volan | Ce te învață |
-|---|---|---|---|---|
-| 1 Coasta | **Luna** | Poliția (0,9; grip 10) | driftează curat, ține turbo-ul pentru dreapta mare | drift ca unealtă de viraj, turbo pe decizie |
-| 2 Orașele | **Vex** | Muscle (1,35; viteză 37) | cel mai rapid pe drepte, slab în viraj strâns | unde câștigi un viraj contra unei mașini mai rapide |
-| 3 Sălbăticia | **Kai** | Pompierii (2,0) | te împinge la contact, nu cedează linia | cum te ferești de o masă dublă, când o folosești |
-| 4 Înălțimile | **Robo** | Autobuzul (2,6; viteză 30) | blochează, pe serpentine n-ai pe unde | răbdare și linie; finalul e un zid care se mișcă |
+| Lume | Rival | Mașină | Pista rivalului | Caracterul la volan | Ce te învață |
+|---|---|---|---|---|---|
+| 1 | **Luna** | Poliția (0,9; grip 10) | Kyoto | driftează curat, ține turbo-ul pentru dreapta mare | drift ca unealtă de viraj, turbo pe decizie |
+| 2 | **Kai** | Pompierii (2,0) | Machu Picchu | te împinge la contact, nu cedează linia | cum te ferești de o masă dublă, când o folosești |
+| 3 | **Robo** | Autobuzul (2,6; viteză 30) | Fiordland | blochează; pe banda de autocar n-ai pe unde | **scurtătura**: autobuzul nu poate lua drumul vechi din pădure, tu da |
+| final | **Vex** | Muscle (1,35; viteză 37) | Monument Valley | cel mai rapid pe drepte, slab în viraj strâns | unde câștigi un viraj contra unei mașini mai rapide; închide bucla pe prima pistă |
+
+Pista rivalului e în lumea lui și e cea mai potrivită stilului: Luna pe
+virajele strânse din Kyoto, Kai pe serpentinele din Machu Picchu (unde
+autobuzul-hazard deja împinge — rivalul e ecoul lui), Robo pe Fiordland,
+unde blocajul e bătut de scurtătură, nu de contact. Rivalul final rulează pe
+Monument Valley, prima pistă a jocului, cu mașina pe care ai început — e
+propunere, nu decizie (§12). Pistele rivalilor sunt câmpuri pe `CareerWorld`
+(`rival`, `rival_track`), deci se mută odată cu gruparea.
 
 Numele sunt cele din `Race.PILOTS`, ca piloții să fie aceiași în cursă și
 ca rivali (jucătorul îi „cunoaște” deja din grilă).
@@ -239,11 +278,8 @@ numerele:
   pe prima dreaptă și proba s-a terminat;
 - rivalul pornește din pole, jucătorul din spate.
 
-Pista rivalului e cea mai potrivită stilului lui: Robo pe Transfăgărășan
-(serpentine, blocajul merge), Kai pe Serengeti (spațiu de contact), Vex pe
-Chongqing (drepte lungi pe pasaje), Luna pe Okinawa (viraje de coastă).
 Rivalul apare pe raft de la 2 ștampile din lumea lui, ca să nu fie prima
-cursă pe care o vezi acolo.
+cursă pe care o vezi acolo; rivalul final apare când cei trei sunt învinși.
 
 Garda: `ProbeRace` cu rivalul contra AI-ului de grilă pe aceeași mașină —
 rivalul trebuie să iasă **măsurabil mai rapid pe distribuție** (memoria
@@ -285,10 +321,11 @@ server.
 
 ## 8. Legătura cu monetizarea
 
-Cu modelul recomandat (gratuit de încercat, o plată pentru tot), **prima
-cutie de pe raft e gratis și conține toată bucla**: 3 piste × 3 probe, un
-rival, o mașină câștigată (Poliția), un abțibild. Plata e a doua cutie
-sigilată, pe care o vezi de la început. Jucătorul plătește după ce a simțit
+Cu modelul recomandat (gratuit de încercat, o plată pentru tot), **cutia cu
+`free = true` (Lumea 1: Monument Valley, Kyoto, Cappadocia, Serengeti) e
+gratis și conține toată bucla**: 4 piste × 3 probe, un rival (Luna), o
+mașină câștigată (Poliția), abțibilduri. Plata e a doua cutie sigilată, pe
+care o vezi de la început. Jucătorul plătește după ce a simțit
 tot, nu ca să afle ce e. Dacă modelul ales e premium pur, cutiile se deschid
 toate pe ștampile și nimic nu se schimbă în cod în afara gardei de
 deblocare.
@@ -318,29 +355,41 @@ o capcană. Cheile pe un **`id` stabil** nou în `TrackInfo` (`okinawa`,
 
 ```
 [meta]       version = 1
-[track:okinawa]   race_medal = 2   tt_medal = 1   tt_best_ms = 183420   challenge = true
-[world:coasta]    rival_beaten = true   cup_won = false
+[track:kyoto]     race_medal = 2   tt_medal = 1   tt_best_ms = 183420   challenge = true
+[rival:luna]      beaten = true
+[cup:world_1]     won = false
 [garage]     unlocked = ["buggy", "taxi", "police_sports"]
-[stickers]   okinawa = true
+[stickers]   kyoto = true
 [daily]      last_date = "2026-10-16"   streak = 4
 ```
 
-Ștampilele nu se stochează: se **calculează** din medalii + rivali, ca să nu
-poată diverge. `CareerState` e un autoload nou (`scripts/autoload/career.gd`),
-nu încă un bloc în `GameState` (care are deja garaj, campionat, touch,
-setări, recorduri).
+Cheile sunt **pe pistă și pe rival**, nu pe lume: o regrupare (§3) mută
+pistele între cutii fără să atingă fișierul. Singura cheie pe lume e cupa
+(`[cup:<world_id>]`), care chiar aparține grupării — dacă lumea dispare,
+cupa ei devine orfană și se ignoră, nu strică nimic. Ștampilele nu se
+stochează: se **calculează** din medalii + rivali, ca să nu poată diverge.
+`CareerState` e un autoload nou (`scripts/autoload/career.gd`), nu încă un
+bloc în `GameState` (care are deja garaj, campionat, touch, setări,
+recorduri); citește `CareerConfig` la pornire și expune `worlds()`,
+`stamps()`, `is_unlocked(world)`.
 
 ## 11. Planul de implementare, în PR-uri mici
 
 Fiecare pas are o gardă headless, ca restul proiectului; capturile de UI se
 fac cu fereastră (memoria `snapshot-nu-merge-headless`).
 
-1. **Date + raft + ștampile + gating** — `Career` autoload, `id` pe
-   `TrackInfo`, migrarea recordurilor, ecranul raftului cu cutii și
-   `TrackCard`-uri cu medalii, pașaportul. Butonul CAREER în meniu,
-   CHAMPIONSHIP dispare. *Gardă:* `ProbeCareer` scrie rezultate sintetice și
-   verifică pragurile, persistența și migrarea (inclusiv un `career.cfg` cu
-   versiune necunoscută → nu se corupe, se ignoră cu mesaj).
+1. **Date + raft + ștampile + gating** — resursele `CareerWorld` /
+   `CareerConfig` cu gruparea din §3 (trei `.tres` de lume + unul de
+   config; Ha Long în niciuna), `Career` autoload, `id` pe `TrackInfo`,
+   migrarea recordurilor, ecranul raftului cu cutii și `TrackCard`-uri cu
+   medalii, pașaportul. Butonul CAREER în meniu, CHAMPIONSHIP dispare.
+   *Gardă:* `ProbeCareer` scrie rezultate sintetice și verifică pragurile,
+   persistența și migrarea (inclusiv un `career.cfg` cu versiune necunoscută
+   → nu se corupe, se ignoră cu mesaj), plus **config-ul**: exact o lume
+   `free`, nicio pistă în două lumi, fiecare `id` de pistă există în
+   `TRACK_SCENES`, `rival_track` e în lumea lui; și **regruparea**: mută o
+   pistă între două lumi în config-ul de test și verifică că medaliile ei
+   și ștampilele totale nu se schimbă.
 2. **Medalii pe cursă + contratimpul cu rezervor sigilat** — semnalele
    `lap_completed` / `race_finished` pe `Race` (cerute de `CLAUDE.md` de
    mult), `turbo_recharge` pe `Car`, modul contratimp (`ai_count = 0`, HUD cu
@@ -356,7 +405,8 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
 4. **Provocările de gimmick** — `ChallengeTracker` + contractul per pistă,
    **câte un PR per pistă**, întâi cele 8 cu semnal existent (Okinawa,
    Stromboli, Kyoto, Jodhpur, Serengeti, Monument Valley, Machu Picchu,
-   Transfăgărășan), apoi cele 5 care cer semnal nou. Abțibildul
+   Transfăgărășan), apoi cele 4 din carieră care cer semnal nou (Chongqing,
+   Cappadocia, Baikal, Fiordland); Ha Long când intră într-o lume. Abțibildul
    = un decal pe materialul de clasă al mașinii, **nu o textură per asset**
    (regula din `CLAUDE.md`; o clasă „abțibilduri” cu un atlas partajat).
    *Gardă:* o sondă care aruncă semnalul sintetic și verifică verdictul, plus
@@ -379,18 +429,25 @@ Ce **nu** intră în v1: sens invers (§7, cere dovadă per pistă), fantoma
 
 ## 12. Decizii deschise (ale dezvoltatorului)
 
-1. **Gruparea lumilor** din §3 — propunerea e pe caracter; alternativa e pe
-   continent (Europa / Asia / Africa-Americi / Oceania, dezechilibrată 3-6-3-1).
-2. **Care 3 piste sunt gratis** — propunerea: Coasta (Okinawa, Ha Long,
-   Stromboli). Trebuie să fie cele mai polish-uite la release.
-3. **Garajul de start**: Buggy + Taxi, sau o singură mașină (progresie mai
+**Decise (16 oct 2026):** gruparea lumilor și lumea gratuită (§3), Ha Long
+în afara carierei deocamdată, gruparea ca date refăcută dintr-un `.tres`.
+
+Rămase:
+
+1. **Numele celor trei lumi** — grupele nu sunt pe continent sau pe climă,
+   deci numele vine din altceva (etape ale turului? „Lumea 1/2/3”?). Apare
+   pe cutie, deci decide și iconografia raftului.
+2. **Garajul de start**: Buggy + Taxi, sau o singură mașină (progresie mai
    lungă, început mai sărac).
-4. **Rivalul final**: Autobuzul pe Transfăgărășan (propunere) — cere
-   comportamentul de apărare din §5; fără el, altă mașină la final.
-5. **Pragurile de ștampile** (5 / 12 / 20) și **țintele de contratimp** —
+3. **Rivalii și pistele lor** (§5): Luna/Poliția pe Kyoto, Kai/Pompierii pe
+   Machu Picchu, Robo/Autobuzul pe Fiordland, Vex/Muscle rival final pe
+   Monument Valley — propunere; Robo cere comportamentul de apărare, fără
+   el altă mașină în lumea 3.
+4. **Pragurile de ștampile** (6 / 14) și **țintele de contratimp** —
    amândouă se pun la volan, nu din calcul.
-6. **Numele** în joc: „ștampile / pașaport / cutii” sau alt vocabular de
-   jucărie („abțibilduri pe cutie”, „raftul”). Nu e doar text: decide
-   iconografia raftului.
-7. **Sens invers** — intră sau nu în v1 după ce `ProbeRace` îl rulează pe
+5. **Vocabularul** în joc: „ștampile / pașaport / cutii” sau alt vocabular
+   de jucărie („abțibilduri pe cutie”, „raftul”).
+6. **Sens invers** — intră sau nu în v1 după ce `ProbeRace` îl rulează pe
    fiecare pistă.
+7. **Ha Long** — când intră în carieră și în ce lume (a patra cutie, sau a
+   cincea pistă a uneia existente; `CareerWorld.tracks` nu are limită).

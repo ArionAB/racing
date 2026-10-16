@@ -969,7 +969,11 @@ _dike_len = ((_DIKE_TO - _DIKE_FROM) % 1.0) * L_TOTAL
 _n_dike = max(2, int(_dike_len / 8.0))
 for i in range(_n_dike):
     ff = _DIKE_FROM + (_DIKE_TO - _DIKE_FROM) * (i + 0.5) / _n_dike
-    g = at_road(ff, 10.5)
+    # 14,5 m lateral, nu 10,5: digul are 8 m modul si ~2,6 m adancime, deci
+    # la 10,5 marginea lui ajungea la 4,7 m de ax — SUB semi-latimea de 7 m,
+    # adica pe asfalt (masurat cu tools/sv_halong_gabarit.gd). Distanta se
+    # masoara pe GABARIT, nu pe origine.
+    g = at_road(ff, 14.5)
     add(f"Dig{i:02d}", "dike",
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0, 1.0, 1.0, 1.0)}, "
         f"{g[0]:.2f}, {g[1] - 0.55:.2f}, {g[2]:.2f})")
@@ -982,7 +986,10 @@ _par_len = ((_PAR_TO - _PAR_FROM) % 1.0) * L_TOTAL
 _n_par = max(2, int(_par_len / 6.0))
 for i in range(_n_par):
     ff = _PAR_FROM + (_PAR_TO - _PAR_FROM) * (i + 0.5) / _n_par
-    g = at_road(ff, -9.5)
+    # -11,5, nu -9,5: parapetul are 0,55 m coama plus talus, deci la -9,5
+    # marginea ajungea la 6,4-7,0 m de ax, adica PE asfalt (semi-latime 7,0).
+    # Un parapet MARGINESTE drumul, nu sta in el.
+    g = at_road(ff, -11.5)
     add(f"Parapet{i:02d}", "parapet",
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0, 1.0, 1.0, 1.0)}, "
         f"{g[0]:.2f}, {g[1] - 0.10:.2f}, {g[2]:.2f})")
@@ -990,7 +997,7 @@ for i in range(_n_par):
 # --- belvederea: reperul construit de pe varf (POI D) ----------------------
 # "Belvedere nu am stiut unde este" a fost verdictul la volan; pavilionul e
 # raspunsul (brief §1.7). Sta pe partea dinspre priveliste, langa CameraZone.
-_g = at_road(F["D belvedere"], -13.0)
+_g = at_road(F["D belvedere"], -16.0)   # gabaritul lui ajungea la 7,7 m de ax
 add("PavilionBelvedere", "pavilion",
     f"Transform3D({rot_y_s(yaw_z_to(*travel_g(F['D belvedere'])) + 90.0, 1.0, 1.0, 1.0)}, "
     f"{_g[0]:.2f}, {_g[1] - 0.20:.2f}, {_g[2]:.2f})")
@@ -998,19 +1005,48 @@ add("PavilionBelvedere", "pavilion",
 # --- vegetatia: ficusi si bambus pe urcarea spre belvedere (POI D) --------
 # Pe malul dinspre interior (stanga), unde e versantul. Alternanta determinista.
 _veg = []
-for i in range(14):
-    u = (i + 0.5) / 14.0
+# DENSITATEA vine din bugetul MASURAT, nu din prudenta.
+#
+# `tools/ProbePerf.tscn --track=14 --mobile` da pe Ha Long 41 de desene in
+# medie (varf 78) si 0,22 ms GPU. Pentru comparatie, pe aceeasi sonda:
+# Track08 1088 (varf 2194), Track09 760, Track10 553, Track02 506. Deci pista
+# desena de ~13-26 de ori mai putin decat cele deja livrate, pe acelasi buget
+# de 16,6 ms/cadru.
+#
+# Cifra aia nu e un merit, e un semnal ca versantul era GOL. 14 piese pe toata
+# urcarea insemna una la ~20 m, adica o planta razleata din cand in cand, nu un
+# versant de carst. Acum 34, pe trei randuri de departare, cu varietate pe
+# specie si pe latura — si tot ramane cu un ordin de marime sub celelalte piste.
+for i in range(34):
+    u = (i + 0.5) / 34.0
     ff = F["D urcare"] + (F["D creasta"] - F["D urcare"]) * u
     side = -1.0 if i % 3 != 1 else 1.0
-    lat = side * (12.0 + 5.0 * ((i * 7) % 4) / 3.0)
-    kind = ("ficus_a", "bamboo", "ficus_b", "bamboo")[i % 4]
+    # trei randuri: aproape de drum, mijloc, departe. Randul departat e mai
+    # rar, ca silueta sa nu devina un zid verde.
+    rand = i % 3
+    # 12,0 de baza, nu 10,0: ficusii au coroana de ~1,6 m raza, deci la 10
+    # marginea cadea la 6,9-8,0 m de ax.
+    lat = side * (12.0 + rand * 7.5 + 3.0 * ((i * 7) % 4) / 3.0)
+    kind = ("ficus_a", "bamboo", "ficus_b", "bamboo",
+            "ficus_a", "scrub")[i % 6]
     _veg.append((ff, lat, kind, i * 47.0))
 # tufe pe creasta, in jurul belvederei
-for i in range(6):
-    u = (i + 0.5) / 6.0
+for i in range(14):
+    u = (i + 0.5) / 14.0
     ff = F["D creasta"] + (F["D varf"] - F["D creasta"]) * u
-    _veg.append((ff, (-1.0 if i % 2 else 1.0) * (10.0 + 3.0 * (i % 3)),
-                 "scrub", i * 61.0))
+    # 11,5 de baza, nu 9,0: la 9,0 fiecare al patrulea exemplar cadea exact
+    # pe pragul de gabarit si coroana ajungea la 6,9 m de ax.
+    _veg.append((ff, (-1.0 if i % 2 else 1.0) * (11.5 + 4.0 * (i % 4)),
+                 "scrub" if i % 3 else "ficus_b", i * 61.0))
+# vegetatie si pe coasta de nord, langa parapet (POI G): maimutele stau
+# intr-un loc cu copaci, nu pe un parapet intr-un desert.
+for i in range(12):
+    u = (i + 0.5) / 12.0
+    ff = F_MAIMUTE - 0.020 + 0.040 * u
+    # 15,5 de baza: la 13 coroanele ajungeau la 6,9-8,0 m de ax. Si aici
+    # distanta se da pe GABARIT, nu pe origine.
+    _veg.append((ff, -(15.5 + 6.0 * (i % 3)),
+                 ("ficus_b", "bamboo", "ficus_a")[i % 3], i * 83.0))
 for i, (ff, lat, kind, yaw) in enumerate(_veg):
     g = at_road(ff, lat)
     add(f"Veg{i:02d}", kind,

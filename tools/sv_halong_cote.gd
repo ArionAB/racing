@@ -86,7 +86,13 @@ func _ready() -> void:
 	# Lista de corectii, gata de folosit: nodul -> cota reala a terenului.
 	# Generatorul o citeste si o aplica, in loc sa recalculeze `_lift_peaks`
 	# in Python (unde ar diverge tacut de formula din joc).
-	if ingropate + plutind > 0:
+	# Se scriu TOATE nodurile de sol, nu doar cele gresite acum.
+	#
+	# Prima versiune tiparea doar abaterile, iar fisierul de corectii se
+	# rescria la fiecare rulare — deci fiecare regenerare PIERDEA fixurile
+	# aplicate anterior si bilantul se inrautatea (10 gresite -> 15 dupa
+	# "reparare"). Tabelul trebuie sa fie complet, nu diferential.
+	if true:
 		print("")
 		print("--- CORECTII (nod: cota_teren) ---")
 		for ch2 in decor.get_children():
@@ -104,9 +110,7 @@ func _ready() -> void:
 			var gy2: float = sampler.ground_y(q.x, q.z)
 			if gy2 < sea_y - 1.0:
 				continue
-			var dd: float = q.y - gy2
-			if dd < -0.25 or dd > 0.35:
-				print("COTA %s %.3f" % [n2, gy2])
+			print("COTA %s %.3f" % [n2, gy2])
 
 	print("")
 	print("=== BILANT pe uscat: %d bune, %d ingropate, %d plutind ==="

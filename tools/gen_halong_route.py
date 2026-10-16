@@ -967,6 +967,53 @@ for i, (ff, lat, kind, yaw) in enumerate(_veg):
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
         f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
 
+# --- COTELE DE PE USCAT, MASURATE PE TERENUL REAL ---------------------------
+#
+# Generatorul stie doar DRUMUL: `at_road(f, lat)` da cota soselei. Pe apa e
+# exact ce trebuie (turnul intra in mare la -1,20 fata de drum). Pe uscat nu:
+# acolo unde un `TerrainPeak` ridica solul peste drum, aceeasi formula ingroapa
+# piesa, iar acolo unde terenul coboara (rapa de golf), o lasa in aer.
+#
+# Masurat pe Track22 cu `tools/sv_halong_cote.gd`: 4 turnuri ingropate cu
+# 0,88-0,97 m si 16 piese plutind, una la 12,55 m in aer.
+#
+# DE CE NU RECALCULEZ AICI: `TrackSideSampler._lift_peaks` combina domul
+# masivului prin `_smax` NETED, adauga zgomot de dune si mascheaza tot cu banda
+# de protectie a asfaltului. Reimplementata in Python, formula ar diverge tacut
+# de cea din joc la prima schimbare — exact tiparul din memoria
+# `justificarea-din-comentariu-se-verifica`. Asa, cifra vine din `ground_y()`,
+# adica din terenul pe care se conduce efectiv.
+#
+# FLUXUL, cand se muta ceva pe uscat:
+#   1. ruleaza generatorul (cotele vechi raman pentru nodurile nemutate);
+#   2. godot --headless --path . res://tools/SvHalongCote.tscn
+#      > tools/halong_cote_teren.txt   (doar liniile `COTA`);
+#   3. ruleaza generatorul din nou — citeste fisierul si corecteaza.
+# Sonda e si garda: `VERDICT: OK` doar cand nimic nu mai e ingropat sau plutind.
+COTE_TEREN = {}
+_cote_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "halong_cote_teren.txt")
+if os.path.isfile(_cote_path):
+    with open(_cote_path, encoding="utf-8") as _fh:
+        for _ln in _fh:
+            _parts = _ln.split()
+            if len(_parts) == 3 and _parts[0] == "COTA":
+                COTE_TEREN[_parts[1]] = float(_parts[2])
+
+if COTE_TEREN:
+    _fixed = 0
+    for _i, (_nm, _res, _xf, _extra) in enumerate(dec):
+        if _nm not in COTE_TEREN:
+            continue
+        # Transform3D(b0..b8, ox, oy, oz) -> se rescrie doar oy.
+        # Transform3D(b0..b8, ox, oy, oz): ultimele trei valori sunt pozitia,
+        # deci `oy` e penultima. Se rescrie DOAR ea.
+        _head, _oy, _oz = _xf.rsplit(",", 2)
+        dec[_i] = (_nm, _res,
+                   f"{_head}, {COTE_TEREN[_nm]:.2f},{_oz}", _extra)
+        _fixed += 1
+    print(f"\ncote de teren aplicate: {_fixed} din {len(COTE_TEREN)} masurate")
+
 RES = {"rock": "13_rock", "quay": "14_quay",
        "stack_a": "20_stack_a", "stack_b": "21_stack_b",
        "house_a": "22_house_a", "house_b": "23_house_b",

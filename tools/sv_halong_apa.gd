@@ -47,7 +47,8 @@ func _ready() -> void:
 	for ch in decor.get_children():
 		var nm := String(ch.name)
 		if not (nm.begins_with("CasaPlutitoare") or nm.begins_with("TarcPeste")
-				or nm.begins_with("BarcaMica")):
+				or nm.begins_with("BarcaMica") or nm.begins_with("TurnCalcar")
+				or nm.begins_with("Insulita")):
 			continue
 		# Corpurile de coliziune generate de `world_prop` (`<nume>_col`) NU se
 		# masoara: ele stau la originea lor proprie si `ground_y` le raporta o

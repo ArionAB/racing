@@ -50,8 +50,12 @@ GROUPS = {
     "animals": ("animals", ["macaque"], 1.2),
     # Fundalul: 150-320 m latime. Pasul mare si clip_end-ul de 5 km din `sheet`
     # sunt ce face diferenta intre o plansa cu trei siluete si una goala.
-    "background": ("rocks", ["karst_horizon_a", "karst_horizon_b",
-                             "karst_horizon_c"], 260.0),
+    # Fundalul e UN fisier cu trei noduri (KarstRow_A/B/C), nu trei fisiere:
+    # `Track._build_horizon` incarca un singur `horizon_model` per tema si
+    # scoate din el cate un nod pe nume (track.gd:6251-6256). Numele vechi
+    # (karst_horizon_a/b/c) nu mai exista pe disc, deci grupul raporta "LIPSA:"
+    # pe toate trei si randa o plansa goala.
+    "background": ("rocks", ["halong_horizon"], 260.0),
 }
 
 # Turnurile si fundalul se vad din LATERAL, aproape de orizontala: contractul

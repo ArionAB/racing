@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.3 (brief de design, gruparea decisă, echilibrul garajului ca pas 0)
+# Modul Carieră — „Turul lumii” — v0.5 (brief de design, gruparea decisă, echilibrul garajului ca pas 0, măsurat la viteză egală)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -39,6 +39,13 @@
 > turbo neatinsă; pragul de veto pe ecart **8%, provizoriu**, se fixează
 > după prima rundă de retuning. Pasul 0 pornește cu sonda (`ProbeCarBalance`),
 > apoi retuning-ul A/B.
+>
+> **v0.5 (17 oct 2026), măsurat:** sonda există — `tools/car_balance.sh`
+> (PR #553), toate cele 6 mașini pe aceeași grilă, viteză egală, 12 piste ×
+> 2 seed-uri. Rezultat: **Poliția prima pe 12/12**, Pompierii +17–25%,
+> Autobuzul +23–35% (§2.1). Prima matrice din v0.3 avea un artefact
+> (`speed_scale` 1,0 doar pe slotul jucătorului) — corectată; linia de bază
+> „înainte” e `echilibru_garaj_baseline_2026-10-17_viteza_egala.md`.
 
 ## 0. Într-o propoziție
 
@@ -139,56 +146,68 @@ pentru carieră.
   de statistici; `HUD.show_results(title, rows, primary)`.
 - **Fantomă (replay)**: nu există.
 
-## 2.1 Echilibrul garajului, măsurat (16 oct 2026)
+## 2.1 Echilibrul garajului, măsurat (16–17 oct 2026)
 
 Observația dezvoltatorului, la volan: „indiferent de hartă, mașina care
 câștigă mereu e Poliția; autobuzul și pompierii sunt încete”. Verificată
-cu `ProbeRace --mode=race`: același `AIController` la volanul tuturor
-(al „jucătorului” prin `--car=`), 240 s, seed 1, pe trei piste ale lumii 1
-și una a lumii 2; două rulări per pistă (Muscle, apoi Buggy la volanul
-jucătorului; grila AI acoperă Poliția, Taxiul, Pompierii și două Autobuze).
-**Cel mai bun tur, în secunde**, cel mai bun din cele două rulări:
+cu `tools/car_balance.sh` (PR #553): toate cele 6 mașini pe aceeași grilă
+(`ProbeRace --ai-cars=1,2,3,4,5`), același `AIController` la volanul
+tuturor, **viteză egală** (`--equal-speed`), 240 s/cursă, 2 seed-uri, pe
+toate cele 12 piste din carieră. **Cel mai bun tur, în secunde**, minimul
+pe seed-uri; în paranteză, ecartul față de cea mai rapidă mașină a pistei:
 
-| Mașină | Kyoto | Monument Valley | Serengeti | Transfăgărășan | față de cea mai rapidă |
-|---|---|---|---|---|---|
-| Muscle | **65,5** | **61,6** | 71,3 | **67,9** | 0 … +1% |
-| Buggy | 65,6 | 62,0 | 71,0 | 69,0 | 0 … +2% |
-| Poliția | 66,9 | 64,0 | **70,7** | 68,9 | 0 … +4% |
-| Taxi | 69,4 | 65,8 | 78,5 | 70,8 | +4 … +11% |
-| Pompierii | 76,5 | 73,3 | 86,8 | 80,6 | **+17 … +23%** |
-| Autobuzul | 82,9 | 77,9 | 89,3 | 86,2 | **+26 … +27%** |
+| Mașină | Mon. Valley | Kyoto | Cappadocia | Serengeti | Transfăg. | Chongqing | Machu P. | Okinawa | Baikal | Stromboli | Jodhpur | Fiordland | locul 1 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Poliția | **60,5** | **62,5** | **68,5** | **69,3** | **65,7** | **63,2** | **67,8** | **58,9** | **50,9** | **68,2** | **64,5** | **63,9** | **12** |
+| Muscle | 61,6 (+2%) | 64,1 (+3%) | 73,2 (+7%) | 71,1 (+3%) | 69,2 (+5%) | 64,2 (+2%) | 70,2 (+4%) | 61,0 (+4%) | 52,8 (+4%) | 68,7 (+1%) | 66,5 (+3%) | 67,1 (+5%) | 0 |
+| Buggy | 61,6 (+2%) | 64,7 (+4%) | 70,8 (+3%) | 73,0 (+5%) | 68,1 (+4%) | 65,5 (+4%) | 70,0 (+3%) | 61,6 (+5%) | 52,8 (+4%) | 68,9 (+1%) | 66,6 (+3%) | 65,9 (+3%) | 0 |
+| Taxi | 64,0 (+6%) | 66,8 (+7%) | 71,4 (+4%) | 74,7 (+8%) | 70,2 (+7%) | 67,9 (+7%) | 71,8 (+6%) | 64,2 (+9%) | 53,2 (+4%) | 71,5 (+5%) | 69,1 (+7%) | 69,2 (+8%) | 0 |
+| Pompierii | 72,5 (+20%) | 75,8 (+21%) | 83,5 (+22%) | 87,0 (+25%) | 79,0 (+20%) | 77,5 (+22%) | 81,9 (+21%) | 71,6 (+22%) | 59,7 (+17%) | 79,6 (+17%) | 77,2 (+20%) | 79,2 (+24%) | 0 |
+| Autobuzul | 77,0 (+27%) | 81,8 (+31%) | 92,3 (+35%) | *fals* | 85,3 (+30%) | 83,0 (+31%) | 86,8 (+28%) | 77,9 (+32%) | 67,1 (+32%) | 84,1 (+23%) | 82,2 (+27%) | 83,9 (+31%) | 0 |
+| *ecart* | 27% | 31% | 35% | 25% | 30% | 31% | 28% | 32% | 32% | 23% | 27% | 31% | |
 
-(Seed unic: `ProbeRace` e nedeterministă — memoria `proberace-nedeterminism`
-— dar zgomotul ei e de 1–8% între cele două autobuze din aceeași cursă;
-ecarturile de 17–27% sunt mult peste. Rapoartele brute, cu repunerile și
-blocajele fiecărei rulări, sunt în `echilibru_garaj_baseline_2026-10-16.md`
-— linia de bază „înainte” pentru A/B-ul de la pasul 0. 8 rulări, ~75 s
-fiecare, headless; matricea completă pe 12 piste costă ~30 min — e gardă,
-nu ceremonie.)
+Raportul complet, cu blocajele și repunerile fiecărei mașini pe fiecare
+pistă, e în `echilibru_garaj_baseline_2026-10-17_viteza_egala.md` — **linia
+de bază „înainte”** pentru A/B-ul de la pasul 0 (24 de curse, ~85 s
+fiecare, headless, ~35 min; e gardă la cerere, nu ceremonie).
+
+**Corecție față de prima măsurătoare (16 oct).** Prima matrice (4 piste,
+`ProbeRace --car=N`, păstrată în `echilibru_garaj_baseline_2026-10-16.md`)
+dădea Muscle/Buggy primele și Poliția la +2–4%. Era un artefact: `ProbeRace`
+dă adversarilor de grilă `speed_scale` 0,88–0,97 (variația onestă a AI-ului)
+și lasă slotul jucătorului la 1,0 — corect când măsori pista, dar slotul
+jucătorului (Muscle sau Buggy în acele rulări) pornea cu 3–12% avantaj. La
+viteză egală ordinea e exact cea de la volan (memoria
+`proberace-speed-scale-contamineaza-comparatia`).
 
 Ce spun cifrele:
 
-- **Două clase, nu șase stiluri.** Trio-ul ușor (Muscle, Buggy, Poliția) e
-  în 1–4% pe orice pistă; Taxiul e la +6–11%; Pompierii și Autobuzul sunt
-  cu **un sfert** mai lenți pe tur, peste tot. Pe o cursă de 3 tururi
-  înseamnă 50–70 s în urmă. Nicio pistă nu echilibrează asta: viteza se
-  plătește pe fiecare metru, masa (singurul lor atu) doar la contact.
-- **AI-ul vs volanul.** Cu AI-ul, Muscle e la egalitate cu Poliția; la
-  volan uman Poliția câștigă. Nu e contradicție: AI-ul exploatează perfect
-  și grip-ul 7 al Muscle-ului, omul nu — grip 10 + accelerația cea mai mare
-  fac Poliția cea mai *accesibilă* la limită. Matricea măsoară potențialul
-  mașinii, volanul accesibilitatea; verdictele coincid pe ce contează: cele
-  grele nu pot câștiga nicăieri, iar principiul 4 („alegerea mașinii =
+- **Poliția e prima pe 12 din 12 piste.** Exact observația de la volan.
+  Muscle și Buggy la +1–7%, Taxi +4–9%: un trio-plus-unu în 10%. Pompierii
+  +17–25% și Autobuzul +23–35%: **o clasă separată, cu un sfert mai lentă pe
+  tur, pe orice pistă** — pe o cursă de 3 tururi, 50–80 s în urmă. Nicio
+  pistă nu echilibrează asta: viteza se plătește pe fiecare metru, masa
+  (singurul lor atu) doar la contact. Principiul 4 („alegerea mașinii =
   alegerea stilului”) e azi un slider de dificultate.
-- **Mașinile grele pică și gimmick-urile.** Pe Serengeti, un autobuz s-a
-  înțepenit pe kicker-ul `FlyoffRamp` (frac 0,87: 3 blocaje, 9 repuneri în
-  20 s) — nu are viteza să-l ia. Echilibrul nu e doar timp pe tur, e și
-  „poate mașina asta să treacă de fiecare gimmick”.
-- **Descoperire colaterală, de tratat separat**: același autobuz are un
-  „tur” de 17,8 s, imediat după o repunere la frac 0,06. Ipoteza:
-  repunerea peste linia de start numără un tur. Dacă e așa, `try_record`
-  poate salva un record fals și pentru jucător (recover după off-road lângă
-  linie). Issue separat, nu intră în PR-ul ăsta.
+- **Nu e o pistă care s-o favorizeze pe Poliție** — nici serpentinele
+  (Transfăgărășan +5% față de Muscle), nici drepte lungi (Chongqing +2%),
+  nici gheața (Baikal +4%). Accelerația 17 + grip 10 + 0,9 masă câștigă
+  peste tot fiindcă nu plătesc nimic în afara contactului.
+- **Mașinile grele pică și gimmick-urile.** Autobuzul: 18 repuneri pe
+  kicker-ul `FlyoffRamp` din Serengeti (nu are viteza să-l ia), blocaje pe
+  Chongqing (3) și Stromboli (3); Pompierii, 3 blocaje pe Machu Picchu —
+  pantele. Echilibrul nu e doar timp pe tur, e și „poate mașina asta să
+  treacă de fiecare gimmick”.
+- **Baikal: 11–29 repuneri pentru toate mașinile** (plăcile de gheață) —
+  proprietate a pistei, nu a mașinii; cele rapide cad mai des (Muscle 29,
+  Poliția 25, Pompierii 11). Nu intră în echilibru, dar e cifra pe care o
+  verifici când retuning-ul schimbă vitezele.
+- **Descoperire colaterală, de tratat separat**: pe Serengeti autobuzul are
+  un „tur” de 15,8 s (16 oct: 17,8 s), imediat după o repunere lângă linia
+  de start. Ipoteza: repunerea peste linie numără un tur. Dacă e așa,
+  `try_record` poate salva un record fals și pentru jucător (recover după
+  off-road lângă linie). Sonda îl respinge acum singură (sub jumătatea
+  medianei pistei = fals), dar fix-ul e în `Race` — issue separat (§12.8).
 
 Consecința pentru carieră: **rivalii (§5) și „câștigi mașina rivalului” cer
 ca fiecare mașină să fie cea mai bună undeva.** Cariera nu creează problema,
@@ -484,7 +503,7 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    12 piste din carieră, cel puțin 2 seed-uri (nedeterminism), raportată ca
    tabel în log. Trei praguri: (i) **veto**: ecartul de best lap pe o pistă
    între cea mai rapidă și cea mai lentă mașină ≤ 8%, provizoriu până după
-   prima rundă de retuning (azi 26–27%); (ii)
+   prima rundă de retuning (azi 23–35%); (ii)
    **veto**: nicio mașină cu blocaje/repuneri pe gimmick peste linia de
    bază a pistei din `ProbeRace`; (iii) **raportat, nu veto**: fiecare
    mașină cea mai rapidă pe cel puțin o pistă — asta e ținta de design, dar

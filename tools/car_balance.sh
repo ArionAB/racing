@@ -45,7 +45,11 @@
 #           abia cu linie de baza per pista (memoria `garda-fara-linie-de-baza`);
 #   RAPORT  cate piste are fiecare masina pe locul 1 — tinta de design
 #           ("fiecare masina prima undeva"), fara veto (lectia plafonului de
-#           triunghiuri din CLAUDE.md: un prag atins mereu cere ceremonie).
+#           triunghiuri din CLAUDE.md: un prag atins mereu cere ceremonie);
+#   FALS    un tur sub JUMATATEA medianei pistei nu e record, e bug-ul "repunerea
+#           peste linia de start numara un tur" (brief §12.8; autobuzul a "facut"
+#           15,8 s pe Serengeti dupa 18 repuneri pe kicker) — se arata ca FALS
+#           si iese din clasament, fara veto, pana la fix-ul din Race.
 # Iese cu 0 daca nu e niciun veto; scrie "VERDICT: OK" / "VERDICT: PROBLEMA".
 
 set -uo pipefail
@@ -168,6 +172,23 @@ REPORT=$(awk -F'\t' -v veto="$VETO_PCT" -v order="$TRACKS" -v equal="${EQUAL:-za
 		for (i = 1; i <= 6; i++) if (garage[i] in cars) rows[++m] = garage[i]
 		for (c = 1; c <= ncars; c++) { found = 0; for (i = 1; i <= m; i++) if (rows[i] == carlist[c]) found = 1; if (!found) rows[++m] = carlist[c] }
 
+		# Turul FALS: o repunere peste linia de start numara un tur (brief §2.1,
+		# §12.8 — autobuzul a "facut" 15,8 s pe Serengeti dupa 18 repuneri pe
+		# kicker). Pana la fix-ul din Race, sonda il respinge singura: un tur sub
+		# JUMATATEA medianei pistei (mediana celor mai bune tururi ale masinilor)
+		# nu e record, e bug — se arata ca FALS si iese din clasament, fara veto.
+		for (i = 1; i <= n; i++) {
+			t = ord[i]; if (!(t in seen)) continue
+			k = 0; delete vals
+			for (r = 1; r <= m; r++) { key = rows[r] SUBSEP t; if (key in bestlap) vals[++k] = bestlap[key] }
+			if (k == 0) continue
+			asort(vals)
+			med[t] = (k % 2) ? vals[(k + 1) / 2] : (vals[k / 2] + vals[k / 2 + 1]) / 2
+			for (r = 1; r <= m; r++) {
+				key = rows[r] SUBSEP t
+				if ((key in bestlap) && bestlap[key] < 0.5 * med[t]) fals[key] = 1
+			}
+		}
 		printf "## Cel mai bun tur (s), minimul pe seed-uri — %s\n\n", equal
 		printf "| Masina |"; for (i = 1; i <= n; i++) if (ord[i] in seen) printf " %s |", name[ord[i]]; printf " locul 1 |\n"
 		printf "|---|"; for (i = 1; i <= n; i++) if (ord[i] in seen) printf "---|"; printf "---|\n"
@@ -177,7 +198,7 @@ REPORT=$(awk -F'\t' -v veto="$VETO_PCT" -v order="$TRACKS" -v equal="${EQUAL:-za
 			fast[t] = 0; slow[t] = 0; who[t] = ""
 			for (r = 1; r <= m; r++) {
 				car = rows[r]; key = car SUBSEP t
-				if (!(key in bestlap)) continue
+				if (!(key in bestlap) || (key in fals)) continue
 				b = bestlap[key]
 				if (fast[t] == 0 || b < fast[t]) { fast[t] = b; who[t] = car }
 				if (b > slow[t]) slow[t] = b
@@ -189,7 +210,8 @@ REPORT=$(awk -F'\t' -v veto="$VETO_PCT" -v order="$TRACKS" -v equal="${EQUAL:-za
 			for (i = 1; i <= n; i++) {
 				t = ord[i]; if (!(t in seen)) continue
 				key = car SUBSEP t
-				if (key in bestlap) {
+				if (key in fals) printf " %.1f FALS |", bestlap[key]
+				else if (key in bestlap) {
 					b = bestlap[key]
 					if (car == who[t]) { printf " **%.1f** |", b; wins++ }
 					else printf " %.1f (+%.0f%%) |", b, (b - fast[t]) / fast[t] * 100
@@ -221,6 +243,7 @@ REPORT=$(awk -F'\t' -v veto="$VETO_PCT" -v order="$TRACKS" -v equal="${EQUAL:-za
 				bl = blocks[key] + 0; rp = resp[key] + 0
 				cell = sprintf("%d / %d", bl, rp)
 				if (!(key in bestlap)) { cell = cell " FARA TUR"; problems++ }
+				else if (key in fals) cell = cell " tur fals"
 				else if (bl >= 3) cell = cell " !"
 				printf " %s |", cell
 			}

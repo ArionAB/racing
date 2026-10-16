@@ -56,6 +56,11 @@ func _unhandled_input(event: InputEvent) -> void:
 ## marginea dinspre turbo a lui DRIFT ar fi raspuns „turbo", si ai fi ars bara
 ## incercand sa derapezi.
 func _zone_at(pos: Vector2) -> String:
+	# Gazul se testeaza PRIMUL: e butonul tinut apasat tot timpul, deci orice
+	# ambiguitate la margine trebuie sa cada in favoarea lui — pierderea
+	# gazului la mijlocul unei drepte se simte ca joc stricat.
+	if pos.distance_to(_gas_center()) < GAS_RADIUS + 14.0:
+		return "gas"
 	var d_turbo := pos.distance_to(_turbo_center())
 	var d_drift := pos.distance_to(_drift_center())
 	var in_turbo := d_turbo < BUTTON_RADIUS + 14.0
@@ -66,12 +71,28 @@ func _zone_at(pos: Vector2) -> String:
 		return "turbo"
 	if in_drift:
 		return "drift"
+	# BUTOANELE DE VIRAJ BAT jumatatile de ecran. Amandoua sunt desenate in
+	# stanga (x ≈ 118 si 262), deci cu regula „x < jumatate => stanga" apasarea
+	# pe sageata DREAPTA vira tot la stanga — butonul aratat jucatorului facea
+	# exact pe dos. Zona ramane jumatatea de ecran pentru degetul care cade
+	# alaturi, dar ce e desenat are ultimul cuvant.
+	var d_left := pos.distance_to(_steer_left_center())
+	var d_right := pos.distance_to(_steer_right_center())
+	var in_left := d_left < STEER_RADIUS + 18.0
+	var in_right := d_right < STEER_RADIUS + 18.0
+	if in_left and in_right:
+		return "left" if d_left <= d_right else "right"
+	if in_left:
+		return "left"
+	if in_right:
+		return "right"
 	return "left" if pos.x < size.x * 0.5 else "right"
 
 func _refresh() -> void:
 	var steer := 0.0
 	var drift := false
 	var turbo := false
+	var gas := false
 	for zone in _touches.values():
 		match zone:
 			"left":
@@ -82,21 +103,38 @@ func _refresh() -> void:
 				drift = true
 			"turbo":
 				turbo = true
+			"gas":
+				gas = true
 	GameState.touch_steer = clampf(steer, -1.0, 1.0)
 	GameState.touch_drift = drift
 	GameState.touch_turbo = turbo
+	GameState.touch_gas = gas
 	GameState.touch_active = not _touches.is_empty()
 
 ## TURBO si DRIFT stau amandoua sub degetul drept — „actionez" intr-o mana,
 ## „conduc" in cealalta. TURBO e cel exterior (se apasa cel mai des, degetul
 ## mare ajunge la colt fara sa intinda mana).
+## TURBO si DRIFT urca pe randul de deasupra gazului, ca in mockup: coltul de
+## jos e al acceleratiei, pe care degetul o tine apasat.
 func _turbo_center() -> Vector2:
-	return Vector2(size.x - 128.0, size.y - 128.0)
+	return Vector2(size.x - 272.0, size.y - 272.0)
 
 ## Distanta intre centre: razele sunt 78 si 70, deci de la 160 px in sus
 ## discurile nu se mai ating. 168 lasa si o margine de aer intre ele.
 func _drift_center() -> Vector2:
-	return Vector2(size.x - 296.0, size.y - 128.0)
+	# y la -292, nu -272: la -272 discul lui DRIFT atingea discul gazului
+	# (centre la 156 px, raze 88+70=158). Si se tin apasate IMPREUNA —
+	# accelerezi in timp ce derapezi — deci suprapunerea nu e teoretica.
+	return Vector2(size.x - 104.0, size.y - 292.0)
+
+## GAZUL: chiar in coltul din dreapta-jos, cu TURBO si DRIFT mutate pe randul
+## de DEASUPRA lui (ca in mockup). Acolo sta degetul mare in repaus — iar de
+## cand acceleratia e explicita, degetul sta pe el aproape toata cursa, deci
+## nu poate fi butonul la care intinzi mana. Cel mai mare de pe ecran.
+const GAS_RADIUS: float = 88.0
+
+func _gas_center() -> Vector2:
+	return Vector2(size.x - 128.0, size.y - 118.0)
 
 func _steer_left_center() -> Vector2:
 	return Vector2(118.0, size.y - 128.0)
@@ -164,11 +202,35 @@ func _draw_flame(center: Vector2, active: bool) -> void:
 		Color(1.0, 0.52, 0.10, 0.95 if active else 0.80))
 
 
+## Triunghiul gazului: varful in sus, colturile usor retezate ca sa nu arate
+## ca un „play" de media player. Poligon, nu glifa — acelasi motiv ca la
+## flacara si sageti (fontul implicit de pe Android randeaza caseta goala).
+func _draw_gas_arrow(center: Vector2, active: bool) -> void:
+	var w := 30.0
+	var h := 26.0
+	var pts := PackedVector2Array([
+		center + Vector2(0.0, -h),
+		center + Vector2(w, h * 0.72),
+		center + Vector2(w * 0.72, h),
+		center + Vector2(-w * 0.72, h),
+		center + Vector2(-w, h * 0.72),
+	])
+	draw_colored_polygon(pts, Color(1, 1, 1, 0.97 if active else 0.82))
+
+
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var zones: Array = _touches.values()
 	var turbo_active: bool = zones.has("turbo")
 	var drift_active: bool = zones.has("drift")
+
+	# GAZUL: cel mai mare, in coltul din dreapta-jos. Verde — singura culoare
+	# de pe ecran care spune „mergi" fara cuvinte, si clar distincta de
+	# portocaliul lui TURBO, ca sa nu apesi din greseala turbo cand vrei gaz.
+	var gas_active: bool = zones.has("gas")
+	var go := Color(0.45, 0.92, 0.45)
+	_draw_round_button(_gas_center(), GAS_RADIUS, gas_active, go)
+	_draw_gas_arrow(_gas_center(), gas_active)
 
 	# TURBO: portocaliu, cu flacara. Cel mai mare buton de pe ecran — e si
 	# actiunea cea mai frecventa, si singura cu consecinta imediata la viteza.

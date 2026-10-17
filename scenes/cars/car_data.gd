@@ -69,6 +69,9 @@ extends Resource
 ## ar sta ascunsa in interior, deci nu se ataseaza deloc.
 @export var open_cockpit: bool = false
 ## GLB-ul figurinei: 7 piese rigide ca noduri separate (vezi Driver.PART_NAMES).
+## E doar IMPLICITUL (AI-ul il foloseste): jucatorul isi alege soferul in garaj,
+## separat de masina (GameState.DRIVER_DATA), si il primeste prin
+## `Car.apply_data(..., driver_override)`.
 @export var driver_model: PackedScene
 ## Unde se aseaza SEZUTUL figurinei, in spatiul masinii (fata = -Z, sus = +Y),
 ## dupa scalarea si rotirea modelului. Cota scaunului, nu a picioarelor.

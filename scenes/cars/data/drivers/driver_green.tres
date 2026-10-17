@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DriverData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/cars/driver_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/toy_driver_green.glb" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Verde"
+color = Color(0.25, 0.48, 0.24, 1)
+model = ExtResource("2")

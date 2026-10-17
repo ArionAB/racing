@@ -20,14 +20,22 @@ func get_throttle() -> float:
 	# dezvoltatorului, oct 2026, dupa primul test pe iPhone). Inainte mergea pe
 	# auto-accelerate — orice deget pe ecran insemna gaz — dar atunci butonul
 	# din mockup n-ar fi facut nimic: mergeai la fel si fara sa-l atingi.
+	# Frana BATE gazul: daca tii amandoua (degetul mare pe granita), vrei sa
+	# incetinesti. `throttle < 0` franeaza cat mergi inainte si devine
+	# marsarier cand aproape ai oprit — o singura comanda pentru amandoua.
+	if GameState.touch_brake:
+		return -1.0
 	if GameState.touch_gas:
 		return 1.0
-	# TURBO si DRIFT implica GAZ. Toate trei stau sub acelasi deget mare drept,
-	# deci nu pot fi tinute simultan — iar fara gaz niciuna nu are sens: cu
-	# TURBO arzi bara stand pe loc, iar drift-ul se stinge singur cand viteza
-	# scade sub `drift_min_speed`, adica fix ce se intampla daca nu accelerezi.
-	# Pe tastatura nu apare problema: degete separate pe W / SPACE / SHIFT.
-	if GameState.touch_turbo or GameState.touch_drift:
+	# TURBO implica gaz: altfel ai arde bara stand pe loc, iar TURBO si ^ nu
+	# pot fi tinute simultan cu acelasi deget mare.
+	#
+	# DRIFT **nu** mai implica gaz (oct 2026, al treilea test pe device). Cat
+	# timp il implica, nu puteai FRANA in drift, deci nu puteai strange o
+	# curba luata prea repede — exact manevra pentru care exista frana de mana.
+	# Acum alegi tu: ^ + DRIFT derapezi accelerand, DRIFT singur intri pe
+	# inertie, v + DRIFT franezi derapand.
+	if GameState.touch_turbo:
 		return 1.0
 	return 0.0
 

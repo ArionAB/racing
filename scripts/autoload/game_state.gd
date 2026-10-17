@@ -227,7 +227,12 @@ var touch_turbo: bool = false
 ## Gazul, de cand acceleratia e explicita (oct 2026): butonul ^ din
 ## dreapta-jos. Inainte orice deget pe ecran insemna gaz (auto-accelerate).
 var touch_gas: bool = false
-var touch_active: bool = false # cel putin un deget pe ecran (auto-accelerate)
+## Frana / marsarierul (butonul v). Aceeasi comanda: `throttle < 0` franeaza
+## cat mergi inainte, si devine marsarier cand aproape ai oprit.
+var touch_brake: bool = false
+## Cel putin un deget pe ecran. NU mai comanda gazul (auto-accelerate a fost
+## scos in oct 2026) — a ramas doar informativ, pentru sonde.
+var touch_active: bool = false
 
 # Best lap per pista (nume pista -> milisecunde), persistat. Cheia e numele,
 # nu indexul: la stergerea sau reordonarea unei piste, indexul ramas liber era
@@ -458,6 +463,7 @@ func reset_touch() -> void:
 	touch_drift = false
 	touch_turbo = false
 	touch_gas = false
+	touch_brake = false
 	touch_active = false
 
 # ---------------------------------------------------------------- setari

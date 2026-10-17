@@ -55,19 +55,25 @@ pur plus haosul fizic, nu proiectilele.
 - Turbo Ignition: bară care se încarcă din mers (accelerat de drift), arsă
   la cerere cu butonul TURBO ✔
 - Countdown + rocket start (ține TURBO în ultima secundă), poziții live ✔
-- Touch controls: butoane ◀ ▶ de viraj (cu jumătățile de ecran ca zonă de
-  toleranță în jurul lor) + **accelerație explicită pe butonul ▲** din
-  dreapta-jos + butoane DRIFT/TURBO deasupra lui ✔ — validat pe iPhone
-  (oct 2026). Auto-accelerate (orice deget pe ecran = gaz) a fost **înlocuit**
-  de butonul ▲, decizia dezvoltatorului după primul test pe device: cu
-  auto-accelerate butonul din mockup n-ar fi făcut nimic, mergeai la fel și
-  fără să-l atingi. **TURBO și DRIFT implică gaz** (al doilea test pe device):
-  toate trei stau sub degetul mare drept, deci nu pot fi ținute simultan, iar
-  fără gaz n-au sens — cu TURBO arzi bara stând pe loc, iar drift-ul se stinge
-  singur sub `drift_min_speed`. Virajul NU implică gaz (altfel ar fi
-  auto-accelerate pe altă ușă). Garda `ProbeTouchZones` verifică maparea
-  atingere→comandă, că discurile apăsate împreună nu se ating, și gazul
-  subînțeles — măsurat pe `PlayerController` real.
+- Touch controls: **numai butoane** — ◀ ▶ viraj (stânga-jos), ▲ gaz și ▼
+  frână/marșarier (dreapta-jos, ca o pereche de pedale), TURBO/DRIFT pe rândul
+  de deasupra lor ✔ — validat pe iPhone (oct 2026, trei iterații).
+  - **Jumătățile de ecran au fost scoase.** Virau mașina la orice atingere pe
+    display (deget sprijinit, palmă), și se simțea ca și cum jocul trage de
+    volan singur. Toleranța e marginea de +18 px din jurul discului.
+  - **Auto-accelerate scos** (orice deget = gaz): cu el, butonul ▲ n-ar fi
+    făcut nimic. Accelerația e explicită.
+  - **▼ e și frână și marșarier**, nu două butoane: în fizică e aceeași
+    comandă — `throttle < 0` frânează cât mergi >2 m/s și devine marșarier sub
+    `reverse_speed` (vezi `_apply_driving`). Frâna bate gazul dacă ții ambele.
+  - **TURBO implică gaz** (altfel arzi bara stând pe loc), dar **DRIFT nu**:
+    cât timp îl implica, nu puteai frâna în drift, deci nu puteai strânge o
+    curbă luată prea repede — exact manevra pentru care există frâna de mână.
+    Acum alegi: ▲+DRIFT derapezi accelerând, DRIFT singur intri pe inerție,
+    ▼+DRIFT frânezi derapând.
+  - Garda `ProbeTouchZones` verifică maparea atingere→comandă (inclusiv că
+    zonele goale nu mai dau nimic), că discurile apăsate împreună nu se ating,
+    și matricea de accelerație — măsurată pe `PlayerController` real.
 
 ## Post-MVP (nu implementa fără să fie cerut)
 

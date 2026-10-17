@@ -964,7 +964,7 @@ for i, (ff, lat, kind, yaw, sc) in enumerate((
 
 # --- digul de piatra: marginea dinspre mare, pe latura de sud (POI C) ------
 # Module de 8 m insiruite pe fractii egale. Numarul vine din LUNGIME, nu ghicit.
-_DIKE_FROM, _DIKE_TO = F["C dig"] - 0.030, F["C dig"] + 0.016
+_DIKE_FROM, _DIKE_TO = F["C dig"] - 0.030, F["C dig"] + 0.085
 _dike_len = ((_DIKE_TO - _DIKE_FROM) % 1.0) * L_TOTAL
 _n_dike = max(2, int(_dike_len / 8.0))
 for i in range(_n_dike):
@@ -977,6 +977,52 @@ for i in range(_n_dike):
     add(f"Dig{i:02d}", "dike",
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0, 1.0, 1.0, 1.0)}, "
         f"{g[0]:.2f}, {g[1] - 0.55:.2f}, {g[2]:.2f})")
+
+# --- POI C: turnuri mici, moloz la baza, vegetatie de mal (gauntlet) --------
+# Bara: drum pe zid de piatra, turnuri care intra in apa cu o nisa, bolovani la
+# poale, smocuri de verde. Digul de mai sus acopera acum toata zona (pana in
+# dreptul grotei). Grota ramane decizie deschisa — aici nu se construieste.
+# Distantele sunt pe GABARIT: un turn la scara s are ~5*s m raza, deci laterala
+# = raza + 14,5 (dig) + rezerva, nu "cat sa para aproape".
+_C0, _C1 = F["C dig"] - 0.010, F["C dig"] + 0.100
+# 1) turnuri mici in apa, pe dreapta (spre larg), dincolo de dig
+for i, (dff, lat, sc, nm) in enumerate((
+        (0.008, 27.0, 1.25, "stack_b"), (0.026, 31.0, 1.55, "stack_a"),
+        (0.046, 26.0, 1.15, "stack_b"), (0.062, 33.0, 1.6, "stack_a"),
+        (0.080, 28.0, 1.3, "stack_b"), (0.097, 30.0, 1.5, "stack_a"))):
+    ff = F["C dig"] + dff
+    g = at_road(ff, lat)
+    _su = sc * (0.72 if nm == "stack_a" else 0.95)
+    add(f"TurnC{i:02d}", nm,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + i * 41.0, _su, _su, _su)}, "
+        f"{g[0]:.2f}, {g[1] - 1.20:.2f}, {g[2]:.2f})")
+    # inel de moloz la baza (shore_boulder) — "stanca mancata"
+    for q in range(3):
+        a = math.radians(i * 37.0 + q * 125.0)
+        rr = 4.2 * sc ** 0.5 + 1.0
+        ox, oz = math.cos(a) * rr, math.sin(a) * rr
+        bs = 0.9 + 0.25 * ((i + q) % 3)
+        add(f"BolovanC{i}{q}", "boulder",
+            f"Transform3D({rot_y_s(i * 53.0 + q * 71.0, bs, bs, bs)}, "
+            f"{g[0] + ox:.2f}, {_SEA_Y - 0.15:.2f}, {g[2] + oz:.2f})")
+# 2) bolovani la poalele digului, pe latura apei (lateral 17-19)
+for i in range(16):
+    ff = _C0 + (_C1 - _C0) * (i + 0.5) / 16.0
+    lat = 17.0 + 1.6 * ((i * 5) % 3)
+    bs = 0.9 + 0.3 * ((i * 7) % 4) / 3.0
+    g = at_road(ff, lat)
+    add(f"BolovanDigC{i:02d}", "boulder",
+        f"Transform3D({rot_y_s(i * 67.0, bs, bs, bs)}, {g[0]:.2f}, {_SEA_Y - 0.15:.2f}, {g[2]:.2f})")
+# 3) vegetatie de mal pe interior (stanga): smocuri si ficusi in 2 randuri
+for i in range(26):
+    ff = _C0 + (_C1 - _C0) * (i + 0.5) / 26.0
+    rand = i % 2
+    lat = -(11.5 + rand * 6.5 + 2.0 * ((i * 3) % 4) / 3.0)
+    kind = ("scrub", "ficus_a", "bamboo", "scrub", "ficus_b", "scrub")[i % 6]
+    g = at_road(ff, lat)
+    add(f"VegC{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + i * 59.0, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
 
 # --- parapetul de coasta: pe latura unde stau maimutele (POI G) ------------
 # Maimutele sar DIN perete, iar parapetul e cel pe care stau (brief §1.5), deci

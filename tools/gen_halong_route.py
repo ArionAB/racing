@@ -730,13 +730,27 @@ RAVINES = [
      r3(F_RAFT0 + (F_RAFT1 - F_RAFT0) * 0.72), 30.0, 1),
     # 4 golful pe latura de coasta: de la gura golfului pana inainte de chei.
     (r3(F["G golf E"]), r3(F["G golf V"] + 0.010), 20.0, 1),
+    # 5 APA PE STANGA PONTOANELOR. Un drum de pontoane trebuie sa aiba apa pe
+    # AMANDOUA partile — altfel e un ponton peste o plaja.
+    #
+    # Masurat pe captura POI B (frac 0,10): dreapta e golf la -15,3 m, stanga
+    # e nisip plat la +0,3, pe ~50 m lateral. Cauza: `RAVINES[0]` are latura
+    # `1` (doar dreapta), deci interiorul buclei ramanea uscat.
+    #
+    # Rapa asta e mai INGUSTA (90 m fata de 150) si mai putin adanca (-9 fata
+    # de -15): interiorul buclei e un golf inchis, nu larg deschis, iar o rapa
+    # lata ar manca terenul pe care urca POI D. Se opreste inainte de dig,
+    # unde terenul trebuie sa ramana uscat.
+    (r3(F["A chei"] + 0.012), r3(F["C dig"] - 0.015), 24.0, -1),
 ]
 rav_txt = ", ".join(f"Vector4({a}, {b}, {c}, {d})" for a, b, c, d in RAVINES)
 # Fundul: apa de golf e ADANCA (brief §0.1: verde-jad opac, nu turcoaz de mic
 # adanc). -14 e SEA_NEAR_DEPTH, de la care culoarea e de larg.
-RAV_FLOORS = [(0, -15.0), (1, -14.0), (2, -5.0), (3, -6.0), (4, -14.0)]
+RAV_FLOORS = [(0, -15.0), (1, -14.0), (2, -5.0), (3, -6.0), (4, -14.0),
+              (5, -9.0)]   # golful din interiorul buclei: mai putin adanc
 floors_txt = ", ".join(f"Vector2({i}, {y})" for i, y in RAV_FLOORS)
-RAV_WIDTHS = [(0, 150.0), (1, 120.0), (2, 70.0), (3, 55.0), (4, 130.0)]
+RAV_WIDTHS = [(0, 150.0), (1, 120.0), (2, 70.0), (3, 55.0), (4, 130.0),
+              (5, 90.0)]   # mai ingusta: nu are voie sa manance urcarea POI D
 widths_txt = ", ".join(f"Vector2({i}, {w})" for i, w in RAV_WIDTHS)
 # Apa in rape, la cota marii (0.0). E ACELASI golf, nu bazine separate — si de
 # aceea se declara O SINGURA DATA, pe rapa 0: `_build_ravine_water` umple prin
@@ -745,6 +759,10 @@ widths_txt = ", ".join(f"Vector2({i}, {w})" for i, w in RAV_WIDTHS)
 # libera si iese cu `push_warning` ("rapa N n-are nicio celula sub 0.0") plus o
 # zona de repunere eliberata degeaba. Prima versiune le declarase pe toate cinci
 # si sonda a scos exact patru avertismente.
+# Apa se declara TOT o singura data, pe rapa 0: `_build_ravine_water` umple
+# prin inundare de la buza in jos si tine minte celulele ude, deci o a doua
+# declaratie cu aceeasi cota n-ar mai gasi nimic liber si ar iesi cu
+# `push_warning`. Rapa 5 e la aceeasi cota (0,0), deci inundarea o prinde.
 RAV_WATER = [(0, 0.0, 18.0)]
 rwater_txt = ", ".join(f"Vector3({i}, {y}, {b})" for i, y, b in RAV_WATER)
 
@@ -1124,7 +1142,9 @@ for i in range(14):
     ff = F["D creasta"] + (F["D varf"] - F["D creasta"]) * u
     # 11,5 de baza, nu 9,0: la 9,0 fiecare al patrulea exemplar cadea exact
     # pe pragul de gabarit si coroana ajungea la 6,9 m de ax.
-    _veg.append((ff, (-1.0 if i % 2 else 1.0) * (11.5 + 4.0 * (i % 4)),
+    # 13,5 de baza (era 11,5): ficusul remodelat are coroana de 4,9 m lata
+    # (era 2,4), deci marginea lui ajungea la 7,5-7,7 m de ax.
+    _veg.append((ff, (-1.0 if i % 2 else 1.0) * (13.5 + 4.0 * (i % 4)),
                  "scrub" if i % 3 else "ficus_b", i * 61.0))
 # vegetatie si pe coasta de nord, langa parapet (POI G): maimutele stau
 # intr-un loc cu copaci, nu pe un parapet intr-un desert.
@@ -1156,7 +1176,8 @@ for i in range(_n_ev):
     ff = _E0 + (_F_E_VEG_END - _E0) * u
     side = -1.0 if i % 2 == 0 else 1.0
     rand = (i // 2) % 3
-    lat = side * (12.5 + rand * 7.0 + 2.5 * ((i * 5) % 4) / 3.0)
+    # 14,5 de baza (era 12,5): coroana ficusului remodelat are 4,9 m lata.
+    lat = side * (14.5 + rand * 7.0 + 2.5 * ((i * 5) % 4) / 3.0)
     kind = ("ficus_a", "bamboo", "scrub", "ficus_b", "bamboo", "scrub")[i % 6]
     _ev.append((f"VegE{i:02d}", ff, lat, kind, i * 53.0, 1.0))
 # 2) tufe dese pe marginea de cale la ace (un smoc de verde la fiecare cot)
@@ -1164,7 +1185,7 @@ for j, fa in enumerate((F["E ac1b"], F["E ac2b"])):
     for q in range(6):
         ff = fa + (q - 2.5) * 0.0035
         side = 1.0 if q % 2 else -1.0
-        _ev.append((f"VegEAc{j}{q}", ff, side * (11.0 + 2.0 * (q % 3)),
+        _ev.append((f"VegEAc{j}{q}", ff, side * (13.0 + 2.0 * (q % 3)),
                     "scrub" if q % 2 else "ficus_b", q * 71.0 + j * 17.0, 1.0))
 for nm_, ff_, lat_, kind_, yaw_, sc_ in _ev:
     g = at_road(ff_, lat_)

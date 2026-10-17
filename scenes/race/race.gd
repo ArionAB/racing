@@ -695,6 +695,10 @@ func _setup_challenge() -> void:
 	add_child(_challenge_tracker)
 	_challenge_tracker.setup(challenge, player, track)
 	hud.set_challenge(challenge.title)
+	_challenge_tracker.progress_changed.connect(hud.set_challenge_progress)
+	hud.set_challenge_progress(_challenge_tracker.progress_text())
+	lap_completed.connect(func(laps: int, _ms: int) -> void:
+		_challenge_tracker.notify_lap(laps))
 	_challenge_tracker.failed_changed.connect(func(_failed: bool) -> void:
 		hud.set_challenge_failed()
 		hud.flash_message("CHALLENGE FAILED"))

@@ -99,6 +99,15 @@ func validate(cfg: CareerConfig = null) -> PackedStringArray:
 		if not CareerChallenge.KNOWN_EVENTS.has(challenge.event):
 			problems.append("provocarea %s: evenimentul '%s' nu e cunoscut" % [
 				challenge.track, challenge.event])
+		if challenge.rule == CareerChallenge.Rule.AT_LEAST and challenge.count < 1:
+			problems.append("provocarea %s: AT_LEAST cere count >= 1" % challenge.track)
+		if challenge.fail_event != &"" \
+				and not CareerChallenge.FAIL_EVENTS.has(challenge.fail_event) \
+				and not CareerChallenge.KNOWN_EVENTS.has(challenge.fail_event):
+			problems.append("provocarea %s: fail_event '%s' nu e cunoscut" % [
+				challenge.track, challenge.fail_event])
+		if challenge.event == &"wall_hit" and challenge.zone == &"":
+			problems.append("provocarea %s: wall_hit cere o zona" % challenge.track)
 	return problems
 
 

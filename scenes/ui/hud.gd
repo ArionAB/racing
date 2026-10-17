@@ -40,6 +40,8 @@ var _charge_fill_style: StyleBoxFlat
 var _charge_bolt: Label
 var _sealed_label: Label
 var _challenge_label: Label
+var _challenge_title: String = ""
+var _challenge_failed: bool = false
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -741,12 +743,22 @@ func set_sealed_turbo(on: bool) -> void:
 
 ## Provocarea gimmick-ului: "CHALLENGE: <titlu>", verde pana o pici.
 func set_challenge(title: String) -> void:
+	_challenge_title = title
 	_challenge_label.text = "CHALLENGE: " + title
 	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
 	_challenge_label.visible = true
 
 
+## Progresul regulii („1 / 3", „LAP 2 ✓"), langa titlu; dupa esec nu mai conteaza.
+func set_challenge_progress(text: String) -> void:
+	if _challenge_failed:
+		return
+	_challenge_label.text = "CHALLENGE: " + _challenge_title \
+		+ ("   " + text if text != "" else "")
+
+
 func set_challenge_failed() -> void:
+	_challenge_failed = true
 	_challenge_label.text = "CHALLENGE FAILED"
 	_challenge_label.modulate = Color(1.0, 0.4, 0.35)
 

@@ -153,6 +153,7 @@ func _setup_race() -> void:
 	# singura data, la GO).
 	if Career.is_time_trial():
 		player.turbo_recharge = false
+		_setup_ghost()
 	camera = ChaseCamera.new()
 	add_child(camera)
 	camera.target = player
@@ -173,6 +174,8 @@ func _setup_race() -> void:
 	hud.results_primary.connect(_on_results_primary)
 	hud.setup_minimap(track, cars)
 	hud.set_sealed_turbo(Career.is_time_trial())
+	if _ghost_car != null:
+		hud.set_ghost_time(_ghost_car.data.total_ms)
 	_setup_challenge()
 	hud.show_countdown("READY?")
 	_setup_windshield_wipers()
@@ -376,6 +379,10 @@ func _tick_countdown(delta: float) -> void:
 
 func _go() -> void:
 	state = State.RUNNING
+	if _ghost_recorder != null:
+		_ghost_recorder.start()
+	if _ghost_car != null:
+		_ghost_car.set_clock_ms(0.0)
 	hud.show_countdown("GO!")
 	AudioManager.play_sfx(&"go_beep")
 	get_tree().create_timer(0.7, false).timeout.connect(
@@ -405,6 +412,8 @@ func _clock_ms() -> int:
 
 func _tick_race(delta: float) -> void:
 	_race_clock += delta
+	if _ghost_car != null:
+		_ghost_car.set_clock_ms(_race_clock * 1000.0)
 	_tick_offroad_clock(delta)
 	_tick_wrong_way(delta)
 	for i in cars.size():
@@ -700,9 +709,31 @@ func _setup_challenge() -> void:
 		hud.flash_message("CHALLENGE FAILED"))
 
 
+var _ghost_recorder: GhostRecorder
+var _ghost_car: GhostCar
+var _ghost_saved: bool = false
+
+## Contratimp: inregistreaza cursa asta si, daca exista o fantoma salvata pe
+## pista, o reda. Fantoma veche se incarca ACUM, inainte ca cursa sa o
+## inlocuiasca.
+func _setup_ghost() -> void:
+	_ghost_recorder = GhostRecorder.new()
+	_ghost_recorder.name = "GhostRecorder"
+	_ghost_recorder.target = player
+	add_child(_ghost_recorder)
+	var saved := Career.load_ghost(Career.active_track)
+	if saved != null:
+		_ghost_car = GhostCar.new()
+		_ghost_car.name = "GhostCar"
+		add_child(_ghost_car)
+		_ghost_car.setup(saved)
+		_ghost_car.set_clock_ms(0.0)
+
 func _finish_race() -> void:
 	state = State.FINISHED
 	_player_race_ms = _clock_ms()
+	if _ghost_recorder != null:
+		_ghost_recorder.stop()
 	_race_record_new = not Career.is_time_trial() \
 		and GameState.try_race_record(GameState.selected_track, _player_race_ms)
 	_update_positions()
@@ -716,7 +747,14 @@ func _finish_race() -> void:
 	# argint/bronz), salvata imediat, nu la apasarea unui buton.
 	_career_medal = -1
 	if Career.is_time_trial():
+		# Best-ul de DINAINTE: finish_time_trial il suprascrie.
+		var previous_best := int(Career.track_state(Career.active_track).tt_best_ms)
 		_career_medal = Career.finish_time_trial(_player_race_ms)
+		if _ghost_recorder != null:
+			_ghost_saved = Career.save_ghost_if_best(Career.active_track,
+				_ghost_recorder.build_data(Career.active_track,
+					GameState.selected_car, GameState.total_laps,
+					_player_race_ms), _player_race_ms, previous_best)
 	elif Career.is_challenge():
 		# O conditie per proba: pozitia nu conta si nu da medalie de cursa.
 		_challenge_done = Career.finish_challenge(
@@ -787,7 +825,8 @@ func _time_trial_title() -> String:
 	if info.has_targets():
 		verdict = _career_medal_text(_career_medal) if _career_medal > 0 \
 			else "NO MEDAL"
-	return "TIME TRIAL — %s — %s" % [_fmt_ms(_player_race_ms), verdict]
+	return "TIME TRIAL — %s — %s%s" % [_fmt_ms(_player_race_ms), verdict,
+		" · NEW GHOST" if _ghost_saved else ""]
 
 
 ## Cele trei tinte sub randul jucatorului: `right` = timpul tinta,

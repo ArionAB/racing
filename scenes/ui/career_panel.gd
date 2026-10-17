@@ -223,6 +223,10 @@ func _open_sheet(track_id: StringName) -> void:
 	if int(state.tt_best_ms) > 0:
 		tt_sub = "BEST %s · %s" % [TrackCard._format_ms(int(state.tt_best_ms)),
 			_medal_name(int(state.tt_medal))]
+	# Doar existenta fisierului, nu parsarea lui (~100 KB): foaia se reface la
+	# fiecare deschidere. Un fisier corupt iese oricum curat la start (load_ghost).
+	if FileAccess.file_exists(Career.ghost_path(track_id)):
+		tt_sub += " · GHOST"
 	if not info.has_targets():
 		tt_sub += "  (no targets yet)"
 	var tt_btn := _sheet_button("TIME TRIAL", tt_sub)

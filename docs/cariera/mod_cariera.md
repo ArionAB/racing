@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.5 (brief de design, gruparea decisă, echilibrul garajului ca pas 0, măsurat la viteză egală)
+# Modul Carieră — „Turul lumii” — v0.6 (brief de design, gruparea decisă, pasul 0 măsurat și retunat în două runde)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -46,6 +46,14 @@
 > Autobuzul +23–35% (§2.1). Prima matrice din v0.3 avea un artefact
 > (`speed_scale` 1,0 doar pe slotul jucătorului) — corectată; linia de bază
 > „înainte” e `echilibru_garaj_baseline_2026-10-17_viteza_egala.md`.
+>
+> **v0.6 (17 oct 2026), retunat:** două runde pe ramura
+> `cariera/pas0-retuning`, A/B pe aceeași matrice (§2.1.1): ecart **23–35%
+> → 5–11% → 3–6% pe 10 piste din 12**; locul 1 împărțit (Poliția 5, Taxi 4,
+> Buggy 2, Pompierii 1). Cele două piste rămase peste 8% sunt de gimmick
+> (kicker-ul din Serengeti pentru autobuz, gheața din Baikal), nu de mașină.
+> Tuning-ul din cifre se oprește aici; urmează verdictul dezvoltatorului la
+> volan (§11 pasul 0, ultimul punct).
 
 ## 0. Într-o propoziție
 
@@ -179,6 +187,50 @@ dă adversarilor de grilă `speed_scale` 0,88–0,97 (variația onestă a AI-ulu
 jucătorului (Muscle sau Buggy în acele rulări) pornea cu 3–12% avantaj. La
 viteză egală ordinea e exact cea de la volan (memoria
 `proberace-speed-scale-contamineaza-comparatia`).
+
+### 2.1.1 Rundele 1–2 de retuning (17 oct 2026, ramura `cariera/pas0-retuning`)
+
+Aceeași matrice, aceleași 12 piste × 2 seed-uri; rapoartele complete în
+`echilibru_garaj_runda1_2026-10-17.md` și `echilibru_garaj_runda2_2026-10-17.md`.
+
+| Mașină | viteză / accel / grip (înainte → runda 2) | ecart înainte | runda 1 | runda 2 | locul 1 (r2) |
+|---|---|---|---|---|---|
+| Poliția | 36/17/10 → **34,5**/17/**9,5** | — (12/12) | 0…+2% | 0…+3% | **5** |
+| Taxi | 33/16/9 → **35**/16/9 | +4…+9% | 0…+6% | 0…+5% | **4** |
+| Buggy | 35/16/8,5 + **off-road 0,65** | +1…+5% | +1…+6% | 0…+6% | **2** |
+| Pompierii | 32/12/8 → **35/15**/8 | +17…+25% | +1…+7% | 0…+5% | **1** |
+| Muscle | 37/15/7 → **36**/15/**7,5** | +1…+7% | +1…+11% | 0…+3% | 0 |
+| Autobuzul | 30/11/8 → **35/14,5**/8 | +23…+35% | +5…+11% | +2…+6% | 0 |
+| *ecart pe pistă* | | **23–35%** | 5–11% (Baikal 32%) | **3–6%** pe 10/12 | |
+
+Masele n-au fost atinse (`--mode=bump` identic). Ce a decis fiecare rundă:
+
+- **Runda 1** a strâns viteza maximă în 34,5–36 și a dat celor grele
+  accelerație (cu drag 0,35, viteza lor terminală accel/drag era 31–34 —
+  se târau spre plafon; acum 40–43). A tăiat accelerația Muscle-ului la 14
+  ca „cruiser”: **greșit**, a devenit cel mai lent pe 5 piste — pe pistele
+  noastre, întoarse, accelerația și grip-ul bat plafonul. Și a arătat că
+  **Baikal** (gheața acumulează stres proporțional cu masa, 0,29 s până la
+  rupere pentru autobuz) e singura pistă unde masa pedepsește direct timpul.
+- **Runda 2** a dat Muscle-ului înapoi 15 și grip 7,5, autobuzului 35/14,5,
+  Poliției grip 9,5, și a comprimat masa din stresul gheții (√: autobuzul
+  161, Poliția 95 — ordinea rămâne, gimmick-ul trece cu orice mașină).
+- **Cele două veto-uri rămase sunt de gimmick, nu de mașină**: Serengeti 10%
+  (autobuzul, 13 repuneri pe kicker-ul `FlyoffRamp` — nu are viteza să-l ia
+  nici acum), Baikal 20% (13–22 repuneri pentru toate mașinile; cel mai bun
+  tur al Poliției și al autobuzului include repuneri — zgomot pe 2 seed-uri).
+  Se tratează ca pasabilitate (§11 pasul 0, „gimmick-urile trec cu orice
+  mașină”), nu prin alte cifre în `CarData`.
+- **Ce cumpără masa, (a)**: `Car.hazard_mass_ratio` = clamp(135/masă, 0,4–1)
+  — 1,0 până la Muscle (mașina implicită, pe care s-au măsurat contractele),
+  Pompierii 0,68, Autobuzul 0,52; doar reduce. Aplicat în vârtej, taifun,
+  macara, monorail. Kyoto și turma aveau deja raportul lor (referința 100).
+  Împingerile cu forță × masă (balon, arzător, telecabină, haboob) rămân
+  neutre — fiecare are un contract măsurat ca accelerație, se decide la
+  volan dacă merită. Orbirea nu se scalează: e a șoferului.
+- Matricea măsoară **potențialul** mașinii cu AI-ul la volan, nu
+  accesibilitatea ei pentru om; de aceea tuning-ul din cifre se oprește la
+  runda 2 și verdictul e al dezvoltatorului, pe fiecare mașină, pe 3 piste.
 
 Ce spun cifrele:
 
@@ -597,4 +649,7 @@ Rămase:
 (b) trece prin turmă/trafic/bolovani fără să piardă viteza; bara de turbo
 nu se atinge. Pragul de veto pe ecartul best lap per pistă: **8%,
 provizoriu** — sub 5% mașinile devin la fel, peste 10% cele lente rămân
-lente; se fixează după prima rundă de retuning.
+lente; se fixează după prima rundă de retuning. **După runda 2 (§2.1.1):**
+8% e atins pe 10 piste din 12 și cele două rămase sunt de gimmick, deci
+pragul rămâne 8%; nu se ridică pentru ele (lecția plafonului de
+triunghiuri), se repară pasabilitatea.

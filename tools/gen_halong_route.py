@@ -1180,6 +1180,163 @@ for i in range(26):
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + i * 59.0, 1.0, 1.0, 1.0)}, "
         f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
 
+# --- BANDA DE JOS PESTE GURA GOLFULUI + MAREEA (brief §3, §7.3) --------------
+# Scurtatura TAIE COARDA peste gura golfului: drumul ocoleste 228 m spre uscat,
+# banda trece direct 163 m (-28.4%, tinta Monument Valley). E la nivelul apei
+# (cote 1.38-1.79), deci o terasa de maree sta acolo credibil — ceea ce NU era
+# posibil pe latura dreapta de dinainte.
+#
+# COTA SE RACORDEAZA LA CAPETE: `TrackBranch` citeste capetele de pe bucla
+# PRINCIPALA (antetul clasei: "capetele nu se deseneaza"), deci o banda
+# coborata uniform ar lasa o treapta egala cu toata coborarea la ambele
+# jonctiuni — de patru ori limita de 0.3 m (memoria
+# `banda-coborata-uniform-lasa-treapta`). Profilul de coborare e `4u(1-u)`:
+# zero la capete, maxim la mijloc. Acelasi profil il are si bombarea.
+#
+# Calculul sta AICI, inaintea header-ului de scena: in `.tscn` toate
+# `[sub_resource]` vin INAINTEA primului `[node]`, altfel parserul da
+# "Unknown tag 'sub_resource' in file" si scena nu se incarca deloc.
+BR_F0, BR_F1 = 0.8555, 0.9653
+_BR_DROP = 0.0          # banda e PE COTA DRUMULUI, nu sub ea. Vezi mai jos.
+# BANDA NU POATE AVEA COTA PROPRIE, si asta e un contract intre doua sisteme,
+# masurat pe doua garzi diferite:
+#
+#  1. `ProbeLaneClear` — DECISIVA. `TrackSideSampler._carve_branches` sapa
+#     terenul la cota benzii minus `BRANCH_DROP` (0.25 m), dar la CAPETE
+#     `TrackBranch` racordeaza la cota buclei principale, deci terenul ramane
+#     sus si blocheaza intrarea. Baleiat:
+#       _BR_DROP 0.00 ->  1 blocaj (jonca, pe ruta principala — nu banda)
+#       _BR_DROP 0.25 -> 17 blocaje (TerrainBody in fata, la 0.09-5.3 m)
+#       _BR_DROP 0.45 -> 13 blocaje
+#     Adica ORICE coborare blocheaza capetele benzii. Terasa de abraziune
+#     "scufundata" nu se poate face asa; daca o vrem, cere sapatura proprie
+#     (`custom_hollows`) sau o rapa, nu o cota de banda.
+#
+#  2. `ProbeCameraSolid` — a doua constrangere, mai permisiva (0.7 m era inca
+#     bine): pe o banda prea coborata camera INTRA IN MASINA, si sonda
+#     raporteaza collider "Car", nu un perete (memoria
+#     banda-coborata-ingroapa-camera). Baleiat: 0.0-0.7 -> 0 incidente,
+#     0.85/1.0 -> 1. Sonda aia E determinista, altfel decat ProbeRace.
+#
+# Cu 0.0 banda ramane o scurtatura de -32.8% pe acelasi plan ca drumul, iar
+# mareea o uda si o inchide la fel de bine: gimmickul nu depinde de cota.
+_BR_BOW = 10.0         # bombare spre apa la mijloc (m), ca sa nu fie o rigla
+_br_a = at_road(BR_F0)
+_br_b = at_road(BR_F1)
+_cdx, _cdz = _br_b[0] - _br_a[0], _br_b[2] - _br_a[2]
+_clen = math.hypot(_cdx, _cdz) or 1.0
+# Normala la coarda, orientata spre AFARA golfului (spre sud/apa): golful intra
+# spre nord, deci bombarea merge in sensul opus fundului.
+_cnx, _cnz = _cdz / _clen, -_cdx / _clen
+_gulf = at_road(frac["G golf fund"])
+if ((_gulf[0] - _br_a[0]) * _cnx + (_gulf[2] - _br_a[2]) * _cnz) > 0.0:
+    _cnx, _cnz = -_cnx, -_cnz
+_br_pts = []
+for _j in range(5):
+    _u = (_j + 0.5) / 5.0
+    _shape = 4.0 * _u * (1.0 - _u)      # zero la capete, 1.0 la mijloc
+    _br_pts.append((_br_a[0] + _cdx * _u + _cnx * _BR_BOW * _shape,
+                    _br_a[1] + (_br_b[1] - _br_a[1]) * _u - _BR_DROP * _shape,
+                    _br_a[2] + _cdz * _u + _cnz * _BR_BOW * _shape))
+_br_origin = _br_pts[0]
+_br_local = [(p[0] - _br_origin[0], p[1] - _br_origin[1], p[2] - _br_origin[2])
+             for p in _br_pts]
+# Mareea sta la MIJLOCUL benzii, pe cota ei reala (acolo coborarea e maxima).
+_tide_mid = (_br_a[0] + _cdx * 0.5 + _cnx * _BR_BOW,
+             (_br_a[1] + _br_b[1]) * 0.5 - _BR_DROP,
+             _br_a[2] + _cdz * 0.5 + _cnz * _BR_BOW)
+_tide_yaw = yaw_z_to(_cdx / _clen, _cdz / _clen)
+print(f"\n  banda de jos: {BR_F0:.4f} -> {BR_F1:.4f}, coarda {_clen:.1f} m")
+
+# Polilinia benzii de jos (capete + puncte coapte), in coordonate Godot, pentru
+# garda turnurilor POI G: banda taie coarda peste golf, adica prin INTERIORUL
+# viraturii unde stau turnurile de pe stanga. ProbeRace: AI-ul ia banda si da
+# in hull-urile turnurilor (blocaje cu `TurnCalcarG00_col`, `G13_col`).
+_BANDA_POLY = [(_br_a[0], _br_a[2])] + [(q[0], q[2]) for q in _br_pts] + [(_br_b[0], _br_b[2])]
+
+
+def _d_banda(x, z):
+    best = 1e9
+    for (x1, z1), (x2, z2) in zip(_BANDA_POLY, _BANDA_POLY[1:]):
+        dx, dz = x2 - x1, z2 - z1
+        t = max(0.0, min(1.0, ((x - x1) * dx + (z - z1) * dz) / max(1e-9, dx * dx + dz * dz)))
+        best = min(best, math.hypot(x - (x1 + dx * t), z - (z1 + dz * t)))
+    return best
+
+
+# --- POI G: soseaua taiata in peretele de calcar (0,84 -> 0,98) ------------
+# Bara: perete de calcar lipit de sosea, vegetatie agatata pe el, parapet cu
+# maimute. Peretele NU vine din relief (`_lift_peaks` stinge masivele langa
+# sosea), deci se construieste din turnuri karst_tower_* LIPITE si scalate.
+# Distanta se da pe GABARIT: centrul = semilatime + 2,5 m + raza bazei, ca
+# marginea turnului sa stea la ~9,5 m de ax (prag garda 8,0; semilatime 7,0).
+_G0, _G1 = F["G golf E"] + 0.004, F["G golf V"] + 0.012
+_g_len = ((_G1 - _G0) % 1.0) * L_TOTAL
+# (semi-extindere AABB MASURATA pe GLB: 18.2 / 16.9 / 25.0 m, inaltime, raza
+#  mijloc). Garda de gabarit se uita la colturile AABB-ului, nu la raza nominala.
+_TW = {"tower_a": (18.2, 55.0, 16.0), "tower_b": (16.9, 45.0, 16.0),
+       "tower_c": (25.0, 65.0, 18.0)}
+_AGAT = {}
+_SINK = {}     # cat intra turnul in sol: ascunde poala rugina de apa (nisa)
+_n_tw = max(4, int(_g_len / 15.0))
+_NOTW = os.environ.get('HLG_NOTW')
+for i in range(_n_tw):
+    ff = _G0 + (_G1 - _G0) * (i + 0.5) / _n_tw
+    kind = ("tower_a", "tower_b")[i % 2]
+    rb, hh, rm = _TW[kind]
+    sc = (0.42, 0.50, 0.38, 0.46, 0.52)[(i * 3) % 5]
+    lat = -(9.4 + 1.2 * rb * sc * (1.0 + 0.04 * ((i * 7) % 3)))
+    # CURVA: lat se masoara perpendicular pe tangenta, dar in viraj (fileturi de
+    # 44-48 m) interiorul se strange spre bucla inainte/inapoi, iar colizorul
+    # convex al turnului ajunge la ~3 m de asfalt (ProbeRace: 2 blocaje la
+    # 0,869 cu turnul 00 la 17,7 m perpendicular). Distanta se verifica pe TOATE
+    # punctele buclei: turnul se departeaza pana ce hull-ul (raza rb*sc) ramane
+    # la >= 9,5 m de orice punct de ax; daca nu incape, se omite.
+    _r_hull = rb * sc
+    _ok = False
+    for _extra_lat in range(0, 16):
+        g = at_road(ff, lat - _extra_lat * 1.0)
+        if (min(math.hypot(g[0] - q[0], g[2] + q[1]) for q in rs) >= _r_hull + 15.0
+                and _d_banda(g[0], g[2]) >= _r_hull + 12.0):
+            lat = lat - _extra_lat * 1.0
+            _ok = True
+            break
+    if not _ok:
+        continue
+    gr = at_road(ff, 0.0)
+    if _NOTW:
+        continue
+    nm = f"TurnCalcarG{i:02d}"
+    _sink = 4.2 * sc
+    _SINK[nm] = _sink
+    add(nm, kind,
+        f"Transform3D({rot_y_s(round(yaw_z_to(*travel_g(ff)) / 90.0) * 90.0 + (i % 2) * 180.0, sc, sc, sc)}, {g[0]:.2f}, {g[1] - _sink:.2f}, {g[2]:.2f})")
+    # vegetatie AGATATA pe fata dinspre sosea: 2 smocuri la 25% si 50% din
+    # inaltime, pe raza ~0,85 din cea de la mijloc, spre ax.
+    dx, dz = gr[0] - g[0], gr[2] - g[2]
+    dl = math.hypot(dx, dz) or 1.0
+    for q, (hf, akind) in enumerate(((0.22, "scrub"), (0.42, "ficus_b"), (0.64, "ficus_a"))):
+        rr = rm * sc * (0.80, 0.86, 0.90)[q]
+        ax_, az_ = g[0] + dx / dl * rr, g[2] + dz / dl * rr
+        an = f"AgatG{i:02d}{q}"
+        _AGAT[an] = (nm, hh * sc * hf - _sink)
+        add(an, akind,
+            f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + q * 90.0 + i * 31.0, 2.3, 2.3, 2.3)}, "
+            f"{ax_:.2f}, {g[1] + hh * sc * hf - _sink:.2f}, {az_:.2f})")
+# smocuri la piciorul peretelui, intre sosea si turn (cresc pe sol: Veg*)
+for i in range(_n_tw * 2):
+    ff = _G0 + (_G1 - _G0) * (i + 0.5) / (_n_tw * 2)
+    kind = ("scrub", "bamboo", "scrub", "ficus_a")[i % 4]
+    lat = -(14.8 + 1.2 * ((i * 5) % 3))
+    g = at_road(ff, lat)
+    # nu pe banda de jos: trunchiul ficusului e solid (ProbeRace: ejectare la
+    # 35 m/s in VegGP01, la 2,4 m de banda)
+    if _d_banda(g[0], g[2]) < 13.0:
+        continue
+    add(f"VegGP{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + i * 47.0, 1.4, 1.4, 1.4)}, "
+        f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
+
 # --- parapetul de coasta: pe latura unde stau maimutele (POI G) ------------
 # Maimutele sar DIN perete, iar parapetul e cel pe care stau (brief §1.5), deci
 # se insiruie in jurul fractiei lor, pe partea dinspre perete (stanga = -lat).
@@ -1191,7 +1348,7 @@ for i in range(_n_par):
     # -11,5, nu -9,5: parapetul are 0,55 m coama plus talus, deci la -9,5
     # marginea ajungea la 6,4-7,0 m de ax, adica PE asfalt (semi-latime 7,0).
     # Un parapet MARGINESTE drumul, nu sta in el.
-    g = at_road(ff, -11.5)
+    g = at_road(ff, -12.2)
     add(f"Parapet{i:02d}", "parapet",
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0, 1.0, 1.0, 1.0)}, "
         f"{g[0]:.2f}, {g[1] - 0.10:.2f}, {g[2]:.2f})")
@@ -1323,6 +1480,7 @@ for i, _t in enumerate(_veg):
     add(f"Veg{i:02d}", kind,
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, _sc, _sc, _sc)}, "
         f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
+
 
 # --- POI E: coborarea in doua ace de par + plaja (0,53 -> 0,74) ------------
 # Construit ca UNITATE (gauntlet): versant imbracat pe ambele randuri, stanci
@@ -1536,6 +1694,17 @@ if COTE_TEREN:
         _fixed += 1
     print(f"\ncote de teren aplicate: {_fixed} din {len(COTE_TEREN)} masurate")
 
+if COTE_TEREN:
+    for _i, (_nm, _res, _xf, _extra) in enumerate(dec):
+        if _nm in _SINK and _nm in COTE_TEREN:
+            _head, _oy, _oz = _xf.rsplit(",", 2)
+            dec[_i] = (_nm, _res, f"{_head}, {COTE_TEREN[_nm] - _SINK[_nm]:.2f},{_oz}", _extra)
+    for _i, (_nm, _res, _xf, _extra) in enumerate(dec):
+        if _nm in _AGAT and _AGAT[_nm][0] in COTE_TEREN:
+            _head, _oy, _oz = _xf.rsplit(",", 2)
+            dec[_i] = (_nm, _res,
+                       f"{_head}, {COTE_TEREN[_AGAT[_nm][0]] + _AGAT[_nm][1]:.2f},{_oz}", _extra)
+
 RES = {"rock": "13_rock", "quay": "14_quay",
        "stack_a": "20_stack_a", "stack_b": "21_stack_b",
        "house_a": "22_house_a", "house_b": "23_house_b",
@@ -1546,7 +1715,7 @@ RES = {"rock": "13_rock", "quay": "14_quay",
        "ficus_a": "32_ficus_a", "ficus_b": "33_ficus_b",
        "bamboo": "34_bamboo", "scrub": "35_scrub",
        "boulder": "36_boulder",
-       "tower_a": "37_tower_a", "tower_b": "38_tower_b", "tower_c": "39_tower_c"}
+       "tower_a": "40_tower_a", "tower_b": "41_tower_b", "tower_c": "42_tower_c"}
 
 # --- consola: fractiile care conteaza la pasul urmator -----------------------
 print("\n=== FRACTII (pentru pasii urmatori) ===")
@@ -1562,73 +1731,6 @@ for idx, (a, b) in enumerate(PONT_SEGS):
 print(f"\n  jonca:   {F_JONCA:.4f}")
 print(f"  maimute: {F_MAIMUTE:.4f}")
 
-# --- BANDA DE JOS PESTE GURA GOLFULUI + MAREEA (brief §3, §7.3) --------------
-# Scurtatura TAIE COARDA peste gura golfului: drumul ocoleste 228 m spre uscat,
-# banda trece direct 163 m (-28.4%, tinta Monument Valley). E la nivelul apei
-# (cote 1.38-1.79), deci o terasa de maree sta acolo credibil — ceea ce NU era
-# posibil pe latura dreapta de dinainte.
-#
-# COTA SE RACORDEAZA LA CAPETE: `TrackBranch` citeste capetele de pe bucla
-# PRINCIPALA (antetul clasei: "capetele nu se deseneaza"), deci o banda
-# coborata uniform ar lasa o treapta egala cu toata coborarea la ambele
-# jonctiuni — de patru ori limita de 0.3 m (memoria
-# `banda-coborata-uniform-lasa-treapta`). Profilul de coborare e `4u(1-u)`:
-# zero la capete, maxim la mijloc. Acelasi profil il are si bombarea.
-#
-# Calculul sta AICI, inaintea header-ului de scena: in `.tscn` toate
-# `[sub_resource]` vin INAINTEA primului `[node]`, altfel parserul da
-# "Unknown tag 'sub_resource' in file" si scena nu se incarca deloc.
-BR_F0, BR_F1 = 0.8555, 0.9653
-_BR_DROP = 0.0          # banda e PE COTA DRUMULUI, nu sub ea. Vezi mai jos.
-# BANDA NU POATE AVEA COTA PROPRIE, si asta e un contract intre doua sisteme,
-# masurat pe doua garzi diferite:
-#
-#  1. `ProbeLaneClear` — DECISIVA. `TrackSideSampler._carve_branches` sapa
-#     terenul la cota benzii minus `BRANCH_DROP` (0.25 m), dar la CAPETE
-#     `TrackBranch` racordeaza la cota buclei principale, deci terenul ramane
-#     sus si blocheaza intrarea. Baleiat:
-#       _BR_DROP 0.00 ->  1 blocaj (jonca, pe ruta principala — nu banda)
-#       _BR_DROP 0.25 -> 17 blocaje (TerrainBody in fata, la 0.09-5.3 m)
-#       _BR_DROP 0.45 -> 13 blocaje
-#     Adica ORICE coborare blocheaza capetele benzii. Terasa de abraziune
-#     "scufundata" nu se poate face asa; daca o vrem, cere sapatura proprie
-#     (`custom_hollows`) sau o rapa, nu o cota de banda.
-#
-#  2. `ProbeCameraSolid` — a doua constrangere, mai permisiva (0.7 m era inca
-#     bine): pe o banda prea coborata camera INTRA IN MASINA, si sonda
-#     raporteaza collider "Car", nu un perete (memoria
-#     banda-coborata-ingroapa-camera). Baleiat: 0.0-0.7 -> 0 incidente,
-#     0.85/1.0 -> 1. Sonda aia E determinista, altfel decat ProbeRace.
-#
-# Cu 0.0 banda ramane o scurtatura de -32.8% pe acelasi plan ca drumul, iar
-# mareea o uda si o inchide la fel de bine: gimmickul nu depinde de cota.
-_BR_BOW = 10.0         # bombare spre apa la mijloc (m), ca sa nu fie o rigla
-_br_a = at_road(BR_F0)
-_br_b = at_road(BR_F1)
-_cdx, _cdz = _br_b[0] - _br_a[0], _br_b[2] - _br_a[2]
-_clen = math.hypot(_cdx, _cdz) or 1.0
-# Normala la coarda, orientata spre AFARA golfului (spre sud/apa): golful intra
-# spre nord, deci bombarea merge in sensul opus fundului.
-_cnx, _cnz = _cdz / _clen, -_cdx / _clen
-_gulf = at_road(frac["G golf fund"])
-if ((_gulf[0] - _br_a[0]) * _cnx + (_gulf[2] - _br_a[2]) * _cnz) > 0.0:
-    _cnx, _cnz = -_cnx, -_cnz
-_br_pts = []
-for _j in range(5):
-    _u = (_j + 0.5) / 5.0
-    _shape = 4.0 * _u * (1.0 - _u)      # zero la capete, 1.0 la mijloc
-    _br_pts.append((_br_a[0] + _cdx * _u + _cnx * _BR_BOW * _shape,
-                    _br_a[1] + (_br_b[1] - _br_a[1]) * _u - _BR_DROP * _shape,
-                    _br_a[2] + _cdz * _u + _cnz * _BR_BOW * _shape))
-_br_origin = _br_pts[0]
-_br_local = [(p[0] - _br_origin[0], p[1] - _br_origin[1], p[2] - _br_origin[2])
-             for p in _br_pts]
-# Mareea sta la MIJLOCUL benzii, pe cota ei reala (acolo coborarea e maxima).
-_tide_mid = (_br_a[0] + _cdx * 0.5 + _cnx * _BR_BOW,
-             (_br_a[1] + _br_b[1]) * 0.5 - _BR_DROP,
-             _br_a[2] + _cdz * 0.5 + _cnz * _BR_BOW)
-_tide_yaw = yaw_z_to(_cdx / _clen, _cdz / _clen)
-print(f"\n  banda de jos: {BR_F0:.4f} -> {BR_F1:.4f}, coarda {_clen:.1f} m")
 
 tscn = f"""[gd_scene format=3]
 
@@ -1660,9 +1762,9 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/bamboo_clump.glb" id="34_bamboo"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/scrub_tuft.glb" id="35_scrub"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/rocks/shore_boulder.glb" id="36_boulder"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_a.glb" id="37_tower_a"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_b.glb" id="38_tower_b"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_c.glb" id="39_tower_c"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_a.glb" id="40_tower_a"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_b.glb" id="41_tower_b"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_c.glb" id="42_tower_c"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true

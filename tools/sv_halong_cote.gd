@@ -84,7 +84,10 @@ func _ready() -> void:
 			continue
 		var d: float = p.y - gy
 		var stare := "OK"
-		if d < -0.25:
+		# TurnCalcarG se infige INTENTIONAT 4,2*scara (max ~2,6 m) in sol, ca poala
+		# rugina "de nisa de val" a turnului sa nu se vada pe uscat.
+		var tol := -2.7 if nm.begins_with("TurnCalcarG") else -0.25
+		if d < tol:
 			stare = "INGROPATA cu %.2f m" % (-d)
 			ingropate += 1
 		elif d > 0.35:

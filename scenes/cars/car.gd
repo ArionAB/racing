@@ -130,7 +130,10 @@ const SLIP_GRIP_ICE: float = 1.5
 @export var body_color: Color = Color(0.95, 0.45, 0.1)
 ## MASA, nu un "factor": intra ca 1/m in impulsul de coliziune (_resolve_bump).
 @export var mass_factor: float = 1.0
-@export var offroad_speed_factor: float = 0.45
+## Implicitul global al plafonului off-road; CarData.offroad_speed_factor il
+## suprascrie per masina (buggy-ul), iar o valoare negativa acolo inseamna asta.
+const OFFROAD_SPEED_DEFAULT: float = 0.45
+@export var offroad_speed_factor: float = OFFROAD_SPEED_DEFAULT
 ## Centrul de masa pe verticala (m). Vezi CarData.center_of_mass_y — implicitul
 ## de aici (-0.15) e cel vechi, pastrat pentru orice masina fara CarData.
 @export var center_of_mass_y: float = -0.15
@@ -566,6 +569,11 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 	grip = data.grip
 	mass_factor = data.mass_factor
 	mass = 100.0 * mass_factor # identitatea prin masa, direct in solver
+	# Off-road per masina (buggy-ul); -1 in CarData = implicitul global. Se
+	# scrie MEREU, nu doar cand e pozitiv: `_swap_player_car` aplica alta
+	# CarData pe acelasi corp, si valoarea buggy-ului ar ramane pe taxi.
+	offroad_speed_factor = data.offroad_speed_factor \
+		if data.offroad_speed_factor >= 0.0 else OFFROAD_SPEED_DEFAULT
 	center_of_mass_y = data.center_of_mass_y
 	center_of_mass = Vector3(0.0, center_of_mass_y, 0.0)
 	body_color = data.color if color_override.a == 0.0 else color_override
@@ -1343,6 +1351,19 @@ func _update_invert_marker() -> void:
 	_invert_marker.visible = true
 	var pulse := 1.0 + 0.2 * sin(float(Time.get_ticks_msec()) * 0.018)
 	_invert_marker.scale = Vector3.ONE * pulse
+
+
+## Cat din efectul unui hazard „de aruncare" (rotire, ridicare, impins, viteza
+## taiata) primeste masina asta. 1.0 pentru tot ce e cel mult cat Muscle
+## (135 = masina implicita a jucatorului, pe care s-au masurat contractele
+## gimmick-urilor), mai putin pentru cele grele: Pompierii 0.68, Autobuzul
+## 0.52. Doar REDUCE, nu amplifica: usoarele platesc deja prin contact (1/m in
+## `_resolve_bump`), iar un hazard mai dur pe Politie ar muta contractele
+## masurate. Pasul 0 din docs/cariera/mod_cariera.md, decizia (a). Hazardele
+## din Kyoto (Gion, Shishimai, Shishi-odoshi, Daruma) si turma au deja
+## raportul lor (referinta 100, clamp 0.4..1.4) si raman cum sunt.
+func hazard_mass_ratio(reference_mass: float = 135.0) -> float:
+	return clampf(reference_mass / maxf(mass, 1.0), 0.4, 1.0)
 
 
 func apply_sweep(push: Vector3) -> void:

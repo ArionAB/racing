@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.7 (brief de design; pasul 0 retunat, pasul 1 construit)
+# Modul Carieră — „Turul lumii” — v0.8 (brief de design; pasul 0 retunat, pașii 1–2 construiți)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -64,6 +64,17 @@
 > lui CHAMPIONSHIP, medalia cursei după loc + „BACK TO CAREER”, garda
 > `ProbeCareer` (130 de verificări, cu sabotaj) în `verify_local.sh` (13/13).
 > Pasul 0 a fost merge-uit (#553, #555); verdictul la volan rămâne deschis.
+>
+> **v0.8 (17 oct 2026), pasul 2 construit** (PR #561, stivuit pe #556):
+> semnalele `lap_completed` / `race_finished` pe `Race`, `Car.turbo_recharge`
+> (rezervorul sigilat: bara pornește plină și nu se mai încarcă, arderea
+> merge), modul TIME_TRIAL în `Career` (singur pe pistă, `ai_count` restaurat
+> la ieșire), țintele `tt_gold/silver/bronze_ms` în `TrackInfo` (toate 0 până
+> le pune dezvoltatorul la volan), foaia pistei pe raft (RACE / TIME TRIAL /
+> CHALLENGE „soon”), rezultatele cu cele trei ținte, eticheta SEALED în HUD.
+> Gărzi: `ProbeSealedTurbo` (0,300 → 0,300 sigilat cu 360 de cadre de drift;
+> contra-probă 0,300 → 1,000; arderea 0,300 → 0,020) și `ProbeCareer` la 180
+> de verificări; `verify_local` 14/14. Contratimpul nu a fost rulat la volan.
 
 ## 0. Într-o propoziție
 
@@ -593,7 +604,10 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    `TRACK_SCENES`, `rival_track` e în lumea lui; și **regruparea**: mută o
    pistă între două lumi în config-ul de test și verifică că medaliile ei
    și ștampilele totale nu se schimbă.
-2. **Medalii pe cursă + contratimpul cu rezervor sigilat** — semnalele
+2. **Medalii pe cursă + contratimpul cu rezervor sigilat — CONSTRUIT (PR
+   #561, 17 oct).** Starea: `pas2_contratimp_stare.md`. Țintele din
+   `TrackInfo` sunt 0 pe toate pistele până le pui la volan. Planul inițial:
+   semnalele
    `lap_completed` / `race_finished` pe `Race` (cerute de `CLAUDE.md` de
    mult), `turbo_recharge` pe `Car`, modul contratimp (`ai_count = 0`, HUD cu
    cele trei ținte), `tt_*_ms` pe fiecare `TrackInfo` — **valorile le pune

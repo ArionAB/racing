@@ -3009,14 +3009,25 @@ func _update_spin(delta: float) -> void:
 			_spin_angle = 0.0
 	_visual.rotation.y = _spin_angle
 
+## Modelul 3D al unei masini, cu scala si rotatia din CarData, fara fizica.
+## Static ca sa-l poata folosi si fantoma din contratimp (GhostCar) — acelasi
+## model, aceeasi orientare, fara sa dubleze cifrele. Null daca masina nu are
+## model (placeholder-ul de cuburi ramane doar al lui `_build_visual`).
+static func build_model(car_data: CarData) -> Node3D:
+	if car_data == null or car_data.model == null:
+		return null
+	var model := car_data.model.instantiate() as Node3D
+	model.scale = Vector3.ONE * car_data.model_scale
+	model.rotation.y = deg_to_rad(car_data.model_rotation_deg)
+	return model
+
+
 func _build_visual() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
 	# Model 3D real daca exista in CarData; altfel placeholder din cuburi.
 	if data != null and data.model != null:
-		var model := data.model.instantiate() as Node3D
-		model.scale = Vector3.ONE * data.model_scale
-		model.rotation.y = deg_to_rad(data.model_rotation_deg)
+		var model := Car.build_model(data)
 		_visual.add_child(model)
 		# Gasim rotile dupa nume, ca sa le animam (spin + viraj + compresie).
 		_wheels_all.clear()

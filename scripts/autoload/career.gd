@@ -28,6 +28,10 @@ const MEDAL_GOLD := 3
 var config: CareerConfig
 ## Suprascris de sonda cu o cale temporara, ca sa nu atinga salvarea reala.
 var save_path: String = "user://career.cfg"
+## Fantomele contratimpului, cate un fisier per pista (nu in career.cfg: un
+## fisier de ~100 KB n-are ce cauta intr-un ConfigFile citit la fiecare start).
+## Sondele il suprascriu, ca sa nu atinga fantomele reale.
+var ghost_dir: String = "user://ghosts/"
 
 ## True cat timp jucatorul e intr-o cursa pornita din raft.
 var active: bool = false
@@ -322,6 +326,51 @@ func finish_time_trial(race_ms: int) -> int:
 	var medal := time_trial_medal(active_track, race_ms)
 	set_time_trial(active_track, medal, race_ms)
 	return medal
+
+
+# ------------------------------------------------------------- fantome
+
+func ghost_path(track_id: StringName) -> String:
+	return ghost_dir.path_join("%s.bin" % track_id)
+
+
+## Scrie fantoma DOAR daca `race_ms` bate `previous_best_ms` (best-ul de DINAINTE
+## de `finish_time_trial`; 0 = nicio cursa inca). Un fisier cu versiune mai noua
+## decat stim nu se suprascrie (aceeasi regula ca la career.cfg). Intoarce true
+## daca a scris.
+func save_ghost_if_best(track_id: StringName, data: GhostData, race_ms: int,
+		previous_best_ms: int) -> bool:
+	if data == null or race_ms <= 0:
+		return false
+	if previous_best_ms > 0 and race_ms >= previous_best_ms:
+		return false
+	var path := ghost_path(track_id)
+	if FileAccess.file_exists(path):
+		var old := FileAccess.get_file_as_bytes(path)
+		if GhostData.file_version(old) > GhostData.VERSION:
+			push_warning("Career: fantoma %s e dintr-o versiune mai noua, nu o suprascriu" % path)
+			return false
+	DirAccess.make_dir_recursive_absolute(ghost_dir)
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		push_warning("Career: nu pot scrie fantoma %s" % path)
+		return false
+	file.store_buffer(data.to_bytes())
+	file.close()
+	return true
+
+
+## Null daca lipseste, e corupta sau e dintr-o versiune mai noua.
+func load_ghost(track_id: StringName) -> GhostData:
+	var path := ghost_path(track_id)
+	if not FileAccess.file_exists(path):
+		return null
+	var bytes := FileAccess.get_file_as_bytes(path)
+	var data := GhostData.from_bytes(bytes)
+	if data == null:
+		push_warning("Career: fantoma %s ignorata (versiune %d, corupta sau necunoscuta)"
+			% [path, GhostData.file_version(bytes)])
+	return data
 
 
 func leave() -> void:

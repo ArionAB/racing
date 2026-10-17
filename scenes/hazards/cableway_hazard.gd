@@ -55,6 +55,11 @@ extends Node3D
 ##     ramane pe peron.
 
 ## Tabelul de clase de material, prin PRELOAD (vezi PathMover).
+## O masina a urcat la bord (usile s-au inchis cu ea pe podea). Emis o data
+## per imbarcare, nu per cadru de `_hold_aboard`; il asculta provocarea
+## „ALL ABOARD" din cariera (brief §4.3). Nu schimba nimic in joc.
+signal boarded(car: Car)
+
 const WorldProp = preload("res://scenes/props/world_prop.gd")
 const CABIN_MODEL: String = "res://assets/models/chongqing/vehicles/cableway_cabin.glb"
 const TOWER_MODEL: String = "res://assets/models/chongqing/structures/cableway_tower.glb"
@@ -465,6 +470,7 @@ func _on_state_changed(from: State, to: State) -> void:
 			if car == null or doorway.has(car):
 				continue
 			_aboard[car] = _body.to_local(car.global_position)
+			boarded.emit(car)
 	elif from == State.UP or from == State.DOWN:
 		# Usile se deschid: masina isi afla etajul si pleaca pe roti.
 		for key in _aboard.keys():

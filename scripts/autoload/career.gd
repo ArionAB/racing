@@ -12,6 +12,8 @@ extends Node
 
 signal progress_changed
 
+enum Mode { RACE, TIME_TRIAL }
+
 const CONFIG_PATH := "res://scenes/career/data/career_config.tres"
 ## Versiunea schemei din `career.cfg`. Un fisier cu versiune mai mare vine de la
 ## un build mai nou: il lasam neatins (vezi `_read_only`).
@@ -31,6 +33,10 @@ var active_track: StringName = &""
 ## Cine porneste efectiv cursa. Implicit GameState.start_race; sonda il
 ## inlocuieste ca sa testeze `start_track` fara sa schimbe scena.
 var race_starter: Callable = Callable()
+## Modul cursei de cariera curente (contratimp = singur, rezervor sigilat).
+var active_mode: Mode = Mode.RACE
+## `GameState.ai_count` dinaintea contratimpului; -1 = nu l-am schimbat.
+var _saved_ai_count: int = -1
 
 var _tracks: Dictionary = {} # id -> {race_medal, tt_medal, tt_best_ms, challenge}
 var _rivals: Dictionary = {} # id -> true cand e batut
@@ -208,13 +214,23 @@ func _changed() -> void:
 
 # ----------------------------------------------------- cursa de cariera
 
-func start_track(id: StringName) -> void:
+func start_track(id: StringName, mode: Mode = Mode.RACE) -> void:
 	var index := TrackInfo.index_of_id(id)
 	if index < 0:
 		push_error("Career: pista %s nu exista" % id)
 		return
+	# Un start nou peste un contratimp neinchis nu are voie sa piarda valoarea
+	# originala a lui ai_count: restauram inainte sa re-salvam.
+	_restore_ai_count()
 	active = true
 	active_track = id
+	active_mode = mode
+	if mode == Mode.TIME_TRIAL:
+		# `ai_count` e global si Race il citeste la spawn; contratimpul e singur.
+		# `leave()` il readuce, ca o cursa rapida dupa un contratimp parasit
+		# prin MENU sa nu ramana fara adversari.
+		_saved_ai_count = GameState.ai_count
+		GameState.ai_count = 0
 	GameState.champ_active = false
 	GameState.selected_track = index
 	if race_starter.is_valid():
@@ -234,8 +250,49 @@ func finish_active(position: int) -> int:
 	return medal
 
 
+func is_time_trial() -> bool:
+	return active and active_mode == Mode.TIME_TRIAL
+
+
+## Medalia unui timp de contratimp fata de tintele pistei `id`. Functie pura:
+## o tinta 0 = "fara tinta inca" si nu da medalie.
+static func time_trial_medal(id: StringName, ms: int) -> int:
+	var index := TrackInfo.index_of_id(id)
+	if index < 0:
+		return MEDAL_NONE
+	return medal_for_time(TrackInfo.for_track(index), ms)
+
+
+static func medal_for_time(info: TrackInfo, ms: int) -> int:
+	if info.tt_gold_ms > 0 and ms <= info.tt_gold_ms:
+		return MEDAL_GOLD
+	if info.tt_silver_ms > 0 and ms <= info.tt_silver_ms:
+		return MEDAL_SILVER
+	if info.tt_bronze_ms > 0 and ms <= info.tt_bronze_ms:
+		return MEDAL_BRONZE
+	return MEDAL_NONE
+
+
+## Rezultatul unui contratimp: salveaza timpul minim si medalia maxima,
+## returneaza medalia castigata acum.
+func finish_time_trial(race_ms: int) -> int:
+	if not is_time_trial():
+		return MEDAL_NONE
+	var medal := time_trial_medal(active_track, race_ms)
+	set_time_trial(active_track, medal, race_ms)
+	return medal
+
+
 func leave() -> void:
 	active = false
+	active_mode = Mode.RACE
+	_restore_ai_count()
+
+
+func _restore_ai_count() -> void:
+	if _saved_ai_count >= 0:
+		GameState.ai_count = _saved_ai_count
+		_saved_ai_count = -1
 
 
 # ----------------------------------------------------------- persistenta

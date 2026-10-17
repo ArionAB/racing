@@ -232,8 +232,9 @@ func _open_sheet(track_id: StringName) -> void:
 	column.add_child(tt_btn)
 
 	var challenge := Career.challenge_for(track_id)
-	var challenge_btn := _sheet_button("CHALLENGE", "SOON")
+	var challenge_btn: Button
 	if challenge == null:
+		challenge_btn = _sheet_button("CHALLENGE", "SOON")
 		challenge_btn.disabled = true
 	else:
 		# Titlul + DONE (verde) cand e bifata, altfel ce trebuie facut.

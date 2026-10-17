@@ -29,6 +29,16 @@ extends Control
 ##    la alta din banda. Poate aparea si la stanga capatului plin (masina din
 ##    vitrina e mai slaba), nu doar la dreapta — altfel ar citi ca „cat mai ai
 ##    pana la maxim", care e alta informatie.
+##
+## 4. SOFERUL e a doua axa de alegere, independenta de masina (decizia
+##    dezvoltatorului, 17 oct 2026). Bara DRIVER il schimba cu sageti, nu cu
+##    cartonase: skinurile au acelasi corp si se deosebesc prin culori si cap,
+##    deci se compara in vitrina, pe masina, nu pe o banda de nume. Bara sta
+##    SUB VITRINA, in stanga-jos, nu in panoul de statistici: panoul era deja
+##    plin pe 720p (SELECT se termina la un pixel de banda de jos), iar soferul
+##    n-are statistici — e o alegere de langa figurina, nu de langa bare. Ca si
+##    masina, se COMITE abia la SELECT — un singur buton salveaza amandoua
+##    alegerile, ca sa nu existe doua reguli pe acelasi ecran.
 
 signal back_pressed
 
@@ -54,8 +64,15 @@ const CARD_SIZE := Vector2(190, 132)
 ## 3D isi scade exact atat din latime, ca masina sa se centreze pe spatiul
 ## RAMAS, nu pe mijlocul ecranului — altfel sta pe jumatate sub panou.
 const STATS_W := 470.0
+## Latura butoanelor de sageata din bara DRIVER: tinta de deget, nu de mouse.
+const ARROW_SIZE := 56.0
 
 var _preview: CarPreview
+var _driver_name: Label
+var _arrows: Array[Button] = []
+## Soferul din vitrina — ca `_shown`, poate diferi de `GameState.selected_driver`
+## pana apesi SELECT.
+var _shown_driver: int = 0
 var _name_label: Label
 var _bars: Array[StatBar] = []
 var _mass_meter: MassMeter
@@ -77,6 +94,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_compute_ranges()
 	_shown = GameState.selected_car
+	_shown_driver = GameState.selected_driver
 
 	# Vitrina ocupa doar spatiul LIBER, nu tot ecranul: panoul de statistici
 	# sta peste dreapta, banda de cartonase peste jos. Intinsa pe tot
@@ -91,6 +109,7 @@ func _ready() -> void:
 
 	_build_header()
 	_build_stats_panel()
+	_build_driver_bar()
 	_build_card_strip()
 
 	_show(_shown)
@@ -205,6 +224,92 @@ func _build_stats_panel() -> void:
 	box.add_child(select)
 
 
+# --------------------------------------------------------------- bara DRIVER
+
+## „DRIVER  [<] NUME [>]", o pastila in stanga-jos a vitrinei, deasupra benzii
+## de cartonase. Numele poarta bifa cand skinul din vitrina e si cel salvat —
+## acelasi semn ca pe cartonasele de masini, ca sa citeasca la fel.
+func _build_driver_bar() -> void:
+	var bar := PanelContainer.new()
+	bar.add_theme_stylebox_override("panel", _panel_style(16))
+	# Ancorata jos-stanga si crescuta IN SUS si spre dreapta din minimul ei:
+	# cu `position` scris de mana (tiparul din restul panoului) ar fi depins de
+	# marimea parintelui in momentul lui `_ready`, care e inca zero.
+	bar.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bar.offset_left = 28
+	bar.offset_right = 28
+	bar.offset_bottom = -(CARD_SIZE.y + 36) - 20
+	bar.offset_top = bar.offset_bottom
+	add_child(bar)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 18)
+	margin.add_theme_constant_override("margin_right", 12)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	bar.add_child(margin)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	margin.add_child(row)
+
+	var head := _make_label(20, false)
+	head.text = "DRIVER"
+	head.add_theme_color_override("font_color", DIM)
+	head.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(head)
+	var prev := _arrow_button("<", -1)
+	row.add_child(prev)
+	_driver_name = _make_label(26, true)
+	_driver_name.add_theme_color_override("font_color", ACCENT)
+	_driver_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_driver_name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	# Latime fixa, ca sagetile sa nu sara cand un nume e mai lung decat altul.
+	_driver_name.custom_minimum_size = Vector2(180, 0)
+	row.add_child(_driver_name)
+	var next := _arrow_button(">", 1)
+	row.add_child(next)
+	_arrows = [prev, next]
+
+
+func _arrow_button(glyph: String, step: int) -> Button:
+	var button := Button.new()
+	button.text = glyph
+	button.custom_minimum_size = Vector2(ARROW_SIZE, ARROW_SIZE)
+	button.add_theme_font_override("font", FONT_BOLD)
+	button.add_theme_font_size_override("font_size", 30)
+	button.add_theme_color_override("font_color", TITLE_COLOR)
+	_style_button(button, 12)
+	button.pressed.connect(func() -> void: _show_driver(_shown_driver + step))
+	return button
+
+
+## Schimba soferul din vitrina, cu intoarcere la capete. Masina ramane si
+## vitrina NU isi reseteaza unghiul: figurina se schimba pe loc, sub ochi, ca
+## sa se vada exact ce difera.
+func _show_driver(index: int) -> void:
+	_shown_driver = wrapi(index, 0, GameState.DRIVER_DATA.size())
+	_preview.show_car(GameState.CAR_DATA[_shown] as CarData,
+		_driver_scene(_shown_driver))
+	_refresh_driver_row()
+
+
+func _driver_scene(index: int) -> PackedScene:
+	return (GameState.DRIVER_DATA[index] as DriverData).model
+
+
+func _refresh_driver_row() -> void:
+	var skin := GameState.DRIVER_DATA[_shown_driver] as DriverData
+	var chosen := _shown_driver == GameState.selected_driver
+	_driver_name.text = skin.display_name.to_upper() + (" ✓" if chosen else "")
+	# Pe o caroserie inchisa figurina nu se vede, deci n-ai ce compara aici;
+	# alegerea ramane valabila pentru masinile deschise, doar bara se stinge.
+	var open := (GameState.CAR_DATA[_shown] as CarData).open_cockpit
+	for arrow in _arrows:
+		arrow.disabled = not open
+	_driver_name.modulate.a = 1.0 if open else 0.45
+
+
 # ------------------------------------------------------------ banda de jos
 
 func _build_card_strip() -> void:
@@ -267,9 +372,10 @@ func _show(index: int) -> void:
 	var data := GameState.CAR_DATA[_shown] as CarData
 	var current := GameState.CAR_DATA[GameState.selected_car] as CarData
 
-	_preview.show_car(data)
+	_preview.show_car(data, _driver_scene(_shown_driver))
 	_preview.reset_spin()
 	_name_label.text = data.display_name.to_upper()
+	_refresh_driver_row()
 
 	# Fantoma arata masina selectata ACUM — si doar cand te uiti la alta.
 	var ghost := _shown != GameState.selected_car
@@ -320,13 +426,15 @@ func _refresh_cards() -> void:
 
 func _on_select_pressed() -> void:
 	GameState.selected_car = _shown
+	GameState.selected_driver = _shown_driver
 	GameState.save_settings()
 	_show(_shown) # fantoma dispare: masina din vitrina E cea selectata
 
 
-## Repune garajul pe masina salvata — chemat cand se deschide panoul, ca sa nu
-## ramana pe ce te uitai data trecuta fara sa fi apasat SELECT.
+## Repune garajul pe masina si soferul salvati — chemat cand se deschide
+## panoul, ca sa nu ramana pe ce te uitai data trecuta fara sa fi apasat SELECT.
 func reopen() -> void:
+	_shown_driver = GameState.selected_driver
 	_show(GameState.selected_car)
 
 

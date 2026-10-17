@@ -298,6 +298,7 @@ kind = 0
 model = ExtResource("m_bear")
 model_scale = 1.0
 face_travel = true
+follow_ground = true
 motion = 1
 sweep_speed = 1.2
 

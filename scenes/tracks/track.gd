@@ -4169,22 +4169,40 @@ static func themes() -> Dictionary:
 		"water_glint": 0.55,
 		# Calcarul de carst: cenusiu-deschis in soare (#A8A49A). Clasa e cea a
 		# calcarului Ryukyu (aceeasi roca), cu tenta proprie — brief §4.
-		"ground_tint": Color.html("8E8C84"),
-		# Soare de dimineata tarzie din ESE (~110 grade, 30 de grade elevatie),
-		# alb-cald (#FFF0D8). Busola 180 - y = 110 => y = 70. Azimutul se
-		# remasoara pe traseul real (memoria azimutul-soarelui-fata-de-drum).
-		"sun_rotation_deg": Vector3(-30, 70, 0),
-		"sun_color": Color(1.0, 0.94, 0.85),
-		"sun_energy": 1.1,
-		# Ambient de dimineata umeda (#C8D8DC la 0.32): umbrele din grota si de
-		# sub surplombe trebuie sa iasa VERZI-ALBASTRE de la lumina reflectata
-		# de apa, nu negre (memoria umbra-fara-culoare-e-negru-mort).
-		"ambient_color": Color.html("C8D8DC"),
-		"ambient_energy": 0.32,
-		# Aer umed de golf: albastru-pal spalacit sus (#6E9AC4), alb-cald laptos
-		# la orizont. NU albastrul adanc de altitudine (Alpi, Transfagarasan).
-		"sky_top": Color.html("6E9AC4"),
-		"sky_horizon": Color.html("E8E2D6"),
+		# NISIP AURIU (cerinta dezvoltatorului, oct 2026: "it's a tropical place
+		# i want a tropical sunny golden hour vibe").
+		#
+		# Cifra e MASURATA pe plaja din diorama acceptata
+		# (`halong_diorama_v1.jpg`, 377 de esantioane filtrate pe hue 25-60,
+		# saturatie 0,20-0,55, valoare > 0,60): **#E5D2A0, hue 43, saturatie
+		# 0,30**. Vechiul `8E8C84` avea saturatie 0,03 — gri neutru, exact ce se
+		# vedea in joc ca "nisip gri uniform" si ce a numit si constructorul
+		# POI-ului D ca diferenta fata de bara.
+		"ground_tint": Color.html("E5D2A0"),
+		# ORA DE AUR: soare JOS din ESE (~110 grade busola, 18 grade elevatie).
+		# Elevatia coboara de la 30 la 18 — asta e ce face ora de aur: unghi mic,
+		# umbre lungi, lumina care intra pe sub coroane in loc sa cada vertical.
+		# AZIMUTUL RAMANE 70 (busola 180 - y = 110): el e verificat de garda de
+		# azimut din generator, care masoara reperele in cadru — nu se schimba
+		# fara sa se reruleze ea (memoria azimutul-soarelui-fata-de-drum).
+		"sun_rotation_deg": Vector3(-18, 70, 0),
+		# Chihlimbar cald, nu alb-cald: hue ~38, cat sa imbrace nisipul si
+		# calcarul fara sa faca totul portocaliu.
+		"sun_color": Color(1.0, 0.89, 0.72),
+		# 1,35 in loc de 1,1: la 18 grade lumina strabate mai multa atmosfera,
+		# deci sursa trebuie mai tare ca scena sa nu iasa intunecata.
+		"sun_energy": 1.35,
+		# Ambient de ora de aur (#D6CBB4 la 0.34): gri-CALD care bate spre
+		# chihlimbar, nu albastru-gri rece. Umbrele raman citibile si colorate
+		# (memoria umbra-fara-culoare-e-negru-mort) — doar ca pe o plaja
+		# tropicala la apus ele sunt calde, nu albastre.
+		"ambient_color": Color.html("D6CBB4"),
+		"ambient_energy": 0.34,
+		# Cer de ora de aur: albastru ceva mai adanc sus (#5E92C8), CHIHLIMBAR
+		# la orizont (#F2DCB4). Gradientul asta e ce deosebeste ora de aur de
+		# amiaza — nu intensitatea soarelui, ci cerul cald jos.
+		"sky_top": Color.html("5E92C8"),
+		"sky_horizon": Color.html("F2DCB4"),
 		# Ceata 120 -> 340: aici e MECANICA DE COMPOZITIE, nu doar atmosfera —
 		# e ce separa turnurile in straturi de adancime pe belvedere (brief §2.0,
 		# memoria scara-de-adancime-are-gol). Reperele stau sub fog_end, iar
@@ -4195,7 +4213,11 @@ static func themes() -> Dictionary:
 		# Ceata se masoara HSV fata de APA, nu fata de ground_tint (memoria
 		# ceata-in-familia-solului, adaptata: pe o pista jumatate-apa, familia
 		# solului e apa). Alb-cald cu nuanta verzuie (#D8DCD4).
-		"fog": Color.html("D8DCD4"),
+		# Ceata CALDA (#E8D9BC): la ora de aur aerul peste apa imprastie lumina
+		# joasa, deci departarea se spala in auriu, nu in gri. Intervalul
+		# 120 -> 340 ramane neatins: el e mecanica de compozitie, verificata de
+		# garzile de mai sus.
+		"fog": Color.html("E8D9BC"),
 		# Okinawa a coborat `fog_sky_affect` ca sa-si arate cerul; Ha Long ramane
 		# pe implicitul 1.0, cerul lui de golf cetos E ceata.
 		"fog_sky_affect": 1.0,
@@ -12301,6 +12323,9 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# ramane implicitul clasei, deci nimic de pe alte piste nu se misca.
 		ball.max_sweep_speed = float(kind.get("sweep_speed",
 			theme_flag("hazard_sweep_speed", SlidingHazard.MAX_SWEEP_SPEED_DEFAULT)))
+		# Cota din sol, nu din linia asfaltului (vacile de pe coama Serengeti,
+		# #503). Doar la cerere — vezi SlidingHazard.follow_ground.
+		ball.follow_ground = bool(kind.get("follow_ground", false))
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
 		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa

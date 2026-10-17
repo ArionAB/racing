@@ -112,6 +112,13 @@ enum Kind {
 ## care traverseaza cu umarul inainte nu traverseaza, pluteste.
 @export var face_travel: bool = false
 
+## Calca pe sol pe toata cursa (teren si sosea), in loc sa ramana la cota
+## asfaltului pana la capatul de parcare. Pe o parte care cade in gol, se
+## opreste la buza. Vezi `SlidingHazard.follow_ground`.
+##
+## Stins implicit: pe apa (jonca de pe Ha Long) „solul" e fundul marii.
+@export var follow_ground: bool = false
+
 ## Se rostogoleste in timp ce traverseaza (raza reala o ia din model).
 ##
 ## Doar bolovanii. Un car cu fan care se da peste cap traversand ulita e exact
@@ -236,6 +243,8 @@ func model_spec() -> Dictionary:
 		spec["scale"] = model_scale
 		spec["roll"] = roll
 		spec["face_travel"] = face_travel
+		if follow_ground:
+			spec["follow_ground"] = true
 		if not model_node.is_empty():
 			spec["model_node"] = model_node
 	if not tri_class.is_empty():

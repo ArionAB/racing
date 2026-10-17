@@ -55,6 +55,38 @@ func _ready() -> void:
 			print("%-8s <-> %-8s  %6.0f px (nevoie %.0f) %s" % [
 				names[i], names[j], d, need, "OK" if ok else "<<< SE ATING"])
 
+	# A TREIA GARDA: GAZUL CARE SE SUBINTELEGE. Toate comenzile de actiune stau
+	# sub acelasi deget mare drept, deci nu pot fi tinute odata cu ^. Daca TURBO
+	# sau DRIFT n-ar implica gaz, ai arde bara stand pe loc, respectiv drift-ul
+	# s-ar stinge singur sub `drift_min_speed`. Se masoara pe `PlayerController`
+	# real, nu pe o copie a regulii.
+	print("")
+	var pc := PlayerController.new()
+	add_child(pc)
+	var throttle_cases := [
+		["doar GAZ", {"gas": true}, 1.0],
+		["doar TURBO", {"turbo": true}, 1.0],
+		["doar DRIFT", {"drift": true}, 1.0],
+		["TURBO+DRIFT", {"turbo": true, "drift": true}, 1.0],
+		["niciun buton", {}, 0.0],
+		["doar viraj", {"steer": 1.0}, 0.0],
+	]
+	for c in throttle_cases:
+		GameState.reset_touch()
+		var st: Dictionary = c[1]
+		GameState.touch_gas = bool(st.get("gas", false))
+		GameState.touch_turbo = bool(st.get("turbo", false))
+		GameState.touch_drift = bool(st.get("drift", false))
+		GameState.touch_steer = float(st.get("steer", 0.0))
+		var got := pc.get_throttle()
+		var want: float = c[2]
+		var ok := is_equal_approx(got, want)
+		if not ok:
+			fail += 1
+		print("%-14s -> gaz %.1f (astept %.1f) %s" % [
+			c[0], got, want, "OK" if ok else "<<< PICA"])
+	GameState.reset_touch()
+
 	print("")
 	print("VERDICT: %s (%d esecuri)" % ["OK" if fail == 0 else "PICA", fail])
 	get_tree().quit(1 if fail > 0 else 0)

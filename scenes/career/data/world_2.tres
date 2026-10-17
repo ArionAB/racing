@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CareerWorld" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/career/career_world.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"world_2"
+display_name = "LUMEA 2"
+tracks = Array[StringName]([&"transfagarasan", &"chongqing", &"machu_picchu", &"okinawa"])
+free = false
+stamps_to_unlock = 6

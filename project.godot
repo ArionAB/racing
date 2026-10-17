@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.7")
 [autoload]
 
 GameState="*res://scripts/autoload/game_state.gd"
+Career="*res://scripts/autoload/career.gd"
 AudioManager="*res://scripts/autoload/audio_manager.gd"
 
 [debug_draw_3d]

@@ -145,6 +145,11 @@ run_step "Garajul: bare, masa si incadrarea vitrinei" garage.log 'probe_garage:'
 run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeCareer.tscn -- --check
 
+# Cariera pasul 4a: provocarea gimmick-ului. Tracker-ul numara doar evenimentele
+# jucatorului (cu contra-probe pe alte masini), datele sabotate dau cate o
+# problema, foaia pistei se activeaza, pistele reale au sursa semnalului.
+run_step "Provocari: tracker-ul numara doar ce trebuie" challenge.log 'VERDICT:' -- 	--headless --path . res://tools/ProbeChallenge.tscn
+
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then
 	echo "VERIFICARE LOCALA: OK (${#PASSED[@]} pasi). Log-uri in $LOGS"

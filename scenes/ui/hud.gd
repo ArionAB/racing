@@ -40,6 +40,7 @@ var _charge_fill_style: StyleBoxFlat
 var _charge_bolt: Label
 var _sealed_label: Label
 var _ghost_label: Label
+var _challenge_label: Label
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -366,6 +367,13 @@ func _build_turbo_bar(root: Control) -> void:
 	_ghost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_ghost_label.visible = false
 	holder.add_child(_ghost_label)
+	# Provocarea gimmick-ului (cariera): in aceeasi zona ca SEALED; cele doua
+	# moduri nu se suprapun (contratimp vs provocare).
+	_challenge_label = _make_label(16)
+	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
+	_challenge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_challenge_label.visible = false
+	holder.add_child(_challenge_label)
 
 	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
 	# marginea intunecata sa ramana vizibila si cand bara e plina.
@@ -743,6 +751,16 @@ func set_ghost_time(ms: int) -> void:
 	_ghost_label.visible = ms > 0
 	if ms > 0:
 		_ghost_label.text = "GHOST %s" % TrackCard._format_ms(ms)
+## Provocarea gimmick-ului: "CHALLENGE: <titlu>", verde pana o pici.
+func set_challenge(title: String) -> void:
+	_challenge_label.text = "CHALLENGE: " + title
+	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
+	_challenge_label.visible = true
+
+
+func set_challenge_failed() -> void:
+	_challenge_label.text = "CHALLENGE FAILED"
+	_challenge_label.modulate = Color(1.0, 0.4, 0.35)
 
 
 func set_turbo(charge: float, boosting: bool) -> void:

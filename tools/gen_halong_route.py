@@ -730,13 +730,27 @@ RAVINES = [
      r3(F_RAFT0 + (F_RAFT1 - F_RAFT0) * 0.72), 30.0, 1),
     # 4 golful pe latura de coasta: de la gura golfului pana inainte de chei.
     (r3(F["G golf E"]), r3(F["G golf V"] + 0.010), 20.0, 1),
+    # 5 APA PE STANGA PONTOANELOR. Un drum de pontoane trebuie sa aiba apa pe
+    # AMANDOUA partile — altfel e un ponton peste o plaja.
+    #
+    # Masurat pe captura POI B (frac 0,10): dreapta e golf la -15,3 m, stanga
+    # e nisip plat la +0,3, pe ~50 m lateral. Cauza: `RAVINES[0]` are latura
+    # `1` (doar dreapta), deci interiorul buclei ramanea uscat.
+    #
+    # Rapa asta e mai INGUSTA (90 m fata de 150) si mai putin adanca (-9 fata
+    # de -15): interiorul buclei e un golf inchis, nu larg deschis, iar o rapa
+    # lata ar manca terenul pe care urca POI D. Se opreste inainte de dig,
+    # unde terenul trebuie sa ramana uscat.
+    (r3(F["A chei"] + 0.012), r3(F["C dig"] - 0.015), 24.0, -1),
 ]
 rav_txt = ", ".join(f"Vector4({a}, {b}, {c}, {d})" for a, b, c, d in RAVINES)
 # Fundul: apa de golf e ADANCA (brief §0.1: verde-jad opac, nu turcoaz de mic
 # adanc). -14 e SEA_NEAR_DEPTH, de la care culoarea e de larg.
-RAV_FLOORS = [(0, -15.0), (1, -14.0), (2, -5.0), (3, -6.0), (4, -14.0)]
+RAV_FLOORS = [(0, -15.0), (1, -14.0), (2, -5.0), (3, -6.0), (4, -14.0),
+              (5, -9.0)]   # golful din interiorul buclei: mai putin adanc
 floors_txt = ", ".join(f"Vector2({i}, {y})" for i, y in RAV_FLOORS)
-RAV_WIDTHS = [(0, 150.0), (1, 120.0), (2, 70.0), (3, 55.0), (4, 130.0)]
+RAV_WIDTHS = [(0, 150.0), (1, 120.0), (2, 70.0), (3, 55.0), (4, 130.0),
+              (5, 90.0)]   # mai ingusta: nu are voie sa manance urcarea POI D
 widths_txt = ", ".join(f"Vector2({i}, {w})" for i, w in RAV_WIDTHS)
 # Apa in rape, la cota marii (0.0). E ACELASI golf, nu bazine separate — si de
 # aceea se declara O SINGURA DATA, pe rapa 0: `_build_ravine_water` umple prin
@@ -745,6 +759,10 @@ widths_txt = ", ".join(f"Vector2({i}, {w})" for i, w in RAV_WIDTHS)
 # libera si iese cu `push_warning` ("rapa N n-are nicio celula sub 0.0") plus o
 # zona de repunere eliberata degeaba. Prima versiune le declarase pe toate cinci
 # si sonda a scos exact patru avertismente.
+# Apa se declara TOT o singura data, pe rapa 0: `_build_ravine_water` umple
+# prin inundare de la buza in jos si tine minte celulele ude, deci o a doua
+# declaratie cu aceeasi cota n-ar mai gasi nimic liber si ar iesi cu
+# `push_warning`. Rapa 5 e la aceeasi cota (0,0), deci inundarea o prinde.
 RAV_WATER = [(0, 0.0, 18.0)]
 rwater_txt = ", ".join(f"Vector3({i}, {y}, {b})" for i, y, b in RAV_WATER)
 
@@ -765,8 +783,10 @@ def add(nm, res, xform, extra=""):
 
 # Turnuri de calcar pe exteriorul buclei, ca FLANC (brief §2.0: < 40 m lateral).
 k = 0
-for ff, lat, sc in ((0.09, 34.0, 2.6), (0.14, 38.0, 3.1), (0.19, 33.0, 2.4),
-                    (0.26, 36.0, 2.8), (0.31, -30.0, 2.2), (0.355, -34.0, 2.9),
+# 0.09/0.14/0.19 (POI B) scoase: la scara 2,4-3,1 erau blocuri de 25-30 m la
+# 33-38 m de ax, ziduri verticale in cadrul camerei; POI B are acum turnuri mici
+# proprii (`TurnB*`, mai jos), ca in bara.
+for ff, lat, sc in ((0.26, 36.0, 2.8), (0.31, -30.0, 2.2), (0.355, -34.0, 2.9),
                     (0.76, 32.0, 2.3), (0.80, 36.0, 2.7), (0.86, 34.0, 2.5),
                     (0.92, 38.0, 3.0), (0.96, 32.0, 2.2)):
     g = at_road(ff, lat)
@@ -827,6 +847,46 @@ for _idx, (_pa, _pb) in enumerate(PONT_SEGS):
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(_pa)) + 90.0, 1.0, _QUAY_SY, 3.9)}, "
         f"{g[0]:.2f}, {g[1] - _top_offset:.2f}, {g[2]:.2f})")
     k += 1
+
+# --- POI B: turnuri mici din apa, cu smoc pe varf si moloz la poale ---------
+# Bara (bara_poi_B.png): turnuri de calcar de 10-18 m care ies DREPT din apa,
+# fiecare cu smoc de verde pe varf (`Tower_Scrub` e deja in GLB) si bolovani la
+# linia apei, tablierul serpuind printre ele. Turnurile `karst_tower_*` (45-65 m)
+# scalate la 0,2-0,34 dau 11-20 m, cu nisa de val la baza (contract kit).
+# DISTANTA PE GABARIT: pontonul are 6 m carosabil (3 m semi-latime), deci
+# lateral = 3 + jumatatea latimii turnului + rezerva, nu o cifra la ochi.
+# Doar pe DREAPTA (spre larg): pe stanga terenul e uscat la cota drumului pe
+# ~50 m (masurat), turnurile ar sta pe nisip.
+_TW_HALF = {"tower_a": 17.5, "tower_b": 16.5, "tower_c": 20.5}
+_TW_BASE_R = {"tower_a": 12.8, "tower_b": 12.0, "tower_c": 14.0}
+_PB0, _PB1 = PONT_SEGS[0][0] - 0.004, PONT_SEGS[-1][1] + 0.004
+_TWB = (  # (u in [0,1], rezerva m, tip, scara)
+    (0.02, 5.0, "tower_a", 0.30), (0.075, 12.0, "tower_c", 0.20),
+    (0.13, 3.5, "tower_b", 0.27), (0.19, 9.0, "tower_a", 0.22),
+    (0.245, 4.0, "tower_c", 0.24), (0.30, 11.0, "tower_b", 0.20),
+    (0.355, 3.0, "tower_a", 0.31), (0.41, 8.0, "tower_c", 0.21),
+    (0.465, 4.5, "tower_b", 0.26), (0.52, 10.0, "tower_a", 0.20),
+    (0.575, 3.5, "tower_c", 0.25), (0.63, 7.0, "tower_a", 0.28),
+    (0.69, 12.0, "tower_b", 0.19), (0.745, 4.0, "tower_c", 0.23),
+    (0.80, 9.0, "tower_a", 0.24), (0.855, 3.0, "tower_b", 0.28),
+    (0.915, 8.0, "tower_a", 0.21), (0.97, 5.0, "tower_c", 0.22),
+)
+for i, (u, gap, kind, sc) in enumerate(_TWB):
+    ff = _PB0 + (_PB1 - _PB0) * u
+    lat = 8.2 + 1.5 * _TW_HALF[kind] * sc + max(gap * 0.5, 2.0)
+    g = at_road(ff, lat)
+    # origine la baza; nisa kitului sta la 3,3 m*sc deasupra ei -> baza sub apa
+    add(f"TurnB{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + i * 67.0, sc, sc, sc)}, "
+        f"{g[0]:.2f}, {0.0 - (3.3 * sc - 0.2):.2f}, {g[2]:.2f})")
+    # moloz la linia apei: 4 bolovani in jurul bazei ("stanca mancata")
+    for q in range(4):
+        a = math.radians(i * 41.0 + q * 91.0)
+        rr = _TW_BASE_R[kind] * sc + 0.6 + 0.5 * (q % 2)
+        bs = 0.55 + 0.35 * ((i + q) % 3)
+        add(f"BolovanB{i:02d}{q}", "boulder",
+            f"Transform3D({rot_y_s(i * 53.0 + q * 71.0, bs, bs, bs)}, "
+            f"{g[0] + math.cos(a) * rr:.2f}, {-0.2:.2f}, {g[2] + math.sin(a) * rr:.2f})")
 
 # --- VALURILE 2 SI 3: satul, barcile, drumul, vegetatia, belvederea ---------
 #
@@ -1218,6 +1278,29 @@ for _a, _b, _dm in _D_LEFT:
         _k = _D_KINDS[(_dl * 3) % 10]
         _veg.append((ff, lat, _k, _dl * 71.0, (1.3 if lat > -13.5 else (2.8 if _k == 'scrub' else _D_SC[_dl % 5]))))
         _dl += 1
+for i in range(34):
+    u = (i + 0.5) / 34.0
+    ff = F["D urcare"] + (F["D creasta"] - F["D urcare"]) * u
+    side = -1.0 if i % 3 != 1 else 1.0
+    # trei randuri: aproape de drum, mijloc, departe. Randul departat e mai
+    # rar, ca silueta sa nu devina un zid verde.
+    rand = i % 3
+    # 12,0 de baza, nu 10,0: ficusii au coroana de ~1,6 m raza, deci la 10
+    # marginea cadea la 6,9-8,0 m de ax.
+    lat = side * (12.0 + rand * 7.5 + 3.0 * ((i * 7) % 4) / 3.0)
+    kind = ("ficus_a", "bamboo", "ficus_b", "bamboo",
+            "ficus_a", "scrub")[i % 6]
+    _veg.append((ff, lat, kind, i * 47.0))
+# tufe pe creasta, in jurul belvederei
+for i in range(14):
+    u = (i + 0.5) / 14.0
+    ff = F["D creasta"] + (F["D varf"] - F["D creasta"]) * u
+    # 11,5 de baza, nu 9,0: la 9,0 fiecare al patrulea exemplar cadea exact
+    # pe pragul de gabarit si coroana ajungea la 6,9 m de ax.
+    # 13,5 de baza (era 11,5): ficusul remodelat are coroana de 4,9 m lata
+    # (era 2,4), deci marginea lui ajungea la 7,5-7,7 m de ax.
+    _veg.append((ff, (-1.0 if i % 2 else 1.0) * (13.5 + 4.0 * (i % 4)),
+                 "scrub" if i % 3 else "ficus_b", i * 61.0))
 # vegetatie si pe coasta de nord, langa parapet (POI G): maimutele stau
 # intr-un loc cu copaci, nu pe un parapet intr-un desert.
 for i in range(12):
@@ -1256,7 +1339,8 @@ for i in range(_n_ev):
     ff = _E0 + (_F_E_VEG_END - _E0) * u
     side = -1.0 if i % 2 == 0 else 1.0
     rand = (i // 2) % 3
-    lat = side * (12.5 + rand * 7.0 + 2.5 * ((i * 5) % 4) / 3.0)
+    # 14,5 de baza (era 12,5): coroana ficusului remodelat are 4,9 m lata.
+    lat = side * (14.5 + rand * 7.0 + 2.5 * ((i * 5) % 4) / 3.0)
     kind = ("ficus_a", "bamboo", "scrub", "ficus_b", "bamboo", "scrub")[i % 6]
     _ev.append((f"VegE{i:02d}", ff, lat, kind, i * 53.0, 1.0))
 # 2) tufe dese pe marginea de cale la ace (un smoc de verde la fiecare cot)
@@ -1264,7 +1348,7 @@ for j, fa in enumerate((F["E ac1b"], F["E ac2b"])):
     for q in range(6):
         ff = fa + (q - 2.5) * 0.0035
         side = 1.0 if q % 2 else -1.0
-        _ev.append((f"VegEAc{j}{q}", ff, side * (11.0 + 2.0 * (q % 3)),
+        _ev.append((f"VegEAc{j}{q}", ff, side * (13.0 + 2.0 * (q % 3)),
                     "scrub" if q % 2 else "ficus_b", q * 71.0 + j * 17.0, 1.0))
 for nm_, ff_, lat_, kind_, yaw_, sc_ in _ev:
     g = at_road(ff_, lat_)
@@ -1461,8 +1545,8 @@ RES = {"rock": "13_rock", "quay": "14_quay",
        "dike": "30_dike", "pavilion": "31_pavilion",
        "ficus_a": "32_ficus_a", "ficus_b": "33_ficus_b",
        "bamboo": "34_bamboo", "scrub": "35_scrub",
-       "tower_a": "36_tower_a", "tower_b": "37_tower_b", "tower_c": "38_tower_c",
-       "boulder": "39_boulder"}
+       "boulder": "36_boulder",
+       "tower_a": "37_tower_a", "tower_b": "38_tower_b", "tower_c": "39_tower_c"}
 
 # --- consola: fractiile care conteaza la pasul urmator -----------------------
 print("\n=== FRACTII (pentru pasii urmatori) ===")
@@ -1575,10 +1659,10 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/karst_ficus_b.glb" id="33_ficus_b"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/bamboo_clump.glb" id="34_bamboo"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/scrub_tuft.glb" id="35_scrub"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_a.glb" id="36_tower_a"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_b.glb" id="37_tower_b"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_c.glb" id="38_tower_c"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/shore_boulder.glb" id="39_boulder"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/shore_boulder.glb" id="36_boulder"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_a.glb" id="37_tower_a"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_b.glb" id="38_tower_b"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_c.glb" id="39_tower_c"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true

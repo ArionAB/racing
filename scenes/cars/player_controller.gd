@@ -30,13 +30,15 @@ func get_throttle() -> float:
 	# TURBO implica gaz: altfel ai arde bara stand pe loc, iar TURBO si ^ nu
 	# pot fi tinute simultan cu acelasi deget mare.
 	#
-	# DRIFT **nu** mai implica gaz (oct 2026, al treilea test pe device). Cat
-	# timp il implica, nu puteai FRANA in drift, deci nu puteai strange o
-	# curba luata prea repede — exact manevra pentru care exista frana de mana.
-	# Acum alegi tu: ^ + DRIFT derapezi accelerand, DRIFT singur intri pe
-	# inertie, v + DRIFT franezi derapand.
 	if GameState.touch_turbo:
 		return 1.0
+	# DRIFT SINGUR e frana de mana adevarata: franeaza si, aproape oprit, da
+	# MARSARIER — exact ca v (decizia dezvoltatorului, oct 2026). Inainte
+	# implica gaz (nu puteai frana in drift), apoi lasa masina pe inertie, si
+	# se simtea ca butonul te impinge inainte. Cu ^ sau TURBO tinute, cele de
+	# mai sus castiga: ^ + DRIFT ramane drift accelerand.
+	if is_drift_pressed():
+		return -1.0
 	return 0.0
 
 func is_drift_pressed() -> bool:

@@ -27,6 +27,14 @@ func _ready() -> void:
 		["gol dreapta-sus", Vector2(s.x * 0.8, s.y * 0.3), ""],
 		["gol mijloc", Vector2(s.x * 0.5, s.y * 0.5), ""],
 		["gol langa sageti", Vector2(s.x * 0.33, s.y - 128.0), ""],
+		# Discul desenat ESTE zona: chiar in interiorul inelului vireaza, chiar
+		# in afara lui nu. Inainte o margine invizibila de 18 px vira si acolo.
+		["STANGA in inel", tc.call("_steer_left_center")
+			+ Vector2(0.0, TouchControls.STEER_RADIUS - 2.0), "left"],
+		["STANGA langa inel", tc.call("_steer_left_center")
+			+ Vector2(0.0, TouchControls.STEER_RADIUS + 2.0), ""],
+		["DREAPTA langa inel", tc.call("_steer_right_center")
+			+ Vector2(0.0, -TouchControls.STEER_RADIUS - 2.0), ""],
 	]
 	var fail := 0
 	for c in cases:
@@ -62,10 +70,45 @@ func _ready() -> void:
 			print("%-8s <-> %-8s  %6.0f px (nevoie %.0f) %s" % [
 				names[i], names[j], d, need, "OK" if ok else "<<< SE ATING"])
 
+	# A PATRA GARDA: GLISAREA. Un deget pus pe display in afara butoanelor nu
+	# are voie sa vireze nici daca aluneca apoi peste ◀ ▶ (palma, degetul
+	# sprijinit). Unul pornit de pe ◀ poate glisa pe ▶ si schimba directia.
+	# Pe evenimente reale prin `_unhandled_input`, nu pe `_zone_at`.
+	print("")
+	var left_c: Vector2 = tc.call("_steer_left_center")
+	var right_c: Vector2 = tc.call("_steer_right_center")
+	var drag_cases := [
+		["gol -> STANGA", Vector2(s.x * 0.5, s.y * 0.5), left_c, 0.0],
+		["STANGA -> DREAPTA", left_c, right_c, 1.0],
+		["STANGA -> gol", left_c, Vector2(s.x * 0.5, s.y * 0.5), 0.0],
+	]
+	for c in drag_cases:
+		var down := InputEventScreenTouch.new()
+		down.index = 0
+		down.position = c[1]
+		down.pressed = true
+		tc.call("_unhandled_input", down)
+		var drag := InputEventScreenDrag.new()
+		drag.index = 0
+		drag.position = c[2]
+		tc.call("_unhandled_input", drag)
+		var got_steer := GameState.touch_steer
+		var want_steer: float = c[3]
+		var ok := is_equal_approx(got_steer, want_steer)
+		if not ok:
+			fail += 1
+		print("%-18s -> viraj %.1f (astept %.1f) %s" % [
+			c[0], got_steer, want_steer, "OK" if ok else "<<< PICA"])
+		var up := InputEventScreenTouch.new()
+		up.index = 0
+		up.position = c[2]
+		up.pressed = false
+		tc.call("_unhandled_input", up)
+
 	# A TREIA GARDA: GAZUL CARE SE SUBINTELEGE. Toate comenzile de actiune stau
-	# sub acelasi deget mare drept, deci nu pot fi tinute odata cu ^. Daca TURBO
-	# sau DRIFT n-ar implica gaz, ai arde bara stand pe loc, respectiv drift-ul
-	# s-ar stinge singur sub `drift_min_speed`. Se masoara pe `PlayerController`
+	# sub acelasi deget mare drept, deci nu pot fi tinute odata cu ^. TURBO
+	# implica gaz, altfel ai arde bara stand pe loc. DRIFT singur e frana de
+	# mana: franeaza si da marsarier, ca v. Se masoara pe `PlayerController`
 	# real, nu pe o copie a regulii.
 	print("")
 	var pc := PlayerController.new()
@@ -73,7 +116,7 @@ func _ready() -> void:
 	var throttle_cases := [
 		["doar GAZ", {"gas": true}, 1.0],
 		["doar TURBO", {"turbo": true}, 1.0],
-		["doar DRIFT", {"drift": true}, 0.0],
+		["doar DRIFT", {"drift": true}, -1.0],
 		["TURBO+DRIFT", {"turbo": true, "drift": true}, 1.0],
 		["GAZ+DRIFT", {"gas": true, "drift": true}, 1.0],
 		["doar FRANA", {"brake": true}, -1.0],

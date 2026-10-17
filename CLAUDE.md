@@ -60,17 +60,18 @@ pur plus haosul fizic, nu proiectilele.
   de deasupra lor ✔ — validat pe iPhone (oct 2026, trei iterații).
   - **Jumătățile de ecran au fost scoase.** Virau mașina la orice atingere pe
     display (deget sprijinit, palmă), și se simțea ca și cum jocul trage de
-    volan singur. Toleranța e marginea de +18 px din jurul discului.
+    volan singur. Zona de viraj e **exact discul desenat** ◀ ▶ (fără margine
+    invizibilă), iar un deget pus în altă parte rămâne mort chiar dacă
+    alunecă peste săgeți.
   - **Auto-accelerate scos** (orice deget = gaz): cu el, butonul ▲ n-ar fi
     făcut nimic. Accelerația e explicită.
   - **▼ e și frână și marșarier**, nu două butoane: în fizică e aceeași
     comandă — `throttle < 0` frânează cât mergi >2 m/s și devine marșarier sub
     `reverse_speed` (vezi `_apply_driving`). Frâna bate gazul dacă ții ambele.
-  - **TURBO implică gaz** (altfel arzi bara stând pe loc), dar **DRIFT nu**:
-    cât timp îl implica, nu puteai frâna în drift, deci nu puteai strânge o
-    curbă luată prea repede — exact manevra pentru care există frâna de mână.
-    Acum alegi: ▲+DRIFT derapezi accelerând, DRIFT singur intri pe inerție,
-    ▼+DRIFT frânezi derapând.
+  - **TURBO implică gaz** (altfel arzi bara stând pe loc), iar **DRIFT singur
+    e frână de mână**: frânează și, aproape oprit, dă marșarier — ca ▼. Cât
+    timp implica gaz, nu puteai frâna în drift; pe inerție se simțea că
+    butonul te împinge înainte. ▲+DRIFT (sau TURBO+DRIFT) derapezi accelerând.
   - Garda `ProbeTouchZones` verifică maparea atingere→comandă (inclusiv că
     zonele goale nu mai dau nimic), că discurile apăsate împreună nu se ating,
     și matricea de accelerație — măsurată pe `PlayerController` real.

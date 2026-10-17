@@ -1402,7 +1402,15 @@ _veg = []
 _D_A, _D_B = 0.362, 0.528
 _D_KINDS = ("ficus_a", "bamboo", "ficus_b", "scrub", "ficus_a", "bamboo",
             "ficus_b", "ficus_a", "scrub", "bamboo")
-_D_ROWS = (13.5, 17.0, 21.0, 26.0, 32.0, 39.0)
+# Primul rand la 15,5 m, nu 13,5. Ficusul REMODELAT are coroana de 4,9 m lata
+# (raza 2,45 la scara 1,0), iar randurile astea ruleaza la scara 1,8-2,6 —
+# deci raza reala e 4,4-6,4 m. La 13,5 marginea ajungea la 7,1-9,1 m de ax,
+# sub pragul de 8,0 al garzii de gabarit (semi-latime 7,0 + un metru de umar).
+# Cifra vine din aritmetica, nu din incercari: 8,0 + 2,45 x 2,6 = 14,4 minim.
+# Randul 1 la 17,5 (nu 15,5): la 15,5 ramaneau 3 piese intre 3,6 si 7,7 m
+# de ax, masurat pe scena integrata. Variatia de +1,5 m din bucla plus
+# scara 1,8-2,6 a ficusului duceau marginea sub prag.
+_D_ROWS = (17.5, 20.5, 24.0, 28.0, 33.0, 39.0)
 # Scara: ficusul de 1,0 era un bat cu o minge pe un platou de nisip. 1,8-2,6x
 # da coroane de 3-4 m care se ating intre ele; tufa merge pana la 3,2x. Gabaritul
 # (coroana ~1,6 m x scara) il masoara SvHalongGabarit, nu aceasta cifra.
@@ -1433,7 +1441,10 @@ for _a, _b, _dm in _D_LEFT:
                 _dl += 1
                 continue
         _k = _D_KINDS[(_dl * 3) % 10]
-        _veg.append((ff, lat, _k, _dl * 71.0, (1.3 if lat > -13.5 else (2.8 if _k == 'scrub' else _D_SC[_dl % 5]))))
+        _veg.append((ff, lat, _k, _dl * 71.0, # scara 1,0 pe randul lipit de drum (era 1,3): la -12,2 m origine,
+        # o coroana de 1,3x (raza 3,2) ajungea la 9,0 m de ax, iar o tufa
+        # la 2,8x si mai aproape. Masurat pe scena integrata.
+        (1.0 if lat > -17.0 else (2.2 if _k == 'scrub' else _D_SC[_dl % 5]))))
         _dl += 1
 for i in range(34):
     u = (i + 0.5) / 34.0
@@ -1442,9 +1453,12 @@ for i in range(34):
     # trei randuri: aproape de drum, mijloc, departe. Randul departat e mai
     # rar, ca silueta sa nu devina un zid verde.
     rand = i % 3
-    # 12,0 de baza, nu 10,0: ficusii au coroana de ~1,6 m raza, deci la 10
-    # marginea cadea la 6,9-8,0 m de ax.
-    lat = side * (12.0 + rand * 7.5 + 3.0 * ((i * 7) % 4) / 3.0)
+    # 14,5 de baza, nu 12,0: ficusul REMODELAT are coroana de 4,9 m lata (era
+    # 2,4), deci la 12,0 marginea cadea la 3,6-7,8 m de ax, sub semi-latimea
+    # de 7,0. Masurat pe scena integrata, unde aceasta bucla (cea veche, de
+    # trei randuri) coexista cu bucla densa adaugata de constructorul POI-ului
+    # D — amandoua emit `Veg*`, deci amandoua trebuie sa respecte gabaritul.
+    lat = side * (14.5 + rand * 7.5 + 3.0 * ((i * 7) % 4) / 3.0)
     kind = ("ficus_a", "bamboo", "ficus_b", "bamboo",
             "ficus_a", "scrub")[i % 6]
     _veg.append((ff, lat, kind, i * 47.0))
@@ -1456,7 +1470,12 @@ for i in range(14):
     # pe pragul de gabarit si coroana ajungea la 6,9 m de ax.
     # 13,5 de baza (era 11,5): ficusul remodelat are coroana de 4,9 m lata
     # (era 2,4), deci marginea lui ajungea la 7,5-7,7 m de ax.
-    _veg.append((ff, (-1.0 if i % 2 else 1.0) * (13.5 + 4.0 * (i % 4)),
+    # 16,5 de baza (era 13,5): coroana remodelata plus scara de creasta
+    # ducea marginea la 3,6-7,7 m de ax.
+    _veg.append((ff, (-1.0 if i % 2 else 1.0) * (19.0 + 4.0 * (i % 4)),
+                 # ficusul de creasta pe scara 1,0 (implicit): la scari mai
+                 # mari coroana de 4,9 m ajunge peste gabarit de la 16,5 m
+                 # origine. Tufele raman mici oricum.
                  "scrub" if i % 3 else "ficus_b", i * 61.0))
 # vegetatie si pe coasta de nord, langa parapet (POI G): maimutele stau
 # intr-un loc cu copaci, nu pe un parapet intr-un desert.
@@ -1473,11 +1492,25 @@ if os.environ.get("HL_GRID"):
         _ff = 0.36 + 0.17 * _si / 47.0
         for _la in range(-40, 49, 4):
             _veg.append((_ff, float(_la), "scrub", 0.0))
-for i, _t in enumerate(_veg):
+# NUMELE VIN DIN POZITIE, NU DIN ORDINE.
+#
+# Prima versiune folosea `enumerate(_veg)`, deci `Veg57` insemna "a 58-a piesa
+# din lista". Cand mecanismul de scoatere elimina un copac de pe apa, TOATE
+# piesele de dupa el se renumerotau — asa ca la urmatoarea rulare tabelul de
+# cote se aplica altor piese, iar defectul reaparea sub alt nume. Bucla
+# masoara-si-aplica OSCILA la nesfarsit intre 3 si 20 de piese pe apa, fara sa
+# convearga niciodata.
+#
+# Cu numele derivat din fractie si lateral (in decimetri), identitatea unei
+# piese nu mai depinde de cate piese au fost scoase inaintea ei. `Veg_0421_m152`
+# ramane acelasi nod intre rulari, deci tabelul de cote se aplica unde trebuie.
+for _t in _veg:
     ff, lat, kind, yaw = _t[:4]
     _sc = _t[4] if len(_t) > 4 else 1.0
     g = at_road(ff, lat)
-    add(f"Veg{i:02d}", kind,
+    _sgn = "m" if lat < 0 else "p"
+    _nm = "Veg_%04d_%s%03d" % (round((ff % 1.0) * 10000), _sgn, round(abs(lat) * 10))
+    add(_nm, kind,
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, _sc, _sc, _sc)}, "
         f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
 
@@ -1506,7 +1539,7 @@ for j, fa in enumerate((F["E ac1b"], F["E ac2b"])):
     for q in range(6):
         ff = fa + (q - 2.5) * 0.0035
         side = 1.0 if q % 2 else -1.0
-        _ev.append((f"VegEAc{j}{q}", ff, side * (13.0 + 2.0 * (q % 3)),
+        _ev.append((f"VegEAc{j}{q}", ff, side * (15.5 + 2.0 * (q % 3)),
                     "scrub" if q % 2 else "ficus_b", q * 71.0 + j * 17.0, 1.0))
 for nm_, ff_, lat_, kind_, yaw_, sc_ in _ev:
     g = at_road(ff_, lat_)
@@ -1645,6 +1678,33 @@ if os.path.isfile(_cote_path):
             if len(_parts) == 3 and _parts[0] == "COTA":
                 COTE_TEREN[_parts[1]] = float(_parts[2])
 
+# TABELUL E CUMULATIV, si trebuie sa fie.
+#
+# Sonda masoara doar ce e IN SCENA. Odata ce un copac de pe apa a fost scos, el
+# nu mai apare in masuratoarea urmatoare — deci intrarea lui dispare din tabel,
+# generatorul nu mai stie ca pozitia aia e in golf, si piesa REVINE. Bucla
+# masoara-si-aplica oscila la nesfarsit (0 -> 23 -> 0 plutind), fara sa
+# convearga.
+#
+# Fisierul se rescrie la fiecare rulare din ce vede sonda, deci memoria
+# pozitiilor rele trebuie tinuta separat. `halong_veg_apa.txt` e lista de
+# nume care au fost MACAR O DATA peste apa; ea doar creste.
+_apa_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         "halong_veg_apa.txt")
+VEG_PE_APA = set()
+if os.path.isfile(_apa_path):
+    with open(_apa_path, encoding="utf-8") as _fh:
+        VEG_PE_APA = {ln.strip() for ln in _fh if ln.strip()}
+_noi = {n for n, gy in COTE_TEREN.items()
+        if n.startswith("Veg") and gy < 0.05}
+if _noi - VEG_PE_APA:
+    VEG_PE_APA |= _noi
+    with open(_apa_path, "w", encoding="utf-8", newline="
+") as _fh:
+        for _n in sorted(VEG_PE_APA):
+            _fh.write(_n + "
+")
+
 # VEGETATIA DE PESTE APA SE SCOATE, nu se coboara.
 #
 # Un copac nu e ancorat de linia apei — daca terenul sub el e sub cota marii,
@@ -1669,8 +1729,8 @@ if COTE_TEREN:
         if not _nm.startswith("Veg"):
             continue
         _gy = COTE_TEREN.get(_nm)
-        if _gy is not None and _gy < _VEG_MIN_GROUND:
-            _scoase.append((_nm, _gy))
+        if _nm in VEG_PE_APA or (_gy is not None and _gy < _VEG_MIN_GROUND):
+            _scoase.append((_nm, _gy if _gy is not None else -99.0))
     if _scoase:
         _rele = {n for n, _ in _scoase}
         dec[:] = [d for d in dec if d[0] not in _rele]

@@ -203,9 +203,9 @@ func _in_zone() -> bool:
 	if _zone_node == null:
 		return false
 	# CameraZone are intindere pe fractie (Cappadocia: StancaSpirala) SAU cutie;
-	# `_player_inside` le stie pe amandoua, deci nu dublam logica.
+	# `contains_player` le stie pe amandoua, deci nu dublam logica.
 	if _zone_node is CameraZone:
-		return (_zone_node as CameraZone)._player_inside()
+		return (_zone_node as CameraZone).contains_player()
 	if _zone_node is Area3D:
 		return (_zone_node as Area3D).overlaps_body(player)
 	return false

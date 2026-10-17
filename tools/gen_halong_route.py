@@ -1053,6 +1053,61 @@ for i, (ff, lat, kind, yaw) in enumerate(_veg):
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
         f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
 
+# --- POI E: coborarea in doua ace de par + plaja (0,53 -> 0,74) ------------
+# Construit ca UNITATE (gauntlet): versant imbracat pe ambele randuri, stanci
+# in petice la acele de par, plaja cu bolovani si barci trase la mal. Toate
+# fractiile vin din F[...]; cotele de sol le masoara SvHalongCote.
+_F_E_VEG_END = F['E plaja'] - 0.015
+_E0, _E1 = F["D varf"] + 0.006, F["E iesire"] + 0.004
+_E_PLAJA = F["E plaja"]
+_ev = []
+# 1) versantul: 3 randuri de departare, ambele laturi, pana la plaja.
+_n_ev = 40
+for i in range(_n_ev):
+    u = (i + 0.5) / _n_ev
+    ff = _E0 + (_F_E_VEG_END - _E0) * u
+    side = -1.0 if i % 2 == 0 else 1.0
+    rand = (i // 2) % 3
+    lat = side * (12.5 + rand * 7.0 + 2.5 * ((i * 5) % 4) / 3.0)
+    kind = ("ficus_a", "bamboo", "scrub", "ficus_b", "bamboo", "scrub")[i % 6]
+    _ev.append((f"VegE{i:02d}", ff, lat, kind, i * 53.0, 1.0))
+# 2) tufe dese pe marginea de cale la ace (un smoc de verde la fiecare cot)
+for j, fa in enumerate((F["E ac1b"], F["E ac2b"])):
+    for q in range(6):
+        ff = fa + (q - 2.5) * 0.0035
+        side = 1.0 if q % 2 else -1.0
+        _ev.append((f"VegEAc{j}{q}", ff, side * (11.0 + 2.0 * (q % 3)),
+                    "scrub" if q % 2 else "ficus_b", q * 71.0 + j * 17.0, 1.0))
+for nm_, ff_, lat_, kind_, yaw_, sc_ in _ev:
+    g = at_road(ff_, lat_)
+    add(nm_, kind_,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff_)) + yaw_, sc_, sc_, sc_)}, "
+        f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
+# 3) stanci in petice (bolovani) pe versant, la ace si pe plaja
+for i, (ff, lat, sc) in enumerate((
+        (F["E ac1a"] - 0.006, 15.0, 1.3), (F["E ac1a"] + 0.010, -16.0, 1.6),
+        (F["E ac1b"] + 0.006, 17.0, 1.4), (F["E ac2a"] - 0.008, -15.0, 1.5),
+        (F["E ac2a"] + 0.008, 16.0, 1.2), (F["E ac2b"] + 0.007, -17.0, 1.6),
+        (_E_PLAJA - 0.020, 14.0, 1.3), (_E_PLAJA - 0.012, -15.0, 1.5),
+        (_E_PLAJA - 0.004, 16.0, 1.8), (_E_PLAJA + 0.004, -14.5, 1.4),
+        (_E_PLAJA + 0.012, 15.0, 1.6), (_E_PLAJA + 0.020, -16.0, 1.3),
+        (_E_PLAJA + 0.028, 15.5, 1.7))):
+    g = at_road(ff, lat)
+    add(f"BolovanE{i:02d}", "boulder",
+        f"Transform3D({rot_y_s(i * 61.0, sc, sc, sc)}, {g[0]:.2f}, {g[1] - 0.10:.2f}, {g[2]:.2f})")
+# 4) plaja: barci trase la mal, rastel de plase, ficusi la marginea nisipului
+for i, (ff, lat, kind, yaw) in enumerate((
+        (_E_PLAJA - 0.008, 19.0, "sampan", 80.0), (_E_PLAJA + 0.002, 21.0, "basket", 0.0),
+        (_E_PLAJA + 0.014, 20.0, "sampan", 100.0), (_E_PLAJA + 0.022, 19.5, "basket", 0.0))):
+    g = at_road(ff, lat)
+    add(f"BarcaPlajaE{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})")
+g = at_road(_E_PLAJA + 0.008, 13.0)
+add("RastelPlajaE00", "rack",
+    f"Transform3D({rot_y_s(yaw_z_to(*travel_g(_E_PLAJA + 0.008)) + 90.0, 1.0, 1.0, 1.0)}, "
+    f"{g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})")
+
 # --- COTELE DE PE USCAT, MASURATE PE TERENUL REAL ---------------------------
 #
 # Generatorul stie doar DRUMUL: `at_road(f, lat)` da cota soselei. Pe apa e
@@ -1086,6 +1141,41 @@ if os.path.isfile(_cote_path):
             if len(_parts) == 3 and _parts[0] == "COTA":
                 COTE_TEREN[_parts[1]] = float(_parts[2])
 
+# VEGETATIA DE PESTE APA SE SCOATE, nu se coboara.
+#
+# Un copac nu e ancorat de linia apei — daca terenul sub el e sub cota marii,
+# piesa trebuie sa DISPARA, nu sa primeasca o cota. Masurat pe scena
+# integrata: 20 de `Veg*` din POI D stateau peste apa, unele la -11 m, cu
+# trunchiul intrand drept in mare. Se vede in videoul de pe telefon, iar garda
+# veche le sarea (linia `if gy < sea_y - 1.0: continue` presupunea ca orice
+# piesa de peste apa adanca e o barca).
+#
+# Randurile exterioare ale versantului (rand 1 si 2) ajung la 27 m lateral; pe
+# o pista jumatate pe apa, atat trece de mal in golf. Nu se ingusteaza randul
+# (s-ar rari versantul exact unde bara cere sa fie imbracat) — se scot doar
+# pozitiile care cad in apa, iar restul raman.
+#
+# Cota marii in lume e 0,00 (`SEA_OFFSET` e calculat ca sa iasa asa, vezi
+# garda de apa de mai sus), deci pragul e 0,05 m peste ea.
+_SEA_LEVEL_WORLD = 0.0
+_VEG_MIN_GROUND = _SEA_LEVEL_WORLD + 0.05
+if COTE_TEREN:
+    _scoase = []
+    for _nm, _res, _xf, _extra in list(dec):
+        if not _nm.startswith("Veg"):
+            continue
+        _gy = COTE_TEREN.get(_nm)
+        if _gy is not None and _gy < _VEG_MIN_GROUND:
+            _scoase.append((_nm, _gy))
+    if _scoase:
+        _rele = {n for n, _ in _scoase}
+        dec[:] = [d for d in dec if d[0] not in _rele]
+        print("\nvegetatie scoasa de pe apa: %d piese" % len(_scoase))
+        for _n, _g in _scoase[:6]:
+            print("   %-10s teren %+6.2f" % (_n, _g))
+        if len(_scoase) > 6:
+            print("   ... si inca %d" % (len(_scoase) - 6))
+
 if COTE_TEREN:
     _fixed = 0
     for _i, (_nm, _res, _xf, _extra) in enumerate(dec):
@@ -1108,7 +1198,8 @@ RES = {"rock": "13_rock", "quay": "14_quay",
        "parapet": "29_parapet",
        "dike": "30_dike", "pavilion": "31_pavilion",
        "ficus_a": "32_ficus_a", "ficus_b": "33_ficus_b",
-       "bamboo": "34_bamboo", "scrub": "35_scrub"}
+       "bamboo": "34_bamboo", "scrub": "35_scrub",
+       "boulder": "36_boulder"}
 
 # --- consola: fractiile care conteaza la pasul urmator -----------------------
 print("\n=== FRACTII (pentru pasii urmatori) ===")
@@ -1221,6 +1312,7 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/karst_ficus_b.glb" id="33_ficus_b"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/bamboo_clump.glb" id="34_bamboo"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/scrub_tuft.glb" id="35_scrub"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/shore_boulder.glb" id="36_boulder"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true

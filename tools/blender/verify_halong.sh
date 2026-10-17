@@ -150,8 +150,10 @@ echo "== vegetatie =="
 # `scrub_tuft` rtamane pe --origin=base: tufa e UN nod (miez + frunze impreuna,
 # la 0,8 m nu merita spart), deci regula per-nod i se aplica si trebuie sa stea
 # pe sol.
-check "plants/karst_ficus_a.glb"             400 --origin=assembly
-check "plants/karst_ficus_b.glb"             400 --origin=assembly
+# 500, nu 400: coroana remodelata (lata si joasa, dupa verdictul la volan)
+# costa mai mult decat una ingusta pe trunchi lung.
+check "plants/karst_ficus_a.glb"             500 --origin=assembly
+check "plants/karst_ficus_b.glb"             500 --origin=assembly
 check "plants/bamboo_clump.glb"              300 --origin=assembly
 check "plants/scrub_tuft.glb"                120
 

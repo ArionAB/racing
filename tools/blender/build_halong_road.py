@@ -70,7 +70,13 @@ clear_built()
 
 # --- sloturile pe roluri (halong_kit.md §0.4) --------------------------------
 HL_ROCK = MARBLE_GREY         # 29: calcar in soare, piatra cioplita, dig
-HL_ROCK_DARK = ROCK_LIGHT     # 3: calcar in umbra, interiorul grotei
+# SLOTUL 3 E PORTOCALIU, nu calcar in umbra. In atlas e **#CE8D4A,
+# saturatie 0,64** — stanca de desert. Folosit pentru rosturile parapetului si
+# stalactite, iesea ca dungi de RUGINA pe piatra cenusie (vizibil pe captura
+# POI C). Aceeasi capcana ca la corpul turnurilor, care fusese deja mutat pe
+# 29: numele "ROCK_LIGHT" suna a calcar palid si nu e.
+# SAND_SHADOW 2 = nisip in umbra, gri-cald inchis: piatra in umbra, nu rugina.
+HL_ROCK_DARK = SAND_SHADOW    # 2: calcar in umbra, rosturi, interiorul grotei
 HL_SCRUB = TROPICAL_GREEN     # 21: vegetatie de carst
 HL_LEAF_DARK = LOG_DARK       # 28: umbra adanca de frunzis, lemn inchis
 HL_WOOD = WOOD                # 9: barne, lemnul pavilionului

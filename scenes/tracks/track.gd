@@ -3958,6 +3958,22 @@ static func themes() -> Dictionary:
 		# (brief §2.0), iar ceata implicita (90 -> 250) il inghite.
 		"fog_begin": 140.0,
 		"fog_end": 350.0,
+		# LUMINA DE INSULA INSORITA. Mostenite de la "island", patru lucruri
+		# faceau cadrul sa citeasca a zi innorata, nu a dupa-amiaza tropicala:
+		# - `fog_sky_affect` implicit 1.0: ceata de adancime vede cerul la
+		#   infinit, deci albastrul temei nu ajungea NICIODATA pe ecran — toata
+		#   fasia de sus era culoarea cetii, alb-palid. La 0.35 cerul ramane cer.
+		# - ceata palida (0.82, 0.91, 0.93): departarea se spala spre alb in loc
+		#   sa se raceasca spre albastru (memoria ceata-in-familia-solului).
+		# - soare aproape alb + ambient bej: fata luminata si cea din umbra aveau
+		#   aceeasi nuanta, doar alta luminozitate. Cald in lumina, rece in umbra
+		#   e contrastul care citeste "soare". Ambientul ramane CULOARE, nu cer
+		#   (memoria ambient-din-cer-respins-masurat), doar mai rece.
+		"fog_sky_affect": 0.2,
+		"sky_top": Color(0.12, 0.36, 0.80),
+		"sky_horizon": Color(0.42, 0.64, 0.90),
+		"fog": Color(0.66, 0.80, 0.93),
+		"sun_color": Color(1.0, 0.90, 0.74),
 		# FUNDALUL (brief §2.0): insula Ie (conul Gusukuyama) pe inelul de NV si
 		# insulele Kerama pe inelul de V/S, din `okinawa_horizon.glb` (noduri copii
 		# directe ale radacinii: IeIsland_A, Kerama_A/B/C). Inelele stau intre 200 si
@@ -4180,6 +4196,9 @@ static func themes() -> Dictionary:
 		# ceata-in-familia-solului, adaptata: pe o pista jumatate-apa, familia
 		# solului e apa). Alb-cald cu nuanta verzuie (#D8DCD4).
 		"fog": Color.html("D8DCD4"),
+		# Okinawa a coborat `fog_sky_affect` ca sa-si arate cerul; Ha Long ramane
+		# pe implicitul 1.0, cerul lui de golf cetos E ceata.
+		"fog_sky_affect": 1.0,
 		# Fundalul: `halong_horizon.glb`, kit propriu (brief §1.9). Inelul si
 		# modelul lui Okinawa raman GOLITE in sensul ca nu se mostenesc —
 		# altfel ar aparea insula Ie si Kerama in golful vietnamez.

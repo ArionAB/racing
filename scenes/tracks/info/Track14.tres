@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_info")
+id = &"serengeti"
 display_name = "Serengeti"
 region = "TANZANIA"
 accent = Color(0.74, 0.62, 0.26, 1)

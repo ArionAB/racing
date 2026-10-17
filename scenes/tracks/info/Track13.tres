@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_info")
+id = &"cappadocia"
 display_name = "Cappadocia"
 region = "TURKEY"
 accent = Color(0.82, 0.52, 0.34, 1)

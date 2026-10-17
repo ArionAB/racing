@@ -145,6 +145,11 @@ run_step "Serengeti: traversarile calca pe sol, cu fata inainte" hazard_ground.l
 	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=7
 run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log 'VERDICT:|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeAnimalOverlap.tscn -- --track=7 --no-batch
+# Cariera pasul 1: config validat (cu sabotaj), persistenta pe pista, stampile
+# calculate si gating-ul lumilor, versiune necunoscuta lasata neatinsa,
+# regruparea fara pierderi, raftul numarat in scena si lacatul cursei.
+run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
+	--headless --path . res://tools/ProbeCareer.tscn -- --check
 
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then

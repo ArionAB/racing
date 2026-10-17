@@ -17,10 +17,16 @@ func _ready() -> void:
 		["sageata STANGA", tc.call("_steer_left_center"), "left"],
 		["sageata DREAPTA", tc.call("_steer_right_center"), "right"],
 		["GAZ", tc.call("_gas_center"), "gas"],
+		["FRANA", tc.call("_brake_center"), "brake"],
 		["TURBO", tc.call("_turbo_center"), "turbo"],
 		["DRIFT", tc.call("_drift_center"), "drift"],
-		["gol stanga-sus", Vector2(s.x * 0.2, s.y * 0.3), "left"],
-		["gol dreapta-sus", Vector2(s.x * 0.8, s.y * 0.3), "right"],
+		# Jumatatile de ecran au fost SCOASE: o atingere in afara butoanelor nu
+		# mai face nimic. Inainte astea doua raspundeau "left"/"right" si virau
+		# masina cand sprijineai degetul pe display.
+		["gol stanga-sus", Vector2(s.x * 0.2, s.y * 0.3), ""],
+		["gol dreapta-sus", Vector2(s.x * 0.8, s.y * 0.3), ""],
+		["gol mijloc", Vector2(s.x * 0.5, s.y * 0.5), ""],
+		["gol langa sageti", Vector2(s.x * 0.33, s.y - 128.0), ""],
 	]
 	var fail := 0
 	for c in cases:
@@ -39,6 +45,7 @@ func _ready() -> void:
 		"gaz": [tc.call("_gas_center"), TouchControls.GAS_RADIUS],
 		"turbo": [tc.call("_turbo_center"), TouchControls.BUTTON_RADIUS],
 		"drift": [tc.call("_drift_center"), TouchControls.BUTTON_RADIUS * 0.9],
+		"frana": [tc.call("_brake_center"), TouchControls.BRAKE_RADIUS],
 		"stanga": [tc.call("_steer_left_center"), TouchControls.STEER_RADIUS],
 		"dreapta": [tc.call("_steer_right_center"), TouchControls.STEER_RADIUS],
 	}
@@ -66,8 +73,12 @@ func _ready() -> void:
 	var throttle_cases := [
 		["doar GAZ", {"gas": true}, 1.0],
 		["doar TURBO", {"turbo": true}, 1.0],
-		["doar DRIFT", {"drift": true}, 1.0],
+		["doar DRIFT", {"drift": true}, 0.0],
 		["TURBO+DRIFT", {"turbo": true, "drift": true}, 1.0],
+		["GAZ+DRIFT", {"gas": true, "drift": true}, 1.0],
+		["doar FRANA", {"brake": true}, -1.0],
+		["FRANA+DRIFT", {"brake": true, "drift": true}, -1.0],
+		["FRANA+GAZ", {"brake": true, "gas": true}, -1.0],
 		["niciun buton", {}, 0.0],
 		["doar viraj", {"steer": 1.0}, 0.0],
 	]
@@ -77,6 +88,7 @@ func _ready() -> void:
 		GameState.touch_gas = bool(st.get("gas", false))
 		GameState.touch_turbo = bool(st.get("turbo", false))
 		GameState.touch_drift = bool(st.get("drift", false))
+		GameState.touch_brake = bool(st.get("brake", false))
 		GameState.touch_steer = float(st.get("steer", 0.0))
 		var got := pc.get_throttle()
 		var want: float = c[2]

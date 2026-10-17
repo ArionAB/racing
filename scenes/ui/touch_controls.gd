@@ -42,9 +42,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		queue_redraw()
 	elif event is InputEventScreenDrag:
 		var drag := event as InputEventScreenDrag
-		if _touches.get(drag.index, "") in ["left", "right"]:
+		# Degetul care gliseaza intre sageti schimba directia; daca iese de pe
+		# ele, virajul se OPRESTE (zona goala). Inainte zona goala insemna
+		# jumatatea de ecran, deci nu se oprea niciodata.
+		if _touches.get(drag.index, "") in ["left", "right", ""]:
 			var zone := _zone_at(drag.position)
-			if zone in ["left", "right"]:
+			if zone in ["left", "right", ""]:
 				_touches[drag.index] = zone
 				_refresh()
 				queue_redraw()
@@ -61,6 +64,8 @@ func _zone_at(pos: Vector2) -> String:
 	# gazului la mijlocul unei drepte se simte ca joc stricat.
 	if pos.distance_to(_gas_center()) < GAS_RADIUS + 14.0:
 		return "gas"
+	if pos.distance_to(_brake_center()) < BRAKE_RADIUS + 14.0:
+		return "brake"
 	var d_turbo := pos.distance_to(_turbo_center())
 	var d_drift := pos.distance_to(_drift_center())
 	var in_turbo := d_turbo < BUTTON_RADIUS + 14.0
@@ -71,11 +76,11 @@ func _zone_at(pos: Vector2) -> String:
 		return "turbo"
 	if in_drift:
 		return "drift"
-	# BUTOANELE DE VIRAJ BAT jumatatile de ecran. Amandoua sunt desenate in
-	# stanga (x ≈ 118 si 262), deci cu regula „x < jumatate => stanga" apasarea
-	# pe sageata DREAPTA vira tot la stanga — butonul aratat jucatorului facea
-	# exact pe dos. Zona ramane jumatatea de ecran pentru degetul care cade
-	# alaturi, dar ce e desenat are ultimul cuvant.
+	# DOAR butoanele vireaza. Jumatatile de ecran au fost SCOASE (oct 2026,
+	# dupa al treilea test pe device): o atingere oriunde pe display — degetul
+	# sprijinit, palma, un tap langa buton — vira masina fara sa vrei, si asta
+	# se simtea ca si cum jocul trage de volan singur. Marginea generoasa din
+	# jurul discului (+18 px) ramane toata toleranta de care e nevoie.
 	var d_left := pos.distance_to(_steer_left_center())
 	var d_right := pos.distance_to(_steer_right_center())
 	var in_left := d_left < STEER_RADIUS + 18.0
@@ -86,13 +91,16 @@ func _zone_at(pos: Vector2) -> String:
 		return "left"
 	if in_right:
 		return "right"
-	return "left" if pos.x < size.x * 0.5 else "right"
+	# In afara oricarui buton: NICIO comanda. Degetul pe display nu mai face
+	# nimic — nici viraj, nici gaz.
+	return ""
 
 func _refresh() -> void:
 	var steer := 0.0
 	var drift := false
 	var turbo := false
 	var gas := false
+	var brake := false
 	for zone in _touches.values():
 		match zone:
 			"left":
@@ -105,10 +113,13 @@ func _refresh() -> void:
 				turbo = true
 			"gas":
 				gas = true
+			"brake":
+				brake = true
 	GameState.touch_steer = clampf(steer, -1.0, 1.0)
 	GameState.touch_drift = drift
 	GameState.touch_turbo = turbo
 	GameState.touch_gas = gas
+	GameState.touch_brake = brake
 	GameState.touch_active = not _touches.is_empty()
 
 ## TURBO si DRIFT stau amandoua sub degetul drept — „actionez" intr-o mana,
@@ -135,6 +146,16 @@ const GAS_RADIUS: float = 88.0
 
 func _gas_center() -> Vector2:
 	return Vector2(size.x - 128.0, size.y - 118.0)
+
+## FRANA / MARSARIERUL, la stanga gazului. Aceeasi comanda in fizica: cat timp
+## mergi inainte peste 2 m/s franeaza, sub atat devine marsarier singur (vezi
+## `_apply_driving` din car.gd) — deci NU e nevoie de doua butoane. Gazul si
+## frana se apasa alternativ, niciodata odata, deci pot sta lipite.
+## Mai mic decat gazul: il folosesti pe secunde, nu pe minute.
+const BRAKE_RADIUS: float = 68.0
+
+func _brake_center() -> Vector2:
+	return Vector2(size.x - 298.0, size.y - 108.0)
 
 func _steer_left_center() -> Vector2:
 	return Vector2(118.0, size.y - 128.0)
@@ -218,6 +239,22 @@ func _draw_gas_arrow(center: Vector2, active: bool) -> void:
 	draw_colored_polygon(pts, Color(1, 1, 1, 0.97 if active else 0.82))
 
 
+## Sageata franei: acelasi triunghi, intors in jos si putin mai mic (butonul
+## e mai mic). `scale` tine cele doua forme legate — daca una se schimba, se
+## schimba amandoua, si raman o pereche vizibila.
+func _draw_brake_arrow(center: Vector2, active: bool) -> void:
+	var w := 30.0 * 0.78
+	var h := 26.0 * 0.78
+	var pts := PackedVector2Array([
+		center + Vector2(0.0, h),
+		center + Vector2(w, -h * 0.72),
+		center + Vector2(w * 0.72, -h),
+		center + Vector2(-w * 0.72, -h),
+		center + Vector2(-w, -h * 0.72),
+	])
+	draw_colored_polygon(pts, Color(1, 1, 1, 0.97 if active else 0.82))
+
+
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var zones: Array = _touches.values()
@@ -231,6 +268,14 @@ func _draw() -> void:
 	var go := Color(0.45, 0.92, 0.45)
 	_draw_round_button(_gas_center(), GAS_RADIUS, gas_active, go)
 	_draw_gas_arrow(_gas_center(), gas_active)
+
+	# FRANA / MARSARIERUL, la stanga gazului. Rosu-caramiziu: perechea lui
+	# verde, aceeasi conventie ca semaforul. Nu „STOP" aprins, ca sa nu para
+	# avertisment — e o comanda normala, folosita in fiecare viraj strans.
+	var brake_active: bool = zones.has("brake")
+	var stop := Color(0.95, 0.42, 0.38)
+	_draw_round_button(_brake_center(), BRAKE_RADIUS, brake_active, stop)
+	_draw_brake_arrow(_brake_center(), brake_active)
 
 	# TURBO: portocaliu, cu flacara. Cel mai mare buton de pe ecran — e si
 	# actiunea cea mai frecventa, si singura cu consecinta imediata la viteza.

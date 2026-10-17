@@ -253,7 +253,9 @@ func _spawn_cars() -> void:
 		if i == 0:
 			player = car
 			car.is_player = true
-			car.apply_data(GameState.CAR_DATA[GameState.selected_car] as CarData)
+			# Masina SI soferul vin din garaj, ca doua alegeri separate.
+			car.apply_data(GameState.CAR_DATA[GameState.selected_car] as CarData,
+				Car.NO_COLOR, GameState.selected_driver_model())
 			car.set_controller(PlayerController.new())
 		else:
 			# Sondele pot inlocui lineup-ul (`GameState.ai_cars_override`), ca
@@ -660,6 +662,9 @@ func _on_player_lap(laps: int) -> void:
 	if laps >= GameState.total_laps and state != State.FINISHED:
 		_finish_race()
 
+## Medalia cursei de cariera curente (-1 = nu e cursa de cariera).
+var _career_medal: int = -1
+
 func _finish_race() -> void:
 	state = State.FINISHED
 	_player_race_ms = _clock_ms()
@@ -672,6 +677,11 @@ func _finish_race() -> void:
 	order.sort_custom(func(a: int, b: int) -> bool:
 		return cars[a].race_position < cars[b].race_position)
 	_final_order = order
+	# Cursa de cariera: medalia vine din pozitia jucatorului (1/2/3 = aur/
+	# argint/bronz), salvata imediat, nu la apasarea unui buton.
+	_career_medal = -1
+	if Career.active:
+		_career_medal = Career.finish_active(player.race_position)
 	if GameState.champ_active:
 		GameState.record_results(_final_order)
 	if _race_record_new:
@@ -706,6 +716,9 @@ func _show_results() -> void:
 		})
 	var title := "RESULTS — " + _track_title()
 	var primary := "RESTART"
+	if Career.active:
+		title += "\n" + _career_medal_text(_career_medal)
+		primary = "BACK TO CAREER"
 	if GameState.champ_active:
 		title = "RACE %d/%d — %s" % [GameState.champ_round + 1,
 			GameState.CHAMP_ROUNDS, _track_title()]
@@ -713,7 +726,19 @@ func _show_results() -> void:
 			else "NEXT RACE"
 	hud.show_results(title, rows, primary)
 
+func _career_medal_text(medal: int) -> String:
+	match medal:
+		Career.MEDAL_GOLD: return "GOLD"
+		Career.MEDAL_SILVER: return "SILVER"
+		Career.MEDAL_BRONZE: return "BRONZE"
+	return "NO MEDAL — finish top 3"
+
 func _on_results_primary() -> void:
+	if Career.active:
+		Career.leave()
+		GameState.menu_open_panel = &"career"
+		GameState.go_to_menu()
+		return
 	if not GameState.champ_active:
 		GameState.start_race()
 		return
@@ -777,7 +802,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_6: _swap_player_car(5)
 
 func _swap_player_car(index: int) -> void:
-	player.apply_data(GameState.CAR_DATA[index] as CarData)
+	player.apply_data(GameState.CAR_DATA[index] as CarData,
+		Car.NO_COLOR, GameState.selected_driver_model())
 	_fit_camera_to_player()
 
 ## Camera se retrage proportional cu lungimea vehiculului (autobuzul ar

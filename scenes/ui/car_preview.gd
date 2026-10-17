@@ -238,7 +238,9 @@ func _build_podium(world: Node3D) -> void:
 
 ## Asaza o masina in vitrina. Se poate chema oricat de des — modelul vechi se
 ## arunca intai, deci schimbarea rapida din strip nu lasa masini stivuite.
-func show_car(data: CarData) -> void:
+## `driver`: skinul ales in garaj (GameState.DRIVER_DATA), separat de masina;
+## null = figurina din .tres, exact ce primeste AI-ul.
+func show_car(data: CarData, driver: PackedScene = null) -> void:
 	if _model_root != null:
 		_model_root.queue_free()
 		_model_root = null
@@ -258,8 +260,9 @@ func show_car(data: CarData) -> void:
 		# atlas + AO din vertex colors, FBX-urile RgsDev isi pastreaza ale lor.
 		if data.palette_model:
 			Palette.apply_world_material(model)
-		if data.open_cockpit and data.driver_model != null:
-			_seat_driver(data)
+		var figure_scene := driver if driver != null else data.driver_model
+		if data.open_cockpit and figure_scene != null:
+			_seat_driver(data, figure_scene)
 	else:
 		# CarData fara model: cutia de rezerva, ca vitrina sa nu fie goala.
 		var box := MeshInstance3D.new()
@@ -283,8 +286,8 @@ func show_car(data: CarData) -> void:
 ## (fata = -Z), nu in spatiul modelului rotit cu 180°; pus sub model, ajunge
 ## oglindit pe Z — adica pe capota in loc de pe scaun, cum a si iesit la
 ## prima captura.
-func _seat_driver(data: CarData) -> void:
-	var figure := data.driver_model.instantiate() as Node3D
+func _seat_driver(data: CarData, scene: PackedScene) -> void:
+	var figure := scene.instantiate() as Node3D
 	_model_root.add_child(figure)
 	figure.position = data.driver_seat
 	Palette.apply_world_material(figure)

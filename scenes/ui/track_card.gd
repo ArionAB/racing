@@ -16,6 +16,10 @@ const RADIUS := 8
 
 var track_index: int = 0
 var _outline_box: StyleBoxFlat
+var _medals: _Medals
+## Starea medaliilor cerute de raft; null cat timp nu s-a chemat `set_medals`
+## (cursa rapida), iar cardul ramane exact ca inainte.
+var _medal_state: Array = []
 
 
 func setup(index: int) -> TrackCard:
@@ -62,11 +66,30 @@ func _ready() -> void:
 	outline.add_theme_stylebox_override("panel", _outline_box)
 	add_child(outline)
 
+	if not _medal_state.is_empty():
+		_apply_medals()
+
 	mouse_entered.connect(_refresh_outline)
 	mouse_exited.connect(_refresh_outline)
 	focus_entered.connect(_refresh_outline)
 	focus_exited.connect(_refresh_outline)
 	_refresh_outline()
+
+
+## Medaliile pistei in colt dreapta-sus: cursa, contratimp, provocare. Folosit
+## doar de raftul carierei. Se poate chema si inainte, si dupa `_ready`.
+func set_medals(race: int, tt: int, challenge: bool) -> void:
+	_medal_state = [race, tt, challenge]
+	if is_node_ready():
+		_apply_medals()
+
+
+func _apply_medals() -> void:
+	if _medals == null:
+		_medals = _Medals.new()
+		add_child(_medals)
+	_medals.set_state(int(_medal_state[0]), int(_medal_state[1]),
+		bool(_medal_state[2]))
 
 
 func _refresh_outline() -> void:
@@ -207,3 +230,61 @@ class _Clock extends Control:
 		draw_arc(c, 9.0, 0.0, TAU, 32, col, 2.0, true)
 		draw_line(c, c + Vector2(0, -5.5), col, 2.0, true)
 		draw_line(c, c + Vector2(4.0, 0), col, 2.0, true)
+
+
+## Trei discuri in colt: medalia cursei, a contratimpului (auriu/argintiu/
+## bronz; gol = doar contur) si provocarea (verde plin cand e facuta).
+## Desenat, fara texturi.
+class _Medals extends Control:
+	const GOLD := Color(0.95, 0.78, 0.25)
+	const SILVER := Color(0.80, 0.83, 0.88)
+	const BRONZE := Color(0.75, 0.50, 0.30)
+	const CHALLENGE := Color(0.35, 0.80, 0.45)
+	const RADIUS := 9.0
+	const GAP := 6.0
+
+	var race: int = 0
+	var tt: int = 0
+	var challenge: bool = false
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var w := 3.0 * RADIUS * 2.0 + 2.0 * GAP
+		# Ancorat sus-dreapta, cu 10 px de margine.
+		anchor_left = 1.0
+		anchor_right = 1.0
+		offset_left = -(w + 10.0)
+		offset_right = -10.0
+		offset_top = 10.0
+		offset_bottom = 10.0 + RADIUS * 2.0
+
+	func set_state(race_medal: int, tt_medal: int, done: bool) -> void:
+		race = race_medal
+		tt = tt_medal
+		challenge = done
+		queue_redraw()
+
+	static func medal_color(medal: int) -> Color:
+		match medal:
+			3: return GOLD
+			2: return SILVER
+			1: return BRONZE
+		return Color(0, 0, 0, 0)
+
+	func _draw() -> void:
+		var values: Array = [race, tt, challenge]
+		for i in 3:
+			var c := Vector2(RADIUS + i * (RADIUS * 2.0 + GAP), RADIUS)
+			var filled := false
+			var color := Color.WHITE
+			if i < 2:
+				filled = int(values[i]) > 0
+				color = medal_color(int(values[i]))
+			else:
+				filled = bool(values[i])
+				color = CHALLENGE
+			if filled:
+				draw_circle(c, RADIUS, color)
+			else:
+				# Gol: contur, ca sa se vada ce mai ramane de castigat.
+				draw_arc(c, RADIUS - 1.0, 0.0, TAU, 24, TEXT_DIM, 2.0, true)

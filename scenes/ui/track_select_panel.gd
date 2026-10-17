@@ -67,16 +67,22 @@ func _ready() -> void:
 ## Inaltimea urmeaza latimea coloanei, ca imaginea sa-si pastreze formatul pe
 ## orice ecran (stretch "expand" lasa latimea sa varieze cu telefonul).
 func _fit_cards() -> void:
-	if _cards.is_empty() or size.y <= 0.0:
+	fit_cards(_grid, _cards, size)
+
+
+## Aceeasi logica o foloseste si raftul carierei (CareerPanel), pe mai multe
+## grile: `area` e dimensiunea ecranului-parinte (decide 3 sau 4 coloane).
+static func fit_cards(grid: GridContainer, cards: Array[TrackCard], area: Vector2) -> void:
+	if cards.is_empty() or area.y <= 0.0:
 		return
-	var columns := WIDE_COLUMNS if size.x / size.y >= WIDE_ASPECT else COLUMNS
-	if _grid.columns != columns:
-		_grid.columns = columns # re-aseaza grila, care cheama iar functia asta
+	var columns := WIDE_COLUMNS if area.x / area.y >= WIDE_ASPECT else COLUMNS
+	if grid.columns != columns:
+		grid.columns = columns # re-aseaza grila, care cheama iar functia asta
 		return
-	var sep := float(_grid.get_theme_constant("h_separation"))
-	var width := (_grid.size.x - sep * (columns - 1)) / columns
+	var sep := float(grid.get_theme_constant("h_separation"))
+	var width := (grid.size.x - sep * (columns - 1)) / columns
 	var height := roundf(width * CARD_ASPECT)
-	for card in _cards:
+	for card in cards:
 		if not is_equal_approx(card.custom_minimum_size.y, height):
 			card.custom_minimum_size.y = height
 
@@ -96,6 +102,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _build_header() -> Control:
+	return build_header("QUICK RACE", "CHOOSE A TRACK", back_pressed.emit)
+
+
+## Antetul comun al ecranelor pe tot ecranul: `<  BACK`, titlu si subtitlu
+## intre doua linii. Il refolosesc si panourile carierei.
+static func build_header(title_text: String, subtitle_text: String,
+		on_back: Callable) -> Control:
 	var header := Control.new()
 	header.custom_minimum_size = Vector2(0, 96)
 
@@ -105,7 +118,7 @@ func _build_header() -> Control:
 	titles.add_theme_constant_override("separation", 2)
 	header.add_child(titles)
 	var title := Label.new()
-	title.text = "QUICK RACE"
+	title.text = title_text
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 52)
 	title.add_theme_color_override("font_color", TITLE_COLOR)
@@ -118,7 +131,7 @@ func _build_header() -> Control:
 	titles.add_child(sub_row)
 	sub_row.add_child(_rule())
 	var subtitle := Label.new()
-	subtitle.text = "CHOOSE A TRACK"
+	subtitle.text = subtitle_text
 	subtitle.add_theme_font_size_override("font_size", 20)
 	subtitle.add_theme_color_override("font_color", SUBTITLE_COLOR)
 	sub_row.add_child(subtitle)
@@ -142,12 +155,12 @@ func _build_header() -> Control:
 	back.add_theme_stylebox_override("normal", box)
 	back.add_theme_stylebox_override("hover", box_hover)
 	back.add_theme_stylebox_override("pressed", box_pressed)
-	back.pressed.connect(back_pressed.emit)
+	back.pressed.connect(on_back)
 	header.add_child(back)
 	return header
 
 
-func _rule() -> Control:
+static func _rule() -> Control:
 	var line := ColorRect.new()
 	line.color = Color(0.30, 0.37, 0.50)
 	line.custom_minimum_size = Vector2(90, 2)

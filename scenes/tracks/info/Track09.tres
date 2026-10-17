@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_info")
+id = &"alpi"
 display_name = "The Alps"
 region = "EUROPE"
 accent = Color(0.55, 0.66, 0.78, 1)

@@ -11,6 +11,12 @@ extends Resource
 const INFO_DIR := "res://scenes/tracks/info/"
 const THUMB_DIR := "res://assets/ui/track_thumbs/"
 
+static var _id_cache: Dictionary = {}
+
+## Cheia STABILA a pistei: cariera, abtibildurile si `career.cfg` se leaga de
+## ea, nu de `display_name`, care e text de afis si poate fi redenumit
+## (recordurile vechi raman pe nume). Goala => se deduce din numele scenei.
+@export var id: StringName = &""
 @export var display_name: String = ""
 ## Tara / regiunea, afisata sub nume ("JAPONIA", "EUROPA").
 @export var region: String = ""
@@ -30,10 +36,22 @@ static func for_track(track_index: int) -> TrackInfo:
 	if ResourceLoader.exists(path):
 		var info := load(path) as TrackInfo
 		if info != null:
+			if info.id == &"":
+				info.id = StringName(scene_key(track_index).to_lower())
 			return info
 	var fallback := TrackInfo.new()
+	fallback.id = StringName(scene_key(track_index).to_lower())
 	fallback.display_name = GameState.TRACK_NAMES[track_index]
 	return fallback
+
+
+## Indexul din GameState.TRACK_SCENES al pistei cu acest `id`, sau -1.
+## Cariera vorbeste in id-uri; cursa, in indici.
+static func index_of_id(track_id: StringName) -> int:
+	if _id_cache.is_empty():
+		for i in GameState.TRACK_SCENES.size():
+			_id_cache[for_track(i).id] = i
+	return int(_id_cache.get(track_id, -1))
 
 
 ## Calea asteptata a imaginii ("res://assets/ui/track_thumbs/Track09.png").

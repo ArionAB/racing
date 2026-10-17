@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_info")
+id = &"machu_picchu"
 display_name = "Machu Picchu"
 region = "PERU"
 accent = Color(0.33, 0.58, 0.34, 1)

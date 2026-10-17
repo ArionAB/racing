@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_info")
+id = &"jodhpur"
 display_name = "Jodhpur"
 region = "INDIA"
 accent = Color(0.31, 0.44, 0.72, 1)

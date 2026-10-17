@@ -167,6 +167,9 @@ var ai_cars_override: Array[int] = []
 # Selectii (masina aleasa se persista).
 var selected_car: int = 0
 var selected_track: int = 0
+## Panoul pe care MainMenu il deschide direct la intrare (&"career" dupa o
+## cursa de cariera). Citit o singura data si golit.
+var menu_open_panel: StringName = &""
 
 # Campionat: 3 curse, punctaj cumulat per "slot" (0 = jucatorul, 1.. = AI).
 var champ_active: bool = false
@@ -399,10 +402,12 @@ func save_records() -> void:
 
 func start_quick_race(track_index: int) -> void:
 	champ_active = false
+	Career.leave()
 	selected_track = track_index
 	start_race()
 
 func start_championship() -> void:
+	Career.leave()
 	champ_active = true
 	champ_round = 0
 	champ_points.clear()
@@ -444,6 +449,7 @@ func take_loading_screen() -> bool:
 
 func go_to_menu() -> void:
 	champ_active = false
+	Career.leave() # iesirea prin MENU inchide si cursa de cariera
 	reset_touch()
 	get_tree().change_scene_to_file(MENU_SCENE)
 

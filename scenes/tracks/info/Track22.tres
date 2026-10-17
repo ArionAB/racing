@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_info")
+id = &"halong"
 display_name = "Ha Long"
 region = "ASIA"
 accent = Color(0.29, 0.48, 0.42, 1)

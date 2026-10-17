@@ -173,6 +173,7 @@ func _setup_race() -> void:
 	hud.results_primary.connect(_on_results_primary)
 	hud.setup_minimap(track, cars)
 	hud.set_sealed_turbo(Career.is_time_trial())
+	_setup_challenge()
 	hud.show_countdown("READY?")
 	_setup_windshield_wipers()
 	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
@@ -678,6 +679,26 @@ func _on_player_lap(laps: int) -> void:
 
 ## Medalia cursei de cariera curente (-1 = nu e cursa de cariera).
 var _career_medal: int = -1
+var _challenge_tracker: ChallengeTracker
+var _challenge_done: bool = false
+
+## Provocarea gimmick-ului (cariera): tracker-ul asculta semnalele hazardelor
+## si ale jucatorului; HUD-ul arata eticheta si o pica o singura data.
+func _setup_challenge() -> void:
+	if not Career.is_challenge():
+		return
+	var challenge := Career.challenge_for(Career.active_track)
+	if challenge == null:
+		return
+	_challenge_tracker = ChallengeTracker.new()
+	_challenge_tracker.name = "ChallengeTracker"
+	add_child(_challenge_tracker)
+	_challenge_tracker.setup(challenge, player, track)
+	hud.set_challenge(challenge.title)
+	_challenge_tracker.failed_changed.connect(func(_failed: bool) -> void:
+		hud.set_challenge_failed()
+		hud.flash_message("CHALLENGE FAILED"))
+
 
 func _finish_race() -> void:
 	state = State.FINISHED
@@ -696,6 +717,10 @@ func _finish_race() -> void:
 	_career_medal = -1
 	if Career.is_time_trial():
 		_career_medal = Career.finish_time_trial(_player_race_ms)
+	elif Career.is_challenge():
+		# O conditie per proba: pozitia nu conta si nu da medalie de cursa.
+		_challenge_done = Career.finish_challenge(
+			_challenge_tracker != null and _challenge_tracker.evaluate())
 	elif Career.active:
 		_career_medal = Career.finish_active(player.race_position)
 	if GameState.champ_active:
@@ -737,6 +762,13 @@ func _show_results() -> void:
 		title = _time_trial_title()
 		primary = "BACK TO CAREER"
 		_append_time_trial_targets(rows)
+	elif Career.is_challenge():
+		var challenge_title := "?"
+		if _challenge_tracker != null:
+			challenge_title = _challenge_tracker.challenge.title
+		title = "CHALLENGE — %s — %s" % [challenge_title,
+			"DONE" if _challenge_done else "FAILED"]
+		primary = "BACK TO CAREER"
 	elif Career.active:
 		title += "\n" + _career_medal_text(_career_medal)
 		primary = "BACK TO CAREER"

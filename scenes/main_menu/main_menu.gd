@@ -31,9 +31,10 @@ func _ready() -> void:
 
 	var quick := _make_button("QUICK RACE")
 	_main_box.add_child(quick)
-	var champ := _make_button("CHAMPIONSHIP")
-	champ.pressed.connect(GameState.start_championship)
-	_main_box.add_child(champ)
+	# CAREER a inlocuit butonul CHAMPIONSHIP; campionatul ramane in GameState
+	# (il va folosi cupa lumii), doar intrarea din meniu a disparut.
+	var career_btn := _make_button("CAREER")
+	_main_box.add_child(career_btn)
 	var garage_btn := _make_button("GARAGE")
 	_main_box.add_child(garage_btn)
 	var settings_btn := _make_button("SETTINGS")
@@ -44,6 +45,8 @@ func _ready() -> void:
 
 	var track_panel := _build_track_panel()
 	quick.pressed.connect(func() -> void: _show_panel(track_panel))
+	var career_panel := _build_career_panel()
+	career_btn.pressed.connect(func() -> void: _show_panel(career_panel))
 	var garage_panel := _build_garage_panel()
 	garage_btn.pressed.connect(func() -> void: _show_panel(garage_panel))
 	var settings := SettingsPanel.new()
@@ -52,6 +55,11 @@ func _ready() -> void:
 	_panels.append(settings)
 	settings.back_pressed.connect(_show_main)
 	settings_btn.pressed.connect(func() -> void: _show_panel(settings))
+
+	# Dupa o cursa de cariera revenim direct pe raft, nu pe meniul principal.
+	if GameState.menu_open_panel == &"career":
+		GameState.menu_open_panel = &""
+		_show_panel(career_panel)
 
 # ------------------------------------------------------------------ panouri
 
@@ -73,6 +81,15 @@ func _show_main() -> void:
 ## Alegerea pistei pentru cursa rapida: grila de cartonase pe ecran intreg.
 func _build_track_panel() -> Control:
 	var panel := TrackSelectPanel.new()
+	panel.visible = false
+	add_child(panel)
+	_panels.append(panel)
+	panel.back_pressed.connect(_show_main)
+	return panel
+
+## Raftul carierei: lumi si piste, pe ecran intreg.
+func _build_career_panel() -> Control:
+	var panel := CareerPanel.new()
 	panel.visible = false
 	add_child(panel)
 	_panels.append(panel)

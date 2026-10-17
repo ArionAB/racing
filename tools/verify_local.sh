@@ -137,6 +137,12 @@ run_step "Controale touch: maparea si distantele" touch_zones.log 'VERDICT:' -- 
 run_step "Garajul: bare, masa si incadrarea vitrinei" garage.log 'probe_garage:' -- \
 	--headless --path . res://tools/ProbeGarage.tscn -- --check
 
+# Cariera pasul 1: config validat (cu sabotaj), persistenta pe pista, stampile
+# calculate si gating-ul lumilor, versiune necunoscuta lasata neatinsa,
+# regruparea fara pierderi, raftul numarat in scena si lacatul cursei.
+run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
+	--headless --path . res://tools/ProbeCareer.tscn -- --check
+
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then
 	echo "VERIFICARE LOCALA: OK (${#PASSED[@]} pasi). Log-uri in $LOGS"

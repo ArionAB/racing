@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.10 (brief de design; pasul 0 retunat, pașii 1, 2, 4a și 5 construiți)
+# Modul Carieră — „Turul lumii” — v0.11 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -101,6 +101,25 @@
 > fantoma „dev”, selecția „a ta / a rivalului”. Cu patru PR-uri de cod în
 > stivă (#556 → #561 → #563, #564) și brief-ul în #557, construcția se
 > oprește până la merge și la verdictul la volan.
+>
+> **v0.11 (17 oct 2026), pasul 4b construit + corecție de stare.** 4b: regulile
+> `AT_LEAST` / `EVERY_LAP` / `CLEAN_LAP`, semnale noi doar `signal` + `emit`
+> în semafor (`passed_on_red`, cu detecția minimă de trecere a liniei),
+> telecabină (`boarded`), gheață (`plate_broken`), zona spiralei prin
+> `CameraZone.contains_player()`, scurtătura prin `Car.route`; cele 5
+> provocări: RED RUNNER (Transfăgărășan, 3 treceri pe roșu, zero autocar),
+> CLEAN SPIRAL (Cappadocia, perete ≥ 12 m/s în `StancaSpirala`), ALL ABOARD
+> (Chongqing), THIN ICE (Baikal), OLD ROAD (Fiordland). `ProbeChallenge` la
+> 186 de verificări. **Toate cele 12 piste din carieră au provocare.**
+> *Corecția:* PR-urile stivuite #561, #563, #564 au fost merge-uite **în
+> ramurile lor de bază, nu în main** (GitHub merge-uiește în `base`; bazele
+> n-au fost șterse) — main are doar pasul 1 (#556). Restul (2, 4a, 4b, 5) e
+> într-un singur PR pe main, **#569**, pe o ramură cu main-ul și toate
+> ramurile stivei aduse în ea, verificată cu import. Pragul 12 m/s, cifra „3
+> treceri pe roșu” (AI-ul trece de ~10 ori în 150 s în modul LANE) și
+> contractele în joc rămân de validat la volan. Două sonde vechi
+> (`ProbeIceField` punctul 5, `ProbeFiordSemafor`) pică identic pe main — nu
+> sunt în `verify_local.sh`; issue separat.
 
 ## 0. Într-o propoziție
 
@@ -645,10 +664,11 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    din pole, deblocarea mașinii în garaj (garajul citește `Career.unlocked`,
    mașinile blocate se văd gri cu „învinge-l pe Luna”). *Gardă:* `ProbeRace`
    rival vs AI de grilă, aceeași mașină, pe distribuție (§5).
-4. **Provocările de gimmick — 4a CONSTRUIT (PR #563, 17 oct)**: tracker-ul
-   generic „zero evenimente” + cele 7 piste cu semnal existent; starea în
-   `pas4a_provocari_stare.md`. 4b (cele 5 piste cu semnal nou, reguli pe tur
-   / pe zonă) rămâne. Planul inițial: `ChallengeTracker` + contractul per pistă,
+4. **Provocările de gimmick — 4a și 4b CONSTRUITE (#563, #569, 17 oct)**:
+   tracker-ul generic cu patru reguli, toate cele 12 piste cu provocare;
+   starea în `pas4a_provocari_stare.md` și `pas4b_provocari_stare.md`.
+   Rămân abțibildurile (cosmeticul pe mașină) și validarea la volan a
+   pragurilor. Planul inițial: `ChallengeTracker` + contractul per pistă,
    **câte un PR per pistă**, întâi cele 8 cu semnal existent (Okinawa,
    Stromboli, Kyoto, Jodhpur, Serengeti, Monument Valley, Machu Picchu,
    Transfăgărășan), apoi cele 4 din carieră care cer semnal nou (Chongqing,

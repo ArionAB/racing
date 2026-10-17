@@ -41,6 +41,10 @@ extends Node
 ##    MeshInstance3D-uri, si masinile cu `open_cockpit` au si figurina.
 ##    Memoria `efecte-invizibile-nu-se-numara` spune de ce nu ne oprim la
 ##    „scriptul n-a crapat": numaram nodurile de mesh, nu apelurile.
+##
+## 6. SOFERUL. Bara DRIVER plimbata prin toate skinurile pune in vitrina
+##    figurina din GLB-ul skinului curent (`scene_file_path` al nodului
+##    instantiat), cu eticheta potrivita.
 
 ## Cat din bara trebuie sa acopere garajul, de la cea mai slaba la cea mai
 ## buna masina. 0.6 = diferentele reale ocupa macar 60% din latime.
@@ -240,6 +244,66 @@ func _run_checks(panel: GaragePanel) -> void:
 					data.display_name, found.size(), Driver.PART_NAMES.size(),
 					", ".join(Array(Driver.PART_NAMES).filter(
 						func(p): return not String(p) in found))])
+
+	# --- 8: SOFERUL ales separat ajunge in vitrina ---
+	# Skinul se alege independent de masina (bara DRIVER). Se verifica pe
+	# `scene_file_path` al figurinei INSTANTIATE — de unde a venit nodul din
+	# vitrina — nu pe ce crede panoul ca a cerut (memoria
+	# `garda-circulara-propria-functie`). Doua intrari din lista care ar duce la
+	# acelasi GLB pica si ele: ar fi doua nume pentru un singur sofer.
+	_check_driver_skins(panel)
+
+
+## Plimba bara DRIVER prin toate skinurile, pe prima masina deschisa, si
+## cere ca figurina din vitrina sa vina din GLB-ul skinului curent.
+func _check_driver_skins(panel: GaragePanel) -> void:
+	var open_car := -1
+	for i in GameState.CAR_DATA.size():
+		if (GameState.CAR_DATA[i] as CarData).open_cockpit:
+			open_car = i
+			break
+	if open_car < 0:
+		_notes.append("sofer: nicio masina deschisa in garaj, skinurile nu se verifica")
+		return
+	if GameState.DRIVER_DATA.size() < 2:
+		_fails.append("sofer: %d skin in DRIVER_DATA — n-ai ce alege" % \
+			GameState.DRIVER_DATA.size())
+	var keep_shown := panel._shown_driver
+	panel._show(open_car)
+	var seen: Array[String] = []
+	for k in GameState.DRIVER_DATA.size():
+		var skin := GameState.DRIVER_DATA[k] as DriverData
+		panel._show_driver(k)
+		var figure := _figure_in(panel)
+		var path := figure.scene_file_path if figure != null else ""
+		_notes.append("sofer %s: %s" % [skin.display_name,
+			path.get_file() if path != "" else "(fara figurina)"])
+		if figure == null:
+			_fails.append("sofer %s: figurina lipseste din vitrina" % skin.display_name)
+			continue
+		if skin.model == null or path != skin.model.resource_path:
+			_fails.append("sofer %s: in vitrina e %s, nu %s" % [
+				skin.display_name, path.get_file(),
+				skin.model.resource_path.get_file() if skin.model != null else "(null)"])
+		elif path in seen:
+			_fails.append("sofer %s: acelasi GLB ca alt skin (%s)" % [
+				skin.display_name, path.get_file()])
+		seen.append(path)
+		# Numele din bara urmeaza skinul — altfel sageata schimba figurina si
+		# eticheta minte.
+		if not panel._driver_name.text.begins_with(skin.display_name.to_upper()):
+			_fails.append("sofer %s: bara DRIVER arata „%s”" % [
+				skin.display_name, panel._driver_name.text])
+	panel._show_driver(keep_shown)
+
+
+## Figurina din vitrina: copilul lui `_model_root` care are piesa `Torso`.
+## Caroseriile n-au asa ceva, deci nu se poate confunda cu masina.
+func _figure_in(panel: GaragePanel) -> Node3D:
+	for child in panel._preview._model_root.get_children():
+		if not child.find_children("Torso", "MeshInstance3D", true, false).is_empty():
+			return child as Node3D
+	return null
 
 
 ## Proiecteaza colturile gabaritului fiecarei masini prin camera vitrinei si

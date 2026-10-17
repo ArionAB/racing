@@ -561,7 +561,15 @@ func set_controller(new_controller: CarController) -> void:
 	add_child(new_controller)
 	new_controller.setup(self)
 
-func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) -> void:
+## „Fara culoare de inlocuire" pentru `apply_data`: alfa 0 = ramane
+## `CarData.color`. Cine vrea doar al treilea argument (soferul) paseaza asta.
+const NO_COLOR := Color(0, 0, 0, 0)
+
+## `driver_override`: figurina aleasa in garaj, separat de masina
+## (`GameState.selected_driver_model()`); doar jucatorul o primeste. Null =
+## perechea din .tres, care e implicitul pentru AI.
+func apply_data(new_data: CarData, color_override: Color = NO_COLOR,
+		driver_override: PackedScene = null) -> void:
 	data = new_data
 	car_name = data.display_name
 	max_speed = data.max_speed
@@ -591,16 +599,20 @@ func apply_data(new_data: CarData, color_override: Color = Color(0, 0, 0, 0)) ->
 		lights.name = "Lights"
 		_visual.add_child(lights)
 		lights.setup(self, _visual.get_child(0) as Node3D)
-	# Soferul, doar pe caroserii deschise (vezi CarData.open_cockpit).
+	# Soferul, doar pe caroserii deschise (vezi CarData.open_cockpit). Skinul
+	# vine din garaj pentru jucator si din .tres pentru AI; scaunul e acelasi,
+	# fiindca toate skinurile stau pe acelasi corp (DriverData).
 	_driver = null
 	is_ejected = false
 	_eject_left = 0.0
-	if data.open_cockpit and data.driver_model != null:
+	var driver_scene := driver_override if driver_override != null \
+		else data.driver_model
+	if data.open_cockpit and driver_scene != null:
 		_driver = Driver.new()
 		_driver.name = "Driver"
 		_visual.add_child(_driver)
 		_driver.position = data.driver_seat
-		_driver.setup(data.driver_model, self)
+		_driver.setup(driver_scene, self)
 	# Colizerul, suspensia si efectele urmeaza dimensiunile vehiculului.
 	if _collision_shape != null:
 		var box := _collision_shape.shape as BoxShape3D

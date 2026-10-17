@@ -1,6 +1,6 @@
 extends Node
 ## Singleton (autoload): stare globala intre scene, puntea touch, setari
-## persistate, garaj (masina aleasa) si starea campionatului.
+## persistate, garaj (masina si soferul alese) si starea campionatului.
 
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 const MENU_SCENE: String = "res://scenes/main_menu/MainMenu.tscn"
@@ -21,6 +21,17 @@ const CAR_DATA: Array[Resource] = [
 ## masina de jucator/AI de cursa) — separat de CAR_DATA ca sa nu apara din
 ## greseala in lineup-ul AI_CARS sau la selectia de masina.
 const CAR_DATA_TUKTUK: CarData = preload("res://scenes/cars/data/tuktuk.tres")
+
+## Soferii: skinurile figurinei, alese in garaj SEPARAT de masina (decizia
+## dezvoltatorului, 17 oct 2026). Un skin nou = un .tres nou aici. Primul e
+## implicitul — albastrul, ca pana acum pe masina implicita (Muscle). Perechea
+## din `CarData.driver_model` ramane doar pentru AI.
+const DRIVER_DATA: Array[Resource] = [
+	preload("res://scenes/cars/data/drivers/driver_blue.tres"),
+	preload("res://scenes/cars/data/drivers/driver_red.tres"),
+	preload("res://scenes/cars/data/drivers/driver_yellow.tres"),
+	preload("res://scenes/cars/data/drivers/driver_green.tres"),
+]
 
 ## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in cursa rapida.
 ##
@@ -164,12 +175,20 @@ var traffic_override: int = -1
 ## toate cele 6 masini din garaj pe aceeasi grila (docs/cariera §2.1, §11 pas 0).
 var ai_cars_override: Array[int] = []
 
-# Selectii (masina aleasa se persista).
+# Selectii (masina si soferul alese se persista).
 var selected_car: int = 0
+## Index in DRIVER_DATA. Se aplica DOAR masinii jucatorului, pe orice caroserie
+## deschisa; AI-ul isi tine figurina din .tres.
+var selected_driver: int = 0
 var selected_track: int = 0
 ## Panoul pe care MainMenu il deschide direct la intrare (&"career" dupa o
 ## cursa de cariera). Citit o singura data si golit.
 var menu_open_panel: StringName = &""
+
+
+## Figurina aleasa in garaj, gata de dat lui `Car.apply_data` ca override.
+func selected_driver_model() -> PackedScene:
+	return (DRIVER_DATA[selected_driver] as DriverData).model
 
 # Campionat: 3 curse, punctaj cumulat per "slot" (0 = jucatorul, 1.. = AI).
 var champ_active: bool = false
@@ -477,6 +496,8 @@ func load_settings() -> void:
 	engine_volume = float(cfg.get_value("audio", "engine_volume", 1.0))
 	selected_car = clampi(int(cfg.get_value("game", "selected_car", 0)),
 		0, CAR_DATA.size() - 1)
+	selected_driver = clampi(int(cfg.get_value("game", "selected_driver", 0)),
+		0, DRIVER_DATA.size() - 1)
 	# Limitele sunt cele ale sliderelor din SettingsPanel: un fisier de setari
 	# stricat de mana n-are voie sa scoata camera in alta galaxie.
 	cam_distance_scale = clampf(
@@ -497,6 +518,7 @@ func save_settings() -> void:
 	cfg.set_value("audio", "sfx_volume", sfx_volume)
 	cfg.set_value("audio", "engine_volume", engine_volume)
 	cfg.set_value("game", "selected_car", selected_car)
+	cfg.set_value("game", "selected_driver", selected_driver)
 	cfg.set_value("camera", "distance_scale", cam_distance_scale)
 	cfg.set_value("camera", "height_scale", cam_height_scale)
 	cfg.set_value("camera", "fov_scale", cam_fov_scale)

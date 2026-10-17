@@ -253,7 +253,9 @@ func _spawn_cars() -> void:
 		if i == 0:
 			player = car
 			car.is_player = true
-			car.apply_data(GameState.CAR_DATA[GameState.selected_car] as CarData)
+			# Masina SI soferul vin din garaj, ca doua alegeri separate.
+			car.apply_data(GameState.CAR_DATA[GameState.selected_car] as CarData,
+				Car.NO_COLOR, GameState.selected_driver_model())
 			car.set_controller(PlayerController.new())
 		else:
 			# Sondele pot inlocui lineup-ul (`GameState.ai_cars_override`), ca
@@ -800,7 +802,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_6: _swap_player_car(5)
 
 func _swap_player_car(index: int) -> void:
-	player.apply_data(GameState.CAR_DATA[index] as CarData)
+	player.apply_data(GameState.CAR_DATA[index] as CarData,
+		Car.NO_COLOR, GameState.selected_driver_model())
 	_fit_camera_to_player()
 
 ## Camera se retrage proportional cu lungimea vehiculului (autobuzul ar

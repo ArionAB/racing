@@ -508,13 +508,18 @@ func _catch(car: Car) -> void:
 	# de skill din interiorul contactului: cine atinge tromba pe margine pierde o
 	# secunda, cine intra in ochi pierde doua si jumatate.
 	var core := _hit_depth(car)
-	var lift := lerpf(LIFT_MIN, LIFT_MAX, core)
+	# Masa cumpara (pasul 0, decizia (a)): autobuzul e ridicat la jumatate,
+	# pastreaza mai mult din viteza si se invarte mai putin. 1.0 pana la
+	# Muscle, deci LIFT_MIN/LIFT_MAX raman cifrele masurate pe masina implicita.
+	var ratio := car.hazard_mass_ratio()
+	var lift := lerpf(LIFT_MIN, LIFT_MAX, core) * ratio
+	var keep := lerpf(1.0, SPEED_KEEP, ratio)
 	# Inaltimea ceruta se traduce in viteza verticala, nu invers: `launch` ia m/s,
 	# dar cifra pe care o reglezi si o vezi pe ecran e inaltimea.
 	car.launch(sqrt(2.0 * car.gravity * lift))
-	car.velocity.x *= SPEED_KEEP
-	car.velocity.z *= SPEED_KEEP
-	car.spin_body(SPIN_CAR * (1.0 if core > 0.5 else 0.6), LOFT_MAX_TIME)
+	car.velocity.x *= keep
+	car.velocity.z *= keep
+	car.spin_body(SPIN_CAR * ratio * (1.0 if core > 0.5 else 0.6), LOFT_MAX_TIME)
 	_lofted[car] = 0.0
 
 

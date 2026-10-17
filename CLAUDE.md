@@ -61,8 +61,13 @@ pur plus haosul fizic, nu proiectilele.
   (oct 2026). Auto-accelerate (orice deget pe ecran = gaz) a fost **înlocuit**
   de butonul ▲, decizia dezvoltatorului după primul test pe device: cu
   auto-accelerate butonul din mockup n-ar fi făcut nimic, mergeai la fel și
-  fără să-l atingi. Garda `ProbeTouchZones` verifică maparea atingere→comandă
-  și că discurile apăsate împreună (gaz+drift, gaz+turbo) nu se ating.
+  fără să-l atingi. **TURBO și DRIFT implică gaz** (al doilea test pe device):
+  toate trei stau sub degetul mare drept, deci nu pot fi ținute simultan, iar
+  fără gaz n-au sens — cu TURBO arzi bara stând pe loc, iar drift-ul se stinge
+  singur sub `drift_min_speed`. Virajul NU implică gaz (altfel ar fi
+  auto-accelerate pe altă ușă). Garda `ProbeTouchZones` verifică maparea
+  atingere→comandă, că discurile apăsate împreună nu se ating, și gazul
+  subînțeles — măsurat pe `PlayerController` real.
 
 ## Post-MVP (nu implementa fără să fie cerut)
 

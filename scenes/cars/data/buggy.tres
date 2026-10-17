@@ -12,6 +12,7 @@ max_speed = 35.0
 acceleration = 16.0
 grip = 8.5
 mass_factor = 1.0
+offroad_speed_factor = 0.65
 spring_freq = 2.2
 damping_ratio = 0.5
 suspension_rest = 0.4

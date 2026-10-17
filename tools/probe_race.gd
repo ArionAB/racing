@@ -158,6 +158,17 @@ var _seed: int = SEED
 ## Masina jucatorului, index in GameState.CAR_DATA. Suprascris cu --car=N.
 ## 0 = Muscle, masina de referinta a proiectului.
 var _player_car: int = 0
+## `--ai-cars=a,b,c,...`: lineup-ul AI (indecsi in CAR_DATA), in locul lui
+## Race.AI_CARS. Pentru matricea de echilibru (tools/car_balance.sh): toate
+## cele 6 masini din garaj pe grila dintr-o singura cursa (jucator = --car,
+## adversari = restul).
+var _ai_cars: Array[int] = []
+## `--equal-speed`: toate masinile la speed_scale 1.0. Fara el, adversarii
+## primesc 0.88..0.97 (variatia onesta a AI-ului), iar slotul jucatorului
+## ramane la 1.0 — corect cand masori PISTA, dar contamineaza orice comparatie
+## INTRE masini cu 3-12% in favoarea slotului jucatorului (prima matrice din
+## docs/cariera/mod_cariera.md §2.1 a fost masurata asa).
+var _equal_speed: bool = false
 ## Numarul de adversari AI. -1 = nu se atinge GameState.ai_count (implicitul
 ## de joc, 5 -> 6 masini pe grila). Suprascris cu --ai=N — Fiordland cere 8
 ## masini pe grila (brief §7 pasul 3: 8 masini, fara decor, pe tunelul cu
@@ -424,6 +435,12 @@ func _ready() -> void:
 			_no_torii = true
 		elif arg == "--train-cam":
 			_train_cam = true
+		elif arg.begins_with("--ai-cars="):
+			_ai_cars.clear()
+			for s in arg.trim_prefix("--ai-cars=").split(","):
+				_ai_cars.append(int(s))
+		elif arg == "--equal-speed":
+			_equal_speed = true
 	# Masina jucatorului se FIXEAZA, nu se mosteneste.
 	#
 	# `GameState.selected_car` se salveaza in `user://settings.cfg`, deci sonda
@@ -482,6 +499,7 @@ func _start_race() -> void:
 	GameState.champ_active = false
 	GameState.total_laps = 99 # cursa nu se termina singura; o oprim pe timp
 	GameState.traffic_override = _traffic
+	GameState.ai_cars_override = _ai_cars
 	_bucket_speed.resize(BUCKETS)
 	_bucket_samples.resize(BUCKETS)
 	_bucket_slow.resize(BUCKETS)
@@ -514,7 +532,10 @@ func _start_race() -> void:
 		else:
 			(car.controller as AIController).line_offset = rng.randf_range(-0.35, 0.35)
 		# Variatie onesta, dar determinista — altfel cifrele danseaza intre rulari.
-		car.speed_scale = 1.0 if car == player else rng.randf_range(0.88, 0.97)
+		# Zarul se trage MEREU, si cu `--equal-speed`: asa seed-ul da aceleasi
+		# line_offset-uri cu sau fara el, iar A/B-ul compara doar vitezele.
+		var roll := rng.randf_range(0.88, 0.97)
+		car.speed_scale = 1.0 if (car == player or _equal_speed) else roll
 		_stats.append({
 			"name": "%s (%s)" % [car.pilot_name, car.car_name],
 			"offroad_s": 0.0, "slow_s": 0.0, "reverse_s": 0.0,

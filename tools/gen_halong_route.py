@@ -1136,6 +1136,18 @@ for i in range(_n_par):
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0, 1.0, 1.0, 1.0)}, "
         f"{g[0]:.2f}, {g[1] - 0.10:.2f}, {g[2]:.2f})")
 
+# --- parapet pe marginea dinspre gol (POI D) -------------------------------
+# Bara: parapet pe latura unde terenul cade in golf (stanga, frac 0,40-0,44).
+# La -11,5 ca in G: marginea nu intra pe asfalt (semi-latime 7,0).
+_PD_A, _PD_B = 0.392, 0.442
+_n_pd = max(2, int(((_PD_B - _PD_A) * L_TOTAL) / 6.0))
+for i in range(_n_pd):
+    ff = _PD_A + (_PD_B - _PD_A) * (i + 0.5) / _n_pd
+    g = at_road(ff, -11.5)
+    add(f"ParapetD{i:02d}", "parapet",
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1] - 0.10:.2f}, {g[2]:.2f})")
+
 # --- belvederea: reperul construit de pe varf (POI D) ----------------------
 # "Belvedere nu am stiut unde este" a fost verdictul la volan; pavilionul e
 # raspunsul (brief §1.7). Sta pe partea dinspre priveliste, langa CameraZone.
@@ -1159,27 +1171,53 @@ _veg = []
 # urcarea insemna una la ~20 m, adica o planta razleata din cand in cand, nu un
 # versant de carst. Acum 34, pe trei randuri de departare, cu varietate pe
 # specie si pe latura — si tot ramane cu un ordin de marime sub celelalte piste.
-for i in range(34):
-    u = (i + 0.5) / 34.0
-    ff = F["D urcare"] + (F["D creasta"] - F["D urcare"]) * u
-    side = -1.0 if i % 3 != 1 else 1.0
-    # trei randuri: aproape de drum, mijloc, departe. Randul departat e mai
-    # rar, ca silueta sa nu devina un zid verde.
-    rand = i % 3
-    # 12,0 de baza, nu 10,0: ficusii au coroana de ~1,6 m raza, deci la 10
-    # marginea cadea la 6,9-8,0 m de ax.
-    lat = side * (12.0 + rand * 7.5 + 3.0 * ((i * 7) % 4) / 3.0)
-    kind = ("ficus_a", "bamboo", "ficus_b", "bamboo",
-            "ficus_a", "scrub")[i % 6]
-    _veg.append((ff, lat, kind, i * 47.0))
-# tufe pe creasta, in jurul belvederei
-for i in range(14):
-    u = (i + 0.5) / 14.0
-    ff = F["D creasta"] + (F["D varf"] - F["D creasta"]) * u
-    # 11,5 de baza, nu 9,0: la 9,0 fiecare al patrulea exemplar cadea exact
-    # pe pragul de gabarit si coroana ajungea la 6,9 m de ax.
-    _veg.append((ff, (-1.0 if i % 2 else 1.0) * (11.5 + 4.0 * (i % 4)),
-                 "scrub" if i % 3 else "ficus_b", i * 61.0))
+# VERSANT IMBRACAT (POI D), nu 34 de piese razlete. Terenul a fost HARTUIT
+# (grila temporara de `Veg` pe frac 0,36-0,53 x lateral -40..+48, masurata cu
+# SvHalongCote): spre INTERIOR (dreapta, +) uscatul e platou continuu de la
+# +11 m pana la +48; spre EXTERIOR (stanga, -) uscatul se rupe in golf intre
+# frac 0,397 si 0,437 (la -12 m cota coboara sub 0). Randurile vechi mergeau la
+# -27 m si 20 din 34 cadeau in apa. Acum:
+#   * dreapta: sase randuri de adancime (11,5 ... 38 m), dens, pe toata lungimea;
+#   * stanga: doar unde terenul exista, cu adancimea limitata de tabelul de mai
+#     jos (cota > 2 m pe tot intervalul), si ocolit pavilionul.
+# Distanta se da pe GABARIT: coroana de ficus ~1,6 m, deci 11,5 m de origine
+# lasa 9,9 m pana la ax (pragul garzii: 8,0).
+_D_A, _D_B = 0.362, 0.528
+_D_KINDS = ("ficus_a", "bamboo", "ficus_b", "scrub", "ficus_a", "bamboo",
+            "ficus_b", "ficus_a", "scrub", "bamboo")
+_D_ROWS = (13.5, 17.0, 21.0, 26.0, 32.0, 39.0)
+# Scara: ficusul de 1,0 era un bat cu o minge pe un platou de nisip. 1,8-2,6x
+# da coroane de 3-4 m care se ating intre ele; tufa merge pana la 3,2x. Gabaritul
+# (coroana ~1,6 m x scara) il masoara SvHalongGabarit, nu aceasta cifra.
+_D_SC = (1.8, 2.3, 2.0, 2.6, 1.9)
+for i in range(130):
+    ff = _D_A + (_D_B - _D_A) * (i + 0.5) / 130.0
+    row = (i * 5 + (i // 6)) % 6
+    lat = _D_ROWS[row] + 1.5 * ((i * 7) % 3)
+    _k = _D_KINDS[i % 10]
+    _sc = (2.6 + 0.6 * (i % 3)) if _k == "scrub" else _D_SC[i % 5]
+    _veg.append((ff, lat, _k, i * 47.0, _sc))
+# stanga: (frac_start, frac_end, adancime_max_m)
+_D_LEFT = ((0.362, 0.372, 30.0), (0.372, 0.385, 18.0), (0.385, 0.397, 12.0),
+           (0.438, 0.449, 12.0), (0.449, 0.458, 16.0), (0.458, 0.466, 22.0),
+           (0.466, 0.528, 36.0))
+_dl = 0
+for _a, _b, _dm in _D_LEFT:
+    _n = max(1, int(round((_b - _a) * L_TOTAL / 7.0)))
+    for j in range(_n):
+        ff = _a + (_b - _a) * (j + 0.5) / _n
+        lat = -(16.0 + 4.5 * ((_dl * 5) % 4))
+        lat = max(lat, -_dm)
+        lat = -12.0 if _dm <= 12.0 else lat
+        # pavilionul sta la -16 m, fractia belvederei: ocolit pe +-12 m
+        if abs(ff - F["D belvedere"]) * L_TOTAL < 12.0 and lat > -24.0:
+            lat = -26.0 if _dm >= 26.0 else lat
+            if lat > -24.0:
+                _dl += 1
+                continue
+        _k = _D_KINDS[(_dl * 3) % 10]
+        _veg.append((ff, lat, _k, _dl * 71.0, (1.3 if lat > -13.5 else (2.8 if _k == 'scrub' else _D_SC[_dl % 5]))))
+        _dl += 1
 # vegetatie si pe coasta de nord, langa parapet (POI G): maimutele stau
 # intr-un loc cu copaci, nu pe un parapet intr-un desert.
 for i in range(12):
@@ -1189,10 +1227,18 @@ for i in range(12):
     # distanta se da pe GABARIT, nu pe origine.
     _veg.append((ff, -(15.5 + 6.0 * (i % 3)),
                  ("ficus_b", "bamboo", "ficus_a")[i % 3], i * 83.0))
-for i, (ff, lat, kind, yaw) in enumerate(_veg):
+if os.environ.get("HL_GRID"):
+    _GRID_N = 0
+    for _si in range(48):
+        _ff = 0.36 + 0.17 * _si / 47.0
+        for _la in range(-40, 49, 4):
+            _veg.append((_ff, float(_la), "scrub", 0.0))
+for i, _t in enumerate(_veg):
+    ff, lat, kind, yaw = _t[:4]
+    _sc = _t[4] if len(_t) > 4 else 1.0
     g = at_road(ff, lat)
     add(f"Veg{i:02d}", kind,
-        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, _sc, _sc, _sc)}, "
         f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
 
 # --- POI E: coborarea in doua ace de par + plaja (0,53 -> 0,74) ------------

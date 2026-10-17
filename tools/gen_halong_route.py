@@ -1699,11 +1699,9 @@ _noi = {n for n, gy in COTE_TEREN.items()
         if n.startswith("Veg") and gy < 0.05}
 if _noi - VEG_PE_APA:
     VEG_PE_APA |= _noi
-    with open(_apa_path, "w", encoding="utf-8", newline="
-") as _fh:
+    with open(_apa_path, "w", encoding="utf-8", newline="\n") as _fh:
         for _n in sorted(VEG_PE_APA):
-            _fh.write(_n + "
-")
+            _fh.write(_n + "\n")
 
 # VEGETATIA DE PESTE APA SE SCOATE, nu se coboara.
 #

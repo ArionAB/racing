@@ -39,6 +39,7 @@ var _charge_fill: Panel
 var _charge_fill_style: StyleBoxFlat
 var _charge_bolt: Label
 var _sealed_label: Label
+var _ghost_label: Label
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -358,6 +359,13 @@ func _build_turbo_bar(root: Control) -> void:
 	_sealed_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_sealed_label.visible = false
 	holder.add_child(_sealed_label)
+
+	# Contratimp cu fantoma salvata: timpul ei, ca sa stii pe cine urmaresti.
+	_ghost_label = _make_label(16)
+	_ghost_label.modulate = Color(0.75, 0.9, 1.0)
+	_ghost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_ghost_label.visible = false
+	holder.add_child(_ghost_label)
 
 	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
 	# marginea intunecata sa ramana vizibila si cand bara e plina.
@@ -728,6 +736,13 @@ func flash_message(text: String) -> void:
 ## Rezervor sigilat (contratimp de cariera): arata eticheta SEALED.
 func set_sealed_turbo(on: bool) -> void:
 	_sealed_label.visible = on
+
+
+## Eticheta "GHOST 3:12.4"; ms <= 0 o ascunde.
+func set_ghost_time(ms: int) -> void:
+	_ghost_label.visible = ms > 0
+	if ms > 0:
+		_ghost_label.text = "GHOST %s" % TrackCard._format_ms(ms)
 
 
 func set_turbo(charge: float, boosting: bool) -> void:

@@ -1,10 +1,18 @@
-[gd_resource type="Resource" script_class="CareerConfig" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="CareerConfig" load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scenes/career/career_config.gd" id="1"]
 [ext_resource type="Resource" path="res://scenes/career/data/world_1.tres" id="w1"]
 [ext_resource type="Resource" path="res://scenes/career/data/world_2.tres" id="w2"]
 [ext_resource type="Resource" path="res://scenes/career/data/world_3.tres" id="w3"]
+[ext_resource type="Resource" path="res://scenes/career/data/challenges/kyoto.tres" id="c_kyoto"]
+[ext_resource type="Resource" path="res://scenes/career/data/challenges/stromboli.tres" id="c_stromboli"]
+[ext_resource type="Resource" path="res://scenes/career/data/challenges/serengeti.tres" id="c_serengeti"]
+[ext_resource type="Resource" path="res://scenes/career/data/challenges/okinawa.tres" id="c_okinawa"]
+[ext_resource type="Resource" path="res://scenes/career/data/challenges/monument_valley.tres" id="c_monument_valley"]
+[ext_resource type="Resource" path="res://scenes/career/data/challenges/machu_picchu.tres" id="c_machu_picchu"]
+[ext_resource type="Resource" path="res://scenes/career/data/challenges/jodhpur.tres" id="c_jodhpur"]
 
 [resource]
 script = ExtResource("1")
 worlds = Array[Resource]([ExtResource("w1"), ExtResource("w2"), ExtResource("w3")])
+challenges = Array[Resource]([ExtResource("c_kyoto"), ExtResource("c_stromboli"), ExtResource("c_serengeti"), ExtResource("c_okinawa"), ExtResource("c_monument_valley"), ExtResource("c_machu_picchu"), ExtResource("c_jodhpur")])

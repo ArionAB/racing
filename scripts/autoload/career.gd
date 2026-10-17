@@ -12,7 +12,9 @@ extends Node
 
 signal progress_changed
 
-enum Mode { RACE, TIME_TRIAL }
+## CHALLENGE e o cursa normala (cu AI) cu `ChallengeTracker` pornit; nu da
+## medalie de cursa, doar bifa provocarii.
+enum Mode { RACE, TIME_TRIAL, CHALLENGE }
 
 const CONFIG_PATH := "res://scenes/career/data/career_config.tres"
 ## Versiunea schemei din `career.cfg`. Un fisier cu versiune mai mare vine de la
@@ -87,7 +89,25 @@ func validate(cfg: CareerConfig = null) -> PackedStringArray:
 				world.rival_track, world.id])
 	if free_count != 1:
 		problems.append("trebuie exact o lume free, sunt %d" % free_count)
+	var challenged: Dictionary = {}
+	for challenge in target.challenges:
+		if TrackInfo.index_of_id(challenge.track) < 0:
+			problems.append("provocarea %s: pista nu exista in TRACK_SCENES" % challenge.track)
+		if challenged.has(challenge.track):
+			problems.append("doua provocari pe pista %s" % challenge.track)
+		challenged[challenge.track] = true
+		if not CareerChallenge.KNOWN_EVENTS.has(challenge.event):
+			problems.append("provocarea %s: evenimentul '%s' nu e cunoscut" % [
+				challenge.track, challenge.event])
 	return problems
+
+
+## Provocarea pistei `track_id`, sau null daca pista n-are una.
+func challenge_for(track_id: StringName) -> CareerChallenge:
+	for challenge in config.challenges:
+		if challenge.track == track_id:
+			return challenge
+	return null
 
 
 # ------------------------------------------------------------- progres
@@ -248,6 +268,18 @@ func finish_active(position: int) -> int:
 	var medal := medal_for_position(position)
 	set_race_medal(active_track, medal)
 	return medal
+
+
+func is_challenge() -> bool:
+	return active and active_mode == Mode.CHALLENGE
+
+
+## Rezultatul unei provocari: bifa se pune doar la reusita si nu se pierde la
+## un esec ulterior (ca medaliile, pastram maximul). Returneaza `success`.
+func finish_challenge(success: bool) -> bool:
+	if is_challenge() and success:
+		set_challenge(active_track)
+	return success and is_challenge()
 
 
 func is_time_trial() -> bool:

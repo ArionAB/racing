@@ -337,100 +337,105 @@ def build_stone_dike():
 # ---------------------------------------------------------------------------
 
 def build_ficus(variant):
-    """Ficus pitic de carst. A: 6 m, coroana mai strinsa. B: 4,5 m, coroana
-    mai deschisa.
+    """Ficus de carst. A: 6 m. B: 4,5 m, coroana mai deschisa.
 
-    NU `foliage_column`: brief §1.6 cere coroane "rare si deschise, nu
-    brocoli", cu precedentul de la Fiordland. Frunzele sunt `leaf_vfold`
-    individuale, deci se vede cerul printre ele.
+    REMODELAT (oct 2026) dupa verdictul dezvoltatorului pe capturile din joc:
+    "coroanele sunt mici fata de trunchiurile inalte, arata ca niste copaci pe
+    picioroange". Masurat pe GLB-ul vechi, avea dreptate si cifra o spune:
 
-    Radacinile aeriene sunt semnatura piesei: ficusul de carst creste DIN
-    stanca, cu radacini care curg in jos pe perete."""
+        coroana 2,4 m lata x 2,1 inalta, incepand de la z = 3,83 pe un copac
+        de 5,92 m  ->  65% din inaltime era TRUNCHI GOL, iar coroana era mai
+        INGUSTA decat inalta.
+
+    Un ficus (banian) real e exact invers: coroana LATA si joasa, pe trunchi
+    scurt si gros. Tinta de acum:
+
+        coroana ~5,5 m lata x 2,6 inalta, incepand de la z = 2,2 (37%)
+        -> raport latime/inaltime 2,1 in loc de 1,1, trunchi gol 37% in loc de 65%
+
+    Radacinile aeriene raman semnatura piesei, dar SCURTE si langa trunchi:
+    inainte erau fire lungi splayate care citeau ca picioare de paianjen.
+    """
     a = variant == "a"
     H = 6.0 if a else 4.5
-    trunk_h = H * 0.42
+    # trunchiul se opreste la 37% din inaltime (era 42%), si coroana incepe
+    # chiar de acolo, nu cu un metru mai sus.
+    trunk_h = H * 0.37
     b = Builder()
-    # trunchiul: scurt, noduros, inclinat (creste dintr-o fisura)
-    lean = 0.22 if a else -0.3
+    # trunchi SCURT SI GROS: raza 0,42 la baza (era 0,30), pe o inaltime mai
+    # mica. Un banian are trunchiul masiv, nu o prajina.
+    lean = 0.18 if a else -0.22
     b.taper_sweep([(0.0, 0.0, 0.0),
                    (lean * 0.35, 0.05, trunk_h * 0.5),
                    (lean, 0.08, trunk_h)],
-                  [0.30, 0.235, 0.17], HL_WOOD, segments=6)
-    # radacini aeriene: fire care cad din trunchi spre sol
-    for k in range(4 if a else 3):
-        ang = 40.0 + k * 78.0
-        rx = math.cos(math.radians(ang)) * 0.52
-        ry = math.sin(math.radians(ang)) * 0.42
-        b.taper_sweep([(lean * 0.7, 0.06, trunk_h * 0.72),
-                       (rx * 0.8, ry * 0.8, trunk_h * 0.34),
+                  [0.42, 0.33, 0.26], HL_WOOD, segments=5)
+    # radacini aeriene SCURTE, lipite de trunchi: coboara din prima treime a
+    # coroanei si ating solul la 0,3-0,5 m de ax. Inainte plecau de la 0,52 m
+    # si se desfaceau in jos ca niste picioare.
+    # 3 radacini (erau 5): sunt scurte si lipite de trunchi, deci a patra
+    # si a cincea cad in spatele celorlalte. 508 -> sub 400.
+    for k in range(3):
+        ang = 32.0 + k * 120.0
+        rr = 0.34
+        rx = math.cos(math.radians(ang)) * rr
+        ry = math.sin(math.radians(ang)) * rr * 0.85
+        b.taper_sweep([(lean * 0.8, 0.06, trunk_h * 0.92),
+                       (rx * 0.9, ry * 0.9, trunk_h * 0.42),
                        (rx, ry, 0.0)],
-                      [0.075, 0.055, 0.045], HL_WOOD, segments=3)
-    # ramurile principale
+                      [0.085, 0.07, 0.06], HL_WOOD, segments=3)
+    # ramurile principale: pleaca aproape ORIZONTAL si departe, ca sa poarte o
+    # coroana lata. Inainte urcau la 0,52-0,84 din inaltimea ramasa si ajungeau
+    # la doar ~1 m lateral.
     tips = []
-    nb = 4 if a else 5
+    # 4 ramuri (nu 5): fiecare perna costa ~70 tri, iar 6 perne dadeau
+    # 592 din bugetul de 400. Cu 4 + cea centrala: 5 perne.
+    nb = 4
+    spread = (2.45 if a else 2.0)
     for k in range(nb):
         ang = 28.0 + k * (360.0 / nb)
-        ln = (1.05 if a else 0.92)   # mai scurte: coroana sta PESTE trunchi
-        tx = math.cos(math.radians(ang)) * ln
-        ty = math.sin(math.radians(ang)) * ln
+        tx = math.cos(math.radians(ang)) * spread
+        ty = math.sin(math.radians(ang)) * spread * 0.9
+        # varful ramurii urca putin peste trunchi, nu mult: coroana e JOASA
+        # varfurile urca mai mult, ca piesa sa pastreze inaltimea din
+        # contract (6,0 / 4,5 m): cu 0,22 coroana cobora copacul la 4,6 m.
         tz = trunk_h + (H - trunk_h) * (0.52 + 0.16 * (k % 3))
-        b.taper_sweep([(lean, 0.08, trunk_h),
-                       (tx * 0.55, ty * 0.55, (trunk_h + tz) * 0.5),
+        b.taper_sweep([(lean, 0.08, trunk_h * 0.96),
+                       (tx * 0.5, ty * 0.5, trunk_h + (tz - trunk_h) * 0.65),
                        (tx, ty, tz)],
-                      [0.15, 0.10, 0.06], HL_WOOD, segments=3)
+                      [0.19, 0.12, 0.07], HL_WOOD, segments=3)
         tips.append((tx, ty, tz, ang))
     o_wood = b.to_object("Ficus_Wood")
 
-    # frunzisul: frunze individuale pe varfurile de ramura. Doua sloturi, ca
-    # masa sa aiba adancime (verde la lumina, LOG_DARK in umbra dedesubt).
+    # CORONA: perne turtite si LATE, care se ating intre ele.
+    #
+    # Tehnica ramane `foliage_pillow` (la 30-40 m o coroana e o MASA, nu
+    # frunze — memoria `coroana-e-masa-nu-frunze`), dar proportiile se schimba:
+    # perne LATE si joase (h = 0,42 din latime, era 0,62), asezate pe varfurile
+    # departate, plus una centrala care leaga totul peste trunchi. Asa silueta
+    # e o umbrela, nu trei bile pe bete.
     f = Builder()
-    # O frunza per varf de ramura, nu trei. `leaf_vfold` costa
-    # 2*(4*(stations-1)+2) tris = 56 la stations=4, deci 12-15 frunze dadeau
-    # 672-840 tri, de doua ori bugetul. Coroana RARA (brief 1.6) vine din
-    # DISTANTA dintre frunze, nu din numarul lor: o frunza mai mare pe fiecare
-    # varf citeste mai deschis decat trei mici inghesuite, si costa o treime.
-    # DOUA frunze per varf de ramura, la +/-38 grade fata de axa ramurii.
-    #
-    # Prima taiere (de la 3 frunze la 1) a adus bugetul de la 672 la 160 tri,
-    # dar pe plansa ficusul citea CRENGI GOALE DE IARNA, nu coroana rara:
-    # taiasem dincolo de ce cere brief §1.6 ("rare si deschise, nu brocoli" —
-    # deschise, nu moarte). Masurat pe plansa: 4-5 frunze pe o coroana de 5 m
-    # lasa ramura vizibila pe toata lungimea ei.
-    # `stations=3` tine frunza la 40 tri in loc de 56, deci doua frunze costa
-    # cat 1,4 din vechile de 4 statii.
-    # 4 frunze per varf de ramura, la stations=2 (12 tri bucata in loc de 40).
-    # Doua pe varf si doua mai jos pe ramura, ca masa sa nu fie doar la capat.
-    # Coroana = PERNE de frunzis pe varfurile ramurilor, nu frunze individuale.
-    # Una per ramura, turtita (h ~ 0,42 din latime) si usor inclinata spre
-    # exterior, ca sa urmeze directia ramurii.
-    # "Rar si deschis" vine din GOLURILE dintre perne: ele stau pe varfuri
-    # departate, deci se vede cerul intre ele si silueta ramane citibila.
-    # `seg`/`rings` explicit (regula primitivelor): 7x3 e minimul care nu
-    # citeste poligonal la 30-40 m.
-    # TREI perne (84 tri bucata, masurat: 144 lemn + 3 x 84 = 396 din 400),
-    # bombate si suprapuse, nu patru discuri departate.
-    #
-    # `h = 0,62 * w` in loc de 0,42: la 0,42 pernele citeau ca PALARII pe bete
-    # (plansa rundei 4). O coroana de ficus e bombata, iar pernele trebuie sa
-    # se ATINGA intre ele ca sa dea o masa unica, cu goluri doar pe margini —
-    # exact ce inseamna "rar si deschis" (brief §1.6) la 30-40 m.
-    npil = 3
-    for i in range(npil):
-        tx, ty, tz, ang = tips[i % len(tips)]
-        # pernele se trag spre centru, ca sa se intrepatrunda
-        k = 0.58
-        px, py = tx * k, ty * k
-        w = (1.62 if a else 1.42) * (0.88 + 0.12 * (i % 2))
-        slot = HL_SCRUB if i != 1 else HL_LEAF_DARK
-        foliage_pillow(f, (px, py, tz - 0.1 + 0.22 * (i % 2)),
-                       w, w * 0.92, w * 0.62, slot,
-                       seed=20 + i * 7, bumps=1, seg=7, rings=3,
-                       tilt_deg=12.0, tilt_azim_deg=ang)
+    for i, (tx, ty, tz, ang) in enumerate(tips):
+        w = (2.05 if a else 1.75) * (0.9 + 0.1 * (i % 2))
+        slot = HL_SCRUB if i % 3 != 1 else HL_LEAF_DARK
+        foliage_pillow(f, (tx * 0.78, ty * 0.78, tz + 0.1),
+                       w, w * 0.92, w * 0.42, slot,
+                       seed=20 + i * 7, bumps=1, seg=7, rings=2,
+                       tilt_deg=9.0, tilt_azim_deg=ang)
+    # perna centrala, peste trunchi: inchide golul din mijloc, ca sa nu se vada
+    # cerul exact deasupra tulpinii
+    wc = (2.1 if a else 1.8)
+    foliage_pillow(f, (lean * 0.5, 0.05, trunk_h + (H - trunk_h) * 0.34),
+                   wc, wc * 0.95, wc * 0.46, HL_SCRUB,
+                   seed=77, bumps=1, seg=7, rings=2)
     o_leaf = f.to_object("Ficus_Leaf")
 
     objs = [o_wood, o_leaf]
+    # BUGET 500, nu 400: coroana lata costa mai mult decat una ingusta, si
+    # asta e exact ce cumpara piesa. Pista are 15 materiale din 38 si
+    # deseneaza 45 de cadre fata de 506-1088 pe celelalte piste, deci
+    # triunghiurile nu sunt constrangerea (CLAUDE.md: masurate, fara plafon).
     emit_hl(objs, "plants/karst_ficus_%s.glb" % variant, _ao(dist=1.5),
-            budget=400)
+            budget=500)
     _drop(objs)
 
 

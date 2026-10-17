@@ -1203,6 +1203,80 @@ g = at_road(_E_PLAJA + 0.008, 13.0)
 add("RastelPlajaE00", "rack",
     f"Transform3D({rot_y_s(yaw_z_to(*travel_g(_E_PLAJA + 0.008)) + 90.0, 1.0, 1.0, 1.0)}, "
     f"{g[0]:.2f}, {g[1]:.2f}, {g[2]:.2f})")
+# --- POI F: canalul cu podetul de plute (frac 0.74 -> 0.84) -----------------
+# Masurat inainte: 2 piese pe 207 m (1,0 la 100 m, prag 3,0). Terenul a fost
+# masurat pe grila fractie x lateral (tools/tmp_f_terrain.gd, sters dupa):
+#   * 0.74-0.775: USCAT plat (+1,1..1,3) pe ambele parti pana la ~50 m;
+#   * 0.78-0.84, stanga (-): APA adanca (-3..-10) de la 12 m lateral in afara;
+#   * 0.78-0.80, dreapta (+): apa de la ~22 m; de la 0.80 uscat abia de la 35-45 m.
+# Deci: turnurile mari stau pe apa (stanga, plus unul in dreapta la 0.789),
+# vegetatia NUMAI pe uscat (inainte de canal si pe malul din dreapta, lat 48).
+# Distantele sunt pe GABARIT: turn scalat 0.6 are ~10-11 m raza, deci la 46 m
+# de origine marginea e la ~35 m de ax. Podetul are carosabil de 6 m: nimic
+# la mai putin de 13 m de ax.
+def _poi_f_towers():
+    out = []
+    for i, (ff, lat, res, sc, yaw) in enumerate((
+            (0.752, -52.0, "tower_a", 0.62, 15.0),    # uscat, inainte de canal
+            (0.786, -46.0, "tower_c", 0.60, 140.0),   # apa, stanga
+            (0.789, 56.0, "tower_b", 0.55, 80.0),     # apa, dreapta
+            (0.822, -50.0, "tower_b", 0.66, 200.0),   # apa, stanga
+            (0.835, 62.0, "tower_a", 0.55, 310.0),    # uscat, dreapta
+            (0.812, -62.0, "stack_a", 1.4, 40.0),     # stiva izolata, apa
+    )):
+        g = at_road(ff, lat)
+        add(f"TurnCalcarF{i:02d}", res,
+            f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, sc, sc, sc)}, "
+            f"{g[0]:.2f}, {g[1] - 1.20:.2f}, {g[2]:.2f})")
+        out.append((ff, lat, res, sc))
+    return out
+
+_f_towers = _poi_f_towers()
+# Poala de moloz: bolovani la linia apei, in jurul turnurilor de pe apa.
+# Originea lor e la baza, deci stau pe 0.00 (putin sub, ca sa nu se vada fundul).
+_moloz = []
+for (ff, lat, res, sc) in _f_towers:
+    if ff in (0.752, 0.835):
+        continue   # turnurile de pe uscat isi iau poala din teren
+    r_t = {"tower_a": 16.0, "tower_b": 16.0, "tower_c": 16.0, "stack_a": 5.0}[res] * sc
+    c = at_road(ff, lat)
+    for j in range(3):
+        a = math.radians(70.0 + j * 120.0 + ff * 900.0)
+        _moloz.append((c[0] + math.cos(a) * r_t * 0.9, c[2] + math.sin(a) * r_t * 0.9,
+                       1.1 + 0.5 * j, j * 77.0 + ff * 500.0))
+for i, (mx, mz, msc, myaw) in enumerate(_moloz):
+    add(f"MolozF{i:02d}", "boulder",
+        f"Transform3D({rot_y_s(myaw, msc, msc, msc)}, {mx:.2f}, {-0.45:.2f}, {mz:.2f})")
+
+# Barci mici pe apa deschisa: 14-34 m de ax (jonca taie podetul la 0.789 —
+# nimic in +-0.006 din jurul ei).
+for i, (ff, lat, kind, yaw) in enumerate((
+        (0.783, -38.0, "sampan", 70.0), (0.797, -31.0, "basket", 0.0),
+        (0.806, -20.0, "sampan", 112.0), (0.816, -36.0, "basket", 0.0),
+        (0.826, -26.0, "sampan", 35.0), (0.822, 27.0, "basket", 0.0),
+        (0.830, 33.0, "sampan", 150.0), (0.800, -42.0, "sampan", 95.0),
+)):
+    g = at_road(ff, lat)
+    add(f"BarcaMicaF{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {_SEA_Y:.2f}, {g[2]:.2f})")
+
+# Vegetatie agatata: grupuri pe uscatul din fata canalului (0.742-0.774) si pe
+# malul din dreapta (lat 48). NU peste apa — garda de cote sare copacii de pe
+# apa adanca, deci terenul sub fiecare se verifica separat.
+_vf = []
+for i in range(10):
+    ff = 0.742 + 0.0033 * i
+    side = -1.0 if i % 2 else 1.0
+    _vf.append((ff, side * (14.0 + 4.0 * (i % 4)),
+                ("ficus_a", "bamboo", "ficus_b", "scrub", "bamboo")[i % 5], i * 53.0))
+for i in range(3):
+    _vf.append((0.806 + 0.012 * i, 48.0, ("ficus_b", "bamboo", "ficus_a")[i], i * 71.0))
+for i, (ff, lat, kind, yaw) in enumerate(_vf):
+    g = at_road(ff, lat)
+    add(f"VegF{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1] - 0.15:.2f}, {g[2]:.2f})")
 
 # --- COTELE DE PE USCAT, MASURATE PE TERENUL REAL ---------------------------
 #
@@ -1295,7 +1369,8 @@ RES = {"rock": "13_rock", "quay": "14_quay",
        "dike": "30_dike", "pavilion": "31_pavilion",
        "ficus_a": "32_ficus_a", "ficus_b": "33_ficus_b",
        "bamboo": "34_bamboo", "scrub": "35_scrub",
-       "boulder": "36_boulder"}
+       "tower_a": "36_tower_a", "tower_b": "37_tower_b", "tower_c": "38_tower_c",
+       "boulder": "39_boulder"}
 
 # --- consola: fractiile care conteaza la pasul urmator -----------------------
 print("\n=== FRACTII (pentru pasii urmatori) ===")
@@ -1408,7 +1483,10 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/karst_ficus_b.glb" id="33_ficus_b"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/bamboo_clump.glb" id="34_bamboo"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/scrub_tuft.glb" id="35_scrub"]
-[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/shore_boulder.glb" id="36_boulder"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_a.glb" id="36_tower_a"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_b.glb" id="37_tower_b"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_c.glb" id="38_tower_c"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/shore_boulder.glb" id="39_boulder"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true

@@ -1388,7 +1388,7 @@ transform = Transform3D(0.3762, 0, 0.9785, 0, 1.0484, 0, -0.9785, 0, 0.3762, 243
 transform = Transform3D(-0.1586, 0, 0.953, 0, 0.9661, 0, -0.953, 0, -0.1586, 236.49, -0.3, 139.22)
 
 [node name="gnu215" parent="DecorManual/ZoneA_Camp" unique_id=568579176 instance=ExtResource("s_wildebeest")]
-transform = Transform3D(-0.6423, 0, 0.7796, 0, 1.0101, 0, -0.7796, 0, -0.6423, 247.59, -0.3, 146.64)
+transform = Transform3D(-0.6423, 0, 0.7796, 0, 1.0101, 0, -0.7796, 0, -0.6423, 246.8829, -0.3000, 147.3471)
 
 [node name="gnu216" parent="DecorManual/ZoneA_Camp" unique_id=1489495015 instance=ExtResource("s_wildebeest")]
 transform = Transform3D(-0.0441, 0, 1.0001, 0, 1.0011, 0, -1.0001, 0, -0.0441, 234.47, -0.3, 144.62)
@@ -2968,16 +2968,16 @@ transform = Transform3D(-0.131525, 0, -0.47791, 0, 0.495678, 0, 0.47791, 0, -0.1
 transform = Transform3D(0.953339, 0, -0.584497, 0, 1.118253, 0, 0.584497, 0, 0.953339, -46.566093, -1.18, 151.5)
 
 [node name="Crocodil92" parent="DecorManual/ZoneC_VadulMara" unique_id=357608259 instance=ExtResource("s_crocodile")]
-transform = Transform3D(0.743375, 0, 0.692525, 0, 1.015971, 0, -0.692525, 0, 0.743375, -55.55046, -1.18, 179.5)
+transform = Transform3D(0.743375, 0, 0.692525, 0, 1.015971, 0, -0.692525, 0, 0.743375, -55.9331, -1.1800, 178.5761)
 
 [node name="Crocodil93" parent="DecorManual/ZoneC_VadulMara" unique_id=1577440191 instance=ExtResource("s_crocodile")]
-transform = Transform3D(0.934246, 0, 0.341026, 0, 0.994542, 0, -0.341026, 0, 0.934246, -83.51447, -1.18, 152.12602)
+transform = Transform3D(0.934246, 0, 0.341026, 0, 0.994542, 0, -0.341026, 0, 0.934246, -82.1003, -1.1800, 153.5402)
 
 [node name="Crocodil94" parent="DecorManual/ZoneC_VadulMara" unique_id=592882106 instance=ExtResource("s_crocodile")]
 transform = Transform3D(0.696731, 0, -0.793112, 0, 1.05568, 0, 0.793112, 0, 0.696731, -91.53036, -1.18, 176.42067)
 
 [node name="Crocodil95" parent="DecorManual/ZoneC_VadulMara" unique_id=2111445839 instance=ExtResource("s_crocodile")]
-transform = Transform3D(1.109446, 0, -0.167676, 0, 1.122046, 0, 0.167676, 0, 1.109446, -62.176544, -1.18, 182.05281)
+transform = Transform3D(1.109446, 0, -0.167676, 0, 1.122046, 0, 0.167676, 0, 1.109446, -60.3288, -1.1800, 182.8182)
 
 [node name="KopjeLeu96" parent="DecorManual/ZoneC_VadulMara" unique_id=1447492262 instance=ExtResource("s_kopje_camp")]
 transform = Transform3D(-0.63105786, 0, -1.0790119, 0, 1.2499999, 0, 1.0790119, 0, -0.63105786, -37.36, -0.0141067505, 127)
@@ -5932,15 +5932,15 @@ transform = Transform3D(-0.74471843, 0, 1.561943, 0, 1.7303964, 0, -1.561943, 0,
 metadata/coliziune = "none"
 
 [node name="E_Elefant179" parent="DecorManual/ZoneE_Buza" unique_id=325086958 instance=ExtResource("s_elephant")]
-transform = Transform3D(-1.0614799, 0, -1.4323093, 0, 1.7827646, 0, 1.4323093, 0, -1.0614799, 44.751137, 2.1895447, -99.30366)
+transform = Transform3D(-1.0614799, 0, -1.4323093, 0, 1.7827646, 0, 1.4323093, 0, -1.0614799, 13.3392, 1.7000, -112.3149)
 metadata/coliziune = "none"
 
 [node name="E_Elefant180" parent="DecorManual/ZoneE_Buza" unique_id=1471608901 instance=ExtResource("s_elephant")]
-transform = Transform3D(1.4174013, 0, 0.92056155, 0, 1.6901065, 0, -0.92056155, 0, 1.4174013, 44.0703, 3.770523, -100.47501)
+transform = Transform3D(1.4174013, 0, 0.92056155, 0, 1.6901065, 0, -0.92056155, 0, 1.4174013, 57.8469, 5.2126, -133.7347)
 metadata/coliziune = "none"
 
 [node name="E_Elefant181" parent="DecorManual/ZoneE_Buza" unique_id=162012916 instance=ExtResource("s_elephant")]
-transform = Transform3D(1.0732288, 0, -1.3381413, 0, 1.7153549, 0, 1.3381413, 0, 1.0732288, 37.47219, 2.3657074, -101.47408)
+transform = Transform3D(1.0732288, 0, -1.3381413, 0, 1.7153549, 0, 1.3381413, 0, 1.0732288, 37.4722, 1.7000, -136.4741)
 metadata/coliziune = "none"
 
 [node name="E_CrustaSare" type="MultiMeshInstance3D" parent="DecorManual/ZoneE_Buza" unique_id=1356940998]

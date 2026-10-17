@@ -152,10 +152,31 @@ decor (regula (c)).
 
 | ce | verdict |
 |---|---|
-| **Solul e nisip gri uniform** — în bară pământul e verde, roca iese în petice | **acceptat ca atare**, nu se schimbă acum |
+| **Solul e nisip gri uniform** — în bară pământul e verde, roca iese în petice | **REVENIT asupra deciziei** (17 oct): „it's a tropical place i want a tropical sunny golden hour vibe". Schimbat tot ansamblul de lumină, nu doar nisipul — vezi mai jos |
 | **Ficusul: coroană mică pe trunchi înalt**, „copaci pe picioroange" | **remodelat** — vezi mai jos |
 | **Digul e grindă plată**, nu zidul vertical din bară | **acceptat ca atare** |
 | **Jonca aruncă șoferul** la 37 m/s | **da, așa trebuie** — comportamentul rămâne |
+
+### Ora de aur tropicală
+
+Nisipul singur n-ar fi ajuns: un sol galben sub lumină de amiază tot a amiază
+citește. Schimbat ansamblul:
+
+```
+ground_tint   8E8C84 -> E5D2A0   nisip auriu (MASURAT pe diorama: 377 de
+                                 esantioane, hue 43, saturatie 0,30; vechiul
+                                 gri avea saturatie 0,03)
+sun elevatie     -30 -> -18      umbre lungi, lumina pe sub coroane
+sun_color      FFF0D8 -> FFE3B8  chihlimbar, nu alb-cald
+sun_energy       1,1 -> 1,35     compenseaza atmosfera la unghi mic
+ambient       C8D8DC -> D6CBB4   gri-cald, nu albastru-gri rece
+sky_horizon   E8E2D6 -> F2DCB4   chihlimbar jos: asta face ora de aur
+fog           D8DCD4 -> E8D9BC   departarea se spala in auriu
+```
+
+**Azimutul soarelui NU s-a atins** (rămâne 70 = busolă 110): el e verificat de
+garda de azimut din generator, care măsoară reperele în cadru. S-a schimbat
+doar elevația.
 
 ### Ficusul, remodelat
 

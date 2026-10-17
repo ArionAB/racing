@@ -21,6 +21,12 @@ extends Resource
 ## 2.6 (autobuz). Verifica orice retunare cu:
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeRace.tscn -- --mode=bump
 @export var mass_factor: float = 1.0
+## Plafonul pe iarba/nisip, ca FRACTIE din viteza maxima — identitate off-road
+## (pasul 0 din docs/cariera/mod_cariera.md): buggy-ul pierde mai putin pe iarba
+## decat restul, deci scurtaturile prin off-road sunt ale lui. Sub 0 =
+## implicitul global (Car.OFFROAD_SPEED_DEFAULT, 0.45), ca masinile fara parere
+## sa ramana exact cum erau.
+@export var offroad_speed_factor: float = -1.0
 
 ## Centrul de masa pe verticala (m fata de origine, sub 0 = mai jos, coborat).
 ## Identitate: majoritatea masinilor stau jos si stabil (-0.15, ca inainte de

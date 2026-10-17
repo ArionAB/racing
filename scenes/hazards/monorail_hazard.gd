@@ -515,9 +515,15 @@ func _hit_cars() -> void:
 		# Viteza de dupa lovitura: ce ti-a mai ramas din a ta, plus impinsul
 		# garniturii pe directia ei. Se SCRIE (vezi [HazardThrow]) — cu o
 		# adunare, aruncarea devine ejectare in afara hartii.
-		var mine := Vector3(car.velocity.x, 0.0, car.velocity.z) * keep_speed
-		var horizontal := mine + _train_dir * side_push
-		HazardThrow.throw(car, _train, horizontal, throw_height, clear_seconds)
+		# Masa cumpara (pasul 0, decizia (a)): garnitura impinge si ridica
+		# autobuzul la jumatate si ii lasa mai mult din viteza. 1.0 pana la
+		# Muscle, deci cifrele masurate pe masina implicita nu se misca.
+		var ratio := car.hazard_mass_ratio()
+		var mine := Vector3(car.velocity.x, 0.0, car.velocity.z) \
+			* lerpf(1.0, keep_speed, ratio)
+		var horizontal := mine + _train_dir * side_push * ratio
+		HazardThrow.throw(car, _train, horizontal, throw_height * ratio,
+			clear_seconds)
 		var sign := signf(_train_dir.cross(Vector3.UP).dot(
 			-car.global_transform.basis.z))
 		car.spin_body(spin_rate * (sign if absf(sign) > 0.01 else 1.0),

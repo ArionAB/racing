@@ -22,6 +22,13 @@ func get_throttle() -> float:
 	# din mockup n-ar fi facut nimic: mergeai la fel si fara sa-l atingi.
 	if GameState.touch_gas:
 		return 1.0
+	# TURBO si DRIFT implica GAZ. Toate trei stau sub acelasi deget mare drept,
+	# deci nu pot fi tinute simultan — iar fara gaz niciuna nu are sens: cu
+	# TURBO arzi bara stand pe loc, iar drift-ul se stinge singur cand viteza
+	# scade sub `drift_min_speed`, adica fix ce se intampla daca nu accelerezi.
+	# Pe tastatura nu apare problema: degete separate pe W / SPACE / SHIFT.
+	if GameState.touch_turbo or GameState.touch_drift:
+		return 1.0
 	return 0.0
 
 func is_drift_pressed() -> bool:

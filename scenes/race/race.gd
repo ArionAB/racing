@@ -256,7 +256,12 @@ func _spawn_cars() -> void:
 			car.apply_data(GameState.CAR_DATA[GameState.selected_car] as CarData)
 			car.set_controller(PlayerController.new())
 		else:
-			var data_idx: int = AI_CARS[(i - 1) % AI_CARS.size()]
+			# Sondele pot inlocui lineup-ul (`GameState.ai_cars_override`), ca
+			# sa puna toate masinile din garaj pe aceeasi grila: matricea de
+			# echilibru masoara masinile, nu lineup-ul jocului.
+			var lineup: Array[int] = GameState.ai_cars_override \
+				if not GameState.ai_cars_override.is_empty() else AI_CARS
+			var data_idx: int = lineup[(i - 1) % lineup.size()]
 			car.apply_data(GameState.CAR_DATA[data_idx] as CarData,
 				AI_COLORS[(i - 1) % AI_COLORS.size()])
 			var ai := AIController.new()

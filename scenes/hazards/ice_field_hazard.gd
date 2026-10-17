@@ -1041,7 +1041,14 @@ func _step_plate(plate: Dictionary, cars: Array[Car], delta: float) -> void:
 		if not _in_poly(poly, st):
 			continue
 		on_plate.append(car)
-		var w := car.mass * (2.0 if car.is_boosting else 1.0)
+		# Masa intra COMPRIMATA (radacina patrata din mass_factor, pe scara
+		# lui 100): autobuzul apasa 161, nu 260, Politia 95, nu 90. Ordinea
+		# ramane — greul tot sparge mai mult — dar nu mai rupe placa in 0,29 s
+		# la fiecare trecere: in matricea de echilibru (pasul 0, runda 1)
+		# Baikal era singura pista cu ecart 32%, 25 de repuneri pentru autobuz.
+		# Gimmick-ul trebuie sa treaca cu orice masina, nu sa fie egal.
+		var w := 100.0 * sqrt(maxf(car.mass_factor, 0.01)) \
+			* (2.0 if car.is_boosting else 1.0)
 		load_kg += w
 		torque_s += w * clampf(st.x - c2.x, -6.0, 6.0)
 		torque_t += w * clampf(st.y - c2.y, -6.0, 6.0)

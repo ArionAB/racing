@@ -8,9 +8,9 @@
 script = ExtResource("1")
 display_name = "Politia"
 color = Color(0.25, 0.45, 0.95, 1)
-max_speed = 36.0
+max_speed = 34.5
 acceleration = 17.0
-grip = 10.0
+grip = 9.5
 mass_factor = 0.9
 spring_freq = 3.0
 damping_ratio = 0.7

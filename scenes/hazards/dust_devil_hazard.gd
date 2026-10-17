@@ -251,17 +251,23 @@ func _physics_process(delta: float) -> void:
 			continue
 		_cooldown[car] = cooldown
 		var dir_sign := 1.0 if (spins % 2 == 0) else -1.0
-		car.apply_yaw_kick(dir_sign * deg_to_rad(spin_deg) / spin_time, spin_time)
+		# Masa cumpara (pasul 0, decizia (a)): autobuzul se roteste si se ridica
+		# la jumatate si pastreaza mai mult din viteza. 1.0 pana la Muscle,
+		# deci contractul masurat pe masina implicita nu se misca.
+		var ratio := car.hazard_mass_ratio()
+		var keep := lerpf(1.0, speed_keep, ratio)
+		car.apply_yaw_kick(dir_sign * deg_to_rad(spin_deg) * ratio / spin_time,
+			spin_time)
 		# Ridicarea: inaltimea ceruta se traduce in viteza verticala, nu invers
 		# (aceeasi aritmetica ca la tromba: v = sqrt(2*g*h)). Cifra pe care o
 		# reglezi e inaltimea, fiindca aia se vede.
 		if lift_m > 0.0:
-			car.launch(sqrt(2.0 * car.gravity * lift_m))
-			car.velocity.x *= speed_keep
-			car.velocity.z *= speed_keep
+			car.launch(sqrt(2.0 * car.gravity * lift_m * ratio))
+			car.velocity.x *= keep
+			car.velocity.z *= keep
 			# Caroseria se invarte si vizual cat e in aer: fara asta, o masina
 			# ridicata drept arata ca un lift, nu ca un vartej.
-			car.spin_body(dir_sign * 5.0, spin_time)
+			car.spin_body(dir_sign * 5.0 * ratio, spin_time)
 		if blind_time > 0.0:
 			car.blind(blind_time)
 		spins += 1

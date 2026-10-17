@@ -176,7 +176,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 ## Foaia pistei: fundal semi-opac care inchide la tap, cu un panou centrat
-## (nume, RACE, TIME TRIAL, CHALLENGE inca blocat, BACK). Un tap pe card nu
+## (nume, RACE, TIME TRIAL, CHALLENGE (blocat fara provocare), BACK). Un tap pe card nu
 ## mai porneste cursa direct: jucatorul alege intai modul.
 func _open_sheet(track_id: StringName) -> void:
 	_close_sheet()
@@ -231,9 +231,20 @@ func _open_sheet(track_id: StringName) -> void:
 		Career.start_track(track_id, Career.Mode.TIME_TRIAL))
 	column.add_child(tt_btn)
 
+	var challenge := Career.challenge_for(track_id)
 	var challenge_btn := _sheet_button("CHALLENGE", "SOON")
+	if challenge == null:
+		challenge_btn.disabled = true
+	else:
+		# Titlul + DONE (verde) cand e bifata, altfel ce trebuie facut.
+		var done := bool(state.challenge)
+		challenge_btn = _sheet_button("CHALLENGE",
+			challenge.title + ("  ·  DONE" if done else "\n" + challenge.hint))
+		if done:
+			challenge_btn.add_theme_color_override("font_color", Color(0.55, 0.9, 0.5))
+		challenge_btn.pressed.connect(func() -> void:
+			Career.start_track(track_id, Career.Mode.CHALLENGE))
 	challenge_btn.name = "ChallengeButton"
-	challenge_btn.disabled = true
 	column.add_child(challenge_btn)
 
 	var back_btn := _sheet_button("BACK", "")

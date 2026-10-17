@@ -1141,6 +1141,41 @@ if os.path.isfile(_cote_path):
             if len(_parts) == 3 and _parts[0] == "COTA":
                 COTE_TEREN[_parts[1]] = float(_parts[2])
 
+# VEGETATIA DE PESTE APA SE SCOATE, nu se coboara.
+#
+# Un copac nu e ancorat de linia apei — daca terenul sub el e sub cota marii,
+# piesa trebuie sa DISPARA, nu sa primeasca o cota. Masurat pe scena
+# integrata: 20 de `Veg*` din POI D stateau peste apa, unele la -11 m, cu
+# trunchiul intrand drept in mare. Se vede in videoul de pe telefon, iar garda
+# veche le sarea (linia `if gy < sea_y - 1.0: continue` presupunea ca orice
+# piesa de peste apa adanca e o barca).
+#
+# Randurile exterioare ale versantului (rand 1 si 2) ajung la 27 m lateral; pe
+# o pista jumatate pe apa, atat trece de mal in golf. Nu se ingusteaza randul
+# (s-ar rari versantul exact unde bara cere sa fie imbracat) — se scot doar
+# pozitiile care cad in apa, iar restul raman.
+#
+# Cota marii in lume e 0,00 (`SEA_OFFSET` e calculat ca sa iasa asa, vezi
+# garda de apa de mai sus), deci pragul e 0,05 m peste ea.
+_SEA_LEVEL_WORLD = 0.0
+_VEG_MIN_GROUND = _SEA_LEVEL_WORLD + 0.05
+if COTE_TEREN:
+    _scoase = []
+    for _nm, _res, _xf, _extra in list(dec):
+        if not _nm.startswith("Veg"):
+            continue
+        _gy = COTE_TEREN.get(_nm)
+        if _gy is not None and _gy < _VEG_MIN_GROUND:
+            _scoase.append((_nm, _gy))
+    if _scoase:
+        _rele = {n for n, _ in _scoase}
+        dec[:] = [d for d in dec if d[0] not in _rele]
+        print("\nvegetatie scoasa de pe apa: %d piese" % len(_scoase))
+        for _n, _g in _scoase[:6]:
+            print("   %-10s teren %+6.2f" % (_n, _g))
+        if len(_scoase) > 6:
+            print("   ... si inca %d" % (len(_scoase) - 6))
+
 if COTE_TEREN:
     _fixed = 0
     for _i, (_nm, _res, _xf, _extra) in enumerate(dec):

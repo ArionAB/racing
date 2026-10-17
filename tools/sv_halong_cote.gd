@@ -51,6 +51,7 @@ func _ready() -> void:
 	print("")
 	print("%-22s %9s %9s %8s  %s" % ["nod", "teren", "acum", "delta", "stare"])
 
+	var _cote: Array[String] = []
 	var ingropate := 0
 	var plutind := 0
 	var ok := 0
@@ -73,6 +74,11 @@ func _ready() -> void:
 		if nm.begins_with("Veg") and gy < sea_y + 0.05:
 			print("%-22s %+9.2f  VEGETATIE PE APA" % [nm, gy])
 			plutind += 1
+			# Si in tabelul de cote, ca generatorul sa afle ca sunt pe apa si
+			# sa le SCOATA. Fara linia asta nodul nu ajunge niciodata in
+			# `halong_cote_teren.txt` (`continue` il opreste inainte), deci
+			# generatorul nu are de unde sti ca pozitia e in golf.
+			_cote.append("COTA %s %.3f" % [nm, gy])
 			continue
 		if gy < sea_y - 1.0:
 			continue
@@ -100,6 +106,8 @@ func _ready() -> void:
 	if true:
 		print("")
 		print("--- CORECTII (nod: cota_teren) ---")
+		for _l in _cote:
+			print(_l)
 		for ch2 in decor.get_children():
 			var n2 := String(ch2.name)
 			if n2.ends_with("_col"):

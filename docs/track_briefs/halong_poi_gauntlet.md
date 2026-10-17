@@ -144,6 +144,40 @@ de 26, lovitura aruncă șoferul. Un autobuz care intră într-o barcă la 133 k
 aruncând șoferul poate fi comportamentul corect — sau jonca ar trebui să fie
 „moale" (impuls, nu perete), ca alte hazarde mobile. **Nu am schimbat nimic.**
 
+## Deciziile dezvoltatorului (17 oct 2026)
+
+Puse în fața lui după ce doi constructori au ajuns independent, pe POI-uri
+diferite, la aceeași concluzie: densitatea trece, look-ul nu, cauza e sub
+decor (regula (c)).
+
+| ce | verdict |
+|---|---|
+| **Solul e nisip gri uniform** — în bară pământul e verde, roca iese în petice | **acceptat ca atare**, nu se schimbă acum |
+| **Ficusul: coroană mică pe trunchi înalt**, „copaci pe picioroange" | **remodelat** — vezi mai jos |
+| **Digul e grindă plată**, nu zidul vertical din bară | **acceptat ca atare** |
+| **Jonca aruncă șoferul** la 37 m/s | **da, așa trebuie** — comportamentul rămâne |
+
+### Ficusul, remodelat
+
+Măsurat pe GLB-ul vechi, verdictul era corect și cifra îl confirmă:
+
+```
+INAINTE  coroana 2,4 m lata x 2,1 inalta, de la z=3,83 pe un copac de 5,92
+         -> 65% trunchi gol, coroana mai INGUSTA decat inalta
+ACUM     coroana 4,9 m lata x 3,0 inalta, de la z=3,06 pe 6,0 m
+         -> 51% trunchi gol, raport latime/inaltime 1,6 in loc de 1,1
+```
+
+Tehnica rămâne `foliage_pillow` (la 30–40 m o coroană e o **masă**, nu frunze
+— memoria `coroana-e-masa-nu-frunze`). S-au schimbat **proporțiile**: trunchi
+mai gros și mai scurt, ramuri aproape orizontale la 2,45 m, perne late și
+turtite plus una centrală peste trunchi, rădăcini aeriene scurte și lipite.
+
+Bugetul piesei 400 → 500 (474 măsurat): o coroană lată costă mai mult decât
+una îngustă, și asta e exact ce cumpără piesa. Triunghiurile nu sunt
+constrângerea pe pista asta (15 materiale din 38, 45 de desene față de
+506–1088 pe celelalte piste).
+
 ## Gărzi care au trecut peste defecte reale — de ce
 
 Două dintre gărzile scrise în sesiunea fără gauntlet au raportat verde pe

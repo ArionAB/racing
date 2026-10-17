@@ -12301,6 +12301,9 @@ func _build_hazard(frac: float, spec: Dictionary = {}) -> void:
 		# ramane implicitul clasei, deci nimic de pe alte piste nu se misca.
 		ball.max_sweep_speed = float(kind.get("sweep_speed",
 			theme_flag("hazard_sweep_speed", SlidingHazard.MAX_SWEEP_SPEED_DEFAULT)))
+		# Cota din sol, nu din linia asfaltului (vacile de pe coama Serengeti,
+		# #503). Doar la cerere — vezi SlidingHazard.follow_ground.
+		ball.follow_ground = bool(kind.get("follow_ground", false))
 		# Cu ce se uita obiectul spre directia in care matura. Fara steag ramane
 		# pe axele LUMII, ceea ce e o nepasare acceptabila la o barca targ ita
 		# (n-are un "inainte" al ei) si vizibil gresit la un animal: o testoasa

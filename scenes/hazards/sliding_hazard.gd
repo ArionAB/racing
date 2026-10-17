@@ -94,6 +94,19 @@ const ESCAPE_LANE_DEFAULT: float = 0.0
 ## m/s dati masinii lovite, ca sa iasa din calea obstacolului.
 const SWEEP_PUSH: float = 5.5
 
+## `follow_ground` — cat poate cobori / urca solul fata de linia asfaltului
+## inainte ca obstacolul sa se OPREASCA acolo, in loc sa-l urmeze. Un animal
+## coboara un taluz de un metru si jumatate; nu coboara peretele unei coame.
+## Masurat pe coama Serengeti (E_Ankole1-5): la umar solul e la -1,1 m, iar
+## dupa un metru cade la -5…-21 m. Fara oprire, vaca ar fi coborat peretele.
+const GROUND_MAX_DROP: float = 1.5
+const GROUND_MAX_RISE: float = 3.0
+## Esantioane ale profilului de sol pe toata cursa (-1..+1).
+const GROUND_SAMPLES: int = 41
+## Cate cadre de fizica se reincearca profilul (terenul intra in spatiul fizic
+## abia dupa primul pas, ca la `AvalancheHazard`).
+const GROUND_ATTEMPTS: int = 30
+
 ## Modelele cu schelet (vaca) isi aleg animatia dupa VITEZA REALA a nodului,
 ## nu dupa faza de miscare: aceeasi regula acopera si pendularea (viteza
 ## sinusoidala — la capete vaca incetineste si se apuca de pascut) si
@@ -152,6 +165,19 @@ var phase: float = 0.0
 ## verticalei), in loc sa mearga cu spatele. Pus de pista odata cu
 ## `face_travel`. Pendularea si usa nu-l folosesc.
 var turn_around: bool = false
+## Corpul calca pe SOL pe toata cursa, nu pe linia dreapta prin asfalt.
+##
+## Fara el, cota e cea a centrului (axa drumului) pana la capatul de parcare —
+## corect pe campie, gresit oriunde acostamentul coboara: vacile de pe coama
+## Serengeti (#503) pareau sa pluteasca la capatul din dreapta, cu versantul
+## la 5-21 m sub copite. Cu el, cota vine dintr-un profil de sol masurat o
+## singura data pe axa cursei (teren + sosea, fara decor, masini sau apa), iar
+## capatul de pe o parte care cade in gol se scurteaza pana la buza (vezi
+## GROUND_MAX_DROP).
+##
+## OPT-IN, nu implicit: un obstacol care traverseaza APA (jonca de pe Ha Long)
+## ar fi coborat pe fundul marii.
+var follow_ground: bool = false
 
 ## Model optional + configuratia lui.
 var model_scene: PackedScene
@@ -189,6 +215,12 @@ var _configured: bool = false
 var _cooldown: Dictionary = {}
 ## Viteza reala a corpului la ultimul pas (m/s). USA nu imbranceste cat sta.
 var _speed: float = 0.0
+## `follow_ground`: abaterea solului fata de linia cursei, pe GROUND_SAMPLES
+## puncte de la -1 la +1, si cat din cursa se parcurge pe fiecare parte.
+var _ground_dy := PackedFloat32Array()
+var _ground_attempts: int = GROUND_ATTEMPTS
+var _reach_neg: float = 1.0
+var _reach_pos: float = 1.0
 
 func _ready() -> void:
 	sync_to_physics = true
@@ -211,7 +243,7 @@ func _configure() -> void:
 		add_to_group(DOOR_GROUP)
 	# Pozitia de start a defazajului, nu centrul: altfel primul cadru "vede" o
 	# deplasare de toata amplitudinea si roteste mingea brusc.
-	_last_pos = center + travel * _offset_now()
+	_last_pos = _pos_at(_offset_now())
 
 ## Obstacolul nu iese niciodata din sosea: cursa se taie astfel incat MARGINEA
 ## lui sa se opreasca la marginea drumului (plus `escape_lane`, daca pista e
@@ -482,7 +514,10 @@ func _physics_process(delta: float) -> void:
 	if not _configured:
 		_configure()
 	_time += delta
-	var next_pos := center + travel * _offset_now()
+	if follow_ground and _ground_dy.is_empty() and _ground_attempts > 0 \
+			and not Engine.is_editor_hint():
+		_measure_ground()
+	var next_pos := _pos_at(_offset_now())
 	var moved := next_pos - _last_pos
 	# Intoarcerea la capat de cursa: O SINGURA scriere de transform (baza +
 	# pozitie) — cu sync_to_physics, pozitia si rotatia scrise separat in
@@ -532,6 +567,85 @@ func _in_telegraph(time: float) -> bool:
 ## a sti unde e obstacolul, care ar fi divergat la prima corectie de mecanica.
 func _offset_now() -> float:
 	return _offset_at(_time)
+
+## Pozitia in lume pentru o fractie de cursa -1..+1. Fara `follow_ground` e
+## linia dreapta prin centru, ca pana acum; cu el, fractia se scurteaza pe
+## partea care cade in gol si cota urmeaza profilul de sol.
+func _pos_at(offset: float) -> Vector3:
+	if _ground_dy.is_empty():
+		return center + travel * offset
+	var k := offset * (_reach_pos if offset > 0.0 else _reach_neg)
+	var f := (k + 1.0) * 0.5 * float(GROUND_SAMPLES - 1)
+	var i := clampi(int(floor(f)), 0, GROUND_SAMPLES - 2)
+	var dy := lerpf(_ground_dy[i], _ground_dy[i + 1], clampf(f - float(i), 0.0, 1.0))
+	return center + travel * k + Vector3.UP * dy
+
+## Profilul solului pe axa cursei, o singura data (terenul si soseaua nu se
+## misca). Se reincearca pana raspunde spatiul fizic; daca nu raspunde deloc,
+## obstacolul ramane pe linia dreapta, ca fara steag.
+func _measure_ground() -> void:
+	_ground_attempts -= 1
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return
+	var dys := PackedFloat32Array()
+	dys.resize(GROUND_SAMPLES)
+	var found := 0
+	for s in GROUND_SAMPLES:
+		var k := -1.0 + 2.0 * float(s) / float(GROUND_SAMPLES - 1)
+		var p := center + travel * k
+		var gy := _ground_y(space, p)
+		dys[s] = NAN if is_nan(gy) else gy - p.y
+		if not is_nan(gy):
+			found += 1
+	if found == 0:
+		return
+	# Gauri (fara sol sub raza): iau vecinul cel mai apropiat cu sol.
+	for s in GROUND_SAMPLES:
+		if not is_nan(dys[s]):
+			continue
+		for d in range(1, GROUND_SAMPLES):
+			if s - d >= 0 and not is_nan(dys[s - d]):
+				dys[s] = dys[s - d]
+				break
+			if s + d < GROUND_SAMPLES and not is_nan(dys[s + d]):
+				dys[s] = dys[s + d]
+				break
+	# Cat se merge pe fiecare parte: pana la ultimul esantion inainte de
+	# primul care iese din fereastra [-GROUND_MAX_DROP, +GROUND_MAX_RISE].
+	var mid := (GROUND_SAMPLES - 1) / 2
+	_reach_pos = _side_reach(dys, mid, 1)
+	_reach_neg = _side_reach(dys, mid, -1)
+	_ground_dy = dys
+
+func _side_reach(dys: PackedFloat32Array, mid: int, dir: int) -> float:
+	var last_ok := mid
+	var s := mid + dir
+	while s >= 0 and s < GROUND_SAMPLES:
+		if dys[s] < -GROUND_MAX_DROP or dys[s] > GROUND_MAX_RISE:
+			break
+		last_ok = s
+		s += dir
+	return float(absi(last_ok - mid)) / float(mid)
+
+## Cota SOLULUI sub un punct: terenul si soseaua, adica corpurile statice pe
+## care pista le pune direct sub ea (TerrainBody, RoadTop, fusta). Decorul
+## (copaci, stanci), masinile si alte obstacole se sar — o vaca nu urca pe un
+## trunchi de acacia doar fiindca raza l-a atins primul.
+func _ground_y(space: PhysicsDirectSpaceState3D, at: Vector3) -> float:
+	var from := at + Vector3.UP * (GROUND_MAX_RISE + 3.0)
+	var exclude: Array[RID] = [get_rid()]
+	for attempt in 8:
+		var q := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * 80.0)
+		q.exclude = exclude
+		var hit := space.intersect_ray(q)
+		if hit.is_empty():
+			return NAN
+		var body := hit.collider as Node
+		if body is StaticBody3D and body.get_parent() is Track:
+			return (hit.position as Vector3).y
+		exclude.append(hit.rid as RID)
+	return NAN
 
 func _offset_at(time: float) -> float:
 	if motion == Motion.PENDULARE:

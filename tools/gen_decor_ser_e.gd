@@ -438,6 +438,9 @@ func _boma_and_herd() -> void:
 		_out.append('model = ExtResource("s_cow")')
 		_out.append("model_scale = %.3f" % COW_SCALE)
 		_out.append("face_travel = true")
+		# Pe coama solul cade abrupt dincolo de umar: fara asta vacile
+		# parcau la cota asfaltului, cu versantul la 5-21 m sub ele (#503).
+		_out.append("follow_ground = true")
 		_out.append("motion = 1")
 		_out.append("")
 		print("; Ankole%d la frac %.4f (%.1f, %.1f, %.1f), defazaj %.3f"

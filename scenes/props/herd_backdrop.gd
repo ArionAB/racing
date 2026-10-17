@@ -23,6 +23,10 @@ extends Node3D
 ## Cota vine dintr-o raza reala pe teren, trasa in primul cadru de fizica (in
 ## `_ready` spatiul fizic nu raspunde inca); memoria
 ## `terrain-mesh-y-extrapoleaza` spune de ce nu se foloseste campul neted.
+## Raza ia DOAR TerrainBody, iar un loc pe care sta un corp de decor (trunchi,
+## stanca, termitiera) se respinge: inainte, 157 din 856 de animale stateau in
+## acacii si bolovani sau cocotate pe ele, pana la 16 m (#501). Garda e
+## `tools/ProbeAnimalOverlap.tscn`.
 
 ## Cate animale in total (gnu + zebre).
 @export_range(0, 1200) var count: int = 320
@@ -53,9 +57,21 @@ extends Node3D
 @export_range(0.0, 6.0, 0.1) var min_gap: float = 0.0
 @export var seed: int = 1403
 
+## Cate locuri se incearca pentru un animal, si din cate cer si `min_gap`.
+const PLACE_TRIES := 36
+const PLACE_TRIES_GAP := 12
+## Amprenta folosita la testul de loc liber (vezi `_footprint_query`).
+const FOOTPRINT_RADIUS := 1.2
+const FOOTPRINT_HEIGHT := 1.3
+
 var _mmi_gnu: MultiMeshInstance3D
 var _mmi_zebra: MultiMeshInstance3D
 var _built := false
+## Transformurile in lume ale tuturor animalelor, in ordinea asezarii. Pentru
+## garda `tools/probe_animal_overlap.gd`: in headless MultiMesh-ul NU le mai
+## da inapoi (`get_instance_transform` iese zero — memoria
+## `multimesh-masuratoare-moarta`), deci sonda le citeste de aici.
+var placed_transforms: Array[Transform3D] = []
 
 
 func _ready() -> void:
@@ -104,14 +120,21 @@ func _build() -> void:
 	var top := global_position.y + 150.0
 	var placed: Array[Vector2] = []
 	var gap2 := min_gap * min_gap
+	var body_probe := _footprint_query()
+	var dropped := 0
 	for i in count:
 		var sgn: float = sides[i % sides.size()]
 		var lx := 0.0
 		var lz := 0.0
-		# Pana la 12 incercari sa cada la cel putin `min_gap` de vecini; daca
-		# nu reuseste, se accepta ultima (mai bine un animal in plus decat un
-		# gol, si oricum banda e finita).
-		for _try in 12:
+		var wp := Vector3.ZERO
+		var gy := global_position.y
+		var found := false
+		# Primele PLACE_TRIES_GAP incercari cer si `min_gap` fata de vecini si
+		# loc liber de decor; dupa ele, doar locul liber (mai bine doi gnu
+		# apropiati decat un gol, si oricum banda e finita). Un animal care n-a
+		# gasit deloc loc liber se sare: mai bine unul lipsa decat unul intr-o
+		# acacie.
+		for attempt in PLACE_TRIES:
 			lx = rng.randf_range(-half_x, half_x)
 			# Mai desi aproape de drum decat departe (t patrat pe uniform:
 			# jumatate din animale in primul sfert al benzii), ca in referinta,
@@ -119,25 +142,27 @@ func _build() -> void:
 			var t := rng.randf()
 			t = t * t
 			lz = sgn * lerpf(band_near, band_far, t)
-			if gap2 <= 0.0:
-				break
-			var ok := true
-			for q in placed:
-				if Vector2(lx, lz).distance_squared_to(q) < gap2:
-					ok = false
-					break
-			if ok:
-				break
+			wp = global_transform * Vector3(lx, 0.0, lz)
+			gy = _terrain_y(space, wp, top)
+			if is_nan(gy):
+				gy = global_position.y
+			if _occupied(space, body_probe, Vector3(wp.x, gy, wp.z)):
+				continue
+			if gap2 > 0.0 and attempt < PLACE_TRIES_GAP:
+				var ok := true
+				for q in placed:
+					if Vector2(lx, lz).distance_squared_to(q) < gap2:
+						ok = false
+						break
+				if not ok:
+					continue
+			found = true
+			break
+		if not found:
+			dropped += 1
+			continue
 		if gap2 > 0.0:
 			placed.append(Vector2(lx, lz))
-		var wp := global_transform * Vector3(lx, 0.0, lz)
-		var gy := global_position.y
-		var q := PhysicsRayQueryParameters3D.create(
-			Vector3(wp.x, top, wp.z), Vector3(wp.x, top - 400.0, wp.z))
-		q.collide_with_areas = false
-		var hit: Dictionary = space.intersect_ray(q)
-		if not hit.is_empty():
-			gy = float(hit["position"].y)
 		var yaw := rng.randf_range(-heading_spread, heading_spread)
 		# -Z e „inainte" la mesh-urile din kit; curgerea merge pe +Z local,
 		# deci fata spre +Z inseamna yaw PI.
@@ -152,12 +177,63 @@ func _build() -> void:
 		var scl := rng.randf_range(0.92, 1.08)
 		var xf := Transform3D(basis.scaled(Vector3(scl, scl, scl)),
 			Vector3(wp.x, gy, wp.z))
+		placed_transforms.append(xf)
 		if rng.randf() < zebra_ratio:
 			xf_zebra.append(xf)
 		else:
 			xf_gnu.append(xf)
+	if dropped > 0:
+		print("HerdBackdrop %s: %d/%d animale fara loc liber de decor, sarite"
+			% [name, dropped, count])
 	_mmi_gnu = _lot("FundalGnu", gnu_mesh, xf_gnu, mat, rng)
 	_mmi_zebra = _lot("FundalZebra", zebra_mesh, xf_zebra, mat, rng)
+
+
+## Cota TERENULUI sub punct. Raza veche lua cota din primul corp lovit, deci
+## un gnu asezat sub o acacie ateriza pe varful trunchiului (pana la 9,8 m) iar
+## unul langa `umarIesire38` pe stanca, la 16 m (#501). Corpurile care nu sunt
+## teren se sar, ca in `FlamingoFlock._ground`.
+func _terrain_y(space: PhysicsDirectSpaceState3D, wp: Vector3, top: float) -> float:
+	var q := PhysicsRayQueryParameters3D.create(
+		Vector3(wp.x, top, wp.z), Vector3(wp.x, top - 400.0, wp.z))
+	q.collide_with_areas = false
+	for _i in 8:
+		var hit: Dictionary = space.intersect_ray(q)
+		if hit.is_empty():
+			return NAN
+		var col := hit["collider"] as Node
+		if col != null and String(col.name).begins_with("TerrainBody"):
+			return float(hit["position"].y)
+		q.exclude = q.exclude + [hit["rid"]]
+	return NAN
+
+
+## Amprenta unui animal ca cilindru vertical: raza ~ jumatate din lungimea
+## gnu-ului (2,4 m) stransa putin — yaw-ul se trage DUPA alegerea locului, deci
+## forma nu poate depinde de el. Pleaca la 0,2 m peste sol, ca panta sa nu
+## atinga terenul (care oricum se sare dupa nume).
+func _footprint_query() -> PhysicsShapeQueryParameters3D:
+	var cyl := CylinderShape3D.new()
+	cyl.radius = FOOTPRINT_RADIUS
+	cyl.height = FOOTPRINT_HEIGHT
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = cyl
+	q.collide_with_areas = false
+	return q
+
+
+## Locul e ocupat de un corp care nu e teren: trunchi, stanca, termitiera,
+## cort, sosea. Decorul fara coliziune (iarba, tufe) nu conteaza — prin el se
+## trece, si un gnu in iarba e chiar locul lui.
+func _occupied(space: PhysicsDirectSpaceState3D,
+		q: PhysicsShapeQueryParameters3D, at: Vector3) -> bool:
+	q.transform = Transform3D(Basis.IDENTITY,
+		at + Vector3.UP * (0.2 + FOOTPRINT_HEIGHT * 0.5))
+	for r in space.intersect_shape(q, 8):
+		var col := r["collider"] as Node
+		if col is StaticBody3D and not String(col.name).begins_with("TerrainBody"):
+			return true
+	return false
 
 
 func _lot(lot_name: String, mesh: Mesh, xfs: Array[Transform3D],

@@ -765,8 +765,10 @@ def add(nm, res, xform, extra=""):
 
 # Turnuri de calcar pe exteriorul buclei, ca FLANC (brief §2.0: < 40 m lateral).
 k = 0
-for ff, lat, sc in ((0.09, 34.0, 2.6), (0.14, 38.0, 3.1), (0.19, 33.0, 2.4),
-                    (0.26, 36.0, 2.8), (0.31, -30.0, 2.2), (0.355, -34.0, 2.9),
+# 0.09/0.14/0.19 (POI B) scoase: la scara 2,4-3,1 erau blocuri de 25-30 m la
+# 33-38 m de ax, ziduri verticale in cadrul camerei; POI B are acum turnuri mici
+# proprii (`TurnB*`, mai jos), ca in bara.
+for ff, lat, sc in ((0.26, 36.0, 2.8), (0.31, -30.0, 2.2), (0.355, -34.0, 2.9),
                     (0.76, 32.0, 2.3), (0.80, 36.0, 2.7), (0.86, 34.0, 2.5),
                     (0.92, 38.0, 3.0), (0.96, 32.0, 2.2)):
     g = at_road(ff, lat)
@@ -827,6 +829,46 @@ for _idx, (_pa, _pb) in enumerate(PONT_SEGS):
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(_pa)) + 90.0, 1.0, _QUAY_SY, 3.9)}, "
         f"{g[0]:.2f}, {g[1] - _top_offset:.2f}, {g[2]:.2f})")
     k += 1
+
+# --- POI B: turnuri mici din apa, cu smoc pe varf si moloz la poale ---------
+# Bara (bara_poi_B.png): turnuri de calcar de 10-18 m care ies DREPT din apa,
+# fiecare cu smoc de verde pe varf (`Tower_Scrub` e deja in GLB) si bolovani la
+# linia apei, tablierul serpuind printre ele. Turnurile `karst_tower_*` (45-65 m)
+# scalate la 0,2-0,34 dau 11-20 m, cu nisa de val la baza (contract kit).
+# DISTANTA PE GABARIT: pontonul are 6 m carosabil (3 m semi-latime), deci
+# lateral = 3 + jumatatea latimii turnului + rezerva, nu o cifra la ochi.
+# Doar pe DREAPTA (spre larg): pe stanga terenul e uscat la cota drumului pe
+# ~50 m (masurat), turnurile ar sta pe nisip.
+_TW_HALF = {"tower_a": 17.5, "tower_b": 16.5, "tower_c": 20.5}
+_TW_BASE_R = {"tower_a": 12.8, "tower_b": 12.0, "tower_c": 14.0}
+_PB0, _PB1 = PONT_SEGS[0][0] - 0.004, PONT_SEGS[-1][1] + 0.004
+_TWB = (  # (u in [0,1], rezerva m, tip, scara)
+    (0.02, 5.0, "tower_a", 0.30), (0.075, 12.0, "tower_c", 0.20),
+    (0.13, 3.5, "tower_b", 0.27), (0.19, 9.0, "tower_a", 0.22),
+    (0.245, 4.0, "tower_c", 0.24), (0.30, 11.0, "tower_b", 0.20),
+    (0.355, 3.0, "tower_a", 0.31), (0.41, 8.0, "tower_c", 0.21),
+    (0.465, 4.5, "tower_b", 0.26), (0.52, 10.0, "tower_a", 0.20),
+    (0.575, 3.5, "tower_c", 0.25), (0.63, 7.0, "tower_a", 0.28),
+    (0.69, 12.0, "tower_b", 0.19), (0.745, 4.0, "tower_c", 0.23),
+    (0.80, 9.0, "tower_a", 0.24), (0.855, 3.0, "tower_b", 0.28),
+    (0.915, 8.0, "tower_a", 0.21), (0.97, 5.0, "tower_c", 0.22),
+)
+for i, (u, gap, kind, sc) in enumerate(_TWB):
+    ff = _PB0 + (_PB1 - _PB0) * u
+    lat = 8.2 + 1.5 * _TW_HALF[kind] * sc + max(gap * 0.5, 2.0)
+    g = at_road(ff, lat)
+    # origine la baza; nisa kitului sta la 3,3 m*sc deasupra ei -> baza sub apa
+    add(f"TurnB{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + i * 67.0, sc, sc, sc)}, "
+        f"{g[0]:.2f}, {0.0 - (3.3 * sc - 0.2):.2f}, {g[2]:.2f})")
+    # moloz la linia apei: 4 bolovani in jurul bazei ("stanca mancata")
+    for q in range(4):
+        a = math.radians(i * 41.0 + q * 91.0)
+        rr = _TW_BASE_R[kind] * sc + 0.6 + 0.5 * (q % 2)
+        bs = 0.55 + 0.35 * ((i + q) % 3)
+        add(f"BolovanB{i:02d}{q}", "boulder",
+            f"Transform3D({rot_y_s(i * 53.0 + q * 71.0, bs, bs, bs)}, "
+            f"{g[0] + math.cos(a) * rr:.2f}, {-0.2:.2f}, {g[2] + math.sin(a) * rr:.2f})")
 
 # --- VALURILE 2 SI 3: satul, barcile, drumul, vegetatia, belvederea ---------
 #
@@ -1245,7 +1287,8 @@ RES = {"rock": "13_rock", "quay": "14_quay",
        "dike": "30_dike", "pavilion": "31_pavilion",
        "ficus_a": "32_ficus_a", "ficus_b": "33_ficus_b",
        "bamboo": "34_bamboo", "scrub": "35_scrub",
-       "boulder": "36_boulder"}
+       "boulder": "36_boulder",
+       "tower_a": "37_tower_a", "tower_b": "38_tower_b", "tower_c": "39_tower_c"}
 
 # --- consola: fractiile care conteaza la pasul urmator -----------------------
 print("\n=== FRACTII (pentru pasii urmatori) ===")
@@ -1359,6 +1402,9 @@ tscn = f"""[gd_scene format=3]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/bamboo_clump.glb" id="34_bamboo"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/scrub_tuft.glb" id="35_scrub"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/rocks/shore_boulder.glb" id="36_boulder"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_a.glb" id="37_tower_a"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_b.glb" id="38_tower_b"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_c.glb" id="39_tower_c"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true

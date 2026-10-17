@@ -28,6 +28,9 @@
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/bamboo_clump.glb" id="34_bamboo"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/plants/scrub_tuft.glb" id="35_scrub"]
 [ext_resource type="PackedScene" path="res://assets/models/halong/rocks/shore_boulder.glb" id="36_boulder"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_a.glb" id="37_tower_a"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_b.glb" id="38_tower_b"]
+[ext_resource type="PackedScene" path="res://assets/models/halong/rocks/karst_tower_c.glb" id="39_tower_c"]
 
 [sub_resource type="Curve3D" id="Curve3D_main"]
 closed = true
@@ -260,37 +263,28 @@ rise_m = 1.5
 script = ExtResource("9_prop")
 
 [node name="TurnCalcar00" parent="DecorManual" instance=ExtResource("20_stack_a")]
-transform = Transform3D(1.86055, 0, 0.20673, 0, 1.8719999999999999, 0, -0.20673, 0, 1.86055, -385.67, -0.60, -145.16)
+transform = Transform3D(1.41964, 0, 1.43139, 0, 2.016, 0, -1.43139, 0, 1.41964, -312.42, 0.39, 218.61)
 
 [node name="TurnCalcar01" parent="DecorManual" instance=ExtResource("21_stack_b")]
-transform = Transform3D(2.82138, 0, -0.84430, 0, 2.945, 0, 0.84430, 0, 2.82138, -378.22, -0.60, -41.86)
+transform = Transform3D(1.32828, 0, 1.61362, 0, 2.09, 0, -1.61362, 0, 1.32828, -190.31, 1.33, 216.90)
 
 [node name="TurnCalcar02" parent="DecorManual" instance=ExtResource("20_stack_a")]
-transform = Transform3D(1.35754, 0, -1.06914, 0, 1.728, 0, 1.06914, 0, 1.35754, -361.47, -0.60, 61.23)
+transform = Transform3D(1.74797, 0, 1.14208, 0, 2.088, 0, -1.14208, 0, 1.74797, -102.59, 2.69, 236.63)
 
 [node name="TurnCalcar03" parent="DecorManual" instance=ExtResource("21_stack_b")]
-transform = Transform3D(2.43447, 0, -1.07189, 0, 2.6599999999999997, 0, 1.07189, 0, 2.43447, -312.42, 0.39, 218.61)
+transform = Transform3D(-2.18498, 0, 0.00955, 0, 2.1849999999999996, 0, -0.00955, 0, -2.18498, 110.01, 0.24, -216.22)
 
 [node name="TurnCalcar04" parent="DecorManual" instance=ExtResource("20_stack_a")]
-transform = Transform3D(1.50250, 0, -0.50156, 0, 1.584, 0, 0.50156, 0, 1.50250, -190.31, 2.21, 216.90)
+transform = Transform3D(-1.91050, 0, 0.35935, 0, 1.944, 0, -0.35935, 0, -1.91050, 22.79, 2.21, -237.73)
 
 [node name="TurnCalcar05" parent="DecorManual" instance=ExtResource("21_stack_b")]
-transform = Transform3D(2.23335, 0, -1.61313, 0, 2.755, 0, 1.61313, 0, 2.23335, -102.59, 3.66, 236.63)
+transform = Transform3D(-1.05637, 0, 2.12714, 0, 2.375, 0, -2.12714, 0, -1.05637, -81.10, 3.66, -258.00)
 
 [node name="TurnCalcar06" parent="DecorManual" instance=ExtResource("20_stack_a")]
-transform = Transform3D(-0.58669, 0, 1.54859, 0, 1.656, 0, -1.54859, 0, -0.58669, 110.01, 1.15, -216.22)
+transform = Transform3D(-1.62795, 0, 1.41964, 0, 2.16, 0, -1.41964, 0, -1.62795, -179.37, 1.15, -360.73)
 
 [node name="TurnCalcar07" parent="DecorManual" instance=ExtResource("21_stack_b")]
-transform = Transform3D(-0.46072, 0, 2.52328, 0, 2.565, 0, -2.52328, 0, -0.46072, 22.79, 1.10, -237.73)
-
-[node name="TurnCalcar08" parent="DecorManual" instance=ExtResource("20_stack_a")]
-transform = Transform3D(1.21815, 0, 1.32518, 0, 1.7999999999999998, 0, -1.32518, 0, 1.21815, -81.10, 0.41, -258.00)
-
-[node name="TurnCalcar09" parent="DecorManual" instance=ExtResource("21_stack_b")]
-transform = Transform3D(0.97895, 0, 2.67659, 0, 2.8499999999999996, 0, -2.67659, 0, 0.97895, -179.37, 0.50, -360.73)
-
-[node name="TurnCalcar10" parent="DecorManual" instance=ExtResource("20_stack_a")]
-transform = Transform3D(0.50315, 0, 1.50196, 0, 1.584, 0, -1.50196, 0, 0.50315, -257.13, 0.22, -304.88)
+transform = Transform3D(-1.61222, 0, 1.32998, 0, 2.09, 0, -1.32998, 0, -1.61222, -257.13, 1.10, -304.88)
 
 [node name="Insulita00" parent="DecorManual" instance=ExtResource("14_quay")]
 transform = Transform3D(0.11043, 0, -3.87615, 0, 1.0, 0, 0.99388, 0, 0.43068, -348.75, -1.12, -120.74)
@@ -309,6 +303,276 @@ transform = Transform3D(0.13757, 0, -3.86292, 0, 1.0, 0, 0.99049, 0, 0.53652, -3
 
 [node name="Insulita05" parent="DecorManual" instance=ExtResource("14_quay")]
 transform = Transform3D(0.33282, 0, -3.67766, 0, 1.0, 0, 0.94299, 0, 1.29800, -315.36, -0.94, 133.14)
+
+[node name="TurnB00" parent="DecorManual" instance=ExtResource("37_tower_a")]
+transform = Transform3D(0.29817, 0, 0.03313, 0, 0.3, 0, -0.03313, 0, 0.29817, -372.52, -0.79, -166.46)
+
+[node name="BolovanB000" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.55000, 0, -0.00000, 0, 0.55, 0, 0.00000, 0, 0.55000, -368.08, -0.20, -166.46)
+
+[node name="BolovanB001" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.29301, 0, -0.85097, 0, 0.9, 0, 0.85097, 0, 0.29301, -372.60, -0.20, -161.52)
+
+[node name="BolovanB002" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.98501, 0, -0.76958, 0, 1.25, 0, 0.76958, 0, -0.98501, -376.96, -0.20, -166.62)
+
+[node name="BolovanB003" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.46127, 0, 0.29955, 0, 0.55, 0, -0.29955, 0, -0.46127, -372.26, -0.20, -171.40)
+
+[node name="TurnB01" parent="DecorManual" instance=ExtResource("39_tower_c")]
+transform = Transform3D(0.09800, 0, -0.17435, 0, 0.2, 0, 0.17435, 0, 0.09800, -372.05, -0.46, -146.19)
+
+[node name="BolovanB010" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.54163, 0, -0.71877, 0, 0.9, 0, 0.71877, 0, 0.54163, -369.49, -0.20, -143.96)
+
+[node name="BolovanB011" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.69899, 0, -1.03630, 0, 1.25, 0, 1.03630, 0, -0.69899, -374.66, -0.20, -143.30)
+
+[node name="BolovanB012" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.53126, 0, 0.14235, 0, 0.55, 0, -0.14235, 0, -0.53126, -374.54, -0.20, -148.51)
+
+[node name="BolovanB013" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.06278, 0, 0.89781, 0, 0.9, 0, -0.89781, 0, -0.06278, -369.34, -0.20, -149.00)
+
+[node name="TurnB02" parent="DecorManual" instance=ExtResource("38_tower_b")]
+transform = Transform3D(-0.16496, 0, -0.21375, 0, 0.27, 0, 0.21375, 0, -0.16496, -366.38, -0.69, -126.50)
+
+[node name="BolovanB020" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.34455, 0, -1.20158, 0, 1.25, 0, 1.20158, 0, -0.34455, -365.84, -0.20, -122.70)
+
+[node name="BolovanB021" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.54925, 0, -0.02878, 0, 0.55, 0, 0.02878, 0, -0.54925, -370.68, -0.20, -125.98)
+
+[node name="BolovanB022" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.33715, 0, 0.83447, 0, 0.9, 0, -0.83447, 0, -0.33715, -366.78, -0.20, -130.32)
+
+[node name="BolovanB023" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.94339, 0, 0.82007, 0, 1.25, 0, -0.82007, 0, 0.94339, -362.05, -0.20, -126.88)
+
+[node name="TurnB03" parent="DecorManual" instance=ExtResource("37_tower_a")]
+transform = Transform3D(-0.21284, 0, 0.05568, 0, 0.22, 0, -0.05568, 0, -0.21284, -365.53, -0.53, -104.43)
+
+[node name="BolovanB030" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.51347, 0, -0.19710, 0, 0.55, 0, 0.19710, 0, -0.51347, -367.39, -0.20, -101.57)
+
+[node name="BolovanB031" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.57851, 0, 0.68944, 0, 0.9, 0, -0.68944, 0, -0.57851, -368.77, -0.20, -106.62)
+
+[node name="BolovanB032" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.64380, 0, 1.07146, 0, 1.25, 0, -1.07146, 0, 0.64380, -363.57, -0.20, -107.23)
+
+[node name="BolovanB033" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.53798, 0, -0.11435, 0, 0.55, 0, 0.11435, 0, 0.53798, -362.36, -0.20, -102.13)
+
+[node name="TurnB04" parent="DecorManual" instance=ExtResource("39_tower_c")]
+transform = Transform3D(-0.03481, 0, 0.23746, 0, 0.24, 0, -0.23746, 0, -0.03481, -362.41, -0.59, -84.46)
+
+[node name="BolovanB040" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.76324, 0, 0.47693, 0, 0.9, 0, -0.47693, 0, -0.76324, -366.21, -0.20, -83.37)
+
+[node name="BolovanB041" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.28119, 0, 1.21796, 0, 1.25, 0, -1.21796, 0, 0.28119, -363.56, -0.20, -88.77)
+
+[node name="BolovanB042" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.54699, 0, 0.05749, 0, 0.55, 0, -0.05749, 0, 0.54699, -358.56, -0.20, -85.42)
+
+[node name="BolovanB043" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.38036, 0, -0.81568, 0, 0.9, 0, 0.81568, 0, 0.38036, -361.40, -0.20, -80.11)
+
+[node name="TurnB05" parent="DecorManual" instance=ExtResource("38_tower_b")]
+transform = Transform3D(0.17082, 0, 0.10402, 0, 0.2, 0, -0.10402, 0, 0.17082, -361.24, -0.46, -64.27)
+
+[node name="BolovanB050" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.10894, 0, 1.24524, 0, 1.25, 0, -1.24524, 0, -0.10894, -363.96, -0.20, -65.54)
+
+[node name="BolovanB051" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.50245, 0, 0.22371, 0, 0.55, 0, -0.22371, 0, 0.50245, -359.70, -0.20, -67.41)
+
+[node name="BolovanB052" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.61380, 0, -0.65822, 0, 0.9, 0, 0.65822, 0, 0.61380, -358.57, -0.20, -62.91)
+
+[node name="BolovanB053" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.58684, 0, -1.10368, 0, 1.25, 0, 1.10368, 0, -0.58684, -362.88, -0.20, -61.18)
+
+[node name="TurnB06" parent="DecorManual" instance=ExtResource("37_tower_a")]
+transform = Transform3D(0.25187, 0, -0.18072, 0, 0.31, 0, 0.18072, 0, 0.25187, -358.70, -0.82, -44.23)
+
+[node name="BolovanB060" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.40873, 0, 0.36802, 0, 0.55, 0, -0.36802, 0, 0.40873, -360.56, -0.20, -48.40)
+
+[node name="BolovanB061" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.78716, 0, -0.43633, 0, 0.9, 0, 0.43633, 0, 0.78716, -354.03, -0.20, -46.21)
+
+[node name="BolovanB062" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.21706, 0, -1.23101, 0, 1.25, 0, 1.23101, 0, -0.21706, -356.99, -0.20, -39.99)
+
+[node name="BolovanB063" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.54323, 0, -0.08604, 0, 0.55, 0, 0.08604, 0, -0.54323, -363.43, -0.20, -42.41)
+
+[node name="TurnB07" parent="DecorManual" instance=ExtResource("39_tower_c")]
+transform = Transform3D(-0.04602, 0, -0.20489, 0, 0.21, 0, 0.20489, 0, -0.04602, -356.79, -0.49, -24.12)
+
+[node name="BolovanB070" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.88346, 0, -0.17173, 0, 0.9, 0, 0.17173, 0, 0.88346, -355.75, -0.20, -27.51)
+
+[node name="BolovanB071" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.17397, 0, -1.23784, 0, 1.25, 0, 1.23784, 0, 0.17397, -352.94, -0.20, -22.87)
+
+[node name="BolovanB072" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.49005, 0, -0.24969, 0, 0.55, 0, 0.24969, 0, -0.49005, -357.94, -0.20, -20.77)
+
+[node name="BolovanB073" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.64741, 0, 0.62519, 0, 0.9, 0, -0.62519, 0, -0.64741, -360.58, -0.20, -25.50)
+
+[node name="TurnB08" parent="DecorManual" instance=ExtResource("38_tower_b")]
+transform = Transform3D(-0.25578, 0, -0.04667, 0, 0.26, 0, 0.04667, 0, -0.25578, -352.79, -0.66, -4.25)
+
+[node name="BolovanB080" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.54796, 0, -1.12349, 0, 1.25, 0, 1.12349, 0, 0.54796, -349.64, -0.20, -6.22)
+
+[node name="BolovanB081" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.38891, 0, -0.38891, 0, 0.55, 0, 0.38891, 0, -0.38891, -350.62, -0.20, -0.63)
+
+[node name="BolovanB082" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.80891, 0, 0.39453, 0, 0.9, 0, -0.39453, 0, -0.80891, -356.02, -0.20, -2.39)
+
+[node name="BolovanB083" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.15234, 0, 1.24068, 0, 1.25, 0, -1.24068, 0, 0.15234, -354.84, -0.20, -7.94)
+
+[node name="TurnB09" parent="DecorManual" instance=ExtResource("37_tower_a")]
+transform = Transform3D(-0.10992, 0, 0.16708, 0, 0.2, 0, -0.16708, 0, -0.10992, -352.12, -0.46, 16.00)
+
+[node name="BolovanB090" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.24969, 0, -0.49005, 0, 0.55, 0, 0.49005, 0, -0.24969, -349.00, -0.20, 16.49)
+
+[node name="BolovanB091" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.89124, 0, 0.12526, 0, 0.9, 0, -0.12526, 0, -0.89124, -352.75, -0.20, 19.60)
+
+[node name="BolovanB092" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.23851, 0, 1.22703, 0, 1.25, 0, -1.22703, 0, -0.23851, -355.22, -0.20, 15.40)
+
+[node name="BolovanB093" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.47631, 0, 0.27500, 0, 0.55, 0, -0.27500, 0, 0.47631, -351.36, -0.20, 12.42)
+
+[node name="TurnB10" parent="DecorManual" instance=ExtResource("39_tower_c")]
+transform = Transform3D(0.13857, 0, 0.20809, 0, 0.25, 0, -0.20809, 0, 0.13857, -349.33, -0.62, 36.01)
+
+[node name="BolovanB100" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.88633, 0, -0.15628, 0, 0.9, 0, 0.15628, 0, -0.88633, -346.69, -0.20, 39.15)
+
+[node name="BolovanB101" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.60601, 0, 1.09327, 0, 1.25, 0, -1.09327, 0, -0.60601, -352.90, -0.20, 38.91)
+
+[node name="BolovanB102" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.36802, 0, 0.40873, 0, 0.55, 0, -0.40873, 0, 0.36802, -351.85, -0.20, 32.78)
+
+[node name="BolovanB103" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.82845, 0, -0.35166, 0, 0.9, 0, 0.35166, 0, 0.82845, -345.66, -0.20, 33.24)
+
+[node name="TurnB11" parent="DecorManual" instance=ExtResource("37_tower_a")]
+transform = Transform3D(0.27638, 0, -0.04487, 0, 0.28, 0, 0.04487, 0, 0.27638, -348.02, -0.72, 56.66)
+
+[node name="BolovanB110" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.91419, 0, 0.85250, 0, 1.25, 0, -0.85250, 0, -0.91419, -348.09, -0.20, 60.85)
+
+[node name="BolovanB111" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.22371, 0, 0.50245, 0, 0.55, 0, -0.50245, 0, 0.22371, -352.70, -0.20, 56.50)
+
+[node name="BolovanB112" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.89658, 0, -0.07844, 0, 0.9, 0, 0.07844, 0, 0.89658, -347.80, -0.20, 52.48)
+
+[node name="BolovanB113" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.30240, 0, -1.21287, 0, 1.25, 0, 1.21287, 0, 0.30240, -343.35, -0.20, 56.99)
+
+[node name="TurnB12" parent="DecorManual" instance=ExtResource("38_tower_b")]
+transform = Transform3D(0.04567, 0, -0.18443, 0, 0.19, 0, 0.18443, 0, 0.04567, -344.85, -0.43, 78.51)
+
+[node name="BolovanB120" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.05749, 0, 0.54699, 0, 0.55, 0, -0.54699, 0, 0.05749, -346.77, -0.20, 80.65)
+
+[node name="BolovanB121" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.87693, 0, 0.20246, 0, 0.9, 0, -0.20246, 0, 0.87693, -347.32, -0.20, 76.20)
+
+[node name="BolovanB122" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.66240, 0, -1.06006, 0, 1.25, 0, 1.06006, 0, 0.66240, -342.85, -0.20, 76.44)
+
+[node name="BolovanB123" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.34613, 0, -0.42743, 0, 0.55, 0, 0.42743, 0, -0.34613, -342.46, -0.20, 80.90)
+
+[node name="TurnB13" parent="DecorManual" instance=ExtResource("39_tower_c")]
+transform = Transform3D(-0.18391, 0, -0.13812, 0, 0.23, 0, 0.13812, 0, -0.18391, -340.45, -0.56, 98.29)
+
+[node name="BolovanB130" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.77145, 0, 0.46353, 0, 0.9, 0, -0.46353, 0, 0.77145, -344.25, -0.20, 98.75)
+
+[node name="BolovanB131" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.95756, 0, -0.80348, 0, 1.25, 0, 0.80348, 0, 0.95756, -340.91, -0.20, 93.99)
+
+[node name="BolovanB132" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.19710, 0, -0.51347, 0, 0.55, 0, 0.51347, 0, -0.19710, -336.65, -0.20, 97.96)
+
+[node name="BolovanB133" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.89945, 0, 0.03141, 0, 0.9, 0, -0.03141, 0, -0.89945, -340.15, -0.20, 102.60)
+
+[node name="TurnB14" parent="DecorManual" instance=ExtResource("37_tower_a")]
+transform = Transform3D(-0.20765, 0, 0.12034, 0, 0.24, 0, -0.12034, 0, -0.20765, -339.39, -0.59, 118.53)
+
+[node name="BolovanB140" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(1.15898, 0, -0.46826, 0, 1.25, 0, 0.46826, 0, 1.15898, -342.43, -0.20, 116.48)
+
+[node name="BolovanB141" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.02878, 0, -0.54925, 0, 0.55, 0, 0.54925, 0, -0.02878, -336.99, -0.20, 115.11)
+
+[node name="BolovanB142" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.86514, 0, -0.24807, 0, 0.9, 0, 0.24807, 0, -0.86514, -336.42, -0.20, 120.69)
+
+[node name="BolovanB143" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.71697, 0, 1.02394, 0, 1.25, 0, -1.02394, 0, -0.71697, -341.90, -0.20, 121.86)
+
+[node name="TurnB15" parent="DecorManual" instance=ExtResource("38_tower_b")]
+transform = Transform3D(-0.02168, 0, 0.27916, 0, 0.28, 0, -0.27916, 0, -0.02168, -330.79, -0.72, 140.89)
+
+[node name="BolovanB150" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.14235, 0, -0.53126, 0, 0.55, 0, 0.53126, 0, 0.14235, -331.82, -0.20, 137.06)
+
+[node name="BolovanB151" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.74613, 0, -0.50327, 0, 0.9, 0, 0.50327, 0, -0.74613, -326.47, -0.20, 139.81)
+
+[node name="BolovanB152" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.99829, 0, 0.75227, 0, 1.25, 0, -0.75227, 0, -0.99829, -329.90, -0.20, 144.74)
+
+[node name="BolovanB153" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.16996, 0, 0.52308, 0, 0.55, 0, -0.52308, 0, 0.16996, -335.16, -0.20, 141.81)
+
+[node name="TurnB16" parent="DecorManual" instance=ExtResource("37_tower_a")]
+transform = Transform3D(0.18637, 0, 0.09677, 0, 0.21, 0, -0.09677, 0, 0.18637, -324.01, -0.49, 161.86)
+
+[node name="BolovanB160" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.55410, 0, -0.70921, 0, 0.9, 0, 0.70921, 0, -0.55410, -322.57, -0.20, 158.90)
+
+[node name="BolovanB161" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-1.18190, 0, 0.40696, 0, 1.25, 0, -0.40696, 0, -1.18190, -320.64, -0.20, 163.58)
+
+[node name="BolovanB162" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.00000, 0, 0.55000, 0, 0.55, 0, -0.55000, 0, 0.00000, -325.55, -0.20, 164.76)
+
+[node name="BolovanB163" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.85097, 0, 0.29301, 0, 0.9, 0, -0.29301, 0, 0.85097, -327.32, -0.20, 160.02)
+
+[node name="TurnB17" parent="DecorManual" instance=ExtResource("39_tower_c")]
+transform = Transform3D(0.18986, 0, -0.11114, 0, 0.22, 0, 0.11114, 0, 0.18986, -315.78, -0.53, 183.33)
+
+[node name="BolovanB170" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-1.24981, 0, 0.02182, 0, 1.25, 0, -0.02182, 0, -1.24981, -312.39, -0.20, 181.89)
+
+[node name="BolovanB171" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(-0.16996, 0, 0.52308, 0, 0.55, 0, -0.52308, 0, -0.16996, -314.21, -0.20, 187.21)
+
+[node name="BolovanB172" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(0.71877, 0, 0.54163, 0, 0.9, 0, -0.54163, 0, 0.71877, -319.21, -0.20, 184.65)
+
+[node name="BolovanB173" parent="DecorManual" instance=ExtResource("36_boulder")]
+transform = Transform3D(1.03630, 0, -0.69899, 0, 1.25, 0, 0.69899, 0, 1.03630, -317.21, -0.20, 179.40)
 
 [node name="CasaPlutitoare00" parent="DecorManual" instance=ExtResource("22_house_a")]
 transform = Transform3D(0.97936, 0, -0.20210, 0, 1.0, 0, 0.20210, 0, 0.97936, -402.25, -0.12, -221.95)

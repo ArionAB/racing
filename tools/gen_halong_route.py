@@ -892,6 +892,102 @@ for i, (ff, lat, kind, yaw, sc) in enumerate((
         f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, sc, sc, sc)}, "
         f"{g[0]:.2f}, {_SEA_Y:.2f}, {g[2]:.2f})")
 
+# --- POI A, satul DENS (0.98 -> 0.05): fiecare POI ca unitate ----------------
+# Bucla veche punea satul la F["A chei"] + 0.006..0.028, adica DUPA capatul POI
+# A (0.05): masurat de ProbePoiCoverage, POI A avea 4 piese pe 145 m (2,8 la
+# 100 m, prag 6,0). Aici satul acopera chiar fereastra POI-ului, pe metri fata
+# de "A chei" (negativ = inainte de chei, spre linia de start/golful V).
+# Bara (bara_poi_A.png): case colorate LIPITE, tarcuri cu flotoare albastre,
+# barci legate, plase intinse — sat locuit, nu trei case razlete.
+#
+# TEREN (masurat cu o gratar de ground_y, dm x lateral): la dm -110..-10 exista
+# o PLATFORMA de uscat la +0,7..+0,9 intre lateral 0 si ~60 m (cheiul real), cu
+# tarmul la lateral ~62; dincolo apa: -1,4 la 68 m, -3,8 la 78, -7 la 88, -11 la
+# 98. Deci casele plutitoare NU pot sta la 21-34 m (prima incercare: 45 din 85
+# piese pe uscat) — ele stau la >= 68 m, in spatele cheiului de piatra, iar pe
+# platforma vin cheiul, rastelele de plase si vegetatia de tarm.
+_LA = L_TOTAL
+_A_DM0, _A_DM1 = -118.0, -8.0
+
+
+def _fa(dm):
+    return F["A chei"] + dm / _LA
+
+
+# cheiul de piatra pe tarm (lateral 60): module de 12,1 m pe X, X -> axa
+# drumului. Terenul de sub el e la ~+0,7, deci baza la -0,8 aduce varful (1,5 m)
+# la +0,7, la nivelul platformei.
+for i in range(10):
+    ff = _fa(_A_DM0 + 6.0 + i * 12.1)
+    g = at_road(ff, 60.0)
+    add(f"CheiStart{i:02d}", "quay",
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {-0.80:.2f}, {g[2]:.2f})")
+
+# casele: trei randuri in adancime, frontul lung (7 m) pe directia de mers,
+# yaw variat ca sa nu citeasca raft
+_cas = []
+for i in range(12):       # randul 1: langa cheiu, la 69 m
+    _cas.append((_A_DM0 + 4.0 + i * 9.4, 69.0, "house_a" if i % 2 == 0 else "house_b",
+                 90.0 + (-9.0, 7.0, -4.0, 11.0)[i % 4]))
+for i in range(11):       # randul 2: decalat, la 80 m
+    _cas.append((_A_DM0 + 9.0 + i * 9.9, 80.0, "house_b" if i % 2 == 0 else "house_a",
+                 90.0 + (6.0, -12.0, 3.0, -7.0)[i % 4]))
+for i in range(9):        # randul 3: spre larg, la 92 m
+    _cas.append((_A_DM0 + 2.0 + i * 12.4, 92.0, "house_a" if i % 3 else "house_b",
+                 90.0 + (-15.0, 10.0, 0.0)[i % 3]))
+for i, (dm, lat, kind, yaw) in enumerate(_cas):
+    ff = _fa(dm)
+    g = at_road(ff, lat)
+    add(f"CasaPlutitoare{20 + i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {_SEA_Y - 0.12:.2f}, {g[2]:.2f})")
+
+# tarcurile de peste: doua lanturi de 8 m (modulare), cu flotoarele albastre
+_tar = [(_A_DM0 + 2.0 + i * 8.2, 106.0) for i in range(7)] +        [(_A_DM0 + 14.0 + i * 8.2, 117.0) for i in range(6)]
+for i, (dm, lat) in enumerate(_tar):
+    ff = _fa(dm)
+    g = at_road(ff, lat)
+    add(f"TarcPeste{20 + i:02d}", "farm",
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)), 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {_SEA_Y - 0.10:.2f}, {g[2]:.2f})")
+
+# rastele de plase pe platforma de uscat, aproape de tarm (cota terenului ~0,7)
+for i, dm in enumerate((-108.0, -86.0, -64.0, -42.0, -20.0)):
+    ff = _fa(dm)
+    g = at_road(ff, 50.0 + (i % 2) * 3.0)
+    add(f"RastelPlase{20 + i:02d}", "rack",
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + 90.0 + (i % 2) * 8.0, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1] - 0.30:.2f}, {g[2]:.2f})")
+
+# barcile legate: intre cheiu si primul rand, si intre randuri
+_barci = []
+for i in range(7):
+    _barci.append((_A_DM0 + 8.0 + i * 16.0, 64.5,
+                   "sampan" if i % 2 == 0 else "basket", 90.0 + 6.0 * i))
+for i in range(4):
+    _barci.append((_A_DM0 + 12.0 + i * 27.0, 86.0,
+                   "basket" if i % 2 == 0 else "sampan", 84.0 + 9.0 * i))
+for i in range(3):
+    _barci.append((_A_DM0 + 30.0 + i * 33.0, 99.0, "sampan", 96.0 - 12.0 * i))
+for i, (dm, lat, kind, yaw) in enumerate(_barci):
+    ff = _fa(dm)
+    g = at_road(ff, lat)
+    add(f"BarcaMica{20 + i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {_SEA_Y:.2f}, {g[2]:.2f})")
+
+# vegetatia de tarm pe platforma (lateral 24-42, departe de apa de la 62 m)
+for i, (dm, lat, kind, yaw) in enumerate((
+        (-112.0, 30.0, "ficus_a", 20.0), (-95.0, 40.0, "bamboo", 80.0),
+        (-76.0, 28.0, "ficus_b", 140.0), (-58.0, 39.0, "bamboo", 10.0),
+        (-36.0, 30.0, "ficus_a", 200.0), (-16.0, 38.0, "bamboo", 55.0))):
+    ff = _fa(dm)
+    g = at_road(ff, lat)
+    add(f"VegCheiA{i:02d}", kind,
+        f"Transform3D({rot_y_s(yaw_z_to(*travel_g(ff)) + yaw, 1.0, 1.0, 1.0)}, "
+        f"{g[0]:.2f}, {g[1] - 0.30:.2f}, {g[2]:.2f})")
+
 # --- grota: gura pe turnul de la POI C -------------------------------------
 # Portalul se lipeste de turn, cu spatele plat spre el. Cota: originea la baza,
 # deci se aseaza pe cota drumului din dreptul grotei.

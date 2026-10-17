@@ -137,6 +137,15 @@ run_step "Controale touch: maparea si distantele" touch_zones.log 'VERDICT:' -- 
 run_step "Garajul: bare, masa si incadrarea vitrinei" garage.log 'probe_garage:' -- \
 	--headless --path . res://tools/ProbeGarage.tscn -- --check
 
+# Serengeti (#501-#503). Animalele care traverseaza calca pe sol pe toata
+# cursa (vacile de pe coama parcau la 5-21 m peste versant) si merg cu fata
+# inainte (elefantul avea trompa pe +Z); figurantii si turma de fundal nu stau
+# in copaci sau stanci, nici cocotati pe ele (157 din 856 de gnu stateau asa).
+run_step "Serengeti: traversarile calca pe sol, cu fata inainte" hazard_ground.log 'VERDICT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeHazardGround.tscn -- --track=7
+run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log 'VERDICT:|PICAT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeAnimalOverlap.tscn -- --track=7 --no-batch
+
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then
 	echo "VERIFICARE LOCALA: OK (${#PASSED[@]} pasi). Log-uri in $LOGS"

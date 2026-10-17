@@ -8,8 +8,8 @@
 script = ExtResource("1")
 display_name = "Autobuzul"
 color = Color(0.4, 0.7, 0.3, 1)
-max_speed = 30.0
-acceleration = 11.0
+max_speed = 34.5
+acceleration = 14.0
 mass_factor = 2.6
 spring_freq = 1.8
 damping_ratio = 0.45

@@ -8,7 +8,7 @@
 script = ExtResource("1")
 display_name = "Taxi"
 color = Color(0.95, 0.8, 0.15, 1)
-max_speed = 33.0
+max_speed = 35.0
 grip = 9.0
 mass_factor = 1.15
 spring_freq = 2.4

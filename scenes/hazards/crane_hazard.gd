@@ -382,9 +382,14 @@ func _hit_cars(delta: float) -> void:
 			tangent = Vector3.RIGHT * signf(float(tower_side))
 		else:
 			tangent = tangent.normalized()
-		var mine := Vector3(car.velocity.x, 0.0, car.velocity.z) * keep_speed
-		HazardThrow.throw(car, _load, mine + tangent * sweep_push,
-			lift_rise, clear_seconds)
+		# Masa cumpara (pasul 0, decizia (a)): prefabricatul impinge si ridica
+		# autobuzul la jumatate si ii lasa mai mult din viteza. 1.0 pana la
+		# Muscle, deci cifrele masurate pe masina implicita nu se misca.
+		var ratio := car.hazard_mass_ratio()
+		var mine := Vector3(car.velocity.x, 0.0, car.velocity.z) \
+			* lerpf(1.0, keep_speed, ratio)
+		HazardThrow.throw(car, _load, mine + tangent * sweep_push * ratio,
+			lift_rise * ratio, clear_seconds)
 		# Sensul rotirii urmeaza sensul maturarii, ca invartirea sa se citeasca
 		# drept „m-a impins prefabricatul", nu ca un bug de fizica.
 		var sign := signf(tangent.cross(Vector3.UP).dot(

@@ -441,8 +441,10 @@ func _check_panel() -> void:
 				_expect((buttons[key] as Button).custom_minimum_size.y >= 64.0,
 					key + " sub 64 px")
 		if buttons.has("ChallengeButton"):
-			_expect((buttons["ChallengeButton"] as Button).disabled, "CHALLENGE e dezactivat")
-			_expect((buttons["ChallengeButton"] as Button).text.contains("SOON"), "CHALLENGE zice SOON")
+			# Din pasul 4a, pistele cu provocare (primul card, Monument Valley, are
+			# una) au butonul activ; SOON ramane pentru cele fara (ProbeChallenge).
+			_expect(not (buttons["ChallengeButton"] as Button).disabled, "CHALLENGE activ pe pista cu provocare")
+			_expect(not (buttons["ChallengeButton"] as Button).text.contains("SOON"), "CHALLENGE nu mai zice SOON")
 		if buttons.has("TimeTrialButton"):
 			_expect(not (buttons["TimeTrialButton"] as Button).disabled, "TIME TRIAL activ")
 			var ai_before := GameState.ai_count

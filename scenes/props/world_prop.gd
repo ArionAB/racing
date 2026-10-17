@@ -79,6 +79,9 @@ const COLLISION_META := "coliziune"
 const PROP_COLLISION := {
 	# --- se trece PRIN ele ------------------------------------------------
 	"ice_grotto_arch": "mesh",       # tunelul scurt de la POI D
+	# Ha Long: masivul cu grota marina, tunelul de ~85 m sapat pe axa soselei
+	# (tools/blender/build_halong_grotto.py). Hull-ul ar umple tunelul.
+	"grotto_massif": "mesh",
 	"railway_tunnel_portal": "mesh", # galeria + portalul, drumul intra in ele
 	"viaduct_arch": "mesh",          # soseaua trece pe DEDESUBT la 0.66-0.72
 	"start_gate_logs": "mesh",       # poarta de start, peste linia de plecare

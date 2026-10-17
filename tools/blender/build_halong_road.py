@@ -694,53 +694,83 @@ def build_macaque():
 # halong_horizon (§1.9) — UN fisier, TREI noduri
 # ---------------------------------------------------------------------------
 
+# Profilul de carst al turnurilor din kit (`build_halong_karst.py`,
+# KARST_PROFILE), rarit la 9 inele: nisa de val, consola, perete drept,
+# umar rotunjit sub creasta. La 120-340 m nisa nu se mai vede ca adancime, dar
+# umarul rotunjit si capacul verde da — ele despart „turn" de „bloc".
+HORIZON_PROFILE = [
+    (0.000, 0.86),
+    (0.055, 0.62),   # nisa de val
+    (0.120, 0.96),   # consola
+    (0.400, 1.00),
+    (0.650, 0.99),
+    (0.800, 0.93),
+    (0.900, 0.80),
+    (0.960, 0.62),
+    (1.000, 0.40),   # varf rotunjit, nu capac plat
+]
+
+
 def _karst_row(b, width, height, n, seed, slot_main, slot_pale=None,
                pale_from=0.55, rings3=True):
-    """Un sir de turnuri de carst ca SILUETA: `n` conuri trunchiate cu profil
-    de turn (strangere la baza, perete drept), aliniate pe X.
+    """Un sir de turnuri de carst ca SILUETA de fundal, aliniat pe X.
 
-    Fatete MARI: la 150-320 m si scara 1,3-2,4x detaliul fin e zgomot
-    (memoria `silueta-inainte-de-umbrire`). segments=6 explicit.
-    Volume INCHISE, citibile din orice azimut."""
-    rnd = _lcg(seed)
+    REFACUT (oct 2026) dupa verdictul de la volan: „blocuri gri urate".
+    Versiunea veche era din conuri trunchiate cu 6 fete si capac plat — prisme
+    hexagonale cu fete plane mari, care sub soarele de ora de aur citeau ca
+    BLOCURI de beton, nu ca stanca, mai ales odata ce se vedeau de la 120-200 m
+    (asezarea lor nu tinea cont de lungimea sirului, vezi
+    `tools/probe_horizon_clear.gd`). Acum fiecare turn e din vocabularul
+    turnurilor din kit (`ring_points` + `faceted_shell`, zgomot pe coloana =
+    dungi verticale) cu profilul de carst de mai sus si un capac de tufe pe
+    `HL_SCRUB`: varful verde e semnatura turnului Ha Long si se citeste si
+    prin ceata. Turnurile se SUPRAPUN pe X, deci sirul e un masiv cu creste,
+    nu o insiruire de stalpi.
+
+    `rings3` False (planul departat) = mai putine fatete si fara tufe de
+    perete: acolo conteaza doar conturul de sus."""
+    rnd = _ok_rand(seed)
     half = width * 0.5
+    seg = 9 if rings3 else 7
     for k in range(n):
         t = (k + 0.5) / n
-        x = -half + width * t
-        h = height * (0.52 + 0.48 * rnd())
-        r = h * (0.26 + 0.1 * rnd())
-        y = (rnd() - 0.5) * height * 0.3
+        x = -half + width * t + (rnd() - 0.5) * width / n * 0.6
+        h = height * (0.55 + 0.45 * rnd())
+        # h / raza ~ 2,6-3,4, ca la turnurile din kit (contract >= 2,5).
+        rm = h / (2.6 + 0.8 * rnd())
+        ratio = 0.80 + 0.15 * rnd()
+        y = (rnd() - 0.5) * height * 0.35
+        lean = (rnd() - 0.5) * rm * 0.5
         slot = slot_main
         if slot_pale is not None and rnd() > pale_from:
             slot = slot_pale
-        # turnul: baza strangsa, perete drept, varf retras — profilul de carst
-        # redus la trei inele (la distanta asta nu se vede mai mult)
+        rings = []
+        for (zf, rf) in HORIZON_PROFILE:
+            lt = max(0.0, min(1.0, (zf - 0.25) / 0.7))
+            rings.append((zf * h, rf * rm, rf * rm * ratio,
+                          x + lean * lt * lt, y))
+        pts, _ = ring_points(rings, seg, seed * 31 + k, 0.16)
+        faceted_shell(b, pts, slot, cap_bottom=False)
+        # Capacul verde: 3-5 ciorchini pe creasta, revarsati peste buza.
+        r_top = rm * 0.55
+        tx = x + lean
+        for i in range(3 + int(rnd() * 3)):
+            a = 2.0 * math.pi * (i + rnd() * 0.6) / 4.0
+            rho = r_top * (0.15 + 0.6 * rnd())
+            s = r_top * (0.55 + 0.3 * rnd())
+            chunk(b, (tx + math.cos(a) * rho, y + math.sin(a) * rho * ratio,
+                      h * (0.955 + 0.03 * rnd())),
+                  (s, s * 0.9, s * 0.42), seed * 97 + k * 7 + i, HL_SCRUB,
+                  seg=5, nr=2, jag=0.25)
         if rings3:
-            # TREI inele, dar cu raze care VARIAZA pe inaltime.
-            #
-            # Prima versiune avea pereti drepti (1,0 -> 0,95) si capac plat la
-            # 0,5: sirul citea ca o LINIE DE BLOCURI, un mic skyline. Am
-            # incercat un al patrulea inel pentru varf rotunjit — 1720 tri din
-            # 1500 si castig vizual aproape nul, deci inelul nu era cauza.
-            # Cauza e peretele DREPT: un turn de carst se umfla la mijloc si se
-            # strange spre varf, iar diferenta se citeste si de la 150-320 m.
-            # `bulge` variaza per turn (determinist din rnd), deci sirul nu mai
-            # are doua siluete identice. Acelasi buget, alta forma.
-            bulge = 1.0 + 0.16 * (rnd() - 0.3)
-            b.frustum((x, y, h * 0.05), r * 0.80, r * bulge, h * 0.1, slot,
-                      segments=6)
-            b.frustum((x, y, h * 0.5), r * bulge, r * 0.82, h * 0.8, slot,
-                      segments=6)
-            b.frustum((x, y, h * 0.95), r * 0.82, r * 0.26, h * 0.1, slot,
-                      segments=6)
-        else:
-            # Planul depArtat: DOUA inele. Brief 1.9 il cere "silueta aproape
-            # plata", iar la 320 m strangerea de la baza nu se mai citeste;
-            # ce rtamane e conturul de sus.
-            b.frustum((x, y, h * 0.5), r * 0.88, r * 0.80, h, slot,
-                      segments=6)
-            b.frustum((x, y, h * 0.96), r * 0.80, r * 0.24, h * 0.09, slot,
-                      segments=6)
+            # O tufa agatata pe perete, in treimea de sus: rupe verticala.
+            a = 2.0 * math.pi * rnd()
+            zf = 0.6 + 0.25 * rnd()
+            s = rm * 0.22
+            chunk(b, (x + lean * 0.5 + math.cos(a) * rm * 0.97,
+                      y + math.sin(a) * rm * ratio * 0.97, zf * h),
+                  (s, s * 0.9, s * 0.6), seed * 89 + k, HL_SCRUB,
+                  seg=5, nr=2, jag=0.3)
 
 
 def build_horizon():
@@ -766,7 +796,7 @@ def build_horizon():
         _karst_row(b, w, h, n, seed, s_main, s_pale, rings3=r3)
         objs.append(b.to_object(name))
     emit_hl(objs, "rocks/halong_horizon.glb", _ao(flat=True, dist=25.0),
-            budget=1500, flat_ao=True)
+            budget=12000, flat_ao=True)
     _drop(objs)
 
 

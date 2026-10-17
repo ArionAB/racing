@@ -151,6 +151,11 @@ run_step "Serengeti: animalele nu stau in copaci si stanci" animal_overlap.log '
 run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 	--headless --path . res://tools/ProbeCareer.tscn -- --check
 
+# Decorul asezat pe solul de la generare ramane sub teren cand terenul creste
+# dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.
+run_step "Serengeti: niciun decor ingropat sub teren" decor_buried.log 'VERDICT:|PICAT:' -- \
+	--headless --fixed-fps 60 --path . res://tools/ProbeDecorBuried.tscn -- --track=7 --no-batch
+
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then
 	echo "VERIFICARE LOCALA: OK (${#PASSED[@]} pasi). Log-uri in $LOGS"

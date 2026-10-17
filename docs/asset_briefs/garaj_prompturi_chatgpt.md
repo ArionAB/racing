@@ -482,6 +482,29 @@ Prima reactie la foaie a fost sa interzicem bratele de suspensie si sa cerem
 cusca din 8 tevi groase. **Respinsa de dezvoltator:** masinile sunt hero, nu
 decor — detaliul structural ramane, contextul il cere acum explicit.
 
+**A doua foaie** (`img/vehicles/concept_buggy_v2.jpeg`, cu corectia de buggy
+lipita in aceeasi conversatie) — aceeasi masuratoare:
+
+| ce | v1 | v2 | tinta |
+|---|---|---|---|
+| lungime / diametru roata (lateral) | 4.38 | 4.35 | 4.4 |
+| ecartament / diametru roata (fata) | 2.50 | 2.67 | 2.5 |
+| latime cuva / ecartament (fata) | 0.46 | **0.55** | 0.67 |
+| latime cuva / latime totala (sus) | 0.57 | **0.61** | 0.67 |
+| diametru roata lateral vs fata | 0.78 | **0.86** | 1.00 |
+
+Brate de suspensie cu arcuri, cusca cu contravantuiri, motor negru cu chiulase
+si esapament gros, stopuri: toate au aparut. Cuva s-a largit, dar nu pana la
+tinta; vederile s-au apropiat ca scara, dar tot nu sunt identice. **Verdict:
+se trece la brief.** Foaia e referinta de FORMA si de asezare a detaliilor;
+cotele le poarta brieful (3.7 × 2.1, cuva 1.4 m), nu pixelii. O a treia
+iteratie pe latimea cuvei ar costa mai mult decat corectia de 20 cm din
+Blender. Lectia de metoda: modelul de imagini se apropie de tinta in pasi de
+~20-40% pe iteratie, deci cifrele exacte se cer in brief, nu in prompt.
+
+Versionare: foile pastrate se numesc `concept_<nume>.jpeg`,
+`concept_<nume>_v2.jpeg`...; brieful trimite la ultima.
+
 ## 5. Note pentru noi (nu intra in prompt)
 
 - **Monster truck si clampul rotii.** `car.gd` clampeaza raza de suspensie la

@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.9 (brief de design; pasul 0 retunat, pașii 1, 2 și 4a construiți)
+# Modul Carieră — „Turul lumii” — v0.10 (brief de design; pasul 0 retunat, pașii 1, 2, 4a și 5 construiți)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -87,6 +87,20 @@
 > Picchu (împins de autobuz), Jodhpur (tuk-tuk). Gardă `ProbeChallenge` (99 de
 > verificări, sabotaj + contra-probă); `verify_local` 15/15. Rămân pentru 4b
 > cele 5 piste care cer semnal nou. Pasul 5 (fantoma) lansat în paralel.
+>
+> **v0.10 (17 oct 2026), pasul 5 construit** (PR #564, stivuit pe #561):
+> `GhostRecorder` la 20 Hz de la GO, `GhostData` cu format propriu versionat
+> (`StreamPeerBuffer`, fișier trunchiat respins), `user://ghosts/<pistă>.bin`
+> scris doar la record personal nou, `GhostCar` = doar modelul mașinii
+> (`Car.build_model`, funcție statică), zero corpuri fizice, un singur
+> material transparent partajat, poziția din ceasul cursei; HUD „GHOST
+> m:ss.d”, „· GHOST” pe foaie, „· NEW GHOST” la rezultate. Gardă `ProbeGhost`
+> (195 de verificări: 1200 de eșantioane / 60 s, round-trip 0 m / 0,04°,
+> raza interpolată 50 ± 0,003 m, fișier doar la PB, versiune 99 neatinsă);
+> `verify_local` 15/15 pe ramură. Rămân: fantoma rivalului (pasul 3),
+> fantoma „dev”, selecția „a ta / a rivalului”. Cu patru PR-uri de cod în
+> stivă (#556 → #561 → #563, #564) și brief-ul în #557, construcția se
+> oprește până la merge și la verdictul la volan.
 
 ## 0. Într-o propoziție
 
@@ -643,7 +657,9 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    (regula din `CLAUDE.md`; o clasă „abțibilduri” cu un atlas partajat).
    *Gardă:* o sondă care aruncă semnalul sintetic și verifică verdictul, plus
    sabotaj (semnalul greșit nu trece).
-5. **Fantoma** — înregistrare, fișier, redare, selecția „a ta / a rivalului”.
+5. **Fantoma — CONSTRUITĂ (PR #564, 17 oct)**, fără selecția „a ta / a
+   rivalului” (vine cu rivalii, pasul 3); starea în `pas5_fantoma_stare.md`.
+   Planul inițial: înregistrare, fișier, redare, selecția „a ta / a rivalului”.
    *Gardă:* înregistrare sintetică de 3 tururi → fișier → redare la aceeași
    poziție în același cadru (toleranță 1 cm).
 6. **Polish** — cupa lumii pe campionatul existent, provocarea zilei,

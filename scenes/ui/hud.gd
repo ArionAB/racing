@@ -38,6 +38,7 @@ var _charge_bg: Panel
 var _charge_fill: Panel
 var _charge_fill_style: StyleBoxFlat
 var _charge_bolt: Label
+var _sealed_label: Label
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -348,6 +349,15 @@ func _build_turbo_bar(root: Control) -> void:
 		_panel_style(int(CHARGE_H * 0.5), Color(0, 0, 0, 0.55)))
 	_charge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(_charge_bg)
+
+	# Contratimp: bara nu se mai incarca. Eticheta mica spune asta, ca
+	# jucatorul sa nu astepte o umplere care nu vine.
+	_sealed_label = _make_label(16)
+	_sealed_label.text = "SEALED"
+	_sealed_label.modulate = Color(1.0, 0.85, 0.3)
+	_sealed_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_sealed_label.visible = false
+	holder.add_child(_sealed_label)
 
 	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
 	# marginea intunecata sa ramana vizibila si cand bara e plina.
@@ -714,6 +724,11 @@ func flash_message(text: String) -> void:
 	var tw := create_tween()
 	tw.tween_interval(1.2)
 	tw.tween_property(_message, "modulate:a", 0.0, 0.5)
+
+## Rezervor sigilat (contratimp de cariera): arata eticheta SEALED.
+func set_sealed_turbo(on: bool) -> void:
+	_sealed_label.visible = on
+
 
 func set_turbo(charge: float, boosting: bool) -> void:
 	var filled := clampf(charge, 0.0, 1.0)

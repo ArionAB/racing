@@ -117,6 +117,10 @@ const SLIP_GRIP_ICE: float = 1.5
 @export var turbo_fill_time: float = 10.0
 ## In drift bara se umple de atatea ori mai repede — driftul ramane rasplatit.
 @export var turbo_drift_multiplier: float = 2.5
+## Contratimpul de cariera (brief 4.2) il pune pe false: bara NU se mai incarca
+## (nici din mers, nici din drift). Pornesti plin si decizi unde arzi rezervorul
+## (principiul 2); drift-ul ramane unealta de viraj. Arderea merge ca de obicei.
+@export var turbo_recharge: bool = true
 ## Secunde de ardere continua de la bara plina.
 @export var turbo_burn_time: float = 2.2
 ## Sub pragul asta nu poti porni turbo (previne "sputter"-ul din taste scurte).
@@ -1175,7 +1179,8 @@ func _update_turbo(turbo_pressed: bool, delta: float) -> void:
 		var fill := delta / turbo_fill_time
 		if is_drifting:
 			fill *= turbo_drift_multiplier
-		turbo_charge = minf(turbo_charge + fill, 1.0)
+		if turbo_recharge:
+			turbo_charge = minf(turbo_charge + fill, 1.0)
 
 func _start_boost() -> void:
 	var forward := -global_transform.basis.z

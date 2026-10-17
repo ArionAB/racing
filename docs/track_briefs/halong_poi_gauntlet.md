@@ -113,6 +113,37 @@ numărul de SCENĂ (22); `ProbeRace` și restul iau INDEXUL (14).**
 | SvHalongGabarit | `res://tools/SvHalongGabarit.tscn` | 0 peste gabarit |
 | ProbePerf | `res://tools/ProbePerf.tscn -- --track=22 --mobile` | raportat; azi 45 desene (Track08 1088) |
 
+## Ejectarea de la frac 0,787 — urmărită, NU e din decor
+
+POI F a raportat o ejectare pe podeț: autobuzul lovește un „perete" la 36,9 m/s,
+la poziția joncii. Urmărită cu un diagnostic temporar în `car.gd` (scos după),
+care tipărea numele corpului lovit:
+
+```
+[perete] @RigidBody3D@8123 lovește @AnimatableBody3D@367 @ (39.4, 1.4, -203.5)
+[ejectare] t=73.3s  Nyx (Autobuzul)  frac=0.787  perete 36.9 m/s
+```
+
+`AnimatableBody3D` = **jonca** (`SlidingHazard extends AnimatableBody3D`). Nu e
+decor, e hazardul declarat al POI-ului.
+
+**Distribuții, nu o rulare** (memoria `proberace-nedeterminism`):
+
+| ramură | ejectări |
+|---|---|
+| baseline (fără decorul F) | **1 din 4** rulări |
+| cu decorul F | **5 din 5** |
+
+Deci decorul **nu a creat** defectul — l-a făcut repetabil. Jonca lasă
+deliberat o bandă liberă de ~5 m (`JONCA_SCALE` e calculat din
+`ROAD_AT_RAFT_M - JONCA_FREE_TARGET_M`), iar o mașină care calculează greșit
+*trebuie* pedepsită: asta e decizia de gameplay, nu un bug.
+
+Ce rămâne de decis de dezvoltator: la 37 m/s, peste pragul `eject_wall_dv`
+de 26, lovitura aruncă șoferul. Un autobuz care intră într-o barcă la 133 km/h
+aruncând șoferul poate fi comportamentul corect — sau jonca ar trebui să fie
+„moale" (impuls, nu perete), ca alte hazarde mobile. **Nu am schimbat nimic.**
+
 ## Gărzi care au trecut peste defecte reale — de ce
 
 Două dintre gărzile scrise în sesiunea fără gauntlet au raportat verde pe

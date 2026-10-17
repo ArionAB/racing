@@ -21,7 +21,7 @@ extends Node
 ## Piesele care trebuie sa STEA PE SOL (nu pe apa). Restul decorului e ancorat
 ## de linia apei si se aseaza corect din formula de drum.
 const PREFIXE_DE_SOL := ["TurnCalcar", "Veg", "PavilionBelvedere", "Parapet",
-	"Dig", "GuraGrota"]
+	"Dig", "GuraGrota", "BolovanE", "BarcaPlajaE", "RastelPlajaE"]
 
 
 func _ready() -> void:
@@ -69,6 +69,11 @@ func _ready() -> void:
 		var gy: float = sampler.ground_y(p.x, p.z)
 		# Piesele de pe APA (teren mult sub mare) nu se judeca aici: ele sunt
 		# ancorate corect de linia apei.
+		# Vegetatia NU are voie peste apa (nu e ancorata de linia apei).
+		if nm.begins_with("Veg") and gy < sea_y + 0.05:
+			print("%-22s %+9.2f  VEGETATIE PE APA" % [nm, gy])
+			plutind += 1
+			continue
 		if gy < sea_y - 1.0:
 			continue
 		var d: float = p.y - gy

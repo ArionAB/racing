@@ -16,7 +16,7 @@ extends Node
 const TMP_PATH := "user://probe_career_tmp.cfg"
 ## Cate verificari trebuie sa fi rulat. Daca cineva scoate o sectiune sau o
 ## iesire timpurie sare peste ele, numarul scade si verdictul pica.
-const MIN_CHECKS := 60
+const MIN_CHECKS := 170
 
 var _fails: Array[String] = []
 var _checks: int = 0
@@ -49,6 +49,7 @@ func _ready() -> void:
 	_check_regroup()
 	await _check_panel()
 	_check_race_lock()
+	_check_time_trial()
 
 	# Restaurare + curatenie.
 	Career.config = _real_config
@@ -411,6 +412,59 @@ func _check_panel() -> void:
 			sealed_after += 1
 	_expect(cards_after == 8 and sealed_after == 1,
 		"dupa deblocare: 8 carduri / 1 sigilata, sunt %d / %d" % [cards_after, sealed_after])
+	# Foaia pistei: tap pe card deschide butoanele, nu porneste cursa.
+	var started := [0]
+	Career.race_starter = func() -> void: started[0] += 1
+	all.clear()
+	_collect(panel, all)
+	var first: TrackCard = null
+	for n in all:
+		if n is TrackCard:
+			first = n
+			break
+	_expect(first != null, "exista un card pentru foaie")
+	first.pressed.emit()
+	await get_tree().process_frame
+	_expect(panel._sheet != null, "tap pe card deschide foaia pistei")
+	_expect(started[0] == 0 and not Career.active, "tap pe card nu porneste cursa direct")
+	if panel._sheet != null:
+		var sheet_nodes: Array[Node] = []
+		_collect(panel._sheet, sheet_nodes)
+		var buttons := {}
+		for n in sheet_nodes:
+			if n is Button:
+				buttons[n.name] = n
+		_expect(buttons.size() == 4, "foaia are 4 butoane (RACE, TIME TRIAL, CHALLENGE, BACK): %d" % buttons.size())
+		for key in ["RaceButton", "TimeTrialButton", "ChallengeButton", "BackButton"]:
+			_expect(buttons.has(key), "foaia: lipseste " + key)
+			if buttons.has(key):
+				_expect((buttons[key] as Button).custom_minimum_size.y >= 64.0,
+					key + " sub 64 px")
+		if buttons.has("ChallengeButton"):
+			# Din pasul 4a, pistele cu provocare (primul card, Monument Valley, are
+			# una) au butonul activ; SOON ramane pentru cele fara (ProbeChallenge).
+			_expect(not (buttons["ChallengeButton"] as Button).disabled, "CHALLENGE activ pe pista cu provocare")
+			_expect(not (buttons["ChallengeButton"] as Button).text.contains("SOON"), "CHALLENGE nu mai zice SOON")
+		if buttons.has("TimeTrialButton"):
+			_expect(not (buttons["TimeTrialButton"] as Button).disabled, "TIME TRIAL activ")
+			var ai_before := GameState.ai_count
+			(buttons["TimeTrialButton"] as Button).pressed.emit()
+			_expect(started[0] == 1 and Career.is_time_trial(), "TIME TRIAL porneste contratimpul")
+			Career.leave()
+			_expect(GameState.ai_count == ai_before, "leave() readuce ai_count dupa foaie")
+	# ui_cancel inchide foaia, nu panoul.
+	var closed := [0]
+	panel.back_pressed.connect(func() -> void: closed[0] += 1)
+	var cancel := InputEventAction.new()
+	cancel.action = "ui_cancel"
+	cancel.pressed = true
+	panel._unhandled_input(cancel)
+	await get_tree().process_frame
+	_expect(panel._sheet == null, "ui_cancel inchide foaia")
+	_expect(closed[0] == 0, "primul ui_cancel nu inchide panoul")
+	panel._unhandled_input(cancel)
+	_expect(closed[0] == 1, "al doilea ui_cancel inchide panoul")
+	Career.race_starter = Callable()
 	panel.queue_free()
 	await get_tree().process_frame
 
@@ -442,6 +496,98 @@ func _check_race_lock() -> void:
 	_expect(not Career.active, "leave() trebuie sa opreasca modul de cariera")
 	_expect(Career.finish_active(1) == Career.MEDAL_NONE, "in afara carierei finish_active nu da medalii")
 	GameState.champ_active = false
+
+
+# --------------------------------------------------- 8. contratimpul
+
+func _check_time_trial() -> void:
+	_reset_save()
+	# (a) medalia din tinte, pe un TrackInfo sintetic 100/110/120 s.
+	var info := TrackInfo.new()
+	info.tt_gold_ms = 100000
+	info.tt_silver_ms = 110000
+	info.tt_bronze_ms = 120000
+	for pair in [[99000, 3], [100000, 3], [105000, 2], [110000, 2], [115000, 1],
+			[120000, 1], [121000, 0]]:
+		_expect(Career.medal_for_time(info, pair[0]) == pair[1],
+			"medalie pentru %d ms: %d != %d" % [pair[0], Career.medal_for_time(info, pair[0]), pair[1]])
+	var none := TrackInfo.new()
+	_expect(not none.has_targets(), "tinte 0 => has_targets false")
+	_expect(info.has_targets(), "tinte setate => has_targets true")
+	for ms in [1, 100000, 999999999]:
+		_expect(Career.medal_for_time(none, ms) == 0, "tinte 0 nu dau medalie (%d)" % ms)
+	_expect(Career.time_trial_medal(&"nu_exista", 1) == 0, "pista necunoscuta => 0")
+
+	# (b) ai_count: 0 in contratimp, readus de leave(); RACE nu-l atinge.
+	var started := [0]
+	Career.race_starter = func() -> void: started[0] += 1
+	var saved_ai := GameState.ai_count
+	GameState.ai_count = 5
+	Career.start_track(&"kyoto", Career.Mode.TIME_TRIAL)
+	_expect(GameState.ai_count == 0, "contratimp: ai_count 0, este %d" % GameState.ai_count)
+	_expect(Career.is_time_trial() and Career.active_mode == Career.Mode.TIME_TRIAL,
+		"modul contratimp setat")
+	Career.leave()
+	_expect(GameState.ai_count == 5, "leave() readuce ai_count: %d" % GameState.ai_count)
+	_expect(not Career.is_time_trial(), "dupa leave nu mai e contratimp")
+	# Doua start-uri la rand nu pierd valoarea originala.
+	Career.start_track(&"kyoto", Career.Mode.TIME_TRIAL)
+	Career.start_track(&"kyoto", Career.Mode.TIME_TRIAL)
+	Career.leave()
+	_expect(GameState.ai_count == 5, "start dublu: ai_count tot 5, este %d" % GameState.ai_count)
+	Career.start_track(&"kyoto", Career.Mode.RACE)
+	_expect(GameState.ai_count == 5, "RACE nu atinge ai_count")
+	_expect(not Career.is_time_trial() and Career.active, "RACE: activ, nu contratimp")
+	# finish_time_trial in RACE nu salveaza nimic.
+	_expect(Career.finish_time_trial(90000) == 0
+		and int(Career.track_state(&"kyoto").tt_best_ms) == 0,
+		"finish_time_trial in RACE nu salveaza nimic")
+	Career.leave()
+	_expect(GameState.ai_count == 5, "leave dupa RACE lasa ai_count 5")
+	_expect(started[0] == 4, "4 porniri, sunt %d" % started[0])
+	GameState.ai_count = saved_ai
+
+	# (c) finish_time_trial: timp minim, medalie maxima. Tintele pistei reale
+	# sunt 0 (neintroduse), deci le punem temporar pe resursa si le readucem.
+	var kyoto_info := TrackInfo.for_track(TrackInfo.index_of_id(&"kyoto"))
+	var old_targets := [kyoto_info.tt_gold_ms, kyoto_info.tt_silver_ms, kyoto_info.tt_bronze_ms]
+	kyoto_info.tt_gold_ms = 100000
+	kyoto_info.tt_silver_ms = 110000
+	kyoto_info.tt_bronze_ms = 120000
+	Career.start_track(&"kyoto", Career.Mode.TIME_TRIAL)
+	var m1 := Career.finish_time_trial(130000)
+	var m2 := Career.finish_time_trial(105000)
+	var st := Career.track_state(&"kyoto")
+	_expect(m1 == 0 and m2 == 2, "medalii intoarse: %d, %d" % [m1, m2])
+	_expect(int(st.tt_best_ms) == 105000 and int(st.tt_medal) == 2,
+		"best 105000 / medalie 2: %d / %d" % [int(st.tt_best_ms), int(st.tt_medal)])
+	Career.finish_time_trial(118000)
+	st = Career.track_state(&"kyoto")
+	_expect(int(st.tt_best_ms) == 105000 and int(st.tt_medal) == 2,
+		"un timp mai slab nu strica best-ul / medalia")
+	Career.leave()
+	kyoto_info.tt_gold_ms = old_targets[0]
+	kyoto_info.tt_silver_ms = old_targets[1]
+	kyoto_info.tt_bronze_ms = old_targets[2]
+	# Tinte 0: timpul se salveaza, medalia nu.
+	Career.start_track(&"serengeti", Career.Mode.TIME_TRIAL)
+	var m3 := Career.finish_time_trial(200000)
+	_expect(m3 == 0 and int(Career.track_state(&"serengeti").tt_best_ms) == 200000,
+		"fara tinta: timp salvat, fara medalie")
+	Career.leave()
+	Career.race_starter = Callable()
+
+	# (d) semnalele cursei exista (fara sa instantiem o cursa intreaga).
+	var race_script := load("res://scenes/race/race.gd") as GDScript
+	var race: Node = race_script.new()
+	_expect(race.has_signal("lap_completed"), "Race.lap_completed lipseste")
+	_expect(race.has_signal("race_finished"), "Race.race_finished lipseste")
+	race.free()
+
+	# (e) rezervorul: steagul exista pe Car, implicit true.
+	var car := (load("res://scenes/cars/Car.tscn") as PackedScene).instantiate() as Car
+	_expect(car.turbo_recharge, "Car.turbo_recharge implicit true")
+	car.free()
 
 
 func _report() -> void:

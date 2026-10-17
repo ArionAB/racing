@@ -23,6 +23,15 @@ static var _id_cache: Dictionary = {}
 ## Culoarea placeholder-ului cat timp lipseste imaginea, si a bulinei de regiune.
 @export var accent: Color = Color(0.35, 0.45, 0.6)
 
+@export_group("Contratimp")
+## Timpi pe TOATA cursa (3 tururi) cu rezervor sigilat, PUSI DE DEZVOLTATOR LA
+## VOLAN (aur = timpul lui curat; argint ~ aur x 1.06, bronz ~ aur x 1.15 ca
+## punct de pornire). Nu se calculeaza din AI: AI-ul nu conduce cu rezervor
+## sigilat. 0 = fara tinta inca: nu da medalie, dar timpul se salveaza.
+@export var tt_gold_ms: int = 0
+@export var tt_silver_ms: int = 0
+@export var tt_bronze_ms: int = 0
+
 
 ## Numele de baza al scenei ("Track09") pentru o pozitie din TRACK_SCENES.
 static func scene_key(track_index: int) -> String:
@@ -43,6 +52,15 @@ static func for_track(track_index: int) -> TrackInfo:
 	fallback.id = StringName(scene_key(track_index).to_lower())
 	fallback.display_name = GameState.TRACK_NAMES[track_index]
 	return fallback
+
+
+## True daca pista are cel putin o tinta de contratimp completata.
+static func has_time_trial_targets(track_index: int) -> bool:
+	return for_track(track_index).has_targets()
+
+
+func has_targets() -> bool:
+	return tt_gold_ms > 0 or tt_silver_ms > 0 or tt_bronze_ms > 0
 
 
 ## Indexul din GameState.TRACK_SCENES al pistei cu acest `id`, sau -1.

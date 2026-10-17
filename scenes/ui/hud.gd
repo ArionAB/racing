@@ -38,6 +38,11 @@ var _charge_bg: Panel
 var _charge_fill: Panel
 var _charge_fill_style: StyleBoxFlat
 var _charge_bolt: Label
+var _sealed_label: Label
+var _ghost_label: Label
+var _challenge_label: Label
+var _challenge_title: String = ""
+var _challenge_failed: bool = false
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -348,6 +353,29 @@ func _build_turbo_bar(root: Control) -> void:
 		_panel_style(int(CHARGE_H * 0.5), Color(0, 0, 0, 0.55)))
 	_charge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(_charge_bg)
+
+	# Contratimp: bara nu se mai incarca. Eticheta mica spune asta, ca
+	# jucatorul sa nu astepte o umplere care nu vine.
+	_sealed_label = _make_label(16)
+	_sealed_label.text = "SEALED"
+	_sealed_label.modulate = Color(1.0, 0.85, 0.3)
+	_sealed_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_sealed_label.visible = false
+	holder.add_child(_sealed_label)
+
+	# Contratimp cu fantoma salvata: timpul ei, ca sa stii pe cine urmaresti.
+	_ghost_label = _make_label(16)
+	_ghost_label.modulate = Color(0.75, 0.9, 1.0)
+	_ghost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_ghost_label.visible = false
+	holder.add_child(_ghost_label)
+	# Provocarea gimmick-ului (cariera): in aceeasi zona ca SEALED; cele doua
+	# moduri nu se suprapun (contratimp vs provocare).
+	_challenge_label = _make_label(16)
+	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
+	_challenge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_challenge_label.visible = false
+	holder.add_child(_challenge_label)
 
 	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
 	# marginea intunecata sa ramana vizibila si cand bara e plina.
@@ -714,6 +742,38 @@ func flash_message(text: String) -> void:
 	var tw := create_tween()
 	tw.tween_interval(1.2)
 	tw.tween_property(_message, "modulate:a", 0.0, 0.5)
+
+## Rezervor sigilat (contratimp de cariera): arata eticheta SEALED.
+func set_sealed_turbo(on: bool) -> void:
+	_sealed_label.visible = on
+
+
+## Eticheta "GHOST 3:12.4"; ms <= 0 o ascunde.
+func set_ghost_time(ms: int) -> void:
+	_ghost_label.visible = ms > 0
+	if ms > 0:
+		_ghost_label.text = "GHOST %s" % TrackCard._format_ms(ms)
+## Provocarea gimmick-ului: "CHALLENGE: <titlu>", verde pana o pici.
+func set_challenge(title: String) -> void:
+	_challenge_title = title
+	_challenge_label.text = "CHALLENGE: " + title
+	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
+	_challenge_label.visible = true
+
+
+## Progresul regulii („1 / 3", „LAP 2 ✓"), langa titlu; dupa esec nu mai conteaza.
+func set_challenge_progress(text: String) -> void:
+	if _challenge_failed:
+		return
+	_challenge_label.text = "CHALLENGE: " + _challenge_title \
+		+ ("   " + text if text != "" else "")
+
+
+func set_challenge_failed() -> void:
+	_challenge_failed = true
+	_challenge_label.text = "CHALLENGE FAILED"
+	_challenge_label.modulate = Color(1.0, 0.4, 0.35)
+
 
 func set_turbo(charge: float, boosting: bool) -> void:
 	var filled := clampf(charge, 0.0, 1.0)

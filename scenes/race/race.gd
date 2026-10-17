@@ -60,6 +60,12 @@ var _lap_start_ms: int = -1
 var _race_clock: float = 0.0
 ## Timpul total al jucatorului la sosire (ms); -1 pana trece linia.
 var _player_race_ms: int = -1
+
+## Tur terminat de jucator (numarul de tururi facute si timpul turului).
+## Pentru ChallengeTracker (cariera, pasul 4); nimic nu o asculta inca in joc.
+signal lap_completed(laps: int, lap_ms: int)
+## Cursa jucatorului s-a terminat (pozitia finala si timpul total).
+signal race_finished(position: int, race_ms: int)
 var _race_record_new: bool = false
 var _best_lap_ms: int = -1
 var _final_order: Array = [] # sloturi in ordinea sosirii
@@ -143,6 +149,11 @@ func _setup_race() -> void:
 	add_child(_skid_parent)
 	_spawn_cars()
 	_spawn_traffic()
+	# Contratimp de cariera: rezervor sigilat (bara nu se incarca; se umple o
+	# singura data, la GO).
+	if Career.is_time_trial():
+		player.turbo_recharge = false
+		_setup_ghost()
 	camera = ChaseCamera.new()
 	add_child(camera)
 	camera.target = player
@@ -162,6 +173,10 @@ func _setup_race() -> void:
 	hud.menu_requested.connect(GameState.go_to_menu)
 	hud.results_primary.connect(_on_results_primary)
 	hud.setup_minimap(track, cars)
+	hud.set_sealed_turbo(Career.is_time_trial())
+	if _ghost_car != null:
+		hud.set_ghost_time(_ghost_car.data.total_ms)
+	_setup_challenge()
 	hud.show_countdown("READY?")
 	_setup_windshield_wipers()
 	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
@@ -366,6 +381,10 @@ func _tick_countdown(delta: float) -> void:
 
 func _go() -> void:
 	state = State.RUNNING
+	if _ghost_recorder != null:
+		_ghost_recorder.start()
+	if _ghost_car != null:
+		_ghost_car.set_clock_ms(0.0)
 	hud.show_countdown("GO!")
 	AudioManager.play_sfx(&"go_beep")
 	get_tree().create_timer(0.7, false).timeout.connect(
@@ -377,6 +396,8 @@ func _go() -> void:
 		car.on_start_grid = false # se dezgheata fizica; de aici incolo e cursa
 		var hold := float(_drift_hold.get(car, 0.0))
 		if car == player:
+			if not player.turbo_recharge:
+				player.turbo_charge = 1.0
 			if hold > 0.05 and hold <= 1.05:
 				car.force_boost(1.2)
 				hud.flash_message("ROCKET START!")
@@ -393,6 +414,8 @@ func _clock_ms() -> int:
 
 func _tick_race(delta: float) -> void:
 	_race_clock += delta
+	if _ghost_car != null:
+		_ghost_car.set_clock_ms(_race_clock * 1000.0)
 	_tick_offroad_clock(delta)
 	_tick_wrong_way(delta)
 	for i in cars.size():
@@ -655,21 +678,70 @@ func _on_player_lap(laps: int) -> void:
 		var lap_ms := now - _lap_start_ms
 		if _best_lap_ms < 0 or lap_ms < _best_lap_ms:
 			_best_lap_ms = lap_ms
-		if GameState.try_record(GameState.selected_track, lap_ms):
+		# Recordurile din GameState sunt ale cursei normale; cu rezervor sigilat
+		# regula e alta si timpii nu sunt comparabili, deci nu se scriu.
+		if not Career.is_time_trial() and GameState.try_record(GameState.selected_track, lap_ms):
 			hud.flash_message("NEW LAP RECORD! " + _fmt_ms(lap_ms))
 			AudioManager.play_sfx(&"drift_level", 1.5)
+		lap_completed.emit(laps, lap_ms)
 	_lap_start_ms = now
 	if laps >= GameState.total_laps and state != State.FINISHED:
 		_finish_race()
 
 ## Medalia cursei de cariera curente (-1 = nu e cursa de cariera).
 var _career_medal: int = -1
+var _challenge_tracker: ChallengeTracker
+var _challenge_done: bool = false
+
+## Provocarea gimmick-ului (cariera): tracker-ul asculta semnalele hazardelor
+## si ale jucatorului; HUD-ul arata eticheta si o pica o singura data.
+func _setup_challenge() -> void:
+	if not Career.is_challenge():
+		return
+	var challenge := Career.challenge_for(Career.active_track)
+	if challenge == null:
+		return
+	_challenge_tracker = ChallengeTracker.new()
+	_challenge_tracker.name = "ChallengeTracker"
+	add_child(_challenge_tracker)
+	_challenge_tracker.setup(challenge, player, track)
+	hud.set_challenge(challenge.title)
+	_challenge_tracker.progress_changed.connect(hud.set_challenge_progress)
+	hud.set_challenge_progress(_challenge_tracker.progress_text())
+	lap_completed.connect(func(laps: int, _ms: int) -> void:
+		_challenge_tracker.notify_lap(laps))
+	_challenge_tracker.failed_changed.connect(func(_failed: bool) -> void:
+		hud.set_challenge_failed()
+		hud.flash_message("CHALLENGE FAILED"))
+
+
+var _ghost_recorder: GhostRecorder
+var _ghost_car: GhostCar
+var _ghost_saved: bool = false
+
+## Contratimp: inregistreaza cursa asta si, daca exista o fantoma salvata pe
+## pista, o reda. Fantoma veche se incarca ACUM, inainte ca cursa sa o
+## inlocuiasca.
+func _setup_ghost() -> void:
+	_ghost_recorder = GhostRecorder.new()
+	_ghost_recorder.name = "GhostRecorder"
+	_ghost_recorder.target = player
+	add_child(_ghost_recorder)
+	var saved := Career.load_ghost(Career.active_track)
+	if saved != null:
+		_ghost_car = GhostCar.new()
+		_ghost_car.name = "GhostCar"
+		add_child(_ghost_car)
+		_ghost_car.setup(saved)
+		_ghost_car.set_clock_ms(0.0)
 
 func _finish_race() -> void:
 	state = State.FINISHED
 	_player_race_ms = _clock_ms()
-	_race_record_new = GameState.try_race_record(GameState.selected_track,
-		_player_race_ms)
+	if _ghost_recorder != null:
+		_ghost_recorder.stop()
+	_race_record_new = not Career.is_time_trial() \
+		and GameState.try_race_record(GameState.selected_track, _player_race_ms)
 	_update_positions()
 	# Ordinea finala = pozitiile din clipa sosirii jucatorului (AI-ul din
 	# spate isi pastreaza locul relativ; cursa e a jucatorului).
@@ -680,7 +752,20 @@ func _finish_race() -> void:
 	# Cursa de cariera: medalia vine din pozitia jucatorului (1/2/3 = aur/
 	# argint/bronz), salvata imediat, nu la apasarea unui buton.
 	_career_medal = -1
-	if Career.active:
+	if Career.is_time_trial():
+		# Best-ul de DINAINTE: finish_time_trial il suprascrie.
+		var previous_best := int(Career.track_state(Career.active_track).tt_best_ms)
+		_career_medal = Career.finish_time_trial(_player_race_ms)
+		if _ghost_recorder != null:
+			_ghost_saved = Career.save_ghost_if_best(Career.active_track,
+				_ghost_recorder.build_data(Career.active_track,
+					GameState.selected_car, GameState.total_laps,
+					_player_race_ms), _player_race_ms, previous_best)
+	elif Career.is_challenge():
+		# O conditie per proba: pozitia nu conta si nu da medalie de cursa.
+		_challenge_done = Career.finish_challenge(
+			_challenge_tracker != null and _challenge_tracker.evaluate())
+	elif Career.active:
 		_career_medal = Career.finish_active(player.race_position)
 	if GameState.champ_active:
 		GameState.record_results(_final_order)
@@ -691,6 +776,7 @@ func _finish_race() -> void:
 	else:
 		hud.flash_message("FINISH — %s place!" % _ordinal(player.race_position))
 	get_tree().create_timer(1.5, false).timeout.connect(_show_results)
+	race_finished.emit(player.race_position, _player_race_ms)
 
 func _show_results() -> void:
 	var rows: Array[Dictionary] = []
@@ -716,7 +802,18 @@ func _show_results() -> void:
 		})
 	var title := "RESULTS — " + _track_title()
 	var primary := "RESTART"
-	if Career.active:
+	if Career.is_time_trial():
+		title = _time_trial_title()
+		primary = "BACK TO CAREER"
+		_append_time_trial_targets(rows)
+	elif Career.is_challenge():
+		var challenge_title := "?"
+		if _challenge_tracker != null:
+			challenge_title = _challenge_tracker.challenge.title
+		title = "CHALLENGE — %s — %s" % [challenge_title,
+			"DONE" if _challenge_done else "FAILED"]
+		primary = "BACK TO CAREER"
+	elif Career.active:
 		title += "\n" + _career_medal_text(_career_medal)
 		primary = "BACK TO CAREER"
 	if GameState.champ_active:
@@ -725,6 +822,33 @@ func _show_results() -> void:
 		primary = "FINAL STANDINGS" if GameState.champ_is_last_round() \
 			else "NEXT RACE"
 	hud.show_results(title, rows, primary)
+
+## Titlul: TIME TRIAL - 3:12.4 - SILVER, sau NO TARGET YET (pista n-are
+## tinte) / NO MEDAL (peste bronz).
+func _time_trial_title() -> String:
+	var info := TrackInfo.for_track(GameState.selected_track)
+	var verdict := "NO TARGET YET"
+	if info.has_targets():
+		verdict = _career_medal_text(_career_medal) if _career_medal > 0 \
+			else "NO MEDAL"
+	return "TIME TRIAL — %s — %s%s" % [_fmt_ms(_player_race_ms), verdict,
+		" · NEW GHOST" if _ghost_saved else ""]
+
+
+## Cele trei tinte sub randul jucatorului: `right` = timpul tinta,
+## culoarea cartonasului = culoarea medaliei.
+func _append_time_trial_targets(rows: Array[Dictionary]) -> void:
+	var info := TrackInfo.for_track(GameState.selected_track)
+	for entry in [["GOLD", info.tt_gold_ms, CareerPanel.GOLD],
+			["SILVER", info.tt_silver_ms, CareerPanel.SILVER],
+			["BRONZE", info.tt_bronze_ms, CareerPanel.BRONZE]]:
+		rows.append({
+			"name": entry[0],
+			"color": entry[2],
+			"right": _fmt_ms(int(entry[1])) if int(entry[1]) > 0 else "--",
+			"is_player": false,
+		})
+
 
 func _career_medal_text(medal: int) -> String:
 	match medal:

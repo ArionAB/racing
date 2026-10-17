@@ -118,6 +118,8 @@ run_step "Reintrarea pe sosea dupa iesirea pe nisip" reentry.log 'VERDICT:' -- \
 run_step "Camera in caverna (tot intervalul de slidere)" cavecam.log 'TOATE OK|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeCavecam.tscn
 run_step "Strivit: turbo-ul nu scoate masina din strivire" crush_turbo.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeCrushTurbo.tscn
+run_step "Rezervor sigilat: bara nu se incarca, arderea merge" sealed_turbo.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSealedTurbo.tscn
+run_step "Fantoma: inregistrare, fisier, redare" ghost.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeGhost.tscn
 run_step "Bolovanul de pe buza + directie inversata" rim_boulder.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeRimBoulder.tscn
 run_step "Registrul MeshCpu (citiri GPU refolosite)" meshcpu.log 'MeshCpu:' -- \
 	--headless --path . res://tools/ProbeMeshCpu.tscn
@@ -155,6 +157,10 @@ run_step "Cariera: config, persistenta, gating, raft" career.log 'VERDICT:' -- \
 # dupa aceea: padurea Lerai ajunsese la 20-30 m sub peretele craterului.
 run_step "Serengeti: niciun decor ingropat sub teren" decor_buried.log 'VERDICT:|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeDecorBuried.tscn -- --track=7 --no-batch
+# Cariera pasul 4a: provocarea gimmick-ului. Tracker-ul numara doar evenimentele
+# jucatorului (cu contra-probe pe alte masini), datele sabotate dau cate o
+# problema, foaia pistei se activeaza, pistele reale au sursa semnalului.
+run_step "Provocari: tracker-ul numara doar ce trebuie" challenge.log 'VERDICT:' -- 	--headless --path . res://tools/ProbeChallenge.tscn
 
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then

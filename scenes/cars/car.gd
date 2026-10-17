@@ -117,6 +117,10 @@ const SLIP_GRIP_ICE: float = 1.5
 @export var turbo_fill_time: float = 10.0
 ## In drift bara se umple de atatea ori mai repede — driftul ramane rasplatit.
 @export var turbo_drift_multiplier: float = 2.5
+## Contratimpul de cariera (brief 4.2) il pune pe false: bara NU se mai incarca
+## (nici din mers, nici din drift). Pornesti plin si decizi unde arzi rezervorul
+## (principiul 2); drift-ul ramane unealta de viraj. Arderea merge ca de obicei.
+@export var turbo_recharge: bool = true
 ## Secunde de ardere continua de la bara plina.
 @export var turbo_burn_time: float = 2.2
 ## Sub pragul asta nu poti porni turbo (previne "sputter"-ul din taste scurte).
@@ -1187,7 +1191,8 @@ func _update_turbo(turbo_pressed: bool, delta: float) -> void:
 		var fill := delta / turbo_fill_time
 		if is_drifting:
 			fill *= turbo_drift_multiplier
-		turbo_charge = minf(turbo_charge + fill, 1.0)
+		if turbo_recharge:
+			turbo_charge = minf(turbo_charge + fill, 1.0)
 
 func _start_boost() -> void:
 	var forward := -global_transform.basis.z
@@ -3004,14 +3009,25 @@ func _update_spin(delta: float) -> void:
 			_spin_angle = 0.0
 	_visual.rotation.y = _spin_angle
 
+## Modelul 3D al unei masini, cu scala si rotatia din CarData, fara fizica.
+## Static ca sa-l poata folosi si fantoma din contratimp (GhostCar) — acelasi
+## model, aceeasi orientare, fara sa dubleze cifrele. Null daca masina nu are
+## model (placeholder-ul de cuburi ramane doar al lui `_build_visual`).
+static func build_model(car_data: CarData) -> Node3D:
+	if car_data == null or car_data.model == null:
+		return null
+	var model := car_data.model.instantiate() as Node3D
+	model.scale = Vector3.ONE * car_data.model_scale
+	model.rotation.y = deg_to_rad(car_data.model_rotation_deg)
+	return model
+
+
 func _build_visual() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
 	# Model 3D real daca exista in CarData; altfel placeholder din cuburi.
 	if data != null and data.model != null:
-		var model := data.model.instantiate() as Node3D
-		model.scale = Vector3.ONE * data.model_scale
-		model.rotation.y = deg_to_rad(data.model_rotation_deg)
+		var model := Car.build_model(data)
 		_visual.add_child(model)
 		# Gasim rotile dupa nume, ca sa le animam (spin + viraj + compresie).
 		_wheels_all.clear()

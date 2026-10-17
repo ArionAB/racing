@@ -12,6 +12,10 @@ extends Node
 
 signal progress_changed
 
+## CHALLENGE e o cursa normala (cu AI) cu `ChallengeTracker` pornit; nu da
+## medalie de cursa, doar bifa provocarii.
+enum Mode { RACE, TIME_TRIAL, CHALLENGE }
+
 const CONFIG_PATH := "res://scenes/career/data/career_config.tres"
 ## Versiunea schemei din `career.cfg`. Un fisier cu versiune mai mare vine de la
 ## un build mai nou: il lasam neatins (vezi `_read_only`).
@@ -24,6 +28,10 @@ const MEDAL_GOLD := 3
 var config: CareerConfig
 ## Suprascris de sonda cu o cale temporara, ca sa nu atinga salvarea reala.
 var save_path: String = "user://career.cfg"
+## Fantomele contratimpului, cate un fisier per pista (nu in career.cfg: un
+## fisier de ~100 KB n-are ce cauta intr-un ConfigFile citit la fiecare start).
+## Sondele il suprascriu, ca sa nu atinga fantomele reale.
+var ghost_dir: String = "user://ghosts/"
 
 ## True cat timp jucatorul e intr-o cursa pornita din raft.
 var active: bool = false
@@ -31,6 +39,10 @@ var active_track: StringName = &""
 ## Cine porneste efectiv cursa. Implicit GameState.start_race; sonda il
 ## inlocuieste ca sa testeze `start_track` fara sa schimbe scena.
 var race_starter: Callable = Callable()
+## Modul cursei de cariera curente (contratimp = singur, rezervor sigilat).
+var active_mode: Mode = Mode.RACE
+## `GameState.ai_count` dinaintea contratimpului; -1 = nu l-am schimbat.
+var _saved_ai_count: int = -1
 
 var _tracks: Dictionary = {} # id -> {race_medal, tt_medal, tt_best_ms, challenge}
 var _rivals: Dictionary = {} # id -> true cand e batut
@@ -81,7 +93,34 @@ func validate(cfg: CareerConfig = null) -> PackedStringArray:
 				world.rival_track, world.id])
 	if free_count != 1:
 		problems.append("trebuie exact o lume free, sunt %d" % free_count)
+	var challenged: Dictionary = {}
+	for challenge in target.challenges:
+		if TrackInfo.index_of_id(challenge.track) < 0:
+			problems.append("provocarea %s: pista nu exista in TRACK_SCENES" % challenge.track)
+		if challenged.has(challenge.track):
+			problems.append("doua provocari pe pista %s" % challenge.track)
+		challenged[challenge.track] = true
+		if not CareerChallenge.KNOWN_EVENTS.has(challenge.event):
+			problems.append("provocarea %s: evenimentul '%s' nu e cunoscut" % [
+				challenge.track, challenge.event])
+		if challenge.rule == CareerChallenge.Rule.AT_LEAST and challenge.count < 1:
+			problems.append("provocarea %s: AT_LEAST cere count >= 1" % challenge.track)
+		if challenge.fail_event != &"" \
+				and not CareerChallenge.FAIL_EVENTS.has(challenge.fail_event) \
+				and not CareerChallenge.KNOWN_EVENTS.has(challenge.fail_event):
+			problems.append("provocarea %s: fail_event '%s' nu e cunoscut" % [
+				challenge.track, challenge.fail_event])
+		if challenge.event == &"wall_hit" and challenge.zone == &"":
+			problems.append("provocarea %s: wall_hit cere o zona" % challenge.track)
 	return problems
+
+
+## Provocarea pistei `track_id`, sau null daca pista n-are una.
+func challenge_for(track_id: StringName) -> CareerChallenge:
+	for challenge in config.challenges:
+		if challenge.track == track_id:
+			return challenge
+	return null
 
 
 # ------------------------------------------------------------- progres
@@ -208,13 +247,23 @@ func _changed() -> void:
 
 # ----------------------------------------------------- cursa de cariera
 
-func start_track(id: StringName) -> void:
+func start_track(id: StringName, mode: Mode = Mode.RACE) -> void:
 	var index := TrackInfo.index_of_id(id)
 	if index < 0:
 		push_error("Career: pista %s nu exista" % id)
 		return
+	# Un start nou peste un contratimp neinchis nu are voie sa piarda valoarea
+	# originala a lui ai_count: restauram inainte sa re-salvam.
+	_restore_ai_count()
 	active = true
 	active_track = id
+	active_mode = mode
+	if mode == Mode.TIME_TRIAL:
+		# `ai_count` e global si Race il citeste la spawn; contratimpul e singur.
+		# `leave()` il readuce, ca o cursa rapida dupa un contratimp parasit
+		# prin MENU sa nu ramana fara adversari.
+		_saved_ai_count = GameState.ai_count
+		GameState.ai_count = 0
 	GameState.champ_active = false
 	GameState.selected_track = index
 	if race_starter.is_valid():
@@ -234,8 +283,106 @@ func finish_active(position: int) -> int:
 	return medal
 
 
+func is_challenge() -> bool:
+	return active and active_mode == Mode.CHALLENGE
+
+
+## Rezultatul unei provocari: bifa se pune doar la reusita si nu se pierde la
+## un esec ulterior (ca medaliile, pastram maximul). Returneaza `success`.
+func finish_challenge(success: bool) -> bool:
+	if is_challenge() and success:
+		set_challenge(active_track)
+	return success and is_challenge()
+
+
+func is_time_trial() -> bool:
+	return active and active_mode == Mode.TIME_TRIAL
+
+
+## Medalia unui timp de contratimp fata de tintele pistei `id`. Functie pura:
+## o tinta 0 = "fara tinta inca" si nu da medalie.
+static func time_trial_medal(id: StringName, ms: int) -> int:
+	var index := TrackInfo.index_of_id(id)
+	if index < 0:
+		return MEDAL_NONE
+	return medal_for_time(TrackInfo.for_track(index), ms)
+
+
+static func medal_for_time(info: TrackInfo, ms: int) -> int:
+	if info.tt_gold_ms > 0 and ms <= info.tt_gold_ms:
+		return MEDAL_GOLD
+	if info.tt_silver_ms > 0 and ms <= info.tt_silver_ms:
+		return MEDAL_SILVER
+	if info.tt_bronze_ms > 0 and ms <= info.tt_bronze_ms:
+		return MEDAL_BRONZE
+	return MEDAL_NONE
+
+
+## Rezultatul unui contratimp: salveaza timpul minim si medalia maxima,
+## returneaza medalia castigata acum.
+func finish_time_trial(race_ms: int) -> int:
+	if not is_time_trial():
+		return MEDAL_NONE
+	var medal := time_trial_medal(active_track, race_ms)
+	set_time_trial(active_track, medal, race_ms)
+	return medal
+
+
+# ------------------------------------------------------------- fantome
+
+func ghost_path(track_id: StringName) -> String:
+	return ghost_dir.path_join("%s.bin" % track_id)
+
+
+## Scrie fantoma DOAR daca `race_ms` bate `previous_best_ms` (best-ul de DINAINTE
+## de `finish_time_trial`; 0 = nicio cursa inca). Un fisier cu versiune mai noua
+## decat stim nu se suprascrie (aceeasi regula ca la career.cfg). Intoarce true
+## daca a scris.
+func save_ghost_if_best(track_id: StringName, data: GhostData, race_ms: int,
+		previous_best_ms: int) -> bool:
+	if data == null or race_ms <= 0:
+		return false
+	if previous_best_ms > 0 and race_ms >= previous_best_ms:
+		return false
+	var path := ghost_path(track_id)
+	if FileAccess.file_exists(path):
+		var old := FileAccess.get_file_as_bytes(path)
+		if GhostData.file_version(old) > GhostData.VERSION:
+			push_warning("Career: fantoma %s e dintr-o versiune mai noua, nu o suprascriu" % path)
+			return false
+	DirAccess.make_dir_recursive_absolute(ghost_dir)
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		push_warning("Career: nu pot scrie fantoma %s" % path)
+		return false
+	file.store_buffer(data.to_bytes())
+	file.close()
+	return true
+
+
+## Null daca lipseste, e corupta sau e dintr-o versiune mai noua.
+func load_ghost(track_id: StringName) -> GhostData:
+	var path := ghost_path(track_id)
+	if not FileAccess.file_exists(path):
+		return null
+	var bytes := FileAccess.get_file_as_bytes(path)
+	var data := GhostData.from_bytes(bytes)
+	if data == null:
+		push_warning("Career: fantoma %s ignorata (versiune %d, corupta sau necunoscuta)"
+			% [path, GhostData.file_version(bytes)])
+	return data
+
+
 func leave() -> void:
 	active = false
+	active_mode = Mode.RACE
+	_restore_ai_count()
+
+
+func _restore_ai_count() -> void:
+	if _saved_ai_count >= 0:
+		GameState.ai_count = _saved_ai_count
+		_saved_ai_count = -1
 
 
 # ----------------------------------------------------------- persistenta

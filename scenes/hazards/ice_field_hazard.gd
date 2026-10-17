@@ -54,6 +54,10 @@ extends Node3D
 ## al axelor si verificate geometric in tools/probe_ice_field.gd, nu ghicite.
 
 ## Cat de sus pluteste campul peste placa lacului (m).
+## O placa a cedat; `cars` = masinile care erau pe ea in clipa asta. Il asculta
+## provocarea „THIN ICE" din cariera (brief §4.3); nu schimba nimic in joc.
+signal plate_broken(cars: Array[Car])
+
 const RAISE: float = 0.38
 ## Buza fetei de sus peste profilul de baza.
 const LIP: float = 0.05
@@ -1082,6 +1086,7 @@ func _step_plate(plate: Dictionary, cars: Array[Car], delta: float) -> void:
 			+ delta * load_kg / BREAK_LOAD
 		if float(plate["stress"]) >= BREAK_TIME:
 			print("DBG IceField: placa rupta, %d masini" % on_plate.size())
+			plate_broken.emit(on_plate)
 			plate["state"] = PlateState.BROKEN
 			plate["timer"] = 0.0
 			_play_crack(plate, 0.62, 2.0)

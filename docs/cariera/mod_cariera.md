@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.8 (brief de design; pasul 0 retunat, pașii 1–2 construiți)
+# Modul Carieră — „Turul lumii” — v0.9 (brief de design; pasul 0 retunat, pașii 1, 2 și 4a construiți)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -75,6 +75,18 @@
 > Gărzi: `ProbeSealedTurbo` (0,300 → 0,300 sigilat cu 360 de cadre de drift;
 > contra-probă 0,300 → 1,000; arderea 0,300 → 0,020) și `ProbeCareer` la 180
 > de verificări; `verify_local` 14/14. Contratimpul nu a fost rulat la volan.
+>
+> **v0.9 (17 oct 2026), pasul 4a construit** (PR #563, stivuit pe #561):
+> `CareerChallenge` ca resursă per pistă, `ChallengeTracker` cu regula „zero
+> evenimente” abonat la semnalele existente (numără doar jucătorul; hazard
+> lipsă = `push_warning`, nu reușită tăcută), modul CHALLENGE (cursă normală
+> cu tracker; o condiție per probă, fără medalie de cursă), butonul CHALLENGE
+> activ pe foaie, HUD „CHALLENGE: …” / „FAILED”. Cele 7 piste cu semnal:
+> Kyoto (aruncat), Stromboli (minge de foc), Serengeti (animal), Okinawa (val,
+> prag 0,5: 0,22 în apă / 0,75 creasta), Monument Valley (strivit), Machu
+> Picchu (împins de autobuz), Jodhpur (tuk-tuk). Gardă `ProbeChallenge` (99 de
+> verificări, sabotaj + contra-probă); `verify_local` 15/15. Rămân pentru 4b
+> cele 5 piste care cer semnal nou. Pasul 5 (fantoma) lansat în paralel.
 
 ## 0. Într-o propoziție
 
@@ -619,7 +631,10 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    din pole, deblocarea mașinii în garaj (garajul citește `Career.unlocked`,
    mașinile blocate se văd gri cu „învinge-l pe Luna”). *Gardă:* `ProbeRace`
    rival vs AI de grilă, aceeași mașină, pe distribuție (§5).
-4. **Provocările de gimmick** — `ChallengeTracker` + contractul per pistă,
+4. **Provocările de gimmick — 4a CONSTRUIT (PR #563, 17 oct)**: tracker-ul
+   generic „zero evenimente” + cele 7 piste cu semnal existent; starea în
+   `pas4a_provocari_stare.md`. 4b (cele 5 piste cu semnal nou, reguli pe tur
+   / pe zonă) rămâne. Planul inițial: `ChallengeTracker` + contractul per pistă,
    **câte un PR per pistă**, întâi cele 8 cu semnal existent (Okinawa,
    Stromboli, Kyoto, Jodhpur, Serengeti, Monument Valley, Machu Picchu,
    Transfăgărășan), apoi cele 4 din carieră care cer semnal nou (Chongqing,

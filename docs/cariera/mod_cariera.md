@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.6 (brief de design, gruparea decisă, pasul 0 măsurat și retunat în două runde)
+# Modul Carieră — „Turul lumii” — v0.7 (brief de design; pasul 0 retunat, pasul 1 construit)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -54,6 +54,16 @@
 > (kicker-ul din Serengeti pentru autobuz, gheața din Baikal), nu de mașină.
 > Tuning-ul din cifre se oprește aici; urmează verdictul dezvoltatorului la
 > volan (§11 pasul 0, ultimul punct).
+>
+> **v0.7 (17 oct 2026), pasul 1 construit** (PR #556, ramura
+> `cariera/pas1-raft`, constructor Sonnet pe brief auto-conținut): lumile ca
+> resurse `.tres` (`scenes/career/`), `TrackInfo.id` pe toate cele 16 piste,
+> autoload `Career` (progres pe pistă/rival în `user://career.cfg` v1,
+> ștampile calculate, read-only pe versiune necunoscută), raftul
+> (`CareerPanel`: pașaport, cutii, carduri cu medalii, lacăt), CAREER în locul
+> lui CHAMPIONSHIP, medalia cursei după loc + „BACK TO CAREER”, garda
+> `ProbeCareer` (130 de verificări, cu sabotaj) în `verify_local.sh` (13/13).
+> Pasul 0 a fost merge-uit (#553, #555); verdictul la volan rămâne deschis.
 
 ## 0. Într-o propoziție
 
@@ -566,7 +576,12 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    un PR cu sonda + unul cu retuning-ul, A/B pe aceeași matrice (memoria
    `proberace-nedeterminism`: distribuții, nu o rulare).
 
-1. **Date + raft + ștampile + gating** — resursele `CareerWorld` /
+1. **Date + raft + ștampile + gating — CONSTRUIT (PR #556, 17 oct).**
+   Starea exactă, abaterile și ce a rămas: `pas1_raft_stare.md`. Notă: „Okinawa”
+   din lumea 2 e `okinawa` = Track20 (cea nouă); `okinawa_manual` (Track08),
+   Dunele și Alpii rămân în afara lumilor, ca Ha Long. Fluxul în joc (medalie →
+   BACK TO CAREER → raft) e acoperit de sondă, nu rulat la volan. Planul inițial
+   al pasului: resursele `CareerWorld` /
    `CareerConfig` cu gruparea din §3 (trei `.tres` de lume + unul de
    config; Ha Long în niciuna), `Career` autoload, `id` pe `TrackInfo`,
    migrarea recordurilor, ecranul raftului cu cutii și `TrackCard`-uri cu

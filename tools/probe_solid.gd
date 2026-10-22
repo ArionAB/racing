@@ -43,7 +43,9 @@ func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--track="):
 			only = int(arg.trim_prefix("--track="))
-	for i in range(1, 22):
+	# 30, nu 22: limita fixa lasa pe dinafara pista cea mai noua (Track22, Ha
+	# Long, n-a fost scanata niciodata) — aceeasi capcana ca in probe_decor.
+	for i in range(1, 30):
 		var path := "res://scenes/tracks/Track%02d.tscn" % i
 		if not ResourceLoader.exists(path):
 			continue

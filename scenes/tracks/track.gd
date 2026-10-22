@@ -15033,6 +15033,27 @@ const KERB_EDGE_SHADE: Color = Color(0.86, 0.86, 0.86)
 const KERB_RED: Color = Color(0.904, 0.160, 0.106)
 const KERB_WHITE: Color = Color(0.979, 0.979, 0.979)
 
+## Pe ce indici ai bordura (1) — scris de `_build_kerbs` cu ACELEASI conditii ca
+## mesh-ul, citit de [method kerb_at]. Gol = pista fara borduri.
+var _kerb_idx: PackedByteArray = PackedByteArray()
+
+
+## E punctul `pos` (de langa indexul `index` al buclei principale) pe o bordura?
+## Banda e KERB_WIDTH lata, inauntrul marginii soselei, pe ambele laturi; exista
+## doar unde `_build_kerbs` a pus mesh. Ieftin: un test pe octet, apoi o
+## proiectie. Il foloseste masina ca sa scuture suspensia pe bordura.
+func kerb_at(index: int, pos: Vector3) -> bool:
+	var n := _kerb_idx.size()
+	if n == 0:
+		return false
+	var i := ((index % n) + n) % n
+	if _kerb_idx[i] == 0:
+		return false
+	var lat := absf((pos - baked[i]).dot(_side_at(i)))
+	var w := width_at_index(i)
+	return lat <= w and lat >= w - KERB_WIDTH
+
+
 ## Bordurile rosu-alb de pe marginile virajelor stranse.
 ##
 ## UN SINGUR mesh pentru amandoua culorile, nu doua: culoarea vine acum din
@@ -15045,6 +15066,7 @@ const KERB_WHITE: Color = Color(0.979, 0.979, 0.979)
 ## (curbura peste 0.08 rad). Nu sunt decor, sunt SEMNAL — daca ar margini toata
 ## pista, n-ar mai spune nimic despre unde se franeaza.
 func _build_kerbs() -> void:
+	_kerb_idx = PackedByteArray()
 	# Un drum de nisip n-are borduri turnate. Semnalul lor — "aici se franeaza",
 	# citit de departe — NU se pierde: pe virajele aceleiasi piste raman
 	# chevron-urile (_build_chevrons), umarul de pietris (_build_shoulders) si,
@@ -15106,6 +15128,11 @@ func _build_kerbs() -> void:
 			st.set_color(tint)
 			st.set_uv(Vector2(u_in, v1)); st.add_vertex(in1)
 			emitted = true
+		# Segmentul i..j (i, i+1) are bordura: indexul masinii poate cadea pe oricare.
+		if _kerb_idx.is_empty():
+			_kerb_idx.resize(n)
+		_kerb_idx[i] = 1
+		_kerb_idx[(i + 1) % n] = 1
 	if not emitted:
 		return
 	st.generate_normals()

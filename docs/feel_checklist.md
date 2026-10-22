@@ -49,7 +49,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* The loop is on or off with the handbrake, at one level, on every surface.
 - [ ] **Surfaces that talk** `surface-voice` · Missing · ⭐  
   Grass rumble, gravel hiss, puddle spray, and kerbs that tick through the suspension, the sound and the camera as you ride them.  
-  *Today:* No rolling sounds. Kerbs are visual only. The stone steps already push noise into the springs, so the mechanism exists.
+  *Today:* Kerbs now tick through the suspension (`Track.kerb_at`, `Car.on_kerb`, `kerb_wheels`; `ProbeKerb`). No rolling sounds yet, no grass or gravel voice.
 - [ ] **Sense of speed** `sense-of-speed` · Partial  
   Wider field of view, camera pulling back, wind noise rising with speed, trackside objects near the road streaming past.  
   *Today:* FOV and pull-back are in. No wind sound, no speed lines.
@@ -61,7 +61,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Entry and exit ramps feel good. Smoke and marks are on/off rather than scaled.
 - [ ] **Jumps with a skill component** `jump-skill` · Partial  
   Lip stretch on takeoff, a little air control so gas and brake level the nose, then a landing thud scaled by fall speed, a dust puff, squash and a camera dip.  
-  *Today:* Stretch, squash, sound and shake are in. No air control, no landing dust, fixed-level thud.
+  *Today:* Stretch, squash, sound and shake are in. Air control is in: throttle pitches the nose down, brake up, capped at 0.9 rad/s, player only (`ProbeAirControl`). Still missing: landing dust, fixed-level thud.
 - [x] **Steering that tightens with speed** `steering-speed` · Have  
   Less steering lock at high speed so the car never feels twitchy, snappy lock at low speed, and a short smoothing on input so a button tap does not jerk.  
   *Today:* Lock tapers linearly from full at 50% of max speed to 65% at max (`steer_taper_at_top`), drift exempt. `PlayerController` smooths digital steering: 0.10 s in, 0.06 s out, instant through zero on reversal. Guard: `ProbeSteerSpeed`.
@@ -125,9 +125,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Corner hits spin, straight hits shove** `corner-hits` · Have  
   Clipping a rear corner rotates the leading car more than a square push. Being rear-ended wobbles you without stopping you.  
   *Today:* Mostly emergent from the physics.
-- [ ] **Spin-out assist** `spinout-assist` · Missing  
+- [x] **Spin-out assist** `spinout-assist` · Have  
   Once a car is turned past sideways, a gentle auto-straighten so the player is back on line in a second instead of facing the wrong way. Arcade standard.  
-  *Today:* None.
+  *Today:* Slip past 100 degrees at 6 m/s or more (not reversing by choice) turns the nose back toward the direction of travel, or the road when nearly stopped, through `_impact_yaw`; about 1 s from a 150 degree spin. Drift (slip up to 35 degrees) never reaches it. Guard: `ProbeSpinout`.
 - [ ] **You know who hit you** `who-hit-me` · Missing  
   A camera kick from the hit side, a positional impact sound from the other car, a horn from the AI.  
   *Today:* Impact sounds are flat 2D and only fire when the player is involved.
@@ -142,7 +142,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* None.
 - [ ] **Slipstream** `slipstream` · Missing  
   A small speed gain when following closely, with wind lines and a sound. Rewards closeness without contact and makes running in the pack tactical.  
-  *Today:* None.
+  *Today:* Physics is in: `Car.draft` (0..1) builds in 0.5 s behind a car 2 to 14 m ahead in a narrow cone, both above 50% of max speed, for +1.5 m/s cap and +10% acceleration; same rule for every car (`ProbeSlipstream`). Wind lines and the sound are still missing; they can read `draft`.
 - [ ] **AI that reacts** `ai-reacts` · Missing  
   A wobble when hit, a counter-steer, a momentary grudge against whoever hit it, horns.  
   *Today:* AI gets only the raw physics.

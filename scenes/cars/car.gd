@@ -221,6 +221,56 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 @export var stuck_nudge_speed: float = 2.5
 @export var stuck_nudge_yaw: float = 2.4
 
+@export_group("Spin-out assist")
+## Masina scapata din mana (slip peste `spinout_slip_deg` fata de directia in
+## care se misca, la peste `spinout_min_speed`) e rotita usor spre directia de
+## mers — sau spre sosea, cand aproape s-a oprit dupa spin — ca jucatorul sa fie
+## inapoi pe linie in ~1 s (feel_checklist: spinout-assist). Intra prin
+## _impact_yaw. Marsarierul din voie (frana, viteza mica) si driftul (slip
+## 20-35 grade) nu ajung la prag.
+@export var spinout_enabled: bool = true
+@export var spinout_slip_deg: float = 100.0
+## Asistenta se opreste cand botul e la mai putin de atatea grade de tinta.
+@export var spinout_release_deg: float = 45.0
+@export var spinout_min_speed: float = 6.0
+## rad/s per radian de eroare, plafonat la spinout_yaw_max (NU la bump_yaw_max:
+## aici e o corectie de ~0,7 s, nu un efect de lovitura).
+@export var spinout_yaw_gain: float = 3.0
+@export var spinout_yaw_max: float = 3.5
+
+@export_group("Control in aer")
+## Doar pentru jucator (PlayerController): in aer gazul apleaca botul in jos si
+## frana il ridica, ca sa poti nivela pentru aterizare. Plafonat si bland; fara
+## control pe yaw, iar lansarea de pe rampe nu se schimba.
+@export var air_control_enabled: bool = true
+## Viteza unghiulara maxima de tangaj adaugata de comanda (rad/s).
+@export var air_pitch_rate: float = 0.9
+## Cat de repede ajunge la ea (rad/s^2).
+@export var air_pitch_accel: float = 3.5
+
+@export_group("Slipstream")
+## O masina care urmeaza de aproape (`slip_min_gap`..`slip_max_gap` m in spatele
+## alteia, in con ingust, amandoua peste `slip_min_speed_frac` din max_speed)
+## primeste un plafon de viteza si o acceleratie mai mari, care cresc in
+## `slip_build_s` si dispar in `slip_fade_s`. Aceeasi regula pentru oricine.
+@export var slipstream_enabled: bool = true
+@export var slip_min_gap: float = 2.0
+@export var slip_max_gap: float = 14.0
+## Latimea conului: jumatatea unei masini + atat pe metru de distanta.
+@export var slip_cone: float = 0.15
+@export var slip_min_speed_frac: float = 0.5
+@export var slip_speed_bonus: float = 1.5 # m/s peste plafon la draft = 1
+@export var slip_accel_bonus: float = 0.10 # +10% acceleratie la draft = 1
+## Peste atata rotatie (rad/s) masina e in viraj si nu primeste aspiratie.
+@export var slip_max_yaw: float = 0.5
+@export var slip_build_s: float = 0.5
+@export var slip_fade_s: float = 0.25
+
+@export_group("Borduri")
+## Bordura scutura suspensia ca treptele (vezi STEP_NOISE_M), proportional cu
+## viteza. Oprit = fara scuturat (feel_checklist: surface-voice).
+@export var kerb_rumble_enabled: bool = true
+
 @export_group("Auto-upright")
 ## Rasturnata (pe acoperis sau pe o parte) si aproape oprita, masina se intoarce
 ## pe roti PE LOC, cu un salt mic, in loc sa astepte repunerea (feel_checklist:
@@ -584,6 +634,17 @@ var _eject_left: float = 0.0
 const RECOVER_S: float = 1.0
 ## „Rasturnata" = acelasi criteriu ca `Race._watch_recovery` (FLIPPED_COS /
 ## FLIPPED_SPEED / FLIPPED_S): cos fata de vertical sub 0.3 si sub 4 m/s.
+## Bordura: ±KERB_NOISE_M in compresia arcului pe un pas de KERB_PITCH_M. La
+## 25 m/s e ~18 Hz — o vibratie, nu un hop. Amplitudinea creste cu viteza.
+const KERB_NOISE_M: float = 0.035
+const KERB_PITCH_M: float = 1.4
+## Citibile de audio/camera: macar o roata pe bordura acum / cate roti.
+var on_kerb: bool = false
+var kerb_wheels: int = 0
+## Cat de „in aspiratie" e masina, 0..1 (vezi _update_draft). Citibil de efecte.
+var draft: float = 0.0
+var _spinout_on: bool = false
+var _spinout_left: float = 0.0
 const UPRIGHT_FLIPPED_COS: float = 0.3
 const UPRIGHT_FLIPPED_SPEED: float = 4.0
 ## Daca tot nu s-a putut intoarce dupa atat (s de stat rasturnata), recover().
@@ -865,6 +926,7 @@ func _physics_process(delta: float) -> void:
 
 	_update_drift(drift_pressed, steer, fwd_speed, delta)
 	_update_turbo(turbo_pressed, delta)
+	_update_draft(delta)
 	brake_lamp = (throttle < 0.0 and fwd_speed > 1.0) or is_drifting
 
 	_apply_driving(steer, throttle, fwd_h, fwd_speed)
@@ -932,6 +994,8 @@ func _apply_suspension() -> void:
 	fwd_along.y = 0.0
 	fwd_along = fwd_along.normalized()
 	var steps_wheels := 0
+	var kerb_count := 0
+	var kerb_speed := Vector2(linear_velocity.x, linear_velocity.z).length()
 	# Rigiditatea pe roata din frecventa si masa pe roata (k = m(2*pi*f)^2),
 	# amortizarea din raport — tuning independent de cat cantareste masina.
 	var wheel_mass := mass * 0.25
@@ -971,6 +1035,16 @@ func _apply_suspension() -> void:
 			compression = clampf(compression
 				+ STEP_NOISE_M * sin(TAU * along / STEP_PITCH_M),
 				0.0, suspension_rest)
+		# Bordura: acelasi truc ca treptele, dar pe un pas mai fin si cu amplitudine
+		# care creste cu viteza; oprit nu scutura. Doar pe bucla principala.
+		if (kerb_rumble_enabled and track != null and route == 0
+				and kerb_speed > 2.0
+				and track.kerb_at(road_index, hit.position as Vector3)):
+			kerb_count += 1
+			var along_k := (hit.position as Vector3).dot(fwd_along)
+			compression = clampf(compression + KERB_NOISE_M
+				* clampf((kerb_speed - 2.0) / 18.0, 0.0, 1.0)
+				* sin(TAU * along_k / KERB_PITCH_M), 0.0, suspension_rest)
 		wheel_compression[i] = compression
 		var offset := attach - global_position
 		var point_vel := linear_velocity + angular_velocity.cross(offset)
@@ -982,6 +1056,8 @@ func _apply_suspension() -> void:
 		# masina in jos nefiresc.
 		if force_mag > 0.0:
 			apply_force(up * force_mag, offset)
+	kerb_wheels = kerb_count
+	on_kerb = kerb_count > 0
 	if (steps_wheels > 0) != on_steps:
 		on_steps = steps_wheels > 0
 		steps_changed.emit(self, on_steps)
@@ -1019,6 +1095,7 @@ func _apply_driving(steer: float, throttle: float,
 	# nu exista nicio rezistenta modelata) e pastrata de constructie.
 	var ground_frac := float(wheels_on_ground) / 4.0
 	if ground_frac == 0.0:
+		_air_control(throttle)
 		return
 
 	var rel_vel := velocity - _ground_velocity
@@ -1030,6 +1107,7 @@ func _apply_driving(steer: float, throttle: float,
 		var accel := acceleration
 		if is_boosting:
 			accel += turbo_accel_bonus
+		accel *= 1.0 + draft * slip_accel_bonus
 		apply_force(fwd_h * accel * throttle * mass * ground_frac,
 			_contact_offset)
 	elif throttle < 0.0:
@@ -1084,6 +1162,7 @@ func _apply_driving(steer: float, throttle: float,
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
 	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign \
 		* _steer_taper(fwd_speed, drift_amt)
+	_spinout_assist(throttle, fwd_h, hvel)
 	# Comanda + rotatia ramasa din lovituri (se stinge singura, plafonata).
 	var kick := _yaw_kick if _yaw_kick_left > 0.0 else 0.0
 	angular_velocity = Vector3(
@@ -1097,6 +1176,111 @@ func _steer_taper(fwd_speed: float, drift_amt: float) -> float:
 	var start := max_speed * steer_taper_start
 	var t := clampf(inverse_lerp(start, max_speed, absf(fwd_speed)), 0.0, 1.0)
 	return lerpf(lerpf(1.0, steer_taper_at_top, t), 1.0, drift_amt)
+
+
+## Spin-out assist (feel_checklist: spinout-assist): vezi grupul de exporturi.
+## Declansare: unghiul dintre bot si viteza (orizontala, fata de sol) peste
+## `spinout_slip_deg`, la peste `spinout_min_speed`, fara sa fie marsarier din
+## voie (fara gaz la viteza de marsarier: frana, sau rulat de-a-ndaratelea pe o
+## panta). Odata pornita (cel mult 2 s),
+## tine pana botul e la `spinout_release_deg` de tinta: directia de mers, iar
+## sub 3 m/s directia soselei (daca exista pista). Rotatia intra prin
+## _impact_yaw, ca orice alt impuls de yaw — niciodata cuplu.
+func _spinout_assist(throttle: float, fwd_h: Vector3, hvel: Vector3) -> void:
+	if not spinout_enabled:
+		_spinout_on = false
+		return
+	var speed := hvel.length()
+	var target := Vector3.ZERO
+	if speed > 3.0:
+		target = hvel / speed
+	elif _spinout_on and track != null:
+		var ahead := track.point_at(road_index + 3, route) - track.point_at(road_index, route)
+		ahead.y = 0.0
+		if ahead.length_squared() > 1e-4:
+			target = ahead.normalized()
+	if not _spinout_on:
+		if speed < spinout_min_speed:
+			return
+		var by_choice := throttle <= 0.0 and speed <= reverse_speed * 1.3
+		if fwd_h.dot(target) < cos(deg_to_rad(spinout_slip_deg)) and not by_choice:
+			_spinout_on = true
+			_spinout_left = 2.0
+		return
+	_spinout_left -= get_physics_process_delta_time()
+	if (target == Vector3.ZERO or _spinout_left <= 0.0
+			or fwd_h.dot(target) > cos(deg_to_rad(spinout_release_deg))):
+		_spinout_on = false
+		return
+	var err := atan2(fwd_h.cross(target).y, fwd_h.dot(target))
+	var want := clampf(err * spinout_yaw_gain, -spinout_yaw_max, spinout_yaw_max)
+	if absf(want) > absf(_impact_yaw):
+		_impact_yaw = want
+
+
+## Control in aer: gazul apleaca botul, frana il ridica. Doar jucatorul; AI-ul
+## ramane neutru in aer. Se ADAUGA la viteza unghiulara pe axa dreapta a
+## masinii pana la `air_pitch_rate`, fara sa franeze rotatia din lansare.
+func _air_control(throttle: float) -> void:
+	if (not air_control_enabled or not (controller is PlayerController)
+			or throttle == 0.0 or not race_active):
+		return
+	var right := global_transform.basis.x
+	var along := angular_velocity.dot(right)
+	# Pozitiv in jurul axei dreapta = bot in sus; gaz (throttle > 0) = bot in jos.
+	var want := -signf(throttle) * air_pitch_rate
+	var step := air_pitch_accel * get_physics_process_delta_time()
+	var new_along := along
+	if want < 0.0 and along > want:
+		new_along = maxf(along - step, want)
+	elif want > 0.0 and along < want:
+		new_along = minf(along + step, want)
+	angular_velocity += right * (new_along - along)
+
+
+## Slipstream: cea mai buna masina din fata, in con, da `draft` tinta 1.
+func _update_draft(delta: float) -> void:
+	var target := 0.0
+	if slipstream_enabled and race_active and not finished and wheels_on_ground > 0:
+		target = _draft_target()
+	var rate := 1.0 / maxf(slip_fade_s, 0.01)
+	if target > draft:
+		rate = 1.0 / maxf(slip_build_s, 0.01)
+	draft = move_toward(draft, target, rate * delta)
+
+
+func _draft_target() -> float:
+	var v := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
+	if v.length() < max_speed * slip_min_speed_frac:
+		return 0.0
+	# Aspiratia e un lucru de DREAPTA: in viraj conul se strange si nimeni nu
+	# mai e „in spatele" nimanui. Fara portita asta, bonusul de acceleratie facea
+	# masinile sa intre mai tare in viraje (ProbeRace: loviturile de perete
+	# se dublau pe Transfagarasan).
+	if absf(angular_velocity.y) > slip_max_yaw:
+		return 0.0
+	var fwd := -global_transform.basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	for node in get_tree().get_nodes_in_group(&"cars"):
+		var other := node as Car
+		if other == null or other == self or other.finished or not other.race_active:
+			continue
+		var rel := other.global_position - global_position
+		rel.y = 0.0
+		var along := rel.dot(fwd)
+		if along < slip_min_gap or along > slip_max_gap:
+			continue
+		var lat := (rel - fwd * along).length()
+		if lat > 0.9 + along * slip_cone:
+			continue
+		var ov := Vector3(other.linear_velocity.x, 0.0, other.linear_velocity.z)
+		if ov.length() < other.max_speed * slip_min_speed_frac:
+			continue
+		if ov.dot(fwd) < ov.length() * 0.8:
+			continue
+		return 1.0
+	return 0.0
 
 
 ## Bilantul contactelor raportate de solver: izbituri cu alte masini (plafon,
@@ -1429,6 +1613,7 @@ func _current_max_speed() -> float:
 		vmax *= track.route_speed_factor(route)
 	if is_boosting:
 		vmax += turbo_speed_bonus
+	vmax += draft * slip_speed_bonus
 	# Strivirea taie plafonul, nu viteza curenta: pierzi timp reaccelerand, exact
 	# ca la offroad. Se aplica DUPA turbo, ca sa nu poti sterge pedeapsa cu boost.
 	return vmax * crush_factor

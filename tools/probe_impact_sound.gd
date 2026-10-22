@@ -17,7 +17,10 @@ extends Node
 ##      noi + `wall_hit` o singura data (nu mai exista sunetul vechi fix), iar
 ##      volumul de pe playerul din pool e cel din jurnal;
 ##   6. o ciocnire intre masini scoate UN singur set de sunete (desi o emit ambele
-##      masini), cu corpul `bump` si clinchetul `metal_hit`.
+##      masini), cu corpul `bump` si clinchetul `metal_hit`;
+##   7. clacul de plastic (toy-sound-palette): UN `impact_clack_*` pe orice impact
+##      intre masini peste prag, niciunul la perete; mereu sub stratul principal
+##      cel mai tare, mai tare cu puterea, ambele variante, fara repetitie, 2D.
 ##
 ## Ruleaza CA SCENA:
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeImpactSound.tscn
@@ -45,6 +48,7 @@ func _ready() -> void:
 	_test_floor()
 	_test_layers_and_monotonic()
 	_test_variants_and_pitch()
+	_test_clack()
 	await _test_wall_pipeline()
 	await _test_car_pipeline()
 	AudioManager.clock = func() -> float: return Time.get_ticks_msec() * 0.001
@@ -172,6 +176,77 @@ func _test_variants_and_pitch() -> void:
 	_check(sum_hard < sum_soft, "impactul tare e mai grav decat cel usor")
 
 
+func _clacks(plan: Array) -> Array:
+	return plan.filter(func(e: Dictionary) -> bool: return String(e["name"]).begins_with("impact_clack"))
+
+
+func _test_clack() -> void:
+	print("")
+	print("-- 7. clacul de plastic --")
+	var all_one := true
+	var quieter := true
+	var wall_clean := true
+	var mono := true
+	var prev_db := -INF
+	var first_bad := 0.0
+	var s := 2.5
+	while s <= 30.0:
+		var cp := AudioManager.plan_impact(&"car", s)
+		var cl := _clacks(cp)
+		if cl.size() != 1:
+			all_one = false
+			first_bad = s
+		else:
+			var db := float((cl[0] as Dictionary)["db"])
+			var top_main := -INF
+			for e in cp:
+				if e["role"] == &"main":
+					top_main = maxf(top_main, float(e["db"]))
+			if db >= top_main - 3.0:
+				quieter = false
+				first_bad = s
+			if db < prev_db - 1.0e-9:
+				mono = false
+			prev_db = db
+		if not _clacks(AudioManager.plan_impact(&"wall", s)).is_empty():
+			wall_clean = false
+		s += 0.1
+	_check(all_one, "masina: exact un clack pe orice impact 2.5 .. 30 m/s (abatere la %.1f)" % first_bad)
+	_check(quieter, "clacul e cu >= 3 dB sub stratul principal cel mai tare (abatere la %.1f)" % first_bad)
+	_check(wall_clean, "perete: niciun clack, la nicio putere")
+	_check(mono, "clacul nu scade cu puterea")
+	var c_lo := float((_clacks(AudioManager.plan_impact(&"car", 3.0))[0] as Dictionary)["db"])
+	var c_hi := float((_clacks(AudioManager.plan_impact(&"car", 22.0))[0] as Dictionary)["db"])
+	var crash_hi := -INF
+	for e in AudioManager.plan_impact(&"car", 22.0):
+		if e["layer"] == &"crash":
+			crash_hi = float(e["db"])
+	print("  clack: %.1f dB la 3 m/s, %.1f dB la 22 m/s (crash la 22: %.1f dB)" % [c_lo, c_hi, crash_hi])
+	_check(c_hi - c_lo > 8.0, "clacul creste cu > 8 dB intre 3 si 22 m/s")
+	_check(c_hi < crash_hi - 6.0, "la 22 m/s clacul e cu > 6 dB sub crash")
+	_check(c_lo >= -30.0, "clacul usor ramane audibil (>= -30 dB)")
+	var last := &""
+	var seen: Dictionary = {}
+	var repeat := false
+	var p_soft := 0.0
+	var p_hard := 0.0
+	for i in 200:
+		var soft_e := _clacks(AudioManager.plan_impact(&"car", 3.5))[0] as Dictionary
+		var hard_e := _clacks(AudioManager.plan_impact(&"car", 22.0))[0] as Dictionary
+		for e: Dictionary in [soft_e, hard_e]:
+			if e["name"] == last:
+				repeat = true
+			last = e["name"]
+			seen[last] = true
+		p_soft += float(soft_e["pitch"])
+		p_hard += float(hard_e["pitch"])
+	_check(seen.size() == 2, "ambele variante de clack se folosesc (%d)" % seen.size())
+	_check(not repeat, "aceeasi varianta de clack nu se repeta de doua ori la rand")
+	_check(p_hard < p_soft, "clacul tare e mai grav decat cel usor")
+	_check(String((_clacks(AudioManager.plan_impact(&"car", 9.0))[0] as Dictionary)["role"]) == "body",
+		"clacul e strat de corp (2D, tacut intre AI)")
+
+
 # ------------------------------------------------------------ conducta reala
 
 func _box(size: Vector3, pos: Vector3) -> StaticBody3D:
@@ -232,6 +307,8 @@ func _test_wall_pipeline() -> void:
 		"peretele ramane 2D")
 	_check(names.count(&"bump") == 0 and names.count(&"metal_hit") == 0,
 		"fara bump / metal_hit la perete")
+	_check(names.filter(func(n: StringName) -> bool: return String(n).begins_with("impact_clack")).is_empty(),
+		"fara clack de plastic la perete")
 	var hit: Dictionary = {}
 	for e in log:
 		if e["name"] == &"wall_hit":
@@ -281,6 +358,16 @@ func _test_car_pipeline() -> void:
 	_check(emits[0] >= 2, "ambele masini au emis `impact` (%d)" % emits[0])
 	_check(names.count(&"bump") == 1, "bump o singura data pe perechea de masini")
 	_check(names.count(&"metal_hit") == 1, "metal_hit o singura data")
+	var clack_log := log.filter(func(e: Dictionary) -> bool:
+		return String(e["name"]).begins_with("impact_clack"))
+	_check(clack_log.size() == 1, "un singur clack de plastic pe perechea de masini")
+	_check(clack_log.all(func(e: Dictionary) -> bool: return not e["positional"]),
+		"clacul ajunge 2D (strat de corp)")
+	var clack_stream := false
+	for p in AudioManager._pool:
+		if p.stream == AudioManager.stream(&"impact_clack_a") 				or p.stream == AudioManager.stream(&"impact_clack_b"):
+			clack_stream = true
+	_check(clack_stream, "un player din pool poarta efectiv streamul de clack")
 	_check(log.any(func(e: Dictionary) -> bool: return String(e["name"]).begins_with("impact_")),
 		"un strat principal a sunat")
 	snd.queue_free()

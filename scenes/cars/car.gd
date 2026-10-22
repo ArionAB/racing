@@ -506,6 +506,36 @@ const ANT_DAMPING: float = 0.16
 ## Cheia: rad/s in repaus (aproape stop) si la viteza maxima.
 const KEY_SPIN_MIN: float = 0.0
 const KEY_SPIN_MAX: float = 18.0
+## Zdranganeala (toy-animation: piese de plastic care zornaie). Pe teren aspru
+## antena si cheia tremura mic si repede, DOAR vizual (nu intra in starea
+## arcului antenei). Sursele: bordura, trepte de piatra, teren afanat (iarba,
+## pietris, pamant) si aterizarile; totul scalat cu viteza.
+@export_group("Zdranganeala jucariei")
+## Comutator (sabotaj pentru sonda: stins, jucaria sta calma pe teren aspru).
+@export var toy_rattle_enabled: bool = true
+## Unghiul maxim (rad) al tremurului: varful antenei si cheia pe axa ei.
+@export var rattle_ant_rad: float = 0.09
+@export var rattle_key_rad: float = 0.14
+## Cat de tare zdrangane fiecare sursa, la viteza plina (0..1).
+@export var rattle_kerb: float = 1.0
+@export var rattle_steps: float = 0.9
+@export var rattle_loose: float = 0.45
+## Sub viteza asta (m/s) nu zdrangane pe teren; la `rattle_full_speed` e la maxim.
+@export var rattle_min_speed: float = 2.0
+@export var rattle_full_speed: float = 18.0
+## Aterizare: cadere (m/s) la care rafala e maxima, si cat dureaza (s) pana moare.
+@export var rattle_land_full_fall: float = 12.0
+@export var rattle_land_decay_s: float = 0.35
+## Netezirea nivelului: urca repede (1/s), coboara mai incet.
+@export var rattle_attack: float = 22.0
+@export var rattle_release: float = 7.0
+@export_group("")
+## Nivelul curent de zdranganeala (0..1), pentru sonde si debug.
+var toy_rattle: float = 0.0
+var _rattle_drive_smooth: float = 0.0
+var _rattle_burst: float = 0.0
+var _rattle_t: float = 0.0
+var _toy_loose: bool = false
 ## Starea elastica a jolt-ului: deplasare si tilt (vector orizontal in spatiul
 ## masinii; directia = spre ce se apleaca varful, lungimea = unghiul in rad).
 var _jolt_pos: Vector3 = Vector3.ZERO
@@ -794,6 +824,7 @@ func _ready() -> void:
 	impact.connect(_on_impact_visual)
 	landed.connect(_on_landed_visual)
 	respawned.connect(_reset_visual_offsets)
+	landed.connect(_on_landed_rattle)
 	# Colizerul caroseriei NU atinge solul in mers (garda la sol o da
 	# suspensia); exista pentru imbranceli si aterizari dure. Talpa lui sta la
 	# +0.25 fata de origine (care e la nivelul solului): bordurile si dalele
@@ -2699,6 +2730,7 @@ func _update_effects(delta: float) -> void:
 	var on_branch := track != null and route != 0 \
 		and track.is_on_road(road_index, global_position, route)
 	var loose := _on_loose_ground(on_road)
+	_toy_loose = loose
 	_update_slide(delta)
 	_update_scrape_sparks()
 	# Fumul si urmele urmeaza ALUNECAREA, nu butonul: handbrake-ul le aprinde
@@ -4113,6 +4145,9 @@ func _on_impact_visual(_car: Car, kind: StringName, strength: float,
 func _reset_visual_offsets(_c: Car = null) -> void:
 	_jolt_pos = Vector3.ZERO
 	_jolt_pos_vel = Vector3.ZERO
+	_rattle_burst = 0.0
+	_rattle_drive_smooth = 0.0
+	toy_rattle = 0.0
 	_jolt_tilt = Vector3.ZERO
 	_jolt_tilt_vel = Vector3.ZERO
 	_rub_lean = Vector3.ZERO
@@ -4334,9 +4369,48 @@ static func _toy_key_clear(parts: Array, kp: Vector3, sc: float, stand: float) -
 	return true
 
 
+## Aterizare dura: rafala de zdranganeala proportionala cu caderea.
+func _on_landed_rattle(_car: Car, fall_speed: float) -> void:
+	_rattle_burst = maxf(_rattle_burst,
+		clampf(fall_speed / maxf(rattle_land_full_fall, 0.1), 0.0, 1.0))
+
+
+## Nivelul de zdranganeala (0..1) in `toy_rattle` si tremurul acestui cadru
+## (doua axe, ~±1): suma de trei sinusoide neinrudite sub frecventa Nyquist a
+## cadrului de fizica — pare zgomot rapid, nu o unda. Sursele de teren cer
+## roti pe sol si viteza; rafala de aterizare nu depinde de nici una.
+func _update_rattle(dt: float, fwd_speed: float) -> Vector2:
+	var surface := 0.0
+	if toy_rattle_enabled and wheels_on_ground > 0:
+		if on_kerb:
+			surface = rattle_kerb
+		if on_steps:
+			surface = maxf(surface, rattle_steps)
+		if _toy_loose:
+			surface = maxf(surface, rattle_loose)
+	var speed_k := clampf(inverse_lerp(rattle_min_speed, rattle_full_speed,
+		absf(fwd_speed)), 0.0, 1.0)
+	var drive := surface * speed_k
+	var rate := rattle_attack if drive > _rattle_drive_smooth else rattle_release
+	_rattle_drive_smooth = move_toward(_rattle_drive_smooth, drive, rate * dt)
+	_rattle_burst = maxf(_rattle_burst - dt / maxf(rattle_land_decay_s, 0.05), 0.0)
+	toy_rattle = clampf(maxf(_rattle_drive_smooth,
+		_rattle_burst if toy_rattle_enabled else 0.0), 0.0, 1.0)
+	if toy_rattle < 0.001:
+		return Vector2.ZERO
+	_rattle_t += dt
+	var t := _rattle_t
+	return Vector2(
+		(sin(TAU * 26.3 * t) + 0.8 * sin(TAU * 17.1 * t + 1.3)
+			+ 0.6 * sin(TAU * 11.7 * t + 2.9)) / 2.4,
+		(sin(TAU * 23.9 * t + 0.7) + 0.8 * sin(TAU * 14.3 * t + 2.2)
+			+ 0.6 * sin(TAU * 9.1 * t + 4.1)) / 2.4)
+
+
 ## Antena (arc fortat de acceleratie) si cheia (turatie dupa viteza).
 func _update_toys(delta: float, fwd_speed: float) -> void:
 	var dt := minf(delta, 0.05)
+	var jit := _update_rattle(dt, fwd_speed)
 	if _toy_antenna != null:
 		# Acceleratia masinii in spatiul ei; varful ramane in urma ei.
 		var acc := (velocity - _prev_velocity) / maxf(delta, 0.0001)
@@ -4347,15 +4421,19 @@ func _update_toys(delta: float, fwd_speed: float) -> void:
 		_ant_tilt = (sp[0] as Vector3) + target
 		_ant_vel = sp[1]
 		_ant_tilt = _ant_tilt.limit_length(ANT_MAX * 1.4)
+		# Zdranganeala se adauga DOAR la desen: starea arcului ramane curata.
+		var drawn := _ant_tilt + Vector3(jit.x, 0.0, jit.y) * (rattle_ant_rad * toy_rattle)
 		var q := Quaternion.IDENTITY
-		if _ant_tilt.length_squared() > 1e-10:
-			q = Quaternion(Vector3.UP.cross(_ant_tilt).normalized(), _ant_tilt.length())
+		if drawn.length_squared() > 1e-10:
+			q = Quaternion(Vector3.UP.cross(drawn).normalized(), drawn.length())
 		_toy_antenna.quaternion = q
 	if _toy_key != null:
 		var f := clampf(absf(fwd_speed) / maxf(max_speed, 1.0), 0.0, 1.2)
 		_key_angle = fposmod(_key_angle + lerpf(KEY_SPIN_MIN, KEY_SPIN_MAX, f)
 			* signf(fwd_speed if absf(fwd_speed) > 0.5 else 1.0) * dt, TAU)
-		_toy_key.rotation.z = _key_angle
+		# Cheia sta slab pe ax: pe teren aspru se clatina in jurul lui X si Y.
+		var wob := Vector2(jit.y, jit.x) * (rattle_key_rad * toy_rattle)
+		_toy_key.rotation = Vector3(wob.x, wob.y, _key_angle)
 
 
 func _build_visual() -> void:

@@ -9,6 +9,7 @@ const ImpactFeelScript := preload("res://scenes/race/impact_feel.gd")
 const PositionWatchScript := preload("res://scenes/race/position_watch.gd")
 const HapticsFeedScript := preload("res://scenes/race/haptics_feed.gd")
 const ImpactSoundScript := preload("res://scenes/race/impact_sound.gd")
+const RocketStartAudioScript := preload("res://scenes/race/rocket_start_audio.gd")
 const SpeedLinesScript := preload("res://scenes/ui/speed_lines.gd")
 ## Pilotii sunt stabili intre curse (punctele de campionat raman pe slot).
 const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna", "Kai", "Nyx"]
@@ -53,6 +54,8 @@ var position_watch: PositionWatchScript
 var haptics: HapticsFeedScript
 ## Sunetul de contact (impact in straturi, hartaieli, aterizare); vezi ImpactSound.
 var impact_sound: ImpactSoundScript
+## Clichetul si arcul rocket start-ului (doar jucatorul); vezi RocketStartAudio.
+var rocket_audio: RocketStartAudioScript
 var hud: RaceHUD
 ## „Parbrizul ud" (Fiordland, brief pasul 4): picaturi pe ecran cand jucatorul
 ## e in perdeaua Stirling sau in ploaie. Null pe piste fara niciun
@@ -215,6 +218,8 @@ func _setup_race() -> void:
 	impact_sound.racing = func() -> bool: return state == State.RUNNING
 	add_child(impact_sound)
 	impact_sound.setup(player, cars)
+	rocket_audio = RocketStartAudioScript.new()
+	add_child(rocket_audio)
 	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
 		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5) * 0.65))
 	player.landed.connect(func(_c: Car, fall: float) -> void:
@@ -402,6 +407,8 @@ func _tick_countdown(delta: float) -> void:
 			_drift_hold[car] = float(_drift_hold.get(car, 0.0)) + delta
 		else:
 			_drift_hold[car] = 0.0
+	if rocket_audio != null and player != null:
+		rocket_audio.tick(delta, float(_drift_hold.get(player, 0.0)))
 	if _countdown_left > 3.0:
 		return
 	if _countdown_left > 0.0:
@@ -432,10 +439,11 @@ func _go() -> void:
 		if car == player:
 			if not player.turbo_recharge:
 				player.turbo_charge = 1.0
-			if hold > 0.05 and hold <= 1.05:
+			if hold > rocket_audio.min_hold_s and hold <= rocket_audio.window_s:
 				car.force_boost(1.2)
 				hud.flash_message("ROCKET START!")
-			elif hold > 1.05:
+				rocket_audio.on_go(true)
+			elif hold > rocket_audio.window_s:
 				hud.flash_message("Too early...")
 				car.hold_turbo_until_release()
 		elif _rng.randf() < 0.45:

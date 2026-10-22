@@ -15,10 +15,11 @@ scrii un nume.
 
 **Zero assets audio externe. Zero obligatii de licenta.**
 
-Toate cele **55** de fisiere din `assets/audio/` sunt sintetizate procedural
+Toate cele **59** de fisiere din `assets/audio/` sunt sintetizate procedural
 (WAV mono 22050 Hz / 16-bit): cele 28 vechi si cele 16 de eveniment de
 `tools/generate_sfx.gd`, cele 11 ale vocilor continue de masina (motor, derapaj,
-suprafete, turbo, vant) de `tools/generate_sfx_car.gd` — cod scris in cadrul
+suprafete, turbo, vant) si cele 4 ale paletei de jucarie (clacuri de plastic,
+arc si clichet de rocket start) de `tools/generate_sfx_car.gd` — cod scris in cadrul
 proiectului, deci drepturile sunt ale noastre. Nu exista nicio inregistrare
 descarcata, niciun sample de biblioteca, nimic generat de AI.
 
@@ -30,6 +31,13 @@ acelasi rezultat — generatorul e determinist (`rng.seed = 20260718`).
 vechi: rulat peste cele 28, hash-urile lor raman neschimbate (verificat 22 oct 2026),
 iar cele 11 noi ies identice la doua rulari consecutive. Fisier separat tocmai ca sa
 nu mute zgomotul generatorului vechi (un singur `rng` semanat o data).
+
+Cele **4** ale paletei de jucarie (`impact_clack_a/b`, `rocket_spring`,
+`rocket_ratchet`) se genereaza tot in `generate_sfx_car.gd`, dar dintr-un sir de
+zgomot **separat** (`rng_toy.seed = 20261023`, blocul `_save_toy_palette`, salvat
+dupa cele 11): regenerat, toate cele 55 de fisiere dinainte raman identice
+bit-pentru-bit (verificat cu md5 inainte/dupa, 23 oct 2026) si doua rulari
+consecutive dau aceleasi 4 fisiere.
 
 Cele **16** de fisiere de eveniment adaugate pe 22 oct 2026 (impact in straturi,
 hartaieli, claxon, stinger, hazarde, decor) se genereaza dintr-un sir de zgomot
@@ -52,6 +60,9 @@ Pentru cele doua excepții vezi [Datoria tehnica](#datorie-tehnica-doua-fisiere-
 | `wind_loop.wav` | vant dupa viteza (bucla 1.2 s, doar jucator) | `generate_sfx_car.gd` | proprietate proiect |
 | `turbo_click.wav` / `turbo_release.wav` | clickul la apasarea turbo / sisaitul de la capat | `generate_sfx_car.gd` | proprietate proiect |
 | `turbo_whoosh.wav` | suvoiul turbo cat arde (bucla 0.8 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `impact_clack_a.wav` / `impact_clack_b.wav` | clac de plastic peste impactul intre masini (doua variante, ~0,085 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `rocket_spring.wav` | „zrrrt” de arc tras la GO, doar pe start rocket (~0,66 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `rocket_ratchet.wav` | clichetul cheii cat tii TURBO in numaratoare (~0,32 s) | `generate_sfx_car.gd` | proprietate proiect |
 | `skid_loop.wav` | bucla de derapaj | `generate_sfx.gd` | proprietate proiect |
 | `boost.wav` | turbo | `generate_sfx.gd` | proprietate proiect |
 | `drift_start.wav` / `drift_level.wav` | intrare in drift / prag de bara | `generate_sfx.gd` | proprietate proiect |

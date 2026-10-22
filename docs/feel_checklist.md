@@ -140,9 +140,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Hits between AI cars near you** `ai-ai-hits` · Have  
   Positional and quieter, so the pack sounds alive.  
   *Today:* Done. A hit between two cars that are not the player sounds only within `ai_range_m` (35 m) of the camera and from 3.5 m/s, 8 dB quieter than the same hit with the player, positional (main layer only, no body), at most one per 0.12 s overall and 0.15 s per pair. It uses priority 1 in the 3D pool of four, so it never steals a player or hazard sound. Guard: `ProbePositionalHits`.
-- [ ] **Position-change feedback** `position-change` · Missing  
+- [x] **Position-change feedback** `position-change` · Have  
   A short stinger and a HUD popup when you overtake or are overtaken.  
-  *Today:* The HUD popup is in (`PositionWatch` + `PositionPopup`): "P3" with a green up or red down triangle after a position is held 0.4 s, coalesced, none in countdown or after the finish. Still missing: the stinger (audio); hook it on `PositionWatch.announced`.
+  *Today:* Done. The HUD popup is in (`PositionWatch` + `PositionPopup`): "P3" with a green up or red down triangle after a position is held 0.4 s, coalesced, none in countdown or after the finish. The stinger rides the same `PositionWatch.announced` signal (`AudioManager.play_stinger`): a three-note rising arpeggio (`stinger_up.wav`, 0.37 s) for a better position, a two-note falling slide (`stinger_down.wav`, 0.38 s) for a worse one, 2D at -8 dB, exact pitch. Guard: `ProbeStinger`.
 - [ ] **Slipstream** `slipstream` · Missing  
   A small speed gain when following closely, with wind lines and a sound. Rewards closeness without contact and makes running in the pack tactical.  
   *Today:* None.

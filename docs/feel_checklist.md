@@ -71,9 +71,12 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **Toy-only animation** `toy-animation` · Partial  
   Antenna wobble, a wind-up key spinning faster with speed, plastic bits that rattle. Personality every second of driving.  
   *Today:* Antenna (spring, driven by acceleration and impacts) and a wind-up key on the back (spin follows speed) are in, built procedurally and mounted on the model surface by ray casts, per-car flag `CarData.toy_animation`. Still missing: plastic bits that rattle.
-- [ ] **Haptics** `haptics` · Missing  
-  Short rumble on kerbs, landings and hits on a controller. Phone vibration on the big ones.  
-  *Today:* None anywhere.
+- [x] **Haptics** `haptics` · Have  
+  Short rumble on landings and hits on a controller. Phone vibration on the big ones.  
+  *Today:* `HapticsFeed` pulses the player only, on impacts (wall and car), hard landings (6 m/s and up) and turbo start: 15-60 ms, amplitude 0.25-1.0 scaled by strength, at most one pulse per 0.15 s on the real clock, silent in countdown and after the finish. Phones via `Input.vibrate_handheld`, pads via `start_joy_vibration`. Settings: Vibration toggle, persisted, default on. Kerb rumble is split out below.
+- [ ] **Kerb rumble** `kerb-haptics` · Optional  
+  A faint continuous buzz while riding a kerb, tied to the surface the car is on.  
+  *Today:* None. Needs a continuous pulse path next to `HapticsFeed.pulse()`; the 0.15 s rate limit is too slow for a buzz.
 
 ## Hitting the world
 
@@ -139,13 +142,13 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Silent.
 - [ ] **Position-change feedback** `position-change` · Missing  
   A short stinger and a HUD popup when you overtake or are overtaken.  
-  *Today:* None.
+  *Today:* The HUD popup is in (`PositionWatch` + `PositionPopup`): "P3" with a green up or red down triangle after a position is held 0.4 s, coalesced, none in countdown or after the finish. Still missing: the stinger (audio); hook it on `PositionWatch.announced`.
 - [ ] **Slipstream** `slipstream` · Missing  
   A small speed gain when following closely, with wind lines and a sound. Rewards closeness without contact and makes running in the pack tactical.  
   *Today:* None.
 - [ ] **AI that reacts** `ai-reacts` · Missing  
   A wobble when hit, a counter-steer, a momentary grudge against whoever hit it, horns.  
-  *Today:* AI gets only the raw physics.
+  *Today:* Wobble, counter-steer and grudge are in (`AIController`, `reacts` toggle, tunables `wobble_*` and `grudge_*`): a car hit by another car at 4 m/s or more gets a decaying steering term (faded in between 8 and 18 m/s, so hairpins are untouched), its first lobe against the yaw the hit imparted, and for 4 s it tries to sit alongside the car that hit it (one lane over, only while that car is within 28 m ahead). Steering and target line only, no speed or grip change. Still missing: the horns (audio).
 - [x] **Player's hits big, AI's hits small** `player-big-ai-small` · Have  
   Hit-stop and shake make your own bumps feel powerful. AI-initiated contact on you stays capped and telegraphed so bumping reads as a mechanic, not punishment.  
   *Today:* Impulses are capped, and the camera feedback is asymmetric: the attacker is decided from both cars' pre-impact speeds along the contact line. Player attacker (or equal head-on) gets full kick and hit-stop; an AI hitting you gets a capped kick (0.4 m) and no hit-stop.

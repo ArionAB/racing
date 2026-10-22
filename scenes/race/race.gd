@@ -6,6 +6,8 @@ extends Node3D
 
 const CAR_SCENE: PackedScene = preload("res://scenes/cars/Car.tscn")
 const ImpactFeelScript := preload("res://scenes/race/impact_feel.gd")
+const PositionWatchScript := preload("res://scenes/race/position_watch.gd")
+const HapticsFeedScript := preload("res://scenes/race/haptics_feed.gd")
 const SpeedLinesScript := preload("res://scenes/ui/speed_lines.gd")
 ## Pilotii sunt stabili intre curse (punctele de campionat raman pe slot).
 const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna", "Kai", "Nyx"]
@@ -44,6 +46,10 @@ var traffic: Array[Car] = []
 var _ai_visible: Array[Car] = []
 var camera: ChaseCamera
 var impact_feel: ImpactFeelScript
+## Anunta pozitiile TINUTE (depasiri) catre popup-ul din HUD; vezi PositionWatch.
+var position_watch: PositionWatchScript
+## Vibratia jucatorului (impacturi, aterizari, turbo); vezi HapticsFeed.
+var haptics: HapticsFeedScript
 var hud: RaceHUD
 ## „Parbrizul ud" (Fiordland, brief pasul 4): picaturi pe ecran cand jucatorul
 ## e in perdeaua Stirling sau in ploaie. Null pe piste fara niciun
@@ -193,6 +199,13 @@ func _setup_race() -> void:
 	impact_feel.racing = func() -> bool: return state == State.RUNNING
 	add_child(impact_feel)
 	impact_feel.setup(player, cars, camera, vignette)
+	position_watch = PositionWatchScript.new()
+	add_child(position_watch)
+	position_watch.announced.connect(hud.show_position_change)
+	haptics = HapticsFeedScript.new()
+	haptics.racing = func() -> bool: return state == State.RUNNING
+	add_child(haptics)
+	haptics.setup(player)
 	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
 		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5) * 0.65))
 	player.landed.connect(func(_c: Car, fall: float) -> void:
@@ -364,6 +377,10 @@ func _physics_process(delta: float) -> void:
 		_tick_countdown(delta)
 	else:
 		_tick_race(delta)
+	# Si in numaratoare/dupa final: `active == false` reseteaza referinta, deci
+	# popup-ul de depasire nu apare cand clasamentul nu inseamna inca/mai nimic.
+	position_watch.observe(player.race_position, delta,
+		state == State.RUNNING and not player.finished)
 	_update_hud()
 
 # -------------------------------------------------------------- countdown
@@ -746,6 +763,8 @@ func _setup_ghost() -> void:
 func _finish_race() -> void:
 	state = State.FINISHED
 	impact_feel.cancel_hit_stop()
+	position_watch.reset(0)
+	hud.position_popup.hide_now()
 	_player_race_ms = _clock_ms()
 	if _ghost_recorder != null:
 		_ghost_recorder.stop()

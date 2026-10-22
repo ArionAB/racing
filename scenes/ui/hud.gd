@@ -64,6 +64,10 @@ var _offroad_label: Label
 ## „WRONG WAY" (#499): mare, rosu, pulsand cat timp mergi pe contrasens.
 var _wrong_way_label: Label
 var _wrong_way_tween: Tween
+## Popup „P3 ▲/▼" la depasiri (feel: position-change). Public ca sondele sa-l citeasca.
+var position_popup: PositionPopupScript
+
+const PositionPopupScript := preload("res://scenes/ui/position_popup.gd")
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -170,6 +174,12 @@ func _ready() -> void:
 	_wrong_way_label.add_theme_color_override("font_color", Color(1.0, 0.22, 0.18))
 	_wrong_way_label.visible = false
 	root.add_child(_wrong_way_label)
+
+	position_popup = PositionPopupScript.new()
+	position_popup.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 96)
+	position_popup.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	root.add_child(position_popup)
 
 	_message = _make_label(38)
 	_message.set_anchors_and_offsets_preset(
@@ -734,6 +744,12 @@ func set_wrong_way(on: bool) -> void:
 		_wrong_way_tween = create_tween().set_loops()
 		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 0.35, 0.35)
 		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 1.0, 0.35)
+
+
+## Popup de depasire: `new_pos` mai mic decat `old_pos` = ai urcat. Il cheama Race
+## din PositionWatch (pozitia tinuta, nu schimbarile de o clipa).
+func show_position_change(new_pos: int, old_pos: int) -> void:
+	position_popup.show_change(new_pos, old_pos)
 
 
 func flash_message(text: String) -> void:

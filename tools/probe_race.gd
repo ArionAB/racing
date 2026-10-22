@@ -1335,6 +1335,17 @@ func _report_race() -> void:
 		laps[laps.size() - 1], laps[0], laps[laps.size() - 1] - laps[0]])
 	print("--- repuneri totale: %d · cel mai mult in afara soselei: %.1f%%" % [
 		total_respawns, worst_offroad])
+	var react_hits := 0
+	var grudges := 0
+	var grudge_s := 0.0
+	for c in cars:
+		var rc := c.controller as AIController
+		if rc != null:
+			react_hits += rc.react_count
+			grudges += rc.grudge_count
+			grudge_s += rc.grudge_active_s
+	print("--- reactii AI (ai-reacts): %d lovituri, %d ranchiuni, %.1f s de linie de ranchiuna (reacts=%s)" % [
+		react_hits, grudges, grudge_s, str(OS.get_environment("AI_REACTS") != "0")])
 	print("--- ejectari: %d (perete %d, aterizare %d) · cea mai dura aterizare FARA ejectare: %.1f m/s" % [
 		total_ej_wall + total_ej_land, total_ej_wall, total_ej_land, land_max])
 	var branch_total := 0

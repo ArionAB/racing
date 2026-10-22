@@ -11,7 +11,7 @@ extends Node
 ##      tace; volumul la 25 m/s e cu >= 6 dB peste cel de la 5 m/s.
 ##   3. Cross-fade iarba -> pietris: la ~0.08 s dupa schimbare canta amandoua (cea
 ##      veche se stinge, cea noua urca); dupa 0.6 s a ramas doar pietrisul.
-##   4. Bordura: `set_on_kerb(true)` la 20 m/s porneste `kerb_rattle`, mai tare si
+##   4. Bordura: `override_kerb = 1` la 20 m/s porneste `kerb_rattle`, mai tare si
 ##      cu pitch mai mare la viteza mai mare; `false` o opreste in < 0.3 s. Pe loc nu canta.
 ##   5. Adversarul (AI): nicio bucla de rulare, nicio bordura, niciun vant.
 ##   6. Pe PISTA REALA (Track01, masina cu `track` setat): pe sosea de asfalt suprafata
@@ -169,7 +169,7 @@ func _test_kerb() -> void:
 	U.drv(car).throttle = 1.0
 	au.override_surface = 0 # asfalt
 	await _run(car, 8.0, 0.4)
-	au.set_on_kerb(true)
+	au.override_kerb = 1
 	await _run(car, 8.0, 0.4)
 	var slow_db: float = au.kerb.volume_db if au.kerb != null else -99.0
 	var slow_pitch: float = au.kerb.pitch_scale if au.kerb != null else 0.0
@@ -182,10 +182,10 @@ func _test_kerb() -> void:
 	_check(ok_stream, "bordura canta `kerb_rattle`")
 	_check(fast_db - slow_db >= 6.0 and fast_pitch - slow_pitch >= 0.2,
 		"mai tare (>= 6 dB) si cu pitch mai mare cu viteza")
-	au.set_on_kerb(false)
+	au.override_kerb = 0
 	await _run(car, 26.0, 0.3)
 	_check(au.kerb == null or not au.kerb.playing, "dupa iesirea de pe bordura se opreste in < 0.3 s")
-	au.set_on_kerb(true)
+	au.override_kerb = 1
 	U.drv(car).throttle = 0.0
 	for _f in 40:
 		car.linear_velocity = Vector3(0, car.linear_velocity.y, 0)
@@ -202,7 +202,7 @@ func _test_ai() -> void:
 	var au = U.audio(car)
 	U.drv(car).throttle = 1.0
 	au.override_surface = 1
-	au.set_on_kerb(true)
+	au.override_kerb = 1
 	await _run(car, 25.0, 0.8)
 	_check(au.roll.is_empty() and au.kerb == null and au.wind == null,
 		"AI: fara rulare, bordura sau vant")

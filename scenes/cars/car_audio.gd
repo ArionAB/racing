@@ -150,6 +150,8 @@ var on_kerb: bool = false
 
 ## Cusaturi pentru sonde (pista lipseste in teste): -1 = automat.
 var override_loose: int = -1
+## Pentru sonde (ca `override_surface`): -1 = citeste `Car.on_kerb`, 0/1 = fortat.
+var override_kerb: int = -1
 var override_surface: int = -1
 ## Generatorul rateurilor: o sonda ii pune o samanta.
 var rng := RandomNumberGenerator.new()
@@ -215,7 +217,7 @@ func tick(delta: float, on_road: bool, loose: bool) -> void:
 	if car.is_player:
 		surface = _surface_kind(on_road, is_loose)
 		_update_roll(dt, speed)
-		set_on_kerb(car.on_kerb)
+		set_on_kerb(car.on_kerb if override_kerb < 0 else override_kerb == 1)
 		_update_kerb(dt, speed)
 		_update_wind(dt, speed)
 		_update_turbo(dt, speed)

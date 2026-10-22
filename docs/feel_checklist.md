@@ -86,9 +86,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **Impact sound in layers** `impact-layers` · Partial · ⭐  
   Soft tap, crunch, big crash chosen by speed difference, with random pitch so repeats never sound like a machine gun.  
   *Today:* Car-on-car already layers two sounds by speed. The wall hit is one fixed-level sound.
-- [ ] **Directional camera kick and hit-stop** `hitstop-shake` · Partial · ⭐  
+- [x] **Directional camera kick and hit-stop** `hitstop-shake` · Have  
   Shake in the direction of the hit rather than randomly, plus a freeze of a few frames on big hits so the brain registers the weight. The cheapest weight trick in games.  
-  *Today:* Shake is scaled by impact but random. No hit-stop.
+  *Today:* `ImpactFeel` kicks the chase cam along the hit normal (spring, settles in ~0.2 s, small roll) and freezes the world 40-90 ms on player impacts of 9 m/s or more (`HitStop`, real-time restore, cooldown 0.6 s, no freeze in countdown). No screen-shake setting exists, so nothing to follow.
 - [ ] **Body jolt on the visual body** `body-jolt` · Missing  
   Nudge the mesh, not the physics body, in the hit direction and let it spring back. The physics stays safe and the car looks like it took the hit.  
   *Today:* The visual node already does squash and drift roll, so the hook is there. No impact jolt.
@@ -146,9 +146,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **AI that reacts** `ai-reacts` · Missing  
   A wobble when hit, a counter-steer, a momentary grudge against whoever hit it, horns.  
   *Today:* AI gets only the raw physics.
-- [ ] **Player's hits big, AI's hits small** `player-big-ai-small` · Partial  
+- [x] **Player's hits big, AI's hits small** `player-big-ai-small` · Have  
   Hit-stop and shake make your own bumps feel powerful. AI-initiated contact on you stays capped and telegraphed so bumping reads as a mechanic, not punishment.  
-  *Today:* Impulses are capped. No asymmetry in feedback yet.
+  *Today:* Impulses are capped, and the camera feedback is asymmetric: the attacker is decided from both cars' pre-impact speeds along the contact line. Player attacker (or equal head-on) gets full kick and hit-stop; an AI hitting you gets a capped kick (0.4 m) and no hit-stop.
 - [x] **Ejections only for walls and landings** `ejections-walls-only` · Have  
   Keeps contact between cars friendly. A bump should never cost you the driver.  
   *Today:* Already excluded from car-on-car contact. Keep it.

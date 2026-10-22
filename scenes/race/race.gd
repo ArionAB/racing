@@ -5,6 +5,7 @@ extends Node3D
 ## start, progres/pozitii, rezultate si avansarea campionatului.
 
 const CAR_SCENE: PackedScene = preload("res://scenes/cars/Car.tscn")
+const ImpactFeelScript := preload("res://scenes/race/impact_feel.gd")
 ## Pilotii sunt stabili intre curse (punctele de campionat raman pe slot).
 const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna", "Kai", "Nyx"]
 ## Lineup-ul AI: masina (index in GameState.CAR_DATA) + culoarea per slot.
@@ -41,6 +42,7 @@ var traffic: Array[Car] = []
 ## doua liste "oficiale" sa nu se amestece cu cealalta.
 var _ai_visible: Array[Car] = []
 var camera: ChaseCamera
+var impact_feel: ImpactFeelScript
 var hud: RaceHUD
 ## „Parbrizul ud" (Fiordland, brief pasul 4): picaturi pe ecran cand jucatorul
 ## e in perdeaua Stirling sau in ploaie. Null pe piste fara niciun
@@ -165,7 +167,8 @@ func _setup_race() -> void:
 		var tuner := CameraTuner.new()
 		tuner.camera = camera
 		add_child(tuner)
-	add_child(Vignette.new())
+	var vignette := Vignette.new()
+	add_child(vignette)
 	hud = RaceHUD.new()
 	add_child(hud)
 	hud.restart_requested.connect(GameState.start_race)
@@ -179,8 +182,14 @@ func _setup_race() -> void:
 	_setup_challenge()
 	hud.show_countdown("READY?")
 	_setup_windshield_wipers()
+	# Reactia la izbituri (kick directional, hit-stop, cine a lovit pe cine):
+	# vezi ImpactFeel. Zgomotul de mai jos ramane doar ca fond.
+	impact_feel = ImpactFeelScript.new()
+	impact_feel.racing = func() -> bool: return state == State.RUNNING
+	add_child(impact_feel)
+	impact_feel.setup(player, cars, camera, vignette)
 	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
-		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5)))
+		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5) * 0.65))
 	player.landed.connect(func(_c: Car, fall: float) -> void:
 		camera.add_trauma(clampf(fall / 30.0, 0.1, 0.35)))
 	player.boost_started.connect(func(_c: Car) -> void:
@@ -200,15 +209,9 @@ func _setup_race() -> void:
 	# FumaroleHazard).
 	player.blinded.connect(func(_c: Car, seconds: float) -> void:
 		hud.blind_flash(seconds))
-	# Imbranceala se SIMTE proportional cu cat ai incasat: un autobuz care te ia
-	# din spate zguduie ecranul, o atingere lateral aproape deloc.
-	#
-	# Shake-ul e trauma^2, deci sub ~0.4 practic nu se vede (vezi nota de la
-	# `splashed`). Plafonul vechi era chiar 0.35 — izbiturile se simteau doar
-	# pe hartie (#500). Acum o atingere la prag (2.5 m/s) da ~0.23 (abia), o
-	# izbitura plina (15 m/s, plafonul de violenta) da 0.6.
-	player.bumped.connect(func(_c: Car, _other: Car, delta_v: float) -> void:
-		camera.add_trauma(clampf(0.12 + delta_v / 22.0, 0.12, 0.6)))
+	# Imbranceala intre masini (kick + zgomot + hit-stop, scalate dupa cine a
+	# lovit) o da ImpactFeel, pe semnalul `impact` — vezi mai sus. Inainte,
+	# aici era doar zgomot proportional cu delta-v (#500).
 	# Repunerea teleporteaza masina: camera trebuie sa sara cu ea, altfel
 	# urmareste cateva cadre un punct de la 100m.
 	player.respawned.connect(func(_c: Car) -> void:
@@ -737,6 +740,7 @@ func _setup_ghost() -> void:
 
 func _finish_race() -> void:
 	state = State.FINISHED
+	impact_feel.cancel_hit_stop()
 	_player_race_ms = _clock_ms()
 	if _ghost_recorder != null:
 		_ghost_recorder.stop()

@@ -2392,7 +2392,7 @@ func _update_drift_smoke() -> void:
 	var d := sqrt(s)
 	_drift_density.set_offset(1, lerpf(0.3, 1.0, d)) # fractia care se vede
 	_drift_density.set_color(0, Color(1, 1, 1, lerpf(0.55, 1.0, d))) # opacitatea
-	var size := lerpf(0.7, 1.25, s)
+	var size := lerpf(0.9, 1.9, s)
 	_drift_particles.scale_amount_min = 0.6 * size
 	_drift_particles.scale_amount_max = 1.4 * size
 
@@ -2441,10 +2441,10 @@ func _on_landed_visual(_car: Car, fall_speed: float) -> void:
 		_land_dust.emission_box_extents = Vector3(
 			data.body_width * 0.45, 0.05, data.body_length * 0.4)
 	_land_dust.color = _surface_dust_color()
-	_land_dust.initial_velocity_max = lerpf(1.5, 3.5, k)
-	_land_dust.radial_accel_min = lerpf(3.0, 6.0, k)
-	_land_dust.radial_accel_max = lerpf(5.0, 10.0, k)
-	_land_dust.scale_amount_max = lerpf(1.0, 1.7, k)
+	_land_dust.initial_velocity_max = lerpf(2.5, 5.0, k)
+	_land_dust.radial_accel_min = lerpf(4.0, 7.0, k)
+	_land_dust.radial_accel_max = lerpf(6.0, 12.0, k)
+	_land_dust.scale_amount_max = lerpf(1.0, 1.6, k)
 	_land_dust.restart()
 
 
@@ -2762,6 +2762,11 @@ func _update_scrape_sparks() -> void:
 	var n := Vector3.ZERO
 	var rel := Vector3.ZERO
 	var density := 0.0
+	# Cat de sus pleaca scanteile: pe perete bine in sus (peretele le-ar ascunde
+	# din camera de sus), intre masini si mai sus — contactul e intre doua
+	# acoperisuri, iar scanteia trebuie sa treaca de ele ca sa se vada.
+	var lift := 0.9
+	var lift_y := 0.05
 	if wall_contact and wall_scrape_speed > scrape_min_speed:
 		live = true
 		point = wall_point
@@ -2777,14 +2782,18 @@ func _update_scrape_sparks() -> void:
 		rel = velocity - rub_car.velocity
 		rel.y = 0.0
 		density = inverse_lerp(rub_min_speed, 10.0, rub_speed)
+		lift = 1.6
+		lift_y = 0.35
 	if not live:
 		_scrape_sparks.emitting = false
 		return
 	var tangent := rel - n * rel.dot(n)
 	var back := -tangent.normalized() if tangent.length_squared() > 0.01 		else Vector3.ZERO
-	_scrape_sparks.global_position = point + Vector3.UP * 0.05
+	_scrape_sparks.global_position = point + Vector3.UP * lift_y
 	# Spre inapoi pe directia de mers, putin in afara peretelui si in sus.
-	_set_spark_direction(_scrape_sparks, back * 0.8 + n * 0.35 + Vector3.UP * 0.5)
+	# Si bine in sus: din camera de sus, sparturile care raman la nivelul
+	# peretelui se ascund in spatele lui.
+	_set_spark_direction(_scrape_sparks, back * 0.6 + n * 0.5 + Vector3.UP * lift)
 	var d := clampf(density, 0.0, 1.0)
 	_scrape_density.set_offset(1, lerpf(0.25, 1.0, d))
 	_scrape_sparks.initial_velocity_min = lerpf(2.5, 5.0, d)
@@ -2865,11 +2874,13 @@ func _contact_point_with(other: Car, fallback: Vector3) -> Vector3:
 
 
 static var _spark_material: StandardMaterial3D = null
-const SPARKS_MIN: int = 10
-const SPARKS_MAX: int = 24
-## Emitatorul continuu de razuire/frecare. Impreuna cu SPARKS_MAX: 32 de
-## scantei pe masina, plafonul din fisa de feel.
-const SCRAPE_SPARKS_AMOUNT: int = 8
+const SPARKS_MIN: int = 8
+const SPARKS_MAX: int = 14
+## Emitatorul continuu de razuire/frecare. Impreuna cu SPARKS_MAX (14): 32 de
+## scantei pe masina, plafonul din fisa de feel. (Rafala de la ciocnirea intre
+## masini a coborat de la 24 la 14 ca sa incapa; la camera de joc o razuire cu
+## 8-12 scantei se vedea ca doua-trei puncte risipite in urma masinii.)
+const SCRAPE_SPARKS_AMOUNT: int = 18
 
 func _build_sparks() -> void:
 	_sparks = CPUParticles3D.new()
@@ -2936,7 +2947,7 @@ func _build_scrape_sparks(heat: Gradient, shrink: Curve) -> void:
 	e.top_level = true # inainte de add_child: dupa, ar ingheta transformul
 	e.emitting = false
 	e.amount = SCRAPE_SPARKS_AMOUNT
-	e.lifetime = 0.22
+	e.lifetime = 0.2
 	e.randomness = 0.6
 	e.local_coords = false
 	e.spread = 28.0
@@ -2957,7 +2968,9 @@ func _build_scrape_sparks(heat: Gradient, shrink: Curve) -> void:
 		Color(1, 1, 1, 1), Color(1, 1, 1, 0)]))
 	e.color_initial_ramp = _scrape_density
 	var streak := BoxMesh.new()
-	streak.size = Vector3(0.05, 0.34, 0.05)
+	# Mai groase decat rafala: la camera de joc (16 m) o dara de 5 cm abia avea
+	# 2 pixeli si se vedeau doua-trei puncte portocalii pe captura.
+	streak.size = Vector3(0.16, 0.95, 0.16)
 	streak.material = _spark_material
 	e.mesh = streak
 	e.particle_flag_align_y = true
@@ -2980,15 +2993,17 @@ func _build_land_dust() -> void:
 	e.amount = LAND_DUST_AMOUNT
 	e.lifetime = 0.75
 	e.local_coords = false
+	# Aproape orizontal, in toate directiile: norul trebuie sa iasa de sub masina,
+	# nu sa urce pe sub ea (de sus, un nor ramas sub caroserie nu se vede).
 	e.direction = Vector3.UP
-	e.spread = 70.0
-	e.initial_velocity_min = 0.5
-	e.initial_velocity_max = 2.0
-	e.radial_accel_min = 3.0
-	e.radial_accel_max = 6.0
-	e.damping_min = 2.0
-	e.damping_max = 3.5
-	e.gravity = Vector3(0, -0.8, 0)
+	e.spread = 85.0
+	e.initial_velocity_min = 1.5
+	e.initial_velocity_max = 3.5
+	e.radial_accel_min = 5.0
+	e.radial_accel_max = 9.0
+	e.damping_min = 1.5
+	e.damping_max = 2.5
+	e.gravity = Vector3(0, 0.4, 0)
 	e.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	e.emission_box_extents = Vector3(0.9, 0.05, 1.4)
 	e.scale_amount_min = 0.6
@@ -3004,7 +3019,7 @@ func _build_land_dust() -> void:
 	fade.set_colors(PackedColorArray([
 		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.6), Color(1, 1, 1, 0.0)]))
 	e.color_ramp = fade
-	e.mesh = _puff_mesh(0.34)
+	e.mesh = _puff_mesh(0.9)
 	e.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(e)
 	_land_dust = e

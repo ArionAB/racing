@@ -66,10 +66,12 @@ const GLANCE_LATERAL_M: float = 4.0
 const GLANCE_LONGITUDINAL_M: float = 2.5
 const GLANCE_MAX_YAW: float = 0.9
 const GLANCE_RATE: float = 7.0
-## Pumnul: durata (s), cat de sus urca bratul (rad, inainte-sus) si de la ce
+## Pumnul: durata (s), cat de sus urca bratul (rad, in jurul axei laterale;
+## POZITIV = in sus, de la orizontala spre cer — verificat pe captura:
+## `ARMS_UP_AIR` negativ duce de fapt bratul in jos, spre poala) si de la ce
 ## delta-v lovit de alta masina il scoate.
 const FIST_DURATION: float = 0.9
-const FIST_RAISE: float = -1.9
+const FIST_RAISE: float = 1.9
 const FIST_MIN_DV: float = 3.5
 
 var car: Car

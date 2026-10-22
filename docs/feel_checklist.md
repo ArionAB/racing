@@ -130,7 +130,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* None.
 - [ ] **You know who hit you** `who-hit-me` · Missing  
   A camera kick from the hit side, a positional impact sound from the other car, a horn from the AI.  
-  *Today:* Impact sounds are flat 2D and only fire when the player is involved.
+  *Today:* Camera kick comes from the hit side and the screen edge on that side flashes briefly (`Vignette.flash_edge`). Still missing: positional impact sound from the other car and the AI horn (audio).
 - [ ] **Driver reactions to the other car** `driver-social` · Missing  
   A fist shake at the offender, a head whip, a glance at the car alongside.  
   *Today:* Lean only.

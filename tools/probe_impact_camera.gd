@@ -25,6 +25,7 @@ var _player: Car
 var _ai: Car
 var _cam: ChaseCamera
 var _feel: ImpactFeelScript
+var _vig: Vignette
 var _racing: bool = true
 var _events: Array[Dictionary] = []
 
@@ -42,6 +43,7 @@ func _ready() -> void:
 	await _test_wall_hit()
 	await _test_hitstop_safety()
 	await _test_attacker()
+	await _test_edge_flash()
 	Engine.time_scale = 1.0
 	print("")
 	print("VERDICT: ", "PROBLEMA" if _failed else "OK")
@@ -96,7 +98,9 @@ func _rig(player_pos: Vector3, with_ai: bool, ai_pos: Vector3 = Vector3.ZERO,
 	_feel = ImpactFeelScript.new()
 	_feel.racing = func() -> bool: return _racing
 	add_child(_feel)
-	_feel.setup(_player, cars, _cam, null)
+	_vig = Vignette.new()
+	add_child(_vig)
+	_feel.setup(_player, cars, _cam, _vig)
 	_events.clear()
 	_player.impact.connect(func(_c: Car, kind: StringName, strength: float,
 			normal: Vector3, _p: Vector3, _o: Node) -> void:
@@ -111,7 +115,7 @@ func _rig(player_pos: Vector3, with_ai: bool, ai_pos: Vector3 = Vector3.ZERO,
 func _teardown() -> void:
 	Engine.time_scale = 1.0
 	get_tree().paused = false
-	for n in [_feel, _cam, _player, _ai]:
+	for n in [_feel, _cam, _vig, _player, _ai]:
 		if is_instance_valid(n):
 			(n as Node).queue_free()
 	await _frames(3)
@@ -343,3 +347,51 @@ func _test_attacker() -> void:
 	_check(b.kick > 0.0 and b.kick <= 0.4 + 0.001, "AI-ul atacator: kick plafonat (<=0.4 m)")
 	_check(b.kick < a.kick * 0.9, "AI-ul atacator: kick mai mic decat al jucatorului")
 	_check(c.attacker, "frontal egal: jucatorul ramane atacatorul")
+
+
+# ------------------------------------------------------ 5. flash de margine
+
+func _edges() -> Array[float]:
+	return [_vig.edge_alpha(Vignette.Edge.LEFT), _vig.edge_alpha(Vignette.Edge.RIGHT),
+		_vig.edge_alpha(Vignette.Edge.TOP), _vig.edge_alpha(Vignette.Edge.BOTTOM)]
+
+
+func _test_edge_flash() -> void:
+	print("")
+	print("-- 5. flash de margine dinspre lovitura --")
+	_racing = false # fara hit-stop, doar flash-ul
+	await _rig(Vector3(0, 0.7, 40), false)
+	# Camera priveste -Z; dreapta ecranului = +X. Normala arata dinspre obstacol
+	# spre masina, deci un obstacol la STANGA are normala +X.
+	_player.impact.emit(_player, &"wall", 12.0, Vector3(1, 0, 0), Vector3.ZERO, null)
+	var e := _edges()
+	print("  obstacol la stanga: L=%.2f R=%.2f sus=%.2f jos=%.2f" % [e[0], e[1], e[2], e[3]])
+	_check(e[0] > 0.2 and e[1] == 0.0 and e[2] == 0.0 and e[3] == 0.0,
+		"obstacol la stanga => doar marginea stanga")
+	_check(_vig.get_child(1).visible, "fasia stanga e vizibila")
+	await _frames(40)
+	e = _edges()
+	_check(e[0] == 0.0 and not _vig.is_processing(),
+		"flash-ul se stinge singur si nodul nu mai ruleaza (cost zero)")
+	_check(not _vig.get_child(1).visible, "fasia revine ascunsa")
+	_player.impact.emit(_player, &"wall", 12.0, Vector3(-1, 0, 0), Vector3.ZERO, null)
+	e = _edges()
+	_check(e[1] > 0.2 and e[0] == 0.0, "obstacol la dreapta => marginea dreapta")
+	await _frames(40)
+	_player.impact.emit(_player, &"wall", 12.0, Vector3(0, 0, 1), Vector3.ZERO, null)
+	e = _edges()
+	_check(e[2] > 0.2 and e[3] == 0.0, "obstacol in fata => marginea de sus")
+	await _frames(40)
+	_player.impact.emit(_player, &"wall", 12.0, Vector3(0, 0, -1), Vector3.ZERO, null)
+	e = _edges()
+	_check(e[3] > 0.2 and e[2] == 0.0, "lovit din spate => marginea de jos")
+	await _frames(40)
+	_player.impact.emit(_player, &"wall", 4.0, Vector3(1, 0, 0), Vector3.ZERO, null)
+	var small := _vig.edge_alpha(Vignette.Edge.LEFT)
+	await _frames(40)
+	_player.impact.emit(_player, &"wall", 18.0, Vector3(1, 0, 0), Vector3.ZERO, null)
+	var big := _vig.edge_alpha(Vignette.Edge.LEFT)
+	print("  alfa: izbitura 4 m/s %.2f, 18 m/s %.2f" % [small, big])
+	_check(big > small * 2.0 and big <= _feel.flash_max + 0.001,
+		"flash-ul creste cu forta si e plafonat")
+	await _teardown()

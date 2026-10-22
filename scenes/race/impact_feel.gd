@@ -53,9 +53,11 @@ const HitStopScript := preload("res://scenes/race/hit_stop.gd")
 ## Si trauma, la fel (fractie).
 @export var victim_trauma_scale: float = 0.5
 
-# --- flash de margine ---
-@export var flash_per_mps: float = 0.03
-@export var flash_max: float = 0.55
+# --- flash de margine (who-hit-me) ---
+## Alfa pe m/s de schimbare de viteza, si plafonul. Scurt si discret: arata DIN
+## ce parte a venit lovitura, nu acopera cadrul.
+@export var flash_per_mps: float = 0.035
+@export var flash_max: float = 0.5
 
 var player: Car
 var camera: ChaseCamera
@@ -133,6 +135,7 @@ func _on_impact(car: Car, kind: StringName, strength: float, normal: Vector3,
 		roll *= victim_kick_scale
 	last_kick = kick_m
 	camera.kick(normal, kick_m, roll)
+	_flash_hit_side(normal, strength, attacker)
 	if kind == &"car":
 		var tr := clampf(car_trauma_base + strength * car_trauma_per_mps,
 			0.0, car_trauma_max)
@@ -141,6 +144,25 @@ func _on_impact(car: Car, kind: StringName, strength: float, normal: Vector3,
 		var k := clampf((strength - hitstop_min_strength)
 			/ maxf(hitstop_full_strength - hitstop_min_strength, 0.01), 0.0, 1.0)
 		hit_stop.trigger(lerpf(hitstop_min_ms, hitstop_max_ms, k) * 0.001)
+
+
+## Flash pe marginea ecranului dinspre obstacol (invers normalei: normala arata
+## DINSPRE obstacol spre masina). Dreapta/fata ecranului se iau din camera.
+func _flash_hit_side(normal: Vector3, strength: float, attacker: bool) -> void:
+	if vignette == null:
+		return
+	var right := camera.global_transform.basis.x
+	var fwd := -camera.global_transform.basis.z
+	right.y = 0.0
+	fwd.y = 0.0
+	if right.length_squared() < 1e-6 or fwd.length_squared() < 1e-6:
+		return
+	var toward := -Vector3(normal.x, 0.0, normal.z)
+	var a := clampf(strength * flash_per_mps, 0.0, flash_max)
+	if not attacker:
+		a *= victim_kick_scale
+	vignette.flash_edge(Vector2(toward.dot(right.normalized()),
+		toward.dot(fwd.normalized())), a)
 
 
 ## Cine a lovit? Pereti: jucatorul (te-ai izbit tu de el). Masini: comparam cat

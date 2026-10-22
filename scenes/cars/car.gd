@@ -261,6 +261,10 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 @export var slip_min_speed_frac: float = 0.5
 @export var slip_speed_bonus: float = 1.5 # m/s peste plafon la draft = 1
 @export var slip_accel_bonus: float = 0.10 # +10% acceleratie la draft = 1
+## Cat de departe in fata se uita (m) si ce schimbare de directie (rad) inseamna
+## „drumul se curbeaza": peste ea, aspiratia se retrage.
+@export var slip_lookahead_m: float = 45.0
+@export var slip_curve_rad: float = 0.15
 ## Peste atata rotatie (rad/s) masina e in viraj si nu primeste aspiratie.
 @export var slip_max_yaw: float = 0.5
 @export var slip_build_s: float = 0.5
@@ -1249,6 +1253,20 @@ func _update_draft(delta: float) -> void:
 	draft = move_toward(draft, target, rate * delta)
 
 
+func _road_curves_ahead() -> bool:
+	if track == null or track.curve == null:
+		return false
+	var step := maxf(track.curve.bake_interval, 0.1)
+	var n := maxi(int(slip_lookahead_m / step), 2)
+	var t0 := track.point_at(road_index + 1, route) - track.point_at(road_index, route)
+	var t1 := track.point_at(road_index + n + 1, route) - track.point_at(road_index + n, route)
+	t0.y = 0.0
+	t1.y = 0.0
+	if t0.length_squared() < 1e-6 or t1.length_squared() < 1e-6:
+		return false
+	return t0.angle_to(t1) > slip_curve_rad
+
+
 func _draft_target() -> float:
 	var v := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
 	if v.length() < max_speed * slip_min_speed_frac:
@@ -1257,7 +1275,13 @@ func _draft_target() -> float:
 	# mai e „in spatele" nimanui. Fara portita asta, bonusul de acceleratie facea
 	# masinile sa intre mai tare in viraje (ProbeRace: loviturile de perete
 	# se dublau pe Transfagarasan).
-	if absf(angular_velocity.y) > slip_max_yaw:
+	if absf(angular_velocity.y) > slip_max_yaw or brake_lamp:
+		return 0.0
+	# Drumul din fata se curbeaza: bonusul se retrage INAINTE de viraj, ca plafonul
+	# in plus sa nu intre in curba (AI-ul isi planifica franarea pe viteza de
+	# dinaintea aspiratiei). Unghiul dintre tangenta de acum si cea de la
+	# `slip_lookahead_m` mai departe pe ruta masinii.
+	if _road_curves_ahead():
 		return 0.0
 	var fwd := -global_transform.basis.z
 	fwd.y = 0.0

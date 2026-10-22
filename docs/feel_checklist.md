@@ -86,9 +86,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **Scrape loop and sparks** `scrape-sparks` · Missing · ⭐  
   While sliding along a wall: a continuous grind whose pitch follows speed, sparks from the contact point, a slight pull on the steering.  
   *Today:* Sparks are in: a continuous `ScrapeSparks` emitter at the wall contact point above 4 m/s (rate follows scrape speed) and a burst on wall impacts above 6 m/s. Still missing: the grind loop sound and the slight pull on the steering. Still just the single one-shot clunk.
-- [ ] **Impact sound in layers** `impact-layers` · Partial · ⭐  
+- [x] **Impact sound in layers** `impact-layers` · Have · ⭐  
   Soft tap, crunch, big crash chosen by speed difference, with random pitch so repeats never sound like a machine gun.  
-  *Today:* Car-on-car already layers two sounds by speed. The wall hit is one fixed-level sound.
+  *Today:* Done: `ImpactSound` (one node in `Race`) turns every `Car.impact` into a plan from `AudioManager.plan_impact`. One monotonic master volume (-17 dB at the 2.5 m/s feed threshold to -1 dB at 22 m/s) is split by equal-power weights between tap, crunch and crash, two variants each with no immediate repeat, pitch dropping with strength and jittered; a body layer on top (`wall_hit` on walls, `bump` plus `metal_hit` between cars). Nothing plays below the threshold. The fixed `wall_hit` and the `bump`/`metal_hit` calls are gone from `Car`; a car-car hit arrives from both cars and is merged into one set of sounds per tick. Guard: `ProbeImpactSound`.
 - [x] **Directional camera kick and hit-stop** `hitstop-shake` · Have  
   Shake in the direction of the hit rather than randomly, plus a freeze of a few frames on big hits so the brain registers the weight. The cheapest weight trick in games.  
   *Today:* `ImpactFeel` kicks the chase cam along the hit normal (spring, settles in ~0.2 s, small roll) and freezes the world 40-90 ms on player impacts of 9 m/s or more (`HitStop`, real-time restore, cooldown 0.6 s, no freeze in countdown). No screen-shake setting exists, so nothing to follow.

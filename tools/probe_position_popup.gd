@@ -118,6 +118,13 @@ func _part_b() -> void:
 	var hud = race.hud
 	var pop = hud.position_popup
 	_check(pop != null and not pop.visible, "popup exista si e ascuns la start")
+	await get_tree().process_frame
+	var vp_w: float = get_viewport().get_visible_rect().size.x
+	var cx: float = pop.get_global_rect().get_center().x
+	print("  popup: centru x=%.1f din latimea %.0f, y sus=%.1f" % [cx, vp_w, pop.get_global_rect().position.y])
+	_check(absf(cx - vp_w * 0.5) < 3.0, "popup centrat pe orizontala")
+	_check(pop.get_global_rect().position.y > 40.0 and pop.get_global_rect().end.y < 260.0,
+		"popup sub marginea de sus, deasupra mesajelor centrale")
 	# Numaratoare: pozitia schimbata fortat nu scoate popup.
 	_check(race.state == race.State.COUNTDOWN, "cursa e in numaratoare")
 	_set_rank(race, true)

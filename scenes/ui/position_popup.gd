@@ -26,10 +26,16 @@ var _dir: int = 0
 var _tri_color: Color = Color.WHITE
 
 
-func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+func _init() -> void:
+	# Marimea minima TREBUIE sa existe inainte ca HUD-ul sa aplice ancora
+	# (`set_anchors_and_offsets_preset` o citeste), altfel popup-ul ar iesi
+	# necentrat.
 	custom_minimum_size = Vector2(190, 84)
 	size = custom_minimum_size
+
+
+func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pivot_offset = size * 0.5
 	_label = Label.new()
 	_label.add_theme_font_override("font",

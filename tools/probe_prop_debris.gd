@@ -228,7 +228,8 @@ func _test_pile_cap() -> void:
 	_check(total >= 1, "izbitura in gramada scoate aschii")
 	_check(max_per_frame <= 1, "cel mult o rafala pe cadru")
 	_check(total <= int(1.2 / PropDebris.COOLDOWN_S) + 1, "rata limitata de pauza globala (<= %d)" % (int(1.2 / PropDebris.COOLDOWN_S) + 1))
-	_check(particles == PropDebris.SLOTS * (PropDebris.CHUNKS + PropDebris.PUFFS), "particulele totale raman cele fixe ale managerului (%d)" % particles)
+	var fixed := PropDebris.SLOTS * (PropDebris.CHUNKS + PropDebris.PUFFS) + PropDebris.LEAF_SLOTS * PropDebris.LEAVES
+	_check(particles == fixed, "particulele totale raman cele fixe ale managerului (%d = %d)" % [particles, fixed])
 	_check(on_props == 0, "zero noduri de particule pe piese")
 	car.queue_free()
 

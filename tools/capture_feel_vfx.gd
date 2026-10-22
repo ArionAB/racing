@@ -64,6 +64,8 @@ func _ready() -> void:
 		await _stage_fist()
 	if _only.is_empty() or "props" in _only:
 		await _stage_props()
+	if _only.is_empty() or "veg" in _only:
+		await _stage_veg()
 	if _only.is_empty() or "pose" in _only:
 		await _stage_pose()
 	print("[capture] gata, %d imagini" % _shot_n)
@@ -410,4 +412,48 @@ func _stage_props() -> void:
 	await _shot("props_3")
 	car.queue_free()
 	holder.queue_free()
+	_follow = null
+
+
+## Citirea REALA a tufelor dintr-o pista (Track01) si frunzele la trecere.
+## Doar cu fereastra: headless MultiMesh da pozitii zero.
+func _stage_veg() -> void:
+	print("[capture] -- veg (Track01, citire reala de chunk-uri)")
+	var SoftVeg := load("res://scenes/props/soft_vegetation.gd")
+	var t := (load("res://scenes/tracks/Track01.tscn") as PackedScene).instantiate() as Track
+	add_child(t)
+	for _i in 4:
+		await get_tree().process_frame
+	var n: int = SoftVeg.scan(t)
+	print("[capture] tufe citite din Track01: %d" % n)
+	if n == 0:
+		return
+	# Prima tufa de langa un loc plat: masina vine spre ea pe directia +X.
+	var e: Dictionary = SoftVeg._cache[t.get_instance_id()]
+	var pick := Vector3.ZERO
+	for cell in e["cells"].keys():
+		var arr: PackedFloat32Array = e["cells"][cell]
+		pick = Vector3(arr[0], arr[1], arr[2])
+		break
+	print("[capture] tufa aleasa la %s" % pick)
+	var car := _spawn(pick + Vector3(-14.0, 1.5, 0.0), -PI * 0.5)
+	car.soft_veg_root = t
+	_follow = car
+	_cam_offset = Vector3(-12.5, 10.0, 0.0)
+	await _wait(0.9)
+	car.linear_velocity = Vector3(26, 0, 0)
+	var m: Variant = load("res://scenes/props/prop_debris.gd").instance()
+	var l0: int = int(m.leaf_bursts) if m != null else 0
+	var f := 0
+	while (m == null or int(m.leaf_bursts) == l0) and f < 200:
+		await get_tree().physics_frame
+		m = load("res://scenes/props/prop_debris.gd").instance()
+		f += 1
+	print("[capture] frunze dupa %d cadre, depth %.2f" % [f, car._veg_depth])
+	await _wait(0.08)
+	await _shot("veg_1")
+	await _wait(0.15)
+	await _shot("veg_2")
+	car.queue_free()
+	t.queue_free()
 	_follow = null

@@ -19,6 +19,10 @@ extends Node3D
 const SLOTS: int = 4
 const CHUNKS: int = 6
 const PUFFS: int = 4
+## Frunze (soft-hazards): 3 rafale de cate 8, tot din acelasi manager.
+const LEAF_SLOTS: int = 3
+const LEAVES: int = 8
+const LEAF_COOLDOWN_S: float = 0.12
 const MIN_DV: float = 1.8
 const FULL_DV: float = 14.0
 const COOLDOWN_S: float = 0.08
@@ -38,6 +42,9 @@ var _next_slot: int = 0
 var _awake: Array[RigidBody3D] = []
 var _prev_v: Dictionary = {}
 var _cooldown: float = 0.0
+var _leaf_slots: Array[CPUParticles3D] = []
+var _next_leaf: int = 0
+var _leaf_cooldown: float = 0.0
 ## Statistici pentru sonde.
 var bursts: int = 0
 var last_strength: float = 0.0
@@ -67,6 +74,16 @@ static func _ensure(tree: SceneTree) -> Node3D:
 	return mgr
 
 
+## O rafala de frunze la `at`, aruncata spre `dir`, scalata cu `k` (0..1) si
+## colorata `tint`. Nu face nimic cat managerul nu e inca in arbore (prima
+## cerere il creeaza amanat) sau cat pauza globala nu a trecut.
+static func leaf_burst(tree: SceneTree, at: Vector3, dir: Vector3, k: float, tint: Color) -> bool:
+	var mgr: Variant = _ensure(tree)
+	if not mgr.is_inside_tree():
+		return false
+	return mgr._leaves(at, dir, k, tint)
+
+
 ## Managerul curent (sau null) — pentru sonde.
 static func instance() -> Node3D:
 	return _instance if is_instance_valid(_instance) else null
@@ -74,6 +91,10 @@ static func instance() -> Node3D:
 
 func _ready() -> void:
 	top_level = true # in lume, oriunde ar fi pus
+	for i in LEAF_SLOTS:
+		var le := _make_leaves()
+		add_child(le)
+		_leaf_slots.append(le)
 	for i in SLOTS:
 		var slot := {}
 		slot["chunks"] = _make_chunks()
@@ -101,6 +122,7 @@ func _forget(body: RigidBody3D) -> void:
 
 func _physics_process(delta: float) -> void:
 	_cooldown = maxf(_cooldown - delta, 0.0)
+	_leaf_cooldown = maxf(_leaf_cooldown - delta, 0.0)
 	var best_dv := 0.0
 	var best: RigidBody3D = null
 	for body in _awake:
@@ -151,6 +173,44 @@ func _burst(body: RigidBody3D, dv: float) -> void:
 	var dg := dust.color_initial_ramp as Gradient
 	dg.set_offset(1, lerpf(0.4, 1.0, k))
 	dust.restart()
+
+
+var leaf_bursts: int = 0
+
+
+func _leaves(at: Vector3, dir: Vector3, k: float, tint: Color) -> bool:
+	if _leaf_cooldown > 0.0:
+		return false
+	_leaf_cooldown = LEAF_COOLDOWN_S
+	leaf_bursts += 1
+	var e := _leaf_slots[_next_leaf]
+	_next_leaf = (_next_leaf + 1) % LEAF_SLOTS
+	e.global_position = at
+	e.direction = dir.normalized() if dir.length_squared() > 1e-4 else Vector3.UP
+	e.color = tint
+	e.initial_velocity_min = lerpf(1.5, 3.0, k)
+	e.initial_velocity_max = lerpf(3.0, 7.0, k)
+	(e.color_initial_ramp as Gradient).set_offset(1, lerpf(0.4, 1.0, k))
+	e.restart()
+	return true
+
+
+func _make_leaves() -> CPUParticles3D:
+	var e := _make_chunks()
+	e.name = "Leaves"
+	e.amount = LEAVES
+	e.lifetime = 0.9
+	e.spread = 60.0
+	e.gravity = Vector3(0, -5.0, 0)
+	e.damping_min = 0.5
+	e.damping_max = 1.5
+	e.angular_velocity_min = -540.0
+	e.angular_velocity_max = 540.0
+	var leaf := BoxMesh.new() # frunza = placa subtire, nu aschie
+	leaf.size = Vector3(0.42, 0.05, 0.28)
+	leaf.material = _chunk_material
+	e.mesh = leaf
+	return e
 
 
 func _make_chunks() -> CPUParticles3D:

@@ -69,6 +69,10 @@ signal ejected(car: Car, ragdoll: Node3D)
 signal impact(car: Car, kind: StringName, strength: float, normal: Vector3,
 		point: Vector3, other: Node)
 
+## Efecte vizuale comune (fara class_name: se preincarca).
+const SoftVegetation := preload("res://scenes/props/soft_vegetation.gd")
+const PropDebris := preload("res://scenes/props/prop_debris.gd")
+
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
 @export var max_speed: float = 34.0
@@ -366,6 +370,19 @@ var _spin_angle: float = 0.0
 @export var wall_spark_burst_dv: float = 6.0
 ## Viteza de cadere (m/s) de la care aterizarea ridica praf.
 @export var land_dust_min_fall: float = 5.0
+## Tufe (soft-hazards): cand rotile trec printr-o tufa din `SoftVegetation`
+## (chunk-uri de vegetatie fara coliziune) cu cel putin atata viteza (m/s),
+## sare o rafala de frunze.
+@export var bush_burst_min_speed: float = 6.0
+## Franare usoara in tufa, in m/s^2 la centrul ei (scade spre margine). 6 = o
+## tufa trecuta cu 25 m/s costa ~0.5 m/s; 0 o opreste. Se aplica tuturor
+## masinilor la fel (si AI-ului), deci nu favorizeaza pe nimeni — dar muta
+## timpii pe turele cu multa vegetatie langa drum.
+@export var bush_drag: float = 6.0
+## Radacina de unde se citesc tufele; null = pista. Pentru sonde.
+var soft_veg_root: Node3D = null
+var _veg_cooldown: float = 0.0
+var _veg_depth: float = 0.0
 ## Starea elastica a jolt-ului: deplasare si tilt (vector orizontal in spatiul
 ## masinii; directia = spre ce se apleaca varful, lungimea = unghiul in rad).
 var _jolt_pos: Vector3 = Vector3.ZERO
@@ -2230,6 +2247,7 @@ func _update_effects(delta: float) -> void:
 	if _fire_particles != null:
 		_fire_particles.emitting = burn_time > 0.0
 	_update_dust(on_road, loose, on_branch)
+	_update_soft_veg(delta)
 	_drop_trail(delta, loose)
 	_drop_leaf_wear(delta, on_road)
 	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
@@ -2376,6 +2394,37 @@ var _dust_route: int = -1
 ## Roata e pe un interval de pamant al pistei (Track.is_dirt_at)? Doar ca sa
 ## stim cand sa recolorez fumul de drift la trecerea pamant <-> asfalt.
 var _drift_on_dirt: bool = false
+
+## Tufele: rafala de frunze la intrare si franare usoara cat rotile sunt
+## in ea. Registrul (`SoftVegetation`) se citeste o data pe cursa, din chunk-urile
+## de vegetatie ale pistei; fara ele (sau headless) depth e mereu 0.
+func _update_soft_veg(delta: float) -> void:
+	_veg_cooldown = maxf(_veg_cooldown - delta, 0.0)
+	var root: Node3D = soft_veg_root if soft_veg_root != null else track
+	if root == null or not race_active or wheels_on_ground == 0:
+		_veg_depth = 0.0
+		return
+	if not SoftVegetation.is_scanned(root):
+		SoftVegetation.scan(root)
+	var speed := horizontal_speed()
+	if speed < 2.0 or SoftVegetation.count(root) == 0:
+		_veg_depth = 0.0
+		return
+	_veg_depth = SoftVegetation.depth_at(root, global_position)
+	if _veg_depth <= 0.0:
+		return
+	var v := Vector3(velocity.x, 0.0, velocity.z)
+	# Franare mica, pe directia de mers: nu schimba directia si nu atinge solverul.
+	apply_central_force(-v.normalized() * bush_drag * _veg_depth * mass)
+	if speed >= bush_burst_min_speed and _veg_cooldown <= 0.0:
+		_veg_cooldown = 0.3
+		var tint := Color(0.38, 0.56, 0.24)
+		if track != null:
+			tint = tint.lerp(track.theme_ground_tint, 0.25)
+		PropDebris.leaf_burst(get_tree(), global_position + Vector3.UP * 0.4,
+			v.normalized() * 0.5 + Vector3.UP,
+			clampf(inverse_lerp(bush_burst_min_speed, 28.0, speed), 0.0, 1.0), tint)
+
 
 ## Fumul de cauciuc dupa alunecare (0..1): cate pufuri se vad, cat de opace si
 ## cat de mari. La 1 e fumul de dinainte; la alunecari mici e o adiere subtire.

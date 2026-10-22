@@ -139,7 +139,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Silent.
 - [ ] **Position-change feedback** `position-change` · Missing  
   A short stinger and a HUD popup when you overtake or are overtaken.  
-  *Today:* None.
+  *Today:* The HUD popup is in (`PositionWatch` + `PositionPopup`): "P3" with a green up or red down triangle after a position is held 0.4 s, coalesced, none in countdown or after the finish. Still missing: the stinger (audio); hook it on `PositionWatch.announced`.
 - [ ] **Slipstream** `slipstream` · Missing  
   A small speed gain when following closely, with wind lines and a sound. Rewards closeness without contact and makes running in the pack tactical.  
   *Today:* None.

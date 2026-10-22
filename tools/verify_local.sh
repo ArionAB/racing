@@ -121,6 +121,7 @@ run_step "Strivit: turbo-ul nu scoate masina din strivire" crush_turbo.log 'VERD
 run_step "Feed-ul de contact: perete, razuire, masina" contact_feed.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeContactFeed.tscn
 run_step "Camera la izbituri: kick, hit-stop, atacator" impact_camera.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactCamera.tscn
 run_step "Race: ImpactFeel cablat (kick, hit-stop, final)" impact_wiring.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactWiring.tscn
+run_step "Popup de pozitie: debounce, numaratoare, final" position_popup.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePositionPopup.tscn
 run_step "Linii de viteza: prag, monotonie, turbo" speed_lines.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSpeedLines.tscn
 run_step "Hazarde mobile: kick de camera, fara hit-stop" hazard_kick.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHazardKick.tscn
 run_step "Rezervor sigilat: bara nu se incarca, arderea merge" sealed_turbo.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSealedTurbo.tscn

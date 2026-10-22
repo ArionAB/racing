@@ -85,7 +85,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Wall hits within 30 degrees of the wall plane (`glance_angle_deg`) cut car friction to `glance_friction` and nudge the nose toward parallel through `_impact_yaw`; head-on keeps the stop-with-bounce. A nose pinned at low speed for 0.4 s is shoved away. Moving hazards (AnimatableBody3D) are skipped. Guard: `ProbeWallGlance`.
 - [ ] **Scrape loop and sparks** `scrape-sparks` · Missing · ⭐  
   While sliding along a wall: a continuous grind whose pitch follows speed, sparks from the contact point, a slight pull on the steering.  
-  *Today:* Sparks are in: a continuous `ScrapeSparks` emitter at the wall contact point above 4 m/s (rate follows scrape speed) and a burst on wall impacts above 6 m/s. Still missing: the grind loop sound and the slight pull on the steering. Still just the single one-shot clunk.
+  *Today:* Sparks are in: a continuous `ScrapeSparks` emitter at the wall contact point above 4 m/s (rate follows scrape speed) and a burst on wall impacts above 6 m/s. The grind loop is in too (`scrape_loop.wav`, player only, driven by `ImpactSound`): above 2 m/s of `wall_scrape_speed`, volume -24 to -7 dB and pitch 0.75 to 1.45 follow the speed, 40 ms in and 100 ms out with a 60 ms hold so contact flicker never stutters it (guard `ProbeScrapeLoop`). Still missing: the slight pull on the steering (physics).
 - [x] **Impact sound in layers** `impact-layers` · Have · ⭐  
   Soft tap, crunch, big crash chosen by speed difference, with random pitch so repeats never sound like a machine gun.  
   *Today:* Done: `ImpactSound` (one node in `Race`) turns every `Car.impact` into a plan from `AudioManager.plan_impact`. One monotonic master volume (-17 dB at the 2.5 m/s feed threshold to -1 dB at 22 m/s) is split by equal-power weights between tap, crunch and crash, two variants each with no immediate repeat, pitch dropping with strength and jittered; a body layer on top (`wall_hit` on walls, `bump` plus `metal_hit` between cars). Nothing plays below the threshold. The fixed `wall_hit` and the `bump`/`metal_hit` calls are gone from `Car`; a car-car hit arrives from both cars and is merged into one set of sounds per tick. Guard: `ProbeImpactSound`.
@@ -122,9 +122,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Readable mass** `readable-mass` · Have  
   Heavy shoves light, with a visible yaw kick and sideways displacement, capped so nobody goes into orbit.  
   *Today:* Done well: mass ratio from the solver, a clamped yaw kick, a brief loss of grip.
-- [ ] **Side-by-side rubbing** `side-rubbing` · Partial  
+- [x] **Side-by-side rubbing** `side-rubbing` · Have  
   Sustained contact needs the scrape loop, continuous sparks, both bodies leaning away, and a steady push apart so cars do not weld.  
-  *Today:* The push apart exists. Continuous sparks at the rub point above 2 m/s relative speed (one car of the pair emits) and both bodies lean about 3 degrees away are in. Still missing: the scrape loop sound.
+  *Today:* Done. The push apart exists. Continuous sparks at the rub point above 2 m/s relative speed (one car of the pair emits) and both bodies lean about 3 degrees away are in. A softer plastic-on-plastic rub loop (`rub_loop.wav`, player only) runs above 1.5 m/s of relative tangential speed, -26 to -10 dB with pitch 0.8 to 1.3 following `rub_speed`, same fades as the wall grind. Guard `ProbeScrapeLoop`.
 - [x] **Corner hits spin, straight hits shove** `corner-hits` · Have  
   Clipping a rear corner rotates the leading car more than a square push. Being rear-ended wobbles you without stopping you.  
   *Today:* Mostly emergent from the physics.

@@ -267,11 +267,6 @@ func _test_pinned() -> void:
 		var f := -car.global_transform.basis.z
 		var into := -f.dot(Vector3(0, 0, 1)) * -1.0 # +1 = botul in perete
 		min_into = minf(min_into, into)
-		if OS.get_cmdline_user_args().has("--trace") and int(t / STEP) % 6 == 0:
-			print("   t=%.2f x=%.2f z=%.2f v=%.2f fwd=(%.2f,%.2f) wc=%s stuck=%.2f yaw=%.2f" % [t,
-				car.global_position.x, car.global_position.z, car.horizontal_speed(),
-				-car.global_transform.basis.z.x, -car.global_transform.basis.z.z,
-				car.wall_contact, car._stuck_t, car._impact_yaw])
 	lateral = absf(car.global_position.x - start_x)
 	var f2 := -car.global_transform.basis.z
 	var into_end := -f2.z # +1 = botul drept in perete

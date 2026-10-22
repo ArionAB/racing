@@ -101,9 +101,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **Cosmetic damage** `cosmetic-damage` · Optional  
   Scuff decals, a wobbling bumper, a dented mesh swapped after a few hits, reset each race, no mechanical penalty. Makes crashes feel remembered.  
   *Today:* None.
-- [ ] **Auto-upright on the roof** `auto-upright` · Missing  
+- [x] **Auto-upright on the roof** `auto-upright` · Have  
   A car on its roof flips back in place with a bounce after a second, instead of waiting for a respawn.  
-  *Today:* The roof triggers a respawn after a moment.
+  *Today:* After 0.3 s near-stopped on the roof or a side the car hops (`upright_hop`) and rolls back onto its wheels in place, about 1 s, keeping position and heading (`Car._tick_upright`, signal `uprighted`). In water, far off-road or below the road it falls back to `recover()` at 1.5 s, as before. Guard: `ProbeUpright`.
 - [ ] **A price in the turbo bar** `turbo-price` · Optional  
   A hard wall hit drains some charge, turning the turbo into a risk meter that rewards clean driving.  
   *Today:* None.

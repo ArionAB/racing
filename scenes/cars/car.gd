@@ -27,6 +27,9 @@ signal boost_started(car: Car)
 signal wall_hit(car: Car, impact: float)
 signal landed(car: Car, fall_speed: float)
 signal respawned(car: Car)
+## Masina rasturnata s-a intors pe roti PE LOC (vezi `_tick_upright`), fara
+## repunere. Pentru camera/sunet/particule: nu e `respawned`.
+signal uprighted(car: Car)
 ## Repunerea cu tranzitie a inceput (#495): masina clipeste `RECOVER_S`
 ## secunde, fara comenzi, apoi vine `respawned`. Race intuneca ecranul.
 signal recovery_started(car: Car, seconds: float)
@@ -217,6 +220,21 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 ## Impingerea laterala (m/s, dinspre perete) si rotatia (rad/s) a nudge-ului.
 @export var stuck_nudge_speed: float = 2.5
 @export var stuck_nudge_yaw: float = 2.4
+
+@export_group("Auto-upright")
+## Rasturnata (pe acoperis sau pe o parte) si aproape oprita, masina se intoarce
+## pe roti PE LOC, cu un salt mic, in loc sa astepte repunerea (feel_checklist:
+## auto-upright). Oprit = comportamentul vechi (Race o repune dupa 1,5 s).
+@export var upright_enabled: bool = true
+## Cat sta rasturnata inainte sa se intoarca (s) — sa se opreasca din rostogolit.
+@export var upright_delay: float = 0.3
+## Viteza verticala a saltului (m/s). Gravitatia jocului e 28, deci ~0,3 s in aer.
+@export var upright_hop: float = 2.8
+## Cat de repede se roteste spre vertical: rad/s per radian de eroare
+## (plafonat la UPRIGHT_MAX_RATE). Rotatia e pe axa botului, deci directia ramane.
+@export var upright_turn_rate: float = 7.0
+## Cat poate dura incercarea (s); daca nu e pe roti pana atunci, cade pe recover().
+@export var upright_max_time: float = 0.9
 
 @export_group("Suspensie")
 ## Cursa arcului in repaus (m). Raza de cast = rest + wheel_radius.
@@ -564,6 +582,20 @@ var _eject_left: float = 0.0
 ## Repunerea cu tranzitie (#495): cat mai clipeste pana la teleport, si cu ce
 ## retragere se va face repunerea.
 const RECOVER_S: float = 1.0
+## „Rasturnata" = acelasi criteriu ca `Race._watch_recovery` (FLIPPED_COS /
+## FLIPPED_SPEED / FLIPPED_S): cos fata de vertical sub 0.3 si sub 4 m/s.
+const UPRIGHT_FLIPPED_COS: float = 0.3
+const UPRIGHT_FLIPPED_SPEED: float = 4.0
+## Daca tot nu s-a putut intoarce dupa atat (s de stat rasturnata), recover().
+## Egal cu FLIPPED_S din Race: cele doua plase se intalnesc in acelasi moment.
+const UPRIGHT_GIVE_UP_S: float = 1.5
+const UPRIGHT_MAX_RATE: float = 10.0
+## Peste atata in afara soselei (m), locul nu e bun de intors pe loc.
+const UPRIGHT_OFFROAD_M: float = 14.0
+## Sub cota soselei cu atat (m) = cazut in groapa/rapa, nu intoarcem pe loc.
+const UPRIGHT_BELOW_ROAD_M: float = 3.0
+var _roof_t: float = 0.0
+var _upright_left: float = 0.0
 ## De cate ori pe secunda clipeste caroseria in tranzitie.
 const RECOVER_BLINK_HZ: float = 7.0
 var _recover_left: float = 0.0
@@ -821,6 +853,7 @@ func _physics_process(delta: float) -> void:
 		turbo_pressed = false
 		_tick_recover(delta)
 
+	_tick_upright(delta)
 	_apply_suspension()
 
 	var forward := -global_transform.basis.z
@@ -1305,6 +1338,82 @@ func _toward_parallel(fwd: Vector3, n: Vector3) -> float:
 func _set_car_friction(value: float) -> void:
 	if _pmat != null and _pmat.friction != value:
 		_pmat.friction = value
+
+
+## Auto-upright (feel_checklist: auto-upright). Rasturnata si aproape oprita
+## `upright_delay` secunde, masina sare (`upright_hop`) si se roteste spre
+## vertical pe axa botului, deci pozitia si directia ramane. Se foloseste
+## viteza unghiulara pe X/Z (yaw-ul e al directiei, scris in _apply_driving; in
+## aer _apply_driving nici nu ruleaza), nu o teleportare: fizica o aseaza.
+##
+## Locuri in care NU se intoarce pe loc — raman pe plasa veche (Race o repune
+## la 1,5 s, iar noi apelam recover() la acelasi prag): in apa, cu mult sub
+## sosea, sau la peste UPRIGHT_OFFROAD_M de ea. Aceleasi hazarde, aceleasi
+## declansatoare de repunere ca inainte.
+func _tick_upright(delta: float) -> void:
+	if not upright_enabled or finished or not race_active or on_start_grid \
+			or _eject_left > 0.0 or _recover_left > 0.0:
+		_roof_t = 0.0
+		_upright_left = 0.0
+		return
+	if _upright_left > 0.0:
+		_run_upright(delta)
+		return
+	var flipped := global_transform.basis.y.dot(Vector3.UP) < UPRIGHT_FLIPPED_COS \
+		and horizontal_speed() < UPRIGHT_FLIPPED_SPEED
+	if not flipped:
+		_roof_t = 0.0
+		return
+	_roof_t += delta
+	if _roof_t >= UPRIGHT_GIVE_UP_S:
+		_roof_t = 0.0
+		recover() # nu s-a putut intoarce (loc invalid sau incercare ratata)
+	elif _roof_t >= upright_delay and _upright_spot_ok():
+		_upright_left = upright_max_time
+		# Doar sus: ce mai aluneca pe orizontala (sub 4 m/s) se opreste, ca masina
+		# sa ramana unde a fost rasturnata.
+		linear_velocity = Vector3(0.0, maxf(linear_velocity.y, upright_hop), 0.0)
+
+
+func _run_upright(delta: float) -> void:
+	_upright_left -= delta
+	var up := global_transform.basis.y
+	var cos_up := up.dot(Vector3.UP)
+	if cos_up > 0.85 and wheels_on_ground >= 2:
+		_upright_left = 0.0
+		_roof_t = 0.0
+		uprighted.emit(self)
+		return
+	if _upright_left <= 0.0:
+		# Incercarea s-a terminat si tot nu e pe roti: plasa veche.
+		_upright_left = 0.0
+		_roof_t = 0.0
+		if cos_up < 0.6:
+			recover()
+		return
+	var axis := up.cross(Vector3.UP)
+	if axis.length_squared() < 1e-4:
+		axis = global_transform.basis.z # exact pe acoperis: ruleaza pe axa botului
+	axis = axis.normalized()
+	var theta := acos(clampf(cos_up, -1.0, 1.0))
+	var rate := minf(theta * upright_turn_rate, UPRIGHT_MAX_RATE)
+	angular_velocity = Vector3(axis.x * rate, angular_velocity.y, axis.z * rate)
+
+
+## Se poate intoarce pe loc aici? (Fara pista — sonde — mereu da.)
+func _upright_spot_ok() -> bool:
+	if in_water:
+		return false
+	if track == null:
+		return true
+	var rp := track.point_at(road_index, route)
+	if global_position.y < rp.y - UPRIGHT_BELOW_ROAD_M:
+		return false
+	if not track.is_on_road(road_index, global_position, route):
+		var dh := Vector2(global_position.x - rp.x, global_position.z - rp.z).length()
+		if dh > UPRIGHT_OFFROAD_M:
+			return false
+	return true
 
 
 ## Plafonul de viteza al momentului: taiat de iarba, ridicat de turbo.

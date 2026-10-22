@@ -74,9 +74,28 @@ func _settle(cars: Array) -> void:
 
 ## Razuire pe perete in unghi de `deg` grade, cu viteza `speed`; intoarce
 ## cadrele cu emisie, viteza maxima de razuire si rata (offset-ul rampei).
-func _scrape_run(x0: float, deg: float, speed: float) -> Dictionary:
+## Sofer de proba: tine botul in perete, ca jucatorul care razuieste
+## intentionat. Fara el, de cand razuirea in unghi mic indreapta masina
+## paralel cu peretele (glancing-vs-headon), o masina lasata in voia ei se
+## dezlipeste dupa cateva cadre, iar scenariul nu mai masoara o razuire.
+class HoldIntoWall:
+	extends CarController
+	func get_steer() -> float:
+		return 0.5
+	func get_throttle() -> float:
+		return 0.45
+	func is_drift_pressed() -> bool:
+		return false
+	func is_turbo_pressed() -> bool:
+		return false
+
+
+func _scrape_run(x0: float, deg: float, speed: float,
+		hold_into_wall: bool = false) -> Dictionary:
 	var car := _spawn(Vector3(x0, 0.7, -17.6), -PI * 0.5)
 	await _settle([car])
+	if hold_into_wall:
+		car.set_controller(HoldIntoWall.new())
 	var dir := Vector3(cos(deg_to_rad(deg)), 0, -sin(deg_to_rad(deg)))
 	car.rotation.y = atan2(-dir.x, -dir.z)
 	car.linear_velocity = dir * speed
@@ -124,7 +143,7 @@ func _test_wall_scrape() -> void:
 	car.queue_free()
 	await get_tree().physics_frame
 
-	var mid := await _scrape_run(60.0, 12.0, 8.0)
+	var mid := await _scrape_run(60.0, 12.0, 8.0, true)
 	print("  mediu: viteza max de razuire %.1f, rata %.2f" % [mid.max_scrape, mid.rate])
 	(mid.car as Car).queue_free()
 	await get_tree().physics_frame

@@ -67,6 +67,16 @@ const HitStopScript := preload("res://scenes/race/hit_stop.gd")
 @export var flash_per_mps: float = 0.035
 @export var flash_max: float = 0.5
 
+## Bordura (surface-voice): cat timp jucatorul calca pe bordura, camera
+## tremura usor — un prag de trauma, nu un adaos, deci nu se acumuleaza.
+## Se scaleaza cu viteza intre `kerb_min_speed` si viteza maxima. 0 = oprit.
+@export var kerb_trauma: float = 0.3
+## Sub viteza asta (m/s) bordura nu misca ecranul.
+@export var kerb_min_speed: float = 6.0
+## Turbo (turbo-event): la aprindere camera ramane o clipa in urma — un kick
+## inapoi (metri), pe acelasi arc ca la izbituri. 0 = oprit.
+@export var turbo_lag_m: float = 0.8
+
 var player: Car
 var camera: ChaseCamera
 var vignette: Vignette
@@ -103,6 +113,7 @@ func setup(p_player: Car, p_cars: Array, p_camera: ChaseCamera,
 		hit_stop = HitStopScript.new()
 		add_child(hit_stop)
 	player.impact.connect(_on_impact)
+	player.boost_started.connect(_on_boost)
 	# Orice repunere sau aruncare scoate lumea din inghet pe loc.
 	player.respawned.connect(func(_c: Car) -> void: cancel_hit_stop())
 	player.ejected.connect(func(_c: Car, _r: Node3D) -> void: cancel_hit_stop())
@@ -116,6 +127,29 @@ func cancel_hit_stop() -> void:
 
 func _physics_process(_delta: float) -> void:
 	_snapshot()
+	_kerb_rumble()
+
+
+## Pragul de trauma pe bordura. Citeste `Car.on_kerb` (pus de fizica).
+func _kerb_rumble() -> void:
+	if camera == null or not is_instance_valid(player) or kerb_trauma <= 0.0:
+		return
+	if not player.on_kerb or not racing.call():
+		return
+	var v := Vector3(player.linear_velocity.x, 0.0, player.linear_velocity.z).length()
+	if v < kerb_min_speed:
+		return
+	var k := clampf(inverse_lerp(kerb_min_speed, maxf(player.max_speed, kerb_min_speed + 1.0), v),
+		0.0, 1.0)
+	camera.trauma = maxf(camera.trauma, kerb_trauma * (0.4 + 0.6 * k))
+
+
+## Turbo aprins: camera e trasa inapoi o clipa, apoi arcul o aduce la loc —
+## masina „pleaca" din cadru inaintea camerei.
+func _on_boost(car: Car) -> void:
+	if car != player or camera == null or turbo_lag_m <= 0.0:
+		return
+	camera.kick(car.global_transform.basis.z, turbo_lag_m)
 
 
 ## Vitezele orizontale ale masinilor la inceputul tick-ului. `impact` se emite

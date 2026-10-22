@@ -45,6 +45,7 @@ func _ready() -> void:
 	measured += _part_b(feed, car)
 	measured += _part_c(feed, car)
 	measured += _part_d()
+	measured += _part_kerb(feed, car)
 	if measured == 0:
 		_check(false, "n-am masurat nimic")
 	await _part_e()
@@ -249,3 +250,52 @@ func _part_e() -> void:
 	player.impact.emit(player, &"wall", 20.0, Vector3.BACK, Vector3.ZERO, null)
 	_check(got.size() == n, "dupa final: nimic")
 	Engine.time_scale = 1.0
+
+
+## Bordura: pulsuri slabe cat timp `on_kerb` la viteza; o izbitura imediat dupa
+## un tic de bordura trece de limita de ritm (e mult mai tare).
+func _part_kerb(feed: Node, car: Car) -> int:
+	print("")
+	print("-- bordura --")
+	var count_kerb := func(seconds: float, speed: float, on: bool) -> Array:
+		car.on_kerb = on
+		car.linear_velocity = Vector3(0, 0, -speed)
+		var n0: int = (feed.pulse_log as Array).size()
+		var t := 0.0
+		while t < seconds:
+			_advance(1.0 / 60.0)
+			t += 1.0 / 60.0
+			feed._physics_process(1.0 / 60.0)
+		var amps: Array = []
+		for e in (feed.pulse_log as Array).slice(n0):
+			if (e as Dictionary).kind == &"kerb":
+				amps.append(float((e as Dictionary).amp))
+		return amps
+	_advance(1.0)
+	var fast: Array = count_kerb.call(1.0, 25.0, true)
+	_advance(1.0)
+	var slow: Array = count_kerb.call(1.0, 3.0, true)
+	_advance(1.0)
+	var off: Array = count_kerb.call(1.0, 25.0, false)
+	var amp_max := 0.0
+	for a in fast:
+		amp_max = maxf(amp_max, float(a))
+	print("  25 m/s pe bordura: %d pulsuri in 1 s, amplitudine max %.2f; 3 m/s: %d; in afara: %d"
+		% [fast.size(), amp_max, slow.size(), off.size()])
+	_check(fast.size() >= 4 and fast.size() <= 6, "pe bordura la viteza: ~1 puls la 0.18 s")
+	_check(amp_max > 0.0 and amp_max <= 0.35, "pulsurile de bordura sunt slabe (<= 0.35)")
+	_check(slow.is_empty(), "sub viteza minima: fara pulsuri")
+	_check(off.is_empty(), "fara bordura: fara pulsuri")
+	# Izbitura la 0.05 s dupa un tic de bordura.
+	_advance(1.0)
+	car.on_kerb = true
+	car.linear_velocity = Vector3(0, 0, -25)
+	feed._physics_process(1.0 / 60.0)
+	car.on_kerb = false
+	_advance(0.05)
+	var n := _captured.size()
+	car.impact.emit(car, &"wall", 20.0, Vector3.BACK, Vector3.ZERO, null)
+	var passed := _captured.size() > n
+	print("  izbitura de 20 m/s la 0.05 s dupa un tic de bordura: %s" % ("trece" if passed else "pierduta"))
+	_check(passed, "izbitura tare nu e inghitita de ticul de bordura")
+	return fast.size()

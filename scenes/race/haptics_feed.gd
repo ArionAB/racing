@@ -55,7 +55,18 @@ var pulse_log: Array[Dictionary] = []
 ## Cate pulsuri au fost refuzate si de ce (sonde): {"off": n, "rate": n, "idle": n}.
 var dropped: Dictionary = {"off": 0, "rate": 0, "idle": 0}
 
+## Bordura: pulsuri scurte si slabe cat timp jucatorul calca pe ea, peste
+## `kerb_min_speed`, la cel mult unul pe `kerb_interval_s`. 0 amp = oprit.
+@export var kerb_min_speed: float = 6.0
+@export var kerb_interval_s: float = 0.18
+@export var kerb_amp: Vector2 = Vector2(0.15, 0.3)
+## Un puls care trece de ultimul cu factorul asta ocoleste limita de rata:
+## o izbitura imediat dupa un tic de bordura nu se pierde.
+@export var override_ratio: float = 1.5
+
 var _last_t: float = -1.0e9
+var _last_amp: float = 0.0
+var _kerb_t: float = -1.0e9
 var _player: Car
 
 
@@ -86,6 +97,21 @@ func _on_boost(_c: Car) -> void:
 	pulse(boost_ms, boost_amp, &"boost")
 
 
+func _physics_process(_delta: float) -> void:
+	if not is_instance_valid(_player) or not _player.on_kerb or kerb_amp.y <= 0.0:
+		return
+	var v := Vector3(_player.linear_velocity.x, 0.0, _player.linear_velocity.z).length()
+	if v < kerb_min_speed:
+		return
+	var now := float(clock.call())
+	if now - _kerb_t < kerb_interval_s:
+		return
+	_kerb_t = now
+	var k := clampf(inverse_lerp(kerb_min_speed, maxf(_player.max_speed, kerb_min_speed + 1.0), v),
+		0.0, 1.0)
+	pulse(min_ms, lerpf(kerb_amp.x, kerb_amp.y, k), &"kerb")
+
+
 ## UNICUL punct de iesire. Intoarce true daca pulsul a plecat spre `output`.
 func pulse(ms: int, amp: float, kind: StringName = &"") -> bool:
 	if not bool(enabled_source.call()):
@@ -95,10 +121,11 @@ func pulse(ms: int, amp: float, kind: StringName = &"") -> bool:
 		dropped["idle"] += 1
 		return false
 	var now := float(clock.call())
-	if now - _last_t < min_interval_s:
+	if now - _last_t < min_interval_s and amp < _last_amp * override_ratio:
 		dropped["rate"] += 1
 		return false
 	_last_t = now
+	_last_amp = amp
 	ms = clampi(ms, min_ms, max_ms)
 	amp = clampf(amp, 0.0, 1.0)
 	pulse_log.append({"t": now, "ms": ms, "amp": amp, "kind": kind})

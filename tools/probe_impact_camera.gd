@@ -44,6 +44,7 @@ func _ready() -> void:
 	await _test_hitstop_safety()
 	await _test_attacker()
 	await _test_edge_flash()
+	await _test_turbo_lag()
 	Engine.time_scale = 1.0
 	print("")
 	print("VERDICT: ", "PROBLEMA" if _failed else "OK")
@@ -395,3 +396,26 @@ func _test_edge_flash() -> void:
 	_check(big > small * 2.0 and big <= _feel.flash_max + 0.001,
 		"flash-ul creste cu forta si e plafonat")
 	await _teardown()
+
+
+## Turbo-event: la aprinderea turbo-ului camera e trasa INAPOI (spre +Z local al
+## masinii) cu `turbo_lag_m`, apoi arcul o aduce la loc.
+func _test_turbo_lag() -> void:
+	print("")
+	print("-- turbo: camera ramane o clipa in urma --")
+	await _rig(Vector3(0, 0.7, 40), false)
+	var back := _player.global_transform.basis.z
+	back.y = 0.0
+	back = back.normalized()
+	_player.force_boost(0.5)
+	var along := _cam.kick_offset().dot(back)
+	var side := absf(_cam.kick_offset().dot(_player.global_transform.basis.x))
+	print("  kick dupa aprindere: %.2f m inapoi, %.2f m lateral (tinta %.2f)"
+		% [along, side, _feel.turbo_lag_m])
+	_check(along > 0.7 * _feel.turbo_lag_m, "camera e trasa inapoi la aprinderea turbo-ului")
+	_check(side < 0.1, "fara deviere laterala")
+	await _frames(40)
+	print("  dupa 0.67 s: %.3f m" % _cam.kick_offset().length())
+	_check(_cam.kick_offset().length() < 0.05 * _feel.turbo_lag_m, "arcul o aduce inapoi")
+	_teardown()
+	await _frames(2)

@@ -47,18 +47,18 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Tire squeal that tracks slip** `slip-squeal` · Have · ⭐  
   Volume and pitch follow how much the tires actually slide, so a light slide whispers and a full drift screams. Off asphalt it turns into gravel hiss.  
   *Today:* `CarAudio` drives the loop from the real slide (lateral slip speed 2-13 m/s and slip angle 6-40 degrees), not from the handbrake flag: about -30 dB at 8 degrees, -8 dB at 40, pitch 0.85 to 1.4. Hard braking above 12 m/s^2 squeals too. On loose ground (`_on_loose_ground`) it crossfades to a gravel hiss (`skid_gravel`). AI cars do the same, 4 dB quieter. Guarded by `ProbeSlipSqueal`.
-- [ ] **Surfaces that talk** `surface-voice` · Partial · ⭐  
+- [x] **Surfaces that talk** `surface-voice` · Have · ⭐  
   Grass rumble, gravel hiss, puddle spray, and kerbs that tick through the suspension, the sound and the camera as you ride them.  
-  *Today:* Kerbs tick through the suspension (`Track.kerb_at`, `Car.on_kerb`, `ProbeKerb`) and rattle in the sound (`CarAudio`, kerb loop). Rolling loops for grass, gravel or sand and shallow water, crossfaded by surface and scaled by speed, player only (`ProbeSurfaceVoice`). Still missing: the camera reacting to kerbs.
-- [ ] **Sense of speed** `sense-of-speed` · Partial  
+  *Today:* Kerbs tick through the suspension (`Track.kerb_at`, `Car.on_kerb`), rattle in the sound (`CarAudio`) and buzz the camera (`ImpactFeel.kerb_trauma`, a shake floor scaled by speed); `ProbeKerb` checks all three on a real track. Rolling loops for grass, gravel or sand and shallow water, crossfaded by surface and scaled by speed, player only (`ProbeSurfaceVoice`).
+- [x] **Sense of speed** `sense-of-speed` · Have  
   Wider field of view, camera pulling back, wind noise rising with speed, trackside objects near the road streaming past.  
-  *Today:* FOV and pull-back are in, plus edge speed lines from 70% of max speed and during turbo (`SpeedLines`, hidden = zero cost below the threshold). Wind noise is in now (`CarAudio`, player only: near silent below half of max speed, about -17 dB at max, louder with turbo, 3 dB-ish swell with slipstream once `Car.draft` exists; `ProbeWind`). Still missing: trackside streaming.
-- [ ] **Turbo as a three-part event** `turbo-event` · Partial  
+  *Today:* FOV and pull-back, edge speed lines from 70% of max speed and during turbo (`SpeedLines`, hidden below the threshold), wind noise rising with speed and swelling in a slipstream (`CarAudio`, `ProbeWind`). Trackside objects near the road are a track-design rule, not code: keep placing decor close to the asphalt on fast sections.
+- [x] **Turbo as a three-part event** `turbo-event` · Have  
   A click on press, an immediate kick with the camera lagging a beat behind, a sustained whoosh, and a release hiss when it ends.  
-  *Today:* The sound side is in (`CarAudio`, player only, `ProbeTurboSound`): a plastic click on press (`turbo_click`, from `boost_started`), the existing `boost` kick, a sustained whoosh loop with a short fade in and out while the bar burns, and a release hiss when it ends after at least 0.25 s of burn. Flame and pitch bump stay. Left unticked: the camera-lags-a-beat part is not part of this audio work.
-- [ ] **Drift with a snap in and a snap out** `drift-snap` · Partial  
+  *Today:* A plastic click on press, the `boost` kick plus a +4 m/s shove, the camera pulled back 0.8 m and sprung back (`ImpactFeel.turbo_lag_m`, `ProbeImpactCamera`), a sustained whoosh while the bar burns and a release hiss after at least 0.25 s of burn (`CarAudio`, `ProbeTurboSound`).
+- [x] **Drift with a snap in and a snap out** `drift-snap` · Have  
   Clear entry, a held slide you steer against, and an exit that straightens cleanly. Smoke thickens with the slide angle.  
-  *Today:* Entry and exit ramps feel good. Smoke density, opacity and size and the skid-mark opacity now scale with the slide angle and speed, and marks are also left on big slides without the handbrake and on hard braking. Still missing: the squeal that tracks slip (see `slip-squeal`).
+  *Today:* Entry and exit ramps as before. Smoke density, opacity and size and the skid-mark opacity scale with the slide angle and speed (`ProbeDriftSmoke`), marks also on big slides without the handbrake and on hard braking, and the squeal tracks the slip (`slip-squeal`).
 - [x] **Jumps with a skill component** `jump-skill` · Have  
   Lip stretch on takeoff, a little air control so gas and brake level the nose, then a landing thud scaled by fall speed, a dust puff, squash and a camera dip.  
   *Today:* Stretch, squash and shake as before. Air control: throttle pitches the nose down, brake up, capped at 0.9 rad/s, player only (`ProbeAirControl`). Landing dust burst, surface-tinted and scaled by fall speed (`ProbeLandingDust`). Landing thud scales with fall speed, with a heavy layer from 9 to 16 m/s (`ProbeLandThud`).
@@ -74,18 +74,18 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Haptics** `haptics` · Have  
   Short rumble on landings and hits on a controller. Phone vibration on the big ones.  
   *Today:* `HapticsFeed` pulses the player only, on impacts (wall and car), hard landings (6 m/s and up) and turbo start: 15-60 ms, amplitude 0.25-1.0 scaled by strength, at most one pulse per 0.15 s on the real clock, silent in countdown and after the finish. Phones via `Input.vibrate_handheld`, pads via `start_joy_vibration`. Settings: Vibration toggle, persisted, default on. Kerb rumble is split out below.
-- [ ] **Kerb rumble** `kerb-haptics` · Optional  
+- [x] **Kerb rumble** `kerb-haptics` · Have  
   A faint continuous buzz while riding a kerb, tied to the surface the car is on.  
-  *Today:* None. Needs a continuous pulse path next to `HapticsFeed.pulse()`; the 0.15 s rate limit is too slow for a buzz.
+  *Today:* `HapticsFeed` sends a weak 15 ms pulse every 0.18 s while the player rides a kerb above 6 m/s (amplitude 0.15 to 0.3 by speed). A pulse at least 1.5 times stronger than the last one now passes the 0.15 s rate limit, so a crash right after a kerb tick is never swallowed. `ProbeHaptics` checks both.
 
 ## Hitting the world
 
 - [x] **Glancing versus head-on** `glancing-vs-headon` · Have  
   A scrape along a wall costs little speed and lets you slide on. A head-on stops you with a bounce. The impact angle decides, and a small yaw nudge away from the wall keeps the nose from pinning.  
   *Today:* Wall hits within 30 degrees of the wall plane (`glance_angle_deg`) cut car friction to `glance_friction` and nudge the nose toward parallel through `_impact_yaw`; head-on keeps the stop-with-bounce. A nose pinned at low speed for 0.4 s is shoved away. Moving hazards (AnimatableBody3D) are skipped. Guard: `ProbeWallGlance`.
-- [ ] **Scrape loop and sparks** `scrape-sparks` · Missing · ⭐  
+- [x] **Scrape loop and sparks** `scrape-sparks` · Have · ⭐  
   While sliding along a wall: a continuous grind whose pitch follows speed, sparks from the contact point, a slight pull on the steering.  
-  *Today:* Sparks are in: a continuous `ScrapeSparks` emitter at the wall contact point above 4 m/s (rate follows scrape speed) and a burst on wall impacts above 6 m/s. The grind loop is in too (`scrape_loop.wav`, player only, driven by `ImpactSound`): above 2 m/s of `wall_scrape_speed`, volume -24 to -7 dB and pitch 0.75 to 1.45 follow the speed, 40 ms in and 100 ms out with a 60 ms hold so contact flicker never stutters it (guard `ProbeScrapeLoop`). Still missing: the slight pull on the steering (physics).
+  *Today:* Continuous sparks at the wall contact point above 4 m/s plus a burst on hits above 6 m/s (`ProbeContactSparks`), and a grind loop whose volume and pitch follow the scrape speed (`ProbeScrapeLoop`). The pull on the steering was left out on purpose: `glancing-vs-headon` nudges the nose away from the wall, and a pull toward it would fight that.
 - [x] **Impact sound in layers** `impact-layers` · Have · ⭐  
   Soft tap, crunch, big crash chosen by speed difference, with random pitch so repeats never sound like a machine gun.  
   *Today:* Done: `ImpactSound` (one node in `Race`) turns every `Car.impact` into a plan from `AudioManager.plan_impact`. One monotonic master volume (-17 dB at the 2.5 m/s feed threshold to -1 dB at 22 m/s) is split by equal-power weights between tap, crunch and crash, two variants each with no immediate repeat, pitch dropping with strength and jittered; a body layer on top (`wall_hit` on walls, `bump` plus `metal_hit` between cars). Nothing plays below the threshold. The fixed `wall_hit` and the `bump`/`metal_hit` calls are gone from `Car`; a car-car hit arrives from both cars and is merged into one set of sounds per tick. Guard: `ProbeImpactSound`.
@@ -143,9 +143,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Position-change feedback** `position-change` · Have  
   A short stinger and a HUD popup when you overtake or are overtaken.  
   *Today:* Done. The HUD popup is in (`PositionWatch` + `PositionPopup`): "P3" with a green up or red down triangle after a position is held 0.4 s, coalesced, none in countdown or after the finish. The stinger rides the same `PositionWatch.announced` signal (`AudioManager.play_stinger`): a three-note rising arpeggio (`stinger_up.wav`, 0.37 s) for a better position, a two-note falling slide (`stinger_down.wav`, 0.38 s) for a worse one, 2D at -8 dB, exact pitch. Guard: `ProbeStinger`.
-- [ ] **Slipstream** `slipstream` · Missing  
+- [x] **Slipstream** `slipstream` · Have  
   A small speed gain when following closely, with wind lines and a sound. Rewards closeness without contact and makes running in the pack tactical.  
-  *Today:* Physics is in: `Car.draft` (0..1) builds in 0.5 s behind a car 2 to 14 m ahead in a narrow cone, both above 50% of max speed, for +1.5 m/s cap and +10% acceleration; same rule for every car (`ProbeSlipstream`). Wind lines and the sound are still missing; they can read `draft`.
+  *Today:* `Car.draft` (0..1) builds in 0.5 s behind a car 2 to 14 m ahead in a narrow cone, both above 50% of max speed, for +1.5 m/s cap and +10% acceleration, and drops before curves and under braking; same rule for every car (`ProbeSlipstream`). The speed lines get a cool-tinted floor while drafting and the wind swells (`SpeedLines`, `CarAudio`). Switch: `slipstream_enabled`.
 - [x] **AI that reacts** `ai-reacts` · Have  
   A wobble when hit, a counter-steer, a momentary grudge against whoever hit it, horns.  
   *Today:* Done. Wobble, counter-steer and grudge are in (`AIController`, `reacts` toggle, tunables `wobble_*` and `grudge_*`): a car hit by another car at 4 m/s or more gets a decaying steering term (faded in between 8 and 18 m/s, so hairpins are untouched), its first lobe against the yaw the hit imparted, and for 4 s it tries to sit alongside the car that hit it (one lane over, only while that car is within 28 m ahead). Steering and target line only, no speed or grip change. The car that starts a grudge also sounds a toy horn (see `who-hit-me`, guard `ProbeHorn`).

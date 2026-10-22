@@ -215,11 +215,7 @@ func tick(delta: float, on_road: bool, loose: bool) -> void:
 	if car.is_player:
 		surface = _surface_kind(on_road, is_loose)
 		_update_roll(dt, speed)
-		# TODO(feel/handling-2): cand `Car.on_kerb` ajunge in aceasta ramura, inlocuieste
-		# linia de mai jos cu `set_on_kerb(car.on_kerb)`. Pana atunci proprietatea lipseste:
-		# garda `in` o sare, iar bordura o comanda cine apeleaza `set_on_kerb` (sondele).
-		if &"on_kerb" in car:
-			set_on_kerb(car.get(&"on_kerb") == true)
+		set_on_kerb(car.on_kerb)
 		_update_kerb(dt, speed)
 		_update_wind(dt, speed)
 		_update_turbo(dt, speed)
@@ -462,10 +458,8 @@ func _update_kerb(dt: float, speed: float) -> void:
 func _update_wind(dt: float, speed: float) -> void:
 	var f := speed / maxf(car.max_speed, 1.0)
 	var want := smoothstep(wind_start_frac, wind_full_frac, f)
-	# Aspiratia (slipstream): `Car.draft` (0..1) vine din feel/handling-2; pana
-	# ajunge in aceasta ramura `get` intoarce null si vantul ramane neschimbat.
-	var dv: Variant = car.get(&"draft")
-	var draft_amt := clampf(float(dv), 0.0, 1.0) if dv != null else 0.0
+	# Aspiratia (slipstream): `Car.draft` (0..1) umfla putin vantul.
+	var draft_amt := clampf(car.draft, 0.0, 1.0)
 	want = minf(want + wind_draft_swell * draft_amt * smoothstep(0.4, 0.8, f), 1.0)
 	_wind_gain = lerpf(_wind_gain, want, 1.0 - exp(-4.0 * dt))
 	if _wind_gain < 0.01:

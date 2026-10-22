@@ -23,6 +23,12 @@ var _failed: bool = false
 var _off: bool = false
 
 
+## Consumatorii lui `on_kerb` (sunet + camera), numarati in _ride: cadre cu
+## zdranganeala pornita in CarAudio si cadre cu pragul de trauma al camerei.
+var _audio_on: float = 0.0
+var _cam_on: float = 0.0
+
+
 func _check(ok: bool, what: String) -> void:
 	print("  [", "OK " if ok else "PICAT", "] ", what)
 	if not ok:
@@ -132,6 +138,10 @@ func _ride(race: Race, track: Track, spots: Array[int], lat_from_edge: float,
 	var samples: Array = []
 	var on_frames := 0
 	var frames := 0
+	var audio_frames := 0
+	var cam_frames := 0
+	# ImpactFeel tremura camera doar in cursa pornita.
+	race.state = Race.State.RUNNING
 	for f in 90:
 		# Menti viteza pe tangenta locala si atrage spre linia de lateral dorita.
 		var idx := track.closest_index(car.road_index, car.global_position)
@@ -151,6 +161,11 @@ func _ride(race: Race, track: Track, spots: Array[int], lat_from_edge: float,
 			frames += 1
 			if car.on_kerb:
 				on_frames += 1
+			var au: Node = car.get(&"_audio")
+			if au != null and au.get(&"on_kerb") == true:
+				audio_frames += 1
+			if race.camera != null and race.camera.trauma >= 0.1:
+				cam_frames += 1
 			# Cea mai agitata roata: bordura nu o loveste pe fiecare in acelasi moment.
 			samples.append(car.wheel_compression.duplicate())
 	# Variatia RAPIDA: abaterea patratica medie a diferentei de la un cadru la
@@ -162,6 +177,10 @@ func _ride(race: Race, track: Track, spots: Array[int], lat_from_edge: float,
 			var d: float = (samples[k] as Array)[wi] - (samples[k - 1] as Array)[wi]
 			sq += d * d
 		worst = maxf(worst, sqrt(sq / float(maxi(samples.size() - 1, 1))))
+	_audio_on = float(audio_frames) / float(maxi(frames, 1))
+	_cam_on = float(cam_frames) / float(maxi(frames, 1))
+	if race.camera != null:
+		race.camera.trauma = 0.0
 	return Vector2(worst, float(on_frames) / float(maxi(frames, 1)))
 
 
@@ -169,11 +188,17 @@ func _test_ride(race: Race, track: Track, spots: Array[int]) -> void:
 	print("")
 	print("-- 2. pe bordura la 25 m/s --")
 	var on := await _ride(race, track, spots, 0.45, 25.0, true)
+	var on_audio := _audio_on
+	var on_cam := _cam_on
 	var off := await _ride(race, track, spots, 0.45, 25.0, false)
 	print("  cu scuturat: salt/cadru %.4f m, pe bordura %.0f%% din cadre; fara: salt/cadru %.4f m"
 		% [on.x, on.y * 100.0, off.x])
 	_check(on.y >= 0.6, "on_kerb adevarat in >= 60% din cadre")
 	_check(on.x >= 1.6 * maxf(off.x, 0.0015), "saltul compresiei intre cadre >= 1.6x fata de fara scuturat")
+	print("  zdranganeala in sunet %.0f%% din cadre, camera tremura %.0f%%"
+		% [on_audio * 100.0, on_cam * 100.0])
+	_check(on_audio >= 0.6 * on.y, "sunetul de bordura urmeaza on_kerb (CarAudio)")
+	_check(on_cam >= 0.6 * on.y, "camera tremura pe bordura (ImpactFeel)")
 	print("")
 	print("-- 3. oprita pe bordura si pe axa soselei --")
 	var slow := await _ride(race, track, spots, 0.45, 1.0, true)
@@ -182,3 +207,5 @@ func _test_ride(race: Race, track: Track, spots: Array[int]) -> void:
 		% [slow.x, road.x, road.y * 100.0])
 	_check(slow.x < 0.5 * on.x, "oprita pe bordura nu scutura (< jumatate din 25 m/s)")
 	_check(road.y < 0.05, "pe axa soselei on_kerb ramane fals")
+	print("  pe axa: sunet %.0f%%, camera %.0f%%" % [_audio_on * 100.0, _cam_on * 100.0])
+	_check(_audio_on < 0.05 and _cam_on < 0.05, "pe axa: fara zdranganeala si fara tremur")

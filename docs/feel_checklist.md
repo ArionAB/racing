@@ -145,7 +145,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* None.
 - [ ] **AI that reacts** `ai-reacts` · Missing  
   A wobble when hit, a counter-steer, a momentary grudge against whoever hit it, horns.  
-  *Today:* AI gets only the raw physics.
+  *Today:* Wobble, counter-steer and grudge are in (`AIController`, `reacts` toggle, tunables `wobble_*` and `grudge_*`): a car hit by another car at 4 m/s or more gets a decaying steering term (faded in between 8 and 18 m/s, so hairpins are untouched), its first lobe against the yaw the hit imparted, and for 4 s it tries to sit alongside the car that hit it (one lane over, only while that car is within 28 m ahead). Steering and target line only, no speed or grip change. Still missing: the horns (audio).
 - [x] **Player's hits big, AI's hits small** `player-big-ai-small` · Have  
   Hit-stop and shake make your own bumps feel powerful. AI-initiated contact on you stays capped and telegraphed so bumping reads as a mechanic, not punishment.  
   *Today:* Impulses are capped, and the camera feedback is asymmetric: the attacker is decided from both cars' pre-impact speeds along the contact line. Player attacker (or equal head-on) gets full kick and hit-stop; an AI hitting you gets a capped kick (0.4 m) and no hit-stop.

@@ -50,6 +50,14 @@ const HitStopScript := preload("res://scenes/race/hit_stop.gd")
 ## Cand lovitura vine de la un AI: fractia din kick-ul normal si plafonul lui (m).
 @export var victim_kick_scale: float = 0.45
 @export var victim_kick_cap: float = 0.4
+## Cand te loveste un hazard mobil (barierele, autobuzul): kick aproape plin, fara
+## hit-stop. Lumea nu "joaca" impotriva ta ca un adversar, dar impingerea trebuie
+## sa se vada de unde vine; nu o plafonam ca pe cea de la AI.
+@export var hazard_kick_scale: float = 0.8
+## Din cat din schimbarea de viteza trebuie sa fi venit apropierea jucatorului ca
+## sa fi lovit el un corp mobil (hazard): izbit intr-un perete, aproape tot dv e al
+## tau; maturat de o bariera in timp ce stai, aproape nimic.
+@export var hazard_attacker_share: float = 0.4
 ## Si trauma, la fel (fractie).
 @export var victim_trauma_scale: float = 0.5
 
@@ -126,16 +134,21 @@ func _on_impact(car: Car, kind: StringName, strength: float, normal: Vector3,
 		_point: Vector3, other: Node) -> void:
 	if car != player or camera == null:
 		return
-	var attacker := _player_is_attacker(kind, normal, other)
+	var attacker := _player_is_attacker(kind, normal, other, strength)
 	last_player_attacker = attacker
 	var kick_m := clampf(strength * kick_per_mps, 0.0, kick_max)
 	var roll := minf(strength * roll_deg_per_mps, roll_deg_max)
 	if not attacker:
-		kick_m = minf(kick_m * victim_kick_scale, victim_kick_cap)
-		roll *= victim_kick_scale
+		if other is Car:
+			kick_m = minf(kick_m * victim_kick_scale, victim_kick_cap)
+			roll *= victim_kick_scale
+		else:
+			# Hazard mobil: impingere clara, fara hit-stop (vezi mai jos).
+			kick_m *= hazard_kick_scale
+			roll *= hazard_kick_scale
 	last_kick = kick_m
 	camera.kick(normal, kick_m, roll)
-	_flash_hit_side(normal, strength, attacker)
+	_flash_hit_side(normal, strength, attacker, other is Car)
 	if kind == &"car":
 		var tr := clampf(car_trauma_base + strength * car_trauma_per_mps,
 			0.0, car_trauma_max)
@@ -148,7 +161,8 @@ func _on_impact(car: Car, kind: StringName, strength: float, normal: Vector3,
 
 ## Flash pe marginea ecranului dinspre obstacol (invers normalei: normala arata
 ## DINSPRE obstacol spre masina). Dreapta/fata ecranului se iau din camera.
-func _flash_hit_side(normal: Vector3, strength: float, attacker: bool) -> void:
+func _flash_hit_side(normal: Vector3, strength: float, attacker: bool,
+		other_is_car: bool) -> void:
 	if vignette == null:
 		return
 	var right := camera.global_transform.basis.x
@@ -160,7 +174,7 @@ func _flash_hit_side(normal: Vector3, strength: float, attacker: bool) -> void:
 	var toward := -Vector3(normal.x, 0.0, normal.z)
 	var a := clampf(strength * flash_per_mps, 0.0, flash_max)
 	if not attacker:
-		a *= victim_kick_scale
+		a *= victim_kick_scale if other_is_car else hazard_kick_scale
 	vignette.flash_edge(Vector2(toward.dot(right.normalized()),
 		toward.dot(fwd.normalized())), a)
 
@@ -173,8 +187,20 @@ func _flash_hit_side(normal: Vector3, strength: float, attacker: bool) -> void:
 ## mai mare din apropierea totala a lovit. Din spate peste un AI stationar:
 ## cota jucatorului e 100%. AI din spate peste jucator: 0%. Frontal egal: 50%,
 ## deci jucatorul (pragul e sub 50%): mecanica e a lui.
-func _player_is_attacker(kind: StringName, normal: Vector3, other: Node) -> bool:
+##
+## Pereti: jucatorul loveste (te-ai izbit tu), cu o exceptie: un corp cinematic
+## (AnimatableBody3D = hazard mobil) care te matura cat stai pe loc. Acolo
+## jucatorul e atacator doar daca cota lui din schimbarea de viteza (cat se
+## apropia de obstacol INAINTE) trece de `hazard_attacker_share`.
+func _player_is_attacker(kind: StringName, normal: Vector3, other: Node,
+		strength: float = 0.0) -> bool:
 	if kind != &"car":
+		if other is AnimatableBody3D and strength > 0.01:
+			var nn := Vector3(normal.x, 0.0, normal.z)
+			if nn.length_squared() > 1e-6:
+				var vpp: Vector3 = _vel_prev.get(player, Vector3.ZERO)
+				last_share = maxf(vpp.dot(-nn.normalized()), 0.0) / strength
+				return last_share >= hazard_attacker_share
 		return true
 	var o := other as Car
 	var n := Vector3(normal.x, 0.0, normal.z)

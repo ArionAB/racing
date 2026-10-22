@@ -109,7 +109,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* None.
 - [ ] **Every moving hazard speaks** `hazards-speak` · Partial  
   Each moving hazard gets its own contact sound and shake.  
-  *Today:* Train and avalanche crush, shake and sound. The sliding barrier and the bus push you silently.
+  *Today:* Train and avalanche crush, shake and sound. The sliding barrier and the bus (moving kinematic bodies) now reach the camera through the contact feed: a clear kick from the side that shoved you (80% of a full kick, no hit-stop) and an edge flash. Still silent: the contact sound for each hazard (audio).
 - [ ] **World reactions** `world-reactions` · Optional  
   Birds flushing, a sign wobbling, dust dropping in caves. Character, not mechanics, and cheap.  
   *Today:* None.

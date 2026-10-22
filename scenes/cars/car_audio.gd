@@ -75,8 +75,8 @@ enum Surface { NONE, GRASS, GRAVEL, WATER }
 ## Sansa unui al doilea rateu, la 70-160 ms dupa primul.
 @export_range(0.0, 1.0, 0.01) var pop_double_chance: float = 0.45
 ## Volumul (dB): jucator, adversar apropiat.
-@export var pop_db_player: float = -4.0
-@export var pop_db_ai: float = -10.0
+@export var pop_db_player: float = -8.0
+@export var pop_db_ai: float = -14.0
 ## Un adversar rateaza doar daca e la mai putin de atat de camera (m).
 @export var pop_ai_range: float = 30.0
 
@@ -482,7 +482,7 @@ func _on_boost_started(_c: Car) -> void:
 	if not car.is_player:
 		return
 	turbo_clicks += 1
-	AudioManager.play_sfx(&"turbo_click", 1.0, -6.0)
+	AudioManager.play_sfx(&"turbo_click", 1.0, -10.0)
 
 
 func _update_turbo(dt: float, speed: float) -> void:

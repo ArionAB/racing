@@ -118,6 +118,44 @@ run_step "Reintrarea pe sosea dupa iesirea pe nisip" reentry.log 'VERDICT:' -- \
 run_step "Camera in caverna (tot intervalul de slidere)" cavecam.log 'TOATE OK|PICAT:' -- \
 	--headless --fixed-fps 60 --path . res://tools/ProbeCavecam.tscn
 run_step "Strivit: turbo-ul nu scoate masina din strivire" crush_turbo.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeCrushTurbo.tscn
+run_step "Feed-ul de contact: perete, razuire, masina" contact_feed.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeContactFeed.tscn
+run_step "Motor cu trepte si sarcina (sunet): caderi la schimbare, zumzet sub gaz" engine_voice.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeEngineVoice.tscn
+run_step "Rateuri la ridicarea gazului (sunet): sansa, cooldown, doar turatie mare" lift_pops.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeLiftPops.tscn
+run_step "Scrasnet dupa alunecare (sunet): volum/pitch cu unghiul, sisait pe pietris" slip_squeal.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSlipSqueal.tscn
+run_step "Vocile suprafetelor (sunet): iarba/pietris/apa, cross-fade, bordura, pista reala" surface_voice.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSurfaceVoice.tscn
+run_step "Turbo (sunet): click, suvoi cat arde, sisait la capat" turbo_sound.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeTurboSound.tscn
+run_step "Vant (sunet): mut sub jumatate din viteza, urca spre plafon" wind.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeWind.tscn
+run_step "Sunet de impact: straturi dupa putere, variante, conducta" impact_sound.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactSound.tscn
+run_step "Rocket start (sunet): clichet cat tii TURBO, arc la GO doar pe rocket" rocket_start.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeRocketStart.tscn
+run_step "Bucle de contact: razuire, frecare, fara hartuiala la palpaire" scrape_loop.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeScrapeLoop.tscn
+run_step "Aterizare: bufnitura dupa viteza de cadere, strat greu" land_thud.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeLandThud.tscn
+run_step "Impacturi pozitionale: cine m-a lovit, AI-AI, pool de 4" positional_hits.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePositionalHits.tscn
+run_step "Claxon de jucarie: ranchiuna, frecare, pauze, raza" horn.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHorn.tscn
+run_step "Stinger de pozitie: urcare, coborare, coalescare, cablaj" stinger.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeStinger.tscn
+run_step "Hazarde mobile: sunet de contact (bariera, autobuz)" hazard_sound.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHazardSound.tscn
+run_step "Decor lovit: sunet de tac, pauza, prioritate" prop_knock.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePropKnock.tscn
+run_step "Volan: se strange cu viteza, drift scutit, netezire" steer_speed.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSteerSpeed.tscn
+run_step "Perete: razuire pastreaza viteza, frontal opreste, anti-lipire" wall_glance.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeWallGlance.tscn
+run_step "Rasturnat: se intoarce pe roti pe loc, plasa pentru loc invalid" upright.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeUpright.tscn
+run_step "Body jolt: caroseria vizuala la impact, revenire, compunere" body_jolt.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeBodyJolt.tscn
+run_step "Scantei de contact: razuire, rafala, frecare intre masini" contact_sparks.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeContactSparks.tscn
+run_step "Fum si urme de drift dupa unghiul de alunecare" drift_smoke.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeDriftSmoke.tscn
+run_step "Praful de aterizare, colorat dupa suprafata" landing_dust.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeLandingDust.tscn
+run_step "Soferul: tresarire, tremur, privire, pumn" driver_react.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeDriverReact.tscn
+run_step "Decor lovit: aschii, butoi knockable, plafon" prop_debris.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePropDebris.tscn
+run_step "Tufe: frunze si franare usoara" soft_veg.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSoftVeg.tscn
+run_step "Jucaria: antena cu arc, cheia de intors si zdranganeala pe teren aspru, fara intrari in caroserie" toy_animation.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeToyAnimation.tscn
+run_step "Camera la izbituri: kick, hit-stop, atacator" impact_camera.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactCamera.tscn
+run_step "Race: ImpactFeel cablat (kick, hit-stop, final)" impact_wiring.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactWiring.tscn
+run_step "Popup de pozitie: debounce, numaratoare, final" position_popup.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePositionPopup.tscn
+run_step "AI care reactioneaza: clatinare, ranchiuna, cinstit" ai_react.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeAiReact.tscn
+run_step "Vibratie: marime, ritm, setare, cablaj" haptics.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHaptics.tscn
+run_step "Linii de viteza: prag, monotonie, turbo" speed_lines.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSpeedLines.tscn
+run_step "Hazarde mobile: kick de camera, fara hit-stop" hazard_kick.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHazardKick.tscn
+run_step "Spin-out: asistenta intoarce masina, nu strica driftul" spinout.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSpinout.tscn
+run_step "Aer: gazul apleaca botul, frana il ridica, AI neutru" air_control.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeAirControl.tscn
+run_step "Slipstream: aspiratie doar in con, fara lipire" slipstream.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSlipstream.tscn
+run_step "Bordura: scutura suspensia doar in viteza" kerb.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeKerb.tscn
 run_step "Rezervor sigilat: bara nu se incarca, arderea merge" sealed_turbo.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSealedTurbo.tscn
 run_step "Fantoma: inregistrare, fisier, redare" ghost.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeGhost.tscn
 run_step "Bolovanul de pe buza + directie inversata" rim_boulder.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeRimBoulder.tscn

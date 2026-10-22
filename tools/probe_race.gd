@@ -197,6 +197,8 @@ const CLIFF_STUCK_SECONDS: float = 3.5
 const CLIFF_FRACS: Array[float] = [0.12, 0.31, 0.44, 0.58, 0.73, 0.91]
 
 var _mode: String = "race"
+## Exporturi de masina suprascrise din linia de comanda (`--car-set=`).
+var _car_set: Dictionary = {}
 var _track_index: int = 0
 var _seconds: float = 150.0
 ## `--rain=1`: fortata ploaia peste orice `RainCycle` de pe pista, prin
@@ -288,6 +290,13 @@ var _run_t0: float = -1.0
 
 var _race: Node = null
 var _elapsed: float = 0.0
+## Statistici de feel (vezi _fx_* in bucla de esantionare).
+var _fx_ticks: int = 0
+var _fx_draft: int = 0
+var _fx_spin: int = 0
+var _fx_kerb: int = 0
+var _fx_swaps: int = 0
+var _fx_pos: Dictionary = {}
 var _stats: Array[Dictionary] = []
 var _done: bool = false
 
@@ -392,6 +401,16 @@ func _ready() -> void:
 			_track_index = int(arg.trim_prefix("--track="))
 		elif arg.begins_with("--seconds="):
 			_seconds = float(arg.trim_prefix("--seconds="))
+		elif arg.begins_with("--car-set="):
+			# `--car-set=prop=valoare`: suprascrie un export al TUTUROR masinilor
+			# (A/B in acelasi build, ex. `--car-set=steer_taper_at_top=1.0`,
+			# `--car-set=glance_enabled=false`).
+			var kv := arg.trim_prefix("--car-set=").split("=")
+			if kv.size() == 2:
+				if kv[1] == "true" or kv[1] == "false":
+					_car_set[kv[0]] = kv[1] == "true"
+				else:
+					_car_set[kv[0]] = float(kv[1])
 		elif arg.begins_with("--seed="):
 			_seed = int(arg.trim_prefix("--seed="))
 		elif arg.begins_with("--car="):
@@ -519,6 +538,8 @@ func _start_race() -> void:
 	var cars: Array[Car] = _race.cars
 	for i in cars.size():
 		var car := cars[i]
+		for k: String in _car_set:
+			car.set(k, _car_set[k])
 		if car == player:
 			var ai := AIController.new()
 			car.set_controller(ai)
@@ -978,6 +999,20 @@ func _tick_race(delta: float) -> void:
 			_bucket_slow[b] += 1
 		_watch_stuck(car, st, speed, delta)
 		_watch_laps_and_jump(car, st, i)
+		# Statistici de feel (slipstream / spin-out / borduri): cat timp are
+		# masina draft, asistenta de spin pornita, o roata pe bordura; si cate
+		# schimbari de pozitie (depasiri) au avut loc.
+		_fx_ticks += 1
+		if car.draft > 0.5:
+			_fx_draft += 1
+		if car._spinout_on:
+			_fx_spin += 1
+		if car.on_kerb:
+			_fx_kerb += 1
+		var prev_pos: int = _fx_pos.get(i, car.race_position)
+		if prev_pos != car.race_position:
+			_fx_swaps += 1
+		_fx_pos[i] = car.race_position
 	if not _signal_hazards.is_empty():
 		_watch_signal_fleet(cars)
 	if _elapsed >= _seconds:
@@ -1319,8 +1354,22 @@ func _report_race() -> void:
 	laps.sort()
 	print("--- ritm: cel mai rapid %.2f tururi, cel mai lent %.2f (ecart %.2f)" % [
 		laps[laps.size() - 1], laps[0], laps[laps.size() - 1] - laps[0]])
+	var fxn := float(maxi(_fx_ticks, 1))
+	print("--- feel: draft>0.5 %.1f%% din timp · spin-assist %.2f%% · pe bordura %.1f%% · schimbari de pozitie %d" % [
+		_fx_draft / fxn * 100.0, _fx_spin / fxn * 100.0, _fx_kerb / fxn * 100.0, _fx_swaps])
 	print("--- repuneri totale: %d · cel mai mult in afara soselei: %.1f%%" % [
 		total_respawns, worst_offroad])
+	var react_hits := 0
+	var grudges := 0
+	var grudge_s := 0.0
+	for c in cars:
+		var rc := c.controller as AIController
+		if rc != null:
+			react_hits += rc.react_count
+			grudges += rc.grudge_count
+			grudge_s += rc.grudge_active_s
+	print("--- reactii AI (ai-reacts): %d lovituri, %d ranchiuni, %.1f s de linie de ranchiuna (reacts=%s)" % [
+		react_hits, grudges, grudge_s, str(OS.get_environment("AI_REACTS") != "0")])
 	print("--- ejectari: %d (perete %d, aterizare %d) · cea mai dura aterizare FARA ejectare: %.1f m/s" % [
 		total_ej_wall + total_ej_land, total_ej_wall, total_ej_land, land_max])
 	var branch_total := 0

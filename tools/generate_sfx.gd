@@ -78,6 +78,10 @@ func _init() -> void:
 	# Tabla pe tabla la ciocnirea intre masini (#500). TOT LA SFARSIT: `rng` e
 	# un singur sir, orice sunet inserat mai sus rescrie fisiere neatinse.
 	_save("metal_hit", _metal_hit())
+	# Sunete de EVENIMENT (impact in straturi, hartaieli, aterizare, claxon, stingere,
+	# hazarde, decor lovit). Au `rng_ev` PROPRIU: nu consuma din `rng`, deci cele 28
+	# de fisiere de mai sus raman identice bit-pentru-bit. Vezi blocul de la sfarsit.
+	_save_event_sounds()
 	print("SFX generate in res://assets/audio/")
 	quit()
 
@@ -689,3 +693,335 @@ func _save(name: String, data: PackedFloat32Array) -> void:
 			v += 65536
 		f.store_16(v)
 	print("  %s (%d samples)" % [path, data.size()])
+
+
+# ======================================================================
+# SUNETE DE EVENIMENT (impact-layers, scrape/rub, land, claxon, stingere,
+# hazarde, decor). Bloc separat, cu generator de zgomot PROPRIU: adaugarea lor
+# nu atinge sirul `rng` al sunetelor vechi.
+# ======================================================================
+
+var rng_ev := RandomNumberGenerator.new()
+
+
+func _save_event_sounds() -> void:
+	rng_ev.seed = 20261022
+	# Trei straturi de impact (usor / mediu / puternic), cate doua variante.
+	_save("impact_tap_a", _impact_tap(0))
+	_save("impact_tap_b", _impact_tap(1))
+	_save("impact_crunch_a", _impact_crunch(0))
+	_save("impact_crunch_b", _impact_crunch(1))
+	_save("impact_crash_a", _impact_crash(0))
+	_save("impact_crash_b", _impact_crash(1))
+	# Hartaielile: in bucla, volumul si pitch-ul vin din joc.
+	_save("scrape_loop", _scrape_loop())
+	_save("rub_loop", _rub_loop())
+	_save("land_heavy", _land_heavy())
+	_save("toy_horn", _toy_horn())
+	_save("stinger_up", _stinger(true))
+	_save("stinger_down", _stinger(false))
+	_save("hazard_barrier_hit", _hazard_barrier_hit())
+	_save("hazard_bus_hit", _hazard_bus_hit())
+	_save("prop_knock_a", _prop_knock(0))
+	_save("prop_knock_b", _prop_knock(1))
+
+
+func _ev_noise() -> float:
+	return rng_ev.randf() * 2.0 - 1.0
+
+
+## Atingere de plastic: un „tac" scurt si sec. Trei moduri inalte care se sting
+## repede, un click de zgomot trece-sus si un corp mic de ~200 Hz. Variantele
+## difera prin frecvente, ca doua atingeri la rand sa nu sune identic.
+func _impact_tap(variant: int) -> PackedFloat32Array:
+	var n := int(RATE * 0.1)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var f1: float = [880.0, 1010.0][variant]
+	var f2: float = [1900.0, 2150.0][variant]
+	var f3: float = [3100.0, 3420.0][variant]
+	var prev := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var nz := _ev_noise()
+		var hp := nz - prev
+		prev = nz
+		var modes := sin(TAU * f1 * t) * exp(-t * 55.0) * 0.5 \
+			+ sin(TAU * f2 * t) * exp(-t * 85.0) * 0.35 \
+			+ sin(TAU * f3 * t) * exp(-t * 120.0) * 0.2
+		var click := hp * exp(-t * 450.0) * 0.7
+		var body := sin(TAU * 210.0 * t) * exp(-t * 60.0) * 0.4
+		var attack := minf(float(i) / (RATE * 0.0008), 1.0)
+		out[i] = (modes + click + body) * attack
+	return _peak_norm(out, 0.85)
+
+
+## Crancanit de plastic care cedeaza: zgomot cu taietura care COBOARA (incepe
+## ascutit, se intuneca), cu pocnituri rare peste el (bucatile care sar) si un
+## corp jos. ~0,26 s. Mai mult zgomot decat ton: nu are inaltime.
+func _impact_crunch(variant: int) -> PackedFloat32Array:
+	var n := int(RATE * 0.26)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	var crk := 0.0
+	var p_crack: float = [0.012, 0.018][variant]
+	var body_f: float = [125.0, 150.0][variant]
+	for i in n:
+		var t := float(i) / float(RATE)
+		var k := float(i) / float(n)
+		lp += lerpf(0.75, 0.12, minf(k * 1.6, 1.0)) * (_ev_noise() - lp)
+		if rng_ev.randf() < p_crack * (1.0 - k):
+			crk = _ev_noise()
+		crk *= 0.82
+		var env := exp(-t * 11.0)
+		var body := sin(TAU * lerpf(body_f, body_f * 0.55, minf(t / 0.12, 1.0)) * t) \
+			* exp(-t * 26.0) * 0.55
+		var attack := minf(float(i) / (RATE * 0.001), 1.0)
+		out[i] = (lp * 0.9 * env + crk * 0.7 * env + body) * attack
+	return _peak_norm(out, 0.9)
+
+
+## Izbitura mare: bubuitura joasa (78 -> 38 Hz), un val de zgomot care se
+## intuneca si se rupe in pocnituri (jucaria care se sparge), si un inel slab de
+## tabla/plastic dur. Coada de ~0,5 s: energia e in atac, nu in coada.
+func _impact_crash(variant: int) -> PackedFloat32Array:
+	var n := int(RATE * 0.55)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	var crk := 0.0
+	var phase := 0.0
+	var f0: float = [78.0, 92.0][variant]
+	var ring_a: float = [430.0, 510.0][variant]
+	var ring_b: float = [1130.0, 1290.0][variant]
+	for i in n:
+		var t := float(i) / float(RATE)
+		var k := float(i) / float(n)
+		phase += lerpf(f0, f0 * 0.48, minf(t / 0.3, 1.0)) / float(RATE)
+		var thump := sin(TAU * phase) * exp(-t * 8.0) * 0.95
+		lp += lerpf(0.55, 0.08, minf(k * 1.3, 1.0)) * (_ev_noise() - lp)
+		if rng_ev.randf() < 0.03 * (1.0 - k):
+			crk = _ev_noise()
+		crk *= 0.8
+		var debris := (lp * 0.8 + crk * 0.55) * exp(-t * 5.5)
+		var ring := (sin(TAU * ring_a * t) * 0.6 + sin(TAU * ring_b * t) * 0.4) \
+			* exp(-t * 14.0) * 0.18
+		var attack := minf(float(i) / (RATE * 0.001), 1.0)
+		out[i] = (thump + debris + ring) * attack
+	return _peak_norm(out, 0.92)
+
+
+## Roade un perete: zgomot trecut printr-un filtru trece-banda (~0,8-2,5 kHz) cu o
+## modulatie ASPRA si neregulata (maruntisul de zgarieturi), plus o rezonanta de
+## tabla subtire. IN BUCLA: fara ton stabil in afara rezonantei, deci se inchide
+## prin suprapunere (primii 25% in fondu cu un capat in plus), ca typhoon_roar.
+## Jocul ii da pitch (viteza de razuire) si volum.
+func _scrape_loop() -> PackedFloat32Array:
+	var n := int(RATE * 0.8)
+	var fade := int(n * 0.25)
+	var raw := PackedFloat32Array()
+	raw.resize(n + fade)
+	var lp1 := 0.0
+	var lp2 := 0.0
+	var rasp := 0.0
+	var rasp_v := 0.0
+	for i in n + fade:
+		var t := float(i) / float(RATE)
+		var nz := _ev_noise()
+		lp1 += 0.38 * (nz - lp1)
+		lp2 += 0.07 * (lp1 - lp2)
+		var band := lp1 - lp2 # trece-banda grosolan
+		# Asprimea: o tinta care se schimba la ~25 Hz, netezita.
+		if i % 880 == 0:
+			rasp_v = 0.55 + rng_ev.randf() * 0.7
+		rasp += 0.02 * (rasp_v - rasp)
+		var ring := sin(TAU * 2350.0 * t) * 0.07 + sin(TAU * 1480.0 * t) * 0.05
+		raw[i] = band * 1.3 * rasp + ring * rasp
+	return _peak_norm(_loop_crossfade(raw, n, fade), 0.8)
+
+
+## Frecare plastic pe plastic intre doua caroserii: mai joasa si mai moale decat
+## scrasnetul de perete. Zgomot trece-jos (~900 Hz) cu „sacadari" (stick-slip)
+## ritmice la ~38 Hz — ce da senzatia de doua suprafete care se prind si scapa.
+## IN BUCLA, aceeasi suprapunere de capete.
+func _rub_loop() -> PackedFloat32Array:
+	var n := int(RATE * 0.8)
+	var fade := int(n * 0.25)
+	var raw := PackedFloat32Array()
+	raw.resize(n + fade)
+	var lp := 0.0
+	var lp_b := 0.0
+	for i in n + fade:
+		var t := float(i) / float(RATE)
+		var nz := _ev_noise()
+		lp += 0.14 * (nz - lp)
+		lp_b += 0.45 * (nz - lp_b)
+		var slip := 0.55 + 0.45 * sin(TAU * 38.0 * t + sin(TAU * 3.1 * t) * 2.0)
+		raw[i] = (lp * 2.2 + (lp_b - lp) * 0.5) * slip
+	return _peak_norm(_loop_crossfade(raw, n, fade), 0.8)
+
+
+## Capetele unei bucle de zgomot: `raw` are n + fade esantioane; primele `fade`
+## se amesteca cu cele in plus de la coada, ca ultima esantion sa curga in prima
+## fara click.
+func _loop_crossfade(raw: PackedFloat32Array, n: int, fade: int) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in n:
+		out[i] = raw[i]
+	for i in fade:
+		var k := float(i) / float(fade)
+		out[i] = raw[i] * k + raw[n + i] * (1.0 - k)
+	return out
+
+
+## Aterizare grea (peste ~10 m/s cadere): bubuitura de 62 -> 28 Hz si un
+## zdranganit de suspensie (zgomot trece-banda, doua sacadari) deasupra. Se
+## adauga PESTE land.wav, nu il inlocuieste.
+func _land_heavy() -> PackedFloat32Array:
+	var n := int(RATE * 0.5)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var phase := 0.0
+	var lp := 0.0
+	var lp2 := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		phase += lerpf(62.0, 28.0, minf(t / 0.35, 1.0)) / float(RATE)
+		var boom := sin(TAU * phase) * exp(-t * 7.0)
+		var nz := _ev_noise()
+		lp += 0.4 * (nz - lp)
+		lp2 += 0.08 * (lp - lp2)
+		var rattle := (lp - lp2) * (exp(-t * 14.0) + 0.6 * exp(-(t - 0.09) * (t - 0.09) * 9000.0))
+		var attack := minf(float(i) / (RATE * 0.002), 1.0)
+		out[i] = (boom * 0.9 + rattle * 0.8) * attack
+	return _peak_norm(out, 0.9)
+
+
+## Claxon de jucarie: „pa-PIP" din doua note de unda patrata filtrata (apasi o
+## para de cauciuc), a doua cu un sfert de ton mai sus. Fara vibrato. ~0,3 s.
+func _toy_horn() -> PackedFloat32Array:
+	var n := int(RATE * 0.32)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	var phase_a := 0.0
+	var phase_b := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var second := t >= 0.13
+		var f := 520.0 if not second else 655.0
+		var tt := t if not second else t - 0.13
+		var len_s := 0.12 if not second else 0.19
+		phase_a += f / float(RATE)
+		phase_b += f * 1.5 / float(RATE) # cvinta: claxonul are doua gatuiri
+		var sq := (1.0 if fmod(phase_a, 1.0) < 0.5 else -1.0) * 0.6 \
+			+ (1.0 if fmod(phase_b, 1.0) < 0.5 else -1.0) * 0.3
+		lp += 0.28 * (sq - lp)
+		var env := minf(tt / 0.006, 1.0) * clampf((len_s - tt) / 0.02, 0.0, 1.0)
+		out[i] = lp * env
+	return _peak_norm(out, 0.45)
+
+
+## Stinger de pozitie: ascendent = trei note de arpegiu scurte (urcare), descendent
+## = doua note cazute cu o alunecare de pitch (coborare). Unda triunghi cu un pic
+## de armonica a treia, ca sa taie prin motor fara sa sune a beep de countdown.
+## ~0,3-0,4 s fiecare.
+func _stinger(up: bool) -> PackedFloat32Array:
+	var notes: Array = [659.0, 831.0, 988.0] if up else [622.0, 466.0]
+	var step := 0.085 if up else 0.12
+	var dur := (step * float(notes.size())) + (0.12 if up else 0.14)
+	var n := int(RATE * dur)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var phase := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var idx := mini(int(t / step), notes.size() - 1)
+		var tt := t - float(idx) * step
+		var f: float = notes[idx]
+		var last := idx == notes.size() - 1
+		if not up and last:
+			f *= lerpf(1.0, 0.94, minf(tt / 0.14, 1.0)) # alunecarea finala
+		phase += f / float(RATE)
+		var tri := absf(fmod(phase, 1.0) * 4.0 - 2.0) - 1.0
+		var h3 := sin(TAU * phase * 3.0) * 0.18
+		var env := minf(tt / 0.004, 1.0) * exp(-tt * (7.0 if last else 14.0))
+		out[i] = (tri * 0.8 + h3) * env * clampf((dur - t) / 0.03, 0.0, 1.0)
+	return _peak_norm(out, 0.6)
+
+
+## Bariera glisanta lovita: „BONC" de plastic gol/lemn — trei moduri nearmonice
+## joase (330 / 610 / 980 Hz) si un corp de 140 Hz, cu un clinchet scurt la
+## atac. Mai plin si mai lent decat un tap, mai putin metalic decat tabla.
+func _hazard_barrier_hit() -> PackedFloat32Array:
+	var n := int(RATE * 0.36)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var prev := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var nz := _ev_noise()
+		var hp := nz - prev
+		prev = nz
+		var modes := sin(TAU * 330.0 * t) * exp(-t * 16.0) * 0.55 \
+			+ sin(TAU * 610.0 * t) * exp(-t * 24.0) * 0.4 \
+			+ sin(TAU * 980.0 * t) * exp(-t * 36.0) * 0.25
+		var body := sin(TAU * lerpf(160.0, 110.0, minf(t / 0.08, 1.0)) * t) \
+			* exp(-t * 28.0) * 0.6
+		var click := hp * exp(-t * 300.0) * 0.5
+		var attack := minf(float(i) / (RATE * 0.001), 1.0)
+		out[i] = (modes + body + click) * attack
+	return _peak_norm(out, 0.9)
+
+
+## Autobuzul te loveste: masa mare — o bubuitura de 95 -> 45 Hz, tabla larga care
+## suna jos (inel de 175 / 340 Hz) si un scartait scurt de suspensie la coada.
+## Mai lung si mai grav decat bariera: se simte greutatea.
+func _hazard_bus_hit() -> PackedFloat32Array:
+	var n := int(RATE * 0.55)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var phase := 0.0
+	var lp := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		phase += lerpf(95.0, 45.0, minf(t / 0.3, 1.0)) / float(RATE)
+		var thump := sin(TAU * phase) * exp(-t * 9.0)
+		var panel := (sin(TAU * 175.0 * t) * 0.6 + sin(TAU * 340.0 * t) * 0.4) \
+			* exp(-t * 12.0) * 0.5
+		lp += 0.3 * (_ev_noise() - lp)
+		var squeak_gate := clampf((t - 0.12) * 20.0, 0.0, 1.0) * exp(-maxf(t - 0.12, 0.0) * 8.0)
+		var squeak := sin(TAU * (1250.0 + 140.0 * sin(TAU * 7.0 * t)) * t) * squeak_gate * 0.06
+		var scuff := lp * exp(-t * 18.0) * 0.5
+		var attack := minf(float(i) / (RATE * 0.0015), 1.0)
+		out[i] = (thump + panel + scuff + squeak) * attack
+	return _peak_norm(out, 0.92)
+
+
+## Decor usor lovit (con, cutie, panou): doua „tac"-uri de lemn/plastic la 30 ms
+## unul de altul (se loveste de el insusi), mai scurt si mai sec decat tap-ul
+## de impact. Variantele: lemn mai gol (a) si plastic mai ascutit (b).
+func _prop_knock(variant: int) -> PackedFloat32Array:
+	var n := int(RATE * 0.16)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var f: float = [520.0, 740.0][variant]
+	var prev := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var nz := _ev_noise()
+		var hp := nz - prev
+		prev = nz
+		var v := 0.0
+		for hit in 2:
+			var tt := t - float(hit) * 0.03
+			if tt < 0.0:
+				continue
+			var g := 1.0 if hit == 0 else 0.55
+			v += g * (sin(TAU * f * tt) * exp(-tt * 55.0) * 0.6
+				+ sin(TAU * f * 2.1 * tt) * exp(-tt * 80.0) * 0.3
+				+ hp * exp(-tt * 500.0) * 0.5)
+		out[i] = v
+	return _peak_norm(out, 0.8)

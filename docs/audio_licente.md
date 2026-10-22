@@ -11,12 +11,15 @@ audio le listeaza pe **toate**, nu doar pe cele cu atribuire obligatorie: la
 audio mai probabil greseala e sa nu stii *de unde* vine un fisier, nu sa uiti sa
 scrii un nume.
 
-## Starea de acum (14 oct 2026)
+## Starea de acum (22 oct 2026)
 
 **Zero assets audio externe. Zero obligatii de licenta.**
 
-Toate cele **28** de fisiere din `assets/audio/` sunt sintetizate procedural de
-`tools/generate_sfx.gd` (WAV mono 22050 Hz / 16-bit) — cod scris in cadrul
+Toate cele **59** de fisiere din `assets/audio/` sunt sintetizate procedural
+(WAV mono 22050 Hz / 16-bit): cele 28 vechi si cele 16 de eveniment de
+`tools/generate_sfx.gd`, cele 11 ale vocilor continue de masina (motor, derapaj,
+suprafete, turbo, vant) si cele 4 ale paletei de jucarie (clacuri de plastic,
+arc si clichet de rocket start) de `tools/generate_sfx_car.gd` — cod scris in cadrul
 proiectului, deci drepturile sunt ale noastre. Nu exista nicio inregistrare
 descarcata, niciun sample de biblioteca, nimic generat de AI.
 
@@ -24,13 +27,42 @@ Verificat prin regenerare in worktree curat (14 oct 2026): 26 din 28 de fisiere
 ies **identice bit-pentru-bit** cu cele din git, si doua rulari consecutive dau
 acelasi rezultat — generatorul e determinist (`rng.seed = 20260718`).
 
+`generate_sfx_car.gd` are `rng`-ul lui (`seed = 20261022`) si nu atinge niciun fisier
+vechi: rulat peste cele 28, hash-urile lor raman neschimbate (verificat 22 oct 2026),
+iar cele 11 noi ies identice la doua rulari consecutive. Fisier separat tocmai ca sa
+nu mute zgomotul generatorului vechi (un singur `rng` semanat o data).
+
+Cele **4** ale paletei de jucarie (`impact_clack_a/b`, `rocket_spring`,
+`rocket_ratchet`) se genereaza tot in `generate_sfx_car.gd`, dar dintr-un sir de
+zgomot **separat** (`rng_toy.seed = 20261023`, blocul `_save_toy_palette`, salvat
+dupa cele 11): regenerat, toate cele 55 de fisiere dinainte raman identice
+bit-pentru-bit (verificat cu md5 inainte/dupa, 23 oct 2026) si doua rulari
+consecutive dau aceleasi 4 fisiere.
+
+Cele **16** de fisiere de eveniment adaugate pe 22 oct 2026 (impact in straturi,
+hartaieli, claxon, stinger, hazarde, decor) se genereaza dintr-un sir de zgomot
+**separat** (`rng_ev.seed = 20261022`, blocul `_save_event_sounds`), asa ca
+adaugarea lor n-a mutat niciun bit din cele 28 de dinainte (verificat: dupa
+regenerare, `git status` arata modificate doar cele doua fisiere Gion de mai jos).
+
 Pentru cele doua excepții vezi [Datoria tehnica](#datorie-tehnica-doua-fisiere-nu-se-mai-regenereaza).
 
 ### Inventar
 
 | Fisier | Rol | Sursa | Licenta |
 |---|---|---|---|
-| `engine_loop.wav` | bucla de motor (pitch dupa RPM) | `generate_sfx.gd` | proprietate proiect |
+| `engine_loop.wav` | bucla de motor veche (inlocuita pe masini de `engine_whine`/`engine_whirr`; ramane ca `AudioManager.ENGINE_LOOP`) | `generate_sfx.gd` | proprietate proiect |
+| `engine_whine.wav` | motor de jucarie, stratul tiuit (bucla 0.5 s, 330 Hz; jucator si AI) | `generate_sfx_car.gd` | proprietate proiect |
+| `engine_whirr.wav` | motor de jucarie, stratul zumzet de angrenaje (bucla 0.5 s; doar jucator, sub sarcina) | `generate_sfx_car.gd` | proprietate proiect |
+| `skid_gravel.wav` | sisait de derapaj pe sol afanat (bucla 0.6 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `roll_grass.wav` / `roll_gravel.wav` / `roll_water.wav` | rularea pe iarba / pietris-nisip / apa mica (bucle 1 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `kerb_rattle.wav` | zdranganeala de bordura (bucla 0.4 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `wind_loop.wav` | vant dupa viteza (bucla 1.2 s, doar jucator) | `generate_sfx_car.gd` | proprietate proiect |
+| `turbo_click.wav` / `turbo_release.wav` | clickul la apasarea turbo / sisaitul de la capat | `generate_sfx_car.gd` | proprietate proiect |
+| `turbo_whoosh.wav` | suvoiul turbo cat arde (bucla 0.8 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `impact_clack_a.wav` / `impact_clack_b.wav` | clac de plastic peste impactul intre masini (doua variante, ~0,085 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `rocket_spring.wav` | „zrrrt” de arc tras la GO, doar pe start rocket (~0,66 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `rocket_ratchet.wav` | clichetul cheii cat tii TURBO in numaratoare (~0,32 s) | `generate_sfx_car.gd` | proprietate proiect |
 | `skid_loop.wav` | bucla de derapaj | `generate_sfx.gd` | proprietate proiect |
 | `boost.wav` | turbo | `generate_sfx.gd` | proprietate proiect |
 | `drift_start.wav` / `drift_level.wav` | intrare in drift / prag de bara | `generate_sfx.gd` | proprietate proiect |
@@ -48,6 +80,15 @@ Pentru cele doua excepții vezi [Datoria tehnica](#datorie-tehnica-doua-fisiere-
 | `daruma_toc.wav` / `daruma_slide.wav` | daruma-otoshi (Kyoto) | `generate_sfx.gd` | proprietate proiect |
 | `shishimai_music.wav` / `shishimai_clack.wav` | shishimai (Kyoto) | `generate_sfx.gd` | proprietate proiect |
 | `gion_bayashi.wav` / `gion_wheels.wav` | car Gion Matsuri (Kyoto) | `generate_sfx.gd` | proprietate proiect |
+| `impact_tap_a.wav` / `impact_tap_b.wav` | impact usor, strat tap (doua variante, ~0,1 s) | `generate_sfx.gd` | proprietate proiect |
+| `impact_crunch_a.wav` / `impact_crunch_b.wav` | impact mediu, strat crunch (~0,26 s) | `generate_sfx.gd` | proprietate proiect |
+| `impact_crash_a.wav` / `impact_crash_b.wav` | impact tare, strat crash (~0,55 s) | `generate_sfx.gd` | proprietate proiect |
+| `scrape_loop.wav` / `rub_loop.wav` | bucle de contact: razuire pe perete / frecare intre masini | `generate_sfx.gd` | proprietate proiect |
+| `land_heavy.wav` | strat greu al aterizarii (peste `land.wav`) | `generate_sfx.gd` | proprietate proiect |
+| `toy_horn.wav` | claxon de jucarie al AI-ului (ranchiuna, frecare) | `generate_sfx.gd` | proprietate proiect |
+| `stinger_up.wav` / `stinger_down.wav` | stinger la depasire / la fiind depasit | `generate_sfx.gd` | proprietate proiect |
+| `hazard_barrier_hit.wav` / `hazard_bus_hit.wav` | contact cu bariera glisanta / cu autobuzul | `generate_sfx.gd` | proprietate proiect |
+| `prop_knock_a.wav` / `prop_knock_b.wav` | decor usor lovit (lemn / plastic) | `generate_sfx.gd` | proprietate proiect |
 
 **Muzica: nu exista.** Nici piese, nici ambianta de fundal, nici bus `Music`.
 `AudioManager` are doua bus-uri (`SFX`, `Engine`) si doua slidere in setari

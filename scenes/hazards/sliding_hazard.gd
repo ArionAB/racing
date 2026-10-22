@@ -198,6 +198,9 @@ var model_tri_class: String = ""
 ## coca de lemn si o dunga vopsita, deci ii trebuie maparea per nod — aceeasi
 ## impartire ca la landmark-uri ("tri_class" vs "classes").
 var model_classes: Dictionary = {}
+## Sunetul de contact (feel_checklist: hazards-speak): ghiontul bariere il reda
+## pozitional, la masina lovita. Gol = hazard mut (o pista poate sa-l stinga).
+var contact_sfx: StringName = &"hazard_barrier_hit"
 
 var _time: float = 0.0
 var _pivot: Node3D
@@ -770,6 +773,18 @@ func _shove_cars(delta: float) -> void:
 		fwd.y = 0.0
 		car.apply_sweep(away.normalized() * SWEEP_PUSH
 			+ fwd.normalized() * SWEEP_PUSH * 0.5 + Vector3.UP * 0.8)
+		_speak(car)
+
+
+## Sunetul ghiontului, pozitional la masina. Prin arbore, nu prin identificatorul
+## autoload-ului: hazardul trebuie sa se compileze si in modul `--script`.
+func _speak(car: Car) -> void:
+	if contact_sfx == &"":
+		return
+	var audio := get_node_or_null(^"/root/AudioManager")
+	if audio != null:
+		audio.hazard_contact(contact_sfx, car.global_position + Vector3.UP * 0.5,
+			car.is_player)
 
 
 ## Muta sloturile modelului dupa `WorldProp.SLOT_REMAP_BY_MODEL`, daca stem-ul

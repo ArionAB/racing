@@ -5,6 +5,12 @@ extends Node3D
 ## start, progres/pozitii, rezultate si avansarea campionatului.
 
 const CAR_SCENE: PackedScene = preload("res://scenes/cars/Car.tscn")
+const ImpactFeelScript := preload("res://scenes/race/impact_feel.gd")
+const PositionWatchScript := preload("res://scenes/race/position_watch.gd")
+const HapticsFeedScript := preload("res://scenes/race/haptics_feed.gd")
+const ImpactSoundScript := preload("res://scenes/race/impact_sound.gd")
+const RocketStartAudioScript := preload("res://scenes/race/rocket_start_audio.gd")
+const SpeedLinesScript := preload("res://scenes/ui/speed_lines.gd")
 ## Pilotii sunt stabili intre curse (punctele de campionat raman pe slot).
 const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna", "Kai", "Nyx"]
 ## Lineup-ul AI: masina (index in GameState.CAR_DATA) + culoarea per slot.
@@ -41,6 +47,15 @@ var traffic: Array[Car] = []
 ## doua liste "oficiale" sa nu se amestece cu cealalta.
 var _ai_visible: Array[Car] = []
 var camera: ChaseCamera
+var impact_feel: ImpactFeelScript
+## Anunta pozitiile TINUTE (depasiri) catre popup-ul din HUD; vezi PositionWatch.
+var position_watch: PositionWatchScript
+## Vibratia jucatorului (impacturi, aterizari, turbo); vezi HapticsFeed.
+var haptics: HapticsFeedScript
+## Sunetul de contact (impact in straturi, hartaieli, aterizare); vezi ImpactSound.
+var impact_sound: ImpactSoundScript
+## Clichetul si arcul rocket start-ului (doar jucatorul); vezi RocketStartAudio.
+var rocket_audio: RocketStartAudioScript
 var hud: RaceHUD
 ## „Parbrizul ud" (Fiordland, brief pasul 4): picaturi pe ecran cand jucatorul
 ## e in perdeaua Stirling sau in ploaie. Null pe piste fara niciun
@@ -165,7 +180,12 @@ func _setup_race() -> void:
 		var tuner := CameraTuner.new()
 		tuner.camera = camera
 		add_child(tuner)
-	add_child(Vignette.new())
+	var vignette := Vignette.new()
+	add_child(vignette)
+	# Linii de viteza pe margini: ascunse (cost zero) sub ~70% din viteza maxima.
+	var speed_lines := SpeedLinesScript.new()
+	speed_lines.target = player
+	add_child(speed_lines)
 	hud = RaceHUD.new()
 	add_child(hud)
 	hud.restart_requested.connect(GameState.start_race)
@@ -179,8 +199,29 @@ func _setup_race() -> void:
 	_setup_challenge()
 	hud.show_countdown("READY?")
 	_setup_windshield_wipers()
+	# Reactia la izbituri (kick directional, hit-stop, cine a lovit pe cine):
+	# vezi ImpactFeel. Zgomotul de mai jos ramane doar ca fond.
+	impact_feel = ImpactFeelScript.new()
+	impact_feel.racing = func() -> bool: return state == State.RUNNING
+	add_child(impact_feel)
+	impact_feel.setup(player, cars, camera, vignette)
+	position_watch = PositionWatchScript.new()
+	add_child(position_watch)
+	position_watch.announced.connect(hud.show_position_change)
+	position_watch.announced.connect(AudioManager.play_stinger)
+	haptics = HapticsFeedScript.new()
+	haptics.racing = func() -> bool: return state == State.RUNNING
+	add_child(haptics)
+	haptics.setup(player)
+	# Sunetul impacturilor, hartaielilor si aterizarilor; vezi ImpactSound.
+	impact_sound = ImpactSoundScript.new()
+	impact_sound.racing = func() -> bool: return state == State.RUNNING
+	add_child(impact_sound)
+	impact_sound.setup(player, cars)
+	rocket_audio = RocketStartAudioScript.new()
+	add_child(rocket_audio)
 	player.wall_hit.connect(func(_c: Car, impact: float) -> void:
-		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5)))
+		camera.add_trauma(clampf(impact / 45.0, 0.15, 0.5) * 0.65))
 	player.landed.connect(func(_c: Car, fall: float) -> void:
 		camera.add_trauma(clampf(fall / 30.0, 0.1, 0.35)))
 	player.boost_started.connect(func(_c: Car) -> void:
@@ -200,15 +241,9 @@ func _setup_race() -> void:
 	# FumaroleHazard).
 	player.blinded.connect(func(_c: Car, seconds: float) -> void:
 		hud.blind_flash(seconds))
-	# Imbranceala se SIMTE proportional cu cat ai incasat: un autobuz care te ia
-	# din spate zguduie ecranul, o atingere lateral aproape deloc.
-	#
-	# Shake-ul e trauma^2, deci sub ~0.4 practic nu se vede (vezi nota de la
-	# `splashed`). Plafonul vechi era chiar 0.35 — izbiturile se simteau doar
-	# pe hartie (#500). Acum o atingere la prag (2.5 m/s) da ~0.23 (abia), o
-	# izbitura plina (15 m/s, plafonul de violenta) da 0.6.
-	player.bumped.connect(func(_c: Car, _other: Car, delta_v: float) -> void:
-		camera.add_trauma(clampf(0.12 + delta_v / 22.0, 0.12, 0.6)))
+	# Imbranceala intre masini (kick + zgomot + hit-stop, scalate dupa cine a
+	# lovit) o da ImpactFeel, pe semnalul `impact` — vezi mai sus. Inainte,
+	# aici era doar zgomot proportional cu delta-v (#500).
 	# Repunerea teleporteaza masina: camera trebuie sa sara cu ea, altfel
 	# urmareste cateva cadre un punct de la 100m.
 	player.respawned.connect(func(_c: Car) -> void:
@@ -356,6 +391,10 @@ func _physics_process(delta: float) -> void:
 		_tick_countdown(delta)
 	else:
 		_tick_race(delta)
+	# Si in numaratoare/dupa final: `active == false` reseteaza referinta, deci
+	# popup-ul de depasire nu apare cand clasamentul nu inseamna inca/mai nimic.
+	position_watch.observe(player.race_position, delta,
+		state == State.RUNNING and not player.finished)
 	_update_hud()
 
 # -------------------------------------------------------------- countdown
@@ -368,6 +407,8 @@ func _tick_countdown(delta: float) -> void:
 			_drift_hold[car] = float(_drift_hold.get(car, 0.0)) + delta
 		else:
 			_drift_hold[car] = 0.0
+	if rocket_audio != null and player != null:
+		rocket_audio.tick(delta, float(_drift_hold.get(player, 0.0)))
 	if _countdown_left > 3.0:
 		return
 	if _countdown_left > 0.0:
@@ -398,10 +439,11 @@ func _go() -> void:
 		if car == player:
 			if not player.turbo_recharge:
 				player.turbo_charge = 1.0
-			if hold > 0.05 and hold <= 1.05:
+			if hold > rocket_audio.min_hold_s and hold <= rocket_audio.window_s:
 				car.force_boost(1.2)
 				hud.flash_message("ROCKET START!")
-			elif hold > 1.05:
+				rocket_audio.on_go(true)
+			elif hold > rocket_audio.window_s:
 				hud.flash_message("Too early...")
 				car.hold_turbo_until_release()
 		elif _rng.randf() < 0.45:
@@ -737,6 +779,9 @@ func _setup_ghost() -> void:
 
 func _finish_race() -> void:
 	state = State.FINISHED
+	impact_feel.cancel_hit_stop()
+	position_watch.reset(0)
+	hud.position_popup.hide_now()
 	_player_race_ms = _clock_ms()
 	if _ghost_recorder != null:
 		_ghost_recorder.stop()

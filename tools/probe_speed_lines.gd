@@ -83,6 +83,45 @@ func _ready() -> void:
 	_check(not _car.is_boosting and not _lines.visible,
 		"dupa turbo: ascunse din nou (cost zero)")
 
+	# Aspiratia: o masina din fata, ambele la 55% din viteza maxima (sub pragul
+	# liniilor, 70%): draft real -> liniile apar cu podeaua de draft, si se sting
+	# cand liderul dispare.
+	var lead := Car.new()
+	add_child(lead)
+	lead.global_position = Vector3(0, 0.7, -8)
+	lead.race_active = true
+	_car.global_position = Vector3(0, 0.7, 0)
+	_car.linear_velocity = Vector3.ZERO
+	for _i in 60:
+		await get_tree().physics_frame # asezare pe roti inainte de zbor
+	var peak := 0.0
+	var draft_seen := 0.0
+	for _i in 90:
+		# Doar orizontal: y ramane al fizicii, altfel masinile plutesc.
+		_car.linear_velocity = Vector3(0, _car.linear_velocity.y, -0.55 * _car.max_speed)
+		lead.linear_velocity = Vector3(0, lead.linear_velocity.y, -0.55 * lead.max_speed)
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		peak = maxf(peak, _lines.intensity())
+		draft_seen = maxf(draft_seen, _car.draft)
+	print("  aspiratie la 55%% viteza: draft %.2f, intensitate %.2f, vizibil=%s"
+		% [draft_seen, _lines.intensity(), str(_lines.visible)])
+	_check(draft_seen > 0.9, "masina real in aspiratie (draft > 0.9)")
+	_check(_lines.visible and _lines.intensity() >= _lines.draft_floor * 0.9 - 0.02,
+		"aspiratie: liniile apar cu podeaua de draft chiar sub pragul de viteza")
+	_check(_lines.intensity() < _lines.turbo_floor - 0.2, "podeaua de draft e sub cea de turbo")
+	# Fara aspiratie, la aceeasi viteza: ascunse (curba statica, fara scena).
+	_check(SpeedLinesScript.intensity_for(0.55, false) == 0.0, "fara draft la 55%: zero")
+	_check(SpeedLinesScript.intensity_for(0.55, false, 0.7, 1.0, 0.8, 0.2) == 0.0,
+		"sub pragul de draft (0.2 < 0.3): zero")
+	lead.queue_free()
+	_car.linear_velocity = Vector3(0, 0, -0.3 * _car.max_speed)
+	for _i in 120:
+		_car.linear_velocity = Vector3(0, 0, -0.3 * _car.max_speed)
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	_check(not _lines.visible, "dupa aspiratie: ascunse din nou")
+
 	# Fara masina: ascuns.
 	_lines.target = null
 	await get_tree().process_frame

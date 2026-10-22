@@ -52,7 +52,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* No rolling sounds. Kerbs are visual only. The stone steps already push noise into the springs, so the mechanism exists.
 - [ ] **Sense of speed** `sense-of-speed` · Partial  
   Wider field of view, camera pulling back, wind noise rising with speed, trackside objects near the road streaming past.  
-  *Today:* FOV and pull-back are in. No wind sound, no speed lines.
+  *Today:* FOV and pull-back are in, plus edge speed lines from 70% of max speed and during turbo (`SpeedLines`, hidden = zero cost below the threshold). Still missing: wind noise that rises with speed (audio), trackside streaming.
 - [ ] **Turbo as a three-part event** `turbo-event` · Partial  
   A click on press, an immediate kick with the camera lagging a beat behind, a sustained whoosh, and a release hiss when it ends.  
   *Today:* One-shot at the start plus flame and a pitch bump. No sustain, no release.

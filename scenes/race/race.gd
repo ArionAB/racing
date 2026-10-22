@@ -6,6 +6,7 @@ extends Node3D
 
 const CAR_SCENE: PackedScene = preload("res://scenes/cars/Car.tscn")
 const ImpactFeelScript := preload("res://scenes/race/impact_feel.gd")
+const SpeedLinesScript := preload("res://scenes/ui/speed_lines.gd")
 ## Pilotii sunt stabili intre curse (punctele de campionat raman pe slot).
 const PILOTS: Array[String] = ["Tu", "Robo", "Vex", "Luna", "Kai", "Nyx"]
 ## Lineup-ul AI: masina (index in GameState.CAR_DATA) + culoarea per slot.
@@ -169,6 +170,10 @@ func _setup_race() -> void:
 		add_child(tuner)
 	var vignette := Vignette.new()
 	add_child(vignette)
+	# Linii de viteza pe margini: ascunse (cost zero) sub ~70% din viteza maxima.
+	var speed_lines := SpeedLinesScript.new()
+	speed_lines.target = player
+	add_child(speed_lines)
 	hud = RaceHUD.new()
 	add_child(hud)
 	hud.restart_requested.connect(GameState.start_race)

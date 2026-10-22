@@ -197,6 +197,8 @@ const CLIFF_STUCK_SECONDS: float = 3.5
 const CLIFF_FRACS: Array[float] = [0.12, 0.31, 0.44, 0.58, 0.73, 0.91]
 
 var _mode: String = "race"
+## Exporturi de masina suprascrise din linia de comanda (`--car-set=`).
+var _car_set: Dictionary = {}
 var _track_index: int = 0
 var _seconds: float = 150.0
 ## `--rain=1`: fortata ploaia peste orice `RainCycle` de pe pista, prin
@@ -392,6 +394,12 @@ func _ready() -> void:
 			_track_index = int(arg.trim_prefix("--track="))
 		elif arg.begins_with("--seconds="):
 			_seconds = float(arg.trim_prefix("--seconds="))
+		elif arg.begins_with("--car-set="):
+			# `--car-set=prop=valoare`: suprascrie un export al TUTUROR masinilor
+			# (A/B in acelasi build, ex. `--car-set=steer_taper_at_top=1.0`).
+			var kv := arg.trim_prefix("--car-set=").split("=")
+			if kv.size() == 2:
+				_car_set[kv[0]] = float(kv[1])
 		elif arg.begins_with("--seed="):
 			_seed = int(arg.trim_prefix("--seed="))
 		elif arg.begins_with("--car="):
@@ -519,6 +527,8 @@ func _start_race() -> void:
 	var cars: Array[Car] = _race.cars
 	for i in cars.size():
 		var car := cars[i]
+		for k: String in _car_set:
+			car.set(k, _car_set[k])
 		if car == player:
 			var ai := AIController.new()
 			car.set_controller(ai)

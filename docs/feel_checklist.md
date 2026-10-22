@@ -62,9 +62,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **Jumps with a skill component** `jump-skill` · Partial  
   Lip stretch on takeoff, a little air control so gas and brake level the nose, then a landing thud scaled by fall speed, a dust puff, squash and a camera dip.  
   *Today:* Stretch, squash, sound and shake are in. No air control, no landing dust, fixed-level thud.
-- [ ] **Steering that tightens with speed** `steering-speed` · Missing · ⭐  
+- [x] **Steering that tightens with speed** `steering-speed` · Have  
   Less steering lock at high speed so the car never feels twitchy, snappy lock at low speed, and a short smoothing on input so a button tap does not jerk.  
-  *Today:* Yaw is written straight from the input with no smoothing. Matters a lot on button-only touch.
+  *Today:* Lock tapers linearly from full at 50% of max speed to 65% at max (`steer_taper_at_top`), drift exempt. `PlayerController` smooths digital steering: 0.10 s in, 0.06 s out, instant through zero on reversal. Guard: `ProbeSteerSpeed`.
 - [ ] **A driver who reacts to the road** `driver-reacts` · Partial  
   A flinch on impacts, a head turn into the corner, arms that shake on kerbs.  
   *Today:* Torso and head lean with cornering and braking forces. No impact or kerb reaction.

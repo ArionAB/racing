@@ -82,6 +82,15 @@ signal impact(car: Car, kind: StringName, strength: float, normal: Vector3,
 @export_group("Directie")
 @export var steer_speed: float = 1.9
 @export var grip: float = 8.0
+## Cat din unghiul de volan ramane la viteza maxima (1.0 = fara strangere).
+## La viteza mica ai volan plin; de la `steer_taper_start` in sus unghiul scade
+## liniar pana la valoarea asta la max_speed, ca masina sa nu devina nervoasa
+## pe drepte (feel_checklist: steering-speed). DRIFT-ul e scutit: termenul se
+## amesteca spre 1.0 cu `_drift_amount()`, deci frana de mana ramane unealta
+## de viraj stransa la orice viteza.
+@export_range(0.3, 1.0, 0.01) var steer_taper_at_top: float = 0.65
+## De la ce fractie din max_speed incepe strangerea (sub ea: volan plin).
+@export_range(0.0, 1.0, 0.01) var steer_taper_start: float = 0.5
 
 @export_group("Drift (handbrake)")
 @export var drift_grip: float = 2.0
@@ -1001,11 +1010,21 @@ func _apply_driving(steer: float, throttle: float,
 		effective_steer += (drift_steer - steer) \
 			* lerpf(1.0, drift_yaw_at_top, drift_t) * drift_amt
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
-	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign
+	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign \
+		* _steer_taper(fwd_speed, drift_amt)
 	# Comanda + rotatia ramasa din lovituri (se stinge singura, plafonata).
 	var kick := _yaw_kick if _yaw_kick_left > 0.0 else 0.0
 	angular_velocity = Vector3(
 		angular_velocity.x, yaw_rate + _impact_yaw + kick, angular_velocity.z)
+
+
+## Strangerea virajului cu viteza: 1.0 sub `steer_taper_start` din max_speed,
+## coboara liniar la `steer_taper_at_top` la max_speed (si ramane acolo cu
+## turbo). Scutita in drift: se amesteca spre 1.0 cu dozajul driftului.
+func _steer_taper(fwd_speed: float, drift_amt: float) -> float:
+	var start := max_speed * steer_taper_start
+	var t := clampf(inverse_lerp(start, max_speed, absf(fwd_speed)), 0.0, 1.0)
+	return lerpf(lerpf(1.0, steer_taper_at_top, t), 1.0, drift_amt)
 
 
 ## Bilantul contactelor raportate de solver: izbituri cu alte masini (plafon,

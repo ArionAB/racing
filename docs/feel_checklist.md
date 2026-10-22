@@ -61,7 +61,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Entry and exit ramps feel good. Smoke density, opacity and size and the skid-mark opacity now scale with the slide angle and speed, and marks are also left on big slides without the handbrake and on hard braking. Still missing: the squeal that tracks slip (see `slip-squeal`).
 - [ ] **Jumps with a skill component** `jump-skill` · Partial  
   Lip stretch on takeoff, a little air control so gas and brake level the nose, then a landing thud scaled by fall speed, a dust puff, squash and a camera dip.  
-  *Today:* Stretch, squash, sound and shake are in, and a landing dust burst (surface-tinted, scaled by fall speed) is in. Still missing: air control and the fall-scaled thud.
+  *Today:* Stretch, squash, sound and shake are in, and a landing dust burst (surface-tinted, scaled by fall speed) is in. The landing thud now scales with fall speed (`AudioManager.plan_land`, player only): `land.wav` from 6 m/s at -16 to -2 dB with pitch 1.25 to 0.85, plus a `land_heavy` layer fading in between 9 and 16 m/s (guard `ProbeLandThud`). Still missing: air control (physics), so the item stays open.
 - [x] **Steering that tightens with speed** `steering-speed` · Have  
   Less steering lock at high speed so the car never feels twitchy, snappy lock at low speed, and a short smoothing on input so a button tap does not jerk.  
   *Today:* Lock tapers linearly from full at 50% of max speed to 65% at max (`steer_taper_at_top`), drift exempt. `PlayerController` smooths digital steering: 0.10 s in, 0.06 s out, instant through zero on reversal. Guard: `ProbeSteerSpeed`.
@@ -85,19 +85,19 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Wall hits within 30 degrees of the wall plane (`glance_angle_deg`) cut car friction to `glance_friction` and nudge the nose toward parallel through `_impact_yaw`; head-on keeps the stop-with-bounce. A nose pinned at low speed for 0.4 s is shoved away. Moving hazards (AnimatableBody3D) are skipped. Guard: `ProbeWallGlance`.
 - [ ] **Scrape loop and sparks** `scrape-sparks` · Missing · ⭐  
   While sliding along a wall: a continuous grind whose pitch follows speed, sparks from the contact point, a slight pull on the steering.  
-  *Today:* Sparks are in: a continuous `ScrapeSparks` emitter at the wall contact point above 4 m/s (rate follows scrape speed) and a burst on wall impacts above 6 m/s. Still missing: the grind loop sound and the slight pull on the steering. Still just the single one-shot clunk.
-- [ ] **Impact sound in layers** `impact-layers` · Partial · ⭐  
+  *Today:* Sparks are in: a continuous `ScrapeSparks` emitter at the wall contact point above 4 m/s (rate follows scrape speed) and a burst on wall impacts above 6 m/s. The grind loop is in too (`scrape_loop.wav`, player only, driven by `ImpactSound`): above 2 m/s of `wall_scrape_speed`, volume -24 to -7 dB and pitch 0.75 to 1.45 follow the speed, 40 ms in and 100 ms out with a 60 ms hold so contact flicker never stutters it (guard `ProbeScrapeLoop`). Still missing: the slight pull on the steering (physics).
+- [x] **Impact sound in layers** `impact-layers` · Have · ⭐  
   Soft tap, crunch, big crash chosen by speed difference, with random pitch so repeats never sound like a machine gun.  
-  *Today:* Car-on-car already layers two sounds by speed. The wall hit is one fixed-level sound.
+  *Today:* Done: `ImpactSound` (one node in `Race`) turns every `Car.impact` into a plan from `AudioManager.plan_impact`. One monotonic master volume (-17 dB at the 2.5 m/s feed threshold to -1 dB at 22 m/s) is split by equal-power weights between tap, crunch and crash, two variants each with no immediate repeat, pitch dropping with strength and jittered; a body layer on top (`wall_hit` on walls, `bump` plus `metal_hit` between cars). Nothing plays below the threshold. The fixed `wall_hit` and the `bump`/`metal_hit` calls are gone from `Car`; a car-car hit arrives from both cars and is merged into one set of sounds per tick. Guard: `ProbeImpactSound`.
 - [x] **Directional camera kick and hit-stop** `hitstop-shake` · Have  
   Shake in the direction of the hit rather than randomly, plus a freeze of a few frames on big hits so the brain registers the weight. The cheapest weight trick in games.  
   *Today:* `ImpactFeel` kicks the chase cam along the hit normal (spring, settles in ~0.2 s, small roll) and freezes the world 40-90 ms on player impacts of 9 m/s or more (`HitStop`, real-time restore, cooldown 0.6 s, no freeze in countdown). No screen-shake setting exists, so nothing to follow.
 - [x] **Body jolt on the visual body** `body-jolt` · Have  
   Nudge the mesh, not the physics body, in the hit direction and let it spring back. The physics stays safe and the car looks like it took the hit.  
   *Today:* Done: on the car's own `impact` the visual body moves up to 8 cm along the normal and tilts up to 5.5 degrees away, on an exact underdamped spring (back to rest in about 0.35 s). One compose step now writes the visual transform (drift roll, spin, jolt, rub lean); squash keeps owning scale. Tunables `jolt_*` on `Car`.
-- [ ] **Things that fly** `things-fly` · Partial  
+- [x] **Things that fly** `things-fly` · Have  
   Cones, cups, blocks, signs that scatter with a sound and a few debris chunks. The tax for hitting things should be low where you want chaos.  
-  *Today:* Small decor flies and now throws debris chunks and a dust puff scaled by hit speed from one pooled manager (`PropDebris`, 64 particles total, one burst per frame max); the hand-placed `Barrel` is knockable too (the GLB barrels already were). Still missing: the sound.
+  *Today:* Small decor flies and now throws debris chunks and a dust puff scaled by hit speed from one pooled manager (`PropDebris`, 64 particles total, one burst per frame max); the hand-placed `Barrel` is knockable too (the GLB barrels already were). Each burst now also knocks (`prop_knock_a`/`_b`, wood and plastic, `AudioManager.prop_knock`): positional at the prop through the 3D pool at priority 0 (it never steals a player or hazard sound), -24 to -9 dB and pitch 1.2 to 0.88 with the hit, at most one per 0.12 s, nothing beyond 40 m from the camera. Guard: `ProbePropKnock`.
 - [x] **Soft hazards** `soft-hazards` · Have  
   Bushes that slow you with a leaf burst, puddles and sand that spray.  
   *Today:* Done: water and sand were in; now driving through bushes, ferns, sage and grass tufts (vegetation chunks without collision, read by `SoftVegetation`) throws a leaf burst and brakes mildly (`Car.bush_drag`, 6 m/s^2 at the centre of a bush, 0 turns it off). Dense grass carpet is excluded on purpose.
@@ -110,9 +110,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **A price in the turbo bar** `turbo-price` · Optional  
   A hard wall hit drains some charge, turning the turbo into a risk meter that rewards clean driving.  
   *Today:* None.
-- [ ] **Every moving hazard speaks** `hazards-speak` · Partial  
+- [x] **Every moving hazard speaks** `hazards-speak` · Have  
   Each moving hazard gets its own contact sound and shake.  
-  *Today:* Train and avalanche crush, shake and sound. The sliding barrier and the bus (moving kinematic bodies) now reach the camera through the contact feed: a clear kick from the side that shoved you (80% of a full kick, no hit-stop) and an edge flash. Still silent: the contact sound for each hazard (audio).
+  *Today:* Done. Train and avalanche crush, shake and sound. The sliding barrier and the bus (moving kinematic bodies) reach the camera through the contact feed: a clear kick from the side that shoved you (80% of a full kick, no hit-stop) and an edge flash. Each now also speaks from the shove itself, positional at the car through the 3D pool: `SlidingHazard.contact_sfx` (default `hazard_barrier_hit`, a hollow plastic bonk, shared by every motion of that class; a track can set another name or `&""` for silence) and `BusHazard.contact_sfx` (`hazard_bus_hit`, a low thump with a panel ring and a short squeak). Player at -5 dB, an AI car 8 dB quieter, one sound per 0.12 s overall, nothing beyond 60 m from the camera. Guard: `ProbeHazardSound`.
 - [ ] **World reactions** `world-reactions` · Optional  
   Birds flushing, a sign wobbling, dust dropping in caves. Character, not mechanics, and cheap.  
   *Today:* None.
@@ -122,33 +122,33 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Readable mass** `readable-mass` · Have  
   Heavy shoves light, with a visible yaw kick and sideways displacement, capped so nobody goes into orbit.  
   *Today:* Done well: mass ratio from the solver, a clamped yaw kick, a brief loss of grip.
-- [ ] **Side-by-side rubbing** `side-rubbing` · Partial  
+- [x] **Side-by-side rubbing** `side-rubbing` · Have  
   Sustained contact needs the scrape loop, continuous sparks, both bodies leaning away, and a steady push apart so cars do not weld.  
-  *Today:* The push apart exists. Continuous sparks at the rub point above 2 m/s relative speed (one car of the pair emits) and both bodies lean about 3 degrees away are in. Still missing: the scrape loop sound.
+  *Today:* Done. The push apart exists. Continuous sparks at the rub point above 2 m/s relative speed (one car of the pair emits) and both bodies lean about 3 degrees away are in. A softer plastic-on-plastic rub loop (`rub_loop.wav`, player only) runs above 1.5 m/s of relative tangential speed, -26 to -10 dB with pitch 0.8 to 1.3 following `rub_speed`, same fades as the wall grind. Guard `ProbeScrapeLoop`.
 - [x] **Corner hits spin, straight hits shove** `corner-hits` · Have  
   Clipping a rear corner rotates the leading car more than a square push. Being rear-ended wobbles you without stopping you.  
   *Today:* Mostly emergent from the physics.
 - [ ] **Spin-out assist** `spinout-assist` · Missing  
   Once a car is turned past sideways, a gentle auto-straighten so the player is back on line in a second instead of facing the wrong way. Arcade standard.  
   *Today:* None.
-- [ ] **You know who hit you** `who-hit-me` · Missing  
+- [x] **You know who hit you** `who-hit-me` · Have  
   A camera kick from the hit side, a positional impact sound from the other car, a horn from the AI.  
-  *Today:* Camera kick comes from the hit side and the screen edge on that side flashes briefly (`Vignette.flash_edge`). Still missing: positional impact sound from the other car and the AI horn (audio).
+  *Today:* Done. Camera kick comes from the hit side and the screen edge on that side flashes briefly (`Vignette.flash_edge`). For a car-car hit that involves the player, `ImpactSound` keeps the body (`bump`, `metal_hit`) as a 2D punch and plays the main layer (tap, crunch or crash) from one of four pooled `AudioStreamPlayer3D` nodes owned by `AudioManager`, at the contact point pushed `positional_spread_m` (3 m) toward the other car so the side is audible from the chase cam. The AI sounds a toy horn (`toy_horn.wav`, own tone per car, 3 s per-car and 0.4 s global cooldown, only within 55 m of the camera) when it starts a grudge, and now and then (`rub_honk_chance` 0.5, once per episode) after the player has rubbed it for 0.6 s. Guards: `ProbePositionalHits`, `ProbeHorn`.
 - [x] **Driver reactions to the other car** `driver-social` · Have  
   A fist shake at the offender, a head whip, a glance at the car alongside.  
   *Today:* Done (open-cockpit drivers): the head turns toward a car alongside (within 4 m laterally or rubbing), the flinch whips the head on a hit, and after being hit by another car the arm on that side shakes a fist for under a second while the head turns to the offender. The car that did the hitting does not shake a fist, and walls do not trigger it.
-- [ ] **Hits between AI cars near you** `ai-ai-hits` · Missing  
+- [x] **Hits between AI cars near you** `ai-ai-hits` · Have  
   Positional and quieter, so the pack sounds alive.  
-  *Today:* Silent.
-- [ ] **Position-change feedback** `position-change` · Missing  
+  *Today:* Done. A hit between two cars that are not the player sounds only within `ai_range_m` (35 m) of the camera and from 3.5 m/s, 8 dB quieter than the same hit with the player, positional (main layer only, no body), at most one per 0.12 s overall and 0.15 s per pair. It uses priority 1 in the 3D pool of four, so it never steals a player or hazard sound. Guard: `ProbePositionalHits`.
+- [x] **Position-change feedback** `position-change` · Have  
   A short stinger and a HUD popup when you overtake or are overtaken.  
-  *Today:* The HUD popup is in (`PositionWatch` + `PositionPopup`): "P3" with a green up or red down triangle after a position is held 0.4 s, coalesced, none in countdown or after the finish. Still missing: the stinger (audio); hook it on `PositionWatch.announced`.
+  *Today:* Done. The HUD popup is in (`PositionWatch` + `PositionPopup`): "P3" with a green up or red down triangle after a position is held 0.4 s, coalesced, none in countdown or after the finish. The stinger rides the same `PositionWatch.announced` signal (`AudioManager.play_stinger`): a three-note rising arpeggio (`stinger_up.wav`, 0.37 s) for a better position, a two-note falling slide (`stinger_down.wav`, 0.38 s) for a worse one, 2D at -8 dB, exact pitch. Guard: `ProbeStinger`.
 - [ ] **Slipstream** `slipstream` · Missing  
   A small speed gain when following closely, with wind lines and a sound. Rewards closeness without contact and makes running in the pack tactical.  
   *Today:* None.
-- [ ] **AI that reacts** `ai-reacts` · Missing  
+- [x] **AI that reacts** `ai-reacts` · Have  
   A wobble when hit, a counter-steer, a momentary grudge against whoever hit it, horns.  
-  *Today:* Wobble, counter-steer and grudge are in (`AIController`, `reacts` toggle, tunables `wobble_*` and `grudge_*`): a car hit by another car at 4 m/s or more gets a decaying steering term (faded in between 8 and 18 m/s, so hairpins are untouched), its first lobe against the yaw the hit imparted, and for 4 s it tries to sit alongside the car that hit it (one lane over, only while that car is within 28 m ahead). Steering and target line only, no speed or grip change. Still missing: the horns (audio).
+  *Today:* Done. Wobble, counter-steer and grudge are in (`AIController`, `reacts` toggle, tunables `wobble_*` and `grudge_*`): a car hit by another car at 4 m/s or more gets a decaying steering term (faded in between 8 and 18 m/s, so hairpins are untouched), its first lobe against the yaw the hit imparted, and for 4 s it tries to sit alongside the car that hit it (one lane over, only while that car is within 28 m ahead). Steering and target line only, no speed or grip change. The car that starts a grudge also sounds a toy horn (see `who-hit-me`, guard `ProbeHorn`).
 - [x] **Player's hits big, AI's hits small** `player-big-ai-small` · Have  
   Hit-stop and shake make your own bumps feel powerful. AI-initiated contact on you stays capped and telegraphed so bumping reads as a mechanic, not punishment.  
   *Today:* Impulses are capped, and the camera feedback is asymmetric: the attacker is decided from both cars' pre-impact speeds along the contact line. Player attacker (or equal head-on) gets full kick and hit-stop; an AI hitting you gets a capped kick (0.4 m) and no hit-stop.

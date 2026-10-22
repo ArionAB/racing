@@ -143,6 +143,12 @@ func _burst(body: RigidBody3D, dv: float) -> void:
 	bursts += 1
 	last_strength = dv
 	var k := clampf(inverse_lerp(MIN_DV, FULL_DV, dv), 0.0, 1.0)
+	# Sunetul (feel_checklist: things-fly): un „tac" usor la locul loviturii, cu
+	# pauza proprie in AudioManager. Prin arbore: scriptul se compileaza si in
+	# modul `--script`, unde identificatorul autoload-ului nu exista.
+	var audio := get_node_or_null(^"/root/AudioManager")
+	if audio != null:
+		audio.prop_knock(body.global_position, k)
 	var slot: Dictionary = _slots[_next_slot]
 	_next_slot = (_next_slot + 1) % SLOTS
 	# O piesa grea scoate aschii mai mari decat un stalp subtire.

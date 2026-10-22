@@ -2040,6 +2040,12 @@ func _process_hit(hit: Array) -> void:
 		grudge_car = other
 		grudge_left = grudge_s
 		grudge_count += 1
+		# Claxonul de jucarie al celui pagubit (pozitional; pauza o tine AudioManager).
+		# Prin arbore, nu prin identificatorul autoload-ului: scriptul trebuie sa se
+		# compileze si in modul `--script` (vezi hazardele).
+		var audio := get_node_or_null(^"/root/AudioManager")
+		if audio != null:
+			audio.honk(car.get_instance_id(), car.global_position)
 
 
 ## Linia de ranchiuna: ne asaza langa atacator, la `grudge_gap_m` intre axe, pe

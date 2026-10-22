@@ -15,11 +15,11 @@ scrii un nume.
 
 **Zero assets audio externe. Zero obligatii de licenta.**
 
-Toate cele **39** de fisiere din `assets/audio/` sunt sintetizate procedural
-(WAV mono 22050 Hz / 16-bit): cele 28 vechi de `tools/generate_sfx.gd`, cele 11 ale
-vocilor continue de masina (motor, derapaj, suprafete, turbo, vant) de
-`tools/generate_sfx_car.gd` — cod scris in cadrul proiectului, deci drepturile sunt
-ale noastre. Nu exista nicio inregistrare
+Toate cele **55** de fisiere din `assets/audio/` sunt sintetizate procedural
+(WAV mono 22050 Hz / 16-bit): cele 28 vechi si cele 16 de eveniment de
+`tools/generate_sfx.gd`, cele 11 ale vocilor continue de masina (motor, derapaj,
+suprafete, turbo, vant) de `tools/generate_sfx_car.gd` — cod scris in cadrul
+proiectului, deci drepturile sunt ale noastre. Nu exista nicio inregistrare
 descarcata, niciun sample de biblioteca, nimic generat de AI.
 
 Verificat prin regenerare in worktree curat (14 oct 2026): 26 din 28 de fisiere
@@ -30,6 +30,12 @@ acelasi rezultat — generatorul e determinist (`rng.seed = 20260718`).
 vechi: rulat peste cele 28, hash-urile lor raman neschimbate (verificat 22 oct 2026),
 iar cele 11 noi ies identice la doua rulari consecutive. Fisier separat tocmai ca sa
 nu mute zgomotul generatorului vechi (un singur `rng` semanat o data).
+
+Cele **16** de fisiere de eveniment adaugate pe 22 oct 2026 (impact in straturi,
+hartaieli, claxon, stinger, hazarde, decor) se genereaza dintr-un sir de zgomot
+**separat** (`rng_ev.seed = 20261022`, blocul `_save_event_sounds`), asa ca
+adaugarea lor n-a mutat niciun bit din cele 28 de dinainte (verificat: dupa
+regenerare, `git status` arata modificate doar cele doua fisiere Gion de mai jos).
 
 Pentru cele doua excepții vezi [Datoria tehnica](#datorie-tehnica-doua-fisiere-nu-se-mai-regenereaza).
 
@@ -63,6 +69,15 @@ Pentru cele doua excepții vezi [Datoria tehnica](#datorie-tehnica-doua-fisiere-
 | `daruma_toc.wav` / `daruma_slide.wav` | daruma-otoshi (Kyoto) | `generate_sfx.gd` | proprietate proiect |
 | `shishimai_music.wav` / `shishimai_clack.wav` | shishimai (Kyoto) | `generate_sfx.gd` | proprietate proiect |
 | `gion_bayashi.wav` / `gion_wheels.wav` | car Gion Matsuri (Kyoto) | `generate_sfx.gd` | proprietate proiect |
+| `impact_tap_a.wav` / `impact_tap_b.wav` | impact usor, strat tap (doua variante, ~0,1 s) | `generate_sfx.gd` | proprietate proiect |
+| `impact_crunch_a.wav` / `impact_crunch_b.wav` | impact mediu, strat crunch (~0,26 s) | `generate_sfx.gd` | proprietate proiect |
+| `impact_crash_a.wav` / `impact_crash_b.wav` | impact tare, strat crash (~0,55 s) | `generate_sfx.gd` | proprietate proiect |
+| `scrape_loop.wav` / `rub_loop.wav` | bucle de contact: razuire pe perete / frecare intre masini | `generate_sfx.gd` | proprietate proiect |
+| `land_heavy.wav` | strat greu al aterizarii (peste `land.wav`) | `generate_sfx.gd` | proprietate proiect |
+| `toy_horn.wav` | claxon de jucarie al AI-ului (ranchiuna, frecare) | `generate_sfx.gd` | proprietate proiect |
+| `stinger_up.wav` / `stinger_down.wav` | stinger la depasire / la fiind depasit | `generate_sfx.gd` | proprietate proiect |
+| `hazard_barrier_hit.wav` / `hazard_bus_hit.wav` | contact cu bariera glisanta / cu autobuzul | `generate_sfx.gd` | proprietate proiect |
+| `prop_knock_a.wav` / `prop_knock_b.wav` | decor usor lovit (lemn / plastic) | `generate_sfx.gd` | proprietate proiect |
 
 **Muzica: nu exista.** Nici piese, nici ambianta de fundal, nici bus `Music`.
 `AudioManager` are doua bus-uri (`SFX`, `Engine`) si doua slidere in setari

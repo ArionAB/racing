@@ -47,9 +47,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Tire squeal that tracks slip** `slip-squeal` · Have · ⭐  
   Volume and pitch follow how much the tires actually slide, so a light slide whispers and a full drift screams. Off asphalt it turns into gravel hiss.  
   *Today:* `CarAudio` drives the loop from the real slide (lateral slip speed 2-13 m/s and slip angle 6-40 degrees), not from the handbrake flag: about -30 dB at 8 degrees, -8 dB at 40, pitch 0.85 to 1.4. Hard braking above 12 m/s^2 squeals too. On loose ground (`_on_loose_ground`) it crossfades to a gravel hiss (`skid_gravel`). AI cars do the same, 4 dB quieter. Guarded by `ProbeSlipSqueal`.
-- [ ] **Surfaces that talk** `surface-voice` · Missing · ⭐  
+- [ ] **Surfaces that talk** `surface-voice` · Partial · ⭐  
   Grass rumble, gravel hiss, puddle spray, and kerbs that tick through the suspension, the sound and the camera as you ride them.  
-  *Today:* Sound half done, `CarAudio` (player only): rolling loops for grass, gravel or sand (also a dirt road) and shallow water, crossfaded by surface and scaled by speed (grass or sand off the road is told apart by the theme's ground tint). A plastic kerb rattle (`kerb_rattle`, `CarAudio.set_on_kerb`) is built and probed, but nothing feeds it yet: it reads `Car.on_kerb` as soon as that exists (guarded `in` check, one marked line). Guarded by `ProbeSurfaceVoice`. Still missing: kerbs through the suspension and camera, and the `on_kerb` wiring. Leave unticked until kerbs are wired.
+  *Today:* Kerbs tick through the suspension (`Track.kerb_at`, `Car.on_kerb`, `ProbeKerb`) and rattle in the sound (`CarAudio`, kerb loop). Rolling loops for grass, gravel or sand and shallow water, crossfaded by surface and scaled by speed, player only (`ProbeSurfaceVoice`). Still missing: the camera reacting to kerbs.
 - [ ] **Sense of speed** `sense-of-speed` · Partial  
   Wider field of view, camera pulling back, wind noise rising with speed, trackside objects near the road streaming past.  
   *Today:* FOV and pull-back are in, plus edge speed lines from 70% of max speed and during turbo (`SpeedLines`, hidden = zero cost below the threshold). Wind noise is in now (`CarAudio`, player only: near silent below half of max speed, about -17 dB at max, louder with turbo, 3 dB-ish swell with slipstream once `Car.draft` exists; `ProbeWind`). Still missing: trackside streaming.
@@ -59,9 +59,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **Drift with a snap in and a snap out** `drift-snap` · Partial  
   Clear entry, a held slide you steer against, and an exit that straightens cleanly. Smoke thickens with the slide angle.  
   *Today:* Entry and exit ramps feel good. Smoke density, opacity and size and the skid-mark opacity now scale with the slide angle and speed, and marks are also left on big slides without the handbrake and on hard braking. Still missing: the squeal that tracks slip (see `slip-squeal`).
-- [ ] **Jumps with a skill component** `jump-skill` · Partial  
+- [x] **Jumps with a skill component** `jump-skill` · Have  
   Lip stretch on takeoff, a little air control so gas and brake level the nose, then a landing thud scaled by fall speed, a dust puff, squash and a camera dip.  
-  *Today:* Stretch, squash, sound and shake are in, and a landing dust burst (surface-tinted, scaled by fall speed) is in. The landing thud now scales with fall speed (`AudioManager.plan_land`, player only): `land.wav` from 6 m/s at -16 to -2 dB with pitch 1.25 to 0.85, plus a `land_heavy` layer fading in between 9 and 16 m/s (guard `ProbeLandThud`). Still missing: air control (physics), so the item stays open.
+  *Today:* Stretch, squash and shake as before. Air control: throttle pitches the nose down, brake up, capped at 0.9 rad/s, player only (`ProbeAirControl`). Landing dust burst, surface-tinted and scaled by fall speed (`ProbeLandingDust`). Landing thud scales with fall speed, with a heavy layer from 9 to 16 m/s (`ProbeLandThud`).
 - [x] **Steering that tightens with speed** `steering-speed` · Have  
   Less steering lock at high speed so the car never feels twitchy, snappy lock at low speed, and a short smoothing on input so a button tap does not jerk.  
   *Today:* Lock tapers linearly from full at 50% of max speed to 65% at max (`steer_taper_at_top`), drift exempt. `PlayerController` smooths digital steering: 0.10 s in, 0.06 s out, instant through zero on reversal. Guard: `ProbeSteerSpeed`.
@@ -128,9 +128,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Corner hits spin, straight hits shove** `corner-hits` · Have  
   Clipping a rear corner rotates the leading car more than a square push. Being rear-ended wobbles you without stopping you.  
   *Today:* Mostly emergent from the physics.
-- [ ] **Spin-out assist** `spinout-assist` · Missing  
+- [x] **Spin-out assist** `spinout-assist` · Have  
   Once a car is turned past sideways, a gentle auto-straighten so the player is back on line in a second instead of facing the wrong way. Arcade standard.  
-  *Today:* None.
+  *Today:* Slip past 100 degrees at 6 m/s or more (not reversing by choice) turns the nose back toward the direction of travel, or the road when nearly stopped, through `_impact_yaw`; about 1 s from a 150 degree spin. Drift (slip up to 35 degrees) never reaches it. Guard: `ProbeSpinout`.
 - [x] **You know who hit you** `who-hit-me` · Have  
   A camera kick from the hit side, a positional impact sound from the other car, a horn from the AI.  
   *Today:* Done. Camera kick comes from the hit side and the screen edge on that side flashes briefly (`Vignette.flash_edge`). For a car-car hit that involves the player, `ImpactSound` keeps the body (`bump`, `metal_hit`) as a 2D punch and plays the main layer (tap, crunch or crash) from one of four pooled `AudioStreamPlayer3D` nodes owned by `AudioManager`, at the contact point pushed `positional_spread_m` (3 m) toward the other car so the side is audible from the chase cam. The AI sounds a toy horn (`toy_horn.wav`, own tone per car, 3 s per-car and 0.4 s global cooldown, only within 55 m of the camera) when it starts a grudge, and now and then (`rub_honk_chance` 0.5, once per episode) after the player has rubbed it for 0.6 s. Guards: `ProbePositionalHits`, `ProbeHorn`.
@@ -145,7 +145,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Done. The HUD popup is in (`PositionWatch` + `PositionPopup`): "P3" with a green up or red down triangle after a position is held 0.4 s, coalesced, none in countdown or after the finish. The stinger rides the same `PositionWatch.announced` signal (`AudioManager.play_stinger`): a three-note rising arpeggio (`stinger_up.wav`, 0.37 s) for a better position, a two-note falling slide (`stinger_down.wav`, 0.38 s) for a worse one, 2D at -8 dB, exact pitch. Guard: `ProbeStinger`.
 - [ ] **Slipstream** `slipstream` · Missing  
   A small speed gain when following closely, with wind lines and a sound. Rewards closeness without contact and makes running in the pack tactical.  
-  *Today:* None.
+  *Today:* Physics is in: `Car.draft` (0..1) builds in 0.5 s behind a car 2 to 14 m ahead in a narrow cone, both above 50% of max speed, for +1.5 m/s cap and +10% acceleration; same rule for every car (`ProbeSlipstream`). Wind lines and the sound are still missing; they can read `draft`.
 - [x] **AI that reacts** `ai-reacts` · Have  
   A wobble when hit, a counter-steer, a momentary grudge against whoever hit it, horns.  
   *Today:* Done. Wobble, counter-steer and grudge are in (`AIController`, `reacts` toggle, tunables `wobble_*` and `grudge_*`): a car hit by another car at 4 m/s or more gets a decaying steering term (faded in between 8 and 18 m/s, so hairpins are untouched), its first lobe against the yaw the hit imparted, and for 4 s it tries to sit alongside the car that hit it (one lane over, only while that car is within 28 m ahead). Steering and target line only, no speed or grip change. The car that starts a grudge also sounds a toy horn (see `who-hit-me`, guard `ProbeHorn`).

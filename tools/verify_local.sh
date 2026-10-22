@@ -151,6 +151,10 @@ run_step "AI care reactioneaza: clatinare, ranchiuna, cinstit" ai_react.log 'VER
 run_step "Vibratie: marime, ritm, setare, cablaj" haptics.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHaptics.tscn
 run_step "Linii de viteza: prag, monotonie, turbo" speed_lines.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSpeedLines.tscn
 run_step "Hazarde mobile: kick de camera, fara hit-stop" hazard_kick.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHazardKick.tscn
+run_step "Spin-out: asistenta intoarce masina, nu strica driftul" spinout.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSpinout.tscn
+run_step "Aer: gazul apleaca botul, frana il ridica, AI neutru" air_control.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeAirControl.tscn
+run_step "Slipstream: aspiratie doar in con, fara lipire" slipstream.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSlipstream.tscn
+run_step "Bordura: scutura suspensia doar in viteza" kerb.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeKerb.tscn
 run_step "Rezervor sigilat: bara nu se incarca, arderea merge" sealed_turbo.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSealedTurbo.tscn
 run_step "Fantoma: inregistrare, fisier, redare" ghost.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeGhost.tscn
 run_step "Bolovanul de pe buza + directie inversata" rim_boulder.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeRimBoulder.tscn

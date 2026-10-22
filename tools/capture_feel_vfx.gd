@@ -66,6 +66,8 @@ func _ready() -> void:
 		await _stage_props()
 	if _only.is_empty() or "veg" in _only:
 		await _stage_veg()
+	if _only.is_empty() or "toy" in _only:
+		await _stage_toy()
 	if _only.is_empty() or "pose" in _only:
 		await _stage_pose()
 	print("[capture] gata, %d imagini" % _shot_n)
@@ -456,4 +458,43 @@ func _stage_veg() -> void:
 	await _shot("veg_2")
 	car.queue_free()
 	t.queue_free()
+	_follow = null
+
+
+## Antena si cheia pe mai multe masini, din spate-dreapta, de aproape; apoi o
+## franare cu antena aplecata (camera de joc).
+func _stage_toy() -> void:
+	print("[capture] -- toy (camera aproape, din spate-dreapta)")
+	_follow = null
+	var i := 0
+	for idx in [0, 2, 3, 4, 5]:
+		var car := _spawn(Vector3(500 + i * 20, 0.7, 500), -PI * 0.5, idx)
+		await _settle([car])
+		var c := car.global_position + Vector3(0, 0.9, 0)
+		_cam.global_position = c + Vector3(-3.6, 1.8, 2.6)
+		_cam.look_at(c, Vector3.UP)
+		await get_tree().process_frame
+		await _shot("toy_%d" % idx)
+		_cam.global_position = c + Vector3(-3.4, 0.5, 0.0)
+		_cam.look_at(c + Vector3(0, -0.1, 0), Vector3.UP)
+		await get_tree().process_frame
+		await _shot("toyrear_%d" % idx)
+		car.queue_free()
+		i += 1
+		await get_tree().physics_frame
+	# Franare: antena inainte.
+	_cam_offset = Vector3(-7.0, 3.0, 4.5)
+	var car2 := _spawn(Vector3(300, 0.7, -300), -PI * 0.5, 0)
+	var drv := ScriptDriver.new()
+	car2.set_controller(drv)
+	_follow = car2
+	await _settle([car2])
+	drv.throttle = 1.0
+	await _wait(3.0)
+	drv.throttle = -1.0
+	await _wait(0.25)
+	await _shot("toy_brake_1")
+	await _wait(0.2)
+	await _shot("toy_brake_2")
+	car2.queue_free()
 	_follow = null

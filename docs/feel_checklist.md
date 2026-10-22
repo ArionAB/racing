@@ -68,9 +68,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **A driver who reacts to the road** `driver-reacts` · Have  
   A flinch on impacts, a head turn into the corner, arms that shake on kerbs.  
   *Today:* Done (open-cockpit drivers): torso and head lean with cornering and braking forces and the head turns with the steering, flinch away from every impact (back in about 0.4 s), and the arms shake on rough ground from spring compression speed.
-- [ ] **Toy-only animation** `toy-animation` · Missing  
+- [ ] **Toy-only animation** `toy-animation` · Partial  
   Antenna wobble, a wind-up key spinning faster with speed, plastic bits that rattle. Personality every second of driving.  
-  *Today:* None.
+  *Today:* Antenna (spring, driven by acceleration and impacts) and a wind-up key on the back (spin follows speed) are in, built procedurally and mounted on the model surface by ray casts, per-car flag `CarData.toy_animation`. Still missing: plastic bits that rattle.
 - [ ] **Haptics** `haptics` · Missing  
   Short rumble on kerbs, landings and hits on a controller. Phone vibration on the big ones.  
   *Today:* None anywhere.
@@ -94,10 +94,10 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Done: on the car's own `impact` the visual body moves up to 8 cm along the normal and tilts up to 5.5 degrees away, on an exact underdamped spring (back to rest in about 0.35 s). One compose step now writes the visual transform (drift roll, spin, jolt, rub lean); squash keeps owning scale. Tunables `jolt_*` on `Car`.
 - [ ] **Things that fly** `things-fly` · Partial  
   Cones, cups, blocks, signs that scatter with a sound and a few debris chunks. The tax for hitting things should be low where you want chaos.  
-  *Today:* Small decor already flies, silently. Barrels are static.
-- [ ] **Soft hazards** `soft-hazards` · Partial  
+  *Today:* Small decor flies and now throws debris chunks and a dust puff scaled by hit speed from one pooled manager (`PropDebris`, 64 particles total, one burst per frame max); the hand-placed `Barrel` is knockable too (the GLB barrels already were). Still missing: the sound.
+- [x] **Soft hazards** `soft-hazards` · Have  
   Bushes that slow you with a leaf burst, puddles and sand that spray.  
-  *Today:* Water and sand are in. No bush reaction.
+  *Today:* Done: water and sand were in; now driving through bushes, ferns, sage and grass tufts (vegetation chunks without collision, read by `SoftVegetation`) throws a leaf burst and brakes mildly (`Car.bush_drag`, 6 m/s^2 at the centre of a bush, 0 turns it off). Dense grass carpet is excluded on purpose.
 - [ ] **Cosmetic damage** `cosmetic-damage` · Optional  
   Scuff decals, a wobbling bumper, a dented mesh swapped after a few hits, reset each race, no mechanical penalty. Makes crashes feel remembered.  
   *Today:* None.

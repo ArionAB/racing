@@ -62,6 +62,8 @@ func _ready() -> void:
 		await _stage_land()
 	if _only.is_empty() or "fist" in _only:
 		await _stage_fist()
+	if _only.is_empty() or "props" in _only:
+		await _stage_props()
 	if _only.is_empty() or "pose" in _only:
 		await _stage_pose()
 	print("[capture] gata, %d imagini" % _shot_n)
@@ -377,3 +379,35 @@ func _stage_pose() -> void:
 		await get_tree().process_frame
 		await _shot("pose_" + key)
 	car.queue_free()
+
+
+## Butoaie knockable lovite la viteza de cursa: aschii si praf, camera de joc.
+func _stage_props() -> void:
+	print("[capture] -- props (camera de joc)")
+	_cam_offset = Vector3(-12.5, 10.0, 0.0)
+	var car := _spawn(Vector3(-380, 0.7, 250), -PI * 0.5)
+	_follow = car
+	var holder := Node3D.new()
+	add_child(holder)
+	for i in 5:
+		var b := Barrel.new()
+		holder.add_child(b)
+		b.global_position = Vector3(-352 + i * 0.5, 0, 250 + (i - 2) * 0.85)
+	await _settle([car])
+	car.linear_velocity = Vector3(24, 0, 0)
+	var f := 0
+	var m: Variant = load("res://scenes/props/prop_debris.gd").instance()
+	var b0: int = int(m.bursts)
+	while int(m.bursts) == b0 and f < 300:
+		await get_tree().physics_frame
+		f += 1
+	print("[capture] primul contact dupa %d cadre, forta %.1f" % [f, m.last_strength])
+	await _wait(0.06)
+	await _shot("props_1")
+	await _wait(0.14)
+	await _shot("props_2")
+	await _wait(0.2)
+	await _shot("props_3")
+	car.queue_free()
+	holder.queue_free()
+	_follow = null

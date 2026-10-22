@@ -61,7 +61,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Entry and exit ramps feel good. Smoke density, opacity and size and the skid-mark opacity now scale with the slide angle and speed, and marks are also left on big slides without the handbrake and on hard braking. Still missing: the squeal that tracks slip (see `slip-squeal`).
 - [ ] **Jumps with a skill component** `jump-skill` · Partial  
   Lip stretch on takeoff, a little air control so gas and brake level the nose, then a landing thud scaled by fall speed, a dust puff, squash and a camera dip.  
-  *Today:* Stretch, squash, sound and shake are in, and a landing dust burst (surface-tinted, scaled by fall speed) is in. Still missing: air control and the fall-scaled thud.
+  *Today:* Stretch, squash, sound and shake are in, and a landing dust burst (surface-tinted, scaled by fall speed) is in. The landing thud now scales with fall speed (`AudioManager.plan_land`, player only): `land.wav` from 6 m/s at -16 to -2 dB with pitch 1.25 to 0.85, plus a `land_heavy` layer fading in between 9 and 16 m/s (guard `ProbeLandThud`). Still missing: air control (physics), so the item stays open.
 - [x] **Steering that tightens with speed** `steering-speed` · Have  
   Less steering lock at high speed so the car never feels twitchy, snappy lock at low speed, and a short smoothing on input so a button tap does not jerk.  
   *Today:* Lock tapers linearly from full at 50% of max speed to 65% at max (`steer_taper_at_top`), drift exempt. `PlayerController` smooths digital steering: 0.10 s in, 0.06 s out, instant through zero on reversal. Guard: `ProbeSteerSpeed`.

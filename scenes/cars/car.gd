@@ -2386,9 +2386,13 @@ func _update_drift_smoke() -> void:
 	var s := slide_amount
 	if is_drifting:
 		s = maxf(s, 0.2)
-	_drift_density.set_offset(1, lerpf(0.2, 1.0, s)) # fractia care se vede
-	_drift_density.set_color(0, Color(1, 1, 1, lerpf(0.5, 1.0, s))) # opacitatea
-	var size := lerpf(0.6, 1.25, s)
+	# Densitatea si opacitatea pe radacina: un drift obisnuit (20-30 de grade) sa
+	# arate cam ca fumul de dinainte, iar 40 de grade sa-l intreaca; doar marimea
+	# urmeaza liniar.
+	var d := sqrt(s)
+	_drift_density.set_offset(1, lerpf(0.3, 1.0, d)) # fractia care se vede
+	_drift_density.set_color(0, Color(1, 1, 1, lerpf(0.55, 1.0, d))) # opacitatea
+	var size := lerpf(0.7, 1.25, s)
 	_drift_particles.scale_amount_min = 0.6 * size
 	_drift_particles.scale_amount_max = 1.4 * size
 

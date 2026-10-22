@@ -18,6 +18,13 @@ extends CanvasLayer
 @export var full_frac: float = 1.0
 ## Intensitatea minima cat arde turbo-ul, oricat de incet ai merge in clipa aia.
 @export var turbo_floor: float = 0.8
+## Aspiratia (slipstream): de la `draft_threshold` din `Car.draft`, liniile au
+## o podea de `draft_floor` * draft chiar si sub pragul de viteza, putin mai
+## reci la culoare (`draft_tint`) — se vede ca „te trage" masina din fata. Mai
+## slaba decat podeaua turbo-ului (0.8): e un indiciu, nu o explozie.
+@export var draft_threshold: float = 0.3
+@export var draft_floor: float = 0.5
+@export var draft_tint: Color = Color(0.78, 0.9, 1.0)
 ## Alfa maxim al unei dunge la intensitatea 1 (discret: se vede la marginea ochiului).
 @export var max_alpha: float = 0.5
 ## Cat de repede urca / coboara intensitatea afisata (1/s), netezita ca sa nu palpaie.
@@ -30,6 +37,7 @@ const SHADER_CODE: String = """
 shader_type canvas_item;
 uniform float intensity = 0.0;
 uniform float max_alpha = 0.5;
+uniform vec3 tint = vec3(1.0);
 uniform float aspect = 1.78;
 const float LINES = 64.0;
 
@@ -60,7 +68,7 @@ void fragment() {
 	float fx = 1.0 - smoothstep(0.0, 0.13, min(uv.x, 1.0 - uv.x));
 	float fy = 1.0 - smoothstep(0.0, 0.09, min(uv.y, 1.0 - uv.y));
 	float edge = max(fx, fy);
-	COLOR = vec4(1.0, 1.0, 1.0, line * dash * edge * on * intensity * max_alpha);
+	COLOR = vec4(tint, line * dash * edge * on * intensity * max_alpha);
 }
 """
 
@@ -102,9 +110,12 @@ func _ready() -> void:
 ## Intensitatea tinta 0..1 pentru o fractie de viteza si turbo.
 ## Statica ca sonda sa-i poata verifica curba fara scena.
 static func intensity_for(speed_frac: float, boosting: bool, p_start: float = 0.70,
-		p_full: float = 1.0, p_turbo_floor: float = 0.8) -> float:
+		p_full: float = 1.0, p_turbo_floor: float = 0.8, p_draft: float = 0.0,
+		p_draft_threshold: float = 0.3, p_draft_floor: float = 0.5) -> float:
 	var t := clampf((speed_frac - p_start) / maxf(p_full - p_start, 0.001), 0.0, 1.0)
 	var base := t * t * (3.0 - 2.0 * t) # smoothstep
+	if p_draft > p_draft_threshold:
+		base = maxf(base, p_draft_floor * p_draft)
 	return maxf(base, p_turbo_floor) if boosting else base
 
 
@@ -118,8 +129,10 @@ func _process(delta: float) -> void:
 		visible = false
 		return
 	var frac := target.horizontal_speed() / maxf(target.max_speed, 0.1)
+	# `draft` citit prin get(): fisierul ruleaza si pe ramuri unde Car nu-l are inca.
+	var draft := float(target.get(&"draft"))
 	var goal := intensity_for(frac, target.is_boosting, start_frac, full_frac,
-		turbo_floor)
+		turbo_floor, draft, draft_threshold, draft_floor)
 	var rate := rise_rate if goal > _intensity else fall_rate
 	_intensity = move_toward(_intensity, goal, rate * delta)
 	if _intensity <= HIDE_BELOW and goal <= 0.0:
@@ -128,5 +141,11 @@ func _process(delta: float) -> void:
 		return
 	visible = true
 	_mat.set_shader_parameter("intensity", _intensity)
+	# Culoarea: alb, cu un strop de rece cat dureaza aspiratia (turbo-ul ramane alb).
+	var cool := clampf((draft - draft_threshold) / maxf(1.0 - draft_threshold, 0.01), 0.0, 1.0)
+	if target.is_boosting:
+		cool = 0.0
+	var c := Color.WHITE.lerp(draft_tint, cool)
+	_mat.set_shader_parameter("tint", Vector3(c.r, c.g, c.b))
 	var vp := get_viewport().get_visible_rect().size
 	_mat.set_shader_parameter("aspect", vp.x / maxf(vp.y, 1.0))

@@ -72,6 +72,10 @@ signal ejected(car: Car, ragdoll: Node3D)
 signal impact(car: Car, kind: StringName, strength: float, normal: Vector3,
 		point: Vector3, other: Node)
 
+## Efecte vizuale comune (fara class_name: se preincarca).
+const SoftVegetation := preload("res://scenes/props/soft_vegetation.gd")
+const PropDebris := preload("res://scenes/props/prop_debris.gd")
+
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
 @export var max_speed: float = 34.0
@@ -416,6 +420,38 @@ var _spin_angle: float = 0.0
 @export var wall_spark_burst_dv: float = 6.0
 ## Viteza de cadere (m/s) de la care aterizarea ridica praf.
 @export var land_dust_min_fall: float = 5.0
+## Tufe (soft-hazards): cand rotile trec printr-o tufa din `SoftVegetation`
+## (chunk-uri de vegetatie fara coliziune) cu cel putin atata viteza (m/s),
+## sare o rafala de frunze.
+@export var bush_burst_min_speed: float = 6.0
+## Franare usoara in tufa, in m/s^2 la centrul ei (scade spre margine). 6 = o
+## tufa trecuta cu 25 m/s costa ~0.5 m/s; 0 o opreste. Se aplica tuturor
+## masinilor la fel (si AI-ului), deci nu favorizeaza pe nimeni — dar muta
+## timpii pe turele cu multa vegetatie langa drum.
+@export var bush_drag: float = 6.0
+## Radacina de unde se citesc tufele; null = pista. Pentru sonde.
+var soft_veg_root: Node3D = null
+var _veg_cooldown: float = 0.0
+var _veg_depth: float = 0.0
+## Jucaria (toy-animation): antena cu arc si cheia de intors. Noduri copil ale
+## lui `_visual` (se refac cu el la apply_data); null daca masina n-are model,
+## are `toy_animation` stins sau modelul n-a avut unde sa le monteze.
+var _toy_antenna: Node3D = null
+var _toy_key: Node3D = null
+## Antena: aplecarea varfului (vector orizontal in spatiul masinii, lungime =
+## unghi in rad) si viteza ei — un arc subamortizat, nu un mers invers.
+var _ant_tilt: Vector3 = Vector3.ZERO
+var _ant_vel: Vector3 = Vector3.ZERO
+var _key_angle: float = 0.0
+## Cat de tare se apleaca antena pe m/s^2 de acceleratie, plafonul (rad) si
+## arcul ei (rad/s, amortizare: jos = legana mai mult).
+const ANT_PER_ACCEL: float = 0.018
+const ANT_MAX: float = 0.40
+const ANT_FREQ: float = 17.0
+const ANT_DAMPING: float = 0.16
+## Cheia: rad/s in repaus (aproape stop) si la viteza maxima.
+const KEY_SPIN_MIN: float = 0.0
+const KEY_SPIN_MAX: float = 18.0
 ## Starea elastica a jolt-ului: deplasare si tilt (vector orizontal in spatiul
 ## masinii; directia = spre ce se apleaca varful, lungimea = unghiul in rad).
 var _jolt_pos: Vector3 = Vector3.ZERO
@@ -2493,6 +2529,7 @@ func _update_effects(delta: float) -> void:
 	if _fire_particles != null:
 		_fire_particles.emitting = burn_time > 0.0
 	_update_dust(on_road, loose, on_branch)
+	_update_soft_veg(delta)
 	_drop_trail(delta, loose)
 	_drop_leaf_wear(delta, on_road)
 	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
@@ -2639,6 +2676,37 @@ var _dust_route: int = -1
 ## Roata e pe un interval de pamant al pistei (Track.is_dirt_at)? Doar ca sa
 ## stim cand sa recolorez fumul de drift la trecerea pamant <-> asfalt.
 var _drift_on_dirt: bool = false
+
+## Tufele: rafala de frunze la intrare si franare usoara cat rotile sunt
+## in ea. Registrul (`SoftVegetation`) se citeste o data pe cursa, din chunk-urile
+## de vegetatie ale pistei; fara ele (sau headless) depth e mereu 0.
+func _update_soft_veg(delta: float) -> void:
+	_veg_cooldown = maxf(_veg_cooldown - delta, 0.0)
+	var root: Node3D = soft_veg_root if soft_veg_root != null else track
+	if root == null or not race_active or wheels_on_ground == 0:
+		_veg_depth = 0.0
+		return
+	if not SoftVegetation.is_scanned(root):
+		SoftVegetation.scan(root)
+	var speed := horizontal_speed()
+	if speed < 2.0 or SoftVegetation.count(root) == 0:
+		_veg_depth = 0.0
+		return
+	_veg_depth = SoftVegetation.depth_at(root, global_position)
+	if _veg_depth <= 0.0:
+		return
+	var v := Vector3(velocity.x, 0.0, velocity.z)
+	# Franare mica, pe directia de mers: nu schimba directia si nu atinge solverul.
+	apply_central_force(-v.normalized() * bush_drag * _veg_depth * mass)
+	if speed >= bush_burst_min_speed and _veg_cooldown <= 0.0:
+		_veg_cooldown = 0.3
+		var tint := Color(0.38, 0.56, 0.24)
+		if track != null:
+			tint = tint.lerp(track.theme_ground_tint, 0.25)
+		PropDebris.leaf_burst(get_tree(), global_position + Vector3.UP * 0.4,
+			v.normalized() * 0.5 + Vector3.UP,
+			clampf(inverse_lerp(bush_burst_min_speed, 28.0, speed), 0.0, 1.0), tint)
+
 
 ## Fumul de cauciuc dupa alunecare (0..1): cate pufuri se vad, cat de opace si
 ## cat de mari. La 1 e fumul de dinainte; la alunecari mici e o adiere subtire.
@@ -3028,8 +3096,8 @@ func _update_scrape_sparks() -> void:
 	# Cat de sus pleaca scanteile: pe perete bine in sus (peretele le-ar ascunde
 	# din camera de sus), intre masini si mai sus — contactul e intre doua
 	# acoperisuri, iar scanteia trebuie sa treaca de ele ca sa se vada.
-	var lift := 0.9
-	var lift_y := 0.05
+	var lift := 1.3
+	var lift_y := 0.55
 	if wall_contact and wall_scrape_speed > scrape_min_speed:
 		live = true
 		point = wall_point
@@ -3056,7 +3124,7 @@ func _update_scrape_sparks() -> void:
 	# Spre inapoi pe directia de mers, putin in afara peretelui si in sus.
 	# Si bine in sus: din camera de sus, sparturile care raman la nivelul
 	# peretelui se ascund in spatele lui.
-	_set_spark_direction(_scrape_sparks, back * 0.6 + n * 0.5 + Vector3.UP * lift)
+	_set_spark_direction(_scrape_sparks, back * 0.7 + n * 0.35 + Vector3.UP * lift)
 	var d := clampf(density, 0.0, 1.0)
 	_scrape_density.set_offset(1, lerpf(0.25, 1.0, d))
 	_scrape_sparks.initial_velocity_min = lerpf(2.5, 5.0, d)
@@ -3142,11 +3210,11 @@ func _contact_point_with(other: Car, fallback: Vector3) -> Vector3:
 static var _spark_material: StandardMaterial3D = null
 const SPARKS_MIN: int = 8
 const SPARKS_MAX: int = 14
-## Emitatorul continuu de razuire/frecare. Impreuna cu SPARKS_MAX (14): 32 de
-## scantei pe masina, plafonul din fisa de feel. (Rafala de la ciocnirea intre
+## Emitatorul continuu de razuire/frecare. Impreuna cu SPARKS_MAX (14): 40 de
+## scantei pe masina (plafonul cerut: <= ~40). (Rafala de la ciocnirea intre
 ## masini a coborat de la 24 la 14 ca sa incapa; la camera de joc o razuire cu
 ## 8-12 scantei se vedea ca doua-trei puncte risipite in urma masinii.)
-const SCRAPE_SPARKS_AMOUNT: int = 18
+const SCRAPE_SPARKS_AMOUNT: int = 26
 
 func _build_sparks() -> void:
 	_sparks = CPUParticles3D.new()
@@ -3213,19 +3281,31 @@ func _build_scrape_sparks(heat: Gradient, shrink: Curve) -> void:
 	e.top_level = true # inainte de add_child: dupa, ar ingheta transformul
 	e.emitting = false
 	e.amount = SCRAPE_SPARKS_AMOUNT
-	e.lifetime = 0.2
+	e.lifetime = 0.28
 	e.randomness = 0.6
 	e.local_coords = false
-	e.spread = 28.0
+	e.spread = 32.0
 	e.initial_velocity_min = 2.5
 	e.initial_velocity_max = 6.0
-	e.gravity = Vector3(0, -14.0, 0)
+	e.gravity = Vector3(0, -12.0, 0)
 	e.damping_min = 1.0
 	e.damping_max = 3.0
-	e.scale_amount_min = 0.7
-	e.scale_amount_max = 1.1
+	# Pornesc imprastiate pe ~1 m in jurul contactului, nu dintr-un punct:
+	# razuirea e o LINIE de contact lunga cat caroseria.
+	e.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	e.emission_sphere_radius = 0.6
+	e.scale_amount_min = 0.9
+	e.scale_amount_max = 1.3
 	e.scale_amount_curve = shrink
-	e.color_ramp = heat
+	# Rampa proprie, SATURATA (portocaliu-galben apoi rosu), nu alb-galben ca la
+	# rafala: alb-galben pe un perete bej sau o dala deschisa dispare. Opacitatea
+	# ramane plina pana aproape de capat.
+	var hot := Gradient.new()
+	hot.set_offsets(PackedFloat32Array([0.0, 0.5, 0.85, 1.0]))
+	hot.set_colors(PackedColorArray([
+		Color(1.0, 0.85, 0.25, 1.0), Color(1.0, 0.5, 0.05, 1.0),
+		Color(0.95, 0.22, 0.02, 1.0), Color(0.8, 0.12, 0.02, 0.0)]))
+	e.color_ramp = hot
 	# Rata: cine nu cade in partea opaca a rampei se naste invizibil.
 	_scrape_density = Gradient.new()
 	_scrape_density.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
@@ -3236,7 +3316,7 @@ func _build_scrape_sparks(heat: Gradient, shrink: Curve) -> void:
 	var streak := BoxMesh.new()
 	# Mai groase decat rafala: la camera de joc (16 m) o dara de 5 cm abia avea
 	# 2 pixeli si se vedeau doua-trei puncte portocalii pe captura.
-	streak.size = Vector3(0.16, 0.95, 0.16)
+	streak.size = Vector3(0.2, 1.25, 0.2)
 	streak.material = _spark_material
 	e.mesh = streak
 	e.particle_flag_align_y = true
@@ -3726,6 +3806,7 @@ func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	_update_spin(delta)
 	_update_jolt(delta)
 	_compose_visual()
+	_update_toys(delta, fwd_speed)
 
 
 ## Invartirea de caroserie, cat tine si pe urma inapoi la zero.
@@ -3828,6 +3909,9 @@ func _on_impact_visual(_car: Car, kind: StringName, strength: float,
 		var gain := 1.0 / maxf(_jolt_peak_per_velocity(), 1e-5)
 		_jolt_pos_vel += n_local * (jolt_max_offset * k * gain)
 		_jolt_tilt_vel += n_local * (deg_to_rad(jolt_max_tilt_deg) * k * gain)
+	# Antena zvacneste in directia loviturii (varful ramane in urma caroseriei).
+	if _toy_antenna != null and n_local.length_squared() > 1e-6:
+		_ant_vel -= n_local * (clampf(strength, 0.0, 20.0) * 0.12 * ANT_FREQ)
 	if kind == &"wall" and strength >= wall_spark_burst_dv:
 		_emit_wall_sparks(point, normal, strength)
 	if _driver != null:
@@ -3845,6 +3929,8 @@ func _reset_visual_offsets(_c: Car = null) -> void:
 	_jolt_tilt = Vector3.ZERO
 	_jolt_tilt_vel = Vector3.ZERO
 	_rub_lean = Vector3.ZERO
+	_ant_tilt = Vector3.ZERO
+	_ant_vel = Vector3.ZERO
 	if _visual != null:
 		_compose_visual()
 
@@ -3861,9 +3947,237 @@ static func build_model(car_data: CarData) -> Node3D:
 	return model
 
 
+## ---------------------------------------------------------------- jucaria
+
+## Mesh de caroserie al modelului (fara roti), in spatiul `_visual`: fiecare
+## intrare are TriangleMesh-ul, transformarea si cutia. Pentru raze.
+func _toy_collect(n: Node3D, parent_xf: Transform3D, out: Array) -> void:
+	var t := parent_xf * n.transform
+	var low := String(n.name).to_lower()
+	var mi := n as MeshInstance3D
+	if mi != null and mi.mesh != null and not ("wheel" in low or "tire" in low):
+		out.append({"tm": mi.mesh.generate_triangle_mesh(), "xf": t,
+			"box": t * mi.mesh.get_aabb()})
+	for c in n.get_children():
+		if c is Node3D:
+			_toy_collect(c as Node3D, t, out)
+
+
+## Cea mai apropiata intersectie a razei cu caroseria; gol daca nu ataca nimic.
+static func toy_ray(parts: Array, from: Vector3, dir: Vector3) -> Dictionary:
+	var best := {}
+	var best_d := INF
+	for part: Dictionary in parts:
+		var xf: Transform3D = part["xf"]
+		var inv := xf.affine_inverse()
+		var hit: Dictionary = (part["tm"] as TriangleMesh).intersect_ray(
+			inv * from, (inv.basis * dir).normalized())
+		if hit.is_empty():
+			continue
+		var p: Vector3 = xf * (hit["position"] as Vector3)
+		var d := from.distance_to(p)
+		if d < best_d:
+			best_d = d
+			best = {"position": p, "distance": d}
+	return best
+
+
+## Mesh primitiv cu UV-urile puse pe slotul de paleta (ca restul lumii: o
+## singura textura de atlas, zero materiale noi) si culoare de vertex alba.
+static func _toy_mesh(prim: PrimitiveMesh, slot: int) -> ArrayMesh:
+	var arrays := prim.get_mesh_arrays()
+	var n := (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	var uvs := PackedVector2Array()
+	uvs.resize(n)
+	uvs.fill(Palette.uv(slot))
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	var cols := PackedColorArray()
+	cols.resize(n)
+	cols.fill(Color(0.96, 0.96, 0.96))
+	arrays[Mesh.ARRAY_COLOR] = cols
+	var m := ArrayMesh.new()
+	m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return m
+
+
+static func _toy_part(parent: Node3D, mesh: PrimitiveMesh, slot: int,
+		pos: Vector3, rot: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = _toy_mesh(mesh, slot)
+	mi.material_override = Palette.world_material()
+	mi.position = pos
+	mi.rotation = rot
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	return mi
+
+
+## Antena si cheia, montate pe suprafata modelului: antena pe coltul din
+## dreapta-spate (raza de sus in jos gaseste cota caroseriei acolo), cheia in
+## mijlocul fetei din spate (raza dinspre spate gaseste fata). Daca raza nu
+## gaseste nimic, piesa nu se monteaza — mai bine lipsa decat plutind.
+func _build_toys(model: Node3D) -> void:
+	var parts: Array = []
+	_toy_collect(model, Transform3D.IDENTITY, parts)
+	if parts.is_empty():
+		return
+	var box: AABB = (parts[0]["box"] as AABB)
+	for part: Dictionary in parts:
+		box = box.merge(part["box"])
+	var unit := clampf(box.size.x / 2.2, 0.6, 1.3)
+	# Antena: candidati (x ca fractie din latime, z = distanta de spatele
+	# modelului, in unitati), intai coltul din dreapta-spate. Se alege primul la
+	# care raza gaseste caroseria SI vergeaua, in repaus si inclinata la 0.25 rad
+	# in 8 directii, nu intalneste niciun triunghi (un buggy deschis sau un
+	# camion cu scara nu au caroserie sub orice punct).
+	var length := 0.95 * unit
+	var spots := [Vector2(0.84, 0.45), Vector2(0.16, 0.45), Vector2(0.84, 0.9),
+		Vector2(0.16, 0.9), Vector2(0.7, 0.45), Vector2(0.3, 0.45),
+		Vector2(0.84, 1.4), Vector2(0.16, 1.4), Vector2(0.5, 0.45)]
+	var ant_base := Vector3.ZERO
+	var found := false
+	for spot: Vector2 in spots:
+		var ax := box.position.x + box.size.x * spot.x
+		var az := box.end.z - spot.y * unit
+		var top := toy_ray(parts, Vector3(ax, box.end.y + 1.0, az), Vector3.DOWN)
+		if top.is_empty():
+			continue
+		var base: Vector3 = (top["position"] as Vector3) - Vector3(0, 0.03, 0)
+		if _toy_segments_clear(parts, base, length):
+			ant_base = base
+			found = true
+			break
+	if found:
+		var ant := Node3D.new()
+		ant.name = "ToyAntenna"
+		ant.position = ant_base
+		_visual.add_child(ant)
+		var stem := CylinderMesh.new()
+		stem.top_radius = 0.022 * unit
+		stem.bottom_radius = 0.03 * unit
+		stem.height = length
+		stem.radial_segments = 6
+		stem.rings = 1
+		_toy_part(ant, stem, Palette.ASPHALT, Vector3(0, length * 0.5, 0))
+		var tip := SphereMesh.new()
+		tip.radius = 0.085 * unit
+		tip.height = 0.17 * unit
+		tip.radial_segments = 8
+		tip.rings = 4
+		_toy_part(ant, tip, Palette.KERB_RED, Vector3(0, length + 0.03 * unit, 0))
+		_toy_antenna = ant
+	# Cheia: pe fata din spate. Raze dinspre spate la cateva inaltimi (30-70% din
+	# cutie) si doua pozitii laterale, ferite de axa (acolo sta placuta de
+	# inmatriculare, galbena si ea); se alege cea mai din spate suprafata (panoul
+	# portbagajului, nu scaunul din interior). Apoi o departeaza de fata pana
+	# cand nicio aripa, in niciun unghi, nu mai taie caroseria.
+	var key_hit := {}
+	for fx: float in [-0.3, 0.3]:
+		for f: float in [0.3, 0.4, 0.5, 0.6, 0.7]:
+			var ky := box.position.y + box.size.y * f
+			var kx := box.get_center().x + box.size.x * fx
+			var h := toy_ray(parts, Vector3(kx, ky, box.end.z + 1.5), Vector3(0, 0, -1))
+			if h.is_empty():
+				continue
+			if key_hit.is_empty() or (h["position"] as Vector3).z > (key_hit["position"] as Vector3).z + 0.02:
+				key_hit = h
+	if not key_hit.is_empty():
+		var kp: Vector3 = (key_hit["position"] as Vector3) + Vector3(0, 0, -0.02)
+		var sc := clampf(box.size.x * 0.2, 0.3, 0.7)
+		var stand := 0.0
+		while stand < 0.6 and not _toy_key_clear(parts, kp, sc, stand):
+			stand += 0.05
+		if stand >= 0.6:
+			return # nicio departare nu scoate aripile din caroserie: fara cheie
+		var key := Node3D.new()
+		key.name = "ToyKey"
+		key.position = kp
+		_visual.add_child(key)
+		var shaft_len := 0.3 * sc + stand
+		var shaft := CylinderMesh.new()
+		shaft.top_radius = 0.05 * sc
+		shaft.bottom_radius = 0.05 * sc
+		shaft.height = shaft_len
+		shaft.radial_segments = 6
+		shaft.rings = 1
+		_toy_part(key, shaft, Palette.CAR_BLUE, Vector3(0, 0, shaft_len * 0.5),
+			Vector3(PI * 0.5, 0, 0))
+		for side in [-1.0, 1.0]:
+			var wing := BoxMesh.new()
+			wing.size = Vector3(0.62 * sc, 0.32 * sc, 0.07 * sc)
+			_toy_part(key, wing, Palette.CAR_BLUE,
+				Vector3(side * 0.34 * sc, 0, shaft_len + 0.02 * sc))
+		_toy_key = key
+
+
+## Segment liber de caroseria? (primul triunghi lovit e dincolo de capat.)
+static func _toy_clear(parts: Array, a: Vector3, b: Vector3) -> bool:
+	var d := b - a
+	var l := d.length()
+	if l < 0.001:
+		return true
+	var hit := toy_ray(parts, a, d / l)
+	return hit.is_empty() or float(hit["distance"]) > l - 0.01
+
+
+## Vergeaua antenei, de la `base` in sus, in repaus si inclinata la 0.25 rad in
+## 8 directii, libera de caroserie.
+static func _toy_segments_clear(parts: Array, base: Vector3, length: float) -> bool:
+	var from := base + Vector3(0, 0.06, 0)
+	if not _toy_clear(parts, from, base + Vector3(0, length + 0.1, 0)):
+		return false
+	for k in 8:
+		var yaw := TAU * k / 8.0
+		var tilted := base + Vector3(sin(0.25) * cos(yaw), cos(0.25),
+			sin(0.25) * sin(yaw)) * (length + 0.1)
+		if not _toy_clear(parts, from, tilted):
+			return false
+	return true
+
+
+## Aripile cheii (12 unghiuri de rotatie) libere de caroserie, cu fusul
+## prelungit cu `stand`.
+static func _toy_key_clear(parts: Array, kp: Vector3, sc: float, stand: float) -> bool:
+	var axis := kp + Vector3(0, 0, 0.3 * sc + stand + 0.02 * sc)
+	for k in 12:
+		var a := TAU * k / 12.0
+		var tip := axis + Vector3(cos(a) * 0.68 * sc, sin(a) * 0.68 * sc, 0)
+		if not _toy_clear(parts, axis, tip):
+			return false
+	return true
+
+
+## Antena (arc fortat de acceleratie) si cheia (turatie dupa viteza).
+func _update_toys(delta: float, fwd_speed: float) -> void:
+	var dt := minf(delta, 0.05)
+	if _toy_antenna != null:
+		# Acceleratia masinii in spatiul ei; varful ramane in urma ei.
+		var acc := (velocity - _prev_velocity) / maxf(delta, 0.0001)
+		var a_local := global_transform.basis.inverse() * acc
+		a_local.y = 0.0
+		var target := (-a_local * ANT_PER_ACCEL).limit_length(ANT_MAX)
+		var sp := Car.spring_step(_ant_tilt - target, _ant_vel, ANT_FREQ, ANT_DAMPING, dt)
+		_ant_tilt = (sp[0] as Vector3) + target
+		_ant_vel = sp[1]
+		_ant_tilt = _ant_tilt.limit_length(ANT_MAX * 1.4)
+		var q := Quaternion.IDENTITY
+		if _ant_tilt.length_squared() > 1e-10:
+			q = Quaternion(Vector3.UP.cross(_ant_tilt).normalized(), _ant_tilt.length())
+		_toy_antenna.quaternion = q
+	if _toy_key != null:
+		var f := clampf(absf(fwd_speed) / maxf(max_speed, 1.0), 0.0, 1.2)
+		_key_angle = fposmod(_key_angle + lerpf(KEY_SPIN_MIN, KEY_SPIN_MAX, f)
+			* signf(fwd_speed if absf(fwd_speed) > 0.5 else 1.0) * dt, TAU)
+		_toy_key.rotation.z = _key_angle
+
+
 func _build_visual() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
+	_toy_antenna = null
+	_toy_key = null
+	_ant_tilt = Vector3.ZERO
+	_ant_vel = Vector3.ZERO
 	# Model 3D real daca exista in CarData; altfel placeholder din cuburi.
 	if data != null and data.model != null:
 		var model := Car.build_model(data)
@@ -3890,6 +4204,8 @@ func _build_visual() -> void:
 				var car_left := wheel_node.position.x > 0.0
 				var axle := 0 if is_front else 1
 				_wheel_corner.append(axle * 2 + (0 if car_left else 1))
+		if data.toy_animation:
+			_build_toys(model)
 		if not _wheels_all.is_empty():
 			# Raza reala = inaltimea centrului rotii (sta pe sol) x scala.
 			_wheel_radius = maxf(0.15,

@@ -62,6 +62,12 @@ func _ready() -> void:
 		await _stage_land()
 	if _only.is_empty() or "fist" in _only:
 		await _stage_fist()
+	if _only.is_empty() or "props" in _only:
+		await _stage_props()
+	if _only.is_empty() or "veg" in _only:
+		await _stage_veg()
+	if _only.is_empty() or "toy" in _only:
+		await _stage_toy()
 	if _only.is_empty() or "pose" in _only:
 		await _stage_pose()
 	print("[capture] gata, %d imagini" % _shot_n)
@@ -377,3 +383,118 @@ func _stage_pose() -> void:
 		await get_tree().process_frame
 		await _shot("pose_" + key)
 	car.queue_free()
+
+
+## Butoaie knockable lovite la viteza de cursa: aschii si praf, camera de joc.
+func _stage_props() -> void:
+	print("[capture] -- props (camera de joc)")
+	_cam_offset = Vector3(-12.5, 10.0, 0.0)
+	var car := _spawn(Vector3(-380, 0.7, 250), -PI * 0.5)
+	_follow = car
+	var holder := Node3D.new()
+	add_child(holder)
+	for i in 5:
+		var b := Barrel.new()
+		holder.add_child(b)
+		b.global_position = Vector3(-352 + i * 0.5, 0, 250 + (i - 2) * 0.85)
+	await _settle([car])
+	car.linear_velocity = Vector3(24, 0, 0)
+	var f := 0
+	var m: Variant = load("res://scenes/props/prop_debris.gd").instance()
+	var b0: int = int(m.bursts)
+	while int(m.bursts) == b0 and f < 300:
+		await get_tree().physics_frame
+		f += 1
+	print("[capture] primul contact dupa %d cadre, forta %.1f" % [f, m.last_strength])
+	await _wait(0.06)
+	await _shot("props_1")
+	await _wait(0.14)
+	await _shot("props_2")
+	await _wait(0.2)
+	await _shot("props_3")
+	car.queue_free()
+	holder.queue_free()
+	_follow = null
+
+
+## Citirea REALA a tufelor dintr-o pista (Track01) si frunzele la trecere.
+## Doar cu fereastra: headless MultiMesh da pozitii zero.
+func _stage_veg() -> void:
+	print("[capture] -- veg (Track01, citire reala de chunk-uri)")
+	var SoftVeg := load("res://scenes/props/soft_vegetation.gd")
+	var t := (load("res://scenes/tracks/Track01.tscn") as PackedScene).instantiate() as Track
+	add_child(t)
+	for _i in 4:
+		await get_tree().process_frame
+	var n: int = SoftVeg.scan(t)
+	print("[capture] tufe citite din Track01: %d" % n)
+	if n == 0:
+		return
+	# Prima tufa de langa un loc plat: masina vine spre ea pe directia +X.
+	var e: Dictionary = SoftVeg._cache[t.get_instance_id()]
+	var pick := Vector3.ZERO
+	for cell in e["cells"].keys():
+		var arr: PackedFloat32Array = e["cells"][cell]
+		pick = Vector3(arr[0], arr[1], arr[2])
+		break
+	print("[capture] tufa aleasa la %s" % pick)
+	var car := _spawn(pick + Vector3(-14.0, 1.5, 0.0), -PI * 0.5)
+	car.soft_veg_root = t
+	_follow = car
+	_cam_offset = Vector3(-12.5, 10.0, 0.0)
+	await _wait(0.9)
+	car.linear_velocity = Vector3(26, 0, 0)
+	var m: Variant = load("res://scenes/props/prop_debris.gd").instance()
+	var l0: int = int(m.leaf_bursts) if m != null else 0
+	var f := 0
+	while (m == null or int(m.leaf_bursts) == l0) and f < 200:
+		await get_tree().physics_frame
+		m = load("res://scenes/props/prop_debris.gd").instance()
+		f += 1
+	print("[capture] frunze dupa %d cadre, depth %.2f" % [f, car._veg_depth])
+	await _wait(0.08)
+	await _shot("veg_1")
+	await _wait(0.15)
+	await _shot("veg_2")
+	car.queue_free()
+	t.queue_free()
+	_follow = null
+
+
+## Antena si cheia pe mai multe masini, din spate-dreapta, de aproape; apoi o
+## franare cu antena aplecata (camera de joc).
+func _stage_toy() -> void:
+	print("[capture] -- toy (camera aproape, din spate-dreapta)")
+	_follow = null
+	var i := 0
+	for idx in [0, 2, 3, 4, 5]:
+		var car := _spawn(Vector3(500 + i * 20, 0.7, 500), -PI * 0.5, idx)
+		await _settle([car])
+		var c := car.global_position + Vector3(0, 0.9, 0)
+		_cam.global_position = c + Vector3(-3.6, 1.8, 2.6)
+		_cam.look_at(c, Vector3.UP)
+		await get_tree().process_frame
+		await _shot("toy_%d" % idx)
+		_cam.global_position = c + Vector3(-3.4, 0.5, 0.0)
+		_cam.look_at(c + Vector3(0, -0.1, 0), Vector3.UP)
+		await get_tree().process_frame
+		await _shot("toyrear_%d" % idx)
+		car.queue_free()
+		i += 1
+		await get_tree().physics_frame
+	# Franare: antena inainte.
+	_cam_offset = Vector3(-7.0, 3.0, 4.5)
+	var car2 := _spawn(Vector3(300, 0.7, -300), -PI * 0.5, 0)
+	var drv := ScriptDriver.new()
+	car2.set_controller(drv)
+	_follow = car2
+	await _settle([car2])
+	drv.throttle = 1.0
+	await _wait(3.0)
+	drv.throttle = -1.0
+	await _wait(0.25)
+	await _shot("toy_brake_1")
+	await _wait(0.2)
+	await _shot("toy_brake_2")
+	car2.queue_free()
+	_follow = null

@@ -58,6 +58,12 @@ extends Resource
 ## Dimensiunile vizuale DUPA scalare — dimensioneaza colizerul si efectele.
 @export var body_length: float = 3.8
 @export var body_width: float = 2.2
+## Personalitate de jucarie pe caroserie (feel_checklist: toy-animation): o
+## antena care se legana cu acceleratia si loviturile si o cheie de intors pe
+## spate care se invarte mai repede cu viteza. Procedurale, montate pe
+## suprafata REALA a modelului (raze), deci nu intra in caroserie. Se stinge
+## per masina cu false.
+@export var toy_animation: bool = true
 ## Modelul e un GLB din pipeline-ul nostru (UV pe atlasul de paleta, AO in
 ## vertex colors) si primeste `Palette.world_material()` la instantiere.
 ## Fals pentru FBX-urile RgsDev, care isi aduc materialele lor.

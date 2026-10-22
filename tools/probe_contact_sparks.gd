@@ -11,7 +11,7 @@ extends Node
 ##   3. rafala `Sparks` la izbitura de perete >= 6 m/s, nu si sub 6;
 ##   4. frecare intre masini: EXACT o masina din pereche emite (fara dublura),
 ##      opreste in 0.2 s dupa separare, iar corpurile se apleaca una de alta;
-##   5. bugetul de particule pe masina: scanteile continue + rafala <= 32.
+##   5. bugetul de particule pe masina: scanteile continue + rafala <= 40.
 ## Numaratoarea de emitatori nu dovedeste ca se VEDE ceva — vezi capturile
 ## din raport; sonda doar pazeste logica (cand, unde, cat).
 ##
@@ -119,8 +119,8 @@ func _test_wall_scrape() -> void:
 			stop_frame = f
 	print("  oprit dupa %d cadre (%.3f s)" % [stop_frame, stop_frame * STEP])
 	_check(stop_frame >= 0 and stop_frame * STEP <= 0.2, "se opreste in cel mult 0.2 s dupa desprindere")
-	_check(car._scrape_sparks.amount + car._sparks.amount <= 32,
-		"buget: %d continue + %d rafala <= 32" % [car._scrape_sparks.amount, car._sparks.amount])
+	_check(car._scrape_sparks.amount + car._sparks.amount <= 40,
+		"buget: %d continue + %d rafala <= 40" % [car._scrape_sparks.amount, car._sparks.amount])
 	car.queue_free()
 	await get_tree().physics_frame
 

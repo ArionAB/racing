@@ -18,6 +18,8 @@ var model: Node3D
 ## Modelele noi sunt construite la scara lumii; a ramas pentru assets vechi.
 var model_scale: float = 1.0
 
+const PropDebris := preload("res://scenes/props/prop_debris.gd")
+
 func _ready() -> void:
 	add_to_group("markers")
 	mass = 0.4
@@ -43,3 +45,5 @@ func _ready() -> void:
 	shape.shape = cyl
 	shape.position = Vector3.UP * (aabb.position.y + aabb.size.y * 0.5)
 	add_child(shape)
+	# Aschii si praf cand e lovit (things-fly); in editor `watch` nu face nimic.
+	PropDebris.watch(self)

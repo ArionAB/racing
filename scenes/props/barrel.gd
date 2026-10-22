@@ -32,6 +32,11 @@ func _build() -> void:
 	mi.mesh = mesh
 	mi.material_override = Palette.world_material()
 	add_child(mi)
+	# In joc butoiul se imprastie ca restul decorului mic (BumpProp: 0,6 x 0,9 m,
+	# ~4 kg — chiar greutatea de jucarie pentru care e calibrata densitatea de
+	# acolo). Fara plafon de piese, sau in editor, ramane colizorul static.
+	if not Engine.is_editor_hint() and BumpProp.wrap(mi) != null:
+		return
 	var shape := CollisionShape3D.new()
 	var cyl := CylinderShape3D.new()
 	cyl.radius = 0.3

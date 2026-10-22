@@ -44,9 +44,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **A toy sound palette** `toy-sound-palette` · Missing  
   Toy cars do not have a V8. An electric whine with a small gear whirr like Re-Volt's RC cars, plastic clacks on contact, rattles on kerbs, a pull-back spring at rocket start. Cheap, and identity nobody else has.  
   *Today:* The engine is now an electric whine plus a gear whirr (`engine_whine`, `engine_whirr`, synthesized by `tools/generate_sfx_car.gd`), a plastic kerb rattle sample exists (`kerb_rattle`, not wired until `Car.on_kerb` lands) and the turbo has a plastic click. Still missing: plastic clacks on car contact and the pull-back spring at rocket start.
-- [ ] **Tire squeal that tracks slip** `slip-squeal` · Partial · ⭐  
+- [x] **Tire squeal that tracks slip** `slip-squeal` · Have · ⭐  
   Volume and pitch follow how much the tires actually slide, so a light slide whispers and a full drift screams. Off asphalt it turns into gravel hiss.  
-  *Today:* The loop is on or off with the handbrake, at one level, on every surface.
+  *Today:* `CarAudio` drives the loop from the real slide (lateral slip speed 2-13 m/s and slip angle 6-40 degrees), not from the handbrake flag: about -30 dB at 8 degrees, -8 dB at 40, pitch 0.85 to 1.4. Hard braking above 12 m/s^2 squeals too. On loose ground (`_on_loose_ground`) it crossfades to a gravel hiss (`skid_gravel`). AI cars do the same, 4 dB quieter. Guarded by `ProbeSlipSqueal`.
 - [ ] **Surfaces that talk** `surface-voice` · Missing · ⭐  
   Grass rumble, gravel hiss, puddle spray, and kerbs that tick through the suspension, the sound and the camera as you ride them.  
   *Today:* No rolling sounds. Kerbs are visual only. The stone steps already push noise into the springs, so the mechanism exists.

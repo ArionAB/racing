@@ -85,10 +85,10 @@ enum Surface { NONE, GRASS, GRAVEL, WATER }
 @export var slip_min_speed: float = 4.0
 ## Viteza laterala (m/s) la care incepe soapta si la care e scrasnet plin.
 @export var slip_lat_lo: float = 2.0
-@export var slip_lat_hi: float = 9.0
+@export var slip_lat_hi: float = 13.0
 ## Unghiul de derapaj (grade) la care incepe si la care e plin.
 @export var slip_angle_lo: float = 6.0
-@export var slip_angle_hi: float = 35.0
+@export var slip_angle_hi: float = 40.0
 ## Franare tare: decelerare (m/s^2) de la care scrasneste roata blocata, si
 ## nivelul (0..1) la decelerare mica / mare.
 @export var brake_decel_min: float = 12.0
@@ -215,10 +215,11 @@ func tick(delta: float, on_road: bool, loose: bool) -> void:
 	if car.is_player:
 		surface = _surface_kind(on_road, is_loose)
 		_update_roll(dt, speed)
-		# TODO(feel/handling-2): cand `Car.on_kerb` ajunge in aceasta ramura, citeste-l
-		# direct (`set_on_kerb(car.on_kerb)`); pana atunci proprietatea lipseste si
-		# `get` intoarce null (= fals), deci bordura ramane mut. (Linia de mai jos.)
-		set_on_kerb(car.get(&"on_kerb") == true)
+		# TODO(feel/handling-2): cand `Car.on_kerb` ajunge in aceasta ramura, inlocuieste
+		# linia de mai jos cu `set_on_kerb(car.on_kerb)`. Pana atunci proprietatea lipseste:
+		# garda `in` o sare, iar bordura o comanda cine apeleaza `set_on_kerb` (sondele).
+		if &"on_kerb" in car:
+			set_on_kerb(car.get(&"on_kerb") == true)
 		_update_kerb(dt, speed)
 		_update_wind(dt, speed)
 		_update_turbo(dt, speed)

@@ -121,6 +121,7 @@ run_step "Strivit: turbo-ul nu scoate masina din strivire" crush_turbo.log 'VERD
 run_step "Feed-ul de contact: perete, razuire, masina" contact_feed.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeContactFeed.tscn
 run_step "Motor cu trepte si sarcina (sunet): caderi la schimbare, zumzet sub gaz" engine_voice.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeEngineVoice.tscn
 run_step "Rateuri la ridicarea gazului (sunet): sansa, cooldown, doar turatie mare" lift_pops.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeLiftPops.tscn
+run_step "Scrasnet dupa alunecare (sunet): volum/pitch cu unghiul, sisait pe pietris" slip_squeal.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSlipSqueal.tscn
 run_step "Volan: se strange cu viteza, drift scutit, netezire" steer_speed.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSteerSpeed.tscn
 run_step "Perete: razuire pastreaza viteza, frontal opreste, anti-lipire" wall_glance.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeWallGlance.tscn
 run_step "Rasturnat: se intoarce pe roti pe loc, plasa pentru loc invalid" upright.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeUpright.tscn

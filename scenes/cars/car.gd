@@ -2765,8 +2765,8 @@ func _update_scrape_sparks() -> void:
 	# Cat de sus pleaca scanteile: pe perete bine in sus (peretele le-ar ascunde
 	# din camera de sus), intre masini si mai sus — contactul e intre doua
 	# acoperisuri, iar scanteia trebuie sa treaca de ele ca sa se vada.
-	var lift := 0.9
-	var lift_y := 0.05
+	var lift := 1.3
+	var lift_y := 0.55
 	if wall_contact and wall_scrape_speed > scrape_min_speed:
 		live = true
 		point = wall_point
@@ -2793,7 +2793,7 @@ func _update_scrape_sparks() -> void:
 	# Spre inapoi pe directia de mers, putin in afara peretelui si in sus.
 	# Si bine in sus: din camera de sus, sparturile care raman la nivelul
 	# peretelui se ascund in spatele lui.
-	_set_spark_direction(_scrape_sparks, back * 0.6 + n * 0.5 + Vector3.UP * lift)
+	_set_spark_direction(_scrape_sparks, back * 0.7 + n * 0.35 + Vector3.UP * lift)
 	var d := clampf(density, 0.0, 1.0)
 	_scrape_density.set_offset(1, lerpf(0.25, 1.0, d))
 	_scrape_sparks.initial_velocity_min = lerpf(2.5, 5.0, d)
@@ -2876,11 +2876,11 @@ func _contact_point_with(other: Car, fallback: Vector3) -> Vector3:
 static var _spark_material: StandardMaterial3D = null
 const SPARKS_MIN: int = 8
 const SPARKS_MAX: int = 14
-## Emitatorul continuu de razuire/frecare. Impreuna cu SPARKS_MAX (14): 32 de
-## scantei pe masina, plafonul din fisa de feel. (Rafala de la ciocnirea intre
+## Emitatorul continuu de razuire/frecare. Impreuna cu SPARKS_MAX (14): 40 de
+## scantei pe masina (plafonul cerut: <= ~40). (Rafala de la ciocnirea intre
 ## masini a coborat de la 24 la 14 ca sa incapa; la camera de joc o razuire cu
 ## 8-12 scantei se vedea ca doua-trei puncte risipite in urma masinii.)
-const SCRAPE_SPARKS_AMOUNT: int = 18
+const SCRAPE_SPARKS_AMOUNT: int = 26
 
 func _build_sparks() -> void:
 	_sparks = CPUParticles3D.new()
@@ -2947,19 +2947,31 @@ func _build_scrape_sparks(heat: Gradient, shrink: Curve) -> void:
 	e.top_level = true # inainte de add_child: dupa, ar ingheta transformul
 	e.emitting = false
 	e.amount = SCRAPE_SPARKS_AMOUNT
-	e.lifetime = 0.2
+	e.lifetime = 0.28
 	e.randomness = 0.6
 	e.local_coords = false
-	e.spread = 28.0
+	e.spread = 32.0
 	e.initial_velocity_min = 2.5
 	e.initial_velocity_max = 6.0
-	e.gravity = Vector3(0, -14.0, 0)
+	e.gravity = Vector3(0, -12.0, 0)
 	e.damping_min = 1.0
 	e.damping_max = 3.0
-	e.scale_amount_min = 0.7
-	e.scale_amount_max = 1.1
+	# Pornesc imprastiate pe ~1 m in jurul contactului, nu dintr-un punct:
+	# razuirea e o LINIE de contact lunga cat caroseria.
+	e.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	e.emission_sphere_radius = 0.6
+	e.scale_amount_min = 0.9
+	e.scale_amount_max = 1.3
 	e.scale_amount_curve = shrink
-	e.color_ramp = heat
+	# Rampa proprie, SATURATA (portocaliu-galben apoi rosu), nu alb-galben ca la
+	# rafala: alb-galben pe un perete bej sau o dala deschisa dispare. Opacitatea
+	# ramane plina pana aproape de capat.
+	var hot := Gradient.new()
+	hot.set_offsets(PackedFloat32Array([0.0, 0.5, 0.85, 1.0]))
+	hot.set_colors(PackedColorArray([
+		Color(1.0, 0.85, 0.25, 1.0), Color(1.0, 0.5, 0.05, 1.0),
+		Color(0.95, 0.22, 0.02, 1.0), Color(0.8, 0.12, 0.02, 0.0)]))
+	e.color_ramp = hot
 	# Rata: cine nu cade in partea opaca a rampei se naste invizibil.
 	_scrape_density = Gradient.new()
 	_scrape_density.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
@@ -2970,7 +2982,7 @@ func _build_scrape_sparks(heat: Gradient, shrink: Curve) -> void:
 	var streak := BoxMesh.new()
 	# Mai groase decat rafala: la camera de joc (16 m) o dara de 5 cm abia avea
 	# 2 pixeli si se vedeau doua-trei puncte portocalii pe captura.
-	streak.size = Vector3(0.16, 0.95, 0.16)
+	streak.size = Vector3(0.2, 1.25, 0.2)
 	streak.material = _spark_material
 	e.mesh = streak
 	e.particle_flag_align_y = true

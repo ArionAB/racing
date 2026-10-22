@@ -46,6 +46,12 @@ static func spawn(parent: Node, player: bool, pos: Vector3 = Vector3(0, 0.7, 0))
 	return car
 
 
+## Cade pe sol: cateva zeci de cadre dupa spawn, ca rotile sa atinga asfaltul.
+static func settle(tree: SceneTree, seconds: float = 0.6) -> void:
+	for _f in int(seconds / STEP):
+		await tree.physics_frame
+
+
 static func audio(car: Car) -> Node:
 	return car._audio
 
@@ -57,4 +63,6 @@ static func drv(car: Car) -> ScriptCtl:
 ## Vitezele se pun fata de botul masinii, doar pe orizontala.
 static func pin_speed(car: Car, speed: float) -> void:
 	var fwd := -car.global_transform.basis.z
-	car.linear_velocity = Vector3(fwd.x, 0.0, fwd.z).normalized() * speed
+	var v := Vector3(fwd.x, 0.0, fwd.z).normalized() * speed
+	# Verticala ramane a fizicii: fara ea masina atarna in aer cat o fixam.
+	car.linear_velocity = Vector3(v.x, car.linear_velocity.y, v.z)

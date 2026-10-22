@@ -124,6 +124,9 @@ enum Surface { NONE, GRASS, GRAVEL, WATER }
 @export var wind_full_frac: float = 1.15
 @export var wind_db: Vector2 = Vector2(-58.0, -12.0)
 @export var wind_pitch: Vector2 = Vector2(0.85, 1.35)
+## Cat creste vantul (0..1 din scara de volum) in aspiratia altei masini, la
+## `draft` = 1; doar peste ~jumatate din viteza maxima.
+@export_range(0.0, 0.5, 0.01) var wind_draft_swell: float = 0.15
 
 # --- Stare publica (o citesc sondele) ---
 var car: Car
@@ -214,7 +217,7 @@ func tick(delta: float, on_road: bool, loose: bool) -> void:
 		_update_roll(dt, speed)
 		# TODO(feel/handling-2): cand `Car.on_kerb` ajunge in aceasta ramura, citeste-l
 		# direct (`set_on_kerb(car.on_kerb)`); pana atunci proprietatea lipseste si
-		# `get` intoarce null (= fals), deci bordura ramane mut.
+		# `get` intoarce null (= fals), deci bordura ramane mut. (Linia de mai jos.)
 		set_on_kerb(car.get(&"on_kerb") == true)
 		_update_kerb(dt, speed)
 		_update_wind(dt, speed)
@@ -458,6 +461,11 @@ func _update_kerb(dt: float, speed: float) -> void:
 func _update_wind(dt: float, speed: float) -> void:
 	var f := speed / maxf(car.max_speed, 1.0)
 	var want := smoothstep(wind_start_frac, wind_full_frac, f)
+	# Aspiratia (slipstream): `Car.draft` (0..1) vine din feel/handling-2; pana
+	# ajunge in aceasta ramura `get` intoarce null si vantul ramane neschimbat.
+	var dv: Variant = car.get(&"draft")
+	var draft_amt := clampf(float(dv), 0.0, 1.0) if dv != null else 0.0
+	want = minf(want + wind_draft_swell * draft_amt * smoothstep(0.4, 0.8, f), 1.0)
 	_wind_gain = lerpf(_wind_gain, want, 1.0 - exp(-4.0 * dt))
 	if _wind_gain < 0.01:
 		if wind.playing:

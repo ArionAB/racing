@@ -38,9 +38,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Engine note with gears and load** `engine-gears` · Have · ⭐  
   The ear reads acceleration from a pitch that climbs, drops at a shift and climbs again, and from a note that gets harsher under throttle and softer on lift.  
   *Today:* `CarAudio` (`scenes/cars/car_audio.gd`): five fake gears derived from speed (the pitch drops about 0.5 at each shift, with a 0.14 s torque cut, and climbs again), an idle at standstill, and load from the throttle: the whine gets louder and a gear whirr layer fades in over it. The player runs two loops, an AI car one. Guarded by `ProbeEngineVoice`. Tunables are `@export` vars on `CarAudio`.
-- [ ] **Throttle-lift pops** `lift-pops` · Missing  
+- [x] **Throttle-lift pops** `lift-pops` · Have  
   A crackle when you lift at high revs, fired at random so it never becomes a pattern.  
-  *Today:* The backfire sample is loaded but never played.
+  *Today:* `CarAudio` plays `backfire` when the throttle drops from above 0.6 to below 0.2 above 70% of max speed: 55% chance, 1.5-2.7 s cooldown, a 45% chance of a quick second pop, random pitch. The player always; AI cars only within 30 m of the camera and 6 dB quieter. Guarded by `ProbeLiftPops`.
 - [ ] **A toy sound palette** `toy-sound-palette` · Missing  
   Toy cars do not have a V8. An electric whine with a small gear whirr like Re-Volt's RC cars, plastic clacks on contact, rattles on kerbs, a pull-back spring at rocket start. Cheap, and identity nobody else has.  
   *Today:* The engine is now an electric whine plus a gear whirr (`engine_whine`, `engine_whirr`, synthesized by `tools/generate_sfx_car.gd`), a plastic kerb rattle sample exists (`kerb_rattle`, not wired until `Car.on_kerb` lands) and the turbo has a plastic click. Still missing: plastic clacks on car contact and the pull-back spring at rocket start.

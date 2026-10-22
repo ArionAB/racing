@@ -123,6 +123,7 @@ run_step "Camera la izbituri: kick, hit-stop, atacator" impact_camera.log 'VERDI
 run_step "Race: ImpactFeel cablat (kick, hit-stop, final)" impact_wiring.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactWiring.tscn
 run_step "Popup de pozitie: debounce, numaratoare, final" position_popup.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePositionPopup.tscn
 run_step "AI care reactioneaza: clatinare, ranchiuna, cinstit" ai_react.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeAiReact.tscn
+run_step "Vibratie: marime, ritm, setare, cablaj" haptics.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHaptics.tscn
 run_step "Linii de viteza: prag, monotonie, turbo" speed_lines.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSpeedLines.tscn
 run_step "Hazarde mobile: kick de camera, fara hit-stop" hazard_kick.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHazardKick.tscn
 run_step "Rezervor sigilat: bara nu se incarca, arderea merge" sealed_turbo.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSealedTurbo.tscn

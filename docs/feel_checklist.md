@@ -71,9 +71,12 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **Toy-only animation** `toy-animation` · Missing  
   Antenna wobble, a wind-up key spinning faster with speed, plastic bits that rattle. Personality every second of driving.  
   *Today:* None.
-- [ ] **Haptics** `haptics` · Missing  
-  Short rumble on kerbs, landings and hits on a controller. Phone vibration on the big ones.  
-  *Today:* None anywhere.
+- [x] **Haptics** `haptics` · Have  
+  Short rumble on landings and hits on a controller. Phone vibration on the big ones.  
+  *Today:* `HapticsFeed` pulses the player only, on impacts (wall and car), hard landings (6 m/s and up) and turbo start: 15-60 ms, amplitude 0.25-1.0 scaled by strength, at most one pulse per 0.15 s on the real clock, silent in countdown and after the finish. Phones via `Input.vibrate_handheld`, pads via `start_joy_vibration`. Settings: Vibration toggle, persisted, default on. Kerb rumble is split out below.
+- [ ] **Kerb rumble** `kerb-haptics` · Optional  
+  A faint continuous buzz while riding a kerb, tied to the surface the car is on.  
+  *Today:* None. Needs a continuous pulse path next to `HapticsFeed.pulse()`; the 0.15 s rate limit is too slow for a buzz.
 
 ## Hitting the world
 

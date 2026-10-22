@@ -17,7 +17,12 @@ extends Node
 ##      (trece prin zero) si se linisteste sub 2 grade intr-o secunda dupa
 ##      oprire; demarajul o apleaca inapoi; o lovitura laterala zvacneste in
 ##      partea opusa;
-##   5. cheia: turatia la 25 m/s > de 2 ori cea de la 6 m/s, si zero pe loc.
+##   5. cheia: turatia la 25 m/s > de 2 ori cea de la 6 m/s, si zero pe loc;
+##   6. zdranganeala (piese de plastic care zornaie): pe bordura, trepte, teren
+##      afanat si dupa aterizari antena (si cheia) tremura mic si repede, mai mult
+##      cu viteza; pe drum neted la aceeasi viteza si pe loc, deloc. Apoi pe o
+##      pista reala, tinuta pe banda de bordura la 25 m/s fata de axa soselei.
+## Sabotaj (trebuie sa PICE): `-- --off` stinge `toy_rattle_enabled`.
 ##
 ## Ruleaza CA SCENA:
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeToyAnimation.tscn
@@ -26,6 +31,7 @@ const STEP: float = 1.0 / 60.0
 const CAR_SCENE: String = "res://scenes/cars/Car.tscn"
 
 var _failed: bool = false
+var _off: bool = false
 
 
 class ScriptDriver:
@@ -36,6 +42,7 @@ class ScriptDriver:
 
 
 func _ready() -> void:
+	_off = "--off" in OS.get_cmdline_user_args()
 	var g := StaticBody3D.new()
 	var cs := CollisionShape3D.new()
 	var sh := BoxShape3D.new()
@@ -55,6 +62,8 @@ func _ready() -> void:
 		i += 1
 	await _test_flag_off()
 	await _test_dynamics()
+	await _test_rattle()
+	await _test_rattle_real_kerb()
 	print("")
 	print("VERDICT: ", "PROBLEMA" if _failed else "OK")
 	get_tree().quit(1 if _failed else 0)
@@ -72,6 +81,8 @@ func _spawn(d: CarData, pos: Vector3) -> Car:
 	car.apply_data(d)
 	car.global_position = pos
 	car.race_active = true
+	if _off:
+		car.toy_rattle_enabled = false
 	return car
 
 
@@ -298,3 +309,208 @@ func _key_rate(car: Car, hold_speed: float = -1.0) -> float:
 		total += absf(wrapf(a1 - a0, -PI, PI))
 		a0 = a1
 	return total / (6.0 * STEP)
+
+
+# ------------------------------------------------------- zdranganeala
+
+## Cat de repede se misca varful antenei de la un cadru la altul (rad/cadru, RMS):
+## tremurul rapid, nu aplecarea lenta a arcului. `setup` ruleaza inaintea fiecarui
+## pas (flaguri de teren fortate), `speed` e viteza data lui `_update_toys`.
+func _jitter(car: Car, speed: float, frames: int, setup: Callable) -> Dictionary:
+	var prev := _top_lean(car)
+	var prev_key := Vector2((car._toy_key as Node3D).rotation.x, (car._toy_key as Node3D).rotation.y)
+	var sq := 0.0
+	var sq_key := 0.0
+	var mean_r := 0.0
+	for _f in frames:
+		setup.call()
+		car._update_toys(STEP, speed)
+		var l := _top_lean(car)
+		var kk := Vector2((car._toy_key as Node3D).rotation.x, (car._toy_key as Node3D).rotation.y)
+		sq += (l - prev).length_squared()
+		sq_key += (kk - prev_key).length_squared()
+		prev = l
+		prev_key = kk
+		mean_r += car.toy_rattle
+	return {"ant": sqrt(sq / float(frames)), "key": sqrt(sq_key / float(frames)),
+		"rattle": mean_r / float(frames)}
+
+
+func _test_rattle() -> void:
+	print("")
+	print("-- 6. zdranganeala: bordura, trepte, afanat, aterizare --")
+	if _off:
+		print("  (SABOTAJ: toy_rattle_enabled = false)")
+	var car := _spawn(GameState.CAR_DATA[0] as CarData, Vector3(-200, 0.7, 200))
+	car.set_controller(ScriptDriver.new())
+	for _f in int(1.0 / STEP):
+		await get_tree().physics_frame
+	_check(car.wheels_on_ground > 0, "masina de proba sta pe roti (%d)" % car.wheels_on_ground)
+	var none := func() -> void:
+		car.on_kerb = false
+		car.on_steps = false
+		car._toy_loose = false
+	var kerb := func() -> void:
+		car.on_kerb = true
+		car.on_steps = false
+		car._toy_loose = false
+	var steps := func() -> void:
+		car.on_kerb = false
+		car.on_steps = true
+		car._toy_loose = false
+	var loose := func() -> void:
+		car.on_kerb = false
+		car.on_steps = false
+		car._toy_loose = true
+	# Aceeasi viteza (20 m/s), aceeasi masina: doar terenul difera. Se lasa 20 de
+	# cadre sa se aseze nivelul, apoi se masoara 120.
+	var res: Dictionary = {}
+	for pair in [["neted", none, 20.0], ["bordura", kerb, 20.0], ["trepte", steps, 20.0],
+			["afanat", loose, 20.0], ["bordura 4 m/s", kerb, 4.0], ["bordura pe loc", kerb, 0.0]]:
+		var setup: Callable = pair[1]
+		_jitter(car, float(pair[2]), 20, setup)
+		res[pair[0]] = _jitter(car, float(pair[2]), 120, setup)
+		var r: Dictionary = res[pair[0]]
+		print("  %-15s antena %.4f rad/cadru, cheie %.4f, nivel mediu %.2f"
+			% [pair[0], r.ant, r.key, r.rattle])
+	var smooth_ant: float = res["neted"].ant
+	var smooth_key: float = res["neted"].key
+	_check(smooth_ant < 0.002 and smooth_key < 0.002,
+		"drum neted la 20 m/s: antena si cheia nu tremura (%.4f / %.4f)" % [smooth_ant, smooth_key])
+	for nm: String in ["bordura", "trepte", "afanat"]:
+		var r: Dictionary = res[nm]
+		var floor_ant := maxf(smooth_ant, 0.001)
+		_check(float(r.ant) > 10.0 * floor_ant and float(r.ant) > 0.01,
+			"%s la 20 m/s: antena tremura (%.4f, de %.0f ori peste drumul neted)"
+			% [nm, r.ant, float(r.ant) / floor_ant])
+		_check(float(r.key) > 10.0 * maxf(smooth_key, 0.001),
+			"%s la 20 m/s: si cheia se clatina pe ax (%.4f)" % [nm, r.key])
+	_check(float(res["bordura"].ant) < 0.12,
+		"tremurul ramane mic (< 0.12 rad/cadru, e plastic, nu o furtuna): %.4f"
+		% float(res["bordura"].ant))
+	_check(float(res["bordura"].ant) > 1.8 * float(res["bordura 4 m/s"].ant),
+		"mai repede = mai tare: bordura 20 m/s %.4f vs 4 m/s %.4f"
+		% [float(res["bordura"].ant), float(res["bordura 4 m/s"].ant)])
+	_check(float(res["bordura pe loc"].ant) < 0.002 and float(res["bordura pe loc"].rattle) < 0.01,
+		"pe loc, chiar pe bordura: nimic (%.4f)" % float(res["bordura pe loc"].ant))
+	# Aterizare: rafala scurta, apoi liniste.
+	none.call()
+	for _k in 40:
+		car._update_toys(STEP, 0.0)
+	var base_r := car.toy_rattle
+	car.landed.emit(car, 12.0)
+	var burst := _jitter(car, 0.0, 12, none)
+	for _k in 30:
+		car._update_toys(STEP, 0.0)
+	var later := _jitter(car, 0.0, 30, none)
+	print("  aterizare 12 m/s (pe loc): primele 12 cadre antena %.4f, nivel %.2f; dupa 0.7 s: %.4f"
+		% [burst.ant, burst.rattle, later.ant])
+	_check(base_r < 0.01, "inainte de aterizare: liniste")
+	_check(float(burst.ant) > 0.01 and float(burst.rattle) > 0.4,
+		"aterizare grea: antena zornaie chiar si pe loc")
+	_check(float(later.ant) < 0.002, "rafala moare in sub o secunda")
+	car.landed.emit(car, 6.5)
+	var soft := _jitter(car, 0.0, 12, none)
+	print("  aterizare 6.5 m/s: antena %.4f (vs %.4f la 12 m/s)" % [soft.ant, burst.ant])
+	_check(float(soft.ant) < float(burst.ant), "aterizarea usoara zornaie mai putin decat cea grea")
+	car.queue_free()
+	await get_tree().physics_frame
+
+
+## Pe o pista REALA cu borduri: masina jucatorului tinuta la 25 m/s pe banda
+## bordurii vs pe axa soselei; aceeasi procedura, aceeasi masina.
+func _test_rattle_real_kerb() -> void:
+	print("")
+	print("-- 7. pista reala: bordura vs axa soselei --")
+	var measured := false
+	for t in [2, 0, 1, 3, 5, 7, 8, 9]:
+		GameState.selected_track = t
+		GameState.champ_active = false
+		GameState.total_laps = 99
+		var race := (load("res://scenes/race/Race.tscn") as PackedScene).instantiate() as Race
+		add_child(race)
+		var track: Track = race.track
+		var spots: Array[int] = []
+		for i in track._kerb_idx.size():
+			if track._kerb_idx[i] == 1 and i % 2 == 0:
+				spots.append(i)
+		if spots.size() < 30 or race.player._toy_antenna == null:
+			race.queue_free()
+			await get_tree().physics_frame
+			continue
+		print("  pista %d (%s)" % [t, track.track_name])
+		var guard := 0
+		while race.state != Race.State.RUNNING and guard < 1800:
+			await get_tree().physics_frame
+			guard += 1
+		race.player.toy_rattle_enabled = not _off
+		var on := await _ride_ant(race, track, spots, 0.45, 25.0)
+		var axis := await _ride_ant(race, track, spots,
+			track.width_at_index(spots[spots.size() / 3]), 25.0)
+		var slow := await _ride_ant(race, track, spots, 0.45, 1.0)
+		print("  bordura 25 m/s: antena %.4f rad/cadru, nivel %.2f; axa: %.4f, nivel %.2f; bordura 1 m/s: %.4f, nivel %.2f"
+			% [on.x, on.y, axis.x, axis.y, slow.x, slow.y])
+		_check(on.y > 0.4, "pe bordura reala nivelul de zdranganeala urca (%.2f)" % on.y)
+		_check(on.x > 2.0 * maxf(axis.x, 0.002),
+			"antena tremura pe bordura de >2 ori mai mult decat pe axa (%.4f vs %.4f)" % [on.x, axis.x])
+		_check(axis.y < 0.15, "pe axa soselei zdranganeala ramane joasa (%.2f)" % axis.y)
+		_check(slow.y < 0.1, "oprit pe bordura: fara zdranganeala (%.2f)" % slow.y)
+		measured = true
+		race.queue_free()
+		await get_tree().physics_frame
+		break
+	_check(measured, "o pista cu borduri si jucarie a fost gasita si masurata")
+
+
+class HoldDriver:
+	extends CarController
+	func get_throttle() -> float:
+		return 0.0
+
+
+## Tine masina pe lateralul dorit al unui tronson cu borduri si masoara tremurul
+## antenei (RMS al deplasarii varfului pe cadru) si nivelul mediu de zdranganeala.
+func _ride_ant(race: Race, track: Track, spots: Array[int], lat_from_edge: float,
+		speed: float) -> Vector2:
+	var car := race.player
+	car.set_controller(HoldDriver.new())
+	var i0 := spots[spots.size() / 3]
+	var side := track._side_at(i0)
+	var w := track.width_at_index(i0)
+	var pos: Vector3 = track.baked[i0] + side * (w - lat_from_edge)
+	var tang: Vector3 = track.baked[(i0 + 3) % track.baked.size()] - track.baked[i0]
+	tang.y = 0.0
+	tang = tang.normalized()
+	car.global_transform = Transform3D(Basis.looking_at(tang, Vector3.UP), pos + Vector3.UP * 0.6)
+	car.linear_velocity = tang * speed
+	car.angular_velocity = Vector3.ZERO
+	car.race_active = true
+	car.road_index = i0
+	car.last_safe_index = i0
+	race.state = Race.State.RUNNING
+	var prev := Vector3.ZERO
+	var sq := 0.0
+	var n := 0
+	var level := 0.0
+	for f in 90:
+		var idx := track.closest_index(car.road_index, car.global_position)
+		var s2 := track._side_at(idx)
+		var w2 := track.width_at_index(idx)
+		var t2: Vector3 = track.baked[(idx + 3) % track.baked.size()] - track.baked[idx]
+		t2.y = 0.0
+		t2 = t2.normalized()
+		var lat := (car.global_position - track.baked[idx]).dot(s2)
+		var want := w2 - lat_from_edge
+		var v := t2 * speed + s2 * clampf((want - lat) * 6.0, -3.0, 3.0)
+		v.y = car.linear_velocity.y
+		car.linear_velocity = v
+		car.rotation.y = atan2(-t2.x, -t2.z)
+		await get_tree().physics_frame
+		if f >= 20:
+			var l := _top_lean(car)
+			if n > 0:
+				sq += (l - prev).length_squared()
+			prev = l
+			n += 1
+			level += car.toy_rattle
+	return Vector2(sqrt(sq / float(maxi(n - 1, 1))), level / float(maxi(n, 1)))

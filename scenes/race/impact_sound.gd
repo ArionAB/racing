@@ -101,16 +101,17 @@ func _init() -> void:
 func setup(p_player: Car, p_cars: Array) -> void:
 	_player = p_player
 	_cars.clear()
-	for c in p_cars:
+	var all: Array = p_cars.duplicate()
+	all.append(_player)
+	for c in all:
 		var car := c as Car
 		if car == null or _cars.has(car):
 			continue
 		_cars.append(car)
-		car.impact.connect(_on_impact)
-	if not _cars.has(_player):
-		_cars.append(_player)
-		_player.impact.connect(_on_impact)
-	_player.landed.connect(_on_landed)
+		if not car.impact.is_connected(_on_impact):
+			car.impact.connect(_on_impact)
+	if not _player.landed.is_connected(_on_landed):
+		_player.landed.connect(_on_landed)
 
 
 func _exit_tree() -> void:

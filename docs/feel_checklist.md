@@ -131,24 +131,24 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **Spin-out assist** `spinout-assist` · Missing  
   Once a car is turned past sideways, a gentle auto-straighten so the player is back on line in a second instead of facing the wrong way. Arcade standard.  
   *Today:* None.
-- [ ] **You know who hit you** `who-hit-me` · Missing  
+- [x] **You know who hit you** `who-hit-me` · Have  
   A camera kick from the hit side, a positional impact sound from the other car, a horn from the AI.  
-  *Today:* Camera kick comes from the hit side and the screen edge on that side flashes briefly (`Vignette.flash_edge`). Still missing: positional impact sound from the other car and the AI horn (audio).
+  *Today:* Done. Camera kick comes from the hit side and the screen edge on that side flashes briefly (`Vignette.flash_edge`). For a car-car hit that involves the player, `ImpactSound` keeps the body (`bump`, `metal_hit`) as a 2D punch and plays the main layer (tap, crunch or crash) from one of four pooled `AudioStreamPlayer3D` nodes owned by `AudioManager`, at the contact point pushed `positional_spread_m` (3 m) toward the other car so the side is audible from the chase cam. The AI sounds a toy horn (`toy_horn.wav`, own tone per car, 3 s per-car and 0.4 s global cooldown, only within 55 m of the camera) when it starts a grudge, and now and then (`rub_honk_chance` 0.5, once per episode) after the player has rubbed it for 0.6 s. Guards: `ProbePositionalHits`, `ProbeHorn`.
 - [x] **Driver reactions to the other car** `driver-social` · Have  
   A fist shake at the offender, a head whip, a glance at the car alongside.  
   *Today:* Done (open-cockpit drivers): the head turns toward a car alongside (within 4 m laterally or rubbing), the flinch whips the head on a hit, and after being hit by another car the arm on that side shakes a fist for under a second while the head turns to the offender. The car that did the hitting does not shake a fist, and walls do not trigger it.
-- [ ] **Hits between AI cars near you** `ai-ai-hits` · Missing  
+- [x] **Hits between AI cars near you** `ai-ai-hits` · Have  
   Positional and quieter, so the pack sounds alive.  
-  *Today:* Silent.
+  *Today:* Done. A hit between two cars that are not the player sounds only within `ai_range_m` (35 m) of the camera and from 3.5 m/s, 8 dB quieter than the same hit with the player, positional (main layer only, no body), at most one per 0.12 s overall and 0.15 s per pair. It uses priority 1 in the 3D pool of four, so it never steals a player or hazard sound. Guard: `ProbePositionalHits`.
 - [ ] **Position-change feedback** `position-change` · Missing  
   A short stinger and a HUD popup when you overtake or are overtaken.  
   *Today:* The HUD popup is in (`PositionWatch` + `PositionPopup`): "P3" with a green up or red down triangle after a position is held 0.4 s, coalesced, none in countdown or after the finish. Still missing: the stinger (audio); hook it on `PositionWatch.announced`.
 - [ ] **Slipstream** `slipstream` · Missing  
   A small speed gain when following closely, with wind lines and a sound. Rewards closeness without contact and makes running in the pack tactical.  
   *Today:* None.
-- [ ] **AI that reacts** `ai-reacts` · Missing  
+- [x] **AI that reacts** `ai-reacts` · Have  
   A wobble when hit, a counter-steer, a momentary grudge against whoever hit it, horns.  
-  *Today:* Wobble, counter-steer and grudge are in (`AIController`, `reacts` toggle, tunables `wobble_*` and `grudge_*`): a car hit by another car at 4 m/s or more gets a decaying steering term (faded in between 8 and 18 m/s, so hairpins are untouched), its first lobe against the yaw the hit imparted, and for 4 s it tries to sit alongside the car that hit it (one lane over, only while that car is within 28 m ahead). Steering and target line only, no speed or grip change. Still missing: the horns (audio).
+  *Today:* Done. Wobble, counter-steer and grudge are in (`AIController`, `reacts` toggle, tunables `wobble_*` and `grudge_*`): a car hit by another car at 4 m/s or more gets a decaying steering term (faded in between 8 and 18 m/s, so hairpins are untouched), its first lobe against the yaw the hit imparted, and for 4 s it tries to sit alongside the car that hit it (one lane over, only while that car is within 28 m ahead). Steering and target line only, no speed or grip change. The car that starts a grudge also sounds a toy horn (see `who-hit-me`, guard `ProbeHorn`).
 - [x] **Player's hits big, AI's hits small** `player-big-ai-small` · Have  
   Hit-stop and shake make your own bumps feel powerful. AI-initiated contact on you stays capped and telegraphed so bumping reads as a mechanic, not punishment.  
   *Today:* Impulses are capped, and the camera feedback is asymmetric: the attacker is decided from both cars' pre-impact speeds along the contact line. Player attacker (or equal head-on) gets full kick and hit-stop; an AI hitting you gets a capped kick (0.4 m) and no hit-stop.

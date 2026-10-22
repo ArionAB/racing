@@ -250,6 +250,7 @@ var sfx_log: Array[Dictionary] = []
 var _pool3d: Array[AudioStreamPlayer3D] = []
 var _p3_prio: Array[int] = []
 var _p3_start: Array[float] = []
+var _p3_until: Array[float] = []
 var _last_variant: Dictionary = {}
 var _loops: Dictionary = {}
 var _horn_ready: Dictionary = {}
@@ -270,6 +271,7 @@ func _events_ready() -> void:
 		_pool3d.append(p)
 		_p3_prio.append(0)
 		_p3_start.append(-1.0e9)
+		_p3_until.append(-1.0e9)
 	for loop_name: StringName in LOOP_STREAMS:
 		var wav := EVENT_SFX[LOOP_STREAMS[loop_name]] as AudioStreamWAV
 		if wav != null:
@@ -452,13 +454,18 @@ func _step_loop(l: Dictionary, delta: float) -> void:
 ## vechi), dar numai daca nu e mai important decat noul sunet; altfel sunetul se
 ## pierde. Prioritati: 3 jucatorul/hazard, 2 claxon, 1 AI-AI, 0 decor.
 func play_sfx_at(sfx_name: StringName, pos: Vector3, pitch: float = 1.0,
-		volume_db: float = -6.0, priority: int = 1) -> AudioStreamPlayer3D:
+		volume_db: float = -6.0, priority: int = 1, jitter: float = 0.03) -> AudioStreamPlayer3D:
 	var snd := stream(sfx_name)
 	if snd == null or _pool3d.is_empty():
 		return null
+	var now := float(clock.call())
 	var idx := -1
+	# „Liber" = ceasul `clock` a trecut de sfarsitul sunetului, nu `playing`: pe
+	# desktop e acelasi lucru, dar in sondele headless (simulare mai rapida decat
+	# timpul real) `playing` ramane adevarat mult dupa ce sunetul ar fi trebuit sa se
+	# termine, iar comportamentul pool-ului ar depinde de viteza masinii.
 	for i in _pool3d.size():
-		if not _pool3d[i].playing:
+		if now >= _p3_until[i]:
 			idx = i
 			break
 	if idx < 0:
@@ -475,18 +482,29 @@ func play_sfx_at(sfx_name: StringName, pos: Vector3, pitch: float = 1.0,
 	var player := _pool3d[idx]
 	player.stream = snd
 	player.global_position = pos
-	player.pitch_scale = pitch * randf_range(0.97, 1.03)
+	player.pitch_scale = pitch * (randf_range(1.0 - jitter, 1.0 + jitter) if jitter > 0.0 else 1.0)
 	player.volume_db = volume_db
 	player.play()
 	_p3_prio[idx] = priority
-	_p3_start[idx] = float(clock.call())
+	_p3_start[idx] = now
+	_p3_until[idx] = now + snd.get_length() / maxf(player.pitch_scale, 0.1)
 	_log(sfx_name, volume_db, player.pitch_scale, true, pos)
 	return player
 
 
-## Playerele 3D (sonde: pozitii, volume, cate canta).
+## Playerele 3D (sonde: pozitii, volume).
 func pool3d() -> Array[AudioStreamPlayer3D]:
 	return _pool3d
+
+
+## Cate playere 3D sunt ocupate ACUM, dupa `clock` (sonde).
+func pool3d_busy() -> int:
+	var now := float(clock.call())
+	var n := 0
+	for i in _pool3d.size():
+		if now < _p3_until[i]:
+			n += 1
+	return n
 
 
 ## Pozitia camerei active (urechea), sau Vector3.INF daca nu exista.
@@ -520,7 +538,7 @@ func honk(key: int, pos: Vector3) -> bool:
 	_horn_ready[key] = now + horn_cooldown_s
 	_horn_global_until = now + horn_global_gap_s
 	var tone := 0.84 + float(posmod(key, 9)) * 0.045
-	play_sfx_at(&"toy_horn", pos, tone, horn_db, 2)
+	play_sfx_at(&"toy_horn", pos, tone, horn_db, 2, 0.0) # tonul masinii: fara zgomot
 	return true
 
 

@@ -122,6 +122,8 @@ run_step "Feed-ul de contact: perete, razuire, masina" contact_feed.log 'VERDICT
 run_step "Sunet de impact: straturi dupa putere, variante, conducta" impact_sound.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactSound.tscn
 run_step "Bucle de contact: razuire, frecare, fara hartuiala la palpaire" scrape_loop.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeScrapeLoop.tscn
 run_step "Aterizare: bufnitura dupa viteza de cadere, strat greu" land_thud.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeLandThud.tscn
+run_step "Impacturi pozitionale: cine m-a lovit, AI-AI, pool de 4" positional_hits.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePositionalHits.tscn
+run_step "Claxon de jucarie: ranchiuna, frecare, pauze, raza" horn.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHorn.tscn
 run_step "Volan: se strange cu viteza, drift scutit, netezire" steer_speed.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSteerSpeed.tscn
 run_step "Perete: razuire pastreaza viteza, frontal opreste, anti-lipire" wall_glance.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeWallGlance.tscn
 run_step "Rasturnat: se intoarce pe roti pe loc, plasa pentru loc invalid" upright.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeUpright.tscn

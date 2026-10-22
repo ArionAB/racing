@@ -122,6 +122,11 @@ run_step "Feed-ul de contact: perete, razuire, masina" contact_feed.log 'VERDICT
 run_step "Volan: se strange cu viteza, drift scutit, netezire" steer_speed.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSteerSpeed.tscn
 run_step "Perete: razuire pastreaza viteza, frontal opreste, anti-lipire" wall_glance.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeWallGlance.tscn
 run_step "Rasturnat: se intoarce pe roti pe loc, plasa pentru loc invalid" upright.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeUpright.tscn
+run_step "Body jolt: caroseria vizuala la impact, revenire, compunere" body_jolt.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeBodyJolt.tscn
+run_step "Scantei de contact: razuire, rafala, frecare intre masini" contact_sparks.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeContactSparks.tscn
+run_step "Fum si urme de drift dupa unghiul de alunecare" drift_smoke.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeDriftSmoke.tscn
+run_step "Praful de aterizare, colorat dupa suprafata" landing_dust.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeLandingDust.tscn
+run_step "Soferul: tresarire, tremur, privire, pumn" driver_react.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeDriverReact.tscn
 run_step "Rezervor sigilat: bara nu se incarca, arderea merge" sealed_turbo.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSealedTurbo.tscn
 run_step "Fantoma: inregistrare, fisier, redare" ghost.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeGhost.tscn
 run_step "Bolovanul de pe buza + directie inversata" rim_boulder.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeRimBoulder.tscn

@@ -58,16 +58,16 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* One-shot at the start plus flame and a pitch bump. No sustain, no release.
 - [ ] **Drift with a snap in and a snap out** `drift-snap` · Partial  
   Clear entry, a held slide you steer against, and an exit that straightens cleanly. Smoke thickens with the slide angle.  
-  *Today:* Entry and exit ramps feel good. Smoke and marks are on/off rather than scaled.
+  *Today:* Entry and exit ramps feel good. Smoke density, opacity and size and the skid-mark opacity now scale with the slide angle and speed, and marks are also left on big slides without the handbrake and on hard braking. Still missing: the squeal that tracks slip (see `slip-squeal`).
 - [ ] **Jumps with a skill component** `jump-skill` · Partial  
   Lip stretch on takeoff, a little air control so gas and brake level the nose, then a landing thud scaled by fall speed, a dust puff, squash and a camera dip.  
-  *Today:* Stretch, squash, sound and shake are in. No air control, no landing dust, fixed-level thud.
+  *Today:* Stretch, squash, sound and shake are in, and a landing dust burst (surface-tinted, scaled by fall speed) is in. Still missing: air control and the fall-scaled thud.
 - [x] **Steering that tightens with speed** `steering-speed` · Have  
   Less steering lock at high speed so the car never feels twitchy, snappy lock at low speed, and a short smoothing on input so a button tap does not jerk.  
   *Today:* Lock tapers linearly from full at 50% of max speed to 65% at max (`steer_taper_at_top`), drift exempt. `PlayerController` smooths digital steering: 0.10 s in, 0.06 s out, instant through zero on reversal. Guard: `ProbeSteerSpeed`.
-- [ ] **A driver who reacts to the road** `driver-reacts` · Partial  
+- [x] **A driver who reacts to the road** `driver-reacts` · Have  
   A flinch on impacts, a head turn into the corner, arms that shake on kerbs.  
-  *Today:* Torso and head lean with cornering and braking forces. No impact or kerb reaction.
+  *Today:* Done (open-cockpit drivers): torso and head lean with cornering and braking forces and the head turns with the steering, flinch away from every impact (back in about 0.4 s), and the arms shake on rough ground from spring compression speed.
 - [ ] **Toy-only animation** `toy-animation` · Missing  
   Antenna wobble, a wind-up key spinning faster with speed, plastic bits that rattle. Personality every second of driving.  
   *Today:* None.
@@ -82,16 +82,16 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Wall hits within 30 degrees of the wall plane (`glance_angle_deg`) cut car friction to `glance_friction` and nudge the nose toward parallel through `_impact_yaw`; head-on keeps the stop-with-bounce. A nose pinned at low speed for 0.4 s is shoved away. Moving hazards (AnimatableBody3D) are skipped. Guard: `ProbeWallGlance`.
 - [ ] **Scrape loop and sparks** `scrape-sparks` · Missing · ⭐  
   While sliding along a wall: a continuous grind whose pitch follows speed, sparks from the contact point, a slight pull on the steering.  
-  *Today:* A single one-shot clunk. Sparks exist only for car-on-car.
+  *Today:* Sparks are in: a continuous `ScrapeSparks` emitter at the wall contact point above 4 m/s (rate follows scrape speed) and a burst on wall impacts above 6 m/s. Still missing: the grind loop sound and the slight pull on the steering. Still just the single one-shot clunk.
 - [ ] **Impact sound in layers** `impact-layers` · Partial · ⭐  
   Soft tap, crunch, big crash chosen by speed difference, with random pitch so repeats never sound like a machine gun.  
   *Today:* Car-on-car already layers two sounds by speed. The wall hit is one fixed-level sound.
 - [ ] **Directional camera kick and hit-stop** `hitstop-shake` · Partial · ⭐  
   Shake in the direction of the hit rather than randomly, plus a freeze of a few frames on big hits so the brain registers the weight. The cheapest weight trick in games.  
   *Today:* Shake is scaled by impact but random. No hit-stop.
-- [ ] **Body jolt on the visual body** `body-jolt` · Missing  
+- [x] **Body jolt on the visual body** `body-jolt` · Have  
   Nudge the mesh, not the physics body, in the hit direction and let it spring back. The physics stays safe and the car looks like it took the hit.  
-  *Today:* The visual node already does squash and drift roll, so the hook is there. No impact jolt.
+  *Today:* Done: on the car's own `impact` the visual body moves up to 8 cm along the normal and tilts up to 5.5 degrees away, on an exact underdamped spring (back to rest in about 0.35 s). One compose step now writes the visual transform (drift roll, spin, jolt, rub lean); squash keeps owning scale. Tunables `jolt_*` on `Car`.
 - [ ] **Things that fly** `things-fly` · Partial  
   Cones, cups, blocks, signs that scatter with a sound and a few debris chunks. The tax for hitting things should be low where you want chaos.  
   *Today:* Small decor already flies, silently. Barrels are static.
@@ -121,7 +121,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* Done well: mass ratio from the solver, a clamped yaw kick, a brief loss of grip.
 - [ ] **Side-by-side rubbing** `side-rubbing` · Partial  
   Sustained contact needs the scrape loop, continuous sparks, both bodies leaning away, and a steady push apart so cars do not weld.  
-  *Today:* The push apart exists. Sparks fire only on the first contact, no loop.
+  *Today:* The push apart exists. Continuous sparks at the rub point above 2 m/s relative speed (one car of the pair emits) and both bodies lean about 3 degrees away are in. Still missing: the scrape loop sound.
 - [x] **Corner hits spin, straight hits shove** `corner-hits` · Have  
   Clipping a rear corner rotates the leading car more than a square push. Being rear-ended wobbles you without stopping you.  
   *Today:* Mostly emergent from the physics.
@@ -131,9 +131,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **You know who hit you** `who-hit-me` · Missing  
   A camera kick from the hit side, a positional impact sound from the other car, a horn from the AI.  
   *Today:* Impact sounds are flat 2D and only fire when the player is involved.
-- [ ] **Driver reactions to the other car** `driver-social` · Missing  
+- [x] **Driver reactions to the other car** `driver-social` · Have  
   A fist shake at the offender, a head whip, a glance at the car alongside.  
-  *Today:* Lean only.
+  *Today:* Done (open-cockpit drivers): the head turns toward a car alongside (within 4 m laterally or rubbing), the flinch whips the head on a hit, and after being hit by another car the arm on that side shakes a fist for under a second while the head turns to the offender. The car that did the hitting does not shake a fist, and walls do not trigger it.
 - [ ] **Hits between AI cars near you** `ai-ai-hits` · Missing  
   Positional and quieter, so the pack sounds alive.  
   *Today:* Silent.

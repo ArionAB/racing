@@ -20,6 +20,10 @@ const SFX: Dictionary = {
 	&"turbo_click": preload("res://assets/audio/turbo_click.wav"),
 	&"turbo_whoosh": preload("res://assets/audio/turbo_whoosh.wav"),
 	&"turbo_release": preload("res://assets/audio/turbo_release.wav"),
+	# Rocket start (RocketStartAudio): clichetul cheii cat tii TURBO in numaratoare
+	# si arcul tras care se descarca la GO. Una-lovituri, nu bucle.
+	&"rocket_ratchet": preload("res://assets/audio/rocket_ratchet.wav"),
+	&"rocket_spring": preload("res://assets/audio/rocket_spring.wav"),
 	&"boost": preload("res://assets/audio/boost.wav"),
 	&"drift_start": preload("res://assets/audio/drift_start.wav"),
 	&"drift_level": preload("res://assets/audio/drift_level.wav"),
@@ -174,6 +178,9 @@ const EVENT_SFX: Dictionary = {
 	&"impact_crunch_b": preload("res://assets/audio/impact_crunch_b.wav"),
 	&"impact_crash_a": preload("res://assets/audio/impact_crash_a.wav"),
 	&"impact_crash_b": preload("res://assets/audio/impact_crash_b.wav"),
+	# Clacul de plastic, doar intre masini (a patra categorie, peste cele trei).
+	&"impact_clack_a": preload("res://assets/audio/impact_clack_a.wav"),
+	&"impact_clack_b": preload("res://assets/audio/impact_clack_b.wav"),
 	# Hartaielile (bucle, vezi set_loop).
 	&"scrape_loop": preload("res://assets/audio/scrape_loop.wav"),
 	&"rub_loop": preload("res://assets/audio/rub_loop.wav"),
@@ -192,6 +199,7 @@ const IMPACT_LAYERS: Dictionary = {
 	&"tap": [&"impact_tap_a", &"impact_tap_b"],
 	&"crunch": [&"impact_crunch_a", &"impact_crunch_b"],
 	&"crash": [&"impact_crash_a", &"impact_crash_b"],
+	&"clack": [&"impact_clack_a", &"impact_clack_b"],
 	&"knock": [&"prop_knock_a", &"prop_knock_b"],
 }
 
@@ -213,6 +221,10 @@ const POOL3D_SIZE: int = 4
 @export var impact_db_max: float = -1.0
 ## Un strat cu cota mai mica din amestec nu se mai reda (economie de voci).
 @export var impact_min_layer_weight: float = 0.12
+## Clacul de plastic al contactului intre masini (toy-sound-palette): cu cate dB
+## sub volumul total al impactului. Urmeaza aceeasi curba (mai tare cu puterea),
+## dar ramane mereu sub stratul principal — un accent, nu strat de impact.
+@export var impact_clack_offset_db: float = -8.0
 ## Cat se adauga stratului principal cand e redat pozitional (atenuarea 3D il taie).
 @export var positional_gain_db: float = 3.0
 
@@ -322,7 +334,7 @@ func _events_ready() -> void:
 ## (suma cotelor = 1): puterea totala creste cu puterea impactului, iar caracterul
 ## trece de la „tac" la „crancanit" la „bufnitura" fara sa sara in volum. Peste ele
 ## vine un strat de corp (rol &"body"): `wall_hit` la perete, `bump` (+ clinchetul
-## `metal_hit`) intre masini — cel care da „punch"-ul si ramane mereu 2D.
+## `metal_hit`, plus clacul de plastic `impact_clack_*`) intre masini — cel care da „punch"-ul si ramane mereu 2D.
 ##
 ## `kind`: &"wall" sau &"car" (ca `Car.impact`). Fiecare intrare:
 ## {name, db, pitch, role: &"main"|&"body", layer}.
@@ -359,6 +371,13 @@ func plan_impact(kind: StringName, strength: float) -> Array[Dictionary]:
 			"db": master - 5.0 + 10.0 * log(body_w) / log(10.0),
 			"pitch": lerpf(1.1, 0.85, k) * randf_range(0.97, 1.03),
 			"role": &"body", "layer": &"body"})
+	# Clacul de plastic doar intre masini: pitch-ul coboara cu puterea (plastic
+	# mai greu), volumul urca cu `master` (deci cu puterea), mereu sub principale.
+	if is_car:
+		plan.append({"name": _pick_variant(&"clack"),
+			"db": master + impact_clack_offset_db,
+			"pitch": lerpf(1.15, 0.9, k) * randf_range(0.95, 1.05),
+			"role": &"body", "layer": &"clack"})
 	# Clinchetul de tabla doar intre masini, ca inainte (#500), ceva mai tarziu.
 	var metal_w := smoothstep(4.0, 10.0, strength)
 	if is_car and metal_w >= impact_min_layer_weight:

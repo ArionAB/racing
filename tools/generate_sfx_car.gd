@@ -37,6 +37,7 @@ func _init() -> void:
 	_save("turbo_click", _turbo_click())
 	_save("turbo_whoosh", _turbo_whoosh())
 	_save("turbo_release", _turbo_release())
+	_save_toy_palette() # dupa toate celelalte: rng_toy propriu
 	print("SFX masina generate in res://assets/audio/")
 	quit()
 
@@ -426,3 +427,114 @@ func _save(name: String, data: PackedFloat32Array) -> void:
 			v += 65536
 		f.store_16(v)
 	print("  %s (%d samples)" % [path, data.size()])
+
+
+# ------------------------------------------------- paleta de jucarie (a doua)
+#
+# Clacuri de plastic la contactul intre masini si arcul de tragere + clichetul
+# de la rocket start (toy-sound-palette). Au GENERATOR DE ZGOMOT PROPRIU
+# (`rng_toy`) si sunt salvate DUPA cele 11 de mai sus: nu muta niciun bit din
+# fisierele existente (nici din cele ale generatorului vechi, nici de aici).
+
+var rng_toy := RandomNumberGenerator.new()
+
+
+func _save_toy_palette() -> void:
+	rng_toy.seed = 20261023
+	_save("impact_clack_a", _impact_clack(0))
+	_save("impact_clack_b", _impact_clack(1))
+	_save("rocket_spring", _rocket_spring())
+	_save("rocket_ratchet", _rocket_ratchet())
+
+
+func _toy_noise() -> float:
+	return rng_toy.randf() * 2.0 - 1.0
+
+
+## Cloncanitul a doua bucati de plastic tare care se ating: 2-3 tocuri foarte
+## scurte (9-12 ms unul de altul), fiecare un inel inalt (doua moduri
+## nearmonice, ~2-4 kHz) care moare in cateva milisecunde, plus un click de
+## zgomot si un corp mic de ~800 Hz. Mai sec si mai ascutit decat `prop_knock`
+## (lemn, 520/740 Hz) si decat clickul de turbo; mult mai scurt decat tap-ul.
+## Variantele difera prin numarul si frecventele tocurilor.
+func _impact_clack(variant: int) -> PackedFloat32Array:
+	var n := int(RATE * 0.085)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	# [intarziere s, frecventa Hz, amplitudine, disparitie 1/s]
+	var hits: Array = [
+		[[0.0, 2650.0, 1.0, 170.0], [0.011, 3900.0, 0.7, 210.0]],
+		[[0.0, 3100.0, 1.0, 190.0], [0.009, 2200.0, 0.8, 180.0], [0.021, 3700.0, 0.55, 230.0]],
+	][variant]
+	for h in hits:
+		var start := int(float(h[0]) * float(RATE))
+		var f := float(h[1])
+		for j in n - start:
+			var t := float(j) / float(RATE)
+			var ring := sin(TAU * f * t) * exp(-t * float(h[3])) \
+				+ 0.45 * sin(TAU * f * 1.58 * t + 0.8) * exp(-t * float(h[3]) * 1.5)
+			var click := _toy_noise() * exp(-t * 1400.0) * 0.5
+			var body := sin(TAU * 800.0 * t) * exp(-t * 90.0) * 0.25
+			out[start + j] += (ring * 0.75 + click + body) * float(h[2])
+	return _peak_norm(out, 0.78)
+
+
+## „Zrrrt" de la un arc tras si lasat: un motor cu frictiune care urla de la
+## turatie joasa la una inalta si se opreste scurt. Un tren de impulsuri a carui
+## rata urca de la 28 la 190 Hz in 0.5 s — fiecare impuls excita un inel de
+## ~1.9 kHz (zumzetul metalic al angrenajelor) — peste un zumzet de dinte de
+## fierastrau, apoi un „tk" cand clichetul prinde. Pitch-ul de joc nu-l umbla:
+## urcusul e deja in sunet.
+func _rocket_spring() -> PackedFloat32Array:
+	var n := int(RATE * 0.66)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var phase := 0.0
+	var saw_phase := 0.0
+	var ring_t := 1.0e9
+	var ring_amp := 0.0
+	var lp := 0.0
+	for i in n:
+		var t := float(i) / float(RATE)
+		var k := minf(t / 0.5, 1.0)
+		var rate := lerpf(28.0, 190.0, k * k)
+		phase += rate / float(RATE)
+		if phase >= 1.0:
+			phase -= 1.0
+			ring_t = 0.0
+			ring_amp = 0.75 + 0.25 * rng_toy.randf()
+		ring_t += 1.0 / float(RATE)
+		var pulse := sin(TAU * 1900.0 * ring_t) * exp(-ring_t * 650.0) * ring_amp
+		saw_phase += rate * 1.0 / float(RATE)
+		saw_phase -= floorf(saw_phase)
+		var saw := (saw_phase * 2.0 - 1.0)
+		lp += 0.35 * (saw - lp)
+		var env := minf(t / 0.03, 1.0) * (1.0 if t < 0.5 else exp(-(t - 0.5) * 38.0))
+		out[i] = (pulse * 0.8 + lp * 0.5 * k) * env
+	# Clichetul care prinde, la 0.56 s.
+	var tk := int(0.56 * float(RATE))
+	for j in n - tk:
+		var t2 := float(j) / float(RATE)
+		out[tk + j] += (sin(TAU * 1450.0 * t2) * exp(-t2 * 300.0) * 0.55
+			+ _toy_noise() * exp(-t2 * 1100.0) * 0.4)
+	return _peak_norm(out, 0.70)
+
+
+## Clichetul cheii care se intoarce: cinci „tic"-uri de plastic tot mai dese
+## (70 -> 40 ms), mai joase si mai grele decat clacul. Jocul il reia cat tii
+## TURBO in numaratoare, cu pitch urcand — arcul se incarca.
+func _rocket_ratchet() -> PackedFloat32Array:
+	var n := int(RATE * 0.32)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var times := [0.0, 0.07, 0.134, 0.19, 0.24]
+	var amps := [0.8, 0.85, 0.9, 0.95, 1.0]
+	for h in times.size():
+		var start := int(float(times[h]) * float(RATE))
+		for j in n - start:
+			var t := float(j) / float(RATE)
+			var tone := sin(TAU * 1250.0 * t) * exp(-t * 260.0) \
+				+ 0.5 * sin(TAU * 2350.0 * t + 0.4) * exp(-t * 340.0)
+			var click := _toy_noise() * exp(-t * 1500.0) * 0.55
+			out[start + j] += (tone * 0.7 + click) * float(amps[h])
+	return _peak_norm(out, 0.85)

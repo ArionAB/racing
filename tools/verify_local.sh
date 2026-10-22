@@ -126,6 +126,7 @@ run_step "Vocile suprafetelor (sunet): iarba/pietris/apa, cross-fade, bordura, p
 run_step "Turbo (sunet): click, suvoi cat arde, sisait la capat" turbo_sound.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeTurboSound.tscn
 run_step "Vant (sunet): mut sub jumatate din viteza, urca spre plafon" wind.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeWind.tscn
 run_step "Sunet de impact: straturi dupa putere, variante, conducta" impact_sound.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactSound.tscn
+run_step "Rocket start (sunet): clichet cat tii TURBO, arc la GO doar pe rocket" rocket_start.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeRocketStart.tscn
 run_step "Bucle de contact: razuire, frecare, fara hartuiala la palpaire" scrape_loop.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeScrapeLoop.tscn
 run_step "Aterizare: bufnitura dupa viteza de cadere, strat greu" land_thud.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeLandThud.tscn
 run_step "Impacturi pozitionale: cine m-a lovit, AI-AI, pool de 4" positional_hits.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePositionalHits.tscn
@@ -143,7 +144,7 @@ run_step "Praful de aterizare, colorat dupa suprafata" landing_dust.log 'VERDICT
 run_step "Soferul: tresarire, tremur, privire, pumn" driver_react.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeDriverReact.tscn
 run_step "Decor lovit: aschii, butoi knockable, plafon" prop_debris.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePropDebris.tscn
 run_step "Tufe: frunze si franare usoara" soft_veg.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSoftVeg.tscn
-run_step "Jucaria: antena cu arc si cheia de intors, fara intrari in caroserie" toy_animation.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeToyAnimation.tscn
+run_step "Jucaria: antena cu arc, cheia de intors si zdranganeala pe teren aspru, fara intrari in caroserie" toy_animation.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeToyAnimation.tscn
 run_step "Camera la izbituri: kick, hit-stop, atacator" impact_camera.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactCamera.tscn
 run_step "Race: ImpactFeel cablat (kick, hit-stop, final)" impact_wiring.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactWiring.tscn
 run_step "Popup de pozitie: debounce, numaratoare, final" position_popup.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePositionPopup.tscn

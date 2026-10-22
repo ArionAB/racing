@@ -130,6 +130,10 @@ run_step "Soferul: tresarire, tremur, privire, pumn" driver_react.log 'VERDICT:'
 run_step "Decor lovit: aschii, butoi knockable, plafon" prop_debris.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePropDebris.tscn
 run_step "Tufe: frunze si franare usoara" soft_veg.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSoftVeg.tscn
 run_step "Jucaria: antena cu arc si cheia de intors, fara intrari in caroserie" toy_animation.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeToyAnimation.tscn
+run_step "Camera la izbituri: kick, hit-stop, atacator" impact_camera.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactCamera.tscn
+run_step "Race: ImpactFeel cablat (kick, hit-stop, final)" impact_wiring.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactWiring.tscn
+run_step "Linii de viteza: prag, monotonie, turbo" speed_lines.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSpeedLines.tscn
+run_step "Hazarde mobile: kick de camera, fara hit-stop" hazard_kick.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHazardKick.tscn
 run_step "Rezervor sigilat: bara nu se incarca, arderea merge" sealed_turbo.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeSealedTurbo.tscn
 run_step "Fantoma: inregistrare, fisier, redare" ghost.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeGhost.tscn
 run_step "Bolovanul de pe buza + directie inversata" rim_boulder.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeRimBoulder.tscn

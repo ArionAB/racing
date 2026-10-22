@@ -52,7 +52,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* No rolling sounds. Kerbs are visual only. The stone steps already push noise into the springs, so the mechanism exists.
 - [ ] **Sense of speed** `sense-of-speed` · Partial  
   Wider field of view, camera pulling back, wind noise rising with speed, trackside objects near the road streaming past.  
-  *Today:* FOV and pull-back are in. No wind sound, no speed lines.
+  *Today:* FOV and pull-back are in, plus edge speed lines from 70% of max speed and during turbo (`SpeedLines`, hidden = zero cost below the threshold). Still missing: wind noise that rises with speed (audio), trackside streaming.
 - [ ] **Turbo as a three-part event** `turbo-event` · Partial  
   A click on press, an immediate kick with the camera lagging a beat behind, a sustained whoosh, and a release hiss when it ends.  
   *Today:* One-shot at the start plus flame and a pitch bump. No sustain, no release.
@@ -86,9 +86,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **Impact sound in layers** `impact-layers` · Partial · ⭐  
   Soft tap, crunch, big crash chosen by speed difference, with random pitch so repeats never sound like a machine gun.  
   *Today:* Car-on-car already layers two sounds by speed. The wall hit is one fixed-level sound.
-- [ ] **Directional camera kick and hit-stop** `hitstop-shake` · Partial · ⭐  
+- [x] **Directional camera kick and hit-stop** `hitstop-shake` · Have  
   Shake in the direction of the hit rather than randomly, plus a freeze of a few frames on big hits so the brain registers the weight. The cheapest weight trick in games.  
-  *Today:* Shake is scaled by impact but random. No hit-stop.
+  *Today:* `ImpactFeel` kicks the chase cam along the hit normal (spring, settles in ~0.2 s, small roll) and freezes the world 40-90 ms on player impacts of 9 m/s or more (`HitStop`, real-time restore, cooldown 0.6 s, no freeze in countdown). No screen-shake setting exists, so nothing to follow.
 - [x] **Body jolt on the visual body** `body-jolt` · Have  
   Nudge the mesh, not the physics body, in the hit direction and let it spring back. The physics stays safe and the car looks like it took the hit.  
   *Today:* Done: on the car's own `impact` the visual body moves up to 8 cm along the normal and tilts up to 5.5 degrees away, on an exact underdamped spring (back to rest in about 0.35 s). One compose step now writes the visual transform (drift roll, spin, jolt, rub lean); squash keeps owning scale. Tunables `jolt_*` on `Car`.
@@ -109,7 +109,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* None.
 - [ ] **Every moving hazard speaks** `hazards-speak` · Partial  
   Each moving hazard gets its own contact sound and shake.  
-  *Today:* Train and avalanche crush, shake and sound. The sliding barrier and the bus push you silently.
+  *Today:* Train and avalanche crush, shake and sound. The sliding barrier and the bus (moving kinematic bodies) now reach the camera through the contact feed: a clear kick from the side that shoved you (80% of a full kick, no hit-stop) and an edge flash. Still silent: the contact sound for each hazard (audio).
 - [ ] **World reactions** `world-reactions` · Optional  
   Birds flushing, a sign wobbling, dust dropping in caves. Character, not mechanics, and cheap.  
   *Today:* None.
@@ -130,7 +130,7 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
   *Today:* None.
 - [ ] **You know who hit you** `who-hit-me` · Missing  
   A camera kick from the hit side, a positional impact sound from the other car, a horn from the AI.  
-  *Today:* Impact sounds are flat 2D and only fire when the player is involved.
+  *Today:* Camera kick comes from the hit side and the screen edge on that side flashes briefly (`Vignette.flash_edge`). Still missing: positional impact sound from the other car and the AI horn (audio).
 - [x] **Driver reactions to the other car** `driver-social` · Have  
   A fist shake at the offender, a head whip, a glance at the car alongside.  
   *Today:* Done (open-cockpit drivers): the head turns toward a car alongside (within 4 m laterally or rubbing), the flinch whips the head on a hit, and after being hit by another car the arm on that side shakes a fist for under a second while the head turns to the offender. The car that did the hitting does not shake a fist, and walls do not trigger it.
@@ -146,9 +146,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **AI that reacts** `ai-reacts` · Missing  
   A wobble when hit, a counter-steer, a momentary grudge against whoever hit it, horns.  
   *Today:* AI gets only the raw physics.
-- [ ] **Player's hits big, AI's hits small** `player-big-ai-small` · Partial  
+- [x] **Player's hits big, AI's hits small** `player-big-ai-small` · Have  
   Hit-stop and shake make your own bumps feel powerful. AI-initiated contact on you stays capped and telegraphed so bumping reads as a mechanic, not punishment.  
-  *Today:* Impulses are capped. No asymmetry in feedback yet.
+  *Today:* Impulses are capped, and the camera feedback is asymmetric: the attacker is decided from both cars' pre-impact speeds along the contact line. Player attacker (or equal head-on) gets full kick and hit-stop; an AI hitting you gets a capped kick (0.4 m) and no hit-stop.
 - [x] **Ejections only for walls and landings** `ejections-walls-only` · Have  
   Keeps contact between cars friendly. A bump should never cost you the driver.  
   *Today:* Already excluded from car-on-car contact. Keep it.

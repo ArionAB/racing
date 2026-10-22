@@ -230,7 +230,7 @@ const POOL3D_SIZE: int = 4
 @export var knock_db_min: float = -24.0
 @export var knock_db_max: float = -9.0
 @export var knock_range_m: float = 40.0
-@export var knock_interval_s: float = 0.07
+@export var knock_interval_s: float = 0.12
 
 @export_group("Playere 3D")
 ## Pana la atatia metri de camera sunetul 3D nu slabeste deloc; peste, scade

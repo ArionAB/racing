@@ -95,9 +95,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Body jolt on the visual body** `body-jolt` · Have  
   Nudge the mesh, not the physics body, in the hit direction and let it spring back. The physics stays safe and the car looks like it took the hit.  
   *Today:* Done: on the car's own `impact` the visual body moves up to 8 cm along the normal and tilts up to 5.5 degrees away, on an exact underdamped spring (back to rest in about 0.35 s). One compose step now writes the visual transform (drift roll, spin, jolt, rub lean); squash keeps owning scale. Tunables `jolt_*` on `Car`.
-- [ ] **Things that fly** `things-fly` · Partial  
+- [x] **Things that fly** `things-fly` · Have  
   Cones, cups, blocks, signs that scatter with a sound and a few debris chunks. The tax for hitting things should be low where you want chaos.  
-  *Today:* Small decor flies and now throws debris chunks and a dust puff scaled by hit speed from one pooled manager (`PropDebris`, 64 particles total, one burst per frame max); the hand-placed `Barrel` is knockable too (the GLB barrels already were). Still missing: the sound.
+  *Today:* Small decor flies and now throws debris chunks and a dust puff scaled by hit speed from one pooled manager (`PropDebris`, 64 particles total, one burst per frame max); the hand-placed `Barrel` is knockable too (the GLB barrels already were). Each burst now also knocks (`prop_knock_a`/`_b`, wood and plastic, `AudioManager.prop_knock`): positional at the prop through the 3D pool at priority 0 (it never steals a player or hazard sound), -24 to -9 dB and pitch 1.2 to 0.88 with the hit, at most one per 0.12 s, nothing beyond 40 m from the camera. Guard: `ProbePropKnock`.
 - [x] **Soft hazards** `soft-hazards` · Have  
   Bushes that slow you with a leaf burst, puddles and sand that spray.  
   *Today:* Done: water and sand were in; now driving through bushes, ferns, sage and grass tufts (vegetation chunks without collision, read by `SoftVegetation`) throws a leaf burst and brakes mildly (`Car.bush_drag`, 6 m/s^2 at the centre of a bush, 0 turns it off). Dense grass carpet is excluded on purpose.
@@ -110,9 +110,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [ ] **A price in the turbo bar** `turbo-price` · Optional  
   A hard wall hit drains some charge, turning the turbo into a risk meter that rewards clean driving.  
   *Today:* None.
-- [ ] **Every moving hazard speaks** `hazards-speak` · Partial  
+- [x] **Every moving hazard speaks** `hazards-speak` · Have  
   Each moving hazard gets its own contact sound and shake.  
-  *Today:* Train and avalanche crush, shake and sound. The sliding barrier and the bus (moving kinematic bodies) now reach the camera through the contact feed: a clear kick from the side that shoved you (80% of a full kick, no hit-stop) and an edge flash. Still silent: the contact sound for each hazard (audio).
+  *Today:* Done. Train and avalanche crush, shake and sound. The sliding barrier and the bus (moving kinematic bodies) reach the camera through the contact feed: a clear kick from the side that shoved you (80% of a full kick, no hit-stop) and an edge flash. Each now also speaks from the shove itself, positional at the car through the 3D pool: `SlidingHazard.contact_sfx` (default `hazard_barrier_hit`, a hollow plastic bonk, shared by every motion of that class; a track can set another name or `&""` for silence) and `BusHazard.contact_sfx` (`hazard_bus_hit`, a low thump with a panel ring and a short squeak). Player at -5 dB, an AI car 8 dB quieter, one sound per 0.12 s overall, nothing beyond 60 m from the camera. Guard: `ProbeHazardSound`.
 - [ ] **World reactions** `world-reactions` · Optional  
   Birds flushing, a sign wobbling, dust dropping in caves. Character, not mechanics, and cheap.  
   *Today:* None.

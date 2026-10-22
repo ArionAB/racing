@@ -542,7 +542,6 @@ var _prev_velocity: Vector3 = Vector3.ZERO
 ## si o dadea jos din cabina pe usa din spate (masurat in ProbeCableway).
 var _ground_velocity: Vector3 = Vector3.ZERO
 var _wall_cooldown: float = 0.0
-var _bump_cooldown: float = 0.0
 var _impact_wall_cooldown: float = 0.0
 var _last_static: Node = null
 ## Frecarea implicita a masinii (PhysicsMaterial din _ready).
@@ -972,7 +971,6 @@ func _physics_process(delta: float) -> void:
 	_update_effects(delta)
 	_update_water(delta)
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
-	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
 	_respawn_cooldown = maxf(_respawn_cooldown - delta, 0.0)
 	# Checkpoint: aici, cu roatele pe asfalt, eram in siguranta.
 	if track != null and is_on_floor() \
@@ -1259,15 +1257,9 @@ func _process_contacts(delta: float) -> void:
 					_contact_point_with(other, (global_position
 						+ other.global_position) * 0.5), other)
 				_emit_sparks(other, dv)
-				if _bump_cooldown <= 0.0 and (is_player or other.is_player):
-					_bump_cooldown = 0.25
-					AudioManager.play_sfx(&"bump")
-					# Tabla pe tabla, dozata dupa impuls (#500): o atingere abia
-					# se aude si suna mai subtire, o izbitura plina e tare si
-					# grava. Inainte era doar bufnitura `bump`, la volum fix.
-					var k := _bump_strength(dv)
-					AudioManager.play_sfx(&"metal_hit", lerpf(1.18, 0.86, k),
-						lerpf(-20.0, -1.0, k))
+				# Sunetul (bufnitura `bump` + tabla `metal_hit`, plus straturile
+				# tap/crunch/crash) nu mai e aici: il da ImpactSound, pe semnalul
+				# `impact` de mai sus (feel_checklist: impact-layers).
 		# Impulsul de separare (reteta SuperTuxKart): contactul sustinut nu
 		# are voie sa lipeasca masinile. O acceleratie LATERALA le impinge una
 		# de langa alta -- centrala (fara rotatie: directia ramane a soferului),
@@ -1306,8 +1298,7 @@ func _process_contacts(delta: float) -> void:
 		if dv_h > 8.0 and _wall_cooldown <= 0.0:
 			_wall_cooldown = 0.35
 			wall_hit.emit(self, dv_h)
-			if is_player:
-				AudioManager.play_sfx(&"wall_hit")
+			# Sunetul peretelui il da ImpactSound (strat dupa putere, nu un nivel fix).
 		# Izbitura dura de perete arunca soferul. Directia de zbor e viteza de
 		# DINAINTE de impact: figurina continua drumul pe care masina nu l-a
 		# mai putut face, peste bariera.
@@ -1848,8 +1839,8 @@ func _detect_landing() -> void:
 		if _prev_velocity.y < -6.0:
 			landed.emit(self, -_prev_velocity.y)
 			_punch_scale(Vector3(1.15, 0.8, 1.15))
-			if is_player:
-				AudioManager.play_sfx(&"land")
+			# Sunetul aterizarii (volum/pitch dupa viteza de cadere) il da ImpactSound,
+			# pe semnalul `landed` de mai sus.
 			# Aterizare de la inaltime: soferul sare din scaun, drept in sus si
 			# putin inainte (masina se opreste brusc pe verticala, el nu).
 			if -_prev_velocity.y >= eject_land_speed:

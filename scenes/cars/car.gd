@@ -60,6 +60,14 @@ signal steps_changed(car: Car, on: bool)
 ## figurina cazuta, deja in lume — camera o urmareste cat tine `eject_hold`,
 ## apoi masina se repune pe pista si soferul reapare pe scaun.
 signal ejected(car: Car, ragdoll: Node3D)
+## Feed-ul comun de contact (docs/feel_checklist.md): orice izbitura de perete
+## sau de alta masina peste `impact_min_dv`, cu directie si punct. `kind` e
+## &"wall" sau &"car"; `normal` e orizontala si arata DINSPRE obstacol SPRE
+## masina (directia in care esti impins); `other` e corpul lovit. Il citesc
+## camera, caroseria, soferul si sunetul — nu mai adauga consumatori in
+## _process_contacts, conecteaza-te aici.
+signal impact(car: Car, kind: StringName, strength: float, normal: Vector3,
+		point: Vector3, other: Node)
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -174,6 +182,9 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 ## scrisa direct de directie, deci solverul n-are cum sa le roteasca una de pe
 ## linia celeilalte. Vezi _process_contacts.
 @export var bump_separation_accel: float = 6.0
+## Pragul feed-ului `impact` (m/s de delta-v orizontal). Sub el contactul e
+## frecare: o raspunde starea continua (wall_contact / rub_car), nu semnalul.
+@export var impact_min_dv: float = 2.5
 
 @export_group("Suspensie")
 ## Cursa arcului in repaus (m). Raza de cast = rest + wheel_radius.
@@ -398,6 +409,27 @@ var _prev_velocity: Vector3 = Vector3.ZERO
 var _ground_velocity: Vector3 = Vector3.ZERO
 var _wall_cooldown: float = 0.0
 var _bump_cooldown: float = 0.0
+var _impact_wall_cooldown: float = 0.0
+var _last_static: Node = null
+
+# --- Starea de contact a tick-ului (feed comun, vezi semnalul `impact`) ---
+## In contact cu un perete/obstacol static ACUM (normala aproape orizontala;
+## solul de sub caroserie nu conteaza).
+var wall_contact: bool = false
+## Normala orizontala medie a peretelui, dinspre perete spre masina.
+var wall_normal: Vector3 = Vector3.ZERO
+## Punctul mediu de contact cu peretele (global).
+var wall_point: Vector3 = Vector3.ZERO
+## Viteza de-a lungul peretelui cat il atingi (m/s) — viteza de razuire.
+var wall_scrape_speed: float = 0.0
+## Masina de care te freci ACUM (null daca niciuna).
+var rub_car: Car = null
+## Punctul mediu de contact cu `rub_car`.
+var rub_point: Vector3 = Vector3.ZERO
+## Normala orizontala dinspre `rub_car` spre noi.
+var rub_normal: Vector3 = Vector3.ZERO
+## Viteza relativa TANGENTIALA fata de `rub_car` (m/s) — cat de tare va frecati.
+var rub_speed: float = 0.0
 ## instance_id-ul celeilalte masini -> secunde pana la urmatorul semnal admis.
 var _bump_pairs: Dictionary = {}
 ## Rotatia (rad/s) primita dintr-o lovitura excentrica; se stinge singura si
@@ -979,6 +1011,8 @@ func _apply_driving(steer: float, throttle: float,
 ## Bilantul contactelor raportate de solver: izbituri cu alte masini (plafon,
 ## rotatie, slip, semnal), pereti (wall_hit) si popice (imprastiate).
 func _process_contacts(delta: float) -> void:
+	_scan_contact_state()
+	_impact_wall_cooldown = maxf(_impact_wall_cooldown - delta, 0.0)
 	var cars_hit: Array[Car] = []
 	var static_hit := false
 	for body in get_colliding_bodies():
@@ -1038,6 +1072,13 @@ func _process_contacts(delta: float) -> void:
 					continue
 				_bump_pairs[key] = bump_pair_cooldown
 				bumped.emit(self, other, dv)
+				var away_n := global_position - other.global_position
+				away_n.y = 0.0
+				impact.emit(self, &"car", dv,
+					away_n.normalized() if away_n.length_squared() > 1e-4
+						else -dv_vec.normalized(),
+					_contact_point_with(other, (global_position
+						+ other.global_position) * 0.5), other)
 				_emit_sparks(other, dv)
 				if _bump_cooldown <= 0.0 and (is_player or other.is_player):
 					_bump_cooldown = 0.25
@@ -1075,6 +1116,14 @@ func _process_contacts(delta: float) -> void:
 		# Perete/bariera: impact = schimbarea ORIZONTALA de viteza (aterizarea
 		# dura pe sol are dv vertical si nu e izbitura de perete).
 		var dv_h := Vector3(dv_vec.x, 0.0, dv_vec.z).length()
+		if dv_h >= impact_min_dv and _impact_wall_cooldown <= 0.0:
+			_impact_wall_cooldown = 0.2
+			var n := wall_normal
+			if n == Vector3.ZERO:
+				n = Vector3(dv_vec.x, 0.0, dv_vec.z).normalized()
+			impact.emit(self, &"wall", dv_h, n,
+				wall_point if wall_contact else global_position - n * collider_half_width(),
+				_last_static)
 		if dv_h > 8.0 and _wall_cooldown <= 0.0:
 			_wall_cooldown = 0.35
 			wall_hit.emit(self, dv_h)
@@ -2497,6 +2546,61 @@ func _emit_sparks(other: Car, dv: float) -> void:
 	_sparks.amount = int(lerpf(float(SPARKS_MIN), float(SPARKS_MAX), k))
 	_sparks.initial_velocity_max = lerpf(7.0, 13.0, k)
 	_sparks.restart()
+
+
+## Starea de contact a tick-ului, dintr-o singura trecere prin punctele
+## solverului: perete (normala aproape orizontala) si masina de care te freci.
+## Solul de sub caroserie (normala in sus) nu e perete.
+func _scan_contact_state() -> void:
+	wall_contact = false
+	wall_scrape_speed = 0.0
+	rub_car = null
+	rub_speed = 0.0
+	_last_static = null
+	var state := PhysicsServer3D.body_get_direct_state(get_rid())
+	if state == null:
+		return
+	var wn := Vector3.ZERO
+	var wp := Vector3.ZERO
+	var wc := 0
+	var rn := Vector3.ZERO
+	var rp := Vector3.ZERO
+	var rc := 0
+	for i in state.get_contact_count():
+		var obj := state.get_contact_collider_object(i)
+		var pt := state.get_contact_collider_position(i)
+		var n := state.get_contact_local_normal(i)
+		var to_me := global_position - pt
+		if n.dot(to_me) < 0.0:
+			n = -n
+		var nh := Vector3(n.x, 0.0, n.z)
+		if obj is Car:
+			if rub_car == null:
+				rub_car = obj as Car
+			if obj == rub_car:
+				rp += pt
+				rc += 1
+				var away := Vector3(to_me.x, 0.0, to_me.z)
+				rn += away.normalized() if away.length_squared() > 1e-4 else nh
+		elif obj is StaticBody3D:
+			if absf(n.y) > 0.7 or nh.length_squared() < 1e-4:
+				continue
+			_last_static = obj as Node
+			wn += nh.normalized()
+			wp += pt
+			wc += 1
+	if wc > 0:
+		wall_contact = true
+		wall_normal = wn.normalized() if wn.length_squared() > 1e-6 else wall_normal
+		wall_point = wp / float(wc)
+		var vh := Vector3(velocity.x, 0.0, velocity.z)
+		wall_scrape_speed = (vh - wall_normal * vh.dot(wall_normal)).length()
+	if rc > 0:
+		rub_point = rp / float(rc)
+		rub_normal = rn.normalized() if rn.length_squared() > 1e-6 else Vector3.ZERO
+		var rel := velocity - rub_car.velocity
+		rel.y = 0.0
+		rub_speed = (rel - rub_normal * rel.dot(rub_normal)).length()
 
 
 ## Punctul de contact cu `other`, cum il raporteaza solverul (media punctelor

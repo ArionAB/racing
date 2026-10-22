@@ -77,9 +77,9 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 
 ## Hitting the world
 
-- [ ] **Glancing versus head-on** `glancing-vs-headon` · Missing  
+- [x] **Glancing versus head-on** `glancing-vs-headon` · Have  
   A scrape along a wall costs little speed and lets you slide on. A head-on stops you with a bounce. The impact angle decides, and a small yaw nudge away from the wall keeps the nose from pinning.  
-  *Today:* One physics material for everything, no angle logic.
+  *Today:* Wall hits within 30 degrees of the wall plane (`glance_angle_deg`) cut car friction to `glance_friction` and nudge the nose toward parallel through `_impact_yaw`; head-on keeps the stop-with-bounce. A nose pinned at low speed for 0.4 s is shoved away. Moving hazards (AnimatableBody3D) are skipped. Guard: `ProbeWallGlance`.
 - [ ] **Scrape loop and sparks** `scrape-sparks` · Missing · ⭐  
   While sliding along a wall: a continuous grind whose pitch follows speed, sparks from the contact point, a slight pull on the steering.  
   *Today:* A single one-shot clunk. Sparks exist only for car-on-car.

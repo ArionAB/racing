@@ -396,10 +396,14 @@ func _ready() -> void:
 			_seconds = float(arg.trim_prefix("--seconds="))
 		elif arg.begins_with("--car-set="):
 			# `--car-set=prop=valoare`: suprascrie un export al TUTUROR masinilor
-			# (A/B in acelasi build, ex. `--car-set=steer_taper_at_top=1.0`).
+			# (A/B in acelasi build, ex. `--car-set=steer_taper_at_top=1.0`,
+			# `--car-set=glance_enabled=false`).
 			var kv := arg.trim_prefix("--car-set=").split("=")
 			if kv.size() == 2:
-				_car_set[kv[0]] = float(kv[1])
+				if kv[1] == "true" or kv[1] == "false":
+					_car_set[kv[0]] = kv[1] == "true"
+				else:
+					_car_set[kv[0]] = float(kv[1])
 		elif arg.begins_with("--seed="):
 			_seed = int(arg.trim_prefix("--seed="))
 		elif arg.begins_with("--car="):

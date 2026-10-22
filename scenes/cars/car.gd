@@ -195,6 +195,29 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 ## frecare: o raspunde starea continua (wall_contact / rub_car), nu semnalul.
 @export var impact_min_dv: float = 2.5
 
+@export_group("Perete (razuire)")
+## Logica razuire-vs-frontal (feel_checklist: glancing-vs-headon). Oprita =
+## comportamentul vechi (un material pentru orice unghi, fara nudge) — sondele
+## A/B o stang cu asta.
+@export var glance_enabled: bool = true
+## O lovitura de perete e „razuire" cand viteza dinainte de contact face cel
+## mult atatea grade cu planul peretelui. Peste: frontal (se opreste cu bounce).
+@export_range(5.0, 60.0, 1.0) var glance_angle_deg: float = 30.0
+## Frecarea masinii cat tine o razuire (implicit 0.4, vezi _ready). Solverul
+## combina frecarile corpurilor; fara asta botul infipt in perete ar manca
+## viteza pe toata lungimea contactului.
+@export_range(0.0, 0.4, 0.01) var glance_friction: float = 0.05
+## Nudge-ul de directie spre paralel cu peretele: rad/s per radian de unghi
+## intre bot si perete, plafonat de `glance_yaw_max` (si de bump_yaw_max).
+## Intra prin _impact_yaw (apply_torque ar fi sters in tick-ul urmator).
+@export var glance_yaw_gain: float = 8.0
+@export var glance_yaw_max: float = 1.5
+## Anti-lipire: cat sta botul in perete, la viteza mica, pana e impins.
+@export var stuck_nudge_time: float = 0.4
+## Impingerea laterala (m/s, dinspre perete) si rotatia (rad/s) a nudge-ului.
+@export var stuck_nudge_speed: float = 2.5
+@export var stuck_nudge_yaw: float = 2.4
+
 @export_group("Suspensie")
 ## Cursa arcului in repaus (m). Raza de cast = rest + wheel_radius.
 @export var suspension_rest: float = 0.35
@@ -420,6 +443,17 @@ var _wall_cooldown: float = 0.0
 var _bump_cooldown: float = 0.0
 var _impact_wall_cooldown: float = 0.0
 var _last_static: Node = null
+## Frecarea implicita a masinii (PhysicsMaterial din _ready).
+const CAR_FRICTION: float = 0.4
+var _pmat: PhysicsMaterial
+## Razuire in curs (vezi _wall_glance); ramane aprinsa 0.15 s dupa ultimul
+## contact, ca un contact care palpaie sa nu reporneasca episodul.
+var _glance_episode: bool = false
+var _glance_gap: float = 0.0
+## Cat timp sta botul infipt in perete la viteza mica (anti-lipire).
+var _stuck_t: float = 0.0
+var _stuck_cool: float = 0.0
+var _stuck_push_left: float = 0.0
 
 # --- Starea de contact a tick-ului (feed comun, vezi semnalul `impact`) ---
 ## In contact cu un perete/obstacol static ACUM (normala aproape orizontala;
@@ -431,6 +465,10 @@ var wall_normal: Vector3 = Vector3.ZERO
 var wall_point: Vector3 = Vector3.ZERO
 ## Viteza de-a lungul peretelui cat il atingi (m/s) — viteza de razuire.
 var wall_scrape_speed: float = 0.0
+## Peretele atins e un corp MOBIL (AnimatableBody3D: autobuz, bariera, tren,
+## avalansa...). Logica de razuire il ocoleste: strivirea si purtarea raman
+## exact ca inainte.
+var wall_moving: bool = false
 ## Masina de care te freci ACUM (null daca niciuna).
 var rub_car: Car = null
 ## Punctul mediu de contact cu `rub_car`.
@@ -563,8 +601,9 @@ func _ready() -> void:
 	collision_mask |= BumpProp.LAYER
 	var pmat := PhysicsMaterial.new()
 	pmat.bounce = bump_restitution
-	pmat.friction = 0.4
+	pmat.friction = CAR_FRICTION
 	physics_material_override = pmat
+	_pmat = pmat
 	_build_visual()
 	_build_effects()
 	# Colizerul caroseriei NU atinge solul in mers (garda la sol o da
@@ -1170,6 +1209,102 @@ func _process_contacts(delta: float) -> void:
 		_yaw_kick_left -= delta
 		if _yaw_kick_left <= 0.0:
 			_yaw_kick = 0.0
+	_wall_glance(delta)
+
+
+## Razuire vs frontal (feel_checklist: glancing-vs-headon) + anti-lipire.
+##
+## Problema: botul infipt in perete la un unghi mic NU se roteste singur
+## (directia scrie yaw-ul direct), iar grip-ul lateral il impinge in zid cu
+## zeci de m/s^2 — frecarea de perete mananca viteza cat tine contactul.
+## Raspunsul are trei parti:
+##   1. EPISODUL incepe cand viteza de DINAINTE de tick (`_prev_velocity`, adica
+##      inainte ca solverul sa aplice bounce-ul) face cel mult `glance_angle_deg`
+##      cu planul peretelui si merge cu peste 5 m/s. Un frontal nu intra: se
+##      opreste cu bounce, ca pana acum.
+##   2. cat tine episodul, frecarea masinii scade la `glance_friction`: se pierde
+##      componenta normala (cu bounce-ul din material), tangentiala ramane.
+##   3. botul e rotit spre paralel prin `_impact_yaw` (rad/s ~ unghiul), deci
+##      grip-ul nu mai impinge in zid si contactul se termina singur.
+## Hazardele mobile (AnimatableBody3D) nu intra: strivire/purtare neschimbate.
+##
+## Anti-lipire, separat: botul in perete (> ~17 grade) la sub 3 m/s mai mult de
+## `stuck_nudge_time` primeste o impingere dinspre perete + o rotatie spre
+## tangenta. Fara ea, un jucator cu gaz tinut sta lipit pana la repunere.
+func _wall_glance(delta: float) -> void:
+	_stuck_cool = maxf(_stuck_cool - delta, 0.0)
+	var live := glance_enabled and wall_contact and not wall_moving \
+		and rub_car == null and wheels_on_ground > 0 and race_active \
+		and not finished and _eject_left <= 0.0 and _recover_left <= 0.0
+	if not live:
+		_stuck_t = maxf(_stuck_t - delta * 2.0, 0.0)
+		_stuck_push_left = 0.0 # fara contact nu mai exista „perete de ocolit"
+		_glance_gap += delta
+		if _glance_gap > 0.15:
+			_glance_episode = false
+		_set_car_friction(glance_friction if _glance_episode else CAR_FRICTION)
+		return
+	_glance_gap = 0.0
+	var n := wall_normal
+	var fwd := -global_transform.basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	var into_h := -fwd.dot(n) # +1 = botul drept in perete
+	var vref := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z)
+	var speed := vref.length()
+	if not _glance_episode:
+		if speed > 5.0:
+			var into_v := -vref.dot(n) / speed
+			if absf(into_v) <= sin(deg_to_rad(glance_angle_deg)):
+				_glance_episode = true
+		elif into_h > 0.05 and into_h <= sin(deg_to_rad(glance_angle_deg * 2.0)):
+			# Aproape oprita, cu botul oblic in perete: tot razuire (altfel
+			# gazul o tine lipita, cu grip-ul lateral impingand in zid).
+			_glance_episode = true
+	_set_car_friction(glance_friction if _glance_episode else CAR_FRICTION)
+
+	# Nudge spre paralel, doar cat botul e inca spre perete (nu si cand te
+	# departezi) si nu e un frontal (peste 2x unghiul de razuire).
+	var fwd_speed := Vector3(velocity.x, 0.0, velocity.z).dot(fwd)
+	if _glance_episode and fwd_speed > 0.0 and into_h > 0.03 \
+			and into_h <= sin(deg_to_rad(glance_angle_deg * 2.0)):
+		var want := _toward_parallel(fwd, n) * clampf(
+			asin(into_h) * glance_yaw_gain, 0.0, glance_yaw_max)
+		if absf(want) > absf(_impact_yaw):
+			_impact_yaw = clampf(want, -bump_yaw_max, bump_yaw_max)
+
+	# Anti-lipire.
+	var slow := Vector3(velocity.x, 0.0, velocity.z).length() < 3.0
+	if slow and into_h > 0.3:
+		_stuck_t += delta
+	else:
+		_stuck_t = maxf(_stuck_t - delta * 2.0, 0.0)
+	if _stuck_t >= stuck_nudge_time and _stuck_cool <= 0.0:
+		_stuck_t = 0.0
+		_stuck_cool = 0.6
+		_stuck_push_left = 0.3
+		linear_velocity += n * stuck_nudge_speed
+	if _stuck_push_left > 0.0:
+		# Rotatia se REAFIRMA cat tine impingerea: peretele se opune la un
+		# singur impuls (masurat: jumatate din unghiul calculat).
+		_stuck_push_left -= delta
+		_impact_yaw = clampf(_toward_parallel(fwd, n) * stuck_nudge_yaw,
+			-bump_yaw_max, bump_yaw_max)
+
+
+## +1 / -1: in ce sens trebuie rotit botul (yaw pozitiv = stanga) ca sa se
+## aseze paralel cu peretele de normala `n`, pe latura cea mai apropiata.
+func _toward_parallel(fwd: Vector3, n: Vector3) -> float:
+	var t := fwd - n * fwd.dot(n)
+	if t.length_squared() < 1e-4:
+		t = Vector3(-n.z, 0.0, n.x) # frontal exact: alege o tangenta oarecare
+	var s := signf(fwd.cross(t).y)
+	return s if s != 0.0 else 1.0
+
+
+func _set_car_friction(value: float) -> void:
+	if _pmat != null and _pmat.friction != value:
+		_pmat.friction = value
 
 
 ## Plafonul de viteza al momentului: taiat de iarba, ridicat de turbo.
@@ -2572,6 +2707,7 @@ func _emit_sparks(other: Car, dv: float) -> void:
 ## Solul de sub caroserie (normala in sus) nu e perete.
 func _scan_contact_state() -> void:
 	wall_contact = false
+	wall_moving = false
 	wall_scrape_speed = 0.0
 	rub_car = null
 	rub_speed = 0.0
@@ -2605,6 +2741,8 @@ func _scan_contact_state() -> void:
 			if absf(n.y) > 0.7 or nh.length_squared() < 1e-4:
 				continue
 			_last_static = obj as Node
+			if obj is AnimatableBody3D:
+				wall_moving = true
 			wn += nh.normalized()
 			wp += pt
 			wc += 1

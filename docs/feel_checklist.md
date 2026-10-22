@@ -35,15 +35,15 @@ Status today: **Have** in the game and working · **Partial** exists but not sca
 - [x] **Weight transfer you can see** `weight-transfer` · Have  
   Roll in corners, squat under throttle, dive under braking. That is how the brain reads mass.  
   *Today:* Comes for free from the raycast suspension, with springs set per car.
-- [ ] **Engine note with gears and load** `engine-gears` · Missing · ⭐  
+- [x] **Engine note with gears and load** `engine-gears` · Have · ⭐  
   The ear reads acceleration from a pitch that climbs, drops at a shift and climbs again, and from a note that gets harsher under throttle and softer on lift.  
-  *Today:* One linear pitch ramp at fixed volume. No gears, no throttle input. Sounds like a vacuum cleaner at top speed.
+  *Today:* `CarAudio` (`scenes/cars/car_audio.gd`): five fake gears derived from speed (the pitch drops about 0.5 at each shift, with a 0.14 s torque cut, and climbs again), an idle at standstill, and load from the throttle: the whine gets louder and a gear whirr layer fades in over it. The player runs two loops, an AI car one. Guarded by `ProbeEngineVoice`. Tunables are `@export` vars on `CarAudio`.
 - [ ] **Throttle-lift pops** `lift-pops` · Missing  
   A crackle when you lift at high revs, fired at random so it never becomes a pattern.  
   *Today:* The backfire sample is loaded but never played.
 - [ ] **A toy sound palette** `toy-sound-palette` · Missing  
   Toy cars do not have a V8. An electric whine with a small gear whirr like Re-Volt's RC cars, plastic clacks on contact, rattles on kerbs, a pull-back spring at rocket start. Cheap, and identity nobody else has.  
-  *Today:* Realistic-leaning samples, no toy signature.
+  *Today:* The engine is now an electric whine plus a gear whirr (`engine_whine`, `engine_whirr`, synthesized by `tools/generate_sfx_car.gd`), a plastic kerb rattle sample exists (`kerb_rattle`, not wired until `Car.on_kerb` lands) and the turbo has a plastic click. Still missing: plastic clacks on car contact and the pull-back spring at rocket start.
 - [ ] **Tire squeal that tracks slip** `slip-squeal` · Partial · ⭐  
   Volume and pitch follow how much the tires actually slide, so a light slide whispers and a full drift screams. Off asphalt it turns into gravel hiss.  
   *Today:* The loop is on or off with the handbrake, at one level, on every surface.

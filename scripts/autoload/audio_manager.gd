@@ -5,6 +5,21 @@ extends Node
 ## inlocuirea cu assets reale nu atinge codul de joc.
 
 const SFX: Dictionary = {
+	# Vocile continue ale masinii (CarAudio, tools/generate_sfx_car.gd): motorul
+	# de jucarie in doua straturi, sisaitul de derapaj pe sol afanat, rularea pe
+	# suprafete, bordura, vantul si cele trei momente ale turbo-ului. Bucle,
+	# exceptand clickul si sisaitul de la capat — vezi lista din _ready.
+	&"engine_whine": preload("res://assets/audio/engine_whine.wav"),
+	&"engine_whirr": preload("res://assets/audio/engine_whirr.wav"),
+	&"skid_gravel": preload("res://assets/audio/skid_gravel.wav"),
+	&"roll_grass": preload("res://assets/audio/roll_grass.wav"),
+	&"roll_gravel": preload("res://assets/audio/roll_gravel.wav"),
+	&"roll_water": preload("res://assets/audio/roll_water.wav"),
+	&"kerb_rattle": preload("res://assets/audio/kerb_rattle.wav"),
+	&"wind_loop": preload("res://assets/audio/wind_loop.wav"),
+	&"turbo_click": preload("res://assets/audio/turbo_click.wav"),
+	&"turbo_whoosh": preload("res://assets/audio/turbo_whoosh.wav"),
+	&"turbo_release": preload("res://assets/audio/turbo_release.wav"),
 	&"boost": preload("res://assets/audio/boost.wav"),
 	&"drift_start": preload("res://assets/audio/drift_start.wav"),
 	&"drift_level": preload("res://assets/audio/drift_level.wav"),
@@ -86,6 +101,16 @@ func _ready() -> void:
 			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
 			@warning_ignore("integer_division")
 			wav.loop_end = wav.data.size() / 2 # frames (16-bit mono)
+	# Buclele vocilor de masina (CarAudio). Lista separata de cea de sus, ca doua
+	# ramuri care adauga bucle sa nu se calce pe aceleasi randuri.
+	for car_loop: StringName in [&"engine_whine", &"engine_whirr", &"skid_gravel",
+			&"roll_grass", &"roll_gravel", &"roll_water", &"kerb_rattle",
+			&"wind_loop", &"turbo_whoosh"]:
+		var cwav := SFX[car_loop] as AudioStreamWAV
+		if cwav != null:
+			cwav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+			@warning_ignore("integer_division")
+			cwav.loop_end = cwav.data.size() / 2
 	for i in POOL_SIZE:
 		var player := AudioStreamPlayer.new()
 		player.bus = &"SFX"

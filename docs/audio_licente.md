@@ -11,18 +11,25 @@ audio le listeaza pe **toate**, nu doar pe cele cu atribuire obligatorie: la
 audio mai probabil greseala e sa nu stii *de unde* vine un fisier, nu sa uiti sa
 scrii un nume.
 
-## Starea de acum (14 oct 2026)
+## Starea de acum (22 oct 2026)
 
 **Zero assets audio externe. Zero obligatii de licenta.**
 
-Toate cele **28** de fisiere din `assets/audio/` sunt sintetizate procedural de
-`tools/generate_sfx.gd` (WAV mono 22050 Hz / 16-bit) — cod scris in cadrul
-proiectului, deci drepturile sunt ale noastre. Nu exista nicio inregistrare
+Toate cele **39** de fisiere din `assets/audio/` sunt sintetizate procedural
+(WAV mono 22050 Hz / 16-bit): cele 28 vechi de `tools/generate_sfx.gd`, cele 11 ale
+vocilor continue de masina (motor, derapaj, suprafete, turbo, vant) de
+`tools/generate_sfx_car.gd` — cod scris in cadrul proiectului, deci drepturile sunt
+ale noastre. Nu exista nicio inregistrare
 descarcata, niciun sample de biblioteca, nimic generat de AI.
 
 Verificat prin regenerare in worktree curat (14 oct 2026): 26 din 28 de fisiere
 ies **identice bit-pentru-bit** cu cele din git, si doua rulari consecutive dau
 acelasi rezultat — generatorul e determinist (`rng.seed = 20260718`).
+
+`generate_sfx_car.gd` are `rng`-ul lui (`seed = 20261022`) si nu atinge niciun fisier
+vechi: rulat peste cele 28, hash-urile lor raman neschimbate (verificat 22 oct 2026),
+iar cele 11 noi ies identice la doua rulari consecutive. Fisier separat tocmai ca sa
+nu mute zgomotul generatorului vechi (un singur `rng` semanat o data).
 
 Pentru cele doua excepții vezi [Datoria tehnica](#datorie-tehnica-doua-fisiere-nu-se-mai-regenereaza).
 
@@ -30,7 +37,15 @@ Pentru cele doua excepții vezi [Datoria tehnica](#datorie-tehnica-doua-fisiere-
 
 | Fisier | Rol | Sursa | Licenta |
 |---|---|---|---|
-| `engine_loop.wav` | bucla de motor (pitch dupa RPM) | `generate_sfx.gd` | proprietate proiect |
+| `engine_loop.wav` | bucla de motor veche (inlocuita pe masini de `engine_whine`/`engine_whirr`; ramane ca `AudioManager.ENGINE_LOOP`) | `generate_sfx.gd` | proprietate proiect |
+| `engine_whine.wav` | motor de jucarie, stratul tiuit (bucla 0.5 s, 330 Hz; jucator si AI) | `generate_sfx_car.gd` | proprietate proiect |
+| `engine_whirr.wav` | motor de jucarie, stratul zumzet de angrenaje (bucla 0.5 s; doar jucator, sub sarcina) | `generate_sfx_car.gd` | proprietate proiect |
+| `skid_gravel.wav` | sisait de derapaj pe sol afanat (bucla 0.6 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `roll_grass.wav` / `roll_gravel.wav` / `roll_water.wav` | rularea pe iarba / pietris-nisip / apa mica (bucle 1 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `kerb_rattle.wav` | zdranganeala de bordura (bucla 0.4 s) | `generate_sfx_car.gd` | proprietate proiect |
+| `wind_loop.wav` | vant dupa viteza (bucla 1.2 s, doar jucator) | `generate_sfx_car.gd` | proprietate proiect |
+| `turbo_click.wav` / `turbo_release.wav` | clickul la apasarea turbo / sisaitul de la capat | `generate_sfx_car.gd` | proprietate proiect |
+| `turbo_whoosh.wav` | suvoiul turbo cat arde (bucla 0.8 s) | `generate_sfx_car.gd` | proprietate proiect |
 | `skid_loop.wav` | bucla de derapaj | `generate_sfx.gd` | proprietate proiect |
 | `boost.wav` | turbo | `generate_sfx.gd` | proprietate proiect |
 | `drift_start.wav` / `drift_level.wav` | intrare in drift / prag de bara | `generate_sfx.gd` | proprietate proiect |

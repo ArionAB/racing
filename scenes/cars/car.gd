@@ -513,8 +513,12 @@ static var _ring_mesh: ArrayMesh = null
 ## spune ca solul e granular — bucatile fac asta. De aceea aici e corect ce era
 ## gresit la praf: geometrie mica, opaca, cu gravitatie reala.
 var _debris_particles: CPUParticles3D
-var _engine_audio: AudioStreamPlayer3D
-var _skid_audio: AudioStreamPlayer3D
+## Vocile continue (motor, derapaj, suprafete, turbo, vant): vezi car_audio.gd.
+const CarAudio := preload("res://scenes/cars/car_audio.gd")
+var _audio: Node
+## Gazul comandat in ultimul tick (-1..1), dupa taierile din aruncare/repunere.
+## Il citeste CarAudio (motorul, rateurile); fizica foloseste variabila locala.
+var throttle_input: float = 0.0
 var _turbo_full_latch: bool = false
 
 # Rotile modelului (noduri separate in FBX-urile RgsDev).
@@ -941,6 +945,7 @@ func _physics_process(delta: float) -> void:
 		turbo_pressed = false
 		_tick_recover(delta)
 
+	throttle_input = throttle
 	_tick_upright(delta)
 	_apply_suspension()
 
@@ -2512,11 +2517,6 @@ func _update_effects(delta: float) -> void:
 		# asfaltul care se vede prin drum.
 		if not loose:
 			_drop_skid_marks(delta, mark)
-	if is_drifting:
-		if not _skid_audio.playing:
-			_skid_audio.play()
-	elif _skid_audio.playing:
-		_skid_audio.stop()
 	# Ding cand bara de turbo ajunge plina — stii fara sa te uiti in jos.
 	if turbo_charge >= 1.0 and not _turbo_full_latch and is_player:
 		_turbo_full_latch = true
@@ -2532,10 +2532,8 @@ func _update_effects(delta: float) -> void:
 	_update_soft_veg(delta)
 	_drop_trail(delta, loose)
 	_drop_leaf_wear(delta, on_road)
-	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
-	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
-	_engine_audio.pitch_scale = lerpf(0.7, 1.9, speed_frac) \
-		+ (0.25 if is_boosting else 0.0)
+	# Motor cu trepte, derapaj dupa alunecare, suprafete, turbo, vant.
+	_audio.tick(delta, on_road, loose)
 
 ## De la cat de mare e alunecarea fara handbrake pornesc fumul si urmele.
 const SMOKE_FREE_SLIDE: float = 0.3
@@ -3699,22 +3697,11 @@ func _build_effects() -> void:
 	_fire_particles.mesh = fire_mesh
 	add_child(_fire_particles)
 
-	# Motor pozitional: al tau se aude mereu, adversarii cand sunt aproape.
-	_engine_audio = AudioStreamPlayer3D.new()
-	_engine_audio.stream = AudioManager.ENGINE_LOOP
-	_engine_audio.bus = &"Engine"
-	_engine_audio.volume_db = -14.0
-	_engine_audio.max_distance = 60.0
-	add_child(_engine_audio)
-	_engine_audio.play()
-
-	# Scrasnet de cauciuc cat tine drift-ul.
-	_skid_audio = AudioStreamPlayer3D.new()
-	_skid_audio.stream = AudioManager.SKID_LOOP
-	_skid_audio.bus = &"SFX"
-	_skid_audio.volume_db = -10.0
-	_skid_audio.max_distance = 45.0
-	add_child(_skid_audio)
+	# Vocile masinii: motor pozitional (al tau se aude mereu, adversarii cand sunt
+	# aproape), derapaj, suprafete, turbo, vant. Creat aici, cu playerele la nevoie.
+	_audio = CarAudio.new()
+	add_child(_audio)
+	_audio.setup(self)
 
 	# Umbra blob: disc intunecat, pozitionat pe sol la fiecare tick.
 	# top_level = nu mosteneste transformarea masinii (o setam noi global).

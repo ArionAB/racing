@@ -662,6 +662,25 @@ Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
    aceluiași flag); (5) derrick-ul pe stânga = aproape teatru, pe dreapta =
    pedeapsă reală care pică pragul.
 
+   **Deciziile dezvoltatorului (25 oct 2026, după pasul 1):**
+   1. **Camioanele rămân din față, cu cod de AI nou**: AI-ul citește banda
+      camionului care vine (aceeași informație ca jucătorul — corpul
+      vizibil, nu faza), pe tiparul `_signal_lane_keep`; contactul frontal
+      cu camionul **nu mai ejectează** (flag pe `BusHazard`, implicit stins,
+      Machu Picchu bit-identic). Momentul „vine spre tine” e păstrat.
+   2. **Excavatorul: AI-ul dă cu zarul** la fiecare apropiere (1–6,
+      determinist pe seed): 1–3 nu trece pe sub braț (ia banda liberă),
+      4–6 trece și riscă brațul, ca jucătorul. Zarul e decizia, nu
+      informația — AI-ul nu citește faza brațului. Rămâne pe piazzale
+      (10 m), pe dreapta, cum îl construiește codul.
+   3. **Bermă continuă de moloz** pe toată marginea teraselor dinspre gol
+      (înlocuiește „berma doar ca punctuație” din §2.0, care nu ținea
+      pentru AI); golul se vede peste ea.
+   4. **Sania lovește cu strivirea de 3 s** a clasei, ca acum: un bloc de
+      2 t pe sanie te oprește, coerent cu masa.
+   Derrick-ul rămâne cu turnul pe stânga sensului (singura poziție care
+   trece pragul); calibrarea lui din §3 se corectează la „aproape teatru”.
+
 2. `Track23.tscn` din `TrackFromPath` (`tools/gen_carrara_route.py`, schela
    `gen_fiordland_route.py`: pas 12 m, viraje > 90° pe arc), temă `carrara`
    (doar lumina, cerul, ceața, solul), traseul din §2, `custom_ravines` pe

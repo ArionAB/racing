@@ -51,8 +51,14 @@ const STACK_MIN_DY: float = 14.0
 func _ready() -> void:
 	await get_tree().process_frame
 	var only := -1
+	# `--scene=res://tools/SondaCarraraB.tscn`: o pista sintetica care nu e in
+	# TRACK_SCENES (sondele tehnice de dinaintea unei piste). Verdictul si codul
+	# de iesire raspund pentru ea, ca la `--track`.
+	var scene_path := ""
 	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--track="):
+		if arg.begins_with("--scene="):
+			scene_path = arg.trim_prefix("--scene=")
+		elif arg.begins_with("--track="):
 			# `resolve_track_index` accepta si POZITIA din lista si NUMARUL
 			# scenei (memoria `indici-de-pista-intre-unelte`) — inainte se lua
 			# indexul brut, deci `--track=13` cadea in afara listei si sonda
@@ -61,6 +67,14 @@ func _ready() -> void:
 				int(arg.trim_prefix("--track=")))
 	var failed := false
 	var bad_tracks: PackedStringArray = []
+	if not scene_path.is_empty():
+		var bad_scene := await _check_path(scene_path)
+		print("  PISTA %s: %s" % [scene_path.get_file().get_basename(),
+			"PROBLEMA" if bad_scene else "OK"])
+		print("")
+		print("VERDICT: %s pe pista ceruta" % ("PROBLEMA" if bad_scene else "OK"))
+		get_tree().quit(1 if bad_scene else 0)
+		return
 	for i in GameState.TRACK_SCENES.size():
 		if only >= 0 and i != only:
 			continue
@@ -90,7 +104,11 @@ func _ready() -> void:
 
 
 func _check(idx: int) -> bool:
-	var scene := load(GameState.TRACK_SCENES[idx]) as PackedScene
+	return await _check_path(GameState.TRACK_SCENES[idx])
+
+
+func _check_path(path: String) -> bool:
+	var scene := load(path) as PackedScene
 	var track := scene.instantiate() as Track
 	get_tree().root.add_child(track)
 	await get_tree().process_frame
@@ -100,7 +118,7 @@ func _check(idx: int) -> bool:
 	# Numele scenei, nu idx + 1: indexul in TRACK_SCENES nu mai coincide cu
 	# numarul din fisier de cand s-au sters piste din mijlocul listei.
 	print("=== %s — %s (half_width %.1f) ===" % [
-		GameState.TRACK_SCENES[idx].get_file().get_basename(),
+		path.get_file().get_basename(),
 		track.track_name, track.half_width])
 	var problems := 0
 	for ri in track.routes.size():

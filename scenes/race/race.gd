@@ -112,8 +112,7 @@ func _ready() -> void:
 		_load_behind_screen()
 		return
 	# Mediul (cer, soare, teren) e construit de pista — fiecare are tema ei.
-	var track_scene := load(
-		GameState.TRACK_SCENES[GameState.selected_track]) as PackedScene
+	var track_scene := load(GameState.current_track_scene()) as PackedScene
 	_mount_track(track_scene.instantiate() as Track)
 	_setup_race()
 

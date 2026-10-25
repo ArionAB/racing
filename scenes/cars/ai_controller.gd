@@ -316,6 +316,45 @@ var _signal_block_m: float = INF
 ## Indexul de traseu al fiecarui semafor gasit (ca la usi: scanat o data per
 ## instanta, cheie = instance id).
 var _signal_index: Dictionary = {}
+## Camionul care vine din FATA (`BusHazard.ai_reads_lane`, Carrara): cat de
+## departe (m, pe axa) se citeste corpul VIZIBIL al camionului. Un om il vede de
+## la 50-100 m pe rampa (brief §2.0); la ~30 m/s inchiderea cu camionul e de
+## ~38 m/s, deci 90 m = ~2.4 s.
+static var bus_reach_m: float = 90.0
+## Dupa ce centrul camionului a trecut de noi cu atatia metri, linia se desface.
+const BUS_PASSED_M: float = 9.0
+## Cat de repede (1/s) se instaleaza / se desface banda opusa camionului.
+static var bus_blend_rate: float = 1.8
+## Jumatatea latimii masinii pentru calculul culoarului liber + marja.
+const BUS_CAR_HALF_M: float = 1.1
+static var bus_margin_m: float = 0.35
+## Reducere MODERATA de viteza in ac (fractia vitezei-tinta) cat banda opusa e
+## instalata: nu franare in coada, doar ridicat piciorul in viraj strans.
+static var bus_corner_speed: float = 1.0
+## Fara derapaj / turbo cat banda opusa camionului e instalata (blend > 0.3).
+static var bus_no_drift: bool = true
+var _bus_best_blend: float = 0.0
+var _bus_idx: Dictionary = {}
+var _bus_blend: Dictionary = {}
+var _bus_latched: Dictionary = {}
+var _bus_tline: Dictionary = {}
+var _bus_speed_scale: float = 1.0
+var _bus_trace: bool = OS.get_environment("BUS_TRACE") == "1"
+
+## Excavatorul (`ExcavatorHazard.ai_dice`, Carrara): la apropiere AI-ul da cu
+## zarul O DATA PER TRECERE — 1-3 ocoleste pe banda libera, 4-6 trece pe sub brat
+## si ii asuma riscul, ca jucatorul. Zarul E decizia, nu informatia: AI-ul nu
+## citeste faza bratului. Sasiul (mereu solid) se ocoleste in ambele cazuri.
+const EXC_REACH_M: float = 120.0
+const EXC_PASSED_M: float = 14.0
+const EXC_BLEND_RATE: float = 1.5
+const EXC_MARGIN_M: float = 0.4
+var _exc_info: Dictionary = {}
+var _exc_choice: Dictionary = {}
+var _exc_blend: Dictionary = {}
+var _exc_rng: RandomNumberGenerator = null
+## Zarurile date, pentru sonde: [rezultat 1-6, ...] in ordinea trecerilor.
+var dice_log: Array[int] = []
 ## Doar pentru sonde: `false` = AI-ul ignora tubul (garda trebuie sa prinda
 ## contacte cu el — altfel nu e armata).
 var reads_shishi: bool = true
@@ -503,6 +542,10 @@ func update(delta: float) -> void:
 	# ramane mereu un culoar. NU se franeaza: se alege banda libera pe fereastra de
 	# sosire (vezi `_shishimai_line`).
 	line = _shishimai_line(idx, speed, line)
+	# Camionul care vine din fata (Carrara): banda opusa lui. Dupa ocolirea de
+	# trafic (regula de siguranta), inainte de culoarul unic care are ultimul cuvant.
+	line = _bus_line(idx, speed, line, severity)
+	line = _exc_line(idx, line)
 	# CULOARUL UNIC are ultimul cuvant. Pe restul pistei ocolirea poate folosi
 	# toata latimea; intr-un blocaj cu o singura fanta, orice metru in afara
 	# fantei e zid, deci linia se strange inapoi in ea. Fereastra e ingusta
@@ -619,6 +662,7 @@ func update(delta: float) -> void:
 	# `speed_zone_scale`.
 	var zone_scale := speed_zone_scale()
 	target *= zone_scale
+	target *= _bus_speed_scale
 	# In zona de prudenta banda de toleranta de 6% dispare: viteza reala a masinilor
 	# sta sub `max_speed` (drag), deci cu banda tinta redusa cu 10% nu ar fi
 	# frant niciodata (masurat pe ProbeHaboob: -2,6% fata de -10% cerut).
@@ -642,7 +686,12 @@ func update(delta: float) -> void:
 		_throttle = 0.0
 
 	# --- drift (handbrake) pe viraje sustinute: si vireaza, si umple bara ---
-	if not _drift:
+	if bus_no_drift and _bus_best_blend > 0.3:
+		# Camion din fata in banda opusa: linia curata conteaza mai mult decat
+		# umplerea barei; derapajul de la iesirea din ac matura masina peste
+		# axa (masurat in ProbeCarrara, T3 start).
+		_drift = false
+	elif not _drift:
 		if severity > 0.34 and speed > car.drift_min_speed * 1.2:
 			_drift = true
 	elif severity < 0.12 or speed < car.drift_min_speed * 0.7:
@@ -650,7 +699,7 @@ func update(delta: float) -> void:
 
 	# --- turbo: pe drept, si oprit inainte de viraj, ca sa nu-l irosim in perete
 	if not _turbo:
-		if car.turbo_charge > 0.6 and severity <= 0.0 and _throttle > 0.0:
+		if car.turbo_charge > 0.6 and severity <= 0.0 and _throttle > 0.0 				and not (bus_no_drift and _bus_best_blend > 0.3):
 			_turbo = true
 	elif car.turbo_charge < 0.05 or severity > 0.25:
 		_turbo = false
@@ -1012,6 +1061,200 @@ func _shishi_line(idx: int, speed: float, line: float) -> float:
 			float(_shishi_sign[key]) * absf(hz.ai_safe_lane_m()) / hw,
 			-LINE_MAX, LINE_MAX)
 		return lerpf(line, target, blend)
+	return line
+
+
+## Camionul care vine din fata (`BusHazard.ai_reads_lane`): AI-ul citeste
+## aceleasi lucruri ca un om — POZITIA corpului vizibil (nu faza ascunsa, nu
+## ceasul) — si trece pe banda opusa lui pana il depaseste. Tiparul e al lui
+## `_shishi_line` / `_signal_lane_keep`: latch + amestec, NICIODATA frana in
+## coada (memoria `franare-de-coada-blocaj-reciproc`). In ac se poate ridica
+## usor piciorul (`bus_corner_speed`).
+##
+## Culoarul liber se calculeaza din laterala REALA a camionului la fiecare tick
+## (in ac corpul de 8 m inclina si laterala se schimba): intre marginea lui
+## interioara (+ semilatimea masinii + marja) si marginea asfaltului.
+func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
+	_bus_speed_scale = 1.0
+	_bus_best_blend = 0.0
+	var buses := get_tree().get_nodes_in_group(BusHazard.AI_GROUP)
+	if buses.is_empty():
+		return line
+	var r := track.route_at(car.route)
+	if r == null or r.count() == 0:
+		return line
+	var n_pts := r.count()
+	var bake: float = track.curve.bake_interval
+	var dt := get_physics_process_delta_time()
+	var best_blend := 0.0
+	for node in buses:
+		var bus := node as BusHazard
+		if bus == null:
+			continue
+		var key := bus.get_instance_id()
+		var target_blend := 0.0
+		var tline: float = _bus_tline.get(key, 0.0)
+		if not bus.is_hidden():
+			var tp := bus.body_position()
+			var bi: int
+			if _bus_idx.has(key) and track.is_on_road(int(_bus_idx[key]), tp, car.route):
+				bi = track.closest_index(int(_bus_idx[key]), tp, car.route)
+			else:
+				bi = track.closest_index_global(tp, car.route)
+			_bus_idx[key] = bi
+			var d_idx := bi - idx
+			if d_idx < -n_pts / 2:
+				d_idx += n_pts
+			elif d_idx > n_pts / 2:
+				d_idx -= n_pts
+			var along := _arc_to(r, idx, d_idx, bake)
+			var rd := r.baked[r.wrap_index(bi + 1)] - r.baked[r.wrap_index(bi)]
+			rd.y = 0.0
+			var fwd := bus.body_forward()
+			fwd.y = 0.0
+			var oncoming := rd.length_squared() > 1e-6 and fwd.length_squared() > 1e-6 				and rd.normalized().dot(fwd.normalized()) < -0.2
+			var tl := r.side_at(bi).dot(tp - r.baked[r.wrap_index(bi)])
+			var hw_t: float = maxf(track.width_at_index(bi) if car.route == 0 				else r.half_width, 0.001)
+			var on_road := absf(tl) < hw_t + 1.5
+			if oncoming and on_road and along <= bus_reach_m and along >= -BUS_PASSED_M:
+				_bus_latched[key] = true
+			else:
+				_bus_latched.erase(key)
+			if _bus_latched.has(key):
+				target_blend = 1.0
+				var ext := bus.body_half_width() + bus_margin_m
+				# lateral cu semn, + = dreapta. Banda libera e de partea unde
+				# ramane mai mult loc intre camion si marginea asfaltului.
+				var room_right := hw_t - 0.2 - (tl + ext)
+				var room_left := (tl - ext) - (-hw_t + 0.2)
+				var side := 1.0 if room_right >= room_left else -1.0
+				var lo: float
+				var hi: float
+				if side > 0.0:
+					lo = tl + ext + BUS_CAR_HALF_M
+					hi = hw_t - 0.2 - BUS_CAR_HALF_M
+				else:
+					hi = tl - ext - BUS_CAR_HALF_M
+					lo = -hw_t + 0.2 + BUS_CAR_HALF_M
+				var lat := (lo + hi) * 0.5 if lo < hi else (hi if side > 0.0 else lo)
+				tline = clampf(lat / hw_t, -LINE_MAX, LINE_MAX)
+				_bus_tline[key] = tline
+		var blend: float = _bus_blend.get(key, 0.0)
+		blend = move_toward(blend, target_blend, dt * bus_blend_rate)
+		_bus_blend[key] = blend
+		if _bus_trace and blend > 0.0:
+			var bp := bus.body_position()
+			var rr := track.route_at(car.route)
+			var ci := rr.closest_index(idx, car.global_position)
+			print("[bus] f=%d %s blend=%.2f tline=%.2f line=%.2f carlat=%.2f v=%.1f frac=%.3f" % [
+				Engine.get_physics_frames(), car.pilot_name, blend, tline, line,
+				rr.side_at(ci).dot(car.global_position - rr.baked[ci]), speed,
+				track.frac_at(idx, car.route)])
+		if blend > 0.0:
+			line = lerpf(line, tline, blend)
+			best_blend = maxf(best_blend, blend)
+	_bus_best_blend = best_blend
+	if best_blend > 0.0 and bus_corner_speed < 1.0:
+		_bus_speed_scale = lerpf(1.0, bus_corner_speed, best_blend * severity)
+	return line
+
+
+## Excavatorul cu zar: vezi comentariul de la `EXC_REACH_M`. Geometria (unde e
+## brat-ul si sasiul in coordonatele soselei) se calculeaza o data per masina.
+func _exc_line(idx: int, line: float) -> float:
+	var nodes := get_tree().get_nodes_in_group(ExcavatorHazard.AI_GROUP)
+	if nodes.is_empty():
+		return line
+	var r := track.route_at(car.route)
+	if r == null or r.count() == 0:
+		return line
+	var n_pts := r.count()
+	var bake: float = track.curve.bake_interval
+	var dt := get_physics_process_delta_time()
+	for node in nodes:
+		var exc := node as ExcavatorHazard
+		if exc == null:
+			continue
+		var key := exc.get_instance_id()
+		if not _exc_info.has(key):
+			var ei := track.closest_index_global(exc.global_position, car.route)
+			var side := r.side_at(ei)
+			var center := r.baked[r.wrap_index(ei)]
+			var corners := exc.ai_box_corners()
+			var span := {}
+			for part: String in ["arm", "body"]:
+				var lo := 1.0e9
+				var hi := -1.0e9
+				for c: Vector3 in corners[part]:
+					var l := side.dot(c - center)
+					lo = minf(lo, l)
+					hi = maxf(hi, l)
+				span[part] = Vector2(lo, hi)
+			var hw_e: float = maxf(track.width_at_index(ei) if car.route == 0 				else r.half_width, 0.001)
+			var body: Vector2 = span["body"]
+			var arm: Vector2 = span["arm"]
+			var blocked_lo := minf(body.x, arm.x)
+			var blocked_hi := maxf(body.y, arm.y)
+			# sasiul sta pe partea cu laterala medie mai departe de axa
+			var body_side := 1.0 if (body.x + body.y) >= 0.0 else -1.0
+			# banda libera: partea cu mai mult loc, miezul ei
+			var room_left := (blocked_lo - EXC_MARGIN_M) - (-hw_e + 0.2)
+			var room_right := (hw_e - 0.2) - (blocked_hi + EXC_MARGIN_M)
+			var free_lat: float
+			if room_left >= room_right:
+				var hi_f := blocked_lo - EXC_MARGIN_M - BUS_CAR_HALF_M
+				var lo_f := -hw_e + 0.2 + BUS_CAR_HALF_M
+				free_lat = (lo_f + hi_f) * 0.5 if lo_f < hi_f else hi_f
+			else:
+				var lo_f2 := blocked_hi + EXC_MARGIN_M + BUS_CAR_HALF_M
+				var hi_f2 := hw_e - 0.2 - BUS_CAR_HALF_M
+				free_lat = (lo_f2 + hi_f2) * 0.5 if lo_f2 < hi_f2 else lo_f2
+			# "trec": ating banda bratului, dar nu sasiul (mereu solid)
+			var pass_lat := (body.x - EXC_MARGIN_M - BUS_CAR_HALF_M) if body_side > 0.0 				else (body.y + EXC_MARGIN_M + BUS_CAR_HALF_M)
+			_exc_info[key] = {"idx": ei, "hw": hw_e, "free": free_lat,
+				"pass": pass_lat, "body_side": body_side}
+		var info: Dictionary = _exc_info[key]
+		var d_idx: int = int(info["idx"]) - idx
+		if d_idx < -n_pts / 2:
+			d_idx += n_pts
+		elif d_idx > n_pts / 2:
+			d_idx -= n_pts
+		var along := _arc_to(r, idx, d_idx, bake)
+		var choice: int = _exc_choice.get(key, 0)
+		if along <= EXC_REACH_M and along >= -EXC_PASSED_M:
+			if choice == 0:
+				if _exc_rng == null:
+					_exc_rng = RandomNumberGenerator.new()
+					_exc_rng.seed = hash("%.5f|%s|%.2f" % [line_offset, car.pilot_name, car.mass])
+				var roll := _exc_rng.randi_range(1, 6)
+				dice_log.append(roll)
+				choice = 1 if roll <= 3 else 2
+				_exc_choice[key] = choice
+		elif choice != 0 and (along < -EXC_PASSED_M or along > EXC_REACH_M + 40.0):
+			_exc_choice.erase(key)
+			choice = 0
+		var blend: float = _exc_blend.get(key, 0.0)
+		blend = move_toward(blend, 1.0 if choice != 0 else 0.0, dt * EXC_BLEND_RATE)
+		_exc_blend[key] = blend
+		if blend <= 0.0:
+			continue
+		var hw: float = float(info["hw"])
+		var lat_now := line * hw
+		var lat_goal: float
+		var last_choice: int = int(_exc_info[key].get("last", 0))
+		if choice != 0:
+			_exc_info[key]["last"] = choice
+			last_choice = choice
+		if last_choice == 1:
+			lat_goal = float(info["free"])
+		else:
+			# trece: isi tine linia, dar nu intra in sasiu
+			lat_goal = lat_now
+			if float(info["body_side"]) > 0.0:
+				lat_goal = minf(lat_now, float(info["pass"]))
+			else:
+				lat_goal = maxf(lat_now, float(info["pass"]))
+		return lerpf(line, clampf(lat_goal / hw, -LINE_MAX, LINE_MAX), blend)
 	return line
 
 

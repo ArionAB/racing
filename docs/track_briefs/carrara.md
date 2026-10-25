@@ -681,6 +681,49 @@ Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
    Derrick-ul rămâne cu turnul pe stânga sensului (singura poziție care
    trece pragul); calibrarea lui din §3 se corectează la „aproape teatru”.
 
+   **Runda 2 după decizii (25 oct 2026, `carrara/sonde-ai` @ 41f155c5,
+   pushată, fără PR).** Cod nou, toate în spatele unor flag-uri implicit
+   stinse (Machu Picchu bit-identic, dovedit cu hash pe 6 rulări):
+   `Car._process_contacts` — un corp cu meta `soft_hit_crush` dă strivire
+   scurtă în loc de ejectare; `BusHazard.soft_contact` / `ai_reads_lane`;
+   `ExcavatorHazard.soft_contact` / `ai_dice` (prin `HazardMarker`);
+   `AIController._bus_line` (citește corpul vizibil al camionului care vine,
+   ≤ 90 m, ia culoarul liber, fără drift și turbo cât ține banda) și
+   `_exc_line` (zarul 1–6, RNG propriu pe seed, nu consumă RNG-ul cursei);
+   `custom_parapets` stilul 2 = berma de 0,6 m, subțiată 10 m la capete.
+
+   | | runda 1 | runda 2 | contract |
+   |---|---|---|---|
+   | camioane: repuneri atribuibile / 16 seed-uri | 426 | **2** | ✔ |
+   | camioane: contact în ac / pe terase | 55% / 62% | **14% / 17%** | — |
+   | camioane: pierdere per întâlnire cu contact (mediană) | 4,16 s | **1,11 s** | ✔ (≤ 2 s) |
+   | camioane: `[blocaj]` atribuibile | 37 | **8** (3 cu faza mutată) | ✘ (zero) |
+   | camioane: delta pe tur, grele / ușoare | +6,7 / +5,1 s | **+1,0 / +1,0 s** | — |
+   | excavator: pe banda liberă | 1% | **48%** (zarul: 80/78/86/78/78/82) | ✔ |
+   | excavator: `[blocaj]` / repuneri | 30 / 221 | **7 / 8** | ✘ / ≈ |
+   | excavator 4–6 cu brațul jos: pierdere mediană | 4,25 s | **2,21 s** | ✘ (≤ 1,5 s) |
+   | terase fără hazard: `[blocaj]` / repuneri | 51 / 12 | **26 / 20** (bermă) | ✘ |
+   | terase + camioane: căderi > 3 m | 35 | **1** | ✔ |
+
+   **Citirea coordonatorului:** (1) camioanele sunt rezolvate în substanță;
+   5 din cele 8 blocaje sunt la start, când tot plutonul întâlnește camionul
+   pe prima terasă — pe Track23 faza camioanelor se alege ca la start să nu
+   fie niciunul pe B (cu faza mutată rămân 3). (2) La excavator, blocajele
+   și cele 2,2 s sunt **chiar prețul zarului**: AI-ul care dă 4–6 și ajunge
+   la începutul fazei închise așteaptă ~3 s, exact ca un jucător care
+   riscă și pierde; contractul „zero blocaj” a fost scris înainte de decizia
+   zarului și nu se mai aplică ca atare — se urmărește doar ca nimeni să nu
+   rămână blocat peste o fază (≤ 3,5 s). (3) **Berma singură nu rezolvă
+   marginile** pe bucla sintetică: AI-ul iese larg din ace și lovește
+   începutul bermei (ejectare la ~40 m/s); prelungită pe exteriorul acelor
+   a fost mai rău (74 de blocaje). Cauza e geometria acelor sintetice
+   (6 m lățime, ieșire scurtă), nu berma — **se rezolvă pe traseul real**,
+   cu ProbeRace la pasul 3: ace mai late la ieșire, berma începută după
+   ieșirea din ac, nu pe ea.
+
+   **Pasul 1 e închis.** Codul de la ambele ramuri de sonde intră în
+   ramura de construcție a pistei (pasul 2), nu separat în main.
+
 2. `Track23.tscn` din `TrackFromPath` (`tools/gen_carrara_route.py`, schela
    `gen_fiordland_route.py`: pas 12 m, viraje > 90° pe arc), temă `carrara`
    (doar lumina, cerul, ceața, solul), traseul din §2, `custom_ravines` pe

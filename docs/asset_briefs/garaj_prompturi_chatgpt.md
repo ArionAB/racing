@@ -568,10 +568,34 @@ pentru buggy s-a ales a doua varianta (`concept_buggy_v2.jpeg`).
   60°; bevelul de corp se ruleaza cu `bevel_angle=65`, ca sa teseasca doar
   cutiile (90°). La 30°/50° suspensia singura ajungea la 2096 tri.
 
-| # | masina | stare |
-|---|---|---|
-| 1 | Buggy | `buggy_v2.glb` construit (6322 tri, v1 avea 2444; un singur material); captura din garaj trimisa dezvoltatorului |
-| 2-10 | restul | de facut, in acelasi tipar |
+| # | masina | GLB | tri | driver_seat (Godot) | note |
+|---|---|---|---|---|---|
+| 1 | Buggy | `buggy_v2.glb` | 6322 | (0, 0.48, 0.18) | pilotul |
+| 2 | Muscle | `roadster_v2.glb` | 6326 | (-0.42, 0.58, 0.22) | |
+| 3 | Politia | `police_v2.glb` | 5582 | (-0.40, 0.64, 0.25) | respinsa de 2 ori (cutii, flanc jos) |
+| 4 | Taxi | `taxi_v2.glb` | 6298 | (-0.42, 0.64, 0.15) | |
+| 5 | Pompierii | `firetruck_v2.glb` | 6106 | (-0.42, 0.95, -0.67) | respinsa o data (sedan lung) |
+| 6 | Autobuzul | `bus_v2.glb` | 4656 | (-0.55, 1.02, -1.30) | |
+| 7 | Ambulanta (NOUA) | `ambulance.glb` | 5984 | (-0.42, 0.74, -0.70) | |
+| 8 | Hot rod (NOUA) | `hotrod.glb` | 6458 | (-0.38, 0.52, 0.50) | roti spate 0.46 doar vizual |
+| 9 | Macaraua (NOUA) | `tow_truck.glb` | 5722 | (-0.42, 0.84, -0.70) | |
+| 10 | Monster (NOUA) | `monster.glb` | 5946 | (0, 1.10, -0.05) | roata 0.62, plafon 0.65 in car.gd |
+
+Toate 10 sunt in `GameState.CAR_DATA` (cele noi la coada). Fizica celor 6
+vechi e neschimbata: raza rotii si gabaritul de coliziune din `.tres` raman.
+Identitatea celor 4 noi (masa, viteza, grip, suspensie) e o PROPUNERE din
+tabelul de mai sus, verificata doar cu ProbeRace pe Dunele (fara rasturnari);
+reglajul fin e la volan. AI-ul (`Race.AI_CARS`) nu le foloseste inca.
+
+**Limita ramasa la monster:** cu roata de contract (0.62) si figurina de 1.25 m,
+rotile nu ajung „mai inalte decat cabina" ca in foaie (iese ~0.48 din inaltime,
+foaia ~0.60). Asta ar cere roti mai mari si un plafon mai sus in car.gd.
+
+**Lectia constructorilor (agenti Sonnet, `garaj_v2_constructor.md`):** 7 din
+9 masini au cerut cel putin o runda in plus dupa ce coordonatorul a deschis
+plansa; de doua ori (politia, pompierii) raportul spunea ca silueta se
+potriveste si nu se potrivea. Plansa `compare_concept.py` o deschide
+coordonatorul — raportul constructorului nu e verdict.
 
 **Punct deschis (nu tine de model):** in joc, `Palette.apply_world_material`
 pune peste masini si stratul de detaliu triplanar al lumii — dungi gri

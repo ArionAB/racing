@@ -731,9 +731,6 @@ const CLASS_TEXTURES := {
 	# ROTITA (CLASS_LIFT / CLASS_LIFT_ROTATE): venele ei sunt verticale, iar taietura cu
 	# fir diamantat lasa dungi ORIZONTALE. Tenta e calibrata in joc, vezi CLASS_TINT.
 	"carrara_marble": "res://assets/textures/classes/olkhon_marble.png",
-	# Martorul variantei B a testului de mostra (`carrara_real`): aceeasi dala, alta tenta
-	# (aproape alba, ~(238,236,230) la soare de 38 grade); ridicare proprie, vezi CLASS_LIFT.
-	"carrara_marble_real": "res://assets/textures/classes/olkhon_marble.png",
 	# LUTUL BATUT al termitierelor (Serengeti). ACEEASI dala ca "rock" — nu se
 	# dubleaza in memorie, se schimba doar ridicarea si tenta (mecanica
 	# volcanic_rock / tuff_cream / city_concrete).
@@ -1082,7 +1079,6 @@ const CLASS_TINT := {
 	# #A9BEDD x 0.38; dala ridicata la luminanta 0.87 -> tenta liniara (0.70, 0.94, 1.0)).
 	# Valorile finale sunt masurate pe captura de joc, vezi docs/track_briefs/carrara.md.
 	"carrara_marble": Color(0.79, 0.87, 0.86),
-	"carrara_marble_real": Color(0.85, 0.90, 0.97),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
@@ -1318,9 +1314,6 @@ const CLASS_LIFT := {
 	# Marmura Carrara: dala olkhon (luminanta 0.41) trebuie sa ajunga pe un crem deschis;
 	# tenta poate doar sa INTUNECE, deci dala se ridica (vezi CLASS_TINT).
 	"carrara_marble": 0.87,
-	# Martorul B: ridicare proprie (0.94), fiindca albastrul tintei (~230) cere mai mult decat
-	# poate da dala la 0.87 cu tenta <= 1. Imagine ridicata separata (zero textura noua).
-	"carrara_marble_real": 0.94,
 	"village_plaster": 0.88,
 	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
 	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:
@@ -1408,7 +1401,6 @@ const CLASS_LIFT_ROTATE := {
 	"shu_vermilion": true,
 	# Venele dalei olkhon sunt verticale; fata taiata cu firul diamantat are dungi ORIZONTALE.
 	"carrara_marble": true,
-	"carrara_marble_real": true,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -1537,7 +1529,6 @@ const CLASS_TRIPLANAR_SCALE := {
 	"granite": 0.09,
 	# Marmura Carrara: dala rotita (dungi orizontale), o repetitie la ~8 m.
 	"carrara_marble": 0.12,
-	"carrara_marble_real": 0.12,
 	# Zidaria taiata: 0.5 = o repetitie la 2 m, adica SCARA REALA a sursei.
 	# Blocurile din fotografie ies atunci la 20-40 cm, randurile din geometrie
 	# sunt la 0.9 m: doua scari de zidarie care se sprijina una pe alta, exact

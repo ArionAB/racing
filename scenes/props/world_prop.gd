@@ -2225,13 +2225,10 @@ const _TF_HOUSE := {"House_Stone": _TF_STONE, "House_Plaster": _TF_PLASTER,
 const _TF_WALL := {"Wall_Stone": _TF_STONE}
 const _TF_BEECH_TREE := {"Beech_Leaves": _TF_BEECH}
 const _TF_JNEAPAN_BUSH := {"Jneapan_Needles": _TF_JNEAPAN}
-## Carrara (test de mostra): coroana castanului ia clasa `tf_beech` (brief §4), ca pe
-## Transfagarasan; marmura nu trece pe aici (fetele pistei sunt cod, nu GLB-uri).
+## Carrara (Track23, brief §4): coroana castanului ia clasa `tf_beech` (ca pe Transfagarasan),
+## iar conurile de moloz stau pe marmura la baza peretilor; marmura pistei in sine nu trece pe
+## aici (fetele pistei sunt cod, nu GLB-uri).
 const CLASSES_CARRARA := {
-	"beech_tree_a": {"Beech_Leaves": _TF_BEECH},
-}
-## Carrara A2: ca CLASSES_CARRARA, plus fagul B si conurile de moloz pe marmura (la baza peretilor).
-const CLASSES_CARRARA2 := {
 	"beech_tree_a": {"Beech_Leaves": _TF_BEECH},
 	"beech_tree_b": {"Beech_Leaves": _TF_BEECH},
 	"scree_cone": {"Scree_Schist": Palette.TRI_PREFIX + "carrara_marble"},
@@ -2359,10 +2356,8 @@ const CLASSES_BY_THEME := {
 	"okinawa": CLASSES_OKINAWA,
 	# Transfagarasan (Track21): vezi `CLASSES_TRANSFAGARASAN`.
 	"transfagarasan": CLASSES_TRANSFAGARASAN,
-	# Carrara (Track23, TESTUL DE MOSTRA, brief carrara.md §7 pasul 0): castanul din fag.
+	# Carrara (Track23, brief carrara.md): castanul din fag, conul de moloz pe marmura.
 	"carrara": CLASSES_CARRARA,
-	"carrara_real": CLASSES_CARRARA,
-	"carrara2": CLASSES_CARRARA2,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -2559,23 +2554,16 @@ const SLOT_REMAP_BY_GROUP := {
 const SLOTS_CARRARA := {
 	"kamaz_truck": {7: Palette.RUST_METAL, 22: Palette.DRY_VEGETATION},
 	"beech_tree_a": {29: Palette.VOLCANIC_BLACK},
-}
-# A2: ca SLOTS_CARRARA, plus fagul B si excavatorul (PAINTED_METAL 11 albastrui -> galben-spalacit 13;
-# rugina 10 ramane), ca utilajul sa nu fie gri-albastru.
-const SLOTS_CARRARA2 := {
-	"kamaz_truck": {7: Palette.RUST_METAL, 22: Palette.DRY_VEGETATION},
-	"beech_tree_a": {29: Palette.VOLCANIC_BLACK},
 	"beech_tree_b": {29: Palette.VOLCANIC_BLACK},
+	# Excavatorul: PAINTED_METAL 11 (albastrui) -> galben-spalacit 13; rugina 10 ramane.
 	"rusted_digger": {11: Palette.DRY_VEGETATION},
 }
 const SLOT_REMAP_BY_THEME := {
-	# Carrara (Track23, test de mostra): camionul din Baikal pe galben-spalacit + rugina.
+	# Carrara (Track23): camionul din Baikal pe galben-spalacit + rugina.
 	# Cabina KERB_RED 7 -> RUST_METAL 10; panoul de acoperis si farurile FOAM_WHITE 22 ->
 	# DRY_VEGETATION 13 (FOAM_WHITE nu are voie pe nicio suprafata a pistei, brief §4).
 	# Trunchiul fagului MARBLE_GREY 29 -> VOLCANIC_BLACK 20, ca pe Transfagarasan.
 	"carrara": SLOTS_CARRARA,
-	"carrara_real": SLOTS_CARRARA,
-	"carrara2": SLOTS_CARRARA2,
 	# Transfagarasan (Track21), tabla acoperisurilor. Brief: tabla argintie, dar slotul
 	# ASPHALT_EDGE 6 (#696765) e gri de asfalt, iar o clasa o poate doar INTUNECA. Deci slotul
 	# se muta pe MARBLE_GREY 29 (#B8B4AC), fara material nou. `cascada` are tabla pe

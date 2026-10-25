@@ -4289,35 +4289,34 @@ static func themes() -> Dictionary:
 		"decor": "none",
 	}, true)
 	_themes_cache["halong"] = hl
-	# CARRARA (Track23, docs/track_briefs/carrara.md §4, §7 pasul 0 = TESTUL DE MOSTRA,
-	# `scenes/tracks/Track23Mostra.tscn`). Paleta CALDA asumata: ora aurie, marmura
-	# crem-aurie la soare, praf bej pe tot ce e orizontal, ceata in familia prafului.
-	# Sablonul e `monumentvalley` (soare jos, ambient rece, umbre pornite), fara relief
-	# propriu: decorul se pune de mana, deci `decor` "none", fara pereti/borduri/faleze.
+	# CARRARA (Track23, docs/track_briefs/carrara.md §4, §7 pasii 0-2). Paleta CALDA asumata:
+	# ora aurie, marmura crem-aurie la soare, praf bej pe tot ce e orizontal. Valorile sunt
+	# varianta "A2" a testului de mostra (cer albastru Mediterana, orizont alb-cald, ceata
+	# neutra, `dune_scale` 0), singura care a trecut: A calda cu cer piersica a fost citita
+	# "desert-canion", B (reala) "poate gheata". Sablonul de pornire e `monumentvalley`
+	# (soare jos, ambient rece, umbre pornite), fara relief propriu: decorul se pune de mana,
+	# deci `decor` "none", fara pereti/borduri/faleze.
 	#
 	# Tentele (`ground_tint`, `scarp_tint`) sunt calculate INVERS din lumina scenei, ca in
-	# `fiordland`: tinta dupa randare ~(196,176,142) pentru praful orizontal; valorile din
-	# fisier sunt cele CALIBRATE pe captura de joc (--gamecam), nu cele din socoteala. Socoteala
-	# pura nu iese: pe orizontala, la soare de 22 grade (sin = 0.375), lumina directa e doar
-	# 0.47 din cea de pe o fata verticala, iar tenta de vertex color nu poate depasi 1.0. Masurat
-	# (ProbeMasca, 5 cadre): praful terasei ~(189,169,137), terenul ~(201,179,145), drumul
-	# ~(199,179,154) la soare — tinta (196,176,142).
+	# `fiordland`: calibrate pe captura de joc (--gamecam), nu din socoteala. Socoteala pura nu
+	# iese: pe orizontala, la soare de 22 grade (sin = 0.375), lumina directa e doar 0.47 din cea
+	# de pe o fata verticala, iar tenta de vertex color nu poate depasi 1.0.
 	_themes_cache["carrara"] = {
 		"sun_color": Color.html("FFD2A0"),
 		"sun_energy": 1.25,
 		"exposure": 1.0,
-		# Elevatie 22 grade; azimutul 30 = soare dinspre SE, deci fetele orientate spre S
-		# (spre drumul de jos) sunt luminate, cele spre N / V stau in umbra (ambient).
+		# Elevatia 22 grade; azimutul e PROVIZORIU (se remasoara pe traseul real, memoria
+		# `azimutul-soarelui-fata-de-drum`) si se suprascrie pe pista cu `custom_sun_rotation_deg`.
 		"sun_rotation_deg": Vector3(-22, 30, 0),
 		"ambient_color": Color.html("A9BEDD"),
 		"ambient_energy": 0.38,
-		"sky_top": Color.html("3F79C9"),
-		"sky_horizon": Color.html("F1D3AA"),
+		"sky_top": Color.html("2A5BA6"),
+		"sky_horizon": Color.html("EDE6D8"),
 		"sky_cover_alpha": 0.0,
-		"fog": Color.html("D9C4A6"),
+		"fog": Color.html("E2DCD0"),
 		"fog_sky_affect": 0.10,
 		"fog_depth": true,
-		"fog_begin": 120.0,
+		"fog_begin": 150.0,
 		"fog_end": 300.0,
 		"fog_curve": 1.4,
 		"fog_max": 0.62,
@@ -4325,10 +4324,13 @@ static func themes() -> Dictionary:
 		"shadow_opacity": 0.65,
 		"shadow_distance": 120.0,
 		"shadow_blur": 1.0,
-		"ground_tint": Color(1.0, 0.97, 0.74),
-		"hill_color": Color(0.62, 0.54, 0.40),
-		"dirt_road_tint": Color(0.84, 0.84, 0.80),
-		"scarp_tint": Color(0.85, 0.76, 0.60),
+		# O cariera nu sta intr-un camp de dune: campul departat ramane PLAT la cota medie a
+		# soselei (TrackSideSampler.dune_scale; 1.0 = comportamentul vechi, bit-identic).
+		"dune_scale": 0.0,
+		"ground_tint": Color(0.94, 0.97, 0.79),
+		"hill_color": Color(0.60, 0.56, 0.47),
+		"dirt_road_tint": Color(0.83, 0.84, 0.83),
+		"scarp_tint": Color(0.80, 0.77, 0.66),
 		"scarp_slope_deg": 38.0,
 		"scarp_fade_deg": 10.0,
 		"dust_color": null, # null = derivat din ground_tint (umerii soselei, praful din roti)
@@ -4342,39 +4344,6 @@ static func themes() -> Dictionary:
 		"hazard_model": "",
 		"water": false,
 	}
-	# CARRARA, VARIANTA B ("mai aproape de realitate", martorul testului de mostra):
-	# soare la 38 grade, alb-cald, cer pal la orizont, praful tras spre gri-alb neutru.
-	# Aceeasi geometrie; marmura foloseste clasa `carrara_marble_real` (tenta aproape alba).
-	var cr: Dictionary = (_themes_cache["carrara"] as Dictionary).duplicate()
-	cr.merge({
-		"sun_color": Color(1.0, 0.95, 0.85),
-		"sun_rotation_deg": Vector3(-38, 30, 0),
-		"sky_horizon": Color.html("E8EBEE"),
-		"fog": Color.html("D6D6D0"),
-		"ground_tint": Color(0.90, 0.86, 0.78),
-		"hill_color": Color(0.58, 0.55, 0.50),
-		"dirt_road_tint": Color(0.80, 0.80, 0.80),
-		"scarp_tint": Color(0.80, 0.77, 0.72),
-	}, true)
-	_themes_cache["carrara_real"] = cr
-	# CARRARA, VARIANTA A2 (runda 2 a testului de mostra): ca A, dar fara "desert". Criticii
-	# orbi au citit A ca desert-canion (dune, ceata piersica, copac singur): relieful campului
-	# departat se aplatizeaza (`dune_scale` 0), cerul si ceata trec de la piersica la alb-cald
-	# neutru, praful se trage spre gri-bej. Soarele auriu si marmura crem-aurie RAMAN (ele au
-	# scos "iarna").
-	var ca2: Dictionary = (_themes_cache["carrara"] as Dictionary).duplicate()
-	ca2.merge({
-		"dune_scale": 0.0,
-		"sky_top": Color.html("2A5BA6"),
-		"sky_horizon": Color.html("EDE6D8"),
-		"fog": Color.html("E2DCD0"),
-		"fog_begin": 150.0,
-		"ground_tint": Color(0.94, 0.97, 0.79),
-		"dirt_road_tint": Color(0.83, 0.84, 0.83),
-		"hill_color": Color(0.60, 0.56, 0.47),
-		"scarp_tint": Color(0.80, 0.77, 0.66),
-	}, true)
-	_themes_cache["carrara2"] = ca2
 	return _themes_cache
 
 

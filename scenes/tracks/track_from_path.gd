@@ -216,6 +216,21 @@ extends Track
 ## (Chongqing D: Hongya Dong sta pe el, apa incepe dincolo). Vezi
 ## Track._ravine_floors.
 @export var custom_ravine_floors: Array[Vector2] = []
+## PLATOURI DE BANC: dreptunghiuri plate care inlocuiesc campul de teren — doua
+## alaturate, cu cote diferite si margine DURA intre ele, fac o treapta verticala
+## (fata unui gradon de cariera). Fiecare element e un Dictionary cu cheile `x0`, `x1`,
+## `z0`, `z1` (coordonate de LUME, z0 < z1), `lvl` (PackedVector2Array de (x, cota
+## SOSELEI); liniar pe portiuni, fixat la capete) si `soft` (Vector4: cat se stinge
+## in afara marginii vest / est / nord / sud, 0 = margine dura). Terenul randeaza
+## treapta cu randuri fine ([constant Track.BENCH_FINE_DIV]) pe randul si coloana care
+## contin o margine dura, deci fata iese aproape verticala — la grila de 7.92 m ar fi
+## o panta de ~50 grade. Margini dure pot fi doar E-V sau N-S (aliniate la axele
+## lumii). Vezi [method TrackSideSampler._apply_benches]. Generat de
+## `tools/gen_carrara_route.py`.
+@export var custom_bench_patches: Array[Dictionary] = []
+## Rape cu racord strans (indici in `custom_ravines`): marginea asfaltului nu mai cade 1 m
+## inaintea buzei. Vezi [member TrackSideSampler.tight_ravines].
+@export var custom_tight_ravines: Array[int] = []
 
 ## LATIMEA rapelor: (indice de rapa, metri de la buza). Vezi
 ## Track._ravine_widths. Fara ea saparea se intinde lateral la infinit si valea
@@ -393,6 +408,14 @@ func _landmark_spots() -> Array[Vector3]:
 
 func _ravines() -> Array[Vector4]:
 	return custom_ravines
+
+
+func _bench_patches() -> Array:
+	return custom_bench_patches
+
+
+func _tight_ravines() -> Array[int]:
+	return custom_tight_ravines
 
 
 func _rail_segments() -> Array[Vector4]:

@@ -114,6 +114,16 @@ uniform float snow_cover = 0.35;
 uniform float snow_scale = 0.045;
 uniform float snow_slope_gain = 0.6;
 uniform float snow_edge_noise = 0.10;
+// DUNGILE DE FIR PE FETELE DE GRADON (Carrara, `face_stripe_*` din tema): pe fetele abrupte
+// (`v_tri_w` ~ 0) cota LUMII modifica albedoul in benzi orizontale, ca urmele firului diamantat
+// pe un perete de cariera. Amplitudine 0 (implicit) = ramura nu se executa, randarea e cea
+// dinainte, pixel cu pixel, pe orice alta pista.
+uniform float face_stripe_amp = 0.0;
+uniform float face_stripe_period = 0.7;
+// Scara proiectiei laterale (micro) pe fetele abrupte; 1.0 = cea din `tiling_micro`. Pe Carrara fetele de
+// marmura au nevoie de vene mai mari decat granulatia pietrisului din plan.
+uniform float side_tiling_k = 1.0;
+varying float v_wy;
 varying float v_snow_elig;
 varying vec3 v_wpos;
 varying float v_ny;
@@ -152,8 +162,9 @@ void vertex() {
 	// texturii) folosim VERTEX.y direct: exact directia care lipsea din
 	// proiectia planara, si motivul intregului fix.
 	vec2 side = mix(VERTEX.zy, VERTEX.xy, step(n.x, n.z));
-	v_uv_side = side * tiling_micro;
+	v_uv_side = side * tiling_micro * side_tiling_k;
 	v_uv_side_macro = side * tiling_macro;
+	v_wy = VERTEX.y;
 	if (snow_on > 0.5) {
 		v_snow_elig = CUSTOM0.r;
 		v_wpos = VERTEX;
@@ -191,6 +202,12 @@ void fragment() {
 	micro = mix(vec3(detail_mean), micro, k);
 	macro = mix(vec3(detail_mean), macro, k);
 	ALBEDO = COLOR.rgb * micro * macro;
+	if (face_stripe_amp > 0.0) {
+		// Doua frecvente, ca dungile sa nu fie o scara regulata: 0.7 m (firul) si ~1.9 m (reprize).
+		float sy = 0.62 * sin(v_wy * 6.2831853 / face_stripe_period)
+				+ 0.38 * sin(v_wy * 6.2831853 / (face_stripe_period * 2.7) + 1.3);
+		ALBEDO *= 1.0 - (1.0 - v_tri_w) * face_stripe_amp * (0.5 + 0.5 * sy);
+	}
 	if (snow_on > 0.5) {
 		vec2 q = v_wpos.xz * snow_scale;
 		float n = 0.55 * snow_vnoise(q) + 0.30 * snow_vnoise(q * 2.3 + 17.0)

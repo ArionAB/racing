@@ -31,6 +31,8 @@ class Rec:
 	var spd := PackedFloat64Array()
 	var up := PackedFloat64Array()
 	var yaw := PackedFloat64Array()
+	var spin := PackedFloat64Array()
+	var crush := PackedFloat64Array()
 
 	func add(time: float, car: Car) -> void:
 		t.append(time)
@@ -41,6 +43,8 @@ class Rec:
 		up.append(car.global_transform.basis.y.dot(Vector3.UP))
 		var fwd := -car.global_transform.basis.z
 		yaw.append(atan2(-fwd.x, -fwd.z))
+		spin.append(float(car.get("_spin_left")))
+		crush.append(car.crush_time)
 
 	func size() -> int:
 		return t.size()
@@ -51,7 +55,7 @@ static func make_ground(parent: Node) -> StaticBody3D:
 	g.name = "Ground"
 	var cs := CollisionShape3D.new()
 	var box := BoxShape3D.new()
-	box.size = Vector3(900.0, 1.0, 900.0)
+	box.size = Vector3(1800.0, 1.0, 1800.0)
 	cs.shape = box
 	g.add_child(cs)
 	g.position = Vector3(0.0, -0.5, 0.0)
@@ -72,7 +76,7 @@ static func spawn_car(parent: Node, idx: int, x: float, z: float,
 	var drv := WaypointDriver.new()
 	var pts: Array[Vector3] = []
 	var k := 0
-	while z - 40.0 * k > -420.0:
+	while z - 40.0 * k > -820.0:
 		pts.append(Vector3(x, 0.0, z - 40.0 * float(k + 1)))
 		k += 1
 	drv.waypoints = pts
@@ -115,6 +119,12 @@ static func analyze(hit: Rec, ctrl: Rec, t_hit: float) -> Dictionary:
 	var x_abs_max := 0.0
 	var up_min := 1.0
 	var v_peak := 0.0
+	var spin_max := 0.0
+	var crush_max := 0.0
+	var y_roll := -INF
+	for i in range(i_before, i_hit + 1):
+		y_roll = maxf(y_roll, hit.y[i])
+	var y_air := -INF
 	var flipped_s := 0.0
 	var flipped_run := 0.0
 	var flipped_run_max := 0.0
@@ -124,6 +134,10 @@ static func analyze(hit: Rec, ctrl: Rec, t_hit: float) -> Dictionary:
 		x_abs_max = maxf(x_abs_max, absf(hit.x[i]))
 		up_min = minf(up_min, hit.up[i])
 		v_peak = maxf(v_peak, hit.spd[i])
+		spin_max = maxf(spin_max, hit.spin[i])
+		crush_max = maxf(crush_max, hit.crush[i])
+		if i <= i_hit + 60:
+			y_air = maxf(y_air, hit.y[i])
 		# Regula de repunere din race.gd: rasturnata (cos < 0.3) si sub 4 m/s.
 		if hit.up[i] < 0.3 and hit.spd[i] < 4.0:
 			flipped_s += STEP
@@ -161,6 +175,9 @@ static func analyze(hit: Rec, ctrl: Rec, t_hit: float) -> Dictionary:
 		"recover_s": recover_s,
 		"loss": loss,
 		"v_peak": v_peak,
+		"spin_max": spin_max,
+		"crush_max": crush_max,
+		"rise": y_air - y_roll,
 		"v_end": hit.spd[i_end],
 		"v_end_ctrl": ctrl.spd[i_end],
 		"n": n,

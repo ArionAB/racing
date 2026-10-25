@@ -96,6 +96,11 @@ const STEP_UP: float = 0.6
 ## 45°, vizibil, si e semn ca traseul trebuie oprit inaintea peretelui.
 const MAX_CLIMB: float = 1.0
 
+## Cat din abaterea de orientare se inchide pe cadru la modelul care aluneca
+## (`roll_model` stins): netezeste zgomotul terenului fara sa ramana in urma
+## pe racordarea de la baza jgheabului.
+const SLIDE_ALIGN: float = 0.3
+
 ## Efectul strivirii: durata, plafon de viteza, turtire, cat din viteza ramane.
 ##
 ## Cifrele vin din #242, unde strivirea a fost ceruta explicit: masina ramane
@@ -136,9 +141,11 @@ var route_pause: float = DEFAULT_ROUTE_PAUSE
 ## `PathMover.stick_to_ground`).
 var stick_to_ground: bool = true
 ## Cu traseu: modelul se ROSTOGOLESTE pe distanta parcursa (implicit, bolovanul).
-## Stins = modelul doar ALUNECA, fara sa se roteasca: sania de lizzatura
-## (Carrara, POI G) coboara jgheabul pe talpa ei, iar o sanie care se da peste
-## cap ar fi absurda. Directia de miscare (deci si ghiontul) ramane aceeasi.
+## Stins = modelul doar ALUNECA, fara sa se roteasca cu distanta: sania de
+## lizzatura (Carrara, POI G) coboara jgheabul pe talpa ei, iar o sanie care se
+## da peste cap ar fi absurda. Directia de miscare (deci si ghiontul) ramane
+## aceeasi. Modelul isi pune -Z pe directia de mers si se inclina cu panta
+## (vezi `_slide_align`), iar talpa lui sta pe suprafata.
 @export var roll_model: bool = true
 
 ## Modelul bolovanului: GLB-ul, piesa din el (gol = tot), scara. Null = cel
@@ -171,6 +178,14 @@ var _last_phase: int = -1
 var _cooldown: Dictionary = {}
 ## Raza reala a bolovanului, masurata pe model.
 var _radius: float = ROCK_RADIUS
+## Pentru modelul care aluneca: modelul, jumatatea lui de inaltime si cota lui
+## locala dupa centrare (talpa trebuie sa stea pe suprafata, nu sfera).
+var _model: Node3D = null
+var _half_h: float = ROCK_RADIUS
+var _model_y0: float = 0.0
+## Prima aliniere a unei treceri se face dintr-un salt, nu netezit: sania
+## apare sus pe jgheab si nu are voie sa fie o clipa dreapta pe o panta de 30.
+var _slide_fresh: bool = true
 ## Ultima axa de rostogolire: pastrata cand miscarea e aproape verticala
 ## (piatra sare), ca sa continue sa se invarta in aer in loc sa inghete.
 var _roll_axis: Vector3 = Vector3.RIGHT
@@ -344,6 +359,9 @@ func _center_and_measure(model: Node3D) -> void:
 		return
 	model.position -= box.get_center()
 	_radius = maxf(box.size.x, box.size.z) * 0.5
+	_model = model
+	_half_h = box.size.y * 0.5
+	_model_y0 = model.position.y
 
 
 ## Traseul vine in coordonatele PISTEI; il aducem in spatiul local, calculam
@@ -490,6 +508,7 @@ func _process_route(delta: float) -> void:
 			# Piatra tocmai s-a desprins: teleportare la start, fara sa se
 			# „rostogoleasca" toata lungimea traseului inapoi intr-un cadru.
 			_last_pos = pos
+			_slide_fresh = true
 		_on_phase_enter_route(idx)
 		_last_phase = idx
 	if moving:
@@ -594,8 +613,33 @@ func _roll_along(wanted: Vector3) -> void:
 		_move_dir = flat.normalized()
 		_roll_axis = Vector3.UP.cross(_move_dir).normalized()
 	if not roll_model:
-		return # sania aluneca: directia de miscare s-a retinut, rotirea nu
+		# Sania aluneca: nicio rostogolire (directia de miscare s-a retinut mai
+		# sus), doar aliniere la mers si la panta.
+		# Pragul e mai mic decat la `_move_dir` ca sa prinda si primul cadru al
+		# unei treceri, iar un salt aproape vertical (cadere de pe o buza,
+		# teleportarea de la pornire) nu orienteaza sania: se asteapta panta.
+		if flat.length() > 0.0003 and absf(moved.y) < 2.0 * flat.length():
+			_slide_align(moved / dist)
+		return
 	_pivot.rotate(_roll_axis, -dist / _radius)
+
+
+## Modelul care aluneca: cu -Z spre directia de mers (si deci inclinat cu
+## panta), iar talpa pe suprafata.
+##
+## Centrul sta cu o RAZA deasupra terenului, pe VERTICALA, si pivotul se
+## inclina in jurul lui. Fara corectie, pe 30 de grade o talpa de 2,4 m pluteste
+## cu un colt si intra in sol cu celalalt (masurat ±0,98 m). Talpa e la
+## `_half_h` sub centru dupa NORMALA, iar suprafata e la `_radius * cos(panta)`:
+## modelul coboara diferenta (pe plat: `_radius - _half_h`, 0 la un model cu
+## talpa cat inaltimea).
+func _slide_align(heading: Vector3) -> void:
+	var target := Basis.looking_at(heading, Vector3.UP)
+	_pivot.basis = target if _slide_fresh else _pivot.basis.slerp(target, SLIDE_ALIGN)
+	_slide_fresh = false
+	if _model != null:
+		var cos_t := clampf(_pivot.basis.y.dot(Vector3.UP), 0.0, 1.0)
+		_model.position.y = _model_y0 - (_radius * cos_t - _half_h)
 
 
 ## Rostogolirea modelului FARA traseu: doar in coborare si asezare. La

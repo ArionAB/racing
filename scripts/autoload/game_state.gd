@@ -113,11 +113,16 @@ const TRACK_SCENES: Array[String] = [
 	# numarul scenei); probe_decor/probe_manual vor 22, snapshot/probe_race/
 	# probe_layout vor 14 SAU 22 (memoria probe-decor-numar-de-scena).
 	"res://scenes/tracks/Track22.tscn", # Ha Long = INDEXUL 14
+	# Track23 = INDEXUL 15 (Carrara, brief carrara.md): la COADA listei, fara swap. Uneltele o
+	# adreseaza cu --track=15 (snapshot / probe_race / probe_layout / probe_buried) SAU --track=23
+	# (resolve_track_index o gaseste dupa numarul scenei); probe_decor / probe_manual iau DOAR
+	# numarul scenei, 23 (memoria `probe-decor-numar-de-scena`).
+	"res://scenes/tracks/Track23.tscn", # Carrara = INDEXUL 15
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Transfagarasan", "Baikal", "Stromboli",
 	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
-	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long",
+	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long", "Carrara",
 ]
 const CHAMP_ROUNDS: int = 3
 

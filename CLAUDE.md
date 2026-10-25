@@ -61,7 +61,8 @@ pur plus haosul fizic, nu proiectilele.
   inerție (`drift_yaw_inertia`), nu-l întoarce; **unghiul rămâne și la viteză
   de cursă** (`drift_arc_tight_top`, nu zero); **impulsul pierdut prin
   frecarea laterală se întoarce** scalat cu gazul (`drift_momentum_keep`):
-  ▲+DRIFT ține viteza, DRIFT singur o pierde pe inerție, ▼+DRIFT frânează.
+  ▲+DRIFT ține viteza (powerslide); DRIFT singur e frână de mână și frânează
+  (vezi touch, mai sus), deci nimic nu se întoarce.
   Juice: rotație vizuală în plus pe model, tresărire la ieșire + ciripit,
   scrâșnet după alunecare, bara de turbo pulsează. Garda: `ProbeDriftEntry`
   (4 contracte, fiecare cu sabotaj care pică).

@@ -24,6 +24,9 @@ extends RigidBody3D
 ## simulare.
 
 signal boost_started(car: Car)
+## Frana de mana eliberata dupa un drift de `seconds`. HUD-ul pulseaza bara
+## de turbo: rasplata (umplerea 2.5x) se vede in clipa in care se termina.
+signal drift_ended(car: Car, seconds: float)
 signal wall_hit(car: Car, impact: float)
 signal landed(car: Car, fall_speed: float)
 signal respawned(car: Car)
@@ -111,8 +114,38 @@ const SLIP_GRIP_WET: float = 3.6
 ## nu mai e unealta de viraj, e modul de condus. Tema poate suprascrie prin
 ## Track.ice_grip(); asta e implicitul.
 const SLIP_GRIP_ICE: float = 1.5
-@export var drift_steer_bonus: float = 1.5
-@export var drift_bias: float = 0.4
+## Cat de strans vireaza driftul cand tii volanul SPRE interior, in unitati
+## de volan plin (1.0 = virajul normal cu volan plin). Maparea CTR (oct 2026):
+## in drift volanul nu mai alege SENSUL — ala e `drift_dir`, fixat la intrare
+## — ci doar RAZA, intre `drift_arc_wide` (contravolan plin) si
+## `drift_arc_tight` (volan spre interior). Contravolanul largeste alunecarea,
+## n-o inverseaza: asa „prinzi" un spate care fuge, ca in orice drift arcade.
+@export var drift_arc_tight: float = 1.6
+## Acelasi arc strans la viteza maxima (intre ele, liniar pe viteza). Mai mic
+## decat 1.6: la 29 m/s un arc de 1.6 inseamna 3 rad/s, adica tromba. Dar NU
+## zero, cum era `drift_yaw_at_top` pana in oct 2026: fara rotatie in plus, la
+## viteza de cursa frana de mana nu mai era decat o frana cu ruliu. Unghiul de
+## derapaj E driftul — ProbeDriftEntry il cere >= 18° la 85% din vmax.
+@export var drift_arc_tight_top: float = 1.25
+## Arcul cu contravolan plin: aproape drept, dar tot in sensul driftului.
+@export var drift_arc_wide: float = 0.2
+## Constanta de timp (s) cu care rotatia URMEAZA comanda cat esti in drift. Pe
+## asfalt rotatia e scrisa direct (arcade: volanul e rotatia); in drift are
+## inertie, ca sa existe ce prinde cu contravolanul. Fara ea, volanul lasat
+## liber oprea rotatia in acelasi tick: alunecarea se termina ca un
+## intrerupator, nu ca un spate care se aseaza.
+@export var drift_yaw_inertia: float = 0.25
+## Cat din impulsul inainte pierdut prin frecarea laterala se intoarce ca forta
+## pe directia caroseriei cat drifteaza (0 = nimic, 1 = viteza se pastreaza
+## intreaga). Scalat cu gazul: ▲+DRIFT tine viteza (powerslide), DRIFT singur
+## o pierde pe inertie, ▼+DRIFT franeaza. Fara asta fata, cu aderenta plina,
+## „scrubuia" componenta laterala si driftul frana ca un zid: la 62% din vmax
+## pierdea 36% din viteza intr-o secunda (masurat, oct 2026).
+@export var drift_momentum_keep: float = 0.85
+## Rotatie IN PLUS, doar pe model, in sensul driftului (grade la drift plin).
+## Trucul din kart-uri: caroseria arata mai intoarsa decat e fizic, iar
+## alunecarea se citeste de la prima privire, nu din urmele de pe asfalt.
+@export var drift_visual_yaw_deg: float = 10.0
 @export var drift_min_speed: float = 9.0
 ## Secunde in care driftul intra deplin dupa ce tragi frana de mana. Inainte
 ## era un singur tick: rotatia sarea cu 60% si aderenta spatelui scadea de 4
@@ -120,14 +153,11 @@ const SLIP_GRIP_ICE: float = 1.5
 @export var drift_ramp_in: float = 0.2
 ## Secunde in care spatele se reaseaza dupa ce eliberezi frana de mana.
 @export var drift_ramp_out: float = 0.25
-## Driftul se dozeaza pe viteza: la drift_min_speed e pivotul strans de pana
-## acum, spre viteza maxima devine o alunecare larga care pastreaza viteza.
+## Driftul se dozeaza pe viteza: la drift_min_speed e pivotul strans, spre
+## viteza maxima un arc mai larg (`drift_arc_tight_top`) cu spatele mai ferm.
 ## Inainte era acelasi pivot la orice viteza — la 29 m/s: 3.3 rad/s (190°/s),
 ## 42° de derapaj si 11 m/s pierduti in jumatate de secunda.
 ##
-## Cat din rotatia COMANDATA in plus (drift_steer_bonus + drift_bias) ramane
-## la viteza maxima; 1 = toata, ca la viteza mica.
-@export var drift_yaw_at_top: float = 0.0
 ## Aderenta spatelui in drift la viteza maxima (`drift_grip` e cea de la
 ## drift_min_speed; intre ele, liniar). MAI MARE decat drift_grip, nu mai mica:
 ## rotatia driftului vine mai ales din dezechilibrul fata-spate (fata tine,
@@ -387,6 +417,19 @@ var drift_dir: float = 0.0
 ## trasa, coboara in drift_ramp_out dupa. `is_drifting` spune daca e TRASA
 ## (turbo, stopuri, fum); fizica si ruliul citesc dozajul de aici.
 var drift_blend: float = 0.0
+## Rotatia COMANDATA, netezita: pe asfalt e chiar comanda, in drift o urmeaza
+## cu `drift_yaw_inertia`. Stare separata de angular_velocity, ca loviturile
+## (solver, _impact_yaw) sa nu se strecoare in netezire.
+var _yaw_cmd: float = 0.0
+## Cat a tinut driftul curent (s); raportat in `drift_ended`.
+var _drift_time: float = 0.0
+## Rotatia vizuala in plus a modelului (rad), netezita spre tinta.
+var _drift_visual_yaw: float = 0.0
+## Reasezarea de la iesirea din drift: un ruliu scurt in sens opus, pe
+## `_visual`. `_snap_dir` e sensul driftului care tocmai s-a terminat.
+const DRIFT_SNAP_TIME: float = 0.22
+var _snap_left: float = 0.0
+var _snap_dir: float = 0.0
 ## Stopurile aprinse: frana de serviciu (inapoi cu viteza inainte) sau
 ## handbrake-ul de drift. Citit de [CarLights]; scris o data pe tick.
 var brake_lamp: bool = false
@@ -1062,7 +1105,7 @@ func _physics_process(delta: float) -> void:
 	_update_draft(delta)
 	brake_lamp = (throttle < 0.0 and fwd_speed > 1.0) or is_drifting
 
-	_apply_driving(steer, throttle, fwd_h, fwd_speed)
+	_apply_driving(steer, throttle, fwd_h, fwd_speed, delta)
 
 	slip_time = maxf(slip_time - delta, 0.0)
 	crush_time = maxf(crush_time - delta, 0.0)
@@ -1221,7 +1264,7 @@ func _apply_suspension() -> void:
 ## _contact_offset); grip-ul lateral e per axa, ca driftul sa taie doar
 ## spatele.
 func _apply_driving(steer: float, throttle: float,
-		fwd_h: Vector3, fwd_speed: float) -> void:
+		fwd_h: Vector3, fwd_speed: float, delta: float) -> void:
 	# Tractiunea cere contact: cu rotile in aer nu se accelereaza si nu se
 	# vireaza. Drag-ul lipseste si el — lectia sariturii din aug 2026 (in aer
 	# nu exista nicio rezistenta modelata) e pastrata de constructie.
@@ -1264,6 +1307,10 @@ func _apply_driving(steer: float, throttle: float,
 	# spatele cedeaza mai putin, deci se roteste mai putin — arc larg.
 	var drift_amt := _drift_amount()
 	var drift_t := _drift_speed_t(fwd_speed)
+	# Puterea pierduta prin frecarea laterala, adunata pe axe: pentru o forta
+	# de amortizare -k·lat, F·v = -k·|lat|². In drift o parte se intoarce ca
+	# impuls inainte — vezi `drift_momentum_keep`.
+	var scrub_power := 0.0
 	for axle in 2:
 		if _axle_grounded[axle] == 0:
 			continue
@@ -1281,24 +1328,50 @@ func _apply_driving(steer: float, throttle: float,
 		var lat := Vector3(point_vel.x, 0.0, point_vel.z)
 		lat -= fwd_h * lat.dot(fwd_h)
 		var axle_frac: float = float(_axle_grounded[axle]) / 2.0
-		apply_force(-lat * grip_axle * mass * 0.5 * axle_frac, offset)
+		var k := grip_axle * mass * 0.5 * axle_frac
+		apply_force(-lat * k, offset)
+		scrub_power += k * lat.length_squared()
 
-	# --- Directia (amplificata si "impinsa" in directia drift-ului) ---
+	# --- Impulsul inainte intors in drift (powerslide) ---
+	# O forta pe directia caroseriei a carei putere (F·fwd_speed) egaleaza
+	# fractia `keep` din cea pierduta lateral: viteza se ROTESTE spre bot in
+	# loc sa se piarda — trucul din kart-uri, scris ca forta. Centrala, ca
+	# plafonul: e un guvernator de joc, nu un motor, n-are voie sa adauge
+	# tangaj. Plafonata la de trei ori acceleratia, ca un derapaj extrem sa nu
+	# devina catapulta, si stinsa cat tine alunecarea de la balta/T-bone
+	# (slip_time): aia e pedeapsa, nu drift.
+	if drift_amt > 0.0 and throttle > 0.0 and fwd_speed > 3.0 \
+			and slip_time <= 0.0:
+		var keep_force := scrub_power / fwd_speed \
+			* drift_momentum_keep * drift_amt * throttle
+		keep_force = minf(keep_force, acceleration * 3.0 * mass)
+		apply_central_force(fwd_h * keep_force * ground_frac)
+
+	# --- Directia: in drift volanul alege RAZA, nu sensul (maparea CTR) ---
 	var speed_frac := clampf(absf(fwd_speed) / (max_speed * 0.5), 0.0, 1.0)
 	var effective_steer := steer
 	if drift_amt > 0.0:
-		var drift_steer := clampf(
-			steer * drift_steer_bonus + drift_dir * drift_bias, -1.6, 1.6)
-		effective_steer += (drift_steer - steer) \
-			* lerpf(1.0, drift_yaw_at_top, drift_t) * drift_amt
+		# +1 = volan spre interiorul alunecarii, -1 = contravolan plin.
+		var into := clampf(steer * drift_dir, -1.0, 1.0)
+		var tight := lerpf(drift_arc_tight, drift_arc_tight_top, drift_t)
+		var arc := lerpf(drift_arc_wide, tight, (into + 1.0) * 0.5)
+		effective_steer = lerpf(steer, drift_dir * arc, drift_amt)
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
 	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign \
 		* _steer_taper(fwd_speed, drift_amt)
+	# Pe asfalt comanda se scrie direct (arcade: volanul e rotatia). In drift
+	# rotatia o URMEAZA cu inertie, ca sa existe ce prinde cu contravolanul;
+	# rampa de iesire duce tau la zero, deci revenirea pe asfalt e continua.
+	var tau := drift_yaw_inertia * drift_amt
+	if tau > 0.001:
+		_yaw_cmd = lerpf(_yaw_cmd, yaw_rate, 1.0 - exp(-delta / tau))
+	else:
+		_yaw_cmd = yaw_rate
 	_spinout_assist(throttle, fwd_h, hvel)
 	# Comanda + rotatia ramasa din lovituri (se stinge singura, plafonata).
 	var kick := _yaw_kick if _yaw_kick_left > 0.0 else 0.0
 	angular_velocity = Vector3(
-		angular_velocity.x, yaw_rate + _impact_yaw + kick, angular_velocity.z)
+		angular_velocity.x, _yaw_cmd + _impact_yaw + kick, angular_velocity.z)
 
 
 ## Strangerea virajului cu viteza: 1.0 sub `steer_taper_start` din max_speed,
@@ -1772,16 +1845,34 @@ func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float,
 		if drift_pressed and fwd_speed > drift_min_speed and absf(steer) > 0.25:
 			is_drifting = true
 			drift_dir = signf(steer)
+			_drift_time = 0.0
 			if is_player:
 				AudioManager.play_sfx(&"drift_start")
 	elif not drift_pressed or fwd_speed < drift_min_speed * 0.55:
-		is_drifting = false
+		_end_drift()
 	if is_drifting:
+		_drift_time += delta
 		drift_blend = move_toward(drift_blend, 1.0,
 			delta / maxf(drift_ramp_in, 0.001))
 	else:
 		drift_blend = move_toward(drift_blend, 0.0,
 			delta / maxf(drift_ramp_out, 0.001))
+
+
+## Iesirea din drift, cea JUCATA (frana de mana eliberata sau viteza prea
+## mica): spatele se reaseaza pe rampa, caroseria tresare o data in sens
+## opus, cauciucul ciripeste cand se prinde iar, iar HUD-ul afla ca sa
+## pulseze bara. Repunerea si aruncarea sting driftul direct, fara nimic
+## din astea — acolo nu s-a terminat un drift, a disparut masina.
+func _end_drift() -> void:
+	is_drifting = false
+	_snap_left = DRIFT_SNAP_TIME
+	_snap_dir = drift_dir
+	# Un drift de sub 0.3 s e o atingere de buton, nu o alunecare: fara
+	# ciripit, altfel fiecare tap pocneste.
+	if is_player and _drift_time > 0.3:
+		AudioManager.play_sfx(&"drift_end")
+	drift_ended.emit(self, _drift_time)
 
 
 ## Dozajul driftului aplicat fizicii: rampa netezita (smoothstep), ca intrarea
@@ -2382,8 +2473,11 @@ func respawn(backoff_m: float = 14.0) -> void:
 	angular_velocity = Vector3.ZERO
 	_prev_velocity = velocity
 	_commanded_yaw = 0.0
+	_yaw_cmd = 0.0
 	is_drifting = false
 	drift_blend = 0.0
+	_drift_visual_yaw = 0.0
+	_snap_left = 0.0
 	is_boosting = false
 	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
 	_douse_left = 0.0 # repus = uscat, nu mai picura
@@ -4026,8 +4120,22 @@ func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	# `_visual.rotation` (cum facea lerp-ul vechi), deci niciunul nu-l mananca
 	# pe celalalt.
 	var speed_frac := clampf(fwd_speed / max_speed, 0.0, 1.0)
-	var target_roll := -steer * 0.05 * speed_frac * 1.6 * drift_blend
+	# Pe sensul DRIFTULUI, nu al volanului: cu maparea CTR poti tine contravolan
+	# in plina alunecare, iar caroseria tot spre exterior se lasa.
+	var target_roll := -drift_dir * 0.05 * speed_frac * 1.6 * drift_blend
+	# Reasezarea de la iesire: o jumatate de sinusoida in sens opus ruliului
+	# de drift — spatele se prinde si caroseria tresare o data.
+	if _snap_left > 0.0:
+		_snap_left = maxf(_snap_left - delta, 0.0)
+		target_roll += _snap_dir * 0.045 * speed_frac \
+			* sin(PI * (1.0 - _snap_left / DRIFT_SNAP_TIME))
 	_drift_roll = lerpf(_drift_roll, target_roll, 8.0 * delta)
+	# Rotatia in plus a modelului in sensul driftului (drift_visual_yaw_deg),
+	# dozata cu rampa, netezita ca sa nu sara la intrare; intra in compunere
+	# ca termen de yaw, langa tromba (vezi _compose_visual).
+	_drift_visual_yaw = lerpf(_drift_visual_yaw,
+		drift_dir * deg_to_rad(drift_visual_yaw_deg) * _drift_amount(),
+		minf(10.0 * delta, 1.0))
 	_update_spin(delta)
 	_update_jolt(delta)
 	_compose_visual()
@@ -4037,7 +4145,8 @@ func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 ## Invartirea de caroserie, cat tine si pe urma inapoi la zero.
 ##
 ## Axa Y e singura libera in vechiul Euler (`_update_visual_tilt` scria pe Z),
-## acum unghiul ramane doar un TERMEN al compunerii din `_compose_visual`.
+## acum unghiul ramane doar un TERMEN al compunerii din `_compose_visual`,
+## adunat cu rotatia in plus din drift (`_drift_visual_yaw`).
 func _update_spin(delta: float) -> void:
 	if _spin_left > 0.0:
 		_spin_left -= delta
@@ -4115,7 +4224,8 @@ func _compose_visual() -> void:
 	if tilt.length_squared() > 1e-10:
 		# Varful (UP) se deplaseaza spre `tilt` cand rotim in jurul lui UP x tilt.
 		q = Quaternion(Vector3.UP.cross(tilt).normalized(), tilt.length())
-	q = q * Quaternion(Vector3.UP, _spin_angle) 		* Quaternion(Vector3.BACK, _drift_roll)
+	q = q * Quaternion(Vector3.UP, _spin_angle + _drift_visual_yaw) \
+		* Quaternion(Vector3.BACK, _drift_roll)
 	_visual.quaternion = q
 	_visual.position = _jolt_pos
 

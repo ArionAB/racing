@@ -123,6 +123,11 @@ const NEAR_PLANE: float = 0.3
 ## privitul spre vectorul de viteza era singurul mod de a nu conduce orb intr-un
 ## drift; acum e doar o rasucire in plus peste una pe care ochiul o are gratis.
 const AIM_VEL_WEIGHT: float = 0.40
+## Cat URCA ponderea de mai sus la drift plin (dozat cu Car.drift_blend). In
+## drift caroseria e intoarsa fata de drum cu 20-30°; privind mai mult spre
+## directia de mers vezi iesirea din viraj, iar masina iti apare din trei
+## sferturi, cu flancul la vedere — exact silueta care vinde alunecarea.
+const DRIFT_AIM_EXTRA: float = 0.25
 ## Cat de mult se muta POZITIA rig-ului spre acelasi vector. Mic intentionat:
 ## ancorarea pe viteza leagana rig-ul in drift si pierzi botul din cadru. Cu
 ## bratul mai lung (12.5 m), acelasi unghi inseamna mai multi metri de leganare,
@@ -538,7 +543,9 @@ func _physics_process(delta: float) -> void:
 		vel_dir = vel.normalized()
 
 	var anchor := fwd.slerp(vel_dir, anchor_vel_weight).normalized()
-	var aim := fwd.slerp(vel_dir, aim_vel_weight).normalized()
+	var aim_w := clampf(
+		aim_vel_weight + DRIFT_AIM_EXTRA * target.drift_blend, 0.0, 1.0)
+	var aim := fwd.slerp(vel_dir, aim_w).normalized()
 	_aim_dir = _aim_dir.slerp(aim, 1.0 - exp(-aim_smooth * delta)).normalized()
 
 	var speed_frac := clampf(target.horizontal_speed() / target.max_speed,

@@ -54,6 +54,18 @@ pur plus haosul fizic, nu proiectilele.
 - Presetări de mașini ✔ (de mutat în resurse `CarData`)
 - Turbo Ignition: bară care se încarcă din mers (accelerat de drift), arsă
   la cerere cu butonul TURBO ✔
+- Drift cu feel de arcade ✔ (oct 2026, feedback de la volan: „frâna de mână
+  doar frânează și înclină mașina"). Trei schimbări în `_apply_driving`, toate
+  cu export vars: **maparea CTR** — în drift volanul alege *raza*, nu sensul
+  (`drift_arc_wide`…`drift_arc_tight`), iar contravolanul prinde spatele cu
+  inerție (`drift_yaw_inertia`), nu-l întoarce; **unghiul rămâne și la viteză
+  de cursă** (`drift_arc_tight_top`, nu zero); **impulsul pierdut prin
+  frecarea laterală se întoarce** scalat cu gazul (`drift_momentum_keep`):
+  ▲+DRIFT ține viteza (powerslide); DRIFT singur e frână de mână și frânează
+  (vezi touch, mai sus), deci nimic nu se întoarce.
+  Juice: rotație vizuală în plus pe model, tresărire la ieșire + ciripit,
+  scrâșnet după alunecare, bara de turbo pulsează. Garda: `ProbeDriftEntry`
+  (4 contracte, fiecare cu sabotaj care pică).
 - Countdown + rocket start (ține TURBO în ultima secundă), poziții live ✔
 - Touch controls: **numai butoane** — ◀ ▶ viraj (stânga-jos), ▲ gaz și ▼
   frână/marșarier (dreapta-jos, ca o pereche de pedale), TURBO/DRIFT pe rândul

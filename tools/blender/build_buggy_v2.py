@@ -33,8 +33,9 @@ import math
 import os
 from mathutils import Matrix, Vector
 
-exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                       "toy_driver_parts.py")).read())
+HERE = os.path.dirname(os.path.abspath(__file__))
+exec(open(os.path.join(HERE, "toy_driver_parts.py")).read())
+exec(open(os.path.join(HERE, "garage_v2_parts.py")).read())
 
 PAINT = CAR_YELLOW
 HOOD = FOAM_WHITE
@@ -49,92 +50,6 @@ Y_FRONT = -1.30                # ampatament 2.66, din foaie (fata = -Y)
 Y_REAR = 1.36
 SEAT = (0.0, 0.18, 0.48)       # sezutul figurinei; picioarele coboara 0.41 sub el
 TOP = 1.82                     # axa tubului de acoperis: casca + 9 cm
-TUBE = 0.045                   # raza tuburilor de cusca
-
-
-# =============================================================================
-# Primitive de forma (locale garajului v2)
-# =============================================================================
-def loft(b, sections, slot):
-    """Solid inchis din sectiuni (x, z) la cote y date, toate cu acelasi numar
-    de puncte, in aceeasi ordine. Capetele se inchid cu poligonul sectiunii,
-    triangulat (sectiunile in U sunt concave)."""
-    rings = []
-    verts = []
-    for y, poly in sections:
-        ring = [b.bm.verts.new((x, y, z)) for x, z in poly]
-        rings.append(ring)
-        verts.extend(ring)
-    n = len(rings[0])
-    for lo, hi in zip(rings, rings[1:]):
-        for i in range(n):
-            j = (i + 1) % n
-            b.bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
-    caps = [b.bm.faces.new(tuple(reversed(rings[0]))), b.bm.faces.new(tuple(rings[-1]))]
-    bmesh.ops.triangulate(b.bm, faces=caps, quad_method="BEAUTY", ngon_method="BEAUTY")
-    return b._tag(verts, slot)
-
-
-def mirror_poly(right):
-    """Poligon simetric: `right` merge pe partea +X de sus in jos; intoarce
-    conturul inchis (dreapta in jos, apoi stanga in sus)."""
-    return list(right) + [(-x, z) for x, z in reversed(right)]
-
-
-def _fillet(pts, r):
-    """Racordeaza colturile unei polilinii: fiecare colt interior devine trei
-    puncte pe o parabola, ca inelele tubului sa nu se strice in cot."""
-    pts = [Vector(p) for p in pts]
-    out = [pts[0]]
-    for i in range(1, len(pts) - 1):
-        p, a, c = pts[i], pts[i - 1], pts[i + 1]
-        da, dc = (a - p), (c - p)
-        f = min(r, da.length * 0.45, dc.length * 0.45)
-        pa = p + da.normalized() * f
-        pc = p + dc.normalized() * f
-        out += [pa, pa * 0.25 + p * 0.5 + pc * 0.25, pc]
-    out.append(pts[-1])
-    return out
-
-
-def tube(b, pts, slot=None, r=TUBE, fillet=0.12):
-    """Tub rotund (8 laturi) pe o polilinie, cu coturi racordate."""
-    return b.sweep(_fillet(pts, fillet), r, DARK if slot is None else slot,
-                   segments=8, dome_end=False, cap_start=True)
-
-
-def rod(b, p1, p2, r, slot, segments=8):
-    """Cilindru orientat intre doua puncte (Builder.cylinder stie doar axe)."""
-    return b.sweep([p1, p2], r, slot, segments=segments, dome_end=False, cap_start=True)
-
-
-def toy_wheel_fn(radius, width, segments=20, hub_frac=0.60):
-    """Anvelopa de revolutie in jurul lui X, cu umeri rotunzi (profilul de mai
-    jos, shade smooth il netezeste), plus discul de jenta plat, putin retras."""
-    hw = width * 0.5
-    prof = [(0.62, -0.92), (0.86, -1.0), (0.97, -0.82), (1.0, -0.42),
-            (1.0, 0.42), (0.97, 0.82), (0.86, 1.0), (0.62, 0.92)]
-
-    def build(b):
-        rings = []
-        verts = []
-        for k in range(segments):
-            a = 2.0 * math.pi * k / segments
-            ca, sa = math.cos(a), math.sin(a)
-            ring = [b.bm.verts.new((x * hw, r * radius * ca, r * radius * sa))
-                    for r, x in prof]
-            rings.append(ring)
-            verts.extend(ring)
-        n = len(prof)
-        for k in range(segments):
-            lo, hi = rings[k], rings[(k + 1) % segments]
-            for i in range(n):
-                j = (i + 1) % n
-                b.bm.faces.new((lo[i], lo[j], hi[j], hi[i]))
-        b._tag(verts, TIRE)
-        b.cylinder((0.0, 0.0, 0.0), radius * hub_frac, width * 0.88, RIM,
-                   segments=16, axis="X")
-    return build
 
 
 # =============================================================================
@@ -150,16 +65,7 @@ def tub(b):
           (-0.05, 0.75, 0.93, 0.30, 0.38),
           (0.70, 0.64, 0.93, 0.30, 0.38),
           (0.96, 0.58, 0.93, 0.76, 0.84)]
-    secs = []
-    for y, hw, zt, zb, zf in st:
-        zm = zb + 0.45 * (zt - zb)
-        wall = 0.14
-        right = [(hw - wall, zt), (hw - 0.05, zt), (hw, zt - 0.07),
-                 (hw - 0.02, zm), (hw - 0.20, zb)]
-        poly = right + [(-x, z) for x, z in reversed(right)]
-        poly += [(-(hw - wall), zf), (hw - wall, zf)]
-        secs.append((y, poly))
-    loft(b, secs, PAINT)
+    loft(b, [(y, u_section(hw, zt, zb, zf)) for y, hw, zt, zb, zf in st], PAINT)
 
 
 def nose(b):
@@ -269,77 +175,13 @@ def buggy(b):
     engine(b)
 
 
-# =============================================================================
-# Previzualizare: figurina neexportata + vederi ortografice ca in foaie
-# =============================================================================
-def preview_driver(shirt):
-    """Aceeasi figurina ca build_driver, dar fara export: un build de masina nu
-    are voie sa rescrie GLB-urile de sofer pe care le incarca jocul."""
-    return [
-        part("Hips", build_hips, (0.0, 0.0, 0.0)),
-        part("Torso", build_torso, (0.0, 0.0, HIP_H), AO_PART, 0.02, shirt),
-        part("Head", build_head, (0.0, 0.0, NECK_Z), AO_PART, 0.02, shirt),
-        part("Arm_L", build_arm, (-SHOULDER[0], SHOULDER[1], SHOULDER[2]),
-             AO_PART, 0.02, shirt),
-        part("Arm_R", build_arm, (SHOULDER[0], SHOULDER[1], SHOULDER[2]),
-             AO_PART, 0.02, shirt),
-        part("Leg_L", build_leg, (-HIP_JOINT[0], HIP_JOINT[1], HIP_JOINT[2])),
-        part("Leg_R", build_leg, (HIP_JOINT[0], HIP_JOINT[1], HIP_JOINT[2])),
-    ]
-
-
-def ortho(path, view, scale=4.4, res=(640, 480)):
-    """Vedere ortografica la scara fixa (aceeasi pentru lateral/fata/sus, ca in
-    foaie). Camera separata: `shot` refoloseste PreviewCam in perspectiva."""
-    scene = bpy.context.scene
-    cam = bpy.data.objects.get("OrthoCam")
-    if cam is None:
-        data = bpy.data.cameras.new("OrthoCam")
-        data.type = "ORTHO"
-        cam = bpy.data.objects.new("OrthoCam", data)
-        scene.collection.objects.link(cam)
-    cam.data.ortho_scale = scale
-    cz = 0.85
-    if view == "side":       # din stanga (+X), fata in stanga imaginii
-        cam.location = (12.0, 0.0, cz)
-        cam.rotation_euler = (math.pi / 2, 0.0, math.pi / 2)
-    elif view == "front":    # din fata (-Y)
-        cam.location = (0.0, -12.0, cz)
-        cam.rotation_euler = (math.pi / 2, 0.0, 0.0)
-    else:                    # de sus, fata in stanga
-        cam.location = (0.0, 0.0, 12.0)
-        cam.rotation_euler = (0.0, 0.0, math.pi / 2)
-    prev = scene.camera
-    scene.camera = cam
-    scene.render.resolution_x, scene.render.resolution_y = res
-    scene.render.filepath = path
-    bpy.ops.render.render(write_still=True)
-    scene.camera = prev
-    return path
-
-
 if __name__ == "__main__":
     clear_built()
     objs = export_vehicle(
         "Buggy", buggy,
         dict(radius=WHEEL_R, width=WHEEL_W, half_track=HALF_TRACK,
              y_front=Y_FRONT, y_rear=Y_REAR,
-             wheel_fn=toy_wheel_fn(WHEEL_R, WHEEL_W), wheel_bevel=0.0),
+             wheel_factory=toy_wheel_fn, wheel_bevel=0.0),
         "vehicles/buggy_v2.glb", SEAT, bevel=0.03, bevel_angle=65.0)
 
-    g = dict(globals())
-    exec(open(os.path.join(HERE_PARTS, "preview.py")).read(), g)
-    out_dir = os.path.join(PROJECT, "snapshots", "garaj_v2")
-    os.makedirs(out_dir, exist_ok=True)
-    driver = preview_driver(CAR_BLUE)
-    seat_driver(driver, SEAT)
-    g["shot"](objs + driver, os.path.join(out_dir, "buggy_v2_hero.png"),
-              azimuth=-52.0, elevation=13.0, margin=1.3)
-    for o in driver:
-        o.hide_render = True
-    ground = bpy.data.objects.get("PreviewGround")
-    for view in ("side", "front", "top"):
-        if ground is not None:
-            ground.hide_render = view == "top"
-        ortho(os.path.join(out_dir, "buggy_v2_%s.png" % view), view)
-    print("PREVIEW: %s/buggy_v2_*.png" % out_dir)
+    preview_sheet("buggy_v2", objs, SEAT, length=3.7)

@@ -95,17 +95,31 @@ def make_wheel_fn(radius, width, segments=14, rim_frac=0.55):
 
 
 def vehicle_wheels(prefix, radius, width, half_track, y_front, y_rear,
-                   half_track_rear=None, wheel_fn=None, wheel_bevel=0.02):
+                   half_track_rear=None, wheel_fn=None, wheel_bevel=0.02,
+                   wheel_factory=None, radius_rear=None, width_rear=None):
     """Cele 4 roti ca noduri separate, cu origine in centru, la cota razei.
-    `wheel_fn` inlocuieste cilindrul simplu (garajul v2: anvelopa rotunjita,
-    vezi build_buggy_v2.py); `wheel_bevel=0` cand forma isi aduce singura
-    rotunjimea."""
-    fn = wheel_fn or make_wheel_fn(radius, width)
+
+    `wheel_factory(radius, width)` intoarce functia de build a rotii (garajul
+    v2: anvelopa rotunjita, garage_v2_parts.toy_wheel_fn); `wheel_fn` e o
+    functie fixa, aceeasi pe toate patru. `wheel_bevel=0` cand forma isi aduce
+    singura rotunjimea.
+
+    `radius_rear` / `width_rear`: roti spate diferite (hot rod). Raza FIZICA
+    o ia Car din PRIMA roata (Front_Left, vezi car.gd `_build_visual`); spatele
+    mai mare e doar vizual, dar tot atinge solul, fiindca centrul lui sta la
+    cota propriei raze."""
     out = []
     for name, sx, sy in WHEEL_CORNERS:
-        y = y_front if sy < 0 else y_rear
-        ht = half_track if (sy < 0 or half_track_rear is None) else half_track_rear
-        out.append(part("%s_%s" % (prefix, name), fn, (sx * ht, y, radius),
+        rear = sy > 0
+        r = radius_rear if (rear and radius_rear) else radius
+        w = width_rear if (rear and width_rear) else width
+        if wheel_factory is not None:
+            fn = wheel_factory(r, w)
+        else:
+            fn = wheel_fn or make_wheel_fn(r, w)
+        y = y_rear if rear else y_front
+        ht = half_track_rear if (rear and half_track_rear is not None) else half_track
+        out.append(part("%s_%s" % (prefix, name), fn, (sx * ht, y, r),
                         AO_WHEEL, wheel_bevel))
     return out
 
@@ -137,7 +151,7 @@ def export_vehicle(prefix, build_body, wheel_spec, filename, seat, bevel=0.03,
     """Un vehicul: corpul (o singura piesa, origine la sol) + 4 roti + cele doua
     obiecte de lampi (`_Lamp_Tail`, `_Lamp_Head`; vezi LAMP_TAIL mai sus).
     `wheel_spec` = dict(radius, width, half_track, y_front, y_rear[, half_track_rear,
-    wheel_fn, wheel_bevel]).
+    wheel_fn | wheel_factory, wheel_bevel, radius_rear, width_rear]).
     `bevel_angle` peste 45 lasa nebevelate tuburile cu 8 laturi (fete la 45°):
     rotunjimea lor o da shade smooth, iar bevelul le-ar tripla triunghiurile.
     Tipareste `driver_seat` gata de pus in .tres."""

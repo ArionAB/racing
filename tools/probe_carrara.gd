@@ -45,6 +45,22 @@ extends Node
 ##       1% din treceri, deci 30 [blocaj] / 14 repuneri pe seed. Un culoar pe
 ##       banda libera (-0.7) rezolva: 1 blocaj, 0 la brat, 94% treceri libere.
 ##
+## RUNDA 2 (cod nou, aceleasi 16 seed-uri; scene `*AI.tscn`):
+##   CAMIOANE: AI-ul citeste banda camionului (`AIController._bus_line`) si nu
+##   mai deraiaza/arde turbo cat banda e instalata; lovitura frontala nu mai
+##   ejecteaza (meta `soft_hit_crush`). Fara indiciu de pista: recuperari 445 ->
+##   4 (baza 4), ejectari 431 -> 2, contacte 68 -> 13.6/seed, pierdere mediana
+##   pe intalnire cu contact 4.16 -> 1.11 s, delta pe tur +5..+6.7 -> +0.9..+1.0
+##   s. Ramane: 8 [blocaj] atribuibile (5 la startul cursei, cand plutonul
+##   intalneste camionul B de pe T1; cu faza B=0.2: 3).
+##   EXCAVATOR: zar 1-6 per trecere (1-3 ocoleste): 48% pe banda libera; 7
+##   [blocaj], 8 repuneri (baza 4), cei care intalnesc bratul jos pierd 2.2 s
+##   (mediana), 5.4 s (p90).
+##   BERMA (`custom_parapets` stil 2) pe terasele cu gol: baza 51 [blocaj]/12
+##   repuneri -> 26/20 (berma) sau 6/12 (berma + `ai_drop_edges` 2.6 m), dar cu
+##   drop 2.6 camioanele sunt mai prost (banda libera a camionului e tocmai spre
+##   margine).
+##
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 const APPROACH_M: float = 60.0
 const BUCKET_M: float = 10.0
@@ -130,6 +146,16 @@ func _ready() -> void:
 			_side_accel = float(arg.trim_prefix("--side-accel="))
 		elif arg.begins_with("--label="):
 			_label = arg.trim_prefix("--label=")
+		elif arg.begins_with("--bus-margin="):
+			AIController.bus_margin_m = float(arg.trim_prefix("--bus-margin="))
+		elif arg.begins_with("--bus-reach="):
+			AIController.bus_reach_m = float(arg.trim_prefix("--bus-reach="))
+		elif arg.begins_with("--bus-corner-speed="):
+			AIController.bus_corner_speed = float(arg.trim_prefix("--bus-corner-speed="))
+		elif arg == "--bus-drift":
+			AIController.bus_no_drift = false
+		elif arg.begins_with("--bus-blend="):
+			AIController.bus_blend_rate = float(arg.trim_prefix("--bus-blend="))
 		elif arg == "--equal-speed":
 			_equal_speed = true
 		elif arg == "--diag":
@@ -748,6 +774,8 @@ func _finish() -> void:
 		for k in ["name", "car_name", "mass", "mass_factor", "line_offset", "slow_s",
 				"rev_s", "off_s", "respawns", "walls", "cross", "laps_t"]:
 			cc[k] = c[k]
+		var ctl := cars[i].controller as AIController
+		cc["dice"] = ctl.dice_log if ctl != null else []
 		res.cars.append(cc)
 	if not _out.is_empty():
 		var f := FileAccess.open(_out, FileAccess.WRITE)

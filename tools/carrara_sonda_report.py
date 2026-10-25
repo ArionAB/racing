@@ -323,6 +323,15 @@ def report_exc(base_runs, ex_runs):
                 w["name"] = ev["name"]
                 w["run"] = r
                 passes.append(w)
+    # zarul AI-ului (daca exista): a k-a trecere a masinii = a k-a aruncare
+    cnt = defaultdict(int)
+    for w in passes:
+        r = w["run"]
+        d = r["cars"][w["car"]].get("dice", [])
+        k = cnt[(r["seed"], w["car"])]
+        cnt[(r["seed"], w["car"])] += 1
+        w["dice"] = d[k] if k < len(d) else 0
+    has_dice = any(w["dice"] for w in passes)
     print("\nTRECERI pe langa excavator: %d total (%.1f / masina / seed)" % (len(passes), len(passes) / max(n * 8, 1)))
     classes = defaultdict(list)
     for w in passes:
@@ -343,6 +352,25 @@ def report_exc(base_runs, ex_runs):
             key[0], key[1], len(v), med(vm), vm[int(0.1 * (len(vm) - 1))],
             fmt(med(ls)), fmt(ls[int(0.9 * (len(ls) - 1))] if ls else float("nan")),
             fmt(ls[-1] if ls else float("nan"))))
+    if has_dice:
+        print("\nZARUL (1-3 ocoleste, 4-6 trece): rezultate %s" % dict(sorted(
+            ((d, sum(1 for w in passes if w["dice"] == d)) for d in range(1, 7)))))
+        for lab, sel in (("1-3 ocoleste", lambda d: 1 <= d <= 3), ("4-6 trece", lambda d: d >= 4)):
+            ws = [w for w in passes if sel(w["dice"])]
+            if not ws:
+                continue
+            freep = sum(1 for w in ws if not w["inlane"])
+            ls = sorted(w["loss"] for w in ws if w["loss"] is not None)
+            vm = sorted(w["v_min"] for w in ws)
+            blk = [w for w in ws if w["blk"] and w["inlane"]]
+            lb = sorted(w["loss"] for w in blk if w["loss"] is not None)
+            print("  %-13s n=%4d  pe banda libera %4.0f%%  v_min med %.1f  loss med %s p90 %s worst %s | brat JOS in banda: n=%d loss med %s p90 %s worst %s" % (
+                lab, len(ws), 100.0 * freep / len(ws), med(vm), fmt(med(ls)),
+                fmt(ls[int(0.9 * (len(ls) - 1))] if ls else float("nan")), fmt(ls[-1] if ls else float("nan")),
+                len(blk), fmt(med(lb)), fmt(lb[int(0.9 * (len(lb) - 1))] if lb else float("nan")),
+                fmt(lb[-1] if lb else float("nan"))))
+        tot = sum(1 for w in passes if w["dice"])
+        print("  total banda libera (cu zar): %.0f%%" % (100.0 * sum(1 for w in passes if w["dice"] and not w["inlane"]) / max(tot, 1)))
     # conectat?
     a = [w["v_min"] for w in classes.get(("brat JOS", "in banda bratului"), [])]
     b = [w["v_min"] for w in classes.get(("brat SUS", "in banda bratului"), [])]

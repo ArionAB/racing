@@ -273,6 +273,25 @@ def main():
                 str(i) for i in range(len(rav))))
             props.append("custom_ravine_widths = Array[Vector2]([%s])" % ", ".join(
                 "Vector2(%d, 14)" % i for i in range(len(rav))))
+            if os.environ.get("BERM") == "1":
+                # berma continua de moloz (stil 2) pe marginea dinspre gol a teraselor
+                # T2 si T3 incep de la inceputul acului dinaintea lor: exteriorul
+                # acului e tot margine de gol, iar fara asta capatul bermei ar fi
+                # un zid pe traiectoria masinilor care ies larg din ac
+                lead = os.environ.get("BERM_FROM_HAIRPIN") == "1"
+                par = [(rav[0][0], rav[0][1], rav[0][3], 2),
+                       ((fr["H1"][0] if lead else rav[1][0]), rav[1][1], rav[1][3], 2),
+                       ((fr["H2"][0] if lead else rav[2][0]), rav[2][1], rav[2][3], 2)]
+                props.append("custom_parapets = Array[Vector4]([%s])" % ", ".join(
+                    "Vector4(%.4f, %.4f, %d, %d)" % q for q in par))
+            if os.environ.get("DROP") == "1":
+                # AI-ul tine axa la DROP m de marginea dinspre gol (mecanismul
+                # existent `Track.ai_drop_edges`, Jodhpur)
+                dm = float(os.environ.get("DROP_M", "1.8"))
+                props.append("ai_drop_edges = Array[Vector4]([%s])" % ", ".join(
+                    "Vector4(%.4f, %.4f, %d, %.1f)" % (max(a - float(os.environ.get("DROP_LEAD", "0.012")), 0.0), b, c, dm)
+                    for (a, b, c) in [(rav[0][0], rav[0][1], rav[0][3]), (fr["H1"][0], rav[1][1], rav[1][3]),
+                                      (fr["H2"][0], rav[2][1], rav[2][3])]))
             cut = [
                 (fr["T1"][0] + 0.002, fr["T1"][1], Y_TOP + 8.0, -1),
                 (fr["T2"][0], fr["T2"][1], Y_TOP - 9.0 + 8.0, 1),
@@ -305,7 +324,7 @@ def main():
         tl = curve_len(tc)
         travel = tl / TRUCK_SPEED
         # defazaj de o jumatate de ciclu intre cele doua camioane, in secunde
-        phase_b = (TRUCK_PERIOD * 0.5 * TRUCK_SPEED) / tl
+        phase_b = float(os.environ["PHASE_B"]) if os.environ.get("PHASE_B") else (TRUCK_PERIOD * 0.5 * TRUCK_SPEED) / tl
         print("curba camion: %d puncte, %.1f m, %.1f s la %.1f m/s, perioada %.0f s, phase B %.3f" % (
             len(tc), tl, travel, TRUCK_SPEED, TRUCK_PERIOD, phase_b))
         assert phase_b < 1.0, "perioada prea mare pentru lungimea curbei"
@@ -324,6 +343,8 @@ def main():
                 'apex_radius_m = 15.0',
                 'shove = 3.0',
                 'side_accel = 8.0',
+                'ai_reads_lane = %s' % ("true" if os.environ.get("TRUCK_AI") == "1" else "false"),
+                'soft_contact = %s' % ("true" if os.environ.get("TRUCK_AI") == "1" else "false"),
                 'model = ExtResource("4_kamaz")',
                 'model_yaw = %s' % os.environ.get("TRUCK_YAW", "0"),
                 '']
@@ -342,7 +363,10 @@ def main():
     mid = pts[(a + b) // 2]
     scene += ['[node name="Excavator" type="Marker3D" parent="Hazarduri"]',
               'transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %.3f, %.3f, %.3f)' % mid,
-              'script = ExtResource("2_marker")', 'kind = 7', '']
+              'script = ExtResource("2_marker")', 'kind = 7']
+    if os.environ.get("EXC_AI") == "1":
+        scene += ['excavator_ai_dice = true', 'excavator_soft_contact = true']
+    scene += ['']
     scene += truck_nodes
     out = os.environ.get("OUT", OUT)
     open(out, "w", newline="\n").write("\n".join(scene) + "\n")

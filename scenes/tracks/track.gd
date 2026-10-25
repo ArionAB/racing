@@ -4342,6 +4342,7 @@ static func themes() -> Dictionary:
 		"terrain_sand_class": "carrara_marble",
 		"terrain_face_marble": true,
 		"face_stripe_amp": 0.14,
+		"face_ao": 0.62,
 		"face_side_tiling_k": 0.4,
 		# Flancurile abrupte (massiful, taluzuri) iau mai devreme proiectia laterala: la 4.0 o panta de
 		# 45 de grade ramanea 90% planara si textura iesea intinsa pe verticala.
@@ -6991,8 +6992,7 @@ var _fine_y_cache: Dictionary = {}
 
 
 ## Marcheaza randurile si coloanele care contin o margine dura. O treapta cade intre doua
-## sub-noduri ale UNUI singur rand; daca marginea nimereste chiar un nod, treapta cade in
-## randul dinainte, deci se marcheaza si vecinul.
+## sub-noduri ale UNUI singur rand (cel care contine marginea).
 func _terrain_fine_mark() -> void:
 	_fine_row = PackedByteArray()
 	_fine_col = PackedByteArray()
@@ -7004,14 +7004,18 @@ func _terrain_fine_mark() -> void:
 	_fine_col.resize(_terr_cells)
 	var any := false
 	for ze: float in edges["z"]:
-		var r := int(floor((ze - _terr_origin.z) / _terr_step))
-		for rr in [r - 1, r]:
+		var fz := (ze - _terr_origin.z) / _terr_step
+		var r := int(floor(fz))
+		# marginea cade in randul `r`; doar daca nimereste chiar pe un nod (sub 1 cm) treapta e
+		# intre ultimul sub-nod al randului dinainte si nod, deci se marcheaza si vecinul
+		for rr in ([r - 1, r] if (fz - float(r)) * _terr_step < 0.01 else [r]):
 			if rr >= 0 and rr < _terr_cells:
 				_fine_row[rr] = 1
 				any = true
 	for xe: float in edges["x"]:
-		var c := int(floor((xe - _terr_origin.x) / _terr_step))
-		for cc in [c - 1, c]:
+		var fx := (xe - _terr_origin.x) / _terr_step
+		var c := int(floor(fx))
+		for cc in ([c - 1, c] if (fx - float(c)) * _terr_step < 0.01 else [c]):
 			if cc >= 0 and cc < _terr_cells:
 				_fine_col[cc] = 1
 				any = true
@@ -7365,6 +7369,11 @@ func _build_terrain() -> void:
 	# citeste perechea PRIMA — pe Carrara dala de marmura (`terrain_sand_class`), nu pietrisul
 	# de pe tot restul terenului. Fals pe orice alta tema = `alt_all` ramane cel de dinainte.
 	var face_marble: bool = alt_all and bool(theme_flag("terrain_face_marble", false))
+	# AO COPT pe fata unei trepte (cheia `face_ao`, 1.0 = fara): varful fetei ramane la tenta lui,
+	# piciorul se intuneca pana la acest factor, deci fiecare fata are un gradient propriu si
+	# treptele suprapuse se citesc ca benzi, nu ca un singur perete. Vertex color poate doar
+	# INTUNECA (memoria `surfacetool-clamp-vertex-color`), de aceea gradientul coboara spre picior.
+	var face_ao: float = float(theme_flag("face_ao", 1.0))
 	# PETICE DE ZAPADA VECHE PE VERSANT (cheia `snow_patches`, Dictionary).
 	# Trei critici orbi au numit aceeasi lipsa: in referinta zapada de iulie sta
 	# in PETICE albe cu margini taiate, nu intr-o tenta. Tenta pe vertex nu poate:
@@ -7459,9 +7468,13 @@ func _build_terrain() -> void:
 					# fara tenta de panta — varfurile comune ar fi trasat un gradient pe toata
 					# fasia plata de 7.9 m de sub fata.
 					var tri_slope := -1.0
+					var tri_y0 := 0.0
+					var tri_y1 := 0.0
 					if fine_quad:
 						tri_slope = _tri_slope_deg(corners[tri[0]], corners[tri[1]], corners[tri[2]])
 						st.set_smooth_group(-1 if tri_slope >= BENCH_FLAT_SHADE_DEG else 0)
+						tri_y0 = minf(minf(corners[tri[0]].y, corners[tri[1]].y), corners[tri[2]].y)
+						tri_y1 = maxf(maxf(corners[tri[0]].y, corners[tri[1]].y), corners[tri[2]].y)
 					for corner_idx: int in tri:
 						var v: Vector3 = corners[corner_idx]
 						var cell_slope_deg: float = slope_deg[corner_idx] if tri_slope < 0.0 else tri_slope
@@ -7685,6 +7698,8 @@ func _build_terrain() -> void:
 						if alt_all:
 							grass_w = (1.0 - face_w) if face_marble else 1.0
 						var col := tint * shade
+						if face_ao < 1.0 and tri_slope >= BENCH_FLAT_SHADE_DEG and tri_y1 - tri_y0 > 0.5:
+							col *= lerpf(face_ao, 1.0, (v.y - tri_y0) / (tri_y1 - tri_y0))
 						st.set_color(Color(col.r, col.g, col.b, grass_w))
 						# UV din coordonate de LUME, nu din indexul celulei: asa
 						# textura curge continuu peste toata suprafata, fara sa se

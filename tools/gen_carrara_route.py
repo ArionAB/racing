@@ -690,21 +690,6 @@ size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
     def fnum(v_):
         return repr(round(float(v_), 3))
 
-    # ---- benzi de culoare pe COTA (`custom_strata_bands`): fiecare banc (treapta) isi are tenta lui, alternand
-    # praf deschis / praf mai inchis, ca scara sa se citeasca din ochiul soferului chiar daca fetele (ascunse
-    # de propria muchie, vezi brief §2.0) nu se vad. Fetele iau tenta de marmura peste (scarp_tint).
-    band_levels = []
-    for (n_, x0, x1, z0, z1, lvl, sw, se, sn, ss) in patches:
-        if n_ in ("PitB", "E0"):
-            continue
-        mid = sum(e_ for _x, e_ in lvl) / len(lvl) if n_ not in ("T1", "T2", "T3") else sum(e_ for _x, e_ in lvl) / len(lvl)
-        band_levels.append((mid - 0.3, n_))
-    band_levels.sort()
-    band_tints_pal = [(0.93, 0.90, 0.80, 1.0), (0.78, 0.74, 0.66, 1.0)]
-    bands_txt = ", ".join(V4(fnum(l - 1.4), fnum(l + 1.4), 0.5, 0) for l, _n in band_levels)
-    band_tints_txt = ", ".join("Color(%s, %s, %s, %s)" % tuple(fnum(c) for c in band_tints_pal[i % 2])
-                               for i in range(len(band_levels)))
-
     patch_txt = ", ".join(
         "{ \"lvl\": PackedVector2Array(" + ", ".join(f"{fnum(a)}, {fnum(b)}" for a, b in lvl) + "), "
         f"\"soft\": Vector4({fnum(sw)}, {fnum(se)}, {fnum(sn)}, {fnum(ss)}), "
@@ -750,8 +735,6 @@ custom_viaduct_net_margin = 12.0
 custom_ravine_floors = Array[Vector2]([{fl_txt}])
 custom_ravine_widths = Array[Vector2]([{rw_txt}])
 custom_bench_patches = Array[Dictionary]([{patch_txt}])
-custom_strata_bands = Array[Vector4]([{bands_txt}])
-custom_strata_band_tints = Array[Color]([{band_tints_txt}])
 custom_width_segments = Array[Vector3]([{w_txt}])
 custom_parapets = Array[Vector4]([{par_txt}])
 width_flow_windows = Array[Vector2]([{fw_txt}])

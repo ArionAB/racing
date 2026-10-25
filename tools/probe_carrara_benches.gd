@@ -54,6 +54,8 @@ func _ready() -> void:
 		_reveal(track)
 	elif mode == "edge":
 		_edge(track)
+	elif mode == "info":
+		_info(track)
 	get_tree().quit()
 
 
@@ -257,3 +259,21 @@ func _edge(track: Track) -> void:
 			"STANGA" if sgn < 0.0 else "DREAPTA", out.size()])
 		for l in out:
 			print(l)
+
+
+## `--mode=info`: cat teren fin s-a generat (randuri / coloane fine) si cate triunghiuri are terenul.
+func _info(track: Track) -> void:
+	var rows := 0
+	var cols := 0
+	for b in track._fine_row:
+		rows += int(b)
+	for b in track._fine_col:
+		cols += int(b)
+	var terrain := track.find_child("Terrain", true, false) as MeshInstance3D
+	var tris := 0
+	if terrain != null:
+		var arr := terrain.mesh.surface_get_arrays(0)
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+		tris = idx.size() / 3
+	print("INFO: randuri fine %d, coloane fine %d (din %d celule pe latura), triunghiuri teren %d" % [
+		rows, cols, track._terr_cells, tris])

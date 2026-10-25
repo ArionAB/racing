@@ -2225,6 +2225,11 @@ const _TF_HOUSE := {"House_Stone": _TF_STONE, "House_Plaster": _TF_PLASTER,
 const _TF_WALL := {"Wall_Stone": _TF_STONE}
 const _TF_BEECH_TREE := {"Beech_Leaves": _TF_BEECH}
 const _TF_JNEAPAN_BUSH := {"Jneapan_Needles": _TF_JNEAPAN}
+## Carrara (test de mostra): coroana castanului ia clasa `tf_beech` (brief §4), ca pe
+## Transfagarasan; marmura nu trece pe aici (fetele pistei sunt cod, nu GLB-uri).
+const CLASSES_CARRARA := {
+	"beech_tree_a": {"Beech_Leaves": _TF_BEECH},
+}
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
 	"schist_outcrop_c": _TF_OUTCROP,
@@ -2348,6 +2353,9 @@ const CLASSES_BY_THEME := {
 	"okinawa": CLASSES_OKINAWA,
 	# Transfagarasan (Track21): vezi `CLASSES_TRANSFAGARASAN`.
 	"transfagarasan": CLASSES_TRANSFAGARASAN,
+	# Carrara (Track23, TESTUL DE MOSTRA, brief carrara.md §7 pasul 0): castanul din fag.
+	"carrara": CLASSES_CARRARA,
+	"carrara_real": CLASSES_CARRARA,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -2541,7 +2549,17 @@ const SLOT_REMAP_BY_GROUP := {
 ## (tools/gen_decor_mp_f.gd), care ignora complet sloturile de atlas — dar
 ## piesele plasate individual (WorldProp, ex. `--vitrina`) tot citesc atlasul,
 ## si o remapare globala pe model le-ar fi schimbat si pe Track15.
+const SLOTS_CARRARA := {
+	"kamaz_truck": {7: Palette.RUST_METAL, 22: Palette.DRY_VEGETATION},
+	"beech_tree_a": {29: Palette.VOLCANIC_BLACK},
+}
 const SLOT_REMAP_BY_THEME := {
+	# Carrara (Track23, test de mostra): camionul din Baikal pe galben-spalacit + rugina.
+	# Cabina KERB_RED 7 -> RUST_METAL 10; panoul de acoperis si farurile FOAM_WHITE 22 ->
+	# DRY_VEGETATION 13 (FOAM_WHITE nu are voie pe nicio suprafata a pistei, brief §4).
+	# Trunchiul fagului MARBLE_GREY 29 -> VOLCANIC_BLACK 20, ca pe Transfagarasan.
+	"carrara": SLOTS_CARRARA,
+	"carrara_real": SLOTS_CARRARA,
 	# Transfagarasan (Track21), tabla acoperisurilor. Brief: tabla argintie, dar slotul
 	# ASPHALT_EDGE 6 (#696765) e gri de asfalt, iar o clasa o poate doar INTUNECA. Deci slotul
 	# se muta pe MARBLE_GREY 29 (#B8B4AC), fara material nou. `cascada` are tabla pe

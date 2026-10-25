@@ -731,6 +731,11 @@ const CLASS_TEXTURES := {
 	# ROTITA (CLASS_LIFT / CLASS_LIFT_ROTATE): venele ei sunt verticale, iar taietura cu
 	# fir diamantat lasa dungi ORIZONTALE. Tenta e calibrata in joc, vezi CLASS_TINT.
 	"carrara_marble": "res://assets/textures/classes/olkhon_marble.png",
+	# PIETRISUL carierei Carrara (Track23): solul de teren citea NISIP ("sand ripples" pe 10/10 cadre ale
+	# mostrei) fiindca terenul avea doar perechea `surface_sand`. ACEEASI dala ca `branch_texture`
+	# (`surface_gravel.png`, granulatie fina de pietris, media 0,842 ca nisipul si iarba) pusa pe
+	# perechea a doua a terenului prin `terrain_alt_class` — zero textura noua, zero material nou.
+	"carrara_gravel": "res://assets/textures/surface_gravel.png",
 	# LUTUL BATUT al termitierelor (Serengeti). ACEEASI dala ca "rock" — nu se
 	# dubleaza in memorie, se schimba doar ridicarea si tenta (mecanica
 	# volcanic_rock / tuff_cream / city_concrete).
@@ -1074,11 +1079,14 @@ const CLASS_TINT := {
 	# joc (104,139,53) pe coroana, deci R prea mare si B prea mic: corectie liniara
 	# (0.81, 0.98, 1.19) peste (0.559, 0.833, 0.584).
 	"tf_beech": Color(0.7030, 0.9165, 0.8510),
-	# Marmura Carrara: INCEPUT DE CALIBRARE (calculat invers din lumina temei `carrara`:
-	# soare #FFD2A0 x 1.25 pe o fata inclinata 22 grade fata de directia soarelui, ambient
-	# #A9BEDD x 0.38; dala ridicata la luminanta 0.87 -> tenta liniara (0.70, 0.94, 1.0)).
-	# Valorile finale sunt masurate pe captura de joc, vezi docs/track_briefs/carrara.md.
-	"carrara_marble": Color(0.79, 0.87, 0.86),
+	# Marmura Carrara, calibrata pe lumina REALA a temei (cuburi de proba pe Track23, soare #FFD2A0
+	# x 1.25 la 22 grade, ambient #BCCCE8 x 0.42): fata la soare (228,196,159) H 32 S 0.30 V 0.90,
+	# fata in umbra (109,114,117) H 208 S 0.07 V 0.46 (dX contract: S <= 0.12, dV >= 0.28).
+	# Tenta veche (0.79, 0.87, 0.86) era CIAN (compensa soarele portocaliu): lumina directa iesea
+	# crem, dar umbra, doar din ambient albastru x tenta cian, iesea albastru-cian saturat
+	# (H 196, S 0.25 — "gheata albastra" la criticii orbi ai mostrei). Acum tenta e aproape
+	# NEUTRA (usor mai putin albastra decat verdele), iar ambientul mai putin saturat.
+	"carrara_marble": Color(0.76, 0.765, 0.75),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),

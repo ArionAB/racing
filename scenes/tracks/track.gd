@@ -4308,8 +4308,12 @@ static func themes() -> Dictionary:
 		# Elevatia 22 grade; azimutul e PROVIZORIU (se remasoara pe traseul real, memoria
 		# `azimutul-soarelui-fata-de-drum`) si se suprascrie pe pista cu `custom_sun_rotation_deg`.
 		"sun_rotation_deg": Vector3(-22, 30, 0),
-		"ambient_color": Color.html("A9BEDD"),
-		"ambient_energy": 0.38,
+		# Ambient: MAI PUTIN SATURAT decat #A9BEDD x 0.38 al mostrei. Fetele in umbra primesc doar
+		# lumina asta; cu tenta cian a clasei iesea albastru-cian saturat (H 196, S 0.25). Acum
+		# fata in umbra iese gri-albastrui (H 208, S 0.07), raport soare/ambient 1.25/0.42 = 3.0.
+		# Masurat pe cuburi de marmura in lumina reala (vezi palette.gd, CLASS_TINT carrara_marble).
+		"ambient_color": Color.html("BCCCE8"),
+		"ambient_energy": 0.42,
 		"sky_top": Color.html("2A5BA6"),
 		"sky_horizon": Color.html("EDE6D8"),
 		"sky_cover_alpha": 0.0,
@@ -4327,6 +4331,12 @@ static func themes() -> Dictionary:
 		# O cariera nu sta intr-un camp de dune: campul departat ramane PLAT la cota medie a
 		# soselei (TrackSideSampler.dune_scale; 1.0 = comportamentul vechi, bit-identic).
 		"dune_scale": 0.0,
+		# SOLUL: pietris / piatra compactata, nu nisip ondulat. Perechea a doua de texturi a terenului
+		# (`terrain_alt_class`) poarta dala `surface_gravel`, iar `terrain_alt_all` o pune pe TOT
+		# terenul (inclusiv pe fetele de pe panta, unde altfel ramanea nisipul).
+		"terrain_alt_class": "carrara_gravel",
+		"terrain_alt_all": true,
+		"terrain_alt_keep_macro": true,
 		"ground_tint": Color(0.94, 0.97, 0.79),
 		"hill_color": Color(0.60, 0.56, 0.47),
 		"dirt_road_tint": Color(0.83, 0.84, 0.83),
@@ -7188,6 +7198,7 @@ func _build_terrain() -> void:
 	# Greutatea zonei intra si in COLOR.a (perechea a doua de texturi a
 	# shader-ului) DOAR daca tema a dat perechii a doua o dala de roca.
 	var zone_alt: bool = theme_flag("terrain_alt_class", null) != null
+	var alt_all: bool = zone_alt and bool(theme_flag("terrain_alt_all", false))
 	# PETICE DE ZAPADA VECHE PE VERSANT (cheia `snow_patches`, Dictionary).
 	# Trei critici orbi au numit aceeasi lipsa: in referinta zapada de iulie sta
 	# in PETICE albe cu margini taiate, nu intr-o tenta. Tenta pe vertex nu poate:
@@ -7480,6 +7491,10 @@ func _build_terrain() -> void:
 						if snow_w > 0.0:
 							tint = tint.lerp(snow_tint as Color, snow_w)
 							grass_w *= 1.0 - snow_w
+					# `terrain_alt_all`: toata perechea a doua (Carrara: pietris) pe tot terenul, fara
+					# nisip nicaieri. Fals pe orice alta tema = nimic nu se schimba.
+					if alt_all:
+						grass_w = 1.0
 					var col := tint * shade
 					st.set_color(Color(col.r, col.g, col.b, grass_w))
 					# UV din coordonate de LUME, nu din indexul celulei: asa
@@ -7532,8 +7547,12 @@ func _build_terrain() -> void:
 		if alt_cls != null:
 			mat.set_shader_parameter("grass_micro",
 				Palette._class_texture(String(alt_cls)))
-			mat.set_shader_parameter("grass_macro",
-				_tex("res://assets/textures/surface_sand_macro.png"))
+			# Macro-ul ramane al nisipului (dungi verticale = ondulatii), mai putin cand tema cere
+			# `terrain_alt_keep_macro`: Carrara pastreaza macro-ul de iarba (pete neregulate de pamant
+			# batut), ca pietrisul sa nu citeasca "nisip ondulat". Fals pe celelalte teme = neschimbat.
+			if not bool(theme_flag("terrain_alt_keep_macro", false)):
+				mat.set_shader_parameter("grass_macro",
+					_tex("res://assets/textures/surface_sand_macro.png"))
 		if snow_cfg != null:
 			var sc: Dictionary = snow_cfg
 			mat.set_shader_parameter("snow_on", 1.0)

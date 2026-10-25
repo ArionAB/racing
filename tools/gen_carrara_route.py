@@ -481,24 +481,28 @@ if OUT_PATH:
         (IDX("H portal iesire", -20.0), IDX("H portal iesire", 55.0)),
     ]
 
-    # ---- rape (len)
+    # ---- rape (len). ADANCIMEA e relativa la cota drumului MEDIATA (`road_level`, nu cea locala), deci
+    # pentru o podea ABSOLUTA se declara adancime mare si se lasa podeaua sa taie: cu 5-9 m cerute,
+    # la 50 m de terasa tinta iesea 11-17 (o creasta de 15 m intre doua rape, masurat cu profilul N-S).
     ravines = [
         # 0: A / terasa 1, golul pe DREAPTA (pit). Cornisa taiata vertical, podea la +16.
-        (LEN("H portal iesire", 20.0), LEN("B T1 sfarsit plat", 8.0), 9, 1),
+        (LEN("H portal iesire", 20.0), LEN("B T1 sfarsit plat", 8.0), 40, 1),
         # 1: terasa 2, golul pe STANGA (mergem spre V, pit-ul e la S), podea la +7.
-        (LEN("B T2 inceput plat", -6.0), LEN("B T2 sfarsit plat", 6.0), 9, -1),
+        (LEN("B T2 inceput plat", -6.0), LEN("B T2 sfarsit plat", 6.0), 40, -1),
         # 2: terasa 3, golul pe DREAPTA, podea la +2 (fundul carierei).
-        (LEN("B T3 inceput plat", -6.0), LEN("B T3 sfarsit plat", 6.0), 5, 1),
+        (LEN("B T3 inceput plat", -6.0), LEN("B T3 sfarsit plat", 6.0), 40, 1),
         # 3: cariera de sus E, golul pe DREAPTA: 43 m pana la fundul carierei (+2).
-        (LEN("D portal sus (E inceput)", 20.0), LEN("E sfarsit"), 44, 1),
+        (LEN("D portal sus (E inceput)", 20.0), LEN("E sfarsit"), 60, 1),
         # 4: cheiul Ponti di Vara: viaduct pe ambele parti, 30 m de gol, podea la +17.
-        (LEN("F pod", -15.0), LEN("F pod", 15.0), 26, 0),
+        (LEN("F pod", -15.0), LEN("F pod", 15.0), 40, 0),
+        # 5: fundul carierei C, pe DREAPTA (S): baltile stau pe podea, nu pe un platou de +20.
+        (LEN("C intrare podea", -20.0), LEN("D rampa jos"), 40, 1),
     ]
     cornice = [0, 1, 2, 3, 4]
     scarp = [0, 1, 2, 3]
     viaduct = [4]
-    floors = [(0, 16.0), (1, 7.0), (2, 2.0), (3, 2.0), (4, 17.0)]
-    widths = [(0, 40.0), (1, 40.0), (2, 60.0), (3, 90.0), (4, 60.0)]
+    floors = [(0, 16.0), (1, 7.0), (2, 2.0), (3, 2.0), (4, 17.0), (5, 2.0)]
+    widths = [(0, 40.0), (1, 40.0), (2, 60.0), (3, 90.0), (4, 60.0), (5, 70.0)]
 
     # ---- berma continua de moloz (stil 2): doar pe marginile cu gol, NU pe ace, si DUPA iesirea din ac
     parapets = [

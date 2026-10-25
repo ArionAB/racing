@@ -707,6 +707,8 @@ var _steps_here: bool = false
 var speed_limit_factor: float = 1.0
 ## Raza rotii fizice (cast = rest + raza); se deriva din model in apply_data.
 var _susp_wheel_radius: float = 0.30
+## Plafonul razei fizice: roata monster truck-ului (0.62) plus marja.
+const SUSP_WHEEL_RADIUS_MAX := 0.65
 ## Colturile rotilor in spatiul masinii; din dimensiunile CarData.
 var _wheel_points: Array[Vector3] = []
 ## Media punctelor de contact cu solul (offset fata de origine): AICI se
@@ -927,7 +929,11 @@ func apply_data(new_data: CarData, color_override: Color = NO_COLOR,
 	spring_freq = data.spring_freq
 	damping_ratio = data.damping_ratio
 	suspension_rest = data.suspension_rest
-	_susp_wheel_radius = clampf(_wheel_radius, 0.22, 0.42)
+	# Plafonul era 0.42; monster truck-ul (garaj v2) are roata de 0.62 si cu
+	# plafonul vechi raza ar fi iesit cu 20 cm sub roata desenata — cast-ul
+	# (rest + raza) ar fi atins solul cu janta, nu cu anvelopa. Decizia
+	# dezvoltatorului, 25 oct 2026 (garaj_prompturi_chatgpt.md §4, varianta a).
+	_susp_wheel_radius = clampf(_wheel_radius, 0.22, SUSP_WHEEL_RADIUS_MAX)
 	_rebuild_suspension_geometry(
 		data.body_width * 0.42, data.body_length * 0.38)
 	if _drift_particles != null:

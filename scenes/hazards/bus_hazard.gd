@@ -110,6 +110,22 @@ extends "res://scenes/props/path_mover.gd"
 ## masina lovita. Gol = autobuz mut.
 @export var contact_sfx: StringName = &"hazard_bus_hit"
 
+## CAMIONUL VINE DIN FATA (Carrara, brief §3): doua flaguri, AMBELE implicit
+## stinse, deci Machu Picchu (autobuzul care coboara) ramane bit-identic.
+##
+## `ai_reads_lane`: AI-ul vede corpul VIZIBIL al camionului (pozitia lui pe
+## sosea, ca jucatorul — niciodata faza ascunsa) si trece pe banda opusa lui
+## pana il depaseste. Vezi `AIController._bus_line`.
+@export var ai_reads_lane: bool = false
+## `soft_contact`: lovitura frontala NU mai ejecteaza soferul (un camion e un
+## corp greu, nu un zid de beton la 36 m/s): ghiont + strivire de
+## `soft_crush_s` secunde. Vezi `Car._process_contacts` (meta `soft_hit_crush`).
+@export var soft_contact: bool = false
+@export_range(0.2, 3.0, 0.1) var soft_crush_s: float = 1.2
+
+## Grupul pe care il citeste AI-ul (doar daca `ai_reads_lane`).
+const AI_GROUP: StringName = &"ai_bus_lane"
+
 ## Reapare sus si porneste la vale (carlig pentru claxon/telegraf).
 signal descent_started(bus: BusHazard)
 ## A ajuns jos si s-a ascuns.
@@ -187,6 +203,10 @@ func _build_body() -> void:
 		_box_center = Vector3.UP * (body_size.y * 0.5)
 	_build_nose()
 	_build_shove_area()
+	if soft_contact:
+		_body.set_meta(&"soft_hit_crush", soft_crush_s)
+	if ai_reads_lane:
+		add_to_group(AI_GROUP)
 
 
 ## Fata oblica din fata (-Z local) + flancul care inchide triunghiul.
@@ -355,6 +375,23 @@ func _show() -> void:
 	if _shove_area != null:
 		_shove_area.monitoring = true
 	descent_started.emit(self)
+
+
+## Pozitia corpului VIZIBIL (lume) si semilatimea lui — ce vede si un om.
+func body_position() -> Vector3:
+	return _body.global_position if _body != null else global_position
+
+
+func body_forward() -> Vector3:
+	return -_body.global_transform.basis.z if _body != null else Vector3.FORWARD
+
+
+func body_half_width() -> float:
+	return _box_size.x * 0.5 if _box_size.x > 0.0 else body_size.x * 0.5
+
+
+func body_half_length() -> float:
+	return _box_size.z * 0.5 if _box_size.z > 0.0 else body_size.z * 0.5
 
 
 ## Ascuns acum? (pentru sonde)

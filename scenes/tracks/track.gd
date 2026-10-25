@@ -12132,6 +12132,17 @@ const PARAPET_BLOCK_M: float = 4.0
 const ROCK_LIP_HEIGHT: float = 1.6
 const ROCK_LIP_WAVE: float = 0.45
 const ROCK_LIP_THICK: float = 1.4
+## Stilul 2 (BERMA de moloz, Carrara): dambul continuu de la marginea unei
+## terase, dinspre gol. 0.6 m inalt, cu fata dinspre drum in panta (se citeste ca
+## moloz, nu ca bariera de beton), dar abrupta (~53 grade): un prag lateral
+## > 0.3 m e zid pentru roata (memoria `suprafete-cu-goluri-si-praguri`) si
+## berma are tocmai rolul sa opreasca masina, nu sa o lanseze.
+const BERM_HEIGHT: float = 0.6
+const BERM_RUN: float = 0.45
+## Berma se subtiaza spre capete pe atatia metri: un capat taiat drept e un zid
+## pe traiectoria masinii care iese larg dintr-un ac.
+const BERM_TAPER_M: float = 10.0
+const BERM_THICK: float = 1.1
 
 
 func _parapet_segments() -> Array[Vector4]:
@@ -12159,9 +12170,21 @@ func _build_parapets() -> void:
 			if not is_zero_approx(seg.z) and signf(seg.z) != side_sign:
 				continue
 			var rock := int(seg.w) == 1
+			var berm := int(seg.w) == 2
 			var thick := ROCK_LIP_THICK if rock else PARAPET_THICK
+			if berm:
+				thick = BERM_THICK
 			# Sectiunea transversala la fiecare punct copt din interval.
 			var secs: Array = [] # [inner_top, outer_top, inner_bot, outer_bot, dist]
+			var d_first := -1.0
+			var d_last := -1.0
+			if berm:
+				for i in n:
+					var fb := _dists[i] / total_len
+					if fb >= seg.x and fb <= seg.y:
+						if d_first < 0.0:
+							d_first = _dists[i]
+						d_last = _dists[i]
 			for i in n:
 				var f := _dists[i] / total_len
 				if f < seg.x or f > seg.y:
@@ -12177,6 +12200,20 @@ func _build_parapets() -> void:
 					var d: float = _dists[i]
 					h = ROCK_LIP_HEIGHT + ROCK_LIP_WAVE * (0.6 * sin(d * 0.41)
 						+ 0.4 * sin(d * 1.37 + 1.1))
+				if berm:
+					var tap := smoothstep(0.0, 1.0, minf(
+						(float(_dists[i]) - d_first) / BERM_TAPER_M,
+						(d_last - float(_dists[i])) / BERM_TAPER_M))
+					h = BERM_HEIGHT * maxf(tap, 0.05)
+					# fata dinspre drum in panta: baza la marginea asfaltului,
+					# creasta la BERM_RUN dincolo
+					secs.append([
+						e + out * BERM_RUN + Vector3.UP * h,
+						e + out * thick + Vector3.UP * h,
+						e - Vector3.UP * 0.15,
+						e + out * thick - Vector3.UP * PARAPET_SKIRT,
+						_dists[i], side * side_sign])
+					continue
 				secs.append([
 					e + Vector3.UP * h,
 					e + out * thick + Vector3.UP * h,
@@ -12193,6 +12230,8 @@ func _build_parapets() -> void:
 				var slot := Palette.FOAM_WHITE if block == 0 else Palette.KERB_RED
 				if rock:
 					slot = Palette.ROCK_DARK
+				elif berm:
+					slot = Palette.CORAL_SAND if block == 0 else Palette.MARBLE_GREY
 				var outv: Vector3 = a[5]
 				# top, fata dinspre sosea, fata dinspre vale
 				_parapet_quad(st, a[0], b[0], b[1], a[1], slot, Vector3.UP)
@@ -12203,7 +12242,7 @@ func _build_parapets() -> void:
 			var last: Array = secs[secs.size() - 1]
 			var d0: Vector3 = (secs[1] as Array)[0] - first[0]
 			var d1: Vector3 = last[0] - (secs[secs.size() - 2] as Array)[0]
-			var cap := Palette.ROCK_DARK if rock else Palette.KERB_RED
+			var cap := Palette.ROCK_DARK if rock else (Palette.MARBLE_GREY if berm else Palette.KERB_RED)
 			_parapet_quad(st, first[0], first[1], first[3], first[2],
 				cap, -d0.normalized())
 			_parapet_quad(st, last[0], last[1], last[3], last[2],
@@ -12976,7 +13015,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.FLYOFF:
 			_build_flyoff(frac)
 		HazardMarker.Kind.EXCAVATOR:
-			_build_excavator(frac)
+			_build_excavator(frac, spec)
 		HazardMarker.Kind.AVALANCHE:
 			_build_avalanche(frac, spec)
 		HazardMarker.Kind.WAVE:
@@ -15384,7 +15423,7 @@ func _bake_decor(cliffs: Node3D, decor: Node3D, scen: Node3D) -> void:
 	TrackDecorBatch.bake(decor, decor.get_node_or_null(^"Sway") as SwayDriver)
 	TrackDecorBatch.bake(scen)
 
-func _build_excavator(frac: float) -> void:
+func _build_excavator(frac: float, spec: Dictionary = {}) -> void:
 	const PATH := "res://assets/models/vehicles/rusted_digger.glb"
 	if not ResourceLoader.exists(PATH):
 		return
@@ -15399,6 +15438,8 @@ func _build_excavator(frac: float) -> void:
 	# 0.75, deci scara devine 1.0 si colizoarele se recalibreaza in hazard.
 	excavator.model_scene = load(PATH)
 	excavator.model_scale = 1.0
+	excavator.ai_dice = bool(spec.get("excavator_ai_dice", false))
+	excavator.soft_contact = bool(spec.get("excavator_soft_contact", false))
 	add_child(excavator)
 	# Corpul sta PE marginea soselei (blocheaza banda exterioara),
 	# bratul coboara spre centru — lasa o strecuratoare pe interior.

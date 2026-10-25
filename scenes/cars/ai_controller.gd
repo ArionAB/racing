@@ -628,10 +628,16 @@ func update(delta: float) -> void:
 		_throttle = 0.0
 
 	# --- drift (handbrake) pe viraje sustinute: si vireaza, si umple bara ---
+	# Eliberat si cand pilotul CONTRAVOLANEAZA: cu maparea CTR (oct 2026),
+	# volanul in sens opus nu mai intoarce masina in drift, doar largeste
+	# alunecarea — deci corectia spre exterior nu vine pana nu lasi frana de
+	# mana. Exact ce face un om: prinde spatele eliberand butonul. Fara regula
+	# asta pilotul statea cu frana trasa si contravolan plin si iesea pe iarba
+	# (ProbeRace Track0: offroad 6-13% fata de 0-1% pe main).
 	if not _drift:
 		if severity > 0.34 and speed > car.drift_min_speed * 1.2:
 			_drift = true
-	elif severity < 0.12 or speed < car.drift_min_speed * 0.7:
+	elif severity < 0.12 or speed < car.drift_min_speed * 0.7 			or (car.is_drifting and _steer * car.drift_dir < -0.15):
 		_drift = false
 
 	# --- turbo: pe drept, si oprit inainte de viraj, ca sa nu-l irosim in perete

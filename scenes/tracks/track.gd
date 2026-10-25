@@ -12747,6 +12747,11 @@ func _tunnel_specs() -> Array[Vector4]:
 ## oprire). Plina doar pentru tunelurile cu `camera_tail_m` > 0.
 var _tunnel_camera_tail: Dictionary = {}
 
+## Clasa triplanara a tubului, per tunel (cheie = fractia liniei de oprire, ca la coada de
+## camera). Goala = `wet_gneiss` pe toate (Fiordland, Transfagarasan: bit-identic). Plina doar
+## pentru tunelurile care cer alta clasa (`TunnelSignalHazard.tube_class`, Carrara: marmura).
+var _tunnel_tube_class: Dictionary = {}
+
 
 ## Tunelurile declarate ca noduri [TunnelSignalHazard], in aceleasi patru
 ## numere. Cautare recursiva si manuala, ca la varfuri.
@@ -12768,6 +12773,8 @@ func _collect_tunnels(node: Node, out: Array[Vector4]) -> void:
 				sig.tunnel_half_width, sig.tunnel_ceiling))
 			if sig.camera_tail_m > 0.0:
 				_tunnel_camera_tail[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.camera_tail_m # cheia trece prin float32, ca spec.x
+			if sig.tube_class != "wet_gneiss":
+				_tunnel_tube_class[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.tube_class
 		_collect_tunnels(child, out)
 
 
@@ -12872,7 +12879,8 @@ func _build_tunnel(spec: Vector4) -> void:
 	rock.generate_normals()
 	_add_mesh_with_collision(rock.commit(), Color.WHITE, null, 0.9, 0.5,
 		BaseMaterial3D.CULL_DISABLED, null, null, true,
-		Palette.triplanar_class_material("wet_gneiss"), "TunnelBore")
+		Palette.triplanar_class_material(String(_tunnel_tube_class.get(spec.x, "wet_gneiss"))),
+		"TunnelBore")
 	concrete.generate_normals()
 	_add_mesh_with_collision(concrete.commit(), Palette.color(Palette.CONCRETE),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,

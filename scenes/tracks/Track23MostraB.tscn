@@ -1,0 +1,53 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
+[ext_resource type="Script" path="res://scenes/tracks/carrara_mostra.gd" id="2_mostra"]
+[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="3_prop"]
+[ext_resource type="PackedScene" path="res://assets/models/baikal/vehicles/kamaz_truck.glb" id="m0_kamaz_truck"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/beech_tree_a.glb" id="m1_beech_tree_a"]
+[ext_resource type="PackedScene" path="res://assets/models/stromboli/plants/ginestra_bush.glb" id="m2_ginestra_bush"]
+
+[sub_resource type="Curve3D" id="Curve3D_mostra"]
+closed = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 7, -12, 0, 0, 0, 0, 0, 0, 40, 7, -12, 0, 0, 0, 0, 0, 0, 80, 7, -12, 0, 0, 0, 0, 0, 0, 110, 5.125, -12, 0, 0, 0, 0, 0, 0, 130, 3.875, -12, 0, 0, 0, 0, 0, 0, 140, 3.25, -12, 0, 0, 0, 0, 0, 0, 152.124, 2.375, -5, 0, 0, 0, 0, 0, 0, 152.124, 1.5, 9, 0, 0, 0, 0, 0, 0, 140, 0.625, 16, 0, 0, 0, 0, 0, 0, 130, 0, 16, 0, 0, 0, 0, 0, 0, 110, 0, 16, 0, 0, 0, 0, 0, 0, 70, 0, 16, 0, 0, 0, 0, 0, 0, 30, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, -40, 1.386, 16, 0, 0, 0, 0, 0, 0, -70, 2.426, 16, 0, 0, 0, 0, 0, 0, -80, 2.772, 16, 0, 0, 0, 0, 0, 0, -92.1244, 3.257, 9, 0, 0, 0, 0, 0, 0, -92.1244, 3.743, -5, 0, 0, 0, 0, 0, 0, -80, 4.228, -12, 0, 0, 0, 0, 0, 0, -70, 4.574, -12, 0, 0, 0, 0, 0, 0, -40, 5.614, -12),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 22
+
+[node name="Track23" type="Node3D"]
+script = ExtResource("1_track")
+custom_name = "Mostra Carrara B"
+custom_theme = "carrara_real"
+custom_world_seed_name = "carrara_mostra"
+custom_half_width = 7.0
+custom_gate_model = "none"
+custom_dirt_ranges = Array[Vector2]([Vector2(0, 1)])
+traffic_count = 0
+
+[node name="Path" type="Path3D" parent="."]
+curve = SubResource("Curve3D_mostra")
+
+[node name="Mostra" type="Node3D" parent="."]
+script = ExtResource("2_mostra")
+marble_class = "carrara_marble_real"
+pool_y = 0.32
+cube_y = -0.22
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("3_prop")
+
+[node name="Camion_parcat" parent="DecorManual" instance=ExtResource("m0_kamaz_truck")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1.000, 0, -1.00000, 0, 0.00000, 113.00, -0.260, 26.00)
+
+[node name="Fag_A" parent="DecorManual" instance=ExtResource("m1_beech_tree_a")]
+transform = Transform3D(0.93969, 0, 0.34202, 0, 1.000, 0, -0.34202, 0, 0.93969, 140.00, 1.030, 2.00)
+
+[node name="Fag_B" parent="DecorManual" instance=ExtResource("m1_beech_tree_a")]
+transform = Transform3D(-0.76604, 0, 0.64279, 0, 1.000, 0, -0.64279, 0, -0.76604, -30.00, 1.110, 34.00)
+
+[node name="Ginestra_A" parent="DecorManual" instance=ExtResource("m2_ginestra_bush")]
+transform = Transform3D(1.37873, 0, 0.24311, 0, 1.400, 0, -0.24311, 0, 1.37873, 124.00, 0.020, 32.00)
+
+[node name="Ginestra_B" parent="DecorManual" instance=ExtResource("m2_ginestra_bush")]
+transform = Transform3D(-1.31557, 0, -0.47883, 0, 1.400, 0, 0.47883, 0, -1.31557, -8.00, 0.050, 28.00)

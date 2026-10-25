@@ -107,11 +107,14 @@ const TRACK_SCENES: Array[String] = [
 	# numarul scenei); probe_decor/probe_manual vor 22, snapshot/probe_race/
 	# probe_layout vor 14 SAU 22 (memoria probe-decor-numar-de-scena).
 	"res://scenes/tracks/Track22.tscn", # Ha Long = INDEXUL 14
+	"res://scenes/tracks/Track23Mostra.tscn", # MOSTRA CARRARA — temporar, se scoate inainte de merge (INDEXUL 15)
+	"res://scenes/tracks/Track23MostraB.tscn", # MOSTRA CARRARA — temporar, se scoate inainte de merge (INDEXUL 16)
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Transfagarasan", "Baikal", "Stromboli",
 	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
 	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long",
+	"Mostra Carrara A", "Mostra Carrara B", # MOSTRA CARRARA — temporar, se scoate inainte de merge
 ]
 const CHAMP_ROUNDS: int = 3
 

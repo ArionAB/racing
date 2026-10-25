@@ -769,10 +769,11 @@ func set_ghost_time(ms: int) -> void:
 	_ghost_label.visible = ms > 0
 	if ms > 0:
 		_ghost_label.text = "GHOST %s" % TrackCard._format_ms(ms)
-## Provocarea gimmick-ului: "CHALLENGE: <titlu>", verde pana o pici.
+## Provocarea gimmick-ului (bonus +1 in cursa de cariera): "CHALLENGE +1:
+## <titlu>", verde pana o pici.
 func set_challenge(title: String) -> void:
 	_challenge_title = title
-	_challenge_label.text = "CHALLENGE: " + title
+	_challenge_label.text = _challenge_prefix() + title
 	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
 	_challenge_label.visible = true
 
@@ -781,8 +782,12 @@ func set_challenge(title: String) -> void:
 func set_challenge_progress(text: String) -> void:
 	if _challenge_failed:
 		return
-	_challenge_label.text = "CHALLENGE: " + _challenge_title \
+	_challenge_label.text = _challenge_prefix() + _challenge_title \
 		+ ("   " + text if text != "" else "")
+
+
+static func _challenge_prefix() -> String:
+	return "CHALLENGE +%d: " % Career.CHALLENGE_POINTS
 
 
 func set_challenge_failed() -> void:

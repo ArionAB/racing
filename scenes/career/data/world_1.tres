@@ -8,4 +8,4 @@ id = &"world_1"
 display_name = "LUMEA 1"
 tracks = Array[StringName]([&"monument_valley", &"kyoto", &"cappadocia", &"serengeti"])
 free = true
-stamps_to_unlock = 0
+points_to_unlock = 0

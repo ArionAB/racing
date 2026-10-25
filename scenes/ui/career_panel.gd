@@ -1,8 +1,9 @@
 class_name CareerPanel
 extends Control
-## Raftul carierei: pasaportul (stampile + medalii) sus, apoi o cutie per lume
+## Raftul carierei: pasaportul (puncte + medalii) sus, apoi o cutie per lume
 ## cu pistele ei. Lumea deblocata arata carduri (tap = deschide foaia pistei:
-## RACE / TIME TRIAL); cea sigilata arata un lacat si cate stampile mai lipsesc.
+## RACE cu bonusul provocarii / TIME TRIAL); cea sigilata arata un lacat si
+## cate puncte mai lipsesc.
 ## Pe ecran intreg, cu antet fix; doar continutul deruleaza. Acelasi tipar ca
 ## TrackSelectPanel, a carui grila si antet le refoloseste.
 
@@ -15,7 +16,7 @@ const SILVER := Color(0.80, 0.83, 0.88)
 const BRONZE := Color(0.75, 0.50, 0.30)
 
 ## Referinte pastrate pentru reimprospatare (si pentru sonda).
-var _stamps_label: Label
+var _points_label: Label
 var _medals_row: HBoxContainer
 var _worlds_box: VBoxContainer
 var _first_card: TrackCard
@@ -62,16 +63,16 @@ func _ready() -> void:
 	visibility_changed.connect(_on_visibility_changed)
 
 
-## Pasaportul: STAMPS N / MAX mare, medaliile pe culori sub el.
+## Pasaportul: POINTS N / MAX mare, medaliile pe culori sub el.
 func _build_passport() -> Control:
 	var box := _make_box()
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6)
 	box.get_child(0).add_child(column)
-	_stamps_label = Label.new()
-	_stamps_label.add_theme_font_size_override("font_size", 40)
-	_stamps_label.add_theme_color_override("font_color", TrackSelectPanel.TITLE_COLOR)
-	column.add_child(_stamps_label)
+	_points_label = Label.new()
+	_points_label.add_theme_font_size_override("font_size", 40)
+	_points_label.add_theme_color_override("font_color", TrackSelectPanel.TITLE_COLOR)
+	column.add_child(_points_label)
 	_medals_row = HBoxContainer.new()
 	_medals_row.add_theme_constant_override("separation", 22)
 	column.add_child(_medals_row)
@@ -79,7 +80,7 @@ func _build_passport() -> Control:
 
 
 func _refresh() -> void:
-	_stamps_label.text = "STAMPS  %d / %d" % [Career.stamps(), Career.max_stamps()]
+	_points_label.text = "POINTS  %d / %d" % [Career.points(), Career.max_points()]
 
 	for child in _medals_row.get_children():
 		child.free()
@@ -152,7 +153,7 @@ func _build_sealed(world: CareerWorld) -> Control:
 	row.add_theme_constant_override("separation", 16)
 	row.custom_minimum_size = Vector2(0, 56)
 	row.add_child(_Lock.new())
-	var label := _label("SEALED — %d MORE STAMPS" % Career.stamps_missing(world),
+	var label := _label("SEALED — %d MORE POINTS" % Career.points_missing(world),
 		22, TrackCard.TEXT_DIM)
 	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(label)
@@ -176,8 +177,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 ## Foaia pistei: fundal semi-opac care inchide la tap, cu un panou centrat
-## (nume, RACE, TIME TRIAL, CHALLENGE (blocat fara provocare), BACK). Un tap pe card nu
-## mai porneste cursa direct: jucatorul alege intai modul.
+## (nume, RACE cu punctele pistei, eticheta BONUS a provocarii, TIME TRIAL,
+## BACK). Un tap pe card nu mai porneste cursa direct: jucatorul alege intai
+## modul.
 func _open_sheet(track_id: StringName) -> void:
 	_close_sheet()
 	var index := TrackInfo.index_of_id(track_id)
@@ -213,11 +215,28 @@ func _open_sheet(track_id: StringName) -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(title)
 
-	var race_btn := _sheet_button("RACE", _medal_name(int(state.race_medal)))
+	# RACE: locul cel mai bun si punctele stranse pe pista (loc + bonus) din 4.
+	var race_btn := _sheet_button("RACE", "%s  ·  %d / %d PTS" % [
+		_place_name(int(state.race_medal)), Career.track_points(track_id),
+		Career.MAX_TRACK_POINTS])
 	race_btn.name = "RaceButton"
 	race_btn.pressed.connect(func() -> void:
 		Career.start_track(track_id, Career.Mode.RACE))
 	column.add_child(race_btn)
+
+	# Provocarea gimmick-ului e BONUS (+1) in cursa normala, nu proba separata
+	# (decizia dezvoltatorului, 25 oct 2026): o eticheta sub RACE, nu un buton.
+	# Pista fara provocare nu arata nimic (nici „SOON").
+	var challenge := Career.challenge_for(track_id)
+	if challenge != null:
+		var done := bool(state.challenge)
+		var bonus := _label("BONUS +%d  ·  %s%s" % [Career.CHALLENGE_POINTS,
+			challenge.title, "  ·  DONE" if done else "\n" + challenge.hint], 18,
+			Color(0.55, 0.9, 0.5) if done else TrackCard.TEXT_DIM)
+		bonus.name = "BonusLabel"
+		bonus.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		bonus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		column.add_child(bonus)
 
 	var tt_sub := "NO TIME YET"
 	if int(state.tt_best_ms) > 0:
@@ -235,23 +254,6 @@ func _open_sheet(track_id: StringName) -> void:
 		Career.start_track(track_id, Career.Mode.TIME_TRIAL))
 	column.add_child(tt_btn)
 
-	var challenge := Career.challenge_for(track_id)
-	var challenge_btn: Button
-	if challenge == null:
-		challenge_btn = _sheet_button("CHALLENGE", "SOON")
-		challenge_btn.disabled = true
-	else:
-		# Titlul + DONE (verde) cand e bifata, altfel ce trebuie facut.
-		var done := bool(state.challenge)
-		challenge_btn = _sheet_button("CHALLENGE",
-			challenge.title + ("  ·  DONE" if done else "\n" + challenge.hint))
-		if done:
-			challenge_btn.add_theme_color_override("font_color", Color(0.55, 0.9, 0.5))
-		challenge_btn.pressed.connect(func() -> void:
-			Career.start_track(track_id, Career.Mode.CHALLENGE))
-	challenge_btn.name = "ChallengeButton"
-	column.add_child(challenge_btn)
-
 	var back_btn := _sheet_button("BACK", "")
 	back_btn.name = "BackButton"
 	back_btn.pressed.connect(_close_sheet)
@@ -268,12 +270,23 @@ func _close_sheet() -> void:
 		_first_card.grab_focus.call_deferred()
 
 
+## Pentru contratimp (tinte de timp): culoarea medaliei.
 static func _medal_name(medal: int) -> String:
 	match medal:
 		Career.MEDAL_GOLD: return "GOLD"
 		Career.MEDAL_SILVER: return "SILVER"
 		Career.MEDAL_BRONZE: return "BRONZE"
 	return "—"
+
+
+## Pentru cursa: medalia e locul (3/2/1 = 1st/2nd/3rd), iar jucatorul
+## gandeste in locuri si puncte, nu in culori.
+static func _place_name(medal: int) -> String:
+	match medal:
+		Career.MEDAL_GOLD: return "1ST PLACE"
+		Career.MEDAL_SILVER: return "2ND PLACE"
+		Career.MEDAL_BRONZE: return "3RD PLACE"
+	return "NO PODIUM YET"
 
 
 ## Buton mare (>= 64 px) cu titlu si, daca e, un subtitlu pe al doilea rand.

@@ -12,7 +12,9 @@ extends Resource
 @export var tracks: Array[StringName] = []
 ## Lumea de inceput: mereu deschisa, indiferent de stampile.
 @export var free: bool = false
-@export var stamps_to_unlock: int = 0
+## Pragul de puncte cumulate (toate lumile) la care cutia se deschide; 0 pe
+## lumea free. Punctele: brief §3 (loc 3/2/1 + bonus provocare 1).
+@export var points_to_unlock: int = 0
 ## Rivalul lumii si pista lui (pasul 3+). Goale in pasul 1, dar schema e
 ## completa ca sa nu rescriem resursele mai tarziu.
 @export var rival: StringName = &""

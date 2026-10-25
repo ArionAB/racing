@@ -12,10 +12,12 @@ extends Node
 ##     hazard (`.new()`, fara scena si fara _ready), pasate prin
 ##     `setup(..., sources)`: tracker-ul nu are cum sa "reuseasca" pe un nod
 ##     inventat, iar scena pistei nu trebuie incarcata.
-##  3. CAREER: modul CHALLENGE porneste ca RACE (ai_count neatins), bifa se pune
-##     doar la reusita si nu se pierde la un esec ulterior.
-##  4. FOAIA: butonul CHALLENGE e activ pe pistele cu provocare (subtitlu =
-##     titlul), DONE cand e bifata, si ramane SOON pe o pista fara provocare.
+##  3. CAREER: provocarea e BONUS (+1) in cursa normala de cariera (25 oct 2026):
+##     RACE o poarta (`challenge_to_track`), contratimpul nu; `finish_active`
+##     da punctele locului + bonusul, bifa nu cere podium si nu se pierde la
+##     un esec ulterior; pe o pista fara provocare bonusul nu exista.
+##  4. FOAIA: fara buton CHALLENGE; eticheta BONUS (titlu + hint) pe pistele
+##     cu provocare, DONE cand e bifata, si NIMIC pe o pista fara provocare.
 ##  5. PISTE REALE: pentru fiecare provocare pe semnal de hazard, pista se
 ##     incarca si contine cel putin o sursa a semnalului cerut (altfel
 ##     contractul ar fi o garda fara nimic de masurat).
@@ -537,30 +539,51 @@ func _check_new_signals() -> void:
 # ---------------------------------------------------------------- 3. career
 
 func _check_career() -> void:
+	_remove_tmp()
 	Career.load_progress()
 	var started := [0]
 	Career.race_starter = func() -> void: started[0] += 1
 	GameState.ai_count = 3
-	Career.start_track(&"kyoto", Career.Mode.CHALLENGE)
-	_expect(Career.active and Career.active_mode == Career.Mode.CHALLENGE and Career.is_challenge(),
-		"start_track(CHALLENGE) seteaza modul")
-	_expect(started[0] == 1, "cursa de provocare porneste")
+	Career.start_track(&"kyoto", Career.Mode.RACE)
+	_expect(Career.active and Career.active_mode == Career.Mode.RACE, "start_track(RACE) seteaza modul")
+	_expect(started[0] == 1, "cursa porneste")
 	_expect(GameState.ai_count == 3, "ai_count neatins (cursa cu AI), este %d" % GameState.ai_count)
-	_expect(not Career.is_time_trial(), "provocarea nu e contratimp")
-	var stamps0 := Career.stamps()
-	_expect(not Career.finish_challenge(false), "finish_challenge(false) intoarce false")
-	_expect(not bool(Career.track_state(&"kyoto").challenge) and Career.stamps() == stamps0,
+	_expect(Career.challenge_to_track() != null
+		and Career.challenge_to_track() == Career.challenge_for(&"kyoto"),
+		"cursa normala de cariera poarta provocarea pistei")
+	var points0 := Career.points()
+	_expect(Career.finish_active(5, false) == 0, "locul 5 fara provocare = 0 puncte")
+	_expect(not bool(Career.track_state(&"kyoto").challenge) and Career.points() == points0,
 		"un esec nu pune nimic")
-	_expect(Career.finish_challenge(true), "finish_challenge(true) intoarce true")
-	_expect(bool(Career.track_state(&"kyoto").challenge) and Career.stamps() == stamps0 + 1,
-		"reusita pune bifa si +1 stampila")
-	_expect(int(Career.track_state(&"kyoto").race_medal) == 0,
-		"provocarea nu da medalie de cursa")
-	Career.finish_challenge(false)
-	_expect(bool(Career.track_state(&"kyoto").challenge), "reusita nu se pierde la un esec ulterior")
+	_expect(Career.finish_active(5, true) == Career.CHALLENGE_POINTS,
+		"locul 5 cu provocarea reusita = +1 (bonusul nu cere podium)")
+	_expect(bool(Career.track_state(&"kyoto").challenge) and Career.points() == points0 + 1,
+		"reusita pune bifa si +1 punct")
+	_expect(int(Career.track_state(&"kyoto").race_medal) == 0, "sub podium nu da medalie de cursa")
+	_expect(Career.finish_active(1, true) == Career.MAX_TRACK_POINTS,
+		"locul 1 + provocare = 4 puncte intr-o cursa")
+	_expect(Career.points() == points0 + Career.MAX_TRACK_POINTS,
+		"pe raft: 3 + 1 = 4 (bifa nu se numara de doua ori)")
+	Career.finish_active(5, false)
+	_expect(bool(Career.track_state(&"kyoto").challenge)
+		and int(Career.track_state(&"kyoto").race_medal) == Career.MEDAL_GOLD,
+		"reusita si locul nu se pierd la o cursa mai slaba")
 	Career.leave()
-	_expect(not Career.is_challenge(), "dupa leave() nu mai e provocare")
-	_expect(not Career.finish_challenge(true), "in afara unei provocari finish_challenge nu bifeaza")
+	_expect(Career.challenge_to_track() == null, "dupa leave() nu mai e provocare de urmarit")
+	_expect(Career.finish_active(1, true) == 0, "in afara carierei finish_active nu da puncte")
+	# Contratimpul nu poarta provocarea (singur pe pista, fara trafic).
+	Career.start_track(&"kyoto", Career.Mode.TIME_TRIAL)
+	_expect(Career.is_time_trial() and Career.challenge_to_track() == null,
+		"contratimpul nu are provocare")
+	Career.leave()
+	# Pista fara provocare: bonusul nu exista, chiar daca cineva il raporteaza.
+	Career.start_track(NO_CHALLENGE_TRACK, Career.Mode.RACE)
+	_expect(Career.challenge_to_track() == null, "%s: fara provocare de urmarit" % NO_CHALLENGE_TRACK)
+	_expect(Career.finish_active(1, true) == Career.MEDAL_GOLD,
+		"fara provocare pe pista, bonusul nu se da (doar locul)")
+	_expect(not bool(Career.track_state(NO_CHALLENGE_TRACK).challenge),
+		"fara provocare pe pista, bifa nu se pune")
+	Career.leave()
 	Career.race_starter = Callable()
 
 
@@ -576,6 +599,16 @@ func _sheet_buttons(panel: CareerPanel) -> Dictionary:
 	return out
 
 
+func _sheet_labels(panel: CareerPanel) -> Dictionary:
+	var nodes: Array[Node] = []
+	_collect(panel._sheet, nodes)
+	var out := {}
+	for n in nodes:
+		if n is Label:
+			out[n.name] = n
+	return out
+
+
 func _check_sheet() -> void:
 	Career.config = _real_config
 	_remove_tmp()
@@ -584,43 +617,58 @@ func _check_sheet() -> void:
 	add_child(panel)
 	await get_tree().process_frame
 	await get_tree().process_frame
+	var zero_pts := "%d / %d PTS" % [0, Career.MAX_TRACK_POINTS]
 	for track_id in EXPECTED:
 		panel._open_sheet(track_id)
 		await get_tree().process_frame
-		var b: Button = _sheet_buttons(panel).get("ChallengeButton")
+		var buttons := _sheet_buttons(panel)
+		var bonus: Label = _sheet_labels(panel).get("BonusLabel")
 		var c := Career.challenge_for(track_id)
-		_expect(b != null and not b.disabled, "%s: CHALLENGE activ" % track_id)
-		if b != null:
-			_expect(c.title in b.text and c.hint in b.text and not ("SOON" in b.text),
-				"%s: subtitlu = titlu + hint ('%s')" % [track_id, b.text])
-	# apasarea porneste provocarea
+		_expect(not buttons.has("ChallengeButton"), "%s: fara buton CHALLENGE" % track_id)
+		_expect(bonus != null, "%s: eticheta BONUS exista" % track_id)
+		if bonus != null:
+			_expect(c.title in bonus.text and c.hint in bonus.text and not ("SOON" in bonus.text)
+				and ("+%d" % Career.CHALLENGE_POINTS) in bonus.text and not ("DONE" in bonus.text),
+				"%s: BONUS = +1, titlu + hint, nebifata ('%s')" % [track_id, bonus.text])
+		var race: Button = buttons.get("RaceButton")
+		_expect(race != null and "NO PODIUM YET" in race.text and zero_pts in race.text,
+			"%s: RACE arata 'NO PODIUM YET · %s' ('%s')" % [track_id, zero_pts,
+				race.text if race != null else ""])
+	# RACE porneste cursa normala, care poarta provocarea.
 	var started := [0]
 	Career.race_starter = func() -> void: started[0] += 1
 	panel._open_sheet(&"kyoto")
 	await get_tree().process_frame
-	(_sheet_buttons(panel)["ChallengeButton"] as Button).pressed.emit()
-	_expect(started[0] == 1 and Career.is_challenge() and Career.active_track == &"kyoto",
-		"apasarea CHALLENGE porneste provocarea pe Kyoto")
-	Career.finish_challenge(true)
+	(_sheet_buttons(panel)["RaceButton"] as Button).pressed.emit()
+	_expect(started[0] == 1 and Career.active and Career.active_track == &"kyoto"
+		and Career.challenge_to_track() == Career.challenge_for(&"kyoto"),
+		"apasarea RACE porneste cursa pe Kyoto cu provocarea ei")
+	Career.finish_active(3, true)
 	Career.leave()
 	panel._open_sheet(&"kyoto")
 	await get_tree().process_frame
-	var done_btn: Button = _sheet_buttons(panel)["ChallengeButton"]
-	_expect("DONE" in done_btn.text and not done_btn.disabled,
-		"Kyoto bifata: DONE ('%s')" % done_btn.text)
+	var done: Label = _sheet_labels(panel)["BonusLabel"]
+	_expect("DONE" in done.text, "Kyoto bifata: BONUS ... DONE ('%s')" % done.text)
+	var race_after: Button = _sheet_buttons(panel)["RaceButton"]
+	var two_pts := "%d / %d PTS" % [Career.MEDAL_BRONZE + Career.CHALLENGE_POINTS,
+		Career.MAX_TRACK_POINTS]
+	_expect("3RD PLACE" in race_after.text and two_pts in race_after.text,
+		"Kyoto dupa locul 3 + bonus: '3RD PLACE · %s' ('%s')" % [two_pts, race_after.text])
 	panel.queue_free()
 	await get_tree().process_frame
 
-	# O pista FARA provocare (Kyoto scoasa din config in memorie): SOON + disabled.
+	# O pista FARA provocare (Kyoto scoasa din config in memorie): nicio
+	# eticheta BONUS, niciun buton CHALLENGE, 3 butoane.
 	Career.config = _clone(&"kyoto")
 	var panel2 := CareerPanel.new()
 	add_child(panel2)
 	await get_tree().process_frame
 	panel2._open_sheet(&"kyoto")
 	await get_tree().process_frame
-	var soon: Button = _sheet_buttons(panel2)["ChallengeButton"]
-	_expect(soon.disabled and "SOON" in soon.text,
-		"fara provocare: CHALLENGE disabled + SOON ('%s')" % soon.text)
+	var buttons2 := _sheet_buttons(panel2)
+	_expect(not _sheet_labels(panel2).has("BonusLabel") and not buttons2.has("ChallengeButton")
+		and buttons2.size() == 3,
+		"fara provocare: fara BONUS, fara CHALLENGE, 3 butoane (%d)" % buttons2.size())
 	panel2.queue_free()
 	Career.config = _real_config
 	Career.race_starter = Callable()

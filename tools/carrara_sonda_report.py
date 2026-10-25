@@ -326,7 +326,8 @@ def report_exc(base_runs, ex_runs):
     print("\nTRECERI pe langa excavator: %d total (%.1f / masina / seed)" % (len(passes), len(passes) / max(n * 8, 1)))
     classes = defaultdict(list)
     for w in passes:
-        inl = (lo - 1.1) <= w["lat_at_pass"] <= (hi + 1.1)
+        w["lat_sel"] = w.get("lat_30", w["lat_in"])   # alegerea de banda la -30 m, inainte de orice oprire/marsarier
+        inl = (lo - 1.1) <= w["lat_sel"] <= (hi + 1.1)
         blk = bool(w["blocking_min_d"] or w["blocking_at_pass"])
         w["inlane"] = inl
         w["blk"] = blk
@@ -349,11 +350,16 @@ def report_exc(base_runs, ex_runs):
         fmt(med(a), 1), len(a), fmt(med(b), 1), len(b)))
     # contacte
     cts = [(r["seed"], ev) for r in ex_runs for ev in r["exc_events"] if ev["kind"] == "contact"]
-    print("CONTACTE cu excavatorul: %d evenimente; cu brat JOS (blocking) %d; viteza la intrare mediana %s, v_min mediana %s" % (
-        len(cts), sum(1 for _, e in cts if e["blocking"]),
-        fmt(med([e["v_in"] for _, e in cts]), 1), fmt(med([e["v_min"] for _, e in cts]), 1)))
-    print("  contacte cu arm_d<1 (la brat): %d ; la sasiu: %d" % (
-        sum(1 for _, e in cts if e["arm_d"] < 1.0), sum(1 for _, e in cts if e["arm_d"] >= 1.0)))
+    arm_c = [e for _, e in cts if e["blocking"] and e["arm_d"] <= 3.0]
+    body_c = [e for _, e in cts if not (e["blocking"] and e["arm_d"] <= 3.0)]
+    print("CONTACTE cu excavatorul: %d evenimente; viteza la intrare mediana %s, v_min mediana %s" % (
+        len(cts), fmt(med([e["v_in"] for _, e in cts]), 1), fmt(med([e["v_min"] for _, e in cts]), 1)))
+    print("  in BRATUL coborat (arm_d<=3 m, coliziune activa): %d = %.1f / seed; v_in mediana %s, v_min mediana %s" % (
+        len(arm_c), len(arm_c) / max(n, 1), fmt(med([e["v_in"] for e in arm_c]), 1), fmt(med([e["v_min"] for e in arm_c]), 1)))
+    print("  in CORPUL parcat / altceva (sasiul e mereu solid, lat ~1.5..6.5): %d = %.1f / seed; lat mediana %s" % (
+        len(body_c), len(body_c) / max(n, 1), fmt(med([e["lat"] for e in body_c]), 1)))
+    ej = [e for r in ex_runs for e in r.get("ejects", [])]
+    print("  ejectari sofer: %d (%.1f / seed), dv mediana %s m/s" % (len(ej), len(ej) / max(n, 1), fmt(med([e["value"] for e in ej]), 1)))
     # opriti sub brat
     stopped = [w for w in passes if w["blk"] and w["v_min"] < 2.0]
     print("OPRITI sub/inaintea bratului (v_min<2 m/s cu brat jos): %d din %d treceri cu brat jos" % (

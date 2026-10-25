@@ -26,6 +26,25 @@ extends Node
 ## bucla e sintetica, deci cifrele valideaza MECANISMUL si ordinul de marime;
 ## verdictul de flota se da pe Track23, cu ProbeRace, cand exista.
 
+## CE A IESIT (25 oct 2026, 8 masini din garaj, 16 seed-uri x 200 s, pista
+## sintetica `tools/SondaCarrara*.tscn`; scenele se regenereaza cu
+## `tools/gen_carrara_sonda.py`, variantele sunt variabile de mediu):
+##   (a) CAMIOANE: hazardul e FIZIC corect (corpul sta pe banda stanga a cursei,
+##       lat -1.75 m pe terasa, cutia Kamaz 2.68 x 8 m; defazajul real intre
+##       camioane 55 s = jumatate din perioada de 110 s), dar AI-ul nu-l vede:
+##       ~62% din intalnirile pe terasa si 55% din cele din ac se termina cu
+##       contact, iar ORICE contact frontal e ejectare de sofer (dv 31-52 m/s,
+##       pragul `eject_wall_dv` 26) + repunere: ~28 repuneri/seed fata de 0.25 pe
+##       baza. Hint-ul din brief (culoar +0.5 pe ace) injumatateste contactele
+##       din ac (55% -> 28%) dar nu atinge terasele; culoarul pe tot coborasul
+##       (+0.5, de la linia de start la capatul T3) coboara la 21.9 contacte /
+##       seed si 6.8 repuneri / seed. Niciuna din variante nu atinge contractul
+##       (0 blocaje, ~2 s / intalnire): vezi raportul coordonatorului.
+##   (b) EXCAVATOR: bratul chiar blocheaza (v_min 0.1 m/s cu bratul jos fata de
+##       26.6 m/s cu bratul sus, in aceeasi banda); AI-ul alege banda libera in
+##       1% din treceri, deci 30 [blocaj] / 14 repuneri pe seed. Un culoar pe
+##       banda libera (-0.7) rezolva: 1 blocaj, 0 la brat, 94% treceri libere.
+##
 const RACE_SCENE: String = "res://scenes/race/Race.tscn"
 const APPROACH_M: float = 60.0
 const BUCKET_M: float = 10.0

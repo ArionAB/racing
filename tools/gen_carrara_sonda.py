@@ -32,7 +32,7 @@ OUT = os.path.join(ROOT, "tools", "SondaCarrara.tscn")
 
 STEP = 12.0          # pas pe drepte (memoria viraje-stranse: pas 12 m)
 HW_TERRACE = 3.5     # 7 m
-HW_HAIRPIN = 3.0     # 6 m
+HW_HAIRPIN = float(os.environ.get("HW_HAIRPIN", "3.0"))     # 6 m
 HW_EXC = 5.0         # 10 m (POI A)
 R_HAIRPIN = float(os.environ.get("R_HAIRPIN", "16.0"))
 ARC_PTS = int(os.environ.get("ARC_PTS", "4"))   # puncte pe arc incl. capetele
@@ -183,7 +183,7 @@ def nearest_frac(rows, x, z):
 
 TRUCK_SPEED = 8.0
 TRUCK_PERIOD = 110.0   # brief §3: bucla camioanelor ~110 s
-TRUCK_LANE = 0.5       # centrul camionului la 0.5 * half_width de axa, pe STANGA cursei
+TRUCK_LANE = float(os.environ.get("TRUCK_LANE", "0.5"))       # centrul camionului la 0.5 * half_width de axa, pe STANGA cursei
 
 
 def truck_curve(rows, seg_fr):

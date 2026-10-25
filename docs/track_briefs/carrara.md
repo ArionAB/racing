@@ -751,6 +751,50 @@ Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
    (`cliff_face` / `TerrainBluff` / clasa `carrara_marble` pe pereți), nu
    cu decor.
 
+4. **Rezultatul pasului 4 (26 oct 2026, `carrara/track` @ 40459855,
+   pushată).** Mecanism nou, nu `CliffFace` (foaie vizuală fără coliziune,
+   lipită de marginea drumului): **`custom_bench_patches`** — dreptunghiuri
+   în care terenul ia cota locală a drumului, cu muchie tare între două
+   petice vecine — plus **rânduri fine** de teren (rândul de grilă care
+   ține o muchie tare se împarte în 8 sub-rânduri de 0,99 m, deci treapta
+   iese ~84° în loc de rampa de ~50° a grilei de 7,92 m), coliziunea
+   urmează mesh-ul. Fețele abrupte iau clasa `carrara_marble` cu dungi de
+   fir din cota lumii (perioadă 0,7 m) și AO pe față. Celelalte piste sunt
+   identice la hash (Track01, 08, 13, 14, 15, 16, 17, 20, 22).
+
+   | contract | înainte | după |
+   |---|---|---|
+   | profile de bancă (≥ 5 m, ≥ 70°, bancă plată ≥ 4 m) | 6/44 | **70/70** (fețe 82–84°, bancă 4–6 m) |
+   | E: puncte din care se vede fundul (≤ +8 m) | 10/14 | **13/14** (singurul fără = camera în portal) |
+   | E: % din cadru pe fund | 8,6% | **10,5%** (ținta 15% — ratată) |
+   | ProbeRace: `[blocaj]` / repuneri / ejectări pe 16 seed-uri | 3 / 2 / 0 | **0 / 1 / 1** (ejectarea la portalurile tunelurilor, prezentă și înainte) |
+
+   E are acum o scară de **5 fețe** (+45 → +36 → +27 → +18 → +10 → fund
+   +0,8); fundul carierei s-a lărgit spre vest până la x = −190. Treptele
+   din ace nu au fețe (muchiile tari merg doar pe axele E–V / N–S).
+
+   **Criticii orbi (doi, 9 capturi Carrara amestecate cu Monument Valley și
+   Baikal):** teren „făcut de om / tăiat” **16 din 18**, „cădere sub drum”
+   de pe E și F **10 din 10**, iarnă **0 din 18**, confuzie cu deșertul
+   roșu **0**; cuvintele lor, nesugerate: „quarry face”, „open-pit mine
+   bench system”, „excavation”. Comparat cu mostra (deșert 10/10), pista
+   **se citește carieră**. Deci dezvăluirea funcționează vizual chiar dacă
+   cifra de 15% nu e atinsă — cifra e o aproximare a citirii, iar citirea
+   a trecut. Rămân: (1) pereții în umbră citesc „cărămidă / plăci
+   albastru-gri” — dungile de fir + tenta de umbră pe marmură, de reglat la
+   arta POI-urilor; (2) ceața aplatizează căderea; (3) anotimpul e
+   „neclar” peste tot fiindcă nu există încă vegetație (castanii și
+   ginestra vin cu decorul); (4) G (ravaneto) e o câmpie plată
+   „ambiguă” — are nevoie de moloz și de flancul verde; (5) soarele (yaw
+   −10) pune fundul și scara E în umbră pe ~110 m — azimutul e o pârghie
+   pentru dezvăluire, de remăsurat.
+
+   **Planul adnotat** (intrarea diorama-ei, memoria
+   `diorama-din-geometria-reala`): `tools/annotate_carrara_plan.py`, din
+   Track23.tscn + harta de fracții. **X nu e oglindit**: traseul Carrara e
+   scris direct în coordonate Godot, deci captura de sus are deja estul la
+   dreapta.
+
 2. `Track23.tscn` din `TrackFromPath` (`tools/gen_carrara_route.py`, schela
    `gen_fiordland_route.py`: pas 12 m, viraje > 90° pe arc), temă `carrara`
    (doar lumina, cerul, ceața, solul), traseul din §2, `custom_ravines` pe
@@ -853,30 +897,49 @@ Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
   dezvoltatorului (§2 din `mod_cariera.md`: regruparea e o editare de
   `.tres`); până atunci, ca Ha Long, **doar cursă rapidă**.
 
-## 9. Prompt pentru ChatGPT (dioramă de referință) — se scrie la pasul 4
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready
 
-Decizia din memoria `diorama-din-geometria-reala` (Serengeti, 6 sep 2026):
-imaginea dată pentru dioramă e **captura reală de sus din Godot**
-(`snapshot.gd --track=15`) peste care se desenează legenda (POI, culoarea
-hazardului, loturile, nordul, scara), **după** ce traseul trece de
-ProbeLayout și ProbeRace — nu un plan de propunere. Promptul complet vine
-cu v0.2, odată cu captura. Ce e fix de acum, paragraful de stil:
+Se atașează `plan_adnotat.png` (planul real al pistei, de sus, din
+`tools/annotate_carrara_plan.py`). Geometria din imagine e obligatorie;
+literele sunt legenda.
 
-> *Stylized toy-diorama, low-poly, single low golden-hour sun from the
-> side with long blue shadows, deep blue sky fading to peach at the
-> horizon. A marble quarry amphitheatre cut into a mountain in flat
-> terraces: every vertical cut face is warm cream, almost golden where the
-> sun hits it and blue-grey in shadow, with horizontal wire-saw stripes
-> and rust drip stains; every horizontal surface (terraces, haul roads,
-> yard) is warm beige dust with tyre tracks; cream-grey rubble slopes;
-> faded-yellow and rusty toy machines (excavator with block forks, dump
-> truck with blocks, A-frame derrick swinging a block, wire-saw machine
-> with a flywheel and a water jet); stacked marble cubes with small
-> orange paint marks; opaque milky turquoise slurry pools on the quarry
-> floor; one dark tunnel portal in the cream wall; a brick railway viaduct
-> over a gorge; on one flank only, a warm green chestnut forest with
+> *Make a stylized toy-diorama of the racing track in the attached
+> top-down plan. The plan is the real geometry from the game and is
+> mandatory: keep the route, its order, the positions of A to H, the
+> terrace levels and the pit exactly where they are; the letters are a
+> legend, do not paint them. Camera: three-quarter view from the
+> south-east, high, the whole track in frame.*
+>
+> *Place: an open-pit marble quarry in the Apuan Alps, high summer,
+> golden-hour sun low from the side with long blue-grey shadows, deep
+> blue sky fading to warm white at the horizon. Every vertical cut face
+> is warm cream marble, almost golden where lit and soft grey-blue in
+> shadow, with fine horizontal wire-saw stripes and rust drip stains;
+> every horizontal surface (terraces, haul roads, yard) is warm beige
+> gravel dust with tyre tracks. Nothing in the image is white and nothing
+> reads as snow or winter.*
+>
+> *A — the quarry yard at +25 m: stacked marble cubes in neat rows, a
+> faded-yellow rusty excavator with block forks parked on the right of
+> the road, a site container, an open-air museum corner (a mine cart with
+> a block, an old wire-saw wheel, a wooden sled). B — three flat
+> terraces (+25, +16, +7) joined by two hairpins, separated by vertical
+> cut faces 9 m high, a low rubble berm along each drop edge, a loaded
+> dump truck climbing toward the viewer on the terraces. C — the quarry
+> floor at +1 m: opaque milky turquoise slurry pools, an A-frame derrick
+> swinging a marble block over the road, a crawler chainsaw cutting into
+> the wall. D — a square dark portal cut straight into the marble wall:
+> the road climbs inside the mountain (dashed in the plan: underground).
+> E — the top terrace at +45 m with a staircase of five 9 m marble steps
+> down to the floor on its pit side. F — a brick railway viaduct with
+> marble piers over a gorge with a pale stream. G — a long descent on a
+> slope of cream-grey marble rubble, with a warm green chestnut forest,
 > yellow broom bushes and a small stone village with terracotta roofs and
-> a church tower. High summer, golden light: nothing in the image is
-> white, nothing reads as snow or winter. No text, no brand names, no
-> people. The geometry in the attached top-down capture is mandatory;
-> letters are the legend.*
+> a church tower on the hillside on one flank only. H — an old stone
+> railway tunnel portal leading back to the yard.*
+>
+> *Low-poly toy look, chunky shapes, painted textures, soft ambient
+> occlusion. No text, no brand names, no people.*
+
+Prompt pentru planșa de assets: se scrie după ce diorama e acceptată
+(ordinea din memoria `diorama-din-geometria-reala`).

@@ -74,20 +74,22 @@ WPTS = [
     (372.0,  -112.0, 38, None, "D ac iesire"),
     (125.0,  -112.0, 0, 44.0, "D rampa sus"),
     (100.0,  -112.0, 0, 45.0, "D portal sus (E inceput)"),
-    # E: cariera de sus (+45), marginea de sud, spre V, golul pe dreapta. Doua S-uri cu
-    # concavitatea spre gol (virajele spre dreapta intra in cadru prin fata).
-    (55.0,   -112.0, 80, 45.0, "E S1 intrare"),
-    (-15.0,  -88.0, 80, 45.0, "E S1 apex (spre gol)"),
-    (-75.0,  -112.0, 80, 45.0, "E S2 apex"),
+    # E: cariera de sus (+45), marginea de sud, spre V, golul pe dreapta. DREAPTA, fara S-uri: cele doua
+    # S-uri din brief (concavitate spre gol) puneau golul pe INTERIORUL virajului la dreapta (masinile
+    # taiau spre apex, peste berma) si pe EXTERIORUL celui la stanga (masinile ieseau largi peste
+    # berma): ProbeRace runda 2-3, 6 caderi + 2 ejectari de 43 m/s la 0.60-0.69. Revine, daca vrea
+    # dezvoltatorul, ca raza mare (>= 300 m) sau cu `ai_drop_edges`.
     (-115.0, -112.0, 0, 45.0, "E sfarsit"),
     # F: podul (+43) peste chei, drept, pe aceeasi dreapta (30 m de gol).
     (-150.0, -112.0, 0, 43.0, "F pod"),
     # G: ravaneto-ul, +43 -> +27, spre N pe flancul de vest, cu S-uri.
-    (-300.0, -112.0, 80, None, "G colt SV"),
-    (-300.0, -30.0, 70, None, "G S1"),
-    (-232.0, 25.0, 80, None, "G S2"),
-    (-310.0, 70.0, 60, None, "G S3"),
-    (-300.0, 105.0, 45, None, "G colt NV"),
+    (-330.0, -112.0, 80, None, "G colt SV"),
+    (-330.0, -30.0, 70, None, "G S1"),
+    (-262.0, 25.0, 80, None, "G S2"),
+    (-340.0, 70.0, 60, None, "G S3"),
+    # Colt NV: 35 m de DREAPTA intre sfarsitul arcului (x -285) si portalul Marmifera (x -250); aripile
+    # portalului (14 m) loveau masinile care ies larg din arc (ProbeRace, runda 0: 3 ejectari la 0.94).
+    (-330.0, 105.0, 45, None, "G colt NV"),
     # H: tunelul Marmifera, drept pe Y1 intre G si piazzale.
     (-250.0, 105.0, 0, 27.0, "H portal intrare"),
     (-205.0, 105.0, 0, 25.5, "H portal iesire"),
@@ -463,20 +465,21 @@ if OUT_PATH:
     # ---- latimi (idx). Jumatati de latime; globalul 4.5 e C si G (9 m). Ordinea conteaza:
     # primul sector care contine fractia castiga, deci tunelurile (cele mai inguste) sunt primele.
     width_segments = [
-        # H: tunelul Marmifera (6,5 m) — exact intre portaluri.
-        (IDX("H portal intrare"), IDX("H portal iesire"), 3.25),
-        # D + E: galeria si cariera de sus (7 m), de la portalul de jos la capatul lui E.
-        (IDX("D portal jos"), IDX("E sfarsit"), 3.5),
-        # F: podul (6 m), peste 60 m centrat pe pod; trecerea E->F o face fereastra de curgere.
-        (IDX("F pod", -30.0), IDX("F pod", 30.0), 3.0),
+        # H: tunelul Marmifera — exact intre portaluri. 8 m, nu 6,5 din brief: la 6,5 m masinile de 35 m/s
+        # (venind dintr-un arc) loveau rama/aripile portalului (ProbeRace runda 0-1: 5 ejectari la 0.94-0.97).
+        (IDX("H portal intrare"), IDX("H portal iesire"), 4.0),
+        # D + E: galeria si cariera de sus, de la portalul de jos la capatul lui E. 8 m (brief: 7).
+        (IDX("D portal jos"), IDX("E sfarsit"), 4.0),
+        # F: podul NU mai are sector (era 6 m): la 6 m AI-ul tinea linia la 2,6 m de axa si rotile
+        # treceau peste marginea tablierului fara parapet (18 repuneri in 16 curse, runda 0).
+        # Iese cu latimea globala, 9 m; trecerea 7 -> 9 m e rampa de 30 m a sectorului E.
         # A: piazzale-ul (10 m), de la iesirea din tunel pana la capatul coridorului de blocuri.
         (IDX("H portal iesire", 1.0), IDX("A iesire coridor"), 5.0),
-        # B: terasele si acele (8,5 m) — acele NU mai sunt de 6 m (lectia sondelor, runda 2).
-        (IDX("B T1 sfarsit plat"), IDX("B T3 sfarsit plat"), 4.25),
+        # B: terasele si acele iau latimea GLOBALA (9 m) — acele NU mai sunt de 6 m (lectia sondelor, runda
+        # 2). Sectorul de 8,5 m din runda 0-4 strangea soseaua de la 10 la 8,5 m chiar pe dreapta de
+        # start, unde plutonul e inca grupat (o masina impinsa lateral a trecut peste berma, runda 4).
     ]
     flow_windows = [
-        # E -> F -> iesire: latimea curge intre sectoarele lipite (7 -> 6 -> 9 m).
-        (IDX("E sfarsit", -40.0), IDX("F pod", 85.0)),
         # H -> A: iesirea din tunel (6,5 m) direct in piazzale (10 m).
         (IDX("H portal iesire", -20.0), IDX("H portal iesire", 55.0)),
     ]
@@ -506,10 +509,21 @@ if OUT_PATH:
 
     # ---- berma continua de moloz (stil 2): doar pe marginile cu gol, NU pe ace, si DUPA iesirea din ac
     parapets = [
-        (LEN("A start"), LEN("B T1 sfarsit plat"), 1, 2),
-        (LEN("B T2 inceput plat"), LEN("B T2 sfarsit plat"), -1, 2),
-        (LEN("B T3 inceput plat"), LEN("B T3 sfarsit plat"), 1, 2),
+        # Prima berma incepe LA IESIREA din tunel (peste linia de start, interval cu trecere): fara ea,
+        # primii 40 m de piazzale aveau faleza de 9 m si nicio bariera, iar plutonul din grila cadea pe
+        # bancul de +16 (ProbeRace runda 1: 10 [blocaj] cu masina ramasa jos la lat 10 m).
+        # ...si tine pana la INCEPUTUL arcului (25 m de intrare dreapta dupa terasa plata), nu pana la sfarsitul
+        # terasei: masinile care taiau spre interiorul acului 1 treceau de capatul subtiat al bermei si
+        # cadeau pe bancul de +16, de unde nu mai ieseau (ProbeRace runda 4: 6 [blocaj] cu o masina
+        # ramasa 100 s jos, lat 9 m).
+        (LEN("H portal iesire", 25.0), LEN("B ac1 N", -19.0), 1, 2),
+        (LEN("B T2 inceput plat"), LEN("B ac2 N", -19.0), -1, 2),
+        (LEN("B T3 inceput plat"), LEN("B T3 sfarsit plat", 12.0), 1, 2),
         (LEN("D portal sus (E inceput)", 20.0), LEN("E sfarsit"), 1, 2),
+        # Podul (F): golul e pe AMBELE parti si tablierul nu are umeri — o roata peste muchie = cadere
+        # in chei (ProbeRace runda 2: 7 repuneri ViaductNet4 pe 16 curse, masini la 5 m de axa pe un
+        # tablier de 4,5). Berma pe ambele laturi, pe lungimea tablierului vizibil (+-55 m).
+        (LEN("F pod", -55.0), LEN("F pod", 55.0), 0, 2),
     ]
 
     # ---- sol: drum de praf peste tot, mai putin podul si Marmifera; umed pe C
@@ -517,7 +531,9 @@ if OUT_PATH:
         (IDX("F pod", 62.0), IDX("H portal intrare", -2.0)),
         (IDX("H portal iesire", 2.0), IDX("F pod", -62.0)),
     ]
-    wet = [(IDX("C intrare podea"), IDX("D portal jos"))]
+    # Ud doar pana cu 40 m inainte de portal: masinile care alunecau in cotul ud iesisera cu botul
+    # pe diagonala in cadrul portalului (ejectare 31 m/s, runda 0).
+    wet = [(IDX("C intrare podea"), IDX("D portal jos", -40.0))]
 
     rav_txt = ", ".join(V4(*r) for r in ravines)
     fl_txt = ", ".join(V2(a, b) for a, b in floors)
@@ -564,15 +580,60 @@ camera_tail_m = {tail}
 tube_only = true
 tube_class = "carrara_marble"
 """
-    tunnels_txt = tunnel_node("TunelGalerie", "D portal jos", "D portal sus (E inceput)", 3.5, 9.0, 14.0) \
-        + tunnel_node("TunelMarmifera", "H portal intrare", "H portal iesire", 3.25, 7.0, 12.0)
+    tunnels_txt = tunnel_node("TunelGalerie", "D portal jos", "D portal sus (E inceput)", 4.0, 9.0, 14.0) \
+        + tunnel_node("TunelMarmifera", "H portal intrare", "H portal iesire", 4.0, 7.0, 12.0)
+
+    # ---- Plase de repunere sub marginile cu gol (RespawnZone, ca ViaductNet): berma de 0,6 m nu opreste o
+    # masina impinsa lateral la 25 m/s (urca pe ea si cade), iar bancul de sub faleza nu e drum: masina
+    # ramanea acolo toata cursa ([blocaj] 6x, ProbeRace runda 6), iar jucatorul ar putea chiar sa taie
+    # acul pe banc. Cutii subtiri chiar la piciorul falezei, sub cota drumului, pe segmente DREPTE.
+    nets = []
+    net_shapes = []
+
+    def net(name, t0, o0, t1, o1, side, lat0, lat1, y_lo, y_hi):
+        a = pos_at(tag_s[t0] + o0)
+        b = pos_at(tag_s[t1] + o1)
+        dx, dz = (b[0] - a[0]), -(b[1] - a[1])
+        length = math.hypot(dx, dz)
+        dx, dz = dx / length, dz / length
+        rx, rz = -dz, dx                  # DREAPTA sensului de mers in lume (inainte x sus = (-fz, 0, fx))
+        lat = side * (lat0 + lat1) * 0.5
+        cx = (a[0] + b[0]) * 0.5 + rx * lat
+        cz = -(a[1] + b[1]) * 0.5 + rz * lat
+        cy = (y_lo + y_hi) * 0.5
+        bxv = (-rx, 0.0, -rz)             # X local = STANGA (baza dreapta, det +1; cutia e simetrica)
+        bzv = (dx, 0.0, dz)               # Z local = sensul de mers
+        nets.append(f"""
+[node name="{name}" type="Area3D" parent="Hazarduri"]
+transform = Transform3D({r3(bxv[0])}, 0, {r3(bzv[0])}, 0, 1, 0, {r3(bxv[2])}, 0, {r3(bzv[2])}, {r2(cx)}, {r2(cy)}, {r2(cz)})
+script = ExtResource("6_respawn")
+backoff_m = 16.0
+
+[node name="Forma" type="CollisionShape3D" parent="Hazarduri/{name}"]
+shape = SubResource("Box_{name}")
+""")
+        net_shapes.append(f"""
+[sub_resource type="BoxShape3D" id="Box_{name}"]
+size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
+""")
+
+    # A + terasa 1: golul pe DREAPTA (S), bancul de +16
+    net("PlasaA", "H portal iesire", 12.0, "B ac1 N", -19.0, 1, 6.5, 17.0, 12.0, 22.0)
+    # terasa 2: golul pe STANGA, bancul de +7
+    net("PlasaT2", "B T2 inceput plat", -4.0, "B ac2 N", -19.0, -1, 6.5, 17.0, 3.0, 13.0)
+    # terasa 3: golul pe DREAPTA, fundul carierei (+2)
+    net("PlasaT3", "B T3 inceput plat", -4.0, "B T3 sfarsit plat", 8.0, 1, 6.5, 17.0, -1.0, 5.0)
+    # cariera de sus E: golul pe DREAPTA (N), 43 m pana la fundul carierei
+    net("PlasaE", "D portal sus (E inceput)", 4.0, "E sfarsit", 0.0, 1, 6.5, 24.0, -2.0, 36.0)
 
     tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
+[ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="6_respawn"]
 
+{"".join(net_shapes)}
 [sub_resource type="Curve3D" id="Curve3D_carrara"]
 closed = true
 _data = {{
@@ -587,6 +648,8 @@ custom_name = "Carrara"
 custom_theme = "carrara"
 custom_half_width = {HALF_WIDTH}
 custom_road_surface = "asphalt"
+custom_gate_model = "none"
+custom_sun_rotation_deg = Vector3(-22, -10, 0)
 custom_sea_level_offset = {sea_offset}
 custom_wet_ranges = Array[Vector2]([{wet_txt}])
 custom_dirt_ranges = Array[Vector2]([{dirt_txt}])
@@ -608,7 +671,7 @@ curve = SubResource("Curve3D_carrara")
 [node name="Peaks" type="Node3D" parent="."]
 {peaks_txt}
 [node name="Hazarduri" type="Node3D" parent="."]
-{tunnels_txt}"""
+{tunnels_txt}{"".join(nets)}"""
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:
         f.write(tscn)
     print(f"\nscris: {OUT_PATH}")

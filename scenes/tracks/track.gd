@@ -12251,19 +12251,31 @@ func _build_parapets() -> void:
 				thick = BERM_THICK
 			# Sectiunea transversala la fiecare punct copt din interval.
 			var secs: Array = [] # [inner_top, outer_top, inner_bot, outer_bot, dist]
+			# Intervalul poate TRECE peste linia de start (`seg.y < seg.x`, ca la rape si sectoare):
+			# berma de la intrarea in piazzale (Carrara) incepe inainte de linie si continua dupa ea,
+			# fara gaura in mijloc. Punctele se iau in ORDINEA mersului (intai cele de dupa seg.x,
+			# apoi cele de pana la seg.y), iar `dist` creste monoton peste linie (+ lungimea
+			# turului). Fara trecere peste linie ordinea si cifrele raman exact cele vechi.
+			var wraps: bool = seg.y < seg.x
+			var order: Array[int] = []
+			if wraps:
+				for i in n:
+					if _dists[i] / total_len >= seg.x:
+						order.append(i)
+				for i in n:
+					if _dists[i] / total_len <= seg.y:
+						order.append(i)
+			else:
+				for i in n:
+					var fo := _dists[i] / total_len
+					if fo >= seg.x and fo <= seg.y:
+						order.append(i)
 			var d_first := -1.0
 			var d_last := -1.0
-			if berm:
-				for i in n:
-					var fb := _dists[i] / total_len
-					if fb >= seg.x and fb <= seg.y:
-						if d_first < 0.0:
-							d_first = _dists[i]
-						d_last = _dists[i]
-			for i in n:
-				var f := _dists[i] / total_len
-				if f < seg.x or f > seg.y:
-					continue
+			if berm and not order.is_empty():
+				d_first = _parapet_dist(order[0], wraps, seg.y, total_len)
+				d_last = _parapet_dist(order[order.size() - 1], wraps, seg.y, total_len)
+			for i in order:
 				var c := baked[i]
 				var side := _side_at(i)
 				var e := c + side * (width_at_index(i) + PARAPET_GAP) * side_sign
@@ -12276,9 +12288,10 @@ func _build_parapets() -> void:
 					h = ROCK_LIP_HEIGHT + ROCK_LIP_WAVE * (0.6 * sin(d * 0.41)
 						+ 0.4 * sin(d * 1.37 + 1.1))
 				if berm:
+					var di := _parapet_dist(i, wraps, seg.y, total_len)
 					var tap := smoothstep(0.0, 1.0, minf(
-						(float(_dists[i]) - d_first) / BERM_TAPER_M,
-						(d_last - float(_dists[i])) / BERM_TAPER_M))
+						(di - d_first) / BERM_TAPER_M,
+						(d_last - di) / BERM_TAPER_M))
 					h = BERM_HEIGHT * maxf(tap, 0.05)
 					# fata dinspre drum in panta: baza la marginea asfaltului,
 					# creasta la BERM_RUN dincolo
@@ -12329,6 +12342,15 @@ func _build_parapets() -> void:
 	_add_mesh_with_collision(mesh, Color.WHITE, null, 1.0, 0.5,
 		BaseMaterial3D.CULL_DISABLED, null, null, true,
 		Palette.world_material(), "Parapet")
+
+
+## Distanta pe tur a punctului `i` pentru un interval de parapet: cu trecere peste linia de start,
+## punctele de dupa linie (frac <= `f_end`) primesc + lungimea turului, ca sa creasca monoton.
+func _parapet_dist(i: int, wraps: bool, f_end: float, total_len: float) -> float:
+	var d := float(_dists[i])
+	if wraps and d / total_len <= f_end:
+		d += total_len
+	return d
 
 
 ## Un cvadrilater pe atlasul de paleta, cu fata spre `hint` (infasurarea se

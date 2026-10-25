@@ -7,13 +7,18 @@ extends Node
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeTunelHash.tscn -- --scenes=16,21
 ##
 ## `--scenes=` ia NUMERE DE SCENA (Track16.tscn, Track21.tscn), nu pozitii din lista.
+## `--names=Parapet,TunnelBore` schimba corpurile masurate (prefix de nume; implicit tuburile de tunel):
+## aceeasi amprenta pentru parapete (berma stil 2, interval cu trecere peste linia de start).
 
 func _ready() -> void:
 	await get_tree().process_frame
 	var nums: PackedStringArray = ["16", "21"]
+	var names: PackedStringArray = ["TunnelBore", "TunnelPortal"]
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--scenes="):
 			nums = arg.trim_prefix("--scenes=").split(",")
+		elif arg.begins_with("--names="):
+			names = arg.trim_prefix("--names=").split(",")
 	for num in nums:
 		var path := "res://scenes/tracks/Track%02d.tscn" % int(num)
 		var scene := load(path) as PackedScene
@@ -29,7 +34,11 @@ func _ready() -> void:
 			if body == null:
 				continue
 			var nm := String(body.name)
-			if not (nm.begins_with("TunnelBore") or nm.begins_with("TunnelPortal")):
+			var wanted := false
+			for want in names:
+				if nm.begins_with(want):
+					wanted = true
+			if not wanted:
 				continue
 			count += 1
 			# Geometria = fetele trimesh-ului de coliziune (acelasi ArrayMesh ca vizualul);

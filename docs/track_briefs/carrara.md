@@ -503,6 +503,58 @@ deloc; (3) `ExcavatorHazard` are placeholder procedural dacă GLB-ul nu are
    luminate din §4. Dacă A trece → pasul 1. Dacă A pică și B nu e mai bun →
    locul se schimbă (§8: Rio Tinto / Bingham), și brief-ul se rescrie
    păstrând §2–§3. Cost: câteva ore, zero traseu, zero kit.
+
+   **Rezultatul (25 oct 2026, ramura `carrara/mostra`, TRECUT la limită
+   pe „carieră”, curat pe „iarnă”).** Scena `Track23Mostra*.tscn` (A
+   caldă, B reală, A2 caldă + semnale de carieră), capturi `--gamecam` la
+   aceleași 5 fracții, patru critici orbi în două runde, ordini amestecate
+   diferit, fără să știe câte locuri sunt. Decodat:
+
+   | variantă | „iarnă” | ambiguu / „poate gheață” | „carieră” | „șantier” | „deșert” fără carieră |
+   |---|---|---|---|---|---|
+   | **A** caldă, runda 1 (fără deșert real în set) | 0/10 | 0/10 | 0/10 | 0/10 | 10/10 |
+   | **A** caldă, runda 2 (cu Monument Valley în set) | 0/10 | 0/10 | 6/10 | 4/10 | 0/10 |
+   | **A2** caldă + dungi, grilă de blocuri, utilaje, teren plat | 0/10 | 0/10 | 6/10 | 4/10 | 0/10 |
+   | **B** reală (martor) | 0/20 | **15/20** | 0/20 | 0/20 | 5/20 |
+   | Baikal | 20/20 | 0 | – | – | – |
+   | Monument Valley | 0/10 | 0 | 0 | 0 | 10/10 „deșert roșu” |
+
+   Ce înseamnă: (1) **rezerva dezvoltatorului era corectă** — Carrara
+   „reală” iese „poate gheață / roci înghețate” pe 3 din 4 cadre; (2)
+   **paleta caldă omoară iarna complet** (0 din 30 de citiri); (3) „carieră”
+   se citește **relativ la set**: fără un deșert adevărat alături, A era
+   „canion de deșert”; lângă Monument Valley, A și A2 devin „carieră de
+   deșert” / „șantier pe nisip”, iar MV rămâne „deșert roșu” — deci
+   familia nu se confundă cu pista de deșert existentă. (4) Semnalele din
+   A2 **nu au mutat cifra** față de A în aceeași rundă; dungile de fir se
+   văd măsurat (−10–12% luminanță în benzi, supraviețuiesc la blur 1 px),
+   dar nu schimbă verdictul de la distanța camerei. Contractul A2: ≤ 1/5
+   iarnă ✔ (0/5), ≥ 3/5 carieră ✔ (3/5 la fiecare critic) — **la limită**.
+
+   Contracte măsurate (ProbeMasca pe nume de mesh, A / A2): fața luminată H
+   41° pe 99,9% din pixeli sub 60°; ΔV soare/umbră 0,42 / 0,40 (≥ 0,28 ✔);
+   balta S 0,60 (✔); slotul 22 = 0,000 m². Gărzi: ProbeLayout OK,
+   `verify_local.sh` OK (57 pași).
+
+   **Două defecte rămase, cu cauza** (de reparat pe pista reală, nu în
+   mostră): (a) **fețele în umbră ies albastru-cian saturat** (S 0,25, H
+   196°) — criticii le citesc „gheață albastră” sau „metal vopsit”; ținta
+   din §4 era *gri*-albăstrui: S ≤ 0,12, adică ambient mai puțin albastru /
+   mai puțin energetic sau o tentă de umbră caldă pe clasă; (b) **solul se
+   citește nisip** pe 10/10 cadre („sand ripples”, „dunes”) — textura
+   `surface_sand` a terenului, nu culoarea; pe pista reală terasele și
+   drumurile trec pe o clasă de **pietriș / piatră compactată**
+   (`terrain_alt_class` + zone de sol), iar `dune_scale = 0` (parametru nou
+   din mostră) rămâne pe tema `carrara`. Tema de pornire pentru Track23
+   e `carrara2` (cer albastru Mediterana, orizont alb-cald, ceață
+   neutră), nu `carrara` (orizont piersică = sablonul MV).
+
+   **Ce se scoate înainte de orice merge**: intrările 15–17 din
+   `GameState.TRACK_SCENES` (marcate „MOSTRA CARRARA — temporar”),
+   `Track23Mostra*.tscn`, `carrara_mostra.gd`, `tools/gen_carrara_mostra.py`.
+   Rămân: temele (redenumite), clasa `carrara_marble`, remap-urile din
+   `world_prop.gd`, `dune_scale` din `track_side_sampler.gd` (implicit 1,0,
+   bit-identic pe celelalte piste).
 1. **Trecerea de contracte (§5.6) + sonde tehnice înaintea traseului**
    (`tools/ProbeCarrara.tscn`): (a) două `BusHazard` pe o buclă `Path3D`
    care taie sensul cursei de două ori, `phase` 0 / 0,5, 8 AI, 16 seed-uri:

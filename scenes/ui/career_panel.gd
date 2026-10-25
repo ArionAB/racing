@@ -1,8 +1,9 @@
 class_name CareerPanel
 extends Control
-## Raftul carierei: pasaportul (stampile + medalii) sus, apoi o cutie per lume
-## cu pistele ei. Lumea deblocata arata carduri (tap = porneste cursa de
-## cariera); cea sigilata arata un lacat si cate stampile mai lipsesc.
+## Raftul carierei: pasaportul (puncte + medalii) sus, apoi o cutie per lume
+## cu pistele ei. Lumea deblocata arata carduri (tap = deschide foaia pistei:
+## RACE cu bonusul provocarii / TIME TRIAL); cea sigilata arata un lacat si
+## cate puncte mai lipsesc.
 ## Pe ecran intreg, cu antet fix; doar continutul deruleaza. Acelasi tipar ca
 ## TrackSelectPanel, a carui grila si antet le refoloseste.
 
@@ -15,10 +16,12 @@ const SILVER := Color(0.80, 0.83, 0.88)
 const BRONZE := Color(0.75, 0.50, 0.30)
 
 ## Referinte pastrate pentru reimprospatare (si pentru sonda).
-var _stamps_label: Label
+var _points_label: Label
 var _medals_row: HBoxContainer
 var _worlds_box: VBoxContainer
 var _first_card: TrackCard
+## Foaia pistei deschisa (null = inchisa).
+var _sheet: Control
 
 
 func _ready() -> void:
@@ -60,16 +63,16 @@ func _ready() -> void:
 	visibility_changed.connect(_on_visibility_changed)
 
 
-## Pasaportul: STAMPS N / MAX mare, medaliile pe culori sub el.
+## Pasaportul: POINTS N / MAX mare, medaliile pe culori sub el.
 func _build_passport() -> Control:
 	var box := _make_box()
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6)
 	box.get_child(0).add_child(column)
-	_stamps_label = Label.new()
-	_stamps_label.add_theme_font_size_override("font_size", 40)
-	_stamps_label.add_theme_color_override("font_color", TrackSelectPanel.TITLE_COLOR)
-	column.add_child(_stamps_label)
+	_points_label = Label.new()
+	_points_label.add_theme_font_size_override("font_size", 40)
+	_points_label.add_theme_color_override("font_color", TrackSelectPanel.TITLE_COLOR)
+	column.add_child(_points_label)
 	_medals_row = HBoxContainer.new()
 	_medals_row.add_theme_constant_override("separation", 22)
 	column.add_child(_medals_row)
@@ -77,7 +80,7 @@ func _build_passport() -> Control:
 
 
 func _refresh() -> void:
-	_stamps_label.text = "STAMPS  %d / %d" % [Career.stamps(), Career.max_stamps()]
+	_points_label.text = "POINTS  %d / %d" % [Career.points(), Career.max_points()]
 
 	for child in _medals_row.get_children():
 		child.free()
@@ -135,7 +138,7 @@ func _build_grid(world: CareerWorld) -> Control:
 		card.set_medals(int(state.race_medal), int(state.tt_medal),
 			bool(state.challenge))
 		var id := track_id
-		card.pressed.connect(func() -> void: Career.start_track(id))
+		card.pressed.connect(func() -> void: _open_sheet(id))
 		grid.add_child(card)
 		cards.append(card)
 		if _first_card == null or index == GameState.selected_track:
@@ -150,7 +153,7 @@ func _build_sealed(world: CareerWorld) -> Control:
 	row.add_theme_constant_override("separation", 16)
 	row.custom_minimum_size = Vector2(0, 56)
 	row.add_child(_Lock.new())
-	var label := _label("SEALED — %d MORE STAMPS" % Career.stamps_missing(world),
+	var label := _label("SEALED — %d MORE POINTS" % Career.points_missing(world),
 		22, TrackCard.TEXT_DIM)
 	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(label)
@@ -166,7 +169,133 @@ func _on_visibility_changed() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
-		back_pressed.emit()
+		# Intai se inchide foaia; panoul abia la a doua apasare.
+		if _sheet != null:
+			_close_sheet()
+		else:
+			back_pressed.emit()
+
+
+## Foaia pistei: fundal semi-opac care inchide la tap, cu un panou centrat
+## (nume, RACE cu punctele pistei, eticheta BONUS a provocarii, TIME TRIAL,
+## BACK). Un tap pe card nu mai porneste cursa direct: jucatorul alege intai
+## modul.
+func _open_sheet(track_id: StringName) -> void:
+	_close_sheet()
+	var index := TrackInfo.index_of_id(track_id)
+	if index < 0:
+		return
+	var info := TrackInfo.for_track(index)
+	var state := Career.track_state(track_id)
+
+	_sheet = Control.new()
+	_sheet.name = "TrackSheet"
+	_sheet.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(_sheet)
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.65)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed \
+				or event is InputEventScreenTouch and event.pressed:
+			_close_sheet())
+	_sheet.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_sheet.add_child(center)
+	var box := _make_box()
+	box.custom_minimum_size = Vector2(560, 0)
+	center.add_child(box)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 14)
+	box.get_child(0).add_child(column)
+
+	var title := _label(info.display_name, 36, TrackSelectPanel.TITLE_COLOR)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(title)
+
+	# RACE: locul cel mai bun si punctele stranse pe pista (loc + bonus) din 4.
+	var race_btn := _sheet_button("RACE", "%s  ·  %d / %d PTS" % [
+		_place_name(int(state.race_medal)), Career.track_points(track_id),
+		Career.MAX_TRACK_POINTS])
+	race_btn.name = "RaceButton"
+	race_btn.pressed.connect(func() -> void:
+		Career.start_track(track_id, Career.Mode.RACE))
+	column.add_child(race_btn)
+
+	# Provocarea gimmick-ului e BONUS (+1) in cursa normala, nu proba separata
+	# (decizia dezvoltatorului, 25 oct 2026): o eticheta sub RACE, nu un buton.
+	# Pista fara provocare nu arata nimic (nici „SOON").
+	var challenge := Career.challenge_for(track_id)
+	if challenge != null:
+		var done := bool(state.challenge)
+		var bonus := _label("BONUS +%d  ·  %s%s" % [Career.CHALLENGE_POINTS,
+			challenge.title, "  ·  DONE" if done else "\n" + challenge.hint], 18,
+			Color(0.55, 0.9, 0.5) if done else TrackCard.TEXT_DIM)
+		bonus.name = "BonusLabel"
+		bonus.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		bonus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		column.add_child(bonus)
+
+	var tt_sub := "NO TIME YET"
+	if int(state.tt_best_ms) > 0:
+		tt_sub = "BEST %s · %s" % [TrackCard._format_ms(int(state.tt_best_ms)),
+			_medal_name(int(state.tt_medal))]
+	# Doar existenta fisierului, nu parsarea lui (~100 KB): foaia se reface la
+	# fiecare deschidere. Un fisier corupt iese oricum curat la start (load_ghost).
+	if FileAccess.file_exists(Career.ghost_path(track_id)):
+		tt_sub += " · GHOST"
+	if not info.has_targets():
+		tt_sub += "  (no targets yet)"
+	var tt_btn := _sheet_button("TIME TRIAL", tt_sub)
+	tt_btn.name = "TimeTrialButton"
+	tt_btn.pressed.connect(func() -> void:
+		Career.start_track(track_id, Career.Mode.TIME_TRIAL))
+	column.add_child(tt_btn)
+
+	var back_btn := _sheet_button("BACK", "")
+	back_btn.name = "BackButton"
+	back_btn.pressed.connect(_close_sheet)
+	column.add_child(back_btn)
+	race_btn.grab_focus.call_deferred()
+
+
+func _close_sheet() -> void:
+	if _sheet == null:
+		return
+	_sheet.queue_free()
+	_sheet = null
+	if _first_card != null:
+		_first_card.grab_focus.call_deferred()
+
+
+## Pentru contratimp (tinte de timp): culoarea medaliei.
+static func _medal_name(medal: int) -> String:
+	match medal:
+		Career.MEDAL_GOLD: return "GOLD"
+		Career.MEDAL_SILVER: return "SILVER"
+		Career.MEDAL_BRONZE: return "BRONZE"
+	return "—"
+
+
+## Pentru cursa: medalia e locul (3/2/1 = 1st/2nd/3rd), iar jucatorul
+## gandeste in locuri si puncte, nu in culori.
+static func _place_name(medal: int) -> String:
+	match medal:
+		Career.MEDAL_GOLD: return "1ST PLACE"
+		Career.MEDAL_SILVER: return "2ND PLACE"
+		Career.MEDAL_BRONZE: return "3RD PLACE"
+	return "NO PODIUM YET"
+
+
+## Buton mare (>= 64 px) cu titlu si, daca e, un subtitlu pe al doilea rand.
+func _sheet_button(text: String, subtitle: String) -> Button:
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(0, 72)
+	button.text = text if subtitle == "" else "%s\n%s" % [text, subtitle]
+	button.add_theme_font_size_override("font_size", 24)
+	return button
 
 
 ## Cutie cu fundal si contur ca ale cartonaselor; continutul intra in

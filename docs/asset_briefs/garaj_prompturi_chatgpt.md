@@ -28,7 +28,7 @@ asamblata din primitive.
    garaj**: ar ancora modelul pe cutii.
 2. Lipeste cate un prompt din §2, pe rand. Fiecare intoarce o imagine (foaia)
    plus o lista de cote si culori per piesa.
-3. Salveaza imaginile ca `docs/asset_briefs/img/concept_<nume>.png`. Vederile
+3. Salveaza imaginile ca `docs/asset_briefs/img/vehicles/concept_<nume>.jpeg`. Vederile
    ortografice sunt la aceeasi scara, deci cotele se extrag din pixeli (metoda
    de la piste: traseu/cote din imagine cu PIL).
 4. Daca o foaie iese cu text, decaluri sau crom, cere refacerea cu
@@ -46,7 +46,7 @@ notele sunt in romana. Dupa foi vine pasul 2: brief per masina, build Blender,
 | cockpit deschis la **toate** masinile, soferul se vede si poate fi ejectat | verdictul dezvoltatorului 18 sep 2026 ("toti ragdoll"), `docs/prototip_sofer_ragdoll.md` |
 | culori plate, doar sloturile de masina (14-16) + sloturile deja folosite pe vehicule | style_bible §1 (masinile la saturatie 0.85-1.0, mediul la 0.45-0.60); `toy_driver_parts.py` |
 | fara text, decaluri, crom, PBR | style_bible §4: masinile raman pe paleta, fara texturi; textul s-ar picta din sloturi, scump si murdar |
-| fara detaliu de frecventa inalta | style_bible §3 (se pierde la 60 km/h, transforma silueta in zgomot) |
+| detaliu structural DA, zgomot sub-centimetric NU | **„La masini nu facem economie, trebuie sa arate foarte bine"** (dezvoltatorul, 17 oct 2026). Regula §3 din style_bible („fara detaliu de frecventa inalta") e scrisa pentru decorul vazut in treacat; o masina e o instanta, pe un singur material, mereu in prim-plan (chase cam la 12 m, vitrina de aproape). Brate de suspensie, cusca cu contravantuiri, esapament, motor la vedere: toate DA. Doar suruburi, nituri, cabluri si profil de anvelopa NU — nu se citesc nici in vitrina |
 | cote in metri, ancorate pe masina de 4 m | style_bible §2; `body_length`/`body_width` din `CarData` dimensioneaza colizorul |
 | roti r 0.37-0.46 | fizica le clampeaza la 0.22-0.42 (`car.gd`, `_susp_wheel_radius`); peste 0.42 e doar vizual — vezi nota la Monster |
 | 4 vederi la aceeasi scara: 3/4 hero + lateral/fata/sus ortografic | ca sa putem masura, nu ghici |
@@ -62,9 +62,12 @@ notele sunt in romana. Dupa foi vine pasul 2: brief per masina, build Blender,
 | 5 | Pompierii (pumper) | grea, lenta, impinge | 2.0 | 4.9 × 2.0 × 2.0 | 0.44 | `vehicles/firetruck_v2.glb` |
 | 6 | Autobuzul (tour bus) | cea mai grea, leganata | 2.6 | 5.5 × 2.1 × 2.3 | 0.46 | `vehicles/bus_v2.glb` |
 | 7 | Ambulanta | NOUA: grea-medie, inalta, se apleaca in viraj | ~1.8 | 4.6 × 2.1 × 2.2 | 0.40 | `vehicles/ambulance.glb` |
-| 8 | Camioneta (pickup) | NOUA: medie, garda mare, off-road | ~1.3 | 4.5 × 2.0 × 1.7 | 0.42 | `vehicles/pickup.glb` |
+| 8 | **Hot rod** (inlocuieste camioneta, 25 oct 2026) | NOUA: rapid, instabil — spatele greu, motor urias in fata | ~1.2 | ~4.0 × 1.9 × 1.3 (se masoara din foaie la build) | de masurat | `vehicles/hotrod.glb` |
 | 9 | Tow truck | NOUA: grea, lunga, carlig pe brat | ~2.2 | 5.0 × 2.1 × 2.1 | 0.44 | `vehicles/tow_truck.glb` |
 | 10 | Monster truck | NOUA: roti uriase, centru de masa sus, saltareata | ~1.6 | 4.4 × 2.6 × 2.4 | 0.62 (vizual, vezi §4) | `vehicles/monster.glb` |
+
+Camioneta (pickup) a iesit din lista: foaia ei nu s-a generat, iar hot rod-ul
+din lista de rezerva (§3) i-a luat locul — decizia dezvoltatorului, 25 oct 2026.
 
 Masele pentru 7-10 sunt propuneri, nu contract: scara din `CarData` e 0.9
 (sport) .. 2.6 (autobuz) si cere valori departate intre ele, nu inghesuite.
@@ -86,9 +89,15 @@ Keep this context for every vehicle in this conversation.
   match its charm, but cars are much cleaner and more saturated than the props.
 - Cars are TOYS: oversized wheels, wide track, short overhangs, thick bumpers,
   rounded corners (about 4 cm bevel at real scale), vertical proportions
-  exaggerated by ~15-20%. Big readable shapes only. If a detail would vanish
-  at 60 km/h seen from 12 m behind and 10 m above, leave it out: no bolts,
-  no thin railings, no panel lines, no door seams, no vents, no mirrors.
+  exaggerated by ~15-20%. Bodies are CHUNKY: the cabin or tub is at least two
+  thirds of the track width, never a narrow spine between wide wheels.
+- Cars are the HERO assets of the game: the player's car fills the screen
+  and the garage shows it up close on a rotating podium. So structural detail
+  is welcome and wanted: suspension arms, roll-cage bracing, exhausts, engine
+  parts, mirrors, spoilers, racks, bumpers with shape. Make them look
+  great. Keep every part chunky and rounded (nothing thinner than ~4 cm) and
+  skip only sub-centimeter noise: bolts, rivets, wires, panel seams, tire
+  tread.
 - Everything is FLAT COLOR from a fixed palette. No gradients, no metallic
   paint, no chrome, no reflections, no textures, no weathering, no decals,
   no logos, no license plates and NO LETTERING of any kind (where a real
@@ -97,14 +106,17 @@ Keep this context for every vehicle in this conversation.
   its type, because a toy driver figurine sits in it and is thrown out on
   big crashes (ragdoll). No roof over the driver, no doors needed, at most
   a short windscreen (~35 cm tall) and a roll hoop or cage. The figurine is a
-  chunky blocky toy figure, ~1.1 m tall when seated: white helmet, colored
-  shirt, dark pants. It sits on the LEFT, unless the vehicle is a
-  single-seater (center). Leave it a real seat and a simple steering wheel.
-- Lights: headlights and tail lights are simple rectangular or round blocks
-  in the "glass" color (the game makes them glow). Big and obvious.
-- Wheels: four identical wheels, fat simple cylinders: tire in near-black
-  with a lighter flat hub disc. Radius 0.37-0.46 m on a 4 m car. They stick
-  out past the body enough to read as toy wheels.
+  toy figure with these proportions, ~1.1 m tall when seated: head ~0.40 m,
+  shoulders ~0.50 m wide, simple white helmet, colored shirt, dark pants.
+  Draw it with care, it is part of the car's look. It sits on the LEFT,
+  unless the vehicle is a single-seater (center). Give it a real seat at
+  least 0.6 m wide and a steering wheel.
+- Lights: EVERY vehicle has two headlight blocks at the front and two tail
+  light blocks at the rear, rectangular or round, in the "glass" color (the
+  game makes them glow). Big and obvious.
+- Wheels: four identical wheels, fat cylinders: tire in near-black with a
+  lighter hub. Radius 0.37-0.46 m on a 4 m car. They stick out past the body
+  enough to read as toy wheels.
 
 == PALETTE (hex) — use ONLY these ==
 Main body colors (the only saturated colors in the game; cars own them):
@@ -137,7 +149,9 @@ soft even studio light. Layout:
     figurine seated.
   - BOTTOM row (small, all at the same scale): true orthographic SIDE view
     (left side), FRONT view, TOP view — WITHOUT the figurine, so the body
-    silhouette is clean for modeling.
+    silhouette is clean for modeling. The wheel diameter must be IDENTICAL
+    in pixels across the three orthographic views: they are one drawing seen
+    from three sides, and the wheel is our ruler.
 All views show the same vehicle with identical colors. No labels, no
 captions, no dimension arrows, no text anywhere in the image.
 After the image, write a short list: dimensions (L × W × H, wheel radius,
@@ -163,13 +177,18 @@ suspension. It must LOOK light: a bare tub on big exposed wheels, lots of
 negative space through the cage.
 Dimensions: 3.7 m long × 2.1 m wide over the wheels × 1.5 m to the top of
 the cage. Wheel radius 0.42 m, width 0.36 m, fully exposed, no fenders.
-The tub is 1.4 m wide and sits 0.35 m above the ground.
-Shape: open tube roll cage around a single center seat; short sloped hood
-with two small round headlights on a thick front nudge bar; an exposed
-boxy engine block behind the seat, higher than the tub.
-Colors: tub car yellow; cage, nudge bar, chassis and tires near-black;
-seat dark brown; hood panel white; hubs light grey; lights glass turquoise.
-Memorable feature: the exposed engine box behind the driver, and the wheels
+The tub is 1.4 m wide — two thirds of the track, a chunky toy stance, NOT a
+narrow sand rail — and sits 0.35 m above the ground.
+Shape: a roll cage of thick tubes (~8 cm) with real bracing around a single
+center seat; short sloped hood with two round headlights on a thick front
+nudge bar; chunky suspension arms to the front wheels; behind the seat an
+EXPOSED ENGINE, near-black, as tall as the seat back, with visible cylinder
+heads and a short fat exhaust; two rectangular tail lights on the back of
+the tub.
+Colors: tub car yellow; cage, nudge bar, suspension arms, engine and tires
+near-black; seat dark brown; hood panel white; hubs and exhaust light grey;
+lights glass turquoise.
+Memorable feature: the exposed engine behind the driver, and the wheels
 being almost as tall as the tub.
 Driver: single seat, center.
 ```
@@ -442,7 +461,31 @@ altfel nu merita slotul in garaj (CLAUDE.md principiul 4).
 
 ---
 
-## 4. Note pentru noi (nu intra in prompt)
+## 4. Lectii din prima foaie (buggy, 17 oct 2026)
+
+`img/vehicles/concept_buggy.jpeg`, generata cu contextul in forma initiala.
+Formatul a iesit cum a fost cerut (layout, fundal, paleta, fara text, figurina
+doar in 3/4). Masurat pe vederile ortografice, cu diametrul rotii ca unitate
+(scriptul e in istoricul sesiunii; PIL, masca pe intuneric si pe galben):
+
+| ce | foaie | tinta |
+|---|---|---|
+| lungime / diametru roata (lateral) | 4.38 | 4.4 |
+| ecartament / diametru roata (fata) | 2.50 | 2.5 |
+| latime cuva / ecartament (fata) | **0.46** | 0.67 |
+| diametru roata lateral vs fata | **120 vs 154 px** | identic |
+
+Lungimea si ecartamentul au iesit exact. Cuva era prea ingusta (sand rail, nu
+jucarie) si vederile nu erau la aceeasi scara — de aici randurile noi din
+context despre „cabina cel putin doua treimi din ecartament" si „roata
+identica in pixeli in cele trei vederi". Lipseau stopurile; acum sunt cerute
+la toate masinile.
+
+Prima reactie la foaie a fost sa interzicem bratele de suspensie si sa cerem
+cusca din 8 tevi groase. **Respinsa de dezvoltator:** masinile sunt hero, nu
+decor — detaliul structural ramane, contextul il cere acum explicit.
+
+## 5. Note pentru noi (nu intra in prompt)
 
 - **Monster truck si clampul rotii.** `car.gd` clampeaza raza de suspensie la
   0.22-0.42 m (`_susp_wheel_radius`), iar cursa de cast e `rest + raza`. O
@@ -464,8 +507,13 @@ altfel nu merita slotul in garaj (CLAUDE.md principiul 4).
   cauta `car.gd`); faruri/stopuri noduri separate `<Prefix>_Lamp_Head` /
   `<Prefix>_Lamp_Tail`; originea ansamblului la sol, `verify_glb.py ...
   --origin=assembly`; scaunul se traduce cu `seat_godot()` in
-  `CarData.driver_seat`. Buget: masina e o singura instanta, deci 3000-5000
-  tri dupa bevel (style_bible §3, clasa "hero").
+  `CarData.driver_seat`. **Buget: FARA plafon de triunghiuri la masini**
+  („la masini nu facem economie" — dezvoltatorul, 17 oct 2026). O masina e o
+  instanta pe un singur material (+ `finish:vehicle` + lampile), deci
+  geometria e aproape gratis pe mobil; sase masini a cate 15-20k tri sunt
+  sub o zecime din orice pista. Ce conteaza e sa nu aduca materiale sau
+  texturi proprii. Cifra din `verify_glb.py` se trece ca masurata, nu ca
+  plafon.
 - **Soferul se alege separat de masina** (decizia dezvoltatorului, 17 oct
   2026, facuta pe ramura `feat/sofer-ales-in-garaj`): skinurile sunt resurse
   `DriverData` (`scenes/cars/data/drivers/*.tres`, listate in
@@ -482,3 +530,76 @@ altfel nu merita slotul in garaj (CLAUDE.md principiul 4).
 - FBX-urile RgsDev neutilizate se pot sterge intr-un PR separat de curatenie,
   dupa ce `grep -r "\.fbx" scenes scripts tools` confirma ca nu le mai cere
   nimeni.
+
+---
+
+## 5. Pasul 2 — de la foaie la GLB (incepand cu 25 oct 2026)
+
+**Foile sunt gata** (`img/vehicles/concept_*.jpeg`): 9 din lista + hot rod-ul;
+pentru buggy s-a ales a doua varianta (`concept_buggy_v2.jpeg`).
+
+**Deciziile dezvoltatorului, 25 oct 2026:**
+- **Monster truck: varianta (a)** din §4 — plafonul clampului de roata se
+  ridica la ~0.65 m, verificat cu `ProbeRace --mode=bump` ca celelalte masini
+  nu se schimba. Se face odata cu build-ul monster-ului, nu inainte.
+- **Hot rod-ul intra ca masina 8**, in locul camionetei.
+
+**Metoda (fara agent extern — Blender headless din repo):**
+- cate un `tools/blender/build_<nume>_v2.py` per masina; contractul comun
+  (roti, lampi, export, figurina) ramane in `toy_driver_parts.py`.
+  `export_vehicle` primeste acum `bevel_angle` si `wheel_spec.wheel_fn`
+  (anvelopa rotunda); cele 5 masini vechi se construiesc identic;
+- formele se iau din foaie, **cotele din tabelul de mai sus** — vederile
+  ortografice ale foilor NU sunt garantat la aceeasi scara (monster-ul a iesit
+  cu 3.7 m latime in loc de 2.6, roata ~0.85 in loc de 0.62);
+- verificarea vizuala: `compare_concept.py <nume> <foaie>` pune foaia deasupra
+  randarilor noastre (3/4 + lateral/fata/sus la aceeasi scara), apoi captura
+  din joc: `ProbeGarage.tscn -- --car=<index>`;
+- `.tres`-ul se muta pe GLB-ul nou intr-un commit separat, dupa ce
+  dezvoltatorul a vazut captura din garaj.
+
+**Doua lucruri aflate la buggy, valabile pentru toate:**
+- **Figurina are 1.25 m de la sezut la varful castii**, nu ~1.1 cat presupune
+  promptul (§1). Cusca/arcul se inalta cat sa treaca peste casca (+9 cm), deci
+  inaltimile din tabel sunt minime, nu exacte. La buggy: 1.87 in loc de 1.5. La
+  v1 casca iesea prin acoperisul custii. Picioarele coboara 0.41 m sub sezut,
+  deci sezutul nu poate cobori oricat: pantofii ies prin podea.
+- **Bugetul de triunghiuri:** tuburile cu 8 laturi au fete la 45°, cele cu 6 la
+  60°; bevelul de corp se ruleaza cu `bevel_angle=65`, ca sa teseasca doar
+  cutiile (90°). La 30°/50° suspensia singura ajungea la 2096 tri.
+
+| # | masina | GLB | tri | driver_seat (Godot) | note |
+|---|---|---|---|---|---|
+| 1 | Buggy | `buggy_v2.glb` | 6322 | (0, 0.48, 0.18) | pilotul |
+| 2 | Muscle | `roadster_v2.glb` | 6326 | (-0.42, 0.58, 0.22) | |
+| 3 | Politia | `police_v2.glb` | 5582 | (-0.40, 0.64, 0.25) | respinsa de 2 ori (cutii, flanc jos) |
+| 4 | Taxi | `taxi_v2.glb` | 6298 | (-0.42, 0.64, 0.15) | |
+| 5 | Pompierii | `firetruck_v2.glb` | 6106 | (-0.42, 0.95, -0.67) | respinsa o data (sedan lung) |
+| 6 | Autobuzul | `bus_v2.glb` | 4656 | (-0.55, 1.02, -1.30) | |
+| 7 | Ambulanta (NOUA) | `ambulance.glb` | 5984 | (-0.42, 0.74, -0.70) | |
+| 8 | Hot rod (NOUA) | `hotrod.glb` | 6458 | (-0.38, 0.52, 0.50) | roti spate 0.46 doar vizual |
+| 9 | Macaraua (NOUA) | `tow_truck.glb` | 5722 | (-0.42, 0.84, -0.70) | |
+| 10 | Monster (NOUA) | `monster.glb` | 5946 | (0, 1.10, -0.05) | roata 0.62, plafon 0.65 in car.gd |
+
+Toate 10 sunt in `GameState.CAR_DATA` (cele noi la coada). Fizica celor 6
+vechi e neschimbata: raza rotii si gabaritul de coliziune din `.tres` raman.
+Identitatea celor 4 noi (masa, viteza, grip, suspensie) e o PROPUNERE din
+tabelul de mai sus, verificata doar cu ProbeRace pe Dunele (fara rasturnari);
+reglajul fin e la volan. AI-ul (`Race.AI_CARS`) nu le foloseste inca.
+
+**Limita ramasa la monster:** cu roata de contract (0.62) si figurina de 1.25 m,
+rotile nu ajung „mai inalte decat cabina" ca in foaie (iese ~0.48 din inaltime,
+foaia ~0.60). Asta ar cere roti mai mari si un plafon mai sus in car.gd.
+
+**Lectia constructorilor (agenti Sonnet, `garaj_v2_constructor.md`):** 7 din
+9 masini au cerut cel putin o runda in plus dupa ce coordonatorul a deschis
+plansa; de doua ori (politia, pompierii) raportul spunea ca silueta se
+potriveste si nu se potrivea. Plansa `compare_concept.py` o deschide
+coordonatorul — raportul constructorului nu e verdict.
+
+**Punct deschis (nu tine de model):** in joc, `Palette.apply_world_material`
+pune peste masini si stratul de detaliu triplanar al lumii — dungi gri
+ondulate pe vopsea, cele mai vizibile pe suprafetele mari si deschise (capota
+alba a buggy-ului). Foile cer masini curate, „mult mai curate decat
+decorul". Buggy-ul v1 are aceleasi dungi, deci nu e regresie; e o decizie de
+material (de pilda: masinile fara stratul triplanar), de luat separat.

@@ -43,6 +43,8 @@ const LOST_BELOW_M: float = 25.0
 ## Cat se ridica talpa cutiei peste talpa modelului (vezi `_setup`).
 const SPAWN_LIFT_M: float = 0.03
 
+const PropDebris := preload("res://scenes/props/prop_debris.gd")
+
 var _spawn_y: float = 0.0
 
 
@@ -115,6 +117,8 @@ func _setup(model: Node3D) -> void:
 	linear_damp = 0.3
 	angular_damp = 0.6
 	_spawn_y = global_position.y
+	# Aschii si praf la lovitura (things-fly): managerul comun, nu noduri proprii.
+	PropDebris.watch(self)
 	sleeping = true
 	set_physics_process(false)
 	sleeping_state_changed.connect(func() -> void:

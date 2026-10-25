@@ -106,6 +106,9 @@ extends "res://scenes/props/path_mover.gd"
 ## brief e o forta care tine cat tine contactul — deriva laterala de regim e
 ## side_accel / grip, deci ~3 m/s la 30. (PathMover are deja `push_accel`, campul radial al hovercraftului — asta e alta forta, laterala.)
 @export_range(0.0, 60.0, 1.0) var side_accel: float = 8.0
+## Sunetul de contact (feel_checklist: hazards-speak): la ghiont, pozitional la
+## masina lovita. Gol = autobuz mut.
+@export var contact_sfx: StringName = &"hazard_bus_hit"
 
 ## Reapare sus si porneste la vale (carlig pentru claxon/telegraf).
 signal descent_started(bus: BusHazard)
@@ -406,3 +409,8 @@ func _shove_cars(delta: float) -> void:
 		car.apply_sweep(right * side * shove
 			+ fwd.normalized() * shove * 0.3 + Vector3.UP * 0.3)
 		shoved.emit(self, car)
+		if contact_sfx != &"":
+			var audio := get_node_or_null(^"/root/AudioManager")
+			if audio != null:
+				audio.hazard_contact(contact_sfx,
+					car.global_position + Vector3.UP * 0.5, car.is_player)

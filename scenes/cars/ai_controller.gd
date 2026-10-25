@@ -398,11 +398,20 @@ func configure(race_track: Track, rng: RandomNumberGenerator,
 	if race_track != null and race_track.ai_shortcut_chance >= 0.0:
 		chance = race_track.ai_shortcut_chance
 	prefers_shortcut = rng.randf() < chance
+	# A/B pentru ProbeRace: AI_REACTS=0 stinge reactia la lovituri (nu consuma rng).
+	var react_mode := OS.get_environment("AI_REACTS")
+	reacts = react_mode != "0"
+	# Ablatie pentru ProbeRace: doar clatinarea, sau doar ranchiuna.
+	if react_mode == "wobble":
+		grudge_s = 0.0
+	elif react_mode == "grudge":
+		wobble_max = 0.0
 
 func update(delta: float) -> void:
 	if track == null or car == null:
 		return
 	var speed := car.horizontal_speed()
+	_react_tick(delta)
 	_watch_progress(delta, speed)
 	if _unstick_timer > 0.0:
 		_drive_unstick(delta)
@@ -464,6 +473,9 @@ func update(delta: float) -> void:
 	# Adica exact esecul caruselului: un hazard pe care AI-ul nu-l poate citi
 	# devine ambuteiaj. Cu linia de mai jos + gurile departate: 2 pereti, 14
 	# repuneri, masini care termina tururi.
+	# Ranchiuna (vezi `_grudge_line`): ne asezam langa cel care ne-a lovit, dar
+	# INAINTE de regulile de siguranta de mai jos, care au ultimul cuvant.
+	line = _grudge_line(idx, line, keep_off, delta)
 	line = _fireball_line(speed, line)
 	# Pasajul rotativ (Chongqing, brief §2 POI F): la fel ca gheizerele, culoarul
 	# liber se schimba IN TIMP — deschis se trece pe axa, inchis pe rampa de
@@ -543,7 +555,9 @@ func update(delta: float) -> void:
 					_alley_approach = true
 	if car.route != 0:
 		near = _alley_gate_aim_on(car.route, idx, near)
-	_steer = clampf(_angle_to(fwd, near) * 2.2, -1.0, 1.0)
+	base_steer = clampf(_angle_to(fwd, near) * 2.2, -1.0, 1.0)
+	# Clatinarea de dupa lovitura se adauga la volan (zero cand nu a fost niciuna).
+	_steer = clampf(base_steer + wobble_now, -1.0, 1.0)
 
 	# --- pedale: viteza-tinta din cat de stramt e ce urmeaza ---
 	var target := car.max_speed * lerpf(1.0, CORNER_SPEED_FLOOR, severity)
@@ -1845,6 +1859,261 @@ func _drive_unstick(delta: float) -> void:
 		_steer = _unstick_steer
 		if _unstick_timer <= 0.0:
 			_reset_progress()
+
+# ------------------------------------------------------ reactia la lovituri
+#
+# (docs/feel_checklist.md: ai-reacts). Doua lucruri, ambele DOAR prin iesirile
+# proprii ale pilotului: volanul si linia tinta. Nu se atinge nicio plafon de
+# viteza, nicio aderenta, niciun gaz: principiul 5, AI onest.
+#
+#  - clatinare + contravirare: dupa o lovitura de la o masina, volanul primeste un
+#    termen aditiv: primul lob contra rotatiei imprimate de lovitura, apoi un
+#    depasire mai mica, care se stinge. Se vede ca soferul prinde masina.
+#  - ranchiuna: cel care ne-a lovit (atacatorul, dupa cine se apropia mai mult
+#    pe linia de contact) devine tinta liniei noastre cateva secunde: ne
+#    asezam LANGA el, la un culoar distanta, cat timp e aproape si in fata. Fara
+#    gaz in plus si fara contact intentionat: doar presiune laterala. Apoi uita.
+#
+# Linia de ranchiuna se aplica INAINTE de toate regulile de siguranta ale pistei
+# (gheizere, semafor, culoar unic, muchie fara parapet): acelea au ultimul cuvant.
+
+## Comutatorul intregii functii (A/B in ProbeRace: AI_REACTS=0 o stinge; =wobble
+## sau =grudge lasa doar jumatatea respectiva).
+@export var reacts: bool = true
+## Sub aceasta schimbare de viteza (m/s) o lovitura nu declanseaza nimic.
+@export var react_min_strength: float = 4.0
+## La aceasta schimbare de viteza clatinarea atinge amplitudinea maxima.
+@export var react_full_strength: float = 12.0
+## Amplitudinea maxima a termenului aditiv de volan (volanul merge pe [-1, 1]).
+@export var wobble_max: float = 0.3
+## Perioada clatinarii (s) si constanta de stingere (s). Primul lob e contravirarea.
+@export var wobble_period_s: float = 0.6
+@export var wobble_decay_s: float = 0.35
+## Clatinarea e un efect de viteza mare: sub `wobble_min_speed` (m/s) nu se aplica, iar
+## pana la `wobble_min_speed + wobble_speed_ramp` creste liniar. In hairpin-uri si pe
+## manevre lente volanul oricum e la limita, iar lovitura se rezolva de la sine.
+@export var wobble_min_speed: float = 8.0
+@export var wobble_speed_ramp: float = 10.0
+## Dupa atata timp clatinarea se taie de tot (exp(-1.4/0.35) ~ 2%).
+@export var wobble_duration_s: float = 1.4
+## Cat tine ranchiuna (s).
+@export var grudge_s: float = 4.0
+## Cota minima din apropierea totala pe linia de contact ca celalalt sa fie
+## atacatorul. Frontal egal (50%) nu naste ranchiuna la nimeni.
+@export var grudge_attacker_share: float = 0.6
+## Ranchiuna apasa doar cat atacatorul e la mai putin de atatia metri IN FATA...
+@export var grudge_reach_m: float = 28.0
+## ...si pana la atatia metri in spatele botului (alaturi inca conteaza).
+@export var grudge_behind_m: float = 3.0
+## Distanta laterala (m, intre axe) la care ne asezam langa el. Peste
+## AVOID_CLEARANCE_M * 1.25 = 3.25 (pragul cu histereza al `_avoid_line`), ca
+## ocolirea sa nu vada un blocaj in culoarul nostru si sa ne traga inapoi spre el.
+@export var grudge_gap_m: float = 3.4
+## Cat de repede intra / iese linia de ranchiuna (1/s): fara smucituri de volan.
+@export var grudge_blend_rate: float = 2.5
+
+## Observabile pentru sonde/depanare.
+var react_count: int = 0
+## Cate ranchiuni s-au nascut si cate secunde a apasat linia de ranchiuna (blend > 0.5).
+var grudge_count: int = 0
+var grudge_active_s: float = 0.0
+var wobble_now: float = 0.0
+var base_steer: float = 0.0
+var grudge_car: Car = null
+var grudge_left: float = 0.0
+var grudge_blend: float = 0.0
+var grudge_line: float = 0.0
+
+var _react_hooked: bool = false
+var _pending_hit: Array = []
+var _hist: Array[Dictionary] = [{}, {}, {}]
+var _hist_i: int = 0
+var _wobble_t: float = INF
+var _wobble_amp: float = 0.0
+var _wobble_sign: float = 1.0
+var _grudge_side: float = 0.0
+
+
+func _hook_react() -> void:
+	if _react_hooked or car == null:
+		return
+	_react_hooked = true
+	car.impact.connect(_on_car_impact)
+	car.respawned.connect(func(_c: Car) -> void: _react_clear())
+
+
+func _react_clear() -> void:
+	_pending_hit = []
+	_wobble_t = INF
+	wobble_now = 0.0
+	grudge_car = null
+	grudge_left = 0.0
+	grudge_blend = 0.0
+	_grudge_side = 0.0
+
+
+func _on_car_impact(_c: Car, kind: StringName, strength: float, normal: Vector3,
+		_point: Vector3, other: Node) -> void:
+	if not reacts or kind != &"car" or strength < react_min_strength:
+		return
+	if not _pending_hit.is_empty() and float(_pending_hit[0]) >= strength:
+		return
+	_pending_hit = [strength, normal, other]
+
+
+## Apelat la inceputul fiecarui `update`: istoricul vitezelor, lovitura de
+## procesat, cronometrele clatinarii si ale ranchiunii.
+func _react_tick(delta: float) -> void:
+	if not reacts:
+		if _wobble_t < INF or grudge_car != null or grudge_blend > 0.0:
+			_react_clear()
+		return
+	_hook_react()
+	# Vitezele orizontale la inceputul tick-ului, pentru TOATE masinile din
+	# cursa: `impact` se emite in `Car._process_contacts`, INAINTEA lui
+	# `update`, deci vitezele celui mai nou slot sunt deja post-lovitura; cele de
+	# dinainte sunt in slotul cel mai vechi (2 tick-uri in urma).
+	_hist_i = (_hist_i + 1) % 3
+	var cur := _hist[_hist_i]
+	cur.clear()
+	cur[car] = Vector3(car.linear_velocity.x, 0.0, car.linear_velocity.z)
+	for other in traffic:
+		if other != null and other != car and is_instance_valid(other):
+			cur[other] = Vector3(other.linear_velocity.x, 0.0, other.linear_velocity.z)
+	if not _pending_hit.is_empty():
+		_process_hit(_pending_hit)
+		_pending_hit = []
+	if _wobble_t < wobble_duration_s:
+		_wobble_t += delta
+		wobble_now = _wobble_sign * _wobble_amp \
+			* exp(-_wobble_t / maxf(wobble_decay_s, 0.01)) \
+			* sin(TAU * _wobble_t / maxf(wobble_period_s, 0.05))
+		wobble_now *= clampf((car.horizontal_speed() - wobble_min_speed)
+			/ maxf(wobble_speed_ramp, 0.01), 0.0, 1.0)
+	else:
+		wobble_now = 0.0
+	if grudge_left > 0.0:
+		grudge_left -= delta
+		if grudge_left <= 0.0 or grudge_car == null \
+				or not is_instance_valid(grudge_car):
+			grudge_left = 0.0
+			grudge_car = null
+
+
+func _process_hit(hit: Array) -> void:
+	var strength := float(hit[0])
+	var normal := hit[1] as Vector3
+	var other := hit[2] as Car
+	react_count += 1
+	# --- clatinare: primul lob CONTRA rotatiei imprimate de lovitura ---
+	var yaw := car.angular_velocity.y
+	var sgn := 0.0
+	if absf(yaw) >= 0.5:
+		sgn = -signf(yaw)
+	else:
+		# Fara rotatie vizibila: contra impingerii laterale (am fost impinsi spre
+		# dreapta => volan spre stanga, adica pozitiv).
+		sgn = signf(Vector3(normal.x, 0.0, normal.z).dot(car.global_transform.basis.x))
+		if sgn == 0.0:
+			sgn = 1.0
+	var amp := wobble_max * clampf((strength - react_min_strength)
+		/ maxf(react_full_strength - react_min_strength, 0.01), 0.3, 1.0)
+	var decayed := 0.0
+	if _wobble_t < wobble_duration_s:
+		decayed = _wobble_amp * exp(-_wobble_t / maxf(wobble_decay_s, 0.01))
+	if amp >= decayed:
+		_wobble_amp = amp
+		_wobble_sign = sgn
+		_wobble_t = 0.0
+	# --- ranchiuna: doar fata de un atacator real, un alt pilot (nu trafic) ---
+	if other == null or other == car or not is_instance_valid(other) or other.finished:
+		return
+	if not (other.is_player or other.controller is AIController):
+		return
+	var n := Vector3(normal.x, 0.0, normal.z)
+	if n.length_squared() < 1e-6:
+		return
+	n = n.normalized()
+	var old: Dictionary = _hist[(_hist_i + 1) % 3]
+	if not old.has(car) or not old.has(other):
+		return
+	var toward_me := maxf((old[car] as Vector3).dot(-n), 0.0)
+	var toward_other := maxf((old[other] as Vector3).dot(n), 0.0)
+	var total := toward_me + toward_other
+	if total < 0.5:
+		return
+	if toward_other / total >= grudge_attacker_share:
+		grudge_car = other
+		grudge_left = grudge_s
+		grudge_count += 1
+		# Claxonul de jucarie al celui pagubit (pozitional; pauza o tine AudioManager).
+		# Prin arbore, nu prin identificatorul autoload-ului: scriptul trebuie sa se
+		# compileze si in modul `--script` (vezi hazardele).
+		var audio := get_node_or_null(^"/root/AudioManager")
+		if audio != null:
+			audio.honk(car.get_instance_id(), car.global_position)
+
+
+## Linia de ranchiuna: ne asaza langa atacator, la `grudge_gap_m` intre axe, pe
+## partea pe care suntem deja. Intoarce `line` nemodificata cand nu e cazul.
+## Se cheama INAINTEA regulilor de siguranta ale pistei (ele au ultimul cuvant).
+func _grudge_line(idx: int, line: float, keep_off: float, delta: float) -> float:
+	var want := false
+	var target := grudge_line
+	if reacts and grudge_car != null and grudge_left > 0.0 \
+			and _door_block_m >= DOOR_BRAKE_M and _signal_block_m >= SIGNAL_BRAKE_M \
+			and not _gate_hold and not _alley_approach \
+			and grudge_car.route == car.route:
+		var r := track.route_at(car.route)
+		if r != null and r.count() > 0:
+			var n := r.count()
+			var d := grudge_car.road_index - idx
+			if r.closed:
+				if d > n / 2:
+					d -= n
+				elif d < -n / 2:
+					d += n
+			var ahead_m := float(d) * track.curve.bake_interval
+			if ahead_m >= -grudge_behind_m and ahead_m <= grudge_reach_m:
+				var bidx: int = grudge_car.road_index
+				var hw := track.width_at_index(bidx) if car.route == 0 else r.half_width
+				hw = maxf(hw, 0.001)
+				var off_lat := r.side_at(bidx).dot(
+					grudge_car.global_position - r.baked[r.wrap_index(bidx)]) / hw
+				var my_lat := r.side_at(idx).dot(
+					car.global_position - r.baked[r.wrap_index(idx)]) / hw
+				var gap_frac := grudge_gap_m / hw
+				var cand_l := off_lat - gap_frac
+				var cand_r := off_lat + gap_frac
+				var l_ok := cand_l >= _line_lo
+				var r_ok := cand_r <= _line_hi
+				if _grudge_side == 0.0:
+					_grudge_side = -1.0 if my_lat < off_lat else 1.0
+				if _grudge_side < 0.0 and not l_ok and r_ok:
+					_grudge_side = 1.0
+				elif _grudge_side > 0.0 and not r_ok and l_ok:
+					_grudge_side = -1.0
+				if (_grudge_side < 0.0 and l_ok) or (_grudge_side > 0.0 and r_ok):
+					target = cand_l if _grudge_side < 0.0 else cand_r
+					# Sector cu hazard pe axa: nu traversam axa ca sa tinem ranchiuna.
+					if not (keep_off > 0.0 and absf(line) > 0.01
+							and signf(target) != signf(line)):
+						want = true
+						# Departe = abia schitata, aproape = plina.
+						target = lerpf(line, target, clampf(
+							(grudge_reach_m - ahead_m)
+							/ maxf(grudge_reach_m - 8.0, 0.001), 0.0, 1.0))
+	if not want:
+		_grudge_side = 0.0
+	grudge_blend = move_toward(grudge_blend, 1.0 if want else 0.0,
+		delta * grudge_blend_rate)
+	if want:
+		grudge_line = target
+	if grudge_blend <= 0.0:
+		return line
+	if grudge_blend > 0.5:
+		grudge_active_s += delta
+	return clampf(lerpf(line, grudge_line, grudge_blend), _line_lo, _line_hi)
 
 func get_steer() -> float:
 	return _steer

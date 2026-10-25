@@ -624,6 +624,7 @@ kind = 0
 model = ExtResource("10_cow")
 model_scale = 0.9
 face_travel = true
+follow_ground = true
 motion = 1
 sweep_speed = 1.8
 

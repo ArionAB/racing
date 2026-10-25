@@ -16,6 +16,12 @@ const CAR_DATA: Array[Resource] = [
 	preload("res://scenes/cars/data/bus.tres"),
 	preload("res://scenes/cars/data/firetruck.tres"),
 	preload("res://scenes/cars/data/buggy.tres"),
+	# Garajul v2 (oct 2026): masinile noi stau la COADA, ca indicii de mai sus
+	# (Race.AI_CARS, fantomele din cariera, selected_car salvat) sa nu se mute.
+	preload("res://scenes/cars/data/ambulance.tres"),
+	preload("res://scenes/cars/data/hotrod.tres"),
+	preload("res://scenes/cars/data/tow_truck.tres"),
+	preload("res://scenes/cars/data/monster.tres"),
 ]
 ## Traficul de tuk-tuk-uri (Jodhpur): NU e in garaj (nu se poate alege ca
 ## masina de jucator/AI de cursa) — separat de CAR_DATA ca sa nu apara din
@@ -227,6 +233,9 @@ var show_perf: bool = false
 ## Setare ca sa se poata compara la volan, din pauza; prima de stins daca
 ## device-ul nu tine 60 fps (vezi CarLights).
 var real_headlight: bool = true
+## Vibratie la impacturi, aterizari dure si pornirea turbo-ului (telefon si
+## manete). Doar jucatorul; implicit pornita. Vezi HapticsFeed.
+var haptics_enabled: bool = true
 ## NIVELUL GRAFIC — comutatorul de device din planul de grafica pe mobil.
 ##   0 = ECONOMIC: fara umbre dinamice, fara glow, randare 3D la ~720 px
 ##       inaltime pe telefon. Ce ramane e AO-ul copt + blob-ul masinii.
@@ -511,6 +520,7 @@ func load_settings() -> void:
 	show_perf = bool(cfg.get_value("debug", "show_perf", false))
 	real_headlight = bool(cfg.get_value("debug", "real_headlight", true))
 	gfx_tier = clampi(int(cfg.get_value("video", "gfx_tier", 1)), 0, 2)
+	haptics_enabled = bool(cfg.get_value("input", "haptics", true))
 
 func save_settings() -> void:
 	var cfg := ConfigFile.new()
@@ -526,6 +536,7 @@ func save_settings() -> void:
 	cfg.set_value("debug", "show_perf", show_perf)
 	cfg.set_value("debug", "real_headlight", real_headlight)
 	cfg.set_value("video", "gfx_tier", gfx_tier)
+	cfg.set_value("input", "haptics", haptics_enabled)
 	cfg.save(SETTINGS_PATH)
 
 

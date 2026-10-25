@@ -67,6 +67,11 @@ func _build() -> void:
 			AudioManager.apply_volumes()
 			GameState.save_settings())
 
+	_add_toggle(box, "Vibration", GameState.haptics_enabled,
+		func(on: bool) -> void:
+			GameState.haptics_enabled = on
+			GameState.save_settings())
+
 	# --- camera ---
 	# Sliderele lucreaza pe FACTORI, nu pe metri: valorile din ChaseCamera raman
 	# implicitul, iar setarea le scaleaza. Din pauza, camera se muta sub deget —

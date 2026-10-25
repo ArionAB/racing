@@ -4169,22 +4169,40 @@ static func themes() -> Dictionary:
 		"water_glint": 0.55,
 		# Calcarul de carst: cenusiu-deschis in soare (#A8A49A). Clasa e cea a
 		# calcarului Ryukyu (aceeasi roca), cu tenta proprie — brief §4.
-		"ground_tint": Color.html("8E8C84"),
-		# Soare de dimineata tarzie din ESE (~110 grade, 30 de grade elevatie),
-		# alb-cald (#FFF0D8). Busola 180 - y = 110 => y = 70. Azimutul se
-		# remasoara pe traseul real (memoria azimutul-soarelui-fata-de-drum).
-		"sun_rotation_deg": Vector3(-30, 70, 0),
-		"sun_color": Color(1.0, 0.94, 0.85),
-		"sun_energy": 1.1,
-		# Ambient de dimineata umeda (#C8D8DC la 0.32): umbrele din grota si de
-		# sub surplombe trebuie sa iasa VERZI-ALBASTRE de la lumina reflectata
-		# de apa, nu negre (memoria umbra-fara-culoare-e-negru-mort).
-		"ambient_color": Color.html("C8D8DC"),
-		"ambient_energy": 0.32,
-		# Aer umed de golf: albastru-pal spalacit sus (#6E9AC4), alb-cald laptos
-		# la orizont. NU albastrul adanc de altitudine (Alpi, Transfagarasan).
-		"sky_top": Color.html("6E9AC4"),
-		"sky_horizon": Color.html("E8E2D6"),
+		# NISIP AURIU (cerinta dezvoltatorului, oct 2026: "it's a tropical place
+		# i want a tropical sunny golden hour vibe").
+		#
+		# Cifra e MASURATA pe plaja din diorama acceptata
+		# (`halong_diorama_v1.jpg`, 377 de esantioane filtrate pe hue 25-60,
+		# saturatie 0,20-0,55, valoare > 0,60): **#E5D2A0, hue 43, saturatie
+		# 0,30**. Vechiul `8E8C84` avea saturatie 0,03 — gri neutru, exact ce se
+		# vedea in joc ca "nisip gri uniform" si ce a numit si constructorul
+		# POI-ului D ca diferenta fata de bara.
+		"ground_tint": Color.html("E5D2A0"),
+		# ORA DE AUR: soare JOS din ESE (~110 grade busola, 18 grade elevatie).
+		# Elevatia coboara de la 30 la 18 — asta e ce face ora de aur: unghi mic,
+		# umbre lungi, lumina care intra pe sub coroane in loc sa cada vertical.
+		# AZIMUTUL RAMANE 70 (busola 180 - y = 110): el e verificat de garda de
+		# azimut din generator, care masoara reperele in cadru — nu se schimba
+		# fara sa se reruleze ea (memoria azimutul-soarelui-fata-de-drum).
+		"sun_rotation_deg": Vector3(-18, 70, 0),
+		# Chihlimbar cald, nu alb-cald: hue ~38, cat sa imbrace nisipul si
+		# calcarul fara sa faca totul portocaliu.
+		"sun_color": Color(1.0, 0.89, 0.72),
+		# 1,35 in loc de 1,1: la 18 grade lumina strabate mai multa atmosfera,
+		# deci sursa trebuie mai tare ca scena sa nu iasa intunecata.
+		"sun_energy": 1.35,
+		# Ambient de ora de aur (#D6CBB4 la 0.34): gri-CALD care bate spre
+		# chihlimbar, nu albastru-gri rece. Umbrele raman citibile si colorate
+		# (memoria umbra-fara-culoare-e-negru-mort) — doar ca pe o plaja
+		# tropicala la apus ele sunt calde, nu albastre.
+		"ambient_color": Color.html("D6CBB4"),
+		"ambient_energy": 0.34,
+		# Cer de ora de aur: albastru ceva mai adanc sus (#5E92C8), CHIHLIMBAR
+		# la orizont (#F2DCB4). Gradientul asta e ce deosebeste ora de aur de
+		# amiaza — nu intensitatea soarelui, ci cerul cald jos.
+		"sky_top": Color.html("5E92C8"),
+		"sky_horizon": Color.html("F2DCB4"),
 		# Ceata 120 -> 340: aici e MECANICA DE COMPOZITIE, nu doar atmosfera —
 		# e ce separa turnurile in straturi de adancime pe belvedere (brief §2.0,
 		# memoria scara-de-adancime-are-gol). Reperele stau sub fog_end, iar
@@ -4195,7 +4213,11 @@ static func themes() -> Dictionary:
 		# Ceata se masoara HSV fata de APA, nu fata de ground_tint (memoria
 		# ceata-in-familia-solului, adaptata: pe o pista jumatate-apa, familia
 		# solului e apa). Alb-cald cu nuanta verzuie (#D8DCD4).
-		"fog": Color.html("D8DCD4"),
+		# Ceata CALDA (#E8D9BC): la ora de aur aerul peste apa imprastie lumina
+		# joasa, deci departarea se spala in auriu, nu in gri. Intervalul
+		# 120 -> 340 ramane neatins: el e mecanica de compozitie, verificata de
+		# garzile de mai sus.
+		"fog": Color.html("E8D9BC"),
 		# Okinawa a coborat `fog_sky_affect` ca sa-si arate cerul; Ha Long ramane
 		# pe implicitul 1.0, cerul lui de golf cetos E ceata.
 		"fog_sky_affect": 1.0,
@@ -4220,21 +4242,29 @@ static func themes() -> Dictionary:
 		# (MARBLE_GREY 29 calcar, FOAM_WHITE 22 pentru planul palid), iar o
 		# clasa triplanara le-ar sterge.
 		"horizon_class": "",
+		# Sirurile de turnuri au 148-304 m lungime: degajarea se cere de la
+		# toata amprenta, iar sirul sta tangent la circuit (vezi ramura
+		# `horizon_footprint` din `_build_horizon`). Inainte, trei siruri
+		# treceau la 1-2 m de axa soselei — „blocurile gri din mijlocul
+		# pistei" raportate la volan (oct 2026). Garda e
+		# `tools/probe_horizon_clear.gd --track=22`.
+		"horizon_footprint": true,
+		# Gardul invizibil mostenit de la Okinawa ramane DOAR langa apa (dig,
+		# podet, mal). Pe nisip marginea asfaltului e libera — vezi
+		# `walls_water_only` in `_build_walls`.
+		"walls_water_only": true,
 		"horizon_rings": [
-			# `dy` RIDICA siluetele, si pe pista asta e obligatoriu.
-			# `_build_horizon` le ingroapa 4 m in TEREN; pe uscat e corect, dar
-			# aici inelele cad pe GOLF, unde "terenul" e fundul marii. Masurat
-			# cu `tools/sv_halong_oriz.gd`: toate 12 stateau la -23..-25 m, pe
-			# un fund de ~-20, deci din piese de 40-50 m se vedeau ~20 — de aia
-			# citeau ca niste blocuri palide si scunde, nu ca turnuri de carst.
-			# Cu dy = +21 baza ajunge pe la -3 (intra in apa, cum trebuie) si
-			# varful la 37-47 m.
+			# Baza se aseaza pe OGLINDA APEI (sau pe teren, daca e mai sus) in
+			# modul amprenta, deci `dy` nu mai compenseaza fundul marii. Vechiul
+			# +21 era calculat pentru un fund de ~-24 (`tools/sv_halong_oriz.gd`)
+			# si ridica in aer sirurile cazute pe uscat. Cu +1, baza intra 3 m
+			# in apa si varful ajunge la ~37-60 m peste ea.
 			{"near": 260.0, "far": 340.0, "count": 4, "scale": 1.0,
-				"clear": 120.0, "dy": 21.0, "picks": ["KarstRow_A"]},
+				"clear": 120.0, "dy": 1.0, "picks": ["KarstRow_A"]},
 			{"near": 340.0, "far": 460.0, "count": 4, "scale": 1.15,
-				"clear": 150.0, "dy": 21.0, "picks": ["KarstRow_B"]},
+				"clear": 150.0, "dy": 1.0, "picks": ["KarstRow_B"]},
 			{"near": 460.0, "far": 620.0, "count": 4, "scale": 1.3,
-				"clear": 180.0, "dy": 21.0, "picks": ["KarstRow_C"]},
+				"clear": 180.0, "dy": 1.0, "picks": ["KarstRow_C"]},
 		],
 		# Scatterul si props-urile Okinawa se sting: vocabularul (fukugi, pin
 		# ryukyu, pandanus) e japonez. Decorul se pune de mana, pe POI, ca la
@@ -6278,6 +6308,59 @@ func _build_horizon(centroid: Vector3) -> void:
 				var at: Vector2 = ring["at"]
 				pos = Vector3(at.x, 0.0, at.y)
 				found = true
+			# SIR TANGENT, DEGAJARE PE AMPRENTA (optional, oct 2026, Ha Long):
+			# `"horizon_footprint": true` in tema. Cautarea de mai jos masoara
+			# degajarea in PIVOT, ceea ce e corect pentru un butte de 25-60 m,
+			# dar nu pentru un SIR de turnuri de 148-304 m la scara 1-1,56 cu
+			# rotatie la zar: masurat cu `tools/probe_horizon_clear.gd`, trei
+			# siruri treceau la 1-2 m de axa soselei, iar 10 din 12 intrau sub
+			# 100 m — raportat la volan ca „blocuri gri, unele chiar in mijlocul
+			# pistei". Aici piesa se alege INAINTE de cautare, se intoarce cu
+			# lungimea tangenta la cerc (un fundal care priveste circuitul, nu
+			# un perete vazut din capat) si `clear` se cere de la TOATA amprenta.
+			# Fara cheie, ramura nu ruleaza si sirul rng ramane bit-identic.
+			var fp_model: Node3D = null
+			var fp_yaw := 0.0
+			var fp_scale := 1.0
+			var fp_pts := PackedVector2Array()
+			if bool(theme_flag("horizon_footprint", false)) and not found:
+				var fp_picks: Array = ring["picks"]
+				var fp_theme_picks: Array = theme_flag("horizon_picks", [])
+				if not fp_theme_picks.is_empty():
+					fp_picks = fp_theme_picks[mini(rings.find(ring),
+						fp_theme_picks.size() - 1)]
+				fp_model = _extract_glb_node(scene,
+					fp_picks[rng.randi_range(0, fp_picks.size() - 1)])
+				if fp_model == null:
+					missed += 1
+					continue
+				# Rotatia Y cu unghiul t duce X-ul local in (cos t, -sin t);
+				# tangenta la cerc in unghiul `angle` cere t = PI/2 - angle.
+				fp_yaw = PI * 0.5 - angle + rng.randf_range(-0.2, 0.2)
+				fp_scale = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
+				fp_pts = _footprint_grid(fp_model)
+				# Fara relaxare sub 85%: o silueta care nu incape la degajare
+				# reala ramane afara (cer gol pe un arc e mai putin rau decat
+				# un perete gri la marginea drumului — vezi podeaua de mai sus).
+				for relax: float in [1.0, 0.85]:
+					var dist: float = float(ring["near"])
+					while dist <= limit:
+						var cand := centroid \
+							+ Vector3(cos(angle), 0, sin(angle)) * dist
+						if _footprint_clear(cand, fp_pts, fp_yaw, fp_scale,
+								clear * relax):
+							pos = cand
+							found = true
+							break
+						dist += 6.0
+					if found:
+						if relax < 1.0:
+							relaxed += 1
+						break
+				if not found:
+					fp_model.queue_free()
+					missed += 1
+					continue
 			for relax in ([] if found else relaxari):
 				var dist: float = float(ring["near"])
 				while dist <= limit:
@@ -6311,8 +6394,8 @@ func _build_horizon(centroid: Vector3) -> void:
 			if not theme_picks.is_empty():
 				picks = theme_picks[mini(rings.find(ring),
 					theme_picks.size() - 1)]
-			var model := _extract_glb_node(scene,
-				picks[rng.randi_range(0, picks.size() - 1)])
+			var model := fp_model if fp_model != null else _extract_glb_node(
+				scene, picks[rng.randi_range(0, picks.size() - 1)])
 			if model == null:
 				continue
 			add_child(model)
@@ -6326,7 +6409,21 @@ func _build_horizon(centroid: Vector3) -> void:
 			var dy: float = float(ring.get("dy", 0.0))
 			model.position = Vector3(pos.x,
 				_sampler.ground_y(pos.x, pos.z) - 4.0 + dy, pos.z)
+			if fp_model != null:
+				# Baza pe OGLINDA APEI sau pe teren, nu pe fundul marii plus un
+				# `dy` fix: un sir de 300-470 m nu sta pe un singur fund. Cu
+				# `dy` +21 calculat pentru fundul de -24, sirurile cazute pe
+				# uscat pluteau 20 m in aer (captura, oct 2026). Se ia cel mai
+				# jos punct de teren de sub amprenta, ridicat la cota marii.
+				var low := INF
+				for p in fp_pts:
+					var w := _footprint_world(pos, p, fp_yaw, fp_scale)
+					low = minf(low, _sampler.ground_y(w.x, w.z))
+				var sea_y := _sampler.mean_road_y() + sea_level_offset
+				model.position.y = maxf(low, sea_y) - 4.0 + dy
 			model.rotation.y = rng.randf_range(0.0, TAU)
+			if fp_model != null:
+				model.rotation.y = fp_yaw
 			# ORIENTARE FIXA (optional, oct 2026, Transfagarasan): `"yaw_deg"` suprascrie
 			# rotatia trasa la sorti (tragerea ramane, ca sirul rng al celorlalte inele
 			# sa fie identic). Creasta (230 x 66 m) vazuta din capat citeste doua
@@ -6338,6 +6435,8 @@ func _build_horizon(centroid: Vector3) -> void:
 			# vederea soferului. Sunt fundal pur, deci exagerarea nu costa nimic:
 			# zero coliziune, sub 180 tris fiecare.
 			var s: float = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
+			if fp_model != null:
+				s = fp_scale
 			model.scale = Vector3.ONE * s
 			# SILUETELE DE ORIZONT NU ARUNCA UMBRA, si asta nu e o economie de
 			# draw calls — e cauza platoului de luminanta de pe Cappadocia,
@@ -6402,6 +6501,51 @@ func _build_horizon(centroid: Vector3) -> void:
 		# design. E exact bug-ul pe care l-a avut versiunea anterioara.
 		push_warning("%s: %d siluete de orizont n-au incaput (degajare fata de sosea)"
 			% [track_name, missed])
+
+
+## Grila de puncte (in XZ local) care acopera dreptunghiul de baza al unei
+## siluete: 7 pe lungime x 3 pe adancime. Destul pentru un sir de turnuri, a
+## carui amprenta e un dreptunghi lung; vezi ramura `horizon_footprint`.
+func _footprint_grid(model: Node3D) -> PackedVector2Array:
+	var box := AABB()
+	var first := true
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		# Transformul fata de `model`: nodul nu e inca in arbore.
+		var xf := Transform3D.IDENTITY
+		var walk: Node = mi
+		while walk != null and walk != model:
+			xf = (walk as Node3D).transform * xf
+			walk = walk.get_parent()
+		var b := xf * mi.mesh.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	var pts := PackedVector2Array()
+	for ix in 7:
+		for iz in 3:
+			pts.append(Vector2(
+				box.position.x + box.size.x * float(ix) / 6.0,
+				box.position.z + box.size.z * float(iz) / 2.0))
+	return pts
+
+
+func _footprint_world(pos: Vector3, p: Vector2, yaw: float, s: float) -> Vector3:
+	var c := cos(yaw)
+	var sn := sin(yaw)
+	return Vector3(pos.x + (p.x * c + p.y * sn) * s, 0.0,
+		pos.z + (-p.x * sn + p.y * c) * s)
+
+
+## Toata amprenta e la cel putin `clear` m de sosea? Iese la primul punct prea
+## aproape — cautarea pe raza testeaza zeci de candidati per slot.
+func _footprint_clear(pos: Vector3, pts: PackedVector2Array, yaw: float,
+		s: float, clear: float) -> bool:
+	for p in pts:
+		if _road_distance_xz(_footprint_world(pos, p, yaw, s)) < clear:
+			return false
+	return true
 
 
 ## Stinge aruncarea de umbra pe tot subarborele. Vezi motivul la apelul din
@@ -11848,6 +11992,8 @@ func _build_walls() -> void:
 	var deck_rails := bool(theme_flag("deck_rails", walls_on))
 	if not walls_on and not deck_rails:
 		return
+	var water_only := bool(theme_flag("walls_water_only", false))
+	var sea_y_walls := _sampler.mean_road_y() + sea_level_offset
 	var loop_poly := PackedVector2Array()
 	for p in _points():
 		loop_poly.append(Vector2(p.x, p.z))
@@ -11908,6 +12054,25 @@ func _build_walls() -> void:
 			var elevated := mid.y > 1.0
 			if not exterior and not elevated and not on_deck:
 				continue
+			# GARD DOAR LANGA APA (optional, oct 2026, Ha Long): `"walls_water_only":
+			# true`. Tema mosteneste de la Okinawa gardul exterior INVIZIBIL
+			# (`wall_visible` false) — acolo justificat, digul are mare pe ambele
+			# parti. Pe Ha Long insa „exterior sau mai sus de 1 m" acopera aproape
+			# toata bucla, si pe uscat masina se lovea de un zid nevazut la
+			# marginea asfaltului, pe nisip deschis: raportat la volan ca „nu poti
+			# iesi de pe drum". Aici gardul ramane doar unde dincolo de margine e
+			# APA (fundul sub oglinda marii in primii 15 m); pe nisip iesirea e
+			# libera, iar ceasul de offroad (#497) face restul.
+			if not on_deck and water_only:
+				var out := _side_at(i) * side_sign
+				var wet := false
+				for k: float in [3.0, 8.0, 15.0]:
+					var q := mid + out * k
+					if _sampler.ground_y(q.x, q.z) < sea_y_walls:
+						wet = true
+						break
+				if not wet:
+					continue
 			# Parapetul declarat al pistei bate regula implicita. Pe pod NU:
 			# balustrada podului e parte din citirea podului (vezi mai sus).
 			if not on_deck and mode != -1:
@@ -14868,6 +15033,27 @@ const KERB_EDGE_SHADE: Color = Color(0.86, 0.86, 0.86)
 const KERB_RED: Color = Color(0.904, 0.160, 0.106)
 const KERB_WHITE: Color = Color(0.979, 0.979, 0.979)
 
+## Pe ce indici ai bordura (1) — scris de `_build_kerbs` cu ACELEASI conditii ca
+## mesh-ul, citit de [method kerb_at]. Gol = pista fara borduri.
+var _kerb_idx: PackedByteArray = PackedByteArray()
+
+
+## E punctul `pos` (de langa indexul `index` al buclei principale) pe o bordura?
+## Banda e KERB_WIDTH lata, inauntrul marginii soselei, pe ambele laturi; exista
+## doar unde `_build_kerbs` a pus mesh. Ieftin: un test pe octet, apoi o
+## proiectie. Il foloseste masina ca sa scuture suspensia pe bordura.
+func kerb_at(index: int, pos: Vector3) -> bool:
+	var n := _kerb_idx.size()
+	if n == 0:
+		return false
+	var i := ((index % n) + n) % n
+	if _kerb_idx[i] == 0:
+		return false
+	var lat := absf((pos - baked[i]).dot(_side_at(i)))
+	var w := width_at_index(i)
+	return lat <= w and lat >= w - KERB_WIDTH
+
+
 ## Bordurile rosu-alb de pe marginile virajelor stranse.
 ##
 ## UN SINGUR mesh pentru amandoua culorile, nu doua: culoarea vine acum din
@@ -14880,6 +15066,7 @@ const KERB_WHITE: Color = Color(0.979, 0.979, 0.979)
 ## (curbura peste 0.08 rad). Nu sunt decor, sunt SEMNAL — daca ar margini toata
 ## pista, n-ar mai spune nimic despre unde se franeaza.
 func _build_kerbs() -> void:
+	_kerb_idx = PackedByteArray()
 	# Un drum de nisip n-are borduri turnate. Semnalul lor — "aici se franeaza",
 	# citit de departe — NU se pierde: pe virajele aceleiasi piste raman
 	# chevron-urile (_build_chevrons), umarul de pietris (_build_shoulders) si,
@@ -14941,6 +15128,11 @@ func _build_kerbs() -> void:
 			st.set_color(tint)
 			st.set_uv(Vector2(u_in, v1)); st.add_vertex(in1)
 			emitted = true
+		# Segmentul i..j (i, i+1) are bordura: indexul masinii poate cadea pe oricare.
+		if _kerb_idx.is_empty():
+			_kerb_idx.resize(n)
+		_kerb_idx[i] = 1
+		_kerb_idx[(i + 1) % n] = 1
 	if not emitted:
 		return
 	st.generate_normals()

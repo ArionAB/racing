@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CareerChallenge" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/career/career_challenge.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+track = &"transfagarasan"
+title = "RED RUNNER"
+hint = "Run the tunnel light 3 times without the bus hitting you."
+rule = 1
+event = &"red_run"
+count = 3
+fail_event = &"bus_hit"

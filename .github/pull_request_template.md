@@ -14,6 +14,7 @@ Closes #
 - [ ] Pentru schimbari de fizica/gameplay: verificat headless (`--headless --fixed-fps 60`)
 - [ ] `bash tools/verify_local.sh` trece, rulat pe ramura cu main-ul adus in ea (inlocuieste CI-ul de pe GitHub)
 - [ ] Respecta constrangerile mobile (poly buget, particule, UI touch-first) daca e cazul
+- [ ] Pentru schimbari de feel (sunet, camera, impact, particule, fizica de contact): bifat elementul in `docs/feel_checklist.md`, cu `(#PR)` la capat, si scris `feel: <id>` mai sus
 
 ## Cum am testat
 

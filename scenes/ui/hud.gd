@@ -40,6 +40,11 @@ var _charge_fill_style: StyleBoxFlat
 var _charge_bolt: Label
 ## Flash-ul barii de turbo la iesirea din drift (1 -> 0 in ~0.3 s).
 var _charge_flash: float = 0.0
+var _sealed_label: Label
+var _ghost_label: Label
+var _challenge_label: Label
+var _challenge_title: String = ""
+var _challenge_failed: bool = false
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -61,6 +66,10 @@ var _offroad_label: Label
 ## „WRONG WAY" (#499): mare, rosu, pulsand cat timp mergi pe contrasens.
 var _wrong_way_label: Label
 var _wrong_way_tween: Tween
+## Popup „P3 ▲/▼" la depasiri (feel: position-change). Public ca sondele sa-l citeasca.
+var position_popup: PositionPopupScript
+
+const PositionPopupScript := preload("res://scenes/ui/position_popup.gd")
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -167,6 +176,12 @@ func _ready() -> void:
 	_wrong_way_label.add_theme_color_override("font_color", Color(1.0, 0.22, 0.18))
 	_wrong_way_label.visible = false
 	root.add_child(_wrong_way_label)
+
+	position_popup = PositionPopupScript.new()
+	position_popup.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 96)
+	position_popup.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	root.add_child(position_popup)
 
 	_message = _make_label(38)
 	_message.set_anchors_and_offsets_preset(
@@ -350,6 +365,29 @@ func _build_turbo_bar(root: Control) -> void:
 		_panel_style(int(CHARGE_H * 0.5), Color(0, 0, 0, 0.55)))
 	_charge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(_charge_bg)
+
+	# Contratimp: bara nu se mai incarca. Eticheta mica spune asta, ca
+	# jucatorul sa nu astepte o umplere care nu vine.
+	_sealed_label = _make_label(16)
+	_sealed_label.text = "SEALED"
+	_sealed_label.modulate = Color(1.0, 0.85, 0.3)
+	_sealed_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_sealed_label.visible = false
+	holder.add_child(_sealed_label)
+
+	# Contratimp cu fantoma salvata: timpul ei, ca sa stii pe cine urmaresti.
+	_ghost_label = _make_label(16)
+	_ghost_label.modulate = Color(0.75, 0.9, 1.0)
+	_ghost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_ghost_label.visible = false
+	holder.add_child(_ghost_label)
+	# Provocarea gimmick-ului (cariera): in aceeasi zona ca SEALED; cele doua
+	# moduri nu se suprapun (contratimp vs provocare).
+	_challenge_label = _make_label(16)
+	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
+	_challenge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_challenge_label.visible = false
+	holder.add_child(_challenge_label)
 
 	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
 	# marginea intunecata sa ramana vizibila si cand bara e plina.
@@ -710,12 +748,55 @@ func set_wrong_way(on: bool) -> void:
 		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 1.0, 0.35)
 
 
+## Popup de depasire: `new_pos` mai mic decat `old_pos` = ai urcat. Il cheama Race
+## din PositionWatch (pozitia tinuta, nu schimbarile de o clipa).
+func show_position_change(new_pos: int, old_pos: int) -> void:
+	position_popup.show_change(new_pos, old_pos)
+
+
 func flash_message(text: String) -> void:
 	_message.text = text
 	_message.modulate.a = 1.0
 	var tw := create_tween()
 	tw.tween_interval(1.2)
 	tw.tween_property(_message, "modulate:a", 0.0, 0.5)
+
+## Rezervor sigilat (contratimp de cariera): arata eticheta SEALED.
+func set_sealed_turbo(on: bool) -> void:
+	_sealed_label.visible = on
+
+
+## Eticheta "GHOST 3:12.4"; ms <= 0 o ascunde.
+func set_ghost_time(ms: int) -> void:
+	_ghost_label.visible = ms > 0
+	if ms > 0:
+		_ghost_label.text = "GHOST %s" % TrackCard._format_ms(ms)
+## Provocarea gimmick-ului (bonus +1 in cursa de cariera): "CHALLENGE +1:
+## <titlu>", verde pana o pici.
+func set_challenge(title: String) -> void:
+	_challenge_title = title
+	_challenge_label.text = _challenge_prefix() + title
+	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
+	_challenge_label.visible = true
+
+
+## Progresul regulii („1 / 3", „LAP 2 ✓"), langa titlu; dupa esec nu mai conteaza.
+func set_challenge_progress(text: String) -> void:
+	if _challenge_failed:
+		return
+	_challenge_label.text = _challenge_prefix() + _challenge_title \
+		+ ("   " + text if text != "" else "")
+
+
+static func _challenge_prefix() -> String:
+	return "CHALLENGE +%d: " % Career.CHALLENGE_POINTS
+
+
+func set_challenge_failed() -> void:
+	_challenge_failed = true
+	_challenge_label.text = "CHALLENGE FAILED"
+	_challenge_label.modulate = Color(1.0, 0.4, 0.35)
+
 
 func set_turbo(charge: float, boosting: bool, drifting: bool = false) -> void:
 	var filled := clampf(charge, 0.0, 1.0)

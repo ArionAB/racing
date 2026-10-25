@@ -56,6 +56,10 @@ func _ready() -> void:
 		_edge(track)
 	elif mode == "info":
 		_info(track)
+	elif mode == "ray":
+		for pair in _arg("pts", "").split(";"):
+			var xy := pair.split(",")
+			print("  raza la (%s, %s): y fizic %.2f" % [xy[0], xy[1], _ground_at(float(xy[0]), -float(xy[1]))])
 	get_tree().quit()
 
 

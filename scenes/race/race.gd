@@ -730,17 +730,19 @@ func _on_player_lap(laps: int) -> void:
 	if laps >= GameState.total_laps and state != State.FINISHED:
 		_finish_race()
 
-## Medalia cursei de cariera curente (-1 = nu e cursa de cariera).
+## Medalia cursei de cariera curente (-1 = nu e cursa de cariera); in cursa
+## normala e locul (3/2/1), in contratimp tinta atinsa.
 var _career_medal: int = -1
+## Punctele facute de cursa asta (loc + bonus), pentru ecranul de rezultate.
+var _career_points: int = 0
 var _challenge_tracker: ChallengeTracker
 var _challenge_done: bool = false
 
-## Provocarea gimmick-ului (cariera): tracker-ul asculta semnalele hazardelor
-## si ale jucatorului; HUD-ul arata eticheta si o pica o singura data.
+## Provocarea gimmick-ului e bonus (+1) in cursa normala de cariera: tracker-ul
+## asculta semnalele hazardelor si ale jucatorului; HUD-ul arata eticheta si o
+## pica o singura data. Nu in contratimp (vezi `Career.challenge_to_track`).
 func _setup_challenge() -> void:
-	if not Career.is_challenge():
-		return
-	var challenge := Career.challenge_for(Career.active_track)
+	var challenge := Career.challenge_to_track()
 	if challenge == null:
 		return
 	_challenge_tracker = ChallengeTracker.new()
@@ -794,9 +796,10 @@ func _finish_race() -> void:
 	order.sort_custom(func(a: int, b: int) -> bool:
 		return cars[a].race_position < cars[b].race_position)
 	_final_order = order
-	# Cursa de cariera: medalia vine din pozitia jucatorului (1/2/3 = aur/
-	# argint/bronz), salvata imediat, nu la apasarea unui buton.
+	# Cursa de cariera: locul da punctele (1/2/3 = 3/2/1), provocarea reusita
+	# in aceeasi cursa +1; salvate imediat, nu la apasarea unui buton.
 	_career_medal = -1
+	_career_points = 0
 	if Career.is_time_trial():
 		# Best-ul de DINAINTE: finish_time_trial il suprascrie.
 		var previous_best := int(Career.track_state(Career.active_track).tt_best_ms)
@@ -806,12 +809,10 @@ func _finish_race() -> void:
 				_ghost_recorder.build_data(Career.active_track,
 					GameState.selected_car, GameState.total_laps,
 					_player_race_ms), _player_race_ms, previous_best)
-	elif Career.is_challenge():
-		# O conditie per proba: pozitia nu conta si nu da medalie de cursa.
-		_challenge_done = Career.finish_challenge(
-			_challenge_tracker != null and _challenge_tracker.evaluate())
 	elif Career.active:
-		_career_medal = Career.finish_active(player.race_position)
+		_challenge_done = _challenge_tracker != null and _challenge_tracker.evaluate()
+		_career_medal = Career.medal_for_position(player.race_position)
+		_career_points = Career.finish_active(player.race_position, _challenge_done)
 	if GameState.champ_active:
 		GameState.record_results(_final_order)
 	if _race_record_new:
@@ -851,15 +852,8 @@ func _show_results() -> void:
 		title = _time_trial_title()
 		primary = "BACK TO CAREER"
 		_append_time_trial_targets(rows)
-	elif Career.is_challenge():
-		var challenge_title := "?"
-		if _challenge_tracker != null:
-			challenge_title = _challenge_tracker.challenge.title
-		title = "CHALLENGE — %s — %s" % [challenge_title,
-			"DONE" if _challenge_done else "FAILED"]
-		primary = "BACK TO CAREER"
 	elif Career.active:
-		title += "\n" + _career_medal_text(_career_medal)
+		title += "\n" + _career_points_text()
 		primary = "BACK TO CAREER"
 	if GameState.champ_active:
 		title = "RACE %d/%d — %s" % [GameState.champ_round + 1,
@@ -895,12 +889,25 @@ func _append_time_trial_targets(rows: Array[Dictionary]) -> void:
 		})
 
 
+## Contratimp: culoarea tintei atinse.
 func _career_medal_text(medal: int) -> String:
 	match medal:
 		Career.MEDAL_GOLD: return "GOLD"
 		Career.MEDAL_SILVER: return "SILVER"
 		Career.MEDAL_BRONZE: return "BRONZE"
-	return "NO MEDAL — finish top 3"
+	return "NO MEDAL"
+
+
+## Cursa de cariera: „1ST PLACE +3  ·  CHALLENGE +1  =  4 PTS". Sub podium
+## locul da +0; fara provocare pe pista, doar locul. Spune ce a facut cursa
+## asta, nu cat e pe raft (asta o spune raftul).
+func _career_points_text() -> String:
+	var text := "%s PLACE +%d" % [_ordinal(player.race_position).to_upper(),
+		maxi(_career_medal, 0)]
+	if _challenge_tracker != null:
+		text += "  ·  CHALLENGE " + (("+%d" % Career.CHALLENGE_POINTS)
+			if _challenge_done else "FAILED")
+	return "%s  =  %d PTS" % [text, _career_points]
 
 func _on_results_primary() -> void:
 	if Career.active:

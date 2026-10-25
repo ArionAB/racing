@@ -7,14 +7,19 @@ extends Node
 ##  1. Progresul e pe PISTA si pe RIVAL, niciodata pe lume. Gruparea pistelor in
 ##     lumi e DATE (config) si se poate schimba; daca medaliile ar sta sub
 ##     lume, o regrupare le-ar pierde. Singura cheie pe lume e cupa.
-##  2. Stampilele se CALCULEAZA din progres, nu se stocheaza. Un total salvat
+##  2. Punctele se CALCULEAZA din progres, nu se stocheaza. Un total salvat
 ##     separat se poate desincroniza de medalii; unul derivat nu.
+##
+## Punctajul (decizia dezvoltatorului, 25 oct 2026, dupa sesiunea la volan):
+## locul 1/2/3 = 3/2/1 puncte (= valoarea medaliei), provocarea gimmick-ului
+## reusita in ACEEASI cursa = +1 bonus. Nu exista proba separata de provocare
+## si nicio „stampila" plata: locul mai bun plateste mai mult. Contratimpul nu
+## da puncte pana nu are tinte (brief §4.2).
 
 signal progress_changed
 
-## CHALLENGE e o cursa normala (cu AI) cu `ChallengeTracker` pornit; nu da
-## medalie de cursa, doar bifa provocarii.
-enum Mode { RACE, TIME_TRIAL, CHALLENGE }
+## RACE poarta si provocarea pistei (bonus +1, vezi `challenge_to_track`).
+enum Mode { RACE, TIME_TRIAL }
 
 const CONFIG_PATH := "res://scenes/career/data/career_config.tres"
 ## Versiunea schemei din `career.cfg`. Un fisier cu versiune mai mare vine de la
@@ -24,6 +29,12 @@ const MEDAL_NONE := 0
 const MEDAL_BRONZE := 1
 const MEDAL_SILVER := 2
 const MEDAL_GOLD := 3
+## Bonusul provocarii reusite in cursa; un rival batut = cat o victorie
+## (implicit, rivalii nu sunt construiti — brief §12).
+const CHALLENGE_POINTS := 1
+const RIVAL_POINTS := 3
+## Maximul pe o pista: locul 1 + bonusul.
+const MAX_TRACK_POINTS := MEDAL_GOLD + CHALLENGE_POINTS
 
 var config: CareerConfig
 ## Suprascris de sonda cu o cale temporara, ca sa nu atinga salvarea reala.
@@ -167,7 +178,8 @@ func is_cup_won(world_id: StringName) -> bool:
 	return bool(_cups.get(world_id, false))
 
 
-## 1 -> aur, 2 -> argint, 3 -> bronz, restul nimic.
+## 1 -> aur, 2 -> argint, 3 -> bronz, restul nimic. Valoarea medaliei E
+## punctajul locului (3/2/1), de aceea nu exista o functie separata de puncte.
 static func medal_for_position(position: int) -> int:
 	match position:
 		1: return MEDAL_GOLD
@@ -176,43 +188,50 @@ static func medal_for_position(position: int) -> int:
 	return MEDAL_NONE
 
 
-## Stampile castigate: pe piesele din lumi (o pista fara lume nu conteaza),
-## +1 pentru fiecare dintre medalia de cursa, medalia de contratimp si
-## provocare, plus +1 per rival batut.
-func stamps() -> int:
+## Punctele unei piste: locul (3/2/1) + bonusul provocarii. Fiecare componenta
+## isi tine maximul separat: locul 1 fara provocare intr-o cursa si locul 3 cu
+## provocarea reusita in alta dau impreuna 3 + 1 — bonusul se poate vana si
+## intr-o cursa ulterioara, nu doar in cea cu locul cel mai bun.
+func track_points(id: StringName) -> int:
+	var state := track_state(id)
+	return int(state.race_medal) + (CHALLENGE_POINTS if bool(state.challenge) else 0)
+
+
+## Punctele castigate: pe pistele din lumi (o pista fara lume nu conteaza),
+## plus RIVAL_POINTS per rival batut. Contratimpul nu intra: fara tinte, o
+## medalie de contratimp nu exista inca (brief §4.2).
+func points() -> int:
 	var total := 0
 	for world in config.worlds:
 		for track_id in world.tracks:
-			var state := track_state(track_id)
-			total += int(int(state.race_medal) > 0) + int(int(state.tt_medal) > 0) \
-				+ int(bool(state.challenge))
+			total += track_points(track_id)
 		if world.rival != &"" and bool(_rivals.get(world.rival, false)):
-			total += 1
+			total += RIVAL_POINTS
 	return total
 
 
-func max_stamps() -> int:
+func max_points() -> int:
 	var total := 0
 	for world in config.worlds:
-		total += 3 * world.tracks.size()
+		total += MAX_TRACK_POINTS * world.tracks.size()
 		if world.rival != &"":
-			total += 1
+			total += RIVAL_POINTS
 	return total
 
 
 func progress_fraction() -> float:
-	var maximum := max_stamps()
-	return float(stamps()) / float(maximum) if maximum > 0 else 0.0
+	var maximum := max_points()
+	return float(points()) / float(maximum) if maximum > 0 else 0.0
 
 
 func is_world_unlocked(world: CareerWorld) -> bool:
-	return world.free or stamps() >= world.stamps_to_unlock
+	return world.free or points() >= world.points_to_unlock
 
 
-func stamps_missing(world: CareerWorld) -> int:
+func points_missing(world: CareerWorld) -> int:
 	if world.free:
 		return 0
-	return maxi(0, world.stamps_to_unlock - stamps())
+	return maxi(0, world.points_to_unlock - points())
 
 
 ## Cate medalii de fiecare culoare (cursa + contratimp) are jucatorul in
@@ -272,27 +291,33 @@ func start_track(id: StringName, mode: Mode = Mode.RACE) -> void:
 		GameState.start_race()
 
 
-## Inregistreaza rezultatul cursei de cariera. Returneaza medalia castigata
-## acum (0 si daca nu e cursa de cariera). `active` ramane true pana la
-## `leave()`: ecranul de rezultate inca apartine cursei.
-func finish_active(position: int) -> int:
+## Inregistreaza rezultatul cursei de cariera: locul da medalia (= punctele
+## locului), `challenge_done` pune bifa provocarii (+CHALLENGE_POINTS; se
+## ignora pe o pista fara provocare). Returneaza punctele facute ACUM de cursa
+## asta (0 si daca nu e cursa de cariera) — nu diferenta fata de ce era salvat:
+## ecranul de rezultate spune ce ai facut, raftul spune ce ai strans. Bifa si
+## medalia nu se pierd la o cursa mai slaba (pastram maximul). `active` ramane
+## true pana la `leave()`: ecranul de rezultate inca apartine cursei.
+func finish_active(position: int, challenge_done: bool = false) -> int:
 	if not active:
-		return MEDAL_NONE
+		return 0
 	var medal := medal_for_position(position)
 	set_race_medal(active_track, medal)
-	return medal
-
-
-func is_challenge() -> bool:
-	return active and active_mode == Mode.CHALLENGE
-
-
-## Rezultatul unei provocari: bifa se pune doar la reusita si nu se pierde la
-## un esec ulterior (ca medaliile, pastram maximul). Returneaza `success`.
-func finish_challenge(success: bool) -> bool:
-	if is_challenge() and success:
+	var bonus := 0
+	if challenge_done and challenge_for(active_track) != null:
 		set_challenge(active_track)
-	return success and is_challenge()
+		bonus = CHALLENGE_POINTS
+	return medal + bonus
+
+
+## Provocarea de urmarit in cursa curenta, sau null. Doar in RACE: provocarea
+## e bonus in cursa normala (cu adversari si trafic), nu proba separata. In
+## contratimp nu exista (singur pe pista, jumatate din contracte — trafic,
+## autobuz — n-ar avea ce masura).
+func challenge_to_track() -> CareerChallenge:
+	if not active or active_mode != Mode.RACE:
+		return null
+	return challenge_for(active_track)
 
 
 func is_time_trial() -> bool:

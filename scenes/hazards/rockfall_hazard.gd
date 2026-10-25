@@ -135,6 +135,11 @@ var route_pause: float = DEFAULT_ROUTE_PAUSE
 ## (vezi GRAVITY). Stins = urmeaza exact cota curbei (acelasi contract ca
 ## `PathMover.stick_to_ground`).
 var stick_to_ground: bool = true
+## Cu traseu: modelul se ROSTOGOLESTE pe distanta parcursa (implicit, bolovanul).
+## Stins = modelul doar ALUNECA, fara sa se roteasca: sania de lizzatura
+## (Carrara, POI G) coboara jgheabul pe talpa ei, iar o sanie care se da peste
+## cap ar fi absurda. Directia de miscare (deci si ghiontul) ramane aceeasi.
+@export var roll_model: bool = true
 
 ## Modelul bolovanului: GLB-ul, piesa din el (gol = tot), scara. Null = cel
 ## implicit (`DEFAULT_MODEL`). Vin de pe HazardMarker, grupul „Model".
@@ -588,6 +593,8 @@ func _roll_along(wanted: Vector3) -> void:
 	if flat.length() > 0.001:
 		_move_dir = flat.normalized()
 		_roll_axis = Vector3.UP.cross(_move_dir).normalized()
+	if not roll_model:
+		return # sania aluneca: directia de miscare s-a retinut, rotirea nu
 	_pivot.rotate(_roll_axis, -dist / _radius)
 
 

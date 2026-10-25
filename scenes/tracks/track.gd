@@ -4357,6 +4357,24 @@ static func themes() -> Dictionary:
 		"scarp_tint": Color(0.80, 0.77, 0.72),
 	}, true)
 	_themes_cache["carrara_real"] = cr
+	# CARRARA, VARIANTA A2 (runda 2 a testului de mostra): ca A, dar fara "desert". Criticii
+	# orbi au citit A ca desert-canion (dune, ceata piersica, copac singur): relieful campului
+	# departat se aplatizeaza (`dune_scale` 0), cerul si ceata trec de la piersica la alb-cald
+	# neutru, praful se trage spre gri-bej. Soarele auriu si marmura crem-aurie RAMAN (ele au
+	# scos "iarna").
+	var ca2: Dictionary = (_themes_cache["carrara"] as Dictionary).duplicate()
+	ca2.merge({
+		"dune_scale": 0.0,
+		"sky_top": Color.html("2A5BA6"),
+		"sky_horizon": Color.html("EDE6D8"),
+		"fog": Color.html("E2DCD0"),
+		"fog_begin": 150.0,
+		"ground_tint": Color(0.94, 0.97, 0.79),
+		"dirt_road_tint": Color(0.83, 0.84, 0.83),
+		"hill_color": Color(0.60, 0.56, 0.47),
+		"scarp_tint": Color(0.80, 0.77, 0.66),
+	}, true)
+	_themes_cache["carrara2"] = ca2
 	return _themes_cache
 
 
@@ -5682,6 +5700,7 @@ func rebuild() -> void:
 	_sampler.bluffs = _node_bluffs()
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
+	_sampler.dune_scale = float(theme_flag("dune_scale", 1.0))
 	_sampler.shore_in = float(theme_flag("shore_band_in",
 		TrackSideSampler.SHORE_BAND_IN))
 	_sampler.shore_out = float(theme_flag("shore_band_out",

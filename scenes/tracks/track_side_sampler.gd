@@ -198,6 +198,10 @@ var _widths: PackedFloat32Array
 var _total_len: float
 ## Curbura precalculata per index — se cere de multe ori, se calculeaza o data.
 var _curvature: PackedFloat32Array
+## Cat din relieful de dune (mare + detaliu) ramane: 1.0 = comportamentul vechi,
+## bit-identic; 0.0 = camp departat PLAT la cota medie a soselei. Cheia de tema
+## `dune_scale` (Carrara: o cariera nu sta intr-un camp de dune).
+var dune_scale: float = 1.0
 ## Faza zgomotului de dune, ca terenul sa difere de la o pista la alta.
 var _dune_phase: float = 0.0
 ## Campul de dune: FBM de simplex, instantiat O DATA — ground_y se apeleaza de
@@ -1687,7 +1691,7 @@ static func _ring_window(f: float, f0: float, f1: float, fade: float) -> float:
 ## ~1.9 m fata de 2.3 m inainte; vaile adanci le reteaza oricum clamp-ul
 ## de -1 m din ground_y.
 func _dunes(wx: float, wz: float) -> float:
-	return _noise.get_noise_2d(wx, wz) * 7.0
+	return _noise.get_noise_2d(wx, wz) * 7.0 * dune_scale
 
 
 ## Dune MICI: zgomot de detaliu la ~11 m lungime de unda, ±0.35 m amplitudine.
@@ -1704,9 +1708,9 @@ func _dunes(wx: float, wz: float) -> float:
 ## Amplitudinea (±0.35 m) e departe de pragul de ±3.5 m/50 m din style_bible
 ## §11.3, deci masinile care ies de pe drum nu sar.
 func _detail_dunes(wx: float, wz: float) -> float:
-	return sin(wx * 0.57 + _dune_phase * 3.0) \
+	return (sin(wx * 0.57 + _dune_phase * 3.0) \
 		* cos(wz * 0.61 - _dune_phase) * 0.22 \
-		+ sin((wx + wz) * 0.43 + _dune_phase * 5.0) * 0.13
+		+ sin((wx + wz) * 0.43 + _dune_phase * 5.0) * 0.13) * dune_scale
 
 
 ## Punctele benzilor secundare, pentru consumatorii care isi fac propria

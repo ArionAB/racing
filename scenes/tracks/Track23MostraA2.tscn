@@ -1,0 +1,107 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
+[ext_resource type="Script" path="res://scenes/tracks/carrara_mostra.gd" id="2_mostra"]
+[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="3_prop"]
+[ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="4_peak"]
+[ext_resource type="PackedScene" path="res://assets/models/baikal/vehicles/kamaz_truck.glb" id="m0_kamaz_truck"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/rusted_digger.glb" id="m1_rusted_digger"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/rocks/scree_cone.glb" id="m2_scree_cone"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/beech_tree_a.glb" id="m3_beech_tree_a"]
+[ext_resource type="PackedScene" path="res://assets/models/transfagarasan/plants/beech_tree_b.glb" id="m4_beech_tree_b"]
+[ext_resource type="PackedScene" path="res://assets/models/stromboli/plants/ginestra_bush.glb" id="m5_ginestra_bush"]
+
+[sub_resource type="Curve3D" id="Curve3D_mostra"]
+closed = true
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 7, -12, 0, 0, 0, 0, 0, 0, 40, 7, -12, 0, 0, 0, 0, 0, 0, 80, 7, -12, 0, 0, 0, 0, 0, 0, 110, 5.125, -12, 0, 0, 0, 0, 0, 0, 130, 3.875, -12, 0, 0, 0, 0, 0, 0, 140, 3.25, -12, 0, 0, 0, 0, 0, 0, 152.124, 2.375, -5, 0, 0, 0, 0, 0, 0, 152.124, 1.5, 9, 0, 0, 0, 0, 0, 0, 140, 0.625, 16, 0, 0, 0, 0, 0, 0, 130, 0, 16, 0, 0, 0, 0, 0, 0, 110, 0, 16, 0, 0, 0, 0, 0, 0, 70, 0, 16, 0, 0, 0, 0, 0, 0, 30, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, -40, 1.386, 16, 0, 0, 0, 0, 0, 0, -70, 2.426, 16, 0, 0, 0, 0, 0, 0, -80, 2.772, 16, 0, 0, 0, 0, 0, 0, -92.1244, 3.257, 9, 0, 0, 0, 0, 0, 0, -92.1244, 3.743, -5, 0, 0, 0, 0, 0, 0, -80, 4.228, -12, 0, 0, 0, 0, 0, 0, -70, 4.574, -12, 0, 0, 0, 0, 0, 0, -40, 5.614, -12),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 22
+
+[node name="Track23" type="Node3D"]
+script = ExtResource("1_track")
+custom_name = "Mostra Carrara A2"
+custom_theme = "carrara2"
+custom_world_seed_name = "carrara_mostra"
+custom_half_width = 7.0
+custom_gate_model = "none"
+custom_dirt_ranges = Array[Vector2]([Vector2(0, 1)])
+traffic_count = 0
+
+[node name="Path" type="Path3D" parent="."]
+curve = SubResource("Curve3D_mostra")
+
+[node name="Mostra" type="Node3D" parent="."]
+script = ExtResource("2_mostra")
+marble_class = "carrara_marble"
+pool_y = 0.32
+cube_y = -0.15
+stripes = true
+block_grid = true
+grid_y = -0.15
+
+[node name="Peaks" type="Node3D" parent="."]
+
+[node name="MasivSpate" type="Marker3D" parent="Peaks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.00, 45.00, -95.00)
+gizmo_extents = 90
+script = ExtResource("4_peak")
+radius_m = 90
+
+[node name="DecorManual" type="Node3D" parent="."]
+script = ExtResource("3_prop")
+
+[node name="Camion_parcat" parent="DecorManual" instance=ExtResource("m0_kamaz_truck")]
+transform = Transform3D(0.00000, 0, 1.00000, 0, 1.000, 0, -1.00000, 0, 0.00000, 113.00, -0.260, 26.00)
+
+[node name="Camion_2" parent="DecorManual" instance=ExtResource("m0_kamaz_truck")]
+transform = Transform3D(0.03490, 0, 0.99939, 0, 1.000, 0, -0.99939, 0, 0.03490, 125.00, -0.270, 27.00)
+
+[node name="Excavator" parent="DecorManual" instance=ExtResource("m1_rusted_digger")]
+transform = Transform3D(-0.93969, 0, 0.34202, 0, 1.000, 0, -0.34202, 0, -0.93969, 74.00, 0.270, 37.00)
+
+[node name="Con_1" parent="DecorManual" instance=ExtResource("m2_scree_cone")]
+transform = Transform3D(0.50000, 0, 0.00000, 0, 0.500, 0, -0.00000, 0, 0.50000, 16.00, -0.280, 27.40)
+
+[node name="Con_2" parent="DecorManual" instance=ExtResource("m2_scree_cone")]
+transform = Transform3D(-0.55000, 0, 0.00000, 0, 0.550, 0, -0.00000, 0, -0.55000, 44.00, -0.190, 27.40)
+
+[node name="Con_3" parent="DecorManual" instance=ExtResource("m2_scree_cone")]
+transform = Transform3D(-0.50000, 0, 0.00000, 0, 0.500, 0, -0.00000, 0, -0.50000, 26.00, -0.010, 5.60)
+
+[node name="Con_4" parent="DecorManual" instance=ExtResource("m2_scree_cone")]
+transform = Transform3D(0.55000, 0, 0.00000, 0, 0.550, 0, -0.00000, 0, 0.55000, 60.00, -0.010, 5.60)
+
+[node name="Fag_1" parent="DecorManual" instance=ExtResource("m3_beech_tree_a")]
+transform = Transform3D(0.93969, 0, 0.34202, 0, 1.000, 0, -0.34202, 0, 0.93969, 98.00, 5.100, -0.50)
+
+[node name="Fag_2" parent="DecorManual" instance=ExtResource("m4_beech_tree_b")]
+transform = Transform3D(0.19101, 0, 1.08329, 0, 1.100, 0, -1.08329, 0, 0.19101, 104.00, 4.500, 0.20)
+
+[node name="Fag_3" parent="DecorManual" instance=ExtResource("m3_beech_tree_a")]
+transform = Transform3D(-0.68944, 0, 0.57851, 0, 0.900, 0, -0.57851, 0, -0.68944, 110.00, 4.280, -0.60)
+
+[node name="Fag_4" parent="DecorManual" instance=ExtResource("m4_beech_tree_b")]
+transform = Transform3D(-0.93969, 0, -0.34202, 0, 1.000, 0, 0.34202, 0, -0.93969, 117.00, 3.750, 0.00)
+
+[node name="Fag_5" parent="DecorManual" instance=ExtResource("m3_beech_tree_a")]
+transform = Transform3D(-0.19101, 0, -1.08329, 0, 1.100, 0, 1.08329, 0, -0.19101, 124.00, 3.420, -0.40)
+
+[node name="Fag_6" parent="DecorManual" instance=ExtResource("m4_beech_tree_b")]
+transform = Transform3D(0.76604, 0, -0.64279, 0, 1.000, 0, 0.64279, 0, 0.76604, 131.00, 2.910, 0.30)
+
+[node name="Fag_7" parent="DecorManual" instance=ExtResource("m3_beech_tree_a")]
+transform = Transform3D(0.76604, 0, 0.64279, 0, 1.000, 0, -0.64279, 0, 0.76604, 137.00, 2.610, -0.50)
+
+[node name="Ginestra_1" parent="DecorManual" instance=ExtResource("m5_ginestra_bush")]
+transform = Transform3D(1.37873, 0, 0.24311, 0, 1.400, 0, -0.24311, 0, 1.37873, 101.00, 5.300, -2.80)
+
+[node name="Ginestra_2" parent="DecorManual" instance=ExtResource("m5_ginestra_bush")]
+transform = Transform3D(-0.24311, 0, 1.37873, 0, 1.400, 0, -1.37873, 0, -0.24311, 114.00, 4.400, -2.60)
+
+[node name="Ginestra_3" parent="DecorManual" instance=ExtResource("m5_ginestra_bush")]
+transform = Transform3D(-1.31557, 0, -0.47883, 0, 1.400, 0, 0.47883, 0, -1.31557, 128.00, 3.550, -2.80)
+
+[node name="Ginestra_4" parent="DecorManual" instance=ExtResource("m5_ginestra_bush")]
+transform = Transform3D(-1.31557, 0, -0.47883, 0, 1.400, 0, 0.47883, 0, -1.31557, 124.00, 0.020, 32.00)

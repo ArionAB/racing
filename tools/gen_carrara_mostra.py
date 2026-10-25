@@ -90,6 +90,31 @@ PROPS = [
 ]
 
 
+# A2 (runda 2): fara copac singur — fagii in rand pe taluzul dintre cele doua drumuri (treapta
+# terenului de la est de gradoni, ~4 m pe ~5 m); masivul TerrainPeak e fundalul gradonilor, camion x2, excavator, conuri de moloz la baza peretilor.
+PEAK = ("MasivSpate", 40.0, 45.0, -95.0, 90.0)   # nume, x, y(cota varf), z, raza
+PROPS2 = [
+    ("Camion_parcat", "baikal/vehicles/kamaz_truck.glb", 113.0, 26.0, 90.0, 1.0, "truck"),
+    ("Camion_2", "baikal/vehicles/kamaz_truck.glb", 125.0, 27.0, 88.0, 1.0, "truck2"),
+    ("Excavator", "vehicles/rusted_digger.glb", 74.0, 37.0, 160.0, 1.0, "digger"),
+    ("Con_1", "transfagarasan/rocks/scree_cone.glb", 16.0, 27.4, 0.0, 0.5, "cone1"),
+    ("Con_2", "transfagarasan/rocks/scree_cone.glb", 44.0, 27.4, 180.0, 0.55, "cone2"),
+    ("Con_3", "transfagarasan/rocks/scree_cone.glb", 26.0, 5.6, 180.0, 0.5, "cone3"),
+    ("Con_4", "transfagarasan/rocks/scree_cone.glb", 60.0, 5.6, 0.0, 0.55, "cone4"),
+    ("Fag_1", "transfagarasan/plants/beech_tree_a.glb", 98.0, -0.5, 20.0, 1.0, "fag1"),
+    ("Fag_2", "transfagarasan/plants/beech_tree_b.glb", 104.0, 0.2, 80.0, 1.1, "fag2"),
+    ("Fag_3", "transfagarasan/plants/beech_tree_a.glb", 110.0, -0.6, 140.0, 0.9, "fag3"),
+    ("Fag_4", "transfagarasan/plants/beech_tree_b.glb", 117.0, 0.0, 200.0, 1.0, "fag4"),
+    ("Fag_5", "transfagarasan/plants/beech_tree_a.glb", 124.0, -0.4, 260.0, 1.1, "fag5"),
+    ("Fag_6", "transfagarasan/plants/beech_tree_b.glb", 131.0, 0.3, 320.0, 1.0, "fag6"),
+    ("Fag_7", "transfagarasan/plants/beech_tree_a.glb", 137.0, -0.5, 40.0, 1.0, "fag7"),
+    ("Ginestra_1", "stromboli/plants/ginestra_bush.glb", 101.0, -2.8, 10.0, 1.4, "gin3"),
+    ("Ginestra_2", "stromboli/plants/ginestra_bush.glb", 114.0, -2.6, 100.0, 1.4, "gin4"),
+    ("Ginestra_3", "stromboli/plants/ginestra_bush.glb", 128.0, -2.8, 200.0, 1.4, "gin5"),
+    ("Ginestra_4", "stromboli/plants/ginestra_bush.glb", 124.0, 32.0, 200.0, 1.4, "gin1"),
+]
+
+
 def curve_resource(pts, ys):
     data = []
     for (x, z), y in zip(pts, ys):
@@ -107,14 +132,17 @@ def curve_resource(pts, ys):
     )
 
 
-def scene(theme, marble_class, label, ground, pts, ys):
+def scene(theme, marble_class, label, ground, pts, ys, a2=False):
     ext = [
         '[ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]',
         '[ext_resource type="Script" path="res://scenes/tracks/carrara_mostra.gd" id="2_mostra"]',
         '[ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="3_prop"]',
     ]
+    props = PROPS2 if a2 else PROPS
+    if a2:
+        ext.append('[ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="4_peak"]')
     glbs = {}
-    for _, glb, *_r in PROPS:
+    for _, glb, *_r in props:
         if glb not in glbs:
             glbs[glb] = "m%d_%s" % (len(glbs), glb.split("/")[-1].replace(".glb", ""))
             ext.append('[ext_resource type="PackedScene" path="res://assets/models/%s" id="%s"]'
@@ -138,10 +166,24 @@ def scene(theme, marble_class, label, ground, pts, ys):
     out.append('marble_class = "%s"' % marble_class)
     out.append("pool_y = %g" % (ground.get("pool", 0.0) + 0.12))
     out.append("cube_y = %g" % ground.get("cubes", 0.0))
+    if a2:
+        out.append("stripes = true")
+        out.append("block_grid = true")
+        out.append("grid_y = %g" % ground.get("cubes", 0.0))
     out.append("")
+    if a2:
+        nm, px, py, pz, pr = PEAK
+        out.append('[node name="Peaks" type="Node3D" parent="."]')
+        out.append("")
+        out.append('[node name="%s" type="Marker3D" parent="Peaks"]' % nm)
+        out.append("transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, %.2f, %.2f, %.2f)" % (px, py, pz))
+        out.append("gizmo_extents = %g" % pr)
+        out.append('script = ExtResource("4_peak")')
+        out.append("radius_m = %g" % pr)
+        out.append("")
     out.append('[node name="DecorManual" type="Node3D" parent="."]')
     out.append('script = ExtResource("3_prop")')
-    for name, glb, x, z, yaw, sc, key in PROPS:
+    for name, glb, x, z, yaw, sc, key in props:
         c, s_ = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
         y = ground.get(key, 0.0)
         out.append("")
@@ -154,11 +196,19 @@ def scene(theme, marble_class, label, ground, pts, ys):
 
 def main():
     ground = {}
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("--"):
         ground = json.load(open(sys.argv[1]))
     pts = build_path()
     ys, total = heights(pts)
     print("puncte: %d, lungime ~%.0f m" % (len(pts), total))
+    if "--a2" in sys.argv:
+        sys.argv.remove("--a2")
+        if len(sys.argv) > 1:
+            ground = json.load(open(sys.argv[1]))
+        with open("scenes/tracks/Track23MostraA2.tscn", "w", encoding="utf-8", newline="\n") as f:
+            f.write(scene("carrara2", "carrara_marble", "Mostra Carrara A2", ground, pts, ys, True))
+        print("scris scenes/tracks/Track23MostraA2.tscn")
+        return
     for fname, theme, cls, label in (
             ("scenes/tracks/Track23Mostra.tscn", "carrara", "carrara_marble", "Mostra Carrara A"),
             ("scenes/tracks/Track23MostraB.tscn", "carrara_real", "carrara_marble_real",

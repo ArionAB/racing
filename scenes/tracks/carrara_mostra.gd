@@ -27,10 +27,22 @@ extends Node3D
 @export var pool_y: float = 0.1
 ## Cota solului unde stau cuburile (masurata pe teren in scena).
 @export var cube_y: float = 0.0
+## A2 (runda 2): dungi de fir REGULATE pe fetele verticale — benzi orizontale de STRIPE_H metri,
+## cu intunecare alternanta in vertex color (zero material nou).
+@export var stripes: bool = false
+## A2: cuburile in GRILA regulata, aliniata cu drumul, stive de 2, cateva cu o fata "taiata
+## proaspat" (mai deschisa decat restul, care sunt intunecate de intemperii).
+@export var block_grid: bool = false
+## Cota solului pe care sta grila de blocuri (A2).
+@export var grid_y: float = 0.0
 
 const FACE_ROWS: int = 3
 ## Lungimea maxima a unui segment de fata / celula de terasa (m).
 const SEG_M: float = 10.0
+## Inaltimea unei benzi de dunga de fir (A2) si factorul LINIAR al benzii intunecate (~10% pe V
+## dupa gama + tonemap; masurat: ~10% pe luminanta la 0.70). Vertex color doar intuneca (memoria surfacetool-clamp-vertex-color).
+const STRIPE_H: float = 0.7
+const STRIPE_DARK: float = 0.70
 ## Treimea de jos a fetei e patina (MARBLE_GREY amestecat spre alb).
 const PATINA_MIX: float = 0.45
 const PATINA_FRACTION: float = 0.35
@@ -155,6 +167,9 @@ func _build_counter_wall() -> void:
 
 ## Cuburi de marmura (1.5-3 m) stivuite langa drum, la est de zidul-contra, in soare.
 func _build_cubes() -> void:
+	if block_grid:
+		_build_block_grid()
+		return
 	# (x, z, latura, yaw grade, cota de sus a stivei pe care sta: 0 = pe sol)
 	var cubes: Array[Vector4] = [
 		Vector4(66.0, 26.5, 3.0, 8.0),
@@ -195,6 +210,51 @@ func _build_cubes() -> void:
 		col.transform = Transform3D(Basis.from_euler(Vector3(0, deg_to_rad(c.w), 0)),
 				mi.position)
 		_body.add_child(col)
+
+
+## A2: grila de blocuri 2.6-3 m, doua randuri aliniate cu drumul (axa X), stive de 2 pe unele
+## coloane. Blocurile sunt intunecate de intemperii (0.80 liniar); 5 au fetele +X si -Z (cele pe
+## care le vede soferul) taiate proaspat: alb curat.
+func _build_block_grid() -> void:
+	var rows: Array[float] = [26.5, 30.4]
+	var sizes: Array[float] = [3.0, 2.8, 2.6, 3.0, 2.8, 2.6, 3.0]
+	var stack_on: Array[int] = [1, 3, 4, 6, 2]   # coloane care primesc un bloc deasupra
+	var fresh: Array[int] = [0, 3, 8, 10, 12]    # indici (in ordinea de creare) cu fata proaspata
+	var k := 0
+	var made: Array[Vector3] = []
+	for r in rows.size():
+		for i in sizes.size():
+			var sz := sizes[(i + r) % sizes.size()]
+			var cx := 62.0 + float(i) * 3.7
+			made.append(Vector3(cx, rows[r], sz))
+			_grid_cube(k, Vector3(cx, grid_y + sz * 0.5, rows[r]), sz, k in fresh)
+			k += 1
+			if (i in stack_on and r == 0) or (i in [0, 5] and r == 1):
+				var up_sz := 2.4
+				_grid_cube(k, Vector3(cx, grid_y + sz + up_sz * 0.5, rows[r]), up_sz, k in fresh)
+				k += 1
+	print("carrara_mostra: grila de blocuri: %d cuburi" % k)
+
+
+func _grid_cube(k: int, center: Vector3, side: float, fresh: bool) -> void:
+	var weathered := Color(0.80, 0.80, 0.80)
+	var cols := PackedColorArray([weathered, weathered, Color.WHITE, weathered,
+		weathered, weathered])
+	if fresh:
+		cols[0] = Color.WHITE   # +X
+		cols[5] = Color.WHITE   # -Z
+	var mi := MeshInstance3D.new()
+	mi.name = "Cub_%d" % k
+	mi.mesh = _cube_mesh(side, cols)
+	mi.material_override = _marble
+	mi.position = center
+	add_child(mi)
+	var col := CollisionShape3D.new()
+	var bs := BoxShape3D.new()
+	bs.size = Vector3(side, side, side)
+	col.shape = bs
+	col.position = center
+	_body.add_child(col)
 
 
 # -------------------------------------------------------------------- balta
@@ -241,6 +301,9 @@ func _face(mesh_name: String, a: Vector2, b: Vector2, y0: float, y1: float,
 		pa = pb
 		pb = t
 	var segs := maxi(1, ceili((pb - pa).length() / SEG_M))
+	if stripes:
+		_face_striped(mesh_name, pa, pb, y0, y1, n, segs)
+		return
 	var cols_n := segs + 1
 	var verts := PackedVector3Array()
 	var normals := PackedVector3Array()
@@ -274,6 +337,75 @@ func _face(mesh_name: String, a: Vector2, b: Vector2, y0: float, y1: float,
 	mi.mesh = _array_mesh(verts, normals, colors, uvs, idx)
 	mi.material_override = _marble
 	add_child(mi)
+
+
+## Varianta A2 a fetei: benzi orizontale de STRIPE_H m, fiecare un strat de culoare plata (vertecsi
+## dubli la muchie, ca benzile sa aiba muchie crunta, nu gradient Gouraud). Benzile impare sunt mai
+## inchise; treimea de jos poarta in plus patina (ca in varianta fara dungi).
+func _face_striped(mesh_name: String, pa: Vector3, pb: Vector3, y0: float, y1: float,
+		n: Vector3, segs: int) -> void:
+	var cols_n := segs + 1
+	var verts := PackedVector3Array()
+	var normals := PackedVector3Array()
+	var colors := PackedColorArray()
+	var uvs := PackedVector2Array()
+	var idx := PackedInt32Array()
+	var patina := Palette.color(Palette.MARBLE_GREY).lerp(Color.WHITE, PATINA_MIX)
+	var h := y1 - y0
+	var bands := maxi(1, ceili(h / STRIPE_H))
+	for b in bands:
+		# Benzile se numara de SUS in jos, ca modelul sa fie acelasi indiferent de picior.
+		var ya := y1 - float(b + 1) * STRIPE_H
+		var yb := y1 - float(b) * STRIPE_H
+		ya = maxf(ya, y0)
+		var shade := STRIPE_DARK if (b % 2) == 1 else 1.0
+		var col := Color(shade, shade, shade)
+		if (ya - y0) < h * PATINA_FRACTION:
+			col = Color(col.r * patina.r, col.g * patina.g, col.b * patina.b)
+		var base := verts.size()
+		for yy in [ya, yb]:
+			for c in cols_n:
+				var p := pa.lerp(pb, float(c) / float(segs))
+				verts.append(Vector3(p.x, yy, p.z))
+				normals.append(n)
+				colors.append(col)
+				uvs.append(Vector2.ZERO)
+		for c in segs:
+			var i0 := base + c
+			var i1 := i0 + 1
+			var i2 := i0 + cols_n
+			var i3 := i2 + 1
+			idx.append_array([i0, i2, i3, i0, i3, i1])
+	var mi := MeshInstance3D.new()
+	mi.name = mesh_name
+	mi.mesh = _array_mesh(verts, normals, colors, uvs, idx)
+	mi.material_override = _marble
+	add_child(mi)
+
+
+## Cub cu culoare de vertex PE FATA (A2): `face_cols` = +X, -X, +Y, -Y, +Z, -Z.
+func _cube_mesh(side: float, face_cols: PackedColorArray) -> ArrayMesh:
+	var h := side * 0.5
+	var dirs: Array[Vector3] = [Vector3.RIGHT, Vector3.LEFT, Vector3.UP, Vector3.DOWN,
+		Vector3.BACK, Vector3.FORWARD]
+	var verts := PackedVector3Array()
+	var normals := PackedVector3Array()
+	var colors := PackedColorArray()
+	var uvs := PackedVector2Array()
+	var idx := PackedInt32Array()
+	for f in 6:
+		var nrm := dirs[f]
+		var up := Vector3.UP if absf(nrm.y) < 0.5 else Vector3.FORWARD
+		var right := up.cross(nrm)
+		var base := verts.size()
+		# stanga-jos, stanga-sus, dreapta-sus, dreapta-jos (vazut din exterior)
+		for corner in [Vector2(-1, -1), Vector2(-1, 1), Vector2(1, 1), Vector2(1, -1)]:
+			verts.append(nrm * h + right * corner.x * h + up * corner.y * h)
+			normals.append(nrm)
+			colors.append(face_cols[f])
+			uvs.append(Vector2.ZERO)
+		idx.append_array([base, base + 1, base + 2, base, base + 2, base + 3])
+	return _array_mesh(verts, normals, colors, uvs, idx)
 
 
 ## O suprafata orizontala (terasa) cu materialul terenului si culoarea prafului. Celule de

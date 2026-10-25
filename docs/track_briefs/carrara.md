@@ -724,6 +724,33 @@ Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
    **Pasul 1 e închis.** Codul de la ambele ramuri de sonde intră în
    ramura de construcție a pistei (pasul 2), nu separat în main.
 
+   **Rezultatul pașilor 2–3 (25 oct 2026, ramura `carrara/track` @
+   15a9cd03, pushată, fără PR).** Track23 = **indexul 15**, 2072 m, orar,
+   din `tools/gen_carrara_route.py`. ProbeLayout OK (rază min 17,2 m, pantă
+   max 11,8%, apropiere de sine 37,8 m), ProbeBuried OK, `verify_local` OK,
+   15 materiale. Tema `carrara` e singura (testele scoase); umbra S 0,07
+   (de la 0,25), sol `carrara_gravel` (= `surface_gravel.png`, prin
+   `terrain_alt_class`). Tunelurile D și H sunt „doar tub” (exporturi noi
+   `tube_only`, `tube_class`, tavan până la 24 m; Track16 și Track21
+   identice la hash). ProbeRace pe pista goală, 7 runde de geometrie:
+   27 → **2 repuneri**, 6 → **0 ejectări**, **3 `[blocaj]`** (o mașină, un
+   eveniment) pe 16 seed-uri; tur 67–70 s.
+
+   Abateri de la §2, toate pentru contactele AI-ului: terase, ace și pod la
+   9 m (nu 6–7), tunelurile la 8 m, E **fără S-uri** (puneau peretele pe
+   interior), **fără poartă de start** (stâlpii ejectau), bermă și pe pod,
+   plase `RespawnZone` sub muchiile teraselor (o cădere devine repunere,
+   nu mașină blocată).
+
+   **Ce nu e încă pista din brief:** capturile arată că terenul **nu e un
+   amfiteatru**. Samplerul face pante netede între drumurile vecine, nu
+   gradoni cu fețe verticale; de pe E se vede un șanț pe dreapta, nu
+   cariera cu bălțile; terasele B sunt drumuri pe o pantă de nisip, nu
+   trepte tăiate. Asta e exact verificarea pasului 4 („captura de pe E: se
+   vede fundul?”) și se rezolvă acolo, cu fețe verticale construite
+   (`cliff_face` / `TerrainBluff` / clasa `carrara_marble` pe pereți), nu
+   cu decor.
+
 2. `Track23.tscn` din `TrackFromPath` (`tools/gen_carrara_route.py`, schela
    `gen_fiordland_route.py`: pas 12 m, viraje > 90° pe arc), temă `carrara`
    (doar lumina, cerul, ceața, solul), traseul din §2, `custom_ravines` pe

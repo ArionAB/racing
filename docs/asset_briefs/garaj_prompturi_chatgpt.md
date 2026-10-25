@@ -28,7 +28,7 @@ asamblata din primitive.
    garaj**: ar ancora modelul pe cutii.
 2. Lipeste cate un prompt din §2, pe rand. Fiecare intoarce o imagine (foaia)
    plus o lista de cote si culori per piesa.
-3. Salveaza imaginile ca `docs/asset_briefs/img/concept_<nume>.png`. Vederile
+3. Salveaza imaginile ca `docs/asset_briefs/img/vehicles/concept_<nume>.jpeg`. Vederile
    ortografice sunt la aceeasi scara, deci cotele se extrag din pixeli (metoda
    de la piste: traseu/cote din imagine cu PIL).
 4. Daca o foaie iese cu text, decaluri sau crom, cere refacerea cu
@@ -62,9 +62,12 @@ notele sunt in romana. Dupa foi vine pasul 2: brief per masina, build Blender,
 | 5 | Pompierii (pumper) | grea, lenta, impinge | 2.0 | 4.9 × 2.0 × 2.0 | 0.44 | `vehicles/firetruck_v2.glb` |
 | 6 | Autobuzul (tour bus) | cea mai grea, leganata | 2.6 | 5.5 × 2.1 × 2.3 | 0.46 | `vehicles/bus_v2.glb` |
 | 7 | Ambulanta | NOUA: grea-medie, inalta, se apleaca in viraj | ~1.8 | 4.6 × 2.1 × 2.2 | 0.40 | `vehicles/ambulance.glb` |
-| 8 | Camioneta (pickup) | NOUA: medie, garda mare, off-road | ~1.3 | 4.5 × 2.0 × 1.7 | 0.42 | `vehicles/pickup.glb` |
+| 8 | **Hot rod** (inlocuieste camioneta, 25 oct 2026) | NOUA: rapid, instabil — spatele greu, motor urias in fata | ~1.2 | ~4.0 × 1.9 × 1.3 (se masoara din foaie la build) | de masurat | `vehicles/hotrod.glb` |
 | 9 | Tow truck | NOUA: grea, lunga, carlig pe brat | ~2.2 | 5.0 × 2.1 × 2.1 | 0.44 | `vehicles/tow_truck.glb` |
 | 10 | Monster truck | NOUA: roti uriase, centru de masa sus, saltareata | ~1.6 | 4.4 × 2.6 × 2.4 | 0.62 (vizual, vezi §4) | `vehicles/monster.glb` |
+
+Camioneta (pickup) a iesit din lista: foaia ei nu s-a generat, iar hot rod-ul
+din lista de rezerva (§3) i-a luat locul — decizia dezvoltatorului, 25 oct 2026.
 
 Masele pentru 7-10 sunt propuneri, nu contract: scara din `CarData` e 0.9
 (sport) .. 2.6 (autobuz) si cere valori departate intre ele, nu inghesuite.
@@ -527,3 +530,52 @@ decor — detaliul structural ramane, contextul il cere acum explicit.
 - FBX-urile RgsDev neutilizate se pot sterge intr-un PR separat de curatenie,
   dupa ce `grep -r "\.fbx" scenes scripts tools` confirma ca nu le mai cere
   nimeni.
+
+---
+
+## 5. Pasul 2 — de la foaie la GLB (incepand cu 25 oct 2026)
+
+**Foile sunt gata** (`img/vehicles/concept_*.jpeg`): 9 din lista + hot rod-ul;
+pentru buggy s-a ales a doua varianta (`concept_buggy_v2.jpeg`).
+
+**Deciziile dezvoltatorului, 25 oct 2026:**
+- **Monster truck: varianta (a)** din §4 — plafonul clampului de roata se
+  ridica la ~0.65 m, verificat cu `ProbeRace --mode=bump` ca celelalte masini
+  nu se schimba. Se face odata cu build-ul monster-ului, nu inainte.
+- **Hot rod-ul intra ca masina 8**, in locul camionetei.
+
+**Metoda (fara agent extern — Blender headless din repo):**
+- cate un `tools/blender/build_<nume>_v2.py` per masina; contractul comun
+  (roti, lampi, export, figurina) ramane in `toy_driver_parts.py`.
+  `export_vehicle` primeste acum `bevel_angle` si `wheel_spec.wheel_fn`
+  (anvelopa rotunda); cele 5 masini vechi se construiesc identic;
+- formele se iau din foaie, **cotele din tabelul de mai sus** — vederile
+  ortografice ale foilor NU sunt garantat la aceeasi scara (monster-ul a iesit
+  cu 3.7 m latime in loc de 2.6, roata ~0.85 in loc de 0.62);
+- verificarea vizuala: `compare_concept.py <nume> <foaie>` pune foaia deasupra
+  randarilor noastre (3/4 + lateral/fata/sus la aceeasi scara), apoi captura
+  din joc: `ProbeGarage.tscn -- --car=<index>`;
+- `.tres`-ul se muta pe GLB-ul nou intr-un commit separat, dupa ce
+  dezvoltatorul a vazut captura din garaj.
+
+**Doua lucruri aflate la buggy, valabile pentru toate:**
+- **Figurina are 1.25 m de la sezut la varful castii**, nu ~1.1 cat presupune
+  promptul (§1). Cusca/arcul se inalta cat sa treaca peste casca (+9 cm), deci
+  inaltimile din tabel sunt minime, nu exacte. La buggy: 1.87 in loc de 1.5. La
+  v1 casca iesea prin acoperisul custii. Picioarele coboara 0.41 m sub sezut,
+  deci sezutul nu poate cobori oricat: pantofii ies prin podea.
+- **Bugetul de triunghiuri:** tuburile cu 8 laturi au fete la 45°, cele cu 6 la
+  60°; bevelul de corp se ruleaza cu `bevel_angle=65`, ca sa teseasca doar
+  cutiile (90°). La 30°/50° suspensia singura ajungea la 2096 tri.
+
+| # | masina | stare |
+|---|---|---|
+| 1 | Buggy | `buggy_v2.glb` construit (6322 tri, v1 avea 2444; un singur material); captura din garaj trimisa dezvoltatorului |
+| 2-10 | restul | de facut, in acelasi tipar |
+
+**Punct deschis (nu tine de model):** in joc, `Palette.apply_world_material`
+pune peste masini si stratul de detaliu triplanar al lumii — dungi gri
+ondulate pe vopsea, cele mai vizibile pe suprafetele mari si deschise (capota
+alba a buggy-ului). Foile cer masini curate, „mult mai curate decat
+decorul". Buggy-ul v1 are aceleasi dungi, deci nu e regresie; e o decizie de
+material (de pilda: masinile fara stratul triplanar), de luat separat.

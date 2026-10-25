@@ -95,15 +95,18 @@ def make_wheel_fn(radius, width, segments=14, rim_frac=0.55):
 
 
 def vehicle_wheels(prefix, radius, width, half_track, y_front, y_rear,
-                   half_track_rear=None):
-    """Cele 4 roti ca noduri separate, cu origine in centru, la cota razei."""
-    fn = make_wheel_fn(radius, width)
+                   half_track_rear=None, wheel_fn=None, wheel_bevel=0.02):
+    """Cele 4 roti ca noduri separate, cu origine in centru, la cota razei.
+    `wheel_fn` inlocuieste cilindrul simplu (garajul v2: anvelopa rotunjita,
+    vezi build_buggy_v2.py); `wheel_bevel=0` cand forma isi aduce singura
+    rotunjimea."""
+    fn = wheel_fn or make_wheel_fn(radius, width)
     out = []
     for name, sx, sy in WHEEL_CORNERS:
         y = y_front if sy < 0 else y_rear
         ht = half_track if (sy < 0 or half_track_rear is None) else half_track_rear
         out.append(part("%s_%s" % (prefix, name), fn, (sx * ht, y, radius),
-                        AO_WHEEL, 0.02))
+                        AO_WHEEL, wheel_bevel))
     return out
 
 
@@ -129,10 +132,14 @@ def lamp_head_round(center, radius, depth, segments=8):
     LAMP_HEAD.cylinder(center, radius, depth, FOAM_WHITE, segments=segments, axis="Y")
 
 
-def export_vehicle(prefix, build_body, wheel_spec, filename, seat, bevel=0.03):
+def export_vehicle(prefix, build_body, wheel_spec, filename, seat, bevel=0.03,
+                   bevel_angle=30.0):
     """Un vehicul: corpul (o singura piesa, origine la sol) + 4 roti + cele doua
     obiecte de lampi (`_Lamp_Tail`, `_Lamp_Head`; vezi LAMP_TAIL mai sus).
-    `wheel_spec` = dict(radius, width, half_track, y_front, y_rear[, half_track_rear]).
+    `wheel_spec` = dict(radius, width, half_track, y_front, y_rear[, half_track_rear,
+    wheel_fn, wheel_bevel]).
+    `bevel_angle` peste 45 lasa nebevelate tuburile cu 8 laturi (fete la 45°):
+    rotunjimea lor o da shade smooth, iar bevelul le-ar tripla triunghiurile.
     Tipareste `driver_seat` gata de pus in .tres."""
     print("%s:" % prefix)
     global LAMP_TAIL, LAMP_HEAD
@@ -140,7 +147,7 @@ def export_vehicle(prefix, build_body, wheel_spec, filename, seat, bevel=0.03):
     LAMP_TAIL, LAMP_HEAD = Builder(), Builder()
     build_body(b)
     body = b.to_object("%s_Body" % prefix)
-    st = finish(body, bevel=bevel, ao=AO_BODY, origin=None)
+    st = finish(body, bevel=bevel, bevel_angle=bevel_angle, ao=AO_BODY, origin=None)
     print("  %-26s %5d tris  AO %.2f..%.2f" % (body.name, st["tris"],
                                                st["ao_min"], st["ao_max"]))
     lamps = []

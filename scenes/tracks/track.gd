@@ -12976,7 +12976,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.FLYOFF:
 			_build_flyoff(frac)
 		HazardMarker.Kind.EXCAVATOR:
-			_build_excavator(frac)
+			_build_excavator(frac, spec)
 		HazardMarker.Kind.AVALANCHE:
 			_build_avalanche(frac, spec)
 		HazardMarker.Kind.WAVE:
@@ -15384,7 +15384,7 @@ func _bake_decor(cliffs: Node3D, decor: Node3D, scen: Node3D) -> void:
 	TrackDecorBatch.bake(decor, decor.get_node_or_null(^"Sway") as SwayDriver)
 	TrackDecorBatch.bake(scen)
 
-func _build_excavator(frac: float) -> void:
+func _build_excavator(frac: float, spec: Dictionary = {}) -> void:
 	const PATH := "res://assets/models/vehicles/rusted_digger.glb"
 	if not ResourceLoader.exists(PATH):
 		return
@@ -15399,6 +15399,8 @@ func _build_excavator(frac: float) -> void:
 	# 0.75, deci scara devine 1.0 si colizoarele se recalibreaza in hazard.
 	excavator.model_scene = load(PATH)
 	excavator.model_scale = 1.0
+	excavator.ai_dice = bool(spec.get("excavator_ai_dice", false))
+	excavator.soft_contact = bool(spec.get("excavator_soft_contact", false))
 	add_child(excavator)
 	# Corpul sta PE marginea soselei (blocheaza banda exterioara),
 	# bratul coboara spre centru — lasa o strecuratoare pe interior.

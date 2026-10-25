@@ -630,6 +630,38 @@ Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
    sol, trecere prin el = învârtit, nu oprit (contractul 22 → 1,1 m/s e
    **eșecul**, nu reușita); (e) decizia **sală**: citit builderul tunelului,
    ales (a) sau (b) din §3.
+
+   **Rezultatul pasului 1 (25 oct 2026, ramurile `carrara/sonde-ai` și
+   `carrara/sonde-mec`, pushate, fără PR).** Trecerea de contracte e la
+   §5.6. Sondele, pe piste sintetice (memoria
+   `harnas-sintetic-comportament-emergent`: cifrele dovedesc mecanismul și
+   ordinul de mărime, verdictul de flotă se dă pe Track23), 8 mașini din
+   garajul real, 16 seed-uri, cu / fără hazard pe aceeași scenă:
+
+   | hazard | verdict | cifrele care decid |
+   |---|---|---|
+   | **(a) camioanele din față, în ace** | **PICAT** | AI-ul nu vede camionul: fiecare contact frontal (apropiere ~36 m/s, corp cinematic = masă infinită) **ejectează șoferul** → repunere. Fără indiciu: 27,8 repuneri/seed (față de 0,25), contact în 55% din întâlnirile din ac și 62% pe terase, +5–7 s pe tur. Indiciul din brief (bandă pe ace ±20 m): ace 28%, terase tot 63%. Bandă dreaptă pe **toată coborârea**: +0,2–1,0 s pe tur, dar tot 4,5–6,8 repuneri/seed și culoar de un singur șir |
+   | **(b) cupa excavatorului** | **PICAT așa cum e construit, TRECUT cu culoar** | AI-ul nu citește brațul: 1% din treceri pe banda liberă, 30 `[blocaj]`, 205 din 291 opriți sub braț coborât (pierdere mediană 4,25 s). Coliziunea brațului e conectată (0,1 m/s jos vs 26,6 sus). Cu `custom_lane_corridors` pe banda liberă: 0 blocaje, 94% pe banda liberă, 0,13 s — dar atunci **doar jucătorul** are decizia de timing. Brațul blochează **45%** din ciclu (nu 36%). Pe un drum de 7 m (terase) închide practic tot → excavatorul stă numai pe piazzale (10 m) |
+   | **(c) sania de lizzatura** | **TRECUT** (cu ~28 de linii, nu 3) | Fără aliniere, sania plutea ±0,98 m pe jgheabul de 30°; cu `roll_model = false` + aliniere la mers și pantă + așezare pe talpă: +0,009 m plutire, −0,11 m la genunchiul concav. Traversează fiecare bandă (0,72 s în fiecare), 0 răsturnări, 0 repuneri, pierdere +0,86…+1,41 s, diferită pe mase. Implicitul `true` bit-identic (hash pe 480 de cadre). **Dar** lovitura e strivirea de 3 s a clasei: mașina cade la 15–32% din viteză în 0,5 s — nu „ghiontul” din §3. Telegraph-ul e fix 1,4 s (nu 2) |
+   | **(d) derrick-ul de 16 m** | **TRECUT, zero cod**, cu condiție | `tower_crane.glb` × 0,7256, `hook_radius` 17,9 → braț efectiv 13,0 m, blocul la 0,64 m de drum, 3,54 m/s. **Turnul pe STÂNGA** sensului: 86–100% din viteză păstrată, învârtit 1,08 s, pierdere ≤ 0,11 s. **Pe dreapta**: mașinile ușoare păstrează 54% (pică pragul de 60% de la Chongqing). Calibrarea „≈ +1,5 s” din §3 nu există: pe stânga derrick-ul e aproape teatru |
+
+   **Descoperire fără legătură cu hazardele:** pe terasele cu gol neprotejat
+   (varianta „Terase”, fără niciun hazard) AI-ul **cade singur** de pe muchie:
+   51 `[blocaj]` și 12 repuneri pe 16 seed-uri. Regula din §2.0 „berma doar
+   ca punctuație” nu ține pentru AI — terasele cer o margine pe care AI-ul o
+   respectă (bermă continuă, perete scund sau tratament de margine în AI).
+
+   **Ce rămâne de decis de dezvoltator (înainte de traseu):** (1) camioanele
+   — păstrăm „vine din față” cu cod de AI nou (citirea benzii camionului,
+   tiparul `_signal_lane_keep`, + contact frontal care nu ejectează) sau le
+   întoarcem în sensul cursei (precedentul validat de la Machu Picchu) sau
+   le scoatem de pe bandă; (2) excavatorul — culoar fix pentru AI (doar
+   jucătorul pândește brațul) sau cod de AI care citește brațul; (3)
+   marginea teraselor — bermă continuă vs perete scund vs cod de AI; (4)
+   sania — strivire 3 s (ca acum) sau ghiont ușor (cod mic, în spatele
+   aceluiași flag); (5) derrick-ul pe stânga = aproape teatru, pe dreapta =
+   pedeapsă reală care pică pragul.
+
 2. `Track23.tscn` din `TrackFromPath` (`tools/gen_carrara_route.py`, schela
    `gen_fiordland_route.py`: pas 12 m, viraje > 90° pe arc), temă `carrara`
    (doar lumina, cerul, ceața, solul), traseul din §2, `custom_ravines` pe

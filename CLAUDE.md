@@ -60,9 +60,10 @@ pur plus haosul fizic, nu proiectilele.
   de deasupra lor ✔ — validat pe iPhone (oct 2026, trei iterații).
   - **Jumătățile de ecran au fost scoase.** Virau mașina la orice atingere pe
     display (deget sprijinit, palmă), și se simțea ca și cum jocul trage de
-    volan singur. Zona de viraj e **exact discul desenat** ◀ ▶ (fără margine
-    invizibilă), iar un deget pus în altă parte rămâne mort chiar dacă
-    alunecă peste săgeți.
+    volan singur. Zona de viraj e discul ◀ ▶ plus o **margine de 24 px**
+    (`STEER_TOUCH_PAD`, revenită la cererea dezvoltatorului: degetul care cade
+    lângă buton trebuie să vireze), iar discurile stau la 40 px unul de altul.
+    Un deget pus în altă parte rămâne mort chiar dacă alunecă peste săgeți.
   - **Auto-accelerate scos** (orice deget = gaz): cu el, butonul ▲ n-ar fi
     făcut nimic. Accelerația e explicită.
   - **▼ e și frână și marșarier**, nu două butoane: în fizică e aceeași

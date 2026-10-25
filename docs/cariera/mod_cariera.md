@@ -132,7 +132,7 @@
 > foaie. Contratimpul rămâne **fără puncte** până la o decizie — propunerea
 > e în §4.2: un singur timp PAR per pistă, *măsurat* de AI-ul onest sub
 > regulile contratimpului, nu calculat de mână. Construit pe ramura
-> `cariera/puncte`: `Career.points()` / `track_points()` / `max_points()`
+> `cariera/puncte` (PR #576): `Career.points()` / `track_points()` / `max_points()`
 > (12 × 4 = 48), `finish_active(loc, provocare)` întoarce punctele cursei,
 > `challenge_to_track()` înlocuiește modul CHALLENGE, `CareerWorld.
 > points_to_unlock` (lumea 2 la **8**, lumea 3 la **18** — provizorii), foaia
@@ -728,7 +728,7 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    `ProbeRace --ai=0 --sealed-turbo` confirmă că bara nu crește; ecranul de
    rezultate arată medalia corectă pentru timpi sintetici.
 2b. **Puncte în loc de ștampile + provocarea ca bonus în cursă — CONSTRUIT
-   (ramura `cariera/puncte`, 25 oct).** Decizia dezvoltatorului după sesiunea
+   (PR #576, ramura `cariera/puncte`, 25 oct).** Decizia dezvoltatorului după sesiunea
    la volan (v0.12). `Career.points()` = Σ pe pistele din lumi
    (`race_medal` + 1 dacă `challenge`) + 3 per rival; `max_points()` = 48;
    `finish_active(loc, provocare_reușită)` salvează amândouă și întoarce

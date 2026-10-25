@@ -16,6 +16,12 @@ const CAR_DATA: Array[Resource] = [
 	preload("res://scenes/cars/data/bus.tres"),
 	preload("res://scenes/cars/data/firetruck.tres"),
 	preload("res://scenes/cars/data/buggy.tres"),
+	# Garajul v2 (oct 2026): masinile noi stau la COADA, ca indicii de mai sus
+	# (Race.AI_CARS, fantomele din cariera, selected_car salvat) sa nu se mute.
+	preload("res://scenes/cars/data/ambulance.tres"),
+	preload("res://scenes/cars/data/hotrod.tres"),
+	preload("res://scenes/cars/data/tow_truck.tres"),
+	preload("res://scenes/cars/data/monster.tres"),
 ]
 ## Traficul de tuk-tuk-uri (Jodhpur): NU e in garaj (nu se poate alege ca
 ## masina de jucator/AI de cursa) — separat de CAR_DATA ca sa nu apara din

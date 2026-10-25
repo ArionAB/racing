@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="CarData" load_steps=4 format=3]
+
+[ext_resource type="Script" uid="uid://b3bsh85drrmvy" path="res://scenes/cars/car_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/tow_truck.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/toy_driver_green.glb" id="3"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Macaraua"
+color = Color(0.95, 0.82, 0.24, 1)
+max_speed = 34.5
+acceleration = 14.5
+grip = 8.0
+mass_factor = 2.2
+spring_freq = 2.0
+damping_ratio = 0.55
+suspension_rest = 0.4
+model = ExtResource("2")
+model_scale = 1.0
+model_rotation_deg = 180.0
+body_length = 5.0
+body_width = 2.1
+palette_model = true
+open_cockpit = true
+driver_model = ExtResource("3")
+driver_seat = Vector3(-0.42, 0.84, -0.70)

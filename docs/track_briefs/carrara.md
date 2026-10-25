@@ -1,4 +1,4 @@
-# Track brief — Carrara / bazinul de marmură Fantiscritti (`Track23`, temă `carrara`) — v0.2 (concept, paletă caldă asumată)
+# Track brief — Carrara / bazinul de marmură Fantiscritti (`Track23`, temă `carrara`) — v0.3 (concept, paletă caldă asumată, contracte din cod)
 
 > Concept de pistă, înaintea listei de assets. Scheletul e cel din
 > `serengeti.md` / `fiordland.md`; secțiunile de assets (§5) sunt schițate,
@@ -437,18 +437,80 @@ tine), scrâșnetul cupei, clopotul saniei (2 s înainte), pernele
 pneumatice (telegraph-ul blocului), ecoul din galerie (reverb în
 `CameraZone`), pulberea sub roți pe ravaneto. Fără voci.
 
-### 5.6 Trecerea de contracte (de făcut la pasul 1 din §7, memoria `brief-cere-glb-cod-il-face-deja`)
+### 5.6 Trecerea de contracte — FĂCUTĂ (25 oct 2026, din cod citit pe main @ 9e935513)
 
-Înainte de primul GLB, un agent de explorare citește **consumatorul**
-fiecărei piese din §5.2 și dă verdictul ARE CONSUMATOR (fișier:linie) /
-decor pur / CONFLICT. Trei locuri unde codul **ar putea face singur**
-piesa, de verificat: (1) `TrackChannel` construiește tablier **și
-turnuri** — cu `build_towers = false` arcele vin din GLB, dar dacă builderul
-pune și pile, GLB-ul le dublează; (2) `TunnelSignalHazard` / builderul
-tunelului de la Fiordland construiește **tubul și portalurile** — galeria D
-și tunelul H poate n-au nevoie de `gallery_portal.glb` / `marmifera_portal.glb`
-deloc; (3) `ExcavatorHazard` are placeholder procedural dacă GLB-ul nu are
-`arm` — un model fără nodul ăsta trece `verify_glb.py` și nu mișcă nimic.
+Memoria `brief-cere-glb-cod-il-face-deja`. Agent de explorare, verdicte cu
+fișier:linie, citările-cheie reverificate de coordonator. **Concluzia:**
+șapte lucruri pe care v0.2 le numea „zero cod” cer cod — mic, dar real.
+Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
+
+| piesă | verdict | contractul real (din cod) | ce era greșit în v0.2 |
+|---|---|---|---|
+| `quarry_truck` | ARE CONSUMATOR — `PathMover._build_model` (path_mover.gd:285-321) | botul pe −Z (corecție `model_yaw`), originea jos la mijloc, coliziunea = **o cutie din AABB-ul modelului** (`body_size` ignorat); nasul oblic iese ~1,3 m în fața modelului (bus_hazard.gd:198-218) | „buclă” — vezi mai jos |
+| `quarry_excavator` | ARE CONSUMATOR, **legat de alt model** | `_build_excavator` încarcă fix `rusted_digger.glb` (track.gd:15388), parchează **pe DREAPTA** (`dir.cross(UP)`, :15394-15405), toate mesh-urile forțate pe `rust_metal` (excavator_hazard.gd:37), coliziunea brațului = cutie fixă calibrată pe rusted_digger (:68-74); `period`/`raise_angle` sunt `var`, nu export, cu praguri literale 0–2,5–3,5–6–7 s | „parcat pe stânga”, „zero cod”, „GLB nou” — nu există cârlig pentru model, latură sau fază |
+| `derrick` | ARE CONSUMATOR — `CraneHazard._build_tower` (crane_hazard.gd:157-198), nod în .tscn (nu HazardMarker) | `JIB_HEIGHT = 22.05` e **constantă** (:48) — pivotul, coliziunea catargului și cablul o folosesc; nodul `Jib` cu originea în balama; cablul îl desenează codul | catarg de 16 m „zero cod” — merge **doar** cu `model_scale` 0,726 + `hook_radius` ≈ 17,9 (sau JIB_HEIGHT devine export) |
+| `marble_block_hooked` | ARE CONSUMATOR — `slab_model` (:124, :234-240) | originea în cârlig, coliziunea = **constanta** `SLAB_SIZE` 4,6 × 2,99 × 2,2 (:53) | un bloc de 2,5 m primește un colizor invizibil de 4,6 m dacă nu se modelează în anvelopă sau constanta nu devine export |
+| `lizza_sled` | ARE CONSUMATOR — `RockfallHazard._rock_model` (rockfall_hazard.gd:266-326) | raza = max(AABB.x, AABB.z)/2 (:341) dă **sfera** de coliziune și cota centrului: o sanie de 3 m plutește ~0,9 m; nimic nu o rotește spre mers; lovitura = **strivire 3 s** (:707-727), telegraph fix 1,4 s | „3 linii” — realist 10–20: flag + yaw spre mers + așezare pe talpă + colizor cutie (+ lovitură mai ușoară) |
+| `wire_saw` | DECOR PUR | nimic nu pornește `AnimationPlayer` într-un GLB de decor; singurul consumator de „rotește un copil” e `windmill.gd` (nod `Blades`, `axis`, `rpm`) | nod `flywheel` / animație `Spin` — fără consumator; se numește `Blades` și primește scriptul morii |
+| `chain_saw_crawler`, `drill_rig`, `quarry_sign_block` | DECOR PUR | coliziune `hull` implicită (world_prop.gd:4357-4378) | — |
+| `ponti_di_vara` | DECOR PUR, coliziune de suprascris | `hull` implicit = bloc plin peste chei → `coliziune = "mesh"` sau `"none"` pe instanță | „fără coliziune proprie” nu se întâmplă singur |
+| `marmifera_portal`, `gallery_portal` | CONFLICT parțial — codul face rama | `_tun_frame` (track.gd:12902-12990) construiește rama de beton + aripi de 14 m, fără export de oprire; precedent Transfăgărășan: GLB-ul pus **peste** rama codului, deschiderea mai mare decât tubul, coliziune `mesh` | portal 8 × 8 într-un tub de 10 m = treaptă vizibilă |
+| `gallery_pillar` | DECOR PUR | `hull` = corect pentru stâlp plin; AI-ul nu-l vede → ProbeRace | — |
+| `museum_set` | DECOR PUR | **`keep_variants` nu există** în world_prop (doar metadată moartă în gen_mont_scena.gd:289): toate cele 3 noduri se randează | variantele se livrează ca 3 GLB sau se acceptă toate trei |
+| `colonnata_*` | DECOR PUR | clasele există (`tf_stone`, `roof_tiles`), dar se aplică pe **nume de mesh** printr-o intrare `CLASSES_BY_THEME["carrara"]` (precedent `_TF_HOUSE`, world_prop.gd:2223) | — (intrarea se scrie odată cu tema) |
+
+**Corecturi la §3 care decurg:**
+- **Camioanele nu fac buclă.** `BusHazard` ignoră `travel_mode`: merge o
+  dată 0 → capăt, se ascunde `period − lungime/viteză` s (coliziune oprită)
+  și reapare la capătul 0 (bus_hazard.gd:325-351). Curba e **deschisă**, cu
+  capetele în spatele unui perete; „drumul de serviciu” nu trebuie. Două
+  camioane = două noduri pe aceeași `Curve3D`; `phase` decalează doar
+  pornirea, deci jumătate de ciclu iese numai dacă `period` ≈ timpul de
+  parcurs. Terasele B și podul F stau pe aceeași curbă, în ordinea vizitei.
+- **Podul nu e plat.** `LiftBridgeHazard` cu `static_deck` construiește
+  **necondiționat** pilele (lift_bridge_hazard.gd:252, la 11 m pe maluri),
+  rampele de lemn și un tablier la **+1,6 m peste drum** (cocoașă), lat cât
+  `custom_half_width` global, nu cât drumul local; și își face singur
+  `RespawnZone` (:666-681). Pentru „viaduct de 6 m, drum plat” trebuie
+  `build_piers`/`build_ramps` ca export și lățimea din `width_at(frac)` —
+  sau podul se face altfel (tablier ca drum normal peste o `custom_ravine`
+  + arcele ca decor `mesh`), de decis la construcția POI F.
+- **Galeria și tunelul cer cod în builderul de tunel**: `TunnelSignalHazard`
+  aduce mereu autobuz + semafor (nu există declarație „doar tub”),
+  materialul e fix `wet_gneiss` (track.gd:12780, rece-închis — opusul
+  marmurei calde), `tunnel_ceiling` are plafon 12 m (tunnel_signal_hazard.gd:392)
+  și nu există lărgire pe interval.
+- **Sala (decizia din §3): lărgire în builder, nu GLB.** Un GLB de sală nu
+  poate sta în tubul continuu (pereții tubului la ±3,5 m taie sala de 16 m);
+  ar cere tăierea tubului în două declarații, fiecare cu autobuzul și ramele
+  ei în mijlocul sălii. Lărgirea: profilele tubului au număr fix de vertecși,
+  deci interpolarea pe secțiuni e sigură topologic; estimat 25–40 de linii în
+  3 funcții (`_collect_tunnels`, `_build_tunnel`, exporturile nodului), plus
+  reluarea ProbeBuried / ProbeLaneClear. Drumul se lărgește deja prin
+  `custom_width_segments`. Stâlpii rămân GLB cu `hull`. `CameraZone` are tot
+  ce cere brief-ul (`ceiling` 0–40, `ceiling_dist`, `darkness`, interval pe
+  fracții) — dar builderul de tunel își pune deja o zonă proprie
+  (`darkness` 0,5 fix), deci a doua se suprapune: se aliniază la construcție.
+- **Excavatorul**: pe un drum de 10 m brațul închide jumătatea dreaptă plus
+  ~1,7 m din stânga, lasă ~3,3 m liberi — „strecurătoarea” e a codului, nu
+  o întâmplare. Cele 4 lipsuri (model, latură, fază, clasă) se rezolvă cu o
+  intrare de spec pe `HazardMarker`, nu cu clasă nouă.
+
+**Lista de cod (mic, fără clase noi), în ordinea POI-urilor:**
+1. `ExcavatorHazard` / `_build_excavator`: model, latură, fază, clasă de
+   material din spec; implicitele = comportamentul de azi, bit-identic.
+2. `CraneHazard`: `JIB_HEIGHT` și `SLAB_SIZE` ca exporturi cu implicitele
+   de azi (sau rămâne trucul `model_scale` dacă sonda îl validează).
+3. `RockfallHazard`: modul „sanie” (fără rostogolire, yaw spre mers,
+   așezat pe talpă, colizor cutie, lovitură = ghiont fără strivire),
+   implicit neschimbat.
+4. `LiftBridgeHazard`: `build_piers`, `build_ramps`, lățime locală — sau
+   pod fără `TrackChannel`.
+5. Tunel: declarație „doar tub”, clasă de material pe tunel, plafon > 12,
+   lărgire pe interval.
+6. `wire_saw`: volantul numit `Blades` + `windmill.gd`.
+7. Tema `carrara2` + clasa `carrara_marble` + intrările de remap (există pe
+   ramura `carrara/mostra`, de adus).
 
 ## 6. Bugete
 

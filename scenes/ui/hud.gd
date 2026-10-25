@@ -38,6 +38,8 @@ var _charge_bg: Panel
 var _charge_fill: Panel
 var _charge_fill_style: StyleBoxFlat
 var _charge_bolt: Label
+## Flash-ul barii de turbo la iesirea din drift (1 -> 0 in ~0.3 s).
+var _charge_flash: float = 0.0
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -715,7 +717,7 @@ func flash_message(text: String) -> void:
 	tw.tween_interval(1.2)
 	tw.tween_property(_message, "modulate:a", 0.0, 0.5)
 
-func set_turbo(charge: float, boosting: bool) -> void:
+func set_turbo(charge: float, boosting: bool, drifting: bool = false) -> void:
 	var filled := clampf(charge, 0.0, 1.0)
 	# Dimensiunile se iau de la jgheab, nu din constante: daca layout-ul il
 	# intinde vreodata altfel, umplutura il urmeaza in loc sa lase o dunga.
@@ -726,8 +728,27 @@ func set_turbo(charge: float, boosting: bool) -> void:
 		color = Color(1.0, 0.55, 0.1)              # arde
 	elif filled >= 1.0:
 		color = Color(1.0, 0.9, 0.2)               # plina, gata de foc
+	elif drifting:
+		# In drift bara se umple de 2.5x: pulseaza spre alb la 5 Hz, ca
+		# rasplata sa se SIMTA cat se intampla, nu doar sa se vada din coada
+		# ochiului intr-un colt al ecranului.
+		var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.001 * TAU * 5.0)
+		color = color.lerp(Color(0.85, 0.97, 1.0), 0.15 + 0.35 * pulse)
+	# Flash-ul de la iesirea din drift (flash_turbo): o clipa spre alb, apoi
+	# inapoi. Se stinge aici, nu in _process — HUD-ul primeste set_turbo la
+	# fiecare tick de fizica, iar _process-ul lui iese devreme fara perf.
+	if _charge_flash > 0.0:
+		color = color.lerp(Color.WHITE, _charge_flash)
+		_charge_flash = maxf(
+			_charge_flash - get_physics_process_delta_time() * 3.3, 0.0)
 	_charge_fill_style.bg_color = color
 	# Fulgerul se aprinde in culoarea barii cand ai ce arde si sta stins cat
 	# timp se incarca: semnalul „apasa ACUM" fara inca un element pe ecran.
 	_charge_bolt.modulate = color if (boosting or filled >= 1.0) \
-		else Color(1, 1, 1, 0.45)
+		else Color(1, 1, 1, 0.45 + 0.55 * _charge_flash)
+
+
+## Bara de turbo tresare o clipa: chemata la iesirea dintr-un drift (Race, pe
+## semnalul Car.drift_ended), ca sa lege rasplata de gestul care a adus-o.
+func flash_turbo() -> void:
+	_charge_flash = 0.9

@@ -78,8 +78,31 @@ func _init() -> void:
 	# Tabla pe tabla la ciocnirea intre masini (#500). TOT LA SFARSIT: `rng` e
 	# un singur sir, orice sunet inserat mai sus rescrie fisiere neatinse.
 	_save("metal_hit", _metal_hit())
+	# Ciripitul de la eliberarea franei de mana (iesirea din drift). TOT LA
+	# SFARSIT: `rng` e un singur sir, orice sunet inserat mai sus rescrie
+	# fisiere neatinse.
+	_save("drift_end", _drift_end())
 	print("SFX generate in res://assets/audio/")
 	quit()
+
+
+## Cauciucul care se prinde iar la iesirea din drift: 80 ms, zgomot filtrat
+## plus un ton care CADE (1400 -> 700 Hz) — inversul lui drift_start, care e
+## doar zgomot in stingere. Atac de ~7 ms ca sa nu pocneasca, coada patratica.
+func _drift_end() -> PackedFloat32Array:
+	var n := int(RATE * 0.08)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var lp := 0.0
+	var phase := 0.0
+	for i in n:
+		var t := float(i) / float(n)
+		lp = lp * 0.5 + (rng.randf() * 2.0 - 1.0) * 0.5
+		var freq := lerpf(1400.0, 700.0, t)
+		phase += TAU * freq / float(RATE)
+		var env := minf(t * 12.0, 1.0) * (1.0 - t) * (1.0 - t)
+		out[i] = (lp * 0.35 + sin(phase) * 0.45) * env * 0.9
+	return out
 
 ## Tabla pe tabla (#500): clinchet metalic, nu bufnitura. Patru moduri
 ## NEARMONICE (ca o placa de tabla, nu ca o coarda: 1 : 2,3 : 3,6 : 5,2), cele

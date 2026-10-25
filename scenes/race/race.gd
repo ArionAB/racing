@@ -170,6 +170,11 @@ func _setup_race() -> void:
 		camera.add_trauma(clampf(fall / 30.0, 0.1, 0.35)))
 	player.boost_started.connect(func(_c: Car) -> void:
 		camera.add_trauma(0.18))
+	# Iesirea din drift: bara de turbo tresare — rasplata (umplerea 2.5x) se
+	# leaga de gest. Doar dupa un drift adevarat, nu dupa un tap pe buton.
+	player.drift_ended.connect(func(_c: Car, seconds: float) -> void:
+		if seconds > 0.3:
+			hud.flash_turbo())
 	# Valul care spala digul: izbitura de apa se vede, nu doar se aude.
 	#
 	# Plafonul e 0.85, cel mai mare din lista, si nu e o scapare: shake-ul e
@@ -896,7 +901,7 @@ func _update_hud() -> void:
 		hud.set_detail("race: %s   rec: %s   race rec: %s%s\n%s on %s   [SPACE] turbo  [SHIFT] drift%s" % [
 			race_text, record_text, race_rec_text, champ_line,
 			player.car_name, _track_title(), cam_hint])
-	hud.set_turbo(player.turbo_charge, player.is_boosting)
+	hud.set_turbo(player.turbo_charge, player.is_boosting, player.is_drifting)
 
 
 ## Numele pistei pentru jucator: cel din TrackInfo (tradus), nu

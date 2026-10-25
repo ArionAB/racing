@@ -96,6 +96,15 @@ WPTS = [
 ]
 
 
+# ---- TREPTELE (pasul 4): gradonii ca fete verticale, nu pante. Vezi `custom_bench_patches`.
+BENCH_W = 8.0        # banc plat intre marginea asfaltului si muchia fetei (contract >= 4 m dupa berma)
+BENCH_W_E = 7.5      # banc plat pe E (inainte de prima fata); mai mic ca BENCH_W: fundul se vede mai devreme
+E_STEPS = 5          # fetele scarii de pe E spre fundul carierei
+E_TREAD = 8.0        # latimea unei trepte intermediare (m)
+WEST = -112.0       # capatul de V al scarii de pe E (fata N-S a gradonului de V)
+PIT_WEST = -190.0   # capatul de V al fundului carierei (trece de scara, spre cheiul podului)
+PIT_FLOOR = 0.8      # fundul carierei (drumul C sta la +2; ravena lui C coboara la acelasi nivel)
+
 def v(a, b):
     return (b[0] - a[0], b[1] - a[1])
 
@@ -487,25 +496,22 @@ if OUT_PATH:
     # ---- rape (len). ADANCIMEA e relativa la cota drumului MEDIATA (`road_level`, nu cea locala), deci
     # pentru o podea ABSOLUTA se declara adancime mare si se lasa podeaua sa taie: cu 5-9 m cerute,
     # la 50 m de terasa tinta iesea 11-17 (o creasta de 15 m intre doua rape, masurat cu profilul N-S).
+    # Rapele 0-3 din versiunea cu grila (terasele A/T2/T3/E ca cornise) au fost INLOCUITE de platourile de
+    # banc de mai jos: o cornisa cade ~50 de grade pe grila de 7.92 m si lipita de asfalt; treptele
+    # adevarate sunt `custom_bench_patches` (fata verticala, bancul plat de BENCH_W m inaintea ei).
     ravines = [
-        # 0: A / terasa 1, golul pe DREAPTA (pit). Cornisa taiata vertical, podea la +16.
-        (LEN("H portal iesire", 20.0), LEN("B T1 sfarsit plat", 8.0), 40, 1),
-        # 1: terasa 2, golul pe STANGA (mergem spre V, pit-ul e la S), podea la +7.
-        (LEN("B T2 inceput plat", -6.0), LEN("B T2 sfarsit plat", 6.0), 40, -1),
-        # 2: terasa 3, golul pe DREAPTA, podea la +2 (fundul carierei).
-        (LEN("B T3 inceput plat", -6.0), LEN("B T3 sfarsit plat", 6.0), 40, 1),
-        # 3: cariera de sus E, golul pe DREAPTA: 43 m pana la fundul carierei (+2).
-        (LEN("D portal sus (E inceput)", 20.0), LEN("E sfarsit"), 60, 1),
-        # 4: cheiul Ponti di Vara: viaduct pe ambele parti, 30 m de gol, podea la +17.
+        # 0: cheiul Ponti di Vara: viaduct pe ambele parti, 30 m de gol, podea la +17.
         (LEN("F pod", -15.0), LEN("F pod", 15.0), 40, 0),
-        # 5: fundul carierei C, pe DREAPTA (S): baltile stau pe podea, nu pe un platou de +20.
+        # 1: fundul carierei C, pe DREAPTA (S): baltile stau pe podea, nu pe un platou de +20.
         (LEN("C intrare podea", -20.0), LEN("D rampa jos"), 40, 1),
     ]
-    cornice = [0, 1, 2, 3, 4]
-    scarp = [0, 1, 2, 3]
-    viaduct = [4]
-    floors = [(0, 16.0), (1, 7.0), (2, 2.0), (3, 2.0), (4, 17.0), (5, 2.0)]
-    widths = [(0, 40.0), (1, 40.0), (2, 60.0), (3, 90.0), (4, 60.0), (5, 70.0)]
+    cornice = [0]
+    scarp = []
+    # C (idx 1): racord strans, fara treapta de 1 m la marginea asfaltului (vezi TrackSideSampler.tight_ravines)
+    tight = [1]
+    viaduct = [0]
+    floors = [(0, 17.0), (1, 2.0)]
+    widths = [(0, 60.0), (1, 70.0)]
 
     # ---- berma continua de moloz (stil 2): doar pe marginile cu gol, NU pe ace, si DUPA iesirea din ac
     parapets = [
@@ -617,14 +623,96 @@ shape = SubResource("Box_{name}")
 size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
 """)
 
-    # A + terasa 1: golul pe DREAPTA (S), bancul de +16
-    net("PlasaA", "H portal iesire", 12.0, "B ac1 N", -19.0, 1, 6.5, 17.0, 12.0, 22.0)
-    # terasa 2: golul pe STANGA, bancul de +7
-    net("PlasaT2", "B T2 inceput plat", -4.0, "B ac2 N", -19.0, -1, 6.5, 17.0, 3.0, 13.0)
-    # terasa 3: golul pe DREAPTA, fundul carierei (+2)
-    net("PlasaT3", "B T3 inceput plat", -4.0, "B T3 sfarsit plat", 8.0, 1, 6.5, 17.0, -1.0, 5.0)
-    # cariera de sus E: golul pe DREAPTA (N), 43 m pana la fundul carierei
-    net("PlasaE", "D portal sus (E inceput)", 4.0, "E sfarsit", 0.0, 1, 6.5, 24.0, -2.0, 36.0)
+    # Plase de repunere pe platourile de SUB fiecare fata (o cadere peste muchie devine repunere, nu o masina
+    # blocata pe un banc care nu duce nicaieri). Lateral: de la muchia fetei (HALF_WIDTH + BENCH_W) spre gol.
+    LIPLAT = HALF_WIDTH + BENCH_W
+    net("PlasaA", "H portal iesire", 12.0, "B ac1 N", -19.0, 1, LIPLAT + 0.5, LIPLAT + 12.0, 12.0, 22.0)
+    net("PlasaT2", "B T2 inceput plat", -4.0, "B ac2 N", -19.0, -1, LIPLAT + 0.5, LIPLAT + 12.0, 3.0, 13.0)
+    net("PlasaT3", "B T3 inceput plat", -4.0, "B T3 sfarsit plat", 8.0, 1, LIPLAT + 0.5, LIPLAT + 12.0, -1.0, 8.0)
+    LIPLAT_E = HALF_WIDTH + BENCH_W_E
+    net("PlasaE", "D portal sus (E inceput)", 4.0, "E sfarsit", 0.0, 1, LIPLAT_E + 0.5, LIPLAT_E + E_TREAD * E_STEPS + 6.0, -2.0, 42.0)
+
+    # ---- PLATOURI DE BANC (coordonate de lume: gx = x, gz = -y; z0 < z1 = nord -> sud).
+    # Cota soselei la un x dat, citita din traseul resamplat (`rs`), pe fasia de y [ylo, yhi].
+    def level_profile(ylo, yhi, xlo, xhi, thin=8.0):
+        pts_ = sorted((p_[0], p_[2]) for p_ in rs if ylo <= p_[1] <= yhi and xlo <= p_[0] <= xhi)
+        out_ = []
+        for x_, e_ in pts_:
+            if not out_ or x_ - out_[-1][0] >= thin * 0.5:
+                out_.append((x_, e_))
+        if pts_ and out_[-1][0] != pts_[-1][0]:
+            out_.append(pts_[-1])
+        return out_
+
+    def const_level(e):
+        return [(-1000.0, e), (1000.0, e)]
+
+    patches = []
+
+    def patch(name, x0, x1, ya, yb, lvl, soft_w, soft_e, soft_n, soft_s):
+        """Dreptunghi plat in plan: x in [x0, x1], y harta in [ya, yb]. soft_* = cat se stinge in afara
+        marginii vest / est / NORD (y mare) / SUD (y mic); 0 = margine DURA (aici cade o treapta)."""
+        assert x0 < x1 and ya < yb
+        patches.append((name, x0, x1, -yb, -ya, lvl, soft_w, soft_e, soft_n, soft_s))
+
+    Y_T1, Y_T2, Y_T3 = Y1, Y2, Y3
+    # Muchia fiecarei fete (y harta). T1 curge spre E: golul (T2) e la S, deci fata F1 sta cu BENCH_W
+    # dincolo de marginea de S a lui T1. T2 curge spre V: golul (T3) e tot la S. Idem T3 -> fundul.
+    LIP1 = Y_T1 - HALF_WIDTH - BENCH_W
+    LIP2 = Y_T2 - HALF_WIDTH - BENCH_W
+    LIP3 = Y_T3 - HALF_WIDTH - BENCH_W
+    # E curge spre V pe y = -112: golul e la N (y mare). Muchiile treptelor, de la S la N.
+    E_LIPS = [-112.0 + HALF_WIDTH + BENCH_W_E + E_TREAD * k for k in range(E_STEPS)]
+
+    # fundul carierei. Partea A (sub bancul lui T3): muchia de N DURA la LIP3 (fata T3 -> fund, sau, unde
+    # T3 n-are platou, un gradon in cota drumului de acolo); capatul de E se stinge (45 -> 65) in partea B,
+    # care urmeaza drumul C pe la S la >= 12 m de marginea lui (nu-l sapa).
+    patch("PitA", PIT_WEST, 45.0, E_LIPS[-1], LIP3, const_level(PIT_FLOOR), 0.0, 20.0, 0.0, 0.0)
+    patch("PitB", 45.0, 115.0, E_LIPS[-1], 3.5, const_level(PIT_FLOOR), 0.0, 30.0, 8.0, 0.0)
+    # scara de pe E: niveluri egale de la 45 la fundul carierei; treapta 0 e bancul lui E
+    e_drop = (45.0 - PIT_FLOOR) / E_STEPS
+    e_edges = [-124.0] + E_LIPS      # y harta, de la S la N
+    for k in range(E_STEPS):
+        # treapta 0 e BANCUL lui E (drumul sta pe el): se opreste la capatul lui E, ca podul F (+43) sa nu
+        # intre intr-un platou de +45. Treptele 1..n coboara pana la capatul de V al fundului carierei.
+        patch("E%d" % k, WEST if k == 0 else PIT_WEST, 104.0, e_edges[k], e_edges[k + 1],
+              const_level(45.0 - e_drop * k),
+              20.0 if k == 0 else 0.0, 15.0, 0.0, 12.0 if k == 0 else 0.0)
+
+    # T3 / T2 / T1: banc langa drum, fata la LIP*, platoul de sub ea pana la urmatoarea fata
+    l3 = level_profile(Y_T3 - 5, Y_T3 + 5, -100.0, 40.0)
+    l2 = level_profile(Y_T2 - 5, Y_T2 + 5, -100.0, 38.0)
+    l1 = level_profile(Y_T1 - 5, Y_T1 + 5, -150.0, 45.0)
+    patch("T3", -60.0, 28.0, LIP3, LIP2, l3, 25.0, 25.0, 0.0, 0.0)
+    patch("T2", -86.0, 8.0, LIP2, LIP1, l2, 22.0, 22.0, 0.0, 0.0)
+    patch("T1", -150.0, 12.0, LIP1, Y_T1 + 8.0, l1, 25.0, 28.0, 12.0, 0.0)
+
+    def fnum(v_):
+        return repr(round(float(v_), 3))
+
+    # ---- benzi de culoare pe COTA (`custom_strata_bands`): fiecare banc (treapta) isi are tenta lui, alternand
+    # praf deschis / praf mai inchis, ca scara sa se citeasca din ochiul soferului chiar daca fetele (ascunse
+    # de propria muchie, vezi brief §2.0) nu se vad. Fetele iau tenta de marmura peste (scarp_tint).
+    band_levels = []
+    for (n_, x0, x1, z0, z1, lvl, sw, se, sn, ss) in patches:
+        if n_ in ("PitB", "E0"):
+            continue
+        mid = sum(e_ for _x, e_ in lvl) / len(lvl) if n_ not in ("T1", "T2", "T3") else sum(e_ for _x, e_ in lvl) / len(lvl)
+        band_levels.append((mid - 0.3, n_))
+    band_levels.sort()
+    band_tints_pal = [(0.93, 0.90, 0.80, 1.0), (0.78, 0.74, 0.66, 1.0)]
+    bands_txt = ", ".join(V4(fnum(l - 1.4), fnum(l + 1.4), 0.5, 0) for l, _n in band_levels)
+    band_tints_txt = ", ".join("Color(%s, %s, %s, %s)" % tuple(fnum(c) for c in band_tints_pal[i % 2])
+                               for i in range(len(band_levels)))
+
+    patch_txt = ", ".join(
+        "{ \"lvl\": PackedVector2Array(" + ", ".join(f"{fnum(a)}, {fnum(b)}" for a, b in lvl) + "), "
+        f"\"soft\": Vector4({fnum(sw)}, {fnum(se)}, {fnum(sn)}, {fnum(ss)}), "
+        f"\"x0\": {fnum(x0)}, \"x1\": {fnum(x1)}, \"z0\": {fnum(z0)}, \"z1\": {fnum(z1)} }}"
+        for (_n, x0, x1, z0, z1, lvl, sw, se, sn, ss) in patches)
+    print("platouri de banc:")
+    for (n_, x0, x1, z0, z1, lvl, sw, se, sn, ss) in patches:
+        print(f"  {n_:4s} x[{x0:7.1f},{x1:7.1f}] y[{-z1:7.1f},{-z0:7.1f}]  cota {lvl[0][1]:5.1f}..{lvl[-1][1]:5.1f}  soft W{sw:g} E{se:g} N{sn:g} S{ss:g}")
 
     tscn = f"""[gd_scene format=3]
 
@@ -656,10 +744,14 @@ custom_dirt_ranges = Array[Vector2]([{dirt_txt}])
 custom_ravines = Array[Vector4]([{rav_txt}])
 custom_cornice_ravines = Array[int]([{", ".join(str(i) for i in cornice)}])
 custom_scarp_ravines = Array[int]([{", ".join(str(i) for i in scarp)}])
+custom_tight_ravines = Array[int]([{", ".join(str(i) for i in tight)}])
 custom_viaduct_ravines = Array[int]([{", ".join(str(i) for i in viaduct)}])
 custom_viaduct_net_margin = 12.0
 custom_ravine_floors = Array[Vector2]([{fl_txt}])
 custom_ravine_widths = Array[Vector2]([{rw_txt}])
+custom_bench_patches = Array[Dictionary]([{patch_txt}])
+custom_strata_bands = Array[Vector4]([{bands_txt}])
+custom_strata_band_tints = Array[Color]([{band_tints_txt}])
 custom_width_segments = Array[Vector3]([{w_txt}])
 custom_parapets = Array[Vector4]([{par_txt}])
 width_flow_windows = Array[Vector2]([{fw_txt}])

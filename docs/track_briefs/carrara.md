@@ -828,6 +828,29 @@ Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
    bermă). Decizia rămasă e a dezvoltatorului (regula „o dată pe trecere”
    e a lui).
 
+   **Decizia dezvoltatorului (26 oct 2026): „renunță după o așteptare”.**
+   O mașină care a dat 4–6 și a stat oprită în zona brațului (−2…30 m,
+   deci și cea din coadă) o fază închisă întreagă (`EXC_GIVE_UP_S` = 3,5 s)
+   trece pe banda liberă până la capătul trecerii; zarul rămâne o dată pe
+   trecere, faza brațului nu se citește (`carrara/track` @ 43a456a3).
+   Măsurat pe Track23, 16 seed-uri × 230 s, „înainte” = același cod cu
+   pragul la infinit:
+
+   | | înainte | după |
+   |---|---|---|
+   | `[blocaj]` la braț (doar excavator / ambele hazarde) | 35 / 22 | **21 / 16** |
+   | așteptare maximă | 8,8 s | **7,3 s** |
+   | așteptări peste 5 s | 7 | **3** |
+   | așteptări peste 3,5 s la start | 7 | 6 |
+   | contacte noi cu corpul excavatorului | — | 0 |
+
+   **Contractul nu e atins:** regula costă ea însăși 3,5 s + ~1 s de
+   pornire, deci „peste 3,5 s” nu poate ajunge la zero; și două mașini
+   (seed 14) rămân prinse între corpul excavatorului și bermă, de unde banda
+   liberă e de neatins cât brațul e jos. Pârghii netestate: prag mai scurt
+   (~2,5 s), ieșire din pană cu marșarier, sau excavatorul mutat unde
+   plutonul e deja răsfirat.
+
 2. `Track23.tscn` din `TrackFromPath` (`tools/gen_carrara_route.py`, schela
    `gen_fiordland_route.py`: pas 12 m, viraje > 90° pe arc), temă `carrara`
    (doar lumina, cerul, ceața, solul), traseul din §2, `custom_ravines` pe

@@ -27,14 +27,21 @@ func _ready() -> void:
 		["gol dreapta-sus", Vector2(s.x * 0.8, s.y * 0.3), ""],
 		["gol mijloc", Vector2(s.x * 0.5, s.y * 0.5), ""],
 		["gol langa sageti", Vector2(s.x * 0.33, s.y - 128.0), ""],
-		# Discul desenat ESTE zona: chiar in interiorul inelului vireaza, chiar
-		# in afara lui nu. Inainte o margine invizibila de 18 px vira si acolo.
-		["STANGA in inel", tc.call("_steer_left_center")
-			+ Vector2(0.0, TouchControls.STEER_RADIUS - 2.0), "left"],
+		# Marginea din jurul discului vireaza (degetul cade langa buton), dar se
+		# opreste la STEER_TOUCH_PAD: dincolo de ea, display-ul e mort.
 		["STANGA langa inel", tc.call("_steer_left_center")
-			+ Vector2(0.0, TouchControls.STEER_RADIUS + 2.0), ""],
-		["DREAPTA langa inel", tc.call("_steer_right_center")
-			+ Vector2(0.0, -TouchControls.STEER_RADIUS - 2.0), ""],
+			+ Vector2(0.0, TouchControls.STEER_RADIUS + 2.0), "left"],
+		["STANGA in margine", tc.call("_steer_left_center") + Vector2(0.0,
+			TouchControls.STEER_RADIUS + TouchControls.STEER_TOUCH_PAD - 2.0), "left"],
+		["STANGA dupa margine", tc.call("_steer_left_center") + Vector2(0.0,
+			TouchControls.STEER_RADIUS + TouchControls.STEER_TOUCH_PAD + 2.0), ""],
+		["DREAPTA dupa margine", tc.call("_steer_right_center") + Vector2(0.0,
+			-TouchControls.STEER_RADIUS - TouchControls.STEER_TOUCH_PAD - 2.0), ""],
+		# Golul dintre discuri nu e fasie moarta: vireaza sageata mai apropiata.
+		["intre sageti, stg", (tc.call("_steer_left_center")
+			+ tc.call("_steer_right_center")) * 0.5 - Vector2(4.0, 0.0), "left"],
+		["intre sageti, dr", (tc.call("_steer_left_center")
+			+ tc.call("_steer_right_center")) * 0.5 + Vector2(4.0, 0.0), "right"],
 	]
 	var fail := 0
 	for c in cases:
@@ -107,16 +114,17 @@ func _ready() -> void:
 
 	# A TREIA GARDA: GAZUL CARE SE SUBINTELEGE. Toate comenzile de actiune stau
 	# sub acelasi deget mare drept, deci nu pot fi tinute odata cu ^. TURBO
-	# implica gaz, altfel ai arde bara stand pe loc. DRIFT singur e frana de
-	# mana: franeaza si da marsarier, ca v. Se masoara pe `PlayerController`
-	# real, nu pe o copie a regulii.
+	# implica gaz, altfel ai arde bara stand pe loc; DRIFT implica gaz, altfel
+	# driftul e o frana (viteza pastrata doar cu gaz, vezi PlayerController).
+	# Frana bate orice. Se masoara pe `PlayerController` real, nu pe o copie
+	# a regulii.
 	print("")
 	var pc := PlayerController.new()
 	add_child(pc)
 	var throttle_cases := [
 		["doar GAZ", {"gas": true}, 1.0],
 		["doar TURBO", {"turbo": true}, 1.0],
-		["doar DRIFT", {"drift": true}, -1.0],
+		["doar DRIFT", {"drift": true}, 1.0],
 		["TURBO+DRIFT", {"turbo": true, "drift": true}, 1.0],
 		["GAZ+DRIFT", {"gas": true, "drift": true}, 1.0],
 		["doar FRANA", {"brake": true}, -1.0],

@@ -27,6 +27,7 @@ const SFX: Dictionary = {
 	&"boost": preload("res://assets/audio/boost.wav"),
 	&"drift_start": preload("res://assets/audio/drift_start.wav"),
 	&"drift_level": preload("res://assets/audio/drift_level.wav"),
+	&"drift_end": preload("res://assets/audio/drift_end.wav"),
 	&"backfire": preload("res://assets/audio/backfire.wav"),
 	&"wall_hit": preload("res://assets/audio/wall_hit.wav"),
 	&"bump": preload("res://assets/audio/bump.wav"),

@@ -321,41 +321,46 @@ Neschimbat (acceptat).
 ## Livrare grupa D
 
 Script: `tools/blender/build_fiordland_rocks.py` (`_wall_body`/`_overhang`/`build_torrent_chute`
-rescrise; `_niche`/`_shelf` pastrate). Comparatii:
-`docs/asset_briefs/img/fiordland_fidelity/{stirling_ledge,torrent_chute}.png`
-(camera preview mutata pe fata, azimut 205). Bugete verify: 3600 / 2600.
+rescrise in doua runde; `_niche`/`_shelf` pastrate). Comparatii:
+`docs/asset_briefs/img/fiordland_fidelity/{stirling_ledge,stirling_ledge_drum,torrent_chute}.png`
+(`stirling_ledge_drum.png` = privit de pe drum: azimut 160, elevatie 9; celelalte azimut 205).
+Bugete verify: 4600 / 3600.
 
-| piesa | AABB Godot (X x Y x Z) | tri | contract v1 |
+**Runda 2 (verdict coordonator din joc):** cu clasa `wet_gneiss` pe `Wall`/`Rock`,
+fatetele mici dispar, iar runda 1 citea ca o cutie. Acum conteaza doar relieful
+mare (metri): coama in trepte, contraforti care ies 1-4 m cu goluri adanci
+intre ei, capete zimtate in plan, pisc la torrent.
+
+| piesa | AABB Godot (X x Y x Z) | tri | contract |
 |---|---|---|---|
-| `stirling_ledge` | 22,3 x 26,9 x 40,4 | 3.004 (Wall 1.928, Overhang 1.040, Shelf 36) | 21,6 x 26,6 x 39,6 (+3% / +1% / +2%) |
-| `torrent_chute` | 11,2 x 16,2 x 24,9 | 1.670 | 11,0 x 16,0 x 24,0 (+2% / +1% / +4%) |
+| `stirling_ledge` | 22,2 x 26,9 x 41,3 | 4.066 (Wall 3.062, Overhang 968, Shelf 36) | v1 21,6 x 26,6 x 39,6 (+3% / +1% / +4%) |
+| `torrent_chute` | 14,0 x 24,0 x 34,0 | 2.420 | **contract relaxat** de coordonator: Z pana la ~34, Y pana la ~24 (v1 11,0 x 16,0 x 24,0) |
 
-Contracte masurate pe GLB exportat (`verify_glb.py` + coordonate):
-- `stirling_ledge`: buza `Overhang` Y min = **14,002** (14,0); `Shelf` Y 0,38-0,40, X 0..3, Z +-15 (neschimbat); `Wall` Y 0..26,60, X -1,40..12,20; nisa: nicio coloana sub cota 7,05 (build) pe |Z|<14,8 (garda din build ridica eroare), deci liber deasupra `Shelf` = 7,05 m (>= 5); `Overhang` X -10,12..11,41; **nodurile raman Wall/Overhang/Shelf** (fara `Moss`, v1 nu il exporta).
-- Schimbare fata de v1: `Overhang` nu mai e limitat la Y <= 21,4: contine si lespezile de muschi de pe coama/terasele peretelui (Y pana la 26,9), fiindca `Wall` ia `wet_gneiss` in joc si muschiul de pe el se pierde. Minimul (buza, 14,0) e neschimbat.
-- `torrent_chute`: nod `Rock`; buza la z = 14,0 (iese pana la X = -3,16 peste banda), gura 20 m la buza (10 m la baza), cuveta goala 4 x 6 m cu fund `VOLCANIC_BLACK` la z ~15,5 si margine de blocuri; coliziune neschimbata (`none`).
+Contracte masurate pe GLB exportat:
+- `stirling_ledge`: buza `Overhang` Y min = **14,000**; `Shelf` Y 0,38-0,40, X 0..3, Z +-15 (identic cu v1); `Wall` X -1,20..12,20 (nimic mai aproape de drum de x = -1,2 in afara `Overhang`), Y 0..26,60; nisa: nicio coloana/bloc sub cota 7,05 (build) pe |Z| < 14,8 si niciun bloc cazut la |Z| < 15,2 (garda din build ridica eroare), deci liber deasupra `Shelf` = 7,05 m (>= 5); coliziune `mesh` neschimbata; noduri Wall / Overhang / Shelf (fara nod nou; muschiul sta pe `Overhang`, ca in runda 1).
+- `Overhang` Y max = 26,9 (nu mai e plafonat la 21,4): contine petice/lespezi de muschi de pe terase si coama (Wall ia `wet_gneiss` si muschiul de pe el s-ar pierde). Minimul (buza 14,0) e neschimbat.
+- `torrent_chute`: nod `Rock`; buza la z = 14,0, iese pana la X = -3,03 peste banda (restul masei X >= -1,2... blocurile de picior X >= -0,9), gura 20 m la buza; coliziune `none`.
 
 ### stirling_ledge
 | element | pe plansa | in randare |
 |---|---|---|
-| coloane verticale fatetate | prisme late, trepte | 8 coloane peste nisa + 4 la capete (latimi ~2-5 m), fiecare cu creasta pe fata, cap inclinat, jumatate cu treapta de retragere |
-| platou cu muschi sus | iarba/muschi | lespezi `TROPICAL_GREEN` pe coama coloanelor inalte (nod `Overhang`) |
-| terase cu muschi pe flanc | mici, la jumatate | cate o lespede pe treapta fiecarui capat (z >= 14,5) |
-| blocuri cazute | la baza | 15 blocuri la capete (|Z| 15-19,5), in afara `Shelf` |
-| surplomb | contract | 10 segmente-prisma fatetate, buza neregulata (8,4-10 m), sus muschi pe jumatatea dinspre perete |
-| dungi ude | benzi sub buza | `VOLCANIC_BLACK` pe subfata si pe fata buzei (1 din 3 segmente) |
+| coama | coboara in trepte spre dreapta | 4 trepte pe Y: 26,2 / 23,4 / 20,6 / 17,6 m, varfurile coloanelor difera 1-3 m |
+| capete | contraforti zimtati | 4-5 contraforti pe fiecare capat (1,3-2,3 m latime), ies pana la x = -0,9 din masa retrasa la x = 3,0-3,8, goluri de 0,5-1,1 m, muchii inclinate (skew pana la 0,8 m), capetele decalate pe Y |
+| deasupra surplombului | coloane inalte | pana la 6 contraforti de la z = 16,8 la coama (pe unde coama depaseste 19,5 m), ies pana la x ~ 0,2 |
+| nisa + surplomb | contract | surplombul coboara odata cu coama (radacina = min(21, coama - 0,6)); sub el negru (`VOLCANIC_BLACK`) |
+| muschi | petice pe terase si platou | lespezi neregulate pe tiera treptelor si pe varfurile coloanelor + pe 4 din 10 segmente ale surplombului, doar pe jumatatea dinspre perete; fara dunga zig-zag |
+| blocuri la baza | talus la capete | 22 de blocuri 0,8-3,0 m la capete, |Z| 15,2-20,6, X >= 0,9 (in afara Shelf-ului si a drumului) |
 
 ### torrent_chute
 | element | pe plansa | in randare |
 |---|---|---|
-| jgheab pe toata inaltimea | adanc, cu trepte | 7 trepte de pat-roca `VOLCANIC_BLACK`, jgheabul se largeste de la 10 m (jos) la 20 m (buza) |
-| masiv fatetat | varf cu fete mari | 6 coloane-contrafort (3 pe parte), inaltimi 16 -> 7 m spre exterior, creasta pe fata |
-| buza | peste banda | 3 segmente fatetate la +14,0, 3 m peste banda |
-| cuveta | goala sus | fund negru + margine de 4 blocuri cu muschi |
-| platou | muschi | 5 coloane de ~15-16 m cu varf `TROPICAL_GREEN` |
-| blocuri | la gura | 8 blocuri (4 in gura, 4 la picioarele contraforturilor) |
+| pisc | varf neregulat deasupra buzei | 6 coloane de 17,8-24,0 m in spatele cuvetei (X 7-11), zimtate in plan |
+| contraforti | de o parte si alta a jgheabului | 4 coloane pe parte, 21-23 m langa jgheab scazand la 8-9 m spre exterior (pana la |Z| = 17) |
+| jgheab | taietura adanca in V/U cu trepte | 7 trepte `VOLCANIC_BLACK`, latimea creste de la 10 m (jos) la 20 m (buza) |
+| buza + cuveta | contract | buza 3 segmente la +14,0, 3 m peste banda; cuveta goala 3 x 6 m cu fund negru, margine de 3 blocuri cu muschi, doi umeri laterali (terase cu muschi) |
+| blocuri la picior | in gura, nu pe banda | 16 blocuri in gura si la baza contraforturilor, X >= -0,9 |
 
 ### Goluri ramase (oneste)
-- `torrent_chute`: contractul (gura de 20 m pe o masa de 24 m, buza plata la +14) da o silueta de "poarta" cu capac, nu varful ascutit de pe plansa. Pentru silueta de pisc ar trebui relaxata latimea gurii.
-- `stirling_ledge`: coama e un "pieptene" de coloane mai plat decat pe plansa (care coboara in trepte spre dreapta); surplombul (contract) domina vizual si e mai verde decat pe desen; terasele cu muschi sunt lespezi simple, nu petice organice; dungile ude nu se vad in joc (clasa `wet_gneiss` inlocuieste slotul pe `Wall`).
-- Capturile de joc si `ProbeRace`/`probe_manual` nu s-au rulat (fara Godot, conform sarcinii): coliziunea `mesh` a lui `stirling_ledge` s-a schimbat si trebuie verificata la integrare.
+- `stirling_ledge`: surplombul (contract) ramane o lespede mare deschisa la culoare (marble) sub coama; peretele din spatele lui nu e un platou continuu cu iarba ca pe plansa; relieful e din prisme, nu din faţete organice. Verificarea din joc (clasa `wet_gneiss`) e a coordonatorului.
+- `torrent_chute`: piscul e o coroana de 6 coloane, nu un con neted ca pe plansa; cuveta de pe buza ramane un dreptunghi negru vizibil de sus.
+- Fara Godot: `ProbeRace`/`probe_manual`/`ProbeLaneClear` nu au rulat; coliziunea `mesh` a lui `stirling_ledge` s-a schimbat, iar masa lui `torrent_chute` s-a extins pe X (pana la 11) si Z (+-17), deci decorul din jur trebuie reverificat la integrare.

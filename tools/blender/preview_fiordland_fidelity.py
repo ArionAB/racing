@@ -60,7 +60,6 @@ PIECES = [
     "driftwood", "bush_plane", "coach_fiordland", "beech_a", "beech_b", "beech_c",
     "beech_dead", "rata_tree", "tussock_clump", "stump", "chasm_rock",
     "chasm_bridge_rail", "tree_avalanche", "scree_slab", "kea", "penguin_tawaki",
-    "cruise_boat_builder",
 ]
 HORIZON_NODES = {"FarWall_A", "SnowRidge_A", "SnowRidge_B"}
 
@@ -71,9 +70,6 @@ SPECS = {n: {"camera": {"azimuth": 55.0, "elevation": 24.0, "lens": 60.0, "margi
 SPECS["coach_fiordland"]["camera"].update(azimuth=40.0)
 SPECS["bush_plane"]["camera"].update(azimuth=130.0, elevation=24.0, margin=1.0)
 SPECS["cruise_boat"]["camera"].update(azimuth=20.0, elevation=20.0)
-for _n in ("kayak_a", "kayak_b"):
-    SPECS[_n]["camera"].update(azimuth=20.0, elevation=40.0)
-SPECS["cruise_boat_builder"]["camera"].update(azimuth=20.0, elevation=20.0)
 for _n in ("kayak_a", "kayak_b", "driftwood"):
     SPECS[_n]["camera"].update(azimuth=20.0, elevation=28.0)
 SPECS["wharf"]["camera"].update(azimuth=-20.0, elevation=30.0)

@@ -2,7 +2,7 @@
 
   fiordland/vehicles/coach_fiordland.glb       autocarul din tunelul Homer (TunnelSignalHazard)
   fiordland/vehicles/bush_plane.glb            monomotor (PathMover, aer)
-  fiordland/vehicles/cruise_boat_builder.glb   CANDIDAT Builder pentru vaporas (in joc ramane reuse-ul)
+  fiordland/vehicles/cruise_boat.glb           vaporasul de croaziera (inlocuieste reuse-ul descarcat)
   fiordland/props/kayak_a.glb                  caiac rosu-portocaliu
   fiordland/props/kayak_b.glb                  caiac galben
 
@@ -14,7 +14,7 @@ eliptice/poligonale, nu din cutii:
   - plane: fuzelaj loft eliptic, aripa sus pe montanti (plan trapezoidal),
     coada cu deriva rosie, tren fix cu carenaje, elice cu 2 pale.
   - caiace: bucla cu curbura de bordaj (sheer) si rocker, 2 cockpituri.
-  - cruise_boat_builder: carena cu evazare, doua punti, geamuri in sir,
+  - cruise_boat: carena cu evazare, doua punti, geamuri in sir,
     punte deschisa cu balustrada si banci, platforma de lemn la pupa.
 
 COACH: cotele SUNT contractul de gameplay (TunnelSignalHazard / BusHazard iau
@@ -517,11 +517,11 @@ save_blend([plane], "fiordland_plane.blend")
 
 # origin=None: linia de plutire e Z=0 prin constructie (chila la ~-1.2).
 boat = build_boat()
-emit(boat, "vehicles/cruise_boat_builder.glb", 99999, bevel=0.03, bevel_angle=45.0,
+emit(boat, "vehicles/cruise_boat.glb", 99999, bevel=0.03, bevel_angle=45.0,
      origin=None, smooth_angle=40.0)
-path, size = export_glb([boat], "fiordland/vehicles/cruise_boat_builder.glb")
+path, size = export_glb([boat], "fiordland/vehicles/cruise_boat.glb")
 print("export: %s (%.0f KB)" % (path, size / 1024.0))
-save_blend([boat], "fiordland_boat_builder.blend")
+save_blend([boat], "fiordland_boat.blend")
 
 kayak_a = build_kayak(KERB_RED, LAVA_ORANGE, "KayakA")
 emit(kayak_a, "props/kayak_a.glb", 99999, bevel=0.01, bevel_angle=55.0, origin="base",

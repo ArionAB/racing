@@ -416,3 +416,12 @@ Diferente ramase:
 - plane: fuzelajul e mai subtire decat al plansei; elicea e o singura bara inclinata; fara fereastra de usa separata.
 - kayak: coca e mai ingusta in sectiune (cota de 0,35 m limiteaza adancimea); fara scaune in cockpit.
 - avalansa: lemnul e brun saturat (nu exista gri-brun in paleta), muschiul `TROPICAL_GREEN` iese mai viu decat verdele-oliv al plansei; radacinile citesc ca niste cioturi scurte, nu ca o panza de radacini; bolovanul e fatetat grosier (7-8 laturi).
+
+**Decizia coordonatorului (26 oct 2026): candidatul intra in joc.** Capturat pe
+Track16 la camera de joc (frac 0,02, POI A), langa reuse-ul descarcat: candidatul
+se citeste "vaporas de excursie" (sir de geamuri, puntea deschisa cu banci si
+balustrada vizibile de sus), reuse-ul se citea "feribot cu cos". Builder-ul
+exporta acum direct `vehicles/cruise_boat.glb` (nod `Boat`, aceeasi cale, deci
+Track16.tscn ramane valid); `build_fiordland_boats_reuse.py`, `.blend`-urile lui
+intermediare si intrarile CC-BY din `assets/CREDITS.md` sunt scoase (niciun
+asset descarcat nu mai e in joc). Decizia e reversibila din git (e5d9745f).

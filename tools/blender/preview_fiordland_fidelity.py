@@ -72,6 +72,7 @@ SPECS["bush_plane"]["camera"].update(azimuth=40.0, elevation=28.0)
 SPECS["cruise_boat"]["camera"].update(azimuth=20.0, elevation=20.0)
 for _n in ("kayak_a", "kayak_b", "driftwood"):
     SPECS[_n]["camera"].update(azimuth=20.0, elevation=40.0)
+SPECS["wharf"]["camera"].update(azimuth=-20.0, elevation=30.0)
 SPECS["chasm_bridge_rail"]["camera"].update(azimuth=10.0, elevation=24.0)
 for _n in HORIZON_NODES:
     SPECS[_n]["camera"].update(azimuth=0.0, elevation=6.0)

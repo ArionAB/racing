@@ -89,16 +89,16 @@ check "props/kayak_a.glb"            100 --allow-car-slots=KayakA
 check "props/kayak_b.glb"            100 --allow-car-slots=KayakB
 
 echo "== satul (brief §1.3, val 4) =="
-check "structures/wharf.glb"          400
+check "structures/wharf.glb"          2100
 # cafe_shed/lodge: House_Wall + House_Roof, origine ASSEMBLY — acoperisul nu
 # atinge solul prin constructie (aceeasi exceptie ca stirling_ledge/beech).
-check "buildings/cafe_shed.glb"       400 --origin=assembly
-check "buildings/lodge.glb"           700 --origin=assembly
-check "structures/heli_pad.glb"       200
-check "props/luggage_container.glb"   150
-check "props/road_sign_blank.glb"     100
+check "buildings/cafe_shed.glb"       2100 --origin=assembly
+check "buildings/lodge.glb"           3700 --origin=assembly
+check "structures/heli_pad.glb"       1150
+check "props/luggage_container.glb"   950
+check "props/road_sign_blank.glb"     160
 check "props/traffic_light_pole.glb"  250
-check "props/snow_pole.glb"            40
+check "props/snow_pole.glb"            90
 
 echo "== animalele (brief §1.7, val 4) =="
 # kea: rig, actiuni Idle/Open (nu se verifica prin verify_glb.py, care nu

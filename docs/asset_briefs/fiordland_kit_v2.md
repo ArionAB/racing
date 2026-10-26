@@ -225,40 +225,42 @@ instanțe), apoi `bash tools/verify_local.sh` înainte de PR.
 
 ## Livrare grupa A
 
-Script: `tools/blender/build_fiordland_rocks.py` (vocabular nou: `_hull` =
-invelitoare convexa cu fete coplanare topite, `_pit`, `_hexa`; codul
-`stirling_ledge`/`torrent_chute` neatins, GLB-urile lor identice). Comparatii:
+Script: `tools/blender/build_fiordland_rocks.py` (v2, runda 2; `stirling_ledge` /
+`torrent_chute` neatinse). Comparatii:
 `docs/asset_briefs/img/fiordland_fidelity/{chasm_rock,guard_rock,scree_slab}.png`.
-Bugete verify actualizate: 1500 / 200 / 4600. Zero sloturi noi.
+Bugete verify: 1500 / 200 / 3300. Zero sloturi noi.
 
 | piesa | AABB Godot (X x Y x Z) | tri |
 |---|---|---|
-| `chasm_rock` | 5,55 x 2,44 x 4,81 | 1.432 |
-| `guard_rock` | 1,14 x 0,79 x 0,65 | 164 |
-| `scree_slab` | 5,31 x 1,47 x 7,90 | 4.468 |
+| `chasm_rock` | 6,03 x 2,50 x 4,48 | 1.372 |
+| `guard_rock` | 1,11 x 0,80 x 0,67 | 150 |
+| `scree_slab` | 5,20 x 1,47 x 7,94 | 3.114 |
 
 ### chasm_rock
 | element | pe plansa | in randare |
 |---|---|---|
-| flancuri | pereti verticali fatetati, blocuri late | placa joasa + placa de sus rotita (trepte), inel de blocuri cu pereti verticali; fete late |
-| marmite | 2 adanci, fund inchis, cea mare in fata | 2 (r 0,95 fata / 0,72 spate), pereti verticali 0,9 m, fund VOLCANIC_BLACK |
-| creasta | margine in trepte, blocuri cazute | blocuri de inel la inaltimi diferite; 6 blocuri cazute pe margine (mici si ascutite) |
+| corp | o lespede monolitica, mai lata la baza | un miez prismatic cu contur neregulat (14 colturi) + inel de 14 coloane de flanc inclinate spre interior |
+| flancuri | coloane verticale de inaltimi diferite, coboara spre fata | inaltimi 0,9-2,4 m, mai joase spre -Y (fata) |
+| suprafata de sus | continua, contur neregulat, fara coroana | o singura fata de sus usor frantă; nimic ridicat deasupra ei |
+| marmite | 2 taiate in suprafata, 3 lobi, pereti verticali inchisi; mare in fata-centru | 2 (boolean DIFFERENCE, prisme in 3 lobi), adancime ~1,5 m, pereti si fund VOLCANIC_BLACK |
+| blocuri | 2-3 blocuri late la baza | 3 blocuri ghemuite la baza |
 
 ### guard_rock
 | element | pe plansa | in randare |
 |---|---|---|
-| volum | bolovan inalt, fete mari plane, fata de rupere inclinata | invelitoare convexa fatetata, varf deplasat spre +X; h/l = 0,69 |
-| muschi | pete pe baza si muchii | doar banda de sus (taiata exact la z=0,52; contract §0.1.3) |
-| fragment la baza | lespezi mici in fata | o piatra mica langa baza |
+| volum | bloc inalt (h/l ~0,85), putine plane mari | ~10 plane (invelitoare convexa, topire 12 grade); h 0,80 / l 1,11 = 0,72 |
+| creasta | muchie verticala unde se intalnesc 2 fete | punctele din fata (x=0) formeaza creasta |
+| plan de sus | inclinat | plan inclinat spre +X |
+| muschi | pete pe plan, pe flancuri joase si in crapatura | pete: jumatate din planul de sus, flancurile joase din spate/capete, o petica in crapatura (fata libera) |
 
 ### scree_slab
 | element | pe plansa | in randare |
 |---|---|---|
-| movila | con inalt cu varf fatetat | movila joasa alungita pe Y, acoperita de ~45 blocuri fatetate (GNEISS / VOLCANIC_BLACK) |
-| inel | 25-40 pietre pe sol | 32 pietre imprastiate in jur |
+| movila | un con cu varful spre spate, fete plane mari in 2-3 griuri | un singur mesh (grila de inaltimi, triunghiuri plane), varf deplasat spre +Y, patch-uri MARBLE_GREY / VOLCANIC_BLACK |
+| fusta | blocuri la baza | 5 blocuri ghemuite |
+| inel | 25-40 pietre separate | 22 pietre ghemuite rotunjit-poliedrice, fara piramide; fara SAND_SHADOW |
 
 ### Goluri ramase (oneste)
-- `chasm_rock`: marmitele au contur octogonal regulat si creasta de inel cu aspect de "coroana"; pe plansa sunt neregulate, taiate in lespede. Blocurile cazute sunt prea mici/ascutite fata de plansa.
-- `guard_rock`: fetele sunt triunghiulare-icosaedrice, nu cele cateva plane mari ale plansei; musch doar sus (contractul), plansa il are si pe baza.
-- `scree_slab`: nu are un singur varf clar; blocurile sunt piramidale/ascutite, iar maronul SAND_SHADOW se vede printre ele; costul in triunghiuri (4,5k) e mult peste ~900 din brief. Y limitat la 1,5.
-- `verify_fiordland.sh` da `KIT: PROBLEME` doar din `cruise_boat`/`kayak_a/b` (grupa E, nu a mea); cele trei piese ies OK.
+- `chasm_rock`: conturul de sus e prea neted fata de plansa (contur aproape oval, nu 3 lobi pe margine), iar marmitele par putin adanci din camera planseta; flancurile sunt coloane aproape uniforme ca latime. Trepte mai putine decat pe plansa.
+- `guard_rock`: planele sunt mai putine si mai rare decat pe plansa; petele de muschi sunt taiate pe plane (colturoase), nu organice.
+- `scree_slab`: varful e jos (1,47 m vs un con inalt pe plansa) si fetele sunt triunghiuri mici, nu placi mari; culorile sunt in pete mari, nu pe fete individuale. 3,1k tri, peste tinta 1.500-2.000.

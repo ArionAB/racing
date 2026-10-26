@@ -620,142 +620,197 @@ def _hexa(b, bot, top, slot):
 # --- chasm_rock --------------------------------------------------------------
 #
 # Contract: 6.0 x 2.5 x 4.72 (Godot X x Y x Z) = 6.0 x 4.72 x 2.5 Blender.
-# Planseta: lespede de gneis cu flancuri fatetate in doua trepte, blocuri
-# cazute pe margine si DOUA marmite adanci (pereti verticali, fund inchis),
-# cea mare in fata. Marmitele stau doar pe fata de sus; flancurile sunt
-# stanca fatetata (piesa e si bolovan generic de zid).
-def _pit(b, cx, cy, r, z_base, floor_z, rand, rim_w, h_lo, h_hi, segs=8):
-    """Marmita: fund (disc VOLCANIC_BLACK) + inel de 8 blocuri cu perete
-    interior vertical si creasta in trepte (fiecare bloc cu inaltimea lui)."""
-    b.cylinder((cx, cy, floor_z - 0.05), r, 0.10, WET_STREAK, segments=segs, axis="Z")
-    outer = [r + rim_w * (0.8 + rand() * 0.5) for _ in range(segs)]
-    for i in range(segs):
-        j = (i + 1) % segs
-        a0 = 2 * math.pi * i / segs
-        a1 = 2 * math.pi * j / segs
-        h = h_lo + (h_hi - h_lo) * rand()
-        drop = 0.15 + rand() * 0.15
-        ia = (cx + math.cos(a0) * r, cy + math.sin(a0) * r)
-        ib = (cx + math.cos(a1) * r, cy + math.sin(a1) * r)
-        oa = (cx + math.cos(a0) * outer[i], cy + math.sin(a0) * outer[i])
-        ob = (cx + math.cos(a1) * outer[j], cy + math.sin(a1) * outer[j])
-        bot = [(ia[0], ia[1], z_base), (ib[0], ib[1], z_base),
-               (ob[0], ob[1], z_base), (oa[0], oa[1], z_base)]
-        top = [(ia[0], ia[1], h), (ib[0], ib[1], h),
-               (ob[0], ob[1], h - drop), (oa[0], oa[1], h - drop)]
-        _hexa(b, bot, top, GNEISS)
+# v2 (verdict coordonator): O SINGURA lespede monolitica. Corp = miez prismatic
+# cu contur neregulat (suprafata de sus continua) + coloane de flanc de
+# inaltimi diferite care coboara spre fata (-Y), plus 2 marmite TAIATE in fata
+# de sus (boolean DIFFERENCE cu prisme cu contur in 3 lobi), cu pereti
+# verticali inchisi la culoare. Nicio coroana peste suprafata de sus.
+def _outline(rand, n, rx, ry, jit=0.08, rot=0.0):
+    pts = []
+    for i in range(n):
+        a = rot + 2 * math.pi * (i + (rand() - 0.5) * 0.3) / n
+        k = 1.0 + (rand() * 2 - 1) * jit
+        pts.append((math.cos(a) * rx * k, math.sin(a) * ry * k))
+    return pts
+
+
+def _prism_xy(b, pts, z0, ztop, slot):
+    """Prisma verticala din contur 2D (ngon sus/jos). `ztop(x,y)` -> cota sus."""
+    vb = [b.bm.verts.new((x, y, z0)) for x, y in pts]
+    vt = [b.bm.verts.new((x, y, ztop(x, y))) for x, y in pts]
+    fs = [b.bm.faces.new(tuple(reversed(vb))), b.bm.faces.new(tuple(vt))]
+    n = len(pts)
+    for i in range(n):
+        j = (i + 1) % n
+        fs.append(b.bm.faces.new((vb[i], vb[j], vt[j], vt[i])))
+    for f in fs:
+        f[b.slot] = slot
+    return fs
+
+
+def _round_stone(b, rand, c, size, slot):
+    """Piatra GHEMUITA rotunjit-poliedrica (fara varfuri/piramide): 3 inele
+    (5 jos, 5 la mijloc rotit, 3 sus). `size` = diametre (x, y, z)."""
+    cx, cy, cz = c
+    sx, sy, sz = size
+    pts = []
+    for z, n, r, rot in ((0.0, 5, 0.90, 0.0), (0.5, 5, 1.0, 0.63), (0.88, 3, 0.45, 0.3)):
+        for i in range(n):
+            a = rot + 2 * math.pi * i / n + (rand() - 0.5) * 0.35
+            k = r * (0.88 + rand() * 0.24)
+            pts.append((cx + math.cos(a) * k * sx * 0.5,
+                        cy + math.sin(a) * k * sy * 0.5,
+                        cz + z * sz * (0.9 + rand() * 0.2)))
+    return _hull(b, pts, slot, 7.0)
 
 
 def build_chasm_rock():
-    b = Builder()
+    import bpy as _bpy
     rand = _lcg(4501)
-    # trepte: placa joasa (flancul de jos) + placa de sus mai mica si rotita
-    t1 = _ring_pts(rand, 0.0, 0.0, 0.0, 2.55, 1.95, 11, 0.10)
-    t1 += _ring_pts(rand, 0.0, 0.0, 0.95, 2.52, 1.93, 11, 0.07, rot=0.0)
-    _hull(b, t1, GNEISS, 6.0)
-    t2 = _ring_pts(rand, -0.1, 0.1, 0.55, 2.25, 1.62, 10, 0.08, rot=0.5)
-    t2 += _ring_pts(rand, -0.1, 0.1, 1.45, 2.18, 1.58, 10, 0.08, rot=0.5)
-    _hull(b, t2, GNEISS, 6.0)
-    floor_z = 1.50
-    # marmita mare (fata = -Y), mica in spate-stanga
-    _pit(b, 0.55, -0.55, 0.95, 0.60, floor_z, rand, 0.85, 2.20, 2.50)
-    _pit(b, -1.05, 0.85, 0.72, 0.60, floor_z, rand, 0.80, 2.10, 2.40)
-    # blocuri cazute pe margine: 6 pietre fatetate, partial sub placa
-    for (ang, rad, sz, zc) in ((200, 0.96, (1.7, 1.4, 1.5), 0.55),
-                               (260, 0.97, (1.9, 1.3, 1.3), 0.45),
-                               (330, 0.98, (1.6, 1.4, 1.4), 0.50),
-                               (20, 0.97, (1.4, 1.2, 1.1), 0.40),
-                               (95, 0.95, (1.6, 1.2, 1.2), 0.45),
-                               (150, 0.97, (1.4, 1.2, 1.1), 0.40)):
+    n = 14
+    outer = _outline(rand, n, 2.70, 2.15, 0.11, rot=0.1)
+    core = [(x * 0.80, y * 0.80) for x, y in outer]
+    z_core = 2.42
+
+    # miezul: suprafata de sus continua (usor inclinata spre fata)
+    bc = Builder()
+    _prism_xy(bc, core, 0.0, lambda x, y: z_core + 0.07 * y - 0.10 * abs(x + 0.3), GNEISS)
+    core_obj = bc.to_object("ChasmCore")
+
+    # cele doua marmite: prisme cu contur in 3 lobi, taiate de sus
+    bk = Builder()
+    for (cx, cy, r, phi) in ((0.30, -0.35, 1.00, 0.4), (-1.25, 0.75, 0.72, 1.9)):
+        pts = []
+        for i in range(12):
+            a = 2 * math.pi * i / 12
+            k = 1.0 + 0.28 * math.cos(3 * a + phi) + (rand() - 0.5) * 0.08
+            pts.append((cx + math.cos(a) * r * k, cy + math.sin(a) * r * k))
+        _prism_xy(bk, pts, 0.85, lambda x, y: 3.2, WET_STREAK)
+    cut_obj = bk.to_object("ChasmCut")
+    mod = core_obj.modifiers.new("pits", "BOOLEAN")
+    mod.operation = "DIFFERENCE"
+    mod.solver = "EXACT"
+    mod.object = cut_obj
+    for o in list(_bpy.context.view_layer.objects):
+        o.select_set(False)
+    _bpy.context.view_layer.objects.active = core_obj
+    core_obj.select_set(True)
+    _bpy.ops.object.modifier_apply(modifier="pits")
+    cm = cut_obj.data
+    _bpy.data.objects.remove(cut_obj, do_unlink=True)
+    _bpy.data.meshes.remove(cm)
+
+    # coloanele de flanc: inaltimi diferite, mai joase spre fata (-Y)
+    b = Builder()
+    for k in range(n):
+        j = (k + 1) % n
+        ym = (outer[k][1] + outer[j][1]) * 0.5 / 2.15
+        h = 1.60 + 0.65 * ym + (rand() - 0.5) * 0.9
+        h = max(0.9, min(2.40, h))
+        ok, oj = outer[k], outer[j]
+        ck, cj = core[k], core[j]
+        s = 0.86
+        bot = [(ok[0], ok[1], 0.0), (oj[0], oj[1], 0.0),
+               (cj[0], cj[1], 0.0), (ck[0], ck[1], 0.0)]
+        top = [(ok[0] * s, ok[1] * s, h), (oj[0] * s, oj[1] * s, h),
+               (cj[0], cj[1], h), (ck[0], ck[1], h)]
+        _hexa(b, bot, top, GNEISS)
+    # 3 blocuri ghemuite la baza, acelasi limbaj fatetat
+    for (ang, sz) in ((205, (1.5, 1.2, 0.85)), (300, (1.6, 1.2, 0.75)), (15, (1.3, 1.1, 0.8))):
         a = math.radians(ang)
-        cx, cy = math.cos(a) * 2.45 * rad, math.sin(a) * 1.92 * rad
-        _hull(b, _stone_pts(rand, (cx, cy, zc), sz, n=9, base_cut=0.7), GNEISS, 6.0)
-    return b.to_object("Rock")
+        _round_stone(b, rand, (math.cos(a) * 2.55, math.sin(a) * 2.0, 0.0), sz, GNEISS)
+    obj = b.to_object("Rock")
+    _bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    core_obj.select_set(True)
+    _bpy.context.view_layer.objects.active = obj
+    _bpy.ops.object.join()
+    return obj
 
 
 # --- guard_rock --------------------------------------------------------------
 #
-# Contract: 1.18 x 0.80(max) x 0.70 Godot X x Y x Z = Blender X x Z x Y.
-# Planseta: bolovan fatetat mai inalt decat lat, fete mari plane, fata de
-# rupere inclinata. Corp MARBLE_GREY pana la z=ZC, muschi doar deasupra
-# (taiat exact in plan, deci suprapunerea de y intre sloturi e 0).
+# v2: bloc inalt din ~10 plane mari: fata mare in fata, creasta verticala
+# unde se intalnesc doua fete, plan de sus inclinat. Muschi in PETE (nu capac):
+# pe planul de sus (jumatate) si pe flancurile joase / in crapatura.
 def build_guard_rock():
     b = Builder()
-    rand = _lcg(4601)
-    pts = _ring_pts(rand, 0.0, 0.0, 0.0, 0.47, 0.27, 6, 0.10, rot=0.2)
-    pts += _ring_pts(rand, 0.02, 0.0, 0.36, 0.54, 0.31, 6, 0.10, rot=0.7)
-    # varful: puncte sus, deplasate spre +X = fata de rupere inclinata
-    pts += [(0.18, 0.04, 0.80), (0.36, -0.10, 0.74), (-0.04, 0.12, 0.70)]
-    _hull(b, pts, GNEISS, 9.0)
-    _hull(b, _stone_pts(rand, (-0.42, -0.22, 0.07), (0.30, 0.22, 0.2), n=8), GNEISS, 5.0)
-    for v in b.bm.verts:          # latime 1.00 -> 1.14 (afin: fetele raman plane)
-        v.co.x *= 1.14
-    zc = 0.52
+    pts = [(-0.52, -0.26, 0.0), (0.18, -0.34, 0.0), (0.56, -0.06, 0.0),
+           (0.40, 0.30, 0.0), (-0.30, 0.32, 0.0), (-0.56, 0.04, 0.0),
+           # creasta verticala in fata (doua puncte unul peste altul)
+           (0.00, -0.35, 0.10), (-0.02, -0.28, 0.66),
+           (-0.50, -0.20, 0.40), (0.50, -0.22, 0.34),
+           # planul de sus, inclinat spre dreapta
+           (-0.38, -0.02, 0.80), (0.05, -0.10, 0.76), (0.30, 0.10, 0.60), (-0.10, 0.22, 0.74)]
+    _hull(b, pts, GNEISS, 12.0)
     geom = list(b.bm.verts) + list(b.bm.edges) + list(b.bm.faces)
-    _bmesh.ops.bisect_plane(b.bm, geom=geom, plane_co=(0, 0, zc), plane_no=(0, 0, 1))
+    _bmesh.ops.bisect_plane(b.bm, geom=geom, plane_co=(0, 0, 0.2), plane_no=(0, 0, 1))
+    geom = list(b.bm.verts) + list(b.bm.edges) + list(b.bm.faces)
+    _bmesh.ops.bisect_plane(b.bm, geom=geom, plane_co=(0.12, 0, 0), plane_no=(1, 0, 0))
     for f in b.bm.faces:
         c = f.calc_center_median()
-        f[b.slot] = MOSS if c.z > zc else GNEISS
+        moss = (c.z > 0.62 and c.x > 0.12) or \
+               (c.z < 0.2 and c.y > -0.15 and (c.x > 0.2 or c.x < -0.32)) or \
+               (c.z < 0.45 and -0.12 < c.x < 0.06 and c.y < -0.1)
+        f[b.slot] = MOSS if moss else GNEISS
     return b.to_object("Rock")
 
 
 # --- scree_slab --------------------------------------------------------------
 #
-# Contract: 5.0 x 1.5(max) x 8.0 Godot = 5.0 x 8.0 x 1.5 Blender (Y lung).
-# Planseta: con de grohotis cu blocuri mari fatetate, inconjurat de un inel de
-# pietre separate pe sol. Compromis (brief §2): movila joasa alungita pe Y cu
-# creasta fatetata + blocuri, plus ~28 de pietre imprastiate.
+# v2: O SINGURA movila (varf usor spre spate, +Y) dintr-un mesh fatetat cu
+# fete plane mari in 2 griuri (MARBLE_GREY + VOLCANIC_BLACK), cu o fusta de
+# blocuri ghemuite la baza si un inel de ~28 pietre rotunjit-poliedrice
+# imprastiate. FARA SAND_SHADOW. Y max 1.5.
 def build_scree_slab():
     b = Builder()
     rand = _lcg(4701)
-    a_x, b_y, H = 1.95, 3.35, 1.20
-
-    def mound_z(x, y):
-        t = 1.0 - (x / a_x) ** 2 - (y / b_y) ** 2
-        return H * max(t, 0.0) ** 0.8
-
-    # miezul movilei: invelitoare convexa a doua inele + o creasta pe Y
-    core = _ring_pts(rand, 0, 0, 0.0, a_x * 0.80, b_y * 0.80, 12, 0.06)
-    core += _ring_pts(rand, 0, 0, 0.62, a_x * 0.55, b_y * 0.60, 10, 0.10, rot=0.2)
-    core += [(0.1, -1.6, 1.0), (-0.1, 0.0, 1.12), (0.12, 1.5, 0.95)]
-    _hull(b, core, SCREE, 6.0)
-
-    # blocurile mari (grohotisul) pe suprafata movilei, de la creasta in jos
-    cells = []
-    gy = -b_y * 0.95
-    while gy <= b_y * 0.95:
-        gx = -a_x * 0.95
-        while gx <= a_x * 0.95:
-            if (gx / a_x) ** 2 + (gy / b_y) ** 2 < 0.95:
-                cells.append((gx + (rand() - 0.5) * 0.5, gy + (rand() - 0.5) * 0.5))
-            gx += 0.66
-        gy += 0.66
-    for (x, y) in cells:
-        z = mound_z(x, y)
-        s = 0.85 + rand() * 0.5 - 0.3 * min(1.0, abs(y) / b_y)
-        slot = WET_STREAK if rand() < 0.28 else GNEISS
-        _hull(b, _stone_pts(rand, (x, y, z + s * 0.08),
-                            (s * (1.0 + rand() * 0.5), s * (1.0 + rand() * 0.5),
-                             s * 0.8), n=9, base_cut=0.5, spread=0.2), slot, 6.0)
-
-    # inelul de pietre imprastiate pe sol, pana la marginile 5 x 8
+    # movila = grila de inaltimi (triunghiuri plane, flat-shaded): varf spre
+    # spate (+Y), zgomot de cota si de pozitie -> multe fatete plane de marimi
+    # si inclinari diferite, in 2 griuri
+    nx, ny = 10, 16
+    ax, ay = 2.05, 3.35
+    grid = {}
+    patch = {(a, c): rand() < 0.42 for a in range(nx) for c in range(ny)}
+    for j in range(ny + 1):
+        for i in range(nx + 1):
+            x = (i / nx * 2 - 1) * ax + (rand() - 0.5) * 0.22
+            y = (j / ny * 2 - 1) * ay + (rand() - 0.5) * 0.28
+            yy = (y - 0.45) / ay          # varful deplasat spre +Y
+            r = math.sqrt((x / ax) ** 2 + yy * yy)
+            z = 1.62 * max(0.0, 1.0 - r) ** 1.1 * (0.85 + rand() * 0.3)
+            if r < 0.85:
+                z += (rand() - 0.5) * 0.14
+            grid[(i, j)] = b.bm.verts.new((x, y, max(z, 0.0)))
+    for j in range(ny):
+        for i in range(nx):
+            q = [grid[(i, j)], grid[(i + 1, j)], grid[(i + 1, j + 1)], grid[(i, j + 1)]]
+            if all(v.co.z <= 0.0 for v in q):
+                continue
+            for tri in ((q[0], q[1], q[2]), (q[0], q[2], q[3])) if (i + j) % 2 else                        ((q[0], q[1], q[3]), (q[1], q[2], q[3])):
+                f = b.bm.faces.new(tri)
+                f[b.slot] = VOLCANIC_BLACK if patch[(i // 2 * 2, j // 2 * 2)] else GNEISS
+    # fusta: blocuri ghemuite la baza movilei
+    for i in range(5):
+        a = 2 * math.pi * (i + rand() * 0.5) / 5
+        s = 0.7 + rand() * 0.4
+        _round_stone(b, rand, (math.cos(a) * 1.85, math.sin(a) * 3.05, 0.0),
+                     (s * 1.2, s * 1.0, s * 0.7), GNEISS if rand() < 0.65 else VOLCANIC_BLACK)
+    # inelul de pietre pe sol (ghemuite), pana la marginile 5 x 8
     placed = 0
     tries = 0
-    while placed < 32 and tries < 400:
+    while placed < 22 and tries < 600:
         tries += 1
         a = rand() * 2 * math.pi
-        k = 1.12 + rand() * 0.45          # >1 = in afara miezului
+        k = 1.12 + rand() * 0.45
         x = math.cos(a) * 2.38 * k * 0.92
         y = math.sin(a) * 3.92 * k * 0.92
-        if abs(x) > 2.4 or abs(y) > 3.85:
+        if abs(x) > 2.3 or abs(y) > 3.8:
             continue
-        s = 0.25 + rand() * 0.40
-        slot = GNEISS if rand() < 0.7 else WET_STREAK
-        _hull(b, _stone_pts(rand, (x, y, s * 0.18),
-                            (s * 1.3, s * 1.1, s * 0.85), n=10, base_cut=0.5, spread=0.2), slot, 8.0)
+        s = 0.28 + rand() * 0.42
+        _round_stone(b, rand, (x, y, 0.0), (s * 1.3, s * 1.1, s * 0.75),
+                     GNEISS if rand() < 0.7 else VOLCANIC_BLACK)
         placed += 1
-    for v in b.bm.verts:          # Y max 1.5 (contract): 1.65 * 0.89
-        v.co.z *= 0.89
     return b.to_object("Rock")
 
 
@@ -866,7 +921,7 @@ emit(guard_obj, "rocks/guard_rock.glb", AO_SMALL,
      bevel=0.012, budget=200, force_flat=True)
 scree_obj = build_scree_slab()
 emit(scree_obj, "rocks/scree_slab.glb", AO_SMALL,
-     bevel=0.02, budget=4600, force_flat=True)
+     bevel=0.012, budget=3300, force_flat=True)
 
 print()
 for path, tris, kb, ao_lo, ao_hi, budget in results:

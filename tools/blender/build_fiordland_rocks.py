@@ -111,25 +111,37 @@ def _rock_x(b, center, size, slot, seed, segments=7, rings=4, taper=0.16,
     return faces
 
 
-SL_CAPS = []    # lespezi de muschi (x0, x1, y0, y1, z) pentru nodul Overhang
+SL_CAPS = []    # petice de muschi (x0, x1, y0, y1, z) pentru nodul Overhang
 SL_BASE_Z = -0.4      # baza peretelui in coordonate de build (contract: Shelf la +0.4 in GLB)
 SL_TOP_Z = 26.2       # coama (26.6 in GLB)
 SL_BACK_X = 12.2
 
 
-def _column(b, rand, y0, y1, zb, zt, xf, slot, ridge=0.55, tier=None, back=SL_BACK_X):
-    """Coloana prismatica fatetata: fata spre -X are o creasta (2 fete mari in
-    unghi), capul inclinat, marginile de sus decalate pe Y. Pe tiera superioara
-    (`tier` = (z_treapta, retragere)) fata se retrage -> treapta."""
+def _sl_crest(y):
+    """Coama coboara in trepte mari dinspre -Y (26.2) spre +Y (~17.5)."""
+    if y < -9.0:
+        return 26.2
+    if y < -1.0:
+        return 23.4
+    if y < 8.0:
+        return 20.6
+    return 17.6
+
+
+def _column(b, rand, y0, y1, zb, zt, xf, slot, ridge=0.55, tier=None, back=SL_BACK_X,
+            skew=0.9, lean_k=0.5):
+    """Coloana prismatica fatetata: fata spre -X are o creasta, capul inclinat,
+    marginile de sus decalate pe Y (muchii care nu sunt verticale). Cu `tier` =
+    (z_treapta, retragere) fata se retrage deasupra treptei."""
     def hullpts(z0, z1, xfront, ridge_on):
-        sk = (rand() - 0.5) * 0.9
+        sk = (rand() - 0.5) * skew
         ym = (y0 + y1) * 0.5 + (rand() - 0.5) * (y1 - y0) * 0.25
-        lean = (rand() - 0.3) * 0.5
+        lean = (rand() - 0.3) * lean_k
         pts = [(xfront, y0, z0), (xfront, y1, z0),
                (xfront + lean, y0 + sk, z1), (xfront + lean, y1 + sk, z1),
                (back, y0, z0), (back, y1, z0), (back, y0 + sk, z1), (back, y1 + sk, z1)]
         if ridge_on:
-            r = min(ridge * (0.5 + rand()), xfront)
+            r = min(ridge * (0.5 + rand()), max(xfront + 1.2, 0.0))
             pts.append((xfront - r, ym, z0 + (z1 - z0) * (0.25 + rand() * 0.4)))
             pts.append((xfront - r * 0.6, ym + sk * 0.5, z1 - (z1 - z0) * 0.08))
         return pts
@@ -142,14 +154,16 @@ def _column(b, rand, y0, y1, zb, zt, xf, slot, ridge=0.55, tier=None, back=SL_BA
 
 
 def _wall_body(b):
-    """v3: perete din COLOANE prismatice fatetate (latimi si inaltimi diferite,
-    unele cu treapta), fata la x >= 0 (nu intra pe Shelf/drum). Nisa ramane gol
-    real: coloanele de deasupra ei incep la z = SL_NICHE_CLEAR + 0.05."""
+    """v4: relief mare (clasa wet_gneiss sterge fatetele mici). Coama in 4 trepte
+    spre +Y; masa de spate retrasa (x=3.6) + CONTRAFORTI ingusti care ies pana la
+    x=-1.2, cu goluri adanci intre ei, la capete si deasupra surplombului;
+    capetele in trepte pe Y; blocuri cazute la baza capetelor. Nisa ramane gol."""
     global SL_CAPS
     SL_CAPS = []
-    rand = _lcg(5521)
+    rand = _lcg(5531)
     faces = set()
     hl = SL_NICHE_LEN * 0.5
+    YL, YR = -20.2, 20.2
 
     def split(a, bnd, n, wmin):
         ws = [wmin + rand() for _ in range(n)]
@@ -160,39 +174,65 @@ def _wall_body(b):
             y += (bnd - a) * w / t
         return out
 
-    ends = split(-19.8, -hl, 2, 0.7) + split(hl, 19.84, 2, 0.7)
+    # --- masa de spate: capete pe toata inaltimea, mijloc doar deasupra nisei
+    for (a, bnd) in ((YL, -hl), (hl, YR)):
+        for (y0, y1) in split(a, bnd, 2, 0.8):
+            zt = _sl_crest((y0 + y1) * 0.5) - 0.8 * rand()
+            faces |= _column(b, rand, y0 - 0.1, y1 + 0.1, SL_BASE_Z, zt, 3.0 + rand() * 0.8,
+                             GNEISS, tier=(11.0 + rand() * 4.0, 1.0 + rand()))
     mids = split(-hl, hl, 8, 0.7)
-    tops_mid = [25.0, 26.2, 24.0, 25.6, 26.2, 23.2, 25.0, 24.4]
     for i, (y0, y1) in enumerate(mids):
-        o0 = 0.1 if i > 0 else 0.0
-        o1 = 0.1 if i < len(mids) - 1 else 0.0
-        zt = tops_mid[i]
-        xf = 0.5 + rand() * 1.1
-        faces |= _column(b, rand, y0 - o0, y1 + o1, SL_NICHE_CLEAR + 0.05, zt, xf, GNEISS,
-                         tier=((zt - 3.5 - rand() * 2.5), 0.8 + rand() * 0.8) if i % 2 == 0 else None)
-        if zt > 24.5:
-            SL_CAPS.append((xf + 1.6, SL_BACK_X - 1.0, y0 + 0.3, y1 - 0.3, zt))
-    for i, (y0, y1) in enumerate(ends):
-        zt = (21.0, 26.0, 26.2, 22.5)[i]
-        xf = 0.3 + rand() * 0.9
-        # capetele dinspre nisa se suprapun usor peste cel de la marginea nisei
-        o0 = 0.1 if i in (1, 3) else 0.0
-        o1 = 0.1 if i in (0, 2) else 0.0
-        hs = 14.5 + rand() * 3.0
-        faces |= _column(b, rand, y0 - o0, y1 + o1, SL_BASE_Z, zt, xf, GNEISS,
-                         tier=(hs, 0.9 + rand() * 0.8))
-        # teras cu muschi la treapta (z >= 14: nodul Overhang nu coboara sub buza)
-        SL_CAPS.append((xf + 0.1, xf + 1.0 + 0.8, y0 + 0.2, y1 - 0.2, hs))
-        SL_CAPS.append((xf + 1.8, SL_BACK_X - 1.5, y0 + 0.4, y1 - 0.4, zt))
-    # blocuri cazute la baza, doar in capetele peretelui (in afara Shelf-ului)
-    for (sgn, n_st) in ((-1.0, 7), (1.0, 8)):
-        for _ in range(n_st):
-            sx = 1.0 + rand() * 1.9
-            y = sgn * (16.4 + rand() * 3.0)
-            x = -0.8 + rand() * 4.2
-            pts = _stone_pts(rand, (x, y, SL_BASE_Z + sx * 0.5), (sx * 1.2, sx * 1.1, sx * 1.05),
-                             n=9, base_cut=0.5, spread=0.3)
-            faces |= _hull(b, pts, GNEISS, 6.0)
+        ym = (y0 + y1) * 0.5
+        zt = _sl_crest(ym) - rand() * 1.8
+        xf = 1.0 + rand() * 2.6
+        faces |= _column(b, rand, y0 - (0.1 if i else 0.0), y1 + (0.1 if i < 7 else 0.0),
+                         SL_NICHE_CLEAR + 0.05, zt, xf, GNEISS,
+                         tier=(zt - 3.5 - rand() * 2.5, 0.8 + rand() * 0.8) if i % 2 == 0 else None)
+        if i % 3 == 0:
+            SL_CAPS.append((xf + 1.8, SL_BACK_X - 1.5, y0 + 0.4, y1 - 0.4, zt))
+
+    # --- contraforti la capete (ies pana la x = -1.2, goluri de ~0.8 m intre ei)
+    for sg in (-1.0, 1.0):
+        y = 15.1
+        k = 0
+        while y < 19.9:
+            w = 1.3 + rand() * 1.0
+            y1 = min(y + w, 20.2)
+            yc = sg * (y + y1) * 0.5
+            zt = _sl_crest(yc) - (0.0 if (sg < 0 and k == 1) else 1.0 + rand() * 4.5)
+            xf = (-0.9, 0.2, -0.4, 0.6)[k % 4]
+            ya, yb = sorted((sg * y, sg * y1))
+            # capetele se decaleaza pe Y (zimti in plan), nu o muchie dreapta
+            ya += (rand() - 0.5) * 0.5
+            faces |= _column(b, rand, ya, yb, SL_BASE_Z, zt, xf, GNEISS, ridge=0.7, back=5.5,
+                             skew=1.6, lean_k=1.2,
+                             tier=(zt * (0.55 + rand() * 0.2), 0.7 + rand() * 0.6) if zt > 14 else None)
+            if zt > 15:
+                SL_CAPS.append((xf + 0.2, xf + 2.8, ya + 0.15, yb - 0.15, zt))
+            y = y1 + 0.5 + rand() * 0.6
+            k += 1
+
+    # --- contraforti deasupra surplombului (z 17..coama), peste nisa
+    ups = ((-14.0, 2.4, 0.2), (-9.0, 2.0, 1.0), (-4.6, 2.8, -0.2), (0.4, 2.2, 0.8),
+           (5.0, 2.4, 0.4), (10.0, 2.6, 1.2))
+    for (yc, w, xf) in ups:
+        zt = _sl_crest(yc) - rand() * 1.4
+        if zt < 19.5:
+            continue
+        faces |= _column(b, rand, yc - w * 0.5, yc + w * 0.5, 16.8, zt, xf, GNEISS, ridge=0.6,
+                         back=6.0, skew=1.4, lean_k=1.0)
+        SL_CAPS.append((xf + 0.4, xf + 3.0, yc - w * 0.5 + 0.2, yc + w * 0.5 - 0.2, zt))
+
+    # --- blocuri cazute la baza capetelor, in afara Shelf-ului (|Y| >= 15,2)
+    for sg in (-1.0, 1.0):
+        for n_st, (lo, hi, ylo, yhi) in ((5, (1.8, 3.0, 17.0, 19.6)), (6, (0.8, 1.7, 16.0, 20.6))):
+            for _ in range(n_st):
+                sx = lo + rand() * (hi - lo)
+                y = sg * (ylo + rand() * (yhi - ylo))
+                x = 0.9 + rand() * 3.6
+                pts = _stone_pts(rand, (x, y, SL_BASE_Z + sx * 0.45), (sx * 1.2, sx * 1.1, sx),
+                                 n=9, base_cut=0.5, spread=0.3)
+                faces |= _hull(b, pts, GNEISS, 6.0)
     front_faces = [f for f in faces if f.is_valid]
 
     guard_hl = hl - 0.2
@@ -355,23 +395,22 @@ def _overhang(b):
             out = min(out, SL_LIP_OUT + 0.7)
         lt = 1.6 + rand() * 1.2
         ym = (y0 + y1) * 0.5
+        rh = min(SL_LIP_Z + 7.0, _sl_crest(ym) - 0.6)
         sk = (rand() - 0.5) * 0.7
         pts = [(-out, y0, SL_LIP_Z), (-out, y1, SL_LIP_Z),
                (-out + 0.2, y0 + sk, SL_LIP_Z + lt), (-out + 0.2, y1 + sk, SL_LIP_Z + lt),
                (SL_WALL_DEEP * 0.35, y0, SL_LIP_Z - 0.4), (SL_WALL_DEEP * 0.35, y1, SL_LIP_Z - 0.4),
-               (SL_WALL_DEEP * 0.35, y0, SL_LIP_Z + 7.0), (SL_WALL_DEEP * 0.35, y1, SL_LIP_Z + 7.0),
-               (-out * 0.45, ym + sk, SL_LIP_Z + lt + 1.7 + rand() * 0.8),
+               (SL_WALL_DEEP * 0.35, y0, rh), (SL_WALL_DEEP * 0.35, y1, rh),
+               (-out * 0.45, ym + sk, min(SL_LIP_Z + lt + 1.7 + rand() * 0.8, rh - 0.3)),
                (-out * 0.55, ym, SL_LIP_Z - 0.15)]
         fs = _hull(b, pts, GNEISS, 5.0)
         for f in fs:
             c = f.calc_center_median()
             if f.normal.z > 0.35:
                 # muschi doar pe jumatatea dinspre perete + pete; fata din fata ramane gneis
-                f[b.slot] = MOSS if (c.x > -out * 0.35 or rand() < 0.25) else GNEISS
-            elif f.normal.z < -0.3 and i % 3 == 1:
-                f[b.slot] = WET_STREAK
+                f[b.slot] = MOSS if (i in (2, 3, 6, 8) and c.x > -out * 0.2) else GNEISS
             elif f.normal.z < -0.3:
-                f[b.slot] = WET_STREAK if rand() < 0.5 else GNEISS
+                f[b.slot] = WET_STREAK
             elif f.normal.x < -0.5 and i % 3 == 0:
                 f[b.slot] = WET_STREAK      # dunga udata pe fata buzei
         faces |= fs
@@ -425,46 +464,52 @@ TC_LIP_OUT = 3.0
 
 
 def build_torrent_chute():
-    """v3: masiv fatetat din coloane. Doua contraforturi (coloane) care se
-    despart spre buza (gura 20 m la +14), jgheab cu treptele patului pe
-    VOLCANIC_BLACK (7 trepte, trepte de ~2 m), buza peste banda (3 m), cuveta
-    goala deasupra (fund negru, margine de blocuri), blocuri la gura."""
+    """v4 (contract relaxat: Z pana la ~34, Y pana la ~24): masiv cu PISC. Jgheab
+    in V/U cu 7 trepte negre taiat in fata, contraforti laterali inalti de o
+    parte si de alta (21-24 m langa jgheab, scazand spre margini), buza la +14
+    (3 m peste banda), cuveta goala cu margine de blocuri, si DEASUPRA/in spatele
+    ei un pisc neregulat din coloane de 18-24 m. Blocuri la picior."""
     b = Builder()
-    rand = _lcg(6611)
-    back = TC_DEEP
+    rand = _lcg(6633)
+    back = 11.0
     faces = set()
 
     def hw(z):
-        """semilatimea jgheabului la cota z: 5 m jos, 10 m la buza"""
         return 5.0 + 5.0 * min(z, TC_LIP_Z) / TC_LIP_Z
 
-    # --- contraforturile: 3 coloane pe fiecare parte, de la jgheab spre exterior
-    heights = {-1: (15.4, 11.6, 7.2), 1: (16.02, 12.4, 8.4)}
+    OUT = 17.0
+    # --- contraforturi laterale: 4 coloane pe parte, inaltimi scazand spre exterior
+    hts = {-1: (21.0, 17.5, 12.5, 8.0), 1: (23.4, 19.0, 14.0, 9.0)}
     for sg in (-1.0, 1.0):
-        hs = heights[int(sg)]
-        for j in range(3):
-            ha = hs[j]
-            xf = 0.2 + rand() * 1.3
-            lean = (rand() - 0.3) * 0.5
+        for j in range(4):
+            ha = hts[int(sg)][j]
+            xf = 0.0 + rand() * 1.8 + (0.0 if j < 2 else 0.8)
+            lean = (rand() - 0.2) * 0.9
+            fa, fb = j / 4.0, (j + 1) / 4.0 + (0.05 if j < 3 else 0.0)
 
             def ypos(z, f, sg=sg):
-                return sg * (hw(z) + (12.0 - hw(z)) * f)
-            fa, fb = j / 3.0, (j + 1) / 3.0 + (0.04 if j < 2 else 0.0)
+                return sg * (hw(z) + (OUT - hw(z)) * f)
+            sk = (rand() - 0.5) * 1.6
             pts = []
             for z in (0.0, ha):
                 for f in (fa, fb):
-                    pts.append((xf + (lean if z else 0.0), ypos(z, f), z))
-                    pts.append((back, ypos(z, f), z))
-            r = 0.3 + rand() * 0.6
-            pts.append((max(0.0, xf - r), ypos(ha * 0.4, (fa + fb) * 0.5), ha * 0.4))
-            pts.append((max(0.0, xf - r * 0.6), ypos(ha * 0.92, (fa + fb) * 0.5), ha * 0.92))
-            faces |= _hull(b, pts, GNEISS, 5.0)
+                    yy = ypos(z, f) + (sk if z else 0.0)
+                    pts.append((xf + (lean if z else 0.0), yy, z))
+                    pts.append((back, yy, z))
+            r = 0.4 + rand() * 0.7
+            pts.append((max(-0.8, xf - r), ypos(ha * 0.4, (fa + fb) * 0.5), ha * 0.4))
+            pts.append((max(-0.8, xf - r * 0.6), ypos(ha * 0.92, (fa + fb) * 0.5) + sk * 0.5, ha * 0.92))
+            fs = _hull(b, pts, GNEISS, 5.0)
+            for f in fs:
+                if f.normal.z > 0.5 and j >= 1:
+                    f[b.slot] = MOSS if rand() < 0.75 else GNEISS
+            faces |= fs
 
-    # --- patul jgheabului: 7 trepte de piatra neagra (udata)
+    # --- patul jgheabului: 7 trepte de piatra neagra, pana la spatele masivului
     nst = 7
     for i in range(nst):
         z = TC_LIP_Z * (i + 1) / nst
-        x0 = TC_LIP_OUT * 0.0 + 3.0 * i / (nst - 1) if i else 0.0
+        x0 = 3.0 * i / (nst - 1) if i else 0.0
         w = hw(z) + 0.4
         jit = lambda: (rand() - 0.5) * 0.35
         pts = []
@@ -479,11 +524,11 @@ def build_torrent_chute():
                 f[b.slot] = WET_STREAK
         faces |= fs
 
-    # --- buza: 3 segmente fatetate, iese 3 m peste banda (x = -3), la z = 14
+    # --- buza: 3 segmente fatetate, 3 m peste banda (x = -3), la z = 14
     ys = (-10.0, -3.4, 3.2, 10.0)
     for k in range(3):
         y0, y1 = ys[k] - 0.05, ys[k + 1] + 0.05
-        lo = TC_LIP_OUT + (rand() - 0.5) * 0.5 if k == 1 else TC_LIP_OUT
+        lo = TC_LIP_OUT + ((rand() - 0.5) * 0.5 if k == 1 else 0.0)
         lt = 1.3 + (rand() - 0.5) * 0.3
         sk = (rand() - 0.5) * 0.5
         pts = [(-lo, y0, TC_LIP_Z), (-lo, y1, TC_LIP_Z),
@@ -497,27 +542,36 @@ def build_torrent_chute():
                 f[b.slot] = WET_STREAK
         faces |= fs
 
-    # --- masa din spate deasupra buzei: coloane de inaltimi diferite, platou cu muschi
-    bounds = (-9.0, -5.5, -2.0, 1.8, 5.6, 9.0)
-    tops = (14.9, 16.0, 15.3, 15.9, 14.8)
-    for k in range(5):
-        y0, y1 = bounds[k] - 0.05, bounds[k + 1] + 0.05
-        xf = 3.5 + (rand() - 0.5) * 0.6 if abs((y0 + y1) * 0.5) < 9 else 0.4 + rand()
-        sk = (rand() - 0.5) * 0.6
-        zt = tops[k]
-        pts = [(xf, y0, TC_LIP_Z), (xf, y1, TC_LIP_Z), (back, y0, TC_LIP_Z), (back, y1, TC_LIP_Z),
-               (xf + 0.1, y0 + sk, zt), (xf + 0.1, y1 + sk, zt), (back, y0 + sk, zt), (back, y1 + sk, zt),
-               (xf - 0.4, (y0 + y1) * 0.5, zt - 1.2)]
+    # --- umerii laterali ai cuvetei (terase joase cu muschi, langa cuveta)
+    for (y0, y1, zt) in ((-9.4, -3.9, 16.6), (3.9, 9.4, 17.4)):
+        pts = [(3.5, y0, TC_LIP_Z), (3.5, y1, TC_LIP_Z), (9.5, y0, TC_LIP_Z), (9.5, y1, TC_LIP_Z),
+               (3.7, y0 + 0.3, zt), (3.7, y1 - 0.3, zt), (9.0, y0 + 0.6, zt + 0.8), (9.0, y1 - 0.6, zt + 0.8),
+               (3.0, (y0 + y1) * 0.5, zt - 1.0)]
         fs = _hull(b, pts, GNEISS, 5.0)
         for f in fs:
             if f.normal.z > 0.5:
                 f[b.slot] = MOSS
         faces |= fs
-    # --- cuveta suspendata: fund negru la z = 16.0 (6 x 4), margine de blocuri joase
-    basin = list(b.box((4.8, 0.0, TC_LIP_Z + 1.55), (4.0, 6.0, 0.1), WET_STREAK))
-    faces |= set(basin)
-    rim = (((4.8, -3.6), (4.6, 1.8, 0.55)), ((4.8, 3.6), (4.6, 1.8, 0.45)),
-           ((2.4, 0.0), (1.2, 6.8, 0.4)), ((7.0, 0.0), (1.2, 6.8, 0.5)))
+
+    # --- PISCUL: 6 coloane in spatele cuvetei, 18-24 m, neregulate in plan
+    summit = ((-9.0, -5.8, 7.4, 20.5), (-6.2, -2.4, 8.4, 22.4), (-2.8, 1.2, 7.2, 24.0),
+              (0.8, 4.4, 8.6, 21.8), (4.0, 7.4, 7.6, 19.6), (7.0, 10.0, 9.0, 17.8))
+    for (y0, y1, xf, zt) in summit:
+        sk = (rand() - 0.5) * 1.4
+        pts = [(xf, y0, TC_LIP_Z), (xf, y1, TC_LIP_Z), (back, y0 - 0.5, TC_LIP_Z), (back, y1 + 0.5, TC_LIP_Z),
+               (xf + 0.6, y0 + sk, zt), (xf + 0.6, y1 + sk, zt),
+               (back - 1.2, y0 + 0.3, zt - 1.0), (back - 1.2, y1 - 0.3, zt - 1.0),
+               (xf - 0.9, (y0 + y1) * 0.5, zt - 2.4), (xf - 0.3, (y0 + y1) * 0.5 + sk * 0.5, zt - 0.3)]
+        fs = _hull(b, pts, GNEISS, 5.0)
+        for f in fs:
+            if f.normal.z > 0.6 and zt < 21:
+                f[b.slot] = MOSS
+        faces |= fs
+
+    # --- cuveta suspendata: fund negru, margine de blocuri joase cu muschi
+    faces |= set(b.box((5.3, 0.0, TC_LIP_Z + 1.55), (3.0, 6.0, 0.1), WET_STREAK))
+    rim = (((5.3, -3.5), (3.2, 1.6, 0.5)), ((5.3, 3.5), (3.2, 1.6, 0.45)),
+           ((3.5, 0.0), (1.0, 6.4, 0.4)))
     for (cx, cy), (sx, sy, sz) in rim:
         pts = _stone_pts(rand, (cx, cy, TC_LIP_Z + 1.5 + sz * 0.5), (sx, sy, sz * 1.8),
                          n=8, base_cut=0.5, spread=0.2)
@@ -526,9 +580,13 @@ def build_torrent_chute():
             if f.normal.z > 0.5:
                 f[b.slot] = MOSS
         faces |= fs
-    # --- blocuri la gura si la picioarele contraforturilor
-    for (cx, cy, sx) in ((-0.6, -3.6, 1.4), (-0.9, -0.5, 1.1), (-0.4, 2.8, 1.5), (-0.8, 4.5, 1.0),
-                         (-0.7, -11.6, 1.8), (-0.4, 11.6, 1.9), (0.9, -12.0, 1.4), (1.0, 12.0, 1.3)):
+    # --- blocuri la picior: in gura si la baza contraforturilor (x >= -1.2)
+    spots = [(-0.6, -3.6, 1.4), (-0.9, -0.5, 1.1), (-0.4, 2.8, 1.5), (-0.8, 4.4, 1.0)]
+    for sg in (-1.0, 1.0):
+        for yy, sx, x in ((8.0, 2.4, 0.4), (11.0, 2.0, 0.8), (14.0, 2.6, 1.0), (16.0, 1.5, 1.6),
+                          (9.5, 1.2, -0.5), (12.5, 1.4, -0.3)):
+            spots.append((x, sg * yy, sx))
+    for (cx, cy, sx) in spots:
         pts = _stone_pts(rand, (cx, cy, sx * 0.5), (sx * 1.2, sx * 1.1, sx),
                          n=9, base_cut=0.5, spread=0.3)
         faces |= _hull(b, pts, GNEISS, 6.0)
@@ -982,12 +1040,12 @@ wall_obj, overhang_obj, shelf_obj = _build_pieces()
 # sare in trepte intre ele. Exact "flat-shaded facets like the MP pieces"
 # din revizuirea coordonatorului.
 emit([wall_obj, overhang_obj, shelf_obj], "rocks/stirling_ledge.glb", AO_WALL,
-     origin="base_axis", bevel=0.06, smooth_angle=None, budget=3600,
+     origin="base_axis", bevel=0.06, smooth_angle=None, budget=4600,
      force_flat=True)
 
 torrent_obj = build_torrent_chute()
 emit(torrent_obj, "rocks/torrent_chute.glb", AO_WALL,
-     origin="base_axis", bevel=0.07, smooth_angle=None, budget=2600, force_flat=True)
+     origin="base_axis", bevel=0.07, smooth_angle=None, budget=3600, force_flat=True)
 chasm_obj = build_chasm_rock()
 emit(chasm_obj, "rocks/chasm_rock.glb", AO_SMALL,
      bevel=0.04, budget=2100, force_flat=True)

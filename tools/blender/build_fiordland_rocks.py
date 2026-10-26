@@ -128,6 +128,82 @@ def _sl_crest(y):
     return 17.6
 
 
+def _island_data(bms):
+    """Insulele de mesh (componente conexe) din toate bmesh-urile: dict cu varfuri,
+    triunghiuri si un BVH propriu, ca sa se poata testa contactul geometric real."""
+    from mathutils.bvhtree import BVHTree
+    out = []
+    for bm in bms:
+        bm.verts.index_update()
+        bm.faces.index_update()
+        seen = set()
+        for v0 in bm.verts:
+            if v0.index in seen:
+                continue
+            stack, comp = [v0], []
+            seen.add(v0.index)
+            while stack:
+                v = stack.pop()
+                comp.append(v)
+                for e in v.link_edges:
+                    w = e.other_vert(v)
+                    if w.index not in seen:
+                        seen.add(w.index)
+                        stack.append(w)
+            idx = {v.index: k for k, v in enumerate(comp)}
+            cos = [v.co.copy() for v in comp]
+            fset = {f for v in comp for f in v.link_faces}
+            tris = []
+            for f in fset:
+                vs = [idx[v.index] for v in f.verts]
+                for k in range(1, len(vs) - 1):
+                    tris.append((vs[0], vs[k], vs[k + 1]))
+            out.append({"cos": cos, "bvh": BVHTree.FromPolygons(cos, tris, all_triangles=True),
+                        "zmin": min(c.z for c in cos)})
+    return out
+
+
+def _check_islands(bms, ground_z, label, tol=0.08):
+    """Garda anti-plutire. Fiecare insula de mesh trebuie sa stea pe sol (zmin <=
+    ground_z + tol) sau sa ATINGA/INTERSECTEZE o alta insula: unul dintre varfurile
+    ei joase (la <= 0.4 m de zmin) e la <= tol de suprafata altei insule sau
+    in interiorul ei (paritate pe raza in sus). Altfel RuntimeError."""
+    from mathutils import Vector
+    isl = _island_data(bms)
+    bad = []
+    for i, a in enumerate(isl):
+        if a["zmin"] <= ground_z + tol:
+            continue
+        low = [c for c in a["cos"] if c.z <= a["zmin"] + 0.4]
+        ok = False
+        for j, o in enumerate(isl):
+            if j == i:
+                continue
+            for c in low:
+                loc, nrm, fi, d = o["bvh"].find_nearest(c, tol)
+                if loc is not None:
+                    ok = True
+                    break
+                hits, p = 0, c + Vector((0, 0, 1e-4))
+                while True:
+                    h = o["bvh"].ray_cast(p, Vector((0, 0, 1)))
+                    if h[0] is None:
+                        break
+                    hits += 1
+                    p = h[0] + Vector((0, 0, 1e-4))
+                if hits % 2 == 1:
+                    ok = True
+                    break
+            if ok:
+                break
+        if not ok:
+            bad.append((a["zmin"], min(c.x for c in a["cos"]), min(c.y for c in a["cos"]),
+                        max(c.z for c in a["cos"])))
+    if bad:
+        raise RuntimeError("%s: %d insule plutitoare, ex. zmin %.2f la x %.2f y %.2f (zmax %.2f)"
+                           % ((label, len(bad)) + bad[0]))
+
+
 def _column(b, rand, y0, y1, zb, zt, xf, slot, ridge=0.55, tier=None, back=SL_BACK_X,
             skew=0.9, lean_k=0.5):
     """Coloana prismatica fatetata: fata spre -X are o creasta, capul inclinat,
@@ -230,9 +306,29 @@ def _wall_body(b):
                 sx = lo + rand() * (hi - lo)
                 y = sg * (ylo + rand() * (yhi - ylo))
                 x = 0.9 + rand() * 3.6
-                pts = _stone_pts(rand, (x, y, SL_BASE_Z + sx * 0.45), (sx * 1.2, sx * 1.1, sx),
+                pts = _stone_pts(rand, (x, y, SL_BASE_Z + sx * 0.25), (sx * 1.2, sx * 1.1, sx),
                                  n=9, base_cut=0.5, spread=0.3)
                 faces |= _hull(b, pts, GNEISS, 6.0)
+    # petice/lespezi de muschi: cota = suprafata REALA a coloanei de dedesubt (raza
+    # in jos pe bmesh), nu cota nominala a coamei -- altfel pluteau deasupra
+    # coloanelor coborate
+    from mathutils.bvhtree import BVHTree
+    tree = BVHTree.FromBMesh(b.bm)
+    snapped = []
+    for (x0, x1, y0, y1, z) in SL_CAPS:
+        if x1 <= x0 or y1 <= y0:
+            continue
+        xm, ym = (x0 + x1) * 0.5, (y0 + y1) * 0.5
+        pts = [(xm, ym), (x0 + 0.1, y0 + 0.1), (x1 - 0.1, y0 + 0.1),
+               (x1 - 0.1, y1 - 0.1), (x0 + 0.1, y1 - 0.1)]
+        hits = []
+        for (px, py) in pts:
+            h = tree.ray_cast(Vector((px, py, 60.0)), Vector((0, 0, -1)))
+            hits.append(h[0].z if h[0] is not None else None)
+        if hits[0] is None or any(h is None or abs(h - hits[0]) > 1.3 for h in hits):
+            continue          # nu are un varf plat sub el: nu pune petic
+        snapped.append((x0, x1, y0, y1, min(hits) - 0.02))
+    SL_CAPS = snapped
     front_faces = [f for f in faces if f.is_valid]
 
     guard_hl = hl - 0.2
@@ -418,13 +514,11 @@ def _overhang(b):
     for (x0, x1, y0, y1, z) in SL_CAPS:
         if x1 <= x0 or y1 <= y0:
             continue
-        w, d = (y1 - y0), (x1 - x0)
-        j = lambda: (rand() - 0.5) * 0.5
-        pts = [(x0 + j(), y0 + j(), z + 0.02), (x1 + j(), y0 + j(), z + 0.02),
-               (x1 + j(), y1 + j(), z + 0.02), (x0 + j(), y1 + j(), z + 0.02),
-               ((x0 + x1) * 0.5, y0 + 0.35 + j(), z + 0.02), ((x0 + x1) * 0.5, y1 - 0.35 + j(), z + 0.02)]
-        pts2 = [(p[0], p[1], p[2] + 0.18 + rand() * 0.12) for p in pts]
-        fs = _hull(b, pts + pts2, MOSS, 3.0)
+        j = lambda: (rand() - 0.5) * 0.2
+        base = [(x0 + j(), y0 + j()), (x1 + j(), y0 + j()), (x1 + j(), y1 + j()), (x0 + j(), y1 + j()),
+                ((x0 + x1) * 0.5, y0 + 0.3 + j()), ((x0 + x1) * 0.5, y1 - 0.3 + j())]
+        pts = [(px, py, z - 0.25) for px, py in base] +               [(px, py, z + 0.1 + rand() * 0.08) for px, py in base]
+        fs = _hull(b, pts, MOSS, 3.0)
         faces |= fs
     return faces
 
@@ -436,10 +530,11 @@ def _build_pieces():
     bw = Builder()
     wall_faces, wall_front_faces = _wall_body(bw)
     niche_faces = _niche(bw)
-    wall_obj = bw.to_object("Wall")
 
     bo = Builder()
     overhang_faces = _overhang(bo)
+    _check_islands([bw.bm, bo.bm], 0.0, "stirling_ledge")
+    wall_obj = bw.to_object("Wall")
     overhang_obj = bo.to_object("Overhang")
 
     bs = Builder()
@@ -569,7 +664,7 @@ def build_torrent_chute():
         faces |= fs
 
     # --- cuveta suspendata: fund negru, margine de blocuri joase cu muschi
-    faces |= set(b.box((5.3, 0.0, TC_LIP_Z + 1.55), (3.0, 6.0, 0.1), WET_STREAK))
+    faces |= set(b.box((5.3, 0.0, TC_LIP_Z + 0.8), (3.0, 6.0, 1.6), WET_STREAK))  # coboara pana la treapta (era 0,1 m plutind la +1,5)
     rim = (((5.3, -3.5), (3.2, 1.6, 0.5)), ((5.3, 3.5), (3.2, 1.6, 0.45)),
            ((3.5, 0.0), (1.0, 6.4, 0.4)))
     for (cx, cy), (sx, sy, sz) in rim:
@@ -587,9 +682,10 @@ def build_torrent_chute():
                           (9.5, 1.2, -0.5), (12.5, 1.4, -0.3)):
             spots.append((x, sg * yy, sx))
     for (cx, cy, sx) in spots:
-        pts = _stone_pts(rand, (cx, cy, sx * 0.5), (sx * 1.2, sx * 1.1, sx),
+        pts = _stone_pts(rand, (cx, cy, sx * 0.25), (sx * 1.2, sx * 1.1, sx),
                          n=9, base_cut=0.5, spread=0.3)
         faces |= _hull(b, pts, GNEISS, 6.0)
+    _check_islands([b.bm], 0.0, "torrent_chute")
     return b.to_object("Rock")
 
 

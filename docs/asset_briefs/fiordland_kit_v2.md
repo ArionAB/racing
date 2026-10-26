@@ -230,12 +230,12 @@ Ramura `fiord/kit-v2-c`, script `tools/blender/build_fiordland_village.py`
 `docs/asset_briefs/img/fiordland_fidelity/{wharf,cafe_shed,lodge,heli_pad,luggage_container,road_sign_blank,snow_pole}.png`.
 `verify_fiordland.sh`: toate piesele grupei C sunt OK; `cruise_boat`, `kayak_a/b`
 (grupa E, neatinse aici) dau PROBLEME si inainte de aceasta livrare.
-Bugete noi in `verify_fiordland.sh`: wharf 2100, cafe 2100, lodge 3700,
+Bugete noi in `verify_fiordland.sh`: wharf 2300, cafe 2100, lodge 3700,
 heli 1150, container 950, semn 160, jalon 90.
 
 | piesa | AABB Godot X x Y x Z | tri |
 |---|---|---:|
-| wharf | 4,75 x 2,70 x 20,0 (capete plane la Z=±10) | 1968 |
+| wharf | 4,77 x 2,88 x 20,0 (capete plane la Z=±10) | 2076 |
 | cafe_shed | 5,90 x 6,39 x 4,90 | 1960 |
 | lodge | 17,2 x 7,74 x 8,10 | 3520 |
 | heli_pad | 12,08 x 0,39 x 12,07 | 1052 |
@@ -248,27 +248,26 @@ Culorile cladirilor: pereti `LOG_DARK` 28, acoperis `ASPHALT_EDGE` 6 cu nervuri
 
 | element | pe plansa | in randare |
 |---|---|---|
-| wharf: zid din asize | 4 randuri de blocuri decalate, rosturi adanci | 4 randuri x ~13 blocuri pe fiecare fata lunga, decalate, miez negru intre ele, 3 tonuri de gri la intamplare |
-| wharf: puntea | lespede palida, margini cu lespezi | punte `CONCRETE` cu 5 rosturi, coronament din lespezi pe ambele margini |
-| wharf: babale | 4 stalpi groși de lemn cu capat taiat, doi lipiti de fata | 2 piloti (r 0,24) lipiti de fata +X pana peste coronament + 2 babale pe coronamentul -X, capete `SAND_LIGHT` |
+| wharf: zid din asize | 4 randuri de blocuri decalate, rosturi adanci | 4 randuri de inaltimi diferite (0,50/0,38/0,50/0,37), blocuri de 0,7-2,1 m, iesite 2-10 cm, cu fata tesita (bloc tronconic, 12 tri), rosturi de 6 cm pe miez negru, 3 tonuri de gri |
+| wharf: puntea | lespede palida, margini cu lespezi | punte `ASPHALT_EDGE` (gri inchis) cu 5 rosturi, zid coborat la 1,75 m ca babalele sa urce ~0,95 m peste punte in limita Y, coronament din lespezi pe ambele margini |
+| wharf: babale | 4 stalpi groși de lemn cu capat taiat, doi lipiti de fata | 6 babale groase (r 0,27, capac 0,31): 3 piloti lipiti de fata +X pana peste coronament + 3 pe marginea -X, ~0,95 m peste punte, capete `SAND_LIGHT` |
 | lodge: etaje, balcon | 2 niveluri, galerie la etaj | 2 niveluri, balcon continuu cu balustrada (2 lise) si 7 stalpi de sprijin |
 | lodge: ferestre | grupuri calde la parter, sir la etaj, 2 la capat | parter fata: 4 ferestre + 2 usi cu geam; etaj: 8 ferestre; capete: 2+2 + una in fronton; spate 5+6 |
 | lodge: acoperis | 2 ape de tabla gri cu nervuri, streasina | 2 ape, nervuri la 0,65 m, coama cu capac, streasina 1,05 m fata / 0,85 spate, frontoane inchise |
 | cafe_shed | 2 niveluri, balcon, trepte dreapta, ferestre calde | idem la scara mica: 2+3 ferestre fata, usa cu trepte, balcon, capete cu 2+2 |
 | heli_pad | tambur din blocuri pe 2 randuri, platforma, inel alb, H | 2 randuri x 26 blocuri, platforma `ASPHALT`, inel alb 32 segmente, H din 3 bare, relief 5 cm, Y 0,39 |
-| container | nervuri verticale, rama la capete, usi duble | laterale si acoperis ondulate (10/4 nervuri), rama cu 4 stalpi si 8 sine, usi duble cu tije si balamale pe ambele capete |
-| road_sign | panou verde, bordura alba groasa, 2 stalpi gri cilindrici | rama alba, camp verde, 2 stalpi gri r 0,09 cu coliere |
+| container | nervuri verticale, rama la capete, usi duble | corp, laterale, acoperis si usi pe ACELASI slot gri inchis (`ASPHALT_EDGE`), nervurile ies doar din geometrie + AO (10/4 nervuri); rama cu 4 stalpi si 8 sine pe `ASPHALT`, usi duble cu tije si balamale pe ambele capete |
+| road_sign | panou verde inchis, bordura alba groasa, 2 stalpi gri cilindrici | rama alba, camp `TROPICAL_GREEN` cu culoarea de vertex (AO) inmultita cu 0,38 in build (niciun slot verde existent nu e destul de inchis), 2 stalpi gri r 0,09 cu coliere |
 | snow_pole | rosu sus, alb, rosu, alb jos | 4 benzi: alb, rosu, alb, rosu (de jos in sus) |
 
 Diferente ramase, cinstit:
-- wharf: blocurile sunt cutii drepte, fara rotunjirea si neregularitatea pietrei
-  de pe plansa; piesa are 20 m, plansa arata un tronson scurt (scara din brief).
+- wharf: blocurile sunt tronconice (tesite) dar tot poliedre drepte, fara
+  rotunjirea pietrei de pe plansa; babalele par subtiri pe o piesa de 20 m; piesa are 20 m, plansa arata un tronson scurt (scara din brief).
   Puntea iese mai deschisa si mai uniforma decat cea de pe plansa.
 - cladiri: peretii sunt busteni orizontali plati; pe plansa lemnul e mai
   neregulat, cu geamuri mai mici si multe, iar etajul e o galerie adanca.
   Ferestrele sunt toate la fel (cutie + montanti), culoarea lor calda e palida.
   Trimul de lemn e `WOOD` doar pe balcon/pervaz, restul `LOG_DARK`.
-- container: nervurile laterale ies mai deschise la culoare decat planseta;
-  fara pata de rugina de pe capatul din plansa.
-- semn: campul verde e mai luminos decat verdele inchis de pe plansa (slot 21).
+- container: un singur gri; fara pata de rugina de pe capatul din plansa.
+- semn: verdele e slotul 21 intunecat prin vertex color; ramane putin mai saturat decat cel de pe plansa.
 - jalon: rosul `KERB_RED` e mai inchis decat portocaliul de pe plansa.

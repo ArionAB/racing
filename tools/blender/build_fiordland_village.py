@@ -80,52 +80,68 @@ class Local:
 # intre ele si babale de lemn cu capac. Capete PLANE la y = +-10.
 WH_HL = 10.0          # semi-lungime (Blender Y)
 WH_CORE = 1.95        # semi-latime miez
-WH_H = 2.0            # inaltimea zidului
-WH_ROWS = 4
+WH_H = 1.75           # inaltimea zidului (cu puntea si coronamentul ~1.95)
+WH_ROW_H = (0.50, 0.38, 0.50, 0.37)   # inaltimi de rand diferite
+
+
+def _chamfer_block(b, x0, x1, ya, yb, za, zb, side, slot, ch=0.045):
+    """Bloc de zidarie: baza (spre miez) dreptunghi plin, fata exterioara mai
+    mica cu `ch` pe y si z — ca o fateta tesita, tot 12 triunghiuri."""
+    def X(x):
+        return x * side
+    base = [(x0, ya, za), (x0, yb, za), (x0, yb, zb), (x0, ya, zb)]
+    face = [(x1, ya + ch, za + ch), (x1, yb - ch, za + ch),
+            (x1, yb - ch, zb - ch), (x1, ya + ch, zb - ch)]
+    vb = [b.bm.verts.new((X(x), y, z)) for x, y, z in base]
+    vf = [b.bm.verts.new((X(x), y, z)) for x, y, z in face]
+    quads = [(vb[3], vb[2], vb[1], vb[0]), (vf[0], vf[1], vf[2], vf[3])]
+    for i in range(4):
+        j = (i + 1) % 4
+        quads.append((vb[i], vb[j], vf[j], vf[i]))
+    for q in quads:
+        f = b.bm.faces.new(q)
+        f[b.slot] = slot
 
 
 def _course_face(b, side, rand):
-    """Un rand de asize pe o fata lunga (side = +1 -> +X, -1 -> -X)."""
-    row_h = WH_H / WH_ROWS
-    for r in range(WH_ROWS):
-        z0 = r * row_h
+    """Asize pe o fata lunga (side = +1 -> +X, -1 -> -X): inaltimi de rand
+    diferite, blocuri de lungimi diferite, iesite 2-6 cm unul fata de altul."""
+    z0 = 0.0
+    for r, rh in enumerate(WH_ROW_H):
         y = -WH_HL
-        # decalaj: randurile pare incep cu bloc scurt, cele impare cu bloc lung
-        first = 0.55 + rand() * 0.35 if r % 2 == 0 else 1.2 + rand() * 0.4
-        length = first
+        length = 0.6 + rand() * 0.4 if r % 2 == 0 else 1.3 + rand() * 0.6
         while y < WH_HL - 1e-4:
             y1 = min(y + length, WH_HL)
-            if WH_HL - y1 < 0.6:           # nu lasa un ciot la capat
+            if WH_HL - y1 < 0.6:
                 y1 = WH_HL
-            ya = y + (0.0 if y <= -WH_HL + 1e-4 else 0.025)
-            yb = y1 - (0.0 if y1 >= WH_HL - 1e-4 else 0.025)
-            out = 0.13 + rand() * 0.05     # cat iese blocul din miez
+            ya = y + (0.0 if y <= -WH_HL + 1e-4 else 0.03)
+            yb = y1 - (0.0 if y1 >= WH_HL - 1e-4 else 0.03)
+            out = 0.10 + rand() * 0.10
             u = rand()
-            slot = GNEISS if u < 0.38 else (ASPHALT_EDGE if u < 0.80 else VOLCANIC_BLACK)
-            hh = row_h - 0.05
-            zc = z0 + row_h * 0.5 + (rand() - 0.5) * 0.015
-            b.box((side * (WH_CORE + out * 0.5 - 0.02), (ya + yb) * 0.5, zc),
-                  (out + 0.04, yb - ya, hh), slot)
+            slot = GNEISS if u < 0.34 else (ASPHALT_EDGE if u < 0.78 else VOLCANIC_BLACK)
+            ja, jb = (rand() - 0.5) * 0.05, (rand() - 0.5) * 0.05
+            _chamfer_block(b, WH_CORE - 0.02, WH_CORE + out, ya, yb,
+                           z0 + 0.025 + ja, z0 + rh - 0.025 + jb, side, slot)
             y = y1
-            length = 0.95 + rand() * 0.95
+            length = 0.7 + rand() * 1.4
+        z0 += rh
 
 
 def build_wharf():
     b = Builder()
     rand = _lcg(7101)
-    # miezul: rosturile adanci se citesc ca negru intre blocuri
     b.box((0.0, 0.0, WH_H * 0.5), (WH_CORE * 2, WH_HL * 2, WH_H), VOLCANIC_BLACK)
     _course_face(b, +1, rand)
     _course_face(b, -1, rand)
 
-    # puntea: lespede de piatra palida, cu 5 rosturi transversale
+    # puntea: lespede de piatra gri-bej inchis, cu rosturi transversale
     deck_top = WH_H + 0.10
-    b.box((0.0, 0.0, WH_H + 0.05), (3.5, WH_HL * 2, 0.10), CONCRETE)
+    b.box((0.0, 0.0, WH_H + 0.05), (3.5, WH_HL * 2, 0.10), ASPHALT_EDGE)
     for k in range(1, 6):
         y = -WH_HL + k * (WH_HL * 2 / 6.0)
-        b.box((0.0, y, deck_top + 0.004), (3.5, 0.025, 0.02), ASPHALT_EDGE)
+        b.box((0.0, y, deck_top + 0.004), (3.5, 0.03, 0.02), VOLCANIC_BLACK)
 
-    # coronament: lespezi late pe ambele margini, cu rosturi, usor iesite
+    # coronament: lespezi late pe ambele margini
     for side in (+1, -1):
         y = -WH_HL
         while y < WH_HL - 1e-4:
@@ -133,25 +149,26 @@ def build_wharf():
             y1 = min(y + ln, WH_HL)
             if WH_HL - y1 < 0.8:
                 y1 = WH_HL
-            ya = y + (0.0 if y <= -WH_HL + 1e-4 else 0.025)
-            yb = y1 - (0.0 if y1 >= WH_HL - 1e-4 else 0.025)
+            ya = y + (0.0 if y <= -WH_HL + 1e-4 else 0.03)
+            yb = y1 - (0.0 if y1 >= WH_HL - 1e-4 else 0.03)
             u = rand()
-            slot = GNEISS if u < 0.5 else ASPHALT_EDGE
+            slot = GNEISS if u < 0.5 else CONCRETE
             b.box((side * 1.98, (ya + yb) * 0.5, WH_H + 0.10), (0.56, yb - ya, 0.20), slot)
             y = y1
 
-    # 4 babale: 2 stalpi lungi lipiti de fata +X (se vad pe plansa ca niste
-    # piloti verticali) si 2 babale scurte pe coronamentul -X. Toate cu
-    # capac mai lat si capat taiat clar (SAND_LIGHT = lemn proaspat taiat).
-    posts = [(+1, -6.0, 2.64), (+1, 7.4, 2.64), (-1, -7.8, 2.42), (-1, 3.2, 2.42)]
-    for side, y, top in posts:
+    # 6 babale GROASE (r 0.27), ~0.9 m peste punte, capat taiat: 3 piloti pe
+    # fata +X (urca de jos pana peste coronament) si 3 babale pe marginea -X
+    top = WH_H + 0.10 + 0.95
+    posts = [(+1, -8.6, top), (+1, 0.4, top), (+1, 8.2, top),
+             (-1, -5.0, top), (-1, 3.8, top), (-1, 9.0, top)]
+    for side, y, t in posts:
         if side > 0:
-            cx, z0 = 2.20, 0.10        # pilot lipit de zid, urca pana peste coronament
+            cx, z0 = 2.20, 0.10
         else:
-            cx, z0 = -1.98, WH_H + 0.20
-        h = top - z0
-        b.cylinder((cx, y, z0 + h * 0.5), 0.24, h, WOOD_SLOT, segments=7, axis="Z")
-        cap = b.cylinder((cx, y, top + 0.02), 0.29, 0.09, WOOD_SLOT, segments=7, axis="Z")
+            cx, z0 = -1.95, WH_H + 0.20
+        h = t - z0
+        b.cylinder((cx, y, z0 + h * 0.5), 0.27, h, WOOD_SLOT, segments=8, axis="Z")
+        cap = b.cylinder((cx, y, t + 0.03), 0.31, 0.10, WOOD_SLOT, segments=8, axis="Z")
         b.retag(cap, WARM, where="up")
     return b.to_object("Wharf")
 
@@ -422,14 +439,14 @@ def build_luggage_container():
     b = Builder()
     L, W, H = 6.1, 2.4, 2.6
     hl, hw = L * 0.5, W * 0.5
-    b.box((0.0, 0.0, 1.30), (2.2, 5.9, 2.4), METAL_DARK)
+    b.box((0.0, 0.0, 1.30), (2.2, 5.9, 2.4), METAL)
     # laterale ondulate (nervuri spre exterior, ies pana la +-1.2)
     for sgn in (+1.0, -1.0):
-        f = b.corrugate((0.0, 0.0, 0.0), (5.6, 0.05, 2.2), GNEISS, ribs=10, depth=0.06)
+        f = b.corrugate((0.0, 0.0, 0.0), (5.6, 0.05, 2.2), METAL, ribs=10, depth=0.06)
         _xform(b, f, Matrix.Rotation(math.radians(-90.0 * sgn), 3, "Z"),
                (sgn * (hw - 0.085), 0.0, 1.30))
     # acoperis ondulat: nervuri pe lungime
-    f = b.corrugate((0.0, 0.0, 0.0), (2.0, 0.05, 5.6), GNEISS, ribs=4, depth=0.06)
+    f = b.corrugate((0.0, 0.0, 0.0), (2.0, 0.05, 5.6), METAL, ribs=4, depth=0.06)
     _xform(b, f, Matrix.Rotation(math.radians(90.0), 3, "X"), (0.0, 0.0, H - 0.085))
     # rama: stalpi de colt + sine sus/jos pe laturi si capete
     for sx in (-1.0, 1.0):
@@ -525,8 +542,24 @@ clear_built()
 results = []
 
 
+def _darken_slot(obj, slot, k):
+    """Inmulteste culoarea de vertex (AO) a fetelor de pe `slot` cu k: un verde
+    de panou de drum mai inchis decat orice slot verde existent, fara slot nou."""
+    me = obj.data
+    uv = me.uv_layers.active.data
+    ca = me.color_attributes.active_color
+    u0 = slot_u(slot)
+    seen = set()
+    for poly in me.polygons:
+        if abs(uv[poly.loop_indices[0]].uv.x - u0) < 1e-4:
+            seen.update(poly.vertices)
+    for vi in seen:
+        c = ca.data[vi].color
+        ca.data[vi].color = (c[0] * k, c[1] * k, c[2] * k, c[3])
+
+
 def emit(objs, path, ao, origin="base", bevel=0.03, smooth_angle=45.0,
-         budget=None, no_collision=False, bevel_angle=30.0):
+         budget=None, no_collision=False, bevel_angle=30.0, darken=None):
     if not isinstance(objs, (list, tuple)):
         objs = [objs]
     solo = len(objs) == 1
@@ -543,6 +576,8 @@ def emit(objs, path, ao, origin="base", bevel=0.03, smooth_angle=45.0,
     for o in objs:
         st = finish(o, bevel=bevel, bevel_angle=bevel_angle, ao=ao,
                     origin=(origin if solo else None), smooth_angle=smooth_angle)
+        if darken:
+            _darken_slot(o, darken[0], darken[1])
         if not solo:
             for v in o.data.vertices:
                 v.co += place
@@ -558,7 +593,7 @@ wharf_obj = build_wharf()
 # fara bevel: sute de blocuri ar multiplica triunghiurile; rosturile adanci
 # (miez negru) dau muchia. bevel_angle e irelevant la 0.
 emit(wharf_obj, "structures/wharf.glb", AO_STRUCT, origin="base_axis",
-     bevel=0.0, budget=1800)
+     bevel=0.0, budget=2300)
 
 # cafe_shed INAINTE de lodge: Blender numeste al doilea House_Wall "House_Wall.001"
 cafe_wall, cafe_roof = build_cafe_shed()
@@ -576,7 +611,8 @@ container_obj = build_luggage_container()
 emit(container_obj, "props/luggage_container.glb", AO_SMALL, bevel=0.0, budget=900)
 
 sign_obj = build_road_sign_blank()
-emit(sign_obj, "props/road_sign_blank.glb", AO_SMALL, bevel=0.0, budget=250)
+emit(sign_obj, "props/road_sign_blank.glb", AO_SMALL, bevel=0.0, budget=250,
+     darken=(MOSS, 0.38))
 
 pole_obj = build_traffic_light_pole()
 emit(pole_obj, "props/traffic_light_pole.glb", AO_SMALL, bevel=0.008,

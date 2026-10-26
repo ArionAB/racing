@@ -89,7 +89,7 @@ check "props/kayak_a.glb"            100 --allow-car-slots=KayakA
 check "props/kayak_b.glb"            100 --allow-car-slots=KayakB
 
 echo "== satul (brief §1.3, val 4) =="
-check "structures/wharf.glb"          2100
+check "structures/wharf.glb"          2300
 # cafe_shed/lodge: House_Wall + House_Roof, origine ASSEMBLY — acoperisul nu
 # atinge solul prin constructie (aceeasi exceptie ca stirling_ledge/beech).
 check "buildings/cafe_shed.glb"       2100 --origin=assembly

@@ -75,6 +75,8 @@ for _n in ("kayak_a", "kayak_b", "driftwood"):
     SPECS[_n]["camera"].update(azimuth=20.0, elevation=40.0)
 SPECS["chasm_rock"]["camera"].update(azimuth=55.0, elevation=35.0)
 SPECS["gneiss_block"]["camera"].update(azimuth=55.0, elevation=35.0)
+SPECS["stirling_ledge"]["camera"].update(azimuth=205.0, elevation=22.0)
+SPECS["torrent_chute"]["camera"].update(azimuth=205.0, elevation=22.0)
 SPECS["scree_slab"]["camera"].update(azimuth=55.0, elevation=24.0)
 SPECS["wharf"]["camera"].update(azimuth=-20.0, elevation=30.0)
 SPECS["chasm_bridge_rail"]["camera"].update(azimuth=10.0, elevation=24.0)

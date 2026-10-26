@@ -561,21 +561,30 @@ func _gfx_line() -> String:
 		Viewport.MSAA_8X: msaa = "8x"
 	var h3d := int(DisplayServer.window_get_size().y * vpn.scaling_3d_scale)
 	var shadows := "off"
+	var shadows_forced := GameState.dbg_shadows > 0
 	if _perf_sun != null and _perf_sun.shadow_enabled:
 		var two := _perf_sun.directional_shadow_mode \
 			== DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-		shadows = "2 splits" if two else "1 split"
+		# Si costul pe pixel: distanta pana la care pixelii citesc harta,
+		# filtrul (hard = un esantion) si harta insasi.
+		shadows = "%s %dm %s %d" % ["2 splits" if two else "1 split",
+			roundi(_perf_sun.directional_shadow_max_distance),
+			"hard" if GameState.shadow_filter_hard else "soft",
+			GameState.shadow_atlas_px()]
+		shadows_forced = shadows_forced or GameState.dbg_shadow_dist > 0 \
+			or GameState.dbg_shadow_filter > 0 or GameState.dbg_shadow_size > 0
 	var glow := "off"
 	if _perf_env != null and _perf_env.environment != null \
 			and _perf_env.environment.glow_enabled:
 		glow = "on"
 	var star := func(forced: bool) -> String: return "*" if forced else ""
-	return "%s  |  MSAA %s%s  |  3D %dp%s  |  shadows %s%s  |  glow %s%s" % [
+	return "%s  |  MSAA %s%s  |  3D %dp%s  |  shadows %s%s  |  glow %s%s  |  LOD %dpx%s" % [
 		GameState.GFX_TIER_NAMES[GameState.gfx_tier],
 		msaa, star.call(GameState.dbg_msaa > 0),
 		h3d, star.call(GameState.dbg_scale > 0),
-		shadows, star.call(GameState.dbg_shadows > 0),
-		glow, star.call(GameState.dbg_glow > 0)]
+		shadows, star.call(shadows_forced),
+		glow, star.call(GameState.dbg_glow > 0),
+		roundi(vpn.mesh_lod_threshold), star.call(GameState.dbg_lod > 0)]
 
 
 ## Fontul HUD-ului: Barlow Condensed (SIL OFL, vezi

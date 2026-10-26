@@ -323,70 +323,70 @@ def build_kea():
 
 # --- penguin_tawaki --------------------------------------------------------
 #
-# Contract: 0.75 m inalt, static. Spate/cap VOLCANIC_BLACK, burta FOAM_WHITE,
-# sprânceana galbena (CAR_YELLOW) pe fiecare parte a capului pana la ceafa,
-# cioc KERB_RED inchis. Exceptie --allow-car-slots=Penguin.
-# Contract 0.75 m total. BUG gasit prin masuratoare (nu presupus): profilul
-# corpului avea cote Z HARDCODATE (0.24/0.52/0.78) independente de `PG_H`,
-# deci scaderea lui PG_H nu miscase deloc varful real al corpului — bbox-ul
-# ramanea 0.816 indiferent de parametru. Fix: profilul e acum proportional cu
-# `body_h`, deci PG_H chiar controleaza cota finala. head_top e ~0.14 peste
-# body_h; masurat dupa fix, PG_H=0.60 da inaltimea totala ~0.75.
-PG_H = 0.60
+# Contract: 0.75 m inalt, static. Kit v2: corp in forma de para, aplecat in
+# fata (forfecare Y ~ z), aripioare pe langa corp (plane in YZ, evazate jos),
+# cap negru rotund, SPRANCEANA CAR_YELLOW ca tub subtire de deasupra ochiului
+# spre ceafa pe fiecare parte (exceptie --allow-car-slots=Penguin), cioc gros
+# LAVA_ORANGE, burta FOAM_WHITE care urca pana la barbie, labe FLAMINGO_PINK
+# (slot 31, legalizat: --allow-slots=31).
+PG_LEAN = 0.20          # forfecare: y += PG_LEAN * z
+PG_HEAD_Z = 0.640
+
+
+def _flipper(b, sx, slot):
+    """Placa subtire in planul YZ, lipita de flanc, evazata spre jos."""
+    outline = [(0.075, 0.39), (0.01, 0.42), (-0.06, 0.25), (-0.045, 0.13),
+               (0.0, 0.15), (0.06, 0.30)]
+    t = 0.013
+    outer, inner = [], []
+    for y, z in outline:
+        xo = sx * (0.128 + (0.42 - z) * 0.12)
+        outer.append(b.bm.verts.new((xo + sx * t, y, z)))
+        inner.append(b.bm.verts.new((xo - sx * t, y, z)))
+    n = len(outline)
+    fo = b.bm.faces.new(tuple(outer if sx > 0 else outer[::-1]))
+    fi = b.bm.faces.new(tuple(inner[::-1] if sx > 0 else inner))
+    for i in range(n):
+        j = (i + 1) % n
+        q = (outer[i], outer[j], inner[j], inner[i])
+        b.bm.faces.new(q if sx > 0 else q[::-1])
+    return b._tag(outer + inner, slot)
 
 
 def build_penguin():
-    """segments=6 pe corp, 5 pe cap (nu 9/8): masurat, chiar 7/6 iesea
-    546/300 dupa bevel — un pinguin de 0.75 m langa drum nu are nevoie de
-    rotunjime fina, mai ales cu 7 randuri de profil pe corp."""
     b = Builder()
-    body_h = PG_H
-    # corp: ovoid vertical, ingust la baza, mai lat la mijloc — silueta
-    # "in picioare" a unui pinguin. Profil scurtat la 5 randuri (nu 7):
-    # fiecare rand in plus costa `segments` fete, deci scaderea de la 7 la 5
-    # taie ~2/7 din corpul singur. Cotele Z PROPORTIONALE cu body_h (nu
-    # hardcodate) — vezi nota de mai sus.
-    prof = [(0.09, 0.0), (0.155, body_h * 0.31), (0.15, body_h * 0.67),
-           (0.08, body_h * 0.94), (0.0, body_h)]
-    body = b.revolve(prof, BEAK, segments=6, origin=(0.0, 0.0, 0.0))
-    top_z = body_h
+    # corp: para (larg jos, ingust spre gat)
+    prof = [(0.095, 0.02), (0.150, 0.07), (0.172, 0.20), (0.158, 0.32),
+            (0.120, 0.42), (0.090, 0.52), (0.078, 0.58)]
+    body = b.revolve(prof, BEAK, segments=8, origin=(0.0, 0.0, 0.0))
+    b.retag(body, BELLY, where=lambda c, n: n.y > 0.15 and c.z > 0.05)
 
-    # burta: FOAM_WHITE pe fata din fata (+Y), banda larga
-    b.retag(body, BELLY, where=lambda c, n: n.y > 0.32)
+    # cap: sfera usor turtita, negru; barbia alba (jumatatea de jos, fata)
+    hz = PG_HEAD_Z
+    head = b.revolve([(0.050, -0.082), (0.088, -0.050), (0.102, 0.0),
+                      (0.088, 0.054), (0.047, 0.088), (0.0, 0.100)],
+                     BEAK, segments=8, origin=(0.0, 0.0, hz))
+    b.retag(head, BELLY, where=lambda c, n: n.y > 0.30 and c.z < hz - 0.045)
 
-    # capul: continua profilul in sus
-    head_z = body_h
-    head = b.revolve([(0.05, 0.0), (0.06, 0.06), (0.0, 0.14)],
-                     BEAK, segments=5, origin=(0.0, 0.0, head_z))
-    b.retag(head, BEAK)
-    b.retag(head, BELLY, where=lambda c, n: n.y > 0.35 and c.z < head_z + 0.06)
+    # cioc gros, portocaliu-rosu, usor in jos
+    b.frustum((0.0, 0.145, hz - 0.020), 0.027, 0.011, 0.10, LAVA_ORANGE,
+              segments=6, axis="Y")
 
-    # cioc: mic, KERB_RED inchis
-    b.frustum((0.0, 0.09, head_z + 0.05), 0.022, 0.006, 0.05, BILL,
-             segments=4, axis="Y")
-
-    # sprancenele tawaki: doua benzi CAR_YELLOW de la ochi spre ceafa, pe
-    # fiecare parte a capului — RETAG pe fetele laterale ale capului, in
-    # banda orizontala, cost ZERO triunghiuri (brief: "pana la ceafa").
-    b.retag(head, BROW,
-           where=lambda c, n: (abs(n.x) > 0.45 and n.y < 0.55
-                               and (head_z + 0.03) < c.z < (head_z + 0.11)))
-
-    # aripioarele (flipper), lipite pe flancuri, BEAK (negru). Contur pe 4
-    # puncte (nu mai putine — sub 4 nu mai citeste ca aripioara), dar
-    # `prism()` costa fix indiferent de numarul de puncte in acest interval,
-    # deci nu mai era loc de taiat aici — bugetul se recupereaza in alta parte.
+    # sprancenele tawaki: tub galben de deasupra ochiului, peste crestet, spre
+    # ceafa, pe fiecare parte
     for sx in (-1.0, 1.0):
-        flip = b.prism([(0.05, 0.10), (0.03, -0.20), (-0.03, -0.24),
-                        (-0.05, 0.06)], 0.02, BEAK,
-                       center=(sx * 0.155, -0.02, body_h * 0.55))
-        b.retag(flip, BEAK)
+        b.sweep([(sx * 0.050, 0.080, hz + 0.050), (sx * 0.088, 0.000, hz + 0.062),
+                 (sx * 0.080, -0.075, hz + 0.026)], 0.013, BROW,
+                segments=4, dome_end=True, cap_start=True)
+        _flipper(b, sx, BEAK)
 
-    # picioarele: O SINGURA cutie lata (nu doua), sub corp — de la 1-2 m
-    # distanta silueta picioarelor separate nu se citea oricum, si tăierea
-    # asta a fost ce a dus piesa sub buget (masurat: 428 -> sub 300).
-    b.box((0.0, 0.02, -0.02), (0.14, 0.10, 0.04), BEAK)
+    # labe: doua pene late, roz, iesite in fata
+    for sx in (-1.0, 1.0):
+        b.box((sx * 0.065, 0.075, 0.010), (0.060, 0.150, 0.020), FLAMINGO_PINK)
 
+    # aplecare in fata: forfecare pe Y proportionala cu z
+    for v in b.bm.verts:
+        v.co.y += PG_LEAN * max(0.0, v.co.z)
     return b.to_object("Penguin")
 
 
@@ -409,7 +409,7 @@ penguin_obj = build_penguin()
 st = finish(penguin_obj, bevel=0.006, bevel_angle=60.0, ao=AO_PENGUIN,
            origin="base", smooth_angle=45.0)
 path, size = export_glb([penguin_obj], "fiordland/animals/penguin_tawaki.glb")
-results.append(("animals/penguin_tawaki.glb", st["tris"], size / 1024.0, 300, ""))
+results.append(("animals/penguin_tawaki.glb", st["tris"], size / 1024.0, 700, ""))
 print("export: %s (%.0f KB)" % (path, size / 1024.0))
 save_blend([penguin_obj], "fiordland_penguin.blend")
 

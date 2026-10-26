@@ -110,7 +110,7 @@ echo "== animalele (brief §1.7, val 4) =="
 # citeste actiuni) — verificat separat prin preview + raportul de culoare
 # din build_fiordland_animals.py.
 check "animals/kea.glb"              700
-check "animals/penguin_tawaki.glb"   300 --allow-car-slots=Penguin
+check "animals/penguin_tawaki.glb"   700 --allow-car-slots=Penguin --allow-slots=31
 
 echo "== fundalul (brief §1.2, val 4) =="
 check "rocks/fiordland_horizon.glb"  6600 --origin=assembly

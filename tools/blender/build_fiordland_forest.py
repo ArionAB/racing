@@ -196,17 +196,19 @@ def build_beech(spec, ppm, axis_x, base_y, target, r_mid, seed, dspan):
         bc = Builder()
         allf = set()
         for i, (c, wx, wy, hz) in enumerate(clumps):
-            allf |= bc.boulder((c.x, c.y, c.z), (wx, wy, hz * 0.9), CROWN,
-                               seed=seed + i * 13, segments=8, rings=2,
-                               deviation=0.20)
+            # mase ROTUNJITE (v3): inaltime/latime ~0.72, nu discuri
+            hh = max(hz, 0.72 * 0.5 * (wx + wy))
+            allf |= bc.boulder((c.x, c.y, c.z), (wx, wy, hh * 0.95), CROWN,
+                               seed=seed + i * 13, segments=8, rings=3,
+                               deviation=0.16)
             br = _lcg(seed + i * 7)
-            for j in range(2):
-                ph = 2.0 * math.pi * (j * 0.5 + br() * 0.4)
-                allf |= bc.boulder(
-                    (c.x + math.cos(ph) * wx * 0.36, c.y + math.sin(ph) * wy * 0.36,
-                     c.z - hz * (0.02 + br() * 0.12)),
-                    (wx * 0.48, wy * 0.48, hz * 0.62), CROWN,
-                    seed=seed + i * 31 + j, segments=5, rings=2, deviation=0.22)
+            ph = 2.0 * math.pi * br()
+            # lob suplimentar atarnat spre exterior (margine de conopida)
+            allf |= bc.boulder(
+                (c.x + math.cos(ph) * wx * 0.40, c.y + math.sin(ph) * wy * 0.40,
+                 c.z - hh * 0.22),
+                (wx * 0.55, wy * 0.55, hh * 0.55), CROWN,
+                seed=seed + i * 31, segments=6, rings=2, deviation=0.18)
         bc.retag(allf, TRUNK, where="down")
         bc.retag(allf, CROWN, where="up")
         top = max(clumps, key=lambda q: q[0].z)
@@ -288,7 +290,7 @@ def build_beech_dead():
     ramuri subtiri; o ramura joasa laterala la ~35%; tulpina continua putin si
     se rupe intr-un ciot cu 3 aschii. Totul rotund si conic, fara varfuri."""
     H = 8.5
-    TARGET = (2.9, 3.0, 8.5)
+    TARGET = (4.8, 4.8, 8.5)
 
     def assemble(k):
         kx, ky, kz = k
@@ -320,17 +322,17 @@ def build_beech_dead():
         zf = H * 0.50 * kz
         pf = _trunk_at(pts, zf)
         # 3 ramuri groase din furca
-        for az, L, ph0, ph1 in ((8, 3.6, 66, 22), (178, 3.4, 62, 20), (268, 3.0, 45, 12)):
+        for az, L, ph0, ph1 in ((15, 4.2, 50, 14), (135, 4.0, 46, 12), (255, 3.8, 42, 10)):
             lp, lr = _limb(b, pf - Vector((0, 0, 0.1)), az, L * kz, ph0, ph1,
                            0.33, 0.08, n=5, seg=7, kx=kx, ky=ky, kz=1.0)
-            for idx, sgn, Lf in ((2, 1, 1.5), (3, -1, 1.2), (4, 1, 0.8)):
+            for idx, sgn, Lf in ((2, 1, 1.7), (3, -1, 1.4), (4, 1, 1.0)):
                 _limb(b, lp[idx], az + sgn * 42, Lf, 45, 10, lr[idx] * 0.75,
                       0.03, n=3, seg=5, kx=kx, ky=ky, kz=kz)
         # ramura joasa laterala la ~35%
         pl = _trunk_at(pts, H * 0.35 * kz)
-        lp, lr = _limb(b, pl - Vector((0, 0, 0.05)), 120, 2.6, 75, 25, 0.19,
+        lp, lr = _limb(b, pl - Vector((0, 0, 0.05)), 190, 3.4, 78, 30, 0.24,
                        0.05, n=4, seg=6, kx=kx, ky=ky, kz=kz)
-        _limb(b, lp[2], 120 - 40, 1.1, 40, 8, lr[2] * 0.6, 0.02, n=3, seg=5,
+        _limb(b, lp[2], 190 + 40, 1.1, 40, 8, lr[2] * 0.6, 0.02, n=3, seg=5,
               kx=kx, ky=ky, kz=kz)
         return [b]
 

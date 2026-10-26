@@ -330,7 +330,7 @@ originea nu mai e centrata pe bbox-ul coroanei, ci pe baza trunchiului.
 | beech_a | coroana 6,00 x 4,5..7,5 x 5,60; total inaltime 7,50 | 1004 |
 | beech_b | coroana 8,00 x 3,8..10,6 x 7,39; total inaltime 10,60 | 906 |
 | beech_c | coroana 11,01 x 4,6..14,3 x 10,18; total inaltime 14,30 | 978 |
-| beech_dead | 2,90 x 8,50 x 3,00 (origine pe baza tulpinii, base_axis) | 944 |
+| beech_dead | 2,90 -> 4,80 x 8,50 x 4,80 (contract schimbat de coordonator: X/Z pana la 5,0; origine pe baza tulpinii, base_axis) | 944 |
 | rata_tree | 4,30 x 5,00 x 4,20 | 830 |
 | tussock_clump | 0,68 x 0,80 x 0,68 | 1760 |
 | stump | 1,10 x 0,80 x 1,00 | 620 |
@@ -339,10 +339,10 @@ originea nu mai e centrata pe bbox-ul coroanei, ci pe baza trunchiului.
 
 | element | pe planșă | in randare |
 |---|---|---|
-| fagi: coroana | umbrela larga peste ~60% din inaltime, 8-9 mase festonate care se contopesc, cateva goluri intunecate | 8-9 mase aplatizate (8 seg x 2 inele + 2 umflaturi de margine), pozitii din pixeli, latime ~0,8 x inaltime; se suprapun mai mult decat inainte, dar contururile raman mai netede/poligonale decat marginea festonata a desenului; golurile dintre etaje sunt mai mari decat pe planșă |
+| fagi: coroana | umbrela larga peste ~60% din inaltime, mase puffy de conopida care se contopesc intr-o cupola | 9 mase ROTUNJITE (inaltime/latime >= 0.72, 8 seg x 3 inele, deviatie 0,16) + cate un lob atarnat spre exterior, pozitii din pixeli; nu mai sunt discuri/placi (reluat dupa feedback din joc). Siluetele raman poligonale, iar la beech_c coroana coboara si acopera mult din trunchi |
 | fagi: trunchi | partea de jos goala ~35-40%, apoi furca in V in 3-4 ramuri groase care intra in coroana | trunchi evazat cu 4 radacini, furca la ~36% din inaltime cu ramuri groase spre mase (curbate: intai in sus, apoi afara); se vad intre masele de jos, dar doar 1-2 simultan |
 | beech_b | ramura joasa pe o parte | masa joasa stanga-fata iesita lateral |
-| beech_dead (reluat de constructor nou) | trunchi conic aplecat, baza evazata, 4-6 crengi groase curbate in sus cu 1-2 furci, varf zdrentuit | trunchi gros evazat cu 5 contraforturi, furca la 50% in 3 ramuri groase (curbate in sus, fiecare cu 3 furci), ramura joasa laterala la 35%, ciot rupt cu 3 aschii; toate sectiuni rotunde 5-8 segmente. Cota Y 8,5 + X 2,9 impun un copac ingust: ramurile raman apropiate de trunchi, mai putin desfacute in V decat pe planșa |
+| beech_dead (reluat de constructor nou) | trunchi conic aplecat, baza evazata, 4-6 crengi groase curbate in sus cu 1-2 furci, varf zdrentuit | trunchi gros evazat cu 5 contraforturi, furca la 50% in 3 ramuri groase la 40-60 grade (azimuturi 15/135/255), curbate in sus, fiecare cu 3 furci, ramura joasa laterala la 35% (azimut 190), ciot rupt cu 3 aschii; sectiuni rotunde. Latime coroana ~0,5 x inaltime (X 4,8 / Z 4,8, contract nou); ramura joasa se suprapune vizual cu o ramura din spate |
 | rata | copacel, trunchi ~35%, 6-9 smocuri deschise, flori in petice | trunchi ~40% care se ramifica, 8 mase cu cer intre ele, 5 petice de flori turtite (rosu 7) pe masa, putin ridicate |
 | tussock (reluat de constructor nou) | fantana de 25-40 lame subtiri 30-70 grade, varfuri aplecate, 2-3 sub-smocuri | 110 lame (3 sub-smocuri 38/38/34), panglici cu sectiune triunghiulara 16 tri, baza verde 12 / ultimele 40% paiu 13, interioare scurte si drepte, marginale lungi si cazute; cupola densa, dar lamele raman mai rigide/ascutite decat desenul |
 | stump (reluat de constructor nou) | 5-6 creste joase late, mușchi in petice, taietura deschisa cu inele | 6 creste late turtite (latime ~2-3x inaltimea) care curg de pe flancul trunchiului pana la nivelul solului, trunchi cu fatete jitterate, mușchi 12 in petice pe creste si baza, taietura SAND_LIGHT + inel; petecele de mușchi ies blocate (fete mari, low-poly), varfurile crestelor inca destul de ascutite |

@@ -795,6 +795,39 @@ Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
    scris direct în coordonate Godot, deci captura de sus are deja estul la
    dreapta.
 
+5. **Rezultatul pasului 5 (26 oct 2026, `carrara/track` @ a05eb27d,
+   pushată).** Hazardele sunt generate din `tools/gen_carrara_route.py`
+   (supraviețuiesc regenerării). 16 seed-uri × 230 s, bază pe aceeași pistă
+   și același cod.
+
+   | | bază | camioane | excavator |
+   |---|---|---|---|
+   | `[blocaj]` | 0 | **0** | 35 (toate la braț) |
+   | repuneri (atribuibile) | 1 | 2 (1) | 4 (4) |
+   | ejectări | 1 | 2 | 1 |
+
+   **Camioanele trec contractul.** Camionul 1 urcă B pe o curbă deschisă
+   de 603 m (`period` 118, ascuns la start — plutonul îl întâlnește abia în
+   turul 2); camionul 2 vine din față pe E–F–G, 218 m peste pod (`period`
+   60). 561 de întâlniri: contact 2% în ace, 3% pe terase, 6% pe pod;
+   pierdere per întâlnire mediană 0,15 s (cu contact 0,33 s), delta pe tur
+   +0,2…+0,8 s pe clase; 99–100% din mașini pe banda opusă camionului în
+   ace. **Lecția de geometrie:** pe banda stângă în acul 1 camionul dădea
+   50% contacte și 23 de căderi de 9,5 m — mașinile alunecă spre exterior
+   în arc. Fixul: camionul ia **interiorul acului 1** (banda dreaptă a
+   cursei, cu rampă de schimbare pe T2) și `nose_side` −1 împinge spre
+   interior, nu spre gol → 1% contacte, 0 căderi. Viteza, driftul și berma
+   prelungită n-au mișcat cifra.
+
+   **Excavatorul nu trece:** zarul se distribuie corect (86/83/93/82/82/85,
+   49% pe banda liberă), ramura 4–6 pierde 2,4 s median, dar la **start**
+   plutonul strâns face coadă la braț: mașinile 4–6 așteaptă una în spatele
+   alteia câte un ciclu de braț — 7 așteptări peste 3,5 s (max 8,8 s) în
+   primele 15 s, 1 mai târziu. Schimbare în AI: ramura 4–6 **așteaptă** la
+   braț în loc să dea înapoi (manevra de mers înapoi urca mașinile pe
+   bermă). Decizia rămasă e a dezvoltatorului (regula „o dată pe trecere”
+   e a lui).
+
 2. `Track23.tscn` din `TrackFromPath` (`tools/gen_carrara_route.py`, schela
    `gen_fiordland_route.py`: pas 12 m, viraje > 90° pe arc), temă `carrara`
    (doar lumina, cerul, ceața, solul), traseul din §2, `custom_ravines` pe

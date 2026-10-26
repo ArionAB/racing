@@ -14,6 +14,33 @@ lângă desen. Aici **fidelitatea față de planșă e criteriu de acceptare**, 
 tiparul `okinawa_kit_v2.md` §0.1 și al memoriei
 `blender-fidelitate-fata-de-plansa`.
 
+## Starea la livrare (26 oct 2026)
+
+Înainte/după din camera de joc, pe cele 8 POI-uri:
+`docs/asset_briefs/img/fiordland_fidelity/joc_inainte_dupa.png`. Comparațiile
+per piesă: `docs/asset_briefs/img/fiordland_fidelity/<nume>.png` (după) și
+`.../inainte/<nume>.png` (v1).
+
+| verdict | piese |
+|---|---|
+| **acceptat** | `guard_rock`, `chasm_rock`, `gneiss_block` (nou), `scree_slab`, `stirling_ledge`, fagii `beech_a/b/c`, `beech_dead`, `rata_tree`, `tussock_clump`, `stump`, `driftwood`, `chasm_bridge_rail`, `wharf`, `cafe_shed`, `lodge`, `heli_pad`, `luggage_container`, `road_sign_blank`, `snow_pole`, `coach_fiordland`, `bush_plane`, `kayak_a/b`, `cruise_boat` (Builder, înlocuiește reuse-ul), `penguin_tawaki`, `SnowRidge_A/B` |
+| **provizoriu** (2 runde consumate, mai bun decât v1, încă departe de planșă) | `torrent_chute` (coroană de coloane, citește ruină mai mult decât masiv), `tree_avalanche` (culori mai saturate decât planșa), `FarWall_A/B` (pădurea încă verde deschis; în joc ceața o estompează) |
+| **nerefăcut, cu motiv** | `traffic_light_pole` (scos din pistă), `kea` (anulat) |
+
+Integrare în `Track16.tscn`: 488 de instanțe generice `chasm_rock` → `gneiss_block`
+(clasa `wet_gneiss`); 7 obiecte de decor de pe creasta Stirling v1 reașezate sau
+scoase. Gărzi pe Track16, față de `main` (9f5dd770): `verify_fiordland.sh` OK;
+`probe_manual --track=16` 1 obiect (`sealRock1`, intenționat) ca pe main;
+`probe_decor` OK (30 de materiale din 38); `ProbeLaneClear` OK, exact linia de
+bază; `ProbeRace` 6 seed-uri: 2–6 repuneri pe cursă (main: 3–11), tur minim
+67,8–69,7 s (main: 67,7–69,7 s), repunerile în aceleași locuri ca pe main.
+
+**Ce rămâne vizibil în joc:** stâncile-hero (`stirling_ledge`, `torrent_chute`)
+au relief mare acum, dar sub clasa închisă `wet_gneiss` și lumina plată a pistei
+citesc tot ca mase întunecate de aproape. Următorul pas nu e geometrie: e
+tenta/scara clasei pe piesele mari (lumina, memoria
+`geometria-fara-lumina-e-invizibila`).
+
 ## 0. Ce se schimbă față de v1 și ce NU
 
 **Se suprascrie același fișier** (aceeași cale, același nume de nod). Spre
@@ -364,7 +391,7 @@ Ramura `fiord/kit-v2-e`, scripturi `tools/blender/build_fiordland_vehicles.py`
 (autocar, avion, caiace, candidatul `cruise_boat_builder`) si
 `build_fiordland_avalanche.py`. Partea de canoe a fost scoasa din
 `build_fiordland_boats_reuse.py` (reuse-ul de vapor ramane). Comparatii:
-`docs/asset_briefs/img/fiordland_fidelity/{coach_fiordland,bush_plane,kayak_a,kayak_b,cruise_boat_builder,tree_avalanche}.png`
+`docs/asset_briefs/img/fiordland_fidelity/{coach_fiordland,bush_plane,kayak_a,kayak_b,cruise_boat,tree_avalanche}.png`
 (intrare noua `cruise_boat_builder` in `preview_fiordland_fidelity.py`, foloseste decuparea `cruise_boat`;
 camera avionului mutata pe azimut 130 ca sa vada botul ca pe plansa).
 `verify_fiordland.sh`: `VERDICT KIT: OK`. Bugete: coach 3600, plane 1900,

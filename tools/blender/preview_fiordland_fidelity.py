@@ -60,6 +60,7 @@ PIECES = [
     "driftwood", "bush_plane", "coach_fiordland", "beech_a", "beech_b", "beech_c",
     "beech_dead", "rata_tree", "tussock_clump", "stump", "chasm_rock",
     "chasm_bridge_rail", "tree_avalanche", "scree_slab", "kea", "penguin_tawaki",
+    "cruise_boat_builder",
 ]
 HORIZON_NODES = {"FarWall_A", "SnowRidge_A", "SnowRidge_B"}
 
@@ -68,10 +69,11 @@ HORIZON_NODES = {"FarWall_A", "SnowRidge_A", "SnowRidge_B"}
 SPECS = {n: {"camera": {"azimuth": 55.0, "elevation": 24.0, "lens": 60.0, "margin": 1.08}}
          for n in PIECES}
 SPECS["coach_fiordland"]["camera"].update(azimuth=40.0)
-SPECS["bush_plane"]["camera"].update(azimuth=40.0, elevation=28.0)
+SPECS["bush_plane"]["camera"].update(azimuth=130.0, elevation=24.0, margin=1.0)
 SPECS["cruise_boat"]["camera"].update(azimuth=20.0, elevation=20.0)
+SPECS["cruise_boat_builder"]["camera"].update(azimuth=20.0, elevation=20.0)
 for _n in ("kayak_a", "kayak_b", "driftwood"):
-    SPECS[_n]["camera"].update(azimuth=20.0, elevation=40.0)
+    SPECS[_n]["camera"].update(azimuth=20.0, elevation=28.0)
 SPECS["wharf"]["camera"].update(azimuth=-20.0, elevation=30.0)
 SPECS["chasm_bridge_rail"]["camera"].update(azimuth=10.0, elevation=24.0)
 for _n in HORIZON_NODES:
@@ -103,7 +105,7 @@ def _import_piece(name):
 
 def compare_piece(name, res_height=900):
     os.makedirs(FID_DIR, exist_ok=True)
-    crop = os.path.join(CROPS, name + ".png")
+    crop = os.path.join(CROPS, name.replace("_builder", "") + ".png")
     if not os.path.exists(crop):
         print("LIPSA decupare:", crop)
         return

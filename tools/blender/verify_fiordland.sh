@@ -43,7 +43,8 @@ check() {  # check <cale> <buget> [flag...]
 echo "== stancile-hero (brief §1.1, val 1) =="
 check "rocks/stirling_ledge.glb"   3000 --origin=assembly
 check "rocks/torrent_chute.glb"    1500
-check "rocks/chasm_rock.glb"        1500
+check "rocks/chasm_rock.glb"        2100
+check "rocks/gneiss_block.glb"      1500
 check "rocks/guard_rock.glb"         200
 check "rocks/scree_slab.glb"        3300
 

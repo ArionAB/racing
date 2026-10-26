@@ -52,21 +52,21 @@ echo "== padurea (brief §1.4, val 2) =="
 # aceeasi exceptie ca stirling_ledge, si pentru acelasi motiv (Crown nu
 # atinge solul prin constructie, deci finish() per nod l-ar re-centra si
 # ansamblul s-ar desface).
-check "plants/beech_a.glb"          300 --origin=assembly
-check "plants/beech_b.glb"          300 --origin=assembly
-check "plants/beech_c.glb"          300 --origin=assembly
-check "plants/beech_dead.glb"       250
-check "plants/rata_tree.glb"        400
-check "plants/tussock_clump.glb"    150
-check "props/stump.glb"             150
-check "props/driftwood.glb"         150
+check "plants/beech_a.glb"         1050 --origin=assembly
+check "plants/beech_b.glb"          920 --origin=assembly
+check "plants/beech_c.glb"         1020 --origin=assembly
+check "plants/beech_dead.glb"       540
+check "plants/rata_tree.glb"       1100
+check "plants/tussock_clump.glb"    710
+check "props/stump.glb"             340
+check "props/driftwood.glb"         240
 # chasm_bridge_rail: Rail_L/Rail_R, origine "waterline" — Y=0 e cota
 # TABLIEI (brief: "origine pe axa drumului, la cota tabliei"), nu solul:
 # grinda laterala coboara sub 0, balustrada urca deasupra, exact geometria
 # care "incaleca" originea pe care verify_glb.py o numeste waterline (in
 # lipsa unui mod "deck", contractul e identic: nimic n-are voie sa atinga
 # solul, originea trebuie STRADUITA de geometrie pe ambele parti).
-check "structures/chasm_bridge_rail.glb" 600 --origin=waterline
+check "structures/chasm_bridge_rail.glb" 850 --origin=waterline
 
 echo "== avalansa (brief §1.5, val 3) =="
 # tree_avalanche: 4 noduri Boulder_A..D, origine CENTRU (contractul

@@ -222,3 +222,41 @@ de joc pe Track16 (camera de joc, nu doar planșa), `probe_manual` /
 `probe_decor` (decor plutitor sau îngropat după schimbarea formei),
 `ProbeLaneClear` și `ProbeRace` (coliziunea hull s-a schimbat pe sute de
 instanțe), apoi `bash tools/verify_local.sh` înainte de PR.
+
+## Livrare grupa B
+
+Script: `tools/blender/build_fiordland_forest.py` (layout citit pe pixeli din
+decupare + `_fit`, care itereaza scalarea pozitiilor pana cand AABB-ul iese pe
+cotele §2). Comparatii: `docs/asset_briefs/img/fiordland_fidelity/<nume>.png`.
+`verify_fiordland.sh`: bugetele grupei B actualizate; cele 3 PROBLEME ramase
+(`cruise_boat`, `kayak_a/b`) sunt ale grupei E, nu ale acesteia.
+
+| piesa | AABB masurat (X x Y x Z) | tri |
+|---|---|---:|
+| beech_a | 3,70 x 7,50 x 4,10 | 1004 |
+| beech_b | 4,71 x 10,60 x 4,99 | 880 |
+| beech_c | 7,51 x 14,30 x 7,17 | 978 |
+| beech_dead | 2,90 x 8,69 x 2,77 | 516 |
+| rata_tree | 4,30 x 4,60 x 4,20 | 1066 |
+| tussock_clump | 0,68 x 0,80 x 0,68 | 680 |
+| stump | 1,10 x 0,80 x 1,00 | 318 |
+| driftwood | 4,00 x 1,35 x 0,62 | 224 |
+| chasm_bridge_rail | 12,08 x 1,40 x 40,46 (Rail_L/R centrate la +-5,83) | 816 |
+
+Elementele (planșa -> randare):
+
+| element | pe planșă | in randare |
+|---|---|---|
+| fagi: coroana | 8-9 mase late, in etaje, cu cer intre ele | 8-9 mase (8 seg x 2 inele) + 2 umflaturi pe margine fiecare, pozitii luate din pixeli; etajele se citesc, dar masele sunt mai rotunde/izolate si mai putin „norisor" cu margine festonata |
+| fagi: trunchi | gros, evazat, 3-4 radacini, se desparte in 3-4 ramuri groase vizibile | trunchi evazat 1,7x, 4 radacini, o ramura per masa; ramurile se vad doar partial (sunt acoperite de mase), despartirea in „V" de pe planșă nu e citita clar |
+| beech_b | ramura joasa pe o parte | masa joasa stanga prezenta |
+| beech_dead | trunchi gros rupt, 6-8 crengi cu furci | trunchi evazat + 5 radacini, 9 crengi cu 4 furci, varf taiat; trunchiul e prea „stalp", crengile prea ascutite/subtiri, nu au curbura planșei |
+| rata | trunchi vizibil, 6-9 smocuri, 4-8 ciorchini rosii mici | 9 mase, 6 ciorchini octaedrici/masa (rosu 7), trunchi cu 2 randuri de ramuri; ciorchinii citesc ca „pietre" mici, nu ca pete pe frunzis; lipseste discul verde de la baza |
+| tussock | 2 smocuri, 20-30 lame in fantana, varf galben-oliv | 2 x 17 lame arcuite, varfuri DRY_VEGETATION; baza inca prea „tub", lamele prea rigide/late fata de firele fine ale planșei |
+| stump | ciot evazat, 5-6 radacini lungi, inele, mușchi | corp evazat + 7 radacini, disc de taietura + inel, mușchi pe radacini; radacinile sunt mai conice/spikate si mușchiul prea saturat |
+| driftwood | buștean gros, capat zdrentuit, 3-4 crengi ridicate, cateva pe sol | buștean + 3 ridicate + 1 furca + 2 cazute + aschii la capat; crengile sunt mai drepte/conice, fara noduri |
+| chasm_bridge_rail | stalpi patrati, 2 randuri de scanduri cu rosturi | 17 stalpi 0,30 m la 2,5 m, scanduri exterioare decalate, rosturi; nu are vena lemnului/uzura |
+
+Goluri sincere: formele sunt corecte ca proportii si numar de elemente, dar
+coroanele fagilor si crengile arborelui uscat raman mai „geometrice" decat
+desenul (nicio fateta festonata); nu am verificat in joc, doar pe comparatie.

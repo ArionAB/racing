@@ -80,8 +80,8 @@ class Local:
 # intre ele si babale de lemn cu capac. Capete PLANE la y = +-10.
 WH_HL = 10.0          # semi-lungime (Blender Y)
 WH_CORE = 1.95        # semi-latime miez
-WH_H = 1.75           # inaltimea zidului (cu puntea si coronamentul ~1.95)
-WH_ROW_H = (0.50, 0.38, 0.50, 0.37)   # inaltimi de rand diferite
+WH_H = 1.92           # inaltimea zidului: puntea iese la ~2,12 m, cota v1 (2,0 + coronament)
+WH_ROW_H = (0.55, 0.42, 0.55, 0.40)   # inaltimi de rand diferite, suma = WH_H
 
 
 def _chamfer_block(b, x0, x1, ya, yb, za, zb, side, slot, ch=0.045):

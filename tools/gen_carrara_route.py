@@ -699,14 +699,145 @@ size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
     for (n_, x0, x1, z0, z1, lvl, sw, se, sn, ss) in patches:
         print(f"  {n_:4s} x[{x0:7.1f},{x1:7.1f}] y[{-z1:7.1f},{-z0:7.1f}]  cota {lvl[0][1]:5.1f}..{lvl[-1][1]:5.1f}  soft W{sw:g} E{se:g} N{sn:g} S{ss:g}")
 
+    # ======================================================================================
+    # HAZARDE (brief par.2 POI A/B/F, par.3; pasul 5): camionul 1 pe B, camionul 2 pe pod, excavatorul pe
+    # piazzale. Curbele camioanelor se deriva din axa COAPTA (tools/data/carrara_baked.csv = dump-ul
+    # `ProbeCarrara --dump-route`), nu din poligonul de control: Catmull-Rom strange arcele. Se regenereaza cu:
+    #   godot ... res://tools/ProbeCarrara.tscn -- --scene=res://scenes/tracks/Track23.tscn --dump-route=<csv>
+    # ======================================================================================
+    BAKED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "carrara_baked.csv")
+    hz_ext = hz_sub = hz_nodes = zones_meta = ""
+    if os.path.exists(BAKED):
+        import csv as _csv
+        brow = [tuple(map(float, r.values())) for r in _csv.DictReader(open(BAKED, encoding="utf-8"))]
+        nb = len(brow)
+
+        def b_near(gx, gz):
+            return min(range(nb), key=lambda i: (brow[i][0] - gx) ** 2 + (brow[i][2] - gz) ** 2)
+
+        def b_frac(fr_):
+            return min(range(nb), key=lambda i: abs(brow[i][4] - fr_))
+
+        TRUCK_SPEED = 8.0
+
+        def truck_curve(i_from, i_to, lane_k, enter_off, exit_off):
+            """Axa coapta de la `i_from` la `i_to` (i_from > i_to: SENS INVERS cursei), decalata pe STANGA
+            cursei cu lane_k * half_width; capetele iesite din drum pe partea stanga a cursei."""
+            lane_pts, last = [], None
+            for i in range(i_from, i_to - 1, -1):
+                x, y, z, hw, _f = brow[i]
+                j, k = min(i + 1, nb - 1), max(i - 1, 0)
+                dx, dz = brow[j][0] - brow[k][0], brow[j][2] - brow[k][2]
+                l_ = math.hypot(dx, dz)
+                dx, dz = dx / l_, dz / l_              # directia CURSEI
+                rx, rz = -dz, dx                       # dreapta cursei (dir x UP)
+                px, pz = x - rx * lane_k * hw, z - rz * lane_k * hw
+                if last is not None and math.hypot(px - last[0], pz - last[2]) < 5.0:
+                    continue
+                lane_pts.append((px, y, pz, dx, dz, rx, rz))
+                last = lane_pts[-1]
+            x0, y0, z0, dx0, dz0, rx0, rz0 = lane_pts[0]
+            xe, ye, ze, dxe, dze, rxe, rze = lane_pts[-1]
+            # intrare: din spatele camionului (sensul cursei = de unde vine), pe stanga cursei, in afara drumului
+            ent = [(x0 + dx0 * a - rx0 * b, y0, z0 + dz0 * a - rz0 * b) for a, b in enter_off]
+            # iesire: inainte (contra cursei), pe stanga cursei
+            ext = [(xe - dxe * a - rxe * b, ye, ze - dze * a - rze * b) for a, b in exit_off]
+            return ent + [(a, b, c) for a, b, c, *_ in lane_pts] + ext
+
+        def curve_len(c_):
+            return sum(math.hypot(b_[0] - a_[0], b_[2] - a_[2]) for a_, b_ in zip(c_, c_[1:]))
+
+        def bus_node(name, curve_id, c_, period, hide0):
+            """phase astfel incat camionul se ASCUNDE la `hide0` s dupa t=0 (mai are hide0 * viteza de parcurs)."""
+            ln = curve_len(c_)
+            ph = max(0.0, 1.0 - hide0 * TRUCK_SPEED / ln)
+            reappear = hide0 + max(period - ln / TRUCK_SPEED, 0.5)
+            print(f"  {name}: curba {ln:.0f} m = {ln / TRUCK_SPEED:.1f} s, perioada {period:.0f} s, phase {ph:.4f} -> "
+                  f"ascuns de la t={hide0:.1f} s, reapare la t={reappear:.1f} s")
+            return f"""
+[node name="{name}" type="Path3D" parent="Hazarduri"]
+script = ExtResource("7_bus")
+curve = SubResource("{curve_id}")
+speed = {TRUCK_SPEED}
+period = {period}
+phase = {round(ph, 4)}
+nose_side = 1
+nose_angle_deg = 20.0
+apex_outer_m = 0.0
+apex_radius_m = 15.0
+shove = 3.0
+side_accel = 8.0
+ai_reads_lane = true
+soft_contact = true
+model = ExtResource("8_kamaz")
+"""
+
+        def curve_sub(cid, c_):
+            flat = ", ".join(f"0, 0, 0, 0, 0, 0, {round(a, 2)}, {round(b, 2)}, {round(c, 2)}" for a, b, c in c_)
+            return f"""
+[sub_resource type="Curve3D" id="{cid}"]
+_data = {{
+"points": PackedVector3Array({flat}),
+"tilts": PackedFloat32Array({", ".join("0" for _ in c_)})
+}}
+point_count = {len(c_)}
+"""
+
+        print("\nhazarde:")
+        # camionul 1: din C (frac 0.318, banda stanga a cursei) pana in capul lui T1 (frac 0.059). La startul cursei
+        # (3.6 s de numaratoare; plutonul ajunge la T1 la ~10 s) e deja ascuns: reapare dupa ce plutonul a trecut.
+        # Intrarea vine din NORD (partea stanga a cursei), prin afara drumului.
+        c1 = truck_curve(b_frac(0.318), b_frac(0.059), 0.5, [(30.0, 32.0), (10.0, 12.0)],
+                         [(8.0, 7.0), (16.0, 20.0), (20.0, 34.0)])
+        # camionul 2: peste pod (F), de la G (x ~ -214) la E (x ~ -70), pe partea stanga a cursei (S)
+        c2 = truck_curve(b_near(-214.0, 112.0), b_near(-70.0, 112.0), 0.5, [(25.0, 30.0), (10.0, 12.0)],
+                         [(8.0, 7.0), (16.0, 18.0), (20.0, 30.0)])
+        hz_ext = (
+            '[ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="7_bus"]\n'
+            '[ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="9_marker"]\n'
+            '[ext_resource type="PackedScene" path="res://assets/models/baikal/vehicles/kamaz_truck.glb" id="8_kamaz"]\n')
+        hz_sub = curve_sub("Curve3D_camion1", c1) + curve_sub("Curve3D_camion2", c2)
+        # perioada 118 s (brief par.2: ~110), ascuns la t = 3 s (reapare la ~44 s, dupa ce plutonul a trecut de C); pod: perioada 60 s (nu e multiplu al turului de ~68 s),
+        # ascuns la t = 7 s
+        hz_nodes += bus_node("Camion1B", "Curve3D_camion1", c1, 118.0, 3.0)
+        hz_nodes += bus_node("Camion2Pod", "Curve3D_camion2", c2, 60.0, 7.0)
+        # excavatorul: pe piazzale, DUPA grila (frac 0.04 = ~83 m dupa linia de start), inaintea coridorului de blocuri
+        ie = b_frac(0.040)
+        hz_nodes += f"""
+[node name="Excavator" type="Marker3D" parent="Hazarduri"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {round(brow[ie][0], 2)}, {round(brow[ie][1], 2)}, {round(brow[ie][2], 2)})
+script = ExtResource("9_marker")
+kind = 7
+excavator_ai_dice = true
+excavator_soft_contact = true
+"""
+        print(f"  excavator: frac 0.040 la x {brow[ie][0]:.1f} (grila x ~ -190..-160, linia de start x -148)")
+        # zonele pentru sonde (fractii pe INDEX): metadata citita de tools/probe_carrara.gd
+        zz = [("A", IDX("H portal iesire"), IDX("A iesire coridor")),
+              ("T1", IDX("A iesire coridor"), IDX("B T1 sfarsit plat")),
+              ("H1", IDX("B T1 sfarsit plat"), IDX("B T2 inceput plat")),
+              ("T2", IDX("B T2 inceput plat"), IDX("B T2 sfarsit plat")),
+              ("H2", IDX("B T2 sfarsit plat"), IDX("B T3 inceput plat")),
+              ("T3", IDX("B T3 inceput plat"), IDX("B T3 sfarsit plat")),
+              ("C", IDX("B T3 sfarsit plat"), IDX("D portal jos")),
+              ("D", IDX("D portal jos"), IDX("D portal sus (E inceput)")),
+              ("E", IDX("D portal sus (E inceput)"), IDX("F pod", -35.0)),
+              ("F", IDX("F pod", -35.0), IDX("F pod", 35.0)),
+              ("G", IDX("F pod", 35.0), IDX("H portal intrare")),
+              ("H", IDX("H portal intrare"), IDX("H portal iesire"))]
+        zones_meta = "metadata/zones = {" + ", ".join(
+            f'"{n_}": Vector2({a_}, {b_})' for n_, a_, b_ in zz if a_ <= b_) + "}\n" + 'metadata/zone_default = "A"\n'
+    else:
+        print("ATENTIE: tools/data/carrara_baked.csv lipseste: Track23 se genereaza FARA hazarde")
+
     tscn = f"""[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/tracks/track_from_path.gd" id="1_track"]
 [ext_resource type="Script" path="res://scenes/tracks/terrain_peak.gd" id="2_peak"]
 [ext_resource type="Script" path="res://scenes/hazards/tunnel_signal_hazard.gd" id="5_signal"]
 [ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="6_respawn"]
-
-{"".join(net_shapes)}
+{hz_ext}
+{"".join(net_shapes)}{hz_sub}
 [sub_resource type="Curve3D" id="Curve3D_carrara"]
 closed = true
 _data = {{
@@ -739,14 +870,14 @@ custom_width_segments = Array[Vector3]([{w_txt}])
 custom_parapets = Array[Vector4]([{par_txt}])
 width_flow_windows = Array[Vector2]([{fw_txt}])
 terrain_pad_m = 160.0
-
+{zones_meta}
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource("Curve3D_carrara")
 
 [node name="Peaks" type="Node3D" parent="."]
 {peaks_txt}
 [node name="Hazarduri" type="Node3D" parent="."]
-{tunnels_txt}{"".join(nets)}"""
+{tunnels_txt}{"".join(nets)}{hz_nodes}"""
     with open(OUT_PATH, "w", encoding="utf-8", newline="\n") as f:
         f.write(tscn)
     print(f"\nscris: {OUT_PATH}")

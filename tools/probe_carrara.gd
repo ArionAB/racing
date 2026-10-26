@@ -327,7 +327,7 @@ func _zone_of(frac: float) -> String:
 		var v: Vector2 = _zones[k]
 		if frac >= v.x and frac <= v.y:
 			return k
-	return "RET"
+	return String(_track.get_meta("zone_default", "RET"))
 
 
 func _physics_process(delta: float) -> void:
@@ -447,6 +447,7 @@ func _tick_car(i: int, car: Car, delta: float) -> void:
 	# pe ruta, lateral < 10 m), in fata ei pe sensul cursei, la mai putin de
 	# APPROACH_M. Terasa de alaturi (30 m lateral) nu conteaza.
 	var near_truck := 1e9
+	var near_j := -1
 	for j in _trucks.size():
 		var tr: BusHazard = _trucks[j]
 		if tr.is_hidden():
@@ -462,7 +463,9 @@ func _tick_car(i: int, car: Car, delta: float) -> void:
 			ahead += _len
 		var same_road: bool = absf(trc.y - rc.y) < 10.0 and absf(trc.y) < 8.0
 		if same_road:
-			near_truck = minf(near_truck, dist)
+			if dist < near_truck:
+				near_truck = dist
+				near_j = j
 		var open: bool = int((c.enc_open as Array)[j]) >= 0
 		if same_road and ((not open and ahead > 0.0 and ahead < APPROACH_M) 				or (open and ahead > -8.0 and ahead < APPROACH_M + 10.0)):
 			_update_encounter(i, j, car, tr, dist, u, rc, zone, speed)
@@ -525,7 +528,7 @@ func _tick_car(i: int, car: Car, delta: float) -> void:
 			var rec := {"t": snappedf(_t, 0.1), "car": i, "name": c.name,
 				"frac": snappedf(frac, 0.001), "zone": zone, "v": snappedf(speed, 0.1),
 				"lat": snappedf(rc.y, 0.1), "touching": touching,
-				"truck_d": snappedf(near_truck, 0.1), "exc_d": snappedf(near_exc, 0.1),
+				"truck_d": snappedf(near_truck, 0.1), "truck_j": near_j, "exc_d": snappedf(near_exc, 0.1),
 				"since_contact": snappedf(_t - float(c.last_contact_t), 0.1),
 				"on_road": on_road}
 			_blocaj.append(rec)
@@ -535,7 +538,7 @@ func _tick_car(i: int, car: Car, delta: float) -> void:
 				", ".join(touching) if not touching.is_empty() else "-"])
 	# starea anterioara (pentru respawn)
 	c.prev = {"frac": frac, "zone": zone, "lat": rc.y, "speed": speed,
-		"truck_d": near_truck, "exc_d": near_exc, "u": u, "on_road": on_road,
+		"truck_d": near_truck, "truck_j": near_j, "exc_d": near_exc, "u": u, "on_road": on_road,
 		"y": car.global_position.y, "road_y": _track.point_at(car.road_index, car.route).y}
 
 
@@ -566,6 +569,7 @@ func _on_respawn(i: int) -> void:
 		"lat": snappedf(float(p.get("lat", 0.0)), 0.1),
 		"v": snappedf(float(p.get("speed", 0.0)), 0.1),
 		"truck_d": snappedf(float(p.get("truck_d", 1e9)), 0.1),
+		"truck_j": int(p.get("truck_j", -1)),
 		"exc_d": snappedf(float(p.get("exc_d", 1e9)), 0.1),
 		"since_contact": snappedf(_t - float(c.last_contact_t), 0.1),
 		"on_road": p.get("on_road", true),

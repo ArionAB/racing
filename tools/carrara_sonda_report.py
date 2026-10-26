@@ -19,6 +19,7 @@ import sys
 from collections import defaultdict
 
 BUCKET = 10.0
+ZONE_ORDER = ["A", "T1", "H1", "T2", "H2", "T3", "C", "D", "E", "F", "G", "H", "RET"]
 BASE_K = 40
 
 
@@ -194,7 +195,7 @@ def report_trucks(base_runs, tr_runs, terrain):
         hit = [e for e in sel if e["contact"]]
         print("  intalniri %-12s: %4d, cu contact %4d = %.0f%%" % (zlab, len(sel), len(hit),
               100.0 * len(hit) / max(len(sel), 1)))
-    for z in ("T1", "H1", "T2", "H2", "T3", "RET"):
+    for z in ZONE_ORDER:
         sel = [e for e in ho if e["zone_min"] == z]
         if sel:
             hit = [e for e in sel if e["contact"]]
@@ -226,7 +227,7 @@ def report_trucks(base_runs, tr_runs, terrain):
         if v:
             print("  clasa %-6s n=%4d  mediana %6.2f  worst %6.2f" % (k, len(v), med(v), max(v)))
     # per zona
-    for z in ("T1", "H1", "T2", "H2", "T3", "RET"):
+    for z in ZONE_ORDER:
         v = [e["loss"] for e in ho if e.get("loss") is not None and e["zone_min"] == z and e["contact"]]
         if v:
             print("  cu contact, zona %-3s: n=%3d mediana %5.2f worst %5.2f" % (z, len(v), med(v), max(v)))
@@ -411,6 +412,25 @@ def report_exc(base_runs, ex_runs):
         sys.exit(1)
 
 
+def filter_truck(runs, j):
+    """Pastreaza doar evenimentele camionului `j` (contacte, intalniri, atribuiri); celelalte camioane
+    devin invizibile (truck_d / since_contact = infinit), ca sa se poata masura un camion separat."""
+    out = []
+    for r in runs:
+        r2 = dict(r)
+        r2["encounters"] = [e for e in r["encounters"] if e["truck"] == j]
+        r2["contacts"] = [c for c in r["contacts"] if c["truck"] == j]
+        r2["blocaj"] = [dict(b, truck_d=(b["truck_d"] if b.get("truck_j", -1) == j else 1e9),
+                             since_contact=(b["since_contact"] if b.get("truck_j", -1) == j else 1e9),
+                             touching=[t for t in b["touching"] if not (str(t).startswith("CAMION") and b.get("truck_j", -1) != j)])
+                        for b in r["blocaj"]]
+        r2["respawns"] = [dict(b, truck_d=(b["truck_d"] if b.get("truck_j", -1) == j else 1e9),
+                               since_contact=(b["since_contact"] if b.get("truck_j", -1) == j else 1e9))
+                          for b in r["respawns"]]
+        out.append(r2)
+    return out
+
+
 def main():
     kind = sys.argv[1]
     base = load(sys.argv[2])
@@ -419,6 +439,9 @@ def main():
         print("VERDICT: PROBLEMA (director gol)")
         sys.exit(1)
     if kind == "trucks":
+        for a in sys.argv:
+            if a.startswith("--truck="):
+                other = filter_truck(other, int(a.split("=")[1]))
         report_trucks(base, other, "--terrain" in sys.argv)
     else:
         report_exc(base, other)

@@ -1,4 +1,5 @@
-"""Fiordland — inlocuire cruise_boat/kayak_a/kayak_b cu asset-uri externe
+"""Fiordland — inlocuire cruise_boat cu asset extern (caiacele kayak_a/b sunt
+acum Builder, kit v2 grupa E, build_fiordland_vehicles.py; partea de canoe a fost scoasa)
 (decizia dezvoltatorului, 26 sep 2026, docs/track_briefs/fiordland_stare_poi.md
 decizia #2: vaporasul "cutie alba" trebuie sa citeasca vapor).
 
@@ -227,88 +228,8 @@ def process_ship():
     return obj
 
 
-def process_kayak(name_out, hull_slot, blend_name, node_name):
-    imported = _import_glb(CANOE_SRC)
-    obj = _bake_transforms_to_single_mesh(imported, node_name)
-
-    # Sloturile GLB: material_0 (index 2, TEXTURAT, 236 tri) - ARUNCAT, se
-    # topeste in hull_slot (culoarea vine din paleta, nu din JPEG); material_1
-    # (index 0, "material_1", fara culoare proprie/alb implicit, 5659 tri,
-    # cea mai mare parte a corpului) -> hull_slot; "Default" (index 1, gri
-    # mediu, 880 tri, probabil cockpit/interior) -> DARK (cockpit negru,
-    # brief-ul original: "Cockpit VOLCANIC_BLACK").
-    _drop_materials_keep_slot_map(
-        obj, {0: hull_slot, 1: DARK, 2: hull_slot})
-
-    (x0, x1), (y0, y1), (z0, z1) = _mesh_extent(obj)
-    ext = {"x": x1 - x0, "y": y1 - y0, "z": z1 - z0}
-    long_axis = max(ext, key=ext.get)
-    print("%s: extent brut X=%.3f Y=%.3f Z=%.3f, axa lunga=%s" %
-          (node_name, ext["x"], ext["y"], ext["z"], long_axis))
-    if long_axis == "x":
-        _rotate_object_data(obj, (0.0, 0.0, 90.0))
-    elif long_axis == "z":
-        _rotate_object_data(obj, (90.0, 0.0, 0.0))
-    (x0, x1), (y0, y1), (z0, z1) = _mesh_extent(obj)
-    ext = {"x": x1 - x0, "y": y1 - y0, "z": z1 - z0}
-    print("%s: extent dupa rotatie X=%.3f Y=%.3f Z=%.3f" %
-          (node_name, ext["x"], ext["y"], ext["z"]))
-    assert ext["y"] >= ext["x"] and ext["y"] >= ext["z"], \
-        "orientare gresita: lungimea tot nu e pe Y"
-
-    # Scara: contractul vechi kayak_a/b = 3.6 x 0.6 x 0.35 m (lungime x latime
-    # x inaltime). "canoe ~5 m" din task, dar kit-ul existent (grila
-    # KAYAK_PIER_LAT/TANG, boat_lat etc.) e calculat pe 3.6 m si pe "none"
-    # collision, deci pastram lungimea contractuala 3.6 m ca sa nu strice
-    # geometria fina din jurul ei (caiacele stau langa capatul pontonului,
-    # in spatiul lasat de vechiul kayak) — o canoe de 3,6 m e perfect
-    # plauzibila (canoe de 2 persoane).
-    TARGET_LEN = 3.6
-    factor = TARGET_LEN / ext["y"]
-    _scale_mesh(obj, factor)
-    (x0, x1), (y0, y1), (z0, z1) = _mesh_extent(obj)
-    print("%s: extent dupa scalare (m) X=%.3f Y=%.3f Z=%.3f" %
-          (node_name, x1 - x0, y1 - y0, z1 - z0))
-
-    # Origine la baza (plutesc la suprafata apei, ca vechile kayak_a/b —
-    # "none" collision, asezate direct la _sea_y).
-    snap_before = None
-    dx = -(x0 + x1) * 0.5
-    dy = -(y0 + y1) * 0.5
-    dz = -z0
-    for v in obj.data.vertices:
-        v.co.x += dx
-        v.co.y += dy
-        v.co.z += dz
-
-    snap = snapshot_slots(obj)
-    apply_bevel(obj, 0.012, angle_deg=65.0)
-    apply_smooth(obj, 34.0)
-    assign_uvs(obj, snap)
-    obj.data.materials.clear()
-    obj.data.materials.append(atlas_material())
-    rng = bake_ao(obj, **AO_VEHICLE)
-    if "slot" in obj.data.attributes:
-        obj.data.attributes.remove(obj.data.attributes["slot"])
-
-    tris = tri_count(obj)
-    print("%s: %d tri (contract vechi 100, buget informal, fara plafon)" %
-          (node_name, tris))
-    print("%s: AO min/max %.3f/%.3f" % (node_name, rng[0], rng[1]))
-
-    path, size = export_glb([obj], name_out)
-    print("export: %s (%.0f KB)" % (path, size / 1024.0))
-    save_blend([obj], blend_name)
-    return obj
-
-
 clear_built()
 
 ship = process_ship()
 
-kayak_a = process_kayak("fiordland/props/kayak_a.glb", CAR_BLUE,
-                        "fiordland_kayak_a_v2.blend", "KayakA")
-kayak_b = process_kayak("fiordland/props/kayak_b.glb", CAR_YELLOW,
-                        "fiordland_kayak_b_v2.blend", "KayakB")
-
-print("== gata: cruise_boat.glb, kayak_a.glb, kayak_b.glb inlocuite ==")
+print("== gata: cruise_boat.glb inlocuit (caiacele sunt Builder, vezi build_fiordland_vehicles.py) ==")

@@ -352,3 +352,67 @@ originea nu mai e centrata pe bbox-ul coroanei, ci pe baza trunchiului.
 Goluri sincere: silueta coroanei fagilor e mai aproape de desen dar nu are
 marginea festonata; tussock-ul e mai rar decat desenul; radacinile ciotului
 sunt conice; nu am verificat in joc, doar pe comparatie.
+
+## Livrare grupa E
+
+Ramura `fiord/kit-v2-e`, scripturi `tools/blender/build_fiordland_vehicles.py`
+(autocar, avion, caiace, candidatul `cruise_boat_builder`) si
+`build_fiordland_avalanche.py`. Partea de canoe a fost scoasa din
+`build_fiordland_boats_reuse.py` (reuse-ul de vapor ramane). Comparatii:
+`docs/asset_briefs/img/fiordland_fidelity/{coach_fiordland,bush_plane,kayak_a,kayak_b,cruise_boat_builder,tree_avalanche}.png`
+(intrare noua `cruise_boat_builder` in `preview_fiordland_fidelity.py`, foloseste decuparea `cruise_boat`;
+camera avionului mutata pe azimut 130 ca sa vada botul ca pe plansa).
+`verify_fiordland.sh`: `VERDICT KIT: OK`. Bugete: coach 3600, plane 1900,
+kayak 1300, avalansa 2600, cruise_boat (reuse descarcat, 1640 tri) 1700,
+cruise_boat_builder 4300.
+
+| piesa | AABB Godot X x Y x Z | tri |
+|---|---|---:|
+| coach_fiordland | 3,03 x 3,21 x 8,62 (contract <= 3,06 x 3,29 x 8,66) | 3492 |
+| bush_plane (origine centru) | 8,00 x 1,89 x 7,33 | 1852 |
+| kayak_a / kayak_b | 0,60 x 0,35 x 3,60 | 1222 / 1222 |
+| cruise_boat_builder (waterline) | 4,84 x 6,20 (-1,2..5,0) x 13,94 | 4196 |
+| Boulder_A / B / C / D | 2,59x2,08x2,02 / 1,89x1,65x1,65 / 1,59x1,19x1,19 / 1,49x1,14x1,19 | 463 / 578 / 589 / 908 |
+
+Raport de laturi max pe noduri: A 1,28, B 1,15, C 1,34, D 1,31 (<= 1,5).
+Sloturi: coach `CACTUS_GREEN` 12 caroserie, `FOAM_WHITE` acoperis,
+`VOLCANIC_BLACK` geamuri, `MARBLE_GREY` dungi, `SAND_LIGHT` faruri;
+avion `FOAM_WHITE` + `CAR_RED`; caiac A `KERB_RED` corp + `LAVA_ORANGE` punte,
+B `CAR_YELLOW`, cockpit `VOLCANIC_BLACK`; avalansa `VOLCANIC_BLACK`/`ASPHALT_EDGE`
+roca, `LOG_DARK` lemn, `TROPICAL_GREEN` muschi. Zero sloturi noi.
+
+| element | pe plansa | in randare |
+|---|---|---|
+| coach: caroserie | verde-lime, jos, fata rotunjita | verde `CACTUS_GREEN`, profil lateral cu fata inclinata; mai inchis decat lime-ul plansei (nu exista un slot mai deschis), fata e plana, nu bombata |
+| coach: geamuri | banda neagra continua cu montanti, de la usa pana in spate | banda neagra pe toata lungimea cu 8 montanti verzi, geam spate |
+| coach: parbriz | mare, inclinat, cu rame | panou negru inclinat 30 grade, 2 rame verzi laterale |
+| coach: acoperis | alb, aer conditionat ca placi gri | cutie alba, 2 unitati `ASPHALT_EDGE` (1,25x1,6 si 0,8x0,9) |
+| coach: roti | 2 puncte, roti cu janta in pasaje decupate | 4 roti (anvelopa 14 laturi + janta + butuc) in pasaje taiate IN profil (arc de 0,7 m) cu perete interior negru |
+| coach: faruri | 2 mari, jos, calde | 2 cilindri `SAND_LIGHT` + 2 cutii, grila neagra, bara neagra |
+| plane: fuzelaj | volum rotund, bot cu spinner rosu | loft eliptic 10 sectiuni, spinner rosu, dunga rosie pe flanc de la nas la coada |
+| plane: aripa | sus, 2 montanti subtiri, varfuri rosii | plan 6,8+2x0,6 m, grosime 0,12, varfuri rosii, 2x2 montanti negri |
+| plane: coada | deriva rosie inalta, stabilizator cu varfuri rosii | deriva rosie extrudata, stabilizator alb cu varfuri rosii |
+| plane: cabina | geamuri multe, parbriz mare | geam lateral lung pe fiecare parte + parbriz inclinat |
+| plane: tren/elice | 2 roti mari cu picior, roata de bot, elice | picioare, 2 carenaje albe, roti cu jante, roata de bot, elice cu 1 bara-doua pale (negre) |
+| kayak: forma | fuzelat la ambele capete, sheer ridicat la capete | bucla cu 15 sectiuni, latime ~ (1-|u|^2,3)^0,55, sheer 0,085 m si rocker |
+| kayak: cockpituri | 2 negre in treimea de mijloc, cu scaun | 2 ovale negre cu coaming de culoarea corpului la y=-0,48 si +0,52 |
+| kayak: punte | nervuri, mansoane | punte pe a doua culoare (A) / aceeasi (B), 2 nervuri + 2 cleme la fiecare capat |
+| cruise: carena | alba, evazata, banda neagra sub linie | 8 sectiuni, evazare 0,45 m pe 1,1 m, banda neagra sub linia apei |
+| cruise: doua punti, geamuri | sir lung de geamuri negre, punte de sus deschisa | 8 geamuri negre pe parter, front inclinat cu geamuri, timonerie cu 3 geamuri + parbriz |
+| cruise: punte deschisa | balustrada, banci rosiatice | balustrada alba 3 laturi, 3 randuri x 2 banci `TILE_TERRACOTTA` cu spatar |
+| cruise: pupa | platforma de lemn | puntea de la pupa (1,5 m) pe `WOOD`, cu balustrada |
+| avalansa: structura | trunchi rupt cu radacini si ramuri, bolovani cu muschi | fiecare nod = bolovan fatetat (6-8 laturi) + 2-4 trunchiuri scurte, taiat/rupt (splinter), unul sau doua cu talpa evazata + 5-6 radacini, 1-2 ciot de ramura; A mult stanca, D mult lemn |
+
+Despre `cruise_boat_builder` (parere cinstita): citeste mai clar "vaporas de excursie" decat
+reuse-ul (feribot cu cos), fiindca are sirul lung de geamuri, punte deschisa cu banci si
+balustrada si platforma de lemn la pupa, adica exact elementele plansei. Dar e cutie
+curata: carena are doar evazare usoara, nu curbura de pe plansa, cabina e un bloc cu
+colturi drepte, iar cu 4200 tri e de 2,5x reuse-ul. La camera de joc (14 m lungime) l-as
+alege pentru identitate; decizia si verificarea pe Track16 raman ale coordonatorului.
+Fisierul din joc `cruise_boat.glb` nu e atins.
+
+Diferente ramase:
+- coach: verdele iese ~(88,120,50) fata de lime-ul plansei; fata plata si colturile drepte; dunga laterala e doar gri-deschis, fara efectul de uzura.
+- plane: fuzelajul e mai subtire decat al plansei; elicea e o singura bara inclinata; fara fereastra de usa separata.
+- kayak: coca e mai ingusta in sectiune (cota de 0,35 m limiteaza adancimea); fara scaune in cockpit.
+- avalansa: lemnul e brun saturat (nu exista gri-brun in paleta), muschiul `TROPICAL_GREEN` iese mai viu decat verdele-oliv al plansei; radacinile citesc ca niste cioturi scurte, nu ca o panza de radacini; bolovanul e fatetat grosier (7-8 laturi).

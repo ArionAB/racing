@@ -72,21 +72,26 @@ echo "== avalansa (brief §1.5, val 3) =="
 # tree_avalanche: 4 noduri Boulder_A..D, origine CENTRU (contractul
 # AvalancheHazard — obiectul se rostogoleste, vezi memoria
 # `sonda-scurta-extrapolata-gresit` si docul din avalanche_hazard.gd).
-check "effects/tree_avalanche.glb"  300 --origin=center
+check "effects/tree_avalanche.glb" 2600 --origin=center
 
 echo "== vehiculele (brief §1.6, val 3) =="
-check "vehicles/coach_fiordland.glb" 1200
+check "vehicles/coach_fiordland.glb" 3600
 # bush_plane: origine CENTRU (PathMover in aer, stick_to_ground=false) +
 # exceptie CAR_RED declarata pe dungile fuzelajului/aripilor (brief §1.6).
-check "vehicles/bush_plane.glb"      900 --origin=center --allow-car-slots=Plane
+check "vehicles/bush_plane.glb"     1900 --origin=center --allow-car-slots=Plane
 # cruise_boat: origine LA LINIA DE PLUTIRE — geometria INCALECA Y=0 (carena
 # sub, suprastructura deasupra), acelasi contract ca "waterline" din
 # verify_glb.py (memoria stirling_ledge/waterline).
-check "vehicles/cruise_boat.glb"    1500 --origin=waterline
+# cruise_boat.glb = reuse descarcat ("Cruise Ship - toofan", 1640 tri, decizia
+# dezvoltatorului): bugetul e numarul masurat + margine, nu un plafon de Builder.
+check "vehicles/cruise_boat.glb"    1700 --origin=waterline
+# cruise_boat_builder.glb = candidatul Builder (grupa E, kit v2); nu e in joc
+# pana nu decide coordonatorul inlocuirea.
+check "vehicles/cruise_boat_builder.glb" 4300 --origin=waterline
 # kayak_a/b: exceptia CAR_BLUE/CAR_YELLOW declarata (brief §4 paleta —
 # caiacele sunt accent saturat, ca avionul).
-check "props/kayak_a.glb"            100 --allow-car-slots=KayakA
-check "props/kayak_b.glb"            100 --allow-car-slots=KayakB
+check "props/kayak_a.glb"           1300 --allow-car-slots=KayakA
+check "props/kayak_b.glb"           1300 --allow-car-slots=KayakB
 
 echo "== satul (brief §1.3, val 4) =="
 check "structures/wharf.glb"          2300

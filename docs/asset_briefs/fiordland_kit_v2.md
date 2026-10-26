@@ -496,3 +496,59 @@ la `stirling_ledge` aveau baza la +0,2-0,6 m (acum pe sol, contractele 14,0 / 0,
 - `stirling_ledge`: surplombul (contract) ramane o lespede mare deschisa la culoare (marble) sub coama; peretele din spatele lui nu e un platou continuu cu iarba ca pe plansa; relieful e din prisme, nu din faţete organice. Verificarea din joc (clasa `wet_gneiss`) e a coordonatorului.
 - `torrent_chute`: piscul e o coroana de 6 coloane, nu un con neted ca pe plansa; cuveta de pe buza ramane un dreptunghi negru vizibil de sus.
 - Fara Godot: `ProbeRace`/`probe_manual`/`ProbeLaneClear` nu au rulat; coliziunea `mesh` a lui `stirling_ledge` s-a schimbat, iar masa lui `torrent_chute` s-a extins pe X (pana la 11) si Z (+-17), deci decorul din jur trebuie reverificat la integrare.
+
+## Livrare grupa F
+
+Ramura `fiord/kit-v2-f`. Scripturi: `tools/blender/build_fiordland_horizon.py`
+(rescris), `build_fiordland_animals.py` (doar `build_penguin`; `kea.glb`
+neschimbat, 682 tri, identic). Comparatii:
+`docs/asset_briefs/img/fiordland_fidelity/{FarWall_A,SnowRidge_A,SnowRidge_B,penguin_tawaki}.png`
+(camera orizontului pe azimut 90 = fata lunga, nu capatul) si, pentru fiecare nod de
+orizont, **4 azimuturi** (0/90/180/270) in `quad_<nod>.png` (mod nou `--quad` in
+`preview_fiordland_fidelity.py` + `tile_quad.py`), fiindca jocul da yaw aleator.
+`verify_fiordland.sh`: `VERDICT KIT: OK`; bugete 6600 (orizont) / 700 (animale, kea 682 + pinguin 620).
+
+Cauza principala a numarului de triunghiuri: bevelul de 0,30-0,35 m pe fatete de zeci de metri
+dubla cifra fara niciun efect vizibil la 200 m prin ceata; orizontul se exporta acum cu `bevel=0`.
+
+| nod | AABB Godot X x Y x Z | tri | v1 |
+|---|---|---:|---|
+| FarWall_A | 180,0 x 63,4 x 67,3 | 2342 | 180 x 57,2 x 70,0 |
+| FarWall_B | 180,0 x 67,1 x 63,1 | 2308 | 180 x 67,4 x 73,1 |
+| SnowRidge_A | 126,3 x 89,8 x 119,3 | 862 | 119,5 x 90 x 114,5 |
+| SnowRidge_B | 119,5 x 89,6 x 124,0 | 862 | 107,3 x 90 x 122,9 |
+| Penguin (origine baza) | 0,35 x 0,74 x 0,46 (cu cioc) | 620 | cota 0,75 |
+
+Constructie: nu piramide, ci campuri de inaltime cusute (FarWall: 64 coloane x 17 randuri, coloane
+suplimentare in jurul fiecarei ravene; SnowRidge: 12 inele x 36 segmente cu 3 varfuri), culoarea pusa
+pe fiecare fata din pozitia ei. Zero sloturi noi.
+
+| element | pe planșă | in randare |
+|---|---|---|
+| FarWall: creasta | 3 varfuri late, sei adanci, zimtata fin | 6-7 tente cu pante diferite (max = varfuri/sei), zimtare per pozitie (nu sinus), capetele coboara |
+| FarWall: fete | perete abrupt, ravene, contraforturi | 3-4 contraforturi per fata (latime +16..36%), ravene gaussiene taiate 6-10 m, fata +Y mai abrupta decat -Y, ambele fete lizibile |
+| FarWall: padure | pete verde inchis pe ravene, 2/3 de jos | `TROPICAL_GREEN` pana la o linie care urca in ravene (+45%) si variaza pe lungime, pete izolate deasupra, `LOG_DARK` doar la baza |
+| FarWall: roca | gneis inchis | `VOLCANIC_BLACK`, `MARBLE_GREY` pe 3-18% din fete, mai mult spre creasta |
+| FarWall: cascade | 2-4 fire albe subtiri | 3 (A: +Y) + 4 (A: -Y), 3 + 3 (B) fasii `FOAM_WHITE` de 1,4 m, in fundul ravenelor, de la 0,94 din inaltime spre baza |
+| SnowRidge: masiv | 2-3 varfuri, fatete mari | 3 varfuri (103/94/73 m nominal -> 90 m real), ravene radiale, fatete ~8-10 m |
+| SnowRidge: zapada | pete pe ravene si fete putin inclinate | `FOAM_WHITE` cu linie joasa in ravene si ridicata pe fete abrupte; colturi de stanca ies din zapada |
+| SnowRidge: baza | roca gri, brau de padure | roca `VOLCANIC_BLACK`, brau `TROPICAL_GREEN` sub ~17-24% |
+| Penguin: corp | para, aplecat in fata | revolutie 8 laturi, profil de para, forfecare Y proportionala cu z (aplecare ~11 grade) |
+| Penguin: cap/cioc | cap negru rotund, cioc gros portocaliu-rosu | cap 8 laturi r=0,10; cioc `LAVA_ORANGE` trunchi de con 10 cm |
+| Penguin: sprancene | galbene, de deasupra ochiului spre ceafa, pe ambele parti | 2 tuburi `CAR_YELLOW` (exceptie `--allow-car-slots=Penguin`) |
+| Penguin: burta | alba pana la barbie | `FOAM_WHITE` pe fata corpului si pe jumatatea de jos a capului |
+| Penguin: aripioare, labe | pe langa corp; labe roz | 2 placi in plan YZ evazate usor; 2 pene late `FLAMINGO_PINK` (slot 31, `--allow-slots=31`) |
+
+Diferente ramase:
+- Orizont: culorile slotului ies mai saturate decat planșa (verdele `TROPICAL_GREEN` e mai viu decat padurea gri-verzuie); `MARBLE_GREY` citeste bej. Prin ceata (fog_end 320 m) ar trebui sa se tempereze, dar verdictul e pe captura de joc.
+- FarWall: cascadele sunt fasii drepte pe un perete, nu fire care serpuiesc; nu exista fate cu aspect de pad aratat in poza (stanca e neteda pe fatete); peticele de padure sunt pe celule mari, nu foliaj fin.
+- SnowRidge: planșa e un bloc cu fete laterale verticale; aici e un masiv cu panta continua (silueta de masiv, nu de diorama). O cascada subtire pe SnowRidge nu s-a pus (fasia ar iesi tot alba pe zapada). Cele doua noduri A/B difera doar prin varfuri/ravene.
+- Pinguin: laba e o pana plata, fara degete; fara coada; ochiul nu e modelat (cap negru pe negru); sprancenele sunt tuburi, nu pene caracteristice. Aripioarele sunt rigide si au putin prea mult spatiu fata de corp.
+
+### Grupa F — runda de culoare (verdictul coordonatorului, formele neschimbate)
+
+Doar culori/petice in `build_fiordland_horizon.py`; AABB si tri identice (6374).
+- FarWall: roca doar `VOLCANIC_BLACK` + `ASPHALT_EDGE`, fara `MARBLE_GREY` (cateva fatete mai luminoase doar pe creasta fetei +Y, <3%). Linia padurii nu mai e pe coloana de grila, ci prag pe inaltimea fetei cu zgomot 2D neted (urmareste ravenele si creasta); peticele de padure izolate au fost scoase. Talpa si capacele: roca inchisa, nu maro.
+- SnowRidge: brau de padure cu margine neregulata (zgomot 2D pe pozitie, coboara/urca pe ravene); punctele maro de la baza scoase; fundul inchis pe roca.
+- Abatere de la cerere: amestecul `TROPICAL_GREEN`/`LOG_DARK` 55/45 NU s-a tinut. `LOG_DARK` iese BRUN pe ecran (atlasul nu are verde mai inchis), iar la 45% peretele devenea maro, nu padure. Pe FarWall `LOG_DARK` ramane 4% + pana la 20% in fundul ravenelor; pe SnowRidge 0. "Verde inchis" ramane deci doar prin AO copt (floor 0,2) si ceata; un verde mai inchis cere un slot nou sau o clasa de padure la integrare (`horizon_class`), decizie a coordonatorului.
+- Ramane: rocile citesc gri-violet mediu, nu negru-verzui ca pe planșa.

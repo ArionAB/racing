@@ -62,12 +62,13 @@ PIECES = [
     "beech_dead", "rata_tree", "tussock_clump", "stump", "chasm_rock", "gneiss_block",
     "chasm_bridge_rail", "tree_avalanche", "scree_slab", "kea", "penguin_tawaki",
 ]
-HORIZON_NODES = {"FarWall_A", "SnowRidge_A", "SnowRidge_B"}
+PIECES_EXTRA = ["FarWall_B"]
+HORIZON_NODES = {"FarWall_A", "FarWall_B", "SnowRidge_A", "SnowRidge_B"}
 
 # Planșa e desenata de sus-dreapta, ~25-30 grade: camera la azimut ~-50
 # (fata piesei e +Y, deci azimut 90 = din fata).
 SPECS = {n: {"camera": {"azimuth": 55.0, "elevation": 24.0, "lens": 60.0, "margin": 1.08}}
-         for n in PIECES}
+         for n in PIECES + PIECES_EXTRA}
 SPECS["coach_fiordland"]["camera"].update(azimuth=40.0)
 SPECS["bush_plane"]["camera"].update(azimuth=130.0, elevation=24.0, margin=1.0)
 SPECS["cruise_boat"]["camera"].update(azimuth=20.0, elevation=20.0)
@@ -83,7 +84,7 @@ SPECS["wharf"]["camera"].update(azimuth=-20.0, elevation=30.0)
 SPECS["driftwood"]["camera"].update(azimuth=90.0, elevation=32.0)
 SPECS["chasm_bridge_rail"]["camera"].update(azimuth=10.0, elevation=24.0)
 for _n in HORIZON_NODES:
-    SPECS[_n]["camera"].update(azimuth=0.0, elevation=6.0)
+    SPECS[_n]["camera"].update(azimuth=90.0, elevation=6.0)
 
 
 def _import_piece(name):
@@ -135,9 +136,28 @@ def compare_piece(name, res_height=900):
         pass
 
 
+
+def quad_piece(name, out_dir, res_height=500):
+    """4 azimuturi (0/90/180/270) ale unui nod de orizont: orizontul primeste
+    YAW ALEATOR, deci fiecare parte trebuie sa citeasca ca munte. Doar pentru
+    verificare. Tiling-ul: tools/blender/tile_quad.py (PIL nu e in Blender)."""
+    os.makedirs(out_dir, exist_ok=True)
+    for az in (0, 90, 180, 270):
+        _clear()
+        meshes = _import_piece(name)
+        _render(meshes, os.path.join(out_dir, "q_%s_%d.png" % (name, az)),
+                res_height=res_height, aspect=1.6, azimuth=float(az),
+                elevation=6.0, lens=60.0, margin=1.08)
+
+
 argv = sys.argv
 args = argv[argv.index("--") + 1:] if "--" in argv else []
-if "--compare" in args:
+if "--quad" in args:
+    _qi = args.index("--quad")
+    _qd = args[_qi + 2] if len(args) > _qi + 2 else FID_DIR
+    for n in args[_qi + 1].split(","):
+        quad_piece(n, _qd)
+elif "--compare" in args:
     for n in args[args.index("--compare") + 1].split(","):
         compare_piece(n)
 elif "--all" in args:

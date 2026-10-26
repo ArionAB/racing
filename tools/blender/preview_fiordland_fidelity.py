@@ -44,6 +44,7 @@ CLASS_BY_NODE = {
     ("stirling_ledge", "Wall"): _GNEISS,
     ("torrent_chute", "Rock"): _GNEISS,
     ("chasm_rock", "Rock.001"): _GNEISS,
+    ("gneiss_block", "Gneiss_Block"): _GNEISS,
     ("beech_a", "Trunk"): _BARK, ("beech_a", "Crown"): _CANOPY,
     ("beech_b", "Trunk.001"): _BARK, ("beech_b", "Crown.001"): _CANOPY,
     ("beech_c", "Trunk.002"): _BARK, ("beech_c", "Crown.002"): _CANOPY,
@@ -58,7 +59,7 @@ PIECES = [
     "road_sign_blank", "FarWall_A", "SnowRidge_A", "SnowRidge_B", "wharf", "cafe_shed",
     "heli_pad", "lodge", "luggage_container", "cruise_boat", "kayak_a", "kayak_b",
     "driftwood", "bush_plane", "coach_fiordland", "beech_a", "beech_b", "beech_c",
-    "beech_dead", "rata_tree", "tussock_clump", "stump", "chasm_rock",
+    "beech_dead", "rata_tree", "tussock_clump", "stump", "chasm_rock", "gneiss_block",
     "chasm_bridge_rail", "tree_avalanche", "scree_slab", "kea", "penguin_tawaki",
 ]
 HORIZON_NODES = {"FarWall_A", "SnowRidge_A", "SnowRidge_B"}
@@ -72,6 +73,12 @@ SPECS["bush_plane"]["camera"].update(azimuth=130.0, elevation=24.0, margin=1.0)
 SPECS["cruise_boat"]["camera"].update(azimuth=20.0, elevation=20.0)
 for _n in ("kayak_a", "kayak_b", "driftwood"):
     SPECS[_n]["camera"].update(azimuth=20.0, elevation=28.0)
+    SPECS[_n]["camera"].update(azimuth=20.0, elevation=40.0)
+SPECS["chasm_rock"]["camera"].update(azimuth=55.0, elevation=35.0)
+SPECS["gneiss_block"]["camera"].update(azimuth=55.0, elevation=35.0)
+SPECS["stirling_ledge"]["camera"].update(azimuth=205.0, elevation=22.0)
+SPECS["torrent_chute"]["camera"].update(azimuth=205.0, elevation=22.0)
+SPECS["scree_slab"]["camera"].update(azimuth=55.0, elevation=24.0)
 SPECS["wharf"]["camera"].update(azimuth=-20.0, elevation=30.0)
 SPECS["driftwood"]["camera"].update(azimuth=90.0, elevation=32.0)
 SPECS["chasm_bridge_rail"]["camera"].update(azimuth=10.0, elevation=24.0)
@@ -105,6 +112,7 @@ def _import_piece(name):
 def compare_piece(name, res_height=900):
     os.makedirs(FID_DIR, exist_ok=True)
     crop = os.path.join(CROPS, name.replace("_builder", "") + ".png")
+    crop = os.path.join(CROPS, {"gneiss_block": "chasm_rock"}.get(name, name) + ".png")
     if not os.path.exists(crop):
         print("LIPSA decupare:", crop)
         return

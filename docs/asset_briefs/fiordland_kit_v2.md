@@ -274,40 +274,45 @@ Diferente ramase, cinstit:
 
 ## Livrare grupa A
 
-Script: `tools/blender/build_fiordland_rocks.py` (v2, runda 2; `stirling_ledge` /
-`torrent_chute` neatinse). Comparatii:
-`docs/asset_briefs/img/fiordland_fidelity/{chasm_rock,guard_rock,scree_slab}.png`.
-Bugete verify: 1500 / 200 / 3300. Zero sloturi noi.
+Script: `tools/blender/build_fiordland_rocks.py`. `guard_rock` neatins (acceptat).
+`chasm_rock` si `scree_slab` **reluate de constructor nou** (dupa 2 runde esuate:
+v1 "castel cu turnuri", v2 "tambur cu varf neted"; scree "piramide pe disc",
+apoi "petic plat in pete"). Comparatii:
+`docs/asset_briefs/img/fiordland_fidelity/{chasm_rock,gneiss_block,guard_rock,scree_slab}.png`.
+Bugete verify: 2100 / 1500 / 200 / 3300. Zero sloturi noi.
 
 | piesa | AABB Godot (X x Y x Z) | tri |
 |---|---|---|
-| `chasm_rock` | 6,03 x 2,50 x 4,48 | 1.372 |
+| `chasm_rock` (`Rock.001`) | 6,00 x 2,55 x 4,72 | 1.874 |
+| `gneiss_block` (`Gneiss_Block`, NOU, fara marmite) | 5,99 x 2,55 x 4,71 | 1.344 |
 | `guard_rock` | 1,11 x 0,80 x 0,67 | 150 |
-| `scree_slab` | 5,20 x 1,47 x 7,94 | 3.114 |
+| `scree_slab` (`Rock.003`) | 4,99 x 2,28 x 7,99 | 3.122 |
 
-### chasm_rock
+### chasm_rock (reluat de constructor nou)
 | element | pe plansa | in randare |
 |---|---|---|
-| corp | o lespede monolitica, mai lata la baza | un miez prismatic cu contur neregulat (14 colturi) + inel de 14 coloane de flanc inclinate spre interior |
-| flancuri | coloane verticale de inaltimi diferite, coboara spre fata | inaltimi 0,9-2,4 m, mai joase spre -Y (fata) |
-| suprafata de sus | continua, contur neregulat, fara coroana | o singura fata de sus usor frantă; nimic ridicat deasupra ei |
-| marmite | 2 taiate in suprafata, 3 lobi, pereti verticali inchisi; mare in fata-centru | 2 (boolean DIFFERENCE, prisme in 3 lobi), adancime ~1,5 m, pereti si fund VOLCANIC_BLACK |
-| blocuri | 2-3 blocuri late la baza | 3 blocuri ghemuite la baza |
+| contur | lobat, cu intrande, mai lat la baza | 18 colturi la unghiuri neuniforme, raza +-16%, 3 intrande (x0,66); baza 1,22x, flancurile urca spre interior |
+| flancuri | coloane de latimi diferite, trepte | 18 prisme fatetate (invelitoare convexa) de latimi ~0,5-1,6 m, impinse +-0,3 m, inaltimi ~1,0-2,5 dupa lespedea de deasupra |
+| suprafata de sus | lespezi la cote diferite despartite de crapaturi | 3 lespezi: spate 2,50, fata-stanga 2,02, fata-dreapta 1,72, crapaturi de 14 cm intre ele |
+| marmite | 2, 3 lobi, cea mare in fata | cea mare ~2 m (r 1,0) in fata, cea mica (r 0,68) in spate, fiecare = 3 cilindri suprapusi (boolean), adancime 1,5-1,7 m, pereti si fund `VOLCANIC_BLACK` |
+| blocuri | la baza | 3 blocuri poliedrice rotunjite |
+
+### gneiss_block (nou, cerut de coordonator)
+Acelasi generator ca `chasm_rock` cu `pits_on=False` (acelasi seed, acelasi corp),
+fara marmite; crapaturile dintre lespezi raman. Slot `MARBLE_GREY`. Nod
+`Gneiss_Block`, origine baza. Integrarea (inlocuirea lui `chasm_rock` la cele ~490
+de instante generice, `.import`) ramane a coordonatorului.
 
 ### guard_rock
-| element | pe plansa | in randare |
-|---|---|---|
-| volum | bloc inalt (h/l ~0,85), putine plane mari | ~10 plane (invelitoare convexa, topire 12 grade); h 0,80 / l 1,11 = 0,72 |
-| creasta | muchie verticala unde se intalnesc 2 fete | punctele din fata (x=0) formeaza creasta |
-| plan de sus | inclinat | plan inclinat spre +X |
-| muschi | pete pe plan, pe flancuri joase si in crapatura | pete: jumatate din planul de sus, flancurile joase din spate/capete, o petica in crapatura (fata libera) |
+Neschimbat (acceptat).
 
-### scree_slab
+### scree_slab (reluat de constructor nou)
 | element | pe plansa | in randare |
 |---|---|---|
-| movila | un con cu varful spre spate, fete plane mari in 2-3 griuri | un singur mesh (grila de inaltimi, triunghiuri plane), varf deplasat spre +Y, patch-uri MARBLE_GREY / VOLCANIC_BLACK |
-| fusta | blocuri la baza | 5 blocuri ghemuite |
-| inel | 25-40 pietre separate | 22 pietre ghemuite rotunjit-poliedrice, fara piramide; fara SAND_SHADOW |
+| movila | con abrupt cu varful spre spate, fete late | 11 segmente x 5 inele + varf, varf decalat spre +Y, h 2,2 m (contract schimbat), 3 rape pe flanc |
+| culoare | fete in 2-3 griuri, negru in rape | pe FATA: ~69% `MARBLE_GREY`, ~30% `ASPHALT_EDGE` (6), `VOLCANIC_BLACK` doar langa rape; fara `SAND_SHADOW` |
+| fusta | blocuri la baza | 9 blocuri semi-ingropate |
+| inel | 25-40 pietre | 30 pietre poliedrice rotunjite, 0,2-0,6 m |
 
 ### Goluri ramase (oneste)
 - `chasm_rock`: conturul de sus e prea neted fata de plansa (contur aproape oval, nu 3 lobi pe margine), iar marmitele par putin adanci din camera planseta; flancurile sunt coloane aproape uniforme ca latime. Trepte mai putine decat pe plansa.
@@ -425,3 +430,48 @@ exporta acum direct `vehicles/cruise_boat.glb` (nod `Boat`, aceeasi cale, deci
 Track16.tscn ramane valid); `build_fiordland_boats_reuse.py`, `.blend`-urile lui
 intermediare si intrarile CC-BY din `assets/CREDITS.md` sunt scoase (niciun
 asset descarcat nu mai e in joc). Decizia e reversibila din git (e5d9745f).
+
+- `chasm_rock`: varful e incarcat vizual (coloanele de rama si lespezile se amesteca la 35 grade); crapatura intunecata de la marmita pe flanc nu e modelata; marmitele citesc mai putin adanci decat pe plansa pentru ca in joc nodul ia clasa `wet_gneiss` uniforma (doar AO le arata).
+- `scree_slab`: 3,1k tri (tinta ~2.000); fetele sunt mai mici decat pe plansa, conul e mai piramidal decat movila desenata; inaltime masurata 2,28 m (varf 2,2 + bevel).
+
+## Livrare grupa D
+
+Script: `tools/blender/build_fiordland_rocks.py` (`_wall_body`/`_overhang`/`build_torrent_chute`
+rescrise; `_niche`/`_shelf` pastrate). Comparatii:
+`docs/asset_briefs/img/fiordland_fidelity/{stirling_ledge,torrent_chute}.png`
+(camera preview mutata pe fata, azimut 205). Bugete verify: 3600 / 2600.
+
+| piesa | AABB Godot (X x Y x Z) | tri | contract v1 |
+|---|---|---|---|
+| `stirling_ledge` | 22,3 x 26,9 x 40,4 | 3.004 (Wall 1.928, Overhang 1.040, Shelf 36) | 21,6 x 26,6 x 39,6 (+3% / +1% / +2%) |
+| `torrent_chute` | 11,2 x 16,2 x 24,9 | 1.670 | 11,0 x 16,0 x 24,0 (+2% / +1% / +4%) |
+
+Contracte masurate pe GLB exportat (`verify_glb.py` + coordonate):
+- `stirling_ledge`: buza `Overhang` Y min = **14,002** (14,0); `Shelf` Y 0,38-0,40, X 0..3, Z +-15 (neschimbat); `Wall` Y 0..26,60, X -1,40..12,20; nisa: nicio coloana sub cota 7,05 (build) pe |Z|<14,8 (garda din build ridica eroare), deci liber deasupra `Shelf` = 7,05 m (>= 5); `Overhang` X -10,12..11,41; **nodurile raman Wall/Overhang/Shelf** (fara `Moss`, v1 nu il exporta).
+- Schimbare fata de v1: `Overhang` nu mai e limitat la Y <= 21,4: contine si lespezile de muschi de pe coama/terasele peretelui (Y pana la 26,9), fiindca `Wall` ia `wet_gneiss` in joc si muschiul de pe el se pierde. Minimul (buza, 14,0) e neschimbat.
+- `torrent_chute`: nod `Rock`; buza la z = 14,0 (iese pana la X = -3,16 peste banda), gura 20 m la buza (10 m la baza), cuveta goala 4 x 6 m cu fund `VOLCANIC_BLACK` la z ~15,5 si margine de blocuri; coliziune neschimbata (`none`).
+
+### stirling_ledge
+| element | pe plansa | in randare |
+|---|---|---|
+| coloane verticale fatetate | prisme late, trepte | 8 coloane peste nisa + 4 la capete (latimi ~2-5 m), fiecare cu creasta pe fata, cap inclinat, jumatate cu treapta de retragere |
+| platou cu muschi sus | iarba/muschi | lespezi `TROPICAL_GREEN` pe coama coloanelor inalte (nod `Overhang`) |
+| terase cu muschi pe flanc | mici, la jumatate | cate o lespede pe treapta fiecarui capat (z >= 14,5) |
+| blocuri cazute | la baza | 15 blocuri la capete (|Z| 15-19,5), in afara `Shelf` |
+| surplomb | contract | 10 segmente-prisma fatetate, buza neregulata (8,4-10 m), sus muschi pe jumatatea dinspre perete |
+| dungi ude | benzi sub buza | `VOLCANIC_BLACK` pe subfata si pe fata buzei (1 din 3 segmente) |
+
+### torrent_chute
+| element | pe plansa | in randare |
+|---|---|---|
+| jgheab pe toata inaltimea | adanc, cu trepte | 7 trepte de pat-roca `VOLCANIC_BLACK`, jgheabul se largeste de la 10 m (jos) la 20 m (buza) |
+| masiv fatetat | varf cu fete mari | 6 coloane-contrafort (3 pe parte), inaltimi 16 -> 7 m spre exterior, creasta pe fata |
+| buza | peste banda | 3 segmente fatetate la +14,0, 3 m peste banda |
+| cuveta | goala sus | fund negru + margine de 4 blocuri cu muschi |
+| platou | muschi | 5 coloane de ~15-16 m cu varf `TROPICAL_GREEN` |
+| blocuri | la gura | 8 blocuri (4 in gura, 4 la picioarele contraforturilor) |
+
+### Goluri ramase (oneste)
+- `torrent_chute`: contractul (gura de 20 m pe o masa de 24 m, buza plata la +14) da o silueta de "poarta" cu capac, nu varful ascutit de pe plansa. Pentru silueta de pisc ar trebui relaxata latimea gurii.
+- `stirling_ledge`: coama e un "pieptene" de coloane mai plat decat pe plansa (care coboara in trepte spre dreapta); surplombul (contract) domina vizual si e mai verde decat pe desen; terasele cu muschi sunt lespezi simple, nu petice organice; dungile ude nu se vad in joc (clasa `wet_gneiss` inlocuieste slotul pe `Wall`).
+- Capturile de joc si `ProbeRace`/`probe_manual` nu s-au rulat (fara Godot, conform sarcinii): coliziunea `mesh` a lui `stirling_ledge` s-a schimbat si trebuie verificata la integrare.

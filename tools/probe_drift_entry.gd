@@ -36,7 +36,10 @@ extends Node
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeDriftEntry.tscn
 ## Suprascrieri pentru tunare (dupa `--`): --ramp-in= --ramp-out= --arc-tight=
 ## --arc-top= --arc-wide= --inertia= --keep= --grip-top= --grip= ;
-## --car=<nume> incarca scenes/cars/data/<nume>.tres.
+## --car=<nume> incarca scenes/cars/data/<nume>.tres; --drift-throttle=<g>
+## pune gazul la g cat tine frana de mana (1 = AI / ^+DRIFT, 0 = inertie,
+## -1 = frana): asa s-a vazut ca DRIFT singur pe touch, mapat ca frana (#578),
+## pastra 9% din viteza dupa 1 s, fata de 99% cu gaz.
 
 const STEP: float = 1.0 / 60.0
 ## Viteze de intrare ca fractie din max_speed-ul masinii testate.
@@ -137,6 +140,8 @@ func _run(speed_frac: float) -> void:
 		"keep": "drift_momentum_keep", "grip-top": "drift_grip_at_top",
 		"grip": "drift_grip"}
 	for k: String in _overrides:
+		if k == "drift-throttle":
+			continue
 		assert(props.has(k), "suprascriere necunoscuta: " + k)
 		car.set(props[k], _overrides[k])
 	var drv := ScriptDriver.new()
@@ -160,8 +165,12 @@ func _run(speed_frac: float) -> void:
 	var yaw_normal := car.angular_velocity.y
 	var v_in := car.horizontal_speed()
 
-	# Frana de mana trasa, volanul spre interior.
+	# Frana de mana trasa, volanul spre interior. `--drift-throttle=` pune
+	# gazul la valoarea data cat tine frana de mana (0 = DRIFT singur pe
+	# touch, -1 = DRIFT ca frana, cum e din #578); implicit ramane 1.
 	drv.drift = true
+	if _overrides.has("drift-throttle"):
+		drv.throttle = float(_overrides["drift-throttle"])
 	var prev_yaw := car.angular_velocity.y
 	var max_jump_in := 0.0
 	var slip_half := 0.0

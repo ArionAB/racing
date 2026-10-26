@@ -57,16 +57,24 @@ func get_throttle() -> float:
 		return 1.0
 	# TURBO implica gaz: altfel ai arde bara stand pe loc, iar TURBO si ^ nu
 	# pot fi tinute simultan cu acelasi deget mare.
-	#
 	if GameState.touch_turbo:
 		return 1.0
-	# DRIFT SINGUR e frana de mana adevarata: franeaza si, aproape oprit, da
-	# MARSARIER — exact ca v (decizia dezvoltatorului, oct 2026). Inainte
-	# implica gaz (nu puteai frana in drift), apoi lasa masina pe inertie, si
-	# se simtea ca butonul te impinge inainte. Cu ^ sau TURBO tinute, cele de
-	# mai sus castiga: ^ + DRIFT ramane drift accelerand.
+	# DRIFT implica gaz, din acelasi motiv ca TURBO: pe touch toate butoanele
+	# de actiune stau sub degetul mare drept, deci DRIFT nu poate fi tinut
+	# odata cu ^. Istoric (oct 2026): implica gaz (#552) -> nu implica, ca sa
+	# poti frana in drift (#559) -> DRIFT singur = frana de mana (#578) ->
+	# inapoi la gaz (26 oct). Ce s-a schimbat intre timp: driftul tine viteza
+	# doar cu gaz (`drift_momentum_keep`, #579), iar AI-ul drifteaza mereu
+	# cu gazul apasat. Masurat in ProbeDriftEntry --drift-throttle=, la 85%
+	# din vmax dupa 1 s de drift: cu gaz 99% din viteza, pe inertie 27%, cu
+	# frana 9% si masina intoarsa cu spatele. Adica pe telefon fiecare drift
+	# era o oprire de urgenta cu piruieta, iar AI-ul parea ca „n-are
+	# problema". Virajul strans vine acum din maparea CTR (arcul strans), nu
+	# din frana; iar cine vrea totusi sa franeze derapand tine v (sau S pe
+	# tastatura): frana bate gazul, vezi mai sus. Si pe tastatura la fel, ca
+	# testul de pe desktop sa simta exact ce simte telefonul.
 	if is_drift_pressed():
-		return -1.0
+		return 1.0
 	return 0.0
 
 func is_drift_pressed() -> bool:

@@ -154,9 +154,9 @@ AABB-urile sunt în **axele Godot** (Y în sus, înainte −Z), măsurate cu
 
 | piesă | instanțe | noduri | AABB v1 | origine | buget v1 → v2 | ce arată v1 / ce cere planșa |
 |---|---:|---|---|---|---|---|
-| `beech_a` | 121 | `Trunk`, `Crown` | 3,7 × 7,5 × 4,1 | assembly | 228 → ~700 | v1: 3 cuburi verzi pe un băț înclinat. Planșa: **trunchi gros și drept cu evazare la bază (3–4 rădăcini), care se desface în 3–5 ramuri groase; coroana e un nor de 8–14 mase fațetate grupate în ETAJE, cu goluri între ele prin care se vede cerul, și forma de ansamblu mai lată decât înaltă**. Contractul v1 (trunchi negru subțire, „nu brocoli") cade: planșa câștigă. Rămâne doar ideea golurilor între etaje |
-| `beech_b` | 82 | `Trunk.001`, `Crown.001` | 4,7 × 10,6 × 5,0 | assembly | 292 → ~800 | idem, mai înalt, coroana mai asimetrică (ramura joasă iese pe o parte, cum e pe planșă) |
-| `beech_c` | 101 | `Trunk.002`, `Crown.002` | 7,5 × 14,3 × 7,2 | assembly | 292 → ~900 | idem, cel mai înalt și cel mai lat, 4 etaje |
+| `beech_a` | 121 | `Trunk`, `Crown` | 3,7 × 7,5 × 4,1 (**excepție: coroana X/Z până la 6,0 m**; înălțimea ±10%, trunchiul rămâne coloană la origine) | assembly | 228 → ~700 | v1: 3 cuburi verzi pe un băț înclinat. Planșa: **trunchi gros și drept cu evazare la bază (3–4 rădăcini), care se desface în 3–5 ramuri groase; coroana e un nor de 8–14 mase fațetate grupate în ETAJE, cu goluri între ele prin care se vede cerul, și forma de ansamblu mai lată decât înaltă**. Contractul v1 (trunchi negru subțire, „nu brocoli") cade: planșa câștigă. Rămâne doar ideea golurilor între etaje |
+| `beech_b` | 82 | `Trunk.001`, `Crown.001` | 4,7 × 10,6 × 5,0 (**excepție: coroana X/Z până la 8,0 m**) | assembly | 292 → ~800 | idem, mai înalt, coroana mai asimetrică (ramura joasă iese pe o parte, cum e pe planșă) |
+| `beech_c` | 101 | `Trunk.002`, `Crown.002` | 7,5 × 14,3 × 7,2 (**excepție: coroana X/Z până la 11,0 m**) | assembly | 292 → ~900 | idem, cel mai înalt și cel mai lat, 4 etaje |
 | `beech_dead` | 66 | `Beech_Dead` | 2,9 × 8,5 × 3,3 | bază | 136 → ~400 | v1: un băț verde cu 4 ace. Planșa: **trunchi gros, rupt la vârf (ciot), cu evazare și rădăcini la bază, și 6–8 crengi groase care se ramifică din nou în crenguțe**, toate conice. Fără verde pe trunchi (mușchiul doar ca petice mici, dar nodul ia `bark_beech` oricum) |
 | `rata_tree` | 13 | `Rata` | 4,3 × 3,7 × 4,2 | bază | 354 → ~900 | v1: o bilă verde cu 3 fețe roșii. Planșa: **copăcel cu trunchi vizibil și ramuri, coroană în 6–9 smocuri separate, fiecare stropit cu 4–8 ciorchini roșii mici** (florile sunt puncte pe suprafață, nu fețe mari). **Excepție de cotă: Y poate urca la 5 m** (contractul v1 cerea 5 m, a ieșit 3,67). Sloturi: §0.1.3 |
 | `tussock_clump` | **313** | `Tussock_Clump` | 0,68 × 0,80 × 0,68 | bază | 144 → ~450 | v1: 6 fire verzi drepte. Planșa: **smoc des de 20–30 de lame curbate în afară, ca o fântână, cu vârfurile aplecate, galben-oliv la vârf și verde la bază**; 2–3 smocuri lipite. `CACTUS_GREEN` 12 + `SAND_LIGHT` 0 pe vârfuri, sau `tint_gradient` |
@@ -313,3 +313,42 @@ Bugete verify: 1500 / 200 / 3300. Zero sloturi noi.
 - `chasm_rock`: conturul de sus e prea neted fata de plansa (contur aproape oval, nu 3 lobi pe margine), iar marmitele par putin adanci din camera planseta; flancurile sunt coloane aproape uniforme ca latime. Trepte mai putine decat pe plansa.
 - `guard_rock`: planele sunt mai putine si mai rare decat pe plansa; petele de muschi sunt taiate pe plane (colturoase), nu organice.
 - `scree_slab`: varful e jos (1,47 m vs un con inalt pe plansa) si fetele sunt triunghiuri mici, nu placi mari; culorile sunt in pete mari, nu pe fete individuale. 3,1k tri, peste tinta 1.500-2.000.
+
+## Livrare grupa B
+
+Script: `tools/blender/build_fiordland_forest.py` (layout citit pe pixeli din
+decupare + `_fit`, care itereaza scalarea pozitiilor pana cand extinderea
+nimereste cotele). Comparatii: `docs/asset_briefs/img/fiordland_fidelity/<nume>.png`.
+`verify_fiordland.sh`: bugetele grupei B actualizate, toate OK; verdictul
+kitului ramane PROBLEME doar din `cruise_boat` / `kayak_a/b` (grupa E, pre-existent).
+
+Fagii: trunchiul (baza la origine, raza 0,36 / 0,44 / 0,55) e coloana unica;
+originea nu mai e centrata pe bbox-ul coroanei, ci pe baza trunchiului.
+
+| piesa | AABB masurat (X x Y x Z) | tri |
+|---|---|---:|
+| beech_a | coroana 6,00 x 4,5..7,5 x 5,60; total inaltime 7,50 | 1004 |
+| beech_b | coroana 8,00 x 3,8..10,6 x 7,39; total inaltime 10,60 | 906 |
+| beech_c | coroana 11,01 x 4,6..14,3 x 10,18; total inaltime 14,30 | 978 |
+| beech_dead | 2,90 x 8,50 x 2,90 (Z era 3,3 in v1: un arbore mort mai ingust e acceptat) | 524 |
+| rata_tree | 4,30 x 5,00 x 4,20 | 830 |
+| tussock_clump | 0,68 x 0,80 x 0,68 | 720 |
+| stump | 1,10 x 0,80 x 1,00 | 304 |
+| driftwood | 4,00 x 1,35 x 0,62 | 256 |
+| chasm_bridge_rail | 11,96 x 1,40 x 40,46 (Rail_L/R centrate la +-5,84) | 720 |
+
+| element | pe planșă | in randare |
+|---|---|---|
+| fagi: coroana | umbrela larga peste ~60% din inaltime, 8-9 mase festonate care se contopesc, cateva goluri intunecate | 8-9 mase aplatizate (8 seg x 2 inele + 2 umflaturi de margine), pozitii din pixeli, latime ~0,8 x inaltime; se suprapun mai mult decat inainte, dar contururile raman mai netede/poligonale decat marginea festonata a desenului; golurile dintre etaje sunt mai mari decat pe planșă |
+| fagi: trunchi | partea de jos goala ~35-40%, apoi furca in V in 3-4 ramuri groase care intra in coroana | trunchi evazat cu 4 radacini, furca la ~36% din inaltime cu ramuri groase spre mase (curbate: intai in sus, apoi afara); se vad intre masele de jos, dar doar 1-2 simultan |
+| beech_b | ramura joasa pe o parte | masa joasa stanga-fata iesita lateral |
+| beech_dead | trunchi conic aplecat, baza evazata, 4-6 crengi groase curbate in sus cu 1-2 furci, varf zdrentuit | trunchi evazat si usor aplecat, 5 crengi curbate (J) cu 2 furci fiecare, varf cu 3 aschii; crengile pornesc mai sus/mai dese decat pe planșă si sunt mai subtiri la capete |
+| rata | copacel, trunchi ~35%, 6-9 smocuri deschise, flori in petice | trunchi ~40% care se ramifica, 8 mase cu cer intre ele, 5 petice de flori turtite (rosu 7) pe masa, putin ridicate |
+| tussock | fantana de 25-40 lame subtiri 30-70 grade, varfuri aplecate, 2-3 sub-smocuri | 3 sub-smocuri x 12 lame, arc cu varful aplecat, baza verde 12 / varf paiu 13; rar si cu lame prea late/drepte fata de desen (care e un smoc dens) |
+| stump | 5-6 creste joase late, mușchi in petice, taietura deschisa cu inele | 6 radacini lungi si joase, mușchi in petice (12), taietura SAND_LIGHT + inel; radacinile raman conice (sectiune circulara), nu creste late turtite |
+| driftwood | buștean cu capat zdrentuit, crengi rotunde in unghiuri diferite, cateva pe sol | buștean + 4 crengi conice rotunde (unghiuri diferite, una cu furca) + 2 cazute, 6 aschii la capat; fara noduri/curbura |
+| chasm_bridge_rail | stalpi patrati la ~2,5-3 m, 2 scanduri groase | 15 stalpi 0,20 m la 2,86 m, scanduri 0,08 x 0,22 m decalate, LOG_DARK cu petice WOOD; fara vena lemnului |
+
+Goluri sincere: silueta coroanei fagilor e mai aproape de desen dar nu are
+marginea festonata; tussock-ul e mai rar decat desenul; radacinile ciotului
+sunt conice; nu am verificat in joc, doar pe comparatie.

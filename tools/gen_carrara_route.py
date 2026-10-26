@@ -720,7 +720,7 @@ size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
 
         TRUCK_SPEED = 8.0
 
-        def truck_curve(i_from, i_to, lane_k, enter_off, exit_off):
+        def truck_curve(i_from, i_to, lane_k, enter_off, exit_off, lane_fn=None):
             """Axa coapta de la `i_from` la `i_to` (i_from > i_to: SENS INVERS cursei), decalata pe STANGA
             cursei cu lane_k * half_width; capetele iesite din drum pe partea stanga a cursei."""
             lane_pts, last = [], None
@@ -731,7 +731,10 @@ size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
                 l_ = math.hypot(dx, dz)
                 dx, dz = dx / l_, dz / l_              # directia CURSEI
                 rx, rz = -dz, dx                       # dreapta cursei (dir x UP)
-                px, pz = x - rx * lane_k * hw, z - rz * lane_k * hw
+                k_eff = lane_k
+                if lane_fn is not None:
+                    k_eff = lane_fn(brow[i][4])
+                px, pz = x - rx * k_eff * hw, z - rz * k_eff * hw
                 if last is not None and math.hypot(px - last[0], pz - last[2]) < 5.0:
                     continue
                 lane_pts.append((px, y, pz, dx, dz, rx, rz))
@@ -747,7 +750,7 @@ size = Vector3({r2(abs(lat1 - lat0))}, {r2(y_hi - y_lo)}, {r2(length)})
         def curve_len(c_):
             return sum(math.hypot(b_[0] - a_[0], b_[2] - a_[2]) for a_, b_ in zip(c_, c_[1:]))
 
-        def bus_node(name, curve_id, c_, period, hide0):
+        def bus_node(name, curve_id, c_, period, hide0, nose_side=1):
             """phase astfel incat camionul se ASCUNDE la `hide0` s dupa t=0 (mai are hide0 * viteza de parcurs)."""
             ln = curve_len(c_)
             ph = max(0.0, 1.0 - hide0 * TRUCK_SPEED / ln)
@@ -761,7 +764,7 @@ curve = SubResource("{curve_id}")
 speed = {TRUCK_SPEED}
 period = {period}
 phase = {round(ph, 4)}
-nose_side = 1
+nose_side = {nose_side}
 nose_angle_deg = 20.0
 apex_outer_m = 0.0
 apex_radius_m = 15.0
@@ -787,8 +790,21 @@ point_count = {len(c_)}
         # camionul 1: din C (frac 0.318, banda stanga a cursei) pana in capul lui T1 (frac 0.059). La startul cursei
         # (3.6 s de numaratoare; plutonul ajunge la T1 la ~10 s) e deja ascuns: reapare dupa ce plutonul a trecut.
         # Intrarea vine din NORD (partea stanga a cursei), prin afara drumului.
+        def sstep(a_, b_, x_):
+            t_ = max(0.0, min(1.0, (x_ - a_) / (b_ - a_)))
+            return t_ * t_ * (3.0 - 2.0 * t_)
+
+        h1_inner = os.environ.get("H1_INNER", "1") == "1"   # implicit PORNIT (vezi mai jos)
+
+        def lane1(f_):
+            # H1_INNER: pe arcul 1 camionul trece pe interior (banda dreapta a cursei), cu rampa de ~40 m
+            if not h1_inner:
+                return 0.5
+            s_ = sstep(0.168, 0.150, f_) * sstep(0.075, 0.095, f_)
+            return 0.5 - 1.0 * s_
+
         c1 = truck_curve(b_frac(0.318), b_frac(0.059), 0.5, [(30.0, 32.0), (10.0, 12.0)],
-                         [(8.0, 7.0), (16.0, 20.0), (20.0, 34.0)])
+                         [(8.0, 7.0), (16.0, 20.0), (20.0, 34.0)], lane1)
         # camionul 2: peste pod (F), de la G (x ~ -214) la E (x ~ -70), pe partea stanga a cursei (S)
         c2 = truck_curve(b_near(-214.0, 112.0), b_near(-70.0, 112.0), 0.5, [(25.0, 30.0), (10.0, 12.0)],
                          [(8.0, 7.0), (16.0, 18.0), (20.0, 30.0)])
@@ -799,10 +815,10 @@ point_count = {len(c_)}
         hz_sub = curve_sub("Curve3D_camion1", c1) + curve_sub("Curve3D_camion2", c2)
         # perioada 118 s (brief par.2: ~110), ascuns la t = 3 s (reapare la ~44 s, dupa ce plutonul a trecut de C); pod: perioada 60 s (nu e multiplu al turului de ~68 s),
         # ascuns la t = 7 s
-        hz_nodes += bus_node("Camion1B", "Curve3D_camion1", c1, 118.0, 3.0)
+        hz_nodes += bus_node("Camion1B", "Curve3D_camion1", c1, 118.0, 3.0, -1)
         hz_nodes += bus_node("Camion2Pod", "Curve3D_camion2", c2, 60.0, 7.0)
-        # excavatorul: pe piazzale, DUPA grila (frac 0.04 = ~83 m dupa linia de start), inaintea coridorului de blocuri
-        ie = b_frac(0.040)
+        # excavatorul: pe piazzale, DUPA grila (frac 0.05 = ~104 m dupa linia de start), inaintea coridorului de blocuri
+        ie = b_frac(0.050)
         hz_nodes += f"""
 [node name="Excavator" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {round(brow[ie][0], 2)}, {round(brow[ie][1], 2)}, {round(brow[ie][2], 2)})
@@ -811,7 +827,7 @@ kind = 7
 excavator_ai_dice = true
 excavator_soft_contact = true
 """
-        print(f"  excavator: frac 0.040 la x {brow[ie][0]:.1f} (grila x ~ -190..-160, linia de start x -148)")
+        print(f"  excavator: frac 0.050 la x {brow[ie][0]:.1f} (grila x ~ -190..-160, linia de start x -148)")
         # zonele pentru sonde (fractii pe INDEX): metadata citita de tools/probe_carrara.gd
         zz = [("A", IDX("H portal iesire"), IDX("A iesire coridor")),
               ("T1", IDX("A iesire coridor"), IDX("B T1 sfarsit plat")),

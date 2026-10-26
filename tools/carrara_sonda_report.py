@@ -118,9 +118,9 @@ def report_trucks(base_runs, tr_runs, terrain):
     for lab, runs in (("BASE", base_runs), ("CAMIOANE", tr_runs)):
         print(per_seed_line("repuneri total %s" % lab, [len(r["respawns"]) for r in runs]))
     print(per_seed_line("repuneri atribuibile camioanelor", [
-        sum(1 for b in r["respawns"] if truck_attr(b, 25.0, 3.0)) for r in tr_runs]))
+        sum(1 for b in r["respawns"] if truck_attr(b, 25.0, 12.0)) for r in tr_runs]))
     print(per_seed_line("  din care cadere >3 m (margine)", [
-        sum(1 for b in r["respawns"] if truck_attr(b, 25.0, 3.0) and b["drop_m"] > 3.0)
+        sum(1 for b in r["respawns"] if truck_attr(b, 25.0, 12.0) and b["drop_m"] > 3.0)
         for r in tr_runs]))
     for lab, runs in (("BASE", base_runs), ("CAMIOANE", tr_runs)):
         print(per_seed_line("ejectari sofer %s" % lab, [len(r.get("ejects", [])) for r in runs]))
@@ -143,7 +143,7 @@ def report_trucks(base_runs, tr_runs, terrain):
         for b in r["blocaj"]:
             zc[("blocaj", b["zone"], truck_attr(b))] += 1
         for b in r["respawns"]:
-            zc[("repunere", b["zone"], truck_attr(b, 25.0, 3.0))] += 1
+            zc[("repunere", b["zone"], truck_attr(b, 25.0, 12.0))] += 1
     zb = defaultdict(int)
     for r in base_runs:
         for b in r["blocaj"]:
@@ -372,6 +372,18 @@ def report_exc(base_runs, ex_runs):
                 fmt(lb[-1] if lb else float("nan"))))
         tot = sum(1 for w in passes if w["dice"])
         print("  total banda libera (cu zar): %.0f%%" % (100.0 * sum(1 for w in passes if w["dice"] and not w["inlane"]) / max(tot, 1)))
+    stops = [dict(e, seed=r["seed"]) for r in ex_runs for e in r.get("exc_stops", []) if e["dur"] >= 0.5]
+    if stops:
+        late = [e for e in stops if e["t"] >= 15.0]
+        early = [e for e in stops if e["t"] < 15.0]
+        print("ASTEPTARI la brat (la < 15 m, sub 2 m/s, continuu, >= 0.5 s): %d episoade; max %.1f s; > 3.5 s: %d (%.0f%%); > 5 s: %d" % (
+            len(stops), max(e["dur"] for e in stops), sum(1 for e in stops if e["dur"] > 3.5),
+            100.0 * sum(1 for e in stops if e["dur"] > 3.5) / len(stops), sum(1 for e in stops if e["dur"] > 5.0)))
+        for lab, sel in (("startul cursei (t < 15 s, plutonul grupat)", early), ("restul cursei (t >= 15 s)", late)):
+            if sel:
+                ds = sorted(e["dur"] for e in sel)
+                print("   %-44s n=%3d  mediana %.1f s  p90 %.1f s  max %.1f s  > 3.5 s: %d" % (
+                    lab, len(sel), med(ds), ds[int(0.9 * (len(ds) - 1))], ds[-1], sum(1 for d_ in ds if d_ > 3.5)))
     # conectat?
     a = [w["v_min"] for w in classes.get(("brat JOS", "in banda bratului"), [])]
     b = [w["v_min"] for w in classes.get(("brat SUS", "in banda bratului"), [])]

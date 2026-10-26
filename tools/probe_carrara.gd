@@ -81,6 +81,9 @@ var _shove: float = -1.0
 var _side_accel: float = -1.0
 var _equal_speed: bool = false
 var _label: String = ""
+## `--trace-car=Vex --trace-window=0,16`: pozitia unei masini (lat, viteza, distanta la excavator) la ~10 Hz.
+var _trace_car: String = ""
+var _trace_win: Vector2 = Vector2(0.0, 1e9)
 
 var _race: Node = null
 var _track: Track = null
@@ -100,6 +103,7 @@ var _c: Array[Dictionary] = []
 var _encounters: Array[Dictionary] = []
 var _contacts: Array[Dictionary] = []
 var _exc_events: Array[Dictionary] = []
+var _exc_stops: Array[Dictionary] = []
 var _blocaj: Array[Dictionary] = []
 var _respawns: Array[Dictionary] = []
 var _truck_stats: Dictionary = {}
@@ -148,10 +152,19 @@ func _ready() -> void:
 			_label = arg.trim_prefix("--label=")
 		elif arg.begins_with("--bus-margin="):
 			AIController.bus_margin_m = float(arg.trim_prefix("--bus-margin="))
+		elif arg.begins_with("--bus-sight="):
+			AIController.bus_sight_m = float(arg.trim_prefix("--bus-sight="))
+		elif arg.begins_with("--bus-hug="):
+			AIController.bus_corner_hug = float(arg.trim_prefix("--bus-hug="))
 		elif arg.begins_with("--bus-reach="):
 			AIController.bus_reach_m = float(arg.trim_prefix("--bus-reach="))
 		elif arg.begins_with("--bus-corner-speed="):
 			AIController.bus_corner_speed = float(arg.trim_prefix("--bus-corner-speed="))
+		elif arg.begins_with("--trace-car="):
+			_trace_car = arg.trim_prefix("--trace-car=")
+		elif arg.begins_with("--trace-window="):
+			var tw := arg.trim_prefix("--trace-window=").split(",")
+			_trace_win = Vector2(float(tw[0]), float(tw[1]))
 		elif arg == "--bus-drift":
 			AIController.bus_no_drift = false
 		elif arg.begins_with("--bus-blend="):
@@ -442,6 +455,16 @@ func _tick_car(i: int, car: Car, delta: float) -> void:
 	if not on_road:
 		c.off_s = float(c.off_s) + delta
 
+	if not _trace_car.is_empty() and String(c.name).contains(_trace_car) 			and _t >= _trace_win.x and _t <= _trace_win.y and Engine.get_physics_frames() % 6 == 0:
+		var tj := ""
+		for jj in _trucks.size():
+			var trc2: Vector2 = _truck_rc[jj]
+			if trc2.x < 1e8:
+				tj += " T%d(ahead %.0f lat %.2f)" % [jj, fposmod(trc2.x - rc.x + _len * 0.5, _len) - _len * 0.5, trc2.y]
+		print("[trace] t=%.2f %s frac=%.4f lat=%.2f v=%.1f exc_d=%.1f wheels=%d y=%.2f%s" % [
+			_t, c.name, frac, rc.y, speed,
+			(Vector2(car.global_position.x - _exc.global_position.x, car.global_position.z - _exc.global_position.z).length() if _exc != null else -1.0),
+			car.wheels_on_ground, car.global_position.y, tj])
 	# --- hazarde: distante, contacte, intalniri ---
 	# O INTALNIRE = camionul e pe ACELASI drum cu masina (diferenta de distanta
 	# pe ruta, lateral < 10 m), in fata ei pe sensul cursei, la mai putin de
@@ -486,6 +509,15 @@ func _tick_car(i: int, car: Car, delta: float) -> void:
 	if _exc != null:
 		near_exc = Vector2(car.global_position.x - _exc.global_position.x,
 			car.global_position.z - _exc.global_position.z).length()
+		# episoade de ASTEPTARE la brat: masina la < 15 m de excavator si sub 2 m/s, continuu
+		var stopped_here: bool = near_exc < 15.0 and speed < 2.0
+		if stopped_here:
+			if float(c.get("stop_t0", -1.0)) < 0.0:
+				c.stop_t0 = _t
+		elif float(c.get("stop_t0", -1.0)) >= 0.0:
+			_exc_stops.append({"car": i, "name": c.name, "t": snappedf(float(c.stop_t0), 0.1),
+				"dur": snappedf(_t - float(c.stop_t0), 0.1), "ended_near": near_exc < 15.0})
+			c.stop_t0 = -1.0
 
 	var hit_truck := -1
 	var hit_exc := false
@@ -769,7 +801,7 @@ func _finish() -> void:
 		"exc_lat": [_exc_lat_lo, _exc_lat_hi],
 		"exc_block_frac": float(_exc_block_ticks) / maxf(float(_exc_ticks), 1.0),
 		"apex": _apex, "cars": [], "encounters": _encounters, "contacts": _contacts,
-		"exc_events": _exc_events, "blocaj": _blocaj, "respawns": _respawns,
+		"exc_events": _exc_events, "exc_stops": _exc_stops, "blocaj": _blocaj, "respawns": _respawns,
 		"truck_stats": _truck_stats, "hairpin": _hairpin, "truck_events": _truck_events, "ejects": _ejects,
 	}
 	for i in cars.size():

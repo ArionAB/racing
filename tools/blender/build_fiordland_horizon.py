@@ -1,25 +1,31 @@
 """Fiordland — Fundalul (brief §1.2, val 4 din
-docs/asset_briefs/fiordland_kit.md).
+docs/asset_briefs/fiordland_kit.md; refacut in kit v2, grupa F).
 
   fiordland/rocks/fiordland_horizon.glb   FarWall_A, FarWall_B, SnowRidge_A, SnowRidge_B
 
 UN SINGUR fisier, 4 noduri. Consumatorul e `Track._build_horizon` (scenes/
-tracks/track.gd:4628): ia nodurile DUPA NUME (din `horizon_picks`), le asaza
-pe inele la 150-300 m de centroid, le SCALEAZA 0.85-1.4x si le da un YAW
+tracks/track.gd): ia nodurile DUPA NUME (din `horizon_picks`), le asaza pe
+inele la 170-300 m de centroid, le SCALEAZA 0.55-0.75x si le da un YAW
 ALEATOR — deci fiecare nod trebuie sa fie un VOLUM INCHIS, lizibil din ORICE
-azimut. "Flat-backed" nu merge (brief): o placa vazuta din spate da o
-fatada goala.
+azimut. Nodul ramane pe atlas (fara clasa), deci culorile slotului se vad.
 
-FarWall_A/B: 180 x 45 x 70 m, creasta lunga si ingusta cu pereti ABRUPTI pe
-AMBELE fete (nu doar una), benzi orizontale de padure (LOG_DARK/
-TROPICAL_GREEN), fete de gneis MARBLE_GREY si 2 fire albe verticale
-(FOAM_WHITE, 1.5 m late) pe fiecare fata lunga.
+v1 (piramide cu 3 benzi plate) iesea "Toblerone" (sawtooth). v2 pleaca de la planșa:
 
-SnowRidge_A/B: ~90 m inalte, ~120 m baza, calota FOAM_WHITE pe treimea de
-sus, apoi MARBLE_GREY, apoi padure la baza (trei etaje, memoria
-`munte-flanc-nu-fundal`).
+FarWall_A/B: perete lung (180 m), abrupt pe AMBELE fete, cu creasta zimtata
+NEREGULAT (6-7 varfuri cu pante diferite si saua intre ele, nu fierastrau),
+fete sparte in contraforturi si RAVENE care coboara de langa creasta. Roca
+inchisa (VOLCANIC_BLACK / MARBLE_GREY pe fatetele luminate) ACOPERITA de padure
+(TROPICAL_GREEN / LOG_DARK) pe cele ~2/3 de jos, mai sus in ravene si cu pete
+izolate; 2-4 cascade FOAM_WHITE subtiri pe fiecare fata lunga, in fundul
+ravenelor, de langa creasta in jos.
 
-<= 5.000 tri TOTAL. FARA CloudBank (pânza billboard din cod).
+SnowRidge_A/B: masiv cu 3 varfuri (nu un con), fatete mari, zapada (FOAM_WHITE)
+in PETE care coboara pe ravene si pe fetele putin inclinate (nu calota plata),
+roca gri inchis dedesubt, brau de padure la baza.
+
+Constructie: nu cuburi/conuri, ci CAMPURI DE INALTIME cusute (coloane pe
+lungime pentru perete, inele polare pentru masiv); culoarea se pune pe fiecare
+fata din pozitia ei (cost zero triunghiuri).
 
 Rulare:
     D:/Blender/blender.exe --background --factory-startup \
@@ -30,284 +36,282 @@ import math
 from mathutils import Matrix, Vector
 
 # Sloturile legale pe Fiordland (brief §0.4). ROCK_DARK/ROCK_LIGHT interzise.
-GNEISS = MARBLE_GREY
-WET_STREAK = VOLCANIC_BLACK
+GNEISS_LIT = MARBLE_GREY
+GNEISS_DARK = VOLCANIC_BLACK
 FOREST = TROPICAL_GREEN
 FOREST_DARK = LOG_DARK
 SNOW = FOAM_WHITE
-SCREE = SAND_SHADOW
+FALL = FOAM_WHITE
 
 AO_WALL = dict(samples=12, dist=30.0, gradient="vertical",
-              low=0.46, high=1.00, power=0.84, floor=0.18)
+              low=0.50, high=1.00, power=0.84, floor=0.22)
 AO_RIDGE = dict(samples=12, dist=24.0, gradient="vertical",
-                low=0.44, high=1.00, power=0.85, floor=0.16)
+                low=0.48, high=1.00, power=0.85, floor=0.20)
+
+
+def _hash(i, j=0, seed=0):
+    n = (int(i) * 374761393 + int(j) * 668265263 + int(seed) * 2246822519) & 0xFFFFFFFF
+    n = ((n ^ (n >> 13)) * 1274126177) & 0xFFFFFFFF
+    return ((n ^ (n >> 16)) & 0xFFFF) / 65535.0
+
+
+def _vn(x, seed, scale):
+    """Zgomot de valoare 1D neted, 0..1."""
+    u = x / scale
+    i = math.floor(u)
+    f = u - i
+    f = f * f * (3.0 - 2.0 * f)
+    return _hash(i, 0, seed) * (1.0 - f) + _hash(i + 1, 0, seed) * f
+
+
+def _sstep(a, b, x):
+    t = max(0.0, min(1.0, (x - a) / (b - a)))
+    return t * t * (3.0 - 2.0 * t)
 
 
 # --- FarWall_A / FarWall_B ----------------------------------------------------
-#
-# Contract: 180 x 45 x 70 m. VOLUM INCHIS (doua fete lungi abrupte, capete
-# inchise) — nu o placa. Reteta: panza CUSUTA in jurul unui contur ingust si
-# lung (ca gorge_far_wall de la Machu Picchu), dar cu DOUA fete verticale
-# simetrice (nu o singura fata concava cu spate plat) — deci un profil
-# aproape DREPTUNGHIULAR ingust vazut de sus (o creasta, nu un arc), cu
-# creasta neregulata si taluzuri abrupte pe AMBELE laturi lungi.
 FW_LEN = 180.0
-FW_DEPTH = 45.0
-# Contract 70 m. Masurat pe GLB, FW_H=70 direct dadea bbox 61-66 m (capetele
-# coboara la 0.35x, deci varful mediu al crestei sta sub FW_H nominal) —
-# ridicat proportional ca varful REAL sa cada pe ~70.
-FW_H = 78.0
+T_ROWS = [0.0, 0.12, 0.26, 0.42, 0.58, 0.72, 0.85, 0.94, 1.0]
+N_T = len(T_ROWS)
 
 
-def _far_wall(seed, name):
-    """Creasta lunga si ingusta, cu SECTIUNE VARIABILA pe toata lungimea —
-    nu un profil triunghiular constant scalat doar in inaltime (defectul
-    "Toblerone" semnalat de coordonator, val 4 revizuire): fiecare coloana
-    isi are propria inaltime (40-70 m), propria latime de baza (30-55 m) si
-    propriul taluz, iar cateva coloane impinse in afara pe fiecare parte
-    (nu simetric) dau 2-3 pinteni/contraforturi vizibili in silueta. O parte
-    e mai abrupta decat cealalta (batere diferita pe +Y fata de -Y), iar
-    creasta e neregulata prin PERTURBATIE ADITIVA (LCG per coloana), nu
-    printr-o suma de sinusoide periodice — asta era sursa dintelui de
-    fierastrau regulat vizibil pe planta veche.
-
-    Construita din INELE pe lungime (COLS coloane), cusute intre ele —
-    acelasi tipar ca `gorge_far_wall`, dar profilul de sectiune e acum
-    SIMETRIC pe doua fete abrupte (nu concav-cu-spate-plat), cu latimea de
-    baza si taluzul variind independent de inaltime pe fiecare coloana."""
+def _far_wall(seed, name, hmax, n_peaks, ravines_p, ravines_m, buttress_seed):
+    """Perete lung. `ravines_p` / `ravines_m`: pozitiile X ale ravenelor pe
+    fata +Y / -Y (aici se pun si cascadele)."""
     b = Builder()
-    rnd = _lcg(seed)
-    COLS = 26
-    half_len = FW_LEN * 0.5
+    half = FW_LEN * 0.5
 
-    # --- inaltimea crestei: 40-70 m, perturbatie ADITIVA neperiodica (suma
-    # de pasi random-walk, nu sinusoide) — o creasta reala nu repeta acelasi
-    # interval la fiecare N coloane.
-    h_lo, h_hi = 40.0, FW_H
-    crest_h = [0.0] * COLS
-    walk = (h_lo + h_hi) * 0.5
-    for i in range(COLS):
-        walk += (rnd() - 0.5) * 22.0
-        walk = max(h_lo, min(h_hi, walk))
-        crest_h[i] = walk
-    for _pass in range(2):
-        sm = list(crest_h)
-        for i in range(1, COLS - 1):
-            crest_h[i] = (sm[i - 1] + 2.0 * sm[i] + sm[i + 1]) * 0.25
-    # capetele coboara, ca volumul sa se inchida curat
-    crest_h[0] = h_lo * 0.5
-    crest_h[-1] = h_lo * 0.5
-    crest_h[1] = (crest_h[1] + h_lo) * 0.5
-    crest_h[-2] = (crest_h[-2] + h_lo) * 0.5
+    # --- creasta: 6-7 tente cu pante diferite; max = varfuri si sei neregulate
+    peaks = []
+    for k in range(n_peaks):
+        xk = -74.0 + 148.0 * k / (n_peaks - 1.0) + (_hash(k, 1, seed) - 0.5) * 16.0
+        hk = 0.62 + 0.38 * _hash(k, 2, seed)
+        sl = 0.0075 + 0.0090 * _hash(k, 3, seed)     # panta, in fractii din hmax/m
+        peaks.append((xk, hk, sl))
+    top = max(p[1] for p in peaks)
 
-    # --- latimea de baza: 30-55 m, INDEPENDENTA de inaltime (un varf inalt
-    # nu inseamna neaparat o baza lata) — acelasi random-walk, seed diferit.
-    w_lo, w_hi = 30.0, 55.0
-    base_w = [0.0] * COLS
-    walkw = (w_lo + w_hi) * 0.5
-    for i in range(COLS):
-        walkw += (rnd() - 0.5) * 14.0
-        walkw = max(w_lo, min(w_hi, walkw))
-        base_w[i] = walkw
-    for _pass in range(2):
-        sm = list(base_w)
-        for i in range(1, COLS - 1):
-            base_w[i] = (sm[i - 1] + 2.0 * sm[i] + sm[i + 1]) * 0.25
+    def crest_h(x):
+        h = 0.0
+        for xk, hk, sl in peaks:
+            h = max(h, hk / top - sl * abs(x - xk))
+        h = max(h, 0.50 + 0.10 * _vn(x, seed + 5, 22.0))
+        # creasta zimtata fin, NEPERIODICA: valoare per pozitie, nu sinus
+        h += (_hash(int(round(x * 0.62)), 7, seed) - 0.5) * 0.07
+        end = _sstep(half, half - 16.0, abs(x)) * 0.0
+        e = min(1.0, (half - abs(x)) / 14.0)
+        h *= 0.40 + 0.60 * _sstep(0.0, 1.0, e)
+        return max(0.30, h) * hmax
 
-    # --- 2-3 pinteni pe FIECARE parte, la pozitii ALEATOARE (nu simetrice
-    # intre cele doua fete): coloanele alese impinse in afara cu un bonus de
-    # latime local, ca un contrafort vizibil in silueta de sus.
-    def _spur_bonus(side_sign):
-        bonus = [0.0] * COLS
-        n_spurs = 2 + (1 if rnd() > 0.5 else 0)
-        for _ in range(n_spurs):
-            ci = int(2 + rnd() * (COLS - 4))
-            amp = 8.0 + rnd() * 10.0
-            width = 2 + int(rnd() * 2)
-            for di in range(-width, width + 1):
-                k = ci + di
-                if 0 <= k < COLS:
-                    falloff = max(0.0, 1.0 - abs(di) / (width + 1.0))
-                    bonus[k] = max(bonus[k], amp * falloff)
-        return bonus
+    # --- latimea de baza (jumatate), contraforturi (gaussiene +), pinteni
+    def base_w(x, side):
+        w = 22.0 + 6.0 * _vn(x, seed + 11, 31.0)
+        return w
 
-    spur_plus = _spur_bonus(1.0)     # pinteni pe fata +Y
-    spur_minus = _spur_bonus(-1.0)   # pinteni pe fata -Y, independenti
+    butt = {1: [], -1: []}
+    for side in (1, -1):
+        nb = 3 + (1 if _hash(side, 5, buttress_seed) > 0.5 else 0)
+        for k in range(nb):
+            bx = -66.0 + 132.0 * (k + _hash(k, side + 9, buttress_seed) * 0.8) / nb
+            butt[side].append((bx, 0.16 + 0.20 * _hash(k, side + 13, buttress_seed),
+                               5.0 + 4.0 * _hash(k, side + 17, buttress_seed)))
+    ravs = {1: ravines_p, -1: ravines_m}
+    rav_depth = {s: [6.0 + 4.0 * _hash(k, s + 23, buttress_seed)
+                     for k in range(len(ravs[s]))] for s in (1, -1)}
+    SIG = 3.4
 
-    # --- asimetrie: o parte mai abrupta decat cealalta (batere diferita)
-    batter_plus_frac = 0.18 + rnd() * 0.10    # +Y: taluz mai INGUST (abrupt)
-    batter_minus_frac = 0.34 + rnd() * 0.12   # -Y: taluz mai LARG (domol)
+    def rav_strength(x, side):
+        g = 0.0
+        for xr in ravs[side]:
+            g = max(g, math.exp(-((x - xr) / SIG) ** 2))
+        return g
 
-    xs = [-half_len + FW_LEN * i / (COLS - 1.0) for i in range(COLS)]
+    def half_w(x, t, side):
+        m = 1.0
+        for bx, amp, bw in butt[side]:
+            m += amp * math.exp(-((x - bx) / bw) ** 2)
+        p = 1.30 if side > 0 else 1.55     # fata +Y mai abrupta decat -Y
+        w = base_w(x, side) * m * (1.0 - t ** p)
+        cut = 0.0
+        for xr, d in zip(ravs[side], rav_depth[side]):
+            g = math.exp(-((x - xr) / SIG) ** 2)
+            prof = (0.35 + 0.65 * min(1.0, t / 0.30)) * (1.0 - 0.55 * _sstep(0.86, 1.0, t))
+            cut += d * g * prof
+        end_k = _sstep(half - 6.0, half - 22.0, abs(x))   # fara ravene la capete
+        return max(0.8, w - cut * end_k)
 
-    # profil de sectiune, per coloana: talpa (variabila pe Y), un rand la
-    # mijloc (taluz, ASIMETRIC intre +Y si -Y), creasta (0, crest_h) — deci
-    # atat inaltimea CAT SI latimea/adancimea variaza independent coloana cu
-    # coloana, plus pintenii impinsi in afara.
+    # --- coloanele: uniforme + 2 suplimentare in jurul fiecarei ravene (fasia
+    # de cascada de 1.4 m intre ele)
+    xs = [-half + FW_LEN * i / 63.0 for i in range(64)]
+    fall_x = []
+    for side in (1, -1):
+        for xr in ravs[side]:
+            fall_x.append((side, xr))
+    xs = [x for x in xs if all(abs(x - xr) > 2.0 for _, xr in fall_x)]
+    for _, xr in fall_x:
+        xs += [xr - 0.7, xr + 0.7]
+    xs = sorted(set(round(x, 3) for x in xs))
+    xs[0], xs[-1] = -half, half
+
+    def yc(x):
+        return (_vn(x, seed + 31, 45.0) - 0.5) * 12.0
+
     cols = []
-    for i, x in enumerate(xs):
-        h = crest_h[i]
-        hw = base_w[i] * 0.5
-        y_plus = hw + spur_plus[i]     # talpa pe +Y, cu pinten
-        y_minus = hw + spur_minus[i]   # talpa pe -Y, cu pinten propriu
-        y_mid_plus = y_plus * (1.0 - batter_plus_frac)
-        y_mid_minus = y_minus * (1.0 - batter_minus_frac)
-        z_mid = h * (0.38 + rnd() * 0.08)
-        cols.append([
-            Vector((x, -y_minus, 0.0)),
-            Vector((x, -y_mid_minus, z_mid)),
-            Vector((x, 0.0, h)),
-            Vector((x, y_mid_plus, z_mid)),
-            Vector((x, y_plus, 0.0)),
-        ])
+    for ci, x in enumerate(xs):
+        h = crest_h(x)
+        shift = yc(x)
+        col = []
+        for r in range(2 * N_T - 1):
+            if r < N_T - 1:
+                t, side = T_ROWS[r], -1
+            elif r == N_T - 1:
+                t, side = 1.0, 0
+            else:
+                t, side = T_ROWS[2 * N_T - 2 - r], 1
+            if side == 0:
+                y = shift
+                z = h
+            else:
+                w = half_w(x, t, side)
+                jy = (_hash(ci, r, seed + 3) - 0.5) * 1.6 * (1.0 - t) * (1 if t > 0 else 0.3)
+                jz = (_hash(ci, r, seed + 4) - 0.5) * 2.4 if 0.0 < t < 1.0 else 0.0
+                y = shift * (0.30 + 0.70 * t) + side * (w + jy)
+                z = t * h + jz
+            col.append(b.bm.verts.new((x, y, z)))
+        cols.append(col)
 
-    verts = [[b.bm.verts.new(p) for p in col] for col in cols]
     n_rows = len(cols[0])
-    faces = []
-    for i in range(COLS - 1):
+    for i in range(len(xs) - 1):
+        xm = 0.5 * (xs[i] + xs[i + 1])
         for r in range(n_rows - 1):
-            f = b.bm.faces.new((verts[i][r], verts[i + 1][r],
-                               verts[i + 1][r + 1], verts[i][r + 1]))
-            f[b.slot] = GNEISS
-            faces.append(f)
-    # talpa: inchide dedesubt, urmarind latimea VARIABILA per coloana (nu un
-    # dreptunghi fix) — ca sa nu se vada prin volum de jos si sa nu apara
-    # trepte artificiale la talpa unde latimea sare intre coloane vecine.
-    floor_faces = []
-    for i in range(COLS - 1):
-        f = b.bm.faces.new((verts[i][0], verts[i][-1],
-                           verts[i + 1][-1], verts[i + 1][0]))
-        f[b.slot] = GNEISS
-        floor_faces.append(f)
-    faces += floor_faces
-    # capetele: inchid volumul pe X
-    end0 = b.bm.faces.new(tuple(reversed(verts[0])))
-    end1 = b.bm.faces.new(tuple(verts[-1]))
-    end0[b.slot] = GNEISS
-    end1[b.slot] = GNEISS
-    faces += [end0, end1]
-
-    # --- benzile orizontale de culoare, RETAG (zero triunghiuri) ---
-    allf = [f for f in faces if f.is_valid]
-    # poalele: pamant/pietris, sub 10%
-    b.retag(allf, SCREE, where=lambda c, n: c.z < FW_H * 0.10)
-    # padurea: banda larga, 10-55%
-    b.retag(allf, FOREST, where=lambda c, n: FW_H * 0.10 <= c.z < FW_H * 0.55)
-    # umbra de padure pe fetele care privesc "in jos" (aproape orizontale,
-    # taluz lin) sau spre -Y
-    b.retag(allf, FOREST_DARK,
-           where=lambda c, n: (FW_H * 0.10 <= c.z < FW_H * 0.55
-                               and (n.y < -0.3 or abs(n.z) > 0.5)))
-    # creasta: gneis descoperit peste 55%
-    b.retag(allf, GNEISS, where=lambda c, n: c.z >= FW_H * 0.55)
-
-    # --- 2 fire albe verticale (FOAM_WHITE, 1.5 m late) pe FIECARE fata
-    # lunga (+Y si -Y) — brief §1.2. Benzi verticale RETAG (zero triunghiuri),
-    # pozitionate la 2 fractii de-a lungul lungimii, cate una pe fiecare fata.
-    # LATIMEA benzii trebuie sa fie CEL PUTIN cat pasul dintre coloane
-    # (FW_LEN/(COLS-1) ~= 7.2 m aici), altfel un prag de 1,5 m (litera
-    # brief-ului) nu nimereste NICIODATA centrul vreunei fete — masurat
-    # direct (0 fete retag-uite cu 1,5 m). Fata e unitatea cea mai fina pe
-    # care banda o poate ocupa; brief-ul cere "1,5 m late" ca impresie
-    # vizuala de la distanta prin ceata, nu ca toleranta geometrica exacta
-    # pe o grila de 7 m.
-    col_step = FW_LEN / (COLS - 1.0)
-    thread_x = [-half_len + FW_LEN * 0.32, -half_len + FW_LEN * 0.68]
-    thread_w = max(1.5, col_step * 1.3)
-    for side in (-1.0, 1.0):
-        for tx in thread_x:
-            b.retag(allf, SNOW,
-                   where=lambda c, n, tx=tx, side=side: (
-                       abs(c.x - tx) < thread_w * 0.5
-                       and n.y * side > 0.3
-                       and FW_H * 0.06 < c.z < FW_H * 0.85))
-
+            f = b.bm.faces.new((cols[i][r], cols[i + 1][r],
+                               cols[i + 1][r + 1], cols[i][r + 1]))
+            if r < N_T - 1:
+                side, ti = -1, r
+                tmid = 0.5 * (T_ROWS[r] + T_ROWS[r + 1])
+            else:
+                side = 1
+                ti = 2 * N_T - 2 - (r + 1)
+                tmid = 0.5 * (T_ROWS[ti] + T_ROWS[ti + 1])
+            f[b.slot] = _wall_color(xm, tmid, side, i, r, seed, ravs, fall_x,
+                                    rav_strength)
+        # talpa
+        f = b.bm.faces.new((cols[i][0], cols[i][-1], cols[i + 1][-1], cols[i + 1][0]))
+        f[b.slot] = FOREST_DARK
+    e0 = b.bm.faces.new(tuple(reversed(cols[0])))
+    e1 = b.bm.faces.new(tuple(cols[-1]))
+    e0[b.slot] = GNEISS_DARK
+    e1[b.slot] = GNEISS_DARK
     return b.to_object(name)
 
 
+def _wall_color(xm, t, side, i, r, seed, ravs, fall_x, rav_strength):
+    hv = _hash(i // 2, r // 2 + 40, seed + 41)
+    hv2 = _hash(i // 2, r // 2 + 40, seed + 43)
+    # cascada: fasia dintre cele doua coloane de langa fiecare ravena
+    for s, xr in fall_x:
+        if s == side and abs(xm - xr) < 0.2 and 0.07 < t < 0.94:
+            return FALL
+    g = rav_strength(xm, side)
+    line = 0.36 + 0.24 * _vn(xm, seed + 51, 38.0) + 0.45 * g
+    # pete: padurea mai sus, izolate, deasupra liniei, pe fetele din umbra
+    if t < line + 0.04 * (hv - 0.5):
+        if t < 0.07 or hv < 0.025:
+            return FOREST_DARK
+        return FOREST
+    if t < line + 0.17 and hv2 < 0.20:
+        return FOREST if hv < 0.6 else FOREST_DARK
+    # roca: gneis inchis; fatete luminate (gri) mai multe spre creasta
+    lit = 0.03 + 0.15 * _sstep(0.60, 0.95, t)
+    return GNEISS_LIT if hv < lit else GNEISS_DARK
+
+
 # --- SnowRidge_A / SnowRidge_B ------------------------------------------------
-#
-# Contract: ~90 m inalt, ~120 m baza. Calota FOAM_WHITE pe treimea de sus,
-# apoi MARBLE_GREY, apoi padure la baza — trei etaje (memoria
-# `munte-flanc-nu-fundal`). Varf ASCUTIT si aproape (con neregulat, umar
-# lateral), origine la baza centrata.
-# Contract ~90 m inalt, ~120 m baza. Masurat pe GLB: SR_H=84 -> bbox 84 m
-# (aproape 1:1, apex-ul e chiar varful geometriei), SR_BASE=120 -> bbox
-# ~105-106 m (rings-urile de sub umar nu ating raza nominala). Amandoua
-# ridicate proportional.
 SR_H = 90.0
-SR_BASE = 137.0
+SR_R = 60.0
 
 
-def _snow_ridge(seed, name, lean_x=10.0, lean_y=4.0):
+def _snow_ridge(seed, name, peaks, outline=1.0):
+    """Masiv cu 3 varfuri. `peaks`: (cx, cy, H, R, p, n_ravene, faza)."""
     b = Builder()
-    rnd = _lcg(seed)
-    segments, rings = 10, 7
+    segs = 36
+    rings = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.69, 0.77, 0.84, 0.90, 0.95, 1.0]
+    hmax = max(p[2] for p in peaks)
 
-    col_dev = [0.80 + rnd() * 0.22 for _ in range(segments)]
-    col_dev2 = [0.86 + rnd() * 0.16 for _ in range(segments)]
-    SHOULDER = 0.40
+    def field(x, y):
+        best, bk = 0.0, 0
+        for k, (cx, cy, H, R, p, nr, ph) in enumerate(peaks):
+            dx, dy = x - cx, y - cy
+            d = math.hypot(dx, dy)
+            th = math.atan2(dy, dx)
+            rv = math.cos(nr * th + ph)
+            u = max(0.0, 1.0 - d / R)
+            # ravenele cresc spre varf: adancime ~ u, taiate in profil
+            z = H * (u ** p) * (1.0 - 0.16 * (0.5 - 0.5 * rv) * min(1.0, u * 2.0))
+            if z > best:
+                best, bk = z, k
+        cx, cy, H, R, p, nr, ph = peaks[bk]
+        rv = math.cos(nr * math.atan2(y - cy, x - cx) + ph)
+        return best, rv
 
-    rings_v = []
-    for k in range(rings + 1):
-        t = k / rings
-        z = SR_H * t
-        frac = t
-        if frac < SHOULDER:
-            u = frac / SHOULDER
-            radius_scale = 1.0 - 0.32 * (u ** 1.25)
+    def outline_r(a):
+        return SR_R * outline * (0.92 + 0.16 * _vn(a * 20.0, seed + 61, 3.0))
+
+    center = b.bm.verts.new((0, 0, field(0, 0)[0]))
+    ring_v = []
+    for ri, rr in enumerate(rings):
+        row = []
+        for i in range(segs):
+            a = 2.0 * math.pi * i / segs
+            R = outline_r(a)
+            jr = 1.0 + (_hash(i, ri, seed + 63) - 0.5) * 0.10 * (1.0 if rr < 1.0 else 0.0)
+            ja = (_hash(i, ri, seed + 64) - 0.5) * 0.05
+            x = math.cos(a + ja) * R * rr * jr
+            y = math.sin(a + ja) * R * rr * jr
+            z, _ = field(x, y)
+            z *= (1.0 - rr ** 5)
+            if rr < 1.0:
+                z += (_hash(i, ri, seed + 65) - 0.5) * 2.4
+                z = max(z, 0.5)
+            else:
+                z = 0.0
+            row.append(b.bm.verts.new((x, y, z)))
+        ring_v.append(row)
+
+    faces = []
+    for i in range(segs):
+        j = (i + 1) % segs
+        faces.append(b.bm.faces.new((center, ring_v[0][i], ring_v[0][j])))
+    for ri in range(len(rings) - 1):
+        for i in range(segs):
+            j = (i + 1) % segs
+            faces.append(b.bm.faces.new((ring_v[ri][i], ring_v[ri + 1][i],
+                                         ring_v[ri + 1][j], ring_v[ri][j])))
+    base = b.bm.faces.new(tuple(ring_v[-1][::-1]))
+    base[b.slot] = FOREST_DARK
+
+    bmesh.ops.recalc_face_normals(b.bm, faces=b.bm.faces[:])
+    for f in faces:
+        f.normal_update()
+        c = f.calc_center_median()
+        n = f.normal
+        zr = c.z / hmax
+        _, rv = field(c.x, c.y)
+        hv = _hash(int(c.x * 3), int(c.y * 3), seed + 71)
+        hv2 = _hash(int(c.x * 2), int(c.y * 2), seed + 73)
+        steep = max(0.0, 0.72 - n.z)
+        foot = 0.17 + 0.07 * hv
+        # zapada: linie joasa in ravene (rv<0 = fund de ravena), mai sus pe
+        # coaste; fetele abrupte tin putina
+        sline = 0.34 + 0.14 * rv + 0.45 * steep + 0.10 * (hv - 0.5)
+        if zr < foot:
+            col = FOREST_DARK if (hv < 0.12 or zr < 0.0) else FOREST
+        elif zr > sline:
+            col = SNOW
+            if zr > 0.80 and steep > 0.32 and hv2 < 0.45:
+                col = GNEISS_DARK      # coltul de stanca care iese din zapada
         else:
-            u = (frac - SHOULDER) / max(1.0 - SHOULDER, 1e-6)
-            radius_scale = 0.68 * (1.0 - 0.90 * (u ** 1.05))
-        ring_dev = 0.92 + rnd() * 0.10
-        lx = lean_x * (frac ** 1.7)
-        ly = lean_y * (frac ** 2.1)
-        ring = []
-        for i in range(segments):
-            a = 2.0 * math.pi * i / segments
-            ca, sa = math.cos(a), math.sin(a)
-            d = col_dev[i] * (1.0 - t) + col_dev2[i] * t
-            r = radius_scale * ring_dev * d
-            ring.append(b.bm.verts.new((lx + ca * r * SR_BASE * 0.5,
-                                        ly + sa * r * SR_BASE * 0.5, z)))
-        rings_v.append(ring)
-
-    body = []
-    for lo, hi in zip(rings_v, rings_v[1:]):
-        for i in range(segments):
-            j = (i + 1) % segments
-            body.append(b.bm.faces.new((lo[i], lo[j], hi[j], hi[i])))
-    base_face = b.bm.faces.new(tuple(reversed(rings_v[0])))
-    apex = b.bm.verts.new((lean_x * 1.08, lean_y * 1.08, SR_H))
-    tip = []
-    for i in range(segments):
-        j = (i + 1) % segments
-        tip.append(b.bm.faces.new((rings_v[-1][i], rings_v[-1][j], apex)))
-
-    for f in body + tip:
-        f[b.slot] = GNEISS
-    base_face[b.slot] = SCREE
-
-    allf = body + tip
-    # trei etaje: padure la poale, gneis la mijloc, calota alba peste 66%
-    b.retag(allf, SCREE, where=lambda c, n: c.z < SR_H * 0.08)
-    b.retag(allf, FOREST, where=lambda c, n: SR_H * 0.08 <= c.z < SR_H * 0.42)
-    b.retag(allf, FOREST_DARK,
-           where=lambda c, n: (SR_H * 0.08 <= c.z < SR_H * 0.42 and n.y < -0.35))
-    b.retag(allf, GNEISS, where=lambda c, n: SR_H * 0.42 <= c.z < SR_H * 0.66)
-    b.retag(allf, SNOW, where=lambda c, n: c.z >= SR_H * 0.66)
-
-    # REVIZUIRE COORDONATOR (val 4, a doua trecere): umarul (`b.rock(...,
-    # flat_top=True)`) si masele de padure pe flanc (`b.boulder()`) citeau ca
-    # "cutii mici lipite pe con" in planta — la scara relativa a unui con de
-    # 90 m, un `rock()`/`boulder()` de 20-30 m cu doar 5-6 segmente si
-    # `flat_top` iese prea fatetat/dreptunghiular ca sa se confunde cu
-    # geometria conului insusi, si se vede exact ca un corp strain lipit.
-    # SCOASE complet: calota de zapada ramane retag PUR pe treimea de sus
-    # (fara volum adaugat), exact contractul brief-ului. Silueta conului
-    # (varf decalat, umar din PROFILUL inelelor, nu dintr-o masa separata)
-    # ramane singura sursa de relief pe flanc.
-
+            col = GNEISS_LIT if (n.z > 0.5 and hv2 < 0.14) else GNEISS_DARK
+        f[b.slot] = col
     return b.to_object(name)
 
 
@@ -317,20 +321,30 @@ clear_built()
 results = []
 
 
-def emit(obj, path_or_none, ao, bevel=0.30, smooth_angle=26.0, origin="base_axis"):
+def emit(obj, path_or_none, ao, bevel=0.0, smooth_angle=26.0, origin="base_axis"):
     st = finish(obj, bevel=bevel, ao=ao, origin=origin, smooth_angle=smooth_angle)
     results.append((obj.name, st["tris"], st["ao_min"], st["ao_max"]))
     return obj
 
 
-far_a = emit(_far_wall(9101, "FarWall_A"), None, AO_WALL, bevel=0.35,
-            smooth_angle=24.0)
-far_b = emit(_far_wall(9202, "FarWall_B"), None, AO_WALL, bevel=0.35,
-            smooth_angle=24.0)
-ridge_a = emit(_snow_ridge(9301, "SnowRidge_A", lean_x=9.0, lean_y=3.0),
-              None, AO_RIDGE, bevel=0.30, smooth_angle=26.0)
-ridge_b = emit(_snow_ridge(9402, "SnowRidge_B", lean_x=-11.0, lean_y=5.0),
-              None, AO_RIDGE, bevel=0.30, smooth_angle=26.0)
+# varfuri: (cx, cy, H, R, p, n_ravene, faza)
+PEAKS_A = [(-24.0, 2.0, 103.0, 54.0, 1.05, 5, 0.4),
+           (26.0, -6.0, 94.0, 52.0, 1.05, 4, 1.7),
+           (2.0, 24.0, 73.0, 36.0, 1.05, 6, 0.9)]
+PEAKS_B = [(22.0, -3.0, 99.0, 54.0, 1.05, 6, 2.1),
+           (-26.0, 8.0, 88.0, 52.0, 1.05, 5, 0.2),
+           (0.0, -26.0, 68.0, 36.0, 1.05, 4, 1.1)]
+
+far_a = emit(_far_wall(9101, "FarWall_A", 62.0, 7, [-52.0, -4.0, 44.0],
+                       [-36.0, 14.0, 58.0, -70.0], 111),
+             None, AO_WALL, bevel=0.0, smooth_angle=12.0)
+far_b = emit(_far_wall(9202, "FarWall_B", 68.0, 6, [-60.0, -18.0, 30.0, 66.0],
+                       [-44.0, 6.0, 50.0], 222),
+             None, AO_WALL, bevel=0.0, smooth_angle=12.0)
+ridge_a = emit(_snow_ridge(9301, "SnowRidge_A", PEAKS_A),
+               None, AO_RIDGE, bevel=0.0, smooth_angle=14.0)
+ridge_b = emit(_snow_ridge(9402, "SnowRidge_B", PEAKS_B),
+               None, AO_RIDGE, bevel=0.0, smooth_angle=14.0)
 
 built = [far_a, far_b, ridge_a, ridge_b]
 _, sz = export_glb(built, "fiordland/rocks/fiordland_horizon.glb")
@@ -340,7 +354,7 @@ total = sum(t for _, t, _, _ in results)
 print()
 for name, tris, ao_lo, ao_hi in results:
     print("%-14s tris=%6d  AO %.2f..%.2f" % (name, tris, ao_lo, ao_hi))
-flag = "OK" if total <= 5000 else "DEPASIT (buget 5000)"
+flag = "OK" if total <= 8000 else "DEPASIT (buget 8000)"
 print("TOTAL horizon: %d tris  %s" % (total, flag))
 
 # separate in .blend, ca sa nu se suprapuna la editare

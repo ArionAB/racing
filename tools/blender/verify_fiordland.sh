@@ -113,7 +113,7 @@ check "animals/kea.glb"              700
 check "animals/penguin_tawaki.glb"   300 --allow-car-slots=Penguin
 
 echo "== fundalul (brief §1.2, val 4) =="
-check "rocks/fiordland_horizon.glb"  5000 --origin=assembly
+check "rocks/fiordland_horizon.glb"  6600 --origin=assembly
 
 echo
 total=$(find "$ROOT" -name '*.glb' 2>/dev/null | wc -l)

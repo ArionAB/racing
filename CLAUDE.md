@@ -61,8 +61,9 @@ pur plus haosul fizic, nu proiectilele.
   inerție (`drift_yaw_inertia`), nu-l întoarce; **unghiul rămâne și la viteză
   de cursă** (`drift_arc_tight_top`, nu zero); **impulsul pierdut prin
   frecarea laterală se întoarce** scalat cu gazul (`drift_momentum_keep`):
-  ▲+DRIFT ține viteza (powerslide); DRIFT singur e frână de mână și frânează
-  (vezi touch, mai sus), deci nimic nu se întoarce.
+  cu gaz driftul ține viteza (powerslide), cu ▼ frânezi derapând. De aceea
+  **DRIFT implică gaz** (vezi touch, mai jos): altfel, pe un singur deget,
+  fiecare drift era o frânare.
   Juice: rotație vizuală în plus pe model, tresărire la ieșire + ciripit,
   scrâșnet după alunecare, bara de turbo pulsează. Garda: `ProbeDriftEntry`
   (4 contracte, fiecare cu sabotaj care pică).
@@ -81,10 +82,17 @@ pur plus haosul fizic, nu proiectilele.
   - **▼ e și frână și marșarier**, nu două butoane: în fizică e aceeași
     comandă — `throttle < 0` frânează cât mergi >2 m/s și devine marșarier sub
     `reverse_speed` (vezi `_apply_driving`). Frâna bate gazul dacă ții ambele.
-  - **TURBO implică gaz** (altfel arzi bara stând pe loc), iar **DRIFT singur
-    e frână de mână**: frânează și, aproape oprit, dă marșarier — ca ▼. Cât
-    timp implica gaz, nu puteai frâna în drift; pe inerție se simțea că
-    butonul te împinge înainte. ▲+DRIFT (sau TURBO+DRIFT) derapezi accelerând.
+  - **TURBO implică gaz** (altfel arzi bara stând pe loc) și **DRIFT implică
+    gaz** (26 oct 2026, după trei schimbări de sens: #552 gaz → #559 fără →
+    #578 frână → gaz). Motivul e același: toate butoanele de acțiune stau sub
+    degetul mare drept, deci nu poți ține ▲ și DRIFT odată. Iar din #579
+    driftul ține viteza *doar cu gaz*: măsurat la 85% din vmax după 1 s de
+    drift, cu gaz păstrezi 99%, pe inerție 27%, cu frână 9% și mașina întoarsă
+    cu spatele — adică pe telefon fiecare drift era o oprire de urgență, în
+    timp ce AI-ul (care drifteză cu gaz) părea că n-are nicio problemă.
+    Virajul strâns vine din arcul CTR, nu din frânare; cine vrea să frâneze
+    derapând ține ▼ (frâna bate gazul). La fel pe tastatură, ca testul de pe
+    desktop să simtă ce simte telefonul.
   - Garda `ProbeTouchZones` verifică maparea atingere→comandă (inclusiv că
     zonele goale nu mai dau nimic), că discurile apăsate împreună nu se ating,
     și matricea de accelerație — măsurată pe `PlayerController` real.

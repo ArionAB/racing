@@ -114,16 +114,17 @@ func _ready() -> void:
 
 	# A TREIA GARDA: GAZUL CARE SE SUBINTELEGE. Toate comenzile de actiune stau
 	# sub acelasi deget mare drept, deci nu pot fi tinute odata cu ^. TURBO
-	# implica gaz, altfel ai arde bara stand pe loc. DRIFT singur e frana de
-	# mana: franeaza si da marsarier, ca v. Se masoara pe `PlayerController`
-	# real, nu pe o copie a regulii.
+	# implica gaz, altfel ai arde bara stand pe loc; DRIFT implica gaz, altfel
+	# driftul e o frana (viteza pastrata doar cu gaz, vezi PlayerController).
+	# Frana bate orice. Se masoara pe `PlayerController` real, nu pe o copie
+	# a regulii.
 	print("")
 	var pc := PlayerController.new()
 	add_child(pc)
 	var throttle_cases := [
 		["doar GAZ", {"gas": true}, 1.0],
 		["doar TURBO", {"turbo": true}, 1.0],
-		["doar DRIFT", {"drift": true}, -1.0],
+		["doar DRIFT", {"drift": true}, 1.0],
 		["TURBO+DRIFT", {"turbo": true, "drift": true}, 1.0],
 		["GAZ+DRIFT", {"gas": true, "drift": true}, 1.0],
 		["doar FRANA", {"brake": true}, -1.0],

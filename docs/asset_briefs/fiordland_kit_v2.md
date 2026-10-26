@@ -222,3 +222,43 @@ de joc pe Track16 (camera de joc, nu doar planșa), `probe_manual` /
 `probe_decor` (decor plutitor sau îngropat după schimbarea formei),
 `ProbeLaneClear` și `ProbeRace` (coliziunea hull s-a schimbat pe sute de
 instanțe), apoi `bash tools/verify_local.sh` înainte de PR.
+
+## Livrare grupa A
+
+Script: `tools/blender/build_fiordland_rocks.py` (vocabular nou: `_hull` =
+invelitoare convexa cu fete coplanare topite, `_pit`, `_hexa`; codul
+`stirling_ledge`/`torrent_chute` neatins, GLB-urile lor identice). Comparatii:
+`docs/asset_briefs/img/fiordland_fidelity/{chasm_rock,guard_rock,scree_slab}.png`.
+Bugete verify actualizate: 1500 / 200 / 4600. Zero sloturi noi.
+
+| piesa | AABB Godot (X x Y x Z) | tri |
+|---|---|---|
+| `chasm_rock` | 5,55 x 2,44 x 4,81 | 1.432 |
+| `guard_rock` | 1,14 x 0,79 x 0,65 | 164 |
+| `scree_slab` | 5,31 x 1,47 x 7,90 | 4.468 |
+
+### chasm_rock
+| element | pe plansa | in randare |
+|---|---|---|
+| flancuri | pereti verticali fatetati, blocuri late | placa joasa + placa de sus rotita (trepte), inel de blocuri cu pereti verticali; fete late |
+| marmite | 2 adanci, fund inchis, cea mare in fata | 2 (r 0,95 fata / 0,72 spate), pereti verticali 0,9 m, fund VOLCANIC_BLACK |
+| creasta | margine in trepte, blocuri cazute | blocuri de inel la inaltimi diferite; 6 blocuri cazute pe margine (mici si ascutite) |
+
+### guard_rock
+| element | pe plansa | in randare |
+|---|---|---|
+| volum | bolovan inalt, fete mari plane, fata de rupere inclinata | invelitoare convexa fatetata, varf deplasat spre +X; h/l = 0,69 |
+| muschi | pete pe baza si muchii | doar banda de sus (taiata exact la z=0,52; contract §0.1.3) |
+| fragment la baza | lespezi mici in fata | o piatra mica langa baza |
+
+### scree_slab
+| element | pe plansa | in randare |
+|---|---|---|
+| movila | con inalt cu varf fatetat | movila joasa alungita pe Y, acoperita de ~45 blocuri fatetate (GNEISS / VOLCANIC_BLACK) |
+| inel | 25-40 pietre pe sol | 32 pietre imprastiate in jur |
+
+### Goluri ramase (oneste)
+- `chasm_rock`: marmitele au contur octogonal regulat si creasta de inel cu aspect de "coroana"; pe plansa sunt neregulate, taiate in lespede. Blocurile cazute sunt prea mici/ascutite fata de plansa.
+- `guard_rock`: fetele sunt triunghiulare-icosaedrice, nu cele cateva plane mari ale plansei; musch doar sus (contractul), plansa il are si pe baza.
+- `scree_slab`: nu are un singur varf clar; blocurile sunt piramidale/ascutite, iar maronul SAND_SHADOW se vede printre ele; costul in triunghiuri (4,5k) e mult peste ~900 din brief. Y limitat la 1,5.
+- `verify_fiordland.sh` da `KIT: PROBLEME` doar din `cruise_boat`/`kayak_a/b` (grupa E, nu a mea); cele trei piese ies OK.

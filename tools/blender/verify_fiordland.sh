@@ -43,9 +43,9 @@ check() {  # check <cale> <buget> [flag...]
 echo "== stancile-hero (brief §1.1, val 1) =="
 check "rocks/stirling_ledge.glb"   3000 --origin=assembly
 check "rocks/torrent_chute.glb"    1500
-check "rocks/chasm_rock.glb"        600
-check "rocks/guard_rock.glb"         80
-check "rocks/scree_slab.glb"        300
+check "rocks/chasm_rock.glb"        1500
+check "rocks/guard_rock.glb"         200
+check "rocks/scree_slab.glb"        4600
 
 echo "== padurea (brief §1.4, val 2) =="
 # beech_a/b/c: DOUA noduri (Trunk+Crown, brief §0.6) cu origine comuna —

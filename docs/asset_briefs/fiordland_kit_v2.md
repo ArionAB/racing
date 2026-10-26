@@ -1,0 +1,224 @@
+# Brief assets — Fiordland (`Track16`) — kit v2: fidelitate față de planșă
+
+**De ce există.** Dezvoltatorul (26 oct 2026): „o parte din asseturile din
+Fiordland arată cam bland, ar trebui refăcute în Blender să semene mai mult cu
+ce avem și să compari cu fișa de inventar". Comparația pe toată planșa
+(`docs/asset_briefs/img/fiordland_fidelity/inainte/<nume>.png`, decupare
+stânga | GLB-ul de pe main dreapta) arată că aproape tot kitul v1 e o
+primitivă: stâncile sunt cutii cu capac verde, casele cutii fără ferestre,
+cheiul o placă, bolovanii de avalanșă bile, fagii cuburi pe un băț.
+
+Kitul v1 a fost construit pe contractul `fiordland_kit.md`, care spunea
+explicit că planșa dă „siluete și culori" — dar nimeni n-a pus randarea
+lângă desen. Aici **fidelitatea față de planșă e criteriu de acceptare**, pe
+tiparul `okinawa_kit_v2.md` §0.1 și al memoriei
+`blender-fidelitate-fata-de-plansa`.
+
+## 0. Ce se schimbă față de v1 și ce NU
+
+**Se suprascrie același fișier** (aceeași cale, același nume de nod). Spre
+deosebire de Okinawa v2, aici nu există o pistă veche care să țină kitul v1:
+Track16 e singurul consumator, iar `Track16.tscn` are **~1.800 de instanțe**
+așezate de mână pe piesele astea (658 `chasm_rock`, 313 `tussock_clump`, 287
+`guard_rock`, ~300 de fagi…). Calea identică păstrează uid-ul din `.import`,
+deci scena rămâne validă fără nicio editare, **cu condiția ca piesa nouă să
+ocupe același loc**. De aici cele trei contracte de mai jos.
+
+### 0.1 Contractul care ține scena validă (nu se negociază)
+
+1. **Numele nodurilor rămân EXACT** cele din tabelul §2 (inclusiv sufixele
+   `.001`, care în Godot devin `_001`). `WorldProp` leagă clasele, coliziunea
+   și rupturile de accent de ele (`scenes/props/world_prop.gd`:
+   `CLASSES_BY_MODEL`, `PROP_COLLISION`, `SPLIT_MODELS`, `ACCENT_SPLIT`).
+   Un nod nou, în plus, e permis doar unde scrie în §2.
+2. **Gabaritul (AABB) rămâne în ±10% pe fiecare axă** față de coloana „AABB
+   v1" din §2, și **originea e de același tip** (bază / assembly / center /
+   waterline). Piesele sunt așezate pe teren, lângă drum, în pereți de
+   bolovani: una care crește cu 30% intră în drum sau în vecina ei.
+   Excepțiile (unde planșa cere altă proporție și locul permite) sunt scrise
+   în §2 cu motiv.
+3. **Benzile de culoare pe care jocul le rupe se păstrează.** `guard_rock`:
+   corpul pe `MARBLE_GREY` 29 jos, mușchiul pe `TROPICAL_GREEN` 21 doar
+   **deasupra** (suprapunere de y < 5% din înălțime). Ruptura de accent
+   separă cele două după slot și pune `wet_gneiss` pe corp. `rata_tree`:
+   florile pe `KERB_RED` 7, frunzișul pe 21+28 (frunzișul pleacă în
+   `Rata_Accente` și ia `beech_canopy`).
+
+### 0.2 Culoarea de pe ecran nu e mereu a slotului
+
+Pe nodurile din tabelul de mai jos, jocul **înlocuiește slotul cu o clasă
+triplanară** (textură + tentă). Acolo slotul nu contează. Contează **forma**
+(silueta, fațetele, cavitățile, crăpăturile) și **AO-ul copt**, care rămâne
+peste clasă. Comparația (`preview_fiordland_fidelity.py`) randează aceste
+noduri pe tenta aproximativă a clasei, nu pe slot.
+
+| fișier | nod | clasa în joc |
+|---|---|---|
+| `stirling_ledge` | `Wall` | `wet_gneiss` (gneis gri închis, rece) |
+| `torrent_chute` | `Rock` | `wet_gneiss` |
+| `chasm_rock` | `Rock.001` | `wet_gneiss` pe **tot nodul** (mușchiul pictat se pierde; dacă vrei mușchi vizibil, e geometrie, nu slot) |
+| `guard_rock` | `Rock.002` | `wet_gneiss` pe slotul 29 (după ruptură), mușchiul 21 rămâne |
+| `beech_a/b/c` | `Trunk*` / `Crown*` | `bark_beech` / `beech_canopy` |
+| `beech_dead` | `Beech_Dead` | `bark_beech` |
+| `driftwood` | `Driftwood` | `wet_wood` |
+| `wharf` | `Wharf` | slotul 21 e remapat pe `MARBLE_GREY` (nu pune 21 pe chei) |
+| `cafe_shed`, `lodge` | `House_Roof*` | atlas (forțat), deci slotul acoperișului contează |
+
+### 0.3 Corecturile din v1 care rămân (decizii, nu stil)
+
+- **Fără apă în GLB.** Perdelele de cascadă, spuma, bazinele le face codul
+  (`WaterfallVisual`). Planșa le-a desenat la `stirling_ledge` și
+  `torrent_chute`: acolo se modelează **albia de rocă**, nu apa.
+- **Fără copaci în GLB-ul stâncilor.** Pe planșă `stirling_ledge` și
+  `torrent_chute` au fagi pe vârf. Fagii se pun ca decor la integrare (sunt
+  deja în scenă). Pe stâncă rămâne **platoul de mușchi și iarbă**, fiindcă
+  el e formă, nu decor.
+- **Fără lămpi la semafor.** `traffic_light_pole` nu se reface: dezvoltatorul
+  l-a scos din pistă (796d8b82), iar lampa o face `TunnelSignalHazard`.
+- **`kea` nu se reface**: dezvoltatorul l-a anulat (26 sep).
+- **Cotele vin din §2**, nu din planșă (mașinuța de scară e desenată la fel
+  de mică pe fiecare rând, deci planșa minte la scară).
+- **Fără text, fără cifre, fără logo-uri.** Excepția e `H`-ul heliportului,
+  care e semn, nu text.
+
+### 0.4 Ce se relaxează față de v1
+
+- **Triunghiurile.** Bugetele v1 (72 de tri un bolovan, 300 un fag) sunt
+  cauza principală a lipsei de detaliu. CLAUDE.md: triunghiurile nu au
+  plafon, singurul veto e numărul de **materiale**, care aici e neschimbat
+  (zero sloturi noi, aceleași clase). Coloana „buget v2" din §2 e
+  orientativă: **piesele de masă (sute de instanțe) până la ~3×** v1, iar
+  piesele unice cât cere planșa. `verify_fiordland.sh` primește bugetele
+  noi, scrise de constructor cu cifra măsurată.
+- **Ferestrele luminate.** v1 le interzicea fiindcă atlasul n-are emisiv.
+  Pe planșă cabanele au geamuri calde, galben-portocaliu, și asta le face
+  cabane. Se pun pe `SAND_LIGHT` 0 (`#E8C074`) ca **culoare**, nu emisie:
+  citesc „geam cald" pe vremea ploioasă a pistei.
+- **Etajele.** `cafe_shed` și `lodge` pot urca la două niveluri cu balcon,
+  cum sunt pe planșă: amprenta (X/Z) rămâne în ±10%, înălțimea poate crește
+  (vezi §2).
+
+## 1. Referințe și unelte
+
+| fișier | ce e |
+|---|---|
+| `docs/track_briefs/img/fiordland_assets_v1/<nume>.png` | **decuparea piesei**, mărită 3× (`tools/blender/crop_fiordland_sheet.py`, montajul `_control.png`). Referința de lucru: silueta, numărul de elemente, pozițiile lor, proporțiile interne, culorile |
+| `docs/track_briefs/img/fiordland_assets_v1.jpg` | planșa întreagă |
+| `docs/asset_briefs/img/fiordland_fidelity/inainte/<nume>.png` | comparația v1, ca să vezi de unde pleci |
+| `tools/blender/preview_fiordland_fidelity.py` | `--compare a,b,c` → `docs/asset_briefs/img/fiordland_fidelity/<nume>.png` (decupare stânga, GLB-ul exportat dreapta, culoare reală + tenta clasei, AO) |
+| `tools/blender/verify_fiordland.sh` | verdictul tehnic al kitului (bugete, sloturi, origini) |
+| `docs/asset_briefs/fiordland_inventory.md` | ce s-a măsurat la v1, contractele înghețate (buza Stirling, `Boulder_A..D`, AABB autocar) |
+
+Rulare (din rădăcina worktree-ului):
+
+    D:/Blender/blender.exe --background --factory-startup \
+        --python tools/blender/run_build.py -- build_fiordland_rocks.py
+    D:/Blender/blender.exe --background --factory-startup \
+        --python tools/blender/run_build.py -- preview_fiordland_fidelity.py -- --compare chasm_rock
+
+**Randarea rulează pe GPU și e serială:** înainte de orice randare,
+`mkdir D:/GameDev/.render_lock` (dacă eșuează, alt proces randează:
+așteaptă și reîncearcă), `rmdir` imediat după.
+
+## 1.1 Criteriul de acceptare (verdictul îl dă coordonatorul, nu constructorul)
+
+Pentru fiecare piesă, comparația `fiordland_fidelity/<nume>.png` și, în
+inventar, un tabel **element | pe planșă (poziție, formă, număr) | în
+randare**. Elementele sunt cele care schimbă silueta sau umbra, la 30 m
+din mașină: fațete, trepte, cavități, ferestre, balcoane, scânduri, rădăcini,
+lame de iarbă. **Numărătoarea nu ajunge** (memoria
+`numaratoarea-trece-amplasarea-nu`): contează **unde** stă elementul și ce
+**formă** are. „Toate elementele prezente" scris de constructor nu e dovadă:
+coordonatorul se uită la planșă.
+
+**Silueta întâi, fațetarea după** (memoria `silueta-inainte-de-umbrire`).
+Nu adăuga detalii pe o formă greșită: dacă silueta nu e a desenului,
+reconstruiește volumul. Maximum **2 runde** pe aceeași piesă la același
+constructor. Dacă nu converge, o reia un constructor nou, pornind de la
+verdictul scris (memoria `kit-reluare-cu-constructor-nou`).
+
+## 2. Inventar v2 — verdictul pe v1 și contractul fiecărei piese
+
+AABB-urile sunt în **axele Godot** (Y în sus, înainte −Z), măsurate cu
+`verify_glb.py` pe GLB-urile v1 de pe main (9f5dd770).
+
+### Grupa A — stâncile mici (`build_fiordland_rocks.py`) — val 1
+
+| piesă | instanțe | noduri | AABB v1 (X × Y × Z) | origine | buget v1 → v2 | ce arată v1 / ce cere planșa |
+|---|---:|---|---|---|---|---|
+| `chasm_rock` | **658** | `Rock.001` | 6,00 × 2,50 × 4,72 | bază | 416 → ~1.200 | v1: o pâine netedă cu două pastile negre lipite pe vârf. Planșa: **lespede de gneis rotunjită, cu muchii fațetate în trepte și blocuri căzute pe margine; 2 marmite ADÂNCI (cilindri săpați, cu pereți verticali și fund închis), una mai mare în față**. Atenție: e folosită și ca piatră generică (261 `gneisWall`, 78 `grohotisGramada`, 50 `waterline`): marmitele stau doar pe fața de sus, iar flancurile sunt stâncă fațetată, ca piesa să citească „stâncă" și din lateral, cu marmitele nevăzute |
+| `guard_rock` | **287** | `Rock.002` | 1,18 × 0,58 × 0,70 | bază | 72 → ~250 | v1: o prismă hexagonală turtită, plată sus. Planșa: **bolovan fațetat, mai înalt decât lat** (h/l ≈ 0,8–0,9), cu fețe mari plane în unghiuri diferite și o față de rupere înclinată. **Excepție de cotă: Y poate urca la 0,80 m** (e parapet, nu obstacol de carosabil). Mușchiul e o bandă pe treimea de sus și pe muchii (benzi de y, §0.1.3) |
+| `scree_slab` | 52 | `Rock.003` | 5,00 × 1,20 × 8,00 | bază | 264 → ~900 | v1: o placă maro plată cu 4 pietricele. Planșa: **con de grohotiș cu vârf fațetat și blocuri mari, înconjurat de un inel de 25–40 de pietre separate pe sol**. v1 a respins conul („apron pe pantă"). Compromis: **o movilă joasă, alungită pe Z**, cu creasta fațetată, nu un con ascuțit, plus pietrele din jur. Coliziunea e `none` (se calcă), deci se poate să fie mai înaltă: Y până la 1,5 m. Sloturi `MARBLE_GREY` 29 pe pietre, `SAND_SHADOW` 2 doar pe golurile dintre ele |
+
+### Grupa B — pădurea (`build_fiordland_forest.py`) — val 1
+
+| piesă | instanțe | noduri | AABB v1 | origine | buget v1 → v2 | ce arată v1 / ce cere planșa |
+|---|---:|---|---|---|---|---|
+| `beech_a` | 121 | `Trunk`, `Crown` | 3,7 × 7,5 × 4,1 | assembly | 228 → ~700 | v1: 3 cuburi verzi pe un băț înclinat. Planșa: **trunchi gros și drept cu evazare la bază (3–4 rădăcini), care se desface în 3–5 ramuri groase; coroana e un nor de 8–14 mase fațetate grupate în ETAJE, cu goluri între ele prin care se vede cerul, și forma de ansamblu mai lată decât înaltă**. Contractul v1 (trunchi negru subțire, „nu brocoli") cade: planșa câștigă. Rămâne doar ideea golurilor între etaje |
+| `beech_b` | 82 | `Trunk.001`, `Crown.001` | 4,7 × 10,6 × 5,0 | assembly | 292 → ~800 | idem, mai înalt, coroana mai asimetrică (ramura joasă iese pe o parte, cum e pe planșă) |
+| `beech_c` | 101 | `Trunk.002`, `Crown.002` | 7,5 × 14,3 × 7,2 | assembly | 292 → ~900 | idem, cel mai înalt și cel mai lat, 4 etaje |
+| `beech_dead` | 66 | `Beech_Dead` | 2,9 × 8,5 × 3,3 | bază | 136 → ~400 | v1: un băț verde cu 4 ace. Planșa: **trunchi gros, rupt la vârf (ciot), cu evazare și rădăcini la bază, și 6–8 crengi groase care se ramifică din nou în crenguțe**, toate conice. Fără verde pe trunchi (mușchiul doar ca petice mici, dar nodul ia `bark_beech` oricum) |
+| `rata_tree` | 13 | `Rata` | 4,3 × 3,7 × 4,2 | bază | 354 → ~900 | v1: o bilă verde cu 3 fețe roșii. Planșa: **copăcel cu trunchi vizibil și ramuri, coroană în 6–9 smocuri separate, fiecare stropit cu 4–8 ciorchini roșii mici** (florile sunt puncte pe suprafață, nu fețe mari). **Excepție de cotă: Y poate urca la 5 m** (contractul v1 cerea 5 m, a ieșit 3,67). Sloturi: §0.1.3 |
+| `tussock_clump` | **313** | `Tussock_Clump` | 0,68 × 0,80 × 0,68 | bază | 144 → ~450 | v1: 6 fire verzi drepte. Planșa: **smoc des de 20–30 de lame curbate în afară, ca o fântână, cu vârfurile aplecate, galben-oliv la vârf și verde la bază**; 2–3 smocuri lipite. `CACTUS_GREEN` 12 + `SAND_LIGHT` 0 pe vârfuri, sau `tint_gradient` |
+| `stump` | 1 | `Stump` | 1,1 × 0,8 × 1,0 | bază | 68 → ~400 | v1: o prismă cu 2 țepi. Planșa: **ciot evazat cu 5–6 rădăcini lungi care se întind pe sol, tăietură plană sus cu inele, mușchi verde pe rădăcini și la bază** |
+| `driftwood` | 37 | `Driftwood` | 4,0 × 0,4 × 0,6 | bază | 52 → ~300 | v1: un băț frânt. Planșa: **buștean gros culcat, cu capătul rupt zdrențuit și 3–4 crengi groase care se ridică din el, câteva căzute pe sol**. Excepție de cotă: Y până la 1,5 m (crengile ridicate), X/Z în ±10% |
+| `chasm_bridge_rail` | 1 | `Rail_L`, `Rail_R` | 12,2 × 1,4 × 40,5 | waterline | 336 → ~1.200 | v1: două grinzi. Planșa: **gard de lemn: stâlpi pătrați la ~2,5 m, cu 2 rânduri de scânduri orizontale**. Contract înghețat: Rail_L/R la X = ±5,84, lungimea 40 m, `waterline` (geometria încalecă Y=0) |
+
+### Grupa C — satul (`build_fiordland_village.py`) — val 1
+
+| piesă | inst. | noduri | AABB v1 | origine | buget v1 → v2 | ce arată v1 / ce cere planșa |
+|---|---:|---|---|---|---|---|
+| `wharf` | 2 | `Wharf` | 4,6 × 2,6 × 20,1 | bază (axă) | 376 → ~1.500 | v1: o cutie gri cu 4 butoni. Planșa: **zid de cheu din blocuri de piatră în asize (rânduri decalate, rosturi adânci), punte de piatră/lemn deasupra și stâlpi groși de lemn (babale) la colțuri, cu capac**. Capete plane la Z = ±10,05 (contract v1) |
+| `cafe_shed` | 2 | `House_Wall`, `House_Roof` | 5,8 × 3,7 × 4,6 | assembly | 308 → ~1.800 | v1: o cutie maro cu placă albastră. Planșa: **cabană din lemn închis (`LOG_DARK` 28) pe două niveluri, acoperiș în două ape de tablă gri cu streașină, ferestre calde (`SAND_LIGHT` 0) cu ramă, ușă, scări de intrare**. Amprenta X/Z ±10%, **Y până la 6,5 m** |
+| `lodge` | 2 | `House_Wall.001`, `House_Roof.001` | 17,1 × 6,2 × 8,1 | assembly | 636 → ~3.000 | v1: o cutie maro cu acoperiș albastru. Planșa: **lodge lung pe două niveluri, balcon continuu la etaj cu balustradă, 8–10 ferestre calde pe fațadă, două uși, acoperiș gri în două ape cu nervuri (`corrugate`)**. Amprenta ±10%, Y până la 8 m. Corectura v1 („un singur nivel") cade |
+| `heli_pad` | 1 | `HeliPad` | 11,7 × 0,3 × 12,0 | bază | 178 → ~800 | v1: un disc palid cu fețe albe aleatoare. Planșa: **tambur din blocuri de piatră pe margine, platformă întunecată (`VOLCANIC_BLACK` 20 / `ASPHALT_EDGE`), cerc alb și H alb în relief mic**. Coliziunea `none` (se calcă): **Y maxim 0,4 m** |
+| `luggage_container` | 1 | `Container` | 2,4 × 2,6 × 6,1 | bază | 88 → ~500 | v1: cutie albastru-bej. Planșa: **container gri închis cu nervuri verticale (`corrugate`) pe laterale, ramă la capete, uși duble cu balamale pe capăt** |
+| `road_sign_blank` | 1 | `RoadSign` | 1,6 × 2,5 × 0,1 | bază | 36 → ~200 | aproape bun. Planșa: **stâlpi de metal gri (nu lemn), panou verde cu bordură albă și ramă groasă** |
+| `snow_pole` | 47 | `SnowPole` | 0,06 × 2,0 × 0,06 | bază | 40 → ~80 | aproape bun. Planșa: **benzi alternante roșu-alb pe toată înălțimea (4–5 benzi)**, nu doar vârful |
+
+### Grupa D — stâncile-hero (`build_fiordland_rocks.py`) — val 2, după A
+
+| piesă | noduri | AABB v1 | origine | ce arată v1 / ce cere planșa |
+|---|---|---|---|---|
+| `stirling_ledge` | `Wall`, `Overhang`, `Shelf` | 21,6 × 26,6 × 39,6 | assembly | v1: 4 cilindri bej în dungi, cu o placă. Planșa: **masiv de gneis în coloane verticale fațetate (prisme lungi, rupte în trepte), cu fețe mari plane, platou cu mușchi și iarbă sus, terase mici cu mușchi pe flanc, blocuri căzute la bază**. Contractele înghețate din `fiordland_inventory.md` rămân: buza surplombului la **+14,0 m**, nișa ≥ 5 m liber deasupra `Shelf`, coliziune `mesh` |
+| `torrent_chute` | `Rock` | 11,0 × 16,0 × 24,0 | assembly | v1: o cutie bej cu capac verde. Planșa: **masiv fațetat, cu jgheab adânc tăiat pe toată înălțimea (albie de rocă cu trepte), blocuri la gură, platou cu mușchi**. Buza jgheabului la +14,0 m, coliziune `none` |
+
+### Grupa E — vehiculele și avalanșa — val 2
+
+| piesă | noduri | AABB v1 | origine | ce arată v1 / ce cere planșa |
+|---|---|---|---|---|
+| `coach_fiordland` | `Coach` | 3,06 × 3,29 × 8,66 | bază | v1: o cutie albă pe una verde. Planșa: **autocar cu caroserie verde (`TROPICAL_GREEN` 21 sau `CACTUS_GREEN` 12), bandă de geamuri negre continuă cu montanți, parbriz mare înclinat, acoperiș alb cu aer condiționat, roți cu jante în pasaje decupate, faruri**. **AABB-ul e contract de gameplay (≤ 3,0 × 3,2 × 8,5 + bevel, `TunnelSignalHazard`): nu crește** |
+| `bush_plane` | `Plane` | 8,0 × 1,9 × 7,5 | center | v1: corect ca idee, subțire. Planșa: **fuzelaj cu volum (bot rotunjit, cabină cu geamuri), aripă sus pe montanți, coadă cu derivă roșie, dungi roșii, tren fix cu roți și carenaje, elice**. Anvergura 8,0 m, origine centru |
+| `kayak_a`, `kayak_b` | `KayakA`, `KayakB` | 1,6 × 0,6 × 3,6 | bază | acum: o barcă pneumatică cu volan (reuse „Canoe – Low poly", 6.775 tri), nu caiac. Planșa: **caiac sit-on-top, fuzelat la ambele capete, 2 cockpituri negre, punte cu nervuri**. `kayak_a` roșu-portocaliu (`KERB_RED` 7 / `LAVA_ORANGE` 30), `kayak_b` galben (`CAR_YELLOW` 16). Cota: **0,6 × 0,35 × 3,6** (contractul v1). Se face din Builder și **înlocuiește reuse-ul** |
+| `cruise_boat` | `Boat` | 4,8 × 6,2 × 14,0 | waterline | acum: un feribot cu coș (reuse „Cruise Ship – toofan", decizia dezvoltatorului #2, 26 sep: cutia albă v1 nu citea vapor). Planșa: **vaporaș de croazieră alb, cu carenă curbată, două punți cu șir lung de geamuri negre, punte de sus deschisă cu balustradă și bănci, pupă cu platformă de lemn**. Se construiește din Builder și **intră în joc DOAR dacă bate reuse-ul pe comparație și la camera de joc**. Altfel rămâne reuse-ul |
+| `tree_avalanche` | `Boulder_A..D` | ~2,6 / 1,9 / 1,6 / 1,5 (max X,Z) | **center** | v1: bile cu țepi. Planșa: **trunchiuri rupte cu rădăcini și crengi, bolovani cu mușchi**. Contractul `AvalancheHazard` rămâne: **raport de laturi ≤ 1,5 : 1** (piesa se rostogolește într-o sferă de coliziune), deci fiecare nod e un ghem: bolovan fațetat prins în 2–4 trunchiuri scurte rupte, cu rădăcini evazate și crengi, A = mai mult rocă, D = mai mult lemn |
+
+### Grupa F — fundalul și pinguinul — val 2
+
+| piesă | noduri | ce arată v1 / ce cere planșa |
+|---|---|---|
+| `fiordland_horizon` | `FarWall_A`, `FarWall_B`, `SnowRidge_A`, `SnowRidge_B` | v1: piramide cu 3 benzi plate de culoare. Planșa: **FarWall = perete abrupt și lung, cu creasta zimțată neregulat, fețe de gneis închis acoperite de pădure (pete verde închis care urcă pe ravene), 2–4 cascade albe subțiri**; **SnowRidge = masiv cu 2–3 vârfuri, fațete mari, zăpadă în pete care coboară pe ravene (nu calotă plată), stâncă gri închis dedesubt**. Contractul v1 rămâne: volume închise lizibile din orice azimut (yaw aleator), noduri cu nume fix, `cast_shadow` OFF la integrare |
+| `penguin_tawaki` | `Penguin` | v1: un prism cu cap galben. Planșa: **corp în formă de pară, aplecat ușor în față, aripioare pe lângă corp, cap negru rotund cu sprânceana galbenă care trece de ochi spre ceafă, cioc portocaliu-roșu gros, labe roz**. Cota 0,75 m |
+
+### Nu se refac
+
+`traffic_light_pole` (scos din pistă), `kea` (anulat), `CloudBank_A` (cod),
+`fern_clump_a/b` (reuse `plants/fern_cluster.glb`).
+
+## 3. Valuri
+
+| val | grupa | constructor | worktree / ramură |
+|---|---|---|---|
+| 1 | A stâncile mici | Sonnet | `D:/GameDev/wt-fiord-v2-a` / `fiord/kit-v2-a` |
+| 1 | B pădurea | Sonnet | `D:/GameDev/wt-fiord-v2-b` / `fiord/kit-v2-b` |
+| 1 | C satul | Sonnet | `D:/GameDev/wt-fiord-v2-c` / `fiord/kit-v2-c` |
+| 2 | D stâncile-hero | Sonnet | după A, pe același script |
+| 2 | E vehicule + avalanșă | Sonnet | — |
+| 2 | F fundal + pinguin | Sonnet | — |
+
+Integrarea e a coordonatorului, în `D:/GameDev/wt-fiord-kit-v2` /
+`fiord/kit-v2`: merge pe grupe, `--import`, `verify_fiordland.sh`, capturi
+de joc pe Track16 (camera de joc, nu doar planșa), `probe_manual` /
+`probe_decor` (decor plutitor sau îngropat după schimbarea formei),
+`ProbeLaneClear` și `ProbeRace` (coliziunea hull s-a schimbat pe sute de
+instanțe), apoi `bash tools/verify_local.sh` înainte de PR.

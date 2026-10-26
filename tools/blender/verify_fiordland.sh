@@ -55,10 +55,10 @@ echo "== padurea (brief §1.4, val 2) =="
 check "plants/beech_a.glb"         1050 --origin=assembly
 check "plants/beech_b.glb"          950 --origin=assembly
 check "plants/beech_c.glb"         1020 --origin=assembly
-check "plants/beech_dead.glb"       560
+check "plants/beech_dead.glb"       990
 check "plants/rata_tree.glb"       880
-check "plants/tussock_clump.glb"    760
-check "props/stump.glb"             330
+check "plants/tussock_clump.glb"   1850
+check "props/stump.glb"             660
 check "props/driftwood.glb"         280
 # chasm_bridge_rail: Rail_L/Rail_R, origine "waterline" — Y=0 e cota
 # TABLIEI (brief: "origine pe axa drumului, la cota tabliei"), nu solul:

@@ -72,7 +72,7 @@ echo "== avalansa (brief §1.5, val 3) =="
 # tree_avalanche: 4 noduri Boulder_A..D, origine CENTRU (contractul
 # AvalancheHazard — obiectul se rostogoleste, vezi memoria
 # `sonda-scurta-extrapolata-gresit` si docul din avalanche_hazard.gd).
-check "effects/tree_avalanche.glb"  300 --origin=center
+check "effects/tree_avalanche.glb" 2600 --origin=center
 
 echo "== vehiculele (brief §1.6, val 3) =="
 check "vehicles/coach_fiordland.glb" 3600

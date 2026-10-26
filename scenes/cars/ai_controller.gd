@@ -321,6 +321,12 @@ var _signal_index: Dictionary = {}
 ## la 50-100 m pe rampa (brief §2.0); la ~30 m/s inchiderea cu camionul e de
 ## ~38 m/s, deci 90 m = ~2.4 s.
 static var bus_reach_m: float = 90.0
+## Distanta in linie dreapta (m) de la care se vede camionul peste gol (terasa de sus -> cea de jos) ...
+static var bus_sight_m: float = 110.0
+## Cat de mult trage tinta spre marginea opusa camionului cand virajul e strans (0 = deloc, 2 = complet la severitate 0.5).
+static var bus_corner_hug: float = 2.0
+## ... cu conditia sa nu fie mai departe de atat PE AXA (ca sa nu citeasca un camion din alta zona a pistei).
+const BUS_FAR_ALONG_M: float = 260.0
 ## Dupa ce centrul camionului a trecut de noi cu atatia metri, linia se desface.
 const BUS_PASSED_M: float = 9.0
 ## Cat de repede (1/s) se instaleaza / se desface banda opusa camionului.
@@ -340,6 +346,7 @@ var _bus_latched: Dictionary = {}
 var _bus_tline: Dictionary = {}
 var _bus_speed_scale: float = 1.0
 var _bus_trace: bool = OS.get_environment("BUS_TRACE") == "1"
+var _exc_trace: bool = OS.get_environment("EXC_TRACE") == "1"
 
 ## Excavatorul (`ExcavatorHazard.ai_dice`, Carrara): la apropiere AI-ul da cu
 ## zarul O DATA PER TRECERE — 1-3 ocoleste pe banda libera, 4-6 trece pe sub brat
@@ -353,6 +360,13 @@ var _exc_info: Dictionary = {}
 var _exc_choice: Dictionary = {}
 var _exc_blend: Dictionary = {}
 var _exc_rng: RandomNumberGenerator = null
+## Blocat de bratul coborat (ramura 4-6 a zarului): masina ASTEAPTA la brat, nu face marsarier — ca la usa de
+## piatra / semafor (`_watch_progress` reseteaza ferestrele). Fara asta, deblocarea dadea marsarier virat spre
+## berma si masina ramanea cocotata pe ea (ProbeCarrara pe Track23: 6 din 7 repuneri la brat). Plafon de timp:
+## o asteptare care depaseste o faza de brat (3.2 s) + marja trece la deblocarea obisnuita.
+const EXC_WAIT_CAP_S: float = 5.0
+var _exc_hold: bool = false
+var _exc_hold_time: float = 0.0
 ## Zarurile date, pentru sonde: [rezultat 1-6, ...] in ordinea trecerilor.
 var dice_log: Array[int] = []
 ## Doar pentru sonde: `false` = AI-ul ignora tubul (garda trebuie sa prinda
@@ -1116,7 +1130,12 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 			var tl := r.side_at(bi).dot(tp - r.baked[r.wrap_index(bi)])
 			var hw_t: float = maxf(track.width_at_index(bi) if car.route == 0 				else r.half_width, 0.001)
 			var on_road := absf(tl) < hw_t + 1.5
-			if oncoming and on_road and along <= bus_reach_m and along >= -BUS_PASSED_M:
+			# Vazut: pe axa pana la `bus_reach_m`, SAU in linie dreapta pana la `bus_sight_m` cand mai e de
+			# mers pana la el cel mult BUS_FAR_ALONG_M — de pe terasa de sus se vede camionul de pe cea de
+			# jos peste gol (brief §2: "il vezi de pe terasa de sus, alegi interiorul acului").
+			var planar := Vector2(car.global_position.x - tp.x, car.global_position.z - tp.z).length()
+			var seen := along <= bus_reach_m or (planar <= bus_sight_m and along <= BUS_FAR_ALONG_M)
+			if oncoming and on_road and seen and along >= -BUS_PASSED_M:
 				_bus_latched[key] = true
 			else:
 				_bus_latched.erase(key)
@@ -1137,19 +1156,25 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 					hi = tl - ext - BUS_CAR_HALF_M
 					lo = -hw_t + 0.2 + BUS_CAR_HALF_M
 				var lat := (lo + hi) * 0.5 if lo < hi else (hi if side > 0.0 else lo)
+				# In viraj masina aluneca spre exterior (ProbeCarrara pe Track23: tinta +1.9 m, ajunge la
+				# -1.3 m la apexul acului), deci tinteste mai spre marginea opusa camionului cand
+				# severitatea virajului creste.
+				if lo < hi and bus_corner_hug > 0.0:
+					var edge := hi - 0.25 if side > 0.0 else lo + 0.25
+					lat = lerpf(lat, edge, clampf(severity * bus_corner_hug, 0.0, 1.0))
 				tline = clampf(lat / hw_t, -LINE_MAX, LINE_MAX)
 				_bus_tline[key] = tline
 		var blend: float = _bus_blend.get(key, 0.0)
 		blend = move_toward(blend, target_blend, dt * bus_blend_rate)
 		_bus_blend[key] = blend
-		if _bus_trace and blend > 0.0:
+		if _bus_trace and (blend > 0.0 or target_blend > 0.0):
 			var bp := bus.body_position()
 			var rr := track.route_at(car.route)
 			var ci := rr.closest_index(idx, car.global_position)
-			print("[bus] f=%d %s blend=%.2f tline=%.2f line=%.2f carlat=%.2f v=%.1f frac=%.3f" % [
+			print("[bus] f=%d %s blend=%.2f tline=%.2f line=%.2f carlat=%.2f v=%.1f frac=%.3f latched=%s" % [
 				Engine.get_physics_frames(), car.pilot_name, blend, tline, line,
 				rr.side_at(ci).dot(car.global_position - rr.baked[ci]), speed,
-				track.frac_at(idx, car.route)])
+				track.frac_at(idx, car.route), str(_bus_latched.has(key))])
 		if blend > 0.0:
 			line = lerpf(line, tline, blend)
 			best_blend = maxf(best_blend, blend)
@@ -1162,6 +1187,7 @@ func _bus_line(idx: int, speed: float, line: float, severity: float) -> float:
 ## Excavatorul cu zar: vezi comentariul de la `EXC_REACH_M`. Geometria (unde e
 ## brat-ul si sasiul in coordonatele soselei) se calculeaza o data per masina.
 func _exc_line(idx: int, line: float) -> float:
+	_exc_hold = false
 	var nodes := get_tree().get_nodes_in_group(ExcavatorHazard.AI_GROUP)
 	if nodes.is_empty():
 		return line
@@ -1233,6 +1259,9 @@ func _exc_line(idx: int, line: float) -> float:
 		elif choice != 0 and (along < -EXC_PASSED_M or along > EXC_REACH_M + 40.0):
 			_exc_choice.erase(key)
 			choice = 0
+		# in fata bratului (ramura "trece"), aproape oprita: asteapta, nu da inapoi
+		if choice == 2 and along > -2.0 and along < 9.0 and car.horizontal_speed() < 3.0:
+			_exc_hold = true
 		var blend: float = _exc_blend.get(key, 0.0)
 		blend = move_toward(blend, 1.0 if choice != 0 else 0.0, dt * EXC_BLEND_RATE)
 		_exc_blend[key] = blend
@@ -1254,6 +1283,10 @@ func _exc_line(idx: int, line: float) -> float:
 				lat_goal = minf(lat_now, float(info["pass"]))
 			else:
 				lat_goal = maxf(lat_now, float(info["pass"]))
+		if _exc_trace and Engine.get_physics_frames() % 6 == 0:
+			print("[exc] f=%d %s choice=%d along=%.1f blend=%.2f line_in=%.2f goal=%.2f lat_goal=%.2f free=%.2f pass=%.2f" % [
+				Engine.get_physics_frames(), car.pilot_name, last_choice, along, blend, line,
+				clampf(lat_goal / hw, -LINE_MAX, LINE_MAX), lat_goal, float(info["free"]), float(info["pass"])])
 		return lerpf(line, clampf(lat_goal / hw, -LINE_MAX, LINE_MAX), blend)
 	return line
 
@@ -1971,6 +2004,14 @@ func _watch_progress(delta: float, speed: float) -> void:
 	if _gate_hold:
 		_reset_progress()
 		return
+	# Asteptarea sub brat (excavator cu zar): vezi EXC_WAIT_CAP_S.
+	if _exc_hold:
+		_exc_hold_time += delta
+		if _exc_hold_time < EXC_WAIT_CAP_S:
+			_reset_progress()
+			return
+	else:
+		_exc_hold_time = 0.0
 	# Plasa rapida: izbitura frontala care opreste masina pe loc.
 	if speed < STALL_SPEED:
 		_stall_time += delta

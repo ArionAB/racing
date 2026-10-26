@@ -38,6 +38,7 @@ from mathutils import Matrix, Vector
 # Sloturile legale pe Fiordland (brief §0.4). ROCK_DARK/ROCK_LIGHT interzise.
 GNEISS_LIT = MARBLE_GREY
 GNEISS_DARK = VOLCANIC_BLACK
+GNEISS_MID = ASPHALT_EDGE
 FOREST = TROPICAL_GREEN
 FOREST_DARK = LOG_DARK
 SNOW = FOAM_WHITE
@@ -62,6 +63,18 @@ def _vn(x, seed, scale):
     f = u - i
     f = f * f * (3.0 - 2.0 * f)
     return _hash(i, 0, seed) * (1.0 - f) + _hash(i + 1, 0, seed) * f
+
+
+def _vn2(x, y, seed, sx, sy):
+    """Zgomot de valoare 2D neted, 0..1 (praguri netede pe fatete, nu pe celule)."""
+    u, v = x / sx, y / sy
+    i, j = math.floor(u), math.floor(v)
+    fu, fv = u - i, v - j
+    fu = fu * fu * (3.0 - 2.0 * fu)
+    fv = fv * fv * (3.0 - 2.0 * fv)
+    a = _hash(i, j, seed) * (1 - fu) + _hash(i + 1, j, seed) * fu
+    c = _hash(i, j + 1, seed) * (1 - fu) + _hash(i + 1, j + 1, seed) * fu
+    return a * (1 - fv) + c * fv
 
 
 def _sstep(a, b, x):
@@ -196,7 +209,7 @@ def _far_wall(seed, name, hmax, n_peaks, ravines_p, ravines_m, buttress_seed):
                                     rav_strength)
         # talpa
         f = b.bm.faces.new((cols[i][0], cols[i][-1], cols[i + 1][-1], cols[i + 1][0]))
-        f[b.slot] = FOREST_DARK
+        f[b.slot] = GNEISS_DARK
     e0 = b.bm.faces.new(tuple(reversed(cols[0])))
     e1 = b.bm.faces.new(tuple(cols[-1]))
     e0[b.slot] = GNEISS_DARK
@@ -205,24 +218,24 @@ def _far_wall(seed, name, hmax, n_peaks, ravines_p, ravines_m, buttress_seed):
 
 
 def _wall_color(xm, t, side, i, r, seed, ravs, fall_x, rav_strength):
-    hv = _hash(i // 2, r // 2 + 40, seed + 41)
-    hv2 = _hash(i // 2, r // 2 + 40, seed + 43)
     # cascada: fasia dintre cele doua coloane de langa fiecare ravena
-    for s, xr in fall_x:
-        if s == side and abs(xm - xr) < 0.2 and 0.07 < t < 0.94:
+    for sd, xr in fall_x:
+        if sd == side and abs(xm - xr) < 0.2 and 0.07 < t < 0.94:
             return FALL
     g = rav_strength(xm, side)
-    line = 0.36 + 0.24 * _vn(xm, seed + 51, 38.0) + 0.45 * g
-    # pete: padurea mai sus, izolate, deasupra liniei, pe fetele din umbra
-    if t < line + 0.04 * (hv - 0.5):
-        if t < 0.07 or hv < 0.025:
-            return FOREST_DARK
-        return FOREST
-    if t < line + 0.17 and hv2 < 0.20:
-        return FOREST if hv < 0.6 else FOREST_DARK
-    # roca: gneis inchis; fatete luminate (gri) mai multe spre creasta
-    lit = 0.03 + 0.15 * _sstep(0.60, 0.95, t)
-    return GNEISS_LIT if hv < lit else GNEISS_DARK
+    # linia padurii: urmeaza ravenele (+g) si creasta, cu zgomot 2D neted
+    # (prag pe inaltimea fetei, nu pe coloana de grila)
+    n1 = _vn2(xm, t * 60.0, seed + 41, 14.0, 16.0)
+    line = 0.34 + 0.22 * _vn(xm, seed + 51, 38.0) + 0.45 * g + 0.34 * (n1 - 0.5)
+    n2 = _vn2(xm, t * 60.0 + 7.0, seed + 43, 9.0, 11.0)
+    if t < line:
+        # amestec TROPICAL_GREEN / LOG_DARK, LOG_DARK mai des in ravene si la baza. NU 45%: LOG_DARK iese brun pe ecran si 45% da un perete maro, nu padure
+        dark = 0.04 + 0.16 * g
+        return FOREST_DARK if n2 < dark else FOREST
+    # roca: negru vulcanic + gri inchis; cateva fatete usor mai luminoase sus
+    if t > 0.82 and side > 0 and n2 > 0.90:
+        return GNEISS_LIT
+    return GNEISS_DARK if n2 < 0.62 else GNEISS_MID
 
 
 # --- SnowRidge_A / SnowRidge_B ------------------------------------------------
@@ -287,7 +300,7 @@ def _snow_ridge(seed, name, peaks, outline=1.0):
             faces.append(b.bm.faces.new((ring_v[ri][i], ring_v[ri + 1][i],
                                          ring_v[ri + 1][j], ring_v[ri][j])))
     base = b.bm.faces.new(tuple(ring_v[-1][::-1]))
-    base[b.slot] = FOREST_DARK
+    base[b.slot] = GNEISS_DARK
 
     bmesh.ops.recalc_face_normals(b.bm, faces=b.bm.faces[:])
     for f in faces:
@@ -299,18 +312,18 @@ def _snow_ridge(seed, name, peaks, outline=1.0):
         hv = _hash(int(c.x * 3), int(c.y * 3), seed + 71)
         hv2 = _hash(int(c.x * 2), int(c.y * 2), seed + 73)
         steep = max(0.0, 0.72 - n.z)
-        foot = 0.17 + 0.07 * hv
+        foot = 0.17 + 0.16 * (_vn2(c.x, c.y, seed + 77, 22.0, 22.0) - 0.5) + 0.10 * max(0.0, -rv)
         # zapada: linie joasa in ravene (rv<0 = fund de ravena), mai sus pe
         # coaste; fetele abrupte tin putina
         sline = 0.34 + 0.14 * rv + 0.45 * steep + 0.10 * (hv - 0.5)
         if zr < foot:
-            col = FOREST_DARK if (hv < 0.12 or zr < 0.0) else FOREST
+            col = FOREST   # fara LOG_DARK: iese brun pe ecran (puncte maro la baza)
         elif zr > sline:
             col = SNOW
             if zr > 0.80 and steep > 0.32 and hv2 < 0.45:
                 col = GNEISS_DARK      # coltul de stanca care iese din zapada
         else:
-            col = GNEISS_LIT if (n.z > 0.5 and hv2 < 0.14) else GNEISS_DARK
+            col = GNEISS_LIT if (n.z > 0.6 and hv2 < 0.05) else (GNEISS_MID if hv2 > 0.70 else GNEISS_DARK)
         f[b.slot] = col
     return b.to_object(name)
 

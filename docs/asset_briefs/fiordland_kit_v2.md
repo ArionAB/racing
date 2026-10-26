@@ -464,3 +464,11 @@ Diferente ramase:
 - FarWall: cascadele sunt fasii drepte pe un perete, nu fire care serpuiesc; nu exista fate cu aspect de pad aratat in poza (stanca e neteda pe fatete); peticele de padure sunt pe celule mari, nu foliaj fin.
 - SnowRidge: planșa e un bloc cu fete laterale verticale; aici e un masiv cu panta continua (silueta de masiv, nu de diorama). O cascada subtire pe SnowRidge nu s-a pus (fasia ar iesi tot alba pe zapada). Cele doua noduri A/B difera doar prin varfuri/ravene.
 - Pinguin: laba e o pana plata, fara degete; fara coada; ochiul nu e modelat (cap negru pe negru); sprancenele sunt tuburi, nu pene caracteristice. Aripioarele sunt rigide si au putin prea mult spatiu fata de corp.
+
+### Grupa F — runda de culoare (verdictul coordonatorului, formele neschimbate)
+
+Doar culori/petice in `build_fiordland_horizon.py`; AABB si tri identice (6374).
+- FarWall: roca doar `VOLCANIC_BLACK` + `ASPHALT_EDGE`, fara `MARBLE_GREY` (cateva fatete mai luminoase doar pe creasta fetei +Y, <3%). Linia padurii nu mai e pe coloana de grila, ci prag pe inaltimea fetei cu zgomot 2D neted (urmareste ravenele si creasta); peticele de padure izolate au fost scoase. Talpa si capacele: roca inchisa, nu maro.
+- SnowRidge: brau de padure cu margine neregulata (zgomot 2D pe pozitie, coboara/urca pe ravene); punctele maro de la baza scoase; fundul inchis pe roca.
+- Abatere de la cerere: amestecul `TROPICAL_GREEN`/`LOG_DARK` 55/45 NU s-a tinut. `LOG_DARK` iese BRUN pe ecran (atlasul nu are verde mai inchis), iar la 45% peretele devenea maro, nu padure. Pe FarWall `LOG_DARK` ramane 4% + pana la 20% in fundul ravenelor; pe SnowRidge 0. "Verde inchis" ramane deci doar prin AO copt (floor 0,2) si ceata; un verde mai inchis cere un slot nou sau o clasa de padure la integrare (`horizon_class`), decizie a coordonatorului.
+- Ramane: rocile citesc gri-violet mediu, nu negru-verzui ca pe planșa.

@@ -812,6 +812,8 @@ func _finish() -> void:
 			cc[k] = c[k]
 		var ctl := cars[i].controller as AIController
 		cc["dice"] = ctl.dice_log if ctl != null else []
+		cc["give_ups"] = ctl.give_up_log.map(func(g: Dictionary) -> Dictionary:
+			return {"t": g["t"], "along": snappedf(float(g["along"]), 0.1)}) if ctl != null else []
 		res.cars.append(cc)
 	if not _out.is_empty():
 		var f := FileAccess.open(_out, FileAccess.WRITE)

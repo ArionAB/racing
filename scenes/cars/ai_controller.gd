@@ -369,6 +369,15 @@ var _exc_hold: bool = false
 var _exc_hold_time: float = 0.0
 ## Zarurile date, pentru sonde: [rezultat 1-6, ...] in ordinea trecerilor.
 var dice_log: Array[int] = []
+## „Renunta dupa o asteptare": o masina care a dat 4-6 si sta aproape oprita in fata bratului (sau in coloana
+## din spatele altei masini, pana la EXC_WAIT_ZONE_M) cumuleaza timp; la EXC_GIVE_UP_S pierde pariul si ia
+## banda libera pana la sfarsitul trecerii. Nu citeste faza bratului (fara informatie ascunsa).
+## 3.5 s = o faza inchisa a bratului (3.2 s) + marja: oricine a asteptat o faza completa a vazut pariul pierdut.
+const EXC_GIVE_UP_S: float = 3.5
+const EXC_WAIT_ZONE_M: float = 30.0
+var _exc_wait: Dictionary = {}
+## Doar pentru sonde: per renuntare {t (s fizice de la start), pilot, along, key}.
+var give_up_log: Array[Dictionary] = []
 ## Doar pentru sonde: `false` = AI-ul ignora tubul (garda trebuie sa prinda
 ## contacte cu el — altfel nu e armata).
 var reads_shishi: bool = true
@@ -1258,7 +1267,20 @@ func _exc_line(idx: int, line: float) -> float:
 				_exc_choice[key] = choice
 		elif choice != 0 and (along < -EXC_PASSED_M or along > EXC_REACH_M + 40.0):
 			_exc_choice.erase(key)
+			_exc_wait.erase(key)
 			choice = 0
+		# asteptarea pariului pierdut (masina din coloana conteaza si ea)
+		if choice == 2 and along > -2.0 and along < EXC_WAIT_ZONE_M and car.horizontal_speed() < 3.0:
+			var waited: float = float(_exc_wait.get(key, 0.0)) + dt
+			_exc_wait[key] = waited
+			if waited >= EXC_GIVE_UP_S:
+				choice = 1
+				_exc_choice[key] = 1
+				_exc_wait.erase(key)
+				give_up_log.append({"t": snappedf(Engine.get_physics_frames() / 60.0, 0.1), "pilot": car.pilot_name,
+					"along": along, "key": key})
+		elif choice != 1:
+			_exc_wait.erase(key)
 		# in fata bratului (ramura "trece"), aproape oprita: asteapta, nu da inapoi
 		if choice == 2 and along > -2.0 and along < 9.0 and car.horizontal_speed() < 3.0:
 			_exc_hold = true

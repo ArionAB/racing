@@ -233,6 +233,12 @@ enum Kind {
 ## `PathMover.stick_to_ground`.
 @export var rock_stick_to_ground: bool = true
 
+## Modelul se ROSTOGOLESTE pe distanta parcursa (implicit, bolovanul). Stins =
+## doar ALUNECA, cu -Z pe directia de mers si talpa pe suprafata: sania de
+## lizzatura (Carrara, POI G). Vezi `RockfallHazard.roll_model`. Cheia ajunge
+## in spec doar cand e stinsa, deci orice nod de azi ramane bit-identic.
+@export var rock_roll_model: bool = true
+
 
 ## Ce a declarat nodul despre INFATISAREA obstacolului, in forma pe care o
 ## citeste deja `Track._build_hazard`: acelasi dictionar ca o intrare din
@@ -283,6 +289,8 @@ func model_spec() -> Dictionary:
 		spec["rock_speed"] = rock_speed
 		spec["rock_pause"] = rock_pause
 		spec["rock_stick_to_ground"] = rock_stick_to_ground
+		if not rock_roll_model:
+			spec["rock_roll_model"] = false
 	return spec
 
 

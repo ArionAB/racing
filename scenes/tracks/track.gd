@@ -13494,6 +13494,7 @@ func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 	rock.route_pause = float(spec.get("rock_pause",
 		RockfallHazard.DEFAULT_ROUTE_PAUSE))
 	rock.stick_to_ground = bool(spec.get("rock_stick_to_ground", true))
+	rock.roll_model = bool(spec.get("rock_roll_model", true))
 	for g in spec.get("groups", []):
 		rock.add_to_group(g)
 	# Cu TRASEU desenat in editor: bolovanul urmeaza curba de la primul punct

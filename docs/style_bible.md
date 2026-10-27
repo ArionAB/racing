@@ -420,6 +420,17 @@ se vede.
 Comutatorul e **`Track.theme_shadows`**. Dacă primul test pe device nu ține 60 fps,
 se stinge de acolo și AO-ul copt rămâne singura sursă de volum.
 
+**Profilul ieftin al telefonului (oct 2026).** Pe iPhone 12 Pro, Kyoto și Jodhpur
+cădeau pe Normal cu umbre „chiar și cu o felie". Măsurat (ProbePerf `--mobile`):
+2 felii → 1 felie taie ~10% din costul umbrei, umbra stinsă taie ~30% din cadru.
+Costul nu e în cascade, e în **pixelii care primesc umbra**: fiecare pixel luminat
+până la `shadow_distance` citește harta cu filtrul moale (4 eșantioane). Pe
+telefon, nivelul Normal pune de aceea o cascadă, plafon de 55 m peste tema
+(`Track.shadow_distance_cap`) și filtru hard (un eșantion; la 2048 pe 55 m sunt
+37 texeli/m, deci muchia dură rămâne mică). Maxim păstrează tema. Panoul TEST
+PERFORMANȚĂ are comutatoare separate pentru filtru, distanță, hartă și LOD, ca
+A/B-ul pe device să arate care dintre ele contează.
+
 `CLIFF_AO_STRENGTH` a coborât 0.45 → 0.22 odată cu ele: AO-ul radial și umbra
 dinamică **se adună**, iar la 0.45 baza falezelor ieșea aproape neagră.
 

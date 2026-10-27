@@ -159,6 +159,28 @@ func _add_perf_tests(box: VBoxContainer) -> void:
 		func(i: int) -> void:
 			GameState.dbg_glow = i
 			GameState.apply_gfx_tier())
+	# Costul umbrei pe PIXEL (oct 2026): filtrul, distanta si harta — ce
+	# „shadows" singur nu desparte. Prima comutare pe Hard/Soft recompileaza
+	# pipeline-urile (un sughit), apoi nimic.
+	_add_choice(box, "Test: shadow filter", GameState.DBG_SHADOW_FILTER_NAMES,
+		GameState.dbg_shadow_filter,
+		func(i: int) -> void:
+			GameState.dbg_shadow_filter = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: shadow distance", GameState.DBG_SHADOW_DIST_NAMES,
+		GameState.dbg_shadow_dist,
+		func(i: int) -> void:
+			GameState.dbg_shadow_dist = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: shadow map", GameState.DBG_SHADOW_SIZE_NAMES,
+		GameState.dbg_shadow_size,
+		func(i: int) -> void:
+			GameState.dbg_shadow_size = i
+			GameState.apply_gfx_tier())
+	_add_choice(box, "Test: mesh LOD", GameState.DBG_LOD_NAMES, GameState.dbg_lod,
+		func(i: int) -> void:
+			GameState.dbg_lod = i
+			GameState.apply_gfx_tier())
 
 
 ## Camera vie afla imediat, prin grup. Salvarea merge in acelasi apel: sliderele

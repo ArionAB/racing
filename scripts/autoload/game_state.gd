@@ -260,11 +260,34 @@ var haptics_enabled: bool = true
 ##   1 = NORMAL (implicit): umbre + glow; pe telefon randarea 3D la ~864 px
 ##       inaltime si MSAA 4x (pe un GPU cu placi 4x la 0.75 e mai ieftin si
 ##       mai curat decat 2x la nativ); pe desktop rezolutie nativa.
-##   2 = MAXIM: totul, la rezolutie nativa, MSAA 4x.
+##       Pe telefon umbra e in PROFILUL IEFTIN (vezi SHADOW_DISTANCE_MOBILE).
+##   2 = MAXIM: totul, la rezolutie nativa, MSAA 4x, umbra cum o cere tema.
 ## Umbrele si glow-ul se citesc la construirea pistei (Track.gfx_tier), deci
 ## schimbarea lor se vede la urmatoarea cursa; scala si MSAA se aplica pe loc.
 const GFX_TIER_NAMES: Array[String] = ["Low", "Normal", "High"]
 var gfx_tier: int = 1
+
+## PROFILUL IEFTIN DE UMBRA al telefonului pe Normal (26 oct 2026). Pe iPhone
+## 12 Pro, Kyoto si Jodhpur cadeau pe Normal cu umbre „chiar si cu 1 felie".
+## Masurat cu ProbePerf --mobile: 2 felii -> 1 felie taie ~10% din costul
+## umbrei, umbra stinsa taie ~30% din cadru. Deci costul NU e in cascade, e in
+## pixelii care PRIMESC umbra: fiecare pixel luminat pana la `shadow_distance`
+## (90 m) citeste harta de umbra cu filtrul moale (soft_shadow_filter_quality
+## 2 = 4 esantioane; implicitul Godot pe mobil e 0 = Hard, 1 esantion).
+## Profilul schimba exact asta: filtru Hard, plafon de distanta (pixelii de
+## dincolo sar peste citire; harta de 2048 ajunge la 37 texeli/m, deci muchia
+## dura ramane mica) si o singura cascada (fara banda de amestec intre felii,
+## care citeste ambele harti). Nivelul MAXIM pastreaza reglajele temei; pe
+## desktop nu se aplica (bugetul de acolo nu e cel de pe telefon).
+const SHADOW_DISTANCE_MOBILE: float = 55.0
+## Pragul de LOD al mesh-urilor importate (px pe ecran sub care se trece la
+## nivelul mai grosier), per nivel, pe telefon: Economic / Normal / Maxim.
+## Masurat pe Jodhpur: 8 px taie ~23% din triunghiuri; pe desktop ramane 1.
+const MESH_LOD_PX_MOBILE: Array[float] = [8.0, 4.0, 1.0]
+## Starea EFECTIVA a filtrului de umbra (RenderingServer n-are getter), citita
+## de HUD pentru linia de optiuni.
+var shadow_filter_hard: bool = false
+var _shadow_atlas_px: int = 0
 
 # Puntea touch. Conventia ecranului: -1 = stanga, +1 = dreapta.
 var touch_steer: float = 0.0
@@ -311,6 +334,15 @@ func apply_gfx_tier() -> void:
 	if vp == null:
 		return
 	var mobile := OS.has_feature("mobile")
+	# Profilul ieftin de umbra (vezi SHADOW_DISTANCE_MOBILE): plafonul si
+	# cascada unica le citeste Track la construirea soarelui, filtrul se
+	# aplica pe loc, global.
+	var cheap_shadows := mobile and gfx_tier == 1
+	Track.shadow_distance_cap = SHADOW_DISTANCE_MOBILE if cheap_shadows else 0.0
+	Track.shadow_single_split = cheap_shadows
+	_set_shadow_filter(cheap_shadows or _project_shadow_filter() == RenderingServer.SHADOW_QUALITY_HARD)
+	_set_shadow_atlas(_project_shadow_size())
+	vp.mesh_lod_threshold = MESH_LOD_PX_MOBILE[gfx_tier] if mobile else 1.0
 	if mobile:
 		var target_h: float = [720.0, 864.0, 100000.0][gfx_tier]
 		# Inaltimea in PIXELI FIZICI, nu `get_visible_rect()`: cu
@@ -347,10 +379,24 @@ const DBG_SCALE_NAMES: Array[String] = ["Tier", "540p", "648p", "720p", "864p", 
 const DBG_SCALE_H: Array[float] = [0.0, 540.0, 648.0, 720.0, 864.0, 100000.0]
 const DBG_SHADOW_NAMES: Array[String] = ["Tier", "Off", "1 split", "2 splits"]
 const DBG_GLOW_NAMES: Array[String] = ["Tier", "Off", "On"]
+## Comutatoarele de umbra pe PIXEL (26 oct 2026): filtrul, distanta si harta.
+## Astea despart costul pe care „Off / 1 felie / 2 felii" nu-l despartea:
+## cat platesc pixelii care primesc umbra, nu cati casteri intra in pasa.
+const DBG_SHADOW_FILTER_NAMES: Array[String] = ["Tier", "Hard", "Soft"]
+const DBG_SHADOW_DIST_NAMES: Array[String] = ["Tier", "40 m", "55 m", "70 m", "90 m"]
+const DBG_SHADOW_DIST_M: Array[float] = [0.0, 40.0, 55.0, 70.0, 90.0]
+const DBG_SHADOW_SIZE_NAMES: Array[String] = ["Tier", "1024", "2048", "4096"]
+const DBG_SHADOW_SIZE_PX: Array[int] = [0, 1024, 2048, 4096]
+const DBG_LOD_NAMES: Array[String] = ["Tier", "1 px", "4 px", "8 px"]
+const DBG_LOD_PX: Array[float] = [0.0, 1.0, 4.0, 8.0]
 var dbg_msaa: int = 0
 var dbg_scale: int = 0
 var dbg_shadows: int = 0
 var dbg_glow: int = 0
+var dbg_shadow_filter: int = 0
+var dbg_shadow_dist: int = 0
+var dbg_shadow_size: int = 0
+var dbg_lod: int = 0
 
 ## Aplica comutatoarele de test peste nivelul grafic. Se cheama la sfarsitul
 ## lui `apply_gfx_tier`, la pornirea cursei (pista abia si-a construit soarele)
@@ -366,12 +412,22 @@ func apply_debug_gfx() -> void:
 		var h := float(DisplayServer.window_get_size().y)
 		vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 		vp.scaling_3d_scale = clampf(DBG_SCALE_H[dbg_scale] / maxf(h, 1.0), 0.25, 1.0)
+	if dbg_lod > 0:
+		vp.mesh_lod_threshold = DBG_LOD_PX[dbg_lod]
+	# Filtrul si harta de umbra sunt globale (RenderingServer); valoarea de
+	# nivel a fost scrisa de `apply_gfx_tier` chiar inainte, deci aici doar
+	# suprascriem cand comutatorul nu e pe „Nivel".
+	if dbg_shadow_filter > 0:
+		_set_shadow_filter(dbg_shadow_filter == 1)
+	if dbg_shadow_size > 0:
+		_set_shadow_atlas(DBG_SHADOW_SIZE_PX[dbg_shadow_size])
 	# Soarele si mediul pistei: valorile date de nivel se tin in metadata la
 	# prima atingere, ca „Nivel" sa le poata pune inapoi exact.
 	for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
 		var sun := n as DirectionalLight3D
 		if not sun.has_meta(&"dbg_orig"):
-			sun.set_meta(&"dbg_orig", [sun.shadow_enabled, sun.directional_shadow_mode])
+			sun.set_meta(&"dbg_orig", [sun.shadow_enabled, sun.directional_shadow_mode,
+				sun.directional_shadow_max_distance])
 		var orig: Array = sun.get_meta(&"dbg_orig")
 		match dbg_shadows:
 			0:
@@ -385,6 +441,8 @@ func apply_debug_gfx() -> void:
 			3:
 				sun.shadow_enabled = true
 				sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+		sun.directional_shadow_max_distance = DBG_SHADOW_DIST_M[dbg_shadow_dist] \
+			if dbg_shadow_dist > 0 else float(orig[2])
 	for n in get_tree().root.find_children("*", "WorldEnvironment", true, false):
 		var we := n as WorldEnvironment
 		if we.environment == null:
@@ -395,6 +453,45 @@ func apply_debug_gfx() -> void:
 			we.environment.glow_enabled = bool(we.get_meta(&"dbg_orig"))
 		else:
 			we.environment.glow_enabled = dbg_glow == 2
+
+
+## Filtrul hartii de umbra directionale, global. Hard = un esantion per pixel
+## (hardware compare); Soft = cel din project.godot (`soft_shadow_filter_quality`,
+## cu sufixul .mobile pe telefon). In Forward Mobile numarul de esantioane e o
+## constanta de specializare, deci prima schimbare recompileaza pipeline-urile:
+## un sughit la comutare, nimic pe cadru dupa.
+func _set_shadow_filter(hard: bool) -> void:
+	shadow_filter_hard = hard
+	RenderingServer.directional_soft_shadow_filter_set_quality(
+		RenderingServer.SHADOW_QUALITY_HARD if hard else _project_shadow_filter())
+
+
+## Harta de umbra directionala (atlasul), global; se realoca doar cand se
+## schimba marimea.
+func _set_shadow_atlas(px: int) -> void:
+	if px == _shadow_atlas_px:
+		return
+	_shadow_atlas_px = px
+	var bits16 := bool(ProjectSettings.get_setting_with_override(
+		&"rendering/lights_and_shadows/directional_shadow/16_bits"))
+	RenderingServer.directional_shadow_atlas_set_size(px, bits16)
+
+
+## Marimea efectiva a hartii de umbra (px), pentru linia de optiuni din HUD.
+func shadow_atlas_px() -> int:
+	return _shadow_atlas_px
+
+
+func _project_shadow_filter() -> RenderingServer.ShadowQuality:
+	return int(ProjectSettings.get_setting_with_override(
+		&"rendering/lights_and_shadows/directional_shadow/soft_shadow_filter_quality")) \
+		as RenderingServer.ShadowQuality
+
+
+func _project_shadow_size() -> int:
+	return int(ProjectSettings.get_setting_with_override(
+		&"rendering/lights_and_shadows/directional_shadow/size"))
+
 
 ## Returneaza true daca timpul e record nou pe pista respectiva.
 func try_record(track_index: int, lap_ms: int) -> bool:

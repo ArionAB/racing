@@ -147,7 +147,10 @@ res://
   3 / Beach Buggy Racing: fără contact cu solul, orice obiect pare lipit peste
   fundal. Rămâne tot o singură lumină, doar că aruncă. Comutatorul e
   `Track.theme_shadows`; **e prima setare de stins dacă testul pe device nu ține
-  60fps.**
+  60fps.** Pe telefon, nivelul Normal rulează **profilul ieftin** (oct 2026,
+  măsurat pe iPhone 12 Pro: costul umbrei e în pixelii care o *primesc*, nu în
+  cascade): o cascadă, plafon 55 m, filtru hard — `GameState.SHADOW_DISTANCE_MOBILE`,
+  `Track.shadow_distance_cap`. Nivelul Maxim păstrează reglajele temei.
 - **Texturi: materiale de clasă, nu per asset.** Culoarea vine dintr-un atlas
   de paletă, detaliul de suprafață dintr-un strat triplanar partajat
   (`Palette.world_material()`). Un asset nu aduce NICIODATĂ texturi proprii —

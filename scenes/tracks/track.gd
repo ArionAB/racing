@@ -261,6 +261,13 @@ var theme_shadows: bool = true
 ## scriptul e @tool: in editor autoload-ul nu exista, iar 1 (normal) e exact
 ## ce trebuie sa vada editorul. 0 = economic: fara umbre dinamice, fara glow.
 static var gfx_tier: int = 1
+## PROFILUL IEFTIN DE UMBRA al telefonului (GameState.apply_gfx_tier, 26 oct
+## 2026, vezi GameState.SHADOW_DISTANCE_MOBILE): plafon peste `shadow_distance`
+## al temei (0 = fara plafon) si o singura cascada in loc de doua. Statice din
+## acelasi motiv ca gfx_tier; implicitele sunt „tema decide", deci editorul
+## si desktopul nu se schimba.
+static var shadow_distance_cap: float = 0.0
+static var shadow_single_split: bool = false
 
 ## Bloom subtil (style_bible §8). Singurul efect fullscreen din joc — un lant de
 ## downsample pe cadru, deci cel mai scump item de fill rate pe care il rulam.
@@ -1715,6 +1722,12 @@ static func themes() -> Dictionary:
 			"shadow_opacity": 0.65,
 			"shadow_distance": 90.0,
 			"shadow_blur": 1.0,
+			# GLOW STINS (26 oct 2026): Kyoto n-are niciun material emisiv (nicio
+			# lampa, lumina e fixa de zi) si glow_hdr_threshold e 1.1, deci
+			# lantul de downsample nu lumina nimic — era cost pur de fill rate
+			# pe telefon, unde padurea cadea la 30 fps. Pistele cu lampi
+			# (Jodhpur, Chongqing) il pastreaza.
+			"glow": false,
 			# SOLUL: pamant de padure cu muschi, olive cald. Sub decor se vede
 			# pe versant; covorul de frunze din D vine din perechea a doua de
 			# texturi (`terrain_alt_class` + `ground_zones`, mecanismul
@@ -6100,7 +6113,13 @@ func _build_environment() -> void:
 		# metru. `blend_splits` topeste granita dintre felii, altfel s-ar
 		# vedea o linie unde rezolutia se schimba. Cheia `shadow_splits` a
 		# temei poate cere 1 (vechea purtare) daca o pista anume o cere.
-		if int(theme_flag("shadow_splits", 2)) >= 2:
+		#
+		# ...si profilul ieftin al telefonului (`shadow_single_split`, oct
+		# 2026) cere tot 1: pe iPhone 12 Pro costul umbrei s-a dovedit a fi in
+		# pixelii care o primesc, iar banda de amestec dintre felii citeste
+		# AMBELE harti. Cu plafonul de distanta de mai jos, o cascada pe 2048
+		# da 37 texeli/m — mai mult decat felia departata de azi.
+		if int(theme_flag("shadow_splits", 2)) >= 2 and not shadow_single_split:
 			sun.directional_shadow_mode = \
 				DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 			sun.directional_shadow_split_1 = float(
@@ -6115,8 +6134,13 @@ func _build_environment() -> void:
 		# umeri si randul apropiat al turmei — stau la 8-45 m, deci 110 ii
 		# acopera; cheia ramane totusi onorata, ca sa nu mai minta comentariul
 		# din tema (memoria `justificarea-din-comentariu-se-verifica`).
-		sun.directional_shadow_max_distance = float(
-			theme_flag("shadow_distance", SHADOW_DISTANCE))
+		# Plafonul telefonului (`shadow_distance_cap`) se aseaza PESTE tema:
+		# pixelii de dincolo de el nu mai citesc harta deloc, si tot ce e
+		# dincolo e oricum in ceata (fog_begin e la 90-100 m pe temele astea).
+		var shadow_dist := float(theme_flag("shadow_distance", SHADOW_DISTANCE))
+		if shadow_distance_cap > 0.0:
+			shadow_dist = minf(shadow_dist, shadow_distance_cap)
+		sun.directional_shadow_max_distance = shadow_dist
 		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
 		# taioasa de pixeli pe nisip.
 		sun.shadow_blur = float(theme_flag("shadow_blur", 1.4))

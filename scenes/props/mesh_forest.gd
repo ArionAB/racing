@@ -41,13 +41,23 @@ extends Node3D
 @export var zones: Array[MeshForestZone] = []
 ## Latura feliei de culling (m). O felie mare = putine draw call-uri dar AABB
 ## larg (se deseneaza si cand doar un colt e in cadru); una mica = invers.
-@export_range(32.0, 400.0, 1.0, "suffix:m") var slice_m: float = 90.0
-## LOD pe distanta: dincolo de `lod_m` (masurat pana la centrul AABB-ului feliei,
-## deci +-jumatate de felie) o felie se deseneaza cu mesh-ul SIMPLIFICAT al
-## speciei (meshoptimizer, via ImporterMesh.generate_lods; coroana de artar
-## 2880 -> ~280 triunghiuri). 0 = fara LOD. Masurat: fara el, valea de artari
-## trimitea ~6,5M triunghiuri/cadru (kyoto, ProbePerf).
-@export_range(0.0, 400.0, 1.0, "suffix:m") var lod_m: float = 60.0
+## Felia e si GRANULA LOD-ului (distanta se masoara la centrul ei), deci la 90 m
+## un copac la 85 m putea fi la detaliu intreg; 60 m strange eroarea la +-42.
+@export_range(32.0, 400.0, 1.0, "suffix:m") var slice_m: float = 60.0
+## LOD pe distanta, in TREI trepte (masurate pana la centrul AABB-ului feliei,
+## deci +-jumatate de felie): pana la `lod_near_m` mesh-ul intreg, pana la
+## `lod_m` nivelul MEDIU (~1/3 din indici), dincolo cel mai GROSIER al speciei
+## (meshoptimizer, via ImporterMesh.generate_lods; artarul momiji_a 2696 ->
+## 806 -> 408 triunghiuri). `lod_m` 0 = fara LOD; `lod_near_m` 0 sau >= lod_m
+## = fara treapta medie. Masurat (ProbePerf --mobile, Kyoto): fara LOD valea de
+## artari trimitea ~6,5M triunghiuri/cadru; cu o treapta la 60 m si felii de
+## 90 m, 2,7-2,8M in valea D fata de 1,34M media pistei — copacii APROPIATI la
+## detaliu intreg, nu numarul lor (acelasi numar de desene). Cu trei trepte,
+## felia de 60 m si unghiurile importerului la generare: 1,0-1,2M in vale,
+## media 0,87M, desenele +3% (26 oct 2026). Fara fade intre trepte: schimbarea
+## la 22 m se judeca la volan; `visibility_range_fade_mode` e optiunea.
+@export_range(0.0, 400.0, 1.0, "suffix:m") var lod_near_m: float = 22.0
+@export_range(0.0, 400.0, 1.0, "suffix:m") var lod_m: float = 50.0
 ## Cat intra trunchiul in pamant (m): relieful palpaie sub radacina.
 @export_range(0.0, 1.0, 0.01, "suffix:m") var sink_m: float = 0.25
 ## Cat de mult mai multa marja fata de o sosea obisnuita cere o scurtatura
@@ -72,6 +82,8 @@ var slice_count: int = 0
 var counts_by_species: Dictionary = {}
 var counts_by_zone: Dictionary = {}
 var tris_by_species: Dictionary = {}
+## Triunghiurile unei instante pe fiecare treapta de LOD: stem -> [intreg, mediu, grosier].
+var tris_by_lod: Dictionary = {}
 var total_tris: int = 0
 var build_ms: int = 0
 ## Cate candidate au picat si de ce (diagnostic).
@@ -91,7 +103,8 @@ const _OCC_CELL: float = 2.0
 var _occ: Dictionary = {}
 
 var _species_mesh: Dictionary = {}   # stem -> ArrayMesh
-var _species_far: Dictionary = {}    # stem -> ArrayMesh simplificat (sau acelasi)
+var _species_mid: Dictionary = {}    # stem -> ArrayMesh la nivelul MEDIU (sau acelasi)
+var _species_far: Dictionary = {}    # stem -> ArrayMesh la cel mai grosier (sau acelasi)
 var _species_tris: Dictionary = {}   # stem -> int
 var _claims: Array[Vector3] = []     # (x, z, raza) ale zonelor cu claim
 var _bounds: Rect2 = Rect2()
@@ -153,9 +166,9 @@ func _build() -> void:
 	build_ms = Time.get_ticks_msec() - t0
 	done = true
 	if verbose:
-		print("MeshForest %s: %d instante, %d felii, %d triunghiuri totale, %d ms | specii %s | zone %s | respinse %s" % [
+		print("MeshForest %s: %d instante, %d felii, %d triunghiuri totale, %d ms | specii %s | LOD tri/instanta (intreg, mediu, grosier) %s | zone %s | respinse %s" % [
 			name, instance_count, slice_count, total_tris, build_ms,
-			counts_by_species, counts_by_zone, rejected])
+			counts_by_species, tris_by_lod, counts_by_zone, rejected])
 	built.emit()
 
 
@@ -246,6 +259,8 @@ func _edge_dist(p: Vector2) -> float:
 
 func _build_species(theme: String) -> void:
 	_species_mesh.clear()
+	_species_mid.clear()
+	_species_far.clear()
 	_species_tris.clear()
 	for ps in scenes:
 		if ps == null:
@@ -255,41 +270,102 @@ func _build_species(theme: String) -> void:
 		if mesh == null:
 			push_warning("MeshForest: %s nu are mesh" % stem)
 			continue
-		var far := _simplified(mesh) if lod_m > 0.0 else mesh
+		var lods := _lod_variants(mesh) if lod_m > 0.0 else {}
+		var far: ArrayMesh = lods.get("far", mesh)
+		var mid: ArrayMesh = lods.get("mid", mesh)
 		# Netezirea coroanei (Palette.SMOOTH_FOLIAGE) DUPA LOD: simplificarea
 		# facuta pe normale netede sudeaza varfurile altfel si lasa coroana
 		# departata in cioburi plate (vazut pe captura, oct 2026).
 		var foliage := Palette.foliage_surfaces(mesh)
 		if not foliage.is_empty():
-			mesh = Palette.smoothed_mesh(mesh, foliage)
-			far = mesh if lod_m <= 0.0 else Palette.smoothed_mesh(far, foliage)
+			var smooth := Palette.smoothed_mesh(mesh, foliage)
+			far = smooth if far == mesh else Palette.smoothed_mesh(far, foliage)
+			mid = smooth if mid == mesh else Palette.smoothed_mesh(mid, foliage)
+			mesh = smooth
 		_species_mesh[stem] = mesh
+		_species_mid[stem] = mid
 		_species_far[stem] = far
-		var tris := 0
-		for s in mesh.get_surface_count():
-			var arr := mesh.surface_get_arrays(s)
-			var idx: Variant = arr[Mesh.ARRAY_INDEX]
-			tris += (idx as PackedInt32Array).size() / 3 if idx != null \
-				else (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+		var tris := _mesh_tris(mesh)
 		_species_tris[stem] = tris
+		tris_by_lod[stem] = [tris, _mesh_tris(mid), _mesh_tris(far)]
 
 
-## Varianta de departare: acelasi mesh, cu indicii celui mai grosier LOD
-## (ImporterMesh.generate_lods) pe fiecare suprafata care are unul. Varfurile
-## raman toate (cele nefolosite costa doar memorie); materialele se pastreaza.
-static func _simplified(src: ArrayMesh) -> ArrayMesh:
+static func _mesh_tris(mesh: ArrayMesh) -> int:
+	var tris := 0
+	for s in mesh.get_surface_count():
+		var arr := mesh.surface_get_arrays(s)
+		var idx: Variant = arr[Mesh.ARRAY_INDEX]
+		tris += (idx as PackedInt32Array).size() / 3 if idx != null \
+			else (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+	return tris
+
+
+## Tinta treptei MEDII de LOD: fractia din indicii mesh-ului intreg pe care o
+## cautam printre nivelurile generate (se ia nivelul cel mai apropiat de ea).
+const MID_LOD_RATIO: float = 0.33
+## Peste fractia asta nivelul „mediu" nu merita o treapta (momiji_b: singurul
+## nivel negrosier avea 94% din indici — memorie in plus, zero castig).
+const MID_LOD_MAX_RATIO: float = 0.7
+
+## Variantele de departare: acelasi mesh, cu indicii altui nivel LOD
+## (ImporterMesh.generate_lods) pe fiecare suprafata care are unul — `far` cu
+## cel mai grosier, `mid` cu cel mai apropiat de [constant MID_LOD_RATIO] din
+## indicii intregi. Varfurile raman toate (cele nefolosite costa doar memorie);
+## materialele se pastreaza. Cheia `mid` lipseste cand specia n-are un nivel
+## intermediar care sa merite (sub [constant MID_LOD_MAX_RATIO] din intreg).
+##
+## Unghiurile sunt ALE IMPORTERULUI (meshes/lods/normal_merge_angle 60,
+## normal_split_angle 25), adica ce primeste orice GLB din proiect la import.
+## Prima versiune le dadea inversate (25, 60): sudarea mai zgarcita a varfurilor
+## lasa coroanele de foi (geometrie deconectata) aproape nesimplificate —
+## momiji_c 2696 -> 868 si NICIUN nivel intermediar, ginkgo 3080 -> 914. Cu
+## unghiurile importerului: momiji_c 2696 -> 806 -> 188, ginkgo 3080 -> 1640
+## -> 436, momiji_b 2160 -> 542 -> 190 (ProbeForest, 26 oct 2026).
+static func _lod_variants(src: ArrayMesh) -> Dictionary:
 	var im := ImporterMesh.new()
 	for si in src.get_surface_count():
 		im.add_surface(Mesh.PRIMITIVE_TRIANGLES, src.surface_get_arrays(si), [], {}, src.surface_get_material(si))
-	im.generate_lods(25.0, 60.0, [])
-	var out := ArrayMesh.new()
+	im.generate_lods(60.0, 25.0, [])
+	var far := ArrayMesh.new()
+	var mid := ArrayMesh.new()
+	var full_total := 0
+	var mid_total := 0
 	for si in src.get_surface_count():
-		var arr := src.surface_get_arrays(si)
+		var arr_far := src.surface_get_arrays(si)
+		var arr_mid := src.surface_get_arrays(si)
+		var idx: Variant = arr_far[Mesh.ARRAY_INDEX]
+		var full_n := (idx as PackedInt32Array).size() if idx != null \
+			else (arr_far[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+		var mid_n := full_n
 		var nl := im.get_surface_lod_count(si)
 		if nl > 0:
-			arr[Mesh.ARRAY_INDEX] = im.get_surface_lod_indices(si, nl - 1)
-		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
-		out.surface_set_material(si, src.surface_get_material(si))
+			arr_far[Mesh.ARRAY_INDEX] = im.get_surface_lod_indices(si, nl - 1)
+			# Nivelul mediu: dintre cele NEgrosiere, cel cu numarul de indici
+			# cel mai apropiat de tinta.
+			var best := -1
+			var best_err := INF
+			for li in nl - 1:
+				var ratio := float(im.get_surface_lod_indices(si, li).size()) / maxf(float(full_n), 1.0)
+				if ratio > MID_LOD_MAX_RATIO:
+					continue
+				var err := absf(ratio - MID_LOD_RATIO)
+				if err < best_err:
+					best_err = err
+					best = li
+			if best >= 0:
+				arr_mid[Mesh.ARRAY_INDEX] = im.get_surface_lod_indices(si, best)
+				mid_n = (arr_mid[Mesh.ARRAY_INDEX] as PackedInt32Array).size()
+		full_total += full_n
+		mid_total += mid_n
+		far.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr_far)
+		far.surface_set_material(si, src.surface_get_material(si))
+		mid.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr_mid)
+		mid.surface_set_material(si, src.surface_get_material(si))
+	var out := {"far": far}
+	# Treapta medie se judeca pe SPECIE, nu pe suprafata: un trunchi redus la
+	# jumatate sub o coroana ramasa intreaga nu e un nivel mediu.
+	if mid_total <= int(MID_LOD_MAX_RATIO * float(full_total)):
+		out["mid"] = mid
 	return out
 
 
@@ -611,24 +687,40 @@ func _emit(groups: Dictionary) -> void:
 		var xfs: Array[Transform3D] = g["xf"]
 		var z := zones[int(g["zone"])]
 		var stem := String(g["stem"])
-		var far_used: bool = lod_m > 0.0 and _species_far[stem] != _species_mesh[stem]
-		for far in ([false, true] if far_used else [false]):
+		# Treptele de LOD ale feliei: [mesh, de la (m), pana la (m; 0 = fara
+		# limita)]. Treptele cu acelasi mesh ca precedenta se topesc in ea, deci
+		# o specie fara nivel mediu are doua trepte, una fara niciun LOD una.
+		var full: ArrayMesh = _species_mesh[stem]
+		var steps: Array = [[full, 0.0, 0.0, ""]]
+		if lod_m > 0.0:
+			var mid: ArrayMesh = _species_mid.get(stem, full)
+			if mid != full and lod_near_m > 0.0 and lod_near_m < lod_m:
+				steps[-1][2] = lod_near_m
+				steps.append([mid, lod_near_m, 0.0, "_mid"])
+			var far: ArrayMesh = _species_far.get(stem, full)
+			if far != steps[-1][0]:
+				steps[-1][2] = lod_m
+				steps.append([far, lod_m, 0.0, "_far"])
+		for k in steps.size():
+			var begin := float(steps[k][1])
+			var end := float(steps[k][2])
+			if z.view_m > 0.0:
+				end = z.view_m if end <= 0.0 else minf(end, z.view_m)
+				if begin >= end:
+					continue
 			var mm := MultiMesh.new()
 			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.mesh = _species_far[stem] if far else _species_mesh[stem]
+			mm.mesh = steps[k][0]
 			mm.instance_count = xfs.size()
 			for i in xfs.size():
 				mm.set_instance_transform(i, xfs[i])
 			var mmi := MultiMeshInstance3D.new()
-			mmi.name = String(key).replace("|", "_") + ("_far" if far else "")
+			mmi.name = String(key).replace("|", "_") + String(steps[k][3])
 			mmi.multimesh = mm
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if bool(g["shadow"]) 				else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			if far_used:
-				if far:
-					mmi.visibility_range_begin = lod_m
-				else:
-					mmi.visibility_range_end = lod_m
-			if z.view_m > 0.0:
-				mmi.visibility_range_end = z.view_m if (far or not far_used) else minf(z.view_m, lod_m)
+			if begin > 0.0:
+				mmi.visibility_range_begin = begin
+			if end > 0.0:
+				mmi.visibility_range_end = end
 			add_child(mmi)
 		slice_count += 1

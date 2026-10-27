@@ -47,4 +47,34 @@ func _ready() -> void:
 			if mmi.multimesh.instance_count > 0 and mmi.multimesh.get_instance_transform(0).origin != Vector3.ZERO:
 				nz += 1
 		print("CONTROL felii cu prima instanta nenula: %d / %d" % [nz, tot])
+		# Treptele de LOD (oct 2026): cate MultiMesh-uri are fiecare treapta,
+		# cate triunghiuri ar desena toate instantele ei si intervalul de
+		# vizibilitate — ca sa se vada ca treapta MEDIE exista si sta intre
+		# intreg si grosier, nu doar ca cifra totala s-a miscat (memoria
+		# `reglajul-ieftin-se-testeaza-pe-cifra`).
+		var per_level := {}
+		for c in forest.get_children():
+			var mmi := c as MultiMeshInstance3D
+			if mmi == null:
+				continue
+			var level := "near"
+			if mmi.name.ends_with("_mid"):
+				level = "mid"
+			elif mmi.name.ends_with("_far"):
+				level = "far"
+			if not per_level.has(level):
+				per_level[level] = {"mmi": 0, "tris": 0, "range": []}
+			var d: Dictionary = per_level[level]
+			d["mmi"] = int(d["mmi"]) + 1
+			var mesh := mmi.multimesh.mesh
+			var t := 0
+			for s in mesh.get_surface_count():
+				var idx: Variant = mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX]
+				if idx != null:
+					t += (idx as PackedInt32Array).size() / 3
+			d["tris"] = int(d["tris"]) + t * mmi.multimesh.instance_count
+			d["range"] = [mmi.visibility_range_begin, mmi.visibility_range_end]
+		print("LOD trepte (mmi, tri daca s-ar desena toate, interval m): ", per_level)
+		if not per_level.has("mid"):
+			print("ATENTIE: nicio felie pe treapta MEDIE de LOD")
 	get_tree().quit(0)

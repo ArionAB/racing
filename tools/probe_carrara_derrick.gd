@@ -3,6 +3,10 @@ extends Node
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeCarraraDerrick.tscn
 ##   (optional, dupa `--`): --quick  (fara baleiajul de decalaj)
+##                          --carrara (modelele kitului: carrara/structures/derrick.glb
+##                                     + carrara/props/marble_block_hooked.glb in locul
+##                                     stand-in-ului Chongqing; calibrarea „Chongqing
+##                                     22 m" ramane pe tower_crane.glb)
 ##
 ## Brief carrara.md par.2 POI C, par.3 ("Derrick-ul cu bloc"), par.7 pasul 1 (d).
 ## Stand-in: `tower_crane.glb` (Chongqing, catarg 22.05 m) cu `model_scale` =
@@ -46,6 +50,10 @@ var _scale: float
 var _ref22: bool = false
 ## Pe ce parte a drumului sta turnul: -1 stanga (brief), +1 dreapta (ca ProbeCrane).
 var _side: int = -1
+## --carrara: derrick-ul si blocul agatat din kitul Carrara in locul stand-in-ului.
+var _carrara: bool = false
+const DERRICK_MODEL: String = "res://assets/models/carrara/structures/derrick.glb"
+const BLOCK_MODEL: String = "res://assets/models/carrara/props/marble_block_hooked.glb"
 var _phase: float = PHASE
 var _results: Array[Dictionary] = []
 
@@ -56,9 +64,12 @@ func _ready() -> void:
 			_quick = true
 		elif a == "--right":
 			_side = 1
+		elif a == "--carrara":
+			_carrara = true
 	await get_tree().process_frame
 	# Inaltimea reala a catargului din mesh (nu o cifra din brief).
-	var crane := (load(CraneScript.CRANE_MODEL) as PackedScene).instantiate() as Node3D
+	var crane := (load(DERRICK_MODEL if _carrara else CraneScript.CRANE_MODEL) as PackedScene).instantiate() as Node3D
+	print("    modele: %s" % ("KIT CARRARA (derrick.glb + marble_block_hooked.glb)" if _carrara else "stand-in Chongqing (tower_crane.glb + prefab_slab.glb)"))
 	var mast_mesh := crane.find_child("TowerCrane", true, false) as MeshInstance3D
 	var real_mast := mast_mesh.get_aabb().size.y
 	crane.free()
@@ -119,6 +130,10 @@ func _world(slab: PackedScene) -> Dictionary:
 	hz.tower_side = _side
 	hz.tower_offset = TOWER_OFFSET
 	hz.road_half_width = ROAD_HALF
+	if _carrara and not _ref22:
+		hz.crane_model = load(DERRICK_MODEL) as PackedScene
+		if slab == null:
+			slab = load(BLOCK_MODEL) as PackedScene
 	if slab != null:
 		hz.slab_model = slab
 	root.add_child(hz)
@@ -190,7 +205,8 @@ func _measure_geometry() -> Dictionary:
 		"pivotul (%.3f) si colizorul catargului (%.3f) cobora cu el la 16 m" % [pivot_y, col_top])
 	_verdict(absf(pivot_y - mb.end.y) < 0.05, "pivotul sta in varful catargului din mesh (diferenta %.3f m)" % (pivot_y - mb.end.y))
 	# sarcina: prefab_slab (default) vs cub de marmura de 2.5 m
-	var slab_node := hz._load.find_child("PrefabSlab", true, false) as Node3D
+	# copiii lui Load: cablu (0), colizor (1), modelul sarcinii (2), zona (3)
+	var slab_node := (hz._load.get_child(2) if _carrara else hz._load.find_child("PrefabSlab", true, false)) as Node3D
 	var sb := _world_aabb(slab_node)
 	var col := hz._load.get_child(1) as CollisionShape3D
 	var cbox := col.shape as BoxShape3D

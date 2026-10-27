@@ -76,6 +76,63 @@ print("   noduri: OK (%s)" % ", ".join(names))
 PY
 fi
 
+nodes_are() {  # nodes_are <cale> <nume...>: numele nodurilor-mesh, sortate
+  python - "$@" <<'PY' || fail=1
+import sys, os
+sys.path.insert(0, os.path.join("tools", "blender"))
+from verify_glb import load_glb
+g = load_glb(sys.argv[1])[0]
+names = sorted(n.get("name") for n in g["nodes"] if "mesh" in n)
+want = sorted(sys.argv[2:])
+if names != want:
+    print("   !! noduri %s, cerute %s" % (names, want))
+    sys.exit(1)
+print("   noduri: OK (%s)" % ", ".join(names))
+PY
+}
+
+echo
+echo "== val 1, crr-a: utilajele-hazard (kit §1.1) =="
+# Exceptii declarate (crr-a):
+#   derrick.glb   --origin=waterline: doua RADACINI cu ancore diferite --
+#                 `TowerCrane` cu baza la 0, `Jib` cu originea in BALAMA (codul
+#                 il muta pe pivotul de la JIB_HEIGHT), carligul lui atarna
+#                 sub balama (-0,41). verify_glb citeste fiecare nod in spatiul
+#                 lui, deci ansamblul „incaleca" Y=0; contractul real (varful
+#                 catargului 22,05, +-1,8 pe X, carligul la Z -17,9, Jib fara
+#                 translatie) e in measure_carrara_crr_a.py derrick.
+#   quarry_excavator.glb --origin=waterline: `arm` e copil al lui `body`, cu
+#                 pivotul la (0,55; 1,95; -0,42); mesh-urile bratului au Y local
+#                 negativ (-1,03). verify_glb nu compune ierarhia; rigul se
+#                 masoara in lume, cu ierarhie, in measure_carrara_excavator.py.
+#   marble_block_hooked.glb --origin=rim: blocul ATARNA sub origine (carligul),
+#                 de la -3,05 la 0 (chingi + inel), ca prefab_slab.glb.
+check "structures/derrick.glb" --origin=waterline
+if [ -f "$ROOT/structures/derrick.glb" ]; then
+  python tools/blender/measure_carrara_crr_a.py derrick "$ROOT/structures/derrick.glb" || fail=1
+  nodes_are "$ROOT/structures/derrick.glb" Jib TowerCrane
+fi
+check "props/marble_block_hooked.glb" --origin=rim
+if [ -f "$ROOT/props/marble_block_hooked.glb" ]; then
+  python tools/blender/measure_carrara_crr_a.py block "$ROOT/props/marble_block_hooked.glb" || fail=1
+  nodes_are "$ROOT/props/marble_block_hooked.glb" Block_Marble Block_MarbleBase Block_Strap Block_Paint
+fi
+check "props/lizza_sled.glb" --origin=assembly
+if [ -f "$ROOT/props/lizza_sled.glb" ]; then
+  python tools/blender/measure_carrara_crr_a.py sled "$ROOT/props/lizza_sled.glb" || fail=1
+  nodes_are "$ROOT/props/lizza_sled.glb" Sled_Wood Sled_Rope Sled_Marble Sled_MarbleBase
+fi
+check "rocks/block_informe_a.glb"
+if [ -f "$ROOT/rocks/block_informe_a.glb" ]; then
+  python tools/blender/measure_carrara_crr_a.py informe "$ROOT/rocks/block_informe_a.glb" || fail=1
+  nodes_are "$ROOT/rocks/block_informe_a.glb" Informe_Marble
+fi
+check "vehicles/quarry_excavator.glb" --origin=waterline
+if [ -f "$ROOT/vehicles/quarry_excavator.glb" ]; then
+  python tools/blender/measure_carrara_excavator.py "$ROOT/vehicles/quarry_excavator.glb" || fail=1
+  nodes_are "$ROOT/vehicles/quarry_excavator.glb" Body_Paint Body_Rust Body_Black Arm_Paint Arm_Rust Arm_Black
+fi
+
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then

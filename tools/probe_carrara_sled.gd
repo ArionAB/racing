@@ -3,6 +3,9 @@ extends Node
 ##
 ##   godot --headless --fixed-fps 60 --path . res://tools/ProbeCarraraSled.tscn
 ##   (optional, dupa `--`): --quick  (fara baleiajul de decalaj si fara benzile +-3)
+##                          --glb=res://...  (sania din kit in locul cutiilor sintetice;
+##                                            golul se masoara sub talpile GLB-ului,
+##                                            varianta „lunga" se sare)
 ##
 ## Brief carrara.md §3 ("Sania de lizzatura"), §6 (5), §7 pasul 1 (c). Scena e
 ## SINTETICA (nu exista traseu inca): drum drept de 9 m, un jgheab de 30 grade
@@ -56,19 +59,32 @@ var _ease: float = EASE_K
 var _sin: float
 var _cos: float
 var _results: Array[Dictionary] = []
+## --glb: modelul din kit (carrara/props/lizza_sled.glb). Talpa de contact a
+## sanii din kit: talpile la X +-1,01, de la Z +1,20 (spate) la -0,70 (de
+## acolo in fata varful e ridicat, ca la o sanie) -- coordonate de MODEL, cu
+## originea GLB-ului la talpa (nodul `Sled_Wood` sta in origine).
+var _glb: String = ""
+const GLB_BASE_NODE := "Sled_Wood"
+const GLB_CONTACT: Array[Vector3] = [Vector3(-1.01, 0.0, 1.20), Vector3(1.01, 0.0, 1.20),
+	Vector3(-1.01, 0.0, -0.70), Vector3(1.01, 0.0, -0.70), Vector3(0.0, 0.0, 0.25)]
 
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a == "--quick":
 			_quick = true
+		elif a.begins_with("--glb="):
+			_glb = a.substr(6)
 	_sin = sin(deg_to_rad(ANGLE_DEG))
 	_cos = cos(deg_to_rad(ANGLE_DEG))
 	await get_tree().process_frame
 	print("")
 	print("=== CARRARA (c): sania de lizzatura (RockfallHazard, roll_model) ===")
+	if _glb != "":
+		print("    MODEL: %s (talpa de contact %s)" % [_glb, str(GLB_CONTACT)])
 	var clr := await _measure_clearance("ideala", 2.4, 2.4, 0.4, 2.0, true)
-	await _measure_clearance("lunga", 2.2, 3.6, 0.35, 2.0, false)
+	if _glb == "":
+		await _measure_clearance("lunga", 2.2, 3.6, 0.35, 2.0, false)
 	_ease = 8.0
 	print("")
 	print("    (racordare concava de 8 m in loc de 4: raza ~14 m)")
@@ -139,6 +155,8 @@ func _build_chute(parent: Node) -> void:
 
 
 func _sled_scene(width: float, length: float, base_h: float, block: float) -> PackedScene:
+	if _glb != "":
+		return load(_glb) as PackedScene
 	var root := Node3D.new()
 	root.name = "Sled"
 	var base := MeshInstance3D.new()
@@ -215,7 +233,7 @@ func _measure_clearance(label: String, width: float, length: float, base_h: floa
 	await get_tree().physics_frame
 	var radius := hz._radius
 	var container := hz._pivot.get_child(0) as Node3D
-	var base := container.find_child("Base", true, false) as Node3D
+	var base := container.find_child(GLB_BASE_NODE if _glb != "" else "Base", true, false) as Node3D
 	print("    raza masurata de hazard: %.3f m (sfera de coliziune); inaltime model %.2f m, jumatate %.3f"
 		% [radius, base_h + block, (base_h + block) * 0.5])
 	print("    traseu %.1f m, durata unei treceri %.2f s, cross_time %.2f s, ciclu setat %.1f s -> rock_pause = %.2f s"
@@ -228,6 +246,8 @@ func _measure_clearance(label: String, width: float, length: float, base_h: floa
 		for sz in [-1.0, 1.0]:
 			corners.append(Vector3(sx * width * 0.5, -base_h * 0.5, sz * length * 0.5))
 	corners.append(Vector3(0.0, -base_h * 0.5, 0.0))
+	if _glb != "":
+		corners = GLB_CONTACT.duplicate()
 	var max_gap := -INF
 	var max_gap_perp := -INF
 	var min_gap := INF

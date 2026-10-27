@@ -144,6 +144,28 @@ Detaliile pe piese sunt în `carrara_inventory_crr-a.md`, `_crr-b.md`,
    `Viaduct_Parapet` se stinge dacă rămâne berma din cod pe pod; șinele din
    portalul Marmifera se taie dacă încurcă.
 
+### Clasele cablate (coordonator, 27 oct 2026)
+
+`CLASSES_CARRARA` în `scenes/props/world_prop.gd` (scopat pe tema `carrara`,
+celelalte piste neatinse): `*_Marble` → `carrara_marble` pe blocuri, stive,
+blocurile informe, moloz, bermă, conducte, portalul galeriei și pilele
+viaductului; prefixul `X_Marble` prinde și `X_MarbleBase`, deci **dunga gri a
+patinei dispare în joc** (decizia 1 închisă). `Portal_Stone` (Marmifera) →
+`tf_stone`. `Viaduct_Brick` → **`ok_roof`**: pe atlas ieșea portocaliu-viu, pe
+`roof_tiles` (fără tentă pe temă) aproape alb, pe `ok_roof` cărămidă roșie.
+
+| captură | ce arată |
+|---|---|
+| `clase_A_coridor.png` | stivele citesc piatră tăiată cu vene, nu lemn. Containerul și rezervorul de motorină rămân pe atlas, dungate (piese de metal, fără clasă) |
+| `clase_viaduct_sus_a.png`, `_sus_b.png` | arcele de cărămidă roșie pe pile de marmură, în V-ul cheiului, sub tablier |
+| `clase_viaduct_chei_b.png` | camera a ieșit sub teren (vedere nevalidă ca joc); arată doar că pilele citesc marmură |
+| `clase_C_blocuri.png`, `clase_galerie_iesire.png` | pentru comparație cu capturile de dinainte |
+
+Materiale pe pistă (`probe_decor --track=23`): **21** (≤ 38).
+Hazardele (blocul derrick-ului, sania, camionul) iau clasele prin
+`prop_classes()`, nu prin tema pistei: blocurile lor de marmură rămân pe atlas
+până se adaugă acolo.
+
 ## Stare la oprire
 
 - Pilotul e complet: harnasul, GLB-ul, garda, comparațiile. `bash

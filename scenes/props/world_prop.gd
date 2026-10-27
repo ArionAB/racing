@@ -2228,10 +2228,31 @@ const _TF_JNEAPAN_BUSH := {"Jneapan_Needles": _TF_JNEAPAN}
 ## Carrara (Track23, brief §4): coroana castanului ia clasa `tf_beech` (ca pe Transfagarasan),
 ## iar conurile de moloz stau pe marmura la baza peretilor; marmura pistei in sine nu trece pe
 ## aici (fetele pistei sunt cod, nu GLB-uri).
+const _CRR_MARBLE: String = Palette.TRI_PREFIX + "carrara_marble"
 const CLASSES_CARRARA := {
 	"beech_tree_a": {"Beech_Leaves": _TF_BEECH},
 	"beech_tree_b": {"Beech_Leaves": _TF_BEECH},
-	"scree_cone": {"Scree_Schist": Palette.TRI_PREFIX + "carrara_marble"},
+	"scree_cone": {"Scree_Schist": _CRR_MARBLE},
+	# Kitul Carrara (docs/asset_briefs/carrara_kit.md, regula 8): marmura e pe doua noduri,
+	# `*_Marble` (crem) si `*_MarbleBase` (patina). Prefixul `X_Marble` le prinde pe AMANDOUA,
+	# deci primesc aceeasi clasa si dunga gri a bazei (tare in preview, decizia 1 din
+	# carrara_inventory.md) dispare in joc: clasa triplanara inlocuieste culoarea slotului.
+	"marble_block_a": {"Block_Marble": _CRR_MARBLE},
+	"marble_block_b": {"Block_Marble": _CRR_MARBLE},
+	"marble_block_c": {"Block_Marble": _CRR_MARBLE},
+	"block_stack_a": {"Stack_Marble": _CRR_MARBLE},
+	"block_stack_b": {"Stack_Marble": _CRR_MARBLE},
+	"block_informe_a": {"Informe_Marble": _CRR_MARBLE},
+	"block_informe_b": {"Informe_Marble": _CRR_MARBLE},
+	"rubble_pile_a": {"Rubble_Marble": _CRR_MARBLE},
+	"rubble_pile_b": {"Rubble_Marble": _CRR_MARBLE},
+	"safety_berm": {"Berm_Marble": _CRR_MARBLE},
+	"pipe_run": {"Pipe_Marble": _CRR_MARBLE},
+	"gallery_portal": {"Portal_Marble": _CRR_MARBLE},
+	# Caramida viaductului pe `ok_roof` (olanele Okinawa, tinta #B8452E): pe atlas iesea portocaliu-viu, iar pe `roof_tiles` (fara tenta pe tema) iesea aproape alba.
+	"ponti_di_vara": {"Viaduct_Marble": _CRR_MARBLE,
+		"Viaduct_Brick": Palette.TRI_PREFIX + "ok_roof"},
+	"marmifera_portal": {"Portal_Stone": _TF_STONE},
 }
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,

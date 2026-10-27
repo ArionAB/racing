@@ -953,7 +953,7 @@ Hazardele rămân reuse; ce lipsește sunt **parametri**, nu clase.
   dezvoltatorului (§2 din `mod_cariera.md`: regruparea e o editare de
   `.tres`); până atunci, ca Ha Long, **doar cursă rapidă**.
 
-## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready
+## 9. Prompt pentru ChatGPT (dioramă de referință) — v0.1, paste-ready, acceptată la iter2
 
 Se atașează `plan_adnotat.png` (planul real al pistei, de sus, din
 `tools/annotate_carrara_plan.py`). Geometria din imagine e obligatorie;
@@ -997,5 +997,117 @@ literele sunt legenda.
 > *Low-poly toy look, chunky shapes, painted textures, soft ambient
 > occlusion. No text, no brand names, no people.*
 
-Prompt pentru planșa de assets: se scrie după ce diorama e acceptată
-(ordinea din memoria `diorama-din-geometria-reala`).
+Se atașează `plan_adnotat.png` = `img/carrara_plan_adnotat.png` (regenerat
+pe 27 oct cu `tools/annotate_carrara_plan.py` din captura pasului 4,
+identic la pixel cu cel de atunci).
+
+### 9.0.1 Corectura după prima generare — paste-ready
+
+Prima generare (`img/carrara_plan/diorama_v01_iter1.jpg`) avea traseul în
+ordinea bună, dar E la nivelul fundului, scara E urcând spre peretele de
+nord și D ca drum deschis. Corectura, în aceeași conversație:
+
+> *Good start: keep the route order, the yard, the three terraces with the
+> truck, the slurry pools, the derrick, the viaduct, the village and the
+> warm golden palette exactly as they are. Fix the heights and one tunnel:
+> (1) E is the HIGHEST road on the whole track, a rim 45 m above the quarry
+> floor and 20 m above the yard; raise it to the top of the cut. (2) The
+> five 9 m marble steps go down FROM E's road TO the quarry floor, on the
+> pit side of E. (3) D is NOT an open road: the road enters a square dark
+> portal at floor level on the east side of the pit and comes out of a
+> second portal onto E, high on the rim, with no visible road between
+> them. (4) Wire-saw stripes are HORIZONTAL. (5) On the quarry floor,
+> replace the second excavator with a low crawler chainsaw. (6) The forest
+> and the village stay on the west flank only. Same camera, same light,
+> same toy-diorama style. No text, no brand names, no people.*
+
+### 9.1 Prompt pentru ChatGPT (planșa de inventar de assets) — v0.1, paste-ready
+
+Se dă **în aceeași conversație**, după ce diorama e acceptată. Numele de
+fișier sunt contractul (`assets/models/carrara/`, §5). Ce face codul sau ce
+se refolosește **nu** intră în planșă (§5.3, `docs/asset_briefs/carrara_kit.md`
+§1.7): castanii, ginestra, molozul mare, zidurile de sprijin, Kamaz-ul.
+
+> *Now make an asset inventory sheet for this diorama, in the same low-poly
+> toy style and warm palette: every distinct object drawn once, isolated, on
+> a plain light-grey background, in a neat grid, in a 3/4 view, all at the
+> same scale (a toy car shown for scale in one corner), with small simple
+> text labels under each object using exactly these file names (labels are
+> the only text allowed). No brand names or logos on any machine; machines
+> are faded yellow and rusty, not bright construction yellow.*
+>
+> *Hero machines: quarry_truck (heavy dump truck, 3.6 x 3 x 7 m, two marble
+> blocks in the bed, front facing the viewer-left), quarry_excavator (70 t tracked excavator, ~4 m tall,
+> with a two-prong BLOCK FORK instead of a bucket, arm drawn raised),
+> derrick (a single 16 m A-frame mast with a long swinging boom and a
+> hanging cable — NOT a gantry with two legs and a beam), marble_block_hooked
+> (a 2.5 m marble block in lifting straps hanging from a hook), lizza_sled (a
+> wooden log sled carrying a 2 m block, with ropes), wire_saw (diamond
+> wire-saw machine: a small chassis on two rails, a 1 m flywheel, the wire
+> loop and a water jet), chain_saw_crawler (low tracked machine with a long
+> chainsaw arm cutting into a wall), drill_rig (drilling machine with a 6 m
+> mast).*
+> *Structures: ponti_di_vara (railway viaduct, 30 m long and 25 m tall,
+> three brick arches on cream marble piers), marmifera_portal (old stone
+> railway tunnel portal with a round arch, 7 x 6.5 m), gallery_portal (a
+> square opening 8 x 8 m cut straight into a marble face, with a single work
+> lamp), gallery_pillar (a square marble pillar 3 x 3 x 18 m with sawn
+> faces), museum_set (three separate pieces side by side: a mine cart on
+> rails carrying a block, an old helical-wire saw wheel, an old wooden
+> sled), quarry_sign_block (one marble block with one polished face, no
+> text).*
+> *Village: colonnata_church (stone church with a 14 m bell tower,
+> terracotta tile roof), colonnata_house_a, colonnata_house_b,
+> colonnata_house_c (small stone houses with terracotta tile roofs, all
+> different).*
+> *Quarry kit: marble_block_a, marble_block_b, marble_block_c (simple cubes
+> of 1.5, 2 and 3 m with saw marks), block_stack_a, block_stack_b (stacks of
+> blocks 2-3 high), block_informe_a, block_informe_b (irregular broken marble
+> chunks), rubble_pile_a, rubble_pile_b, safety_berm (a 6 m long low rubble
+> berm, sloped toward the road), work_lamp (tripod with a floodlight),
+> cable_reel, water_tank, fuel_tank, office_container (site office
+> container), quarry_sign_a, quarry_sign_b (warning signs with only a
+> chevron or a hanging-block pictogram, no text), pipe_run (a straight
+> section of water pipes on small supports).*
+> *Background: apuan_ridge (a strip of 2-3 cream-grey limestone peaks with
+> pale rubble streaks down their flanks, warm green forest at the base, NO
+> snow caps).*
+
+### 9.2 Rezultatul: diorama și planșa acceptate (27 oct 2026)
+
+În `img/carrara_plan/`:
+- `diorama_v01_iter1.jpg` (prima generare, respinsă: E jos, D deschis);
+- `diorama_v01_iter2.jpg` (**acceptată**);
+- `inventar_v01_a.jpg` (**planșa acceptată**);
+- `inventar_v01_b.jpg` (a doua generare, referință pentru utilaje și
+  creastă).
+
+**Diorama, iter2:** D a devenit galerie (portal jos pe fund, portal sus pe
+flanc, fără drum vizibil între ele), dungile de fir sunt orizontale,
+ferăstrăul-lanț a luat locul celui de-al doilea excavator, pădurea a rămas
+pe flancul de vest. **Abaterea acceptată:** E e tot la nivelul fundului —
+ChatGPT a mutat căderea de 45 m în afara lui E, spre chei, nu în carieră.
+Același defect de două ori la rând, deci bucla se oprește (memoria
+`criticul-cere-ce-zona-nu-poate-da`): o margine înaltă aproape de o cameră
+din sud-est ar ascunde fundul, iar generatorul sacrifică una din două.
+Cotele vin din `Track23`, nu din dioramă (precedentul Transfăgărășan
+§9.2); diorama dă paleta, atmosfera și inventarul.
+
+**Planșa, `_a`:** cele trei verificări trec — derrick-ul e un catarg cu
+braț (nu portal), excavatorul are furcă, creasta n-are calotă albă. Are
+mașinuța de scară (lipsește pe `_b`), iar derrick-ul n-are bloc (pe `_b`
+ține unul, dublând `marble_block_hooked`). Ce corectează modelatorul, nu
+ChatGPT (kit, „Corecturi decise de coordonator”): galbenul saturat al
+utilajelor → `DRY_VEGETATION` 13, rezervorul albastru → `PAINTED_METAL`,
+vegetația și bolovanii lipiți pe clădiri și viaduct se scot, cotele
+relative ale planșei nu se folosesc.
+
+**Contractul de kit** e `docs/asset_briefs/carrara_kit.md`, cu decupările
+în `img/carrara_assets_v1/` (`tools/blender/crop_carrara_sheet.py`). Patru
+cote ale schiței din §5.2 s-au schimbat la trecerea prin cod: camionul are
+**≤ 2,9 m** lățime (anvelopa Kamaz-ului pe care s-au măsurat contractele
+camioanelor, nu 3,6), derrick-ul se modelează la **22,05 m** și intră în joc
+cu `model_scale` 0,7256 (constanta `JIB_HEIGHT`), portalul galeriei are
+golul **≥ 10 × 10,5 m** (rama de beton a tubului din cod are 9,6 × 9,8),
+iar viaductul are **36 m** pe un gol măsurat de 31 m și pile de 26 m.
+`gallery_pillar` e amânat: sala de 16 m nu s-a construit.

@@ -104,6 +104,46 @@ zgomot de nedeterminism Jolt pe un hazard pe care schimbarea nu-l atinge
 Nevăzut încă: camionul în joc cu fereastră (lumina temei, umbrele, clasa
 marmurei pe blocuri). Captura vine cu primul val, la integrare.
 
+## Valul 1 — acceptarea coordonatorului (27 oct 2026)
+
+Trei constructori Opus în paralel (cerința dezvoltatorului pe sesiunea asta),
+ramurile `carrara/kit-a`, `kit-b`, `kit-c`, unite aici fără conflict.
+`verify_carrara.sh` → `VERDICT KIT: OK` pe toate cele **26** de GLB-uri.
+Detaliile pe piese sunt în `carrara_inventory_crr-a.md`, `_crr-b.md`,
+`_crr-c.md`; coordonatorul a văzut comparațiile.
+
+| grup | piese | verdict |
+|---|---|---|
+| crr-a, utilaje-hazard | `derrick`, `marble_block_hooked`, `block_informe_a`, `quarry_excavator` | **acceptate**. Sonda derrick-ului dă aceleași verdicte ca stand-in-ul (21 OK), iar cârligul desenat cade acum pe sarcină (−12,98 față de −13,00). Rigul excavatorului e în ±0,1 m față de `rusted_digger` |
+| crr-a | `lizza_sled` | **de refăcut**: pe amprenta de 2,4 × 2,4 m, blocul de 2,0 m acoperă sania și piesa citește „ladă pe palet”. Sonda ține amprenta (la 2,6 m pica pe timpul pierdut, 1,64 s > 1,6). Leacul care respectă sonda: **bloc mai jos (~1,2–1,4 m)** pe aceeași amprentă, tălpi ridicate în față, ca să se vadă sania. Toleranța de ±0,2 din kit e mai largă decât ce ține sonda: se strânge la ±0,05 |
+| crr-b, structuri | `ponti_di_vara`, `gallery_portal`, `marmifera_portal` | **acceptate**. Nimic peste −0,05 pe banda drumului (−0,060 măsurat), goluri 10,30 × 10,85 m și 10,20 m / cheia 9,60 m; fiecare gardă pică pe copia sabotată |
+| crr-c, kitul de carieră | 17 piese | **acceptate**. Blocurile citesc crem, nu alb (captura de 12 blocuri). Blocurile au 20 de triunghiuri, nu 12, fiindcă păstrează împărțirea pe două tonuri |
+
+**Decizii pentru integrare (Godot, Track23):**
+1. **Banda de patină** (`*_MarbleBase`, treimea de jos) iese o dungă gri tare
+   în preview pe toate piesele de marmură (blocuri, viaduct, portalul
+   galeriei, sanie). Se judecă în joc: dacă clasa `carrara_marble` o
+   înmoaie, rămâne; dacă nu, nodurile `*_MarbleBase` primesc o tentă mai
+   apropiată de crem sau se contopesc cu `*_Marble` (atunci blocurile revin
+   la 12 triunghiuri).
+2. **Derrick-ul pe Track23** cere `model_scale` 0,7256 **și** `hook_radius`
+   17,9 (cum îl rulează sonda), altfel cablul din cod nu iese din cârligul
+   desenat.
+3. **Picioarele din spate ale derrick-ului** ajung la +7,85 m pe Z (5,7 m în
+   joc), în afara colizorului catargului din cod (3,6 × 3,6). O mașină ieșită
+   de pe drum trece prin ele: se pune coliziune pe instanță sau se verifică
+   cu ProbeRace că nimeni nu ajunge acolo.
+4. **Kitul avea semnul greșit** la derrick: cu turnul pe stânga
+   (`tower_side = −1`, x = −7), +X e SPRE drum, nu dinspre el. Constructorul
+   a deschis A-ul de-a lungul drumului (Z), deci nimic nu trece de ±1,78 pe
+   X. Corectat în `carrara_kit.md`.
+5. **Excavatorul** așteaptă codul: `_build_excavator` încarcă fix
+   `rusted_digger.glb` și pune `rust_metal` pe tot modelul (punctul 1 din
+   lista de cod a brief-ului §5.6).
+6. **Coliziunile** structurilor: `mesh` pe viaduct și pe portaluri;
+   `Viaduct_Parapet` se stinge dacă rămâne berma din cod pe pod; șinele din
+   portalul Marmifera se taie dacă încurcă.
+
 ## Stare la oprire
 
 - Pilotul e complet: harnasul, GLB-ul, garda, comparațiile. `bash

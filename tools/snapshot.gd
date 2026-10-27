@@ -169,6 +169,10 @@ extends Node
 ##                             sunt stare, nu functie de timp. Ceasul din
 ##                             hazard (`_cross_time`) spune cand e piatra
 ##                             deasupra soselei; sonda il tipareste.
+##   --crane-at=13.6           MACARAUA / DERRICK-UL (CraneHazard) la N SECUNDE in ciclul ei
+##                             (`_time`, `phase` adunat ca in hazard). Ceas inghetat. Pe
+##                             derrick-ul Carrara (perioada 23, phase 0) sarcina trece axa
+##                             la 13,6 s si 20,9 s; sonda tipareste cat mai e pana la trecere.
 ##   --herd-at=4.0             RAUL DE GNU (HerdHazard, Serengeti) la N SECUNDE
 ##                             in ciclul pulsului (puls 8 s + gol 7 s = 15 s;
 ##                             `_time` absolut, fara `phase`). Capul pulsului
@@ -414,6 +418,7 @@ func _ready() -> void:
 	var wave_at := -1.0
 	var dirt_ranges: Array[Vector2] = []
 	var rock_at := -1.0
+	var crane_at := -1.0
 	var avalanche_at := -1.0
 	var door_at := -1.0
 	var herd_at := -1.0
@@ -558,6 +563,8 @@ func _ready() -> void:
 			shishi_phase = float(arg.trim_prefix("--shishi-phase="))
 		elif arg.begins_with("--rock-at="):
 			rock_at = float(arg.trim_prefix("--rock-at="))
+		elif arg.begins_with("--crane-at="):
+			crane_at = float(arg.trim_prefix("--crane-at="))
 		elif arg.begins_with("--avalanche-at="):
 			avalanche_at = float(arg.trim_prefix("--avalanche-at="))
 		elif arg.begins_with("--door-at="):
@@ -756,6 +763,8 @@ func _ready() -> void:
 			if child is EruptionCycle:
 				(child as EruptionCycle).hazard_group = &""
 		await _set_rock_time(track, rock_at)
+	if crane_at >= 0.0:
+		_set_crane_time(track, crane_at)
 	if avalanche_at >= 0.0:
 		await _set_avalanche_time(track, avalanche_at)
 	# Faza de ploaie (Fiordland). `RainCycle._collect` e amanat cu
@@ -2272,3 +2281,21 @@ func _nearest_cave_zone(track: Node, at: Vector3,
 			best_d = d
 			best = z
 	return best
+
+
+## Aduce macaraua (`CraneHazard`) la `seconds` in ciclul ei si o INGHEATA: bratul,
+## carligul si sarcina se scriu o data din `_apply_cycle`, fara simulare (ciclul e
+## o functie de timp, nu are stare).
+func _set_crane_time(root: Node, seconds: float) -> void:
+	var found := 0
+	for node in root.find_children("*", "CraneHazard", true, false):
+		var hz := node as CraneHazard
+		hz.set("_started", true)
+		hz.set("_time", seconds)
+		hz._apply_cycle(1.0 / 60.0)
+		hz.set_physics_process(false)
+		found += 1
+		var lp := hz.load_body().global_position
+		print("--crane-at=%.2f: %s, sarcina la (%.1f, %.1f, %.1f), urmatoarea trecere peste axa in %.2f s"
+			% [seconds, hz.name, lp.x, lp.y, lp.z, hz.seconds_to_crossing()])
+	print("--crane-at=%.2f: %d macarale fortate" % [seconds, found])

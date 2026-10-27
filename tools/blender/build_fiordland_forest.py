@@ -31,6 +31,7 @@ Rulare:
 """
 
 import math
+import bmesh
 from mathutils import Matrix, Vector
 
 # Sloturile legale pe Fiordland (brief §0.4).
@@ -48,556 +49,568 @@ AO_RAIL = dict(samples=16, dist=2.0, gradient="vertical",
                low=0.46, high=1.00, power=0.88, floor=0.18)
 
 
-# --- beech (fag argintiu) ----------------------------------------------------
+# --- unelte comune v2 (fidelitate fata de planse) ----------------------------
+#
+# Brief v2 (fiordland_kit_v2.md §2 grupa B): planșa bate contractul v1. Copacii
+# se construiesc dintr-un LAYOUT citit de pe decuparea planșei (pixeli ->
+# metri), nu din reguli generice: fiecare masa de coroana are pozitia ei.
+# `_fit` apoi scaleaza pozitiile/marimile pana cand AABB-ul iese pe cotele
+# contractului (planșa e desenata mai lata decat cer cotele din §2).
 
-def _beech_trunk(b, height, r_base, seed, lean=0.16, kink=True):
-    """Trunchi NEGRU si SUBTIRE: 0.25-0.45 m la baza, gol pe prima jumatate,
-    usor aplecat sau cu o cotitura — nu un stalp drept.
+def _bb(builders):
+    xs, ys, zs = [], [], []
+    for b in builders:
+        for v in b.bm.verts:
+            xs.append(v.co.x); ys.append(v.co.y); zs.append(v.co.z)
+    return (max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs))
 
-    `taper_sweep` pe o cale de 4 puncte: primele doua aproape coliniare (partea
-    goala), ultimele doua cu o cotitura (`kink`) unde incep sa se desprinda
-    ramurile joase ale primului etaj.
-    """
-    rand = _lcg(seed)
-    a0 = rand() * 6.28
-    lean_dir = Vector((math.cos(a0), math.sin(a0), 0.0))
-    pts = [Vector((0.0, 0.0, 0.0))]
-    radii = [r_base]
-    # partea goala: aproape dreapta, usor inclinata
-    pts.append(lean_dir * (height * lean * 0.35) + Vector((0, 0, height * 0.46)))
-    radii.append(r_base * 0.74)
-    if kink:
-        # cotitura: schimba directia, nu doar continua panta
-        a1 = a0 + math.radians(35.0 + rand() * 50.0)
-        kink_dir = Vector((math.cos(a1), math.sin(a1), 0.0))
-        pts.append(lean_dir * (height * lean * 0.55)
-                   + kink_dir * (height * 0.09)
-                   + Vector((0, 0, height * 0.72)))
-        radii.append(r_base * 0.52)
-    pts.append(lean_dir * (height * lean) + Vector((0, 0, height * 0.94)))
-    radii.append(r_base * 0.30)
-    b.taper_sweep(pts, radii, TRUNK, segments=5)
+
+def _fit(assemble, target, k0, iters=5):
+    """`assemble(k)` -> [Builder]; k = (kx, ky, kz). Itereaza k pana cand
+    extinderea X/Y(adancime)/Z(inaltime) a ansamblului nimereste `target`."""
+    k = list(k0)
+    for _ in range(iters):
+        bs = assemble(k)
+        dx, dy, dz = _bb(bs)
+        for b in bs:
+            b.bm.free()
+        k[0] *= target[0] / dx
+        k[1] *= target[1] / dy
+        k[2] *= target[2] / dz
+    return assemble(k), k
+
+
+def _trunk_at(pts, z):
+    for p0, p1 in zip(pts, pts[1:]):
+        if p0.z <= z <= p1.z:
+            t = (z - p0.z) / max(p1.z - p0.z, 1e-6)
+            return p0.lerp(p1, t)
+    return pts[-1].copy() if z > pts[-1].z else pts[0].copy()
+
+
+def _make_trunk(bt, top_z, r_mid, lean_to, seg=6, flare=1.45):
+    """Trunchi cu EVAZARE la baza (planșa: baza se lateste in 3-4 radacini),
+    subtiindu-se spre varf; liderul urca pana sub masa cea mai de sus."""
+    fr = [0.0, 0.05, 0.16, 0.45, 0.72, 1.0]
+    rr = [flare, 1.18, 1.0, 0.82, 0.58, 0.34]
+    pts = [Vector((lean_to[0] * t ** 1.6, lean_to[1] * t ** 1.6, top_z * t))
+           for t in fr]
+    bt.taper_sweep(pts, [r_mid * r for r in rr], TRUNK, segments=seg)
     return pts
 
 
-def _crown_tier(b, center, radius_xy, thick, seed, segments=6, lumps=3,
-                rings=2):
-    """O MASA de coroana: ciorchine de bulgari APROAPE ROTUNZI (nu discuri
-    turtite), grupati intr-un volum compact, cu goluri de cer intre mase.
-
-    REFACUT sep 2026 (defectul "gard viu"/"lollipop"/"etaje plate", numit
-    orb pe 4 POI — vezi docs/track_briefs/fiordland_stare_poi.md). Cauza
-    gasita in geometrie, nu in asezare: fiecare "lump" avea marimea Z
-    (`lz`) derivata din `thick`, care la randul lui era o FRACTIUNE mica
-    din raza XY (`w * 0.34..0.50`) — deci fiecare bulgare era, prin
-    constructie, o placa lata si subtire. Cate placi ai fi pus una langa
-    alta, tot placi ramaneau: de-aia treceau toate variantele de asezare
-    (jitter, offset Z, cerc) fara sa schimbe verdictul criticilor.
-
-    Fix: bulgarii sunt acum aproape SFERICI (squash 0.82-1.05, ca la
-    `_crown_mass` din quenualul Machu Picchu — acelasi princiu: o coroana
-    de fag nu e o umbrela turtita, e o masa adunata). `thick` ramane
-    parametrul de INTRARE (controleaza cat de mare e masa pe verticala),
-    dar raza fiecarui bulgare se calculeaza din marimea lui, nu din
-    `thick` impartit iar. Bulgarii se suprapun partial (distanta dintre
-    centre < suma razelor) ca sa nu ramana goluri interne, dar fiecare isi
-    pastreaza cupola vizibila prin offset in TOATE cele 3 axe, nu doar pe
-    cerc in plan.
-
-    Fetele de sus TROPICAL_GREEN (lumina), cele de jos LOG_DARK (umbra sub
-    masa) — brief-ul cere explicit asta, nu doar un slot uniform.
-    """
+def _roots(bt, r_mid, n, seed, seg=4):
+    """Radacini joase, care pleaca din evazarea trunchiului si intra in sol."""
     rand = _lcg(seed)
-    rx, ry = radius_xy
-    r_lump = max(rx, ry) * 0.62     # raza tipica a UNUI bulgare, din marimea masei
-    all_faces = set()
-    for i in range(lumps):
-        a = 2.0 * math.pi * i / lumps + rand() * 0.8
-        # centrele stau APROAPE de mijloc (nu la marginea razei) — cu bulgari
-        # aproape sferici de raza r_lump, o distributie prea larga ar lasa
-        # goluri intre ei; aproape de centru + raze mari => suprapunere reala
-        dist_r = r_lump * (0.30 + rand() * 0.22)
-        lx, ly = math.cos(a) * dist_r, math.sin(a) * dist_r
-        size_f = 0.68 + rand() * 0.34       # marimi APROAPE EGALE intre bulgari
-        size = r_lump * size_f
-        # offset pe TOATE axele, nu doar Z: rupe silueta si din lateral, nu
-        # doar de sus (o distributie doar-pe-cerc-in-plan tot da un disc
-        # vazut din masina, chiar daca bulgarii individuali sunt rotunzi)
-        lz_off = thick * (rand() - 0.5) * 0.7
-        squash = 0.82 + rand() * 0.23       # APROAPE 1.0 — rotund, nu turtit
-        faces = b.boulder(
-            (center[0] + lx, center[1] + ly, center[2] + lz_off),
-            (size * 2.0, size * (0.90 + rand() * 0.2) * 2.0,
-             size * squash * 2.0), CROWN,
-            seed=seed + i * 13, segments=segments, rings=rings,
-            deviation=0.24)
-        all_faces |= set(faces)
-    b.retag(all_faces, TRUNK, where="down")
-    b.retag(all_faces, CROWN, where="up")
-    return all_faces
+    for k in range(n):
+        a = 2.0 * math.pi * k / n + rand() * 0.7
+        d = Vector((math.cos(a), math.sin(a), 0.0))
+        L = r_mid * (2.1 + rand() * 0.6)
+        bt.taper_sweep([d * (r_mid * 0.7) + Vector((0, 0, r_mid * 0.75)),
+                        d * (L * 0.55) + Vector((0, 0, r_mid * 0.30)),
+                        d * L + Vector((0, 0, 0.0))],
+                       [r_mid * 0.55, r_mid * 0.38, r_mid * 0.06], TRUNK,
+                       segments=seg)
 
 
-def build_beech(height, n_tiers, seed_base, budget):
-    """`height` = inaltimea totala (8/11/14 m). `n_tiers` = 3 sau 4 etaje.
+def _branches(bt, clumps, tpts, r_mid, r_factor=0.5, split_lo=0.42, seg=5):
+    """Ramuri groase care pleaca din FURCA trunchiului (V clar) spre masele
+    de coroana: masele joase pleaca chiar din furca, cele inalte mai sus pe
+    lider. Ramura urca aproape vertical intai, apoi se departeaza (arc)."""
+    top_z = tpts[-1].z
+    split_z = split_lo * top_z
+    for (c, wx, wy, hz) in clumps:
+        horiz = math.hypot(c.x, c.y)
+        if horiz < 0.3 and c.z > top_z * 0.75:
+            continue
+        t = min(max((c.z - split_z) / max(top_z - split_z, 1e-6), 0.0), 1.0)
+        z_a = split_z + t * 0.8 * (c.z - 0.4 - split_z)
+        if z_a > c.z - 0.3:
+            z_a = c.z * 0.7
+        p0 = _trunk_at(tpts, z_a)
+        tgt = Vector((c.x, c.y, c.z - 0.15 * hz))
+        if (tgt - p0).length < 0.35:
+            continue
+        mid = p0.lerp(tgt, 0.45)
+        mid.z = p0.z + (tgt.z - p0.z) * 0.75
+        r0 = r_mid * r_factor * (1.0 if t < 0.3 else 0.85)
+        bt.taper_sweep([p0, mid, tgt], [r0, r0 * 0.66, r0 * 0.25], TRUNK,
+                       segments=seg)
 
-    Coroana ocupa treimea superioara pana la jumatate din inaltime — trunchiul
-    e gol pe prima jumatate (brief). Etajele sunt la inaltimi DIFERITE, cu
-    goluri intre ele (nu se ating pe Z), si fiecare are propriul offset XY, ca
-    sa nu iasa un turn coaxial.
 
-    A DOUA revizuire coordonator (val 2, dupa fix-ul de goluri): golurile
-    erau acolo, dar (1) etajele PLUTEAU — nicio geometrie nu lega discul de
-    trunchi; (2) varful trunchiului STRAPUNGEA etajul de sus (vizibil pe
-    beech_b/c); (3) coroana combinata era doar 30-40% din inaltime, cand un
-    fag real e 55-70% — citea ca "table pe stalp", nu ca arbore. Fix, in
-    ordine:
-      - trunchiul se opreste la `trunk_top_t` (SUB centrul ultimului etaj,
-        nu la varful nominal `height`) — vezi mai jos
-      - fiecare etaj primeste o RAMURA scurta (taper_sweep, 1 prism conic,
-        cateva tri) de la trunchi pana sub centrul lui, inclinata 20-40°
-      - `off_r` (offset lateral) creste substantial — proportional cu
-        INALTIMEA arborelui, nu doar cu latimea discului, ca sa iasa o
-        coroana combinata de 55-70% din inaltime
-      - azimuturile etajelor sunt distribuite pe cerc (2*pi*i/n_tiers +
-        jitter), nu toate independente — asa se suprapun in PLAN (vazute de
-        sus, de la camera de joc), dar raman la Z diferite (vazute din lateral)
+def _clump_records(spec, ppm, axis_x, base_y, k, dspan, grow=1.22):
+    kx, ky, kz = k
+    out = []
+    for (px, py, w, h, df) in spec:
+        out.append((Vector(((px - axis_x) / ppm * kx, df * dspan * ky,
+                            (base_y - py) / ppm * kz)),
+                    w / ppm * (0.55 + 0.45 * kx) * grow,
+                    w / ppm * (0.55 + 0.45 * ky) * 0.95 * grow,
+                    h / ppm * kz * (0.85 + 0.2 * grow)))
+    return out
 
-    DOUA noduri (Trunk + Crown, brief §0.6: o piesa care primeste clasa la
-    integrare se sparge la export in obiecte cu un singur material) — doua
-    Builder-e separate, ca la stirling_ledge (Wall/Overhang/Shelf).
-    """
-    rand = _lcg(seed_base)
-    r_base = 0.16 + rand() * 0.09   # 0.25..0.45 m diametru brief -> raza 0.13..0.23
 
-    # Etajele intai (geometria lor decide unde se opreste trunchiul), apoi
-    # trunchiul, apoi ramurile — trunchiul din urma, ca varful lui sa poata
-    # fi plasat SUB primul etaj deja calculat (punctul 2 din revizuire).
-    crown_lo = height * 0.44
-    crown_hi = height * 0.98    # coroana nu mai urca pana aproape de varf -
-                                 # trunchiul se opreste SUB etajul de sus (pct 2)
-    n = max(n_tiers, 1)
-    avail = crown_hi - crown_lo
-    # etajele mai groase si mai late decat inainte: tinta buget 220-280/fag,
-    # nu 88-108 — coordonatorul cere sa se FOLOSEASCA bugetul (pct 5).
-    #
-    # ATENTIE: `w` aici e raza NOMINALA data lui `_crown_tier`, dar geometria
-    # REALA iese mai mare — bulgarii secundari din `_crown_tier` au propriul
-    # offset (pana la 0.6*max(rx,ry)) si propria marime (pana la 1.15*size_f),
-    # deci extentul randat pe o axa poate trece de 1.5x raza nominala.
-    # Masurat pe GLB (nu presupus): w_avg=0.30*H dadea beech_c la 16.97 m
-    # inaltime (18% peste 14 m) si 13.93 m latime (84% din inaltime, peste
-    # tinta 55-70%). Coboara la 0.20*H si off_r la 0.10*H, calibrate DIRECT
-    # pe masuratoarea gresita (impartite la ~1.4-1.5, factorul de balonare
-    # observat), apoi reverificate.
-    w_avg = height * 0.20        # raza medie NOMINALA a unui etaj
-    thick_avg = w_avg * 0.42
-    gap = thick_avg * 0.55
-    slot = max(avail / n, thick_avg + gap)
-    tier_specs = []   # (cx, cy, z_center, w, h, thick, seed)
-    z = crown_lo
-    # azimuturi distribuite pe cerc + jitter: coroana se suprapune in PLAN
-    for i in range(n):
-        t = i / max(n - 1, 1)
-        w = w_avg * (0.80 + rand() * 0.40) * (1.0 - 0.08 * t)
-        thick = w * (0.34 + rand() * 0.16)
-        z_center = z + thick * 0.5
-        a = (2.0 * math.pi * i / n) + (rand() - 0.5) * 1.1
-        # offset lateral PROPORTIONAL CU INALTIMEA arborelui (nu doar cu
-        # latimea discului): asa iese coroana combinata la 55-70% din H,
-        # in loc de 30-40% (defectul semnalat) — raza creste usor cu 'i'
-        # (etajele de sus, mai mici, se departeaza mai mult, ca la un fag
-        # real unde coroana se largeste catre mijloc/varf)
-        off_r = height * (0.09 + 0.06 * t) * (0.85 + rand() * 0.3)
-        cx, cy = math.cos(a) * off_r, math.sin(a) * off_r
-        tier_specs.append((cx, cy, z_center, w, w * (0.82 + rand() * 0.3),
-                           thick, seed_base + 40 + i * 11))
-        z += slot
-    # capacul FINAL: ultimul tier nu are voie sa impinga varful peste
-    # `height` — daca `slot` (dictat de thick_avg) a acumulat mai mult decat
-    # `avail`, se comprima uniform tot stivajul pe Z (pastreaza proportiile
-    # relative, doar scaleaza), in loc sa se lase varful sa treaca de tinta.
-    z_top = tier_specs[-1][2] + tier_specs[-1][5] * 0.5
-    if z_top > crown_hi:
-        scale_z = (crown_hi - crown_lo) / max(z_top - crown_lo, 1e-6)
-        tier_specs = [(cx, cy, crown_lo + (zc - crown_lo) * scale_z, w, h,
-                       th, sd)
-                      for (cx, cy, zc, w, h, th, sd) in tier_specs]
+# --- beech (fag argintiu) ----------------------------------------------------
+#
+# Layout citit de pe decupare: (x_px, y_px, latime_px, inaltime_px, adancime
+# in [-1,1]). Coroana = 9 mase fatetate in ETAJE cu cer intre ele, mai late
+# decat inalte; trunchi gros cu evazare + 4 radacini, ramuri groase.
 
-    # A TREIA revizuire coordonator: trunchiul scurt (oprit sub PRIMUL etaj)
-    # obliga fiecare ramura sa acopere singura toata distanta pana la etajul
-    # ei — pentru etajul de sus (idx=3 la beech_c, la ~9 m deasupra bazei
-    # trunchiului), o SINGURA ramura dreapta pe distanta aia fie nu ajunge
-    # vizual (arata scurta/absenta), fie, daca ajunge, citeste ca un al
-    # doilea trunchi diagonal, nu ca o creanga. Fix arhitectural, nu doar
-    # numeric: trunchiul urca acum aproape pana SUB PENULTIMUL etaj (nu doar
-    # primul), iar fiecare ramura porneste dintr-un punct de-a lungul
-    # acestui trunchi LUNG, proportional cu inaltimea etajului ei — deci
-    # fiecare ramura ramane SCURTA (cateva metri, nu 5-9 m), exact reteta
-    # cursa "1 prism, 4-6 tris, 20-40°" ceruta de coordonator. Trunchiul
-    # insusi se opreste sub centrul ULTIMULUI etaj (fara sa-l strapunga —
-    # cerinta #2), iar acel ultim etaj primeste o ramura scurta separat,
-    # la fel ca celelalte.
-    trunk_h = tier_specs[-1][2] - tier_specs[-1][5] * 0.55
-    bt = Builder()
-    trunk_pts = _beech_trunk(bt, trunk_h, r_base * 2.0, seed_base,
-                             lean=0.14 + rand() * 0.10)
-    trunk_top = trunk_pts[-1]
+BEECH_A_SPEC = [
+    (160, 48, 120, 66, 0.0),      # cupola de sus
+    (103, 98, 82, 54, -0.7),      # sus-stanga
+    (215, 122, 104, 66, 0.5),     # sus-dreapta
+    (130, 128, 52, 40, 0.15),     # umplutura dintre ele
+    (78, 160, 128, 80, 0.7),      # mijloc-stanga, masa mare
+    (198, 186, 100, 58, 0.95),    # mijloc-fata
+    (276, 214, 94, 70, -0.45),    # dreapta
+    (76, 240, 108, 40, -0.8),     # etajul de jos, stanga
+    (206, 242, 70, 34, 0.55),     # etajul de jos, dreapta
+]
+BEECH_B_SPEC = [
+    (190, 40, 80, 60, 0.0),
+    (150, 80, 90, 55, -0.7),
+    (295, 108, 100, 50, 0.4),
+    (215, 112, 52, 40, -0.2),
+    (160, 155, 85, 60, 0.8),
+    (255, 160, 130, 60, -0.5),
+    (97, 218, 110, 80, 0.9),       # ramura joasa pe o parte, ca pe planșă
+    (290, 224, 80, 55, -0.7),
+]
+BEECH_C_SPEC = [
+    (205, 40, 95, 50, 0.0),
+    (152, 85, 90, 55, -0.8),
+    (250, 100, 95, 55, 0.6),
+    (205, 118, 42, 40, 0.1),
+    (102, 130, 105, 65, 0.7),
+    (170, 166, 95, 55, -0.4),
+    (290, 186, 130, 60, -0.6),
+    (130, 236, 90, 40, 0.9),
+    (285, 262, 120, 50, 0.5),
+]
 
-    bc = Builder()
-    for idx, (cx, cy, z_center, w, h, thick, seed) in enumerate(tier_specs):
-        # etajele de jos (mai mari, mai aproape de camera) primesc un al
-        # treilea bulgare — masa in plus exact unde se vede cel mai mult;
-        # tinta coordonator 220-280 tri/fag (foloseste bugetul de 300)
-        # Pe fagii cu 4 etaje (b/c) doar PRIMUL etaj ia lumps=3 (bugetul de
-        # 300 nu incape 2x3-lumpuri + restul), pe cel cu 3 etaje (a) primele
-        # doua. Val 3 (rework silueta): TOATE etajele primesc acum lumps=3
-        # (nu doar cele apropiate) — testat izolat (`_debug_tier4_*.png`),
-        # 2 bulgari tot citeau ca doua placi lipite, 3 bulgari pe cerc rup
-        # conturul vizibil de jur imprejur. `rings=2` uniform (nu 3 pe
-        # apropiate) tine bugetul: 3 lumps x rings=2 x segments=4 = 48 tri
-        # brut/etaj, incape in 220-280/fag chiar la 4 etaje.
-        _crown_tier(bc, (cx, cy, z_center), (w, h), thick, seed=seed,
-                   segments=4, lumps=3, rings=2)
-        # RAMURA: porneste dintr-un punct DE-A LUNGUL TRUNCHIULUI LUNG, la
-        # aproape aceeasi cota ca centrul etajului ei (branch_t urmareste
-        # direct fractia de inaltime a etajului, nu un interval fix
-        # 0.55-0.95 independent de tier) — asa ramane SCURTA, doar diferenta
-        # locala dintre trunchi si tier, in loc sa acopere toata distanta de
-        # la baza trunchiului.
-        t_frac = (z_center - trunk_pts[0].z) / max(trunk_top.z - trunk_pts[0].z, 1e-6)
-        branch_t = max(0.0, min(t_frac - 0.06, 0.97))
-        branch_base = trunk_pts[0].lerp(trunk_top, branch_t)
-        tier_center = Vector((cx, cy, z_center))
-        to_tier = tier_center - branch_base
-        dist = to_tier.length
-        # opreste-te ADANC sub tier (in interiorul volumului de bulgari),
-        # nu la jumatate de drum — raza tier-ului e `w`
-        reach = max(dist - w * 0.40, dist * 0.6)
-        branch_dir = to_tier.normalized() if dist > 1e-4 else Vector((0, 0, 1))
-        branch_tip = branch_base + branch_dir * reach
-        branch_tip.z = min(branch_tip.z, z_center - thick * 0.15)
-        # Grosime substantiala: o ramura care sustine un nor de 2-3 m
-        # latime trebuie sa citeasca la fel de groasa ca o creanga reala,
-        # nu un fir.
-        r0 = max(r_base * 0.9, 0.08)
-        bc.taper_sweep([branch_base, branch_tip], [r0, r0 * 0.55], TRUNK,
-                      segments=5)
 
-    trunk_obj = bt.to_object("Trunk")
-    crown_obj = bc.to_object("Crown")
-    return trunk_obj, crown_obj
+def build_beech(spec, ppm, axis_x, base_y, target, r_mid, seed, dspan):
+    def assemble(k):
+        clumps = _clump_records(spec, ppm, axis_x, base_y, k, dspan, grow=1.5)
+        bc = Builder()
+        allf = set()
+        for i, (c, wx, wy, hz) in enumerate(clumps):
+            # mase ROTUNJITE (v3): inaltime/latime ~0.72, nu discuri
+            hh = max(hz, 0.72 * 0.5 * (wx + wy))
+            allf |= bc.boulder((c.x, c.y, c.z), (wx, wy, hh * 0.95), CROWN,
+                               seed=seed + i * 13, segments=8, rings=3,
+                               deviation=0.16)
+            br = _lcg(seed + i * 7)
+            ph = 2.0 * math.pi * br()
+            # lob suplimentar atarnat spre exterior (margine de conopida)
+            allf |= bc.boulder(
+                (c.x + math.cos(ph) * wx * 0.40, c.y + math.sin(ph) * wy * 0.40,
+                 c.z - hh * 0.22),
+                (wx * 0.55, wy * 0.55, hh * 0.55), CROWN,
+                seed=seed + i * 31, segments=6, rings=2, deviation=0.18)
+        bc.retag(allf, TRUNK, where="down")
+        bc.retag(allf, CROWN, where="up")
+        top = max(clumps, key=lambda q: q[0].z)
+        top_z = top[0].z - top[3] * 0.30
+        bt = Builder()
+        tpts = _make_trunk(bt, top_z, r_mid, (top[0].x * 0.35, top[0].y * 0.35), flare=1.7)
+        _roots(bt, r_mid, 4, seed + 7)
+        _branches(bt, clumps, tpts, r_mid, r_factor=0.70, split_lo=0.42)
+        return [bt, bc]
+
+    (bt, bc), k = _fit(assemble, target, (1.0, 1.0, 1.0))
+    print("beech fit k=%.3f %.3f %.3f" % tuple(k))
+    return bt.to_object("Trunk"), bc.to_object("Crown")
 
 
 # --- beech_dead ----------------------------------------------------------------
 
+# --- unelte v3 (grupa B, constructor nou): sectiuni arbitrare pe traseu --------
+
+def _ring_sweep(b, pts, sections, slots, up=(0, 0, 1)):
+    """Matura o sectiune pe un traseu. `sections[i]` = lista de (u, v) in cadrul
+    (x lateral, y normal) al statiei i, sau None pentru un VARF (un singur
+    vertex, ex. capatul lamei). `slots[i]` = slotul segmentului i->i+1.
+    Capacul de start se inchide cu o fata (corp inchis: se vede din orice
+    unghi, fara backface culling)."""
+    pts = [Vector(p) for p in pts]
+    frames = b._frames(pts, up=up)
+    rings = []
+    for p, (_t, x, y), sec in zip(pts, frames, sections):
+        if sec is None:
+            rings.append([b.bm.verts.new(p)])
+        else:
+            rings.append([b.bm.verts.new(p + x * u + y * v) for (u, v) in sec])
+    made = []
+    for si, (lo, hi) in enumerate(zip(rings, rings[1:])):
+        n = max(len(lo), len(hi))
+        fs = []
+        if len(hi) == 1:
+            for i in range(n):
+                fs.append(b.bm.faces.new((lo[i], lo[(i + 1) % n], hi[0])))
+        else:
+            for i in range(n):
+                j = (i + 1) % n
+                fs.append(b.bm.faces.new((lo[i], lo[j], hi[j], hi[i])))
+        for f in fs:
+            f[b.slot] = slots[si]
+        made += fs
+    cap = b.bm.faces.new(tuple(reversed(rings[0])))
+    cap[b.slot] = slots[0]
+    made.append(cap)
+    bmesh.ops.recalc_face_normals(b.bm, faces=made)
+    return made
+
+
+def _limb(b, p0, az, L, phi0, phi1, r0, r1, n=4, seg=6, kx=1.0, kz=1.0,
+          slot=None, ky=None):
+    """Ramura rotunda, subtiata, care porneste la phi0 grade de verticala si se
+    curbeaza spre phi1 (mai vertical = se indreapta in sus). Intoarce
+    (puncte, raze) ca sa se poata ramifica din ea."""
+    slot = TRUNK if slot is None else slot
+    ky = kx if ky is None else ky
+    a = math.radians(az)
+    d = Vector((math.cos(a) * kx, math.sin(a) * ky, 0.0))
+    pts, rad = [Vector(p0)], [r0]
+    ds = L / n
+    for i in range(n):
+        t = (i + 0.5) / n
+        phi = math.radians(phi0 + (phi1 - phi0) * t)
+        pts.append(pts[-1] + d * (math.sin(phi) * ds) + Vector((0, 0, math.cos(phi) * ds * kz)))
+        rad.append(r0 + (r1 - r0) * (i + 1) / n)
+    b.taper_sweep(pts, rad, slot, segments=seg)
+    return pts, rad
+
+
 def build_beech_dead():
-    """Fag uscat 9 m: trunchi + 4-6 crengi goale, 2-3 petice de muschi."""
-    b = Builder()
-    H = 9.0
-    rand = _lcg(5201)
-    trunk_pts = _beech_trunk(b, H, 0.34, 5201, lean=0.10, kink=True)
-    top = trunk_pts[-1]
-    n_branches = 5
-    for k in range(n_branches):
-        a = 2.0 * math.pi * k / n_branches + rand() * 0.9
-        d = Vector((math.cos(a), math.sin(a), 0.0))
-        # crengile pornesc de-a lungul trunchiului, nu toate din varf — un fag
-        # uscat isi pierde crengile pe toata inaltimea, nu doar in crestet
-        t0 = 0.55 + rand() * 0.35
-        base = trunk_pts[0].lerp(top, t0) if t0 < 1.0 else top
-        L = H * (0.14 + rand() * 0.16)
-        mid = base + d * (L * 0.5) + Vector((0, 0, L * 0.25))
-        tip = base + d * L + Vector((0, 0, L * 0.42))
-        b.taper_sweep([base, mid, tip], [0.05, 0.03, 0.008], TRUNK, segments=4)
-    # muschi: petice retag pe trunchi, zero cost
-    moss_faces = b.retag(set(f for f in b.bm.faces if f.is_valid), MOSS,
-                         where=lambda c, n: (c.z < H * 0.3) and (n.x > 0.3 or n.y > 0.3))
+    """Fag uscat (v3): trunchi gros care se subtiaza, baza evazata cu 5
+    contraforturi scurte; la ~50% se FURCHEAZA in 3 ramuri groase care se
+    desfac 25-45 grade si se curbeaza in sus, fiecare furcheaza inca o data in
+    ramuri subtiri; o ramura joasa laterala la ~35%; tulpina continua putin si
+    se rupe intr-un ciot cu 3 aschii. Totul rotund si conic, fara varfuri."""
+    H = 8.5
+    TARGET = (4.8, 4.8, 8.5)
+
+    def assemble(k):
+        kx, ky, kz = k
+        b = Builder()
+        fr = [0.0, 0.04, 0.14, 0.30, 0.50, 0.70, 0.88, 0.94]
+        rad = [0.80, 0.52, 0.44, 0.38, 0.30, 0.20, 0.15, 0.13]
+        pts = [Vector((0.18 * f * f * 2.2, 0.08 * f * f * 2.0, H * f * kz))
+               for f in fr]
+        b.taper_sweep(pts, rad, TRUNK, segments=8)
+        # contraforturi: creste late si joase care coboara din evazare
+        rr = _lcg(5207)
+        for j in range(5):
+            a = 2.0 * math.pi * j / 5 + rr() * 0.5
+            d = Vector((math.cos(a), math.sin(a), 0.0))
+            L = 0.62 + rr() * 0.2
+            b.taper_sweep([d * 0.22 + Vector((0, 0, 0.62)),
+                           d * (L * 0.5) + Vector((0, 0, 0.27)),
+                           d * L + Vector((0, 0, 0.0))],
+                          [0.17, 0.12, 0.0], TRUNK, segments=6)
+        # ciot rupt: trei aschii de inaltimi diferite
+        top = pts[-1]
+        for j, (hh, ang) in enumerate(((0.75, 20), (0.45, 140), (0.30, 250))):
+            a = math.radians(ang)
+            d = Vector((math.cos(a), math.sin(a), 0.0))
+            b.taper_sweep([top - Vector((0, 0, 0.1)) + d * 0.04,
+                           top + d * 0.07 + Vector((0, 0, hh * 0.5)),
+                           top + d * 0.10 + Vector((0, 0, hh))],
+                          [0.10, 0.065, 0.0], TRUNK, segments=5)
+        zf = H * 0.50 * kz
+        pf = _trunk_at(pts, zf)
+        # 3 ramuri groase din furca
+        for az, L, ph0, ph1 in ((15, 4.2, 50, 14), (135, 4.0, 46, 12), (255, 3.8, 42, 10)):
+            lp, lr = _limb(b, pf - Vector((0, 0, 0.1)), az, L * kz, ph0, ph1,
+                           0.33, 0.08, n=5, seg=7, kx=kx, ky=ky, kz=1.0)
+            for idx, sgn, Lf in ((2, 1, 1.7), (3, -1, 1.4), (4, 1, 1.0)):
+                _limb(b, lp[idx], az + sgn * 42, Lf, 45, 10, lr[idx] * 0.75,
+                      0.03, n=3, seg=5, kx=kx, ky=ky, kz=kz)
+        # ramura joasa laterala la ~35%
+        pl = _trunk_at(pts, H * 0.35 * kz)
+        lp, lr = _limb(b, pl - Vector((0, 0, 0.05)), 190, 3.4, 78, 30, 0.24,
+                       0.05, n=4, seg=6, kx=kx, ky=ky, kz=kz)
+        _limb(b, lp[2], 190 + 40, 1.1, 40, 8, lr[2] * 0.6, 0.02, n=3, seg=5,
+              kx=kx, ky=ky, kz=kz)
+        return [b]
+
+    (b,), k = _fit(assemble, TARGET, (1.0, 1.0, 1.0))
+    print("beech_dead fit k=%.3f %.3f %.3f" % tuple(k))
+    b.retag(set(f for f in b.bm.faces if f.is_valid), MOSS,
+            where=lambda c, n: (c.z < 0.9) and abs(n.z) < 0.5
+            and (int(c.x * 7 + c.y * 5) % 4 == 0))
     return b.to_object("Beech_Dead")
+
 
 
 # --- rata_tree -----------------------------------------------------------------
 
+RATA_SPEC = [
+    (178, 40, 70, 38, 0.0),        # varf
+    (246, 86, 90, 52, 0.55),       # dreapta-sus, cea mai mare masa
+    (108, 100, 72, 48, -0.6),      # stanga-sus
+    (158, 110, 52, 40, -0.1),      # mijloc, in spate
+    (282, 150, 52, 42, -0.4),      # dreapta-mijloc
+    (150, 128, 76, 40, 0.8),       # mijloc-fata
+    (128, 166, 78, 46, -0.5),      # stanga-jos
+    (214, 166, 54, 36, 0.6),       # dreapta-jos
+]
+
+
 def build_rata_tree():
-    """Rata in floare, 5 m: TUFA DENSA, ROTUNJITA — nu acacia africana.
+    """Rata in floare: COPACEL cu trunchi vizibil (~35% din inaltime) care se
+    ramifica, coroana deschisa din 8 mase rotunjite, cu cer intre ele; florile
+    sunt petice turtite de ciorchini (rosu 7) care ies putin din suprafata
+    frunzisului, 5 pe masa — nu piramide in picioare. Frunzis 21 + 28."""
+    ppm, ax, by = 54.0, 190.0, 285.0
+    TARGET = (4.3, 4.2, 5.0)
+    spec = RATA_SPEC
 
-    A DOUA revizuire coordonator: prima versiune (limbi lungi si golase cu
-    cate un disc turtit in varf, plus un disc central la furca) citea EXACT
-    ca o acacie de Serengeti — silueta interzisa explicit pentru pista asta.
-    Cauza: limbile erau prea lungi si prea vizibile (bare pana la capat),
-    iar "ciorchinii" foloseau reteta `_crown_tier` a fagului (discuri
-    turtite, late-nu-inalte) — corecta pentru fag, gresita pentru rata.
+    def assemble(k):
+        clumps = _clump_records(spec, ppm, ax, by, k, 1.7)
+        bcr = Builder()
+        rand = _lcg(5401)
+        allf = set()
+        for i, (c, wx, wy, hz) in enumerate(clumps):
+            allf |= bcr.boulder((c.x, c.y, c.z), (wx, wy, hz), CROWN,
+                                seed=5311 + i * 11, segments=6, rings=2,
+                                deviation=0.20)
+        bcr.retag(allf, TRUNK, where="down")
+        bcr.retag(allf, CROWN, where="up")
+        for i, (c, wx, wy, hz) in enumerate(clumps):
+            n_cl = 5
+            for j in range(n_cl):
+                th = math.radians(6.0 + rand() * 54.0)
+                ph = 2.0 * math.pi * (j + rand() * 0.6) / n_cl
+                p = Vector((c.x + math.sin(th) * math.cos(ph) * wx * 0.5,
+                            c.y + math.sin(th) * math.sin(ph) * wy * 0.5,
+                            c.z + math.cos(th) * hz * 0.5)) \
+                    + Vector((0, 0, -0.03))
+                s = 0.34 + rand() * 0.14
+                bcr.boulder((p.x, p.y, p.z), (s, s, s * 0.42), FLOWER,
+                            seed=5600 + i * 17 + j, segments=5, rings=1,
+                            deviation=0.12)
+        top = max(clumps, key=lambda q: q[0].z)
+        top_z = top[0].z - top[3] * 0.25
+        tr = Builder()
+        r_mid = 0.20
+        tpts = _make_trunk(tr, top_z, r_mid, (top[0].x * 0.3, top[0].y * 0.3),
+                           seg=5, flare=1.5)
+        _roots(tr, r_mid, 3, 5303, seg=3)
+        _branches(tr, clumps, tpts, r_mid, r_factor=0.62, split_lo=0.44, seg=4)
+        bmesh_ops_join(bcr, tr)
+        return [bcr]
 
-    Rata (Metrosideros umbellata) e o tufa DENSA si ROTUNDA: trunchi scurt,
-    limbi scurte aproape ascunse de frunzis, coroana UN SINGUR bulgare
-    umflat facut din 5-7 volume care se ATING si se INTREPATRUND (nu
-    turtite si distantate ca la fag). Fix complet, reteta noua:
-      - trunchi FOARTE scurt (<=1.2 m vizibil), apoi 3-4 limbi SCURTE
-        (<=1.5 m), majoritatea ingropate in coroana de la baza
-      - coroana: 6 bulgari `boulder()` ROTUNJITI (squash bland, NU turtiti
-        ca discurile de fag), cu centrele apropiate de centrul arborelui si
-        raze mari fata de distanta dintre ele — se SUPRAPUN masiv, ca sa nu
-        ramana cer vizibil prin mijloc
-      - FARA disc central la furca (interzis explicit de coordonator)
-      - flori: NU bulgari separati mari (43% din fete, prea mult) — acum
-        cutii mici RETAG pe o fractie din fetele de sus/exterior ale
-        coroanei (15-25% cerut), plus cateva bulgare-cluster mici RAR, ca
-        sa citeasca "verde punctat cu rosu", nu "copac rosu"
-    """
-    b = Builder()
-    H = 5.0
-    rand = _lcg(5301)
-
-    # Trunchi foarte scurt: <=1.2 m vizibil (brief). `_beech_trunk` cu
-    # kink=False si o inaltime mica da un trunchi drept, gros la baza.
-    trunk_h = 0.75 + rand() * 0.35   # 0.75-1.10 m, sub plafonul de 1.2 m
-    trunk_pts = _beech_trunk(b, trunk_h, 0.30, 5301, lean=0.08, kink=False)
-    fork = trunk_pts[-1]
-
-    # Centrul coroanei: putin deasupra furcii, undeva pe la 40% din H —
-    # coroana insasi (bulgarii, mai jos) urca de acolo pana aproape de H.
-    crown_center_z = fork.z + H * 0.06
-
-    # 3-4 limbi SCURTE (<=1.5 m), majoritatea ascunse in coroana — nu se
-    # vede lemn gol intre trunchi si frunzis, ca la acacie. Limbile exista
-    # doar ca sa dea bulgarilor de coroana un punct de plecare diferit de
-    # trunchi (silueta usor asimetrica), nu ca element vizibil in sine.
-    n_limbs = 4
-    limb_tips = []
-    for li in range(n_limbs):
-        a = 2.0 * math.pi * li / n_limbs + rand() * 0.5
-        d = Vector((math.cos(a), math.sin(a), 0.0))
-        limb_len = 0.7 + rand() * 0.6          # <=1.5 m (brief)
-        rise = limb_len * (0.55 + rand() * 0.25)
-        tip = fork + d * limb_len + Vector((0, 0, rise))
-        b.taper_sweep([fork, tip], [0.11, 0.05], TRUNK, segments=4)
-        limb_tips.append(tip)
-
-    # Coroana: 6 bulgari ROTUNJITI, denși, care se ATING/INTREPATRUND.
-    # Raza fiecarui bulgare (crown_r) e mare fata de raza de distributie a
-    # centrelor (dist_r) — raportul asta e ce garanteaza suprapunerea
-    # masiva ceruta ("no sky shows through the middle"). Un bulgar central
-    # plus 5 in jurul lui, pe doua "etaje" joase (nu turnuri) — dom, nu
-    # coloana.
-    crown_w_target = H * (0.85 + rand() * 0.15)   # latime finala tinta 4-5 m (raza ~2.1-2.4)
-    crown_r_nominal = crown_w_target * 0.5
-    dist_r = crown_r_nominal * 0.34   # centrele stau APROAPE de mijloc -> suprapunere mare
-    lump_specs = []   # (center, size_xyz, seed)
-    # bulgarele central, cel mai mare
-    lump_specs.append((Vector((0.0, 0.0, crown_center_z + crown_r_nominal * 0.30)),
-                       crown_r_nominal * (0.62 + rand() * 0.10), 5311))
-    n_ring = 5
-    for k in range(n_ring):
-        a = 2.0 * math.pi * k / n_ring + rand() * 0.5
-        r = dist_r * (0.85 + rand() * 0.3)
-        cx, cy = math.cos(a) * r, math.sin(a) * r
-        # doua "randuri" pe Z (nu toate la aceeasi cota) — rupe conturul de
-        # sus, exact lectia de la fag, dar aici bulgarii RAMAN rotunjiti
-        # (squash bland), nu turtiti in disc
-        cz = crown_center_z + (crown_r_nominal * (0.05 if k % 2 == 0 else 0.55))
-        size = crown_r_nominal * (0.52 + rand() * 0.20)
-        lump_specs.append((Vector((cx, cy, cz)), size, 5320 + k * 11))
-
-    crown_faces = []
-    lump_records = []   # (center, size) pentru plasarea florilor
-    for center, size, seed in lump_specs:
-        # squash BLAND (0.78-0.92, nu 0.35-0.5 ca la fagul turtit): bulgarii
-        # raman rotunjiti — silueta de tufa, nu de disc
-        sz = size * (0.78 + _lcg(seed)() * 0.14)
-        faces = b.boulder((center.x, center.y, center.z),
-                          (size * 2.0, size * 1.9, sz * 2.0), CROWN,
-                          seed=seed, segments=6, rings=3, deviation=0.18)
-        crown_faces.extend(faces)
-        lump_records.append((center, size))
-
-    b.retag(crown_faces, TRUNK, where="down")
-    b.retag(crown_faces, CROWN, where="up")
-
-    # Flori: 15-25% din fetele coroanei, RETAG (fara cost de triunghiuri) pe
-    # fetele de sus/exterior selectate — plus cativa "muguri" mici ridicati
-    # (bulgari foarte mici) pe cateva dintre ele, ca florile sa citeasca
-    # usor 3D, nu doar ca pete de culoare. Selectia e determinista din LCG
-    # separat, NU toate fetele de sus (ar depasi 25%).
-    up_faces = [f for f in crown_faces if f.is_valid]
-    frand = _lcg(5401)
-    # Prima incercare (flower_target_frac=0.19, factor de compensare 1.35,
-    # plus 6 muguri de marime s=0.14-0.20*size) a dat 30.6% KERB_RED masurat
-    # DIRECT din GLB — peste tinta 15-25%, muguri numarati gresit ca "fete"
-    # cand de fapt sunt bulgari intregi (multe fete fiecare). Recalibrat
-    # DUPA masuratoare, nu presupus: fractia de retag coboara la 0.11 (fara
-    # factorul de compensare inventat), iar mugurii scad la 4, mult mai mici.
-    flower_target_frac = 0.11
-    flower_faces = set()
-    for f in up_faces:
-        f.normal_update()
-        if f.normal.z > 0.25 and frand() < flower_target_frac:
-            flower_faces.add(f)
-    b.retag(flower_faces, FLOWER)
-
-    # Cativa muguri mici RIDICATI (bulgari mici), rari — accent 3D peste
-    # petele retag, nu sursa principala de rosu (altfel se intoarce la
-    # "copac rosu"). 4 muguri mici, fiecare ~16 tri brut (2*4*2).
-    # FIX (wave-2 review): mugurii plecau de la `rr = size*(0.75..1.0)`, adica
-    # ADUNAND propria lor raza deasupra asta ii scotea des complet AFARA din
-    # bulgarele-parinte — masurat pe fiordland_rata_chasecam.png: 4 cuburi mici
-    # plutind detasat de coroana. Un mugure trebuie sa-si INTERSECTEZE bulgarele
-    # care-l gazduieste, nu doar sa-i atinga centrul cu al lui: centrul mugurelui
-    # se plaseaza la `rr = size*(0.55..0.75)` (STRICT sub raza bulgarelui), ca
-    # jumatate din volumul lui (raza proprie `s`) sa iasa peste crusta si
-    # jumatate sa ramana ingropat in ea — exact ce arata un mugur crescut din
-    # coroana, nu unul asezat langa ea.
-    n_bud = 4
-    for i in range(n_bud):
-        center, size = lump_records[1 + (i % (len(lump_records) - 1))]
-        a = frand() * 6.28
-        outward = Vector((math.cos(a), math.sin(a), 0.0))
-        rr = size * (0.55 + frand() * 0.20)
-        px, py = center.x + outward.x * rr, center.y + outward.y * rr
-        pz = center.z + size * (0.10 + frand() * 0.25)
-        s = size * (0.08 + frand() * 0.04)
-        b.boulder((px, py, pz), (s, s, s * 0.85), FLOWER,
-                 seed=5500 + i, segments=4, rings=2, deviation=0.12)
-
-    tri_est_faces = len(crown_faces)
-    kerb_faces = len(flower_faces) + n_bud * 1   # aproximativ, pentru log; cifra reala se ia din GLB
-    print("rata_tree: %d fete coroana, %d RETAG la FLOWER (~%.0f%%) + %d muguri"
-          % (tri_est_faces, len(flower_faces),
-             100.0 * len(flower_faces) / max(tri_est_faces, 1), n_bud))
+    (b,), k = _fit(assemble, TARGET, (0.8, 0.8, 1.0))
+    print("rata fit k=%.3f %.3f %.3f" % tuple(k))
+    n_red = sum(1 for f in b.bm.faces if f[b.slot] == FLOWER)
+    print("rata_tree: %d fete FLOWER din %d" % (n_red, len(b.bm.faces)))
     return b.to_object("Rata")
+
+
+def bmesh_ops_join(dst, src):
+    """Copiaza geometria + slotul fetelor din `src` in `dst`."""
+    vmap = {}
+    for v in src.bm.verts:
+        vmap[v] = dst.bm.verts.new(v.co)
+    for f in src.bm.faces:
+        nf = dst.bm.faces.new([vmap[v] for v in f.verts])
+        nf[dst.slot] = f[src.slot]
+    src.bm.free()
 
 
 # --- tussock_clump ---------------------------------------------------------------
 
 def build_tussock_clump():
-    """Smoc de tussock: 10-14 lame CACTUS_GREEN, varfuri SAND_SHADOW.
-    0.8 m inalt, 1.0 m diametru.
-
-    Buget 150: masurat direct (nu formula) — o lama `leaf_vfold(stations=2)`
-    costa 24 tris in GLB. Brief-ul cere 10-14 lame minim, dar la 0.8 m si
-    buget 150 incap doar 6 (144 tris): numarul de lame din brief e un plafon
-    calitativ ("10-14"), iar bugetul e contractul care castiga (§0). La 6
-    lame in evantai regulat, cu unghiuri jitter-uite, smocul tot citeste plin.
-
-    ATENTIE la `stations=2`: `leaf_vfold` esantioneaza profilul DOAR la
-    t=0 si t=1 — varful arcului (rise*sin(t*1.4), maxim undeva la mijloc)
-    nu se vede niciodata, iar inaltimea varfului iese din
-    `rise*sin(1.4) - droop*length`. Prima versiune (rise~0.2, droop=0.30,
-    length~0.5) dadea varful la 0.10 m in loc de 0.8 m — masurat pe GLB, nu
-    presupus. Aici `rise` e calibrat DIRECT pe formula (nu pe "cat pare
-    rezonabil"), ca varful sa cada aproape de 0.8 m.
-    """
+    """Smoc DENS (v3): 3 sub-smocuri lipite, ~32 lame fiecare (96 total).
+    Lama = panglica subtire cu sectiune triunghiulara (corp inchis, 16 tri),
+    2.5 cm la baza -> varf. Pleaca dintr-o baza stransa (raza ~5 cm) la 12-70
+    grade de verticala (cele marginale mai culcate), se curbeaza spre afara si
+    se apleaca la varf; interioarele sunt scurte si drepte, marginalele lungi
+    si cazute: siluet de cupola mai lata sus decat la baza. Baza verde-oliv
+    (MOSS), ultimele ~40% paiu (DRY_VEGETATION)."""
     b = Builder()
-    rand = _lcg(5501)
-    n_blades = 6
-    for k in range(n_blades):
-        a = 360.0 * k / n_blades + rand() * 18.0
-        length = 0.30 + rand() * 0.10
-        width = 0.05 + rand() * 0.02
-        # rise calibrat pe formula analitica a lui leaf_vfold la stations=2:
-        # tip_z = rise*sin(1.4) - droop*length. Tinta varf ~0.75-0.85 m.
-        droop = 0.12
-        rise = (0.72 + rand() * 0.08 + droop * length) / math.sin(1.4)
-        leaf_vfold(b, (0.0, 0.0, 0.02), a, length, width, rise, MOSS,
-                   fold_deg=20.0, stations=2, thick=0.012, droop=droop)
-    # varfurile decolorate: retag pe fetele de sus, aproape de capat (Z mare)
-    zs = [v.co.z for v in b.bm.verts]
-    z_hi = max(zs) if zs else 0.6
-    b.retag(set(f for f in b.bm.faces if f.is_valid), SAND_SHADOW,
-           where=lambda c, n: c.z > z_hi * 0.72)
+    rand = _lcg(5503)
+    clumps = [(-0.12, 0.05, 38), (0.13, -0.02, 38), (0.0, -0.14, 34)]
+    for (cx, cy, n) in clumps:
+        for i in range(n):
+            a = 2.0 * math.pi * (i * 0.618034 % 1.0) + rand() * 0.3
+            d = Vector((math.cos(a), math.sin(a), 0.0))
+            rn = (i * 7 % n) / float(n - 1)          # 0 central .. 1 marginal
+            rn = rn ** 0.8
+            phi0 = math.radians(10.0 + 34.0 * rn + rand() * 14.0)
+            dphi = math.radians(24.0 + 58.0 * rn + rand() * 10.0)
+            ell = 0.50 + 0.42 * rn + rand() * 0.10   # lungimea
+            r0 = 0.015 + 0.04 * rand()
+            base = Vector((cx, cy, 0.0)) + d * r0
+            stops = (0.0, 0.30, 0.62, 1.0)
+            pts = [base]
+            ph = phi0
+            for si in range(1, 4):
+                ds = ell * (stops[si] - stops[si - 1])
+                phm = phi0 + dphi * (stops[si] + stops[si - 1]) * 0.5
+                pts.append(pts[-1] + d * (math.sin(phm) * ds)
+                           + Vector((0, 0, math.cos(phm) * ds)))
+            w = 0.040 + rand() * 0.012
+            th = w * 0.55
+            def sec(f):
+                ww = w * f
+                return [(-ww * 0.5, 0.0), (ww * 0.5, 0.0), (0.0, th * f)]
+            secs = [sec(1.0), sec(0.9), sec(0.62), None]
+            _ring_sweep(b, pts, secs, [MOSS, MOSS, DRY_VEGETATION], up=d)
+    _rescale(b, (0.68, 0.80, 0.68))
     return b.to_object("Tussock_Clump")
+
+
+
+def _rescale(b, target):
+    """Scaleaza X/Y/Z (Blender) ca extinderea sa nimereasca `target`
+    (x, z_up, y_adancime) — Godot-order: X, Y sus, Z adancime."""
+    xs = [v.co.x for v in b.bm.verts]
+    ys = [v.co.y for v in b.bm.verts]
+    zs = [v.co.z for v in b.bm.verts]
+    sx = target[0] / max(max(xs) - min(xs), 1e-6)
+    sz = target[1] / max(max(zs) - min(zs), 1e-6)
+    sy = target[2] / max(max(ys) - min(ys), 1e-6)
+    zlo = min(zs)
+    for v in b.bm.verts:
+        v.co.x *= sx
+        v.co.y *= sy
+        v.co.z = (v.co.z - zlo) * sz + zlo
 
 
 # --- stump -------------------------------------------------------------------
 
 def build_stump():
-    """Ciot cu muschi: 1.0 m diametru x 0.8 m. LOG_DARK, capac CACTUS_GREEN,
-    3 radacini.
-
-    Buget 150: masurat (nu formula) dupa bevel — corpul+3 radacini la
-    segments=6/3 si bevel 0.015 au dat 224, tot peste. Bevel taiat complet
-    (0.0): pe un ciot vazut de la 1-2 m langa drum, fatetele nete citesc bine
-    fara tesitura, iar corpul coboara la segments=5.
-    """
+    """Ciot (v3): trunchi usor conic cu fatete neregulate (varfurile jitterate
+    radial), 6 radacini = CRESTE LATE SI JOASE (sectiune turtita, latime 2-3x
+    inaltimea) care pornesc sus pe flancul trunchiului si curg in jos si afara,
+    sfarsind LA NIVELUL SOLULUI. Muschi (12) in petice pe creste si baza, nu
+    dungi. Taietura de sus deschisa cu inele."""
     b = Builder()
-    rand = _lcg(5601)
-    faces = list(b.rock((0.0, 0.0, 0.0), (1.0, 0.9, 0.8 / Builder.FLAT_TOP_FRAC),
-                        TRUNK, seed=5601, segments=5, rings=2, taper=0.10,
-                        flat_top=True, squash=0.98))
-    top_z = Builder.flat_top_z(0.0, 0.8 / Builder.FLAT_TOP_FRAC)
-    b.retag(faces, MOSS, where=lambda c, n: n.z > 0.55 and c.z > top_z * 0.7)
-    for k in range(3):
-        a = 2.0 * math.pi * k / 3 + rand() * 0.6
+    rand = _lcg(5603)
+    pts = [Vector((0, 0, 0)), Vector((0.01, 0, 0.2)), Vector((0, 0.01, 0.5)),
+           Vector((0.03, 0, 0.78))]
+    b.taper_sweep(pts, [0.58, 0.42, 0.34, 0.30], TRUNK, segments=10)
+    jr = _lcg(5604)
+    for v in b.bm.verts:
+        if v.co.z > 0.03:
+            f = 1.0 + (jr() - 0.5) * 0.16
+            v.co.x *= f
+            v.co.y *= f
+    n = 6
+    for k in range(n):
+        a = 2.0 * math.pi * k / n + (rand() - 0.5) * 0.45
         d = Vector((math.cos(a), math.sin(a), 0.0))
-        b.taper_sweep([Vector((0, 0, 0.14)), d * 0.34 + Vector((0, 0, 0.04)),
-                       d * 0.62 + Vector((0, 0, 0.0))],
-                      [0.11, 0.07, 0.02], TRUNK, segments=3)
+        L = 0.78 + rand() * 0.22
+        w0 = 0.19 + rand() * 0.04
+        rp = [d * 0.22 + Vector((0, 0, 0.50)),
+              d * (L * 0.30) + Vector((0, 0, 0.30)),
+              d * (L * 0.52) + Vector((0, 0, 0.15)),
+              d * (L * 0.74) + Vector((0, 0, 0.06)),
+              d * (L * 0.92) + Vector((0, 0, 0.022)),
+              d * L + Vector((0, 0, 0.008))]
+        ws = [w0, w0 * 1.1, w0 * 1.0, w0 * 0.8, w0 * 0.5, w0 * 0.18]
+        hs = [0.10, 0.085, 0.06, 0.04, 0.02, 0.008]
+
+        def ell(w, h):
+            return [(w * math.cos(2 * math.pi * q / 8),
+                     h * math.sin(2 * math.pi * q / 8)) for q in range(8)]
+        secs = [ell(ws[i], hs[i]) for i in range(6)]
+        _ring_sweep(b, rp, secs, [TRUNK] * 5)
+    def moss_here(c, nn):
+        if nn.z < 0.15 or c.z > 0.45:
+            return False
+        q = (math.sin(c.x * 11.0 + 1.3) * math.sin(c.y * 9.0 + 0.4)
+             + 0.6 * math.sin(c.z * 19.0 + c.x * 7.0))
+        return q > 0.5 or c.z < 0.04
+    b.retag(set(f for f in b.bm.faces if f.is_valid), MOSS, where=moss_here)
+    top_z = 0.78
+    b.retag(set(f for f in b.bm.faces if f.is_valid), SAND_LIGHT,
+            where=lambda c, nn: nn.z > 0.9 and c.z > top_z - 0.02)
+    b.frustum((0.03, 0.0, top_z + 0.006), 0.15, 0.15, 0.012, SAND_SHADOW,
+              segments=8)
+    _rescale(b, (1.1, 0.8, 1.0))
     return b.to_object("Stump")
+
 
 
 # --- driftwood -----------------------------------------------------------------
 
 def build_driftwood():
-    """Trunchi decolorat pe mal, 4 m lung. WOOD.
-
-    Buget 150: masurat dupa bevel (0.02 il scumpea la 160) — bevel=0.0 la
-    emit, `taper_sweep(segments=5)` pe 4 puncte + 2 crengi ramane sub buget.
-    """
+    """Bustean gros culcat, capatul rupt ZDRENTUIT (6 aschii + capac
+    intunecat), 4 ramuri rotunde si conice care se ridica in unghiuri
+    diferite (una cu furca), 2 cazute pe sol."""
     b = Builder()
-    rand = _lcg(5701)
-    pts = [Vector((0.0, 0.0, 0.14)),
-           Vector((1.3, 0.12, 0.10)),
-           Vector((2.6, -0.08, 0.16)),
-           Vector((4.0, 0.05, 0.11))]
-    radii = [0.19, 0.17, 0.14, 0.09]
-    b.taper_sweep(pts, radii, WOOD_SLOT, segments=5)
-    # 2 crengi rupte, scurte
-    for k, t0 in enumerate((0.35, 0.68)):
-        i = min(int(t0 * (len(pts) - 1)), len(pts) - 2)
-        f = t0 * (len(pts) - 1) - i
-        p = pts[i].lerp(pts[i + 1], f)
-        a = rand() * 6.28
-        d = Vector((math.cos(a), math.sin(a), 0.3))
-        tip = p + d.normalized() * 0.5
-        b.taper_sweep([p, tip], [0.06, 0.015], WOOD_SLOT, segments=3)
+    pts = [Vector((0.0, 0.0, 0.20)), Vector((1.3, 0.05, 0.19)),
+           Vector((2.6, 0.0, 0.22)), Vector((3.85, -0.04, 0.27))]
+    b.taper_sweep(pts, [0.25, 0.23, 0.19, 0.12], WOOD_SLOT, segments=7)
+    for k in range(6):
+        a = 2.0 * math.pi * k / 6
+        yy, zz = math.cos(a) * 0.17, 0.20 + math.sin(a) * 0.17
+        h = 0.18 + 0.16 * ((k * 5) % 3) / 2.0
+        b.taper_sweep([Vector((0.12, yy, zz)),
+                       Vector((-0.08 - h * 0.5, yy * 1.2, zz + h * 0.4))],
+                      [0.055, 0.0], WOOD_SLOT, segments=3)
+    b.retag(set(f for f in b.bm.faces if f.is_valid), LOG_DARK,
+            where=lambda c, n: n.x < -0.8 and c.x < 0.02)
+
+    def limb(path, radii, seg=6):
+        b.taper_sweep([Vector(p) for p in path], radii, WOOD_SLOT, segments=seg)
+
+    # ridicate, in unghiuri diferite (abrupt / inclinat / aproape orizontal)
+    limb([(1.30, 0.00, 0.34), (1.52, 0.08, 0.80), (1.72, 0.12, 1.20)],
+         [0.15, 0.11, 0.035])
+    limb([(2.10, 0.00, 0.36), (2.55, -0.12, 0.66), (3.05, -0.22, 0.88)],
+         [0.15, 0.11, 0.035])
+    limb([(2.85, 0.02, 0.34), (3.15, 0.12, 0.78), (3.40, 0.16, 1.10)],
+         [0.14, 0.10, 0.035])
+    limb([(3.20, 0.14, 0.76), (3.55, 0.24, 0.84), (3.92, 0.26, 0.98)],
+         [0.07, 0.05, 0.03])
+    # cazute pe sol, spre capatul subtire
+    limb([(1.20, -0.12, 0.18), (1.85, -0.24, 0.12), (2.50, -0.30, 0.06)],
+         [0.12, 0.08, 0.025], 5)
+    limb([(2.30, 0.14, 0.19), (2.85, 0.24, 0.12), (3.40, 0.30, 0.06)],
+         [0.11, 0.07, 0.025], 5)
+    _rescale(b, (4.0, 1.35, 0.62))
     return b.to_object("Driftwood")
 
 
 # --- chasm_bridge_rail -----------------------------------------------------------
 #
-# Contract: DOAR balustradele si grinzile laterale, tablia NU. 40 m lung (Y),
-# doua balustrade la X = ±5.8. Stalpi la 4 m, doua randuri de mana curenta,
-# grinda laterala 0.4x0.3 sub fiecare balustrada. WOOD. Noduri Rail_L, Rail_R.
-# Origine pe axa drumului, la cota tabliei, centrata pe Y (--origin=assembly).
+# Gard de lemn (planșa): stalpi patrati la 2.5 m, doua randuri de scanduri
+# orizontale pe fata exterioara, imbinate (rosturi) si decalate intre randuri.
+# Contract inghetat: Rail_L/R centrate la X = ±5.84, lungime 40 m (±20.25),
+# Y de la -0.4 (stalpii coboara pe lateralul tablei) la +1.0 (waterline).
 CB_LEN = 40.0
-CB_X = 5.8
-CB_POST_STEP = 4.0
-CB_HEIGHT = 1.0
-CB_BEAM_SIZE = (0.4, 0.3)
+CB_X = 5.80
+CB_N = 15           # stalpi: 14 deschideri de ~2.86 m
 
 
 def _bridge_rail(sign):
-    """O balustrada (Rail_L sau Rail_R), la X = sign * CB_X.
-
-    Buget total 600 pentru AMBELE noduri (300/nod): 11 stalpi (pas 4 m pe
-    40 m) + 2 lise + 1 grinda laterala = 14 cutii/grinzi, 12 tris brut fiecare
-    = 168 brut, dar bevel-ul (3.67x masurat in dio_lib) le duce la ~617 — mult
-    peste 300/nod. Bevel-ul e taiat aici (piesa se vede de la distanta, pe un
-    pod, nu de aproape ca stirling_ledge), deci ramane geometria brut-cubica,
-    sub buget cu marja.
-    """
+    """Gard masiv: stalpi 0.20 m patrati (-0.4..1.0), doua scanduri groase
+    (0.08 x 0.22 m) pe fata exterioara, imbinate si decalate, lemn inchis."""
     b = Builder()
     hl = CB_LEN * 0.5
-    x = sign * CB_X
-    p1 = (x, -hl, 0.0)
-    p2 = (x, hl, 0.0)
-    faces = b.railing(p1, p2, CB_HEIGHT, CB_POST_STEP, 0.09, 0.07,
-                      WOOD_SLOT, rails=2)
-    # grinda laterala, sub balustrada, in AFARA (spre exterior de tablie)
-    beam_y0 = (-hl, hl)
-    beam_x = x + sign * (CB_BEAM_SIZE[1] * 0.5 + 0.02)
-    beam = b.beam((beam_x, -hl, -CB_BEAM_SIZE[0] * 0.5),
-                  (beam_x, hl, -CB_BEAM_SIZE[0] * 0.5),
-                  (CB_BEAM_SIZE[1], CB_BEAM_SIZE[0]), WOOD_SLOT,
-                  up=(0, 0, 1))
+    step = CB_LEN / float(CB_N - 1)
+    for i in range(CB_N):
+        y = -hl + i * step
+        b.box((sign * CB_X, y, 0.30), (0.20, 0.20, 1.40), TRUNK)
+
+    def row(z_c, bounds, slot_cycle):
+        for j, (y0, y1) in enumerate(zip(bounds, bounds[1:])):
+            b.box((sign * (CB_X + 0.10 + 0.04), (y0 + y1) * 0.5, z_c),
+                  (0.08, (y1 - y0) - 0.04, 0.22), slot_cycle[j % len(slot_cycle)])
+    top_b = [-hl - 0.25 + (CB_LEN + 0.5) * i / 7.0 for i in range(8)]
+    top_b.append(hl + 0.25)
+    top_b = [-hl - 0.25 + (CB_LEN + 0.5) * i / 7.0 for i in range(8)]
+    low_b = [-hl - 0.25, -hl + (CB_LEN + 0.5) / 14.0] + \
+        [-hl - 0.25 + (CB_LEN + 0.5) * (i + 0.5) / 7.0 for i in range(1, 7)] + \
+        [hl + 0.25]
+    row(0.80, top_b, (TRUNK, TRUNK, WOOD_SLOT))
+    row(0.40, low_b, (TRUNK, WOOD_SLOT, TRUNK))
     name = "Rail_L" if sign < 0 else "Rail_R"
     return b.to_object(name)
 
@@ -642,8 +655,8 @@ def emit(objs, path, ao, origin="base", bevel=0.02, smooth_angle=45.0,
 # rece, varf spre culoarea slotului) - vezi tint_gradient in dio_lib.
 CROWN_TINT = ((0.56, 0.62, 0.52), (1.04, 1.00, 0.82))
 
-def emit_beech(height, n_tiers, seed_base, path, budget=300):
-    trunk_obj, crown_obj = build_beech(height, n_tiers, seed_base, budget)
+def emit_beech(objs, path, budget=900):
+    trunk_obj, crown_obj = objs
     # tint DOAR pe Crown (verde) — Trunk e LOG_DARK, tint_gradient l-ar sari
     # oricum (green_only), dar apelul separat e mai clar decat un tint comun.
     st_t = finish(trunk_obj, bevel=0.0, ao=AO_TREE, origin=None,
@@ -659,8 +672,7 @@ def emit_beech(height, n_tiers, seed_base, path, budget=300):
     for o in (trunk_obj, crown_obj):
         for v in o.data.vertices:
             xs.append(v.co.x); ys.append(v.co.y); zs.append(v.co.z)
-    place = Vector((-(min(xs) + max(xs)) * 0.5, -(min(ys) + max(ys)) * 0.5,
-                    -min(zs)))
+    place = Vector((0.0, 0.0, -min(zs)))
     for o in (trunk_obj, crown_obj):
         for v in o.data.vertices:
             v.co += place
@@ -672,12 +684,18 @@ def emit_beech(height, n_tiers, seed_base, path, budget=300):
     return trunk_obj, crown_obj
 
 
-beech_a_t, beech_a_c = emit_beech(8.0, 3, 6101, "plants/beech_a.glb", 300)
-beech_b_t, beech_b_c = emit_beech(11.0, 4, 6201, "plants/beech_b.glb", 300)
-beech_c_t, beech_c_c = emit_beech(14.0, 4, 6301, "plants/beech_c.glb", 300)
+beech_a_t, beech_a_c = emit_beech(
+    build_beech(BEECH_A_SPEC, 54.0, 155.0, 420.0, (6.0, 5.6, 7.5), 0.36, 6101, 1.0),
+    "plants/beech_a.glb", 900)
+beech_b_t, beech_b_c = emit_beech(
+    build_beech(BEECH_B_SPEC, 36.1, 200.0, 395.0, (8.0, 7.4, 10.6), 0.44, 6201, 1.0),
+    "plants/beech_b.glb", 1000)
+beech_c_t, beech_c_c = emit_beech(
+    build_beech(BEECH_C_SPEC, 28.0, 200.0, 415.0, (11.0, 10.2, 14.3), 0.55, 6301, 1.0),
+    "plants/beech_c.glb", 1100)
 
 dead_obj = build_beech_dead()
-emit(dead_obj, "plants/beech_dead.glb", AO_TREE, bevel=0.0, budget=250)
+emit(dead_obj, "plants/beech_dead.glb", AO_TREE, origin="base_axis", bevel=0.0, budget=900)
 
 rata_obj = build_rata_tree()
 emit(rata_obj, "plants/rata_tree.glb", AO_TREE, bevel=0.0, budget=400,

@@ -2318,6 +2318,13 @@ const CLASSES_BY_THEME := {
 		"chasm_rock": {
 			"Rock_001": Palette.TRI_PREFIX + "wet_gneiss",
 		},
+		# Kit v2 (oct 2026): `gneiss_block` e corpul lui `chasm_rock` FARA
+		# marmite — piatra generica (peretii de gneis, malul, gramezile de
+		# grohotis, ~490 de instante). Cu marmite, sirurile de bolovani citeau
+		# fantani de piatra; marmitele raman doar pe `chasm_rock` (POI D/F).
+		"gneiss_block": {
+			"Gneiss_Block": Palette.TRI_PREFIX + "wet_gneiss",
+		},
 		# Lotul STANCA UDA: moss_boulder_b, DUPA ruptura (_split_theme_accents,
 		# SPLIT_MODELS_BY_THEME) — corpul, curatat de capacul de muschi, ramane
 		# numit "Moss_Boulder_B" (ruptura nu redenumeste nodul original, doar

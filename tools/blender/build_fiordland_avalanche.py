@@ -41,7 +41,8 @@ import math
 from mathutils import Vector
 
 # Sloturile legale pe Fiordland (brief §0.4). ROCK_DARK/ROCK_LIGHT interzise.
-BOULDER_ROCK = MARBLE_GREY
+BOULDER_ROCK = VOLCANIC_BLACK
+ROCK_ALT = ASPHALT_EDGE
 LOG = LOG_DARK
 MOSS = TROPICAL_GREEN
 
@@ -190,157 +191,130 @@ def _root_plate(b, center, axis, plate_r, slot, seed, prongs=6):
     return faces
 
 
-def _tangle_A(seed):
-    """A: bolovan STRAPUNS de 2 bustene groase — roca domina PRIN VOLUM, dar
-    bustenii sunt GROSI si ies clar pe AMBELE capete (nu unul lung + unul
-    aproape ingropat) — revizuire coordonator (a doua trecere): cu un capat
-    scurt aproape ascuns, A tot citea "minge cu doi tepi", nu "bolovan
-    strapuns". Aici fiecare bustean iese vizibil pe ambele parti, mai scurt
-    pe fiecare parte (ca sa incapa in plafonul de aspect) dar cu diametrul
-    MARE (spre 0.30*marime, capatul de sus al intervalului cerut) — grosimea,
-    nu lungimea, e ce spune ochiului "asta e un bustean", nu un tep.
-    """
-    b = Builder()
+def _hash01(c):
+    """Pseudo-aleator determinist pe pozitie (pentru variatia de slot pe fete)."""
+    v = math.sin(c.x * 12.9898 + c.y * 78.233 + c.z * 37.719) * 43758.5453
+    return v - math.floor(v)
+
+
+def _rock(b, center, size, seed, segments=7, rings=3, dev=0.18):
+    """Bolovan fatetat: fete pe doua grii + petice de muschi pe cele de sus."""
+    faces = b.boulder(center, size, BOULDER_ROCK, seed=seed, segments=segments,
+                      rings=rings, deviation=dev)
+
+    def pick(c, n):
+        h = _hash01(c)
+        if n.z > 0.35 and h < 0.62:
+            return True
+        return False
+    moss = b.retag(faces, MOSS, where=lambda c, n: pick(c, n))
+    rest = [f for f in faces if f.is_valid and f not in moss]
+    b.retag(rest, ROCK_ALT, where=lambda c, n: _hash01(c * 1.7) < 0.35)
+    return faces
+
+
+def _log(b, root, tip, r_root, r_tip, seed, seg=7, flare=False, broken=True,
+         branches=0, roots=0):
+    """Bustean scurt: taiat/rupt la capete, cu evazare + radacini la `root`
+    (talpa de radacini smulsa) si cu cateva ramuri-ciot."""
     rand = _lcg(seed)
-    rock_r = BASE * 0.40
-    b.boulder((0.0, 0.0, 0.0),
-             (rock_r * 2.0 * 0.95, rock_r * 2.0 * 0.95, rock_r * 2.0 * 0.88),
-             BOULDER_ROCK, seed=seed + 1, segments=8, rings=4, deviation=0.14)
+    root, tip = Vector(root), Vector(tip)
+    ax = (tip - root)
+    length = ax.length
+    axn = ax.normalized()
+    ref = Vector((0, 0, 1)) if abs(axn.z) < 0.9 else Vector((1, 0, 0))
+    px = ref.cross(axn).normalized()
+    py = axn.cross(px)
+    bend = (px * (rand() - 0.5) + py * (rand() - 0.5)) * length * 0.16
+    pts, rads = [], []
+    if flare:
+        pts += [root, root + axn * length * 0.10, root + axn * length * 0.24]
+        rads += [r_root * 1.85, r_root * 1.30, r_root * 1.04]
+    else:
+        pts += [root, root + axn * length * 0.24]
+        rads += [r_root, r_root * 1.02]
+    pts += [root + axn * length * 0.55 + bend, root + axn * length * 0.88 + bend * 0.6, tip]
+    rads += [(r_root + r_tip) * 0.5, r_tip * 1.05, r_tip]
+    b.taper_sweep(pts, rads, LOG, segments=seg, cap_start=True, cap_end=not broken)
+    if broken:
+        _splinter_cap(b, tip, axn, r_tip, LOG, seed + 3, seg)
+    if flare:
+        # muschi pe talpa de radacini
+        b.retag([f for f in b.bm.faces if f.is_valid], MOSS,
+                where=lambda c, n: (c - root).length < length * 0.17 and _hash01(c) < 0.8)
+    for i in range(roots):
+        a = 2.0 * math.pi * (i + 0.3 * rand()) / roots
+        dirv = (px * math.cos(a) + py * math.sin(a))
+        p0 = root + axn * length * 0.03 + dirv * r_root * 1.3
+        p1 = p0 + dirv * r_root * 0.8 - axn * r_root * 0.45
+        p2 = p1 + dirv * r_root * 0.7 - axn * r_root * 0.8
+        faces = b.taper_sweep([p0, p1, p2], [r_root * 0.50, r_root * 0.38, r_root * 0.12], LOG,
+                              segments=5, cap_start=False, cap_end=True)
+        b.retag(list(faces), MOSS, where=lambda c, n: _hash01(c) < 0.25)
+    for i in range(branches):
+        f = 0.35 + 0.5 * rand()
+        base = root + axn * length * f
+        sd = (px * (rand() - 0.5) * 2.0 + py * (rand() - 0.5) * 2.0).normalized()
+        d = (sd * 0.85 + axn * 0.35).normalized()
+        blen = 0.30 + 0.22 * rand()
+        b.taper_sweep([base - d * r_root * 0.3, base + d * blen * 0.5 + Vector((0, 0, 0.04)),
+                       base + d * blen + Vector((0, 0, 0.10))],
+                      [r_root * 0.36, r_root * 0.28, r_root * 0.14], LOG,
+                      segments=5, cap_start=False, cap_end=True)
 
-    log_r = BASE * 0.29 * 0.5   # raza = 0.5 * diametru, spre CAPATUL de sus (0.22-0.30)
-    out = BASE * 0.27            # iese clar pe AMBELE capete (0.25-0.45*BASE)
-    # a doua axa are o componenta Z mare (0.55, nu 0.25): cu ambele bustene
-    # aproape in planul XY, dimensiunea Z ramanea mica si raportul X/Z sau
-    # Y/Z sarea peste 1.5:1 desi X si Y singure erau ok. Un bustean care iese
-    # si pe verticala ridica minimul si tine cubul compact pe toate axele.
-    dirs = [Vector((1.0, 0.15, 0.05)).normalized(),
-           Vector((-0.15, 0.5, -0.6)).normalized()]
-    for i, dv in enumerate(dirs):
-        root = -dv * (rock_r * 0.45 + out)
-        tip = dv * (rock_r * 0.45 + out)
-        # SPLINTER pe ambele capete — bustenii traverseaza si ies vizibil pe
-        # ambele parti, contractul "iesind clar pe ambele capete".
-        _log_segment(b, root, tip, log_r * (0.92 + rand() * 0.16), LOG,
-                    seed=seed + 30 + i * 11, segments=6, splinter=True,
-                    splinter_root=True)
 
-    all_faces = [f for f in b.bm.faces if f.is_valid]
-    b.retag(all_faces, MOSS, where=lambda c, n: n.z > 0.65 and c.z > rock_r * 0.3)
+def _tangle_A(seed):
+    """A: mai mult roca. Bolovan mare, apucat jos de un bustean cu talpa de
+    radacini si strapuns sus de unul rupt, cu ciot de ramura."""
+    b = Builder()
+    _rock(b, (0.1, 0.0, 0.05), (1.8, 1.65, 1.5), seed + 1)
+    _log(b, (-1.05, -0.35, -0.40), (0.55, -0.05, -0.30), 0.23, 0.17, seed + 10,
+         flare=True, broken=False, branches=1, roots=5)
+    _log(b, (0.45, 0.75, -0.60), (0.80, 0.55, 0.80), 0.20, 0.15, seed + 20,
+         broken=True, branches=1)
     return b.to_object("Boulder_A")
 
 
 def _tangle_B(seed):
-    """B: bolovan cu 3 bustene — inca roca vizibila la mijloc, dar lemnul
-    trece pe trei directii diferite, deci ocupa mai mult din silueta decat A.
-
-    Fiecare bustean ASIMETRIC (capat lung + capat scurt, ca la A): cu 3
-    bustene aproape ortogonali, o iesire SIMETRICA pe fiecare (prima
-    versiune) aduna cate un capat lung pe fiecare din cele 3 axe si bbox-ul
-    sare la ~2:1. Aici doar UN capat pe fiecare bustean iese clar
-    (0.25-0.45*BASE), celalalt ramane aproape ingropat.
-    """
+    """B: bolovan mijlociu, doua trunchiuri rupte il incrucisea, unul cu
+    talpa de radacini."""
     b = Builder()
-    rand = _lcg(seed)
-    rock_r = BASE * 0.40   # marit fata de prima incercare — B trebuie sa
-    # ramana intre A (~50% lemn) si C (logs-led): masurat, bolovanul mic
-    # (0.36) dadea 70.9% lemn, peste C (57.5%) — ordinea A<B<C<D se rupea.
-    b.boulder((0.0, 0.0, 0.0),
-             (rock_r * 2.0 * 0.92, rock_r * 2.0 * 0.92, rock_r * 2.0 * 0.85),
-             BOULDER_ROCK, seed=seed + 1, segments=8, rings=4, deviation=0.15)
-
-    log_r = BASE * 0.25 * 0.5
-    out_long = BASE * 0.26
-    out_short = BASE * 0.09
-    # una din cele 3 directii are componenta Z dominanta (nu doar 0.4): cu
-    # toate trei aproape in planul XY, dimensiunea Z ramanea mica si
-    # raportul X/Z sau Y/Z sarea peste plafon (masurat 1.87:1). Un bustean
-    # clar vertical tine cubul compact pe toate axele.
-    dirs = [Vector((1.0, 0.1, 0.1)).normalized(),
-           Vector((-0.5, 0.75, -0.15)).normalized(),
-           Vector((-0.2, -0.35, 0.85)).normalized()]
-    for i, dv in enumerate(dirs):
-        root = -dv * (rock_r * 0.5 + out_short)
-        tip = dv * (rock_r * 0.5 + out_long)
-        _log_segment(b, root, tip, log_r * (0.85 + rand() * 0.25), LOG,
-                    seed=seed + 30 + i * 11, segments=6, splinter=(i < 2))
-
-    all_faces = [f for f in b.bm.faces if f.is_valid]
-    b.retag(all_faces, MOSS, where=lambda c, n: n.z > 0.65 and c.z > rock_r * 0.3)
+    _rock(b, (-0.1, 0.05, -0.1), (1.35, 1.25, 1.15), seed + 1, dev=0.2)
+    _log(b, (0.95, -0.55, -0.45), (-0.55, 0.25, 0.20), 0.24, 0.17, seed + 10,
+         flare=True, broken=False, branches=1, roots=5)
+    _log(b, (-0.60, 0.75, -0.15), (0.50, 0.15, 0.95), 0.18, 0.13, seed + 20,
+         broken=True, branches=2)
+    _log(b, (-0.85, -0.55, -0.25), (-0.15, -0.20, 0.45), 0.15, 0.11, seed + 30,
+         broken=True)
     return b.to_object("Boulder_B")
 
 
 def _tangle_C(seed):
-    """C: 3 bustene INCRUCISATI care PRIND un bolovan mic la centru — lemnul
-    e acum majoritar in silueta, roca se vede doar prin golurile dintre
-    bustene."""
+    """C: trei trunchiuri scurte prind un bolovan mic; lemnul domina."""
     b = Builder()
-    rand = _lcg(seed)
-    rock_r = BASE * 0.24   # bolovan MIC (prins, nu dominant)
-    b.boulder((0.0, 0.05, -0.05), (rock_r * 2.0, rock_r * 1.9, rock_r * 1.7),
-             BOULDER_ROCK, seed=seed + 1, segments=5, rings=2, deviation=0.14)
-
-    log_r = BASE * 0.28 * 0.5
-    span = BASE * 0.58   # bustenii sunt LUNGI, trec pe langa bolovan
-    # trei axe incrucisate prin apropierea centrului, cu offset-uri mici ca
-    # sa nu treaca exact prin acelasi punct (citeste ca gramada, nu ca
-    # asterisc simetric)
-    axes = [
-        (Vector((1.0, 0.2, 0.0)).normalized(), Vector((0.0, 0.05, 0.08))),
-        (Vector((-0.35, 0.9, 0.15)).normalized(), Vector((0.06, -0.04, 0.05))),
-        (Vector((-0.3, -0.55, -0.75)).normalized(), Vector((-0.05, 0.03, -0.06))),
-    ]
-    for i, (dv, off) in enumerate(axes):
-        root = off - dv * span * 0.5
-        tip = off + dv * span * 0.5
-        _log_segment(b, root, tip, log_r * (0.85 + rand() * 0.2), LOG,
-                    seed=seed + 30 + i * 11, segments=6)
-
-    all_faces = [f for f in b.bm.faces if f.is_valid]
-    b.retag(all_faces, MOSS, where=lambda c, n: n.z > 0.65 and c.z > 0.25)
+    _rock(b, (0.0, 0.05, -0.05), (0.85, 0.8, 0.75), seed + 1, segments=6, rings=3)
+    _log(b, (-1.00, -0.30, -0.35), (0.85, 0.25, 0.15), 0.25, 0.18, seed + 10,
+         flare=True, broken=True, branches=2, roots=6)
+    _log(b, (0.45, 0.85, -0.50), (-0.20, -0.65, 0.85), 0.19, 0.14, seed + 20,
+         broken=True, branches=1)
+    _log(b, (0.50, -0.70, 0.55), (-0.45, 0.50, -0.55), 0.16, 0.12, seed + 30,
+         broken=True)
     return b.to_object("Boulder_C")
 
 
 def _tangle_D(seed):
-    """D: ghem de 3-4 bustene incrucisati, piatra doar o pana mica infipta
-    intre ei, plus o TALPA DE RADACINI pe un capat — cel mai mult lemn din
-    kit, contractul coordonatorului (>= 70% fete LOG_DARK)."""
+    """D: ghem de lemn: patru trunchiuri si doua talpi de radacini, piatra doar
+    o pana mica."""
     b = Builder()
-    rand = _lcg(seed)
-
-    log_r = BASE * 0.29 * 0.5
-    span = BASE * 0.62
-    axes = [
-        Vector((1.0, 0.1, -0.05)).normalized(),
-        Vector((-0.25, 0.95, 0.1)).normalized(),
-        Vector((-0.45, -0.6, 0.55)).normalized(),
-        Vector((0.15, -0.35, -0.85)).normalized(),
-    ]
-    offs = [Vector((0, 0.04, 0.05)), Vector((0.05, -0.03, -0.04)),
-           Vector((-0.04, 0.05, 0.02)), Vector((0.03, -0.02, 0.06))]
-    tips_for_roots = []
-    for i, dv in enumerate(axes):
-        off = offs[i]
-        root = off - dv * span * 0.5
-        tip = off + dv * span * 0.5
-        _log_segment(b, root, tip, log_r * (0.82 + rand() * 0.22), LOG,
-                    seed=seed + 30 + i * 13, segments=6, splinter=(i % 2 == 0))
-        if i % 2 == 1:
-            tips_for_roots.append((root, -dv))
-
-    # talpa de radacini pe UN capat de bustean (cel de-al doilea axa, root
-    # end, care nu a primit splinter)
-    root_axis = axes[1]
-    root_center = offs[1] - root_axis * span * 0.5
-    _root_plate(b, root_center, -root_axis, BASE * 0.30, LOG,
-               seed=seed + 200, prongs=6)
-
-    # piatra: doar o pana mica infipta intre bustene, aproape de centru
-    wedge_r = BASE * 0.15
-    b.boulder((0.05, -0.05, 0.02), (wedge_r * 1.8, wedge_r * 1.6, wedge_r * 1.4),
-             BOULDER_ROCK, seed=seed + 500, segments=5, rings=2, deviation=0.16)
-
-    all_faces = [f for f in b.bm.faces if f.is_valid]
-    b.retag(all_faces, MOSS, where=lambda c, n: n.z > 0.6 and c.z > 0.1)
+    _rock(b, (0.1, 0.0, -0.25), (0.65, 0.6, 0.5), seed + 1, segments=6, rings=2)
+    _log(b, (-1.00, -0.30, -0.15), (0.90, 0.15, 0.25), 0.25, 0.17, seed + 10,
+         flare=True, broken=True, branches=2, roots=6)
+    _log(b, (0.80, -0.70, -0.55), (-0.30, 0.85, 0.50), 0.22, 0.15, seed + 20,
+         flare=True, broken=True, branches=1, roots=5)
+    _log(b, (-0.40, 0.70, -0.60), (0.55, -0.10, 0.85), 0.17, 0.12, seed + 30,
+         broken=True, branches=2)
+    _log(b, (0.30, -0.15, 0.80), (-0.35, 0.10, -0.80), 0.14, 0.10, seed + 40,
+         broken=True)
     return b.to_object("Boulder_D")
 
 
@@ -388,6 +362,16 @@ def emit_avalanche(objs):
     # rotunjea usor, stergand exact taietura ceruta ("fatetele de prisma
     # raman taiate"). La 78 grade doar bolovanul (curbura mult mai lina intre
     # inele) mai primeste bevel vizibil; bustenii raman fatetati.
+    # scara v1 (max X,Z): A 2.6 / B 1.9 / C 1.6 / D 1.5 m — hazardul rescaleaza
+    # oricum la 1.0-2.8, dar diferenta de marime intre noduri ramane.
+    targets = {"Boulder_A": 2.6, "Boulder_B": 1.9, "Boulder_C": 1.6, "Boulder_D": 1.5}
+    for o in objs:
+        xs = [v.co.x for v in o.data.vertices]
+        zs = [v.co.z for v in o.data.vertices]
+        cur = max(max(xs) - min(xs), max(zs) - min(zs))
+        k = targets[o.name] / cur
+        for v in o.data.vertices:
+            v.co *= k
     for o in objs:
         finish(o, bevel=0.02, bevel_angle=78.0, ao=AO_TANGLE, origin="center",
               smooth_angle=40.0)

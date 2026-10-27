@@ -203,6 +203,22 @@ crr_gap "structures/marmifera_portal.glb" --rect=10.0,6.0 --crown=8.5 --floor=0.
 crr_nodes "structures/marmifera_portal.glb" "Portal_Glow,Portal_Moss,Portal_Rail,Portal_Stone,Portal_Void"
 
 echo
+echo "== val 1, crr-c: kitul de cariera (kit §1.5) =="
+# --origin=assembly pe piesele cu noduri *_Marble / *_MarbleBase (sau _Paint,
+# _Glow): baza patinei atinge solul, partea in lumina incepe la o treime, deci
+# fiecare nod luat separat n-ar trece garda de talpa. Piesele cu un singur nod
+# (pe atlas) trec pe originea implicita.
+for f in rocks/marble_block_a.glb rocks/marble_block_b.glb rocks/marble_block_c.glb          rocks/block_stack_a.glb rocks/block_stack_b.glb rocks/block_informe_b.glb          rocks/rubble_pile_a.glb rocks/rubble_pile_b.glb structures/safety_berm.glb          props/work_lamp.glb props/pipe_run.glb; do
+  check "$f" --origin=assembly
+done
+for f in props/cable_reel.glb props/water_tank.glb props/fuel_tank.glb          buildings/office_container.glb props/quarry_sign_a.glb props/quarry_sign_b.glb; do
+  check "$f"
+done
+# noduri, cote fata de tabel, sloturi interzise (FOAM_WHITE 22, CAR_* 14-16),
+# capete identice la modulele de 6 m (berma, conductele)
+python tools/blender/measure_crr_kit.py || fail=1
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

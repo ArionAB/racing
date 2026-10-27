@@ -134,10 +134,17 @@ class_name CityFill
 var stats := {}
 
 
+var _cell_forced: bool = false
+
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--indigo="):
 			indigo_ratio = clampf(float(a.trim_prefix("--indigo=")), 0.0, 1.0)
+		elif a.begins_with("--cell="):
+			# A/B de feliere in sonde (ProbePerf): si randurile explicite se
+			# felieaza atunci, ca sa se vada ce taie frustumul.
+			cell_m = maxf(10.0, float(a.trim_prefix("--cell=")))
+			_cell_forced = true
 	if Engine.is_editor_hint() or models.is_empty():
 		return
 	_build.call_deferred()
@@ -174,7 +181,7 @@ func _build() -> void:
 		if face_xz.z > 0.0:
 			xf = _faced(xf, mi)
 		var cell := Vector2i(floori(xf.origin.x / cell_m), floori(xf.origin.z / cell_m))
-		if not explicit_xforms.is_empty():
+		if not explicit_xforms.is_empty() and not _cell_forced:
 			# Randurile explicite sunt o fasie de cateva sute de metri langa
 			# drum: o singura felie (altfel axele x = 0 / z = 0 le taie in
 			# patru si dubleaza desenele fara castig de culling).
@@ -563,12 +570,11 @@ func _templates() -> Array:
 
 ## Acelasi mesh, cu LOD-uri generate (ImporterMesh, ca la importul GLB).
 func _with_lods(src: Mesh) -> Mesh:
-	var im := ImporterMesh.new()
-	for s in src.get_surface_count():
-		im.add_surface(Mesh.PRIMITIVE_TRIANGLES, src.surface_get_arrays(s))
-	im.generate_lods(25.0, 60.0, [])
-	var out := im.get_mesh()
-	return out if out != null and out.get_surface_count() > 0 else src
+	# Unghiurile importerului (60, 25), nu inversate: cu (25, 60) casa albastra
+	# `blue_house_a` cobora doar la 261 de triunghiuri, acum la 105 — nivelul
+	# grosier e „doar acoperisul si zidurile", exact ce se vede de la 200 m.
+	var out := MeshCpu.with_lods(src)
+	return out if out.get_surface_count() > 0 else src
 
 
 func _tris(mesh: Mesh, s: int) -> int:

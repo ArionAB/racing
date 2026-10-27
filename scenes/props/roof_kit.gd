@@ -57,7 +57,8 @@ func _ready() -> void:
 		var st: SurfaceTool = cells[key]
 		var mi := MeshInstance3D.new()
 		mi.name = "Terase_%d_%d" % [key.x, key.y]
-		mi.mesh = st.commit()
+		mi.mesh = MeshCpu.with_lods(st.commit())
+		mi.lod_bias = 0.5 # piese mici (rezervoare, ghivece, sfori): vezi BazaarKit
 		add_child(mi)
 		_meshes.append(mi)
 	_apply_materials.call_deferred()

@@ -63,9 +63,13 @@ func _ready() -> void:
 			elif mmi.name.ends_with("_far"):
 				level = "far"
 			if not per_level.has(level):
-				per_level[level] = {"mmi": 0, "tris": 0, "range": []}
+				per_level[level] = {"mmi": 0, "tris": 0, "begin_m": [INF, 0.0], "end_m": [INF, 0.0]}
 			var d: Dictionary = per_level[level]
 			d["mmi"] = int(d["mmi"]) + 1
+			# Pragurile (minim/maxim pe treapta): cu intinderea feliei adunata,
+			# pragul pe centru variaza de la felie la felie (vezi `lod_near_m`).
+			d["begin_m"] = [minf(d["begin_m"][0], mmi.visibility_range_begin), maxf(d["begin_m"][1], mmi.visibility_range_begin)]
+			d["end_m"] = [minf(d["end_m"][0], mmi.visibility_range_end), maxf(d["end_m"][1], mmi.visibility_range_end)]
 			var mesh := mmi.multimesh.mesh
 			var t := 0
 			for s in mesh.get_surface_count():
@@ -73,8 +77,7 @@ func _ready() -> void:
 				if idx != null:
 					t += (idx as PackedInt32Array).size() / 3
 			d["tris"] = int(d["tris"]) + t * mmi.multimesh.instance_count
-			d["range"] = [mmi.visibility_range_begin, mmi.visibility_range_end]
-		print("LOD trepte (mmi, tri daca s-ar desena toate, interval m): ", per_level)
+		print("LOD trepte (mmi, tri daca s-ar desena toate, praguri min/max m): ", per_level)
 		if not per_level.has("mid"):
 			print("ATENTIE: nicio felie pe treapta MEDIE de LOD")
 	get_tree().quit(0)

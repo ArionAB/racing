@@ -346,23 +346,38 @@ func _catenary(a: Vector3, b: Vector3, sag: float, out: Array[Vector3],
 		out.append(a.lerp(b, t) + Vector3.DOWN * (4.0 * sag * t * (1.0 - t)))
 
 
+## Latura celulei de feliere (m). O portiune de felinare acopera 150-500 m de
+## drum; intr-un singur MultiMesh, AABB-ul ei e cat portiunea si se deseneaza
+## intreaga, inclusiv sforile din spatele camerei. Pe Jodhpur becurile erau
+## 67k triunghiuri/cadru in medie si 166k pe dreapta H (ProbePerf --attrib,
+## 27 oct 2026). Pe celule, frustumul taie ce e in spate si pe lateral.
+const SLICE_M: float = 60.0
+
 func _add_multimesh(label: String, mesh: Mesh, mat: Material,
 		xfs: Array[Transform3D], shadows: bool) -> void:
 	if xfs.is_empty():
 		return
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = mesh
-	mm.instance_count = xfs.size()
-	for k in xfs.size():
-		mm.set_instance_transform(k, xfs[k])
-	var mmi := MultiMeshInstance3D.new()
-	mmi.name = label
-	mmi.multimesh = mm
-	mmi.material_override = mat
-	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows \
-		else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mmi)
+	var cells := {}
+	for xf in xfs:
+		var key := Vector2i(floori(xf.origin.x / SLICE_M), floori(xf.origin.z / SLICE_M))
+		if not cells.has(key):
+			cells[key] = [] as Array[Transform3D]
+		(cells[key] as Array[Transform3D]).append(xf)
+	for key: Vector2i in cells:
+		var part: Array[Transform3D] = cells[key]
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = mesh
+		mm.instance_count = part.size()
+		for k in part.size():
+			mm.set_instance_transform(k, part[k])
+		var mmi := MultiMeshInstance3D.new()
+		mmi.name = "%s_%d_%d" % [label, key.x, key.y]
+		mmi.multimesh = mm
+		mmi.material_override = mat
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows \
+			else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mmi)
 
 
 ## Bipiramida hexagonala (12 triunghiuri), UV colapsat pe slot: din camera de

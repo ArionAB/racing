@@ -151,6 +151,17 @@ res://
   măsurat pe iPhone 12 Pro: costul umbrei e în pixelii care o *primesc*, nu în
   cascade): o cascadă, plafon 55 m, filtru hard — `GameState.SHADOW_DISTANCE_MOBILE`,
   `Track.shadow_distance_cap`. Nivelul Maxim păstrează reglajele temei.
+- **LOD-uri pe tot ce e reconstruit din cod.** Un GLB importat are LOD-uri; o
+  copie a mesh-ului făcută din arrays (ruptura de accente, UV mutate, kituri
+  unite din `SurfaceTool`) le PIERDE și se desenează întreagă la orice distanță.
+  Pe Jodhpur 169 de case albastre cu pereții rupți (3.150–3.918 tri fiecare)
+  n-aveau niciun LOD și erau cea mai mare parte a cadrului (oct 2026). Regula:
+  aceiași indici → `MeshCpu.surface_lods(src, s)` poartă LOD-urile sursei;
+  indici noi → `MeshCpu.generated_lods(arrays)` / `MeshCpu.with_lods(mesh)`.
+  Când o pistă e grea, se măsoară **cine** e greu cu `ProbePerf --attrib=A,B`
+  (stinge grupurile pe rând, într-o singură încărcare), nu se ghicește. Celulele
+  mai mici de coacere NU ajută (măsurat: adaugă triunghiuri și desene — vezi
+  nota de la `TrackDecorBatch.CELL_M`).
 - **Texturi: materiale de clasă, nu per asset.** Culoarea vine dintr-un atlas
   de paletă, detaliul de suprafață dintr-un strat triplanar partajat
   (`Palette.world_material()`). Un asset nu aduce NICIODATĂ texturi proprii —

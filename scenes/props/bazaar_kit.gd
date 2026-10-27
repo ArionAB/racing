@@ -65,6 +65,7 @@ extends Node3D
 @export var strip_gap: Vector2 = Vector2(0.0, 0.08)
 
 const CELL_M := 60.0
+const KIT_LOD_BIAS := 0.5
 const POLE_SLOT := 9
 const BASKET_SLOT := 28
 const ROPE_SLOT := 28
@@ -118,7 +119,12 @@ func _ready() -> void:
 		var st: SurfaceTool = cells[key]
 		var mi := MeshInstance3D.new()
 		mi.name = "Bazar_%d_%d" % [key.x, key.y]
-		mi.mesh = st.commit()
+		# Cu LOD-uri: mesh-ul unit al unei celule are 4-22k triunghiuri si sta
+		# langa drum; fara ele se desena intreg si de la 100 m (ProbePerf, 27 oct 2026).
+		mi.mesh = MeshCpu.with_lods(st.commit())
+		# Piesele au 20-60 cm: la 30 m detaliul scos de nivelul urmator e sub un
+		# pixel, deci LOD-ul poate cobori de doua ori mai devreme decat pe case.
+		mi.lod_bias = KIT_LOD_BIAS
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		add_child(mi)
 		_meshes.append(mi)

@@ -51,7 +51,7 @@ func _ready() -> void:
 		_chhatri(st, bases[i], s, y, n)
 	_mesh = MeshInstance3D.new()
 	_mesh.name = "Chhatri"
-	_mesh.mesh = st.commit()
+	_mesh.mesh = MeshCpu.with_lods(st.commit())
 	add_child(_mesh)
 	_apply_material.call_deferred()
 

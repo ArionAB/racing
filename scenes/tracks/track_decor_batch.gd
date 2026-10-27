@@ -55,7 +55,33 @@ extends RefCounted
 ## 250 si nu 1000, desi dau acelasi numar: la 250 o celula tot NU acopera toata
 ## pista, deci taierea ramane reala pe o pista mai lunga sau mai intortocheata
 ## decat cele de azi. Aceeasi cifra, mai putina credinta ca lumea nu se schimba.
+##
+## REMASURAT pe Jodhpur si Kyoto (27 oct 2026, ProbePerf --mobile --cell=N,
+## celulele si pe CityFill): celulele mai mici NU taie triunghiuri, le ADAUGA.
+##    Jodhpur  250 m: 800k tri medie / 554 desene    Kyoto 250 m: 812k / 634
+##             100 m: 810k / 645                            60 m: 850k / 960
+##              60 m: 828k / 729
+##              40 m: 848k / 795
+## Motivul: Godot alege LOD-ul unui MultiMesh dupa distanta pana la cel mai
+## APROPIAT punct al AABB-ului lui, deci o celula mare care contine camera
+## trage tot ce e in ea la detaliu intreg, dar restul celulelor mari ajung
+## departe si coboara; cu celule mici, celulele de la 40-150 m urca pe
+## niveluri intermediare si pierd mai mult decat castiga frustumul. Deci
+## pentru triunghiuri parghia e LOD-ul mesh-urilor (MeshCpu.with_lods pe tot
+## ce e reconstruit din cod), nu latura celulei.
 const CELL_M: float = 250.0
+
+## `--cell=N` pe linia de comanda suprascrie latura celulei (A/B in sonde,
+## ex. ProbePerf: cat taie frustumul la 60 fata de 250). Citit o singura data.
+static var _cell_override: float = -1.0
+
+static func cell_default() -> float:
+	if _cell_override < 0.0:
+		_cell_override = 0.0
+		for arg in OS.get_cmdline_user_args():
+			if arg.begins_with("--cell="):
+				_cell_override = maxf(10.0, float(arg.trim_prefix("--cell=")))
+	return _cell_override if _cell_override > 0.0 else CELL_M
 
 ## Marcheaza un nod ca fiind vegetatie care se leagana. Se pune la plasare, se
 ## citeste la coacere: dupa ce nodul dispare in buffer, singurul mod de a mai sti
@@ -190,7 +216,9 @@ static func _collect(node: Node3D, xf: Transform3D, swaying: bool,
 
 static func _add(mi: MeshInstance3D, xf: Transform3D, swaying: bool,
 		groups: Dictionary, flipped: Dictionary,
-		extra_key: String = "", cell_m: float = CELL_M) -> String:
+		extra_key: String = "", cell_m: float = -1.0) -> String:
+	if cell_m <= 0.0:
+		cell_m = cell_default()
 	var cell := Vector2i(
 		int(floor(xf.origin.x / cell_m)), int(floor(xf.origin.z / cell_m)))
 	# Instanta oglindita primeste mesh-ul cu triunghiurile intoarse (vezi nota
@@ -433,7 +461,7 @@ static func _collect_manual(node: Node3D, ctx: Dictionary) -> void:
 	if node is MeshInstance3D and _bakeable(node as MeshInstance3D, ctx["lights"]):
 		var mi := node as MeshInstance3D
 		var world := mi.global_transform * mi.get_aabb()
-		var cell_m := CELL_M
+		var cell_m := cell_default()
 		for box: AABB in ctx["decals"]:
 			if box.intersects(world):
 				cell_m = float(ctx["cell"])

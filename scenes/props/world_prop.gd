@@ -3160,7 +3160,8 @@ static func _mesh_with_colors_dimmed(src: Mesh, f: float) -> Mesh:
 				var c := cols[i]
 				cols[i] = Color(c.r * f, c.g * f, c.b * f, c.a)
 		arr[Mesh.ARRAY_COLOR] = cols
-		MeshCpu.add_surface(out, arr)
+		# Aceiasi indici ca sursa: LOD-urile importului se poarta mai departe.
+		MeshCpu.add_surface(out, arr, MeshCpu.surface_lods(src, s))
 		var m := src.surface_get_material(s)
 		if m != null:
 			out.surface_set_material(s, m)
@@ -3228,7 +3229,8 @@ static func _mesh_with_slots_moved(src: Mesh, remap: Dictionary) -> Mesh:
 					# culoarea vecinului la prima filtrare bilineara.
 					uv[i].x = (float(int(remap[slot])) + 0.5) / float(Palette.SLOTS)
 			arr[Mesh.ARRAY_TEX_UV] = uv
-		MeshCpu.add_surface(out, arr)
+		# Aceiasi indici ca sursa: LOD-urile importului se poarta mai departe.
+		MeshCpu.add_surface(out, arr, MeshCpu.surface_lods(src, s))
 		var m := src.surface_get_material(s)
 		if m != null:
 			out.surface_set_material(s, m)

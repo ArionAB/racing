@@ -88,7 +88,7 @@ def cut_marble_block(marble, base, center_xy, size, z0=0.0, yaw_deg=0.0,
 
 
 def wheel_crr(tyre, hub, cap, cx, cy, cz, radius, width, side, hub_slot=CRR_PAINT,
-              seg=14, lugs=14, outer=True):
+              seg=16, lugs=16, outer=True):
     """Roata de camion pe axa X: anvelopa (cilindru, `seg` laturi) cu `lugs`
     crampoane scurte pe banda de rulare (ies 4 cm) si, daca `outer`, janta (disc
     de vopsea in `hub`, capac de rugina in `cap`) iesita pe fata exterioara.
@@ -99,7 +99,7 @@ def wheel_crr(tyre, hub, cap, cx, cy, cz, radius, width, side, hub_slot=CRR_PAIN
         py = cy + math.cos(a) * (radius + 0.005)
         pz = cz + math.sin(a) * (radius + 0.005)
         rot = Matrix.Rotation(a, 3, "X")   # y local -> radial
-        tyre.box((cx, py, pz), (width * 0.92, 0.07, 0.17), CRR_BLACK, rotation=rot)
+        tyre.box((cx, py, pz), (width * 0.98, 0.07, 0.19), CRR_BLACK, rotation=rot)
     if outer:
         xo = cx + side * (width * 0.5)
         hub.cylinder((xo, cy, cz), radius * 0.50, 0.05, hub_slot, segments=10, axis="X")

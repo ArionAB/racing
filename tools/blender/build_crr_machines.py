@@ -55,12 +55,14 @@ def build_quarry_truck():
         mici in contur, un evacuator. Fara capota lunga: grila neagra pe fata
         cabinei, cu 3 bare de vopsea.
      3. Bara de protectie de rugina in fata (1 corp), miez de radiator sub cabina.
-     4. Bena: rigida, deschisa deasupra: podea + 2 pereti laterali evazati
-        (6 grade) + perete din spate RIDICAT (cu 0,30 m peste laterale: „muchia
-        din spate ridicata") + perete din fata inalt care continua peste cabina
-        cu o COPERTINA inclinata, ca pe planșa.
-     5. Nervuri: 5 pe fiecare latura a benei (rugina) + sina de rugina pe
-        muchia de sus a laterale si a peretelui din spate.
+     4. Bena (runda 3): CAROSERIE PLINA de otel, nu platforma cu rame: podea +
+        2 placi laterale inchise (evazate 6 grade) cu buza rulata sus + perete
+        din spate RIDICAT (cu 0,40 m peste laterale: „muchia din spate
+        ridicata"). Peretele din FATA e o pana care urca spre fata si se
+        continua cu COPERTINA peste cabina, toate in `Truck_Body`; doua placi
+        triunghiulare inchid copertina pe laterale. Fara sine deschise, fara
+        stalpi.
+     5. Nervuri: 4 pe fiecare placa laterala, verticale, in relief (7 cm).
      6. Sasiu: 2 longeroane inguste, axe negre, subsasiu de rugina sub bena,
         2 balamale de rugina in spate, 2 cilindri hidraulici (negri) sub bena.
      7. Blocuri: 2 blocuri de marmura (1,85 x 1,80 x 1,40 si 1,80 x 1,70 x 1,36),
@@ -94,50 +96,67 @@ def build_quarry_truck():
         wheel_crr(black, body, rust, sx * 1.14, TK_Y_REAR, TK_CZ, TK_R, 0.44, sx)   # exterioara
         wheel_crr(black, body, rust, sx * 0.67, TK_Y_REAR, TK_CZ, TK_R, 0.44, sx, outer=False)
 
-    # --- 4. bena ---------------------------------------------------------------
+    # --- 4. bena: CAROSERIE PLINA de otel (placi inchise), copertina o continua -----
     y_f, y_b = 1.77, -3.70                      # capetele benei (fata / spate)
     bl = y_f - y_b
     yc = (y_f + y_b) * 0.5
+    z_rim = 2.58                                # muchia de sus a laterale
     body.box((0.0, yc, (TK_FLOOR0 + TK_FLOOR1) * 0.5), (2.44, bl, TK_FLOOR1 - TK_FLOOR0), CRR_PAINT)
+    zc_side = (TK_FLOOR0 + z_rim) * 0.5
     for sx in (-1, 1):
-        tilted_box(body, (sx * 1.18, yc, 2.315), (0.12, bl, 0.67), CRR_PAINT, rot_y=sx * 6.0)
-        # --- 5. sina de sus + nervuri -------------------------------------
-        rust.box((sx * 1.22, yc, 2.68), (0.22, bl, 0.10), CRR_RUST)
-        for k in range(5):
-            yr = y_b + 0.5 + k * (bl - 1.0) / 4.0
-            tilted_box(rust, (sx * 1.27, yr, 2.30), (0.06, 0.15, 0.60), CRR_RUST, rot_y=sx * 6.0)
-    body.box((0.0, y_b + 0.06, 2.465), (2.44, 0.12, 0.97), CRR_PAINT)          # spate ridicat
-    rust.box((0.0, y_b + 0.06, 2.98), (2.56, 0.20, 0.10), CRR_RUST)
-    body.box((0.0, y_f - 0.07, 2.515), (2.44, 0.14, 1.07), CRR_PAINT)          # perete fata
-    # copertina peste cabina, usor lasata spre fata
-    tilted_box(body, (0.0, 2.65, 3.20), (2.60, 1.90, 0.14), CRR_PAINT, rot_x=-3.0)
-    rust.box((0.0, 3.58, 3.13), (2.60, 0.10, 0.14), CRR_RUST)
+        tilted_box(body, (sx * 1.18, yc, zc_side), (0.14, bl, z_rim - TK_FLOOR0), CRR_PAINT, rot_y=sx * 6.0)
+        body.box((sx * 1.215, yc, z_rim + 0.02), (0.24, bl, 0.12), CRR_PAINT)      # buza de sus, rulata
+        # --- 5. 4 nervuri verticale in relief, pe placa plina ----------------
+        for k in range(4):
+            yr = y_b + 0.85 + k * (bl - 1.7) / 3.0
+            tilted_box(body, (sx * 1.255, yr, zc_side), (0.07, 0.20, z_rim - TK_FLOOR0 - 0.06),
+                       CRR_PAINT, rot_y=sx * 6.0)
+        # placa triunghiulara de la cabina: inchide laterala sub copertina
+        for xo in (1.12, 1.30):
+            pass
+        side = []
+        for xx in (1.10, 1.30):
+            for (yy, zz) in ((1.30, z_rim), (1.95, z_rim), (2.12, 3.17), (1.95, 3.17)):
+                side.append(Vector((sx * xx, yy, zz)))
+        _hull(body, side, CRR_PAINT)
+    body.box((0.0, y_b + 0.07, 2.475), (2.44, 0.14, 0.99), CRR_PAINT)          # spate ridicat
+    body.box((0.0, y_b + 0.07, 2.995), (2.60, 0.22, 0.12), CRR_PAINT)          # buza spate
+    # peretele din fata: pana care urca SPRE FATA, continuata de copertina peste cabina
+    wall = []
     for sx in (-1, 1):
-        rust.box((sx * 0.95, 2.2, 3.06), (0.12, 0.12, 0.26), CRR_RUST)         # console
+        for (yy, zz) in ((1.55, TK_FLOOR1), (1.80, TK_FLOOR1), (2.12, 3.17), (1.87, 3.17)):
+            wall.append(Vector((sx * 1.30, yy, zz)))
+    _hull(body, wall, CRR_PAINT)
+    canopy = []
+    for sx in (-1, 1):
+        for (yy, zz) in ((1.87, 3.17), (3.55, 3.10), (3.55, 2.97), (1.87, 3.03)):
+            canopy.append(Vector((sx * 1.30, yy, zz)))
+    _hull(body, canopy, CRR_PAINT)
+    body.box((0.0, 3.52, 2.95), (2.60, 0.09, 0.20), CRR_PAINT)                 # buza copertinei
 
     # --- 2. cabina -------------------------------------------------------------
     body.box((0.0, 2.725, 2.19), (2.30, 1.65, 0.62), CRR_PAINT)                 # caroseria, peste roti
     body.box((0.0, 3.05, 1.665), (1.60, 1.00, 0.43), CRR_PAINT)                 # miez de radiator
     cab_pts = []
     for sx in (-1, 1):
-        for (yy, zz) in ((1.90, 2.50), (3.35, 2.50), (3.10, 3.00), (1.90, 3.00)):
+        for (yy, zz) in ((1.90, 2.50), (3.35, 2.50), (3.10, 2.92), (1.90, 2.92)):
             cab_pts.append(Vector((sx * 1.02, yy, zz)))
     _hull(body, cab_pts, CRR_PAINT)                                             # sera
-    slope = math.degrees(math.atan2(0.25, 0.50))
-    glen = math.hypot(0.25, 0.50)
-    tilted_box(black, (0.0, 3.225 + 0.02, 2.75), (1.80, 0.05, glen * 0.84), CRR_BLACK, rot_x=slope)
+    slope = math.degrees(math.atan2(0.25, 0.42))
+    glen = math.hypot(0.25, 0.42)
+    tilted_box(black, (0.0, 3.225 + 0.02, 2.71), (1.80, 0.05, glen * 0.84), CRR_BLACK, rot_x=slope)
     for sx in (-1, 1):
-        black.box((sx * 1.035, 2.55, 2.75), (0.05, 1.00, 0.34), CRR_BLACK)     # geam lateral
-        rust.box((sx * 1.19, 3.30, 2.78), (0.07, 0.06, 0.18), CRR_RUST)        # brat oglinda
-        black.box((sx * 1.25, 3.30, 2.82), (0.08, 0.14, 0.32), CRR_BLACK)      # oglinda
-    black.box((0.0, 1.88, 2.75), (1.50, 0.05, 0.34), CRR_BLACK)                # luneta
-    rust.cylinder((1.02, 1.835, 2.70), 0.06, 0.70, CRR_RUST, segments=8)        # evacuator
+        black.box((sx * 1.035, 2.55, 2.70), (0.05, 1.00, 0.28), CRR_BLACK)     # geam lateral
+        rust.box((sx * 1.19, 3.30, 2.72), (0.07, 0.06, 0.18), CRR_RUST)        # brat oglinda
+        black.box((sx * 1.25, 3.30, 2.76), (0.08, 0.14, 0.32), CRR_BLACK)      # oglinda
+    black.box((0.0, 1.88, 2.70), (1.50, 0.05, 0.28), CRR_BLACK)                # luneta
+    rust.cylinder((1.02, 1.835, 2.62), 0.06, 0.60, CRR_RUST, segments=8)        # evacuator
 
     # --- 3. grila, bara ---------------------------------------------------------
     black.box((0.0, 3.57, 2.17), (1.60, 0.06, 0.42), CRR_BLACK)                # grila
     for k in range(3):
         body.box((0.0, 3.605, 2.04 + k * 0.13), (1.64, 0.05, 0.04), CRR_PAINT)
-    rust.box((0.0, 3.78, 1.55), (2.30, 0.40, 0.36), CRR_RUST)                  # bara
+    rust.box((0.0, 3.84, 1.55), (2.30, 0.28, 0.26), CRR_RUST)                  # bara
 
     # praf pe flancul benei (pete mici)
     for sx in (-1, 1):

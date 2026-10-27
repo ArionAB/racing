@@ -198,6 +198,10 @@ var _widths: PackedFloat32Array
 var _total_len: float
 ## Curbura precalculata per index — se cere de multe ori, se calculeaza o data.
 var _curvature: PackedFloat32Array
+## Cat din relieful de dune (mare + detaliu) ramane: 1.0 = comportamentul vechi,
+## bit-identic; 0.0 = camp departat PLAT la cota medie a soselei. Cheia de tema
+## `dune_scale` (Carrara: o cariera nu sta intr-un camp de dune).
+var dune_scale: float = 1.0
 ## Faza zgomotului de dune, ca terenul sa difere de la o pista la alta.
 var _dune_phase: float = 0.0
 ## Campul de dune: FBM de simplex, instantiat O DATA — ground_y se apeleaza de
@@ -294,6 +298,26 @@ const CAPE_BLEND: float = 8.0
 ## [member cuttings]: goala pe orice pista fara noduri, deci `ground_y` nu se
 ## schimba cu nimic acolo. Vezi [method _carve_bluffs].
 var bluffs: PackedFloat32Array = PackedFloat32Array()
+## PLATOURI DE BANC declarate ([code]custom_bench_patches[/code] pe pista): dreptunghiuri
+## in plan, plate la o cota data, care INLOCUIESC campul din ele. Doua platouri
+## alaturate cu cote diferite si margine DURA intre ele (soft = 0) fac o TREAPTA —
+## fata verticala a unui gradon. Se seteaza de Track dupa constructie, ca
+## [member bluffs]: lista goala pe orice pista fara ele, deci `ground_y` nu se
+## schimba cu nimic acolo. Vezi [method _apply_benches].
+##
+## Fiecare element e un Dictionary: `x0`, `x1`, `z0`, `z1` (lume, z0 < z1), `lvl`
+## (PackedVector2Array de (x, cota SOSELEI), liniar pe portiuni, fixat la capete) si
+## `soft` (Vector4: cat se stinge in afara marginii vest / est / nord(-z) / sud(+z);
+## 0 = margine dura).
+var bench_patches: Array = []
+## Rape cu racord STRANS (indici in `_ravines`, ca `_scarps`, dar fara sa schimbe buza):
+## doar `SMOOTH_SCARP_K` in loc de `SMOOTH_RAVINE_K`. Motivul, masurat pe Carrara (C): `_smin`
+## cu k = 3 coboara cota cu k / 4 = 0,75 m chiar si unde tinta = cota soselei (inaintea buzei),
+## deci pe TOATA lungimea rapei marginea asfaltului cade 1,05 m (0,75 + GROUND_DROP) — un
+## perete de 1 m pentru roata, in care masinile alunecate din cotul ud ramaneau blocate
+## (ProbeRace: [blocaj] la 0.37-0.38, prezent si in versiunea de dinainte). Cu 0,4 abaterea e
+## de 0,1 m. Lista goala pe orice pista fara ea: `ground_y` nu se schimba nicaieri altundeva.
+var tight_ravines: Array[int] = []
 const BLUFF_STRIDE := 15
 ## Pe cati metri, dincolo de `road_clear_m`, abruptul creste de la zero la plin.
 const BLUFF_ROAD_FADE: float = 8.0
@@ -780,6 +804,10 @@ func ground_y(wx: float, wz: float) -> float:
 	y = _carve_branches(y, wx, wz, dist, near_i)
 	y = _carve_lagoon(y, dist, wx, wz, near_i)
 	y = _carve_ravines(y, road_level, dist, near_i, wx, wz) - GROUND_DROP
+	# Platourile de banc DUPA rape si INAINTEA debleelor: inlocuiesc campul din
+	# dreptunghiurile lor (vezi _apply_benches). Lista goala = `y` neatins.
+	if not bench_patches.is_empty():
+		y = _apply_benches(y, wx, wz)
 	# Debleele DUPA rape: ridica doar latura opusa golului (o rapa declarata pe
 	# aceeasi latura ar fi umpluta la loc), si inaintea plafonului de scobitura.
 	y = _lift_cuttings(y, local, near_i, wx, wz)
@@ -959,6 +987,81 @@ func _carve_bluffs(y: float, wx: float, wz: float, dist: float,
 				y = minf(y, lerpf(y, c, mix))
 		k += BLUFF_STRIDE
 	return y
+
+
+## Cota SOSELEI data de profilul liniar pe portiuni `pts` (Vector2(x, cota)) la x.
+static func _pw_level(pts: PackedVector2Array, x: float) -> float:
+	var n := pts.size()
+	if n == 0:
+		return 0.0
+	if x <= pts[0].x:
+		return pts[0].y
+	if x >= pts[n - 1].x:
+		return pts[n - 1].y
+	for i in range(1, n):
+		if x <= pts[i].x:
+			var a := pts[i - 1]
+			var b := pts[i]
+			return lerpf(a.y, b.y, (x - a.x) / maxf(b.x - a.x, 1e-6))
+	return pts[n - 1].y
+
+
+## Aplica platourile de banc ([member bench_patches]) peste camp.
+##
+## De ce exista, cu masuratoarea in fata (Carrara, pasul 4). Terenul trece prin
+## [method ground_y] si ajunge pe o grila de 7.92 m; un gradon de marmura e o FATA
+## de 6-9 m, deci grila o intinde pe o celula intreaga (~50 grade). Fata o taie
+## abia randurile FINE ale terenului ([code]Track._build_terrain[/code] subimparte
+## randul/coloana care contine o margine dura), dar ele au nevoie ca CAMPUL sa
+## aiba treapta chiar acolo — iar campul urmareste soseaua, deci intre doua drumuri
+## vecine face o panta, nu doua platouri. Platoul spune explicit: aici cota e
+## asta, pana la marginea asta.
+##
+## E un INLOCUITOR, nu un plafon (`lerp`, nu `minf`): bancul de sus ridica si cel
+## de jos coboara. Nu are banda de protectie a asfaltului, fiindca platoul se
+## declara doar acolo unde cota lui = cota soselei de langa el (generatorul o
+## citeste din traseu), deci langa drum inlocuieste cu aceeasi valoare.
+func _apply_benches(y: float, wx: float, wz: float) -> float:
+	for p: Dictionary in bench_patches:
+		var soft: Vector4 = p["soft"]
+		var x0: float = p["x0"]
+		var x1: float = p["x1"]
+		var z0: float = p["z0"]
+		var z1: float = p["z1"]
+		if wx < x0 - soft.x or wx > x1 + soft.y or wz < z0 - soft.z or wz > z1 + soft.w:
+			continue
+		var m := 1.0
+		if wx < x0:
+			m *= smoothstep(x0 - soft.x, x0, wx)
+		elif wx > x1:
+			m *= 1.0 - smoothstep(x1, x1 + soft.y, wx)
+		if wz < z0:
+			m *= smoothstep(z0 - soft.z, z0, wz)
+		elif wz > z1:
+			m *= 1.0 - smoothstep(z1, z1 + soft.w, wz)
+		if m <= 0.0:
+			continue
+		y = lerpf(y, _pw_level(p["lvl"], wx) - GROUND_DROP, m)
+	return y
+
+
+## Marginile DURE ale platourilor, in coordonate de lume: `z` = valori pe care
+## cade o treapta orientata E-V (muchie nord/sud cu soft 0), `x` = idem N-S.
+## Track subimparte randurile / coloanele grilei care le contin.
+func bench_hard_edges() -> Dictionary:
+	var zs := PackedFloat32Array()
+	var xs := PackedFloat32Array()
+	for p: Dictionary in bench_patches:
+		var soft: Vector4 = p["soft"]
+		if soft.z <= 0.0:
+			zs.append(float(p["z0"]))
+		if soft.w <= 0.0:
+			zs.append(float(p["z1"]))
+		if soft.x <= 0.0:
+			xs.append(float(p["x0"]))
+		if soft.y <= 0.0:
+			xs.append(float(p["x1"]))
+	return {"z": zs, "x": xs}
 
 
 func _carve_hollows(y: float, wx: float, wz: float) -> float:
@@ -1554,7 +1657,8 @@ func _carve_ravines(y: float, road_level: float, dist: float, near_i: int,
 		# dadeau teren plat la 30.3 (= cota drumului) chiar in centrul lor, si
 		# singurul "mal" ramanea o panza de faleza. Fara latime declarata, fade
 		# e 1 si comportamentul e cel dinainte.
-		var carved := _smin(y, target, SMOOTH_SCARP_K if scarp else SMOOTH_RAVINE_K)
+		var carved := _smin(y, target, SMOOTH_SCARP_K if (scarp or tight_ravines.has(ri))
+			else SMOOTH_RAVINE_K)
 		if not ravine_capes.is_empty():
 			fade *= 1.0 - _cape_weight(ri, near_i, dist)
 		y = lerpf(y, carved, fade)
@@ -1687,7 +1791,7 @@ static func _ring_window(f: float, f0: float, f1: float, fade: float) -> float:
 ## ~1.9 m fata de 2.3 m inainte; vaile adanci le reteaza oricum clamp-ul
 ## de -1 m din ground_y.
 func _dunes(wx: float, wz: float) -> float:
-	return _noise.get_noise_2d(wx, wz) * 7.0
+	return _noise.get_noise_2d(wx, wz) * 7.0 * dune_scale
 
 
 ## Dune MICI: zgomot de detaliu la ~11 m lungime de unda, ±0.35 m amplitudine.
@@ -1704,9 +1808,9 @@ func _dunes(wx: float, wz: float) -> float:
 ## Amplitudinea (±0.35 m) e departe de pragul de ±3.5 m/50 m din style_bible
 ## §11.3, deci masinile care ies de pe drum nu sar.
 func _detail_dunes(wx: float, wz: float) -> float:
-	return sin(wx * 0.57 + _dune_phase * 3.0) \
+	return (sin(wx * 0.57 + _dune_phase * 3.0) \
 		* cos(wz * 0.61 - _dune_phase) * 0.22 \
-		+ sin((wx + wz) * 0.43 + _dune_phase * 5.0) * 0.13
+		+ sin((wx + wz) * 0.43 + _dune_phase * 5.0) * 0.13) * dune_scale
 
 
 ## Punctele benzilor secundare, pentru consumatorii care isi fac propria

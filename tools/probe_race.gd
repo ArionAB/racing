@@ -298,6 +298,12 @@ var _fx_kerb: int = 0
 var _fx_swaps: int = 0
 var _fx_pos: Dictionary = {}
 var _stats: Array[Dictionary] = []
+## Istoricul pozitiilor (ultimele ~2,4 s, la 0,2 s) per masina: `[repunere]` tipareste pozitia DUPA
+## repunere, nu de unde a cazut masina, iar fara locul caderii nu se poate repara geometria. La
+## fiecare repunere / ejectare se tipareste `  inainte:` cu fractia, pozitia, viteza si daca era pe
+## sosea, la -2,0 / -1,0 / -0,4 s. Nu schimba nicio cifra din raport.
+var _hist: Array = []
+var _hist_clock: float = 0.0
 var _done: bool = false
 
 ## Fiordland (Track16), verdictul de flotă pentru TunnelSignalHazard (brief
@@ -930,6 +936,20 @@ func _tick_race(delta: float) -> void:
 				_race.track.is_on_road(c.road_index, c.global_position,
 					c.route), c.horizontal_speed(),
 				c.global_position.x, c.global_position.y, c.global_position.z])
+	_hist_clock += delta
+	var hist_tick := _hist_clock >= 0.2
+	if hist_tick:
+		_hist_clock = 0.0
+		while _hist.size() < cars.size():
+			_hist.append([])
+		for hi in cars.size():
+			var hc := cars[hi]
+			var ring: Array = _hist[hi]
+			ring.append([_elapsed, _race.track.frac_at(hc.road_index, hc.route),
+				hc.global_position, hc.horizontal_speed(),
+				_race.track.is_on_road(hc.road_index, hc.global_position, hc.route)])
+			if ring.size() > 12:
+				ring.pop_front()
 	for i in cars.size():
 		var car := cars[i]
 		var st := _stats[i]
@@ -1227,6 +1247,22 @@ func _tunnel_zone_diag(car: Car) -> String:
 		", ".join(touching) if not touching.is_empty() else "-"]
 
 
+func _print_before(index: int) -> void:
+	if index >= _hist.size():
+		return
+	var ring: Array = _hist[index]
+	var line := "  inainte:"
+	for back: int in [10, 5, 2]:
+		var k := ring.size() - back
+		if k < 0:
+			continue
+		var e: Array = ring[k]
+		var p: Vector3 = e[2]
+		line += "  t=%.1f frac=%.3f poz=(%.0f,%.1f,%.0f) v=%.0f %s |" % [
+			e[0], e[1], p.x, p.y, p.z, e[3], "drum" if e[4] else "AFARA"]
+	print(line)
+
+
 func _on_respawn(car: Car, index: int) -> void:
 	_stats[index].respawns = int(_stats[index].respawns) + 1
 	if _jump_near >= 0.0:
@@ -1241,6 +1277,7 @@ func _on_respawn(car: Car, index: int) -> void:
 		_race.track.frac_at(car.road_index, car.route),
 		car.global_position.x, car.global_position.y, car.global_position.z,
 		_tunnel_zone_diag(car)])
+	_print_before(index)
 
 
 func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
@@ -1254,6 +1291,7 @@ func _on_eject(car: Car, _ragdoll: Node3D, index: int) -> void:
 		car.last_eject_cause, car.last_eject_value,
 		car.global_position.x, car.global_position.y, car.global_position.z,
 		_tunnel_zone_diag(car)])
+	_print_before(index)
 
 
 ## Fiordland: contact DISCRET cu autocarul (un eveniment per ghiont, nu cadre

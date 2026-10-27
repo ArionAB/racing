@@ -349,6 +349,9 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 ## ramane doar izbitura FRONTALA (de la ~19 m/s in sus, cu ricoseul inclus)
 ## sau una oblica peste ~60° la viteza maxima.
 @export var eject_wall_dv: float = 26.0
+## Plafonul de viteza (fractie) cat tine strivirea unei lovituri MOI (meta
+## `soft_hit_crush` pe corpul lovit: camionul Carrara, bratul excavatorului).
+const SOFT_CRUSH_FACTOR: float = 0.6
 ## Viteza de cadere (m/s) la aterizare peste care soferul zboara.
 ## Masurat cu ProbeRace pe Alpii (garaj deschis, 150 s): SARITURA PROIECTATA
 ## peste gol (frac 0.71) ateriza la 24-30 m/s, si la pragul de 24 fiecare
@@ -1515,6 +1518,8 @@ func _process_contacts(delta: float) -> void:
 	_impact_wall_cooldown = maxf(_impact_wall_cooldown - delta, 0.0)
 	var cars_hit: Array[Car] = []
 	var static_hit := false
+	var hard_static := false
+	var soft_crush := 0.0
 	for body in get_colliding_bodies():
 		if body is Car:
 			cars_hit.append(body as Car)
@@ -1531,6 +1536,13 @@ func _process_contacts(delta: float) -> void:
 				+ Vector3.UP * 1.5)
 		elif body is StaticBody3D:
 			static_hit = true
+			# Contact MOALE (camion, brat de excavator): corp greu, nu zid de
+			# beton. Meta `soft_hit_crush` (secunde de strivire) o pune hazardul,
+			# in spatele unui flag implicit stins. Fara meta, nimic nu se schimba.
+			if body.has_meta(&"soft_hit_crush"):
+				soft_crush = maxf(soft_crush, float(body.get_meta(&"soft_hit_crush")))
+			else:
+				hard_static = true
 			# Lava (Stromboli): contactul e distrugere, nu perete. Meta vine de
 			# la LavaFlowHazard, pe colizorul stadiului curent.
 			if body.has_meta(&"lava"):
@@ -1625,7 +1637,13 @@ func _process_contacts(delta: float) -> void:
 		# Izbitura dura de perete arunca soferul. Directia de zbor e viteza de
 		# DINAINTE de impact: figurina continua drumul pe care masina nu l-a
 		# mai putut face, peste bariera.
-		if dv_h >= eject_wall_dv:
+		if dv_h >= eject_wall_dv and not hard_static and soft_crush > 0.0:
+			# Lovitura moale grea: ghiont (l-a dat deja solverul + hazardul) si
+			# o strivire scurta in loc de ejectare. Cooldown, ca un contact
+			# sustinut sa nu reinnoiasca strivirea in fiecare tick.
+			if crush_time <= 0.0:
+				crush(soft_crush, SOFT_CRUSH_FACTOR, Vector3(1.25, 0.65, 1.1), 1.0)
+		elif dv_h >= eject_wall_dv:
 			# 0.6 din viteza inainte + 7.5 m/s in sus: peste o bariera de 1,2 m
 			# trece; intr-o faleza se izbeste si cade — amandoua sunt corecte.
 			var fling := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z) * 0.6

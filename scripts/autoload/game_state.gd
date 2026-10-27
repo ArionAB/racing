@@ -113,11 +113,16 @@ const TRACK_SCENES: Array[String] = [
 	# numarul scenei); probe_decor/probe_manual vor 22, snapshot/probe_race/
 	# probe_layout vor 14 SAU 22 (memoria probe-decor-numar-de-scena).
 	"res://scenes/tracks/Track22.tscn", # Ha Long = INDEXUL 14
+	# Track23 = INDEXUL 15 (Carrara, brief carrara.md): la COADA listei, fara swap. Uneltele o
+	# adreseaza cu --track=15 (snapshot / probe_race / probe_layout / probe_buried) SAU --track=23
+	# (resolve_track_index o gaseste dupa numarul scenei); probe_decor / probe_manual iau DOAR
+	# numarul scenei, 23 (memoria `probe-decor-numar-de-scena`).
+	"res://scenes/tracks/Track23.tscn", # Carrara = INDEXUL 15
 ]
 const TRACK_NAMES: Array[String] = [
 	"Dunele", "Okinawa manual", "Transfagarasan", "Baikal", "Stromboli",
 	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
-	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long",
+	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long", "Carrara",
 ]
 const CHAMP_ROUNDS: int = 3
 
@@ -155,6 +160,13 @@ static func track_label(index: int) -> String:
 	return "%s (%s)" % [TRACK_NAMES[index],
 		String(TRACK_SCENES[index]).get_file().get_basename()]
 
+## Scena pistei curente: suprascrierea sondei, altfel din lista de joc.
+func current_track_scene() -> String:
+	if not track_scene_override.is_empty():
+		return track_scene_override
+	return TRACK_SCENES[selected_track]
+
+
 ## Puncte pe pozitie (locul 1..6). Lista TREBUIE sa aiba cel putin atatea
 ## intrari cate masini sunt in cursa: `record_results` indexeaza cu rangul.
 const CHAMP_POINTS: Array[int] = [10, 8, 6, 4, 2, 1]
@@ -180,6 +192,12 @@ var traffic_override: int = -1
 ## `ai_count` se repeta ciclic, ca si `AI_CARS`. Matricea de echilibru pune
 ## toate cele 6 masini din garaj pe aceeasi grila (docs/cariera §2.1, §11 pas 0).
 var ai_cars_override: Array[int] = []
+## Scena de pista folosita IN LOC de `TRACK_SCENES[selected_track]` (sonde:
+## piste sintetice care nu trebuie sa intre in lista de joc, ex. tools/
+## SondaCarraraB.tscn). Gol (implicit) = lista. Acelasi tipar ca
+## `traffic_override`: singurul punct din care o sonda poate schimba pista
+## INAINTE ca `Race._ready` sa o incarce. Vezi `current_track_scene()`.
+var track_scene_override: String = ""
 
 # Selectii (masina si soferul alese se persista).
 var selected_car: int = 0

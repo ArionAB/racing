@@ -303,6 +303,11 @@ const RED_RUN_HALF_WIDTH_M: float = 12.0
 
 
 func _ready() -> void:
+	if tube_only:
+		# Vezi `tube_only`: fara ceas, autocar, lampa sau grup AI. `lamp` ramane null si nimic
+		# din cod nu-l atinge cat timp `_physics_process` e stins.
+		set_physics_process(false)
+		return
 	add_to_group(AI_GROUP)
 	_startup_grace_left = first_green_bonus_s
 	if lamp == null:
@@ -389,7 +394,25 @@ func _build_bus() -> void:
 ## tavan, movila, portaluri, zona de camera — o construieste [Track] din
 ## aceleasi numere (`Track._build_tunnels`), ca sa nu existe doua copii ale
 ## lor. Nu intra in nimic din ce face lampa sau autocarul.
-@export_range(4.0, 12.0, 0.1) var tunnel_ceiling: float = 6.5
+##
+## Plafonul de 12 m s-a ridicat la 24 (Carrara, galeria Ravaccione: spirala de 9-10 m si sala
+## de 16-18 m, brief §2 POI D): `Track._build_tunnel` nu are propria limita, doar exportul.
+@export_range(4.0, 24.0, 0.1) var tunnel_ceiling: float = 6.5
+
+## DOAR TUB (Carrara, galeria D si tunelul Marmifera H): nodul ramane DECLARATIA tunelului
+## (linia de oprire = originea lui, lungimea, semilatimea, tavanul — le citeste
+## `Track._collect_tunnels`, care construieste tubul), dar nu aduce nimic din semafor: nici
+## autocar, nici lampa, nici intrarea in grupul AI (`AI_GROUP`), nici ceas. Un tunel fara
+## gimmick-ul Fiordland (autocarul din fata) nu are de ce sa plateasca un `BusHazard` ascuns si
+## o lampa care nu se aprinde niciodata, iar AI-ul nu trebuie sa-l creada un semnal.
+## Implicit false: Fiordland / Transfagarasan raman bit-identice (dovada: ProbeTunelHash).
+@export var tube_only: bool = false
+
+## Clasa triplanara a peretilor, tavanului si movilei tubului (`Palette.CLASS_TEXTURES`).
+## Implicit `wet_gneiss` (rece, inchisa — tunelurile Fiordland / Transfagarasan); Carrara pune
+## `carrara_marble` (marmura calda), fiindca un tub de gneis ud in muntele de marmura ar fi
+## opusul brief-ului. Citita de `Track._collect_tunnels`.
+@export var tube_class: String = "wet_gneiss"
 
 ## Pe ce banda a tunelului merge autocarul, fata de AXA drumului (m, semn
 ## local X — acelasi semn ca `TrackRoute.side_at` / `lateral_distance`:

@@ -725,6 +725,17 @@ const CLASS_TEXTURES := {
 	# canal, deci nu cere CLASS_LIFT. Clasa separata fiindca o tenta pe
 	# `olkhon_marble` ar fi revopsit Stanca Samanului de pe Baikal.
 	"granite": "res://assets/textures/classes/olkhon_marble.png",
+	# MARMURA CARRARA (Track23, brief carrara.md §4, TESTUL DE MOSTRA). ACEEASI dala ca
+	# `olkhon_marble` (zero textura noua): clasa pune pe fetele verticale tăiate cu firul
+	# un crem-auriu la soare (tinta ~(232,214,178)), nu albul zapezii. Dala ridicata si
+	# ROTITA (CLASS_LIFT / CLASS_LIFT_ROTATE): venele ei sunt verticale, iar taietura cu
+	# fir diamantat lasa dungi ORIZONTALE. Tenta e calibrata in joc, vezi CLASS_TINT.
+	"carrara_marble": "res://assets/textures/classes/olkhon_marble.png",
+	# PIETRISUL carierei Carrara (Track23): solul de teren citea NISIP ("sand ripples" pe 10/10 cadre ale
+	# mostrei) fiindca terenul avea doar perechea `surface_sand`. ACEEASI dala ca `branch_texture`
+	# (`surface_gravel.png`, granulatie fina de pietris, media 0,842 ca nisipul si iarba) pusa pe
+	# perechea a doua a terenului prin `terrain_alt_class` — zero textura noua, zero material nou.
+	"carrara_gravel": "res://assets/textures/surface_gravel.png",
 	# LUTUL BATUT al termitierelor (Serengeti). ACEEASI dala ca "rock" — nu se
 	# dubleaza in memorie, se schimba doar ridicarea si tenta (mecanica
 	# volcanic_rock / tuff_cream / city_concrete).
@@ -1068,6 +1079,14 @@ const CLASS_TINT := {
 	# joc (104,139,53) pe coroana, deci R prea mare si B prea mic: corectie liniara
 	# (0.81, 0.98, 1.19) peste (0.559, 0.833, 0.584).
 	"tf_beech": Color(0.7030, 0.9165, 0.8510),
+	# Marmura Carrara, calibrata pe lumina REALA a temei (cuburi de proba pe Track23, soare #FFD2A0
+	# x 1.25 la 22 grade, ambient #BCCCE8 x 0.42): fata la soare (228,196,159) H 32 S 0.30 V 0.90,
+	# fata in umbra (109,114,117) H 208 S 0.07 V 0.46 (dX contract: S <= 0.12, dV >= 0.28).
+	# Tenta veche (0.79, 0.87, 0.86) era CIAN (compensa soarele portocaliu): lumina directa iesea
+	# crem, dar umbra, doar din ambient albastru x tenta cian, iesea albastru-cian saturat
+	# (H 196, S 0.25 — "gheata albastra" la criticii orbi ai mostrei). Acum tenta e aproape
+	# NEUTRA (usor mai putin albastra decat verdele), iar ambientul mai putin saturat.
+	"carrara_marble": Color(0.76, 0.765, 0.75),
 	# Granitul Serengeti — valoare de INTEGRARE, nu a unui singur POI.
 	# Sase bucati au masurat aceeasi clasa independent, pe capturi diferite:
 	# A (0.50,0.56,0.68), B (0.56,0.60,0.68), C (0.520,0.578,0.723),
@@ -1300,6 +1319,9 @@ const CLASS_LIFT := {
 	"tf_stone": 0.800,
 	# Fagul Transfagarasan: G tinta (0.254 liniar) e peste media dalei (0.182), deci ridicare.
 	"tf_beech": 0.500,
+	# Marmura Carrara: dala olkhon (luminanta 0.41) trebuie sa ajunga pe un crem deschis;
+	# tenta poate doar sa INTUNECE, deci dala se ridica (vezi CLASS_TINT).
+	"carrara_marble": 0.87,
 	"village_plaster": 0.88,
 	# Tufarisul uscat: dala lui `macchia` are luminanta 0.417 si trebuie sa
 	# ajunga pe slotul 13 (0.606). Ridicarea e insa la 0.82, nu la 0.606:
@@ -1385,6 +1407,8 @@ const CLASS_LIFT := {
 ## stalp. Doar pe clase cu CLASS_LIFT: rotirea se face pe imaginea deja copiata.
 const CLASS_LIFT_ROTATE := {
 	"shu_vermilion": true,
+	# Venele dalei olkhon sunt verticale; fata taiata cu firul diamantat are dungi ORIZONTALE.
+	"carrara_marble": true,
 }
 
 ## Clasele care se aplica TRIPLANAR in spatiul lumii, pe assets cu UV-uri
@@ -1511,6 +1535,8 @@ const CLASS_TRIPLANAR_SCALE := {
 	# Granitul Serengeti: aceeasi dala ca olkhon_marble, aceeasi scara —
 	# world triplanar, ca stratele sa curga din bolovan in kopje.
 	"granite": 0.09,
+	# Marmura Carrara: dala rotita (dungi orizontale), o repetitie la ~8 m.
+	"carrara_marble": 0.12,
 	# Zidaria taiata: 0.5 = o repetitie la 2 m, adica SCARA REALA a sursei.
 	# Blocurile din fotografie ies atunci la 20-40 cm, randurile din geometrie
 	# sunt la 0.9 m: doua scari de zidarie care se sprijina una pe alta, exact

@@ -193,6 +193,17 @@ enum Kind {
 ## §4, acelasi leac ca la bolovanul de zapada din avalanche_hazard.gd).
 @export var model_classes: Dictionary = {}
 
+@export_group("Excavator")
+
+## Doar pentru EXCAVATOR: AI-ul da cu zarul la apropiere (o data per trecere,
+## deterministic pe seed): 1-3 ia banda libera, 4-6 trece pe sub brat si risca
+## bratul ca jucatorul. NU citeste faza bratului. Implicit fals = bit-identic.
+@export var excavator_ai_dice: bool = false
+
+## Doar pentru EXCAVATOR: lovitura NU ejecteaza soferul (ghiont + strivire
+## scurta, ca camionul). Implicit fals = bit-identic.
+@export var excavator_soft_contact: bool = false
+
 @export_group("Rostogolire")
 
 ## Doar pentru ROCKFALL, cand nodul are un copil Path3D cu traseul.
@@ -251,6 +262,10 @@ func model_spec() -> Dictionary:
 		spec["tri_class"] = tri_class
 	if not model_classes.is_empty():
 		spec["classes"] = model_classes
+	if excavator_ai_dice:
+		spec["excavator_ai_dice"] = true
+	if excavator_soft_contact:
+		spec["excavator_soft_contact"] = true
 	# Modul de miscare se trimite DOAR cand nu e implicitul. Cheia lipsa
 	# inseamna „ce zice pista", exact ca la model — un `motion: 0` trimis mereu
 	# ar fi stins o eventuala declaratie de tema, in loc s-o lase sa vorbeasca.

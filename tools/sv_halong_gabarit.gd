@@ -8,7 +8,7 @@
 ##
 ##   godot --headless --path . res://tools/SvHalongGabarit.tscn
 extends Node
-const PREFIXE := ["TurnCalcar", "Veg", "Dig", "Parapet", "CasaPlutitoare",
+const PREFIXE := ["TurnCalcar", "TurnB", "BolovanB", "Veg", "Dig", "Parapet", "CasaPlutitoare",
 	"TarcPeste", "BarcaMica", "PavilionBelvedere", "RastelPlase"]
 ## `Insulita` NU intra: insulitele fixe de sub ponton sunt PRIN DEFINITIE pe
 ## traseu — ele poarta capetele tablierului. Contractul lor e pragul vertical

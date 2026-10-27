@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CarData" format=3 uid="uid://chtvtnqldaqm5"]
 
 [ext_resource type="Script" uid="uid://b3bsh85drrmvy" path="res://scenes/cars/car_data.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/models/vehicles/open_taxi.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/vehicles/taxi_v2.glb" id="2"]
 [ext_resource type="PackedScene" path="res://assets/models/vehicles/toy_driver_green.glb" id="3"]
 
 [resource]
@@ -22,4 +22,4 @@ body_width = 2.05
 palette_model = true
 open_cockpit = true
 driver_model = ExtResource("3")
-driver_seat = Vector3(-0.42, 0.72, 0.15)
+driver_seat = Vector3(-0.42, 0.64, 0.15)

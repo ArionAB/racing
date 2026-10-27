@@ -87,6 +87,20 @@ const LOOK_HEIGHT: float = 0.40
 
 const MAX_SHAKE: float = 0.35 # metri de offset la trauma maxima
 
+# --- lovitura directionala (kick) ---
+## Frecventa proprie a arcului care aduce camera inapoi dupa o lovitura
+## (rad/s). Cu amortizarea de mai jos, 20 rad/s se linisteste sub 5% in ~0.3 s:
+## lovitura trebuie sa fie un ghiont, nu un leganat.
+@export var kick_omega: float = 20.0
+## Raportul de amortizare (1.0 = critic). Putin sub 1: o singura revenire
+## usoara dincolo de zero (~5%) da senzatia de elasticitate, apoi se aseaza.
+@export var kick_damping: float = 0.7
+## Plafonul deplasarii acumulate (m). Mai multe lovituri la rand se aduna,
+## dar camera nu pleaca niciodata din cadru.
+@export var kick_limit: float = 1.4
+## Plafonul inclinarii acumulate din lovituri (grade).
+@export var kick_roll_limit_deg: float = 4.0
+
 ## Cat de departe deseneaza camera.
 ##
 ## Implicitul Godot e 4000m — desenam de zece ori mai departe decat se vede.
@@ -109,6 +123,11 @@ const NEAR_PLANE: float = 0.3
 ## privitul spre vectorul de viteza era singurul mod de a nu conduce orb intr-un
 ## drift; acum e doar o rasucire in plus peste una pe care ochiul o are gratis.
 const AIM_VEL_WEIGHT: float = 0.40
+## Cat URCA ponderea de mai sus la drift plin (dozat cu Car.drift_blend). In
+## drift caroseria e intoarsa fata de drum cu 20-30°; privind mai mult spre
+## directia de mers vezi iesirea din viraj, iar masina iti apare din trei
+## sferturi, cu flancul la vedere — exact silueta care vinde alunecarea.
+const DRIFT_AIM_EXTRA: float = 0.25
 ## Cat de mult se muta POZITIA rig-ului spre acelasi vector. Mic intentionat:
 ## ancorarea pe viteza leagana rig-ul in drift si pierzi botul din cadru. Cu
 ## bratul mai lung (12.5 m), acelasi unghi inseamna mai multi metri de leganare,
@@ -164,6 +183,15 @@ const GROUP := &"chase_camera"
 
 var target: Car
 var trauma: float = 0.0
+## Starea arcului de lovitura: deplasare (in lume, orizontala) si inclinare.
+## Se aplica pe camera copil, NU pe rig: rig-ului i se rescrie pozitia si
+## privirea in fiecare cadru, deci o deplasare pusa acolo ar fi mancata de lerp.
+var _kick_pos: Vector3 = Vector3.ZERO
+var _kick_vel: Vector3 = Vector3.ZERO
+var _kick_roll: float = 0.0
+var _kick_roll_vel: float = 0.0
+## Inclinarea de viraj (netezita), separata de cea de lovitura.
+var _lean_roll: float = 0.0
 
 var _cam: Camera3D
 var _aim_dir: Vector3 = Vector3.FORWARD
@@ -410,6 +438,59 @@ func add_trauma(amount: float) -> void:
 	trauma = minf(trauma + amount, 1.0)
 
 
+## Lovitura directionala: camera e IMPINSA in sensul in care e impinsa masina
+## (`dir` = normala impactului, dinspre obstacol spre masina), cu `meters`
+## amplitudine si un pic de ruliu in aceeasi parte. Revine prin arc (vezi
+## `kick_omega`). Spre deosebire de `add_trauma`, nu e zgomot: jucatorul vede
+## DIN ce parte a venit lovitura.
+func kick(dir: Vector3, meters: float, roll_deg: float = 0.0) -> void:
+	var d := Vector3(dir.x, 0.0, dir.z)
+	if d.length_squared() < 1e-6 or meters <= 0.0:
+		return
+	d = d.normalized()
+	_kick_pos += d * meters
+	if _kick_pos.length() > kick_limit:
+		_kick_pos = _kick_pos.normalized() * kick_limit
+	# Ruliu: in partea in care e impinsa camera (dreapta ecranului => ruliu
+	# negativ pe z, ca la o capatana impinsa spre dreapta).
+	var right := global_transform.basis.x
+	right.y = 0.0
+	if right.length_squared() > 1e-6:
+		var side := d.dot(right.normalized())
+		_kick_roll -= side * deg_to_rad(roll_deg)
+		var lim := deg_to_rad(kick_roll_limit_deg)
+		_kick_roll = clampf(_kick_roll, -lim, lim)
+
+
+## Cat din ultima lovitura a ramas neasezat (0 = camera linistita). Pentru sonde.
+func kick_offset() -> Vector3:
+	return _kick_pos
+
+
+func kick_roll_rad() -> float:
+	return _kick_roll
+
+
+## Un pas al arcului amortizat (Euler semi-implicit). Chemat in fiecare cadru
+## de fizica; cu hit-stop `delta` e minuscul si arcul pur si simplu ingheata
+## odata cu lumea, apoi isi continua revenirea.
+func _step_kick(delta: float) -> void:
+	var w := kick_omega
+	var c := 2.0 * kick_damping * w
+	_kick_vel += (-_kick_pos * (w * w) - _kick_vel * c) * delta
+	_kick_pos += _kick_vel * delta
+	_kick_roll_vel += (-_kick_roll * (w * w) - _kick_roll_vel * c) * delta
+	_kick_roll += _kick_roll_vel * delta
+	if _kick_pos.length_squared() < 1e-6 and _kick_vel.length_squared() < 1e-6:
+		_kick_pos = Vector3.ZERO
+		_kick_vel = Vector3.ZERO
+	if absf(_kick_roll) < 1e-5 and absf(_kick_roll_vel) < 1e-5:
+		_kick_roll = 0.0
+		_kick_roll_vel = 0.0
+	# Deplasarea e in lume; camera copil o primeste in spatiul rig-ului.
+	_cam.position = global_transform.basis.inverse() * _kick_pos
+
+
 ## Panta camerei in pozitia de repaus. Ridicarea la viteza o pastreaza (vezi
 ## `_physics_process`), deci asta e UNGHIUL camerei, nu doar o valoare de start.
 func _pitch_tan() -> float:
@@ -462,7 +543,9 @@ func _physics_process(delta: float) -> void:
 		vel_dir = vel.normalized()
 
 	var anchor := fwd.slerp(vel_dir, anchor_vel_weight).normalized()
-	var aim := fwd.slerp(vel_dir, aim_vel_weight).normalized()
+	var aim_w := clampf(
+		aim_vel_weight + DRIFT_AIM_EXTRA * target.drift_blend, 0.0, 1.0)
+	var aim := fwd.slerp(vel_dir, aim_w).normalized()
 	_aim_dir = _aim_dir.slerp(aim, 1.0 - exp(-aim_smooth * delta)).normalized()
 
 	var speed_frac := clampf(target.horizontal_speed() / target.max_speed,
@@ -497,7 +580,9 @@ func _physics_process(delta: float) -> void:
 	var lateral := target.global_transform.basis.x.dot(vel)
 	var roll := clampf(-lateral / ROLL_FULL_LATERAL, -1.0, 1.0) \
 		* deg_to_rad(roll_max_deg)
-	_cam.rotation.z = lerpf(_cam.rotation.z, roll, 1.0 - exp(-6.0 * delta))
+	_lean_roll = lerpf(_lean_roll, roll, 1.0 - exp(-6.0 * delta))
+	_step_kick(delta)
+	_cam.rotation.z = _lean_roll + _kick_roll
 
 	# Shake in spatiul ecranului (h/v offset pe camera, nu pe rig).
 	trauma = maxf(trauma - 1.8 * delta, 0.0)
@@ -511,6 +596,10 @@ func snap_behind() -> void:
 		return
 	_focus_left = 0.0
 	_focus = null
+	_kick_pos = Vector3.ZERO
+	_kick_vel = Vector3.ZERO
+	_kick_roll = 0.0
+	_kick_roll_vel = 0.0
 	var fwd := -target.global_transform.basis.z
 	fwd.y = 0.0
 	fwd = fwd.normalized()

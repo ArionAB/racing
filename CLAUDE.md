@@ -54,23 +54,45 @@ pur plus haosul fizic, nu proiectilele.
 - Presetări de mașini ✔ (de mutat în resurse `CarData`)
 - Turbo Ignition: bară care se încarcă din mers (accelerat de drift), arsă
   la cerere cu butonul TURBO ✔
+- Drift cu feel de arcade ✔ (oct 2026, feedback de la volan: „frâna de mână
+  doar frânează și înclină mașina"). Trei schimbări în `_apply_driving`, toate
+  cu export vars: **maparea CTR** — în drift volanul alege *raza*, nu sensul
+  (`drift_arc_wide`…`drift_arc_tight`), iar contravolanul prinde spatele cu
+  inerție (`drift_yaw_inertia`), nu-l întoarce; **unghiul rămâne și la viteză
+  de cursă** (`drift_arc_tight_top`, nu zero); **impulsul pierdut prin
+  frecarea laterală se întoarce** scalat cu gazul (`drift_momentum_keep`):
+  cu gaz driftul ține viteza (powerslide), cu ▼ frânezi derapând. De aceea
+  **DRIFT implică gaz** (vezi touch, mai jos): altfel, pe un singur deget,
+  fiecare drift era o frânare.
+  Juice: rotație vizuală în plus pe model, tresărire la ieșire + ciripit,
+  scrâșnet după alunecare, bara de turbo pulsează. Garda: `ProbeDriftEntry`
+  (4 contracte, fiecare cu sabotaj care pică).
 - Countdown + rocket start (ține TURBO în ultima secundă), poziții live ✔
 - Touch controls: **numai butoane** — ◀ ▶ viraj (stânga-jos), ▲ gaz și ▼
   frână/marșarier (dreapta-jos, ca o pereche de pedale), TURBO/DRIFT pe rândul
   de deasupra lor ✔ — validat pe iPhone (oct 2026, trei iterații).
   - **Jumătățile de ecran au fost scoase.** Virau mașina la orice atingere pe
     display (deget sprijinit, palmă), și se simțea ca și cum jocul trage de
-    volan singur. Toleranța e marginea de +18 px din jurul discului.
+    volan singur. Zona de viraj e discul ◀ ▶ plus o **margine de 24 px**
+    (`STEER_TOUCH_PAD`, revenită la cererea dezvoltatorului: degetul care cade
+    lângă buton trebuie să vireze), iar discurile stau la 40 px unul de altul.
+    Un deget pus în altă parte rămâne mort chiar dacă alunecă peste săgeți.
   - **Auto-accelerate scos** (orice deget = gaz): cu el, butonul ▲ n-ar fi
     făcut nimic. Accelerația e explicită.
   - **▼ e și frână și marșarier**, nu două butoane: în fizică e aceeași
     comandă — `throttle < 0` frânează cât mergi >2 m/s și devine marșarier sub
     `reverse_speed` (vezi `_apply_driving`). Frâna bate gazul dacă ții ambele.
-  - **TURBO implică gaz** (altfel arzi bara stând pe loc), dar **DRIFT nu**:
-    cât timp îl implica, nu puteai frâna în drift, deci nu puteai strânge o
-    curbă luată prea repede — exact manevra pentru care există frâna de mână.
-    Acum alegi: ▲+DRIFT derapezi accelerând, DRIFT singur intri pe inerție,
-    ▼+DRIFT frânezi derapând.
+  - **TURBO implică gaz** (altfel arzi bara stând pe loc) și **DRIFT implică
+    gaz** (26 oct 2026, după trei schimbări de sens: #552 gaz → #559 fără →
+    #578 frână → gaz). Motivul e același: toate butoanele de acțiune stau sub
+    degetul mare drept, deci nu poți ține ▲ și DRIFT odată. Iar din #579
+    driftul ține viteza *doar cu gaz*: măsurat la 85% din vmax după 1 s de
+    drift, cu gaz păstrezi 99%, pe inerție 27%, cu frână 9% și mașina întoarsă
+    cu spatele — adică pe telefon fiecare drift era o oprire de urgență, în
+    timp ce AI-ul (care drifteză cu gaz) părea că n-are nicio problemă.
+    Virajul strâns vine din arcul CTR, nu din frânare; cine vrea să frâneze
+    derapând ține ▼ (frâna bate gazul). La fel pe tastatură, ca testul de pe
+    desktop să simtă ce simte telefonul.
   - Garda `ProbeTouchZones` verifică maparea atingere→comandă (inclusiv că
     zonele goale nu mai dau nimic), că discurile apăsate împreună nu se ating,
     și matricea de accelerație — măsurată pe `PlayerController` real.
@@ -125,7 +147,10 @@ res://
   3 / Beach Buggy Racing: fără contact cu solul, orice obiect pare lipit peste
   fundal. Rămâne tot o singură lumină, doar că aruncă. Comutatorul e
   `Track.theme_shadows`; **e prima setare de stins dacă testul pe device nu ține
-  60fps.**
+  60fps.** Pe telefon, nivelul Normal rulează **profilul ieftin** (oct 2026,
+  măsurat pe iPhone 12 Pro: costul umbrei e în pixelii care o *primesc*, nu în
+  cascade): o cascadă, plafon 55 m, filtru hard — `GameState.SHADOW_DISTANCE_MOBILE`,
+  `Track.shadow_distance_cap`. Nivelul Maxim păstrează reglajele temei.
 - **Texturi: materiale de clasă, nu per asset.** Culoarea vine dintr-un atlas
   de paletă, detaliul de suprafață dintr-un strat triplanar partajat
   (`Palette.world_material()`). Un asset nu aduce NICIODATĂ texturi proprii —

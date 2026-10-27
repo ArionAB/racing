@@ -1669,6 +1669,51 @@ golfului G, adică un hazard mobil cu masă — nu pe belvedere (0,47–0,55) ș
 banda de maree. Zona 0,95–1,00 la 15 m/s pe toate seed-urile e fundul golfului G
 cu raze de fillet 34–40 m: viraj strâns legitim, 0 pereți.
 
+### 7.7 Al doilea drum la volan (17 oct 2026): blocuri gri, zid nevăzut, grota
+
+Trei observații ale dezvoltatorului, de pe iPhone (build-ul de pe `main` după
+#565), și ce s-a găsit măsurând fiecare:
+
+**„Blocuri gri urâte, unele chiar în mijlocul pistei".** Erau șirurile de fundal
+(`halong_horizon.glb`, `KarstRow_A/B/C`, 148–304 m lungime la scara 1, până la
+~470 m cu scara inelului). `_build_horizon` cerea degajarea doar în **pivot**,
+deci jumătatea unui șir rotit la zar trecea peste drum. Măsurat cu
+`tools/probe_horizon_clear.gd --track=22` (vertecșii, nu pivotul): **3 șiruri la
+1–2 m de axa șoselei, 10 din 12 sub 100 m**. Reparat cu modul `horizon_footprint`
+(doar pe tema `halong`): șirul se alege înaintea căutării, stă tangent la circuit
+și degajarea se cere de la toată amprenta; baza stă pe oglinda apei, nu pe
+fundul mării plus `dy` fix (care ridica în aer șirurile căzute pe uscat).
+Rezultat: **9/12 șiruri, toate ≥ 124 m**; cele 3 care nu încap la degajare
+reală lipsesc — cer gol pe un arc e mai puțin rău decât un perete la margine.
+Forma s-a refăcut și ea în Blender: prismele hexagonale cu capac plat (citeau
+beton) sunt acum turnuri cu profil de carst și capac verde, din vocabularul
+turnurilor din kit.
+
+**„Nu poți ieși de pe drum".** Tema moștenea de la Okinawa gardul exterior
+INVIZIBIL (`wall_visible` false) — **1 446 m** de zid nevăzut, practic toată
+bucla. Acum `walls_water_only`: gardul rămâne doar unde dincolo de margine e apă
+în primii 15 m (**275 m**, frac 0,387–0,453 și 0,782–0,849); parapetul pontoanelor
+nu se atinge. ProbeRace pe 6 seed-uri: 23 de repuneri înainte, 21 după, în
+aceleași două puncte (0,777 și 0,86–0,88) — neutru pentru AI. Ceasul de offroad
+de 3 s (#497) rămâne, e regula globală.
+
+**Grota — „s-o facem în Blender".** Nu poarta (`grotto_portal`, eșuată de patru
+ori: o gaură cere perete, memoria `gaura-in-perete-cere-perete`), ci **piesa
+întreagă**: `structures/grotto_massif.glb` (`tools/blender/build_halong_grotto.py`),
+masiv de carst ~87 × 72 m, 46 m înalt, cu tunelul de ~85 m săpat prin boolean
+pe **axa reală** a șoselei (`tools/dump_road_span.gd` → `tools/data/
+halong_grotto_axis.json`). Gabarit: pereți la ±8,6 m (carosabil 12 m), boltă la
+11 m = `CameraGrota.ceiling`, guri evazate, stalactite doar pe buză, ≥ 9,5 m.
+Coliziune `mesh`, `camera_blocker`. Au ieșit 25 de piese ale POI C îngropate în
+masiv (digul 19–27, bolovanii de dig, vegetație, un stack) și `TerrainPeak
+TurnGrota`. Gărzi: `probe_solid` (care NU scana Track22 — limita era 22),
+`ProbeCameraSolid` 0 incidente, `ProbeBuried` OK, materiale 16/38.
+
+**Găsit pe drum, nereparat:** `ProbeLaneClear` e roșu și pe `main` (2 probe
+blocate de joncă la 0,790 față de linia de bază 1) — nu vine din schimbările de
+aici; inelul portocaliu de la nișa turnurilor (slotul 2 sub soarele de oră de
+aur).
+
 ## 8. Lecții aplicate anticipat, și ce a fost respins
 
 - **Patru axe, scrise înaintea traseului** (§2.0). Consecința derivată din

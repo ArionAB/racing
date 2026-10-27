@@ -247,6 +247,11 @@ signal headlights_on()
 ## O masina a fost lovita frontal de autocar (ghiontul BusHazard.shoved,
 ## retransmis cu semnatura simpla pentru sonde/HUD).
 signal bus_hit(car: Car)
+## O masina a trecut linia semaforului (spre tunel) CAT era rosu. Emis o data
+## per trecere (provocarea „RED RUNNER" din cariera, brief §4.3); nu schimba
+## nimic in joc. Hazardul nu avea detectie de trecere: `_detect_red_runs`
+## e cea mai mica varianta (linia = originea nodului, +Z local spre tunel).
+signal passed_on_red(car: Car)
 
 ## Bonus de verde DOAR la primul ciclu (s) — runda 2 (coordonator), bug gasit
 ## la verdict: TOATE ejectarile masurate pe 4 seed-uri (0, 3, 6, 14) cad in
@@ -289,9 +294,20 @@ var _was_red: bool = false
 var _headlight_fired: bool = false
 ## Vezi doc la `first_green_bonus_s`.
 var _startup_grace_left: float = 0.0
+## Z-ul local anterior al fiecarei masini (pentru a prinde trecerea liniei) si
+## masinile deja numarate in rosul curent (golit la verde).
+var _prev_z: Dictionary = {}
+var _red_counted: Dictionary = {}
+## Cat de lat e „podul" liniei (m): o masina pe alt drum, in paralel, nu conteaza.
+const RED_RUN_HALF_WIDTH_M: float = 12.0
 
 
 func _ready() -> void:
+	if tube_only:
+		# Vezi `tube_only`: fara ceas, autocar, lampa sau grup AI. `lamp` ramane null si nimic
+		# din cod nu-l atinge cat timp `_physics_process` e stins.
+		set_physics_process(false)
+		return
 	add_to_group(AI_GROUP)
 	_startup_grace_left = first_green_bonus_s
 	if lamp == null:
@@ -378,7 +394,25 @@ func _build_bus() -> void:
 ## tavan, movila, portaluri, zona de camera — o construieste [Track] din
 ## aceleasi numere (`Track._build_tunnels`), ca sa nu existe doua copii ale
 ## lor. Nu intra in nimic din ce face lampa sau autocarul.
-@export_range(4.0, 12.0, 0.1) var tunnel_ceiling: float = 6.5
+##
+## Plafonul de 12 m s-a ridicat la 24 (Carrara, galeria Ravaccione: spirala de 9-10 m si sala
+## de 16-18 m, brief §2 POI D): `Track._build_tunnel` nu are propria limita, doar exportul.
+@export_range(4.0, 24.0, 0.1) var tunnel_ceiling: float = 6.5
+
+## DOAR TUB (Carrara, galeria D si tunelul Marmifera H): nodul ramane DECLARATIA tunelului
+## (linia de oprire = originea lui, lungimea, semilatimea, tavanul — le citeste
+## `Track._collect_tunnels`, care construieste tubul), dar nu aduce nimic din semafor: nici
+## autocar, nici lampa, nici intrarea in grupul AI (`AI_GROUP`), nici ceas. Un tunel fara
+## gimmick-ul Fiordland (autocarul din fata) nu are de ce sa plateasca un `BusHazard` ascuns si
+## o lampa care nu se aprinde niciodata, iar AI-ul nu trebuie sa-l creada un semnal.
+## Implicit false: Fiordland / Transfagarasan raman bit-identice (dovada: ProbeTunelHash).
+@export var tube_only: bool = false
+
+## Clasa triplanara a peretilor, tavanului si movilei tubului (`Palette.CLASS_TEXTURES`).
+## Implicit `wet_gneiss` (rece, inchisa — tunelurile Fiordland / Transfagarasan); Carrara pune
+## `carrara_marble` (marmura calda), fiindca un tub de gneis ud in muntele de marmura ar fi
+## opusul brief-ului. Citita de `Track._collect_tunnels`.
+@export var tube_class: String = "wet_gneiss"
 
 ## Pe ce banda a tunelului merge autocarul, fata de AXA drumului (m, semn
 ## local X — acelasi semn ca `TrackRoute.side_at` / `lateral_distance`:
@@ -632,6 +666,7 @@ func ai_decision_point() -> Vector3:
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	_detect_red_runs()
 	if _startup_grace_left > 0.0:
 		_startup_grace_left -= delta
 		# Re-pinam ascunderea autocarului la ACELASI target in fiecare tick de
@@ -662,6 +697,28 @@ func _physics_process(delta: float) -> void:
 		if _clock >= transit_start - headlight_lead_s:
 			_headlight_fired = true
 			headlights_on.emit()
+
+
+## Trecerea liniei de oprire (z local 0, dinspre -Z spre +Z, in lat. podului)
+## cat timp `is_red()`. Un singur pas de fizica nu poate sari mai mult de
+## ~1 m, deci un salt mare de z (repunere) nu e trecere. Masinile vin din
+## grupul `cars`; filtrul pe jucator il face consumatorul.
+func _detect_red_runs() -> void:
+	if not is_inside_tree():
+		return
+	var red := is_red()
+	if not red:
+		_red_counted.clear()
+	for node in get_tree().get_nodes_in_group(&"cars"):
+		var car := node as Car
+		if car == null:
+			continue
+		var local := to_local(car.global_position)
+		var prev_z: float = _prev_z.get(car, local.z)
+		_prev_z[car] = local.z
+		if red and prev_z < 0.0 and local.z >= 0.0 and prev_z > -4.0 				and absf(local.x) <= RED_RUN_HALF_WIDTH_M and not _red_counted.has(car):
+			_red_counted[car] = true
+			passed_on_red.emit(car)
 
 
 func _on_bus_shoved(_bus_ref: BusHazard, car: Car) -> void:

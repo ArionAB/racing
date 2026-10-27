@@ -1,4 +1,4 @@
-# Modul Carieră — „Turul lumii” — v0.10 (brief de design; pasul 0 retunat, pașii 1, 2, 4a și 5 construiți)
+# Modul Carieră — „Turul lumii” — v0.12 (brief de design; pasul 0 retunat, pașii 1, 2, 4a, 4b și 5 construiți; punctaj în loc de ștampile după sesiunea la volan)
 
 > Cerut de dezvoltator pe 16 oct 2026, în perioada de polish pentru release:
 > „pornind de la modul Adventure din Crash Team Racing, ce idei ai pentru
@@ -101,15 +101,57 @@
 > fantoma „dev”, selecția „a ta / a rivalului”. Cu patru PR-uri de cod în
 > stivă (#556 → #561 → #563, #564) și brief-ul în #557, construcția se
 > oprește până la merge și la verdictul la volan.
+>
+> **v0.11 (17 oct 2026), pasul 4b construit + corecție de stare.** 4b: regulile
+> `AT_LEAST` / `EVERY_LAP` / `CLEAN_LAP`, semnale noi doar `signal` + `emit`
+> în semafor (`passed_on_red`, cu detecția minimă de trecere a liniei),
+> telecabină (`boarded`), gheață (`plate_broken`), zona spiralei prin
+> `CameraZone.contains_player()`, scurtătura prin `Car.route`; cele 5
+> provocări: RED RUNNER (Transfăgărășan, 3 treceri pe roșu, zero autocar),
+> CLEAN SPIRAL (Cappadocia, perete ≥ 12 m/s în `StancaSpirala`), ALL ABOARD
+> (Chongqing), THIN ICE (Baikal), OLD ROAD (Fiordland). `ProbeChallenge` la
+> 186 de verificări. **Toate cele 12 piste din carieră au provocare.**
+> *Corecția:* PR-urile stivuite #561, #563, #564 au fost merge-uite **în
+> ramurile lor de bază, nu în main** (GitHub merge-uiește în `base`; bazele
+> n-au fost șterse) — main are doar pasul 1 (#556). Restul (2, 4a, 4b, 5) e
+> într-un singur PR pe main, **#569**, pe o ramură cu main-ul și toate
+> ramurile stivei aduse în ea, verificată cu import. Pragul 12 m/s, cifra „3
+> treceri pe roșu” (AI-ul trece de ~10 ori în 150 s în modul LANE) și
+> contractele în joc rămân de validat la volan. Două sonde vechi
+> (`ProbeIceField` punctul 5, `ProbeFiordSemafor`) pică identic pe main — nu
+> sunt în `verify_local.sh`; issue separat.
+>
+> **v0.12 (25 oct 2026), verdictul la volan + pivot la puncte.** Dezvoltatorul
+> a condus cariera și a găsit trei lucruri: (1) **medalia nu plătea** — orice
+> loc din top 3 dădea aceeași ștampilă, deci locul 1 nu merita efortul; (2)
+> contratimpul **n-are ținte** și nu există o metodă de a le calcula; (3)
+> provocarea ca **probă separată** e o cursă în plus pe aceeași pistă.
+> Deciziile lui: **puncte în loc de ștampile** — locul 1/2/3 = **3/2/1**;
+> **provocarea e bonus +1 în cursa normală** (exemplul lui: Serengeti, locul 1
+> = 3 puncte + 1 pentru niciun animal lovit); modul CHALLENGE dispare de pe
+> foaie. Contratimpul rămâne **fără puncte** până la o decizie — propunerea
+> e în §4.2: un singur timp PAR per pistă, *măsurat* de AI-ul onest sub
+> regulile contratimpului, nu calculat de mână. Construit pe ramura
+> `cariera/puncte` (PR #576): `Career.points()` / `track_points()` / `max_points()`
+> (12 × 4 = 48), `finish_active(loc, provocare)` întoarce punctele cursei,
+> `challenge_to_track()` înlocuiește modul CHALLENGE, `CareerWorld.
+> points_to_unlock` (lumea 2 la **8**, lumea 3 la **18** — provizorii), foaia
+> pistei cu RACE „1ST PLACE · 4 / 4 PTS” + eticheta BONUS sub el, rezultatele
+> „1ST PLACE +3 · CHALLENGE +1 = 4 PTS”, HUD „CHALLENGE +1: …”. Salvarea
+> `career.cfg` e **neschimbată** (v1): progresul existent se recitește ca
+> puncte, zero migrare. Gărzi: `ProbeCareer` 188 și `ProbeChallenge` 217
+> verificări, cu sabotaj (pragul lumii 2 mutat la 6 → 4 picări). Nerulat la
+> volan: fluxul cursă → „+3 · CHALLENGE +1” → raft.
 
 ## 0. Într-o propoziție
 
 Mașinuța face turul lumii: un raft cu diorame (trei lumi de câte 4 piste,
-gruparea e date, nu cod), fiecare pistă jucată de trei ori cu alt obiectiv
-(cursă, contratimp cu rezervor sigilat, provocarea gimmick-ului), fiecare
-lume cu un rival 1 contra 1 a cărui mașină o câștigi, iar progresul se numără
-în ștampile pe pașaport — orice medalie e o ștampilă, deci niciun obiectiv nu
-blochează singur drumul mai departe.
+gruparea e date, nu cod), fiecare pistă cu o cursă care **plătește după loc**
+(3/2/1 puncte) și un **bonus** pentru provocarea gimmick-ului reușită în
+aceeași cursă (+1), plus un contratimp cu rezervor sigilat și fantomă;
+fiecare lume cu un rival 1 contra 1 a cărui mașină o câștigi, iar progresul
+se numără în **puncte** pe pașaport — lumea următoare se deschide la un prag
+de puncte, deci niciun obiectiv nu blochează singur drumul mai departe.
 
 ## 1. Ce ține un jucător într-o carieră (și ce luăm din CTR)
 
@@ -117,13 +159,14 @@ Trei resorturi, toate verificate pe CTR (1999) și pe refacerea Nitro-Fueled
 (2019):
 
 1. **Următorul lucru e vizibil și la 3 minute distanță.** Pe raft se vede
-   mereu ce urmează și ce lipsește („mai ai 2 ștampile”). CTR face asta bine:
+   mereu ce urmează și ce lipsește („mai ai 2 puncte”). CTR face asta bine:
    ușile închise din hub se văd de la început.
 2. **Poți alege cum ajungi acolo.** CTR face asta prost: Oxide și boșii sunt
    ziduri obligatorii, iar Nitro-Fueled a adăugat un grind de monede. La noi:
-   lumea următoare se deschide pe ștampile, iar ștampilele vin din oricare
-   din cele trei probe — jucătorul blocat pe o cursă își ia ștampila din
-   contratimp sau din provocare.
+   lumea următoare se deschide pe puncte, iar punctele vin din loc **și**
+   din bonusul provocării, pe oricare pistă a lumii — jucătorul blocat pe
+   locul 4 pe o pistă își ia punctele de pe alta sau din bonus (bonusul nu
+   cere podium).
 3. **Recompensa e identitate, nu putere.** Mașină nouă cu alt stil, abțibild
    pe caroserie, pagină de pașaport — niciodată +5% viteză. E principiul 4
    din `CLAUDE.md` și verdictul §3.5 din docul de monetizare.
@@ -318,7 +361,7 @@ dar o scoate la lumină la fiecare rival și la fiecare țintă de contratimp
 **Raftul.** Ecranul carierei e un raft cu cutii de jucării — câte una per
 lume, în stilul dioramei din `docs/style_bible.md`. Cutia deschisă arată cele
 3–4 piste ale lumii ca `TrackCard`-uri cu medaliile lor; cutia sigilată arată
-numele lumii, silueta și „mai ai N ștampile”. E un ecran 2D (Control), nu un
+numele lumii, silueta și „mai ai N puncte”. E un ecran 2D (Control), nu un
 hub 3D condus.
 
 **Lumile** (decizia dezvoltatorului, 16 oct 2026): 12 piste în trei cutii
@@ -338,13 +381,13 @@ câștigată (§8).
 resursă `CareerConfig` (`resources/career/career_config.tres`) ține lista de
 lumi; fiecare lume e o resursă `CareerWorld` cu `id`, `display_name`,
 `tracks: Array[StringName]` (id-uri de pistă, §10), `rival` (§5), `free:
-bool`, `stamps_to_unlock`. Regulile care decurg de aici:
+bool`, `points_to_unlock`. Regulile care decurg de aici:
 
 - **a regrupa = a edita un `.tres`**, zero cod; o pistă poate fi mutată, o
   lume adăugată sau scoasă, Ha Long introdus mai târziu;
 - **progresul se ține pe pistă** (medalii, provocare, timp) și pe `id` de
   rival, **niciodată pe lume** — deci o regrupare nu pierde nimic și nu
-  cere migrare; ștampilele se recalculează din ce e pe piste (§10);
+  cere migrare; punctele se recalculează din ce e pe piste (§10);
 - lumea gratuită e cea cu `free = true`, nu „prima din listă”; garda
   `ProbeCareer` verifică că exact una e gratuită și că lumile nu împart
   piste;
@@ -352,25 +395,39 @@ bool`, `stamps_to_unlock`. Regulile care decurg de aici:
   rapidă (Ha Long azi) — nu e eroare, e starea normală a unei piste noi până
   o pui într-o cutie.
 
-**Pașaportul.** Fiecare medalie, de orice culoare, pe orice probă, plus
-fiecare rival învins, e o **ștampilă**. Lumea următoare se deschide la un
-prag de ștampile cumulat (`stamps_to_unlock` pe fiecare `CareerWorld`;
-propunere de pornire, de tunat la volan: lumea 2 la 6, lumea 3 la 14;
-maximul e 12 piste × 3 probe + 3 rivali + rivalul final = 40). Pragurile
-sunt alese ca o lume să se poată deschide **fără niciun aur și fără rivalul**
-lumii curente — rivalul dă mașina, nu cheia. Pașaportul e și ecranul de
-progres: ștampile, medalii pe culori, mașini, abțibilduri, procent.
+**Pașaportul** *(v0.12)*. Fiecare pistă dă până la **4 puncte**: locul final
+în cursă (1/2/3 = **3/2/1**, sub podium 0) plus **+1** pentru provocarea
+gimmick-ului reușită în aceeași cursă. Fiecare componentă își ține maximul
+separat (locul cel mai bun, bifa provocării), deci bonusul se poate vâna și
+într-o cursă ulterioară, de pe orice loc. Rivalul învins = **3 puncte** (cât
+o victorie; implicit, până la pasul 3). Lumea următoare se deschide la un
+prag de puncte cumulat (`points_to_unlock` pe fiecare `CareerWorld`;
+provizoriu, de tunat la volan: lumea 2 la **8** din cele 16 posibile în lumea
+1, lumea 3 la **18** din 32; maximul e 12 × 4 = **48** + rivalii). Pragurile
+sunt alese ca o lume să se poată deschide **fără niciun loc 1** (patru locuri
+2 = 8) **și fără rivalul** lumii curente — rivalul dă mașina, nu cheia.
+Pașaportul e și ecranul de progres: puncte, medalii pe culori, mașini,
+abțibilduri, procent.
+
+*Istoric:* v0.1–v0.11 numărau „ștampile” — +1 plat pentru orice medalie, pe
+oricare din trei probe (36 maxim; lumea 2 la 6, lumea 3 la 14). La volan s-a
+văzut că așa locul 1 nu merita efortul: bronzul și aurul valorau la fel.
 
 ## 4. Cele trei probe pe fiecare pistă
 
-Aceeași pistă, trei abilități diferite; 12 piste devin 36 de obiective fără
-conținut nou.
+Aceeași pistă, trei abilități diferite — dar **două alergări**, nu trei
+(v0.12): cursa poartă și provocarea gimmick-ului, contratimpul e separat.
+12 piste devin 48 de puncte fără conținut nou.
 
 ### 4.1 Cursa
 
-Cursa de azi: 3 tururi, 5 AI. Medalie după locul final: **aur** = 1,
-**argint** = 2, **bronz** = 3. Nimic sub 3, dar cursa se poate repeta
-oricând. Nu se atinge nimic din feel.
+Cursa de azi: 3 tururi, 5 AI. **Puncte după locul final: 1 = 3, 2 = 2, 3 =
+1**, nimic sub 3 (v0.12; până atunci medalie plată). Aur/argint/bronz rămân
+culoarea discului de pe card, dar valoarea lor **e** punctajul. Cursa se
+poate repeta oricând; se păstrează locul cel mai bun. Nu se atinge nimic din
+feel. Provocarea gimmick-ului (§4.3) rulează **în aceeași cursă** și adaugă
++1; pe foaie, RACE arată „1ST PLACE · 4 / 4 PTS”, iar sub el eticheta BONUS
+cu titlul și indiciul provocării.
 
 ### 4.2 Contratimpul cu rezervor sigilat
 
@@ -390,14 +447,39 @@ sigilat. Pe ecranul de rezultate: timpul tău, cele trei ținte, care a căzut.
 Recordurile existente pe tur și pe cursă rămân cum sunt (cursa normală);
 contratimpul își ține recordul separat, fiindcă regula e alta.
 
+**Starea (25 oct 2026):** țintele sunt 0 pe toate pistele, iar dezvoltatorul
+a spus la volan că nu știe cum să le calculeze — metoda „la volan” de mai sus
+cere 12 alergări curate și îmbătrânește la primul retuning de fizică.
+Contratimpul **nu dă puncte** până la o decizie; rămâne mod liber, cu
+fantomă.
+
+**Propunere (de decis, §12 punctul 9):** nu se *calculează*, se **măsoară**,
+cu pilotul onest pe care-l avem deja — AI-ul. Un singur timp **PAR** per
+pistă, nu trei: `ProbeRace` cu mașina jucătorului condusă de `AIController`,
+`ai_count = 0` și `turbo_recharge = false` — exact regulile contratimpului,
+deci obiecția „AI-ul nu conduce cu rezervor sigilat” dispare dacă îl punem să
+conducă așa — minimul pe 2 seed-uri (memoria `proberace-nedeterminism`),
+scris de o unealtă în `TrackInfo` (`tools/tt_targets.sh`, pe modelul
+`car_balance.sh`; ~75 s reale per pistă). Bate PAR-ul = **+1 punct** (al
+cincilea al pistei), ca bonusul provocării; sub PAR nimic, fără gradații —
+gradațiile fără plată erau exact problema de la cursă. Fantoma rămâne
+motivația reală a contratimpului. PAR-ul se regenerează la orice retuning,
+fără mână, și e explicabil jucătorului: „bate pilotul casei”. Mașina: PAR-ul
+se măsoară cu cea mai rapidă mașină pe pista aia (ecartul garajului e 3–6%,
+§2.1), deci cu o mașină lentă e mai greu — asta e identitate, nu nedreptate.
+
 ### 4.3 Provocarea gimmick-ului
 
 Fiecare pistă are gimmick-ul ei, deci provocarea e **unică per pistă și e
 scrisă cu numele lui** (memoria `garda-cu-numele-gimmickului`: contractul ca
 cifră). Se joacă în cursă normală, cu adversari; condiția se verifică de un
-`ChallengeTracker` care ascultă semnale (§2) și numără. Reușita dă o
-ștampilă și un **abțibild** care se lipește pe mașina jucătorului — cosmetic
-câștigat, nu cumpărat, vizibil în garaj și în cursă.
+`ChallengeTracker` care ascultă semnale (§2) și numără. Reușita dă **+1
+punct la cursa aia** (v0.12: nu mai e probă separată — tracker-ul pornește în
+fiecare cursă de carieră a pistei, HUD-ul arată „CHALLENGE +1: …” și „CHALLENGE
+FAILED” la primul eveniment; nu și în contratimp, unde jumătate din contracte
+— trafic, autobuz — n-ar avea ce măsura) și un **abțibild** care se lipește pe
+mașina jucătorului — cosmetic câștigat, nu cumpărat, vizibil în garaj și în
+cursă.
 
 Propuneri, cu ce semnal există deja și ce trebuie adăugat. Cele 8 cu semnal
 existent se fac primele.
@@ -420,8 +502,8 @@ existent se fac primele.
 
 Regula de scriere: provocarea cere **ceva ce AI-ul nu face** (ocolește
 riscul, sau îl ia conștient), ca jucătorul să aibă de ce să joace altfel
-decât în cursă. Nu cere locul 1 în plus — ar fi dublă condiție, a doua
-ștampilă ar costa cât două.
+decât în cursă. Nu cere locul 1 în plus: bonusul se dă și de pe locul 6 —
+altfel ar fi dublă condiție și al patrulea punct ar costa cât două.
 
 ## 5. Rivalii
 
@@ -477,7 +559,7 @@ numerele:
   pe prima dreaptă și proba s-a terminat;
 - rivalul pornește din pole, jucătorul din spate.
 
-Rivalul apare pe raft de la 2 ștampile din lumea lui, ca să nu fie prima
+Rivalul apare pe raft de la 4 puncte din lumea lui (două podiumuri), ca să nu fie prima
 cursă pe care o vezi acolo; rivalul final apare când cei trei sunt învinși.
 
 Garda: `ProbeRace` cu rivalul contra AI-ului de grilă pe aceeași mașină —
@@ -522,11 +604,11 @@ server.
 
 Cu modelul recomandat (gratuit de încercat, o plată pentru tot), **cutia cu
 `free = true` (Lumea 1: Monument Valley, Kyoto, Cappadocia, Serengeti) e
-gratis și conține toată bucla**: 4 piste × 3 probe, un rival (Vex), o
+gratis și conține toată bucla**: 4 piste × (cursă cu bonus + contratimp), un rival (Vex), o
 mașină câștigată (Poliția), abțibilduri. Plata e a doua cutie sigilată, pe
 care o vezi de la început. Jucătorul plătește după ce a simțit
 tot, nu ca să afle ce e. Dacă modelul ales e premium pur, cutiile se deschid
-toate pe ștampile și nimic nu se schimbă în cod în afara gardei de
+toate pe puncte și nimic nu se schimbă în cod în afara gardei de
 deblocare.
 
 Nimic din carieră nu introduce monedă, consumabile sau upgrade-uri —
@@ -534,15 +616,17 @@ abțibildurile sunt singurul „inventar” și se câștigă doar prin joc.
 
 ## 9. Ce evită designul (lecțiile CTR)
 
-- **Zidul unic** (Oxide, boșii obligatorii) → ștampile cumulate din trei
-  probe; rivalul dă mașina, nu cheia.
+- **Zidul unic** (Oxide, boșii obligatorii) → puncte cumulate din loc și
+  bonus, pe orice pistă a lumii; rivalul dă mașina, nu cheia.
 - **Grind-ul de monede** (Nitro-Fueled) → fără monedă; docul de monetizare
   §3.5 și §3.9 o respinge deja.
 - **Upgrade-uri de statistici ca progresie** → nu: ar strica AI-ul onest
   (ținta de viteză e `car.max_speed`) și identitatea mașinilor.
 - **Hub-ul condus** → raft 2D; fun-ul e pe pistă, nu între piste.
-- **Două condiții pe o ștampilă** (CTR cere literele *și* locul 1) → o
-  condiție per probă.
+- **Două condiții pe un punct** (CTR cere literele *și* locul 1) → locul
+  și provocarea plătesc separat, în aceeași cursă.
+- **Gradații fără plată** (lecția noastră, 25 oct 2026: aur = bronz = o
+  ștampilă) → locul mai bun valorează mai mult; nicio medalie fără puncte.
 
 ## 10. Date și persistență
 
@@ -565,12 +649,14 @@ o capcană. Cheile pe un **`id` stabil** nou în `TrackInfo` (`okinawa`,
 Cheile sunt **pe pistă și pe rival**, nu pe lume: o regrupare (§3) mută
 pistele între cutii fără să atingă fișierul. Singura cheie pe lume e cupa
 (`[cup:<world_id>]`), care chiar aparține grupării — dacă lumea dispare,
-cupa ei devine orfană și se ignoră, nu strică nimic. Ștampilele nu se
-stochează: se **calculează** din medalii + rivali, ca să nu poată diverge.
+cupa ei devine orfană și se ignoră, nu strică nimic. Punctele nu se
+stochează: se **calculează** din medalii + provocări + rivali, ca să nu poată
+diverge (de aceea pivotul v0.12 n-a cerut migrare: aceleași câmpuri, altă
+sumă).
 `CareerState` e un autoload nou (`scripts/autoload/career.gd`), nu încă un
 bloc în `GameState` (care are deja garaj, campionat, touch, setări,
 recorduri); citește `CareerConfig` la pornire și expune `worlds()`,
-`stamps()`, `is_unlocked(world)`.
+`points()`, `is_world_unlocked(world)`.
 
 ## 11. Planul de implementare, în PR-uri mici
 
@@ -613,7 +699,8 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    un PR cu sonda + unul cu retuning-ul, A/B pe aceeași matrice (memoria
    `proberace-nedeterminism`: distribuții, nu o rulare).
 
-1. **Date + raft + ștampile + gating — CONSTRUIT (PR #556, 17 oct).**
+1. **Date + raft + ștampile + gating — CONSTRUIT (PR #556, 17 oct; ștampilele
+   au devenit puncte în v0.12, vezi pasul 2b).**
    Starea exactă, abaterile și ce a rămas: `pas1_raft_stare.md`. Notă: „Okinawa”
    din lumea 2 e `okinawa` = Track20 (cea nouă); `okinawa_manual` (Track08),
    Dunele și Alpii rămân în afara lumilor, ca Ha Long. Fluxul în joc (medalie →
@@ -629,7 +716,7 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    `free`, nicio pistă în două lumi, fiecare `id` de pistă există în
    `TRACK_SCENES`, `rival_track` e în lumea lui; și **regruparea**: mută o
    pistă între două lumi în config-ul de test și verifică că medaliile ei
-   și ștampilele totale nu se schimbă.
+   și punctele totale nu se schimbă.
 2. **Medalii pe cursă + contratimpul cu rezervor sigilat — CONSTRUIT (PR
    #561, 17 oct).** Starea: `pas2_contratimp_stare.md`. Țintele din
    `TrackInfo` sunt 0 pe toate pistele până le pui la volan. Planul inițial:
@@ -640,15 +727,33 @@ fac cu fereastră (memoria `snapshot-nu-merge-headless`).
    dezvoltatorul la volan**, PR-ul le lasă pe 0 = „fără țintă încă”. *Gardă:*
    `ProbeRace --ai=0 --sealed-turbo` confirmă că bara nu crește; ecranul de
    rezultate arată medalia corectă pentru timpi sintetici.
+2b. **Puncte în loc de ștampile + provocarea ca bonus în cursă — CONSTRUIT
+   (PR #576, ramura `cariera/puncte`, 25 oct).** Decizia dezvoltatorului după sesiunea
+   la volan (v0.12). `Career.points()` = Σ pe pistele din lumi
+   (`race_medal` + 1 dacă `challenge`) + 3 per rival; `max_points()` = 48;
+   `finish_active(loc, provocare_reușită)` salvează amândouă și întoarce
+   punctele cursei; `challenge_to_track()` dă provocarea de urmărit (doar în
+   RACE); `Mode.CHALLENGE`, `is_challenge()`, `finish_challenge()` scoase.
+   `CareerWorld.stamps_to_unlock` → `points_to_unlock` (8 / 18). Foaia: RACE
+   „1ST PLACE · 4 / 4 PTS”, eticheta BONUS (titlu + indiciu, DONE când e
+   bifată), fără buton CHALLENGE și fără „SOON”; rezultate „1ST PLACE +3 ·
+   CHALLENGE +1 = 4 PTS”; HUD „CHALLENGE +1: …”. Salvarea neschimbată.
+   *Gardă:* `ProbeCareer` (188: lacătele la 8/18, bronz→aur = +2,
+   contratimpul 0, pista din afara lumilor 0, rivalul +3, foaia cu 3 butoane +
+   BONUS) și `ProbeChallenge` (217: bonusul fără podium, nu în contratimp, nu
+   pe pista fără provocare; foaia pe toate cele 12 piste). Rămân la volan:
+   fluxul în joc și pragurile 8 / 18.
 3. **Rivalii** — butonul de calitate pe `AIController` (`line_quality`,
    `line_offset` 0, praguri de turbo), comportamentul de apărare, modul 1v1
    din pole, deblocarea mașinii în garaj (garajul citește `Career.unlocked`,
    mașinile blocate se văd gri cu „învinge-l pe Luna”). *Gardă:* `ProbeRace`
    rival vs AI de grilă, aceeași mașină, pe distribuție (§5).
-4. **Provocările de gimmick — 4a CONSTRUIT (PR #563, 17 oct)**: tracker-ul
-   generic „zero evenimente” + cele 7 piste cu semnal existent; starea în
-   `pas4a_provocari_stare.md`. 4b (cele 5 piste cu semnal nou, reguli pe tur
-   / pe zonă) rămâne. Planul inițial: `ChallengeTracker` + contractul per pistă,
+4. **Provocările de gimmick — 4a și 4b CONSTRUITE (#563, #569, 17 oct)**:
+   tracker-ul generic cu patru reguli, toate cele 12 piste cu provocare;
+   starea în `pas4a_provocari_stare.md` și `pas4b_provocari_stare.md`.
+   Rămân abțibildurile (cosmeticul pe mașină) și validarea la volan a
+   pragurilor. **v0.12:** provocarea nu mai e probă separată, e bonus +1 în
+   cursa normală (pasul 2b). Planul inițial: `ChallengeTracker` + contractul per pistă,
    **câte un PR per pistă**, întâi cele 8 cu semnal existent (Okinawa,
    Stromboli, Kyoto, Jodhpur, Serengeti, Monument Valley, Machu Picchu,
    Transfăgărășan), apoi cele 4 din carieră care cer semnal nou (Chongqing,
@@ -693,10 +798,11 @@ Rămase:
 3. **Rivalii** (§5): perechile Vex/Poliția, Luna/Pompierii, Robo/Autobuzul,
    Nyx/Muscle final — propunere; pistele lor le alege matricea **după pasul
    0**. Robo cere comportamentul de apărare, fără el altă mașină în lumea 3.
-4. **Pragurile de ștampile** (6 / 14) și **țintele de contratimp** —
-   amândouă se pun la volan, nu din calcul.
-5. **Vocabularul** în joc: „ștampile / pașaport / cutii” sau alt vocabular
-   de jucărie („abțibilduri pe cutie”, „raftul”).
+4. **Pragurile de puncte** (8 / 18, provizorii din v0.12) — se pun la volan,
+   nu din calcul; țintele de contratimp au punctul lor (9).
+5. **Vocabularul** în joc: „puncte / pașaport / cutii” sau alt vocabular
+   de jucărie („abțibilduri pe cutie”, „raftul”). Ștampilele au ieșit din
+   mecanică (v0.12); pot rămâne ca grafică a pașaportului.
 6. **Sens invers** — intră sau nu în v1 după ce `ProbeRace` îl rulează pe
    fiecare pistă.
 7. **Ha Long** — când intră în carieră și în ce lume (a patra cutie, sau a
@@ -704,6 +810,16 @@ Rămase:
 8. **Turul fals după repunere** (§2.1): issue separat, de verificat înainte
    ca recordurile de carieră să conteze — o repunere peste linie nu are
    voie să numere un tur.
+
+9. **Contratimpul: PAR măsurat de AI** (§4.2) — un singur timp per pistă,
+   măsurat de `AIController` sub regulile contratimpului, +1 punct când îl
+   bați. De acceptat sau respins; până atunci contratimpul nu dă puncte.
+10. **Rivalul = 3 puncte** (`Career.RIVAL_POINTS`, implicit „cât o
+    victorie”) — de confirmat când se construiesc rivalii (pasul 3).
+
+**Decise (25 oct 2026, la volan):** puncte în loc de ștampile — locul 1/2/3 =
+3/2/1; provocarea gimmick-ului e bonus +1 în cursa normală, nu probă
+separată; contratimpul fără puncte până la decizia de la punctul 9.
 
 **Decise (17 oct 2026):** ce cumpără masa = (a) hazarde scalate cu masa +
 (b) trece prin turmă/trafic/bolovani fără să piardă viteza; bara de turbo

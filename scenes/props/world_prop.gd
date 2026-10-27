@@ -79,6 +79,9 @@ const COLLISION_META := "coliziune"
 const PROP_COLLISION := {
 	# --- se trece PRIN ele ------------------------------------------------
 	"ice_grotto_arch": "mesh",       # tunelul scurt de la POI D
+	# Ha Long: masivul cu grota marina, tunelul de ~85 m sapat pe axa soselei
+	# (tools/blender/build_halong_grotto.py). Hull-ul ar umple tunelul.
+	"grotto_massif": "mesh",
 	"railway_tunnel_portal": "mesh", # galeria + portalul, drumul intra in ele
 	"viaduct_arch": "mesh",          # soseaua trece pe DEDESUBT la 0.66-0.72
 	"start_gate_logs": "mesh",       # poarta de start, peste linia de plecare
@@ -2222,6 +2225,14 @@ const _TF_HOUSE := {"House_Stone": _TF_STONE, "House_Plaster": _TF_PLASTER,
 const _TF_WALL := {"Wall_Stone": _TF_STONE}
 const _TF_BEECH_TREE := {"Beech_Leaves": _TF_BEECH}
 const _TF_JNEAPAN_BUSH := {"Jneapan_Needles": _TF_JNEAPAN}
+## Carrara (Track23, brief §4): coroana castanului ia clasa `tf_beech` (ca pe Transfagarasan),
+## iar conurile de moloz stau pe marmura la baza peretilor; marmura pistei in sine nu trece pe
+## aici (fetele pistei sunt cod, nu GLB-uri).
+const CLASSES_CARRARA := {
+	"beech_tree_a": {"Beech_Leaves": _TF_BEECH},
+	"beech_tree_b": {"Beech_Leaves": _TF_BEECH},
+	"scree_cone": {"Scree_Schist": Palette.TRI_PREFIX + "carrara_marble"},
+}
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
 	"schist_outcrop_c": _TF_OUTCROP,
@@ -2307,6 +2318,13 @@ const CLASSES_BY_THEME := {
 		"chasm_rock": {
 			"Rock_001": Palette.TRI_PREFIX + "wet_gneiss",
 		},
+		# Kit v2 (oct 2026): `gneiss_block` e corpul lui `chasm_rock` FARA
+		# marmite — piatra generica (peretii de gneis, malul, gramezile de
+		# grohotis, ~490 de instante). Cu marmite, sirurile de bolovani citeau
+		# fantani de piatra; marmitele raman doar pe `chasm_rock` (POI D/F).
+		"gneiss_block": {
+			"Gneiss_Block": Palette.TRI_PREFIX + "wet_gneiss",
+		},
 		# Lotul STANCA UDA: moss_boulder_b, DUPA ruptura (_split_theme_accents,
 		# SPLIT_MODELS_BY_THEME) — corpul, curatat de capacul de muschi, ramane
 		# numit "Moss_Boulder_B" (ruptura nu redenumeste nodul original, doar
@@ -2345,6 +2363,8 @@ const CLASSES_BY_THEME := {
 	"okinawa": CLASSES_OKINAWA,
 	# Transfagarasan (Track21): vezi `CLASSES_TRANSFAGARASAN`.
 	"transfagarasan": CLASSES_TRANSFAGARASAN,
+	# Carrara (Track23, brief carrara.md): castanul din fag, conul de moloz pe marmura.
+	"carrara": CLASSES_CARRARA,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la
@@ -2538,7 +2558,19 @@ const SLOT_REMAP_BY_GROUP := {
 ## (tools/gen_decor_mp_f.gd), care ignora complet sloturile de atlas — dar
 ## piesele plasate individual (WorldProp, ex. `--vitrina`) tot citesc atlasul,
 ## si o remapare globala pe model le-ar fi schimbat si pe Track15.
+const SLOTS_CARRARA := {
+	"kamaz_truck": {7: Palette.RUST_METAL, 22: Palette.DRY_VEGETATION},
+	"beech_tree_a": {29: Palette.VOLCANIC_BLACK},
+	"beech_tree_b": {29: Palette.VOLCANIC_BLACK},
+	# Excavatorul: PAINTED_METAL 11 (albastrui) -> galben-spalacit 13; rugina 10 ramane.
+	"rusted_digger": {11: Palette.DRY_VEGETATION},
+}
 const SLOT_REMAP_BY_THEME := {
+	# Carrara (Track23): camionul din Baikal pe galben-spalacit + rugina.
+	# Cabina KERB_RED 7 -> RUST_METAL 10; panoul de acoperis si farurile FOAM_WHITE 22 ->
+	# DRY_VEGETATION 13 (FOAM_WHITE nu are voie pe nicio suprafata a pistei, brief §4).
+	# Trunchiul fagului MARBLE_GREY 29 -> VOLCANIC_BLACK 20, ca pe Transfagarasan.
+	"carrara": SLOTS_CARRARA,
 	# Transfagarasan (Track21), tabla acoperisurilor. Brief: tabla argintie, dar slotul
 	# ASPHALT_EDGE 6 (#696765) e gri de asfalt, iar o clasa o poate doar INTUNECA. Deci slotul
 	# se muta pe MARBLE_GREY 29 (#B8B4AC), fara material nou. `cascada` are tabla pe

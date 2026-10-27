@@ -261,6 +261,13 @@ var theme_shadows: bool = true
 ## scriptul e @tool: in editor autoload-ul nu exista, iar 1 (normal) e exact
 ## ce trebuie sa vada editorul. 0 = economic: fara umbre dinamice, fara glow.
 static var gfx_tier: int = 1
+## PROFILUL IEFTIN DE UMBRA al telefonului (GameState.apply_gfx_tier, 26 oct
+## 2026, vezi GameState.SHADOW_DISTANCE_MOBILE): plafon peste `shadow_distance`
+## al temei (0 = fara plafon) si o singura cascada in loc de doua. Statice din
+## acelasi motiv ca gfx_tier; implicitele sunt „tema decide", deci editorul
+## si desktopul nu se schimba.
+static var shadow_distance_cap: float = 0.0
+static var shadow_single_split: bool = false
 
 ## Bloom subtil (style_bible §8). Singurul efect fullscreen din joc — un lant de
 ## downsample pe cadru, deci cel mai scump item de fill rate pe care il rulam.
@@ -1715,6 +1722,12 @@ static func themes() -> Dictionary:
 			"shadow_opacity": 0.65,
 			"shadow_distance": 90.0,
 			"shadow_blur": 1.0,
+			# GLOW STINS (26 oct 2026): Kyoto n-are niciun material emisiv (nicio
+			# lampa, lumina e fixa de zi) si glow_hdr_threshold e 1.1, deci
+			# lantul de downsample nu lumina nimic — era cost pur de fill rate
+			# pe telefon, unde padurea cadea la 30 fps. Pistele cu lampi
+			# (Jodhpur, Chongqing) il pastreaza.
+			"glow": false,
 			# SOLUL: pamant de padure cu muschi, olive cald. Sub decor se vede
 			# pe versant; covorul de frunze din D vine din perechea a doua de
 			# texturi (`terrain_alt_class` + `ground_zones`, mecanismul
@@ -4169,22 +4182,40 @@ static func themes() -> Dictionary:
 		"water_glint": 0.55,
 		# Calcarul de carst: cenusiu-deschis in soare (#A8A49A). Clasa e cea a
 		# calcarului Ryukyu (aceeasi roca), cu tenta proprie — brief §4.
-		"ground_tint": Color.html("8E8C84"),
-		# Soare de dimineata tarzie din ESE (~110 grade, 30 de grade elevatie),
-		# alb-cald (#FFF0D8). Busola 180 - y = 110 => y = 70. Azimutul se
-		# remasoara pe traseul real (memoria azimutul-soarelui-fata-de-drum).
-		"sun_rotation_deg": Vector3(-30, 70, 0),
-		"sun_color": Color(1.0, 0.94, 0.85),
-		"sun_energy": 1.1,
-		# Ambient de dimineata umeda (#C8D8DC la 0.32): umbrele din grota si de
-		# sub surplombe trebuie sa iasa VERZI-ALBASTRE de la lumina reflectata
-		# de apa, nu negre (memoria umbra-fara-culoare-e-negru-mort).
-		"ambient_color": Color.html("C8D8DC"),
-		"ambient_energy": 0.32,
-		# Aer umed de golf: albastru-pal spalacit sus (#6E9AC4), alb-cald laptos
-		# la orizont. NU albastrul adanc de altitudine (Alpi, Transfagarasan).
-		"sky_top": Color.html("6E9AC4"),
-		"sky_horizon": Color.html("E8E2D6"),
+		# NISIP AURIU (cerinta dezvoltatorului, oct 2026: "it's a tropical place
+		# i want a tropical sunny golden hour vibe").
+		#
+		# Cifra e MASURATA pe plaja din diorama acceptata
+		# (`halong_diorama_v1.jpg`, 377 de esantioane filtrate pe hue 25-60,
+		# saturatie 0,20-0,55, valoare > 0,60): **#E5D2A0, hue 43, saturatie
+		# 0,30**. Vechiul `8E8C84` avea saturatie 0,03 — gri neutru, exact ce se
+		# vedea in joc ca "nisip gri uniform" si ce a numit si constructorul
+		# POI-ului D ca diferenta fata de bara.
+		"ground_tint": Color.html("E5D2A0"),
+		# ORA DE AUR: soare JOS din ESE (~110 grade busola, 18 grade elevatie).
+		# Elevatia coboara de la 30 la 18 — asta e ce face ora de aur: unghi mic,
+		# umbre lungi, lumina care intra pe sub coroane in loc sa cada vertical.
+		# AZIMUTUL RAMANE 70 (busola 180 - y = 110): el e verificat de garda de
+		# azimut din generator, care masoara reperele in cadru — nu se schimba
+		# fara sa se reruleze ea (memoria azimutul-soarelui-fata-de-drum).
+		"sun_rotation_deg": Vector3(-18, 70, 0),
+		# Chihlimbar cald, nu alb-cald: hue ~38, cat sa imbrace nisipul si
+		# calcarul fara sa faca totul portocaliu.
+		"sun_color": Color(1.0, 0.89, 0.72),
+		# 1,35 in loc de 1,1: la 18 grade lumina strabate mai multa atmosfera,
+		# deci sursa trebuie mai tare ca scena sa nu iasa intunecata.
+		"sun_energy": 1.35,
+		# Ambient de ora de aur (#D6CBB4 la 0.34): gri-CALD care bate spre
+		# chihlimbar, nu albastru-gri rece. Umbrele raman citibile si colorate
+		# (memoria umbra-fara-culoare-e-negru-mort) — doar ca pe o plaja
+		# tropicala la apus ele sunt calde, nu albastre.
+		"ambient_color": Color.html("D6CBB4"),
+		"ambient_energy": 0.34,
+		# Cer de ora de aur: albastru ceva mai adanc sus (#5E92C8), CHIHLIMBAR
+		# la orizont (#F2DCB4). Gradientul asta e ce deosebeste ora de aur de
+		# amiaza — nu intensitatea soarelui, ci cerul cald jos.
+		"sky_top": Color.html("5E92C8"),
+		"sky_horizon": Color.html("F2DCB4"),
 		# Ceata 120 -> 340: aici e MECANICA DE COMPOZITIE, nu doar atmosfera —
 		# e ce separa turnurile in straturi de adancime pe belvedere (brief §2.0,
 		# memoria scara-de-adancime-are-gol). Reperele stau sub fog_end, iar
@@ -4195,7 +4226,11 @@ static func themes() -> Dictionary:
 		# Ceata se masoara HSV fata de APA, nu fata de ground_tint (memoria
 		# ceata-in-familia-solului, adaptata: pe o pista jumatate-apa, familia
 		# solului e apa). Alb-cald cu nuanta verzuie (#D8DCD4).
-		"fog": Color.html("D8DCD4"),
+		# Ceata CALDA (#E8D9BC): la ora de aur aerul peste apa imprastie lumina
+		# joasa, deci departarea se spala in auriu, nu in gri. Intervalul
+		# 120 -> 340 ramane neatins: el e mecanica de compozitie, verificata de
+		# garzile de mai sus.
+		"fog": Color.html("E8D9BC"),
 		# Okinawa a coborat `fog_sky_affect` ca sa-si arate cerul; Ha Long ramane
 		# pe implicitul 1.0, cerul lui de golf cetos E ceata.
 		"fog_sky_affect": 1.0,
@@ -4220,21 +4255,29 @@ static func themes() -> Dictionary:
 		# (MARBLE_GREY 29 calcar, FOAM_WHITE 22 pentru planul palid), iar o
 		# clasa triplanara le-ar sterge.
 		"horizon_class": "",
+		# Sirurile de turnuri au 148-304 m lungime: degajarea se cere de la
+		# toata amprenta, iar sirul sta tangent la circuit (vezi ramura
+		# `horizon_footprint` din `_build_horizon`). Inainte, trei siruri
+		# treceau la 1-2 m de axa soselei — „blocurile gri din mijlocul
+		# pistei" raportate la volan (oct 2026). Garda e
+		# `tools/probe_horizon_clear.gd --track=22`.
+		"horizon_footprint": true,
+		# Gardul invizibil mostenit de la Okinawa ramane DOAR langa apa (dig,
+		# podet, mal). Pe nisip marginea asfaltului e libera — vezi
+		# `walls_water_only` in `_build_walls`.
+		"walls_water_only": true,
 		"horizon_rings": [
-			# `dy` RIDICA siluetele, si pe pista asta e obligatoriu.
-			# `_build_horizon` le ingroapa 4 m in TEREN; pe uscat e corect, dar
-			# aici inelele cad pe GOLF, unde "terenul" e fundul marii. Masurat
-			# cu `tools/sv_halong_oriz.gd`: toate 12 stateau la -23..-25 m, pe
-			# un fund de ~-20, deci din piese de 40-50 m se vedeau ~20 — de aia
-			# citeau ca niste blocuri palide si scunde, nu ca turnuri de carst.
-			# Cu dy = +21 baza ajunge pe la -3 (intra in apa, cum trebuie) si
-			# varful la 37-47 m.
+			# Baza se aseaza pe OGLINDA APEI (sau pe teren, daca e mai sus) in
+			# modul amprenta, deci `dy` nu mai compenseaza fundul marii. Vechiul
+			# +21 era calculat pentru un fund de ~-24 (`tools/sv_halong_oriz.gd`)
+			# si ridica in aer sirurile cazute pe uscat. Cu +1, baza intra 3 m
+			# in apa si varful ajunge la ~37-60 m peste ea.
 			{"near": 260.0, "far": 340.0, "count": 4, "scale": 1.0,
-				"clear": 120.0, "dy": 21.0, "picks": ["KarstRow_A"]},
+				"clear": 120.0, "dy": 1.0, "picks": ["KarstRow_A"]},
 			{"near": 340.0, "far": 460.0, "count": 4, "scale": 1.15,
-				"clear": 150.0, "dy": 21.0, "picks": ["KarstRow_B"]},
+				"clear": 150.0, "dy": 1.0, "picks": ["KarstRow_B"]},
 			{"near": 460.0, "far": 620.0, "count": 4, "scale": 1.3,
-				"clear": 180.0, "dy": 21.0, "picks": ["KarstRow_C"]},
+				"clear": 180.0, "dy": 1.0, "picks": ["KarstRow_C"]},
 		],
 		# Scatterul si props-urile Okinawa se sting: vocabularul (fukugi, pin
 		# ryukyu, pandanus) e japonez. Decorul se pune de mana, pe POI, ca la
@@ -4259,6 +4302,86 @@ static func themes() -> Dictionary:
 		"decor": "none",
 	}, true)
 	_themes_cache["halong"] = hl
+	# CARRARA (Track23, docs/track_briefs/carrara.md §4, §7 pasii 0-2). Paleta CALDA asumata:
+	# ora aurie, marmura crem-aurie la soare, praf bej pe tot ce e orizontal. Valorile sunt
+	# varianta "A2" a testului de mostra (cer albastru Mediterana, orizont alb-cald, ceata
+	# neutra, `dune_scale` 0), singura care a trecut: A calda cu cer piersica a fost citita
+	# "desert-canion", B (reala) "poate gheata". Sablonul de pornire e `monumentvalley`
+	# (soare jos, ambient rece, umbre pornite), fara relief propriu: decorul se pune de mana,
+	# deci `decor` "none", fara pereti/borduri/faleze.
+	#
+	# Tentele (`ground_tint`, `scarp_tint`) sunt calculate INVERS din lumina scenei, ca in
+	# `fiordland`: calibrate pe captura de joc (--gamecam), nu din socoteala. Socoteala pura nu
+	# iese: pe orizontala, la soare de 22 grade (sin = 0.375), lumina directa e doar 0.47 din cea
+	# de pe o fata verticala, iar tenta de vertex color nu poate depasi 1.0.
+	_themes_cache["carrara"] = {
+		"sun_color": Color.html("FFD2A0"),
+		"sun_energy": 1.25,
+		"exposure": 1.0,
+		# Elevatia 22 grade; azimutul e PROVIZORIU (se remasoara pe traseul real, memoria
+		# `azimutul-soarelui-fata-de-drum`) si se suprascrie pe pista cu `custom_sun_rotation_deg`.
+		"sun_rotation_deg": Vector3(-22, 30, 0),
+		# Ambient: MAI PUTIN SATURAT decat #A9BEDD x 0.38 al mostrei. Fetele in umbra primesc doar
+		# lumina asta; cu tenta cian a clasei iesea albastru-cian saturat (H 196, S 0.25). Acum
+		# fata in umbra iese gri-albastrui (H 208, S 0.07), raport soare/ambient 1.25/0.42 = 3.0.
+		# Masurat pe cuburi de marmura in lumina reala (vezi palette.gd, CLASS_TINT carrara_marble).
+		"ambient_color": Color.html("BCCCE8"),
+		"ambient_energy": 0.42,
+		"sky_top": Color.html("2A5BA6"),
+		"sky_horizon": Color.html("EDE6D8"),
+		"sky_cover_alpha": 0.0,
+		"fog": Color.html("E2DCD0"),
+		"fog_sky_affect": 0.10,
+		"fog_depth": true,
+		"fog_begin": 150.0,
+		"fog_end": 300.0,
+		"fog_curve": 1.4,
+		"fog_max": 0.62,
+		"shadows": true,
+		"shadow_opacity": 0.65,
+		"shadow_distance": 120.0,
+		"shadow_blur": 1.0,
+		# O cariera nu sta intr-un camp de dune: campul departat ramane PLAT la cota medie a
+		# soselei (TrackSideSampler.dune_scale; 1.0 = comportamentul vechi, bit-identic).
+		"dune_scale": 0.0,
+		# SOLUL: pietris / piatra compactata, nu nisip ondulat. Perechea a doua de texturi a terenului
+		# (`terrain_alt_class`) poarta dala `surface_gravel`, iar `terrain_alt_all` o pune pe TOT
+		# terenul (inclusiv pe fetele de pe panta, unde altfel ramanea nisipul).
+		"terrain_alt_class": "carrara_gravel",
+		"terrain_alt_all": true,
+		"terrain_alt_keep_macro": true,
+		# Fetele de gradon (triunghiuri abrupte, vezi `custom_bench_patches`): marmura, nu pietrisul,
+		# cu dungi orizontale de fir diamantat la ~0.7 m (cota lumii in shader).
+		"terrain_sand_class": "carrara_marble",
+		"terrain_face_marble": true,
+		"face_stripe_amp": 0.14,
+		"face_ao": 0.62,
+		"face_side_tiling_k": 0.4,
+		# Flancurile abrupte (massiful, taluzuri) iau mai devreme proiectia laterala: la 4.0 o panta de
+		# 45 de grade ramanea 90% planara si textura iesea intinsa pe verticala.
+		"terrain_tri_power": 1.8,
+		"face_stripe_period": 0.7,
+		"ground_tint": Color(0.94, 0.97, 0.79),
+		"hill_color": Color(0.60, 0.56, 0.47),
+		"dirt_road_tint": Color(0.83, 0.84, 0.83),
+		# Fetele de gradon sunt marmura (clasa `carrara_marble`): tenta lor = tenta clasei (neutra,
+		# vezi Palette.CLASS_TINT), nu un bej cald — dala ridicata e deja crem, iar soarele de 22 de
+		# grade o incalzeste. Pragul urca la 52 de grade ca doar fetele (>70) sa fie marmura, nu si
+		# flancurile masivului.
+		"scarp_tint": Color(0.73, 0.765, 0.80),
+		"scarp_slope_deg": 52.0,
+		"scarp_fade_deg": 10.0,
+		"dust_color": null, # null = derivat din ground_tint (umerii soselei, praful din roti)
+		"loose_grip": 7.0,
+		"horizon_model": "",
+		"walls": false,
+		"kerbs": false,
+		"cliffs": false,
+		"decor": "none",
+		"props": "forest",
+		"hazard_model": "",
+		"water": false,
+	}
 	return _themes_cache
 
 
@@ -4972,6 +5095,17 @@ func _flyoff_fracs() -> Array[float]:
 func _ravines() -> Array[Vector4]:
 	return []
 
+## Rapele cu racord STRANS (indici in [method _ravines]): vezi [member TrackSideSampler.tight_ravines].
+func _tight_ravines() -> Array[int]:
+	return []
+
+## PLATOURILE DE BANC declarate (vezi [member TrackSideSampler.bench_patches]): niste
+## dreptunghiuri plate care inlocuiesc campul de teren si, cu margine dura intre ele, fac
+## o treapta verticala (fata unui gradon). Fiecare: Dictionary cu `x0`, `x1`, `z0`, `z1`
+## (lume), `lvl` (PackedVector2Array de (x, cota soselei)) si `soft` (Vector4).
+func _bench_patches() -> Array:
+	return []
+
 ## Care dintre rapele de mai sus sunt CORNISE: buza lipita de asfalt, in loc de
 ## valea lina de sub o creasta de fly-off. Indici in lista intoarsa de
 ## [method _ravines].
@@ -5582,8 +5716,12 @@ func rebuild() -> void:
 	# Abrupturile (TerrainBluff), tot dupa constructie: goale pe orice pista
 	# fara noduri, deci ground_y nu se schimba acolo.
 	_sampler.bluffs = _node_bluffs()
+	# Platourile de banc (treptele de gradon): goale pe orice pista fara ele.
+	_sampler.bench_patches = _bench_patches()
+	_sampler.tight_ravines = _tight_ravines()
 	# Tarmul: implicit lenes (atol), dar temele vulcanice il pot strange.
 	# Vezi TrackSideSampler.shore_in / shore_out.
+	_sampler.dune_scale = float(theme_flag("dune_scale", 1.0))
 	_sampler.shore_in = float(theme_flag("shore_band_in",
 		TrackSideSampler.SHORE_BAND_IN))
 	_sampler.shore_out = float(theme_flag("shore_band_out",
@@ -5975,7 +6113,13 @@ func _build_environment() -> void:
 		# metru. `blend_splits` topeste granita dintre felii, altfel s-ar
 		# vedea o linie unde rezolutia se schimba. Cheia `shadow_splits` a
 		# temei poate cere 1 (vechea purtare) daca o pista anume o cere.
-		if int(theme_flag("shadow_splits", 2)) >= 2:
+		#
+		# ...si profilul ieftin al telefonului (`shadow_single_split`, oct
+		# 2026) cere tot 1: pe iPhone 12 Pro costul umbrei s-a dovedit a fi in
+		# pixelii care o primesc, iar banda de amestec dintre felii citeste
+		# AMBELE harti. Cu plafonul de distanta de mai jos, o cascada pe 2048
+		# da 37 texeli/m — mai mult decat felia departata de azi.
+		if int(theme_flag("shadow_splits", 2)) >= 2 and not shadow_single_split:
 			sun.directional_shadow_mode = \
 				DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 			sun.directional_shadow_split_1 = float(
@@ -5990,8 +6134,13 @@ func _build_environment() -> void:
 		# umeri si randul apropiat al turmei — stau la 8-45 m, deci 110 ii
 		# acopera; cheia ramane totusi onorata, ca sa nu mai minta comentariul
 		# din tema (memoria `justificarea-din-comentariu-se-verifica`).
-		sun.directional_shadow_max_distance = float(
-			theme_flag("shadow_distance", SHADOW_DISTANCE))
+		# Plafonul telefonului (`shadow_distance_cap`) se aseaza PESTE tema:
+		# pixelii de dincolo de el nu mai citesc harta deloc, si tot ce e
+		# dincolo e oricum in ceata (fog_begin e la 90-100 m pe temele astea).
+		var shadow_dist := float(theme_flag("shadow_distance", SHADOW_DISTANCE))
+		if shadow_distance_cap > 0.0:
+			shadow_dist = minf(shadow_dist, shadow_distance_cap)
+		sun.directional_shadow_max_distance = shadow_dist
 		# Estompeaza muchia umbrei. Fara ea, o cascada singura pe 90m da o linie
 		# taioasa de pixeli pe nisip.
 		sun.shadow_blur = float(theme_flag("shadow_blur", 1.4))
@@ -6278,6 +6427,59 @@ func _build_horizon(centroid: Vector3) -> void:
 				var at: Vector2 = ring["at"]
 				pos = Vector3(at.x, 0.0, at.y)
 				found = true
+			# SIR TANGENT, DEGAJARE PE AMPRENTA (optional, oct 2026, Ha Long):
+			# `"horizon_footprint": true` in tema. Cautarea de mai jos masoara
+			# degajarea in PIVOT, ceea ce e corect pentru un butte de 25-60 m,
+			# dar nu pentru un SIR de turnuri de 148-304 m la scara 1-1,56 cu
+			# rotatie la zar: masurat cu `tools/probe_horizon_clear.gd`, trei
+			# siruri treceau la 1-2 m de axa soselei, iar 10 din 12 intrau sub
+			# 100 m — raportat la volan ca „blocuri gri, unele chiar in mijlocul
+			# pistei". Aici piesa se alege INAINTE de cautare, se intoarce cu
+			# lungimea tangenta la cerc (un fundal care priveste circuitul, nu
+			# un perete vazut din capat) si `clear` se cere de la TOATA amprenta.
+			# Fara cheie, ramura nu ruleaza si sirul rng ramane bit-identic.
+			var fp_model: Node3D = null
+			var fp_yaw := 0.0
+			var fp_scale := 1.0
+			var fp_pts := PackedVector2Array()
+			if bool(theme_flag("horizon_footprint", false)) and not found:
+				var fp_picks: Array = ring["picks"]
+				var fp_theme_picks: Array = theme_flag("horizon_picks", [])
+				if not fp_theme_picks.is_empty():
+					fp_picks = fp_theme_picks[mini(rings.find(ring),
+						fp_theme_picks.size() - 1)]
+				fp_model = _extract_glb_node(scene,
+					fp_picks[rng.randi_range(0, fp_picks.size() - 1)])
+				if fp_model == null:
+					missed += 1
+					continue
+				# Rotatia Y cu unghiul t duce X-ul local in (cos t, -sin t);
+				# tangenta la cerc in unghiul `angle` cere t = PI/2 - angle.
+				fp_yaw = PI * 0.5 - angle + rng.randf_range(-0.2, 0.2)
+				fp_scale = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
+				fp_pts = _footprint_grid(fp_model)
+				# Fara relaxare sub 85%: o silueta care nu incape la degajare
+				# reala ramane afara (cer gol pe un arc e mai putin rau decat
+				# un perete gri la marginea drumului — vezi podeaua de mai sus).
+				for relax: float in [1.0, 0.85]:
+					var dist: float = float(ring["near"])
+					while dist <= limit:
+						var cand := centroid \
+							+ Vector3(cos(angle), 0, sin(angle)) * dist
+						if _footprint_clear(cand, fp_pts, fp_yaw, fp_scale,
+								clear * relax):
+							pos = cand
+							found = true
+							break
+						dist += 6.0
+					if found:
+						if relax < 1.0:
+							relaxed += 1
+						break
+				if not found:
+					fp_model.queue_free()
+					missed += 1
+					continue
 			for relax in ([] if found else relaxari):
 				var dist: float = float(ring["near"])
 				while dist <= limit:
@@ -6311,8 +6513,8 @@ func _build_horizon(centroid: Vector3) -> void:
 			if not theme_picks.is_empty():
 				picks = theme_picks[mini(rings.find(ring),
 					theme_picks.size() - 1)]
-			var model := _extract_glb_node(scene,
-				picks[rng.randi_range(0, picks.size() - 1)])
+			var model := fp_model if fp_model != null else _extract_glb_node(
+				scene, picks[rng.randi_range(0, picks.size() - 1)])
 			if model == null:
 				continue
 			add_child(model)
@@ -6326,7 +6528,21 @@ func _build_horizon(centroid: Vector3) -> void:
 			var dy: float = float(ring.get("dy", 0.0))
 			model.position = Vector3(pos.x,
 				_sampler.ground_y(pos.x, pos.z) - 4.0 + dy, pos.z)
+			if fp_model != null:
+				# Baza pe OGLINDA APEI sau pe teren, nu pe fundul marii plus un
+				# `dy` fix: un sir de 300-470 m nu sta pe un singur fund. Cu
+				# `dy` +21 calculat pentru fundul de -24, sirurile cazute pe
+				# uscat pluteau 20 m in aer (captura, oct 2026). Se ia cel mai
+				# jos punct de teren de sub amprenta, ridicat la cota marii.
+				var low := INF
+				for p in fp_pts:
+					var w := _footprint_world(pos, p, fp_yaw, fp_scale)
+					low = minf(low, _sampler.ground_y(w.x, w.z))
+				var sea_y := _sampler.mean_road_y() + sea_level_offset
+				model.position.y = maxf(low, sea_y) - 4.0 + dy
 			model.rotation.y = rng.randf_range(0.0, TAU)
+			if fp_model != null:
+				model.rotation.y = fp_yaw
 			# ORIENTARE FIXA (optional, oct 2026, Transfagarasan): `"yaw_deg"` suprascrie
 			# rotatia trasa la sorti (tragerea ramane, ca sirul rng al celorlalte inele
 			# sa fie identic). Creasta (230 x 66 m) vazuta din capat citeste doua
@@ -6338,6 +6554,8 @@ func _build_horizon(centroid: Vector3) -> void:
 			# vederea soferului. Sunt fundal pur, deci exagerarea nu costa nimic:
 			# zero coliziune, sub 180 tris fiecare.
 			var s: float = float(ring["scale"]) * rng.randf_range(0.85, 1.2)
+			if fp_model != null:
+				s = fp_scale
 			model.scale = Vector3.ONE * s
 			# SILUETELE DE ORIZONT NU ARUNCA UMBRA, si asta nu e o economie de
 			# draw calls — e cauza platoului de luminanta de pe Cappadocia,
@@ -6402,6 +6620,51 @@ func _build_horizon(centroid: Vector3) -> void:
 		# design. E exact bug-ul pe care l-a avut versiunea anterioara.
 		push_warning("%s: %d siluete de orizont n-au incaput (degajare fata de sosea)"
 			% [track_name, missed])
+
+
+## Grila de puncte (in XZ local) care acopera dreptunghiul de baza al unei
+## siluete: 7 pe lungime x 3 pe adancime. Destul pentru un sir de turnuri, a
+## carui amprenta e un dreptunghi lung; vezi ramura `horizon_footprint`.
+func _footprint_grid(model: Node3D) -> PackedVector2Array:
+	var box := AABB()
+	var first := true
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		# Transformul fata de `model`: nodul nu e inca in arbore.
+		var xf := Transform3D.IDENTITY
+		var walk: Node = mi
+		while walk != null and walk != model:
+			xf = (walk as Node3D).transform * xf
+			walk = walk.get_parent()
+		var b := xf * mi.mesh.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	var pts := PackedVector2Array()
+	for ix in 7:
+		for iz in 3:
+			pts.append(Vector2(
+				box.position.x + box.size.x * float(ix) / 6.0,
+				box.position.z + box.size.z * float(iz) / 2.0))
+	return pts
+
+
+func _footprint_world(pos: Vector3, p: Vector2, yaw: float, s: float) -> Vector3:
+	var c := cos(yaw)
+	var sn := sin(yaw)
+	return Vector3(pos.x + (p.x * c + p.y * sn) * s, 0.0,
+		pos.z + (-p.x * sn + p.y * c) * s)
+
+
+## Toata amprenta e la cel putin `clear` m de sosea? Iese la primul punct prea
+## aproape — cautarea pe raza testeaza zeci de candidati per slot.
+func _footprint_clear(pos: Vector3, pts: PackedVector2Array, yaw: float,
+		s: float, clear: float) -> bool:
+	for p in pts:
+		if _road_distance_xz(_footprint_world(pos, p, yaw, s)) < clear:
+			return false
+	return true
 
 
 ## Stinge aruncarea de umbra pe tot subarborele. Vezi motivul la apelul din
@@ -6701,6 +6964,7 @@ func _terrain_grid() -> void:
 			_terr_heights[gz * (_terr_cells + 1) + gx] = _sampler.ground_y(
 				_terr_origin.x + float(gx) * _terr_step,
 				_terr_origin.z + float(gz) * _terr_step)
+	_terrain_fine_mark()
 
 
 ## Cota SUPRAFETEI de teren — nu a campului din sampler, ci a triunghiului care
@@ -6722,6 +6986,8 @@ func _terrain_mesh_y(x: float, z: float) -> float:
 	var fz := clampf((z - _terr_origin.z) / _terr_step, 0.0, last)
 	var gx := int(fx)
 	var gz := int(fz)
+	if not _fine_row.is_empty() and (_fine_row[gz] == 1 or _fine_col[gx] == 1):
+		return _fine_mesh_y(x, z, gx, gz)
 	var u := fx - float(gx)
 	var v := fz - float(gz)
 	var row := _terr_cells + 1
@@ -6732,6 +6998,139 @@ func _terrain_mesh_y(x: float, z: float) -> float:
 	if u + v <= 1.0:
 		return h00 + u * (h10 - h00) + v * (h01 - h00)
 	return h11 + (1.0 - u) * (h01 - h11) + (1.0 - v) * (h10 - h11)
+
+
+## Cate sub-intervale are un rand / o coloana FINA a grilei de teren (vezi
+## [member custom_bench_patches]). 8 => 0.99 m: o fata de 9 m pe un singur sub-interval
+## iese la ~84 de grade, deci "aproape verticala" e masurabila.
+const BENCH_FINE_DIV: int = 8
+## De la ce inclinare (grade) un triunghi fin primeste normala lui proprie (fata plana,
+## neneteda cu vecinii) si tenta de panta calculata pe triunghi.
+const BENCH_FLAT_SHADE_DEG: float = 55.0
+## 1 pe randurile / coloanele grilei care contin o margine DURA de platou de banc.
+## Goale pe pistele fara platouri: atunci toate cele trei cai de mai jos sunt cele de
+## dinainte, la bit.
+var _fine_row: PackedByteArray = PackedByteArray()
+var _fine_col: PackedByteArray = PackedByteArray()
+var _fine_y_cache: Dictionary = {}
+
+
+## Marcheaza randurile si coloanele care contin o margine dura. O treapta cade intre doua
+## sub-noduri ale UNUI singur rand (cel care contine marginea).
+func _terrain_fine_mark() -> void:
+	_fine_row = PackedByteArray()
+	_fine_col = PackedByteArray()
+	_fine_y_cache.clear()
+	if _sampler == null or _sampler.bench_patches.is_empty():
+		return
+	var edges := _sampler.bench_hard_edges()
+	_fine_row.resize(_terr_cells)
+	_fine_col.resize(_terr_cells)
+	var any := false
+	for ze: float in edges["z"]:
+		var fz := (ze - _terr_origin.z) / _terr_step
+		var r := int(floor(fz))
+		# marginea cade in randul `r`; doar daca nimereste chiar pe un nod (sub 1 cm) treapta e
+		# intre ultimul sub-nod al randului dinainte si nod, deci se marcheaza si vecinul
+		for rr in ([r - 1, r] if (fz - float(r)) * _terr_step < 0.01 else [r]):
+			if rr >= 0 and rr < _terr_cells:
+				_fine_row[rr] = 1
+				any = true
+	for xe: float in edges["x"]:
+		var fx := (xe - _terr_origin.x) / _terr_step
+		var c := int(floor(fx))
+		for cc in ([c - 1, c] if (fx - float(c)) * _terr_step < 0.01 else [c]):
+			if cc >= 0 and cc < _terr_cells:
+				_fine_col[cc] = 1
+				any = true
+	if not any:
+		_fine_row = PackedByteArray()
+		_fine_col = PackedByteArray()
+
+
+## Cota unui sub-nod al celulei (gx, gz): `ax` / `az` = indicele absolut pe grila FINA
+## (K sub-intervale pe celula, indiferent daca celula e fina pe acea axa). Nodurile care
+## coincid cu grila de baza citesc grila, restul campul.
+@warning_ignore("integer_division")
+func _fine_node_y(ax: int, az: int) -> float:
+	var k := BENCH_FINE_DIV
+	if ax % k == 0 and az % k == 0:
+		return _terr_heights[(az / k) * (_terr_cells + 1) + (ax / k)]
+	var key := Vector2i(ax, az)
+	var hit: Variant = _fine_y_cache.get(key)
+	if hit != null:
+		return hit
+	var h := _sampler.ground_y(
+		_terr_origin.x + float(ax) * _terr_step / float(k),
+		_terr_origin.z + float(az) * _terr_step / float(k))
+	_fine_y_cache[key] = h
+	return h
+
+
+## Cota SUPRAFETEI intr-o celula fina — aceeasi interpolare pe triunghiuri ca
+## [method _terrain_mesh_y], dar pe sub-celula care contine punctul.
+@warning_ignore("integer_division")
+func _fine_mesh_y(x: float, z: float, gx: int, gz: int) -> float:
+	var k := BENCH_FINE_DIV
+	var kx := k if _fine_col[gx] == 1 else 1
+	var kz := k if _fine_row[gz] == 1 else 1
+	var fx := clampf((x - _terr_origin.x) / _terr_step - float(gx), 0.0, 0.99999) * float(kx)
+	var fz := clampf((z - _terr_origin.z) / _terr_step - float(gz), 0.0, 0.99999) * float(kz)
+	var sx := int(fx)
+	var sz := int(fz)
+	var u := fx - float(sx)
+	var v := fz - float(sz)
+	# indice absolut pe grila fina: un pas de sub-celula = k / kx sub-noduri fine
+	var dx := k / kx
+	var dz := k / kz
+	var bx := gx * k + sx * dx
+	var bz := gz * k + sz * dz
+	var h00 := _fine_node_y(bx, bz)
+	var h10 := _fine_node_y(bx + dx, bz)
+	var h01 := _fine_node_y(bx, bz + dz)
+	var h11 := _fine_node_y(bx + dx, bz + dz)
+	if u + v <= 1.0:
+		return h00 + u * (h10 - h00) + v * (h01 - h00)
+	return h11 + (1.0 - u) * (h01 - h11) + (1.0 - v) * (h10 - h11)
+
+
+## Sferturile fine ale celulei (gx, gz), in formatul consumat de `_build_terrain`:
+## [colturi (4 Vector3), indicii de nod cel mai apropiat pentru greutatile pe varf, true].
+@warning_ignore("integer_division")
+func _terrain_fine_quads(gx: int, gz: int) -> Array:
+	var k := BENCH_FINE_DIV
+	var kx := k if _fine_col[gx] == 1 else 1
+	var kz := k if _fine_row[gz] == 1 else 1
+	var dx := k / kx
+	var dz := k / kz
+	var cells := _terr_cells
+	var out: Array = []
+	for sz in kz:
+		for sx in kx:
+			var bx := gx * k + sx * dx
+			var bz := gz * k + sz * dz
+			var corners: Array = []
+			var gis: Array = []
+			for c in 4:
+				var ax := bx + (dx if (c & 1) == 1 else 0)
+				var az := bz + (dz if (c & 2) == 2 else 0)
+				corners.append(Vector3(
+					_terr_origin.x + float(ax) * _terr_step / float(k),
+					_fine_node_y(ax, az),
+					_terr_origin.z + float(az) * _terr_step / float(k)))
+				gis.append(clampi(int(round(float(az) / float(k))), 0, cells) * (cells + 1)
+					+ clampi(int(round(float(ax) / float(k))), 0, cells))
+			out.append([corners, gis, true])
+	return out
+
+
+## Inclinarea (grade fata de orizontala) a triunghiului abc.
+func _tri_slope_deg(a: Vector3, b: Vector3, c: Vector3) -> float:
+	var n := (b - a).cross(c - a)
+	var l := n.length()
+	if l <= 0.0:
+		return 0.0
+	return rad_to_deg(acos(clampf(absf(n.y) / l, 0.0, 1.0)))
 
 
 ## SOLUL PE ZONE DE TUR: greutate + tenta per varf de grila, din cheia de tema
@@ -6988,6 +7387,17 @@ func _build_terrain() -> void:
 	# Greutatea zonei intra si in COLOR.a (perechea a doua de texturi a
 	# shader-ului) DOAR daca tema a dat perechii a doua o dala de roca.
 	var zone_alt: bool = theme_flag("terrain_alt_class", null) != null
+	var alt_all: bool = zone_alt and bool(theme_flag("terrain_alt_all", false))
+	# FETELE DE GRADON pe marmura (cheia `terrain_face_marble`): pe triunghiurile abrupte (fata
+	# unei trepte, vezi `custom_bench_patches`) greutatea perechii a doua se stinge, deci shaderul
+	# citeste perechea PRIMA — pe Carrara dala de marmura (`terrain_sand_class`), nu pietrisul
+	# de pe tot restul terenului. Fals pe orice alta tema = `alt_all` ramane cel de dinainte.
+	var face_marble: bool = alt_all and bool(theme_flag("terrain_face_marble", false))
+	# AO COPT pe fata unei trepte (cheia `face_ao`, 1.0 = fara): varful fetei ramane la tenta lui,
+	# piciorul se intuneca pana la acest factor, deci fiecare fata are un gradient propriu si
+	# treptele suprapuse se citesc ca benzi, nu ca un singur perete. Vertex color poate doar
+	# INTUNECA (memoria `surfacetool-clamp-vertex-color`), de aceea gradientul coboara spre picior.
+	var face_ao: float = float(theme_flag("face_ao", 1.0))
 	# PETICE DE ZAPADA VECHE PE VERSANT (cheia `snow_patches`, Dictionary).
 	# Trei critici orbi au numit aceeasi lipsa: in referinta zapada de iulie sta
 	# in PETICE albe cu margini taiate, nu intr-o tenta. Tenta pe vertex nu poate:
@@ -7042,257 +7452,292 @@ func _build_terrain() -> void:
 					heights[idx00 + cells + 2],
 					origin.z + float(gz + 1) * step),
 			]
-			# INCLINAREA, pentru fata de stanca. Se ia PER VERTEX, din campul
-			# de inaltimi cu diferente centrale — nu per celula: o valoare pe
-			# celula face ca fiecare celula sa primeasca o singura tenta, si
-			# muchia dintre doua celule sare. Rezultatul, vazut pe captura, e o
-			# tabla de sah de PATRATE pe versantul departat. Per vertex,
-			# valorile se interpoleaza pe triunghi si marginea iese continua.
-			var slope_at := func(cx: int, cz: int) -> float:
-				var i0: int = cz * (cells + 1) + cx
-				var hL: float = heights[i0 - (1 if cx > 0 else 0)]
-				var hR: float = heights[i0 + (1 if cx < cells else 0)]
-				var hD: float = heights[i0 - ((cells + 1) if cz > 0 else 0)]
-				var hU: float = heights[i0 + ((cells + 1) if cz < cells else 0)]
-				var sx: float = (hR - hL) / (step * (2.0 if cx > 0 and cx < cells else 1.0))
-				var sz: float = (hU - hD) / (step * (2.0 if cz > 0 and cz < cells else 1.0))
-				return rad_to_deg(atan2(sqrt(sx * sx + sz * sz), 1.0))
-			var slope_deg := [0.0, 0.0, 0.0, 0.0]
-			if scarp_tint != null:
-				slope_deg[0] = slope_at.call(gx, gz)
-				slope_deg[1] = slope_at.call(gx + 1, gz)
-				slope_deg[2] = slope_at.call(gx, gz + 1)
-				slope_deg[3] = slope_at.call(gx + 1, gz + 1)
-			for tri in [[0, 1, 2], [1, 3, 2]]:
-				for corner_idx: int in tri:
-					var v: Vector3 = corners[corner_idx]
-					var cell_slope_deg: float = slope_deg[corner_idx]
-					# Nuanta dupa inaltimea RELATIVA la media pistei, nu absoluta.
-					# Absoluta functiona doar cat timp terenul statea in jurul lui
-					# zero; acum, cu terenul care urca la 19 m, ar fi spalat tot
-					# varful pistei in alb.
-					var rel := v.y - _sampler.mean_road_y()
-					var shade := clampf(1.0 + rel * 0.012, 0.86, 1.10)
-					shade *= _cliff_shadow(v, cliff_xz)
-					var tint := terrain_base_tint
-					# Greutatea de iarba (0 = plaja/nisip, 1 = camp), plecata
-					# spre shader prin COLOR.a: acolo alege intre perechea de
-					# texturi de nisip si cea de iarba (#206).
-					var grass_w := 0.0
-					# Covorul de savana (vezi savanna_grass_w mai sus): se
-					# aplica INAINTE de inland, ca o tema care ar avea si mare
-					# si savana sa poata suprascrie pe fasia de plaja.
-					if savanna_w > 0.0:
-						grass_w = savanna_w
-						if savanna_tint != null:
-							tint = tint.lerp(savanna_tint as Color, savanna_w)
-					if inland != null:
-						# Banda de trecere e larga (3.5 m de cota) tocmai ca sa
-						# nu se vada o linie de nivel: dunele o strambă singure,
-						# iar marginea iese neregulata, ca o plaja.
-						var t := clampf((v.y - sea_y - BEACH_SAND_TOP)
-							/ BEACH_FADE, 0.0, 1.0)
-						grass_w = t * inland_mix
-						tint = tint.lerp(inland as Color, grass_w)
-						# Peticele de pamant, doar pe iarba: tenta coboara spre
-						# pamant batut si greutatea spre nisip, ca in petic sa
-						# se vada granulatia de sol, nu firele de iarba.
-						var patch := smoothstep(0.55, 0.75,
-							dirt_noise.get_noise_2d(v.x, v.z) * 0.5 + 0.5) \
-							* grass_w
-						if patch > 0.0:
-							tint = tint.lerp(TERRAIN_DIRT_COLOR, patch * 0.65)
-							grass_w *= 1.0 - patch * 0.75
-					# ZAPADA DE CREASTA, oglinda plajei de mai sus: acolo
-					# materialul se schimba SUB o cota, aici PESTE ea. Cota e
-					# absoluta (nu relativa la media pistei) fiindca linia
-					# zapezii e o proprietate a MUNTELUI, nu a traseului: daca
-					# maine soseaua urca cu 10 m, zapada nu trebuie sa urce cu
-					# ea. Vezi "snow_line" din themes().
-					#
-					# Greutatea de iarba se stinge odata cu albul: pe piatra
-					# inghetata nu creste iarba, iar fara asta shader-ul ar
-					# amesteca textura de pajiste peste zapada.
-					# ETAJUL DE STANCA, intre pajiste si zapada. Aceeasi forma
-					# ca zapada de mai jos (cota absoluta, margine zdrentuita
-					# cu acelasi zgomot) fiindca e acelasi fel de lucru: o
-					# limita de vegetatie pe munte, nu o proprietate a pistei.
-					# Se aplica INAINTE de zapada, ca albul sa ramana ultimul
-					# strat — pe creasta e zapada peste piatra, nu invers.
-					# STRATUL ROSU DE SUB SOSEA (Valea Rosie, brief §1).
-					# Se aplica PRIMUL, ca orice etaj de deasupra sa ramana
-					# peste el, si merge INVERS fata de rock/snow: greutatea
-					# creste cu cat COBORI sub `strata_line`, nu cu cat urci.
-					#
-					# De ce prin teren si nu prin geometrie noua: rosul trebuie
-					# sa fie a doua masa de TEREN vazuta peste un gol, sub
-					# nivelul drumului — nu o banda pictata pe conuri (aia s-a
-					# incercat si s-a scos, fiindca rosul pe silueta se citeste
-					# ca murdarie, nu ca distanta). Terenul de sub sosea exista
-					# deja: masurat, 28% din vertecsi stau sub cota 25, cu
-					# lobul mare la 10-20 m, adica 12-22 m sub soseaua medie.
-					# Deci nu e nevoie de mesh nou si nici de plasare: culoarea
-					# se aseaza pe relieful care e deja acolo.
-					#
-					# Marginea se zdrentuieste cu ACELASI zgomot ca celelalte
-					# etaje: o linie de nivel curata se citeste ca desen tehnic,
-					# iar aici ar taia un inel perfect in jurul pistei.
-					if strata_tint != null:
-						var strata_w := clampf(
-							(strata_line - v.y) / strata_fade, 0.0, 1.0)
-						strata_w = clampf(strata_w + dirt_noise.get_noise_2d(
-							v.x * 0.45, v.z * 0.45) * 0.20, 0.0, 1.0)
-						strata_w = smoothstep(0.0, 1.0, strata_w)
-						if strata_w > 0.0:
-							tint = tint.lerp(strata_tint as Color, strata_w)
-							# Pe faleza rosie nu creste iarba, ca si pe piatra.
-							grass_w *= 1.0 - strata_w
-					# BENZILE de deasupra stratului de baza (vezi nota lunga de
-					# la declararea lui `strata_bands`).
-					if has_bands:
-						var bands: Array = strata_bands as Array
-						var btints: Array = strata_band_tints as Array
-						# Zgomotul e MIC aici, si asta e o cifra masurata, nu un
-						# gust. Etajele snow/rock isi permit ±0.22-0.25 de
-						# GREUTATE fiindca banda lor de trecere e de 22 m de cota
-						# si vertecsii cad des in ea. Aici o banda are 10-14 m,
-						# iar malul opus are un rand de vertecsi la fiecare ~5 m:
-						# cu ±2.5 m de zgomot doi vertecsi vecini cad in faze
-						# diferite ale ACELEIASI benzi. Masurat pe malul opus la
-						# frac 0.27, prima incercare: y 33 rosu, 41 palid, 48
-						# ruginiu inchis, 53 crem — alternanta, nu stratigrafie.
-						# La ±0.8 m marginea ramane neregulata fara sa sara peste
-						# un rand intreg.
-						var jitter := dirt_noise.get_noise_2d(
-							v.x * 0.45, v.z * 0.45) * 0.8
-						for bi in bands.size():
-							if bi >= btints.size():
-								break
-							var band: Vector4 = bands[bi]
-							var lo := band.x + jitter
-							var hi := band.y + jitter
-							var bfade := maxf(band.z, 0.001)
-							# Trapez: urca pe `bfade` la baza, coboara pe `bfade`
-							# la varf. Fara asta o banda ar avea muchii C0 si
-							# s-ar citi ca decal, nu ca strat de roca.
-							var w_up := clampf((v.y - lo) / bfade, 0.0, 1.0)
-							var w_dn := clampf((hi - v.y) / bfade, 0.0, 1.0)
-							var bw := smoothstep(0.0, 1.0, minf(w_up, w_dn))
-							if bw > 0.0:
-								tint = tint.lerp(btints[bi] as Color, bw)
-								grass_w *= 1.0 - bw
-					if crust_tint != null or shore_tint != null:
-						var sd := _sampler.lagoon_signed_dist(v.x, v.z)
-						if sd < 1e8:
-							if crust_tint != null:
-								# 1 pana la `crust_width` in afara conturului,
-								# apoi coboara pe `crust_fade`; marginea se
-								# zdrentuieste cu acelasi zgomot ca etajele.
-								var crust_w := clampf(
-									(sd + crust_width + crust_fade) / crust_fade,
-									0.0, 1.0)
-								crust_w = clampf(crust_w + dirt_noise.get_noise_2d(
-									v.x * 0.5, v.z * 0.5) * 0.30, 0.0, 1.0)
-								crust_w = smoothstep(0.0, 1.0, crust_w)
-								# Garda de cota (vezi comentariul de la declararea
-								# crust_rise_start): fara ea crusta urca pe peretele
-								# craterului oriunde XZ-ul cade in banda, masurat
-								# 37% din nucleul benzii pe versant (cota 6-42 m).
-								var rise := clampf(
-									(v.y - sea_y - crust_rise_start) / crust_rise_fade,
-									0.0, 1.0)
-								crust_w *= 1.0 - rise
-								if crust_w > 0.0:
-									tint = tint.lerp(crust_tint as Color, crust_w)
-									# Pe soda nu creste iarba.
-									grass_w *= 1.0 - crust_w
-							if shore_tint != null:
-								# Trapez peste linia apei: -shore_out .. +shore_in,
-								# cu 2 m de racord la fiecare capat.
-								var s_up := clampf((sd + shore_out) / 2.0, 0.0, 1.0)
-								var s_dn := clampf((shore_in - sd) / 2.0, 0.0, 1.0)
-								var shore_w := smoothstep(0.0, 1.0, minf(s_up, s_dn))
-								shore_w *= 0.55 + 0.45 * clampf(
-									dirt_noise.get_noise_2d(v.x * 1.5, v.z * 1.5)
-									* 0.5 + 0.5, 0.0, 1.0)
-								if shore_w > 0.0:
-									tint = tint.lerp(shore_tint as Color, shore_w * 0.85)
-					if rock_tint != null:
-						var rock_w := clampf(
-							(v.y - rock_line) / rock_fade, 0.0, 1.0)
-						rock_w = clampf(rock_w + dirt_noise.get_noise_2d(
-							v.x * 0.5, v.z * 0.5) * 0.25, 0.0, 1.0)
-						rock_w = smoothstep(0.0, 1.0, rock_w)
-						if rock_w > 0.0:
-							tint = tint.lerp(rock_tint as Color, rock_w)
-							# Pe piatra nu creste iarba: greutatea coboara spre
-							# textura de nisip/roca, exact ca sub zapada.
-							grass_w *= 1.0 - rock_w
-					# FATA DE STANCA: dupa panta, nu dupa cota. Se aplica
-					# INAINTE de zapada, ca albul sa ramana ultimul strat.
-					if scarp_tint != null and cell_slope_deg > 0.0:
-						var scarp_w := clampf(
-							(cell_slope_deg - scarp_deg) / scarp_fade_deg,
-							0.0, 1.0)
-						# Marginea se zdrentuieste cu ACELASI zgomot ca restul
-						# straturilor: o linie de panta perfecta se citeste ca
-						# desen tehnic, nu ca roca.
-						scarp_w = clampf(scarp_w + dirt_noise.get_noise_2d(
-							v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0)
-						scarp_w = smoothstep(0.0, 1.0, scarp_w)
-						if scarp_w > 0.0:
-							tint = tint.lerp(scarp_tint as Color, scarp_w)
-							# Pe fata de stanca nu creste iarba.
-							grass_w *= 1.0 - scarp_w
-					# ZONA DE SOL (gresia fantanii, riolitul fortului): DUPA
-					# fata de stanca, ca in zona ei sa castige zona — groapa
-					# fantanii e gresie si pe pereti, nu riolit.
-					if not zone_w.is_empty():
-						var gi: int = idx00 + [0, 1, cells + 1, cells + 2][corner_idx]
-						var zw: float = zone_w[gi]
-						if zw > 0.0:
-							zw = smoothstep(0.0, 1.0, clampf(zw + dirt_noise.get_noise_2d(
-								v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0))
-							var zt: Color = zone_tints[gi]
-							tint = tint.lerp(zt, zw)
-							if zone_alt:
-								grass_w = lerpf(grass_w, 1.0, zw)
-							# PETE DE MUSCHI (Kyoto POI D): alfa tentei de zona < 1
-							# vopseste petele (zgomot de 5-8 m) in verde de muschi,
-							# cu taria (1 - a). Solul temei (oliv pe dala de nisip)
-							# iesea gri in captura, deci tenta e explicita, pe
-							# aceeasi dala a zonei. Alfa 1 (toate celelalte zone) =
-							# nimic schimbat.
-							if zt.a < 0.999:
-								var mp := smoothstep(0.05, 0.3, moss_noise.get_noise_2d(
-									v.x, v.z)) * (1.0 - zt.a) * zw
-								tint = tint.lerp(GROUND_MOSS_TINT, mp)
-					if snow_tint != null:
-						var snow_w := clampf(
-							(v.y - snow_line) / snow_fade, 0.0, 1.0)
-						# Marginea se zdrentuieste cu ACELASI zgomot ca peticele
-						# de pamant: o linie de nivel perfecta se citeste ca
-						# desen tehnic. Amplitudinea e in METRI de cota, deci
-						# raportata la latimea benzii de trecere.
-						snow_w = clampf(snow_w + dirt_noise.get_noise_2d(
-							v.x * 0.6, v.z * 0.6) * 0.22, 0.0, 1.0)
-						snow_w = smoothstep(0.0, 1.0, snow_w)
-						if snow_w > 0.0:
-							tint = tint.lerp(snow_tint as Color, snow_w)
-							grass_w *= 1.0 - snow_w
-					var col := tint * shade
-					st.set_color(Color(col.r, col.g, col.b, grass_w))
-					# UV din coordonate de LUME, nu din indexul celulei: asa
-					# textura curge continuu peste toata suprafata, fara sa se
-					# vada grila de 32x32 in tiparul ei.
-					st.set_uv(Vector2(v.x, v.z) * SURFACE_TILING)
-					# A doua scara, pentru stratul de detaliu: aceeasi textura,
-					# de 15 ori mai lenta. Suprapuse, cele doua rup tiparul de
-					# repetitie pe care ochiul il prinde imediat pe suprafete mari.
-					st.set_uv2(Vector2(v.x, v.z) * SURFACE_TILING_MACRO)
-					if snow_cfg != null:
-						st.set_custom(0, Color(snow_elig[idx00 + [0, 1, cells + 1, cells + 2][corner_idx]], 0.0, 0.0, 0.0))
-					st.add_vertex(v)
+			# Randurile/coloanele FINE (treptele de gradon, `custom_bench_patches`): celula e
+			# subimpartita, deci fata unei trepte iese aproape verticala. Pe orice alta celula
+			# lista are un singur sfert de celula, exact cel de dinainte.
+			var quads: Array
+			if not _fine_row.is_empty() and (_fine_row[gz] == 1 or _fine_col[gx] == 1):
+				quads = _terrain_fine_quads(gx, gz)
+			else:
+				quads = [[corners, [idx00, idx00 + 1, idx00 + cells + 1, idx00 + cells + 2], false]]
+			for quad: Array in quads:
+				corners = quad[0]
+				var gis: Array = quad[1]
+				var fine_quad: bool = quad[2]
+				# INCLINAREA, pentru fata de stanca. Se ia PER VERTEX, din campul
+				# de inaltimi cu diferente centrale — nu per celula: o valoare pe
+				# celula face ca fiecare celula sa primeasca o singura tenta, si
+				# muchia dintre doua celule sare. Rezultatul, vazut pe captura, e o
+				# tabla de sah de PATRATE pe versantul departat. Per vertex,
+				# valorile se interpoleaza pe triunghi si marginea iese continua.
+				var slope_at := func(cx: int, cz: int) -> float:
+					var i0: int = cz * (cells + 1) + cx
+					var hL: float = heights[i0 - (1 if cx > 0 else 0)]
+					var hR: float = heights[i0 + (1 if cx < cells else 0)]
+					var hD: float = heights[i0 - ((cells + 1) if cz > 0 else 0)]
+					var hU: float = heights[i0 + ((cells + 1) if cz < cells else 0)]
+					var sx: float = (hR - hL) / (step * (2.0 if cx > 0 and cx < cells else 1.0))
+					var sz: float = (hU - hD) / (step * (2.0 if cz > 0 and cz < cells else 1.0))
+					return rad_to_deg(atan2(sqrt(sx * sx + sz * sz), 1.0))
+				var slope_deg := [0.0, 0.0, 0.0, 0.0]
+				if scarp_tint != null and not fine_quad:
+					slope_deg[0] = slope_at.call(gx, gz)
+					slope_deg[1] = slope_at.call(gx + 1, gz)
+					slope_deg[2] = slope_at.call(gx, gz + 1)
+					slope_deg[3] = slope_at.call(gx + 1, gz + 1)
+				for tri in [[0, 1, 2], [1, 3, 2]]:
+					# Pe un sfert FIN, inclinarea si umbrirea se iau pe TRIUNGHI: fata unui
+					# gradon (aproape verticala) are tenta de stanca si normala ei proprie
+					# (smooth group -1), iar triunghiurile plate de langa ea raman netede si
+					# fara tenta de panta — varfurile comune ar fi trasat un gradient pe toata
+					# fasia plata de 7.9 m de sub fata.
+					var tri_slope := -1.0
+					var tri_y0 := 0.0
+					var tri_y1 := 0.0
+					if fine_quad:
+						tri_slope = _tri_slope_deg(corners[tri[0]], corners[tri[1]], corners[tri[2]])
+						st.set_smooth_group(-1 if tri_slope >= BENCH_FLAT_SHADE_DEG else 0)
+						tri_y0 = minf(minf(corners[tri[0]].y, corners[tri[1]].y), corners[tri[2]].y)
+						tri_y1 = maxf(maxf(corners[tri[0]].y, corners[tri[1]].y), corners[tri[2]].y)
+					for corner_idx: int in tri:
+						var v: Vector3 = corners[corner_idx]
+						var cell_slope_deg: float = slope_deg[corner_idx] if tri_slope < 0.0 else tri_slope
+						# Nuanta dupa inaltimea RELATIVA la media pistei, nu absoluta.
+						# Absoluta functiona doar cat timp terenul statea in jurul lui
+						# zero; acum, cu terenul care urca la 19 m, ar fi spalat tot
+						# varful pistei in alb.
+						var rel := v.y - _sampler.mean_road_y()
+						var shade := clampf(1.0 + rel * 0.012, 0.86, 1.10)
+						shade *= _cliff_shadow(v, cliff_xz)
+						var tint := terrain_base_tint
+						# Greutatea de iarba (0 = plaja/nisip, 1 = camp), plecata
+						# spre shader prin COLOR.a: acolo alege intre perechea de
+						# texturi de nisip si cea de iarba (#206).
+						var grass_w := 0.0
+						var face_w := 0.0
+						# Covorul de savana (vezi savanna_grass_w mai sus): se
+						# aplica INAINTE de inland, ca o tema care ar avea si mare
+						# si savana sa poata suprascrie pe fasia de plaja.
+						if savanna_w > 0.0:
+							grass_w = savanna_w
+							if savanna_tint != null:
+								tint = tint.lerp(savanna_tint as Color, savanna_w)
+						if inland != null:
+							# Banda de trecere e larga (3.5 m de cota) tocmai ca sa
+							# nu se vada o linie de nivel: dunele o strambă singure,
+							# iar marginea iese neregulata, ca o plaja.
+							var t := clampf((v.y - sea_y - BEACH_SAND_TOP)
+								/ BEACH_FADE, 0.0, 1.0)
+							grass_w = t * inland_mix
+							tint = tint.lerp(inland as Color, grass_w)
+							# Peticele de pamant, doar pe iarba: tenta coboara spre
+							# pamant batut si greutatea spre nisip, ca in petic sa
+							# se vada granulatia de sol, nu firele de iarba.
+							var patch := smoothstep(0.55, 0.75,
+								dirt_noise.get_noise_2d(v.x, v.z) * 0.5 + 0.5) \
+								* grass_w
+							if patch > 0.0:
+								tint = tint.lerp(TERRAIN_DIRT_COLOR, patch * 0.65)
+								grass_w *= 1.0 - patch * 0.75
+						# ZAPADA DE CREASTA, oglinda plajei de mai sus: acolo
+						# materialul se schimba SUB o cota, aici PESTE ea. Cota e
+						# absoluta (nu relativa la media pistei) fiindca linia
+						# zapezii e o proprietate a MUNTELUI, nu a traseului: daca
+						# maine soseaua urca cu 10 m, zapada nu trebuie sa urce cu
+						# ea. Vezi "snow_line" din themes().
+						#
+						# Greutatea de iarba se stinge odata cu albul: pe piatra
+						# inghetata nu creste iarba, iar fara asta shader-ul ar
+						# amesteca textura de pajiste peste zapada.
+						# ETAJUL DE STANCA, intre pajiste si zapada. Aceeasi forma
+						# ca zapada de mai jos (cota absoluta, margine zdrentuita
+						# cu acelasi zgomot) fiindca e acelasi fel de lucru: o
+						# limita de vegetatie pe munte, nu o proprietate a pistei.
+						# Se aplica INAINTE de zapada, ca albul sa ramana ultimul
+						# strat — pe creasta e zapada peste piatra, nu invers.
+						# STRATUL ROSU DE SUB SOSEA (Valea Rosie, brief §1).
+						# Se aplica PRIMUL, ca orice etaj de deasupra sa ramana
+						# peste el, si merge INVERS fata de rock/snow: greutatea
+						# creste cu cat COBORI sub `strata_line`, nu cu cat urci.
+						#
+						# De ce prin teren si nu prin geometrie noua: rosul trebuie
+						# sa fie a doua masa de TEREN vazuta peste un gol, sub
+						# nivelul drumului — nu o banda pictata pe conuri (aia s-a
+						# incercat si s-a scos, fiindca rosul pe silueta se citeste
+						# ca murdarie, nu ca distanta). Terenul de sub sosea exista
+						# deja: masurat, 28% din vertecsi stau sub cota 25, cu
+						# lobul mare la 10-20 m, adica 12-22 m sub soseaua medie.
+						# Deci nu e nevoie de mesh nou si nici de plasare: culoarea
+						# se aseaza pe relieful care e deja acolo.
+						#
+						# Marginea se zdrentuieste cu ACELASI zgomot ca celelalte
+						# etaje: o linie de nivel curata se citeste ca desen tehnic,
+						# iar aici ar taia un inel perfect in jurul pistei.
+						if strata_tint != null:
+							var strata_w := clampf(
+								(strata_line - v.y) / strata_fade, 0.0, 1.0)
+							strata_w = clampf(strata_w + dirt_noise.get_noise_2d(
+								v.x * 0.45, v.z * 0.45) * 0.20, 0.0, 1.0)
+							strata_w = smoothstep(0.0, 1.0, strata_w)
+							if strata_w > 0.0:
+								tint = tint.lerp(strata_tint as Color, strata_w)
+								# Pe faleza rosie nu creste iarba, ca si pe piatra.
+								grass_w *= 1.0 - strata_w
+						# BENZILE de deasupra stratului de baza (vezi nota lunga de
+						# la declararea lui `strata_bands`).
+						if has_bands:
+							var bands: Array = strata_bands as Array
+							var btints: Array = strata_band_tints as Array
+							# Zgomotul e MIC aici, si asta e o cifra masurata, nu un
+							# gust. Etajele snow/rock isi permit ±0.22-0.25 de
+							# GREUTATE fiindca banda lor de trecere e de 22 m de cota
+							# si vertecsii cad des in ea. Aici o banda are 10-14 m,
+							# iar malul opus are un rand de vertecsi la fiecare ~5 m:
+							# cu ±2.5 m de zgomot doi vertecsi vecini cad in faze
+							# diferite ale ACELEIASI benzi. Masurat pe malul opus la
+							# frac 0.27, prima incercare: y 33 rosu, 41 palid, 48
+							# ruginiu inchis, 53 crem — alternanta, nu stratigrafie.
+							# La ±0.8 m marginea ramane neregulata fara sa sara peste
+							# un rand intreg.
+							var jitter := dirt_noise.get_noise_2d(
+								v.x * 0.45, v.z * 0.45) * 0.8
+							for bi in bands.size():
+								if bi >= btints.size():
+									break
+								var band: Vector4 = bands[bi]
+								var lo := band.x + jitter
+								var hi := band.y + jitter
+								var bfade := maxf(band.z, 0.001)
+								# Trapez: urca pe `bfade` la baza, coboara pe `bfade`
+								# la varf. Fara asta o banda ar avea muchii C0 si
+								# s-ar citi ca decal, nu ca strat de roca.
+								var w_up := clampf((v.y - lo) / bfade, 0.0, 1.0)
+								var w_dn := clampf((hi - v.y) / bfade, 0.0, 1.0)
+								var bw := smoothstep(0.0, 1.0, minf(w_up, w_dn))
+								if bw > 0.0:
+									tint = tint.lerp(btints[bi] as Color, bw)
+									grass_w *= 1.0 - bw
+						if crust_tint != null or shore_tint != null:
+							var sd := _sampler.lagoon_signed_dist(v.x, v.z)
+							if sd < 1e8:
+								if crust_tint != null:
+									# 1 pana la `crust_width` in afara conturului,
+									# apoi coboara pe `crust_fade`; marginea se
+									# zdrentuieste cu acelasi zgomot ca etajele.
+									var crust_w := clampf(
+										(sd + crust_width + crust_fade) / crust_fade,
+										0.0, 1.0)
+									crust_w = clampf(crust_w + dirt_noise.get_noise_2d(
+										v.x * 0.5, v.z * 0.5) * 0.30, 0.0, 1.0)
+									crust_w = smoothstep(0.0, 1.0, crust_w)
+									# Garda de cota (vezi comentariul de la declararea
+									# crust_rise_start): fara ea crusta urca pe peretele
+									# craterului oriunde XZ-ul cade in banda, masurat
+									# 37% din nucleul benzii pe versant (cota 6-42 m).
+									var rise := clampf(
+										(v.y - sea_y - crust_rise_start) / crust_rise_fade,
+										0.0, 1.0)
+									crust_w *= 1.0 - rise
+									if crust_w > 0.0:
+										tint = tint.lerp(crust_tint as Color, crust_w)
+										# Pe soda nu creste iarba.
+										grass_w *= 1.0 - crust_w
+								if shore_tint != null:
+									# Trapez peste linia apei: -shore_out .. +shore_in,
+									# cu 2 m de racord la fiecare capat.
+									var s_up := clampf((sd + shore_out) / 2.0, 0.0, 1.0)
+									var s_dn := clampf((shore_in - sd) / 2.0, 0.0, 1.0)
+									var shore_w := smoothstep(0.0, 1.0, minf(s_up, s_dn))
+									shore_w *= 0.55 + 0.45 * clampf(
+										dirt_noise.get_noise_2d(v.x * 1.5, v.z * 1.5)
+										* 0.5 + 0.5, 0.0, 1.0)
+									if shore_w > 0.0:
+										tint = tint.lerp(shore_tint as Color, shore_w * 0.85)
+						if rock_tint != null:
+							var rock_w := clampf(
+								(v.y - rock_line) / rock_fade, 0.0, 1.0)
+							rock_w = clampf(rock_w + dirt_noise.get_noise_2d(
+								v.x * 0.5, v.z * 0.5) * 0.25, 0.0, 1.0)
+							rock_w = smoothstep(0.0, 1.0, rock_w)
+							if rock_w > 0.0:
+								tint = tint.lerp(rock_tint as Color, rock_w)
+								# Pe piatra nu creste iarba: greutatea coboara spre
+								# textura de nisip/roca, exact ca sub zapada.
+								grass_w *= 1.0 - rock_w
+						# FATA DE STANCA: dupa panta, nu dupa cota. Se aplica
+						# INAINTE de zapada, ca albul sa ramana ultimul strat.
+						if scarp_tint != null and cell_slope_deg > 0.0:
+							var scarp_w := clampf(
+								(cell_slope_deg - scarp_deg) / scarp_fade_deg,
+								0.0, 1.0)
+							# Marginea se zdrentuieste cu ACELASI zgomot ca restul
+							# straturilor: o linie de panta perfecta se citeste ca
+							# desen tehnic, nu ca roca.
+							scarp_w = clampf(scarp_w + dirt_noise.get_noise_2d(
+								v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0)
+							scarp_w = smoothstep(0.0, 1.0, scarp_w)
+							if scarp_w > 0.0:
+								tint = tint.lerp(scarp_tint as Color, scarp_w)
+								# Pe fata de stanca nu creste iarba.
+								grass_w *= 1.0 - scarp_w
+							face_w = scarp_w
+						# ZONA DE SOL (gresia fantanii, riolitul fortului): DUPA
+						# fata de stanca, ca in zona ei sa castige zona — groapa
+						# fantanii e gresie si pe pereti, nu riolit.
+						if not zone_w.is_empty():
+							var gi: int = gis[corner_idx]
+							var zw: float = zone_w[gi]
+							if zw > 0.0:
+								zw = smoothstep(0.0, 1.0, clampf(zw + dirt_noise.get_noise_2d(
+									v.x * 0.5, v.z * 0.5) * 0.18, 0.0, 1.0))
+								var zt: Color = zone_tints[gi]
+								tint = tint.lerp(zt, zw)
+								if zone_alt:
+									grass_w = lerpf(grass_w, 1.0, zw)
+								# PETE DE MUSCHI (Kyoto POI D): alfa tentei de zona < 1
+								# vopseste petele (zgomot de 5-8 m) in verde de muschi,
+								# cu taria (1 - a). Solul temei (oliv pe dala de nisip)
+								# iesea gri in captura, deci tenta e explicita, pe
+								# aceeasi dala a zonei. Alfa 1 (toate celelalte zone) =
+								# nimic schimbat.
+								if zt.a < 0.999:
+									var mp := smoothstep(0.05, 0.3, moss_noise.get_noise_2d(
+										v.x, v.z)) * (1.0 - zt.a) * zw
+									tint = tint.lerp(GROUND_MOSS_TINT, mp)
+						if snow_tint != null:
+							var snow_w := clampf(
+								(v.y - snow_line) / snow_fade, 0.0, 1.0)
+							# Marginea se zdrentuieste cu ACELASI zgomot ca peticele
+							# de pamant: o linie de nivel perfecta se citeste ca
+							# desen tehnic. Amplitudinea e in METRI de cota, deci
+							# raportata la latimea benzii de trecere.
+							snow_w = clampf(snow_w + dirt_noise.get_noise_2d(
+								v.x * 0.6, v.z * 0.6) * 0.22, 0.0, 1.0)
+							snow_w = smoothstep(0.0, 1.0, snow_w)
+							if snow_w > 0.0:
+								tint = tint.lerp(snow_tint as Color, snow_w)
+								grass_w *= 1.0 - snow_w
+						# `terrain_alt_all`: toata perechea a doua (Carrara: pietris) pe tot terenul, fara
+						# nisip nicaieri. Fals pe orice alta tema = nimic nu se schimba.
+						if alt_all:
+							grass_w = (1.0 - face_w) if face_marble else 1.0
+						var col := tint * shade
+						if face_ao < 1.0 and tri_slope >= BENCH_FLAT_SHADE_DEG and tri_y1 - tri_y0 > 0.5:
+							col *= lerpf(face_ao, 1.0, (v.y - tri_y0) / (tri_y1 - tri_y0))
+						st.set_color(Color(col.r, col.g, col.b, grass_w))
+						# UV din coordonate de LUME, nu din indexul celulei: asa
+						# textura curge continuu peste toata suprafata, fara sa se
+						# vada grila de 32x32 in tiparul ei.
+						st.set_uv(Vector2(v.x, v.z) * SURFACE_TILING)
+						# A doua scara, pentru stratul de detaliu: aceeasi textura,
+						# de 15 ori mai lenta. Suprapuse, cele doua rup tiparul de
+						# repetitie pe care ochiul il prinde imediat pe suprafete mari.
+						st.set_uv2(Vector2(v.x, v.z) * SURFACE_TILING_MACRO)
+						if snow_cfg != null:
+							st.set_custom(0, Color(snow_elig[gis[corner_idx]], 0.0, 0.0, 0.0))
+						st.add_vertex(v)
+				if fine_quad:
+					st.set_smooth_group(0)
 	# Indexarea uneste colturile de celula partajate (pozitie+culoare+UV
 	# identice), deci normalele se mediaza REAL intre celule vecine: dunele
 	# prind lumina continuu, fara fatete aleatorii pe grila.
@@ -7332,8 +7777,26 @@ func _build_terrain() -> void:
 		if alt_cls != null:
 			mat.set_shader_parameter("grass_micro",
 				Palette._class_texture(String(alt_cls)))
-			mat.set_shader_parameter("grass_macro",
-				_tex("res://assets/textures/surface_sand_macro.png"))
+			# Macro-ul ramane al nisipului (dungi verticale = ondulatii), mai putin cand tema cere
+			# `terrain_alt_keep_macro`: Carrara pastreaza macro-ul de iarba (pete neregulate de pamant
+			# batut), ca pietrisul sa nu citeasca "nisip ondulat". Fals pe celelalte teme = neschimbat.
+			if not bool(theme_flag("terrain_alt_keep_macro", false)):
+				mat.set_shader_parameter("grass_macro",
+					_tex("res://assets/textures/surface_sand_macro.png"))
+		# Perechea PRIMA ca dala de marmura (fetele de gradon) + dungile orizontale de fir diamantat,
+		# doar pe teme care le cer. Vezi `terrain_face_marble` si `face_stripe_*` in terrain_splat.
+		var sand_cls: Variant = theme_flag("terrain_sand_class", null)
+		if sand_cls != null:
+			mat.set_shader_parameter("sand_micro", Palette._class_texture(String(sand_cls)))
+		var stripe_amp: Variant = theme_flag("face_stripe_amp", null)
+		if stripe_amp != null:
+			mat.set_shader_parameter("face_stripe_amp", float(stripe_amp))
+			mat.set_shader_parameter("face_stripe_period",
+				float(theme_flag("face_stripe_period", 0.7)))
+			mat.set_shader_parameter("side_tiling_k", float(theme_flag("face_side_tiling_k", 1.0)))
+		var tri_pow: Variant = theme_flag("terrain_tri_power", null)
+		if tri_pow != null:
+			mat.set_shader_parameter("tri_power", float(tri_pow))
 		if snow_cfg != null:
 			var sc: Dictionary = snow_cfg
 			mat.set_shader_parameter("snow_on", 1.0)
@@ -11848,6 +12311,8 @@ func _build_walls() -> void:
 	var deck_rails := bool(theme_flag("deck_rails", walls_on))
 	if not walls_on and not deck_rails:
 		return
+	var water_only := bool(theme_flag("walls_water_only", false))
+	var sea_y_walls := _sampler.mean_road_y() + sea_level_offset
 	var loop_poly := PackedVector2Array()
 	for p in _points():
 		loop_poly.append(Vector2(p.x, p.z))
@@ -11908,6 +12373,25 @@ func _build_walls() -> void:
 			var elevated := mid.y > 1.0
 			if not exterior and not elevated and not on_deck:
 				continue
+			# GARD DOAR LANGA APA (optional, oct 2026, Ha Long): `"walls_water_only":
+			# true`. Tema mosteneste de la Okinawa gardul exterior INVIZIBIL
+			# (`wall_visible` false) — acolo justificat, digul are mare pe ambele
+			# parti. Pe Ha Long insa „exterior sau mai sus de 1 m" acopera aproape
+			# toata bucla, si pe uscat masina se lovea de un zid nevazut la
+			# marginea asfaltului, pe nisip deschis: raportat la volan ca „nu poti
+			# iesi de pe drum". Aici gardul ramane doar unde dincolo de margine e
+			# APA (fundul sub oglinda marii in primii 15 m); pe nisip iesirea e
+			# libera, iar ceasul de offroad (#497) face restul.
+			if not on_deck and water_only:
+				var out := _side_at(i) * side_sign
+				var wet := false
+				for k: float in [3.0, 8.0, 15.0]:
+					var q := mid + out * k
+					if _sampler.ground_y(q.x, q.z) < sea_y_walls:
+						wet = true
+						break
+				if not wet:
+					continue
 			# Parapetul declarat al pistei bate regula implicita. Pe pod NU:
 			# balustrada podului e parte din citirea podului (vezi mai sus).
 			if not on_deck and mode != -1:
@@ -11967,6 +12451,24 @@ const PARAPET_BLOCK_M: float = 4.0
 const ROCK_LIP_HEIGHT: float = 1.6
 const ROCK_LIP_WAVE: float = 0.45
 const ROCK_LIP_THICK: float = 1.4
+## Stilul 2 (BERMA de moloz, Carrara): dambul continuu de la marginea unei
+## terase, dinspre gol. 0.6 m inalt, cu fata dinspre drum in panta (se citeste ca
+## moloz, nu ca bariera de beton), dar abrupta (~53 grade): un prag lateral
+## > 0.3 m e zid pentru roata (memoria `suprafete-cu-goluri-si-praguri`) si
+## berma are tocmai rolul sa opreasca masina, nu sa o lanseze.
+const BERM_HEIGHT: float = 0.6
+const BERM_RUN: float = 0.45
+## SPATELE bermei (spre banc/gol): creasta plata si apoi o RAMPA blanda (~25 grade), nu
+## perete. Masurat pe Carrara (ProbeRace, runda 4): o masina impinsa peste berma de o lovitura
+## laterala ateriza pe bancul plat de DINCOLO, cu berma de 0.6 m verticala in fata (spatele
+## vechi cobora drept 0.9 m), si ramanea blocata acolo pana la repunerea de stall — acelasi
+## prag lateral > 0.3 m care e zid. Cu rampa, masina de dincolo urca la loc pe drum.
+const BERM_CREST: float = 0.3
+const BERM_BACK_RUN: float = 1.3
+## Berma se subtiaza spre capete pe atatia metri: un capat taiat drept e un zid
+## pe traiectoria masinii care iese larg dintr-un ac.
+const BERM_TAPER_M: float = 10.0
+const BERM_THICK: float = 1.1
 
 
 func _parapet_segments() -> Array[Vector4]:
@@ -11994,13 +12496,37 @@ func _build_parapets() -> void:
 			if not is_zero_approx(seg.z) and signf(seg.z) != side_sign:
 				continue
 			var rock := int(seg.w) == 1
+			var berm := int(seg.w) == 2
 			var thick := ROCK_LIP_THICK if rock else PARAPET_THICK
+			if berm:
+				thick = BERM_THICK
 			# Sectiunea transversala la fiecare punct copt din interval.
 			var secs: Array = [] # [inner_top, outer_top, inner_bot, outer_bot, dist]
-			for i in n:
-				var f := _dists[i] / total_len
-				if f < seg.x or f > seg.y:
-					continue
+			# Intervalul poate TRECE peste linia de start (`seg.y < seg.x`, ca la rape si sectoare):
+			# berma de la intrarea in piazzale (Carrara) incepe inainte de linie si continua dupa ea,
+			# fara gaura in mijloc. Punctele se iau in ORDINEA mersului (intai cele de dupa seg.x,
+			# apoi cele de pana la seg.y), iar `dist` creste monoton peste linie (+ lungimea
+			# turului). Fara trecere peste linie ordinea si cifrele raman exact cele vechi.
+			var wraps: bool = seg.y < seg.x
+			var order: Array[int] = []
+			if wraps:
+				for i in n:
+					if _dists[i] / total_len >= seg.x:
+						order.append(i)
+				for i in n:
+					if _dists[i] / total_len <= seg.y:
+						order.append(i)
+			else:
+				for i in n:
+					var fo := _dists[i] / total_len
+					if fo >= seg.x and fo <= seg.y:
+						order.append(i)
+			var d_first := -1.0
+			var d_last := -1.0
+			if berm and not order.is_empty():
+				d_first = _parapet_dist(order[0], wraps, seg.y, total_len)
+				d_last = _parapet_dist(order[order.size() - 1], wraps, seg.y, total_len)
+			for i in order:
 				var c := baked[i]
 				var side := _side_at(i)
 				var e := c + side * (width_at_index(i) + PARAPET_GAP) * side_sign
@@ -12012,6 +12538,21 @@ func _build_parapets() -> void:
 					var d: float = _dists[i]
 					h = ROCK_LIP_HEIGHT + ROCK_LIP_WAVE * (0.6 * sin(d * 0.41)
 						+ 0.4 * sin(d * 1.37 + 1.1))
+				if berm:
+					var di := _parapet_dist(i, wraps, seg.y, total_len)
+					var tap := smoothstep(0.0, 1.0, minf(
+						(di - d_first) / BERM_TAPER_M,
+						(d_last - di) / BERM_TAPER_M))
+					h = BERM_HEIGHT * maxf(tap, 0.05)
+					# fata dinspre drum in panta: baza la marginea asfaltului,
+					# creasta la BERM_RUN dincolo
+					secs.append([
+						e + out * BERM_RUN + Vector3.UP * h,
+						e + out * (BERM_RUN + BERM_CREST) + Vector3.UP * h,
+						e - Vector3.UP * 0.15,
+						e + out * (BERM_RUN + BERM_CREST + BERM_BACK_RUN) - Vector3.UP * 0.35,
+						_dists[i], side * side_sign])
+					continue
 				secs.append([
 					e + Vector3.UP * h,
 					e + out * thick + Vector3.UP * h,
@@ -12028,6 +12569,8 @@ func _build_parapets() -> void:
 				var slot := Palette.FOAM_WHITE if block == 0 else Palette.KERB_RED
 				if rock:
 					slot = Palette.ROCK_DARK
+				elif berm:
+					slot = Palette.CORAL_SAND if block == 0 else Palette.MARBLE_GREY
 				var outv: Vector3 = a[5]
 				# top, fata dinspre sosea, fata dinspre vale
 				_parapet_quad(st, a[0], b[0], b[1], a[1], slot, Vector3.UP)
@@ -12038,7 +12581,7 @@ func _build_parapets() -> void:
 			var last: Array = secs[secs.size() - 1]
 			var d0: Vector3 = (secs[1] as Array)[0] - first[0]
 			var d1: Vector3 = last[0] - (secs[secs.size() - 2] as Array)[0]
-			var cap := Palette.ROCK_DARK if rock else Palette.KERB_RED
+			var cap := Palette.ROCK_DARK if rock else (Palette.MARBLE_GREY if berm else Palette.KERB_RED)
 			_parapet_quad(st, first[0], first[1], first[3], first[2],
 				cap, -d0.normalized())
 			_parapet_quad(st, last[0], last[1], last[3], last[2],
@@ -12050,6 +12593,15 @@ func _build_parapets() -> void:
 	_add_mesh_with_collision(mesh, Color.WHITE, null, 1.0, 0.5,
 		BaseMaterial3D.CULL_DISABLED, null, null, true,
 		Palette.world_material(), "Parapet")
+
+
+## Distanta pe tur a punctului `i` pentru un interval de parapet: cu trecere peste linia de start,
+## punctele de dupa linie (frac <= `f_end`) primesc + lungimea turului, ca sa creasca monoton.
+func _parapet_dist(i: int, wraps: bool, f_end: float, total_len: float) -> float:
+	var d := float(_dists[i])
+	if wraps and d / total_len <= f_end:
+		d += total_len
+	return d
 
 
 ## Un cvadrilater pe atlasul de paleta, cu fata spre `hint` (infasurarea se
@@ -12487,6 +13039,11 @@ func _tunnel_specs() -> Array[Vector4]:
 ## oprire). Plina doar pentru tunelurile cu `camera_tail_m` > 0.
 var _tunnel_camera_tail: Dictionary = {}
 
+## Clasa triplanara a tubului, per tunel (cheie = fractia liniei de oprire, ca la coada de
+## camera). Goala = `wet_gneiss` pe toate (Fiordland, Transfagarasan: bit-identic). Plina doar
+## pentru tunelurile care cer alta clasa (`TunnelSignalHazard.tube_class`, Carrara: marmura).
+var _tunnel_tube_class: Dictionary = {}
+
 
 ## Tunelurile declarate ca noduri [TunnelSignalHazard], in aceleasi patru
 ## numere. Cautare recursiva si manuala, ca la varfuri.
@@ -12508,6 +13065,8 @@ func _collect_tunnels(node: Node, out: Array[Vector4]) -> void:
 				sig.tunnel_half_width, sig.tunnel_ceiling))
 			if sig.camera_tail_m > 0.0:
 				_tunnel_camera_tail[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.camera_tail_m # cheia trece prin float32, ca spec.x
+			if sig.tube_class != "wet_gneiss":
+				_tunnel_tube_class[Vector4(frac_at(i), 0.0, 0.0, 0.0).x] = sig.tube_class
 		_collect_tunnels(child, out)
 
 
@@ -12612,7 +13171,8 @@ func _build_tunnel(spec: Vector4) -> void:
 	rock.generate_normals()
 	_add_mesh_with_collision(rock.commit(), Color.WHITE, null, 0.9, 0.5,
 		BaseMaterial3D.CULL_DISABLED, null, null, true,
-		Palette.triplanar_class_material("wet_gneiss"), "TunnelBore")
+		Palette.triplanar_class_material(String(_tunnel_tube_class.get(spec.x, "wet_gneiss"))),
+		"TunnelBore")
 	concrete.generate_normals()
 	_add_mesh_with_collision(concrete.commit(), Palette.color(Palette.CONCRETE),
 		null, 1.0, 0.5, BaseMaterial3D.CULL_DISABLED,
@@ -12811,7 +13371,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 		HazardMarker.Kind.FLYOFF:
 			_build_flyoff(frac)
 		HazardMarker.Kind.EXCAVATOR:
-			_build_excavator(frac)
+			_build_excavator(frac, spec)
 		HazardMarker.Kind.AVALANCHE:
 			_build_avalanche(frac, spec)
 		HazardMarker.Kind.WAVE:
@@ -14868,6 +15428,27 @@ const KERB_EDGE_SHADE: Color = Color(0.86, 0.86, 0.86)
 const KERB_RED: Color = Color(0.904, 0.160, 0.106)
 const KERB_WHITE: Color = Color(0.979, 0.979, 0.979)
 
+## Pe ce indici ai bordura (1) — scris de `_build_kerbs` cu ACELEASI conditii ca
+## mesh-ul, citit de [method kerb_at]. Gol = pista fara borduri.
+var _kerb_idx: PackedByteArray = PackedByteArray()
+
+
+## E punctul `pos` (de langa indexul `index` al buclei principale) pe o bordura?
+## Banda e KERB_WIDTH lata, inauntrul marginii soselei, pe ambele laturi; exista
+## doar unde `_build_kerbs` a pus mesh. Ieftin: un test pe octet, apoi o
+## proiectie. Il foloseste masina ca sa scuture suspensia pe bordura.
+func kerb_at(index: int, pos: Vector3) -> bool:
+	var n := _kerb_idx.size()
+	if n == 0:
+		return false
+	var i := ((index % n) + n) % n
+	if _kerb_idx[i] == 0:
+		return false
+	var lat := absf((pos - baked[i]).dot(_side_at(i)))
+	var w := width_at_index(i)
+	return lat <= w and lat >= w - KERB_WIDTH
+
+
 ## Bordurile rosu-alb de pe marginile virajelor stranse.
 ##
 ## UN SINGUR mesh pentru amandoua culorile, nu doua: culoarea vine acum din
@@ -14880,6 +15461,7 @@ const KERB_WHITE: Color = Color(0.979, 0.979, 0.979)
 ## (curbura peste 0.08 rad). Nu sunt decor, sunt SEMNAL — daca ar margini toata
 ## pista, n-ar mai spune nimic despre unde se franeaza.
 func _build_kerbs() -> void:
+	_kerb_idx = PackedByteArray()
 	# Un drum de nisip n-are borduri turnate. Semnalul lor — "aici se franeaza",
 	# citit de departe — NU se pierde: pe virajele aceleiasi piste raman
 	# chevron-urile (_build_chevrons), umarul de pietris (_build_shoulders) si,
@@ -14941,6 +15523,11 @@ func _build_kerbs() -> void:
 			st.set_color(tint)
 			st.set_uv(Vector2(u_in, v1)); st.add_vertex(in1)
 			emitted = true
+		# Segmentul i..j (i, i+1) are bordura: indexul masinii poate cadea pe oricare.
+		if _kerb_idx.is_empty():
+			_kerb_idx.resize(n)
+		_kerb_idx[i] = 1
+		_kerb_idx[(i + 1) % n] = 1
 	if not emitted:
 		return
 	st.generate_normals()
@@ -15192,7 +15779,7 @@ func _bake_decor(cliffs: Node3D, decor: Node3D, scen: Node3D) -> void:
 	TrackDecorBatch.bake(decor, decor.get_node_or_null(^"Sway") as SwayDriver)
 	TrackDecorBatch.bake(scen)
 
-func _build_excavator(frac: float) -> void:
+func _build_excavator(frac: float, spec: Dictionary = {}) -> void:
 	const PATH := "res://assets/models/vehicles/rusted_digger.glb"
 	if not ResourceLoader.exists(PATH):
 		return
@@ -15207,6 +15794,8 @@ func _build_excavator(frac: float) -> void:
 	# 0.75, deci scara devine 1.0 si colizoarele se recalibreaza in hazard.
 	excavator.model_scene = load(PATH)
 	excavator.model_scale = 1.0
+	excavator.ai_dice = bool(spec.get("excavator_ai_dice", false))
+	excavator.soft_contact = bool(spec.get("excavator_soft_contact", false))
 	add_child(excavator)
 	# Corpul sta PE marginea soselei (blocheaza banda exterioara),
 	# bratul coboara spre centru — lasa o strecuratoare pe interior.

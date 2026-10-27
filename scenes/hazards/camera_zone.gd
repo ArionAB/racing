@@ -323,6 +323,14 @@ func _first_world_env(n: Node) -> WorldEnvironment:
 	return null
 
 
+## Jucatorul e in zona ACUM, in oricare din cele doua moduri (cutie sau
+## interval de fractie). Publica pentru provocarile carierei
+## (ChallengeTracker, „CLEAN SPIRAL"), care au nevoie de aceeasi apartenenta
+## pe care o foloseste camera — nu de o a doua definitie a zonei.
+func contains_player() -> bool:
+	return _player_inside()
+
+
 func _player_inside() -> bool:
 	if frac_to > frac_from:
 		return _player_in_frac_span()

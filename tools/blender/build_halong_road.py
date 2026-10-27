@@ -70,7 +70,13 @@ clear_built()
 
 # --- sloturile pe roluri (halong_kit.md §0.4) --------------------------------
 HL_ROCK = MARBLE_GREY         # 29: calcar in soare, piatra cioplita, dig
-HL_ROCK_DARK = ROCK_LIGHT     # 3: calcar in umbra, interiorul grotei
+# SLOTUL 3 E PORTOCALIU, nu calcar in umbra. In atlas e **#CE8D4A,
+# saturatie 0,64** — stanca de desert. Folosit pentru rosturile parapetului si
+# stalactite, iesea ca dungi de RUGINA pe piatra cenusie (vizibil pe captura
+# POI C). Aceeasi capcana ca la corpul turnurilor, care fusese deja mutat pe
+# 29: numele "ROCK_LIGHT" suna a calcar palid si nu e.
+# SAND_SHADOW 2 = nisip in umbra, gri-cald inchis: piatra in umbra, nu rugina.
+HL_ROCK_DARK = SAND_SHADOW    # 2: calcar in umbra, rosturi, interiorul grotei
 HL_SCRUB = TROPICAL_GREEN     # 21: vegetatie de carst
 HL_LEAF_DARK = LOG_DARK       # 28: umbra adanca de frunzis, lemn inchis
 HL_WOOD = WOOD                # 9: barne, lemnul pavilionului
@@ -331,100 +337,105 @@ def build_stone_dike():
 # ---------------------------------------------------------------------------
 
 def build_ficus(variant):
-    """Ficus pitic de carst. A: 6 m, coroana mai strinsa. B: 4,5 m, coroana
-    mai deschisa.
+    """Ficus de carst. A: 6 m. B: 4,5 m, coroana mai deschisa.
 
-    NU `foliage_column`: brief §1.6 cere coroane "rare si deschise, nu
-    brocoli", cu precedentul de la Fiordland. Frunzele sunt `leaf_vfold`
-    individuale, deci se vede cerul printre ele.
+    REMODELAT (oct 2026) dupa verdictul dezvoltatorului pe capturile din joc:
+    "coroanele sunt mici fata de trunchiurile inalte, arata ca niste copaci pe
+    picioroange". Masurat pe GLB-ul vechi, avea dreptate si cifra o spune:
 
-    Radacinile aeriene sunt semnatura piesei: ficusul de carst creste DIN
-    stanca, cu radacini care curg in jos pe perete."""
+        coroana 2,4 m lata x 2,1 inalta, incepand de la z = 3,83 pe un copac
+        de 5,92 m  ->  65% din inaltime era TRUNCHI GOL, iar coroana era mai
+        INGUSTA decat inalta.
+
+    Un ficus (banian) real e exact invers: coroana LATA si joasa, pe trunchi
+    scurt si gros. Tinta de acum:
+
+        coroana ~5,5 m lata x 2,6 inalta, incepand de la z = 2,2 (37%)
+        -> raport latime/inaltime 2,1 in loc de 1,1, trunchi gol 37% in loc de 65%
+
+    Radacinile aeriene raman semnatura piesei, dar SCURTE si langa trunchi:
+    inainte erau fire lungi splayate care citeau ca picioare de paianjen.
+    """
     a = variant == "a"
     H = 6.0 if a else 4.5
-    trunk_h = H * 0.42
+    # trunchiul se opreste la 37% din inaltime (era 42%), si coroana incepe
+    # chiar de acolo, nu cu un metru mai sus.
+    trunk_h = H * 0.37
     b = Builder()
-    # trunchiul: scurt, noduros, inclinat (creste dintr-o fisura)
-    lean = 0.22 if a else -0.3
+    # trunchi SCURT SI GROS: raza 0,42 la baza (era 0,30), pe o inaltime mai
+    # mica. Un banian are trunchiul masiv, nu o prajina.
+    lean = 0.18 if a else -0.22
     b.taper_sweep([(0.0, 0.0, 0.0),
                    (lean * 0.35, 0.05, trunk_h * 0.5),
                    (lean, 0.08, trunk_h)],
-                  [0.30, 0.235, 0.17], HL_WOOD, segments=6)
-    # radacini aeriene: fire care cad din trunchi spre sol
-    for k in range(4 if a else 3):
-        ang = 40.0 + k * 78.0
-        rx = math.cos(math.radians(ang)) * 0.52
-        ry = math.sin(math.radians(ang)) * 0.42
-        b.taper_sweep([(lean * 0.7, 0.06, trunk_h * 0.72),
-                       (rx * 0.8, ry * 0.8, trunk_h * 0.34),
+                  [0.42, 0.33, 0.26], HL_WOOD, segments=5)
+    # radacini aeriene SCURTE, lipite de trunchi: coboara din prima treime a
+    # coroanei si ating solul la 0,3-0,5 m de ax. Inainte plecau de la 0,52 m
+    # si se desfaceau in jos ca niste picioare.
+    # 3 radacini (erau 5): sunt scurte si lipite de trunchi, deci a patra
+    # si a cincea cad in spatele celorlalte. 508 -> sub 400.
+    for k in range(3):
+        ang = 32.0 + k * 120.0
+        rr = 0.34
+        rx = math.cos(math.radians(ang)) * rr
+        ry = math.sin(math.radians(ang)) * rr * 0.85
+        b.taper_sweep([(lean * 0.8, 0.06, trunk_h * 0.92),
+                       (rx * 0.9, ry * 0.9, trunk_h * 0.42),
                        (rx, ry, 0.0)],
-                      [0.075, 0.055, 0.045], HL_WOOD, segments=3)
-    # ramurile principale
+                      [0.085, 0.07, 0.06], HL_WOOD, segments=3)
+    # ramurile principale: pleaca aproape ORIZONTAL si departe, ca sa poarte o
+    # coroana lata. Inainte urcau la 0,52-0,84 din inaltimea ramasa si ajungeau
+    # la doar ~1 m lateral.
     tips = []
-    nb = 4 if a else 5
+    # 4 ramuri (nu 5): fiecare perna costa ~70 tri, iar 6 perne dadeau
+    # 592 din bugetul de 400. Cu 4 + cea centrala: 5 perne.
+    nb = 4
+    spread = (2.45 if a else 2.0)
     for k in range(nb):
         ang = 28.0 + k * (360.0 / nb)
-        ln = (1.05 if a else 0.92)   # mai scurte: coroana sta PESTE trunchi
-        tx = math.cos(math.radians(ang)) * ln
-        ty = math.sin(math.radians(ang)) * ln
+        tx = math.cos(math.radians(ang)) * spread
+        ty = math.sin(math.radians(ang)) * spread * 0.9
+        # varful ramurii urca putin peste trunchi, nu mult: coroana e JOASA
+        # varfurile urca mai mult, ca piesa sa pastreze inaltimea din
+        # contract (6,0 / 4,5 m): cu 0,22 coroana cobora copacul la 4,6 m.
         tz = trunk_h + (H - trunk_h) * (0.52 + 0.16 * (k % 3))
-        b.taper_sweep([(lean, 0.08, trunk_h),
-                       (tx * 0.55, ty * 0.55, (trunk_h + tz) * 0.5),
+        b.taper_sweep([(lean, 0.08, trunk_h * 0.96),
+                       (tx * 0.5, ty * 0.5, trunk_h + (tz - trunk_h) * 0.65),
                        (tx, ty, tz)],
-                      [0.15, 0.10, 0.06], HL_WOOD, segments=3)
+                      [0.19, 0.12, 0.07], HL_WOOD, segments=3)
         tips.append((tx, ty, tz, ang))
     o_wood = b.to_object("Ficus_Wood")
 
-    # frunzisul: frunze individuale pe varfurile de ramura. Doua sloturi, ca
-    # masa sa aiba adancime (verde la lumina, LOG_DARK in umbra dedesubt).
+    # CORONA: perne turtite si LATE, care se ating intre ele.
+    #
+    # Tehnica ramane `foliage_pillow` (la 30-40 m o coroana e o MASA, nu
+    # frunze — memoria `coroana-e-masa-nu-frunze`), dar proportiile se schimba:
+    # perne LATE si joase (h = 0,42 din latime, era 0,62), asezate pe varfurile
+    # departate, plus una centrala care leaga totul peste trunchi. Asa silueta
+    # e o umbrela, nu trei bile pe bete.
     f = Builder()
-    # O frunza per varf de ramura, nu trei. `leaf_vfold` costa
-    # 2*(4*(stations-1)+2) tris = 56 la stations=4, deci 12-15 frunze dadeau
-    # 672-840 tri, de doua ori bugetul. Coroana RARA (brief 1.6) vine din
-    # DISTANTA dintre frunze, nu din numarul lor: o frunza mai mare pe fiecare
-    # varf citeste mai deschis decat trei mici inghesuite, si costa o treime.
-    # DOUA frunze per varf de ramura, la +/-38 grade fata de axa ramurii.
-    #
-    # Prima taiere (de la 3 frunze la 1) a adus bugetul de la 672 la 160 tri,
-    # dar pe plansa ficusul citea CRENGI GOALE DE IARNA, nu coroana rara:
-    # taiasem dincolo de ce cere brief §1.6 ("rare si deschise, nu brocoli" —
-    # deschise, nu moarte). Masurat pe plansa: 4-5 frunze pe o coroana de 5 m
-    # lasa ramura vizibila pe toata lungimea ei.
-    # `stations=3` tine frunza la 40 tri in loc de 56, deci doua frunze costa
-    # cat 1,4 din vechile de 4 statii.
-    # 4 frunze per varf de ramura, la stations=2 (12 tri bucata in loc de 40).
-    # Doua pe varf si doua mai jos pe ramura, ca masa sa nu fie doar la capat.
-    # Coroana = PERNE de frunzis pe varfurile ramurilor, nu frunze individuale.
-    # Una per ramura, turtita (h ~ 0,42 din latime) si usor inclinata spre
-    # exterior, ca sa urmeze directia ramurii.
-    # "Rar si deschis" vine din GOLURILE dintre perne: ele stau pe varfuri
-    # departate, deci se vede cerul intre ele si silueta ramane citibila.
-    # `seg`/`rings` explicit (regula primitivelor): 7x3 e minimul care nu
-    # citeste poligonal la 30-40 m.
-    # TREI perne (84 tri bucata, masurat: 144 lemn + 3 x 84 = 396 din 400),
-    # bombate si suprapuse, nu patru discuri departate.
-    #
-    # `h = 0,62 * w` in loc de 0,42: la 0,42 pernele citeau ca PALARII pe bete
-    # (plansa rundei 4). O coroana de ficus e bombata, iar pernele trebuie sa
-    # se ATINGA intre ele ca sa dea o masa unica, cu goluri doar pe margini —
-    # exact ce inseamna "rar si deschis" (brief §1.6) la 30-40 m.
-    npil = 3
-    for i in range(npil):
-        tx, ty, tz, ang = tips[i % len(tips)]
-        # pernele se trag spre centru, ca sa se intrepatrunda
-        k = 0.58
-        px, py = tx * k, ty * k
-        w = (1.62 if a else 1.42) * (0.88 + 0.12 * (i % 2))
-        slot = HL_SCRUB if i != 1 else HL_LEAF_DARK
-        foliage_pillow(f, (px, py, tz - 0.1 + 0.22 * (i % 2)),
-                       w, w * 0.92, w * 0.62, slot,
-                       seed=20 + i * 7, bumps=1, seg=7, rings=3,
-                       tilt_deg=12.0, tilt_azim_deg=ang)
+    for i, (tx, ty, tz, ang) in enumerate(tips):
+        w = (2.05 if a else 1.75) * (0.9 + 0.1 * (i % 2))
+        slot = HL_SCRUB if i % 3 != 1 else HL_LEAF_DARK
+        foliage_pillow(f, (tx * 0.78, ty * 0.78, tz + 0.1),
+                       w, w * 0.92, w * 0.42, slot,
+                       seed=20 + i * 7, bumps=1, seg=7, rings=2,
+                       tilt_deg=9.0, tilt_azim_deg=ang)
+    # perna centrala, peste trunchi: inchide golul din mijloc, ca sa nu se vada
+    # cerul exact deasupra tulpinii
+    wc = (2.1 if a else 1.8)
+    foliage_pillow(f, (lean * 0.5, 0.05, trunk_h + (H - trunk_h) * 0.34),
+                   wc, wc * 0.95, wc * 0.46, HL_SCRUB,
+                   seed=77, bumps=1, seg=7, rings=2)
     o_leaf = f.to_object("Ficus_Leaf")
 
     objs = [o_wood, o_leaf]
+    # BUGET 500, nu 400: coroana lata costa mai mult decat una ingusta, si
+    # asta e exact ce cumpara piesa. Pista are 15 materiale din 38 si
+    # deseneaza 45 de cadre fata de 506-1088 pe celelalte piste, deci
+    # triunghiurile nu sunt constrangerea (CLAUDE.md: masurate, fara plafon).
     emit_hl(objs, "plants/karst_ficus_%s.glb" % variant, _ao(dist=1.5),
-            budget=400)
+            budget=500)
     _drop(objs)
 
 
@@ -683,53 +694,83 @@ def build_macaque():
 # halong_horizon (§1.9) — UN fisier, TREI noduri
 # ---------------------------------------------------------------------------
 
+# Profilul de carst al turnurilor din kit (`build_halong_karst.py`,
+# KARST_PROFILE), rarit la 9 inele: nisa de val, consola, perete drept,
+# umar rotunjit sub creasta. La 120-340 m nisa nu se mai vede ca adancime, dar
+# umarul rotunjit si capacul verde da — ele despart „turn" de „bloc".
+HORIZON_PROFILE = [
+    (0.000, 0.86),
+    (0.055, 0.62),   # nisa de val
+    (0.120, 0.96),   # consola
+    (0.400, 1.00),
+    (0.650, 0.99),
+    (0.800, 0.93),
+    (0.900, 0.80),
+    (0.960, 0.62),
+    (1.000, 0.40),   # varf rotunjit, nu capac plat
+]
+
+
 def _karst_row(b, width, height, n, seed, slot_main, slot_pale=None,
                pale_from=0.55, rings3=True):
-    """Un sir de turnuri de carst ca SILUETA: `n` conuri trunchiate cu profil
-    de turn (strangere la baza, perete drept), aliniate pe X.
+    """Un sir de turnuri de carst ca SILUETA de fundal, aliniat pe X.
 
-    Fatete MARI: la 150-320 m si scara 1,3-2,4x detaliul fin e zgomot
-    (memoria `silueta-inainte-de-umbrire`). segments=6 explicit.
-    Volume INCHISE, citibile din orice azimut."""
-    rnd = _lcg(seed)
+    REFACUT (oct 2026) dupa verdictul de la volan: „blocuri gri urate".
+    Versiunea veche era din conuri trunchiate cu 6 fete si capac plat — prisme
+    hexagonale cu fete plane mari, care sub soarele de ora de aur citeau ca
+    BLOCURI de beton, nu ca stanca, mai ales odata ce se vedeau de la 120-200 m
+    (asezarea lor nu tinea cont de lungimea sirului, vezi
+    `tools/probe_horizon_clear.gd`). Acum fiecare turn e din vocabularul
+    turnurilor din kit (`ring_points` + `faceted_shell`, zgomot pe coloana =
+    dungi verticale) cu profilul de carst de mai sus si un capac de tufe pe
+    `HL_SCRUB`: varful verde e semnatura turnului Ha Long si se citeste si
+    prin ceata. Turnurile se SUPRAPUN pe X, deci sirul e un masiv cu creste,
+    nu o insiruire de stalpi.
+
+    `rings3` False (planul departat) = mai putine fatete si fara tufe de
+    perete: acolo conteaza doar conturul de sus."""
+    rnd = _ok_rand(seed)
     half = width * 0.5
+    seg = 9 if rings3 else 7
     for k in range(n):
         t = (k + 0.5) / n
-        x = -half + width * t
-        h = height * (0.52 + 0.48 * rnd())
-        r = h * (0.26 + 0.1 * rnd())
-        y = (rnd() - 0.5) * height * 0.3
+        x = -half + width * t + (rnd() - 0.5) * width / n * 0.6
+        h = height * (0.55 + 0.45 * rnd())
+        # h / raza ~ 2,6-3,4, ca la turnurile din kit (contract >= 2,5).
+        rm = h / (2.6 + 0.8 * rnd())
+        ratio = 0.80 + 0.15 * rnd()
+        y = (rnd() - 0.5) * height * 0.35
+        lean = (rnd() - 0.5) * rm * 0.5
         slot = slot_main
         if slot_pale is not None and rnd() > pale_from:
             slot = slot_pale
-        # turnul: baza strangsa, perete drept, varf retras — profilul de carst
-        # redus la trei inele (la distanta asta nu se vede mai mult)
+        rings = []
+        for (zf, rf) in HORIZON_PROFILE:
+            lt = max(0.0, min(1.0, (zf - 0.25) / 0.7))
+            rings.append((zf * h, rf * rm, rf * rm * ratio,
+                          x + lean * lt * lt, y))
+        pts, _ = ring_points(rings, seg, seed * 31 + k, 0.16)
+        faceted_shell(b, pts, slot, cap_bottom=False)
+        # Capacul verde: 3-5 ciorchini pe creasta, revarsati peste buza.
+        r_top = rm * 0.55
+        tx = x + lean
+        for i in range(3 + int(rnd() * 3)):
+            a = 2.0 * math.pi * (i + rnd() * 0.6) / 4.0
+            rho = r_top * (0.15 + 0.6 * rnd())
+            s = r_top * (0.55 + 0.3 * rnd())
+            chunk(b, (tx + math.cos(a) * rho, y + math.sin(a) * rho * ratio,
+                      h * (0.955 + 0.03 * rnd())),
+                  (s, s * 0.9, s * 0.42), seed * 97 + k * 7 + i, HL_SCRUB,
+                  seg=5, nr=2, jag=0.25)
         if rings3:
-            # TREI inele, dar cu raze care VARIAZA pe inaltime.
-            #
-            # Prima versiune avea pereti drepti (1,0 -> 0,95) si capac plat la
-            # 0,5: sirul citea ca o LINIE DE BLOCURI, un mic skyline. Am
-            # incercat un al patrulea inel pentru varf rotunjit — 1720 tri din
-            # 1500 si castig vizual aproape nul, deci inelul nu era cauza.
-            # Cauza e peretele DREPT: un turn de carst se umfla la mijloc si se
-            # strange spre varf, iar diferenta se citeste si de la 150-320 m.
-            # `bulge` variaza per turn (determinist din rnd), deci sirul nu mai
-            # are doua siluete identice. Acelasi buget, alta forma.
-            bulge = 1.0 + 0.16 * (rnd() - 0.3)
-            b.frustum((x, y, h * 0.05), r * 0.80, r * bulge, h * 0.1, slot,
-                      segments=6)
-            b.frustum((x, y, h * 0.5), r * bulge, r * 0.82, h * 0.8, slot,
-                      segments=6)
-            b.frustum((x, y, h * 0.95), r * 0.82, r * 0.26, h * 0.1, slot,
-                      segments=6)
-        else:
-            # Planul depArtat: DOUA inele. Brief 1.9 il cere "silueta aproape
-            # plata", iar la 320 m strangerea de la baza nu se mai citeste;
-            # ce rtamane e conturul de sus.
-            b.frustum((x, y, h * 0.5), r * 0.88, r * 0.80, h, slot,
-                      segments=6)
-            b.frustum((x, y, h * 0.96), r * 0.80, r * 0.24, h * 0.09, slot,
-                      segments=6)
+            # O tufa agatata pe perete, in treimea de sus: rupe verticala.
+            a = 2.0 * math.pi * rnd()
+            zf = 0.6 + 0.25 * rnd()
+            s = rm * 0.22
+            chunk(b, (x + lean * 0.5 + math.cos(a) * rm * 0.97,
+                      y + math.sin(a) * rm * ratio * 0.97, zf * h),
+                  (s, s * 0.9, s * 0.6), seed * 89 + k, HL_SCRUB,
+                  seg=5, nr=2, jag=0.3)
 
 
 def build_horizon():
@@ -755,7 +796,7 @@ def build_horizon():
         _karst_row(b, w, h, n, seed, s_main, s_pale, rings3=r3)
         objs.append(b.to_object(name))
     emit_hl(objs, "rocks/halong_horizon.glb", _ao(flat=True, dist=25.0),
-            budget=1500, flat_ao=True)
+            budget=12000, flat_ao=True)
     _drop(objs)
 
 

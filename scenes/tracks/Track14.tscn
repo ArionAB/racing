@@ -3041,7 +3041,7 @@ transform = Transform3D(-0.557444, 0, -0.862917, 0, 1.027312, 0, 0.862917, 0, -0
 metadata/coliziune = "trunk"
 
 [node name="Acacia112" parent="DecorManual/ZoneC_VadulMara" unique_id=615739017 instance=ExtResource("s_fig_tree")]
-transform = Transform3D(-1.007751, 0, 0.19166, 0, 1.025814, 0, -0.19166, 0, -1.007751, -98.16776, -4.5627794, 140.97728)
+transform = Transform3D(-1.007751, 0, 0.19166, 0, 1.025814, 0, -0.19166, 0, -1.007751, -98.1678, -2.2618, 140.9773)
 metadata/coliziune = "trunk"
 
 [node name="Acacia113" parent="DecorManual/ZoneC_VadulMara" unique_id=1598041421 instance=ExtResource("s_fig_tree")]
@@ -5507,22 +5507,6 @@ metadata/coliziune = "trunk"
 transform = Transform3D(0.51222336, 0, 0.43028176, 0, 0.66896576, 0, -0.43028176, 0, 0.51222336, 5.042919, 1.7000122, -126.10852)
 metadata/coliziune = "trunk"
 
-[node name="E_FlancVerde79" parent="DecorManual/ZoneE_Buza" unique_id=1288748269 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.42210835, 0, -0.21460313, 0, 0.47352928, 0, 0.21460313, 0, -0.42210835, 23.1322, 23.87616, -108.5406)
-metadata/coliziune = "trunk"
-
-[node name="E_FlancVerde80" parent="DecorManual/ZoneE_Buza" unique_id=664731909 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(0.37900916, 0, 0.050565045, 0, 0.3823673, 0, -0.050565045, 0, 0.37900916, 28.312473, 35.357086, -115.37337)
-metadata/coliziune = "trunk"
-
-[node name="E_FlancVerde81" parent="DecorManual/ZoneE_Buza" unique_id=417052172 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.47813016, 0, -0.17601073, 0, 0.509498, 0, 0.17601073, 0, -0.47813016, 30.071865, 30.456085, -112.29787)
-metadata/coliziune = "trunk"
-
-[node name="E_FlancVerde82" parent="DecorManual/ZoneE_Buza" unique_id=967849836 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(0.40008757, 0, 0.5172918, 0, 0.65395784, 0, -0.5172918, 0, 0.40008757, 39.377785, 2.9367828, -101.1284)
-metadata/coliziune = "trunk"
-
 [node name="E_FlancVerde83" parent="DecorManual/ZoneE_Buza" unique_id=2098479079 instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.6259564, 0, 0.20658474, 0, 0.65916514, 0, -0.20658474, 0, -0.6259564, 23.852919, 1.699997, -139.20699)
 metadata/coliziune = "trunk"
@@ -5584,7 +5568,7 @@ transform = Transform3D(-0.21750854, 0, 0.6084541, 0, 0.6461628, 0, -0.6084541, 
 metadata/coliziune = "trunk"
 
 [node name="E_FlancVerde98" parent="DecorManual/ZoneE_Buza" unique_id=1852188543 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(0.34577444, 0, 0.29293784, 0, 0.45318046, 0, -0.29293784, 0, 0.34577444, 33.483673, 35.376938, -116.29386)
+transform = Transform3D(0.34577444, 0, 0.29293784, 0, 0.45318046, 0, -0.29293784, 0, 0.34577444, 33.4837, 37.9210, -116.2939)
 metadata/coliziune = "trunk"
 
 [node name="E_FlancVerde99" parent="DecorManual/ZoneE_Buza" unique_id=26713684 instance=ExtResource("s_fever_tree")]
@@ -5647,16 +5631,8 @@ metadata/coliziune = "trunk"
 transform = Transform3D(-0.84640545, 0, -0.7033432, 0, 1.1004971, 0, 0.7033432, 0, -0.84640545, 25.413177, 1.699997, -134.86943)
 metadata/coliziune = "trunk"
 
-[node name="E_Lerai108" parent="DecorManual/ZoneE_Buza" unique_id=1874627000 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(-0.81029344, 0, -0.82156634, 0, 1.1539266, 0, 0.82156634, 0, -0.81029344, 47.48014, 5.146866, -99.46481)
-metadata/coliziune = "trunk"
-
 [node name="E_Lerai109" parent="DecorManual/ZoneE_Buza" unique_id=785335985 instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.9965775, 0, -0.60791135, 0, 1.1673572, 0, 0.60791135, 0, 0.9965775, 16.241035, 1.699997, -137.12334)
-metadata/coliziune = "trunk"
-
-[node name="E_Lerai110" parent="DecorManual/ZoneE_Buza" unique_id=1868098658 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(0.8003836, 0, 0.5307024, 0, 0.9603432, 0, -0.5307024, 0, 0.8003836, 66.881935, 2.4563293, -86.88052)
 metadata/coliziune = "trunk"
 
 [node name="E_Lerai111" parent="DecorManual/ZoneE_Buza" unique_id=202564544 instance=ExtResource("s_fever_tree")]
@@ -5675,10 +5651,6 @@ metadata/coliziune = "trunk"
 transform = Transform3D(-0.76410735, 0, -0.41703773, 0, 0.8705059, 0, 0.41703773, 0, -0.76410735, -3.0272229, 1.699997, -129.05484)
 metadata/coliziune = "trunk"
 
-[node name="E_Lerai115" parent="DecorManual/ZoneE_Buza" unique_id=1544109508 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-1.0093188, 0, 0.31984, 0, 1.0587833, 0, -0.31984, 0, -1.0093188, 76.54422, 2.9320984, -66.63038)
-metadata/coliziune = "trunk"
-
 [node name="E_Lerai116" parent="DecorManual/ZoneE_Buza" unique_id=26093795 instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-1.1472131, 0, -0.28770998, 0, 1.1827404, 0, 0.28770998, 0, -1.1472131, 15.353069, 1.7000122, -125.05049)
 metadata/coliziune = "trunk"
@@ -5689,10 +5661,6 @@ metadata/coliziune = "trunk"
 
 [node name="E_Lerai118" parent="DecorManual/ZoneE_Buza" unique_id=574143479 instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.6728692, 0, -0.6551963, 0, 0.93916726, 0, 0.6551963, 0, 0.6728692, 20.636353, 1.699997, -129.58427)
-metadata/coliziune = "trunk"
-
-[node name="E_Lerai119" parent="DecorManual/ZoneE_Buza" unique_id=2130829912 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.93597007, 0, 0.4650711, 0, 1.0451465, 0, -0.4650711, 0, -0.93597007, 43.21213, 5.4794464, -101.97896)
 metadata/coliziune = "trunk"
 
 [node name="E_Lerai120" parent="DecorManual/ZoneE_Buza" unique_id=2102261558 instance=ExtResource("s_acacia_umbrella_a")]
@@ -5717,10 +5685,6 @@ metadata/coliziune = "trunk"
 
 [node name="E_Lerai125" parent="DecorManual/ZoneE_Buza" unique_id=626325495 instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(-0.30293998, 0, -0.79724544, 0, 0.8528616, 0, 0.79724544, 0, -0.30293998, 17.720953, 1.699997, -131.64615)
-metadata/coliziune = "trunk"
-
-[node name="E_Lerai126" parent="DecorManual/ZoneE_Buza" unique_id=221711517 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(0.83928925, 0, -0.18703863, 0, 0.8598778, 0, 0.18703863, 0, 0.83928925, 62.158787, 7.05394, -93.52031)
 metadata/coliziune = "trunk"
 
 [node name="E_Lerai127" parent="DecorManual/ZoneE_Buza" unique_id=477999398 instance=ExtResource("s_fever_tree")]
@@ -5751,10 +5715,6 @@ metadata/coliziune = "trunk"
 transform = Transform3D(0.11735417, 0, -0.8608125, 0, 0.86877507, 0, 0.8608125, 0, 0.11735417, 5.6421304, 1.7000122, -121.977936)
 metadata/coliziune = "trunk"
 
-[node name="E_Lerai134" parent="DecorManual/ZoneE_Buza" unique_id=1009453271 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(0.4695104, 0, 1.0397815, 0, 1.1408706, 0, -1.0397815, 0, 0.4695104, 44.874, 2.3241882, -99.40215)
-metadata/coliziune = "trunk"
-
 [node name="E_Lerai135" parent="DecorManual/ZoneE_Buza" unique_id=1517535334 instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.66198295, 0, -0.72648704, 0, 0.98285544, 0, 0.72648704, 0, 0.66198295, 17.443163, 1.699997, -130.03725)
 metadata/coliziune = "trunk"
@@ -5775,32 +5735,12 @@ metadata/coliziune = "trunk"
 transform = Transform3D(0.9617115, 0, -0.06937727, 0, 0.9642107, 0, 0.06937727, 0, 0.9617115, 3.5204773, 1.699997, -132.4121)
 metadata/coliziune = "trunk"
 
-[node name="E_Lerai140" parent="DecorManual/ZoneE_Buza" unique_id=420449231 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(1.037206, 0, -0.07362586, 0, 1.0398159, 0, 0.07362586, 0, 1.037206, 45.324966, 1.5807648, -98.51185)
-metadata/coliziune = "trunk"
-
-[node name="E_Lerai141" parent="DecorManual/ZoneE_Buza" unique_id=939660434 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(-0.71173555, 0, 0.7312849, 0, 1.0204632, 0, -0.7312849, 0, -0.71173555, 55.203037, 1.3031921, -95.70699)
-metadata/coliziune = "trunk"
-
-[node name="E_Lerai142" parent="DecorManual/ZoneE_Buza" unique_id=1637741732 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(0.77673614, 0, -0.37867734, 0, 0.86412704, 0, 0.37867734, 0, 0.77673614, 71.66572, 2.666504, -74.977425)
-metadata/coliziune = "trunk"
-
 [node name="E_Lerai143" parent="DecorManual/ZoneE_Buza" unique_id=672991768 instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.9048925, 0, -0.31193414, 0, 0.95714855, 0, 0.31193414, 0, 0.9048925, -7.58244, 1.699997, -126.64962)
 metadata/coliziune = "trunk"
 
 [node name="E_Lerai144" parent="DecorManual/ZoneE_Buza" unique_id=1825124617 instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(0.79017574, 0, -0.6237343, 0, 1.0066887, 0, 0.6237343, 0, 0.79017574, 21.232685, 1.699997, -133.25925)
-metadata/coliziune = "trunk"
-
-[node name="E_Lerai145" parent="DecorManual/ZoneE_Buza" unique_id=414450269 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(1.1729668, 0, -0.20765427, 0, 1.1912059, 0, 0.20765427, 0, 1.1729668, 46.255848, 7.0674286, -101.835594)
-metadata/coliziune = "trunk"
-
-[node name="E_Lerai146" parent="DecorManual/ZoneE_Buza" unique_id=1890709865 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(0.46324384, 0, 0.9771095, 0, 1.0813593, 0, -0.9771095, 0, 0.46324384, 44.83744, 5.4630737, -101.718666)
 metadata/coliziune = "trunk"
 
 [node name="E_Lerai147" parent="DecorManual/ZoneE_Buza" unique_id=576025765 instance=ExtResource("s_fever_tree")]
@@ -5871,10 +5811,6 @@ metadata/coliziune = "trunk"
 transform = Transform3D(0.85737777, 0, -0.16170599, 0, 0.8724938, 0, 0.16170599, 0, 0.85737777, 23.05732, 1.699997, -128.45692)
 metadata/coliziune = "trunk"
 
-[node name="E_Lerai164" parent="DecorManual/ZoneE_Buza" unique_id=2076680120 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(-0.5287202, 0, 0.78947294, 0, 0.9501645, 0, -0.78947294, 0, -0.5287202, 61.07414, 7.287201, -95.86459)
-metadata/coliziune = "trunk"
-
 [node name="E_Lerai165" parent="DecorManual/ZoneE_Buza" unique_id=1334116530 instance=ExtResource("s_fever_tree")]
 transform = Transform3D(0.66356546, 0, -0.943359, 0, 1.1533626, 0, 0.943359, 0, 0.66356546, 12.311247, 1.7000122, -134.06615)
 metadata/coliziune = "trunk"
@@ -5895,20 +5831,8 @@ metadata/coliziune = "trunk"
 transform = Transform3D(-0.7511362, 0, 0.8226339, 0, 1.1139714, 0, -0.8226339, 0, -0.7511362, -21.87377, 1.699997, -136.16336)
 metadata/coliziune = "trunk"
 
-[node name="E_Lerai170" parent="DecorManual/ZoneE_Buza" unique_id=1396095435 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(0.9765298, 0, 0.0127571225, 0, 0.9766131, 0, -0.0127571225, 0, 0.9765298, 61.321995, 0.59954834, -89.378815)
-metadata/coliziune = "trunk"
-
-[node name="E_Lerai171" parent="DecorManual/ZoneE_Buza" unique_id=1843914940 instance=ExtResource("s_acacia_umbrella_a")]
-transform = Transform3D(-0.8789032, 0, 0.4963806, 0, 1.0093882, 0, -0.4963806, 0, -0.8789032, 74.32577, 1.4181213, -68.19456)
-metadata/coliziune = "trunk"
-
 [node name="E_Lerai172" parent="DecorManual/ZoneE_Buza" unique_id=1284267267 instance=ExtResource("s_fever_tree")]
 transform = Transform3D(-0.7268415, 0, -0.35941383, 0, 0.8108495, 0, 0.35941383, 0, -0.7268415, 8.433727, 1.7000122, -129.48184)
-metadata/coliziune = "trunk"
-
-[node name="E_Lerai173" parent="DecorManual/ZoneE_Buza" unique_id=1024957122 instance=ExtResource("s_fever_tree")]
-transform = Transform3D(-0.6589941, 0, 0.88843, 0, 1.106156, 0, -0.88843, 0, -0.6589941, 55.778156, 8.499023, -98.06018)
 metadata/coliziune = "trunk"
 
 [node name="E_Lerai174" parent="DecorManual/ZoneE_Buza" unique_id=789324096 instance=ExtResource("s_acacia_umbrella_a")]
@@ -6888,7 +6812,7 @@ transform = Transform3D(-0.3233, 0, -0.9463, 0, 1, 0, 0.9463, 0, -0.3233, -59.91
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72.107, -2.061, 47.611)
 
 [node name="acacia_umbrella_b_107" parent="DecorManual/ZoneG_FundulCraterului" unique_id=536647289 instance=ExtResource("s_acacia_umbrella_b")]
-transform = Transform3D(0.7149, 0, -0.9008, 0, 1.15, 0, 0.9008, 0, 0.7149, -72.86062, -2.173, 35.74154)
+transform = Transform3D(0.7149, 0, -0.9008, 0, 1.15, 0, 0.9008, 0, 0.7149, -72.8606, -0.1503, 35.7415)
 
 [node name="acacia_umbrella_a_108" parent="DecorManual/ZoneG_FundulCraterului" unique_id=1406788861 instance=ExtResource("s_acacia_umbrella_a")]
 transform = Transform3D(-0.6179, 0, -0.8489, 0, 1.05, 0, 0.8489, 0, -0.6179, -82.09339, 1.8320313, 26.495258)

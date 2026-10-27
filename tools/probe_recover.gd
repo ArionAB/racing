@@ -56,6 +56,10 @@ func _physics_process(delta: float) -> void:
 			if _respawned_at >= 0.0 or _phase_t > 4.0:
 				_report_manual()
 				_begin("rasturnat")
+				# Plasa de repunere se proba cu intoarcerea pe loc STINSA: de la
+				# `auto-upright`, o masina rasturnata pe asfalt se intoarce singura
+				# (vezi ProbeUpright). Plasa ramane pentru locurile invalide.
+				p.upright_enabled = false
 				var t := p.global_transform
 				t.basis = t.basis.rotated(t.basis.z.normalized(), PI)
 				p.global_transform = Transform3D(t.basis, t.origin + Vector3.UP * 1.5)

@@ -1,22 +1,29 @@
 class_name TouchControls
 extends Control
-## Controale touch (portate din racing 2D): jumatatea stanga/dreapta a
-## ecranului vireaza (auto-accelerate, fara pedala) + butoane mari pentru
-## TURBO si DRIFT (dreapta-jos). Evenimente touch brute pentru multitouch
-## corect; starea se scrie in GameState.
-##
-## Butoanele de viraj din stanga-jos sunt DESENATE, dar zona de atingere
-## ramane toata jumatatea de ecran: pe un telefon in miscare, o tinta de 80 px
-## se rateaza, iar un viraj ratat se citeste ca joc stricat. Butoanele spun
-## jucatorului UNDE sa puna degetul; jumatatea de ecran il iarta cand nu
-## nimereste.
+## Controale touch: NUMAI butoane. ◀ ▶ vireaza (stanga-jos), ^ gaz si v
+## frana/marsarier (dreapta-jos), TURBO si DRIFT pe randul de deasupra lor.
+## Evenimente touch brute pentru multitouch corect; starea se scrie in
+## GameState. O atingere in afara butoanelor nu face nimic.
 
 const BUTTON_RADIUS: float = 78.0
-## Butoanele de viraj: mai mici decat zona lor reala de atingere, perechea
-## asezata in coltul din stanga-jos ca in orice racer de mobil.
-const STEER_RADIUS: float = 52.0
+## Butoanele de viraj, perechea din coltul din stanga-jos.
+const STEER_RADIUS: float = 68.0
+## Marginea de atingere din jurul discului de viraj. A fost scoasa o data (zona
+## = exact discul) si a revenit la cererea dezvoltatorului (25 oct 2026): un
+## deget care cade chiar langa ◀ ▶ trebuie sa vireze in continuare. E locala —
+## 24 px in jurul discului, nu jumatatea de ecran — deci degetul sprijinit in
+## alta parte pe display ramane tot mort.
+const STEER_TOUCH_PAD: float = 24.0
+## Aerul dintre discurile desenate ◀ ▶. La 8 px (cat era) le vedeai lipite si
+## degetul nu stia pe care cade; 40 px le separa vizibil. Zonele de atingere,
+## largite cu STEER_TOUCH_PAD, tot se ating intre ele, deci in golul dintre
+## discuri vireaza sageata cea mai apropiata — nu exista o fasie moarta.
+const STEER_GAP: float = 40.0
 
 var _touches: Dictionary = {} # index deget -> zona ("left"/"right"/"drift"/"turbo")
+## Degetele care au APASAT pe o sageata. Doar ele pot glisa intre sageti; un
+## deget pus pe display in alta parte ramane mort chiar daca aluneca pe ◀ ▶.
+var _steer_fingers: Dictionary = {}
 
 func _ready() -> void:
 	# ..._and_offsets_...: ancorele singure lasa `size` pe (0,0) pana cand
@@ -35,17 +42,21 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
 		if touch.pressed:
-			_touches[touch.index] = _zone_at(touch.position)
+			var zone := _zone_at(touch.position)
+			_touches[touch.index] = zone
+			if zone in ["left", "right"]:
+				_steer_fingers[touch.index] = true
 		else:
 			_touches.erase(touch.index)
+			_steer_fingers.erase(touch.index)
 		_refresh()
 		queue_redraw()
 	elif event is InputEventScreenDrag:
 		var drag := event as InputEventScreenDrag
-		# Degetul care gliseaza intre sageti schimba directia; daca iese de pe
-		# ele, virajul se OPRESTE (zona goala). Inainte zona goala insemna
-		# jumatatea de ecran, deci nu se oprea niciodata.
-		if _touches.get(drag.index, "") in ["left", "right", ""]:
+		# Degetul care a apasat pe o sageta si gliseaza schimba directia; daca
+		# iese de pe ele, virajul se OPRESTE (zona goala) si revine daca se
+		# intoarce. Un deget pornit din alta parte nu intra aici deloc.
+		if _steer_fingers.has(drag.index):
 			var zone := _zone_at(drag.position)
 			if zone in ["left", "right", ""]:
 				_touches[drag.index] = zone
@@ -79,12 +90,12 @@ func _zone_at(pos: Vector2) -> String:
 	# DOAR butoanele vireaza. Jumatatile de ecran au fost SCOASE (oct 2026,
 	# dupa al treilea test pe device): o atingere oriunde pe display — degetul
 	# sprijinit, palma, un tap langa buton — vira masina fara sa vrei, si asta
-	# se simtea ca si cum jocul trage de volan singur. Marginea generoasa din
-	# jurul discului (+18 px) ramane toata toleranta de care e nevoie.
+	# se simtea ca si cum jocul trage de volan singur. Toleranta e doar marginea
+	# STEER_TOUCH_PAD din jurul discului.
 	var d_left := pos.distance_to(_steer_left_center())
 	var d_right := pos.distance_to(_steer_right_center())
-	var in_left := d_left < STEER_RADIUS + 18.0
-	var in_right := d_right < STEER_RADIUS + 18.0
+	var in_left := d_left < STEER_RADIUS + STEER_TOUCH_PAD
+	var in_right := d_right < STEER_RADIUS + STEER_TOUCH_PAD
 	if in_left and in_right:
 		return "left" if d_left <= d_right else "right"
 	if in_left:
@@ -161,7 +172,7 @@ func _steer_left_center() -> Vector2:
 	return Vector2(118.0, size.y - 128.0)
 
 func _steer_right_center() -> Vector2:
-	return Vector2(262.0, size.y - 128.0)
+	return _steer_left_center() + Vector2(2.0 * STEER_RADIUS + STEER_GAP, 0.0)
 
 
 ## Un buton rotund de HUD: disc translucid, inel subtire, glifa in mijloc.

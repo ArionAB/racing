@@ -24,9 +24,15 @@ extends RigidBody3D
 ## simulare.
 
 signal boost_started(car: Car)
+## Frana de mana eliberata dupa un drift de `seconds`. HUD-ul pulseaza bara
+## de turbo: rasplata (umplerea 2.5x) se vede in clipa in care se termina.
+signal drift_ended(car: Car, seconds: float)
 signal wall_hit(car: Car, impact: float)
 signal landed(car: Car, fall_speed: float)
 signal respawned(car: Car)
+## Masina rasturnata s-a intors pe roti PE LOC (vezi `_tick_upright`), fara
+## repunere. Pentru camera/sunet/particule: nu e `respawned`.
+signal uprighted(car: Car)
 ## Repunerea cu tranzitie a inceput (#495): masina clipeste `RECOVER_S`
 ## secunde, fara comenzi, apoi vine `respawned`. Race intuneca ecranul.
 signal recovery_started(car: Car, seconds: float)
@@ -60,6 +66,18 @@ signal steps_changed(car: Car, on: bool)
 ## figurina cazuta, deja in lume — camera o urmareste cat tine `eject_hold`,
 ## apoi masina se repune pe pista si soferul reapare pe scaun.
 signal ejected(car: Car, ragdoll: Node3D)
+## Feed-ul comun de contact (docs/feel_checklist.md): orice izbitura de perete
+## sau de alta masina peste `impact_min_dv`, cu directie si punct. `kind` e
+## &"wall" sau &"car"; `normal` e orizontala si arata DINSPRE obstacol SPRE
+## masina (directia in care esti impins); `other` e corpul lovit. Il citesc
+## camera, caroseria, soferul si sunetul — nu mai adauga consumatori in
+## _process_contacts, conecteaza-te aici.
+signal impact(car: Car, kind: StringName, strength: float, normal: Vector3,
+		point: Vector3, other: Node)
+
+## Efecte vizuale comune (fara class_name: se preincarca).
+const SoftVegetation := preload("res://scenes/props/soft_vegetation.gd")
+const PropDebris := preload("res://scenes/props/prop_debris.gd")
 
 # --- Statistici (suprascrise de CarData la apply_data) ---
 @export_group("Motor")
@@ -74,6 +92,15 @@ signal ejected(car: Car, ragdoll: Node3D)
 @export_group("Directie")
 @export var steer_speed: float = 1.9
 @export var grip: float = 8.0
+## Cat din unghiul de volan ramane la viteza maxima (1.0 = fara strangere).
+## La viteza mica ai volan plin; de la `steer_taper_start` in sus unghiul scade
+## liniar pana la valoarea asta la max_speed, ca masina sa nu devina nervoasa
+## pe drepte (feel_checklist: steering-speed). DRIFT-ul e scutit: termenul se
+## amesteca spre 1.0 cu `_drift_amount()`, deci frana de mana ramane unealta
+## de viraj stransa la orice viteza.
+@export_range(0.3, 1.0, 0.01) var steer_taper_at_top: float = 0.65
+## De la ce fractie din max_speed incepe strangerea (sub ea: volan plin).
+@export_range(0.0, 1.0, 0.01) var steer_taper_start: float = 0.5
 
 @export_group("Drift (handbrake)")
 @export var drift_grip: float = 2.0
@@ -87,8 +114,38 @@ const SLIP_GRIP_WET: float = 3.6
 ## nu mai e unealta de viraj, e modul de condus. Tema poate suprascrie prin
 ## Track.ice_grip(); asta e implicitul.
 const SLIP_GRIP_ICE: float = 1.5
-@export var drift_steer_bonus: float = 1.5
-@export var drift_bias: float = 0.4
+## Cat de strans vireaza driftul cand tii volanul SPRE interior, in unitati
+## de volan plin (1.0 = virajul normal cu volan plin). Maparea CTR (oct 2026):
+## in drift volanul nu mai alege SENSUL — ala e `drift_dir`, fixat la intrare
+## — ci doar RAZA, intre `drift_arc_wide` (contravolan plin) si
+## `drift_arc_tight` (volan spre interior). Contravolanul largeste alunecarea,
+## n-o inverseaza: asa „prinzi" un spate care fuge, ca in orice drift arcade.
+@export var drift_arc_tight: float = 1.6
+## Acelasi arc strans la viteza maxima (intre ele, liniar pe viteza). Mai mic
+## decat 1.6: la 29 m/s un arc de 1.6 inseamna 3 rad/s, adica tromba. Dar NU
+## zero, cum era `drift_yaw_at_top` pana in oct 2026: fara rotatie in plus, la
+## viteza de cursa frana de mana nu mai era decat o frana cu ruliu. Unghiul de
+## derapaj E driftul — ProbeDriftEntry il cere >= 18° la 85% din vmax.
+@export var drift_arc_tight_top: float = 1.25
+## Arcul cu contravolan plin: aproape drept, dar tot in sensul driftului.
+@export var drift_arc_wide: float = 0.2
+## Constanta de timp (s) cu care rotatia URMEAZA comanda cat esti in drift. Pe
+## asfalt rotatia e scrisa direct (arcade: volanul e rotatia); in drift are
+## inertie, ca sa existe ce prinde cu contravolanul. Fara ea, volanul lasat
+## liber oprea rotatia in acelasi tick: alunecarea se termina ca un
+## intrerupator, nu ca un spate care se aseaza.
+@export var drift_yaw_inertia: float = 0.25
+## Cat din impulsul inainte pierdut prin frecarea laterala se intoarce ca forta
+## pe directia caroseriei cat drifteaza (0 = nimic, 1 = viteza se pastreaza
+## intreaga). Scalat cu gazul: ▲+DRIFT tine viteza (powerslide), DRIFT singur
+## o pierde pe inertie, ▼+DRIFT franeaza. Fara asta fata, cu aderenta plina,
+## „scrubuia" componenta laterala si driftul frana ca un zid: la 62% din vmax
+## pierdea 36% din viteza intr-o secunda (masurat, oct 2026).
+@export var drift_momentum_keep: float = 0.85
+## Rotatie IN PLUS, doar pe model, in sensul driftului (grade la drift plin).
+## Trucul din kart-uri: caroseria arata mai intoarsa decat e fizic, iar
+## alunecarea se citeste de la prima privire, nu din urmele de pe asfalt.
+@export var drift_visual_yaw_deg: float = 10.0
 @export var drift_min_speed: float = 9.0
 ## Secunde in care driftul intra deplin dupa ce tragi frana de mana. Inainte
 ## era un singur tick: rotatia sarea cu 60% si aderenta spatelui scadea de 4
@@ -96,14 +153,11 @@ const SLIP_GRIP_ICE: float = 1.5
 @export var drift_ramp_in: float = 0.2
 ## Secunde in care spatele se reaseaza dupa ce eliberezi frana de mana.
 @export var drift_ramp_out: float = 0.25
-## Driftul se dozeaza pe viteza: la drift_min_speed e pivotul strans de pana
-## acum, spre viteza maxima devine o alunecare larga care pastreaza viteza.
+## Driftul se dozeaza pe viteza: la drift_min_speed e pivotul strans, spre
+## viteza maxima un arc mai larg (`drift_arc_tight_top`) cu spatele mai ferm.
 ## Inainte era acelasi pivot la orice viteza — la 29 m/s: 3.3 rad/s (190°/s),
 ## 42° de derapaj si 11 m/s pierduti in jumatate de secunda.
 ##
-## Cat din rotatia COMANDATA in plus (drift_steer_bonus + drift_bias) ramane
-## la viteza maxima; 1 = toata, ca la viteza mica.
-@export var drift_yaw_at_top: float = 0.0
 ## Aderenta spatelui in drift la viteza maxima (`drift_grip` e cea de la
 ## drift_min_speed; intre ele, liniar). MAI MARE decat drift_grip, nu mai mica:
 ## rotatia driftului vine mai ales din dezechilibrul fata-spate (fata tine,
@@ -117,6 +171,10 @@ const SLIP_GRIP_ICE: float = 1.5
 @export var turbo_fill_time: float = 10.0
 ## In drift bara se umple de atatea ori mai repede — driftul ramane rasplatit.
 @export var turbo_drift_multiplier: float = 2.5
+## Contratimpul de cariera (brief 4.2) il pune pe false: bara NU se mai incarca
+## (nici din mers, nici din drift). Pornesti plin si decizi unde arzi rezervorul
+## (principiul 2); drift-ul ramane unealta de viraj. Arderea merge ca de obicei.
+@export var turbo_recharge: bool = true
 ## Secunde de ardere continua de la bara plina.
 @export var turbo_burn_time: float = 2.2
 ## Sub pragul asta nu poti porni turbo (previne "sputter"-ul din taste scurte).
@@ -170,6 +228,101 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 ## scrisa direct de directie, deci solverul n-are cum sa le roteasca una de pe
 ## linia celeilalte. Vezi _process_contacts.
 @export var bump_separation_accel: float = 6.0
+## Pragul feed-ului `impact` (m/s de delta-v orizontal). Sub el contactul e
+## frecare: o raspunde starea continua (wall_contact / rub_car), nu semnalul.
+@export var impact_min_dv: float = 2.5
+
+@export_group("Perete (razuire)")
+## Logica razuire-vs-frontal (feel_checklist: glancing-vs-headon). Oprita =
+## comportamentul vechi (un material pentru orice unghi, fara nudge) — sondele
+## A/B o stang cu asta.
+@export var glance_enabled: bool = true
+## O lovitura de perete e „razuire" cand viteza dinainte de contact face cel
+## mult atatea grade cu planul peretelui. Peste: frontal (se opreste cu bounce).
+@export_range(5.0, 60.0, 1.0) var glance_angle_deg: float = 30.0
+## Frecarea masinii cat tine o razuire (implicit 0.4, vezi _ready). Solverul
+## combina frecarile corpurilor; fara asta botul infipt in perete ar manca
+## viteza pe toata lungimea contactului.
+@export_range(0.0, 0.4, 0.01) var glance_friction: float = 0.05
+## Nudge-ul de directie spre paralel cu peretele: rad/s per radian de unghi
+## intre bot si perete, plafonat de `glance_yaw_max` (si de bump_yaw_max).
+## Intra prin _impact_yaw (apply_torque ar fi sters in tick-ul urmator).
+@export var glance_yaw_gain: float = 8.0
+@export var glance_yaw_max: float = 1.5
+## Anti-lipire: cat sta botul in perete, la viteza mica, pana e impins.
+@export var stuck_nudge_time: float = 0.4
+## Impingerea laterala (m/s, dinspre perete) si rotatia (rad/s) a nudge-ului.
+@export var stuck_nudge_speed: float = 2.5
+@export var stuck_nudge_yaw: float = 2.4
+
+@export_group("Spin-out assist")
+## Masina scapata din mana (slip peste `spinout_slip_deg` fata de directia in
+## care se misca, la peste `spinout_min_speed`) e rotita usor spre directia de
+## mers — sau spre sosea, cand aproape s-a oprit dupa spin — ca jucatorul sa fie
+## inapoi pe linie in ~1 s (feel_checklist: spinout-assist). Intra prin
+## _impact_yaw. Marsarierul din voie (frana, viteza mica) si driftul (slip
+## 20-35 grade) nu ajung la prag.
+@export var spinout_enabled: bool = true
+@export var spinout_slip_deg: float = 100.0
+## Asistenta se opreste cand botul e la mai putin de atatea grade de tinta.
+@export var spinout_release_deg: float = 45.0
+@export var spinout_min_speed: float = 6.0
+## rad/s per radian de eroare, plafonat la spinout_yaw_max (NU la bump_yaw_max:
+## aici e o corectie de ~0,7 s, nu un efect de lovitura).
+@export var spinout_yaw_gain: float = 3.0
+@export var spinout_yaw_max: float = 3.5
+
+@export_group("Control in aer")
+## Doar pentru jucator (PlayerController): in aer gazul apleaca botul in jos si
+## frana il ridica, ca sa poti nivela pentru aterizare. Plafonat si bland; fara
+## control pe yaw, iar lansarea de pe rampe nu se schimba.
+@export var air_control_enabled: bool = true
+## Viteza unghiulara maxima de tangaj adaugata de comanda (rad/s).
+@export var air_pitch_rate: float = 0.9
+## Cat de repede ajunge la ea (rad/s^2).
+@export var air_pitch_accel: float = 3.5
+
+@export_group("Slipstream")
+## O masina care urmeaza de aproape (`slip_min_gap`..`slip_max_gap` m in spatele
+## alteia, in con ingust, amandoua peste `slip_min_speed_frac` din max_speed)
+## primeste un plafon de viteza si o acceleratie mai mari, care cresc in
+## `slip_build_s` si dispar in `slip_fade_s`. Aceeasi regula pentru oricine.
+@export var slipstream_enabled: bool = true
+@export var slip_min_gap: float = 2.0
+@export var slip_max_gap: float = 14.0
+## Latimea conului: jumatatea unei masini + atat pe metru de distanta.
+@export var slip_cone: float = 0.15
+@export var slip_min_speed_frac: float = 0.5
+@export var slip_speed_bonus: float = 1.5 # m/s peste plafon la draft = 1
+@export var slip_accel_bonus: float = 0.10 # +10% acceleratie la draft = 1
+## Cat de departe in fata se uita (m) si ce schimbare de directie (rad) inseamna
+## „drumul se curbeaza": peste ea, aspiratia se retrage.
+@export var slip_lookahead_m: float = 45.0
+@export var slip_curve_rad: float = 0.15
+## Peste atata rotatie (rad/s) masina e in viraj si nu primeste aspiratie.
+@export var slip_max_yaw: float = 0.5
+@export var slip_build_s: float = 0.5
+@export var slip_fade_s: float = 0.25
+
+@export_group("Borduri")
+## Bordura scutura suspensia ca treptele (vezi STEP_NOISE_M), proportional cu
+## viteza. Oprit = fara scuturat (feel_checklist: surface-voice).
+@export var kerb_rumble_enabled: bool = true
+
+@export_group("Auto-upright")
+## Rasturnata (pe acoperis sau pe o parte) si aproape oprita, masina se intoarce
+## pe roti PE LOC, cu un salt mic, in loc sa astepte repunerea (feel_checklist:
+## auto-upright). Oprit = comportamentul vechi (Race o repune dupa 1,5 s).
+@export var upright_enabled: bool = true
+## Cat sta rasturnata inainte sa se intoarca (s) — sa se opreasca din rostogolit.
+@export var upright_delay: float = 0.3
+## Viteza verticala a saltului (m/s). Gravitatia jocului e 28, deci ~0,3 s in aer.
+@export var upright_hop: float = 2.8
+## Cat de repede se roteste spre vertical: rad/s per radian de eroare
+## (plafonat la UPRIGHT_MAX_RATE). Rotatia e pe axa botului, deci directia ramane.
+@export var upright_turn_rate: float = 7.0
+## Cat poate dura incercarea (s); daca nu e pe roti pana atunci, cade pe recover().
+@export var upright_max_time: float = 0.9
 
 @export_group("Suspensie")
 ## Cursa arcului in repaus (m). Raza de cast = rest + wheel_radius.
@@ -196,6 +349,9 @@ const OFFROAD_SPEED_DEFAULT: float = 0.45
 ## ramane doar izbitura FRONTALA (de la ~19 m/s in sus, cu ricoseul inclus)
 ## sau una oblica peste ~60° la viteza maxima.
 @export var eject_wall_dv: float = 26.0
+## Plafonul de viteza (fractie) cat tine strivirea unei lovituri MOI (meta
+## `soft_hit_crush` pe corpul lovit: camionul Carrara, bratul excavatorului).
+const SOFT_CRUSH_FACTOR: float = 0.6
 ## Viteza de cadere (m/s) la aterizare peste care soferul zboara.
 ## Masurat cu ProbeRace pe Alpii (garaj deschis, 150 s): SARITURA PROIECTATA
 ## peste gol (frac 0.71) ateriza la 24-30 m/s, si la pragul de 24 fiecare
@@ -264,6 +420,19 @@ var drift_dir: float = 0.0
 ## trasa, coboara in drift_ramp_out dupa. `is_drifting` spune daca e TRASA
 ## (turbo, stopuri, fum); fizica si ruliul citesc dozajul de aici.
 var drift_blend: float = 0.0
+## Rotatia COMANDATA, netezita: pe asfalt e chiar comanda, in drift o urmeaza
+## cu `drift_yaw_inertia`. Stare separata de angular_velocity, ca loviturile
+## (solver, _impact_yaw) sa nu se strecoare in netezire.
+var _yaw_cmd: float = 0.0
+## Cat a tinut driftul curent (s); raportat in `drift_ended`.
+var _drift_time: float = 0.0
+## Rotatia vizuala in plus a modelului (rad), netezita spre tinta.
+var _drift_visual_yaw: float = 0.0
+## Reasezarea de la iesirea din drift: un ruliu scurt in sens opus, pe
+## `_visual`. `_snap_dir` e sensul driftului care tocmai s-a terminat.
+const DRIFT_SNAP_TIME: float = 0.22
+var _snap_left: float = 0.0
+var _snap_dir: float = 0.0
 ## Stopurile aprinse: frana de serviciu (inapoi cu viteza inainte) sau
 ## handbrake-ul de drift. Citit de [CarLights]; scris o data pe tick.
 var brake_lamp: bool = false
@@ -325,6 +494,116 @@ var _visual: Node3D
 var _spin_rate: float = 0.0
 var _spin_left: float = 0.0
 var _spin_angle: float = 0.0
+
+# --- Reactii VIZUALE de contact (docs/feel_checklist.md: body-jolt, scrape-sparks,
+# side-rubbing, drift-snap, landing dust). Nimic de aici nu atinge fizica:
+# citesc semnalele `impact` / `landed` si starea de contact a tick-ului.
+## Cat de departe e impinsa caroseria VIZUALA (nu corpul fizic) la o izbitura
+## maxima, in metri, in directia normalei.
+@export var jolt_max_offset: float = 0.08
+## Cat se inclina caroseria vizuala, in afara obstacolului, la izbitura maxima.
+@export var jolt_max_tilt_deg: float = 5.5
+## Delta-v (m/s) la care jolt-ul atinge maximul. Sub el creste cu radacina
+## patrata, ca o lovitura mica sa se vada si ea.
+@export var jolt_full_dv: float = 14.0
+## Frecventa proprie (rad/s) si amortizarea (1 = critic) arcului de revenire.
+## 24 rad/s cu 0.4 inseamna ~4 Hz si o stingere sub 5% in 0.35 s.
+@export var jolt_freq: float = 24.0
+@export var jolt_damping: float = 0.4
+## Inclinarea (grade) a caroseriei in afara masinii de care te freci.
+@export var rub_lean_deg: float = 3.0
+## Sub viteza asta (m/s) de razuire pe perete nu mai sar scantei continue.
+@export var scrape_min_speed: float = 4.0
+## Sub viteza asta (m/s) de frecare intre masini nu mai sar scantei continue.
+@export var rub_min_speed: float = 2.0
+## Izbitura de perete (delta-v) de la care apare si rafala de scantei.
+@export var wall_spark_burst_dv: float = 6.0
+## Viteza de cadere (m/s) de la care aterizarea ridica praf.
+@export var land_dust_min_fall: float = 5.0
+## Tufe (soft-hazards): cand rotile trec printr-o tufa din `SoftVegetation`
+## (chunk-uri de vegetatie fara coliziune) cu cel putin atata viteza (m/s),
+## sare o rafala de frunze.
+@export var bush_burst_min_speed: float = 6.0
+## Franare usoara in tufa, in m/s^2 la centrul ei (scade spre margine). 6 = o
+## tufa trecuta cu 25 m/s costa ~0.5 m/s; 0 o opreste. Se aplica tuturor
+## masinilor la fel (si AI-ului), deci nu favorizeaza pe nimeni — dar muta
+## timpii pe turele cu multa vegetatie langa drum.
+@export var bush_drag: float = 6.0
+## Radacina de unde se citesc tufele; null = pista. Pentru sonde.
+var soft_veg_root: Node3D = null
+var _veg_cooldown: float = 0.0
+var _veg_depth: float = 0.0
+## Jucaria (toy-animation): antena cu arc si cheia de intors. Noduri copil ale
+## lui `_visual` (se refac cu el la apply_data); null daca masina n-are model,
+## are `toy_animation` stins sau modelul n-a avut unde sa le monteze.
+var _toy_antenna: Node3D = null
+var _toy_key: Node3D = null
+## Antena: aplecarea varfului (vector orizontal in spatiul masinii, lungime =
+## unghi in rad) si viteza ei — un arc subamortizat, nu un mers invers.
+var _ant_tilt: Vector3 = Vector3.ZERO
+var _ant_vel: Vector3 = Vector3.ZERO
+var _key_angle: float = 0.0
+## Cat de tare se apleaca antena pe m/s^2 de acceleratie, plafonul (rad) si
+## arcul ei (rad/s, amortizare: jos = legana mai mult).
+const ANT_PER_ACCEL: float = 0.018
+const ANT_MAX: float = 0.40
+const ANT_FREQ: float = 17.0
+const ANT_DAMPING: float = 0.16
+## Cheia: rad/s in repaus (aproape stop) si la viteza maxima.
+const KEY_SPIN_MIN: float = 0.0
+const KEY_SPIN_MAX: float = 18.0
+## Zdranganeala (toy-animation: piese de plastic care zornaie). Pe teren aspru
+## antena si cheia tremura mic si repede, DOAR vizual (nu intra in starea
+## arcului antenei). Sursele: bordura, trepte de piatra, teren afanat (iarba,
+## pietris, pamant) si aterizarile; totul scalat cu viteza.
+@export_group("Zdranganeala jucariei")
+## Comutator (sabotaj pentru sonda: stins, jucaria sta calma pe teren aspru).
+@export var toy_rattle_enabled: bool = true
+## Unghiul maxim (rad) al tremurului: varful antenei si cheia pe axa ei.
+@export var rattle_ant_rad: float = 0.09
+@export var rattle_key_rad: float = 0.14
+## Cat de tare zdrangane fiecare sursa, la viteza plina (0..1).
+@export var rattle_kerb: float = 1.0
+@export var rattle_steps: float = 0.9
+@export var rattle_loose: float = 0.45
+## Sub viteza asta (m/s) nu zdrangane pe teren; la `rattle_full_speed` e la maxim.
+@export var rattle_min_speed: float = 2.0
+@export var rattle_full_speed: float = 18.0
+## Aterizare: cadere (m/s) la care rafala e maxima, si cat dureaza (s) pana moare.
+@export var rattle_land_full_fall: float = 12.0
+@export var rattle_land_decay_s: float = 0.35
+## Netezirea nivelului: urca repede (1/s), coboara mai incet.
+@export var rattle_attack: float = 22.0
+@export var rattle_release: float = 7.0
+@export_group("")
+## Nivelul curent de zdranganeala (0..1), pentru sonde si debug.
+var toy_rattle: float = 0.0
+var _rattle_drive_smooth: float = 0.0
+var _rattle_burst: float = 0.0
+var _rattle_t: float = 0.0
+var _toy_loose: bool = false
+## Starea elastica a jolt-ului: deplasare si tilt (vector orizontal in spatiul
+## masinii; directia = spre ce se apleaca varful, lungimea = unghiul in rad).
+var _jolt_pos: Vector3 = Vector3.ZERO
+var _jolt_pos_vel: Vector3 = Vector3.ZERO
+var _jolt_tilt: Vector3 = Vector3.ZERO
+var _jolt_tilt_vel: Vector3 = Vector3.ZERO
+## Aplecarea de la frecare laterala cu alta masina, netezita.
+var _rub_lean: Vector3 = Vector3.ZERO
+## Strop-ul de ruliu din drift (fostul `_visual.rotation.z`, tinut separat ca
+## sa se poata compune cu jolt-ul in loc sa fie scris peste).
+var _drift_roll: float = 0.0
+## Unghiul de derapaj (grade, 0..90) intre directia de mers si botul masinii,
+## fata de SOL, si „cat de tare aluneca" (0..1, netezit) din el si din viteza.
+var slip_angle_deg: float = 0.0
+var slide_amount: float = 0.0
+## Scanteile CONTINUE (razuire pe perete sau frecare intre masini): un singur
+## emitator, 8 particule, rata data de ramp-ul de culoare initiala.
+var _scrape_sparks: CPUParticles3D
+var _scrape_density: Gradient
+var _drift_density: Gradient
+## Praful de aterizare (rafala o data pe cadere).
+var _land_dust: CPUParticles3D
 var _drift_particles: CPUParticles3D
 var _boost_particles: CPUParticles3D
 ## Flacarile de pe capota cat masina arde. Emit din FATA masinii, catre
@@ -364,8 +643,12 @@ static var _ring_mesh: ArrayMesh = null
 ## spune ca solul e granular — bucatile fac asta. De aceea aici e corect ce era
 ## gresit la praf: geometrie mica, opaca, cu gravitatie reala.
 var _debris_particles: CPUParticles3D
-var _engine_audio: AudioStreamPlayer3D
-var _skid_audio: AudioStreamPlayer3D
+## Vocile continue (motor, derapaj, suprafete, turbo, vant): vezi car_audio.gd.
+const CarAudio := preload("res://scenes/cars/car_audio.gd")
+var _audio: Node
+## Gazul comandat in ultimul tick (-1..1), dupa taierile din aruncare/repunere.
+## Il citeste CarAudio (motorul, rateurile); fizica foloseste variabila locala.
+var throttle_input: float = 0.0
 var _turbo_full_latch: bool = false
 
 # Rotile modelului (noduri separate in FBX-urile RgsDev).
@@ -393,7 +676,42 @@ var _prev_velocity: Vector3 = Vector3.ZERO
 ## si o dadea jos din cabina pe usa din spate (masurat in ProbeCableway).
 var _ground_velocity: Vector3 = Vector3.ZERO
 var _wall_cooldown: float = 0.0
-var _bump_cooldown: float = 0.0
+var _impact_wall_cooldown: float = 0.0
+var _last_static: Node = null
+## Frecarea implicita a masinii (PhysicsMaterial din _ready).
+const CAR_FRICTION: float = 0.4
+var _pmat: PhysicsMaterial
+## Razuire in curs (vezi _wall_glance); ramane aprinsa 0.15 s dupa ultimul
+## contact, ca un contact care palpaie sa nu reporneasca episodul.
+var _glance_episode: bool = false
+var _glance_gap: float = 0.0
+## Cat timp sta botul infipt in perete la viteza mica (anti-lipire).
+var _stuck_t: float = 0.0
+var _stuck_cool: float = 0.0
+var _stuck_push_left: float = 0.0
+
+# --- Starea de contact a tick-ului (feed comun, vezi semnalul `impact`) ---
+## In contact cu un perete/obstacol static ACUM (normala aproape orizontala;
+## solul de sub caroserie nu conteaza).
+var wall_contact: bool = false
+## Normala orizontala medie a peretelui, dinspre perete spre masina.
+var wall_normal: Vector3 = Vector3.ZERO
+## Punctul mediu de contact cu peretele (global).
+var wall_point: Vector3 = Vector3.ZERO
+## Viteza de-a lungul peretelui cat il atingi (m/s) — viteza de razuire.
+var wall_scrape_speed: float = 0.0
+## Peretele atins e un corp MOBIL (AnimatableBody3D: autobuz, bariera, tren,
+## avalansa...). Logica de razuire il ocoleste: strivirea si purtarea raman
+## exact ca inainte.
+var wall_moving: bool = false
+## Masina de care te freci ACUM (null daca niciuna).
+var rub_car: Car = null
+## Punctul mediu de contact cu `rub_car`.
+var rub_point: Vector3 = Vector3.ZERO
+## Normala orizontala dinspre `rub_car` spre noi.
+var rub_normal: Vector3 = Vector3.ZERO
+## Viteza relativa TANGENTIALA fata de `rub_car` (m/s) — cat de tare va frecati.
+var rub_speed: float = 0.0
 ## instance_id-ul celeilalte masini -> secunde pana la urmatorul semnal admis.
 var _bump_pairs: Dictionary = {}
 ## Rotatia (rad/s) primita dintr-o lovitura excentrica; se stinge singura si
@@ -435,6 +753,8 @@ var _steps_here: bool = false
 var speed_limit_factor: float = 1.0
 ## Raza rotii fizice (cast = rest + raza); se deriva din model in apply_data.
 var _susp_wheel_radius: float = 0.30
+## Plafonul razei fizice: roata monster truck-ului (0.62) plus marja.
+const SUSP_WHEEL_RADIUS_MAX := 0.65
 ## Colturile rotilor in spatiul masinii; din dimensiunile CarData.
 var _wheel_points: Array[Vector3] = []
 ## Media punctelor de contact cu solul (offset fata de origine): AICI se
@@ -481,6 +801,31 @@ var _eject_left: float = 0.0
 ## Repunerea cu tranzitie (#495): cat mai clipeste pana la teleport, si cu ce
 ## retragere se va face repunerea.
 const RECOVER_S: float = 1.0
+## „Rasturnata" = acelasi criteriu ca `Race._watch_recovery` (FLIPPED_COS /
+## FLIPPED_SPEED / FLIPPED_S): cos fata de vertical sub 0.3 si sub 4 m/s.
+## Bordura: ±KERB_NOISE_M in compresia arcului pe un pas de KERB_PITCH_M. La
+## 25 m/s e ~18 Hz — o vibratie, nu un hop. Amplitudinea creste cu viteza.
+const KERB_NOISE_M: float = 0.035
+const KERB_PITCH_M: float = 1.4
+## Citibile de audio/camera: macar o roata pe bordura acum / cate roti.
+var on_kerb: bool = false
+var kerb_wheels: int = 0
+## Cat de „in aspiratie" e masina, 0..1 (vezi _update_draft). Citibil de efecte.
+var draft: float = 0.0
+var _spinout_on: bool = false
+var _spinout_left: float = 0.0
+const UPRIGHT_FLIPPED_COS: float = 0.3
+const UPRIGHT_FLIPPED_SPEED: float = 4.0
+## Daca tot nu s-a putut intoarce dupa atat (s de stat rasturnata), recover().
+## Egal cu FLIPPED_S din Race: cele doua plase se intalnesc in acelasi moment.
+const UPRIGHT_GIVE_UP_S: float = 1.5
+const UPRIGHT_MAX_RATE: float = 10.0
+## Peste atata in afara soselei (m), locul nu e bun de intors pe loc.
+const UPRIGHT_OFFROAD_M: float = 14.0
+## Sub cota soselei cu atat (m) = cazut in groapa/rapa, nu intoarcem pe loc.
+const UPRIGHT_BELOW_ROAD_M: float = 3.0
+var _roof_t: float = 0.0
+var _upright_left: float = 0.0
 ## De cate ori pe secunda clipeste caroseria in tranzitie.
 const RECOVER_BLINK_HZ: float = 7.0
 var _recover_left: float = 0.0
@@ -518,10 +863,16 @@ func _ready() -> void:
 	collision_mask |= BumpProp.LAYER
 	var pmat := PhysicsMaterial.new()
 	pmat.bounce = bump_restitution
-	pmat.friction = 0.4
+	pmat.friction = CAR_FRICTION
 	physics_material_override = pmat
+	_pmat = pmat
 	_build_visual()
 	_build_effects()
+	# Reactiile vizuale citesc feed-ul de contact; nu adauga nimic in fizica.
+	impact.connect(_on_impact_visual)
+	landed.connect(_on_landed_visual)
+	respawned.connect(_reset_visual_offsets)
+	landed.connect(_on_landed_rattle)
 	# Colizerul caroseriei NU atinge solul in mers (garda la sol o da
 	# suspensia); exista pentru imbranceli si aterizari dure. Talpa lui sta la
 	# +0.25 fata de origine (care e la nivelul solului): bordurile si dalele
@@ -624,7 +975,11 @@ func apply_data(new_data: CarData, color_override: Color = NO_COLOR,
 	spring_freq = data.spring_freq
 	damping_ratio = data.damping_ratio
 	suspension_rest = data.suspension_rest
-	_susp_wheel_radius = clampf(_wheel_radius, 0.22, 0.42)
+	# Plafonul era 0.42; monster truck-ul (garaj v2) are roata de 0.62 si cu
+	# plafonul vechi raza ar fi iesit cu 20 cm sub roata desenata — cast-ul
+	# (rest + raza) ar fi atins solul cu janta, nu cu anvelopa. Decizia
+	# dezvoltatorului, 25 oct 2026 (garaj_prompturi_chatgpt.md §4, varianta a).
+	_susp_wheel_radius = clampf(_wheel_radius, 0.22, SUSP_WHEEL_RADIUS_MAX)
 	_rebuild_suspension_geometry(
 		data.body_width * 0.42, data.body_length * 0.38)
 	if _drift_particles != null:
@@ -737,6 +1092,8 @@ func _physics_process(delta: float) -> void:
 		turbo_pressed = false
 		_tick_recover(delta)
 
+	throttle_input = throttle
+	_tick_upright(delta)
 	_apply_suspension()
 
 	var forward := -global_transform.basis.z
@@ -748,9 +1105,10 @@ func _physics_process(delta: float) -> void:
 
 	_update_drift(drift_pressed, steer, fwd_speed, delta)
 	_update_turbo(turbo_pressed, delta)
+	_update_draft(delta)
 	brake_lamp = (throttle < 0.0 and fwd_speed > 1.0) or is_drifting
 
-	_apply_driving(steer, throttle, fwd_h, fwd_speed)
+	_apply_driving(steer, throttle, fwd_h, fwd_speed, delta)
 
 	slip_time = maxf(slip_time - delta, 0.0)
 	crush_time = maxf(crush_time - delta, 0.0)
@@ -767,7 +1125,6 @@ func _physics_process(delta: float) -> void:
 	_update_effects(delta)
 	_update_water(delta)
 	_wall_cooldown = maxf(_wall_cooldown - delta, 0.0)
-	_bump_cooldown = maxf(_bump_cooldown - delta, 0.0)
 	_respawn_cooldown = maxf(_respawn_cooldown - delta, 0.0)
 	# Checkpoint: aici, cu roatele pe asfalt, eram in siguranta.
 	if track != null and is_on_floor() \
@@ -815,6 +1172,8 @@ func _apply_suspension() -> void:
 	fwd_along.y = 0.0
 	fwd_along = fwd_along.normalized()
 	var steps_wheels := 0
+	var kerb_count := 0
+	var kerb_speed := Vector2(linear_velocity.x, linear_velocity.z).length()
 	# Rigiditatea pe roata din frecventa si masa pe roata (k = m(2*pi*f)^2),
 	# amortizarea din raport — tuning independent de cat cantareste masina.
 	var wheel_mass := mass * 0.25
@@ -854,6 +1213,16 @@ func _apply_suspension() -> void:
 			compression = clampf(compression
 				+ STEP_NOISE_M * sin(TAU * along / STEP_PITCH_M),
 				0.0, suspension_rest)
+		# Bordura: acelasi truc ca treptele, dar pe un pas mai fin si cu amplitudine
+		# care creste cu viteza; oprit nu scutura. Doar pe bucla principala.
+		if (kerb_rumble_enabled and track != null and route == 0
+				and kerb_speed > 2.0
+				and track.kerb_at(road_index, hit.position as Vector3)):
+			kerb_count += 1
+			var along_k := (hit.position as Vector3).dot(fwd_along)
+			compression = clampf(compression + KERB_NOISE_M
+				* clampf((kerb_speed - 2.0) / 18.0, 0.0, 1.0)
+				* sin(TAU * along_k / KERB_PITCH_M), 0.0, suspension_rest)
 		wheel_compression[i] = compression
 		var offset := attach - global_position
 		var point_vel := linear_velocity + angular_velocity.cross(offset)
@@ -865,6 +1234,8 @@ func _apply_suspension() -> void:
 		# masina in jos nefiresc.
 		if force_mag > 0.0:
 			apply_force(up * force_mag, offset)
+	kerb_wheels = kerb_count
+	on_kerb = kerb_count > 0
 	if (steps_wheels > 0) != on_steps:
 		on_steps = steps_wheels > 0
 		steps_changed.emit(self, on_steps)
@@ -896,12 +1267,13 @@ func _apply_suspension() -> void:
 ## _contact_offset); grip-ul lateral e per axa, ca driftul sa taie doar
 ## spatele.
 func _apply_driving(steer: float, throttle: float,
-		fwd_h: Vector3, fwd_speed: float) -> void:
+		fwd_h: Vector3, fwd_speed: float, delta: float) -> void:
 	# Tractiunea cere contact: cu rotile in aer nu se accelereaza si nu se
 	# vireaza. Drag-ul lipseste si el — lectia sariturii din aug 2026 (in aer
 	# nu exista nicio rezistenta modelata) e pastrata de constructie.
 	var ground_frac := float(wheels_on_ground) / 4.0
 	if ground_frac == 0.0:
+		_air_control(throttle)
 		return
 
 	var rel_vel := velocity - _ground_velocity
@@ -913,6 +1285,7 @@ func _apply_driving(steer: float, throttle: float,
 		var accel := acceleration
 		if is_boosting:
 			accel += turbo_accel_bonus
+		accel *= 1.0 + draft * slip_accel_bonus
 		apply_force(fwd_h * accel * throttle * mass * ground_frac,
 			_contact_offset)
 	elif throttle < 0.0:
@@ -937,6 +1310,10 @@ func _apply_driving(steer: float, throttle: float,
 	# spatele cedeaza mai putin, deci se roteste mai putin — arc larg.
 	var drift_amt := _drift_amount()
 	var drift_t := _drift_speed_t(fwd_speed)
+	# Puterea pierduta prin frecarea laterala, adunata pe axe: pentru o forta
+	# de amortizare -k·lat, F·v = -k·|lat|². In drift o parte se intoarce ca
+	# impuls inainte — vezi `drift_momentum_keep`.
+	var scrub_power := 0.0
 	for axle in 2:
 		if _axle_grounded[axle] == 0:
 			continue
@@ -954,29 +1331,195 @@ func _apply_driving(steer: float, throttle: float,
 		var lat := Vector3(point_vel.x, 0.0, point_vel.z)
 		lat -= fwd_h * lat.dot(fwd_h)
 		var axle_frac: float = float(_axle_grounded[axle]) / 2.0
-		apply_force(-lat * grip_axle * mass * 0.5 * axle_frac, offset)
+		var k := grip_axle * mass * 0.5 * axle_frac
+		apply_force(-lat * k, offset)
+		scrub_power += k * lat.length_squared()
 
-	# --- Directia (amplificata si "impinsa" in directia drift-ului) ---
+	# --- Impulsul inainte intors in drift (powerslide) ---
+	# O forta pe directia caroseriei a carei putere (F·fwd_speed) egaleaza
+	# fractia `keep` din cea pierduta lateral: viteza se ROTESTE spre bot in
+	# loc sa se piarda — trucul din kart-uri, scris ca forta. Centrala, ca
+	# plafonul: e un guvernator de joc, nu un motor, n-are voie sa adauge
+	# tangaj. Plafonata la de trei ori acceleratia, ca un derapaj extrem sa nu
+	# devina catapulta, si stinsa cat tine alunecarea de la balta/T-bone
+	# (slip_time): aia e pedeapsa, nu drift.
+	if drift_amt > 0.0 and throttle > 0.0 and fwd_speed > 3.0 \
+			and slip_time <= 0.0:
+		var keep_force := scrub_power / fwd_speed \
+			* drift_momentum_keep * drift_amt * throttle
+		keep_force = minf(keep_force, acceleration * 3.0 * mass)
+		apply_central_force(fwd_h * keep_force * ground_frac)
+
+	# --- Directia: in drift volanul alege RAZA, nu sensul (maparea CTR) ---
 	var speed_frac := clampf(absf(fwd_speed) / (max_speed * 0.5), 0.0, 1.0)
 	var effective_steer := steer
 	if drift_amt > 0.0:
-		var drift_steer := clampf(
-			steer * drift_steer_bonus + drift_dir * drift_bias, -1.6, 1.6)
-		effective_steer += (drift_steer - steer) \
-			* lerpf(1.0, drift_yaw_at_top, drift_t) * drift_amt
+		# +1 = volan spre interiorul alunecarii, -1 = contravolan plin.
+		var into := clampf(steer * drift_dir, -1.0, 1.0)
+		var tight := lerpf(drift_arc_tight, drift_arc_tight_top, drift_t)
+		var arc := lerpf(drift_arc_wide, tight, (into + 1.0) * 0.5)
+		effective_steer = lerpf(steer, drift_dir * arc, drift_amt)
 	var reverse_sign := -1.0 if fwd_speed < -0.5 else 1.0
-	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign
+	var yaw_rate := effective_steer * steer_speed * speed_frac * reverse_sign \
+		* _steer_taper(fwd_speed, drift_amt)
+	# Pe asfalt comanda se scrie direct (arcade: volanul e rotatia). In drift
+	# rotatia o URMEAZA cu inertie, ca sa existe ce prinde cu contravolanul;
+	# rampa de iesire duce tau la zero, deci revenirea pe asfalt e continua.
+	var tau := drift_yaw_inertia * drift_amt
+	if tau > 0.001:
+		_yaw_cmd = lerpf(_yaw_cmd, yaw_rate, 1.0 - exp(-delta / tau))
+	else:
+		_yaw_cmd = yaw_rate
+	_spinout_assist(throttle, fwd_h, hvel)
 	# Comanda + rotatia ramasa din lovituri (se stinge singura, plafonata).
 	var kick := _yaw_kick if _yaw_kick_left > 0.0 else 0.0
 	angular_velocity = Vector3(
-		angular_velocity.x, yaw_rate + _impact_yaw + kick, angular_velocity.z)
+		angular_velocity.x, _yaw_cmd + _impact_yaw + kick, angular_velocity.z)
+
+
+## Strangerea virajului cu viteza: 1.0 sub `steer_taper_start` din max_speed,
+## coboara liniar la `steer_taper_at_top` la max_speed (si ramane acolo cu
+## turbo). Scutita in drift: se amesteca spre 1.0 cu dozajul driftului.
+func _steer_taper(fwd_speed: float, drift_amt: float) -> float:
+	var start := max_speed * steer_taper_start
+	var t := clampf(inverse_lerp(start, max_speed, absf(fwd_speed)), 0.0, 1.0)
+	return lerpf(lerpf(1.0, steer_taper_at_top, t), 1.0, drift_amt)
+
+
+## Spin-out assist (feel_checklist: spinout-assist): vezi grupul de exporturi.
+## Declansare: unghiul dintre bot si viteza (orizontala, fata de sol) peste
+## `spinout_slip_deg`, la peste `spinout_min_speed`, fara sa fie marsarier din
+## voie (fara gaz la viteza de marsarier: frana, sau rulat de-a-ndaratelea pe o
+## panta). Odata pornita (cel mult 2 s),
+## tine pana botul e la `spinout_release_deg` de tinta: directia de mers, iar
+## sub 3 m/s directia soselei (daca exista pista). Rotatia intra prin
+## _impact_yaw, ca orice alt impuls de yaw — niciodata cuplu.
+func _spinout_assist(throttle: float, fwd_h: Vector3, hvel: Vector3) -> void:
+	if not spinout_enabled:
+		_spinout_on = false
+		return
+	var speed := hvel.length()
+	var target := Vector3.ZERO
+	if speed > 3.0:
+		target = hvel / speed
+	elif _spinout_on and track != null:
+		var ahead := track.point_at(road_index + 3, route) - track.point_at(road_index, route)
+		ahead.y = 0.0
+		if ahead.length_squared() > 1e-4:
+			target = ahead.normalized()
+	if not _spinout_on:
+		if speed < spinout_min_speed:
+			return
+		var by_choice := throttle <= 0.0 and speed <= reverse_speed * 1.3
+		if fwd_h.dot(target) < cos(deg_to_rad(spinout_slip_deg)) and not by_choice:
+			_spinout_on = true
+			_spinout_left = 2.0
+		return
+	_spinout_left -= get_physics_process_delta_time()
+	if (target == Vector3.ZERO or _spinout_left <= 0.0
+			or fwd_h.dot(target) > cos(deg_to_rad(spinout_release_deg))):
+		_spinout_on = false
+		return
+	var err := atan2(fwd_h.cross(target).y, fwd_h.dot(target))
+	var want := clampf(err * spinout_yaw_gain, -spinout_yaw_max, spinout_yaw_max)
+	if absf(want) > absf(_impact_yaw):
+		_impact_yaw = want
+
+
+## Control in aer: gazul apleaca botul, frana il ridica. Doar jucatorul; AI-ul
+## ramane neutru in aer. Se ADAUGA la viteza unghiulara pe axa dreapta a
+## masinii pana la `air_pitch_rate`, fara sa franeze rotatia din lansare.
+func _air_control(throttle: float) -> void:
+	if (not air_control_enabled or not (controller is PlayerController)
+			or throttle == 0.0 or not race_active):
+		return
+	var right := global_transform.basis.x
+	var along := angular_velocity.dot(right)
+	# Pozitiv in jurul axei dreapta = bot in sus; gaz (throttle > 0) = bot in jos.
+	var want := -signf(throttle) * air_pitch_rate
+	var step := air_pitch_accel * get_physics_process_delta_time()
+	var new_along := along
+	if want < 0.0 and along > want:
+		new_along = maxf(along - step, want)
+	elif want > 0.0 and along < want:
+		new_along = minf(along + step, want)
+	angular_velocity += right * (new_along - along)
+
+
+## Slipstream: cea mai buna masina din fata, in con, da `draft` tinta 1.
+func _update_draft(delta: float) -> void:
+	var target := 0.0
+	if slipstream_enabled and race_active and not finished and wheels_on_ground > 0:
+		target = _draft_target()
+	var rate := 1.0 / maxf(slip_fade_s, 0.01)
+	if target > draft:
+		rate = 1.0 / maxf(slip_build_s, 0.01)
+	draft = move_toward(draft, target, rate * delta)
+
+
+func _road_curves_ahead() -> bool:
+	if track == null or track.curve == null:
+		return false
+	var step := maxf(track.curve.bake_interval, 0.1)
+	var n := maxi(int(slip_lookahead_m / step), 2)
+	var t0 := track.point_at(road_index + 1, route) - track.point_at(road_index, route)
+	var t1 := track.point_at(road_index + n + 1, route) - track.point_at(road_index + n, route)
+	t0.y = 0.0
+	t1.y = 0.0
+	if t0.length_squared() < 1e-6 or t1.length_squared() < 1e-6:
+		return false
+	return t0.angle_to(t1) > slip_curve_rad
+
+
+func _draft_target() -> float:
+	var v := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
+	if v.length() < max_speed * slip_min_speed_frac:
+		return 0.0
+	# Aspiratia e un lucru de DREAPTA: in viraj conul se strange si nimeni nu
+	# mai e „in spatele" nimanui. Fara portita asta, bonusul de acceleratie facea
+	# masinile sa intre mai tare in viraje (ProbeRace: loviturile de perete
+	# se dublau pe Transfagarasan).
+	if absf(angular_velocity.y) > slip_max_yaw or brake_lamp:
+		return 0.0
+	# Drumul din fata se curbeaza: bonusul se retrage INAINTE de viraj, ca plafonul
+	# in plus sa nu intre in curba (AI-ul isi planifica franarea pe viteza de
+	# dinaintea aspiratiei). Unghiul dintre tangenta de acum si cea de la
+	# `slip_lookahead_m` mai departe pe ruta masinii.
+	if _road_curves_ahead():
+		return 0.0
+	var fwd := -global_transform.basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	for node in get_tree().get_nodes_in_group(&"cars"):
+		var other := node as Car
+		if other == null or other == self or other.finished or not other.race_active:
+			continue
+		var rel := other.global_position - global_position
+		rel.y = 0.0
+		var along := rel.dot(fwd)
+		if along < slip_min_gap or along > slip_max_gap:
+			continue
+		var lat := (rel - fwd * along).length()
+		if lat > 0.9 + along * slip_cone:
+			continue
+		var ov := Vector3(other.linear_velocity.x, 0.0, other.linear_velocity.z)
+		if ov.length() < other.max_speed * slip_min_speed_frac:
+			continue
+		if ov.dot(fwd) < ov.length() * 0.8:
+			continue
+		return 1.0
+	return 0.0
 
 
 ## Bilantul contactelor raportate de solver: izbituri cu alte masini (plafon,
 ## rotatie, slip, semnal), pereti (wall_hit) si popice (imprastiate).
 func _process_contacts(delta: float) -> void:
+	_scan_contact_state()
+	_impact_wall_cooldown = maxf(_impact_wall_cooldown - delta, 0.0)
 	var cars_hit: Array[Car] = []
 	var static_hit := false
+	var hard_static := false
+	var soft_crush := 0.0
 	for body in get_colliding_bodies():
 		if body is Car:
 			cars_hit.append(body as Car)
@@ -993,6 +1536,13 @@ func _process_contacts(delta: float) -> void:
 				+ Vector3.UP * 1.5)
 		elif body is StaticBody3D:
 			static_hit = true
+			# Contact MOALE (camion, brat de excavator): corp greu, nu zid de
+			# beton. Meta `soft_hit_crush` (secunde de strivire) o pune hazardul,
+			# in spatele unui flag implicit stins. Fara meta, nimic nu se schimba.
+			if body.has_meta(&"soft_hit_crush"):
+				soft_crush = maxf(soft_crush, float(body.get_meta(&"soft_hit_crush")))
+			else:
+				hard_static = true
 			# Lava (Stromboli): contactul e distrugere, nu perete. Meta vine de
 			# la LavaFlowHazard, pe colizorul stadiului curent.
 			if body.has_meta(&"lava"):
@@ -1034,16 +1584,17 @@ func _process_contacts(delta: float) -> void:
 					continue
 				_bump_pairs[key] = bump_pair_cooldown
 				bumped.emit(self, other, dv)
+				var away_n := global_position - other.global_position
+				away_n.y = 0.0
+				impact.emit(self, &"car", dv,
+					away_n.normalized() if away_n.length_squared() > 1e-4
+						else -dv_vec.normalized(),
+					_contact_point_with(other, (global_position
+						+ other.global_position) * 0.5), other)
 				_emit_sparks(other, dv)
-				if _bump_cooldown <= 0.0 and (is_player or other.is_player):
-					_bump_cooldown = 0.25
-					AudioManager.play_sfx(&"bump")
-					# Tabla pe tabla, dozata dupa impuls (#500): o atingere abia
-					# se aude si suna mai subtire, o izbitura plina e tare si
-					# grava. Inainte era doar bufnitura `bump`, la volum fix.
-					var k := _bump_strength(dv)
-					AudioManager.play_sfx(&"metal_hit", lerpf(1.18, 0.86, k),
-						lerpf(-20.0, -1.0, k))
+				# Sunetul (bufnitura `bump` + tabla `metal_hit`, plus straturile
+				# tap/crunch/crash) nu mai e aici: il da ImpactSound, pe semnalul
+				# `impact` de mai sus (feel_checklist: impact-layers).
 		# Impulsul de separare (reteta SuperTuxKart): contactul sustinut nu
 		# are voie sa lipeasca masinile. O acceleratie LATERALA le impinge una
 		# de langa alta -- centrala (fara rotatie: directia ramane a soferului),
@@ -1071,15 +1622,28 @@ func _process_contacts(delta: float) -> void:
 		# Perete/bariera: impact = schimbarea ORIZONTALA de viteza (aterizarea
 		# dura pe sol are dv vertical si nu e izbitura de perete).
 		var dv_h := Vector3(dv_vec.x, 0.0, dv_vec.z).length()
+		if dv_h >= impact_min_dv and _impact_wall_cooldown <= 0.0:
+			_impact_wall_cooldown = 0.2
+			var n := wall_normal
+			if n == Vector3.ZERO:
+				n = Vector3(dv_vec.x, 0.0, dv_vec.z).normalized()
+			impact.emit(self, &"wall", dv_h, n,
+				wall_point if wall_contact else global_position - n * collider_half_width(),
+				_last_static)
 		if dv_h > 8.0 and _wall_cooldown <= 0.0:
 			_wall_cooldown = 0.35
 			wall_hit.emit(self, dv_h)
-			if is_player:
-				AudioManager.play_sfx(&"wall_hit")
+			# Sunetul peretelui il da ImpactSound (strat dupa putere, nu un nivel fix).
 		# Izbitura dura de perete arunca soferul. Directia de zbor e viteza de
 		# DINAINTE de impact: figurina continua drumul pe care masina nu l-a
 		# mai putut face, peste bariera.
-		if dv_h >= eject_wall_dv:
+		if dv_h >= eject_wall_dv and not hard_static and soft_crush > 0.0:
+			# Lovitura moale grea: ghiont (l-a dat deja solverul + hazardul) si
+			# o strivire scurta in loc de ejectare. Cooldown, ca un contact
+			# sustinut sa nu reinnoiasca strivirea in fiecare tick.
+			if crush_time <= 0.0:
+				crush(soft_crush, SOFT_CRUSH_FACTOR, Vector3(1.25, 0.65, 1.1), 1.0)
+		elif dv_h >= eject_wall_dv:
 			# 0.6 din viteza inainte + 7.5 m/s in sus: peste o bariera de 1,2 m
 			# trece; intr-o faleza se izbeste si cade — amandoua sunt corecte.
 			var fling := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z) * 0.6
@@ -1098,6 +1662,178 @@ func _process_contacts(delta: float) -> void:
 		_yaw_kick_left -= delta
 		if _yaw_kick_left <= 0.0:
 			_yaw_kick = 0.0
+	_wall_glance(delta)
+
+
+## Razuire vs frontal (feel_checklist: glancing-vs-headon) + anti-lipire.
+##
+## Problema: botul infipt in perete la un unghi mic NU se roteste singur
+## (directia scrie yaw-ul direct), iar grip-ul lateral il impinge in zid cu
+## zeci de m/s^2 — frecarea de perete mananca viteza cat tine contactul.
+## Raspunsul are trei parti:
+##   1. EPISODUL incepe cand viteza de DINAINTE de tick (`_prev_velocity`, adica
+##      inainte ca solverul sa aplice bounce-ul) face cel mult `glance_angle_deg`
+##      cu planul peretelui si merge cu peste 5 m/s. Un frontal nu intra: se
+##      opreste cu bounce, ca pana acum.
+##   2. cat tine episodul, frecarea masinii scade la `glance_friction`: se pierde
+##      componenta normala (cu bounce-ul din material), tangentiala ramane.
+##   3. botul e rotit spre paralel prin `_impact_yaw` (rad/s ~ unghiul), deci
+##      grip-ul nu mai impinge in zid si contactul se termina singur.
+## Hazardele mobile (AnimatableBody3D) nu intra: strivire/purtare neschimbate.
+##
+## Anti-lipire, separat: botul in perete (> ~17 grade) la sub 3 m/s mai mult de
+## `stuck_nudge_time` primeste o impingere dinspre perete + o rotatie spre
+## tangenta. Fara ea, un jucator cu gaz tinut sta lipit pana la repunere.
+func _wall_glance(delta: float) -> void:
+	_stuck_cool = maxf(_stuck_cool - delta, 0.0)
+	var live := glance_enabled and wall_contact and not wall_moving \
+		and rub_car == null and wheels_on_ground > 0 and race_active \
+		and not finished and _eject_left <= 0.0 and _recover_left <= 0.0
+	if not live:
+		_stuck_t = maxf(_stuck_t - delta * 2.0, 0.0)
+		_stuck_push_left = 0.0 # fara contact nu mai exista „perete de ocolit"
+		_glance_gap += delta
+		if _glance_gap > 0.15:
+			_glance_episode = false
+		_set_car_friction(glance_friction if _glance_episode else CAR_FRICTION)
+		return
+	_glance_gap = 0.0
+	var n := wall_normal
+	var fwd := -global_transform.basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	var into_h := -fwd.dot(n) # +1 = botul drept in perete
+	var vref := Vector3(_prev_velocity.x, 0.0, _prev_velocity.z)
+	var speed := vref.length()
+	if not _glance_episode:
+		if speed > 5.0:
+			var into_v := -vref.dot(n) / speed
+			if absf(into_v) <= sin(deg_to_rad(glance_angle_deg)):
+				_glance_episode = true
+		elif into_h > 0.05 and into_h <= sin(deg_to_rad(glance_angle_deg * 2.0)):
+			# Aproape oprita, cu botul oblic in perete: tot razuire (altfel
+			# gazul o tine lipita, cu grip-ul lateral impingand in zid).
+			_glance_episode = true
+	_set_car_friction(glance_friction if _glance_episode else CAR_FRICTION)
+
+	# Nudge spre paralel, doar cat botul e inca spre perete (nu si cand te
+	# departezi) si nu e un frontal (peste 2x unghiul de razuire).
+	var fwd_speed := Vector3(velocity.x, 0.0, velocity.z).dot(fwd)
+	if _glance_episode and fwd_speed > 0.0 and into_h > 0.03 \
+			and into_h <= sin(deg_to_rad(glance_angle_deg * 2.0)):
+		var want := _toward_parallel(fwd, n) * clampf(
+			asin(into_h) * glance_yaw_gain, 0.0, glance_yaw_max)
+		if absf(want) > absf(_impact_yaw):
+			_impact_yaw = clampf(want, -bump_yaw_max, bump_yaw_max)
+
+	# Anti-lipire.
+	var slow := Vector3(velocity.x, 0.0, velocity.z).length() < 3.0
+	if slow and into_h > 0.3:
+		_stuck_t += delta
+	else:
+		_stuck_t = maxf(_stuck_t - delta * 2.0, 0.0)
+	if _stuck_t >= stuck_nudge_time and _stuck_cool <= 0.0:
+		_stuck_t = 0.0
+		_stuck_cool = 0.6
+		_stuck_push_left = 0.3
+		linear_velocity += n * stuck_nudge_speed
+	if _stuck_push_left > 0.0:
+		# Rotatia se REAFIRMA cat tine impingerea: peretele se opune la un
+		# singur impuls (masurat: jumatate din unghiul calculat).
+		_stuck_push_left -= delta
+		_impact_yaw = clampf(_toward_parallel(fwd, n) * stuck_nudge_yaw,
+			-bump_yaw_max, bump_yaw_max)
+
+
+## +1 / -1: in ce sens trebuie rotit botul (yaw pozitiv = stanga) ca sa se
+## aseze paralel cu peretele de normala `n`, pe latura cea mai apropiata.
+func _toward_parallel(fwd: Vector3, n: Vector3) -> float:
+	var t := fwd - n * fwd.dot(n)
+	if t.length_squared() < 1e-4:
+		t = Vector3(-n.z, 0.0, n.x) # frontal exact: alege o tangenta oarecare
+	var s := signf(fwd.cross(t).y)
+	return s if s != 0.0 else 1.0
+
+
+func _set_car_friction(value: float) -> void:
+	if _pmat != null and _pmat.friction != value:
+		_pmat.friction = value
+
+
+## Auto-upright (feel_checklist: auto-upright). Rasturnata si aproape oprita
+## `upright_delay` secunde, masina sare (`upright_hop`) si se roteste spre
+## vertical pe axa botului, deci pozitia si directia ramane. Se foloseste
+## viteza unghiulara pe X/Z (yaw-ul e al directiei, scris in _apply_driving; in
+## aer _apply_driving nici nu ruleaza), nu o teleportare: fizica o aseaza.
+##
+## Locuri in care NU se intoarce pe loc — raman pe plasa veche (Race o repune
+## la 1,5 s, iar noi apelam recover() la acelasi prag): in apa, cu mult sub
+## sosea, sau la peste UPRIGHT_OFFROAD_M de ea. Aceleasi hazarde, aceleasi
+## declansatoare de repunere ca inainte.
+func _tick_upright(delta: float) -> void:
+	if not upright_enabled or finished or not race_active or on_start_grid \
+			or _eject_left > 0.0 or _recover_left > 0.0:
+		_roof_t = 0.0
+		_upright_left = 0.0
+		return
+	if _upright_left > 0.0:
+		_run_upright(delta)
+		return
+	var flipped := global_transform.basis.y.dot(Vector3.UP) < UPRIGHT_FLIPPED_COS \
+		and horizontal_speed() < UPRIGHT_FLIPPED_SPEED
+	if not flipped:
+		_roof_t = 0.0
+		return
+	_roof_t += delta
+	if _roof_t >= UPRIGHT_GIVE_UP_S:
+		_roof_t = 0.0
+		recover() # nu s-a putut intoarce (loc invalid sau incercare ratata)
+	elif _roof_t >= upright_delay and _upright_spot_ok():
+		_upright_left = upright_max_time
+		# Doar sus: ce mai aluneca pe orizontala (sub 4 m/s) se opreste, ca masina
+		# sa ramana unde a fost rasturnata.
+		linear_velocity = Vector3(0.0, maxf(linear_velocity.y, upright_hop), 0.0)
+
+
+func _run_upright(delta: float) -> void:
+	_upright_left -= delta
+	var up := global_transform.basis.y
+	var cos_up := up.dot(Vector3.UP)
+	if cos_up > 0.85 and wheels_on_ground >= 2:
+		_upright_left = 0.0
+		_roof_t = 0.0
+		uprighted.emit(self)
+		return
+	if _upright_left <= 0.0:
+		# Incercarea s-a terminat si tot nu e pe roti: plasa veche.
+		_upright_left = 0.0
+		_roof_t = 0.0
+		if cos_up < 0.6:
+			recover()
+		return
+	var axis := up.cross(Vector3.UP)
+	if axis.length_squared() < 1e-4:
+		axis = global_transform.basis.z # exact pe acoperis: ruleaza pe axa botului
+	axis = axis.normalized()
+	var theta := acos(clampf(cos_up, -1.0, 1.0))
+	var rate := minf(theta * upright_turn_rate, UPRIGHT_MAX_RATE)
+	angular_velocity = Vector3(axis.x * rate, angular_velocity.y, axis.z * rate)
+
+
+## Se poate intoarce pe loc aici? (Fara pista — sonde — mereu da.)
+func _upright_spot_ok() -> bool:
+	if in_water:
+		return false
+	if track == null:
+		return true
+	var rp := track.point_at(road_index, route)
+	if global_position.y < rp.y - UPRIGHT_BELOW_ROAD_M:
+		return false
+	if not track.is_on_road(road_index, global_position, route):
+		var dh := Vector2(global_position.x - rp.x, global_position.z - rp.z).length()
+		if dh > UPRIGHT_OFFROAD_M:
+			return false
+	return true
 
 
 ## Plafonul de viteza al momentului: taiat de iarba, ridicat de turbo.
@@ -1113,6 +1849,7 @@ func _current_max_speed() -> float:
 		vmax *= track.route_speed_factor(route)
 	if is_boosting:
 		vmax += turbo_speed_bonus
+	vmax += draft * slip_speed_bonus
 	# Strivirea taie plafonul, nu viteza curenta: pierzi timp reaccelerand, exact
 	# ca la offroad. Se aplica DUPA turbo, ca sa nu poti sterge pedeapsa cu boost.
 	return vmax * crush_factor
@@ -1126,16 +1863,34 @@ func _update_drift(drift_pressed: bool, steer: float, fwd_speed: float,
 		if drift_pressed and fwd_speed > drift_min_speed and absf(steer) > 0.25:
 			is_drifting = true
 			drift_dir = signf(steer)
+			_drift_time = 0.0
 			if is_player:
 				AudioManager.play_sfx(&"drift_start")
 	elif not drift_pressed or fwd_speed < drift_min_speed * 0.55:
-		is_drifting = false
+		_end_drift()
 	if is_drifting:
+		_drift_time += delta
 		drift_blend = move_toward(drift_blend, 1.0,
 			delta / maxf(drift_ramp_in, 0.001))
 	else:
 		drift_blend = move_toward(drift_blend, 0.0,
 			delta / maxf(drift_ramp_out, 0.001))
+
+
+## Iesirea din drift, cea JUCATA (frana de mana eliberata sau viteza prea
+## mica): spatele se reaseaza pe rampa, caroseria tresare o data in sens
+## opus, cauciucul ciripeste cand se prinde iar, iar HUD-ul afla ca sa
+## pulseze bara. Repunerea si aruncarea sting driftul direct, fara nimic
+## din astea — acolo nu s-a terminat un drift, a disparut masina.
+func _end_drift() -> void:
+	is_drifting = false
+	_snap_left = DRIFT_SNAP_TIME
+	_snap_dir = drift_dir
+	# Un drift de sub 0.3 s e o atingere de buton, nu o alunecare: fara
+	# ciripit, altfel fiecare tap pocneste.
+	if is_player and _drift_time > 0.3:
+		AudioManager.play_sfx(&"drift_end")
+	drift_ended.emit(self, _drift_time)
 
 
 ## Dozajul driftului aplicat fizicii: rampa netezita (smoothstep), ca intrarea
@@ -1187,7 +1942,8 @@ func _update_turbo(turbo_pressed: bool, delta: float) -> void:
 		var fill := delta / turbo_fill_time
 		if is_drifting:
 			fill *= turbo_drift_multiplier
-		turbo_charge = minf(turbo_charge + fill, 1.0)
+		if turbo_recharge:
+			turbo_charge = minf(turbo_charge + fill, 1.0)
 
 func _start_boost() -> void:
 	var forward := -global_transform.basis.z
@@ -1443,8 +2199,8 @@ func _detect_landing() -> void:
 		if _prev_velocity.y < -6.0:
 			landed.emit(self, -_prev_velocity.y)
 			_punch_scale(Vector3(1.15, 0.8, 1.15))
-			if is_player:
-				AudioManager.play_sfx(&"land")
+			# Sunetul aterizarii (volum/pitch dupa viteza de cadere) il da ImpactSound,
+			# pe semnalul `landed` de mai sus.
 			# Aterizare de la inaltime: soferul sare din scaun, drept in sus si
 			# putin inainte (masina se opreste brusc pe verticala, el nu).
 			if -_prev_velocity.y >= eject_land_speed:
@@ -1735,8 +2491,11 @@ func respawn(backoff_m: float = 14.0) -> void:
 	angular_velocity = Vector3.ZERO
 	_prev_velocity = velocity
 	_commanded_yaw = 0.0
+	_yaw_cmd = 0.0
 	is_drifting = false
 	drift_blend = 0.0
+	_drift_visual_yaw = 0.0
+	_snap_left = 0.0
 	is_boosting = false
 	_spin_left = 0.0 # repusa pe sosea, nu mai e in tromba
 	_douse_left = 0.0 # repus = uscat, nu mai picura
@@ -2089,19 +2848,25 @@ func _update_effects(delta: float) -> void:
 	var on_branch := track != null and route != 0 \
 		and track.is_on_road(road_index, global_position, route)
 	var loose := _on_loose_ground(on_road)
-	if is_drifting:
+	_toy_loose = loose
+	_update_slide(delta)
+	_update_scrape_sparks()
+	# Fumul si urmele urmeaza ALUNECAREA, nu butonul: handbrake-ul le aprinde
+	# oricum (cu un minim), dar o alunecare mare fara handbrake (gheata, dupa
+	# o lovitura, derapaj de coada) le aprinde si ea, iar franarea tare lasa
+	# urma de blocare. Intensitatea vine din unghiul de derapaj si viteza.
+	var mark := _skid_mark_strength(delta)
+	if is_drifting or slide_amount >= SMOKE_FREE_SLIDE:
 		_drift_particles.emitting = true
+		_update_drift_smoke()
+	else:
+		_drift_particles.emitting = false
+	if mark > 0.0:
 		# Cauciuc ars doar pe suprafata TARE. Pe pamant derapajul se vede in dara
 		# de rulare si in norul de praf; o pata neagra lucioasa acolo ar fi
 		# asfaltul care se vede prin drum.
 		if not loose:
-			_drop_skid_marks(delta)
-		if not _skid_audio.playing:
-			_skid_audio.play()
-	else:
-		_drift_particles.emitting = false
-		if _skid_audio.playing:
-			_skid_audio.stop()
+			_drop_skid_marks(delta, mark)
 	# Ding cand bara de turbo ajunge plina — stii fara sa te uiti in jos.
 	if turbo_charge >= 1.0 and not _turbo_full_latch and is_player:
 		_turbo_full_latch = true
@@ -2114,15 +2879,62 @@ func _update_effects(delta: float) -> void:
 	if _fire_particles != null:
 		_fire_particles.emitting = burn_time > 0.0
 	_update_dust(on_road, loose, on_branch)
+	_update_soft_veg(delta)
 	_drop_trail(delta, loose)
 	_drop_leaf_wear(delta, on_road)
-	# Pitch de motor variabil: turatia urca cu viteza + salt la turbo.
-	var speed_frac := clampf(horizontal_speed() / max_speed, 0.0, 1.2)
-	_engine_audio.pitch_scale = lerpf(0.7, 1.9, speed_frac) \
-		+ (0.25 if is_boosting else 0.0)
+	# Motor cu trepte, derapaj dupa alunecare, suprafete, turbo, vant.
+	_audio.tick(delta, on_road, loose)
 
-## Urme de cauciuc: placute plate depuse sub rotile din spate in drift.
-func _drop_skid_marks(delta: float) -> void:
+## De la cat de mare e alunecarea fara handbrake pornesc fumul si urmele.
+const SMOKE_FREE_SLIDE: float = 0.3
+## Franare tare (m/s^2 decelerare) de la care roata blocata lasa urma.
+const BRAKE_MARK_DECEL: float = 12.0
+
+## „Cat de tare aluneca" (0..1) din unghiul de derapaj si viteza: 4 grade sunt
+## zgomot, 40 de grade sunt plin; viteza mica taie la 30% (o alunecare la pas
+## nu face nor). Pura, ca sa o poata masura o sonda.
+static func slide_amount_for(slip_deg: float, speed: float) -> float:
+	var a := smoothstep(4.0, 40.0, slip_deg)
+	return clampf(a * clampf(speed / 20.0, 0.3, 1.0), 0.0, 1.0)
+
+
+## Unghiul de derapaj si `slide_amount`, o data pe tick. Viteza e FATA DE SOL
+## (ca restul fizicii): pe o platforma mobila nu aluneci doar pentru ca ea merge.
+func _update_slide(delta: float) -> void:
+	var rel := velocity - _ground_velocity
+	rel.y = 0.0
+	var sp := rel.length()
+	var target := 0.0
+	slip_angle_deg = 0.0
+	if wheels_on_ground > 0 and sp > 3.0:
+		var b := global_transform.basis
+		var fwd := Vector3(-b.z.x, 0.0, -b.z.z).normalized()
+		var right := Vector3(b.x.x, 0.0, b.x.z).normalized()
+		# Cu spatele inainte, „derapajul" e fata de coada: abs pe ambele.
+		slip_angle_deg = rad_to_deg(atan2(absf(rel.dot(right)), absf(rel.dot(fwd))))
+		target = slide_amount_for(slip_angle_deg, sp)
+	slide_amount = lerpf(slide_amount, target, 1.0 - exp(-12.0 * minf(delta, 0.05)))
+
+
+## Opacitatea urmei de cauciuc pe acest tick (0 = nu lasa). Handbrake: minim
+## 0.3, urca cu alunecarea. Fara handbrake: doar o alunecare mare, sau franare
+## tare cu masina inca in viteza (roata blocata).
+func _skid_mark_strength(delta: float) -> float:
+	if is_drifting:
+		return lerpf(0.3, 1.0, slide_amount)
+	if slide_amount >= SMOKE_FREE_SLIDE:
+		return slide_amount * 0.85
+	if brake_lamp and wheels_on_ground >= 3 and horizontal_speed() > 10.0:
+		var fwd := -global_transform.basis.z
+		var decel := (_prev_velocity - velocity).dot(fwd) / maxf(delta, 0.0001)
+		if decel > BRAKE_MARK_DECEL:
+			return clampf(0.35 + (decel - BRAKE_MARK_DECEL) * 0.02, 0.35, 0.6)
+	return 0.0
+
+
+## Urme de cauciuc: placute plate depuse sub rotile din spate cand aluneci;
+## `strength` (0..1) le da opacitatea.
+func _drop_skid_marks(delta: float, strength: float = 1.0) -> void:
 	if skid_parent == null or not is_on_floor():
 		return
 	_skid_accum += horizontal_speed() * delta
@@ -2150,6 +2962,9 @@ func _drop_skid_marks(delta: float) -> void:
 			+ global_transform.basis.x * half_track_w * side \
 			+ global_transform.basis.z * rear_z + Vector3.UP * 0.06
 		mark.rotation.y = rotation.y
+		# Intensitatea e opacitatea URMEI (transparenta de instanta peste cea a
+		# materialului comun): derapaj usor = dara palida, plin = neagra.
+		mark.transparency = 1.0 - clampf(strength, 0.15, 1.0)
 		var tw := mark.create_tween()
 		# Urma traieste destul cat sa o REVEZI: la un tur de ~55 s, 8 s inseamna
 		# ca inca vezi urmele virajului cand privesti in urma, dar turul urmator
@@ -2210,6 +3025,108 @@ var _dust_route: int = -1
 ## stim cand sa recolorez fumul de drift la trecerea pamant <-> asfalt.
 var _drift_on_dirt: bool = false
 
+## Tufele: rafala de frunze la intrare si franare usoara cat rotile sunt
+## in ea. Registrul (`SoftVegetation`) se citeste o data pe cursa, din chunk-urile
+## de vegetatie ale pistei; fara ele (sau headless) depth e mereu 0.
+func _update_soft_veg(delta: float) -> void:
+	_veg_cooldown = maxf(_veg_cooldown - delta, 0.0)
+	var root: Node3D = soft_veg_root if soft_veg_root != null else track
+	if root == null or not race_active or wheels_on_ground == 0:
+		_veg_depth = 0.0
+		return
+	if not SoftVegetation.is_scanned(root):
+		SoftVegetation.scan(root)
+	var speed := horizontal_speed()
+	if speed < 2.0 or SoftVegetation.count(root) == 0:
+		_veg_depth = 0.0
+		return
+	_veg_depth = SoftVegetation.depth_at(root, global_position)
+	if _veg_depth <= 0.0:
+		return
+	var v := Vector3(velocity.x, 0.0, velocity.z)
+	# Franare mica, pe directia de mers: nu schimba directia si nu atinge solverul.
+	apply_central_force(-v.normalized() * bush_drag * _veg_depth * mass)
+	if speed >= bush_burst_min_speed and _veg_cooldown <= 0.0:
+		_veg_cooldown = 0.3
+		var tint := Color(0.38, 0.56, 0.24)
+		if track != null:
+			tint = tint.lerp(track.theme_ground_tint, 0.25)
+		PropDebris.leaf_burst(get_tree(), global_position + Vector3.UP * 0.4,
+			v.normalized() * 0.5 + Vector3.UP,
+			clampf(inverse_lerp(bush_burst_min_speed, 28.0, speed), 0.0, 1.0), tint)
+
+
+## Fumul de cauciuc dupa alunecare (0..1): cate pufuri se vad, cat de opace si
+## cat de mari. La 1 e fumul de dinainte; la alunecari mici e o adiere subtire.
+## Handbrake-ul tine un minim, ca intrarea in drift sa se vada de la inceput.
+func _update_drift_smoke() -> void:
+	if _drift_density == null:
+		return
+	var s := slide_amount
+	if is_drifting:
+		s = maxf(s, 0.2)
+	# Densitatea si opacitatea pe radacina: un drift obisnuit (20-30 de grade) sa
+	# arate cam ca fumul de dinainte, iar 40 de grade sa-l intreaca; doar marimea
+	# urmeaza liniar.
+	var d := sqrt(s)
+	_drift_density.set_offset(1, lerpf(0.3, 1.0, d)) # fractia care se vede
+	_drift_density.set_color(0, Color(1, 1, 1, lerpf(0.55, 1.0, d))) # opacitatea
+	var size := lerpf(0.9, 1.9, s)
+	_drift_particles.scale_amount_min = 0.6 * size
+	_drift_particles.scale_amount_max = 1.4 * size
+
+
+## Culorile prafului se coc o data, cand masina afla pe ce pista e.
+func _ensure_dust_colors() -> void:
+	if _dust_colors_ready or track == null:
+		return
+	_dust_colors_ready = true
+	# Praful de pe TEREN: mai INCHIS decat solul, nu mai deschis. Prima
+	# versiune folosea lightened(0.22) si ProbeFx a aratat rezultatul: alb pal
+	# pe nisip luminat = invizibil. Contrastul care se citeste ca praf e cel
+	# al unei umbre usoare.
+	_dust_ground_color = track.theme_ground_tint.darkened(0.12)
+	# Praful de pe SOSEA merge exact invers, din acelasi motiv: contrastul,
+	# nu luminozitatea. Drumul de pamant e cea mai inchisa suprafata de sub
+	# roti, deci un nor si mai inchis peste el ar fi invizibil la fel de sigur
+	# cum era cel alb pe nisip.
+	_dust_road_color = track.road_dust_color().lightened(0.18)
+
+
+## Culoarea prafului de sub roti ACUM, aceeasi alegere ca in `_update_dust`
+## (sosea afanata / banda secundara / teren), plus asfaltul, unde praful de
+## rulare nu porneste niciodata: acolo o aterizare ridica un nor gri-deschis.
+func _surface_dust_color() -> Color:
+	if track == null:
+		return DRIFT_SMOKE_COLOR.darkened(0.12)
+	_ensure_dust_colors()
+	var on_road := track.is_on_road(road_index, global_position)
+	var on_branch := route != 0 and track.is_on_road(road_index, global_position, route)
+	if on_road:
+		return _dust_road_color if _on_loose_ground(true) 			else DRIFT_SMOKE_COLOR.darkened(0.12)
+	if on_branch:
+		return track.route_dust_color(route).lightened(0.18)
+	return _dust_ground_color
+
+
+## Aterizare dura (`landed`, deja doar de la 6 m/s in jos): un singur nor de
+## praf din jurul rotilor, mai mare si mai iute cu cat caderea a fost mai
+## lunga. Thud-ul si scuturatura sunt in alta parte.
+func _on_landed_visual(_car: Car, fall_speed: float) -> void:
+	if _land_dust == null or fall_speed < land_dust_min_fall or in_water:
+		return
+	var k := clampf(inverse_lerp(land_dust_min_fall, 24.0, fall_speed), 0.0, 1.0)
+	if data != null:
+		_land_dust.emission_box_extents = Vector3(
+			data.body_width * 0.45, 0.05, data.body_length * 0.4)
+	_land_dust.color = _surface_dust_color()
+	_land_dust.initial_velocity_max = lerpf(2.5, 5.0, k)
+	_land_dust.radial_accel_min = lerpf(4.0, 7.0, k)
+	_land_dust.radial_accel_max = lerpf(6.0, 12.0, k)
+	_land_dust.scale_amount_max = lerpf(1.0, 1.6, k)
+	_land_dust.restart()
+
+
 func _update_dust(on_road: bool, loose: bool, on_branch: bool = false) -> void:
 	if _dust_particles == null or track == null:
 		return
@@ -2225,18 +3142,7 @@ func _update_dust(on_road: bool, loose: bool, on_branch: bool = false) -> void:
 			_dust_source = -1
 			if not on_dirt:
 				_drift_particles.color = DRIFT_SMOKE_COLOR
-	if not _dust_colors_ready:
-		_dust_colors_ready = true
-		# Praful de pe TEREN: mai INCHIS decat solul, nu mai deschis. Prima
-		# versiune folosea lightened(0.22) si ProbeFx a aratat rezultatul: alb pal
-		# pe nisip luminat = invizibil. Contrastul care se citeste ca praf e cel
-		# al unei umbre usoare.
-		_dust_ground_color = track.theme_ground_tint.darkened(0.12)
-		# Praful de pe SOSEA merge exact invers, din acelasi motiv: contrastul,
-		# nu luminozitatea. Drumul de pamant e cea mai inchisa suprafata de sub
-		# roti, deci un nor si mai inchis peste el ar fi invizibil la fel de sigur
-		# cum era cel alb pe nisip.
-		_dust_road_color = track.road_dust_color().lightened(0.18)
+	_ensure_dust_colors()
 	var live := loose and horizontal_speed() > DUST_MIN_SPEED
 	_dust_particles.emitting = live
 	if _debris_particles != null:
@@ -2488,10 +3394,148 @@ func _emit_sparks(other: Car, dv: float) -> void:
 	# Directia: perpendiculara pe linia dintre masini (de-a lungul fetelor care
 	# se freaca), cu o componenta in sus; spread-ul larg face restul.
 	var along := to_other.normalized().cross(Vector3.UP)
-	_sparks.direction = (along * (1.0 if randf() < 0.5 else -1.0) + Vector3.UP * 0.6)
+	_set_spark_direction(_sparks,
+		along * (1.0 if randf() < 0.5 else -1.0) + Vector3.UP * 0.6)
 	_sparks.amount = int(lerpf(float(SPARKS_MIN), float(SPARKS_MAX), k))
 	_sparks.initial_velocity_max = lerpf(7.0, 13.0, k)
 	_sparks.restart()
+
+
+## `direction` al unui emitator CPU e in spatiul NODULUI (velocitatile se rotesc
+## cu baza lui globala chiar si cu `local_coords = false`), iar scanteile
+## noastre sunt copii ai masinii: directia ceruta in LUME trebuie adusa in
+## spatiul ei, altfel iese rotita cu orientarea masinii.
+func _set_spark_direction(emitter: CPUParticles3D, world_dir: Vector3) -> void:
+	var d := emitter.global_transform.basis.inverse() * world_dir
+	emitter.direction = d.normalized() if d.length_squared() > 1e-6 else Vector3.UP
+
+
+## Rafala la o izbitura de perete (>= `wall_spark_burst_dv`): scanteile sar
+## dinspre perete, in sus, si putin inapoi pe directia de mers. Reuseaza
+## emitatorul one-shot de la ciocnirea intre masini.
+func _emit_wall_sparks(point: Vector3, normal: Vector3, strength: float) -> void:
+	if _sparks == null:
+		return
+	var k := _bump_strength(strength)
+	_sparks.global_position = point + Vector3.UP * 0.1
+	var vh := Vector3(velocity.x, 0.0, velocity.z)
+	var tangent := vh - normal * vh.dot(normal)
+	var back := -tangent.normalized() if tangent.length_squared() > 0.01 		else Vector3.ZERO
+	_set_spark_direction(_sparks, normal * 0.9 + Vector3.UP * 0.6 + back * 0.5)
+	_sparks.amount = int(lerpf(float(SPARKS_MIN), float(SPARKS_MAX), k))
+	_sparks.initial_velocity_max = lerpf(7.0, 13.0, k)
+	_sparks.restart()
+
+
+## Scanteile CONTINUE ale razuirii pe perete si ale frecarii intre masini.
+## Un singur emitator (`ScrapeSparks`, 8 particule, viata 0.22 s) servit pe
+## rand: peretele are prioritate. Rata nu se poate schimba la un emitator CPU
+## fara sa-l realoci, deci o da RAMPA DE CULOARE INITIALA: fiecare particula
+## isi alege la nastere un loc pe ea, iar partea „opaca" a rampei (offset 0..p)
+## e fractia care se si vede. Mai multa viteza = p mai mare = mai multe scantei.
+func _update_scrape_sparks() -> void:
+	if _scrape_sparks == null:
+		return
+	var live := false
+	var point := Vector3.ZERO
+	var n := Vector3.ZERO
+	var rel := Vector3.ZERO
+	var density := 0.0
+	# Cat de sus pleaca scanteile: pe perete bine in sus (peretele le-ar ascunde
+	# din camera de sus), intre masini si mai sus — contactul e intre doua
+	# acoperisuri, iar scanteia trebuie sa treaca de ele ca sa se vada.
+	var lift := 1.3
+	var lift_y := 0.55
+	if wall_contact and wall_scrape_speed > scrape_min_speed:
+		live = true
+		point = wall_point
+		n = wall_normal
+		rel = Vector3(velocity.x, 0.0, velocity.z)
+		density = inverse_lerp(scrape_min_speed, 18.0, wall_scrape_speed)
+	elif rub_car != null and rub_speed > rub_min_speed 			and get_instance_id() < rub_car.get_instance_id():
+		# Perechea scanteiaza O SINGURA data (masina cu id-ul mai mic): doua
+		# emitatoare in acelasi punct ar dubla rata si bugetul.
+		live = true
+		point = rub_point
+		n = rub_normal
+		rel = velocity - rub_car.velocity
+		rel.y = 0.0
+		density = inverse_lerp(rub_min_speed, 10.0, rub_speed)
+		lift = 1.6
+		lift_y = 0.35
+	if not live:
+		_scrape_sparks.emitting = false
+		return
+	var tangent := rel - n * rel.dot(n)
+	var back := -tangent.normalized() if tangent.length_squared() > 0.01 		else Vector3.ZERO
+	_scrape_sparks.global_position = point + Vector3.UP * lift_y
+	# Spre inapoi pe directia de mers, putin in afara peretelui si in sus.
+	# Si bine in sus: din camera de sus, sparturile care raman la nivelul
+	# peretelui se ascund in spatele lui.
+	_set_spark_direction(_scrape_sparks, back * 0.7 + n * 0.35 + Vector3.UP * lift)
+	var d := clampf(density, 0.0, 1.0)
+	_scrape_density.set_offset(1, lerpf(0.25, 1.0, d))
+	_scrape_sparks.initial_velocity_min = lerpf(2.5, 5.0, d)
+	_scrape_sparks.initial_velocity_max = lerpf(5.0, 10.0, d)
+	_scrape_sparks.emitting = true
+
+
+## Starea de contact a tick-ului, dintr-o singura trecere prin punctele
+## solverului: perete (normala aproape orizontala) si masina de care te freci.
+## Solul de sub caroserie (normala in sus) nu e perete.
+func _scan_contact_state() -> void:
+	wall_contact = false
+	wall_moving = false
+	wall_scrape_speed = 0.0
+	rub_car = null
+	rub_speed = 0.0
+	_last_static = null
+	var state := PhysicsServer3D.body_get_direct_state(get_rid())
+	if state == null:
+		return
+	var wn := Vector3.ZERO
+	var wp := Vector3.ZERO
+	var wc := 0
+	var rn := Vector3.ZERO
+	var rp := Vector3.ZERO
+	var rc := 0
+	for i in state.get_contact_count():
+		var obj := state.get_contact_collider_object(i)
+		var pt := state.get_contact_collider_position(i)
+		var n := state.get_contact_local_normal(i)
+		var to_me := global_position - pt
+		if n.dot(to_me) < 0.0:
+			n = -n
+		var nh := Vector3(n.x, 0.0, n.z)
+		if obj is Car:
+			if rub_car == null:
+				rub_car = obj as Car
+			if obj == rub_car:
+				rp += pt
+				rc += 1
+				var away := Vector3(to_me.x, 0.0, to_me.z)
+				rn += away.normalized() if away.length_squared() > 1e-4 else nh
+		elif obj is StaticBody3D:
+			if absf(n.y) > 0.7 or nh.length_squared() < 1e-4:
+				continue
+			_last_static = obj as Node
+			if obj is AnimatableBody3D:
+				wall_moving = true
+			wn += nh.normalized()
+			wp += pt
+			wc += 1
+	if wc > 0:
+		wall_contact = true
+		wall_normal = wn.normalized() if wn.length_squared() > 1e-6 else wall_normal
+		wall_point = wp / float(wc)
+		var vh := Vector3(velocity.x, 0.0, velocity.z)
+		wall_scrape_speed = (vh - wall_normal * vh.dot(wall_normal)).length()
+	if rc > 0:
+		rub_point = rp / float(rc)
+		rub_normal = rn.normalized() if rn.length_squared() > 1e-6 else Vector3.ZERO
+		var rel := velocity - rub_car.velocity
+		rel.y = 0.0
+		rub_speed = (rel - rub_normal * rel.dot(rub_normal)).length()
 
 
 ## Punctul de contact cu `other`, cum il raporteaza solverul (media punctelor
@@ -2512,8 +3556,13 @@ func _contact_point_with(other: Car, fallback: Vector3) -> Vector3:
 
 
 static var _spark_material: StandardMaterial3D = null
-const SPARKS_MIN: int = 10
-const SPARKS_MAX: int = 24
+const SPARKS_MIN: int = 8
+const SPARKS_MAX: int = 14
+## Emitatorul continuu de razuire/frecare. Impreuna cu SPARKS_MAX (14): 40 de
+## scantei pe masina (plafonul cerut: <= ~40). (Rafala de la ciocnirea intre
+## masini a coborat de la 24 la 14 ca sa incapa; la camera de joc o razuire cu
+## 8-12 scantei se vedea ca doua-trei puncte risipite in urma masinii.)
+const SCRAPE_SPARKS_AMOUNT: int = 26
 
 func _build_sparks() -> void:
 	_sparks = CPUParticles3D.new()
@@ -2568,7 +3617,109 @@ func _build_sparks() -> void:
 	_sparks.particle_flag_align_y = true
 	_sparks.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_sparks)
+	_build_scrape_sparks(heat, shrink)
 
+
+## Emitatorul continuu de scantei (vezi `_update_scrape_sparks`). `top_level`:
+## sta in lume, nu se roteste cu masina, deci directia ceruta in lume e cea
+## care iese; pozitia i se scrie in fiecare tick cat tine contactul.
+func _build_scrape_sparks(heat: Gradient, shrink: Curve) -> void:
+	var e := CPUParticles3D.new()
+	e.name = "ScrapeSparks"
+	e.top_level = true # inainte de add_child: dupa, ar ingheta transformul
+	e.emitting = false
+	e.amount = SCRAPE_SPARKS_AMOUNT
+	e.lifetime = 0.28
+	e.randomness = 0.6
+	e.local_coords = false
+	e.spread = 32.0
+	e.initial_velocity_min = 2.5
+	e.initial_velocity_max = 6.0
+	e.gravity = Vector3(0, -12.0, 0)
+	e.damping_min = 1.0
+	e.damping_max = 3.0
+	# Pornesc imprastiate pe ~1 m in jurul contactului, nu dintr-un punct:
+	# razuirea e o LINIE de contact lunga cat caroseria.
+	e.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	e.emission_sphere_radius = 0.6
+	e.scale_amount_min = 0.9
+	e.scale_amount_max = 1.3
+	e.scale_amount_curve = shrink
+	# Rampa proprie, SATURATA (portocaliu-galben apoi rosu), nu alb-galben ca la
+	# rafala: alb-galben pe un perete bej sau o dala deschisa dispare. Opacitatea
+	# ramane plina pana aproape de capat.
+	var hot := Gradient.new()
+	hot.set_offsets(PackedFloat32Array([0.0, 0.5, 0.85, 1.0]))
+	hot.set_colors(PackedColorArray([
+		Color(1.0, 0.85, 0.25, 1.0), Color(1.0, 0.5, 0.05, 1.0),
+		Color(0.95, 0.22, 0.02, 1.0), Color(0.8, 0.12, 0.02, 0.0)]))
+	e.color_ramp = hot
+	# Rata: cine nu cade in partea opaca a rampei se naste invizibil.
+	_scrape_density = Gradient.new()
+	_scrape_density.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
+	_scrape_density.set_offsets(PackedFloat32Array([0.0, 1.0]))
+	_scrape_density.set_colors(PackedColorArray([
+		Color(1, 1, 1, 1), Color(1, 1, 1, 0)]))
+	e.color_initial_ramp = _scrape_density
+	var streak := BoxMesh.new()
+	# Mai groase decat rafala: la camera de joc (16 m) o dara de 5 cm abia avea
+	# 2 pixeli si se vedeau doua-trei puncte portocalii pe captura.
+	streak.size = Vector3(0.2, 1.25, 0.2)
+	streak.material = _spark_material
+	e.mesh = streak
+	e.particle_flag_align_y = true
+	e.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(e)
+	_scrape_sparks = e
+
+
+## Praful de aterizare: o rafala (one_shot) de 16 pufuri din jurul rotilor,
+## imprastiate spre exterior de o acceleratie radiala. Aceeasi familie ca
+## praful de rulare (acelasi puf, aceeasi rampa de opacitate); culoarea o
+## primeste la fiecare aterizare, dupa suprafata.
+func _build_land_dust() -> void:
+	var e := CPUParticles3D.new()
+	e.name = "LandDust"
+	e.position = Vector3(0, 0.1, 0)
+	e.emitting = false
+	e.one_shot = true
+	e.explosiveness = 0.95
+	e.amount = LAND_DUST_AMOUNT
+	e.lifetime = 0.75
+	e.local_coords = false
+	# Aproape orizontal, in toate directiile: norul trebuie sa iasa de sub masina,
+	# nu sa urce pe sub ea (de sus, un nor ramas sub caroserie nu se vede).
+	e.direction = Vector3.UP
+	e.spread = 85.0
+	e.initial_velocity_min = 1.5
+	e.initial_velocity_max = 3.5
+	e.radial_accel_min = 5.0
+	e.radial_accel_max = 9.0
+	e.damping_min = 1.5
+	e.damping_max = 2.5
+	e.gravity = Vector3(0, 0.4, 0)
+	e.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	e.emission_box_extents = Vector3(0.9, 0.05, 1.4)
+	e.scale_amount_min = 0.6
+	e.scale_amount_max = 1.2
+	var grow := Curve.new()
+	grow.add_point(Vector2(0.0, 0.5))
+	grow.add_point(Vector2(1.0, 1.0))
+	e.scale_amount_curve = grow
+	e.angle_min = -180.0
+	e.angle_max = 180.0
+	var fade := Gradient.new()
+	fade.set_offsets(PackedFloat32Array([0.0, 0.12, 1.0]))
+	fade.set_colors(PackedColorArray([
+		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.6), Color(1, 1, 1, 0.0)]))
+	e.color_ramp = fade
+	e.mesh = _puff_mesh(0.9)
+	e.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(e)
+	_land_dust = e
+
+
+const LAND_DUST_AMOUNT: int = 16
 
 func _build_effects() -> void:
 	_build_sparks()
@@ -2596,6 +3747,17 @@ func _build_effects() -> void:
 	smoke_fade.set_colors(PackedColorArray([
 		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.42), Color(1, 1, 1, 0.0)]))
 	_drift_particles.color_ramp = smoke_fade
+	# Densitatea fumului: ca la scanteile continue, o rampa de culoare INITIALA
+	# in trepte — fiecare puf isi trage la nastere un loc pe ea, iar partea
+	# opaca (0..p) e fractia care se vede, cu opacitatea ei. `_update_drift_smoke`
+	# muta p si opacitatea cu alunecarea; `color` ramane neatins (sondele de
+	# praf il compara cu culoarea pistei).
+	_drift_density = Gradient.new()
+	_drift_density.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CONSTANT
+	_drift_density.set_offsets(PackedFloat32Array([0.0, 1.0]))
+	_drift_density.set_colors(PackedColorArray([
+		Color(1, 1, 1, 1), Color(1, 1, 1, 0)]))
+	_drift_particles.color_initial_ramp = _drift_density
 	_drift_particles.angle_min = -180.0
 	_drift_particles.angle_max = 180.0
 	# Fumul se destrama crescand, ca norul de praf.
@@ -2681,6 +3843,7 @@ func _build_effects() -> void:
 	# umbra lor ar fi un dreptunghi care se roteste dupa privitor.
 	_dust_particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_dust_particles)
+	_build_land_dust()
 
 	# STROPI DE APA (v12). Doua emitatoare din aceeasi familie ca praful (panza
 	# spre camera cu material luminat, vezi _puff_mesh); culorile vin din tema
@@ -2884,22 +4047,11 @@ func _build_effects() -> void:
 	_fire_particles.mesh = fire_mesh
 	add_child(_fire_particles)
 
-	# Motor pozitional: al tau se aude mereu, adversarii cand sunt aproape.
-	_engine_audio = AudioStreamPlayer3D.new()
-	_engine_audio.stream = AudioManager.ENGINE_LOOP
-	_engine_audio.bus = &"Engine"
-	_engine_audio.volume_db = -14.0
-	_engine_audio.max_distance = 60.0
-	add_child(_engine_audio)
-	_engine_audio.play()
-
-	# Scrasnet de cauciuc cat tine drift-ul.
-	_skid_audio = AudioStreamPlayer3D.new()
-	_skid_audio.stream = AudioManager.SKID_LOOP
-	_skid_audio.bus = &"SFX"
-	_skid_audio.volume_db = -10.0
-	_skid_audio.max_distance = 45.0
-	add_child(_skid_audio)
+	# Vocile masinii: motor pozitional (al tau se aude mereu, adversarii cand sunt
+	# aproape), derapaj, suprafete, turbo, vant. Creat aici, cu playerele la nevoie.
+	_audio = CarAudio.new()
+	add_child(_audio)
+	_audio.setup(self)
 
 	# Umbra blob: disc intunecat, pozitionat pe sol la fiecare tick.
 	# top_level = nu mosteneste transformarea masinii (o setam noi global).
@@ -2979,19 +4131,40 @@ func _update_visual_tilt(delta: float, steer: float, fwd_speed: float) -> void:
 	# git blame pe blocul asta) a murit odata cu CharacterBody3D.
 	#
 	# Ce ramane pe _visual: un STROP de ruliu suplimentar in drift — juice-ul
-	# care vinde alunecarea, calibrat mic ca sa nu se bata cu ruliul fizic —
-	# si invartirea de tromba (_update_spin), care e doar vizuala prin design.
+	# care vinde alunecarea, calibrat mic ca sa nu se bata cu ruliul fizic —,
+	# invartirea de tromba (_update_spin) si reactiile de contact (jolt-ul unei
+	# izbituri, aplecarea la frecare). Fiecare are STAREA ei, iar rotatia
+	# vizuala se COMPUNE din ele la sfarsit: niciunul nu citeste inapoi din
+	# `_visual.rotation` (cum facea lerp-ul vechi), deci niciunul nu-l mananca
+	# pe celalalt.
 	var speed_frac := clampf(fwd_speed / max_speed, 0.0, 1.0)
-	var target_roll := -steer * 0.05 * speed_frac * 1.6 * drift_blend
-	_visual.rotation.z = lerpf(_visual.rotation.z, target_roll, 8.0 * delta)
+	# Pe sensul DRIFTULUI, nu al volanului: cu maparea CTR poti tine contravolan
+	# in plina alunecare, iar caroseria tot spre exterior se lasa.
+	var target_roll := -drift_dir * 0.05 * speed_frac * 1.6 * drift_blend
+	# Reasezarea de la iesire: o jumatate de sinusoida in sens opus ruliului
+	# de drift — spatele se prinde si caroseria tresare o data.
+	if _snap_left > 0.0:
+		_snap_left = maxf(_snap_left - delta, 0.0)
+		target_roll += _snap_dir * 0.045 * speed_frac \
+			* sin(PI * (1.0 - _snap_left / DRIFT_SNAP_TIME))
+	_drift_roll = lerpf(_drift_roll, target_roll, 8.0 * delta)
+	# Rotatia in plus a modelului in sensul driftului (drift_visual_yaw_deg),
+	# dozata cu rampa, netezita ca sa nu sara la intrare; intra in compunere
+	# ca termen de yaw, langa tromba (vezi _compose_visual).
+	_drift_visual_yaw = lerpf(_drift_visual_yaw,
+		drift_dir * deg_to_rad(drift_visual_yaw_deg) * _drift_amount(),
+		minf(10.0 * delta, 1.0))
 	_update_spin(delta)
+	_update_jolt(delta)
+	_compose_visual()
+	_update_toys(delta, fwd_speed)
 
 
 ## Invartirea de caroserie, cat tine si pe urma inapoi la zero.
 ##
-## Axa Y e singura libera: `_update_visual_tilt` scrie in fiecare cadru pe Z
-## (inclinarea in viraj) si pe X (botul in aer), deci orice ar pune altcineva
-## acolo ar fi sters in cadrul urmator. Pe Y nu scrie nimeni.
+## Axa Y e singura libera in vechiul Euler (`_update_visual_tilt` scria pe Z),
+## acum unghiul ramane doar un TERMEN al compunerii din `_compose_visual`,
+## adunat cu rotatia in plus din drift (`_drift_visual_yaw`).
 func _update_spin(delta: float) -> void:
 	if _spin_left > 0.0:
 		_spin_left -= delta
@@ -3002,16 +4175,411 @@ func _update_spin(delta: float) -> void:
 		_spin_angle = lerp_angle(_spin_angle, 0.0, minf(7.0 * delta, 1.0))
 		if absf(_spin_angle) < 0.01:
 			_spin_angle = 0.0
-	_visual.rotation.y = _spin_angle
+
+
+## Cat de mare e varful deplasarii pe unitatea de viteza data arcului la
+## lovitura (arc subamortizat pornit din repaus cu viteza v0:
+## x(t) = v0/wd * e^(-z w t) * sin(wd t), maxim la tan(wd t) = wd / (z w)).
+## Cu ea, `jolt_max_offset` e CHIAR varful vazut, nu o viteza oarecare.
+func _jolt_peak_per_velocity() -> float:
+	var w := jolt_freq
+	var z := clampf(jolt_damping, 0.05, 0.95)
+	var wd := w * sqrt(1.0 - z * z)
+	var tp := atan2(wd, z * w) / wd
+	return exp(-z * w * tp) * sin(wd * tp) / wd
+
+
+## Un pas EXACT al unui arc subamortizat (x'' = -w^2 x - 2 z w x'), pe vectori:
+## intoarce [x, v] dupa `dt`. Solutia inchisa, nu Euler — cu Euler la 60 Hz si
+## 24 rad/s varful iesea cu un sfert mai mic decat cel calculat, iar revenirea
+## se schimba cu rata de cadre.
+static func spring_step(x: Vector3, v: Vector3, w: float, z: float,
+		dt: float) -> Array[Vector3]:
+	var wd := w * sqrt(1.0 - z * z)
+	var e := exp(-z * w * dt)
+	var c := cos(wd * dt)
+	var s := sin(wd * dt)
+	var k := z * w / wd
+	var nx := (x * (c + k * s) + v * (s / wd)) * e
+	var nv := (v * (c - k * s) - x * (w * w / wd * s)) * e
+	return [nx, nv]
+
+
+## Jolt + aplecare la frecare, un pas.
+func _update_jolt(delta: float) -> void:
+	var w := jolt_freq
+	var z := clampf(jolt_damping, 0.05, 0.95)
+	var dt := minf(delta, 0.05)
+	var sp := Car.spring_step(_jolt_pos, _jolt_pos_vel, w, z, dt)
+	_jolt_pos = sp[0]
+	_jolt_pos_vel = sp[1]
+	var st := Car.spring_step(_jolt_tilt, _jolt_tilt_vel, w, z, dt)
+	_jolt_tilt = st[0]
+	_jolt_tilt_vel = st[1]
+	# Plafon: lovituri una dupa alta nu au voie sa scoata caroseria din cadru.
+	_jolt_pos = _jolt_pos.limit_length(jolt_max_offset * 1.3)
+	_jolt_tilt = _jolt_tilt.limit_length(deg_to_rad(jolt_max_tilt_deg) * 1.3)
+	# Frecarea laterala cu alta masina: caroseria se apleaca ASTA de ea.
+	var lean_target := Vector3.ZERO
+	if rub_car != null and rub_speed > rub_min_speed 			and rub_normal != Vector3.ZERO:
+		var n_local := global_transform.basis.inverse() * rub_normal
+		n_local.y = 0.0
+		if n_local.length_squared() > 1e-6:
+			lean_target = n_local.normalized() * deg_to_rad(rub_lean_deg)
+	# Urca repede (contactul solverului palpaie de la un cadru la altul), coboara
+	# mai lent: aplecarea tine pe toata frecarea, nu pulseaza cu ea.
+	var lean_rate := 18.0 if lean_target.length_squared() > _rub_lean.length_squared() else 6.0
+	_rub_lean = _rub_lean.lerp(lean_target, 1.0 - exp(-lean_rate * dt))
+
+
+## Singurul loc care scrie transformarea lui `_visual` (rotatia si pozitia;
+## scala ramane a tween-urilor de squash). Ordinea e cea de Euler de dinainte
+## (Y apoi Z: spin * ruliu de drift), cu aplecarea de contact in cadrul
+## masinii, peste ele.
+func _compose_visual() -> void:
+	var tilt := _jolt_tilt + _rub_lean
+	var q := Quaternion.IDENTITY
+	if tilt.length_squared() > 1e-10:
+		# Varful (UP) se deplaseaza spre `tilt` cand rotim in jurul lui UP x tilt.
+		q = Quaternion(Vector3.UP.cross(tilt).normalized(), tilt.length())
+	q = q * Quaternion(Vector3.UP, _spin_angle + _drift_visual_yaw) \
+		* Quaternion(Vector3.BACK, _drift_roll)
+	_visual.quaternion = q
+	_visual.position = _jolt_pos
+
+
+## Semnalul `impact` (feed-ul comun): impinge si apleaca caroseria vizuala, iar
+## la perete aprinde si rafala de scantei. Fizica nu e atinsa.
+func _on_impact_visual(_car: Car, kind: StringName, strength: float,
+		normal: Vector3, point: Vector3, _other: Node) -> void:
+	if _visual == null:
+		return
+	var k := clampf(sqrt(maxf(strength, 0.0) / maxf(jolt_full_dv, 0.1)), 0.0, 1.0)
+	var n_local := global_transform.basis.inverse() * normal
+	n_local.y = 0.0
+	if n_local.length_squared() > 1e-6:
+		n_local = n_local.normalized()
+		var gain := 1.0 / maxf(_jolt_peak_per_velocity(), 1e-5)
+		_jolt_pos_vel += n_local * (jolt_max_offset * k * gain)
+		_jolt_tilt_vel += n_local * (deg_to_rad(jolt_max_tilt_deg) * k * gain)
+	# Antena zvacneste in directia loviturii (varful ramane in urma caroseriei).
+	if _toy_antenna != null and n_local.length_squared() > 1e-6:
+		_ant_vel -= n_local * (clampf(strength, 0.0, 20.0) * 0.12 * ANT_FREQ)
+	if kind == &"wall" and strength >= wall_spark_burst_dv:
+		_emit_wall_sparks(point, normal, strength)
+	if _driver != null:
+		# „Lovit de" = nu mergeam eu spre ea: viteza de DINAINTE de impact
+		# (inca _prev_velocity: semnalul pleaca din tick-ul propriu).
+		var into := -Vector3(_prev_velocity.x, 0.0, _prev_velocity.z).dot(normal)
+		_driver.react_impact(kind, strength, n_local,
+			kind == &"car" and into < strength * 0.5)
+
+
+## Repunerea sterge orice urma de jolt: masina apare asezata, nu zvacnind.
+func _reset_visual_offsets(_c: Car = null) -> void:
+	_jolt_pos = Vector3.ZERO
+	_jolt_pos_vel = Vector3.ZERO
+	_rattle_burst = 0.0
+	_rattle_drive_smooth = 0.0
+	toy_rattle = 0.0
+	_jolt_tilt = Vector3.ZERO
+	_jolt_tilt_vel = Vector3.ZERO
+	_rub_lean = Vector3.ZERO
+	_ant_tilt = Vector3.ZERO
+	_ant_vel = Vector3.ZERO
+	if _visual != null:
+		_compose_visual()
+
+## Modelul 3D al unei masini, cu scala si rotatia din CarData, fara fizica.
+## Static ca sa-l poata folosi si fantoma din contratimp (GhostCar) — acelasi
+## model, aceeasi orientare, fara sa dubleze cifrele. Null daca masina nu are
+## model (placeholder-ul de cuburi ramane doar al lui `_build_visual`).
+static func build_model(car_data: CarData) -> Node3D:
+	if car_data == null or car_data.model == null:
+		return null
+	var model := car_data.model.instantiate() as Node3D
+	model.scale = Vector3.ONE * car_data.model_scale
+	model.rotation.y = deg_to_rad(car_data.model_rotation_deg)
+	return model
+
+
+## ---------------------------------------------------------------- jucaria
+
+## Mesh de caroserie al modelului (fara roti), in spatiul `_visual`: fiecare
+## intrare are TriangleMesh-ul, transformarea si cutia. Pentru raze.
+func _toy_collect(n: Node3D, parent_xf: Transform3D, out: Array) -> void:
+	var t := parent_xf * n.transform
+	var low := String(n.name).to_lower()
+	var mi := n as MeshInstance3D
+	if mi != null and mi.mesh != null and not ("wheel" in low or "tire" in low):
+		out.append({"tm": mi.mesh.generate_triangle_mesh(), "xf": t,
+			"box": t * mi.mesh.get_aabb()})
+	for c in n.get_children():
+		if c is Node3D:
+			_toy_collect(c as Node3D, t, out)
+
+
+## Cea mai apropiata intersectie a razei cu caroseria; gol daca nu ataca nimic.
+static func toy_ray(parts: Array, from: Vector3, dir: Vector3) -> Dictionary:
+	var best := {}
+	var best_d := INF
+	for part: Dictionary in parts:
+		var xf: Transform3D = part["xf"]
+		var inv := xf.affine_inverse()
+		var hit: Dictionary = (part["tm"] as TriangleMesh).intersect_ray(
+			inv * from, (inv.basis * dir).normalized())
+		if hit.is_empty():
+			continue
+		var p: Vector3 = xf * (hit["position"] as Vector3)
+		var d := from.distance_to(p)
+		if d < best_d:
+			best_d = d
+			best = {"position": p, "distance": d}
+	return best
+
+
+## Mesh primitiv cu UV-urile puse pe slotul de paleta (ca restul lumii: o
+## singura textura de atlas, zero materiale noi) si culoare de vertex alba.
+static func _toy_mesh(prim: PrimitiveMesh, slot: int) -> ArrayMesh:
+	var arrays := prim.get_mesh_arrays()
+	var n := (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	var uvs := PackedVector2Array()
+	uvs.resize(n)
+	uvs.fill(Palette.uv(slot))
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	var cols := PackedColorArray()
+	cols.resize(n)
+	cols.fill(Color(0.96, 0.96, 0.96))
+	arrays[Mesh.ARRAY_COLOR] = cols
+	var m := ArrayMesh.new()
+	m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return m
+
+
+static func _toy_part(parent: Node3D, mesh: PrimitiveMesh, slot: int,
+		pos: Vector3, rot: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = _toy_mesh(mesh, slot)
+	mi.material_override = Palette.world_material()
+	mi.position = pos
+	mi.rotation = rot
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	return mi
+
+
+## Antena si cheia, montate pe suprafata modelului: antena pe coltul din
+## dreapta-spate (raza de sus in jos gaseste cota caroseriei acolo), cheia in
+## mijlocul fetei din spate (raza dinspre spate gaseste fata). Daca raza nu
+## gaseste nimic, piesa nu se monteaza — mai bine lipsa decat plutind.
+func _build_toys(model: Node3D) -> void:
+	var parts: Array = []
+	_toy_collect(model, Transform3D.IDENTITY, parts)
+	if parts.is_empty():
+		return
+	var box: AABB = (parts[0]["box"] as AABB)
+	for part: Dictionary in parts:
+		box = box.merge(part["box"])
+	var unit := clampf(box.size.x / 2.2, 0.6, 1.3)
+	# Antena: candidati (x ca fractie din latime, z = distanta de spatele
+	# modelului, in unitati), intai coltul din dreapta-spate. Se alege primul la
+	# care raza gaseste caroseria SI vergeaua, in repaus si inclinata la 0.25 rad
+	# in 8 directii, nu intalneste niciun triunghi (un buggy deschis sau un
+	# camion cu scara nu au caroserie sub orice punct).
+	var length := 0.95 * unit
+	var spots := [Vector2(0.84, 0.45), Vector2(0.16, 0.45), Vector2(0.84, 0.9),
+		Vector2(0.16, 0.9), Vector2(0.7, 0.45), Vector2(0.3, 0.45),
+		Vector2(0.84, 1.4), Vector2(0.16, 1.4), Vector2(0.5, 0.45)]
+	var ant_base := Vector3.ZERO
+	var found := false
+	for spot: Vector2 in spots:
+		var ax := box.position.x + box.size.x * spot.x
+		var az := box.end.z - spot.y * unit
+		var top := toy_ray(parts, Vector3(ax, box.end.y + 1.0, az), Vector3.DOWN)
+		if top.is_empty():
+			continue
+		var base: Vector3 = (top["position"] as Vector3) - Vector3(0, 0.03, 0)
+		if _toy_segments_clear(parts, base, length):
+			ant_base = base
+			found = true
+			break
+	if found:
+		var ant := Node3D.new()
+		ant.name = "ToyAntenna"
+		ant.position = ant_base
+		_visual.add_child(ant)
+		var stem := CylinderMesh.new()
+		stem.top_radius = 0.022 * unit
+		stem.bottom_radius = 0.03 * unit
+		stem.height = length
+		stem.radial_segments = 6
+		stem.rings = 1
+		_toy_part(ant, stem, Palette.ASPHALT, Vector3(0, length * 0.5, 0))
+		var tip := SphereMesh.new()
+		tip.radius = 0.085 * unit
+		tip.height = 0.17 * unit
+		tip.radial_segments = 8
+		tip.rings = 4
+		_toy_part(ant, tip, Palette.KERB_RED, Vector3(0, length + 0.03 * unit, 0))
+		_toy_antenna = ant
+	# Cheia: pe fata din spate. Raze dinspre spate la cateva inaltimi (30-70% din
+	# cutie) si doua pozitii laterale, ferite de axa (acolo sta placuta de
+	# inmatriculare, galbena si ea); se alege cea mai din spate suprafata (panoul
+	# portbagajului, nu scaunul din interior). Apoi o departeaza de fata pana
+	# cand nicio aripa, in niciun unghi, nu mai taie caroseria.
+	var key_hit := {}
+	for fx: float in [-0.3, 0.3]:
+		for f: float in [0.3, 0.4, 0.5, 0.6, 0.7]:
+			var ky := box.position.y + box.size.y * f
+			var kx := box.get_center().x + box.size.x * fx
+			var h := toy_ray(parts, Vector3(kx, ky, box.end.z + 1.5), Vector3(0, 0, -1))
+			if h.is_empty():
+				continue
+			if key_hit.is_empty() or (h["position"] as Vector3).z > (key_hit["position"] as Vector3).z + 0.02:
+				key_hit = h
+	if not key_hit.is_empty():
+		var kp: Vector3 = (key_hit["position"] as Vector3) + Vector3(0, 0, -0.02)
+		var sc := clampf(box.size.x * 0.2, 0.3, 0.7)
+		var stand := 0.0
+		while stand < 0.6 and not _toy_key_clear(parts, kp, sc, stand):
+			stand += 0.05
+		if stand >= 0.6:
+			return # nicio departare nu scoate aripile din caroserie: fara cheie
+		var key := Node3D.new()
+		key.name = "ToyKey"
+		key.position = kp
+		_visual.add_child(key)
+		var shaft_len := 0.3 * sc + stand
+		var shaft := CylinderMesh.new()
+		shaft.top_radius = 0.05 * sc
+		shaft.bottom_radius = 0.05 * sc
+		shaft.height = shaft_len
+		shaft.radial_segments = 6
+		shaft.rings = 1
+		_toy_part(key, shaft, Palette.CAR_BLUE, Vector3(0, 0, shaft_len * 0.5),
+			Vector3(PI * 0.5, 0, 0))
+		for side in [-1.0, 1.0]:
+			var wing := BoxMesh.new()
+			wing.size = Vector3(0.62 * sc, 0.32 * sc, 0.07 * sc)
+			_toy_part(key, wing, Palette.CAR_BLUE,
+				Vector3(side * 0.34 * sc, 0, shaft_len + 0.02 * sc))
+		_toy_key = key
+
+
+## Segment liber de caroseria? (primul triunghi lovit e dincolo de capat.)
+static func _toy_clear(parts: Array, a: Vector3, b: Vector3) -> bool:
+	var d := b - a
+	var l := d.length()
+	if l < 0.001:
+		return true
+	var hit := toy_ray(parts, a, d / l)
+	return hit.is_empty() or float(hit["distance"]) > l - 0.01
+
+
+## Vergeaua antenei, de la `base` in sus, in repaus si inclinata la 0.25 rad in
+## 8 directii, libera de caroserie.
+static func _toy_segments_clear(parts: Array, base: Vector3, length: float) -> bool:
+	var from := base + Vector3(0, 0.06, 0)
+	if not _toy_clear(parts, from, base + Vector3(0, length + 0.1, 0)):
+		return false
+	for k in 8:
+		var yaw := TAU * k / 8.0
+		var tilted := base + Vector3(sin(0.25) * cos(yaw), cos(0.25),
+			sin(0.25) * sin(yaw)) * (length + 0.1)
+		if not _toy_clear(parts, from, tilted):
+			return false
+	return true
+
+
+## Aripile cheii (12 unghiuri de rotatie) libere de caroserie, cu fusul
+## prelungit cu `stand`.
+static func _toy_key_clear(parts: Array, kp: Vector3, sc: float, stand: float) -> bool:
+	var axis := kp + Vector3(0, 0, 0.3 * sc + stand + 0.02 * sc)
+	for k in 12:
+		var a := TAU * k / 12.0
+		var tip := axis + Vector3(cos(a) * 0.68 * sc, sin(a) * 0.68 * sc, 0)
+		if not _toy_clear(parts, axis, tip):
+			return false
+	return true
+
+
+## Aterizare dura: rafala de zdranganeala proportionala cu caderea.
+func _on_landed_rattle(_car: Car, fall_speed: float) -> void:
+	_rattle_burst = maxf(_rattle_burst,
+		clampf(fall_speed / maxf(rattle_land_full_fall, 0.1), 0.0, 1.0))
+
+
+## Nivelul de zdranganeala (0..1) in `toy_rattle` si tremurul acestui cadru
+## (doua axe, ~±1): suma de trei sinusoide neinrudite sub frecventa Nyquist a
+## cadrului de fizica — pare zgomot rapid, nu o unda. Sursele de teren cer
+## roti pe sol si viteza; rafala de aterizare nu depinde de nici una.
+func _update_rattle(dt: float, fwd_speed: float) -> Vector2:
+	var surface := 0.0
+	if toy_rattle_enabled and wheels_on_ground > 0:
+		if on_kerb:
+			surface = rattle_kerb
+		if on_steps:
+			surface = maxf(surface, rattle_steps)
+		if _toy_loose:
+			surface = maxf(surface, rattle_loose)
+	var speed_k := clampf(inverse_lerp(rattle_min_speed, rattle_full_speed,
+		absf(fwd_speed)), 0.0, 1.0)
+	var drive := surface * speed_k
+	var rate := rattle_attack if drive > _rattle_drive_smooth else rattle_release
+	_rattle_drive_smooth = move_toward(_rattle_drive_smooth, drive, rate * dt)
+	_rattle_burst = maxf(_rattle_burst - dt / maxf(rattle_land_decay_s, 0.05), 0.0)
+	toy_rattle = clampf(maxf(_rattle_drive_smooth,
+		_rattle_burst if toy_rattle_enabled else 0.0), 0.0, 1.0)
+	if toy_rattle < 0.001:
+		return Vector2.ZERO
+	_rattle_t += dt
+	var t := _rattle_t
+	return Vector2(
+		(sin(TAU * 26.3 * t) + 0.8 * sin(TAU * 17.1 * t + 1.3)
+			+ 0.6 * sin(TAU * 11.7 * t + 2.9)) / 2.4,
+		(sin(TAU * 23.9 * t + 0.7) + 0.8 * sin(TAU * 14.3 * t + 2.2)
+			+ 0.6 * sin(TAU * 9.1 * t + 4.1)) / 2.4)
+
+
+## Antena (arc fortat de acceleratie) si cheia (turatie dupa viteza).
+func _update_toys(delta: float, fwd_speed: float) -> void:
+	var dt := minf(delta, 0.05)
+	var jit := _update_rattle(dt, fwd_speed)
+	if _toy_antenna != null:
+		# Acceleratia masinii in spatiul ei; varful ramane in urma ei.
+		var acc := (velocity - _prev_velocity) / maxf(delta, 0.0001)
+		var a_local := global_transform.basis.inverse() * acc
+		a_local.y = 0.0
+		var target := (-a_local * ANT_PER_ACCEL).limit_length(ANT_MAX)
+		var sp := Car.spring_step(_ant_tilt - target, _ant_vel, ANT_FREQ, ANT_DAMPING, dt)
+		_ant_tilt = (sp[0] as Vector3) + target
+		_ant_vel = sp[1]
+		_ant_tilt = _ant_tilt.limit_length(ANT_MAX * 1.4)
+		# Zdranganeala se adauga DOAR la desen: starea arcului ramane curata.
+		var drawn := _ant_tilt + Vector3(jit.x, 0.0, jit.y) * (rattle_ant_rad * toy_rattle)
+		var q := Quaternion.IDENTITY
+		if drawn.length_squared() > 1e-10:
+			q = Quaternion(Vector3.UP.cross(drawn).normalized(), drawn.length())
+		_toy_antenna.quaternion = q
+	if _toy_key != null:
+		var f := clampf(absf(fwd_speed) / maxf(max_speed, 1.0), 0.0, 1.2)
+		_key_angle = fposmod(_key_angle + lerpf(KEY_SPIN_MIN, KEY_SPIN_MAX, f)
+			* signf(fwd_speed if absf(fwd_speed) > 0.5 else 1.0) * dt, TAU)
+		# Cheia sta slab pe ax: pe teren aspru se clatina in jurul lui X si Y.
+		var wob := Vector2(jit.y, jit.x) * (rattle_key_rad * toy_rattle)
+		_toy_key.rotation = Vector3(wob.x, wob.y, _key_angle)
+
 
 func _build_visual() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
+	_toy_antenna = null
+	_toy_key = null
+	_ant_tilt = Vector3.ZERO
+	_ant_vel = Vector3.ZERO
 	# Model 3D real daca exista in CarData; altfel placeholder din cuburi.
 	if data != null and data.model != null:
-		var model := data.model.instantiate() as Node3D
-		model.scale = Vector3.ONE * data.model_scale
-		model.rotation.y = deg_to_rad(data.model_rotation_deg)
+		var model := Car.build_model(data)
 		_visual.add_child(model)
 		# Gasim rotile dupa nume, ca sa le animam (spin + viraj + compresie).
 		_wheels_all.clear()
@@ -3035,6 +4603,8 @@ func _build_visual() -> void:
 				var car_left := wheel_node.position.x > 0.0
 				var axle := 0 if is_front else 1
 				_wheel_corner.append(axle * 2 + (0 if car_left else 1))
+		if data.toy_animation:
+			_build_toys(model)
 		if not _wheels_all.is_empty():
 			# Raza reala = inaltimea centrului rotii (sta pe sol) x scala.
 			_wheel_radius = maxf(0.15,

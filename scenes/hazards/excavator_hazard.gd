@@ -12,6 +12,16 @@ var model_scale: float = 1.0
 var period: float = 7.0 # jos 2.5s + urca 1s + sus 2.5s + coboara 1s
 var raise_angle: float = 0.55
 
+## AI-ul da cu zarul la apropiere (`AIController._exc_line`): 1-3 ocoleste pe
+## banda libera, 4-6 trece pe sub brat. Implicit stins = bit-identic.
+var ai_dice: bool = false
+## Lovitura (brat sau sasiu) NU ejecteaza soferul: ghiont + strivire scurta.
+## Implicit stins = bit-identic. Vezi `Car._process_contacts` (meta).
+var soft_contact: bool = false
+var soft_crush_s: float = 1.0
+const AI_GROUP: StringName = &"ai_excavator"
+
+var _body_shape: CollisionShape3D
 var _arm: Node3D
 var _arm_base_rot: float = 0.0
 var _arm_shape: CollisionShape3D
@@ -19,6 +29,10 @@ var _time: float = 0.0
 
 func _ready() -> void:
 	add_to_group("hazards")
+	if soft_contact:
+		set_meta(&"soft_hit_crush", soft_crush_s)
+	if ai_dice:
+		add_to_group(AI_GROUP)
 	# Sasiul se MASOARA; bratul NU. Vezi de ce mai jos — sunt doua cazuri
 	# diferite, si al doilea e cazul in care masuratoarea iese mai prost decat
 	# valoarea potrivita de mana.
@@ -48,6 +62,7 @@ func _ready() -> void:
 	body_shape.shape = body_box
 	body_shape.position = body_aabb.position + body_aabb.size * 0.5
 	add_child(body_shape)
+	_body_shape = body_shape
 	# Bratul intins peste drum (solid doar cand e coborat) — dimensionat
 	# sa se opreasca unde se opreste si vizualul, nu mai departe.
 	#
@@ -89,3 +104,22 @@ func _physics_process(delta: float) -> void:
 		_arm.rotation.x = _arm_base_rot + raise_angle * raised
 	# Cand bratul e destul de sus, banda devine libera.
 	_arm_shape.disabled = raised > 0.35
+
+
+## Cutiile solide in LUME (colturile), pentru AI: sasiul e mereu solid, bratul
+## doar cand e coborat — dar AI-ul foloseste doar GEOMETRIA lor (unde se afla
+## banda libera), nu faza. Intoarce {"arm": [colturi], "body": [colturi]}.
+func ai_box_corners() -> Dictionary:
+	var out := {"arm": PackedVector3Array(), "body": PackedVector3Array()}
+	for pair: Array in [["arm", _arm_shape], ["body", _body_shape]]:
+		var sh := pair[1] as CollisionShape3D
+		if sh == null or not (sh.shape is BoxShape3D):
+			continue
+		var size := (sh.shape as BoxShape3D).size
+		var corners := PackedVector3Array()
+		for sx in [-0.5, 0.5]:
+			for sy in [-0.5, 0.5]:
+				for sz in [-0.5, 0.5]:
+					corners.append(sh.global_transform * (size * Vector3(sx, sy, sz)))
+		out[pair[0]] = corners
+	return out

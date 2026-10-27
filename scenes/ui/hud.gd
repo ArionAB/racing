@@ -38,6 +38,13 @@ var _charge_bg: Panel
 var _charge_fill: Panel
 var _charge_fill_style: StyleBoxFlat
 var _charge_bolt: Label
+## Flash-ul barii de turbo la iesirea din drift (1 -> 0 in ~0.3 s).
+var _charge_flash: float = 0.0
+var _sealed_label: Label
+var _ghost_label: Label
+var _challenge_label: Label
+var _challenge_title: String = ""
+var _challenge_failed: bool = false
 var _touch: TouchControls
 var _pause_button: Button
 var _respawn_button: Button
@@ -59,6 +66,10 @@ var _offroad_label: Label
 ## „WRONG WAY" (#499): mare, rosu, pulsand cat timp mergi pe contrasens.
 var _wrong_way_label: Label
 var _wrong_way_tween: Tween
+## Popup „P3 ▲/▼" la depasiri (feel: position-change). Public ca sondele sa-l citeasca.
+var position_popup: PositionPopupScript
+
+const PositionPopupScript := preload("res://scenes/ui/position_popup.gd")
 
 func _ready() -> void:
 	# ALWAYS: HUD-ul functioneaza si cu jocul pe pauza.
@@ -165,6 +176,12 @@ func _ready() -> void:
 	_wrong_way_label.add_theme_color_override("font_color", Color(1.0, 0.22, 0.18))
 	_wrong_way_label.visible = false
 	root.add_child(_wrong_way_label)
+
+	position_popup = PositionPopupScript.new()
+	position_popup.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 96)
+	position_popup.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	root.add_child(position_popup)
 
 	_message = _make_label(38)
 	_message.set_anchors_and_offsets_preset(
@@ -348,6 +365,29 @@ func _build_turbo_bar(root: Control) -> void:
 		_panel_style(int(CHARGE_H * 0.5), Color(0, 0, 0, 0.55)))
 	_charge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	holder.add_child(_charge_bg)
+
+	# Contratimp: bara nu se mai incarca. Eticheta mica spune asta, ca
+	# jucatorul sa nu astepte o umplere care nu vine.
+	_sealed_label = _make_label(16)
+	_sealed_label.text = "SEALED"
+	_sealed_label.modulate = Color(1.0, 0.85, 0.3)
+	_sealed_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_sealed_label.visible = false
+	holder.add_child(_sealed_label)
+
+	# Contratimp cu fantoma salvata: timpul ei, ca sa stii pe cine urmaresti.
+	_ghost_label = _make_label(16)
+	_ghost_label.modulate = Color(0.75, 0.9, 1.0)
+	_ghost_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_ghost_label.visible = false
+	holder.add_child(_ghost_label)
+	# Provocarea gimmick-ului (cariera): in aceeasi zona ca SEALED; cele doua
+	# moduri nu se suprapun (contratimp vs provocare).
+	_challenge_label = _make_label(16)
+	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
+	_challenge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_challenge_label.visible = false
+	holder.add_child(_challenge_label)
 
 	# Umplutura e copil al jgheabului, cu 3 px de margine de jur imprejur, ca
 	# marginea intunecata sa ramana vizibila si cand bara e plina.
@@ -561,21 +601,30 @@ func _gfx_line() -> String:
 		Viewport.MSAA_8X: msaa = "8x"
 	var h3d := int(DisplayServer.window_get_size().y * vpn.scaling_3d_scale)
 	var shadows := "off"
+	var shadows_forced := GameState.dbg_shadows > 0
 	if _perf_sun != null and _perf_sun.shadow_enabled:
 		var two := _perf_sun.directional_shadow_mode \
 			== DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-		shadows = "2 splits" if two else "1 split"
+		# Si costul pe pixel: distanta pana la care pixelii citesc harta,
+		# filtrul (hard = un esantion) si harta insasi.
+		shadows = "%s %dm %s %d" % ["2 splits" if two else "1 split",
+			roundi(_perf_sun.directional_shadow_max_distance),
+			"hard" if GameState.shadow_filter_hard else "soft",
+			GameState.shadow_atlas_px()]
+		shadows_forced = shadows_forced or GameState.dbg_shadow_dist > 0 \
+			or GameState.dbg_shadow_filter > 0 or GameState.dbg_shadow_size > 0
 	var glow := "off"
 	if _perf_env != null and _perf_env.environment != null \
 			and _perf_env.environment.glow_enabled:
 		glow = "on"
 	var star := func(forced: bool) -> String: return "*" if forced else ""
-	return "%s  |  MSAA %s%s  |  3D %dp%s  |  shadows %s%s  |  glow %s%s" % [
+	return "%s  |  MSAA %s%s  |  3D %dp%s  |  shadows %s%s  |  glow %s%s  |  LOD %dpx%s" % [
 		GameState.GFX_TIER_NAMES[GameState.gfx_tier],
 		msaa, star.call(GameState.dbg_msaa > 0),
 		h3d, star.call(GameState.dbg_scale > 0),
-		shadows, star.call(GameState.dbg_shadows > 0),
-		glow, star.call(GameState.dbg_glow > 0)]
+		shadows, star.call(shadows_forced),
+		glow, star.call(GameState.dbg_glow > 0),
+		roundi(vpn.mesh_lod_threshold), star.call(GameState.dbg_lod > 0)]
 
 
 ## Fontul HUD-ului: Barlow Condensed (SIL OFL, vezi
@@ -708,6 +757,12 @@ func set_wrong_way(on: bool) -> void:
 		_wrong_way_tween.tween_property(_wrong_way_label, "modulate:a", 1.0, 0.35)
 
 
+## Popup de depasire: `new_pos` mai mic decat `old_pos` = ai urcat. Il cheama Race
+## din PositionWatch (pozitia tinuta, nu schimbarile de o clipa).
+func show_position_change(new_pos: int, old_pos: int) -> void:
+	position_popup.show_change(new_pos, old_pos)
+
+
 func flash_message(text: String) -> void:
 	_message.text = text
 	_message.modulate.a = 1.0
@@ -715,7 +770,44 @@ func flash_message(text: String) -> void:
 	tw.tween_interval(1.2)
 	tw.tween_property(_message, "modulate:a", 0.0, 0.5)
 
-func set_turbo(charge: float, boosting: bool) -> void:
+## Rezervor sigilat (contratimp de cariera): arata eticheta SEALED.
+func set_sealed_turbo(on: bool) -> void:
+	_sealed_label.visible = on
+
+
+## Eticheta "GHOST 3:12.4"; ms <= 0 o ascunde.
+func set_ghost_time(ms: int) -> void:
+	_ghost_label.visible = ms > 0
+	if ms > 0:
+		_ghost_label.text = "GHOST %s" % TrackCard._format_ms(ms)
+## Provocarea gimmick-ului (bonus +1 in cursa de cariera): "CHALLENGE +1:
+## <titlu>", verde pana o pici.
+func set_challenge(title: String) -> void:
+	_challenge_title = title
+	_challenge_label.text = _challenge_prefix() + title
+	_challenge_label.modulate = Color(0.55, 0.9, 0.5)
+	_challenge_label.visible = true
+
+
+## Progresul regulii („1 / 3", „LAP 2 ✓"), langa titlu; dupa esec nu mai conteaza.
+func set_challenge_progress(text: String) -> void:
+	if _challenge_failed:
+		return
+	_challenge_label.text = _challenge_prefix() + _challenge_title \
+		+ ("   " + text if text != "" else "")
+
+
+static func _challenge_prefix() -> String:
+	return "CHALLENGE +%d: " % Career.CHALLENGE_POINTS
+
+
+func set_challenge_failed() -> void:
+	_challenge_failed = true
+	_challenge_label.text = "CHALLENGE FAILED"
+	_challenge_label.modulate = Color(1.0, 0.4, 0.35)
+
+
+func set_turbo(charge: float, boosting: bool, drifting: bool = false) -> void:
 	var filled := clampf(charge, 0.0, 1.0)
 	# Dimensiunile se iau de la jgheab, nu din constante: daca layout-ul il
 	# intinde vreodata altfel, umplutura il urmeaza in loc sa lase o dunga.
@@ -726,8 +818,27 @@ func set_turbo(charge: float, boosting: bool) -> void:
 		color = Color(1.0, 0.55, 0.1)              # arde
 	elif filled >= 1.0:
 		color = Color(1.0, 0.9, 0.2)               # plina, gata de foc
+	elif drifting:
+		# In drift bara se umple de 2.5x: pulseaza spre alb la 5 Hz, ca
+		# rasplata sa se SIMTA cat se intampla, nu doar sa se vada din coada
+		# ochiului intr-un colt al ecranului.
+		var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.001 * TAU * 5.0)
+		color = color.lerp(Color(0.85, 0.97, 1.0), 0.15 + 0.35 * pulse)
+	# Flash-ul de la iesirea din drift (flash_turbo): o clipa spre alb, apoi
+	# inapoi. Se stinge aici, nu in _process — HUD-ul primeste set_turbo la
+	# fiecare tick de fizica, iar _process-ul lui iese devreme fara perf.
+	if _charge_flash > 0.0:
+		color = color.lerp(Color.WHITE, _charge_flash)
+		_charge_flash = maxf(
+			_charge_flash - get_physics_process_delta_time() * 3.3, 0.0)
 	_charge_fill_style.bg_color = color
 	# Fulgerul se aprinde in culoarea barii cand ai ce arde si sta stins cat
 	# timp se incarca: semnalul „apasa ACUM" fara inca un element pe ecran.
 	_charge_bolt.modulate = color if (boosting or filled >= 1.0) \
-		else Color(1, 1, 1, 0.45)
+		else Color(1, 1, 1, 0.45 + 0.55 * _charge_flash)
+
+
+## Bara de turbo tresare o clipa: chemata la iesirea dintr-un drift (Race, pe
+## semnalul Car.drift_ended), ca sa lege rasplata de gestul care a adus-o.
+func flash_turbo() -> void:
+	_charge_flash = 0.9

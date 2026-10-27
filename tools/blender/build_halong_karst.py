@@ -91,7 +91,19 @@ def _drop(objs):
 # acelasi slot pe care il foloseste calcarul Ryukyu din Okinawa — aceeasi roca,
 # aceeasi dala (verificat pe notch_rock_*: sloturile lor sunt 2, 12, 21, 29).
 HL_ROCK = MARBLE_GREY       # 29: calcar cenusiu in soare
-HL_ROCK_DARK = ROCK_LIGHT   # 3: nisa de val, umbra — mai inchis si mai cald
+# BANDA UDA: SAND_SHADOW 2, nu ROCK_LIGHT 3.
+#
+# Aceeasi capcana ca la corpul turnului, lasata pe jumatate reparata. Corpul a
+# trecut pe MARBLE_GREY 29 cand s-a vazut ca iese portocaliu, dar banda de nisa
+# a ramas pe slotul 3 — care e **#CE8D4A, saturatie 0,64**, stanca de desert.
+# In joc se vede ca un INEL PORTOCALIU de rugina la linia apei pe fiecare turn
+# (captura POI C, frac 0,27). Sloturile se verifica in ATLAS, nu dupa nume:
+# "ROCK_LIGHT" suna a calcar palid si e portocaliu aprins.
+#
+# SAND_SHADOW 2 e nisipul in umbra — gri-cald inchis, exact ce trebuie pentru
+# roca uda sub surplomba, si e deja in lista de sloturi legale a pistei
+# (brief §0.4, "lemn spalat de soare").
+HL_ROCK_DARK = SAND_SHADOW   # 2: nisa de val, roca uda in umbra
 HL_SCRUB = TROPICAL_GREEN   # 21: tufe de creasta
 
 HL_RESULTS = []

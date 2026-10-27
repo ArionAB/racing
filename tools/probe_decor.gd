@@ -162,8 +162,9 @@ func _initialize() -> void:
 	# uita: cu `range(1, 20)` un `--track=20` nu gasea nicio pista, apoi la fel
 	# cu 21. Acum 23, pentru Track22 (Ha Long, 15 oct 2026) — garda de materiale
 	# e singura cu drept de veto (CLAUDE.md), deci o pista pe care n-o scaneaza
-	# e o pista fara garda, nu o pista care trece.
-	for i in range(1, 23):
+	# e o pista fara garda, nu o pista care trece. Acum 24, pentru Track23 (Carrara, 25 oct
+	# 2026): `--track=23`, NUMARUL scenei (indexul din lista e 15).
+	for i in range(1, 24):
 		var path := "res://scenes/tracks/Track%02d.tscn" % i
 		if not ResourceLoader.exists(path):
 			continue

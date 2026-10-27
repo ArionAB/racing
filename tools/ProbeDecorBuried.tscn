@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/probe_decor_buried.gd" id="1_pdb"]
+
+[node name="ProbeDecorBuried" type="Node"]
+script = ExtResource("1_pdb")

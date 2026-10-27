@@ -106,6 +106,25 @@ extends "res://scenes/props/path_mover.gd"
 ## brief e o forta care tine cat tine contactul — deriva laterala de regim e
 ## side_accel / grip, deci ~3 m/s la 30. (PathMover are deja `push_accel`, campul radial al hovercraftului — asta e alta forta, laterala.)
 @export_range(0.0, 60.0, 1.0) var side_accel: float = 8.0
+## Sunetul de contact (feel_checklist: hazards-speak): la ghiont, pozitional la
+## masina lovita. Gol = autobuz mut.
+@export var contact_sfx: StringName = &"hazard_bus_hit"
+
+## CAMIONUL VINE DIN FATA (Carrara, brief §3): doua flaguri, AMBELE implicit
+## stinse, deci Machu Picchu (autobuzul care coboara) ramane bit-identic.
+##
+## `ai_reads_lane`: AI-ul vede corpul VIZIBIL al camionului (pozitia lui pe
+## sosea, ca jucatorul — niciodata faza ascunsa) si trece pe banda opusa lui
+## pana il depaseste. Vezi `AIController._bus_line`.
+@export var ai_reads_lane: bool = false
+## `soft_contact`: lovitura frontala NU mai ejecteaza soferul (un camion e un
+## corp greu, nu un zid de beton la 36 m/s): ghiont + strivire de
+## `soft_crush_s` secunde. Vezi `Car._process_contacts` (meta `soft_hit_crush`).
+@export var soft_contact: bool = false
+@export_range(0.2, 3.0, 0.1) var soft_crush_s: float = 1.2
+
+## Grupul pe care il citeste AI-ul (doar daca `ai_reads_lane`).
+const AI_GROUP: StringName = &"ai_bus_lane"
 
 ## Reapare sus si porneste la vale (carlig pentru claxon/telegraf).
 signal descent_started(bus: BusHazard)
@@ -184,6 +203,10 @@ func _build_body() -> void:
 		_box_center = Vector3.UP * (body_size.y * 0.5)
 	_build_nose()
 	_build_shove_area()
+	if soft_contact:
+		_body.set_meta(&"soft_hit_crush", soft_crush_s)
+	if ai_reads_lane:
+		add_to_group(AI_GROUP)
 
 
 ## Fata oblica din fata (-Z local) + flancul care inchide triunghiul.
@@ -354,6 +377,23 @@ func _show() -> void:
 	descent_started.emit(self)
 
 
+## Pozitia corpului VIZIBIL (lume) si semilatimea lui — ce vede si un om.
+func body_position() -> Vector3:
+	return _body.global_position if _body != null else global_position
+
+
+func body_forward() -> Vector3:
+	return -_body.global_transform.basis.z if _body != null else Vector3.FORWARD
+
+
+func body_half_width() -> float:
+	return _box_size.x * 0.5 if _box_size.x > 0.0 else body_size.x * 0.5
+
+
+func body_half_length() -> float:
+	return _box_size.z * 0.5 if _box_size.z > 0.0 else body_size.z * 0.5
+
+
 ## Ascuns acum? (pentru sonde)
 func is_hidden() -> bool:
 	return _hidden
@@ -406,3 +446,8 @@ func _shove_cars(delta: float) -> void:
 		car.apply_sweep(right * side * shove
 			+ fwd.normalized() * shove * 0.3 + Vector3.UP * 0.3)
 		shoved.emit(self, car)
+		if contact_sfx != &"":
+			var audio := get_node_or_null(^"/root/AudioManager")
+			if audio != null:
+				audio.hazard_contact(contact_sfx,
+					car.global_position + Vector3.UP * 0.5, car.is_player)

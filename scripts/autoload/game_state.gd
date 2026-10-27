@@ -353,7 +353,12 @@ func apply_gfx_tier() -> void:
 		var h := float(DisplayServer.window_get_size().y)
 		vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 		vp.scaling_3d_scale = clampf(target_h / maxf(h, 1.0), 0.5, 1.0)
-		vp.msaa_3d = Viewport.MSAA_2X if gfx_tier == 0 else Viewport.MSAA_4X
+		# MSAA 4x doar la MAXIM (27 oct 2026). Pe iPhone 12 Pro limita e costul
+		# pe pixel (testele v2/v3 pe Jodhpur: Economic cu 2x tine 58 fps la
+		# acelasi continut la care Normal cu 4x tinea 44), iar dezvoltatorul
+		# cere 60 fps constant. 2x pe 864p e compromisul; comutatorul de test
+		# „MSAA" din SETARI il poate intoarce la 4x pentru comparatie.
+		vp.msaa_3d = Viewport.MSAA_4X if gfx_tier == 2 else Viewport.MSAA_2X
 	else:
 		# Pe desktop valorile se scriu explicit (nu doar la Maxim), ca un
 		# comutator de test intors pe „Nivel" sa revina la ele.

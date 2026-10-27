@@ -1771,6 +1771,12 @@ static func foliage_surfaces(mesh: Mesh) -> Dictionary:
 ## Copie a mesh-ului cu normale mediate pe pozitie (cuantizata la 5 mm), pe
 ## suprafetele din `only` (gol = toate). Cache pe mesh: instantele aceluiasi
 ## GLB impart rezultatul.
+##
+## CU LOD-URILE SURSEI: indicii raman aceiasi, deci nivelurile importerului se
+## poarta mai departe (`MeshCpu.surface_lods`). Fara ele, fiecare coroana
+## netezita — adica fiecare copac pus ca nod, pe toate pistele — se desena
+## intreaga la orice distanta (Kyoto: 92 coroane de bambus x 1080 tri, artari
+## 2520, ginkgo 2880, toate `lod0` in ProbeLodNodes, 27 oct 2026).
 static func smoothed_mesh(mesh: Mesh, only: Dictionary = {}) -> Mesh:
 	if mesh == null:
 		return null
@@ -1779,8 +1785,9 @@ static func smoothed_mesh(mesh: Mesh, only: Dictionary = {}) -> Mesh:
 	var out := ArrayMesh.new()
 	for si in mesh.get_surface_count():
 		var arrays := mesh.surface_get_arrays(si)
+		var lods := MeshCpu.surface_lods(mesh, si)
 		if not only.is_empty() and not only.has(si):
-			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+			MeshCpu.add_surface(out, arrays, lods)
 			out.surface_set_material(si, mesh.surface_get_material(si))
 			continue
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
@@ -1804,7 +1811,7 @@ static func smoothed_mesh(mesh: Mesh, only: Dictionary = {}) -> Mesh:
 			normals[i] = (acc.get((verts[i] * 200.0).round(), old_n[i]) as Vector3).normalized()
 		arrays[Mesh.ARRAY_NORMAL] = normals
 		arrays[Mesh.ARRAY_TANGENT] = null
-		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		MeshCpu.add_surface(out, arrays, lods)
 		out.surface_set_material(si, mesh.surface_get_material(si))
 	_smoothed_meshes[mesh] = out
 	return out
@@ -2565,42 +2572,55 @@ const ACCENT_SUFFIX: String = "_Accente"
 ## exact cusatura pe care ruptura de accente ar trebui s-o evite.
 ##
 ## Intoarce `true` daca a rupt ceva.
+##
+## PERECHEA RUPTA SE IMPARTE intre instantele aceluiasi mesh sursa (cheie: RID +
+## sloturile pastrate, in `MeshCpu.build_cache`, golit la fiecare constructie):
+## 103 case `blue_house_b` pe Jodhpur = o rupere si o generare de LOD-uri, nu
+## 103. Impartirea e sigura: tot ce modifica un mesh dupa aceea (`_mesh_with_*`
+## din WorldProp) lucreaza pe copie, exact ca pentru resursa .glb partajata.
 static func split_accents(mi: MeshInstance3D, keep_slot) -> bool:
 	if mi.mesh == null or mi.mesh.get_surface_count() == 0:
 		return false
 	if mi.has_node(NodePath(String(mi.name) + ACCENT_SUFFIX)):
 		return false # deja rupt (scena reincarcata in editor)
-	var arr: Array = MeshCpu.surface_arrays(mi.mesh, 0)
-	var uvs: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
-	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
-	if uvs.is_empty() or idx.is_empty():
-		return false
 	var keep_slots: Dictionary = {}
 	if keep_slot is Array:
 		for s: int in keep_slot:
 			keep_slots[s] = true
 	else:
 		keep_slots[int(keep_slot)] = true
-	var keep: PackedInt32Array = PackedInt32Array()
-	var move: PackedInt32Array = PackedInt32Array()
-	var i: int = 0
-	while i + 2 < idx.size():
-		# Slotul triunghiului dupa PRIMUL vertex: UV-urile sunt colapsate pe
-		# centrul slotului, deci toate trei cad in acelasi loc prin constructie.
-		var slot: int = clampi(int(uvs[idx[i]].x * float(SLOTS)), 0, SLOTS - 1)
-		var tri := PackedInt32Array([idx[i], idx[i + 1], idx[i + 2]])
-		if keep_slots.has(slot):
-			keep.append_array(tri)
-		else:
-			move.append_array(tri)
-		i += 3
-	if move.is_empty() or keep.is_empty():
-		return false # totul intr-o parte: nu e nimic de rupt
+	var cache_key := "split|%s|%s" % [mi.mesh.get_rid(), str(keep_slots.keys())]
+	var pair: Array = MeshCpu.build_cache.get(cache_key, [])
+	if pair.is_empty():
+		pair = [null]
+		var arr: Array = MeshCpu.surface_arrays(mi.mesh, 0)
+		var uvs: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+		if not uvs.is_empty() and not idx.is_empty():
+			var keep: PackedInt32Array = PackedInt32Array()
+			var move: PackedInt32Array = PackedInt32Array()
+			var i: int = 0
+			while i + 2 < idx.size():
+				# Slotul triunghiului dupa PRIMUL vertex: UV-urile sunt colapsate pe
+				# centrul slotului, deci toate trei cad in acelasi loc prin constructie.
+				var slot: int = clampi(int(uvs[idx[i]].x * float(SLOTS)), 0, SLOTS - 1)
+				var tri := PackedInt32Array([idx[i], idx[i + 1], idx[i + 2]])
+				if keep_slots.has(slot):
+					keep.append_array(tri)
+				else:
+					move.append_array(tri)
+				i += 3
+			# Totul intr-o parte = nimic de rupt (ramane [null] in cache).
+			if not move.is_empty() and not keep.is_empty():
+				pair = [_mesh_with_indices(arr, keep), _mesh_with_indices(arr, move)]
+		MeshCpu.build_cache[cache_key] = pair
+	if pair.size() < 2:
+		return false
 	var accents := MeshInstance3D.new()
 	accents.name = String(mi.name) + ACCENT_SUFFIX
-	accents.mesh = _mesh_with_indices(arr, move)
+	accents.mesh = pair[1]
 	accents.material_override = world_material()
-	mi.mesh = _mesh_with_indices(arr, keep)
+	mi.mesh = pair[0]
 	mi.add_child(accents)
 	return true
 
@@ -2608,6 +2628,11 @@ static func split_accents(mi: MeshInstance3D, keep_slot) -> bool:
 ## Un ArrayMesh cu ACELEASI arrays de vertecsi, dar alt set de indici. Vertecsii
 ## nefolositi raman in buffer — irosesc cativa kb dar pastreaza indicii valizi
 ## fara remapare, si mesh-urile astea au sute de vertecsi, nu sute de mii.
+##
+## CU LOD-URI GENERATE: indicii sunt noi, deci LOD-urile importului nu se mai
+## potrivesc si se genereaza din nou (`MeshCpu.generated_lods`). Fara ele,
+## partea rupta ramanea la detaliu intreg la orice distanta — pe Jodhpur
+## peretii caselor albastre a/b/c (vezi `MeshCpu.surface_lods`).
 static func _mesh_with_indices(src: Array, indices: PackedInt32Array) -> ArrayMesh:
 	var out: Array = []
 	out.resize(Mesh.ARRAY_MAX)
@@ -2616,7 +2641,7 @@ static func _mesh_with_indices(src: Array, indices: PackedInt32Array) -> ArrayMe
 		out[k] = src[k]
 	out[Mesh.ARRAY_INDEX] = indices
 	var mesh := ArrayMesh.new()
-	MeshCpu.add_surface(mesh, out)
+	MeshCpu.add_surface(mesh, out, MeshCpu.generated_lods(out))
 	return mesh
 
 

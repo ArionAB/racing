@@ -99,7 +99,7 @@ func _ready() -> void:
 				st.generate_normals()
 			var mi := MeshInstance3D.new()
 			mi.name = "%s_%d_%d" % [["Var", "Indigo", "Usi", "Ferestre_Glow"][k], key.x, key.y]
-			mi.mesh = st.commit()
+			mi.mesh = MeshCpu.with_lods(st.commit())
 			if k == 3:
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(mi)

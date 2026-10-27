@@ -34,6 +34,19 @@ extends RefCounted
 static var _arrays: Dictionary = {}
 ## RID-ul mesh-ului -> Array cu pozitiile fiecarei suprafete urcate de noi.
 static var _verts: Dictionary = {}
+## RID-ul mesh-ului -> Array cu LOD-urile citite ale fiecarei suprafete.
+static var _lods: Dictionary = {}
+## Rezultate refolosite pe durata unei constructii (ex. perechile rupte de
+## `Palette.split_accents`, pe mesh sursa): instantele aceluiasi GLB impart
+## mesh-ul, deci ruperea si LOD-urile se fac o data, nu pe fiecare instanta.
+static var build_cache: Dictionary = {}
+
+## Unghiurile de generare a LOD-urilor — cele ale importerului GLB (unire la
+## 60°, separare la 25°). Scrise invers (25, 60), coroanele de foi si fatadele
+## abia se simplificau (momiji_c: 2696 -> 868 fara nivel mediu; cu ordinea
+## corecta 2696 -> 806 -> 188).
+const LOD_MERGE_DEG: float = 60.0
+const LOD_SPLIT_DEG: float = 25.0
 static var _active: bool = false
 static var _frame: int = -1
 
@@ -48,6 +61,8 @@ static var verify_first: String = ""
 static func begin() -> void:
 	_arrays.clear()
 	_verts.clear()
+	_lods.clear()
+	build_cache.clear()
 	_active = true
 	_frame = Engine.get_process_frames()
 
@@ -56,6 +71,8 @@ static func end() -> void:
 	_active = false
 	_arrays.clear()
 	_verts.clear()
+	_lods.clear()
+	build_cache.clear()
 
 
 static func _on() -> bool:
@@ -107,9 +124,11 @@ static func vertices(mesh: Mesh, s: int) -> PackedVector3Array:
 	return arr[Mesh.ARRAY_VERTEX]
 
 
-## `mesh.add_surface_from_arrays(TRIANGLES, arrays)`, tinand minte pozitiile.
-static func add_surface(mesh: ArrayMesh, arrays: Array) -> void:
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+## `mesh.add_surface_from_arrays(TRIANGLES, arrays, [], lods)`, tinand minte
+## pozitiile. `lods` (lungime de muchie -> indici) vine din `surface_lods` cand
+## indicii raman ai sursei, sau din `generated_lods` cand s-au schimbat.
+static func add_surface(mesh: ArrayMesh, arrays: Array, lods: Dictionary = {}) -> void:
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, [], lods)
 	if not _on():
 		return
 	var v: Variant = arrays[Mesh.ARRAY_VERTEX]
@@ -118,6 +137,78 @@ static func add_surface(mesh: ArrayMesh, arrays: Array) -> void:
 	# Copie: apelantul poate scrie mai departe in array-ul lui.
 	_store(_verts, mesh.get_rid(), mesh.get_surface_count(),
 		mesh.get_surface_count() - 1, (v as PackedVector3Array).duplicate())
+
+
+## LOD-urile suprafetei `s` (lungime de muchie -> indici), asa cum le-a scris
+## importerul GLB, ca o copie a mesh-ului cu ACEIASI indici (UV mutate pe alt
+## slot, culori intunecate) sa le poarte mai departe. O copie facuta fara ele
+## se deseneaza la detaliu intreg la orice distanta: pe Jodhpur peretii rupti
+## ai caselor albastre (169 de case, 3.150-3.918 tri fiecare) n-aveau niciun
+## LOD si erau cea mai mare parte a cadrului (ProbePerf --attrib, 27 oct 2026).
+## `mesh_get_surface` e o citire de pe GPU, deci trece prin registru.
+static func surface_lods(mesh: Mesh, s: int) -> Dictionary:
+	var key := mesh.get_rid()
+	if _on():
+		var surfs: Array = _lods.get(key, [])
+		if s < surfs.size() and surfs[s] != null:
+			return (surfs[s] as Dictionary).duplicate()
+	var out := {}
+	var d := RenderingServer.mesh_get_surface(key, s)
+	var lods: Array = d.get("lods", [])
+	var index_count := int(d.get("index_count", 0))
+	var index_data: PackedByteArray = d.get("index_data", PackedByteArray())
+	if not lods.is_empty() and index_count > 0 and index_data.size() > 0:
+		# Indicii sunt pe 16 sau pe 32 de biti dupa numarul de vertecsi; latimea
+		# se citeste din bufferul de baza, nu se ghiceste.
+		var bpi := index_data.size() / index_count
+		for l in lods:
+			var bytes: PackedByteArray = l["index_data"]
+			var idx := PackedInt32Array()
+			if bpi == 4:
+				idx = bytes.to_int32_array()
+			else:
+				idx.resize(bytes.size() / 2)
+				for i in idx.size():
+					idx[i] = bytes.decode_u16(i * 2)
+			out[float(l["edge_length"])] = idx
+	if _on():
+		_store(_lods, key, mesh.get_surface_count(), s, out.duplicate())
+	return out
+
+
+## LOD-uri generate (meshoptimizer, ca la import) pentru array-urile unei
+## suprafete cu indici noi: ruperea accentelor, mesh-urile unite din cod
+## (bazar, terase, ziduri de var). Fara indici nu se poate genera nimic.
+static func generated_lods(arrays: Array) -> Dictionary:
+	var out := {}
+	if arrays.size() <= Mesh.ARRAY_INDEX or arrays[Mesh.ARRAY_INDEX] == null \
+			or (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).is_empty():
+		return out
+	var im := ImporterMesh.new()
+	im.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	im.generate_lods(LOD_MERGE_DEG, LOD_SPLIT_DEG, [])
+	for li in im.get_surface_lod_count(0):
+		out[im.get_surface_lod_size(0, li)] = im.get_surface_lod_indices(0, li)
+	return out
+
+
+## Copia unui mesh (de obicei iesit dintr-un SurfaceTool) cu LOD-uri generate pe
+## fiecare suprafata; suprafetele neindexate se indexeaza intai (sudura pe
+## vertex identic), altfel generatorul nu are pe ce lucra. Materialele raman.
+static func with_lods(src: Mesh) -> ArrayMesh:
+	var out := ArrayMesh.new()
+	for s in src.get_surface_count():
+		var arrays := surface_arrays(src, s)
+		if arrays[Mesh.ARRAY_INDEX] == null:
+			var st := SurfaceTool.new()
+			st.create_from(src, s)
+			st.index()
+			arrays = st.commit_to_arrays()
+		add_surface(out, arrays, generated_lods(arrays))
+		var m := src.surface_get_material(s)
+		if m != null:
+			out.surface_set_material(s, m)
+	return out
 
 
 static func _store(reg: Dictionary, key: RID, count: int, s: int, val: Variant) -> void:

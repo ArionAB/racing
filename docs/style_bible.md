@@ -434,6 +434,22 @@ A/B-ul pe device să arate care dintre ele contează.
 `CLIFF_AO_STRENGTH` a coborât 0.45 → 0.22 odată cu ele: AO-ul radial și umbra
 dinamică **se adună**, iar la 0.45 baza falezelor ieșea aproape neagră.
 
+**Geometria pe telefon: LOD, nu celule (27 oct 2026).** Dezvoltatorul bănuia că
+pe Jodhpur și în orașul Kyoto „se randează prea multe clădiri degeaba". Măsurat
+cu `ProbePerf --attrib` (stinge grupurile pe rând): umplutura de oraș de la
+distanță costa doar ~45k triunghiuri din 800k, pentru că e pe MultiMesh cu
+LOD-urile importului. Cea mai mare parte a cadrului erau **casele din primul
+rând**, ca noduri, cu pereții rupți pe clase: mesh-ul reconstruit pierduse
+LOD-urile și trimitea 3.900 de triunghiuri pe casă la orice distanță. Regula
+din `CLAUDE.md`: tot ce e reconstruit din cod poartă LOD-uri (`MeshCpu`).
+Celulele de coacere mai mici (40/60/100 m) au fost măsurate și **respinse**:
+adaugă triunghiuri și desene, fiindcă Godot alege LOD-ul după cel mai apropiat
+punct al AABB-ului. Pădurea Kyoto are trei trepte cu pragul măsurat la cel mai
+apropiat copac al feliei (nu la centrul ei), ca să nu se mai vadă „copaci care
+apar"; tulpinile de bambus devin prisme (292 → 42), cardurile de frunze se
+răresc. Jodhpur: 800k → ~600k medie, vârf 1,23M → 0,8M. Pe telefon Normal are
+acum MSAA 2x (4x doar la Maxim): limita rămâne costul pe pixel.
+
 **Expunerea se calibrează prin măsurare, nu din ochi.** Cerul de deșert e albastru
 intens; luat ca sursă de ambient, își lasă nuanța pe tot ce e deschis la culoare —
 măsurat, nisipul ieșea `#EAD8CD` (gri-roz) în loc de `#D8A86A`, cu canalul albastru

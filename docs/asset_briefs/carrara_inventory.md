@@ -67,6 +67,43 @@ AABB-ul pe X și Z a rămas identic (2,83 / 7,73).
 - Numele de noduri `Truck_Body/Rust/Black/Marble/MarbleBase`.
 - ProbeRace pe camioane se reia la schimbarea modelului (coordonatorul).
 
+## Integrare pe Track23 (coordonator, 27 oct 2026)
+
+**Acceptat** după runda 3: caroseria basculantei e plină, cu baldachinul peste
+cabină, iar blocurile ies ~0,8 m peste bordură. Abaterile rămase sunt cele din
+tabelul de fidelitate (baldachin mai plat, roți mai mici relativ la caroserie,
+nervurile slab vizibile în aceeași culoare); oliv-ul slotului 13 e decizia de
+paletă din brief §4, nu o abatere de corectat aici.
+
+Schimbarea: `Track23.tscn`, resursa `8_kamaz` (ambele camioane, `Camion1B` și
+`Camion2Pod`) trece de pe `baikal/vehicles/kamaz_truck.glb` pe
+`carrara/vehicles/quarry_truck.glb`. Id-ul resursei a rămas, ca diff-ul să fie o
+linie. Remaparea `kamaz_truck` din `SLOTS_CARRARA` nu mai prinde nimic pe pistă
+și rămâne pentru Kamaz-ul parcat din A (brief §5.3), dacă se pune.
+
+**ProbeRace A/B** (`tools/carrara_race_run.sh`, 16 seed-uri × 210 s, 8 mașini,
+același cod, aceeași pistă; doar modelul camionului diferă):
+
+| | Kamaz | quarry_truck |
+|---|---|---|
+| cadre de contact cu camioanele (`bus_hits`) | 130 | 131 |
+| `[blocaj]` / repuneri atribuibile camioanelor | 0 / 0 | 0 / 0 |
+| ture | 298 | 303 |
+| tur minim / mediu (mediana pe seed-uri) | 65,06 / 69,70 s | 65,09 / 69,44 s |
+| `[blocaj]` total / la excavator (frac 0,048–0,050) | 9 / 7 | 15 / 15 |
+| repuneri / ejectări total | 6 / 3 | 9 / 4 |
+
+Verdict: **schimbarea e neutră pe camioane** — contactele identice, zero
+blocaje sau repuneri lângă camioane în ambele serii. Diferența de blocaje e în
+întregime la brațul excavatorului de pe piazzale (coada de la start, problemă
+deschisă din brief §7 pasul 5, unde aceeași măsurătoare dădea 21), adică
+zgomot de nedeterminism Jolt pe un hazard pe care schimbarea nu-l atinge
+(memoria `proberace-nedeterminism`). Cutia nouă e cu 0,15 m mai lată și cu
+0,27 m mai scurtă decât a Kamaz-ului; n-a mișcat nimic măsurabil.
+
+Nevăzut încă: camionul în joc cu fereastră (lumina temei, umbrele, clasa
+marmurei pe blocuri). Captura vine cu primul val, la integrare.
+
 ## Stare la oprire
 
 - Pilotul e complet: harnasul, GLB-ul, garda, comparațiile. `bash

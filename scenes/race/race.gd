@@ -315,8 +315,12 @@ func _spawn_cars() -> void:
 			# Sondele pot inlocui lineup-ul (`GameState.ai_cars_override`), ca
 			# sa puna toate masinile din garaj pe aceeasi grila: matricea de
 			# echilibru masoara masinile, nu lineup-ul jocului.
-			var lineup: Array[int] = GameState.ai_cars_override \
-				if not GameState.ai_cars_override.is_empty() else AI_CARS
+			# In WORLD CUP, adversarii trasi la startul cupei (fara repetare).
+			var lineup: Array[int] = AI_CARS
+			if not GameState.ai_cars_override.is_empty():
+				lineup = GameState.ai_cars_override
+			elif GameState.champ_active and not GameState.champ_ai_cars.is_empty():
+				lineup = GameState.champ_ai_cars
 			var data_idx: int = lineup[(i - 1) % lineup.size()]
 			car.apply_data(GameState.CAR_DATA[data_idx] as CarData,
 				AI_COLORS[(i - 1) % AI_COLORS.size()])
@@ -860,8 +864,8 @@ func _show_results() -> void:
 		title += "\n" + _career_points_text()
 		primary = "BACK TO CAREER"
 	if GameState.champ_active:
-		title = "RACE %d/%d — %s" % [GameState.champ_round + 1,
-			GameState.CHAMP_ROUNDS, _track_title()]
+		title = "%s — RACE %d/%d — %s" % [GameState.champ_cup.display_name,
+			GameState.champ_round + 1, GameState.champ_rounds(), _track_title()]
 		primary = "FINAL STANDINGS" if GameState.champ_is_last_round() \
 			else "NEXT RACE"
 	hud.show_results(title, rows, primary)
@@ -930,12 +934,18 @@ func _on_results_primary() -> void:
 	else:
 		GameState.champ_next_race()
 
-## Clasamentul final al campionatului, sortat dupa puncte.
+## Clasamentul final al cupei, sortat dupa puncte. La egalitate castiga cine
+## a terminat mai sus ultima cursa — altfel ordinea ar fi a sortarii, care nu
+## e stabila.
 func _show_champion() -> void:
 	_champion_shown = true
 	var slots := range(cars.size())
 	slots.sort_custom(func(a: int, b: int) -> bool:
-		return GameState.champ_points[a] > GameState.champ_points[b])
+		var pa: int = GameState.champ_points[a]
+		var pb: int = GameState.champ_points[b]
+		if pa != pb:
+			return pa > pb
+		return _final_order.find(a) < _final_order.find(b))
 	var rows: Array[Dictionary] = []
 	for rank in slots.size():
 		var slot: int = slots[rank]
@@ -947,9 +957,11 @@ func _show_champion() -> void:
 			"is_player": car.is_player,
 		})
 	var champion := cars[slots[0]]
-	var title := "CHAMPION: %s!" % champion.pilot_name
+	var title := "%s WINNER: %s!" % [GameState.champ_cup.display_name,
+		champion.pilot_name]
 	AudioManager.play_sfx(&"go_beep", 1.3)
-	hud.show_results(title, rows, "NEW CHAMPIONSHIP")
+	# PLAY AGAIN = aceeasi cupa de la capat, cu adversari trasi din nou.
+	hud.show_results(title, rows, "PLAY AGAIN")
 
 # -------------------------------------------------------------------- HUD
 
@@ -1055,8 +1067,8 @@ func _update_hud() -> void:
 	var lap_no := clampi(int(_progress[0].laps) + 1, 1, GameState.total_laps)
 	var champ_line := ""
 	if GameState.champ_active:
-		champ_line = "   race %d/%d" % [
-			GameState.champ_round + 1, GameState.CHAMP_ROUNDS]
+		champ_line = "   race %d/%d  %d pts" % [GameState.champ_round + 1,
+			GameState.champ_rounds(), GameState.champ_points[0]]
 	var record_ms := GameState.best_lap(GameState.selected_track)
 	var record_text := _fmt_ms(record_ms) if record_ms > 0 else "--:--.-"
 	# Indiciul de camera apare doar unde exista si reglajul (build de debug),

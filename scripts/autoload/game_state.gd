@@ -39,26 +39,21 @@ const DRIVER_DATA: Array[Resource] = [
 	preload("res://scenes/cars/data/drivers/driver_green.tres"),
 ]
 
-## Pistele. Primele CHAMP_ROUNDS intra in campionat; restul doar in cursa rapida.
+## Pistele, in ordinea din cursa rapida.
 ##
-## `CHAMP_ROUNDS` a ramas 3 de cand erau trei piste, iar lista a crescut la
-## PAISPREZECE — deci campionatul e Dunele + Okinawa manual + Transfagarasan
-## (indicii 0-2), si restul sunt doar cursa rapida. Nu e o scapare de reparat
-## in graba: lungimea campionatului e decizie de design (3 curse = burst play,
-## 14 = alt ritm), si se schimba deliberat, cu `CHAMP_ROUNDS`, nu din reflex.
-##
-## Pe indexul 2 a stat Alpii (Track09) pana la swap-ul din 14 oct 2026. Deci
-## un swap pe primele CHAMP_ROUNDS pozitii schimba si campionatul: aici a fost
-## vrut explicit (Transfagarasanul ia runda 3), nu incasat din greseala.
+## Campionatul NU mai sta pe primele pozitii din lista (vechiul CHAMP_ROUNDS,
+## care facea din indicii 0-2 campionatul): din oct 2026 cupele din WORLD CUP
+## isi numesc pistele prin `TrackInfo.id`, in `WORLD_CUPS`. Deci un swap aici
+## nu mai muta nicio cupa.
 const TRACK_SCENES: Array[String] = [
 	"res://scenes/tracks/Track01.tscn",
 	"res://scenes/tracks/Track08.tscn",
 	# Track21 = INDEXUL 2 (Transfagarasan). PRIMUL SWAP din proiect: pana acum
 	# Monument Valley, Okinawa si Transfagarasanul doar se ADAUGASERA la coada,
 	# cu nota "pana la swap". Aici Alpii (Track09) IES din lista de joc si
-	# Transfagarasanul le ia locul, inclusiv runda 3 de campionat
-	# (indexul 2 < CHAMP_ROUNDS): decizia dezvoltatorului, 14 oct 2026, nu
-	# un efect secundar — brief transfagarasan.md §8.
+	# Transfagarasanul le ia locul (pe atunci si runda 3 a vechiului
+	# campionat): decizia dezvoltatorului, 14 oct 2026, nu un efect
+	# secundar — brief transfagarasan.md §8.
 	# Track09 RAMANE IN REPO ca banc de test: probe_track09_fracs,
 	# probe_alpine_terrain si verify_all_tracks_load il incarca PE CALE
 	# ("res://scenes/tracks/Track09.tscn"), nu prin index, deci swap-ul nu le
@@ -88,14 +83,14 @@ const TRACK_SCENES: Array[String] = [
 	# N-A FOST FACUT inca, desi nota e aici de la inceputul lui oct 2026.
 	# Tiparul e swap-ul Transfagarasanului de mai sus: se scrie PE POZITIE,
 	# peste Track01, nu se sterge intrarea veche (lista nu are voie sa se
-	# taseze — vezi comentariul de pe indexul 2). Indexul 0 e in campionat.
+	# taseze — vezi comentariul de pe indexul 2).
 	# Uneltele o adreseaza cu --track=19 (resolve_track_index o gaseste dupa
 	# numarul scenei).
 	"res://scenes/tracks/Track19.tscn", # Monument Valley = INDEXUL 12
 	# Track20 = INDEXUL 13 (Okinawa, brief okinawa.md §7): la COADA listei;
 	# Okinawa manual (Track08) ramane pe indexul 1 pana la swap — care, ca la
 	# Monument Valley, N-A FOST FACUT inca. Acelasi tipar: PE POZITIE, peste
-	# Track08. Indexul 1 e in campionat. Uneltele o
+	# Track08. Uneltele o
 	# adreseaza cu --track=20 (resolve_track_index o gaseste dupa numarul scenei;
 	# probe_decor/probe_manual vor 20, snapshot/probe_race/probe_layout vor 13 SAU 20).
 	"res://scenes/tracks/Track20.tscn", # Okinawa = INDEXUL 13
@@ -124,7 +119,18 @@ const TRACK_NAMES: Array[String] = [
 	"Chongqing", "Cappadocia", "Serengeti", "Machu Picchu", "Fiordland",
 	"Jodhpur", "Kyoto", "Monument Valley", "Okinawa", "Ha Long", "Carrara",
 ]
-const CHAMP_ROUNDS: int = 3
+
+## Cupele din WORLD CUP (decizia dezvoltatorului, 30 oct 2026): trei cupe de
+## cate patru curse, puncte cumulate. Raman PE DINAFARA Dunele si Okinawa
+## manual (pistele vechi de test, indicii 0-1), Ha Long si Carrara. Cele 12
+## piste ramase sunt impartite pe geografie, ALTFEL decat lumile carierei, ca
+## modul sa nu fie aceeasi grila jucata a doua oara; fiecare cupa se deschide
+## cu o pista din lumea 1 a carierei (cea mai blanda).
+const WORLD_CUPS: Array[Resource] = [
+	preload("res://scenes/world_cup/data/asia_cup.tres"),
+	preload("res://scenes/world_cup/data/europe_cup.tres"),
+	preload("res://scenes/world_cup/data/frontier_cup.tres"),
+]
 
 
 ## Traduce un `--track=N` de pe linia de comanda in POZITIE din TRACK_SCENES.
@@ -167,9 +173,11 @@ func current_track_scene() -> String:
 	return TRACK_SCENES[selected_track]
 
 
-## Puncte pe pozitie (locul 1..6). Lista TREBUIE sa aiba cel putin atatea
-## intrari cate masini sunt in cursa: `record_results` indexeaza cu rangul.
-const CHAMP_POINTS: Array[int] = [10, 8, 6, 4, 2, 1]
+## Puncte pe pozitie (locul 1..6) in WORLD CUP: 6-5-4-3-2-1, decizia
+## dezvoltatorului (oct 2026; inainte 10-8-6-4-2-1). Pasul egal intre locuri
+## face ca fiecare depasire sa valoreze la fel, si pe podium si in coada.
+## Sub ultima pozitie punctata nu se da nimic (`record_results`).
+const CHAMP_POINTS: Array[int] = [6, 5, 4, 3, 2, 1]
 
 # Config cursa.
 var total_laps: int = 3
@@ -214,9 +222,17 @@ var menu_open_panel: StringName = &""
 func selected_driver_model() -> PackedScene:
 	return (DRIVER_DATA[selected_driver] as DriverData).model
 
-# Campionat: 3 curse, punctaj cumulat per "slot" (0 = jucatorul, 1.. = AI).
+# Campionat (WORLD CUP): cursele cupei, punctaj cumulat per "slot"
+# (0 = jucatorul, 1.. = AI). Traieste doar in memorie: iesirea in MENU
+# abandoneaza cupa.
 var champ_active: bool = false
 var champ_round: int = 0
+## Cupa in desfasurare (una din WORLD_CUPS).
+var champ_cup: WorldCup
+## Masinile adversarilor pe toata cupa: indici in CAR_DATA, unul per slot AI,
+## trasi la `start_championship`. Raman aceleasi de la o cursa la alta, ca
+## punctele de pe slot sa fie ale aceleiasi masini.
+var champ_ai_cars: Array[int] = []
 ## Un slot per masina din cursa; se dimensioneaza din `ai_count`, nu cu o lista
 ## scrisa de mana — altfel adaugarea unui adversar iese in afara tabloului.
 ## Se reface la fiecare `start_championship`; valoarea de aici e doar ca tabloul
@@ -559,14 +575,48 @@ func start_quick_race(track_index: int) -> void:
 	selected_track = track_index
 	start_race()
 
-func start_championship() -> void:
+## Porneste o cupa de la prima cursa, cu adversari trasi din nou. Fara
+## argument reia cupa curenta (PLAY AGAIN dupa clasamentul final).
+func start_championship(cup: WorldCup = champ_cup) -> void:
 	Career.leave()
 	champ_active = true
+	champ_cup = cup
 	champ_round = 0
 	champ_points.clear()
 	champ_points.resize(ai_count + 1) # un slot per masina, jucatorul inclus
-	selected_track = 0
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	champ_ai_cars = draw_ai_lineup(selected_car, ai_count, rng)
+	selected_track = cup.track_index(0)
 	start_race()
+
+
+## Masinile adversarilor pentru o cupa noua: `count` indici din CAR_DATA, in
+## ordine aleatorie, fara repetare si fara masina jucatorului — pe grila nu
+## apar niciodata doua taxiuri sau doua autobuze. Daca garajul ar avea mai
+## putine masini decat adversari, lista se reia de la capat (abia atunci apar
+## dubluri); cu 10 masini si 5 adversari nu se intampla.
+static func draw_ai_lineup(player_car: int, count: int,
+		rng: RandomNumberGenerator) -> Array[int]:
+	var pool: Array[int] = []
+	for i in CAR_DATA.size():
+		if i != player_car:
+			pool.append(i)
+	# Fisher-Yates cu rng-ul primit (nu `shuffle()`, care foloseste seed-ul
+	# global): sonda trage cu seed fix si poate repeta o extragere.
+	for i in range(pool.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var tmp := pool[i]
+		pool[i] = pool[j]
+		pool[j] = tmp
+	var lineup: Array[int] = []
+	for k in count:
+		lineup.append(pool[k % pool.size()])
+	return lineup
+
+
+func champ_rounds() -> int:
+	return champ_cup.tracks.size() if champ_cup != null else 0
 
 ## order_slots[rank] = slotul de pe locul rank (0 = jucator).
 func record_results(order_slots: Array) -> void:
@@ -578,11 +628,11 @@ func record_results(order_slots: Array) -> void:
 		champ_points[int(order_slots[rank])] += CHAMP_POINTS[rank]
 
 func champ_is_last_round() -> bool:
-	return champ_round >= CHAMP_ROUNDS - 1
+	return champ_round >= champ_rounds() - 1
 
 func champ_next_race() -> void:
 	champ_round += 1
-	selected_track = champ_round
+	selected_track = champ_cup.track_index(champ_round)
 	start_race()
 
 func start_race() -> void:
@@ -601,6 +651,9 @@ func take_loading_screen() -> bool:
 	return v
 
 func go_to_menu() -> void:
+	# Din cupa (in mijlocul ei sau dupa clasament) revii pe ecranul cupelor.
+	if champ_active:
+		menu_open_panel = &"world_cup"
 	champ_active = false
 	Career.leave() # iesirea prin MENU inchide si cursa de cariera
 	reset_touch()

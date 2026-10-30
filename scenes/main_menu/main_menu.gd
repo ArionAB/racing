@@ -1,6 +1,6 @@
 extends Control
-## Meniul principal: cursa rapida (cu alegerea pistei), campionat, garaj
-## (alegerea masinii, persistata), setari. Butoane mari pentru touch.
+## Meniul principal: cursa rapida (cu alegerea pistei), cupa lumii, cariera,
+## garaj (alegerea masinii, persistata), setari. Butoane mari pentru touch.
 
 var _main_box: VBoxContainer
 var _panels: Array[Control] = []
@@ -31,8 +31,9 @@ func _ready() -> void:
 
 	var quick := _make_button("QUICK RACE")
 	_main_box.add_child(quick)
-	# CAREER a inlocuit butonul CHAMPIONSHIP; campionatul ramane in GameState
-	# (il va folosi cupa lumii), doar intrarea din meniu a disparut.
+	# WORLD CUP = campionatul din GameState, pe cupe (WorldCupPanel).
+	var cup_btn := _make_button("WORLD CUP")
+	_main_box.add_child(cup_btn)
 	var career_btn := _make_button("CAREER")
 	_main_box.add_child(career_btn)
 	var garage_btn := _make_button("GARAGE")
@@ -45,6 +46,8 @@ func _ready() -> void:
 
 	var track_panel := _build_track_panel()
 	quick.pressed.connect(func() -> void: _show_panel(track_panel))
+	var cup_panel := _build_world_cup_panel()
+	cup_btn.pressed.connect(func() -> void: _show_panel(cup_panel))
 	var career_panel := _build_career_panel()
 	career_btn.pressed.connect(func() -> void: _show_panel(career_panel))
 	var garage_panel := _build_garage_panel()
@@ -57,9 +60,13 @@ func _ready() -> void:
 	settings_btn.pressed.connect(func() -> void: _show_panel(settings))
 
 	# Dupa o cursa de cariera revenim direct pe raft, nu pe meniul principal.
+	# La fel dupa o cupa (terminata sau abandonata): pe ecranul cupelor.
 	if GameState.menu_open_panel == &"career":
 		GameState.menu_open_panel = &""
 		_show_panel(career_panel)
+	elif GameState.menu_open_panel == &"world_cup":
+		GameState.menu_open_panel = &""
+		_show_panel(cup_panel)
 
 # ------------------------------------------------------------------ panouri
 
@@ -81,6 +88,15 @@ func _show_main() -> void:
 ## Alegerea pistei pentru cursa rapida: grila de cartonase pe ecran intreg.
 func _build_track_panel() -> Control:
 	var panel := TrackSelectPanel.new()
+	panel.visible = false
+	add_child(panel)
+	_panels.append(panel)
+	panel.back_pressed.connect(_show_main)
+	return panel
+
+## Cupa lumii: cele trei cupe, cu pistele in ordinea curselor.
+func _build_world_cup_panel() -> Control:
+	var panel := WorldCupPanel.new()
 	panel.visible = false
 	add_child(panel)
 	_panels.append(panel)
@@ -120,6 +136,8 @@ func _make_center_box() -> VBoxContainer:
 func _make_button(text: String) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.custom_minimum_size = Vector2(360, 74)
+	# 66, nu 74: cu WORLD CUP sunt sase butoane, iar la 74 QUIT atingea
+	# marginea de jos a ecranului de 720.
+	button.custom_minimum_size = Vector2(360, 66)
 	button.add_theme_font_size_override("font_size", 30)
 	return button

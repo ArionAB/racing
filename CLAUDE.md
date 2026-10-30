@@ -68,6 +68,11 @@ pur plus haosul fizic, nu proiectilele.
   scrâșnet după alunecare, bara de turbo pulsează. Garda: `ProbeDriftEntry`
   (4 contracte, fiecare cu sabotaj care pică).
 - Countdown + rocket start (ține TURBO în ultima secundă), poziții live ✔
+- **World Cup** ✔ (oct 2026): 3 cupe × 4 curse (`scenes/world_cup/data/`),
+  puncte cumulate 6-5-4-3-2-1 (`GameState.CHAMP_POINTS`). La fiecare cupă
+  nouă adversarii sunt trași aleatoriu din garaj, **niciodată aceeași mașină
+  de două ori** (nici a jucătorului) — `GameState.draw_ai_lineup`. Pe dinafară:
+  Dunele, Okinawa manual, Ha Long, Carrara. Garda: `ProbeWorldCup`.
 - Touch controls: **numai butoane** — ◀ ▶ viraj (stânga-jos), ▲ gaz și ▼
   frână/marșarier (dreapta-jos, ca o pereche de pedale), TURBO/DRIFT pe rândul
   de deasupra lor ✔ — validat pe iPhone (oct 2026, trei iterații).

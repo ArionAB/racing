@@ -255,6 +255,8 @@ model = ExtResource("13_sled")
 rock_speed = 6.5
 rock_pause = 27.76
 rock_roll_model = false
+rock_warn_bell_s = 2.0
+rock_phase = 0.72
 
 [node name="Jgheab" type="Path3D" parent="Hazarduri/Sanie"]
 curve = SubResource("Curve3D_jgheab")

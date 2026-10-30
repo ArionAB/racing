@@ -245,6 +245,12 @@ enum Kind {
 ## spec doar cand e > 0, ca orice nod de azi sa ramana bit-identic.
 @export_range(0.0, 10.0, 0.1) var rock_warn_bell_s: float = 0.0
 
+## Faza ciclului (0..1). Negativ = din fractie (`frac * 3.7`, ca azi). Pe Carrara
+## faza din fractie cadea fix pe plutonul din turul 1 dupa mutarea trecerii
+## saniei de la 0.815 la 0.769 (31 de lovituri pe 16 curse fata de 8).
+## Cheia ajunge in spec doar cand e >= 0, deci orice nod de azi ramane bit-identic.
+@export_range(-1.0, 1.0, 0.01) var rock_phase: float = -1.0
+
 
 ## Ce a declarat nodul despre INFATISAREA obstacolului, in forma pe care o
 ## citeste deja `Track._build_hazard`: acelasi dictionar ca o intrare din
@@ -299,6 +305,8 @@ func model_spec() -> Dictionary:
 			spec["rock_roll_model"] = false
 		if rock_warn_bell_s > 0.0:
 			spec["rock_warn_bell_s"] = rock_warn_bell_s
+		if rock_phase >= 0.0:
+			spec["rock_phase"] = rock_phase
 	return spec
 
 

@@ -1191,6 +1191,12 @@ road_clear_m = {LIZZA_CLEAR}
         d_acc = 0.5 * SLED_SPEED * t_acc
         travel = t_acc + (chute_len - d_acc) / SLED_SPEED
         sled_pause = round(SLED_CYCLE - travel, 2)
+        # clopotul de avertizare, brief par.2 randul G: 2 s inainte de fiecare plecare (RockfallHazard.warn_bell_s)
+        SLED_BELL = 2.0
+        # faza explicita: din fractie (0.769 * 3.7 = 0.845) sania cadea fix pe plutonul din turul 1. ProbeRace, 16 seed-uri,
+        # lovituri de sanie: din fractie 31 (29 in turul 1); 0.72 -> 6 (4 in turul 1, 2 in turul 3); 0.97 -> 1 (decor).
+        # 0.72: rara, dar plutonul o mai intalneste in turul 1, deci jucatorul o vede trecand.
+        SLED_PHASE = 0.72
         kit_ext += '[ext_resource type="PackedScene" path="res://assets/models/carrara/props/lizza_sled.glb" id="13_sled"]\n'
         kit_sub += curve_sub("Curve3D_jgheab", chute)
         kit_nodes += f"""
@@ -1202,6 +1208,8 @@ model = ExtResource("13_sled")
 rock_speed = {SLED_SPEED}
 rock_pause = {sled_pause}
 rock_roll_model = false
+rock_warn_bell_s = {SLED_BELL}
+rock_phase = {SLED_PHASE}
 
 [node name="Jgheab" type="Path3D" parent="Hazarduri/Sanie"]
 curve = SubResource("Curve3D_jgheab")

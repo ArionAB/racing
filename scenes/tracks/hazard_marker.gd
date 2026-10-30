@@ -239,6 +239,12 @@ enum Kind {
 ## in spec doar cand e stinsa, deci orice nod de azi ramane bit-identic.
 @export var rock_roll_model: bool = true
 
+## Clopotul de avertizare, cu atatea secunde INAINTE de fiecare plecare de pe
+## traseu, pozitional din capatul de sus (sania Carrara: 2 s, brief carrara.md
+## §5.5). 0 = fara clopot. Vezi `RockfallHazard.warn_bell_s`. Cheia ajunge in
+## spec doar cand e > 0, ca orice nod de azi sa ramana bit-identic.
+@export_range(0.0, 10.0, 0.1) var rock_warn_bell_s: float = 0.0
+
 
 ## Ce a declarat nodul despre INFATISAREA obstacolului, in forma pe care o
 ## citeste deja `Track._build_hazard`: acelasi dictionar ca o intrare din
@@ -291,6 +297,8 @@ func model_spec() -> Dictionary:
 		spec["rock_stick_to_ground"] = rock_stick_to_ground
 		if not rock_roll_model:
 			spec["rock_roll_model"] = false
+		if rock_warn_bell_s > 0.0:
+			spec["rock_warn_bell_s"] = rock_warn_bell_s
 	return spec
 
 

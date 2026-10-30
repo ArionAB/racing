@@ -99,6 +99,18 @@ const ZEBRA_GLB := "res://assets/models/serengeti/animals/zebra.glb"
 ## Doua lovituri pe aceeasi masina nu vin mai des de atat (s).
 @export_range(0.05, 1.0, 0.05) var hit_cooldown: float = 0.3
 @export_range(0.5, 5.0, 0.1) var tumble_time: float = 1.5
+## Pragul de jos al raportului de masa (animal_mass / masa masinii) care scaleaza
+## ghiontul si franarea. 0.4 = comportamentul de la Serengeti. Animalele USOARE
+## (macacii de pe Ha Long, masa 30) cer un prag mai jos, altfel masina de 90 si
+## autobuzul de 260 ar cadea AMBELE pe 0.4 si masa n-ar mai conta intre ele.
+@export_range(0.02, 1.0, 0.01) var min_mass_ratio: float = 0.4
+## Saritura verticala (m/s) data masinii la fiecare lovitura: zdruncinatura.
+## 0.3 = comportamentul vechi (abia se simte).
+@export_range(0.0, 4.0, 0.05) var jolt_speed: float = 0.3
+## Lovitura se si SIMTE: `Car.impact` (kind &"animal") pentru camera, caroserie
+## si haptica, plus „tac" de decor usor la jucator. Stins implicit, ca Serengeti
+## si Transfagarasan sa ramana neatinse; macacii de pe Ha Long il pornesc (#597).
+@export var hit_feedback: bool = false
 
 @export_group("Bazin de corpuri")
 @export_range(4, 40) var body_pool: int = 16
@@ -821,14 +833,16 @@ func _contacts() -> void:
 
 
 func _hit(a: int, car: Car) -> void:
-	var ratio := clampf(animal_mass / maxf(car.mass, 1.0), 0.4, 1.6)
+	var ratio := clampf(animal_mass / maxf(car.mass, 1.0), min_mass_ratio, 1.6)
 	var fwd := -car.global_transform.basis.z
 	fwd.y = 0.0
 	fwd = fwd.normalized()
 	var fwd_speed := car.velocity.dot(fwd)
 	var loss := fwd * fwd_speed * forward_loss * minf(ratio, 1.0)
-	var push := flow_dir * kick_speed * ratio * ratio + Vector3.UP * 0.3
+	var push := flow_dir * kick_speed * ratio * ratio + Vector3.UP * jolt_speed
 	car.apply_sweep(push - loss)
+	if hit_feedback:
+		_feel_hit(a, car, push - loss)
 	# Animalul cade si isi pierde corpul: nu te tine prins intre el si vecin.
 	_state[a] = State.TUMBLE
 	_tumble_left[a] = tumble_time
@@ -839,3 +853,19 @@ func _hit(a: int, car: Car) -> void:
 	hits += 1
 	tumbles += 1
 	animal_hit.emit(car, ratio)
+
+
+## Lovitura se simte (hit_feedback): acelasi canal ca peretii si masinile —
+## `Car.impact` — ca sa-l citeasca camera (kick), caroseria (jolt), haptica —
+## plus „tac" usor, pozitional, doar la jucator. `strength` = schimbarea de
+## viteza (m/s) data masinii; normala arata dinspre animal spre masina, adica
+## in sensul in care esti impins/franat.
+func _feel_hit(a: int, car: Car, dv: Vector3) -> void:
+	var flat := Vector3(dv.x, 0.0, dv.z)
+	var strength := dv.length()
+	var normal := flat.normalized() if flat.length_squared() > 1e-6 else -flow_dir
+	car.impact.emit(car, &"animal", strength, normal, _pos[a], self)
+	if car.is_player:
+		var audio := get_node_or_null(^"/root/AudioManager")
+		if audio != null:
+			audio.prop_knock(_pos[a], clampf(strength / 12.0, 0.0, 1.0))

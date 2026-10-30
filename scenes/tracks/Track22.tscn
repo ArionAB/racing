@@ -2328,6 +2328,8 @@ transform = Transform3D(-0.44200, 0, 0.89701, 0, 1.0, 0, -0.89701, 0, -0.44200, 
 
 [node name="PorticScurtaturaA" parent="DecorManual" instance=ExtResource("34_bamboo")]
 transform = Transform3D(2.45, 0, 0.40, 0, 2.5, 0, -0.40, 0, 2.45, -120.77, 1.52, -232.84)
+metadata/coliziune = "none"
 
 [node name="PorticScurtaturaB" parent="DecorManual" instance=ExtResource("34_bamboo")]
 transform = Transform3D(-2.45, 0, -0.40, 0, 2.5, 0, 0.40, 0, -2.45, -122.00, 1.52, -225.14)
+metadata/coliziune = "none"

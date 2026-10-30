@@ -115,7 +115,7 @@ Detaliile pe piese sunt în `carrara_inventory_crr-a.md`, `_crr-b.md`,
 | grup | piese | verdict |
 |---|---|---|
 | crr-a, utilaje-hazard | `derrick`, `marble_block_hooked`, `block_informe_a`, `quarry_excavator` | **acceptate**. Sonda derrick-ului dă aceleași verdicte ca stand-in-ul (21 OK), iar cârligul desenat cade acum pe sarcină (−12,98 față de −13,00). Rigul excavatorului e în ±0,1 m față de `rusted_digger` |
-| crr-a | `lizza_sled` | **de refăcut**: pe amprenta de 2,4 × 2,4 m, blocul de 2,0 m acoperă sania și piesa citește „ladă pe palet”. Sonda ține amprenta (la 2,6 m pica pe timpul pierdut, 1,64 s > 1,6). Leacul care respectă sonda: **bloc mai jos (~1,2–1,4 m)** pe aceeași amprentă, tălpi ridicate în față, ca să se vadă sania. Toleranța de ±0,2 din kit e mai largă decât ce ține sonda: se strânge la ±0,05 |
+| crr-a | `lizza_sled` | **refăcută (v2, `carrara/sled-v2`), de judecat de coordonator**. v1 citea „ladă pe palet” (blocul de 2,0 m acoperea toată sania). v2: amprenta tot **2,40 × 2,39 m** (sfera r 1,200, ca sania sintetică a sondei), **monolit de 1,90 × 1,40 × 1,22 m** pe jumătatea din spate, puntea din față liberă **0,77 m**, tălpi plate pe contactul sondei și **vârfuri întoarse până la 0,85 m**, bară de cap între vârfuri, funiile longitudinale întinse în diagonală spre ea; înălțime totală 1,72 m (v1 2,51), 2.048 tri (v1 1.504), aceleași 4 noduri și sloturi. Garda `sled` strânsă la **±0,05** pe amprentă și armată pe formă (marmura 1,2–1,4 m, puntea ≥ 0,6, vârfurile ≥ 0,6, talpa la Y 0); pică pe copia de 2,6 m și pe v1. Sonda: gol, benzi, rotație, timp pierdut (0,86…1,41 s) identice cu v1 și cu sintetica; **un verdict pică pe cuantizare**: la 25 m/s `lat_max` iese 1,05298 (Muscle) față de 1,05314 (Pompierii), egale la rotunjirea de 1 mm a verdictului „cifrele diferă între mașini” (sintetica trece la limită, 1,05298 / 1,05357). Comparație: `img/carrara_fidelity/lizza_sled.png`, `_views.png`; în joc: `img/carrara_montaj/sanie_v2_G_*.png` |
 | crr-b, structuri | `ponti_di_vara`, `gallery_portal`, `marmifera_portal` | **acceptate**. Nimic peste −0,05 pe banda drumului (−0,060 măsurat), goluri 10,30 × 10,85 m și 10,20 m / cheia 9,60 m; fiecare gardă pică pe copia sabotată |
 | crr-c, kitul de carieră | 17 piese | **acceptate**. Blocurile citesc crem, nu alb (captura de 12 blocuri). Blocurile au 20 de triunghiuri, nu 12, fiindcă păstrează împărțirea pe două tonuri |
 
@@ -343,7 +343,7 @@ deci marmura e pe atlas.
 4. **Excavatorul împinge mașini prin asfalt** (vezi atribuirea) — nou găsit, nereparat.
 5. Marmifera: colțurile de sus ale ramei de beton din cod intră în bolțari (se pierd în
    piatră). Galeria: laturile de 18 m intră în pereții rapei C la gura de jos (natural).
-6. `lizza_sled` rămâne „de refăcut" (acceptarea): montată așa cum e.
+6. `lizza_sled`: v2 pe `carrara/sled-v2` (bloc de 1,22 m, vârfuri întoarse), aceleași noduri și amprentă; montajul nu se schimbă.
 7. Blocul basculat din D nu s-a montat: sala de 16 m nu există.
 8. `tools/probe_manual.gd` nu compilează în `--script` (autoload-uri lipsă) și pe
    ramura de bază; am folosit `ProbeDecorBuried` + modul `--decor` al sondei noi.

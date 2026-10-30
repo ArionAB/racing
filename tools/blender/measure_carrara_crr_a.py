@@ -20,7 +20,12 @@ Contractele (docs/asset_briefs/carrara_kit.md §1.1, scenes/hazards/*.gd):
   block    anvelopa SLAB_SIZE: X 4,6, Z 2,2 (+-0,02), de la Y -3,05 la cel mult 0
            (chingi si inel), iar MARMURA singura de la -3,05+0,04 la -0,06 si
            pe X la +-2,3 (+-0,02): blocul umple colizorul.
-  sled     amprenta X si Z 2,4 +-0,2 (sfera = max(X,Z)/2), inaltime 2,3..2,6.
+  sled     amprenta X si Z 2,4 +-0,05 (sfera = max(X,Z)/2; la 2,6 probe_carrara_sled
+           pica pe timpul pierdut), inaltimea totala 1,6..2,0; MARMURA (`Sled_Marble*`)
+           inalta 1,2..1,4 si cu fata la cel putin 0,6 m in spatele botului
+           (puntea din fata libera: v1, cu blocul de 2,0 pe toata sania, citea
+           „lada pe palet"); varfurile talpilor (`Sled_Wood` in fata Z -1,0)
+           urca la cel putin 0,6 m; talpa la Y 0 (+-0,01).
   informe  3 m +-10% pe fiecare axa, |X - Z| <= 0,15 (sfera = max(X,Z)/2).
 Iese cu cod 1 la orice abatere sau la zero varfuri citite.
 """
@@ -132,10 +137,29 @@ def check_sled(path, bad):
     sx, sy, sz = (a[k][1] - a[k][0] for k in range(3))
     print("sania    " + fmt(a) + "   (%.3f x %.3f x %.3f; raza sferei %.3f)" % (sx, sy, sz, max(sx, sz) / 2))
     for nm, v in (("X", sx), ("Z", sz)):
-        if abs(v - 2.4) > 0.2:
-            bad.append("amprenta %s %.3f, cerut 2,4 +-0,2" % (nm, v))
-    if not 2.3 <= sy <= 2.6:
-        bad.append("inaltimea %.3f in afara 2,3..2,6" % sy)
+        if abs(v - 2.4) > 0.05:
+            bad.append("amprenta %s %.3f, cerut 2,4 +-0,05" % (nm, v))
+    if not 1.6 <= sy <= 2.0:
+        bad.append("inaltimea %.3f in afara 1,6..2,0" % sy)
+    if abs(a[1][0]) > 0.01:
+        bad.append("talpa la Y %.3f, cerut 0 +-0,01 (sonda masoara contactul la Y 0)" % a[1][0])
+    mp = [p for nm, v in pts.items() if nm and nm.startswith("Sled_Marble") for p in v]
+    if not mp:
+        bad.append("fara noduri Sled_Marble*")
+        return
+    m = bbox(mp)
+    mh = m[1][1] - m[1][0]
+    deck = m[2][0] - a[2][0]
+    print("marmura  " + fmt(m) + "   (inalta %.3f; puntea libera in fata %.3f)" % (mh, deck))
+    if not 1.2 <= mh <= 1.4:
+        bad.append("blocul %.3f inalt, cerut 1,2..1,4" % mh)
+    if deck < 0.6:
+        bad.append("blocul acopera botul: puntea libera %.3f < 0,6" % deck)
+    tip = [p[1] for p in pts.get("Sled_Wood", []) if p[2] < a[2][0] + 0.2]
+    tip_h = max(tip) if tip else 0.0
+    print("varfuri  talpile in primii 0,2 m urca la Y %.3f" % tip_h)
+    if tip_h < 0.6:
+        bad.append("varfurile talpilor la %.3f, cerut >= 0,6" % tip_h)
 
 
 def check_informe(path, bad):

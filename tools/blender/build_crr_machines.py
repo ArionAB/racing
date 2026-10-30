@@ -540,83 +540,124 @@ def build_marble_block_hooked():
 # ---------------------------------------------------------------------------
 
 LZ_W, LZ_L = 2.4, 2.4       # amprenta (X, Y Blender) = cotele validate de probe_carrara_sled.
-                            # Runda 2 a incercat 2,6 pe lungime (toleranta kitului): sfera a
-                            # crescut la r 1,30 si sonda a picat „timp pierdut" (1,64 > 1,6 s).
-LZ_SOLE = 0.40              # talpa: patina + traverse
-LZ_BLOCK = 2.0              # blocul
+                            # Runda 2 a valului 1 a incercat 2,6 pe lungime: sfera a crescut
+                            # la r 1,30 si sonda a picat „timp pierdut" (1,64 > 1,6 s). +-0,05.
+LZ_SOLE = 0.40              # talpa: patina + traverse (fata de sus a traverselor)
+LZ_BLOCK = 1.22             # blocul (v2; v1 avea 2,0 si acoperea sania: „lada pe palet")
+LZ_BLOCK_X = 1.90           # blocul pe X: mai lat decat inalt, citeste lespede, nu cutie
+LZ_BLOCK_Y = (-0.98, 0.42)  # blocul pe Y: jumatatea din spate; puntea din fata ramane libera
+LZ_FLAT_Y = 0.70            # talpa e plata pana aici (probe_carrara_sled: contactul pana la
+                            # Z Godot -0,70), apoi varful se curbeaza in sus
+LZ_TIP_R = 0.42             # raza curburii varfului
+LZ_TIP_EXT = 0.48           # prelungirea dreapta a varfului, dupa arcul de 80 de grade
 
 AO_SLED = dict(samples=16, dist=0.9, gradient="vertical", low=0.62, high=1.0,
-               power=0.7, floor=0.4, z_range=(0.0, 2.5))
+               power=0.7, floor=0.4, z_range=(0.0, 1.85))
+
+
+def _swept_runner(b, x, pts, w, slot):
+    """Talpa de sanie ca sectiune dreptunghiulara MATURATA pe un profil in
+    planul YZ: `pts` = [(y, z, ny, nz, h)], punctul de pe fata de JOS, normala
+    spre interiorul curburii (sus/inapoi) si grosimea acolo. O invelitoare
+    convexa pe fiecare segment: curbura concava a varfului nu se umple, cum s-ar
+    intampla cu un singur `_hull` pe tot profilul."""
+    for (y0, z0, ny0, nz0, h0), (y1, z1, ny1, nz1, h1) in zip(pts[:-1], pts[1:]):
+        seg = []
+        for dx in (-w / 2, w / 2):
+            for (y, z, ny, nz, h) in ((y0, z0, ny0, nz0, h0), (y1, z1, ny1, nz1, h1)):
+                seg.append(Vector((x + dx, y, z)))
+                seg.append(Vector((x + dx, y + ny * h, z + nz * h)))
+        _hull(b, seg, slot)
+
+
+def _runner_profile():
+    """Profilul talpii: plat de la -L/2 la LZ_FLAT_Y, arc de 80 de grade cu raza
+    LZ_TIP_R, apoi o prelungire dreapta pe tangenta (varful intors in sus, ca
+    la o sanie de lizzatura). Grosimea scade de la 0,25 la 0,18 spre varf."""
+    hl = LZ_L / 2
+    pts = [(-hl, 0.0, 0.0, 1.0, 0.25), (LZ_FLAT_Y, 0.0, 0.0, 1.0, 0.25)]
+    n_arc = 5
+    for i in range(1, n_arc + 1):
+        th = math.radians(80.0 * i / n_arc)
+        h = 0.25 - 0.05 * i / n_arc
+        pts.append((LZ_FLAT_Y + LZ_TIP_R * math.sin(th), LZ_TIP_R * (1 - math.cos(th)),
+                    -math.sin(th), math.cos(th), h))
+    th = math.radians(80.0)
+    y, z = pts[-1][0], pts[-1][1]
+    pts.append((y + LZ_TIP_EXT * math.cos(th), z + LZ_TIP_EXT * math.sin(th),
+                -math.sin(th), math.cos(th), 0.18))
+    return pts
 
 
 def build_lizza_sled():
-    """LISTA DE ELEMENTE (decuparea `lizza_sled.png`, scrisa INAINTE de
-    geometrie; cotele din kit §1.1 / `probe_carrara_sled.gd` suprascriu planșa):
+    """LISTA DE ELEMENTE (v2, dupa verdictul valului 1: „lada pe palet". Decuparea
+    `lizza_sled.png`; cotele din kit §1.1 / `probe_carrara_sled.gd` suprascriu
+    planșa):
 
-     1. Doua TALPI groase de barna pe Y (botul pe +Y Blender = -Z Godot =
-        directia de mers), la X +-0,80, 0,42 lat, 0,25 inalt, lungi de 2,4 m,
-        cu varful din fata RIDICAT la 0,60 m pe ultimii 0,50 m (runda 2 le
-        lungise la 2,6 si a picat sonda sanii; vezi LZ_L). Planșa
-        arata o sanie lunga (~2,5:1); contractul cere amprenta PATRATA
-        2,4 x 2,4 (sfera de coliziune = max(X,Z)/2), deci sania e scurta:
-        abatere de proportie impusa de cod.
-     2. 5 TRAVERSE pe X peste talpi (0,30 x 0,15), cu capetele iesite peste
-        talpi pana la +-1,2 (planșa: capetele ies in lateral, lungimi usor
-        diferite). Talpa + traversele = 0,40 m.
+     1. Doua TALPI groase pe Y (botul pe +Y Blender = -Z Godot = directia de
+        mers), la X +-0,80, 0,42 late, 0,25 groase, plate pe 1,9 m (contactul
+        sondei), cu VARFUL INTORS IN SUS: arc de 80 de grade (r 0,42) si o
+        prelungire pe tangenta pana la ~0,85 m. Asta e semnul de sanie: se vede
+        in fata blocului, din camera de joc (de sus-spate).
+     2. 4 TRAVERSE pe X peste talpi (0,32 x 0,15), capetele iesite peste talpi
+        pana la +-1,2, lungimi usor diferite (planșa). Talpa + traversele = 0,40.
+        Ultima traversa sta pe puntea libera din fata blocului.
      3. Coltare de fier (LOG_DARK) pe fata exterioara a talpilor, la fiecare
-        traversa (planșa: legaturi metalice inchise la imbinari).
-     4. Blocul: 2,0 m cub pe traverse, din 4 blocuri (2 coloane x 2 randuri,
-        rosturi de 4 cm) ca pe planșa; patina pe treimea de jos
-        (`Sled_MarbleBase`), restul `Sled_Marble`.
-     5. FUNII groase (0,09 m) incrucisate: doua pe Y la X +-0,55 (urca pe fata,
-        trec peste bloc, coboara pe spate pana la traverse) si una pe X la
-        mijloc (urca pe laterale) -- se incruciseaza pe fata de sus. Pe planșa
-        funia e canepa deschisa; aici LOG_DARK (lemnul „umbrit" din tabelul de
-        sloturi), ca sa se citeasca pe marmura crem: abatere de nuanta.
-     6. Ce iese din contur: nimic peste 2,4 x 2,4; inaltimea totala ~2,5 cu
+        traversa.
+     4. O BARA de cap intre varfurile talpilor (testata), unde se leaga funiile.
+     5. Blocul: UN monolit de 1,90 x 1,40 x 1,22 m pe JUMATATEA DIN SPATE
+        (v1: 2,0 m cub din 4 blocuri, acoperea toata sania); patina pe treimea
+        de jos (`Sled_MarbleBase`), restul `Sled_Marble`. Puntea din fata
+        (~0,78 m) si varfurile raman libere.
+     6. FUNII (0,08 m, LOG_DARK, ca sa se citeasca pe crem): una transversala
+        peste bloc, legata de o traversa (runda 1 avea doua: grila de colet); doua longitudinale, de la traversa din
+        spate peste bloc si apoi INTINSE in diagonala pana la bara de cap.
+     7. Ce iese din contur: nimic peste 2,4 x 2,4; inaltimea totala ~1,8 cu
         funiile de pe bloc.
     """
     wood, rope, marble, base = Builder(), Builder(), Builder(), Builder()
     W, D = WOOD, LOG_DARK
-    hw, hl = LZ_W / 2, LZ_L / 2
 
-    # --- 1. talpile (profil convex: varful din fata ridicat) -----------------
+    # --- 1. talpile -----------------------------------------------------------
+    prof = _runner_profile()
     for sx in (-1, 1):
-        pts = []
-        for dx in (-0.21, 0.21):
-            for (yy, zz) in ((-hl, 0.0), (hl - 0.50, 0.0), (hl, 0.32), (hl, 0.60),
-                             (hl - 0.32, 0.48), (-hl, 0.25)):
-                pts.append(Vector((sx * 0.80 + dx, yy, zz)))
-        _hull(wood, pts, W)
+        _swept_runner(wood, sx * 0.80, prof, 0.42, W)
 
-    # --- 2. traversele ----------------------------------------------------------
-    for yy, ln in ((-0.98, 2.40), (-0.49, 2.28), (0.0, 2.40), (0.49, 2.32), (0.90, 2.40)):
-        wood.box((0.0, yy, 0.315), (ln, 0.32, 0.17), W)
-        # --- 3. coltarele -------------------------------------------------------
+    # --- 2. traversele + 3. coltarele -------------------------------------------
+    # traversa din spate retrasa la -0,86: capetele talpilor ies ~0,2 m in spate
+    # (v2 runda 1: traversa pe muchie + 5 sipci egale = palet)
+    for yy, ln in ((-0.86, 2.40), (-0.28, 2.28), (0.14, 2.36), (0.62, 2.40)):
+        wood.box((0.0, yy, 0.325), (ln, 0.32, 0.15), W)
         for sx in (-1, 1):
             wood.box((sx * 1.025, yy, 0.17), (0.03, 0.36, 0.30), D)
-
-    # --- 4. blocul --------------------------------------------------------------
-    g = 0.04
-    z0, z1 = LZ_SOLE, LZ_SOLE + LZ_BLOCK
-    zm = (z0 + z1) / 2
-    base_top = z0 + LZ_BLOCK / 3.0
-    hb = LZ_BLOCK / 2
-    for (x0, x1) in ((-hb, -g / 2), (g / 2, hb)):
-        for (za, zb) in ((z0, zm - g / 2), (zm + g / 2, z1)):
-            marble_box(marble, base, (x0, -hb, za), (x1, hb, zb), base_top=base_top)
-
-    # --- 5. funiile ----------------------------------------------------------------
-    t = 0.09
-    zt = z1 + t / 2
+    # capetele din spate ale talpilor, ferecate (se vad din camera de joc, din spate)
     for sx in (-1, 1):
-        x = sx * 0.55
-        polyline_beam(rope, [(x, 1.16, 0.42), (x, hb + t / 2, z1 - 0.05), (x, hb, zt),
-                             (x, -hb, zt), (x, -hb - t / 2, z1 - 0.05), (x, -1.16, 0.42)],
+        wood.box((sx * 0.80, -LZ_L / 2 + 0.06, 0.14), (0.45, 0.10, 0.25), D)
+
+    # --- 4. bara de cap intre varfuri ---------------------------------------------
+    tip_y, tip_z = 1.07, 0.66
+    wood.box((0.0, tip_y, tip_z), (2.10, 0.15, 0.15), W)
+    for sx in (-1, 1):
+        wood.box((sx * 1.025, tip_y, tip_z), (0.03, 0.22, 0.22), D)
+
+    # --- 5. blocul ----------------------------------------------------------------
+    y0, y1 = LZ_BLOCK_Y
+    z0, z1 = LZ_SOLE, LZ_SOLE + LZ_BLOCK
+    hx = LZ_BLOCK_X / 2
+    cut_marble_block(marble, base, (0.0, (y0 + y1) / 2), (LZ_BLOCK_X, y1 - y0, LZ_BLOCK), z0=z0)
+
+    # --- 6. funiile -----------------------------------------------------------------
+    t = 0.08
+    zt = z1 + t / 2
+    for yy in (-0.28,):
+        polyline_beam(rope, [(1.12, yy, 0.42), (hx + t / 2, yy, z1 - 0.05), (hx, yy, zt + 0.02),
+                             (-hx, yy, zt + 0.02), (-hx - t / 2, yy, z1 - 0.05), (-1.12, yy, 0.42)],
+                      t, D, up=(0, 1, 0))
+    for sx in (-1, 1):
+        x = sx * 0.42
+        polyline_beam(rope, [(x, y0 - t / 2, 0.42), (x, y0 - t / 2, z1 - 0.05), (x, y0, zt),
+                             (x, y1, zt), (x, y1 + t / 2, z1 - 0.05), (x, tip_y - 0.04, tip_z + 0.05)],
                       t, D, up=(1, 0, 0))
-    polyline_beam(rope, [(1.16, 0.0, 0.42), (hb + t / 2, 0.0, z1 - 0.05), (hb, 0.0, zt + 0.02),
-                         (-hb, 0.0, zt + 0.02), (-hb - t / 2, 0.0, z1 - 0.05), (-1.16, 0.0, 0.42)],
-                  t, D, up=(0, 1, 0))
 
     return [wood.to_object("Sled_Wood"), rope.to_object("Sled_Rope"),
             marble.to_object("Sled_Marble"), base.to_object("Sled_MarbleBase")]

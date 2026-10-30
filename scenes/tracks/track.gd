@@ -13465,7 +13465,8 @@ func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 	var side := _side_at(idx) * signf(sin(frac * 17.0))
 	var rock := RockfallHazard.new()
 	# Defazare din fractie, ca la SlidingHazard: doua bolovanuri nu cad la unison.
-	rock.phase = fposmod(frac * 3.7, 1.0)
+	# Un nod poate cere faza explicit (`rock_phase` pe HazardMarker).
+	rock.phase = float(spec.get("rock_phase", fposmod(frac * 3.7, 1.0)))
 	# Clasa de material: ce cere nodul, altfel steagul dedicat al temei, altfel
 	# ROCA LUMII (`rock_class` — sisturile alpine, gresia canionului). Ultima
 	# treapta e cea care conteaza: bolovanul care se desprinde dintr-o faleza e
@@ -13495,6 +13496,7 @@ func _build_rockfall(frac: float, spec: Dictionary = {}) -> void:
 		RockfallHazard.DEFAULT_ROUTE_PAUSE))
 	rock.stick_to_ground = bool(spec.get("rock_stick_to_ground", true))
 	rock.roll_model = bool(spec.get("rock_roll_model", true))
+	rock.warn_bell_s = float(spec.get("rock_warn_bell_s", 0.0))
 	for g in spec.get("groups", []):
 		rock.add_to_group(g)
 	# Cu TRASEU desenat in editor: bolovanul urmeaza curba de la primul punct

@@ -950,6 +950,7 @@ func _tick_race(delta: float) -> void:
 				_race.track.is_on_road(hc.road_index, hc.global_position, hc.route)])
 			if ring.size() > 12:
 				ring.pop_front()
+	_poll_hazard_hits(cars)
 	for i in cars.size():
 		var car := cars[i]
 		var st := _stats[i]
@@ -1428,6 +1429,7 @@ func _report_race() -> void:
 		for rn in rim_nodes:
 			rim_hits += (rn as RimBoulderHazard).hits
 		print("--- bolovan de pe buza (RimBoulderHazard): %d masini strivite+inversate" % rim_hits)
+	_report_hazard_hits(cars)
 	var bus_total := 0
 	for i in cars.size():
 		bus_total += int(_stats[i].bus_hits)
@@ -1869,3 +1871,52 @@ func _report_bump() -> void:
 			row.pushed, row.sep, row.yaw_deg,
 			row.impulses, row.impulse_peak])
 	_finish()
+
+
+# ------------------------------------------------------------------------------
+# Loviturile DISCRETE ale derrick-ului (CraneHazard) si ale bolovanului / saniei
+# (RockfallHazard). Contactul fizic nu le prinde: derrick-ul deschide o exceptie de
+# coliziune inainte de impact (HazardThrow), iar sania loveste printr-o zona. Ambele
+# tin insa `_cooldown` (masina -> secunde): o masina care APARE in dictionar e o
+# lovitura noua. Doar citire, fizica nu se atinge.
+var _haz_nodes: Array[Node] = []
+var _haz_scanned: bool = false
+var _haz_prev: Dictionary = {}
+var _haz_hits: Array = []
+
+
+func _poll_hazard_hits(cars: Array[Car]) -> void:
+	if not _haz_scanned:
+		_haz_scanned = true
+		for cls in ["CraneHazard", "RockfallHazard"]:
+			_haz_nodes.append_array(_race.track.find_children("*", cls, true, false))
+	for hz in _haz_nodes:
+		if not is_instance_valid(hz):
+			continue
+		var cd = hz.get("_cooldown")
+		if not (cd is Dictionary):
+			continue
+		var prev: Dictionary = _haz_prev.get(hz, {})
+		var now := {}
+		for car in (cd as Dictionary).keys():
+			if not is_instance_valid(car):
+				continue
+			now[car] = true
+			if not prev.has(car):
+				var idx := cars.find(car)
+				_haz_hits.append([_elapsed, hz.get_class() if hz.get_script() == null else (hz.get_script() as Script).get_global_name(),
+					idx, _race.track.frac_at((car as Car).road_index, (car as Car).route),
+					(car as Car).horizontal_speed()])
+		_haz_prev[hz] = now
+
+
+func _report_hazard_hits(cars: Array[Car]) -> void:
+	if _haz_nodes.is_empty():
+		return
+	var per := {}
+	for h in _haz_hits:
+		per[h[1]] = int(per.get(h[1], 0)) + 1
+	print("--- loviri de hazard (discrete): %s" % (str(per) if not per.is_empty() else "niciuna"))
+	for h in _haz_hits:
+		var who: String = _stats[int(h[2])].name if int(h[2]) >= 0 else "?"
+		print("    [lovitura] t=%5.1fs  %-20s %-15s frac=%.3f  v=%4.1f" % [float(h[0]), who, String(h[1]), float(h[3]), float(h[4])])

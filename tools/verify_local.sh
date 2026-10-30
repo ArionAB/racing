@@ -205,6 +205,12 @@ run_step "Serengeti: niciun decor ingropat sub teren" decor_buried.log 'VERDICT:
 # problema, foaia pistei se activeaza, pistele reale au sursa semnalului.
 run_step "Provocari: tracker-ul numara doar ce trebuie" challenge.log 'VERDICT:' -- 	--headless --path . res://tools/ProbeChallenge.tscn
 
+# Transfagarasan: oile se simt (timp pierdut fata de control, semnal `impact`, nu zid)
+# si exista un urs dupa saritura peste parau, care nu arunca masina in aer (#603/#604).
+run_step "Transfagarasan: oi si urs (hazarde animale)" tf_hazards.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeTfHazards.tscn
+# Conurile din tunel (road_works) se imprastie, nu sunt zid (#602).
+run_step "Transfagarasan: conurile din tunel se imprastie" tf_cones.log 'VERDICT:' -- 	--headless --fixed-fps 60 --path . res://tools/ProbeBumpProps.tscn -- --track=21
+
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then
 	echo "VERIFICARE LOCALA: OK (${#PASSED[@]} pasi). Log-uri in $LOGS"

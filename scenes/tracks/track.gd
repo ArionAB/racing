@@ -5479,6 +5479,7 @@ func _collect_hazards(node: Node, out: Array[Dictionary]) -> void:
 				"kind": hz.kind,
 				"frac": frac_at(_closest_baked_index(p)),
 				"side": hz.deflector_side,
+				"wave_travel": hz.wave_travel,
 				# Infatisarea declarata pe nod, in acelasi vocabular ca o intrare
 				# din `_hazard_kinds()` — vezi HazardMarker.model_spec(). Gol cand
 				# nodul n-a cerut nimic, si atunci decide tema, ca pana acum.
@@ -13382,7 +13383,7 @@ func _build_node_hazard(hz: Dictionary) -> void:
 			_build_avalanche(frac, spec)
 		HazardMarker.Kind.WAVE:
 			# Se sare singur, cu avertisment, daca tema n-are mare.
-			_build_wave_surge(frac)
+			_build_wave_surge(frac, signf(float(hz.get("wave_travel", 1))))
 		HazardMarker.Kind.ICE_SLAB:
 			_build_ice_field_at(frac)
 		HazardMarker.Kind.TRAIN_ALONG:
@@ -16385,7 +16386,7 @@ func _build_hose(frac: float) -> void:
 ## Valul care spala soseaua (#106). E acelasi hazard de apa ca furtunul — banda
 ## uda si taierea de grip vin amandoua din `WaterHazard` — doar ca sursa se misca
 ## si uda doar cat trece.
-func _build_wave_surge(frac: float) -> void:
+func _build_wave_surge(frac: float, travel_sign: float = 1.0) -> void:
 	var n := baked.size()
 	if n == 0:
 		return
@@ -16407,7 +16408,12 @@ func _build_wave_surge(frac: float) -> void:
 	# Directia de mers: perpendicular pe sosea, dinspre larg spre uscat. Nu se
 	# alege la zar — pe un dig marea vine de pe o parte anume, iar un val care
 	# porneste din interiorul insulei ar fi absurd.
-	wave.travel_dir = _side_at(idx)
+	#
+	# `travel_sign` (-1 = spre stanga, vezi HazardMarker.wave_travel): decizia
+	# dezvoltatorului, #609. `_side_at` e DREAPTA drumului, deci +1 = creasta
+	# merge spre dreapta. Tot restul valului (spuma, stropi, imbrancitura) se
+	# ia din `travel_dir`, deci un singur semn le intoarce pe toate.
+	wave.travel_dir = _side_at(idx) * (-1.0 if travel_sign < 0.0 else 1.0)
 	wave.sweep = width_at(frac) * 3.2
 	wave.road_width = width_at(frac) * 2.0
 	# Creasta cat DOUA latimi de drum. Nu e o cifra de gust: la o latime de drum

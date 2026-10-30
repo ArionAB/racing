@@ -75,6 +75,12 @@ enum Kind {
 ## intoarce panta fara ca nimeni sa fi cerut asta.
 @export_enum("Dreapta:1", "Stanga:-1") var deflector_side: int = 1
 
+## Pentru WAVE: incotro MERGE creasta, vazut din masina in sensul cursei.
+## `1` = spre dreapta (vine din stanga, ca pana la #609), `-1` = spre stanga
+## (vine din dreapta). Ignorat de restul. Sensul e al intregului val: miscarea,
+## spuma, stropii si imbrancitura se iau toate din `WaveSurge.travel_dir`.
+@export_enum("Spre dreapta:1", "Spre stanga:-1") var wave_travel: int = 1
+
 @export_group("Model")
 
 ## Ce OBIECT traverseaza soseaua aici. Gol = ce alege tema (vezi

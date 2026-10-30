@@ -811,19 +811,22 @@ point_count = {len(c_)}
         hz_ext = (
             '[ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="7_bus"]\n'
             '[ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="9_marker"]\n'
-            '[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/quarry_truck.glb" id="8_kamaz"]\n')
+            '[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/quarry_truck.glb" id="8_kamaz"]\n'
+            '[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/quarry_excavator.glb" id="15_excavator"]\n')
         hz_sub = curve_sub("Curve3D_camion1", c1) + curve_sub("Curve3D_camion2", c2)
         # perioada 118 s (brief par.2: ~110), ascuns la t = 3 s (reapare la ~44 s, dupa ce plutonul a trecut de C); pod: perioada 60 s (nu e multiplu al turului de ~68 s),
         # ascuns la t = 7 s
         hz_nodes += bus_node("Camion1B", "Curve3D_camion1", c1, 118.0, 3.0, -1)
         hz_nodes += bus_node("Camion2Pod", "Curve3D_camion2", c2, 60.0, 7.0)
-        # excavatorul: pe piazzale, DUPA grila (frac 0.05 = ~104 m dupa linia de start), inaintea coridorului de blocuri
+        # excavatorul: pe piazzale, DUPA grila (frac 0.05 = ~104 m dupa linia de start), inaintea coridorului de blocuri;
+        # modelul din kit, quarry_excavator (vopseaua pe atlas, rugina pe clasa), brief §5.6 lista de cod 1
         ie = b_frac(0.050)
         hz_nodes += f"""
 [node name="Excavator" type="Marker3D" parent="Hazarduri"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, {round(brow[ie][0], 2)}, {round(brow[ie][1], 2)}, {round(brow[ie][2], 2)})
 script = ExtResource("9_marker")
 kind = 7
+model = ExtResource("15_excavator")
 excavator_ai_dice = true
 excavator_soft_contact = true
 """

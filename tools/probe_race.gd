@@ -575,7 +575,7 @@ func _start_race() -> void:
 			"speed_sum": 0.0, "samples": 0,
 			"stuck_t": 0.0, "stuck_reports": 0,
 			"branch_laps": 0, "branch_s": 0.0, "last_route": 0,
-			"lap_t": [], "last_total": 0.0,
+			"lap_t": [], "last_total": 0.0, "last_laps": 0,
 			"jump_armed": false, "jump_ok": 0, "jump_fail": 0, "tub_hits": 0, "daruma_hits": 0, "gion_hits": 0,
 			"jump_v": [], "jump_v_taken": false,
 		})
@@ -761,10 +761,15 @@ func _watch_laps_and_jump(car: Car, st: Dictionary, idx: int) -> void:
 		return
 	if _run_t0 < 0.0:
 		_run_t0 = _elapsed
+	# Turul numarat de CURSA (`_progress.laps`, monoton), nu "floor(total) a
+	# crescut": `total` scade la o repunere in spatele liniei, iar trecerea
+	# urmatoare ar fi aparut aici ca tur nou de 0.85 s, desi cursa nu-l
+	# numara (#580; vezi ProbeFinishOrder).
 	var total := float(_race._progress[idx].total)
-	var last := float(st.last_total)
-	if int(floor(total)) > int(floor(last)) and total > 0.0:
+	var laps_now := int(_race._progress[idx].laps)
+	if laps_now > int(st.last_laps):
 		(st.lap_t as Array).append(_elapsed - _run_t0)
+	st.last_laps = laps_now
 	st.last_total = total
 	if _jump_near < 0.0:
 		return

@@ -6,7 +6,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/respawn_zone.gd" id="6_respawn"]
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="7_bus"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="9_marker"]
-[ext_resource type="PackedScene" path="res://assets/models/baikal/vehicles/kamaz_truck.glb" id="8_kamaz"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/quarry_truck.glb" id="8_kamaz"]
 
 
 [sub_resource type="BoxShape3D" id="Box_PlasaA"]

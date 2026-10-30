@@ -219,6 +219,35 @@ done
 python tools/blender/measure_crr_kit.py || fail=1
 
 echo
+echo "== val 2, crr-d: utilajele de decor (kit §1.2) si coltul de muzeu (kit §1.4) =="
+# Exceptii crr-d, cu motiv:
+#   --origin=assembly   noduri pe rol (*_Paint/_Rust/_Black, *_Wood/_Rope,
+#                       *_Marble/_MarbleBase); offsetul de origine e calculat O
+#                       DATA pe ansamblu, iar piesele de sus nu ating solul.
+#   wire_saw --class-parts=Blades: volantul are UV-uri REALE (cube_uvs), fiindca
+#                       WorldProp.prop_classes() ii pune clasa `rust_metal` PE UV
+#                       (aceeasi intrare ca la roata morii, din Track._LANDMARKS),
+#                       iar un nod care se roteste nu poate lua triplanar de lume.
+#                       `Blades` are pivot propriu (butucul), deci verify_glb il
+#                       citeste in spatiul lui; contractul (rotatie identitate,
+#                       originea in butuc, axa X, Ø 1,8) e in
+#                       measure_carrara_crr_d.py wire_saw, iar rotatia reala pe
+#                       windmill.gd in tools/ProbeWireSaw.tscn.
+crr_d() {  # crr_d <cale> <garda> <noduri,...> [flag verify...]
+  local f="$1" kind="$2" nodes="$3"; shift 3
+  check "$f" --origin=assembly "$@"
+  [ -f "$ROOT/$f" ] || return
+  python tools/blender/measure_carrara_crr_d.py "$kind" "$ROOT/$f" || fail=1
+  crr_nodes "$f" "$nodes"
+}
+crr_d "vehicles/wire_saw.glb" wire_saw "Blades,Saw_Paint,Saw_Rail,Saw_Rust,Saw_Water" --class-parts=Blades
+crr_d "vehicles/chain_saw_crawler.glb" crawler "Crawler_Black,Crawler_Blade,Crawler_Paint,Crawler_Rust"
+crr_d "vehicles/drill_rig.glb" drill "Drill_Black,Drill_Mast,Drill_Paint,Drill_Rust"
+crr_d "props/museum_set_cart.glb" cart "Cart_Marble,Cart_MarbleBase,Cart_Rust,Cart_Wood"
+crr_d "props/museum_set_wheel.glb" wheel "Pulley_Rust,Pulley_Wood"
+crr_d "props/museum_set_sled.glb" sled "OldSled_Rope,OldSled_Rust,OldSled_Wood"
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

@@ -147,6 +147,7 @@ run_step "Tufe: frunze si franare usoara" soft_veg.log 'VERDICT:' -- --headless 
 run_step "Jucaria: antena cu arc, cheia de intors si zdranganeala pe teren aspru, fara intrari in caroserie" toy_animation.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeToyAnimation.tscn
 run_step "Camera la izbituri: kick, hit-stop, atacator" impact_camera.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactCamera.tscn
 run_step "Race: ImpactFeel cablat (kick, hit-stop, final)" impact_wiring.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeImpactWiring.tscn
+run_step "Tururi si ordine de sosire: repunere langa linie, locul final real" finish_order.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeFinishOrder.tscn
 run_step "Popup de pozitie: debounce, numaratoare, final" position_popup.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbePositionPopup.tscn
 run_step "AI care reactioneaza: clatinare, ranchiuna, cinstit" ai_react.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeAiReact.tscn
 run_step "Vibratie: marime, ritm, setare, cablaj" haptics.log 'VERDICT:' -- --headless --fixed-fps 60 --path . res://tools/ProbeHaptics.tscn

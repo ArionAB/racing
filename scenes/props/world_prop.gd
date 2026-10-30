@@ -377,7 +377,12 @@ const PROP_COLLISION := {
 	"tsutenkyo_roof_module": "none", "togetsukyo_module": "none",
 	"torii_senbon": "none", "torii_large": "none",
 	"votive_torii_cluster": "none",  # sir de 7 porti peste poteca: se trece pe sub ele
-	"shiba_fence": "none",  # nuiele de 1,1 m, panou subtire: capcana de colt, nu obstacol
+	# Gard de nuiele (0,19 x 1,1 x 3 m): hull = o placa subtire exact pe panou, nu
+	# un bloc umflat. Fusese "none" ("capcana de colt") si dezvoltatorul a
+	# prins la volan ca se trece prin el (issue #606): gardul sta la >= 1,7 m
+	# de bordura, deci nu ajunge pe carosabil. Piesele din MultiMesh (POI G) au
+	# corp separat, emis de `tools/gen_decor_kyoto_g.gd` (`GardG_col`).
+	"shiba_fence": "hull",
 	"daruma_otoshi": "none",  # corpul il face DarumaOtoshiHazard
 	# Restul kitului ramane hull implicit, corect: pagodele, hondo, kinkakuji,
 	# altarul, clopotnita, bazinul, ema, ceainaria, zidul de templu si cel

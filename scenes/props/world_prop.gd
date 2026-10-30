@@ -2254,6 +2254,25 @@ const CLASSES_CARRARA := {
 		"Viaduct_Brick": Palette.TRI_PREFIX + "ok_roof"},
 	"marmifera_portal": {"Portal_Stone": _TF_STONE},
 }
+## Clasele kitului Ha Long (Track22): piatra de carst, pe FISIER si pe numele
+## nodului. Pana la #598 pista n-avea NICIO intrare aici, deci turnurile,
+## stivele, bolovanii si grota ramaneau pe atlasul gol. Numele de noduri
+## (`Tower_Rock`, `Boulder_Rock`...) nu se mapeaza global (vezi nota de la
+## CLASSES_OKINAWA): cheia e stem-ul GLB-ului, scopata pe tema. Ce ramane pe
+## atlas: `Tower_Scrub` (tufisul de pe varf), `Portal_Dark` (gura grotei),
+## `Grotto_Drips`/`Grotto_Scrub`, siluetele de orizont (in ceata, `horizon_class`
+## gol deliberat).
+const _HL_KARST: String = Palette.TRI_PREFIX + "karst_limestone"
+const CLASSES_HALONG := {
+	"karst_tower_a": {"Tower_Rock": _HL_KARST},
+	"karst_tower_b": {"Tower_Rock": _HL_KARST},
+	"karst_tower_c": {"Tower_Rock": _HL_KARST},
+	"karst_stack_a": {"Tower_Rock": _HL_KARST},
+	"karst_stack_b": {"Tower_Rock": _HL_KARST},
+	"shore_boulder": {"Boulder_Rock": _HL_KARST},
+	"grotto_massif": {"Grotto_Rock": _HL_KARST},
+	"grotto_portal": {"Portal_Rock": _HL_KARST},
+}
 const CLASSES_TRANSFAGARASAN := {
 	"schist_outcrop_a": _TF_OUTCROP, "schist_outcrop_b": _TF_OUTCROP,
 	"schist_outcrop_c": _TF_OUTCROP,
@@ -2386,6 +2405,8 @@ const CLASSES_BY_THEME := {
 	"transfagarasan": CLASSES_TRANSFAGARASAN,
 	# Carrara (Track23, brief carrara.md): castanul din fag, conul de moloz pe marmura.
 	"carrara": CLASSES_CARRARA,
+	# Ha Long (Track22, #598): vezi `CLASSES_HALONG`.
+	"halong": CLASSES_HALONG,
 }
 
 ## Modelele care NU arunca umbra: siluetele de orizont, scalate/asezate la

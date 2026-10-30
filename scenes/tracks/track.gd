@@ -5632,8 +5632,10 @@ func _bake_manual_decor() -> void:
 			cell = maxf(10.0, float(arg.trim_prefix("--decal-cell=")))
 	var t0 := Time.get_ticks_msec()
 	var r := TrackDecorBatch.bake_manual(dm, cell)
-	print("DecorManual coacere: %d noduri de mesh -> %d buffere (%d instante), %d ms"
-		% [r["hidden"], r["batches"], r["instances"], Time.get_ticks_msec() - t0])
+	var unified := TrackDecorBatch.unify_triplanar(self, r.get("tri_converted", {}))
+	print("DecorManual coacere: %d noduri de mesh -> %d buffere (%d instante), %d noduri triplanare unificate, %d ms"
+		% [r["hidden"], r["batches"], r["instances"], unified,
+			Time.get_ticks_msec() - t0])
 
 ## Reconstruieste toata pista (folosit si de editor, la Regenerate).
 ##

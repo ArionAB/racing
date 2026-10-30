@@ -385,19 +385,174 @@ const DECAL_CELL_M: float = 40.0
 ## shaderul sa calculeze normalele corect. Geometria nu se misca.
 const NU_SCALE := Vector3(1.0, 1.0, 1.001)
 
-## PROIECTIA TRIPLANARA DE LUME nu supravietuieste coacerii pe rendererul
-## Mobile: in MultiMesh textura iese proiectata ca si cum instanta n-ar avea
-## rotatia ei (benzi verticale in loc de orizontale pe stancile rock_slab de pe
-## Jodhpur; diff de pixeli 0,63% -> 0,06% cand le scoti din coacere). Piesele
-## pe astfel de materiale (clasele `tri:` — roca, tuf, riolit) raman noduri.
-## Pe Jodhpur sunt ~770 din 3554; restul se coace.
+## PROIECTIA TRIPLANARA DE LUME iese gresit in MultiMesh cu shaderul generat
+## de [StandardMaterial3D] (benzi verticale in loc de orizontale pe stancile
+## rock_slab de pe Jodhpur). Pana in oct 2026 piesele astea ramaneau noduri —
+## pe Jodhpur ~770 din 3554, adica peretii caselor albastre, lespezile, zidurile
+## fortului: ~500 de desene pe cadru plus ~150 in pasa de umbra, partea cea mai
+## mare din ce ramasese dupa coacere.
 ##
-## La fel, o instanta cu bazei degenerata (determinant ~0, de ex. `zidValea52`
+## CAUZA, masurata (cutie cu triplanar, nod vs MultiMesh, diff de pixeli la
+## prag 0,02): rotatia si pozitia instantei ies IDENTIC (0,00%); doar scalarea
+## NEUNIFORMA strica (99,8%). Pe instante MultiMesh `MODEL_NORMAL_MATRIX` nu e
+## inversa transpusa a lui `MODEL_MATRIX`, nici cu `NU_SCALE` pe nod, deci
+## normala dupa care triplanarul isi alege planul (si lumina) e gresita.
+## Reparatia e `_mm_triplanar`: acelasi shader scris de mana, care isi
+## calculeaza singur normala din `MODEL_MATRIX` (aceea include instanta) si o
+## pune inapoi in NORMAL compensata, ca si lumina sa fie a nodului. Masurat:
+## 0,00% fata de nod in toate cazurile, cu sau fara `NU_SCALE`.
+##
+## O instanta cu bazei degenerata (determinant ~0, de ex. `zidValea52`
 ## pe Cappadocia, scara pe Y = 0 in .tscn) nu deseneaza nimic ca nod, dar in
 ## MultiMesh iesea intinsa pe cer. Ramane nod, adica tot nimic.
 static func _world_triplanar(m: Material) -> bool:
 	var sm := m as StandardMaterial3D
 	return sm != null and (sm.uv1_world_triplanar or sm.uv2_world_triplanar)
+
+
+## Proprietatile pe care `_mm_triplanar` le reproduce. Orice alta proprietate
+## diferita de implicit (harta de normale, emisie, transparenta...) inseamna ca
+## shaderul scris de mana n-ar mai fi echivalent: piesa ramane nod, ca inainte.
+const _MM_TRI_PROPS := {
+	"albedo_color": true, "albedo_texture": true, "texture_filter": true,
+	"vertex_color_use_as_albedo": true, "roughness": true,
+	"metallic_specular": true, "uv1_triplanar": true,
+	"uv1_world_triplanar": true, "uv1_scale": true, "uv1_offset": true,
+	"uv1_triplanar_sharpness": true,
+}
+
+## Comutator de A/B pentru sonde: false = purtarea veche (triplanarul ramane
+## nod). In joc ramane mereu true.
+static var mm_triplanar_enabled: bool = true
+
+static var _mm_tri_cache: Dictionary = {}
+static var _mm_tri_shaders: Dictionary = {}
+static var _std_defaults: StandardMaterial3D = null
+
+
+## Echivalentul MultiMesh al unui material triplanar de lume, sau null daca
+## materialul foloseste ceva ce shaderul de mai jos nu reproduce. Unul per
+## material sursa, deci tot un material per clasa.
+static func _mm_triplanar(m: Material) -> ShaderMaterial:
+	var src := m as StandardMaterial3D
+	if src == null or not src.uv1_world_triplanar or src.uv2_world_triplanar \
+			or not mm_triplanar_enabled:
+		return null
+	var id := src.get_instance_id()
+	if _mm_tri_cache.has(id):
+		return _mm_tri_cache[id]
+	if _std_defaults == null:
+		_std_defaults = StandardMaterial3D.new()
+	var ok := true
+	for p in src.get_property_list():
+		if not (int(p["usage"]) & PROPERTY_USAGE_STORAGE):
+			continue
+		var pname := String(p["name"])
+		if _MM_TRI_PROPS.has(pname) or pname.begins_with("resource_") \
+				or pname == "script":
+			continue
+		if src.get(pname) != _std_defaults.get(pname):
+			ok = false
+			break
+	var out: ShaderMaterial = null
+	if ok:
+		out = ShaderMaterial.new()
+		out.resource_name = src.resource_name
+		out.shader = _mm_tri_shader(src.texture_filter, src.vertex_color_use_as_albedo)
+		out.set_shader_parameter("albedo", src.albedo_color)
+		out.set_shader_parameter("texture_albedo", src.albedo_texture)
+		out.set_shader_parameter("uv1_scale", src.uv1_scale)
+		out.set_shader_parameter("uv1_offset", src.uv1_offset)
+		out.set_shader_parameter("uv1_blend_sharpness", src.uv1_triplanar_sharpness)
+		out.set_shader_parameter("roughness", src.roughness)
+		out.set_shader_parameter("specular", src.metallic_specular)
+	_mm_tri_cache[id] = out
+	return out
+
+
+## Dupa `bake_manual`: nodurile de mesh ramase in toata pista care poarta o
+## clasa triplanara convertita (`converted`, chei = id-ul materialului sursa)
+## trec pe echivalent, ca clasa sa ramana un singur material. Pe nod
+## echivalentul e identic la pixel (ProbeTriMultiMesh), deci nu se schimba
+## nimic vizibil. MultiMesh-urile construite altundeva (padurea, CityFill) nu
+## se ating: acolo shaderul lor ar schimba aspectul instantelor neuniforme.
+static func unify_triplanar(root: Node, converted: Dictionary) -> int:
+	if converted.is_empty():
+		return 0
+	var changed := 0
+	for n in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.material_override != null 				and converted.has(mi.material_override.get_instance_id()):
+			mi.material_override = _mm_triplanar(mi.material_override)
+			changed += 1
+	return changed
+
+
+static func _mm_tri_shader(filter: BaseMaterial3D.TextureFilter,
+		vertex_color: bool) -> Shader:
+	var hint: String = {
+		BaseMaterial3D.TEXTURE_FILTER_NEAREST: "filter_nearest",
+		BaseMaterial3D.TEXTURE_FILTER_LINEAR: "filter_linear",
+		BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS: "filter_nearest_mipmap",
+		BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS_ANISOTROPIC: "filter_nearest_mipmap_anisotropic",
+		BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC: "filter_linear_mipmap_anisotropic",
+	}.get(filter, "filter_linear_mipmap")
+	var key := "%s|%d" % [hint, int(vertex_color)]
+	if _mm_tri_shaders.has(key):
+		return _mm_tri_shaders[key]
+	var sh := Shader.new()
+	sh.code = _MM_TRI_CODE.replace("__FILTER__", hint) \
+		.replace("__VCOLOR__", "albedo_tex *= COLOR;" if vertex_color else "")
+	_mm_tri_shaders[key] = sh
+	return sh
+
+
+## Formula shaderului generat de StandardMaterial3D pentru triplanar de lume,
+## cu o singura diferenta: normala. `transpose(inverse(mat3(MODEL_MATRIX)))`
+## e normala corecta si pe nod (unde e exact `MODEL_NORMAL_MATRIX`) si pe
+## instanta MultiMesh (unde `MODEL_NORMAL_MATRIX` greseste); NORMAL se rescrie
+## astfel incat matricea motorului, aplicata dupa, sa dea tot normala corecta.
+const _MM_TRI_CODE := """
+shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+
+uniform vec4 albedo : source_color = vec4(1.0);
+uniform sampler2D texture_albedo : source_color, __FILTER__, repeat_enable;
+uniform vec3 uv1_scale = vec3(1.0);
+uniform vec3 uv1_offset = vec3(0.0);
+uniform float uv1_blend_sharpness = 1.0;
+uniform float roughness = 1.0;
+uniform float specular = 0.5;
+
+varying vec3 uv1_triplanar_pos;
+varying vec3 uv1_power_normal;
+
+void vertex() {
+	vec3 normal = transpose(inverse(mat3(MODEL_MATRIX))) * NORMAL;
+	NORMAL = inverse(MODEL_NORMAL_MATRIX) * normal;
+	uv1_power_normal = pow(abs(normal), vec3(uv1_blend_sharpness));
+	uv1_power_normal /= dot(uv1_power_normal, vec3(1.0));
+	uv1_triplanar_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz * uv1_scale + uv1_offset;
+	uv1_triplanar_pos *= vec3(1.0, -1.0, 1.0);
+}
+
+vec4 triplanar_texture(sampler2D p_sampler, vec3 p_weights, vec3 p_triplanar_pos) {
+	vec4 samp = vec4(0.0);
+	samp += texture(p_sampler, p_triplanar_pos.xy) * p_weights.z;
+	samp += texture(p_sampler, p_triplanar_pos.xz) * p_weights.y;
+	samp += texture(p_sampler, p_triplanar_pos.zy * vec2(-1.0, 1.0)) * p_weights.x;
+	return samp;
+}
+
+void fragment() {
+	vec4 albedo_tex = triplanar_texture(texture_albedo, uv1_power_normal, uv1_triplanar_pos);
+	__VCOLOR__
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	METALLIC = 0.0;
+	ROUGHNESS = roughness;
+	SPECULAR = specular;
+}
+"""
 
 static func _non_uniform(b: Basis) -> bool:
 	var s := b.get_scale().abs()
@@ -436,6 +591,25 @@ static func bake_manual(dm: Node3D, decal_cell_m: float = DECAL_CELL_M) -> Dicti
 		return {"instances": 0, "batches": 0, "hidden": 0}
 	for mi in sources:
 		mi.visible = false
+	# Triplanarul de lume se strica in buffer DOAR pe instantele scalate
+	# neuniform (vezi `_mm_triplanar`); numai grupurile alea primesc shaderul
+	# echivalent. Restul pastreaza materialul clasei, deci clasa nu apare de
+	# doua ori: aceleasi materiale le poarta deja MultiMesh-urile padurii si ale
+	# CityFill, iar pe Kyoto (Track18) o conversie a tuturor grupurilor urca
+	# numarul de materiale de la 37 la 55, peste plafonul de 38 al garzii.
+	#
+	# O clasa convertita trece INTREAGA pe echivalent — si grupurile ei
+	# uniforme, si nodurile ramase (`unify_triplanar`) — altfel ar aparea de
+	# doua ori (pe Kyoto: `stone_wall` si `macchia`, 39 de materiale).
+	var converted := {}
+	for key in groups:
+		var g: Dictionary = groups[key]
+		if bool(g.get("nu", false)) and _world_triplanar(g["mat"]) 				and _mm_triplanar(g["mat"]) != null:
+			converted[(g["mat"] as Material).get_instance_id()] = true
+	for key in groups:
+		var g: Dictionary = groups[key]
+		if converted.has((g["mat"] as Material).get_instance_id()):
+			g["mat"] = _mm_triplanar(g["mat"])
 	var holder := Node3D.new()
 	holder.name = "Batched"
 	dm.add_child(holder)
@@ -444,6 +618,7 @@ static func bake_manual(dm: Node3D, decal_cell_m: float = DECAL_CELL_M) -> Dicti
 		"instances": instances,
 		"batches": groups.size(),
 		"hidden": sources.size(),
+		"tri_converted": converted,
 	}
 
 
@@ -486,7 +661,8 @@ static func _collect_manual(node: Node3D, ctx: Dictionary) -> void:
 static func _bakeable(mi: MeshInstance3D, lights: Array) -> bool:
 	if mi.mesh == null or mi.material_override == null or mi.skin != null:
 		return false
-	if _world_triplanar(mi.material_override):
+	if _world_triplanar(mi.material_override) \
+			and _mm_triplanar(mi.material_override) == null:
 		return false
 	if absf(mi.global_transform.basis.determinant()) <= 1e-6:
 		return false

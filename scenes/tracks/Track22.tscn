@@ -144,6 +144,7 @@ kind = 0
 model = ExtResource("15_boat")
 model_scale = 0.697
 face_travel = true
+on_water = true
 motion = 1
 sweep_speed = 12.0
 

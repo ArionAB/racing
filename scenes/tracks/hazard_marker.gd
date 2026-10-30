@@ -119,6 +119,13 @@ enum Kind {
 ## Stins implicit: pe apa (jonca de pe Ha Long) „solul" e fundul marii.
 @export var follow_ground: bool = false
 
+## Pluteste pe APA: cota hazardului e oglinda marii (`sea_y` din Track), nu cea
+## a asfaltului. Pentru o barca care traverseaza un canal sub un pod/dig: coca
+## sta pe apa si taie soseaua jos, iar catargul si vela matura carosabilul —
+## in loc de o barca pe asfalt, la cota lui (Ha Long, #596). Capetele cursei
+## cad in apa, nu in aer. Doar pentru SLIDING.
+@export var on_water: bool = false
+
 ## Se rostogoleste in timp ce traverseaza (raza reala o ia din model).
 ##
 ## Doar bolovanii. Un car cu fan care se da peste cap traversand ulita e exact
@@ -274,6 +281,8 @@ func model_spec() -> Dictionary:
 		spec["face_travel"] = face_travel
 		if follow_ground:
 			spec["follow_ground"] = true
+		if on_water:
+			spec["on_water"] = true
 		if not model_node.is_empty():
 			spec["model_node"] = model_node
 	if not tri_class.is_empty():

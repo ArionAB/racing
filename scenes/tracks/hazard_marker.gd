@@ -224,7 +224,7 @@ enum Kind {
 @export_range(1.0, 30.0, 0.5) var rock_speed: float = 9.0
 
 ## Cat sta ascuns intre doua treceri (secunde).
-@export_range(0.0, 20.0, 0.5) var rock_pause: float = 3.0
+@export_range(0.0, 20.0, 0.5, "or_greater") var rock_pause: float = 3.0 # sania Carrara: 33,57
 
 ## Cota din TEREN, nu din curba: desenezi traseul din vederea de sus si
 ## bolovanul isi ia inaltimea cu un raycast, urca dealul, coboara pe versant

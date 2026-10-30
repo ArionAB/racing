@@ -219,6 +219,29 @@ done
 python tools/blender/measure_crr_kit.py || fail=1
 
 echo
+echo "== val 2, crr-e: satul Colonnata si blocul-semn (kit §1.4) =="
+# Exceptii crr-e, cu motiv:
+#   --origin=assembly   noduri pe rol (*_Stone/_Roof/_Wood/_Shutter/_Void,
+#                       Sign_Marble/_MarbleBase): originea pe centrul corpului
+#                       principal (nava, casa), baza ansamblului la 0; tigla,
+#                       obloanele si golurile nu ating solul. Biserica NU e
+#                       centrata pe bbox: pronaosul si anexa ies in fata si pe -X,
+#                       clopotnita pe +X (originea = centrul navei).
+#   cotele              measure_crr_buildings.py (pe GLB, coordonate Godot):
+#                       varful crucii 14,0, clopotnita 4 x 4, coama navei 10,0,
+#                       nava 8 x 14, usa pe -Z; casele 9x7 / 7x8 / 10x7 cu coama
+#                       8,0 / 8,5 / 7,5 si axa coamei, hornul mare la B, scara si
+#                       terasa la C; blocul 3 x 2 x 2 cu fata slefuita intreaga pe
+#                       -Z, fara patina pe ea. Plus noduri, sloturi pe nod, fara
+#                       FOAM_WHITE 22 si CAR_* 14-16.
+for f in buildings/colonnata_church.glb buildings/colonnata_house_a.glb          buildings/colonnata_house_b.glb buildings/colonnata_house_c.glb props/quarry_sign_block.glb; do
+  check "$f" --origin=assembly
+done
+python tools/blender/measure_crr_buildings.py > /tmp/crr_e_$$.txt 2>&1; rc=$?
+grep -E "^== |: (OK|PROBLEME)$|!!" /tmp/crr_e_$$.txt; rm -f /tmp/crr_e_$$.txt
+[ "$rc" -eq 0 ] || fail=1
+
+echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="
 if [ -d "$ROOT" ]; then
   while IFS= read -r f; do

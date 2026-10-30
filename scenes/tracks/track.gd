@@ -15781,8 +15781,14 @@ func _bake_decor(cliffs: Node3D, decor: Node3D, scen: Node3D) -> void:
 	TrackDecorBatch.bake(scen)
 
 func _build_excavator(frac: float, spec: Dictionary = {}) -> void:
-	const PATH := "res://assets/models/vehicles/rusted_digger.glb"
-	if not ResourceLoader.exists(PATH):
+	# Modelul vine din spec (`model` pe HazardMarker); fara el e excavatorul de
+	# azi, rusted_digger integral pe rust_metal. Un model declarat fara
+	# `tri_class` trece pe clasele pe PARTI, ca bolovanul cu model
+	# (`_build_rockfall`). Rigul altui model trebuie sa stea in ±0.1 m fata de
+	# rusted_digger: cutia bratului e potrivita de mana (excavator_hazard.gd).
+	const RIG := "res://assets/models/vehicles/rusted_digger.glb"
+	var path := String(spec.get("model", RIG))
+	if not ResourceLoader.exists(path):
 		return
 	var n := baked.size()
 	var idx := int(frac * float(n)) % n
@@ -15793,8 +15799,13 @@ func _build_excavator(frac: float, spec: Dictionary = {}) -> void:
 	# Era un excavator de PLASTIC din tema "lada de nisip". Cel nou e construit
 	# la scara lumii — corpul lui de 3.73 m e practic cat cel vechi inmultit cu
 	# 0.75, deci scara devine 1.0 si colizoarele se recalibreaza in hazard.
-	excavator.model_scene = load(PATH)
+	excavator.model_scene = load(path)
+	# Colizoarele raman ale rigului de referinta (vezi `collider_scene`).
+	if path != RIG and ResourceLoader.exists(RIG):
+		excavator.collider_scene = load(RIG)
 	excavator.model_scale = 1.0
+	excavator.model_class = String(spec.get("tri_class",
+		"" if spec.has("model") else "rust_metal"))
 	excavator.ai_dice = bool(spec.get("excavator_ai_dice", false))
 	excavator.soft_contact = bool(spec.get("excavator_soft_contact", false))
 	add_child(excavator)

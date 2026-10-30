@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scenes/hazards/bus_hazard.gd" id="7_bus"]
 [ext_resource type="Script" path="res://scenes/tracks/hazard_marker.gd" id="9_marker"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/quarry_truck.glb" id="8_kamaz"]
+[ext_resource type="PackedScene" path="res://assets/models/carrara/vehicles/quarry_excavator.glb" id="15_excavator"]
 [ext_resource type="Script" path="res://scenes/hazards/crane_hazard.gd" id="10_crane"]
 [ext_resource type="Script" path="res://scenes/props/world_prop.gd" id="14_prop"]
 [ext_resource type="PackedScene" path="res://assets/models/carrara/structures/derrick.glb" id="11_derrick"]
@@ -205,6 +206,7 @@ model = ExtResource("8_kamaz")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.36, 25.0, -105.0)
 script = ExtResource("9_marker")
 kind = 7
+model = ExtResource("15_excavator")
 excavator_ai_dice = true
 excavator_soft_contact = true
 

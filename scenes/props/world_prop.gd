@@ -4518,6 +4518,22 @@ const KYOTO_MOVING_CLASSES := {
 	"Rick_Red": Palette.TRI_PREFIX + "shu_red",
 }
 
+## Carrara: partile modelelor de HAZARD (camionul, sania, blocul agatat de
+## derrick, excavatorul). Ele nu trec prin `CLASSES_CARRARA` (aceea e pe numele
+## de fisier al decorului), ci prin `prop_classes()` in spatiul obiectului — fara
+## intrarile astea marmura lor ramanea pe atlasul brut. Prefixul `X_Marble`
+## prinde si `X_MarbleBase`, ca la decor. Numele sunt unice in tot
+## `assets/models/` (verificat pe nodurile GLB: `Body_` mai apare doar ca
+## `Body_1..3` la shishimai, care nu incep cu `Body_Rust`).
+const CARRARA_MOVING_CLASSES := {
+	"Truck_Marble": Palette.TRI_PREFIX + "carrara_marble",
+	"Sled_Marble": Palette.TRI_PREFIX + "carrara_marble",
+	"Block_Marble": Palette.TRI_PREFIX + "carrara_marble",
+	"Truck_Rust": Palette.TRI_PREFIX + "rust_metal",
+	"Body_Rust": Palette.TRI_PREFIX + "rust_metal",
+	"Arm_Rust": Palette.TRI_PREFIX + "rust_metal",
+}
+
 static func prop_classes() -> Dictionary:
 	var out := {}
 	out.merge(TrackDecor.ISLAND_CLASSES)
@@ -4527,6 +4543,7 @@ static func prop_classes() -> Dictionary:
 	out.merge(TrackDecor.CAPPADOCIA_CLASSES)
 	out.merge(TrackDecor.FIORDLAND_AIRSTRIP_CLASSES)
 	out.merge(KYOTO_MOVING_CLASSES)
+	out.merge(CARRARA_MOVING_CLASSES)
 	for id: int in Track._LANDMARKS:
 		var info: Dictionary = Track._LANDMARKS[id]
 		if info.has("classes"):

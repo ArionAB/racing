@@ -7,10 +7,22 @@ extends StaticBody3D
 ## Cronometraj — ca barierele din Ignition, dar cu personalitate de sandbox.
 
 var model_scene: PackedScene
+## Rigul din care se MASOARA sasiul (null = chiar `model_scene`). Un model nou
+## care respecta contractul rigului (±0.1 m fata de rusted_digger) isi pastreaza
+## colizoarele rigului de referinta: masurat pe Track23, quarry_excavator are
+## sasiul cu doar 1.6 cm / 4 mm altfel, si totusi seria de 16 curse a sarit de la
+## 6 la 19 repuneri (cu cutia rigului fortata: 7). Cursa e haotica la milimetru,
+## deci schimbarea vizualului nu trebuie sa atinga fizica.
+var collider_scene: PackedScene
 ## Rusted_digger e construit la scara lumii; cel de plastic cerea 0.75.
 var model_scale: float = 1.0
 var period: float = 7.0 # jos 2.5s + urca 1s + sus 2.5s + coboara 1s
 var raise_angle: float = 0.55
+## Clasa triplanara pe TOT modelul. Implicit `rust_metal` (rusted_digger e
+## integral rugina). Gol = modelul isi tine sloturile din atlas si trece prin
+## maparea pe PARTI (`WorldProp.prop_classes()`): quarry_excavator are vopseaua
+## galbena pe atlas si doar `*_Rust` pe clasa.
+var model_class: String = "rust_metal"
 
 ## AI-ul da cu zarul la apropiere (`AIController._exc_line`): 1-3 ocoleste pe
 ## banda libera, 4-6 trece pe sub brat. Implicit stins = bit-identic.
@@ -48,13 +60,24 @@ func _ready() -> void:
 		# Static — nu se misca din loc — deci triplanarul de lume nu "inoata";
 		# bratul se leagana, dar amplitudinea e mica si textura de rugina e
 		# aperiodica, deci nu se citeste.
-		Palette.apply_triplanar_class(model, "rust_metal")
-		var body_node := model.find_child("body", true, false) as Node3D
+		if model_class.is_empty():
+			Palette.apply_object_class_materials(model, WorldProp.prop_classes(),
+				model_scale)
+		else:
+			Palette.apply_triplanar_class(model, model_class)
+		var rig := model
+		if collider_scene != null:
+			rig = collider_scene.instantiate() as Node3D
+			rig.scale = model.scale
+		var body_node := rig.find_child("body", true, false) as Node3D
 		if body_node != null:
 			# `arm` e COPIL al lui `body` in GLB, deci fara skip iese o cutie de
 			# 10 m pe adancime care ar bloca soseaua permanent. Sasiul e o masa
 			# compacta, deci AABB-ul lui e o aproximare buna.
-			body_aabb = model.transform * Track.model_aabb(body_node, _arm)
+			body_aabb = rig.transform * Track.model_aabb(body_node,
+				rig.find_child("arm", true, false) as Node3D)
+		if rig != model:
+			rig.free()
 	# Corpul excavatorului (mereu solid).
 	var body_shape := CollisionShape3D.new()
 	var body_box := BoxShape3D.new()
@@ -103,7 +126,26 @@ func _physics_process(delta: float) -> void:
 	if _arm != null:
 		_arm.rotation.x = _arm_base_rot + raise_angle * raised
 	# Cand bratul e destul de sus, banda devine libera.
-	_arm_shape.disabled = raised > 0.35
+	var solid := raised <= 0.35
+	# Cutia nu se INCHIDE peste o masina: aparuta in jurul ei, Jolt o scoate pe
+	# drumul cel mai scurt, iar cu cutia de la sol la 2.6 m acela e IN JOS, prin
+	# asfalt (~1.1 m, fata de ~2.5 in sus). Urmarit pe Carrara (Track23, seed 8):
+	# y 25 -> 22 in 0.4 s, apoi un tur intreg sub drum pana la culeea viaductului.
+	# Asteapta sa iasa masina; bratul vizual coboara oricum, deci trece "prin" ea.
+	if solid and _arm_shape.disabled and _car_in_arm_box():
+		solid = false
+	_arm_shape.disabled = not solid
+
+
+func _car_in_arm_box() -> bool:
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = _arm_shape.shape
+	query.transform = _arm_shape.global_transform
+	query.exclude = [get_rid()]
+	for hit in get_world_3d().direct_space_state.intersect_shape(query, 8):
+		if hit.get("collider") is Car:
+			return true
+	return false
 
 
 ## Cutiile solide in LUME (colturile), pentru AI: sasiul e mereu solid, bratul

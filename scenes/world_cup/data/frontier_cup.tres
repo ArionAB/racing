@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WorldCup" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/world_cup/world_cup.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"frontier_cup"
+display_name = "FRONTIER CUP"
+accent = Color(0.74, 0.62, 0.26, 1)
+tracks = Array[StringName]([&"monument_valley", &"serengeti", &"machu_picchu", &"fiordland"])

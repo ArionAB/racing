@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WorldCup" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/world_cup/world_cup.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"europe_cup"
+display_name = "EUROPE CUP"
+accent = Color(0.30, 0.56, 0.82, 1)
+tracks = Array[StringName]([&"transfagarasan", &"cappadocia", &"stromboli", &"baikal"])

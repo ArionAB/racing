@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WorldCup" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/world_cup/world_cup.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"asia_cup"
+display_name = "ASIA CUP"
+accent = Color(0.73, 0.21, 0.13, 1)
+tracks = Array[StringName]([&"kyoto", &"chongqing", &"okinawa", &"jodhpur"])

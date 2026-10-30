@@ -10481,7 +10481,9 @@ func _branch_corridor_points() -> PackedVector3Array:
 func _branch_carve_points() -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for i in range(1, routes.size()):
-		if routes[i].surface != "sand" and not routes[i].elevated:
+		# "deck" pe uscat (Ha Long, #594) pastreaza comportamentul lui "sand":
+		# se schimba doar ce se VEDE, nu terenul din jur.
+		if routes[i].surface != "sand" and routes[i].surface != "deck" 				and not routes[i].elevated:
 			out.append_array(routes[i].baked)
 	return out
 

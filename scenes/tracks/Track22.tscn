@@ -231,7 +231,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -111.496, 1.577, -227.431)
 curve = SubResource("Curve3D_banda")
 script = ExtResource("16_branch")
 branch_half_width = 4.0
-surface = 1
+surface = 4
+tint = Color(0.46, 0.48, 0.45, 1)
 
 [node name="CameraGrota" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -183.951, 2.632, 250.060)
@@ -2318,3 +2319,9 @@ transform = Transform3D(-0.99205, 0, -0.12588, 0, 1.0, 0, 0.12588, 0, -0.99205, 
 
 [node name="VegF12" parent="DecorManual" instance=ExtResource("32_ficus_a")]
 transform = Transform3D(-0.44200, 0, 0.89701, 0, 1.0, 0, -0.89701, 0, -0.44200, -33.87, 1.08, -260.42)
+
+[node name="PorticScurtaturaA" parent="DecorManual" instance=ExtResource("34_bamboo")]
+transform = Transform3D(2.45, 0, 0.40, 0, 2.5, 0, -0.40, 0, 2.45, -120.77, 1.52, -232.84)
+
+[node name="PorticScurtaturaB" parent="DecorManual" instance=ExtResource("34_bamboo")]
+transform = Transform3D(-2.45, 0, -0.40, 0, 2.5, 0, 0.40, 0, -2.45, -122.00, 1.52, -225.14)

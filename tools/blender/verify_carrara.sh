@@ -241,6 +241,8 @@ crr_d() {  # crr_d <cale> <garda> <noduri,...> [flag verify...]
   crr_nodes "$f" "$nodes"
 }
 crr_d "vehicles/wire_saw.glb" wire_saw "Blades,Saw_Paint,Saw_Rail,Saw_Rust,Saw_Water" --class-parts=Blades
+crr_d "vehicles/chain_saw_crawler.glb" crawler "Crawler_Black,Crawler_Blade,Crawler_Paint,Crawler_Rust"
+crr_d "vehicles/drill_rig.glb" drill "Drill_Black,Drill_Mast,Drill_Paint,Drill_Rust"
 
 echo
 echo "== GLB-uri nedeclarate (fara exceptii) =="

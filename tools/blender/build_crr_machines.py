@@ -7,6 +7,8 @@
   carrara/rocks/block_informe_a.glb   blocul informe care se rostogoleste (RockfallHazard)
   carrara/vehicles/quarry_excavator.glb  excavatorul cu furca (ExcavatorHazard, rigul rusted_digger)
   carrara/vehicles/wire_saw.glb       masina de fir (decor; volantul `Blades` se roteste, windmill.gd)
+  carrara/vehicles/chain_saw_crawler.glb  ferastraul-lant pe senile (decor)
+  carrara/vehicles/drill_rig.glb      masina de forat (decor)
 
 Rulare:
     D:/Blender/blender.exe --background --factory-startup \\
@@ -1262,6 +1264,270 @@ def build_wire_saw():
     return objs + [blades]
 
 
+# ---------------------------------------------------------------------------
+# chain_saw_crawler -- ferastraul-lant pe senile (decor static, coliziune hull)
+# ---------------------------------------------------------------------------
+
+CS_Y = (-2.25, 2.25)     # corpul fara lama: 4,5 m (centrat pe Y = 0)
+CS_TRACK_Y = (-2.25, 1.95)
+CS_TRACK_H, CS_TRACK_W, CS_TRACK_X = 0.85, 0.60, 0.95
+CS_TOP = 2.20            # cabina
+CS_BLADE_L = 4.0
+CS_BLADE_X = 0.45
+CS_BLADE_H = 0.60        # inaltimea barei (fara dinti; runda 3: 0,60, ca sa incapa coborarea)
+
+AO_CS = dict(samples=16, dist=1.0, gradient="vertical", low=0.62, high=1.0,
+             power=0.8, floor=0.38, z_range=(0.0, CS_TOP))
+
+
+def build_chain_saw_crawler():
+    """LISTA DE ELEMENTE (decuparea `chain_saw_crawler.png`, detaliul din `_b`;
+    scrisa INAINTE de geometrie; corecturile kitului: FARA peretele de marmura
+    de pe decupare -- lama se termina liber --, vopsea DRY_VEGETATION, fara text):
+
+     1. SENILELE: 2, lungi si joase (4,2 x 0,85 x 0,60), 32 de zale cu pinten,
+        roata de intindere si roata motoare de rugina pe fata exterioara, 4
+        role, cadrul vopsit (planșa: senile lungi cat tot corpul, roti mari la
+        capete).
+     2. SASIUL de rugina intre senile si coroana de rotire neagra.
+     3. CORPUL: punte joasa lata (X +-1,2), compartimentul motorului ridicat in
+        spate cu GRILA neagra (4 lamele) pe flancul +X, contragreutatea
+        rotunjita in spate, balustrada de rugina pe capota, cosul de esapament.
+     4. CABINA mica pe stanga-mijloc (-X), cadru vopsit, geamuri negre pe
+        fata, lateral si spate, acoperis cu streasina (punctul cel mai inalt,
+        2,2 m).
+     5. CAPUL DE TAIERE in fata corpului (+Y): bratul scurt vopsit, cutia
+        reductorului, cilindrul hidraulic negru cu tija de rugina, furtunul.
+     6. LAMA (`Crawler_Blade`): bara de 4 m (fata lata in planul YZ, 0,10
+        groasa, 0,60 inalta), un singur corp convex cu VARFUL ROTUNJIT, usor
+        coborata spre varf (runda 3: 13,5 grade, radacina la 1,30 m, varful la
+        ~0,1 m de sol); LANTUL ca DINTI in relief de rugina pe
+        muchia de sus, pe cea de jos si pe nas (~50, fiecare insula separata,
+        inclinati alternativ). Bara pe VOLCANIC_BLACK, dintii pe RUST_METAL.
+     7. Ce iese din contur: lama, 4 m spre +Y (Godot -Z); varful ei liber, la
+        6,25 m de centrul masinii. Nimic altceva.
+    """
+    paint, rust, black, blade = Builder(), Builder(), Builder(), Builder()
+    P, R, K = CRR_PAINT, CRR_RUST, CRR_BLACK
+    y0, y1 = CS_Y
+
+    # --- 1. senilele --------------------------------------------------------------
+    for sx in (-1, 1):
+        crawler_track(paint, rust, black, sx * CS_TRACK_X, CS_TRACK_Y[0], CS_TRACK_Y[1],
+                      CS_TRACK_H, CS_TRACK_W, n_shoes=32, rollers=4, side=sx)
+        paint.box((sx * (CS_TRACK_X + CS_TRACK_W / 2 - 0.07), -0.3, 0.40), (0.02, 1.4, 0.14), CRR_DUST)
+    # --- 2. sasiu + coroana ---------------------------------------------------------
+    rust.box((0.0, -0.15, 0.62), (1.40, 2.6, 0.40), R)
+    black.cylinder((0.0, -0.20, 0.92), 0.95, 0.16, K, segments=16)
+
+    # --- 3. corpul -------------------------------------------------------------------
+    paint.box((0.0, -0.45, 1.25), (2.40, 3.20, 0.56), P)                        # puntea: Z 0,97..1,53
+    paint.box((0.10, -1.40, 1.76), (2.30, 1.70, 0.46), P)                       # capota: Z 1,53..1,99 (runda 2: bloc mai inalt)
+    for k in range(4):
+        black.box((1.255, -1.45, 1.62 + k * 0.09), (0.02, 1.20, 0.05), K)       # grila, pe blocul motorului
+    cw = []
+    for sx in (-1, 1):
+        for zz in (0.97, 1.99):
+            cw.append(Vector((sx * 1.20, -2.05, zz)))
+            cw.append(Vector((sx * 1.00, y0, zz)))
+    _hull(paint, cw, P)
+    for xx in (-0.55, 0.75):
+        rust.beam((xx, -1.95, 1.99), (xx, -1.95, 2.16), 0.06, R)
+        rust.beam((xx, -0.95, 1.99), (xx, -0.95, 2.16), 0.06, R)
+        rust.beam((xx, -1.98, 2.14), (xx, -0.92, 2.14), 0.06, R)
+    rust.cylinder((0.85, -1.70, 2.07), 0.08, 0.20, R, segments=8)               # cosul: ..2,17
+    black.cylinder((0.85, -1.70, 2.17), 0.06, 0.02, K, segments=8)
+
+    # --- 4. cabina ---------------------------------------------------------------------
+    cx, cy = -0.62, -0.05
+    paint.box((cx, cy, 1.83), (0.95, 1.05, 0.60), P)                             # Z 1,53..2,13
+    paint.box((cx, cy - 0.05, 2.165), (1.08, 1.22, 0.07), P)                     # acoperis: 2,20
+    black.box((cx, cy + 0.53, 1.88), (0.80, 0.02, 0.42), K)                     # parbriz
+    black.box((cx - 0.48, cy, 1.88), (0.02, 0.85, 0.42), K)
+    black.box((cx + 0.48, cy + 0.15, 1.88), (0.02, 0.55, 0.42), K)
+    black.box((cx, cy - 0.53, 1.92), (0.70, 0.02, 0.30), K)
+
+    # --- 5. capul de taiere ----------------------------------------------------------------
+    bx = CS_BLADE_X
+    paint.box((bx - 0.05, 1.55, 1.05), (0.55, 0.70, 0.46), P)                   # bratul
+    paint.box((bx - 0.10, y1 - 0.20, 1.30), (0.40, 0.40, 0.66), P)              # reductorul: Y ..2,25
+    black.cylinder((bx + 0.12, y1 - 0.20, 1.30), 0.20, 0.06, K, segments=12, axis="X")
+    black.beam((bx - 0.35, 0.95, 1.55), (bx - 0.35, 1.70, 1.38), 0.13, K)       # cilindrul
+    rust.beam((bx - 0.35, 1.65, 1.39), (bx - 0.35, 2.00, 1.30), 0.06, R)
+    polyline_beam(black, [(bx - 0.55, 0.9, 1.45), (bx - 0.6, 1.5, 1.62), (bx - 0.35, 2.05, 1.40)], 0.05, K)
+
+    # --- 6. lama ---------------------------------------------------------------------------
+    # coordonate in lungul barei: u (0 la radacina, spre +Y), v (sus); coborare 6 grade
+    # runda 2: planșa coboara lama mult mai abrupt, din mijlocul corpului spre sol
+    tilt = math.radians(-13.5)   # runda 3
+    yb, zb = y1, 1.30
+    r = CS_BLADE_H / 2
+    tooth_out = 0.07
+    L_body = CS_BLADE_L / math.cos(tilt) - r - tooth_out         # lungimea pana la centrul nasului
+
+    def P_(u, v, x=bx):
+        return Vector((x, yb + u * math.cos(tilt) - v * math.sin(tilt),
+                       zb + u * math.sin(tilt) + v * math.cos(tilt)))
+
+    bar = []
+    for dx in (-0.05, 0.05):
+        bar += [P_(0.0, r, bx + dx), P_(0.0, -r, bx + dx)]
+        for k in range(9):
+            a = -math.pi / 2 + math.pi * k / 8
+            bar.append(P_(L_body + r * math.cos(a), r * math.sin(a), bx + dx))
+    _hull(blade, bar, K)
+    rot = Matrix.Rotation(tilt, 3, "X")
+    step = 0.17
+    n = int((L_body - 0.10) / step)
+    k_all = 0
+    for side in (1, -1):
+        for k in range(n):
+            u = 0.12 + k * step
+            c = P_(u, side * (r + tooth_out * 0.35))
+            lean = Matrix.Rotation(math.radians(18 * (1 if k % 2 else -1)), 3, "X")
+            blade.box(tuple(c), (0.15, 0.10, 0.10), R, rotation=rot @ lean)
+            k_all += 1
+    for k in range(7):                                                    # nasul
+        a = -math.pi / 2 + math.pi * (k + 0.5) / 7
+        c = P_(L_body + (r + tooth_out * 0.35) * math.cos(a), (r + tooth_out * 0.35) * math.sin(a))
+        blade.box(tuple(c), (0.15, 0.10, 0.10), R,
+                  rotation=rot @ Matrix.Rotation(a + math.pi / 2, 3, "X"))
+        k_all += 1
+    print("    chain_saw_crawler: %d dinti pe lama" % k_all)
+
+    return [paint.to_object("Crawler_Paint"), rust.to_object("Crawler_Rust"),
+            black.to_object("Crawler_Black"), blade.to_object("Crawler_Blade")]
+
+
+# ---------------------------------------------------------------------------
+# drill_rig -- masina de forat pe senile (decor static)
+# ---------------------------------------------------------------------------
+
+DR_TRACK_Y = (-1.75, 1.75)   # senilele: 3,5 m (centrat pe Y = 0)
+DR_TRACK_H, DR_TRACK_W, DR_TRACK_X = 0.80, 0.55, 0.85
+DR_MAST = (0.35, 1.95)       # axa catargului (x, y), in fata senilelor
+DR_MAST_Z = (0.20, 6.20)     # catargul: 6 m
+DR_AUGER_Y = DR_MAST[1] + 0.56   # spirala (raza 0,34) trece pe langa ghidaje
+
+AO_DR = dict(samples=16, dist=1.0, gradient="vertical", low=0.62, high=1.0,
+             power=0.8, floor=0.38, z_range=(0.0, DR_MAST_Z[1]))
+
+
+def build_drill_rig():
+    """LISTA DE ELEMENTE (decuparea `drill_rig.png`, detaliul din `_b`; scrisa
+    INAINTE de geometrie; vopsea DRY_VEGETATION, nu galbenul planșei, fara text):
+
+     1. SENILELE: 2 (3,5 x 0,80 x 0,55), 30 de zale, roti de rugina la capete,
+        4 role, cadrul vopsit.
+     2. SASIUL de rugina si coroana neagra.
+     3. CORPUL: punte vopsita (X +-1,15), capota motorului in spate cu GRILA
+        neagra pe flancul -X (planșa: grila pe flancul din stanga), cutia
+        filtrului pe capota, contragreutatea in spate, balustrada mica.
+     4. CABINA pe stanga-fata, geamuri negre (fata, lateral, spate).
+     5. CATARGUL (`Drill_Mast`, vertical, 6 m): grinda-cheson 0,40 x 0,40 cu
+        canal negru si, runda 3, o a doua coloana subtire legata de ea,
+        doua GHIDAJE de rugina pe fata din fata, 4 coliere, CAPUL (crown) cu
+        doua role sus, piciorul jos.
+     6. PRINDEREA catargului: consola vopsita la baza (intre corp si catarg) si
+        BRATUL frant (doua segmente) din corp spre mijlocul catargului, cu
+        CILINDRUL hidraulic negru sub el (planșa: bratul curbat + cilindrul).
+     7. CAPUL ROTATIV vopsit pe fata catargului, BARA KELLY neagra din cap pana
+        sus, si BURGHIUL de rugina sub cap: ax + spirala (4 spire x 12 trepte)
+        + varful conic (runda 2: spirala deasa, 5 x 16 trepte, ax gros), pana la PAPUCUL de rugina de pe sol (planșa: burghiul
+        spiralat pana jos, papucul patrat).
+     8. FURTUNURILE negre din corp, pe catarg, pana la capul rotativ.
+     9. Ce iese din contur: catargul si burghiul in fata senilelor (+Y Blender,
+        -Z Godot), pana la 6,2 m sus.
+    """
+    paint, rust, black, mast = Builder(), Builder(), Builder(), Builder()
+    P, R, K = CRR_PAINT, CRR_RUST, CRR_BLACK
+    mx, my = DR_MAST
+    z0, z1 = DR_MAST_Z
+
+    # --- 1. senilele + 2. sasiul ----------------------------------------------------
+    for sx in (-1, 1):
+        crawler_track(paint, rust, black, sx * DR_TRACK_X, DR_TRACK_Y[0], DR_TRACK_Y[1],
+                      DR_TRACK_H, DR_TRACK_W, n_shoes=30, rollers=4, side=sx)
+        paint.box((sx * (DR_TRACK_X + DR_TRACK_W / 2 - 0.07), 0.2, 0.38), (0.02, 1.2, 0.12), CRR_DUST)
+    rust.box((0.0, 0.0, 0.58), (1.20, 2.4, 0.36), R)
+    black.cylinder((0.0, -0.10, 0.86), 0.85, 0.14, K, segments=16)
+
+    # --- 3. corpul ----------------------------------------------------------------------
+    paint.box((0.0, -0.35, 1.22), (2.30, 3.10, 0.58), P)                   # puntea: Z 0,93..1,51
+    paint.box((0.10, -1.20, 1.71), (2.10, 1.30, 0.40), P)                  # capota: ..1,91
+    paint.box((0.30, -1.30, 2.00), (0.70, 0.55, 0.18), P)                  # cutia filtrului
+    for k in range(4):
+        black.box((-1.155, -1.25, 1.03 + k * 0.11), (0.02, 0.95, 0.06), K)
+    cw = []
+    for sx in (-1, 1):
+        for zz in (0.93, 1.91):
+            cw.append(Vector((sx * 1.15, -1.70, zz)))
+            cw.append(Vector((sx * 0.95, -2.05, zz)))
+    _hull(paint, cw, P)
+    for xx in (0.9,):
+        rust.beam((xx, -1.75, 1.91), (xx, -1.75, 2.12), 0.05, R)
+        rust.beam((xx, -0.65, 1.91), (xx, -0.65, 2.12), 0.05, R)
+        rust.beam((xx, -1.78, 2.10), (xx, -0.62, 2.10), 0.05, R)
+
+    # --- 4. cabina --------------------------------------------------------------------------
+    cx, cy = -0.55, 0.55
+    paint.box((cx, cy, 1.98), (1.00, 1.10, 0.94), P)                         # Z 1,51..2,45
+    paint.box((cx, cy, 2.48), (1.10, 1.22, 0.07), P)
+    black.box((cx, cy + 0.555, 2.02), (0.82, 0.02, 0.62), K)
+    black.box((cx - 0.505, cy + 0.05, 2.02), (0.02, 0.90, 0.62), K)
+    black.box((cx + 0.505, cy + 0.20, 2.10), (0.02, 0.55, 0.45), K)
+
+    # --- 5. catargul (Drill_Mast) -------------------------------------------------------------
+    mast.box((mx, my, (z0 + z1 - 0.32) / 2), (0.40, 0.40, z1 - z0 - 0.32), P)  # Z 0,20..5,88
+    for k in range(4):
+        mast.box((mx, my, 1.4 + k * 1.15), (0.50, 0.50, 0.12), P)               # colierele
+    mast.box((mx + 0.17, my + 0.10, z1 - 0.16), (1.06, 0.62, 0.32), P)          # capul: ..6,20
+    # runda 3: a doua COLOANA, mai subtire, alaturi (planșa: catargul e un cadru
+    # din doua tuburi legate de coliere, nu un stalp gros)
+    mast.box((mx + 0.52, my, (1.0 + z1 - 0.32) / 2), (0.20, 0.22, z1 - 0.32 - 1.0), P)
+    for k in range(4):
+        mast.box((mx + 0.30, my, 1.4 + k * 1.15), (0.36, 0.16, 0.10), P)         # legaturile
+    mast.box((mx, my, z0 + 0.06), (0.52, 0.52, 0.12), P)                        # piciorul
+    mast.box((mx, my + 0.205, (z0 + z1) / 2 - 0.2), (0.16, 0.02, z1 - z0 - 0.8), K)    # canalul (runda 2), pe nodul catargului
+    for sx in (-1, 1):
+        rust.box((mx + sx * 0.14, my + 0.23, (z0 + z1) / 2 - 0.2), (0.07, 0.07, z1 - z0 - 0.8), R)
+        rust.cylinder((mx + sx * 0.16, my + 0.30, z1 - 0.10), 0.14, 0.08, R, segments=12, axis="X")
+
+    # --- 6. prinderea: consola, bratul frant, cilindrul --------------------------------------------
+    paint.box((mx, (1.25 + my) / 2, 1.20), (0.50, my - 1.25 + 0.1, 0.50), P)
+    polyline_beam(paint, [(mx, 0.75, 1.51), (mx, 1.05, 3.00), (mx, my - 0.20, 3.90)], (0.24, 0.30), P)
+    black.beam((mx - 0.05, 0.90, 1.55), (mx - 0.05, 1.55, 2.80), 0.15, K)
+    rust.beam((mx - 0.05, 1.50, 2.70), (mx - 0.05, my - 0.20, 3.35), 0.07, R)
+
+    # --- 7. capul rotativ, bara kelly, burghiul, papucul -------------------------------------------
+    ay = DR_AUGER_Y
+    paint.box((mx, ay - 0.02, 2.95), (0.55, 0.50, 0.60), P)                    # Z 2,65..3,25
+    black.cylinder((mx, ay - 0.02, 3.25 + (z1 - 0.32 - 3.25) / 2), 0.07, z1 - 0.32 - 3.25, K, segments=8)
+    # runda 2: spirala DESA (planșa: o coloana-surub plina, nu peri): ax gros,
+    # 16 trepte pe spira, placi suprapuse
+    rust.cylinder((mx, ay, (0.40 + 2.65) / 2), 0.14, 2.25, R, segments=10)
+    turns, per = 5, 16
+    zlo, zhi = 0.55, 2.50
+    for k in range(turns * per):
+        t = k / float(turns * per)
+        a = 2 * math.pi * k / per
+        zz = zlo + (zhi - zlo) * t
+        c = (mx + math.cos(a) * 0.22, ay + math.sin(a) * 0.22, zz)
+        rotm = Matrix.Rotation(a, 3, "Z") @ Matrix.Rotation(math.radians(-14), 3, "X")
+        rust.box(c, (0.24, 0.15, 0.07), R, rotation=rotm)
+    rust.frustum((mx, ay, 0.38), 0.03, 0.24, 0.36, R, segments=8)              # varful conic
+    rust.box((mx, ay, 0.06), (0.75, 0.75, 0.12), R)                            # papucul
+    rust.box((mx, ay, 0.16), (0.32, 0.32, 0.10), R)
+
+    # --- 8. furtunurile -------------------------------------------------------------------------------
+    for dx in (-0.12, 0.12):
+        polyline_beam(black, [(mx + dx, 1.10, 1.52), (mx + dx, my - 0.30, 1.90),
+                              (mx + dx, my - 0.26, 2.70), (mx + dx, ay - 0.30, 3.05)], 0.06, K)
+
+    return [paint.to_object("Drill_Paint"), rust.to_object("Drill_Rust"),
+            black.to_object("Drill_Black"), mast.to_object("Drill_Mast")]
+
+
 clear_built()
 if not ONLY or ONLY == "derrick":
     emit_fixed(build_derrick(), "structures/derrick.glb",
@@ -1299,5 +1565,13 @@ if not ONLY or ONLY == "wire_saw":
     emit_pivot(build_wire_saw(), "vehicles/wire_saw.glb", {"": AO_WS, "Blades": AO_WS_BLADES},
                uv_cube={"Blades": 2.2}, bevel=0.03, bevels={"_Rail": 0.015, "_Water": 0.0},
                smooth_angle=40.0)
+    clear_built()
+if not ONLY or ONLY == "chain_saw_crawler":
+    emit_crr(build_chain_saw_crawler(), "vehicles/chain_saw_crawler.glb", AO_CS, bevel=0.03,
+             bevels={"_Black": 0.02, "_Blade": 0.01}, smooth_angle=40.0, center_y=False)
+    clear_built()
+if not ONLY or ONLY == "drill_rig":
+    emit_crr(build_drill_rig(), "vehicles/drill_rig.glb", AO_DR, bevel=0.03,
+             bevels={"_Black": 0.02}, smooth_angle=40.0, center_y=False)
     clear_built()
 report_crr()

@@ -33,8 +33,8 @@ SPECS.update({
     "wire_saw": {"camera": {"azimuth": -14.0, "elevation": 20.0, "lens": 85.0, "margin": 1.05}},
     # planșa: masina in stanga, lama spre dreapta -> camera pe +X, din spate
     "chain_saw_crawler": {"camera": {"azimuth": -22.0, "elevation": 14.0, "lens": 55.0, "margin": 1.05}},
-    # planșa: corpul in stanga, catargul in fata-dreapta
-    "drill_rig": {"camera": {"azimuth": -35.0, "elevation": 10.0, "lens": 55.0, "margin": 1.05}},
+    # planșa: corpul in stanga, catargul in dreapta cu burghiul spre noi -> camera din fata-dreapta
+    "drill_rig": {"camera": {"azimuth": 30.0, "elevation": 10.0, "lens": 55.0, "margin": 1.05}},
     "museum_set_cart": {"camera": {"azimuth": -38.0, "elevation": 22.0, "lens": 55.0, "margin": 1.06}},
     "museum_set_wheel": {"camera": {"azimuth": -20.0, "elevation": 12.0, "lens": 55.0, "margin": 1.06}},
     "museum_set_sled": {"camera": {"azimuth": -35.0, "elevation": 24.0, "lens": 55.0, "margin": 1.06}},

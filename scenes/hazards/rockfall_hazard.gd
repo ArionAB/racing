@@ -544,8 +544,9 @@ func _process_route(delta: float) -> void:
 ## Clopotul de avertizare: suna in cadrul al carui pas de ceas [prev, prev +
 ## delta) contine momentul `period - warn_bell_s`. Plecarea e cadrul care contine
 ## `period` (acolo `fposmod` intoarce ceasul la 0 si piatra incepe sa se miste),
-## deci intre ele sunt exact `warn_bell_s * fps` cadre. Intervalul e inchis la
-## stanga ca un hazard pornit fix pe moment sa sune din primul cadru.
+## deci intre ele sunt `warn_bell_s * fps` cadre (+-1 din rotunjirea ceasului
+## adunat pe float; masurat in ProbeSledBell). Intervalul e inchis la stanga ca
+## un hazard pornit fix pe moment sa sune din primul cadru.
 func _tick_warn_bell(prev: float, delta: float) -> void:
 	var at := period - minf(warn_bell_s, period)
 	# Doua candidate: momentul din ciclul curent si acelasi moment dupa
